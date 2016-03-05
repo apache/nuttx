@@ -1,7 +1,7 @@
 /****************************************************************************
- * include/nuttx/semaphore.h
+ * sched/semaphore/sem_reset.c
  *
- *   Copyright (C) 2014-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,9 +33,6 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_SEMAPHORE_H
-#define __INCLUDE_NUTTX_SEMAPHORE_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
@@ -43,75 +40,16 @@
 #include <nuttx/config.h>
 
 #include <semaphore.h>
+#include <sched.h>
+#include <assert.h>
 
-#include <nuttx/clock.h>
-#include <nuttx/fs/fs.h>
+#include <nuttx/irq.h>
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Type Definitions
- ****************************************************************************/
-
-#ifdef CONFIG_FS_NAMED_SEMAPHORES
-/* This is the named semaphore inode */
-
-struct inode;
-struct nsem_inode_s
-{
-  /* Inode payload unique to named semaphores.  ns_inode must appear first
-   * in this structure in order to support casting between type sem_t and
-   * types of struct nsem_inode_s. */
-
-  FAR struct inode *ns_inode;       /* Containing inode */
-  sem_t ns_sem;                     /* The semaphore */
-};
-#endif
+#include "semaphore/semaphore.h"
 
 /****************************************************************************
- * Public Data
+ * Public Functions
  ****************************************************************************/
-
-#ifndef __ASSEMBLY__
-
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Name: sem_tickwait
- *
- * Description:
- *   This function is a lighter weight version of sem_timedwait().  It is
- *   non-standard and intended only for use within the RTOS.
- *
- * Parameters:
- *   sem     - Semaphore object
- *   start   - The system time that the delay is relative to.  If the
- *             current time is not the same as the start time, then the
- *             delay will be adjust so that the end time will be the same
- *             in any event.
- *   delay   - Ticks to wait from the start time until the semaphore is
- *             posted.  If ticks is zero, then this function is equivalent
- *             to sem_trywait().
- *
- * Return Value:
- *   Zero (OK) is returned on success.  A negated errno value is returned on
- *   failure.  -ETIMEDOUT is returned on the timeout condition.
- *
- ****************************************************************************/
-
-int sem_tickwait(FAR sem_t *sem, systime_t start, uint32_t delay);
 
 /****************************************************************************
  * Name: sem_reset
@@ -129,12 +67,55 @@ int sem_tickwait(FAR sem_t *sem, systime_t start, uint32_t delay);
  *
  ****************************************************************************/
 
-int sem_reset(FAR sem_t *sem, int16_t count);
+int sem_reset(FAR sem_t *sem, int16_t count)
+{
+  irqstate_t flags;
 
-#undef EXTERN
-#ifdef __cplusplus
+  DEBUGASSERT(sem != NULL && count >= 0);
+
+  /* Don't allow any context switches that may result from the following
+   * sem_post operations.
+   */
+
+  sched_lock();
+
+  /* Prevent any access to the semaphore by interrupt handlers while we are
+   * performing this operation.
+   */
+
+  flags = enter_critical_section();
+
+  /* A negative count indicates the negated number of threads that are
+   * waiting to take a count from the semaphore.  Loop here, handing
+   * out counts to any waiting threads.
+   */
+
+  while (sem->semcount < 0 && count > 0)
+    {
+      /* Give out one counting, waking up one of the waiting threads
+       * and, perhaps, kicking off a lot of priority inheritance
+       * logic (REVISIT).
+       */
+
+      DEBUGVERIFY(sem_post(sem));
+      count--;
+    }
+
+  /* We exit the above loop with either (1) no threads waiting for the
+   * (i.e., with sem->semcount >= 0).  In this case, 'count' holds the
+   * the new value of the semaphore count.  OR (2) with threads still
+   * waiting but all of the semaphore counts exhausted:  The current
+   * value of sem->semcount is correct.
+   */
+
+  if (sem->semcount >= 0)
+    {
+      sem->semcount = count;
+    }
+
+  /* Allow any pending context switches to occur now */
+
+  leave_critical_section(flags);
+  sched_unlock();
+  return OK;
 }
-#endif
-
-#endif /* __ASSEMBLY__ */
-#endif /* __INCLUDE_NUTTX_SEMAPHORE_H */
