@@ -124,7 +124,7 @@ void up_irqinitialize(void)
    */
 
 #ifdef CONFIG_IMX6_PIO_IRQ
-  imx_pioirq_initialize();
+  imx_gpioirq_initialize();
 #endif
 
   /* And finally, enable interrupts */

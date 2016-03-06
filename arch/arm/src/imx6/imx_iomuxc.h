@@ -42,6 +42,8 @@
 
 #include <nuttx/config.h>
 
+#include <stdint.h>
+
 #include "chip/imx_iomuxc.h"
 
 /****************************************************************************
@@ -52,16 +54,34 @@
  * Public Types
  ****************************************************************************/
 
-/****************************************************************************
- * Inline Functions
- ****************************************************************************/
+ /* The smallest integer type that can hold the IOMUX encoding */
 
-/****************************************************************************
- * Public Data
- ****************************************************************************/
+typedef uint16_t iomux_pinset_t;
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+ 
+/****************************************************************************
+ * Name: imx_padmux_map
+ *
+ * Description:
+ *   This function map a Pad Mux register index to the corresponding Pad
+ *   Control register index.
+ *
+ ****************************************************************************/
+
+unsigned int imx_padmux_map(unsigned int padmux);
+
+/****************************************************************************
+ * Name: imx_iomux_configure
+ *
+ * Description:
+ *   This function writes the encoded pad configuration to the Pad Control
+ *   register.
+ *
+ ****************************************************************************/
+
+int imx_iomux_configure(uintptr_t padctl, iomux_pinset_t ioset);
 
 #endif /* __ARCH_ARM_SRC_IMX6_IMX_IOMUXC_H */

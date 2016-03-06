@@ -428,7 +428,7 @@ static inline int imx_gpio_configinput(gpio_pinset_t pinset, int port, int pin)
       return -EINVAL;
     }
 
-  index = table[pin];
+  index = (unsigned int)table[pin];
   if (index >= IMX_PADMUX_NREGISTERS)
     {
       return -EINVAL;
@@ -438,9 +438,16 @@ static inline int imx_gpio_configinput(gpio_pinset_t pinset, int port, int pin)
   putreg32(PADMUX_MUXMODE_ALT5, regaddr);
 
   /* Configure pin pad settings */
-#warning Missing logic
 
-  return OK;
+  index = imx_padmux_map(index);
+  index = table[pin];
+  if (index >= IMX_PADCTL_NREGISTERS)
+    {
+      return -EINVAL;
+    }
+
+  regaddr = IMX_PADCTL_ADDRESS(index);
+  return imx_iomux_configure(regaddr, pinset);
 }
 
 /****************************************************************************

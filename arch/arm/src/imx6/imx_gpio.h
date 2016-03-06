@@ -229,7 +229,7 @@ extern "C"
 #ifdef CONFIG_IMX6_GPIO_IRQ
 void imx_gpioirq_initialize(void);
 #else
-#  define imx_gpioirqinitialize()
+#  define imx_gpio_irqinitialize()
 #endif
 
 /************************************************************************************
