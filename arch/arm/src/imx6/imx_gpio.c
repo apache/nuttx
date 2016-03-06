@@ -375,7 +375,7 @@ static inline void imx_gpio_dirin(int port, int pin)
  * Name: imx_gpio_setoutput
  ****************************************************************************/
 
-static inline void imx_gpio_setoutput(int port, int pin, bool value)
+static void imx_gpio_setoutput(int port, int pin, bool value)
 {
   uintptr_t regaddr = IMX_GPIO_DR(port);
   uint32_t regval;
@@ -410,8 +410,10 @@ static inline bool imx_gpio_getinput(int port, int pin)
  * Name: imx_gpio_configinput
  ****************************************************************************/
 
-static inline int imx_gpio_configinput(gpio_pinset_t pinset, int port, int pin)
+static int imx_gpio_configinput(gpio_pinset_t pinset)
 {
+  int port = (pinset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
+  int pin  = (pinset & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT;
   FAR const uint8_t *table;
   iomux_pinset_t ioset;
   uintptr_t regaddr;
@@ -441,7 +443,6 @@ static inline int imx_gpio_configinput(gpio_pinset_t pinset, int port, int pin)
   /* Configure pin pad settings */
 
   index = imx_padmux_map(index);
-  index = table[pin];
   if (index >= IMX_PADCTL_NREGISTERS)
     {
       return -EINVAL;
@@ -456,8 +457,10 @@ static inline int imx_gpio_configinput(gpio_pinset_t pinset, int port, int pin)
  * Name: imx_gpio_configoutput
  ****************************************************************************/
 
-static inline int imx_gpio_configoutput(gpio_pinset_t pinset, int port, int pin)
+static inline int imx_gpio_configoutput(gpio_pinset_t pinset)
 {
+  int port   = (pinset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
+  int pin    = (pinset & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT;
   bool value = ((pinset & GPIO_OUTPUT_ONE) != 0);
 
   /* Set the output value */
@@ -468,6 +471,41 @@ static inline int imx_gpio_configoutput(gpio_pinset_t pinset, int port, int pin)
 
   imx_gpio_dirout(port, pin);
   return OK;
+}
+
+/****************************************************************************
+ * Name: imx_gpio_configperiph
+ ****************************************************************************/
+
+static inline int imx_gpio_configperiph(gpio_pinset_t pinset)
+{
+  iomux_pinset_t ioset;
+  uintptr_t regaddr;
+  uint32_t regval;
+  uint32_t value;
+  unsigned int index;
+
+  /* Configure pin as a peripheral */
+
+  index = ((ioset & GPIO_PADMUX_MASK) >> GPIO_PADMUX_SHIFT);
+  regaddr = IMX_PADMUX_ADDRESS(index);
+
+  value = ((ioset & GPIO_ALT_MASK) >> GPIO_ALT_SHIFT);
+  regval = (value << PADMUX_MUXMODE_SHIFT);
+
+  putreg32(regval, regaddr);
+
+  /* Configure pin pad settings */
+
+  index = imx_padmux_map(index);
+  if (index >= IMX_PADCTL_NREGISTERS)
+    {
+      return -EINVAL;
+    }
+
+  regaddr = IMX_PADCTL_ADDRESS(index);
+  ioset   = (iomux_pinset_t)((pinset & GPIO_IOMUX_MASK) >> GPIO_IOMUX_SHIFT);
+  return imx_iomux_configure(regaddr, ioset);
 }
 
 /****************************************************************************
@@ -485,24 +523,51 @@ static inline int imx_gpio_configoutput(gpio_pinset_t pinset, int port, int pin)
 int imx_config_gpio(gpio_pinset_t pinset)
 {
   irqstate_t flags;
-  int port = (pinset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
-  int pin  = (pinset & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT;
   int ret;
 
   /* Configure the pin as an input initially to avoid any spurios outputs */
 
   flags = enter_critical_section();
-  ret   = imx_gpio_configinput(pinset, port, pin);
-  if (ret >= 0)
+
+  /* Configure based upon the pin mode */
+
+  switch (pinset & GPIO_MODE_MASK)
     {
-      /* Was it really an output pin? */
-
-      if ((pinset & GPIO_OUTPUT) != 0)
+      case GPIO_INPUT:
         {
-          /* YES.. convert the input to an output */
+          /* Configure the pin as a GPIO input */
 
-          ret = imx_gpio_configoutput(pinset, port, pin);
+          ret = imx_gpio_configinput(pinset);
         }
+        break;
+
+      case GPIO_OUTPUT:
+        {
+          /* First coonfigure the pin as a GPIO input to avoid output
+           * glitches.
+           */
+
+          ret = imx_gpio_configinput(pinset);
+          if (ret >= 0)
+            {
+              /* Convert the input to an output */
+
+              ret = imx_gpio_configperiph(pinset);
+            }
+        }
+        break;
+
+      case GPIO_PERIPH:
+        {
+          /* Configure the pin as a peripheral */
+
+          ret = imx_gpio_configinput(pinset);
+        }
+        break;
+
+      default:
+        ret = -EINVAL;
+        break;
     }
 
   leave_critical_section(flags);
