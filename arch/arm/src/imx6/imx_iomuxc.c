@@ -43,6 +43,7 @@
 #include <assert.h>
 #include <errno.h>
 
+#include "up_arch.h"
 #include "imx_iomuxc.h"
 
 /****************************************************************************
@@ -53,7 +54,9 @@
  *
  * REVISIT:  This could be greatly simplified:  The Pad Control registers
  * map 1-to-1 with the Pad Mux registers except for two regions where
- * there are no corresponding Pad Mux registers.
+ * there are no corresponding Pad Mux registers.  The entire table could be
+ * replaced to two range checks and the appropriate offset added to the Pad
+ * Mux Register index.
  */
 
 static const uint8_t g_mux2ctl_map[IMX_PADMUX_NREGISTERS] =
@@ -360,6 +363,66 @@ unsigned int imx_padmux_map(unsigned int padmux)
 
 int imx_iomux_configure(uintptr_t padctl, iomux_pinset_t ioset)
 {
-#warning Missing logic
-  return -ENOSYS;
+  uint32_t regval = 0;
+  uint32_t value;
+
+  /* Select CMOS input or Schmitt Trigger input */
+
+  if ((ioset & IOMUX_SCHMITT_TRIGGER) != 0)
+    {
+      regval |= PADCTL_SRE;
+    }
+
+  /* Select drive strength */
+
+  value = (ioset & PADCTL_DSE_MASK) >> PADCTL_DSE_SHIFT;
+  regval |= PADCTL_DSE(value);
+
+  /* Select spped */
+
+  value = (ioset & IOMUX_SPEED_MASK) >> IOMUX_SPEED_SHIFT;
+  regval |= PADCTL_SPEED(value);
+
+  /* Select CMOS output or Open Drain outpout */
+
+  if ((ioset & IOMUX_OPENDRAIN) != 0)
+    {
+      regval |= PADCTL_ODE;
+    }
+
+  /* Handle pull/keep selection */
+
+  switch (ioset & _IOMUX_PULLTYPE_MASK)
+    {
+      default:
+      case _IOMUX_PULL_NONE:
+        break;
+
+      case _IOMUX_PULL_KEEP:
+        {
+          regval |= PADCTL_PKE;
+        }
+        break;
+
+      case _IOMUX_PULL_ENABLE:
+        {
+          regval |= (PADCTL_PKE | PADCTL_PUE);
+
+          value   = (ioset & _IOMUX_PULLDESC_MASK) >> _IOMUX_PULLDESC_SHIFT;
+          regval |= PADCTL_PUS(value);
+        }
+        break;
+    }
+
+  /* Select slow/fast slew rate */
+
+  if ((ioset & IOMUX_SLEW_FAST) != 0)
+    {
+      regval |= PADCTL_HYS;
+    }
+
+  /* Write the result to the specified Pad Control register */
+
+  putreg32(regval, padctl);
+  return OK;
 }

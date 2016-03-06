@@ -413,6 +413,7 @@ static inline bool imx_gpio_getinput(int port, int pin)
 static inline int imx_gpio_configinput(gpio_pinset_t pinset, int port, int pin)
 {
   FAR const uint8_t *table;
+  iomux_pinset_t ioset;
   uintptr_t regaddr;
   unsigned int index;
 
@@ -447,7 +448,8 @@ static inline int imx_gpio_configinput(gpio_pinset_t pinset, int port, int pin)
     }
 
   regaddr = IMX_PADCTL_ADDRESS(index);
-  return imx_iomux_configure(regaddr, pinset);
+  ioset   = (iomux_pinset_t)((pinset & GPIO_IOMUX_MASK) >> GPIO_IOMUX_SHIFT);
+  return imx_iomux_configure(regaddr, ioset);
 }
 
 /****************************************************************************

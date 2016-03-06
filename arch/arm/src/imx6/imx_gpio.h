@@ -50,100 +50,35 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
-/* Encoding:
+/* 28-bit Encoding:
  *
- *   ENCODING    ...I RRRO DDDL SSVT GGGP PPPP
- *   GPIO INPUT  ...0 .... .... ...T GGGP PPPP
- *   GPIO OUTPUT ...1 RRRO DDDL SSV. GGGP PPPP
+ *   ENCODING    ..IV GGGP PPPP MMMM MMMM MMMM MMMM
+ *   GPIO INPUT  ..0. GGGP PPPP MMMM MMMM MMMM MMMM
+ *   GPIO OUTPUT ..1V GGGP PPPP MMMM MMMM MMMM MMMM
  */
 
 /* Input/Output Selection:
  *
- *   ENCODING    ...I .... .... .... .... ....
+ *   ENCODING    ..I. .... .... .... .... .... ....
  */
 
-#define GPIO_INPUT             (0)        /* Bit 20: 0=input */
-#define GPIO_OUTPUT            (1 << 19)  /* Bit 20: 1=output */
-
-/* Output Pull Up/Down:
- *
- *   GPIO OUTPUT ...1 RRR. .... .... .... ....
- */
-
-#define GPIO_PULL_SHIFT        (17)       /* Bits 17-19: Pull up/down selection */
-#define GPIO_PULL_MASK         (7 << GPIO_PULL_SHIFT)
-#  define GPIO_PULL_NONE       (0 << GPIO_PULL_SHIFT) /* Pull/keeper disabled */
-#  define GPIO_PULL_KEEP       (1 << GPIO_PULL_SHIFT) /* Output determined by keeper */
-#  define GPIO_PULL_UP_22K     (2 << GPIO_PULL_SHIFT) /* Pull up with 22 KOhm resister */
-#  define GPIO_PULL_UP_47K     (3 << GPIO_PULL_SHIFT) /* Pull up with 47 KOhm resister */
-#  define GPIO_PULL_UP_100K    (4 << GPIO_PULL_SHIFT) /* Pull up with 100 KOhm resister */
-#  define GPIO_PULL_DOWN_100K  (5 << GPIO_PULL_SHIFT) /* Pull down with 100 KOhm resister */
-
-/* Open Drain Output:
- *
- *   GPIO OUTPUT ...1 ...O .... .... .... ....
- */
-
-#define GPIO_CMOS_OUTPUT       (1 << 16)  /* Bit 16: 0=CMOS output */
-#define GPIO_OPENDRAIN         (1 << 16)  /* Bit 16: 1=Enable open-drain output */
-
-/* Output Drive Strength:
- *
- *   GPIO OUTPUT ...1 .... DDD. .... .... ....
- */
-
-#define GPIO_DRIVE_SHIFT       (13)       /* Bits 13-15: Output Drive Strength */
-#define GPIO_DRIVE_MASK        (7 << GPIO_DRIVE_SHIFT)
-#  define GPIO_DRIVE_HIZ       (0 << GPIO_DRIVE_SHIFT) /* HI-Z */
-#  define GPIO_DRIVE_260OHM    (1 << GPIO_DRIVE_SHIFT) /* 150 Ohm @3.3V, 260 Ohm @1.8V */
-#  define GPIO_DRIVE_130OHM    (2 << GPIO_DRIVE_SHIFT) /* 75 Ohm @3.3V, 130 Ohm @1.8V */
-#  define GPIO_DRIVE_90OHM     (3 << GPIO_DRIVE_SHIFT) /* 50 Ohm @3.3V, 90 Ohm @1.8V */
-#  define GPIO_DRIVE_60OHM     (4 << GPIO_DRIVE_SHIFT) /* 37 Ohm @3.3V, 60 Ohm @1.8V */
-#  define GPIO_DRIVE_50OHM     (5 << GPIO_DRIVE_SHIFT) /* 30 Ohm @3.3V, 50 Ohm @1.8V */
-#  define GPIO_DRIVE_40OHM     (6 << GPIO_DRIVE_SHIFT) /* 25 Ohm @3.3V, 40 Ohm @1.8V */
-#  define GPIO_DRIVE_33OHM     (7 << GPIO_DRIVE_SHIFT) /* 20 Ohm @3.3V, 33 Ohm @1.8V */
-
-/* Output Slew Rate:
- *
- *   GPIO OUTPUT ...1 .... ...L .... .... ....
- */
-
-#define GPIO_SLEW_SLOW         (0)        /* Bit 12: 0=Slow Slew Rate */
-#define GPIO_SLEW_FAST         (1 << 12)  /* Bit 12: 1=Fast Slew Rate */
-
-/* Output Speed:
- *
- *   GPIO OUTPUT ...1 .... .... SS.. .... ....
- */
-
-#define GPIO_SPEED_SHIFT       (10)       /* Bits 10-11: Speed */
-#define GPIO_SPEED_MASK        (3 << GPIO_SPEED_SHIFT)
-#  define GPIO_SPEED_LOW       (0 << GPIO_SPEED_SHIFT) /* Low frequency (50 MHz) */
-#  define GPIO_SPEED_MEDIUM    (1 << GPIO_SPEED_SHIFT) /* Medium frequency (100, 150 MHz) */
-#  define GPIO_SPEED_MAX       (3 << GPIO_SPEED_SHIFT) /* Maximum frequency (100, 150, 200 MHz) */
+#define GPIO_INPUT             (0)       /* Bit 25: 0=input */
+#define GPIO_OUTPUT            (1 << 25) /* Bit 25: 1=output */
 
 /* Initial Ouptut Value:
  *
- *   GPIO OUTPUT ...1 .... .... ..V. .... ....
+ *   GPIO OUTPUT ..1V .... .... .... .... .... ....
  */
 
-#define GPIO_OUTPUT_ZERO       (0)        /* Bit 9: 0=Initial output is low */
-#define GPIO_OUTPUT_ONE        (1 << 9)   /* Bit 9: 1=Initial output is high */
-
-/* Input Schmitt Trigger:
- *
- *   GPIO INPUT  ...0 .... .... ...T .... ....
- */
-
-#define GPIO_CMOS_INPUT        (0)        /* Bit 8: 0=CMOS input */
-#define GPIO_SCHMITT_TRIGGER   (1 << 8)   /* Bit 8: 1=Enable Schmitt trigger if input */
+#define GPIO_OUTPUT_ZERO       (0)       /* Bit 24: 0=Initial output is low */
+#define GPIO_OUTPUT_ONE        (1 << 24) /* Bit 24: 1=Initial output is high */
 
 /* GPIO Port Number
  *
- *   ENCODING    .... .... .... .... GGG. ....
+ *   ENCODING    .... GGG. .... .... .... .... ....
  */
 
-#define GPIO_PORT_SHIFT        (5)       /* Bits 5-7: Speed */
+#define GPIO_PORT_SHIFT        (21)      /* Bits 21-23: GPIO port index */
 #define GPIO_PORT_MASK         (7 << GPIO_PORT_SHIFT)
 # define GPIO_PORT1            (0 << GPIO_PORT_SHIFT) /* GPIO1 */
 # define GPIO_PORT2            (1 << GPIO_PORT_SHIFT) /* GPIO2 */
@@ -155,10 +90,10 @@
 
 /* GPIO Pin Number:
  *
- *   ENCODING    .... .... .... .... ...P PPPP
+ *   ENCODING    .... ...P PPPP .... .... .... ....
  */
 
-#define GPIO_PIN_SHIFT         (5)       /* Bits 0-4: Speed */
+#define GPIO_PIN_SHIFT         (16)      /* Bits 16-20: GPIO pin number */
 #define GPIO_PIN_MASK          (15 << GPIO_PIN_SHIFT)
 # define GPIO_PIN0             (0 << GPIO_PIN_SHIFT)  /* Pin  0 */
 # define GPIO_PIN1             (1 << GPIO_PIN_SHIFT)  /* Pin  1 */
@@ -192,6 +127,16 @@
 # define GPIO_PIN29            (29 << GPIO_PIN_SHIFT) /* Pin 29 */
 # define GPIO_PIN30            (30 << GPIO_PIN_SHIFT) /* Pin 30 */
 # define GPIO_PIN31            (31 << GPIO_PIN_SHIFT) /* Pin 31 */
+
+/* IOMUX Pin Configuration:
+ *
+ *   ENCODING    .... .... .... MMMM MMMM MMMM MMMM
+ *
+ * See imx_iomuxc.h for detailed content.
+ */
+
+#define GPIO_IOMUX_SHIFT       (0)       /* Bits 9-15: IOMUX pin configuration */
+#define GPIO_IOMUX_MASK        (0xffff << GPIO_IOMUX_SHIFT)
 
 /************************************************************************************
  * Public Types
