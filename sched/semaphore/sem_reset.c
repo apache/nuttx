@@ -55,8 +55,10 @@
  * Name: sem_reset
  *
  * Description:
- *   Reset a semaphore to a specific value.  This kind of operation is
- *   sometimes required for certain error handling conditions.
+ *   Reset a semaphore count to a specific value.  This is similar to part
+ *   of the operation of sem_init().  But sem_reset() may need to wake up
+ *   tasks waiting on a count.  This kind of operation is sometimes required
+ *   within the OS (only) for certain error handling conditions.
  *
  * Parameters:
  *   sem   - Semaphore descriptor to be reset
@@ -74,7 +76,7 @@ int sem_reset(FAR sem_t *sem, int16_t count)
   DEBUGASSERT(sem != NULL && count >= 0);
 
   /* Don't allow any context switches that may result from the following
-   * sem_post operations.
+   * sem_post() operations.
    */
 
   sched_lock();
@@ -85,7 +87,7 @@ int sem_reset(FAR sem_t *sem, int16_t count)
 
   flags = enter_critical_section();
 
-  /* A negative count indicates the negated number of threads that are
+  /* A negative count indicates that the negated number of threads are
    * waiting to take a count from the semaphore.  Loop here, handing
    * out counts to any waiting threads.
    */
@@ -105,7 +107,7 @@ int sem_reset(FAR sem_t *sem, int16_t count)
    * (i.e., with sem->semcount >= 0).  In this case, 'count' holds the
    * the new value of the semaphore count.  OR (2) with threads still
    * waiting but all of the semaphore counts exhausted:  The current
-   * value of sem->semcount is correct.
+   * value of sem->semcount is already correct in this case.
    */
 
   if (sem->semcount >= 0)

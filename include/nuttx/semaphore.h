@@ -117,8 +117,10 @@ int sem_tickwait(FAR sem_t *sem, systime_t start, uint32_t delay);
  * Name: sem_reset
  *
  * Description:
- *   Reset a semaphore to a specific value.  This kind of operation is
- *   sometimes required for certain error handling conditions.
+ *   Reset a semaphore count to a specific value.  This is similar to part
+ *   of the operation of sem_init().  But sem_reset() may need to wake up
+ *   tasks waiting on a count.  This kind of operation is sometimes required
+ *   within the OS (only) for certain error handling conditions.
  *
  * Parameters:
  *   sem   - Semaphore descriptor to be reset
