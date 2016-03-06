@@ -4,6 +4,10 @@
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
+ * Reference:
+ *   "i.MX 6Dual/6Quad ApplicationsProcessor Reference Manual," Document Number
+ *   IMX6DQRM, Rev. 3, 07/2015, FreeScale.
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -42,6 +46,12 @@
 
 #include <nuttx/config.h>
 #include <chip/imx_memorymap.h>
+
+/* These definitions derive from specifications for the i.MX 6Quad/6Dual and require
+ * review and modification in order to support other family members.
+ */
+
+#if defined(CONFIG_ARCH_CHIP_IMX6_6QUAD) || defined(CONFIG_ARCH_CHIP_IMX6_6DUAL)
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -83,7 +93,7 @@
 #define IMX_PADMUX_RGMII_RD3_OFFSET           0x0080
 #define IMX_PADMUX_RGMII_RXC_OFFSET           0x0084
 #define IMX_PADMUX_EIM_ADDR25_OFFSET          0x0088
-#define IMX_PADMUX_EIM_EB2_B_OFFSET           0x008c
+#define IMX_PADMUX_EIM_EB2_OFFSET             0x008c
 #define IMX_PADMUX_EIM_DATA16_OFFSET          0x0090
 #define IMX_PADMUX_EIM_DATA17_OFFSET          0x0094
 #define IMX_PADMUX_EIM_DATA18_OFFSET          0x0098
@@ -92,7 +102,7 @@
 #define IMX_PADMUX_EIM_DATA21_OFFSET          0x00a4
 #define IMX_PADMUX_EIM_DATA22_OFFSET          0x00a8
 #define IMX_PADMUX_EIM_DATA23_OFFSET          0x00ac
-#define IMX_PADMUX_EIM_EB3_B_OFFSET           0x00b0
+#define IMX_PADMUX_EIM_EB3_OFFSET             0x00b0
 #define IMX_PADMUX_EIM_DATA24_OFFSET          0x00b4
 #define IMX_PADMUX_EIM_DATA25_OFFSET          0x00b8
 #define IMX_PADMUX_EIM_DATA26_OFFSET          0x00bc
@@ -110,13 +120,13 @@
 #define IMX_PADMUX_EIM_ADDR18_OFFSET          0x00ec
 #define IMX_PADMUX_EIM_ADDR17_OFFSET          0x00f0
 #define IMX_PADMUX_EIM_ADDR16_OFFSET          0x00f4
-#define IMX_PADMUX_EIM_CS0_B_OFFSET           0x00f8
-#define IMX_PADMUX_EIM_CS1_B_OFFSET           0x00fc
-#define IMX_PADMUX_EIM_OE_B_OFFSET            0x0100
+#define IMX_PADMUX_EIM_CS0_OFFSET             0x00f8
+#define IMX_PADMUX_EIM_CS1_OFFSET             0x00fc
+#define IMX_PADMUX_EIM_OE_OFFSET              0x0100
 #define IMX_PADMUX_EIM_RW_OFFSET              0x0104
-#define IMX_PADMUX_EIM_LBA_B_OFFSET           0x0108
-#define IMX_PADMUX_EIM_EB0_B_OFFSET           0x010c
-#define IMX_PADMUX_EIM_EB1_B_OFFSET           0x0110
+#define IMX_PADMUX_EIM_LBA_OFFSET             0x0108
+#define IMX_PADMUX_EIM_EB0_OFFSET             0x010c
+#define IMX_PADMUX_EIM_EB1_OFFSET             0x0110
 #define IMX_PADMUX_EIM_AD00_OFFSET            0x0114
 #define IMX_PADMUX_EIM_AD01_OFFSET            0x0118
 #define IMX_PADMUX_EIM_AD02_OFFSET            0x011c
@@ -133,7 +143,7 @@
 #define IMX_PADMUX_EIM_AD13_OFFSET            0x0148
 #define IMX_PADMUX_EIM_AD14_OFFSET            0x014c
 #define IMX_PADMUX_EIM_AD15_OFFSET            0x0150
-#define IMX_PADMUX_EIM_WAIT_B_OFFSET          0x0154
+#define IMX_PADMUX_EIM_WAIT_OFFSET            0x0154
 #define IMX_PADMUX_EIM_BCLK_OFFSET            0x0158
 #define IMX_PADMUX_DI0_DISP_CLK_OFFSET        0x015c
 #define IMX_PADMUX_DI0_PIN15_OFFSET           0x0160
@@ -231,12 +241,12 @@
 #define IMX_PADMUX_SD3_RESET_OFFSET           0x02d0
 #define IMX_PADMUX_NAND_CLE_OFFSET            0x02d4
 #define IMX_PADMUX_NAND_ALE_OFFSET            0x02d8
-#define IMX_PADMUX_NAND_WP_B_OFFSET           0x02dc
-#define IMX_PADMUX_NAND_READY_B_OFFSET        0x02e0
-#define IMX_PADMUX_NAND_CS0_B_OFFSET          0x02e4
-#define IMX_PADMUX_NAND_CS1_B_OFFSET          0x02e8
-#define IMX_PADMUX_NAND_CS2_B_OFFSET          0x02ec
-#define IMX_PADMUX_NAND_CS3_B_OFFSET          0x02f0
+#define IMX_PADMUX_NAND_WP_OFFSET             0x02dc
+#define IMX_PADMUX_NAND_READY_OFFSET          0x02e0
+#define IMX_PADMUX_NAND_CS0_OFFSET            0x02e4
+#define IMX_PADMUX_NAND_CS1_OFFSET            0x02e8
+#define IMX_PADMUX_NAND_CS2_OFFSET            0x02ec
+#define IMX_PADMUX_NAND_CS3_OFFSET            0x02f0
 #define IMX_PADMUX_SD4_CMD_OFFSET             0x02f4
 #define IMX_PADMUX_SD4_CLK_OFFSET             0x02f8
 #define IMX_PADMUX_NAND_DATA00_OFFSET         0x02fc
@@ -283,7 +293,7 @@
 #define IMX_PADCTL_RGMII_RD3_OFFSET           0x0394
 #define IMX_PADCTL_RGMII_RXC_OFFSET           0x0398
 #define IMX_PADCTL_EIM_ADDR25_OFFSET          0x039c
-#define IMX_PADCTL_EIM_EB2_B_OFFSET           0x03a0
+#define IMX_PADCTL_EIM_EB2_OFFSET             0x03a0
 #define IMX_PADCTL_EIM_DATA16_OFFSET          0x03a4
 #define IMX_PADCTL_EIM_DATA17_OFFSET          0x03a8
 #define IMX_PADCTL_EIM_DATA18_OFFSET          0x03ac
@@ -292,7 +302,7 @@
 #define IMX_PADCTL_EIM_DATA21_OFFSET          0x03b8
 #define IMX_PADCTL_EIM_DATA22_OFFSET          0x03bc
 #define IMX_PADCTL_EIM_DATA23_OFFSET          0x03c0
-#define IMX_PADCTL_EIM_EB3_B_OFFSET           0x03c4
+#define IMX_PADCTL_EIM_EB3_OFFSET             0x03c4
 #define IMX_PADCTL_EIM_DATA24_OFFSET          0x03c8
 #define IMX_PADCTL_EIM_DATA25_OFFSET          0x03cc
 #define IMX_PADCTL_EIM_DATA26_OFFSET          0x03d0
@@ -310,13 +320,13 @@
 #define IMX_PADCTL_EIM_ADDR18_OFFSET          0x0400
 #define IMX_PADCTL_EIM_ADDR17_OFFSET          0x0404
 #define IMX_PADCTL_EIM_ADDR16_OFFSET          0x0408
-#define IMX_PADCTL_EIM_CS0_B_OFFSET           0x040c
-#define IMX_PADCTL_EIM_CS1_B_OFFSET           0x0410
-#define IMX_PADCTL_EIM_OE_B_OFFSET            0x0414
+#define IMX_PADCTL_EIM_CS0_OFFSET             0x040c
+#define IMX_PADCTL_EIM_CS1_OFFSET             0x0410
+#define IMX_PADCTL_EIM_OE_OFFSET              0x0414
 #define IMX_PADCTL_EIM_RW_OFFSET              0x0418
-#define IMX_PADCTL_EIM_LBA_B_OFFSET           0x041c
-#define IMX_PADCTL_EIM_EB0_B_OFFSET           0x0420
-#define IMX_PADCTL_EIM_EB1_B_OFFSET           0x0424
+#define IMX_PADCTL_EIM_LBA_OFFSET             0x041c
+#define IMX_PADCTL_EIM_EB0_OFFSET             0x0420
+#define IMX_PADCTL_EIM_EB1_OFFSET             0x0424
 #define IMX_PADCTL_EIM_AD00_OFFSET            0x0428
 #define IMX_PADCTL_EIM_AD01_OFFSET            0x042c
 #define IMX_PADCTL_EIM_AD02_OFFSET            0x0430
@@ -333,7 +343,7 @@
 #define IMX_PADCTL_EIM_AD13_OFFSET            0x045c
 #define IMX_PADCTL_EIM_AD14_OFFSET            0x0460
 #define IMX_PADCTL_EIM_AD15_OFFSET            0x0464
-#define IMX_PADCTL_EIM_WAIT_B_OFFSET          0x0468
+#define IMX_PADCTL_EIM_WAIT_OFFSET            0x0468
 #define IMX_PADCTL_EIM_BCLK_OFFSET            0x046c
 #define IMX_PADCTL_DI0_DISP_CLK_OFFSET        0x0470
 #define IMX_PADCTL_DI0_PIN15_OFFSET           0x0474
@@ -398,10 +408,10 @@
 #define IMX_PADCTL_DRAM_ADDR13_OFFSET         0x0560
 #define IMX_PADCTL_DRAM_ADDR14_OFFSET         0x0564
 #define IMX_PADCTL_DRAM_ADDR15_OFFSET         0x0568
-#define IMX_PADCTL_DRAM_CAS_B_OFFSET          0x056c
-#define IMX_PADCTL_DRAM_CS0_B_OFFSET          0x0570
-#define IMX_PADCTL_DRAM_CS1_B_OFFSET          0x0574
-#define IMX_PADCTL_DRAM_RAS_B_OFFSET          0x0578
+#define IMX_PADCTL_DRAM_CAS_OFFSET            0x056c
+#define IMX_PADCTL_DRAM_CS0_OFFSET            0x0570
+#define IMX_PADCTL_DRAM_CS1_OFFSET            0x0574
+#define IMX_PADCTL_DRAM_RAS_OFFSET            0x0578
 #define IMX_PADCTL_DRAM_RESET_OFFSET          0x057c
 #define IMX_PADCTL_DRAM_SDBA0_OFFSET          0x0580
 #define IMX_PADCTL_DRAM_SDBA1_OFFSET          0x0584
@@ -484,12 +494,12 @@
 #define IMX_PADCTL_SD3_RESET_OFFSET           0x06b8
 #define IMX_PADCTL_NAND_CLE_OFFSET            0x06bc
 #define IMX_PADCTL_NAND_ALE_OFFSET            0x06c0
-#define IMX_PADCTL_NAND_WP_B_OFFSET           0x06c4
-#define IMX_PADCTL_NAND_READY_B_OFFSET        0x06c8
-#define IMX_PADCTL_NAND_CS0_B_OFFSET          0x06cc
-#define IMX_PADCTL_NAND_CS1_B_OFFSET          0x06d0
-#define IMX_PADCTL_NAND_CS2_B_OFFSET          0x06d4
-#define IMX_PADCTL_NAND_CS3_B_OFFSET          0x06d8
+#define IMX_PADCTL_NAND_WP_OFFSET             0x06c4
+#define IMX_PADCTL_NAND_READY_OFFSET          0x06c8
+#define IMX_PADCTL_NAND_CS0_OFFSET            0x06cc
+#define IMX_PADCTL_NAND_CS1_OFFSET            0x06d0
+#define IMX_PADCTL_NAND_CS2_OFFSET            0x06d4
+#define IMX_PADCTL_NAND_CS3_OFFSET            0x06d8
 #define IMX_PADCTL_SD4_CMD_OFFSET             0x06dc
 #define IMX_PADCTL_SD4_CLK_OFFSET             0x06e0
 #define IMX_PADCTL_NAND_DATA00_OFFSET         0x06e4
@@ -689,7 +699,7 @@
 #define IMX_PADMUX_RGMII_RD3                  (IMX_IOMUXC_VBASE+IMX_PADMUX_RGMII_RD3_OFFSET)
 #define IMX_PADMUX_RGMII_RXC                  (IMX_IOMUXC_VBASE+IMX_PADMUX_RGMII_RXC_OFFSET)
 #define IMX_PADMUX_EIM_ADDR25                 (IMX_IOMUXC_VBASE+IMX_PADMUX_EIM_ADDR25_OFFSET)
-#define IMX_PADMUX_EIM_EB2_B                  (IMX_IOMUXC_VBASE+IMX_PADMUX_EIM_EB2_B_OFFSET)
+#define IMX_PADMUX_EIM_EB2                    (IMX_IOMUXC_VBASE+IMX_PADMUX_EIM_EB2_OFFSET)
 #define IMX_PADMUX_EIM_DATA16                 (IMX_IOMUXC_VBASE+IMX_PADMUX_EIM_DATA16_OFFSET)
 #define IMX_PADMUX_EIM_DATA17                 (IMX_IOMUXC_VBASE+IMX_PADMUX_EIM_DATA17_OFFSET)
 #define IMX_PADMUX_EIM_DATA18                 (IMX_IOMUXC_VBASE+IMX_PADMUX_EIM_DATA18_OFFSET)
@@ -698,7 +708,7 @@
 #define IMX_PADMUX_EIM_DATA21                 (IMX_IOMUXC_VBASE+IMX_PADMUX_EIM_DATA21_OFFSET)
 #define IMX_PADMUX_EIM_DATA22                 (IMX_IOMUXC_VBASE+IMX_PADMUX_EIM_DATA22_OFFSET)
 #define IMX_PADMUX_EIM_DATA23                 (IMX_IOMUXC_VBASE+IMX_PADMUX_EIM_DATA23_OFFSET)
-#define IMX_PADMUX_EIM_EB3_B                  (IMX_IOMUXC_VBASE+IMX_PADMUX_EIM_EB3_B_OFFSET)
+#define IMX_PADMUX_EIM_EB3                    (IMX_IOMUXC_VBASE+IMX_PADMUX_EIM_EB3_OFFSET)
 #define IMX_PADMUX_EIM_DATA24                 (IMX_IOMUXC_VBASE+IMX_PADMUX_EIM_DATA24_OFFSET)
 #define IMX_PADMUX_EIM_DATA25                 (IMX_IOMUXC_VBASE+IMX_PADMUX_EIM_DATA25_OFFSET)
 #define IMX_PADMUX_EIM_DATA26                 (IMX_IOMUXC_VBASE+IMX_PADMUX_EIM_DATA26_OFFSET)
@@ -716,13 +726,13 @@
 #define IMX_PADMUX_EIM_ADDR18                 (IMX_IOMUXC_VBASE+IMX_PADMUX_EIM_ADDR18_OFFSET)
 #define IMX_PADMUX_EIM_ADDR17                 (IMX_IOMUXC_VBASE+IMX_PADMUX_EIM_ADDR17_OFFSET)
 #define IMX_PADMUX_EIM_ADDR16                 (IMX_IOMUXC_VBASE+IMX_PADMUX_EIM_ADDR16_OFFSET)
-#define IMX_PADMUX_EIM_CS0_B                  (IMX_IOMUXC_VBASE+IMX_PADMUX_EIM_CS0_B_OFFSET)
-#define IMX_PADMUX_EIM_CS1_B                  (IMX_IOMUXC_VBASE+IMX_PADMUX_EIM_CS1_B_OFFSET)
-#define IMX_PADMUX_EIM_OE_B                   (IMX_IOMUXC_VBASE+IMX_PADMUX_EIM_OE_B_OFFSET)
+#define IMX_PADMUX_EIM_CS0                    (IMX_IOMUXC_VBASE+IMX_PADMUX_EIM_CS0_OFFSET)
+#define IMX_PADMUX_EIM_CS1                    (IMX_IOMUXC_VBASE+IMX_PADMUX_EIM_CS1_OFFSET)
+#define IMX_PADMUX_EIM_OE                     (IMX_IOMUXC_VBASE+IMX_PADMUX_EIM_OE_OFFSET)
 #define IMX_PADMUX_EIM_RW                     (IMX_IOMUXC_VBASE+IMX_PADMUX_EIM_RW_OFFSET)
-#define IMX_PADMUX_EIM_LBA_B                  (IMX_IOMUXC_VBASE+IMX_PADMUX_EIM_LBA_B_OFFSET)
-#define IMX_PADMUX_EIM_EB0_B                  (IMX_IOMUXC_VBASE+IMX_PADMUX_EIM_EB0_B_OFFSET)
-#define IMX_PADMUX_EIM_EB1_B                  (IMX_IOMUXC_VBASE+IMX_PADMUX_EIM_EB1_B_OFFSET)
+#define IMX_PADMUX_EIM_LBA                    (IMX_IOMUXC_VBASE+IMX_PADMUX_EIM_LBA_OFFSET)
+#define IMX_PADMUX_EIM_EB0                    (IMX_IOMUXC_VBASE+IMX_PADMUX_EIM_EB0_OFFSET)
+#define IMX_PADMUX_EIM_EB1                    (IMX_IOMUXC_VBASE+IMX_PADMUX_EIM_EB1_OFFSET)
 #define IMX_PADMUX_EIM_AD00                   (IMX_IOMUXC_VBASE+IMX_PADMUX_EIM_AD00_OFFSET)
 #define IMX_PADMUX_EIM_AD01                   (IMX_IOMUXC_VBASE+IMX_PADMUX_EIM_AD01_OFFSET)
 #define IMX_PADMUX_EIM_AD02                   (IMX_IOMUXC_VBASE+IMX_PADMUX_EIM_AD02_OFFSET)
@@ -739,7 +749,7 @@
 #define IMX_PADMUX_EIM_AD13                   (IMX_IOMUXC_VBASE+IMX_PADMUX_EIM_AD13_OFFSET)
 #define IMX_PADMUX_EIM_AD14                   (IMX_IOMUXC_VBASE+IMX_PADMUX_EIM_AD14_OFFSET)
 #define IMX_PADMUX_EIM_AD15                   (IMX_IOMUXC_VBASE+IMX_PADMUX_EIM_AD15_OFFSET)
-#define IMX_PADMUX_EIM_WAIT_B                 (IMX_IOMUXC_VBASE+IMX_PADMUX_EIM_WAIT_B_OFFSET)
+#define IMX_PADMUX_EIM_WAIT                   (IMX_IOMUXC_VBASE+IMX_PADMUX_EIM_WAIT_OFFSET)
 #define IMX_PADMUX_EIM_BCLK                   (IMX_IOMUXC_VBASE+IMX_PADMUX_EIM_BCLK_OFFSET)
 #define IMX_PADMUX_DI0_DISP_CLK               (IMX_IOMUXC_VBASE+IMX_PADMUX_DI0_DISP_CLK_OFFSET)
 #define IMX_PADMUX_DI0_PIN15                  (IMX_IOMUXC_VBASE+IMX_PADMUX_DI0_PIN15_OFFSET)
@@ -837,12 +847,12 @@
 #define IMX_PADMUX_SD3_RESET                  (IMX_IOMUXC_VBASE+IMX_PADMUX_SD3_RESET_OFFSET)
 #define IMX_PADMUX_NAND_CLE                   (IMX_IOMUXC_VBASE+IMX_PADMUX_NAND_CLE_OFFSET)
 #define IMX_PADMUX_NAND_ALE                   (IMX_IOMUXC_VBASE+IMX_PADMUX_NAND_ALE_OFFSET)
-#define IMX_PADMUX_NAND_WP_B                  (IMX_IOMUXC_VBASE+IMX_PADMUX_NAND_WP_B_OFFSET)
-#define IMX_PADMUX_NAND_READY_B               (IMX_IOMUXC_VBASE+IMX_PADMUX_NAND_READY_B_OFFSET)
-#define IMX_PADMUX_NAND_CS0_B                 (IMX_IOMUXC_VBASE+IMX_PADMUX_NAND_CS0_B_OFFSET)
-#define IMX_PADMUX_NAND_CS1_B                 (IMX_IOMUXC_VBASE+IMX_PADMUX_NAND_CS1_B_OFFSET)
-#define IMX_PADMUX_NAND_CS2_B                 (IMX_IOMUXC_VBASE+IMX_PADMUX_NAND_CS2_B_OFFSET)
-#define IMX_PADMUX_NAND_CS3_B                 (IMX_IOMUXC_VBASE+IMX_PADMUX_NAND_CS3_B_OFFSET)
+#define IMX_PADMUX_NAND_WP                    (IMX_IOMUXC_VBASE+IMX_PADMUX_NAND_WP_OFFSET)
+#define IMX_PADMUX_NAND_READY                 (IMX_IOMUXC_VBASE+IMX_PADMUX_NAND_READY_OFFSET)
+#define IMX_PADMUX_NAND_CS0                   (IMX_IOMUXC_VBASE+IMX_PADMUX_NAND_CS0_OFFSET)
+#define IMX_PADMUX_NAND_CS1                   (IMX_IOMUXC_VBASE+IMX_PADMUX_NAND_CS1_OFFSET)
+#define IMX_PADMUX_NAND_CS2                   (IMX_IOMUXC_VBASE+IMX_PADMUX_NAND_CS2_OFFSET)
+#define IMX_PADMUX_NAND_CS3                   (IMX_IOMUXC_VBASE+IMX_PADMUX_NAND_CS3_OFFSET)
 #define IMX_PADMUX_SD4_CMD                    (IMX_IOMUXC_VBASE+IMX_PADMUX_SD4_CMD_OFFSET)
 #define IMX_PADMUX_SD4_CLK                    (IMX_IOMUXC_VBASE+IMX_PADMUX_SD4_CLK_OFFSET)
 #define IMX_PADMUX_NAND_DATA00                (IMX_IOMUXC_VBASE+IMX_PADMUX_NAND_DATA00_OFFSET)
@@ -889,7 +899,7 @@
 #define IMX_PADCTL_RGMII_RD3                  (IMX_IOMUXC_VBASE+IMX_PADCTL_RGMII_RD3_OFFSET)
 #define IMX_PADCTL_RGMII_RXC                  (IMX_IOMUXC_VBASE+IMX_PADCTL_RGMII_RXC_OFFSET)
 #define IMX_PADCTL_EIM_ADDR25                 (IMX_IOMUXC_VBASE+IMX_PADCTL_EIM_ADDR25_OFFSET)
-#define IMX_PADCTL_EIM_EB2_B                  (IMX_IOMUXC_VBASE+IMX_PADCTL_EIM_EB2_B_OFFSET)
+#define IMX_PADCTL_EIM_EB2                    (IMX_IOMUXC_VBASE+IMX_PADCTL_EIM_EB2_OFFSET)
 #define IMX_PADCTL_EIM_DATA16                 (IMX_IOMUXC_VBASE+IMX_PADCTL_EIM_DATA16_OFFSET)
 #define IMX_PADCTL_EIM_DATA17                 (IMX_IOMUXC_VBASE+IMX_PADCTL_EIM_DATA17_OFFSET)
 #define IMX_PADCTL_EIM_DATA18                 (IMX_IOMUXC_VBASE+IMX_PADCTL_EIM_DATA18_OFFSET)
@@ -898,7 +908,7 @@
 #define IMX_PADCTL_EIM_DATA21                 (IMX_IOMUXC_VBASE+IMX_PADCTL_EIM_DATA21_OFFSET)
 #define IMX_PADCTL_EIM_DATA22                 (IMX_IOMUXC_VBASE+IMX_PADCTL_EIM_DATA22_OFFSET)
 #define IMX_PADCTL_EIM_DATA23                 (IMX_IOMUXC_VBASE+IMX_PADCTL_EIM_DATA23_OFFSET)
-#define IMX_PADCTL_EIM_EB3_B                  (IMX_IOMUXC_VBASE+IMX_PADCTL_EIM_EB3_B_OFFSET)
+#define IMX_PADCTL_EIM_EB3                    (IMX_IOMUXC_VBASE+IMX_PADCTL_EIM_EB3_OFFSET)
 #define IMX_PADCTL_EIM_DATA24                 (IMX_IOMUXC_VBASE+IMX_PADCTL_EIM_DATA24_OFFSET)
 #define IMX_PADCTL_EIM_DATA25                 (IMX_IOMUXC_VBASE+IMX_PADCTL_EIM_DATA25_OFFSET)
 #define IMX_PADCTL_EIM_DATA26                 (IMX_IOMUXC_VBASE+IMX_PADCTL_EIM_DATA26_OFFSET)
@@ -916,13 +926,13 @@
 #define IMX_PADCTL_EIM_ADDR18                 (IMX_IOMUXC_VBASE+IMX_PADCTL_EIM_ADDR18_OFFSET)
 #define IMX_PADCTL_EIM_ADDR17                 (IMX_IOMUXC_VBASE+IMX_PADCTL_EIM_ADDR17_OFFSET)
 #define IMX_PADCTL_EIM_ADDR16                 (IMX_IOMUXC_VBASE+IMX_PADCTL_EIM_ADDR16_OFFSET)
-#define IMX_PADCTL_EIM_CS0_B                  (IMX_IOMUXC_VBASE+IMX_PADCTL_EIM_CS0_B_OFFSET)
-#define IMX_PADCTL_EIM_CS1_B                  (IMX_IOMUXC_VBASE+IMX_PADCTL_EIM_CS1_B_OFFSET)
-#define IMX_PADCTL_EIM_OE_B                   (IMX_IOMUXC_VBASE+IMX_PADCTL_EIM_OE_B_OFFSET)
+#define IMX_PADCTL_EIM_CS0                    (IMX_IOMUXC_VBASE+IMX_PADCTL_EIM_CS0_OFFSET)
+#define IMX_PADCTL_EIM_CS1                    (IMX_IOMUXC_VBASE+IMX_PADCTL_EIM_CS1_OFFSET)
+#define IMX_PADCTL_EIM_OE                     (IMX_IOMUXC_VBASE+IMX_PADCTL_EIM_OE_OFFSET)
 #define IMX_PADCTL_EIM_RW                     (IMX_IOMUXC_VBASE+IMX_PADCTL_EIM_RW_OFFSET)
-#define IMX_PADCTL_EIM_LBA_B                  (IMX_IOMUXC_VBASE+IMX_PADCTL_EIM_LBA_B_OFFSET)
-#define IMX_PADCTL_EIM_EB0_B                  (IMX_IOMUXC_VBASE+IMX_PADCTL_EIM_EB0_B_OFFSET)
-#define IMX_PADCTL_EIM_EB1_B                  (IMX_IOMUXC_VBASE+IMX_PADCTL_EIM_EB1_B_OFFSET)
+#define IMX_PADCTL_EIM_LBA                    (IMX_IOMUXC_VBASE+IMX_PADCTL_EIM_LBA_OFFSET)
+#define IMX_PADCTL_EIM_EB0                    (IMX_IOMUXC_VBASE+IMX_PADCTL_EIM_EB0_OFFSET)
+#define IMX_PADCTL_EIM_EB1                    (IMX_IOMUXC_VBASE+IMX_PADCTL_EIM_EB1_OFFSET)
 #define IMX_PADCTL_EIM_AD00                   (IMX_IOMUXC_VBASE+IMX_PADCTL_EIM_AD00_OFFSET)
 #define IMX_PADCTL_EIM_AD01                   (IMX_IOMUXC_VBASE+IMX_PADCTL_EIM_AD01_OFFSET)
 #define IMX_PADCTL_EIM_AD02                   (IMX_IOMUXC_VBASE+IMX_PADCTL_EIM_AD02_OFFSET)
@@ -939,7 +949,7 @@
 #define IMX_PADCTL_EIM_AD13                   (IMX_IOMUXC_VBASE+IMX_PADCTL_EIM_AD13_OFFSET)
 #define IMX_PADCTL_EIM_AD14                   (IMX_IOMUXC_VBASE+IMX_PADCTL_EIM_AD14_OFFSET)
 #define IMX_PADCTL_EIM_AD15                   (IMX_IOMUXC_VBASE+IMX_PADCTL_EIM_AD15_OFFSET)
-#define IMX_PADCTL_EIM_WAIT_B                 (IMX_IOMUXC_VBASE+IMX_PADCTL_EIM_WAIT_B_OFFSET)
+#define IMX_PADCTL_EIM_WAIT                   (IMX_IOMUXC_VBASE+IMX_PADCTL_EIM_WAIT_OFFSET)
 #define IMX_PADCTL_EIM_BCLK                   (IMX_IOMUXC_VBASE+IMX_PADCTL_EIM_BCLK_OFFSET)
 #define IMX_PADCTL_DI0_DISP_CLK               (IMX_IOMUXC_VBASE+IMX_PADCTL_DI0_DISP_CLK_OFFSET)
 #define IMX_PADCTL_DI0_PIN15                  (IMX_IOMUXC_VBASE+IMX_PADCTL_DI0_PIN15_OFFSET)
@@ -1004,10 +1014,10 @@
 #define IMX_PADCTL_DRAM_ADDR13                (IMX_IOMUXC_VBASE+IMX_PADCTL_DRAM_ADDR13_OFFSET)
 #define IMX_PADCTL_DRAM_ADDR14                (IMX_IOMUXC_VBASE+IMX_PADCTL_DRAM_ADDR14_OFFSET)
 #define IMX_PADCTL_DRAM_ADDR15                (IMX_IOMUXC_VBASE+IMX_PADCTL_DRAM_ADDR15_OFFSET)
-#define IMX_PADCTL_DRAM_CAS_B                 (IMX_IOMUXC_VBASE+IMX_PADCTL_DRAM_CAS_B_OFFSET)
-#define IMX_PADCTL_DRAM_CS0_B                 (IMX_IOMUXC_VBASE+IMX_PADCTL_DRAM_CS0_B_OFFSET)
-#define IMX_PADCTL_DRAM_CS1_B                 (IMX_IOMUXC_VBASE+IMX_PADCTL_DRAM_CS1_B_OFFSET)
-#define IMX_PADCTL_DRAM_RAS_B                 (IMX_IOMUXC_VBASE+IMX_PADCTL_DRAM_RAS_B_OFFSET)
+#define IMX_PADCTL_DRAM_CAS                   (IMX_IOMUXC_VBASE+IMX_PADCTL_DRAM_CAS_OFFSET)
+#define IMX_PADCTL_DRAM_CS0                   (IMX_IOMUXC_VBASE+IMX_PADCTL_DRAM_CS0_OFFSET)
+#define IMX_PADCTL_DRAM_CS1                   (IMX_IOMUXC_VBASE+IMX_PADCTL_DRAM_CS1_OFFSET)
+#define IMX_PADCTL_DRAM_RAS                   (IMX_IOMUXC_VBASE+IMX_PADCTL_DRAM_RAS_OFFSET)
 #define IMX_PADCTL_DRAM_RESET                 (IMX_IOMUXC_VBASE+IMX_PADCTL_DRAM_RESET_OFFSET)
 #define IMX_PADCTL_DRAM_SDBA0                 (IMX_IOMUXC_VBASE+IMX_PADCTL_DRAM_SDBA0_OFFSET)
 #define IMX_PADCTL_DRAM_SDBA1                 (IMX_IOMUXC_VBASE+IMX_PADCTL_DRAM_SDBA1_OFFSET)
@@ -1090,12 +1100,12 @@
 #define IMX_PADCTL_SD3_RESET                  (IMX_IOMUXC_VBASE+IMX_PADCTL_SD3_RESET_OFFSET)
 #define IMX_PADCTL_NAND_CLE                   (IMX_IOMUXC_VBASE+IMX_PADCTL_NAND_CLE_OFFSET)
 #define IMX_PADCTL_NAND_ALE                   (IMX_IOMUXC_VBASE+IMX_PADCTL_NAND_ALE_OFFSET)
-#define IMX_PADCTL_NAND_WP_B                  (IMX_IOMUXC_VBASE+IMX_PADCTL_NAND_WP_B_OFFSET)
-#define IMX_PADCTL_NAND_READY_B               (IMX_IOMUXC_VBASE+IMX_PADCTL_NAND_READY_B_OFFSET)
-#define IMX_PADCTL_NAND_CS0_B                 (IMX_IOMUXC_VBASE+IMX_PADCTL_NAND_CS0_B_OFFSET)
-#define IMX_PADCTL_NAND_CS1_B                 (IMX_IOMUXC_VBASE+IMX_PADCTL_NAND_CS1_B_OFFSET)
-#define IMX_PADCTL_NAND_CS2_B                 (IMX_IOMUXC_VBASE+IMX_PADCTL_NAND_CS2_B_OFFSET)
-#define IMX_PADCTL_NAND_CS3_B                 (IMX_IOMUXC_VBASE+IMX_PADCTL_NAND_CS3_B_OFFSET)
+#define IMX_PADCTL_NAND_WP                    (IMX_IOMUXC_VBASE+IMX_PADCTL_NAND_WP_OFFSET)
+#define IMX_PADCTL_NAND_READY                 (IMX_IOMUXC_VBASE+IMX_PADCTL_NAND_READY_OFFSET)
+#define IMX_PADCTL_NAND_CS0                   (IMX_IOMUXC_VBASE+IMX_PADCTL_NAND_CS0_OFFSET)
+#define IMX_PADCTL_NAND_CS1                   (IMX_IOMUXC_VBASE+IMX_PADCTL_NAND_CS1_OFFSET)
+#define IMX_PADCTL_NAND_CS2                   (IMX_IOMUXC_VBASE+IMX_PADCTL_NAND_CS2_OFFSET)
+#define IMX_PADCTL_NAND_CS3                   (IMX_IOMUXC_VBASE+IMX_PADCTL_NAND_CS3_OFFSET)
 #define IMX_PADCTL_SD4_CMD                    (IMX_IOMUXC_VBASE+IMX_PADCTL_SD4_CMD_OFFSET)
 #define IMX_PADCTL_SD4_CLK                    (IMX_IOMUXC_VBASE+IMX_PADCTL_SD4_CLK_OFFSET)
 #define IMX_PADCTL_NAND_DATA00                (IMX_IOMUXC_VBASE+IMX_PADCTL_NAND_DATA00_OFFSET)
@@ -1261,5 +1271,53 @@
 
 /* IOMUXC Register Bit Definitions **************************************************/
 
+/* General Purpose Registers */
 
+/* Pad Mux Registers */
+
+#define PADMUX_MUXMODE_SHIFT                  (0)       /* Bit 0-2: Software Input On Field */
+#define PADMUX_MUXMODE_MASK                   (7 << PADMUX_MUXMODE_SHIFT)
+#  define PADMUX_MUXMODE_ALT0                 (0 << PADMUX_MUXMODE_SHIFT)
+#  define PADMUX_MUXMODE_ALT1                 (1 << PADMUX_MUXMODE_SHIFT)
+#  define PADMUX_MUXMODE_ALT2                 (2 << PADMUX_MUXMODE_SHIFT)
+#  define PADMUX_MUXMODE_ALT3                 (3 << PADMUX_MUXMODE_SHIFT)
+#  define PADMUX_MUXMODE_ALT4                 (4 << PADMUX_MUXMODE_SHIFT)
+#  define PADMUX_MUXMODE_ALT5                 (5 << PADMUX_MUXMODE_SHIFT)
+#  define PADMUX_MUXMODE_ALT6                 (6 << PADMUX_MUXMODE_SHIFT)
+#  define PADMUX_MUXMODE_ALT7                 (7 << PADMUX_MUXMODE_SHIFT)
+#define PADMUX_SION                           (1 << 4)  /* Bit 4: Software Input On Field */
+
+/* Pad Control Registers */
+
+#define PADCTL_SRE                            (1 << 0)  /* Bit 0: Slew Rate Field */
+#define PADCTL_DSE_SHIFT                      (3) /* Bits 3-5: Drive Strength Field */
+#define PADCTL_DSE_MASK                       (7 << PADCTL_DSE_SHIFT)
+#  define PADCTL_DS_HIZ                       (0 << PADCTL_DS_SHIFT) /* HI-Z */
+#  define PADCTL_DS_260OHM                    (1 << PADCTL_DS_SHIFT) /* 150 Ohm @3.3V, 260 Ohm @1.8V */
+#  define PADCTL_DS_130OHM                    (2 << PADCTL_DS_SHIFT) /* 75 Ohm @3.3V, 130 Ohm @1.8V */
+#  define PADCTL_DS_90OHM                     (3 << PADCTL_DS_SHIFT) /* 50 Ohm @3.3V, 90 Ohm @1.8V */
+#  define PADCTL_DS_60OHM                     (4 << PADCTL_DS_SHIFT) /* 37 Ohm @3.3V, 60 Ohm @1.8V */
+#  define PADCTL_DS_50OHM                     (5 << PADCTL_DS_SHIFT) /* 30 Ohm @3.3V, 50 Ohm @1.8V */
+#  define PADCTL_DS_40OHM                     (6 << PADCTL_DS_SHIFT) /* 25 Ohm @3.3V, 40 Ohm @1.8V */
+#  define PADCTL_DS_33OHM                     (7 << PADCTL_DS_SHIFT) /* 20 Ohm @3.3V, 33 Ohm @1.8V */
+#define PADCTL_SPEED_SHIFT                    (6) /* Bits 6-7: Speed Field */
+#define PADCTL_SPEED_MASK                     (3 << PADCTL_SPEED_SHIFT)
+#  define PADCTL_SPEED_LOW                    (0 << PADCTL_SPEED_SHIFT) /* Low frequency (50 MHz) */
+#  define PADCTL_SPEED_MEDIUM                 (1 << PADCTL_SPEED_SHIFT) /* Medium frequency (100, 150 MHz) */
+#  define PADCTL_SPEED_MAX                    (3 << PADCTL_SPEED_SHIFT) /* Maximum frequency (100, 150, 200 MHz) */
+#define PADCTL_ODE                            (1 << 11) /* Bit 11: Open Drain Enable Field */
+#define PADCTL_PKE                            (1 << 12) /* Bit 12: Pull / Keep Enable Field */
+#define PADCTL_PUE                            (1 << 13) /* Bit 13: Pull / Keep Select Field */
+#define PADCTL_PUS_SHIFT                      (14)    /* Bits 14-15: Pull Up / Down Config. Field */
+#define PADCTL_PUS_MASK                       (3 << PADCTL_PUS_SHIFT)
+#  define PADCTL_PUS_DOWN_100K                (0 << PADCTL_PUS_SHIFT) /* 100K Ohm Pull Down */
+#  define PADCTL_PUS_UP_47K                   (1 << PADCTL_PUS_SHIFT) /* 47K Ohm Pull Up */
+#  define PADCTL_PUS_UP_100K                  (2 << PADCTL_PUS_SHIFT) /* 100K Ohm Pull Up */
+#  define PADCTL_PUS_UP_22K                   (3 << PADCTL_PUS_SHIFT) /*  22K Ohm Pull Up */
+#define PADCTL_HYS                            (1 << 16) /* Bit 16: Hysteresis Enable Field */
+
+/* Pad Group Control Registers */
+/* Select Input Registers */
+
+#endif /* CONFIG_ARCH_CHIP_IMX6_6QUAD || CONFIG_ARCH_CHIP_IMX6_6DUAL */
 #endif /* __ARCH_ARM_SRC_IMX6_CHIP_IMX_IOMUXC_H */

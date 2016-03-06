@@ -4,6 +4,10 @@
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
+ * Reference:
+ *   "i.MX 6Dual/6Quad ApplicationsProcessor Reference Manual," Document Number
+ *   IMX6DQRM, Rev. 3, 07/2015, FreeScale.
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
