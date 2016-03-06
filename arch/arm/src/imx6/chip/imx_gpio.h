@@ -51,13 +51,16 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-#define GPIO1                    0       /* Port 1 index */
-#define GPIO2                    1       /* Port 2 index */
-#define GPIO3                    2       /* Port 3 index */
-#define GPIO4                    3       /* Port 4 index */
-#define GPIO5                    4       /* Port 5 index */
-#define GPIO6                    5       /* Port 6 index */
-#define GPIO7                    6       /* Port 7 index */
+#define GPIO1                     0      /* Port 1 index */
+#define GPIO2                     1      /* Port 2 index */
+#define GPIO3                     2      /* Port 3 index */
+#define GPIO4                     3      /* Port 4 index */
+#define GPIO5                     4      /* Port 5 index */
+#define GPIO6                     5      /* Port 6 index */
+#define GPIO7                     6      /* Port 7 index */
+
+#define IMX_GPIO_NPORTS           7      /* Seven total ports */
+#define IMX_GPIO_NPINS           32      /* Up to 32 pins per port */
 
 /* GPIO Register Offsets ************************************************************/
 
