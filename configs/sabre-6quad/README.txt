@@ -77,7 +77,8 @@ Serial Console
 ==============
 
 A DEBUG VCOM is available MICRO USB AB 5 J509.  This corresponds to UART1
-from the i.MX6.
+from the i.MX6.  UART1 connects to J509 via the CSIO_DAT10 and CSIO_DAT11
+pins
 
 Configurations
 ==============

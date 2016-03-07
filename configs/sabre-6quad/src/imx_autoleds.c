@@ -72,6 +72,7 @@
 #include <nuttx/board.h>
 #include <arch/board/board.h>
 
+#include "up_arch.h"
 #include "imx_gpio.h"
 #include "sabre-6quad.h"
 
@@ -116,7 +117,7 @@ void board_autoled_on(int led)
 {
   if (led == 1 || led == 3)
     {
-      imx_gpiowrite(GPIO_LED0, false); /* Low illuminates */
+      imx_gpio_write(GPIO_LED0, false); /* Low illuminates */
     }
 }
 
@@ -128,7 +129,7 @@ void board_autoled_off(int led)
 {
   if (led == 3)
     {
-      imx_gpiowrite(GPIO_LED0, true);  /* High extinguishes */
+      imx_gpio_write(GPIO_LED0, true);  /* High extinguishes */
     }
 }
 
