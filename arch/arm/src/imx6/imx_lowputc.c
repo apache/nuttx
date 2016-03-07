@@ -42,6 +42,8 @@
 #include <stdint.h>
 #include <assert.h>
 
+#include "chip/imx_iomuxc.h"   /* Order matters with these three */
+#include "chip/imx_pinmux.h"
 #include <arch/board/board.h>
 
 #include "up_arch.h"
