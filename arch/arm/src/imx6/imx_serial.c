@@ -52,14 +52,14 @@
 #include <nuttx/arch.h>
 #include <nuttx/serial/serial.h>
 #include <arch/serial.h>
-#include <arch/board/board.h>
 
 #include "chip.h"
 #include "up_arch.h"
 #include "up_internal.h"
 
-#include "imx_config.h"
 #include "chip/imx_uart.h"
+#include "imx_config.h"
+#include "imx_lowputc.h"
 
 #ifdef USE_SERIALDRIVER
 
@@ -228,7 +228,7 @@ static void imx_shutdown(struct uart_dev_s *dev);
 static int  imx_attach(struct uart_dev_s *dev);
 static void imx_detach(struct uart_dev_s *dev);
 
-static int  imx_interrupt(struct uart_dev_s *priv);
+static int  imx_interrupt(struct uart_dev_s *dev);
 #ifdef CONFIG_IMX6_UART1
 static int  imx_uart1_interrupt(int irq, void *context);
 #endif
@@ -542,202 +542,30 @@ static int imx_setup(struct uart_dev_s *dev)
 {
 #ifndef CONFIG_SUPPRESS_UART_CONFIG
   struct imx_uart_s *priv = (struct imx_uart_s *)dev->priv;
-  uint32_t regval;
-  uint32_t ucr2;
-  uint32_t div;
-  uint32_t num;
-  uint32_t den;
+  struct uart_config_s config;
+  int ret;
 
-  /* Disable the UART */
+  /* Configure the UART */
 
-  imx_serialout(priv, UART_UCR1_OFFSET, 0);
-  imx_serialout(priv, UART_UCR2_OFFSET, 0);
-  imx_serialout(priv, UART_UCR3_OFFSET, 0);
-  imx_serialout(priv, UART_UCR4_OFFSET, 0);
+  config.baud       = priv->baud;          /* Configured baud */
+  config.parity     = priv->parity;        /* 0=none, 1=odd, 2=even */
+  config.bits       = priv->bits;          /* Number of bits (5-9) */
+  config.stopbits2  = priv->stopbits2;     /* true: Configure with 2 stop bits instead of 1 */
 
-  /* Set up UCR2 */
-
-  ucr2  = imx_serialin(priv, UART_UCR2_OFFSET);
-  ucr2 |= (UART_UCR2_SRST | UART_UCR2_IRTS)
-
-  /* Select the number of data bits */
-
-  DEBUGASSERT(priv->bits == 7 || priv->bits == 8);
-  if (priv->bits == 8)
-    {
-      ucr2 |= UART_UCR2_WS;
-    }
-
-  /* Select the number of stop bits */
-
-  if (priv->stopbits2)
-    {
-      ucr2 |= UART_UCR2_STPB;
-    }
-
-  /* Select even/odd parity */
-
-  if (priv->parity)
-    {
-      DEBUGASSERT(priv->parity == 1 || priv->parity == 2);
-      ucr2 |= UART_UCR2_PREN;
-      if (priv->parity == 1)
-        {
-          ucr2 |= UART_UCR2_PROE;
-        }
-    }
-
-  /* Select RTS */
-
-#if 0
-  ucr2 &= ~UCR2_IRTS;
-  ucr2 |= UCR2_CTSC;
-#endif
-
-  /* Setup hardware flow control */
-
-  regval = 0;
-#if 0
-  if (priv->hwfc)
-    {
-      ucr2 |= UART_UCR2_IRTS;
-
-      /* CTS controled by Rx FIFO */
-
-      ucr2 |= UART_UCR2_CTSC;
-
-      /* Set CTS trigger level */
-
-      regval |= 30 << UART_UCR4_CTSTL_SHIFT;
-    }
-#endif
-
-  /* i.MX reference clock (PERCLK1) is configured for 16MHz */
-
-  imx_serialout(priv, UART_UCR4_OFFSET, regval | UART_UCR4_REF16);
-
-  /* Setup the new UART configuration */
-
-  imx_serialout(priv, UART_UCR2_OFFSET, ucr2);
-
-  /* Set the baud.
-   *
-   *   baud * 16 / REFFREQ = NUM/DEN
-   *   UBIR    = NUM-1;
-   *   UMBR    = DEN-1
-   *   REFFREQ = PERCLK1 / DIV
-   *   DIV     = RFDIV[2:0]
-   *
-   * First, select a closest value we can for the divider
-   */
-
-  div = (BOARD_PERCLK1_FREQUENCY >> 4) / priv->baud;
-  if (div > 7)
-    {
-      div = 7;
-    }
-  else if (div < 1)
-    {
-      div = 1;
-    }
-
-  /* Now find the numerator and denominator.  These must have
-   * the ratio baud/(PERCLK / div / 16), but the values cannot
-   * exceed 16 bits
-   */
-
-  num = priv->baud;
-  den = (BOARD_PERCLK1_FREQUENCY << 4) / div;
-
-  if (num > den)
-    {
-      if (num > 0x00010000)
-        {
-          /* b16 is a scale such that b16*num = 0x10000 * 2**16 */
-
-          uint32_t b16 = 0x100000000LL / num;
-          num = 0x00010000;
-          den = (b16 * den) >> 16;
-        }
-    }
-  else
-    {
-      if (den > 0x0000ffff)
-        {
-          /* b16 is a scale such that b16*den = 0x10000 * 2**16 */
-
-          uint32_t b16 = 0x100000000LL / den;
-          num = (b16 * num) >> 16;
-          den = 0x00010000;
-        }
-    }
-
-  /* The actual values are we write to the registers need to be
-   * decremented by 1.
-   */
-
-  if (num > 0)
-    {
-      num--;
-    }
-
-  if (den > 0)
-    {
-      den--;
-    }
-
-  /* The UBIR must be set before the UBMR register */
-
-  imx_serialout(priv, UART_UBIR_OFFSET, num);
-  imx_serialout(priv, UART_UBMR_OFFSET, den);
-
-  /* Fixup the divisor, the value in the UFCR regiser is
-   *
-   *   000 = Divide input clock by 6
-   *   001 = Divide input clock by 5
-   *   010 = Divide input clock by 4
-   *   011 = Divide input clock by 3
-   *   100 = Divide input clock by 2
-   *   101 = Divide input clock by 1
-   *   110 = Divide input clock by 7
-   */
-
-  if (div == 7)
-    {
-      div = 6;
-    }
-  else
-    {
-      div = 6 - div;
-    }
-
-  regval = div << UART_UFCR_RFDIV_SHIFT;
-
-  /* Set the TX trigger level to interrupt when the TxFIFO has 2 or fewer
-   * characters.  Set the RX trigger level to interrupt when the RxFIFO has
-   * 1 character.
-   */
-
-  regval |= ((2 << UART_UFCR_TXTL_SHIFT) | (1 << UART_UFCR_RXTL_SHIFT));
-  imx_serialout(priv, UART_UFCR_OFFSET, regval);
+  ret = imx_uart_configure(priv->uartbase, &config);
 
   /* Initialize the UCR1 shadow register */
 
   priv->ucr1 = imx_serialin(priv, UART_UCR1_OFFSET);
 
-  /* Enable the UART
-   *
-   *  UART_UCR1_UARTCLEN = Enable UART clocking
-   */
+  return ret;
 
-  ucr2 |= (UART_UCR2_TXEN | UART_UCR2_RXEN);
-  imx_serialout(priv, UART_UCR1_OFFSET, ucr2);
+#else
+  /* Initialize the UCR1 shadow register */
 
-  priv->ucr1 |= UART_UCR1_UARTCLEN;
-  imx_serialout(priv, UART_UCR1_OFFSET, priv->ucr1);
-#endif
-
+  priv->ucr1 = imx_serialin(priv, UART_UCR1_OFFSET);
   return OK;
+#endif
 }
 
 /****************************************************************************
@@ -824,9 +652,9 @@ static void imx_detach(struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
-static int imx_interrupt(struct uart_dev_s *priv)
+static int imx_interrupt(struct uart_dev_s *dev)
 {
-  struct uart_dev_s *dev;
+  struct imx_uart_s *priv = (struct imx_uart_s *)dev->priv;
   uint32_t usr1;
   int passes = 0;
 
@@ -1114,54 +942,13 @@ static bool imx_txempty(struct uart_dev_s *dev)
 
 void imx_earlyserialinit(void)
 {
-  /* Configure and disable the UART1 */
-
-#ifdef CONFIG_IMX6_UART1
-  imx_serialout(&g_uart1priv, UART_UCR1_OFFSET, 0);
-  imx_serialout(&g_uart1priv, UART_UCR2_OFFSET, 0);
-
-  /* Configure UART1 pins: RXD, TXD, RTS, and CTS */
-
-  imxgpio_configpfoutput(GPIOC, 9);  /* Port C, pin  9: CTS */
-  imxgpio_configpfinput(GPIOC, 10);  /* Port C, pin 10: RTS */
-  imxgpio_configpfoutput(GPIOC, 11); /* Port C, pin 11: TXD */
-  imxgpio_configpfinput(GPIOC, 12);  /* Port C, pin 12: RXD */
-#endif
-
-  /* Configure and disable the UART2 */
-
-#ifdef CONFIG_IMX6_UART2
-  imx_serialout(&g_uart2priv, UART_UCR1_OFFSET, 0);
-  imx_serialout(&g_uart2priv, UART_UCR2_OFFSET, 0);
-
-  /* Configure UART2 pins: RXD, TXD, RTS, and CTS (only, also
-   * supports DTR, DCD, RI, and DSR -- not configured)
+  /* NOTE: This function assumes that low level hardware configuration
+   * -- including all clocking and pin configuration -- was perfomed by the
+   * function imx_lowsetup() earlier in the boot sequence.
    */
 
-  imxgpio_configpfoutput(GPIOB, 28); /* Port B, pin 28: CTS */
-  imxgpio_configpfinput(GPIOB, 29);  /* Port B, pin 29: RTS */
-  imxgpio_configpfoutput(GPIOB, 30); /* Port B, pin 30: TXD */
-  imxgpio_configpfinput(GPIOB, 31);  /* Port B, pin 31: RXD */
-#endif
-
-  /* Configure and disable the UART3 */
-
-#ifdef CONFIG_IMX6_UART3
-  imx_serialout(&g_uart3priv, UART_UCR1_OFFSET, 0);
-  imx_serialout(&g_uart3priv, UART_UCR2_OFFSET, 0);
-
-  /* Configure UART2 pins: RXD, TXD, RTS, and CTS (only, also
-   * supports DTR, DCD, RI, and DSR -- not configured)
-   */
-
-  imxgpio_configpfoutput(GPIOC, 28); /* Port C, pin 18: CTS */
-  imxgpio_configpfinput(GPIOC, 29);  /* Port C, pin 29: RTS */
-  imxgpio_configpfoutput(GPIOC, 30); /* Port C, pin 30: TXD */
-  imxgpio_configpfinput(GPIOC, 31);  /* Port C, pin 31: RXD */
-#endif
-
-  /* Then enable the console UART.  The others will be initialized
-   * if and when they are opened.
+  /* Enable the console UART.  The other UARTs will be initialized if and
+   * when they are first opened.
    */
 
 #ifdef CONSOLE_DEV

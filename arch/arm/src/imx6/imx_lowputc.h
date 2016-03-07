@@ -54,6 +54,16 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* This structure describes the configuration of an UART */
+
+struct uart_config_s
+{
+  uint32_t baud;          /* Configured baud */
+  uint8_t  parity;        /* 0=none, 1=odd, 2=even */
+  uint8_t  bits;          /* Number of bits (5-9) */
+  bool     stopbits2;     /* true: Configure with 2 stop bits instead of 1 */
+};
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -93,6 +103,16 @@ extern "C"
  ****************************************************************************/
 
 void imx_lowsetup(void);
+
+/************************************************************************************
+ * Name: imx_uart_configure
+ *
+ * Description:
+ *   Configure a UART for non-interrupt driven operation
+ *
+ ************************************************************************************/
+
+int imx_uart_configure(uint32_t base, FAR const struct uart_config_s *config);
 
 #undef EXTERN
 #if defined(__cplusplus)
