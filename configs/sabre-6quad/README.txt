@@ -142,7 +142,9 @@ LEDs and Buttons
 
 LEDs
 ----
-A single LED is available driven by USR_DEF_RED_LED.
+A single LED is available driven GPIO1_IO02.  On the schematic this is
+USR_DEF_RED_LED signal to pin T1 (GPIO_2).  This signal is shared with
+KEY_ROW6 (ALT2).  A low value illuminates the LED.
 
 This LED is not used by the board port unless CONFIG_ARCH_LEDS is
 defined.  In that case, the usage by the board port is defined in

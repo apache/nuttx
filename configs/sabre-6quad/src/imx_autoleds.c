@@ -106,7 +106,7 @@ void board_autoled_initialize(void)
 {
   /* Configure LED PIOs for output */
 
-  imx_config_gpio(GPIO_LED0);
+  imx_config_gpio(GPIO_LED);
 }
 
 /****************************************************************************
@@ -117,7 +117,7 @@ void board_autoled_on(int led)
 {
   if (led == 1 || led == 3)
     {
-      imx_gpio_write(GPIO_LED0, false); /* Low illuminates */
+      imx_gpio_write(GPIO_LED, false); /* Low illuminates */
     }
 }
 
@@ -129,7 +129,7 @@ void board_autoled_off(int led)
 {
   if (led == 3)
     {
-      imx_gpio_write(GPIO_LED0, true);  /* High extinguishes */
+      imx_gpio_write(GPIO_LED, true);  /* High extinguishes */
     }
 }
 
