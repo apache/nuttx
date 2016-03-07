@@ -183,7 +183,7 @@
 
 /* UART Control Register 1 */
 
-#define UART_UCR1_UARTEN       (1 << 0)  /* Bit 0: Enable/disable uart */
+#define UART_UCR1_UARTEN       (1 << 0)  /* Bit 0: Enable/disable UART */
 #define UART_UCR1_DOZE         (1 << 1)  /* Bit 1: UART Doze enable */
 #define UART_UCR1_ATDMAEN      (1 << 2)  /* Bit 2: Aging DMA Timer Enable */
 #define UART_UCR1_TXDMAEN      (1 << 3)  /* Bit 3: Transmitter Ready DMA Enable */
@@ -257,9 +257,9 @@
 #define UART_UCR4_LPBYP        (1 << 4)  /* Bit 4:  Low Power B */
 #define UART_UCR4_IRSC         (1 << 5)  /* Bit 5:  IR special case */
 #define UART_UCR4_IDDMAEN      (1 << 6)  /* Bit 6:  DMA IDLE Condition Detected interrupt enable */
-#define UART_UCR4_WKEN         (1 << 7)  /* Bit 7: Wake interrupt enable */
-#define UART_UCR4_ENIRI        (1 << 8)  /* Bit 8: Serial infrared interrupt enable */
-#define UART_UCR4_INVR         (1 << 9)  /* Bit 9: Inverted reception */
+#define UART_UCR4_WKEN         (1 << 7)  /* Bit 7:  Wake interrupt enable */
+#define UART_UCR4_ENIRI        (1 << 8)  /* Bit 8:  Serial infrared interrupt enable */
+#define UART_UCR4_INVR         (1 << 9)  /* Bit 9:  Inverted reception */
 #define UART_UCR4_CTSTL_SHIFT  10        /* Bits 10-15: CTS trigger level */
 #define UART_UCR4_CTSTL_MASK   (0x3f << UART_UCR4_CTSTL_SHIFT)
 #  define UART_UCR4_CTSTL(n)   ((uint32_t)(n) << UART_UCR4_CTSTL_SHIFT)

@@ -557,7 +557,6 @@ static int imx_setup(struct uart_dev_s *dev)
   /* Initialize the UCR1 shadow register */
 
   priv->ucr1 = imx_serialin(priv, UART_UCR1_OFFSET);
-
   return ret;
 
 #else

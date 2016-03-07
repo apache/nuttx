@@ -54,6 +54,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+/* Configuration ************************************************************/
 
 #ifdef IMX_HAVE_UART_CONSOLE
 #  if defined(CONFIG_UART1_SERIAL_CONSOLE)
@@ -88,6 +89,39 @@
 #    define IMX_CONSOLE_2STOP    CONFIG_UART5_2STOP
 #  endif
 #endif
+
+/* Clocking *****************************************************************/
+/* the UART module receives two clocks, a peripheral_clock (ipg_clk) and the
+ * module_clock (ipg_perclk).   The peripheral_clock is used as write clock
+ * of the TxFIFO, read clock of the RxFIFO and synchronization of the modem
+ * control input pins. It must always be running when UART is enabled.
+ *
+ * The default ipg_clk is 66MHz (max 66.5MHz).  ipg_clk is gated by
+ * CCGR5[CG12], uart_clk_enable.  ipg_clk is shared among many modules and
+ * should not be controlled by the UART logic.
+ *
+ * The module_clock is for all the state machines, writing RxFIFO, reading
+ * TxFIFO, etc.  It must always be running when UART is sending or receiving
+ * characters.This clock is used in order to allow frequency scaling on
+ * peripheral_clock without changing configuration of baud rate.
+ *
+ * The default ipg_perclk is 80MHz (max 80MHz).  ipg_clk is gated by
+ * CCGR5[CG13], uart_serial_clk_enable.  The clock generation sequence is:
+ *
+ *   pll3_sw_clk (480M) -> CCGR5[CG13] -> 3 bit divider cg podf=6 ->
+ *     PLL3_80M (80Mhz) -> CDCDR1: uart_clk_podf ->
+ *       6 bit divider default=1 -> UART_CLK_ROOT
+ *
+ * REVISIT:  This logic assumes that all dividers are at the default value
+ * and that the value of the ipg_perclk is 80MHz.
+ */
+
+#define IPG_PERCLK_FREQUENCY  80000000
+
+/* The BRM sub-block receives ref_clk (module_clock clock after divider).
+ * From this clock, and with integer and non-integer division, BRM generates
+ * a 16x baud rate clock.
+ */
 
 /****************************************************************************
  * Private Data
@@ -318,9 +352,7 @@ int imx_uart_configure(uint32_t base, FAR const struct uart_config_s *config)
     }
 #endif
 
-  /* i.MX reference clock (PERCLK1) is configured for 16MHz */
-
-  putreg32(regval | UART_UCR4_REF16, base + UART_UCR4_OFFSET);
+  putreg32(regval, base + UART_UCR4_OFFSET);
 
   /* Setup the new UART configuration */
 
@@ -328,16 +360,17 @@ int imx_uart_configure(uint32_t base, FAR const struct uart_config_s *config)
 
   /* Set the baud.
    *
+   *   buad    = REFFREQ / (16 x NUM/DEM)
    *   baud * 16 / REFFREQ = NUM/DEN
    *   UBIR    = NUM-1;
    *   UMBR    = DEN-1
-   *   REFFREQ = PERCLK1 / DIV
+   *   REFFREQ = PERCLK1 / DIV,   DIV=1..7
    *   DIV     = RFDIV[2:0]
    *
    * First, select a closest value we can for the divider
    */
 
-  div = (BOARD_PERCLK1_FREQUENCY >> 4) / config->baud;
+  div = (IPG_PERCLK_FREQUENCY >> 4) / config->baud;
   if (div > 7)
     {
       div = 7;
@@ -353,7 +386,7 @@ int imx_uart_configure(uint32_t base, FAR const struct uart_config_s *config)
    */
 
   num = config->baud;
-  den = (BOARD_PERCLK1_FREQUENCY << 4) / div;
+  den = (IPG_PERCLK_FREQUENCY << 4) / div;
 
   if (num > den)
     {
@@ -431,12 +464,6 @@ int imx_uart_configure(uint32_t base, FAR const struct uart_config_s *config)
 
   ucr2 |= (UART_UCR2_TXEN | UART_UCR2_RXEN);
   putreg32(ucr2, base + UART_UCR2_OFFSET);
-
-  /* Enable the UART */
-
-  regval  = getreg32(base + UART_UCR1_OFFSET);
-  regval |= UART_UCR1_UARTCLEN;
-  putreg32(regval, base + UART_UCR1_OFFSET);
 #endif
 
   return OK;
