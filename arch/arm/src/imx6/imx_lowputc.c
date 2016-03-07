@@ -42,14 +42,16 @@
 #include <stdint.h>
 #include <assert.h>
 
-#include "chip/imx_iomuxc.h"   /* Order matters with these three */
-#include "chip/imx_pinmux.h"
-#include <arch/board/board.h>
-
 #include "up_arch.h"
+
+#include "chip/imx_iomuxc.h"
+#include "chip/imx_pinmux.h"
 #include "chip/imx_uart.h"
+#include "imx_config.h"
 #include "imx_gpio.h"
 #include "imx_lowputc.h"
+
+#include <arch/board/board.h> /* Include last:  has dependencies */
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -154,6 +156,12 @@ static const struct uart_config_s g_console_config =
 
 void imx_lowsetup(void)
 {
+#ifdef IMX_HAVE_UART
+  /* Make certain that the ipg_perclk is enabled.  The ipg_clk should already
+   * have been enabled.
+   */
+#warning Missing logic
+
 #ifdef CONFIG_IMX6_UART1
   /* Disable and configure UART1 */
 
@@ -269,6 +277,7 @@ void imx_lowsetup(void)
 
   (void)imx_uart_configure(IMX_CONSOLE_VBASE, &g_console_config);
 #endif
+#endif /* IMX_HAVE_UART */
 }
 
 /************************************************************************************
@@ -279,6 +288,7 @@ void imx_lowsetup(void)
  *
  ************************************************************************************/
 
+#ifdef IMX_HAVE_UART
 int imx_uart_configure(uint32_t base, FAR const struct uart_config_s *config)
 {
 #ifndef CONFIG_SUPPRESS_UART_CONFIG
@@ -468,3 +478,4 @@ int imx_uart_configure(uint32_t base, FAR const struct uart_config_s *config)
 
   return OK;
 }
+#endif /* IMX_HAVE_UART */

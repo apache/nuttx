@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/imx6/imx_clockconfig.h
+ * arch/arm/src/imx6/imx_clockconfig.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,17 +33,17 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_IMX6_IMX_CLOCKCONFIG_H
-#define __ARCH_ARM_SRC_IMX6_IMX_CLOCKCONFIG_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
+#include "imx_config.h"
+#include "imx_clockconfig.h"
+
 /****************************************************************************
- * Public Function Prototypes
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -56,6 +56,18 @@
  *
  ****************************************************************************/
 
-void imx_clockconfig(void);
+void imx_clockconfig(void)
+{
+  /* Don't change the current basic clock configuration if we are running
+   * from SDRAM.  In this case, some bootloader logic has already configured
+   * clocking and SDRAM.  We are pretty much committed to using things the
+   * way that the bootloader has left them.
+   */
 
-#endif /* __ARCH_ARM_SRC_IMX6_IMX_CLOCKCONFIG_H */
+#ifndef CONFIG_IMX_BOOT_SDRAM
+#  warning Missing logic
+#endif
+
+  /* Make certain that the ipg_clk is enabled */
+#warning Missing logic
+}

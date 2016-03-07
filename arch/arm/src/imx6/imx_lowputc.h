@@ -51,9 +51,10 @@
 #include "chip.h"
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Public Types
  ****************************************************************************/
 
+#ifdef IMX_HAVE_UART
 /* This structure describes the configuration of an UART */
 
 struct uart_config_s
@@ -63,28 +64,6 @@ struct uart_config_s
   uint8_t  bits;          /* Number of bits (5-9) */
   bool     stopbits2;     /* true: Configure with 2 stop bits instead of 1 */
 };
-
-/****************************************************************************
- * Public Types
- ****************************************************************************/
-
-/****************************************************************************
- * Inline Functions
- ****************************************************************************/
-
-#ifndef __ASSEMBLY__
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -112,12 +91,8 @@ void imx_lowsetup(void);
  *
  ************************************************************************************/
 
+#ifdef IMX_HAVE_UART
 int imx_uart_configure(uint32_t base, FAR const struct uart_config_s *config);
-
-#undef EXTERN
-#if defined(__cplusplus)
-}
 #endif
 
-#endif /* __ASSEMBLY__ */
 #endif /* __ARCH_ARM_SRC_IMX6_IMX_LOWPUTC_H */

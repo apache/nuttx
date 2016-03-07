@@ -132,5 +132,5 @@ CHIP_ASRCS  =
 
 # i.MX6-specific C source files
 
-CHIP_CSRCS  = imx_boot.c imx_memorymap.c imx_irq.c
-CHIP_CSRCS  = imx_gpio.c imx_iomuxc.c imx_serial.c imx_lowputc.c
+CHIP_CSRCS  = imx_boot.c imx_memorymap.c imx_clockconfig.c imx_irq.c
+CHIP_CSRCS += imx_gpio.c imx_iomuxc.c imx_serial.c imx_lowputc.c

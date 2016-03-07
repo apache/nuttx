@@ -930,12 +930,12 @@ static bool imx_txempty(struct uart_dev_s *dev)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: imx_serialinit
+ * Name: imx_earlyserialinit
  *
  * Description:
  *   Performs the low level UART initialization early in
  *   debug so that the serial console will be available
- *   during bootup.  This must be called before imx_serialinit.
+ *   during bootup.  This must be called before up_serialinit.
  *
  ****************************************************************************/
 
@@ -957,7 +957,7 @@ void imx_earlyserialinit(void)
 }
 
 /****************************************************************************
- * Name: imx_serialinit
+ * Name: up_serialinit
  *
  * Description:
  *   Register serial console and serial ports.  This assumes
@@ -965,7 +965,7 @@ void imx_earlyserialinit(void)
  *
  ****************************************************************************/
 
-void imx_serialinit(void)
+void up_serialinit(void)
 {
 #ifdef CONSOLE_DEV
   (void)uart_register("/dev/console", &CONSOLE_DEV);
@@ -989,7 +989,7 @@ void imx_serialinit(void)
 }
 
 /****************************************************************************
- * Name: imx_putc
+ * Name: up_putc
  *
  * Description:
  *   Provide priority, low-level access to support OS debug
@@ -997,7 +997,7 @@ void imx_serialinit(void)
  *
  ****************************************************************************/
 
-int imx_putc(int ch)
+int up_putc(int ch)
 {
   struct imx_uart_s *priv = (struct imx_uart_s *)CONSOLE_DEV.priv;
   uint32_t ier;
@@ -1027,24 +1027,24 @@ int imx_putc(int ch)
  * Pre-processor Definitions
  ****************************************************************************/
 
-#  undef IMX_REGISTER_BASE
+#  undef IMX_CONSOLE_VBASE
 #  if defined(CONFIG_UART1_SERIAL_CONSOLE)
-#    define IMX_REGISTER_BASE IMX_UART1_VBASE
+#    define IMX_CONSOLE_VBASE IMX_UART1_VBASE
 #  elif defined(CONFIG_UART2_SERIAL_CONSOLE)
-#    define IMX_REGISTER_BASE IMX_UART2_VBASE
+#    define IMX_CONSOLE_VBASE IMX_UART2_VBASE
 #  elif defined(CONFIG_UART3_SERIAL_CONSOLE)
-#    define IMX_REGISTER_BASE IMX_UART3_VBASE
+#    define IMX_CONSOLE_VBASE IMX_UART3_VBASE
 #  elif defined(CONFIG_UART4_SERIAL_CONSOLE)
-#    define IMX_REGISTER_BASE IMX_UART4_VBASE
+#    define IMX_CONSOLE_VBASE IMX_UART4_VBASE
 #  elif defined(CONFIG_UART5_SERIAL_CONSOLE)
-#    define IMX_REGISTER_BASE IMX_UART5_VBASE
+#    define IMX_CONSOLE_VBASE IMX_UART5_VBASE
 #  endif
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
-#ifdef IMX_REGISTER_BASE
+#ifdef IMX_CONSOLE_VBASE
 static inline void imx_waittxready(void)
 {
   int tmp;
@@ -1055,7 +1055,7 @@ static inline void imx_waittxready(void)
        * in the TX FIFO.
        */
 
-      if ((getreg32(IMX_REGISTER_BASE + UART_UTS) & UART_UTS_TXFULL) == 0)
+      if ((getreg32(IMX_CONSOLE_VBASE + UART_UTS) & UART_UTS_TXFULL) == 0)
         {
           break;
         }
@@ -1067,9 +1067,9 @@ static inline void imx_waittxready(void)
  * Public Functions
  ****************************************************************************/
 
-int imx_putc(int ch)
+int up_putc(int ch)
 {
-#ifdef IMX_REGISTER_BASE
+#ifdef IMX_CONSOLE_VBASE
   imx_waittxready();
 
   /* Check for LF */
@@ -1078,11 +1078,11 @@ int imx_putc(int ch)
     {
       /* Add CR */
 
-      putreg32((uint16_t)'\r', IMX_REGISTER_BASE + UART_TXD_OFFSET);
+      putreg32((uint16_t)'\r', IMX_CONSOLE_VBASE + UART_TXD_OFFSET);
       imx_waittxready();
     }
 
-  putreg32((uint16_t)ch, IMX_REGISTER_BASE + UART_TXD_OFFSET);
+  putreg32((uint16_t)ch, IMX_CONSOLE_VBASE + UART_TXD_OFFSET);
 #endif
 
   return ch;
