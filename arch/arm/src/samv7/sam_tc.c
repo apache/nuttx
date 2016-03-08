@@ -233,17 +233,17 @@ static const struct sam_tcconfig_s g_tc012config =
       .irq     = SAM_IRQ_TC0,
 
 #ifdef CONFIG_SAMV7_TC0_CLK0
-      .clkset  = PIO_TC0_CLK,
+      .clkset  = GPIO_TC0_CLK,
 #else
       .clkset  = 0,
 #endif
 #ifdef CONFIG_SAMV7_TC0_TIOA0
-      .tioaset = PIO_TC0_IOA,
+      .tioaset = GPIO_TC0_TIOA,
 #else
       .tioaset = 0,
 #endif
 #ifdef CONFIG_SAMV7_TC0_TIOB0
-      .tiobset = PIO_TC0_IOB,
+      .tiobset = GPIO_TC0_TIOB,
 #else
       .tiobset = 0,
 #endif
@@ -256,17 +256,17 @@ static const struct sam_tcconfig_s g_tc012config =
       .irq     = SAM_IRQ_TC1,
 
 #ifdef CONFIG_SAMV7_TC0_CLK1
-      .clkset  = PIO_TC1_CLK,
+      .clkset  = GPIO_TC1_CLK,
 #else
       .clkset  = 0,
 #endif
 #ifdef CONFIG_SAMV7_TC0_TIOA1
-      .tioaset = PIO_TC1_IOA,
+      .tioaset = GPIO_TC1_TIOA,
 #else
       .tioaset = 0,
 #endif
 #ifdef CONFIG_SAMV7_TC0_TIOB1
-      .tiobset = PIO_TC1_IOB,
+      .tiobset = GPIO_TC1_TIOB,
 #else
       .tiobset = 0,
 #endif
@@ -279,17 +279,17 @@ static const struct sam_tcconfig_s g_tc012config =
       .irq     = SAM_IRQ_TC2,
 
 #ifdef CONFIG_SAMV7_TC0_CLK2
-      .clkset  = PIO_TC2_CLK,
+      .clkset  = GPIO_TC2_CLK,
 #else
       .clkset  = 0,
 #endif
 #ifdef CONFIG_SAMV7_TC0_TIOA2
-      .tioaset = PIO_TC2_IOA,
+      .tioaset = GPIO_TC2_TIOA,
 #else
       .tioaset = 0,
 #endif
 #ifdef CONFIG_SAMV7_TC0_TIOB2
-      .tiobset = PIO_TC2_IOB,
+      .tiobset = GPIO_TC2_TIOB,
 #else
       .tiobset = 0,
 #endif
@@ -313,17 +313,17 @@ static const struct sam_tcconfig_s g_tc345config =
       .irq     = SAM_IRQ_TC3,
 
 #ifdef CONFIG_SAMV7_TC1_CLK3
-      .clkset  = PIO_TC3_CLK,
+      .clkset  = GPIO_TC3_CLK,
 #else
       .clkset  = 0,
 #endif
 #ifdef CONFIG_SAMV7_TC1_TIOA3
-      .tioaset = PIO_TC3_IOA,
+      .tioaset = GPIO_TC3_TIOA,
 #else
       .tioaset = 0,
 #endif
 #ifdef CONFIG_SAMV7_TC1_TIOB3
-      .tiobset = PIO_TC3_IOB,
+      .tiobset = GPIO_TC3_TIOB,
 #else
       .tiobset = 0,
 #endif
@@ -336,17 +336,17 @@ static const struct sam_tcconfig_s g_tc345config =
       .irq     = SAM_IRQ_TC4,
 
 #ifdef CONFIG_SAMV7_TC1_CLK4
-      .clkset  = PIO_TC4_CLK,
+      .clkset  = GPIO_TC4_CLK,
 #else
       .clkset  = 0,
 #endif
 #ifdef CONFIG_SAMV7_TC1_TIOA4
-      .tioaset = PIO_TC4_IOA,
+      .tioaset = GPIO_TC4_TIOA,
 #else
       .tioaset = 0,
 #endif
 #ifdef CONFIG_SAMV7_TC1_TIOB4
-      .tiobset = PIO_TC4_IOB,
+      .tiobset = GPIO_TC4_TIOB,
 #else
       .tiobset = 0,
 #endif
@@ -359,17 +359,17 @@ static const struct sam_tcconfig_s g_tc345config =
       .irq     = SAM_IRQ_TC5,
 
 #ifdef CONFIG_SAMV7_TC1_CLK5
-      .clkset  = PIO_TC5_CLK,
+      .clkset  = GPIO_TC5_CLK,
 #else
       .clkset  = 0,
 #endif
 #ifdef CONFIG_SAMV7_TC1_TIOA5
-      .tioaset = PIO_TC5_IOA,
+      .tioaset = GPIO_TC5_TIOA,
 #else
       .tioaset = 0,
 #endif
 #ifdef CONFIG_SAMV7_TC1_TIOB5
-      .tiobset = PIO_TC5_IOB,
+      .tiobset = GPIO_TC5_TIOB,
 #else
       .tiobset = 0,
 #endif
@@ -393,17 +393,17 @@ static const struct sam_tcconfig_s g_tc678config =
       .irq     = SAM_IRQ_TC6,
 
 #ifdef CONFIG_SAMV7_TC2_CLK6
-      .clkset  = PIO_TC6_CLK,
+      .clkset  = GPIO_TC6_CLK,
 #else
       .clkset  = 0,
 #endif
 #ifdef CONFIG_SAMV7_TC2_TIOA6
-      .tioaset = PIO_TC6_IOA,
+      .tioaset = GPIO_TC6_TIOA,
 #else
       .tioaset = 0,
 #endif
 #ifdef CONFIG_SAMV7_TC2_TIOB6
-      .tiobset = PIO_TC6_IOB,
+      .tiobset = GPIO_TC6_TIOB,
 #else
       .tiobset = 0,
 #endif
@@ -416,17 +416,17 @@ static const struct sam_tcconfig_s g_tc678config =
       .irq     = SAM_IRQ_TC7,
 
 #ifdef CONFIG_SAMV7_TC2_CLK7
-      .clkset  = PIO_TC7_CLK,
+      .clkset  = GPIO_TC7_CLK,
 #else
       .clkset  = 0,
 #endif
 #ifdef CONFIG_SAMV7_TC2_TIOA7
-      .tioaset = PIO_TC7_IOA,
+      .tioaset = GPIO_TC7_TIOA,
 #else
       .tioaset = 0,
 #endif
 #ifdef CONFIG_SAMV7_TC2_TIOB7
-      .tiobset = PIO_TC7_IOB,
+      .tiobset = GPIO_TC7_TIOB,
 #else
       .tiobset = 0,
 #endif
@@ -439,17 +439,17 @@ static const struct sam_tcconfig_s g_tc678config =
       .irq     = SAM_IRQ_TC8,
 
 #ifdef CONFIG_SAMV7_TC2_CLK8
-      .clkset  = PIO_TC8_CLK,
+      .clkset  = GPIO_TC8_CLK,
 #else
       .clkset  = 0,
 #endif
 #ifdef CONFIG_SAMV7_TC2_TIOA8
-      .tioaset = PIO_TC8_IOA,
+      .tioaset = GPIO_TC8_TIOA,
 #else
       .tioaset = 0,
 #endif
 #ifdef CONFIG_SAMV7_TC2_TIOB8
-      .tiobset = PIO_TC8_IOB,
+      .tiobset = GPIO_TC8_TIOB,
 #else
       .tiobset = 0,
 #endif
@@ -473,17 +473,17 @@ static const struct sam_tcconfig_s g_tc901config =
       .irq     = SAM_IRQ_TC9,
 
 #ifdef CONFIG_SAMV7_TC2_CLK9
-      .clkset  = PIO_TC9_CLK,
+      .clkset  = GPIO_TC9_CLK,
 #else
       .clkset  = 0,
 #endif
 #ifdef CONFIG_SAMV7_TC2_TIOA9
-      .tioaset = PIO_TC9_IOA,
+      .tioaset = GPIO_TC9_TIOA,
 #else
       .tioaset = 0,
 #endif
 #ifdef CONFIG_SAMV7_TC2_TIOB9
-      .tiobset = PIO_TC9_IOB,
+      .tiobset = GPIO_TC9_TIOB,
 #else
       .tiobset = 0,
 #endif
@@ -496,17 +496,17 @@ static const struct sam_tcconfig_s g_tc901config =
       .irq     = SAM_IRQ_TC10,
 
 #ifdef CONFIG_SAMV7_TC2_CLK10
-      .clkset  = PIO_TC10_CLK,
+      .clkset  = GPIO_TC10_CLK,
 #else
       .clkset  = 0,
 #endif
 #ifdef CONFIG_SAMV7_TC2_TIOA10
-      .tioaset = PIO_TC10_IOA,
+      .tioaset = GPIO_TC10_IOA,
 #else
       .tioaset = 0,
 #endif
 #ifdef CONFIG_SAMV7_TC2_TIOB10
-      .tiobset = PIO_TC10_IOB,
+      .tiobset = GPIO_TC10_IOB,
 #else
       .tiobset = 0,
 #endif
@@ -519,17 +519,17 @@ static const struct sam_tcconfig_s g_tc901config =
       .irq     = SAM_IRQ_TC11,
 
 #ifdef CONFIG_SAMV7_TC2_CLK11
-      .clkset  = PIO_TC11_CLK,
+      .clkset  = GPIO_TC11_CLK,
 #else
       .clkset  = 0,
 #endif
 #ifdef CONFIG_SAMV7_TC2_TIOA11
-      .tioaset = PIO_TC11_IOA,
+      .tioaset = GPIO_TC11_IOA,
 #else
       .tioaset = 0,
 #endif
 #ifdef CONFIG_SAMV7_TC2_TIOB11
-      .tiobset = PIO_TC11_IOB,
+      .tiobset = GPIO_TC11_IOB,
 #else
       .tiobset = 0,
 #endif
