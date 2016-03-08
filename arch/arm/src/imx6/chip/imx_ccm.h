@@ -200,7 +200,7 @@
 #define CCM_CBCMR_GPU3D_CORE_CLK_SEL_MASK             (3 << CCM_CBCMR_GPU3D_CORE_CLK_SEL_SHIFT)
 #  define CCM_CBCMR_GPU3D_CORE_CLK_SEL_MMDC_CH0       (0 << CCM_CBCMR_GPU3D_CORE_CLK_SEL_SHIFT) /* Derive clock from mmdc_ch0 */
 #  define CCM_CBCMR_GPU3D_CORE_CLK_SEL_PLL3_SWCLK     (1 << CCM_CBCMR_GPU3D_CORE_CLK_SEL_SHIFT) /* Derive clock from pll3_sw_clk */
-#  efine CCM_CBCMR_GPU3D_CORE_CLK_SEL_PLL2_PFD1       (2 << CCM_CBCMR_GPU3D_CORE_CLK_SEL_SHIFT) /* Derive clock from PLL2 PFD1 */
+#  define CCM_CBCMR_GPU3D_CORE_CLK_SEL_PLL2_PFD1      (2 << CCM_CBCMR_GPU3D_CORE_CLK_SEL_SHIFT) /* Derive clock from PLL2 PFD1 */
 #  define CCM_CBCMR_GPU3D_CORE_CLK_SEL_PLL2_PFD2      (3 << CCM_CBCMR_GPU3D_CORE_CLK_SEL_SHIFT) /* Derive clock from PLL2 PFD2 */
 #define CCM_CBCMR_GPU3D_SHADER_CLK_SEL_SHIFT          (8)       /* Bits 8-9: Selector for gpu3d_shader clock multiplexer */
 #define CCM_CBCMR_GPU3D_SHADER_CLK_SEL_MASK           (3 << CCM_CBCMR_GPU3D_SHADER_CLK_SEL_SHIFT)
@@ -415,8 +415,8 @@
 #define CCM_CDCDR_SPDIF0_CLK_SEL_SHIFT        (20)       /* Bits 20-21: Selector for spdif0 clock multiplexer */
 #define CCM_CDCDR_SPDIF0_CLK_SEL_MASK         (3 << CCM_CDCDR_SPDIF0_CLK_SEL_SHIFT)
 #  define CCM_CDCDR_SPDIF0_CLK_SEL_DIV_PLL4   (0 << CCM_CDCDR_SPDIF0_CLK_SEL_SHIFT) /* Derive clock from PLL4 divided clock */
-#  define CCM_CDCDR_SPDIF0_CLK_SEL_PLL3 PFD2  (1 << CCM_CDCDR_SPDIF0_CLK_SEL_SHIFT) /* Derive clock from PLL3 PFD2 */
-#  define CCM_CDCDR_SPDIF0_CLK_SEL_PLL3 PFD3  (2 << CCM_CDCDR_SPDIF0_CLK_SEL_SHIFT) /* Derive clock from PLL3 PFD3 */
+#  define CCM_CDCDR_SPDIF0_CLK_SEL_PLL3_PFD2  (1 << CCM_CDCDR_SPDIF0_CLK_SEL_SHIFT) /* Derive clock from PLL3 PFD2 */
+#  define CCM_CDCDR_SPDIF0_CLK_SEL_PLL3_PFD3  (2 << CCM_CDCDR_SPDIF0_CLK_SEL_SHIFT) /* Derive clock from PLL3 PFD3 */
 #  define CCM_CDCDR_SPDIF0_CLK_SEL_PLL3_SWCLK (3 << CCM_CDCDR_SPDIF0_CLK_SEL_SHIFT) /* Derive clock from pll3_sw_clk */
 #define CCM_CDCDR_SPDIF0_CLK_PODF_SHIFT       (22)       /* Bits 22-24: Divider for spdif0 clock podf */
 #define CCM_CDCDR_SPDIF0_CLK_PODF_MASK        (7 << CCM_CDCDR_SPDIF0_CLK_PODF_SHIFT)
@@ -437,7 +437,7 @@
 #  define CCM_CHSCCDR_IPU1_DI0_CLK_SEL_IPP_DI0_CLK    (1 << CCM_CHSCCDR_IPU1_DI0_CLK_SEL_SHIFT) /* Derive clock from ipp_di0_clk */
 #  define CCM_CHSCCDR_IPU1_DI0_CLK_SEL_IPP_DI1_CLK    (2 << CCM_CHSCCDR_IPU1_DI0_CLK_SEL_SHIFT) /* Derive clock from ipp_di1_clk */
 #  define CCM_CHSCCDR_IPU1_DI0_CLK_SEL_LDB_DI0_CLK    (3 << CCM_CHSCCDR_IPU1_DI0_CLK_SEL_SHIFT) /* Derive clock from ldb_di0_clk */
-#  define CCM_CHSCCDR_IPU1_DI0_CLK_SEL_LDB_DI0_CLK    (4 << CCM_CHSCCDR_IPU1_DI0_CLK_SEL_SHIFT) /* Derive clock from ldb_di0_clk */
+#  define CCM_CHSCCDR_IPU1_DI0_CLK_SEL_LDB_DI1_CLK    (4 << CCM_CHSCCDR_IPU1_DI0_CLK_SEL_SHIFT) /* Derive clock from ldb_di1_clk */
 #define CCM_CHSCCDR_IPU1_DI0_PODF_SHIFT               (3)       /* Bits 3-5: Divider for ipu1_di0 clock divider */
 #define CCM_CHSCCDR_IPU1_DI0_PODF_MASK                (7 << CCM_CHSCCDR_IPU1_DI0_PODF_SHIFT)
 #  define CCM_CHSCCDR_IPU1_DI0_PODF(n)                ((uint32_t)(n) << CCM_CHSCCDR_IPU1_DI0_PODF_SHIFT) /* n=(divisor-1) */

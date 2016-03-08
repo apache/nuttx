@@ -46,6 +46,7 @@
 
 #include "chip/imx_iomuxc.h"
 #include "chip/imx_pinmux.h"
+#include "chip/imx_ccm.h"
 #include "chip/imx_uart.h"
 #include "imx_config.h"
 #include "imx_gpio.h"
@@ -107,7 +108,7 @@
  * characters.This clock is used in order to allow frequency scaling on
  * peripheral_clock without changing configuration of baud rate.
  *
- * The default ipg_perclk is 80MHz (max 80MHz).  ipg_clk is gated by
+ * The default ipg_perclk is 80MHz (max 80MHz).  ipg_perclk is gated by
  * CCGR5[CG13], uart_serial_clk_enable.  The clock generation sequence is:
  *
  *   pll3_sw_clk (480M) -> CCGR5[CG13] -> 3 bit divider cg podf=6 ->
@@ -157,10 +158,17 @@ static const struct uart_config_s g_console_config =
 void imx_lowsetup(void)
 {
 #ifdef IMX_HAVE_UART
+  uint32_t regval;
+
   /* Make certain that the ipg_perclk is enabled.  The ipg_clk should already
-   * have been enabled.
+   * have been enabled.  Here we set BOTH the ipg_clk and ipg_perclk so that
+   * clocking is on in all modes (except STOP).
    */
-#warning Missing logic
+
+  regval  = getreg32(IMX_CCM_CCGR5);
+  regval &= (CCM_CCGR5_CG12_MASK | CCM_CCGR5_CG13_MASK);
+  regval |= (CCM_CCGR5_CG12(CCM_CCGR_ALLMODES) | CCM_CCGR5_CG13(CCM_CCGR_ALLMODES));
+  putreg32(regval, IMX_CCM_CCGR5);
 
 #ifdef CONFIG_IMX6_UART1
   /* Disable and configure UART1 */

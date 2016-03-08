@@ -720,7 +720,7 @@
  * must have a separate mapping for the non-contiguous RAM region.
  */
 
-#ifdef CONFIG_BOOT_RUNFROMFLASH
+#ifdef CONFIG_IMX6_BOOT_NOR
 
 /* Some sanity checks.  If we are running from FLASH, then one of the
  * external chip selects must be configured to boot from NOR flash.
@@ -732,7 +732,7 @@
 #      error EIM FLASH size disagreement
 #    endif
 #  else
-#    error CONFIG_BOOT_RUNFROMFLASH=y, but no bootable NOR flash defined
+#    error CONFIG_IMX6_BOOT_NOR=y, but no bootable NOR flash defined
 #  endif
 
   /* Set up the NOR FLASH region as the NUTTX .text region */
@@ -749,7 +749,8 @@
 #  define NUTTX_RAM_PEND         ((CONFIG_RAM_END + 0x000fffff) & 0xfff00000)
 #  define NUTTX_RAM_SIZE         (NUTTX_RAM_PEND - NUTTX_RAM_PADDR)
 
-#else /* CONFIG_BOOT_RUNFROMFLASH */
+#else /* CONFIG_IMX6_BOOT_NOR */
+  /* Must be CONFIG_IMX6_BOOT_OCRAM || CONFIG_IMX6_BOOT_SDRAM || CONFIG_IMX6_BOOT_SRAM */
 
   /* Otherwise we are running from some kind of RAM (OCRAM, SRAM, or SDRAM).
    * Setup the RAM region as the NUTTX .txt, .bss, and .data region.
@@ -760,7 +761,7 @@
 #  define NUTTX_TEXT_PEND        ((CONFIG_RAM_END + 0x000fffff) & 0xfff00000)
 #  define NUTTX_TEXT_SIZE        (NUTTX_TEXT_PEND - NUTTX_TEXT_PADDR)
 
-#endif /* CONFIG_BOOT_RUNFROMFLASH */
+#endif /* CONFIG_IMX6_BOOT_NOR */
 
 /* MMU Page Table Location
  *

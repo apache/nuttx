@@ -80,4 +80,31 @@ config IMX6_SPI2
 	select SPI
 
 endmenu # iMX Peripheral Selection
+
+choice
+	prompt "i.MX6 Boot Configuration"
+	default IMX6_BOOT_SDRAM
+	---help---
+		The startup code needs to know if the code is running from internal SRAM,
+		external SRAM, or CS0-3 in order to initialize properly.  Note that the
+		boot device is not specified for cases where the code is copied into
+		RAM.
+
+config IMX6_BOOT_OCRAM
+	bool "Running from internal OCRAM"
+	select BOOT_RUNFROMISRAM
+
+config IMX6_BOOT_SDRAM
+	bool "Running from external SDRAM"
+	select BOOT_RUNFROMSDRAM
+
+config IMX6_BOOT_NOR
+	bool "Running from external NOR FLASH"
+	select BOOT_RUNFROMFLASH
+
+config IMX6_BOOT_SRAM
+	bool "Running from external SRAM"
+	select BOOT_RUNFROMEXTSRAM
+
+endchoice # i.MX6 Boot Configuration
 endif # ARCH_CHIP_IMX6
