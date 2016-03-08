@@ -36,11 +36,15 @@ USAGE="USAGE: $0 [--debug|--help] <board>/<config>"
 ADVICE="Try '$0 --help' for more information"
 
 unset CONFIG
+silent=n
 
 while [ ! -z "$1" ]; do
     case $1 in
     --debug )
         set -x
+        ;;
+    --silent )
+        silent=y
         ;;
     --help )
         echo "$0 is a tool for refreshing board configurations"
@@ -50,6 +54,8 @@ while [ ! -z "$1" ]; do
         echo "Where:"
         echo "  --debug"
         echo "     Enable script debug"
+        echo "  --silent"
+        echo "     Update board configuration without interaction"
         echo "  --help"
         echo "     Show this help message and exit"
         echo "  <board>"
@@ -157,9 +163,13 @@ fi
 cp -a $DEFCONFIG .config || \
   { echo "ERROR: Failed to copy $DEFCONFIG to .config"; exit 1; }
 
-# Then run oldconfig
+# Then run oldconfig or oldefconfig
 
-make oldconfig
+if [ "X${silent}" == "Xy" ]; then
+  make olddefconfig
+else
+  make oldconfig
+fi
 
 # Show differences
 
@@ -168,14 +178,21 @@ $CMPCONFIG $DEFCONFIG .config
 
 # Save the refreshed configuration
 
-read -p "Save the new configuration (y/n)?" -n 1 -r
-echo
-if [[ $REPLY =~ ^[Yy]$ ]]
-then
+if [ "X${silent}" == "Xy" ]; then
   echo "Saving the new configuration file"
   mv .config $DEFCONFIG || \
       { echo "ERROR: Failed to move .config to $DEFCONFIG"; exit 1; }
   chmod 644 $DEFCONFIG
+else
+  read -p "Save the new configuration (y/n)?" -n 1 -r
+  echo
+  if [[ $REPLY =~ ^[Yy]$ ]]
+  then
+    echo "Saving the new configuration file"
+    mv .config $DEFCONFIG || \
+        { echo "ERROR: Failed to move .config to $DEFCONFIG"; exit 1; }
+    chmod 644 $DEFCONFIG
+  fi
 fi
 
 # Restore any previous .config file

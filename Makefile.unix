@@ -486,6 +486,9 @@ config: apps_preconfig
 oldconfig: apps_preconfig
 	$(Q) APPSDIR=${CONFIG_APPS_DIR} kconfig-conf --oldconfig Kconfig
 
+olddefconfig: apps_preconfig
+	$(Q) APPSDIR=${CONFIG_APPS_DIR} kconfig-conf --olddefconfig Kconfig
+
 menuconfig: apps_preconfig
 	$(Q) APPSDIR=${CONFIG_APPS_DIR} kconfig-mconf Kconfig
 
