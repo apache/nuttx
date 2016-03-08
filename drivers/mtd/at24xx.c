@@ -388,7 +388,7 @@ static ssize_t at24c_bread(FAR struct mtd_dev_s *dev, off_t startblock,
 
       offset += priv->pagesize;
       buffer += priv->pagesize;
-   }
+    }
 
 #if CONFIG_AT24XX_MTD_BLOCKSIZE > AT24XX_PAGESIZE
    return nblocks / (CONFIG_AT24XX_MTD_BLOCKSIZE / AT24XX_PAGESIZE);
