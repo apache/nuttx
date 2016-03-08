@@ -192,6 +192,8 @@ function configure {
     fi
 
     echo "  Refreshing..."
+    cd $nuttx || { echo "ERROR: failed to CD to $nuttx"; exit 1; }
+    make context 1>/dev/null 2>&1
     kconfig-conf --olddefconfig Kconfig 1>/dev/null
 }
 
