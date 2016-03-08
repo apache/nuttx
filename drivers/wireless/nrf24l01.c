@@ -235,7 +235,9 @@ static const struct file_operations nrf24l01_fops =
 #ifndef CONFIG_DISABLE_POLL
   nrf24l01_poll,    /* poll */
 #endif
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   NULL              /* unlink */
+#endif
 };
 
 /****************************************************************************
