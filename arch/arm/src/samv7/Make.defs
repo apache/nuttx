@@ -55,6 +55,10 @@ CMN_CSRCS += up_doirq.c up_hardfault.c up_svcall.c up_vfork.c
 
 # Configuration-dependent common files
 
+ifeq ($(CONFIG_ARMV7M_STACKCHECK),y)
+CMN_CSRCS += up_stackcheck.c
+endif
+
 ifeq ($(CONFIG_ARMV7M_CMNVECTOR),y)
 ifeq ($(CONFIG_ARMV7M_LAZYFPU),y)
 CMN_ASRCS += up_lazyexception.S
