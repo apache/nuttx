@@ -488,7 +488,7 @@ static int twi_wait(struct twi_dev_s *priv, unsigned int size)
    * TWIHS transfer stalls.
    */
 
-  wd_start(priv->timeout, timeout, twi_timeout, 1, (uint32_t)priv);
+  wd_start(priv->timeout, (timeout * size), twi_timeout, 1, (uint32_t)priv);
 
   /* Wait for either the TWIHS transfer or the timeout to complete */
 
@@ -568,7 +568,7 @@ static int twi_interrupt(struct twi_dev_s *priv)
 
       if (priv->xfrd >= msg->length)
         {
-          struct i2c_msg_s *next = msg++;
+          struct i2c_msg_s *next = (msg + 1);
 
           /* Is there another message to after this one?  Does it require a
            * restart?
@@ -601,7 +601,7 @@ static int twi_interrupt(struct twi_dev_s *priv)
 
       else if (priv->xfrd == (msg->length - 1))
         {
-          struct i2c_msg_s *next = msg++;
+          struct i2c_msg_s *next = (msg + 1);
 
           /* Is there another message to after this one?  Does it require a
            * restart?
@@ -626,7 +626,7 @@ static int twi_interrupt(struct twi_dev_s *priv)
 
       if (priv->xfrd >= msg->length)
         {
-          struct i2c_msg_s *next = msg++;
+          struct i2c_msg_s *next = (msg + 1);
 
           /* Is there another message to after this one?  Does it require a
            * restart?
