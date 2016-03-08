@@ -618,6 +618,19 @@ static int twi_interrupt(struct twi_dev_s *priv)
         }
     }
 
+  /* Check for errors.  We must check for errors *before* checking TXRDY or
+   * TXCMP because the error can be signaled in combination with TXRDY or
+   * TXCOMP.
+   */
+
+  else if ((pending & TWIHS_INT_ERRORS) != 0)
+    {
+      /* Wake up the thread with an I/O error indication */
+
+      i2clldbg("ERROR: TWIHS%d pending: %08x\n", priv->attr->twi, pending);
+      twi_wakeup(priv, -EIO);
+    }
+
   /* Byte sent */
 
   else if ((pending & TWIHS_INT_TXRDY) != 0)
@@ -696,16 +709,6 @@ static int twi_interrupt(struct twi_dev_s *priv)
 
           twi_wakeup(priv, OK);
         }
-    }
-
-  /* Check for errors */
-
-  else if ((pending & TWIHS_INT_ERRORS) != 0)
-    {
-      /* Wake up the thread with an I/O error indication */
-
-      i2clldbg("ERROR: TWIHS%d pending: %08x\n", priv->attr->twi, pending);
-      twi_wakeup(priv, -EIO);
     }
 
   return OK;
