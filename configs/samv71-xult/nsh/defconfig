@@ -110,6 +110,7 @@ CONFIG_ARCH_CHIP_SAMV7=y
 CONFIG_ARCH_CORTEXM7=y
 # CONFIG_ARCH_CORTEXA5 is not set
 # CONFIG_ARCH_CORTEXA8 is not set
+# CONFIG_ARCH_CORTEXA9 is not set
 # CONFIG_ARCH_CORTEXR4 is not set
 # CONFIG_ARCH_CORTEXR4F is not set
 # CONFIG_ARCH_CORTEXR5 is not set
@@ -735,6 +736,10 @@ CONFIG_MM_REGIONS=1
 # Audio Support
 #
 # CONFIG_AUDIO is not set
+
+#
+# Wireless Support
+#
 
 #
 # Binary Loader
