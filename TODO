@@ -1679,7 +1679,7 @@ o ARM (arch/arm/)
   Title:       IMPROVED ARM INTERRUPT HANDLING
   Description: ARM interrupt handling performance could be improved in some
                ways. One easy way is to use a pointer to the context save
-               area in current_regs instead of using up_copystate so much.
+               area in g_current_regs instead of using up_copystate so much.
 
                This approach is already implemented for the ARM Cortex-M0,
                Cortex-M3, Cortex-M4, and Cortex-A5 families.  But still needs

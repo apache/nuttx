@@ -1654,7 +1654,7 @@
 	* arch/*/include/*/type.h: On some compilers, char defaults as unsigned.
 	  Explicitly add signed to integer types if signed is what is required.
 	* arch/*: For all architectures -- Global register state save structure
-	  (usually called current_regs) should be marked volatile; Added general
+	  (usually called g_current_regs) should be marked volatile; Added general
 	  capability to support nested interrupts (not fully realized for all
 	  architectures).
 	* sched/task_create.c: Add support for starting kernel-mode thread.
