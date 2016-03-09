@@ -139,7 +139,7 @@ void tim6_handler(void)
 
   /* Check if we are in an interrupt handle */
 
-  if (current_regs)
+  if (up_interrupt_context())
     {
       g_highpri.handler++;
     }
