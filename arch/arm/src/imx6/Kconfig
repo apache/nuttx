@@ -21,16 +21,19 @@ config ARCH_CHIP_IMX6_6DUALLITE
 	bool "i.MX 6DualLite"
 	select ARCH_HAVE_MULTICPU
 	select ARMV7A_HAVE_GIC
+	select ARMV7A_HAVE_GTM
 
 config ARCH_CHIP_IMX6_6DUAL
 	bool "i.MX 6Dual"
 	select ARCH_HAVE_MULTICPU
 	select ARMV7A_HAVE_GIC
+	select ARMV7A_HAVE_GTM
 
 config ARCH_CHIP_IMX6_6QUAD
 	bool "i.MX 6Quad"
 	select ARCH_HAVE_MULTICPU
 	select ARMV7A_HAVE_GIC
+	select ARMV7A_HAVE_GTM
 
 endchoice # iMX.6 Chip Selection
 

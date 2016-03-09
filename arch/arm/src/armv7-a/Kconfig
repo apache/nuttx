@@ -12,6 +12,13 @@ config ARMV7A_HAVE_GIC
 		Selected by the configuration tool if the architecture supports the
 		Generic Interrupt Controller (GIC)
 
+config ARMV7A_HAVE_GTM
+	bool
+	default n
+	---help---
+		Selected by the configuration tool if the architecture supports the
+		Global Timer (GTM)
+
 config ARMV7A_HAVE_L2CC
 	bool
 	default n
