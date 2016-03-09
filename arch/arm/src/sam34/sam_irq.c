@@ -78,8 +78,10 @@
  * Public Data
  ****************************************************************************/
 
-/* This is the address of current interrupt saved state data.  Used for
- * context switching.  Only value during interrupt handling.
+/* g_current_regs[] holds a references to the current interrupt level
+ * register storage structure.  If is non-NULL only during interrupt
+ * processing.  Access to g_current_regs[] must be through the macro
+ * CURRENT_REGS for portability.
  */
 
 volatile uint32_t *g_current_regs[1];
