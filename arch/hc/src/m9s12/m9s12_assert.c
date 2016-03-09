@@ -127,31 +127,31 @@ static inline void up_registerdump(void)
 {
   /* Are user registers available from interrupt processing? */
 
-  if (current_regs)
+  if (g_current_regs)
     {
       lldbg("A:%02x B:%02x X:%02x%02x Y:%02x%02x PC:%02x%02x CCR:%02x\n",
-             current_regs[REG_A], current_regs[REG_B], current_regs[REG_XH],
-             current_regs[REG_XL], current_regs[REG_YH], current_regs[REG_YL],
-             current_regs[REG_PCH], current_regs[REG_PCL], current_regs[REG_CCR]);
+             g_current_regs[REG_A], g_current_regs[REG_B], g_current_regs[REG_XH],
+             g_current_regs[REG_XL], g_current_regs[REG_YH], g_current_regs[REG_YL],
+             g_current_regs[REG_PCH], g_current_regs[REG_PCL], g_current_regs[REG_CCR]);
       lldbg("SP:%02x%02x FRAME:%02x%02x TMP:%02x%02x Z:%02x%02x XY:%02x\n",
-             current_regs[REG_SPH], current_regs[REG_SPL],
-             current_regs[REG_FRAMEH], current_regs[REG_FRAMEL],
-             current_regs[REG_TMPL], current_regs[REG_TMPH], current_regs[REG_ZL],
-             current_regs[REG_ZH], current_regs[REG_XY], current_regs[REG_XY+1]);
+             g_current_regs[REG_SPH], g_current_regs[REG_SPL],
+             g_current_regs[REG_FRAMEH], g_current_regs[REG_FRAMEL],
+             g_current_regs[REG_TMPL], g_current_regs[REG_TMPH], g_current_regs[REG_ZL],
+             g_current_regs[REG_ZH], g_current_regs[REG_XY], g_current_regs[REG_XY+1]);
 
 #if CONFIG_HCS12_MSOFTREGS > 2
 #  error "Need to save more registers"
 #elif CONFIG_HCS12_MSOFTREGS == 2
       lldbg("SOFTREGS: %02x%02x :%02x%02x\n",
-            current_regs[REG_SOFTREG1], current_regs[REG_SOFTREG1+1],
-            current_regs[REG_SOFTREG2], current_regs[REG_SOFTREG2+1]);
+            g_current_regs[REG_SOFTREG1], g_current_regs[REG_SOFTREG1+1],
+            g_current_regs[REG_SOFTREG2], g_current_regs[REG_SOFTREG2+1]);
 #elif CONFIG_HCS12_MSOFTREGS == 1
-      lldbg("SOFTREGS: %02x%02x\n", current_regs[REG_SOFTREG1],
-            current_regs[REG_SOFTREG1+1]);
+      lldbg("SOFTREGS: %02x%02x\n", g_current_regs[REG_SOFTREG1],
+            g_current_regs[REG_SOFTREG1+1]);
 #endif
 
 #ifndef CONFIG_HCS12_NONBANKED
-      lldbg("PPAGE: %02x\n", current_regs[REG_PPAGE],);
+      lldbg("PPAGE: %02x\n", g_current_regs[REG_PPAGE],);
 #endif
     }
 }
@@ -293,7 +293,7 @@ static void _up_assert(int errorcode)
 {
   /* Are we in an interrupt handler or the idle task? */
 
-  if (current_regs || (this_task())->pid == 0)
+  if (g_current_regs || (this_task())->pid == 0)
     {
        (void)up_irq_save();
         for (;;)

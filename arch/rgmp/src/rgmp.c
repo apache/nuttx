@@ -109,7 +109,7 @@ void rtos_exit_interrupt(void)
 
       if (rtcb->xcp.sigdeliver)
         {
-          rtcb->xcp.ctx.tf = current_regs;
+          rtcb->xcp.ctx.tf = g_current_regs;
           push_xcptcontext(&rtcb->xcp);
         }
 
@@ -119,7 +119,7 @@ void rtos_exit_interrupt(void)
 
       if (rtcb != ntcb)
         {
-          rtcb->xcp.ctx.tf = current_regs;
+          rtcb->xcp.ctx.tf = g_current_regs;
           current_task = ntcb;
           rgmp_switch_to(&ntcb->xcp.ctx);
         }

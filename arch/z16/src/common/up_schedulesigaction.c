@@ -106,7 +106,7 @@ void up_schedule_sigaction(FAR struct tcb_s *tcb, sig_deliver_t sigdeliver)
        * being delivered to the currently executing task.
        */
 
-      dbg("rtcb=0x%p current_regs=0x%p\n", this_task(), current_regs);
+      dbg("rtcb=0x%p g_current_regs=0x%p\n", this_task(), g_current_regs);
 
       if (tcb == this_task())
         {
@@ -114,7 +114,7 @@ void up_schedule_sigaction(FAR struct tcb_s *tcb, sig_deliver_t sigdeliver)
            * a task is signalling itself for some reason.
            */
 
-          if (!current_regs)
+          if (!g_current_regs)
             {
               /* In this case just deliver the signal now. */
 
@@ -129,7 +129,7 @@ void up_schedule_sigaction(FAR struct tcb_s *tcb, sig_deliver_t sigdeliver)
 
           else
             {
-              FAR uint32_t *current_pc  = (FAR uint32_t*)&current_regs[REG_PC];
+              FAR uint32_t *current_pc  = (FAR uint32_t*)&g_current_regs[REG_PC];
 
               /* Save the return address and interrupt state. These will be
                * restored by the signal trampoline after the signals have
@@ -138,20 +138,20 @@ void up_schedule_sigaction(FAR struct tcb_s *tcb, sig_deliver_t sigdeliver)
 
               tcb->xcp.sigdeliver     = sigdeliver;
               tcb->xcp.saved_pc       = *current_pc;
-              tcb->xcp.saved_i        = current_regs[REG_FLAGS];
+              tcb->xcp.saved_i        = g_current_regs[REG_FLAGS];
 
               /* Then set up to vector to the trampoline with interrupts
                * disabled
                */
 
               *current_pc             = (uint32_t)up_sigdeliver;
-              current_regs[REG_FLAGS] = 0;
+              g_current_regs[REG_FLAGS] = 0;
 
               /* And make sure that the saved context in the TCB is the
                * same as the interrupt return context.
                */
 
-              up_copystate(tcb->xcp.regs, current_regs);
+              up_copystate(tcb->xcp.regs, g_current_regs);
             }
         }
 

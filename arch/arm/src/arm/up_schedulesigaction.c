@@ -108,7 +108,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
        * being delivered to the currently executing task.
        */
 
-      sdbg("rtcb=0x%p current_regs=0x%p\n", this_task(), current_regs);
+      sdbg("rtcb=0x%p CURRENT_REGS=0x%p\n", this_task(), CURRENT_REGS);
 
       if (tcb == this_task())
         {
@@ -116,7 +116,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
            * a task is signalling itself for some reason.
            */
 
-          if (!current_regs)
+          if (!CURRENT_REGS)
             {
               /* In this case just deliver the signal now. */
 
@@ -132,7 +132,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
            * logic would fail in the strange case where we are in an
            * interrupt handler, the thread is signalling itself, but
            * a context switch to another task has occurred so that
-           * current_regs does not refer to the thread of this_task()!
+           * CURRENT_REGS does not refer to the thread of this_task()!
            */
 
           else
@@ -143,15 +143,15 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                */
 
               tcb->xcp.sigdeliver       = sigdeliver;
-              tcb->xcp.saved_pc         = current_regs[REG_PC];
-              tcb->xcp.saved_cpsr       = current_regs[REG_CPSR];
+              tcb->xcp.saved_pc         = CURRENT_REGS[REG_PC];
+              tcb->xcp.saved_cpsr       = CURRENT_REGS[REG_CPSR];
 
               /* Then set up to vector to the trampoline with interrupts
                * disabled
                */
 
-              current_regs[REG_PC]      = (uint32_t)up_sigdeliver;
-              current_regs[REG_CPSR]    = SVC_MODE | PSR_I_BIT | PSR_F_BIT;
+              CURRENT_REGS[REG_PC]      = (uint32_t)up_sigdeliver;
+              CURRENT_REGS[REG_CPSR]    = SVC_MODE | PSR_I_BIT | PSR_F_BIT;
 
               /* And make sure that the saved context in the TCB
                * is the same as the interrupt return context.

@@ -84,7 +84,7 @@ enum irq_reg
  * Public Data
  ****************************************************************************/
 
-volatile uint32_t *current_regs;
+volatile uint32_t *g_current_regs[1];
 extern uint32_t _exceptions;
 
 /****************************************************************************
@@ -201,7 +201,7 @@ void up_irqinitialize(void)
   /* Prepare hardware */
 
   calypso_exceptions_install();
-  current_regs = NULL;
+  CURRENT_REGS = NULL;
 
   /* Switch to internal ROM */
 
@@ -302,8 +302,8 @@ void up_decodeirq(uint32_t *regs)
    * Passed to but ignored in IRQ handlers
    * Only valid meaning is apparently non-NULL == IRQ context */
 
-  saved_regs = (uint32_t *)current_regs;
-  current_regs = regs;
+  saved_regs = (uint32_t *)CURRENT_REGS;
+  CURRENT_REGS = regs;
 
   /* Detect & deliver the IRQ */
 
@@ -316,7 +316,7 @@ void up_decodeirq(uint32_t *regs)
   tmp |= 0x01;
   putreg8(tmp, IRQ_REG(IRQ_CTRL));
 
-  current_regs = saved_regs;
+  CURRENT_REGS = saved_regs;
 }
 
 /****************************************************************************
@@ -332,8 +332,8 @@ void calypso_fiq(void)
    * Passed to but ignored in IRQ handlers
    * Only valid meaning is apparently non-NULL == IRQ context */
 
-  regs = (uint32_t *)current_regs;
-  current_regs = (uint32_t *)&num;
+  regs = (uint32_t *)CURRENT_REGS;
+  CURRENT_REGS = (uint32_t *)&num;
 
   /* Detect & deliver like an IRQ but we are in FIQ context */
 
@@ -346,5 +346,5 @@ void calypso_fiq(void)
   tmp |= 0x02;
   putreg8(tmp, IRQ_REG(IRQ_CTRL));
 
-  current_regs = regs;
+  CURRENT_REGS = regs;
 }

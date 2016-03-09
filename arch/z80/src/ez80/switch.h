@@ -59,19 +59,19 @@
 
 /* Initialize the IRQ state */
 
-#define INIT_IRQCONTEXT()        current_regs = NULL
+#define INIT_IRQCONTEXT()        g_current_regs = NULL
 
 /* IN_INTERRUPT returns true if the system is currently operating in the interrupt
  * context.  IN_INTERRUPT is the inline equivalent of up_interrupt_context().
  */
 
-#define IN_INTERRUPT()           (current_regs != NULL)
+#define IN_INTERRUPT()           (g_current_regs != NULL)
 
 /* The following macro is used when the system enters interrupt handling logic
  *
  * NOTE: Nested interrupts are not supported in this implementation.  If you want
  * to implement nested interrupts, you would have to change the way that
- * current_regs is handled.  The savestate variable would not work for
+ * g_current_regs is handled.  The savestate variable would not work for
  * that purpose as implemented here because only the outermost nested
  * interrupt can result in a context switch (it can probably be deleted).
  */
@@ -81,25 +81,25 @@
 
 #define IRQ_ENTER(irq, regs) \
   do { \
-    savestate    = (FAR chipreg_t *)current_regs; \
-    current_regs = (regs); \
+    savestate    = (FAR chipreg_t *)g_current_regs; \
+    g_current_regs = (regs); \
   } while (0)
 
 /* The following macro is used when the system exits interrupt handling logic */
 
-#define IRQ_LEAVE(irq)           current_regs = savestate
+#define IRQ_LEAVE(irq)           g_current_regs = savestate
 
 /* The following macro is used to sample the interrupt state (as a opaque handle) */
 
-#define IRQ_STATE()              (current_regs)
+#define IRQ_STATE()              (g_current_regs)
 
 /* Save the current IRQ context in the specified TCB */
 
-#define SAVE_IRQCONTEXT(tcb)     ez80_copystate((tcb)->xcp.regs, (FAR chipreg_t*)current_regs)
+#define SAVE_IRQCONTEXT(tcb)     ez80_copystate((tcb)->xcp.regs, (FAR chipreg_t*)g_current_regs)
 
 /* Set the current IRQ context to the state specified in the TCB */
 
-#define SET_IRQCONTEXT(tcb)      ez80_copystate((FAR chipreg_t*)current_regs, (tcb)->xcp.regs)
+#define SET_IRQCONTEXT(tcb)      ez80_copystate((FAR chipreg_t*)g_current_regs, (tcb)->xcp.regs)
 
 /* Save the user context in the specified TCB.  User context saves can be simpler
  * because only those registers normally saved in a C called need be stored.
@@ -130,7 +130,7 @@
  * If is non-NULL only during interrupt processing.
  */
 
-extern volatile chipreg_t *current_regs;
+extern volatile chipreg_t *g_current_regs;
 #endif
 
 /************************************************************************************

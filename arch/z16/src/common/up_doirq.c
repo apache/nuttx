@@ -92,7 +92,7 @@ FAR chipreg_t *up_doirq(int irq, FAR chipreg_t *regs)
 
       /* Nested interrupts are not supported in this implementation.  If
        * you want to implement nested interrupts, you would have to (1) change
-       * the way that current_regs is handled and (2) the design associated
+       * the way that g_current_regs is handled and (2) the design associated
        * with CONFIG_ARCH_INTERRUPTSTACK.  The savestate variable will not
        * work for that purpose as implemented here because only the outermost
        * nested interrupt can result in a context switch (it can probably be
@@ -100,12 +100,12 @@ FAR chipreg_t *up_doirq(int irq, FAR chipreg_t *regs)
        */
 
       /* Current regs non-zero indicates that we are processing
-       * an interrupt; current_regs is also used to manage
+       * an interrupt; g_current_regs is also used to manage
        * interrupt level context switches.
        */
 
-      savestate    = (FAR chipreg_t *)current_regs;
-      current_regs = regs;
+      savestate    = (FAR chipreg_t *)g_current_regs;
+      g_current_regs = regs;
 
       /* Acknowledge the interrupt */
 
@@ -115,13 +115,13 @@ FAR chipreg_t *up_doirq(int irq, FAR chipreg_t *regs)
 
       irq_dispatch(irq, regs);
 
-      /* Restore the previous value of current_regs.  NULL would indicate that
+      /* Restore the previous value of g_current_regs.  NULL would indicate that
        * we are no longer in an interrupt handler.  It will be non-NULL if we
        * are returning from a nested interrupt.
        */
 
-      ret          = current_regs;
-      current_regs = savestate;
+      ret          = g_current_regs;
+      g_current_regs = savestate;
     }
 
   board_autoled_off(LED_INIRQ);

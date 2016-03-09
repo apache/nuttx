@@ -58,7 +58,7 @@
  * Public Data
  ****************************************************************************/
 
-volatile uint32_t *current_regs;
+volatile uint32_t *g_current_regs[1];
 
 /****************************************************************************
  * Private Data
@@ -106,7 +106,7 @@ void up_irqinitialize(void)
 
   /* currents_regs is non-NULL only while processing an interrupt */
 
-  current_regs = NULL;
+  CURRENT_REGS = NULL;
 
   /* And finally, enable interrupts */
 

@@ -53,7 +53,7 @@
  * Public Data
  ****************************************************************************/
 
-volatile uint32_t *current_regs;
+volatile uint32_t *g_current_regs;
 
 /****************************************************************************
  * Public Funtions
@@ -67,7 +67,7 @@ void up_irqinitialize(void)
 {
   /* Currents_regs is non-NULL only while processing an interrupt */
 
-  current_regs = NULL;
+  g_current_regs = NULL;
 
   /* Enable interrupts */
 

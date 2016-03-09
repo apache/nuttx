@@ -62,14 +62,14 @@
 /* Initialize the IRQ state */
 
 #define INIT_IRQCONTEXT() \
-  current_regs = NULL
+  g_current_regs = NULL
 
 /* IN_INTERRUPT returns true if the system is currently operating in the interrupt
  * context.  IN_INTERRUPT is the inline equivalent of up_interrupt_context().
  */
 
 #define IN_INTERRUPT() \
-  (current_regs != NULL)
+  (g_current_regs != NULL)
 
 /* The following macro declares the variables need by IRQ_ENTER and IRQ_LEAVE.
  * These variables are used to support nested interrupts.
@@ -79,7 +79,7 @@
  *
  * NOTE: Nested interrupts are not supported in this implementation.  If you want
  * to implement nested interrupts, you would have to change the way that
- * current_regs/cbr is handled.  The savestate/savecbr variables would not work
+ * g_current_regs/cbr is handled.  The savestate/savecbr variables would not work
  * for that purpose as implemented here because only the outermost nested
  * interrupt can result in a context switch (they can probabaly be deleted).
  */
@@ -89,23 +89,23 @@
   uint8_t savecbr;
 
 /* The following macro is used when the system enters interrupt handling logic.
- * The entry values of current_regs and current_cbr and stored in local variables.
- * Then current_regs and current_cbr are set to the values of the interrupted
+ * The entry values of g_current_regs and current_cbr and stored in local variables.
+ * Then g_current_regs and current_cbr are set to the values of the interrupted
  * task.
  */
 
 #define IRQ_ENTER(irq, regs) \
   do \
     { \
-      savestate    = (FAR chipreg_t *)current_regs; \
+      savestate    = (FAR chipreg_t *)g_current_regs; \
       savecbr      = current_cbr; \
-      current_regs = (regs); \
+      g_current_regs = (regs); \
       current_cbr  = inp(Z180_MMU_CBR); \
     } \
   while (0)
 
 /* The following macro is used when the system exits interrupt handling logic.
- * The value of current_regs is restored.  If we are not processing a nested
+ * The value of g_current_regs is restored.  If we are not processing a nested
  * interrupt (meaning that we going to return to the user task), then also
  * set the MMU's CBR register.
  */
@@ -113,8 +113,8 @@
 #define IRQ_LEAVE(irq) \
   do \
     { \
-      current_regs = savestate; \
-      if (current_regs) \
+      g_current_regs = savestate; \
+      if (g_current_regs) \
         { \
           current_cbr = savecbr; \
         } \
@@ -128,12 +128,12 @@
 /* The following macro is used to sample the interrupt state (as a opaque handle) */
 
 #define IRQ_STATE() \
-  (current_regs)
+  (g_current_regs)
 
 /* Save the current IRQ context in the specified TCB */
 
 #define SAVE_IRQCONTEXT(tcb) \
-  z180_copystate((tcb)->xcp.regs, (FAR chipreg_t*)current_regs)
+  z180_copystate((tcb)->xcp.regs, (FAR chipreg_t*)g_current_regs)
 
 /* Set the current IRQ context to the state specified in the TCB */
 
@@ -144,7 +144,7 @@
         { \
           current_cbr = (tcb)->xcp.cbr->cbr; \
         } \
-      z180_copystate((FAR chipreg_t*)current_regs, (tcb)->xcp.regs); \
+      z180_copystate((FAR chipreg_t*)g_current_regs, (tcb)->xcp.regs); \
     } \
   while (0)
 
@@ -188,7 +188,7 @@
  * If is non-NULL only during interrupt processing.
  */
 
-extern volatile chipreg_t *current_regs;
+extern volatile chipreg_t *g_current_regs;
 
 /* This holds the value of the MMU's CBR register.  This value is set to the
  * interrupted tasks's CBR on interrupt entry, changed to the new task's CBR if

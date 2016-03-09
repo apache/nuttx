@@ -108,7 +108,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
        * being delivered to the currently executing task.
        */
 
-      sdbg("rtcb=0x%p current_regs=0x%p\n", this_task(), current_regs);
+      sdbg("rtcb=0x%p g_current_regs=0x%p\n", this_task(), g_current_regs);
 
       if (tcb == this_task())
         {
@@ -116,7 +116,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
            * a task is signalling itself for some reason.
            */
 
-          if (!current_regs)
+          if (!g_current_regs)
             {
               /* In this case just deliver the signal now. */
 
@@ -132,7 +132,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
            * logic would fail in the strange case where we are in an
            * interrupt handler, the thread is signalling itself, but
            * a context switch to another task has occurred so that
-           * current_regs does not refer to the thread of this_task()!
+           * g_current_regs does not refer to the thread of this_task()!
            */
 
           else
@@ -143,25 +143,25 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                */
 
               tcb->xcp.sigdeliver   = sigdeliver;
-              tcb->xcp.saved_pc0    = current_regs[REG_PC0];
-              tcb->xcp.saved_pc1    = current_regs[REG_PC1];
+              tcb->xcp.saved_pc0    = g_current_regs[REG_PC0];
+              tcb->xcp.saved_pc1    = g_current_regs[REG_PC1];
 #if defined(REG_PC2)
-              tcb->xcp.saved_pc2    = current_regs[REG_PC2];
+              tcb->xcp.saved_pc2    = g_current_regs[REG_PC2];
 #endif
-              tcb->xcp.saved_sreg   = current_regs[REG_SREG];
+              tcb->xcp.saved_sreg   = g_current_regs[REG_SREG];
 
               /* Then set up to vector to the trampoline with interrupts
                * disabled
                */
 #if !defined(REG_PC2)
-              current_regs[REG_PC0]   = (uint16_t)up_sigdeliver >> 8;
-              current_regs[REG_PC1]   = (uint16_t)up_sigdeliver & 0xff;
+              g_current_regs[REG_PC0]   = (uint16_t)up_sigdeliver >> 8;
+              g_current_regs[REG_PC1]   = (uint16_t)up_sigdeliver & 0xff;
 #else
-              current_regs[REG_PC0]   = (uint32_t)up_sigdeliver >> 16;
-              current_regs[REG_PC1]   = (uint32_t)up_sigdeliver >> 8;
-              current_regs[REG_PC2]   = (uint32_t)up_sigdeliver & 0xff;
+              g_current_regs[REG_PC0]   = (uint32_t)up_sigdeliver >> 16;
+              g_current_regs[REG_PC1]   = (uint32_t)up_sigdeliver >> 8;
+              g_current_regs[REG_PC2]   = (uint32_t)up_sigdeliver & 0xff;
 #endif
-              current_regs[REG_SREG] &= ~(1 << SREG_I);
+              g_current_regs[REG_SREG] &= ~(1 << SREG_I);
 
               /* And make sure that the saved context in the TCB
                * is the same as the interrupt return context.

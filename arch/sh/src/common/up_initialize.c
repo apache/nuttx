@@ -120,7 +120,7 @@ void up_initialize(void)
 {
   /* Initialize global variables */
 
-  current_regs = NULL;
+  g_current_regs = NULL;
 
   /* Calibrate the timing loop */
 

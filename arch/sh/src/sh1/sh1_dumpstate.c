@@ -111,7 +111,7 @@ static void sh1_stackdump(uint32_t sp, uint32_t stack_base)
 
 static inline void sh1_registerdump(void)
 {
-  uint32_t *ptr = (uint32_t*)current_regs;
+  uint32_t *ptr = (uint32_t*)g_current_regs;
 
   /* Are user registers available from interrupt processing? */
 

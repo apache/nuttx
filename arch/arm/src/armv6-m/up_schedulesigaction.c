@@ -121,7 +121,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
        * to the currently executing task.
        */
 
-      sdbg("rtcb=0x%p current_regs=0x%p\n", this_task(), current_regs);
+      sdbg("rtcb=0x%p CURRENT_REGS=0x%p\n", this_task(), CURRENT_REGS);
 
       if (tcb == this_task())
         {
@@ -129,7 +129,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
            * signalling itself for some reason.
            */
 
-          if (!current_regs)
+          if (!CURRENT_REGS)
             {
               /* In this case just deliver the signal now. */
 
@@ -150,22 +150,22 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                */
 
               tcb->xcp.sigdeliver       = sigdeliver;
-              tcb->xcp.saved_pc         = current_regs[REG_PC];
-              tcb->xcp.saved_primask    = current_regs[REG_PRIMASK];
-              tcb->xcp.saved_xpsr       = current_regs[REG_XPSR];
+              tcb->xcp.saved_pc         = CURRENT_REGS[REG_PC];
+              tcb->xcp.saved_primask    = CURRENT_REGS[REG_PRIMASK];
+              tcb->xcp.saved_xpsr       = CURRENT_REGS[REG_XPSR];
 #ifdef CONFIG_BUILD_PROTECTED
-              tcb->xcp.saved_lr         = current_regs[REG_LR];
+              tcb->xcp.saved_lr         = CURRENT_REGS[REG_LR];
 #endif
               /* Then set up to vector to the trampoline with interrupts
                * disabled.  The kernel-space trampoline must run in
                * privileged thread mode.
                */
 
-              current_regs[REG_PC]      = (uint32_t)up_sigdeliver;
-              current_regs[REG_PRIMASK] = 1;
-              current_regs[REG_XPSR]    = ARMV6M_XPSR_T;
+              CURRENT_REGS[REG_PC]      = (uint32_t)up_sigdeliver;
+              CURRENT_REGS[REG_PRIMASK] = 1;
+              CURRENT_REGS[REG_XPSR]    = ARMV6M_XPSR_T;
 #ifdef CONFIG_BUILD_PROTECTED
-              current_regs[REG_LR]      = EXC_RETURN_PRIVTHR;
+              CURRENT_REGS[REG_LR]      = EXC_RETURN_PRIVTHR;
 #endif
               /* And make sure that the saved context in the TCB is the same
                * as the interrupt return context.

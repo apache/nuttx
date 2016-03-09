@@ -107,23 +107,23 @@ static inline void up_registerdump(void)
 {
   /* Are user registers available from interrupt processing? */
 
-  if (current_regs)
+  if (g_current_regs)
     {
       lldbg("R%d: %08x %08x %08x %08x %08x %08x %08x %08x\n",
             0,
-            current_regs[REG_R0], current_regs[REG_R1],
-            current_regs[REG_R2], current_regs[REG_R3],
-            current_regs[REG_R4], current_regs[REG_R5],
-            current_regs[REG_R6], current_regs[REG_R7]);
+            g_current_regs[REG_R0], g_current_regs[REG_R1],
+            g_current_regs[REG_R2], g_current_regs[REG_R3],
+            g_current_regs[REG_R4], g_current_regs[REG_R5],
+            g_current_regs[REG_R6], g_current_regs[REG_R7]);
 
       lldbg("R%d: %08x %08x %08x %08x %08x %08x %08x %08x\n",
             8,
-            current_regs[REG_R8],  current_regs[REG_R9],
-            current_regs[REG_R10], current_regs[REG_R11],
-            current_regs[REG_R12], current_regs[REG_R13],
-            current_regs[REG_R14], current_regs[REG_R15]);
+            g_current_regs[REG_R8],  g_current_regs[REG_R9],
+            g_current_regs[REG_R10], g_current_regs[REG_R11],
+            g_current_regs[REG_R12], g_current_regs[REG_R13],
+            g_current_regs[REG_R14], g_current_regs[REG_R15]);
 
-      lldbg("SR: %08x\n", current_regs[REG_SR]);
+      lldbg("SR: %08x\n", g_current_regs[REG_SR]);
     }
 }
 
@@ -187,9 +187,9 @@ void up_dumpstate(void)
    * pointer (and the above range check should have failed).
    */
 
-  if (current_regs)
+  if (g_current_regs)
     {
-      sp = current_regs[REG_R13];
+      sp = g_current_regs[REG_R13];
       lldbg("sp:     %08x\n", sp);
     }
 

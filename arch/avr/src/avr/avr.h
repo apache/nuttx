@@ -58,8 +58,8 @@
  * state from the TCB.
  */
 
-#define up_savestate(regs)    up_copystate(regs, (uint8_t*)current_regs)
-#define up_restorestate(regs) (current_regs = regs)
+#define up_savestate(regs)    up_copystate(regs, (uint8_t*)g_current_regs)
+#define up_restorestate(regs) (g_current_regs = regs)
 
 /****************************************************************************
  * Public Types
@@ -74,7 +74,7 @@
  * structure.  If is non-NULL only during interrupt processing.
  */
 
-extern volatile uint8_t *current_regs;
+extern volatile uint8_t *g_current_regs;
 
 /* This is the beginning of heap as provided from up_head.S. This is the first
  * address in DRAM after the loaded program+bss+idle stack.  The end of the

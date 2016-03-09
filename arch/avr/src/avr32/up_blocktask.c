@@ -116,10 +116,10 @@ void up_block_task(struct tcb_s *tcb, tstate_t task_state)
 
       /* Are we in an interrupt handler? */
 
-      if (current_regs)
+      if (g_current_regs)
         {
           /* Yes, then we have to do things differently.
-           * Just copy the current_regs into the OLD rtcb.
+           * Just copy the g_current_regs into the OLD rtcb.
            */
 
           up_savestate(rtcb->xcp.regs);

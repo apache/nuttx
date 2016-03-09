@@ -78,7 +78,7 @@ typedef uint32_t *(*doirq_t)(int irq, uint32_t *regs);
  * Public Data
  ****************************************************************************/
 
-volatile uint32_t *current_regs;
+volatile uint32_t *g_current_regs[1];
 
 /* Symbols defined via the linker script */
 
@@ -553,7 +553,7 @@ void up_irqinitialize(void)
 
   /* currents_regs is non-NULL only while processing an interrupt */
 
-  current_regs = NULL;
+  CURRENT_REGS = NULL;
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
   /* Initialize logic to support a second level of interrupt decoding for

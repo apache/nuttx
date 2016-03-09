@@ -93,7 +93,7 @@ static void _up_assert(int errorcode)
 {
   /* Are we in an interrupt handler or the idle task? */
 
-  if (current_regs || this_task()->pid == 0)
+  if (g_current_regs || this_task()->pid == 0)
     {
        (void)up_irq_save();
         for (;;)

@@ -269,7 +269,7 @@ avr32_common:
     /* Disable interrupts in the current SR.  This is necessary because the */
 	/* AVR32 permits nested interrupts (if they are of higher priority).    */
 	/* We can support nested interrupts without some effort because:        */
-	/* - The global variable current_regs permits only one interrupt,       */
+	/* - The global variable g_current_regs permits only one interrupt,       */
 	/* - If CONFIG_ARCH_INTERRUPTSTACK is defined, then there is a single   */
 	/*   interrupt stack, and                                               */
 	/* - Probably other things.                                             */

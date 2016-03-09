@@ -80,14 +80,14 @@ uint32_t *up_doirq(int irq, uint32_t* regs)
   if ((unsigned)irq < NR_IRQS)
     {
       /* Current regs non-zero indicates that we are processing
-       * an interrupt; current_regs is also used to manage
+       * an interrupt; g_current_regs is also used to manage
        * interrupt level context switches.
        *
        * Nested interrupts are not supported.
        */
 
-      DEBUGASSERT(current_regs == NULL);
-      current_regs = regs;
+      DEBUGASSERT(g_current_regs == NULL);
+      g_current_regs = regs;
 
       /* Deliver the IRQ */
 
@@ -95,18 +95,18 @@ uint32_t *up_doirq(int irq, uint32_t* regs)
 
 #if defined(CONFIG_ARCH_FPU) || defined(CONFIG_ARCH_ADDRENV)
       /* Check for a context switch.  If a context switch occurred, then
-       * current_regs will have a different value than it did on entry.  If an
+       * g_current_regs will have a different value than it did on entry.  If an
        * interrupt level context switch has occurred, then restore the floating
        * point state and the establish the correct address environment before
        * returning from the interrupt.
        */
 
-      if (regs != current_regs)
+      if (regs != g_current_regs)
         {
 #ifdef CONFIG_ARCH_FPU
           /* Restore floating point registers */
 
-          up_restorefpu((uint32_t*)current_regs);
+          up_restorefpu((uint32_t*)g_current_regs);
 #endif
 
 #ifdef CONFIG_ARCH_ADDRENV
@@ -124,13 +124,13 @@ uint32_t *up_doirq(int irq, uint32_t* regs)
        * of a context switch performed during interrupt processing.
        */
 
-      regs = current_regs;
+      regs = g_current_regs;
 
-      /* Set current_regs to NULL to indicate that we are no longer in an
+      /* Set g_current_regs to NULL to indicate that we are no longer in an
        * interrupt handler.
        */
 
-      current_regs = NULL;
+      g_current_regs = NULL;
     }
 
   board_autoled_off(LED_INIRQ);

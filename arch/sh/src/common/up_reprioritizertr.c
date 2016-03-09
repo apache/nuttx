@@ -138,13 +138,13 @@ void up_reprioritize_rtr(struct tcb_s *tcb, uint8_t priority)
 
          /* Are we in an interrupt handler? */
 
-          if (current_regs)
+          if (g_current_regs)
             {
               /* Yes, then we have to do things differently.
-               * Just copy the current_regs into the OLD rtcb.
+               * Just copy the g_current_regs into the OLD rtcb.
                */
 
-               up_copystate(rtcb->xcp.regs, current_regs);
+               up_copystate(rtcb->xcp.regs, g_current_regs);
 
               /* Restore the exception context of the rtcb at the (new) head
                * of the ready-to-run task list.
@@ -160,7 +160,7 @@ void up_reprioritize_rtr(struct tcb_s *tcb, uint8_t priority)
                * changes will be made when the interrupt returns.
                */
 
-              current_regs = rtcb->xcp.regs;
+              g_current_regs = rtcb->xcp.regs;
             }
 
           /* Copy the exception context into the TCB at the (old) head of the

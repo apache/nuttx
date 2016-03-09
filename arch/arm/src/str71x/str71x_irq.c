@@ -56,7 +56,7 @@
  * Public Data
  ****************************************************************************/
 
-volatile uint32_t *current_regs;
+volatile uint32_t *g_current_regs[1];
 
 /****************************************************************************
  * Public Functions
@@ -70,7 +70,7 @@ void up_irqinitialize(void)
 {
   /* Currents_regs is non-NULL only while processing an interrupt */
 
-  current_regs = NULL;
+  CURRENT_REGS = NULL;
 
   /* The bulk of IRQ initialization if performed in str71x_head.S, so we
    * have very little to do here -- basically just enabling interrupts;

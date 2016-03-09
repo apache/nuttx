@@ -53,7 +53,7 @@
  * structure.  If is non-NULL only during interrupt processing.
  */
 
-volatile chipreg_t *current_regs;
+volatile chipreg_t *g_current_regs;
 
 /****************************************************************************
  * Public Functions
@@ -65,7 +65,7 @@ volatile chipreg_t *current_regs;
 
 void up_irqinitialize(void)
 {
-  current_regs = NULL;
+  g_current_regs = NULL;
 
   /* And finally, enable interrupts */
 

@@ -84,13 +84,13 @@ void up_release_pending(void)
 
       /* Are we operating in interrupt context? */
 
-      if (current_regs)
+      if (g_current_regs)
         {
           /* Yes, then we have to do things differently.
-           * Just copy the current_regs into the OLD rtcb.
+           * Just copy the g_current_regs into the OLD rtcb.
            */
 
-           up_copystate(rtcb->xcp.regs, current_regs);
+           up_copystate(rtcb->xcp.regs, g_current_regs);
 
           /* Restore the exception context of the rtcb at the (new) head
            * of the ready-to-run task list.
@@ -106,7 +106,7 @@ void up_release_pending(void)
            * changes will be made when the interrupt returns.
            */
 
-          current_regs = rtcb->xcp.regs;
+          g_current_regs = rtcb->xcp.regs;
         }
 
       /* Copy the exception context into the TCB of the task that

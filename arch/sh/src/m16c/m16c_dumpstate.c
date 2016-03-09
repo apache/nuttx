@@ -96,7 +96,7 @@ static inline uint16_t m16c_getsp(void)
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
 static inline uint16_t m16c_getusersp(void)
 {
-  uint8_t *ptr = (uint8_t*) current_regs;
+  uint8_t *ptr = (uint8_t*) g_current_regs;
   return (uint16_t)ptr[REG_SP] << 8 | ptr[REG_SP+1];
 }
 #endif
@@ -123,7 +123,7 @@ static void m16c_stackdump(uint16_t sp, uint16_t stack_base)
 
 static inline void m16c_registerdump(void)
 {
-  uint8_t *ptr = (uint8_t*) current_regs;
+  uint8_t *ptr = (uint8_t*) g_current_regs;
 
   /* Are user registers available from interrupt processing? */
 

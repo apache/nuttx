@@ -81,10 +81,10 @@ void up_release_pending(void)
 
       sched_suspend_scheduler(rtcb);
 
-      if (current_regs)
+      if (g_current_regs)
         {
           /* Yes, then we have to do things differently.
-           * Just copy the current_regs into the OLD rtcb.
+           * Just copy the g_current_regs into the OLD rtcb.
            */
 
            up_savestate(rtcb->xcp.regs);

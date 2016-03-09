@@ -113,46 +113,46 @@ static inline void up_registerdump(void)
 {
   /* Are user registers available from interrupt processing? */
 
-  if (current_regs)
+  if (g_current_regs)
     {
       lldbg("R%02d: %02x %02x %02x %02x %02x %02x %02x %02x\n",
             0,
-            current_regs[REG_R0],  current_regs[REG_R1],
-            current_regs[REG_R2],  current_regs[REG_R3],
-            current_regs[REG_R4],  current_regs[REG_R5],
-            current_regs[REG_R6],  current_regs[REG_R7]);
+            g_current_regs[REG_R0],  g_current_regs[REG_R1],
+            g_current_regs[REG_R2],  g_current_regs[REG_R3],
+            g_current_regs[REG_R4],  g_current_regs[REG_R5],
+            g_current_regs[REG_R6],  g_current_regs[REG_R7]);
 
       lldbg("R%02d: %02x %02x %02x %02x %02x %02x %02x %02x\n",
             8,
-            current_regs[REG_R8],  current_regs[REG_R9],
-            current_regs[REG_R10], current_regs[REG_R11],
-            current_regs[REG_R12], current_regs[REG_R13],
-            current_regs[REG_R14], current_regs[REG_R15]);
+            g_current_regs[REG_R8],  g_current_regs[REG_R9],
+            g_current_regs[REG_R10], g_current_regs[REG_R11],
+            g_current_regs[REG_R12], g_current_regs[REG_R13],
+            g_current_regs[REG_R14], g_current_regs[REG_R15]);
 
       lldbg("R%02d: %02x %02x %02x %02x %02x %02x %02x %02x\n",
             16,
-            current_regs[REG_R16], current_regs[REG_R17],
-            current_regs[REG_R18], current_regs[REG_R19],
-            current_regs[REG_R20], current_regs[REG_R21],
-            current_regs[REG_R22], current_regs[REG_R23]);
+            g_current_regs[REG_R16], g_current_regs[REG_R17],
+            g_current_regs[REG_R18], g_current_regs[REG_R19],
+            g_current_regs[REG_R20], g_current_regs[REG_R21],
+            g_current_regs[REG_R22], g_current_regs[REG_R23]);
 
       lldbg("R%02d: %02x %02x %02x %02x %02x %02x %02x %02x\n",
             24,
-            current_regs[REG_R24], current_regs[REG_R25],
-            current_regs[REG_R26], current_regs[REG_R27],
-            current_regs[REG_R28], current_regs[REG_R29],
-            current_regs[REG_R30], current_regs[REG_R31]);
+            g_current_regs[REG_R24], g_current_regs[REG_R25],
+            g_current_regs[REG_R26], g_current_regs[REG_R27],
+            g_current_regs[REG_R28], g_current_regs[REG_R29],
+            g_current_regs[REG_R30], g_current_regs[REG_R31]);
 
 #if !defined(REG_PC2)
       lldbg("PC:  %02x%02x  SP: %02x%02x SREG: %02x\n",
-            current_regs[REG_PC0], current_regs[REG_PC1],
-            current_regs[REG_SPH], current_regs[REG_SPL],
-            current_regs[REG_SREG]);
+            g_current_regs[REG_PC0], g_current_regs[REG_PC1],
+            g_current_regs[REG_SPH], g_current_regs[REG_SPL],
+            g_current_regs[REG_SREG]);
 #else
       lldbg("PC:  %02x%02x%02x  SP: %02x%02x SREG: %02x\n",
-            current_regs[REG_PC0], current_regs[REG_PC1],
-            current_regs[REG_PC2], current_regs[REG_SPH],
-            current_regs[REG_SPL], current_regs[REG_SREG]);
+            g_current_regs[REG_PC0], g_current_regs[REG_PC1],
+            g_current_regs[REG_PC2], g_current_regs[REG_SPH],
+            g_current_regs[REG_SPL], g_current_regs[REG_SREG]);
 #endif
     }
 }
@@ -221,9 +221,9 @@ void up_dumpstate(void)
    * pointer (and the above range check should have failed).
    */
 
-  if (current_regs)
+  if (g_current_regs)
     {
-      sp = current_regs[REG_R13];
+      sp = g_current_regs[REG_R13];
       lldbg("sp:     %04x\n", sp);
     }
 

@@ -82,7 +82,7 @@ extern uint32_t avr32_int3;
  * Public Data
  ****************************************************************************/
 
-volatile uint32_t *current_regs;
+volatile uint32_t *g_current_regs;
 
 /****************************************************************************
  * Private Types
@@ -217,7 +217,7 @@ void up_irqinitialize(void)
 
   /* currents_regs is non-NULL only while processing an interrupt */
 
-  current_regs = NULL;
+  g_current_regs = NULL;
 
   /* Attach the exception handlers */
 

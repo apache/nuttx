@@ -58,7 +58,7 @@
  * Public Data
  ****************************************************************************/
 
-volatile uint32_t *current_regs;
+volatile uint32_t *g_current_regs[1];
 
 /****************************************************************************
  * Private Data
@@ -174,7 +174,7 @@ void up_irqinitialize(void)
   /* Initialize hardware interrupt vectors */
 
   up_vectorinitialize();
-  current_regs = NULL;
+  CURRENT_REGS = NULL;
 
   /* And finally, enable interrupts */
 

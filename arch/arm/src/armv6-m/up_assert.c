@@ -180,27 +180,27 @@ static inline void up_registerdump(void)
 {
   /* Are user registers available from interrupt processing? */
 
-  if (current_regs)
+  if (CURRENT_REGS)
     {
       /* Yes.. dump the interrupt registers */
 
       lldbg("R0: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-            current_regs[REG_R0],  current_regs[REG_R1],
-            current_regs[REG_R2],  current_regs[REG_R3],
-            current_regs[REG_R4],  current_regs[REG_R5],
-            current_regs[REG_R6],  current_regs[REG_R7]);
+            CURRENT_REGS[REG_R0],  CURRENT_REGS[REG_R1],
+            CURRENT_REGS[REG_R2],  CURRENT_REGS[REG_R3],
+            CURRENT_REGS[REG_R4],  CURRENT_REGS[REG_R5],
+            CURRENT_REGS[REG_R6],  CURRENT_REGS[REG_R7]);
       lldbg("R8: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-            current_regs[REG_R8],  current_regs[REG_R9],
-            current_regs[REG_R10], current_regs[REG_R11],
-            current_regs[REG_R12], current_regs[REG_R13],
-            current_regs[REG_R14], current_regs[REG_R15]);
+            CURRENT_REGS[REG_R8],  CURRENT_REGS[REG_R9],
+            CURRENT_REGS[REG_R10], CURRENT_REGS[REG_R11],
+            CURRENT_REGS[REG_R12], CURRENT_REGS[REG_R13],
+            CURRENT_REGS[REG_R14], CURRENT_REGS[REG_R15]);
 #ifdef CONFIG_BUILD_PROTECTED
       lldbg("xPSR: %08x PRIMASK: %08x EXEC_RETURN: %08x\n",
-            current_regs[REG_XPSR], current_regs[REG_PRIMASK],
-            current_regs[REG_EXC_RETURN]);
+            CURRENT_REGS[REG_XPSR], CURRENT_REGS[REG_PRIMASK],
+            CURRENT_REGS[REG_EXC_RETURN]);
 #else
       lldbg("xPSR: %08x PRIMASK: %08x\n",
-            current_regs[REG_XPSR], current_regs[REG_PRIMASK]);
+            CURRENT_REGS[REG_XPSR], CURRENT_REGS[REG_PRIMASK]);
 #endif
     }
 }
@@ -294,9 +294,9 @@ static void up_dumpstate(void)
    * pointer (and the above range check should have failed).
    */
 
-  if (current_regs)
+  if (CURRENT_REGS)
     {
-      sp = current_regs[REG_R13];
+      sp = CURRENT_REGS[REG_R13];
       lldbg("sp:     %08x\n", sp);
     }
 
@@ -365,7 +365,7 @@ static void _up_assert(int errorcode)
 {
   /* Are we in an interrupt handler or the idle task? */
 
-  if (current_regs || this_task()->pid == 0)
+  if (CURRENT_REGS || this_task()->pid == 0)
     {
       (void)up_irq_save();
       for (; ; )

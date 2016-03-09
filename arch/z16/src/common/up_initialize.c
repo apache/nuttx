@@ -69,7 +69,7 @@
  * interrupt processing.
  */
 
-volatile FAR chipreg_t *current_regs;
+volatile FAR chipreg_t *g_current_regs;
 
 /****************************************************************************
  * Private Types
@@ -133,7 +133,7 @@ void up_initialize(void)
 {
   /* Initialize global variables */
 
-  current_regs = NULL;
+  g_current_regs = NULL;
 
   /* Calibrate the timing loop */
 

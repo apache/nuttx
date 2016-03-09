@@ -58,7 +58,7 @@
  * structure.  If is non-NULL only during interrupt processing.
  */
 
-volatile chipreg_t *current_regs;
+volatile chipreg_t *g_current_regs;
 
 /* This holds the value of the MMU's CBR register.  This value is set to the
  * interrupted tasks's CBR on interrupt entry, changed to the new task's CBR if

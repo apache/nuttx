@@ -68,7 +68,7 @@
  * Public Data
  ****************************************************************************/
 
-volatile uint32_t *current_regs;
+volatile uint32_t *g_current_regs[1];
 
 /****************************************************************************
  * Private Data
@@ -127,7 +127,7 @@ void up_irqinitialize(void)
 
   /* currents_regs is non-NULL only while processing an interrupt */
 
-  current_regs = NULL;
+  CURRENT_REGS = NULL;
 
   /* Setup UART shared interrupt */
 
@@ -310,9 +310,9 @@ void up_decodeirq(uint32_t *regs)
   num = ffs(status) - 1;
   up_ack_irq(num);
 
-  DEBUGASSERT(current_regs == NULL);
-  current_regs = regs;
+  DEBUGASSERT(CURRENT_REGS == NULL);
+  CURRENT_REGS = regs;
 
   irq_dispatch(num, regs);
-  current_regs = NULL;
+  CURRENT_REGS = NULL;
 }

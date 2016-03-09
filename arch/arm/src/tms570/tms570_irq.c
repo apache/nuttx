@@ -64,7 +64,7 @@
  * context switching.  Only value during interrupt handling.
  */
 
-volatile uint32_t *current_regs;
+volatile uint32_t *g_current_regs[1];
 
 /****************************************************************************
  * Private Functions
@@ -159,7 +159,7 @@ void up_irqinitialize(void)
 
   /* currents_regs is non-NULL only while processing an interrupt */
 
-  current_regs = NULL;
+  CURRENT_REGS = NULL;
 
 #ifdef CONFIG_ARMV7R_HAVE_DECODEFIQ
   /* By default, interrupt CHAN0 is mapped to ESM (Error Signal Module)

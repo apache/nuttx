@@ -129,11 +129,11 @@
 
 #  if defined(CONFIG_ARCH_FPU) && (!defined(CONFIG_ARMV7M_CMNVECTOR) || \
       defined(CONFIG_ARMV7M_LAZYFPU))
-#    define up_savestate(regs)  up_copyarmstate(regs, (uint32_t*)current_regs)
+#    define up_savestate(regs)  up_copyarmstate(regs, (uint32_t*)CURRENT_REGS)
 #  else
-#    define up_savestate(regs)  up_copyfullstate(regs, (uint32_t*)current_regs)
+#    define up_savestate(regs)  up_copyfullstate(regs, (uint32_t*)CURRENT_REGS)
 #  endif
-#  define up_restorestate(regs) (current_regs = regs)
+#  define up_restorestate(regs) (CURRENT_REGS = regs)
 
 /* The Cortex-A and Cortex-R supports the same mechanism, but only lazy
  * floating point register save/restore.
@@ -149,11 +149,11 @@
    */
 
 #  if defined(CONFIG_ARCH_FPU)
-#    define up_savestate(regs)  up_copyarmstate(regs, (uint32_t*)current_regs)
+#    define up_savestate(regs)  up_copyarmstate(regs, (uint32_t*)CURRENT_REGS)
 #  else
-#    define up_savestate(regs)  up_copyfullstate(regs, (uint32_t*)current_regs)
+#    define up_savestate(regs)  up_copyfullstate(regs, (uint32_t*)CURRENT_REGS)
 #  endif
-#  define up_restorestate(regs) (current_regs = regs)
+#  define up_restorestate(regs) (CURRENT_REGS = regs)
 
 /* Otherwise, for the ARM7 and ARM9.  The state is copied in full from stack
  * to stack.  This is not very efficient and should be fixed to match Cortex-A5.
@@ -167,11 +167,11 @@
    */
 
 #  if defined(CONFIG_ARCH_FPU)
-#    define up_savestate(regs)  up_copyarmstate(regs, (uint32_t*)current_regs)
+#    define up_savestate(regs)  up_copyarmstate(regs, (uint32_t*)CURRENT_REGS)
 #  else
-#    define up_savestate(regs)  up_copyfullstate(regs, (uint32_t*)current_regs)
+#    define up_savestate(regs)  up_copyfullstate(regs, (uint32_t*)CURRENT_REGS)
 #  endif
-#  define up_restorestate(regs) up_copyfullstate((uint32_t*)current_regs, regs)
+#  define up_restorestate(regs) up_copyfullstate((uint32_t*)CURRENT_REGS, regs)
 
 #endif
 
@@ -204,12 +204,27 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/* This holds a references to the current interrupt level
- * register storage structure.  If is non-NULL only during
- * interrupt processing.
+/* g_current_regs[] holds a references to the current interrupt level
+ * register storage structure.  If is non-NULL only during interrupt
+ * processing.  Access to g_current_regs[] must be through the macro
+ * CURRENT_REGS for portability.
  */
 
-EXTERN volatile uint32_t *current_regs;
+#ifdef CONFIG_SMP
+/* For the case of architectures with multiple CPUs, then there must be one
+ * such value for each processor that can receive an interrupt.
+ */
+
+int up_cpu_index(void); /* See include/nuttx/arch.h */
+EXTERN volatile uint32_t *g_current_regs[CONFIG_SMP_NCPUS];
+#  define CURRENT_REGS (g_current_regs[up_cpu_index()])
+
+#else
+
+EXTERN volatile uint32_t *g_current_regs[1];
+#  define CURRENT_REGS (g_current_regs[0])
+
+#endif
 
 /* This is the beginning of heap as provided from up_head.S.
  * This is the first address in DRAM after the loaded

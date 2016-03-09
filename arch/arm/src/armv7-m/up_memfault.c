@@ -108,20 +108,20 @@ int up_memfault(int irq, FAR void *context)
 #ifdef CONFIG_ARMV7M_USEBASEPRI
 #  ifdef REG_EXC_RETURN
   mfdbg("  xPSR: %08x BASEPRI: %08x EXC_RETURN: %08x (saved)\n",
-        current_regs[REG_XPSR],  current_regs[REG_BASEPRI],
-        current_regs[REG_EXC_RETURN]);
+        CURRENT_REGS[REG_XPSR],  CURRENT_REGS[REG_BASEPRI],
+        CURRENT_REGS[REG_EXC_RETURN]);
 #  else
   mfdbg("  xPSR: %08x BASEPRI: %08x (saved)\n",
-        current_regs[REG_XPSR],  current_regs[REG_BASEPRI]);
+        CURRENT_REGS[REG_XPSR],  CURRENT_REGS[REG_BASEPRI]);
 #  endif
 #else
 #  ifdef REG_EXC_RETURN
   mfdbg("  xPSR: %08x PRIMASK: %08x EXC_RETURN: %08x (saved)\n",
-        current_regs[REG_XPSR],  current_regs[REG_PRIMASK],
-        current_regs[REG_EXC_RETURN]);
+        CURRENT_REGS[REG_XPSR],  CURRENT_REGS[REG_PRIMASK],
+        CURRENT_REGS[REG_EXC_RETURN]);
 #  else
   mfdbg("  xPSR: %08x PRIMASK: %08x (saved)\n",
-        current_regs[REG_XPSR],  current_regs[REG_PRIMASK]);
+        CURRENT_REGS[REG_XPSR],  CURRENT_REGS[REG_PRIMASK]);
 #  endif
 #endif
 

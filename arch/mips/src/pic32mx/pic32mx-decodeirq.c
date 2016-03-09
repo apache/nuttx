@@ -99,17 +99,17 @@ uint32_t *pic32mx_decodeirq(uint32_t *regs)
 
   board_autoled_on(LED_INIRQ);
 
-  /* Save the current value of current_regs (to support nested interrupt
-   * handling).  Then set current_regs to regs, indicating that this is
+  /* Save the current value of g_current_regs (to support nested interrupt
+   * handling).  Then set g_current_regs to regs, indicating that this is
    * the interrupted context that is being processed now.
    */
 
 #ifdef CONFIG_PIC32MX_NESTED_INTERRUPTS
-  savestate = (uint32_t *)current_regs;
+  savestate = (uint32_t *)g_current_regs;
 #else
-  DEBUGASSERT(current_regs == NULL);
+  DEBUGASSERT(g_current_regs == NULL);
 #endif
-  current_regs = regs;
+  g_current_regs = regs;
 
   /* Loop while there are pending interrupts with priority greater than zero */
 
@@ -141,27 +141,27 @@ uint32_t *pic32mx_decodeirq(uint32_t *regs)
     }
 
   /* If a context switch occurred while processing the interrupt then
-   * current_regs may have change value.  If we return any value different
+   * g_current_regs may have change value.  If we return any value different
    * from the input regs, then the lower level will know that a context
    * switch occurred during interrupt processing.
    */
 
-  regs = (uint32_t *)current_regs;
+  regs = (uint32_t *)g_current_regs;
 
 #if defined(CONFIG_ARCH_FPU) || defined(CONFIG_ARCH_ADDRENV)
   /* Check for a context switch.  If a context switch occurred, then
-   * current_regs will have a different value than it did on entry.  If an
+   * g_current_regs will have a different value than it did on entry.  If an
    * interrupt level context switch has occurred, then restore the floating
    * point state and the establish the correct address environment before
    * returning from the interrupt.
    */
 
-  if (regs != current_regs)
+  if (regs != g_current_regs)
     {
 #ifdef CONFIG_ARCH_FPU
       /* Restore floating point registers */
 
-      up_restorefpu((uint32_t *)current_regs);
+      up_restorefpu((uint32_t *)g_current_regs);
 #endif
 
 #ifdef CONFIG_ARCH_ADDRENV
@@ -177,7 +177,7 @@ uint32_t *pic32mx_decodeirq(uint32_t *regs)
 #endif
 
 #ifdef CONFIG_PIC32MX_NESTED_INTERRUPTS
-  /* Restore the previous value of current_regs.  NULL would indicate that
+  /* Restore the previous value of g_current_regs.  NULL would indicate that
    * we are no longer in an interrupt handler.  It will be non-NULL if we
    * are returning from a nested interrupt.
    *
@@ -186,13 +186,13 @@ uint32_t *pic32mx_decodeirq(uint32_t *regs)
    * of fixing nested context switching.  The logic here is insufficient.
    */
 
-  current_regs = savestate;
-  if (current_regs == NULL)
+  g_current_regs = savestate;
+  if (g_current_regs == NULL)
     {
       board_autoled_off(LED_INIRQ);
     }
 #else
-  current_regs = NULL;
+  g_current_regs = NULL;
   board_autoled_off(LED_INIRQ);
 #endif
 

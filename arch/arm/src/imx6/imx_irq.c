@@ -50,8 +50,21 @@
 /****************************************************************************
  * Public Data
  ****************************************************************************/
+/* g_current_regs[] holds a references to the current interrupt level
+ * register storage structure.  If is non-NULL only during interrupt
+ * processing.  Access to g_current_regs[] must be through the macro
+ * CURRENT_REGS for portability.
+ */
 
-volatile uint32_t *current_regs;
+#ifdef CONFIG_SMP
+/* For the case of configurations with multiple CPUs, then there must be one
+ * such value for each processor that can receive an interrupt.
+ */
+
+volatile uint32_t *g_current_regs[CONFIG_SMP_NCPUS];
+#else
+volatile uint32_t *g_current_regs[1];
+#endif
 
 /* Symbols defined via the linker script */
 
@@ -116,7 +129,7 @@ void up_irqinitialize(void)
 
   /* currents_regs is non-NULL only while processing an interrupt */
 
-  current_regs = NULL;
+  CURRENT_REGS = NULL;
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
   /* Initialize logic to support a second level of interrupt decoding for

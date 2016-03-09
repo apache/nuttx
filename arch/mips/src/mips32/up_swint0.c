@@ -160,7 +160,7 @@ int up_swint0(int irq, FAR void *context)
   uint32_t *regs = (uint32_t *)context;
   uint32_t cause;
 
-  DEBUGASSERT(regs && regs == current_regs);
+  DEBUGASSERT(regs && regs == g_current_regs);
 
   /* Software interrupt 0 is invoked with REG_A0 (REG_R4) = system call
    * command and REG_A1-3 and REG_T0-2 (REG_R5-10) = variable number of
@@ -185,16 +185,16 @@ int up_swint0(int irq, FAR void *context)
        *   R4 = SYS_restore_context
        *   R5 = restoreregs
        *
-       * In this case, we simply need to set current_regs to restore register
-       * area referenced in the saved R1. context == current_regs is the normal
-       * exception return.  By setting current_regs = context[R1], we force
+       * In this case, we simply need to set g_current_regs to restore register
+       * area referenced in the saved R1. context == g_current_regs is the normal
+       * exception return.  By setting g_current_regs = context[R1], we force
        * the return to the saved context referenced in R1.
        */
 
       case SYS_restore_context:
         {
           DEBUGASSERT(regs[REG_A1] != 0);
-          current_regs = (uint32_t *)regs[REG_A1];
+          g_current_regs = (uint32_t *)regs[REG_A1];
         }
         break;
 
@@ -210,7 +210,7 @@ int up_swint0(int irq, FAR void *context)
        *
        * In this case, we save the context registers to the save register
        * area reference by the saved contents of R5 and then set
-       * current_regs to to the save register area referenced by the saved
+       * g_current_regs to to the save register area referenced by the saved
        * contents of R6.
        */
 
@@ -218,7 +218,7 @@ int up_swint0(int irq, FAR void *context)
         {
           DEBUGASSERT(regs[REG_A1] != 0 && regs[REG_A2] != 0);
           up_copystate((uint32_t *)regs[REG_A1], regs);
-          current_regs = (uint32_t *)regs[REG_A2];
+          g_current_regs = (uint32_t *)regs[REG_A2];
         }
         break;
 
@@ -248,7 +248,7 @@ int up_swint0(int irq, FAR void *context)
            * the original mode.
            */
 
-          current_regs[REG_EPC] = rtcb->xcp.syscall[index].sysreturn;
+          g_current_regs[REG_EPC] = rtcb->xcp.syscall[index].sysreturn;
 #error "Missing logic -- need to restore the original mode"
           rtcb->xcp.nsyscalls   = index;
         }
@@ -268,7 +268,7 @@ int up_swint0(int irq, FAR void *context)
 
           /* Verify that the SYS call number is within range */
 
-          DEBUGASSERT(current_regs[REG_A0] < SYS_maxsyscall);
+          DEBUGASSERT(g_current_regs[REG_A0] < SYS_maxsyscall);
 
           /* Make sure that we got here that there is a no saved syscall
            * return address.  We cannot yet handle nested system calls.
@@ -287,7 +287,7 @@ int up_swint0(int irq, FAR void *context)
 
           /* Offset R0 to account for the reserved values */
 
-          current_regs[REG_R0] -= CONFIG_SYS_RESERVED;
+          g_current_regs[REG_R0] -= CONFIG_SYS_RESERVED;
 #else
           slldbg("ERROR: Bad SYS call: %d\n", regs[REG_A0]);
 #endif
@@ -298,10 +298,10 @@ int up_swint0(int irq, FAR void *context)
   /* Report what happened.  That might difficult in the case of a context switch */
 
 #ifdef CONFIG_DEBUG_SYSCALL
-  if (regs != current_regs)
+  if (regs != g_current_regs)
     {
       swidbg("SWInt Return: Context switch!\n");
-      up_registerdump((const uint32_t *)current_regs);
+      up_registerdump((const uint32_t *)g_current_regs);
     }
   else
     {

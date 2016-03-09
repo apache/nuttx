@@ -107,9 +107,9 @@
 
 /* Macros for portability */
 
-#define IN_INTERRUPT             (current_regs != NULL)
-#define SAVE_IRQCONTEXT(tcb)     up_copystate((tcb)->xcp.regs, (FAR chipreg_t*)current_regs)
-#define SET_IRQCONTEXT(tcb)      do { current_regs = (tcb)->xcp.regs; } while (0)
+#define IN_INTERRUPT             (g_current_regs != NULL)
+#define SAVE_IRQCONTEXT(tcb)     up_copystate((tcb)->xcp.regs, (FAR chipreg_t*)g_current_regs)
+#define SET_IRQCONTEXT(tcb)      do { g_current_regs = (tcb)->xcp.regs; } while (0)
 #define SAVE_USERCONTEXT(tcb)    up_saveusercontext((tcb)->xcp.regs)
 #define RESTORE_USERCONTEXT(tcb) up_restoreusercontext((tcb)->xcp.regs)
 #define SIGNAL_RETURN(regs)      up_restoreusercontext(regs)
@@ -132,7 +132,7 @@ typedef void (*up_vector_t)(void);
  * interrupt processing.
  */
 
-extern volatile FAR chipreg_t *current_regs;
+extern volatile FAR chipreg_t *g_current_regs;
 #endif
 
 /****************************************************************************

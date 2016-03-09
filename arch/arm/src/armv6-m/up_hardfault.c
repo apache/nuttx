@@ -145,7 +145,7 @@ int up_hardfault(int irq, FAR void *context)
         regs[REG_R8],  regs[REG_R9],  regs[REG_R10], regs[REG_R11],
         regs[REG_R12], regs[REG_R13], regs[REG_R14], regs[REG_R15]);
   hfdbg("  xPSR: %08x PRIMASK: %08x (saved)\n",
-        current_regs[REG_XPSR],  current_regs[REG_PRIMASK]);
+        CURRENT_REGS[REG_XPSR],  CURRENT_REGS[REG_PRIMASK]);
 #endif
 
   (void)up_irq_save();

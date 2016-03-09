@@ -157,7 +157,7 @@ int up_svcall(int irq, FAR void *context)
   uint32_t *regs = (uint32_t *)context;
   uint32_t cmd;
 
-  DEBUGASSERT(regs && regs == current_regs);
+  DEBUGASSERT(regs && regs == CURRENT_REGS);
   cmd = regs[REG_R0];
 
   /* The SVCall software interrupt is called with R0 = system call command
@@ -222,16 +222,16 @@ int up_svcall(int irq, FAR void *context)
        *   R0 = SYS_restore_context
        *   R1 = restoreregs
        *
-       * In this case, we simply need to set current_regs to restore register
-       * area referenced in the saved R1. context == current_regs is the normal
-       * exception return.  By setting current_regs = context[R1], we force
+       * In this case, we simply need to set CURRENT_REGS to restore register
+       * area referenced in the saved R1. context == CURRENT_REGS is the normal
+       * exception return.  By setting CURRENT_REGS = context[R1], we force
        * the return to the saved context referenced in R1.
        */
 
       case SYS_restore_context:
         {
           DEBUGASSERT(regs[REG_R1] != 0);
-          current_regs = (uint32_t *)regs[REG_R1];
+          CURRENT_REGS = (uint32_t *)regs[REG_R1];
         }
         break;
 
@@ -247,7 +247,7 @@ int up_svcall(int irq, FAR void *context)
        *
        * In this case, we do both: We save the context registers to the save
        * register area reference by the saved contents of R1 and then set
-       * current_regs to to the save register area referenced by the saved
+       * CURRENT_REGS to to the save register area referenced by the saved
        * contents of R2.
        */
 
@@ -259,7 +259,7 @@ int up_svcall(int irq, FAR void *context)
     (!defined(CONFIG_ARMV7M_CMNVECTOR) || defined(CONFIG_ARMV7M_LAZYFPU))
           up_savefpu((uint32_t *)regs[REG_R1]);
 #endif
-          current_regs = (uint32_t *)regs[REG_R2];
+          CURRENT_REGS = (uint32_t *)regs[REG_R2];
         }
         break;
 
@@ -485,25 +485,25 @@ int up_svcall(int irq, FAR void *context)
 # ifndef CONFIG_DEBUG_SVCALL
   if (cmd > SYS_switch_context)
 # else
-  if (regs != current_regs)
+  if (regs != CURRENT_REGS)
 # endif
     {
       svcdbg("SVCall Return:\n");
       svcdbg("  R0: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-             current_regs[REG_R0],  current_regs[REG_R1],
-             current_regs[REG_R2],  current_regs[REG_R3],
-             current_regs[REG_R4],  current_regs[REG_R5],
-             current_regs[REG_R6],  current_regs[REG_R7]);
+             CURRENT_REGS[REG_R0],  CURRENT_REGS[REG_R1],
+             CURRENT_REGS[REG_R2],  CURRENT_REGS[REG_R3],
+             CURRENT_REGS[REG_R4],  CURRENT_REGS[REG_R5],
+             CURRENT_REGS[REG_R6],  CURRENT_REGS[REG_R7]);
       svcdbg("  R8: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-             current_regs[REG_R8],  current_regs[REG_R9],
-             current_regs[REG_R10], current_regs[REG_R11],
-             current_regs[REG_R12], current_regs[REG_R13],
-             current_regs[REG_R14], current_regs[REG_R15]);
+             CURRENT_REGS[REG_R8],  CURRENT_REGS[REG_R9],
+             CURRENT_REGS[REG_R10], CURRENT_REGS[REG_R11],
+             CURRENT_REGS[REG_R12], CURRENT_REGS[REG_R13],
+             CURRENT_REGS[REG_R14], CURRENT_REGS[REG_R15]);
 # ifdef REG_EXC_RETURN
       svcdbg(" PSR: %08x EXC_RETURN: %08x\n",
-             current_regs[REG_XPSR], current_regs[REG_EXC_RETURN]);
+             CURRENT_REGS[REG_XPSR], CURRENT_REGS[REG_EXC_RETURN]);
 # else
-      svcdbg(" PSR: %08x\n", current_regs[REG_XPSR]);
+      svcdbg(" PSR: %08x\n", CURRENT_REGS[REG_XPSR]);
 # endif
     }
 # ifdef CONFIG_DEBUG_SVCALL

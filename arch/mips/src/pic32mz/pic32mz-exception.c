@@ -193,7 +193,7 @@ uint32_t *pic32mz_exception(uint32_t *regs)
 
   /* Crash with currents_regs set so that we can dump the register contents. */
 
-  current_regs = regs;
+  g_current_regs = regs;
   PANIC();
   return regs; /* Won't get here */
 }

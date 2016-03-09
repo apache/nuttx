@@ -53,7 +53,7 @@
  * structure.  If is non-NULL only during interrupt processing.
  */
 
-volatile uint32_t *current_regs; /* Actually a pointer to the beginning of a uint8_t array */
+volatile uint32_t *g_current_regs; /* Actually a pointer to the beginning of a uint8_t array */
 
 /****************************************************************************
  * Name: up_irqinitialize
@@ -61,7 +61,7 @@ volatile uint32_t *current_regs; /* Actually a pointer to the beginning of a uin
 
 void up_irqinitialize(void)
 {
-  current_regs = NULL;
+  g_current_regs = NULL;
 
   /* And finally, enable interrupts */
 

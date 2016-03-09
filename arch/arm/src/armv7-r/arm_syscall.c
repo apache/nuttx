@@ -525,7 +525,7 @@ uint32_t *arm_syscall(uint32_t *regs)
 uint32_t *arm_syscall(uint32_t *regs)
 {
   lldbg("SYSCALL from 0x%x\n", regs[REG_PC]);
-  current_regs = regs;
+  CURRENT_REGS = regs;
   PANIC();
 }
 

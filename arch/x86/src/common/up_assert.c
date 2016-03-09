@@ -227,9 +227,9 @@ static void up_dumpstate(void)
 
   /* Then dump the registers (if available) */
 
-  if (current_regs != NULL)
+  if (g_current_regs != NULL)
     {
-      up_registerdump((uint32_t*)current_regs);
+      up_registerdump((uint32_t*)g_current_regs);
     }
 
 #ifdef CONFIG_ARCH_USBDUMP
@@ -251,7 +251,7 @@ static void _up_assert(int errorcode)
 {
   /* Are we in an interrupt handler or the idle task? */
 
-  if (current_regs || (this_task())->pid == 0)
+  if (g_current_regs || (this_task())->pid == 0)
     {
        (void)up_irq_save();
         for (;;)

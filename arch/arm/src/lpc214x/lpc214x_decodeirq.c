@@ -112,7 +112,7 @@ static void lpc214x_decodeirq(uint32_t *regs)
 {
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
   lowsyslog(LOG_ERR, "Unexpected IRQ\n");
-  current_regs = regs;
+  CURRENT_REGS = regs;
   PANIC();
 #else
 
@@ -147,22 +147,22 @@ static void lpc214x_decodeirq(uint32_t *regs)
       uint32_t *savestate;
 
       /* Current regs non-zero indicates that we are processing an interrupt;
-       * current_regs is also used to manage interrupt level context switches.
+       * CURRENT_REGS is also used to manage interrupt level context switches.
        */
 
-      savestate    = (uint32_t *)current_regs;
-      current_regs = regs;
+      savestate    = (uint32_t *)CURRENT_REGS;
+      CURRENT_REGS = regs;
 
       /* Deliver the IRQ */
 
       irq_dispatch(irq, regs);
 
-      /* Restore the previous value of current_regs.  NULL would indicate that
+      /* Restore the previous value of CURRENT_REGS.  NULL would indicate that
        * we are no longer in an interrupt handler.  It will be non-NULL if we
        * are returning from a nested interrupt.
        */
 
-      current_regs = savestate;
+      CURRENT_REGS = savestate;
     }
 #endif
 }

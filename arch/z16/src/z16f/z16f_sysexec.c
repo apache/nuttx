@@ -79,7 +79,7 @@ void z16f_sysexec(FAR chipreg_t *regs)
    * diagnostics.
    */
 
-  current_regs = regs;
+  g_current_regs = regs;
 
   /* The cause of the system exception is indicated in the SYSEXCPH&L
    * registers

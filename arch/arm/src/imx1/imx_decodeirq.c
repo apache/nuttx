@@ -75,20 +75,20 @@ void up_decodeirq(uint32_t *regs)
 {
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
   lowsyslog(LOG_ERR, "Unexpected IRQ\n");
-  current_regs = regs;
+  CURRENT_REGS = regs;
   PANIC();
 #else
   uint32_t regval;
   int irq;
 
   /* Current regs non-zero indicates that we are processing an interrupt;
-   * current_regs is also used to manage interrupt level context switches.
+   * CURRENT_REGS is also used to manage interrupt level context switches.
    *
    * Nested interrupts are not supported.
    */
 
-  DEBUGASSERT(current_regs == NULL);
-  current_regs = regs;
+  DEBUGASSERT(CURRENT_REGS == NULL);
+  CURRENT_REGS = regs;
 
   /* Loop while there are pending interrupts to be processed */
 
@@ -116,18 +116,18 @@ void up_decodeirq(uint32_t *regs)
 
 #if defined(CONFIG_ARCH_FPU) || defined(CONFIG_ARCH_ADDRENV)
           /* Check for a context switch.  If a context switch occurred, then
-           * current_regs will have a different value than it did on entry.
+           * CURRENT_REGS will have a different value than it did on entry.
            * If an interrupt level context switch has occurred, then restore
            * the floating point state and the establish the correct address
            * environment before returning from the interrupt.
            */
 
-          if (regs != current_regs)
+          if (regs != CURRENT_REGS)
             {
 #ifdef CONFIG_ARCH_FPU
               /* Restore floating point registers */
 
-              up_restorefpu((uint32_t *)current_regs);
+              up_restorefpu((uint32_t *)CURRENT_REGS);
 #endif
 
 #ifdef CONFIG_ARCH_ADDRENV
@@ -145,10 +145,10 @@ void up_decodeirq(uint32_t *regs)
     }
   while (irq < NR_IRQS);
 
-  /* Set current_regs to NULL to indicate that we are no longer in
+  /* Set CURRENT_REGS to NULL to indicate that we are no longer in
    * an interrupt handler.
    */
 
-  current_regs = NULL;
+  CURRENT_REGS = NULL;
 #endif
 }

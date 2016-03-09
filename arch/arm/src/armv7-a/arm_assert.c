@@ -175,7 +175,7 @@ static inline void up_registerdump(void)
 {
   /* Are user registers available from interrupt processing? */
 
-  if (current_regs)
+  if (CURRENT_REGS)
     {
       int regs;
 
@@ -183,13 +183,13 @@ static inline void up_registerdump(void)
 
       for (regs = REG_R0; regs <= REG_R15; regs += 8)
         {
-          uint32_t *ptr = (uint32_t *)&current_regs[regs];
+          uint32_t *ptr = (uint32_t *)&CURRENT_REGS[regs];
           lldbg("R%d: %08x %08x %08x %08x %08x %08x %08x %08x\n",
                  regs, ptr[0], ptr[1], ptr[2], ptr[3],
                  ptr[4], ptr[5], ptr[6], ptr[7]);
         }
 
-      lldbg("CPSR: %08x\n", current_regs[REG_CPSR]);
+      lldbg("CPSR: %08x\n", CURRENT_REGS[REG_CPSR]);
     }
 }
 #else
@@ -361,7 +361,7 @@ static void _up_assert(int errorcode)
 {
   /* Are we in an interrupt handler or the idle task? */
 
-  if (current_regs || this_task()->pid == 0)
+  if (CURRENT_REGS || this_task()->pid == 0)
     {
       (void)up_irq_save();
       for (; ; )

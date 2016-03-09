@@ -116,7 +116,7 @@
  *
  * NOTE: Nested interrupts are not supported in this implementation.  If you want
  * to implement nested interrupts, you would have to change the way that
- * current_regs is handled.  The savestate variable would not work for
+ * g_current_regs is handled.  The savestate variable would not work for
  * that purpose as implemented here because only the outermost nested
  * interrupt can result in a context switch (it can probably be deleted).
  */

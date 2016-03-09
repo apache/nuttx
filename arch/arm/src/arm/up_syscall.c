@@ -94,6 +94,6 @@
 void up_syscall(uint32_t *regs)
 {
   lldbg("Syscall from 0x%x\n", regs[REG_PC]);
-  current_regs = regs;
+  CURRENT_REGS = regs;
   PANIC();
 }
