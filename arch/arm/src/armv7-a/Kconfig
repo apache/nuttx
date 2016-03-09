@@ -19,6 +19,13 @@ config ARMV7A_HAVE_GTM
 		Selected by the configuration tool if the architecture supports the
 		Global Timer (GTM)
 
+config ARMV7A_HAVE_PTM
+	bool
+	default n
+	---help---
+		Selected by the configuration tool if the architecture supports the
+		per-processor Private Timers (PTMs)
+
 config ARMV7A_HAVE_L2CC
 	bool
 	default n

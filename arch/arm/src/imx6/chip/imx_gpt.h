@@ -148,6 +148,8 @@
 #define GPT_INT_IF2                (1 << 4)  /* Bit 4: IF2 Input capture 2 Flag */
 #define GPT_INT_ROV                (1 << 5)  /* Bit 5: Rollover flag */
 
+#define GPT_INT_ALL                0x0000003f
+
 /* GPT Output Compare Register 1,2,3 -- 32-bit compare registers */
 /* GPT Input Capture Register 1,2 -- 32-bit capture registers */
 /* GPT Counter Register -- 32-bit counter */
