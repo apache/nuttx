@@ -80,24 +80,76 @@
 /* GPT Register Bit Definitions ****************************************************/
 
 /* GPT Control Register */
-#define GPT_CR_
+
+#define GPT_CR_EN                  (1 << 0)  /* Bit 0: GPT Enable */
+#define GPT_CR_ENMOD               (1 << 1)  /* Bit 1: GPT Enable mode */
+#define GPT_CR_DBGEN               (1 << 2)  /* Bit 2: GPT debug mode enable */
+#define GPT_CR_WAITEN              (1 << 3)  /* Bit 3: GPT Wait Mode enable */
+#define GPT_CR_DOZEEN              (1 << 4)  /* Bit 4: GPT Doze Mode Enable */
+#define GPT_CR_STOPEN              (1 << 5)  /* Bit 5:  GPT Stop Mode enable */
+#define GPT_CR_CLKSRC_SHIFT        (6)       /* Bits 6-8: Clock source select */
+#define GPT_CR_CLKSRC_MASK         (7 << GPT_CR_CLKSRC_SHIFT)
+#  define GPT_CR_CLKSRC_NONE       (0 << GPT_CR_CLKSRC_SHIFT) /* No clock */
+#  define GPT_CR_CLKSRC_PERIPHCLK  (1 << GPT_CR_CLKSRC_SHIFT) /* Peripheral Clock */
+#  define GPT_CR_CLKSRC_HFREF      (2 << GPT_CR_CLKSRC_SHIFT) /* High Frequency Reference Clock */
+#  define GPT_CR_CLKSRC_CLKIN      (3 << GPT_CR_CLKSRC_SHIFT) /* External Clock (CLKIN) */
+#  define GPT_CR_CLKSRC_LFREF      (4 << GPT_CR_CLKSRC_SHIFT) /* Low Frequency Reference Clock */
+#  define GPT_CR_CLKSRC_OSCDIV8    (5 << GPT_CR_CLKSRC_SHIFT) /* Crystal oscillator divided by 8 as Reference Clock */
+#  define GPT_CR_CLKSRC_OSC        (7 << GPT_CR_CLKSRC_SHIFT) /* Crystal oscillator as Reference Clock */
+#define GPT_CR_FFR                 (1 << 9)  /* Bit 9:  Free-Run or Restart mode */
+#define GPT_CR_SWR                 (1 << 15) /* Bit 15: Software reset */
+#define GPT_CR_IM1_SHIFT           (16)      /* Bits 16-17: Input Capture Channel 1 operating mode */
+#define GPT_CR_IM1_MASK            (3 << GPT_CR_IM1_SHIFT)
+#  define GPT_CR_IM1_DISABLED      (0 << GPT_CR_IM1_SHIFT) /* Capture disabled */
+#  define GPT_CR_IM1_RISING        (1 << GPT_CR_IM1_SHIFT) /* Capture on rising edge only */
+#  define GPT_CR_IM1_FALLING       (2 << GPT_CR_IM1_SHIFT) /* Capture on falling edge only */
+#  define GPT_CR_IM1_BOTH          (3 << GPT_CR_IM1_SHIFT) /* Capture on both edges */
+#define GPT_CR_IM2_SHIFT           (18)      /* Bits 18-19: Input Capture Channel 2 operating mode */
+#define GPT_CR_IM2_MASK            (3 << GPT_CR_IM2_SHIFT)
+#  define GPT_CR_IM2_DISABLED      (0 << GPT_CR_IM2_SHIFT) /* Capture disabled */
+#  define GPT_CR_IM2_RISING        (1 << GPT_CR_IM2_SHIFT) /* Capture on rising edge only */
+#  define GPT_CR_IM2_FALLING       (2 << GPT_CR_IM2_SHIFT) /* Capture on falling edge only */
+#  define GPT_CR_IM2_BOTH          (3 << GPT_CR_IM2_SHIFT) /* Capture on both edges */
+#define GPT_CR_OM1_SHIFT           (22)      /* Bits 20-22: Output Compare Channel 1 operating mode */
+#define GPT_CR_OM1_MASK            (7 << GPT_CR_OM1_SHIFT)
+#  define GPT_CR_OM1_DISCON        (0 << GPT_CR_OM1_SHIFT) /* Output disconnected */
+#  define GPT_CR_OM1_TOGGLE        (1 << GPT_CR_OM1_SHIFT) /* Toggle output pin */
+#  define GPT_CR_OM1_CLEAR         (2 << GPT_CR_OM1_SHIFT) /* Clear output pin */
+#  define GPT_CR_OM1_SET           (3 << GPT_CR_OM1_SHIFT) /* Set output pin */
+#  define GPT_CR_OM1_PULSE         (4 << GPT_CR_OM1_SHIFT) /* Generate an active low pulse */
+#define GPT_CR_OM2_SHIFT           (23)      /* Bits 23-25: Output Compare Channel 2 operating mode */
+#define GPT_CR_OM2_MASK            (7 << GPT_CR_OM2_SHIFT)
+#  define GPT_CR_OM2_DISCON        (0 << GPT_CR_OM2_SHIFT) /* Output disconnected */
+#  define GPT_CR_OM2_TOGGLE        (1 << GPT_CR_OM2_SHIFT) /* Toggle output pin */
+#  define GPT_CR_OM2_CLEAR         (2 << GPT_CR_OM2_SHIFT) /* Clear output pin */
+#  define GPT_CR_OM2_SET           (3 << GPT_CR_OM2_SHIFT) /* Set output pin */
+#  define GPT_CR_OM2_PULSE         (4 << GPT_CR_OM2_SHIFT) /* Generate an active low pulse */
+#define GPT_CR_OM3_SHIFT           (26)      /* Bits 26-28: Output Compare Channel 3 operating mode */
+#define GPT_CR_OM3_MASK            (7 << GPT_CR_OM3_SHIFT)
+#  define GPT_CR_OM3_DISCON        (0 << GPT_CR_OM3_SHIFT) /* Output disconnected */
+#  define GPT_CR_OM3_TOGGLE        (1 << GPT_CR_OM3_SHIFT) /* Toggle output pin */
+#  define GPT_CR_OM3_CLEAR         (2 << GPT_CR_OM3_SHIFT) /* Clear output pin */
+#  define GPT_CR_OM3_SET           (3 << GPT_CR_OM3_SHIFT) /* Set output pin */
+#  define GPT_CR_OM3_PULSE         (4 << GPT_CR_OM3_SHIFT) /* Generate an active low pulse */
+#define GPT_CR_FO1                 (1 << 29) /* FO1 Force Output Compare Channel 1 */
+#define GPT_CR_FO2                 (1 << 30) /* FO2 Force Output Compare Channel 2 */
+#define GPT_CR_FO3                 (1 << 31) /* Force Output Compare Channel 3 */
+
 /* GPT Prescaler Register */
-#define GPT_PR_
-/* GPT Status Register */
-#define GPT_SR_
-/* GPT Interrupt Register */
-#define GPT_IR_
-/* GPT Output Compare Register 1 */
-#define GPT_OCR1_
-/* GPT Output Compare Register 2 */
-#define GPT_OCR2_
-/* GPT Output Compare Register 3 */
-#define GPT_OCR3_
-/* GPT Input Capture Register 1 */
-#define GPT_ICR1_
-/* GPT Input Capture Register 2 */
-#define GPT_ICR2_
-/* GPT Counter Register */
-#define GPT_CNT_
+
+#define GPT_PR_MASK                0xfff     /* Bits 0-11: Prescaler value - 1 */
+
+/* GPT Status Register and GPT Interrupt Register */
+
+#define GPT_INT_OF1                (1 << 0)  /* Bit 0: OF3 Output Compare 1 Flag */
+#define GPT_INT_OF2                (1 << 1)  /* Bit 1: OF3 Output Compare 2 Flag */
+#define GPT_INT_OF3                (1 << 2)  /* Bit 2: OF3 Output Compare 3 Flag */
+#define GPT_INT_IF1                (1 << 3)  /* Bit 3: IF2 Input capture 1 Flag */
+#define GPT_INT_IF2                (1 << 4)  /* Bit 4: IF2 Input capture 2 Flag */
+#define GPT_INT_ROV                (1 << 5)  /* Bit 5: Rollover flag */
+
+/* GPT Output Compare Register 1,2,3 -- 32-bit compare registers */
+/* GPT Input Capture Register 1,2 -- 32-bit capture registers */
+/* GPT Counter Register -- 32-bit counter */
 
 #endif /* __ARCH_ARM_SRC_IMX6_CHIP_IMX_GPT_H */
