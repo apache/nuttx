@@ -54,7 +54,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* GIC Register Offsets *****************************************************/
+/* GTM Register Offsets *****************************************************/
 
 #define GTM_COUNT0_OFFSET      0x0000 /* Global Timer Counter Register 0 */
 #define GTM_COUNT1_OFFSET      0x0004 /* Global Timer Counter Register 1 */
@@ -64,7 +64,7 @@
 #define GTM_COMP1_OFFSET       0x0014 /* Comparator Value Register 1 */
 #define GTM_AUTO_OFFSET        0x0018 /* Auto-increment Register */
 
-/* GIC Register Addresses ***************************************************/
+/* GTM Register Addresses ***************************************************/
 
 #define GTM_COUNT0             (MPCORE_GTM_VBASE+GTM_COUNT0_OFFSET)
 #define GTM_COUNT1             (MPCORE_GTM_VBASE+GTM_COUNT1_OFFSET)
@@ -74,7 +74,7 @@
 #define GTM_COMP1              (MPCORE_GTM_VBASE+COMPARE1_OFFSET)
 #define GTM_AUTO               (MPCORE_GTM_VBASE+AUTO_OFFSET)
 
-/* GIC Register Bit Definitions *********************************************/
+/* GTM Register Bit Definitions *********************************************/
 
 /* Global Timer Counter Register 0/1 -- 64-bit timer counter value */
 
@@ -139,5 +139,5 @@ extern "C"
 #endif
 #endif /* __ASSEMBLY__ */
 
-#endif /* CONFIG_ARMV7A_HAVE_GIC */
+#endif /* CONFIG_ARMV7A_HAVE_GTM */
 #endif /* __ARCH_ARM_SRC_ARMV7_A_GTM_H */
