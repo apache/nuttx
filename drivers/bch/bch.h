@@ -62,10 +62,10 @@
 struct bchlib_s
 {
   FAR struct inode *inode; /* I-node of the block driver */
-  sem_t sem;               /* For atomic accesses to this structure */
+  uint32_t sectsize;       /* The size of one sector on the device */
   size_t nsectors;         /* Number of sectors supported by the device */
   size_t sector;           /* The current sector in the buffer */
-  uint16_t sectsize;       /* The size of one sector on the device */
+  sem_t sem;               /* For atomic accesses to this structure */
   uint8_t refs;            /* Number of references */
   bool dirty;              /* true: Data has been written to the buffer */
   bool readonly;           /* true: Only read operations are supported */
