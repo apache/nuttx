@@ -114,8 +114,7 @@
 
 struct mtd_geometry_s
 {
-  uint16_t blocksize;     /* Size of one read/write block. */
-                          /* Probably 16-bits wasted here for alignment */
+  uint32_t blocksize;     /* Size of one read/write block. */
   uint32_t erasesize;     /* Size of one erase blocks -- must be a multiple
                            * of blocksize.*/
   uint32_t neraseblocks;  /* Number of erase blocks */
