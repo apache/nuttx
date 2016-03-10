@@ -94,4 +94,3 @@
 #include "stm32l4_lowputc.h"
 
 #endif /* __ARCH_ARM_SRC_STM32_STM32_H */
-
