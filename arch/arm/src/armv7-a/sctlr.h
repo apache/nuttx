@@ -71,7 +71,18 @@
  */
 
 /* Multiprocessor Affinity Register (MPIDR) */
-/* TODO: To be provided */
+
+#define MPIDR_CPUID_SHIFT        (0)       /* Bits 0-1: CPU ID */
+#define MPIDR_CPUID_MASK         (3 << MPIDR_CPUID_SHIFT)
+#  define MPIDR_CPUID_CPU0       (0 << MPIDR_CPUID_SHIFT)
+#  define MPIDR_CPUID_CPU1       (1 << MPIDR_CPUID_SHIFT)
+#  define MPIDR_CPUID_CPU2       (2 << MPIDR_CPUID_SHIFT)
+#  define MPIDR_CPUID_CPU3       (3 << MPIDR_CPUID_SHIFT)
+                                           /* Bits 2-7: Reserved */
+#define MPIDR_CLUSTID_SHIFT      (8)       /* Bits 8-11: Cluster ID value */
+#define MPIDR_CLUSTID_MASK       (15 << MPIDR_CLUSTID_SHIFT)
+                                           /* Bits 12-29: Reserved */
+#define MPIDR_U                  (1 << 30) /* Bit 30: Multiprocessing Extensions. */
 
 /* Processor Feature Register 0 (ID_PFR0) */
 /* TODO: To be provided */
@@ -119,24 +130,24 @@
  * (2) Not available on A5
  */
 
-#define SCTLR_M            (1 << 0)  /* Bit 0:  Enables the MMU */
-#define SCTLR_A            (1 << 1)  /* Bit 1:  Enables strict alignment of data */
-#define SCTLR_C            (1 << 2)  /* Bit 2:  Determines if data can be cached */
-                                     /* Bits 3-9: Reserved */
-#define SCTLR_SW           (1 << 10) /* Bit 10: SWP/SWPB Enable bit */
-#define SCTLR_Z            (1 << 11) /* Bit 11: Program flow prediction control (1) */
-#define SCTLR_I            (1 << 12) /* Bit 12: Determines if instructions can be cached */
-#define SCTLR_V            (1 << 13) /* Bit 13: Vectors bit */
-#define SCTLR_RR           (1 << 14) /* Bit 14: Cache replacement strategy (2) */
-                                     /* Bits 15-16: Reserved */
-#define SCTLR_HA           (1 << 17) /* Bit 17: Hardware management access disabled (2) */
-                                     /* Bits 18-24: Reserved */
-#define SCTLR_EE           (1 << 25) /* Bit 25: Determines the value the CPSR.E */
-                                     /* Bits 26-27: Reserved */
-#define SCTLR_TRE          (1 << 28) /* Bit 28: TEX remap */
-#define SCTLR_AFE          (1 << 29) /* Bit 29: Access Flag Enable bit */
-#define SCTLR_TE           (1 << 30) /* Bit 30: Thumb exception enable */
-                                     /* Bit 31: Reserved */
+#define SCTLR_M                  (1 << 0)  /* Bit 0:  Enables the MMU */
+#define SCTLR_A                  (1 << 1)  /* Bit 1:  Enables strict alignment of data */
+#define SCTLR_C                  (1 << 2)  /* Bit 2:  Determines if data can be cached */
+                                           /* Bits 3-9: Reserved */
+#define SCTLR_SW                 (1 << 10) /* Bit 10: SWP/SWPB Enable bit */
+#define SCTLR_Z                  (1 << 11) /* Bit 11: Program flow prediction control (1) */
+#define SCTLR_I                  (1 << 12) /* Bit 12: Determines if instructions can be cached */
+#define SCTLR_V                  (1 << 13) /* Bit 13: Vectors bit */
+#define SCTLR_RR                 (1 << 14) /* Bit 14: Cache replacement strategy (2) */
+                                           /* Bits 15-16: Reserved */
+#define SCTLR_HA                 (1 << 17) /* Bit 17: Hardware management access disabled (2) */
+                                           /* Bits 18-24: Reserved */
+#define SCTLR_EE                 (1 << 25) /* Bit 25: Determines the value the CPSR.E */
+                                           /* Bits 26-27: Reserved */
+#define SCTLR_TRE                (1 << 28) /* Bit 28: TEX remap */
+#define SCTLR_AFE                (1 << 29) /* Bit 29: Access Flag Enable bit */
+#define SCTLR_TE                 (1 << 30) /* Bit 30: Thumb exception enable */
+                                           /* Bit 31: Reserved */
 
 /* Auxiliary Control Register (ACTLR) */
 /* TODO: To be provided */
@@ -152,15 +163,15 @@
 
 /* Non-secure Access Control Register (NSACR) */
 
-                                     /* Bits 0-9: Reserved */
-#define NSACR_CP10         (1 << 10) /* Bit 10: Permission to access coprocessor 10 */
-#define NSACR_CP11         (1 << 11) /* Bit 11: Permission to access coprocessor 11 */
-                                     /* Bits 12-13: Reserved */
-#define NSACR_NSD32DIS     (1 << 14) /* Bit 14: Disable the Non-secure use of VFP D16-D31 */
-#define NSACR_NSASEDIS     (1 << 15) /* Bit 15: Disable Non-secure Advanced SIMD Extension */
-                                     /* Bits 16-17: Reserved */
-#define NSACR_NSSMP        (1 << 18) /* Bit 18: ACR SMP bit writable */
-                                     /* Bits 19-31: Reserved */
+                                           /* Bits 0-9: Reserved */
+#define NSACR_CP10               (1 << 10) /* Bit 10: Permission to access coprocessor 10 */
+#define NSACR_CP11               (1 << 11) /* Bit 11: Permission to access coprocessor 11 */
+                                           /* Bits 12-13: Reserved */
+#define NSACR_NSD32DIS           (1 << 14) /* Bit 14: Disable the Non-secure use of VFP D16-D31 */
+#define NSACR_NSASEDIS           (1 << 15) /* Bit 15: Disable Non-secure Advanced SIMD Extension */
+                                           /* Bits 16-17: Reserved */
+#define NSACR_NSSMP              (1 << 18) /* Bit 18: ACR SMP bit writable */
+                                           /* Bits 19-31: Reserved */
 
 /* Virtualization Control Register (VCR) */
 /* TODO: To be provided */
@@ -205,7 +216,7 @@
 
 /* Vector Base Address Register (VBAR) */
 
-#define VBAR_MASK               (0xffffffe0)
+#define VBAR_MASK                (0xffffffe0)
 
 /* Monitor Vector Base Address Register (MVBAR) */
 /* TODO: To be provided */
@@ -218,10 +229,10 @@
 
 /* Context ID Register (CONTEXTIDR) */
 
-#define CONTEXTIDR_ASID_SHIFT   (0)   /* Bits 0-7: Address Space Identifier */
-#define CONTEXTIDR_ASID_MASK    (0xff << CONTEXTIDR_ASID_SHIFT)
-#define CONTEXTIDR_PROCID_SHIFT (8) /* Bits 8-31: Process Identifier */
-#define CONTEXTIDR_PROCID_MASK  (0x00ffffff << CONTEXTIDR_PROCID_SHIFT)
+#define CONTEXTIDR_ASID_SHIFT    (0)   /* Bits 0-7: Address Space Identifier */
+#define CONTEXTIDR_ASID_MASK     (0xff << CONTEXTIDR_ASID_SHIFT)
+#define CONTEXTIDR_PROCID_SHIFT  (8) /* Bits 8-31: Process Identifier */
+#define CONTEXTIDR_PROCID_MASK   (0x00ffffff << CONTEXTIDR_PROCID_SHIFT)
 
 /* Configuration Base Address Register (CBAR) */
 /* TODO: To be provided */
@@ -263,20 +274,36 @@
 
 #ifndef __ASSEMBLY__
 
-/* Get the device ID */
+/* Get the device ID register */
 
 static inline unsigned int cp15_rdid(void)
 {
   unsigned int id;
   __asm__ __volatile__
     (
-      "\tmrc p15, 0, %0, c0, c0, 0"
+      "\tmrc p15, 0, %0, c0, c0, 0\n"
       : "=r" (id)
       :
       : "memory"
     );
 
   return id;
+}
+
+/* Get the Multiprocessor Affinity Register (MPIDR) */
+
+static inline unsigned int cp15_rdmpidr(void)
+{
+  unsigned int mpidr;
+  __asm__ __volatile__
+    (
+      "\tmrc p15, 0, %0, c0, c0, 5\n"
+      : "=r" (mpidr)
+      :
+      : "memory"
+    );
+
+  return mpidr;
 }
 
 /* Read/write the system control register (SCTLR) */
