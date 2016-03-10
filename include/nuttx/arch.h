@@ -1636,6 +1636,45 @@ int up_timer_start(FAR const struct timespec *ts);
 #endif
 
 /****************************************************************************
+ * TLS support
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: up_tls_info
+ *
+ * Description:
+ *   Return the TLS information structure for the currently executing thread.
+ *   When TLS is enabled, up_createstack() will align allocated stacks to
+ *   the TLS_STACK_ALIGN value.  An instance of the following structure will
+ *   be implicitly positioned at the "lower" end of the stack.  Assuming a
+ *   "push down" stack, this is at the "far" end of the stack (and can be
+ *   clobbered if the stack overflows).
+ *
+ *   If an MCU has a "push up" then that TLS structure will lie at the top
+ *   of the stack and stack allocation and initialization logic must take
+ *   care to preserve this structure content.
+ *
+ *   The stack memory is fully accessible to user mode threads but will
+ *   contain references to OS internal, private data structures (such as the
+ *   TCB)
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   A pointer to TLS info structure at the beginning of the STACK memory
+ *   allocation.  This is essentially an appliction of the TLS_INFO(sp)
+ *   macro and has a platform dependency only in the manner in which the
+ *   stack pointer (sp) is obtained and interpreted.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_TLS
+struct tls_info_s; /* Forward reference */
+FAR struct tls_info_s *up_tls_info(void);
+#endif
+
+/****************************************************************************
  * Multiple CPU support
  ****************************************************************************/
 
@@ -1666,6 +1705,10 @@ int up_timer_start(FAR const struct timespec *ts);
  *   Return an index in the range of 0 through (CONFIG_SMP_NCPUS-1) that
  *   corresponds to the currently executing CPU.
  *
+ *   If TLS is enabled, then the RTOS can get this information from the TLS
+ *   info structure.  Otherwise, the MCU-specific logic must provide some
+ *   mechanism to provide the CPU index.
+ *
  * Input Parameters:
  *   None
  *
@@ -1676,7 +1719,12 @@ int up_timer_start(FAR const struct timespec *ts);
  ****************************************************************************/
 
 #ifdef CONFIG_SMP
+#  ifdef CONFIG_TLS
+int tls_cpu_index(void);
+#    define up_cpu_index() tls_cpu_index()
+#  else
 int up_cpu_index(void);
+#  endif
 #else
 #  define up_cpu_index() (0)
 #endif
