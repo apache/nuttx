@@ -11555,3 +11555,5 @@
 	* tools/testbuild.sh:  .config files were not being updated because (a)
 	  kconfig-conf was being called in the wrong directory and (b) apps/Kconfig
 	  had not yet been created.  Now uses 'make olddefconfig' (2016-03-09).
+	* arch/arm/src/stm32l4 and include/stm32l4:  Add support for the STM32L4
+	  family.  From Sebastien Lorquet (2016-03-10).
