@@ -211,7 +211,7 @@ static struct twi_dev_s g_twi0;
 static struct twi_dev_s g_twi1;
 #endif
 
-struct i2c_ops_s g_twiops =
+static const struct i2c_ops_s g_twiops =
 {
   .transfer = twi_transfer
 #ifdef CONFIG_I2C_RESET
