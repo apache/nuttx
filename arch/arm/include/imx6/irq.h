@@ -53,14 +53,47 @@
  * each of the CPU cores.
  *
  * The first 32 interrupts are used for interrupts that are private to the
- * CPUs interface. These interrupts are not included in the table below. All
- * interrupts besides the private CPU are also hooked up to the GPC in the
- * same order.
+ * CPUs interface. interrupts besides the private CPU are also hooked up to
+ * the GIC in the same order.
  *
  * Each interrupt can be configured as a normal or a secure interrupt.
  * Software force registers and software priority masking are also
  * supported. The following table describes the ARM interrupt sources.
  */
+
+/* Private Peripheral Interrupts (PPI) **************************************/
+/* Each Cortex-A9 processor has private interrupts, ID0-ID15, that can only
+ * be triggered by software. These interrupts are aliased so that there is
+ * no requirement for a requesting Cortex-A9 processor to determine its own
+ * CPU ID when it deals with SGIs. The priority of an SGI depends on the
+ * value set by the receiving Cortex-A9 processor in the banked SGI priority
+ * registers, not the priority set by the sending Cortex-A9 processor.
+ */
+
+#define IMX_IRQ_SGI0              0  /* Sofware Generated Interrupt (SGI) 0 */
+#define IMX_IRQ_SGI1              1  /* Sofware Generated Interrupt (SGI) 1 */
+#define IMX_IRQ_SGI2              2  /* Sofware Generated Interrupt (SGI) 2 */
+#define IMX_IRQ_SGI3              3  /* Sofware Generated Interrupt (SGI) 3 */
+#define IMX_IRQ_SGI4              4  /* Sofware Generated Interrupt (SGI) 4 */
+#define IMX_IRQ_SGI5              5  /* Sofware Generated Interrupt (SGI) 5 */
+#define IMX_IRQ_SGI6              6  /* Sofware Generated Interrupt (SGI) 6 */
+#define IMX_IRQ_SGI7              7  /* Sofware Generated Interrupt (SGI) 7 */
+#define IMX_IRQ_SGI8              8  /* Sofware Generated Interrupt (SGI) 8 */
+#define IMX_IRQ_SGI9              9  /* Sofware Generated Interrupt (SGI) 9 */
+#define IMX_IRQ_SGI10            10  /* Sofware Generated Interrupt (SGI) 10 */
+#define IMX_IRQ_SGI11            11  /* Sofware Generated Interrupt (SGI) 11 */
+#define IMX_IRQ_SGI12            12  /* Sofware Generated Interrupt (SGI) 12 */
+#define IMX_IRQ_SGI13            13  /* Sofware Generated Interrupt (SGI) 13 */
+#define IMX_IRQ_SGI14            14  /* Sofware Generated Interrupt (SGI) 14 */
+#define IMX_IRQ_SGI15            15  /* Sofware Generated Interrupt (SGI) 15 */
+
+#define IMX_IRQ_GTM              27  /* Global Timer (GTM) PPI(0) */
+#define IMX_IRQ_FIQ              28  /* Fast Interrupt Request (FIQ) PPI(1) */
+#define IMX_IRQ_PTM              29  /* Private Timer (PTM) PPI(2) */
+#define IMX_IRQ_WDT              30  /* Watchdog Timer (WDT) PPI(3) */
+#define IMX_IRQ_IRQ              31  /* Interrupt Request (IRQ) PPI(4) */
+
+/* Shared Peripheral Interrupts (SPI) ***************************************/
 
 #define IMX_IRQ_IOMUXC           32  /* General Purpose Register 1 from IOMUXC */
 #define IMX_IRQ_DAP              33  /* Debug Access Port interrupt request */
