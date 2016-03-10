@@ -476,6 +476,16 @@ Refreshing Configurations
   be?  Enter ? in response to the 'make oldconfig' prompt and it will show
   you the help text that goes with the option.
 
+  If you don't want to make any decisions are are willing to just accep the
+  recommended default value for each new configuration item, an even easier
+  way is:
+
+    make oldefconfig
+
+  The olddefconfig target will simply bring you configuration up to date with
+  the current Kconfig files, setting any new options to the default value.
+  No questions asked.
+
 NuttX Configuration Tool
 ------------------------
 

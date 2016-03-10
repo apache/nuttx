@@ -575,7 +575,26 @@ refresh.sh
   new dependencies are added.  So an old configuration file may
   not be usable anymore until it is refreshed.
 
-  The steps to refresh the file are:
+  Help is also available:
+
+    $ tools/refresh.sh --help
+    tools/refresh.sh is a tool for refreshing board configurations
+
+    USAGE: tools/refresh.sh [--debug|--help] <board>/<config>
+
+    Where:
+      --debug
+         Enable script debug
+      --silent
+         Update board configuration without interaction
+      --help
+         Show this help message and exit
+      <board>
+         The board directory under nuttx/configs
+      <config>
+         The board configuration directory under nuttx/configs/<board>
+
+  The steps to refresh the file taken by refresh.sh are:
 
   1. Make tools/cmpconfig if it is not already built.
   2. Copy the the defconfig file to the top-level NuttX
@@ -584,6 +603,10 @@ refresh.sh
   3. Execute 'make oldconfig' to update the configuration.
      'make oldconfig' will prompt you for each change in the
      configuration that requires that you make some decision.
+     With the --silent option, the script will use 'make
+     oldefconfig' instead and you won't have to answer any
+     questions;  the refresh will simply accept the default
+     value for any new configuration settings.
   4. Then it runs tools/cmpconfig to show the real differences
      between the configuration files.  Configuration files are
      complex and things can move around so a simple 'diff' between
@@ -597,9 +620,10 @@ refresh.sh
      installed.
   5. Finally, the refreshed defconfig file is copied back in
      place where it can be committed with the next set of
-     difference to the command line.  refresh.sh will prompt
-     you first to avoid overwriting the defconfig file with
-     changes that you do not want.
+     difference to the command line.  If you select the --silent
+     option, this file copy will occur autiomatically.  Otherwise,
+     refresh.sh will prompt you first to avoid overwriting the
+     defconfig file with changes that you may not want.
 
 testbuild.sh
 ------------
