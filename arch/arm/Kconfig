@@ -240,6 +240,19 @@ config ARCH_CHIP_STM32F7
 	---help---
 		STMicro STM32 architectures (ARM Cortex-M7).
 
+config ARCH_CHIP_STM32L4
+	bool "STMicro STM32 L4"
+	select ARCH_HAVE_CMNVECTOR
+	select ARMV7M_CMNVECTOR
+	select ARCH_CORTEXM4
+	select ARCH_HAVE_MPU
+	select ARM_HAVE_MPU_UNIFIED
+	select ARCH_HAVE_I2CRESET
+	select ARCH_HAVE_HEAPCHECK
+	select ARMV7M_HAVE_STACKCHECK
+	---help---
+		STMicro STM32 architectures (ARM Cortex-M4).
+
 config ARCH_CHIP_STR71X
 	bool "STMicro STR71x"
 	select ARCH_ARM7TDMI
@@ -407,6 +420,7 @@ config ARCH_CHIP
 	default "samv7"		if ARCH_CHIP_SAMV7
 	default "stm32"		if ARCH_CHIP_STM32
 	default "stm32f7"	if ARCH_CHIP_STM32F7
+	default "stm32l4"	if ARCH_CHIP_STM32L4
 	default "str71x"	if ARCH_CHIP_STR71X
 	default "tms570"	if ARCH_CHIP_TMS570
 	default "moxart"	if ARCH_CHIP_MOXART
@@ -627,6 +641,9 @@ source arch/arm/src/stm32/Kconfig
 endif
 if ARCH_CHIP_STM32F7
 source arch/arm/src/stm32f7/Kconfig
+endif
+if ARCH_CHIP_STM32L4
+source arch/arm/src/stm32l4/Kconfig
 endif
 if ARCH_CHIP_STR71X
 source arch/arm/src/str71x/Kconfig
