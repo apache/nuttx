@@ -42,6 +42,9 @@
 #include <sys/types.h>
 #include <stdint.h>
 
+#include <arch/irq.h>
+
+#include "up_arch.h"
 #include "gic.h"
 
 #ifdef CONFIG_ARMV7A_HAVE_GIC
@@ -111,7 +114,22 @@ uint32_t *arm_decodeirq(uint32_t *regs)
 
 void up_enable_irq(int irq)
 {
-#  warning Missing logic
+  /* Ignore invalid interrupt IDs.  Also, in the Cortex-A9 MPCore, SGIs are
+   * always enabled. The corresponding bits in the ICDISERn are read as
+   * one, write ignored.
+   */
+
+  if (irq > GIC_IRQ_SGI15 && irq < NR_IRQS)
+    {
+      uintptr_t regaddr;
+
+      /* Write '1' to the corresponding bit in the distributor Interrupt
+       * Set-Enable Register (ICDISER)
+       */
+
+      regaddr = GIC_ICDISER(irq);
+      putreg32(GIC_ICDISER_INT(irq), regaddr);
+    }
 }
 
 /****************************************************************************
@@ -130,7 +148,22 @@ void up_enable_irq(int irq)
 
 void up_disable_irq(int irq)
 {
-#  warning Missing logic
+  /* Ignore invalid interrupt IDs.  Also, in the Cortex-A9 MPCore, SGIs are
+   * always enabled. The corresponding bits in the ICDISERn are read as
+   * one, write ignored.
+   */
+
+  if (irq > GIC_IRQ_SGI15 && irq < NR_IRQS)
+    {
+      uintptr_t regaddr;
+
+      /* Write '1' to the corresponding bit in the distributor Interrupt
+       * Clear-Enable Register (ICDISER)
+       */
+
+      regaddr = GIC_ICDICER(irq);
+      putreg32(GIC_ICDICER_INT(irq), regaddr);
+    }
 }
 
 /****************************************************************************

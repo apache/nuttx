@@ -45,7 +45,7 @@
  * Included Files
  ****************************************************************************/
 
-#include <arch/chip/chip.h>
+#include "chip.h"    /* For CHIP_MPCORE_VBASE */
 
 /****************************************************************************
  * Pre-processor Definitions
