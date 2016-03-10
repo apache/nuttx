@@ -11539,4 +11539,19 @@
 	* sched/semaphore/sem_reset.c and include/nuttx/semaphore.h: Add an internal,
 	  non-standard interface to reset a semaphore count.  This is sometimes
 	  needed by drivers in order to recover from error conditions (2016-03-05)
-
+	* AT24xx driver: Correct missing address calculation logic.  From Frank
+	  Benkert (2016-03-08).
+	* arch/ renaming:  current_regs renamed to g_current_regs in all
+	  architectures.  For ARM which is slowly developing SMP capability,
+	  g_current_regs is now an array of dimension 1 in most case but of higher
+	  dimension of the architecuture supports multiple CPUs (2016-03-09).
+	* MTD: Increase block size in mtd_geometry_s to 32-bits (2016-03-09).
+	* include/nuttx/clock.h:  Missing parenteses in MSEC2TICK macro can
+	  cause wrong calculations.  From Stefan Kolb (2016-03-09).
+	* Build system:  Added a 'make olddefconfig' target that will refresh
+	  a .config file without interaction.  tools/refesh.sh no has a --silent
+	  option so that it can be used in batch modes without human input
+	  (2016-03-09).
+	* tools/testbuild.sh:  .config files were not being updated because (a)
+	  kconfig-conf was being called in the wrong directory and (b) apps/Kconfig
+	  had not yet been created.  Now uses 'make olddefconfig' (2016-03-09).
