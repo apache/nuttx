@@ -374,4 +374,4 @@ void stm32l4_gpioinit(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_STM32_STM32_GPIO_H */
+#endif /* __ARCH_ARM_SRC_STM32L4_STM32L4_GPIO_H */

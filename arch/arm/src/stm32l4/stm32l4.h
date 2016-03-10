@@ -93,4 +93,4 @@
 #include "stm32l4_wdg.h"
 #include "stm32l4_lowputc.h"
 
-#endif /* __ARCH_ARM_SRC_STM32_STM32_H */
+#endif /* __ARCH_ARM_SRC_STM32L4_STM32L4_H */

@@ -185,7 +185,7 @@ config STM32L4_QUADSPI
 
 comment "APB1 Peripherals"
 
-config STM32_PWR
+config STM32L4_PWR
 	bool "PWR"
 	default n
 
@@ -613,6 +613,44 @@ config STM32L4_SPI_DMA
 
 endmenu
 
-#todo i2c config
+menu "I2C Configuration"
+	depends on STM32L4_I2C
+
+config STM32L4_I2C_DYNTIMEO
+	bool "Use dynamic timeouts"
+	default n
+	depends on STM32L4_I2C
+
+config STM32L4_I2C_DYNTIMEO_USECPERBYTE
+	int "Timeout Microseconds per Byte"
+	default 500
+	depends on STM32L4_I2C_DYNTIMEO
+
+config STM32L4_I2C_DYNTIMEO_STARTSTOP
+	int "Timeout for Start/Stop (Milliseconds)"
+	default 1000
+	depends on STM32L4_I2C_DYNTIMEO
+
+config STM32L4_I2CTIMEOSEC
+	int "Timeout seconds"
+	default 0
+	depends on STM32L4_I2C
+
+config STM32L4_I2CTIMEOMS
+	int "Timeout Milliseconds"
+	default 500
+	depends on STM32L4_I2C && !STM32L4_I2C_DYNTIMEO
+
+config STM32L4_I2CTIMEOTICKS
+	int "Timeout for Done and Stop (ticks)"
+	default 500
+	depends on STM32L4_I2C && !STM32L4_I2C_DYNTIMEO
+
+config STM32L4_I2C_DUTY16_9
+	bool "Frequency with Tlow/Thigh = 16/9 "
+	default n
+	depends on STM32L4_I2C
+
+endmenu
 
 endif # ARCH_CHIP_STM32L4
