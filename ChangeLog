@@ -11560,5 +11560,6 @@
 	* configs/nucleo-l476:  Add support for the Nucleo-L476 board.  From
 	  Sebastien Lorquet (2016-03-10).
 	* sched/tls and include/nuttx/tls.h:  Basic definitions needed to support
-	  thread local storage (TLS).  Not used anywhere yet (2016-03-10).
+	  thread local storage (TLS).  Not used anywhere yet (and may not be used
+	  in the near future either) (2016-03-10).
 
