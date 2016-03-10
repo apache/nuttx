@@ -88,10 +88,10 @@
 #define IMX_IRQ_SGI15            15  /* Sofware Generated Interrupt (SGI) 15 */
 
 #define IMX_IRQ_GTM              27  /* Global Timer (GTM) PPI(0) */
-#define IMX_IRQ_FIQ              28  /* Fast Interrupt Request (FIQ) PPI(1) */
+#define IMX_IRQ_FIQ              28  /* Fast Interrupt Request (nFIQ) PPI(1) */
 #define IMX_IRQ_PTM              29  /* Private Timer (PTM) PPI(2) */
 #define IMX_IRQ_WDT              30  /* Watchdog Timer (WDT) PPI(3) */
-#define IMX_IRQ_IRQ              31  /* Interrupt Request (IRQ) PPI(4) */
+#define IMX_IRQ_IRQ              31  /* Interrupt Request (nIRQ) PPI(4) */
 
 /* Shared Peripheral Interrupts (SPI) ***************************************/
 

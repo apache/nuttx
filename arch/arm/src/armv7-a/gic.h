@@ -401,6 +401,55 @@
 #  define GIC_ICDSGIR_TGTFILTER_OTHER (1 << GIC_ICDSGIR_TGTFILTER_SHIFT) /* Interrupt is sent to all but requesting CPU */
 #  define GIC_ICDSGIR_TGTFILTER_THIS  (2 << GIC_ICDSGIR_TGTFILTER_SHIFT) /* Interrupt is sent to requesting CPU only */
 
+/* Interrupt IDs ************************************************************/
+/* The Global Interrupt Controller (GIC) collects up to 224 interrupt
+ * requests and provides a memory mapped interface to each of the CPU core.
+ *
+ * The first 32 interrupts are used for interrupts that are private to the
+ * CPUs interface. Other shared interrupts besides the also hooked up to
+ * the GIC in the same order.  The shared interrupt sources are MCU-
+ * specific and documented in MCU-specific header files.
+ *
+ * Each interrupt can be configured as a normal or a secure interrupt.
+ * Software force registers and software priority masking are also
+ * supported. The following table describes the private RM interrupt
+ * sources.
+ */
+
+/* Private Peripheral Interrupts (PPI) **************************************/
+/* Each Cortex-A9 processor has private interrupts, ID0-ID15, that can only
+ * be triggered by software. These interrupts are aliased so that there is
+ * no requirement for a requesting Cortex-A9 processor to determine its own
+ * CPU ID when it deals with SGIs. The priority of an SGI depends on the
+ * value set by the receiving Cortex-A9 processor in the banked SGI priority
+ * registers, not the priority set by the sending Cortex-A9 processor.
+ */
+
+#define GIC_IRQ_SGI0              0  /* Sofware Generated Interrupt (SGI) 0 */
+#define GIC_IRQ_SGI1              1  /* Sofware Generated Interrupt (SGI) 1 */
+#define GIC_IRQ_SGI2              2  /* Sofware Generated Interrupt (SGI) 2 */
+#define GIC_IRQ_SGI3              3  /* Sofware Generated Interrupt (SGI) 3 */
+#define GIC_IRQ_SGI4              4  /* Sofware Generated Interrupt (SGI) 4 */
+#define GIC_IRQ_SGI5              5  /* Sofware Generated Interrupt (SGI) 5 */
+#define GIC_IRQ_SGI6              6  /* Sofware Generated Interrupt (SGI) 6 */
+#define GIC_IRQ_SGI7              7  /* Sofware Generated Interrupt (SGI) 7 */
+#define GIC_IRQ_SGI8              8  /* Sofware Generated Interrupt (SGI) 8 */
+#define GIC_IRQ_SGI9              9  /* Sofware Generated Interrupt (SGI) 9 */
+#define GIC_IRQ_SGI10            10  /* Sofware Generated Interrupt (SGI) 10 */
+#define GIC_IRQ_SGI11            11  /* Sofware Generated Interrupt (SGI) 11 */
+#define GIC_IRQ_SGI12            12  /* Sofware Generated Interrupt (SGI) 12 */
+#define GIC_IRQ_SGI13            13  /* Sofware Generated Interrupt (SGI) 13 */
+#define GIC_IRQ_SGI14            14  /* Sofware Generated Interrupt (SGI) 14 */
+#define GIC_IRQ_SGI15            15  /* Sofware Generated Interrupt (SGI) 15 */
+
+#define GIC_IRQ_GTM              27  /* Global Timer (GTM) PPI(0) */
+#define GIC_IRQ_FIQ              28  /* Fast Interrupt Request (nFIQ) PPI(1) */
+#define GIC_IRQ_PTM              29  /* Private Timer (PTM) PPI(2) */
+#define GIC_IRQ_WDT              30  /* Watchdog Timer (WDT) PPI(3) */
+#define GIC_IRQ_IRQ              31  /* Interrupt Request (nIRQ) PPI(4) */
+
+/* Shared Peripheral Interrupts (SPI) follow */
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
