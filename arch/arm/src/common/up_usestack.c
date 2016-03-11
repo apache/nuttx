@@ -113,9 +113,6 @@
 
 int up_use_stack(struct tcb_s *tcb, void *stack, size_t stack_size)
 {
-#ifdef CONFIG_TLS
-  FAR struct tls_info_s *info;
-#endif
   size_t top_of_stack;
   size_t size_of_stack;
 
@@ -169,9 +166,7 @@ int up_use_stack(struct tcb_s *tcb, void *stack, size_t stack_size)
 #ifdef CONFIG_TLS
   /* Initialize the TLS data structure */
 
-  info = (FAR struct tls_info_s *)tcb->stack_alloc_ptr;
-  memset(info, 0, sizeof(struct tls_info_s));
-  info->tl_tcb = tcb;
+  memset(tcb->stack_alloc_ptr, 0, sizeof(struct tls_info_s));
 #endif
 
 #ifdef CONFIG_STACK_COLORATION
