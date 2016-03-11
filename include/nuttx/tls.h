@@ -60,7 +60,7 @@
 #define TLS_STACK_ALIGN   (1L << CONFIG_TLS_LOG2_MAXSTACK)
 #define TLS_STACK_MASK    (TLS_STACK_ALIGN - 1)
 #define TLS_MAXSTACK      (TLS_STACK_ALIGN)
-#define TLS_INFO(sp)      ((FAR struct tls_info_s *)((sp) & TLS_STACK_MASK))
+#define TLS_INFO(sp)      ((FAR struct tls_info_s *)((sp) & ~TLS_STACK_MASK))
 
 /****************************************************************************
  * Public Types

@@ -1663,7 +1663,7 @@ int up_timer_start(FAR const struct timespec *ts);
  *
  * Returned Value:
  *   A pointer to TLS info structure at the beginning of the STACK memory
- *   allocation.  This is essentially an appliction of the TLS_INFO(sp)
+ *   allocation.  This is essentially an application of the TLS_INFO(sp)
  *   macro and has a platform dependency only in the manner in which the
  *   stack pointer (sp) is obtained and interpreted.
  *
