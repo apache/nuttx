@@ -69,7 +69,127 @@
 
 void arm_gic_initialize(void)
 {
-#  warning Missing logic
+  unsigned int nlines;
+  unsigned int irq;
+  uint32_t regval;
+  uint32_t field;
+#ifdef CONFIG_SMP
+  int cpu;
+
+  /* Which CPU are we initializing */
+
+  cpu = up_cpu_index();
+#endif
+
+  /* Get the number of interrupt lines. */
+
+  regval = getreg32(GIC_ICDICTR);
+  field  = (regval & GIC_ICDICTR_ITLINES_MASK) >> GIC_ICDICTR_ITLINES_SHIFT;
+  nlines = (field + 1) << 5;
+
+  /* Initialize SPIs.  This should be done only by CPU0. */
+
+#ifdef CONFIG_SMP
+  if (cpu == 0)
+#endif
+    {
+      /* A processor in Secure State sets:
+       *
+       * 1. Which interrupts are non-secure (ICDISR).
+       *    REVISIT: Which bit state corresponds to secure?
+       * 2. Trigger mode of the SPI (ICDICFR). All fields set to 11->Edge
+       *    sensitive.
+       * 3. Innterrupt Clear-Enable (ICDICER)
+       * 3. Priority of the SPI using the priority set register (ICDIPR).
+       *    All set to the middle priority 0x80.
+       * 4. Target that receives the SPI interrupt (ICDIPTR).  Set all to
+       *    CPU0.
+       */
+
+      /* Registers with 1-bit per interrupt */
+
+      for (irq = GIC_IRQ_SPI; irq < nlines; irq += 32)
+        {
+          putreg32(0x00000000, GIC_ICDISR(irq));   /* SPIs secure */
+          putreg32(0xffffffff, GIC_ICDICFR(irq));  /* SPIs edge triggered */
+          putreg32(0xffffffff, GIC_ICDICER(irq));  /* SPIs disabled */
+        }
+
+      /* Registers with 8-bits per interrupt */
+
+      for (irq = GIC_IRQ_SPI; irq < nlines; irq += 8)
+        {
+          putreg32(0x80808080, GIC_ICDIPR(irq));   /* SPI priority */
+          putreg32(0x01010101, GIC_ICDIPTR(irq));  /* SPI on CPU0 */
+        }
+    }
+
+  /* Initialize SGIs and PPIs.  NOTE: A processor in non-secure state cannot
+   * program its interrupt security registers and must get a secure processor
+   * to program the registers.
+   */
+
+  /* Registers with 1-bit per interrupt */
+
+  putreg32(0x00000000, GIC_ICDISR(0));      /* SGIs and PPIs secure */
+  putreg32(0xf8000000, GIC_ICDICER(0));     /* PPIs disabled */
+
+  /* Registers with 8-bits per interrupt */
+
+  putreg32(0x80808080, GIC_ICDIPR(0));         /* SGI[3:0] priority */
+  putreg32(0x80808080, GIC_ICDIPR(4));         /* SGI[4:7] priority */
+  putreg32(0x80808080, GIC_ICDIPR(8));         /* SGI[8:11] priority */
+  putreg32(0x80808080, GIC_ICDIPR(12));        /* SGI[12:15] priority */
+  putreg32(0x80000000, GIC_ICDIPR(24));        /* PPI[0] priority */
+  putreg32(0x80808080, GIC_ICDIPR(28));        /* PPI[1:4] priority */
+
+  /* Set FIQn=1 if secure interrupts are to signal using nfiq_c.
+   * NOTE:  Only for processors that operate in secure state.
+   * REVISIT: Do I need to do this?
+   */
+
+  /* Program the AckCtl bit to select the required interrupt acknowledge
+   * behavior.
+   * NOTE: Only for processors that operate in both secure and non-secure
+   * state.
+   */
+#warning Missing logic
+
+  /* Program the SBPR bit to select the required binary pointer behavior.
+   * NOTE: Only for processors that operate in both secure and non-secure
+   * state.
+   */
+#warning Missing logic
+
+  /* Set EnableS=1 to enable CPU interface to signal secure interrupts.
+   * NOTE:  Only for processors that operate in secure mostatede.
+   */
+#warning Missing logic
+
+  /* Set EnableNS=1 to enable the CPU to signal non-secure interrupts.
+   * NOTE:  Only for processors that operate in non-secure state.
+   * REVISIT: Initial implementation operates only in secure state.
+   */
+
+  /* Set the binary point register.
+   * NOTE: If the processor operates in both security state and SBPR=0,
+   * then it must switch to the other security state and repear the
+   * programming of the binary point register so that the binary point
+   * will be programmed for interrupts in both security states.
+   */
+#warning Missing logic
+
+  /* Enable the distributor by setting the the Enable bit in the enable
+   * register.
+   */
+
+  putreg32(GIC_ICCICR_ENABLE, GIC_ICCICR);
+
+  /* A processor in the secure state must then switch to the non-secure
+   * a repeat setting of the enable bit in the enable register.  This
+   * enables distributor to respond to interrupt in both security states.
+   * REVISIT: Initial implementation operates only in secure state.
+   */
 }
 
 /****************************************************************************

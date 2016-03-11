@@ -207,6 +207,7 @@
 #define GIC_ICDDCR                 (MPCORE_ICD_VBASE+GIC_ICDDCR_OFFSET)
 #define GIC_ICDICTR                (MPCORE_ICD_VBASE+GIC_ICDICTR_OFFSET)
 #define GIC_ICDIIDR                (MPCORE_ICD_VBASE+GIC_ICDIIDR_OFFSET)
+#define GIC_ICDISR(n)              (MPCORE_ICD_VBASE+GIC_ICDISR_OFFSET(n))
 #define GIC_ICDISER(n)             (MPCORE_ICD_VBASE+GIC_ICDISER_OFFSET(n))
 #define GIC_ICDICER(n)             (MPCORE_ICD_VBASE+GIC_ICDICER_OFFSET(n))
 #define GIC_ICDISPR(n)             (MPCORE_ICD_VBASE+GIC_ICDISPR_OFFSET(n))
@@ -315,6 +316,10 @@
 #define GIC_ICDIIDR_REVISION_MASK   (0xfff << GIC_ICDIIDR_REVISION_SHIFT)
 #define GIC_ICDIIDR_VERSION_SHIFT   (24)     /* Bits 24-31: Iimplementer version */
 #define GIC_ICDIIDR_VERSION_MASK    (0xff << GIC_ICDIIDR_VERSION_SHIFT)
+
+/* Interrupt Security Registers: 0x0080-0x009c */
+
+#define GIC_ICDISR_INT(n)           GIC_MASK32(n)
 
 /* Interrupt Set-Enable.
  *
@@ -449,6 +454,8 @@
 #define GIC_IRQ_IRQ              31  /* Interrupt Request (nIRQ) PPI(4) */
 
 /* Shared Peripheral Interrupts (SPI) follow */
+
+#define GIC_IRQ_SPI              32  /* First SPI interrupt ID */
 
 /****************************************************************************
  * Public Function Prototypes
