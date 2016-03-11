@@ -46,7 +46,7 @@
 #include "cp15.h"
 #include "sctlr.h"
 
-#if defined(CONFIG_SMP) && !defined(CONFIG_TLS)
+#ifdef CONFIG_SMP
 
 /****************************************************************************
  * Public Functions
@@ -83,4 +83,4 @@ int up_cpu_index(void)
   return (mpidr & MPIDR_CPUID_MASK) >> MPIDR_CPUID_SHIFT;
 }
 
-#endif /* CONFIG_SMP && !CONFIG_TLS */
+#endif /* CONFIG_SMP */
