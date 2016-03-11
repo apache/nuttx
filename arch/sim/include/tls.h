@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/sim/src/up_usestack.c
+ * arch/sin/include/tls.h
  *
- *   Copyright (C) 2007-2009, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,84 +33,56 @@
  *
  ****************************************************************************/
 
+#ifndef __ARCH_SIM_INCLUDE_TLS_H
+#define __ARCH_SIM_INCLUDE_TLS_H 1
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
-#include <sys/types.h>
-#include <string.h>
-#include <debug.h>
-
+#include <assert.h>
 #include <nuttx/arch.h>
 #include <nuttx/tls.h>
 
-#include "up_internal.h"
+#ifdef CONFIG_TLS
 
 /****************************************************************************
- * Public Functions
+ * Inline Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_use_stack
+ * Name: up_tls_info
  *
  * Description:
- *   Setup up stack-related information in the TCB using pre-allocated stack
- *   memory.  This function is called only from task_init() when a task or
- *   kernel thread is started (never for pthreads).
+ *   Return the TLS information structure for the currently executing thread.
+ *   When TLS is enabled, up_createstack() will align allocated stacks to
+ *   the TLS_STACK_ALIGN value.  An instance of the following structure will
+ *   be implicitly positioned at the "lower" end of the stack.  Assuming a
+ *   "push down" stack, this is at the "far" end of the stack (and can be
+ *   clobbered if the stack overflows).
  *
- *   The following TCB fields must be initialized:
+ *   If an MCU has a "push up" then that TLS structure will lie at the top
+ *   of the stack and stack allocation and initialization logic must take
+ *   care to preserve this structure content.
  *
- *   - adj_stack_size: Stack size after adjustment for hardware,
- *     processor, etc.  This value is retained only for debug
- *     purposes.
- *   - stack_alloc_ptr: Pointer to allocated stack
- *   - adj_stack_ptr: Adjusted stack_alloc_ptr for HW.  The
- *     initial value of the stack pointer.
+ *   The stack memory is fully accessible to user mode threads.
  *
- * Inputs:
- *   - tcb: The TCB of new task
- *   - stack_size:  The allocated stack size.
+ * Input Parameters:
+ *   None
  *
- *   NOTE:  Unlike up_stack_create() and up_stack_release, this function
- *   does not require the task type (ttype) parameter.  The TCB flags will
- *   always be set to provide the task type to up_use_stack() if it needs
- *   that information.
+ * Returned Value:
+ *   A pointer to TLS info structure at the beginning of the STACK memory
+ *   allocation.  This is essentially an application of the TLS_INFO(sp)
+ *   macro and has a platform dependency only in the manner in which the
+ *   stack pointer (sp) is obtained and interpreted.
  *
  ****************************************************************************/
 
-int up_use_stack(FAR struct tcb_s *tcb, FAR void *stack, size_t stack_size)
+static inline FAR struct tls_info_s *up_tls_info(void)
 {
-  FAR size_t *adj_stack_ptr;
-  size_t adj_stack_size;
-  size_t adj_stack_words;
-
-#ifdef CONFIG_TLS
-  /* Make certain that the user provided stack is properly aligned */
-
-  DEBUGASSERT(((uintptr_t)stack & TLS_STACK_MASK) == 0);
-#endif
-  /* Move up to next even word boundary if necessary */
-
-  adj_stack_size = stack_size & ~3;
-  adj_stack_words = adj_stack_size >> 2;
-
-  /* This is the address of the last word in the allocation */
-
-  adj_stack_ptr = &((FAR size_t *)stack)[adj_stack_words - 1];
-
-  /* Save the values in the TCB */
-
-  tcb->adj_stack_size  = adj_stack_size;
-  tcb->stack_alloc_ptr = stack;
-  tcb->adj_stack_ptr   = adj_stack_ptr;
-
-#ifdef CONFIG_TLS
-  /* Initialize the TLS data structure */
-
-  memset(stack, 0, sizeof(struct tls_info_s));
-#endif
-
-  return OK;
+  return TLS_INFO((uintptr_t)__builtin_frame_address(0));
 }
+
+#endif /* CONFIG_TLS */
+#endif /* __ARCH_SIM_INCLUDE_TLS_H */
