@@ -1,5 +1,5 @@
 ############################################################################
-# sched/tls/Make.defs
+# libc/tls/Make.defs
 #
 #   Copyright (C) 2016 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -35,13 +35,7 @@
 
 ifeq ($(CONFIG_TLS),y)
 
-ifeq ($(CONFIG_SMP),y)
-CSRCS += tls_cpuindex.c
-endif
-
-ifneq ($(CONFIG_TLS_NELEM),0)
 CSRCS += tls_setelem.c tls_getelem.c
-endif
 
 # Include tls build support
 

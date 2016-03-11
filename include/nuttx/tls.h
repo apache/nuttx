@@ -57,7 +57,13 @@
 
 #ifndef CONFIG_TLS_NELEM
 #  warning CONFIG_TLS_NELEM is not defined
-#  define CONFIG_TLS_NELEM 0
+#  define CONFIG_TLS_NELEM 1
+#endif
+
+#if CONFIG_TLS_NELEM < 1
+#  error CONFIG_TLS_NELEM must be at least one
+#  undef CONFIG_TLS_NELEM
+#  define CONFIG_TLS_NELEM 1
 #endif
 
 /* TLS Definitions **********************************************************/
@@ -80,44 +86,18 @@
  * of the stack and stack allocation and initialization logic must take
  * care to preserve this structure content.
  *
- * The stack memory is fully accessible to user mode threads but will
- * contain references to OS internal, private data structures (such as the
- * TCB)
+ * The stack memory is fully accessible to user mode threads.  TLS is not
+ * available from interrupt handlers (nor from the IDLE thread).
  */
 
-struct tcb_s; /* Forward reference */
 struct tls_info_s
 {
-  FAR struct tcb_s *tl_tcb;            /* The TCB of the current task */
-#if CONFIG_TLS_NELEM > 0
   uintptr_t tl_elem[CONFIG_TLS_NELEM]; /* TLS elements */
-#endif
 };
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
-
-/****************************************************************************
- * Name: tls_cpu_index
- *
- * Description:
- *   Return an index in the range of 0 through (CONFIG_SMP_NCPUS-1) that
- *   corresponds to the currently executing CPU.  This is index is retained
- *   in the task TCB which is accessible via the tls_info_s structure.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   An integer index in the range of 0 through (CONFIG_SMP_NCPUS-1) that
- *   corresponds to the currently executing CPU
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SMP
-int tls_cpu_index(void);
-#endif
 
 /****************************************************************************
  * Name: tls_get_element
@@ -132,13 +112,11 @@ int tls_cpu_index(void);
  *   The value of TLS element associated with 'elem'. Errors are not reported.
  *   Aero is returned in the event of an error, but zero may also be valid
  *   value and returned when there is no error.  The only possible error would
- *   be if elem >=CONFIG_TLS_NELEM.
+ *   be if elemn < 0 or elem >=CONFIG_TLS_NELEM.
  *
  ****************************************************************************/
 
-#if CONFIG_TLS_NELEM > 0
 uintptr_t tls_get_element(int elem);
-#endif
 
 /****************************************************************************
  * Name: tls_get_element
@@ -152,13 +130,11 @@ uintptr_t tls_get_element(int elem);
  *
  * Returned Value:
  *   None.  Errors are not reported.  The only possible error would be if
- *   elem >=CONFIG_TLS_NELEM.
+ *   elem < 0 or elem >=CONFIG_TLS_NELEM.
  *
  ****************************************************************************/
 
-#if CONFIG_TLS_NELEM > 0
 void tls_set_element(int elem, uintptr_t value);
-#endif
 
 #endif /* CONFIG_TLS */
 #endif /* __INCLUDE_NUTTX_TLS_H */

@@ -1654,9 +1654,7 @@ int up_timer_start(FAR const struct timespec *ts);
  *   of the stack and stack allocation and initialization logic must take
  *   care to preserve this structure content.
  *
- *   The stack memory is fully accessible to user mode threads but will
- *   contain references to OS internal, private data structures (such as the
- *   TCB)
+ *   The stack memory is fully accessible to user mode threads.
  *
  * Input Parameters:
  *   None
@@ -1670,8 +1668,12 @@ int up_timer_start(FAR const struct timespec *ts);
  ****************************************************************************/
 
 #ifdef CONFIG_TLS
-struct tls_info_s; /* Forward reference */
-FAR struct tls_info_s *up_tls_info(void);
+/* struct tls_info_s;
+ * FAR struct tls_info_s *up_tls_info(void);
+ *
+ * The actual declaration or definition is provided in arch/tls.h.  The
+ * actual implementation may be a MACRO or and inline function.
+ */
 #endif
 
 /****************************************************************************
@@ -1705,10 +1707,6 @@ FAR struct tls_info_s *up_tls_info(void);
  *   Return an index in the range of 0 through (CONFIG_SMP_NCPUS-1) that
  *   corresponds to the currently executing CPU.
  *
- *   If TLS is enabled, then the RTOS can get this information from the TLS
- *   info structure.  Otherwise, the MCU-specific logic must provide some
- *   mechanism to provide the CPU index.
- *
  * Input Parameters:
  *   None
  *
@@ -1719,12 +1717,7 @@ FAR struct tls_info_s *up_tls_info(void);
  ****************************************************************************/
 
 #ifdef CONFIG_SMP
-#  ifdef CONFIG_TLS
-int tls_cpu_index(void);
-#    define up_cpu_index() tls_cpu_index()
-#  else
 int up_cpu_index(void);
-#  endif
 #else
 #  define up_cpu_index() (0)
 #endif

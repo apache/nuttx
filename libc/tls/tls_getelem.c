@@ -1,5 +1,5 @@
 /****************************************************************************
- * libc/fixedmath/tls_cpuindex.c
+ * libc/fixedmath/tls_getelem.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,59 +39,55 @@
 
 #include <nuttx/config.h>
 
+#include <stdint.h>
 #include <assert.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/sched.h>
 #include <nuttx/tls.h>
+#include <arch/tls.h>
 
-#if defined(CONFIG_TLS) && defined(CONFIG_SMP)
+#ifdef CONFIG_TLS
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: tls_cpu_index
+ * Name: tls_get_element
  *
  * Description:
- *   Return an index in the range of 0 through (CONFIG_SMP_NCPUS-1) that
- *   corresponds to the currently executing CPU.  This is index is retained
- *   in the task TCB which is accessible via the tls_info_s structure.
- *
- *   There is a race condition in that this thread could be swapped out and
- *   be running on a different CPU when the function returns.  If that is a
- *   problem, then the calling function should disable pre-emption before
- *   calling this function.
+ *   Return an the TLS element associated with the 'elem' index
  *
  * Input Parameters:
- *   None
+ *   elem - Index of TLS element to return
  *
  * Returned Value:
- *   On success, an integer index is returned in the range of 0 through
- *   (CONFIG_SMP_NCPUS-1) that corresponds to the currently executing CPU.
+ *   The value of TLS element associated with 'elem'. Errors are not reported.
+ *   Aero is returned in the event of an error, but zero may also be valid
+ *   value and returned when there is no error.  The only possible error would
+ *   be if elem >=CONFIG_TLS_NELEM.
  *
  ****************************************************************************/
 
-int tls_cpu_index(void)
+uintptr_t tls_get_element(int elem)
 {
   FAR struct tls_info_s *info;
-  FAR struct tcb_s *tcb;
+  uintptr_t ret = 0;
 
-  /* Get the TLS info structure from the current threads stack */
+  DEBUGASSERT(elem >= 0 && elem < CONFIG_TLS_NELEM);
+  if (elem >= 0 && elem < CONFIG_TLS_NELEM)
+    {
+      /* Get the TLS info structure from the current threads stack */
 
-  info = up_tls_info();
-  DEBUGASSERT(info != NULL && info->tl_tcb != NULL);
+      info = up_tls_info();
+      DEBUGASSERT(info != NULL);
 
-  /* Get the TCB from the TLS info.  We expect the TCB state to indicate that
-   * the task is running (it must be because it is this thread).
-   */
+      /* Get the element value from the TLS info. */
 
-  tcb = info->tl_tcb;
-  DEBUGASSERT(tcb->task_state == TSTATE_TASK_RUNNING &&
-              tcb->cpu <= (CONFIG_SMP_NCPUS-1));
+      ret = info->tl_elem[elem];
+    }
 
-  return tcb->cpu;
+  return ret;
 }
 
-#endif /* CONFIG_TLS && CONFIG_SMP */
+#endif /* CONFIG_TLS */

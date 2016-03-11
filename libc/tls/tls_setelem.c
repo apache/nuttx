@@ -1,5 +1,5 @@
 /****************************************************************************
- * libc/fixedmath/tls_getelem.c
+ * libc/fixedmath/tls_setelem.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -44,8 +44,9 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/tls.h>
+#include <arch/tls.h>
 
-#if defined(CONFIG_TLS) && CONFIG_TLS_NELEM > 0
+#ifdef CONFIG_TLS
 
 /****************************************************************************
  * Public Functions
@@ -55,23 +56,21 @@
  * Name: tls_get_element
  *
  * Description:
- *   Return an the TLS element associated with the 'elem' index
+ *   Set the TLS element associated with the 'elem' index to 'value'
  *
  * Input Parameters:
- *   elem - Index of TLS element to return
+ *   elem  - Index of TLS element to set
+ *   value - The new value of the TLS element
  *
  * Returned Value:
- *   The value of TLS element associated with 'elem'. Errors are not reported.
- *   Aero is returned in the event of an error, but zero may also be valid
- *   value and returned when there is no error.  The only possible error would
- *   be if elem >=CONFIG_TLS_NELEM.
+ *   None.  Errors are not reported.  The only possible error would be if
+ *   elem >=CONFIG_TLS_NELEM.
  *
  ****************************************************************************/
 
-uintptr_t tls_get_element(int elem)
+void tls_set_element(int elem, uintptr_t value)
 {
   FAR struct tls_info_s *info;
-  uintptr_t ret = 0;
 
   DEBUGASSERT(elem >= 0 && elem < CONFIG_TLS_NELEM);
   if (elem >= 0 && elem < CONFIG_TLS_NELEM)
@@ -81,12 +80,10 @@ uintptr_t tls_get_element(int elem)
       info = up_tls_info();
       DEBUGASSERT(info != NULL);
 
-      /* Get the element value from the TLS info. */
+      /* Set the element value int the TLS info. */
 
-      ret = info->tl_elem[elem];
+      info->tl_elem[elem] = value;
     }
-
-  return ret;
 }
 
-#endif /* CONFIG_TLS && CONFIG_TLS_NELEM > 0 */
+#endif /* CONFIG_TLS */

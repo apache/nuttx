@@ -524,6 +524,10 @@ o Kernel/Protected Build
                console output.  The requests for the pid() are part of the
                implementation of the I/O's re-entrant semaphore implementation and
                would not be an issue in the more general case.
+
+               Update:
+               One solution might be to used CONFIG_TLS, add the PID to struct
+               tls_info_s.  Then the PID could be obtained without a system call.
   Status:      Open
   Priority:    Low-Medium.  Right now, I do not know if these syscalls are a
                real performance issue or not.  The above statistics were collected
