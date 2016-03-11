@@ -55,6 +55,11 @@
 #  error CONFIG_TLS_LOG2_MAXSTACK is not defined
 #endif
 
+#ifndef CONFIG_TLS_NELEM
+#  warning CONFIG_TLS_NELEM is not defined
+#  define CONFIG_TLS_NELEM 0
+#endif
+
 /* TLS Definitions **********************************************************/
 
 #define TLS_STACK_ALIGN   (1L << CONFIG_TLS_LOG2_MAXSTACK)
@@ -83,7 +88,10 @@
 struct tcb_s; /* Forward reference */
 struct tls_info_s
 {
-  FAR struct tcb_s *tl_tcb; /* The TCB of the current task */
+  FAR struct tcb_s *tl_tcb;            /* The TCB of the current task */
+#if CONFIG_TLS_NELEM > 0
+  uintptr_t tl_elem[CONFIG_TLS_NELEM]; /* TLS elements */
+#endif
 };
 
 /****************************************************************************
@@ -103,12 +111,53 @@ struct tls_info_s
  *
  * Returned Value:
  *   An integer index in the range of 0 through (CONFIG_SMP_NCPUS-1) that
- *   corresponds to the currently executing CPU.
+ *   corresponds to the currently executing CPU
  *
  ****************************************************************************/
 
 #ifdef CONFIG_SMP
 int tls_cpu_index(void);
+#endif
+
+/****************************************************************************
+ * Name: tls_get_element
+ *
+ * Description:
+ *   Return an the TLS element associated with the 'elem' index
+ *
+ * Input Parameters:
+ *   elem - Index of TLS element to return
+ *
+ * Returned Value:
+ *   The value of TLS element associated with 'elem'. Errors are not reported.
+ *   Aero is returned in the event of an error, but zero may also be valid
+ *   value and returned when there is no error.  The only possible error would
+ *   be if elem >=CONFIG_TLS_NELEM.
+ *
+ ****************************************************************************/
+
+#if CONFIG_TLS_NELEM > 0
+uintptr_t tls_get_element(int elem);
+#endif
+
+/****************************************************************************
+ * Name: tls_get_element
+ *
+ * Description:
+ *   Set the TLS element associated with the 'elem' index to 'value'
+ *
+ * Input Parameters:
+ *   elem  - Index of TLS element to set
+ *   value - The new value of the TLS element
+ *
+ * Returned Value:
+ *   None.  Errors are not reported.  The only possible error would be if
+ *   elem >=CONFIG_TLS_NELEM.
+ *
+ ****************************************************************************/
+
+#if CONFIG_TLS_NELEM > 0
+void tls_set_element(int elem, uintptr_t value);
 #endif
 
 #endif /* CONFIG_TLS */

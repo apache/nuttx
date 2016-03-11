@@ -537,6 +537,13 @@ config TLS_LOG2_MAXSTACK
 		values will limit the maximum size of the stack (hence the naming
 		of this configuration value).
 
+config TLS_NELEM
+	int "Number of TLS elements"
+	default 0
+	---help---
+		The number of unique TLS elements.  These can be accessed with
+		tls_get_element() and tls_set_element().
+
 endif # TLS
 
 menu "Pthread Options"
