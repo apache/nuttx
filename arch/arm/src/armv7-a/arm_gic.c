@@ -41,10 +41,12 @@
 
 #include <sys/types.h>
 #include <stdint.h>
+#include <errno.h>
 
 #include <arch/irq.h>
 
 #include "up_arch.h"
+#include "up_internal.h"
 #include "gic.h"
 
 #ifdef CONFIG_ARMV7A_HAVE_GIC
@@ -209,7 +211,29 @@ void arm_gic_initialize(void)
 
 uint32_t *arm_decodeirq(uint32_t *regs)
 {
-#  warning Missing logic
+  uint32_t regval;
+  int irq;
+
+  /* Read the interrupt acknowledge register and get the interrupt ID */
+
+  regval = getreg32(GIC_ICCIAR);
+  irq    = (regval & GIC_ICCIAR_INTID_MASK) >> GIC_ICCIAR_INTID_SHIFT;
+
+  /* Ignore spurions IRQs.  ICCIAR will report 1023 if there is no pending
+   * interrupt.
+   */
+
+  DEBUGASSERT(irg < NR_IRQS || irq == 1023);
+  if (irq < NR_IRQS)
+    {
+      /* Dispatch the interrupt */
+
+      regs = arm_doirq(irq, regs);
+    }
+
+  /* Write to the end-of-interrupt register */
+
+  putreg32(regval, GIC_ICCEOIR);
   return regs;
 }
 
@@ -299,8 +323,29 @@ void up_disable_irq(int irq)
 
 int up_prioritize_irq(int irq, int priority)
 {
-#  warning Missing logic
-  return OK;
+  DEBUGASSERT(irq >= 0 && irq < NR_IRQS && priority >= 0 && priority <= 255);
+
+  /* Ignore invalid interrupt IDs */
+
+  if (irq >= 0 && irq < NR_IRQS)
+    {
+      uintptr_t regaddr;
+      uint32_t regval;
+
+      /* Write the new priority to the corresponding field in the in the
+       * distributor Interrupt Priority Register (GIC_ICDIPR).
+       */
+
+      regaddr  = GIC_ICDIPR(irq);
+      regval   = getreg32(regaddr);
+      regval  &= ~GIC_ICDIPR_ID_MASK(irq);
+      regval  |= GIC_ICDIPR_ID(irq, priority);
+      putreg32(regval, regaddr);
+
+      return OK;
+    }
+
+  return -EINVAL;
 }
 
 #endif /* CONFIG_ARMV7A_HAVE_GIC */

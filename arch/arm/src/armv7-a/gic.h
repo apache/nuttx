@@ -256,6 +256,8 @@
                                              /* Bits 13-31: Reserved */
 /* End of Interrupt Register */
 
+#define GIC_ICCEOIR_SPURIOUS       (0x3ff)
+
 #define GIC_ICCEOIR_INTID_SHIFT    (0)       /* Bits 0-9: Interrupt ID */
 #define GIC_ICCEOIR_INTID_MASK     (0x3ff << GIC_ICCEOIR_INTID_SHIFT)
 #  define GIC_ICCEOIR_INTID(n)     ((uint32_t)(n) << GIC_ICCEOIR_INTID_SHIFT)
