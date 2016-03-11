@@ -20,6 +20,18 @@ Status
 populated with the port is a long way from being complete or even ready to
 begin any kind of testing.
 
+2016-03-11: The i.MX6Q port is essentially code complete.  There are a few
+issues that need to be revisited in the GIC initialization logic.  There is
+no clock configuration logic.  This is probably not an issue if we are
+loaded into SDRAM by a bootloader (because we cannot change the clocking
+anyway in that case).
+
+Parts of the SMP configuration are in place, but several key SMP interfaces
+are still missing.
+
+So there is a lot of testing that could be done but, unfortunately, I still
+have no i.MX6 hardware to test on.
+
 Platform Features
 =================
 
