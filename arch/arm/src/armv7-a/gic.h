@@ -438,6 +438,9 @@
  * CPU ID when it deals with SGIs. The priority of an SGI depends on the
  * value set by the receiving Cortex-A9 processor in the banked SGI priority
  * registers, not the priority set by the sending Cortex-A9 processor.
+ *
+ * NOTE: If CONFIG_SMP is enabled then SGI1 and SGI2 are used for inter-CPU
+ * task management.
  */
 
 #define GIC_IRQ_SGI0              0  /* Sofware Generated Interrupt (SGI) 0 */
@@ -512,6 +515,72 @@ void arm_gic_initialize(void);
  ****************************************************************************/
 
 uint32_t *arm_decodeirq(uint32_t *regs);
+
+/****************************************************************************
+ * Name: arm_cpu_sgi
+ *
+ * Description:
+ *   Perform a Software Generated Interrupt (SGI).  If CONFIG_SMP is
+ *   selected, then the SGI is sent to all CPUs specified in the CPU set.
+ *   That set may include the current CPU.
+ *
+ *   If CONFIG_SMP is not selected, the cpuset is ignored and SGI is sent
+ *   only to the current CPU.
+ *
+ * Input Paramters
+ *   sgi    - The SGI interrupt ID (0-15)
+ *   cpuset - The set of CPUs to receive the SGI
+ *
+ * Returned Value:
+ *   OK is always retured at present.
+ *
+ ****************************************************************************/
+
+int arm_cpu_sgi(int sgi, unsigned int cpuset);
+
+/****************************************************************************
+ * Name: arm_start_handler
+ *
+ * Description:
+ *   This is the handler for SGI1.  This handler simply returns from the
+ *   interrupt, restoring the state of the new task at the head of the ready
+ *   to run list.
+ *
+ * Input Parameters:
+ *   Standard interrupt handling
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SMP
+int arm_start_handler(int irq, FAR void *context);
+#endif
+
+/****************************************************************************
+ * Name: arm_pause_handler
+ *
+ * Description:
+ *   This is the handler for SGI2.  It performs the following operations:
+ *
+ *   1. It saves the current task state at the head of the current assigned
+ *      task list.
+ *   2. It waits on a spinlock, then
+ *   3. Returns from interrupt, restoring the state of the new task at the
+ *      head of the ready to run list.
+ *
+ * Input Parameters:
+ *   Standard interrupt handling
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SMP
+int arm_pause_handler(int irq, FAR void *context);
+#endif
 
 #undef EXTERN
 #ifdef __cplusplus

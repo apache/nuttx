@@ -77,7 +77,7 @@ CMN_CSRCS += arm_schedulesigaction.c arm_sigdeliver.c arm_syscall.c
 CMN_CSRCS += arm_unblocktask.c arm_undefinedinsn.c
 
 ifeq ($(CONFIG_SMP),y)
-CMN_CSRCS += arm_cpuindex.c
+CMN_CSRCS += arm_cpuindex.c arm_cpustart.c arm_cpupause.c
 endif
 
 # Use common heap allocation for now (may need to be customized later)

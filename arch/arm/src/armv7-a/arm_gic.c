@@ -41,8 +41,11 @@
 
 #include <sys/types.h>
 #include <stdint.h>
+#include <stdint.h>
+#include <assert.h>
 #include <errno.h>
 
+#include <nuttx/arch.h>
 #include <arch/irq.h>
 
 #include "up_arch.h"
@@ -126,6 +129,13 @@ void arm_gic_initialize(void)
           putreg32(0x80808080, GIC_ICDIPR(irq));   /* SPI priority */
           putreg32(0x01010101, GIC_ICDIPTR(irq));  /* SPI on CPU0 */
         }
+
+#ifdef CONFIG_SMP
+      /* Attach SGI interrupt handlers */
+
+      DEBUGVERIFY(irq_attach(GIC_IRQ_SGI1, arm_start_handler));
+      DEBUGVERIFY(irq_attach(GIC_IRQ_SGI2, arm_pause_handler));
+#endif
     }
 
   /* The remaining steps need to be done by all CPUs */
@@ -388,6 +398,44 @@ int up_prioritize_irq(int irq, int priority)
     }
 
   return -EINVAL;
+}
+
+/****************************************************************************
+ * Name: arm_cpu_sgi
+ *
+ * Description:
+ *   Perform a Software Generated Interrupt (SGI).  If CONFIG_SMP is
+ *   selected, then the SGI is sent to all CPUs specified in the CPU set.
+ *   That set may include the current CPU.
+ *
+ *   If CONFIG_SMP is not selected, the cpuset is ignored and SGI is sent
+ *   only to the current CPU.
+ *
+ * Input Paramters
+ *   sgi    - The SGI interrupt ID (0-15)
+ *   cpuset - The set of CPUs to receive the SGI
+ *
+ * Returned Value:
+ *   OK is always retured at present.
+ *
+ ****************************************************************************/
+
+int arm_cpu_sgi(int sgi, unsigned int cpuset)
+{
+  uint32_t regval;
+
+  DEBUGASSERT(cpu >= 0 && cpu < CONFIG_SMP_NCPUS);
+
+#if CONFIG_SMP
+  regval = GIC_ICDSGIR_INTID(sgi) |  GIC_ICDSGIR_CPUTARGET(cpuset) |
+           GIC_ICDSGIR_TGTFILTER_LIST;
+#else
+  regval = GIC_ICDSGIR_INTID(sgi) |  GIC_ICDSGIR_CPUTARGET(0) |
+           GIC_ICDSGIR_TGTFILTER_THIS;
+#endif
+
+  putreg32(regval, GIC_ICDSGIR);
+  return OK;
 }
 
 #endif /* CONFIG_ARMV7A_HAVE_GIC */
