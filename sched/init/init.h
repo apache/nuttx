@@ -65,7 +65,7 @@
 void os_start(void);
 
 /****************************************************************************
- * Name: os_smpstart
+ * Name: os_smp_start
  *
  * Description:
  *   In an SMP configution, only one CPU is initially active (CPU 0). System
@@ -82,11 +82,11 @@ void os_start(void);
  ****************************************************************************/
 
 #ifdef CONFIG_SMP
-int os_smpstart(void);
+int os_smp_start(void);
 #endif
 
 /****************************************************************************
- * Name: os_idletask
+ * Name: os_idle_trampoline
  *
  * Description:
  *   This is the common IDLE task for CPUs 1 through (CONFIG_SMP_NCPUS-1).
@@ -101,7 +101,26 @@ int os_smpstart(void);
  ****************************************************************************/
 
 #ifdef CONFIG_SMP
-int os_idletask(int argc, FAR char *argv[]);
+void os_idle_trampoline(void);
+#endif
+
+/****************************************************************************
+ * Name: os_idle_task
+ *
+ * Description:
+ *   This is the common IDLE task for CPUs 1 through (CONFIG_SMP_NCPUS-1).
+ *   It is equivalent to the CPU 0 IDLE logic in os_start.c
+ *
+ * Input Parameters:
+ *   Standard task arguments.
+ *
+ * Returned Value:
+ *   This function does not return.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SMP
+int os_idle_task(int argc, FAR char *argv[]);
 #endif
 
 /****************************************************************************

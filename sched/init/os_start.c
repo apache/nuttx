@@ -453,11 +453,13 @@ void os_start(void)
 #ifdef CONFIG_SMP
       if (cpu > 0)
         {
-          g_idletcb[cpu].cmn.entry.main = os_idletask;
+          g_idletcb[cpu].cmn.start      = os_idle_trampoline;
+          g_idletcb[cpu].cmn.entry.main = os_idle_task;
         }
       else
 #endif
         {
+          g_idletcb[cpu].cmn.start      = (start_t)os_start;
           g_idletcb[cpu].cmn.entry.main = (main_t)os_start;
         }
 
@@ -762,7 +764,7 @@ void os_start(void)
 
   /* Then start the other CPUs */
 
-  DEBUGVERIFY(os_smpstart());
+  DEBUGVERIFY(os_smp_start());
 
 #endif /* CONFIG_SMP */
 

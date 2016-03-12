@@ -1743,7 +1743,6 @@ int up_cpu_index(void);
  *   cpu - The index of the CPU being started.  This will be a numeric
  *         value in the range of from one to (CONFIG_SMP_NCPUS-1).  (CPU
  *         0 is already active)
- *   idletask - The entry point to the IDLE task.
  *
  * Returned Value:
  *   Zero on success; a negated errno value on failure.
@@ -1751,7 +1750,7 @@ int up_cpu_index(void);
  ****************************************************************************/
 
 #ifdef CONFIG_SMP
-int up_cpu_start(int cpu, main_t idletask);
+int up_cpu_start(int cpu);
 #endif
 
 /****************************************************************************

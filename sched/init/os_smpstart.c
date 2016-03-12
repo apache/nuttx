@@ -42,7 +42,6 @@
 #include <sys/types.h>
 #include <stdio.h>
 #include <queue.h>
-#include <errno.h>
 #include <debug.h>
 
 #include <nuttx/arch.h>
@@ -74,11 +73,11 @@ static const char g_idlename[] = "CPUn Idle"
 #endif
 
 /****************************************************************************
- * Private Functions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: os_idletask
+ * Name: os_idle_trampoline
  *
  * Description:
  *   This is the common IDLE task for CPUs 1 through (CONFIG_SMP_NCPUS-1).
@@ -92,7 +91,33 @@ static const char g_idlename[] = "CPUn Idle"
  *
  ****************************************************************************/
 
-int os_idletask(int argc, FAR char *argv[])
+void os_idle_trampoline(void)
+{
+  /* Transfer control to the IDLE task */
+
+  (void)os_idle_task(0, NULL);
+
+  /* The IDLE task should never return */
+
+  PANIC();
+}
+
+/****************************************************************************
+ * Name: os_idle_task
+ *
+ * Description:
+ *   This is the common IDLE task for CPUs 1 through (CONFIG_SMP_NCPUS-1).
+ *   It is equivalent to the CPU 0 IDLE logic in os_start.c
+ *
+ * Input Parameters:
+ *   Standard task arguments.
+ *
+ * Returned Value:
+ *   This function does not return.
+ *
+ ****************************************************************************/
+
+int os_idle_task(int argc, FAR char *argv[])
 {
   /* Enter the IDLE loop */
 
@@ -133,11 +158,7 @@ int os_idletask(int argc, FAR char *argv[])
 }
 
 /****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: os_smpstart
+ * Name: os_smp_start
  *
  * Description:
  *   In an SMP configution, only one CPU is initially active (CPU 0). System
@@ -157,18 +178,38 @@ int os_idletask(int argc, FAR char *argv[])
  *
  ****************************************************************************/
 
-int os_smpstart(void)
+int os_smp_start(void)
 {
   int ret;
   int cpu;
 
-  /* CPU0 is already running.  Start the remaining CPUs */
+  /* Create a stack for all CPU IDLE threads (except CPU0 which already has
+   * a stack).
+   */
 
   for (cpu = 1; cpu < CONFIG_SMP_NCPUS; cpu++)
     {
-      /* And start the CPU.  */
+      FAR struct tcb_s *tcb = current_task(cpu);
+      DEBUGASSERT(tcb != NULL);
 
-      ret = up_cpu_start(cpu, os_idletask);
+      ret = up_create_stack(tcb, CONFIG_SMP_IDLETHREAD_STACKSIZE,
+                            TCB_FLAG_TTYPE_KERNEL);
+      if (ret < 0)
+        {
+          sdbg("ERROR: Failed to allocate stack for CPU%d\n", cpu);
+          return ret;
+        }
+    }
+
+  /* Then start all of the other CPUs after we have completed the memory
+   * allocations.  CPU0 is already running.
+   */
+
+  for (cpu = 1; cpu < CONFIG_SMP_NCPUS; cpu++)
+    {
+      /* Start the CPU */
+
+      ret = up_cpu_start(cpu);
       if (ret < 0)
         {
           sdbg("ERROR: Failed to start CPU%d: %d\n", cpu, ret);
