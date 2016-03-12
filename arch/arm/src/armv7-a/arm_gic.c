@@ -89,7 +89,7 @@ void arm_gic_initialize(void)
   field  = (regval & GIC_ICDICTR_ITLINES_MASK) >> GIC_ICDICTR_ITLINES_SHIFT;
   nlines = (field + 1) << 5;
 
-  /* Initialize SPIs.  This should be done only by CPU0. */
+  /* Initialize SPIs.  The following should be done only by CPU0. */
 
 #ifdef CONFIG_SMP
   if (cpu == 0)
@@ -103,7 +103,9 @@ void arm_gic_initialize(void)
        *    sensitive.
        * 3. Innterrupt Clear-Enable (ICDICER)
        * 3. Priority of the SPI using the priority set register (ICDIPR).
-       *    All set to the middle priority 0x80.
+       *    Priority values are 8-bit unsigned binary. A GIC supports a
+       *    minimum of 16 and a maximum of 256 priority levels. Here all
+       *    are set to the middle priority 128 (0x80).
        * 4. Target that receives the SPI interrupt (ICDIPTR).  Set all to
        *    CPU0.
        */
@@ -126,6 +128,8 @@ void arm_gic_initialize(void)
         }
     }
 
+  /* The remaining steps need to be done by all CPUs */
+
   /* Initialize SGIs and PPIs.  NOTE: A processor in non-secure state cannot
    * program its interrupt security registers and must get a secure processor
    * to program the registers.
@@ -145,41 +149,75 @@ void arm_gic_initialize(void)
   putreg32(0x80000000, GIC_ICDIPR(24));        /* PPI[0] priority */
   putreg32(0x80808080, GIC_ICDIPR(28));        /* PPI[1:4] priority */
 
+#if defined(CONFIG_ARCH_TRUSTZONE_SECURE) || defined(CONFIG_ARCH_TRUSTZONE_BOTH)
   /* Set FIQn=1 if secure interrupts are to signal using nfiq_c.
+   *
    * NOTE:  Only for processors that operate in secure state.
    * REVISIT: Do I need to do this?
    */
 
+#endif
+
+#ifdef CONFIG_ARCH_TRUSTZONE_BOTH
   /* Program the AckCtl bit to select the required interrupt acknowledge
    * behavior.
+   *
    * NOTE: Only for processors that operate in both secure and non-secure
    * state.
    */
-#warning Missing logic
+
+#  warning Missing logic
 
   /* Program the SBPR bit to select the required binary pointer behavior.
+   *
    * NOTE: Only for processors that operate in both secure and non-secure
    * state.
    */
-#warning Missing logic
 
+#  warning Missing logic
+#endif
+
+#if defined(CONFIG_ARCH_TRUSTZONE_SECURE) || defined(CONFIG_ARCH_TRUSTZONE_BOTH)
   /* Set EnableS=1 to enable CPU interface to signal secure interrupts.
+   *
    * NOTE:  Only for processors that operate in secure mostatede.
    */
-#warning Missing logic
 
+#  warning Missing logic
+#endif
+
+#if defined(CONFIG_ARCH_TRUSTZONE_NONSECURE) || defined(CONFIG_ARCH_TRUSTZONE_BOTH)
   /* Set EnableNS=1 to enable the CPU to signal non-secure interrupts.
+   *
    * NOTE:  Only for processors that operate in non-secure state.
    * REVISIT: Initial implementation operates only in secure state.
    */
 
+#  warning Missing logic
+#endif
+
   /* Set the binary point register.
-   * NOTE: If the processor operates in both security state and SBPR=0,
-   * then it must switch to the other security state and repear the
-   * programming of the binary point register so that the binary point
-   * will be programmed for interrupts in both security states.
+   *
+   * Priority values are 8-bit unsigned binary.  The binary point is a 3-bit
+   * field; the value n (n=0-6) specifies that bits (n+1) through bit 7 are
+   * used in the comparison for interrupt pre-emption.  A GIC supports a
+   * minimum of 16 and a maximum of 256 priority levels so not all binary
+   * point settings may be meaningul. The special value n=7 (GIC_ICCBPR_NOPREMPT)
+   * disables pre-emption.  We disable all pre-emption here to prevent nesting
+   * of interrupt handling.
    */
-#warning Missing logic
+
+  putreg32(GIC_ICCBPR_NOPREMPT, GIC_ICCBPR);
+
+#ifdef CONFIG_ARCH_TRUSTZONE_BOTH
+  /* If the processor operates in both security states and SBPR=0, then it
+   * must switch to the other security state and repeat the programming of
+   * the binary point register so that the binary point will be programmed
+   * for interrupts in both security states.
+   */
+
+#  warning Missing logic
+#endif
 
   /* Enable the distributor by setting the the Enable bit in the enable
    * register.
@@ -187,11 +225,15 @@ void arm_gic_initialize(void)
 
   putreg32(GIC_ICCICR_ENABLE, GIC_ICCICR);
 
+#ifdef CONFIG_ARCH_TRUSTZONE_BOTH
   /* A processor in the secure state must then switch to the non-secure
    * a repeat setting of the enable bit in the enable register.  This
    * enables distributor to respond to interrupt in both security states.
    * REVISIT: Initial implementation operates only in secure state.
    */
+
+#  warning Missing logic
+#endif
 }
 
 /****************************************************************************

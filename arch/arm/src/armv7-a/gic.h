@@ -235,14 +235,22 @@
 #define GIC_ICCPMR_MASK            (15 << GIC_ICCPMR_SHIFT)
 #  define GIC_ICCPMR_VALUE(n)      ((uint32_t)(n) << GIC_ICCPMR_SHIFT)
                                              /* Bits 8-31: Reserved */
-/* Binary point Register and liased Non-secure Binary Point Register */
+
+/* Binary point Register and Aliased Non-secure Binary Point Register.
+ * Priority values are 8-bit unsigned binary. A GIC supports a minimum of
+ * 16 and a maximum of 256 priority levels.  As a result, not all binary
+ * point settings make sense.
+ */
 
 #define GIC_ICCBPR_SHIFT           (0)       /* Bits 0-2: Binary point */
 #define GIC_ICCBPR_MASK            (7 << GIC_ICCBPR_SHIFT)
-#  define GIC_ICCBPR_ALL           (3 << GIC_ICCBPR_SHIFT) /* All priority bits are compared for pre-emption */
+#  define GIC_ICCBPR_1_7           (0 << GIC_ICCBPR_SHIFT) /* Priority bits [7:1] compared for pre-emption */
+#  define GIC_ICCBPR_2_7           (1 << GIC_ICCBPR_SHIFT) /* Priority bits [7:2] compared for pre-emption */
+#  define GIC_ICCBPR_3_7           (2 << GIC_ICCBPR_SHIFT) /* Priority bits [7:2] compared for pre-emption */
+#  define GIC_ICCBPR_4_7           (3 << GIC_ICCBPR_SHIFT) /* Priority bits [7:2] compared for pre-emption */
 #  define GIC_ICCBPR_5_7           (4 << GIC_ICCBPR_SHIFT) /* Priority bits [7:5] compared for pre-emption */
 #  define GIC_ICCBPR_6_7           (5 << GIC_ICCBPR_SHIFT) /* Priority bits [7:6] compared for pre-emption */
-#  define GIC_ICCBPR_7             (6 << GIC_ICCBPR_SHIFT) /* Priority bit [7] compared for pre-emption */
+#  define GIC_ICCBPR_7_7           (6 << GIC_ICCBPR_SHIFT) /* Priority bit [7] compared for pre-emption */
 #  define GIC_ICCBPR_NOPREMPT      (7 << GIC_ICCBPR_SHIFT) /* No pre-emption is performed */
                                              /* Bits 3-31: Reserved */
 /* Interrupt Acknowledge Register */
