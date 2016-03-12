@@ -108,14 +108,13 @@ int arm_start_handler(int irq, FAR void *context)
  *   cpu - The index of the CPU being started.  This will be a numeric
  *         value in the range of from one to (CONFIG_SMP_NCPUS-1).  (CPU
  *         0 is already active)
- *   idletask - The entry point to the IDLE task.
  *
  * Returned Value:
  *   Zero on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
-int up_cpu_start(int cpu, main_t idletask)
+int up_cpu_start(int cpu)
 {
   DEBUGASSERT(cpu >= 0 && cpu < CONFIG_SMP_NCPUS && cpu != this_cpu());
 

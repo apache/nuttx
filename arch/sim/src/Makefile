@@ -70,7 +70,7 @@ ifeq ($(CONFIG_SPINLOCK),y)
 endif
 
 ifeq ($(CONFIG_SMP),y)
-  CSRCS += up_smpsignal.c
+  CSRCS += up_smpsignal.c up_smphook.c
   HOSTSRCS += up_simsmp.c
 endif
 
@@ -181,7 +181,7 @@ endif
 endif
 
 ifeq ($(CONFIG_SMP),y)
-  REQUIREDOBJS += up_smpsignal$(OBJEXT)
+  REQUIREDOBJS += up_smpsignal$(OBJEXT) up_smphook$(OBJEXT)
 endif
 
 # Determine which NuttX libraries will need to be linked in

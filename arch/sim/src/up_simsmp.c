@@ -70,7 +70,6 @@ struct sim_cpuinfo_s
 {
   int cpu;                /* CPU number */
   pthread_mutex_t mutex;  /* For synchronization */
-  main_t idletask;        /* IDLE task entry point */
 };
 
 /****************************************************************************
@@ -89,6 +88,7 @@ static volatile spinlock_t    g_sim_cpuwait[CONFIG_SMP_NCPUS];
 void os_start(void) __attribute__ ((noreturn));
 void sim_cpu_pause(int cpu, volatile spinlock_t *wait,
                    volatile unsigned char *paused);
+void sim_smp_hook(void);
 
 /****************************************************************************
  * Private Functions
@@ -191,9 +191,12 @@ static void *sim_idle_trampoline(void *arg)
 
   (void)pthread_mutex_unlock(&cpuinfo->mutex);
 
-  /* Give control to the IDLE task */
+  /* Give control to the IDLE task via the nasty little sim_smp_hook().
+   * sim_smp_hook() is logically a part of this function but needs to be
+   * inserted in the path because in needs to access NuttX domain definitions.
+   */
 
-  (void)cpuinfo->idletask(0, (char **)0);
+  sim_smp_hook();
 
   /* The IDLE task will not return.  This is just to keep the compiler happy */
 
@@ -361,14 +364,13 @@ int up_cpu_index(void)
  *   cpu - The index of the CPU being started.  This will be a numeric
  *         value in the range of from one to (CONFIG_SMP_NCPUS-1).  (CPU
  *         0 is already active)
- *   idletask - The entry point to the IDLE task.
  *
  * Returned Value:
  *   Zero on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
-int up_cpu_start(int cpu, main_t idletask)
+int up_cpu_start(int cpu)
 {
   struct sim_cpuinfo_s cpuinfo;
   int ret;
@@ -376,7 +378,6 @@ int up_cpu_start(int cpu, main_t idletask)
   /* Initialize the CPU info */
 
   cpuinfo.cpu = cpu;
-  cpuinfo.idletask = idletask;
   ret = pthread_mutex_init(&cpuinfo.mutex, NULL);
   if (ret != 0)
     {

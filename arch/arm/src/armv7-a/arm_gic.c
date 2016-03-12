@@ -426,7 +426,7 @@ int arm_cpu_sgi(int sgi, unsigned int cpuset)
 
   DEBUGASSERT(cpu >= 0 && cpu < CONFIG_SMP_NCPUS);
 
-#if CONFIG_SMP
+#ifdef CONFIG_SMP
   regval = GIC_ICDSGIR_INTID(sgi) |  GIC_ICDSGIR_CPUTARGET(cpuset) |
            GIC_ICDSGIR_TGTFILTER_LIST;
 #else

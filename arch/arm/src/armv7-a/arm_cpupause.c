@@ -55,7 +55,8 @@
  * Private Data
  ****************************************************************************/
 
-static spinlock_t g_pause_spinlock[CONFIG_SMP_NCPUS];
+static spinlock_t g_cpu_wait[CONFIG_SMP_NCPUS];
+static spinlock_t g_cpu_paused[CONFIG_SMP_NCPUS];
 
 /****************************************************************************
  * Public Functions
@@ -98,7 +99,8 @@ int arm_pause_handler(int irq, FAR void *context)
 
   /* Wait for the spinlock to be released */
 
-  spin_lock(&g_pause_spinlock[cpu]);
+  spin_unlock(&g_cpu_paused[cpu]);
+  spin_lock(&g_cpu_wait[cpu]);
 
   /* Restore the exception context of the tcb at the (new) head of the
    * assigned task list.
@@ -115,7 +117,7 @@ int arm_pause_handler(int irq, FAR void *context)
    */
 
   up_restorestate(tcb->xcp.regs);
-  spin_unlock(&g_pause_spinlock[cpu]);
+  spin_unlock(&g_cpu_wait[cpu]);
   return OK;
 }
 
@@ -141,18 +143,48 @@ int arm_pause_handler(int irq, FAR void *context)
 
 int up_cpu_pause(int cpu)
 {
+  int ret;
+
   DEBUGASSERT(cpu >= 0 && cpu < CONFIG_SMP_NCPUS && cpu != this_cpu());
 
-  /* Take the spinlock.  The spinlock will cause the SGI2 handler to block
-   * on 'cpu'.
+  /* Take the both spinlocks.  The g_cpu_wait spinlock will prevent the SGI2
+   * handler from returning until up_cpu_resume() is called; g_cpu_paused
+   * is a handshake that will prefent this function from returning until
+   * the CPU is actually paused.
    */
 
-  DEBUGASSERT(!spin_islocked(&g_pause_spinlock[cpu]));
-  spin_lock(&g_pause_spinlock[cpu]);
+  DEBUGASSERT(!spin_islocked(&g_cpu_wait[cpu]) &&
+              !spin_islocked(&g_cpu_paused[cpu]));
+
+  spin_lock(&g_cpu_wait[cpu]);
+  spin_lock(&g_cpu_paused[cpu]);
 
   /* Execute SGI2 */
 
-  return arm_cpu_sgi(GIC_IRQ_SGI2, (1 << cpu));
+  ret = arm_cpu_sgi(GIC_IRQ_SGI2, (1 << cpu));
+  if (ret < 0)
+    {
+      /* What happened?  Unlock the g_cpu_wait spinlock */
+
+      spin_unlock(&g_cpu_wait[cpu]);
+    }
+  else
+    {
+      /* Wait for the other CPU to unlock g_cpu_paused meaning that
+       * it is fully paused and ready for up_cpu_resume();
+       */
+
+      spin_lock(&g_cpu_paused[cpu]);
+    }
+
+  spin_unlock(&g_cpu_paused[cpu]);
+
+  /* On successful return g_cpu_wait will be locked, the other CPU will be
+   * spinninf on g_cpu_wait and will not continue until g_cpu_resume() is
+   * called.  g_cpu_paused will be unlocked in any case.
+   */
+
+ return ret;
 }
 
 /****************************************************************************
@@ -183,8 +215,10 @@ int up_cpu_resume(int cpu)
    * established thread.
    */
 
-  DEBUGASSERT(spin_islocked(&g_pause_spinlock[cpu]));
-  spin_unlock(&g_pause_spinlock[cpu]);
+  DEBUGASSERT(spin_islocked(&g_cpu_wait[cpu]) &&
+              !spin_islocked(&g_cpu_paused[cpu]));
+
+  spin_unlock(&g_cpu_wait[cpu]);
   return OK;
 }
 

@@ -228,6 +228,12 @@ void sim_cpu_pause(int cpu, FAR volatile spinlock_t *wait,
                    FAR volatile unsigned char *paused);
 #endif
 
+/* up_smphook.c ***********************************************************/
+
+#ifdef CONFIG_SMP
+void sim_smp_hook(void);
+#endif
+
 /* up_tickless.c **********************************************************/
 
 #ifdef CONFIG_SCHED_TICKLESS
