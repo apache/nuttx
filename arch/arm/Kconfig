@@ -510,9 +510,37 @@ config ARCH_DPFPU
 		Enable toolchain support for double precision (64-bit) floating
 		point if both the toolchain and the hardware support it.
 
+config ARCH_HAVE_TRUSTZONE
+	bool
+	default n
+	---help---
+		Automatically selected to indicate that the ARM CPU supports
+		TrustZone.
+
+choice
+	prompt "TrustZone Configuration"
+	default ARCH_TRUSTZONE_SECURE
+	depends on ARCH_HAVE_TRUSTZONE
+
+config ARCH_TRUSTZONE_SECURE
+	bool "All CPUs operate secure state"
+
+config ARCH_TRUSTZONE_NONSECURE
+	bool "All CPUs operate non-secure state"
+	depends on EXPERIMENTAL
+
+config ARCH_TRUSTZONE_BOTH
+	bool "CPUs operate in both secure and non-secure states"
+	depends on EXPERIMENTAL
+
+endchoice # TrustZone Configuration
+
 config ARM_HAVE_MPU_UNIFIED
 	bool
 	default n
+	---help---
+		Automatically selected to indicate that the CPU supports a
+		unified MPU for both instruction and data addresses.
 
 config ARM_MPU
 	bool "MPU support"

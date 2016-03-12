@@ -157,10 +157,6 @@ config SAMA5_HAVE_TC2
 	bool
 	default n
 
-config SAMA5_HAVE_TRUSTZONE
-	bool
-	default n
-
 config SAMA5_HAVE_TWI3
 	bool
 	default n
@@ -215,7 +211,7 @@ config ARCH_CHIP_SAMA5D2
 	select SAMA5_HAVE_SFC
 	select SAMA5_HAVE_SPI2
 	select SAMA5_HAVE_TC1
-	select SAMA5_HAVE_TRUSTZONE
+	select ARCH_HAVE_TRUSTZONE
 
 config ARCH_CHIP_SAMA5D3
 	bool
@@ -252,7 +248,7 @@ config ARCH_CHIP_SAMA5D4
 	select SAMA5_HAVE_SPI2
 	select SAMA5_HAVE_TC1
 	select SAMA5_HAVE_TC2
-	select SAMA5_HAVE_TRUSTZONE
+	select ARCH_HAVE_TRUSTZONE
 	select SAMA5_HAVE_TWI3
 
 choice
@@ -748,13 +744,6 @@ config SAMA5_VDEC
 	depends on SAMA5_HAVE_VDEC
 
 endmenu # SAMA5 Peripheral Support
-
-config SAMA5_SECURE
-	bool "Enable secure features"
-	default n
-	depends on SAMA5_HAVE_TRUSTZONE && EXPERIMENTAL
-	---help---
-		Does not do anything now, but may in the future
 
 config SAMA5_PIO_IRQ
 	bool "PIO pin interrupts"
