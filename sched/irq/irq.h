@@ -112,4 +112,3 @@ int irq_unexpected_isr(int irq, FAR void *context);
 #endif
 
 #endif /* __SCHED_IRQ_IRQ_H */
-
