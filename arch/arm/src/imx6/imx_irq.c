@@ -103,7 +103,7 @@ void up_irqinitialize(void)
   }
 #endif
 
-  /* Initialize the Generic Interrupt Controller (GIC) for this CPU */
+  /* Initialize the Generic Interrupt Controller (GIC) for CPU0 */
 
   arm_gic_initialize();
 

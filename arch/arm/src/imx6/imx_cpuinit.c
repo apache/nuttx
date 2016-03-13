@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/sim/src/up_simhook.c
+ * arch/arm/src/imx6/imx_clockconfig.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,11 +39,9 @@
 
 #include <nuttx/config.h>
 
-#include <assert.h>
+#include <nuttx/arch.h>
 
-#include <nuttx/sched.h>
-
-#include "sched/sched.h"
+#include "gic.h"
 
 #ifdef CONFIG_SMP
 
@@ -71,38 +69,8 @@
 
 int up_cpu_initialize(void)
 {
+  /* Initialize the Generic Interrupt Controller (GIC) for CPU0 */
+
+  arm_gic_initialize();
   return OK;
 }
-
-/****************************************************************************
- * Name: sim_smp_hook
- *
- * Description:
- *   This is a mindless little hook between sim_idle_trampoline() and the
- *   real IDLE task logic.  This is only needed because we need to access
- *   elements of the TCB in the simulation domain but sim_idle_trampoline()
- *   lies in the host domain.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None (should not return)
- *
- ****************************************************************************/
-
-void sim_smp_hook(void)
-{
-  struct tcb_s *tcb = this_task();
-  DEBUGASSERT(tcb != NULL && tcb->start != NULL);
-
-  /* Transfer control to the "real" thread start-up routine */
-
-  tcb->start();
-
-  /* That function should not return. */
-
-  PANIC();
-}
-
-#endif /* CONFIG_SMP */
