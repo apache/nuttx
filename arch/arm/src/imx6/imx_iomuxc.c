@@ -348,7 +348,7 @@ static const uint8_t g_mux2ctl_map[IMX_PADMUX_NREGISTERS] =
 
 unsigned int imx_padmux_map(unsigned int padmux)
 {
-  DEBUGASSERT(padmx < IMX_PADMUX_NREGISTERS);
+  DEBUGASSERT(padmux < IMX_PADMUX_NREGISTERS);
   return (unsigned int)g_mux2ctl_map[padmux];
 }
 

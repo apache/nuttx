@@ -105,7 +105,8 @@ void up_irqinitialize(void)
 
   /* Initialize the Generic Interrupt Controller (GIC) for CPU0 */
 
-  arm_gic_initialize();
+  arm_gic0_initialize();  /* Initialization unique to CPU0 */
+  arm_gic_initialize();   /* Initialization common to all CPUs */
 
 #ifdef CONFIG_ARCH_LOWVECTORS
   /* If CONFIG_ARCH_LOWVECTORS is defined, then the vectors located at the

@@ -59,10 +59,104 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: arm_gic_nlines
+ *
+ * Description:
+ *   Return the number of interrupt lines supported by this GIC
+ *   implementation (include both PPIs (32) and SPIs).
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   The number of interrupt lines.
+ *
+ ****************************************************************************/
+
+static inline unsigned int arm_gic_nlines(void)
+{
+  uint32_t regval;
+  uint32_t field;
+
+  /* Get the number of interrupt lines. */
+
+  regval = getreg32(GIC_ICDICTR);
+  field  = (regval & GIC_ICDICTR_ITLINES_MASK) >> GIC_ICDICTR_ITLINES_SHIFT;
+  return (field + 1) << 5;
+}
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: arm_gic0_initialize
+ *
+ * Description:
+ *   Perform common, one-time GIC initialization on CPU0 only.  Both
+ *   arm_gic0_initialize() must be called on CPU0; arm_gic_initialize() must
+ *   be called for all CPUs.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void arm_gic0_initialize(void)
+{
+  unsigned int nlines = arm_gic_nlines();
+  unsigned int irq;
+
+  /* Initialize SPIs.  The following should be done only by CPU0. */
+
+  /* A processor in Secure State sets:
+   *
+   * 1. Which interrupts are non-secure (ICDISR).
+   *    REVISIT: Which bit state corresponds to secure?
+   * 2. Trigger mode of the SPI (ICDICFR). All fields set to 11->Edge
+   *    sensitive.
+   * 3. Innterrupt Clear-Enable (ICDICER)
+   * 3. Priority of the SPI using the priority set register (ICDIPR).
+   *    Priority values are 8-bit unsigned binary. A GIC supports a
+   *    minimum of 16 and a maximum of 256 priority levels. Here all
+   *    are set to the middle priority 128 (0x80).
+   * 4. Target that receives the SPI interrupt (ICDIPTR).  Set all to
+   *    CPU0.
+   */
+
+  /* Registers with 1-bit per interrupt */
+
+  for (irq = GIC_IRQ_SPI; irq < nlines; irq += 32)
+    {
+      putreg32(0x00000000, GIC_ICDISR(irq));   /* SPIs secure */
+      putreg32(0xffffffff, GIC_ICDICFR(irq));  /* SPIs edge triggered */
+      putreg32(0xffffffff, GIC_ICDICER(irq));  /* SPIs disabled */
+    }
+
+  /* Registers with 8-bits per interrupt */
+
+  for (irq = GIC_IRQ_SPI; irq < nlines; irq += 8)
+    {
+      putreg32(0x80808080, GIC_ICDIPR(irq));   /* SPI priority */
+      putreg32(0x01010101, GIC_ICDIPTR(irq));  /* SPI on CPU0 */
+    }
+
+#ifdef CONFIG_SMP
+  /* Attach SGI interrupt handlers */
+
+  DEBUGVERIFY(irq_attach(GIC_IRQ_SGI1, arm_start_handler));
+  DEBUGVERIFY(irq_attach(GIC_IRQ_SGI2, arm_pause_handler));
+#endif
+}
+
+/****************************************************************************
  * Name: arm_gic_initialize
  *
  * Description:
- *   Perform basic GIC initialization for the current CPU
+ *   Perform common GIC initialization for the current CPU (all CPUs)
  *
  * Input Parameters:
  *   None
@@ -74,71 +168,9 @@
 
 void arm_gic_initialize(void)
 {
-  unsigned int nlines;
-  unsigned int irq;
-  uint32_t regval;
-  uint32_t field;
-#ifdef CONFIG_SMP
-  int cpu;
+  uint32_t iccicr;
 
-  /* Which CPU are we initializing */
-
-  cpu = up_cpu_index();
-#endif
-
-  /* Get the number of interrupt lines. */
-
-  regval = getreg32(GIC_ICDICTR);
-  field  = (regval & GIC_ICDICTR_ITLINES_MASK) >> GIC_ICDICTR_ITLINES_SHIFT;
-  nlines = (field + 1) << 5;
-
-  /* Initialize SPIs.  The following should be done only by CPU0. */
-
-#ifdef CONFIG_SMP
-  if (cpu == 0)
-#endif
-    {
-      /* A processor in Secure State sets:
-       *
-       * 1. Which interrupts are non-secure (ICDISR).
-       *    REVISIT: Which bit state corresponds to secure?
-       * 2. Trigger mode of the SPI (ICDICFR). All fields set to 11->Edge
-       *    sensitive.
-       * 3. Innterrupt Clear-Enable (ICDICER)
-       * 3. Priority of the SPI using the priority set register (ICDIPR).
-       *    Priority values are 8-bit unsigned binary. A GIC supports a
-       *    minimum of 16 and a maximum of 256 priority levels. Here all
-       *    are set to the middle priority 128 (0x80).
-       * 4. Target that receives the SPI interrupt (ICDIPTR).  Set all to
-       *    CPU0.
-       */
-
-      /* Registers with 1-bit per interrupt */
-
-      for (irq = GIC_IRQ_SPI; irq < nlines; irq += 32)
-        {
-          putreg32(0x00000000, GIC_ICDISR(irq));   /* SPIs secure */
-          putreg32(0xffffffff, GIC_ICDICFR(irq));  /* SPIs edge triggered */
-          putreg32(0xffffffff, GIC_ICDICER(irq));  /* SPIs disabled */
-        }
-
-      /* Registers with 8-bits per interrupt */
-
-      for (irq = GIC_IRQ_SPI; irq < nlines; irq += 8)
-        {
-          putreg32(0x80808080, GIC_ICDIPR(irq));   /* SPI priority */
-          putreg32(0x01010101, GIC_ICDIPTR(irq));  /* SPI on CPU0 */
-        }
-
-#ifdef CONFIG_SMP
-      /* Attach SGI interrupt handlers */
-
-      DEBUGVERIFY(irq_attach(GIC_IRQ_SGI1, arm_start_handler));
-      DEBUGVERIFY(irq_attach(GIC_IRQ_SGI2, arm_pause_handler));
-#endif
-    }
-
-  /* The remaining steps need to be done by all CPUs */
+  /* Initialize PPIs.  The following steps need to be done by all CPUs */
 
   /* Initialize SGIs and PPIs.  NOTE: A processor in non-secure state cannot
    * program its interrupt security registers and must get a secure processor
@@ -159,53 +191,6 @@ void arm_gic_initialize(void)
   putreg32(0x80000000, GIC_ICDIPR(24));        /* PPI[0] priority */
   putreg32(0x80808080, GIC_ICDIPR(28));        /* PPI[1:4] priority */
 
-#if defined(CONFIG_ARCH_TRUSTZONE_SECURE) || defined(CONFIG_ARCH_TRUSTZONE_BOTH)
-  /* Set FIQn=1 if secure interrupts are to signal using nfiq_c.
-   *
-   * NOTE:  Only for processors that operate in secure state.
-   * REVISIT: Do I need to do this?
-   */
-
-#endif
-
-#ifdef CONFIG_ARCH_TRUSTZONE_BOTH
-  /* Program the AckCtl bit to select the required interrupt acknowledge
-   * behavior.
-   *
-   * NOTE: Only for processors that operate in both secure and non-secure
-   * state.
-   */
-
-#  warning Missing logic
-
-  /* Program the SBPR bit to select the required binary pointer behavior.
-   *
-   * NOTE: Only for processors that operate in both secure and non-secure
-   * state.
-   */
-
-#  warning Missing logic
-#endif
-
-#if defined(CONFIG_ARCH_TRUSTZONE_SECURE) || defined(CONFIG_ARCH_TRUSTZONE_BOTH)
-  /* Set EnableS=1 to enable CPU interface to signal secure interrupts.
-   *
-   * NOTE:  Only for processors that operate in secure mostatede.
-   */
-
-#  warning Missing logic
-#endif
-
-#if defined(CONFIG_ARCH_TRUSTZONE_NONSECURE) || defined(CONFIG_ARCH_TRUSTZONE_BOTH)
-  /* Set EnableNS=1 to enable the CPU to signal non-secure interrupts.
-   *
-   * NOTE:  Only for processors that operate in non-secure state.
-   * REVISIT: Initial implementation operates only in secure state.
-   */
-
-#  warning Missing logic
-#endif
-
   /* Set the binary point register.
    *
    * Priority values are 8-bit unsigned binary.  The binary point is a 3-bit
@@ -219,7 +204,89 @@ void arm_gic_initialize(void)
 
   putreg32(GIC_ICCBPR_NOPREMPT, GIC_ICCBPR);
 
-#ifdef CONFIG_ARCH_TRUSTZONE_BOTH
+  /* Program the idle priority in the PMR */
+
+  putreg32(GIC_ICCPMR_MASK, GIC_ICCPMR);
+
+ /* Configure the  CPU Interface Control Register */
+
+  iccicr  = getreg32(GIC_ICCICR);
+
+#if defined(CONFIG_ARCH_TRUSTZONE_SECURE) || defined(CONFIG_ARCH_TRUSTZONE_BOTH)
+  /* Clear secure state ICCICR bits to be configured below */
+
+  iccicr &= ~(GIC_ICCICRS_FIQEN | GIC_ICCICRS_ACKTCTL | GIC_ICCICRS_CBPR |
+              GIC_ICCICRS_EOIMODES | GIC_ICCICRS_EOIMODENS |
+              GIC_ICCICRS_ENABLEGRP0 | GIC_ICCICRS_ENABLEGRP1 |
+              GIC_ICCICRS_FIQBYPDISGRP0 | GIC_ICCICRS_IRQBYPDISGRP0 |
+              GIC_ICCICRS_FIQBYPDISGRP1 | GIC_ICCICRS_IRQBYPDISGRP1);
+
+#elif defined(CONFIG_ARCH_TRUSTZONE_NONSECURE)
+  /* Clear non-secure state ICCICR bits to be configured below */
+
+  iccicr &= ~(GIC_ICCICRS_EOIMODENS | GIC_ICCICRU_ENABLEGRP1 |
+              GIC_ICCICRU_FIQBYPDISGRP1 |GIC_ICCICRU_IRQBYPDISGRP1);
+
+#endif
+
+#if defined(CONFIG_ARCH_TRUSTZONE_SECURE) || defined(CONFIG_ARCH_TRUSTZONE_BOTH)
+  /* Set FIQn=1 if secure interrupts are to signal using nfiq_c.
+   *
+   * NOTE:  Only for processors that operate in secure state.
+   * REVISIT: Do I need to do this?
+   */
+
+  iccicr |= GIC_ICCICRS_FIQEN;
+#endif
+
+#if defined(ONFIG_ARCH_TRUSTZONE_BOTH)
+  /* Program the AckCtl bit to select the required interrupt acknowledge
+   * behavior.
+   *
+   * NOTE: Only for processors that operate in both secure and non-secure
+   * state.
+   * REVISIT: I don't yet fully understand this setting.
+   */
+
+  // iccicr |= GIC_ICCICRS_ACKTCTL;
+
+  /* Program the SBPR bit to select the required binary pointer behavior.
+   *
+   * NOTE: Only for processors that operate in both secure and non-secure
+   * state.
+   * REVISIT: I don't yet fully understand this setting.
+   */
+
+  // iccicr |= GIC_ICCICRS_CBPR;
+#endif
+
+#if defined(CONFIG_ARCH_TRUSTZONE_SECURE) || defined(CONFIG_ARCH_TRUSTZONE_BOTH)
+  /* Set EnableS=1 to enable CPU interface to signal secure interrupts.
+   *
+   * NOTE:  Only for processors that operate in secure state.
+   */
+
+  iccicr |= GIC_ICCICRS_EOIMODES;
+#endif
+
+#if defined(CONFIG_ARCH_TRUSTZONE_NONSECURE)
+  /* Set EnableNS=1 to enable the CPU to signal non-secure interrupts.
+   *
+   * NOTE:  Only for processors that operate in non-secure state.
+   */
+
+  iccicr |= GIC_ICCICRS_EOIMODENS;
+
+#elif defined(CONFIG_ARCH_TRUSTZONE_BOTH)
+  /* Set EnableNS=1 to enable the CPU to signal non-secure interrupts.
+   *
+   * NOTE:  Only for processors that operate in non-secure state.
+   */
+
+  iccicr |= GIC_ICCICRU_EOIMODENS;
+#endif
+
+ #ifdef CONFIG_ARCH_TRUSTZONE_BOTH
   /* If the processor operates in both security states and SBPR=0, then it
    * must switch to the other security state and repeat the programming of
    * the binary point register so that the binary point will be programmed
@@ -229,9 +296,40 @@ void arm_gic_initialize(void)
 #  warning Missing logic
 #endif
 
+#if !defined(CONFIG_ARCH_HAVE_TRUSTZONE)
   /* Enable the distributor by setting the the Enable bit in the enable
-   * register.
+   * register (no security extensions).
    */
+
+  iccicr |= GIC_ICCICR_ENABLE;
+
+#elif defined(CONFIG_ARCH_TRUSTZONE_SECURE)
+  /* Enable the Group 0 interrupts, FIQEn and disable Group 0/1
+   * bypass.
+   */
+
+  iccicr |= (GIC_ICCICRS_ENABLEGRP0 | GIC_ICCICRS_FIQBYPDISGRP0 |
+             GIC_ICCICRS_IRQBYPDISGRP0 | GIC_ICCICRS_FIQBYPDISGRP1 |
+             GIC_ICCICRS_IRQBYPDISGRP1);
+
+#elif defined(CONFIG_ARCH_TRUSTZONE_BOTH)
+  /* Enable the Group 0/1 interrupts, FIQEn and disable Group 0/1
+   * bypass.
+   */
+
+  iccicr |= (GIC_ICCICRS_ENABLEGRP0 | GIC_ICCICRS_ENABLEGRP1 |
+             GIC_ICCICRS_FIQBYPDISGRP0 | GIC_ICCICRS_IRQBYPDISGRP0 |
+             GIC_ICCICRS_FIQBYPDISGRP1 | GIC_ICCICRS_IRQBYPDISGRP1);
+
+#else /* defined(CONFIG_ARCH_TRUSTZONE_NONSECURE) */
+  /* Enable the Group 1 interrupts and disable Group 1 bypass. */
+
+  iccicr |= (GIC_ICCICRU_ENABLEGRP1 | GIC_ICCICRU_FIQBYPDISGRP1 |
+             GIC_ICCICRU_IRQBYPDISGRP1);
+
+#endif
+
+  /* Write the final ICCICR value */
 
   putreg32(GIC_ICCICR_ENABLE, GIC_ICCICR);
 
@@ -275,7 +373,7 @@ uint32_t *arm_decodeirq(uint32_t *regs)
    * interrupt.
    */
 
-  DEBUGASSERT(irg < NR_IRQS || irq == 1023);
+  DEBUGASSERT(irq < NR_IRQS || irq == 1023);
   if (irq < NR_IRQS)
     {
       /* Dispatch the interrupt */
@@ -416,15 +514,13 @@ int up_prioritize_irq(int irq, int priority)
  *   cpuset - The set of CPUs to receive the SGI
  *
  * Returned Value:
- *   OK is always retured at present.
+ *   OK is always returned at present.
  *
  ****************************************************************************/
 
 int arm_cpu_sgi(int sgi, unsigned int cpuset)
 {
   uint32_t regval;
-
-  DEBUGASSERT(cpu >= 0 && cpu < CONFIG_SMP_NCPUS);
 
 #ifdef CONFIG_SMP
   regval = GIC_ICDSGIR_INTID(sgi) |  GIC_ICDSGIR_CPUTARGET(cpuset) |

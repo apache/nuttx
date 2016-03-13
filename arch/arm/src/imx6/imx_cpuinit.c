@@ -69,8 +69,10 @@
 
 int up_cpu_initialize(void)
 {
-  /* Initialize the Generic Interrupt Controller (GIC) for CPU0 */
+  /* Initialize the Generic Interrupt Controller (GIC) for CPUn (n != 0) */
 
   arm_gic_initialize();
   return OK;
 }
+
+#endif /* CONFIG_SMP */

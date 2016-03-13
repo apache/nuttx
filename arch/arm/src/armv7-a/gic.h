@@ -225,17 +225,42 @@
 /* GIC Register Bit Definitions *********************************************/
 
 /* Interrupt Interface registers */
-/*  CPU Interface Control Register */
+/* CPU Interface Control Register -- without security extensions */
 
-#define GIC_ICCICR_ENABLE          (1 << 0)  /* Bit 0: Enable the CPU interface for this GIC */
+#define GIC_ICCICR_ENABLE          (1 << 0)  /* Bit 0:  Enable the CPU interface for this GIC */
                                              /* Bits 1-31: Reserved */
-/* Interrupt Priority Mask Register */
-                                             /* Bits 0-3: Reserved */
-#define GIC_ICCPMR_SHIFT           (4)       /* Bits 4-7: Priority mask */
-#define GIC_ICCPMR_MASK            (15 << GIC_ICCPMR_SHIFT)
+/* CPU Interface Control Register -- with security extensions, non-secure copy */
+
+#define GIC_ICCICRU_ENABLEGRP1     (1 << 0)  /* Bit 0:  Enable Group 1 interrupts for the CPU */
+                                             /* Bits 1-4: Reserved */
+#define GIC_ICCICRU_FIQBYPDISGRP1  (1 << 5)  /* Bit 5:  FIQ disabled for CPU Group 1*/
+#define GIC_ICCICRU_IRQBYPDISGRP1  (1 << 6)  /* Bit 6:  IRQ disabled for CPU Group 1*/
+                                             /* Bits 7-8: Reserved */
+#define GIC_ICCICRU_EOIMODENS      (1 << 9)  /* Bit 6:  Control EIOIR access (non-secure) */
+                                             /* Bits 10-31: Reserved */
+/* CPU Interface Control Register -- with security extensions, secure copy */
+
+#define GIC_ICCICRS_ENABLEGRP0     (1 << 0)  /* Bit 0:  Enable Group 0 interrupts for the CPU */
+#define GIC_ICCICRS_ENABLEGRP1     (1 << 1)  /* Bit 1:  Enable Group 1 interrupts for the CPU */
+#define GIC_ICCICRS_ACKTCTL        (1 << 2)  /* Bit 2:  Group 1 interrupt activation control */
+#define GIC_ICCICRS_FIQEN          (1 << 3)  /* Bit 3:  Signal Group 0 via FIQ */
+#define GIC_ICCICRS_CBPR           (1 << 4)  /* Bit 4:  Control Group 0/1 Pre-emption */
+#define GIC_ICCICRS_FIQBYPDISGRP0  (1 << 5)  /* Bit 5:  FIQ disabled for CPU Group 0 */
+#define GIC_ICCICRS_IRQBYPDISGRP0  (1 << 6)  /* Bit 6:  IRQ disabled for CPU Group 0 */
+#define GIC_ICCICRS_FIQBYPDISGRP1  (1 << 7)  /* Bit 5:  FIQ disabled for CPU Group 1 */
+#define GIC_ICCICRS_IRQBYPDISGRP1  (1 << 8)  /* Bit 6:  IRQ disabled for CPU Group 1 */
+#define GIC_ICCICRS_EOIMODES       (1 << 9)  /* Bit 6:  Control EIOIR access (secure) */
+#define GIC_ICCICRS_EOIMODENS      (1 << 10) /* Bit 10: Control EIOIR access (non-secure) */
+                                             /* Bits 11-31: Reserved */
+/* Interrupt Priority Mask Register.  Priority values are 8-bit unsigned
+ * binary. A GIC supports a minimum of 16 and a maximum of 256 priority
+ * levels.  As a result, PMR settings make sense.
+ */
+
+#define GIC_ICCPMR_SHIFT           (0)       /* Bits 0-7: Priority mask */
+#define GIC_ICCPMR_MASK            (0xff << GIC_ICCPMR_SHIFT)
 #  define GIC_ICCPMR_VALUE(n)      ((uint32_t)(n) << GIC_ICCPMR_SHIFT)
                                              /* Bits 8-31: Reserved */
-
 /* Binary point Register and Aliased Non-secure Binary Point Register.
  * Priority values are 8-bit unsigned binary. A GIC supports a minimum of
  * 16 and a maximum of 256 priority levels.  As a result, not all binary
@@ -484,10 +509,28 @@ extern "C"
 #endif
 
 /****************************************************************************
+ * Name: arm_gic0_initialize
+ *
+ * Description:
+ *   Perform common, one-time GIC initialization on CPU0 only.  Both
+ *   arm_gic0_initialize() must be called on CPU0; arm_gic_initialize() must
+ *   be called for all CPUs.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void arm_gic0_initialize(void);
+
+/****************************************************************************
  * Name: arm_gic_initialize
  *
  * Description:
- *   Perform basic GIC initialization for the current CPU
+ *   Perform common GIC initialization for the current CPU (all CPUs)
  *
  * Input Parameters:
  *   None
