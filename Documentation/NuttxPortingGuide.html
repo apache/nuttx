@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: February 14, 2016</p>
+      <p>Last Updated: March 13, 2016</p>
     </td>
   </tr>
 </table>
@@ -764,7 +764,7 @@
   <li>
     <code>src/</code>:
     This directory contains board specific drivers.
-    This directory will be linked as <config>arch/</code><i>&lt;arch-name&gt;</i><code>/src/board</code> at configuration
+    This directory will be linked as <i>&lt;config&gt;</i><code>/arch/</code><i>&lt;arch-name&gt;</i><code>/src/board</code> at configuration
     time and will be integrated into the build system.
   </li>
   <li>
@@ -828,11 +828,11 @@
     <p>
       This configuration file will be used at build time:
     </p>
-    <p><ol>
+    <ol>
       <li>As a makefile fragment included in other makefiles, and</li>
       <li>to generate <code>include/nuttx/config.h</code> which is included by
           most C files in the system.</li>
-    </ol></p>
+    </ol>
   </li>
   <li>
     <p>
@@ -1349,7 +1349,7 @@ include/
 |      `-- <i>(Wireless device driver header files)</i>
 `- sys/
     `-- <i>(More standard header files)</i>
-</per></ul>
+</pre></ul>
 
 <h2>2.9 <a name="DirStructLib">nuttx/libc</a></h2>
 <p>
@@ -1397,7 +1397,7 @@ libc/
 |   `-- <i>(Implementation of some functions from time.h)</i>
 `-- unistd/
     `-- <i>(Implementation of some functions from unistd.h)</i>
-</per></ul>
+</pre></ul>
 
 <h2>2.10 <a name="DirStructLibXX">nuttx/libxx</a></h2>
 <p>
@@ -1599,7 +1599,7 @@ netutils/
 </p>
 
 <p>
-  If your application directory is not in the standard location (<code>../apps</code> or <code>../apps-&lt;version&gt</code>),
+  If your application directory is not in the standard location (<code>../apps</code> or <code>../apps-&lt;version&gt;</code>),
   then you should also specify the location of the application directory on the command line like:
 </p>
 <ul><pre>
@@ -1739,7 +1739,7 @@ The system can be re-made subsequently by just typing <code>make</code>.
       An interface which is unique to a certain microprocessor should be prefixed with the name of the microprocessor, for example <code>stm32_</code>, and be prototyped in some header file in the <code>arch/</code> directories.
     </p>
     <p>
-      There is also a <code>arch/<architecture>/include/<chip>/chip.h</code> header file that can be used to communicate other microprocessor-specific information between the board logic and even application logic.
+      There is also a <code>arch/&lt;architecture&gt;/include/&lt;chip&gt;/chip.h</code> header file that can be used to communicate other microprocessor-specific information between the board logic and even application logic.
       Application logic may, for example, need to know specific capabilities of the chip.
       Prototypes in that <code>chip.h</code> header file should follow the microprocessor-specific naming convention.
     </p>
@@ -1751,7 +1751,7 @@ The system can be re-made subsequently by just typing <code>make</code>.
       These <code>board_</code> definitions provide the interface between the board-level logic and the architecture-specific logic.
     </p>
     <p>
-      There is also a <code>configs/<board>/include/board.h</code> header file that can be used to communicate other board-specific information between the architecture logic and even application logic.
+      There is also a <code>configs/&lt;board&gt;/include/board.h</code> header file that can be used to communicate other board-specific information between the architecture logic and even application logic.
       Any definitions which are common between a single architecture and several boards should go in this <code>board.h</code> header file;
       <code>include/nuttx/arch.h</code>is reserved for board-related definitions common to all architectures.
     </p>
@@ -1760,7 +1760,7 @@ The system can be re-made subsequently by just typing <code>make</code>.
       <b>Board-Specific Interfaces</b>.
       Any interface which is unique to a board should be prefixed with the board name, for example <code>stm32f4discovery_</code>.
       Sometimes the board name is too long so <code>stm32_</code> would be okay too.
-      These should be prototyped in <code>configs/<board>/src/<board>.h</code> and should not be used outside of that directory since board-specific definitions have no meaning outside of the board directory.
+      These should be prototyped in <code>configs/&lt;board&gt;/src/&lt;board&gt;.h</code> and should not be used outside of that directory since board-specific definitions have no meaning outside of the board directory.
   </li>
 </ul>
 
@@ -2468,7 +2468,7 @@ In order to use the Tickless OS, one must provide special support from the platf
 
 Currently these timer resources are only provided on a few platforms. An example implementation is for the simulation is at <code>nuttx/arch/sim/src/up_tickless.c</code>.  There is another example for the Atmel SAMA5 at <code>nuttx/arch/arm/src/sama5/sam_tickless.c</code>.  These paragraphs will explain how to provide the Tickless OS support to any platform.
 
-<h4><a name="tickconfig">4.3.4.3 Tickless Configuration Options</a></h4>
+<h4><a name="tickoptions">4.3.4.3 Tickless Configuration Options</a></h4>
 <ul>
   <li>
     <p>
@@ -2519,7 +2519,7 @@ config ARCH_SIM
   </li>
 </ul>
 
-<h4><a name="tickconfig">4.3.4.4 Tickless Imported Intefaces</a></h4>
+<h4><a name="tickimport">4.3.4.4 Tickless Imported Intefaces</a></h4>
 <p>
   The interfaces that must be provided by the platform specified code are defined in <code>include/nuttx/arch.h</code>, listed below, and summarized in the following paragraphs:
 </p>
@@ -2586,7 +2586,7 @@ config ARCH_SIM
 <ul><pre>
 #include &lt;nuttx/arch.h&gt;
 void up_timer_initialize(void);
-</ul>
+</pre></ul>
 <p><b>Description</b>:</p>
 <ul>
   Initializes all platform-specific timer facilities. This function is called early in the initialization sequence by <code>up_intialize()</code>. On return, the current up-time should be available from <code>up_timer_gettime()</code> and the interval timer is ready for use (but not actively timing).
@@ -2609,7 +2609,7 @@ void up_timer_initialize(void);
 <ul><pre>
 #include &lt;nuttx/arch.h&gt;
 int up_timer_gettime(FAR struct timespec *ts);
-</ul>
+</pre></ul>
 <p><b>Description</b>:</p>
   Return the elapsed time since power-up (or, more correctly, since <code>up_timer_initialize()</code> was called). This function is functionally equivalent to <code>clock_gettime()</code> for the clock ID <code>CLOCK_MONOTONIC</code>. This function provides the basis for reporting the current time and also is used to eliminate error build-up from small errors in interval time calculations.
 <ul>
@@ -2633,7 +2633,7 @@ int up_timer_gettime(FAR struct timespec *ts);
 <ul><pre>
 #include &lt;nuttx/arch.h&gt;
 int up_alarm_cancel(FAR struct timespec *ts);
-</ul>
+</pre></ul>
 <p><b>Description</b>:</p>
   Cancel the alarm and return the time of cancellation of the alarm. These two steps need to be as nearly atomic as possible. <code>sched_timer_expiration()</code> will not be called unless the alarm is restarted with <code>up_alarm_start()</code>. If, as a race condition, the alarm has already expired when this function is called, then time returned is the current time.
 <ul>
@@ -2656,7 +2656,7 @@ int up_alarm_cancel(FAR struct timespec *ts);
 <ul><pre>
 #include &lt;nuttx/arch.h&gt;
 int up_alarm_start(FAR const struct timespec *ts);
-</ul>
+</pre></ul>
 <p><b>Description</b>:</p>
   Start the alarm. <code>sched_timer_expiration()</code> will be called when the alarm occurs (unless <code>up_alaram_cancel</code> is called to stop it).
 <ul>
@@ -2679,7 +2679,7 @@ int up_alarm_start(FAR const struct timespec *ts);
 <ul><pre>
 #include &lt;nuttx/arch.h&gt;
 int up_timer_cancel(FAR struct timespec *ts);
-</ul>
+</pre></ul>
 <p><b>Description</b>:</p>
   Cancel the interval timer and return the time remaining on the timer. These two steps need to be as nearly atomic as possible. <code>sched_timer_expiration()</code> will not be called unless the timer is restarted with <code>up_timer_start()</code>. If, as a race condition, the timer has already expired when this function is called, then that pending interrupt must be cleared so that <code>sched_timer_expiration()</code> is not called spuriously and the remaining time of zero should be returned.
 <ul>
@@ -2702,7 +2702,7 @@ int up_timer_cancel(FAR struct timespec *ts);
 <ul><pre>
 #include &lt;nuttx/arch.h&gt;
 int up_timer_start(FAR const struct timespec *ts);
-</ul>
+</pre></ul>
 <p><b>Description</b>:</p>
   Start the interval timer. <code>sched_timer_expiration()</code> will be called at the completion of the timeout (unless <code>up_timer_cancel()</code> is called to stop the timing).
 <ul>
@@ -2990,7 +2990,7 @@ typedef uint32_t  wdparm_t;
   The higher priority worker thread is intended to serve as the <i>bottom half</i> for device drivers.  As a consequence it must run at a very high, fixed priority rivalling the priority of the interrupt handler itself.  Typically, the high priority work queue should be the highest priority thread in your system (the default priority is 224).
 </p>
 <p><b>Compared to the Low Priority Kernel Work Queue</b>.
-  For less critical, lower priority, application oriented worker thread support, consider enabling the lower priority work queue.  The lower priority work queue runs at a lower priority, of course, but has the added advantage that it supports <i>priority inheritance</i> (if <config> CONFIG_PRIORITY_INHERITANCE</code> is also selected):  The priority of the lower priority worker thread can then be adjusted to match the highest priority client.
+  For less critical, lower priority, application oriented worker thread support, consider enabling the lower priority work queue.  The lower priority work queue runs at a lower priority, of course, but has the added advantage that it supports <i>priority inheritance</i> (if &lt;config&gt; CONFIG_PRIORITY_INHERITANCE</code> is also selected):  The priority of the lower priority worker thread can then be adjusted to match the highest priority client.
 </p>
 <p>
   <b>Configuration Options</b>.
@@ -3030,7 +3030,7 @@ typedef uint32_t  wdparm_t;
 <ul>
   <li>
     <p><b>Priority Inheritance</b>.
-      The lower priority worker thread(s) support <i>priority inheritance</i> (if <config> CONFIG_PRIORITY_INHERITANCE</code> is also selected):  The priority of the lower priority worker thread can then be adjusted to match the highest priority client.
+      The lower priority worker thread(s) support <i>priority inheritance</i> (if &lt;config&gt; CONFIG_PRIORITY_INHERITANCE</code> is also selected):  The priority of the lower priority worker thread can then be adjusted to match the highest priority client.
     </p>
     <blockquote>
       <b>NOTE:</b> This priority inheritance feature is not automatic.  The lower priority worker thread will always a fixed priority unless additional logic implements that calls <code>lpwork_boostpriority()</code> to raise the priority of the lower priority worker thread (typically called before scheduling the work) and then calls the matching <code>lpwork_restorepriority()</code> when the work is completed (typically called within the work handler at the completion of the work). Currently, only the NuttX asynchronous I/O logic uses this dynamic prioritization feature.
