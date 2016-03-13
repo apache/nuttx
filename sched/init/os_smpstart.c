@@ -80,11 +80,14 @@ static const char g_idlename[] = "CPUn Idle"
  * Name: os_idle_trampoline
  *
  * Description:
- *   This is the common IDLE task for CPUs 1 through (CONFIG_SMP_NCPUS-1).
- *   It is equivalent to the CPU 0 IDLE logic in os_start.c
+ *   This is the common start-up logic for the IDLE task for CPUs 1 through
+ *   (CONFIG_SMP_NCPUS-1).  Having a start-up function such as this for the
+ *   IDLE is not really an architectural necessity.  It is used only for
+ *   symmetry with now other threads are started (see task_start() and
+ *   pthread_start()).
  *
  * Input Parameters:
- *   Standard task arguments.
+ *   None.
  *
  * Returned Value:
  *   This function does not return.
@@ -93,7 +96,11 @@ static const char g_idlename[] = "CPUn Idle"
 
 void os_idle_trampoline(void)
 {
-  /* Transfer control to the IDLE task */
+  /* Perform architecture-specific initialization for this CPU */
+
+  up_cpu_initialize();
+
+  /* Then transfer control to the IDLE task */
 
   (void)os_idle_task(0, NULL);
 
