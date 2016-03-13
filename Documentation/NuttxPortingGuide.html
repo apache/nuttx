@@ -30,40 +30,41 @@
   <a href="#Introduction">1.0 Introduction</a><br>
   <a href="#DirectoryStructure">2.0 Directory Structure</a>
   <ul>
-    <a href="#DirStructDocumentation">2.1 Documentation</a><br>
-    <a href="#DirStructArch">2.2 arch/</a>
+    <a href="#DirStructDocumentation">2.1 nuttx/Documentation</a><br>
+    <a href="#DirStructArch">2.2 nuttx/arch/</a>
     <ul>
       <a href="#archdirectorystructure">2.2.1 Subdirectory Structure</a><br>
       <a href="#summaryofarchfiles">2.2.2 Summary of Files</a><br>
       <a href="#supportedarchitectures">2.2.3 Supported Architectures</a>
     </ul>
-    <a href="#DirStructBinFmt">2.3 binfmt/</a><br>
-    <a href="#DirStructConfigs">2.4 configs/</a>
+    <a href="#DirStructBinFmt">2.3 nuttx/binfmt/</a><br>
+    <a href="#DirStructAudio">2.4 nuttx/audio/</a><br>
+    <a href="#DirStructConfigs">2.5 nuttx/configs/</a>
     <ul>
-      <a href="#configsdirectorystructure">2.4.1 Subdirectory Structure</a><br>
-      <a href="#summaryofconfigfiles">2.4.2 Summary of Files</a>
+      <a href="#configsdirectorystructure">2.5.1 Subdirectory Structure</a><br>
+      <a href="#summaryofconfigfiles">2.5.2 Summary of Files</a>
       <ul>
-        <a href="#boardlogic">2.4.2.1 Board Specific Logic</a><br>
-        <a href="#boardconfigsubdirs">2.4.2.2 Board Specific Configuration Sub-Directories</a>
+        <a href="#boardlogic">2.5.2.1 Board Specific Logic</a><br>
+        <a href="#boardconfigsubdirs">2.5.2.2 Board Specific Configuration Sub-Directories</a>
       </ul>
-      <a href="#supportedboards">2.4.3 Supported Boards</a><br>
-      <a href="#newboardconfig">2.4.4 Adding a New Board Configuration</a>
+      <a href="#supportedboards">2.5.3 Supported Boards</a><br>
+      <a href="#newboardconfig">2.5.4 Adding a New Board Configuration</a>
     </ul>
-    <a href="#DirStructDrivers">2.5 nuttx/drivers/</a><br>
-    <a href="#DirStructFs">2.6 nuttx/fs/</a><br>
-    <a href="#DirStructGraphics">2.7 nuttx/graphics/</a><br>
-    <a href="#DirStructInclude">2.8 nuttx/include/</a><br>
-    <a href="#DirStructLib">2.9 nuttx/libc/</a><br>
-    <a href="#DirStructLibXX">2.10 nuttx/libxx/</a><br>
-    <a href="#DirStructMm">2.11 nuttx/mm/</a><br>
-    <a href="#DirStructNet">2.12 nuttx/net</a><br>
-    <a href="#DirStructSched">2.13 nuttx/sched/</a><br>
-    <a href="#DirStructSyscall">2.14 nuttx/syscall/</a><br>
-    <a href="#DirStructTools">2.15 nuttx/tools/</a><br>
-    <a href="#topmakefile">2.16 nuttx/Makefile</a><br>
-    <a href="#DirStructNetUtils">2.17 apps/netutils</a><br>
-    <a href="#DirStructNshLib">2.18 apps/nshlib</a><br>
-    <a href="#DirStructExamples">2.19 apps/examples/</a>
+    <a href="#DirStructDrivers">2.6 nuttx/drivers/</a><br>
+    <a href="#DirStructCrypto">2.7 nuttx/crypto/</a><br>
+    <a href="#DirStructFs">2.8 nuttx/fs/</a><br>
+    <a href="#DirStructGraphics">2.9 nuttx/graphics/</a><br>
+    <a href="#DirStructInclude">2.10 nuttx/include/</a><br>
+    <a href="#DirStructLib">2.11 nuttx/lib/</a><br>
+    <a href="#DirStructLibC">2.12 nuttx/libc/</a><br>
+    <a href="#DirStructLibXX">2.13 nuttx/libxx/</a><br>
+    <a href="#DirStructMm">2.14 nuttx/mm/</a><br>
+    <a href="#DirStructNet">2.15 nuttx/net</a><br>
+    <a href="#DirStructSched">2.16 nuttx/sched/</a><br>
+    <a href="#DirStructSyscall">2.17 nuttx/syscall/</a><br>
+    <a href="#DirStructTools">2.18 nuttx/tools/</a><br>
+    <a href="#DirStructWireless">2.19 nuttx/wireless/</a><br>
+    <a href="#topmakefile">2.20 nuttx/Makefile</a><br>
   </ul>
   <a href="#configandbuild">3.0 Configuring and Building</a>
   <ul>
@@ -148,26 +149,35 @@
       <a href="#up_addrenv_kstackfree">4.5.16 <code>up_addrenv_kstackfree()</code></a>
     </ul>
     <a href="#boardctl">4.6 <code>boardctl()</code> Application Interface</a><br>
-    <a href="#exports">4.7 APIs Exported by NuttX to Architecture-Specific Logic</a>
+    <a href="#boardsmp">4.7 Symmetric Multiprocssing (SMP) Application Interface</a>
     <ul>
-      <a href="#osstart">4.7.1 <code>os_start()</code></a><br>
-      <a href="#listmgmt">4.7.2 OS List Management APIs</a><br>
-      <a href="#schedprocesstimer">4.7.3 <code>sched_process_timer()</code></a><br>
-      <a href="#schedtimerexpiration">4.7.4 <code>sched_timer_expiration()</code></a><br>
-      <a href="#schedalarmexpiration">4.7.5 <code>sched_alarm_expiration()</code></a><br>
-      <a href="#irqdispatch">4.7.6 <code>irq_dispatch()</code></a>
+      <a href="#uptestset">4.7.1 <code>up_testset()</code></a><br>
+      <a href="#upcpuindex">4.7.2 <code>up_cpu_index()</code></a><br>
+      <a href="#upcpustart">4.7.3 <code>up_cpu_start()</code></a><br>
+      <a href="#upcpuinitialize">4.7.4 <code>up_cpu_initialize()</code></a><br>
+      <a href="#upcpupause">4.7.5 <code>up_cpu_pause()</code></a><br>
+      <a href="#upcpuresume">4.7.6 <code>up_cpu_resume()</code></a>
     </ul>
-    <a href="#shm">4.8 Shared Memory</a>
+    <a href="#exports">4.8 APIs Exported by NuttX to Architecture-Specific Logic</a>
     <ul>
-      <a href="#upshmat">4.8.1 <code>up_shmat()</code></a><br>
-      <a href="#upshmdt">4.8.2 <code>up_shmdt()</code></a><br>
+      <a href="#osstart">4.8.1 <code>os_start()</code></a><br>
+      <a href="#listmgmt">4.8.2 OS List Management APIs</a><br>
+      <a href="#schedprocesstimer">4.8.3 <code>sched_process_timer()</code></a><br>
+      <a href="#schedtimerexpiration">4.8.4 <code>sched_timer_expiration()</code></a><br>
+      <a href="#schedalarmexpiration">4.8.5 <code>sched_alarm_expiration()</code></a><br>
+      <a href="#irqdispatch">4.8.6 <code>irq_dispatch()</code></a>
     </ul>
-    <a href="#demandpaging">4.9 On-Demand Paging</a><br>
-    <a href="#ledsupport">4.10 LED Support</a>
+    <a href="#shm">4.9 Shared Memory</a>
     <ul>
-      <a href="#ledheaders">4.10.1 Header Files</a><br>
-      <a href="#leddefinitions">4.10.2 LED Definitions</a><br>
-      <a href="#ledapis">4.10.3 Common LED interfaces</a>
+      <a href="#upshmat">4.9.1 <code>up_shmat()</code></a><br>
+      <a href="#upshmdt">4.9.2 <code>up_shmdt()</code></a><br>
+    </ul>
+    <a href="#demandpaging">4.10 On-Demand Paging</a><br>
+    <a href="#ledsupport">4.11 LED Support</a>
+    <ul>
+      <a href="#ledheaders">4.11.1 Header Files</a><br>
+      <a href="#leddefinitions">4.11.2 LED Definitions</a><br>
+      <a href="#ledapis">4.11.3 Common LED interfaces</a>
     </ul>
   </ul>
   <a href="#NxFileSystem">5.0 NuttX File System</a><br>
@@ -263,6 +273,10 @@
 |   |   |       |--<i>&lt;other-chips&gt;</i>/
 |   |   |       `-- <i>(architecture-specific source files)</i>
 |   |   `-- <i>&lt;other-architecture directories&gt;</i>/
+|   |-- <a href="#DirStructAudio">audio</a>/
+|   |   |-- Makefile
+|   |   |-- Kconfig
+|   |   `-- <i>(common audio source files)</i>
 |   |-- <a href="#DirStructBinFmt">binfmt</a>/
 |   |   |-- Makefile
 |   |   |-- Kconfig
@@ -303,7 +317,7 @@
 |   |   |   `-- <i>(more standard header files)</i>
 |   |   |-- <i>(non-standard include sub-directories)</i>
 |   |       `-- <i>(non-standard header files)</i>
-|   |-- <a href="#DirStructLib">libc</a>/
+|   |-- <a href="#DirStructLibC">libc</a>/
 |   |   |-- Makefile
 |   |   |-- Kconfig
 |   |   `-- <i>(libc source files)</i>
@@ -352,8 +366,12 @@
 |   |   |-- Makefile
 |   |   |-- Kconfig
 |   |   `-- <i>(syscall source files)</i>
-|   `-- <a href="#DirStructTools">tools</a>/
-|       `-- <i>(miscellaneous scripts and programs)</i>
+|   |-- <a href="#DirStructTools">tools</a>/
+|   |   `-- <i>(miscellaneous scripts and programs)</i>
+|   `-- <a href="#DirStructWireless">tools</a>/
+|       |-- Makefile
+|       |-- Kconfig
+|       `-- <i>(wireless management source files)</i>
 `- apps
     |-- <a href="#DirStructNetUtils">netutils</a>/
     |   |-- Makefile
@@ -614,35 +632,7 @@
   </p>
 
   <li><code>arch/arm</code>:
-    This directory holds common ARM architectures.  At present, this includes
-    the following subdirectories:
-    <ul>
-      <li><code>arch/arm/include</code> and <code>arch/arm/src/common</code>:
-          Common ARM logic.
-      </li>
-
-      <li><code>arch/arm/include/c5471</code> and <code>arch/arm/src/c5471</code>:
-        TI TMS320C5471 (also called TMS320DM180 or just C5471).
-        NuttX operates on the ARM7 of this dual core processor.
-        This port is complete, verified, and included in the NuttX release 0.1.1.
-      </li>
-
-      <li><code>arch/arm/include/dm320</code> and <code>arch/arm/src/dm320</code>:
-        TI TMS320DM320 (also called just DM320).
-        NuttX operates on the ARM9EJS of this dual core processor.
-        This port complete, verified, and included in the NuttX release 0.2.1.
-      </li>
-
-      <li><code>arch/arm/include/lpc214x</code> and <code>arch/arm/src/lpc214x</code>:
-        These directories provide support for NXP LPC214x family of
-        processors.
-        STATUS: This port boots and passes the OS test (apps/examples/ostest).
-        The port is complete and verified.  As of NuttX 0.3.17, the port includes:
-        timer interrupts, serial console, USB driver, and SPI-based MMC/SD card
-        support.  A verified NuttShell configuration is also available.
-      </li>
-
-    </ul>
+    This directory holds common ARM architectures.
   </li>
 
   <li><code>configs/mcu123-lpc214x</code>:
@@ -717,14 +707,20 @@
   system into memory in a form that can be used to execute them.
 </p>
 
-<h2>2.4 <a name="DirStructConfigs">nuttx/configs</a></h2>
+<h2>2.4 <a name="DirStructAudio">nuttx/audio</a></h2>
+
+<p>
+  The <code>audio/</code> subdirectory contains the NuttX audio sub-system.
+</p>
+
+<h2>2.5 <a name="DirStructConfigs">nuttx/configs</a></h2>
 <p>
   The <code>configs/</code> subdirectory contains configuration data for each board.
   These board-specific configurations plus the architecture-specific configurations in
   the <code>arch/</code> subdirectory complete define a customized port of NuttX.
 </p>
 
-<h3><a name="configsdirectorystructure">2.4.1 Subdirectory Structure</a></h3>
+<h3><a name="configsdirectorystructure">2.5.1 Subdirectory Structure</a></h3>
 <p>
   The configs directory contains board specific configuration files.  Each board must
   provide a subdirectory &lt;board-name&gt; under <code>configs/</code> with the following characteristics:
@@ -750,8 +746,8 @@
 `-- <i>(other board-specific configuration sub-directories)</i>/
 </pre></ul>
 
-<h3><a name="summaryofconfigfiles">2.4.2 Summary of Files</a></h3>
-<h4><a name="boardlogic">2.4.2.1 Board Specific Logic</a></h4>
+<h3><a name="summaryofconfigfiles">2.5.2 Summary of Files</a></h3>
+<h4><a name="boardlogic">2.5.2.1 Board Specific Logic</a></h4>
 <ul>
   <li>
     <code>include/</code>:
@@ -773,7 +769,7 @@
     It must support the following targets:  <code>libext$(LIBEXT)</code>, <code>clean</code>, and <code>distclean</code>.
   </li>
 </ul>
-<h4><a name="boardconfigsubdirs">2.4.2.2 Board Specific Configuration Sub-Directories</a></h4>
+<h4><a name="boardconfigsubdirs">2.5.2.2 Board Specific Configuration Sub-Directories</a></h4>
 <p>
   The <code>configs/</code><i>&lt;board-name&gt;</i><code>/</code> sub-directory holds all of the
   files that are necessary to configure NuttX for the particular board.
@@ -845,248 +841,11 @@
   </li>
 </ul>
 
-<h3><a name="supportedboards">2.4.3 Supported Boards</a></h3>
+<h3><a name="supportedboards">2.5.3 Supported Boards</a></h3>
 <p>
-  All of the specific boards supported by NuttX are identified below.
-  These are the specific <i>&lt;board-name&gt;</i>'s that may be used to configure NuttX
-  as described <a href="#configuringnuttx">below</a>.
+  All of the specific boards supported by NuttX are identified in the  <a href="https://bitbucket.org/nuttx/boards/src/master/README.txt" target="_blank">README.txt</a> file.
 </p>
-<ul>
-  <li><code>configs/avr32dev1</code>:
-    This is a port of NuttX to the Atmel AVR32DEV1 board.  That board is
-    based on the Atmel AT32UC3B0256 MCU and uses a specially patched
-    version of the GNU toolchain:  The patches provide support for the
-    AVR32 family.  That patched GNU toolchain is available only from the
-    Atmel website.  STATUS: This port is functional but very basic.  There
-    are configurations for NSH and the OS test.
-  </li>
-
-  <li><code>configs/c5471evm</code>:
-    This is a port to the Spectrum Digital C5471 evaluation board.  The
-    C5471 is a dual core processor from TI with an ARM7TDMI general purpose
-    processor and a c54 DSP.  It is also known as TMS320DA180 or just DA180.
-    NuttX runs on the ARM core and is built with with a GNU arm-nuttx-elf toolchain
-    under Linux or Cygwin. This port is complete and verified.
-  </li>
-
-  <li><code>configs/demo9s12ne64</code>:
-    Freescale DMO9S12NE64 board based on the MC9S12NE64 hcs12 cpu.  This
-    port uses the m9s12x GCC toolchain.  STATUS:  (Still) under development; it
-    is code complete but has not yet been verified.
-  </li>
-
-  <li><code>configs/ea3131</code>:
-    Embedded Artists EA3131 Development bard.  This board is based on the
-    an NXP LPC3131 MCU. This OS is built with the arm-nuttx-elf toolchain.
-    STATUS:  This port is complete and mature.
-  </li>
-
-  <li><code>configs/eagle100</code>:
-    Micromint Eagle-100 Development board.  This board is based on the
-    an ARM Cortex-M3 MCU, the Luminary LM3S6918. This OS is built with the
-    arm-nuttx-elf toolchain.  STATUS:  This port is complete and mature.
-  </li>
-
-  <li><code>configs/ez80f0910200kitg</code>
-    ez80Acclaim! Microcontroller.  This port use the Zilog ez80f0910200kitg
-    development kit, eZ80F091 part, and the Zilog ZDS-II Windows command line
-    tools.  The development environment is Cygwin under WinXP.
-  </li>
-
-  <li><code>configs/ez80f910200zco</code>:
-    ez80Acclaim! Microcontroller.  This port use the Zilog ez80f0910200zco
-    development kit, eZ80F091 part, and the Zilog ZDS-II Windows command line
-    tools.  The development environment is Cygwin under WinXP.
-  </li>
-
-  <li><code>configs/lm3s6965-ek</code>:
-    Stellaris LM3S6965 Evaluation Kit.  This board is based on the
-    an ARM Cortex-M3 MCU, the Luminary/TI LM3S6965. This OS is built with the
-    arm-nuttx-elf toolchain.  STATUS:  This port is complete and mature.
-  </li>
-
-  <li><code>configs/lm3s8962-ek</code>:
-    Stellaris LMS38962 Evaluation Kit. STATUS: contributed.
-  </li>
-
-  <li><code>configs/lpcxpresso-lpc1768</code>:
-    Embedded Artists base board with NXP LPCExpresso LPC1768.  This board
-    is based on the NXP LPC1768.  The Code Red toolchain is used by default.
-  </li>
-
-  <li><code>configs/mbed</code>:
-    The configurations in this directory support the mbed board (http://mbed.org)
-    that features the NXP LPC1768 microcontroller. This OS is also built
-    with the arm-nuttx-elf toolchain.  STATUS:  Contributed.
-  </li>
-
-  <li><code>configs/mcu123-lpc214x</code>:
-    This port is for the NXP LPC2148 as provided on the mcu123.com
-    lpc214x development board.
-    This OS is also built with the arm-nuttx-elf toolchain* under Linux or Cygwin.
-    The port supports serial, timer0, spi, and usb.
-  </li>
-
-  <li><code>configs/mirtoo</code>:
-    This is the port to the DTX1-4000L &quot;Mirtoo&quot; module.
-    This module uses MicroChipPIC32MX250F128D.
-    See the <a href="http://www.dimitech.com/">Dimitech</a> website for further information.
-  </li>
-
-  <li><code>configs/mx1ads</code>:
-    This is a port to the Motorola MX1ADS development board.  That board
-    is based on the Freescale i.MX1 processor.  The i.MX1 is an ARM920T.
-    STATUS:  This port is nearly code complete but was never fully
-    integrated due to tool-related issues.
-  </li>
-
-  <li><code>configs/ne64badge</code>:
-    Future Electronics Group NE64 /PoE Badge board based on the
-    MC9S12NE64 hcs12 cpu.  This port uses the m9s12x GCC toolchain.
-    STATUS:  The port is code-complete but was never fully tested.
-  </li>
-
-  <li><code>configs/ntosd-dm320</code>:
-    This port uses the Neuros OSD with a GNU arm-nuttx-elf toolchain* under Linux or Cygwin.
-    See <a href="http://wiki.neurostechnology.com/index.php/Developer_Welcome">Neuros Wiki</a>
-    for further information.
-    NuttX operates on the ARM9EJS of this dual core processor.
-    STATUS: This port is code complete, verified, and included in the
-    NuttX 0.2.1 release.
-  </li>
-
-  <li><code>configs/nucleus2g</code>:
-    This port uses the Nucleus 2G board (with Babel CAN board).
-    This board features an NXP LPC1768 processor.
-    See the <a href="http://www.2g-eng.com/">2G Engineering</a> website for more information about the Nucleus 2G.
-  </li>
-
-  <li><code>configs/olimex-lpc1766stk</code>:
-    This port uses the Olimex LPC1766-STK board and a GNU GCC toolchain under
-    Linux or Cygwin.  STATUS: Complete and mature.
-  </li>
-
-  <li><code>configs/olimex-lpc2378</code>:
-    This port uses the Olimex-lpc2378 board and a GNU arm-nuttx-elf toolchain under
-    Linux or Cygwin.  STATUS: ostest and NSH configurations available.
-  </li>
-
-  <li><code>configs/olimex-strp711</code>:
-    This port uses the Olimex STR-P711 board arm-nuttx-elf toolchain* under Linux or Cygwin.
-    See the <a href="http://www.olimex.com/dev/str-p711.html">Olimex</a> web site
-    for further information.
-    STATUS: Configurations for the basic OS test and NSH are complete and verified.
-  </li>
-
-  <li><code>configs/pcblogic-pic32mx</code>:
-    This is the port of NuttX to the PIC32MX board from PCB Logic Design Co.
-    This board features the MicroChip PIC32MX460F512L.
-    The board is a very simple -- little more than a carrier for the PIC32
-    MCU plus voltage regulation, debug interface, and an OTG connector.
-    STATUS:  Code complete but testing has been stalled due to tool related problems
-    (PICkit 2 does not work with the PIC32).
-  </li>
-
-  <li><code>configs/qemu-i486</code>:
-    Port of NuttX to QEMU in i486 mode.  This port will also run on real i486
-    hardware (Google the Bifferboard).
-  </li>
-
-  <li><code>configs/rgmp</code>:
-    RGMP stands for RTOS and GPOS on Multi-Processor.  RGMP is a project for
-    running GPOS and RTOS simultaneously on multi-processor platforms. You can
-    port your favorite RTOS to RGMP together with an unmodified Linux to form a
-    hybrid operating system. This makes your application able to use both RTOS
-    and GPOS features.
-    See the <a href="http://rgmp.sourceforge.net/wiki/index.php/Main_Page">RGMP Wiki</a> for further information about RGMP.
-  </li>
-
-  <li><code>configs/sam3u-ek</code>:
-    The port of NuttX to the Atmel SAM3U-EK development board.
-  </li>
-
-  <li><code>configs/skp16c26</code>:
-    Renesas M16C processor on the Renesas SKP16C26 StarterKit.  This port
-    uses the GNU m32c toolchain.  STATUS:  The port is complete but untested
-    due to issues with compiler internal errors.
-  </li>
-
-  <li><code>configs/stm3210e-eval</code>:
-    STMicro STM3210E-EVAL development board based on the STMicro STM32F103ZET6
-    microcontroller (ARM Cortex-M3).  This port uses the GNU Cortex-M3
-    toolchain.
-  </li>
-
-  <li><code>configs/sim</code>:
-    A user-mode port of NuttX to the x86 Linux platform is available.
-    The purpose of this port is primarily to support OS feature development.
-    This port does not support interrupts or a real timer (and hence no
-    round robin scheduler)  Otherwise, it is complete.
-  </li>
-
-  <li><code>configs/us7032evb1</code>:
-    This is a port of the Hitachi SH-1 on the Hitachi SH-1/US7032EVB1 board.
-    STATUS:  This port is available as of release 0.3.18 of NuttX.  The port is basically
-    complete and many examples run correctly.  However, there are remaining instabilities
-    that make the port un-usable.  The nature of these is not understood; the behavior is
-    that certain SH-1 instructions stop working as advertised.  This could be a silicon
-    problem, some pipeline issue that is not handled properly by the gcc 3.4.5 toolchain
-    (which has very limited SH-1 support to begin with), or perhaps with the CMON debugger.
-    At any rate, I have exhausted all of the energy that I am willing to put into this cool
-    old processor for the time being.
-  </li>
-
-  <li><code>configs/vsn</code>:
-    ISOTEL NetClamps VSN V1.2 ready2go sensor network platform based on the
-    STMicro STM32F103RET6.  Contributed by Uros Platise.
-    See the <a href="http://isotel.eu/NetClamps/">Isotel</a> web site for further information
-    about the NetClamps board.
-  </li>
-
-  <li><code>configs/xtrs</code>:
-    TRS80 Model 3.  This port uses a vintage computer based on the Z80.
-    An emulator for this computer is available to run TRS80 programs on a
-    Linux platform (http://www.tim-mann.org/xtrs.html).
-  </li>
-
-  <li><code>configs/z16f2800100zcog</code>
-    z16f Microcontroller.
-    This port use the Zilog z16f2800100zcog development kit and the
-    Zilog ZDS-II Windows command line tools.
-    The development environment is Cygwin under WinXP.
-  </li>
-
-  <li><code>configs/z80sim</code>:
-    z80 Microcontroller.  This port uses a Z80 instruction set simulator
-    called z80sim.
-    This port also the <a href="http://sdcc.sourceforge.net/">SDCC</a> toolchain under Linux or Cygwin(verified with version 2.6.0).
-  </li>
-
-  <li><code>configs/z8encore000zco</code>
-    z8Encore! Microcontroller.  This port use the Zilog z8encore000zco
-    development kit, Z8F6403 part, and the Zilog ZDS-II Windows command line
-    tools.  The development environment is Cygwin under WinXP.
-  </li>
-
-  <li><code>configs/z8encore000zco</code>
-    z8Encore! Microcontroller.  This port use the Zilog z8f64200100kit
-    development kit, Z8F6423 part, and the Zilog ZDS-II Windows command line
-    tools.  The development environment is Cygwin under WinXP.
-  </li>
-
-  <li><code>configs/z8f64200100kit</code>:
-    z8Encore! Microcontroller.  This port use the Zilog z8f64200100kit
-    development kit, Z8F6423 part, and the Zilog ZDS-II Windows command line
-    tools.  The development environment is Cygwin under WinXP.
-  </li>
-</ul>
-
-<p><small><blockquote>
-  * A customized version of the <a href="http://www.buildroot.org">buildroot</a>
-  is available to build these toolchains under Linux or Cygwin.
-</blockquote></small></p>
-
-<h3><a name="newboardconfig">2.4.4 Adding a New Board Configuration</a></h3>
+<h3><a name="newboardconfig">2.5.4 Adding a New Board Configuration</a></h3>
 <p>
   Okay, so you have created a new board configuration directory.
   Now, how do you hook this board into the configuration system so that you can select with <code>make menuconfig</code>?
@@ -1164,7 +923,13 @@ endif
   This includes additional, board-specific configuration variable definitions in <code>configs/myboard/Kconfig</code>.
 </p>
 
-<h2>2.5 <a name="DirStructDrivers">nuttx/drivers</a></h2>
+<h2>2.6 <a name="DirStructCrypto">nuttx/crypto</a></h2>
+
+<p>
+  This sub-directory holds the NuttX cryptographic sub-system.
+</p>
+
+<h2>2.7 <a name="DirStructDrivers">nuttx/drivers</a></h2>
 
 <p>
   This directory holds architecture-independent device drivers.
@@ -1228,7 +993,7 @@ drivers/
 `-- <i>(Various common driver source files)</i>
 </pre></ul>
 
-<h2>2.6 <a name="DirStructFs">nuttx/fs</a></h2>
+<h2>2.8 <a name="DirStructFs">nuttx/fs</a></h2>
 
 <p>
   This directory contains the NuttX file system.
@@ -1261,7 +1026,7 @@ fs/
  `-- <i>(common file system source files)</i>
 </pre></ul>
 
-<h2>2.7 <a name="DirStructGraphics">nuttx/graphics</a></h2>
+<h2>2.9 <a name="DirStructGraphics">nuttx/graphics</a></h2>
 
 <p>
   This directory contains files for graphics/video support under NuttX.
@@ -1288,7 +1053,7 @@ graphics/
 `-- <i>(common file system source files)</i>
 </pre></ul>
 
-<h2>2.8 <a name="DirStructInclude">nuttx/include</a></h2>
+<h2>2.10 <a name="DirStructInclude">nuttx/include</a></h2>
 <p>
   This directory holds NuttX header files.
   Standard header files file retained in can be included in the <i>normal</i> fashion:
@@ -1351,7 +1116,15 @@ include/
     `-- <i>(More standard header files)</i>
 </pre></ul>
 
-<h2>2.9 <a name="DirStructLib">nuttx/libc</a></h2>
+<h2>2.11 <a name="DirStructLib">nuttx</a></h2>
+
+<p>
+  This is a (almost) empty directory that has a holding place for generated static libraries.
+  The NuttX build system generates a collection of such static libraries in this directory during the compile phaase.
+  These libraries are then in a known place for the final link phase where they are accessed to generated the final binaries.
+</p>
+
+<h2>2.12 <a name="DirStructLibC">nuttx/libc</a></h2>
 <p>
   This directory holds a collection of standard libc-like functions with custom
   interfaces into NuttX.
@@ -1399,28 +1172,28 @@ libc/
     `-- <i>(Implementation of some functions from unistd.h)</i>
 </pre></ul>
 
-<h2>2.10 <a name="DirStructLibXX">nuttx/libxx</a></h2>
+<h2>2.13 <a name="DirStructLibXX">nuttx/libxx</a></h2>
 <p>
   This directory holds a tiny, minimal standard std C++ that can be used to
   build some, simple C++ applications in NuttX.
 </p>
 
-<h2>2.11 <a name="DirStructMm">nuttx/mm</a></h2>
+<h2>2.14 <a name="DirStructMm">nuttx/mm</a></h2>
 <p>
   This is the NuttX memory manager.
 </p>
 
-<h2>2.12 <a name="DirStructNet">nuttx/net</a></h2>
+<h2>2.15 <a name="DirStructNet">nuttx/net</a></h2>
 <p>
   This directory contains the implementation of the NuttX networking layer including internal socket APIs.
 </P>
 
-<h2>2.13 <a name="DirStructSched">nuttx/sched</a></h2>
+<h2>2.16 <a name="DirStructSched">nuttx/sched</a></h2>
 <p>
   The files forming core of the NuttX RTOS reside here.
 </p>
 
-<h2>2.14 <a name="DirStructSyscall">nuttx/syscall</a></h2>
+<h2>2.17 <a name="DirStructSyscall">nuttx/syscall</a></h2>
 <p>
   If NuttX is built as a separately compiled kernel (with <code>CONFIG_BUILD_PROTECTED=y</code> or <code>CONFIG_BUILD_KERNEL=y</code>),
   then the contents of this directory are built.
@@ -1428,7 +1201,7 @@ libc/
   between user-mode applications and the kernel-mode RTOS.
 </p>
 
-<h2>2.15 <a name="DirStructTools">nuttx/tools</a></h2>
+<h2>2.18 <a name="DirStructTools">nuttx/tools</a></h2>
 <p>
   This directory holds a collection of tools and scripts to simplify
   configuring, building and maintaining NuttX.
@@ -1466,86 +1239,17 @@ tools/
   Some of these tools are discussed below as well in the discussion of <a href="#configandbuild">configuring and building</a> NuttX.
 </p>
 
-<h2>2.16 <a name="topmakefile">nuttx/Makefile</a></h2>
+<h2>2.19 <a name="DirStructWireless">nuttx/wireless</a></h2>
+
+<p>
+  This directory holds support for hardware-independent wireless support.
+</p>
+
+<h2>2.20 <a name="topmakefile">nuttx/Makefile</a></h2>
 <p>
   The top-level <code>Makefile</code> in the <code>${TOPDIR}</code> directory contains all of the top-level control
   logic to build NuttX.
   Use of this <code>Makefile</code> to build NuttX is described <a href="#buildingnuttx">below</a>.
-</p>
-
-<h2>2.17 <a name="DirStructNetUtils">apps/netutils</a></h2>
-<p>
-  This directory contains most of the network applications.
-  Some of these are original with NuttX (like tftpc and dhcpd) and others were leveraged from the uIP-1.0 apps directory.
-  As the uIP apps/README says, these applications &quot;are not all heavily tested.&quot;
-</p>
-<ul><pre>
-netutils/
-|-- Kconfig
-|-- Makefile
-|-- dhcdp/
-|   |-- Kconfig
-|   |-- Make.defs
-|   `-- <i>(DHCP client source files)</i>
-|-- dhcpd/
-|   |-- Kconfig
-|   |-- Make.defs
-|   `-- <i>(DHCP server source files)</i>
-|-- ftpc/
-|   |-- Kconfig
-|   |-- Make.defs
-|   `-- <i>(FTP client source files)</i>
-|-- ftpd/
-|   |-- Kconfig
-|   |-- Make.defs
-|   `-- <i>(FTP server source files)</i>
-|-- resolv/
-|   |-- Kconfig
-|   |-- Make.defs
-|   `-- <i>(resolv source files)</i>
-|-- resolv/
-|   |-- Kconfig
-|   |-- Make.defs
-|   `-- <i>(resolv source files)</i>
-|-- smtp/
-|   |-- Kconfig
-|   |-- Make.defs
-|   `-- <i>(smtp source files)</i>
-|-- telnetd/
-|   |-- Kconfig
-|   |-- Make.defs
-|   `-- <i>(Telnet client source files)</i>
-|-- tftpc/
-|   |-- Kconfig
-|   |-- Make.defs
-|   `-- <i>(TFTP client source files)</i>
-|-- thttpd/
-|   |-- Kconfig
-|   |-- Make.defs
-|   `-- <i>(thttpd HTTP server source files)</i>
-|-- netlib/
-|   |-- Kconfig
-|   |-- Make.defs
-|   `-- <i>(netlib source files)</i>
-|-- weblclient/
-|   |-- Kconfig
-|   |-- Make.defs
-|   `-- <i>(webclient source files)</i>
-|-- webserver/
-|   |-- Kconfig
-|   |-- Make.defs
-|   `-- <i>(uIP webserver source files)</i>
-`-- <i>(netutils common files)</i>
-</pre></ul>
-
-<h2>2.18 <a name="DirStructNshLib">apps/nshlib</a></h2>
-<p>
-  This directory contains for the core of the NuttShell (NSH) application.
-</p>
-
-<h2>2.19 <a name="DirStructExamples">apps/examples</a></h2>
-<p>
-  Example and test programs to build against.
 </p>
 
 <table width ="100%">
@@ -3907,24 +3611,230 @@ void lpwork_restorepriority(uint8_t reqprio);
   -1 (<code>ERROR</code>) is returned on failure with the <code>errno</code> variable to to indicate the nature of the failure.
 </ul>
 
-<h2><a name="exports">4.7 APIs Exported by NuttX to Architecture-Specific Logic</a></h2>
+<h4><a name="boardsmp">4.7 Symmetric Multiprocssing (SMP) Application Interface</a></h4>
+<p>
+According to Wikipedia: "Symmetric multiprocessing (SMP) involves a symmetric multiprocessor system hardware and software architecture where two or more identical processors connect to a single, shared main memory, have full access to all I/O devices, and are controlled by a single operating system instance that treats all processors equally, reserving none for special purposes. Most multiprocessor systems today use an SMP architecture. In the case of multi-core processors, the SMP architecture applies to the cores, treating them as separate processors. 
+</p>
+<p>
+"SMP systems are tightly coupled multiprocessor systems with a pool of homogeneous processors running independently, each processor executing different programs and working on different data and with capability of sharing common resources (memory, I/O device, interrupt system and so on) and connected using a system bus or a crossbar."
+</p>
+<p>
+For a technical description of the NuttX implementation of SMP, see the NuttX <a href="http://www.nuttx.org/doku.php?id=wiki:nxinternal:smp">SMP Wiki Page</a>.
+</p>
+
+  None
+</ul>
+
+<h3><a name="uptestset">4.7.1 <code>up_testset()</code></a></h3>
+<p><b>Function Prototype</b>:<p>
+<ul><pre>
+#include &lt;nuttx/spinlock.h&gt;
+#ifdef CONFIG_SPINLOCK
+spinlock_t up_testset(volatile FAR spinlock_t *lock);
+#endif
+</pre></ul>
+
+<p><b>Description</b>:</p>
+<ul>
+  <p>
+    Perform and atomic test and set operation on the provided spinlock.
+  </p>
+</ul>
+<p><b>Input Parameters</b>:</p>
+<ul>
+  <li>
+    <code>lock</code>: The address of spinlock object.
+  </li>
+</ul>
+<p><b>Returned Value</b>:</p>
+<ul>
+  <p>
+    The spinlock is always locked upon return. 
+    The value of previous value of the spinlock variable is returned, either <code>SP_LOCKED</code> if the spinlock was previously locked (meaning that the test-and-set operation failed to obtain the lock) or <code>SP_UNLOCKED</code> if the spinlock was previously unlocked (meaning that we successfully obtained the lock)
+  </p>
+</ul>
+
+<h3><a name="upcpuindex">4.7.2 <code>up_cpu_index()</code></a></h3>
+<p><b>Function Prototype</b>:<p>
+<ul><pre>
+#include &lt;nuttx/arch.h&gt;
+#ifdef CONFIG_SMP
+int up_cpu_index(void);
+#else
+#  define up_cpu_index() (0)
+#endif
+</pre></ul>
+
+<p><b>Description</b>:</p>
+<ul>
+  <p>
+    Return an index in the range of 0 through <code>(CONFIG_SMP_NCPUS-1)</code> that corresponds to the currently executing CPU.
+  </p>
+</ul>
+<p><b>Input Parameters</b>:</p>
+<ul>
+  None
+</ul>
+<p><b>Returned Value</b>:</p>
+<ul>
+  <p>
+    An integer index in the range of 0 through <code>(CONFIG_SMP_NCPUS-1)</code> that corresponds to the currently executing CPU.
+  </p>
+</ul>
+
+<h3><a name="upcpustart">4.7.3 <code>up_cpu_start()</code></a></h3>
+<p><b>Function Prototype</b>:<p>
+<ul><pre>
+#include &lt;nuttx/arch.h&gt;
+#ifdef CONFIG_SMP
+int up_cpu_start(int cpu);
+#endif
+</pre></ul>
+
+<p><b>Description</b>:</p>
+<ul>
+  <p>
+    In an SMP configution, only one CPU is initially active (CPU 0).
+    System initialization occurs on that single thread.
+    At the completion of the initialization of the OS, just before beginning normal multitasking, the additional CPUs would be started by calling this function.
+  </p>
+  <p>
+    Each CPU is provided the entry point to is IDLE task when started.
+    A TCB for each CPU's IDLE task has been initialized and placed in the  CPU's <code>g_assignedtasks[cpu]</code> list.
+    A stack has also been allocated and initialized.
+  </p>
+  <p>
+    The OS initialization logic calls this function repeatedly until each CPU has been started, 1 through <code>(CONFIG_SMP_NCPUS-1)</code>.
+  </p>
+</ul>
+<p><b>Input Parameters</b>:</p>
+<ul>
+  <li>
+    <code>cpu</code>: The index of the CPU being started.
+    This will be a numeric value in the range of from one to <code>(CONFIG_SMP_NCPUS-1)</code>).
+    (CPU 0 is already active).
+  </li>
+</ul>
+<p><b>Returned Value</b>:</p>
+<ul>
+  <p>
+    Zero (<code>OK</code>) is returned on success; a negated <code>errno</code> value on failure.
+  </p>
+</ul>
+
+<h3><a name="upcpuinitialize">4.7.4 <code>up_cpu_initialize()</code></a></h3>
+<p><b>Function Prototype</b>:<p>
+<ul><pre>
+#include &lt;nuttx/arch.h&gt;
+#ifdef CONFIG_SMP
+int up_cpu_initialize(void);
+#endif
+</pre></ul>
+
+<p><b>Description</b>:</p>
+<ul>
+  <p>
+    After the CPU has been started (via <code>up_cpu_start()</code>) the system will call back into the architecture-specific code with this function on the thread of execution of the newly started CPU.
+    This gives the architecture-specific a chance to perform ny initial, CPU-specific initialize on that thread.
+  </p>
+</ul>
+<p><b>Input Parameters</b>:</p>
+<ul>
+  None
+</ul>
+<p><b>Returned Value</b>:</p>
+<ul>
+  <p>
+    Zero (<code>OK</code>) is returned on success; a negated <code>errno</code> value on failure.
+  </p>
+</ul>
+
+<h3><a name="upcpupause">4.7.5 <code>up_cpu_pause()</code></a></h3>
+<p><b>Function Prototype</b>:<p>
+<ul><pre>
+#include &lt;nuttx/arch.h&gt;
+#ifdef CONFIG_SMP
+int up_cpu_pause(int cpu);
+#endif
+</pre></ul>
+
+<p><b>Description</b>:</p>
+<ul>
+  <p>
+    Save the state of the current task at the head of the <code>g_assignedtasks[cpu]</code> task list and then pause task execution on the CPU.
+  </p>
+  <p>
+    This function is called by the OS when the logic executing on one CPU needs to modify the state of the <code>g_assignedtasks[cpu]</code> list for another CPU.
+  </p>
+</ul>
+<p><b>Input Parameters</b>:</p>
+<ul>
+  <li>
+    <code>cpu</code>: The index of the CPU to be paused.
+    This will not be the index of the currently executing CPU.
+  </li>
+</ul>
+<p><b>Returned Value</b>:</p>
+<ul>
+  <p>
+    Zero (<code>OK</code>) is returned on success; a negated <code>errno</code> value on failure.
+  </p>
+</ul>
+
+<h3><a name="upcpuresume">4.7.6 <code>up_cpu_resume()</code></a></h3>
+<p><b>Function Prototype</b>:<p>
+<ul><pre>
+#include &lt;nuttx/arch.h&gt;
+#ifdef CONFIG_SMP
+int up_cpu_resume(int cpu);
+#endif
+</pre></ul>
+
+<p><b>Description</b>:</p>
+<ul>
+  <p>
+    Restart the cpu after it was paused via <code>up_cpu_pause()</code>, restoring the state of the task at the head of the <code>g_assignedtasks[cpu]</code> list, and resume normal tasking.
+  </p>
+  <p>
+    This function is called after <code>up_cpu_pause()</code> in order resume operation of the CPU after modifying its <code>g_assignedtasks[cpu]</code> list.
+  </p>
+</ul>
+<p><b>Input Parameters</b>:</p>
+<ul>
+  <li>
+    <code>cpu</code>: The index of the CPU being resumed.
+    This will not be the index of the currently executing CPU.
+  </li>
+</ul>
+<p><b>Returned Value</b>:</p>
+<ul>
+  <p>
+    Zero (<code>OK</code>) is returned on success; a negated <code>errno</code> value on failure.
+  </p>
+</ul>
+
+<h2><a name="exports">4.8 APIs Exported by NuttX to Architecture-Specific Logic</a></h2>
 <p>
   These are standard interfaces that are exported by the OS
   for use by the architecture specific logic.
 </p>
 
-<h3><a name="osstart">4.7.1 <code>os_start()</code></a></h3>
+<h3><a name="osstart">4.8.1 <code>os_start()</code></a></h3>
 <p>
   <b><i>To be provided</i></b>
 </p>
 
-<h3><a name="listmgmt">4.7.2 OS List Management APIs</a></h3></h3>
+<h3><a name="listmgmt">4.8.2 OS List Management APIs</a></h3></h3>
 <p>
   <b><i>To be provided</i></b>
 </p>
 
-<h3><a name="schedprocesstimer">4.7.3 <code>sched_process_timer()</code></a></h3>
-<p><b>Function Prototype</b>: <code>void sched_process_timer(void);</code></p>
+<h3><a name="schedprocesstimer">4.8.3 <code>sched_process_timer()</code></a></h3>
+<p><b>Function Prototype</b>:</p>
+<ul><pre>
+#include &lt;nuttx/arch.h&gt;
+void sched_process_timer(void);
+</pre></ul>
 
 <p><b>Description</b>.
   This function handles system timer events.
@@ -3934,7 +3844,30 @@ void lpwork_restorepriority(uint8_t reqprio);
   <code>MSEC_PER_TICK</code>.
 </p>
 
-<h3><a name="schedtimerexpiration">4.7.4 <code>sched_timer_expiration()</code></a></h3>
+<h3><a name="schedtimerexpiration">4.8.4 <code>sched_timer_expiration()</code></a></h3>
+<p><b>Function Prototype</b>:<p>
+<ul><pre>
+#include &lt;nuttx/arch.h&gt;
+void sched_timer_expiration(void);
+</pre></ul>
+<p><b>Description</b>:</p>
+  Description: if <code>CONFIG_SCHED_TICKLESS</code> is defined, then this function is provided by the RTOS base code and called from platform-specific code when the interval timer used to implemented the tick-less OS expires.
+<ul>
+</ul>
+<p><b>Input Parameters</b>:</p>
+<ul>
+  None
+</ul>
+<p><b>Returned Value</b>:</p>
+<ul>
+  None
+</ul>
+<p><b>Assumptions</b>:</p>
+<ul>
+  Base code implementation assumes that this function is called from interrupt handling logic with interrupts disabled.
+</ul>
+
+<h3><a name="schedalarmexpiration">4.8.5 <code>sched_alaram_expiration()</code></a></h3>
 <p><b>Function Prototype</b>:<p>
 <ul><pre>
 #include &lt;nuttx/arch.h&gt;
@@ -3957,30 +3890,7 @@ void sched_timer_expiration(void);
   Base code implementation assumes that this function is called from interrupt handling logic with interrupts disabled.
 </ul>
 
-<h3><a name="schedalarmexpiration">4.7.5 <code>sched_alaram_expiration()</code></a></h3>
-<p><b>Function Prototype</b>:<p>
-<ul><pre>
-#include &lt;nuttx/arch.h&gt;
-void sched_timer_expiration(void);
-</ul>
-<p><b>Description</b>:</p>
-  Description: if <code>CONFIG_SCHED_TICKLESS</code> is defined, then this function is provided by the RTOS base code and called from platform-specific code when the interval timer used to implemented the tick-less OS expires.
-<ul>
-</ul>
-<p><b>Input Parameters</b>:</p>
-<ul>
-  None
-</ul>
-<p><b>Returned Value</b>:</p>
-<ul>
-  None
-</ul>
-<p><b>Assumptions</b>:</p>
-<ul>
-  Base code implementation assumes that this function is called from interrupt handling logic with interrupts disabled.
-</ul>
-
-<h3><a name="irqdispatch">4.7.6 <code>irq_dispatch()</code></a></h3>
+<h3><a name="irqdispatch">4.8.6 <code>irq_dispatch()</code></a></h3>
 <p><b>Function Prototype</b>: <code>void irq_dispatch(int irq, FAR void *context);</code></p>
 
 <p><b>Description</b>.
@@ -3989,7 +3899,7 @@ void sched_timer_expiration(void);
   the appropriate, registered handling logic.
 </p>
 
-<h2><a name="shm">4.8 Shared Memory</a></h2>
+<h2><a name="shm">4.9 Shared Memory</a></h2>
 <p>
   Shared memory interfaces are only available with the NuttX kernel build (<code>CONFIG_BUILD_KERNEL=y</code>).
   These interfaces support user memory regions that can be shared between multiple user processes.
@@ -3998,7 +3908,7 @@ void sched_timer_expiration(void);
   Those interfaces are described below:
 </p>
 
-<h3><a name="upshmat">4.8.1 <code>up_shmat()</code></a></h3>
+<h3><a name="upshmat">4.9.1 <code>up_shmat()</code></a></h3>
 <p><b>Function Prototype</b>:<p>
 <ul><pre>
 #include &lt;nuttx/arch.h&gt;
@@ -4027,7 +3937,7 @@ int up_shmat(FAR uintptr_t *pages, unsigned int npages, uintptr_t vaddr);
   Zero (<code>OK</code>) is returned on success; a negated <code>errno</code> value is returned on failure.
 </ul>
 
-<h3><a name="upshmdt">4.8.2 <code>up_shmdt()</code></a></h3>
+<h3><a name="upshmdt">4.9.2 <code>up_shmdt()</code></a></h3>
 <p><b>Function Prototype</b>:<p>
 <ul><pre>
 #include &lt;nuttx/arch.h&gt;
@@ -4053,7 +3963,7 @@ int up_shmdt(uintptr_t vaddr, unsigned int npages);
   Zero (<code>OK</code>) is returned on success; a negated <code>errno</code> value is returned on failure.
 </ul>
 
-<h2><a name="demandpaging">4.9 On-Demand Paging</a></h2>
+<h2><a name="demandpaging">4.10 On-Demand Paging</a></h2>
 <p>
   The NuttX On-Demand Paging feature permits embedded MCUs with some limited RAM space to execute large programs from some non-random access media.
   If the platform meets certain requirements, then NuttX can provide on-demand paging:
@@ -4062,7 +3972,7 @@ int up_shmdt(uintptr_t vaddr, unsigned int npages);
   Please see the <a href="NuttXDemandPaging.html">NuttX Demand Paging</a> design document for further information.
 </p>
 
-<h2><a name="ledsupport">4.10 LED Support</a></h2>
+<h2><a name="ledsupport">4.11 LED Support</a></h2>
 
 <p>
   A board architecture may or may not have LEDs.
@@ -4072,7 +3982,7 @@ int up_shmdt(uintptr_t vaddr, unsigned int npages);
   However, the support provided by each architecture is sufficiently similar that it can be documented here.
 </p>
 
-<h3><a name="ledheaders">4.10.1 Header Files</a></h3>
+<h3><a name="ledheaders">4.11.1 Header Files</a></h3>
 
 <p>
   LED-related definitions are provided in two header files:
@@ -4096,7 +4006,7 @@ int up_shmdt(uintptr_t vaddr, unsigned int npages);
   </ul>
 </p>
 
-<h3><a name="leddefinitions">4.10.2 LED Definitions</a></h3>
+<h3><a name="leddefinitions">4.11.2 LED Definitions</a></h3>
 
 <p>
    The implementation of LED support is very specific to a board architecture.
@@ -4160,7 +4070,7 @@ int up_shmdt(uintptr_t vaddr, unsigned int npages);
   </li>
 </ul>
 
-<h3><a name="ledapis">4.10.3 Common LED interfaces</a></h3>
+<h3><a name="ledapis">4.11.3 Common LED interfaces</a></h3>
 
 <p>
   The <code>include/nuttx/board.h</code> has declarations like:
