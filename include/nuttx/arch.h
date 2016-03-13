@@ -1692,7 +1692,7 @@ int up_timer_start(FAR const struct timespec *ts);
  * Returned Value:
  *   The spinlock is always locked upon return.  The value of previous value
  *   of the spinlock variable is returned, either SP_LOCKED if the spinlock
- *   as previously locked (meaning that the test-and-set operation failed to
+ *   was previously locked (meaning that the test-and-set operation failed to
  *   obtain the lock) or SP_UNLOCKED if the spinlock was previously unlocked
  *   (meaning that we successfully obtained the lock)
  *
@@ -1733,7 +1733,7 @@ int up_cpu_index(void);
  *
  *   Each CPU is provided the entry point to is IDLE task when started.  A
  *   TCB for each CPU's IDLE task has been initialized and placed in the
- *   CPU's g_assignedtasks[cpu] list.  Not stack has been alloced or
+ *   CPU's g_assignedtasks[cpu] list.  A stack has also been allocateded and
  *   initialized.
  *
  *   The OS initialization logic calls this function repeatedly until each
@@ -1788,7 +1788,7 @@ int up_cpu_initialize(void);
  *   CPU.
  *
  * Input Parameters:
- *   cpu - The index of the CPU to be stopped/
+ *   cpu - The index of the CPU to be paused.
  *
  * Returned Value:
  *   Zero on success; a negated errno value on failure.
@@ -1811,7 +1811,7 @@ int up_cpu_pause(int cpu);
  *   the CPU after modifying its g_assignedtasks[cpu] list.
  *
  * Input Parameters:
- *   cpu - The index of the CPU being re-started.
+ *   cpu - The index of the CPU being resumed.
  *
  * Returned Value:
  *   Zero on success; a negated errno value on failure.
