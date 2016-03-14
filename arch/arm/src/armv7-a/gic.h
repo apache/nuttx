@@ -1,6 +1,6 @@
 /****************************************************************************
  * arch/arm/src/armv7-a/gic.h
- * Generic Interrupt Controller Definitions
+ * Generic Interrupt Controller Version 2 Definitions
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -52,7 +52,7 @@
 #include <stdint.h>
 #include "mpcore.h"
 
-#ifdef CONFIG_ARMV7A_HAVE_GIC
+#ifdef CONFIG_ARMV7A_HAVE_GICv2
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -631,5 +631,5 @@ int arm_pause_handler(int irq, FAR void *context);
 #endif
 #endif /* __ASSEMBLY__ */
 
-#endif /* CONFIG_ARMV7A_HAVE_GIC */
+#endif /* CONFIG_ARMV7A_HAVE_GICv2 */
 #endif /* __ARCH_ARM_SRC_ARMV7_A_GIC_H */

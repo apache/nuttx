@@ -5,7 +5,7 @@
 
 comment "ARMv7-A Configuration Options"
 
-config ARMV7A_HAVE_GIC
+config ARMV7A_HAVE_GICv2
 	bool
 	default n
 	---help---

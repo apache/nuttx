@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv7-a/arm_gic.c
+ * arch/arm/src/armv7-a/arm_gicv2.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -52,7 +52,7 @@
 #include "up_internal.h"
 #include "gic.h"
 
-#ifdef CONFIG_ARMV7A_HAVE_GIC
+#ifdef CONFIG_ARMV7A_HAVE_GICv2
 
 /****************************************************************************
  * Public Functions
@@ -534,4 +534,4 @@ int arm_cpu_sgi(int sgi, unsigned int cpuset)
   return OK;
 }
 
-#endif /* CONFIG_ARMV7A_HAVE_GIC */
+#endif /* CONFIG_ARMV7A_HAVE_GICv2 */
