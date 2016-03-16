@@ -843,6 +843,49 @@ void sched_suspend_scheduler(FAR struct tcb_s *tcb);
 #  define sched_suspend_scheduler(tcb)
 #endif
 
+/********************************************************************************
+ * Name: sched_note_*
+ *
+ * Description:
+ *   If instrumentation of the scheduler is enabled, then some outboard logic
+ *   must provide the following interfaces.  These interfaces are not availalble
+ *   to application code.
+ *
+ * Input Parameters:
+ *   tcb - The TCB of the thread to be restarted.
+ *
+ * Returned Value:
+ *   None
+ *
+ ********************************************************************************/
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION
+
+void   sched_note_start(FAR struct tcb_s *tcb);
+void   sched_note_stop(FAR struct tcb_s *tcb);
+void   sched_note_switch(FAR struct tcb_s *fromtcb,
+                         FAR struct tcb_s *totcb);
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
+void sched_note_premption(FAR struct tcb_s *tcb, bool locked);
+#else
+#  define sched_note_premption(t,l)
+#endif
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION_CSECTION
+void sched_note_csection(FAR struct tcb_s *tcb, bool enter);
+#else
+#  define sched_note_csection(t,e)
+#endif
+
+#else
+#  define sched_note_start(t)
+#  define sched_note_stop(t)
+#  define sched_note_switch(t1, t2)
+#  define sched_note_premption(t,l)
+#  define sched_note_csection(t,e)
+#endif /* CONFIG_SCHED_INSTRUMENTATION */
+
 #undef EXTERN
 #if defined(__cplusplus)
 }

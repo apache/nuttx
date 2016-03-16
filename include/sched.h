@@ -243,10 +243,10 @@ int    sched_rr_get_interval(pid_t pid, FAR struct timespec *interval);
 #ifdef CONFIG_SMP
 /* Task affinity */
 
-int sched_setaffinity(pid_t pid, size_t cpusetsize,
-                      FAR const cpu_set_t *mask);
-int sched_getaffinity(pid_t pid, size_t cpusetsize, FAR cpu_set_t *mask);
-int sched_cpu_count(FAR const cpu_set_t *set);
+int    sched_setaffinity(pid_t pid, size_t cpusetsize,
+                         FAR const cpu_set_t *mask);
+int    sched_getaffinity(pid_t pid, size_t cpusetsize, FAR cpu_set_t *mask);
+int    sched_cpu_count(FAR const cpu_set_t *set);
 #endif /* CONFIG_SMP */
 
 /* Task Switching Interfaces (non-standard) */
@@ -254,37 +254,6 @@ int sched_cpu_count(FAR const cpu_set_t *set);
 int    sched_lock(void);
 int    sched_unlock(void);
 int    sched_lockcount(void);
-
-/* If instrumentation of the scheduler is enabled, then some outboard logic
- * must provide the following interfaces.
- */
-
-#ifdef CONFIG_SCHED_INSTRUMENTATION
-
-void   sched_note_start(FAR struct tcb_s *tcb);
-void   sched_note_stop(FAR struct tcb_s *tcb);
-void   sched_note_switch(FAR struct tcb_s *fromtcb,
-                         FAR struct tcb_s *totcb);
-
-#ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
-void sched_note_premption(FAR struct tcb_s *tcb, bool locked);
-#else
-#  define sched_note_premption(t,l)
-#endif
-
-#ifdef CONFIG_SCHED_INSTRUMENTATION_CSECTION
-void sched_note_csection(FAR struct tcb_s *tcb, bool enter);
-#else
-#  define sched_note_csection(t,e)
-#endif
-
-#else
-#  define sched_note_start(t)
-#  define sched_note_stop(t)
-#  define sched_note_switch(t1, t2)
-#  define sched_note_premption(t,l)
-#  define sched_note_csection(t,e)
-#endif /* CONFIG_SCHED_INSTRUMENTATION */
 
 #undef EXTERN
 #if defined(__cplusplus)
