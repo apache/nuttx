@@ -861,10 +861,9 @@ void sched_suspend_scheduler(FAR struct tcb_s *tcb);
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION
 
-void   sched_note_start(FAR struct tcb_s *tcb);
-void   sched_note_stop(FAR struct tcb_s *tcb);
-void   sched_note_switch(FAR struct tcb_s *fromtcb,
-                         FAR struct tcb_s *totcb);
+void sched_note_start(FAR struct tcb_s *tcb);
+void sched_note_stop(FAR struct tcb_s *tcb);
+void sched_note_switch(FAR struct tcb_s *fromtcb, FAR struct tcb_s *totcb);
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
 void sched_note_premption(FAR struct tcb_s *tcb, bool locked);
