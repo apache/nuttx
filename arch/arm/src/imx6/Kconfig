@@ -14,6 +14,8 @@ choice
 config ARCH_CHIP_IMX6_6SOLOLITE
 	bool "i.MX 6SoloLite"
 	select ARMV7A_HAVE_GICv2
+	select ARMV7A_HAVE_GTM
+	select ARMV7A_HAVE_PTM
 
 config ARCH_CHIP_IMX6_6SOLO
 	bool "i.MX 6Solo"
