@@ -46,6 +46,12 @@
  * Pre-processor Definitions
  ************************************************************************************/
 /* Clocking *************************************************************************/
+/* Clocking will be configured at 792 MHz initially when started via U-Boot.  The
+ * Linux kernel will use the CPU frequency scaling code which will switch the
+ * processor frequency between 400 MHz and 1GHz based on load and temperature.
+ *
+ * For now, NuttX simply leaves the clocking at 792MHz.
+ */
 
 /* LED definitions ******************************************************************/
 /* LEDs

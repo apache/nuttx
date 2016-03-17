@@ -35,7 +35,8 @@
 
 /* The i.MX6 has 256 KB of OCRAM beginning at virtual address 0x0090:0000
  * This memory configuration, however, loads into the 1GB DDR3 on board
- * the Sabre 6Quad K which lies at 0x1000:0000.
+ * the Sabre 6Quad K which lies at 0x1000:0000.  Code is positioned at
+ * 0x10800000 which the standard load address of Linux when used with uBoot.
  *
  * Vectors in low memory are assumed and 16KB of OCRAM is reserved at the
  * high end of OCRAM for the page table.
@@ -44,7 +45,7 @@
 MEMORY
 {
 	oscram (W!RX) : ORIGIN = 0x00900000, LENGTH = 256K - 16K
-	ddr3 (W!RX)   : ORIGIN = 0x10000000, LENGTH = 1024K
+	ddr3 (W!RX)   : ORIGIN = 0x10800000, LENGTH = 1024M - 8M
 }
 
 OUTPUT_FORMAT("elf32-littlearm", "elf32-littlearm", "elf32-littlearm")
