@@ -410,13 +410,13 @@ config CDCACM_EPBULKIN_HSSIZE
 		Max package size for the bulk IN endpoint if high speed mode.
 		Default 512.
 
-config CDCACM_NWRREQS
+config CDCACM_NRDREQS
 	int "Number of read requests that can be in flight"
 	default 4
 	---help---
 		The number of read requests that can be in flight
 
-config CDCACM_NRDREQS
+config CDCACM_NWRREQS
 	int "Number of write requests that can be in flight"
 	default 4
 	---help---
