@@ -852,7 +852,7 @@ void sched_suspend_scheduler(FAR struct tcb_s *tcb);
  *   to application code.
  *
  * Input Parameters:
- *   tcb - The TCB of the thread to be restarted.
+ *   tcb - The TCB of the thread.
  *
  * Returned Value:
  *   None

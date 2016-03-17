@@ -408,6 +408,10 @@ config M25P_SPIMODE
 	int "M25P SPI mode"
 	default 0
 
+config M25P_SPIFREQUENCY
+	int "M25P SPI Frequency"
+	default 20000000
+
 config M25P_MANUFACTURER
 	hex "M25P manufacturers ID"
 	default 0x20
