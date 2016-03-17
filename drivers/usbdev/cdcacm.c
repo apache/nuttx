@@ -111,7 +111,7 @@ struct cdcacm_dev_s
    */
 
   struct cdcacm_req_s wrreqs[CONFIG_CDCACM_NWRREQS];
-  struct cdcacm_req_s rdreqs[CONFIG_CDCACM_NWRREQS];
+  struct cdcacm_req_s rdreqs[CONFIG_CDCACM_NRDREQS];
 
   /* Serial I/O buffers */
 
