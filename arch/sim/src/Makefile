@@ -75,7 +75,9 @@ ifeq ($(CONFIG_SMP),y)
 endif
 
 ifeq ($(CONFIG_SCHED_INSTRUMENTATION),y)
+ifneq ($(CONFIG_SCHED_INSTRUMENTATION_BUFFER),y)
   CSRCS += up_schednote.c
+endif
 endif
 
 ifeq ($(CONFIG_DEV_CONSOLE),y)
