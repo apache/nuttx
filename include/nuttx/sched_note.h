@@ -195,16 +195,54 @@ void sched_note_csection(FAR struct tcb_s *tcb, bool enter);
  *   buflen - The length of the user provided buffer.
  *
  * Returned Value:
- *   None
- *
- * Assumptions:
- *   On success, the length of the return note is provided.  A negated
- *   errno value is returned on failure.
+ *   On success, the positive, non-zero length of the return note is
+ *   provided.  Zero is returned only if ther circular buffer is empty.  A
+ *   negated errno value is returned in the event of any failure.
  *
  ****************************************************************************/
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_BUFFER
 ssize_t sched_note_get(FAR uint8_t *buffer, size_t buflen);
+#endif
+
+/****************************************************************************
+ * Name: sched_note_size
+ *
+ * Description:
+ *   Return the size of the next note at the tail of the circular buffer.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   Zero is returned if the circular buffer is empty.  Otherwise, the size
+ *   of the next note is returned.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION_BUFFER
+ssize_t sched_note_size(void);
+#endif
+
+/****************************************************************************
+ * Name: note_register
+ *
+ * Description:
+ *   Register a serial driver at /dev/note that can be used by an
+ *   application to read data from the circular not buffer.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   Zero is returned if the circular buffer is empty.  Otherwise, a negated
+ *   errno value is returned.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_SCHED_INSTRUMENTATION_BUFFER) && \
+    defined(CONFIG_DRIVER_NOTE)
+int note_register(void);
 #endif
 
 #else /* CONFIG_SCHED_INSTRUMENTATION */

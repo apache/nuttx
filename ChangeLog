@@ -11565,4 +11565,6 @@
 	* sched/sched_note.c and include/nuttx/sched_note.c:  Add a configuration
 	  option to buffer RTOS instrumentation data in an in-memory buffer
 	  (2016-03-17).
+	* drivers/syslog/note_driver.c:  Add a character driver that will allow
+	  an appliation to read buffered scheduler instrumentation data (2016-03-17).
 

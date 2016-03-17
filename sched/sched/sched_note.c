@@ -158,7 +158,6 @@ static void note_systime(FAR struct note_common_s *note)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG
 static unsigned int note_length(void)
 {
   unsigned int head = g_note_info.ni_head;
@@ -171,7 +170,6 @@ static unsigned int note_length(void)
 
   return head - tail;
 }
-#endif
 
 /****************************************************************************
  * Name: note_remove
@@ -422,11 +420,9 @@ void sched_note_csection(FAR struct tcb_s *tcb, bool enter)
  *   buflen - The length of the user provided buffer.
  *
  * Returned Value:
- *   None
- *
- * Assumptions:
- *   On success, the length of the return note is provided.  A negated
- *   errno value is returned on failure.
+ *   On success, the positive, non-zero length of the return note is
+ *   provided.  Zero is returned only if ther circular buffer is empty.  A
+ *   negated errno value is returned in the event of any failure.
  *
  ****************************************************************************/
 
@@ -437,9 +433,19 @@ ssize_t sched_note_get(FAR uint8_t *buffer, size_t buflen)
   unsigned int remaining;
   unsigned int tail;
   ssize_t notelen;
+  size_t circlen;
 
   DEBUGASSERT(buffer != NULL);
   flags = enter_critical_section();
+
+  /* Verify that the circular buffer is not empty */
+
+  circlen = note_length();
+  if (circlen <= 0)
+    {
+      notelen = 0;
+      goto errout_with_csection;
+    }
 
   /* Get the index to the tail of the circular buffer */
 
@@ -448,9 +454,9 @@ ssize_t sched_note_get(FAR uint8_t *buffer, size_t buflen)
 
   /* Get the length of the note at the tail index */
 
-  note   = (FAR struct note_common_s *)&g_note_info.ni_buffer[tail];
+  note    = (FAR struct note_common_s *)&g_note_info.ni_buffer[tail];
   notelen = note->nc_length;
-  DEBUGASSERT(notelen <= note_length());
+  DEBUGASSERT(notelen <= circlen);
 
   /* Is the user buffer large enough to hold the note? */
 
@@ -482,6 +488,57 @@ ssize_t sched_note_get(FAR uint8_t *buffer, size_t buflen)
     }
 
   g_note_info.ni_tail = tail;
+
+errout_with_csection:
+  leave_critical_section(flags);
+  return notelen;
+}
+
+/****************************************************************************
+ * Name: sched_note_size
+ *
+ * Description:
+ *   Return the size of the next note at the tail of the circular buffer.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   Zero is returned if the circular buffer is empty.  Otherwise, the size
+ *   of the next note is returned.
+ *
+ ****************************************************************************/
+
+ssize_t sched_note_size(void)
+{
+  FAR struct note_common_s *note;
+  irqstate_t flags;
+  unsigned int tail;
+  ssize_t notelen;
+  size_t circlen;
+
+  DEBUGASSERT(buffer != NULL);
+  flags = enter_critical_section();
+
+  /* Verify that the circular buffer is not empty */
+
+  circlen = note_length();
+  if (circlen <= 0)
+    {
+      notelen = 0;
+      goto errout_with_csection;
+    }
+
+  /* Get the index to the tail of the circular buffer */
+
+  tail = g_note_info.ni_tail;
+  DEBUGASSERT(tail < CONFIG_SCHED_NOTE_BUFSIZE);
+
+  /* Get the length of the note at the tail index */
+
+  note    = (FAR struct note_common_s *)&g_note_info.ni_buffer[tail];
+  notelen = note->nc_length;
+  DEBUGASSERT(notelen <= circlen);
 
 errout_with_csection:
   leave_critical_section(flags);
