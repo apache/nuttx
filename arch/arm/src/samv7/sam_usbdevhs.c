@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/samv7/sam_usbdevhs.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.orgr>
  *
  * This code derives from the UDPHS device controller driver for the SAMA5D3.
@@ -4734,10 +4734,10 @@ static void sam_sw_setup(struct sam_usbdev_s *priv)
       priv->eplist[epno].ep.maxpacket = SAM_USBHS_MAXPACKETSIZE(epno);
     }
 
-  /* Select a smaller endpoint size for EP0 */
+#if CONFIG_USBDEV_EP0_MAXSIZE < SAM_EP0_MAXPACKET
+  /* Select a smaller endpoint size for EP0 if so configured */
 
-#if SAM_EP0MAXPACKET < SAM_MAXPACKET_SIZE
-  priv->eplist[EP0].ep.maxpacket = SAM_EP0MAXPACKET;
+  priv->eplist[EP0].ep.maxpacket = CONFIG_USBDEV_EP0_MAXSIZE;
 #endif
 }
 
