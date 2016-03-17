@@ -687,6 +687,15 @@ void at24c_uninitialize(FAR struct mtd_dev_s *mtd)
 {
   FAR struct at24c_dev_s *priv = (FAR struct at24c_dev_s *)mtd;
   DEBUGASSERT(priv != NULL);
+
+#ifdef CONFIG_MTD_REGISTRATION
+  /* Unregister the MTD with the procfs system if enabled */
+
+  mtd_unregister(&priv->mtd);
+#endif
+
+  /* Free the MTD driver instance */
+
   kmm_free(priv);
 }
 #endif /* CONFIG_AT24XX_MULTI */
