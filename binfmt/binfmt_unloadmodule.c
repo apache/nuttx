@@ -48,7 +48,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/binfmt/binfmt.h>
 
-#include "binfmt_internal.h"
+#include "binfmt.h"
 
 #ifndef CONFIG_BINFMT_DISABLE
 
@@ -210,39 +210,6 @@ int unload_module(FAR struct binary_s *binp)
 
   return OK;
 }
-
-/****************************************************************************
- * Name: binfmt_freeargv
- *
- * Description:
- *   Release the copied argv[] list.
- *
- * Input Parameter:
- *   binp - Load structure
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-#if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
-void binfmt_freeargv(FAR struct binary_s *binp)
-{
-  /* Is there an allocated argument buffer */
-
-  if (binp->argbuffer)
-    {
-      /* Free the argument buffer */
-
-      kmm_free(binp->argbuffer);
-    }
-
-   /* Nullify the allocated argv[] array and the argument buffer pointers */
-
-   binp->argbuffer = (FAR char *)NULL;
-   binp->argv      = (FAR char **)NULL;
-}
-#endif
 
 #endif /* CONFIG_BINFMT_DISABLE */
 

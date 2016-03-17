@@ -42,10 +42,10 @@
 #include <string.h>
 
 /****************************************************************************
- * Global Functions
+ * Public Functions
  ****************************************************************************/
 
-char *strpbrk(const char *str, const char *charset)
+FAR char *strpbrk(FAR const char *str, FAR const char *charset)
 {
   /* Sanity checking */
 
@@ -66,8 +66,8 @@ char *strpbrk(const char *str, const char *charset)
         {
           /* Yes, then this position must be the first occurrence in string */
 
-          return (char*)str;
-	}
+          return (FAR char *)str;
+        }
 
       /* This character from the strings matches none of those in the charset.
        * Try the next character from the string.

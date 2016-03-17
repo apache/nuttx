@@ -138,7 +138,7 @@ struct stmpe811_dev_s
 #ifdef CONFIG_STMPE811_SPI
   FAR struct spi_dev_s *spi;           /* Saved SPI driver instance */
 #else
-  FAR struct i2c_dev_s *i2c;           /* Saved I2C driver instance */
+  FAR struct i2c_master_s *i2c;        /* Saved I2C driver instance */
 #endif
 
   uint8_t inuse;                       /* STMPE811 pins in use */

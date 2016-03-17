@@ -50,7 +50,7 @@
 #include "fs_rammap.h"
 
 /****************************************************************************
- * Global Functions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -133,7 +133,7 @@ FAR void *mmap(FAR void *start, size_t length, int prot, int flags,
 
 #ifdef CONFIG_DEBUG
   if (prot == PROT_NONE ||
-      (flags & (MAP_PRIVATE|MAP_FIXED|MAP_ANONYMOUS|MAP_DENYWRITE)) != 0)
+      (flags & (MAP_PRIVATE | MAP_FIXED | MAP_ANONYMOUS | MAP_DENYWRITE)) != 0)
     {
       fdbg("Unsupported options, prot=%x flags=%04x\n", prot, flags);
       set_errno(ENOSYS);
@@ -170,5 +170,5 @@ FAR void *mmap(FAR void *start, size_t length, int prot, int flags,
 
   /* Return the offset address */
 
-  return (void*)(((uint8_t*)addr) + offset);
+  return (FAR void *)(((FAR uint8_t *)addr) + offset);
 }

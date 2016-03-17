@@ -1,7 +1,7 @@
-/************************************************************************
+/****************************************************************************
  * sched/sched/sched_foreach.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,20 +31,23 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************/
+ ****************************************************************************/
 
 #include <sched.h>
+
+#include <nuttx/irq.h>
+
 #include "sched/sched.h"
 
-/************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************
+/****************************************************************************
  * Name: sched_foreach
  *
  * Description:
@@ -61,24 +64,24 @@
  *
  * Assumptions:
  *
- ************************************************************************/
+ ****************************************************************************/
 
 void sched_foreach(sched_foreach_t handler, FAR void *arg)
 {
-  irqstate_t flags = irqsave();
+  irqstate_t flags = enter_critical_section();
   int ndx;
 
   /* Vist each active task */
 
   for (ndx = 0; ndx < CONFIG_MAX_TASKS; ndx++)
     {
-       if (g_pidhash[ndx].tcb)
-         {
-           handler(g_pidhash[ndx].tcb, arg);
-         }
+      if (g_pidhash[ndx].tcb)
+        {
+          handler(g_pidhash[ndx].tcb, arg);
+        }
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 

@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/input/mxt.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -58,10 +58,11 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/arch.h>
 #include <nuttx/fs/fs.h>
-#include <nuttx/i2c.h>
+#include <nuttx/i2c/i2c_master.h>
 #include <nuttx/wqueue.h>
 
 #include <nuttx/input/touchscreen.h>
@@ -92,8 +93,8 @@
  */
 
 #define MXT_GETUINT16(p) \
-  (((uint16_t)(((FAR uint8_t*)(p))[1]) << 8) | \
-    (uint16_t)(((FAR uint8_t*)(p))[0]))
+  (((uint16_t)(((FAR uint8_t *)(p))[1]) << 8) | \
+    (uint16_t)(((FAR uint8_t *)(p))[0]))
 
 /****************************************************************************
  * Private Types
@@ -165,7 +166,7 @@ struct mxt_dev_s
    * lower half configuration data.
    */
 
-  FAR struct i2c_dev_s *i2c;
+  FAR struct i2c_master_s *i2c;
   FAR const struct mxt_lower_s *lower;
 
   /* This is the allocated array of object information */
@@ -315,20 +316,22 @@ static int mxt_getreg(FAR struct mxt_dev_s *priv, uint16_t regaddr,
 
       /* Set up to write the address */
 
-      addrbuf[0]    = regaddr & 0xff;
-      addrbuf[1]    = (regaddr >> 8) & 0xff;
+      addrbuf[0]       = regaddr & 0xff;
+      addrbuf[1]       = (regaddr >> 8) & 0xff;
 
-      msg[0].addr   = priv->lower->address;
-      msg[0].flags  = 0;
-      msg[0].buffer = addrbuf;
-      msg[0].length = 2;
+      msg[0].frequency = priv->frequency;
+      msg[0].addr      = priv->lower->address;
+      msg[0].flags     = 0;
+      msg[0].buffer    = addrbuf;
+      msg[0].length    = 2;
 
       /* Followed by the read data */
 
-      msg[1].addr   = priv->lower->address;
-      msg[1].flags  = I2C_M_READ;
-      msg[1].buffer = buffer;
-      msg[1].length = buflen;
+      msg[1].frequency = priv->frequency;
+      msg[1].addr      = priv->lower->address;
+      msg[1].flags     = I2C_M_READ;
+      msg[1].buffer    = buffer;
+      msg[1].length    = buflen;
 
       /* Read the register data.  The returned value is the number messages
        * completed.
@@ -342,10 +345,10 @@ static int mxt_getreg(FAR struct mxt_dev_s *priv, uint16_t regaddr,
 
           idbg("WARNING: I2C_TRANSFER failed: %d ... Resetting\n", ret);
 
-          ret = up_i2creset(priv->i2c);
+          ret = I2C_RESET(priv->i2c);
           if (ret < 0)
             {
-              idbg("ERROR: up_i2creset failed: %d\n", ret);
+              idbg("ERROR: I2C_RESET failed: %d\n", ret);
               break;
             }
 #else
@@ -387,20 +390,22 @@ static int mxt_putreg(FAR struct mxt_dev_s *priv, uint16_t regaddr,
 
       /* Set up to write the address */
 
-      addrbuf[0]    = regaddr & 0xff;
-      addrbuf[1]    = (regaddr >> 8) & 0xff;
+      addrbuf[0]       = regaddr & 0xff;
+      addrbuf[1]       = (regaddr >> 8) & 0xff;
 
-      msg[0].addr   = priv->lower->address;
-      msg[0].flags  = 0;
-      msg[0].buffer = addrbuf;
-      msg[0].length = 2;
+      msg[0].frequency = priv->frequency;
+      msg[0].addr      = priv->lower->address;
+      msg[0].flags     = 0;
+      msg[0].buffer    = addrbuf;
+      msg[0].length    = 2;
 
       /* Followed by the write data (with no repeated start) */
 
-      msg[1].addr   = priv->lower->address;
-      msg[1].flags  = I2C_M_NORESTART;
-      msg[1].buffer = (FAR uint8_t *)buffer;
-      msg[1].length = buflen;
+      msg[1].frequency = priv->frequency;
+      msg[1].addr      = priv->lower->address;
+      msg[1].flags     = I2C_M_NORESTART;
+      msg[1].buffer    = (FAR uint8_t *)buffer;
+      msg[1].length    = buflen;
 
       /* Write the register data.  The returned value is the number messages
        * completed.
@@ -414,10 +419,10 @@ static int mxt_putreg(FAR struct mxt_dev_s *priv, uint16_t regaddr,
 
           idbg("WARNING: I2C_TRANSFER failed: %d ... Resetting\n", ret);
 
-          ret = up_i2creset(priv->i2c);
+          ret = I2C_RESET(priv->i2c);
           if (ret < 0)
             {
-              idbg("ERROR: up_i2creset failed: %d\n", ret);
+              idbg("ERROR: I2C_RESET failed: %d\n", ret);
             }
 #else
           idbg("ERROR: I2C_TRANSFER failed: %d\n", ret);
@@ -669,7 +674,7 @@ static inline int mxt_waitsample(FAR struct mxt_dev_s *priv)
    * from changing until it has been reported.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Now release the semaphore that manages mutually exclusive access to
    * the device structure.  This may cause other tasks to become ready to
@@ -715,7 +720,7 @@ errout:
    * have pre-emption disabled.
    */
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return ret;
 }
 
@@ -1368,7 +1373,7 @@ static ssize_t mxt_read(FAR struct file *filep, FAR char *buffer, size_t len)
       memset(report, 0, SIZEOF_TOUCH_SAMPLE_S(ncontacts));
       report->npoints = ncontacts;
 
-      for (i = 0, j= 0; i < priv->nslots && j < ncontacts; i++)
+      for (i = 0, j = 0; i < priv->nslots && j < ncontacts; i++)
         {
           FAR struct mxt_sample_s *sample = &priv->sample[i];
 
@@ -1511,7 +1516,8 @@ static int mxt_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         {
           FAR uint32_t *ptr = (FAR uint32_t *)((uintptr_t)arg);
           DEBUGASSERT(priv->lower != NULL && ptr != NULL);
-          priv->frequency = I2C_SETFREQUENCY(priv->i2c, *ptr);
+
+          priv->frequency = *ptr;
         }
         break;
 
@@ -1734,7 +1740,7 @@ static int mxt_hwinitialize(FAR struct mxt_dev_s *priv)
 
   /* Set the selected I2C frequency */
 
-  priv->frequency = I2C_SETFREQUENCY(priv->i2c, priv->lower->frequency);
+  priv->frequency = priv->lower->frequency;
 
   /* Read the info registers from the device */
 
@@ -1850,7 +1856,7 @@ errout_with_objtab:
  *
  ****************************************************************************/
 
-int mxt_register(FAR struct i2c_dev_s *i2c,
+int mxt_register(FAR struct i2c_master_s *i2c,
                  FAR const struct mxt_lower_s * const lower, int minor)
 {
   FAR struct mxt_dev_s *priv;

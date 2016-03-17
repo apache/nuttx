@@ -122,14 +122,6 @@
 #endif
 
 /****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -155,6 +147,7 @@ static void pga11x_configure(FAR struct spi_dev_s *spi)
 
   SPI_SETMODE(spi, CONFIG_PGA11X_SPIMODE);
   SPI_SETBITS(spi, 8);
+  (void)SPI_HWFEATURES(spi, 0);
   (void)SPI_SETFREQUENCY(spi, CONFIG_PGA11X_SPIFREQUENCY);
 }
 
@@ -169,7 +162,6 @@ static void pga11x_configure(FAR struct spi_dev_s *spi)
  *
  ****************************************************************************/
 
-#ifndef CONFIG_SPI_OWNBUS
 static void pga11x_lock(FAR struct spi_dev_s *spi)
 {
   spivdbg("Locking\n");
@@ -192,9 +184,6 @@ static void pga11x_lock(FAR struct spi_dev_s *spi)
 
   pga11x_configure(spi);
 }
-#else
-#  define pga11x_lock(spi)
-#endif
 
 /****************************************************************************
  * Name: pga11x_unlock
@@ -207,16 +196,12 @@ static void pga11x_lock(FAR struct spi_dev_s *spi)
  *
  ****************************************************************************/
 
-#ifndef CONFIG_SPI_OWNBUS
 static inline void pga11x_unlock(FAR struct spi_dev_s *spi)
 {
   spivdbg("Unlocking\n");
 
   SPI_LOCK(spi, false);
 }
-#else
-#  define pga11x_unlock(spi)
-#endif
 
 /****************************************************************************
  * Name: pga11x_send16
@@ -360,16 +345,8 @@ PGA11X_HANDLE pga11x_initialize(FAR struct spi_dev_s *spi)
 {
   spivdbg("Entry\n");
 
-  /* Configure the SPI us for the device.  Do this now only if the PGA11X is
-   * the only device on the bus.
-   */
-
-#ifdef CONFIG_SPI_OWNBUS
-  pga11x_configure(spi);
-#endif
-
-  /* No other special state is required, just return the SPI driver instance
-   * as the handle.  This gives us a place to extend functionality in the
+  /* No Special state is required, just return the SPI driver instance as
+   * the handle.  This gives us a place to extend functionality in the
    * future if neccessary.
    */
 

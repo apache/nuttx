@@ -329,7 +329,7 @@ static ssize_t ftl_flush(FAR void *priv, FAR const uint8_t *buffer,
       buffer       += dev->geo.erasesize;
     }
 
-  /* Finally, handler any partial blocks after the last full erase block */
+  /* Finally, handle any partial blocks after the last full erase block */
 
   if (remaining > 0)
     {

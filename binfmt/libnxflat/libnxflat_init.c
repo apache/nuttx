@@ -118,14 +118,15 @@ int nxflat_init(const char *filename, struct nxflat_loadinfo_s *loadinfo)
 
   /* Read the NXFLAT header from offset 0 */
 
-  ret = nxflat_read(loadinfo, (char*)&loadinfo->header,
+  ret = nxflat_read(loadinfo, (FAR char *)&loadinfo->header,
                     sizeof(struct nxflat_hdr_s), 0);
   if (ret < 0)
     {
       bdbg("Failed to read NXFLAT header: %d\n", ret);
       return ret;
     }
-  nxflat_dumpbuffer("NXFLAT header", (FAR const uint8_t*)&loadinfo->header,
+
+  nxflat_dumpbuffer("NXFLAT header", (FAR const uint8_t *)&loadinfo->header,
                     sizeof(struct nxflat_hdr_s));
 
   /* Verify the NXFLAT header */

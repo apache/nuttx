@@ -69,6 +69,10 @@
 #  define CONFIG_M25P_SPIMODE SPIDEV_MODE0
 #endif
 
+#ifndef CONFIG_M25P_SPIFREQUENCY
+#  define CONFIG_M25P_SPIFREQUENCY 20000000
+#endif
+
 /* Various manufacturers may have produced the parts.  0x20 is the manufacturer ID
  * for the STMicro MP25x serial FLASH.  If, for example, you are using the a Macronix
  * International MX25 serial FLASH, the correct manufacturer ID would be 0xc2.
@@ -137,6 +141,7 @@
 #define M25P_M25P32_NSECTORS       64
 #define M25P_M25P32_PAGE_SHIFT     8     /* Page size 1 << 8 = 256 */
 #define M25P_M25P32_NPAGES         16384
+#define M25P_M25PX32_SUBSECT_SHIFT 12    /* Sub-Sector size 1 << 12 = 4,096 */
 
 /*  M25P64 capacity is 8,338,608 bytes:
  *  (128 sectors) * (65,536 bytes per sector)
@@ -284,7 +289,8 @@ static void m25p_lock(FAR struct spi_dev_s *dev)
 
   SPI_SETMODE(dev, CONFIG_M25P_SPIMODE);
   SPI_SETBITS(dev, 8);
-  (void)SPI_SETFREQUENCY(dev, 20000000);
+  (void)SPI_HWFEATURES(dev, 0);
+  (void)SPI_SETFREQUENCY(dev, CONFIG_M25P_SPIFREQUENCY);
 }
 
 /************************************************************************************
@@ -382,6 +388,9 @@ static inline int m25p_readid(struct m25p_dev_s *priv)
            priv->nsectors       = M25P_M25P32_NSECTORS;
            priv->pageshift      = M25P_M25P32_PAGE_SHIFT;
            priv->npages         = M25P_M25P32_NPAGES;
+#ifdef CONFIG_M25P_SUBSECTOR_ERASE
+           priv->subsectorshift = M25P_M25PX32_SUBSECT_SHIFT;
+#endif
            return OK;
         }
       else if (capacity == M25P_M25P64_CAPACITY)
@@ -417,34 +426,6 @@ static void m25p_waitwritecomplete(struct m25p_dev_s *priv)
 {
   uint8_t status;
 
-  /* Are we the only device on the bus? */
-
-#ifdef CONFIG_SPI_OWNBUS
-
-  /* Select this FLASH part */
-
-  SPI_SELECT(priv->dev, SPIDEV_FLASH, true);
-
-  /* Send "Read Status Register (RDSR)" command */
-
-  (void)SPI_SEND(priv->dev, M25P_RDSR);
-
-  /* Loop as long as the memory is busy with a write cycle */
-
-  do
-    {
-      /* Send a dummy byte to generate the clock needed to shift out the status */
-
-      status = SPI_SEND(priv->dev, M25P_DUMMY);
-    }
-  while ((status & M25P_SR_WIP) != 0);
-
-  /* Deselect the FLASH */
-
-  SPI_SELECT(priv->dev, SPIDEV_FLASH, false);
-
-#else
-
   /* Loop as long as the memory is busy with a write cycle */
 
   do
@@ -478,7 +459,6 @@ static void m25p_waitwritecomplete(struct m25p_dev_s *priv)
         }
     }
   while ((status & M25P_SR_WIP) != 0);
-#endif
 
   fvdbg("Complete\n");
 }

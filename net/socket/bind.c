@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/socket/bind.c
  *
- *   Copyright (C) 2007-2009, 2012, 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2012, 2014-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -86,9 +86,15 @@ static int pkt_bind(FAR struct pkt_conn_s *conn,
 {
   int ifindex;
 #if 0
-  char hwaddr[6] = {0x00, 0xa1, 0xb1, 0xc1, 0xd1, 0xe1}; /* our MAC for debugging */
+  char hwaddr[6] =  /* our MAC for debugging */
+  {
+    0x00, 0xa1, 0xb1, 0xc1, 0xd1, 0xe1
+  };
 #endif
-  char hwaddr[6] = {0x00, 0xe0, 0xde, 0xad, 0xbe, 0xef}; /* MAC from ifconfig */
+  char hwaddr[6] =  /* MAC from ifconfig */
+  {
+    0x00, 0xe0, 0xde, 0xad, 0xbe, 0xef
+  };
 
   /* Look at the addr and identify network interface */
 
@@ -310,7 +316,7 @@ int psock_bind(FAR struct socket *psock, const struct sockaddr *addr,
   return OK;
 
 errout:
-  *get_errno_ptr() = err;
+  set_errno(err);
   return ERROR;
 }
 

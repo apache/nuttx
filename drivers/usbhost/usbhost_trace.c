@@ -44,7 +44,7 @@
 #include <errno.h>
 #include <debug.h>
 
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 #include <nuttx/usb/usbhost_trace.h>
 #undef usbtrace
 
@@ -148,7 +148,7 @@ void usbhost_trace_common(uint32_t event)
 
   /* Check if tracing is enabled for this ID */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   if (!g_disabled)
     {
       /* Yes... save the new trace data at the head */
@@ -170,7 +170,7 @@ void usbhost_trace_common(uint32_t event)
             }
         }
     }
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 #endif /* CONFIG_USBHOST_TRACE */
 
@@ -230,7 +230,7 @@ void usbhost_trace2(uint16_t id, uint8_t u7, uint16_t u16)
 
 #endif /* CONFIG_USBHOST_TRACE || CONFIG_DEBUG && CONFIG_DEBUG_USB */
 
-/*******************************************************************************
+/****************************************************************************
  * Name: usbtrace_enumerate
  *
  * Description:
@@ -239,7 +239,7 @@ void usbhost_trace2(uint16_t id, uint8_t u7, uint16_t u16)
  * Assumptions:
  *   NEVER called from an interrupt handler
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_USBHOST_TRACE
 int usbhost_trenumerate(usbhost_trcallback_t callback, FAR void *arg)

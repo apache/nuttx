@@ -1,4 +1,4 @@
-/*******************************************************************************
+/****************************************************************************
  * drivers/usbhost/usbhost_devaddr.c
  * Manage USB device addresses
  *
@@ -32,11 +32,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
-/*******************************************************************************
+/****************************************************************************
  * Included Files
- *******************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -48,13 +48,13 @@
 #include <nuttx/usb/usbhost.h>
 #include <nuttx/usb/usbhost_devaddr.h>
 
-/*******************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- *******************************************************************************/
+ ****************************************************************************/
 
-/*******************************************************************************
+/****************************************************************************
  * Private Functions
- *******************************************************************************/
+ ****************************************************************************/
 
 /****************************************************************************
  * Name: usbhost_takesem and usbhost_givesem
@@ -63,7 +63,7 @@
  *   This is just a wrapper to handle the annoying behavior of semaphore
  *   waits that return due to the receipt of a signal.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void usbhost_takesem(FAR struct usbhost_devaddr_s *devgen)
 {
@@ -81,7 +81,7 @@ static void usbhost_takesem(FAR struct usbhost_devaddr_s *devgen)
 
 #define usbhost_givesem(devgen) sem_post(&devgen->exclsem)
 
-/*******************************************************************************
+/****************************************************************************
  * Name: usbhost_devaddr_allocate
  *
  * Description:
@@ -90,7 +90,7 @@ static void usbhost_takesem(FAR struct usbhost_devaddr_s *devgen)
  * Assumptions:
  *   Caller hold the exclsem
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static int usbhost_devaddr_allocate(FAR struct usbhost_devaddr_s *devgen)
 {
@@ -101,7 +101,7 @@ static int usbhost_devaddr_allocate(FAR struct usbhost_devaddr_s *devgen)
 
   /* Loop until we find a valid device address */
 
-  for (;;)
+  for (; ; )
     {
       /* Try the next device address */
 
@@ -140,7 +140,7 @@ static int usbhost_devaddr_allocate(FAR struct usbhost_devaddr_s *devgen)
     }
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: usbhost_devaddr_free
  *
  * Description:
@@ -149,7 +149,7 @@ static int usbhost_devaddr_allocate(FAR struct usbhost_devaddr_s *devgen)
  * Assumptions:
  *   Caller hold the exclsem
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void usbhost_devaddr_free(FAR struct usbhost_devaddr_s *devgen,
                                  uint8_t devaddr)
@@ -173,13 +173,13 @@ static void usbhost_devaddr_free(FAR struct usbhost_devaddr_s *devgen,
     }
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: usbhost_roothubport
  *
  * Description:
  *   Find and return a reference the root hub port.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static inline FAR struct usbhost_roothubport_s *
 usbhost_roothubport(FAR struct usbhost_hubport_s *hport)
@@ -203,14 +203,14 @@ usbhost_roothubport(FAR struct usbhost_hubport_s *hport)
   return (FAR struct usbhost_roothubport_s *)hport;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: usbhost_devaddr_gen
  *
  * Description:
  *   Find root hub port and return a reference to the device function address
  *   data set.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static FAR struct usbhost_devaddr_s *
 usbhost_devaddr_gen(FAR struct usbhost_hubport_s *hport)
@@ -226,11 +226,11 @@ usbhost_devaddr_gen(FAR struct usbhost_hubport_s *hport)
   return NULL;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Public Functions
- *******************************************************************************/
+ ****************************************************************************/
 
-/*******************************************************************************
+/****************************************************************************
  * Name: usbhost_devaddr_initialize
  *
  * Description:
@@ -244,7 +244,7 @@ usbhost_devaddr_gen(FAR struct usbhost_hubport_s *hport)
  * Returned Value:
  *   None
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 void usbhost_devaddr_initialize(FAR struct usbhost_roothubport_s *rhport)
 {
@@ -258,7 +258,7 @@ void usbhost_devaddr_initialize(FAR struct usbhost_roothubport_s *rhport)
   devgen->next = 1;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: usbhost_devaddr_create
  *
  * Description:
@@ -272,7 +272,7 @@ void usbhost_devaddr_initialize(FAR struct usbhost_roothubport_s *rhport)
  *   On success, a new device function address in the the range 0x01 to 0x7f
  *   is returned.  On failure, a negated errno value is returned.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 int usbhost_devaddr_create(FAR struct usbhost_hubport_s *hport)
 {
@@ -302,7 +302,7 @@ int usbhost_devaddr_create(FAR struct usbhost_hubport_s *hport)
   return devaddr;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: usbhost_devaddr_destroy
  *
  * Description:
@@ -316,7 +316,7 @@ int usbhost_devaddr_create(FAR struct usbhost_hubport_s *hport)
  * Returned Value:
  *   None
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 void usbhost_devaddr_destroy(FAR struct usbhost_hubport_s *hport, uint8_t devaddr)
 {

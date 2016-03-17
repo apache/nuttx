@@ -21,11 +21,6 @@ dev_null.c and dev_zero.c
   want to register these devices (devnull_register() and
   devzero_register()).
 
-loop.c
-  Supports the standard loop device that can be used to export a
-  file (or character device) as a block device.  See losetup() and
-  loteardown() in include/nuttx/fs/fs.h.
-
 pwm.c
   Provides the "upper half" of a pulse width modulation (PWM) driver.
   The "lower half" of the PWM driver is provided by device-specific
@@ -36,17 +31,9 @@ ramdisk.c
   a block driver that can be mounted as a files system.  See
   include/nuttx/fs/ramdisk.h.
 
-timer.c
-  Provides the "upper half" for a generic timer driver.  See
-  include/nuttx/timers/timer.h for more information.
-
 rwbuffer.c
   A facility that can be use by any block driver in-order to add
   writing buffering and read-ahead buffering.
-
-watchdog.c
-  Provides the "upper half" for a generic watchdog driver.  See
-  include/nuttx/timers/watchdog.h for more information.
 
 Subdirectories of this directory:
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -81,6 +68,9 @@ eeprom/
   interface but instead use the simple character interface provided by
   the EEPROM drivers.
 
+i2c/
+  I2C drivers and support logic.  See include/nuttx/i2c/i2c_master.h
+
 input/
   This directory holds implementations of human input device (HID)
   drivers.  This includes such things as mouse, touchscreen, joystick,
@@ -93,6 +83,15 @@ input/
 lcd/
   Drivers for parallel and serial LCD and OLED type devices.  These
   drivers support interfaces as defined in include/nuttx/lcd/lcd.h
+
+leds/
+  Various LED-related drivers including discrete as well as PWM-
+  driven LEDs.
+
+loop/
+  Supports the standard loop device that can be used to export a
+  file (or character device) as a block device.  See losetup() and
+  loteardown() in include/nuttx/fs/fs.h.
 
 mmcsd/
   Support for MMC/SD block drivers.  MMC/SD block drivers based on
@@ -148,10 +147,21 @@ serial/
   the NuttX system console.  See also include/nuttx/serial/serial.h
 
 spi/
-  SPI drivers.  See include/nuttx/spi.h
+  SPI drivers and support logic.  See include/nuttx/spi/spi.h
 
 syslog/
   System logging devices. See include/syslog.h and include/nuttx/syslog/syslog.h
+
+timers/
+  Includes support for various timer devices including:
+
+  - An "upper half" for a generic timer driver.  See
+    include/nuttx/timers/timer.h for more information.
+
+  - An "upper half" for a generic watchdog driver.  See
+    include/nuttx/timers/watchdog.h for more information.
+
+  - RTC drivers
 
 usbdev/
   USB device drivers.  See also include/nuttx/usb/usbdev.h

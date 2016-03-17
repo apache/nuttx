@@ -1,7 +1,7 @@
-/************************************************************************
+/****************************************************************************
  * sched/sched/sched_addblocked.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -44,31 +44,11 @@
 
 #include "sched/sched.h"
 
-/************************************************************************
- * Pre-processor Definitions
- ************************************************************************/
-
-/************************************************************************
- * Private Type Declarations
- ************************************************************************/
-
-/************************************************************************
- * Global Variables
- ************************************************************************/
-
-/************************************************************************
- * Private Variables
- ************************************************************************/
-
-/************************************************************************
- * Private Function Prototypes
- ************************************************************************/
-
-/************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************
+/****************************************************************************
  * Name: sched_addblocked
  *
  * Description:
@@ -86,33 +66,34 @@
  * - The caller has established a critical section before
  *   calling this function.
  *
- ************************************************************************/
+ ****************************************************************************/
 
 void sched_addblocked(FAR struct tcb_s *btcb, tstate_t task_state)
 {
+  FAR dq_queue_t *tasklist;
+
   /* Make sure that we received a valid blocked state */
 
-  ASSERT(task_state >= FIRST_BLOCKED_STATE &&
-         task_state <= LAST_BLOCKED_STATE);
+  DEBUGASSERT(task_state >= FIRST_BLOCKED_STATE &&
+              task_state <= LAST_BLOCKED_STATE);
 
-  /* Add the TCB to the blocked task list associated with this state.
-   * First, determine if the task is to be added to a prioritized task
-   * list
-   */
+  /* Add the TCB to the blocked task list associated with this state. */
 
-  if (g_tasklisttable[task_state].prioritized)
+  tasklist = TLIST_BLOCKED(task_state);
+
+  /* Determine if the task is to be added to a prioritized task list. */
+
+  if (TLIST_ISPRIORITIZED(task_state))
     {
       /* Add the task to a prioritized list */
 
-      sched_addprioritized(btcb,
-                           (FAR dq_queue_t*)g_tasklisttable[task_state].list);
+      sched_addprioritized(btcb, tasklist);
     }
   else
     {
       /* Add the task to a non-prioritized list */
 
-      dq_addlast((FAR dq_entry_t*)btcb,
-                 (FAR dq_queue_t*)g_tasklisttable[task_state].list);
+      dq_addlast((FAR dq_entry_t *)btcb, tasklist);
     }
 
   /* Make sure the TCB's state corresponds to the list */

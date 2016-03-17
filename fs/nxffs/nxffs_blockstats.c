@@ -58,7 +58,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Public Variables
+ * Public Data
  ****************************************************************************/
 
 /****************************************************************************
@@ -125,7 +125,7 @@ int nxffs_blockstats(FAR struct nxffs_volume_s *volume,
            * in the NXFFS data.
            */
 
-          FAR struct nxffs_block_s *blkhdr = (FAR struct nxffs_block_s*)bptr;
+          FAR struct nxffs_block_s *blkhdr = (FAR struct nxffs_block_s *)bptr;
 
           /* Increment the total count of blocks examined */
 
@@ -203,7 +203,7 @@ int nxffs_blockstats(FAR struct nxffs_volume_s *volume,
            * in the NXFFS data.
            */
 
-          FAR struct nxffs_block_s *blkhdr = (FAR struct nxffs_block_s*)volume->pack;
+          FAR struct nxffs_block_s *blkhdr = (FAR struct nxffs_block_s *)volume->pack;
 
           /* Collect statistics */
           /* Check if this is a block that should be recognized by NXFFS */

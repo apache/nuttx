@@ -54,9 +54,9 @@
 
 #include "testmngr.h"
 
-/*****************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifndef ARRAY_SIZE
 #  define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
@@ -68,7 +68,7 @@
  * Private Functions
  ****************************************************************************/
 
-static int do_test_aes(FAR struct cipher_testvec* test, int mode, int encrypt)
+static int do_test_aes(FAR struct cipher_testvec *test, int mode, int encrypt)
 {
   FAR void *out = kmm_zalloc(test->rlen);
 

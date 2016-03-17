@@ -1,7 +1,7 @@
 /************************************************************************************
  * drivers/serial/serial.c
  *
- *   Copyright (C) 2007-2009, 2011-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -89,7 +89,7 @@ static int     uart_poll(FAR struct file *filep, FAR struct pollfd *fds, bool se
 #endif
 
 /************************************************************************************
- * Private Variables
+ * Private Data
  ************************************************************************************/
 
 static const struct file_operations g_serialops =
@@ -169,7 +169,7 @@ static void uart_pollnotify(FAR uart_dev_t *dev, pollevent_t eventset)
       if (fds)
         {
 #ifdef CONFIG_SERIAL_REMOVABLE
-          fds->revents |= ((fds->events | (POLLERR|POLLHUP)) & eventset);
+          fds->revents |= ((fds->events | (POLLERR | POLLHUP)) & eventset);
 #else
           fds->revents |= (fds->events & eventset);
 #endif
@@ -207,7 +207,7 @@ static int uart_putxmitchar(FAR uart_dev_t *dev, int ch, bool oktoblock)
 
   /* Loop until we are able to add the character to the TX buffer */
 
-  for (;;)
+  for (; ; )
     {
       if (nexthead != dev->xmit.tail)
         {
@@ -227,7 +227,7 @@ static int uart_putxmitchar(FAR uart_dev_t *dev, int ch, bool oktoblock)
            * the following steps must be atomic.
            */
 
-          flags = irqsave();
+          flags = enter_critical_section();
 
 #ifdef CONFIG_SERIAL_REMOVABLE
           /* Check if the removable device is no longer connected while we
@@ -249,12 +249,15 @@ static int uart_putxmitchar(FAR uart_dev_t *dev, int ch, bool oktoblock)
                */
 
               dev->xmitwaiting = true;
+#ifdef CONFIG_SERIAL_DMA
+              uart_dmatxavail(dev);
+#endif
               uart_enabletxint(dev);
               ret = uart_takesem(&dev->xmitsem, true);
               uart_disabletxint(dev);
             }
 
-          irqrestore(flags);
+          leave_critical_section(flags);
 
 #ifdef CONFIG_SERIAL_REMOVABLE
           /* Check if the removable device was disconnected while we were
@@ -270,9 +273,9 @@ static int uart_putxmitchar(FAR uart_dev_t *dev, int ch, bool oktoblock)
 
           if (ret < 0)
             {
-             /* A signal received while waiting for the xmit buffer to become
-              * non-full will abort the transfer.
-              */
+              /* A signal received while waiting for the xmit buffer to become
+               * non-full will abort the transfer.
+               */
 
               return -EINTR;
             }
@@ -363,9 +366,9 @@ static ssize_t uart_write(FAR struct file *filep, FAR const char *buffer,
 
       if (dev->isconsole)
         {
-          irqstate_t flags = irqsave();
+          irqstate_t flags = enter_critical_section();
           ret = uart_irqwrite(dev, buffer, buflen);
-          irqrestore(flags);
+          leave_critical_section(flags);
           return ret;
         }
       else
@@ -507,6 +510,9 @@ static ssize_t uart_write(FAR struct file *filep, FAR const char *buffer,
 
   if (dev->xmit.head != dev->xmit.tail)
     {
+#ifdef CONFIG_SERIAL_DMA
+      uart_dmatxavail(dev);
+#endif
       uart_enabletxint(dev);
     }
 
@@ -706,7 +712,21 @@ static ssize_t uart_read(FAR struct file *filep, FAR char *buffer, size_t buflen
                * that the following operations are atomic.
                */
 
-              flags = irqsave();
+              flags = enter_critical_section();
+
+#ifdef CONFIG_SERIAL_DMA
+              /* If RX buffer is empty move tail and head to zero position */
+
+              if (rxbuf->head == rxbuf->tail)
+                {
+                  rxbuf->head = rxbuf->tail = 0;
+                }
+
+              /* Notify DMA that there is free space in the RX buffer */
+
+              uart_dmarxfree(dev);
+#endif
+
               uart_enablerxint(dev);
 
 #ifdef CONFIG_SERIAL_REMOVABLE
@@ -731,7 +751,7 @@ static ssize_t uart_read(FAR struct file *filep, FAR char *buffer, size_t buflen
                   ret = uart_takesem(&dev->recvsem, true);
                 }
 
-              irqrestore(flags);
+              leave_critical_section(flags);
 
               /* Was a signal received while waiting for data to be
                * received?  Was a removable device disconnected while
@@ -778,6 +798,27 @@ static ssize_t uart_read(FAR struct file *filep, FAR char *buffer, size_t buflen
         }
     }
 
+#ifdef CONFIG_SERIAL_DMA
+  flags = enter_critical_section();
+
+  /* If RX buffer is empty move tail and head to zero position */
+
+  if (rxbuf->head == rxbuf->tail)
+    {
+      rxbuf->head = rxbuf->tail = 0;
+    }
+
+  leave_critical_section(flags);
+
+  /* Notify DMA that there is free space in the RX buffer */
+
+  uart_dmarxfree(dev);
+
+  /* RX interrupt could be disabled by RX buffer overflow. Enable it now. */
+
+  uart_enablerxint(dev);
+#endif
+
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
 #ifdef CONFIG_SERIAL_IFLOWCONTROL_WATERMARKS
   /* How many bytes are now buffered */
@@ -792,7 +833,7 @@ static ssize_t uart_read(FAR struct file *filep, FAR char *buffer, size_t buflen
       nbuffered = rxbuf->size - rxbuf->tail + rxbuf->head;
     }
 
- /* Is the level now below the watermark level that we need to report? */
+  /* Is the level now below the watermark level that we need to report? */
 
   watermark = (CONFIG_SERIAL_IFLOWCONTROL_LOWER_WATERMARK * rxbuf->size) / 100;
   if (nbuffered <= watermark)
@@ -844,7 +885,7 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           case FIONREAD:
             {
               int count;
-              irqstate_t state = irqsave();
+              irqstate_t flags = enter_critical_section();
 
               /* Determine the number of bytes available in the buffer */
 
@@ -857,9 +898,9 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
                   count = dev->recv.size - (dev->recv.tail - dev->recv.head);
                 }
 
-              irqrestore(state);
+              leave_critical_section(flags);
 
-              *(int *)arg = count;
+              *(FAR int *)((uintptr_t)arg) = count;
               ret = 0;
             }
             break;
@@ -867,7 +908,7 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           case FIONWRITE:
             {
               int count;
-              irqstate_t state = irqsave();
+              irqstate_t flags = enter_critical_section();
 
               /* Determine the number of bytes free in the buffer */
 
@@ -880,9 +921,9 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
                   count = dev->xmit.size - (dev->xmit.head - dev->xmit.tail) - 1;
                 }
 
-              irqrestore(state);
+              leave_critical_section(flags);
 
-              *(int *)arg = count;
+              *(FAR int *)((uintptr_t)arg) = count;
               ret = 0;
             }
             break;
@@ -898,7 +939,7 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         {
           case TCGETS:
             {
-              FAR struct termios *termiosp = (struct termios*)arg;
+              FAR struct termios *termiosp = (FAR struct termios *)arg;
 
               if (!termiosp)
                 {
@@ -916,7 +957,7 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
           case TCSETS:
             {
-              FAR struct termios *termiosp = (struct termios*)arg;
+              FAR struct termios *termiosp = (FAR struct termios *)arg;
 
               if (!termiosp)
                 {
@@ -954,7 +995,7 @@ int uart_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
 
   /* Some sanity checking */
 
-#if CONFIG_DEBUG
+#ifdef CONFIG_DEBUG
   if (!dev || !fds)
     {
       return -ENODEV;
@@ -1044,7 +1085,7 @@ int uart_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
 
       if (dev->disconnected)
         {
-           eventset |= (POLLERR|POLLHUP);
+           eventset |= (POLLERR | POLLHUP);
         }
 #endif
 
@@ -1141,14 +1182,14 @@ static int uart_close(FAR struct file *filep)
 
   /* Free the IRQ and disable the UART */
 
-  flags = irqsave();       /* Disable interrupts */
+  flags = enter_critical_section();       /* Disable interrupts */
   uart_detach(dev);        /* Detach interrupts */
   if (!dev->isconsole)     /* Check for the serial console UART */
     {
       uart_shutdown(dev);  /* Disable the UART */
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   /* We need to re-initialize the semaphores if this is the last close
    * of the device, as the close might be caused by pthread_cancel() of
@@ -1170,7 +1211,7 @@ static int uart_close(FAR struct file *filep)
 
   uart_givesem(&dev->closesem);
   return OK;
- }
+}
 
 /************************************************************************************
  * Name: uart_open
@@ -1228,7 +1269,7 @@ static int uart_open(FAR struct file *filep)
 
   if (tmp == 1)
     {
-      irqstate_t flags = irqsave();
+      irqstate_t flags = enter_critical_section();
 
       /* If this is the console, then the UART has already been initialized. */
 
@@ -1239,7 +1280,7 @@ static int uart_open(FAR struct file *filep)
           ret = uart_setup(dev);
           if (ret < 0)
             {
-              irqrestore(flags);
+              leave_critical_section(flags);
               goto errout_with_sem;
             }
         }
@@ -1254,7 +1295,7 @@ static int uart_open(FAR struct file *filep)
       if (ret < 0)
         {
            uart_shutdown(dev);
-           irqrestore(flags);
+           leave_critical_section(flags);
            goto errout_with_sem;
         }
 
@@ -1265,7 +1306,7 @@ static int uart_open(FAR struct file *filep)
       dev->recv.head = 0;
       dev->recv.tail = 0;
 
-      /* Initialise termios state */
+      /* Initialize termios state */
 
 #ifdef CONFIG_SERIAL_TERMIOS
       dev->tc_iflag = 0;
@@ -1281,10 +1322,16 @@ static int uart_open(FAR struct file *filep)
         }
 #endif
 
+#ifdef CONFIG_SERIAL_DMA
+      /* Notify DMA that there is free space in the RX buffer */
+
+      uart_dmarxfree(dev);
+#endif
+
       /* Enable the RX interrupt */
 
       uart_enablerxint(dev);
-      irqrestore(flags);
+      leave_critical_section(flags);
     }
 
   /* Save the new open count on success */
@@ -1407,7 +1454,7 @@ void uart_connected(FAR uart_dev_t *dev, bool connected)
    * function may be called from interrupt handling logic.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   dev->disconnected = !connected;
   if (!connected)
     {
@@ -1437,12 +1484,9 @@ void uart_connected(FAR uart_dev_t *dev, bool connected)
 
       /* Notify all poll/select waiters that a hangup occurred */
 
-      uart_pollnotify(dev, (POLLERR|POLLHUP));
+      uart_pollnotify(dev, (POLLERR | POLLHUP));
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 #endif
-
-
-

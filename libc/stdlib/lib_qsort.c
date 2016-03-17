@@ -58,8 +58,8 @@
 #define swapcode(TYPE, parmi, parmj, n) \
   { \
     long i = (n) / sizeof (TYPE); \
-    register TYPE *pi = (TYPE *) (parmi); \
-    register TYPE *pj = (TYPE *) (parmj); \
+    register TYPE *pi = (TYPE *)(parmi); \
+    register TYPE *pj = (TYPE *)(parmj); \
     do { \
       register TYPE  t = *pi; \
       *pi++ = *pj; \
@@ -67,9 +67,9 @@
     } while (--i > 0); \
   }
 
-#define SWAPINIT(a, size) \
-  swaptype = ((char *)a - (char *)0) % sizeof(long) || \
-  size % sizeof(long) ? 2 : size == sizeof(long)? 0 : 1;
+#define SWAPINIT(a, width) \
+  swaptype = ((FAR char *)a - (FAR char *)0) % sizeof(long) || \
+  width % sizeof(long) ? 2 : width == sizeof(long)? 0 : 1;
 
 #define swap(a, b) \
   if (swaptype == 0) \
@@ -80,7 +80,7 @@
     } \
   else \
     { \
-      swapfunc(a, b, size, swaptype); \
+      swapfunc(a, b, width, swaptype); \
     }
 
 #define vecswap(a, b, n) if ((n) > 0) swapfunc(a, b, n, swaptype)
@@ -89,15 +89,16 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static inline void swapfunc(char *a, char *b, int n, int swaptype);
-static inline char *med3(char *a, char *b, char *c,
-                         int (*compar)(const void *, const void *));
+static inline void swapfunc(FAR char *a, FAR char *b, int n, int swaptype);
+static inline FAR char *med3(FAR char *a, FAR char *b, FAR char *c,
+                             CODE int (*compar)(FAR const void *,
+                             FAR const void *));
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
-static inline void swapfunc(char *a, char *b, int n, int swaptype)
+static inline void swapfunc(FAR char *a, FAR char *b, int n, int swaptype)
 {
   if (swaptype <= 1)
     {
@@ -109,12 +110,13 @@ static inline void swapfunc(char *a, char *b, int n, int swaptype)
     }
 }
 
-static inline char *med3(char *a, char *b, char *c,
-                         int (*compar)(const void *, const void *))
+static inline FAR char *med3(FAR char *a, FAR char *b, FAR char *c,
+                             CODE int (*compar)(FAR const void *,
+                             FAR const void *))
 {
   return compar(a, b) < 0 ?
-         (compar(b, c) < 0 ? b : (compar(a, c) < 0 ? c : a ))
-              :(compar(b, c) > 0 ? b : (compar(a, c) < 0 ? a : c ));
+         (compar(b, c) < 0 ? b : (compar(a, c) < 0 ? c : a)) :
+         (compar(b, c) > 0 ? b : (compar(a, c) < 0 ? a : c));
 }
 
 /****************************************************************************
@@ -125,50 +127,98 @@ static inline char *med3(char *a, char *b, char *c,
  * Name: qsort
  *
  * Description:
+ *   The qsort() function will sort an array of 'nel' objects, the initial
+ *   element of which is pointed to by 'base'. The size of each object, in
+ *   bytes, is specified by the 'width" argument. If the 'nel' argument has
+ *   the value zero, the comparison function pointed to by 'compar' will not
+ *   be called and no rearrangement will take place.
+ *
+ *   The application will ensure that the comparison function pointed to by
+ *   'compar' does not alter the contents of the array. The implementation
+ *   may reorder elements of the array between calls to the comparison
+ *   function, but will not alter the contents of any individual element.
+ *
+ *   When the same objects (consisting of 'width" bytes, irrespective of
+ *   their current positions in the array) are passed more than once to
+ *   the comparison function, the results will be consistent with one
+ *   another. That is, they will define a total ordering on the array.
+ *
+ *   The contents of the array will be sorted in ascending order according
+ *   to a comparison function. The 'compar' argument is a pointer to the
+ *   comparison function, which is called with two arguments that point to
+ *   the elements being compared. The application will ensure that the
+ *   function returns an integer less than, equal to, or greater than 0,
+ *   if the first argument is considered respectively less than, equal to,
+ *   or greater than the second. If two members compare as equal, their
+ *   order in the sorted array is unspecified.
+ *
+ *   (Based on description from OpenGroup.org).
+ *
+ * Returned Value:
+ *   The qsort() function will not return a value.
+ *
+ * Notes from the original BSD version:
  *   Qsort routine from Bentley & McIlroy's "Engineering a Sort Function".
  *
  ****************************************************************************/
 
-void qsort(void *base, size_t nmemb, size_t size,
-           int(*compar)(const void *, const void *))
+void qsort(FAR void *base, size_t nel, size_t width,
+           CODE int(*compar)(FAR const void *, FAR const void *))
 {
-  char *pa, *pb, *pc, *pd, *pl, *pm, *pn;
-  int d, r, swaptype, swap_cnt;
+  FAR char *pa;
+  FAR char *pb;
+  FAR char *pc;
+  FAR char *pd;
+  FAR char *pl;
+  FAR char *pm;
+  FAR char *pn;
+  int swaptype;
+  int swap_cnt;
+  int d;
+  int r;
 
 loop:
-  SWAPINIT(base, size);
+  SWAPINIT(base, width);
   swap_cnt = 0;
-  if (nmemb < 7)
+
+  if (nel < 7)
     {
-      for (pm = (char *) base + size; pm < (char *) base + nmemb * size; pm += size)
+      for (pm = (FAR char *)base + width;
+           pm < (FAR char *)base + nel * width;
+           pm += width)
         {
-          for (pl = pm; pl > (char *) base && compar(pl - size, pl) > 0; pl -= size)
+          for (pl = pm;
+               pl > (FAR char *)base && compar(pl - width, pl) > 0;
+               pl -= width)
             {
-              swap(pl, pl - size);
+              swap(pl, pl - width);
             }
         }
+
       return;
   }
 
-  pm = (char *) base + (nmemb / 2) * size;
-  if (nmemb > 7)
+  pm = (FAR char *)base + (nel / 2) * width;
+  if (nel > 7)
     {
       pl = base;
-      pn = (char *) base + (nmemb - 1) * size;
-      if (nmemb > 40)
+      pn = (FAR char *)base + (nel - 1) * width;
+      if (nel > 40)
         {
-          d = (nmemb / 8) * size;
+          d  = (nel / 8) * width;
           pl = med3(pl, pl + d, pl + 2 * d, compar);
           pm = med3(pm - d, pm, pm + d, compar);
           pn = med3(pn - 2 * d, pn - d, pn, compar);
         }
+
       pm = med3(pl, pm, pn, compar);
     }
-  swap(base, pm);
-  pa = pb = (char *) base + size;
 
-  pc = pd = (char *) base + (nmemb - 1) * size;
-  for (;;)
+  swap(base, pm);
+  pa = pb = (FAR char *)base + width;
+
+  pc = pd = (FAR char *)base + (nel - 1) * width;
+  for (; ; )
     {
       while (pb <= pc && (r = compar(pb, base)) <= 0)
         {
@@ -176,19 +226,22 @@ loop:
             {
               swap_cnt = 1;
               swap(pa, pb);
-              pa += size;
+              pa += width;
             }
-          pb += size;
+
+          pb += width;
         }
+
       while (pb <= pc && (r = compar(pc, base)) >= 0)
         {
           if (r == 0)
             {
               swap_cnt = 1;
               swap(pc, pd);
-              pd -= size;
+              pd -= width;
             }
-          pc -= size;
+
+          pc -= width;
         }
 
       if (pb > pc)
@@ -198,43 +251,47 @@ loop:
 
       swap(pb, pc);
       swap_cnt = 1;
-      pb += size;
-      pc -= size;
+      pb      += width;
+      pc      -= width;
     }
 
   if (swap_cnt == 0)
     {
       /* Switch to insertion sort */
 
-      for (pm = (char *) base + size; pm < (char *) base + nmemb * size; pm += size)
+      for (pm = (FAR char *)base + width;
+           pm < (FAR char *)base + nel * width;
+           pm += width)
         {
-          for (pl = pm; pl > (char *) base && compar(pl - size, pl) > 0; pl -= size)
+          for (pl = pm;
+               pl > (FAR char *)base && compar(pl - width, pl) > 0;
+               pl -= width)
             {
-              swap(pl, pl - size);
+              swap(pl, pl - width);
             }
         }
 
       return;
     }
 
-  pn = (char *) base + nmemb * size;
-  r = min(pa - (char *)base, pb - pa);
+  pn = (FAR char *)base + nel * width;
+  r  = min(pa - (FAR char *)base, pb - pa);
   vecswap(base, pb - r, r);
-  r = min(pd - pc, pn - pd - size);
+
+  r  = min(pd - pc, pn - pd - width);
   vecswap(pb, pn - r, r);
 
-  if ((r = pb - pa) > size)
+  if ((r = pb - pa) > width)
     {
-      qsort(base, r / size, size, compar);
+      qsort(base, r / width, width, compar);
     }
 
-  if ((r = pd - pc) > size)
+  if ((r = pd - pc) > width)
     {
       /* Iterate rather than recurse to save stack space */
 
       base = pn - r;
-      nmemb = r / size;
+      nel = r / width;
       goto loop;
     }
 }
-

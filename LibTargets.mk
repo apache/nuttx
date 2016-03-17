@@ -64,7 +64,6 @@ $(ARCH_SRC)$(DELIM)libkarch$(LIBEXT): context
 lib$(DELIM)libkarch$(LIBEXT): $(ARCH_SRC)$(DELIM)libkarch$(LIBEXT)
 	$(Q) install $(ARCH_SRC)$(DELIM)libkarch$(LIBEXT) lib$(DELIM)libkarch$(LIBEXT)
 
-
 sched$(DELIM)libsched$(LIBEXT): context
 	$(Q) $(MAKE) -C sched TOPDIR="$(TOPDIR)" libsched$(LIBEXT) KERNEL=y EXTRADEFINES=$(KDEFINE)
 
@@ -118,6 +117,18 @@ audio$(DELIM)libaudio$(LIBEXT): context
 
 lib$(DELIM)libaudio$(LIBEXT): audio$(DELIM)libaudio$(LIBEXT)
 	$(Q) install audio$(DELIM)libaudio$(LIBEXT) lib$(DELIM)libaudio$(LIBEXT)
+
+wireless$(DELIM)libwireless$(LIBEXT): context
+	$(Q) $(MAKE) -C wireless TOPDIR="$(TOPDIR)" libwireless$(LIBEXT) KERNEL=y EXTRADEFINES=$(KDEFINE)
+
+lib$(DELIM)libwireless$(LIBEXT): wireless$(DELIM)libwireless$(LIBEXT)
+	$(Q) install wireless$(DELIM)libwireless$(LIBEXT) lib$(DELIM)libwireless$(LIBEXT)
+
+$(ARCH_SRC)$(DELIM)libarch$(LIBEXT): context
+	$(Q) $(MAKE) -C $(ARCH_SRC) TOPDIR="$(TOPDIR)" libarch$(LIBEXT) KERNEL=y EXTRADEFINES=$(KDEFINE)
+
+lib$(DELIM)libarch$(LIBEXT): $(ARCH_SRC)$(DELIM)libarch$(LIBEXT)
+	$(Q) install $(ARCH_SRC)$(DELIM)libarch$(LIBEXT) lib$(DELIM)libarch$(LIBEXT)
 
 # Special case
 
@@ -190,9 +201,3 @@ mm$(DELIM)libmm$(LIBEXT): context
 
 lib$(DELIM)libmm$(LIBEXT): mm$(DELIM)libmm$(LIBEXT)
 	$(Q) install mm$(DELIM)libmm$(LIBEXT) lib$(DELIM)libmm$(LIBEXT)
-
-$(ARCH_SRC)$(DELIM)libarch$(LIBEXT): context
-	$(Q) $(MAKE) -C $(ARCH_SRC) TOPDIR="$(TOPDIR)" libarch$(LIBEXT)
-
-lib$(DELIM)libarch$(LIBEXT): $(ARCH_SRC)$(DELIM)libarch$(LIBEXT)
-	$(Q) install $(ARCH_SRC)$(DELIM)libarch$(LIBEXT) lib$(DELIM)libarch$(LIBEXT)

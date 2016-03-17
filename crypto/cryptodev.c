@@ -51,6 +51,16 @@
 #include <nuttx/crypto/cryptodev.h>
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#ifdef CONFIG_CRYPTO_AES
+#  define AES_CYPHER(mode) \
+  aes_cypher(op->dst, op->src, op->len, op->iv, ses->key, ses->keylen, \
+             mode, encrypt)
+#endif
+
+/****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
@@ -69,13 +79,18 @@ static int cryptodev_ioctl(FAR struct file *filep, int cmd,
 
 static const struct file_operations g_cryptodevops =
 {
-  0,                  /* open */
-  0,                  /* close */
-  cryptodev_read,     /* read */
-  cryptodev_write,    /* write */
-  0,                  /* seek */
-  cryptodev_ioctl,    /* ioctl */
-  0,                  /* poll */
+  0,                  /* open   */
+  0,                  /* close  */
+  cryptodev_read,     /* read   */
+  cryptodev_write,    /* write  */
+  0,                  /* seek   */
+  cryptodev_ioctl     /* ioctl  */
+#ifndef CONFIG_DISABLE_POLL
+  , 0                 /* poll   */
+#endif
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  , 0                 /* unlink */
+#endif
 };
 
 /****************************************************************************
@@ -96,11 +111,11 @@ static ssize_t cryptodev_write(FAR struct file *filep, FAR const char *buffer,
 
 static int cryptodev_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
-  switch(cmd)
+  switch (cmd)
   {
   case CIOCGSESSION:
     {
-      struct session_op *ses = (struct session_op*)arg;
+      FAR struct session_op *ses = (FAR struct session_op *)arg;
       ses->ses = (uint32_t)ses;
       return OK;
     }
@@ -110,51 +125,46 @@ static int cryptodev_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       return OK;
     }
 
+#ifdef CONFIG_CRYPTO_AES
   case CIOCCRYPT:
     {
-      FAR struct crypt_op *op = (struct crypt_op*)arg;
-      FAR struct session_op *ses = (struct session_op*)op->ses;
+      FAR struct crypt_op *op    = (FAR struct crypt_op *)arg;
+      FAR struct session_op *ses = (FAR struct session_op *)op->ses;
       int encrypt;
 
       switch (op->op)
-      {
-      case COP_ENCRYPT:
-        encrypt = 1;
-        break;
+        {
+        case COP_ENCRYPT:
+          encrypt = 1;
+          break;
 
-      case COP_DECRYPT:
-        encrypt = 0;
-        break;
+        case COP_DECRYPT:
+          encrypt = 0;
+          break;
 
-      default:
-        return -EINVAL;
-      }
+        default:
+          return -EINVAL;
+        }
 
       switch (ses->cipher)
-      {
+        {
+        case CRYPTO_AES_ECB:
+          return AES_CYPHER(AES_MODE_ECB);
 
-#if defined(CONFIG_CRYPTO_AES)
-#  define AES_CYPHER(mode) aes_cypher(op->dst, op->src, op->len, op->iv, ses->key, ses->keylen, mode, encrypt)
+        case CRYPTO_AES_CBC:
+          return AES_CYPHER(AES_MODE_CBC);
 
-      case CRYPTO_AES_ECB:
-        return AES_CYPHER(AES_MODE_ECB);
+        case CRYPTO_AES_CTR:
+          return AES_CYPHER(AES_MODE_CTR);
 
-      case CRYPTO_AES_CBC:
-        return AES_CYPHER(AES_MODE_CBC);
-
-      case CRYPTO_AES_CTR:
-        return AES_CYPHER(AES_MODE_CTR);
-
-#  undef AES_CYPHER
+        default:
+           return -EINVAL;
+        }
+    }
 #endif
 
-      default:
-        return -EINVAL;
-      }
-    }
-
   default:
-    return -EINVAL;
+    return -ENOTTY;
   }
 }
 

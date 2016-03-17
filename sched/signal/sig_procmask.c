@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/signal/sig_procmask.c
  *
- *   Copyright (C) 2007-2009, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,32 +46,13 @@
 #include <debug.h>
 #include <sched.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/wdog.h>
 #include <nuttx/kmalloc.h>
 
 #include "sched/sched.h"
 #include "signal/signal.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Type Declarations
- ****************************************************************************/
-
-/****************************************************************************
- * Global Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -113,9 +94,9 @@
 
 int sigprocmask(int how, FAR const sigset_t *set, FAR sigset_t *oset)
 {
-  FAR struct tcb_s  *rtcb = (FAR struct tcb_s*)g_readytorun.head;
+  FAR struct tcb_s *rtcb = this_task();
   sigset_t   oldsigprocmask;
-  irqstate_t saved_state;
+  irqstate_t flags;
   int        ret = OK;
 
   sched_lock();
@@ -136,7 +117,7 @@ int sigprocmask(int how, FAR const sigset_t *set, FAR sigset_t *oset)
        * ourselves from attempts to process signals from interrupts
        */
 
-      saved_state = irqsave();
+      flags = enter_critical_section();
 
       /* Okay, determine what we are supposed to do */
 
@@ -169,7 +150,7 @@ int sigprocmask(int how, FAR const sigset_t *set, FAR sigset_t *oset)
             break;
         }
 
-      irqrestore(saved_state);
+      leave_critical_section(flags);
 
       /* Now, process any pending signals that were just unmasked */
 

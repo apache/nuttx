@@ -73,17 +73,17 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Global Function Prototypes
+ * Public Function Prototypes
  ****************************************************************************/
 
 int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap);
 
 /****************************************************************************
- * Global Constant Data
+ * Public Constant Data
  ****************************************************************************/
 
 /****************************************************************************
- * Global Variables
+ * Public Data
  ****************************************************************************/
 
 /****************************************************************************
@@ -151,7 +151,7 @@ static int findwidth(FAR const char *buf, FAR const char *fmt)
 }
 
 /****************************************************************************
- * Private Variables
+ * Private Data
  ****************************************************************************/
 
 /****************************************************************************
@@ -168,7 +168,7 @@ int sscanf(FAR const char *buf, FAR const char *fmt, ...)
   int     count;
 
   va_start(ap, fmt);
-  count = vsscanf((FAR const char*)buf, fmt, ap);
+  count = vsscanf((FAR const char *)buf, fmt, ap);
   va_end(ap);
   return count;
 }
@@ -274,7 +274,7 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
               tv = NULL;      /* To avoid warnings about begin uninitialized */
               if (!noassign)
                 {
-                  tv    = va_arg(ap, char*);
+                  tv    = va_arg(ap, FAR char *);
                   tv[0] = '\0';
                 }
 
@@ -330,7 +330,7 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
               tv = NULL;      /* To avoid warnings about beign uninitialized */
               if (!noassign)
                 {
-                  tv    = va_arg(ap, char*);
+                  tv    = va_arg(ap, FAR char *);
                   tv[0] = '\0';
                 }
 
@@ -389,12 +389,12 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
 
                   if (lflag)
                     {
-                      plong = va_arg(ap, long*);
+                      plong = va_arg(ap, FAR long *);
                       *plong = 0;
                     }
                   else
                     {
-                      pint = va_arg(ap, int*);
+                      pint = va_arg(ap, FAR int *);
                       *pint = 0;
                     }
                 }
@@ -513,9 +513,11 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
                 }
             }
 
-          /* Process %f:  Floating point conversion */
+          /* Process %a, %A, %f, %F, %e, %E, %g, and %G:  Floating point
+           * conversions
+           */
 
-          else if (*fmt == 'f' || *fmt == 'F')
+          else if (strchr("aAfFeEgG", *fmt) != NULL)
             {
 #ifdef CONFIG_HAVE_DOUBLE
               FAR double_t *pd = NULL;
@@ -538,13 +540,13 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
 #ifdef CONFIG_HAVE_DOUBLE
                   if (lflag)
                     {
-                      pd  = va_arg(ap, double_t*);
+                      pd  = va_arg(ap, FAR double_t *);
                       *pd = 0.0;
                     }
                   else
 #endif
                     {
-                      pf  = va_arg(ap, float*);
+                      pf  = va_arg(ap, FAR float *);
                       *pf = 0.0;
                     }
                 }
@@ -642,12 +644,12 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
 
                   if (lflag)
                     {
-                      FAR long *plong = va_arg(ap, long*);
+                      FAR long *plong = va_arg(ap, FAR long *);
                       *plong = (long)nchars;
                     }
                   else
                     {
-                      FAR int *pint = va_arg(ap, int*);
+                      FAR int *pint = va_arg(ap, FAR int *);
                       *pint = (int)nchars;
                     }
                 }

@@ -45,7 +45,7 @@
 #include <errno.h>
 #include <debug.h>
 
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 #include <nuttx/usb/usbdev_trace.h>
 #undef usbtrace
 
@@ -113,7 +113,7 @@ static int usbtrace_syslog(const char *fmt, ...)
  * Public Functions
  ****************************************************************************/
 
-/*******************************************************************************
+/****************************************************************************
  * Name: usbtrace_enable
  *
  * Description:
@@ -129,7 +129,7 @@ static int usbtrace_syslog(const char *fmt, ...)
  * Assumptions:
  * - May be called from an interrupt handler
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_USBDEV_TRACE) || \
    (defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_USB))
@@ -140,15 +140,15 @@ usbtrace_idset_t usbtrace_enable(usbtrace_idset_t idset)
 
   /* The following read and write must be atomic */
 
-  flags         = irqsave();
+  flags         = enter_critical_section();
   ret           = g_maskedidset;
   g_maskedidset = idset;
-  irqrestore(flags);
+  leave_critical_section(flags);
   return ret;
 }
 #endif /* CONFIG_USBDEV_TRACE || CONFIG_DEBUG && CONFIG_DEBUG_USB */
 
-/*******************************************************************************
+/****************************************************************************
  * Name: usbtrace
  *
  * Description:
@@ -157,7 +157,7 @@ usbtrace_idset_t usbtrace_enable(usbtrace_idset_t idset)
  * Assumptions:
  *   May be called from an interrupt handler
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_USBDEV_TRACE) || (defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_USB))
 void usbtrace(uint16_t event, uint16_t value)
@@ -166,7 +166,7 @@ void usbtrace(uint16_t event, uint16_t value)
 
   /* Check if tracing is enabled for this ID */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   if ((g_maskedidset & TRACE_ID2BIT(event)) != 0)
     {
 #ifdef CONFIG_USBDEV_TRACE
@@ -196,11 +196,11 @@ void usbtrace(uint16_t event, uint16_t value)
 #endif
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 #endif /* CONFIG_USBDEV_TRACE || CONFIG_DEBUG && CONFIG_DEBUG_USB */
 
-/*******************************************************************************
+/****************************************************************************
  * Name: usbtrace_enumerate
  *
  * Description:
@@ -209,7 +209,7 @@ void usbtrace(uint16_t event, uint16_t value)
  * Assumptions:
  *   NEVER called from an interrupt handler
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_USBDEV_TRACE
 int usbtrace_enumerate(trace_callback_t callback, void *arg)

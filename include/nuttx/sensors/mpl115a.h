@@ -36,7 +36,9 @@
 #ifndef __DRIVERS_SENSORS_MPL115A_H
 #define __DRIVERS_SENSORS_MPL115A_H
 
-#if defined(CONFIG_MPL115A)
+#include <nuttx/config.h>
+
+#if defined(CONFIG_SPI) && defined(CONFIG_MPL115A)
 
 /********************************************************************************************
  * Pre-processor Definitions
@@ -84,6 +86,12 @@
 #define MPL115A_CONVERT             0x12  /* Start Pressure and Temperature Conversion */
 
 /********************************************************************************************
+ * Public Types
+ ********************************************************************************************/
+
+struct spi_dev_s;
+
+/********************************************************************************************
  * Public Function Prototypes
  ********************************************************************************************/
 
@@ -118,5 +126,5 @@ int mpl115a_register(FAR const char *devpath, FAR struct spi_dev_s *spi);
 }
 #endif
 
-#endif /* CONFIG_SENSORS_MPL115A */
+#endif /* CONFIG_SPI && CONFIG_MPL115A */
 #endif /* __DRIVERS_SENSORS_MPL115A_H */

@@ -1,7 +1,7 @@
 /****************************************************************************
  *  sched/mqueue/mq_rcvinternal.c
  *
- *   Copyright (C) 2007, 2008, 2012-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008, 2012-2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,30 +48,11 @@
 #include <sched.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 
 #include "sched/sched.h"
 #include "mqueue/mqueue.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Type Declarations
- ****************************************************************************/
-
-/****************************************************************************
- * Public Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -166,7 +147,7 @@ FAR struct mqueue_msg_s *mq_waitreceive(mqd_t mqdes)
 
   /* Get the message from the head of the queue */
 
-  while ((rcvmsg = (FAR struct mqueue_msg_s*)sq_remfirst(&msgq->msglist)) == NULL)
+  while ((rcvmsg = (FAR struct mqueue_msg_s *)sq_remfirst(&msgq->msglist)) == NULL)
     {
       /* The queue is empty!  Should we block until there the above condition
        * has been satisfied?
@@ -176,7 +157,7 @@ FAR struct mqueue_msg_s *mq_waitreceive(mqd_t mqdes)
         {
           /* Yes.. Block and try again */
 
-          rtcb = (FAR struct tcb_s*)g_readytorun.head;
+          rtcb = this_task();
           rtcb->msgwaitq = msgq;
           msgq->nwaitnotempty++;
 
@@ -249,7 +230,7 @@ ssize_t mq_doreceive(mqd_t mqdes, FAR struct mqueue_msg_s *mqmsg,
                      FAR char *ubuffer, int *prio)
 {
   FAR struct tcb_s *btcb;
-  irqstate_t saved_state;
+  irqstate_t flags;
   FAR struct mqueue_inode_s *msgq;
   ssize_t rcvmsglen;
 
@@ -259,7 +240,7 @@ ssize_t mq_doreceive(mqd_t mqdes, FAR struct mqueue_msg_s *mqmsg,
 
   /* Copy the message into the caller's buffer */
 
-  memcpy(ubuffer, (const void*)mqmsg->mail, rcvmsglen);
+  memcpy(ubuffer, (FAR const void *)mqmsg->mail, rcvmsglen);
 
   /* Copy the message priority as well (if a buffer is provided) */
 
@@ -283,8 +264,8 @@ ssize_t mq_doreceive(mqd_t mqdes, FAR struct mqueue_msg_s *mqmsg,
        * messages can be sent from interrupt handlers.
        */
 
-      saved_state = irqsave();
-      for (btcb = (FAR struct tcb_s*)g_waitingformqnotfull.head;
+      flags = enter_critical_section();
+      for (btcb = (FAR struct tcb_s *)g_waitingformqnotfull.head;
            btcb && btcb->msgwaitq != msgq;
            btcb = btcb->flink);
 
@@ -299,7 +280,7 @@ ssize_t mq_doreceive(mqd_t mqdes, FAR struct mqueue_msg_s *mqmsg,
        msgq->nwaitnotfull--;
        up_unblock_task(btcb);
 
-      irqrestore(saved_state);
+      leave_critical_section(flags);
     }
 
   /* Return the length of the message transferred to the user buffer */

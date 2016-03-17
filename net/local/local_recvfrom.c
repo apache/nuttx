@@ -94,7 +94,7 @@ static int psock_fifo_read(FAR struct socket *psock, FAR void *buf,
            * eventually be reported as ENOTCONN.
            */
 
-          psock->s_flags &= ~(_SF_CONNECTED |_SF_CLOSED);
+          psock->s_flags &= ~(_SF_CONNECTED | _SF_CLOSED);
           conn->lc_state  = LOCAL_STATE_DISCONNECTED;
 
           /* Did we receive any data? */
@@ -115,7 +115,7 @@ static int psock_fifo_read(FAR struct socket *psock, FAR void *buf,
           return ret;
         }
     }
- 
+
   return OK;
 }
 
@@ -351,7 +351,7 @@ psock_dgram_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
   close(conn->lc_infd);
   conn->lc_infd = -1;
 
-  /* Release our reference to the half duplex FIFO*/
+  /* Release our reference to the half duplex FIFO */
 
   (void)local_release_halfduplex(conn);
 
@@ -375,7 +375,7 @@ errout_with_infd:
   conn->lc_infd = -1;
 
 errout_with_halfduplex:
-  /* Release our reference to the half duplex FIFO*/
+  /* Release our reference to the half duplex FIFO */
 
   (void)local_release_halfduplex(conn);
   return ret;

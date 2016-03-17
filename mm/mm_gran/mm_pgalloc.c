@@ -61,7 +61,7 @@
  *
  * Dependencies:  CONFIG_ARCH_USE_MMU and CONFIG_GRAN
  */
- 
+
 /* Debug */
 
 #ifdef CONFIG_CPP_HAVE_VARARGS
@@ -208,9 +208,9 @@ uintptr_t mm_pgalloc(unsigned int npages)
 void mm_pgfree(uintptr_t paddr, unsigned int npages)
 {
 #ifdef CONFIG_GRAN_SINGLE
-  gran_free((FAR void*)paddr, (size_t)npages << MM_PGSHIFT);
+  gran_free((FAR void *)paddr, (size_t)npages << MM_PGSHIFT);
 #else
-  gran_free(g_pgalloc, (FAR void*)paddr, (size_t)npages << MM_PGSHIFT);
+  gran_free(g_pgalloc, (FAR void *)paddr, (size_t)npages << MM_PGSHIFT);
 #endif
 }
 

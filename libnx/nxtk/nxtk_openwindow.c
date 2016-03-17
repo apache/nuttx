@@ -46,7 +46,7 @@
 #include <nuttx/nx/nx.h>
 
 #include "nxcontext.h"
-#include "nxtk_internal.h"
+#include "nxtk.h"
 
 /****************************************************************************
  * Pre-Processor Definitions

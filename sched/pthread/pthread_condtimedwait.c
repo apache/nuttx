@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/pthread/pthread_condtimedwait.c
  *
- *   Copyright (C) 2007-2009, 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2013-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,28 +49,13 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/wdog.h>
 
 #include "sched/sched.h"
 #include "pthread/pthread.h"
 #include "clock/clock.h"
 #include "signal/signal.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Type Declarations
- ****************************************************************************/
-
-/****************************************************************************
- * Global Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Variables
- ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
@@ -119,6 +104,7 @@ static void pthread_condtimedout(int argc, uint32_t pid, uint32_t signo)
 
       info.si_signo           = signo;
       info.si_code            = SI_QUEUE;
+      info.si_errno           = ETIMEDOUT;
       info.si_value.sival_ptr = NULL;
 #ifdef CONFIG_SCHED_HAVE_PARENT
       info.si_pid             = (pid_t)pid;
@@ -181,10 +167,10 @@ static void pthread_condtimedout(int argc, uint32_t pid, uint32_t signo)
 int pthread_cond_timedwait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex,
                            FAR const struct timespec *abstime)
 {
-  FAR struct tcb_s *rtcb = (FAR struct tcb_s *)g_readytorun.head;
+  FAR struct tcb_s *rtcb = this_task();
   int ticks;
   int mypid = (int)getpid();
-  irqstate_t int_state;
+  irqstate_t flags;
   int ret = OK;
   int status;
 
@@ -235,7 +221,7 @@ int pthread_cond_timedwait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex,
            */
 
           sched_lock();
-          int_state = irqsave();
+          flags = enter_critical_section();
 
           /* Convert the timespec to clock ticks.  We must disable pre-emption
            * here so that this time stays valid until the wait begins.
@@ -248,7 +234,7 @@ int pthread_cond_timedwait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex,
                * we fall through the if/then/else
                */
 
-              irqrestore(int_state);
+              leave_critical_section(flags);
             }
           else
             {
@@ -263,7 +249,7 @@ int pthread_cond_timedwait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex,
                    * if/then/else
                    */
 
-                  irqrestore(int_state);
+                  leave_critical_section(flags);
                   ret = ETIMEDOUT;
                 }
               else
@@ -271,14 +257,14 @@ int pthread_cond_timedwait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex,
                   /* Give up the mutex */
 
                   mutex->pid = -1;
-                  ret = pthread_givesemaphore((sem_t*)&mutex->sem);
+                  ret = pthread_givesemaphore((FAR sem_t *)&mutex->sem);
                   if (ret)
                     {
                       /* Restore interrupts  (pre-emption will be enabled when
                        * we fall through the if/then/else)
                        */
 
-                      irqrestore(int_state);
+                      leave_critical_section(flags);
                     }
                   else
                     {
@@ -293,7 +279,7 @@ int pthread_cond_timedwait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex,
                        * are started atomically.
                        */
 
-                      status = sem_wait((sem_t*)&cond->sem);
+                      status = sem_wait((FAR sem_t *)&cond->sem);
 
                       /* Did we get the condition semaphore. */
 
@@ -321,13 +307,13 @@ int pthread_cond_timedwait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex,
                        * handling! (bad)
                        */
 
-                      irqrestore(int_state);
+                      leave_critical_section(flags);
                     }
 
                   /* Reacquire the mutex (retaining the ret). */
 
                   sdbg("Re-locking...\n");
-                  status = pthread_takesemaphore((sem_t*)&mutex->sem);
+                  status = pthread_takesemaphore((FAR sem_t *)&mutex->sem);
                   if (!status)
                     {
                       mutex->pid = mypid;

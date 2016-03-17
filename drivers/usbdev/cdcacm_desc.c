@@ -602,7 +602,7 @@ int16_t cdcacm_mkcfgdesc(FAR uint8_t *buf)
         {
           cdcacm_cpepdesc((FAR const struct usb_epdesc_s *)group->desc,
                           group->hsepsize,
-                          (FAR struct usb_epdesc_s*)dest);
+                          (FAR struct usb_epdesc_s *)dest);
         }
       else
 #endif

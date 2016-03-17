@@ -94,9 +94,9 @@ extern "C"
 #ifdef CONFIG_FS_WRITABLE
 int ramdisk_register(int minor, FAR uint8_t *buffer, uint32_t nsectors,
                      uint16_t sectize, uint8_t rdflags);
-#define romdisk_register(m,b,n,s) ramdisk_register(m,b,n,s,0)
+#define romdisk_register(m,b,n,s) ramdisk_register(m,(FAR uint8_t *)b,n,s,0)
 #else
-int romdisk_register(int minor, FAR uint8_t *buffer, uint32_t nsectors,
+int romdisk_register(int minor, FAR const uint8_t *buffer, uint32_t nsectors,
                      uint16_t sectize);
 #endif
 

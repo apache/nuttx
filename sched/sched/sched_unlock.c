@@ -1,7 +1,7 @@
-/************************************************************************
+/****************************************************************************
  * sched/sched/sched_unlock.c
  *
- *   Copyright (C) 2007, 2009, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,24 +31,26 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/clock.h>
 #include <nuttx/arch.h>
+#include <nuttx/sched_note.h>
 
 #include "sched/sched.h"
 
-/************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************
+/****************************************************************************
  * Name:  sched_unlock
  *
  * Description:
@@ -59,11 +61,11 @@
  *   decremented to zero, any tasks that were eligible to preempt the
  *   current task will execute.
  *
- ************************************************************************/
+ ****************************************************************************/
 
 int sched_unlock(void)
 {
-  FAR struct tcb_s *rtcb = (FAR struct tcb_s*)g_readytorun.head;
+  FAR struct tcb_s *rtcb = this_task();
 
   /* Check for some special cases:  (1) rtcb may be NULL only during
    * early boot-up phases, and (2) sched_unlock() should have no
@@ -72,13 +74,13 @@ int sched_unlock(void)
 
   if (rtcb && !up_interrupt_context())
     {
-      /* Prevent context switches throughout the following */
+      /* Prevent context switches throughout the following. */
 
-      irqstate_t flags = irqsave();
+      irqstate_t flags = enter_critical_section();
 
       /* Decrement the preemption lock counter */
 
-      if (rtcb->lockcount)
+      if (rtcb->lockcount > 0)
         {
           rtcb->lockcount--;
         }
@@ -89,13 +91,40 @@ int sched_unlock(void)
 
       if (rtcb->lockcount <= 0)
         {
+#ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
+          /* Note that we no longer have pre-emption */
+
+          sched_note_premption(rtcb, false);
+#endif
+          /* Set the lock count to zero */
+
           rtcb->lockcount = 0;
 
-          /* Release any ready-to-run tasks that have collected in
-           * g_pendingtasks.
+#ifdef CONFIG_SMP
+          /* The lockcount has decremented to zero and we need to perform
+           * release our hold on the lock.
            */
 
-          if (g_pendingtasks.head)
+          DEBUGASSERT(g_cpu_schedlock == SP_LOCKED &&
+                     (g_cpu_lockset & (1 << this_cpu())) != 0);
+
+          spin_clrbit(&g_cpu_lockset, this_cpu(), &g_cpu_locksetlock,
+                      &g_cpu_schedlock);
+#endif
+
+          /* Release any ready-to-run tasks that have collected in
+           * g_pendingtasks.  In the SMP case, the scheduler remains
+           * locked if interrupts are disabled.
+           *
+           * NOTE: This operation has a very high likelihood of causing
+           * this task to be switched out!
+           */
+
+#ifdef CONFIG_SMP
+          if (g_pendingtasks.head != NULL && rtcb->irqcount <= 0)
+#else
+          if (g_pendingtasks.head != NULL)
+#endif
             {
               up_release_pending();
             }
@@ -118,7 +147,7 @@ int sched_unlock(void)
                * maximum.
                */
 
-              if (rtcb != (FAR struct tcb_s*)g_readytorun.head)
+              if (rtcb != this_task())
                 {
                   rtcb->timeslice = MSEC2TICK(CONFIG_RR_INTERVAL);
                 }
@@ -156,7 +185,7 @@ int sched_unlock(void)
                * change the currently active task.
                */
 
-              if (rtcb == (FAR struct tcb_s*)g_readytorun.head)
+              if (rtcb == this_task())
                 {
                   sched_timer_reassess();
                 }
@@ -165,7 +194,7 @@ int sched_unlock(void)
 #endif
         }
 
-      irqrestore(flags);
+      leave_critical_section(flags);
     }
 
   return OK;

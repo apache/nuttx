@@ -1,7 +1,7 @@
 /********************************************************************************
  * sched/timer/timer_create.c
  *
- *   Copyright (C) 2007-2009, 2011, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011, 2014-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,24 +45,13 @@
 #include <string.h>
 #include <errno.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/wdog.h>
 #include <nuttx/kmalloc.h>
 
 #include "timer/timer.h"
 
 #ifndef CONFIG_DISABLE_POSIX_TIMERS
-
-/********************************************************************************
- * Pre-processor Definitions
- ********************************************************************************/
-
-/********************************************************************************
- * Private Data
- ********************************************************************************/
-
-/********************************************************************************
- * Public Data
- ********************************************************************************/
 
 /********************************************************************************
  * Private Functions
@@ -76,18 +65,18 @@
  *
  ********************************************************************************/
 
-static struct posix_timer_s *timer_allocate(void)
+static FAR struct posix_timer_s *timer_allocate(void)
 {
-  struct posix_timer_s *ret;
-  irqstate_t            flags;
-  uint8_t               pt_flags;
+  FAR struct posix_timer_s *ret;
+  irqstate_t flags;
+  uint8_t pt_flags;
 
   /* Try to get a preallocated timer from the free list */
 
 #if CONFIG_PREALLOC_TIMERS > 0
-  flags = irqsave();
-  ret   = (struct posix_timer_s*)sq_remfirst((sq_queue_t*)&g_freetimers);
-  irqrestore(flags);
+  flags = enter_critical_section();
+  ret   = (FAR struct posix_timer_s *)sq_remfirst((FAR sq_queue_t *)&g_freetimers);
+  leave_critical_section(flags);
 
   /* Did we get one? */
 
@@ -100,7 +89,7 @@ static struct posix_timer_s *timer_allocate(void)
     {
       /* Allocate a new timer from the heap */
 
-      ret      = (struct posix_timer_s*)kmm_malloc(sizeof(struct posix_timer_s));
+      ret      = (FAR struct posix_timer_s *)kmm_malloc(sizeof(struct posix_timer_s));
       pt_flags = 0;
     }
 
@@ -115,9 +104,9 @@ static struct posix_timer_s *timer_allocate(void)
 
       /* And add it to the end of the list of allocated timers */
 
-      flags = irqsave();
-      sq_addlast((sq_entry_t*)ret, (sq_queue_t*)&g_alloctimers);
-      irqrestore(flags);
+      flags = enter_critical_section();
+      sq_addlast((FAR sq_entry_t *)ret, (FAR sq_queue_t *)&g_alloctimers);
+      leave_critical_section(flags);
     }
 
   return ret;
@@ -177,8 +166,8 @@ static struct posix_timer_s *timer_allocate(void)
 
 int timer_create(clockid_t clockid, FAR struct sigevent *evp, FAR timer_t *timerid)
 {
-  struct posix_timer_s *ret;
-  WDOG_ID               wdog;
+  FAR struct posix_timer_s *ret;
+  WDOG_ID wdog;
 
   /* Sanity checks.  Also, we support only CLOCK_REALTIME */
 
@@ -213,19 +202,31 @@ int timer_create(clockid_t clockid, FAR struct sigevent *evp, FAR timer_t *timer
   ret->pt_delay = 0;
   ret->pt_wdog  = wdog;
 
+  /* Was a struct sigevent provided? */
+
   if (evp)
     {
-      ret->pt_signo           = evp->sigev_signo;
-#ifdef CONFIG_CAN_PASS_STRUCTS
-      ret->pt_value           = evp->sigev_value;
-#else
-      ret->pt_value.sival_ptr = evp->sigev_value.sival_ptr;
-#endif
+      /* Yes, copy the entire struct sigevent content */
+
+      memcpy(&ret->pt_event, evp, sizeof(struct sigevent));
     }
   else
     {
-      ret->pt_signo           = SIGALRM;
-      ret->pt_value.sival_ptr = ret;
+      /* "If the evp argument is NULL, the effect is as if the evp argument
+       *  pointed to a sigevent structure with the sigev_notify member
+       *  having the value SIGEV_SIGNAL, the sigev_signo having a default
+       *  signal number, and the sigev_value member having the value of the
+       *  timer ID."
+       */
+
+      ret->pt_event.sigev_notify            = SIGEV_SIGNAL;
+      ret->pt_event.sigev_signo             = SIGALRM;
+      ret->pt_event.sigev_value.sival_ptr   = ret;
+
+#ifdef CONFIG_SIG_EVTHREAD
+      ret->pt_event.sigev_notify_function   = NULL;
+      ret->pt_event.sigev_notify_attributes = NULL;
+#endif
     }
 
   /* Return the timer */

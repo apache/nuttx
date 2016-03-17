@@ -1,7 +1,7 @@
 /****************************************************************************
  *  fs/mqueue/mq_open.c
  *
- *   Copyright (C) 2007-2009, 2011, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011, 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -61,11 +61,11 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Public Variables
+ * Public Data
  ****************************************************************************/
 
 /****************************************************************************
- * Private Variables
+ * Private Data
  ****************************************************************************/
 
 /****************************************************************************
@@ -139,7 +139,8 @@ mqd_t mq_open(FAR const char *mq_name, int oflags, ...)
   sched_lock();
 
   /* Get the inode for this mqueue.  This should succeed if the message
-   * queue has already been created.
+   * queue has already been created.  In this case, inode_finde() will
+   * have incremented the reference count on the inode.
    */
 
   inode = inode_find(fullpath, &relpath);
@@ -157,7 +158,7 @@ mqd_t mq_open(FAR const char *mq_name, int oflags, ...)
        * create a new mqueue with this name.
        */
 
-      if ((oflags & (O_CREAT|O_EXCL)) == (O_CREAT|O_EXCL))
+      if ((oflags & (O_CREAT | O_EXCL)) == (O_CREAT | O_EXCL))
         {
           errcode = EEXIST;
           goto errout_with_inode;
@@ -185,13 +186,13 @@ mqd_t mq_open(FAR const char *mq_name, int oflags, ...)
           goto errout_with_lock;
         }
 
-     /* Create the mqueue.  First we have to extract the additional
-      * parameters from the variable argument list.
-      */
+      /* Create the mqueue.  First we have to extract the additional
+       * parameters from the variable argument list.
+       */
 
       va_start(ap, oflags);
       mode = va_arg(ap, mode_t);
-      attr = va_arg(ap, FAR struct mq_attr*);
+      attr = va_arg(ap, FAR struct mq_attr *);
       va_end(ap);
 
       /* Create an inode in the pseudo-filesystem at this path */
@@ -206,9 +207,11 @@ mqd_t mq_open(FAR const char *mq_name, int oflags, ...)
           goto errout_with_lock;
         }
 
-      /* Allocate memory for the new message queue. */
+      /* Allocate memory for the new message queue.  The new inode will
+       * be created with a reference count of zero.
+       */
 
-      msgq = (FAR struct mqueue_inode_s*)mq_msgqalloc(mode, attr);
+      msgq = (FAR struct mqueue_inode_s *)mq_msgqalloc(mode, attr);
       if (!msgq)
         {
           errcode = ENOSPC;
@@ -230,6 +233,9 @@ mqd_t mq_open(FAR const char *mq_name, int oflags, ...)
       inode->u.i_mqueue = msgq;
       msgq->inode       = inode;
 
+      /* Set the initial reference count on this inode to one */
+
+      inode->i_crefs    = 1;
     }
 
   sched_unlock();

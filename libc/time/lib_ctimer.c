@@ -41,7 +41,7 @@
 
 #include <time.h>
 
-#ifdef CONFIG_TIME_EXTENDED
+#if defined(CONFIG_LIBC_LOCALTIME) || defined(CONFIG_TIME_EXTENDED)
 
 /****************************************************************************
  * Private Data
@@ -80,4 +80,4 @@ FAR char *ctime_r(FAR const time_t *timep, FAR char *buf)
 #endif
 }
 
-#endif /* CONFIG_TIME_EXTENDED */
+#endif /* CONFIG_LIBC_LOCALTIME || CONFIG_TIME_EXTENDED */

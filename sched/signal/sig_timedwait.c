@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/signal/sig_timedwait.c
  *
- *   Copyright (C) 2007-2009, 2012-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2012-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,6 +49,7 @@
 #include <sched.h>
 #include <errno.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/wdog.h>
 
@@ -67,18 +68,6 @@
 #define SIG_WAIT_TIMEOUT 0xff
 
 /****************************************************************************
- * Private Type Declarations
- ****************************************************************************/
-
-/****************************************************************************
- * Global Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Variables
- ****************************************************************************/
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -93,7 +82,7 @@
 static void sig_timeout(int argc, wdparm_t itcb)
 {
   /* On many small machines, pointers are encoded and cannot be simply cast
-   * from uint32_t to struct tcb_s*.  The following union works around this
+   * from uint32_t to struct tcb_s *.  The following union works around this
    * (see wdogparm_t).  This odd logic could be conditioned on
    * CONFIG_CAN_CAST_POINTERS, but it is not too bad in any case.
    */
@@ -115,6 +104,7 @@ static void sig_timeout(int argc, wdparm_t itcb)
     {
       u.wtcb->sigunbinfo.si_signo           = SIG_WAIT_TIMEOUT;
       u.wtcb->sigunbinfo.si_code            = SI_TIMER;
+      u.wtcb->sigunbinfo.si_errno           = ETIMEDOUT;
       u.wtcb->sigunbinfo.si_value.sival_int = 0;
 #ifdef CONFIG_SCHED_HAVE_PARENT
       u.wtcb->sigunbinfo.si_pid             = 0;  /* Not applicable */
@@ -174,10 +164,10 @@ static void sig_timeout(int argc, wdparm_t itcb)
 int sigtimedwait(FAR const sigset_t *set, FAR struct siginfo *info,
                  FAR const struct timespec *timeout)
 {
-  FAR struct tcb_s *rtcb = (FAR struct tcb_s*)g_readytorun.head;
+  FAR struct tcb_s *rtcb = this_task();
   sigset_t intersection;
   FAR sigpendq_t *sigpend;
-  irqstate_t saved_state;
+  irqstate_t flags;
   int32_t waitticks;
   int ret = ERROR;
 
@@ -191,7 +181,7 @@ int sigtimedwait(FAR const sigset_t *set, FAR struct siginfo *info,
    * can only be eliminated by disabling interrupts!
    */
 
-  saved_state = irqsave();
+  flags = enter_critical_section();
 
   /* Check if there is a pending signal corresponding to one of the
    * signals in the pending signal set argument.
@@ -218,7 +208,7 @@ int sigtimedwait(FAR const sigset_t *set, FAR struct siginfo *info,
       /* Then dispose of the pending signal structure properly */
 
       sig_releasependingsignal(sigpend);
-      irqrestore(saved_state);
+      leave_critical_section(flags);
 
       /* The return value is the number of the signal that awakened us */
 
@@ -349,9 +339,9 @@ int sigtimedwait(FAR const sigset_t *set, FAR struct siginfo *info,
           memcpy(info, &rtcb->sigunbinfo, sizeof(struct siginfo));
         }
 
-      irqrestore(saved_state);
-   }
+      leave_critical_section(flags);
+    }
 
-   sched_unlock();
-   return ret;
+  sched_unlock();
+  return ret;
 }

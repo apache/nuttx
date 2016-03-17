@@ -438,22 +438,22 @@ int posix_spawn(FAR pid_t *pid, FAR const char *path,
       goto errout_with_lock;
     }
 
-   /* Wait for the proxy to complete its job */
+  /* Wait for the proxy to complete its job */
 
 #ifdef CONFIG_SCHED_WAITPID
-   ret = waitpid(proxy, &status, 0);
-   if (ret < 0)
-     {
-       sdbg("ERROR: waitpid() failed: %d\n", errno);
-       goto errout_with_lock;
-     }
+  ret = waitpid(proxy, &status, 0);
+  if (ret < 0)
+    {
+      sdbg("ERROR: waitpid() failed: %d\n", errno);
+      goto errout_with_lock;
+    }
 #else
-   spawn_semtake(&g_spawn_execsem);
+  spawn_semtake(&g_spawn_execsem);
 #endif
 
-   /* Get the result and relinquish our access to the parameter structure */
+  /* Get the result and relinquish our access to the parameter structure */
 
-   ret = g_spawn_parms.result;
+  ret = g_spawn_parms.result;
 
 errout_with_lock:
 #ifdef CONFIG_SCHED_WAITPID

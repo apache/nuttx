@@ -178,10 +178,10 @@ static const struct fb_videoinfo_s g_videoinfo =
 
 static const struct lcd_planeinfo_s g_planeinfo =
 {
-  .putrun = skel_putrun,           /* Put a run into LCD memory */
-  .getrun = skel_getrun,           /* Get a run from LCD memory */
-  .buffer = (uint8_t*)g_runbuffer, /* Run scratch buffer */
-  .bpp    = SKEL_BPP,              /* Bits-per-pixel */
+  .putrun = skel_putrun,                /* Put a run into LCD memory */
+  .getrun = skel_getrun,                /* Get a run from LCD memory */
+  .buffer = (FAR uint8_t *)g_runbuffer, /* Run scratch buffer */
+  .bpp    = SKEL_BPP,                   /* Bits-per-pixel */
 };
 
 /* This is the standard, NuttX LCD driver object */
@@ -395,7 +395,7 @@ FAR struct lcd_dev_s *up_oledinitialize(FAR struct spi_dev_s *spi)
 #warning "Missing logic"
 
   /* Configure and enable LCD */
- #warning "Missing logic"
+#warning "Missing logic"
 
   return &g_lcddev.dev;
 }

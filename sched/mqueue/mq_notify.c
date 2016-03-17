@@ -1,7 +1,7 @@
-/************************************************************************
+/****************************************************************************
  *  sched/mqueue/mq_notify.c
  *
- *   Copyright (C) 2007, 2009, 2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011, 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,17 +31,18 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include <signal.h>
 #include <mqueue.h>
 #include <sched.h>
+#include <string.h>
 #include <errno.h>
 
 #include <nuttx/sched.h>
@@ -49,31 +50,11 @@
 #include "sched/sched.h"
 #include "mqueue/mqueue.h"
 
-/************************************************************************
- * Pre-processor Definitions
- ************************************************************************/
-
-/************************************************************************
- * Private Type Declarations
- ************************************************************************/
-
-/************************************************************************
- * Public Variables
- ************************************************************************/
-
-/************************************************************************
- * Private Variables
- ************************************************************************/
-
-/************************************************************************
- * Private Functions
- ************************************************************************/
-
-/************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************
+/****************************************************************************
  * Name: mq_notify
  *
  * Description:
@@ -93,7 +74,7 @@
  * Parameters:
  *   mqdes - Message queue descriptor
  *   notification - Real-time signal structure containing:
- *      sigev_notify - Should be SIGEV_SIGNAL (but actually ignored)
+ *      sigev_notify - Should be SIGEV_SIGNAL or SIGEV_THREAD
  *      sigev_signo - The signo to use for the notification
  *      sigev_value - Value associated with the signal
  *
@@ -124,12 +105,12 @@
  *   message shall satisfy mq_receive()... The resulting behavior is as if
  *   the message queue remains empty, and no notification shall be sent."
  *
- ************************************************************************/
+ ****************************************************************************/
 
-int mq_notify(mqd_t mqdes, const struct sigevent *notification)
+int mq_notify(mqd_t mqdes, FAR const struct sigevent *notification)
 {
-  struct tcb_s *rtcb;
-  struct mqueue_inode_s *msgq;
+  FAR struct tcb_s *rtcb;
+  FAR struct mqueue_inode_s *msgq;
   int errval;
 
   /* Was a valid message queue descriptor provided? */
@@ -149,7 +130,7 @@ int mq_notify(mqd_t mqdes, const struct sigevent *notification)
 
   /* Get the current process ID */
 
-  rtcb = (struct tcb_s*)g_readytorun.head;
+  rtcb = this_task();
 
   /* Is there already a notification attached */
 
@@ -171,10 +152,11 @@ int mq_notify(mqd_t mqdes, const struct sigevent *notification)
 
           /* Yes... Assign it to the current task. */
 
-          msgq->ntvalue.sival_ptr = notification->sigev_value.sival_ptr;
-          msgq->ntsigno           = notification->sigev_signo;
-          msgq->ntpid             = rtcb->pid;
-          msgq->ntmqdes           = mqdes;
+          memcpy(&msgq->ntevent, &notification->sigev_value,
+                 sizeof(struct sigevent));
+
+          msgq->ntpid   = rtcb->pid;
+          msgq->ntmqdes = mqdes;
         }
     }
 
@@ -197,10 +179,9 @@ int mq_notify(mqd_t mqdes, const struct sigevent *notification)
        * thread to detach the notification.
        */
 
-      msgq->ntpid             = INVALID_PROCESS_ID;
-      msgq->ntsigno           = 0;
-      msgq->ntvalue.sival_ptr = NULL;
-      msgq->ntmqdes           = NULL;
+      memset(&msgq->ntevent, 0, sizeof(struct sigevent));
+      msgq->ntpid   = INVALID_PROCESS_ID;
+      msgq->ntmqdes = NULL;
     }
 
   sched_unlock();

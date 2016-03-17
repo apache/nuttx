@@ -394,7 +394,7 @@ void wm8904_clock_analysis(FAR struct audio_lowerhalf_s *dev,
   else
     {
       syslog(LOG_INFO, "  MCLK_DIV:        2\n");
-      sysclk >>=1;
+      sysclk >>= 1;
     }
 
   syslog(LOG_INFO, "  SYSCLK:          %lu (after divider)\n", (unsigned long)sysclk);

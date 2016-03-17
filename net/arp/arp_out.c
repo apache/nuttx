@@ -63,18 +63,22 @@
 #define IPBUF   ((struct arp_iphdr_s *)&dev->d_buf[ETH_HDRLEN])
 
 /****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
  * Private Data
  ****************************************************************************/
 
 /* Support for broadcast address */
 
 static const struct ether_addr g_broadcast_ethaddr =
-  {{0xff, 0xff, 0xff, 0xff, 0xff, 0xff}};
-static const uint16_t g_broadcast_ipaddr[2] = {0xffff, 0xffff};
+{
+  {
+    0xff, 0xff, 0xff, 0xff, 0xff, 0xff
+  }
+};
+
+static const uint16_t g_broadcast_ipaddr[2] =
+{
+  0xffff, 0xffff
+};
 
 /* Support for IGMP multicast addresses.
  *
@@ -93,12 +97,11 @@ static const uint16_t g_broadcast_ipaddr[2] = {0xffff, 0xffff};
  */
 
 #ifdef CONFIG_NET_IGMP
-static const uint8_t g_multicast_ethaddr[3] = {0x01, 0x00, 0x5e};
+static const uint8_t g_multicast_ethaddr[3] =
+{
+  0x01, 0x00, 0x5e
+};
 #endif
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -178,15 +181,15 @@ void arp_out(FAR struct net_driver_s *dev)
    *   addresses=0xff (ff00::/8.)
    */
 
- else if (NTOHS(pip->eh_destipaddr[0]) >= 0xe000 &&
-          NTOHS(pip->eh_destipaddr[0]) <= 0xefff)
+  else if (NTOHS(pip->eh_destipaddr[0]) >= 0xe000 &&
+           NTOHS(pip->eh_destipaddr[0]) <= 0xefff)
     {
       /* Build the well-known IPv4 IGMP Ethernet address.  The first
        * three bytes are fixed; the final three variable come from the
        * last three bytes of the IP address.
        */
 
-      FAR const uint8_t *ip = ((uint8_t*)pip->eh_destipaddr) + 1;
+      FAR const uint8_t *ip = ((FAR uint8_t *)pip->eh_destipaddr) + 1;
       memcpy(peth->dest,  g_multicast_ethaddr, 3);
       memcpy(&peth->dest[3], ip, 3);
     }

@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/usbdev/pl2303.c
  *
- *   Copyright (C) 2008-2013, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2013, 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * This logic emulates the Prolific PL2303 serial/USB converter
@@ -53,6 +53,7 @@
 #include <queue.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/arch.h>
 #include <nuttx/serial/serial.h>
@@ -256,7 +257,7 @@ struct pl2303_dev_s
   FAR struct usbdev_s     *usbdev;    /* usbdev driver pointer */
 
   uint8_t config;                     /* Configuration number */
-  uint8_t nwrq;                       /* Number of queue write requests (in reqlist)*/
+  uint8_t nwrq;                       /* Number of queue write requests (in reqlist) */
   uint8_t nrdq;                       /* Number of queue read requests (in epbulkout) */
   bool    rxenabled;                  /* true: UART RX "interrupts" enabled */
   uint8_t linest[7];                  /* Fake line status */
@@ -370,7 +371,7 @@ static void    usbser_txint(FAR struct uart_dev_s *dev, bool enable);
 static bool    usbser_txempty(FAR struct uart_dev_s *dev);
 
 /****************************************************************************
- * Private Variables
+ * Private Data
  ****************************************************************************/
 
 /* USB class device ********************************************************/
@@ -537,7 +538,7 @@ static uint16_t usbclass_fillrequest(FAR struct pl2303_dev_s *priv, uint8_t *req
 
   /* Disable interrupts */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Transfer bytes while we have bytes available and there is room in the request */
 
@@ -572,7 +573,7 @@ static uint16_t usbclass_fillrequest(FAR struct pl2303_dev_s *priv, uint8_t *req
       uart_datasent(serdev);
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return nbytes;
 }
 
@@ -605,7 +606,7 @@ static int usbclass_sndpacket(FAR struct pl2303_dev_s *priv)
     }
 #endif
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Use our IN endpoint for the transfer */
 
@@ -659,7 +660,7 @@ static int usbclass_sndpacket(FAR struct pl2303_dev_s *priv)
         }
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return ret;
 }
 
@@ -926,7 +927,7 @@ static int16_t usbclass_mkcfgdesc(uint8_t *buf, uint8_t speed, uint8_t type)
 static int16_t usbclass_mkcfgdesc(uint8_t *buf)
 #endif
 {
-  FAR struct usb_cfgdesc_s *cfgdesc = (struct usb_cfgdesc_s*)buf;
+  FAR struct usb_cfgdesc_s *cfgdesc = (FAR struct usb_cfgdesc_s *)buf;
 #ifdef CONFIG_USBDEV_DUALSPEED
   bool hispeed = (speed == USB_SPEED_HIGH);
   uint16_t bulkmxpacket;
@@ -975,9 +976,9 @@ static int16_t usbclass_mkcfgdesc(uint8_t *buf)
       bulkmxpacket = 64;
     }
 
-  usbclass_mkepbulkdesc(&g_epbulkoutdesc, bulkmxpacket, (struct usb_epdesc_s*)buf);
+  usbclass_mkepbulkdesc(&g_epbulkoutdesc, bulkmxpacket, (FAR struct usb_epdesc_s *)buf);
   buf += USB_SIZEOF_EPDESC;
-  usbclass_mkepbulkdesc(&g_epbulkindesc, bulkmxpacket, (struct usb_epdesc_s*)buf);
+  usbclass_mkepbulkdesc(&g_epbulkindesc, bulkmxpacket, (FAR struct usb_epdesc_s *)buf);
 #else
   memcpy(buf, &g_epbulkoutdesc, USB_SIZEOF_EPDESC);
   buf += USB_SIZEOF_EPDESC;
@@ -1046,7 +1047,7 @@ static int usbclass_setconfig(FAR struct pl2303_dev_s *priv, uint8_t config)
   int i;
   int ret = 0;
 
-#if CONFIG_DEBUG
+#ifdef CONFIG_DEBUG
   if (priv == NULL)
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_INVALIDARG), 0);
@@ -1212,11 +1213,11 @@ static void usbclass_rdcomplete(FAR struct usbdev_ep_s *ep,
 
   /* Extract references to private data */
 
-  priv = (FAR struct pl2303_dev_s*)ep->priv;
+  priv = (FAR struct pl2303_dev_s *)ep->priv;
 
   /* Process the received data unless this is some unusual condition */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   switch (req->result)
     {
     case 0: /* Normal completion */
@@ -1227,7 +1228,7 @@ static void usbclass_rdcomplete(FAR struct usbdev_ep_s *ep,
     case -ESHUTDOWN: /* Disconnection */
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_RDSHUTDOWN), 0);
       priv->nrdq--;
-      irqrestore(flags);
+      leave_critical_section(flags);
       return;
 
     default: /* Some other error occurred */
@@ -1243,7 +1244,7 @@ static void usbclass_rdcomplete(FAR struct usbdev_ep_s *ep,
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_RDSUBMIT), (uint16_t)-req->result);
     }
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -1279,10 +1280,10 @@ static void usbclass_wrcomplete(FAR struct usbdev_ep_s *ep,
 
   /* Return the write request to the free list */
 
-  flags = irqsave();
-  sq_addlast((sq_entry_t*)reqcontainer, &priv->reqlist);
+  flags = enter_critical_section();
+  sq_addlast((FAR sq_entry_t *)reqcontainer, &priv->reqlist);
   priv->nwrq++;
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   /* Send the next packet unless this was some unusual termination
    * condition
@@ -1320,7 +1321,7 @@ static void usbclass_wrcomplete(FAR struct usbdev_ep_s *ep,
 static int usbclass_bind(FAR struct usbdevclass_driver_s *driver,
                          FAR struct usbdev_s *dev)
 {
-  FAR struct pl2303_dev_s *priv = ((FAR struct pl2303_driver_s*)driver)->dev;
+  FAR struct pl2303_dev_s *priv = ((FAR struct pl2303_driver_s *)driver)->dev;
   FAR struct pl2303_req_s *reqcontainer;
   irqstate_t flags;
   uint16_t reqlen;
@@ -1448,10 +1449,10 @@ static int usbclass_bind(FAR struct usbdevclass_driver_s *driver,
       reqcontainer->req->priv     = reqcontainer;
       reqcontainer->req->callback = usbclass_wrcomplete;
 
-      flags = irqsave();
-      sq_addlast((sq_entry_t*)reqcontainer, &priv->reqlist);
+      flags = enter_critical_section();
+      sq_addlast((FAR sq_entry_t *)reqcontainer, &priv->reqlist);
       priv->nwrq++;     /* Count of write requests available */
-      irqrestore(flags);
+      leave_critical_section(flags);
     }
 
   /* Report if we are selfpowered */
@@ -1498,7 +1499,7 @@ static void usbclass_unbind(FAR struct usbdevclass_driver_s *driver,
 
   /* Extract reference to private data */
 
-  priv = ((FAR struct pl2303_driver_s*)driver)->dev;
+  priv = ((FAR struct pl2303_driver_s *)driver)->dev;
 
 #ifdef CONFIG_DEBUG
   if (!priv)
@@ -1573,7 +1574,7 @@ static void usbclass_unbind(FAR struct usbdevclass_driver_s *driver,
        * of them
        */
 
-      flags = irqsave();
+      flags = enter_critical_section();
       DEBUGASSERT(priv->nwrq == CONFIG_PL2303_NWRREQS);
       while (!sq_empty(&priv->reqlist))
         {
@@ -1585,7 +1586,7 @@ static void usbclass_unbind(FAR struct usbdevclass_driver_s *driver,
             }
         }
       DEBUGASSERT(priv->nwrq == 0);
-      irqrestore(flags);
+      leave_critical_section(flags);
     }
 
   /* Clear out all data in the circular buffer */
@@ -1626,7 +1627,7 @@ static int usbclass_setup(FAR struct usbdevclass_driver_s *driver,
   /* Extract reference to private data */
 
   usbtrace(TRACE_CLASSSETUP, ctrl->req);
-  priv = ((FAR struct pl2303_driver_s*)driver)->dev;
+  priv = ((FAR struct pl2303_driver_s *)driver)->dev;
 
 #ifdef CONFIG_DEBUG
   if (!priv || !priv->ctrlreq)
@@ -1722,7 +1723,7 @@ static int usbclass_setup(FAR struct usbdevclass_driver_s *driver,
             {
               if (ctrl->type == USB_DIR_IN)
                 {
-                  *(uint8_t*)ctrlreq->buf = priv->config;
+                  *(FAR uint8_t *)ctrlreq->buf = priv->config;
                   ret = 1;
                 }
             }
@@ -1746,7 +1747,7 @@ static int usbclass_setup(FAR struct usbdevclass_driver_s *driver,
 
           case USB_REQ_GETINTERFACE:
             {
-              if (ctrl->type == (USB_DIR_IN|USB_REQ_RECIPIENT_INTERFACE) &&
+              if (ctrl->type == (USB_DIR_IN | USB_REQ_RECIPIENT_INTERFACE) &&
                   priv->config == PL2303_CONFIGIDNONE)
                 {
                   if (index != PL2303_INTERFACEID)
@@ -1755,7 +1756,7 @@ static int usbclass_setup(FAR struct usbdevclass_driver_s *driver,
                     }
                   else
                      {
-                      *(uint8_t*) ctrlreq->buf = PL2303_ALTINTERFACEID;
+                      *(FAR uint8_t *) ctrlreq->buf = PL2303_ALTINTERFACEID;
                       ret = 1;
                     }
                 }
@@ -1817,7 +1818,7 @@ static int usbclass_setup(FAR struct usbdevclass_driver_s *driver,
               {
                 if ((ctrl->type & USB_DIR_IN) != 0)
                   {
-                    *(uint32_t*)ctrlreq->buf = 0xdeadbeef;
+                    *(FAR uint32_t *)ctrlreq->buf = 0xdeadbeef;
                     ret = 4;
                   }
                 else
@@ -1886,7 +1887,7 @@ static void usbclass_disconnect(FAR struct usbdevclass_driver_s *driver,
 
   /* Extract reference to private data */
 
-  priv = ((FAR struct pl2303_driver_s*)driver)->dev;
+  priv = ((FAR struct pl2303_driver_s *)driver)->dev;
 
 #ifdef CONFIG_DEBUG
   if (!priv)
@@ -1900,7 +1901,7 @@ static void usbclass_disconnect(FAR struct usbdevclass_driver_s *driver,
    * connection.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 #ifdef CONFIG_SERIAL_REMOVABLE
   uart_connected(&priv->serdev, false);
 #endif
@@ -1914,7 +1915,7 @@ static void usbclass_disconnect(FAR struct usbdevclass_driver_s *driver,
   priv->serdev.xmit.head = 0;
   priv->serdev.xmit.tail = 0;
   priv->rxhead = 0;
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   /* Perform the soft connect function so that we will we can be
    * re-enumerated.
@@ -1949,7 +1950,7 @@ static void usbclass_suspend(FAR struct usbdevclass_driver_s *driver,
 
   /* Extract reference to private data */
 
-  priv = ((FAR struct pl2303_driver_s*)driver)->dev;
+  priv = ((FAR struct pl2303_driver_s *)driver)->dev;
 
   /* And let the "upper half" driver now that we are suspended */
 
@@ -1983,7 +1984,7 @@ static void usbclass_resume(FAR struct usbdevclass_driver_s *driver,
 
   /* Extract reference to private data */
 
-  priv = ((FAR struct pl2303_driver_s*)driver)->dev;
+  priv = ((FAR struct pl2303_driver_s *)driver)->dev;
 
   /* Are we still configured? */
 
@@ -2016,7 +2017,7 @@ static int usbser_setup(FAR struct uart_dev_s *dev)
 
   /* Sanity check */
 
-#if CONFIG_DEBUG
+#ifdef CONFIG_DEBUG
   if (!dev || !dev->priv)
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_INVALIDARG), 0);
@@ -2026,7 +2027,7 @@ static int usbser_setup(FAR struct uart_dev_s *dev)
 
   /* Extract reference to private data */
 
-  priv = (FAR struct pl2303_dev_s*)dev->priv;
+  priv = (FAR struct pl2303_dev_s *)dev->priv;
 
   /* Check if we have been configured */
 
@@ -2057,7 +2058,7 @@ static void usbser_shutdown(FAR struct uart_dev_s *dev)
 
   /* Sanity check */
 
-#if CONFIG_DEBUG
+#ifdef CONFIG_DEBUG
   if (!dev || !dev->priv)
     {
        usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_INVALIDARG), 0);
@@ -2083,8 +2084,8 @@ static int usbser_attach(FAR struct uart_dev_s *dev)
  * Name: usbser_detach
  *
  * Description:
-*   Does not apply to the USB serial class device
-  *
+ *   Does not apply to the USB serial class device
+ *
  ****************************************************************************/
 
 static void usbser_detach(FAR struct uart_dev_s *dev)
@@ -2119,7 +2120,7 @@ static void usbser_rxint(FAR struct uart_dev_s *dev, bool enable)
 
   /* Sanity check */
 
-#if CONFIG_DEBUG
+#ifdef CONFIG_DEBUG
   if (!dev || !dev->priv)
     {
        usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_INVALIDARG), 0);
@@ -2129,29 +2130,29 @@ static void usbser_rxint(FAR struct uart_dev_s *dev, bool enable)
 
   /* Extract reference to private data */
 
-  priv   = (FAR struct pl2303_dev_s*)dev->priv;
+  priv   = (FAR struct pl2303_dev_s *)dev->priv;
   serdev = &priv->serdev;
 
   /* We need exclusive access to the RX buffer and private structure
    * in the following.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   if (enable)
     {
-       /* RX "interrupts" are enabled.  Is this a transition from disabled
-        * to enabled state?
-        */
+      /* RX "interrupts" are enabled.  Is this a transition from disabled
+       * to enabled state?
+       */
 
-       if (!priv->rxenabled)
-         {
-           /* Yes.  During the time that RX interrupts are disabled, the
-            * the serial driver will be extracting data from the circular
-            * buffer and modifying recv.tail.  During this time, we
-            * should avoid modifying recv.head; When interrupts are restored,
-            * we can update the head pointer for all of the data that we
-            * put into cicular buffer while "interrupts" were disabled.
-            */
+      if (!priv->rxenabled)
+        {
+          /* Yes.  During the time that RX interrupts are disabled, the
+           * the serial driver will be extracting data from the circular
+           * buffer and modifying recv.tail.  During this time, we
+           * should avoid modifying recv.head; When interrupts are restored,
+           * we can update the head pointer for all of the data that we
+           * put into cicular buffer while "interrupts" were disabled.
+           */
 
           if (priv->rxhead != serdev->recv.head)
             {
@@ -2185,7 +2186,7 @@ static void usbser_rxint(FAR struct uart_dev_s *dev, bool enable)
       priv->rxhead    = serdev->recv.head;
       priv->rxenabled = false;
     }
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -2210,7 +2211,7 @@ static void usbser_txint(FAR struct uart_dev_s *dev, bool enable)
 
   /* Sanity checks */
 
-#if CONFIG_DEBUG
+#ifdef CONFIG_DEBUG
   if (!dev || !dev->priv)
     {
        usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_INVALIDARG), 0);
@@ -2218,9 +2219,9 @@ static void usbser_txint(FAR struct uart_dev_s *dev, bool enable)
     }
 #endif
 
- /* Extract references to private data */
+  /* Extract references to private data */
 
-  priv = (FAR struct pl2303_dev_s*)dev->priv;
+  priv = (FAR struct pl2303_dev_s *)dev->priv;
 
   /* If the new state is enabled and if there is data in the XMIT buffer,
    * send the next packet now.
@@ -2249,11 +2250,11 @@ static void usbser_txint(FAR struct uart_dev_s *dev, bool enable)
 
 static bool usbser_txempty(FAR struct uart_dev_s *dev)
 {
-  FAR struct pl2303_dev_s *priv = (FAR struct pl2303_dev_s*)dev->priv;
+  FAR struct pl2303_dev_s *priv = (FAR struct pl2303_dev_s *)dev->priv;
 
   usbtrace(PL2303_CLASSAPI_TXEMPTY, 0);
 
-#if CONFIG_DEBUG
+#ifdef CONFIG_DEBUG
   if (!priv)
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_INVALIDARG), 0);
@@ -2290,7 +2291,7 @@ int usbdev_serialinitialize(int minor)
 
   /* Allocate the structures needed */
 
-  alloc = (FAR struct pl2303_alloc_s*)kmm_malloc(sizeof(struct pl2303_alloc_s));
+  alloc = (FAR struct pl2303_alloc_s *)kmm_malloc(sizeof(struct pl2303_alloc_s));
   if (!alloc)
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_ALLOCDEVSTRUCT), 0);
@@ -2315,7 +2316,7 @@ int usbdev_serialinitialize(int minor)
   priv->linest[3] = (115200 >> 24) & 0xff;
   priv->linest[4] = 0;                     /* One stop bit */
   priv->linest[5] = 0;                     /* No parity */
-  priv->linest[6] = 8;                     /*8 data bits */
+  priv->linest[6] = 8;                     /* 8 data bits */
 
   /* Initialize the serial driver sub-structure */
 

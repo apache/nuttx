@@ -1,7 +1,7 @@
-/************************************************************************
+/****************************************************************************
  * sched/signal/sig_findaction.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,54 +31,34 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "signal/signal.h"
 
-/************************************************************************
- * Pre-processor Definitions
- ************************************************************************/
-
-/************************************************************************
- * Private Type Declarations
- ************************************************************************/
-
-/************************************************************************
- * Global Variables
- ************************************************************************/
-
-/************************************************************************
- * Private Variables
- ************************************************************************/
-
-/************************************************************************
- * Private Function Prototypes
- ************************************************************************/
-
-/************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************
+/****************************************************************************
  * Name: sig_findaction
  *
  * Description:
  *   Allocate a new element for a signal queue
  *
- ************************************************************************/
+ ****************************************************************************/
 
-FAR sigactq_t *sig_findaction(FAR struct tcb_s *stcb, int signo)
+FAR sigactq_t *sig_findaction(FAR struct task_group_s *group, int signo)
 {
   FAR sigactq_t *sigact = NULL;
 
   /* Verify the caller's sanity */
 
-  if (stcb)
+  if (group)
     {
       /* Sigactions can only be assigned to the currently executing
        * thread.  So, a simple lock ought to give us sufficient
@@ -89,7 +69,7 @@ FAR sigactq_t *sig_findaction(FAR struct tcb_s *stcb, int signo)
 
       /* Seach the list for a sigaction on this signal */
 
-      for (sigact = (FAR sigactq_t*)stcb->sigactionq.head;
+      for (sigact = (FAR sigactq_t *)group->tg_sigactionq.head;
           ((sigact) && (sigact->signo != signo));
           sigact = sigact->flink);
 

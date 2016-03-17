@@ -128,8 +128,10 @@ static int fat_attrib(const char *path, fat_attrib_t *retattrib,
 
   /* Set or clear any bits as requested */
 
-  newattributes &= ~(clearbits & (FATATTR_READONLY|FATATTR_HIDDEN|FATATTR_SYSTEM|FATATTR_ARCHIVE));
-  newattributes |=  (setbits   & (FATATTR_READONLY|FATATTR_HIDDEN|FATATTR_SYSTEM|FATATTR_ARCHIVE));
+  newattributes &= ~(clearbits & (FATATTR_READONLY | FATATTR_HIDDEN |
+                                  FATATTR_SYSTEM | FATATTR_ARCHIVE));
+  newattributes |=  (setbits   & (FATATTR_READONLY | FATATTR_HIDDEN |
+                                  FATATTR_SYSTEM | FATATTR_ARCHIVE));
 
   /* Did any thingchange? */
 
@@ -166,7 +168,7 @@ errout:
 }
 
 /****************************************************************************
- * Global Functions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************

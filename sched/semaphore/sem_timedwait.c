@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/semaphore/sem_timedwait.c
  *
- *   Copyright (C) 2011, 2013-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,6 +46,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/wdog.h>
 
@@ -94,7 +95,7 @@
 
 int sem_timedwait(FAR sem_t *sem, FAR const struct timespec *abstime)
 {
-  FAR struct tcb_s *rtcb = (FAR struct tcb_s *)g_readytorun.head;
+  FAR struct tcb_s *rtcb = this_task();
   irqstate_t flags;
   int        ticks;
   int        errcode;
@@ -134,7 +135,7 @@ int sem_timedwait(FAR sem_t *sem, FAR const struct timespec *abstime)
    * enabled while we are blocked waiting for the semaphore.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Try to take the semaphore without waiting. */
 
@@ -179,7 +180,6 @@ int sem_timedwait(FAR sem_t *sem, FAR const struct timespec *abstime)
 
   /* Start the watchdog */
 
-  errcode = OK;
   (void)wd_start(rtcb->waitdog, ticks, (wdentry_t)sem_timeout, 1, getpid());
 
   /* Now perform the blocking wait */
@@ -196,12 +196,17 @@ int sem_timedwait(FAR sem_t *sem, FAR const struct timespec *abstime)
 
   wd_cancel(rtcb->waitdog);
 
+  if (errcode != OK)
+    {
+      goto errout_with_irqdisabled;
+    }
+
   /* We can now restore interrupts and delete the watchdog */
 
   /* Success exits */
 
 success_with_irqdisabled:
-  irqrestore(flags);
+  leave_critical_section(flags);
   wd_delete(rtcb->waitdog);
   rtcb->waitdog = NULL;
   return OK;
@@ -209,7 +214,7 @@ success_with_irqdisabled:
   /* Error exits */
 
 errout_with_irqdisabled:
-  irqrestore(flags);
+  leave_critical_section(flags);
   wd_delete(rtcb->waitdog);
   rtcb->waitdog = NULL;
 

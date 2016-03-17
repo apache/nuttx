@@ -158,21 +158,13 @@ struct nrf24l01_dev_s
  ****************************************************************************/
 /* Low-level SPI helpers */
 
-#ifdef CONFIG_SPI_OWNBUS
 static inline void nrf24l01_configspi(FAR struct spi_dev_s *spi);
-#  define nrf24l01_lock(spi)
-#  define nrf24l01_unlock(spi)
-#else
-#  define nrf24l01_configspi(spi);
 static void nrf24l01_lock(FAR struct spi_dev_s *spi);
 static void nrf24l01_unlock(FAR struct spi_dev_s *spi);
-#endif
 
 static uint8_t nrf24l01_access(FAR struct nrf24l01_dev_s *dev,
     nrf24l01_access_mode_t mode, uint8_t cmd, uint8_t *buf, int length);
-
 static uint8_t nrf24l01_flush_rx(FAR struct nrf24l01_dev_s *dev);
-
 static uint8_t nrf24l01_flush_tx(FAR struct nrf24l01_dev_s *dev);
 
 /* Read register from nrf24 */
@@ -243,14 +235,15 @@ static const struct file_operations nrf24l01_fops =
 #ifndef CONFIG_DISABLE_POLL
   nrf24l01_poll,    /* poll */
 #endif
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   NULL              /* unlink */
+#endif
 };
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
-#ifndef CONFIG_SPI_OWNBUS
 static void nrf24l01_lock(FAR struct spi_dev_s *spi)
 {
   /* Lock the SPI bus because there are multiple devices competing for the
@@ -267,18 +260,17 @@ static void nrf24l01_lock(FAR struct spi_dev_s *spi)
   SPI_SELECT(spi, SPIDEV_WIRELESS, true);
   SPI_SETMODE(spi, SPIDEV_MODE0);
   SPI_SETBITS(spi, 8);
-  SPI_SETFREQUENCY(spi, NRF24L01_SPIFREQ);
+  (void)SPI_HWFEATURES(spi, 0);
+  (void)SPI_SETFREQUENCY(spi, NRF24L01_SPIFREQ);
   SPI_SELECT(spi, SPIDEV_WIRELESS, false);
 }
-#endif
 
 /****************************************************************************
  * Function: nrf24l01_unlock
  *
  * Description:
- *   If we are sharing the SPI bus with other devices (CONFIG_SPI_OWNBUS
- *   undefined) then we need to un-lock the SPI bus for each transfer,
- *   possibly losing the current configuration.
+ *   Un-lock the SPI bus after each transfer, possibly losing the current
+ *   configuration if we are sharing the SPI bus with other devices.
  *
  * Parameters:
  *   spi  - Reference to the SPI driver structure
@@ -290,23 +282,18 @@ static void nrf24l01_lock(FAR struct spi_dev_s *spi)
  *
  ****************************************************************************/
 
-#ifndef CONFIG_SPI_OWNBUS
 static void nrf24l01_unlock(FAR struct spi_dev_s *spi)
 {
   /* Relinquish the SPI bus. */
 
   (void)SPI_LOCK(spi, false);
 }
-#endif
 
 /****************************************************************************
  * Function: nrf24l01_configspi
  *
  * Description:
- *   Configure the SPI for use with the NRF24L01.  This function should be
- *   called once during touchscreen initialization to configure the SPI
- *   bus.  Note that if CONFIG_SPI_OWNBUS is not defined, then this function
- *   does nothing.
+ *   Configure the SPI for use with the NRF24L01.
  *
  * Parameters:
  *   spi  - Reference to the SPI driver structure
@@ -318,20 +305,17 @@ static void nrf24l01_unlock(FAR struct spi_dev_s *spi)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SPI_OWNBUS
 static inline void nrf24l01_configspi(FAR struct spi_dev_s *spi)
 {
-  /* Configure SPI for the NRF24L01 module.
-   * As we own the SPI bus this method is called just once.
-   */
+  /* Configure SPI for the NRF24L01 module. */
 
-  SPI_SELECT(spi, SPIDEV_WIRELESS, true);  // Useful ?
+  SPI_SELECT(spi, SPIDEV_WIRELESS, true);  /* Useful ? */
   SPI_SETMODE(spi, SPIDEV_MODE0);
   SPI_SETBITS(spi, 8);
-  SPI_SETFREQUENCY(spi, NRF24L01_SPIFREQ);
+  (void)SPI_HWFEATURES(spi, 0);
+  (void)SPI_SETFREQUENCY(spi, NRF24L01_SPIFREQ);
   SPI_SELECT(spi, SPIDEV_WIRELESS, false);
 }
-#endif
 
 static inline void nrf24l01_select(struct nrf24l01_dev_s * dev)
 {
@@ -663,7 +647,7 @@ static void nrf24l01_tostate(struct nrf24l01_dev_s *dev, nrf24l01_state_t state)
 
   /* Entering new state */
 
-  switch(state)
+  switch (state)
     {
     case ST_UNKNOWN:
       /* Power down the module here... */
@@ -980,7 +964,7 @@ static int nrf24l01_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         break;
 
       case NRF24L01IOC_GETRETRCFG:  /* Get retransmit params. arg: Pointer to nrf24l01_retrcfg_t */
-        result = -ENOSYS;  /* TODO !*/
+        result = -ENOSYS;  /* TODO */
         break;
 
       case NRF24L01IOC_SETPIPESCFG:
@@ -1053,7 +1037,7 @@ static int nrf24l01_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
 
       case NRF24L01IOC_GETDATARATE:
-        result = -ENOSYS;  /* TODO !*/
+        result = -ENOSYS;  /* TODO */
         break;
 
       case NRF24L01IOC_SETADDRWIDTH:
@@ -1295,7 +1279,7 @@ int nrf24l01_init(FAR struct nrf24l01_dev_s *dev)
   CHECK_ARGS(dev);
   nrf24l01_lock(dev->spi);
 
-  /* Configure the SPI parameters now  (if we own the bus) */
+  /* Configure the SPI parameters before communicating */
 
   nrf24l01_configspi(dev->spi);
 
@@ -1351,7 +1335,8 @@ int nrf24l01_init(FAR struct nrf24l01_dev_s *dev)
 
   /* Clear interrupt sources (useful ?) */
 
-  nrf24l01_writeregbyte(dev, NRF24L01_STATUS, NRF24L01_RX_DR|NRF24L01_TX_DS|NRF24L01_MAX_RT);
+  nrf24l01_writeregbyte(dev, NRF24L01_STATUS,
+                        NRF24L01_RX_DR | NRF24L01_TX_DS | NRF24L01_MAX_RT);
 
 out:
   nrf24l01_unlock(dev->spi);
@@ -1523,7 +1508,7 @@ int nrf24l01_settxpower(FAR struct nrf24l01_dev_s *dev, int outpower)
    * '11' – 0dBm
    */
 
-  switch(outpower)
+  switch (outpower)
     {
     case 0:
       hwpow = 3 << NRF24L01_RF_PWR_SHIFT;

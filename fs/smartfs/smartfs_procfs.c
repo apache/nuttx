@@ -88,7 +88,7 @@ struct smartfs_level1_s
    * open / read / stat, etc.
    */
 
-  struct smartfs_mountpt_s*  mount;
+  FAR struct smartfs_mountpt_s *mount;
   uint8_t direntry;
 };
 
@@ -153,7 +153,7 @@ static size_t   smartfs_files_read(FAR struct file *filep, FAR char *buffer,
 #endif
 
 /****************************************************************************
- * Private Variables
+ * Private Data
  ****************************************************************************/
 
 static const struct smartfs_procfs_entry_s g_direntry[] =
@@ -172,7 +172,7 @@ static const uint8_t g_direntrycount = sizeof(g_direntry) /
                       sizeof(struct smartfs_procfs_entry_s);
 
 /****************************************************************************
- * Public Variables
+ * Public Data
  ****************************************************************************/
 
 /* See include/nutts/fs/procfs.h
@@ -216,7 +216,7 @@ static int smartfs_find_dirref(FAR const char *relpath,
             FAR struct smartfs_level1_s *level1)
 {
   int         ret = -ENOENT;
-  FAR struct  smartfs_mountpt_s* mount;
+  FAR struct  smartfs_mountpt_s *mount;
   uint16_t    x;
   FAR char *  str;
 
@@ -715,7 +715,7 @@ static int smartfs_stat(const char *relpath, struct stat *buf)
 
   ret = smartfs_find_dirref(relpath, &level1);
 
-  buf->st_mode = S_IROTH|S_IRGRP|S_IRUSR;
+  buf->st_mode = S_IROTH | S_IRGRP | S_IRUSR;
   if (ret == OK)
     {
       if (level1.base.level < 3)
@@ -982,7 +982,6 @@ static size_t   smartfs_erasemap_read(FAR struct file *filep, FAR char *buffer,
       copylen = 0;
       for (y = 0; y < rows; y++)
         {
-          //for (x = 0; x < 128; x++)
           for (x = 0; x < cols; x++)
             {
               /* Copy data to the buffer */

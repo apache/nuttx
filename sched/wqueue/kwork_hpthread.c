@@ -53,24 +53,12 @@
 #ifdef CONFIG_SCHED_HPWORK
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Type Declarations
- ****************************************************************************/
-
-/****************************************************************************
  * Public Data
  ****************************************************************************/
 
 /* The state of the kernel mode, high priority work queue. */
 
 struct hp_wqueue_s g_hpwork;
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
@@ -106,7 +94,7 @@ static int work_hpthread(int argc, char *argv[])
 {
   /* Loop forever */
 
-  for (;;)
+  for (; ; )
     {
 #ifndef CONFIG_SCHED_LPWORK
       /* First, perform garbage collection.  This cleans-up memory
@@ -120,7 +108,7 @@ static int work_hpthread(int argc, char *argv[])
        * thread instead.
        */
 
-      sched_garbagecollection();
+      sched_garbage_collection();
 #endif
 
       /* Then process queued work.  work_process will not return until: (1)

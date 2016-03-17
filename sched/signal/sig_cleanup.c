@@ -1,7 +1,7 @@
-/************************************************************************
+/****************************************************************************
  * sched/signal/sig_cleanup.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,42 +31,22 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/arch.h>
 
 #include "signal/signal.h"
 
-/************************************************************************
- * Pre-processor Definitions
- ************************************************************************/
-
-/************************************************************************
- * Private Type Declarations
- ************************************************************************/
-
-/************************************************************************
- * Global Variables
- ************************************************************************/
-
-/************************************************************************
- * Private Variables
- ************************************************************************/
-
-/************************************************************************
- * Private Functions
- ************************************************************************/
-
-/************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************
+/****************************************************************************
  * Name: sig_cleanup
  *
  * Description:
@@ -74,41 +54,33 @@
  *   called only at task deletion time.  The caller is expected to have
  *   assured the critical section necessary to perform this action.
  *
- ************************************************************************/
+ ****************************************************************************/
 
 void sig_cleanup(FAR struct tcb_s *stcb)
 {
-  FAR sigactq_t  *sigact;
   FAR sigq_t     *sigq;
-
-  /* Deallocate all entries in the list of signal actions */
-
-  while ((sigact = (FAR sigactq_t*)sq_remfirst(&stcb->sigactionq)) != NULL)
-    {
-      sig_releaseaction(sigact);
-    }
 
   /* Deallocate all entries in the list of pending signal actions */
 
-  while ((sigq = (FAR sigq_t*)sq_remfirst(&stcb->sigpendactionq)) != NULL)
+  while ((sigq = (FAR sigq_t *)sq_remfirst(&stcb->sigpendactionq)) != NULL)
     {
       sig_releasependingsigaction(sigq);
     }
 
   /* Deallocate all entries in the list of posted signal actions */
 
-  while ((sigq = (FAR sigq_t*)sq_remfirst(&stcb->sigpostedq)) != NULL)
+  while ((sigq = (FAR sigq_t *)sq_remfirst(&stcb->sigpostedq)) != NULL)
     {
       sig_releasependingsigaction(sigq);
     }
 
-   /* Misc. signal-related clean-up */
+  /* Misc. signal-related clean-up */
 
-   stcb->sigprocmask  = ALL_SIGNAL_SET;
-   stcb->sigwaitmask  = NULL_SIGNAL_SET;
+  stcb->sigprocmask  = ALL_SIGNAL_SET;
+  stcb->sigwaitmask  = NULL_SIGNAL_SET;
 }
 
-/************************************************************************
+/****************************************************************************
  * Name: sig_release
  *
  * Description:
@@ -117,15 +89,23 @@ void sig_cleanup(FAR struct tcb_s *stcb)
  *   expected to have assured the critical section necessary to perform
  *   this action.
  *
- ************************************************************************/
+ ****************************************************************************/
 
 void sig_release(FAR struct task_group_s *group)
 {
+  FAR sigactq_t  *sigact;
   FAR sigpendq_t *sigpend;
+
+  /* Deallocate all entries in the list of signal actions */
+
+  while ((sigact = (FAR sigactq_t *)sq_remfirst(&group->tg_sigactionq)) != NULL)
+    {
+      sig_releaseaction(sigact);
+    }
 
   /* Deallocate all entries in the list of pending signals */
 
-  while ((sigpend = (FAR sigpendq_t*)sq_remfirst(&group->sigpendingq)) != NULL)
+  while ((sigpend = (FAR sigpendq_t *)sq_remfirst(&group->tg_sigpendingq)) != NULL)
     {
       sig_releasependingsignal(sigpend);
     }

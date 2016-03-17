@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/net/cs89x0.c
  *
- *   Copyright (C) 2009-2011, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2011, 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -76,7 +76,6 @@
 /* TX poll delay = 1 seconds. CLK_TCK is the number of clock ticks per second */
 
 #define CS89x0_WDDELAY   (1*CLK_TCK)
-#define CS89x0_POLLHSEC  (1*2)
 
 /* TX timeout = 1 minute */
 
@@ -219,9 +218,9 @@ static uint16_t cs89x0_getppreg(struct cs89x0_driver_s *cs89x0, int addr)
 #endif
     }
 
-    /* When configured in I/O mode, the CS89x0 is accessed through eight, 16-bit
-     * I/O ports that in the host system's I/O space.
-     */
+  /* When configured in I/O mode, the CS89x0 is accessed through eight, 16-bit
+   * I/O ports that in the host system's I/O space.
+   */
 
   else
 #endif
@@ -253,9 +252,9 @@ static void cs89x0_putppreg(struct cs89x0_driver_s *cs89x0, int addr, uint16_t v
 #endif
     }
 
-    /* When configured in I/O mode, the CS89x0 is accessed through eight, 16-bit
-     * I/O ports that in the host system's I/O space.
-     */
+  /* When configured in I/O mode, the CS89x0 is accessed through eight, 16-bit
+   * I/O ports that in the host system's I/O space.
+   */
 
   else
 #endif
@@ -306,7 +305,8 @@ static int cs89x0_transmit(struct cs89x0_driver_s *cs89x0)
 
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
-  (void)wd_start(cs89x0->cs_txtimeout, CS89x0_TXTIMEOUT, cs89x0_txtimeout, 1, (uint32_t)cs89x0);
+  (void)wd_start(cs89x0->cs_txtimeout, CS89x0_TXTIMEOUT, cs89x0_txtimeout,
+                 1, (wdparm_t)cs89x0);
   return OK;
 }
 
@@ -397,9 +397,9 @@ static int cs89x0_txpoll(struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-static void cs89x0_receive(struct cs89x0_driver_s *cs89x0, uint16_t isq)
+static void cs89x0_receive(FAR struct cs89x0_driver_s *cs89x0, uint16_t isq)
 {
-  uint16_t *dest;
+  FAR uint16_t *dest;
   uint16_t rxlength;
   int nbytes;
 
@@ -408,31 +408,31 @@ static void cs89x0_receive(struct cs89x0_driver_s *cs89x0, uint16_t isq)
   rxlength = cs89x0_getreg(PPR_RXLENGTH);
   if ((isq & RX_OK) == 0)
     {
-#ifdef CONFIG_C89x0_STATISTICS
-      cd89x0->cs_stats.rx_errors++;
+#ifdef CONFIG_NETDEV_STATISTICS
+      NETDEV_RXERRORS(&cd89x0->cs_dev);
+
+#if 0
       if ((isq & RX_RUNT) != 0)
         {
-          cd89x0->cs_stats.rx_lengtherrors++;
         }
 
       if ((isq & RX_EXTRA_DATA) != 0)
         {
-          cd89x0->cs_stats.rx_lengtherrors++;
         }
 
       if (isq & RX_CRC_ERROR) != 0)
         {
-          if (!(isq & (RX_EXTRA_DATA|RX_RUNT)))
+          if (!(isq & (RX_EXTRA_DATA | RX_RUNT)))
             {
-              cd89x0->cs_stats.rx_crcerrors++;
             }
         }
 
       if ((isq & RX_DRIBBLE) != 0)
         {
-          cd89x0->cs_stats.rx_frameerrors++;
         }
 #endif
+#endif
+
       return;
     }
 
@@ -440,10 +440,7 @@ static void cs89x0_receive(struct cs89x0_driver_s *cs89x0, uint16_t isq)
 
   if (rxlength > ???)
     {
-#ifdef CONFIG_C89x0_STATISTICS
-      cd89x0->cs_stats.rx_errors++;
-      cd89x0->cs_stats.rx_lengtherrors++;
-#endif
+      NETDEV_RXERRORS(&cd89x0->cs_dev);
       return;
     }
 
@@ -451,15 +448,13 @@ static void cs89x0_receive(struct cs89x0_driver_s *cs89x0, uint16_t isq)
    * amount of data in cs89x0->cs_dev.d_len
    */
 
-  dest = (uint16_t*)cs89x0->cs_dev.d_buf;
+  dest = (FAR uint16_t *)cs89x0->cs_dev.d_buf;
   for (nbytes = 0; nbytes < rxlength; nbytes += sizeof(uint16_t))
     {
       *dest++ = cs89x0_getreg(PPR_RXFRAMELOCATION);
     }
 
-#ifdef CONFIG_C89x0_STATISTICS
-  cd89x0->cs_stats.rx_packets++;
-#endif
+  NETDEV_RXPACKETS(&cd89x0->cs_dev);
 
 #ifdef CONFIG_NET_PKT
   /* When packet sockets are enabled, feed the frame into the packet tap */
@@ -473,6 +468,7 @@ static void cs89x0_receive(struct cs89x0_driver_s *cs89x0, uint16_t isq)
   if (BUF->type == HTONS(ETHTYPE_IP))
     {
       nllvdbg("IPv4 frame\n");
+      NETDEV_RXIPV4(&priv->cs_dev);
 
       /* Handle ARP on input then give the IPv4 packet to the network
        * layer
@@ -513,6 +509,7 @@ static void cs89x0_receive(struct cs89x0_driver_s *cs89x0, uint16_t isq)
   if (BUF->type == HTONS(ETHTYPE_IP6))
     {
       nllvdbg("Iv6 frame\n");
+      NETDEV_RXIPV6(&priv->cs_dev);
 
       /* Give the IPv6 packet to the network layer */
 
@@ -549,21 +546,23 @@ static void cs89x0_receive(struct cs89x0_driver_s *cs89x0, uint16_t isq)
 #ifdef CONFIG_NET_ARP
   if (BUF->type == htons(ETHTYPE_ARP))
     {
-       arp_arpin(&cs89x0->cs_dev);
+      NETDEV_RXARP(&priv->cs_dev);
+      arp_arpin(&cs89x0->cs_dev);
 
-       /* If the above function invocation resulted in data that should be
-        * sent out on the network, the field  d_len will set to a value > 0.
-        */
+      /* If the above function invocation resulted in data that should be
+       * sent out on the network, the field  d_len will set to a value > 0.
+       */
 
-       if (cs89x0->cs_dev.d_len > 0)
-         {
-           cs89x0_transmit(cs89x0);
-         }
+      if (cs89x0->cs_dev.d_len > 0)
+        {
+          cs89x0_transmit(cs89x0);
+        }
     }
   else
 #endif
     {
       nllvdbg("Unrecognized packet type %02x\n", BUF->type);
+      NETDEV_RXDROPPED(&priv->cs_dev);
     }
 }
 
@@ -589,28 +588,30 @@ static void cs89x0_txdone(struct cs89x0_driver_s *cs89x0, uint16_t isq)
    * hold the register address causing the interrupt.  We got here because
    * those bits indicated */
 
-#ifdef CONFIG_C89x0_STATISTICS
-  cd89x0->cs_stats.tx_packets++;
+#ifdef CONFIG_NETDEV_STATISTICS
+  NETDEV_TXPACKETS(&cd89x0->cs_dev);
   if ((isq & ISQ_TXEVENT_TXOK) == 0)
     {
-      cd89x0->cs_stats.tx_errors++;
+      NETDEV_TXERRORS(&cd89x0->cs_dev);
     }
+
+#if 0
   if ((isq & ISQ_TXEVENT_LOSSOFCRS) != 0)
     {
-      cd89x0->cs_stats.tx_carriererrors++;
     }
+
   if ((isq & ISQ_TXEVENT_SQEERROR) != 0)
     {
-      cd89x0->cs_stats.tx_heartbeaterrors++;
     }
+
   if (i(sq & ISQ_TXEVENT_OUTWINDOW) != 0)
     {
-      cd89x0->cs_stats.tx_windowerrors++;
     }
+
   if (isq & TX_16_COL)
     {
-      cd89x0->cs_stats.tx_abortederrors++;
     }
+#endif
 #endif
 
   /* If no further xmits are pending, then cancel the TX timeout */
@@ -719,15 +720,11 @@ static int cs89x0_interrupt(int irq, FAR void *context)
             break;
 
         case ISQ_RXMISSEVENT:
-#ifdef CONFIG_C89x0_STATISTICS
-            cd89x0->cs_stats.rx_missederrors += (isq >>6);
-#endif
+            NETDEV_RXERRORS(&cd89x0->cs_dev);
             break;
 
         case ISQ_TXCOLEVENT:
-#ifdef CONFIG_C89x0_STATISTICS
-            cd89x0->cs_stats.collisions += (isq >>6);
-#endif
+            NETDEV_TXERRORS(&cd89x0->cs_dev);
             break;
         }
     }
@@ -793,11 +790,12 @@ static void cs89x0_polltimer(int argc, uint32_t arg, ...)
 
   /* If so, update TCP timing states and poll uIP for new XMIT data */
 
-  (void)devif_timer(&cs89x0->cs_dev, cs89x0_txpoll, CS89x0_POLLHSEC);
+  (void)devif_timer(&cs89x0->cs_dev, cs89x0_txpoll);
 
   /* Setup the watchdog poll timer again */
 
-  (void)wd_start(cs89x0->cs_txpoll, CS89x0_WDDELAY, cs89x0_polltimer, 1, arg);
+  (void)wd_start(cs89x0->cs_txpoll, CS89x0_WDDELAY, cs89x0_polltimer, 1,
+                 (wdparm_t)arg);
 }
 
 /****************************************************************************
@@ -823,14 +821,15 @@ static int cs89x0_ifup(struct net_driver_s *dev)
 
   ndbg("Bringing up: %d.%d.%d.%d\n",
        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
-       (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24 );
+       (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
 
   /* Initialize the Ethernet interface */
 #warning "Missing logic"
 
   /* Set and activate a timer process */
 
-  (void)wd_start(cs89x0->cs_txpoll, CS89x0_WDDELAY, cs89x0_polltimer, 1, (uint32_t)cs89x0);
+  (void)wd_start(cs89x0->cs_txpoll, CS89x0_WDDELAY, cs89x0_polltimer, 1,
+                 (wdparm_t)cs89x0);
 
   /* Enable the Ethernet interrupt */
 
@@ -862,7 +861,7 @@ static int cs89x0_ifdown(struct net_driver_s *dev)
 
   /* Disable the Ethernet interrupt */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   up_disable_irq(CONFIG_CS89x0_IRQ);
 
   /* Cancel the TX poll timer and TX timeout timers */
@@ -873,7 +872,7 @@ static int cs89x0_ifdown(struct net_driver_s *dev)
   /* Reset the device */
 
   cs89x0->cs_bifup = false;
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -901,7 +900,7 @@ static int cs89x0_txavail(struct net_driver_s *dev)
   struct cs89x0_driver_s *cs89x0 = (struct cs89x0_driver_s *)dev->d_private;
   irqstate_t flags;
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Ignore the notification if the interface is not yet up */
 
@@ -915,7 +914,7 @@ static int cs89x0_txavail(struct net_driver_s *dev)
       (void)devif_poll(&cs89x0->cs_dev, cs89x0_txpoll);
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -1033,20 +1032,20 @@ int cs89x0_initialize(FAR const cs89x0_driver_s *cs89x0, int devno)
 
   /* Initialize the driver structure */
 
-  g_cs89x[devno]           = cs89x0;          /* Used to map IRQ back to instance */
-  cs89x0->cs_dev.d_ifup    = cs89x0_ifup;     /* I/F down callback */
-  cs89x0->cs_dev.d_ifdown  = cs89x0_ifdown;   /* I/F up (new IP address) callback */
-  cs89x0->cs_dev.d_txavail = cs89x0_txavail;  /* New TX data callback */
+  g_cs89x[devno]           = cs89x0;             /* Used to map IRQ back to instance */
+  cs89x0->cs_dev.d_ifup    = cs89x0_ifup;        /* I/F down callback */
+  cs89x0->cs_dev.d_ifdown  = cs89x0_ifdown;      /* I/F up (new IP address) callback */
+  cs89x0->cs_dev.d_txavail = cs89x0_txavail;     /* New TX data callback */
 #ifdef CONFIG_NET_IGMP
-  cs89x0->cs_dev.d_addmac  = cs89x0_addmac;   /* Add multicast MAC address */
-  cs89x0->cs_dev.d_rmmac   = cs89x0_rmmac;    /* Remove multicast MAC address */
+  cs89x0->cs_dev.d_addmac  = cs89x0_addmac;      /* Add multicast MAC address */
+  cs89x0->cs_dev.d_rmmac   = cs89x0_rmmac;       /* Remove multicast MAC address */
 #endif
-  cs89x0->cs_dev.d_private = (void*)cs89x0;   /* Used to recover private state from dev */
+  cs89x0->cs_dev.d_private = (FAR void *)cs89x0; /* Used to recover private state from dev */
 
   /* Create a watchdog for timing polling for and timing of transmisstions */
 
-  cs89x0->cs_txpoll       = wd_create();   /* Create periodic poll timer */
-  cs89x0->cs_txtimeout    = wd_create();   /* Create TX timeout timer */
+  cs89x0->cs_txpoll       = wd_create();         /* Create periodic poll timer */
+  cs89x0->cs_txtimeout    = wd_create();         /* Create TX timeout timer */
 
   /* Read the MAC address from the hardware into cs89x0->cs_dev.d_mac.ether_addr_octet */
 

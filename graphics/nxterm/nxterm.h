@@ -194,7 +194,7 @@ struct nxterm_state_s
 };
 
 /****************************************************************************
- * Public Variables
+ * Public Data
  ****************************************************************************/
 
 /* This is the common NX driver file operations */

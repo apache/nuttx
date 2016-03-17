@@ -42,7 +42,7 @@
 #include <stdio.h>
 #include <stdint.h>
 
-#include "lib_internal.h"
+#include "libc.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -77,7 +77,7 @@
  *   characters from stdin until new-line character, end-of-file condition,
  *   or read error.
  *
- **************************************************************************/
+ ****************************************************************************/
 
 FAR char *gets_s(FAR char *s, rsize_t n)
 {

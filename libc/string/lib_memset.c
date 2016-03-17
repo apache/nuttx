@@ -60,11 +60,11 @@
 #endif
 
 /****************************************************************************
- * Global Functions
+ * Public Functions
  ****************************************************************************/
 
 #ifndef CONFIG_ARCH_MEMSET
-void *memset(void *s, int c, size_t n)
+FAR void *memset(FAR void *s, int c, size_t n)
 {
 #ifdef CONFIG_MEMSET_OPTSPEED
   /* This version is optimized for speed (you could do better
@@ -87,7 +87,7 @@ void *memset(void *s, int c, size_t n)
 
       if ((addr & 1) != 0)
         {
-          *(uint8_t*)addr = (uint8_t)c;
+          *(FAR uint8_t *)addr = (uint8_t)c;
           addr += 1;
           n    -= 1;
         }
@@ -102,7 +102,7 @@ void *memset(void *s, int c, size_t n)
 
           if ((addr & 3) != 0)
             {
-              *(uint16_t*)addr = val16;
+              *(FAR uint16_t *)addr = val16;
               addr += 2;
               n    -= 2;
             }
@@ -112,7 +112,7 @@ void *memset(void *s, int c, size_t n)
 
           while (n >= 4)
             {
-              *(uint32_t*)addr = val32;
+              *(FAR uint32_t *)addr = val32;
               addr += 4;
               n    -= 4;
             }
@@ -127,7 +127,7 @@ void *memset(void *s, int c, size_t n)
 
               if ((addr & 7) != 0)
                 {
-                  *(uint32_t*)addr = val32;
+                  *(FAR uint32_t *)addr = val32;
                   addr += 4;
                   n    -= 4;
                 }
@@ -136,7 +136,7 @@ void *memset(void *s, int c, size_t n)
 
               while (n >= 8)
                 {
-                  *(uint64_t*)addr = val64;
+                  *(FAR uint64_t *)addr = val64;
                   addr += 8;
                   n    -= 8;
                 }
@@ -151,7 +151,7 @@ void *memset(void *s, int c, size_t n)
 
       if (n >= 4)
         {
-          *(uint32_t*)addr = val32;
+          *(FAR uint32_t *)addr = val32;
           addr += 4;
           n    -= 4;
         }
@@ -167,20 +167,20 @@ void *memset(void *s, int c, size_t n)
 
       if (n >= 2)
         {
-          *(uint16_t*)addr = val16;
+          *(FAR uint16_t *)addr = val16;
           addr += 2;
           n    -= 2;
         }
 
       if (n >= 1)
         {
-          *(uint8_t*)addr = (uint8_t)c;
+          *(FAR uint8_t *)addr = (uint8_t)c;
         }
     }
 #else
   /* This version is optimized for size */
 
-  unsigned char *p = (unsigned char*)s;
+  FAR unsigned char *p = (FAR unsigned char*)s;
   while (n-- > 0) *p++ = c;
 #endif
   return s;

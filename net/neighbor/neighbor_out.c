@@ -67,7 +67,11 @@
 /* Support for broadcast address */
 
 static const struct ether_addr g_broadcast_ethaddr =
-  {{0xff, 0xff, 0xff, 0xff, 0xff, 0xff}};
+{
+  {
+    0xff, 0xff, 0xff, 0xff, 0xff, 0xff
+  }
+};
 
 /* Support for IGMP multicast addresses.
  *
@@ -86,7 +90,10 @@ static const struct ether_addr g_broadcast_ethaddr =
  */
 
 #ifdef CONFIG_NET_IGMP
-static const uint8_t g_multicast_ethaddr[3] = {0x01, 0x00, 0x5e};
+static const uint8_t g_multicast_ethaddr[3] =
+{
+  0x01, 0x00, 0x5e
+};
 #endif
 
 /****************************************************************************

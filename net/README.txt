@@ -14,6 +14,7 @@ Directory Structure
        +- icmpv6   - Internet Control Message Protocol (IPv6)
        +- iob      - I/O buffering logic
        +- local    - Unix domain (local) sockets
+       +- loopback - Local loopback
        +- neighbor - Neighbor Discovery Protocol (IPv6)
        +- netdev   - Socket network device interface
        +- pkt      - "Raw" packet socket support

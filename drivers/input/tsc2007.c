@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/input/tsc2007.c
  *
- *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -62,10 +62,11 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/arch.h>
 #include <nuttx/fs/fs.h>
-#include <nuttx/i2c.h>
+#include <nuttx/i2c/i2c_master.h>
 #include <nuttx/wqueue.h>
 
 #include <nuttx/input/touchscreen.h>
@@ -165,7 +166,7 @@ struct tsc2007_dev_s
   sem_t waitsem;                       /* Used to wait for the availability of data */
 
   FAR struct tsc2007_config_s *config; /* Board configuration data */
-  FAR struct i2c_dev_s *i2c;           /* Saved I2C driver instance */
+  FAR struct i2c_master_s *i2c;        /* Saved I2C driver instance */
   struct work_s work;                  /* Supports the interrupt handling "bottom half" */
   struct tsc2007_sample_s sample;      /* Last sampled touch point data */
 
@@ -299,7 +300,7 @@ static int tsc2007_sample(FAR struct tsc2007_dev_s *priv,
    * from changing until it has been reported.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Is there new TSC2007 sample data available? */
 
@@ -309,7 +310,7 @@ static int tsc2007_sample(FAR struct tsc2007_dev_s *priv,
        * sampled data.
        */
 
-      memcpy(sample, &priv->sample, sizeof(struct tsc2007_sample_s ));
+      memcpy(sample, &priv->sample, sizeof(struct tsc2007_sample_s));
 
       /* Now manage state transitions */
 
@@ -334,7 +335,7 @@ static int tsc2007_sample(FAR struct tsc2007_dev_s *priv,
       ret = OK;
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return ret;
 }
 
@@ -357,7 +358,7 @@ static int tsc2007_waitsample(FAR struct tsc2007_dev_s *priv,
    */
 
   sched_lock();
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Now release the semaphore that manages mutually exclusive access to
    * the device structure.  This may cause other tasks to become ready to
@@ -403,7 +404,7 @@ errout:
    * have pre-emption disabled.
    */
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   /* Restore pre-emption.  We might get suspended here but that is okay
    * because we already have our sample.  Note:  this means that if there
@@ -430,12 +431,13 @@ static int tsc2007_activate(FAR struct tsc2007_dev_s *priv, uint8_t cmd)
    * activation command (ACKed).
    */
 
-   data = TSC2007_SETUP;
+   data          = TSC2007_SETUP;
 
-   msg.addr   = priv->config->address; /* 7-bit address */
-   msg.flags  = 0;                     /* Write transaction, beginning with START */
-   msg.buffer = &data;                 /* Transfer from this address */
-   msg.length = 1;                     /* Send one byte following the address */
+   msg.frequency = priv->config->frequency;   /* I2C frequency */
+   msg.addr      = priv->config->address;     /* 7-bit address */
+   msg.flags     = 0;                         /* Write transaction, beginning with START */
+   msg.buffer    = &data;                     /* Transfer from this address */
+   msg.length    = 1;                         /* Send one byte following the address */
 
    /* Ignore errors from the setup command (because it is not ACKed) */
 
@@ -443,12 +445,13 @@ static int tsc2007_activate(FAR struct tsc2007_dev_s *priv, uint8_t cmd)
 
    /* Now activate the A/D converter */
 
-   data = cmd;
+   data          = cmd;
 
-   msg.addr   = priv->config->address; /* 7-bit address */
-   msg.flags  = 0;                     /* Write transaction, beginning with START */
-   msg.buffer = &data;                 /* Transfer from this address */
-   msg.length = 1;                     /* Send one byte following the address */
+   msg.frequency = priv->config->frequency;   /* I2C frequency */
+   msg.addr      = priv->config->address;     /* 7-bit address */
+   msg.flags     = 0;                         /* Write transaction, beginning with START */
+   msg.buffer    = &data;                     /* Transfer from this address */
+   msg.length    = 1;                         /* Send one byte following the address */
 
    ret = I2C_TRANSFER(priv->i2c, &msg, 1);
    if (ret < 0)
@@ -483,10 +486,11 @@ static int tsc2007_transfer(FAR struct tsc2007_dev_s *priv, uint8_t cmd)
    *  STOP condition...
    */
 
-   msg.addr   = priv->config->address; /* 7-bit address */
-   msg.flags  = 0;                     /* Write transaction, beginning with START */
-   msg.buffer = &cmd;                  /* Transfer from this address */
-   msg.length = 1;                     /* Send one byte following the address */
+   msg.frequency = priv->config->frequency;   /* I2C frequency */
+   msg.addr      = priv->config->address;     /* 7-bit address */
+   msg.flags     = 0;                         /* Write transaction, beginning with START */
+   msg.buffer    = &cmd;                      /* Transfer from this address */
+   msg.length    = 1;                         /* Send one byte following the address */
 
    ret = I2C_TRANSFER(priv->i2c, &msg, 1);
    if (ret < 0)
@@ -527,10 +531,11 @@ static int tsc2007_transfer(FAR struct tsc2007_dev_s *priv, uint8_t cmd)
    *  data byte has been received...
    */
 
-   msg.addr   = priv->config->address; /* 7-bit address */
-   msg.flags  = I2C_M_READ;            /* Read transaction, beginning with START */
-   msg.buffer = data12;                /* Transfer to this address */
-   msg.length = 2;                     /* Read two bytes following the address */
+   msg.frequency = priv->config->frequency;   /* I2C frequency */
+   msg.addr      = priv->config->address;     /* 7-bit address */
+   msg.flags     = I2C_M_READ;                /* Read transaction, beginning with START */
+   msg.buffer    = data12;                    /* Transfer to this address */
+   msg.length    = 2;                         /* Read two bytes following the address */
 
    ret = I2C_TRANSFER(priv->i2c, &msg, 1);
    if (ret < 0)
@@ -539,10 +544,10 @@ static int tsc2007_transfer(FAR struct tsc2007_dev_s *priv, uint8_t cmd)
        return ret;
      }
 
-   /* Get the MS 8 bits from the first byte and the remaining LS 4 bits from
-    * the second byte.  The valid range of data is then from 0 to 4095 with
-    * the LSB unit corresponding to Vref/4096.
-    */
+  /* Get the MS 8 bits from the first byte and the remaining LS 4 bits from
+   * the second byte.  The valid range of data is then from 0 to 4095 with
+   * the LSB unit corresponding to Vref/4096.
+   */
 
    ret = (unsigned int)data12[0] << 4 | (unsigned int)data12[1] >> 4;
    ivdbg("data: 0x%04x\n", ret);
@@ -971,8 +976,8 @@ static ssize_t tsc2007_read(FAR struct file *filep, FAR char *buffer, size_t len
 
   if (sample.contact == CONTACT_UP)
     {
-       /* Pen is now up.  Is the positional data valid?  This is important to
-        * know because the release will be sent to the window based on its
+      /* Pen is now up.  Is the positional data valid?  This is important to
+       * know because the release will be sent to the window based on its
        * last positional data.
        */
 
@@ -1068,7 +1073,7 @@ static int tsc2007_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         {
           FAR uint32_t *ptr = (FAR uint32_t *)((uintptr_t)arg);
           DEBUGASSERT(priv->config != NULL && ptr != NULL);
-          priv->config->frequency = I2C_SETFREQUENCY(priv->i2c, *ptr);
+          priv->config->frequency = *ptr;
         }
         break;
 
@@ -1210,7 +1215,7 @@ errout:
  *
  ****************************************************************************/
 
-int tsc2007_register(FAR struct i2c_dev_s *dev,
+int tsc2007_register(FAR struct i2c_master_s *dev,
                      FAR struct tsc2007_config_s *config, int minor)
 {
   FAR struct tsc2007_dev_s *priv;
@@ -1249,19 +1254,6 @@ int tsc2007_register(FAR struct i2c_dev_s *dev,
   priv->config = config;          /* Save the board configuration */
   sem_init(&priv->devsem,  0, 1); /* Initialize device structure semaphore */
   sem_init(&priv->waitsem, 0, 0); /* Initialize pen event wait semaphore */
-
-  /* Set the I2C frequency (saving the actual frequency) */
-
-  config->frequency = I2C_SETFREQUENCY(dev, config->frequency);
-
-  /* Set the I2C address and address size */
-
-  ret = I2C_SETADDRESS(dev, config->address, 7);
-  if (ret < 0)
-    {
-      idbg("I2C_SETADDRESS failed: %d\n", ret);
-      goto errout_with_priv;
-    }
 
   /* Make sure that interrupts are disabled */
 
@@ -1306,10 +1298,10 @@ int tsc2007_register(FAR struct i2c_dev_s *dev,
    */
 
 #ifdef CONFIG_TSC2007_MULTIPLE
-  flags         = irqsave();
+  flags         = enter_critical_section();
   priv->flink   = g_tsc2007list;
   g_tsc2007list = priv;
-  irqrestore(flags);
+  leave_critical_section(flags);
 #endif
 
   /* Schedule work to perform the initial sampling and to set the data

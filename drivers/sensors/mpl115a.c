@@ -86,7 +86,8 @@ static int mpl115a_getpressure(FAR struct mpl115a_dev_s *priv);
 
 static int     mpl115a_open(FAR struct file *filep);
 static int     mpl115a_close(FAR struct file *filep);
-static ssize_t mpl115a_read(FAR struct file *, FAR char *, size_t);
+static ssize_t mpl115a_read(FAR struct file *filep, FAR char *buffer,
+                            size_t buflen);
 static ssize_t mpl115a_write(FAR struct file *filep, FAR const char *buffer, size_t buflen);
 
 /****************************************************************************
@@ -111,16 +112,15 @@ static const struct file_operations g_mpl115afops =
  * Private Functions
  ****************************************************************************/
 
-#ifndef CONFIG_SPI_OWNBUS
 static inline void mpl115a_configspi(FAR struct spi_dev_s *spi)
 {
   /* Configure SPI for the MPL115A */
 
   SPI_SETMODE(spi, SPIDEV_MODE0);
   SPI_SETBITS(spi, 8);
-  SPI_SETFREQUENCY(spi, MPL115A_SPI_MAXFREQUENCY);
+  (void)SPI_HWFEATURES(spi, 0);
+  (void)SPI_SETFREQUENCY(spi, MPL115A_SPI_MAXFREQUENCY);
 }
-#endif
 
 /****************************************************************************
  * Name: mpl115a_getreg8
@@ -136,10 +136,8 @@ static uint8_t mpl115a_getreg8(FAR struct mpl115a_dev_s *priv, uint8_t regaddr)
 
   /* If SPI bus is shared then lock and configure it */
 
-#ifndef CONFIG_SPI_OWNBUS
   (void)SPI_LOCK(priv->spi, true);
   mpl115a_configspi(priv->spi);
-#endif
 
   /* Select the MPL115A */
 
@@ -156,9 +154,7 @@ static uint8_t mpl115a_getreg8(FAR struct mpl115a_dev_s *priv, uint8_t regaddr)
 
   /* Unlock bus */
 
-#ifndef CONFIG_SPI_OWNBUS
   (void)SPI_LOCK(priv->spi, false);
-#endif
 
 #ifdef CONFIG_MPL115A_REGDEBUG
   dbg("%02x->%02x\n", regaddr, regval);
@@ -212,8 +208,6 @@ static void mpl115a_updatecaldata(FAR struct mpl115a_dev_s *priv)
 
 static void mpl115a_read_press_temp(FAR struct mpl115a_dev_s *priv)
 {
-  uint16_t pressure;
-
   /* Start a new conversion */
 
   mpl115a_getreg8(priv, (MPL115A_CONVERT << 1));
@@ -251,8 +245,8 @@ static int mpl115a_getpressure(FAR struct mpl115a_dev_s *priv)
 
   /* Check if coefficient data were read correctly */
 
-  if ( (priv->mpl115a_cal_a0 == 0) || (priv->mpl115a_cal_b1 == 0) ||
-       (priv->mpl115a_cal_b2 == 0) || (priv->mpl115a_cal_c12 == 0) )
+  if ((priv->mpl115a_cal_a0 == 0) || (priv->mpl115a_cal_b1 == 0) ||
+      (priv->mpl115a_cal_b2 == 0) || (priv->mpl115a_cal_c12 == 0))
     {
       mpl115a_updatecaldata(priv);
     }
@@ -326,7 +320,7 @@ static ssize_t mpl115a_read(FAR struct file *filep, FAR char *buffer, size_t buf
       return -1;
     }
 
-  if ( buflen != 2)
+  if (buflen != 2)
     {
       sndbg("You can't read something other than 16 bits (2 bytes)\n");
       return -1;

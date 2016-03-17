@@ -1,7 +1,7 @@
 /****************************************************************************
  * syscall/syscall_lookup.h
  *
- *   Copyright (C) 2011, 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -104,6 +104,15 @@ SYSCALL_LOOKUP(up_assert,                 2, STUB_up_assert)
   SYSCALL_LOOKUP(wait,                    1, STUB_wait)
   SYSCALL_LOOKUP(waitid,                  4, STUB_waitid)
 #  endif
+#endif
+
+/* The following can only be defined if we are configured to load
+ * OS modules from a file system.
+ */
+
+#ifdef CONFIG_MODULE
+  SYSCALL_LOOKUP(insmod,                  2, STUB_insmod)
+  SYSCALL_LOOKUP(rmmod,                   1, STUB_rmmod)
 #endif
 
 /* The following can only be defined if we are configured to execute
@@ -269,6 +278,10 @@ SYSCALL_LOOKUP(up_assert,                 2, STUB_up_assert)
   SYSCALL_LOOKUP(pthread_setschedprio,    2, STUB_pthread_setschedprio)
   SYSCALL_LOOKUP(pthread_setspecific,     2, STUB_pthread_setspecific)
   SYSCALL_LOOKUP(pthread_yield,           0, STUB_pthread_yield)
+#  ifdef CONFIG_SMP
+  SYSCALL_LOOKUP(pthread_setaffinity,     3, STUB_pthread_setaffinity)
+  SYSCALL_LOOKUP(pthread_getaffinity,     3, STUB_pthread_getaffinity)
+#  endif
 #  ifndef CONFIG_DISABLE_SIGNALS
   SYSCALL_LOOKUP(pthread_cond_timedwait,  3, STUB_pthread_cond_timedwait)
   SYSCALL_LOOKUP(pthread_kill,            2, STUB_pthread_kill)

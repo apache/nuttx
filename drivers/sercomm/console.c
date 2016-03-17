@@ -35,7 +35,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- **************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/arch.h>
@@ -48,16 +48,6 @@
 
 #include "uart.h"
 #include <nuttx/sercomm/sercomm.h>
-
-/* stubs to make serial driver happy */
-
-void sercomm_recvchars(void *a) { }
-void sercomm_xmitchars(void *a) { }
-
-/* Stubs to make memory allocator happy */
-
-void cons_puts(void *foo){}
-void delay_ms(int ms){}
 
 /************************************************************************************
  * Fileops Prototypes and Structures
@@ -102,7 +92,8 @@ static void recv_cb(uint8_t dlci, struct msgb *msg)
  * Fileops
  ****************************************************************************/
 
-/* XXX: recvmsg is overwritten when multiple msg arrive! */
+/* REVISIT: recvmsg is overwritten when multiple msg arrive! */
+
 static ssize_t sc_console_read(file_t *filep, FAR char *buffer, size_t buflen)
 {
   size_t len;
@@ -130,7 +121,7 @@ static ssize_t sc_console_read(file_t *filep, FAR char *buffer, size_t buflen)
   return len;
 }
 
-/* XXX: redirect to old Osmocom-BB comm/sercomm_cons.c -> 2 buffers */
+/* REVISIT: redirect to old Osmocom-BB comm/sercomm_cons.c -> 2 buffers */
 
 extern int sercomm_puts(const char *s);
 
@@ -180,7 +171,7 @@ static int sc_console_ioctl(struct file *filep, int cmd, unsigned long arg)
 
 int sercomm_register(FAR const char *path, FAR uart_dev_t *dev)
 {
-  /* XXX: initialize MODEMUART to be used for sercomm*/
+  /* REVISIT: initialize MODEMUART to be used for sercomm */
 
   uart_init(SERCOMM_UART_NR, 1);
   uart_baudrate(SERCOMM_UART_NR, UART_115200);
@@ -198,4 +189,24 @@ int sercomm_register(FAR const char *path, FAR uart_dev_t *dev)
 
   dbg("Registering %s\n", path);
   return register_driver(path, &g_sercom_console_ops, 0666, NULL);
+}
+
+/* Stubs to make serial driver happy */
+
+void sercomm_recvchars(void *a)
+{
+}
+
+void sercomm_xmitchars(void *a)
+{
+}
+
+/* Stubs to make memory allocator happy */
+
+void cons_puts(void *foo)
+{
+}
+
+void delay_ms(int ms)
+{
 }

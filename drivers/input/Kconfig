@@ -322,6 +322,49 @@ config STMPE811_REGDEBUG
 
 endif # INPUT_STMPE811
 
+config BUTTONS
+	bool "Button Inputs"
+	default n
+	---help---
+		Enable standard button upper half driver.
+
+if BUTTONS
+
+config BUTTONS_LOWER
+	bool "Generic Lower Half Button Dirver"
+	default n
+	depends on ARCH_BUTTONS && ARCH_IRQBUTTONS
+	---help---
+		If the board supports the standard button interfaces as
+		defined in include/nuttx/board.h header file, then this
+		standard button lower half driver might be usable.
+
+		In order for this generic driver to be usable:
+
+		1. The board implementation must provide the button
+		   interfaces as defined in include/nuttx/board.h
+		2. The board implementation must support interrupts for each
+		  button.
+		3. The board.h header file must provide the definition
+		   NUM_BUTTONS, and
+		4. The board.h header file must not include any other
+		   header files that are not accessibble in this context
+		   (such as those in arch/<arch>/src/<chip>) UNLESS those
+		   inclusions are conditioned on __KERNEL__.  button_lower.c
+		   will undefine __KERNEL__ before included board.h.
+
+		If your board does not meet these requirements, then the
+		button_lower.c file can still be copied to your your
+		board src/ directory and modified for your specific board
+		requirements.
+
+config BUTTONS_NPOLLWAITERS
+	int "Max Number of Poll Waiters"
+	default 2
+	depends on !DISABLE_POLL
+
+endif # BUTTONS
+
 config DJOYSTICK
 	bool "Discrete Joystick"
 	default n

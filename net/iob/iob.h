@@ -46,13 +46,7 @@
 
 #include <nuttx/net/iob.h>
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
+#ifdef CONFIG_NET_IOB
 
 /****************************************************************************
  * Public Data
@@ -77,10 +71,6 @@ extern sem_t g_throttle_sem;  /* Counts available I/O buffers when throttled */
 #if CONFIG_IOB_NCHAINS > 0
 extern sem_t g_qentry_sem;    /* Counts free I/O buffer queue containers */
 #endif
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
 
 /****************************************************************************
  * Public Function Prototypes
@@ -132,4 +122,5 @@ FAR struct iob_s *iob_tryalloc(bool throttled);
 
 FAR struct iob_qentry_s *iob_free_qentry(FAR struct iob_qentry_s *iobq);
 
+#endif /* CONFIG_NET_IOB */
 #endif /* __NET_IOB_IOB_H */

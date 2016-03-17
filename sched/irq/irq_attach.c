@@ -52,11 +52,11 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Global Variables
+ * Public Data
  ****************************************************************************/
 
 /****************************************************************************
- * Private Variables
+ * Private Data
  ****************************************************************************/
 
 /****************************************************************************
@@ -83,14 +83,14 @@ int irq_attach(int irq, xcpt_t isr)
 
   if ((unsigned)irq < NR_IRQS)
     {
-      irqstate_t state;
+      irqstate_t flags;
 
       /* If the new ISR is NULL, then the ISR is being detached.
        * In this case, disable the ISR and direct any interrupts
        * to the unexpected interrupt handler.
        */
 
-      state = irqsave();
+      flags = enter_critical_section();
       if (isr == NULL)
         {
           /* Disable the interrupt if we can before detaching it.  We might
@@ -116,7 +116,7 @@ int irq_attach(int irq, xcpt_t isr)
       /* Save the new ISR in the table. */
 
       g_irqvector[irq] = isr;
-      irqrestore(state);
+      leave_critical_section(flags);
       ret = OK;
     }
 

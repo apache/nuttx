@@ -48,6 +48,7 @@
 #include <stdbool.h>
 #include <elf32.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/binfmt/binfmt.h>
 
 /****************************************************************************
@@ -86,7 +87,7 @@
  * Public Types
  ****************************************************************************/
 
-/* This struct provides a desciption of the currently loaded instantiation
+/* This struct provides a description of the currently loaded instantiation
  * of an ELF binary.
  */
 
@@ -270,96 +271,6 @@ int elf_initialize(void);
  ****************************************************************************/
 
 void elf_uninitialize(void);
-
-/****************************************************************************
- * These are APIs must be provided by architecture-specific logic.
- * (These really belong in include/nuttx/arch.h):
- ****************************************************************************/
-/****************************************************************************
- * Name: up_checkarch
- *
- * Description:
- *   Given the ELF header in 'hdr', verify that the ELF file is appropriate
- *   for the current, configured architecture.  Every architecture that uses
- *   the ELF loader must provide this function.
- *
- * Input Parameters:
- *   hdr - The ELF header read from the ELF file.
- *
- * Returned Value:
- *   True if the architecture supports this ELF file.
- *
- ****************************************************************************/
-
-bool up_checkarch(FAR const Elf32_Ehdr *hdr);
-
-/****************************************************************************
- * Name: up_relocate and up_relocateadd
- *
- * Description:
- *   Perform on architecture-specific ELF relocation.  Every architecture
- *   that uses the ELF loader must provide this function.
- *
- * Input Parameters:
- *   rel - The relocation type
- *   sym - The ELF symbol structure containing the fully resolved value.
- *         There are a few relocation types for a few architectures that do
- *         not require symbol information.  For those, this value will be
- *         NULL.  Implementations of these functions must be able to handle
- *         that case.
- *   addr - The address that requires the relocation.
- *
- * Returned Value:
- *   Zero (OK) if the relocation was successful.  Otherwise, a negated errno
- *   value indicating the cause of the relocation failure.
- *
- ****************************************************************************/
-
-int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
-                uintptr_t addr);
-int up_relocateadd(FAR const Elf32_Rela *rel,
-                   FAR const Elf32_Sym *sym, uintptr_t addr);
-
-#ifdef CONFIG_UCLIBCXX_EXCEPTION
-/****************************************************************************
- * Name: up_init_exidx
- *
- * Description:
- *   Load the boundaries of the Exception Index ELF section in order to
- *   support exception handling for loaded ELF modules.
- *
- * Input Parameters:
- *   address - The ELF section address for the Exception Index
- *   size    - The size of the ELF section.
- *
- * Returned Value:
- *   Always returns Zero (OK).
- *
- ****************************************************************************/
-int up_init_exidx(Elf32_Addr address, Elf32_Word size);
-#endif
-
-/****************************************************************************
- * Name: up_coherent_dcache
- *
- * Description:
- *   Ensure that the I and D caches are coherent within specified region
- *   by cleaning the D cache (i.e., flushing the D cache contents to memory
- *   and invalidating the I cache. This is typically used when code has been
- *   written to a memory region, and will be executed.
- *
- * Input Parameters:
- *   addr - virtual start address of region
- *   len  - Size of the address region in bytes
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-#ifdef CONFIG_ARCH_HAVE_COHERENT_DCACHE
-void up_coherent_dcache(uintptr_t addr, size_t len);
-#endif
 
 #undef EXTERN
 #if defined(__cplusplus)

@@ -53,7 +53,7 @@ config SMARTFS_MULTI_ROOT_DIRS
 		Default: y.
 
 config SMARTFS_ALIGNED_ACCESS
-	bool "Ensure 16 and 32 bit accesses are alined"
+	bool "Ensure 16 and 32 bit accesses are aligned"
 	default n
 	---help---
 		Performs little endian byte accesses to 16 and 32 values

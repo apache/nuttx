@@ -53,7 +53,7 @@
  * Private Functions
  ****************************************************************************/
 
- static inline char *getfilepath(const char *name)
+static inline char *getfilepath(const char *name)
 {
   snprintf(line, PATH_MAX, "%s/" DEFCONFIG, name);
   line[PATH_MAX] = '\0';
@@ -209,6 +209,10 @@ int main(int argc, char **argv, char **envp)
   printf("/* If the maximum message size is zero, then we assume that message queues\n");
   printf(" * support should be disabled\n");
   printf(" */\n\n");
+  printf("#if !defined(CONFIG_MQ_MAXMSGSIZE) || defined(CONFIG_DISABLE_MQUEUE)\n");
+  printf("# undef CONFIG_MQ_MAXMSGSIZE\n");
+  printf("# define CONFIG_MQ_MAXMSGSIZE 0\n");
+  printf("#endif\n\n");
   printf("#if CONFIG_MQ_MAXMSGSIZE <= 0 && !defined(CONFIG_DISABLE_MQUEUE)\n");
   printf("# define CONFIG_DISABLE_MQUEUE 1\n");
   printf("#endif\n\n");

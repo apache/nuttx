@@ -96,7 +96,6 @@
  */
 
 #define TUN_WDDELAY   (1*CLK_TCK)
-#define TUN_POLLHSEC  (1*2)
 
 /****************************************************************************
  * Private Types
@@ -182,7 +181,7 @@ static void tun_ipv6multicast(FAR struct tun_device_s *priv);
 #endif
 
 static int tun_dev_init(FAR struct tun_device_s *priv,
-                        FAR struct file *filep, FAR const char* devfmt);
+                        FAR struct file *filep, FAR const char *devfmt);
 static int tun_dev_uninit(FAR struct tun_device_s *priv);
 
 /* File interface */
@@ -296,7 +295,6 @@ static void tun_pollnotify(FAR struct tun_device_s *priv, pollevent_t eventset)
   if (eventset != 0)
     {
       fds->revents |= eventset;
-      //fvdbg("Report events: %02x\n", fds->revents);
       sem_post(fds->sem);
     }
 }
@@ -326,6 +324,8 @@ static void tun_pollnotify(FAR struct tun_device_s *priv, pollevent_t eventset)
 
 static int tun_transmit(FAR struct tun_device_s *priv)
 {
+  NETDEV_TXPACKETS(&priv->dev);
+
   /* Verify that the hardware is ready to send another packet.  If we get
    * here, then we are committed to sending a packet; Higher level logic
    * must have assured that there is no transmission in progress.
@@ -378,6 +378,7 @@ static int tun_txpoll(struct net_driver_s *dev)
     {
       /* Send the packet */
 
+      priv->read_d_len = priv->dev.d_len;
       tun_transmit(priv);
 
       return 1;
@@ -413,6 +414,8 @@ static void tun_receive(FAR struct tun_device_s *priv)
    * data in priv->dev.d_len
    */
 
+  NETDEV_RXPACKETS(&priv->dev);
+
 #ifdef CONFIG_NET_PKT
   /* When packet sockets are enabled, feed the frame into the packet tap */
 
@@ -421,68 +424,54 @@ static void tun_receive(FAR struct tun_device_s *priv)
 
   /* We only accept IP packets of the configured type and ARP packets */
 
-#ifdef CONFIG_NET_IPv4
+#if defined(CONFIG_NET_IPv4)
+  nllvdbg("IPv4 frame\n");
+  NETDEV_RXIPV4(&priv->dev);
+
+  /* Give the IPv4 packet to the network layer */
+
+  ipv4_input(&priv->dev);
+
+  /* If the above function invocation resulted in data that should be
+   * sent out on the network, the field  d_len will set to a value > 0.
+   */
+
+  if (priv->dev.d_len > 0)
     {
-      nllvdbg("IPv4 frame\n");
-
-      /* Give the IPv4 packet to the network layer */
-
-      ipv4_input(&priv->dev);
-
-      /* If the above function invocation resulted in data that should be
-       * sent out on the network, the field  d_len will set to a value > 0.
-       */
-
-      if (priv->dev.d_len > 0)
-        {
-          priv->write_d_len = priv->dev.d_len;
-          tun_transmit(priv);
-        }
-      else
-        {
-          priv->write_d_len = 0;
-          tun_pollnotify(priv, POLLOUT);
-        }
+      priv->write_d_len = priv->dev.d_len;
+      tun_transmit(priv);
     }
-#endif
-
-#if 0
-#ifdef CONFIG_NET_IPv6
-  if (BUF->type == HTONS(ETHTYPE_IP6))
+  else
     {
-      nllvdbg("Iv6 frame\n");
-
-      /* Give the IPv6 packet to the network layer */
-
-      ipv6_input(&priv->dev);
-
-      /* If the above function invocation resulted in data that should be
-        * sent out on the network, the field  d_len will set to a value > 0.
-        */
-
-      if (priv->dev.d_len > 0)
-        {
-          /* Update the Ethernet header with the correct MAC address */
-
-#ifdef CONFIG_NET_IPv4
-          if (IFF_IS_IPv4(priv->dev.d_flags))
-            {
-              arp_out(&priv->dev);
-            }
-          else
-#endif
-#ifdef CONFIG_NET_IPv6
-            {
-              neighbor_out(&priv->dev);
-            }
-#endif
-
-          /* And send the packet */
-
-          tun_transmit(priv);
-        }
+      priv->write_d_len = 0;
+      tun_pollnotify(priv, POLLOUT);
     }
-#endif
+
+#elif defined(CONFIG_NET_IPv6)
+  nllvdbg("Iv6 frame\n");
+  NETDEV_RXIPV6(&priv->dev);
+
+  /* Give the IPv6 packet to the network layer */
+
+  ipv6_input(&priv->dev);
+
+  /* If the above function invocation resulted in data that should be
+   * sent out on the network, the field  d_len will set to a value > 0.
+   */
+
+  if (priv->dev.d_len > 0)
+    {
+      priv->write_d_len = priv->dev.d_len;
+      tun_transmit(priv);
+    }
+  else
+    {
+      priv->write_d_len = 0;
+      tun_pollnotify(priv, POLLOUT);
+    }
+
+#else
+  NETDEV_RXDROPPED(&priv->dev);
 #endif
 }
 
@@ -507,11 +496,12 @@ static void tun_txdone(FAR struct tun_device_s *priv)
 {
   /* Check for errors and update statistics */
 
+  NETDEV_TXDONE(&priv->dev);
+
   /* Then poll uIP for new XMIT data */
 
   priv->dev.d_buf = priv->read_buf;
   (void)devif_poll(&priv->dev, tun_txpoll);
-  priv->read_d_len = priv->dev.d_len;
 }
 
 /****************************************************************************
@@ -537,14 +527,13 @@ static void tun_poll_process(FAR struct tun_device_s *priv)
    * the TX poll if he are unable to accept another packet for transmission.
    */
 
-  /* If so, update TCP timing states and poll uIP for new XMIT data. Hmmm..
-   * might be bug here.  Does this mean if there is a transmit in progress,
-   * we will missing TCP time state updates?
-   */
+  if (priv->read_d_len == 0)
+    {
+      /* If so, poll uIP for new XMIT data. */
 
-  priv->dev.d_buf = priv->read_buf;
-  (void)devif_timer(&priv->dev, tun_txpoll, TUN_POLLHSEC);
-  priv->read_d_len = priv->dev.d_len;
+      priv->dev.d_buf = priv->read_buf;
+      (void)devif_timer(&priv->dev, tun_txpoll);
+    }
 
   /* Setup the watchdog poll timer again */
 
@@ -576,9 +565,13 @@ static void tun_poll_work(FAR void *arg)
 
   /* Perform the poll */
 
+  tun_lock(priv);
   state = net_lock();
+
   tun_poll_process(priv);
+
   net_unlock(state);
+  tun_unlock(priv);
 }
 #endif
 
@@ -757,7 +750,6 @@ static int tun_txavail(struct net_driver_s *dev)
 
       priv->dev.d_buf = priv->read_buf;
       (void)devif_poll(&priv->dev, tun_txpoll);
-      priv->read_d_len = priv->dev.d_len;
     }
 
   net_unlock(state);
@@ -787,8 +779,6 @@ static int tun_txavail(struct net_driver_s *dev)
 #if defined(CONFIG_NET_IGMP) || defined(CONFIG_NET_ICMPv6)
 static int tun_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 {
-  //FAR struct tun_device_s *priv = (FAR struct tun_device_s *)dev->d_private;
-
   /* Add the MAC address to the hardware multicast routing table */
 
   return OK;
@@ -816,8 +806,6 @@ static int tun_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 #ifdef CONFIG_NET_IGMP
 static int tun_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 {
-  //FAR struct tun_device_s *priv = (FAR struct tun_device_s *)dev->d_private;
-
   /* Add the MAC address to the hardware multicast routing table */
 
   return OK;
@@ -862,7 +850,7 @@ static void tun_ipv6multicast(FAR struct tun_device_s *priv)
  ****************************************************************************/
 
 static int tun_dev_init(FAR struct tun_device_s *priv, FAR struct file *filep,
-                        FAR const char* devfmt)
+                        FAR const char *devfmt)
 {
   int ret;
 
@@ -876,7 +864,7 @@ static int tun_dev_init(FAR struct tun_device_s *priv, FAR struct file *filep,
   priv->dev.d_addmac  = tun_addmac;   /* Add multicast MAC address */
   priv->dev.d_rmmac   = tun_rmmac;    /* Remove multicast MAC address */
 #endif
-  priv->dev.d_private = (void*)priv;   /* Used to recover private state from dev */
+  priv->dev.d_private = (FAR void *)priv; /* Used to recover private state from dev */
 
   /* Initialize the wait semaphore */
 
@@ -1110,7 +1098,7 @@ int tun_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
   FAR struct tun_device_s *priv = filep->f_priv;
   pollevent_t eventset;
   int ret = OK;
-  
+
   if (!priv)
     {
       return -EINVAL;
@@ -1176,8 +1164,8 @@ errout:
 
 static int tun_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
-  FAR struct inode *inode      = filep->f_inode;
-  FAR struct tun_driver_s *tun = inode->i_private;
+  FAR struct inode *inode       = filep->f_inode;
+  FAR struct tun_driver_s *tun  = inode->i_private;
   FAR struct tun_device_s *priv = filep->f_priv;
   int ret = OK;
 
@@ -1185,9 +1173,9 @@ static int tun_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
     {
       uint8_t free_tuns;
       int intf;
-      FAR struct ifreq *ifr = (FAR struct ifreq*)arg;
+      FAR struct ifreq *ifr = (FAR struct ifreq *)arg;
 
-      if (!ifr || ifr->ifr_flags != IFF_TUN)
+      if (!ifr || (ifr->ifr_flags & IFF_MASK) != IFF_TUN)
         {
           return -EINVAL;
         }
@@ -1218,7 +1206,6 @@ static int tun_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       priv = filep->f_priv;
       strncpy(ifr->ifr_name, priv->dev.d_ifname, IFNAMSIZ);
-      lldbg("--- %s\n", priv->dev.d_ifname);
 
       tundev_unlock(tun);
 

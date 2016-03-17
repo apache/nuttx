@@ -1,4 +1,4 @@
-/*****************************************************************************
+/****************************************************************************
 *
 *  spi_version.h  - CC3000 Host Driver Implementation.
 *  Copyright (C) 2011 Texas Instruments Incorporated - http://www.ti.com/

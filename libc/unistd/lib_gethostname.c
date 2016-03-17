@@ -2,7 +2,7 @@
  * libc/unistd/lib_gethostname.c
  *
  *   Copyright (C) 2015 Stavros Polymenis. All rights reserved.
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2016 Gregory Nutt. All rights reserved.
  *   Author: Stavros Polymenis <sp@orbitalfox.com>
  *           Gregory Nutt <gnutt@nuttx.org>
  *
@@ -45,7 +45,7 @@
 #include <string.h>
 #include <unistd.h>
 
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 
 /* This file is only compiled if network support is enabled */
 
@@ -119,9 +119,9 @@ int gethostname(FAR char *name, size_t namelen)
    * that it could change while we are copying it.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   strncpy(name, g_hostname, namelen);
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   return 0;
 

@@ -1,7 +1,7 @@
 /********************************************************************************
  * include/pthread.h
  *
- *   Copyright (C) 2007-2009, 2011-2012, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2012, 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,7 +50,7 @@
 #include <stdbool.h>        /* C99 boolean types */
 #include <unistd.h>         /* For getpid */
 #include <semaphore.h>      /* Needed for sem_t */
-#include <signal.h>         /* Needed for sigset_t */
+#include <signal.h>         /* Needed for sigset_t, includes this file */
 #include <time.h>           /* Needed for struct timespec */
 
 /********************************************************************************
@@ -158,8 +158,11 @@ extern "C"
 
 /* pthread-specific types */
 
-typedef int             pthread_key_t;
-typedef FAR void       *pthread_addr_t;
+typedef int pthread_key_t;
+#define __PTHREAD_KEY_T_DEFINED 1
+
+typedef FAR void *pthread_addr_t;
+#define __PTHREAD_ADDR_T_DEFINED 1
 
 typedef pthread_addr_t (*pthread_startroutine_t)(pthread_addr_t);
 typedef pthread_startroutine_t pthread_func_t;
@@ -175,6 +178,10 @@ struct pthread_attr_s
   uint8_t max_repl;            /* Maximum pending replenishments */
 #endif
 
+#ifdef CONFIG_SMP
+  cpu_set_t affinity;          /* Set of permitted CPUs for the thread */
+#endif
+
   size_t stacksize;            /* Size of the stack allocated for the pthread */
 
 #ifdef CONFIG_SCHED_SPORADIC
@@ -182,17 +189,24 @@ struct pthread_attr_s
   struct timespec budget;      /* Initial budget */
 #endif
 };
+
 typedef struct pthread_attr_s pthread_attr_t;
+#define __PTHREAD_ATTR_T_DEFINED 1
 
 typedef pid_t pthread_t;
+#define __PTHREAD_T_DEFINED 1
 
 typedef int pthread_condattr_t;
+#define __PTHREAD_CONDATTR_T_DEFINED 1
 
 struct pthread_cond_s
 {
   sem_t sem;
 };
+
 typedef struct pthread_cond_s pthread_cond_t;
+#define __PTHREAD_COND_T_DEFINED 1
+
 #define PTHREAD_COND_INITIALIZER {SEM_INITIALIZER(0)}
 
 struct pthread_mutexattr_s
@@ -202,7 +216,9 @@ struct pthread_mutexattr_s
   uint8_t type;     /* Type of the mutex.  See PTHREAD_MUTEX_* definitions */
 #endif
 };
+
 typedef struct pthread_mutexattr_s pthread_mutexattr_t;
+#define __PTHREAD_MUTEXATTR_T_DEFINED 1
 
 struct pthread_mutex_s
 {
@@ -213,7 +229,9 @@ struct pthread_mutex_s
   int   nlocks;   /* The number of recursive locks held */
 #endif
 };
+
 typedef struct pthread_mutex_s pthread_mutex_t;
+#define __PTHREAD_MUTEX_T_DEFINED 1
 
 #ifdef CONFIG_MUTEX_TYPES
 #  define PTHREAD_MUTEX_INITIALIZER {-1, SEM_INITIALIZER(1), PTHREAD_MUTEX_DEFAULT, 0}
@@ -225,24 +243,25 @@ struct pthread_barrierattr_s
 {
   int pshared;
 };
+
 typedef struct pthread_barrierattr_s pthread_barrierattr_t;
+#define __PTHREAD_BARRIERATTR_T_DEFINED 1
 
 struct pthread_barrier_s
 {
   sem_t        sem;
   unsigned int count;
 };
+
 typedef struct pthread_barrier_s pthread_barrier_t;
+#define __PTHREAD_BARRIER_T_DEFINED 1
 
 typedef bool pthread_once_t;
+#define __PTHREAD_ONCE_T_DEFINED 1
 
-/* Forware references */
+/* Forward references */
 
 struct sched_param; /* Defined in sched.h */
-
-/********************************************************************************
- * Public Data
- ********************************************************************************/
 
 /********************************************************************************
  * Public Function Prototypes
@@ -270,6 +289,16 @@ int pthread_attr_setinheritsched(FAR pthread_attr_t *attr,
                                  int inheritsched);
 int pthread_attr_getinheritsched(FAR const pthread_attr_t *attr,
                                  FAR int *inheritsched);
+
+#ifdef CONFIG_SMP
+/* Set or obtain thread affinity attributes */
+
+int pthread_attr_setaffinity_np(FAR pthread_attr_t *attr,
+                                size_t cpusetsize,
+                                FAR const cpu_set_t *cpuset);
+int pthread_attr_getaffinity_np(FAR const pthread_attr_t *attr,
+                                size_t cpusetsize, cpu_set_t *cpuset);
+#endif
 
 /* Set or obtain the default stack size */
 
@@ -326,6 +355,15 @@ int pthread_getschedparam(pthread_t thread, FAR int *policy,
 int pthread_setschedparam(pthread_t thread, int policy,
                           FAR const struct sched_param *param);
 int pthread_setschedprio(pthread_t thread, int prio);
+
+#ifdef CONFIG_SMP
+/* Thread affinity */
+
+int pthread_setaffinity_np(pthread_t thread, size_t cpusetsize,
+                           FAR const cpu_set_t *cpuset);
+int pthread_getaffinity_np(pthread_t thread, size_t cpusetsize,
+                           FAR cpu_set_t *cpuset);
+#endif
 
 /* Thread-specific Data Interfaces */
 
@@ -411,6 +449,80 @@ int pthread_sigmask(int how, FAR const sigset_t *set, FAR sigset_t *oset);
 
 #ifdef __cplusplus
 }
+#endif
+
+/********************************************************************************
+ * Minimal Type Definitions
+ ********************************************************************************/
+
+#else /* __INCLUDE_PTHREAD_H */
+
+#include <sys/types.h>
+#include <stdbool.h>
+
+/* Avoid circular dependencies by assuring that simple type definitions are
+ * available in any inclusion ordering.
+ */
+
+#ifndef __PTHREAD_KEY_T_DEFINED
+typedef int pthread_key_t;
+#  define __PTHREAD_KEY_T_DEFINED 1
+#endif
+
+#ifndef __PTHREAD_ADDR_T_DEFINED
+typedef FAR void *pthread_addr_t;
+#  define __PTHREAD_ADDR_T_DEFINED 1
+#endif
+
+#ifndef __PTHREAD_ATTR_T_DEFINED
+struct pthread_attr_s;
+typedef struct pthread_attr_s pthread_attr_t;
+#  define __PTHREAD_ATTR_T_DEFINED 1
+#endif
+
+#ifndef __PTHREAD_T_DEFINED
+typedef pid_t pthread_t;
+#  define __PTHREAD_T_DEFINED 1
+#endif
+
+#ifndef __PTHREAD_CONDATTR_T_DEFINED
+typedef int pthread_condattr_t;
+#  define __PTHREAD_CONDATTR_T_DEFINED 1
+#endif
+
+#ifndef __PTHREAD_COND_T_DEFINED
+struct pthread_cond_s;
+typedef struct pthread_cond_s pthread_cond_t;
+#  define __PTHREAD_COND_T_DEFINED 1
+#endif
+
+#ifndef __PTHREAD_MUTEXATTR_T_DEFINED
+struct pthread_mutexattr_s;
+typedef struct pthread_mutexattr_s pthread_mutexattr_t;
+#  define __PTHREAD_MUTEXATTR_T_DEFINED 1
+#endif
+
+#ifndef __PTHREAD_MUTEX_T_DEFINED
+struct pthread_mutex_s;
+typedef struct pthread_mutex_s pthread_mutex_t;
+#  define __PTHREAD_MUTEX_T_DEFINED 1
+#endif
+
+#ifndef __PTHREAD_BARRIERATTR_T_DEFINED
+struct pthread_barrierattr_s;
+typedef struct pthread_barrierattr_s pthread_barrierattr_t;
+#  define __PTHREAD_BARRIERATTR_T_DEFINED 1
+#endif
+
+#ifndef __PTHREAD_BARRIER_T_DEFINED
+struct pthread_barrier_s;
+typedef struct pthread_barrier_s pthread_barrier_t;
+#  define __PTHREAD_BARRIER_T_DEFINED 1
+#endif
+
+#ifndef __PTHREAD_ONCE_T_DEFINED
+typedef bool pthread_once_t;
+#  define __PTHREAD_ONCE_T_DEFINED 1
 #endif
 
 #endif /* __INCLUDE_PTHREAD_H */

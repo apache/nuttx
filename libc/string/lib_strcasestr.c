@@ -57,7 +57,7 @@ static FAR char *strcasechr(FAR const char *s, int uc)
           ch = *s;
           if (toupper(ch) == uc)
             {
-              return (FAR char*)s;
+              return (FAR char *)s;
             }
         }
     }
@@ -66,14 +66,14 @@ static FAR char *strcasechr(FAR const char *s, int uc)
 }
 
 /****************************************************************************
- * Global Functions
+ * Public Functions
  ****************************************************************************/
 
 FAR char *strcasestr(FAR const char *str, FAR const char *substr)
 {
-  const char *candidate;  /* Candidate in str with matching start character */
-  char         ch;        /* First character of the substring */
-  int          len;       /* The length of the substring */
+  FAR const char *candidate; /* Candidate in str with matching start character */
+  char ch;                   /* First character of the substring */
+  int len;                   /* The length of the substring */
 
   /* Special case the empty substring */
 
@@ -86,7 +86,7 @@ FAR char *strcasestr(FAR const char *str, FAR const char *substr)
        * the string
        */
 
-      return (char*)str;
+      return (FAR char *)str;
     }
 
   /* Search for the substring */
@@ -94,7 +94,7 @@ FAR char *strcasestr(FAR const char *str, FAR const char *substr)
   candidate = str;
   ch        = toupper(ch);
 
-  for (;;)
+  for (; ; )
     {
       /* strcasechr() will return a pointer to the next occurrence of the
        * character ch in the string (ignoring case)
@@ -103,23 +103,23 @@ FAR char *strcasestr(FAR const char *str, FAR const char *substr)
       candidate = strcasechr(candidate, ch);
       if (!candidate || strlen(candidate) < len)
         {
-           /* First character of the substring does not appear in the string
-            * or the remainder of the string is not long enough to contain the
-            * substring.
-            */
+          /* First character of the substring does not appear in the string
+           * or the remainder of the string is not long enough to contain the
+           * substring.
+           */
 
-           return NULL;
+          return NULL;
         }
 
       /* Check if this is the beginning of a matching substring (ignoring case) */
 
       if (strncasecmp(candidate, substr, len) == 0)
         {
-           /* Yes.. return the pointer to the first occurrence of the matching
-            * substring.
-            */
+          /* Yes.. return the pointer to the first occurrence of the matching
+           * substring.
+           */
 
-           return (char*)candidate;
+          return (FAR char *)candidate;
         }
 
       /* No, find the next candidate after this one */

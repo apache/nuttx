@@ -462,7 +462,7 @@ EXTERN const struct trace_msg_t g_usb_trace_strings_intdecode[];
  * Public Function Prototypes
  ****************************************************************************/
 
-/*******************************************************************************
+/****************************************************************************
  * Name: usbtrace_enable
  *
  * Description:
@@ -478,7 +478,7 @@ EXTERN const struct trace_msg_t g_usb_trace_strings_intdecode[];
  * Assumptions:
  * - May be called from an interrupt handler
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_USBDEV_TRACE) || (defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_USB))
 usbtrace_idset_t usbtrace_enable(usbtrace_idset_t idset);
@@ -486,7 +486,7 @@ usbtrace_idset_t usbtrace_enable(usbtrace_idset_t idset);
 #  define usbtrace_enable(idset)
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: usbtrace
  *
  * Description:
@@ -495,7 +495,7 @@ usbtrace_idset_t usbtrace_enable(usbtrace_idset_t idset);
  * Assumptions:
  *   May be called from an interrupt handler
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_USBDEV_TRACE) || (defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_USB))
 void usbtrace(uint16_t event, uint16_t value);
@@ -503,7 +503,7 @@ void usbtrace(uint16_t event, uint16_t value);
 #  define usbtrace(event, value)
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: usbtrace_enumerate
  *
  * Description:
@@ -512,7 +512,7 @@ void usbtrace(uint16_t event, uint16_t value);
  * Assumptions:
  *   NEVER called from an interrupt handler
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_USBDEV_TRACE
 int usbtrace_enumerate(trace_callback_t callback, void *arg);
@@ -520,13 +520,13 @@ int usbtrace_enumerate(trace_callback_t callback, void *arg);
 #  define usbtrace_enumerate(event)
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: usbtrace_trprint
  *
  * Description:
  *   Print the trace record using the supplied printing function
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 void usbtrace_trprintf(trprintf_t trprintf, uint16_t event, uint16_t value);
 

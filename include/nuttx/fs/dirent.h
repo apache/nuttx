@@ -102,6 +102,19 @@ struct fs_romfsdir_s
 };
 #endif /* CONFIG_FS_ROMFS */
 
+#ifdef CONFIG_FS_TMPFS
+/* For TMPFS, we need the directory object and an index into the directory
+ * entries.
+ */
+
+struct tmpfs_directory_s;              /* Forward reference */
+struct fs_tmpfsdir_s
+{
+  FAR struct tmpfs_directory_s *tf_tdo; /* Directory being enumerated */
+  unsigned int tf_index;               /* Directory index */
+};
+#endif /* CONFIG_FS_TMPFS */
+
 #ifdef CONFIG_FS_BINFS
 /* The apps/ pseudo bin/ directory.  The state value is simply an index */
 
@@ -164,6 +177,17 @@ struct fs_unionfsdir_s
 };
 #endif
 
+#ifdef CONFIG_FS_HOSTFS
+/* HOSTFS provides mapping to directories on the host machine in the
+ * sim environment.
+ */
+
+struct fs_hostfsdir_s
+{
+  FAR void *  fs_dir;                         /* Opaque pointer to host DIR * */
+};
+#endif
+
 #endif /* CONFIG_DISABLE_MOUNTPOINT */
 
 struct fs_dirent_s
@@ -209,6 +233,9 @@ struct fs_dirent_s
 #ifdef CONFIG_FS_ROMFS
       struct fs_romfsdir_s   romfs;
 #endif
+#ifdef CONFIG_FS_TMPFS
+      struct fs_tmpfsdir_s   tmpfs;
+#endif
 #ifdef CONFIG_FS_BINFS
       struct fs_binfsdir_s   binfs;
 #endif
@@ -227,6 +254,9 @@ struct fs_dirent_s
 #ifdef CONFIG_FS_UNIONFS
       struct fs_unionfsdir_s unionfs;
 #endif
+#ifdef CONFIG_FS_HOSTFS
+      struct fs_hostfsdir_s  hostfs;
+#endif
 #endif /* !CONFIG_DISABLE_MOUNTPOINT */
    } u;
 
@@ -236,7 +266,7 @@ struct fs_dirent_s
 };
 
 /****************************************************************************
- * Global Variables
+ * Public Data
  ****************************************************************************/
 
 /****************************************************************************

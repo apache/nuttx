@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/init/init.h
  *
- *   Copyright (C) 2007-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,20 +43,9 @@
 #include <nuttx/config.h>
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Type Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Global Variables
- ****************************************************************************/
-
-/****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
 /****************************************************************************
  * Name: os_start
  *
@@ -74,6 +63,65 @@
  ****************************************************************************/
 
 void os_start(void);
+
+/****************************************************************************
+ * Name: os_smp_start
+ *
+ * Description:
+ *   In an SMP configution, only one CPU is initially active (CPU 0). System
+ *   initialization occurs on that single thread. At the completion of the
+ *   initialization of the OS, just before beginning normal multitasking,
+ *   the additional CPUs would be started by calling this function.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero on success; a negater errno value on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SMP
+int os_smp_start(void);
+#endif
+
+/****************************************************************************
+ * Name: os_idle_trampoline
+ *
+ * Description:
+ *   This is the common IDLE task for CPUs 1 through (CONFIG_SMP_NCPUS-1).
+ *   It is equivalent to the CPU 0 IDLE logic in os_start.c
+ *
+ * Input Parameters:
+ *   Standard task arguments.
+ *
+ * Returned Value:
+ *   This function does not return.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SMP
+void os_idle_trampoline(void);
+#endif
+
+/****************************************************************************
+ * Name: os_idle_task
+ *
+ * Description:
+ *   This is the common IDLE task for CPUs 1 through (CONFIG_SMP_NCPUS-1).
+ *   It is equivalent to the CPU 0 IDLE logic in os_start.c
+ *
+ * Input Parameters:
+ *   Standard task arguments.
+ *
+ * Returned Value:
+ *   This function does not return.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SMP
+int os_idle_task(int argc, FAR char *argv[]);
+#endif
 
 /****************************************************************************
  * Name: os_bringup

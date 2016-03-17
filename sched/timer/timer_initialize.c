@@ -45,15 +45,11 @@
 #include <queue.h>
 #include <errno.h>
 
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 
 #include "timer/timer.h"
 
 #ifndef CONFIG_DISABLE_POSIX_TIMERS
-
-/********************************************************************************
- * Pre-processor Definitions
- ********************************************************************************/
 
 /********************************************************************************
  * Private Data
@@ -83,10 +79,6 @@ volatile sq_queue_t g_freetimers;
 volatile sq_queue_t g_alloctimers;
 
 /********************************************************************************
- * Private Functions
- ********************************************************************************/
-
-/********************************************************************************
  * Public Functions
  ********************************************************************************/
 
@@ -113,18 +105,19 @@ void weak_function timer_initialize(void)
 
   /* Place all of the pre-allocated timers into the free timer list */
 
-  sq_init((sq_queue_t*)&g_freetimers);
+  sq_init((FAR sq_queue_t *)&g_freetimers);
 
   for (i = 0; i < CONFIG_PREALLOC_TIMERS; i++)
     {
       g_prealloctimers[i].pt_flags = PT_FLAGS_PREALLOCATED;
-      sq_addlast((FAR sq_entry_t*)&g_prealloctimers[i], (FAR sq_queue_t*)&g_freetimers);
+      sq_addlast((FAR sq_entry_t *)&g_prealloctimers[i],
+                 (FAR sq_queue_t *)&g_freetimers);
     }
 #endif
 
   /* Initialize the list of allocated timers */
 
-  sq_init((sq_queue_t*)&g_alloctimers);
+  sq_init((FAR sq_queue_t *)&g_alloctimers);
 }
 
 /********************************************************************************
@@ -154,8 +147,8 @@ void weak_function timer_deleteall(pid_t pid)
   FAR struct posix_timer_s *next;
   irqstate_t flags;
 
-  flags = irqsave();
-  for (timer = (FAR struct posix_timer_s*)g_alloctimers.head; timer; timer = next)
+  flags = enter_critical_section();
+  for (timer = (FAR struct posix_timer_s *)g_alloctimers.head; timer; timer = next)
     {
       next = timer->flink;
       if (timer->pt_owner == pid)
@@ -164,7 +157,7 @@ void weak_function timer_deleteall(pid_t pid)
         }
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 #endif /* CONFIG_DISABLE_POSIX_TIMERS */

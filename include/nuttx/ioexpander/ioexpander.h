@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/ioexpander/ioexpander.h
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Sebastien Lorquet <sebastien@lorquet.fr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,8 +41,15 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/wqueue.h>
 
 #if defined(CONFIG_IOEXPANDER)
+
+#ifndef CONFIG_PCA9555_INT_DISABLE
+#ifndef CONFIG_SCHED_WORKQUEUE
+#  error "Work queue support required.  CONFIG_SCHED_WORKQUEUE must be selected."
+#endif
+#endif
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -97,7 +104,7 @@
 #define IOEXP_SETOPTION(dev,pin,opt,val) ((dev)->ops->ioe_option(dev,pin,opt,val))
 
 /****************************************************************************
- * Name: IOEXP_WRITE
+ * Name: IOEXP_WRITEPIN
  *
  * Description:
  *   Set the pin level. Required.
@@ -157,7 +164,7 @@
 #ifdef CONFIG_IOEXPANDER_MULTIPIN
 
 /****************************************************************************
- * Name: IOEXP_MULTIWRITE
+ * Name: IOEXP_MULTIWRITEPIN
  *
  * Description:
  *   Set the pin level for multiple pins. This routine may be faster than
@@ -216,7 +223,7 @@
 #define IOEXP_MULTIREADBUF(dev,pins,vals,count) \
                           ((dev)->ops->ioe_multireadbuf(dev,pin,vals,count))
 
-#endif
+#endif /* CONFIG_IOEXPANDER_MULTIPIN */
 
 /****************************************************************************
  * Public Types
@@ -230,15 +237,15 @@ struct ioexpander_ops_s
                             int direction);
   CODE int (*ioe_option)(FAR struct ioexpander_dev_s *dev, uint8_t pin,
                          int opt, void *val);
-  CODE int (*ioe_write)(FAR struct ioexpander_dev_s *dev, uint8_t pin,
-                        bool value);
+  CODE int (*ioe_writepin)(FAR struct ioexpander_dev_s *dev, uint8_t pin,
+                           bool value);
   CODE int (*ioe_readpin)(FAR struct ioexpander_dev_s *dev, uint8_t pin,
                           bool *value);
   CODE int (*ioe_readbuf)(FAR struct ioexpander_dev_s *dev, uint8_t pin,
                           bool *value);
 #ifdef CONFIG_IOEXPANDER_MULTIPIN
-  CODE int (*ioe_multiwrite)(FAR struct ioexpander_dev_s *dev,
-                             uint8_t *pins, bool *values, int count);
+  CODE int (*ioe_multiwritepin)(FAR struct ioexpander_dev_s *dev,
+                                uint8_t *pins, bool *values, int count);
   CODE int (*ioe_multireadpin)(FAR struct ioexpander_dev_s *dev,
                                uint8_t *pins, bool *values, int count);
   CODE int (*ioe_multireadbuf)(FAR struct ioexpander_dev_s *dev,
@@ -249,8 +256,12 @@ struct ioexpander_ops_s
 struct ioexpander_dev_s
 {
   FAR const struct ioexpander_ops_s *ops;
+#ifdef CONFIG_IOEXPANDER_INT_ENABLE
+  struct work_s work;   /* Supports the interrupt handling "bottom half" */
+  int sigpid;           /* PID to be signaled in case of interrupt */
+  int sigval;           /* Signal to be sent in case of interrupt */
+#endif
 };
 
-#endif //CONFIG_IOEXPANDER
-#endif //__INCLUDE_NUTTX_IOEXPANDER_IOEXPANDER_H
-
+#endif /* CONFIG_IOEXPANDER */
+#endif /* __INCLUDE_NUTTX_IOEXPANDER_IOEXPANDER_H */

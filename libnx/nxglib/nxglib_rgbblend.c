@@ -181,7 +181,7 @@ uint32_t nxglib_rgb24_blend(uint32_t color1, uint32_t color2, ub16_t frac1)
 
   /* Recombine and return the blended value */
 
-  return RGBTO24(r,g,b) ;   
+  return RGBTO24(r,g,b);
 }
 
 #endif
@@ -227,7 +227,7 @@ uint16_t nxglib_rgb565_blend(uint16_t color1, uint16_t color2, ub16_t frac1)
 
   /* Recombine and return the blended value */
 
-  return RGBTO24(r,g,b) ;   
+  return RGBTO24(r,g,b);
 }
 
 #endif

@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/net/net.h
  *
- *   Copyright (C) 2007, 2009-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009-2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,7 +50,7 @@
 #include <semaphore.h>
 
 #ifndef CONFIG_NET_NOINTS
-#  include <arch/irq.h>
+#  include <nuttx/irq.h>
 #endif
 
 /****************************************************************************
@@ -76,9 +76,10 @@
 enum net_lltype_e
 {
   NET_LL_ETHERNET = 0, /* Ethernet */
+  NET_LL_LOOPBACK,     /* Local loopback */
   NET_LL_SLIP,         /* Serial Line Internet Protocol (SLIP) */
-  NET_LL_PPP,          /* Point-to-Point Protocol (PPP) */
   NET_LL_TUN,          /* TUN Virtual Network Device */
+  NET_LL_6LOWPAN       /* IEEE 802.15.4 6LoWPAN*/
 };
 
 /* This defines a bitmap big enough for one bit for each socket option */
@@ -139,7 +140,7 @@ struct socketlist
 /* Callback from netdev_foreach() */
 
 struct net_driver_s; /* Forward reference. Defined in nuttx/net/netdev.h */
-typedef int (*netdev_callback_t)(FAR struct net_driver_s *dev, void *arg);
+typedef int (*netdev_callback_t)(FAR struct net_driver_s *dev, FAR void *arg);
 
 #ifdef CONFIG_NET_NOINTS
 /* Semaphore based locking for non-interrupt based logic.
@@ -253,7 +254,7 @@ void net_initialize(void);
 #ifdef CONFIG_NET_NOINTS
 net_lock_t net_lock(void);
 #else
-#  define net_lock() irqsave()
+#  define net_lock() enter_critical_section()
 #endif
 
 /****************************************************************************
@@ -267,7 +268,7 @@ net_lock_t net_lock(void);
 #ifdef CONFIG_NET_NOINTS
 void net_unlock(net_lock_t flags);
 #else
-#  define net_unlock(f) irqrestore(f)
+#  define net_unlock(f) leave_critical_section(f)
 #endif
 
 /****************************************************************************
@@ -1078,7 +1079,7 @@ int net_vfcntl(int sockfd, int cmd, va_list ap);
  *
  * Parameters:
  *   dev    - The device driver structure to be registered.
- *   lltype - Link level protocol used by the driver (Ethernet, SLIP, PPP, ...
+ *   lltype - Link level protocol used by the driver (Ethernet, SLIP, TUN, ...
  *
  * Returned Value:
  *   0:Success; negated errno on failure
@@ -1130,7 +1131,7 @@ int netdev_unregister(FAR struct net_driver_s *dev);
  *
  ****************************************************************************/
 
-int netdev_foreach(netdev_callback_t callback, void *arg);
+int netdev_foreach(netdev_callback_t callback, FAR void *arg);
 
 #undef EXTERN
 #ifdef __cplusplus

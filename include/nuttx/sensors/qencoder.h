@@ -102,7 +102,7 @@ struct qe_ops_s
 
   /* Return the current position measurement. */
 
-  CODE int (*position)(FAR struct qe_lowerhalf_s *lower, int32_t *pos);
+  CODE int (*position)(FAR struct qe_lowerhalf_s *lower, FAR int32_t *pos);
 
   /* Reset the position measurement to zero. */
 

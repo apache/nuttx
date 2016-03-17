@@ -55,7 +55,7 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
-#if CONFIG_DEBUG
+#ifdef CONFIG_DEBUG
 #  include <nuttx/arch.h>
 #endif
 
@@ -161,7 +161,7 @@ static void pipecommon_pollnotify(FAR struct pipe_dev_s *dev, pollevent_t events
 
 FAR struct pipe_dev_s *pipecommon_allocdev(void)
 {
- struct pipe_dev_s *dev;
+  FAR struct pipe_dev_s *dev;
 
   /* Allocate a private structure to manage the pipe */
 
@@ -197,12 +197,12 @@ void pipecommon_freedev(FAR struct pipe_dev_s *dev)
 
 int pipecommon_open(FAR struct file *filep)
 {
-  struct inode      *inode = filep->f_inode;
-  struct pipe_dev_s *dev   = inode->i_private;
-  int                sval;
-  int                ret;
+  FAR struct inode *inode = filep->f_inode;
+  FAR struct pipe_dev_s *dev = inode->i_private;
+  int sval;
+  int ret;
 
-  DEBUGASSERT(dev);
+  DEBUGASSERT(dev != NULL);
 
   /* Make sure that we have exclusive access to the device structure.  The
    * sem_wait() call should fail only if we are awakened by a signal.
@@ -223,7 +223,7 @@ int pipecommon_open(FAR struct file *filep)
 
   if (dev->d_refs == 0 && dev->d_buffer == NULL)
     {
-      dev->d_buffer = (uint8_t*)kmm_malloc(CONFIG_DEV_PIPE_SIZE);
+      dev->d_buffer = (FAR uint8_t *)kmm_malloc(CONFIG_DEV_PIPE_SIZE);
       if (!dev->d_buffer)
         {
           (void)sem_post(&dev->d_bfsem);
@@ -371,7 +371,7 @@ int pipecommon_close(FAR struct file *filep)
         }
     }
 
-  /* What is the buffer management policy?  Do we free the buffe when the
+  /* What is the buffer management policy?  Do we free the buffer when the
    * last client closes the pipe policy 0, or when the buffer becomes empty.
    * In the latter case, the buffer data will remain valid and can be
    * obtained when the pipe is re-opened.
@@ -418,7 +418,7 @@ ssize_t pipecommon_read(FAR struct file *filep, FAR char *buffer, size_t len)
   struct inode      *inode  = filep->f_inode;
   struct pipe_dev_s *dev    = inode->i_private;
 #ifdef CONFIG_DEV_PIPEDUMP
-  FAR uint8_t       *start  = (uint8_t*)buffer;
+  FAR uint8_t       *start  = (FAR uint8_t *)buffer;
 #endif
   ssize_t            nread  = 0;
   int                sval;
@@ -514,7 +514,7 @@ ssize_t pipecommon_write(FAR struct file *filep, FAR const char *buffer, size_t 
   int                sval;
 
   DEBUGASSERT(dev);
-  pipe_dumpbuffer("To PIPE:", (uint8_t*)buffer, len);
+  pipe_dumpbuffer("To PIPE:", (FAR uint8_t *)buffer, len);
 
   if (len == 0)
     {
@@ -545,7 +545,7 @@ ssize_t pipecommon_write(FAR struct file *filep, FAR const char *buffer, size_t 
   /* Loop until all of the bytes have been written */
 
   last = 0;
-  for (;;)
+  for (; ; )
     {
       /* Calculate the write index AFTER the next byte is written */
 

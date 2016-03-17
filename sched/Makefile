@@ -1,7 +1,7 @@
 ############################################################################
 # sched/Makefile
 #
-#   Copyright (C) 2007-2014 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2007-2014, 2016 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -41,21 +41,22 @@ CSRCS =
 VPATH =
 DEPPATH = --dep-path .
 
+include clock/Make.defs
+include errno/Make.defs
+include environ/Make.defs
+include group/Make.defs
 include init/Make.defs
 include irq/Make.defs
+include mqueue/Make.defs
+include module/Make.defs
 include paging/Make.defs
-include group/Make.defs
+include pthread/Make.defs
 include sched/Make.defs
-include task/Make.defs
-include errno/Make.defs
-include wdog/Make.defs
 include semaphore/Make.defs
 include signal/Make.defs
-include pthread/Make.defs
-include mqueue/Make.defs
-include clock/Make.defs
+include task/Make.defs
 include timer/Make.defs
-include environ/Make.defs
+include wdog/Make.defs
 include wqueue/Make.defs
 
 AOBJS = $(ASRCS:.S=$(OBJEXT))

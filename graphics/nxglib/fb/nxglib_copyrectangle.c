@@ -79,7 +79,7 @@
  *
  ****************************************************************************/
 
-void NXGL_FUNCNAME(nxgl_copyrectangle,NXGLIB_SUFFIX)
+void NXGL_FUNCNAME(nxgl_copyrectangle, NXGLIB_SUFFIX)
 (FAR struct fb_planeinfo_s *pinfo, FAR const struct nxgl_rect_s *dest,
  FAR const void *src, FAR const struct nxgl_point_s *origin,
  unsigned int srcstride)
@@ -131,7 +131,7 @@ void NXGL_FUNCNAME(nxgl_copyrectangle,NXGLIB_SUFFIX)
 
   /* Then copy the image */
 
-  sline = (const uint8_t*)src + NXGL_SCALEX(dest->pt1.x - origin->x) + (dest->pt1.y - origin->y) * srcstride;
+  sline = (FAR const uint8_t *)src + NXGL_SCALEX(dest->pt1.x - origin->x) + (dest->pt1.y - origin->y) * srcstride;
   dline = pinfo->fbmem + dest->pt1.y * deststride + NXGL_SCALEX(dest->pt1.x);
 
   while (rows--)
@@ -171,7 +171,7 @@ void NXGL_FUNCNAME(nxgl_copyrectangle,NXGLIB_SUFFIX)
 #else
       /* Copy the whole line */
 
-      NXGL_MEMCPY((NXGL_PIXEL_T*)dline, (NXGL_PIXEL_T*)sline, width);
+      NXGL_MEMCPY((NXGL_PIXEL_T *)dline, (NXGL_PIXEL_T *)sline, width);
 #endif
       dline += deststride;
       sline += srcstride;

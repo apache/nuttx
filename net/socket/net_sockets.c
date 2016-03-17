@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/socket/net_sockets.c
  *
- *   Copyright (C) 2007-2009, 2011-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -54,22 +54,6 @@
 #if CONFIG_NSOCKET_DESCRIPTORS > 0
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Variables
- ****************************************************************************/
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -83,7 +67,7 @@ static void _net_semtake(FAR struct socketlist *list)
        * the wait was awakened by a signal.
        */
 
-      ASSERT(*get_errno_ptr() == EINTR);
+      DEBUGASSERT(get_errno() == EINTR);
     }
 }
 
@@ -217,7 +201,7 @@ int sockfd_allocate(int minsd)
 
 void sock_release(FAR struct socket *psock)
 {
-#if CONFIG_DEBUG
+#ifdef CONFIG_DEBUG
   if (psock)
 #endif
     {
@@ -297,7 +281,7 @@ FAR struct socket *sockfd_socket(int sockfd)
   FAR struct socketlist *list;
   int ndx = sockfd - __SOCKFD_OFFSET;
 
-  if (ndx >=0 && ndx < CONFIG_NSOCKET_DESCRIPTORS)
+  if (ndx >= 0 && ndx < CONFIG_NSOCKET_DESCRIPTORS)
     {
       list = sched_getsockets();
       if (list)

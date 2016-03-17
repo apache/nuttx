@@ -46,7 +46,7 @@
 #include "pthread/pthread.h"
 
 /****************************************************************************
- * Global Functions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -80,7 +80,7 @@ int pthread_cond_init(FAR pthread_cond_t *cond, FAR const pthread_condattr_t *at
    * with initial count = 0
    */
 
-  else if (sem_init((sem_t*)&cond->sem, 0, 0) != OK)
+  else if (sem_init((FAR sem_t *)&cond->sem, 0, 0) != OK)
     {
       ret = EINVAL;
     }

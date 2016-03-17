@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/mount/fs_mount.c
  *
- *   Copyright (C) 2007-2009, 2011-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -77,7 +77,8 @@
 /* These file systems do not require block drivers */
 
 #if defined(CONFIG_FS_NXFFS) || defined(CONFIG_FS_BINFS) || \
-    defined(CONFIG_FS_PROCFS) || defined(CONFIG_NFS)
+    defined(CONFIG_FS_PROCFS) || defined(CONFIG_NFS) || \
+    defined(CONFIG_FS_TMPFS)
 #  define NONBDFS_SUPPORT
 #endif
 
@@ -92,7 +93,7 @@ struct fsmap_t
 };
 
 /****************************************************************************
- * Private Variables
+ * Private Data
  ****************************************************************************/
 
 #ifdef BDFS_SUPPORT
@@ -101,6 +102,9 @@ extern const struct mountpt_operations fat_operations;
 #endif
 #ifdef CONFIG_FS_ROMFS
 extern const struct mountpt_operations romfs_operations;
+#endif
+#ifdef CONFIG_FS_TMPFS
+extern const struct mountpt_operations tmpfs_operations;
 #endif
 #ifdef CONFIG_FS_SMARTFS
 extern const struct mountpt_operations smartfs_operations;
@@ -134,11 +138,17 @@ extern const struct mountpt_operations binfs_operations;
 #ifdef CONFIG_FS_PROCFS
 extern const struct mountpt_operations procfs_operations;
 #endif
+#ifdef CONFIG_FS_HOSTFS
+extern const struct mountpt_operations hostfs_operations;
+#endif
 
 static const struct fsmap_t g_nonbdfsmap[] =
 {
 #ifdef CONFIG_FS_NXFFS
     { "nxffs", &nxffs_operations },
+#endif
+#ifdef CONFIG_FS_TMPFS
+    { "tmpfs", &tmpfs_operations },
 #endif
 #ifdef CONFIG_NFS
     { "nfs", &nfs_operations },
@@ -149,12 +159,15 @@ static const struct fsmap_t g_nonbdfsmap[] =
 #ifdef CONFIG_FS_PROCFS
     { "procfs", &procfs_operations },
 #endif
+#ifdef CONFIG_FS_HOSTFS
+    { "hostfs", &hostfs_operations },
+#endif
     { NULL, NULL },
 };
 #endif /* NONBDFS_SUPPORT */
 
 /****************************************************************************
- * Public Variables
+ * Public Data
  ****************************************************************************/
 
 /****************************************************************************
@@ -296,6 +309,8 @@ int mount(FAR const char *source, FAR const char *target,
 
   /* Insert a dummy node -- we need to hold the inode semaphore
    * to do this because we will have a momentarily bad structure.
+   * NOTE that the new inode will be created with an initial reference
+   * count of zero.
    */
 
     {
@@ -379,11 +394,11 @@ int mount(FAR const char *source, FAR const char *target,
   mountpt_inode->i_private = fshandle;
   inode_semgive();
 
- /* We can release our reference to the blkdrver_inode, if the filesystem
-  * wants to retain the blockdriver inode (which it should), then it must
-  * have called inode_addref().  There is one reference on mountpt_inode
-  * that will persist until umount2() is called.
-  */
+  /* We can release our reference to the blkdrver_inode, if the filesystem
+   * wants to retain the blockdriver inode (which it should), then it must
+   * have called inode_addref().  There is one reference on mountpt_inode
+   * that will persist until umount2() is called.
+   */
 
 #ifdef BDFS_SUPPORT
 #ifdef NONBDFS_SUPPORT

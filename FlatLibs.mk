@@ -1,7 +1,7 @@
 ############################################################################
 # FlatLibs.mk
 #
-#   Copyright (C) 2007-2012, 2014 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2007-2012, 2014, 2016 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -107,6 +107,12 @@ endif
 
 ifeq ($(CONFIG_AUDIO),y)
 NUTTXLIBS += lib$(DELIM)libaudio$(LIBEXT)
+endif
+
+# Add libraries for the Wireless sub-system
+
+ifeq ($(CONFIG_WIRELESS),y)
+NUTTXLIBS += lib$(DELIM)libwireless$(LIBEXT)
 endif
 
 # Export all libraries

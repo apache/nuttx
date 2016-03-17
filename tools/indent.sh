@@ -2,7 +2,7 @@
 ############################################################################
 # tools/indent.sh
 #
-#   Copyright (C) 2008, 2010 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2008, 2010, 2016 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -48,39 +48,86 @@
 
 options="-nbad -bap -bbb -nbbo -nbc -bl -bl2 -bls -nbs -cbi2 -ncdw -nce -ci2 -cli0 -cp40 -ncs -nbfda -nbfde -di1 -nfc1 -fca -i2 -l80 -lp -ppi2 -lps -npcs -pmt -nprs -npsl -saf -sai -sbi2 -saw -sc -sob -nss -nut"
 
-usage="USAGE: $0 <in-file> <out-file>"
+advice="Try '$0 -h' for more information"
 
-# Inputs
+# Parse inputs
 
-infile=$1
-outfile=$2
+unset filelist
+unset outfile
+files=none
+mode=inplace
 
-# Verify inputs
+while [ ! -z "${1}" ]; do
+	case ${1} in
+	-d )
+		set -x
+		;;
+	-o )
+		shift
+		outfile=${1}
+		mode=copy
+		;;
+	-h )
+		echo "$0 is a tool for generation of proper version files for the NuttX build"
+		echo ""
+		echo "USAGE:"
+		echo "	$0 [-d] -o <out-file> <in-file>"
+		echo "	$0 [-d] <in-file-list>"
+		echo "	$0 [-d] -h"
+		echo ""
+		echo "Where:"
+		echo "	-<in-file>"
+		echo "		A single, unformatted input file"
+		echo "	-<in-file-list>"
+		echo "		A list of unformatted input files that will be reformatted in place."
+		echo "	-o <out-file>"
+		echo "		Write the single, reformatted <in-file> to <out-file>.  <in-file>"
+		echo "		will not be modified."
+		echo "	-d"
+		echo "		Enable script debug"
+		echo "	-h"
+		echo "		Show this help message and exit"
+		exit 0
+		;;
+	* )
+		if [ ! -r ${1} ]; then
+			echo "Readable ${1} does not exist"
+			echo ${advice}
+			exit 1
+		fi
+		if [ -z "${filelist}" ]; then
+			filelist="${1}"
+			files=single
+		else
+			filelist="${filelist} ${1}"
+			files=multiple
+		fi
+		;;
+	esac
+	shift
+done
 
-if [ -z "$infile" ]; then
-    echo "Missing <in-file>"
-    echo $usage
-    exit 1
-fi
+# Verify that at least one input file was provided
 
-if [ ! -r $infile ]; then
-    echo "Readable $infile does not exist"
-    exit 1
-fi
-
-if [ -z "$outfile" ]; then
-    echo "Missing <out-file>"
-    echo $usage
-    exit 1
-fi
-
-if [ -f $outfile ]; then
-    echo "Removing old $outfile"
-    rm $outfile || { echo "Failed to remove $outfile" ; exit 1 ; }
+if [ "X${files}" == "Xnone" ]; then
+	echo "ERROR: Neither <in-file> nor <in-file-list> provided"
+	echo ${advice}
+	exit 1
 fi
 
 # Perform the indentation
 
-indent $options $infile -o $outfile
-
-
+if [ "X${mode}" == "Xcopy" ]; then
+	if [ "X${files}" == "Xmultiple" ]; then
+		echo "ERROR: Only a single <in-file> can be used with the -o option"
+		echo ${advice}
+		exit 1
+	fi
+	if [ -f $outfile ]; then
+		echo "Removing old $outfile"
+		rm $outfile || { echo "Failed to remove $outfile" ; exit 1 ; }
+	fi
+	indent $options $filelist -o $outfile
+else
+	indent $options $filelist
+fi

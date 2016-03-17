@@ -129,7 +129,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/i2c.h>
+#include <nuttx/i2c/i2c_master.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/lcd/lcd.h>
 #include <nuttx/lcd/ssd1306.h>
@@ -208,10 +208,10 @@ static const struct fb_videoinfo_s g_videoinfo =
 
 static const struct lcd_planeinfo_s g_planeinfo =
 {
-  .putrun = ssd1306_putrun,          /* Put a run into LCD memory */
-  .getrun = ssd1306_getrun,          /* Get a run from LCD memory */
-  .buffer = (uint8_t*)g_runbuffer,   /* Run scratch buffer */
-  .bpp    = SSD1306_DEV_BPP,         /* Bits-per-pixel */
+  .putrun = ssd1306_putrun,             /* Put a run into LCD memory */
+  .getrun = ssd1306_getrun,             /* Get a run from LCD memory */
+  .buffer = (FAR uint8_t *)g_runbuffer, /* Run scratch buffer */
+  .bpp    = SSD1306_DEV_BPP,            /* Bits-per-pixel */
 };
 
 /* This is the OLED driver instance (only a single device is supported for now) */
@@ -807,7 +807,7 @@ static int ssd1306_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
 #ifdef CONFIG_LCD_SSD1306_SPI
 FAR struct lcd_dev_s *ssd1306_initialize(FAR struct spi_dev_s *dev, unsigned int devno)
 #else
-FAR struct lcd_dev_s *ssd1306_initialize(FAR struct i2c_dev_s *dev, unsigned int devno)
+FAR struct lcd_dev_s *ssd1306_initialize(FAR struct i2c_master_s *dev, unsigned int devno)
 #endif
 {
   FAR struct ssd1306_dev_s  *priv = &g_oleddev;
@@ -818,36 +818,15 @@ FAR struct lcd_dev_s *ssd1306_initialize(FAR struct i2c_dev_s *dev, unsigned int
 #ifdef CONFIG_LCD_SSD1306_SPI
   priv->spi = dev;
 
-  /* If this SPI bus is not shared, then we can config it now.
-   * If it is shared, then other device could change our config,
-   * then just configure before sending data.
-   */
+  /* Configure the SPI */
 
-#  ifdef CONFIG_SPI_OWNBUS
-    /* Configure SPI */
-
-    SPI_SETMODE(priv->spi, CONFIG_SSD1306_SPIMODE);
-    SPI_SETBITS(priv->spi, 8);
-    SPI_SETFREQUENCY(priv->spi, CONFIG_SSD1306_FREQUENCY);
-#  else
-    /* Configure the SPI */
-
-    ssd1306_configspi(priv->spi);
-#  endif
+  ssd1306_configspi(priv->spi);
 
 #else
   /* Remember the I2C configuration */
 
   priv->i2c  = dev;
   priv->addr = CONFIG_SSD1306_I2CADDR;
-
-  /* Set the I2C address and frequency.  REVISIT:  This logic would be
-   * insufficient if we share the I2C bus with any other devices that also
-   * modify the address and frequency.
-   */
-
-  I2C_SETADDRESS(priv->i2c, CONFIG_SSD1306_I2CADDR, 7);
-  I2C_SETFREQUENCY(priv->i2c, CONFIG_SSD1306_I2CFREQ);
 #endif
 
   /* Lock and select device */
@@ -864,40 +843,40 @@ FAR struct lcd_dev_s *ssd1306_initialize(FAR struct i2c_dev_s *dev, unsigned int
 
   /* Configure the device */
 
-  ssd1306_sendbyte(priv, SSD1306_DISPOFF);         /* Display off 0xae */
-  ssd1306_sendbyte(priv, SSD1306_SETCOLL(0));      /* Set lower column address 0x00 */
-  ssd1306_sendbyte(priv, SSD1306_SETCOLH(0));      /* Set higher column address 0x10 */
-  ssd1306_sendbyte(priv, SSD1306_STARTLINE(0));    /* Set display start line 0x40 */
-  /* ssd1306_sendbyte(priv, SSD1306_PAGEADDR(0));*//* Set page address  (Can ignore)*/
-  ssd1306_sendbyte(priv, SSD1306_CONTRAST_MODE);   /* Contrast control 0x81 */
-  ssd1306_sendbyte(priv,SSD1306_CONTRAST(SSD1306_DEV_CONTRAST));  /* Default contrast 0xCF */
-  ssd1306_sendbyte(priv, SSD1306_REMAPPLEFT);      /* Set segment remap left 95 to 0 | 0xa1 */
-  /* ssd1306_sendbyte(priv, SSD1306_EDISPOFF); */  /* Normal display off 0xa4 (Can ignore)*/
-  ssd1306_sendbyte(priv, SSD1306_NORMAL);          /* Normal (un-reversed) display mode 0xa6 */
-  ssd1306_sendbyte(priv, SSD1306_MRATIO_MODE);     /* Multiplex ratio 0xa8 */
+  ssd1306_sendbyte(priv, SSD1306_DISPOFF);          /* Display off 0xae */
+  ssd1306_sendbyte(priv, SSD1306_SETCOLL(0));       /* Set lower column address 0x00 */
+  ssd1306_sendbyte(priv, SSD1306_SETCOLH(0));       /* Set higher column address 0x10 */
+  ssd1306_sendbyte(priv, SSD1306_STARTLINE(0));     /* Set display start line 0x40 */
+  //ssd1306_sendbyte(priv, SSD1306_PAGEADDR(0));    /* Set page address  (Can ignore) */
+  ssd1306_sendbyte(priv, SSD1306_CONTRAST_MODE);    /* Contrast control 0x81 */
+  ssd1306_sendbyte(priv, SSD1306_CONTRAST(SSD1306_DEV_CONTRAST));  /* Default contrast 0xCF */
+  ssd1306_sendbyte(priv, SSD1306_REMAPPLEFT);       /* Set segment remap left 95 to 0 | 0xa1 */
+  //ssd1306_sendbyte(priv, SSD1306_EDISPOFF);       /* Normal display off 0xa4 (Can ignore) */
+  ssd1306_sendbyte(priv, SSD1306_NORMAL);           /* Normal (un-reversed) display mode 0xa6 */
+  ssd1306_sendbyte(priv, SSD1306_MRATIO_MODE);      /* Multiplex ratio 0xa8 */
   ssd1306_sendbyte(priv, SSD1306_MRATIO(SSD1306_DEV_DUTY));  /* Duty = 1/64 or 1/32 */
-  /* ssd1306_sendbyte(priv, SSD1306_SCANTOCOM0);*/ /* Com scan direction: Scan from COM[n-1] to COM[0] (Can ignore)*/
-  ssd1306_sendbyte(priv, SSD1306_DISPOFFS_MODE);   /* Set display offset 0xd3 */
+  //ssd1306_sendbyte(priv, SSD1306_SCANTOCOM0);     /* Com scan direction: Scan from COM[n-1] to COM[0] (Can ignore) */
+  ssd1306_sendbyte(priv, SSD1306_DISPOFFS_MODE);    /* Set display offset 0xd3 */
   ssd1306_sendbyte(priv, SSD1306_DISPOFFS(0));
-  ssd1306_sendbyte(priv, SSD1306_CLKDIV_SET);      /* Set clock divider 0xd5*/
-  ssd1306_sendbyte(priv, SSD1306_CLKDIV(8,0));     /* 0x80*/
+  ssd1306_sendbyte(priv, SSD1306_CLKDIV_SET);       /* Set clock divider 0xd5 */
+  ssd1306_sendbyte(priv, SSD1306_CLKDIV(8, 0));     /* 0x80 */
 
-  ssd1306_sendbyte(priv, SSD1306_CHRGPER_SET);     /* Set pre-charge period 0xd9 */
-  ssd1306_sendbyte(priv, SSD1306_CHRGPER(0x0f,1)); /* 0xf1 or 0x22 Enhanced mode */
+  ssd1306_sendbyte(priv, SSD1306_CHRGPER_SET);      /* Set pre-charge period 0xd9 */
+  ssd1306_sendbyte(priv, SSD1306_CHRGPER(0x0f, 1)); /* 0xf1 or 0x22 Enhanced mode */
 
-  ssd1306_sendbyte(priv, SSD1306_CMNPAD_CONFIG);   /* Set common pads / set com pins hardware configuration 0xda */
+  ssd1306_sendbyte(priv, SSD1306_CMNPAD_CONFIG);    /* Set common pads / set com pins hardware configuration 0xda */
   ssd1306_sendbyte(priv, SSD1306_CMNPAD(SSD1306_DEV_CMNPAD)); /* 0x12 or 0x02 */
 
-  ssd1306_sendbyte(priv, SSD1306_VCOM_SET);        /* set vcomh 0xdb*/
+  ssd1306_sendbyte(priv, SSD1306_VCOM_SET);         /* set vcomh 0xdb */
   ssd1306_sendbyte(priv, SSD1306_VCOM(0x40));
 
-  ssd1306_sendbyte(priv, SSD1306_CHRPUMP_SET);     /* Set Charge Pump enable/disable 0x8d ssd1306 */
-  ssd1306_sendbyte(priv, SSD1306_CHRPUMP_ON);      /* 0x14 close 0x10 */
+  ssd1306_sendbyte(priv, SSD1306_CHRPUMP_SET);      /* Set Charge Pump enable/disable 0x8d ssd1306 */
+  ssd1306_sendbyte(priv, SSD1306_CHRPUMP_ON);       /* 0x14 close 0x10 */
 
-  /* ssd1306_sendbyte(priv, SSD1306_DCDC_MODE); */ /* DC/DC control mode: on (SSD1306 Not supported) */
-  /* ssd1306_sendbyte(priv, SSD1306_DCDC_ON); */
+  //ssd1306_sendbyte(priv, SSD1306_DCDC_MODE);      /* DC/DC control mode: on (SSD1306 Not supported) */
+  //ssd1306_sendbyte(priv, SSD1306_DCDC_ON);
 
-  ssd1306_sendbyte(priv, SSD1306_DISPON);          /* Display ON 0xaf */
+  ssd1306_sendbyte(priv, SSD1306_DISPON);           /* Display ON 0xaf */
 
   /* De-select and unlock the device */
 

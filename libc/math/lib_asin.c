@@ -1,9 +1,9 @@
-/************************************************************************
+/****************************************************************************
  * libc/math/lib_sin.c
  *
  * This file is a part of NuttX:
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2015 Gregory Nutt. All rights reserved.
  *   Ported by: Darcy Gong
  *
  * It derives from the Rhombs OS math library by Nick Johnson which has
@@ -23,11 +23,11 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
- ************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
@@ -35,14 +35,30 @@
 #include <math.h>
 #include <float.h>
 
-/************************************************************************
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#undef  DBL_EPSILON
+#define DBL_EPSILON 1e-12
+
+/****************************************************************************
  * Public Functions
- ************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_HAVE_DOUBLE
 double asin(double x)
 {
-  long double y, y_sin, y_cos;
+  long double y;
+  long double y_sin;
+  long double y_cos;
+
+  /* Verify that the input value is in the domain of the function */
+
+  if (x < -1.0 || x > 1.0)
+    {
+      return NAN;
+    }
 
   y = 0;
 

@@ -60,7 +60,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/pwm.h>
 
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 
 #ifdef CONFIG_PWM
 
@@ -107,11 +107,17 @@ struct pwm_upperhalf_s
  * Private Function Prototypes
  ****************************************************************************/
 
+static void    pwm_dump(FAR const char *msg,
+                        FAR const struct pwm_info_s *info,
+                        bool started);
 static int     pwm_open(FAR struct file *filep);
 static int     pwm_close(FAR struct file *filep);
-static ssize_t pwm_read(FAR struct file *filep, FAR char *buffer, size_t buflen);
-static ssize_t pwm_write(FAR struct file *filep, FAR const char *buffer, size_t buflen);
-static int     pwm_start(FAR struct pwm_upperhalf_s *upper, unsigned int oflags);
+static ssize_t pwm_read(FAR struct file *filep, FAR char *buffer,
+                        size_t buflen);
+static ssize_t pwm_write(FAR struct file *filep, FAR const char *buffer,
+                         size_t buflen);
+static int     pwm_start(FAR struct pwm_upperhalf_s *upper,
+                         unsigned int oflags);
 static int     pwm_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
 
 /****************************************************************************
@@ -135,13 +141,43 @@ static const struct file_operations g_pwmops =
  * Private Functions
  ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
+ * Name: pwm_dump
+ ****************************************************************************/
+
+static void pwm_dump(FAR const char *msg, FAR const struct pwm_info_s *info,
+                     bool started)
+{
+#ifdef CONFIG_PWM_MULTICHAN
+  int i;
+#endif
+
+  pwmvdbg("%s: frequency: %d", msg, info->frequency);
+
+#ifdef CONFIG_PWM_MULTICHAN
+  for (i = 0; i < CONFIG_PWM_NCHANNELS; i++)
+    {
+      pwmvdbg(" channel: %d duty: %08x",
+              info->channels[i].channel, info->channels[i].duty);
+    }
+#else
+  pwmvdbg(" duty: %08x", info->duty);
+#endif
+
+#ifdef CONFIG_PWM_PULSECOUNT
+  pwmvdbg(" count: %d\n", info->count);
+#endif
+
+  pwmvdbg(" started: %d\n", started);
+}
+
+/****************************************************************************
  * Name: pwm_open
  *
  * Description:
  *   This function is called whenever the PWM device is opened.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static int pwm_open(FAR struct file *filep)
 {
@@ -205,13 +241,13 @@ errout:
   return ret;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: pwm_close
  *
  * Description:
  *   This function is called when the PWM device is closed.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static int pwm_close(FAR struct file *filep)
 {
@@ -262,41 +298,43 @@ errout:
   return ret;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: pwm_read
  *
  * Description:
  *   A dummy read method.  This is provided only to satisfy the VFS layer.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-static ssize_t pwm_read(FAR struct file *filep, FAR char *buffer, size_t buflen)
+static ssize_t pwm_read(FAR struct file *filep, FAR char *buffer,
+                        size_t buflen)
 {
   /* Return zero -- usually meaning end-of-file */
 
   return 0;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: pwm_write
  *
  * Description:
  *   A dummy write method.  This is provided only to satisfy the VFS layer.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-static ssize_t pwm_write(FAR struct file *filep, FAR const char *buffer, size_t buflen)
+static ssize_t pwm_write(FAR struct file *filep, FAR const char *buffer,
+                         size_t buflen)
 {
   return 0;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: pwm_start
  *
  * Description:
  *   Handle the PWMIOC_START ioctl command
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_PWM_PULSECOUNT
 static int pwm_start(FAR struct pwm_upperhalf_s *upper, unsigned int oflags)
@@ -313,7 +351,7 @@ static int pwm_start(FAR struct pwm_upperhalf_s *upper, unsigned int oflags)
     {
       /* Disable interrupts to avoid race conditions */
 
-      flags = irqsave();
+      flags = enter_critical_section();
 
       /* Indicate that if will be waiting for the pulse count to complete.
        * Note that we will only wait if a non-zero pulse count is specified
@@ -360,7 +398,7 @@ static int pwm_start(FAR struct pwm_upperhalf_s *upper, unsigned int oflags)
           upper->waiting = false;
         }
 
-      irqrestore(flags);
+      leave_critical_section(flags);
     }
 
   return ret;
@@ -397,13 +435,13 @@ static int pwm_start(FAR struct pwm_upperhalf_s *upper, unsigned int oflags)
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: pwm_ioctl
  *
  * Description:
  *   The standard ioctl method.  This is where ALL of the PWM work is done.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static int pwm_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
@@ -438,16 +476,10 @@ static int pwm_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case PWMIOC_SETCHARACTERISTICS:
         {
-          FAR const struct pwm_info_s *info = (FAR const struct pwm_info_s*)((uintptr_t)arg);
+          FAR const struct pwm_info_s *info = (FAR const struct pwm_info_s *)((uintptr_t)arg);
           DEBUGASSERT(info != NULL && lower->ops->start != NULL);
 
-#ifdef CONFIG_PWM_PULSECOUNT
-          pwmvdbg("PWMIOC_SETCHARACTERISTICS frequency: %d duty: %08x count: %d started: %d\n",
-                  info->frequency, info->duty, info->count, upper->started);
-#else
-          pwmvdbg("PWMIOC_SETCHARACTERISTICS frequency: %d duty: %08x started: %d\n",
-                  info->frequency, info->duty, upper->started);
-#endif
+          pwm_dump("PWMIOC_SETCHARACTERISTICS", info, upper->started);
 
           /* Save the pulse train characteristics */
 
@@ -475,18 +507,12 @@ static int pwm_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case PWMIOC_GETCHARACTERISTICS:
         {
-          FAR struct pwm_info_s *info = (FAR struct pwm_info_s*)((uintptr_t)arg);
+          FAR struct pwm_info_s *info = (FAR struct pwm_info_s *)((uintptr_t)arg);
           DEBUGASSERT(info != NULL);
 
           memcpy(info, &upper->info, sizeof(struct pwm_info_s));
 
-#ifdef CONFIG_PWM_PULSECOUNT
-          pwmvdbg("PWMIOC_GETCHARACTERISTICS frequency: %d duty: %08x count: %d\n",
-                  info->frequency, info->duty, info->count);
-#else
-          pwmvdbg("PWMIOC_GETCHARACTERISTICS frequency: %d duty: %08x\n",
-                  info->frequency, info->duty);
-#endif
+          pwm_dump("PWMIOC_GETCHARACTERISTICS", info, upper->started);
         }
         break;
 
@@ -498,14 +524,7 @@ static int pwm_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case PWMIOC_START:
         {
-#ifdef CONFIG_PWM_PULSECOUNT
-          pwmvdbg("PWMIOC_START frequency: %d duty: %08x count: %d started: %d\n",
-                  upper->info.frequency, upper->info.duty, upper->info.count,
-                  upper->started);
-#else
-          pwmvdbg("PWMIOC_START frequency: %d duty: %08x started: %d\n",
-                  upper->info.frequency, upper->info.duty, upper->started);
-#endif
+          pwm_dump("PWMIOC_START", &upper->info, upper->started);
           DEBUGASSERT(lower->ops->start != NULL);
 
           /* Start the pulse train */
@@ -531,7 +550,7 @@ static int pwm_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 #ifdef CONFIG_PWM_PULSECOUNT
               if (upper->waiting)
                 {
-              upper->waiting = FALSE;
+                  upper->waiting = false;
                 }
 #endif
             }

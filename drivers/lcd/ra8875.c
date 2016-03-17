@@ -391,9 +391,10 @@ static void ra8875_waitreg(FAR struct ra8875_lcd_s *lcd, uint8_t regaddr, uint8_
 {
   int i = 20000/100;
 
-  while (i-- && ra8875_readreg(lcd, regaddr) & mask) {
-    up_udelay(100);
-  }
+  while (i-- && ra8875_readreg(lcd, regaddr) & mask)
+    {
+      up_udelay(100);
+    }
 }
 #endif
 
@@ -624,9 +625,9 @@ static int ra8875_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buff
 #if RA8875_BPP == 16
   DEBUGASSERT(buffer && ((uintptr_t)buffer & 1) == 0);
 
-  FAR const uint16_t *src = (FAR const uint16_t*)buffer;
+  FAR const uint16_t *src = (FAR const uint16_t *)buffer;
 #else
-  FAR const uint8_t *src = (FAR const uint8_t*)buffer;
+  FAR const uint8_t *src = (FAR const uint8_t *)buffer;
 #endif
   int i;
 
@@ -733,7 +734,7 @@ static int ra8875_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
 #ifndef CONFIG_LCD_NOGETRUN
   FAR struct ra8875_dev_s *priv = &g_lcddev;
   FAR struct ra8875_lcd_s *lcd = priv->lcd;
-  FAR uint16_t *dest = (FAR uint16_t*)buffer;
+  FAR uint16_t *dest = (FAR uint16_t *)buffer;
   int i;
 
   /* Buffer must be provided and aligned to a 16-bit address boundary */
@@ -854,10 +855,10 @@ static int ra8875_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
   DEBUGASSERT(dev && pinfo && planeno == 0);
   lcdvdbg("planeno: %d bpp: %d\n", planeno, RA8875_BPP);
 
-  pinfo->putrun = ra8875_putrun;             /* Put a run into LCD memory */
-  pinfo->getrun = ra8875_getrun;             /* Get a run from LCD memory */
-  pinfo->buffer = (uint8_t*)priv->runbuffer; /* Run scratch buffer */
-  pinfo->bpp    = RA8875_BPP;                /* Bits-per-pixel */
+  pinfo->putrun = ra8875_putrun;                  /* Put a run into LCD memory */
+  pinfo->getrun = ra8875_getrun;                  /* Get a run from LCD memory */
+  pinfo->buffer = (FAR uint8_t *)priv->runbuffer; /* Run scratch buffer */
+  pinfo->bpp    = RA8875_BPP;                     /* Bits-per-pixel */
   return OK;
 }
 
@@ -990,7 +991,7 @@ static inline int ra8875_hwinitialize(FAR struct ra8875_dev_s *priv)
   uint8_t rv;
   FAR struct ra8875_lcd_s *lcd  = priv->lcd;
 
-  /*@@TODO: Maybe some of these values needs to be configurable?? */
+  /* REVISIT: Maybe some of these values needs to be configurable?? */
 
   lcdvdbg("hwinitialize\n");
 
@@ -1079,7 +1080,7 @@ static inline int ra8875_hwinitialize(FAR struct ra8875_dev_s *priv)
   return OK;
 }
 
- /*************************************************************************************
+/**************************************************************************************
  * Public Functions
  **************************************************************************************/
 

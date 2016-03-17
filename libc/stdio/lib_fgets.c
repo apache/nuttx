@@ -41,7 +41,7 @@
 
 #include <stdio.h>
 
-#include "lib_internal.h"
+#include "libc.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -65,7 +65,7 @@
  *   buffer.  A null terminator is stored after the last character in the
  *   buffer.
  *
- **************************************************************************/
+ ****************************************************************************/
 
 char *fgets(FAR char *buf, int buflen, FILE *stream)
 {

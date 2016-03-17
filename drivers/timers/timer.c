@@ -84,11 +84,10 @@
 struct timer_upperhalf_s
 {
   uint8_t   crefs;    /* The number of times the device has been opened */
-//sem_t     exclsem;  /* Supports mutual exclusion */
   FAR char *path;     /* Registration path */
 
   /* The contained lower-half driver */
- 
+
   FAR struct timer_lowerhalf_s *lower;
 };
 
@@ -143,15 +142,6 @@ static int timer_open(FAR struct file *filep)
 
   tmrvdbg("crefs: %d\n", upper->crefs);
 
-  /* Get exclusive access to the device structures */
-
-  ret = 1; //sem_wait(&upper->exclsem);
-  if (ret < 0)
-    {
-      ret = -get_errno();
-      goto errout;
-    }
-
   /* Increment the count of references to the device.  If this the first
    * time that the driver has been opened for this device, then initialize
    * the device.
@@ -163,7 +153,7 @@ static int timer_open(FAR struct file *filep)
       /* More than 255 opens; uint8_t overflows to zero */
 
       ret = -EMFILE;
-      goto errout_with_sem;
+      goto errout;
     }
 
   /* Save the new open count */
@@ -171,9 +161,6 @@ static int timer_open(FAR struct file *filep)
   upper->crefs = tmp;
   ret = OK;
 
-errout_with_sem:
-//  sem_post(&upper->exclsem);
-  
 errout:
   return ret;
 }
@@ -188,20 +175,10 @@ errout:
 
 static int timer_close(FAR struct file *filep)
 {
-  FAR struct inode                *inode = filep->f_inode;
+  FAR struct inode *inode = filep->f_inode;
   FAR struct timer_upperhalf_s *upper = inode->i_private;
-  int                              ret;
 
   tmrvdbg("crefs: %d\n", upper->crefs);
-
-  /* Get exclusive access to the device structures */
-
-  ret = 1; //sem_wait(&upper->exclsem);
-  if (ret < 0)
-    {
-      ret = -get_errno();
-      goto errout;
-    }
 
   /* Decrement the references to the driver.  If the reference count will
    * decrement to 0, then uninitialize the driver.
@@ -212,11 +189,7 @@ static int timer_close(FAR struct file *filep)
       upper->crefs--;
     }
 
-  //sem_post(&upper->exclsem);
-  ret = OK;
-  
-errout:
-  return ret;
+  return OK;
 }
 
 /************************************************************************************
@@ -254,7 +227,7 @@ static ssize_t timer_write(FAR struct file *filep, FAR const char *buffer,
  * Description:
  *   The standard ioctl method.  This is where ALL of the timer work is
  *   done.
- *   
+ *
  ************************************************************************************/
 
 static int timer_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
@@ -266,14 +239,6 @@ static int timer_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   tmrvdbg("cmd: %d arg: %ld\n", cmd, arg);
   DEBUGASSERT(upper && lower);
-
-  /* Get exclusive access to the device structures */
-
-  ret = 1; //sem_wait(&upper->exclsem);
-  if (ret < 0)
-    {
-      return ret;
-    }
 
   /* Handle built-in ioctl commands */
 
@@ -288,7 +253,7 @@ static int timer_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       {
         /* Start the timer, resetting the time to the current timeout */
 
-        if(lower->ops->start)
+        if (lower->ops->start)
           {
             ret = lower->ops->start(lower);
           }
@@ -308,7 +273,7 @@ static int timer_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       {
         /* Stop the timer */
 
-        if(lower->ops->start)
+        if (lower->ops->start)
           {
             ret = lower->ops->stop(lower);
           }
@@ -435,7 +400,6 @@ static int timer_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       break;
     }
 
-  //sem_post(&upper->exclsem);
   return ret;
 }
 
@@ -492,7 +456,6 @@ FAR void *timer_register(FAR const char *path,
    * by kmm_zalloc()).
    */
 
-  //sem_init(&upper->exclsem, 0, 1);
   upper->lower = lower;
 
   /* Copy the registration path */
@@ -519,7 +482,6 @@ errout_with_path:
   kmm_free(upper->path);
 
 errout_with_upper:
-  //sem_destroy(&upper->exclsem);
   kmm_free(upper);
 
 errout:
@@ -566,7 +528,6 @@ void timer_unregister(FAR void *handle)
   /* Then free all of the driver resources */
 
   kmm_free(upper->path);
-  //sem_destroy(&upper->exclsem);
   kmm_free(upper);
 }
 

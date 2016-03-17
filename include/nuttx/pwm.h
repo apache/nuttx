@@ -122,17 +122,30 @@
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+
+#ifdef CONFIG_PWM_MULTICHAN
+struct pwm_chan_s
+{
+  ub16_t  duty;
+  uint8_t channel;
+};
+#endif
+
 /* This structure describes the characteristics of the pulsed output */
 
 struct pwm_info_s
 {
-  uint32_t frequency; /* Frequency of the pulse train */
-  ub16_t   duty;      /* Duty of the pulse train, "1"-to-"0" duration.
-                       * Maximum: 65535/65536 (0x0000ffff)
-                       * Minimum:     1/65536 (0x00000001) */
-#ifdef CONFIG_PWM_PULSECOUNT
-  uint32_t count;     /* The number of pulse to generate.  0 means to
-                       * generate an indefinite number of pulses  */
+  uint32_t           frequency; /* Frequency of the pulse train */
+#ifdef CONFIG_PWM_MULTICHAN
+  struct pwm_chan_s  channels[CONFIG_PWM_NCHANNELS];
+#else
+  ub16_t             duty;      /* Duty of the pulse train, "1"-to-"0" duration.
+                                 * Maximum: 65535/65536 (0x0000ffff)
+                                 * Minimum:     1/65536 (0x00000001) */
+#  ifdef CONFIG_PWM_PULSECOUNT
+  uint32_t           count;     /* The number of pulse to generate.  0 means to
+                                 * generate an indefinite number of pulses */
+#  endif
 #endif
 };
 

@@ -42,7 +42,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#include "lib_internal.h"
+#include "libc.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -67,7 +67,7 @@
  *   This API should not be used because it is inherently unsafe.  Consider
  *   using fgets which is safer and slightly more efficient.
  *
- **************************************************************************/
+ ****************************************************************************/
 
 FAR char *gets(FAR char *s)
 {

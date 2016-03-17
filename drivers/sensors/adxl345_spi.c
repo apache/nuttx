@@ -46,6 +46,7 @@
 #include <debug.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/spi/spi.h>
 #include <nuttx/sensors/adxl345.h>
 
 #include "adxl345.h"
@@ -63,16 +64,15 @@
  *
  ****************************************************************************/
 
-#ifndef CONFIG_SPI_OWNBUS
 static inline void adxl345_configspi(FAR struct spi_dev_s *spi)
 {
   /* Configure SPI for the ADXL345 */
 
   SPI_SETMODE(spi, SPIDEV_MODE3);
   SPI_SETBITS(spi, 8);
-  SPI_SETFREQUENCY(spi, ADXL345_SPI_MAXFREQUENCY);
+  (void)SPI_HWFEATURES(spi, 0);
+  (void)SPI_SETFREQUENCY(spi, ADXL345_SPI_MAXFREQUENCY);
 }
-#endif
 
 /****************************************************************************
  * Public Functions
@@ -92,15 +92,13 @@ uint8_t adxl345_getreg8(FAR struct adxl345_dev_s *priv, uint8_t regaddr)
 
   /* If SPI bus is shared then lock and configure it */
 
-#ifndef CONFIG_SPI_OWNBUS
   (void)SPI_LOCK(priv->spi, true);
   adxl345_configspi(priv->spi);
-#endif
 
   /* Select the ADXL345 */
 
   SPI_SELECT(priv->spi, SPIDEV_ACCELEROMETER, true);
-  
+
   /* Send register to read and get the next byte */
 
   (void)SPI_SEND(priv->spi, regaddr);
@@ -112,9 +110,7 @@ uint8_t adxl345_getreg8(FAR struct adxl345_dev_s *priv, uint8_t regaddr)
 
   /* Unlock bus */
 
-#ifndef CONFIG_SPI_OWNBUS
   (void)SPI_LOCK(priv->spi, false);
-#endif
 
 #ifdef CONFIG_ADXL345_REGDEBUG
   dbg("%02x->%02x\n", regaddr, regval);
@@ -139,15 +135,13 @@ void adxl345_putreg8(FAR struct adxl345_dev_s *priv, uint8_t regaddr,
 
   /* If SPI bus is shared then lock and configure it */
 
-#ifndef CONFIG_SPI_OWNBUS
   (void)SPI_LOCK(priv->spi, true);
   adxl345_configspi(priv->spi);
-#endif
 
   /* Select the ADXL345 */
 
   SPI_SELECT(priv->spi, SPIDEV_ACCELEROMETER, true);
-  
+
   /* Send register address and set the value */
 
   (void)SPI_SEND(priv->spi, regaddr);
@@ -158,9 +152,8 @@ void adxl345_putreg8(FAR struct adxl345_dev_s *priv, uint8_t regaddr,
   SPI_SELECT(priv->spi, SPIDEV_ACCELEROMETER, false);
 
   /* Unlock bus */
-#ifndef CONFIG_SPI_OWNBUS
+
   (void)SPI_LOCK(priv->spi, false);
-#endif
 }
 
 /****************************************************************************
@@ -177,15 +170,13 @@ uint16_t adxl345_getreg16(FAR struct adxl345_dev_s *priv, uint8_t regaddr)
 
   /* If SPI bus is shared then lock and configure it */
 
-#ifndef CONFIG_SPI_OWNBUS
   (void)SPI_LOCK(priv->spi, true);
   adxl345_configspi(priv->spi);
-#endif
 
   /* Select the ADXL345 */
 
   SPI_SELECT(priv->spi, SPIDEV_ACCELEROMETER, true);
-  
+
   /* Send register to read and get the next 2 bytes */
 
   (void)SPI_SEND(priv->spi, regaddr);
@@ -197,9 +188,7 @@ uint16_t adxl345_getreg16(FAR struct adxl345_dev_s *priv, uint8_t regaddr)
 
   /* Unlock bus */
 
-#ifndef CONFIG_SPI_OWNBUS
   (void)SPI_LOCK(priv->spi, false);
-#endif
 
 #ifdef CONFIG_ADXL345_REGDEBUG
   dbg("%02x->%04x\n", regaddr, regval);

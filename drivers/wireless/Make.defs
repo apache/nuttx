@@ -1,7 +1,7 @@
 ############################################################################
 # drivers/wireless/Make.defs
 #
-#   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2011-2012, 2016 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,13 @@
 #
 ############################################################################
 
-ifeq ($(CONFIG_WIRELESS),y)
+ifeq ($(CONFIG_DRIVERS_WIRELESS),y)
+
+# Include IEEE 802.15.4 support
+
+ifeq ($(CONFIG_DRIVERS_IEEE802154),y)
+include wireless$(DELIM)ieee802154$(DELIM)Make.defs
+endif
 
 # Include wireless drivers
 
@@ -47,6 +53,10 @@ endif
 
 ifeq ($(CONFIG_WL_CC3000),y)
 include wireless$(DELIM)cc3000$(DELIM)Make.defs
+endif
+
+ifeq ($(CONFIG_WL_PN532),y)
+CSRCS += pn532.c
 endif
 
 # Include wireless devices build support

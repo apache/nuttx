@@ -540,6 +540,10 @@ config SERIAL_OFLOWCONTROL
 	bool
 	default n
 
+config SERIAL_DMA
+	bool
+	default n
+
 config SERIAL_IFLOWCONTROL_WATERMARKS
 	bool "RX flow control watermarks"
 	default n
@@ -762,6 +766,13 @@ config UART_OFLOWCONTROL
 	---help---
 		Enable UART CTS flow control
 
+config UART_DMA
+	bool "UART DMA support"
+	default n
+	select SERIAL_DMA
+	---help---
+		Enable DMA transfers on UART
+
 endmenu
 
 menu "UART0 Configuration"
@@ -819,6 +830,13 @@ config UART0_OFLOWCONTROL
 	select SERIAL_OFLOWCONTROL
 	---help---
 		Enable UART0 CTS flow control
+
+config UART0_DMA
+	bool "UART0 DMA support"
+	default n
+	select SERIAL_DMA
+	---help---
+		Enable DMA transfers on UART0
 
 endmenu
 
@@ -878,6 +896,13 @@ config USART0_OFLOWCONTROL
 	---help---
 		Enable USART0 CTS flow control
 
+config USART0_DMA
+	bool "USART0 DMA support"
+	default n
+	select SERIAL_DMA
+	---help---
+		Enable DMA transfers on USART0
+
 endmenu
 
 menu "UART1 Configuration"
@@ -935,6 +960,13 @@ config UART1_OFLOWCONTROL
 	select SERIAL_OFLOWCONTROL
 	---help---
 		Enable UART1 CTS flow control
+
+config UART1_DMA
+	bool "UART1 DMA support"
+	default n
+	select SERIAL_DMA
+	---help---
+		Enable DMA transfers on UART1
 
 endmenu
 
@@ -994,6 +1026,13 @@ config USART1_OFLOWCONTROL
 	---help---
 		Enable USART1 CTS flow control
 
+config USART1_DMA
+	bool "USART1 DMA support"
+	default n
+	select SERIAL_DMA
+	---help---
+		Enable DMA transfers on USART1
+
 endmenu
 
 menu "UART2 Configuration"
@@ -1051,6 +1090,13 @@ config UART2_OFLOWCONTROL
 	select SERIAL_OFLOWCONTROL
 	---help---
 		Enable UART2 CTS flow control
+
+config UART2_DMA
+	bool "UART2 DMA support"
+	default n
+	select SERIAL_DMA
+	---help---
+		Enable DMA transfers on UART2
 
 endmenu
 
@@ -1110,6 +1156,12 @@ config USART2_OFLOWCONTROL
 	---help---
 		Enable USART2 CTS flow control
 
+config USART2_DMA
+	bool "USART2 DMA support"
+	default n
+	select SERIAL_DMA
+	---help---
+		Enable DMA transfers on USART2
 endmenu
 
 menu "UART3 Configuration"
@@ -1167,6 +1219,13 @@ config UART3_OFLOWCONTROL
 	select SERIAL_OFLOWCONTROL
 	---help---
 		Enable UART3 CTS flow control
+
+config UART3_DMA
+	bool "UART3 DMA support"
+	default n
+	select SERIAL_DMA
+	---help---
+		Enable DMA transfers on UART3
 
 endmenu
 
@@ -1226,6 +1285,13 @@ config USART3_OFLOWCONTROL
 	---help---
 		Enable USART3 CTS flow control
 
+config USART3_DMA
+	bool "USART3 DMA support"
+	default n
+	select SERIAL_DMA
+	---help---
+		Enable DMA transfers on USART3
+
 endmenu
 
 menu "UART4 Configuration"
@@ -1283,6 +1349,13 @@ config UART4_OFLOWCONTROL
 	select SERIAL_OFLOWCONTROL
 	---help---
 		Enable UART4 CTS flow control
+
+config UART4_DMA
+	bool "UART4 DMA support"
+	default n
+	select SERIAL_DMA
+	---help---
+		Enable DMA transfers on UART4
 
 endmenu
 
@@ -1342,6 +1415,13 @@ config USART4_OFLOWCONTROL
 	---help---
 		Enable USART4 CTS flow control
 
+config USART4_DMA
+	bool "USART4 DMA support"
+	default n
+	select SERIAL_DMA
+	---help---
+		Enable DMA transfers on USART4
+
 endmenu
 
 menu "UART5 Configuration"
@@ -1399,6 +1479,13 @@ config UART5_OFLOWCONTROL
 	select SERIAL_OFLOWCONTROL
 	---help---
 		Enable UART5 CTS flow control
+
+config UART5_DMA
+	bool "UART5 DMA support"
+	default n
+	select SERIAL_DMA
+	---help---
+		Enable DMA transfers on UART5
 
 endmenu
 
@@ -1458,6 +1545,13 @@ config USART5_OFLOWCONTROL
 	---help---
 		Enable USART5 CTS flow control
 
+config USART5_DMA
+	bool "USART5 DMA support"
+	default n
+	select SERIAL_DMA
+	---help---
+		Enable DMA transfers on USART5
+
 endmenu
 
 menu "USART6 Configuration"
@@ -1515,6 +1609,13 @@ config USART6_OFLOWCONTROL
 	select SERIAL_OFLOWCONTROL
 	---help---
 		Enable USART6 CTS flow control
+
+config USART6_DMA
+	bool "USART6 DMA support"
+	default n
+	select SERIAL_DMA
+	---help---
+		Enable DMA transfers on USART6
 
 endmenu
 
@@ -1574,6 +1675,13 @@ config UART6_OFLOWCONTROL
 	---help---
 		Enable UART6 CTS flow control
 
+config UART6_DMA
+	bool "UART6 DMA support"
+	default n
+	select SERIAL_DMA
+	---help---
+		Enable DMA transfers on UART6
+
 endmenu
 
 menu "USART7 Configuration"
@@ -1631,6 +1739,13 @@ config USART7_OFLOWCONTROL
 	select SERIAL_OFLOWCONTROL
 	---help---
 		Enable USART7 CTS flow control
+
+config USART7_DMA
+	bool "USART7 DMA support"
+	default n
+	select SERIAL_DMA
+	---help---
+		Enable DMA transfers on USART7
 
 endmenu
 
@@ -1690,6 +1805,13 @@ config UART7_OFLOWCONTROL
 	---help---
 		Enable UART7 CTS flow control
 
+config UART7_DMA
+	bool "UART7 DMA support"
+	default n
+	select SERIAL_DMA
+	---help---
+		Enable DMA transfers on UART7
+
 endmenu
 
 menu "USART8 Configuration"
@@ -1748,6 +1870,13 @@ config USART8_OFLOWCONTROL
 	---help---
 		Enable USART8 CTS flow control
 
+config USART8_DMA
+	bool "USART8 DMA support"
+	default n
+	select SERIAL_DMA
+	---help---
+		Enable DMA transfers on USART8
+
 endmenu
 
 menu "UART8 Configuration"
@@ -1805,6 +1934,13 @@ config UART8_OFLOWCONTROL
 	select SERIAL_OFLOWCONTROL
 	---help---
 		Enable UART8 CTS flow control
+
+config UART8_DMA
+	bool "UART8 DMA support"
+	default n
+	select SERIAL_DMA
+	---help---
+		Enable DMA transfers on UART8
 
 endmenu
 

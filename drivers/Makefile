@@ -52,10 +52,14 @@ VPATH = .
 include analog$(DELIM)Make.defs
 include audio$(DELIM)Make.defs
 include bch$(DELIM)Make.defs
+include i2c$(DELIM)Make.defs
 include input$(DELIM)Make.defs
 include ioexpander$(DELIM)Make.defs
 include lcd$(DELIM)Make.defs
+include leds$(DELIM)Make.defs
+include loop$(DELIM)Make.defs
 include mmcsd$(DELIM)Make.defs
+include modem$(DELIM)Make.defs
 include mtd$(DELIM)Make.defs
 include eeprom$(DELIM)Make.defs
 include net$(DELIM)Make.defs
@@ -76,7 +80,7 @@ ifneq ($(CONFIG_NFILE_DESCRIPTORS),0)
   CSRCS += dev_null.c dev_zero.c
 
 ifneq ($(CONFIG_DISABLE_MOUNTPOINT),y)
-  CSRCS += ramdisk.c loop.c
+  CSRCS += ramdisk.c
 ifeq ($(CONFIG_DRVR_WRITEBUFFER),y)
   CSRCS += rwbuffer.c
 else

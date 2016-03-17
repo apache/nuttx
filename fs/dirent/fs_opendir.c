@@ -261,7 +261,7 @@ FAR DIR *opendir(FAR const char *path)
 
   if (!inode)
     {
-      /* 'path' is not a does not exist.*/
+      /* 'path' is not a does not exist. */
 
       ret = ENOTDIR;
       goto errout_with_semaphore;
@@ -274,7 +274,7 @@ FAR DIR *opendir(FAR const char *path)
   dir = (FAR struct fs_dirent_s *)kumm_zalloc(sizeof(struct fs_dirent_s));
   if (!dir)
     {
-      /* Insufficient memory to complete the operation.*/
+      /* Insufficient memory to complete the operation. */
 
       ret = ENOMEM;
       goto errout_with_semaphore;
@@ -350,7 +350,7 @@ FAR DIR *opendir(FAR const char *path)
     }
 
   inode_semgive();
-  return ((DIR*)dir);
+  return ((FAR DIR *)dir);
 
   /* Nasty goto's make error handling simpler */
 

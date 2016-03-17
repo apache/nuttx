@@ -1,7 +1,7 @@
 /****************************************************************************
  *  sched/group/group_addrenv.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,16 +41,13 @@
 
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/sched.h>
 
 #include "sched/sched.h"
 #include "group/group.h"
 
 #ifdef CONFIG_ARCH_ADDRENV
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Data
@@ -63,10 +60,6 @@
  */
 
 gid_t g_gid_current;
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -114,7 +107,7 @@ int group_addrenv(FAR struct tcb_s *tcb)
 
   if (!tcb)
     {
-      tcb = (FAR struct tcb_s *)g_readytorun.head;
+      tcb = this_task();
     }
 
   DEBUGASSERT(tcb && tcb->group);
@@ -138,7 +131,7 @@ int group_addrenv(FAR struct tcb_s *tcb)
 
   /* Are we going to change address environments? */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   if (gid != g_gid_current)
     {
       /* Yes.. Is there a current address environment in place? */
@@ -174,11 +167,11 @@ int group_addrenv(FAR struct tcb_s *tcb)
         }
 
       /* Save the new, current group */
-  
+
       g_gid_current = gid;
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 

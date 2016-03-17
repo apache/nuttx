@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/binfmt/symtab.h
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,34 +41,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Types
- ****************************************************************************/
-
-/* struct symbtab_s describes one entry in the symbol table.  A symbol table
- * is a fixed size array of struct symtab_s.  The information is intentionally
- * minimal and supports only:
- *
- * 1. Function pointers as sym_values.  Of other kinds of values need to be
- *    supported, then typing information would also need to be included in
- *    the structure.
- *
- * 2. Fixed size arrays.  There is no explicit provisional for dyanamically
- *    adding or removing entries from the symbol table (realloc might be
- *    used for that purpose if needed).  The intention is to support only
- *    fixed size arrays completely defined at compilation or link time.
- */
-
-struct symtab_s
-{
-  FAR const char *sym_name;          /* A pointer to the symbol name string */
-  FAR const void *sym_value;         /* The value associated witht the string */
-};
+#include <nuttx/symtab.h>
 
 /****************************************************************************
  * Public Functions
@@ -87,7 +60,7 @@ extern "C"
  * Name: exec_getsymtab
  *
  * Description:
- *   Get the current symbol table selection as an atomic operation.
+ *   Get the current application symbol table selection as an atomic operation.
  *
  * Input Parameters:
  *   symtab - The location to store the symbol table.
@@ -104,7 +77,7 @@ void exec_getsymtab(FAR const struct symtab_s **symtab, FAR int *nsymbols);
  * Name: exec_setsymtab
  *
  * Description:
- *   Select a new symbol table selection as an atomic operation.
+ *   Select a new application symbol table selection as an atomic operation.
  *
  * Input Parameters:
  *   symtab - The new symbol table.
@@ -117,82 +90,4 @@ void exec_getsymtab(FAR const struct symtab_s **symtab, FAR int *nsymbols);
 
 void exec_setsymtab(FAR const struct symtab_s *symtab, int nsymbols);
 
-/****************************************************************************
- * Name: symtab_findbyname
- *
- * Description:
- *   Find the symbol in the symbol table with the matching name.
- *   This version assumes that table is not ordered with respect to symbol
- *   name and, hence, access time will be linear with respect to nsyms.
- *
- * Returned Value:
- *   A reference to the symbol table entry if an entry with the matching
- *   name is found; NULL is returned if the entry is not found.
- *
- ****************************************************************************/
-
-FAR const struct symtab_s *
-symtab_findbyname(FAR const struct symtab_s *symtab,
-                  FAR const char *name, int nsyms);
-
-/****************************************************************************
- * Name: symtab_findorderedbyname
- *
- * Description:
- *   Find the symbol in the symbol table with the matching name.
- *   This version assumes that table ordered with respect to symbol name.
- *
- * Returned Value:
- *   A reference to the symbol table entry if an entry with the matching
- *   name is found; NULL is returned if the entry is not found.
- *
- ****************************************************************************/
-
-FAR const struct symtab_s *
-symtab_findorderedbyname(FAR const struct symtab_s *symtab,
-                         FAR const char *name, int nsyms);
-
-/****************************************************************************
- * Name: symtab_findbyvalue
- *
- * Description:
- *   Find the symbol in the symbol table whose value closest (but not greater
- *   than), the provided value. This version assumes that table is not ordered
- *   with respect to symbol name and, hence, access time will be linear with
- *   respect to nsyms.
- *
- * Returned Value:
- *   A reference to the symbol table entry if an entry with the matching
- *   name is found; NULL is returned if the entry is not found.
- *
- ****************************************************************************/
-
-FAR const struct symtab_s *
-symtab_findbyvalue(FAR const struct symtab_s *symtab,
-                   FAR void *value, int nsyms);
-
-/****************************************************************************
- * Name: symtab_findorderedbyvalue
- *
- * Description:
- *   Find the symbol in the symbol table whose value closest (but not greater
- *   than), the provided value. This version assumes that table is ordered
- *   with respect to symbol name.
- *
- * Returned Value:
- *   A reference to the symbol table entry if an entry with the matching
- *   name is found; NULL is returned if the entry is not found.
- *
- ****************************************************************************/
-
-FAR const struct symtab_s *
-symtab_findorderedbyvalue(FAR const struct symtab_s *symtab,
-                          FAR void *value, int nsyms);
-
-#undef EXTERN
-#if defined(__cplusplus)
-}
-#endif
-
 #endif /* __INCLUDE_NUTTX_BINFMT_SYMTAB_H */
-

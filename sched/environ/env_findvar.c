@@ -48,10 +48,6 @@
 #include "environ/environ.h"
 
 /****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -67,7 +63,7 @@ static bool env_cmpname(const char *pszname, const char *peqname)
 
   /* On sucess, pszname will end with '\0' and peqname with '=' */
 
-  if ( *pszname == '\0' && *peqname == '=' )
+  if (*pszname == '\0' && *peqname == '=')
     {
       return true;
     }

@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/semaphore/sem_wait.c
  *
- *   Copyright (C) 2007-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,30 +43,12 @@
 #include <semaphore.h>
 #include <errno.h>
 #include <assert.h>
+
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 
 #include "sched/sched.h"
 #include "semaphore/semaphore.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Type Declarations
- ****************************************************************************/
-
-/****************************************************************************
- * Global Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -96,8 +78,8 @@
 
 int sem_wait(FAR sem_t *sem)
 {
-  FAR struct tcb_s *rtcb = (FAR struct tcb_s*)g_readytorun.head;
-  irqstate_t saved_state;
+  FAR struct tcb_s *rtcb = this_task();
+  irqstate_t flags;
   int ret  = ERROR;
 
   /* This API should not be called from interrupt handlers */
@@ -115,7 +97,7 @@ int sem_wait(FAR sem_t *sem)
        * handler.
        */
 
-      saved_state = irqsave();
+      flags = enter_critical_section();
 
       /* Check if the lock is available */
 
@@ -206,7 +188,7 @@ int sem_wait(FAR sem_t *sem)
 
       /* Interrupts may now be enabled. */
 
-      irqrestore(saved_state);
+      leave_critical_section(flags);
     }
 
   return ret;

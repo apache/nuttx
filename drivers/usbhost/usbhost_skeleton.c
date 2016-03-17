@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/usbhost/usbhost_skeleton.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,6 +47,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/arch.h>
@@ -250,7 +251,7 @@ static inline FAR struct usbhost_state_s *usbhost_allocclass(void)
 
   DEBUGASSERT(!up_interrupt_context());
   priv = (FAR struct usbhost_state_s *)kmm_malloc(sizeof(struct usbhost_state_s));
-  uvdbg("Allocated: %p\n", priv);;
+  uvdbg("Allocated: %p\n", priv);
   return priv;
 }
 
@@ -276,7 +277,7 @@ static inline void usbhost_freeclass(FAR struct usbhost_state_s *usbclass)
    * executing from an interrupt handler.
    */
 
-  uvdbg("Freeing: %p\n", usbclass);;
+  uvdbg("Freeing: %p\n", usbclass);
   kmm_free(usbclass);
 }
 
@@ -293,7 +294,7 @@ static int usbhost_allocdevno(FAR struct usbhost_state_s *priv)
   irqstate_t flags;
   int devno;
 
-  flags = irqsave();
+  flags = enter_critical_section();
   for (devno = 0; devno < 26; devno++)
     {
       uint32_t bitno = 1 << devno;
@@ -301,12 +302,12 @@ static int usbhost_allocdevno(FAR struct usbhost_state_s *priv)
         {
           g_devinuse |= bitno;
           priv->devchar = 'a' + devno;
-          irqrestore(flags);
+          leave_critical_section(flags);
           return OK;
         }
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return -EMFILE;
 }
 
@@ -316,9 +317,9 @@ static void usbhost_freedevno(FAR struct usbhost_state_s *priv)
 
   if (devno >= 0 && devno < 26)
     {
-      irqstate_t flags = irqsave();
+      irqstate_t flags = enter_critical_section();
       g_devinuse &= ~(1 << devno);
-      irqrestore(flags);
+      leave_critical_section(flags);
     }
 }
 
@@ -438,7 +439,7 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
 
   /* Get the total length of the configuration descriptor (little endian).
    * It might be a good check to get the number of interfaces here too.
-  */
+   */
 
   remaining = (int)usbhost_getle16(cfgdesc->totallen);
 
@@ -742,7 +743,7 @@ static void usbhost_putle16(uint8_t *dest, uint16_t val)
 
 static inline uint32_t usbhost_getle32(const uint8_t *val)
 {
- /* Little endian means LS halfword first in byte stream */
+  /* Little endian means LS halfword first in byte stream */
 
   return (uint32_t)usbhost_getle16(&val[2]) << 16 | (uint32_t)usbhost_getle16(val);
 }
@@ -1003,7 +1004,7 @@ static int usbhost_disconnected(struct usbhost_class_s *usbclass)
    * longer available.
    */
 
-  flags              = irqsave();
+  flags              = enter_critical_section();
   priv->disconnected = true;
 
   /* Now check the number of references on the class instance.  If it is one,
@@ -1036,7 +1037,7 @@ static int usbhost_disconnected(struct usbhost_class_s *usbclass)
         }
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 

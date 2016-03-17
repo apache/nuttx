@@ -22,14 +22,6 @@ config SPI_SLAVE_DMA
 
 endif
 
-config SPI_OWNBUS
-	bool "SPI single device"
-	default n
-	---help---
-		Set if there is only one active device on the SPI bus.  No locking or
-		SPI configuration will be performed. It is not necessary for clients to
-		lock, re-configure, etc.
-
 config SPI_EXCHANGE
 	bool "SPI exchange"
 	default y
@@ -62,6 +54,23 @@ config SPI_BITBANG
 		Enable support for a generic SPI bit-bang device.
 		See include/nuttx/spi/spi_bitbang.h for further information.
 
+config SPI_HWFEATURES
+	bool
+	default n
+	---help---
+		Selected only if a specific H/W feature is selected.  This is
+		basically the OR of any specific hardware feature and eanbles
+		the SPI hwfeatures() interface method.
+
+config SPI_CRCGENERATION
+	bool
+	default n
+	select SPI_HWFEATURES
+	---help---
+		Selected by MCU Kconfig logic if implementation supports automatic
+		generation of SPI CRCs.  Enables the HWFEAT_CRCGENERATION option
+		as well as the hwfeartures() interface method.
+
 if SPI_BITBANG
 
 config SPI_BITBANG_VARWIDTH
@@ -71,5 +80,5 @@ config SPI_BITBANG_VARWIDTH
 		Enable support for a variable data width transfers.  Default: 8-bit
 		only.
 
-endif
-endif
+endif # SPI_BITBANG
+endif # SPI

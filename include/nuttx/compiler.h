@@ -40,6 +40,8 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -127,26 +129,44 @@
  */
 
 #if defined(__m32c__)
+/* No I-space access qualifiers */
+
+# define IOBJ
+# define IPTR
+
 /* Select the small, 16-bit addressing model */
 
-# define  CONFIG_SMALL_MEMORY 1
+# define CONFIG_SMALL_MEMORY 1
 
 /* Long and int are not the same size */
 
-# define  CONFIG_LONG_IS_NOT_INT 1
+# define CONFIG_LONG_IS_NOT_INT 1
 
 /* Pointers and int are the same size */
 
 # undef  CONFIG_PTR_IS_NOT_INT
 
 #elif defined(__AVR__)
-/* Select the small, 16-bit addressing model */
+# if defined(CONFIG_AVR_HAS_MEMX_PTR)
+  /* I-space access qualifiers needed by Harvard architecture */
 
-# define  CONFIG_SMALL_MEMORY 1
+#  define IOBJ __flash
+#  define IPTR __memx
+
+# else
+/* No I-space access qualifiers */
+
+#  define IOBJ
+#  define IPTR
+# endif
+
+/* Select the small, 16-bit addressing model (for D-Space) */
+
+# define CONFIG_SMALL_MEMORY 1
 
 /* Long and int are not the same size */
 
-# define  CONFIG_LONG_IS_NOT_INT 1
+# define CONFIG_LONG_IS_NOT_INT 1
 
 /* Pointers and int are the same size */
 
@@ -159,9 +179,14 @@
 #  define CONFIG_HAVE_FARPOINTER 1
 
 #elif defined(__mc68hc1x__)
+/* No I-space access qualifiers */
+
+# define IOBJ
+# define IPTR
+
 /* Select the small, 16-bit addressing model */
 
-# define  CONFIG_SMALL_MEMORY 1
+# define CONFIG_SMALL_MEMORY 1
 
 /* Normally, mc68hc1x code is compiled with the -mshort option
  * which results in a 16-bit integer.  If -mnoshort is defined
@@ -171,22 +196,28 @@
 # if __INT__ == 16
 /* int is 16-bits, long is 32-bits */
 
-#   define  CONFIG_LONG_IS_NOT_INT 1
+#   define CONFIG_LONG_IS_NOT_INT 1
 
-/*  Pointers and int are the same size (16-bits) */
+/* Pointers and int are the same size (16-bits) */
 
 #   undef  CONFIG_PTR_IS_NOT_INT
-#else
+# else
 /* int and long are both 32-bits */
 
 #   undef  CONFIG_LONG_IS_NOT_INT
 
-/*  Pointers and int are NOT the same size */
+/* Pointers and int are NOT the same size */
 
-#   define  CONFIG_PTR_IS_NOT_INT 1
-#endif
+#   define CONFIG_PTR_IS_NOT_INT 1
+# endif
 
 #else
+
+/* No I-space access qualifiers */
+
+# define IOBJ
+# define IPTR
+
 /* Select the large, 32-bit addressing model */
 
 # undef  CONFIG_SMALL_MEMORY
@@ -347,6 +378,11 @@
 # define CONFIG_HAVE_FUNCTIONNAME 1 /* Has __FUNCTION__ */
 # define CONFIG_HAVE_FILENAME     1 /* Has __FILE__ */
 
+/* No I-space access qualifiers */
+
+# define IOBJ
+# define IPTR
+
 /* Attributes
  *
  * The Zilog compiler does not support weak symbols
@@ -476,11 +512,11 @@
 #endif
 
 /****************************************************************************
- * Global Function Prototypes
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Global Function Prototypes
+ * Public Function Prototypes
  ****************************************************************************/
 
 #ifdef __cplusplus
@@ -490,7 +526,6 @@ extern "C"
 #else
 #define EXTERN extern
 #endif
-
 
 #undef EXTERN
 #ifdef __cplusplus

@@ -3,6 +3,8 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
+if DRIVERS_WIRELESS
+
 config WL_CC1101
 	bool "CC1101 RF transceiver support"
 	default n
@@ -14,6 +16,15 @@ menuconfig WL_CC3000
 	select SPI
 
 source drivers/wireless/cc3000/Kconfig
+
+menuconfig DRIVERS_IEEE802154
+	bool "IEEE 802.15.4 Device Support"
+	default n
+	depends on EXPERIMENTAL
+	---help---
+		This directory holds implementations of IEEE802.15.4 device drivers.
+
+source drivers/wireless/ieee802154/Kconfig
 
 config WL_NRF24L01
 	bool "nRF24l01+ transceiver support"
@@ -59,5 +70,37 @@ config WL_NRF24L01_RXFIFO_LEN
 		Length of the software based fifo used to store content of
 		received messages.
 
-endif
-endif
+endif # WL_NRF24L01_RXSUPPORT
+endif # WL_NRF24L01
+
+config WL_PN532
+	bool "pn532 NFC-chip support"
+	default n
+	select SPI
+	---help---
+		This options adds driver support for the PN532 NFC chip.
+
+if WL_PN532
+
+config PN532_SPI_FREQ
+	int "SPI frequency for PN532"
+	default 1000000
+	depends on WL_PN532
+
+config WL_PN532_DEBUG
+	bool "Enable PN532 debug"
+	default n
+	depends on WL_PN532
+
+config WL_PN532_DEBUG_TX
+	bool "trace TX frames"
+	default n
+	depends on WL_PN532_DEBUG
+
+config WL_PN532_DEBUG_RX
+	bool "trace RX frames"
+	default n
+	depends on WL_PN532_DEBUG
+
+endif # WL_PN532
+endif # DRIVERS_WIRELESS

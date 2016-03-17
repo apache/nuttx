@@ -48,19 +48,11 @@
 #include <netinet/in.h>
 
 #include <nuttx/net/net.h>
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 
 #include "arp/arp.h"
 
 #ifdef CONFIG_NET_ARP_SEND
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
 
 /****************************************************************************
  * Private Data
@@ -69,10 +61,6 @@
 /* List of tasks waiting for ARP events */
 
 static FAR struct arp_notify_s *g_arp_waiters;
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -104,10 +92,10 @@ void arp_wait_setup(in_addr_t ipaddr, FAR struct arp_notify_s *notify)
 
   /* Add the wait structure to the list with interrupts disabled */
 
-  flags             = irqsave();
+  flags             = enter_critical_section();
   notify->nt_flink  = g_arp_waiters;
   g_arp_waiters     = notify;
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -134,7 +122,7 @@ int arp_wait_cancel(FAR struct arp_notify_s *notify)
    * head of the list).
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   for (prev = NULL, curr = g_arp_waiters;
        curr && curr != notify;
        prev = curr, curr = curr->nt_flink);
@@ -154,7 +142,7 @@ int arp_wait_cancel(FAR struct arp_notify_s *notify)
       ret = OK;
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   (void)sem_destroy(&notify->nt_sem);
   return ret;
 }
@@ -184,7 +172,7 @@ int arp_wait(FAR struct arp_notify_s *notify, FAR struct timespec *timeout)
    * enabled while we wait.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   DEBUGVERIFY(clock_gettime(CLOCK_REALTIME, &abstime));
 
   abstime.tv_sec  += timeout->tv_sec;
@@ -220,7 +208,7 @@ int arp_wait(FAR struct arp_notify_s *notify, FAR struct timespec *timeout)
 
   /* Re-enable interrupts and return the result of the wait */
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return ret;
 }
 

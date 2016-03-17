@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/tcp/tcp.h
  *
- *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -101,12 +101,6 @@
     devif_conn_callback_free(g_netdevices, cb, NULL)
 #endif
 
-/* Get the current maximum segment size that can be sent on the current
- * TCP connection.
- */
-
-#define tcp_mss(conn)              ((conn)->mss)
-
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
 /* TCP write buffer access macros */
 
@@ -132,6 +126,7 @@
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
+
 /* Representation of a TCP connection.
  *
  * The tcp_conn_s structure is used for identifying a connection. All
@@ -413,10 +408,11 @@ FAR struct tcp_conn_s *tcp_active(FAR struct net_driver_s *dev,
 FAR struct tcp_conn_s *tcp_nextconn(FAR struct tcp_conn_s *conn);
 
 /****************************************************************************
- * Function: tcp_find_ipv4_device
+ * Function: tcp_local_ipv4_device
  *
  * Description:
- *   Select the network driver to use with the IPv4 TCP transaction.
+ *   Select the network driver to use with the IPv4 TCP transaction based
+ *   on the locally bound IPv4 address
  *
  * Input Parameters:
  *   conn - TCP connection structure.  The locally bound address, laddr,
@@ -424,19 +420,41 @@ FAR struct tcp_conn_s *tcp_nextconn(FAR struct tcp_conn_s *conn);
  *
  * Returned Value:
  *   Zero (OK) is returned on success.  A negated errno value is returned
- *   on failure.  -ENODEV is the only expected error value.
+ *   on failure.  -ENETUNREACH is the only expected error value.
  *
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPv4
-int tcp_find_ipv4_device(FAR struct tcp_conn_s *conn);
+int tcp_local_ipv4_device(FAR struct tcp_conn_s *conn);
 #endif
 
 /****************************************************************************
- * Function: tcp_find_ipv6_device
+ * Function: tcp_remote_ipv4_device
  *
  * Description:
- *   Select the network driver to use with the IPv6 TCP transaction.
+ *   Select the network driver to use with the IPv4 TCP transaction based
+ *   on the remotely connected IPv4 address
+ *
+ * Input Parameters:
+ *   conn - TCP connection structure.  The remotely conected address, raddr,
+ *     should be set to a non-zero value in this structure.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success.  A negated errno value is returned
+ *   on failure.  -ENETUNREACH is the only expected error value.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IPv4
+int tcp_remote_ipv4_device(FAR struct tcp_conn_s *conn);
+#endif
+
+/****************************************************************************
+ * Function: tcp_local_ipv6_device
+ *
+ * Description:
+ *   Select the network driver to use with the IPv6 TCP transaction based
+ *   on the locally bound IPv6 address
  *
  * Input Parameters:
  *   conn - TCP connection structure.  The locally bound address, laddr,
@@ -449,7 +467,28 @@ int tcp_find_ipv4_device(FAR struct tcp_conn_s *conn);
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPv6
-int tcp_find_ipv6_device(FAR struct tcp_conn_s *conn);
+int tcp_local_ipv6_device(FAR struct tcp_conn_s *conn);
+#endif
+
+/****************************************************************************
+ * Function: tcp_remote_ipv6_device
+ *
+ * Description:
+ *   Select the network driver to use with the IPv6 TCP transaction based
+ *   on the remotely conected IPv6 address
+ *
+ * Input Parameters:
+ *   conn - TCP connection structure.  The remotely connected address, raddr,
+ *     should be set to a non-zero value in this structure.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success.  A negated errno value is returned
+ *   on failure.  -EHOSTUNREACH is the only expected error value.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IPv6
+int tcp_remote_ipv6_device(FAR struct tcp_conn_s *conn);
 #endif
 
 /****************************************************************************
@@ -1106,6 +1145,35 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
                        size_t len);
 
 /****************************************************************************
+ * Function: psock_tcp_cansend
+ *
+ * Description:
+ *   psock_tcp_cansend() returns a value indicating if a write to the socket
+ *   would block.  No space in the buffer is actually reserved, so it is
+ *   possible that the write may still block if the buffer is filled by
+ *   another means.
+ *
+ * Parameters:
+ *   psock    An instance of the internal socket structure.
+ *
+ * Returned Value:
+ *   OK
+ *     At least one byte of data could be succesfully written.
+ *   -EWOULDBLOCK
+ *     There is no room in the output buffer.
+ *   -EBADF
+ *     An invalid descriptor was specified.
+ *   -ENOTCONN
+ *     The socket is not connected.
+ *
+ * Assumptions:
+ *   Not running at the interrupt level
+ *
+ ****************************************************************************/
+
+int psock_tcp_cansend(FAR struct socket *psock);
+
+/****************************************************************************
  * Function: tcp_wrbuffer_initialize
  *
  * Description:
@@ -1157,6 +1225,21 @@ FAR struct tcp_wrbuffer_s *tcp_wrbuffer_alloc(void);
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
 void tcp_wrbuffer_release(FAR struct tcp_wrbuffer_s *wrb);
+#endif /* CONFIG_NET_TCP_WRITE_BUFFERS */
+
+/****************************************************************************
+ * Function: tcp_wrbuffer_test
+ *
+ * Description:
+ *   Check if there is room in the write buffer.  Does not reserve any space.
+ *
+ * Assumptions:
+ *   None.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
+int tcp_wrbuffer_test(void);
 #endif /* CONFIG_NET_TCP_WRITE_BUFFERS */
 
 /****************************************************************************

@@ -1,7 +1,7 @@
 /****************************************************************************
  *  sched/mqueue/mq_send.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,29 +44,10 @@
 #include  <errno.h>
 #include  <debug.h>
 
+#include  <nuttx/irq.h>
 #include  <nuttx/arch.h>
 
 #include  "mqueue/mqueue.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Type Declarations
- ****************************************************************************/
-
-/****************************************************************************
- * Public Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -119,7 +100,7 @@ int mq_send(mqd_t mqdes, FAR const char *msg, size_t msglen, int prio)
 {
   FAR struct mqueue_inode_s  *msgq;
   FAR struct mqueue_msg_s *mqmsg = NULL;
-  irqstate_t saved_state;
+  irqstate_t flags;
   int ret = ERROR;
 
   /* Verify the input parameters -- setting errno appropriately
@@ -143,14 +124,14 @@ int mq_send(mqd_t mqdes, FAR const char *msg, size_t msglen, int prio)
    *   non-FULL.  This would fail with EAGAIN, EINTR, or ETIMEOUT.
    */
 
-  saved_state = irqsave();
+  flags = enter_critical_section();
   if (up_interrupt_context()      || /* In an interrupt handler */
       msgq->nmsgs < msgq->maxmsgs || /* OR Message queue not full */
       mq_waitsend(mqdes) == OK)      /* OR Successfully waited for mq not full */
     {
       /* Allocate the message */
 
-      irqrestore(saved_state);
+      leave_critical_section(flags);
       mqmsg = mq_msgalloc();
     }
   else
@@ -162,7 +143,7 @@ int mq_send(mqd_t mqdes, FAR const char *msg, size_t msglen, int prio)
        * - When we tried waiting, the wait was unsuccessful.
        */
 
-      irqrestore(saved_state);
+      leave_critical_section(flags);
     }
 
   /* Check if we were able to get a message structure -- this can fail

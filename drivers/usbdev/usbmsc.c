@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/usbdev/usbmsc.c
  *
- *   Copyright (C) 2008-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Mass storage class device.  Bulk-only with SCSI subclass.
@@ -71,6 +71,7 @@
 #include <queue.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/kthread.h>
 #include <nuttx/arch.h>
@@ -255,7 +256,7 @@ static void usbmsc_freereq(FAR struct usbdev_ep_s *ep, struct usbdev_req_s *req)
 static int usbmsc_bind(FAR struct usbdevclass_driver_s *driver,
                        FAR struct usbdev_s *dev)
 {
-  FAR struct usbmsc_dev_s *priv = ((FAR struct usbmsc_driver_s*)driver)->dev;
+  FAR struct usbmsc_dev_s *priv = ((FAR struct usbmsc_driver_s *)driver)->dev;
   FAR struct usbmsc_req_s *reqcontainer;
   irqstate_t flags;
   int ret = OK;
@@ -360,9 +361,9 @@ static int usbmsc_bind(FAR struct usbdevclass_driver_s *driver,
       reqcontainer->req->priv     = reqcontainer;
       reqcontainer->req->callback = usbmsc_wrcomplete;
 
-      flags = irqsave();
-      sq_addlast((sq_entry_t*)reqcontainer, &priv->wrreqlist);
-      irqrestore(flags);
+      flags = enter_critical_section();
+      sq_addlast((FAR sq_entry_t *)reqcontainer, &priv->wrreqlist);
+      leave_critical_section(flags);
     }
 
   /* Report if we are selfpowered (unless we are part of a composite device) */
@@ -413,7 +414,7 @@ static void usbmsc_unbind(FAR struct usbdevclass_driver_s *driver,
 
   /* Extract reference to private data */
 
-  priv = ((FAR struct usbmsc_driver_s*)driver)->dev;
+  priv = ((FAR struct usbmsc_driver_s *)driver)->dev;
 
 #ifdef CONFIG_DEBUG
   if (!priv)
@@ -477,7 +478,7 @@ static void usbmsc_unbind(FAR struct usbdevclass_driver_s *driver,
        * of them
        */
 
-      flags = irqsave();
+      flags = enter_critical_section();
       while (!sq_empty(&priv->wrreqlist))
         {
           reqcontainer = (struct usbmsc_req_s *)sq_remfirst(&priv->wrreqlist);
@@ -495,7 +496,7 @@ static void usbmsc_unbind(FAR struct usbdevclass_driver_s *driver,
           priv->epbulkin = NULL;
         }
 
-      irqrestore(flags);
+      leave_critical_section(flags);
     }
 }
 
@@ -699,7 +700,7 @@ static int usbmsc_setup(FAR struct usbdevclass_driver_s *driver,
 
         case USB_REQ_GETINTERFACE:
           {
-            if (ctrl->type == (USB_DIR_IN|USB_REQ_RECIPIENT_INTERFACE) &&
+            if (ctrl->type == (USB_DIR_IN | USB_REQ_RECIPIENT_INTERFACE) &&
                 priv->config == USBMSC_CONFIGIDNONE)
               {
                 if (index != USBMSC_INTERFACEID)
@@ -868,14 +869,14 @@ static void usbmsc_disconnect(FAR struct usbdevclass_driver_s *driver,
 
   /* Reset the configuration */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   usbmsc_resetconfig(priv);
 
   /* Signal the worker thread */
 
   priv->theventset |= USBMSC_EVENT_DISCONNECT;
   usbmsc_scsi_signal(priv);
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   /* Perform the soft connect function so that we will we can be
    * re-enumerated (unless we are part of a composite device)
@@ -934,7 +935,7 @@ int usbmsc_setconfig(FAR struct usbmsc_dev_s *priv, uint8_t config)
   int i;
   int ret = 0;
 
-#if CONFIG_DEBUG
+#ifdef CONFIG_DEBUG
   if (priv == NULL)
     {
       usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_SETCONFIGINVALIDARGS), 0);
@@ -1083,14 +1084,14 @@ void usbmsc_wrcomplete(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *req)
 
   /* Extract references to private data */
 
-  priv    = (FAR struct usbmsc_dev_s*)ep->priv;
+  priv    = (FAR struct usbmsc_dev_s *)ep->priv;
   privreq = (FAR struct usbmsc_req_s *)req->priv;
 
   /* Return the write request to the free list */
 
-  flags = irqsave();
-  sq_addlast((sq_entry_t*)privreq, &priv->wrreqlist);
-  irqrestore(flags);
+  flags = enter_critical_section();
+  sq_addlast((FAR sq_entry_t *)privreq, &priv->wrreqlist);
+  leave_critical_section(flags);
 
   /* Process the received data unless this is some unusual condition */
 
@@ -1144,7 +1145,7 @@ void usbmsc_rdcomplete(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *req)
 
   /* Extract references to private data */
 
-  priv    = (FAR struct usbmsc_dev_s*)ep->priv;
+  priv    = (FAR struct usbmsc_dev_s *)ep->priv;
   privreq = (FAR struct usbmsc_req_s *)req->priv;
 
   /* Process the received data unless this is some unusual condition */
@@ -1157,9 +1158,9 @@ void usbmsc_rdcomplete(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *req)
 
         /* Add the filled read request from the rdreqlist */
 
-        flags = irqsave();
-        sq_addlast((sq_entry_t*)privreq, &priv->rdreqlist);
-        irqrestore(flags);
+        flags = enter_critical_section();
+        sq_addlast((FAR sq_entry_t *)privreq, &priv->rdreqlist);
+        leave_critical_section(flags);
 
         /* Signal the worker thread that there is received data to be processed */
 
@@ -1326,7 +1327,7 @@ int usbmsc_configure(unsigned int nluns, void **handle)
 
   /* Allocate the structures needed */
 
-  alloc = (FAR struct usbmsc_alloc_s*)kmm_malloc(sizeof(struct usbmsc_alloc_s));
+  alloc = (FAR struct usbmsc_alloc_s *)kmm_malloc(sizeof(struct usbmsc_alloc_s));
   if (!alloc)
     {
       usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_ALLOCDEVSTRUCT), 0);
@@ -1347,7 +1348,9 @@ int usbmsc_configure(unsigned int nluns, void **handle)
 
   /* Allocate the LUN table */
 
-  priv->luntab = (struct usbmsc_lun_s*)kmm_malloc(priv->nluns*sizeof(struct usbmsc_lun_s));
+  priv->luntab = (FAR struct usbmsc_lun_s *)
+    kmm_malloc(priv->nluns*sizeof(struct usbmsc_lun_s));
+
   if (!priv->luntab)
     {
       ret = -ENOMEM;
@@ -1369,7 +1372,7 @@ int usbmsc_configure(unsigned int nluns, void **handle)
 
   /* Return the handle and success */
 
-  *handle = (FAR void*)alloc;
+  *handle = (FAR void *)alloc;
   return OK;
 
 errout:
@@ -1489,7 +1492,7 @@ int usbmsc_bindlun(FAR void *handle, FAR const char *drvrpath,
 
   if (!priv->iobuffer)
     {
-      priv->iobuffer = (uint8_t*)kmm_malloc(geo.geo_sectorsize);
+      priv->iobuffer = (FAR uint8_t *)kmm_malloc(geo.geo_sectorsize);
       if (!priv->iobuffer)
         {
           usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_ALLOCIOBUFFER), geo.geo_sectorsize);
@@ -1501,14 +1504,14 @@ int usbmsc_bindlun(FAR void *handle, FAR const char *drvrpath,
   else if (priv->iosize < geo.geo_sectorsize)
     {
       void *tmp;
-      tmp = (uint8_t*)kmm_realloc(priv->iobuffer, geo.geo_sectorsize);
+      tmp = (FAR uint8_t *)kmm_realloc(priv->iobuffer, geo.geo_sectorsize);
       if (!tmp)
         {
           usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_REALLOCIOBUFFER), geo.geo_sectorsize);
           return -ENOMEM;
         }
 
-      priv->iobuffer = (uint8_t*)tmp;
+      priv->iobuffer = (FAR uint8_t *)tmp;
       priv->iosize   = geo.geo_sectorsize;
     }
 
@@ -1679,10 +1682,10 @@ int usbmsc_exportluns(FAR void *handle)
   /* Signal to start the thread */
 
   uvdbg("Signalling for the SCSI worker thread\n");
-  flags = irqsave();
+  flags = enter_critical_section();
   priv->theventset |= USBMSC_EVENT_READY;
   usbmsc_scsi_signal(priv);
-  irqrestore(flags);
+  leave_critical_section(flags);
 
 errout_with_lock:
   usbmsc_scsi_unlock(priv);
@@ -1701,7 +1704,6 @@ errout_with_lock:
  *
  * Returned Value:
  *   0 on success; a negated errno on failure
-
  *
  ****************************************************************************/
 
@@ -1791,10 +1793,10 @@ void usbmsc_uninitialize(FAR void *handle)
         {
           /* Yes.. Ask the thread to stop */
 
-          flags = irqsave();
+          flags = enter_critical_section();
           priv->theventset |= USBMSC_EVENT_TERMINATEREQUEST;
           usbmsc_scsi_signal(priv);
-          irqrestore(flags);
+          leave_critical_section(flags);
         }
 
       usbmsc_scsi_unlock(priv);

@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/semaphore.h
  *
- *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,6 +44,7 @@
 
 #include <semaphore.h>
 
+#include <nuttx/clock.h>
 #include <nuttx/fs/fs.h>
 
 /****************************************************************************
@@ -60,7 +61,9 @@
 struct inode;
 struct nsem_inode_s
 {
-  /* Inode payload unique to named semaphores */
+  /* Inode payload unique to named semaphores.  ns_inode must appear first
+   * in this structure in order to support casting between type sem_t and
+   * types of struct nsem_inode_s. */
 
   FAR struct inode *ns_inode;       /* Containing inode */
   sem_t ns_sem;                     /* The semaphore */
@@ -108,7 +111,27 @@ extern "C"
  *
  ****************************************************************************/
 
-int sem_tickwait(FAR sem_t *sem, uint32_t start, uint32_t delay);
+int sem_tickwait(FAR sem_t *sem, systime_t start, uint32_t delay);
+
+/****************************************************************************
+ * Name: sem_reset
+ *
+ * Description:
+ *   Reset a semaphore count to a specific value.  This is similar to part
+ *   of the operation of sem_init().  But sem_reset() may need to wake up
+ *   tasks waiting on a count.  This kind of operation is sometimes required
+ *   within the OS (only) for certain error handling conditions.
+ *
+ * Parameters:
+ *   sem   - Semaphore descriptor to be reset
+ *   count - The requested semaphore count
+ *
+ * Return Value:
+ *   0 (OK) or a negated errno value if unsuccessful
+ *
+ ****************************************************************************/
+
+int sem_reset(FAR sem_t *sem, int16_t count);
 
 #undef EXTERN
 #ifdef __cplusplus

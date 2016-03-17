@@ -165,7 +165,7 @@ config BUILD_PROTECTED
 
 config BUILD_KERNEL
 	bool "NuttX kernel build"
-	depends on ARCH_USE_MMU && ARCH_ADDRENV && EXPERIMENTAL
+	depends on ARCH_USE_MMU && ARCH_ADDRENV
 	select LIB_SYSCALL
 	---help---
 		Builds NuttX as a separately compiled kernel.  No applications are
@@ -376,6 +376,12 @@ config ARCH_STDARG_H
 		ARCH_STDARG_H=y and providing. If ARCH_STDARG_H, is not defined, then
 		the stdarg.h header file will stay out-of-the-way in include/nuttx/.
 
+config ARCH_DEBUG_H
+	bool "debug.h"
+	default n
+	---help---
+		 The debug.h contains architecture dependent debugging primitives
+
 endmenu # Customize Header Files
 
 menu "Debug Options"
@@ -412,6 +418,7 @@ comment "Subsystem Debug Options"
 config DEBUG_AUDIO
 	bool "Audio Device Debug Output"
 	default n
+	depends on AUDIO
 	---help---
 		Enable low level debug SYSLOG output from the audio subsystem and
 		device drivers. (disabled by default).  Support for this debug option
@@ -420,6 +427,7 @@ config DEBUG_AUDIO
 config DEBUG_BINFMT
 	bool "Binary Loader Debug Output"
 	default n
+	depends on !BINFMT_DISABLE
 	---help---
 		Enable binary loader debug SYSLOG output (disabled by default)
 
@@ -481,6 +489,15 @@ config DEBUG_SYSCALL
 	---help---
 		Enable very low level output related to system calls.  This gives
 		you basically a poor man's version of strace.
+
+config DEBUG_WIRELESS
+	bool "Wireless Device Debug Output"
+	default n
+	depends on WIRELESS
+	---help---
+		Enable low level debug SYSLOG output from the wireless subsystem and
+		device drivers. (disabled by default).  Support for this debug option
+		is architecture-specific and may not be available for some MCUs.
 
 comment "OS Function Debug Options"
 
@@ -547,6 +564,16 @@ config DEBUG_INPUT
 		such as mice and touchscreens (disabled by default).  Support for
 		this debug option is board-specific and may not be available for
 		some boards.
+
+config DEBUG_DISCRETE
+	bool "Discrete I/O Debug Output"
+	default n
+	depends on DISCRETE_IO
+	---help---
+		Enable low level debug SYSLOG output from the discrete I/O device
+		drivers such as LEDs and I/O expanders (disabled by default).
+		Support for this debug option is board-specific and may not be
+		available for some boards.
 
 config DEBUG_ANALOG
 	bool "Analog Device Debug Output"
@@ -764,6 +791,10 @@ endmenu
 
 menu "Audio Support"
 source audio/Kconfig
+endmenu
+
+menu "Wireless Support"
+source wireless/Kconfig
 endmenu
 
 menu "Binary Loader"

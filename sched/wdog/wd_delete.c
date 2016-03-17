@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/wdog/wd_delete.c
  *
- *   Copyright (C) 2007-2009, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,31 +43,12 @@
 #include <assert.h>
 #include <errno.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/wdog.h>
 #include <nuttx/kmalloc.h>
 
 #include "wdog/wdog.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Type Declarations
- ****************************************************************************/
-
-/****************************************************************************
- * Global Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -95,7 +76,7 @@
 
 int wd_delete(WDOG_ID wdog)
 {
-  irqstate_t state;
+  irqstate_t flags;
 
   DEBUGASSERT(wdog);
 
@@ -103,7 +84,7 @@ int wd_delete(WDOG_ID wdog)
    * it is being deallocated.
    */
 
-  state = irqsave();
+  flags = enter_critical_section();
 
   /* Check if the watchdog has been started. */
 
@@ -128,7 +109,7 @@ int wd_delete(WDOG_ID wdog)
        * We don't need interrupts disabled to do this.
        */
 
-      irqrestore(state);
+      leave_critical_section(flags);
       sched_kfree(wdog);
     }
 
@@ -142,10 +123,10 @@ int wd_delete(WDOG_ID wdog)
        * timers, all with interrupts disabled.
        */
 
-      sq_addlast((FAR sq_entry_t*)wdog, &g_wdfreelist);
+      sq_addlast((FAR sq_entry_t *)wdog, &g_wdfreelist);
       g_wdnfree++;
       DEBUGASSERT(g_wdnfree <= CONFIG_PREALLOC_WDOGS);
-      irqrestore(state);
+      leave_critical_section(flags);
     }
 
   /* Return success */

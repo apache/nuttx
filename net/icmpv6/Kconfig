@@ -19,9 +19,14 @@ if NET_ICMPv6
 config NET_ICMPv6_PING
 	bool "ICMPv6 ping interfaces"
 	default n
+	depends on BUILD_FLAT
 	---help---
 		Provide interfaces to support application level support for
 		for sending ECHO (ping) requests and associating ECHO replies.
+
+		NOTE: Calling these interfaces from application space is a
+		violation of the OS/application interface but for historical
+		reasons, is permitted in the flat build.
 
 config NET_ICMPv6_NEIGHBOR
 	bool "Solicit destination addresses"

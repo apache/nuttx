@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/semaphore/sem_post.c
  *
- *   Copyright (C) 2007-2009, 2012-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2012-2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,30 +42,12 @@
 #include <limits.h>
 #include <semaphore.h>
 #include <sched.h>
+
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 
 #include "sched/sched.h"
 #include "semaphore/semaphore.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Type Declarations
- ****************************************************************************/
-
-/****************************************************************************
- * Global Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -101,7 +83,7 @@
 int sem_post(FAR sem_t *sem)
 {
   FAR struct tcb_s *stcb = NULL;
-  irqstate_t saved_state;
+  irqstate_t flags;
   int ret = ERROR;
 
   /* Make sure we were supplied with a valid semaphore. */
@@ -113,7 +95,7 @@ int sem_post(FAR sem_t *sem)
        * handler.
        */
 
-      saved_state = irqsave();
+      flags = enter_critical_section();
 
       /* Perform the semaphore unlock operation. */
 
@@ -144,7 +126,7 @@ int sem_post(FAR sem_t *sem)
            * that we want.
            */
 
-          for (stcb = (FAR struct tcb_s*)g_waitingforsemaphore.head;
+          for (stcb = (FAR struct tcb_s *)g_waitingforsemaphore.head;
                (stcb && stcb->waitsem != sem);
                stcb = stcb->flink);
 
@@ -173,7 +155,7 @@ int sem_post(FAR sem_t *sem)
 
       /* Interrupts may now be enabled. */
 
-      irqrestore(saved_state);
+      leave_critical_section(flags);
     }
 
   return ret;

@@ -114,6 +114,14 @@ config MTD_NRDBLOCKS
 
 endif # MTD_READAHEAD
 
+config MTD_PROGMEM
+	bool "Enable on-chip program FLASH MTD device"
+	default n
+	---help---
+		Enable to support an MTD device that supports the on-chip FLASH
+		using the interfaces defined in include/nuttx/progmem.  Those
+		interfaces must be exported by chip-specific logic.
+
 config MTD_CONFIG
 	bool "Enable Dev Config (MTD based) device"
 	default n
@@ -260,6 +268,28 @@ config RAMMTD_FLASHSIM
 
 endif
 
+config FILEMTD
+	bool "File-based MTD driver"
+	default n
+	---help---
+		Build support for a File-based MTD driver.
+
+if FILEMTD
+
+config FILEMTD_BLOCKSIZE
+	int "File MTD block size"
+	default 512
+
+config FILEMTD_ERASESIZE
+	int "File MTD erase block size"
+	default 4096
+
+config FILEMTD_ERASESTATE
+	hex "Simulated erase state"
+	default 0xff
+
+endif
+
 config MTD_AT24XX
 	bool "I2C-based AT24xx eeprom"
 	default n
@@ -269,6 +299,15 @@ config MTD_AT24XX
 		at24c128, at24c256)
 
 if MTD_AT24XX
+
+config AT24XX_MULTI
+	bool "Multiple AT24XX devices"
+	default n
+	---help---
+		Build in additional support for multiple AT24XX devices, each with
+		dynamically allocated device structures wiath a separate I2C
+		addresses (but otherwise identical -- support for multiple, different
+		AT24xx, devices not yet supported).
 
 config AT24XX_SIZE
 	int "AT24xx size (Kbit)"
@@ -283,6 +322,7 @@ config AT24XX_ADDR
 	hex "AT24XX I2C address"
 	default 0x50
 	range 0x50 0x57
+	depends on !AT24XX_MULTI
 	---help---
 		The I2C address of the FLASH part.  This is should be 0b01010aaa
 		(where aaa is determined by board/pin configuration).
@@ -308,6 +348,14 @@ config AT24XX_EXTSIZE
 		the size of the memory in bytes.
 
 		Other, block-oriented access are not effected by this setting
+
+config AT24XX_FREQUENCY
+	int "AT24xx I2C bus frequency"
+	default 100000
+	---help---
+	   Set the I2C frequency to use when accessing the AT24CXX EEPROM. This value
+	   must represent a valid I2C speed (normally less than 400.000) or the driver
+	   might fail.
 
 endif
 
@@ -360,6 +408,10 @@ config M25P_SPIMODE
 	int "M25P SPI mode"
 	default 0
 
+config M25P_SPIFREQUENCY
+	int "M25P SPI Frequency"
+	default 20000000
+
 config M25P_MANUFACTURER
 	hex "M25P manufacturers ID"
 	default 0x20
@@ -387,6 +439,58 @@ config M25P_SUBSECTOR_ERASE
 
 endif
 
+config MTD_S25FL1
+	bool "QuadSPI-based S25FL1 FLASH"
+	default n
+
+if MTD_S25FL1
+
+config S25FL1_QSPIMODE
+	int "S25FL1 QuadSPI Mode"
+	default 0
+
+config S25FL1_QSPI_FREQUENCY
+	int "S25FL1 QuadSPI Frequency"
+	default 108000000
+	---help---
+		Per data sheet:
+		– Normal Read (Serial):
+			– 50 MHz clock rate (-40°C to +85°C/105°C)
+			– 45 MHz clock rate (-40°C to +125°C)
+		– Fast Read (Serial):
+			– 108 MHz clock rate (-40°C to +85°C/105°C)
+			– 97 MHz clock rate (-40°C to +125°C)
+		– Dual Read:
+			– 108 MHz clock rate (-40°C to +85°C/105°C)
+			– 97 MHz clock rate (-40°C to +125°C)
+		– Quad Read:
+			– 108 MHz clock rate (-40°C to +85°C/105°C)
+			– 97 MHz clock rate for S25FL164K (-40°C to +125°C)
+
+		- Clock frequency for all SPI commands except for Read Data
+		  command (0x03) and Fast Read command (0x0b): 108 MHz
+		- Clock frequency for Read Data command (0x03): 50 MHz
+		- Clock frequency for all Fast Read commands SIO and MIO: 108 MHz
+
+		In this implementation, only "Quad" reads are performed.
+
+config S25FL1_SECTOR512
+	bool "Simulate 512 byte Erase Blocks"
+	default n
+
+config S25FL1_SCRAMBLE
+	bool "Scramble data"
+	default n
+	---help---
+		Requires drviver support for data scrambling/descrambling.
+
+config S25FL1_SCRAMBLE_KEY
+	hex "Scramble key"
+	default 0x0baddead
+	depends on S25FL1_SCRAMBLE
+
+endif
+
 config MTD_SMART
 	bool "Sector Mapped Allocation for Really Tiny (SMART) Flash support"
 	default n
@@ -400,6 +504,14 @@ config MTD_SMART
 		an erase block needs to be erased.
 
 if MTD_SMART
+
+config SMART_DEV_LOOP
+	bool "Enable SMART loop device"
+	select FILEMTD
+	default n
+	---help---
+		Supports a smart loop device that can be used to export a
+		file (or character device) as a SMART block device.
 
 config MTD_SMART_SECTOR_SIZE
 	int "SMART Device sector size"

@@ -56,19 +56,42 @@
  * DESCRIPTION:   Perform one-time application initialization.
  * ARG:           None
  * CONFIGURATION: CONFIG_LIB_BOARDCTL
- * DEPENDENCIES:  Board logic must provide board_app_initialization
+ * DEPENDENCIES:  Board logic must provide board_app_initialization()
  *
  * CMD:           BOARDIOC_POWEROFF
  * DESCRIPTION:   Power off the board
  * ARG:           Integer value providing power off status information
  * CONFIGURATION: CONFIG_BOARDCTL_POWEROFF
- * DEPENDENCIES:  Board logic must provide board_power_off
+ * DEPENDENCIES:  Board logic must provide the board_power_off() interface.
  *
  * CMD:           BOARDIOC_RESET
  * DESCRIPTION:   Reset the board
  * ARG:           Integer value providing power off status information
  * CONFIGURATION: CONFIG_BOARDCTL_RESET
- * DEPENDENCIES:  Board logic must provide board_reset
+ * DEPENDENCIES:  Board logic must provide the board_reset() interface.
+ *
+ * CMD:           BOARDIOC_UNIQUEID
+ * DESCRIPTION:   Return a unique ID associated with the board (such as a
+ *                serial number or a MAC address).
+ * ARG:           A writable array of size CONFIG_BOARDCTL_UNIQUEID_SIZE in
+ *                which to receive the board unique ID.
+ * DEPENDENCIES:  Board logic must provide the board_uniqueid() interface.
+ *
+ * CMD:           BOARDIOC_APP_SYMTAB
+ * DESCRIPTION:   Select the application symbol table.  This symbol table
+ *                provides the symbol definitions exported to application
+ *                code from application space.
+ * ARG:           A pointer to an instance of struct boardioc_symtab_s
+ * CONFIGURATION: CONFIG_BOARDCTL_APP_SYMTAB
+ * DEPENDENCIES:  None
+ *
+ * CMD:           BOARDIOC_OS_SYMTAB
+ * DESCRIPTION:   Select the OS symbol table.  This symbol table provides
+ *                the symbol definitions exported by the OS to kernel
+ *                modules.
+ * ARG:           A pointer to an instance of struct boardioc_symtab_s
+ * CONFIGURATION: CONFIG_BOARDCTL_OS_SYMTAB
+ * DEPENDENCIES:  None
  *
  * CMD:           BOARDIOC_TSCTEST_SETUP
  * DESCRIPTION:   Touchscreen controller test configuration
@@ -94,6 +117,12 @@
  * CONFIGURATION: CONFIG_LIB_BOARDCTL && CONFIG_BOARDCTL_PWMTEST
  * DEPENDENCIES:  Board logic must provide board_pwm_setup()
  *
+ * CMD:           BOARDIOC_CAN_INITIALIZE
+ * DESCRIPTION:   CAN device initialization
+ * ARG:           None
+ * CONFIGURATION: CONFIG_LIB_BOARDCTL && CONFIG_BOARDCTL_CANINIT
+ * DEPENDENCIES:  Board logic must provide board_can_initialize()
+ *
  * CMD:           BOARDIOC_GRAPHICS_SETUP
  * DESCRIPTION:   Configure graphics that require special initialization
  *                procedures
@@ -105,11 +134,15 @@
 #define BOARDIOC_INIT              _BOARDIOC(0x0001)
 #define BOARDIOC_POWEROFF          _BOARDIOC(0x0002)
 #define BOARDIOC_RESET             _BOARDIOC(0x0003)
-#define BOARDIOC_TSCTEST_SETUP     _BOARDIOC(0x0004)
-#define BOARDIOC_TSCTEST_TEARDOWN  _BOARDIOC(0x0005)
-#define BOARDIOC_ADCTEST_SETUP     _BOARDIOC(0x0006)
-#define BOARDIOC_PWMTEST_SETUP     _BOARDIOC(0x0007)
-#define BOARDIOC_GRAPHICS_SETUP    _BOARDIOC(0x0008)
+#define BOARDIOC_UNIQUEID          _BOARDIOC(0x0004)
+#define BOARDIOC_APP_SYMTAB        _BOARDIOC(0x0005)
+#define BOARDIOC_OS_SYMTAB         _BOARDIOC(0x0006)
+#define BOARDIOC_TSCTEST_SETUP     _BOARDIOC(0x0007)
+#define BOARDIOC_TSCTEST_TEARDOWN  _BOARDIOC(0x0008)
+#define BOARDIOC_ADCTEST_SETUP     _BOARDIOC(0x0009)
+#define BOARDIOC_PWMTEST_SETUP     _BOARDIOC(0x000a)
+#define BOARDIOC_CAN_INITIALIZE    _BOARDIOC(0x000b)
+#define BOARDIOC_GRAPHICS_SETUP    _BOARDIOC(0x000c)
 
 /* If CONFIG_BOARDCTL_IOCTL=y, then boad-specific commands will be support.
  * In this case, all commands not recognized by boardctl() will be forwarded
@@ -118,7 +151,7 @@
  * User defined board commands may begin with this value:
  */
 
-#define BOARDIOC_USER              _BOARDIOC(0x0009)
+#define BOARDIOC_USER              _BOARDIOC(0x000d)
 
 /****************************************************************************
  * Public Type Definitions
@@ -142,6 +175,18 @@ struct boardioc_graphics_s
 #else
   FAR struct fb_vtable_s *dev;   /* OUT: Framebuffer driver instance */
 #endif
+};
+
+/* In order to full describe a symbol table, a vector containing the address
+ * of the symbol table and the number of elements in the symbol table is
+ * required.
+ */
+
+struct symtab_s; /* Forward reference */
+struct boardioc_symtab_s
+{
+  FAR struct symtab_s *symtab;
+  int nsymbols;
 };
 
 /****************************************************************************

@@ -1,4 +1,5 @@
-NuttX TODO List (Last updated August 6, 2015)
+NuttX TODO List (Last updated February 18, 2016)
+NuttX TODO List (Last updated February 18, 2016)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -9,27 +10,29 @@ issues reated to each board port.
 
 nuttx/
 
- (12)  Task/Scheduler (sched/)
+ (13)  Task/Scheduler (sched/)
   (1)  Memory Management (mm/)
   (3)  Signals (sched/signal, arch/)
   (2)  pthreads (sched/pthread)
   (0)  Message Queues (sched/mqueue)
-  (4)  C++ Support
+  (6)  Kernel/Protected Build
+  (3)  C++ Support
   (6)  Binary loaders (binfmt/)
  (12)  Network (net/, drivers/net)
   (4)  USB (drivers/usbdev, drivers/usbhost)
- (12)  Libraries (libc/, libm/)
+  (0)  Other drivers (drivers/)
+ (11)  Libraries (libc/, libm/)
  (11)  File system/Generic drivers (fs/, drivers/)
   (8)  Graphics subsystem (graphics/)
   (1)  Pascal add-on (pcode/)
-  (2)  Build system / Toolchains
-  (3)  Linux/Cywgin simulation (arch/sim)
-  (5)  ARM (arch/arm/)
+  (1)  Build system / Toolchains
+  (4)  Linux/Cywgin simulation (arch/sim)
+  (4)  ARM (arch/arm/)
 
 apps/
 
-  (4)  Network Utilities (apps/netutils/)
-  (3)  NuttShell (NSH) (apps/nshlib)
+  (3)  Network Utilities (apps/netutils/)
+  (2)  NuttShell (NSH) (apps/nshlib)
   (1)  System libraries apps/system (apps/system)
   (4)  Other Applications & Tests (apps/examples/)
 
@@ -213,6 +216,27 @@ o Task/Scheduler (sched/)
   Status:      Open
   Priority:    Medium-ish
 
+  Title:       SCALABILITY
+  Description: Task control information is retained in simple lists.  This
+               is completely appropriate for small embedded systems where
+               the number of tasks, N, is relatively small.  Most list
+               operations are O(N).  This could become as issue if N gets
+               very large.
+
+               In that case, these simple lists should be replaced with
+               something more performant such as a balanced tree in the
+               case of ordered lists.  Fortunately, most internal lists are
+               hidden behind simple accessor functions and so the internal
+               data structures can be changed if need with very little impact.
+
+
+               Explicity refereence to the list strucutre are hidden behnid
+               the macro this_task().
+
+  Status:      Open
+  Priority:    Low.  Things are just the way that we want them for the way
+               that NuttX is used today.
+
 o Memory Managment (mm/)
   ^^^^^^^^^^^^^^^^^^^^^^
 
@@ -314,9 +338,17 @@ o Signals (sched/signal, arch/)
                embedded system.
 
   Title:       SIGEV_THREAD
-  Description: sig_notify() logic does not support SIGEV_THREAD; structure
-               struct sigevent does not provide required members sigev_notify_function
-               or sigev_notify_attributes.
+  Description: Implementation of support for support for SIGEV_THREAD is available
+               only in the FLAT build mode because it uses the OS work queues to
+               perform the callback.  The alternative for the PROTECTED and KERNEL
+               builds would be to create pthreads in the user space to perform the
+               callbacks.  That is not a very attractive solution due to performance
+               issues.  It would also require some additional logic to specify the
+               TCB of the parent so that the pthread could be bound to the correct
+               group.
+
+               There is also some user-space logic in libc/aio/lio_listio.c.  That
+               logic could use the user-space work queue for the callbacks.
   Status:      Low, there are alternative designs.  However, these features
                are required by the POSIX standard.
   Priority:    Low for now
@@ -414,35 +446,19 @@ o Kernel/Protected Build
 
                COMMAND  KERNEL INTERFACE(s)
                -------- ----------------------------------------------
-               losetup  losetup(), loteardown()
                mkfatfs  mkfatfs
                mkrd     ramdisk_register()
-               dd       bchlib_setup(), bchlib_read(), bchlib_write(),
-                        bchlib_teardown()
-               ps       sched_foreach()
-               ifup     netdev_foreach()
-               ifdown   netdev_foreach()
-               ifconfig netdev_foreach(), g_netstats
                ping     icmp_ping()
+
+               The busybox mkfatfs does not involve any OS calls; it does
+               its job by simply opening the block driver (using open/xopen)
+               and modifying it with write operations. See:
+
+                 http://git.busybox.net/busybox/tree/util-linux/mkfs_vfat.c
 
   Status:      Open
   Priority:    Medium/High -- the kernel build configuration is not fully fielded
                yet.
-
-  Title:       NSH free COMMAND LIMITATION
-  Description: The NSH 'free' command only shows memory usage in the user
-               heap only, not usage in the kernel heap.  I am thinking that
-               kernel heap memory usage should be available in /proc/memory.
-  Status:      Open
-  Priority:    Medium/High
-
-  Title:       TELNETD PARTITIONING.
-  Description: Telnetd is implemented as a driver that resides in the apps/
-               directory.  In the kernel/protected build modes, the driver
-               logic must be moved into the kernel part of the build (nuttx/,
-               although the application level interfaces must stay in apps/).
-  Status:      Open
-  Priority:    Medium
 
   Title:       NxTERM PARTITIONING.
   Description: NxTerm is implemented (correctly) as a driver that resides
@@ -508,6 +524,10 @@ o Kernel/Protected Build
                console output.  The requests for the pid() are part of the
                implementation of the I/O's re-entrant semaphore implementation and
                would not be an issue in the more general case.
+
+               Update:
+               One solution might be to used CONFIG_TLS, add the PID to struct
+               tls_info_s.  Then the PID could be obtained without a system call.
   Status:      Open
   Priority:    Low-Medium.  Right now, I do not know if these syscalls are a
                real performance issue or not.  The above statistics were collected
@@ -562,20 +582,6 @@ o C++ Support
                of type unsigned int.  But this is pretty ugly!  A better solution
                would be to get a hold of the compilers definition of size_t.
   Priority:    Low.
-
-  Title:       STATIC CONSTRUCTORS
-  Description: Need to call static constructors
-               Update:  Static constructors are implemented for the STM32 F4 and
-               this will provide the model for all solutions.  Basically, if
-               CONFIG_HAVE_CXXINITIALIZE=y is defined in the configuration, then
-               board-specific code must provide the interface up_cxxinitialize().
-               up_cxxinitialize() is called from application logic to initialize
-               all static class instances.  This TODO item probably has to stay
-               open because this solution is only available on STM32 F4.
-  Status:      Open
-  Priority:    Low, depends on toolchain.  Call to gcc's built-in static
-               constructor logic will probably have to be performed by
-               user logic in the application.
 
   Title:       STATIC CONSTRUCTORS AND MULTITASKING
   Description: The logic that calls static constructors operates on the main
@@ -801,25 +807,6 @@ o Network (net/, drivers/net)
   Status:      Open
   Priority:    Low
 
-  Title:       STANDARDIZE ETHERNET DRIVER STATISTICS
-  Description: Need to standardize collection of statistics from network
-               drivers.  Currently they are useless because they are not
-               accessible.  The solution is to standardize the structure
-               that holds the drivers statistics.  Then apps/nshlib
-               ifconfig command could present the driver statistics.
-
-               Currently these drivers support non-standard statistics:
-
-                 arch/arm/src/kinetis/kinetis_enet.c
-                 arch/arm/src/lpc17xx/lpc17_ethernet.c
-                 arch/arm/src/tiva/lm3s_ethernet.c
-                 arch/mips/src/pic32mx/pic32mx-ethernet.c
-                 arch/z80/src/ez80/ez80_emac.c
-
-               The other Ethernet drivers support no statistics.
-  Status:      Open
-  Priority:    Low.  This is not a bug but an enhancement idea.
-
   Title:       CONCURRENT TCP SEND OPERATIONS
   Description: At present, there cannot be two concurrent active TCP send
                operations in progress using the same socket.  This is because
@@ -989,6 +976,12 @@ o Network (net/, drivers/net)
   Status:      Open
   Priority:    Low.  I don't know of any issues now, but I am sure that
                someone will encounter this in the future.
+
+  Title:       MISSING netdb INTERFACES
+  Description: There is no implementation for many netdb interfaces such as
+               getaddrinfo(), freeaddrinfo(), getnameinfo(), etc.
+  Status:      Open
+  Priority:    Low
 
 o USB (drivers/usbdev, drivers/usbhost)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1197,11 +1190,6 @@ o Libraries (libc/)
   Status:      Open
   Priority:    Low
 
-  Title:       DAYS OF THE WEEK
-  Description: strftime() and other timing functions do not handle days of the week.
-  Status:      Open
-  Priority:    Low
-
   Title:       RESETTING GETOPT()
   Description: There is an issue with the way that getopt() handles errors that
                return '?'.
@@ -1293,12 +1281,16 @@ o Libraries (libc/)
                it does not return at all as the loop in it does not
                converge, hanging your app.
 
-               "There are likely many other issues like these as the Rhombs
+               "There are likely many other issues like these as the Rhombus
                OS code has not been tested or used that much. Sorry for not
                providing patches, but we found it easier just to switch the
                math library."
 
                Ref: https://groups.yahoo.com/neo/groups/nuttx/conversations/messages/7805
+
+               UPDATE: 2015-09-01: A fix for the noted problems with asin()
+               has been applied.
+
 Status:        Open
 Priority:      Low for casual users but clearly high if you need care about
                these incorrect corner case behaviors in the math libraries.
@@ -1308,8 +1300,8 @@ o File system / Generic drivers (fs/, drivers/)
 
   NOTE:  The NXFFS file system has its own TODO list at nuttx/fs/nxffs/README.txt
 
-  Title:       CHMOD() AND TRUNCATE()
-  Description: Implement chmod(), truncate().
+  Title:       CHMOD(), TRUNCATE(), AND FSTAT()
+  Description: Implement chmod(), truncate(), and fstat().
   Status:      Open
   Priority:    Low
 
@@ -1545,6 +1537,7 @@ o Graphics subsystem (graphics/)
   Status:      Open
   Priority:    Low, not a serious issue but worth noting.  There is no plan
                to change this behavior.
+
 o Pascal Add-On (pcode/)
   ^^^^^^^^^^^^^^^^^^^^^^
 
@@ -1568,16 +1561,6 @@ o Pascal Add-On (pcode/)
 o Build system
   ^^^^^^^^^^^^
 
-  Title:       WINDOWS DEPENDENCY GENERATION
-  Description: Dependency generation is currently disabled when a Windows native
-               toolchain is used in a POSIX-like environment (like Cygwin).  The
-               issue is that the Windows tool generates dependencies use Windows
-               path formatting and this fails with the dependency file (Make.dep)
-               is include).  Perhaps the only issue is that all of the Windows
-               dependencies needed to be quoted in the Make.dep files.
-  Status:      Open
-  Priority:    Low -- unless some dependency-related build issues is discovered.
-
   Title:       MAKE EXPORT LIMITATIONS
   Description: The top-level Makefile 'export' target that will bundle up all of the
                NuttX libraries, header files, and the startup object into an export-able
@@ -1590,6 +1573,9 @@ o Build system
                   some new argument, perhaps -u.
   Status:      Open
   Priority:    Low.
+
+o Other drivers (drivers/)
+  ^^^^^^^^^^^^^^^^^^^^^^^^
 
 o Linux/Cywgin simulation (arch/sim)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1623,10 +1609,73 @@ o Linux/Cywgin simulation (arch/sim)
                "faked" during IDLE loop processing and, as a result, there is no
                task pre-emption because there are no asynchronous events.  This could
                probably be fixed if the "timer interrupt" were driver by Linux
-               signals. NOTE:  You would also have to implement irqsave() and
-               irqrestore() to block and (conditionally) unblock the signal.
+               signals. NOTE:  You would also have to implement up_irq_save() and
+               up_irq_restore() to block and (conditionally) unblock the signal.
   Status:      Open
   Priority:    Low
+
+  Title:       SMP SIMULATION ISSUES
+  Description: The configuration has basic support SMP testing.  The simulation
+               supports the emulation of multiple CPUs by creating multiple
+               pthreads, each run a copy of the simulation in the same process
+               address space.
+
+               At present, the SMP simulation is not fully functional:  It does
+               operate on the simulated CPU threads for a few context switches
+               then fails during a setjmp() operation.  I suspect that this is
+               not an issue with the NuttX SMP logic but more likely some chaos
+               in the pthread controls. I have seen similar such strange behavior
+               other times that I have tried to use setjmp/longmp from a signal
+               handler! Like when I tried to implement simulated interrupts
+               using signals.
+
+               Apparently, if longjmp is invoked from the context of a signal
+               handler, the result is undefined:
+               http://www.open-std.org/jtc1/sc22/wg14/www/docs/n1318.htm
+
+               You can enable SMP for ostest configuration by enabling:
+
+                 -# CONFIG_EXPERIMENTAL is not set
+                 +CONFIG_EXPERIMENTAL=y
+
+                 +CONFIG_SPINLOCK=y
+                 +CONFIG_SMP=y
+                 +CONFIG_SMP_NCPUS=2
+                 +CONFIG_SMP_IDLETHREAD_STACKSIZE=2048
+
+               You also must enable near-realtime-performance otherwise even long
+               timeouts will expire before a CPU thread even has a chance to
+               execute.
+
+                 -# CONFIG_SIM_WALLTIME is not set
+                 +CONFIG_SIM_WALLTIME=y
+
+               And you can enable some additional debug output with:
+
+                 -# CONFIG_DEBUG_SCHED is not set
+                 +CONFIG_DEBUG_SCHED=y
+
+                 -# CONFIG_SCHED_INSTRUMENTATION is not set
+                 +CONFIG_SCHED_INSTRUMENTATION=y
+
+               The NSH configuration can also be forced to run SMP, but
+               suffers from the same quirky behavior.  I can be made
+               reliable if you modify arch/sim/src/up_idle.c so that
+               the IDLE loop only runs for CPU0.  Otherwise, often
+               simuart_post() will be called from CPU1 and it will try
+               to restart NSH on CPU0 and, again, the same quirkiness
+               occurs.
+
+               But for example, this command:
+
+                 nsh> sleep 1 &
+
+               will execute the sleep command on CPU1 which has worked
+               every time that I have tried it (which is not too many
+               times).
+
+  Status:      Open
+  Priority:    Low, SMP is important, but SMP on the simulator is not
 
 o ARM (arch/arm/)
   ^^^^^^^^^^^^^^^
@@ -1634,7 +1683,7 @@ o ARM (arch/arm/)
   Title:       IMPROVED ARM INTERRUPT HANDLING
   Description: ARM interrupt handling performance could be improved in some
                ways. One easy way is to use a pointer to the context save
-               area in current_regs instead of using up_copystate so much.
+               area in g_current_regs instead of using up_copystate so much.
 
                This approach is already implemented for the ARM Cortex-M0,
                Cortex-M3, Cortex-M4, and Cortex-A5 families.  But still needs
@@ -1694,31 +1743,6 @@ o ARM (arch/arm/)
                If your design needs continuous interrupts like this, please try
                the above change and, please, submit a patch with the working fix.
 
-  Title:       STACK ALIGNMENT IN INTERRUPT HANDLERS
-  Description: The EABI standard requires that the stack always have a 32-byte
-               alignment.  There is no guarantee at present that the stack will be
-               so aligned in an interrupt handler.  Therefore, I would expect some
-               issues if, for example, floating point or perhaps long long operations
-               were performed in an interrupt handler.
-
-               This issue exists for ARM7, ARM9, Cortex-M0, Cortex-M3, and
-               Cortex-M4 but has been addressed for the Cortex-A5.  The fix
-               is really simple can cannot be incorporated without some
-               substantial testing.  For ARM, the fix is the following logic
-               arround each call into C code from assembly:
-
-                 mov  r4, sp     /* Save the SP in a preserved register */
-                 bic  sp, sp, #7 /* Force 8-byte alignment */
-                 bl   cfunction  /* Call the C function */
-                 mov  sp, r4     /* Restore the possibly unaligned stack pointer */
-
-               This same issue applies to the interrupt stack which is, I think
-               improperly aligned in almost all cases (except Cortex-A5).
-
-  Status:      Open
-  Priority:    Low for me because I never do floating point operations in
-               interrupt handlers.
-
   Title:       IMPROVED TASK START-UP AND SYSCALL RETURN
   Description: Couldn't up_start_task and up_start_pthread syscalls be
                eliminated.  Wouldn't this work to get us from kernel-
@@ -1758,18 +1782,6 @@ o Network Utilities (apps/netutils/)
   Status:      Open.  An annoyance, but not a real problem.
   Priority:    Low
 
-  Title:       DHCPD ACCESSES KERNEL PRIVATE INTERFACE
-  Description: arp_update() is referenced outside of nuttx/net.  It is used in
-               in the netutils/ DHCPD logic to set entries in the ARP table.
-               That is violation of the separation of kernel and OS
-               functionality.  As a consequence, dhcpd will not work with the
-               NuttX kernel built.
-
-               This direct OS call needs to be replaced with a network ioctl()
-               call.
-  Status:      Open
-  Priority:    Medium.  Important for full functionality with kernel build.
-
   Title:       NETWORK MONITOR NOT GENERALLY AVAILABLE
   Description: The NSH network management logic has general applicability
                but is currently useful only because it is embedded in the NSH
@@ -1787,13 +1799,7 @@ o NuttShell (NSH) (apps/nshlib)
                show status for the single interface on the command line; it will
                still show status for all interfaces.
   Status:      Open
-  Priority:    Low (multiple network interfaces not fully supported yet anyway).
-
-  Title:       ARP COMMAND
-  Description: Add an ARP command so that we can see and modify the contents of
-               the ARP table.
-  Status:      Open
-  Priority:    Low (enhancement)
+  Priority:    Low
 
   Title:       ARPPING COMMAND
   Description: Add an arping command

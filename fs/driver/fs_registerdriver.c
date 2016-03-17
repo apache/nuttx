@@ -51,11 +51,11 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Private Variables
+ * Private Data
  ****************************************************************************/
 
 /****************************************************************************
- * Public Variables
+ * Public Data
  ****************************************************************************/
 
 /****************************************************************************
@@ -103,7 +103,9 @@ int register_driver(FAR const char *path, FAR const struct file_operations *fops
   ret = inode_reserve(path, &node);
   if (ret >= 0)
     {
-      /* We have it, now populate it with driver specific information. */
+      /* We have it, now populate it with driver specific information.
+       * NOTE that the initial reference count on the new inode is zero.
+       */
 
       INODE_SET_DRIVER(node);
 

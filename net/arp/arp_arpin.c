@@ -63,18 +63,6 @@
 #define ARPBUF  ((struct arp_hdr_s *)&dev->d_buf[ETH_HDRLEN])
 
 /****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -116,7 +104,7 @@ void arp_arpin(FAR struct net_driver_s *dev)
   dev->d_len = 0;
 
   ipaddr = net_ip4addr_conv32(arp->ah_dipaddr);
-  switch(arp->ah_opcode)
+  switch (arp->ah_opcode)
     {
       case HTONS(ARP_REQUEST):
         nllvdbg("ARP request for IP %04lx\n", (long)ipaddr);
@@ -132,7 +120,7 @@ void arp_arpin(FAR struct net_driver_s *dev)
              * with this host in the future.
              */
 
-            arp_update(arp->ah_sipaddr, arp->ah_shwaddr);
+            arp_hdr_update(arp->ah_sipaddr, arp->ah_shwaddr);
 
             arp->ah_opcode = HTONS(ARP_REPLY);
             memcpy(arp->ah_dhwaddr, arp->ah_shwaddr, ETHER_ADDR_LEN);
@@ -161,7 +149,7 @@ void arp_arpin(FAR struct net_driver_s *dev)
           {
             /* Yes... Insert the address mapping in the ARP table */
 
-            arp_update(arp->ah_sipaddr, arp->ah_shwaddr);
+            arp_hdr_update(arp->ah_sipaddr, arp->ah_shwaddr);
 
             /* Then notify any logic waiting for the ARP result */
 

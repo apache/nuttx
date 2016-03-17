@@ -127,10 +127,6 @@ static FAR sq_queue_t g_freelist;
 #endif
 
 /****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -265,7 +261,7 @@ FAR struct igmp_group_s *igmp_grpalloc(FAR struct net_driver_s *dev,
 
       /* Add the group structure to the list in the device structure */
 
-      sq_addfirst((FAR sq_entry_t*)group, &dev->grplist);
+      sq_addfirst((FAR sq_entry_t *)group, &dev->grplist);
       net_unlock(flags);
     }
 
@@ -363,7 +359,7 @@ void igmp_grpfree(FAR struct net_driver_s *dev, FAR struct igmp_group_s *group)
 
   /* Remove the group structure from the group list in the device structure */
 
-  sq_rem((FAR sq_entry_t*)group, &dev->grplist);
+  sq_rem((FAR sq_entry_t *)group, &dev->grplist);
 
   /* Destroy the wait semaphore */
 
@@ -381,7 +377,7 @@ void igmp_grpfree(FAR struct net_driver_s *dev, FAR struct igmp_group_s *group)
   if (IS_PREALLOCATED(group->flags))
     {
       grplldbg("Put back on free list\n");
-      sq_addlast((FAR sq_entry_t*)group, &g_freelist);
+      sq_addlast((FAR sq_entry_t *)group, &g_freelist);
       net_unlock(flags);
     }
   else

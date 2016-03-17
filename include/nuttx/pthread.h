@@ -2,7 +2,7 @@
  * include/nuttx/pthread.h
  * Non-standard, NuttX-specific pthread-related declarations.
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,11 +51,34 @@
 
 /* Default pthread attribute initializer */
 
-#ifdef CONFIG_SCHED_SPORADIC
+#if CONFIG_RR_INTERVAL == 0
+#  define PTHREAD_DEFAULT_POLICY SCHED_FIFO
+#else
+#  define PTHREAD_DEFAULT_POLICY SCHED_RR
+#endif
+
+/* A lot of hassle to use the old-fashioned struct initializers.  But this
+ * gives us backward compatibility with some very old compilers.
+ */
+
+#if defined(CONFIG_SCHED_SPORADIC) && defined(CONFIG_SMP)
 #  define PTHREAD_ATTR_INITIALIZER \
   { \
     PTHREAD_DEFAULT_PRIORITY, /* priority */ \
-    SCHED_RR,                 /* policy */ \
+    PTHREAD_DEFAULT_POLICY,   /* policy */ \
+    PTHREAD_EXPLICIT_SCHED,   /* inheritsched */ \
+    0,                        /* low_priority */ \
+    0,                        /* max_repl */ \
+    0,                        /* affinity */ \
+    PTHREAD_STACK_DEFAULT,    /* stacksize */ \
+    {0, 0},                   /* repl_period */ \
+    {0, 0}                    /* budget */ \
+  }
+#elif defined(CONFIG_SCHED_SPORADIC)
+#  define PTHREAD_ATTR_INITIALIZER \
+  { \
+    PTHREAD_DEFAULT_PRIORITY, /* priority */ \
+    PTHREAD_DEFAULT_POLICY,   /* policy */ \
     PTHREAD_EXPLICIT_SCHED,   /* inheritsched */ \
     0,                        /* low_priority */ \
     0,                        /* max_repl */ \
@@ -63,11 +86,20 @@
     {0, 0},                   /* repl_period */ \
     {0, 0},                   /* budget */ \
   }
+#elif defined(CONFIG_SMP)
+#  define PTHREAD_ATTR_INITIALIZER \
+  { \
+    PTHREAD_DEFAULT_PRIORITY, /* priority */ \
+    PTHREAD_DEFAULT_POLICY,   /* policy */ \
+    PTHREAD_EXPLICIT_SCHED,   /* inheritsched */ \
+    0,                        /* affinity */ \
+    PTHREAD_STACK_DEFAULT,    /* stacksize */ \
+  }
 #else
 #  define PTHREAD_ATTR_INITIALIZER \
   { \
     PTHREAD_DEFAULT_PRIORITY, /* priority */ \
-    SCHED_RR,                 /* policy */ \
+    PTHREAD_DEFAULT_POLICY,   /* policy */ \
     PTHREAD_EXPLICIT_SCHED,   /* inheritsched */ \
     PTHREAD_STACK_DEFAULT,    /* stacksize */ \
   }

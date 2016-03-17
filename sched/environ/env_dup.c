@@ -52,10 +52,6 @@
 #include "environ/environ.h"
 
 /****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -81,7 +77,7 @@
 
 int env_dup(FAR struct task_group_s *group)
 {
-  FAR struct tcb_s *ptcb = (FAR struct tcb_s*)g_readytorun.head;
+  FAR struct tcb_s *ptcb = this_task();
   FAR char *envp = NULL;
   size_t envlen;
   int ret = OK;

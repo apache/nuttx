@@ -35,33 +35,41 @@
 
 -include $(TOPDIR)/Make.defs
 
+CRYPTO_ASRCS =
+CRYPTO_CSRCS =
+
 ifeq ($(CONFIG_CRYPTO),y)
 
 # Basic
 
-CRYPTO_ASRCS  =
-CRYPTO_CSRCS  = crypto.c testmngr.c
+CRYPTO_CSRCS += crypto.c testmngr.c
 
 # cryptodev support
 
 ifeq ($(CONFIG_CRYPTO_CRYPTODEV),y)
-CRYPTO_CSRCS += cryptodev.c
+  CRYPTO_CSRCS += cryptodev.c
+endif
+
+# Sofware AES library
+
+ifeq ($(CONFIG_CRYPTO_SW_AES),y)
+  CRYPTO_CSRCS += aes.c
 endif
 
 endif # CONFIG_CRYPTO
 
-ASRCS		= $(CRYPTO_ASRCS)
-AOBJS		= $(ASRCS:.S=$(OBJEXT))
+ASRCS = $(CRYPTO_ASRCS)
+AOBJS = $(ASRCS:.S=$(OBJEXT))
 
-CSRCS		= $(CRYPTO_CSRCS)
-COBJS		= $(CSRCS:.c=$(OBJEXT))
+CSRCS = $(CRYPTO_CSRCS)
+COBJS = $(CSRCS:.c=$(OBJEXT))
 
-SRCS		= $(ASRCS) $(CSRCS)
-OBJS		= $(AOBJS) $(COBJS)
+SRCS = $(ASRCS) $(CSRCS)
+OBJS = $(AOBJS) $(COBJS)
 
-BIN		= libcrypto$(LIBEXT)
+BIN = libcrypto$(LIBEXT)
 
-all:	$(BIN)
+all: $(BIN)
 
 $(AOBJS): %$(OBJEXT): %.S
 	$(call ASSEMBLE, $<, $@)

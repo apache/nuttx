@@ -1,0 +1,64 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config FS_TMPFS
+	bool "TMPFS file system"
+	default n
+	depends on !DISABLE_MOUNTPOINT
+	select FS_READABLE
+	select FS_WRITABLE
+	---help---
+		Enable TMPFS filesystem support
+
+if FS_TMPFS
+
+config FS_TMPFS_BLOCKSIZE
+	int "Reported block size"
+	default 512
+	---help---
+		Various queries expect the file system to report resources in units
+		of blocks.  There are, of course, no blocks with the TMPFS.  This
+		options is available to control how sizes are reported.  For very
+		small TMPFS systems, you might want to set this to something smaller
+		the the usual 512 bytes.
+
+config FS_TMPFS_DIRECTORY_ALLOCGUARD
+	int "Directory object over-allocation"
+	default 64
+	---help---
+		In order to avoid frequent reallocations, a little more memory than
+		needed is always allocated.  This permits the directory to grow
+		without so many realloctions.
+
+config FS_TMPFS_DIRECTORY_FREEGUARD
+	int "Directory under free"
+	default 128
+	---help---
+		In order to avoid frequent reallocations, a lot of free memory has
+		to be available before a directory entry shrinks (via reallocation)
+		little more memory than needed is always allocated.  This permits
+		the directory to shrink without so many realloctions.
+
+config FS_TMPFS_FILE_ALLOCGUARD
+	int "Directory object over-allocation"
+	default 512
+	---help---
+		In order to avoid frequent reallocations, a little more memory than
+		needed is always allocated.  This permits the file to grow without
+		so many realloctions.
+
+		You will probably want to use smaller value than the default on tiny
+		TMFPS systems.
+
+config FS_TMPFS_FILE_FREEGUARD
+	int "Directory under free"
+	default 1024
+	---help---
+		In order to avoid frequent reallocations, a lot of free memory has
+		to be available before a directory entry shrinks (via reallocation)
+		little more memory than needed is always allocated.  This permits
+		the file to shrink without so many realloctions.
+
+endif

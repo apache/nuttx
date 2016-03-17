@@ -43,6 +43,10 @@
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
 
+#ifdef CONFIG_ARCH_DEBUG_H
+# include <arch/debug.h>
+#endif
+
 #include <syslog.h>
 
 /****************************************************************************
@@ -94,6 +98,15 @@
 # define EXTRA_ARG
 #endif
 
+/* The actual logger function may be overridden in arch/debug.h if needed. */
+
+#ifndef __arch_syslog
+# define __arch_syslog syslog
+#endif
+#ifndef __arch_lowsyslog
+# define __arch_lowsyslog lowsyslog
+#endif
+
 /* Debug macros will differ depending upon if the toolchain supports
  * macros with a variable number of arguments or not.
  */
@@ -104,30 +117,30 @@
 
 #ifdef CONFIG_DEBUG
 # define dbg(format, ...) \
-  syslog(LOG_ERR, EXTRA_FMT format EXTRA_ARG, ##__VA_ARGS__)
+  __arch_syslog(LOG_ERR, EXTRA_FMT format EXTRA_ARG, ##__VA_ARGS__)
 
 # ifdef CONFIG_ARCH_LOWPUTC
 #  define lldbg(format, ...) \
-   lowsyslog(LOG_ERR, EXTRA_FMT format EXTRA_ARG, ##__VA_ARGS__)
+   __arch_lowsyslog(LOG_ERR, EXTRA_FMT format EXTRA_ARG, ##__VA_ARGS__)
 # else
 #  define lldbg(x...)
 # endif
 
 # ifdef CONFIG_DEBUG_VERBOSE
 #  define vdbg(format, ...) \
-   syslog(LOG_DEBUG, EXTRA_FMT format EXTRA_ARG, ##__VA_ARGS__)
+   __arch_syslog(LOG_DEBUG, EXTRA_FMT format EXTRA_ARG, ##__VA_ARGS__)
 
 #  ifdef CONFIG_ARCH_LOWPUTC
 #    define llvdbg(format, ...) \
-     lowsyslog(LOG_DEBUG, EXTRA_FMT format EXTRA_ARG, ##__VA_ARGS__)
+     __arch_lowsyslog(LOG_DEBUG, EXTRA_FMT format EXTRA_ARG, ##__VA_ARGS__)
 #  else
 #    define llvdbg(x...)
 #  endif
 
-# else
+# else /* CONFIG_DEBUG_VERBOSE */
 #  define vdbg(x...)
 #  define llvdbg(x...)
-# endif
+# endif /* CONFIG_DEBUG_VERBOSE */
 
 #else /* CONFIG_DEBUG */
 
@@ -644,7 +657,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Public Variables
+ * Public Data
  ****************************************************************************/
 
 /****************************************************************************

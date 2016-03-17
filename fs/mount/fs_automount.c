@@ -249,7 +249,7 @@ static void automount_mount(FAR struct automounter_state_s *priv)
 
       priv->mounted = true;
       break;
-      
+
     default:
       fdbg("ERROR: automount_findinode failed: %d\n", ret);
       break;

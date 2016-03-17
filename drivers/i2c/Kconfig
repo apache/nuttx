@@ -1,0 +1,34 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if I2C
+
+config I2C_SLAVE
+	bool "I2C Slave"
+	default n
+
+config I2C_POLLED
+	bool "Polled I2C (no interrupts)"
+	default n
+
+config I2C_RESET
+	bool "Support I2C reset interface method"
+	default n
+	depends on ARCH_HAVE_I2CRESET
+
+config I2C_TRACE
+	bool "Enable I2C trace debug"
+	default n
+
+config I2C_NTRACE
+	int "Number of I2C trace records"
+	default 32
+	depends on I2C_TRACE
+
+config I2C_DRIVER
+	bool "I2C character driver"
+	default n
+
+endif # I2C

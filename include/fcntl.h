@@ -102,7 +102,7 @@
 #define F_GETSIG    6  /* Get the signal sent */
 #define F_NOTIFY    7  /* Provide notification when directory referred to by fd changes (linux)*/
 #define F_SETFD     8  /* Set the file descriptor flags to value */
-#define F_SETFL     9  /* Set  the  file status flags to the value */
+#define F_SETFL     9  /* Set the file status flags to the value */
 #define F_SETLEASE  10 /* Set or remove file lease (linux) */
 #define F_SETLK     11 /* Acquire or release a lock on range of bytes */
 #define F_SETLKW    12 /* Like F_SETLK, but wait for lock to become available */

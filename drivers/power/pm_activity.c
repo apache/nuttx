@@ -41,9 +41,9 @@
 
 #include <nuttx/power/pm.h>
 #include <nuttx/clock.h>
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 
-#include "pm_internal.h"
+#include "pm.h"
 
 #ifdef CONFIG_PM
 
@@ -103,7 +103,7 @@
 
 void pm_activity(int priority)
 {
-  uint32_t now;
+  systime_t now;
   uint32_t accum;
   irqstate_t flags;
 
@@ -115,7 +115,7 @@ void pm_activity(int priority)
     {
       /* Add the priority to the accumulated counts in a critical section. */
 
-      flags = irqsave();
+      flags = enter_critical_section();
       accum = (uint32_t)g_pmglobals.accum + priority;
 
       /* Make sure that we do not overflow the underlying uint16_t representation */
@@ -159,8 +159,9 @@ void pm_activity(int priority)
           (void)pm_update(tmp);
         }
 
-      irqrestore(flags);
+      leave_critical_section(flags);
     }
 }
 
 #endif /* CONFIG_PM */
+

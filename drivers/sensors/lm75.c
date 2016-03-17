@@ -2,7 +2,7 @@
  * drivers/sensors/lm75.c
  * Character driver for the STMicro LM-75 Temperature Sensor
  *
- *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,7 +47,7 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
-#include <nuttx/i2c.h>
+#include <nuttx/i2c/i2c_master.h>
 #include <nuttx/sensors/lm75.h>
 
 #if defined(CONFIG_I2C) && defined(CONFIG_I2C_LM75)
@@ -55,6 +55,10 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+#ifndef CONFIG_LM75_I2C_FREQUENCY
+#  define CONFIG_LM75_I2C_FREQUENCY 100000
+#endif
 
 /* Centigrade to Fahrenheit conversion:  F = 9*C/5 + 32 */
 
@@ -67,9 +71,9 @@
 
 struct lm75_dev_s
 {
-  FAR struct i2c_dev_s *i2c; /* I2C interface */
-  uint8_t addr;              /* I2C address */
-  bool fahrenheit;           /* true: temperature will be reported in fahrenheit */
+  FAR struct i2c_master_s *i2c; /* I2C interface */
+  uint8_t addr;                 /* I2C address */
+  bool fahrenheit;              /* true: temperature will be reported in fahrenheit */
 };
 
 /****************************************************************************
@@ -77,20 +81,26 @@ struct lm75_dev_s
  ****************************************************************************/
 /* I2C Helpers */
 
-static int lm75_readb16(FAR struct lm75_dev_s *priv, uint8_t regaddr,
-                        FAR b16_t *regvalue);
-static int lm75_writeb16(FAR struct lm75_dev_s *priv, uint8_t regaddr,
-                         b16_t regval);
-static int lm75_readtemp(FAR struct lm75_dev_s *priv, FAR b16_t *temp);
-static int lm75_readconf(FAR struct lm75_dev_s *priv, FAR uint8_t *conf);
-static int lm75_writeconf(FAR struct lm75_dev_s *priv, uint8_t conf);
+static int     lm75_i2c_write(FAR struct lm75_dev_s *priv,
+                              FAR const uint8_t *buffer, int buflen);
+static int     lm75_i2c_read(FAR struct lm75_dev_s *priv,
+                             FAR uint8_t *buffer, int buflen);
+static int     lm75_readb16(FAR struct lm75_dev_s *priv, uint8_t regaddr,
+                            FAR b16_t *regvalue);
+static int     lm75_writeb16(FAR struct lm75_dev_s *priv, uint8_t regaddr,
+                             b16_t regval);
+static int     lm75_readtemp(FAR struct lm75_dev_s *priv, FAR b16_t *temp);
+static int     lm75_readconf(FAR struct lm75_dev_s *priv, FAR uint8_t *conf);
+static int     lm75_writeconf(FAR struct lm75_dev_s *priv, uint8_t conf);
 
 /* Character driver methods */
 
 static int     lm75_open(FAR struct file *filep);
 static int     lm75_close(FAR struct file *filep);
-static ssize_t lm75_read(FAR struct file *, FAR char *, size_t);
-static ssize_t lm75_write(FAR struct file *filep, FAR const char *buffer, size_t buflen);
+static ssize_t lm75_read(FAR struct file *filep, FAR char *buffer,
+                         size_t buflen);
+static ssize_t lm75_write(FAR struct file *filep, FAR const char *buffer,
+                          size_t buflen);
 static int     lm75_ioctl(FAR struct file *filep,int cmd,unsigned long arg);
 
 /****************************************************************************
@@ -103,16 +113,69 @@ static const struct file_operations g_lm75fops =
   lm75_close,
   lm75_read,
   lm75_write,
-  0,
+  NULL,
   lm75_ioctl
 #ifndef CONFIG_DISABLE_POLL
-  , 0
+  , NULL
 #endif
 };
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: lm75_i2c_write
+ *
+ * Description:
+ *   Write to the I2C device.
+ *
+ ****************************************************************************/
+
+static int lm75_i2c_write(FAR struct lm75_dev_s *priv,
+                          FAR const uint8_t *buffer, int buflen)
+{
+  struct i2c_msg_s msg;
+
+  /* Setup for the transfer */
+
+  msg.frequency = CONFIG_LM75_I2C_FREQUENCY,
+  msg.addr      = priv->addr;
+  msg.flags     = 0;
+  msg.buffer    = (FAR uint8_t *)buffer;  /* Override const */
+  msg.length    = buflen;
+
+  /* Then perform the transfer. */
+
+  return I2C_TRANSFER(priv->i2c, &msg, 1);
+}
+
+/****************************************************************************
+ * Name: lm75_i2c_read
+ *
+ * Description:
+ *   Read from the I2C device.
+ *
+ ****************************************************************************/
+
+static int lm75_i2c_read(FAR struct lm75_dev_s *priv,
+                         FAR uint8_t *buffer, int buflen)
+{
+  struct i2c_msg_s msg;
+
+  /* Setup for the transfer */
+
+  msg.frequency = CONFIG_LM75_I2C_FREQUENCY,
+  msg.addr      = priv->addr,
+  msg.flags     = I2C_M_READ;
+  msg.buffer    = buffer;
+  msg.length    = buflen;
+
+  /* Then perform the transfer. */
+
+  return I2C_TRANSFER(priv->i2c, &msg, 1);
+}
+
 /****************************************************************************
  * Name: lm75_readb16
  *
@@ -129,20 +192,19 @@ static int lm75_readb16(FAR struct lm75_dev_s *priv, uint8_t regaddr,
 
   /* Write the register address */
 
-  I2C_SETADDRESS(priv->i2c, priv->addr, 7);
-  ret = I2C_WRITE(priv->i2c, &regaddr, 1);
+  ret = lm75_i2c_write(priv, &regaddr, 1);
   if (ret < 0)
     {
-      sndbg("I2C_WRITE failed: %d\n", ret);
+      sndbg("i2c_write failed: %d\n", ret);
       return ret;
     }
 
   /* Restart and read 16-bits from the register (discarding 7) */
 
-  ret = I2C_READ(priv->i2c, buffer, 2);
+  ret = lm75_i2c_read(priv, buffer, 2);
   if (ret < 0)
     {
-      sndbg("I2C_READ failed: %d\n", ret);
+      sndbg("i2c_read failed: %d\n", ret);
       return ret;
     }
 
@@ -182,8 +244,7 @@ static int lm75_writeb16(FAR struct lm75_dev_s *priv, uint8_t regaddr,
 
   /* Write the register address followed by the data (no RESTART) */
 
-  I2C_SETADDRESS(priv->i2c, priv->addr, 7);
-  return I2C_WRITE(priv->i2c, buffer, 3);
+  return lm75_i2c_write(priv, buffer, 3);
 }
 
 /****************************************************************************
@@ -239,19 +300,18 @@ static int lm75_readconf(FAR struct lm75_dev_s *priv, FAR uint8_t *conf)
 
   /* Write the configuration register address */
 
-  I2C_SETADDRESS(priv->i2c, priv->addr, 7);
-
   buffer = LM75_CONF_REG;
-  ret = I2C_WRITE(priv->i2c, &buffer, 1);
+
+  ret = lm75_i2c_write(priv, &buffer, 1);
   if (ret < 0)
     {
-      sndbg("I2C_WRITE failed: %d\n", ret);
+      sndbg("i2c_write failed: %d\n", ret);
       return ret;
     }
 
   /* Restart and read 8-bits from the register */
 
-  ret = I2C_READ(priv->i2c, conf, 1);
+  ret = lm75_i2c_read(priv, conf, 1);
   sndbg("conf: %02x ret: %d\n", *conf, ret);
   return ret;
 }
@@ -277,8 +337,7 @@ static int lm75_writeconf(FAR struct lm75_dev_s *priv, uint8_t conf)
 
   /* Write the register address followed by the data (no RESTART) */
 
-  I2C_SETADDRESS(priv->i2c, priv->addr, 7);
-  return I2C_WRITE(priv->i2c, buffer, 2);
+  return lm75_i2c_write(priv, buffer, 2);
 }
 
 /****************************************************************************
@@ -338,7 +397,7 @@ static ssize_t lm75_read(FAR struct file *filep, FAR char *buffer, size_t buflen
       ret = lm75_readtemp(priv, &temp);
       if (ret < 0)
         {
-          sndbg("lm75_readtemp failed: %d\n",ret);
+          sndbg("lm75_readtemp failed: %d\n", ret);
           return (ssize_t)ret;
         }
 
@@ -377,6 +436,7 @@ static int lm75_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case SNIOC_READCONF:
         {
           FAR uint8_t *ptr = (FAR uint8_t *)((uintptr_t)arg);
+          DEBUGASSERT(ptr != NULL);
           ret = lm75_readconf(priv, ptr);
           sndbg("conf: %02x ret: %d\n", *ptr, ret);
         }
@@ -386,7 +446,7 @@ static int lm75_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case SNIOC_WRITECONF:
         ret = lm75_writeconf(priv, (uint8_t)arg);
-        sndbg("conf: %02x ret: %d\n", *(uint8_t*)arg, ret);
+        sndbg("conf: %02x ret: %d\n", *(FAR uint8_t *)arg, ret);
         break;
 
       /* Shutdown the LM75, Arg: None */
@@ -438,6 +498,7 @@ static int lm75_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case SNIOC_READTHYS:
         {
           FAR b16_t *ptr = (FAR b16_t *)((uintptr_t)arg);
+          DEBUGASSERT(ptr != NULL);
           ret = lm75_readb16(priv, LM75_THYS_REG, ptr);
           sndbg("THYS: %08x ret: %d\n", *ptr, ret);
         }
@@ -455,6 +516,7 @@ static int lm75_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case SNIOC_READTOS:
         {
           FAR b16_t *ptr = (FAR b16_t *)((uintptr_t)arg);
+          DEBUGASSERT(ptr != NULL);
           ret = lm75_readb16(priv, LM75_TOS_REG, ptr);
           sndbg("TOS: %08x ret: %d\n", *ptr, ret);
         }
@@ -462,7 +524,7 @@ static int lm75_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       /* Write TOS (Over-temp Shutdown Threshold) Register. Arg: b16_t value */
 
-      case SNIOC_WRITRETOS:
+      case SNIOC_WRITETOS:
         ret = lm75_writeb16(priv, LM75_TOS_REG, (b16_t)arg);
         sndbg("TOS: %08x ret: %d\n", (b16_t)arg, ret);
         break;
@@ -498,15 +560,23 @@ static int lm75_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-int lm75_register(FAR const char *devpath, FAR struct i2c_dev_s *i2c, uint8_t addr)
+int lm75_register(FAR const char *devpath, FAR struct i2c_master_s *i2c, uint8_t addr)
 {
   FAR struct lm75_dev_s *priv;
   int ret;
 
+  /* Sanity check */
+
+  DEBUGASSERT(i2c != NULL);
+  DEBUGASSERT(addr == CONFIG_LM75_ADDR0 || addr == CONFIG_LM75_ADDR1 ||
+              addr == CONFIG_LM75_ADDR2 || addr == CONFIG_LM75_ADDR3 ||
+              addr == CONFIG_LM75_ADDR4 || addr == CONFIG_LM75_ADDR5 ||
+              addr == CONFIG_LM75_ADDR6 || addr == CONFIG_LM75_ADDR7);
+
   /* Initialize the LM-75 device structure */
 
   priv = (FAR struct lm75_dev_s *)kmm_malloc(sizeof(struct lm75_dev_s));
-  if (!priv)
+  if (priv == NULL)
     {
       sndbg("Failed to allocate instance\n");
       return -ENOMEM;

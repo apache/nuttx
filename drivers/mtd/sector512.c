@@ -107,7 +107,7 @@ struct s512_dev_s
   size_t                sectperblock; /* Number of read/write sectors per erase block */
   uint16_t              stdperblock;  /* Number of 512 byte sectors in one erase block */
   uint8_t               flags;        /* Buffered sector flags */
-  uint32_t              eblockno;     /* Erase sector number in the cache*/
+  uint32_t              eblockno;     /* Erase sector number in the cache */
   FAR uint8_t          *eblock;       /* Allocated erase block */
 };
 
@@ -269,9 +269,9 @@ static int s512_erase(FAR struct mtd_dev_s *dev, off_t sector512, size_t nsector
         }
 
       /* Erase the block containing this sector if it is not already erased.
-      * The erased indicator will be cleared when the data from the erase sector
-      * is read into the cache and set here when we erase the block.
-      */
+       * The erased indicator will be cleared when the data from the erase sector
+       * is read into the cache and set here when we erase the block.
+       */
 
       if (!IS_ERASED(priv))
         {
@@ -538,7 +538,7 @@ static int s512_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
           if (ret >= 0)
             {
               priv->flags    = 0;      /* Buffered sector flags */
-              priv->eblockno = 0;      /* Erase sector number in the cache*/
+              priv->eblockno = 0;      /* Erase sector number in the cache */
               priv->eblock   = NULL;   /* Allocated erase block */
             }
         }
@@ -588,7 +588,7 @@ FAR struct mtd_dev_s *s512_initialize(FAR struct mtd_dev_s *mtd)
   /* We expect that the block size will be >512 and an even multiple of 512 */
 
   if (ret < 0 || geo.erasesize <= SECTOR_512 ||
-     (geo.erasesize & ~MASK_512) != geo.erasesize )
+     (geo.erasesize & ~MASK_512) != geo.erasesize)
     {
       fdbg("ERROR: MTDIOC_GEOMETRY ioctl returned %d, eraseize=%d\n",
            ret, geo.erasesize);

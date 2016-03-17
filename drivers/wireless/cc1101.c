@@ -220,8 +220,7 @@
 
 #define CC1101_MCSM0_XOSC_FORCE_ON  0x01
 
-/*
- * Chip Status Byte
+/* Chip Status Byte
  */
 
 /* Bit fields in the chip status byte */
@@ -273,9 +272,7 @@
 #define CC1101_PARTNUM_VALUE                    0x00
 #define CC1101_VERSION_VALUE                    0x04
 
-/*
- *  Others ...
- */
+/*  Others ... */
 
 #define CC1101_LQI_CRC_OK_BM                    0x80
 #define CC1101_LQI_EST_BM                       0x7F
@@ -301,35 +298,46 @@ struct cc1101_dev_s
 };
 
 /****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static volatile int cc1101_interrupt = 0;
+
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
-void cc1101_access_begin(struct cc1101_dev_s * dev)
+void cc1101_access_begin(FAR struct cc1101_dev_s * dev)
 {
   (void)SPI_LOCK(dev->spi, true);
   SPI_SELECT(dev->spi, SPIDEV_WIRELESS, true);
   SPI_SETMODE(dev->spi, SPIDEV_MODE0);     /* CPOL=0, CPHA=0 */
   SPI_SETBITS(dev->spi, 8);
+  (void)SPI_HWFEATURES(dev->spi, 0);
 }
 
-void cc1101_access_end(struct cc1101_dev_s * dev)
+void cc1101_access_end(FAR struct cc1101_dev_s * dev)
 {
   SPI_SELECT(dev->spi, SPIDEV_WIRELESS, false);
   (void)SPI_LOCK(dev->spi, false);
 }
 
-/** CC1101 Access with Range Check
+/* CC1101 Access with Range Check
  *
- * \param dev CC1101 Private Structure
- * \param addr CC1101 Address
- * \param buf Pointer to buffer, either for read or write access
- * \param length when >0 it denotes read access, when <0 it denotes write
+ * Input Paramters:
+ *   dev CC1101 Private Structure
+ *   addr CC1101 Address
+ *   buf Pointer to buffer, either for read or write access
+ *   length when >0 it denotes read access, when <0 it denotes write
  *        access of -length. abs(length) greater of 1 implies burst mode,
  *        however
- * \return OK on success or errno is set.
+ *
+ * Returned Value:
+ *   OK on success or errno is set.
  */
 
-int cc1101_access(struct cc1101_dev_s * dev, uint8_t addr, uint8_t *buf, int length)
+int cc1101_access(FAR struct cc1101_dev_s * dev, uint8_t addr,
+                  FAR uint8_t *buf, int length)
 {
   int stabyte;
 
@@ -339,143 +347,160 @@ int cc1101_access(struct cc1101_dev_s * dev, uint8_t addr, uint8_t *buf, int len
    */
 
   if ((addr & CC1101_READ_SINGLE) && length != 1)
-        return ERROR;
+    {
+      return ERROR;
+    }
 
-    /* Prepare SPI */
+  /* Prepare SPI */
 
-    cc1101_access_begin(dev);
+  cc1101_access_begin(dev);
 
-    if (length>1 || length < -1)
-        SPI_SETFREQUENCY(dev->spi, CC1101_SPIFREQ_BURST);
-    else SPI_SETFREQUENCY(dev->spi, CC1101_SPIFREQ_SINGLE);
+  if (length > 1 || length < -1)
+    {
+      SPI_SETFREQUENCY(dev->spi, CC1101_SPIFREQ_BURST);
+    }
+  else
+    {
+      SPI_SETFREQUENCY(dev->spi, CC1101_SPIFREQ_SINGLE);
+    }
 
-    /* Transfer */
+  /* Transfer */
 
-    if (length <= 0) {      /* 0 length are command strobes */
-        if (length < -1)
-            addr |= CC1101_WRITE_BURST;
+  if (length <= 0)
+    {
+      /* 0 length are command strobes */
 
-        stabyte = SPI_SEND(dev->spi, addr);
-        if (length) {
-            SPI_SNDBLOCK(dev->spi, buf, -length);
+      if (length < -1)
+        {
+          addr |= CC1101_WRITE_BURST;
+        }
+
+      stabyte = SPI_SEND(dev->spi, addr);
+      if (length)
+        {
+          SPI_SNDBLOCK(dev->spi, buf, -length);
         }
     }
-    else {
-        addr |= CC1101_READ_SINGLE;
-        if (length > 1)
-            addr |= CC1101_READ_BURST;
+  else
+    {
+      addr |= CC1101_READ_SINGLE;
+      if (length > 1)
+        {
+          addr |= CC1101_READ_BURST;
+        }
 
-        stabyte = SPI_SEND(dev->spi, addr);
-        SPI_RECVBLOCK(dev->spi, buf, length);
+      stabyte = SPI_SEND(dev->spi, addr);
+      SPI_RECVBLOCK(dev->spi, buf, length);
     }
 
-    cc1101_access_end(dev);
+  cc1101_access_end(dev);
 
-    return stabyte;
+  return stabyte;
 }
 
-
-/** Strobes command and returns chip status byte
+/* Strobes command and returns chip status byte
  *
  *  By default commands are send as Write. To a command,
  *  CC1101_READ_SINGLE may be OR'ed to obtain the number of RX bytes
  *  pending in RX FIFO.
  */
+
 inline uint8_t cc1101_strobe(struct cc1101_dev_s * dev, uint8_t command)
 {
-    uint8_t status;
+  uint8_t status;
 
-    cc1101_access_begin(dev);
-    SPI_SETFREQUENCY(dev->spi, CC1101_SPIFREQ_SINGLE);
+  cc1101_access_begin(dev);
+  SPI_SETFREQUENCY(dev->spi, CC1101_SPIFREQ_SINGLE);
 
-    status = SPI_SEND(dev->spi, command);
+  status = SPI_SEND(dev->spi, command);
 
-    cc1101_access_end(dev);
+  cc1101_access_end(dev);
 
-    return status;
+  return status;
 }
-
 
 int cc1101_reset(struct cc1101_dev_s * dev)
 {
-    cc1101_strobe(dev, CC1101_SRES);
-    return OK;
+  cc1101_strobe(dev, CC1101_SRES);
+  return OK;
 }
-
 
 int cc1101_checkpart(struct cc1101_dev_s * dev)
 {
-    uint8_t partnum, version;
+  uint8_t partnum;
+  uint8_t version;
 
-    if (cc1101_access(dev, CC1101_PARTNUM, &partnum, 1) < 0 ||
-        cc1101_access(dev, CC1101_VERSION, &version, 1) < 0)
-        return ERROR;
+  if (cc1101_access(dev, CC1101_PARTNUM, &partnum, 1) < 0 ||
+      cc1101_access(dev, CC1101_VERSION, &version, 1) < 0)
+    {
+      return ERROR;
+    }
 
-    if (partnum == CC1101_PARTNUM_VALUE && version == CC1101_VERSION_VALUE)
-        return OK;
+  if (partnum == CC1101_PARTNUM_VALUE && version == CC1101_VERSION_VALUE)
+    {
+      return OK;
+    }
 
-    return ERROR;
+  return ERROR;
 }
-
 
 void cc1101_dumpregs(struct cc1101_dev_s * dev, uint8_t addr, uint8_t length)
 {
-    uint8_t buf[0x30], i;
+  uint8_t buf[0x30], i;
 
-    cc1101_access(dev, addr, buf, length);
+  cc1101_access(dev, addr, (FAR uint8_t *)buf, length);
 
-    printf("CC1101[%2x]: ", addr);
-    for (i=0; i<length; i++) printf(" %2x,", buf[i]);
-    printf("\n");
+  printf("CC1101[%2x]: ", addr);
+  for (i = 0; i < length; i++)
+    {
+      printf(" %2x,", buf[i]);
+    }
+
+  printf("\n");
 }
-
 
 void cc1101_setpacketctrl(struct cc1101_dev_s * dev)
 {
-    uint8_t values[3];
+  uint8_t values[3];
 
-    values[0] = 0;      /* Rx FIFO threshold = 32, Tx FIFO threshold = 33 */
-    cc1101_access(dev, CC1101_FIFOTHR, values, -1);
+  values[0] = 0;      /* Rx FIFO threshold = 32, Tx FIFO threshold = 33 */
+  cc1101_access(dev, CC1101_FIFOTHR, values, -1);
 
-    /* Packet length
-     * Limit it to 61 bytes in total: pktlen, data[61], rssi, lqi
-     */
+  /* Packet length
+   * Limit it to 61 bytes in total: pktlen, data[61], rssi, lqi
+   */
 
-    values[0] = CC1101_PACKET_MAXDATALEN;
-    cc1101_access(dev, CC1101_PKTLEN, values, -1);
+  values[0] = CC1101_PACKET_MAXDATALEN;
+  cc1101_access(dev, CC1101_PKTLEN, values, -1);
 
-    /* Packet Control */
+  /* Packet Control */
 
-    values[0] = 0x04;   /* Append status: RSSI and LQI at the end of received packet */
-                        /* TODO: CRC Auto Flash bit 0x08 ??? */
-    values[1] = 0x05;   /* CRC in Rx and Tx Enabled: Variable Packet mode, defined by first byte */
-                        /* TODO: Enable data whitening ... */
-    cc1101_access(dev, CC1101_PKTCTRL1, values, -2);
+  values[0] = 0x04;   /* Append status: RSSI and LQI at the end of received packet */
+                      /* TODO: CRC Auto Flash bit 0x08 ??? */
+  values[1] = 0x05;   /* CRC in Rx and Tx Enabled: Variable Packet mode, defined by first byte */
+                      /* TODO: Enable data whitening ... */
+  cc1101_access(dev, CC1101_PKTCTRL1, values, -2);
 
-    /* Main Radio Control State Machine */
+  /* Main Radio Control State Machine */
 
-    values[0] = 0x07;   /* No time-out */
-    values[1] = 0x00;   /* Clear channel if RSSI < thr && !receiving;
-                         * TX -> RX, RX -> RX: 0x3F */
-    values[2] = CC1101_MCSM0_VALUE;   /* Calibrate on IDLE -> RX/TX, OSC Timeout = ~500 us
-                           TODO: has XOSC_FORCE_ON */
-    cc1101_access(dev, CC1101_MCSM2, values, -3);
+  values[0] = 0x07;   /* No time-out */
+  values[1] = 0x00;   /* Clear channel if RSSI < thr && !receiving;
+                       * TX -> RX, RX -> RX: 0x3F */
+  values[2] = CC1101_MCSM0_VALUE;   /* Calibrate on IDLE -> RX/TX, OSC Timeout = ~500 us
+                       * TODO: has XOSC_FORCE_ON */
+  cc1101_access(dev, CC1101_MCSM2, values, -3);
 
-    /* Wake-On Radio Control */
+  /* Wake-On Radio Control */
+  /* Not used yet. */
 
-    // Not used yet.
-
-    // WOREVT1:WOREVT0 - 16-bit timeout register
+  /* WOREVT1:WOREVT0 - 16-bit timeout register */
 }
-
 
 /****************************************************************************
  * Callbacks
  ****************************************************************************/
 
-volatile int cc1101_interrupt = 0;
-
-/** External line triggers this callback
+/* External line triggers this callback
  *
  * The concept todo is:
  *  - GPIO provides EXTI Interrupt
@@ -612,7 +637,7 @@ int cc1101_setgdo(struct cc1101_dev_s * dev, uint8_t pin, uint8_t function)
       /* Force XOSC to stay active even in sleep mode */
 
       int value = CC1101_MCSM0_VALUE | CC1101_MCSM0_XOSC_FORCE_ON;
-      cc1101_access(dev, CC1101_MCSM0, &value, -1);
+      cc1101_access(dev, CC1101_MCSM0, (FAR uint8_t *)&value, -1);
 
       dev->flags |= FLAGS_XOSCENABLED;
     }
@@ -621,7 +646,7 @@ int cc1101_setgdo(struct cc1101_dev_s * dev, uint8_t pin, uint8_t function)
       /* Disable XOSC in sleep mode */
 
       int value = CC1101_MCSM0_VALUE;
-      cc1101_access(dev, CC1101_MCSM0, &value, -1);
+      cc1101_access(dev, CC1101_MCSM0, (FAR uint8_t *)&value, -1);
 
       dev->flags &= ~FLAGS_XOSCENABLED;
     }
@@ -634,24 +659,24 @@ int cc1101_setrf(struct cc1101_dev_s * dev, const struct c1101_rfsettings_s *set
   ASSERT(dev);
   ASSERT(settings);
 
-  if (cc1101_access(dev, CC1101_FSCTRL1, &settings->FSCTRL1, -11) < 0)
+  if (cc1101_access(dev, CC1101_FSCTRL1, (FAR uint8_t *)&settings->FSCTRL1, -11) < 0)
     {
       return ERROR;
     }
 
-  if (cc1101_access(dev, CC1101_FOCCFG,  &settings->FOCCFG,  -5) < 0)
+  if (cc1101_access(dev, CC1101_FOCCFG,  (FAR uint8_t *)&settings->FOCCFG,  -5) < 0)
     {
       return ERROR;
     }
 
-  if (cc1101_access(dev, CC1101_FREND1,  &settings->FREND1,  -6) < 0)
+  if (cc1101_access(dev, CC1101_FREND1,  (FAR uint8_t *)&settings->FREND1,  -6) < 0)
     {
       return ERROR;
     }
 
   /* Load Power Table */
 
-  if (cc1101_access(dev, CC1101_PATABLE, settings->PA, -8) < 0)
+  if (cc1101_access(dev, CC1101_PATABLE, (FAR uint8_t *)settings->PA, -8) < 0)
     {
       return ERROR;
     }
@@ -664,7 +689,7 @@ int cc1101_setrf(struct cc1101_dev_s * dev, const struct c1101_rfsettings_s *set
   cc1101_setchannel(dev, dev->channel);
   cc1101_setpower(dev, dev->power);
 
-    return OK;
+  return OK;
 }
 
 int cc1101_setchannel(struct cc1101_dev_s * dev, uint8_t channel)
@@ -753,9 +778,9 @@ int cc1101_read(struct cc1101_dev_s * dev, uint8_t * buf, size_t size)
 {
   ASSERT(dev);
 
-  if (buf==NULL)
+  if (buf == NULL)
     {
-      if (size==0)
+      if (size == 0)
         {
           return 64;
         }
@@ -823,7 +848,7 @@ int cc1101_write(struct cc1101_dev_s * dev, const uint8_t * buf, size_t size)
     }
 
   cc1101_access(dev, CC1101_TXFIFO, &packetlen, -1);
-  cc1101_access(dev, CC1101_TXFIFO, buf, -size);
+  cc1101_access(dev, CC1101_TXFIFO, (FAR uint8_t *)buf, -size);
 
   return 0;
 }

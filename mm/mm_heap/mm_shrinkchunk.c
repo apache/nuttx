@@ -44,11 +44,7 @@
 #include <nuttx/mm/mm.h>
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Global Functions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -73,7 +69,7 @@ void  mm_shrinkchunk(FAR struct mm_heap_s *heap,
 
   /* Get a reference to the next node */
 
-  next = (FAR struct mm_freenode_s*)((char*)node + node->size);
+  next = (FAR struct mm_freenode_s *)((FAR char *)node + node->size);
 
   /* Check if it is free */
 
@@ -84,7 +80,7 @@ void  mm_shrinkchunk(FAR struct mm_heap_s *heap,
 
       /* Get the chunk next the next node (which could be the tail chunk) */
 
-      andbeyond = (FAR struct mm_allocnode_s*)((char*)next + next->size);
+      andbeyond = (FAR struct mm_allocnode_s *)((FAR char *)next + next->size);
 
       /* Remove the next node.  There must be a predecessor, but there may
        * not be a successor node.
@@ -101,7 +97,7 @@ void  mm_shrinkchunk(FAR struct mm_heap_s *heap,
        * tailing memory from the aligned chunk.
        */
 
-      newnode = (FAR struct mm_freenode_s*)((char*)node + size);
+      newnode = (FAR struct mm_freenode_s *)((FAR char *)node + size);
 
       /* Set up the size of the new node */
 
@@ -127,7 +123,7 @@ void  mm_shrinkchunk(FAR struct mm_heap_s *heap,
        * tailing memory from the aligned chunk.
        */
 
-      newnode = (FAR struct mm_freenode_s*)((char*)node + size);
+      newnode = (FAR struct mm_freenode_s *)((FAR char *)node + size);
 
       /* Set up the size of the new node */
 

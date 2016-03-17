@@ -1,7 +1,7 @@
 /****************************************************************************
  *  sched/mqueue/mq_timedsend.c
  *
- *   Copyright (C) 2007-2009, 2011, 2013-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011, 2013-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,28 +47,13 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/wdog.h>
 
 #include "clock/clock.h"
 #include "sched/sched.h"
 #include "mqueue/mqueue.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Type Declarations
- ****************************************************************************/
-
-/****************************************************************************
- * Public Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Variables
- ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
@@ -95,13 +80,13 @@
 static void mq_sndtimeout(int argc, wdparm_t pid)
 {
   FAR struct tcb_s *wtcb;
-  irqstate_t saved_state;
+  irqstate_t flags;
 
   /* Disable interrupts.  This is necessary because an interrupt handler may
    * attempt to send a message while we are doing this.
    */
 
-  saved_state = irqsave();
+  flags = enter_critical_section();
 
   /* Get the TCB associated with this pid.  It is possible that task may no
    * longer be active when this watchdog goes off.
@@ -122,7 +107,7 @@ static void mq_sndtimeout(int argc, wdparm_t pid)
 
   /* Interrupts may now be re-enabled. */
 
-  irqrestore(saved_state);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -183,10 +168,10 @@ static void mq_sndtimeout(int argc, wdparm_t pid)
 int mq_timedsend(mqd_t mqdes, FAR const char *msg, size_t msglen, int prio,
                  FAR const struct timespec *abstime)
 {
-  FAR struct tcb_s *rtcb = (FAR struct tcb_s *)g_readytorun.head;
+  FAR struct tcb_s *rtcb = this_task();
   FAR struct mqueue_inode_s *msgq;
   FAR struct mqueue_msg_s *mqmsg = NULL;
-  irqstate_t saved_state;
+  irqstate_t flags;
   int ticks;
   int result;
   int ret = ERROR;
@@ -274,7 +259,7 @@ int mq_timedsend(mqd_t mqdes, FAR const char *msg, size_t msglen, int prio,
    * disabled here so that this time stays valid until the wait begins.
    */
 
-  saved_state = irqsave();
+  flags = enter_critical_section();
   result = clock_abstime2ticks(CLOCK_REALTIME, abstime, &ticks);
 
   /* If the time has already expired and the message queue is empty,
@@ -290,7 +275,7 @@ int mq_timedsend(mqd_t mqdes, FAR const char *msg, size_t msglen, int prio,
 
   if (result != OK)
     {
-      goto errout_with_irqsave;
+      goto errout_in_critical_section;
     }
 
   /* Start the watchdog and begin the wait for MQ not full */
@@ -314,12 +299,12 @@ int mq_timedsend(mqd_t mqdes, FAR const char *msg, size_t msglen, int prio,
       /* mq_waitsend() will set the errno, but the error exit will reset it */
 
       result = get_errno();
-      goto errout_with_irqsave;
+      goto errout_in_critical_section;
     }
 
   /* That is the end of the atomic operations */
 
-  irqrestore(saved_state);
+  leave_critical_section(flags);
 
   /* If any of the above failed, set the errno.  Otherwise, there should
    * be space for another message in the message queue.  NOW we can allocate
@@ -340,8 +325,8 @@ int mq_timedsend(mqd_t mqdes, FAR const char *msg, size_t msglen, int prio,
  * 'result'
  */
 
-errout_with_irqsave:
-  irqrestore(saved_state);
+errout_in_critical_section:
+  leave_critical_section(flags);
   wd_delete(rtcb->waitdog);
   rtcb->waitdog = NULL;
 

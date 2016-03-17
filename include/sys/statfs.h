@@ -103,6 +103,7 @@
 #define NXFFS_MAGIC           0x4747
 #define SMARTFS_MAGIC         0x54524D53
 #define UNIONFS_MAGIC         0x53464e55
+#define HOSTFS_MAGIC          0x54534f48
 
 /****************************************************************************
  * Type Definitions

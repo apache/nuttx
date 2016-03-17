@@ -172,7 +172,7 @@ int nx_mousein(NXHANDLE handle, nxgl_coord_t x, nxgl_coord_t y, uint8_t buttons)
       y = g_mrange.y - 1;
     }
 
- /* Look any change in values */
+  /* Look any change in values */
 
   if (x != g_mpos.x || y != g_mpos.y || buttons != g_mbutton)
     {

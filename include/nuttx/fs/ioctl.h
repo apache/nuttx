@@ -77,7 +77,16 @@
 #define _RTCBASE        (0x1800) /* RTC ioctl commands */
 #define _RELAYBASE      (0x1900) /* Relay devices ioctl commands */
 #define _CANBASE        (0x1a00) /* CAN ioctl commands */
-#define _BOARDBASE      (0x1b00) /* boardctl ioctl commands */
+#define _BTNBASE        (0x1b00) /* Button ioctl commands */
+#define _ULEDBASE       (0x1c00) /* User LED ioctl commands */
+#define _ZCBASE         (0x1d00) /* Zero Cross ioctl commands */
+#define _LOOPBASE       (0x1e00) /* Loop device commands */
+#define _MODEMBASE      (0x1f00) /* Modem ioctl commands */
+#define _I2CBASE        (0x2000) /* I2C driver commands */
+
+/* boardctl commands share the same number space */
+
+#define _BOARDBASE      (0xff00) /* boardctl commands */
 
 /* Macros used to manage ioctl commands */
 
@@ -217,25 +226,6 @@
 #define _MTDIOCVALID(c)   (_IOC_TYPE(c)==_MTDIOCBASE)
 #define _MTDIOC(nr)       _IOC(_MTDIOCBASE,nr)
 
-#define MTDIOC_GEOMETRY   _MTDIOC(0x0001) /* IN:  Pointer to write-able struct
-                                           *      mtd_geometry_s in which to receive
-                                           *      receive geometry data (see mtd.h)
-                                           * OUT: Geometry structure is populated
-                                           *      with data for the MTD */
-#define MTDIOC_XIPBASE    _MTDIOC(0x0002) /* IN:  Pointer to pointer to void in
-                                           *      which to received the XIP base.
-                                           * OUT: If media is directly accessible,
-                                           *      return (void*) base address
-                                           *      of device memory */
-#define MTDIOC_BULKERASE  _MTDIOC(0x0003) /* IN:  None
-                                           * OUT: None */
-#define MTDIOC_SETSPEED   _MTDIOC(0x0004) /* IN:  New bus speed in Hz
-                                           * OUT: None */
-#define MTDIOC_EXTENDED   _MTDIOC(0x0005) /* IN:  unsigned long
-                                           *      0=Use normal memory region
-                                           *      1=Use alternate/extended memory
-                                           * OUT: None */
-
 /* NuttX ARP driver ioctl definitions (see netinet/arp.h) *******************/
 
 #define _ARPIOCVALID(c)   (_IOC_TYPE(c)==_ARPIOCBASE)
@@ -286,56 +276,56 @@
 /* NuttX Audio driver ioctl definitions *************************************/
 /* (see nuttx/audio/audio.h) */
 
-#define _AUDIOIOCVALID(c)  (_IOC_TYPE(c)==_AUDIOIOCBASE)
-#define _AUDIOIOC(nr)      _IOC(_AUDIOIOCBASE,nr)
+#define _AUDIOIOCVALID(c) (_IOC_TYPE(c)==_AUDIOIOCBASE)
+#define _AUDIOIOC(nr)     _IOC(_AUDIOIOCBASE,nr)
 
 /* Segment LCD driver ioctl definitions *************************************/
 /* (see nuttx/include/lcd/slcd_codec.h */
 
-#define _SLCDIOCVALID(c)   (_IOC_TYPE(c)==_SLCDIOCBASE)
-#define _SLCDIOC(nr)       _IOC(_SLCDIOCBASE,nr)
+#define _SLCDIOCVALID(c)  (_IOC_TYPE(c)==_SLCDIOCBASE)
+#define _SLCDIOC(nr)      _IOC(_SLCDIOCBASE,nr)
 
 /* Wireless driver ioctl definitions ****************************************/
 /* (see nuttx/include/wireless/wireless.h */
 
-#define _WLIOCVALID(c)     (_IOC_TYPE(c)==_WLIOCBASE)
-#define _WLIOC(nr)         _IOC(_WLIOCBASE,nr)
+#define _WLIOCVALID(c)    (_IOC_TYPE(c)==_WLIOCBASE)
+#define _WLIOC(nr)        _IOC(_WLIOCBASE,nr)
 
 /* Application Config Data driver ioctl definitions *************************/
 /* (see nuttx/include/configdata.h */
 
-#define _CFGDIOCVALID(c)   (_IOC_TYPE(c)==_CFGDIOCBASE)
-#define _CFGDIOC(nr)       _IOC(_CFGDIOCBASE,nr)
+#define _CFGDIOCVALID(c)  (_IOC_TYPE(c)==_CFGDIOCBASE)
+#define _CFGDIOC(nr)      _IOC(_CFGDIOCBASE,nr)
 
 /* Timer driver ioctl commands **********************************************/
 /* (see nuttx/include/timer.h */
 
-#define _TCIOCVALID(c)     (_IOC_TYPE(c)==_TCIOCBASE)
-#define _TCIOC(nr)         _IOC(_TCIOCBASE,nr)
+#define _TCIOCVALID(c)    (_IOC_TYPE(c)==_TCIOCBASE)
+#define _TCIOC(nr)        _IOC(_TCIOCBASE,nr)
 
 /* Discrete joystick driver ioctl definitions *******************************/
 /* (see nuttx/include/input/djoystick.h */
 
-#define _DJOYIOCVALID(c)   (_IOC_TYPE(c)==_DJOYBASE)
-#define _DJOYIOC(nr)       _IOC(_DJOYBASE,nr)
+#define _DJOYIOCVALID(c)  (_IOC_TYPE(c)==_DJOYBASE)
+#define _DJOYIOC(nr)      _IOC(_DJOYBASE,nr)
 
 /* Analog joystick driver ioctl definitions *********************************/
 /* (see nuttx/include/input/ajoystick.h */
 
-#define _AJOYIOCVALID(c)   (_IOC_TYPE(c)==_AJOYBASE)
-#define _AJOYIOC(nr)       _IOC(_AJOYBASE,nr)
+#define _AJOYIOCVALID(c)  (_IOC_TYPE(c)==_AJOYBASE)
+#define _AJOYIOC(nr)      _IOC(_AJOYBASE,nr)
 
 /* FIFOs and pipe driver ioctl definitions **********************************/
 
-#define _PIPEIOCVALID(c)   (_IOC_TYPE(c)==_PIPEBASE)
-#define _PIPEIOC(nr)       _IOC(_PIPEBASE,nr)
+#define _PIPEIOCVALID(c)  (_IOC_TYPE(c)==_PIPEBASE)
+#define _PIPEIOC(nr)      _IOC(_PIPEBASE,nr)
 
-#define PIPEIOC_POLICY     _PIPEIOC(0x0001)  /* Set buffer policy
-                                              * IN: unsigned long integer
-                                              *     0=free on last close
-                                              *       (default)
-                                              *     1=fre when empty
-                                              * OUT: None */
+#define PIPEIOC_POLICY    _PIPEIOC(0x0001)  /* Set buffer policy
+                                             * IN: unsigned long integer
+                                             *     0=free on last close
+                                             *       (default)
+                                             *     1=fre when empty
+                                             * OUT: None */
 
 /* RTC driver ioctl definitions *********************************************/
 /* (see nuttx/include/rtc.h */
@@ -346,14 +336,50 @@
 /* Relay driver ioctl definitions *******************************************/
 /* (see nuttx/power/relay.h */
 
-#define _RELAYIOCVALID(c)   (_IOC_TYPE(c)==_RELAYBASE)
-#define _RELAYIOC(nr)       _IOC(_RELAYBASE,nr)
+#define _RELAYIOCVALID(c) (_IOC_TYPE(c)==_RELAYBASE)
+#define _RELAYIOC(nr)     _IOC(_RELAYBASE,nr)
 
 /* CAN driver ioctl definitions *********************************************/
 /* (see nuttx/can.h */
 
-#define _CANIOCVALID(c)     (_IOC_TYPE(c)==_CANBASE)
-#define _CANIOC(nr)         _IOC(_CANBASE,nr)
+#define _CANIOCVALID(c)   (_IOC_TYPE(c)==_CANBASE)
+#define _CANIOC(nr)       _IOC(_CANBASE,nr)
+
+/* Button driver ioctl definitions ******************************************/
+/* (see nuttx/input/buttons.h */
+
+#define _BTNIOCVALID(c)   (_IOC_TYPE(c)==_BTNBASE)
+#define _BTNIOC(nr)       _IOC(_BTNBASE,nr)
+
+/* User LED driver ioctl definitions ****************************************/
+/* (see nuttx/leds/usersled.h */
+
+#define _ULEDIOCVALID(c)   (_IOC_TYPE(c)==_ULEDBASE)
+#define _ULEDIOC(nr)       _IOC(_ULEDBASE,nr)
+
+/* Zero Cross driver ioctl definitions **************************************/
+/* (see nuttx/include/sensor/zerocross.h */
+
+#define _ZCIOCVALID(c)    (_IOC_TYPE(c)==_ZCBASE)
+#define _ZCIOC(nr)        _IOC(_ZCBASE,nr)
+
+/* Loop driver ioctl definitions ********************************************/
+/* (see nuttx/include/fs/loop.h */
+
+#define _LOOPIOCVALID(c)  (_IOC_TYPE(c)==_LOOPBASE)
+#define _LOOPIOC(nr)      _IOC(_LOOPBASE,nr)
+
+/* Modem driver ioctl definitions ********************************************/
+/* see nuttx/include/modem/*.h */
+
+#define _MODEMIOCVALID(c)  (_IOC_TYPE(c)==_MODEMBASE)
+#define _MODEMIOC(nr)      _IOC(_MODEMBASE,nr)
+
+/* I2C driver ioctl definitions **********************************************/
+/* see nuttx/include/i2c/i2c_master.h */
+
+#define _I2CIOCVALID(c)    (_IOC_TYPE(c)==_I2CBASE)
+#define _I2CIOC(nr)        _IOC(_I2CBASE,nr)
 
 /* boardctl() command definitions *******************************************/
 

@@ -10,7 +10,7 @@
  *
  * 1. Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
+ * 2. Redistributions i, 2016n binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
@@ -42,23 +42,12 @@
 #include <queue.h>
 #include <errno.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
 
 #include "timer/timer.h"
 
 #ifndef CONFIG_DISABLE_POSIX_TIMERS
-
-/********************************************************************************
- * Pre-processor Definitions
- ********************************************************************************/
-
-/********************************************************************************
- * Private Data
- ********************************************************************************/
-
-/********************************************************************************
- * Public Data
- ********************************************************************************/
 
 /********************************************************************************
  * Private Functions
@@ -80,23 +69,23 @@ static inline void timer_free(struct posix_timer_s *timer)
 
   /* Remove the timer from the allocated list */
 
-  flags = irqsave();
-  sq_rem((FAR sq_entry_t*)timer, (sq_queue_t*)&g_alloctimers);
+  flags = enter_critical_section();
+  sq_rem((FAR sq_entry_t *)timer, (FAR sq_queue_t *)&g_alloctimers);
 
   /* Return it to the free list if it is one of the preallocated timers */
 
 #if CONFIG_PREALLOC_TIMERS > 0
   if ((timer->pt_flags & PT_FLAGS_PREALLOCATED) != 0)
     {
-      sq_addlast((FAR sq_entry_t*)timer, (FAR sq_queue_t*)&g_freetimers);
-      irqrestore(flags);
+      sq_addlast((FAR sq_entry_t *)timer, (FAR sq_queue_t *)&g_freetimers);
+      leave_critical_section(flags);
     }
   else
 #endif
     {
       /* Otherwise, return it to the heap */
 
-      irqrestore(flags);
+      leave_critical_section(flags);
       sched_kfree(timer);
     }
 }

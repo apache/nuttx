@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/sched/sched_setscheduler.c
  *
- *   Copyright (C) 2007, 2009, 2012, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2012, 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,6 +45,7 @@
 #include <assert.h>
 #include <errno.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 
 #include "sched/sched.h"
@@ -86,7 +87,7 @@ int sched_setscheduler(pid_t pid, int policy,
                        FAR const struct sched_param *param)
 {
   FAR struct tcb_s *tcb;
-  irqstate_t saved_state;
+  irqstate_t flags;
 #ifdef CONFIG_SCHED_SPORADIC
   int errcode;
 #endif
@@ -109,7 +110,7 @@ int sched_setscheduler(pid_t pid, int policy,
 
   /* Check if the task to modify the calling task */
 
-  if (pid == 0 )
+  if (pid == 0)
     {
       pid = getpid();
     }
@@ -131,8 +132,8 @@ int sched_setscheduler(pid_t pid, int policy,
 
   /* Further, disable timer interrupts while we set up scheduling policy. */
 
-  saved_state = irqsave();
-  tcb->flags &= TCB_FLAG_POLICY_MASK;
+  flags = enter_critical_section();
+  tcb->flags &= ~TCB_FLAG_POLICY_MASK;
   switch (policy)
     {
       default:
@@ -273,7 +274,7 @@ int sched_setscheduler(pid_t pid, int policy,
 #endif
     }
 
-  irqrestore(saved_state);
+  leave_critical_section(flags);
 
   /* Set the new priority */
 
@@ -284,7 +285,7 @@ int sched_setscheduler(pid_t pid, int policy,
 #ifdef CONFIG_SCHED_SPORADIC
 errout_with_irq:
   set_errno(errcode);
-  irqrestore(saved_state);
+  leave_critical_section(flags);
   sched_unlock();
   return ERROR;
 #endif

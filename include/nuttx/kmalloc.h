@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/kmalloc.h
  *
- *   Copyright (C) 2007-2008, 2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2008, 2011, 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -177,7 +177,7 @@ void group_free(FAR struct task_group_s *group, FAR void *mem);
 /* Handles memory freed from an interrupt handler.  In that context, kmm_free()
  * (or kumm_free()) cannot be called.  Instead, the allocations are saved in a
  * list of delayed allocations that will be periodically cleaned up by
- * sched_garbagecollection().
+ * sched_garbage_collection().
  */
 
 void sched_ufree(FAR void *address);
@@ -196,7 +196,19 @@ void sched_kfree(FAR void *address);
  * the system for memory in some context.
  */
 
-void sched_garbagecollection(void);
+void sched_garbage_collection(void);
+
+/* Is is not a good idea for the IDLE threads to take the KMM semaphore.
+ * That can cause the IDLE thread to take processing time from higher
+ * priority tasks.  The IDLE threads will only take the KMM semaphore if
+ * there is garbage to be collected.
+ *
+ * Certainly there is a race condition involved in sampling the garbage
+ * state.  The looping nature of the IDLE loops should catch any missed
+ * garbage from the test on the next time arround.
+ */
+
+bool sched_have_garbage(void);
 
 #undef KMALLOC_EXTERN
 #if defined(__cplusplus)

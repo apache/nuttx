@@ -60,10 +60,6 @@
 #define ICMPv6BUF ((struct icmp_ipv6hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
 
 /****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -71,7 +67,7 @@
  * Name: chksum
  ****************************************************************************/
 
-#if !CONFIG_NET_ARCH_CHKSUM
+#ifndef CONFIG_NET_ARCH_CHKSUM
 static uint16_t chksum(uint16_t sum, FAR const uint8_t *data, uint16_t len)
 {
   FAR const uint8_t *dataptr;
@@ -204,7 +200,7 @@ static uint16_t ipv6_upperlayer_chksum(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-#if !CONFIG_NET_ARCH_INCR32
+#ifndef CONFIG_NET_ARCH_INCR32
 static inline void net_carry32(FAR uint8_t *sum, uint16_t op16)
 {
   if (sum[2] < (op16 >> 8))
@@ -254,7 +250,7 @@ static inline void net_carry32(FAR uint8_t *sum, uint16_t op16)
  *
  ****************************************************************************/
 
-#if !CONFIG_NET_ARCH_INCR32
+#ifndef CONFIG_NET_ARCH_INCR32
 void net_incr32(FAR uint8_t *op32, uint16_t op16)
 {
   op32[3] += (op16 & 0xff);
@@ -288,7 +284,7 @@ void net_incr32(FAR uint8_t *op32, uint16_t op16)
  *
  ****************************************************************************/
 
-#if !CONFIG_NET_ARCH_CHKSUM
+#ifndef CONFIG_NET_ARCH_CHKSUM
 uint16_t net_chksum(FAR uint16_t *data, uint16_t len)
 {
   return htons(chksum(0, (uint8_t *)data, len));
@@ -341,7 +337,7 @@ uint16_t ipv4_chksum(FAR struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-#if !CONFIG_NET_ARCH_CHKSUM
+#ifndef CONFIG_NET_ARCH_CHKSUM
 #ifdef CONFIG_NET_IPv4
 uint16_t tcp_ipv4_chksum(FAR struct net_driver_s *dev)
 {
@@ -413,7 +409,7 @@ uint16_t udp_ipv6_chksum(FAR struct net_driver_s *dev)
 uint16_t icmp_chksum(FAR struct net_driver_s *dev, int len)
 {
   FAR struct icmp_iphdr_s *icmp = ICMPBUF;
-  return net_chksum((uint16_t*)&icmp->type, len);
+  return net_chksum((FAR uint16_t *)&icmp->type, len);
 }
 #endif /* CONFIG_NET_ICMP && CONFIG_NET_ICMP_PING */
 

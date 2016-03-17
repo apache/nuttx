@@ -40,9 +40,9 @@
 #include <nuttx/config.h>
 
 #include <nuttx/power/pm.h>
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 
-#include "pm_internal.h"
+#include "pm.h"
 
 #ifdef CONFIG_PM
 
@@ -194,7 +194,7 @@ int pm_changestate(enum pm_state_e newstate)
    * re-enabled.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* First, prepare the drivers for the state change.  In this phase,
    * drivers may refuse the state state change.
@@ -220,7 +220,7 @@ int pm_changestate(enum pm_state_e newstate)
 
   /* Restore the interrupt state */
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return ret;
 }
 

@@ -94,7 +94,7 @@
 
 int nxtk_drawlinewindow(NXTKWINDOW hfwnd, FAR struct nxgl_vector_s *vector,
                         nxgl_coord_t width, nxgl_mxpixel_t color[CONFIG_NX_NPLANES],
-                        bool caps)
+                        uint8_t caps)
 
 {
   struct nxgl_trapezoid_s trap[3];

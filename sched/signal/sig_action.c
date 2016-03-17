@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/signal/sig_action.c
  *
- *   Copyright (C) 2007-2009, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,6 +45,8 @@
 #include <sched.h>
 #include <errno.h>
 
+#include <nuttx/irq.h>
+
 #include "sched/sched.h"
 #include "group/group.h"
 #include "signal/signal.h"
@@ -57,18 +59,6 @@
   { (t)->sa_sigaction = (f)->sa_sigaction; \
     (t)->sa_mask      = (f)->sa_mask; \
     (t)->sa_flags     = (f)->sa_flags; }
-
-/****************************************************************************
- * Private Type Declarations
- ****************************************************************************/
-
-/****************************************************************************
- * Global Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Variables
- ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
@@ -88,7 +78,7 @@ static FAR sigactq_t *sig_allocateaction(void)
 
   /* Try to get the signal action structure from the free list */
 
-  sigact = (FAR sigactq_t*)sq_remfirst(&g_sigfreeaction);
+  sigact = (FAR sigactq_t *)sq_remfirst(&g_sigfreeaction);
 
   /* Check if we got one. */
 
@@ -100,7 +90,7 @@ static FAR sigactq_t *sig_allocateaction(void)
 
       /* And try again */
 
-      sigact = (FAR sigactq_t*)sq_remfirst(&g_sigfreeaction);
+      sigact = (FAR sigactq_t *)sq_remfirst(&g_sigfreeaction);
       ASSERT(sigact);
     }
 
@@ -165,12 +155,16 @@ static FAR sigactq_t *sig_allocateaction(void)
 
 int sigaction(int signo, FAR const struct sigaction *act, FAR struct sigaction *oact)
 {
-  FAR struct tcb_s *rtcb = (FAR struct tcb_s*)g_readytorun.head;
+  FAR struct tcb_s *rtcb = this_task();
+  FAR struct task_group_s *group;
   FAR sigactq_t *sigact;
 
   /* Since sigactions can only be installed from the running thread of
    * execution, no special precautions should be necessary.
    */
+
+  DEBUGASSERT(rtcb != NULL && rtcb->group != NULL);
+  group = rtcb->group;
 
   /* Verify the signal number */
 
@@ -180,9 +174,9 @@ int sigaction(int signo, FAR const struct sigaction *act, FAR struct sigaction *
       return ERROR;
     }
 
-  /* Find the signal in the sigactionq */
+  /* Find the signal in the signal action queue */
 
-  sigact = sig_findaction(rtcb, signo);
+  sigact = sig_findaction(group, signo);
 
   /* Return the old sigaction value if so requested */
 
@@ -231,7 +225,7 @@ int sigaction(int signo, FAR const struct sigaction *act, FAR struct sigaction *
        * can be modified by the child thread.
        */
 
-      flags = irqsave();
+      flags = enter_critical_section();
 
       /* Mark that status should be not be retained */
 
@@ -240,7 +234,7 @@ int sigaction(int signo, FAR const struct sigaction *act, FAR struct sigaction *
       /* Free all pending exit status */
 
       group_removechildren(rtcb->group);
-      irqrestore(flags);
+      leave_critical_section(flags);
     }
 #endif
 
@@ -252,9 +246,9 @@ int sigaction(int signo, FAR const struct sigaction *act, FAR struct sigaction *
 
       if (sigact)
         {
-          /* Yes.. Remove it from sigactionq */
+          /* Yes.. Remove it from signal action queue */
 
-          sq_rem((FAR sq_entry_t*)sigact, &rtcb->sigactionq);
+          sq_rem((FAR sq_entry_t *)sigact, &group->tg_sigactionq);
 
           /* And deallocate it */
 
@@ -279,18 +273,18 @@ int sigaction(int signo, FAR const struct sigaction *act, FAR struct sigaction *
           /* An error has occurred if we could not allocate the sigaction */
 
           if (!sigact)
-           {
+            {
               set_errno(ENOMEM);
               return ERROR;
-           }
+            }
 
           /* Put the signal number in the queue entry */
 
           sigact->signo = (uint8_t)signo;
 
-          /* Add the new sigaction to sigactionq */
+          /* Add the new sigaction to signal action queue */
 
-          sq_addlast((FAR sq_entry_t*)sigact, &rtcb->sigactionq);
+          sq_addlast((FAR sq_entry_t *)sigact, &group->tg_sigactionq);
         }
 
       /* Set the new sigaction */
@@ -313,5 +307,5 @@ void sig_releaseaction(FAR sigactq_t *sigact)
 {
   /* Just put it back on the free list */
 
-  sq_addlast((FAR sq_entry_t*)sigact, &g_sigfreeaction);
+  sq_addlast((FAR sq_entry_t *)sigact, &g_sigfreeaction);
 }

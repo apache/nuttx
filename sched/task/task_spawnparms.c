@@ -127,7 +127,7 @@ static inline int spawn_open(FAR struct spawn_open_file_action_s *action)
     }
 
   /* Does the return file descriptor happen to match the required file
-   * desciptor number?
+   * descriptor number?
    */
 
   else if (fd != action->fd)

@@ -191,6 +191,7 @@ static void at25_lock(FAR struct spi_dev_s *dev)
 
   SPI_SETMODE(dev, CONFIG_AT25_SPIMODE);
   SPI_SETBITS(dev, 8);
+  (void)SPI_HWFEATURES(dev, 0);
   (void)SPI_SETFREQUENCY(dev, CONFIG_AT25_SPIFREQUENCY);
 }
 
@@ -255,34 +256,6 @@ static void at25_waitwritecomplete(struct at25_dev_s *priv)
 {
   uint8_t status;
 
-  /* Are we the only device on the bus? */
-
-#ifdef CONFIG_SPI_OWNBUS
-
-  /* Select this FLASH part */
-
-  SPI_SELECT(priv->dev, SPIDEV_FLASH, true);
-
-  /* Send "Read Status Register (RDSR)" command */
-
-  (void)SPI_SEND(priv->dev, AT25_RDSR);
-
-  /* Loop as long as the memory is busy with a write cycle */
-
-  do
-    {
-      /* Send a dummy byte to generate the clock needed to shift out the status */
-
-      status = SPI_SEND(priv->dev, AT25_DUMMY);
-    }
-  while ((status & AT25_SR_BUSY) != 0);
-
-  /* Deselect the FLASH */
-
-  SPI_SELECT(priv->dev, SPIDEV_FLASH, false);
-
-#else
-
   /* Loop as long as the memory is busy with a write cycle */
 
   do
@@ -316,7 +289,6 @@ static void at25_waitwritecomplete(struct at25_dev_s *priv)
         }
     }
   while ((status & AT25_SR_BUSY) != 0);
-#endif
 
   if (status & AT25_SR_EPE)
     {

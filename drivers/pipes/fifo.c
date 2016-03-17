@@ -121,7 +121,7 @@ static const struct file_operations fifo_fops =
 
 int mkfifo(FAR const char *pathname, mode_t mode)
 {
-  struct pipe_dev_s *dev;
+  FAR struct pipe_dev_s *dev;
   int ret;
 
   /* Allocate and initialize a new device structure instance */
@@ -132,7 +132,7 @@ int mkfifo(FAR const char *pathname, mode_t mode)
       return -ENOMEM;
     }
 
-  ret = register_driver(pathname, &fifo_fops, mode, (void*)dev);
+  ret = register_driver(pathname, &fifo_fops, mode, (FAR void *)dev);
   if (ret != 0)
     {
       pipecommon_freedev(dev);

@@ -46,7 +46,7 @@
 
 #include <nuttx/config.h>
 
-#include <nuttx/i2c.h>
+#include <nuttx/i2c/i2c_master.h>
 #include <nuttx/spi/spi.h>
 
 #include <nuttx/irq.h>
@@ -120,9 +120,6 @@
 #ifdef CONFIG_STMPE811_I2C
 #  ifndef CONFIG_I2C
 #    error "CONFIG_I2C is required in the I2C support"
-#  endif
-#  ifndef CONFIG_I2C_TRANSFER
-#    error "CONFIG_I2C_TRANSFER is required in the I2C configuration"
 #  endif
 #endif
 
@@ -549,7 +546,7 @@ extern "C"
 STMPE811_HANDLE stmpe811_instantiate(FAR struct spi_dev_s *dev,
                                      FAR struct stmpe811_config_s *config);
 #else
-STMPE811_HANDLE stmpe811_instantiate(FAR struct i2c_dev_s *dev,
+STMPE811_HANDLE stmpe811_instantiate(FAR struct i2c_master_s *dev,
                                      FAR struct stmpe811_config_s *config);
 #endif
 

@@ -66,11 +66,11 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Global Variables
+ * Public Data
  ****************************************************************************/
 
 /****************************************************************************
- * Private Variables
+ * Private Data
  ****************************************************************************/
 
 /****************************************************************************
@@ -125,7 +125,7 @@ FAR sem_t *sem_open (FAR const char *name, int oflags, ...)
   FAR const char *relpath = NULL;
   mode_t mode;
   FAR struct nsem_inode_s *nsem;
-  FAR sem_t *sem = (FAR sem_t*)ERROR;
+  FAR sem_t *sem = (FAR sem_t *)ERROR;
   char fullpath[MAX_SEMPATH];
   unsigned value;
   int errcode;
@@ -148,8 +148,9 @@ FAR sem_t *sem_open (FAR const char *name, int oflags, ...)
 
       snprintf(fullpath, MAX_SEMPATH, CONFIG_FS_NAMED_SEMPATH "/%s", name);
 
-      /* Get the inode for this semaphore.  This should succeed if the semaphore
-       * has already been created.
+      /* Get the inode for this semaphore.  This should succeed if the
+       * semaphore has already been created.  In this case, inode_finde()
+       * will have incremented the reference count on the inode.
        */
 
       inode = inode_find(fullpath, &relpath);
@@ -167,7 +168,7 @@ FAR sem_t *sem_open (FAR const char *name, int oflags, ...)
            * create a new semaphore with this name.
            */
 
-          if ((oflags & (O_CREAT|O_EXCL)) == (O_CREAT|O_EXCL))
+          if ((oflags & (O_CREAT | O_EXCL)) == (O_CREAT | O_EXCL))
             {
               errcode = EEXIST;
               goto errout_with_inode;
@@ -194,10 +195,10 @@ FAR sem_t *sem_open (FAR const char *name, int oflags, ...)
               goto errout_with_lock;
             }
 
-         /* Create the semaphore.  First we have to extract the additional
-          * parameters from the variable argument list.
-          * REVISIT:  Mode parameter is not currently used.
-          */
+          /* Create the semaphore.  First we have to extract the additional
+           * parameters from the variable argument list.
+           * REVISIT:  Mode parameter is not currently used.
+           */
 
           va_start(ap, oflags);
           mode  = va_arg(ap, mode_t);
@@ -214,7 +215,9 @@ FAR sem_t *sem_open (FAR const char *name, int oflags, ...)
               goto errout_with_lock;
             }
 
-          /* Create an inode in the pseudo-filesystem at this path */
+          /* Create an inode in the pseudo-filesystem at this path.  The new
+           * inode will be created with a reference count of zero.
+           */
 
           inode_semtake();
           ret = inode_reserve(fullpath, &inode);
@@ -261,9 +264,9 @@ FAR sem_t *sem_open (FAR const char *name, int oflags, ...)
 
   return sem;
 
- errout_with_inode:
+errout_with_inode:
   inode_release(inode);
- errout_with_lock:
+errout_with_lock:
   set_errno(errcode);
   sched_unlock();
   return (FAR sem_t *)ERROR;

@@ -15,6 +15,13 @@ config FS_PROCFS
 
 if FS_PROCFS
 
+config FS_PROCFS_REGISTER
+	bool "Run-time registration"
+	default n
+	---help---
+		Support run-time registration of the new entries in the procfs file
+		system.
+
 menu "Exclude individual procfs entries"
 
 config FS_PROCFS_EXCLUDE_PROCESS
@@ -25,6 +32,13 @@ config FS_PROCFS_EXCLUDE_PROCESS
 		This will reduce code space, but then giving access to process info
 		was kinda the whole point of procfs, but hey, whatever.
 
+config FS_PROCFS_EXCLUDE_MODULE
+	bool "Exclude module information"
+	depends on MODULE
+	default n
+	---help---
+		Causes the module information to be excluded from the procfs system.
+
 config FS_PROCFS_EXCLUDE_UPTIME
 	bool "Exclude uptime"
 	default n
@@ -34,10 +48,20 @@ config FS_PROCFS_EXCLUDE_CPULOAD
 	default n
 	depends on SCHED_CPULOAD
 
+config FS_PROCFS_EXCLUDE_KMM
+	bool "Exclude kmm"
+	default n
+	depends on MM_KERNEL_HEAP
+
 config FS_PROCFS_EXCLUDE_MOUNTS
 	bool "Exclude mounts"
 	default n
 	depends on !DISABLE_MOUNTPOINT
+
+config FS_PROCFS_EXCLUDE_NET
+	bool "Exclude network"
+	depends on NET
+	default n
 
 config FS_PROCFS_EXCLUDE_MTD
 	bool "Exclude mtd"
@@ -52,11 +76,6 @@ config FS_PROCFS_EXCLUDE_PARTITIONS
 config FS_PROCFS_EXCLUDE_SMARTFS
 	bool "Exclude fs/smartfs"
 	depends on FS_SMARTFS
-	default n
-
-config FS_PROCFS_EXCLUDE_CCM
-	bool "Exclude CCM memory usage"
-	depends on STM32_CCM_PROCFS
 	default n
 
 endmenu #

@@ -231,10 +231,9 @@ static int qe_close(FAR struct file *filep)
 
       lower->ops->shutdown(lower);
     }
-  ret = OK;
 
-//errout_with_sem:
   sem_post(&upper->exclsem);
+  ret = OK;
 
 errout:
   return ret;
@@ -243,7 +242,7 @@ errout:
 /************************************************************************************
  * Name: qe_read
  *
- * Description:
+ * Description:O
  *   A dummy read method.  This is provided only to satsify the VFS layer.
  *
  ************************************************************************************/

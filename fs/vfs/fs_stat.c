@@ -58,7 +58,7 @@ static inline int statpseudo(FAR struct inode *inode, FAR struct stat *buf)
 {
   /* Most of the stat entries just do not apply */
 
-  memset(buf, 0, sizeof(struct stat) );
+  memset(buf, 0, sizeof(struct stat));
 
   if (INODE_IS_SPECIAL(inode))
     {
@@ -90,12 +90,12 @@ static inline int statpseudo(FAR struct inode *inode, FAR struct stat *buf)
     {
       if (inode->u.i_ops->read)
         {
-          buf->st_mode = S_IROTH|S_IRGRP|S_IRUSR;
+          buf->st_mode = S_IROTH | S_IRGRP | S_IRUSR;
         }
 
       if (inode->u.i_ops->write)
         {
-          buf->st_mode |= S_IWOTH|S_IWGRP|S_IWUSR;
+          buf->st_mode |= S_IWOTH | S_IWGRP | S_IWUSR;
         }
 
       if (INODE_IS_MOUNTPT(inode))
@@ -123,7 +123,7 @@ static inline int statpseudo(FAR struct inode *inode, FAR struct stat *buf)
        * write-able.
        */
 
-      buf->st_mode |= S_IFDIR|S_IROTH|S_IRGRP|S_IRUSR;
+      buf->st_mode |= S_IFDIR | S_IROTH | S_IRGRP | S_IRUSR;
     }
 
   return OK;
@@ -137,13 +137,13 @@ static inline int statroot(FAR struct stat *buf)
 {
   /* There is no inode associated with the fake root directory */
 
-  memset(buf, 0, sizeof(struct stat) );
-  buf->st_mode = S_IFDIR|S_IROTH|S_IRGRP|S_IRUSR;
+  memset(buf, 0, sizeof(struct stat));
+  buf->st_mode = S_IFDIR | S_IROTH | S_IRGRP | S_IRUSR;
   return OK;
 }
 
 /****************************************************************************
- * Global Functions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************

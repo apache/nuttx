@@ -45,15 +45,12 @@
 #include <assert.h>
 #include <errno.h>
 
-#include "lib_internal.h"
+#include <nuttx/signal.h>
+
+#include "libc.h"
 #include "aio/aio.h"
 
 #ifdef CONFIG_FS_AIO
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-/* Configuration ************************************************************/
 
 /****************************************************************************
  * Private Types
@@ -68,14 +65,6 @@ struct lio_sighand_s
   sigset_t oprocmask;              /* sigprocmask to restore */
   struct sigaction oact;           /* Signal handler to restore */
 };
-
-/****************************************************************************
- * Private Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Public Variables
- ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
@@ -205,13 +194,22 @@ static void lio_sighandler(int signo, siginfo_t *info, void *ucontext)
       if (sighand->sig->sigev_notify == SIGEV_SIGNAL)
         {
 #ifdef CONFIG_CAN_PASS_STRUCTS
-          (void)sigqueue(sighand->pid, sighand->sig->sigev_signo,
-                         sighand->sig->sigev_value);
+          DEBUGASSERT(sigqueue(sighand->pid, sighand->sig->sigev_signo,
+                               sighand->sig->sigev_value));
 #else
-          (void)sigqueue(sighand->pid, sighand->sig->sigev_signo,
-                         sighand->sig->sigev_value.sival_ptr);
+          DEBUGASSERT(sigqueue(sighand->pid, sighand->sig->sigev_signo,
+                               sighand->sig->sigev_value.sival_ptr));
 #endif
         }
+
+#ifdef CONFIG_SIG_EVTHREAD
+      /* Notify the client via a function call */
+
+      else if (ighand->sig->sigev_notify == SIGEV_THREAD)
+        {
+          DEBUGASSERT(sig_notification(sighand->pid, &sighand->sig));
+        }
+#endif
 
       /* And free the container */
 
@@ -305,7 +303,7 @@ static int lio_sigsetup(FAR struct aiocb * const *list, int nent,
 
   /* Attach our signal handler */
 
-  printf("waiter_main: Registering signal handler\n" );
+  printf("waiter_main: Registering signal handler\n");
   act.sa_sigaction = lio_sighandler;
   act.sa_flags = SA_SIGINFO;
 
@@ -352,7 +350,7 @@ static int lio_waitall(FAR struct aiocb * const *list, int nent)
 
   /* Loop until all I/O completes */
 
-  for (;;)
+  for (; ; )
     {
       /* Check if all I/O has completed */
 
@@ -651,7 +649,7 @@ int lio_listio(int mode, FAR struct aiocb *const list[], int nent,
            */
 
           status = lio_waitall(list, nent);
-          if (status < 0 && ret != OK)
+          if (status < 0 && ret == OK)
             {
               /* Something bad happened while waiting and this is the first
                * error to be reported.
@@ -679,7 +677,7 @@ int lio_listio(int mode, FAR struct aiocb *const list[], int nent,
           /* Setup a signal handler to detect when until all I/O completes. */
 
           status = lio_sigsetup(list, nent, sig);
-          if (status < 0 && ret != OK)
+          if (status < 0 && ret == OK)
             {
               /* Something bad happened while setting up the signal and this
                * is the first error to be reported.
@@ -698,8 +696,7 @@ int lio_listio(int mode, FAR struct aiocb *const list[], int nent,
           status = sigqueue(getpid(), sig->sigev_signo,
                             sig->sigev_value.sival_ptr);
 #endif
-
-          if (status < 0 && ret != OK)
+          if (status < 0 && ret == OK)
             {
               /* Something bad happened while signalling ourself and this is
                * the first error to be reported.
@@ -710,6 +707,24 @@ int lio_listio(int mode, FAR struct aiocb *const list[], int nent,
             }
         }
     }
+
+#ifdef CONFIG_SIG_EVTHREAD
+  /* Notify the client via a function call */
+
+  else if (sig && sig->sigev_notify == SIGEV_THREAD)
+    {
+      status = sig_notification(sighand->pid, &sighand->sig);
+      if (status < 0 && ret == OK)
+        {
+         /* Something bad happened while performing the notification
+          * and this is the first error to be reported.
+          */
+
+          retcode = -status;
+          ret     = ERROR;
+        }
+    }
+#endif
 
   /* Case 3: mode == LIO_NOWAIT and sig == NULL
    *

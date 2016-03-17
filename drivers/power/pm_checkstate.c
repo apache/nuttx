@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/power/pm_checkstate.c
  *
- *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,9 +41,9 @@
 
 #include <nuttx/power/pm.h>
 #include <nuttx/clock.h>
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 
-#include "pm_internal.h"
+#include "pm.h"
 
 #ifdef CONFIG_PM
 
@@ -108,7 +108,7 @@
 
 enum pm_state_e pm_checkstate(void)
 {
-  uint32_t now;
+  systime_t now;
   irqstate_t flags;
 
   /* Check for the end of the current time slice.  This must be performed
@@ -116,7 +116,7 @@ enum pm_state_e pm_checkstate(void)
    * logic in pm_activity().
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Check the elapsed time.  In periods of low activity, time slicing is
    * controlled by IDLE loop polling; in periods of higher activity, time
@@ -129,25 +129,26 @@ enum pm_state_e pm_checkstate(void)
    now = clock_systimer();
    if (now - g_pmglobals.stime >= TIME_SLICE_TICKS)
     {
-       int16_t accum;
+      int16_t accum;
 
-       /* Sample the count, reset the time and count, and assess the PM
-        * state.  This is an atomic operation because interrupts are
-        * still disabled.
-        */
+      /* Sample the count, reset the time and count, and assess the PM
+       * state.  This is an atomic operation because interrupts are
+       * still disabled.
+       */
 
-       accum             = g_pmglobals.accum;
-       g_pmglobals.stime = now;
-       g_pmglobals.accum = 0;
+      accum             = g_pmglobals.accum;
+      g_pmglobals.stime = now;
+      g_pmglobals.accum = 0;
 
-       /* Reassessing the PM state may require some computation.  However,
-        * the work will actually be performed on a worker thread at a user-
-        * controlled priority.
-        */
+      /* Reassessing the PM state may require some computation.  However,
+       * the work will actually be performed on a worker thread at a user-
+       * controlled priority.
+       */
 
-       (void)pm_update(accum);
+      (void)pm_update(accum);
     }
-  irqrestore(flags);
+
+  leave_critical_section(flags);
 
   /* Return the recommended state.  Assuming that we are called from the
    * IDLE thread at the lowest priority level, any updates scheduled on the

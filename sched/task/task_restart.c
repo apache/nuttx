@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/task/task_restart.c
  *
- *   Copyright (C) 2007, 2009, 2012-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2012-2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,36 +43,13 @@
 #include <sched.h>
 #include <errno.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 
 #include "sched/sched.h"
 #include "group/group.h"
 #include "signal/signal.h"
 #include "task/task.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Type Declarations
- ****************************************************************************/
-
-/****************************************************************************
- * Global Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -104,7 +81,8 @@ int task_restart(pid_t pid)
 {
   FAR struct tcb_s *rtcb;
   FAR struct task_tcb_s *tcb;
-  irqstate_t state;
+  FAR dq_queue_t *tasklist;
+  irqstate_t flags;
   int status;
 
   /* Make sure this task does not become ready-to-run while
@@ -115,7 +93,7 @@ int task_restart(pid_t pid)
 
   /* Check if the task to restart is the calling task */
 
-  rtcb = (FAR struct tcb_s *)g_readytorun.head;
+  rtcb = this_task();
   if ((pid == 0) || (pid == rtcb->pid))
     {
       /* Not implemented */
@@ -124,84 +102,102 @@ int task_restart(pid_t pid)
       return ERROR;
     }
 
-  /* We are restarting some other task than ourselves */
+#ifdef CONFIG_SMP
+  /* There is currently no capability to restart a task that is actively
+   * running on another CPU either.  This is not the calling cast so if it
+   * is running, then it could only be running a a different CPU.
+   *
+   * Also, will need some interlocks to assure that no tasks are rescheduled
+   * on any other CPU while we do this.
+   */
 
-  else
+#warning Missing SMP logic
+  if (rtcb->task_state == TSTATE_TASK_RUNNING)
     {
-      /* Find for the TCB associated with matching pid  */
+      /* Not implemented */
 
-      tcb = (FAR struct task_tcb_s *)sched_gettcb(pid);
+      set_errno(ENOSYS);
+      return ERROR;
+    }
+#endif
+
+  /* We are restarting some other task than ourselves */
+  /* Find for the TCB associated with matching pid  */
+
+  tcb = (FAR struct task_tcb_s *)sched_gettcb(pid);
 #ifndef CONFIG_DISABLE_PTHREAD
-      if (!tcb || (tcb->cmn.flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_PTHREAD)
+  if (!tcb || (tcb->cmn.flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_PTHREAD)
 #else
-      if (!tcb)
+  if (!tcb)
 #endif
-        {
-          /* There is no TCB with this pid or, if there is, it is not a
-           * task.
-           */
+    {
+      /* There is no TCB with this pid or, if there is, it is not a task. */
 
-          set_errno(ESRCH);
-          return ERROR;
-        }
+      set_errno(ESRCH);
+      return ERROR;
+    }
 
-      /* Try to recover from any bad states */
+  /* Try to recover from any bad states */
 
-      task_recover((FAR struct tcb_s *)tcb);
+  task_recover((FAR struct tcb_s *)tcb);
 
-      /* Kill any children of this thread */
+  /* Kill any children of this thread */
 
-#if HAVE_GROUP_MEMBERS
-      (void)group_killchildren(tcb);
+#ifdef HAVE_GROUP_MEMBERS
+  (void)group_killchildren(tcb);
 #endif
 
-      /* Remove the TCB from whatever list it is in.  At this point, the
-       * TCB should no longer be accessible to the system
-       */
+  /* Remove the TCB from whatever list it is in.  After this point, the TCB
+   * should no longer be accessible to the system
+   */
 
-      state = irqsave();
-      dq_rem((FAR dq_entry_t*)tcb,
-             (dq_queue_t*)g_tasklisttable[tcb->cmn.task_state].list);
-      tcb->cmn.task_state = TSTATE_TASK_INVALID;
-      irqrestore(state);
+#ifdef CONFIG_SMP
+  tasklist = TLIST_HEAD(tcb->cmn.task_state, tcb->cmn.cpu);
+#else
+  tasklist = TLIST_HEAD(tcb->cmn.task_state);
+#endif
 
-      /* Deallocate anything left in the TCB's queues */
+  flags = enter_critical_section();
+  dq_rem((FAR dq_entry_t *)tcb, tasklist);
+  tcb->cmn.task_state = TSTATE_TASK_INVALID;
+  leave_critical_section(flags);
 
-      sig_cleanup((FAR struct tcb_s *)tcb); /* Deallocate Signal lists */
+  /* Deallocate anything left in the TCB's queues */
 
-      /* Reset the current task priority  */
+  sig_cleanup((FAR struct tcb_s *)tcb); /* Deallocate Signal lists */
 
-      tcb->cmn.sched_priority = tcb->init_priority;
+  /* Reset the current task priority  */
 
-      /* Reset the base task priority and the number of pending reprioritizations */
+  tcb->cmn.sched_priority = tcb->init_priority;
+
+  /* Reset the base task priority and the number of pending reprioritizations */
 
 #ifdef CONFIG_PRIORITY_INHERITANCE
-      tcb->cmn.base_priority = tcb->init_priority;
+  tcb->cmn.base_priority = tcb->init_priority;
 #  if CONFIG_SEM_NNESTPRIO > 0
-      tcb->cmn.npend_reprio = 0;
+  tcb->cmn.npend_reprio = 0;
 #  endif
 #endif
 
-      /* Re-initialize the processor-specific portion of the TCB
-       * This will reset the entry point and the start-up parameters
-       */
+  /* Re-initialize the processor-specific portion of the TCB.  This will
+   * reset the entry point and the start-up parameters
+   */
 
-      up_initial_state((FAR struct tcb_s *)tcb);
+  up_initial_state((FAR struct tcb_s *)tcb);
 
-      /* Add the task to the inactive task list */
+  /* Add the task to the inactive task list */
 
-      dq_addfirst((FAR dq_entry_t*)tcb, (dq_queue_t*)&g_inactivetasks);
-      tcb->cmn.task_state = TSTATE_TASK_INACTIVE;
+  dq_addfirst((FAR dq_entry_t *)tcb, (FAR dq_queue_t *)&g_inactivetasks);
+  tcb->cmn.task_state = TSTATE_TASK_INACTIVE;
 
-      /* Activate the task */
+  /* Activate the task */
 
-      status = task_activate((FAR struct tcb_s *)tcb);
-      if (status != OK)
-        {
-          (void)task_delete(pid);
-          set_errno(-status);
-          return ERROR;
-        }
+  status = task_activate((FAR struct tcb_s *)tcb);
+  if (status != OK)
+    {
+      (void)task_delete(pid);
+      set_errno(-status);
+      return ERROR;
     }
 
   sched_unlock();

@@ -73,8 +73,6 @@
  *   When SPI_SELECT is called with devid=SPIDEV_MUX.
  *
  * Other settings that effect the driver:
- *   CONFIG_SPI_OWNBUS -- If the PGA117 is enabled, this must be set to 'y'
- *     if the PGA117 is the only device on the SPI bus;
  *   CONFIG_DEBUG_SPI -- With CONFIG_DEBUG and CONFIG_DEBUG_VERBOSE,
  *     this will enable debug output from the PGA117 driver.
  */

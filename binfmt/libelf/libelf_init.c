@@ -172,19 +172,19 @@ int elf_init(FAR const char *filename, FAR struct elf_loadinfo_s *loadinfo)
 
   /* Read the ELF ehdr from offset 0 */
 
-  ret = elf_read(loadinfo, (FAR uint8_t*)&loadinfo->ehdr, sizeof(Elf32_Ehdr), 0);
+  ret = elf_read(loadinfo, (FAR uint8_t *)&loadinfo->ehdr, sizeof(Elf32_Ehdr), 0);
   if (ret < 0)
     {
       bdbg("Failed to read ELF header: %d\n", ret);
       return ret;
     }
 
-  elf_dumpbuffer("ELF header", (FAR const uint8_t*)&loadinfo->ehdr, sizeof(Elf32_Ehdr));
+  elf_dumpbuffer("ELF header", (FAR const uint8_t *)&loadinfo->ehdr, sizeof(Elf32_Ehdr));
 
   /* Verify the ELF header */
 
   ret = elf_verifyheader(&loadinfo->ehdr);
-  if (ret <0)
+  if (ret < 0)
     {
       /* This may not be an error because we will be called to attempt loading
        * EVERY binary.  If elf_verifyheader() does not recognize the ELF header,

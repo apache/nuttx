@@ -45,7 +45,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include <nuttx/i2c.h>
+#include <nuttx/i2c/i2c_master.h>
 
 #if defined(CONFIG_INPUT) && defined(CONFIG_INPUT_MXT)
 
@@ -86,10 +86,6 @@
 /* Check for some required settings.  This can save the user a lot of time
  * in getting the right configuration.
  */
-
-#ifndef CONFIG_I2C_TRANSFER
-#  error "CONFIG_I2C_TRANSFER is required in the I2C configuration"
-#endif
 
 #ifdef CONFIG_DISABLE_SIGNALS
 #  error "Signals are required.  CONFIG_DISABLE_SIGNALS must not be selected."
@@ -199,7 +195,7 @@ extern "C"
  *
  ****************************************************************************/
 
-int mxt_register(FAR struct i2c_dev_s *i2c,
+int mxt_register(FAR struct i2c_master_s *i2c,
                  FAR const struct mxt_lower_s *lower, int minor);
 
 #undef EXTERN

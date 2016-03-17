@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/signal/sig_pending.c
  *
- *   Copyright (C) 2007-2009, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,28 +42,10 @@
 #include <signal.h>
 #include <sched.h>
 
+#include <nuttx/irq.h>
+
 #include "sched/sched.h"
 #include "signal/signal.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Type Declarations
- ****************************************************************************/
-
-/****************************************************************************
- * Global Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -89,7 +71,7 @@
 
 int sigpending(FAR sigset_t *set)
 {
-  FAR struct tcb_s *rtcb = (FAR struct tcb_s*)g_readytorun.head;
+  FAR struct tcb_s *rtcb = this_task();
   int ret = ERROR;
 
   if (set)
@@ -114,20 +96,20 @@ sigset_t sig_pendingset(FAR struct tcb_s *stcb)
   FAR struct task_group_s *group = stcb->group;
   sigset_t sigpendset;
   FAR sigpendq_t *sigpend;
-  irqstate_t saved_state;
+  irqstate_t flags;
 
   DEBUGASSERT(group);
 
   sigpendset = NULL_SIGNAL_SET;
 
-  saved_state = irqsave();
-  for (sigpend = (FAR sigpendq_t*)group->sigpendingq.head;
+  flags = enter_critical_section();
+  for (sigpend = (FAR sigpendq_t *)group->tg_sigpendingq.head;
        (sigpend); sigpend = sigpend->flink)
     {
       sigaddset(&sigpendset, sigpend->info.si_signo);
     }
 
-  irqrestore(saved_state);
+  leave_critical_section(flags);
 
   return sigpendset;
 }

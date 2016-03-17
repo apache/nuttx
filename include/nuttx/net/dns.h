@@ -164,6 +164,12 @@ struct dns_answer_s
   } u;
 };
 
+/* The type of the callback from dns_foreach_nameserver() */
+
+typedef CODE int (*dns_callback_t)(FAR void *arg,
+                                   FAR struct sockaddr *addr,
+                                   FAR socklen_t addrlen);
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -178,25 +184,35 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Name: dns_setserver
+ * Name: dns_add_nameserver
  *
  * Description:
- *   Configure which DNS server to use for queries.  Set the port number
- *   to zero to use the default DNS server port.
+ *   Configure a DNS server to use for queries.  Set the port number to zero
+ *   to use the default DNS server port.
  *
  ****************************************************************************/
 
-int dns_setserver(FAR const struct sockaddr *addr, socklen_t addrlen);
+int dns_add_nameserver(FAR const struct sockaddr *addr, socklen_t addrlen);
 
 /****************************************************************************
- * Name: dns_getserver
+ * Name: dns_del_nameserver
  *
  * Description:
- *   Obtain the currently configured DNS server.
+ *   Remove a DNS server so it is no longer available for further use.
+ *
+ ****************************************************************************/
+/* REVISIT: Not implemented */
+
+/****************************************************************************
+ * Name: dns_foreach_nameserver
+ *
+ * Description:
+ *   Traverse each nameserver entry in the resolv.conf file and perform the
+ *   the provided callback.
  *
  ****************************************************************************/
 
-int dns_getserver(FAR struct sockaddr *addr, FAR socklen_t *addrlen);
+int dns_foreach_nameserver(dns_callback_t callback, FAR void *arg);
 
 #undef EXTERN
 #if defined(__cplusplus)

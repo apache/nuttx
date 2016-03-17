@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/signal/sig_mqnotempty.c
  *
- *   Copyright (C) 2007-2009, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,26 +49,6 @@
 #include "signal/signal.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Type Declarations
- ****************************************************************************/
-
-/****************************************************************************
- * Global Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functionss
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -90,7 +70,7 @@ int sig_mqnotempty(int pid, int signo, void *sival_ptr)
 #endif
 {
 #ifdef CONFIG_SCHED_HAVE_PARENT
-  FAR struct tcb_s *rtcb = (FAR struct tcb_s *)g_readytorun.head;
+  FAR struct tcb_s *rtcb = this_task();
 #endif
   siginfo_t info;
   int ret;
@@ -112,6 +92,7 @@ int sig_mqnotempty(int pid, int signo, void *sival_ptr)
 
   info.si_signo           = signo;
   info.si_code            = SI_MESGQ;
+  info.si_errno           = OK;
 #ifdef CONFIG_CAN_PASS_STRUCTS
   info.si_value           = value;
 #else

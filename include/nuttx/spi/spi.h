@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/spi/spi.h
  *
- *   Copyright(C) 2008-2013, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright(C) 2008-2013, 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,20 +45,23 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <assert.h>
+#include <errno.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
-/* CONFIG_SPI_OWNBUS - Set if there is only one active device on the SPI bus.
- *   No locking or SPI configuration will be performed. It is not necessary
- *   for clients to lock, re-configure, etc..
+/* These SPI configuration options affect the form of the SPI interface:
+ *
  * CONFIG_SPI_EXCHANGE - Driver supports a single exchange method
  *   (vs a recvblock() and sndblock ()methods).
  * CONFIG_SPI_CMDDATA - Devices on the SPI bus require out-of-band support
  *   to distinguish command transfers from data transfers.  Such devices
  *   will often support either 9-bit SPI (yech) or 8-bit SPI and a GPIO
  *   output that selects between command and data.
+ * CONFIG_SPI_HWFEATURES - Include an interface method to support special,
+ *   hardware-specific SPI features.
  */
 
 /* Access macros ************************************************************/
@@ -84,11 +87,7 @@
  *
  ****************************************************************************/
 
-#ifndef CONFIG_SPI_OWNBUS
-#  define SPI_LOCK(d,l) (d)->ops->lock(d,l)
-#else
-#  define SPI_LOCK(d,l) 0
-#endif
+#define SPI_LOCK(d,l) (d)->ops->lock(d,l)
 
 /****************************************************************************
  * Name: SPI_SELECT
@@ -165,6 +164,44 @@
 
 #define SPI_SETBITS(d,b) \
   do { if ((d)->ops->setbits) (d)->ops->setbits(d,b); } while (0)
+
+/****************************************************************************
+ * Name: SPI_HWFEATURES
+ *
+ * Description:
+ *   Set hardware-specific feature flags.
+ *
+ * Input Parameters:
+ *   dev   - Device-specific state data
+ *   flags - H/W feature flags
+ *
+ * Returned Value:
+ *   Zero (OK) if the selected H/W features are enabled; A negated errno
+ *   value if any H/W feature is not supportable.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SPI_HWFEATURES
+  /* If there are multiple SPI drivers, some may not support hardware
+   * feature selection.
+   */
+
+#  define SPI_HWFEATURES(d,f) \
+  (((d)->ops->hwfeatures) ? (d)->ops->hwfeatures(d,f) : ((f) == 0 ? OK : -ENOSYS))
+
+  /* These are currently defined feature flags */
+
+#  ifdef CONFIG_SPI_CRCGENERATION
+#    HWFEAT_CRCGENERATION (1 << 0) /* Bit 0: Hardward CRC generation */
+#  endif
+
+#else
+  /* Any attempt to select hardware features with CONFIG_SPI_HWFEATURES
+   * deselected will cause an assertion.
+   */
+
+#  define SPI_HWFEATURES(d,f) (((f) == 0) ? OK : -ENOSYS)
+#endif
 
 /****************************************************************************
  * Name: SPI_STATUS
@@ -364,6 +401,8 @@ enum spi_dev_e
   SPIDEV_EEPROM,        /* Select SPI EEPROM device */
   SPIDEV_ACCELEROMETER, /* Select SPI Accelerometer device */
   SPIDEV_BAROMETER,     /* Select SPI Pressure/Barometer device */
+  SPIDEV_TEMPERATURE,   /* Select SPI Temperature sensor device */
+  SPIDEV_IEEE802154,    /* Select SPI IEEE 802.15.4 wireless device */
   SPIDEV_USER           /* Board-specific values start here */
 };
 
@@ -377,22 +416,30 @@ enum spi_mode_e
   SPIDEV_MODE3          /* CPOL=1 CHPHA=1 */
 };
 
+#ifdef CONFIG_SPI_HWFEATURES
+/* This is a type wide enough to support all hardware features */
+
+typedef uint8_t spi_hwfeatures_t;
+#endif
+
 /* The SPI vtable */
 
 struct spi_dev_s;
 struct spi_ops_s
 {
-#ifndef CONFIG_SPI_OWNBUS
   CODE int      (*lock)(FAR struct spi_dev_s *dev, bool lock);
-#endif
   CODE void     (*select)(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
                   bool selected);
   CODE uint32_t (*setfrequency)(FAR struct spi_dev_s *dev, uint32_t frequency);
   CODE void     (*setmode)(FAR struct spi_dev_s *dev, enum spi_mode_e mode);
   CODE void     (*setbits)(FAR struct spi_dev_s *dev, int nbits);
+#ifdef CONFIG_SPI_HWFEATURES
+  CODE int      (*hwfeatures)(FAR struct spi_dev_s *dev,
+                  spi_hwfeatures_t features);
+#endif
   CODE uint8_t  (*status)(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
 #ifdef CONFIG_SPI_CMDDATA
-  CODE int      (*cmddata)(FAR struct spi_dev_s *dev, enum spi_dev_e devid
+  CODE int      (*cmddata)(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
                   bool cmd);
 #endif
   CODE uint16_t (*send)(FAR struct spi_dev_s *dev, uint16_t wd);
@@ -432,42 +479,6 @@ extern "C"
 #else
 #define EXTERN extern
 #endif
-
-/****************************************************************************
- * Name: up_spiinitialize
- *
- * Description:
- *   Initialize the selected SPI port in master mode.
- *
- *   This is a generic prototype for the SPI initialize logic.  Specific
- *   architectures may support different SPI initialization functions if,
- *   for example, those architectures support multiple, incompatible SPI
- *   implementations.  In any event, the prototype of those architecture-
- *   specific initialization functions should be the same as
- *   up_spiinitialize()
- *
- *   As an example, the LPC17xx family supports an SPI block and several SSP
- *   blocks that may be programmed to support the SPI function.  In this
- *   case, the LPC17xx architecture supports these two initialization
- *   functions:
- *
- *     FAR struct spi_dev_s *lpc17_spiinitialize(int port);
- *     FAR struct spi_dev_s *lpc17_sspinitialize(int port);
- *
- *   Another example would be the STM32 families that support both SPI
- *   blocks as well as USARTs that can be configured to perform the SPI
- *   function as well (the STM32 USARTs do not support SPI as of this
- *   writing).
- *
- * Input Parameter:
- *   Port number (for hardware that has multiple SPI interfaces)
- *
- * Returned Value:
- *   Valid SPI device structure reference on success; a NULL on failure
- *
- ****************************************************************************/
-
-FAR struct spi_dev_s *up_spiinitialize(int port);
 
 #undef EXTERN
 #if defined(__cplusplus)

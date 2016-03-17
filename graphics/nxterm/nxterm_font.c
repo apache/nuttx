@@ -311,7 +311,7 @@ nxterm_renderglyph(FAR struct nxterm_state_s *priv,
 
       /* Then render the glyph into the allocated memory */
 
-      ret = RENDERER((FAR nxgl_mxpixel_t*)glyph->bitmap,
+      ret = RENDERER((FAR nxgl_mxpixel_t *)glyph->bitmap,
                       glyph->height, glyph->width, glyph->stride,
                       fbm, priv->wndo.fcolor[0]);
       if (ret < 0)

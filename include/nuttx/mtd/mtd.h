@@ -45,10 +45,41 @@
 
 #include <sys/types.h>
 #include <stdint.h>
+#include <stdbool.h>
+
+#include <nuttx/fs/ioctl.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+/* Ioctl commands */
+
+#define MTDIOC_GEOMETRY   _MTDIOC(0x0001) /* IN:  Pointer to write-able struct
+                                           *      mtd_geometry_s in which to receive
+                                           *      receive geometry data (see mtd.h)
+                                           * OUT: Geometry structure is populated
+                                           *      with data for the MTD */
+#define MTDIOC_XIPBASE    _MTDIOC(0x0002) /* IN:  Pointer to pointer to void in
+                                           *      which to received the XIP base.
+                                           * OUT: If media is directly accessible,
+                                           *      return (void*) base address
+                                           *      of device memory */
+#define MTDIOC_BULKERASE  _MTDIOC(0x0003) /* IN:  None
+                                           * OUT: None */
+#define MTDIOC_PROTECT    _MTDIOC(0x0004) /* IN:  Pointer to read-able struct
+                                           *      mtd_protects_s that provides
+                                           *      the region to protect.
+                                           * OUT: None */
+#define MTDIOC_UNPROTECT  _MTDIOC(0x0005) /* IN:  Pointer to read-able struct
+                                           *      mtd_protects_s that provides
+                                           *      the region to un-protect.
+                                           * OUT: None */
+#define MTDIOC_SETSPEED   _MTDIOC(0x0006) /* IN:  New bus speed in Hz
+                                           * OUT: None */
+#define MTDIOC_EXTENDED   _MTDIOC(0x0007) /* IN:  unsigned long
+                                           *      0=Use normal memory region
+                                           *      1=Use alternate/extended memory
+                                           * OUT: None */
 
 /* Macros to hide implementation */
 
@@ -83,11 +114,20 @@
 
 struct mtd_geometry_s
 {
-  uint16_t blocksize;     /* Size of one read/write block. */
-                          /* Probably 16-bits wasted here for alignment */
+  uint32_t blocksize;     /* Size of one read/write block. */
   uint32_t erasesize;     /* Size of one erase blocks -- must be a multiple
                            * of blocksize.*/
   uint32_t neraseblocks;  /* Number of erase blocks */
+};
+
+/* This structure describes a range of sectors to be protected or
+ * unprotected.
+ */
+
+struct mtd_protect_s
+{
+  off_t  startblock;      /* First block to be [un-]protected */
+  size_t nblocks;         /* Number of blocks to [un-]protect */
 };
 
 /* The following defines the information for writing bytes to a sector
@@ -295,23 +335,30 @@ int smart_initialize(int minor, FAR struct mtd_dev_s *mtd,
  * functions (such as a block or character driver front end).
  */
 
-/************************************************************************************
+/****************************************************************************
  * Name: s512_initialize
  *
  * Description:
- *   Create an initialized MTD device instance.  This MTD driver contains another
- *   MTD driver and converts a larger sector size to a standard 512 byte sector
- *   size.
+ *   Create an initialized MTD device instance.  This MTD driver contains
+ *   another MTD driver and converts a larger sector size to a standard 512
+ *   byte sector size.
  *
- *   MTD devices are not registered in the file system, but are created as instances
- *   that can be bound to other functions (such as a block or character driver front
- *   end).
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_MTD_SECT512
 FAR struct mtd_dev_s *s512_initialize(FAR struct mtd_dev_s *mtd);
 #endif
+
+/****************************************************************************
+ * Name: progmem_initialize
+ *
+ * Description:
+ *   Create and initialize an MTD device instance that can be used to access
+ *   on-chip program memory.
+ *
+ ****************************************************************************/
+
+FAR struct mtd_dev_s *progmem_initialize(void);
 
 /****************************************************************************
  * Name: at45db_initialize
@@ -333,8 +380,27 @@ FAR struct mtd_dev_s *at45db_initialize(FAR struct spi_dev_s *dev);
  *
  ****************************************************************************/
 
-struct i2c_dev_s; /* Forward reference */
-FAR struct mtd_dev_s *at24c_initialize(FAR struct i2c_dev_s *dev);
+struct i2c_master_s; /* Forward reference */
+
+#ifdef CONFIG_AT24XX_MULTI
+FAR struct mtd_dev_s *at24c_initialize(FAR struct i2c_master_s *dev,
+                                       uint8_t address);
+#else
+FAR struct mtd_dev_s *at24c_initialize(FAR struct i2c_master_s *dev);
+#endif
+
+/************************************************************************************
+ * Name: at24c_uninitialize
+ *
+ * Description:
+ *   Release resources held by an allocated MTD device instance.  Resources are only
+ *   allocated for the case where multiple AT24xx devices are support.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_AT24XX_MULTI
+void at24c_uninitialize(FAR struct mtd_dev_s *mtd);
+#endif
 
 /****************************************************************************
  * Name: at25_initialize
@@ -435,6 +501,19 @@ FAR struct mtd_dev_s *sst39vf_initialize(void);
 FAR struct mtd_dev_s *w25_initialize(FAR struct spi_dev_s *dev);
 
 /****************************************************************************
+ * Name: s25fl1_initialize
+ *
+ * Description:
+ *   Create an initialize MTD device instance for the QuadSPI-based ST24FL1
+ *   FLASH part.
+ *
+ ****************************************************************************/
+
+struct qspi_dev_s; /* Forward reference */
+FAR struct mtd_dev_s *s25fl1_initialize(FAR struct qspi_dev_s *qspi,
+                                        bool unprotect);
+
+/****************************************************************************
  * Name: up_flashinitialize
  *
  * Description:
@@ -443,6 +522,37 @@ FAR struct mtd_dev_s *w25_initialize(FAR struct spi_dev_s *dev);
  ****************************************************************************/
 
 FAR struct mtd_dev_s *up_flashinitialize(void);
+
+/****************************************************************************
+ * Name: filemtd_initialize
+ *
+ * Description:
+ *   Create a file backed MTD device.
+ *
+ ****************************************************************************/
+
+FAR struct mtd_dev_s *filemtd_initialize(FAR const char *path, size_t offset,
+                        int16_t sectsize, int32_t erasesize);
+
+/****************************************************************************
+ * Name: filemtd_teardown
+ *
+ * Description:
+ *   Tear down a filemtd device.
+ *
+ ****************************************************************************/
+
+void filemtd_teardown(FAR struct mtd_dev_s* mtd);
+
+/****************************************************************************
+ * Name: filemtd_isfilemtd
+ *
+ * Description:
+ *   Test if MTD is a filemtd device.
+ *
+ ****************************************************************************/
+
+bool filemtd_isfilemtd(FAR struct mtd_dev_s* mtd);
 
 /****************************************************************************
  * Name: mtd_register
@@ -459,6 +569,21 @@ FAR struct mtd_dev_s *up_flashinitialize(void);
 
 #ifdef CONFIG_MTD_REGISTRATION
 int mtd_register(FAR struct mtd_dev_s *mtd, FAR const char *name);
+#endif
+
+/****************************************************************************
+ * Name: mtd_unregister
+ *
+ * Description:
+ *   Un-registers an MTD device with the procfs file system.
+ *
+ * In an embedded system, this all is really unnecessary, but is provided
+ * in the procfs system simply for information purposes (if desired).
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_MTD_REGISTRATION
+int mtd_unregister(FAR struct mtd_dev_s *mtd);
 #endif
 
 #undef EXTERN

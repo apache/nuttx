@@ -1,4 +1,4 @@
-/*****************************************************************************
+/****************************************************************************
  *  nvmem.c  - CC3000 Host Driver Implementation.
  *  Copyright (C) 2011 Texas Instruments Incorporated - http://www.ti.com/
  *
@@ -30,11 +30,11 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  *  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
-/******************************************************************************
+/****************************************************************************
  * Included Files
- ******************************************************************************/
+ ****************************************************************************/
 
 #include <stdio.h>
 #include <string.h>
@@ -44,18 +44,18 @@
 #include <nuttx/wireless/cc3000/evnt_handler.h>
 #include "cc3000.h"
 
-/******************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ******************************************************************************/
+ ****************************************************************************/
 
 #define NVMEM_READ_PARAMS_LEN   (12)
 #define NVMEM_CREATE_PARAMS_LEN   (8)
 #define NVMEM_WRITE_PARAMS_LEN  (16)
 
-/******************************************************************************
+/****************************************************************************
  * Public Functions
- ******************************************************************************/
-/******************************************************************************
+ ****************************************************************************/
+/****************************************************************************
  * Name: nvmem_read
  *
  * Description:
@@ -79,7 +79,7 @@
  * Returned Value:
  *   Number of bytes read, otherwise error.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 signed long nvmem_read(unsigned long ulFileId, unsigned long ulLength,
                        unsigned long ulOffset, uint8_t *buff)
@@ -120,7 +120,7 @@ signed long nvmem_read(unsigned long ulFileId, unsigned long ulLength,
   return ucStatus;
 }
 
-/******************************************************************************
+/****************************************************************************
  * Name: nvmem_write
  *
  * Description:
@@ -141,7 +141,7 @@ signed long nvmem_read(unsigned long ulFileId, unsigned long ulLength,
  * Returned Value:
  *   On success 0, error otherwise.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 signed long nvmem_write(unsigned long ulFileId, unsigned long ulLength,
                         unsigned long ulEntryOffset, uint8_t *buff)
@@ -165,7 +165,7 @@ signed long nvmem_write(unsigned long ulFileId, unsigned long ulLength,
   args = UINT32_TO_STREAM(args, ulEntryOffset);
 
   memcpy((ptr + SPI_HEADER_SIZE + HCI_DATA_CMD_HEADER_SIZE +
-          NVMEM_WRITE_PARAMS_LEN),buff,ulLength);
+          NVMEM_WRITE_PARAMS_LEN), buff, ulLength);
 
   /* Initiate a HCI command but it will come on data channel */
 
@@ -179,7 +179,7 @@ signed long nvmem_write(unsigned long ulFileId, unsigned long ulLength,
   return iRes;
 }
 
-/******************************************************************************
+/****************************************************************************
  * Name: nvmem_set_mac_address
  *
  * Description:
@@ -192,14 +192,14 @@ signed long nvmem_write(unsigned long ulFileId, unsigned long ulLength,
  * Returned Value:
  *   On success 0, error otherwise.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 uint8_t nvmem_set_mac_address(uint8_t *mac)
 {
   return  nvmem_write(NVMEM_MAC_FILEID, MAC_ADDR_LEN, 0, mac);
 }
 
-/******************************************************************************
+/****************************************************************************
  * Name: nvmem_get_mac_address
  *
  * Description:
@@ -212,14 +212,14 @@ uint8_t nvmem_set_mac_address(uint8_t *mac)
  * Returned Value:
  *   On success 0, error otherwise.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 uint8_t nvmem_get_mac_address(uint8_t *mac)
 {
   return  nvmem_read(NVMEM_MAC_FILEID, MAC_ADDR_LEN, 0, mac);
 }
 
-/******************************************************************************
+/****************************************************************************
  * Name: nvmem_write_patch
  *
  * Description:
@@ -236,14 +236,14 @@ uint8_t nvmem_get_mac_address(uint8_t *mac)
  * Returned Value:
  *   On success 0, error otherwise.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 uint8_t nvmem_write_patch(unsigned long ulFileId, unsigned long spLength,
                           const uint8_t *spData)
 {
-  uint8_t   status = 0;
-  uint16_t  offset = 0;
-  uint8_t  *spDataPtr = (uint8_t*)spData;
+  FAR uint8_t *spDataPtr = (FAR uint8_t *)spData;
+  uint8_t status = 0;
+  uint16_t offset = 0;
 
   while ((status == 0) && (spLength >= SP_PORTION_SIZE))
     {
@@ -253,7 +253,7 @@ uint8_t nvmem_write_patch(unsigned long ulFileId, unsigned long spLength,
       spDataPtr += SP_PORTION_SIZE;
     }
 
-  if (status !=0)
+  if (status != 0)
     {
       /* NVMEM error occurred */
 
@@ -270,7 +270,7 @@ uint8_t nvmem_write_patch(unsigned long ulFileId, unsigned long spLength,
   return status;
 }
 
-/******************************************************************************
+/****************************************************************************
  * Name: nvmem_read_sp_version
  *
  * Description:
@@ -284,7 +284,7 @@ uint8_t nvmem_write_patch(unsigned long ulFileId, unsigned long spLength,
  * Returned Value:
  *   On success  0, error otherwise.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifndef CC3000_TINY_DRIVER
 uint8_t nvmem_read_sp_version(uint8_t *patchVer)
@@ -316,7 +316,7 @@ uint8_t nvmem_read_sp_version(uint8_t *patchVer)
 }
 #endif
 
-/******************************************************************************
+/****************************************************************************
  * Name: nvmem_create_entry
  *
  * Description:
@@ -336,7 +336,7 @@ uint8_t nvmem_read_sp_version(uint8_t *patchVer)
  * Returned Value:
  *   On success 0, error otherwise.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 signed long nvmem_create_entry(unsigned long ulFileId, unsigned long ulNewLen)
 {
@@ -349,14 +349,14 @@ signed long nvmem_create_entry(unsigned long ulFileId, unsigned long ulNewLen)
   ptr = tSLInformation.pucTxCommandBuffer;
   args = (ptr + HEADERS_SIZE_CMD);
 
-  /*( Fill in HCI packet structure */
+  /* Fill in HCI packet structure */
 
   args = UINT32_TO_STREAM(args, ulFileId);
   args = UINT32_TO_STREAM(args, ulNewLen);
 
   /* Initiate a HCI command */
 
-  hci_command_send(HCI_CMND_NVMEM_CREATE_ENTRY,ptr, NVMEM_CREATE_PARAMS_LEN);
+  hci_command_send(HCI_CMND_NVMEM_CREATE_ENTRY, ptr, NVMEM_CREATE_PARAMS_LEN);
 
   SimpleLinkWaitEvent(HCI_CMND_NVMEM_CREATE_ENTRY, &retval);
 

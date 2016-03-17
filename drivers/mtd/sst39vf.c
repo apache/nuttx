@@ -417,8 +417,8 @@ static int sst39vf_chiperase(FAR struct sst39vf_dev_s *priv)
 {
 #if 0
   struct sst39vf_wrinfo_s wrinfo;
-  uint32_t start;
-  uint32_t elapsed;
+  systime_t start;
+  systime_t elapsed;
 #endif
 
   /* Send the sequence to erase the chip */
@@ -488,8 +488,8 @@ static int sst39vf_sectorerase(FAR struct sst39vf_dev_s *priv,
 {
   struct sst39vf_wrinfo_s wrinfo;
 #if 0
-  uint32_t start;
-  uint32_t elapsed;
+  systime_t start;
+  systime_t elapsed;
 #endif
 
   /* Set up the sector address */

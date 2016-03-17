@@ -46,10 +46,6 @@
 #ifdef HAVE_GROUP_MEMBERS
 
 /****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -83,11 +79,11 @@ int group_foreachchild(FAR struct task_group_s *group,
 
   for (i = 0; i < group->tg_nmembers; i++)
     {
-       ret = handler(group->tg_members[i], arg);
-       if (ret != 0)
-         {
-           return ret;
-         }
+      ret = handler(group->tg_members[i], arg);
+      if (ret != 0)
+        {
+          return ret;
+        }
     }
 
   return 0;

@@ -2,7 +2,7 @@
  * include/sys/syscall.h
  * This file contains the system call numbers.
  *
- *   Copyright (C) 2011-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -152,12 +152,24 @@
 #  ifdef CONFIG_SCHED_HAVE_PARENT
 #    define SYS_wait                   (__SYS_waitpid+1)
 #    define SYS_waitid                 (__SYS_waitpid+2)
-#    define __SYS_posix_spawn          (__SYS_waitpid+3)
+#    define __SYS_insmod               (__SYS_waitpid+3)
 #  else
-#    define __SYS_posix_spawn          (__SYS_waitpid+1)
+#    define __SYS_insmod               (__SYS_waitpid+1)
 #endif
 #else
-#  define __SYS_posix_spawn            __SYS_waitpid
+#  define __SYS_insmod                 __SYS_waitpid
+#endif
+
+/* The following can only be defined if we are configured to load
+ * OS modules from a file system.
+ */
+
+#ifdef CONFIG_MODULE
+#  define SYS_insmod                   __SYS_insmod
+#  define SYS_rmmod                   (__SYS_insmod+1)
+#  define __SYS_posix_spawn           (__SYS_insmod+2)
+#else
+#  define __SYS_posix_spawn            __SYS_insmod
 #endif
 
 /* The following can only be defined if we are configured to execute
@@ -365,13 +377,21 @@
 #  define SYS_pthread_setspecific      (__SYS_pthread+26)
 #  define SYS_pthread_yield            (__SYS_pthread+27)
 
-#  ifndef CONFIG_DISABLE_SIGNALS
-#    define SYS_pthread_cond_timedwait (__SYS_pthread+28)
-#    define SYS_pthread_kill           (__SYS_pthread+29)
-#    define SYS_pthread_sigmask        (__SYS_pthread+30)
-#    define __SYS_mqueue               (__SYS_pthread+31)
+#  ifndef CONFIG_SMP
+#    define SYS_pthread_setaffinity_np (__SYS_pthread+28)
+#    define SYS_pthread_getaffinity_np (__SYS_pthread+29)
+#    define __SYS_pthread_signals      (__SYS_pthread+30)
 #  else
-#    define __SYS_mqueue               (__SYS_pthread+28)
+#    define __SYS_pthread_signals      (__SYS_pthread+28)
+#  endif
+
+#  ifndef CONFIG_DISABLE_SIGNALS
+#    define SYS_pthread_cond_timedwait (__SYS_pthread_signals+0)
+#    define SYS_pthread_kill           (__SYS_pthread_signals+1)
+#    define SYS_pthread_sigmask        (__SYS_pthread_signals+2)
+#    define __SYS_mqueue               (__SYS_pthread_signals+3)
+#  else
+#    define __SYS_mqueue               __SYS_pthread_signals
 #  endif
 
 #else

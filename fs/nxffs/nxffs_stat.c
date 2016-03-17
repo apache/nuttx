@@ -63,7 +63,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Public Variables
+ * Public Data
  ****************************************************************************/
 
 /****************************************************************************
@@ -166,7 +166,7 @@ int nxffs_stat(FAR struct inode *mountpt, FAR const char *relpath,
         }
 
       buf->st_blocks  = entry.datlen / (volume->geo.blocksize - SIZEOF_NXFFS_BLOCK_HDR);
-      buf->st_mode    = S_IFREG|S_IXOTH|S_IXGRP|S_IXUSR;
+      buf->st_mode    = S_IFREG | S_IXOTH | S_IXGRP | S_IXUSR;
       buf->st_size    = entry.datlen;
       buf->st_atime   = entry.utc;
       buf->st_mtime   = entry.utc;
@@ -180,7 +180,8 @@ int nxffs_stat(FAR struct inode *mountpt, FAR const char *relpath,
     {
       /* It's a read/execute-only directory name */
 
-      buf->st_mode   = S_IFDIR|S_IROTH|S_IRGRP|S_IRUSR|S_IXOTH|S_IXGRP|S_IXUSR;
+      buf->st_mode   = S_IFDIR | S_IROTH | S_IRGRP | S_IRUSR | S_IXOTH |
+                       S_IXGRP | S_IXUSR;
     }
 
   ret = OK;

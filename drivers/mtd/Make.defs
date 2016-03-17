@@ -3,7 +3,7 @@
 # These driver supports various Memory Technology Devices (MTD) using the
 # NuttX MTD interface.
 #
-#   Copyright (C) 2009-2013 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2009-2013, 2015 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -57,6 +57,10 @@ CSRCS += mtd_rwbuffer.c
 endif
 endif
 
+ifeq ($(CONFIG_MTD_PROGMEM),y)
+CSRCS += mtd_progmem.c
+endif
+
 ifeq ($(CONFIG_MTD_NAND),y)
 CSRCS += mtd_nand.c mtd_onfi.c mtd_nandscheme.c mtd_nandmodel.c mtd_modeltab.c
 ifeq ($(CONFIG_MTD_NAND_SWECC),y)
@@ -66,6 +70,10 @@ endif
 
 ifeq ($(CONFIG_RAMMTD),y)
 CSRCS += rammtd.c
+endif
+
+ifeq ($(CONFIG_FILEMTD),y)
+CSRCS += filemtd.c
 endif
 
 ifeq ($(CONFIG_MTD_AT24XX),y)
@@ -90,6 +98,10 @@ endif
 
 ifeq ($(CONFIG_MTD_AT25),y)
 CSRCS += at25.c
+endif
+
+ifeq ($(CONFIG_MTD_S25FL1),y)
+CSRCS += s25fl1.c
 endif
 
 ifeq ($(CONFIG_MTD_SMART),y)

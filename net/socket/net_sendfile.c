@@ -2,7 +2,7 @@
  * net/socket/net_sendfile.c
  *
  *   Copyright (C) 2013 UVC Ingenieure. All rights reserved.
- *   Copyright (C) 2007-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2016 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            Max Holtzberg <mh@uvc.de>
  *
@@ -103,7 +103,7 @@ struct sendfile_s
   uint32_t           snd_isn;     /* Initial sequence number */
   uint32_t           snd_acked;   /* The number of bytes acked */
 #ifdef CONFIG_NET_SOCKOPTS
-  uint32_t           snd_time;    /* Last send time for determining timeout */
+  systime_t          snd_time;    /* Last send time for determining timeout */
 #endif
 };
 
@@ -320,9 +320,21 @@ static inline bool sendfile_addrcheck(FAR struct tcp_conn_s *conn)
 static uint16_t sendfile_interrupt(FAR struct net_driver_s *dev, FAR void *pvconn,
                                    FAR void *pvpriv, uint16_t flags)
 {
-  FAR struct tcp_conn_s *conn = (FAR struct tcp_conn_s*)pvconn;
+  FAR struct tcp_conn_s *conn = (FAR struct tcp_conn_s *)pvconn;
   FAR struct sendfile_s *pstate = (FAR struct sendfile_s *)pvpriv;
   int ret;
+
+#ifdef CONFIG_NETDEV_MULTINIC
+  /* The TCP socket is connected and, hence, should be bound to a device.
+   * Make sure that the polling device is the own that we are bound to.
+   */
+
+  DEBUGASSERT(conn->dev != NULL);
+  if (dev != conn->dev)
+    {
+      return flags;
+    }
+#endif
 
   nllvdbg("flags: %04x acked: %d sent: %d\n",
           flags, pstate->snd_acked, pstate->snd_sent);
@@ -354,9 +366,9 @@ static uint16_t sendfile_interrupt(FAR struct net_driver_s *dev, FAR void *pvcon
 
       uint32_t sndlen = pstate->snd_flen - pstate->snd_sent;
 
-      if (sndlen > tcp_mss(conn))
+      if (sndlen > conn->mss)
         {
-          sndlen = tcp_mss(conn);
+          sndlen = conn->mss;
         }
 
       /* Check if we have "space" in the window */
@@ -708,7 +720,7 @@ ssize_t net_sendfile(int outfd, struct file *infile, off_t *offset,
   /* Set up the ACK callback in the connection */
 
   state.snd_ackcb->flags = (TCP_ACKDATA | TCP_REXMIT | TCP_DISCONN_EVENTS);
-  state.snd_ackcb->priv  = (void*)&state;
+  state.snd_ackcb->priv  = (FAR void *)&state;
   state.snd_ackcb->event = ack_interrupt;
 
   /* Perform the TCP send operation */
@@ -716,7 +728,7 @@ ssize_t net_sendfile(int outfd, struct file *infile, off_t *offset,
   do
     {
       state.snd_datacb->flags = TCP_POLL;
-      state.snd_datacb->priv  = (void*)&state;
+      state.snd_datacb->priv  = (FAR void *)&state;
       state.snd_datacb->event = sendfile_interrupt;
 
       /* Notify the device driver of the availability of TX data */
@@ -732,15 +744,15 @@ ssize_t net_sendfile(int outfd, struct file *infile, off_t *offset,
 
   tcp_callback_free(conn, state.snd_ackcb);
 
- errout_datacb:
+errout_datacb:
   tcp_callback_free(conn, state.snd_datacb);
 
- errout_locked:
+errout_locked:
 
   sem_destroy(&state. snd_sem);
   net_unlock(save);
 
- errout:
+errout:
 
   if (err)
     {

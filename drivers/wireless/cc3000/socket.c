@@ -1,4 +1,4 @@
-/*****************************************************************************
+/****************************************************************************
  *  socket.c  - CC3000 Host Driver Implementation.
  *  Copyright (C) 2011 Texas Instruments Incorporated - http://www.ti.com/
  *
@@ -30,11 +30,11 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  *  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
-/*****************************************************************************
+/****************************************************************************
  * Included Files
- *****************************************************************************/
+ ****************************************************************************/
 
 #include <sys/types.h>
 #include <sys/select.h>
@@ -54,9 +54,9 @@
 #include "cc3000drv.h"
 #include "cc3000.h"
 
-/*****************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifndef ARRAY_SIZE
 #  define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
@@ -99,7 +99,7 @@ static const int bsd2ti_types[] =
  * Public Functions
  ****************************************************************************/
 
-/*****************************************************************************
+/****************************************************************************
  * Name: socket
  *
  * Description:
@@ -120,7 +120,7 @@ static const int bsd2ti_types[] =
  *   On success, socket handle that is used for consequent socket
  *    operations. On error, -1 is returned.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 int cc3000_socket(int domain, int type, int protocol)
 {
@@ -167,7 +167,7 @@ int cc3000_socket(int domain, int type, int protocol)
 
   cc3000_lib_lock();
   type = bsd2ti_types[type];
-  sd = cc3000_socket_impl(domain,type,protocol);
+  sd = cc3000_socket_impl(domain, type, protocol);
 #ifdef CONFIG_CC3000_MT
   cc3000_add_socket(sd);
 #endif
@@ -175,7 +175,7 @@ int cc3000_socket(int domain, int type, int protocol)
   return sd;
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: closesocket
  *
  * Description:
@@ -187,7 +187,7 @@ int cc3000_socket(int domain, int type, int protocol)
  * Returned Value:
  *   On success, zero is returned. On error, -1 is returned.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 int cc3000_closesocket(int sockfd)
 {
@@ -205,7 +205,7 @@ int cc3000_closesocket(int sockfd)
   return ret;
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: accept, cc3000_do_accept
  *
  * Description:
@@ -248,7 +248,7 @@ int cc3000_closesocket(int sockfd)
  *   - On connection pending, SOC_IN_PROGRESS (-2)
  *   - On failure, SOC_ERROR  (-1)
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 int cc3000_do_accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen)
 {
@@ -271,12 +271,12 @@ int cc3000_accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen)
      return -errno;
    }
 
-  memset(addr,0,*addrlen);
-  return cc3000_accept_socket(sockfd,addr,addrlen);
+  memset(addr, 0, *addrlen);
+  return cc3000_accept_socket(sockfd, addr, addrlen);
 }
 #else
 {
-  cc3000_accept_socket(sockfd,0);
+  cc3000_accept_socket(sockfd, 0);
   short nonBlocking = CC3000_SOCK_OFF;
 
   if (setsockopt(sockfd, CC3000_SOL_SOCKET, CC3000_SOCKOPT_ACCEPT_NONBLOCK,
@@ -286,11 +286,11 @@ int cc3000_accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen)
      return -errno;
    }
 
-  return cc3000_do_accept(int sockfd, addr, addrlen);;
+  return cc3000_do_accept(sockfd, addr, addrlen);
 }
 #endif
 
-/*****************************************************************************
+/****************************************************************************
  * Name: bind
  *
  * Description:
@@ -311,7 +311,7 @@ int cc3000_accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen)
  * Returned Value:
  *   On success, zero is returned. On error, -1 is returned.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 int cc3000_bind(int sockfd, FAR const struct sockaddr *addr, socklen_t addrlen)
 {
@@ -323,7 +323,7 @@ int cc3000_bind(int sockfd, FAR const struct sockaddr *addr, socklen_t addrlen)
   return ret;
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: listen
  *
  * Description:
@@ -345,19 +345,19 @@ int cc3000_bind(int sockfd, FAR const struct sockaddr *addr, socklen_t addrlen)
  * Returned Value:
  *   On success, zero is returned. On error, -1 is returned.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 int cc3000_listen(int sockfd, int backlog)
 {
   int ret;
 
   cc3000_lib_lock();
-  ret = cc3000_listen_impl(sockfd,backlog);
+  ret = cc3000_listen_impl(sockfd, backlog);
   cc3000_lib_unlock();
   return ret;
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: connect
  *
  * Description:
@@ -385,7 +385,7 @@ int cc3000_listen(int sockfd, int backlog)
  * Returned Value:
  *   On success, zero is returned. On error, -1 is returned
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 int cc3000_connect(int sockfd, FAR const struct sockaddr *addr, socklen_t addrlen)
 {
@@ -397,7 +397,7 @@ int cc3000_connect(int sockfd, FAR const struct sockaddr *addr, socklen_t addrle
   return ret;
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: select
  *
  * Description:
@@ -434,10 +434,10 @@ int cc3000_connect(int sockfd, FAR const struct sockaddr *addr, socklen_t addrle
  *     will return without delay.
  *   *exceptfds - return the sockets which closed recently.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
-int cc3000_select(int nfds, fd_set *readfds, fd_set *writefds,fd_set *exceptfds,
-           struct timeval *timeout)
+int cc3000_select(int nfds, fd_set *readfds, fd_set *writefds,
+                  fd_set *exceptfds, struct timeval *timeout)
 {
   int ret;
 
@@ -450,7 +450,7 @@ int cc3000_select(int nfds, fd_set *readfds, fd_set *writefds,fd_set *exceptfds,
 }
 
 #ifndef CC3000_TINY_DRIVER
-/*****************************************************************************
+/****************************************************************************
  * Name: setsockopt
  *
  * Description:
@@ -496,7 +496,7 @@ int cc3000_select(int nfds, fd_set *readfds, fd_set *writefds,fd_set *exceptfds,
  * Returned Value:
  *   On success, zero is returned. On error, -1 is returned
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 int cc3000_setsockopt(int sockfd, int level, int option,
                       FAR const void *value, socklen_t value_len)
@@ -510,7 +510,7 @@ int cc3000_setsockopt(int sockfd, int level, int option,
 }
 #endif
 
-/*****************************************************************************
+/****************************************************************************
  * Name: getsockopt
  *
  * Description:
@@ -556,7 +556,7 @@ int cc3000_setsockopt(int sockfd, int level, int option,
  * Returned Value:
  *   On success, zero is returned. On error, -1 is returned
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 int cc3000_getsockopt(int sockfd, int level, int option, FAR void *value,
                       FAR socklen_t *value_len)
@@ -569,7 +569,7 @@ int cc3000_getsockopt(int sockfd, int level, int option, FAR void *value,
   return ret;
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: recv
  *
  * Description:
@@ -589,7 +589,7 @@ int cc3000_getsockopt(int sockfd, int level, int option, FAR void *value,
  *     Return the number of bytes received, or -1 if an error
  *     occurred
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 ssize_t cc3000_recv(int sockfd, FAR void *buf, size_t len, int flags)
 {
@@ -619,7 +619,7 @@ ssize_t cc3000_recv(int sockfd, FAR void *buf, size_t len, int flags)
   return ret;
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: recvfrom
  *
  * Description:
@@ -646,7 +646,7 @@ ssize_t cc3000_recv(int sockfd, FAR void *buf, size_t len, int flags)
  *     Return the number of bytes received, or -1 if an error
  *     occurred
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 ssize_t cc3000_recvfrom(int sockfd, FAR void *buf, size_t len, int flags,
                         FAR struct sockaddr *from, FAR socklen_t *fromlen)
@@ -672,7 +672,7 @@ ssize_t cc3000_recvfrom(int sockfd, FAR void *buf, size_t len, int flags,
   return ret;
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: send
  *
  * Description:
@@ -692,7 +692,7 @@ ssize_t cc3000_recvfrom(int sockfd, FAR void *buf, size_t len, int flags,
  *     Return the number of bytes transmitted, or -1 if an
  *     error occurred
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 ssize_t cc3000_send(int sockfd, FAR const void *buf, size_t len, int flags)
 {
@@ -704,7 +704,7 @@ ssize_t cc3000_send(int sockfd, FAR const void *buf, size_t len, int flags)
   return ret;
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: sendto
  *
  * Description:
@@ -728,7 +728,7 @@ ssize_t cc3000_send(int sockfd, FAR const void *buf, size_t len, int flags)
  *     Return the number of bytes transmitted, or -1 if an
  *     error occurred
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 ssize_t cc3000_sendto(int sockfd, FAR const void *buf, size_t len, int flags,
                       FAR const struct sockaddr *to, socklen_t tolen)
@@ -741,7 +741,7 @@ ssize_t cc3000_sendto(int sockfd, FAR const void *buf, size_t len, int flags,
   return ret;
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: gethostbyname
  *
  * Description:
@@ -762,11 +762,13 @@ ssize_t cc3000_sendto(int sockfd, FAR const void *buf, size_t len, int flags,
  * Returned Value:
  *   On success, positive is returned. On error, negative is returned
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifndef CC3000_TINY_DRIVER
-// TODO: Standard is struct hostent *gethostbyname(const char *name);
-int cc3000_gethostbyname(char * hostname, uint16_t usNameLen, unsigned long* out_ip_addr)
+/* REVISIT: Standard is struct hostent *gethostbyname(const char *name); */
+
+int cc3000_gethostbyname(char *hostname, uint16_t usNameLen,
+                         unsigned long *out_ip_addr)
 {
   int ret;
 
@@ -777,7 +779,7 @@ int cc3000_gethostbyname(char * hostname, uint16_t usNameLen, unsigned long* out
 }
 #endif
 
-/*****************************************************************************
+/****************************************************************************
  * Name: mdnsAdvertiser
  *
  * Description:
@@ -793,7 +795,7 @@ int cc3000_gethostbyname(char * hostname, uint16_t usNameLen, unsigned long* out
  *   On success, zero is returned, return SOC_ERROR if socket was not
  *   opened successfully, or if an error occurred.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 int cc3000_mdnsadvertiser(uint16_t mdnsEnabled, char *deviceServiceName,
                           uint16_t deviceServiceNameLength)

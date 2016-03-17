@@ -205,14 +205,8 @@ struct rit_dev_s
 
 /* Low-level SPI helpers */
 
-static inline void rit_configspi(FAR struct spi_dev_s *spi);
-#ifdef CONFIG_SPI_OWNBUS
-static inline void rit_select(FAR struct spi_dev_s *spi);
-static inline void rit_deselect(FAR struct spi_dev_s *spi);
-#else
 static void rit_select(FAR struct spi_dev_s *spi);
 static void rit_deselect(FAR struct spi_dev_s *spi);
-#endif
 static void rit_sndbytes(FAR struct rit_dev_s *priv, FAR const uint8_t *buffer,
               size_t buflen, bool cmd);
 static void rit_sndcmds(FAR struct rit_dev_s *priv, FAR const uint8_t *table);
@@ -283,20 +277,20 @@ static uint8_t g_framebuffer[RIT_YRES * RIT_XRES / 2];
 
 static const struct fb_videoinfo_s g_videoinfo =
 {
-  .fmt     = RIT_COLORFMT,         /* Color format: RGB16-565: RRRR RGGG GGGB BBBB */
-  .xres    = RIT_XRES,             /* Horizontal resolution in pixel columns */
-  .yres    = RIT_YRES,             /* Vertical resolution in pixel rows */
-  .nplanes = 1,                    /* Number of color planes supported */
+  .fmt     = RIT_COLORFMT,              /* Color format: RGB16-565: RRRR RGGG GGGB BBBB */
+  .xres    = RIT_XRES,                  /* Horizontal resolution in pixel columns */
+  .yres    = RIT_YRES,                  /* Vertical resolution in pixel rows */
+  .nplanes = 1,                         /* Number of color planes supported */
 };
 
 /* This is the standard, NuttX Plane information object */
 
 static const struct lcd_planeinfo_s g_planeinfo =
 {
-  .putrun = rit_putrun,            /* Put a run into LCD memory */
-  .getrun = rit_getrun,            /* Get a run from LCD memory */
-  .buffer = (uint8_t*)g_runbuffer, /* Run scratch buffer */
-  .bpp    = RIT_BPP,               /* Bits-per-pixel */
+  .putrun = rit_putrun,                 /* Put a run into LCD memory */
+  .getrun = rit_getrun,                 /* Get a run from LCD memory */
+  .buffer = (FAR uint8_t *)g_runbuffer, /* Run scratch buffer */
+  .bpp    = RIT_BPP,                    /* Bits-per-pixel */
 };
 
 /* This is the OLED driver instance (only a single device is supported for now) */
@@ -347,8 +341,8 @@ static const uint8_t g_initcmds[] =
      (31 << 1) | SSD1329_PRECHRG2_DBL,  /* Pre-charge speed == 32, doubled */
       SSD1329_NOOP,
   3,  SSD1329_GDDRAM_REMAP,             /* Set GDDRAM re-map */
-     (SSD1329_COM_SPLIT|                /* Enable COM slip even/odd */
-      SSD1329_COM_REMAP|                /* Enable COM re-map */
+     (SSD1329_COM_SPLIT |               /* Enable COM slip even/odd */
+      SSD1329_COM_REMAP |               /* Enable COM re-map */
       SSD1329_NIBBLE_REMAP),            /* Enable nibble re-map */
       SSD1329_NOOP,
   3,  SSD1329_VERT_START,               /* Set Display Start Line */
@@ -405,7 +399,7 @@ static const uint8_t g_sleepon[] =
 static const uint8_t g_horzinc[] =
 {
   SSD1329_GDDRAM_REMAP,
- (SSD1329_COM_SPLIT|SSD1329_COM_REMAP|SSD1329_NIBBLE_REMAP),
+  (SSD1329_COM_SPLIT | SSD1329_COM_REMAP | SSD1329_NIBBLE_REMAP),
 };
 
 /* The following set a window that covers the entire display */
@@ -429,44 +423,6 @@ static const uint8_t g_setallrow[] =
  **************************************************************************************/
 
 /**************************************************************************************
- * Name: rit_configspi
- *
- * Description:
- *   Configure the SPI for use with the P14201
- *
- * Input Parameters:
- *   spi  - Reference to the SPI driver structure
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *
- **************************************************************************************/
-
-static inline void rit_configspi(FAR struct spi_dev_s *spi)
-{
-#ifdef CONFIG_P14201_FREQUENCY
-  ritdbg("Mode: %d Bits: 8 Frequency: %d\n",
-         CONFIG_P14201_SPIMODE, CONFIG_P14201_FREQUENCY);
-#else
-  ritdbg("Mode: %d Bits: 8\n", CONFIG_P14201_SPIMODE);
-#endif
-
-  /* Configure SPI for the P14201.  But only if we own the SPI bus.  Otherwise, don't
-   * bother because it might change.
-   */
-
-#ifdef CONFIG_SPI_OWNBUS
-  SPI_SETMODE(spi, CONFIG_P14201_SPIMODE);
-  SPI_SETBITS(spi, 8);
-#ifdef CONFIG_P14201_FREQUENCY
-  SPI_SETFREQUENCY(spi, CONFIG_P14201_FREQUENCY)
-#endif
-#endif
-}
-
-/**************************************************************************************
  * Name: rit_select
  *
  * Description:
@@ -482,14 +438,6 @@ static inline void rit_configspi(FAR struct spi_dev_s *spi)
  *
  **************************************************************************************/
 
-#ifdef CONFIG_SPI_OWNBUS
-static inline void rit_select(FAR struct spi_dev_s *spi)
-{
-  /* We own the SPI bus, so just select the chip */
-
-  SPI_SELECT(spi, SPIDEV_DISPLAY, true);
-}
-#else
 static void rit_select(FAR struct spi_dev_s *spi)
 {
   /* Select P14201 chip (locking the SPI bus in case there are multiple
@@ -505,11 +453,11 @@ static void rit_select(FAR struct spi_dev_s *spi)
 
   SPI_SETMODE(spi, CONFIG_P14201_SPIMODE);
   SPI_SETBITS(spi, 8);
+  (void)SPI_HWFEATURES(spi, 0);
 #ifdef CONFIG_P14201_FREQUENCY
-  SPI_SETFREQUENCY(spi, CONFIG_P14201_FREQUENCY);
+  (void)SPI_SETFREQUENCY(spi, CONFIG_P14201_FREQUENCY);
 #endif
 }
-#endif
 
 /**************************************************************************************
  * Name: rit_deselect
@@ -527,14 +475,6 @@ static void rit_select(FAR struct spi_dev_s *spi)
  *
  **************************************************************************************/
 
-#ifdef CONFIG_SPI_OWNBUS
-static inline void rit_deselect(FAR struct spi_dev_s *spi)
-{
-  /* We own the SPI bus, so just de-select the chip */
-
-  SPI_SELECT(spi, SPIDEV_DISPLAY, false);
-}
-#else
 static void rit_deselect(FAR struct spi_dev_s *spi)
 {
   /* De-select P14201 chip and relinquish the SPI bus. */
@@ -542,7 +482,6 @@ static void rit_deselect(FAR struct spi_dev_s *spi)
   SPI_SELECT(spi, SPIDEV_DISPLAY, false);
   SPI_LOCK(spi, false);
 }
-#endif
 
 /**************************************************************************************
  * Name: rit_sndbytes
@@ -570,7 +509,7 @@ static void rit_sndbytes(FAR struct rit_dev_s *priv, FAR const uint8_t *buffer,
   uint8_t tmp;
 
   ritdbg("buflen: %d cmd: %s [%02x %02x %02x]\n",
-         buflen, cmd ? "YES" : "NO", buffer[0], buffer[1], buffer[2] );
+         buflen, cmd ? "YES" : "NO", buffer[0], buffer[1], buffer[2]);
   DEBUGASSERT(spi);
 
   /* Clear/set the D/Cn bit to enable command or data mode */
@@ -769,19 +708,19 @@ static int rit_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
           memcpy(&run[start], buffer, aend - start);
         }
 
-       /* An even number of byte-aligned pixel pairs have been written (where
-        * zero counts as an even number).  If npixels was was odd (including
-        * npixels == 1), then handle the final, byte aligned pixel.
-        */
+      /* An even number of byte-aligned pixel pairs have been written (where
+       * zero counts as an even number).  If npixels was was odd (including
+       * npixels == 1), then handle the final, byte aligned pixel.
+       */
 
-       if (aend != end)
-         {
-           /* The leftmost column is contained in source bits 7:4 and in
-            * destination bits 7:4
-            */
+      if (aend != end)
+        {
+          /* The leftmost column is contained in source bits 7:4 and in
+           * destination bits 7:4
+           */
 
-           run[aend] = (run[aend] & 0x0f) | (buffer[aend - start] & 0xf0);
-         }
+          run[aend] = (run[aend] & 0x0f) | (buffer[aend - start] & 0xf0);
+        }
     }
 
   /* CASE 2: First pixel X position is byte aligned
@@ -825,10 +764,10 @@ static int rit_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
           run[i] = (last << 4) | (curr >> 4);
         }
 
-       /* An odd number of unaligned pixel have been written (where npixels
-        * may have been as small as one).  If npixels was was even, then handle
-        * the final, unaligned pixel.
-        */
+      /* An odd number of unaligned pixel have been written (where npixels
+       * may have been as small as one).  If npixels was was even, then handle
+       * the final, unaligned pixel.
+       */
 
       if (aend != end)
         {
@@ -1227,7 +1166,6 @@ FAR struct lcd_dev_s *rit_initialize(FAR struct spi_dev_s *spi, unsigned int dev
 
   /* Select the SD1329 controller */
 
-  rit_configspi(spi);
   rit_select(spi);
 
   /* Clear the display */

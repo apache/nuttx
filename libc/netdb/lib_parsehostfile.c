@@ -50,7 +50,7 @@
 
 #include <arpa/inet.h>
 
-#include "lib_internal.h"
+#include "libc.h"
 
 #ifdef CONFIG_NETDB_HOSTFILE
 
@@ -61,7 +61,7 @@
 /* Check if character is any kind of white space (except for newline) */
 
 #define lib_isspace(c) \
-  ((c) == ' '  || (c) == '\t' || (c) == '\r' || (c) == '\f' || c== '\v')
+  ((c) == ' '  || (c) == '\t' || (c) == '\r' || (c) == '\f' || c == '\v')
 
 /****************************************************************************
  * Private Type Definitions
@@ -279,7 +279,7 @@ ssize_t lib_parse_hostfile(FAR FILE *stream, FAR struct hostent *host,
    * be big enough).
    */
 
- if (buflen <= sizeof(struct hostent_info_s))
+  if (buflen <= sizeof(struct hostent_info_s))
    {
      return -ERANGE;
    }

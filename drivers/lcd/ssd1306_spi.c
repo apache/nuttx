@@ -61,7 +61,6 @@
  *
  ****************************************************************************/
 
-#ifndef CONFIG_SPI_OWNBUS
 static inline void ssd1306_configspi(FAR struct spi_dev_s *spi)
 {
   lcdvdbg("Mode: %d Bits: 8 Frequency: %d\n",
@@ -71,9 +70,9 @@ static inline void ssd1306_configspi(FAR struct spi_dev_s *spi)
 
   SPI_SETMODE(spi, CONFIG_SSD1306_SPIMODE);
   SPI_SETBITS(spi, 8);
-  SPI_SETFREQUENCY(spi, CONFIG_SSD1306_FREQUENCY);
+  (void)SPI_HWFEATURES(spi, 0);
+  (void)SPI_SETFREQUENCY(spi, CONFIG_SSD1306_FREQUENCY);
 }
-#endif
 
 /****************************************************************************
  * Public Functions
@@ -123,7 +122,6 @@ void ssd1306_sendblk(FAR struct ssd1306_dev_s *priv, uint8_t *data, uint8_t len)
 
 void ssd1306_select(FAR struct ssd1306_dev_s *priv, bool cs)
 {
-#ifndef CONFIG_SPI_OWNBUS
   /* If we are selecting the device */
 
   if (cs == true)
@@ -133,13 +131,11 @@ void ssd1306_select(FAR struct ssd1306_dev_s *priv, bool cs)
       (void)SPI_LOCK(priv->spi, true);
       ssd1306_configspi(priv->spi);
     }
-#endif
 
   /* Select/deselect SPI device */
 
   SPI_SELECT(priv->spi, SPIDEV_DISPLAY, cs);
 
-#ifndef CONFIG_SPI_OWNBUS
   /* If we are deselecting the device */
 
   if (cs == false)
@@ -148,7 +144,6 @@ void ssd1306_select(FAR struct ssd1306_dev_s *priv, bool cs)
 
       (void)SPI_LOCK(priv->spi, false);
     }
-#endif
 }
 
 /****************************************************************************

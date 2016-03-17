@@ -99,7 +99,7 @@
  * have an address that can be included in the g_funclookup[] table.
  */
 
-uint32_t syscall_clock_systimer(void);
+systime_t syscall_clock_systimer(void);
 
 /****************************************************************************
  * Pre-processor Definitions

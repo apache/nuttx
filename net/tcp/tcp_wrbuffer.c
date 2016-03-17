@@ -89,10 +89,6 @@ struct wrbuffer_s
 static struct wrbuffer_s g_wrbuffer;
 
 /****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -199,6 +195,24 @@ void tcp_wrbuffer_release(FAR struct tcp_wrbuffer_s *wrb)
 
   sq_addlast(&wrb->wb_node, &g_wrbuffer.freebuffers);
   sem_post(&g_wrbuffer.sem);
+}
+
+/****************************************************************************
+ * Function: tcp_wrbuffer_test
+ *
+ * Description:
+ *   Check if there is room in the write buffer.  Does not reserve any space.
+ *
+ * Assumptions:
+ *   None.
+ *
+ ****************************************************************************/
+
+int tcp_wrbuffer_test(void)
+{
+  int val = 0;
+  sem_getvalue(&g_wrbuffer.sem, &val);
+  return val > 0 ? OK : ERROR;
 }
 
 #endif /* CONFIG_NET && CONFIG_NET_TCP && CONFIG_NET_TCP_WRITE_BUFFERS */

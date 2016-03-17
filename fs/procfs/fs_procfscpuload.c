@@ -100,11 +100,11 @@ static int     cpuload_dup(FAR const struct file *oldp,
 static int     cpuload_stat(FAR const char *relpath, FAR struct stat *buf);
 
 /****************************************************************************
- * Private Variables
+ * Private Data
  ****************************************************************************/
 
 /****************************************************************************
- * Public Variables
+ * Public Data
  ****************************************************************************/
 
 /* See fs_mount.c -- this structure is explicitly externed there.
@@ -337,7 +337,7 @@ static int cpuload_stat(const char *relpath, struct stat *buf)
 
   /* "cpuload" is the name for a read-only file */
 
-  buf->st_mode    = S_IFREG|S_IROTH|S_IRGRP|S_IRUSR;
+  buf->st_mode    = S_IFREG | S_IROTH | S_IRGRP | S_IRUSR;
   buf->st_size    = 0;
   buf->st_blksize = 0;
   buf->st_blocks  = 0;

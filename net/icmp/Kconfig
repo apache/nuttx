@@ -18,15 +18,14 @@ if NET_ICMP
 config NET_ICMP_PING
 	bool "ICMP ping interfaces"
 	default n
+	depends on BUILD_FLAT
 	---help---
 		Provide interfaces to support application level support for
 		for sending ECHO (ping) requests and associating ECHO replies.
 
-config NET_PINGADDRCONF
-	bool "Ping address configuration"
-	default n
-	---help---
-		Use "ping" packet for setting IP address
+		NOTE: Calling these interfaces from application space is a
+		violation of the OS/application interface but for historical
+		reasons, is permitted in the flat build.
 
 endif # NET_ICMP
 endmenu # ICMP Networking Support

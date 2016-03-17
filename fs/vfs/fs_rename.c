@@ -68,11 +68,11 @@
 #ifdef FS_HAVE_RENAME
 
 /****************************************************************************
- * Private Variables
+ * Private Data
  ****************************************************************************/
 
 /****************************************************************************
- * Public Variables
+ * Public Data
  ****************************************************************************/
 
 /****************************************************************************
@@ -175,7 +175,10 @@ int rename(FAR const char *oldpath, FAR const char *newpath)
 #endif
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
     {
-      /* Create a new, empty inode at the destination location */
+      /* Create a new, empty inode at the destination location.
+       * NOTE that the new inode will be created with a reference count
+       * of  zero.
+       */
 
       inode_semtake();
       ret = inode_reserve(newpath, &newinode);
@@ -242,12 +245,12 @@ int rename(FAR const char *oldpath, FAR const char *newpath)
   return OK;
 
 #ifndef CONFIG_DISABLE_MOUNTPOINT
- errout_with_newinode:
+errout_with_newinode:
   inode_release(newinode);
 #endif
- errout_with_oldinode:
+errout_with_oldinode:
   inode_release(oldinode);
- errout:
+errout:
   set_errno(errcode);
   return ERROR;
 }

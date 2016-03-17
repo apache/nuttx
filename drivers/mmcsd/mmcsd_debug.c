@@ -47,7 +47,7 @@
 #include <debug.h>
 
 #include "mmcsd_csd.h"
-#include "mmcsd_internal.h"
+#include "mmcsd.h"
 
 /****************************************************************************
  * Pre-processor Definitions

@@ -48,7 +48,7 @@
 
 #include <nuttx/fs/fs.h>
 
-#include "bch_internal.h"
+#include "bch.h"
 
 /****************************************************************************
  * Private Types
@@ -132,7 +132,6 @@ ssize_t bchlib_read(FAR void *handle, FAR char *buffer, size_t offset, size_t le
 
       /* Adjust pointers and counts */
 
-      sectoffset = 0;
       sector++;
 
       if (sector >= bch->nsectors)
@@ -149,7 +148,7 @@ ssize_t bchlib_read(FAR void *handle, FAR char *buffer, size_t offset, size_t le
    * into the user buffer.
    */
 
-  if (len >= bch->sectsize )
+  if (len >= bch->sectsize)
     {
       nsectors = len / bch->sectsize;
       if (sector + nsectors > bch->nsectors)
@@ -167,9 +166,7 @@ ssize_t bchlib_read(FAR void *handle, FAR char *buffer, size_t offset, size_t le
 
       /* Adjust pointers and counts */
 
-      sectoffset = 0;
       sector    += nsectors;
-
       nbytes     = nsectors * bch->sectsize;
       bytesread += nbytes;
 

@@ -185,42 +185,43 @@ struct romfs_dirinfo_s
 };
 
 /****************************************************************************
- * Global Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Public Function Prototypes
+ * Public Data
  ****************************************************************************/
 
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
 
-EXTERN void romfs_semtake(struct romfs_mountpt_s *rm);
-EXTERN void romfs_semgive(struct romfs_mountpt_s *rm);
-EXTERN int  romfs_hwread(struct romfs_mountpt_s *rm, uint8_t *buffer,
-                  uint32_t sector, unsigned int nsectors);
-EXTERN int  romfs_filecacheread(struct romfs_mountpt_s *rm,
-                  struct romfs_file_s *rf, uint32_t sector);
-EXTERN int  romfs_hwconfigure(struct romfs_mountpt_s *rm);
-EXTERN int  romfs_fsconfigure(struct romfs_mountpt_s *rm);
-EXTERN int  romfs_fileconfigure(struct romfs_mountpt_s *rm,
-                  struct romfs_file_s *rf);
-EXTERN int  romfs_checkmount(struct romfs_mountpt_s *rm);
-EXTERN int  romfs_finddirentry(struct romfs_mountpt_s *rm,
-                  struct romfs_dirinfo_s *dirinfo,
-                  const char *path);
-EXTERN int  romfs_parsedirentry(struct romfs_mountpt_s *rm,
-                  uint32_t offset, uint32_t *poffset, uint32_t *pnext,
-                  uint32_t *pinfo, uint32_t *psize);
-EXTERN int  romfs_parsefilename(struct romfs_mountpt_s *rm, uint32_t offset,
-                  char *pname);
-EXTERN int  romfs_datastart(struct romfs_mountpt_s *rm, uint32_t offset,
-                  uint32_t *start);
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+void romfs_semtake(FAR struct romfs_mountpt_s *rm);
+void romfs_semgive(FAR struct romfs_mountpt_s *rm);
+int  romfs_hwread(FAR struct romfs_mountpt_s *rm, FAR uint8_t *buffer,
+       uint32_t sector, unsigned int nsectors);
+int  romfs_filecacheread(FAR struct romfs_mountpt_s *rm,
+       FAR struct romfs_file_s *rf, uint32_t sector);
+int  romfs_hwconfigure(FAR struct romfs_mountpt_s *rm);
+int  romfs_fsconfigure(FAR struct romfs_mountpt_s *rm);
+int  romfs_fileconfigure(FAR struct romfs_mountpt_s *rm,
+       FAR struct romfs_file_s *rf);
+int  romfs_checkmount(FAR struct romfs_mountpt_s *rm);
+int  romfs_finddirentry(FAR struct romfs_mountpt_s *rm,
+       FAR struct romfs_dirinfo_s *dirinfo,
+       FAR const char *path);
+int  romfs_parsedirentry(FAR struct romfs_mountpt_s *rm,
+       uint32_t offset, FAR uint32_t *poffset, FAR uint32_t *pnext,
+       FAR uint32_t *pinfo, FAR uint32_t *psize);
+int  romfs_parsefilename(FAR struct romfs_mountpt_s *rm, uint32_t offset,
+       FAR char *pname);
+int  romfs_datastart(FAR struct romfs_mountpt_s *rm, uint32_t offset,
+       FAR uint32_t *start);
 
 #undef EXTERN
 #if defined(__cplusplus)

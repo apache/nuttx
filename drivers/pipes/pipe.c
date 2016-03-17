@@ -234,7 +234,7 @@ int pipe(int fd[2])
 
       /* Register the pipe device */
 
-      ret = register_driver(devname, &pipe_fops, 0666, (void*)dev);
+      ret = register_driver(devname, &pipe_fops, 0666, (FAR void *)dev);
       if (ret != 0)
         {
           (void)sem_post(&g_pipesem);

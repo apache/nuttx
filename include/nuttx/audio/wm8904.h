@@ -84,10 +84,6 @@
 #  error CONFIG_I2C is required by the WM8904 driver
 #endif
 
-#ifndef CONFIG_I2C_TRANSFER
-#  error CONFIG_I2C_TRANSFER is required in the I2C configuration
-#endif
-
 #ifndef CONFIG_SCHED_WORKQUEUE
 #  error CONFIG_SCHED_WORKQUEUE is required by the WM8904 driver
 #endif
@@ -214,12 +210,12 @@ extern "C"
  *
  ****************************************************************************/
 
-struct i2c_dev_s;         /* Forward reference. Defined in include/nuttx/i2c.h */
+struct i2c_master_s;      /* Forward reference. Defined in include/nuttx/i2c/i2c_master.h */
 struct i2s_dev_s;         /* Forward reference. Defined in include/nuttx/audio/i2s.h */
 struct audio_lowerhalf_s; /* Forward reference. Defined in nuttx/audio/audio.h */
 
 FAR struct audio_lowerhalf_s *
-  wm8904_initialize(FAR struct i2c_dev_s *i2c, FAR struct i2s_dev_s *i2s,
+  wm8904_initialize(FAR struct i2c_master_s *i2c, FAR struct i2s_dev_s *i2s,
                     FAR const struct wm8904_lower_s *lower);
 
 /****************************************************************************

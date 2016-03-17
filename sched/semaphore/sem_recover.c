@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/semaphore/sem_recover.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,34 +39,11 @@
 
 #include <nuttx/config.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/sched.h>
 
 #include "semaphore/semaphore.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Type Declarations
- ****************************************************************************/
-
-/****************************************************************************
- * Global Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -115,7 +92,7 @@ void sem_recover(FAR struct tcb_s *tcb)
    * enforce that here).
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   if (tcb->task_state == TSTATE_WAIT_SEM)
     {
       sem_t *sem = tcb->waitsem;
@@ -144,5 +121,5 @@ void sem_recover(FAR struct tcb_s *tcb)
       tcb->waitsem = NULL;
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 }

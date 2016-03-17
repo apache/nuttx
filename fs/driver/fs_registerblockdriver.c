@@ -53,11 +53,11 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Private Variables
+ * Private Data
  ****************************************************************************/
 
 /****************************************************************************
- * Public Variables
+ * Public Data
  ****************************************************************************/
 
 /****************************************************************************
@@ -108,7 +108,9 @@ int register_blockdriver(FAR const char *path,
   ret = inode_reserve(path, &node);
   if (ret >= 0)
     {
-      /* We have it, now populate it with block driver specific information. */
+      /* We have it, now populate it with block driver specific information.
+       * NOTE that the initial reference count on the new inode is zero.
+       */
 
       INODE_SET_BLOCK(node);
 

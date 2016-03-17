@@ -51,6 +51,7 @@
 #include <nuttx/fs/fs.h>
 
 #include "inode/inode.h"
+#include "driver/driver.h"
 
 /****************************************************************************
  * Private Functions
@@ -107,7 +108,7 @@ int open(const char *path, int oflags, ...)
 
   /* If the file is opened for creation, then get the mode bits */
 
-  if ((oflags & (O_WRONLY|O_CREAT)) != 0)
+  if ((oflags & (O_WRONLY | O_CREAT)) != 0)
     {
       va_list ap;
       va_start(ap, oflags);
@@ -130,9 +131,42 @@ int open(const char *path, int oflags, ...)
       goto errout;
     }
 
-  /* Verify that the inode is valid and either a "normal" character driver or a
-   * mountpoint.  We specifically exclude block drivers and and "special"
-   * inodes (semaphores, message queues, shared memory).
+#if !defined(CONFIG_DISABLE_PSEUDOFS_OPERATIONS) && \
+    !defined(CONFIG_DISABLE_MOUNTPOINT)
+   /* If the inode is block driver, then we may return a character driver
+    * proxy for the block driver.  block_proxy() will instantiate a BCH
+    * character driver wrapper around the block driver, open(), then
+    * unlink() the character driver.  On success, block_proxy() will
+    * return the file descriptor of the opened character driver.
+    *
+    * NOTE: This will recurse to open the character driver proxy.
+    */
+
+   if (INODE_IS_BLOCK(inode))
+     {
+       /* Release the inode reference */
+
+       inode_release(inode);
+
+       /* Get the file descriptor of the opened character driver proxy */
+
+       fd = block_proxy(path, oflags);
+       if (fd < 0)
+         {
+           ret = fd;
+           goto errout;
+         }
+
+       /* Return the file descriptor */
+
+       return fd;
+     }
+   else
+#endif
+
+  /* Verify that the inode is either a "normal" character driver or a
+   * mountpoint.  We specifically "special" inodes (semaphores, message
+   * queues, shared memory).
    */
 
 #ifndef CONFIG_DISABLE_MOUNTPOINT
@@ -201,11 +235,11 @@ int open(const char *path, int oflags, ...)
 
   return fd;
 
- errout_with_fd:
+errout_with_fd:
   files_release(fd);
- errout_with_inode:
+errout_with_inode:
   inode_release(inode);
- errout:
+errout:
   set_errno(ret);
   return ERROR;
 }

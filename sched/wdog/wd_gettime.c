@@ -1,7 +1,7 @@
 /********************************************************************************
  * sched/wdog/wd_gettime.c
  *
- *   Copyright (C) 2007, 2009, 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2014-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,29 +40,9 @@
 #include <nuttx/config.h>
 
 #include <nuttx/wdog.h>
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 
 #include "wdog/wdog.h"
-
-/********************************************************************************
- * Pre-processor Definitions
- ********************************************************************************/
-
-/********************************************************************************
- * Private Types
- ********************************************************************************/
-
-/********************************************************************************
- * Global Variables
- ********************************************************************************/
-
-/********************************************************************************
- * Private Variables
- ********************************************************************************/
-
-/********************************************************************************
- * Private Functions
- ********************************************************************************/
 
 /********************************************************************************
  * Public Functions
@@ -92,7 +72,7 @@ int wd_gettime(WDOG_ID wdog)
 
   /* Verify the wdog */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   if (wdog && WDOG_ISACTIVE(wdog))
     {
       /* Traverse the watchdog list accumulating lag times until we find the wdog
@@ -107,12 +87,12 @@ int wd_gettime(WDOG_ID wdog)
           delay += curr->lag;
           if (curr == wdog)
             {
-              irqrestore(flags);
+              leave_critical_section(flags);
               return delay;
             }
         }
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return 0;
 }

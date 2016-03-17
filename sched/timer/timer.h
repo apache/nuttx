@@ -1,7 +1,7 @@
 /********************************************************************************
  * sched/timer/timer.h
  *
- *   Copyright (C) 2007-2009, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -67,12 +67,11 @@ struct posix_timer_s
 
   uint8_t         pt_flags;        /* See PT_FLAGS_* definitions */
   uint8_t         pt_crefs;        /* Reference count */
-  uint8_t         pt_signo;        /* Notification signal */
   pid_t           pt_owner;        /* Creator of timer */
   int             pt_delay;        /* If non-zero, used to reset repetitive timers */
   int             pt_last;         /* Last value used to set watchdog */
   WDOG_ID         pt_wdog;         /* The watchdog that provides the timing */
-  union sigval    pt_value;        /* Data passed with notification */
+  struct sigevent pt_event;        /* Notification information */
 };
 
 /********************************************************************************

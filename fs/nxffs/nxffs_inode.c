@@ -61,7 +61,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Public Variables
+ * Public Data
  ****************************************************************************/
 
 /****************************************************************************
@@ -276,7 +276,7 @@ int nxffs_nextentry(FAR struct nxffs_volume_s *volume, off_t offset,
 
   nerased = 0;
   nmagic  = 0;
-  for (;;)
+  for (; ; )
     {
       /* Read the next character */
 
@@ -401,7 +401,7 @@ int nxffs_findinode(FAR struct nxffs_volume_s *volume, FAR const char *name,
    * media.
    */
 
-  for (;;)
+  for (; ; )
    {
       /* Get the next, valid NXFFS inode entry */
 

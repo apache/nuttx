@@ -1,4 +1,4 @@
-/*****************************************************************************
+/****************************************************************************
  * sched/sched/sched_waitpid.c
  *
  *   Copyright (C) 2011-2013, 2015 Gregory Nutt. All rights reserved.
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
-/*****************************************************************************
+/****************************************************************************
  * Included Files
- *****************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -51,15 +51,11 @@
 
 #ifdef CONFIG_SCHED_WAITPID
 
-/*****************************************************************************
- * Private Functions
- *****************************************************************************/
-
-/*****************************************************************************
+/****************************************************************************
  * Public Functions
- *****************************************************************************/
+ ****************************************************************************/
 
-/*****************************************************************************
+/****************************************************************************
  * Name: waitpid
  *
  * Description:
@@ -176,7 +172,7 @@
  *   defined), then waitpid() is still available, but does not obey the
  *   restriction that the pid be a child of the caller.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifndef CONFIG_SCHED_HAVE_PARENT
 pid_t waitpid(pid_t pid, int *stat_loc, int options)
@@ -212,10 +208,14 @@ pid_t waitpid(pid_t pid, int *stat_loc, int options)
       goto errout_with_errno;
     }
 
-  /* The the task group corresponding to this PID */
+  /* Then the task group corresponding to this PID */
 
   group = ctcb->group;
   DEBUGASSERT(group);
+
+  /* Lock this group so that it cannot be deleted until the wait completes */
+
+  group_addwaiter(group);
 
   /* "If more than one thread is suspended in waitpid() awaiting termination of
    * the same process, exactly one thread will return the process status at the
@@ -236,6 +236,8 @@ pid_t waitpid(pid_t pid, int *stat_loc, int options)
       /* Don't wait if status is not available */
 
       ret = sem_trywait(&group->tg_exitsem);
+      group_delwaiter(group);
+
       if (ret < 0)
         {
           pid = 0;
@@ -246,6 +248,8 @@ pid_t waitpid(pid_t pid, int *stat_loc, int options)
       /* Wait if necessary for status to become available */
 
       ret = sem_wait(&group->tg_exitsem);
+      group_delwaiter(group);
+
       if (ret < 0)
         {
           /* Unlock pre-emption and return the ERROR (sem_wait has already set
@@ -274,7 +278,7 @@ errout:
   return ERROR;
 }
 
-/***************************************************************************
+/****************************************************************************
  *
  * If CONFIG_SCHED_HAVE_PARENT is defined, then waitpid will use the SIGHCLD
  * signal.  It can also handle the pid == (pid_t)-1 arguement.  This is
@@ -285,12 +289,12 @@ errout:
  * lost (or to have the data in the struct siginfo to be overwritten by
  * the next signal).
  *
- ***************************************************************************/
+ ****************************************************************************/
 
 #else
 pid_t waitpid(pid_t pid, int *stat_loc, int options)
 {
-  FAR struct tcb_s *rtcb = (FAR struct tcb_s *)g_readytorun.head;
+  FAR struct tcb_s *rtcb = this_task();
   FAR struct tcb_s *ctcb;
 #ifdef CONFIG_SCHED_CHILD_STATUS
   FAR struct child_status_s *child;
@@ -353,11 +357,11 @@ pid_t waitpid(pid_t pid, int *stat_loc, int options)
 
       /* Does this task retain child status? */
 
-       if (retains)
+      if (retains)
         {
-           /* Check if this specific pid has allocated child status? */
+          /* Check if this specific pid has allocated child status? */
 
-           if (group_findchild(rtcb->group, pid) == NULL)
+          if (group_findchild(rtcb->group, pid) == NULL)
             {
               err = ECHILD;
               goto errout_with_errno;
@@ -376,7 +380,7 @@ pid_t waitpid(pid_t pid, int *stat_loc, int options)
     }
   else if (pid != (pid_t)-1)
     {
-     /* Get the TCB corresponding to this PID and make sure it is our child. */
+      /* Get the TCB corresponding to this PID and make sure it is our child. */
 
       ctcb = sched_gettcb(pid);
 #ifdef HAVE_GROUP_MEMBERS
@@ -394,7 +398,7 @@ pid_t waitpid(pid_t pid, int *stat_loc, int options)
 
   /* Loop until the child that we are waiting for dies */
 
-  for (;;)
+  for (; ; )
     {
 #ifdef CONFIG_SCHED_CHILD_STATUS
       /* Check if the task has already died. Signals are not queued in

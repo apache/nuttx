@@ -47,7 +47,7 @@
 
 #include <nuttx/fs/fs.h>
 
-#include "lib_internal.h"
+#include "libc.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -62,11 +62,11 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Global Constant Data
+ * Public Constant Data
  ****************************************************************************/
 
 /****************************************************************************
- * Global Variables
+ * Public Data
  ****************************************************************************/
 
 /****************************************************************************
@@ -74,7 +74,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Private Variables
+ * Private Data
  ****************************************************************************/
 
 /****************************************************************************
@@ -121,11 +121,11 @@ ssize_t lib_fflush(FAR FILE *stream, bool bforce)
 
   if (stream->fs_bufpos  != stream->fs_bufstart)
     {
-       /* Make sure that the buffer holds buffered write data.  We do not
-        * support concurrent read/write buffer usage.
-        */
+      /* Make sure that the buffer holds buffered write data.  We do not
+       * support concurrent read/write buffer usage.
+       */
 
-       if (stream->fs_bufread != stream->fs_bufstart)
+      if (stream->fs_bufread != stream->fs_bufstart)
         {
           /* The buffer holds read data... just return zero meaning "no bytes
            * remaining in the buffer."

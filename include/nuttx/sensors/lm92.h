@@ -2,9 +2,9 @@
  * include/nuttx/sensors/lm92.h
  *
  *   Copyright (C) 2011-2012, 2015 Gregory Nutt. All rights reserved.
- *   Copyright (C) 2015 Alexandru Duru. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *           Alexandru Duru <alexandruduru@gmail.com>
+ *   Copyright (C) 2015 Omni Hoverboards Inc. All rights reserved.
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            Paul Alexander Patience <paul-a.patience@polymtl.ca>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -44,6 +44,8 @@
 
 #include <nuttx/config.h>
 #include <nuttx/fs/ioctl.h>
+
+#if defined(CONFIG_I2C) && defined(CONFIG_LM92)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -101,12 +103,10 @@
  */
 
 /****************************************************************************
- * Public Data
+ * Public Types
  ****************************************************************************/
 
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
+struct i2c_master_s;
 
 /****************************************************************************
  * Public Function Prototypes
@@ -139,7 +139,7 @@ extern "C"
  *
  ****************************************************************************/
 
-int lm92_register(FAR const char *devpath, FAR struct i2c_dev_s *i2c,
+int lm92_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
                   uint8_t addr);
 
 #undef EXTERN
@@ -147,4 +147,5 @@ int lm92_register(FAR const char *devpath, FAR struct i2c_dev_s *i2c,
 }
 #endif
 
+#endif /* CONFIG_I2C && CONFIG_LM92 */
 #endif /* __INCLUDE_NUTTX_SENSORS_LM92_H */

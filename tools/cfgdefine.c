@@ -98,7 +98,7 @@ static const char *dequote_list[] =
  * Private Functions
  ****************************************************************************/
 
- /* Skip over any spaces */
+/* Skip over any spaces */
 
 static char *skip_space(char *ptr)
 {

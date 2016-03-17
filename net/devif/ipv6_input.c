@@ -191,11 +191,11 @@ int ipv6_input(FAR struct net_driver_s *dev)
       goto drop;
     }
 
-   /* If IP broadcast support is configured, we check for a broadcast
-    * UDP packet, which may be destined to us (even if there is no IP
-    * address yet assigned to the device as is the case when we are
-    * negotiating over DHCP for an address).
-    */
+  /* If IP broadcast support is configured, we check for a broadcast
+   * UDP packet, which may be destined to us (even if there is no IP
+   * address yet assigned to the device as is the case when we are
+   * negotiating over DHCP for an address).
+   */
 
 #if defined(CONFIG_NET_BROADCAST) && defined(CONFIG_NET_UDP)
   if (ipv6->proto == IP_PROTO_UDP &&
@@ -204,10 +204,7 @@ int ipv6_input(FAR struct net_driver_s *dev)
       return udp_ipv6_input(dev);
     }
 
-  /* In most other cases, the device must be assigned a non-zero IP
-   * address.  Another exception is when CONFIG_NET_PINGADDRCONF is
-   * enabled...
-   */
+  /* In other cases, the device must be assigned a non-zero IP address. */
 
   else
 #endif

@@ -104,7 +104,7 @@
 #endif
 
 /****************************************************************************
- * Public Variables
+ * Public Data
  ****************************************************************************/
 
 uint32_t nfs_true;
@@ -495,7 +495,7 @@ static int nfs_fileopen(FAR struct nfsmount *nmp, struct nfsnode *np,
        */
 
       tmp = fxdr_unsigned(uint32_t, fattr.fa_mode);
-      if ((tmp & (NFSMODE_IWOTH|NFSMODE_IWGRP|NFSMODE_IWUSR)) == 0)
+      if ((tmp & (NFSMODE_IWOTH | NFSMODE_IWGRP | NFSMODE_IWUSR)) == 0)
         {
           fdbg("ERROR: File is read-only: %08x\n", tmp);
           return EACCES;
@@ -504,7 +504,7 @@ static int nfs_fileopen(FAR struct nfsmount *nmp, struct nfsnode *np,
 
   /* It would be an error if we are asked to create the file exclusively */
 
-  if ((oflags & (O_CREAT|O_EXCL)) == (O_CREAT|O_EXCL))
+  if ((oflags & (O_CREAT | O_EXCL)) == (O_CREAT | O_EXCL))
     {
       /* Already exists -- can't create it exclusively */
 
@@ -528,7 +528,7 @@ static int nfs_fileopen(FAR struct nfsmount *nmp, struct nfsnode *np,
    * access is ignored.
    */
 
-  if ((oflags & (O_TRUNC|O_WRONLY)) == (O_TRUNC|O_WRONLY))
+  if ((oflags & (O_TRUNC | O_WRONLY)) == (O_TRUNC | O_WRONLY))
     {
       /* Truncate the file to zero length.  I think we can do this with
        * the SETATTR call by setting the length to zero.
@@ -567,7 +567,7 @@ static int nfs_open(FAR struct file *filep, FAR const char *relpath,
    * mountpoint private data from the inode structure
    */
 
-  nmp = (struct nfsmount*)filep->f_inode->i_private;
+  nmp = (FAR struct nfsmount *)filep->f_inode->i_private;
   DEBUGASSERT(nmp != NULL);
 
   /* Pre-allocate the file private data to describe the opened file. */
@@ -690,8 +690,8 @@ static int nfs_close(FAR struct file *filep)
 
   /* Recover our private data from the struct file instance */
 
-  nmp = (struct nfsmount*) filep->f_inode->i_private;
-  np  = (struct nfsnode*) filep->f_priv;
+  nmp = (FAR struct nfsmount *) filep->f_inode->i_private;
+  np  = (FAR struct nfsnode *) filep->f_priv;
 
   DEBUGASSERT(nmp != NULL);
 
@@ -787,8 +787,8 @@ static ssize_t nfs_read(FAR struct file *filep, char *buffer, size_t buflen)
 
   /* Recover our private data from the struct file instance */
 
-  nmp = (struct nfsmount*)filep->f_inode->i_private;
-  np  = (struct nfsnode*)filep->f_priv;
+  nmp = (FAR struct nfsmount *)filep->f_inode->i_private;
+  np  = (FAR struct nfsnode *)filep->f_priv;
 
   DEBUGASSERT(nmp != NULL);
 
@@ -835,7 +835,7 @@ static ssize_t nfs_read(FAR struct file *filep, char *buffer, size_t buflen)
 
       /* Initialize the request */
 
-      ptr     = (FAR uint32_t*)&nmp->nm_msgbuffer.read.read;
+      ptr     = (FAR uint32_t *)&nmp->nm_msgbuffer.read.read;
       reqlen  = 0;
 
       /* Copy the variable length, file handle */
@@ -963,8 +963,8 @@ static ssize_t nfs_write(FAR struct file *filep, const char *buffer,
 
   /* Recover our private data from the struct file instance */
 
-  nmp = (struct nfsmount*)filep->f_inode->i_private;
-  np  = (struct nfsnode*)filep->f_priv;
+  nmp = (FAR struct nfsmount *)filep->f_inode->i_private;
+  np  = (FAR struct nfsnode *)filep->f_priv;
 
   DEBUGASSERT(nmp != NULL);
 
@@ -1143,8 +1143,8 @@ static int nfs_dup(FAR const struct file *oldp, FAR struct file *newp)
 
   /* Recover our private data from the struct file instance */
 
-  nmp = (struct nfsmount*)oldp->f_inode->i_private;
-  np  = (struct nfsnode*)oldp->f_priv;
+  nmp = (FAR struct nfsmount *)oldp->f_inode->i_private;
+  np  = (FAR struct nfsnode *)oldp->f_priv;
 
   DEBUGASSERT(nmp != NULL);
 
@@ -1305,7 +1305,7 @@ static int nfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
    * the dirent structure.
    */
 
-  ptr     = (FAR uint32_t*)&nmp->nm_msgbuffer.readdir.readdir;
+  ptr     = (FAR uint32_t *)&nmp->nm_msgbuffer.readdir.readdir;
   reqlen  = 0;
 
   /* Copy the variable length, directory file handle */
@@ -1421,7 +1421,7 @@ static int nfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
 
   tmp    = *ptr++;
   length = fxdr_unsigned(uint32_t, tmp);
-  name   = (uint8_t*)ptr;
+  name   = (FAR uint8_t *)ptr;
 
   /* Increment the pointer past the name (allowing for padding). ptr
    * now points to the cookie.
@@ -1702,8 +1702,9 @@ static int nfs_bind(FAR struct inode *blkdriver, FAR const void *data,
 
   nfs_decode_args(&nprmt, argp);
 
-   /* Determine the size of a buffer that will hold one RPC data transfer.
-    * First, get the maximum size of a read and a write transfer */
+  /* Determine the size of a buffer that will hold one RPC data transfer.
+   * First, get the maximum size of a read and a write transfer.
+   */
 
   buflen = SIZEOF_rpc_call_write(nprmt.wsize);
   tmp    = SIZEOF_rpc_reply_read(nprmt.rsize);
@@ -1817,7 +1818,7 @@ static int nfs_bind(FAR struct inode *blkdriver, FAR const void *data,
 
   error = nfs_request(nmp, NFSPROC_GETATTR,
                       (FAR void *)&getattr, sizeof(struct FS3args),
-                      (FAR void*)&resok, sizeof(struct rpc_reply_getattr));
+                      (FAR void *)&resok, sizeof(struct rpc_reply_getattr));
   if (error)
     {
       fdbg("ERROR: nfs_request failed: %d\n", error);
@@ -1830,7 +1831,7 @@ static int nfs_bind(FAR struct inode *blkdriver, FAR const void *data,
 
   /* Mounted! */
 
-  *handle = (void*)nmp;
+  *handle = (FAR void *)nmp;
   nfs_semgive(nmp);
 
   fvdbg("Successfully mounted\n");
@@ -2045,7 +2046,7 @@ static int nfs_statfs(FAR struct inode *mountpt, FAR struct statfs *sbp)
 
   /* Get the mountpoint private data from the inode structure */
 
-  nmp = (struct nfsmount*)mountpt->i_private;
+  nmp = (FAR struct nfsmount *)mountpt->i_private;
 
   /* Check if the mount is still healthy */
 
@@ -2123,7 +2124,7 @@ static int nfs_remove(struct inode *mountpt, const char *relpath)
 
   /* Get the mountpoint private data from the inode structure */
 
-  nmp = (struct nfsmount*)mountpt->i_private;
+  nmp = (FAR struct nfsmount *)mountpt->i_private;
 
   /* Check if the mount is still healthy */
 
@@ -2209,7 +2210,7 @@ static int nfs_mkdir(struct inode *mountpt, const char *relpath, mode_t mode)
 
   /* Get the mountpoint private data from the inode structure */
 
-  nmp = (struct nfsmount*) mountpt->i_private;
+  nmp = (FAR struct nfsmount *) mountpt->i_private;
 
   /* Check if the mount is still healthy */
 
@@ -2536,7 +2537,7 @@ static int nfs_stat(struct inode *mountpt, const char *relpath,
 
   /* Get the mountpoint private data from the inode structure */
 
-  nmp = (struct nfsmount*)mountpt->i_private;
+  nmp = (FAR struct nfsmount *)mountpt->i_private;
   DEBUGASSERT(nmp && buf);
 
   /* Check if the mount is still healthy */
@@ -2568,9 +2569,9 @@ static int nfs_stat(struct inode *mountpt, const char *relpath,
    * as in the NFSv3 spec.
    */
 
-  mode = tmp & (NFSMODE_IXOTH|NFSMODE_IWOTH|NFSMODE_IROTH|
-                NFSMODE_IXGRP|NFSMODE_IWGRP|NFSMODE_IRGRP|
-                NFSMODE_IXUSR|NFSMODE_IWUSR|NFSMODE_IRUSR);
+  mode = tmp & (NFSMODE_IXOTH | NFSMODE_IWOTH | NFSMODE_IROTH |
+                NFSMODE_IXGRP | NFSMODE_IWGRP | NFSMODE_IRGRP |
+                NFSMODE_IXUSR | NFSMODE_IWUSR | NFSMODE_IRUSR);
 
   /* Handle the cases that are not the same */
 

@@ -40,7 +40,6 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-//#include <sys/statfs.h>
 #include <sys/stat.h>
 
 #include <stdint.h>
@@ -93,11 +92,11 @@ static int     mtd_dup(FAR const struct file *oldp,
 static int     mtd_stat(FAR const char *relpath, FAR struct stat *buf);
 
 /****************************************************************************
- * Private Variables
+ * Private Data
  ****************************************************************************/
 
 /****************************************************************************
- * Public Variables
+ * Public Data
  ****************************************************************************/
 
 /* See fs_mount.c -- this structure is explicitly externed there.
@@ -304,7 +303,7 @@ static int mtd_stat(const char *relpath, struct stat *buf)
 {
   /* File/directory size, access block size */
 
-  buf->st_mode = S_IFREG|S_IROTH|S_IRGRP|S_IRUSR;
+  buf->st_mode    = S_IFREG | S_IROTH | S_IRGRP | S_IRUSR;
   buf->st_size    = 0;
   buf->st_blksize = 0;
   buf->st_blocks  = 0;
@@ -359,6 +358,47 @@ int mtd_register(FAR struct mtd_dev_s *mtd, FAR const char *name)
       /* Now insert at this location */
 
       plast->pnext = mtd;
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: mtd_unregister
+ *
+ * Description:
+ *   Un-Registers an MTD device with the procfs file system.
+ *
+ * In an embedded system, this all is really unnecessary, but is provided
+ * in the procfs system simply for information purposes (if desired).
+ *
+ ****************************************************************************/
+
+int mtd_unregister(FAR struct mtd_dev_s *mtd)
+{
+  FAR struct mtd_dev_s *plast;
+
+  /* Remove the MTD from the list of registered devices */
+
+  if (g_pfirstmtd == mtd)
+    {
+      g_pfirstmtd = mtd->pnext;
+    }
+  else
+    {
+      /* Remove from middle of list */
+
+      plast = g_pfirstmtd;
+      while (plast->pnext != mtd)
+        {
+          /* Skip to next entry as long as there is one */
+
+          plast = plast->pnext;
+        }
+
+      /* Now remove at this location */
+
+      plast->pnext = mtd->pnext;
     }
 
   return OK;

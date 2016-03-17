@@ -1,7 +1,7 @@
 /****************************************************************************
  * tools/mksymtab.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -234,7 +234,7 @@ int main(int argc, char **argv, char **envp)
 
   /* Now the symbol table itself */
 
-  fprintf(outstream, "\nstruct symtab_s %s[] =\n", SYMTAB_NAME);
+  fprintf(outstream, "\nconst struct symtab_s %s[] =\n", SYMTAB_NAME);
   fprintf(outstream, "{\n");
 
   /* Parse each line in the CVS file */

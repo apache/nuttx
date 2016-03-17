@@ -437,10 +437,10 @@ static void settzname(void)
   FAR struct state_s *const sp = lclptr;
   int i;
 
-  tzname[0] = tzname[1] = (FAR char*)g_wildabbr;
+  tzname[0] = tzname[1] = (FAR char *)g_wildabbr;
   if (sp == NULL)
     {
-      tzname[0] = tzname[1] = (FAR char*)GMT;
+      tzname[0] = tzname[1] = (FAR char *)GMT;
       return;
     }
 
@@ -528,6 +528,7 @@ static int tzload(FAR const char *name,
         struct state_s st;
       } u;
   };
+
   char *fullname;
   u_t *up;
   int doaccess;
@@ -1158,7 +1159,7 @@ static FAR const char *getrule(FAR const char *strp,
   return strp;
 }
 
-/*Given a year, a rule, and the offset from UT at the time that rule takes
+/* Given a year, a rule, and the offset from UT at the time that rule takes
  * effect, calculate the year-relative time that rule takes effect.
  */
 
@@ -2122,7 +2123,7 @@ static time_t time2sub(struct tm *const tmp,
         }
     }
 
-  for (;;)
+  for (; ; )
     {
       i = g_mon_lengths[isleap(y)][yourtm.tm_mon];
       if (yourtm.tm_mday <= i)
@@ -2198,7 +2199,7 @@ static time_t time2sub(struct tm *const tmp,
       hi = -(lo + 1);
     }
 
-  for (;;)
+  for (; ; )
     {
       t = lo / 2 + hi / 2;
       if (t < lo)

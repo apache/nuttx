@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/neighbor/neighbor_periodic.c
  *
- *   Copyright (C) 2007-2009, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * A leverage of logic from uIP which also has a BSD style license
@@ -42,17 +42,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/clock.h>
 
 #include "neighbor/neighbor.h"
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-#define USEC_PER_HSEC    500000
-#define TICK_PER_HSEC    (USEC_PER_HSEC / USEC_PER_TICK)   /* Truncates! */
-#define TICK2HSEC(tick)  (((tick)+(TICK_PER_HSEC/2))/TICK_PER_HSEC) /* Rounds */
 
 /****************************************************************************
  * Public Functions
@@ -66,42 +57,34 @@
  *   entries in the Neighbor Table
  *
  * Input Parameters:
- *   None
+ *   hsec - Elapsed time in half seconds since the last check
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-void neighbor_periodic(void)
+void neighbor_periodic(int hsec)
 {
-  uint32_t now;
-  uint32_t ticks;
-  uint32_t hsecs;
   int i;
 
-  /* Get the elapsed time in units of half seconds */
+  /* Only perform the aging when more than a half second has elapsed */
 
-  now   = clock_systimer();
-  ticks = now - g_neighbor_polltime;
-  hsecs = TICK2HSEC(ticks);
-
-  /* Reset the time of the last poll */
-
-  g_neighbor_polltime = now;
-
-  /* Add the elapsed half seconds from each activate entry in the
-   * Neighbor table.
-   */
-
-  for (i = 0; i < CONFIG_NET_IPv6_NCONF_ENTRIES; ++i)
+  if (hsec > 0)
     {
-      uint32_t newtime = g_neighbors[i].ne_time + hsecs;
-      if (newtime > NEIGHBOR_MAXTIME)
-        {
-          newtime = NEIGHBOR_MAXTIME;
-        }
+      /* Add the elapsed half seconds from each activate entry in the
+       * Neighbor table.
+       */
 
-      g_neighbors[i].ne_time = newtime;
+      for (i = 0; i < CONFIG_NET_IPv6_NCONF_ENTRIES; ++i)
+        {
+          uint32_t newtime = g_neighbors[i].ne_time + hsec;
+          if (newtime > NEIGHBOR_MAXTIME)
+            {
+              newtime = NEIGHBOR_MAXTIME;
+            }
+
+          g_neighbors[i].ne_time = newtime;
+        }
     }
 }

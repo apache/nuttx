@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/wdog/wd_start.c
  *
- *   Copyright (C) 2007-2009, 2012, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2012, 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,6 +47,7 @@
 #include <assert.h>
 #include <errno.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/wdog.h>
 
@@ -86,16 +87,9 @@ typedef void (*wdentry4_t)(int argc, wdparm_t arg1, wdparm_t arg2,
 #endif
 
 /****************************************************************************
- * Global Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Variables
- ****************************************************************************/
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
+
 /****************************************************************************
  * Name: wd_expiration
  *
@@ -180,7 +174,7 @@ static inline void wd_expiration(void)
               case 4:
                 (*((wdentry4_t)(wdog->func)))(4,
                                 wdog->parm[0], wdog->parm[1],
-                                wdog->parm[2] ,wdog->parm[3]);
+                                wdog->parm[2], wdog->parm[3]);
                 break;
 #endif
             }
@@ -225,14 +219,14 @@ static inline void wd_expiration(void)
  *
  ****************************************************************************/
 
-int wd_start(WDOG_ID wdog, int delay, wdentry_t wdentry,  int argc, ...)
+int wd_start(WDOG_ID wdog, int32_t delay, wdentry_t wdentry,  int argc, ...)
 {
   va_list ap;
   FAR struct wdog_s *curr;
   FAR struct wdog_s *prev;
   FAR struct wdog_s *next;
   int32_t now;
-  irqstate_t state;
+  irqstate_t flags;
   int i;
 
   /* Verify the wdog */
@@ -249,7 +243,7 @@ int wd_start(WDOG_ID wdog, int delay, wdentry_t wdentry,  int argc, ...)
    * the critical section is established.
    */
 
-  state = irqsave();
+  flags = enter_critical_section();
   if (WDOG_ISACTIVE(wdog))
     {
       wd_cancel(wdog);
@@ -301,7 +295,7 @@ int wd_start(WDOG_ID wdog, int delay, wdentry_t wdentry,  int argc, ...)
     {
       /* Add the watchdog to the head == tail of the queue. */
 
-      sq_addlast((FAR sq_entry_t*)wdog, &g_wdactivelist);
+      sq_addlast((FAR sq_entry_t *)wdog, &g_wdactivelist);
     }
 
   /* There are other active watchdogs in the timer queue */
@@ -322,11 +316,11 @@ int wd_start(WDOG_ID wdog, int delay, wdentry_t wdentry,  int argc, ...)
       /* Advance past shorter delays */
 
       while (now <= delay && curr->next)
-       {
-         prev = curr;
-         curr = curr->next;
-         now += curr->lag;
-       }
+        {
+          prev = curr;
+          curr = curr->next;
+          now += curr->lag;
+        }
 
       /* Check if the new wdog must be inserted before the curr. */
 
@@ -368,13 +362,13 @@ int wd_start(WDOG_ID wdog, int delay, wdentry_t wdentry,  int argc, ...)
           delay -= now;
           if (!curr->next)
             {
-              sq_addlast((FAR sq_entry_t*)wdog, &g_wdactivelist);
+              sq_addlast((FAR sq_entry_t *)wdog, &g_wdactivelist);
             }
           else
             {
               next = curr->next;
               next->lag -= delay;
-              sq_addafter((FAR sq_entry_t*)curr, (FAR sq_entry_t*)wdog,
+              sq_addafter((FAR sq_entry_t *)curr, (FAR sq_entry_t *)wdog,
                           &g_wdactivelist);
             }
         }
@@ -394,7 +388,7 @@ int wd_start(WDOG_ID wdog, int delay, wdentry_t wdentry,  int argc, ...)
   sched_timer_resume();
 #endif
 
-  irqrestore(state);
+  leave_critical_section(flags);
   return OK;
 }
 

@@ -56,22 +56,6 @@
 #include "tcp/tcp.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -172,7 +156,7 @@ void tcp_appsend(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
   else
     {
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
-      DEBUGASSERT(dev->d_sndlen >= 0 && dev->d_sndlen <= conn->mss);
+      DEBUGASSERT(dev->d_sndlen <= conn->mss);
 #else
       /* If d_sndlen > 0, the application has data to be sent. */
 
@@ -253,7 +237,7 @@ void tcp_rexmit(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
     }
 #endif /* CONFIG_NET_IPv6 */
 
- /* If the application has data to be sent, or if the incoming packet had
+  /* If the application has data to be sent, or if the incoming packet had
    * new data in it, we must send out a packet.
    */
 

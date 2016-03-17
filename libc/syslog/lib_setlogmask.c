@@ -1,7 +1,7 @@
 /****************************************************************************
  * lib/syslog/lib_setlogmask.c
  *
- *   Copyright (C) 2007-2009, 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,7 +42,7 @@
 #include <stdint.h>
 #include <syslog.h>
 
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 
 #include "syslog/syslog.h"
 
@@ -97,11 +97,11 @@ int setlogmask(int mask)
    * as interrupts.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   oldmask       = g_syslog_mask;
   g_syslog_mask = (uint8_t)mask;
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return oldmask;
 }

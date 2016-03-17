@@ -30,6 +30,18 @@ config ADC_NO_STARTUP_CONV
 	---help---
 		Do not start conversion when opening ADC device.
 
+config ADC_ADS1242
+	bool "TI ADS1242 support"
+	default n
+	select SPI
+	---help---
+		Enable driver support for the ADS1242 24-Bit SPI powered ADC.
+
+		This driver supports reading the ADC conversion result as well as
+		configuring the ADC, setting the input channel, etc. is implemented
+		via ioctl calls. However, it does not yet implement the standard ADC
+		interface.
+
 config ADC_ADS125X
 	bool "TI ADS1255/ADS1256 support"
 	default n

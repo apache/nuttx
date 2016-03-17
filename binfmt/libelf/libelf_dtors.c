@@ -163,7 +163,7 @@ int elf_loaddtors(FAR struct elf_loadinfo_s *loadinfo)
         {
           /* Allocate memory to hold a copy of the .dtor section */
 
-          loadinfo->ctoralloc = (binfmt_dtor_t*)kumm_malloc(dtorsize);
+          loadinfo->ctoralloc = (binfmt_dtor_t *)kumm_malloc(dtorsize);
           if (!loadinfo->ctoralloc)
             {
               bdbg("Failed to allocate memory for .dtors\n");
@@ -174,7 +174,7 @@ int elf_loaddtors(FAR struct elf_loadinfo_s *loadinfo)
 
           /* Read the section header table into memory */
 
-          ret = elf_read(loadinfo, (FAR uint8_t*)loadinfo->dtors, dtorsize,
+          ret = elf_read(loadinfo, (FAR uint8_t *)loadinfo->dtors, dtorsize,
                          shdr->sh_offset);
           if (ret < 0)
             {
@@ -206,7 +206,7 @@ int elf_loaddtors(FAR struct elf_loadinfo_s *loadinfo)
            * will be relocated via the normal mechanism.
            */
 
-          loadinfo->dtors = (binfmt_dtor_t*)shdr->sh_addr;
+          loadinfo->dtors = (binfmt_dtor_t *)shdr->sh_addr;
         }
     }
 

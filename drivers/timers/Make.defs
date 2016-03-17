@@ -2,7 +2,7 @@
 # drivers/timers/Make.defs
 # These drivers support various timer devices
 #
-#   Copyright (C) 20125Gregory Nutt. All rights reserved.
+#   Copyright (C) 2015 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -47,6 +47,18 @@ endif
 
 ifeq ($(CONFIG_TIMER),y)
   CSRCS += timer.c
+  TMRDEPPATH = --dep-path timers
+  TMRVPATH = :timers
+endif
+
+ifeq ($(CONFIG_RTC_DSXXXX),y)
+  CSRCS += ds3231.c
+  TMRDEPPATH = --dep-path timers
+  TMRVPATH = :timers
+endif
+
+ifeq ($(CONFIG_RTC_PCF85263),y)
+  CSRCS += pcf85263.c
   TMRDEPPATH = --dep-path timers
   TMRVPATH = :timers
 endif

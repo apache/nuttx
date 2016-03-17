@@ -121,7 +121,7 @@ static inline int psock_setup_callbacks(FAR struct socket *psock,
 
       pstate->tc_cb->flags   = (TCP_NEWDATA | TCP_CLOSE | TCP_ABORT |
                                 TCP_TIMEDOUT | TCP_CONNECTED | NETDEV_DOWN);
-      pstate->tc_cb->priv    = (void*)pstate;
+      pstate->tc_cb->priv    = (FAR void *)pstate;
       pstate->tc_cb->event   = psock_connect_interrupt;
       ret                    = OK;
     }
@@ -217,7 +217,7 @@ static uint16_t psock_connect_interrupt(FAR struct net_driver_s *dev,
 
       else if ((flags & TCP_TIMEDOUT) != 0)
         {
-          /* Indicate that the connection timedout?)*/
+          /* Indicate that the connection timedout?) */
 
           pstate->tc_result = -ETIMEDOUT;
         }
@@ -278,22 +278,32 @@ static uint16_t psock_connect_interrupt(FAR struct net_driver_s *dev,
 
 #ifdef CONFIG_NET_IPv4
 #ifdef CONFIG_NET_IPv6
-  if (pstate->tc_conn->domain == PF_INET)
+      if (pstate->tc_conn->domain == PF_INET)
 #endif
-    {
-      pstate->tc_conn->mss = TCP_IPv4_INITIAL_MSS(dev);
-    }
+        {
+          pstate->tc_conn->mss = TCP_IPv4_INITIAL_MSS(dev);
+        }
 #endif /* CONFIG_NET_IPv4 */
 
 #ifdef CONFIG_NET_IPv6
 #ifdef CONFIG_NET_IPv4
-  else
+      else
 #endif
-    {
-      pstate->tc_conn->mss = TCP_IPv4_INITIAL_MSS(dev);
-    }
+        {
+          pstate->tc_conn->mss = TCP_IPv4_INITIAL_MSS(dev);
+        }
 #endif /* CONFIG_NET_IPv6 */
 
+#ifdef CONFIG_NETDEV_MULTINIC
+      /* We now have to filter all outgoing transfers so that they use only
+       * the MSS of this device.
+       */
+
+      DEBUGASSERT(pstate->tc_conn->dev == NULL ||
+                  pstate->tc_conn->dev == dev);
+      pstate->tc_conn->dev = dev;
+
+#endif /* CONFIG_NETDEV_MULTINIC */
 #endif /* CONFIG_NET_MULTILINK */
 
       /* Wake up the waiting thread */
@@ -621,6 +631,14 @@ int psock_connect(FAR struct socket *psock, FAR const struct sockaddr *addr,
 #endif
             {
               ret = udp_connect(psock->s_conn, addr);
+              if (ret < 0 || addr == NULL)
+                {
+                  psock->s_flags &= ~_SF_CONNECTED;
+                }
+              else
+                {
+                  psock->s_flags |= _SF_CONNECTED;
+                }
             }
 #endif /* CONFIG_NET_UDP */
 

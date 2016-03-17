@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/semaphore/sem_tickdwait.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,6 +46,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/clock.h>
 #include <nuttx/wdog.h>
@@ -80,11 +81,11 @@
  *
  ****************************************************************************/
 
-int sem_tickwait(FAR sem_t *sem, uint32_t start, uint32_t delay)
+int sem_tickwait(FAR sem_t *sem, systime_t start, uint32_t delay)
 {
-  FAR struct tcb_s *rtcb = (FAR struct tcb_s *)g_readytorun.head;
+  FAR struct tcb_s *rtcb = this_task();
   irqstate_t flags;
-  uint32_t elapsed;
+  systime_t elapsed;
   int ret;
 
   DEBUGASSERT(sem != NULL && up_interrupt_context() == false &&
@@ -109,7 +110,7 @@ int sem_tickwait(FAR sem_t *sem, uint32_t start, uint32_t delay)
    * enabled while we are blocked waiting for the semaphore.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Try to take the semaphore without waiting. */
 
@@ -136,7 +137,7 @@ int sem_tickwait(FAR sem_t *sem, uint32_t start, uint32_t delay)
   /* Adjust the delay for any time since the delay was calculated */
 
   elapsed = clock_systimer() - start;
-  if (/*elapsed >= (UINT32_MAX / 2) || */ elapsed >= delay)
+  if (/* elapsed >= (UINT32_MAX / 2) || */ elapsed >= delay)
     {
       ret = -ETIMEDOUT;
       goto errout_with_irqdisabled;
@@ -172,7 +173,7 @@ success_with_irqdisabled:
   /* Error exits */
 
 errout_with_irqdisabled:
-  irqrestore(flags);
+  leave_critical_section(flags);
   wd_delete(rtcb->waitdog);
   rtcb->waitdog = NULL;
   return ret;

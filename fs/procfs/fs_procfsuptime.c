@@ -102,11 +102,11 @@ static int     uptime_dup(FAR const struct file *oldp,
 static int     uptime_stat(FAR const char *relpath, FAR struct stat *buf);
 
 /****************************************************************************
- * Private Variables
+ * Private Data
  ****************************************************************************/
 
 /****************************************************************************
- * Public Variables
+ * Public Data
  ****************************************************************************/
 
 /* See fs_mount.c -- this structure is explicitly externed there.
@@ -212,23 +212,16 @@ static ssize_t uptime_read(FAR struct file *filep, FAR char *buffer,
   size_t linesize;
   off_t offset;
   ssize_t ret;
-
-#ifdef CONFIG_SYSTEM_TIME64
-  uint64_t ticktime;
-#if !defined(CONFIG_HAVE_DOUBLE) || !defined(CONFIG_LIBC_FLOATINGPOINT)
-  uint64_t sec;
-#endif
-
-#else
-  uint32_t ticktime;
-#if !defined(CONFIG_HAVE_DOUBLE) || !defined(CONFIG_LIBC_FLOATINGPOINT)
-  uint32_t sec;
-#endif
-#endif
+  systime_t ticktime;
 
 #if defined(CONFIG_HAVE_DOUBLE) && defined(CONFIG_LIBC_FLOATINGPOINT)
   double now;
 #else
+# if defined(CONFIG_SYSTEM_TIME64)
+  uint64_t sec;
+# else
+  uint32_t sec;
+# endif
   unsigned int remainder;
   unsigned int csec;
 #endif
@@ -249,15 +242,9 @@ static ssize_t uptime_read(FAR struct file *filep, FAR char *buffer,
 
   if (filep->f_pos == 0)
     {
-#ifdef CONFIG_SYSTEM_TIME64
-      /* 64-bit timer */
-
-      ticktime = clock_systimer64();
-#else
-      /* 32-bit timer */
+      /* System time */
 
       ticktime = clock_systimer();
-#endif
 
 #if defined(CONFIG_HAVE_DOUBLE) && defined(CONFIG_LIBC_FLOATINGPOINT)
       /* Convert the system up time to a seconds + hundredths of seconds string */
@@ -351,7 +338,7 @@ static int uptime_dup(FAR const struct file *oldp, FAR struct file *newp)
  *
  ****************************************************************************/
 
-static int uptime_stat(const char *relpath, struct stat *buf)
+static int uptime_stat(FAR const char *relpath, FAR struct stat *buf)
 {
   /* "uptime" is the only acceptable value for the relpath */
 
@@ -363,7 +350,7 @@ static int uptime_stat(const char *relpath, struct stat *buf)
 
   /* "uptime" is the name for a read-only file */
 
-  buf->st_mode    = S_IFREG|S_IROTH|S_IRGRP|S_IRUSR;
+  buf->st_mode    = S_IFREG | S_IROTH | S_IRGRP | S_IRUSR;
   buf->st_size    = 0;
   buf->st_blksize = 0;
   buf->st_blocks  = 0;

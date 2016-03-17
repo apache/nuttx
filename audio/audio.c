@@ -379,7 +379,7 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case AUDIOIOC_GETCAPS:
         {
-          FAR struct audio_caps_s *caps = (FAR struct audio_caps_s*)((uintptr_t)arg);
+          FAR struct audio_caps_s *caps = (FAR struct audio_caps_s *)((uintptr_t)arg);
           DEBUGASSERT(lower->ops->getcaps != NULL);
 
           audvdbg("AUDIOIOC_GETCAPS: Device=%d\n", caps->ac_type);
@@ -393,7 +393,7 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case AUDIOIOC_CONFIGURE:
         {
           FAR const struct audio_caps_desc_s *caps =
-            (FAR const struct audio_caps_desc_s*)((uintptr_t)arg);
+            (FAR const struct audio_caps_desc_s *)((uintptr_t)arg);
           DEBUGASSERT(lower->ops->configure != NULL);
 
           audvdbg("AUDIOIOC_INITIALIZE: Device=%d\n", caps->caps.ac_type);
@@ -873,11 +873,11 @@ int audio_register(FAR const char *name, FAR struct audio_lowerhalf_s *dev)
   char path[AUDIO_MAX_DEVICE_PATH];
   static bool dev_audio_created = false;
 #ifndef CONFIG_AUDIO_CUSTOM_DEV_PATH
-  const char* devname = "/dev/audio";
+  FAR const char *devname = "/dev/audio";
 #elif !defined(CONFIG_AUDIO_DEV_ROOT)
-  const char* devname = CONFIG_AUDIO_DEV_PATH;
-  const char* ptr;
-  char* pathptr;
+  FAR const char *devname = CONFIG_AUDIO_DEV_PATH;
+  FAR const char *ptr;
+  FAR char *pathptr;
 #endif
 
   /* Allocate the upper-half data structure */

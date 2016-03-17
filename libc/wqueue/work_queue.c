@@ -1,7 +1,7 @@
 /****************************************************************************
  * libc/wqueue/work_queue.c
  *
- *   Copyright (C) 2009-2011, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2011, 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -53,22 +53,6 @@
 #if defined(CONFIG_LIB_USRWORK) && !defined(__KERNEL__)
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Type Declarations
- ****************************************************************************/
-
-/****************************************************************************
- * Public Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Variables
- ****************************************************************************/
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -103,19 +87,19 @@
 
 static int work_qqueue(FAR struct usr_wqueue_s *wqueue,
                        FAR struct work_s *work, worker_t worker,
-                       FAR void *arg, uint32_t delay)
+                       FAR void *arg, systime_t delay)
 {
   DEBUGASSERT(work != NULL);
-
-  /* First, initialize the work structure */
-
-  work->worker = worker;           /* Work callback */
-  work->arg    = arg;              /* Callback argument */
-  work->delay  = delay;            /* Delay until work performed */
 
   /* Get exclusive access to the work queue */
 
   while (work_lock() < 0);
+
+  /* Initialize the work structure */
+
+  work->worker = worker;           /* Work callback. non-NULL means queued */
+  work->arg    = arg;              /* Callback argument */
+  work->delay  = delay;            /* Delay until work performed */
 
   /* Now, time-tag that entry and put it in the work queue. */
 
@@ -162,7 +146,7 @@ static int work_qqueue(FAR struct usr_wqueue_s *wqueue,
  ****************************************************************************/
 
 int work_queue(int qid, FAR struct work_s *work, worker_t worker,
-               FAR void *arg, uint32_t delay)
+               FAR void *arg, systime_t delay)
 {
   if (qid == USRWORK)
     {

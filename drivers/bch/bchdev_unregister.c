@@ -52,7 +52,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/ioctl.h>
 
-#include "bch_internal.h"
+#include "bch.h"
 
 /****************************************************************************
  * Pre-processor Definitions

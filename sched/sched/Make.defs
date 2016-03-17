@@ -47,6 +47,10 @@ ifeq ($(CONFIG_PRIORITY_INHERITANCE),y)
 CSRCS += sched_reprioritize.c
 endif
 
+ifeq ($(CONFIG_SMP),y)
+CSRCS += sched_getaffinity.c sched_setaffinity.c sched_cpuselect.c
+endif
+
 ifeq ($(CONFIG_SCHED_WAITPID),y)
 CSRCS += sched_waitpid.c
 ifeq ($(CONFIG_SCHED_HAVE_PARENT),y)
@@ -76,6 +80,10 @@ ifeq ($(CONFIG_SCHED_TICKLESS),y)
 CSRCS += sched_timerexpiration.c
 else
 CSRCS += sched_processtimer.c
+endif
+
+ifeq ($(CONFIG_SCHED_INSTRUMENTATION_BUFFER),y)
+CSRCS += sched_note.c
 endif
 
 # Include sched build support

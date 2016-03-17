@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/semaphore/sem_waitirq.c
  *
- *   Copyright (C) 2007-2010, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2010, 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,6 +41,8 @@
 
 #include <sched.h>
 #include <errno.h>
+
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 
 #include "semaphore/semaphore.h"
@@ -77,14 +79,14 @@
 
 void sem_waitirq(FAR struct tcb_s *wtcb, int errcode)
 {
-  irqstate_t saved_state;
+  irqstate_t flags;
 
   /* Disable interrupts.  This is necessary (unfortunately) because an
    * interrupt handler may attempt to post the semaphore while we are
    * doing this.
    */
 
-  saved_state = irqsave();
+  flags = enter_critical_section();
 
   /* It is possible that an interrupt/context switch beat us to the punch
    * and already changed the task's state.
@@ -124,5 +126,5 @@ void sem_waitirq(FAR struct tcb_s *wtcb, int errcode)
 
   /* Interrupts may now be enabled. */
 
-  irqrestore(saved_state);
+  leave_critical_section(flags);
 }

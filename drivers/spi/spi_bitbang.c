@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/spi/spi_bitbang.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,7 +49,7 @@
 
 #ifdef CONFIG_SPI_BITBANG
 
- /****************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 /* This file holds the static, device-independ portion of the generica SPI-
@@ -110,9 +110,7 @@
 
 /* SPI methods */
 
-#ifndef CONFIG_SPI_OWNBUS
 static int      spi_lock(FAR struct spi_dev_s *dev, bool lock);
-#endif
 static void     spi_select(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
                   bool selected);
 static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
@@ -144,25 +142,26 @@ static int      spi_cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
 
 static const struct spi_ops_s g_spiops =
 {
-#ifndef CONFIG_SPI_OWNBUS
-  .lock              = spi_lock,
+  spi_lock,           /* lock */
+  spi_select,         /* select */
+  spi_setfrequency,   /* setfrequency */
+  spi_setmode,        /* setmode */
+  spi_setbits,        /* setbits */
+#ifdef CONFIG_SPI_HWFEATURES
+  0,                  /* hwfeatures */
 #endif
-  .select            = spi_select,
-  .setfrequency      = spi_setfrequency,
-  .setmode           = spi_setmode,
-  .setbits           = spi_setbits,
-  .status            = spi_status,
+  spi_status,         /* status */
 #ifdef CONFIG_SPI_CMDDATA
-  .cmddata           = spi_cmddata,
+  spi_cmddata,        /* cmddata */
 #endif
-  .send              = spi_send,
+  spi_send,           /* send */
 #ifdef CONFIG_SPI_EXCHANGE
-  .exchange          = spi_exchange,
+  spi_exchange,       /* exchange */
 #else
-  .sndblock          = spi_sndblock,
-  .recvblock         = spi_recvblock,
+  spi_sndblock,       /* sndblock */
+  spi_recvblock,      /* recvblock */
 #endif
-  .registercallback  = 0,                 /* Not implemented */
+   0                  /* registercallback */
 };
 
 /****************************************************************************
@@ -190,7 +189,6 @@ static const struct spi_ops_s g_spiops =
  *
  ****************************************************************************/
 
-#ifndef CONFIG_SPI_OWNBUS
 static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
 {
   FAR struct spi_bitbang_s *priv = (FAR struct spi_bitbang_s *)dev;
@@ -216,7 +214,6 @@ static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
 
   return OK;
 }
-#endif
 
 /****************************************************************************
  * Name: spi_select
@@ -438,7 +435,7 @@ static void spi_exchange(FAR struct spi_dev_s *dev,
     }
 }
 
-/***************************************************************************
+/****************************************************************************
  * Name: spi_sndblock
  *
  * Description:

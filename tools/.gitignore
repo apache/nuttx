@@ -4,9 +4,11 @@
 /configure
 /mkconfig
 /mkdeps
+/cnvwindeps
 /mksymtab
 /mksyscall
 /mkversion
+/nxstyle
 /*.exe
 /*.dSYM
 /.k2h-body.dat

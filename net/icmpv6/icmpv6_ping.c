@@ -86,8 +86,8 @@ struct icmpv6_ping_s
   FAR struct devif_callback_s *png_cb; /* Reference to callback instance */
 
   sem_t          png_sem;     /* Use to manage the wait for the response */
-  uint32_t       png_time;    /* Start time for determining timeouts */
-  uint32_t       png_ticks;   /* System clock ticks to wait */
+  systime_t      png_time;    /* Start time for determining timeouts */
+  systime_t      png_ticks;   /* System clock ticks to wait */
   int            png_result;  /* 0: success; <0:negated errno on fail */
   net_ipv6addr_t png_addr;    /* The peer to be ping'ed */
   uint16_t       png_id;      /* Used to match requests with replies */
@@ -97,11 +97,11 @@ struct icmpv6_ping_s
 };
 
 /****************************************************************************
- * Public Variables
+ * Public Data
  ****************************************************************************/
 
 /****************************************************************************
- * Private Variables
+ * Private Data
  ****************************************************************************/
 
 /****************************************************************************
@@ -127,7 +127,7 @@ struct icmpv6_ping_s
 
 static inline int ping_timeout(FAR struct icmpv6_ping_s *pstate)
 {
-  uint32_t elapsed =  clock_systimer() - pstate->png_time;
+  systime_t elapsed =  clock_systimer() - pstate->png_time;
   if (elapsed >= pstate->png_ticks)
     {
       return TRUE;
@@ -456,7 +456,7 @@ int icmpv6_ping(net_ipv6addr_t addr, uint16_t id, uint16_t seqno,
   if (state.png_cb)
     {
       state.png_cb->flags   = (ICMPv6_POLL | ICMPv6_ECHOREPLY);
-      state.png_cb->priv    = (void*)&state;
+      state.png_cb->priv    = (FAR void *)&state;
       state.png_cb->event   = ping_interrupt;
       state.png_result      = -EINTR; /* Assume sem-wait interrupted by signal */
 

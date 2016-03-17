@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/usbhost/usbhost_findclass.c
  *
- *   Copyright (C) 2010, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,27 +44,11 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/usb/usb.h>
 #include <nuttx/usb/usbhost.h>
-#include <arch/irq.h>
 
 #include "usbhost_registry.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
@@ -167,7 +151,7 @@ const struct usbhost_registry_s *usbhost_findclass(const struct usbhost_id_s *id
    * protected by disabling interrupts.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Examine each register class in the linked list */
 
@@ -186,7 +170,7 @@ const struct usbhost_registry_s *usbhost_findclass(const struct usbhost_id_s *id
             {
               /* Yes.. restore interrupts and return the class info */
 
-              irqrestore(flags);
+              leave_critical_section(flags);
               return usbclass;
             }
         }
@@ -194,7 +178,7 @@ const struct usbhost_registry_s *usbhost_findclass(const struct usbhost_id_s *id
 
   /* Not found... restore interrupts and return NULL */
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return NULL;
 }
 

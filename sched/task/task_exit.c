@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/task/task_exit.c
  *
- *   Copyright (C) 2008-2009, 2012-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2012-2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,30 +49,6 @@
 #include "task/task.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Type Declarations
- ****************************************************************************/
-
-/****************************************************************************
- * Global Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -106,7 +82,7 @@
 
 int task_exit(void)
 {
-  FAR struct tcb_s *dtcb = (FAR struct tcb_s*)g_readytorun.head;
+  FAR struct tcb_s *dtcb = this_task();
   FAR struct tcb_s *rtcb;
   int ret;
 
@@ -119,7 +95,7 @@ int task_exit(void)
    */
 
   (void)sched_removereadytorun(dtcb);
-  rtcb = (FAR struct tcb_s*)g_readytorun.head;
+  rtcb = this_task();
 
   /* We are now in a bad state -- the head of the ready to run task list
    * does not correspond to the thread that is running.  Disabling pre-
@@ -131,6 +107,14 @@ int task_exit(void)
    */
 
   rtcb->lockcount++;
+
+#ifdef CONFIG_SMP
+  /* Make sure that the system knows about the locked state */
+
+  spin_setbit(&g_cpu_lockset, this_cpu(), &g_cpu_locksetlock,
+              &g_cpu_schedlock);
+#endif
+
   rtcb->task_state = TSTATE_TASK_READYTORUN;
 
   /* Move the TCB to the specified blocked task list and delete it.  Calling
@@ -147,7 +131,7 @@ int task_exit(void)
    * task list now
    */
 
-  if (g_pendingtasks.head)
+  if (g_pendingtasks.head != NULL)
     {
       (void)sched_mergepending();
     }
@@ -161,5 +145,16 @@ int task_exit(void)
    */
 
   rtcb->lockcount--;
+
+#ifdef CONFIG_SMP
+  if (rtcb->lockcount == 0)
+    {
+      /* Make sure that the system knows about the unlocked state */
+
+      spin_clrbit(&g_cpu_lockset, this_cpu(), &g_cpu_locksetlock,
+                  &g_cpu_schedlock);
+    }
+#endif
+
   return ret;
 }

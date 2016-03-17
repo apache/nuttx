@@ -86,7 +86,6 @@
 /* TX poll delay = 1 seconds. CLK_TCK is the number of clock ticks per second */
 
 #define skeleton_WDDELAY   (1*CLK_TCK)
-#define skeleton_POLLHSEC  (1*2)
 
 /* TX timeout = 1 minute */
 
@@ -113,9 +112,9 @@ struct skel_driver_s
   struct work_s sk_work;       /* For deferring work to the work queue */
 #endif
 
-  /* This holds the information visible to uIP/NuttX */
+  /* This holds the information visible to the NuttX network */
 
-  struct net_driver_s sk_dev;  /* Interface understood by uIP */
+  struct net_driver_s sk_dev;  /* Interface understood by the network */
 };
 
 /****************************************************************************
@@ -149,13 +148,13 @@ static inline void skel_txtimeout_process(FAR struct skel_driver_s *priv);
 #ifdef CONFIG_NET_NOINTS
 static void skel_txtimeout_work(FAR void *arg);
 #endif
-static void skel_txtimeout_expiry(int argc, uint32_t arg, ...);
+static void skel_txtimeout_expiry(int argc, wdparm_t arg, ...);
 
 static inline void skel_poll_process(FAR struct skel_driver_s *priv);
 #ifdef CONFIG_NET_NOINTS
 static void skel_poll_work(FAR void *arg);
 #endif
-static void skel_poll_expiry(int argc, uint32_t arg, ...);
+static void skel_poll_expiry(int argc, wdparm_t arg, ...);
 
 /* NuttX callback functions */
 
@@ -195,8 +194,7 @@ static void skel_ipv6multicast(FAR struct skel_driver_s *priv);
  *
  * Assumptions:
  *   May or may not be called from an interrupt handler.  In either case,
- *   global interrupts are disabled, either explicitly or indirectly through
- *   interrupt handling logic.
+ *   the network is locked.
  *
  ****************************************************************************/
 
@@ -209,13 +207,16 @@ static int skel_transmit(FAR struct skel_driver_s *priv)
 
   /* Increment statistics */
 
+  NETDEV_TXPACKETS(priv->sk_dev);
+
   /* Send the packet: address=priv->sk_dev.d_buf, length=priv->sk_dev.d_len */
 
   /* Enable Tx interrupts */
 
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
-  (void)wd_start(priv->sk_txtimeout, skeleton_TXTIMEOUT, skel_txtimeout_expiry, 1, (uint32_t)priv);
+  (void)wd_start(priv->sk_txtimeout, skeleton_TXTIMEOUT,
+                 skel_txtimeout_expiry, 1, (wdparm_t)priv);
   return OK;
 }
 
@@ -223,8 +224,9 @@ static int skel_transmit(FAR struct skel_driver_s *priv)
  * Function: skel_txpoll
  *
  * Description:
- *   The transmitter is available, check if uIP has any outgoing packets ready
- *   to send.  This is a callback from devif_poll().  devif_poll() may be called:
+ *   The transmitter is available, check if the network has any outgoing
+ *   packets ready to send.  This is a callback from devif_poll().
+ *   devif_poll() may be called:
  *
  *   1. When the preceding TX packet send is complete,
  *   2. When the preceding TX packet send timesout and the interface is reset
@@ -238,8 +240,7 @@ static int skel_transmit(FAR struct skel_driver_s *priv)
  *
  * Assumptions:
  *   May or may not be called from an interrupt handler.  In either case,
- *   global interrupts are disabled, either explicitly or indirectly through
- *   interrupt handling logic.
+ *   the network is locked.
  *
  ****************************************************************************/
 
@@ -304,7 +305,7 @@ static int skel_txpoll(FAR struct net_driver_s *dev)
  *   None
  *
  * Assumptions:
- *   Global interrupts are disabled by interrupt handling logic.
+ *   The network is locked.
  *
  ****************************************************************************/
 
@@ -314,7 +315,9 @@ static void skel_receive(FAR struct skel_driver_s *priv)
     {
       /* Check for errors and update statistics */
 
-      /* Check if the packet is a valid size for the uIP buffer configuration */
+      /* Check if the packet is a valid size for the network buffer
+       * configuration.
+       */
 
       /* Copy the data data from the hardware to priv->sk_dev.d_buf.  Set
        * amount of data in priv->sk_dev.d_len
@@ -332,6 +335,7 @@ static void skel_receive(FAR struct skel_driver_s *priv)
       if (BUF->type == HTONS(ETHTYPE_IP))
         {
           nllvdbg("IPv4 frame\n");
+          NETDEV_RXIPV4(&priv->sk_dev);
 
           /* Handle ARP on input then give the IPv4 packet to the network
            * layer
@@ -372,6 +376,7 @@ static void skel_receive(FAR struct skel_driver_s *priv)
       if (BUF->type == HTONS(ETHTYPE_IP6))
         {
           nllvdbg("Iv6 frame\n");
+          NETDEV_RXIPV6(&priv->sk_dev);
 
           /* Give the IPv6 packet to the network layer */
 
@@ -409,6 +414,7 @@ static void skel_receive(FAR struct skel_driver_s *priv)
       if (BUF->type == htons(ETHTYPE_ARP))
         {
           arp_arpin(&priv->sk_dev);
+          NETDEV_RXARP(&priv->sk_dev);
 
           /* If the above function invocation resulted in data that should be
            * sent out on the network, the field  d_len will set to a value > 0.
@@ -420,6 +426,10 @@ static void skel_receive(FAR struct skel_driver_s *priv)
             }
         }
 #endif
+      else
+        {
+          NETDEV_RXDROPPED(&priv->sk_dev);
+        }
     }
   while (); /* While there are more packets to be processed */
 }
@@ -437,7 +447,7 @@ static void skel_receive(FAR struct skel_driver_s *priv)
  *   None
  *
  * Assumptions:
- *   Global interrupts are disabled by the watchdog logic.
+ *   The network is locked.
  *
  ****************************************************************************/
 
@@ -445,13 +455,28 @@ static void skel_txdone(FAR struct skel_driver_s *priv)
 {
   /* Check for errors and update statistics */
 
-  /* If no further xmits are pending, then cancel the TX timeout and
+  NETDEV_TXDONE(priv->sk_dev);
+
+  /* Check if there are pending transmissions */
+
+  /* If no further transmissions are pending, then cancel the TX timeout and
    * disable further Tx interrupts.
    */
 
   wd_cancel(priv->sk_txtimeout);
 
-  /* Then poll uIP for new XMIT data */
+  /* Then make sure that the TX poll timer is running (if it is already
+   * running, the following would restart it).  This is necessary to
+   * avoid certain race conditions where the polling sequence can be
+   * interrupted.
+   */
+
+  (void)wd_start(priv->sk_txpoll, skeleton_WDDELAY, skel_poll_expiry, 1,
+                 (wdparm_t)priv);
+
+  /* And disable further TX interrupts. */
+
+  /* In any event, poll the network for new TX data */
 
   (void)devif_poll(&priv->sk_dev, skel_txpoll);
 }
@@ -470,7 +495,7 @@ static void skel_txdone(FAR struct skel_driver_s *priv)
  *   None
  *
  * Assumptions:
- *   Ethernet interrupts are disabled
+ *   The network is locked.
  *
  ****************************************************************************/
 
@@ -505,7 +530,7 @@ static inline void skel_interrupt_process(FAR struct skel_driver_s *priv)
  *   OK on success
  *
  * Assumptions:
- *   Ethernet interrupts are disabled
+ *   The network is locked.
  *
  ****************************************************************************/
 
@@ -605,9 +630,11 @@ static inline void skel_txtimeout_process(FAR struct skel_driver_s *priv)
 {
   /* Increment statistics and dump debug info */
 
+  NETDEV_TXTIMEOUTS(priv->sk_dev);
+
   /* Then reset the hardware */
 
-  /* Then poll uIP for new XMIT data */
+  /* Then poll the network for new XMIT data */
 
   (void)devif_poll(&priv->sk_dev, skel_txpoll);
 }
@@ -625,7 +652,7 @@ static inline void skel_txtimeout_process(FAR struct skel_driver_s *priv)
  *   OK on success
  *
  * Assumptions:
- *   Ethernet interrupts are disabled
+ *   The network is locked.
  *
  ****************************************************************************/
 
@@ -662,7 +689,7 @@ static void skel_txtimeout_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static void skel_txtimeout_expiry(int argc, uint32_t arg, ...)
+static void skel_txtimeout_expiry(int argc, wdparm_t arg, ...)
 {
   FAR struct skel_driver_s *priv = (FAR struct skel_driver_s *)arg;
 
@@ -713,16 +740,17 @@ static inline void skel_poll_process(FAR struct skel_driver_s *priv)
    * the TX poll if he are unable to accept another packet for transmission.
    */
 
-  /* If so, update TCP timing states and poll uIP for new XMIT data. Hmmm..
-   * might be bug here.  Does this mean if there is a transmit in progress,
-   * we will missing TCP time state updates?
+  /* If so, update TCP timing states and poll the network for new XMIT data.
+   * Hmmm.. might be bug here.  Does this mean if there is a transmit in
+   * progress, we will missing TCP time state updates?
    */
 
-  (void)devif_timer(&priv->sk_dev, skel_txpoll, skeleton_POLLHSEC);
+  (void)devif_timer(&priv->sk_dev, skel_txpoll);
 
   /* Setup the watchdog poll timer again */
 
-  (void)wd_start(priv->sk_txpoll, skeleton_WDDELAY, skel_poll_expiry, 1, priv);
+  (void)wd_start(priv->sk_txpoll, skeleton_WDDELAY, skel_poll_expiry, 1,
+                 (wdparm_t)priv);
 }
 
 /****************************************************************************
@@ -738,7 +766,7 @@ static inline void skel_poll_process(FAR struct skel_driver_s *priv)
  *   OK on success
  *
  * Assumptions:
- *   Ethernet interrupts are disabled
+ *   The network is locked.
  *
  ****************************************************************************/
 
@@ -774,7 +802,7 @@ static void skel_poll_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static void skel_poll_expiry(int argc, uint32_t arg, ...)
+static void skel_poll_expiry(int argc, wdparm_t arg, ...)
 {
   FAR struct skel_driver_s *priv = (FAR struct skel_driver_s *)arg;
 
@@ -850,7 +878,8 @@ static int skel_ifup(FAR struct net_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  (void)wd_start(priv->sk_txpoll, skeleton_WDDELAY, skel_poll_expiry, 1, (uint32_t)priv);
+  (void)wd_start(priv->sk_txpoll, skeleton_WDDELAY, skel_poll_expiry, 1,
+                 (wdparm_t)priv);
 
   /* Enable the Ethernet interrupt */
 
@@ -882,7 +911,7 @@ static int skel_ifdown(FAR struct net_driver_s *dev)
 
   /* Disable the Ethernet interrupt */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   up_disable_irq(CONFIG_skeleton_IRQ);
 
   /* Cancel the TX poll timer and TX timeout timers */
@@ -898,7 +927,7 @@ static int skel_ifdown(FAR struct net_driver_s *dev)
   /* Mark the device "down" */
 
   priv->sk_bifup = false;
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -927,7 +956,7 @@ static inline void skel_txavail_process(FAR struct skel_driver_s *priv)
     {
       /* Check if there is room in the hardware to hold another outgoing packet. */
 
-      /* If so, then poll uIP for new XMIT data */
+      /* If so, then poll the network for new XMIT data */
 
       (void)devif_poll(&priv->sk_dev, skel_txpoll);
     }
@@ -1007,12 +1036,12 @@ static int skel_txavail(FAR struct net_driver_s *dev)
    * level processing.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Perform the out-of-cycle poll now */
 
   skel_txavail_process(priv);
-  irqrestore(flags);
+  leave_critical_section(flags);
 #endif
 
   return OK;
@@ -1200,12 +1229,12 @@ int skel_initialize(int intf)
   priv->sk_dev.d_addmac  = skel_addmac;   /* Add multicast MAC address */
   priv->sk_dev.d_rmmac   = skel_rmmac;    /* Remove multicast MAC address */
 #endif
-  priv->sk_dev.d_private = (void*)g_skel; /* Used to recover private state from dev */
+  priv->sk_dev.d_private = (FAR void *)g_skel; /* Used to recover private state from dev */
 
   /* Create a watchdog for timing polling for and timing of transmisstions */
 
-  priv->sk_txpoll       = wd_create();   /* Create periodic poll timer */
-  priv->sk_txtimeout    = wd_create();   /* Create TX timeout timer */
+  priv->sk_txpoll       = wd_create();    /* Create periodic poll timer */
+  priv->sk_txtimeout    = wd_create();    /* Create TX timeout timer */
 
   /* Put the interface in the down state.  This usually amounts to resetting
    * the device and/or calling skel_ifdown().

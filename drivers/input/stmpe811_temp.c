@@ -101,7 +101,8 @@ int stmpe811_tempinitialize(STMPE811_HANDLE handle)
 
   /* Aquire data enable */
 
-  stmpe811_putreg8(priv, STMPE811_TEMP_CTRL, (TEMP_CTRL_ACQ|TEMP_CTRL_ENABLE));
+  stmpe811_putreg8(priv, STMPE811_TEMP_CTRL,
+                   (TEMP_CTRL_ACQ | TEMP_CTRL_ENABLE));
 
   return OK;
 }
@@ -130,7 +131,8 @@ uint16_t stmpe811_tempread(STMPE811_HANDLE handle)
 
   /* Acquire data enable */
 
-  stmpe811_putreg8(priv, STMPE811_TEMP_CTRL, (TEMP_CTRL_ACQ|TEMP_CTRL_ENABLE));
+  stmpe811_putreg8(priv, STMPE811_TEMP_CTRL,
+                   (TEMP_CTRL_ACQ | TEMP_CTRL_ENABLE));
 
   /* Read the temperature */
 

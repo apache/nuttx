@@ -2085,7 +2085,8 @@ static int unionfs_unlink(FAR struct inode *mountpt,
     }
 
   /* Check if some exists at this path on file system 1.  This might be
-   * a file or a directory*/
+   * a file or a directory
+   */
 
   um  = &ui->ui_fs[0];
   ret = unionfs_trystat(um->um_node, relpath, um->um_prefix, &buf);
@@ -2444,7 +2445,7 @@ static int unionfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
 
 static int unionfs_getmount(FAR const char *path, FAR struct inode **inode)
 {
- FAR struct inode *minode;
+  FAR struct inode *minode;
 
   /* Find the mountpt */
 
@@ -2568,6 +2569,7 @@ int unionfs_mount(FAR const char *fspath1, FAR const char *prefix1,
 
   /* Insert a dummy node -- we need to hold the inode semaphore
    * to do this because we will have a momentarily bad structure.
+   * NOTE that the inode will be created with a refernce count of zero.
    */
 
   inode_semtake();
@@ -2611,7 +2613,6 @@ int unionfs_mount(FAR const char *fspath1, FAR const char *prefix1,
 errout_with_semaphore:
   inode_semgive();
 
-//errout_with_prefix2:
   if (ui->ui_fs[1].um_prefix != NULL)
     {
       kmm_free(ui->ui_fs[1].um_prefix);

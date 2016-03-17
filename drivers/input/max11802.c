@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/input/max11802.c
  *
- *   Copyright (C) 2011-2012, 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012, 2014-2016 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            Petteri Aimonen <jpa@nx.mail.kapsi.fi>
  *
@@ -57,6 +57,7 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/wdog.h>
 #include <nuttx/kmalloc.h>
@@ -88,16 +89,8 @@
  ****************************************************************************/
 /* Low-level SPI helpers */
 
-#ifdef CONFIG_SPI_OWNBUS
-static inline void max11802_configspi(FAR struct spi_dev_s *spi);
-#  define max11802_lock(spi)
-#  define max11802_unlock(spi)
-#else
-#  define max11802_configspi(spi);
 static void max11802_lock(FAR struct spi_dev_s *spi);
 static void max11802_unlock(FAR struct spi_dev_s *spi);
-#endif
-
 static uint16_t max11802_sendcmd(FAR struct max11802_dev_s *priv,
                                  uint8_t cmd, int *tags);
 
@@ -181,7 +174,6 @@ static struct max11802_dev_s *g_max11802list;
  *
  ****************************************************************************/
 
-#ifndef CONFIG_SPI_OWNBUS
 static void max11802_lock(FAR struct spi_dev_s *spi)
 {
   /* Lock the SPI bus because there are multiple devices competing for the
@@ -197,17 +189,16 @@ static void max11802_lock(FAR struct spi_dev_s *spi)
 
   SPI_SETMODE(spi, CONFIG_MAX11802_SPIMODE);
   SPI_SETBITS(spi, 8);
-  SPI_SETFREQUENCY(spi, CONFIG_MAX11802_FREQUENCY);
+  (void)SPI_HWFEATURES(spi, 0);
+  (void)SPI_SETFREQUENCY(spi, CONFIG_MAX11802_FREQUENCY);
 }
-#endif
 
 /****************************************************************************
  * Function: max11802_unlock
  *
  * Description:
- *   If we are sharing the SPI bus with other devices (CONFIG_SPI_OWNBUS
- *   undefined) then we need to un-lock the SPI bus for each transfer,
- *   possibly losing the current configuration.
+ *   Un-lock the SPI bus after each transfer, possibly losing the current
+ *   configuration if we are sharing the SPI bus with other devices
  *
  * Parameters:
  *   spi  - Reference to the SPI driver structure
@@ -219,46 +210,12 @@ static void max11802_lock(FAR struct spi_dev_s *spi)
  *
  ****************************************************************************/
 
-#ifndef CONFIG_SPI_OWNBUS
 static void max11802_unlock(FAR struct spi_dev_s *spi)
 {
   /* Relinquish the SPI bus. */
 
   (void)SPI_LOCK(spi, false);
 }
-#endif
-
-/****************************************************************************
- * Function: max11802_configspi
- *
- * Description:
- *   Configure the SPI for use with the MAX11802.  This function should be
- *   called once during touchscreen initialization to configure the SPI
- *   bus.  Note that if CONFIG_SPI_OWNBUS is not defined, then this function
- *   does nothing.
- *
- * Parameters:
- *   spi  - Reference to the SPI driver structure
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SPI_OWNBUS
-static inline void max11802_configspi(FAR struct spi_dev_s *spi)
-{
-  /* Configure SPI for the MAX11802.  But only if we own the SPI bus.
-   * Otherwise, don't bother because it might change.
-   */
-
-  SPI_SETMODE(spi, CONFIG_MAX11802_SPIMODE);
-  SPI_SETBITS(spi, 8);
-  SPI_SETFREQUENCY(spi, CONFIG_MAX11802_FREQUENCY);
-}
-#endif
 
 /****************************************************************************
  * Name: max11802_sendcmd
@@ -285,7 +242,7 @@ static uint16_t max11802_sendcmd(FAR struct max11802_dev_s *priv,
 
   result = ((uint16_t)buffer[0] << 8) | (uint16_t)buffer[1];
   *tags = result & 0xF;
-  result >>= 4; // Get rid of tags
+  result >>= 4; /* Get rid of tags */
 
   ivdbg("cmd:%02x response:%04x\n", cmd, result);
   return result;
@@ -349,7 +306,7 @@ static int max11802_sample(FAR struct max11802_dev_s *priv,
    * from changing until it has been reported.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Is there new MAX11802 sample data available? */
 
@@ -359,7 +316,7 @@ static int max11802_sample(FAR struct max11802_dev_s *priv,
        * sampled data.
        */
 
-      memcpy(sample, &priv->sample, sizeof(struct max11802_sample_s ));
+      memcpy(sample, &priv->sample, sizeof(struct max11802_sample_s));
 
       /* Now manage state transitions */
 
@@ -384,7 +341,7 @@ static int max11802_sample(FAR struct max11802_dev_s *priv,
       ret = OK;
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return ret;
 }
 
@@ -407,7 +364,7 @@ static int max11802_waitsample(FAR struct max11802_dev_s *priv,
    */
 
   sched_lock();
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Now release the semaphore that manages mutually exclusive access to
    * the device structure.  This may cause other tasks to become ready to
@@ -457,7 +414,7 @@ errout:
    * have pre-emption disabled.
    */
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   /* Restore pre-emption.  We might get suspended here but that is okay
    * because we already have our sample.  Note:  this means that if there
@@ -980,10 +937,10 @@ static ssize_t max11802_read(FAR struct file *filep, FAR char *buffer,
 
   if (sample.contact == CONTACT_UP)
     {
-       /* Pen is now up.  Is the positional data valid?  This is important to
-        * know because the release will be sent to the window based on its
-        * last positional data.
-        */
+      /* Pen is now up.  Is the positional data valid?  This is important to
+       * know because the release will be sent to the window based on its
+       * last positional data.
+       */
 
       if (sample.valid)
         {
@@ -1254,11 +1211,8 @@ int max11802_register(FAR struct spi_dev_s *spi,
 
   max11802_lock(spi);
 
-  /* Configure the SPI interface */
-
-  max11802_configspi(spi);
-
   /* Configure MAX11802 registers */
+
   SPI_SELECT(priv->spi, SPIDEV_TOUCHSCREEN, true);
   (void)SPI_SEND(priv->spi, MAX11802_CMD_MODE_WR);
   (void)SPI_SEND(priv->spi, MAX11802_MODE);
@@ -1314,10 +1268,10 @@ int max11802_register(FAR struct spi_dev_s *spi,
    */
 
 #ifdef CONFIG_MAX11802_MULTIPLE
-  flags          = irqsave();
+  flags          = enter_critical_section();
   priv->flink    = g_max11802list;
   g_max11802list = priv;
-  irqrestore(flags);
+  leave_critical_section(flags);
 #endif
 
   /* Schedule work to perform the initial sampling and to set the data

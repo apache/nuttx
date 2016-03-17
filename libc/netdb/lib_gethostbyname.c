@@ -42,7 +42,7 @@
 #include <netdb.h>
 #include <errno.h>
 
-#include "lib_internal.h"
+#include "libc.h"
 #include "netdb/lib_netdb.h"
 
 #ifdef CONFIG_LIBC_NETDB

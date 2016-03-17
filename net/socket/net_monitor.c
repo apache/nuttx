@@ -51,10 +51,6 @@
 #include "socket/socket.h"
 
 /****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
@@ -66,6 +62,7 @@ static uint16_t connection_event(FAR struct net_driver_s *dev,
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
 /****************************************************************************
  * Name: connection_closed
  *
@@ -117,7 +114,7 @@ static void connection_closed(FAR struct socket *psock, uint16_t flags)
        * be reported as an ENOTCONN error.
        */
 
-      psock->s_flags &= ~(_SF_CONNECTED |_SF_CLOSED);
+      psock->s_flags &= ~(_SF_CONNECTED | _SF_CLOSED);
     }
 }
 
@@ -163,6 +160,24 @@ static uint16_t connection_event(FAR struct net_driver_s *dev,
 
       else if ((flags & TCP_CONNECTED) != 0)
         {
+#if 0 /* REVISIT: Assertion fires.  Why? */
+#ifdef CONFIG_NETDEV_MULTINIC
+          FAR struct tcp_conn_s *conn = (FAR struct tcp_conn_s *)psock->s_conn;
+
+          /* Make sure that this is the device bound to the connection */
+
+          DEBUGASSERT(conn->dev == NULL || conn->dev == dev);
+          conn->dev = dev;
+#endif
+#endif
+
+          /* If there is no local address assigned to the socket (perhaps
+           * because it was INADDR_ANY), then assign it the address of the
+           * connecting device.
+           *
+           * TODO: Implement this.
+           */
+
           /* Indicate that the socket is now connected */
 
           psock->s_flags |= _SF_CONNECTED;
@@ -244,7 +259,7 @@ int net_startmonitor(FAR struct socket *psock)
   if (cb != NULL)
     {
       cb->event = connection_event;
-      cb->priv  = (void*)psock;
+      cb->priv  = (FAR void *)psock;
       cb->flags = NETDEV_DOWN;
     }
 
@@ -252,7 +267,7 @@ int net_startmonitor(FAR struct socket *psock)
 
   /* Set up to receive callbacks on connection-related events */
 
-  conn->connection_private = (void*)psock;
+  conn->connection_private = (FAR void *)psock;
   conn->connection_event   = connection_event;
 
   net_unlock(save);

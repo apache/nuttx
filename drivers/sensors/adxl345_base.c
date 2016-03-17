@@ -384,7 +384,7 @@ static void adxl345_reset(FAR struct adxl345_dev_s *priv)
 ADXL345_HANDLE adxl345_instantiate(FAR struct spi_dev_s *dev,
                                    FAR struct adxl345_config_s *config)
 #else
-ADXL345_HANDLE adxl345_instantiate(FAR struct i2c_dev_s *dev,
+ADXL345_HANDLE adxl345_instantiate(FAR struct i2c_master_s *dev,
                                    FAR struct adxl345_config_s *config)
 #endif
 {
@@ -409,29 +409,8 @@ ADXL345_HANDLE adxl345_instantiate(FAR struct i2c_dev_s *dev,
 #ifdef CONFIG_ADXL345_SPI
   priv->spi = dev;
 
-  /* If this SPI bus is not shared, then we can config it now.
-   * If it is shared, then other device could change our config,
-   * then just configure before sending data.
-   */
-
-#ifdef CONFIG_SPI_OWNBUS
-  /* Configure SPI for the ADXL345 */
-
-  SPI_SETMODE(priv->spi, SPIDEV_MODE3);
-  SPI_SETBITS(priv->spi, 8);
-  SPI_SETFREQUENCY(priv->spi, ADXL345_SPI_MAXFREQUENCY);
-#endif
-
 #else
   priv->i2c = dev;
-
-  /* Set the I2C address and frequency.  REVISIT:  This logic would be
-   * insufficient if we share the I2C bus with any other devices that also
-   * modify the address and frequency.
-   */
-
-  I2C_SETADDRESS(dev, config->address, 7);
-  I2C_SETFREQUENCY(dev, config->frequency);
 #endif
 
   /* Read and verify the ADXL345 device ID */

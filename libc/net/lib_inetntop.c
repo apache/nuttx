@@ -107,7 +107,7 @@ static int inet_ipv4_ntop(FAR const void *src, FAR char *dest, socklen_t size)
       return -ENOSPC;
     }
 
-  ptr = (FAR char*)src;
+  ptr = (FAR char *)src;
   sprintf(dest, "%d.%d.%d.%d", ptr[0], ptr[1], ptr[2], ptr[3]);
   return OK;
 }

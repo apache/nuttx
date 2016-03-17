@@ -1,7 +1,7 @@
-/*****************************************************************************
+/****************************************************************************
  *  sched/group/group_leave.c
  *
- *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
-/*****************************************************************************
+/****************************************************************************
  * Included Files
- *****************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -44,6 +44,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/net/net.h>
 #include <nuttx/lib.h>
@@ -56,23 +57,11 @@
 
 #ifdef HAVE_TASK_GROUP
 
-/*****************************************************************************
- * Pre-processor Definitions
- *****************************************************************************/
-
-/*****************************************************************************
- * Private Types
- *****************************************************************************/
-
-/*****************************************************************************
- * Private Data
- *****************************************************************************/
-
-/*****************************************************************************
+/****************************************************************************
  * Private Functions
- *****************************************************************************/
+ ****************************************************************************/
 
-/*****************************************************************************
+/****************************************************************************
  * Name: group_remove
  *
  * Description:
@@ -88,7 +77,7 @@
  *   Called during task deletion in a safe context.  No special precautions
  *   are required here.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #if defined(HAVE_GROUP_MEMBERS) || defined(CONFIG_ARCH_ADDRENV)
 static void group_remove(FAR struct task_group_s *group)
@@ -101,7 +90,7 @@ static void group_remove(FAR struct task_group_s *group)
    * This is probably un-necessary.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Find the task group structure */
 
@@ -127,11 +116,11 @@ static void group_remove(FAR struct task_group_s *group)
       curr->flink = NULL;
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 #endif
 
-/*****************************************************************************
+/****************************************************************************
  * Name: group_release
  *
  * Description:
@@ -147,7 +136,7 @@ static void group_remove(FAR struct task_group_s *group)
  *   Called during task deletion in a safe context.  No special precautions
  *   are required here.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 static inline void group_release(FAR struct task_group_s *group)
 {
@@ -271,12 +260,26 @@ static inline void group_release(FAR struct task_group_s *group)
 #  endif
 #endif
 
-  /* Release the group container itself */
+#if defined(CONFIG_SCHED_WAITPID) && !defined(CONFIG_SCHED_HAVE_PARENT)
+  /* If there are threads waiting for this group to be freed, then we cannot
+   * yet free the memory resources.  Instead just mark the group deleted
+   * and wait for those threads complete their waits.
+   */
 
-  sched_kfree(group);
+  if (group->tg_nwaiters > 0)
+    {
+      group->tg_flags |= GROUP_FLAG_DELETED;
+    }
+  else
+#endif
+    {
+      /* Release the group container itself */
+
+      sched_kfree(group);
+    }
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: group_removemember
  *
  * Description:
@@ -295,7 +298,7 @@ static inline void group_release(FAR struct task_group_s *group)
  *   Called during task deletion and also from the reparenting logic, both
  *   in a safe context.  No special precautions are required here.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_GROUP_MEMBERS
 static inline void group_removemember(FAR struct task_group_s *group, pid_t pid)
@@ -312,26 +315,26 @@ static inline void group_removemember(FAR struct task_group_s *group, pid_t pid)
       /* Does this member have the matching pid */
 
       if (group->tg_members[i] == pid)
-       {
+        {
           /* Remove the member from the array of members.  This must be an
            * atomic operation because the member array may be accessed from
            * interrupt handlers (read-only).
            */
 
-          flags = irqsave();
+          flags = enter_critical_section();
           group->tg_members[i] = group->tg_members[group->tg_nmembers - 1];
           group->tg_nmembers--;
-          irqrestore(flags);
+          leave_critical_section(flags);
         }
     }
 }
 #endif /* HAVE_GROUP_MEMBERS */
 
-/*****************************************************************************
+/****************************************************************************
  * Public Functions
- *****************************************************************************/
+ ****************************************************************************/
 
-/*****************************************************************************
+/****************************************************************************
  * Name: group_leave
  *
  * Description:
@@ -350,7 +353,7 @@ static inline void group_removemember(FAR struct task_group_s *group, pid_t pid)
  *   Called during task deletion in a safe context.  No special precautions
  *   are required here.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_GROUP_MEMBERS
 void group_leave(FAR struct tcb_s *tcb)

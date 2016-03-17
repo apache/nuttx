@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/socket/recvfrom.c
  *
- *   Copyright (C) 2007-2009, 2011-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -88,12 +88,12 @@
  * Private Types
  ****************************************************************************/
 
-#if defined(CONFIG_NET_UDP) || defined(CONFIG_NET_TCP)
+#if defined(CONFIG_NET_UDP) || defined(CONFIG_NET_TCP) || defined(CONFIG_NET_PKT)
 struct recvfrom_s
 {
   FAR struct socket       *rf_sock;      /* The parent socket structure */
 #ifdef CONFIG_NET_SOCKOPTS
-  uint32_t                 rf_starttime; /* rcv start time for determining timeout */
+  systime_t                rf_starttime; /* rcv start time for determining timeout */
 #endif
   FAR struct devif_callback_s *rf_cb;    /* Reference to callback instance */
   sem_t                    rf_sem;       /* Semaphore signals recv completion */
@@ -101,7 +101,7 @@ struct recvfrom_s
   uint8_t                 *rf_buffer;    /* Pointer to receive buffer */
   FAR struct sockaddr     *rf_from;      /* Address of sender */
   FAR socklen_t           *rf_fromlen;   /* Number of bytes allocated for address of sender */
-  size_t                   rf_recvlen;   /* The received length */
+  ssize_t                  rf_recvlen;   /* The received length */
   int                      rf_result;    /* Success:OK, failure:negated errno */
 };
 #endif /* CONFIG_NET_UDP || CONFIG_NET_TCP */
@@ -109,6 +109,39 @@ struct recvfrom_s
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Function: recvfrom_add_recvlen
+ *
+ * Description:
+ *   Update information about space available for new data and update size
+ *   of data in buffer,  This logic accounts for the case where
+ *   recvfrom_udpreadahead() sets state.rf_recvlen == -1 .
+ *
+ * Parameters:
+ *   pstate   recvfrom state structure
+ *   recvlen  size of new data appended to buffer
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NET_UDP) || defined(CONFIG_NET_TCP) || defined(CONFIG_NET_PKT)
+
+static inline void recvfrom_add_recvlen(FAR struct recvfrom_s *pstate,
+                                        size_t recvlen)
+{
+  if (pstate->rf_recvlen < 0)
+    {
+      pstate->rf_recvlen = 0;
+    }
+
+  pstate->rf_recvlen += recvlen;
+  pstate->rf_buffer  += recvlen;
+  pstate->rf_buflen  -= recvlen;
+}
+#endif /* CONFIG_NET_UDP || CONFIG_NET_TCP || CONFIG_NET_PKT */
 
 /****************************************************************************
  * Function: recvfrom_newdata
@@ -124,7 +157,7 @@ struct recvfrom_s
  *   The number of bytes taken from the packet.
  *
  * Assumptions:
- *   Running at the interrupt level
+ *   The network is locked.
  *
  ****************************************************************************/
 
@@ -152,9 +185,7 @@ static size_t recvfrom_newdata(FAR struct net_driver_s *dev,
 
   /* Update the accumulated size of the data read */
 
-  pstate->rf_recvlen += recvlen;
-  pstate->rf_buffer  += recvlen;
-  pstate->rf_buflen  -= recvlen;
+  recvfrom_add_recvlen(pstate, recvlen);
 
   return recvlen;
 }
@@ -174,7 +205,7 @@ static size_t recvfrom_newdata(FAR struct net_driver_s *dev,
  *   None.
  *
  * Assumptions:
- *   Running at the interrupt level
+ *   The network is locked.
  *
  ****************************************************************************/
 
@@ -200,9 +231,7 @@ static void recvfrom_newpktdata(FAR struct net_driver_s *dev,
 
   /* Update the accumulated size of the data read */
 
-  pstate->rf_recvlen += recvlen;
-  pstate->rf_buffer  += recvlen;
-  pstate->rf_buffer  -= recvlen;
+  recvfrom_add_recvlen(pstate, recvlen);
 }
 #endif /* CONFIG_NET_PKT */
 
@@ -220,7 +249,7 @@ static void recvfrom_newpktdata(FAR struct net_driver_s *dev,
  *   None.
  *
  * Assumptions:
- *   Running at the interrupt level
+ *   The network is locked.
  *
  ****************************************************************************/
 
@@ -236,8 +265,8 @@ static inline void recvfrom_newtcpdata(FAR struct net_driver_s *dev,
    * add it to the read-ahead buffers.
    */
 
- if (recvlen < dev->d_len)
-   {
+  if (recvlen < dev->d_len)
+    {
 #ifdef CONFIG_NET_TCP_READAHEAD
       FAR struct tcp_conn_s *conn = (FAR struct tcp_conn_s *)pstate->rf_sock->s_conn;
       FAR uint8_t *buffer = (FAR uint8_t *)dev->d_appdata + recvlen;
@@ -292,7 +321,7 @@ static inline void recvfrom_newtcpdata(FAR struct net_driver_s *dev,
  *   None.
  *
  * Assumptions:
- *   Running at the interrupt level
+ *   The network is locked.
  *
  ****************************************************************************/
 
@@ -324,7 +353,7 @@ static inline void recvfrom_newudpdata(FAR struct net_driver_s *dev,
  *   None
  *
  * Assumptions:
- *   Running at the interrupt level
+ *   The network is locked.
  *
  ****************************************************************************/
 
@@ -353,9 +382,7 @@ static inline void recvfrom_tcpreadahead(struct recvfrom_s *pstate)
 
       /* Update the accumulated size of the data read */
 
-      pstate->rf_recvlen += recvlen;
-      pstate->rf_buffer  += recvlen;
-      pstate->rf_buflen  -= recvlen;
+      recvfrom_add_recvlen(pstate, recvlen);
 
       /* If we took all of the ata from the I/O buffer chain is empty, then
        * release it.  If there is still data available in the I/O buffer
@@ -404,8 +431,9 @@ static inline void recvfrom_udpreadahead(struct recvfrom_s *pstate)
    * buffer.
    */
 
-  if ((iob = iob_peek_queue(&conn->readahead)) != NULL &&
-          pstate->rf_buflen > 0)
+  pstate->rf_recvlen = -1;
+
+  if ((iob = iob_peek_queue(&conn->readahead)) != NULL)
     {
       FAR struct iob_s *tmp;
       uint8_t src_addr_size;
@@ -422,12 +450,12 @@ static inline void recvfrom_udpreadahead(struct recvfrom_s *pstate)
           goto out;
         }
 
-      if ( 0
+      if (0
 #ifdef CONFIG_NET_IPv6
-           || src_addr_size == sizeof(struct sockaddr_in6)
+          || src_addr_size == sizeof(struct sockaddr_in6)
 #endif
 #ifdef CONFIG_NET_IPv4
-           || src_addr_size == sizeof(struct sockaddr_in)
+          || src_addr_size == sizeof(struct sockaddr_in)
 #endif
         )
         {
@@ -445,16 +473,23 @@ static inline void recvfrom_udpreadahead(struct recvfrom_s *pstate)
             }
         }
 
-      recvlen = iob_copyout(pstate->rf_buffer, iob, pstate->rf_buflen,
-                            src_addr_size + sizeof(uint8_t));
+      if (pstate->rf_buflen > 0)
+        {
+          recvlen = iob_copyout(pstate->rf_buffer, iob, pstate->rf_buflen,
+                                src_addr_size + sizeof(uint8_t));
 
-      nllvdbg("Received %d bytes (of %d)\n", recvlen, iob->io_pktlen);
+          nllvdbg("Received %d bytes (of %d)\n", recvlen, iob->io_pktlen);
 
-      /* Update the accumulated size of the data read */
+          /* Update the accumulated size of the data read */
 
-      pstate->rf_recvlen += recvlen;
-      pstate->rf_buffer  += recvlen;
-      pstate->rf_buflen  -= recvlen;
+          pstate->rf_recvlen  = recvlen;
+          pstate->rf_buffer  += recvlen;
+          pstate->rf_buflen  -= recvlen;
+        }
+      else
+        {
+          pstate->rf_recvlen = 0;
+        }
 
 out:
       /* Remove the I/O buffer chain from the head of the read-ahead
@@ -485,7 +520,7 @@ out:
  *   TRUE:timeout FALSE:no timeout
  *
  * Assumptions:
- *   Running at the interrupt level
+ *   The network is locked.
  *
  ****************************************************************************/
 
@@ -581,7 +616,7 @@ static inline void recvfrom_pktsender(FAR struct net_driver_s *dev,
 
 #ifdef CONFIG_NET_PKT
 static uint16_t recvfrom_pktinterrupt(FAR struct net_driver_s *dev,
-                                      FAR void *conn, FAR void *pvpriv,
+                                      FAR void *pvconn, FAR void *pvpriv,
                                       uint16_t flags)
 {
   struct recvfrom_s *pstate = (struct recvfrom_s *)pvpriv;
@@ -709,23 +744,39 @@ static inline void recvfrom_tcpsender(FAR struct net_driver_s *dev,
  *
  * Parameters:
  *   dev      The structure of the network driver that caused the interrupt
- *   conn     The connection structure associated with the socket
+ *   pvconn   The connection structure associated with the socket
  *   flags    Set of events describing why the callback was invoked
  *
  * Returned Value:
  *   None
  *
  * Assumptions:
- *   Running at the interrupt level
+ *   The network is locked.
  *
  ****************************************************************************/
 
 #ifdef CONFIG_NET_TCP
 static uint16_t recvfrom_tcpinterrupt(FAR struct net_driver_s *dev,
-                                      FAR void *conn, FAR void *pvpriv,
+                                      FAR void *pvconn, FAR void *pvpriv,
                                       uint16_t flags)
 {
   FAR struct recvfrom_s *pstate = (struct recvfrom_s *)pvpriv;
+
+#if 0 /* REVISIT: The assertion fires.  Why? */
+#ifdef CONFIG_NETDEV_MULTINIC
+  FAR struct tcp_conn_s *conn = (FAR struct tcp_conn_s *)pvconn;
+
+  /* The TCP socket is connected and, hence, should be bound to a device.
+   * Make sure that the polling device is the own that we are bound to.
+   */
+
+  DEBUGASSERT(conn->dev == NULL || conn->dev == dev);
+  if (conn->dev != NULL && conn->dev != dev)
+    {
+      return flags;
+    }
+#endif
+#endif
 
   nllvdbg("flags: %04x\n", flags);
 
@@ -794,11 +845,11 @@ static uint16_t recvfrom_tcpinterrupt(FAR struct net_driver_s *dev,
             }
 
 #ifdef CONFIG_NET_SOCKOPTS
-            /* Reset the timeout.  We will want a short timeout to terminate
-             * the TCP receive.
-             */
+          /* Reset the timeout.  We will want a short timeout to terminate
+           * the TCP receive.
+           */
 
-            pstate->rf_starttime = clock_systimer();
+          pstate->rf_starttime = clock_systimer();
 #endif
         }
 
@@ -881,11 +932,11 @@ static uint16_t recvfrom_tcpinterrupt(FAR struct net_driver_s *dev,
 
           /* Report an error only if no data has been received. (If
            * CONFIG_NET_TCP_RECVDELAY then rf_recvlen should always be
-           * zero).
+           * less than or equal to zero).
            */
 
 #if CONFIG_NET_TCP_RECVDELAY > 0
-          if (pstate->rf_recvlen == 0)
+          if (pstate->rf_recvlen <= 0)
 #endif
             {
               /* Report the timeout error */
@@ -921,7 +972,7 @@ static uint16_t recvfrom_tcpinterrupt(FAR struct net_driver_s *dev,
  *   None
  *
  * Assumptions:
- *   Running at the interrupt level
+ *   The network is locked.
  *
  ****************************************************************************/
 
@@ -966,7 +1017,8 @@ static inline void recvfrom_udpsender(struct net_driver_s *dev, struct recvfrom_
       if (infrom)
         {
 #ifdef CONFIG_NET_IPv6
-          FAR struct udp_conn_s *conn = (FAR struct udp_conn_s*)pstate->rf_sock->s_conn;
+          FAR struct udp_conn_s *conn =
+            (FAR struct udp_conn_s *)pstate->rf_sock->s_conn;
 
           /* Hybrid dual-stack IPv6/IPv4 implementations recognize a special
            * class of addresses, the IPv4-mapped IPv6 addresses.
@@ -1014,7 +1066,8 @@ static inline void recvfrom_udpsender(struct net_driver_s *dev, struct recvfrom_
  *   Terminate the UDP transfer.
  *
  * Parameters:
- *   conn     The connection structure associated with the socket
+ *   pstate - The recvfrom state structure
+ *   result - The result of the operation
  *
  * Returned Value:
  *   None
@@ -1051,14 +1104,14 @@ static void recvfrom_udp_terminate(FAR struct recvfrom_s *pstate, int result)
  *
  * Parameters:
  *   dev      The structure of the network driver that caused the interrupt
- *   conn     The connection structure associated with the socket
+ *   pvconn   The connection structure associated with the socket
  *   flags    Set of events describing why the callback was invoked
  *
  * Returned Value:
  *   None
  *
  * Assumptions:
- *   Running at the interrupt level
+ *   The network is locked.
  *
  ****************************************************************************/
 
@@ -1155,7 +1208,7 @@ static uint16_t recvfrom_udp_interrupt(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NET_UDP) || defined(CONFIG_NET_TCP)
+#if defined(CONFIG_NET_UDP) || defined(CONFIG_NET_TCP) || defined(CONFIG_NET_PKT)
 static void recvfrom_init(FAR struct socket *psock, FAR void *buf,
                           size_t len, FAR struct sockaddr *infrom,
                           FAR socklen_t *fromlen,
@@ -1203,7 +1256,7 @@ static void recvfrom_init(FAR struct socket *psock, FAR void *buf,
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NET_UDP) || defined(CONFIG_NET_TCP)
+#if defined(CONFIG_NET_UDP) || defined(CONFIG_NET_TCP) || defined(CONFIG_NET_PKT)
 static ssize_t recvfrom_result(int result, struct recvfrom_s *pstate)
 {
   int save_errno = get_errno(); /* In case something we do changes it */
@@ -1374,7 +1427,7 @@ static ssize_t pkt_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
   if (state.rf_cb)
     {
       state.rf_cb->flags  = (PKT_NEWDATA | PKT_POLL);
-      state.rf_cb->priv   = (void*)&state;
+      state.rf_cb->priv   = (FAR void *)&state;
       state.rf_cb->event  = recvfrom_pktinterrupt;
 
       /* Notify the device driver of the receive call */
@@ -1482,7 +1535,7 @@ static ssize_t udp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
        * something was received (already in 'ret'); EAGAIN if not.
        */
 
-      if (ret <= 0)
+      if (ret < 0)
         {
           /* Nothing was received */
 
@@ -1493,9 +1546,11 @@ static ssize_t udp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
   /* It is okay to block if we need to.  If there is space to receive anything
    * more, then we will wait to receive the data.  Otherwise return the number
    * of bytes read from the read-ahead buffer (already in 'ret').
+   *
+   * NOTE: that recvfrom_udpreadahead() may set state.rf_recvlen == -1.
    */
 
-  else if (state.rf_recvlen == 0)
+  else if (state.rf_recvlen <= 0)
 #endif
     {
       /* Get the device that will handle the packet transfers.  This may be
@@ -1513,7 +1568,7 @@ static ssize_t udp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
           /* Set up the callback in the connection */
 
           state.rf_cb->flags   = (UDP_NEWDATA | UDP_POLL | NETDEV_DOWN);
-          state.rf_cb->priv    = (void*)&state;
+          state.rf_cb->priv    = (FAR void *)&state;
           state.rf_cb->event   = recvfrom_udp_interrupt;
 
           /* Notify the device driver of the receive call */
@@ -1695,7 +1750,7 @@ static ssize_t tcp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
       if (state.rf_cb)
         {
           state.rf_cb->flags   = (TCP_NEWDATA | TCP_POLL | TCP_DISCONN_EVENTS);
-          state.rf_cb->priv    = (void*)&state;
+          state.rf_cb->priv    = (FAR void *)&state;
           state.rf_cb->event   = recvfrom_tcpinterrupt;
 
           /* Wait for either the receive to complete or for an error/timeout

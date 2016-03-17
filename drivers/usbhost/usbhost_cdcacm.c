@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/usbhost/usbhost_cdcacm.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,6 +49,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/arch.h>
 #include <nuttx/wqueue.h>
@@ -248,7 +249,7 @@ struct usbhost_cdcacm_s
   bool           rxena;          /* True: RX "interrupts" enabled */
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
   bool           iflow;          /* True: Input flow control (RTS) enabled */
-  bool           rts;            /* True: Input flow control is effect */
+  bool           rts;            /* True: Input flow control is in effect */
 #endif
 #ifdef CONFIG_SERIAL_OFLOWCONTROL
   bool           oflow;          /* True: Output flow control (CTS) enabled */
@@ -503,15 +504,15 @@ static FAR struct usbhost_cdcacm_s *usbhost_allocclass(void)
    * our pre-allocated class instances from the free list.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   entry = g_freelist;
   if (entry)
     {
       g_freelist = entry->flink;
     }
 
-  irqrestore(flags);
-  uvdbg("Allocated: %p\n", entry);;
+  leave_critical_section(flags);
+  uvdbg("Allocated: %p\n", entry);
   return (FAR struct usbhost_cdcacm_s *)entry;
 }
 #else
@@ -525,7 +526,7 @@ static FAR struct usbhost_cdcacm_s *usbhost_allocclass(void)
 
   DEBUGASSERT(!up_interrupt_context());
   priv = (FAR struct usbhost_cdcacm_s *)kmm_malloc(sizeof(struct usbhost_cdcacm_s));
-  uvdbg("Allocated: %p\n", priv);;
+  uvdbg("Allocated: %p\n", priv);
   return priv;
 }
 #endif
@@ -555,10 +556,10 @@ static void usbhost_freeclass(FAR struct usbhost_cdcacm_s *usbclass)
 
   /* Just put the pre-allocated class structure back on the freelist */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   entry->flink = g_freelist;
   g_freelist = entry;
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 #else
 static void usbhost_freeclass(FAR struct usbhost_cdcacm_s *usbclass)
@@ -569,7 +570,7 @@ static void usbhost_freeclass(FAR struct usbhost_cdcacm_s *usbclass)
    * from an interrupt handler.
    */
 
-  uvdbg("Freeing: %p\n", usbclass);;
+  uvdbg("Freeing: %p\n", usbclass);
   sched_kfree(usbclass);
 }
 #endif
@@ -587,7 +588,7 @@ static int usbhost_devno_alloc(FAR struct usbhost_cdcacm_s *priv)
   irqstate_t flags;
   int devno;
 
-  flags = irqsave();
+  flags = enter_critical_section();
   for (devno = 0; devno < 32; devno++)
     {
       uint32_t bitno = 1 << devno;
@@ -595,12 +596,12 @@ static int usbhost_devno_alloc(FAR struct usbhost_cdcacm_s *priv)
         {
           g_devinuse |= bitno;
           priv->minor = devno;
-          irqrestore(flags);
+          leave_critical_section(flags);
           return OK;
         }
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return -EMFILE;
 }
 
@@ -618,9 +619,9 @@ static void usbhost_devno_free(FAR struct usbhost_cdcacm_s *priv)
 
   if (devno >= 0 && devno < 32)
     {
-      irqstate_t flags = irqsave();
+      irqstate_t flags = enter_critical_section();
       g_devinuse &= ~(1 << devno);
-      irqrestore(flags);
+      leave_critical_section(flags);
     }
 }
 
@@ -850,8 +851,8 @@ static void usbhost_notification_callback(FAR void *arg, ssize_t nbytes)
           delay = USBHOST_CDCACM_NTDELAY;
         }
 
-     /* Make sure that the  work structure available.  There is a remote
-      * chance that this may collide with a device disconnection event.
+      /* Make sure that the  work structure available.  There is a remote
+       * chance that this may collide with a device disconnection event.
        */
 
       if (work_available(&priv->ntwork))
@@ -1129,12 +1130,12 @@ static void usbhost_rxdata_work(FAR void *arg)
 
       rxbuf->head = nexthead;
       priv->rxndx = rxndx;
- 
+
       /* Update the head point for for the next pass through the loop
        * handling. If nexthead incremented to rxbuf->tail, then the
        * RX buffer will and we will exit the loop at the top.
        */
- 
+
       if (++nexthead >= rxbuf->size)
         {
            nexthead = 0;
@@ -1333,7 +1334,7 @@ static int usbhost_cfgdesc(FAR struct usbhost_cdcacm_s *priv,
 
   /* Get the total length of the configuration descriptor (little endian).
    * It might be a good check to get the number of interfaces here too.
-  */
+   */
 
   remaining = (int)usbhost_getle16(cfgdesc->totallen);
 
@@ -1723,11 +1724,11 @@ static int usbhost_alloc_buffers(FAR struct usbhost_cdcacm_s *priv)
   /* Allocate buffer for sending line coding data. */
 
   ret = DRVR_IOALLOC(hport->drvr, &priv->linecode,
-                     sizeof( struct cdc_linecoding_s));
+                     sizeof(struct cdc_linecoding_s));
   if (ret < 0)
     {
       udbg("ERROR: DRVR_IOALLOC of line coding failed: %d (%d bytes)\n",
-           ret, sizeof( struct cdc_linecoding_s));
+           ret, sizeof(struct cdc_linecoding_s));
       goto errout;
     }
 
@@ -1759,7 +1760,7 @@ static int usbhost_alloc_buffers(FAR struct usbhost_cdcacm_s *priv)
            ret, priv->pktsize);
       goto errout;
     }
-  
+
   /* Allocate a TX buffer for Bulk IN transfers */
 
   ret = DRVR_IOALLOC(hport->drvr, &priv->outbuf, priv->pktsize);
@@ -2113,7 +2114,7 @@ static int usbhost_disconnected(struct usbhost_class_s *usbclass)
    * is no longer available.
    */
 
-  flags              = irqsave();
+  flags              = enter_critical_section();
   priv->disconnected = true;
 
   /* Let the upper half driver know that serial device is no longer
@@ -2181,7 +2182,7 @@ static int usbhost_disconnected(struct usbhost_class_s *usbclass)
         }
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -2213,11 +2214,11 @@ static int usbhost_setup(FAR struct uart_dev_s *uartdev)
   usbhost_takesem(&priv->exclsem);
 
   /* Check if the CDC/ACM device is still connected.  We need to disable
-   * interrupts momentarily to assure that there are no asynchronous 
+   * interrupts momentarily to assure that there are no asynchronous
    * isconnect events.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   if (priv->disconnected)
     {
       /* No... the block driver is no longer bound to the class.  That means that
@@ -2235,7 +2236,7 @@ static int usbhost_setup(FAR struct uart_dev_s *uartdev)
       ret = OK;
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   usbhost_givesem(&priv->exclsem);
   return ret;
 }
@@ -2275,7 +2276,7 @@ static void usbhost_shutdown(FAR struct uart_dev_s *uartdev)
    * no asynchronous disconnect events.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Check if the USB CDC/ACM device is still connected.  If the
    * CDC/ACM device is not connected and the reference count just
@@ -2291,7 +2292,7 @@ static void usbhost_shutdown(FAR struct uart_dev_s *uartdev)
       usbhost_destroy(priv);
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -2386,7 +2387,7 @@ static int usbhost_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 #ifdef CONFIG_SERIAL_TERMIOS
         case TCGETS:
           {
-            FAR struct termios *termiosp = (FAR struct termios*)arg;
+            FAR struct termios *termiosp = (FAR struct termios *)arg;
 
             if (!termiosp)
               {
@@ -2432,7 +2433,7 @@ static int usbhost_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
         case TCSETS:
           {
-            FAR struct termios *termiosp = (FAR struct termios*)arg;
+            FAR struct termios *termiosp = (FAR struct termios *)arg;
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
             bool iflow;
 #endif
@@ -2561,7 +2562,7 @@ static void usbhost_rxint(FAR struct uart_dev_s *uartdev, bool enable)
        */
 
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
-      if (priv->rts))
+      if (priv->rts)
 #endif
         {
           ret = work_queue(LPWORK, &priv->rxwork,
@@ -2592,7 +2593,7 @@ static void usbhost_rxint(FAR struct uart_dev_s *uartdev, bool enable)
 
 static bool usbhost_rxavailable(FAR struct uart_dev_s *uartdev)
 {
-  
+
   FAR struct usbhost_cdcacm_s *priv;
 
   DEBUGASSERT(uartdev && uartdev->priv);
@@ -2653,7 +2654,7 @@ static bool usbhost_rxflowcontrol(FAR struct uart_dev_s *uartdev,
        * RTS.
        */
 
-       priv ->rts = false;
+       priv->rts = false;
 
        /* Cancel any pending RX data reception work */
 
@@ -2667,7 +2668,7 @@ static bool usbhost_rxflowcontrol(FAR struct uart_dev_s *uartdev,
        * RTS.
        */
 
-       priv ->rts = true;
+       priv->rts = true;
 
       /* Restart RX data reception work flow unless RX reception is
        * disabled.

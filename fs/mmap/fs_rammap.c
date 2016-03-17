@@ -55,7 +55,7 @@
 #ifdef CONFIG_FS_RAMMAP
 
 /****************************************************************************
- * Global Data
+ * Public Data
  ****************************************************************************/
 
 /* This is the list of all mapped files */
@@ -63,7 +63,7 @@
 struct fs_allmaps_s g_rammaps;
 
 /****************************************************************************
- * Global Functions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -177,24 +177,24 @@ FAR void *rammap(int fd, size_t length, off_t offset)
       nread = read(fd, rdbuffer, length);
       if (nread < 0)
         {
-           /* Handle the special case where the read was interrupted by a
-            * signal.
-            */
+          /* Handle the special case where the read was interrupted by a
+           * signal.
+           */
 
-           err = get_errno();
-           if (err != EINTR)
-             {
-               /* All other read errors are bad.  errno is already set.
-                * (but maybe should be forced to EINVAL?).  NOTE that if
-                * FS DEBUG is enabled, then the following fdbg() macro will
-                * destroy the errno value.
-                */
+          err = get_errno();
+          if (err != EINTR)
+            {
+              /* All other read errors are bad.  errno is already set.
+               * (but maybe should be forced to EINVAL?).  NOTE that if
+               * FS DEBUG is enabled, then the following fdbg() macro will
+               * destroy the errno value.
+               */
 
-               fdbg("Read failed: offset=%d errno=%d\n", (int)offset, err);
+              fdbg("Read failed: offset=%d errno=%d\n", (int)offset, err);
 #ifdef CONFIG_DEBUG_FS
-               goto errout_with_region;
+              goto errout_with_region;
 #else
-               goto errout_with_errno;
+              goto errout_with_errno;
 #endif
              }
         }

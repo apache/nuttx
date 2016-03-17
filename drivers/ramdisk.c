@@ -441,10 +441,10 @@ static int rd_unlink(FAR struct inode *inode)
  ****************************************************************************/
 
 #ifdef CONFIG_FS_WRITABLE
-int ramdisk_register(int minor, uint8_t *buffer, uint32_t nsectors,
+int ramdisk_register(int minor, FAR uint8_t *buffer, uint32_t nsectors,
                      uint16_t sectsize, uint8_t rdflags)
 #else
-int romdisk_register(int minor, uint8_t *buffer, uint32_t nsectors,
+int romdisk_register(int minor, FAR const uint8_t *buffer, uint32_t nsectors,
                      uint16_t sectsize)
 #endif
 {

@@ -1,7 +1,7 @@
 /********************************************************************************
  * sched/timer/timer_settime.c
  *
- *   Copyright (C) 2007-2010, 2013-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2010, 2013-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,6 +44,9 @@
 #include <string.h>
 #include <errno.h>
 
+#include <nuttx/irq.h>
+#include <nuttx/signal.h>
+
 #include "clock/clock.h"
 #include "signal/signal.h"
 #include "timer/timer.h"
@@ -51,22 +54,10 @@
 #ifndef CONFIG_DISABLE_POSIX_TIMERS
 
 /********************************************************************************
- * Pre-processor Definitions
- ********************************************************************************/
-
-/********************************************************************************
- * Private Data
- ********************************************************************************/
-
-/********************************************************************************
- * Public Data
- ********************************************************************************/
-
-/********************************************************************************
  * Private Function Prototypes
  ********************************************************************************/
 
-static inline void timer_sigqueue(FAR struct posix_timer_s *timer);
+static inline void timer_signotify(FAR struct posix_timer_s *timer);
 static inline void timer_restart(FAR struct posix_timer_s *timer, wdparm_t itimer);
 static void timer_timeout(int argc, wdparm_t itimer);
 
@@ -75,7 +66,7 @@ static void timer_timeout(int argc, wdparm_t itimer);
  ********************************************************************************/
 
 /********************************************************************************
- * Name: timer_sigqueue
+ * Name: timer_signotify
  *
  * Description:
  *   This function basically reimplements sigqueue() so that the si_code can
@@ -92,27 +83,42 @@ static void timer_timeout(int argc, wdparm_t itimer);
  *
  ********************************************************************************/
 
-static inline void timer_sigqueue(FAR struct posix_timer_s *timer)
+static inline void timer_signotify(FAR struct posix_timer_s *timer)
 {
   siginfo_t info;
 
-  /* Create the siginfo structure */
+  /* Notify client via a signal? */
 
-  info.si_signo           = timer->pt_signo;
-  info.si_code            = SI_TIMER;
+  if (timer->pt_event.sigev_notify == SIGEV_SIGNAL)
+    {
+      /* Yes.. Create the siginfo structure */
+
+      info.si_signo           = timer->pt_event.sigev_signo;
+      info.si_code            = SI_TIMER;
+      info.si_errno           = OK;
 #ifdef CONFIG_CAN_PASS_STRUCTS
-  info.si_value           = timer->pt_value;
+      info.si_value           = timer->pt_event.sigev_value;
 #else
-  info.si_value.sival_ptr = timer->pt_value.sival_ptr;
+      info.si_value.sival_ptr = timer->pt_event.sigev_value.sival_ptr;
 #endif
 #ifdef CONFIG_SCHED_HAVE_PARENT
-  info.si_pid             = 0;  /* Not applicable */
-  info.si_status          = OK;
+      info.si_pid             = 0;  /* Not applicable */
+      info.si_status          = OK;
 #endif
 
-  /* Send the signal */
+      /* Send the signal */
 
-  (void)sig_dispatch(timer->pt_owner, &info);
+      DEBUGVERIFY(sig_dispatch(timer->pt_owner, &info));
+    }
+
+#ifdef CONFIG_SIG_EVTHREAD
+  /* Notify the client via a function call */
+
+  else if (timer->pt_event.sigev_notify == SIGEV_THREAD)
+    {
+      DEBUGVERIFY(sig_notification(timer->pt_owner, &timer->pt_event));
+    }
+#endif
 }
 
 /********************************************************************************
@@ -169,7 +175,7 @@ static void timer_timeout(int argc, wdparm_t itimer)
 {
 #ifndef CONFIG_CAN_PASS_STRUCTS
   /* On many small machines, pointers are encoded and cannot be simply cast from
-   * wdparm_t to struct tcb_s*.  The following union works around this (see wdogparm_t).
+   * wdparm_t to struct tcb_s *.  The following union works around this (see wdogparm_t).
    */
 
   union
@@ -186,7 +192,7 @@ static void timer_timeout(int argc, wdparm_t itimer)
    */
 
   u.timer->pt_crefs++;
-  timer_sigqueue(u.timer);
+  timer_signotify(u.timer);
 
   /* Release the reference.  timer_release will return nonzero if the timer
    * was not deleted.
@@ -194,7 +200,7 @@ static void timer_timeout(int argc, wdparm_t itimer)
 
   if (timer_release(u.timer))
     {
-      /* If this is a repetitive timer, the restart the watchdog */
+      /* If this is a repetitive timer, then restart the watchdog */
 
       timer_restart(u.timer, itimer);
     }
@@ -207,7 +213,7 @@ static void timer_timeout(int argc, wdparm_t itimer)
    */
 
   timer->pt_crefs++;
-  timer_sigqueue(timer);
+  timer_signotify(timer);
 
   /* Release the reference.  timer_release will return nonzero if the timer
    * was not deleted.
@@ -293,7 +299,7 @@ int timer_settime(timer_t timerid, int flags, FAR const struct itimerspec *value
                   FAR struct itimerspec *ovalue)
 {
   FAR struct posix_timer_s *timer = (FAR struct posix_timer_s *)timerid;
-  irqstate_t state;
+  irqstate_t intflags;
   int delay;
   int ret = OK;
 
@@ -333,7 +339,7 @@ int timer_settime(timer_t timerid, int flags, FAR const struct itimerspec *value
    * that the system timer is stable.
    */
 
-  state = irqsave();
+  intflags = enter_critical_section();
 
   /* Check if abstime is selected */
 
@@ -375,7 +381,7 @@ int timer_settime(timer_t timerid, int flags, FAR const struct itimerspec *value
                      1, (uint32_t)((wdparm_t)timer));
     }
 
-  irqrestore(state);
+  leave_critical_section(intflags);
   return ret;
 }
 

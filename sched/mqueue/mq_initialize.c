@@ -1,4 +1,4 @@
-/************************************************************************
+/****************************************************************************
  *  sched/mqueue/mq_initialize.c
  *
  *   Copyright (C) 2007, 2009, 2011 Gregory Nutt. All rights reserved.
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -45,13 +45,9 @@
 
 #include "mqueue/mqueue.h"
 
-/************************************************************************
- * Pre-processor Definitions
- ************************************************************************/
-
-/************************************************************************
+/****************************************************************************
  * Private Type Declarations
- ************************************************************************/
+ ****************************************************************************/
 
 /* This is a container for a list of message queue descriptors. */
 
@@ -61,9 +57,9 @@ struct mq_des_block_s
   struct mq_des mqdes[NUM_MSG_DESCRIPTORS];
 };
 
-/************************************************************************
- * Public Variables
- ************************************************************************/
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
 
 /* The g_msgfree is a list of messages that are available for general
  * use.  The number of messages in this list is a system configuration
@@ -85,9 +81,9 @@ sq_queue_t  g_msgfreeirq;
 
 sq_queue_t  g_desfree;
 
-/************************************************************************
- * Private Variables
- ************************************************************************/
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
 
 /* g_msgalloc is a pointer to the start of the allocated block of
  * messages.
@@ -105,11 +101,11 @@ static struct mqueue_msg_s  *g_msgfreeirqalloc;
 
 static sq_queue_t g_desalloc;
 
-/************************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************
+/****************************************************************************
  * Name: mq_msgblockalloc
  *
  * Description:
@@ -118,7 +114,7 @@ static sq_queue_t g_desalloc;
  * Inputs Parameters:
  *  queue
  *
- ************************************************************************/
+ ****************************************************************************/
 
 static struct mqueue_msg_s *
 mq_msgblockalloc(FAR sq_queue_t *queue, uint16_t nmsgs,
@@ -130,7 +126,7 @@ mq_msgblockalloc(FAR sq_queue_t *queue, uint16_t nmsgs,
    * configured number of messages.
    */
 
-  mqmsgblock = (FAR struct mqueue_msg_s*)
+  mqmsgblock = (FAR struct mqueue_msg_s *)
     kmm_malloc(sizeof(struct mqueue_msg_s) * nmsgs);
 
   if (mqmsgblock)
@@ -141,18 +137,18 @@ mq_msgblockalloc(FAR sq_queue_t *queue, uint16_t nmsgs,
       for (i = 0; i < nmsgs; i++)
         {
           mqmsg->type = alloc_type;
-          sq_addlast((FAR sq_entry_t*)mqmsg++, queue);
+          sq_addlast((FAR sq_entry_t *)mqmsg++, queue);
         }
     }
 
   return mqmsgblock;
 }
 
-/************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************
+/****************************************************************************
  * Name: mq_initialize
  *
  * Description:
@@ -166,7 +162,7 @@ mq_msgblockalloc(FAR sq_queue_t *queue, uint16_t nmsgs,
  * Return Value:
  *   None
  *
- ************************************************************************/
+ ****************************************************************************/
 
 void mq_initialize(void)
 {
@@ -195,7 +191,7 @@ void mq_initialize(void)
   mq_desblockalloc();
 }
 
-/************************************************************************
+/****************************************************************************
  * Name: mq_desblockalloc
  *
  * Description:
@@ -208,7 +204,7 @@ void mq_initialize(void)
  * Return Value:
  *   None
  *
- ************************************************************************/
+ ****************************************************************************/
 
 void mq_desblockalloc(void)
 {
@@ -225,13 +221,13 @@ void mq_desblockalloc(void)
        * we ever need to reclaim the memory.
        */
 
-      sq_addlast((FAR sq_entry_t*)&mqdesblock->queue, &g_desalloc);
+      sq_addlast((FAR sq_entry_t *)&mqdesblock->queue, &g_desalloc);
 
       /* Then add each message queue descriptor to the free list */
 
       for (i = 0; i < NUM_MSG_DESCRIPTORS; i++)
         {
-          sq_addlast((FAR sq_entry_t*)&mqdesblock->mqdes[i], &g_desfree);
+          sq_addlast((FAR sq_entry_t *)&mqdesblock->mqdes[i], &g_desfree);
         }
     }
 }

@@ -47,7 +47,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 
-#include "bch_internal.h"
+#include "bch.h"
 
 /****************************************************************************
  * Private Types

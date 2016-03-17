@@ -75,11 +75,11 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Private Variables
+ * Private Data
  ****************************************************************************/
 
 /****************************************************************************
- * Public Variables
+ * Public Data
  ****************************************************************************/
 
 /****************************************************************************
@@ -96,7 +96,7 @@ static void rwb_semtake(sem_t *sem)
 
   while (sem_wait(sem) != 0)
     {
-      /* The only case that an error should occr here is if
+      /* The only case that an error should occur here is if
        * the wait was awakened by a signal.
        */
 
@@ -117,8 +117,8 @@ static void rwb_semtake(sem_t *sem)
 static inline bool rwb_overlap(off_t blockstart1, size_t nblocks1,
                                off_t blockstart2, size_t nblocks2)
 {
-  off_t blockend1 = blockstart1 + nblocks1;
-  off_t blockend2 = blockstart2 + nblocks2;
+  off_t blockend1 = blockstart1 + nblocks1 - 1;
+  off_t blockend2 = blockstart2 + nblocks2 - 1;
 
   /* If the buffer 1 is wholly outside of buffer 2, return false */
 
@@ -257,7 +257,7 @@ static ssize_t rwb_writebuffer(FAR struct rwbuffer_s *rwb,
 
       /* Flush the write buffer */
 
-      ret = rwb->wrflush(rwb, rwb->wrbuffer, rwb->wrblockstart, rwb->wrnblocks);
+      ret = rwb->wrflush(rwb->dev, rwb->wrbuffer, rwb->wrblockstart, rwb->wrnblocks);
       if (ret < 0)
         {
           fdbg("ERROR: Error writing multiple from cache: %d\n", -ret);
@@ -561,7 +561,7 @@ int rwb_invalidate_readahead(FAR struct rwbuffer_s *rwb,
       rhbend = rwb->rhblockstart + rwb->rhnblocks;
       invend = startblock + blockcount;
 
-      if (rhbend <= startblock || rwb->rhblockstart >= invend )
+      if (rhbend <= startblock || rwb->rhblockstart >= invend)
         {
           ret = OK;
         }
@@ -640,7 +640,7 @@ int rwb_initialize(FAR struct rwbuffer_s *rwb)
   /* Setup so that rwb_uninitialize can handle a failure */
 
 #ifdef CONFIG_DRVR_WRITEBUFFER
-  DEBUGASSERT(rwb->wrflush!= NULL);
+  DEBUGASSERT(rwb->wrflush != NULL);
   rwb->wrbuffer = NULL;
 #endif
 #ifdef CONFIG_DRVR_READAHEAD
@@ -747,10 +747,10 @@ void rwb_uninitialize(FAR struct rwbuffer_s *rwb)
  * Name: rwb_read
  ****************************************************************************/
 
-int rwb_read(FAR struct rwbuffer_s *rwb, off_t startblock, uint32_t nblocks,
-             FAR uint8_t *rdbuffer)
+ssize_t rwb_read(FAR struct rwbuffer_s *rwb, off_t startblock,
+                 size_t nblocks, FAR uint8_t *rdbuffer)
 {
-  uint32_t remaining;
+  size_t remaining;
   int ret = OK;
 
   fvdbg("startblock=%ld nblocks=%ld rdbuffer=%p\n",
@@ -785,7 +785,7 @@ int rwb_read(FAR struct rwbuffer_s *rwb, off_t startblock, uint32_t nblocks,
       /* Loop until we have read all of the requested blocks */
 
       rwb_semtake(&rwb->rhsem);
-      for (remaining = nblocks; remaining > 0;)
+      for (remaining = nblocks; remaining > 0; )
         {
           /* Is there anything in the read-ahead buffer? */
 
@@ -822,7 +822,7 @@ int rwb_read(FAR struct rwbuffer_s *rwb, off_t startblock, uint32_t nblocks,
               if (ret < 0)
                 {
                   fdbg("ERROR: Failed to fill the read-ahead buffer: %d\n", ret);
-                  return ret;
+                  return (ssize_t)ret;
                 }
             }
         }
@@ -842,19 +842,19 @@ int rwb_read(FAR struct rwbuffer_s *rwb, off_t startblock, uint32_t nblocks,
        * the user buffer.
        */
 
-      ret = rwb->rhreload(rwb->dev, startblock, nblocks, rdbuffer);
+      ret = rwb->rhreload(rwb->dev, rdbuffer, startblock, nblocks);
     }
 #endif
 
-  return ret;
+  return (ssize_t)ret;
 }
 
 /****************************************************************************
  * Name: rwb_write
  ****************************************************************************/
 
-int rwb_write(FAR struct rwbuffer_s *rwb, off_t startblock,
-              size_t nblocks, FAR const uint8_t *wrbuffer)
+ssize_t rwb_write(FAR struct rwbuffer_s *rwb, off_t startblock,
+                  size_t nblocks, FAR const uint8_t *wrbuffer)
 {
   int ret = OK;
 
@@ -917,10 +917,9 @@ int rwb_write(FAR struct rwbuffer_s *rwb, off_t startblock,
 
       ret = rwb->wrflush(rwb->dev, wrbuffer, startblock, nblocks);
     }
-
 #endif
 
-  return ret;
+  return (ssize_t)ret;
 }
 
 /****************************************************************************

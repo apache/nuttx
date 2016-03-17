@@ -1,7 +1,7 @@
 ############################################################################
 # nxflat/Makefile
 #
-#   Copyright (C) 2007-2009, 2012-2014 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2007-2009, 2012-2015 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -46,7 +46,7 @@ CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" "$(TOPDIR)$(DELIM)sched"}
 BINFMT_ASRCS  =
 BINFMT_CSRCS  = binfmt_globals.c binfmt_register.c binfmt_unregister.c
 BINFMT_CSRCS += binfmt_loadmodule.c binfmt_unloadmodule.c binfmt_execmodule.c
-BINFMT_CSRCS += binfmt_exec.c binfmt_dumpmodule.c
+BINFMT_CSRCS += binfmt_exec.c binfmt_copyargv.c binfmt_dumpmodule.c
 
 ifeq ($(CONFIG_BINFMT_EXEPATH),y)
 BINFMT_CSRCS += binfmt_exepath.c
@@ -55,11 +55,6 @@ endif
 ifeq ($(CONFIG_SCHED_HAVE_PARENT),y)
 BINFMT_CSRCS += binfmt_schedunload.c
 endif
-
-# Symbol table source files
-
-BINFMT_CSRCS += symtab_findbyname.c symtab_findbyvalue.c
-BINFMT_CSRCS += symtab_findorderedbyname.c symtab_findorderedbyvalue.c
 
 ifeq ($(CONFIG_LIBC_EXECFUNCS),y)
 BINFMT_CSRCS += binfmt_execsymtab.c

@@ -110,7 +110,8 @@ static ssize_t skel_read(FAR struct file *filep, FAR char *buffer,
 static int     skel_dup(FAR const struct file *oldp,
                  FAR struct file *newp);
 
-static int     skel_opendir(const char *relpath, FAR struct fs_dirent_s *dir);
+static int     skel_opendir(FAR const char *relpath,
+                 FAR struct fs_dirent_s *dir);
 static int     skel_closedir(FAR struct fs_dirent_s *dir);
 static int     skel_readdir(FAR struct fs_dirent_s *dir);
 static int     skel_rewinddir(FAR struct fs_dirent_s *dir);
@@ -118,11 +119,11 @@ static int     skel_rewinddir(FAR struct fs_dirent_s *dir);
 static int     skel_stat(FAR const char *relpath, FAR struct stat *buf);
 
 /****************************************************************************
- * Private Variables
+ * Private Data
  ****************************************************************************/
 
 /****************************************************************************
- * Public Variables
+ * Public Data
  ****************************************************************************/
 
 /* See include/nutts/fs/procfs.h
@@ -158,7 +159,7 @@ const struct procfs_operations skel_procfsoperations =
  ****************************************************************************/
 
 static int skel_open(FAR struct file *filep, FAR const char *relpath,
-                      int oflags, mode_t mode)
+                     int oflags, mode_t mode)
 {
   FAR struct skel_file_s *priv;
 
@@ -177,7 +178,7 @@ static int skel_open(FAR struct file *filep, FAR const char *relpath,
       return -EACCES;
     }
 
-  /* Allocate a container to hold the task and attribute selection */
+  /* Allocate the open file structure */
 
   priv = (FAR struct skel_file_s *)kmm_zalloc(sizeof(struct skel_file_s));
   if (!priv)
@@ -189,7 +190,9 @@ static int skel_open(FAR struct file *filep, FAR const char *relpath,
   /* TODO: Initialize the context specific data here */
 
 
-  /* Save the index as the open-specific state in filep->f_priv */
+  /* Save the open file structure as the open-specific state in
+   * filep->f_priv.
+   */
 
   filep->f_priv = (FAR void *)priv;
   return OK;
@@ -220,7 +223,7 @@ static int skel_close(FAR struct file *filep)
  ****************************************************************************/
 
 static ssize_t skel_read(FAR struct file *filep, FAR char *buffer,
-                           size_t buflen)
+                         size_t buflen)
 {
   FAR struct skel_file_s *priv;
   ssize_t ret;
@@ -356,11 +359,12 @@ static int skel_closedir(FAR struct fs_dirent_s *dir)
  *
  ****************************************************************************/
 
-static int skel_readdir(struct fs_dirent_s *dir)
+static int skel_readdir(FAR struct fs_dirent_s *dir)
 {
   FAR struct skel_level1_s *level1;
   char  filename[16];
-  int ret, index;
+  int index;
+  int ret;
 
   DEBUGASSERT(dir && dir->u.procfs);
   level1 = dir->u.procfs;
@@ -396,12 +400,13 @@ static int skel_readdir(struct fs_dirent_s *dir)
       /* TODO:  Specify the type of entry */
 
       dir->fd_dir.d_type = DTYPE_FILE;
-      strncpy(dir->fd_dir.d_name, filename, NAME_MAX+1);
+      strncpy(dir->fd_dir.d_name, filename, NAME_MAX + 1);
 
       /* Set up the next directory entry offset.  NOTE that we could use the
        * standard f_pos instead of our own private index.
        */
 
+      level1->base.index = index + 1;
       ret = OK;
     }
 
@@ -415,7 +420,7 @@ static int skel_readdir(struct fs_dirent_s *dir)
  *
  ****************************************************************************/
 
-static int skel_rewinddir(struct fs_dirent_s *dir)
+static int skel_rewinddir(FAR struct fs_dirent_s *dir)
 {
   FAR struct skel_level1_s *priv;
 
@@ -433,7 +438,7 @@ static int skel_rewinddir(struct fs_dirent_s *dir)
  *
  ****************************************************************************/
 
-static int skel_stat(const char *relpath, struct stat *buf)
+static int skel_stat(FAR const char *relpath, FAR truct stat *buf)
 {
   int ret = -ENOENT;
 
@@ -441,7 +446,7 @@ static int skel_stat(const char *relpath, struct stat *buf)
    *        or a directory and set it's permissions.
    */
 
-  buf->st_mode = S_IFDIR|S_IROTH|S_IRGRP|S_IRUSR;
+  buf->st_mode = S_IFDIR | S_IROTH | S_IRGRP | S_IRUSR;
   ret = OK;
 
   /* File/directory size, access block size */

@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/iob/iob_free_qentry.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,28 +49,13 @@
 #include <semaphore.h>
 #include <assert.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/net/iob.h>
 
 #include "iob.h"
 
 #if CONFIG_IOB_NCHAINS > 0
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -95,14 +80,14 @@ FAR struct iob_qentry_s *iob_free_qentry(FAR struct iob_qentry_s *iobq)
    * measures to protect the free list:  We disable interrupts very briefly.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   iobq->qe_flink = g_iob_freeqlist;
   g_iob_freeqlist = iobq;
 
   /* Signal that an I/O buffer chain container is available */
 
   sem_post(&g_qentry_sem);
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   /* And return the I/O buffer chain container after the one that was freed */
 

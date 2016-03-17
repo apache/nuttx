@@ -45,12 +45,12 @@
 #include <unistd.h>
 #include <errno.h>
 
-#include "lib_internal.h"
+#include "libc.h"
 
 #if CONFIG_NFILE_DESCRIPTORS > 0 && !defined(CONFIG_DISABLE_ENVIRON)
 
 /****************************************************************************
- * Public Variables
+ * Public Data
  ****************************************************************************/
 
 /****************************************************************************
@@ -64,14 +64,14 @@
 #if 0
 static inline void _trimdir(char *path)
 {
- /* Skip any trailing '/' characters (unless it is also the leading '/') */
+  /* Skip any trailing '/' characters (unless it is also the leading '/') */
 
- int len = strlen(path) - 1;
- while (len > 0 && path[len] == '/')
-   {
+  int len = strlen(path) - 1;
+  while (len > 0 && path[len] == '/')
+    {
       path[len] = '\0';
       len--;
-   }
+    }
 }
 #else
 #  define _trimdir(p)

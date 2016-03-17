@@ -49,7 +49,7 @@
 
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 
 #include "netdev/netdev.h"
 #include "utils/utils.h"
@@ -170,10 +170,10 @@ void icmpv6_rwait_setup(FAR struct net_driver_s *dev,
 
   /* Add the wait structure to the list with interrupts disabled */
 
-  flags             = irqsave();
+  flags             = enter_critical_section();
   notify->rn_flink  = g_icmpv6_rwaiters;
   g_icmpv6_rwaiters  = notify;
-  irqrestore(flags);
+  leave_critical_section(flags);
 
 #else
   /* If there is only a single network device, then there can be only a
@@ -218,7 +218,7 @@ int icmpv6_rwait_cancel(FAR struct icmpv6_rnotify_s *notify)
    * head of the list).
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   for (prev = NULL, curr = g_icmpv6_rwaiters;
        curr && curr != notify;
        prev = curr, curr = curr->rn_flink);
@@ -238,7 +238,7 @@ int icmpv6_rwait_cancel(FAR struct icmpv6_rnotify_s *notify)
       ret = OK;
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   (void)sem_destroy(&notify->rn_sem);
   return ret;
 
@@ -282,7 +282,7 @@ int icmpv6_rwait(FAR struct icmpv6_rnotify_s *notify,
    * be re-enabled while we wait.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   DEBUGVERIFY(clock_gettime(CLOCK_REALTIME, &abstime));
 
   abstime.tv_sec  += timeout->tv_sec;
@@ -293,9 +293,9 @@ int icmpv6_rwait(FAR struct icmpv6_rnotify_s *notify,
       abstime.tv_nsec -= 1000000000;
     }
 
-   /* REVISIT:  If net_timedwait() is awakened with  signal, we will return
-    * the wrong error code.
-    */
+  /* REVISIT:  If net_timedwait() is awakened with  signal, we will return
+   * the wrong error code.
+   */
 
   (void)net_timedwait(&notify->rn_sem, &abstime);
   ret = notify->rn_result;
@@ -308,7 +308,7 @@ int icmpv6_rwait(FAR struct icmpv6_rnotify_s *notify,
 
   /* Re-enable interrupts and return the result of the wait */
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return ret;
 }
 

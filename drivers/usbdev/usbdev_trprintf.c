@@ -65,13 +65,13 @@
  * Private Functions
  ****************************************************************************/
 
-/*******************************************************************************
+/****************************************************************************
  * Name: get_trstring
  *
  * Description:
  *   Search the driver string data to find the string matching the provided ID.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_USBDEV_TRACE_STRINGS
 static FAR const char *get_trstring(FAR const struct trace_msg_t *array,
@@ -95,13 +95,13 @@ static FAR const char *get_trstring(FAR const struct trace_msg_t *array,
  * Public Functions
  ****************************************************************************/
 
-/*******************************************************************************
+/****************************************************************************
  * Name: usbtrace_trprintf
  *
  * Description:
  *   Print the trace record using the supplied printing function
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 void usbtrace_trprintf(trprintf_t trprintf, uint16_t event, uint16_t value)
 {

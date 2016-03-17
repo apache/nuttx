@@ -117,7 +117,7 @@ struct sigq_s
 typedef struct sigq_s sigq_t;
 
 /****************************************************************************
- * Global Variables
+ * Public Data
  ****************************************************************************/
 
 /* The g_sigfreeaction data structure is a list of available signal action
@@ -186,7 +186,7 @@ void               sig_release(FAR struct task_group_s *group);
 
 FAR sigq_t        *sig_allocatependingsigaction(void);
 void               sig_deliver(FAR struct tcb_s *stcb);
-FAR sigactq_t     *sig_findaction(FAR struct tcb_s *stcb, int signo);
+FAR sigactq_t     *sig_findaction(FAR struct task_group_s *group, int signo);
 int                sig_lowest(FAR sigset_t *set);
 #ifdef CONFIG_CAN_PASS_STRUCTS
 int                sig_mqnotempty(int tid, int signo, union sigval value);

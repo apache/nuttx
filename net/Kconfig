@@ -24,10 +24,12 @@ config NET_NOINTS
 	bool "Not interrupt driven"
 	default n
 	---help---
-		NET_NOINT indicates that uIP is not called from the interrupt level.
-		If NET_NOINTS is defined, critical sections will be managed with semaphores;
-		Otherwise, it assumed that uIP will be called from interrupt level handling
-		and critical sections will be managed by enabling and disabling interrupts.
+		NET_NOINT indicates that network layer is not called from the
+		interrupt level.  If NET_NOINTS is defined, critical sections
+		will be managed with semaphores; Otherwise, it assumed that
+		network layer will be called from interrupt level handling
+		and critical sections will be managed by enabling and disabling
+		interrupts.
 
 config NET_PROMISCUOUS
 	bool "Promiscuous mode"
@@ -42,12 +44,12 @@ config NET_MULTIBUFFER
 	bool "Use multiple device-side I/O buffers"
 	default n
 	---help---
-		Traditionally, uIP has used a single buffer for all incoming and
-		outgoing traffic.  If this configuration is selected, then the
-		driver can manage multiple I/O buffers and can, for example,
-		be filling one input buffer while sending another output buffer.
-		Or, as another example, the driver may support queuing of concurrent
-		input/ouput and output transfers for better performance.
+		Traditionally, the uIP stacl has used a single buffer for all
+		incoming and outgoing traffic.  If this configuration is selected,
+		then the driver can manage multiple I/O buffers and can, for
+		example, be filling one input buffer while sending another output
+		buffer.  Or, as another example, the driver may support queuing of
+		concurrent input/ouput and output transfers for better performance.
 
 config NET_ETH_MTU
 	int "Ethernet packet buffer size (MTU)"
@@ -85,12 +87,25 @@ config NET_SLIP_MTU
 	depends on NET_SLIP
 	range 296 1518
 	---help---
-		Packet buffer size.  This size includes the TCP/UDP payload plus the
-		size of TCP/UDP header and the IP header.  This value is normally
-		referred to as the MTU (Maximum Transmission Unit); the payload
-		payload is the MSS (Maximum Segment Size).  SLIP is required to
-		support at lest 256+20+20 = 296.  Values other than 296 are not
-		recommended.
+		Provides the size of the SLIP packet buffers.  This size includes
+		the TCP/UDP payload plus the size of TCP/UDP header and the IP header.
+		This value is normally referred to as the MTU (Maximum Transmission Unit);
+		the payload payload is the MSS (Maximum Segment Size).
+
+		SLIP is required to support at lest 256+20+20 = 296.  Values other than
+		296 are not recommended.
+
+		The Linux slip module hard-codes its MTU size to 296 (40 bytes for
+		the IP+TPC headers plus 256 bytes of data).  So you might as well
+		set CONFIG_NET_SLIP_MTU to 296 as well.
+
+		There may be an issue with this setting, however.  I see that Linux
+		uses a MTU of 296 and window of 256, but actually only sends 168
+		bytes of data: 40 + 128.  I believe that is to allow for the 2x
+		worst cast packet expansion.  Ideally we would like to advertise the
+		256 MSS, but restrict transfers to 128 bytes (possibly by modifying
+		the MSS value in the TCP connection structure).
+
 
 config NET_SLIP_TCP_RECVWNDO
 	int "SLIP TCP receive window size"
@@ -143,28 +158,38 @@ config NET_ETHERNET
 	bool "Ethernet support"
 	default y if !NET_SLIP
 	default n if NET_SLIP
-	select NETDEV_MULTINIC if NET_SLIP
-	select NET_MULTILINK if NET_SLIP
+	select NETDEV_MULTINIC if NET_LOOPBACK || NET_SLIP || NET_TUN
+	select NET_MULTILINK if NET_LOOPBACK || NET_SLIP || NET_TUN
 	---help---
 		If NET_SLIP is not selected, then Ethernet will be used (there is
 		no need to define anything special in the configuration file to use
 		Ethernet -- it is the default).
 
+config NET_LOOPBACK
+	bool "Local loopback"
+	default n
+	select NETDEV_MULTINIC if NET_ETHERNET || NET_SLIP || NET_TUN
+	select NET_MULTILINK if NET_ETHERNET || NET_SLIP || NET_TUN
+	---help---
+		Add support for the local network loopback device, lo.  Any additional
+		networking devices that are enabled must be compatible with
+		CONFIG_NET_NOINTS.
+
 config NET_SLIP
 	bool "SLIP support"
 	default n
-	select NETDEV_MULTINIC if NET_ETHERNET
-	select NET_MULTILINK if NET_ETHERNET
+	select NETDEV_MULTINIC if NET_ETHERNET || NET_LOOPBACK || NET_TUN
+	select NET_MULTILINK if NET_ETHERNET || NET_LOOPBACK || NET_TUN
 	---help---
 		Enables building of the SLIP driver. SLIP requires
 		at least one IP protocol selected and the following additional
 		network settings: NET_NOINTS and NET_MULTIBUFFER.
 
 		SLIP supports point-to-point IP communications over a serial port.
-		The default data link layer for uIP is Ethernet. If NET_SLIP is
-		defined in the NuttX configuration file, then SLIP will be supported.
-		The basic differences between the SLIP and Ethernet configurations is
-		that when SLIP is selected:
+		The default data link layer for network layer is Ethernet. If
+		NET_SLIP is defined in the NuttX configuration file, then SLIP will
+		be supported.  The basic differences between the SLIP and Ethernet
+		configurations is that when SLIP is selected:
 
 			* The link level header (that comes before the IP header) is omitted.
 			* All MAC address processing is suppressed.
@@ -201,6 +226,9 @@ endif # NET_SLIP
 config NET_TUN
 	bool "TUN Virtual Network Device support"
 	default n
+	select NETDEV_MULTINIC if NET_ETHERNET || NET_LOOPBACK || NET_SLIP
+	select NET_MULTILINK if NET_ETHERNET || NET_LOOPBACK || NET_SLIP
+	select ARCH_HAVE_NETDEV_STATISTICS
 
 if NET_TUN
 
@@ -227,13 +255,15 @@ config NET_IPv4
 	---help---
 		Build in support for IPv4.
 
-config NET_IPv6
+menuconfig NET_IPv6
 	bool "IPv6"
 	default n
 	---help---
 		Build in support for IPv6.
 
 source "net/neighbor/Kconfig"
+source "net/6lowpan/Kconfig"
+
 endmenu # Internet Protocol Selection
 
 source "net/socket/Kconfig"
@@ -245,14 +275,16 @@ source "net/icmp/Kconfig"
 source "net/icmpv6/Kconfig"
 source "net/igmp/Kconfig"
 source "net/arp/Kconfig"
+source "net/loopback/Kconfig"
 source "net/iob/Kconfig"
+source "net/procfs/Kconfig"
 source "net/utils/Kconfig"
 
 config NET_STATISTICS
 	bool "Collect network statistics"
 	default n
 	---help---
-		uIP statistics on or off
+		Network layer statistics on or off
 
 source "net/route/Kconfig"
 

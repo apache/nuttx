@@ -269,13 +269,18 @@
  *    slave device and the SPI slave controller hardware.  This interface
  *    is implemented by the SPI slave device controller lower-half driver
  *    and is provided to the the SPI slave device driver when that driver
- *    is initialized.  That SPI slave device initialization function has
- *    the prototype:
+ *    is initialized.  That SPI slave device initialization function is
+ *    unique to the SPI slave implementation.  The prototype is probably
+ *    something like:
  *
- *      FAR struct spi_sctrlr_s *up_spi_slave_initialize(int port);
+ *      FAR struct spi_sctrlr_s *xyz_spi_slave_initialize(int port);
  *
  *    Given an SPI port number, this function returns an instance of the
  *    SPI slave controller interface.
+ *
+ *    The actual prototype and more detailed usage instructions should
+ *    appear in a header file associated with the specific SPI slave
+ *    implementation.
  *
  * 2) struct spi_sdev_s:  Defines the second interface between the SPI
  *    slave device and the SPI slave controller hardware.  This interface
@@ -387,7 +392,44 @@
  *    upon it.
  *
  * A typical DMA data transfer processes as follows:
- * To be provided
+ * To be provided -- I do not have a design in mind to support DMA on the
+ * Slave side.  The design might be very complex because:
+ *
+ * 1) You need DMA buffers of fixed size, but you cannot know the size of a
+ *    transfer in advance, it could be much larger than your buffer or much
+ *    smaller.  The DMA would fail in either case.
+ *
+ * 2) You cannot setup the DMA before the transfer.  In most SPI protocols,
+ *    the first word send is a command to read or write something following
+ *    by a sequence of transfers to implement the write.  So you have very,
+ *    very limited time window to setup the correct DMA to respond to the
+ *    command.  I am not certain that it can be done reliably.
+ *
+ *    Inserting dummy words into the protocol between the first command word
+ *    and the remaining data transfer could allow time to set up the DMA.
+ *
+ * 3) I mentioned that you do not know the size of the transfer in advance.
+ *    If you set up the DMA to terminate to soon, then you lose the last part
+ *    of the transfer.  If you set the DMA up to be too large, then you will
+ *    get no indication when the transfer completes.
+ *
+ *    The chip select going high would be one possibility to detect the end
+ *    of a transfer.  You could cancel a DMA in progress if the CS changes,
+ *    but I do not know if that would work.  If there is only one device on
+ *    the SPI bus, then most board designs will save a pin and simply tie CS
+ *    to ground.  So the CS is not always a reliable indicator of when the
+ *    transfer completes.
+ *
+ * 4) The option is to use a timer but that would really slow down the
+ *    transfers if each DMA has to end with a timeout.  It would be faster
+ *    non-DMA transfers.
+ *
+ *    If the device as a very restricted protocol, like just register reads
+ *    and writes, then it might possible to implement DMA.  However, that
+ *    solution would not be general and probably not an appropriate part of
+ *    a general OS.  But if the interface is unpredictable, such as reading/
+ *    variable amounts of data from FLASH, there is more risk.  A general
+ *    solution might not be possible.
  */
 
 enum spi_smode_e
@@ -466,23 +508,6 @@ extern "C"
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: up_spi_slave_initialize
- *
- * Description:
- *   Initialize the selected SPI port in slave mode.
- *
- * Input Parameter:
- *   port - Chip select number identifying the "logical" SPI port.  Includes
- *          encoded port and chip select information.
- *
- * Returned Value:
- *   Valid SPI device structure reference on success; a NULL on failure
- *
- ****************************************************************************/
-
-FAR struct spi_sctrlr_s *up_spi_slave_initialize(int port);
 
 #undef EXTERN
 #if defined(__cplusplus)

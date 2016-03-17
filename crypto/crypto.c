@@ -77,7 +77,7 @@ int up_cryptoinitialize(void)
     }
 #endif
 
-#if CONFIG_CRYPTO_ALGTEST
+#ifdef CONFIG_CRYPTO_ALGTEST
   res = crypto_test();
   if (res)
     {

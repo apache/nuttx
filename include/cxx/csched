@@ -64,11 +64,6 @@ namespace std
   using ::sched_lock;
   using ::sched_unlock;
   using ::sched_lockcount;
-#ifdef CONFIG_SCHED_INSTRUMENTATION
-  using ::sched_note_start;
-  using ::sched_note_stop;
-  using ::sched_note_switch;
-#endif
 }
 
 #endif // __INCLUDE_CXX_CSCHED

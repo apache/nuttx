@@ -42,7 +42,7 @@
 #include <stdarg.h>
 #include <debug.h>
 
-#include "lib_internal.h"
+#include "libc.h"
 
 #ifndef CONFIG_CPP_HAVE_VARARGS
 

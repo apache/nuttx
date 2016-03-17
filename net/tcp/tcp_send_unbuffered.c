@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/tcp/tcp_send_unbuffered.c
  *
- *   Copyright (C) 2007-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -103,7 +103,7 @@ struct send_s
   uint32_t                snd_isn;     /* Initial sequence number */
   uint32_t                snd_acked;   /* The number of bytes acked */
 #ifdef CONFIG_NET_SOCKOPTS
-  uint32_t                snd_time;    /* Last send time for determining timeout */
+  systime_t               snd_time;    /* Last send time for determining timeout */
 #endif
 #if defined(CONFIG_NET_TCP_SPLIT)
   bool                    snd_odd;     /* True: Odd packet in pair transaction */
@@ -260,7 +260,7 @@ static inline bool psock_send_addrchck(FAR struct tcp_conn_s *conn)
 }
 
 #else /* CONFIG_NET_ETHERNET */
-#  psock_send_addrchck(r) (true)
+#  define  psock_send_addrchck(r) (true)
 #endif /* CONFIG_NET_ETHERNET */
 
 /****************************************************************************
@@ -289,6 +289,18 @@ static uint16_t tcpsend_interrupt(FAR struct net_driver_s *dev,
 {
   FAR struct tcp_conn_s *conn = (FAR struct tcp_conn_s *)pvconn;
   FAR struct send_s *pstate = (FAR struct send_s *)pvpriv;
+
+#ifdef CONFIG_NETDEV_MULTINIC
+  /* The TCP socket is connected and, hence, should be bound to a device.
+   * Make sure that the polling device is the own that we are bound to.
+   */
+
+  DEBUGASSERT(conn->dev != NULL);
+  if (dev != conn->dev)
+    {
+      return flags;
+    }
+#endif
 
   nllvdbg("flags: %04x acked: %d sent: %d\n",
           flags, pstate->snd_acked, pstate->snd_sent);
@@ -374,7 +386,7 @@ static uint16_t tcpsend_interrupt(FAR struct net_driver_s *dev,
       /* Fall through to re-send data from the last that was ACKed */
     }
 
- /* Check for a loss of connection */
+  /* Check for a loss of connection */
 
   else if ((flags & TCP_DISCONN_EVENTS) != 0)
     {
@@ -387,17 +399,17 @@ static uint16_t tcpsend_interrupt(FAR struct net_driver_s *dev,
       goto end_wait;
     }
 
-   /* Check if the outgoing packet is available (it may have been claimed
-    * by a sendto interrupt serving a different thread).
-    */
+  /* Check if the outgoing packet is available (it may have been claimed
+   * by a sendto interrupt serving a different thread).
+   */
 
 #if 0 /* We can't really support multiple senders on the same TCP socket */
-   else if (dev->d_sndlen > 0)
-     {
-       /* Another thread has beat us sending data, wait for the next poll */
+  else if (dev->d_sndlen > 0)
+    {
+      /* Another thread has beat us sending data, wait for the next poll */
 
-         return flags;
-      }
+      return flags;
+    }
 #endif
 
   /* We get here if (1) not all of the data has been ACKed, (2) we have been
@@ -442,12 +454,12 @@ static uint16_t tcpsend_interrupt(FAR struct net_driver_s *dev,
       if (sndlen >= CONFIG_NET_TCP_SPLIT_SIZE)
         {
           /* sndlen is the number of bytes remaining to be sent.
-           * tcp_mss(conn) will return the number of bytes that can sent
+           * conn->mss will provide the number of bytes that can sent
            * in one packet.  The difference, then, is the number of bytes
            * that would be sent in the next packet after this one.
            */
 
-          int32_t next_sndlen = sndlen - tcp_mss(conn);
+          int32_t next_sndlen = sndlen - conn->mss;
 
           /*  Is this the even packet in the packet pair transaction? */
 
@@ -474,13 +486,13 @@ static uint16_t tcpsend_interrupt(FAR struct net_driver_s *dev,
             {
               /* Will there be another (even) packet afer this one?
                * (next_sndlen > 0)  Will the split condition occur on that
-               * next, even packet? ((next_sndlen - tcp_mss(conn)) < 0) If
+               * next, even packet? ((next_sndlen - conn->mss) < 0) If
                * so, then perform the split now to avoid the case where the
                * byte count is less than CONFIG_NET_TCP_SPLIT_SIZE on the
                * next pair.
                */
 
-              if (next_sndlen > 0 && (next_sndlen - tcp_mss(conn)) < 0)
+              if (next_sndlen > 0 && (next_sndlen - conn->mss) < 0)
                 {
                   /* Here, we know that sndlen must be MSS < sndlen <= 2*MSS
                    * and so (sndlen / 2) is <= MSS.
@@ -497,9 +509,9 @@ static uint16_t tcpsend_interrupt(FAR struct net_driver_s *dev,
 
 #endif /* CONFIG_NET_TCP_SPLIT */
 
-      if (sndlen > tcp_mss(conn))
+      if (sndlen > conn->mss)
         {
-          sndlen = tcp_mss(conn);
+          sndlen = conn->mss;
         }
 
       /* Check if we have "space" in the window */
@@ -866,6 +878,32 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
 errout:
   set_errno(err);
   return ERROR;
+}
+
+/****************************************************************************
+ * Function: psock_tcp_cansend
+ *
+ * Description:
+ *   psock_tcp_cansend() returns a value indicating if a write to the socket
+ *   would block.  It is still possible that the write may block if another
+ *   write occurs first.
+ *
+ * Parameters:
+ *   psock    An instance of the internal socket structure.
+ *
+ * Returned Value:
+ *   OK (Function not implemented).
+ *
+ * Assumptions:
+ *   None
+ *
+ ****************************************************************************/
+
+int psock_tcp_cansend(FAR struct socket *psock)
+{
+  /* TODO: return OK unless someone is waiting for a packet to send */
+
+  return OK;
 }
 
 #endif /* CONFIG_NET && CONFIG_NET_TCP && !CONFIG_NET_TCP_WRITE_BUFFERS */

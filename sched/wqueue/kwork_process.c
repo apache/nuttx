@@ -1,7 +1,7 @@
 /****************************************************************************
  * libc/wqueue/work_process.c
  *
- *   Copyright (C) 2009-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,10 +45,9 @@
 #include <assert.h>
 #include <queue.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/clock.h>
 #include <nuttx/wqueue.h>
-
-#include <arch/irq.h>
 
 #include "wqueue/wqueue.h"
 
@@ -73,22 +72,6 @@
 #endif
 
 /****************************************************************************
- * Private Type Declarations
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -109,24 +92,24 @@
  *
  ****************************************************************************/
 
-void work_process(FAR struct kwork_wqueue_s *wqueue, uint32_t period, int wndx)
+void work_process(FAR struct kwork_wqueue_s *wqueue, systime_t period, int wndx)
 {
   volatile FAR struct work_s *work;
   worker_t  worker;
   irqstate_t flags;
   FAR void *arg;
-  uint32_t elapsed;
-  uint32_t remaining;
-  uint32_t stick;
-  uint32_t ctick;
-  uint32_t next;
+  systime_t elapsed;
+  systime_t remaining;
+  systime_t stick;
+  systime_t ctick;
+  systime_t next;
 
   /* Then process queued work.  We need to keep interrupts disabled while
    * we process items in the work list.
    */
 
   next  = period;
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Get the time that we started this polling cycle in clock ticks. */
 
@@ -178,7 +161,7 @@ void work_process(FAR struct kwork_wqueue_s *wqueue, uint32_t period, int wndx)
                * performed... we don't have any idea how long this will take!
                */
 
-              irqrestore(flags);
+              leave_critical_section(flags);
               worker(arg);
 
               /* Now, unfortunately, since we re-enabled interrupts we don't
@@ -186,7 +169,7 @@ void work_process(FAR struct kwork_wqueue_s *wqueue, uint32_t period, int wndx)
                * back at the head of the list.
                */
 
-              flags = irqsave();
+              flags = enter_critical_section();
               work  = (FAR struct work_s *)wqueue->q.head;
             }
           else
@@ -239,20 +222,20 @@ void work_process(FAR struct kwork_wqueue_s *wqueue, uint32_t period, int wndx)
    * period will be non-zero and equal to wqueue->delay.
    */
 
-   if (period == 0)
-     {
-       sigset_t set;
+  if (period == 0)
+    {
+      sigset_t set;
 
-       /* Wait indefinitely until signalled with SIGWORK */
+      /* Wait indefinitely until signalled with SIGWORK */
 
-       sigemptyset(&set);
-       sigaddset(&set, SIGWORK);
+      sigemptyset(&set);
+      sigaddset(&set, SIGWORK);
 
-       wqueue->worker[wndx].busy = false;
-       DEBUGVERIFY(sigwaitinfo(&set, NULL));
+      wqueue->worker[wndx].busy = false;
+      DEBUGVERIFY(sigwaitinfo(&set, NULL));
        wqueue->worker[wndx].busy = true;
-     }
-   else
+    }
+  else
 #endif
     {
       /* Get the delay (in clock ticks) since we started the sampling */
@@ -280,7 +263,7 @@ void work_process(FAR struct kwork_wqueue_s *wqueue, uint32_t period, int wndx)
         }
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 #endif /* CONFIG_SCHED_WORKQUEUE */

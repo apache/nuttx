@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/wqueue/kwork_cancel.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,28 +43,13 @@
 #include <assert.h>
 #include <errno.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/wqueue.h>
 
 #include "wqueue/wqueue.h"
 
 #ifdef CONFIG_SCHED_WORKQUEUE
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Type Declarations
- ****************************************************************************/
-
-/****************************************************************************
- * Public Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Variables
- ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
@@ -104,16 +89,18 @@ static int work_qcancel(FAR struct kwork_wqueue_s *wqueue,
    * new work is typically added to the work queue from interrupt handlers.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   if (work->worker != NULL)
     {
       /* A little test of the integrity of the work queue */
 
-      DEBUGASSERT(work->dq.flink || (FAR dq_entry_t *)work == wqueue->q.tail);
-      DEBUGASSERT(work->dq.blink || (FAR dq_entry_t *)work == wqueue->q.head);
+      DEBUGASSERT(work->dq.flink != NULL ||
+                  (FAR dq_entry_t *)work == wqueue->q.tail);
+      DEBUGASSERT(work->dq.blink != NULL ||
+                  (FAR dq_entry_t *)work == wqueue->q.head);
 
       /* Remove the entry from the work queue and make sure that it is
-       * mark as available (i.e., the worker field is nullified).
+       * marked as available (i.e., the worker field is nullified).
        */
 
       dq_rem((FAR dq_entry_t *)work, &wqueue->q);
@@ -121,7 +108,7 @@ static int work_qcancel(FAR struct kwork_wqueue_s *wqueue,
       ret = OK;
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return ret;
 }
 

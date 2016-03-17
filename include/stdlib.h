@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/stdlib.h
  *
- *   Copyright (C) 2007-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -76,7 +76,7 @@
  */
 
 #ifndef CONFIG_DISABLE_ENVIRON
-# define environ get_environ_ptr()
+#  define environ get_environ_ptr()
 #endif
 
 /****************************************************************************
@@ -94,6 +94,36 @@ struct mallinfo
   int fordblks; /* This is the total size of memory occupied
                  * by free (not in use) chunks.*/
 };
+
+/* Structure type returned by the div() function. */
+
+struct div_s
+{
+  int quot;     /* Quotient */
+  int rem;      /* Remainder */
+};
+
+typedef struct div_s div_t;
+
+/* Structure type returned by the ldiv() function. */
+
+struct ldiv_s
+{
+  long quot;    /* Quotient */
+  long rem;     /* Remainder */
+};
+
+typedef struct ldiv_s ldiv_t;
+
+/* Structure type returned by the lldiv() function. */
+
+struct lldiv_s
+{
+  long quot;    /* Quotient */
+  long rem;     /* Remainder */
+};
+
+typedef struct lldiv_s lldiv_t;
 
 /****************************************************************************
  * Public Function Prototypes
@@ -116,12 +146,12 @@ int       rand(void);
 /* Environment variable support */
 
 #ifndef CONFIG_DISABLE_ENVIRON
-FAR char **get_environ_ptr( void );
+FAR char **get_environ_ptr(void);
 FAR char *getenv(FAR const char *name);
 int       putenv(FAR const char *string);
 int       clearenv(void);
-int       setenv(const char *name, const char *value, int overwrite);
-int       unsetenv(const char *name);
+int       setenv(FAR const char *name, FAR const char *value, int overwrite);
+int       unsetenv(FAR const char *name);
 #endif
 
 /* Process exit functions */
@@ -142,15 +172,16 @@ void      _exit(int status); /* See unistd.h */
 
 /* String to binary conversions */
 
-long      strtol(const char *, char **, int);
-unsigned long strtoul(const char *, char **, int);
+long      strtol(FAR const char *nptr, FAR char **endptr, int base);
+unsigned long strtoul(FAR const char *nptr, FAR char **endptr, int base);
 #ifdef CONFIG_HAVE_LONG_LONG
-long long strtoll(const char *, char **, int);
-unsigned long long strtoull(const char *, char **, int);
+long long strtoll(FAR const char *nptr, FAR char **endptr, int base);
+unsigned long long strtoull(FAR const char *nptr, FAR char **endptr,
+                            int base);
 #endif
-double_t  strtod(const char *, char **);
+double_t  strtod(FAR const char *str, FAR char **endptr);
 
-#define atoi(nptr)  strtol((nptr), NULL, 10)
+#define atoi(nptr)  ((int)strtol((nptr), NULL, 10))
 #define atol(nptr)  strtol((nptr), NULL, 10)
 #ifdef CONFIG_HAVE_LONG_LONG
 #define atoll(nptr) strtoll((nptr), NULL, 10)
@@ -159,37 +190,54 @@ double_t  strtod(const char *, char **);
 
 /* Binary to string conversions */
 
-char     *itoa(int value, char *str, int base);
+FAR char *itoa(int val, FAR char *str, int base);
 
 /* Memory Management */
 
 FAR void *malloc(size_t);
-void      free(FAR void*);
-FAR void *realloc(FAR void*, size_t);
+void      free(FAR void *);
+FAR void *realloc(FAR void *, size_t);
 FAR void *memalign(size_t, size_t);
 FAR void *zalloc(size_t);
 FAR void *calloc(size_t, size_t);
 
-/* Misc */
+#ifdef CONFIG_CAN_PASS_STRUCTS
+struct mallinfo mallinfo(void);
+#else
+int      mallinfo(FAR struct mallinfo *info);
+#endif
+
+/* Arithmetic */
 
 int      abs(int j);
 long int labs(long int j);
 #ifdef CONFIG_HAVE_LONG_LONG
 long long int llabs(long long int j);
 #endif
+
+#ifdef CONFIG_CAN_PASS_STRUCTS
+div_t    div(int numer, int denom);
+ldiv_t   ldiv(long numer, long denom);
+#ifdef CONFIG_HAVE_LONG_LONG
+lldiv_t  lldiv(long long numer, long long denom);
+#endif
+#endif
+
+/* Temporary files */
+
 int      mktemp(FAR char *path_template);
 int      mkstemp(FAR char *path_template);
 
 /* Sorting */
 
-void     qsort(FAR void *base, size_t nmemb, size_t size,
-               int (*compar)(FAR const void *, FAR const void *));
+void     qsort(FAR void *base, size_t nel, size_t width,
+               CODE int (*compar)(FAR const void *, FAR const void *));
 
-#ifdef CONFIG_CAN_PASS_STRUCTS
-struct mallinfo mallinfo(void);
-#else
-int      mallinfo(struct mallinfo *info);
-#endif
+/* Binary search */
+
+FAR void *bsearch(FAR const void *key, FAR const void *base, size_t nel,
+                  size_t width, CODE int (*compar)(FAR const void *,
+                  FAR const void *));
 
 #undef EXTERN
 #if defined(__cplusplus)

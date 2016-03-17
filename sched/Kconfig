@@ -147,7 +147,7 @@ config SYSTEM_TIME64
 		USEC_PER_TICK, typically at 100Hz. The count at any given time is
 		then the "uptime" in units of system timer ticks.  By default, the
 		system time is 32-bits wide.  Those defaults provide a range of about
-		13.6 years which is probably a sufficient range for "uptime".
+		497 days which is probably a sufficient range for "uptime".
 
 		However, if the system timer rate is significantly higher than 100Hz
 		and/or if a very long "uptime" is required, then this option can be
@@ -228,6 +228,44 @@ config PREALLOC_TIMERS
 endmenu # Clocks and Timers
 
 menu "Tasks and Scheduling"
+
+config SPINLOCK
+	bool "Support Spinlocks"
+	default n
+	depends on EXPERIMENTAL
+	---help---
+		Enables suppport for spinlocks.  Spinlocks are current used only for
+		SMP suppport.
+
+config SMP
+	bool "Symmetric Multi-Processing (SMP)"
+	default n
+	depends on ARCH_HAVE_MULTICPU && EXPERIMENTAL
+	select SPINLOCK
+	---help---
+		Enables support for Symmetric Multi-Processing (SMP) on a multi-CPU
+		platform.
+
+if SMP
+
+config SMP_NCPUS
+	int "Number of CPUs"
+	default 4
+	range 2 32
+	---help---
+		This value identifies the number of CPUs supported by the processor
+		that will be used for SMP.
+
+config SMP_IDLETHREAD_STACKSIZE
+	int "CPU IDLE stack size"
+	default 2048
+	---help---
+		Each CPU will have its own IDLE task.  System initialization occurs
+		on CPU0 and uses CONFIG_IDLETHREAD_STACKSIZE which will probably be
+		larger than is generally needed.  This setting provides the stack
+		size for the IDLE task on CPUS 1 through (CONFIG_SMP_NCPUS-1).
+
+endif # SMP
 
 choice
 	prompt "Initialization Task"
@@ -332,10 +370,10 @@ config SPORADIC_INSTRUMENTATION
 		scheduler behavior. If enabled, then the board-specific logic must
 		provide the following functions:
 
-		void arch_sporadic_start(FAR struct tcb_s *tcb);
-		void arch_sporadic_lowpriority(FAR struct tcb_s *tcb);
-		void arch_sporadic_suspend(FAR struct tcb_s *tcb);
-		void arch_sporadic_resume(FAR struct tcb_s *tcb);
+			void arch_sporadic_start(FAR struct tcb_s *tcb);
+			void arch_sporadic_lowpriority(FAR struct tcb_s *tcb);
+			void arch_sporadic_suspend(FAR struct tcb_s *tcb);
+			void arch_sporadic_resume(FAR struct tcb_s *tcb);
 
 endif # SCHED_SPORADIC
 
@@ -500,6 +538,11 @@ config SCHED_CPULOAD
 		The statistics collected in this could be used, for example in the
 		PROCFS file system to provide CPU load measurements when read.
 
+		Note that in tickless mode of operation (SCHED_TICKLESS) there is
+		no system timer interrupt and CPU load measurements will not be
+		possible unless you provide an alternative clock to driver the
+		sampling and select SCHED_CPULOAD_EXTCLK.
+
 if SCHED_CPULOAD
 
 config SCHED_CPULOAD_EXTCLK
@@ -558,10 +601,72 @@ config SCHED_INSTRUMENTATION
 		If enabled, then the board-specific logic must provide the following
 		functions (see include/sched.h):
 
-		void sched_note_start(FAR struct tcb_s *tcb);
-		void sched_note_stop(FAR struct tcb_s *tcb);
-		void sched_note_switch(FAR struct tcb_s *pFromTcb, FAR struct tcb_s *pToTcb);
+			void sched_note_start(FAR struct tcb_s *tcb);
+			void sched_note_stop(FAR struct tcb_s *tcb);
+			void sched_note_switch(FAR struct tcb_s *pFromTcb, FAR struct tcb_s *pToTcb);
 
+		NOTE: These are internal OS interfaces and are called at at very
+		critical locations in the OS. There is very little that can be
+		done in these interfaces.  For example, normal devices may not be
+		used; syslog output cannot be performed.
+
+		An option is to use SCHED_INSTRUMENTATION_BUFFER below.
+
+if SCHED_INSTRUMENTATION
+
+config SCHED_INSTRUMENTATION_PREEMPTION
+	bool "Preemption monitor hooks"
+	default n
+	---help---
+		Enables additional hooks for changes to pre-emption state.  Board-
+		specific logic must provide this additional logic.
+
+			void sched_note_premption(FAR struct tcb_s *tcb, bool state);
+
+config SCHED_INSTRUMENTATION_CSECTION
+	bool "Critical section monitor hooks"
+	default n
+	depends on SMP
+	---help---
+		Enables additional hooks for entry and exit from critical sections.
+		Interrupts are disabled while within a critical section.  Board-
+		specific logic must provide this additional logic.
+
+			void sched_note_csection(FAR struct tcb_s *tcb, bool state);
+
+config SCHED_INSTRUMENTATION_BUFFER
+	bool "Buffer instrumentation data in memory"
+	default n
+	---help---
+		If this option is selected, then in-memory buffering logic is
+		enabled to capature scheduler instrumentation data.  This has
+		the advantage that (1) the platform logic does not have to provide
+		the sched_note_* interaces described for the previous settings.
+		Instead, the buffering logic catches all of these.  It encodes
+		timestamps the scheduler note and adds the note to an in-memory,
+		circular buffer.  And (2) buffering the scheduler instrumentation
+		data (versus performing some output operation) minimizes the impact
+		of the instrumentation on the behavior of the system.
+
+		If the in-memory buffer becomes full, then older notes are
+		overwritten by newer notes.  The following interface is provided:
+
+			ssize_t sched_note_get(FAR uint8_t *buffer, size_t buflen);
+
+		Platform specific information must call this function and dispose
+		of it quickly so that overwriting of the tail of the circular buffer
+		does not occur.  See include/nuttx/sched_note.h for additional
+		information.
+
+config SCHED_NOTE_BUFSIZE
+	int "Instrumentation buffer size"
+	default 2048
+	depends on SCHED_INSTRUMENTATION_BUFFER
+	---help---
+		The size of the in-memory, circular instrumentation buffer (in
+		bytes).
+
+endif # SCHED_INSTRUMENTATION
 endmenu # Performance Monitoring
 
 menu "Files and I/O"
@@ -606,7 +711,7 @@ config SDCLONE_DISABLE
 	default n
 	---help---
 	Disable cloning of all socket
-	desciptors by task_create() when a new task is started. If
+	descriptors by task_create() when a new task is started. If
 	set, all sockets will appear to be closed in the new task.
 
 config NFILE_DESCRIPTORS
@@ -775,6 +880,18 @@ config SCHED_ONEXIT_MAX
 
 endmenu # RTOS hooks
 
+config SIG_EVTHREAD
+	bool "Support SIGEV_THHREAD"
+	default n
+	depends on BUILD_FLAT && SCHED_WORKQUEUE
+	---help---
+		Built in support for the SIGEV_THREAD signal deliver method.
+
+		NOTE: The current implementation uses a work queue to notify the
+		client.  This, however, would only work in the FLAT build.  A
+		different mechanism would need to be development to support this
+		feature on the PROTECTED or KERNEL build.
+
 menu "Signal Numbers"
 	depends on !DISABLE_SIGNALS
 
@@ -852,7 +969,48 @@ config MQ_MAXMSGSIZE
 
 endmenu # POSIX Message Queue Options
 
-menu "Work Queue Support"
+menuconfig MODULE
+	bool "Enable loadable OS modules"
+	default n
+	---help---
+		Enable support for loadable OS modules.  Default: n
+
+if MODULE
+
+config MODULE_ALIGN_LOG2
+	int "Log2 Section Alignment"
+	default 2
+	---help---
+		Align all sections to this Log2 value:  0->1, 1->2, 2->4, etc.
+
+config MODULE_BUFFERSIZE
+	int "Module I/O Buffer Size"
+	default 128
+	---help---
+		This is an I/O buffer that is used to access the module file.
+		Variable length items will need to be read (such as symbol names).
+		This is really just this initial size of the buffer; it will be
+		reallocated as necessary to hold large symbol names).  Default: 128
+
+config MODULE_BUFFERINCR
+	int "Module I/O Buffer Realloc Increment"
+	default 32
+	---help---
+		This is an I/O buffer that is used to access the module file.
+		Variable length items will need to be read (such as symbol names).
+		This value specifies the size increment to use each time the
+		buffer is reallocated.  Default: 32
+
+config MODULE_DUMPBUFFER
+	bool "Dump module buffers"
+	default n
+	depends on DEBUG && DEBUG_VERBOSE
+	---help---
+		Dump various module buffers for debug purposes
+
+endif
+
+menu "Work queue support"
 
 config SCHED_WORKQUEUE
 #	bool "Enable worker thread"

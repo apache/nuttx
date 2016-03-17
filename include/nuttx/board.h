@@ -101,6 +101,7 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <stdbool.h>
 
 #include <nuttx/compiler.h>
 
@@ -193,6 +194,32 @@ int board_reset(int status);
 #endif
 
 /****************************************************************************
+ * Name: board_uniqueid
+ *
+ * Description:
+ *   Return a unique ID associated with the board.  The meaning of this
+ *   unique ID is not specified.  It may be a chip identifying number, a
+ *   serial number, a MAC address, etc.  It may be in binary or it may be
+ *   ASCII.  The only only requirement is that the length of the unique
+ *   ID be exactly CONFIG_BOARDCTL_UNIQUEID_SIZE in length.
+ *
+ * Input Parameters:
+ *   uniqueid - A reference to a writable memory location provided by the
+ *     caller to receive the board unique ID.  The memory memory referenced
+ *     by this pointer must be at least CONFIG_BOARDCTL_UNIQUEID_SIZE in
+ *     length.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success.  Otherwize a negated errno value is
+ *   returned indicating the nature of the failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_BOARDCTL_UNIQUEID
+int board_uniqueid(FAR uint8_t *uniqueid);
+#endif
+
+/****************************************************************************
  * Name: board_tsc_setup
  *
  * Description:
@@ -205,8 +232,8 @@ int board_reset(int status);
  *   application-level touchscreen testing logic (perhaps by
  *   apps/examples/touchscreen).  If CONFIG_LIB_BOARDCTL=y and
  *   CONFIG_BOARDCTL_TSCTEST=y, then this functions will be invoked via the
- *   (non-standard) boardctl() interface using the commands
- *   BOARDIOC_TSCTEST_SETUP command.
+ *   (non-standard) boardctl() interface using the BOARDIOC_TSCTEST_SETUP
+ *   command.
  *
  * Input Parameters:
  *   minor   - The input device minor number
@@ -231,8 +258,8 @@ int board_tsc_setup(int minor);
  *   application-level touchscreen testing logic (perhaps by
  *   apps/examples/touchscreen).  If CONFIG_LIB_BOARDCTL=y and
  *   CONFIG_BOARDCTL_TSCTEST=y, then this functions will be invoked via the
- *   (non-standard) boardctl() interface using the commands
- *   BOARDIOC_TSCTEST_TEARDOWN command.
+ *   (non-standard) boardctl() interface using the BOARDIOC_TSCTEST_TEARDOWN
+ *   command.
  *
  * Input Parameters:
  *   None
@@ -254,8 +281,8 @@ void board_tsc_teardown(void);
  *   This is an internal OS interface but may be invoked indirectly from
  *   application-level graphics logic.  If CONFIG_LIB_BOARDCTL=y and
  *   CONFIG_BOARDCTL_ADCTEST=y, then this functions will be invoked via the
- *   (non-standard) boardctl() interface using the commands
- *   BOARDIOC_ADCTEST_SETUP command.
+ *   (non-standard) boardctl() interface using the BOARDIOC_ADCTEST_SETUP
+ *   command.
  *
  ****************************************************************************/
 
@@ -288,8 +315,8 @@ int board_pwm_setup(void);
  *   This is an internal OS interface but may be invoked indirectly from
  *   application-level graphics logic.  If CONFIG_LIB_BOARDCTL=y and
  *   CONFIG_BOARDCTL_GRAPHICS=y, then this functions will be invoked via the
- *   (non-standard) boardctl() interface using the commands
- *   BOARDIOC_GRAPHICS_SETUP command.
+ *   (non-standard) boardctl() interface using the BOARDIOC_GRAPHICS_SETUP
+ *   command.
  *
  ****************************************************************************/
 
@@ -299,6 +326,25 @@ FAR struct lcd_dev_s *board_graphics_setup(unsigned int devno);
 #else
 struct fb_vtable_s;
 FAR struct fb_vtable_s *board_graphics_setup(unsigned int devno);
+#endif
+
+/****************************************************************************
+ * Name: board_can_initialize
+ *
+ * Description:
+ *   Perform one-time CAN initialization.  This is currently only needed for
+ *   apps/examples/can.
+ *
+ *   This is an internal OS interface but may be invoked indirectly from
+ *   application-level graphics logic.  If CONFIG_LIB_BOARDCTL=y and
+ *   CONFIG_BOARDCTL_CANINIT=y, then this functions will be invoked via the
+ *   (non-standard) boardctl() interface using the BOARDIOC_CAN_INITIALIZE
+ *   command.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_BOARDCTL_CANINIT
+int board_can_initialize(void);
 #endif
 
 /****************************************************************************
@@ -332,7 +378,7 @@ int board_ioctl(unsigned int cmd, uintptr_t arg);
  *                            multiple LCD devices.
  *   board_lcd_uninitialize - Uninitialize the LCD support
  *
- ***************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_LCD
 struct lcd_dev_s; /* Forward reference */
@@ -343,20 +389,20 @@ void board_lcd_uninitialize(void);
 #endif
 
 /****************************************************************************
- * Name: board_led_initialize
+ * Name: board_autoled_initialize
  *
  * Description:
- *   This functions is called very early in initialization to perform board-
+ *   This function is called very early in initialization to perform board-
  *   specific initialization of LED-related resources.  This includes such
  *   things as, for example, configure GPIO pins to drive the LEDs and also
  *   putting the LEDs in their correct initial state.
  *
- *   NOTE: In most architectures, board_led_initialize() is called from
+ *   NOTE: In most architectures, board_autoled_initialize() is called from
  *   board-specific initialization logic.  But there are a few architectures
  *   where this initialization function is still called from common chip
  *   architecture logic.  This interface is not, however, a common board
  *   interface in any event and, hence, the usage of the name
- *   board_led_initialize is deprecated.
+ *   board_autoled_initialize is deprecated.
  *
  *   WARNING: This interface name will eventually be removed; do not use it
  *   in new board ports.  New implementations should use the naming
@@ -372,13 +418,13 @@ void board_lcd_uninitialize(void);
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
-void board_led_initialize(void);
+void board_autoled_initialize(void);
 #else
-# define board_led_initialize()
+# define board_autoled_initialize()
 #endif
 
 /****************************************************************************
- * Name: board_led_on
+ * Name: board_autoled_on
  *
  * Description:
  *   Set the LED configuration into the ON condition for the state provided
@@ -407,13 +453,13 @@ void board_led_initialize(void);
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
-void board_led_on(int led);
+void board_autoled_on(int led);
 #else
-# define board_led_on(led)
+# define board_autoled_on(led)
 #endif
 
 /****************************************************************************
- * Name: board_led_off
+ * Name: board_autoled_off
  *
  * Description:
  *   Set the LED configuration into the OFF condition for the state provided
@@ -438,9 +484,85 @@ void board_led_on(int led);
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
-void board_led_off(int led);
+void board_autoled_off(int led);
 #else
-# define board_led_off(led)
+# define board_autoled_off(led)
+#endif
+
+/****************************************************************************
+ * Name:  board_userled_initialize
+ *
+ * Description:
+ *   This function may called from application-specific logic during its
+ *   to perform board-specific initialization of LED resources.  This
+ *   includes such things as, for example, configure GPIO pins to drive the
+ *   LEDs and also putting the LEDs in their correct initial state.
+ *
+ *   If CONFIG_ARCH_LEDS is defined, then NuttX will control the on-board
+ *   LEDs.  If CONFIG_ARCH_LEDS is not defined, then this interfaces may be
+ *   available to control the LEDs directly from user board logic or
+ *   indirectly user applications (via the common LED charater driver).
+ *
+ *   Most boards have only a few LEDs and in thoses cases all LEDs may be
+ *   used by the NuttX LED logic exclusively and may not be available for
+ *   use by user logic if CONFIG_ARCH_LEDS=y.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_HAVE_LEDS
+void board_userled_initialize(void);
+#endif
+
+/****************************************************************************
+ * Name:  board_userled
+ *
+ * Description:
+ *   This interface may be used by application specific logic to set the
+ *   state of a single LED.  Definitions for the led identification are
+ *   provided in the board-specific board.h header file that may be included
+ *   like:
+ *
+ *     #included <arch/board/board.h>
+ *
+ *   If CONFIG_ARCH_LEDS is defined, then NuttX will control the on-board
+ *   LEDs.  If CONFIG_ARCH_LEDS is not defined, then this interfaces may be
+ *   available to control the LEDs directly from user board logic or
+ *   indirectly user applications (via the common LED charater driver).
+ *
+ *   Most boards have only a few LEDs and in thoses cases all LEDs may be
+ *   used by the NuttX LED logic exclusively and may not be available for
+ *   use by user logic if CONFIG_ARCH_LEDS=y.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_HAVE_LEDS
+void board_userled(int led, bool ledon);
+#endif
+
+/****************************************************************************
+ * Name:  board_userled_all
+ *
+ * Description:
+ *   This interface may be used by application specific logic to set the
+ *   state of all board LED.  Definitions for the led set member
+ *   identification is provided in the board-specific board.h header file
+ *   that may be includedlike:
+ *
+ *     #included <arch/board/board.h>
+ *
+ *   If CONFIG_ARCH_LEDS is defined, then NuttX will control the on-board
+ *   LEDs.  If CONFIG_ARCH_LEDS is not defined, then this interfaces may be
+ *   available to control the LEDs directly from user board logic or
+ *   indirectly user applications (via the common LED charater driver).
+ *
+ *   Most boards have only a few LEDs and in thoses cases all LEDs may be
+ *   used by the NuttX LED logic exclusively and may not be available for
+ *   use by user logic if CONFIG_ARCH_LEDS=y.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_HAVE_LEDS
+void board_userled_all(uint8_t ledset);
 #endif
 
 /****************************************************************************

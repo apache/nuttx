@@ -48,10 +48,6 @@
 #undef get_environ_ptr
 
 /****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -71,7 +67,7 @@
  *
  ****************************************************************************/
 
-FAR char **get_environ_ptr( void )
+FAR char **get_environ_ptr(void)
 {
 #if 1
 
@@ -85,7 +81,7 @@ FAR char **get_environ_ptr( void )
 
   /* Return a reference to the thread-private environ in the TCB. */
 
-  FAR struct tcb_s *ptcb = (FAR struct tcb_s*)g_readytorun.head;
+  FAR struct tcb_s *ptcb = this_task();
   if (ptcb->envp)
     {
       return &ptcb->envp->ev_env;

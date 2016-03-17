@@ -1,7 +1,7 @@
-/************************************************************************
+/****************************************************************************
  *  sched/mqueue/mq_msgfree.c
  *
- *   Copyright (C) 2007, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,46 +31,27 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include <queue.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
 
 #include "mqueue/mqueue.h"
 
-/************************************************************************
- * Pre-processor Definitions
- ************************************************************************/
-
-/************************************************************************
- * Private Type Declarations
- ************************************************************************/
-
-/************************************************************************
- * Public Variables
- ************************************************************************/
-
-/************************************************************************
- * Private Variables
- ************************************************************************/
-
-/************************************************************************
- * Private Functions
- ************************************************************************/
-
-/************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************
+/****************************************************************************
  * Name: mq_msgfree
  *
  * Description:
@@ -84,11 +65,11 @@
  * Return Value:
  *   None
  *
- ************************************************************************/
+ ****************************************************************************/
 
 void mq_msgfree(FAR struct mqueue_msg_s *mqmsg)
 {
-  irqstate_t saved_state;
+  irqstate_t flags;
 
   /* If this is a generally available pre-allocated message,
    * then just put it back in the free list.
@@ -100,9 +81,9 @@ void mq_msgfree(FAR struct mqueue_msg_s *mqmsg)
        * list from interrupt handlers.
        */
 
-      saved_state = irqsave();
-      sq_addlast((FAR sq_entry_t*)mqmsg, &g_msgfree);
-      irqrestore(saved_state);
+      flags = enter_critical_section();
+      sq_addlast((FAR sq_entry_t *)mqmsg, &g_msgfree);
+      leave_critical_section(flags);
     }
 
   /* If this is a message pre-allocated for interrupts,
@@ -115,9 +96,9 @@ void mq_msgfree(FAR struct mqueue_msg_s *mqmsg)
        * list from interrupt handlers.
        */
 
-      saved_state = irqsave();
-      sq_addlast((FAR sq_entry_t*)mqmsg, &g_msgfreeirq);
-      irqrestore(saved_state);
+      flags = enter_critical_section();
+      sq_addlast((FAR sq_entry_t *)mqmsg, &g_msgfreeirq);
+      leave_critical_section(flags);
     }
 
   /* Otherwise, deallocate it.  Note:  interrupt handlers

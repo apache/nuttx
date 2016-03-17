@@ -1,7 +1,7 @@
-/*****************************************************************************
+/****************************************************************************
  * sched/task/task_reparent.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,15 +31,17 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
-/*****************************************************************************
+/****************************************************************************
  * Included Files
- *****************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include <errno.h>
+
+#include <nuttx/irq.h>
 
 #include "sched/sched.h"
 #include "group/group.h"
@@ -47,15 +49,11 @@
 
 #ifdef CONFIG_SCHED_HAVE_PARENT
 
-/*****************************************************************************
- * Private Functions
- *****************************************************************************/
-
-/*****************************************************************************
+/****************************************************************************
  * Public Functions
- *****************************************************************************/
+ ****************************************************************************/
 
-/*****************************************************************************
+/****************************************************************************
  * Name: task_reparent
  *
  * Description:
@@ -69,7 +67,7 @@
  * Return Value:
  *   0 (OK) on success; A negated errno value on failure.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_GROUP_MEMBERS
 int task_reparent(pid_t ppid, pid_t chpid)
@@ -90,7 +88,7 @@ int task_reparent(pid_t ppid, pid_t chpid)
    * the three task:  Child, current parent, and new parent.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Get the child tasks task group */
 
@@ -202,7 +200,7 @@ int task_reparent(pid_t ppid, pid_t chpid)
 #endif /* CONFIG_SCHED_CHILD_STATUS */
 
 errout_with_ints:
-  irqrestore(flags);
+  leave_critical_section(flags);
   return ret;
 }
 #else
@@ -222,7 +220,7 @@ int task_reparent(pid_t ppid, pid_t chpid)
    * the three task:  Child, current parent, and new parent.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Get the child tasks TCB (chtcb) */
 
@@ -314,7 +312,7 @@ int task_reparent(pid_t ppid, pid_t chpid)
 #endif /* CONFIG_SCHED_CHILD_STATUS */
 
 errout_with_ints:
-  irqrestore(flags);
+  leave_critical_section(flags);
   return ret;
 }
 #endif

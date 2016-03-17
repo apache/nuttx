@@ -50,6 +50,8 @@ Files include in this directory include:
      xxd -g 1 -i romfs.img >romfs.h
 
      then cleaned up with an editor to conform with NuttX coding standards.
+     Also, the data definitions in the romfs.h file should be marked with
+     'const' qualifier the so that the data will be stored in FLASH.
 
 Test Configuration
 ------------------

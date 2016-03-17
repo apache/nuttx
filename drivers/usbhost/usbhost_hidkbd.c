@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/usbhost/usbhost_hidkbd.c
  *
- *   Copyright (C) 2011-2013, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2013, 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -54,6 +54,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/kthread.h>
 #include <nuttx/fs/fs.h>
@@ -663,7 +664,7 @@ static inline FAR struct usbhost_state_s *usbhost_allocclass(void)
 
   DEBUGASSERT(!up_interrupt_context());
   priv = (FAR struct usbhost_state_s *)kmm_malloc(sizeof(struct usbhost_state_s));
-  uvdbg("Allocated: %p\n", priv);;
+  uvdbg("Allocated: %p\n", priv);
   return priv;
 }
 
@@ -687,7 +688,7 @@ static inline void usbhost_freeclass(FAR struct usbhost_state_s *usbclass)
 
   /* Free the class instance. */
 
-  uvdbg("Freeing: %p\n", usbclass);;
+  uvdbg("Freeing: %p\n", usbclass);
   sched_kfree(usbclass);
 }
 
@@ -704,7 +705,7 @@ static int usbhost_allocdevno(FAR struct usbhost_state_s *priv)
   irqstate_t flags;
   int devno;
 
-  flags = irqsave();
+  flags = enter_critical_section();
   for (devno = 0; devno < 26; devno++)
     {
       uint32_t bitno = 1 << devno;
@@ -712,12 +713,12 @@ static int usbhost_allocdevno(FAR struct usbhost_state_s *priv)
         {
           g_devinuse |= bitno;
           priv->devchar = 'a' + devno;
-          irqrestore(flags);
+          leave_critical_section(flags);
           return OK;
         }
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return -EMFILE;
 }
 
@@ -727,9 +728,9 @@ static void usbhost_freedevno(FAR struct usbhost_state_s *priv)
 
   if (devno >= 0 && devno < 26)
     {
-      irqstate_t flags = irqsave();
+      irqstate_t flags = enter_critical_section();
       g_devinuse &= ~(1 << devno);
-      irqrestore(flags);
+      leave_critical_section(flags);
     }
 }
 
@@ -921,7 +922,7 @@ static inline uint8_t usbhost_mapscancode(uint8_t scancode, uint8_t modifier)
 
   /* Is either shift key pressed? */
 
-  if ((modifier & (USBHID_MODIFER_LSHIFT|USBHID_MODIFER_RSHIFT)) != 0)
+  if ((modifier & (USBHID_MODIFER_LSHIFT | USBHID_MODIFER_RSHIFT)) != 0)
     {
       return ucmap[scancode];
     }
@@ -1062,7 +1063,7 @@ static int usbhost_kbdpoll(int argc, char *argv[])
        */
 
       ctrlreq       = (struct usb_ctrlreq_s *)priv->tbuffer;
-      ctrlreq->type = USB_REQ_DIR_IN|USB_REQ_TYPE_CLASS|USB_REQ_RECIPIENT_INTERFACE;
+      ctrlreq->type = USB_REQ_DIR_IN | USB_REQ_TYPE_CLASS | USB_REQ_RECIPIENT_INTERFACE;
       ctrlreq->req  = USBHID_REQUEST_GETREPORT;
 
       usbhost_putle16(ctrlreq->value, (USBHID_REPORTTYPE_INPUT << 8));
@@ -1155,7 +1156,7 @@ static int usbhost_kbdpoll(int argc, char *argv[])
                        * a valid, NUL character.
                        */
 
-                      if ((rpt->modifier & (USBHID_MODIFER_LCTRL|USBHID_MODIFER_RCTRL)) != 0)
+                      if ((rpt->modifier & (USBHID_MODIFER_LCTRL | USBHID_MODIFER_RCTRL)) != 0)
                         {
                           keycode &= 0x1f;
                         }
@@ -1268,7 +1269,7 @@ static int usbhost_kbdpoll(int argc, char *argv[])
 
   udbg("Keyboard removed, polling halted\n");
 
-  flags = irqsave();
+  flags = enter_critical_section();
   priv->polling = false;
 
   /* Decrement the reference count held by this thread. */
@@ -1303,7 +1304,7 @@ static int usbhost_kbdpoll(int argc, char *argv[])
       usbhost_givesem(&priv->exclsem);
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return 0;
 }
 
@@ -1363,7 +1364,7 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
 
   /* Get the total length of the configuration descriptor (little endian).
    * It might be a good check to get the number of interfaces here too.
-  */
+   */
 
   remaining = (int)usbhost_getle16(cfgdesc->totallen);
 
@@ -1712,7 +1713,7 @@ static void usbhost_putle16(uint8_t *dest, uint16_t val)
 
 static inline uint32_t usbhost_getle32(const uint8_t *val)
 {
- /* Little endian means LS halfword first in byte stream */
+  /* Little endian means LS halfword first in byte stream */
 
   return (uint32_t)usbhost_getle16(&val[2]) << 16 | (uint32_t)usbhost_getle16(val);
 }
@@ -2068,7 +2069,7 @@ static int usbhost_open(FAR struct file *filep)
    * events.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   if (priv->disconnected)
     {
       /* No... the driver is no longer bound to the class.  That means that
@@ -2086,7 +2087,7 @@ static int usbhost_open(FAR struct file *filep)
       priv->open = true;
       ret        = OK;
     }
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   usbhost_givesem(&priv->exclsem);
   return ret;
@@ -2120,7 +2121,7 @@ static int usbhost_close(FAR struct file *filep)
    * asynchronous poll or disconnect events.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   priv->crefs--;
 
   /* Check if the USB mouse device is still connected.  If the device is
@@ -2164,7 +2165,7 @@ static int usbhost_close(FAR struct file *filep)
 
               /* Skip giving the semaphore... it is no longer valid */
 
-              irqrestore(flags);
+              leave_critical_section(flags);
               return OK;
             }
           else /* if (priv->crefs == 1) */
@@ -2180,7 +2181,7 @@ static int usbhost_close(FAR struct file *filep)
     }
 
   usbhost_givesem(&priv->exclsem);
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 

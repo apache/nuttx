@@ -85,7 +85,7 @@
  *
  ****************************************************************************/
 
-void NXGL_FUNCNAME(nxgl_setpixel,NXGLIB_SUFFIX)
+void NXGL_FUNCNAME(nxgl_setpixel, NXGLIB_SUFFIX)
   (FAR struct lcd_planeinfo_s *pinfo,
    FAR const struct nxgl_point_s *pos,
    NXGL_PIXEL_T color)

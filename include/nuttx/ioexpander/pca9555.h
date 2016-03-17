@@ -40,7 +40,7 @@
 #ifndef __INCLUDE_NUTTX_IOEXPANDER_PCA9555_H
 #define __INCLUDE_NUTTX_IOEXPANDER_PCA9555_H
 
-#include <nuttx/i2c.h>
+#include <nuttx/i2c/i2c_master.h>
 
 /* A reference to a structure of this type must be passed to the PCA9555 driver when the
  * driver is instantiated. This structure provides information about the configuration of
@@ -63,7 +63,6 @@ struct pca9555_config_s
    */
 
 #ifndef CONFIG_PCA9555_INT_DISABLE
-/* IRQ support TODO */
 
 #ifdef CONFIG_PCA9555_MULTIPLE
   int irq;             /* IRQ number received by interrupt handler. */
@@ -75,12 +74,10 @@ struct pca9555_config_s
    *
    * attach  - Attach the PCA9555 interrupt handler to the GPIO interrupt
    * enable  - Enable or disable the GPIO interrupt
-   * clear   - Acknowledge/clear any pending GPIO interrupt
    */
 
   CODE int  (*attach)(FAR struct pca9555_config_s *state, xcpt_t isr);
   CODE void (*enable)(FAR struct pca9555_config_s *state, bool enable);
-  CODE void (*clear)(FAR struct pca9555_config_s *state);
 #endif
 };
 
@@ -113,7 +110,7 @@ extern "C"
  *
  ********************************************************************************************/
 
-FAR struct ioexpander_dev_s* pca9555_initialize(FAR struct i2c_dev_s *dev,
+FAR struct ioexpander_dev_s* pca9555_initialize(FAR struct i2c_master_s *dev,
                                                 FAR struct pca9555_config_s *config);
 
 #ifdef __cplusplus

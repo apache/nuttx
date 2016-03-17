@@ -38,28 +38,16 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#if defined(CONFIG_NET_TCP) || defined(CONFIG_NET_LOCAL_STREAM)
 
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <errno.h>
 
 #include "tcp/tcp.h"
+#include "udp/udp.h"
 #include "pkt/pkt.h"
 #include "local/local.h"
 #include "socket/socket.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -168,6 +156,31 @@ ssize_t psock_send(FAR struct socket *psock, FAR const void *buf, size_t len,
         break;
 #endif /* CONFIG_NET_TCP || CONFIG_NET_LOCAL_STREAM */
 
+#ifdef CONFIG_NET_UDP
+      case SOCK_DGRAM:
+        {
+#ifdef CONFIG_NET_LOCAL_DGRAM
+#ifdef CONFIG_NET_UDP
+          if (psock->s_domain == PF_LOCAL)
+#endif
+            {
+#warning Missing logic
+              ret = -ENOSYS;
+            }
+#endif /* CONFIG_NET_LOCAL_DGRAM */
+
+#ifdef CONFIG_NET_UDP
+#ifdef CONFIG_NET_LOCAL_DGRAM
+          else
+#endif
+            {
+              ret = psock_udp_send(psock, buf, len);
+            }
+#endif /* CONFIG_NET_UDP */
+        }
+        break;
+#endif /* CONFIG_NET_UDP */
+
       default:
         {
           /* EDESTADDRREQ.  Signifies that the socket is not connection-mode
@@ -250,5 +263,3 @@ ssize_t send(int sockfd, FAR const void *buf, size_t len, int flags)
 {
   return psock_send(sockfd_socket(sockfd), buf, len, flags);
 }
-
-#endif /* CONFIG_NET_TCP || CONFIG_NET_LOCAL_STREAM */

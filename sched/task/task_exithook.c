@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/task/task_exithook.c
  *
- *   Copyright (C) 2011-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -62,11 +62,11 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Global Variables
+ * Public Data
  ****************************************************************************/
 
 /****************************************************************************
- * Private Variables
+ * Private Data
  ****************************************************************************/
 
 /****************************************************************************
@@ -343,6 +343,7 @@ static inline void task_sigchild(gid_t pgid, FAR struct tcb_s *ctcb, int status)
 
       info.si_signo           = SIGCHLD;
       info.si_code            = CLD_EXITED;
+      info.si_errno           = OK;
       info.si_value.sival_ptr = NULL;
 #ifndef CONFIG_DISABLE_PTHREAD
       info.si_pid             = chgrp->tg_task;
@@ -394,6 +395,7 @@ static inline void task_sigchild(FAR struct tcb_s *ptcb,
 
       info.si_signo           = SIGCHLD;
       info.si_code            = CLD_EXITED;
+      info.si_errno           = OK;
       info.si_value.sival_ptr = NULL;
 #ifndef CONFIG_DISABLE_PTHREAD
       info.si_pid             = ctcb->group->tg_task;
@@ -527,8 +529,8 @@ static inline void task_exitwakeup(FAR struct tcb_s *tcb, int status)
         {
           /* Yes.. Wakeup any tasks waiting for this task to exit */
 
-         group->tg_statloc = NULL;
-         while (group->tg_exitsem.semcount < 0)
+          group->tg_statloc = NULL;
+          while (group->tg_exitsem.semcount < 0)
             {
               /* Wake up the thread */
 

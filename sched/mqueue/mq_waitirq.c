@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/mqueue/mq_waitirq.c
  *
- *   Copyright (C) 2007-2009, 2011, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011, 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,30 +42,11 @@
 #include <sched.h>
 #include <errno.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/mqueue.h>
 
 #include "mqueue/mqueue.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Type Declarations
- ****************************************************************************/
-
-/****************************************************************************
- * Public Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -93,13 +74,13 @@
 void mq_waitirq(FAR struct tcb_s *wtcb, int errcode)
 {
   FAR struct mqueue_inode_s *msgq;
-  irqstate_t saved_state;
+  irqstate_t flags;
 
   /* Disable interrupts.  This is necessary because an interrupt handler may
    * attempt to send a message while we are doing this.
    */
 
-  saved_state = irqsave();
+  flags = enter_critical_section();
 
   /* It is possible that an interrupt/context switch beat us to the punch and
    * already changed the task's state.  NOTE:  The operations within the if
@@ -141,5 +122,5 @@ void mq_waitirq(FAR struct tcb_s *wtcb, int errcode)
 
   /* Interrupts may now be enabled. */
 
-  irqrestore(saved_state);
+  leave_critical_section(flags);
 }

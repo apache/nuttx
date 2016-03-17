@@ -66,6 +66,115 @@
 
 #define PTHREAD_KEYS_MAX CONFIG_NPTHREAD_KEYS
 
+/* CPU affinity mask helpers ***************************************************/
+/* These are not standard but are defined for Linux compatibility */
+
+#ifdef CONFIG_SMP
+
+/* void CPU_ZERO(FAR cpu_set_t *set); */
+
+#  define CPU_ZERO(s) do { *(s) = 0; } while (0)
+
+/* void CPU_SET(int cpu, FAR cpu_set_t *set); */
+
+#  define CPU_SET(c,s) do { *(s) |= (1 << (c)); } while (0)
+
+/* void CPU_CLR(int cpu, FAR cpu_set_t *set); */
+
+#  define CPU_CLR(c,s) do { *(s) &= ~(1 << (c)); } while (0)
+
+/* int  CPU_ISSET(int cpu, FAR const cpu_set_t *set); */
+
+#  define CPU_ISSET(c,s) ((*(s) & (1 << (c))) != 0)
+
+/* int CPU_COUNT(FAR const cpu_set_t *set); */
+
+#  define CPU_COUNT(s) sched_cpu_count(s)
+
+/* void CPU_AND(FAR cpu_set_t *destset, FAR const cpu_set_t *srcset1,
+ *              FAR const cpu_set_t *srcset2);
+ */
+
+#  define CPU_AND(d,s1,s2) do { *(d) = *(s1) & *(s2); } while (0)
+
+/* void CPU_OR(FAR cpu_set_t *destset, FAR const cpu_set_t *srcset1,
+ *             FAR const cpu_set_t *srcset2);
+ */
+
+#  define CPU_OR(d,s1,s2) do { *(d) = *(s1) | *(s2); } while (0)
+
+/* void CPU_XOR(FAR cpu_set_t *destset, FAR const cpu_set_t *srcset1,
+ *              FAR const cpu_set_t *srcset2);
+ */
+
+#  define CPU_XOR(d,s1,s2) do { *(d) = *(s1) ^ *(s2); } while (0)
+
+/* int CPU_EQUAL(FAR const cpu_set_t *set1, FAR const cpu_set_t *set2); */
+
+#  define CPU_EQUAL(s1,s2) (*(s2) == *(s2))
+
+/* REVISIT: Variably sized CPU sets are not supported */
+/* FAR cpu_set_t *CPU_ALLOC(int num_cpus); */
+
+#  define CPU_ALLOC(n) (FAR cpu_set_t *)malloc(sizeof(cpu_set_t));
+
+/* void CPU_FREE(cpu_set_t *set); */
+
+#  define CPU_ALLOC(s) free(s)
+
+/* size_t CPU_ALLOC_SIZE(int num_cpus); */
+
+#  define CPU_ALLOC_SIZE(n) sizeof(cpu_set_t)
+
+/* void CPU_ZERO_S(size_t setsize, FAR cpu_set_t *set); */
+
+#  define CPU_ZERO_S(n,s) CPU_ZERO_S(s)
+
+/* void CPU_SET_S(int cpu, size_t setsize, FAR cpu_set_t *set); */
+
+#  define CPU_SET_S(c,n,s) CPU_SET(c,s)
+
+/* void CPU_CLR_S(int cpu, size_t setsize, FAR cpu_set_t *set); */
+
+#  define CPU_CLR_S(c,n,s) CPU_CLR(c,s)
+
+/* int CPU_ISSET_S(int cpu, size_t setsize, FAR const cpu_set_t *set); */
+
+#  define CPU_ISSET_S(c,n,s) CPU_ISSET(c,s)
+
+/* int CPU_COUNT_S(size_t setsize, FAR const cpu_set_t *set); */
+
+#  define CPU_COUNT_S(n,s) CPU_COUNT(s)
+
+/* void CPU_AND_S(size_t setsize, FAR cpu_set_t *destset,
+ *                FAR const cpu_set_t *srcset1,
+ *                FAR const cpu_set_t *srcset2);
+ */
+
+#  define CPU_AND_S(n,d,s1,s2) CPU_AND(d,s1,s2)
+
+/* void CPU_OR_S(size_t setsize, FAR cpu_set_t *destset,
+ *              FAR const cpu_set_t *srcset1,
+ *              FAR const cpu_set_t *srcset2);
+ */
+
+#  define CPU_OR_S(n,d,s1,s2) CPU_OR(d,s1,s2)
+
+/* void CPU_XOR_S(size_t setsize, FAR cpu_set_t *destset,
+ *                FAR const cpu_set_t *srcset1,
+ *                FAR const cpu_set_t *srcset2);
+ */
+
+#  define CPU_XOR_S(n,d,s1,s2) CPU_XOR(d,s1,s2)
+
+/* int CPU_EQUAL_S(size_t setsize, FAR const cpu_set_t *set1,
+ *                 FAR const cpu_set_t *set2);
+ */
+
+#  define CPU_EQUAL_S(n,s1,s2) CPU_EQUAL(s1,s2)
+
+#endif /* CONFIG_SMP */
+
 /********************************************************************************
  * Public Type Definitions
  ********************************************************************************/
@@ -131,28 +240,20 @@ int    sched_get_priority_max(int policy);
 int    sched_get_priority_min(int policy);
 int    sched_rr_get_interval(pid_t pid, FAR struct timespec *interval);
 
+#ifdef CONFIG_SMP
+/* Task affinity */
+
+int    sched_setaffinity(pid_t pid, size_t cpusetsize,
+                         FAR const cpu_set_t *mask);
+int    sched_getaffinity(pid_t pid, size_t cpusetsize, FAR cpu_set_t *mask);
+int    sched_cpu_count(FAR const cpu_set_t *set);
+#endif /* CONFIG_SMP */
+
 /* Task Switching Interfaces (non-standard) */
 
 int    sched_lock(void);
 int    sched_unlock(void);
 int    sched_lockcount(void);
-
-/* If instrumentation of the scheduler is enabled, then some outboard logic
- * must provide the following interfaces.
- */
-
-#ifdef CONFIG_SCHED_INSTRUMENTATION
-
-void   sched_note_start(FAR struct tcb_s *tcb);
-void   sched_note_stop(FAR struct tcb_s *tcb);
-void   sched_note_switch(FAR struct tcb_s *pFromTcb,
-                         FAR struct tcb_s *pToTcb);
-
-#else
-# define sched_note_start(t)
-# define sched_note_stop(t)
-# define sched_note_switch(t1, t2)
-#endif /* CONFIG_SCHED_INSTRUMENTATION */
 
 #undef EXTERN
 #if defined(__cplusplus)

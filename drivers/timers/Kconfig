@@ -117,6 +117,92 @@ config RTC_IOCTL
 		architecture-specific RTC operations to the RTC interface
 
 endif # RTC_DRIVER
+
+config RTC_EXTERNAL
+	bool "External RTC Support"
+	default n
+	---help---
+		In modern MCUs, the RTC is usually implement as an internal
+		peripheral to the MCU.  An option is to use an external RTC
+		connected to the MCU typically via SPI or I2C.
+
+		If an external RTC is connect to the MCU through some bus, then the
+		RTC will not be available to the system until after the system
+		fully boots up and is able to access the bus.  In that case, this
+		setting must be included to suppress attempts to initialize the RTC
+		early in the boot sequence.
+
+config RTC_DSXXXX
+	bool "DS130x/DS323x RTC Driver"
+	default n
+	select I2C
+	select I2C_TRANSFER
+	select RTC_DATETIME
+	depends on RTC_EXTERNAL
+	---help---
+		Enables support for the Maxim Integrated DS3231 I2C RTC timer.
+
+if RTC_DSXXXX
+
+choice
+	prompt "Maxim Integrated RTC"
+	default RTC_DS3231
+
+config RTC_DS1302
+	bool "DS1302"
+	---help---
+		Enables support for the Maxim Integrated DS1307 serial RTC timer.
+
+config RTC_DS1307
+	bool "DS1307"
+	---help---
+		Enables support for the Maxim Integrated DS1307 I2C RTC timer.
+
+config RTC_DS3231
+	bool "DS3231"
+	---help---
+		Enables support for the Maxim Integrated DS3231 I2C RTC timer.
+
+config RTC_DS3232
+	bool "DS3232"
+	---help---
+		Enables support for the Maxim Integrated DS3232 I2C RTC timer.
+
+config RTC_DS3234
+	bool "DS3234"
+	depends on EXPERIMENTAL
+	---help---
+		Enables support for the Maxim Integrated DS3234 SPI RTC timer.
+
+		Not yet implemented.
+
+endchoice # Maxim Integrated RTC
+
+config DS3231_I2C_FREQUENCY
+	int "DS1307/DS323x I2C frequency"
+	default 400000
+	range 1 400000
+
+endif # RTC_DSXXXX
+
+config RTC_PCF85263
+	bool "PCF85263 RTC Driver"
+	default n
+	select I2C
+	select I2C_TRANSFER
+	select RTC_DATETIME
+	depends on RTC_EXTERNAL
+	---help---
+		Enables support for the Maxim Integrated DS3231 I2C RTC timer.
+
+if RTC_PCF85263
+
+config PCF85263_I2C_FREQUENCY
+	int "PCF85263 I2C frequency"
+	default 400000
+	range 1 400000
+
+endif # RTC_PCF85263
 endif # RTC
 
 menuconfig WATCHDOG

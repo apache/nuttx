@@ -81,7 +81,7 @@ static inline void mkfatfs_initmbr(FAR struct fat_format_s *fmt,
 
   /* 8@3: Usually "MSWIN4.1" */
 
-  strcpy((char*)&var->fv_sect[BS_OEMNAME], "NUTTX   ");
+  strcpy((FAR char *)&var->fv_sect[BS_OEMNAME], "NUTTX   ");
 
   /* 2@11: Bytes per sector: 512, 1024, 2048, 4096  */
 
@@ -177,7 +177,7 @@ static inline void mkfatfs_initmbr(FAR struct fat_format_s *fmt,
 
       MBR_PUTFATSZ32(var->fv_sect, var->fv_nfatsects);
 
-      /* 2@40: 0-3:Active FAT, 7=0 both FATS, 7=1 one FAT -- left zero*/
+      /* 2@40: 0-3:Active FAT, 7=0 both FATS, 7=1 one FAT -- left zero */
       /* 2@42: MSB:Major LSB:Minor revision number (0.0) -- left zero */
       /* 4@44: Cluster no. of 1st cluster of root dir */
 
@@ -333,7 +333,7 @@ static inline int mkfatfs_writembr(FAR struct fat_format_s *fmt,
   /* Write all of the reserved sectors */
 
   memset(var->fv_sect, 0, var->fv_sectorsize);
- for (sectno = 1; sectno < fmt->ff_rsvdseccount && ret >= 0; sectno++)
+  for (sectno = 1; sectno < fmt->ff_rsvdseccount && ret >= 0; sectno++)
     {
       ret = DEV_WRITE(var->fv_sect, sectno, 1);
     }
@@ -357,7 +357,7 @@ static inline int mkfatfs_writembr(FAR struct fat_format_s *fmt,
 
       if (ret >= 0)
         {
-          /* Create an image of the fsinfo sector*/
+          /* Create an image of the fsinfo sector */
 
           mkfatfs_initfsinfo(fmt, var);
 
@@ -408,7 +408,7 @@ static inline int mkfatfs_writefat(FAR struct fat_format_s *fmt,
            if (sectno == 0)
              {
                memset(var->fv_sect, 0, var->fv_sectorsize);
-               switch(fmt->ff_fattype)
+               switch (fmt->ff_fattype)
                  {
                    case 12:
                      /* Mark the first two full FAT entries -- 24 bits, 3 bytes total */
@@ -498,7 +498,7 @@ static inline int mkfatfs_writerootdir(FAR struct fat_format_s *fmt,
 }
 
 /****************************************************************************
- * Global Functions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************

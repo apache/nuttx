@@ -65,10 +65,6 @@
 #define IGMPBUF ((struct igmp_iphdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
 
 /****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -134,14 +130,14 @@ void igmp_input(struct net_driver_s *dev)
 
   /* Calculate and check the IGMP checksum */
 
-  if (net_chksum((uint16_t*)&IGMPBUF->type, IGMP_HDRLEN) != 0)
+  if (net_chksum((FAR uint16_t *)&IGMPBUF->type, IGMP_HDRLEN) != 0)
     {
       IGMP_STATINCR(g_netstats.igmp.chksum_errors);
       nlldbg("Checksum error\n");
       return;
     }
 
-  /* Find the group (or create a new one) using the incoming IP address*/
+  /* Find the group (or create a new one) using the incoming IP address */
 
   destipaddr = net_ip4addr_conv32(IGMPBUF->destipaddr);
   group = igmp_grpallocfind(dev, &destipaddr);

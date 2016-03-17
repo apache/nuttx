@@ -1,0 +1,17 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config WIRELESS
+	bool "Wireless Support"
+	default n
+	depends on EXPERIMENTAL
+	---help---
+		Enables overall support for Wireless library.
+
+if WIRELESS
+
+source wireless/ieee802154/Kconfig
+
+endif # WIRELESS

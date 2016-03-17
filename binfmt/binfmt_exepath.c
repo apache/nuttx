@@ -142,7 +142,7 @@ EXEPATH_HANDLE exepath_init(void)
   return (EXEPATH_HANDLE)exepath;
 }
 
- /****************************************************************************
+/****************************************************************************
  * Name: exepath_next
  *
  * Description:
@@ -190,7 +190,7 @@ FAR char *exepath_next(EXEPATH_HANDLE handle, FAR const char *relpath)
    * in the PATH variable have been considered.
    */
 
-  for (;;)
+  for (; ; )
     {
       /* Make sure that exepath->next points to the beginning of a string */
 
@@ -244,7 +244,7 @@ FAR char *exepath_next(EXEPATH_HANDLE handle, FAR const char *relpath)
 
       /* Verify that a regular file exists at this path */
 
-      ret = stat(fullpath, &buf);;
+      ret = stat(fullpath, &buf);
       if (ret == OK && S_ISREG(buf.st_mode))
         {
           return fullpath;

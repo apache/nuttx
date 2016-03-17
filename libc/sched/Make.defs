@@ -37,6 +37,10 @@
 
 CSRCS += sched_getprioritymax.c sched_getprioritymin.c
 
+ifeq ($(CONFIG_SMP),y)
+CSRCS += sched_cpucount.c
+endif
+
 ifeq ($(CONFIG_BUILD_PROTECTED),y)
 CSRCS += task_startup.c
 endif

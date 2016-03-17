@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/input/ads7843e.c
  *
- *   Copyright (C) 2011-2012, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012, 2014, 2016 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            Diego Sanchez <dsanchez@nx-engineering.com>
  *
@@ -63,6 +63,7 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/wdog.h>
 #include <nuttx/kmalloc.h>
@@ -94,15 +95,8 @@
  ****************************************************************************/
 /* Low-level SPI helpers */
 
-#ifdef CONFIG_SPI_OWNBUS
-static inline void ads7843e_configspi(FAR struct spi_dev_s *spi);
-#  define ads7843e_lock(spi)
-#  define ads7843e_unlock(spi)
-#else
-#  define ads7843e_configspi(spi);
 static void ads7843e_lock(FAR struct spi_dev_s *spi);
 static void ads7843e_unlock(FAR struct spi_dev_s *spi);
-#endif
 
 static uint16_t ads7843e_sendcmd(FAR struct ads7843e_dev_s *priv, uint8_t cmd);
 
@@ -180,7 +174,6 @@ static struct ads7843e_dev_s *g_ads7843elist;
  *
  ****************************************************************************/
 
-#ifndef CONFIG_SPI_OWNBUS
 static void ads7843e_lock(FAR struct spi_dev_s *spi)
 {
   /* Lock the SPI bus because there are multiple devices competing for the
@@ -197,18 +190,17 @@ static void ads7843e_lock(FAR struct spi_dev_s *spi)
   SPI_SELECT(spi, SPIDEV_TOUCHSCREEN, true);
   SPI_SETMODE(spi, CONFIG_ADS7843E_SPIMODE);
   SPI_SETBITS(spi, 8);
-  SPI_SETFREQUENCY(spi, CONFIG_ADS7843E_FREQUENCY);
+  (void)SPI_HWFEATURES(spi, 0);
+  (void)SPI_SETFREQUENCY(spi, CONFIG_ADS7843E_FREQUENCY);
   SPI_SELECT(spi, SPIDEV_TOUCHSCREEN, false);
 }
-#endif
 
 /****************************************************************************
  * Function: ads7843e_unlock
  *
  * Description:
- *   If we are sharing the SPI bus with other devices (CONFIG_SPI_OWNBUS
- *   undefined) then we need to un-lock the SPI bus for each transfer,
- *   possibly losing the current configuration.
+ *   Un-lock the SPI bus after each transfer,  possibly losing the current
+ *   configuration if we are sharing the bus with other devices.
  *
  * Parameters:
  *   spi  - Reference to the SPI driver structure
@@ -220,48 +212,12 @@ static void ads7843e_lock(FAR struct spi_dev_s *spi)
  *
  ****************************************************************************/
 
-#ifndef CONFIG_SPI_OWNBUS
 static void ads7843e_unlock(FAR struct spi_dev_s *spi)
 {
   /* Relinquish the SPI bus. */
 
   (void)SPI_LOCK(spi, false);
 }
-#endif
-
-/****************************************************************************
- * Function: ads7843e_configspi
- *
- * Description:
- *   Configure the SPI for use with the ADS7843E.  This function should be
- *   called once during touchscreen initialization to configure the SPI
- *   bus.  Note that if CONFIG_SPI_OWNBUS is not defined, then this function
- *   does nothing.
- *
- * Parameters:
- *   spi  - Reference to the SPI driver structure
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SPI_OWNBUS
-static inline void ads7843e_configspi(FAR struct spi_dev_s *spi)
-{
-  /* Configure SPI for the ADS7843.  But only if we own the SPI bus. 
-   * Otherwise, don't bother because it might change.
-   */
-
-  SPI_SELECT(spi, SPIDEV_TOUCHSCREEN, true);
-  SPI_SETMODE(spi, CONFIG_ADS7843E_SPIMODE);
-  SPI_SETBITS(spi, 8);
-  SPI_SETFREQUENCY(spi, CONFIG_ADS7843E_FREQUENCY);
-  SPI_SELECT(spi, SPIDEV_TOUCHSCREEN, false);
-}
-#endif
 
 /****************************************************************************
  * Name: ads7843e_sendcmd
@@ -385,7 +341,7 @@ static int ads7843e_sample(FAR struct ads7843e_dev_s *priv,
    * from changing until it has been reported.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Is there new ADS7843E sample data available? */
 
@@ -395,7 +351,7 @@ static int ads7843e_sample(FAR struct ads7843e_dev_s *priv,
        * sampled data.
        */
 
-      memcpy(sample, &priv->sample, sizeof(struct ads7843e_sample_s ));
+      memcpy(sample, &priv->sample, sizeof(struct ads7843e_sample_s));
 
       /* Now manage state transitions */
 
@@ -420,7 +376,7 @@ static int ads7843e_sample(FAR struct ads7843e_dev_s *priv,
       ret = OK;
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return ret;
 }
 
@@ -443,7 +399,7 @@ static int ads7843e_waitsample(FAR struct ads7843e_dev_s *priv,
    */
 
   sched_lock();
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Now release the semaphore that manages mutually exclusive access to
    * the device structure.  This may cause other tasks to become ready to
@@ -480,7 +436,7 @@ static int ads7843e_waitsample(FAR struct ads7843e_dev_s *priv,
 
   ivdbg("Sampled\n");
 
-   /* Re-acquire the semaphore that manages mutually exclusive access to
+  /* Re-acquire the semaphore that manages mutually exclusive access to
    * the device structure.  We may have to wait here.  But we have our sample.
    * Interrupts and pre-emption will be re-enabled while we wait.
    */
@@ -493,7 +449,7 @@ errout:
    * have pre-emption disabled.
    */
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   /* Restore pre-emption.  We might get suspended here but that is okay
    * because we already have our sample.  Note:  this means that if there
@@ -974,10 +930,10 @@ static ssize_t ads7843e_read(FAR struct file *filep, FAR char *buffer, size_t le
 
   if (sample.contact == CONTACT_UP)
     {
-       /* Pen is now up.  Is the positional data valid?  This is important to
-        * know because the release will be sent to the window based on its
-        * last positional data.
-        */
+      /* Pen is now up.  Is the positional data valid?  This is important to
+       * know because the release will be sent to the window based on its
+       * last positional data.
+       */
 
       if (sample.valid)
         {
@@ -1252,10 +1208,6 @@ int ads7843e_register(FAR struct spi_dev_s *spi,
 
   ads7843e_lock(spi);
 
-  /* Configure the SPI interface */
-
-  ads7843e_configspi(spi);
-
   /* Enable the PEN IRQ */
 
   ads7843e_sendcmd(priv, ADS7843_CMD_ENABPENIRQ);
@@ -1284,7 +1236,7 @@ int ads7843e_register(FAR struct spi_dev_s *spi,
 #ifdef CONFIG_ADS7843E_MULTIPLE
   priv->flink    = g_ads7843elist;
   g_ads7843elist = priv;
-  irqrestore(flags);
+  leave_critical_section(flags);
 #endif
 
   /* Schedule work to perform the initial sampling and to set the data

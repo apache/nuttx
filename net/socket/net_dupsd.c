@@ -49,10 +49,6 @@
 #if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -99,7 +95,7 @@ int net_dupsd(int sockfd, int minsd)
 
   psock1 = sockfd_socket(sockfd);
 
- /* Verify that the sockfd corresponds to valid, allocated socket */
+  /* Verify that the sockfd corresponds to valid, allocated socket */
 
   if (!psock1 || psock1->s_crefs <= 0)
     {

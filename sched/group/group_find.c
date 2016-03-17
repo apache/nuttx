@@ -1,7 +1,7 @@
-/*****************************************************************************
+/****************************************************************************
  *  sched/group/group_find.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
-/*****************************************************************************
+/****************************************************************************
  * Included Files
- *****************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -44,6 +44,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
 
 #include "group/group.h"
@@ -51,31 +52,11 @@
 
 #ifdef HAVE_TASK_GROUP
 
-/*****************************************************************************
- * Pre-processor Definitions
- *****************************************************************************/
-
-/*****************************************************************************
- * Private Types
- *****************************************************************************/
-
-/*****************************************************************************
- * Private Data
- *****************************************************************************/
-
-/*****************************************************************************
- * Public Data
- *****************************************************************************/
-
-/*****************************************************************************
- * Private Functions
- *****************************************************************************/
-
-/*****************************************************************************
+/****************************************************************************
  * Public Functions
- *****************************************************************************/
+ ****************************************************************************/
 
-/*****************************************************************************
+/****************************************************************************
  * Name: group_findbygid
  *
  * Description:
@@ -97,7 +78,7 @@
  *   precautions should be required here.  However, extra care is taken when
  *   accessing the global g_grouphead list.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #if defined(HAVE_GROUP_MEMBERS) || defined(CONFIG_ARCH_ADDRENV)
 FAR struct task_group_s *group_findbygid(gid_t gid)
@@ -107,22 +88,22 @@ FAR struct task_group_s *group_findbygid(gid_t gid)
 
   /* Find the status structure with the matching GID  */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   for (group = g_grouphead; group; group = group->flink)
     {
       if (group->tg_gid == gid)
         {
-          irqrestore(flags);
+          leave_critical_section(flags);
           return group;
         }
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return NULL;
 }
 #endif
 
-/*****************************************************************************
+/****************************************************************************
  * Name: group_findbypid
  *
  * Description:
@@ -143,7 +124,7 @@ FAR struct task_group_s *group_findbygid(gid_t gid)
  *   precautions should be required here.  However, extra care is taken when
  *   accessing the global g_grouphead list.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_GROUP_MEMBERS
 FAR struct task_group_s *group_findbypid(pid_t pid)
@@ -153,17 +134,17 @@ FAR struct task_group_s *group_findbypid(pid_t pid)
 
   /* Find the status structure with the matching PID  */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   for (group = g_grouphead; group; group = group->flink)
     {
       if (group->tg_task == pid)
         {
-          irqrestore(flags);
+          leave_critical_section(flags);
           return group;
         }
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return NULL;
 }
 #endif

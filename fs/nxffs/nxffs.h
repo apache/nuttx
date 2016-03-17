@@ -316,7 +316,7 @@ struct nxffs_blkstats_s
 };
 
 /****************************************************************************
- * Public Variables
+ * Public Data
  ****************************************************************************/
 
 /* The magic number that appears that the beginning of each NXFFS (logical)

@@ -47,10 +47,6 @@
 #include "environ/environ.h"
 
 /****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -74,7 +70,7 @@
 
 int clearenv(void)
 {
-  FAR struct tcb_s *tcb = (FAR struct tcb_s*)g_readytorun.head;
+  FAR struct tcb_s *tcb = this_task();
   DEBUGASSERT(tcb->group);
 
   env_release(tcb->group);

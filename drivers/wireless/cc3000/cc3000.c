@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/wireless/cc3000.c
  *
- *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2016 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            David_s5 <david_s5@nscdg.com>
  *
@@ -63,6 +63,7 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/clock.h>
 #include <nuttx/arch.h>
@@ -211,27 +212,23 @@ uint8_t spi_readCommand[] = READ_COMMAND;
  *
  ****************************************************************************/
 
-static int cc3000_devtake(FAR struct cc3000_dev_s *priv)
+static inline void cc3000_devtake(FAR struct cc3000_dev_s *priv)
 {
-  int rv;
-
   /* Take the semaphore (perhaps waiting) */
 
-  while ((rv = sem_wait(&priv->devsem)) != 0)
+  while (sem_wait(&priv->devsem) < 0)
     {
-      /* The only case that an error should occur here is if the wait was awakened
-       * by a signal.
+      /* The only case that an error should occur here is if the wait was
+       * awakened by a signal.
        */
 
-      DEBUGASSERT(rv == OK || errno == EINTR);
+      DEBUGASSERT(errno == EINTR);
     }
-
-  return rv;
 }
 
-static inline int cc3000_devgive(FAR struct cc3000_dev_s *priv)
+static inline void cc3000_devgive(FAR struct cc3000_dev_s *priv)
 {
-  return sem_post(&priv->devsem);
+  (void)sem_post(&priv->devsem);
 }
 
 /****************************************************************************
@@ -259,7 +256,8 @@ static inline void cc3000_configspi(FAR struct spi_dev_s *spi)
 
   SPI_SETMODE(spi, CONFIG_CC3000_SPI_MODE);
   SPI_SETBITS(spi, 8);
-  SPI_SETFREQUENCY(spi, CONFIG_CC3000_SPI_FREQUENCY);
+  (void)SPI_HWFEATURES(spi, 0);
+  (void)SPI_SETFREQUENCY(spi, CONFIG_CC3000_SPI_FREQUENCY);
 }
 
 /****************************************************************************
@@ -282,15 +280,9 @@ static inline void cc3000_configspi(FAR struct spi_dev_s *spi)
 
 static void cc3000_lock_and_select(FAR struct spi_dev_s *spi)
 {
-#ifndef CONFIG_SPI_OWNBUS
-  /* Lock the SPI bus because there are multiple devices competing for the
-   * SPI bus
-   */
-
   /* Lock the SPI bus so that we have exclusive access */
 
   (void)SPI_LOCK(spi, true);
-#endif
 
   /* We have the lock.  Now make sure that the SPI bus is configured for the
    * CC3000 (it might have gotten configured for a different device while
@@ -305,9 +297,8 @@ static void cc3000_lock_and_select(FAR struct spi_dev_s *spi)
  * Function: cc3000_unlock
  *
  * Description:
- *   If we are sharing the SPI bus with other devices (CONFIG_SPI_OWNBUS
- *   undefined) then we need to un-lock the SPI bus for each transfer,
- *   possibly losing the current configuration.
+ *   Un-lock the SPI bus after each transfer, possibly losing the current
+ *   configuration if we are sharing the SPI bus with other devices.
  *
  * Parameters:
  *   spi  - Reference to the SPI driver structure
@@ -325,11 +316,9 @@ static void cc3000_deselect_and_unlock(FAR struct spi_dev_s *spi)
 
   SPI_SELECT(spi, SPIDEV_WIRELESS, false);
 
-#ifndef CONFIG_SPI_OWNBUS
   /* Relinquish the SPI bus. */
 
   (void)SPI_LOCK(spi, false);
-#endif
 }
 
 /****************************************************************************
@@ -350,7 +339,7 @@ static void cc3000_deselect_and_unlock(FAR struct spi_dev_s *spi)
  *
  ****************************************************************************/
 
-static int cc3000_wait(FAR struct cc3000_dev_s *priv, sem_t* psem)
+static int cc3000_wait(FAR struct cc3000_dev_s *priv, sem_t *psem)
 {
   int ret;
 
@@ -362,27 +351,16 @@ static int cc3000_wait(FAR struct cc3000_dev_s *priv, sem_t* psem)
   /* Wait on first psem to become signaled */
 
   ret = sem_wait(psem);
-  if (ret >= 0)
-    {
-      /* Yes... then retake the mutual exclusion semaphore */
-
-      ret = cc3000_devtake(priv);
-    }
-
-  sched_unlock();
-
-  /* Was the semaphore wait successful? Did we successful re-take the
-   * mutual exclusion semaphore?
-   */
-
   if (ret < 0)
     {
-      /* No.. One of the two sem_wait's failed. */
-
-      ret = -errno;
+      return -errno;
     }
 
-  return ret;
+  /* Then retake the mutual exclusion semaphore */
+
+  cc3000_devtake(priv);
+  sched_unlock();
+  return OK;
 }
 
 /****************************************************************************
@@ -404,7 +382,7 @@ static int cc3000_wait(FAR struct cc3000_dev_s *priv, sem_t* psem)
 
 static inline int cc3000_wait_irq(FAR struct cc3000_dev_s *priv)
 {
-  return cc3000_wait(priv,&priv->irqsem);
+  return cc3000_wait(priv, &priv->irqsem);
 }
 
 /****************************************************************************
@@ -426,7 +404,7 @@ static inline int cc3000_wait_irq(FAR struct cc3000_dev_s *priv)
 
 static inline int cc3000_wait_ready(FAR struct cc3000_dev_s *priv)
 {
-  return cc3000_wait(priv,&priv->readysem);
+  return cc3000_wait(priv, &priv->readysem);
 }
 
 /****************************************************************************
@@ -531,7 +509,7 @@ static void * select_thread_func(FAR void *arg)
                         {
                           /* Release the waiting threads */
 
-                          waitlldbg("Closed Signaled %d\n",count);
+                          waitlldbg("Closed Signaled %d\n", count);
                           sem_post(&priv->sockets[s].semwait);
                         }
                     }
@@ -631,12 +609,12 @@ static void * cc3000_worker(FAR void *arg)
 
   ASSERT(priv != NULL && priv->config != NULL);
 
-  /* We have started  release our creator*/
+  /* We have started, release our creator */
 
   sem_post(&priv->readysem);
   while (1)
     {
-      PROBE(0,1);
+      PROBE(0, 1);
       CHECK_GUARD(priv);
       cc3000_devtake(priv);
 
@@ -644,8 +622,8 @@ static void * cc3000_worker(FAR void *arg)
 
       if ((cc3000_wait_irq(priv) != -EINTR) && (priv->workertid != -1))
         {
-          PROBE(0,0);
-          nllvdbg("State%d\n",priv->state);
+          PROBE(0, 0);
+          nllvdbg("State%d\n", priv->state);
           switch (priv->state)
             {
             case eSPI_STATE_POWERUP:
@@ -672,7 +650,7 @@ static void * cc3000_worker(FAR void *arg)
 
                 cc3000_lock_and_select(priv->spi); /* Assert CS */
                 priv->state = eSPI_STATE_READ_PROCEED;
-                SPI_EXCHANGE(priv->spi,spi_readCommand, priv->rx_buffer.pbuffer,
+                SPI_EXCHANGE(priv->spi, spi_readCommand, priv->rx_buffer.pbuffer,
                              ARRAY_SIZE(spi_readCommand));
 
                /* Extract Length bytes from Rx Buffer.  Here we need to convert
@@ -719,7 +697,8 @@ static void * cc3000_worker(FAR void *arg)
                     priv->state = eSPI_STATE_READ_READY;
                     priv->rx_buffer.len = data_to_recv;
 
-                    ret = mq_send(priv->queue, &priv->rx_buffer, sizeof(priv->rx_buffer), 1);
+                    ret = mq_send(priv->queue, (FAR const char *)&priv->rx_buffer,
+                                  sizeof(priv->rx_buffer), 1);
                     DEBUGASSERT(ret >= 0);
                     UNUSED(ret);
 
@@ -737,7 +716,7 @@ static void * cc3000_worker(FAR void *arg)
                             priv->state, priv->config->irq_read(priv->config));
 
                     sem_getvalue(&priv->irqsem, &count);
-                    if (priv->config->irq_read(priv->config) && count==0)
+                    if (priv->config->irq_read(priv->config) && count == 0)
                       {
                         sem_post(&priv->irqsem);
                       }
@@ -753,7 +732,7 @@ static void * cc3000_worker(FAR void *arg)
               break;
 
             default:
-              nllvdbg("default: State%d\n",priv->state);
+              nllvdbg("default: State%d\n", priv->state);
               break;
             }
         }
@@ -786,9 +765,9 @@ static int cc3000_interrupt(int irq, FAR void *context)
 
   /* Run the worker thread */
 
-  PROBE(1,0);
+  PROBE(1, 0);
   sem_post(&priv->irqsem);
-  PROBE(1,1);
+  PROBE(1, 1);
 
   /* Clear any pending interrupts and return success */
 
@@ -827,11 +806,7 @@ static int cc3000_open(FAR struct file *filep)
 
   /* Get exclusive access to the driver data structure */
 
-  ret = cc3000_devtake(priv);
-  if (ret < 0)
-    {
-      return -ret;
-    }
+  cc3000_devtake(priv);
 
   /* Increment the reference count */
 
@@ -866,7 +841,7 @@ static int cc3000_open(FAR struct file *filep)
         }
 #endif
 
-      /* Ensure the power is off  so we get the falling edge of IRQ*/
+      /* Ensure the power is off  so we get the falling edge of IRQ */
 
       priv->config->power_enable(priv->config, false);
 
@@ -886,7 +861,7 @@ static int cc3000_open(FAR struct file *filep)
        */
 
       snprintf(queuename, QUEUE_NAMELEN, QUEUE_FORMAT, priv->minor);
-      priv->queue = mq_open(queuename,O_WRONLY|O_CREAT, 0666, &attr);
+      priv->queue = mq_open(queuename, O_WRONLY | O_CREAT, 0666, &attr);
       if (priv->queue < 0)
         {
           ret = -errno;
@@ -993,9 +968,8 @@ out_with_sem:
 
 static int cc3000_close(FAR struct file *filep)
 {
-  FAR struct inode         *inode;
+  FAR struct inode *inode;
   FAR struct cc3000_dev_s *priv;
-  int                       ret;
 #ifdef CONFIG_CC3000_MT
   int s;
 #endif
@@ -1012,11 +986,7 @@ static int cc3000_close(FAR struct file *filep)
 
   /* Get exclusive access to the driver data structure */
 
-  ret = cc3000_devtake(priv);
-  if (ret < 0)
-    {
-      return -EINTR;
-    }
+  cc3000_devtake(priv);
 
   /* Decrement the reference count unless it would decrement a negative
    * value.  When the count decrements to zero, there are no further
@@ -1093,13 +1063,7 @@ static ssize_t cc3000_read(FAR struct file *filep, FAR char *buffer, size_t len)
 
   /* Get exclusive access to the driver data structure */
 
-  ret = cc3000_devtake(priv);
-
-  if (ret < 0)
-    {
-      nread = -errno;
-      goto errout_without_sem;
-    }
+  cc3000_devtake(priv);
 
   /* Verify that the caller has provided a buffer large enough to receive
    * the maximum data.
@@ -1159,7 +1123,7 @@ static ssize_t cc3000_read(FAR struct file *filep, FAR char *buffer, size_t len)
         {
           /* Yes... then retake the mutual exclusion semaphore */
 
-          ret = cc3000_devtake(priv);
+          cc3000_devtake(priv);
         }
 
       /* Was the semaphore wait successful? Did we successful re-take the
@@ -1194,7 +1158,7 @@ static ssize_t cc3000_read(FAR struct file *filep, FAR char *buffer, size_t len)
 
   if (nread > 0)
     {
-      memcpy(buffer,priv->rx_buffer.pbuffer,priv->rx_buffer.len);
+      memcpy(buffer, priv->rx_buffer.pbuffer, priv->rx_buffer.len);
       priv->rx_buffer.len = 0;
      }
 
@@ -1234,7 +1198,7 @@ static ssize_t cc3000_write(FAR struct file *filep, FAR const char *usrbuffer, s
 
   size_t tx_len = (len & 1) ? len : len +1;
 
-  nllvdbg("buffer:%p len:%d tx_len:%d\n", buffer, len, tx_len );
+  nllvdbg("buffer:%p len:%d tx_len:%d\n", buffer, len, tx_len);
 
   DEBUGASSERT(filep);
   inode = filep->f_inode;
@@ -1246,15 +1210,7 @@ static ssize_t cc3000_write(FAR struct file *filep, FAR const char *usrbuffer, s
 
   /* Get exclusive access to the driver data structure */
 
-  ret = cc3000_devtake(priv);
-  if (ret < 0)
-    {
-      /* This should only happen if the wait was canceled by an signal */
-
-      ndbg("sem_wait: %d\n", errno);
-      nwritten = -errno;
-      goto errout_without_sem;
-    }
+  cc3000_devtake(priv);
 
   /* Figure out the total length of the packet in order to figure out if there is padding or not */
 
@@ -1359,13 +1315,7 @@ static int cc3000_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   /* Get exclusive access to the driver data structure */
 
-  ret = cc3000_devtake(priv);
-  if (ret < 0)
-    {
-      /* This should only happen if the wait was canceled by an signal */
-
-      return -errno;
-    }
+  cc3000_devtake(priv);
 
   /* Process the IOCTL by command */
 
@@ -1428,10 +1378,10 @@ static int cc3000_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
           DEBUGASSERT(psize != NULL);
           rv = priv->rx_buffer_max_len;
-          flags = irqsave();
+          flags = enter_critical_section();
           priv->rx_buffer_max_len = *psize;
-          priv->rx_buffer.pbuffer = kmm_realloc(priv->rx_buffer.pbuffer,*psize);
-          irqrestore(flags);
+          priv->rx_buffer.pbuffer = kmm_realloc(priv->rx_buffer.pbuffer, *psize);
+          leave_critical_section(flags);
           DEBUGASSERT(priv->rx_buffer.pbuffer);
           *psize = rv;
           break;
@@ -1470,13 +1420,7 @@ static int cc3000_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
   /* Are we setting up the poll?  Or tearing it down? */
 
-  ret = cc3000_devtake(priv);
-  if (ret < 0)
-    {
-      /* This should only happen if the wait was canceled by an signal */
-
-      return -errno;
-    }
+  cc3000_devtake(priv);
 
   if (setup)
     {
@@ -1605,7 +1549,7 @@ int cc3000_register(FAR struct spi_dev_s *spi,
   sem_init(&priv->devsem,  0, 1);    /* Initialize device structure semaphore */
 
   (void)snprintf(semname, SEM_NAMELEN, SEM_FORMAT, minor);
-  priv->wrkwaitsem = sem_open(semname,O_CREAT,0,0); /* Initialize  Worker Wait semaphore */
+  priv->wrkwaitsem = sem_open(semname, O_CREAT, 0, 0); /* Initialize  Worker Wait semaphore */
 
 #ifdef CONFIG_CC3000_MT
   pthread_mutex_init(&g_cc3000_mut, NULL);
@@ -1645,7 +1589,7 @@ int cc3000_register(FAR struct spi_dev_s *spi,
 #ifdef CONFIG_CC3000_MULTIPLE
   priv->flink    = g_cc3000list;
   g_cc3000list = priv;
-  irqrestore(flags);
+  leave_critical_section(flags);
 #endif
 
   /* And return success (?) */
@@ -1783,7 +1727,7 @@ static int cc3000_add_socket(FAR struct cc3000_dev_s *priv, int sd)
       return sd;
     }
 
-  flags = irqsave();
+  flags = enter_critical_section();
   for (s = 0; s < CONFIG_WL_MAX_SOCKETS; s++)
     {
       if (priv->sockets[s].sd == FREE_SLOT)
@@ -1795,7 +1739,7 @@ static int cc3000_add_socket(FAR struct cc3000_dev_s *priv, int sd)
         }
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return s >= CONFIG_WL_MAX_SOCKETS ? -1 : OK;
 }
 
@@ -1826,7 +1770,7 @@ static int cc3000_remove_socket(FAR struct cc3000_dev_s *priv, int sd)
       return sd;
     }
 
-  flags = irqsave();
+  flags = enter_critical_section();
   if (priv->accepting_socket.acc.sd == sd)
     {
       priv->accepting_socket.acc.sd = CLOSE_SLOT;
@@ -1845,7 +1789,7 @@ static int cc3000_remove_socket(FAR struct cc3000_dev_s *priv, int sd)
         }
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   if (ps)
     {
       sched_lock();
@@ -1885,7 +1829,7 @@ static int cc3000_remote_closed_socket(FAR struct cc3000_dev_s *priv, int sd)
       return sd;
     }
 
-  flags = irqsave();
+  flags = enter_critical_section();
   for (s = 0; s < CONFIG_WL_MAX_SOCKETS; s++)
     {
       if (priv->sockets[s].sd == sd)
@@ -1894,7 +1838,7 @@ static int cc3000_remote_closed_socket(FAR struct cc3000_dev_s *priv, int sd)
         }
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   return s >= CONFIG_WL_MAX_SOCKETS ? -1 : OK;
 }

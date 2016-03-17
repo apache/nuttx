@@ -352,7 +352,7 @@ static int pcode_load(struct binary_s *binp)
         {
           /* Set up for the next gulp */
 
-          DEBUGASSERT(nread > 0 && nread <=remaining);
+          DEBUGASSERT(nread > 0 && nread <= remaining);
           remaining -= nread;
           ptr += nread;
         }

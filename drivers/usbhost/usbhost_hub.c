@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/usbhost/usbhost_hub.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Kaushal Parikh <kaushal@dspworks.in>
  *           Gregory Nutt <gnutt@nuttx.org>
  *
@@ -48,6 +48,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/arch.h>
 #include <nuttx/wqueue.h>
@@ -356,7 +357,7 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_class_s *hubclass,
 
   /* Get the total length of the configuration descriptor (little endian).
    * It might be a good check to get the number of interfaces here too.
-  */
+   */
 
   remaining = (int)usbhost_getle16(cfgdesc->totallen);
 
@@ -980,7 +981,7 @@ static void usbhost_hub_event(FAR void *arg)
    * removed.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   if (!priv->disconnected)
     {
       /* Wait for the next hub event */
@@ -993,7 +994,7 @@ static void usbhost_hub_event(FAR void *arg)
         }
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -1038,7 +1039,7 @@ static void usbhost_disconnect_event(FAR void *arg)
    * longer available.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Cancel any pending transfers on the interrupt IN pipe */
 
@@ -1098,7 +1099,7 @@ static void usbhost_disconnect_event(FAR void *arg)
 
   kmm_free(hubclass);
   hport->devclass = NULL;
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -1463,7 +1464,7 @@ static int usbhost_disconnected(struct usbhost_class_s *hubclass)
    * any subsequent completions of asynchronous transfers.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   priv->disconnected = true;
 
   /* Cancel any pending work. There may be pending HUB work associated with
@@ -1476,7 +1477,7 @@ static int usbhost_disconnected(struct usbhost_class_s *hubclass)
 
   ret = work_queue(LPWORK, &priv->work,
                    (worker_t)usbhost_disconnect_event, hubclass, 0);
-  irqrestore(flags);
+  leave_critical_section(flags);
   return ret;
 }
 

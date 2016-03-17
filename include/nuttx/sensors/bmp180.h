@@ -36,7 +36,9 @@
 #ifndef __DRIVERS_SENSORS_BMP180_H
 #define __DRIVERS_SENSORS_BMP180_H
 
-#if defined(CONFIG_BMP180)
+#include <nuttx/config.h>
+
+#if defined(CONFIG_I2C) && defined(CONFIG_BMP180)
 
 /********************************************************************************************
  * Pre-processor Definitions
@@ -52,6 +54,12 @@
  * CONFIG_BMP180_REGDEBUG
  *   Enable very low register-level debug output.  Requires CONFIG_DEBUG.
  */
+
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
+struct i2c_master_s;
 
 /********************************************************************************************
  * Public Function Prototypes
@@ -81,12 +89,12 @@ extern "C"
  *
  ****************************************************************************/
 
-int bmp180_register(FAR const char *devpath, FAR struct i2c_dev_s *i2c);
+int bmp180_register(FAR const char *devpath, FAR struct i2c_master_s *i2c);
 
 #undef EXTERN
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* CONFIG_BMP180 */
+#endif /* CONFIG_I2C && CONFIG_BMP180 */
 #endif /* __DRIVERS_BMP180_H */

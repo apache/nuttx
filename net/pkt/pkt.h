@@ -61,7 +61,7 @@
  * Public Type Definitions
  ****************************************************************************/
 
-/* Representation of a uIP packet socket connection */
+/* Representation of a packet socket connection */
 
 struct devif_callback_s; /* Forward reference */
 
@@ -94,7 +94,7 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
- struct eth_hdr_s; /* Forward reference */
+struct eth_hdr_s; /* Forward reference */
 
 /* Defined in pkt_conn.c ****************************************************/
 /****************************************************************************

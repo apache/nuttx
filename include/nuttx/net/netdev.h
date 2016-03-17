@@ -2,7 +2,7 @@
  * include/nuttx/net/netdev.h
  * Defines architecture-specific device driver interfaces to the uIP network.
  *
- *   Copyright (C) 2007, 2009, 2011-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Derived largely from portions of uIP with has a similar BSD-styple license:
@@ -66,16 +66,113 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Helper macros for network device statistics */
+
+#ifdef CONFIG_NETDEV_STATISTICS
+#  define NETDEV_RESET_STATISTICS(dev) \
+     memset(&(dev)->d_statistics, 0, sizeof(struct netdev_statistics_s))
+
+#  define _NETDEV_STATISTIC(dev,name) ((dev)->d_statistics.name++)
+#  define _NETDEV_ERROR(dev,name) \
+     do \
+       { \
+         (dev)->d_statistics.name++; \
+         (dev)->d_statistics.errors++; \
+       } \
+     while (0)
+
+#  define NETDEV_RXPACKETS(dev)   _NETDEV_STATISTIC(dev,rx_packets)
+#  define NETDEV_RXFRAGMENTS(dev) _NETDEV_STATISTIC(dev,rx_fragments)
+#  define NETDEV_RXERRORS(dev)    _NETDEV_ERROR(dev,rx_errors)
+#  ifdef CONFIG_NET_IPv4
+#    define NETDEV_RXIPV4(dev)    _NETDEV_STATISTIC(dev,rx_ipv4)
+#  else
+#    define NETDEV_RXIPV4(dev)
+#  endif
+#  ifdef CONFIG_NET_IPv6
+#    define NETDEV_RXIPV6(dev)    _NETDEV_STATISTIC(dev,rx_ipv6)
+#  else
+#    define NETDEV_RXIPV6(dev)
+#  endif
+#  ifdef CONFIG_NET_ARP
+#    define NETDEV_RXARP(dev)     _NETDEV_STATISTIC(dev,rx_arp)
+#  else
+#    define NETDEV_RXARP(dev)
+#  endif
+#  define NETDEV_RXDROPPED(dev)   _NETDEV_STATISTIC(dev,rx_dropped)
+
+#  define NETDEV_TXPACKETS(dev)   _NETDEV_STATISTIC(dev,tx_packets)
+#  define NETDEV_TXDONE(dev)      _NETDEV_STATISTIC(dev,tx_done)
+#  define NETDEV_TXERRORS(dev)    _NETDEV_ERROR(dev,tx_errors)
+#  define NETDEV_TXTIMEOUTS(dev)  _NETDEV_ERROR(dev,tx_timeouts)
+
+#  define NETDEV_ERRORS(dev)      _NETDEV_STATISTIC(dev,errors)
+
+#else
+#  define NETDEV_RESET_STATISTICS(dev)
+#  define NETDEV_RXPACKETS(dev)
+#  define NETDEV_RXFRAGMENTS(dev)
+#  define NETDEV_RXERRORS(dev)
+#  define NETDEV_RXIPV4(dev)
+#  define NETDEV_RXIPV6(dev)
+#  define NETDEV_RXARP(dev)
+#  define NETDEV_RXDROPPED(dev)
+
+#  define NETDEV_TXPACKETS(dev)
+#  define NETDEV_TXDONE(dev)
+#  define NETDEV_TXERRORS(dev)
+#  define NETDEV_TXTIMEOUTS(dev)
+
+#  define NETDEV_ERRORS(dev)
+#endif
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
 
-struct devif_callback_s; /* Forward reference */
+#ifdef CONFIG_NETDEV_STATISTICS
+/* If CONFIG_NETDEV_STATISTICS is enabled and if the driver supports
+ * statistics, then this structure holds the counts of network driver
+ * events.
+ */
+
+struct netdev_statistics_s
+{
+  /* Rx Status */
+
+  uint32_t rx_packets;     /* Number of packets received */
+  uint32_t rx_fragments;   /* Number of fragments received */
+  uint32_t rx_errors;      /* Number of receive errors */
+#ifdef CONFIG_NET_IPv4
+  uint32_t rx_ipv4;        /* Number of Rx IPv4 packets received */
+#endif
+#ifdef CONFIG_NET_IPv6
+  uint32_t rx_ipv6;        /* Number of Rx IPv6 packets received */
+#endif
+#ifdef CONFIG_NET_ARP
+  uint32_t rx_arp;         /* Number of Rx ARP packets received */
+#endif
+  uint32_t rx_dropped;     /* Unsupported Rx packets received */
+
+  /* Tx Status */
+
+  uint32_t tx_packets;     /* Number of Tx packets queued */
+  uint32_t tx_done;        /* Number of packets completed */
+  uint32_t tx_errors;      /* Number of receive errors (incl timeouts) */
+  uint32_t tx_timeouts;    /* Number of Tx timeout errors */
+
+  /* Other status */
+
+  uint32_t errors;         /* Total umber of errors */
+};
+#endif
 
 /* This structure collects information that is specific to a specific network
  * interface driver.  If the hardware platform supports only a single instance
  * of this structure.
  */
+
+struct devif_callback_s; /* Forward reference */
 
 struct net_driver_s
 {
@@ -192,6 +289,15 @@ struct net_driver_s
   sq_queue_t grplist;
 #endif
 
+#ifdef CONFIG_NETDEV_STATISTICS
+  /* If CONFIG_NETDEV_STATISTICS is enabled and if the driver supports
+   * statistics, then this structure holds the counts of network driver
+   * events.
+   */
+
+  struct netdev_statistics_s d_statistics;
+#endif
+
   /* Application callbacks:
    *
    * Network device event handlers are retained in a 'list' and are called
@@ -239,7 +345,7 @@ struct net_driver_s
 typedef int (*devif_poll_callback_t)(FAR struct net_driver_s *dev);
 
 /****************************************************************************
- * Public Variables
+ * Public Data
  ****************************************************************************/
 
 /****************************************************************************
@@ -369,8 +475,7 @@ int ipv6_input(FAR struct net_driver_s *dev);
  ****************************************************************************/
 
 int devif_poll(FAR struct net_driver_s *dev, devif_poll_callback_t callback);
-int devif_timer(FAR struct net_driver_s *dev, devif_poll_callback_t callback,
-                int hsec);
+int devif_timer(FAR struct net_driver_s *dev, devif_poll_callback_t callback);
 
 /****************************************************************************
  * Name: neighbor_out

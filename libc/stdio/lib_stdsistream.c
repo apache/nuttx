@@ -39,7 +39,7 @@
 
 #include <assert.h>
 
-#include "lib_internal.h"
+#include "libc.h"
 
 /****************************************************************************
  * Private Functions
@@ -64,7 +64,7 @@ static int stdsistream_getc(FAR struct lib_sistream_s *this)
       this->nget++;
     }
 
- return ret;
+  return ret;
 }
 
 /****************************************************************************

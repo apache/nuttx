@@ -46,6 +46,10 @@ CSRCS += pthread_attrinit.c pthread_attrdestroy.c \
 		  pthread_mutexattrinit.c pthread_mutexattrdestroy.c \
 		  pthread_mutexattrgetpshared.c pthread_mutexattrsetpshared.c
 
+ifeq ($(CONFIG_SMP),y)
+CSRCS += pthread_attrgetaffinity.c pthread_attrsetaffinity.c
+endif
+
 ifeq ($(CONFIG_MUTEX_TYPES),y)
 CSRCS += pthread_mutexattrsettype.c pthread_mutexattrgettype.c
 endif

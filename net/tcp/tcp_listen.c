@@ -243,7 +243,7 @@ bool tcp_islistener(uint16_t portno)
  *   Accept the new connection for the specified listening port.
  *
  * Assumptions:
- *   Called at interrupt level
+ *   Called with the network locked.
  *
  ****************************************************************************/
 

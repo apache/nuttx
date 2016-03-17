@@ -51,26 +51,6 @@
 #include "netdev/netdev.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -79,7 +59,7 @@
  *
  * Description:
  *   Notify the device driver that forwards the IPv4 address that the
- *  application waits for RX data.
+ *   application waits for RX data.
  *
  * Parameters:
  *   lipaddr - The local board IPv6 address of the socket
@@ -124,7 +104,7 @@ void netdev_ipv4_rxnotify(in_addr_t ripaddr)
  *
  * Description:
  *   Notify the device driver that forwards the IPv6 address that the
- *  application waits for RX data.
+ *   application waits for RX data.
  *
  * Parameters:
  *   lipaddr - The local board IPv6 address of the socket

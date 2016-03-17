@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/local/local_connnect.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -97,7 +97,7 @@ static inline void _local_semtake(sem_t *sem)
        * the wait was awakened by a signal.
        */
 
-      ASSERT(*get_errno_ptr() == EINTR);
+      DEBUGASSERT(get_errno() == EINTR);
     }
 }
 
@@ -143,7 +143,7 @@ int inline local_stream_connect(FAR struct local_conn_s *client,
       return -ECONNREFUSED;
     }
 
-  /* Increment the number of pending server connection s*/
+  /* Increment the number of pending server connection s */
 
   server->u.server.lc_pending++;
   DEBUGASSERT(server->u.server.lc_pending != 0);
@@ -271,7 +271,7 @@ int psock_local_connect(FAR struct socket *psock,
   /* Find the matching server connection */
 
   state = net_lock();
-  for(conn = (FAR struct local_conn_s *)g_local_listeners.head;
+  for (conn = (FAR struct local_conn_s *)g_local_listeners.head;
       conn;
       conn = (FAR struct local_conn_s *)dq_next(&conn->lc_node))
     {

@@ -50,10 +50,6 @@
 #ifdef CONFIG_GRAN
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Data
  ****************************************************************************/
 
@@ -127,7 +123,7 @@ gran_common_initialize(FAR void *heapstart, size_t heapsize, uint8_t log2gran,
    * correct size.
    */
 
-  priv = ( FAR struct gran_s *)kmm_zalloc(SIZEOF_GRAN_S(ngranules));
+  priv = (FAR struct gran_s *)kmm_zalloc(SIZEOF_GRAN_S(ngranules));
   if (priv)
     {
       /* Initialize non-zero elements of the granules heap info structure */

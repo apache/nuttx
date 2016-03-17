@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/devif/devif.h
  *
- *   Copyright (C) 2007-2009, 2013-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2013-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * This logic was leveraged from uIP which also has a BSD-style license:
@@ -51,6 +51,7 @@
 #include <errno.h>
 #include <arch/irq.h>
 
+#include <nuttx/clock.h>
 #include <nuttx/net/ip.h>
 
 /****************************************************************************
@@ -256,6 +257,10 @@ extern uint16_t g_ipid;
 extern uint8_t g_reassembly_timer;
 #endif
 
+/* Time of last poll */
+
+extern systime_t g_polltime;
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -291,7 +296,7 @@ void devif_initialize(void);
  *   Configure the pre-allocated callback structures into a free list.
  *
  * Assumptions:
- *   This function is called with interrupts disabled.
+ *   This function must be called with the network locked.
  *
  ****************************************************************************/
 
@@ -309,7 +314,7 @@ void devif_callback_init(void);
  *   callback.
  *
  * Assumptions:
- *   This function is called with the network locked.
+ *   This function must be called with the network locked.
  *
  ****************************************************************************/
 
@@ -331,7 +336,7 @@ FAR struct devif_callback_s *
  *   The callback structure will be freed in any event.
  *
  * Assumptions:
- *   This function is called with the network locked.
+ *   This function must be called with the network locked.
  *
  ****************************************************************************/
 
@@ -355,7 +360,7 @@ void devif_conn_callback_free(FAR struct net_driver_s *dev,
  *   The callback structure will be freed in any event.
  *
  * Assumptions:
- *   This function is called with the network locked.
+ *   This function must be called with the network locked.
  *
  ****************************************************************************/
 
@@ -381,7 +386,7 @@ void devif_dev_callback_free(FAR struct net_driver_s *dev,
  *   The updated flags as modified by the callback functions.
  *
  * Assumptions:
- *   This function is called with the network locked.
+ *   This function must be called with the network locked.
  *
  ****************************************************************************/
 
@@ -406,7 +411,7 @@ uint16_t devif_conn_event(FAR struct net_driver_s *dev, FAR void *pvconn,
  *   The updated flags as modified by the callback functions.
  *
  * Assumptions:
- *   This function is called with the network locked.
+ *   This function must be called with the network locked.
  *
  ****************************************************************************/
 
@@ -423,8 +428,8 @@ uint16_t devif_dev_event(FAR struct net_driver_s *dev, void *pvconn,
  * The amount of data that actually is sent out after a call to this
  * function is determined by the maximum amount of data TCP allows. uIP
  * will automatically crop the data so that only the appropriate
- * amount of data is sent. The function tcp_mss() can be used to query
- * uIP for the amount of data that actually will be sent.
+ * amount of data is sent. The mss field of the TCP connection structure
+ * can be used to determine the amount of data that actually will be sent.
  *
  * Note:  This function does not guarantee that the sent data will
  * arrive at the destination.  If the data is lost in the network, the
@@ -450,8 +455,7 @@ void devif_send(FAR struct net_driver_s *dev, FAR const void *buf, int len);
  *   in an I/O buffer chain, rather than a flat buffer.
  *
  * Assumptions:
- *   Called from the interrupt level or, at a minimum, with interrupts
- *   disabled.
+ *   This function must be called with the network locked.
  *
  ****************************************************************************/
 
@@ -473,8 +477,7 @@ void devif_iob_send(FAR struct net_driver_s *dev, FAR struct iob_s *buf,
  *   no header on the data.
  *
  * Assumptions:
- *   Called from the interrupt level or, at a minimum, with interrupts
- *   disabled.
+ *   This function must be called with the network locked.
  *
  ****************************************************************************/
 

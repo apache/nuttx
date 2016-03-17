@@ -40,11 +40,6 @@ ifeq ($(CONFIG_FS_SMARTFS),y)
 ASRCS +=
 CSRCS += smartfs_smart.c smartfs_utils.c smartfs_procfs.c
 
-# Files required for mksmartfs utility function
-
-ASRCS +=
-CSRCS += smartfs_mksmartfs.c
-
 # Include SMART build support
 
 DEPPATH += --dep-path smartfs

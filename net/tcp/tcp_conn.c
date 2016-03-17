@@ -543,16 +543,16 @@ static inline int tcp_ipv4_bind(FAR struct tcp_conn_s *conn,
   net_ipv4addr_copy(conn->u.ipv4.laddr, addr->sin_addr.s_addr);
 #endif
 
-  /* Find the device that can receive packets on the network
-   * associated with this local address.
+  /* Find the device that can receive packets on the network associated with
+   * this local address.
    */
 
-  ret = tcp_find_ipv4_device(conn);
+  ret = tcp_local_ipv4_device(conn);
   if (ret < 0)
     {
       /* If no device is found, then the address is not reachable */
 
-      ndbg("tcp_find_ipv4_device failed: %d\n", ret);
+      ndbg("tcp_local_ipv4_device failed: %d\n", ret);
 
       /* Back out the local address setting */
 
@@ -628,12 +628,12 @@ static inline int tcp_ipv6_bind(FAR struct tcp_conn_s *conn,
    * associated with this local address.
    */
 
-  ret = tcp_find_ipv6_device(conn);
+  ret = tcp_local_ipv6_device(conn);
   if (ret < 0)
     {
       /* If no device is found, then the address is not reachable */
 
-      ndbg("tcp_find_ipv6_device failed: %d\n", ret);
+      ndbg("tcp_local_ipv6_device failed: %d\n", ret);
 
       /* Back out the local address setting */
 
@@ -1003,13 +1003,20 @@ FAR struct tcp_conn_s *tcp_alloc_accept(FAR struct net_driver_s *dev,
           net_ipv6addr_copy(conn->u.ipv6.raddr, ip->srcipaddr);
 #ifdef CONFIG_NETDEV_MULTINIC
           net_ipv6addr_copy(conn->u.ipv6.laddr, ip->destipaddr);
+
+          /* We now have to filter all outgoing transfers so that they use
+           * only the MSS of this device.
+           */
+
+          DEBUGASSERT(conn->dev == NULL || conn->dev == dev);
+          conn->dev = dev;
 #endif
 
           /* Find the device that can receive packets on the network
            * associated with this local address.
            */
 
-          ret = tcp_find_ipv6_device(conn);
+          ret = tcp_remote_ipv6_device(conn);
         }
 #endif /* CONFIG_NET_IPv6 */
 
@@ -1020,21 +1027,31 @@ FAR struct tcp_conn_s *tcp_alloc_accept(FAR struct net_driver_s *dev,
         {
           FAR struct ipv4_hdr_s *ip = IPv4BUF;
 
-          /* Set the IPv6 specific MSS and the IPv4 locally bound address. */
+          /* Set the IPv6 specific MSS and the IPv4 bound remote address. */
 
           conn->mss = TCP_IPv4_INITIAL_MSS(dev);
           net_ipv4addr_copy(conn->u.ipv4.raddr,
                             net_ip4addr_conv32(ip->srcipaddr));
+
 #ifdef CONFIG_NETDEV_MULTINIC
+          /* Set the local address as well */
+
           net_ipv4addr_copy(conn->u.ipv4.laddr,
                             net_ip4addr_conv32(ip->destipaddr));
+
+          /* We now have to filter all outgoing transfers so that they use
+           * only the MSS of this device.
+           */
+
+          DEBUGASSERT(conn->dev == NULL || conn->dev == dev);
+          conn->dev = dev;
 #endif
 
           /* Find the device that can receive packets on the network
            * associated with this local address.
            */
 
-          ret = tcp_find_ipv4_device(conn);
+          ret = tcp_remote_ipv4_device(conn);
         }
 #endif /* CONFIG_NET_IPv4 */
 
@@ -1238,8 +1255,9 @@ int tcp_connect(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr)
       goto errout_with_lock;
     }
 
-  /* Set up the local address (laddr) and the remote address (raddr) that describes the TCP connection.
-       */
+  /* Set up the local address (laddr) and the remote address (raddr) that
+   * describes the TCP connection.
+   */
 
 #ifdef CONFIG_NET_IPv4
 #ifdef CONFIG_NET_IPv6
@@ -1259,10 +1277,10 @@ int tcp_connect(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr)
       net_ipv4addr_copy(conn->u.ipv4.raddr, inaddr->sin_addr.s_addr);
 
       /* Find the device that can receive packets on the network associated
-       * with this local address.
+       * with this remote address.
        */
 
-      ret = tcp_find_ipv4_device(conn);
+      ret = tcp_remote_ipv4_device(conn);
     }
 #endif /* CONFIG_NET_IPv4 */
 
@@ -1287,7 +1305,7 @@ int tcp_connect(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr)
        * with this local address.
        */
 
-      ret = tcp_find_ipv6_device(conn);
+      ret = tcp_remote_ipv6_device(conn);
     }
 #endif /* CONFIG_NET_IPv6 */
 

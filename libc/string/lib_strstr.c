@@ -42,7 +42,7 @@
 #include <string.h>
 
 /****************************************************************************
- * Global Functions
+ * Public Functions
  ****************************************************************************/
 
 FAR char *strstr(FAR const char *str, FAR const char *substr)
@@ -62,13 +62,13 @@ FAR char *strstr(FAR const char *str, FAR const char *substr)
        * the string
        */
 
-      return (char*)str;
+      return (FAR char *)str;
     }
 
   /* Search for the substring */
 
   candidate = str;
-  for (;;)
+  for (; ; )
     {
       /* strchr() will return a pointer to the next occurrence of the
        * character ch in the string
@@ -77,19 +77,19 @@ FAR char *strstr(FAR const char *str, FAR const char *substr)
       candidate = strchr(candidate, ch);
       if (!candidate || strlen(candidate) < len)
         {
-           /* First character of the substring does not appear in the string
-            * or the remainder of the string is not long enough to contain the
-            * substring.
-            */
+          /* First character of the substring does not appear in the string
+           * or the remainder of the string is not long enough to contain the
+           * substring.
+           */
 
-           return NULL;
+          return NULL;
         }
 
       /* Check if this is the beginning of a matching substring */
 
       if (strncmp(candidate, substr, len) == 0)
         {
-           return (char*)candidate;
+          return (FAR char *)candidate;
         }
 
       /* No, find the next candidate after this one */

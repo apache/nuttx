@@ -40,7 +40,7 @@
 #include <stdio.h>
 #include <errno.h>
 
-#include "lib_internal.h"
+#include "libc.h"
 
 /****************************************************************************
  * Private Functions

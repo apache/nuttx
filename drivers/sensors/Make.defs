@@ -1,7 +1,7 @@
 ############################################################################
 # drivers/sensors/Make.defs
 #
-#   Copyright (C) 2011-2012, 2015 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2011-2012, 2015-2016 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -53,6 +53,10 @@ ifeq ($(CONFIG_LIS331DL),y)
   CSRCS += lis331dl.c
 endif
 
+ifeq ($(CONFIG_SN_LSM9DS1),y)
+  CSRCS += lsm9ds1.c
+endif
+
 ifeq ($(CONFIG_ADXL345_I2C),y)
   CSRCS += adxl345_i2c.c
 endif
@@ -69,6 +73,18 @@ ifeq ($(CONFIG_LM92),y)
   CSRCS += lm92.c
 endif
 
+ifeq ($(CONFIG_MB7040),y)
+  CSRCS += mb7040.c
+endif
+
+ifeq ($(CONFIG_MCP9844),y)
+  CSRCS += mcp9844.c
+endif
+
+ifeq ($(CONFIG_MS58XX),y)
+  CSRCS += ms58xx.c
+endif
+
 endif # CONFIG_I2C
 
 # These drivers depend on SPI support
@@ -76,6 +92,14 @@ endif # CONFIG_I2C
 ifeq ($(CONFIG_SPI),y)
 ifeq ($(CONFIG_ADXL345_SPI),y)
   CSRCS += adxl345_spi.c
+endif
+
+ifeq ($(CONFIG_MAX31855),y)
+  CSRCS += max31855.c
+endif
+
+ifeq ($(CONFIG_MAX6675),y)
+  CSRCS += max6675.c
 endif
 
 ifeq ($(CONFIG_MPL115A),y)
@@ -87,6 +111,12 @@ endif # CONFIG_SPI
 
 ifeq ($(CONFIG_QENCODER),y)
   CSRCS += qencoder.c
+endif
+
+# Zero Cross upper half
+
+ifeq ($(CONFIG_ZEROCROSS),y)
+  CSRCS += zerocross.c
 endif
 
 # Include sensor driver build support

@@ -67,10 +67,6 @@
 #include "socket/socket.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
  * Private Types
  ****************************************************************************/
 
@@ -82,7 +78,7 @@ struct tcp_close_s
   FAR struct socket       *cl_psock;  /* Reference to the TCP socket */
   sem_t                    cl_sem;    /* Signals disconnect completion */
   int                      cl_result; /* The result of the close */
-  uint32_t                 cl_start;  /* Time close started (in ticks) */
+  systime_t                cl_start;  /* Time close started (in ticks) */
 #endif
 };
 #endif
@@ -117,17 +113,17 @@ static inline int close_timeout(FAR struct tcp_close_s *pstate)
 
   if (pstate)
     {
-     /* Yes Check for a timeout configured via setsockopts(SO_LINGER).
-      * If none... we well let the send wait forever.
-      */
+      /* Yes Check for a timeout configured via setsockopts(SO_LINGER).
+       * If none... we well let the send wait forever.
+       */
 
-     psock = pstate->cl_psock;
-     if (psock && psock->s_linger != 0)
-       {
-         /* Check if the configured timeout has elapsed */
+      psock = pstate->cl_psock;
+      if (psock && psock->s_linger != 0)
+        {
+          /* Check if the configured timeout has elapsed */
 
-         return net_timeo(pstate->cl_start, psock->s_linger);
-       }
+          return net_timeo(pstate->cl_start, psock->s_linger);
+        }
     }
 
   /* No timeout */
@@ -179,7 +175,7 @@ static uint16_t netclose_interrupt(FAR struct net_driver_s *dev,
       /* The disconnection is complete */
 
 #ifdef CONFIG_NET_SOLINGER
-      /* pstate non-NULL means that we are performing a LINGERing close.*/
+      /* pstate non-NULL means that we are performing a LINGERing close. */
 
       if (pstate)
         {
@@ -223,7 +219,7 @@ static uint16_t netclose_interrupt(FAR struct net_driver_s *dev,
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
   /* Check if all outstanding bytes have been ACKed */
 
-  else if (conn->unacked != 0)
+  else if (conn->unacked != 0 || !sq_empty(&conn->write_q))
     {
       /* No... we are still waiting for ACKs.  Drop any received data, but
        * do not yet report TCP_CLOSE in the response.
@@ -357,14 +353,11 @@ static inline int netclose_disconnect(FAR struct socket *psock)
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
   if (psock->s_sndcb)
     {
-      tcp_callback_free(conn, psock->s_sndcb);
       psock->s_sndcb = NULL;
     }
 #endif
 
-  /* There shouldn't be any callbacks registered. */
-
-  DEBUGASSERT(conn && conn->list == NULL);
+  DEBUGASSERT(conn != NULL);
 
   /* Check for the case where the host beat us and disconnected first */
 
@@ -527,9 +520,12 @@ int psock_close(FAR struct socket *psock)
   /* We perform the uIP close operation only if this is the last count on
    * the socket. (actually, I think the socket crefs only takes the values
    * 0 and 1 right now).
+   *
+   * It is possible for a psock to have no connection, e.g. a TCP socket
+   * waiting in accept.
    */
 
-  if (psock->s_crefs <= 1)
+  if (psock->s_crefs <= 1 && psock->s_conn != NULL)
     {
       /* Perform uIP side of the close depending on the protocol type */
 

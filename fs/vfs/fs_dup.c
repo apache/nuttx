@@ -55,7 +55,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Global Functions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -77,7 +77,8 @@ int dup(int fd)
   if ((unsigned int)fd < CONFIG_NFILE_DESCRIPTORS)
     {
       /* Its a valid file descriptor.. dup the file descriptor using any
-       * other file descriptor*/
+       * other file descriptor
+       */
 
       ret = fs_dupfd(fd, 0);
     }

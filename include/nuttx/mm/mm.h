@@ -184,10 +184,10 @@
 
 #ifdef CONFIG_MM_SMALL
    typedef uint16_t mmsize_t;
-#  define MMSIZE_MAX 0xffff
+#  define MMSIZE_MAX UINT16_MAX
 #else
-   typedef size_t mmsize_t;
-#  define MMSIZE_MAX SIZE_MAX
+   typedef uint32_t mmsize_t;
+#  define MMSIZE_MAX UINT32_MAX
 #endif
 
 /* This describes an allocated chunk.  An allocated chunk is
@@ -287,7 +287,7 @@ extern "C"
  *   no global user heap structure.
  */
 
- #if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
+#if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
 /* In the kernel build, there a multiple user heaps; one for each task
  * group.  In this build configuration, the user heap structure lies
  * in a reserved region at the beginning of the .bss/.data address
@@ -491,8 +491,8 @@ int mm_mallinfo(FAR struct mm_heap_s *heap, FAR struct mallinfo *info);
 struct mallinfo kmm_mallinfo(void);
 #else
 int kmm_mallinfo(struct mallinfo *info);
-#endif
 #endif /* CONFIG_CAN_PASS_STRUCTS */
+#endif /* CONFIG_MM_KERNEL_HEAP */
 
 /* Functions contained in mm_shrinkchunk.c **********************************/
 

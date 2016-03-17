@@ -1,7 +1,7 @@
 /****************************************************************************
  * syscall/syscall_clock_systimer.c
  *
- *   Copyright (C) 2011-2012, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012, 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -74,7 +74,7 @@
  *
  ****************************************************************************/
 
-uint32_t syscall_clock_systimer(void)
+systime_t syscall_clock_systimer(void)
 {
   return clock_systimer();
 }

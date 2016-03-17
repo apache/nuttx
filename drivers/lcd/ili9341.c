@@ -1,4 +1,4 @@
-/******************************************************************************
+/****************************************************************************
  * drivers/lcd/ili9341.c
  *
  * LCD driver for the ILI9341 LCD Single Chip Driver
@@ -37,11 +37,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
-/******************************************************************************
+/****************************************************************************
  * Included Files
- ******************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -58,12 +58,11 @@
 
 #include <arch/irq.h>
 
-/******************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ******************************************************************************/
+ ****************************************************************************/
 
-/*
- * This is the generic lcd driver interface for the ili9341 Single Chip LCD
+/* This is the generic lcd driver interface for the ili9341 Single Chip LCD
  * driver. The driver supports multiple displays, each connected with an own
  * ili9341 Single Chip LCD driver. The communication with the LCD single chip
  * driver must be provide by a subdriver accessable trough the ili9341_dev_s
@@ -157,8 +156,7 @@
 
 /* Memory access control (MADCTL) */
 
-/*
- * Landscape:   00100000 / 00101000 / h28
+/* Landscape:   00100000 / 00101000 / h28
  *
  * MY:          0
  * MX:          0
@@ -186,8 +184,7 @@
                                         ILI9341_MADCTL_LANDSCAPE_BGR | \
                                         ILI9341_MADCTL_LANDSCAPE_MH)
 
-/*
- * Portrait:    00000000 / 00001000 / h08
+/* Portrait:    00000000 / 00001000 / h08
  *
  * MY:          0
  * MX:          0
@@ -198,9 +195,9 @@
  */
 
 #define ILI9341_MADCTL_PORTRAIT_MY      0
-#define ILI9341_MADCTL_PORTRAIT_MX      0
+#define ILI9341_MADCTL_PORTRAIT_MX      ILI9341_MEMORY_ACCESS_CONTROL_MX
 #define ILI9341_MADCTL_PORTRAIT_MV      0
-#define ILI9341_MADCTL_PORTRAIT_ML      0
+#define ILI9341_MADCTL_PORTRAIT_ML      ILI9341_MEMORY_ACCESS_CONTROL_ML
 #ifdef CONFIG_BIG_ENDIAN
 #  define ILI9341_MADCTL_PORTRAIT_BGR   0
 #else
@@ -214,8 +211,7 @@
                                         ILI9341_MADCTL_PORTRAIT_ML | \
                                         ILI9341_MADCTL_PORTRAIT_BGR | \
                                         ILI9341_MADCTL_PORTRAIT_MH)
-/*
- * RLandscape:  01100000 / 01101000 / h68
+/* RLandscape:  01100000 / 01101000 / h68
  *
  * MY:          0
  * MX:          1
@@ -225,7 +221,7 @@
  * MH:          0
  */
 
-#define ILI9341_MADCTL_RLANDSCAPE_MY    0
+#define ILI9341_MADCTL_RLANDSCAPE_MY    ILI9341_MEMORY_ACCESS_CONTROL_MY
 #define ILI9341_MADCTL_RLANDSCAPE_MX    ILI9341_MEMORY_ACCESS_CONTROL_MX
 #define ILI9341_MADCTL_RLANDSCAPE_MV    ILI9341_MEMORY_ACCESS_CONTROL_MV
 #define ILI9341_MADCTL_RLANDSCAPE_ML    0
@@ -244,8 +240,7 @@
                                         ILI9341_MADCTL_RLANDSCAPE_BGR | \
                                         ILI9341_MADCTL_RLANDSCAPE_MH)
 
-/*
- * RPortrait:   11000000 / 11001000 / hc8
+/* RPortrait:   11000000 / 11001000 / hc8
  *
  * MY:          1
  * MX:          1
@@ -257,9 +252,9 @@
  */
 
 #define ILI9341_MADCTL_RPORTRAIT_MY     ILI9341_MEMORY_ACCESS_CONTROL_MY
-#define ILI9341_MADCTL_RPORTRAIT_MX     ILI9341_MEMORY_ACCESS_CONTROL_MX
+#define ILI9341_MADCTL_RPORTRAIT_MX     0
 #define ILI9341_MADCTL_RPORTRAIT_MV     0
-#define ILI9341_MADCTL_RPORTRAIT_ML     0
+#define ILI9341_MADCTL_RPORTRAIT_ML     ILI9341_MEMORY_ACCESS_CONTROL_ML
 #ifdef CONFIG_BIG_ENDIAN
 #  define ILI9341_MADCTL_RPORTRAIT_BGR  0
 #else
@@ -292,8 +287,7 @@
 #define ILI9341_PIXSET_16BITMCU_PARAM1  (ILI9341_PIXSET_16BITDPI | \
                                         ILI9341_PIXSET_16BITDBI)
 
-/*
- * 18-bit MCU:  01100110 / h66 (not supported by nuttx until now)
+/* 18-bit MCU:  01100110 / h66 (not supported by nuttx until now)
  *
  * DPI:         6  (RGB18-666 RGB interface)
  * DBI:         6  (RGB18-666 MCU interface)
@@ -324,16 +318,16 @@
 /* First LCD display */
 
 #ifdef CONFIG_LCD_ILI9341_IFACE0
-#  ifdef CONFIG_LCD_ILI9341_IFACE0_LANDSCAPE
+#  if defined(CONFIG_LCD_ILI9341_IFACE0_LANDSCAPE)
 #    define ILI9341_IFACE0_ORIENT     ILI9341_MADCTL_LANDSCAPE_PARAM1
 #    define ILI9341_IFACE0_STRIDE     ILI9341_YRES
-#  elif CONFIG_LCD_ILI9341_IFACE0_PORTRAIT
+#  elif defined(CONFIG_LCD_ILI9341_IFACE0_PORTRAIT)
 #    define ILI9341_IFACE0_ORIENT     ILI9341_MADCTL_PORTRAIT_PARAM1
 #    define ILI9341_IFACE0_STRIDE     ILI9341_XRES
-#  elif CONFIG_LCD_ILI9341_IFACE0_RLANDSCAPE
+#  elif defined(CONFIG_LCD_ILI9341_IFACE0_RLANDSCAPE)
 #    define ILI9341_IFACE0_ORIENT     ILI9341_MADCTL_RLANDSCAPE_PARAM1
 #    define ILI9341_IFACE0_STRIDE     ILI9341_YRES
-#  elif CONFIG_LCD_ILI9341_IFACE0_RPORTRAIT
+#  elif defined(CONFIG_LCD_ILI9341_IFACE0_RPORTRAIT)
 #    define ILI9341_IFACE0_ORIENT     ILI9341_MADCTL_RPORTRAIT_PARAM1
 #    define ILI9341_IFACE0_STRIDE     ILI9341_XRES
 #  endif
@@ -383,12 +377,11 @@
 #  define lcdvdbg(x...)
 #endif
 
-/******************************************************************************
+/****************************************************************************
  * Private Type Definition
- ******************************************************************************/
+ ****************************************************************************/
 
-/*
- * Each single connected ili9341 LCD driver needs an own driver instance
+/* Each single connected ili9341 LCD driver needs an own driver instance
  * to provide a unique getrun and putrun method. Also store fundamental
  * parameter in driver internal structure. This minimal overhead should be
  * acceptable.
@@ -436,9 +429,9 @@ struct ili9341_dev_s
 };
 
 
-/******************************************************************************
+/****************************************************************************
  * Private Function Protototypes
- ******************************************************************************/
+ ****************************************************************************/
 
 /* Internal low level helpers */
 
@@ -453,14 +446,14 @@ static int ili9341_putrun(int devno, fb_coord_t row, fb_coord_t col,
 static int ili9341_getrun(int devno, fb_coord_t row, fb_coord_t col,
                          FAR uint8_t * buffer, size_t npixels);
 #endif
-/*
- * Definition of the public visible getrun / putrun methods
+
+/* Definition of the public visible getrun / putrun methods
  * each for a single LCD driver
  */
 
 #ifdef CONFIG_LCD_ILI9341_IFACE0
 static int ili9341_putrun0(fb_coord_t row, fb_coord_t col,
-                            FAR const uint8_t * buffer, size_t npixsels);
+                           FAR const uint8_t *buffer, size_t npixsels);
 #endif
 #ifdef CONFIG_LCD_ILI9341_IFACE1
 static int ili9341_putrun1(fb_coord_t row, fb_coord_t col,
@@ -492,9 +485,9 @@ static int ili9341_setpower(struct lcd_dev_s *dev, int power);
 static int ili9341_getcontrast(struct lcd_dev_s *dev);
 static int ili9341_setcontrast(struct lcd_dev_s *dev, unsigned int contrast);
 
-/******************************************************************************
+/****************************************************************************
  * Private Data
- ******************************************************************************/
+ ****************************************************************************/
 
 /* Initialize driver instance 1 < LCD_ILI9341_NINTERFACES */
 
@@ -537,11 +530,11 @@ static struct ili9341_dev_s g_lcddev[CONFIG_LCD_ILI9341_NINTERFACES] =
 #endif
 };
 
-/******************************************************************************
+/****************************************************************************
  * Private Functions
- ******************************************************************************/
+ ****************************************************************************/
 
-/******************************************************************************
+/****************************************************************************
  * Name:  ili9341_getxres
  *
  * Description:
@@ -555,7 +548,7 @@ static struct ili9341_dev_s g_lcddev[CONFIG_LCD_ILI9341_NINTERFACES] =
  *
  *   Horicontal resolution
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 static inline uint16_t ili9341_getxres(FAR struct ili9341_dev_s *dev)
 {
@@ -569,7 +562,7 @@ static inline uint16_t ili9341_getxres(FAR struct ili9341_dev_s *dev)
 }
 
 
-/*******************************************************************************
+/****************************************************************************
  * Name:  ili9341_getyres
  *
  * Description:
@@ -583,7 +576,7 @@ static inline uint16_t ili9341_getxres(FAR struct ili9341_dev_s *dev)
  *
  *   Vertical resolution
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 static inline uint16_t ili9341_getyres(FAR struct ili9341_dev_s *dev)
 {
@@ -597,7 +590,7 @@ static inline uint16_t ili9341_getyres(FAR struct ili9341_dev_s *dev)
 }
 
 
-/*******************************************************************************
+/****************************************************************************
  * Name:  ili9341_selectarea
  *
  * Description:
@@ -610,7 +603,7 @@ static inline uint16_t ili9341_getyres(FAR struct ili9341_dev_s *dev)
  *   x1        - End x position
  *   y1        - End y position
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 static void ili9341_selectarea(FAR struct ili9341_lcd_s *lcd,
                             uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1)
@@ -633,7 +626,7 @@ static void ili9341_selectarea(FAR struct ili9341_lcd_s *lcd,
 }
 
 
-/*******************************************************************************
+/****************************************************************************
  * Name:  ili9341_putrun
  *
  * Description:
@@ -652,14 +645,14 @@ static void ili9341_selectarea(FAR struct ili9341_lcd_s *lcd,
  *   On success - OK
  *   On error   - -EINVAL
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 static int ili9341_putrun(int devno, fb_coord_t row, fb_coord_t col,
                             FAR const uint8_t * buffer, size_t npixels)
 {
   FAR struct ili9341_dev_s *dev = &g_lcddev[devno];
   FAR struct ili9341_lcd_s *lcd = dev->lcd;
-  FAR const uint16_t *src = (const uint16_t*)buffer;
+  FAR const uint16_t *src = (FAR const uint16_t *)buffer;
 
   DEBUGASSERT(buffer && ((uintptr_t)buffer & 1) == 0);
 
@@ -693,7 +686,7 @@ static int ili9341_putrun(int devno, fb_coord_t row, fb_coord_t col,
 }
 
 
-/*******************************************************************************
+/****************************************************************************
  * Name:  ili9341_getrun
  *
  * Description:
@@ -712,7 +705,7 @@ static int ili9341_putrun(int devno, fb_coord_t row, fb_coord_t col,
  *   On success - OK
  *   On error   - -EINVAL
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 # ifndef CONFIG_LCD_NOGETRUN
 static int ili9341_getrun(int devno, fb_coord_t row, fb_coord_t col,
@@ -720,7 +713,7 @@ static int ili9341_getrun(int devno, fb_coord_t row, fb_coord_t col,
 {
   FAR struct ili9341_dev_s *dev = &g_lcddev[devno];
   FAR struct ili9341_lcd_s *lcd = dev->lcd;
-  FAR uint16_t *dest = (uint16_t*)buffer;
+  FAR uint16_t *dest = (FAR uint16_t *)buffer;
 
   DEBUGASSERT(buffer && ((uintptr_t)buffer & 1) == 0);
 
@@ -754,7 +747,7 @@ static int ili9341_getrun(int devno, fb_coord_t row, fb_coord_t col,
 }
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name:  ili9341_hwinitialize
  *
  * Description:
@@ -768,7 +761,7 @@ static int ili9341_getrun(int devno, fb_coord_t row, fb_coord_t col,
  *   On success - OK
  *   On error - EINVAL
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 static int ili9341_hwinitialize(FAR struct ili9341_dev_s *dev)
 {
@@ -846,11 +839,11 @@ static int ili9341_hwinitialize(FAR struct ili9341_dev_s *dev)
 }
 
 
-/*******************************************************************************
+/****************************************************************************
  * Public Functions
- ******************************************************************************/
+ ****************************************************************************/
 
-/*******************************************************************************
+/****************************************************************************
  * Name:  ili9341_putrunx
  *
  * Description:
@@ -868,7 +861,7 @@ static int ili9341_hwinitialize(FAR struct ili9341_dev_s *dev)
  *   On success - OK
  *   On error   - -EINVAL
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_LCD_ILI9341_IFACE0
 static int ili9341_putrun0(fb_coord_t row, fb_coord_t col,
@@ -887,7 +880,7 @@ static int ili9341_putrun1(fb_coord_t row, fb_coord_t col,
 #endif
 
 
-/*******************************************************************************
+/****************************************************************************
  * Name:  ili9341_getrunx
  *
  * Description:
@@ -905,7 +898,7 @@ static int ili9341_putrun1(fb_coord_t row, fb_coord_t col,
  *   On success - OK
  *   On error   - -EINVAL
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 #ifndef CONFIG_LCD_NOGETRUN
 # ifdef CONFIG_LCD_ILI9341_IFACE0
@@ -926,7 +919,7 @@ static int ili9341_getrun1(fb_coord_t row, fb_coord_t col,
 #endif
 
 
-/*******************************************************************************
+/****************************************************************************
  * Name:  ili9341_getvideoinfo
  *
  * Description:
@@ -941,7 +934,7 @@ static int ili9341_getrun1(fb_coord_t row, fb_coord_t col,
  *  On success - OK
  *  On error   - -EINVAL
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 static int ili9341_getvideoinfo(FAR struct lcd_dev_s *dev,
                                FAR struct fb_videoinfo_s *vinfo)
@@ -964,7 +957,7 @@ static int ili9341_getvideoinfo(FAR struct lcd_dev_s *dev,
   return -EINVAL;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name:  ili9341_getplaneinfo
  *
  * Description:
@@ -980,7 +973,7 @@ static int ili9341_getvideoinfo(FAR struct lcd_dev_s *dev,
  *  On success - OK
  *  On error   - -EINVAL
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 static int ili9341_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
                                FAR struct lcd_planeinfo_s *pinfo)
@@ -994,7 +987,7 @@ static int ili9341_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
       pinfo->getrun = priv->getrun;
 #endif
       pinfo->bpp    = priv->bpp;
-      pinfo->buffer = (uint8_t*)priv->runbuffer;  /* Run scratch buffer */
+      pinfo->buffer = (FAR uint8_t *)priv->runbuffer;  /* Run scratch buffer */
 
       lcdvdbg("planeno: %d bpp: %d\n", planeno, pinfo->bpp);
 
@@ -1004,7 +997,7 @@ static int ili9341_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
   return -EINVAL;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name:  ili9341_getpower
  *
  * Description:
@@ -1019,7 +1012,7 @@ static int ili9341_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
  *  On success - OK
  *  On error   - -EINVAL
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 static int ili9341_getpower(FAR struct lcd_dev_s *dev)
 {
@@ -1035,7 +1028,7 @@ static int ili9341_getpower(FAR struct lcd_dev_s *dev)
   return -EINVAL;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name:  ili9341_setpower
  *
  * Description:
@@ -1051,7 +1044,7 @@ static int ili9341_getpower(FAR struct lcd_dev_s *dev)
  *  On success - OK
  *  On error   - -EINVAL
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 static int ili9341_setpower(FAR struct lcd_dev_s *dev, int power)
 {
@@ -1092,7 +1085,7 @@ static int ili9341_setpower(FAR struct lcd_dev_s *dev, int power)
   return -EINVAL;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name:  ili9341_getcontrast
  *
  * Description:
@@ -1106,7 +1099,7 @@ static int ili9341_setpower(FAR struct lcd_dev_s *dev, int power)
  *  On success - current contrast value
  *  On error   - -ENOSYS, not supported by the ili9341.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 static int ili9341_getcontrast(struct lcd_dev_s *dev)
 {
@@ -1114,7 +1107,7 @@ static int ili9341_getcontrast(struct lcd_dev_s *dev)
   return -ENOSYS;
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name:  ili9341_setcontrast
  *
  * Description:
@@ -1128,7 +1121,7 @@ static int ili9341_getcontrast(struct lcd_dev_s *dev)
  *  On success - OK
  *  On error   - -ENOSYS, not supported by the ili9341.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 static int ili9341_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
 {
@@ -1137,7 +1130,7 @@ static int ili9341_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
 }
 
 
-/*******************************************************************************
+/****************************************************************************
  * Name:  ili9341_initialize
  *
  * Description:
@@ -1158,7 +1151,7 @@ static int ili9341_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
  *   On success, this function returns a reference to the LCD driver object for
  *   the specified LCD driver. NULL is returned on any failure.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 FAR struct lcd_dev_s *ili9341_initialize(
                         FAR struct ili9341_lcd_s *lcd, int devno)
@@ -1201,7 +1194,7 @@ FAR struct lcd_dev_s *ili9341_initialize(
 }
 
 
-/******************************************************************************
+/****************************************************************************
  * Name:  ili9341_clear
  *
  * Description:
@@ -1219,7 +1212,7 @@ FAR struct lcd_dev_s *ili9341_initialize(
  *  On success - OK
  *  On error   - -EINVAL
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 int ili9341_clear(FAR struct lcd_dev_s *dev, uint16_t color)
 {

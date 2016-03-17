@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/wdog/wdog_recover.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,35 +39,12 @@
 
 #include <nuttx/config.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/wdog.h>
 #include <nuttx/sched.h>
 
 #include "wdog/wdog.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Type Declarations
- ****************************************************************************/
-
-/****************************************************************************
- * Global Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -103,7 +80,7 @@ void wd_recover(FAR struct tcb_s *tcb)
    * the future.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   if (tcb->waitdog)
     {
       (void)wd_cancel(tcb->waitdog);
@@ -111,5 +88,5 @@ void wd_recover(FAR struct tcb_s *tcb)
       tcb->waitdog = NULL;
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 }

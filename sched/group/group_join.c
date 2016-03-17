@@ -1,7 +1,7 @@
-/*****************************************************************************
+/****************************************************************************
  *  sched/group/group_join.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
-/*****************************************************************************
+/****************************************************************************
  * Included Files
- *****************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -44,6 +44,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
 
 #include "sched/sched.h"
@@ -52,26 +53,18 @@
 
 #if defined(HAVE_TASK_GROUP) && !defined(CONFIG_DISABLE_PTHREAD)
 
-/*****************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- *****************************************************************************/
+ ****************************************************************************/
 /* Is this worth making a configuration option? */
 
 #define GROUP_REALLOC_MEMBERS 4
 
-/*****************************************************************************
- * Private Types
- *****************************************************************************/
-
-/*****************************************************************************
- * Private Data
- *****************************************************************************/
-
-/*****************************************************************************
+/****************************************************************************
  * Private Functions
- *****************************************************************************/
+ ****************************************************************************/
 
-/*****************************************************************************
+/****************************************************************************
  * Name: group_addmember
  *
  * Description:
@@ -88,7 +81,7 @@
  *   Called during thread creation and during reparenting in a safe context.
  *   No special precautions are required here.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_GROUP_MEMBERS
 static inline int group_addmember(FAR struct task_group_s *group, pid_t pid)
@@ -126,10 +119,10 @@ static inline int group_addmember(FAR struct task_group_s *group, pid_t pid)
        * may be traversed from an interrupt handler (read-only).
        */
 
-      flags = irqsave();
+      flags = enter_critical_section();
       group->tg_members   = newmembers;
       group->tg_mxmembers = newmax;
-      irqrestore(flags);
+      leave_critical_section(flags);
     }
 
   /* Assign this new pid to the group; group->tg_nmembers will be incremented
@@ -141,11 +134,11 @@ static inline int group_addmember(FAR struct task_group_s *group, pid_t pid)
 }
 #endif /* HAVE_GROUP_MEMBERS */
 
-/*****************************************************************************
+/****************************************************************************
  * Public Functions
- *****************************************************************************/
+ ****************************************************************************/
 
-/*****************************************************************************
+/****************************************************************************
  * Name: group_bind
  *
  * Description:
@@ -168,11 +161,11 @@ static inline int group_addmember(FAR struct task_group_s *group, pid_t pid)
  * - Called during thread creation in a safe context.  No special precautions
  *   are required here.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 int group_bind(FAR struct pthread_tcb_s *tcb)
 {
-  FAR struct tcb_s *ptcb = (FAR struct tcb_s *)g_readytorun.head;
+  FAR struct tcb_s *ptcb = this_task();
 
   DEBUGASSERT(ptcb && tcb && ptcb->group && !tcb->cmn.group);
 
@@ -182,7 +175,7 @@ int group_bind(FAR struct pthread_tcb_s *tcb)
   return OK;
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: group_join
  *
  * Description:
@@ -205,7 +198,7 @@ int group_bind(FAR struct pthread_tcb_s *tcb)
  * - Called during thread creation in a safe context.  No special precautions
  *   are required here.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 int group_join(FAR struct pthread_tcb_s *tcb)
 {

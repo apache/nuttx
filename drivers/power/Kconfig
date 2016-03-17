@@ -2,21 +2,39 @@
 # For a description of the syntax of this configuration file,
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
-config BATTERY
-	bool "Battery support"
+
+config BATTERY_CHARGER
+	bool "Battery Charger support"
+	default n
+
+config BQ2425X
+	bool "BQ2425X Battery charger support"
+	default n
+	select I2C
+	select I2C_BQ2425X
+	depends on BATTERY_CHARGER
+	---help---
+		The BQ24250/BQ24251 are battery charger for lithium-ion batteries.
+
+config BATTERY_GAUGE
+	bool "Battery Fuel Gauge support"
 	default n
 	
 config MAX1704X
-	bool "MAX1704X Battery charger support"
+	bool "MAX1704X Battery fuel gauge support"
 	default n
 	select I2C
 	select I2C_MAX1704X
-	depends on BATTERY
+	depends on BATTERY_GAUGE
 	---help---
 		The MAX17040/MAX17041 are ultra-compact, low-cost, host-side fuel-gauge
 		systems for lithium-ion (Li+) batteries in handheld and portable equipment.
 		The MAX17040 is configured to operate with a single lithium cell and the
 		MAX17041 is configured for a dual-cell 2S pack.
+
+config I2C_BQ2425X
+	bool
+	default y if BQ2425X
 
 config I2C_MAX1704X
 	bool

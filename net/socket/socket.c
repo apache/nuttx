@@ -185,9 +185,9 @@ static int psock_local_alloc(FAR struct socket *psock)
       return -ENOMEM;
     }
 
- /* Set the reference count on the connection structure.  This reference
-  * count will be incremented only if the socket is dup'ed
-  */
+  /* Set the reference count on the connection structure.  This reference
+   * count will be incremented only if the socket is dup'ed
+   */
 
   DEBUGASSERT(conn->lc_crefs == 0);
   conn->lc_crefs = 1;

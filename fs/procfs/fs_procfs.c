@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/procfs/fs_procfs.c
  *
- *   Copyright (C) 2013-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -53,6 +53,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/sched.h>
 #include <nuttx/kmalloc.h>
@@ -60,8 +61,6 @@
 #include <nuttx/fs/procfs.h>
 #include <nuttx/fs/dirent.h>
 #include <nuttx/regex.h>
-
-#include <arch/irq.h>
 
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && defined(CONFIG_FS_PROCFS)
 
@@ -77,12 +76,17 @@
 
 extern const struct procfs_operations proc_operations;
 extern const struct procfs_operations cpuload_operations;
+extern const struct procfs_operations kmm_operations;
+extern const struct procfs_operations module_operations;
 extern const struct procfs_operations uptime_operations;
 
-/* This is not good.  These are implemented in drivers/mtd.  Having to
- * deal with them here is not a good coupling.
+/* This is not good.  These are implemented in other sub-systems.  Having to
+ * deal with them here is not a good coupling. What is really needed is a
+ * run-time procfs registration system vs. a build time, fixed procfs
+ * configuration.
  */
 
+extern const struct procfs_operations net_procfsoperations;
 extern const struct procfs_operations mtd_procfsoperations;
 extern const struct procfs_operations part_procfsoperations;
 extern const struct procfs_operations smartfs_procfsoperations;
@@ -101,7 +105,11 @@ extern const struct procfs_operations ccm_procfsoperations;
  ****************************************************************************/
 /* Table of all known / pre-registered procfs handlers / participants. */
 
-static const struct procfs_entry_s g_procfsentries[] =
+#ifdef CONFIG_FS_PROCFS_REGISTER
+static const struct procfs_entry_s g_base_entries[] =
+#else
+static const struct procfs_entry_s g_procfs_entries[] =
+#endif
 {
 #ifndef CONFIG_FS_PROCFS_EXCLUDE_PROCESS
   { "[0-9]*/**",        &proc_operations },
@@ -112,9 +120,22 @@ static const struct procfs_entry_s g_procfsentries[] =
   { "cpuload",          &cpuload_operations },
 #endif
 
+#if defined(CONFIG_MM_KERNEL_HEAP) && !defined(CONFIG_FS_PROCFS_EXCLUDE_KMM)
+  { "kmm",              &kmm_operations },
+#endif
+
+#if defined(CONFIG_MODULE) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MODULE)
+  { "modules",          &module_operations },
+#endif
+
 #if defined(CONFIG_FS_SMARTFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_SMARTFS)
 //{ "fs/smartfs",       &smartfs_procfsoperations },
   { "fs/smartfs**",     &smartfs_procfsoperations },
+#endif
+
+#if defined(CONFIG_NET) && !defined(CONFIG_FS_PROCFS_EXCLUDE_NET)
+  { "net",              &net_procfsoperations },
+  { "net/**",           &net_procfsoperations },
 #endif
 
 #if defined(CONFIG_MTD) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MTD)
@@ -128,14 +149,18 @@ static const struct procfs_entry_s g_procfsentries[] =
 #if !defined(CONFIG_FS_PROCFS_EXCLUDE_UPTIME)
   { "uptime",           &uptime_operations },
 #endif
-
-#if defined(CONFIG_STM32_CCM_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_CCM)
-  { "ccm",             &ccm_procfsoperations },
-#endif
 };
 
-static const uint8_t g_procfsentrycount = sizeof(g_procfsentries) /
+#ifdef CONFIG_FS_PROCFS_REGISTER
+static const uint8_t g_base_entrycount = sizeof(g_base_entries) /
+                                        sizeof(struct procfs_entry_s);
+
+static FAR struct procfs_entry_s *g_procfs_entries;
+static uint8_t g_procfs_entrycount;
+#else
+static const uint8_t g_procfs_entrycount = sizeof(g_procfs_entries) /
                                           sizeof(struct procfs_entry_s);
+#endif
 
 /****************************************************************************
  * Private Function Prototypes
@@ -178,12 +203,20 @@ static int     procfs_statfs(FAR struct inode *mountpt,
 static int     procfs_stat(FAR struct inode *mountpt,
                  FAR const char *relpath, FAR struct stat *buf);
 
+/* Initialization */
+
+#ifdef CONFIG_FS_PROCFS_REGISTER
+int procfs_initialize(void);
+#else
+#  define procfs_initialize()
+#endif
+
 /****************************************************************************
- * Private Variables
+ * Private Data
  ****************************************************************************/
 
 /****************************************************************************
- * Public Variables
+ * Public Data
  ****************************************************************************/
 
 /* See fs_mount.c -- this structure is explicitly externed there.
@@ -293,25 +326,25 @@ static int procfs_open(FAR struct file *filep, FAR const char *relpath,
 
   /* Perform the stat based on the procfs_entry operations */
 
-  for (x = 0; x < g_procfsentrycount; x++)
+  for (x = 0; x < g_procfs_entrycount; x++)
     {
       /* Test if the path matches this entry's specification */
 
-      if (match(g_procfsentries[x].pathpattern, relpath))
+      if (match(g_procfs_entries[x].pathpattern, relpath))
         {
           /* Match found!  Stat using this procfs entry */
 
-          DEBUGASSERT(g_procfsentries[x].ops &&
-              g_procfsentries[x].ops->open);
+          DEBUGASSERT(g_procfs_entries[x].ops &&
+              g_procfs_entries[x].ops->open);
 
-          ret = g_procfsentries[x].ops->open(filep, relpath, oflags, mode);
+          ret = g_procfs_entries[x].ops->open(filep, relpath, oflags, mode);
 
           if (ret == OK)
             {
               DEBUGASSERT(filep->f_priv);
 
               ((struct procfs_file_s *) filep->f_priv)->procfsentry =
-                                    &g_procfsentries[x];
+                                    &g_procfs_entries[x];
             }
         }
     }
@@ -475,15 +508,15 @@ static int procfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
        */
 
 #ifndef CONFIG_FS_PROCFS_EXCLUDE_PROCESS
-      flags = irqsave();
+      flags = enter_critical_section();
       sched_foreach(procfs_enum, level0);
-      irqrestore(flags);
+      leave_critical_section(flags);
 #else
       level0->base.index = 0;
       level0->base.nentries = 0;
 #endif
 
-      /* Initialze lastread entries */
+      /* Initialize lastread entries */
 
       level0->lastread = "";
       level0->lastlen = 0;
@@ -498,19 +531,19 @@ static int procfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
 
       /* Search the static array of procfs_entries */
 
-      for (x = 0; x < g_procfsentrycount; x++)
+      for (x = 0; x < g_procfs_entrycount; x++)
         {
           /* Test if the path matches this entry's specification */
 
-          if (match(g_procfsentries[x].pathpattern, relpath))
+          if (match(g_procfs_entries[x].pathpattern, relpath))
             {
               /* Match found!  Call the handler's opendir routine.  If successful,
                * this opendir routine will create an entry derived from struct
                * procfs_dir_priv_s as dir->u.procfs.
                */
 
-              DEBUGASSERT(g_procfsentries[x].ops && g_procfsentries[x].ops->opendir);
-              ret = g_procfsentries[x].ops->opendir(relpath, dir);
+              DEBUGASSERT(g_procfs_entries[x].ops && g_procfs_entries[x].ops->opendir);
+              ret = g_procfs_entries[x].ops->opendir(relpath, dir);
 
               if (ret == OK)
                 {
@@ -519,7 +552,7 @@ static int procfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
                   /* Set the procfs_entry handler */
 
                   dirpriv = (FAR struct procfs_dir_priv_s *)dir->u.procfs;
-                  dirpriv->procfsentry = &g_procfsentries[x];
+                  dirpriv->procfsentry = &g_procfs_entries[x];
                 }
 
               return ret;
@@ -527,13 +560,13 @@ static int procfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
 
             /* Test for a sub-string match (e.g. "ls /proc/fs") */
 
-          else if (strncmp(g_procfsentries[x].pathpattern, relpath, len) == 0)
+          else if (strncmp(g_procfs_entries[x].pathpattern, relpath, len) == 0)
             {
               FAR struct procfs_level1_s *level1;
 
               /* Doing an intermediate directory search */
 
-              /* The path refers to the top level directory.  Allocate the level0
+              /* The path refers to the top level directory.  Allocate the level1
                * dirent structure.
                */
 
@@ -627,9 +660,9 @@ static int procfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
            * directory name.
            */
 
-          while (index < priv->nentries + g_procfsentrycount)
+          while (index < priv->nentries + g_procfs_entrycount)
             {
-              name = g_procfsentries[index - priv->nentries].pathpattern;
+              name = g_procfs_entries[index - priv->nentries].pathpattern;
               while (*name != '/' && *name != '\0')
                 {
                   if (*name == '*' || *name == '[' || *name == '?')
@@ -647,38 +680,38 @@ static int procfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
               /* Test if we skipped this entry */
 
               if (name != NULL)
-              {
-                /* This entry is okay to report. Test if it has a duplicate
-                 * first level name as the one we just reported.  This could
-                 * happen in the event of procfs_entry_s such as:
-                 *
-                 *    fs/smartfs
-                 *    fs/nfs
-                 *    fs/nxffs
-                 */
+                {
+                  /* This entry is okay to report. Test if it has a duplicate
+                   * first level name as the one we just reported.  This could
+                   * happen in the event of procfs_entry_s such as:
+                   *
+                   *    fs/smartfs
+                   *    fs/nfs
+                   *    fs/nxffs
+                   */
 
-                name = g_procfsentries[index - priv->nentries].pathpattern;
-                if (!level0->lastlen || (strncmp(name, level0->lastread,
+                  name = g_procfs_entries[index - priv->nentries].pathpattern;
+                  if (!level0->lastlen || (strncmp(name, level0->lastread,
                       level0->lastlen) != 0))
-                  {
-                    /* Not a duplicate, return the first segment of this
-                     * entry
-                     */
+                    {
+                      /* Not a duplicate, return the first segment of this
+                       * entry
+                       */
 
-                    break;
-                  }
-                else
-                  {
-                    /* Skip this entry ... duplicate 1st level name found */
+                      break;
+                    }
+                  else
+                    {
+                      /* Skip this entry ... duplicate 1st level name found */
 
-                    index++;
-                  }
-              }
+                      index++;
+                    }
+                }
             }
 
           /* Test if we are at the end of the directory */
 
-          if (index >= priv->nentries + g_procfsentrycount)
+          if (index >= priv->nentries + g_procfs_entrycount)
             {
               /* We signal the end of the directory by returning the special
                * error -ENOENT
@@ -718,9 +751,9 @@ static int procfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
 
           pid = level0->pid[index];
 
-          flags = irqsave();
+          flags = enter_critical_section();
           tcb = sched_gettcb(pid);
-          irqrestore(flags);
+          leave_critical_section(flags);
 
           if (!tcb)
             {
@@ -755,13 +788,13 @@ static int procfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
        * subdirectory are listed in order in the procfs_entry array.
        */
 
-      if (strncmp(g_procfsentries[level1->base.index].pathpattern,
-              g_procfsentries[level1->firstindex].pathpattern,
-              level1->subdirlen) == 0)
+      if (strncmp(g_procfs_entries[level1->base.index].pathpattern,
+                  g_procfs_entries[level1->firstindex].pathpattern,
+                  level1->subdirlen) == 0)
         {
           /* This entry matches.  Report the subdir entry */
 
-          name = &g_procfsentries[level1->base.index].pathpattern[
+          name = &g_procfs_entries[level1->base.index].pathpattern[
                     level1->subdirlen + 1];
           level1->lastlen = strcspn(name, "/");
           level1->lastread = name;
@@ -851,6 +884,9 @@ static int procfs_rewinddir(struct inode *mountpt, struct fs_dirent_s *dir)
 static int procfs_bind(FAR struct inode *blkdriver, const void *data,
                        void **handle)
 {
+  /* Make sure that we are properly initialized */
+
+  procfs_initialize();
   return OK;
 }
 
@@ -915,7 +951,7 @@ static int procfs_stat(struct inode *mountpt, const char *relpath,
       /* The path refers to the top level directory */
       /* It's a read-only directory */
 
-      buf->st_mode = S_IFDIR|S_IROTH|S_IRGRP|S_IRUSR;
+      buf->st_mode = S_IFDIR | S_IROTH | S_IRGRP | S_IRUSR;
       ret = OK;
     }
   else
@@ -925,27 +961,27 @@ static int procfs_stat(struct inode *mountpt, const char *relpath,
 
       /* Perform the stat based on the procfs_entry operations */
 
-      for (x = 0; x < g_procfsentrycount; x++)
+      for (x = 0; x < g_procfs_entrycount; x++)
         {
           /* Test if the path matches this entry's specification */
 
-          if (match(g_procfsentries[x].pathpattern, relpath))
+          if (match(g_procfs_entries[x].pathpattern, relpath))
             {
               /* Match found!  Stat using this procfs entry */
 
-              DEBUGASSERT(g_procfsentries[x].ops &&
-                  g_procfsentries[x].ops->stat);
+              DEBUGASSERT(g_procfs_entries[x].ops &&
+                  g_procfs_entries[x].ops->stat);
 
-              return g_procfsentries[x].ops->stat(relpath, buf);
+              return g_procfs_entries[x].ops->stat(relpath, buf);
             }
 
           /* Test for an internal subdirectory stat */
 
-          else if (strncmp(g_procfsentries[x].pathpattern, relpath, len) == 0)
+          else if (strncmp(g_procfs_entries[x].pathpattern, relpath, len) == 0)
             {
               /* It's an internal subdirectory */
 
-              buf->st_mode = S_IFDIR|S_IROTH|S_IRGRP|S_IRUSR;
+              buf->st_mode = S_IFDIR | S_IROTH | S_IRGRP | S_IRUSR;
               ret = OK;
               break;
             }
@@ -961,7 +997,119 @@ static int procfs_stat(struct inode *mountpt, const char *relpath,
 }
 
 /****************************************************************************
+ * Name: procfs_initialize
+ *
+ * Description:
+ *   Configure the initial set of entries in the procfs file system.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_FS_PROCFS_REGISTER
+int procfs_initialize(void)
+{
+  /* Are we already initialized? */
+
+  if (g_procfs_entries == NULL)
+    {
+      /* No.. allocate a modifyable list of entries */
+
+      g_procfs_entries = (FAR struct procfs_entry_s *)
+        kmm_malloc(sizeof(g_base_entries));
+
+      if (g_procfs_entries == NULL)
+        {
+          return -ENOMEM;
+        }
+
+      /* And copy the fixed entries into the allocated array */
+
+      memcpy(g_procfs_entries, g_base_entries, sizeof(g_base_entries));
+      g_procfs_entrycount = g_base_entrycount;
+    }
+
+  return OK;
+}
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: procfs_register
+ *
+ * Description:
+ *   Add a new entry to the procfs file system.
+ *
+ *   NOTE: This function should be called *prior* to mounting the procfs
+ *   file system to prevent concurrency problems with the modification of
+ *   the procfs data set while it is in use.
+ *
+ * Input Parameters:
+ *   entry - Describes the entry to be registered.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_FS_PROCFS_REGISTER
+int procfs_register(FAR const struct procfs_entry_s *entry)
+{
+  FAR struct procfs_entry_s *newtable;
+  unsigned int newcount;
+  size_t newsize;
+  int ret;
+
+  /* Make sure that we are properly initialized */
+
+  procfs_initialize();
+
+  /* realloc the table of procfs entries.
+   *
+   * REVISIT:  This reallocation may free memory previously used for the
+   * procfs entry table.  If that table were actively in use, then that
+   * could cause procfs logic to use a stale memory pointer!  We avoid that
+   * problem by requiring that the procfs file be unmounted when the new
+   * entry is added.  That requirment, however, is not enforced explicitly.
+   *
+   * Locking the scheduler as done below is insufficient.  As would be just
+   * marking the entries as volatile.
+   */
+
+  newcount = g_procfs_entrycount + 1;
+  newsize  = newcount * sizeof(struct procfs_entry_s);
+
+  sched_lock();
+  newtable = (FAR struct procfs_entry_s *)kmm_realloc(g_procfs_entries, newsize);
+  if (newtable == NULL)
+    {
+      /* Reallocation failed! */
+
+      ret = -ENOMEM;
+    }
+  else
+    {
+      /* Copy the new entry at the end of the reallocated table */
+
+      memcpy(&newtable[g_procfs_entrycount], entry, sizeof(struct procfs_entry_s));
+
+      /* Instantiate the reallocated table */
+
+      g_procfs_entries    = newtable;
+      g_procfs_entrycount = newcount;
+      ret = OK;
+    }
+
+  sched_unlock();
+  return ret;
+}
+#endif
 
 #endif /* !CONFIG_DISABLE_MOUNTPOINT && CONFIG_FS_PROCFS */

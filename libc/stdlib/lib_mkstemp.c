@@ -54,14 +54,14 @@
  * Pre-processor definitions
  ****************************************************************************/
 
- #ifndef CONFIG_LIBC_TMPDIR
+#ifndef CONFIG_LIBC_TMPDIR
 #  define CONFIG_LIBC_TMPDIR "/tmp"
 #endif
 
 #define MAX_XS        6
 #define MIN_NUMERIC   0    /* 0-9:   Numeric */
 #define MAX_NUMERIC   9
-#define MIN_UPPERCASE 10   /* 10-35: Upper case */ 
+#define MIN_UPPERCASE 10   /* 10-35: Upper case */
 #define MAX_UPPERCASE 35
 #define MIN_LOWERCASE 36   /* 36-61: Lower case */
 #define MAX_LOWERCASE 61
@@ -153,7 +153,7 @@ static void get_base62(FAR uint8_t *ptr)
     {
       DEBUGASSERT(errno == EINTR);
     }
-     
+
   memcpy(ptr, g_base62, MAX_XS);
   incr_base62();
   sem_post(&g_b62sem);

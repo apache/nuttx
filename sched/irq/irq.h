@@ -41,24 +41,37 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/compiler.h>
+
+#include <sys/types.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
-#include <nuttx/compiler.h>
+#include <nuttx/spinlock.h>
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Public Data
  ****************************************************************************/
 
-/****************************************************************************
- * Public Type Declarations
- ****************************************************************************/
+/* This is the list of interrupt handlers, one for each IRQ.  This is used
+ * by irq_dispatch to transfer control to interrupt handlers after the
+ * occurrence of an interrupt.
+ */
 
 extern FAR xcpt_t g_irqvector[NR_IRQS+1];
 
-/****************************************************************************
- * Public Variables
- ****************************************************************************/
+#ifdef CONFIG_SMP
+/* This is the spinlock that enforces critical sections when interrupts are
+ * disabled.
+ */
+
+extern volatile spinlock_t g_cpu_irqlock;
+
+/* Used to keep track of which CPU(s) hold the IRQ lock. */
+
+extern volatile spinlock_t g_cpu_irqsetlock;
+extern volatile cpu_set_t g_cpu_irqset;
+#endif
 
 /****************************************************************************
  * Public Function Prototypes
@@ -72,7 +85,25 @@ extern "C"
 #define EXTERN extern
 #endif
 
+/****************************************************************************
+ * Name: irq_initialize
+ *
+ * Description:
+ *   Configure the IRQ subsystem
+ *
+ ****************************************************************************/
+
 void weak_function irq_initialize(void);
+
+/****************************************************************************
+ * Name: irq_unexpected_isr
+ *
+ * Description:
+ *   An interrupt has been received for an IRQ that was never registered
+ *   with the system.
+ *
+ ****************************************************************************/
+
 int irq_unexpected_isr(int irq, FAR void *context);
 
 #undef EXTERN
@@ -81,4 +112,3 @@ int irq_unexpected_isr(int irq, FAR void *context);
 #endif
 
 #endif /* __SCHED_IRQ_IRQ_H */
-

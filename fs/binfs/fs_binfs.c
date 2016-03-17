@@ -93,11 +93,11 @@ static int     binfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
                           FAR struct stat *buf);
 
 /****************************************************************************
- * Private Variables
+ * Private Data
  ****************************************************************************/
 
 /****************************************************************************
- * Public Variables
+ * Public Data
  ****************************************************************************/
 
 /* See fs_mount.c -- this structure is explicitly extern'ed there.
@@ -171,7 +171,7 @@ static int binfs_open(FAR struct file *filep, FAR const char *relpath,
 
   /* Save the index as the open-specific state in filep->f_priv */
 
-  filep->f_priv = (FAR void *)index;
+  filep->f_priv = (FAR void *)((uintptr_t)index);
   return OK;
 }
 
@@ -223,7 +223,7 @@ static int binfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
       else
         {
-          *ptr = builtin_getname((int)filep->f_priv);
+          *ptr = builtin_getname((int)((uintptr_t)filep->f_priv));
           ret = OK;
         }
     }
@@ -425,13 +425,14 @@ static int binfs_stat(struct inode *mountpt, const char *relpath, struct stat *b
 
       /* It's a execute-only file name */
 
-      buf->st_mode = S_IFREG|S_IXOTH|S_IXGRP|S_IXUSR;
+      buf->st_mode = S_IFREG | S_IXOTH | S_IXGRP | S_IXUSR;
     }
   else
     {
       /* It's a read/execute-only directory name */
 
-      buf->st_mode = S_IFDIR|S_IROTH|S_IRGRP|S_IRUSR|S_IXOTH|S_IXGRP|S_IXUSR;
+      buf->st_mode = S_IFDIR | S_IROTH | S_IRGRP | S_IRUSR | S_IXOTH |
+                     S_IXGRP | S_IXUSR;
     }
 
   /* File/directory size, access block size */

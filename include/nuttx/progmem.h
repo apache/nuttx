@@ -99,13 +99,13 @@ size_t up_progmem_pagesize(size_t page);
  *   Address to page conversion
  *
  * Input Parameters:
- *   addr - Address with of without flash offset (absolute or aligned to page0)
+ *   addr - Address with or without flash offset (absolute or aligned to page0)
  *
  * Returned Value:
  *   Page or negative value on error.  The following errors are reported
  *   (errno is not set!):
  *
- *     EFAULT: On invalid address
+ *     -EFAULT: On invalid address
  *
  ****************************************************************************/
 
@@ -134,18 +134,18 @@ size_t up_progmem_getaddress(size_t page);
  *   Erase selected page.
  *
  * Input Parameters:
- *   page -
+ *   page - The page index to be erased.
  *
  * Returned Value:
  *   Page size or negative value on error.  The following errors are reported
  *   (errno is not set!):
  *
- *     EFAULT: On invalid page
- *     EIO: On unsuccessful erase
- *     EROFS: On access to write protected area
- *     EACCES: Insufficient permissions (read/write protected)
- *     EPERM: If operation is not permitted due to some other constraints
- *        (i.e. some internal block is not running etc.)
+ *     -EFAULT: On invalid page
+ *     -EIO:    On unsuccessful erase
+ *     -EROFS:  On access to write protected area
+ *     -EACCES: Insufficient permissions (read/write protected)
+ *     -EPERM:  If operation is not permitted due to some other constraints
+ *              (i.e. some internal block is not running etc.)
  *
  ****************************************************************************/
 
@@ -158,14 +158,14 @@ ssize_t up_progmem_erasepage(size_t page);
  *   Checks whether page is erased
  *
  * Input Parameters:
- *    page -
+ *   page - The page index to be checked.
  *
  * Returned Value:
- *   Returns number of bytes written or negative value on error. If it
- *   returns zero then complete page is empty (erased).
+ *   Returns number of bytes NOT erased or negative value on error. If it
+ *   returns zero then complete page is erased.
  *
- *   The following errors are reported (errno is not set!)
- *     EFAULT: On invalid page
+ *   The following errors are reported:
+ *     -EFAULT: On invalid page
  *
  ****************************************************************************/
 
@@ -183,29 +183,24 @@ ssize_t up_progmem_ispageerased(size_t page);
  * Input Parameters:
  *   addr  - Address with or without flash offset (absolute or aligned to page0)
  *   buf   - Pointer to buffer
- *   count - Number of bytes to write *
+ *   count - Number of bytes to write
  *
  * Returned Value:
  *   Bytes written or negative value on error.  The following errors are
  *   reported (errno is not set!)
  *
- *     EINVAL: if count is not aligned with the flash boundaries (i.e.
- *        some MCU's require per half-word or even word access)
+ *     EINVAL: If count is not aligned with the flash boundaries (i.e.
+ *             some MCU's require per half-word or even word access)
  *     EFAULT: On invalid address
- *     EIO: On unsuccessful write
- *     EROFS: On access to write protected area
+ *     EIO:    On unsuccessful write
+ *     EROFS:  On access to write protected area
  *     EACCES: Insufficient permissions (read/write protected)
- *     EPERM: If operation is not permitted due to some other constraints
- *        (i.e. some internal block is not running etc.)
+ *     EPERM:  If operation is not permitted due to some other constraints
+ *             (i.e. some internal block is not running etc.)
  *
  ****************************************************************************/
 
-ssize_t up_progmem_write(size_t addr, const void *buf, size_t count);
-
-/* TODO: Define the following functions and their options:
- *  - up_progmem_protect()
- *  - up_progmem_unprotect()
- */
+ssize_t up_progmem_write(size_t addr, FAR const void *buf, size_t count);
 
 #undef EXTERN
 #if defined(__cplusplus)

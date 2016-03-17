@@ -8,6 +8,8 @@ config WL_CC3000
 	default n
 	select SPI
 	select ARCH_HAVE_NET
+	select CRYPTO
+	select CRYPTO_SW_AES
 	---help---
 		Enable support for the TI CC3000 Wifi Module
 

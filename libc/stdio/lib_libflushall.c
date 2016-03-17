@@ -45,7 +45,7 @@
 
 #include <nuttx/fs/fs.h>
 
-#include "lib_internal.h"
+#include "libc.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -60,11 +60,11 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Global Constant Data
+ * Public Constant Data
  ****************************************************************************/
 
 /****************************************************************************
- * Global Variables
+ * Public Data
  ****************************************************************************/
 
 /****************************************************************************
@@ -72,11 +72,11 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Private Variables
+ * Private Data
  ****************************************************************************/
 
 /****************************************************************************
- * Global Functions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -97,38 +97,38 @@ int lib_flushall(FAR struct streamlist *list)
 
   if (list)
     {
-       int i;
+      int i;
 
-       /* Process each stream in the thread's stream list */
+      /* Process each stream in the thread's stream list */
 
-       stream_semtake(list);
-       for (i = 0; i < CONFIG_NFILE_STREAMS; i++)
-         {
-           FILE *stream = &list->sl_streams[i];
+      stream_semtake(list);
+      for (i = 0; i < CONFIG_NFILE_STREAMS; i++)
+        {
+          FILE *stream = &list->sl_streams[i];
 
-           /* If the stream is open (i.e., assigned a non-negative file
-            * descriptor) and opened for writing, then flush all of the pending
-            * write data in the stream.
-            */
+          /* If the stream is open (i.e., assigned a non-negative file
+           * descriptor) and opened for writing, then flush all of the pending
+           * write data in the stream.
+           */
 
-           if (stream->fs_fd >= 0 && (stream->fs_oflags & O_WROK) != 0)
-             {
-               /* Flush the writable FILE */
+          if (stream->fs_fd >= 0 && (stream->fs_oflags & O_WROK) != 0)
+            {
+              /* Flush the writable FILE */
 
-               ret = lib_fflush(stream, true);
-               if (ret < 0)
-                 {
-                   /* An error occurred during the flush AND/OR we were unable
-                    * to flush all of the buffered write data.  Remember the
-                    * last errcode.
-                    */
+              ret = lib_fflush(stream, true);
+              if (ret < 0)
+                {
+                  /* An error occurred during the flush AND/OR we were unable
+                   * to flush all of the buffered write data.  Remember the
+                   * last errcode.
+                   */
 
-                   lasterrno = ret;
-                 }
-             }
-         }
+                  lasterrno = ret;
+                }
+            }
+        }
 
-       stream_semgive(list);
+      stream_semgive(list);
     }
 
   /* If any flush failed, return the errorcode of the last failed flush */

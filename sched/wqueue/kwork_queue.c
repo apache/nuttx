@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/wqueue/kwork_queue.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,6 +44,7 @@
 #include <assert.h>
 #include <errno.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/clock.h>
 #include <nuttx/wqueue.h>
@@ -51,22 +52,6 @@
 #include "wqueue/wqueue.h"
 
 #ifdef CONFIG_SCHED_WORKQUEUE
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Type Declarations
- ****************************************************************************/
-
-/****************************************************************************
- * Public Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Variables
- ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
@@ -103,29 +88,29 @@
 
 static void work_qqueue(FAR struct kwork_wqueue_s *wqueue,
                         FAR struct work_s *work, worker_t worker,
-                        FAR void *arg, uint32_t delay)
+                        FAR void *arg, systime_t delay)
 {
   irqstate_t flags;
 
-  DEBUGASSERT(work != NULL);
+  DEBUGASSERT(work != NULL && worker != NULL);
 
-  /* First, initialize the work structure */
+  /* First, initialize the work structure.  This must be done with interrupts
+   * disabled.  This permits this function to be called from with task logic
+   * or interrupt handlers.
+   */
 
-  work->worker = worker;           /* Work callback */
+  flags        = enter_critical_section();
+  work->worker = worker;           /* Work callback. non-NULL means queued */
   work->arg    = arg;              /* Callback argument */
   work->delay  = delay;            /* Delay until work performed */
 
-  /* Now, time-tag that entry and put it in the work queue.  This must be
-   * done with interrupts disabled.  This permits this function to be called
-   * from with task logic or interrupt handlers.
-   */
+  /* Now, time-tag that entry and put it in the work queue */
 
-  flags        = irqsave();
   work->qtime  = clock_systimer(); /* Time work queued */
 
   dq_addlast((FAR dq_entry_t *)work, &wqueue->q);
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -162,7 +147,7 @@ static void work_qqueue(FAR struct kwork_wqueue_s *wqueue,
  ****************************************************************************/
 
 int work_queue(int qid, FAR struct work_s *work, worker_t worker,
-               FAR void *arg, uint32_t delay)
+               FAR void *arg, systime_t delay)
 {
 #ifdef CONFIG_SCHED_HPWORK
   if (qid == HPWORK)

@@ -1,4 +1,4 @@
-/*****************************************************************************
+/****************************************************************************
  *  sched/group/group_childstatus.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
-/*****************************************************************************
+/****************************************************************************
  * Included Files
- *****************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -48,9 +48,9 @@
 
 #if defined(CONFIG_SCHED_HAVE_PARENT) && defined(CONFIG_SCHED_CHILD_STATUS)
 
-/*****************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- *****************************************************************************/
+ ****************************************************************************/
 /* Note that there cannot be more that CONFIG_MAX_TASKS tasks in total.
  * However, the number of child status structures may need to be significantly
  * larger because this number includes the maximum number of tasks that are
@@ -70,9 +70,9 @@
 #  undef CONFIG_DEBUG_CHILDSTATUS
 #endif
 
-/*****************************************************************************
+/****************************************************************************
  * Private Types
- *****************************************************************************/
+ ****************************************************************************/
 /* Globals are maintained in a structure to minimize name collisions. */
 
 struct child_pool_s
@@ -81,17 +81,17 @@ struct child_pool_s
   FAR struct child_status_s *freelist;
 };
 
-/*****************************************************************************
+/****************************************************************************
  * Private Data
- *****************************************************************************/
+ ****************************************************************************/
 
 static struct child_pool_s g_child_pool;
 
-/*****************************************************************************
+/****************************************************************************
  * Private Functions
- *****************************************************************************/
+ ****************************************************************************/
 
-/*****************************************************************************
+/****************************************************************************
  * Name: group_dumpchildren
  *
  * Description:
@@ -106,7 +106,7 @@ static struct child_pool_s g_child_pool;
  * Assumptions:
  *   Called early in initialization.  No special precautions are required.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_CHILDSTATUS
 static void group_dumpchildren(FAR struct task_group_s *group,
@@ -126,11 +126,11 @@ static void group_dumpchildren(FAR struct task_group_s *group,
 #  define group_dumpchildren(t,m)
 #endif
 
-/*****************************************************************************
+/****************************************************************************
  * Public Functions
- *****************************************************************************/
+ ****************************************************************************/
 
-/*****************************************************************************
+/****************************************************************************
  * Name: task_initialize
  *
  * Description:
@@ -146,7 +146,7 @@ static void group_dumpchildren(FAR struct task_group_s *group,
  * Assumptions:
  *   Called early in initialization.  No special precautions are required.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 void task_initialize(void)
 {
@@ -166,7 +166,7 @@ void task_initialize(void)
     }
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: group_allocchild
  *
  * Description:
@@ -184,7 +184,7 @@ void task_initialize(void)
  *   Called during task creation in a safe context.  No special precautions
  *   are required here.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 FAR struct child_status_s *group_allocchild(void)
 {
@@ -202,7 +202,7 @@ FAR struct child_status_s *group_allocchild(void)
   return ret;
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: group_freechild
  *
  * Description:
@@ -218,7 +218,7 @@ FAR struct child_status_s *group_allocchild(void)
  *   Called during task creation in a safe context.  No special precautions
  *   are required here.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 void group_freechild(FAR struct child_status_s *child)
 {
@@ -231,7 +231,7 @@ void group_freechild(FAR struct child_status_s *child)
     }
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: group_addchild
  *
  * Description:
@@ -248,7 +248,7 @@ void group_freechild(FAR struct child_status_s *child)
  *   Called during task creation processing in a safe context.  No special
  *   precautions are required here.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 void group_addchild(FAR struct task_group_s *group,
                    FAR struct child_status_s *child)
@@ -261,7 +261,7 @@ void group_addchild(FAR struct task_group_s *group,
   group_dumpchildren(group, "group_addchild");
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: group_findchild
  *
  * Description:
@@ -281,7 +281,7 @@ void group_addchild(FAR struct task_group_s *group,
  *   Called during SIGCHLD processing in a safe context.  No special precautions
  *   are required here.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 FAR struct child_status_s *group_findchild(FAR struct task_group_s *group,
                                            pid_t pid)
@@ -303,7 +303,7 @@ FAR struct child_status_s *group_findchild(FAR struct task_group_s *group,
   return NULL;
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: group_exitchild
  *
  * Description:
@@ -320,7 +320,7 @@ FAR struct child_status_s *group_findchild(FAR struct task_group_s *group,
  *   Called during SIGCHLD processing in a safe context.  No special precautions
  *   are required here.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 FAR struct child_status_s *group_exitchild(FAR struct task_group_s *group)
 {
@@ -339,7 +339,7 @@ FAR struct child_status_s *group_exitchild(FAR struct task_group_s *group)
   return NULL;
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: group_removechild
  *
  * Description:
@@ -359,7 +359,7 @@ FAR struct child_status_s *group_exitchild(FAR struct task_group_s *group)
  *   Called during SIGCHLD processing in a safe context.  No special precautions
  *   are required here.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 FAR struct child_status_s *group_removechild(FAR struct task_group_s *group,
                                              pid_t pid)
@@ -403,7 +403,7 @@ FAR struct child_status_s *group_removechild(FAR struct task_group_s *group,
   return curr;
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: group_removechildren
  *
  * Description:
@@ -419,7 +419,7 @@ FAR struct child_status_s *group_removechild(FAR struct task_group_s *group,
  *   Called during task exit processing in a safe context.  No special
  *   precautions are required here.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 void group_removechildren(FAR struct task_group_s *group)
 {

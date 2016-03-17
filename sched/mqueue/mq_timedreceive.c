@@ -1,7 +1,7 @@
 /****************************************************************************
  *  sched/mqueue/mq_timedreceive.c
  *
- *   Copyright (C) 2007-2009, 2011, 2013-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011, 2013-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,28 +47,13 @@
 #include <mqueue.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/wdog.h>
 
 #include "sched/sched.h"
 #include "clock/clock.h"
 #include "mqueue/mqueue.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Type Declarations
- ****************************************************************************/
-
-/****************************************************************************
- * Public Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Variables
- ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
@@ -95,13 +80,13 @@
 static void mq_rcvtimeout(int argc, wdparm_t pid)
 {
   FAR struct tcb_s *wtcb;
-  irqstate_t saved_state;
+  irqstate_t flags;
 
   /* Disable interrupts.  This is necessary because an interrupt handler may
    * attempt to send a message while we are doing this.
    */
 
-  saved_state = irqsave();
+  flags = enter_critical_section();
 
   /* Get the TCB associated with this pid.  It is possible that task may no
    * longer be active when this watchdog goes off.
@@ -122,7 +107,7 @@ static void mq_rcvtimeout(int argc, wdparm_t pid)
 
   /* Interrupts may now be re-enabled. */
 
-  irqrestore(saved_state);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -182,9 +167,9 @@ static void mq_rcvtimeout(int argc, wdparm_t pid)
 ssize_t mq_timedreceive(mqd_t mqdes, FAR char *msg, size_t msglen,
                         FAR int *prio, FAR const struct timespec *abstime)
 {
-  FAR struct tcb_s *rtcb = (FAR struct tcb_s *)g_readytorun.head;
+  FAR struct tcb_s *rtcb = this_task();
   FAR struct mqueue_msg_s *mqmsg;
-  irqstate_t saved_state;
+  irqstate_t flags;
   int ret = ERROR;
 
   DEBUGASSERT(up_interrupt_context() == false && rtcb->waitdog == NULL);
@@ -229,7 +214,7 @@ ssize_t mq_timedreceive(mqd_t mqdes, FAR char *msg, size_t msglen,
    * because messages can be sent from interrupt level.
    */
 
-  saved_state = irqsave();
+  flags = enter_critical_section();
 
   /* Check if the message queue is empty.  If it is NOT empty, then we
    * will not need to start timer.
@@ -258,7 +243,7 @@ ssize_t mq_timedreceive(mqd_t mqdes, FAR char *msg, size_t msglen,
 
       if (result != OK)
         {
-          irqrestore(saved_state);
+          leave_critical_section(flags);
           sched_unlock();
 
           wd_delete(rtcb->waitdog);
@@ -285,7 +270,7 @@ ssize_t mq_timedreceive(mqd_t mqdes, FAR char *msg, size_t msglen,
 
   /* We can now restore interrupts */
 
-  irqrestore(saved_state);
+  leave_critical_section(flags);
 
   /* Check if we got a message from the message queue.  We might
    * not have a message if:

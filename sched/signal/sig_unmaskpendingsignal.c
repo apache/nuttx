@@ -1,4 +1,4 @@
-/************************************************************************
+/****************************************************************************
  * sched/signal/sig_unmaskpendingsignal.c
  *
  *   Copyright (C) 2007, 2009, 2013 Gregory Nutt. All rights reserved.
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -44,31 +44,11 @@
 #include "sched/sched.h"
 #include "signal/signal.h"
 
-/************************************************************************
- * Pre-processor Definitions
- ************************************************************************/
-
-/************************************************************************
- * Private Type Declarations
- ************************************************************************/
-
-/************************************************************************
- * Global Variables
- ************************************************************************/
-
-/************************************************************************
- * Private Variables
- ************************************************************************/
-
-/************************************************************************
- * Private Function Prototypes
- ************************************************************************/
-
-/************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************
+/****************************************************************************
  * Name: sig_unmaskpendingsignal
  *
  * Description:
@@ -76,33 +56,33 @@
  *   unmasks and processes any pending signals.  This function should
  *   be called whenever the sigprocmask is changed.
  *
- ************************************************************************/
+ ****************************************************************************/
 
 void sig_unmaskpendingsignal(void)
 {
-   FAR struct tcb_s *rtcb = (FAR struct tcb_s*)g_readytorun.head;
-   sigset_t unmaskedset;
-   FAR sigpendq_t *pendingsig;
-   int signo;
+  FAR struct tcb_s *rtcb = this_task();
+  sigset_t unmaskedset;
+  FAR sigpendq_t *pendingsig;
+  int signo;
 
-   /* Prohibit any context switches until we are done with this.
-    * We may still be performing signal operations from interrupt
-    * handlers, however, none of the pending signals that we
-    * are concerned with here should be effected.
-    */
+  /* Prohibit any context switches until we are done with this.
+   * We may still be performing signal operations from interrupt
+   * handlers, however, none of the pending signals that we
+   * are concerned with here should be effected.
+   */
 
-   sched_lock();
+  sched_lock();
 
-   /* Get the set of pending signals that were just unmasked.  The
-    * following operation should be safe because the sigprocmask
-    * can only be changed on this thread of execution.
-    */
+  /* Get the set of pending signals that were just unmasked.  The
+   * following operation should be safe because the sigprocmask
+   * can only be changed on this thread of execution.
+   */
 
-   unmaskedset = ~(rtcb->sigprocmask) & sig_pendingset(rtcb);
+  unmaskedset = ~(rtcb->sigprocmask) & sig_pendingset(rtcb);
 
-   /* Loop while there are unmasked pending signals to be processed. */
+  /* Loop while there are unmasked pending signals to be processed. */
 
-   while (unmaskedset != NULL_SIGNAL_SET)
+  while (unmaskedset != NULL_SIGNAL_SET)
     {
       /* Pending signals will be processed from lowest numbered signal
        * to highest

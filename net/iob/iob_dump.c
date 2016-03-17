@@ -50,7 +50,7 @@
  * Pre-processor definitions
  ****************************************************************************/
 
- #ifndef MIN
+#ifndef MIN
 #  define MIN(a,b) ((a) < (b) ? (a) : (b))
 #endif
 

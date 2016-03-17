@@ -1,7 +1,7 @@
 ############################################################################
 # drivers/input/Make.defs
 #
-#   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2011-2012, 2015 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -69,6 +69,14 @@ endif
 ifneq ($(CONFIG_INPUT_STMPE811_TEMP_DISABLE),y)
   CSRCS += stmpe811_temp.c
 endif
+endif
+
+ifeq ($(CONFIG_BUTTONS),y)
+  CSRCS += button_upper.c
+ifeq ($(CONFIG_BUTTONS_LOWER),y)
+  CSRCS += button_lower.c
+endif
+
 endif
 
 ifeq ($(CONFIG_DJOYSTICK),y)

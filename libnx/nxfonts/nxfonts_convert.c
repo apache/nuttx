@@ -46,7 +46,7 @@
 #include <nuttx/nx/nxglib.h>
 #include <nuttx/nx/nxfonts.h>
 
-#include "nxfonts_internal.h"
+#include "nxfonts.h"
 
 /****************************************************************************
  * Pre-Processor Definitions

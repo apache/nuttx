@@ -1,7 +1,7 @@
 /****************************************************************************
  * binfmt/binfmt_execsymtab.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,6 +41,7 @@
 
 #include <assert.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/binfmt/symtab.h>
 
@@ -68,7 +69,7 @@
 #endif
 
 /****************************************************************************
- * Public Variables
+ * Public Data
  ****************************************************************************/
 
 #ifdef CONFIG_EXECFUNCS_HAVE_SYMTAB
@@ -116,10 +117,10 @@ void exec_getsymtab(FAR const struct symtab_s **symtab, FAR int *nsymbols)
    * size are returned as a single atomic operation.
    */
 
-  flags     = irqsave();
+  flags     = enter_critical_section();
   *symtab   = g_exec_symtab;
   *nsymbols = g_exec_nsymbols;
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -147,10 +148,10 @@ void exec_setsymtab(FAR const struct symtab_s *symtab, int nsymbols)
    * size are set as a single atomic operation.
    */
 
-  flags           = irqsave();
+  flags           = enter_critical_section();
   g_exec_symtab   = symtab;
   g_exec_nsymbols = nsymbols;
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 #endif /* CONFIG_LIBC_EXECFUNCS */

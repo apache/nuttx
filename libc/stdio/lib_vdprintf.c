@@ -42,13 +42,13 @@
 
 #include <stdio.h>
 
-#include "lib_internal.h"
+#include "libc.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-int vdprintf(int fd, FAR const char *fmt, va_list ap)
+int vdprintf(int fd, FAR const IPTR char *fmt, va_list ap)
 {
   struct lib_rawoutstream_s rawoutstream;
 

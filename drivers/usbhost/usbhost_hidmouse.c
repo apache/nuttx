@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/usbhost/usbhost_hidmouse.c
  *
- *   Copyright (C) 2014, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,6 +52,7 @@
 #include <fixedmath.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/kthread.h>
 #include <nuttx/fs/fs.h>
@@ -523,7 +524,7 @@ static inline FAR struct usbhost_state_s *usbhost_allocclass(void)
 
   DEBUGASSERT(!up_interrupt_context());
   priv = (FAR struct usbhost_state_s *)kmm_malloc(sizeof(struct usbhost_state_s));
-  uvdbg("Allocated: %p\n", priv);;
+  uvdbg("Allocated: %p\n", priv);
   return priv;
 }
 
@@ -547,7 +548,7 @@ static inline void usbhost_freeclass(FAR struct usbhost_state_s *usbclass)
 
   /* Free the class instance. */
 
-  uvdbg("Freeing: %p\n", usbclass);;
+  uvdbg("Freeing: %p\n", usbclass);
   sched_kfree(usbclass);
 }
 
@@ -564,7 +565,7 @@ static int usbhost_allocdevno(FAR struct usbhost_state_s *priv)
   irqstate_t flags;
   int devno;
 
-  flags = irqsave();
+  flags = enter_critical_section();
   for (devno = 0; devno < 26; devno++)
     {
       uint32_t bitno = 1 << devno;
@@ -572,12 +573,12 @@ static int usbhost_allocdevno(FAR struct usbhost_state_s *priv)
         {
           g_devinuse |= bitno;
           priv->devno = devno;
-          irqrestore(flags);
+          leave_critical_section(flags);
           return OK;
         }
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return -EMFILE;
 }
 
@@ -587,9 +588,9 @@ static void usbhost_freedevno(FAR struct usbhost_state_s *priv)
 
   if (devno >= 0 && devno < 26)
     {
-      irqstate_t flags = irqsave();
+      irqstate_t flags = enter_critical_section();
       g_devinuse &= ~(1 << devno);
-      irqrestore(flags);
+      leave_critical_section(flags);
     }
 }
 
@@ -1234,7 +1235,7 @@ static int usbhost_mouse_poll(int argc, char *argv[])
 
   udbg("Mouse removed, polling halted\n");
 
-  flags = irqsave();
+  flags = enter_critical_section();
   priv->polling = false;
 
   /* Decrement the reference count held by this thread. */
@@ -1269,7 +1270,7 @@ static int usbhost_mouse_poll(int argc, char *argv[])
       usbhost_givesem(&priv->exclsem);
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return ret;
 }
 
@@ -1292,7 +1293,7 @@ static int usbhost_sample(FAR struct usbhost_state_s *priv,
    * from changing until it has been reported.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Is there new mouse data available? */
 
@@ -1300,7 +1301,7 @@ static int usbhost_sample(FAR struct usbhost_state_s *priv,
     {
       /* Return a copy of the sampled data. */
 
-      memcpy(sample, &priv->sample, sizeof(struct mouse_sample_s ));
+      memcpy(sample, &priv->sample, sizeof(struct mouse_sample_s));
 
 #ifdef CONFIG_HIDMOUSE_TSCIF
       /* Now manage state transitions */
@@ -1329,7 +1330,7 @@ static int usbhost_sample(FAR struct usbhost_state_s *priv,
       ret = OK;
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return ret;
 }
 
@@ -1360,7 +1361,7 @@ static int usbhost_waitsample(FAR struct usbhost_state_s *priv,
    */
 
   sched_lock();
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Now release the semaphore that manages mutually exclusive access to
    * the device structure.  This may cause other tasks to become ready to
@@ -1405,7 +1406,7 @@ static int usbhost_waitsample(FAR struct usbhost_state_s *priv,
 
   ivdbg("Sampled\n");
 
-   /* Re-acquire the semaphore that manages mutually exclusive access to
+  /* Re-acquire the semaphore that manages mutually exclusive access to
    * the device structure.  We may have to wait here.  But we have our sample.
    * Interrupts and pre-emption will be re-enabled while we wait.
    */
@@ -1418,7 +1419,7 @@ errout:
    * have pre-emption disabled.
    */
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   /* Restore pre-emption.  We might get suspended here but that is okay
    * because we already have our sample.  Note:  this means that if there
@@ -1484,7 +1485,7 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
 
   /* Get the total length of the configuration descriptor (little endian).
    * It might be a good check to get the number of interfaces here too.
-  */
+   */
 
   remaining = (int)usbhost_getle16(cfgdesc->totallen);
 
@@ -1783,7 +1784,7 @@ static void usbhost_putle16(uint8_t *dest, uint16_t val)
 
 static inline uint32_t usbhost_getle32(const uint8_t *val)
 {
- /* Little endian means LS halfword first in byte stream */
+  /* Little endian means LS halfword first in byte stream */
 
   return (uint32_t)usbhost_getle16(&val[2]) << 16 | (uint32_t)usbhost_getle16(val);
 }
@@ -2138,7 +2139,7 @@ static int usbhost_open(FAR struct file *filep)
    * events.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   if (priv->disconnected)
     {
       /* No... the driver is no longer bound to the class.  That means that
@@ -2178,7 +2179,7 @@ static int usbhost_open(FAR struct file *filep)
       ret        = OK;
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   usbhost_givesem(&priv->exclsem);
   return ret;
@@ -2212,7 +2213,7 @@ static int usbhost_close(FAR struct file *filep)
    * asynchronous poll or disconnect events.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   priv->crefs--;
 
   /* Check if the USB mouse device is still connected.  If the device is
@@ -2254,7 +2255,7 @@ static int usbhost_close(FAR struct file *filep)
 
               /* Skip giving the semaphore... it is no longer valid */
 
-              irqrestore(flags);
+              leave_critical_section(flags);
               return OK;
             }
           else /* if (priv->crefs == 1) */
@@ -2270,7 +2271,7 @@ static int usbhost_close(FAR struct file *filep)
     }
 
   usbhost_givesem(&priv->exclsem);
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 

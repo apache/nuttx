@@ -529,7 +529,7 @@ static int mio283qt2_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *b
 {
   FAR struct mio283qt2_dev_s *priv = &g_lcddev;
   FAR struct mio283qt2_lcd_s *lcd = priv->lcd;
-  FAR const uint16_t *src = (FAR const uint16_t*)buffer;
+  FAR const uint16_t *src = (FAR const uint16_t *)buffer;
   int i;
 
   /* Buffer must be provided and aligned to a 16-bit address boundary */
@@ -578,7 +578,7 @@ static int mio283qt2_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
 #ifndef CONFIG_LCD_NOGETRUN
   FAR struct mio283qt2_dev_s *priv = &g_lcddev;
   FAR struct mio283qt2_lcd_s *lcd = priv->lcd;
-  FAR uint16_t *dest = (FAR uint16_t*)buffer;
+  FAR uint16_t *dest = (FAR uint16_t *)buffer;
   uint16_t accum;
   int i;
 
@@ -658,10 +658,10 @@ static int mio283qt2_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planen
   DEBUGASSERT(dev && pinfo && planeno == 0);
   lcdvdbg("planeno: %d bpp: %d\n", planeno, MIO283QT2_BPP);
 
-  pinfo->putrun = mio283qt2_putrun;          /* Put a run into LCD memory */
-  pinfo->getrun = mio283qt2_getrun;          /* Get a run from LCD memory */
-  pinfo->buffer = (uint8_t*)priv->runbuffer; /* Run scratch buffer */
-  pinfo->bpp    = MIO283QT2_BPP;             /* Bits-per-pixel */
+  pinfo->putrun = mio283qt2_putrun;               /* Put a run into LCD memory */
+  pinfo->getrun = mio283qt2_getrun;               /* Get a run from LCD memory */
+  pinfo->buffer = (FAR uint8_t *)priv->runbuffer; /* Run scratch buffer */
+  pinfo->bpp    = MIO283QT2_BPP;                  /* Bits-per-pixel */
   return OK;
 }
 
@@ -937,7 +937,7 @@ static inline int mio283qt2_hwinitialize(FAR struct mio283qt2_dev_s *priv)
   return ret;
 }
 
- /*************************************************************************************
+/**************************************************************************************
  * Public Functions
  **************************************************************************************/
 

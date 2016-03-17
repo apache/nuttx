@@ -121,6 +121,6 @@ int uname(FAR struct utsname *name)
   name->machine[SYS_NAMELEN-1] = '\0';
 
   return ret;
- }
+}
 
 #endif /* (!CONFIG_BUILD_PROTECTED) && !CONFIG_BUILD_KERNEL) || __KERNEL__ */

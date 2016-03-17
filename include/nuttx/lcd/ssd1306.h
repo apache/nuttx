@@ -118,10 +118,6 @@
 
 #ifdef CONFIG_LCD_SSD1306_I2C
 
-#ifndef CONFIG_I2C_TRANSFER
-#  error "CONFIG_I2C_TRANSFER must be defined in your NuttX configuration"
-#endif
-
 #ifndef CONFIG_SSD1306_I2CADDR
 #  define CONFIG_SSD1306_I2CADDR 0x78 /* 120 in decimal */
 #endif
@@ -243,7 +239,7 @@ struct spi_dev_s; /* See include/nuttx/spi/spi.h */
 #ifdef CONFIG_LCD_SSD1306_SPI
 FAR struct lcd_dev_s *ssd1306_initialize(FAR struct spi_dev_s *dev, unsigned int devno);
 #else
-FAR struct lcd_dev_s *ssd1306_initialize(FAR struct i2c_dev_s *dev, unsigned int devno);
+FAR struct lcd_dev_s *ssd1306_initialize(FAR struct i2c_master_s *dev, unsigned int devno);
 #endif
 
 /************************************************************************************************

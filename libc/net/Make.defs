@@ -1,7 +1,7 @@
 ############################################################################
 # libc/net/Make.defs
 #
-#   Copyright (C) 2011-2013 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2011-2013, 2015 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -37,6 +37,10 @@
 
 CSRCS += lib_addrconfig.c lib_etherntoa.c lib_htons.c lib_htonl.c
 CSRCS += lib_inetaddr.c lib_inetntoa.c lib_inetntop.c lib_inetpton.c
+
+ifeq ($(CONFIG_NET),y)
+CSRCS += lib_shutdown.c
+endif
 
 # Routing table support
 

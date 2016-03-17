@@ -68,11 +68,11 @@
 #ifdef FS_HAVE_MKDIR
 
 /****************************************************************************
- * Private Variables
+ * Private Data
  ****************************************************************************/
 
 /****************************************************************************
- * Public Variables
+ * Public Data
  ****************************************************************************/
 
 /****************************************************************************
@@ -154,7 +154,10 @@ int mkdir(const char *pathname, mode_t mode)
 
   else
     {
-      /* Create an inode in the pseudo-filesystem at this path */
+      /* Create an inode in the pseudo-filesystem at this path.
+       * NOTE that the new inode will be created with a reference
+       * count of zero.
+       */
 
       inode_semtake();
       ret = inode_reserve(pathname, &inode);
@@ -178,9 +181,9 @@ int mkdir(const char *pathname, mode_t mode)
 
   return OK;
 
- errout_with_inode:
+errout_with_inode:
   inode_release(inode);
- errout:
+errout:
   set_errno(errcode);
   return ERROR;
 }

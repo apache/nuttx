@@ -56,24 +56,12 @@
 #ifdef CONFIG_SCHED_LPWORK
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Type Declarations
- ****************************************************************************/
-
-/****************************************************************************
  * Public Data
  ****************************************************************************/
 
 /* The state of the kernel mode, low priority work queue(s). */
 
 struct lp_wqueue_s g_lpwork;
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
@@ -127,7 +115,7 @@ static int work_lpthread(int argc, char *argv[])
 
   /* Loop forever */
 
-  for (;;)
+  for (; ; )
     {
 #if CONFIG_SCHED_LPNTHREADS > 0
       /* Thread 0 is special.  Only thread 0 performs period garbage collection */
@@ -147,16 +135,16 @@ static int work_lpthread(int argc, char *argv[])
 #endif
         {
           /* Perform garbage collection.  This cleans-up memory de-allocations
-          * that were queued because they could not be freed in that execution
-          * context (for example, if the memory was freed from an interrupt handler).
-          * NOTE: If the work thread is disabled, this clean-up is performed by
-          * the IDLE thread (at a very, very low priority).
-          *
-          * In the event of multiple low priority threads, on index == 0 will do
-          * the garbage collection.
-          */
+           * that were queued because they could not be freed in that execution
+           * context (for example, if the memory was freed from an interrupt handler).
+           * NOTE: If the work thread is disabled, this clean-up is performed by
+           * the IDLE thread (at a very, very low priority).
+           *
+           * In the event of multiple low priority threads, on index == 0 will do
+           * the garbage collection.
+           */
 
-          sched_garbagecollection();
+          sched_garbage_collection();
 
           /* Then process queued work.  work_process will not return until:
            * (1) there is no further work in the work queue, and (2) the polling

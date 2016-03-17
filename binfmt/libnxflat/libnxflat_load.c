@@ -147,7 +147,7 @@ int nxflat_load(struct nxflat_loadinfo_s *loadinfo)
    */
 
   loadinfo->ispace = (uint32_t)mmap(NULL, loadinfo->isize, PROT_READ,
-                                    MAP_SHARED|MAP_FILE, loadinfo->filfd, 0);
+                                    MAP_SHARED | MAP_FILE, loadinfo->filfd, 0);
   if (loadinfo->ispace == (uint32_t)MAP_FAILED)
     {
       bdbg("Failed to map NXFLAT ISpace: %d\n", errno);
@@ -189,7 +189,8 @@ int nxflat_load(struct nxflat_loadinfo_s *loadinfo)
    * DSpace memory.
    */
 
-  ret = nxflat_read(loadinfo, (char*)loadinfo->dspace->region, dreadsize, doffset);
+  ret = nxflat_read(loadinfo, (FAR char *)loadinfo->dspace->region,
+                    dreadsize, doffset);
   if (ret < 0)
     {
       bdbg("Failed to read .data section: %d\n", ret);

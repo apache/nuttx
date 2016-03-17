@@ -32,7 +32,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- **************************************************************************/
+ ****************************************************************************/
 
 #include <stdint.h>
 #include <string.h>
@@ -46,7 +46,6 @@
 #include <arch/calypso/debug.h>
 
 #include <arch/calypso/defines.h>
-//#include <arch/calypso/console.h>
 #include <nuttx/sercomm/sercomm.h>
 
 #include "uart.h"
@@ -269,8 +268,6 @@ static void uart_irq_handler_cons(__unused enum irq_nr irqnr)
   const uint8_t uart = CONS_UART_NR;
   uint8_t iir;
 
-  //uart_putchar_nb(uart, 'U');
-
   iir = uart_reg_read(uart, IIR);
   if (iir & IIR_INT_PENDING)
     {
@@ -312,8 +309,6 @@ static void uart_irq_handler_sercomm(__unused enum irq_nr irqnr, __unused void *
 {
   const uint8_t uart = SERCOMM_UART_NR;
   uint8_t iir, ch;
-
-  //uart_putchar_nb(uart, 'U');
 
   iir = uart_reg_read(uart, IIR);
   if (iir & IIR_INT_PENDING)
@@ -422,7 +417,7 @@ void uart_init(uint8_t uart, uint8_t interrupts)
 #if 0
   if (uart == 1)
     {
-      /* assign UART to MCU and unmask interrupts*/
+      /* assign UART to MCU and unmask interrupts */
 
       writeb(UART_REG_UIR, 0x00);
     }
@@ -454,7 +449,7 @@ void uart_init(uint8_t uart, uint8_t interrupts)
 
   /* THR interrupt only when TX FIFO and TX shift register are empty */
 
-  uart_reg_write(uart, SCR, (1 << 0));// | (1 << 3));
+  uart_reg_write(uart, SCR, (1 << 0)); /* | (1 << 3)); */
 
   /* 8 bit, 1 stop bit, no parity, no break */
 
@@ -570,7 +565,6 @@ int uart_getchar_nb(uint8_t uart, uint8_t *ch)
     }
 
   *ch = readb(UART_REG(uart, RHR));
-  //printf("getchar_nb(%u) = %02x\n", uart, *ch);
   return 1;
 }
 

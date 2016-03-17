@@ -67,7 +67,7 @@ static int     syslog_console_ioctl(FAR struct file *filep, int cmd,
                                     unsigned long arg);
 
 /****************************************************************************
- * Private Variables
+ * Private Data
  ****************************************************************************/
 
 static const struct file_operations g_consoleops =
@@ -130,7 +130,7 @@ static ssize_t syslog_console_write(FAR struct file *filep,
 
 /****************************************************************************
  * Name: syslog_console_init
-****************************************************************************/
+ ****************************************************************************/
 
 void syslog_console_init(void)
 {

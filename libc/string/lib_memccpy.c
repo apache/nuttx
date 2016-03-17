@@ -46,7 +46,7 @@
 #include <string.h>
 
 /****************************************************************************
- * Global Functions
+ * Public Functions
  ****************************************************************************/
 
 
@@ -68,8 +68,8 @@
 
 FAR void *memccpy(FAR void *s1, FAR const void *s2, int c, size_t n)
 {
-  FAR unsigned char *pout = (FAR unsigned char*)s1;
-  FAR unsigned char *pin  = (FAR unsigned char*)s2;
+  FAR unsigned char *pout = (FAR unsigned char *)s1;
+  FAR unsigned char *pin  = (FAR unsigned char *)s2;
 
   /* Copy at most n bytes */
 
@@ -81,16 +81,12 @@ FAR void *memccpy(FAR void *s1, FAR const void *s2, int c, size_t n)
 
       /* Did we just copy the terminating byte c? */
 
-      if (*pout == (unsigned char)c)
+      if (*pout++ == (unsigned char)c)
         {
           /* Yes return a pointer to the byte after the copy of c into s1 */
 
           return (FAR void *)pout;
         }
-
-      /* No increment to the next destination location */
-
-      pout++;
     }
 
   /* C was not found in the first n bytes of s2 */

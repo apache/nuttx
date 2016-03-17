@@ -46,7 +46,7 @@
 #include <debug.h>
 
 #ifdef CONFIG_RTC
-#  include <arch/irq.h>
+#  include <nuttx/irq.h>
 #endif
 
 #include <nuttx/arch.h>
@@ -65,19 +65,7 @@
 #define SEC_PER_DAY  ((time_t)24 * SEC_PER_HOUR)
 
 /****************************************************************************
- * Private Type Declarations
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/**************************************************************************
- * Public Constant Data
- **************************************************************************/
-
-/****************************************************************************
- * Public Variables
+ * Public Data
  ****************************************************************************/
 
 #ifndef CONFIG_SCHED_TICKLESS
@@ -90,13 +78,9 @@ volatile uint32_t g_system_timer;
 
 struct timespec   g_basetime;
 
-/**************************************************************************
- * Private Variables
- **************************************************************************/
-
-/**************************************************************************
+/****************************************************************************
  * Private Functions
- **************************************************************************/
+ ****************************************************************************/
 
 /****************************************************************************
  * Name: clock_basetime
@@ -110,47 +94,53 @@ struct timespec   g_basetime;
 #if defined(CONFIG_RTC_DATETIME)
 /* Initialize the system time using a broken out date/time structure */
 
-static inline void clock_basetime(FAR struct timespec *tp)
+static inline int clock_basetime(FAR struct timespec *tp)
 {
   struct tm rtctime;
+  int ret;
 
   /* Get the broken-out time from the date/time RTC. */
 
-  (void)up_rtc_getdatetime(&rtctime);
+  ret = up_rtc_getdatetime(&rtctime);
+  if (ret >= 0)
+    {
+      /* And use the broken-out time to initialize the system time */
 
-  /* And use the broken-out time to initialize the system time */
+      tp->tv_sec  = mktime(&rtctime);
+      tp->tv_nsec = 0;
+    }
 
-  tp->tv_sec  = mktime(&rtctime);
-  tp->tv_nsec = 0;
+  return ret;
 }
 
 #elif defined(CONFIG_RTC_HIRES)
 
 /* Initialize the system time using a high-resolution structure */
 
-static inline void clock_basetime(FAR struct timespec *tp)
+static inline int clock_basetime(FAR struct timespec *tp)
 {
   /* Get the complete time from the hi-res RTC. */
 
-  (void)up_rtc_gettime(tp);
+  return up_rtc_gettime(tp);
 }
 
 #else
 
 /* Initialize the system time using seconds only */
 
-static inline void clock_basetime(FAR struct timespec *tp)
+static inline int clock_basetime(FAR struct timespec *tp)
 {
   /* Get the seconds (only) from the lo-resolution RTC */
 
   tp->tv_sec  = up_rtc_time();
   tp->tv_nsec = 0;
+  return OK;
 }
 
 #endif /* CONFIG_RTC_HIRES */
 #else /* CONFIG_RTC */
 
-static inline void clock_basetime(FAR struct timespec *tp)
+static inline int clock_basetime(FAR struct timespec *tp)
 {
   time_t jdn = 0;
 
@@ -165,6 +155,7 @@ static inline void clock_basetime(FAR struct timespec *tp)
 
   tp->tv_sec  = jdn * SEC_PER_DAY;
   tp->tv_nsec = 0;
+  return OK;
 }
 
 #endif /* CONFIG_RTC */
@@ -181,7 +172,7 @@ static void clock_inittime(void)
 {
   /* (Re-)initialize the time value to match the RTC */
 
-  clock_basetime(&g_basetime);
+  (void)clock_basetime(&g_basetime);
 #ifndef CONFIG_SCHED_TICKLESS
   g_system_timer = 0;
 #endif
@@ -201,10 +192,12 @@ static void clock_inittime(void)
 
 void clock_initialize(void)
 {
-  /* Initialize the RTC hardware */
+#if defined(CONFIG_RTC) && !defined(CONFIG_RTC_EXTERNAL)
+  /* Initialize the internal RTC hardware.  Initialization of external RTC
+   * must be deferred until the system has booted.
+   */
 
-#ifdef CONFIG_RTC
-  up_rtcinitialize();
+  up_rtc_initialize();
 #endif
 
   /* Initialize the time value to match the RTC */
@@ -247,9 +240,9 @@ void clock_synchronize(void)
 
   /* Re-initialize the time value to match the RTC */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   clock_inittime();
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 #endif
 

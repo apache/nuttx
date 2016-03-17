@@ -1,4 +1,4 @@
-/*****************************************************************************
+/****************************************************************************
  *  netapp.c  - CC3000 Host Driver Implementation.
  *  Copyright (C) 2011 Texas Instruments Incorporated - http://www.ti.com/
  *
@@ -30,11 +30,11 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  *  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
-/******************************************************************************
+/****************************************************************************
  * Included Files
- ******************************************************************************/
+ ****************************************************************************/
 
 #include <string.h>
 
@@ -46,9 +46,9 @@
 #include "cc3000.h"
 #include "cc3000_socket.h"
 
-/******************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ******************************************************************************/
+ ****************************************************************************/
 
 #define MIN_TIMER_VAL_SECONDS      20
 #define MIN_TIMER_SET(t)    if ((0 != t) && (t < MIN_TIMER_VAL_SECONDS)) \
@@ -62,11 +62,11 @@
 #define NETAPP_SET_DEBUG_LEVEL_PARAMS_LEN  (4)
 #define NETAPP_PING_SEND_PARAMS_LEN        (16)
 
-/******************************************************************************
+/****************************************************************************
  * Public Functions
- ******************************************************************************/
+ ****************************************************************************/
 
-/******************************************************************************
+/****************************************************************************
  * Name: netapp_config_mac_adrress
  *
  * Description:
@@ -80,14 +80,14 @@
  * Returned Value:
  *   Return on success 0, otherwise error.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 long netapp_config_mac_adrress(uint8_t *mac)
 {
   return  nvmem_set_mac_address(mac);
 }
 
-/******************************************************************************
+/****************************************************************************
  * Name: netapp_dhcp
  *
  * Description:
@@ -112,7 +112,7 @@ long netapp_config_mac_adrress(uint8_t *mac)
  * Returned Value:
  *   Return on success 0, otherwise error.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 long netapp_dhcp(unsigned long *aucIP, unsigned long *aucSubnetMask,
                  unsigned long *aucDefaultGateway, unsigned long *aucDNSServer)
@@ -129,11 +129,11 @@ long netapp_dhcp(unsigned long *aucIP, unsigned long *aucSubnetMask,
 
   /* Fill in temporary command buffer */
 
-  ARRAY_TO_STREAM(args,aucIP,4);
-  ARRAY_TO_STREAM(args,aucSubnetMask,4);
-  ARRAY_TO_STREAM(args,aucDefaultGateway,4);
+  ARRAY_TO_STREAM(args, aucIP, 4);
+  ARRAY_TO_STREAM(args, aucSubnetMask, 4);
+  ARRAY_TO_STREAM(args, aucDefaultGateway, 4);
   args = UINT32_TO_STREAM(args, 0);
-  ARRAY_TO_STREAM(args,aucDNSServer,4);
+  ARRAY_TO_STREAM(args, aucDNSServer, 4);
 
   /* Initiate a HCI command */
 
@@ -148,7 +148,7 @@ long netapp_dhcp(unsigned long *aucIP, unsigned long *aucSubnetMask,
   return(scRet);
 }
 
-/******************************************************************************
+/****************************************************************************
  * Name: netapp_timeout_values
  *
  * Description:
@@ -196,7 +196,7 @@ long netapp_dhcp(unsigned long *aucIP, unsigned long *aucSubnetMask,
  * Returned Value:
  *   Return on success 0, otherwise error.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifndef CC3000_TINY_DRIVER
 long netapp_timeout_values(unsigned long *aucDHCP, unsigned long *aucARP,
@@ -241,7 +241,7 @@ long netapp_timeout_values(unsigned long *aucDHCP, unsigned long *aucARP,
 }
 #endif
 
-/******************************************************************************
+/****************************************************************************
  * Name: netapp_ping_send
  *
  * Description:
@@ -263,7 +263,7 @@ long netapp_timeout_values(unsigned long *aucDHCP, unsigned long *aucARP,
  * Returned Value:
  *   Return on success 0, otherwise error.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifndef CC3000_TINY_DRIVER
 long netapp_ping_send(unsigned long *ip, unsigned long ulPingAttempts,
@@ -299,7 +299,7 @@ long netapp_ping_send(unsigned long *ip, unsigned long ulPingAttempts,
 }
 #endif
 
-/******************************************************************************
+/****************************************************************************
  * Name: netapp_ping_report
  *
  * Description:
@@ -324,7 +324,7 @@ long netapp_ping_send(unsigned long *ip, unsigned long ulPingAttempts,
  * Returned Value:
  *   None
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifndef CC3000_TINY_DRIVER
 void netapp_ping_report(void)
@@ -349,7 +349,7 @@ void netapp_ping_report(void)
 }
 #endif
 
-/******************************************************************************
+/****************************************************************************
  * Name: netapp_ping_stop
  *
  * Description:
@@ -361,7 +361,7 @@ void netapp_ping_report(void)
  * Returned Value:
  *   On success, zero is returned. On error, -1 is returned.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifndef CC3000_TINY_DRIVER
 long netapp_ping_stop(void)
@@ -388,7 +388,7 @@ long netapp_ping_stop(void)
 }
 #endif
 
-/******************************************************************************
+/****************************************************************************
  * Name: netapp_ipconfig
  *
  * Description:
@@ -416,7 +416,7 @@ long netapp_ping_stop(void)
  * Returned Value:
  *   None
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifndef CC3000_TINY_DRIVER
 void netapp_ipconfig(tNetappIpconfigRetArgs * ipconfig)
@@ -443,7 +443,7 @@ void netapp_ipconfig(tNetappIpconfigRetArgs * ipconfig)
 }
 #endif
 
-/******************************************************************************
+/****************************************************************************
  * Name: netapp_arp_flush
  *
  * Description:
@@ -455,7 +455,7 @@ void netapp_ipconfig(tNetappIpconfigRetArgs * ipconfig)
  * Returned Value:
  *   None
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifndef CC3000_TINY_DRIVER
 long netapp_arp_flush(void)
@@ -483,7 +483,7 @@ long netapp_arp_flush(void)
 }
 #endif
 
-/******************************************************************************
+/****************************************************************************
  * Name: netapp_set_debug_level
  *
  * Description:
@@ -507,7 +507,7 @@ long netapp_arp_flush(void)
  * Returned Value:
  *   On success, zero is returned. On error, -1 is returned
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifndef CC3000_TINY_DRIVER
 long netapp_set_debug_level(unsigned long ulLevel)

@@ -1,7 +1,7 @@
 /****************************************************************************
  *  sched/mqueue/mq_desclose.c
  *
- *   Copyright (C) 2007, 2009, 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2013-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,28 +41,13 @@
 
 #include <mqueue.h>
 #include <sched.h>
+#include <string.h>
 #include <assert.h>
 #include <queue.h>
 
 #include <nuttx/mqueue.h>
 
 #include "mqueue/mqueue.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Type Declarations
- ****************************************************************************/
-
-/****************************************************************************
- * Global Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Variables
- ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
@@ -105,7 +90,7 @@
 
 void mq_desclose(mqd_t mqdes)
 {
-  FAR struct tcb_s *rtcb = (FAR struct tcb_s*)sched_self();
+  FAR struct tcb_s *rtcb = (FAR struct tcb_s *)sched_self();
   FAR struct task_group_s *group = rtcb->group;
   FAR struct mqueue_inode_s *msgq;
 
@@ -115,7 +100,7 @@ void mq_desclose(mqd_t mqdes)
    * descriptors.
    */
 
-  sq_rem((FAR sq_entry_t*)mqdes, &group->tg_msgdesq);
+  sq_rem((FAR sq_entry_t *)mqdes, &group->tg_msgdesq);
 
   /* Find the message queue associated with the message descriptor */
 
@@ -128,15 +113,14 @@ void mq_desclose(mqd_t mqdes)
 #ifndef CONFIG_DISABLE_SIGNALS
   if (msgq->ntmqdes == mqdes)
     {
+      memset(&msgq->ntevent, 0, sizeof(struct sigevent));
       msgq->ntpid   = INVALID_PROCESS_ID;
-      msgq->ntsigno = 0;
-      msgq->ntvalue.sival_int = 0;
       msgq->ntmqdes = NULL;
     }
 #endif
 
-   /* Deallocate the message descriptor */
+  /* Deallocate the message descriptor */
 
-   mq_desfree(mqdes);
+  mq_desfree(mqdes);
 }
 

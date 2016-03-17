@@ -41,7 +41,7 @@
 #include <cstddef>
 #include <debug.h>
 
-#include "libxx_internal.hxx"
+#include "libxx.hxx"
 
 //***************************************************************************
 // Pre-processor Definitions

@@ -48,7 +48,7 @@
 #include <netinet/in.h>
 
 #include <nuttx/net/net.h>
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 
 #include "icmpv6/icmpv6.h"
 
@@ -105,10 +105,10 @@ void icmpv6_wait_setup(const net_ipv6addr_t ipaddr,
 
   /* Add the wait structure to the list with interrupts disabled */
 
-  flags             = irqsave();
+  flags             = enter_critical_section();
   notify->nt_flink  = g_icmpv6_waiters;
   g_icmpv6_waiters  = notify;
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -136,7 +136,7 @@ int icmpv6_wait_cancel(FAR struct icmpv6_notify_s *notify)
    * head of the list).
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   for (prev = NULL, curr = g_icmpv6_waiters;
        curr && curr != notify;
        prev = curr, curr = curr->nt_flink);
@@ -156,7 +156,7 @@ int icmpv6_wait_cancel(FAR struct icmpv6_notify_s *notify)
       ret = OK;
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   (void)sem_destroy(&notify->nt_sem);
   return ret;
 }
@@ -186,7 +186,7 @@ int icmpv6_wait(FAR struct icmpv6_notify_s *notify,
    * be re-enabled while we wait.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   DEBUGVERIFY(clock_gettime(CLOCK_REALTIME, &abstime));
 
   abstime.tv_sec  += timeout->tv_sec;
@@ -197,9 +197,9 @@ int icmpv6_wait(FAR struct icmpv6_notify_s *notify,
       abstime.tv_nsec -= 1000000000;
     }
 
-   /* REVISIT:  If net_timedwait() is awakened with  signal, we will return
-    * the wrong error code.
-    */
+  /* REVISIT:  If net_timedwait() is awakened with  signal, we will return
+   * the wrong error code.
+   */
 
   (void)net_timedwait(&notify->nt_sem, &abstime);
   ret = notify->nt_result;
@@ -212,7 +212,7 @@ int icmpv6_wait(FAR struct icmpv6_notify_s *notify,
 
   /* Re-enable interrupts and return the result of the wait */
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return ret;
 }
 

@@ -58,7 +58,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Public Variables
+ * Public Data
  ****************************************************************************/
 
 /****************************************************************************
@@ -190,7 +190,7 @@ static int nxffs_badblocks(FAR struct nxffs_volume_s *volume)
            i++, block++, blkptr += volume->geo.blocksize)
 #endif
         {
-          FAR struct nxffs_block_s *blkhdr = (FAR struct nxffs_block_s*)blkptr;
+          FAR struct nxffs_block_s *blkhdr = (FAR struct nxffs_block_s *)blkptr;
 
           /* Assume that this is a good block until we learn otherwise */
 
@@ -330,7 +330,7 @@ int nxffs_reformat(FAR struct nxffs_volume_s *volume)
 void nxffs_blkinit(FAR struct nxffs_volume_s *volume, FAR uint8_t *blkptr,
                    uint8_t state)
 {
-  FAR struct nxffs_block_s *blkhdr = (FAR struct nxffs_block_s*)blkptr;
+  FAR struct nxffs_block_s *blkhdr = (FAR struct nxffs_block_s *)blkptr;
 
   memset(blkptr, CONFIG_NXFFS_ERASEDSTATE, volume->geo.blocksize);
   memcpy(blkhdr->magic, g_blockmagic, NXFFS_MAGICSIZE);

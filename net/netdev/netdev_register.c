@@ -61,19 +61,21 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define NETDEV_SLIP_FORMAT      "sl%d"
-#define NETDEV_ETH_FORMAT       "eth%d"
-#define NETDEV_TUN_FORMAT       "tun%d"
+#define NETDEV_ETH_FORMAT   "eth%d"
+#define NETDEV_LO_FORMAT    "lo"
+#define NETDEV_WPAN_FORMAT  "wpan%d"
+#define NETDEV_SLIP_FORMAT  "sl%d"
+#define NETDEV_TUN_FORMAT   "tun%d"
 
 #if defined(CONFIG_NET_SLIP)
 #  define NETDEV_DEFAULT_FORMAT NETDEV_SLIP_FORMAT
-#else /* if defined(CONFIG_NET_ETHERNET) */
+#elif defined(CONFIG_NET_ETHERNET)
 #  define NETDEV_DEFAULT_FORMAT NETDEV_ETH_FORMAT
+#elif defined(CONFIG_NET_6LOWPAN)
+#  define NETDEV_DEFAULT_FORMAT NETDEV_WPAN_FORMAT
+#else /* if defined(CONFIG_NET_LOOPBACK) */
+#  define NETDEV_DEFAULT_FORMAT NETDEV_LO_FORMAT
 #endif
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
 
 /****************************************************************************
  * Private Data
@@ -159,7 +161,7 @@ static int find_devnum(FAR const char *devfmt)
  *
  * Parameters:
  *   dev    - The device driver structure to be registered.
- *   lltype - Link level protocol used by the driver (Ethernet, SLIP, PPP, ...
+ *   lltype - Link level protocol used by the driver (Ethernet, SLIP, TUN, ...
  *              ...
  *
  * Returned Value:
@@ -190,8 +192,19 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
 
       switch (lltype)
         {
+#ifdef CONFIG_NET_LOOPBACK
+          case NET_LL_LOOPBACK:   /* Local loopback */
+            dev->d_llhdrlen = 0;
+            dev->d_mtu      = NET_LO_MTU;
+#ifdef CONFIG_NET_TCP
+            dev->d_recvwndo = NET_LO_TCP_RECVWNDO;
+#endif
+            devfmt          = NETDEV_LO_FORMAT;
+            break;
+#endif
+
 #ifdef CONFIG_NET_ETHERNET
-          case NET_LL_ETHERNET:  /* Ethernet */
+          case NET_LL_ETHERNET:   /* Ethernet */
             dev->d_llhdrlen = ETH_HDRLEN;
             dev->d_mtu      = CONFIG_NET_ETH_MTU;
 #ifdef CONFIG_NET_TCP
@@ -201,8 +214,19 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
             break;
 #endif
 
+#ifdef CONFIG_NET_6LOWPAN
+          case NET_LL_6LOWPAN:    /* IEEE 802.15.4 */
+            dev->d_llhdrlen = 0;  /* REVISIT */
+            dev->d_mtu      = CONFIG_NET_6LOWPAN_MTU;
+#ifdef CONFIG_NET_TCP
+            dev->d_recvwndo = CONFIG_NET_6LOWPAN_TCP_RECVWNDO;
+#endif
+            devfmt          = NETDEV_WPAN_FORMAT;
+            break;
+#endif
+
 #ifdef CONFIG_NET_SLIP
-          case NET_LL_SLIP:      /* Serial Line Internet Protocol (SLIP) */
+          case NET_LL_SLIP:       /* Serial Line Internet Protocol (SLIP) */
             dev->d_llhdrlen = 0;
             dev->d_mtu      = CONFIG_NET_SLIP_MTU;
 #ifdef CONFIG_NET_TCP
@@ -213,24 +237,13 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
 #endif
 
 #ifdef CONFIG_NET_TUN
-          case NET_LL_TUN:       /* Virtual Network Device (TUN) */
+          case NET_LL_TUN:        /* Virtual Network Device (TUN) */
             dev->d_llhdrlen = 0;
             dev->d_mtu      = CONFIG_NET_TUN_MTU;
 #ifdef CONFIG_NET_TCP
             dev->d_recvwndo = CONFIG_NET_TUN_TCP_RECVWNDO;
 #endif
             devfmt          = NETDEV_TUN_FORMAT;
-            break;
-#endif
-
-#if 0                            /* REVISIT: Not yet supported */
-          case NET_LL_PPP:       /* Point-to-Point Protocol (PPP) */
-            dev->d_llhdrlen = 0;
-            dev->d_mtu      = CONFIG_NET_PPP_MTU;
-#ifdef CONFIG_NET_TCP
-            dev->d_recvwndo = CONFIG_NET_PPP_TCP_RECVWNDO;
-#endif
-            devfmt          = NETDEV_PPP_FORMAT;
             break;
 #endif
 
@@ -254,16 +267,35 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
       dev->d_conncb = NULL;
       dev->d_devcb = NULL;
 
-      /* Get the next available device number and sssign a device name to
+      /* Get the next available device number and assign a device name to
        * the interface
        */
 
       save = net_lock();
+
 #ifdef CONFIG_NET_MULTILINK
-      devnum = find_devnum(devfmt);
+#  ifdef CONFIG_NET_LOOPBACK
+      /* The local loopback device is a special case:  There can be only one
+       * local loopback device so it is unnumbered.
+       */
+
+      if (lltype == NET_LL_LOOPBACK)
+        {
+          devnum = 0;
+        }
+      else
+#  endif
+        {
+          devnum = find_devnum(devfmt);
+        }
 #else
+      /* There is only a single link type.  Finding the next network device
+       * number is simple.
+       */
+
       devnum = g_next_devnum++;
 #endif
+
 #ifdef CONFIG_NET_USER_DEVFMT
       if (*dev->d_ifname)
         {
@@ -272,7 +304,7 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
         }
 #endif
 
-      snprintf(dev->d_ifname, IFNAMSIZ, devfmt, devnum );
+      snprintf(dev->d_ifname, IFNAMSIZ, devfmt, devnum);
 
       /* Add the device to the list of known network devices */
 

@@ -68,11 +68,11 @@
 #ifdef FS_HAVE_UNLINK
 
 /****************************************************************************
- * Private Variables
+ * Private Data
  ****************************************************************************/
 
 /****************************************************************************
- * Public Variables
+ * Public Data
  ****************************************************************************/
 
 /****************************************************************************
@@ -225,9 +225,9 @@ int unlink(FAR const char *pathname)
   inode_release(inode);
   return OK;
 
- errout_with_inode:
+errout_with_inode:
   inode_release(inode);
- errout:
+errout:
   set_errno(errcode);
   return ERROR;
 }

@@ -61,17 +61,17 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/input/ajoystick.h>
 
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 
 /****************************************************************************
  * Private Types
  ****************************************************************************/
 
-/* This structure provides the state of one discrete joystick driver */
+/* This structure provides the state of one analog joystick driver */
 
 struct ajoy_upperhalf_s
 {
-  /* Saved binding to the lower half discrete joystick driver */
+  /* Saved binding to the lower half analog joystick driver */
 
   FAR const struct ajoy_lowerhalf_s *au_lower;
 
@@ -143,7 +143,8 @@ static void    ajoy_sample(FAR struct ajoy_upperhalf_s *priv);
 
 static int     ajoy_open(FAR struct file *filep);
 static int     ajoy_close(FAR struct file *filep);
-static ssize_t ajoy_read(FAR struct file *, FAR char *, size_t);
+static ssize_t ajoy_read(FAR struct file *filep, FAR char *buffer,
+                         size_t buflen);
 static int     ajoy_ioctl(FAR struct file *filep, int cmd,
                           unsigned long arg);
 #ifndef CONFIG_DISABLE_POLL
@@ -215,7 +216,7 @@ static void ajoy_enable(FAR struct ajoy_upperhalf_s *priv)
    * interrupts must be disabled.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Visit each opened reference to the device */
 
@@ -265,7 +266,7 @@ static void ajoy_enable(FAR struct ajoy_upperhalf_s *priv)
       lower->al_enable(lower, 0, 0, NULL, NULL);
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 #endif
 
@@ -313,7 +314,7 @@ static void ajoy_sample(FAR struct ajoy_upperhalf_s *priv)
    * interrupts must be disabled.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Sample the new button state */
 
@@ -385,7 +386,7 @@ static void ajoy_sample(FAR struct ajoy_upperhalf_s *priv)
 #endif
 
   priv->au_sample = sample;
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -484,10 +485,10 @@ static int ajoy_close(FAR struct file *filep)
    * detection anyway.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   closing = opriv->ao_closing;
   opriv->ao_closing = true;
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   if (closing)
     {
@@ -822,15 +823,15 @@ errout_with_dusem:
  * Name: ajoy_register
  *
  * Description:
- *   Bind the lower half discrete joystick driver to an instance of the
- *   upper half discrete joystick driver and register the composite character
+ *   Bind the lower half analog joystick driver to an instance of the
+ *   upper half analog joystick driver and register the composite character
  *   driver as the specific device.
  *
  * Input Parameters:
- *   devname - The name of the discrete joystick device to be registers.
+ *   devname - The name of the analog joystick device to be registers.
  *     This should be a string of the form "/priv/ajoyN" where N is the the
  *     minor device number.
- *   lower - An instance of the platform-specific discrete joystick lower
+ *   lower - An instance of the platform-specific analog joystick lower
  *     half driver.
  *
  * Returned Values:

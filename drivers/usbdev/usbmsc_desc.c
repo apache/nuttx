@@ -260,7 +260,7 @@ int usbmsc_mkstrdesc(uint8_t id, struct usb_strdesc_s *strdesc)
         return 4;
       }
 
-      case USBMSC_MANUFACTURERSTRID:
+    case USBMSC_MANUFACTURERSTRID:
       str = g_mscvendorstr;
       break;
 

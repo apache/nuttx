@@ -1,7 +1,7 @@
-/************************************************************************
+/****************************************************************************
  * sched/sched/sched_mergepending.c
  *
- *   Copyright (C) 2007, 2009, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -44,123 +44,113 @@
 #include <queue.h>
 #include <assert.h>
 
+#include <nuttx/sched_note.h>
+
 #include "sched/sched.h"
 
-/************************************************************************
- * Pre-processor Definitions
- ************************************************************************/
-
-/************************************************************************
- * Private Type Declarations
- ************************************************************************/
-
-/************************************************************************
- * Global Variables
- ************************************************************************/
-
-/************************************************************************
- * Private Variables
- ************************************************************************/
-
-/************************************************************************
- * Private Function Prototypes
- ************************************************************************/
-
-/************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************
+/****************************************************************************
  * Name: sched_mergepending
  *
  * Description:
  *   This function merges the prioritized g_pendingtasks list into the
- *   prioritized g_readytorun task list.
+ *   prioritized ready-to-run task list.
  *
  * Inputs:
  *   None
  *
  * Return Value:
- *   true if the head of the g_readytorun task list has changed.
+ *   true if the head of the ready-to-run task list has changed indicating
+ *     a context switch is needed.
  *
  * Assumptions:
  * - The caller has established a critical section before
  *   calling this function (calling sched_lock() first is NOT
- *   a good idea -- use irqsave()).
+ *   a good idea -- use enter_critical_section()).
  * - The caller handles the condition that occurs if the
  *   the head of the sched_mergTSTATE_TASK_PENDINGs is changed.
  *
- ************************************************************************/
+ ****************************************************************************/
 
+#ifndef CONFIG_SMP
 bool sched_mergepending(void)
 {
-  FAR struct tcb_s *pndtcb;
-  FAR struct tcb_s *pndnext;
-  FAR struct tcb_s *rtrtcb;
-  FAR struct tcb_s *rtrprev;
+  FAR struct tcb_s *ptcb;
+  FAR struct tcb_s *pnext;
+  FAR struct tcb_s *rtcb;
+  FAR struct tcb_s *rprev;
   bool ret = false;
 
   /* Initialize the inner search loop */
 
-  rtrtcb = (FAR struct tcb_s*)g_readytorun.head;
+  rtcb = this_task();
 
   /* Process every TCB in the g_pendingtasks list */
 
-  for (pndtcb = (FAR struct tcb_s*)g_pendingtasks.head; pndtcb; pndtcb = pndnext)
+  for (ptcb = (FAR struct tcb_s *)g_pendingtasks.head;
+       ptcb;
+       ptcb = pnext)
     {
-      pndnext = pndtcb->flink;
+      pnext = ptcb->flink;
 
-      /* Search the g_readytorun list to find the location to insert the
-       * new pndtcb. Each is list is maintained in ascending sched_priority
+      /* REVISIT:  Why don't we just remove the ptcb from pending task list
+       * and call sched_addreadytorun?
+       */
+
+      /* Search the ready-to-run list to find the location to insert the
+       * new ptcb. Each is list is maintained in ascending sched_priority
        * order.
        */
 
       for (;
-           (rtrtcb && pndtcb->sched_priority <= rtrtcb->sched_priority);
-           rtrtcb = rtrtcb->flink);
+           (rtcb && ptcb->sched_priority <= rtcb->sched_priority);
+           rtcb = rtcb->flink);
 
-      /* Add the pndtcb to the spot found in the list.  Check if the
-       * pndtcb goes at the ends of the g_readytorun list. This would be
+      /* Add the ptcb to the spot found in the list.  Check if the
+       * ptcb goes at the ends of the ready-to-run list. This would be
        * error condition since the idle test must always be at the end of
-       * the g_readytorun list!
+       * the ready-to-run list!
        */
 
-      ASSERT(rtrtcb);
+      ASSERT(rtcb);
 
-      /* The pndtcb goes just before rtrtcb */
+      /* The ptcb goes just before rtcb */
 
-      rtrprev = rtrtcb->blink;
-      if (!rtrprev)
+      rprev = rtcb->blink;
+      if (!rprev)
         {
-          /* Special case: Inserting pndtcb at the head of the list */
+          /* Special case: Inserting ptcb at the head of the list */
           /* Inform the instrumentation layer that we are switching tasks */
 
-          sched_note_switch(rtrtcb, pndtcb);
+          sched_note_switch(rtcb, ptcb);
 
           /* Then insert at the head of the list */
 
-          pndtcb->flink      = rtrtcb;
-          pndtcb->blink      = NULL;
-          rtrtcb->blink      = pndtcb;
-          g_readytorun.head  = (FAR dq_entry_t*)pndtcb;
-          rtrtcb->task_state = TSTATE_TASK_READYTORUN;
-          pndtcb->task_state = TSTATE_TASK_RUNNING;
-          ret                = true;
+          ptcb->flink       = rtcb;
+          ptcb->blink       = NULL;
+          rtcb->blink       = ptcb;
+          g_readytorun.head = (FAR dq_entry_t *)ptcb;
+          rtcb->task_state  = TSTATE_TASK_READYTORUN;
+          ptcb->task_state  = TSTATE_TASK_RUNNING;
+          ret               = true;
         }
       else
         {
           /* Insert in the middle of the list */
 
-          pndtcb->flink      = rtrtcb;
-          pndtcb->blink      = rtrprev;
-          rtrprev->flink     = pndtcb;
-          rtrtcb->blink      = pndtcb;
-          pndtcb->task_state = TSTATE_TASK_READYTORUN;
+          ptcb->flink       = rtcb;
+          ptcb->blink       = rprev;
+          rprev->flink      = ptcb;
+          rtcb->blink       = ptcb;
+          ptcb->task_state  = TSTATE_TASK_READYTORUN;
         }
 
       /* Set up for the next time through */
 
-      rtrtcb = pndtcb;
+      rtcb = ptcb;
     }
 
   /* Mark the input list empty */
@@ -170,3 +160,48 @@ bool sched_mergepending(void)
 
   return ret;
 }
+#endif /* !CONFIG_SMP */
+
+/****************************************************************************
+ * Name: sched_mergepending
+ *
+ * Description:
+ *   This function merges the prioritized g_pendingtasks list into the
+ *   prioritized ready-to-run task list.
+ *
+ * Inputs:
+ *   None
+ *
+ * Return Value:
+ *   true if the head of the ready-to-run task list has changed indicating
+ *     a context switch is needed.
+ *
+ * Assumptions:
+ * - The caller has established a critical section before
+ *   calling this function (calling sched_lock() first is NOT
+ *   a good idea -- use enter_critical_section()).
+ * - The caller handles the condition that occurs if the
+ *   the head of the sched_mergTSTATE_TASK_PENDINGs is changed.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SMP
+bool sched_mergepending(void)
+{
+  FAR struct tcb_s *ptcb;
+  bool ret = false;
+
+  /* Remove and process every TCB in the g_pendingtasks list */
+
+  for (ptcb = (FAR struct tcb_s *)dq_remfirst((FAR dq_queue_t *)&g_pendingtasks);
+       ptcb != NULL;
+       ptcb = (FAR struct tcb_s *)dq_remfirst((FAR dq_queue_t *)&g_pendingtasks))
+    {
+      /* Add the pending task to the correct ready-to-run list */
+
+      ret |= sched_addreadytorun(ptcb);
+    }
+
+  return ret;
+}
+#endif /* CONFIG_SMP */

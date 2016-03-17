@@ -1,7 +1,7 @@
 /****************************************************************************
  * libc/wqueue/work_usrthread.c
  *
- *   Copyright (C) 2009-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -122,11 +122,11 @@ void work_process(FAR struct usr_wqueue_s *wqueue)
   volatile FAR struct work_s *work;
   worker_t  worker;
   FAR void *arg;
-  uint32_t elapsed;
-  uint32_t remaining;
-  uint32_t stick;
-  uint32_t ctick;
-  uint32_t next;
+  systime_t elapsed;
+  systime_t remaining;
+  systime_t stick;
+  systime_t ctick;
+  systime_t next;
   int ret;
 
   /* Then process queued work.  Lock the work queue while we process items
@@ -304,7 +304,7 @@ static pthread_addr_t work_usrthread(pthread_addr_t arg)
 {
   /* Loop forever */
 
-  for (;;)
+  for (; ; )
     {
       /* Then process queued work.  We need to keep the work queue locked
        * while we process items in the work list.
@@ -386,7 +386,7 @@ int work_usrstart(void)
     (void)pthread_attr_init(&attr);
     (void)pthread_attr_setstacksize(&attr, CONFIG_LIB_USRWORKSTACKSIZE);
 
-+#ifdef CONFIG_SCHED_SPORADIC
+#ifdef CONFIG_SCHED_SPORADIC
     /* Get the current sporadic scheduling parameters.  Those will not be
      * modified.
      */

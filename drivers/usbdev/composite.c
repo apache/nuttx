@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/usbdev/composite.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,6 +45,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/usb/usb.h>
@@ -54,10 +55,6 @@
 #include "composite.h"
 
 #ifdef CONFIG_USBDEV_COMPOSITE
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
 
 /****************************************************************************
  * Private Types
@@ -146,7 +143,7 @@ const char g_compvendorstr[]  = CONFIG_COMPOSITE_VENDORSTR;
 const char g_compproductstr[] = CONFIG_COMPOSITE_PRODUCTSTR;
 const char g_compserialstr[]  = CONFIG_COMPOSITE_SERIALSTR;
 
- /****************************************************************************
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
 /****************************************************************************
@@ -267,7 +264,7 @@ static void composite_freereq(FAR struct usbdev_ep_s *ep,
 static int composite_bind(FAR struct usbdevclass_driver_s *driver,
                           FAR struct usbdev_s *dev)
 {
-  FAR struct composite_dev_s *priv = ((FAR struct composite_driver_s*)driver)->dev;
+  FAR struct composite_dev_s *priv = ((FAR struct composite_driver_s *)driver)->dev;
   int ret;
 
   usbtrace(TRACE_CLASSBIND, 0);
@@ -352,7 +349,7 @@ static void composite_unbind(FAR struct usbdevclass_driver_s *driver,
 
   /* Extract reference to private data */
 
-  priv = ((FAR struct composite_driver_s*)driver)->dev;
+  priv = ((FAR struct composite_driver_s *)driver)->dev;
 
 #ifdef CONFIG_DEBUG
   if (!priv)
@@ -368,7 +365,7 @@ static void composite_unbind(FAR struct usbdevclass_driver_s *driver,
     {
       /* Unbind the constituent class drivers */
 
-      flags = irqsave();
+      flags = enter_critical_section();
       CLASS_UNBIND(priv->dev1, dev);
       CLASS_UNBIND(priv->dev2, dev);
 
@@ -380,7 +377,7 @@ static void composite_unbind(FAR struct usbdevclass_driver_s *driver,
           composite_freereq(dev->ep0, priv->ctrlreq);
           priv->ctrlreq = NULL;
         }
-      irqrestore(flags);
+      leave_critical_section(flags);
     }
 }
 
@@ -417,7 +414,7 @@ static int composite_setup(FAR struct usbdevclass_driver_s *driver,
   /* Extract a reference to private data */
 
   usbtrace(TRACE_CLASSSETUP, ctrl->req);
-  priv = ((FAR struct composite_driver_s*)driver)->dev;
+  priv = ((FAR struct composite_driver_s *)driver)->dev;
 
 #ifdef CONFIG_DEBUG
   if (!priv)
@@ -562,7 +559,7 @@ static int composite_setup(FAR struct usbdevclass_driver_s *driver,
 
         case USB_REQ_GETINTERFACE:
           {
-            if (ctrl->type == (USB_DIR_IN|USB_REQ_RECIPIENT_INTERFACE) &&
+            if (ctrl->type == (USB_DIR_IN | USB_REQ_RECIPIENT_INTERFACE) &&
                 priv->config == COMPOSITE_CONFIGIDNONE)
               {
                 ret = composite_classsetup(priv, dev, ctrl, dataout, outlen);
@@ -651,7 +648,7 @@ static void composite_disconnect(FAR struct usbdevclass_driver_s *driver,
 
   /* Extract reference to private data */
 
-  priv = ((FAR struct composite_driver_s*)driver)->dev;
+  priv = ((FAR struct composite_driver_s *)driver)->dev;
 
 #ifdef CONFIG_DEBUG
   if (!priv)
@@ -665,11 +662,11 @@ static void composite_disconnect(FAR struct usbdevclass_driver_s *driver,
    * the disconnection.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   priv->config = COMPOSITE_CONFIGIDNONE;
   CLASS_DISCONNECT(priv->dev1, dev);
   CLASS_DISCONNECT(priv->dev2, dev);
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   /* Perform the soft connect function so that we will we can be
    * re-enumerated.
@@ -704,7 +701,7 @@ static void composite_suspend(FAR struct usbdevclass_driver_s *driver,
 
   /* Extract reference to private data */
 
-  priv = ((FAR struct composite_driver_s*)driver)->dev;
+  priv = ((FAR struct composite_driver_s *)driver)->dev;
 
 #ifdef CONFIG_DEBUG
   if (!priv)
@@ -716,10 +713,10 @@ static void composite_suspend(FAR struct usbdevclass_driver_s *driver,
 
   /* Forward the suspend event to the constituent devices */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   CLASS_SUSPEND(priv->dev1, priv->usbdev);
   CLASS_SUSPEND(priv->dev2, priv->usbdev);
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -746,7 +743,7 @@ static void composite_resume(FAR struct usbdevclass_driver_s *driver,
 
   /* Extract reference to private data */
 
-  priv = ((FAR struct composite_driver_s*)driver)->dev;
+  priv = ((FAR struct composite_driver_s *)driver)->dev;
 
 #ifdef CONFIG_DEBUG
   if (!priv)
@@ -758,10 +755,10 @@ static void composite_resume(FAR struct usbdevclass_driver_s *driver,
 
   /* Forward the resume event to the constituent devices */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   CLASS_RESUME(priv->dev1, priv->usbdev);
   CLASS_RESUME(priv->dev2, priv->usbdev);
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -798,7 +795,7 @@ FAR void *composite_initialize(void)
 
   /* Allocate the structures needed */
 
-  alloc = (FAR struct composite_alloc_s*)kmm_malloc(sizeof(struct composite_alloc_s));
+  alloc = (FAR struct composite_alloc_s *)kmm_malloc(sizeof(struct composite_alloc_s));
   if (!alloc)
     {
       usbtrace(TRACE_CLSERROR(USBCOMPOSITE_TRACEERR_ALLOCDEVSTRUCT), 0);
@@ -872,7 +869,7 @@ errout_with_alloc:
  * Returned Value:
  *   None
  *
- ***************************************************************************/
+ ****************************************************************************/
 
 void composite_uninitialize(FAR void *handle)
 {

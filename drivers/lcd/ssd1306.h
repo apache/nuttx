@@ -234,7 +234,7 @@ struct ssd1306_dev_s
 #ifdef CONFIG_LCD_SSD1306_SPI
   FAR struct spi_dev_s  *spi;      /* Cached SPI device reference */
 #else
-  FAR struct i2c_dev_s  *i2c;      /* Cached SPI device reference */
+  FAR struct i2c_master_s  *i2c;      /* Cached SPI device reference */
   uint8_t                addr;     /* 7-bit I2C address */
 #endif
   uint8_t                contrast; /* Current contrast setting */
@@ -258,10 +258,7 @@ void ssd1306_sendblk(FAR struct ssd1306_dev_s *priv, uint8_t *data, uint8_t len)
 #ifdef CONFIG_LCD_SSD1306_SPI
 void ssd1306_select(FAR struct ssd1306_dev_s *priv, bool cs);
 void ssd1306_cmddata(FAR struct ssd1306_dev_s *priv, bool cmd);
-
-#ifndef CONFIG_SPI_OWNBUS
 static inline void ssd1306_configspi(FAR struct spi_dev_s *spi)
-#endif
 
 #else
 #  define ssd1306_select(priv, cs)

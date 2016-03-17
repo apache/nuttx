@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/pthread/pthread_create.c
  *
- *   Copyright (C) 2007-2009, 2011, 2013-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011, 2013-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -165,9 +165,9 @@ static inline void pthread_addjoininfo(FAR struct task_group_s *group,
 
 static void pthread_start(void)
 {
-  FAR struct pthread_tcb_s *ptcb = (FAR struct pthread_tcb_s*)g_readytorun.head;
+  FAR struct pthread_tcb_s *ptcb = (FAR struct pthread_tcb_s *)this_task();
   FAR struct task_group_s *group = ptcb->cmn.group;
-  FAR struct join_s *pjoin = (FAR struct join_s*)ptcb->joininfo;
+  FAR struct join_s *pjoin = (FAR struct join_s *)ptcb->joininfo;
   pthread_addr_t exit_status;
 
   DEBUGASSERT(group && pjoin);
@@ -269,8 +269,7 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
 #ifdef CONFIG_ARCH_ADDRENV
   /* Share the address environment of the parent task group. */
 
-  ret = up_addrenv_attach(ptcb->cmn.group,
-                          (FAR struct tcb_s *)g_readytorun.head);
+  ret = up_addrenv_attach(ptcb->cmn.group, this_task());
   if (ret < 0)
     {
       errcode = -ret;
@@ -280,7 +279,7 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
 
   /* Allocate a detachable structure to support pthread_join logic */
 
-  pjoin = (FAR struct join_s*)kmm_zalloc(sizeof(struct join_s));
+  pjoin = (FAR struct join_s *)kmm_zalloc(sizeof(struct join_s));
   if (!pjoin)
     {
       sdbg("ERROR: Failed to allocate join\n");
@@ -405,6 +404,20 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
       goto errout_with_join;
     }
 
+#ifdef CONFIG_SMP
+  /* pthread_schedsetup() will set the affinity mask by inheriting the
+   * setting from the parent task.  We need to override this setting
+   * with the value from the pthread attributes unless that value is
+   * zero:  Zero is the default value and simply means to inherit the
+   * parent thread's affinity mask.
+   */
+
+   if (attr->affinity != 0)
+     {
+       ptcb->cmn.affinity = attr->affinity;
+     }
+#endif
+
   /* Configure the TCB for a pthread receiving on parameter
    * passed by value
    */
@@ -430,7 +443,7 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
 
   /* Set the appropriate scheduling policy in the TCB */
 
-  ptcb->cmn.flags &= TCB_FLAG_POLICY_MASK;
+  ptcb->cmn.flags &= ~TCB_FLAG_POLICY_MASK;
   switch (policy)
     {
       default:
@@ -509,7 +522,7 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
   else
     {
       sched_unlock();
-      dq_rem((FAR dq_entry_t*)ptcb, (dq_queue_t*)&g_inactivetasks);
+      dq_rem((FAR dq_entry_t *)ptcb, (FAR dq_queue_t *)&g_inactivetasks);
       (void)sem_destroy(&pjoin->data_sem);
       (void)sem_destroy(&pjoin->exit_sem);
 

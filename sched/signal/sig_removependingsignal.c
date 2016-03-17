@@ -1,7 +1,7 @@
-/************************************************************************
+/****************************************************************************
  * sched/signal/sig_removependingsignal.c
  *
- *   Copyright (C) 2007, 2009, 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2013-2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -46,56 +46,37 @@
 #include <debug.h>
 #include <sched.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/wdog.h>
 #include <nuttx/kmalloc.h>
 
 #include "signal/signal.h"
 
-/************************************************************************
- * Pre-processor Definitions
- ************************************************************************/
-
-/************************************************************************
- * Private Type Declarations
- ************************************************************************/
-
-/************************************************************************
- * Global Variables
- ************************************************************************/
-
-/************************************************************************
- * Private Variables
- ************************************************************************/
-
-/************************************************************************
- * Private Functions
- ************************************************************************/
-
-/************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************
+/****************************************************************************
  * Name: sig_removependingsignal
  *
  * Description:
  *   Remove the specified signal from the signal pending list
  *
- ************************************************************************/
+ ****************************************************************************/
 
 FAR sigpendq_t *sig_removependingsignal(FAR struct tcb_s *stcb, int signo)
 {
   FAR struct task_group_s *group = stcb->group;
   FAR sigpendq_t *currsig;
   FAR sigpendq_t *prevsig;
-  irqstate_t  saved_state;
+  irqstate_t  flags;
 
   DEBUGASSERT(group);
 
-  saved_state = irqsave();
+  flags = enter_critical_section();
 
-  for (prevsig = NULL, currsig = (FAR sigpendq_t*)group->sigpendingq.head;
+  for (prevsig = NULL, currsig = (FAR sigpendq_t *)group->tg_sigpendingq.head;
        (currsig && currsig->info.si_signo != signo);
        prevsig = currsig, currsig = currsig->flink);
 
@@ -103,15 +84,15 @@ FAR sigpendq_t *sig_removependingsignal(FAR struct tcb_s *stcb, int signo)
     {
       if (prevsig)
         {
-          sq_remafter((FAR sq_entry_t*)prevsig, &group->sigpendingq);
+          sq_remafter((FAR sq_entry_t *)prevsig, &group->tg_sigpendingq);
         }
       else
         {
-          sq_remfirst(&group->sigpendingq);
+          sq_remfirst(&group->tg_sigpendingq);
         }
     }
 
-  irqrestore(saved_state);
+  leave_critical_section(flags);
 
   return currsig;
 }

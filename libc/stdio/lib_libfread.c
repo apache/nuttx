@@ -46,7 +46,7 @@
 #include <fcntl.h>
 #include <errno.h>
 
-#include "lib_internal.h"
+#include "libc.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -61,11 +61,11 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Global Constant Data
+ * Public Constant Data
  ****************************************************************************/
 
 /****************************************************************************
- * Global Variables
+ * Public Data
  ****************************************************************************/
 
 /****************************************************************************
@@ -73,7 +73,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Private Variables
+ * Private Data
  ****************************************************************************/
 
 /****************************************************************************
@@ -86,10 +86,10 @@
 
 ssize_t lib_fread(FAR void *ptr, size_t count, FAR FILE *stream)
 {
-  unsigned char *dest  = (unsigned char*)ptr;
-  ssize_t        bytes_read;
+  FAR unsigned char *dest  = (FAR unsigned char*)ptr;
+  ssize_t bytes_read;
 #if CONFIG_STDIO_BUFFER_SIZE > 0
-  int            ret;
+  int ret;
 #endif
 
   /* Make sure that reading from this stream is allowed */
@@ -288,7 +288,7 @@ ssize_t lib_fread(FAR void *ptr, size_t count, FAR FILE *stream)
 #if CONFIG_STDIO_BUFFER_SIZE > 0
     shortread:
 #endif
-      bytes_read = dest - (unsigned char*)ptr;
+      bytes_read = dest - (FAR unsigned char *)ptr;
 
       /* Set or clear the EOF indicator.  If we get here because of a
        * short read and the total number of* bytes read is zero, then

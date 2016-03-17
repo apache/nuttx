@@ -43,7 +43,7 @@
 #include <string.h>
 #include <ctype.h>
 
-#include "lib_internal.h"
+#include "libc.h"
 
 /****************************************************************************
  * Private Functions

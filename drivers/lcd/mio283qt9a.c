@@ -382,16 +382,15 @@ static inline uint16_t mio283qt9a_gramread(FAR struct mio283qt9a_lcd_s *lcd,
 static void mio283qt9a_setarea(FAR struct mio283qt9a_lcd_s *lcd,
                               uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1)
 {
-   //lcddbg("setarea x0=%d, y0=%d, x1=%d, y1=%d\n", x0, y0, x1, y1);
+  mio283qt9a_putreg(lcd, 0x2a, (x0 >> 8)); /* Set column address x0 */
+  lcd->write(lcd, (x0 & 0xff));            /* Set x0 */
+  lcd->write(lcd, (x1 >> 8));              /* Set x1 */
+  lcd->write(lcd, (x1 & 0xff));            /* Set x1 */
 
-   mio283qt9a_putreg(lcd, 0x2a, (x0 >> 8)); /* set column address x0 */
-   lcd->write(lcd, (x0 & 0xff));            /* set x0 */
-   lcd->write(lcd, (x1 >> 8));              /* set x1 */
-   lcd->write(lcd, (x1 & 0xff));            /* set x1 */
-   mio283qt9a_putreg(lcd, 0x2b, (y0 >> 8)); /* set page address y0 */
-   lcd->write(lcd, (y0 & 0xff));            /* set y0 */
-   lcd->write(lcd, (y1 >> 8));              /* set y1 */
-   lcd->write(lcd, (y1 & 0xff));            /* set y1 */
+  mio283qt9a_putreg(lcd, 0x2b, (y0 >> 8)); /* Set page address y0 */
+  lcd->write(lcd, (y0 & 0xff));            /* Set y0 */
+  lcd->write(lcd, (y1 >> 8));              /* Set y1 */
+  lcd->write(lcd, (y1 & 0xff));            /* Set y1 */
 }
 
 /**************************************************************************************
@@ -445,12 +444,11 @@ static int mio283qt9a_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *
 {
   FAR struct mio283qt9a_dev_s *priv = &g_lcddev;
   FAR struct mio283qt9a_lcd_s *lcd = priv->lcd;
-  FAR const uint16_t *src = (FAR const uint16_t*)buffer;
+  FAR const uint16_t *src = (FAR const uint16_t *)buffer;
   int i;
 
   /* Buffer must be provided and aligned to a 16-bit address boundary */
 
-  //lcdvdbg("row: %d col: %d npixels: %d\n", row, col, npixels);
   DEBUGASSERT(buffer && ((uintptr_t)buffer & 1) == 0);
 
   /* Select the LCD */
@@ -494,7 +492,7 @@ static int mio283qt9a_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer
 #ifndef CONFIG_LCD_NOGETRUN
   FAR struct mio283qt9a_dev_s *priv = &g_lcddev;
   FAR struct mio283qt9a_lcd_s *lcd = priv->lcd;
-  FAR uint16_t *dest = (FAR uint16_t*)buffer;
+  FAR uint16_t *dest = (FAR uint16_t *)buffer;
   uint16_t accum, test;
   int i;
 
@@ -520,8 +518,7 @@ static int mio283qt9a_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer
 
   for (i = 0; i < npixels; i++)
     {
-        test= mio283qt9a_gramread(lcd, &accum);
-       // lcddbg("read 0x%04x\n", test); 
+      test = mio283qt9a_gramread(lcd, &accum);
       *dest++ = test;
     }
 
@@ -572,10 +569,10 @@ static int mio283qt9a_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int plane
   DEBUGASSERT(dev && pinfo && planeno == 0);
   lcdvdbg("planeno: %d bpp: %d\n", planeno, MIO283QT9A_BPP);
 
-  pinfo->putrun = mio283qt9a_putrun;          /* Put a run into LCD memory */
-  pinfo->getrun = mio283qt9a_getrun;          /* Get a run from LCD memory */
-  pinfo->buffer = (uint8_t*)priv->runbuffer;  /* Run scratch buffer */
-  pinfo->bpp    = MIO283QT9A_BPP;             /* Bits-per-pixel */
+  pinfo->putrun = mio283qt9a_putrun;               /* Put a run into LCD memory */
+  pinfo->getrun = mio283qt9a_getrun;               /* Get a run from LCD memory */
+  pinfo->buffer = (FAR uint8_t *)priv->runbuffer;  /* Run scratch buffer */
+  pinfo->bpp    = MIO283QT9A_BPP;                  /* Bits-per-pixel */
 
   return OK;
 }
@@ -833,7 +830,7 @@ static inline int mio283qt9a_hwinitialize(FAR struct mio283qt9a_dev_s *priv)
   return ret;
 }
 
- /*************************************************************************************
+/**************************************************************************************
  * Public Functions
  **************************************************************************************/
 

@@ -52,11 +52,11 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Private Variables
+ * Private Data
  ****************************************************************************/
 
 /****************************************************************************
- * Public Variables
+ * Public Data
  ****************************************************************************/
 
 /****************************************************************************
@@ -70,7 +70,11 @@
 static int inode_namelen(FAR const char *name)
 {
   const char *tmp = name;
-  while (*tmp && *tmp != '/') tmp++;
+  while (*tmp && *tmp != '/')
+    {
+      tmp++;
+    }
+
   return tmp - name;
 }
 
@@ -80,8 +84,12 @@ static int inode_namelen(FAR const char *name)
 
 static void inode_namecpy(char *dest, const char *src)
 {
-  while (*src && *src != '/') *dest++ = *src++;
-  *dest='\0';
+  while (*src && *src != '/')
+    {
+      *dest++ = *src++;
+    }
+
+  *dest = '\0';
 }
 
 /****************************************************************************
@@ -91,7 +99,7 @@ static void inode_namecpy(char *dest, const char *src)
 static FAR struct inode *inode_alloc(FAR const char *name)
 {
   int namelen = inode_namelen(name);
-  FAR struct inode *node = (FAR struct inode*)kmm_zalloc(FSNODE_SIZE(namelen));
+  FAR struct inode *node = (FAR struct inode *)kmm_zalloc(FSNODE_SIZE(namelen));
   if (node)
     {
       inode_namecpy(node->i_name, name);
@@ -145,9 +153,8 @@ static void inode_insert(FAR struct inode *node,
  * Name: inode_reserve
  *
  * Description:
- *   Reserve an (initialized) inode the pseudo file system.
- *
- *   NOTE: Caller must hold the inode semaphore
+ *   Reserve an (initialized) inode the pseudo file system.  The initial
+ *   reference count on the new inode is zero.
  *
  * Input parameters:
  *   path - The path to the inode to create
@@ -160,6 +167,9 @@ static void inode_insert(FAR struct inode *node,
  *   EINVAL - 'path' is invalid for this operation
  *   EEXIST - An inode already exists at 'path'
  *   ENOMEM - Failed to allocate in-memory resources for the operation
+ *
+ * Assumptions:
+ *   Caller must hold the inode semaphore
  *
  ****************************************************************************/
 
@@ -192,7 +202,7 @@ int inode_reserve(FAR const char *path, FAR struct inode **inode)
 
   /* Now we now where to insert the subtree */
 
-  for (;;)
+  for (; ; )
     {
       FAR struct inode *node;
 

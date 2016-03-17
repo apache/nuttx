@@ -1,7 +1,7 @@
 ############################################################################
 # sched/pthread/Make.defs
 #
-#   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -49,6 +49,10 @@ CSRCS += pthread_once.c pthread_release.c pthread_setschedprio.c
 
 ifneq ($(CONFIG_DISABLE_SIGNALS),y)
 CSRCS += pthread_condtimedwait.c pthread_kill.c pthread_sigmask.c
+endif
+
+ifeq ($(CONFIG_SMP),y)
+CSRCS += pthread_setaffinity.c pthread_getaffinity.c
 endif
 
 # Include pthread build support

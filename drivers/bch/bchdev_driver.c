@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/bch/bchdev_driver.c
  *
- *   Copyright (C) 2008-2009, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -58,7 +58,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/ioctl.h>
 
-#include "bch_internal.h"
+#include "bch.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -77,6 +77,9 @@ static ssize_t bch_write(FAR struct file *filep, FAR const char *buffer,
                  size_t buflen);
 static int     bch_ioctl(FAR struct file *filep, int cmd,
                  unsigned long arg);
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+static int     bch_unlink(FAR struct inode *inode);
+#endif
 
 /****************************************************************************
  * Public Data
@@ -84,14 +87,17 @@ static int     bch_ioctl(FAR struct file *filep, int cmd,
 
 const struct file_operations bch_fops =
 {
-  bch_open,  /* open */
-  bch_close, /* close */
-  bch_read,  /* read */
-  bch_write, /* write */
-  bch_seek,  /* seek */
-  bch_ioctl  /* ioctl */
+  bch_open,    /* open */
+  bch_close,   /* close */
+  bch_read,    /* read */
+  bch_write,   /* write */
+  bch_seek,    /* seek */
+  bch_ioctl    /* ioctl */
 #ifndef CONFIG_DISABLE_POLL
-  , 0        /* poll */
+  , 0          /* poll */
+#endif
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  , bch_unlink /* unlink */
 #endif
 };
 
@@ -152,7 +158,8 @@ static int bch_close(FAR struct file *filep)
   (void)bchlib_flushsector(bch);
 
   /* Decrement the reference count (I don't use bchlib_decref() because I
-   * want the entire close operation to be atomic wrt other driver operations.
+   * want the entire close operation to be atomic wrt other driver
+   * operations.
    */
 
   if (bch->refs == 0)
@@ -162,6 +169,30 @@ static int bch_close(FAR struct file *filep)
   else
     {
       bch->refs--;
+
+      /* If the reference count decremented to zero AND if the character
+       * driver has been unlinked, then teardown the BCH device now.
+       */
+
+      if (bch->refs == 0 && bch->unlinked)
+        {
+           /* Tear the driver down now. */
+
+           ret = bchlib_teardown((FAR void *)bch);
+
+           /* bchlib_teardown() would only fail if there are outstanding
+            * references on the device.  Since we know that is not true, it
+            * should not fail at all.
+            */
+
+           DEBUGASSERT(ret >= 0);
+           if (ret >= 0)
+             {
+                /* Return without releasing the stale semaphore */
+
+                return OK;
+             }
+        }
     }
 
   bchlib_semgive(bch);
@@ -302,6 +333,8 @@ static int bch_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   DEBUGASSERT(inode && inode->i_private);
   bch = (FAR struct bchlib_s *)inode->i_private;
 
+  /* Is this a request to get the private data structure */
+
   if (cmd == DIOC_GETPRIV)
     {
       FAR struct bchlib_s **bchr = (FAR struct bchlib_s **)((uintptr_t)arg);
@@ -319,16 +352,86 @@ static int bch_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       bchlib_semgive(bch);
     }
-#if defined(CONFIG_BCH_ENCRYPTION)
+
+#ifdef CONFIG_BCH_ENCRYPTION
+  /* Is this a request to set the encryption key? */
+
   else if (cmd == DIOC_SETKEY)
     {
-      memcpy(bch->key, (void*)arg, CONFIG_BCH_ENCRYPTION_KEY_SIZE);
+      memcpy(bch->key, (FAR void *)arg, CONFIG_BCH_ENCRYPTION_KEY_SIZE);
       ret = OK;
     }
 #endif
 
+  /* Otherwise, pass the IOCTL command on to the contained block driver */
+
+  else
+    {
+      FAR struct inode *bchinode = bch->inode;
+
+      /* Does the block driver support the ioctl method? */
+
+      if (bchinode->u.i_bops->ioctl != NULL)
+        {
+          ret = bchinode->u.i_bops->ioctl(bchinode, cmd, arg);
+        }
+    }
+
   return ret;
 }
+
+/****************************************************************************
+ * Name: bch_unlink
+ *
+ * Handle unlinking of the BCH device
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+static int bch_unlink(FAR struct inode *inode)
+{
+  FAR struct bchlib_s *bch;
+  int ret = OK;
+
+  DEBUGASSERT(inode && inode->i_private);
+  bch = (FAR struct bchlib_s *)inode->i_private;
+
+  /* Get exclusive access to the BCH device */
+
+  bchlib_semtake(bch);
+
+  /* Indicate that the driver has been unlinked */
+
+  bch->unlinked = true;
+
+  /* If there are no open references to the drvier then teardown the BCH
+   * device now.
+   */
+
+  if (bch->refs == 0)
+    {
+      /* Tear the driver down now. */
+
+      ret = bchlib_teardown((FAR void *)bch);
+
+      /* bchlib_teardown() would only fail if there are outstanding
+       * references on the device.  Since we know that is not true, it
+       * should not fail at all.
+       */
+
+      DEBUGASSERT(ret >= 0);
+      if (ret >= 0)
+        {
+          /* Return without releasing the stale semaphore */
+
+          return OK;
+        }
+    }
+
+  bchlib_semgive(bch);
+  return ret;
+}
+#endif
 
 /****************************************************************************
  * Public Functions

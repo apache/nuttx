@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/signal/sig_suspend.c
  *
- *   Copyright (C) 2007-2009, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,30 +44,11 @@
 #include <debug.h>
 #include <sched.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 
 #include "sched/sched.h"
 #include "signal/signal.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Type Declarations
- ****************************************************************************/
-
-/****************************************************************************
- * Global Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -110,11 +91,11 @@
 
 int sigsuspend(FAR const sigset_t *set)
 {
-  FAR struct tcb_s *rtcb = (FAR struct tcb_s*)g_readytorun.head;
+  FAR struct tcb_s *rtcb = this_task();
   sigset_t intersection;
   sigset_t saved_sigprocmask;
   FAR sigpendq_t *sigpend;
-  irqstate_t saved_state;
+  irqstate_t flags;
   int unblocksigno;
 
   /* Several operations must be performed below:  We must determine if any
@@ -124,7 +105,7 @@ int sigsuspend(FAR const sigset_t *set)
    */
 
   sched_lock();  /* Not necessary */
-  saved_state = irqsave();
+  flags = enter_critical_section();
 
   /* Check if there is a pending signal corresponding to one of the
    * signals that will be unblocked by the new sigprocmask.
@@ -143,7 +124,7 @@ int sigsuspend(FAR const sigset_t *set)
       ASSERT(sigpend);
 
       sig_releasependingsignal(sigpend);
-      irqrestore(saved_state);
+      leave_critical_section(flags);
     }
   else
     {
@@ -162,7 +143,7 @@ int sigsuspend(FAR const sigset_t *set)
       /* We are running again, restore the original sigprocmask */
 
       rtcb->sigprocmask = saved_sigprocmask;
-      irqrestore(saved_state);
+      leave_critical_section(flags);
 
       /* Now, handle the (rare?) case where (a) a blocked signal was received
        * while the task was suspended but (b) restoring the original

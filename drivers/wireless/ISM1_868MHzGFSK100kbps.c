@@ -84,40 +84,40 @@
 
 const struct c1101_rfsettings_s cc1101_rfsettings_ISM1_868MHzGFSK100kbps =
 {
-  .FSCTRL1 = 0x08,    /* FSCTRL1       Frequency Synthesizer Control */
-  .FSCTRL0 = 0x00,    /* FSCTRL0       Frequency Synthesizer Control */
+  .FSCTRL1  = 0x08,    /* FSCTRL1       Frequency Synthesizer Control */
+  .FSCTRL0  = 0x00,    /* FSCTRL0       Frequency Synthesizer Control */
 
-  .FREQ2   = 0x20,    /* FREQ2         Frequency Control Word, High Byte */
-  .FREQ1   = 0x25,    /* FREQ1         Frequency Control Word, Middle Byte */
-  .FREQ0   = 0xED,    /* FREQ0         Frequency Control Word, Low Byte */
+  .FREQ2    = 0x20,    /* FREQ2         Frequency Control Word, High Byte */
+  .FREQ1    = 0x25,    /* FREQ1         Frequency Control Word, Middle Byte */
+  .FREQ0    = 0xED,    /* FREQ0         Frequency Control Word, Low Byte */
 
-  .MDMCFG4 = 0x8B,    /* MDMCFG4       Modem Configuration */
-  .MDMCFG3 = 0xE5,    /* MDMCFG3       Modem Configuration */
-  .MDMCFG2 = 0x13,    /* MDMCFG2       Modem Configuration */
-  .MDMCFG1 = 0x22,    /* MDMCFG1       Modem Configuration */
-  .MDMCFG0 = 0xE5,    /* MDMCFG0       Modem Configuration */
+  .MDMCFG4  = 0x8B,    /* MDMCFG4       Modem Configuration */
+  .MDMCFG3  = 0xE5,    /* MDMCFG3       Modem Configuration */
+  .MDMCFG2  = 0x13,    /* MDMCFG2       Modem Configuration */
+  .MDMCFG1  = 0x22,    /* MDMCFG1       Modem Configuration */
+  .MDMCFG0  = 0xE5,    /* MDMCFG0       Modem Configuration */
 
-  .DEVIATN = 0x46,    /* DEVIATN       Modem Deviation Setting */
+  .DEVIATN  = 0x46,    /* DEVIATN       Modem Deviation Setting */
 
-  .FOCCFG  = 0x1D,    /* FOCCFG        Frequency Offset Compensation Configuration */
+  .FOCCFG   = 0x1D,    /* FOCCFG        Frequency Offset Compensation Configuration */
 
-  .BSCFG   = 0x1C,    /* BSCFG         Bit Synchronization Configuration */
+  .BSCFG    = 0x1C,    /* BSCFG         Bit Synchronization Configuration */
 
-  .AGCCTRL2= 0xC7,    /* AGCCTRL2      AGC Control */
-  .AGCCTRL1= 0x00,    /* AGCCTRL1      AGC Control */
-  .AGCCTRL0= 0xB2,    /* AGCCTRL0      AGC Control */
+  .AGCCTRL2 = 0xC7,    /* AGCCTRL2      AGC Control */
+  .AGCCTRL1 = 0x00,    /* AGCCTRL1      AGC Control */
+  .AGCCTRL0 = 0xB2,    /* AGCCTRL0      AGC Control */
 
-  .FREND1  = 0xB6,    /* FREND1        Front End RX Configuration */
-  .FREND0  = 0x10,    /* FREND0        Front End TX Configuration */
+  .FREND1   = 0xB6,    /* FREND1        Front End RX Configuration */
+  .FREND0   = 0x10,    /* FREND0        Front End TX Configuration */
 
-  .FSCAL3  = 0xEA,    /* FSCAL3        Frequency Synthesizer Calibration */
-  .FSCAL2  = 0x2A,    /* FSCAL2        Frequency Synthesizer Calibration */
-  .FSCAL1  = 0x00,    /* FSCAL1        Frequency Synthesizer Calibration */
-  .FSCAL0  = 0x1F,    /* FSCAL0        Frequency Synthesizer Calibration */
+  .FSCAL3   = 0xEA,    /* FSCAL3        Frequency Synthesizer Calibration */
+  .FSCAL2   = 0x2A,    /* FSCAL2        Frequency Synthesizer Calibration */
+  .FSCAL1   = 0x00,    /* FSCAL1        Frequency Synthesizer Calibration */
+  .FSCAL0   = 0x1F,    /* FSCAL0        Frequency Synthesizer Calibration */
 
-  .CHMIN   = 0,       /* Fix at 9th channel: 869.80 MHz +- 100 kHz RF Bandwidth */
-  .CHMAX   = 9,       /* single channel */
+  .CHMIN    = 0,       /* Fix at 9th channel: 869.80 MHz +- 100 kHz RF Bandwidth */
+  .CHMAX    = 9,       /* single channel */
 
-  .PAMAX   = 8,       /* 0 means power OFF, 8 represents PA[7] */
-  .PA      = {0x03, 0x0F, 0x1E, 0x27, 0x67, 0x50, 0x81, 0xC2}
+  .PAMAX    = 8,       /* 0 means power OFF, 8 represents PA[7] */
+  .PA       = {0x03, 0x0F, 0x1E, 0x27, 0x67, 0x50, 0x81, 0xC2}
 };

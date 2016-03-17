@@ -59,7 +59,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/analog/dac.h>
 
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -74,9 +74,11 @@
 
 static int     dac_open(FAR struct file *filep);
 static int     dac_close(FAR struct file *filep);
-static ssize_t dac_read(FAR struct file *, FAR char *, size_t);
-static ssize_t dac_write(FAR struct file *filep, FAR const char *buffer, size_t buflen);
-static int     dac_ioctl(FAR struct file *filep,int cmd,unsigned long arg);
+static ssize_t dac_read(FAR struct file *filep, FAR char *buffer,
+                 size_t buflen);
+static ssize_t dac_write(FAR struct file *filep, FAR const char *buffer,
+                 size_t buflen);
+static int     dac_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
 
 /****************************************************************************
  * Private Data
@@ -141,7 +143,7 @@ static int dac_open(FAR struct file *filep)
             {
               /* Yes.. perform one time hardware initialization. */
 
-              irqstate_t flags = irqsave();
+              irqstate_t flags = enter_critical_section();
               ret = dev->ad_ops->ao_setup(dev);
               if (ret == OK)
                 {
@@ -155,7 +157,7 @@ static int dac_open(FAR struct file *filep)
                   dev->ad_ocount = tmp;
                 }
 
-              irqrestore(flags);
+              leave_critical_section(flags);
             }
         }
 
@@ -215,9 +217,9 @@ static int dac_close(FAR struct file *filep)
 
           /* Free the IRQ and disable the DAC device */
 
-          flags = irqsave();       /* Disable interrupts */
+          flags = enter_critical_section();       /* Disable interrupts */
           dev->ad_ops->ao_shutdown(dev);       /* Disable the DAC */
-          irqrestore(flags);
+          leave_critical_section(flags);
 
           sem_post(&dev->ad_closesem);
         }
@@ -287,7 +289,7 @@ static ssize_t dac_write(FAR struct file *filep, FAR const char *buffer, size_t 
 
   /* Interrupts must disabled throughout the following */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Check if the TX FIFO was empty when we started.  That is a clue that we have
    * to kick off a new TX sequence.
@@ -299,7 +301,7 @@ static ssize_t dac_write(FAR struct file *filep, FAR const char *buffer, size_t 
    * shorter than the minimum.
    */
 
-  if (buflen % 5 == 0 )
+  if (buflen % 5 == 0)
     {
       msglen = 5;
     }
@@ -324,7 +326,7 @@ static ssize_t dac_write(FAR struct file *filep, FAR const char *buffer, size_t 
       msglen = 5;
     }
 
-  while ((buflen - nsent) >= msglen )
+  while ((buflen - nsent) >= msglen)
     {
       /* Check if adding this new message would over-run the drivers ability to enqueue
        * xmit data.
@@ -394,27 +396,27 @@ static ssize_t dac_write(FAR struct file *filep, FAR const char *buffer, size_t 
         }
       else if (msglen == 4)
         {
-          fifo->af_buffer[fifo->af_tail].am_channel=buffer[nsent];
-          fifo->af_buffer[fifo->af_tail].am_data=*(uint32_t *)&buffer[nsent];
-          fifo->af_buffer[fifo->af_tail].am_data&=0xffffff00;
+          fifo->af_buffer[fifo->af_tail].am_channel = buffer[nsent];
+          fifo->af_buffer[fifo->af_tail].am_data    = *(uint32_t *)&buffer[nsent];
+          fifo->af_buffer[fifo->af_tail].am_data   &= 0xffffff00;
         }
       else if (msglen == 3)
         {
-          fifo->af_buffer[fifo->af_tail].am_channel=buffer[nsent];
-          fifo->af_buffer[fifo->af_tail].am_data=(*(uint16_t *)&buffer[nsent+1]);
-          fifo->af_buffer[fifo->af_tail].am_data<<=16;
+          fifo->af_buffer[fifo->af_tail].am_channel = buffer[nsent];
+          fifo->af_buffer[fifo->af_tail].am_data    = (*(uint16_t *)&buffer[nsent+1]);
+          fifo->af_buffer[fifo->af_tail].am_data  <<= 16;
         }
       else if (msglen == 2)
         {
-          fifo->af_buffer[fifo->af_tail].am_channel=0;
-          fifo->af_buffer[fifo->af_tail].am_data=(*(uint16_t *)&buffer[nsent]);
-          fifo->af_buffer[fifo->af_tail].am_data<<=16;
+          fifo->af_buffer[fifo->af_tail].am_channel = 0;
+          fifo->af_buffer[fifo->af_tail].am_data    = (*(uint16_t *)&buffer[nsent]);
+          fifo->af_buffer[fifo->af_tail].am_data  <<= 16;
         }
       else if (msglen == 1)
        {
-          fifo->af_buffer[fifo->af_tail].am_channel=0;
-          fifo->af_buffer[fifo->af_tail].am_data=buffer[nsent];
-          fifo->af_buffer[fifo->af_tail].am_data<<=24;
+          fifo->af_buffer[fifo->af_tail].am_channel = 0;
+          fifo->af_buffer[fifo->af_tail].am_data    = buffer[nsent];
+          fifo->af_buffer[fifo->af_tail].am_data  <<= 24;
        }
 
       /* Increment the tail of the circular buffer */
@@ -426,21 +428,21 @@ static ssize_t dac_write(FAR struct file *filep, FAR const char *buffer, size_t 
       nsent += msglen;
     }
 
- /* We get here after all messages have been added to the FIFO.  Check if
-  * we need to kick of the XMIT sequence.
-  */
+  /* We get here after all messages have been added to the FIFO.  Check if
+   * we need to kick of the XMIT sequence.
+   */
 
- if (empty)
-   {
-     dac_xmit(dev);
-   }
+  if (empty)
+    {
+      dac_xmit(dev);
+    }
 
   /* Return the number of bytes that were sent */
 
   ret = nsent;
 
 return_with_irqdisabled:
-  irqrestore(flags);
+  leave_critical_section(flags);
   return ret;
 }
 

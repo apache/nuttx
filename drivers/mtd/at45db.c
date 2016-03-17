@@ -251,12 +251,18 @@ static int at45db_ioctl(FAR struct mtd_dev_s *mtd, int cmd, unsigned long arg);
 /* Chip erase sequence */
 
 #define CHIP_ERASE_SIZE 4
-static const uint8_t g_chiperase[CHIP_ERASE_SIZE] = {0xc7, 0x94, 0x80, 0x9a};
+static const uint8_t g_chiperase[CHIP_ERASE_SIZE] =
+{
+  0xc7, 0x94, 0x80, 0x9a
+};
 
 /* Sequence to program the device to binary page sizes{256, 512, 1024} */
 
 #define BINPGSIZE_SIZE 4
-static const uint8_t g_binpgsize[BINPGSIZE_SIZE] = {0x3d, 0x2a, 0x80, 0xa6};
+static const uint8_t g_binpgsize[BINPGSIZE_SIZE] =
+{
+  0x3d, 0x2a, 0x80, 0xa6
+};
 
 /************************************************************************************
  * Private Functions
@@ -270,7 +276,7 @@ static void at45db_lock(FAR struct at45db_dev_s *priv)
 {
   /* On SPI buses where there are multiple devices, it will be necessary to lock SPI
    * to have exclusive access to the buses for a sequence of transfers.  The bus
-   & should be locked before the chip is selected.
+   * should be locked before the chip is selected.
    *
    * This is a blocking call and will not return until we have exclusive access to
    * the SPI bus.  We will retain that exclusive access until the bus is unlocked.
@@ -286,6 +292,7 @@ static void at45db_lock(FAR struct at45db_dev_s *priv)
 
   SPI_SETMODE(priv->spi, SPIDEV_MODE0);
   SPI_SETBITS(priv->spi, 8);
+  (void)SPI_HWFEATURES(priv->spi, 0);
   (void)SPI_SETFREQUENCY(priv->spi, CONFIG_AT45DB_FREQUENCY);
 }
 
@@ -640,7 +647,7 @@ static ssize_t at45db_bread(FAR struct mtd_dev_s *mtd, off_t startblock,
   FAR struct at45db_dev_s *priv = (FAR struct at45db_dev_s *)mtd;
   ssize_t nbytes;
 
- /* On this device, we can handle the block read just like the byte-oriented read */
+  /* On this device, we can handle the block read just like the byte-oriented read */
 
   nbytes = at45db_read(mtd, startblock << priv->pageshift,
                        nblocks << priv->pageshift, buffer);

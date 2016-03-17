@@ -68,11 +68,7 @@ typedef int (*holderhandler_t)(FAR struct semholder_s *pholder,
                                FAR sem_t *sem, FAR void *arg);
 
 /****************************************************************************
- * Global Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Variables
+ * Private Data
  ****************************************************************************/
 
 /* Preallocated holder structures */
@@ -81,10 +77,6 @@ typedef int (*holderhandler_t)(FAR struct semholder_s *pholder,
 static struct semholder_s g_holderalloc[CONFIG_SEM_PREALLOCHOLDERS];
 static FAR struct semholder_s *g_freeholders;
 #endif
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Name: sem_allocholder
@@ -290,10 +282,10 @@ static int sem_boostholderprio(FAR struct semholder_s *pholder,
    */
 
   if (!sched_verifytcb(htcb))
-   {
+    {
       sdbg("TCB 0x%08x is a stale handle, counts lost\n", htcb);
       sem_freeholder(sem, pholder);
-   }
+    }
 
 #if CONFIG_SEM_NNESTPRIO > 0
 
@@ -441,10 +433,10 @@ static int sem_restoreholderprio(FAR struct semholder_s *pholder,
    */
 
   if (!sched_verifytcb(htcb))
-   {
+    {
       sdbg("TCB 0x%08x is a stale handle, counts lost\n", htcb);
       sem_freeholder(sem, pholder);
-   }
+    }
 
   /* Was the priority of the holder thread boosted? If so, then drop its
    * priority back to the correct level.  What is the correct level?
@@ -573,7 +565,7 @@ static int sem_restoreholderprio(FAR struct semholder_s *pholder,
 static int sem_restoreholderprioA(FAR struct semholder_s *pholder,
                                   FAR sem_t *sem, FAR void *arg)
 {
-  FAR struct tcb_s *rtcb = (FAR struct tcb_s*)g_readytorun.head;
+  FAR struct tcb_s *rtcb = this_task();
   if (pholder->htcb != rtcb)
     {
       return sem_restoreholderprio(pholder, sem, arg);
@@ -593,7 +585,7 @@ static int sem_restoreholderprioA(FAR struct semholder_s *pholder,
 static int sem_restoreholderprioB(FAR struct semholder_s *pholder,
                                   FAR sem_t *sem, FAR void *arg)
 {
-  FAR struct tcb_s *rtcb = (FAR struct tcb_s*)g_readytorun.head;
+  FAR struct tcb_s *rtcb = this_task();
   if (pholder->htcb == rtcb)
     {
       (void)sem_restoreholderprio(pholder, sem, arg);
@@ -699,7 +691,7 @@ static inline void sem_restorebaseprio_irq(FAR struct tcb_s *stcb,
 static inline void sem_restorebaseprio_task(FAR struct tcb_s *stcb,
                                             FAR sem_t *sem)
 {
-  FAR struct tcb_s *rtcb = (FAR struct tcb_s*)g_readytorun.head;
+  FAR struct tcb_s *rtcb = this_task();
   FAR struct semholder_s *pholder;
 
   /* Perform the following actions only if a new thread was given a count.
@@ -780,7 +772,7 @@ static inline void sem_restorebaseprio_task(FAR struct tcb_s *stcb,
 void sem_initholders(void)
 {
 #if CONFIG_SEM_PREALLOCHOLDERS > 0
- int i;
+  int i;
 
   /* Put all of the pre-allocated holder structures into the free list */
 
@@ -858,7 +850,7 @@ void sem_destroyholder(FAR sem_t *sem)
 
 void sem_addholder(FAR sem_t *sem)
 {
-  FAR struct tcb_s *rtcb = (FAR struct tcb_s*)g_readytorun.head;
+  FAR struct tcb_s *rtcb = this_task();
   FAR struct semholder_s *pholder;
 
   /* Find or allocate a container for this new holder */
@@ -893,7 +885,7 @@ void sem_addholder(FAR sem_t *sem)
 
 void sem_boostpriority(FAR sem_t *sem)
 {
-  FAR struct tcb_s *rtcb = (FAR struct tcb_s*)g_readytorun.head;
+  FAR struct tcb_s *rtcb = this_task();
 
   /* Boost the priority of every thread holding counts on this semaphore
    * that are lower in priority than the new thread that is waiting for a
@@ -922,7 +914,7 @@ void sem_boostpriority(FAR sem_t *sem)
 
 void sem_releaseholder(FAR sem_t *sem)
 {
-  FAR struct tcb_s *rtcb = (FAR struct tcb_s*)g_readytorun.head;
+  FAR struct tcb_s *rtcb = this_task();
   FAR struct semholder_s *pholder;
 
   /* Find the container for this holder */

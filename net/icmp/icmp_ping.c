@@ -83,8 +83,8 @@ struct icmp_ping_s
   FAR struct devif_callback_s *png_cb; /* Reference to callback instance */
 
   sem_t     png_sem;     /* Use to manage the wait for the response */
-  uint32_t  png_time;    /* Start time for determining timeouts */
-  uint32_t  png_ticks;   /* System clock ticks to wait */
+  systime_t png_time;    /* Start time for determining timeouts */
+  systime_t png_ticks;   /* System clock ticks to wait */
   int       png_result;  /* 0: success; <0:negated errno on fail */
   in_addr_t png_addr;    /* The peer to be ping'ed */
   uint16_t  png_id;      /* Used to match requests with replies */
@@ -92,14 +92,6 @@ struct icmp_ping_s
   uint16_t  png_datlen;  /* The length of data to send in the ECHO request */
   bool      png_sent;    /* true... the PING request has been sent */
 };
-
-/****************************************************************************
- * Public Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Variables
- ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
@@ -124,7 +116,7 @@ struct icmp_ping_s
 
 static inline int ping_timeout(FAR struct icmp_ping_s *pstate)
 {
-  uint32_t elapsed =  clock_systimer() - pstate->png_time;
+  systime_t elapsed =  clock_systimer() - pstate->png_time;
   if (elapsed >= pstate->png_ticks)
     {
       return TRUE;
@@ -345,7 +337,7 @@ int icmp_ping(in_addr_t addr, uint16_t id, uint16_t seqno, uint16_t datalen,
 #ifdef CONFIG_NET_ARP_SEND
   int ret;
 #endif
- 
+
   /* Get the device that will be used to route this ICMP ECHO request */
 
 #ifdef CONFIG_NETDEV_MULTINIC
@@ -390,7 +382,7 @@ int icmp_ping(in_addr_t addr, uint16_t id, uint16_t seqno, uint16_t datalen,
   if (state.png_cb)
     {
       state.png_cb->flags   = (ICMP_POLL | ICMP_ECHOREPLY | NETDEV_DOWN);
-      state.png_cb->priv    = (void*)&state;
+      state.png_cb->priv    = (FAR void *)&state;
       state.png_cb->event   = ping_interrupt;
       state.png_result      = -EINTR; /* Assume sem-wait interrupted by signal */
 

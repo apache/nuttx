@@ -88,7 +88,7 @@ static WDOG_ID g_arptimer;           /* ARP timer */
  *
  ****************************************************************************/
 
-static void arptimer_poll(int argc, uint32_t arg, ...)
+static void arptimer_poll(int argc, wdparm_t arg, ...)
 {
   /* Call the ARP timer function every 10 seconds. */
 
@@ -126,7 +126,7 @@ void arp_timer_initialize(void)
   /* Create and start the ARP timer */
 
   g_arptimer = wd_create();
- (void)wd_start(g_arptimer, ARPTIMER_WDINTERVAL, arptimer_poll, 0);
+  (void)wd_start(g_arptimer, ARPTIMER_WDINTERVAL, arptimer_poll, 0);
 }
 
 #endif /* CONFIG_NET_ARP */

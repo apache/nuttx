@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/task/task_activate.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,31 +42,9 @@
 #include <sched.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Type Declarations
- ****************************************************************************/
-
-/****************************************************************************
- * Global Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
+#include <nuttx/sched_note.h>
 
 /****************************************************************************
  * Public Functions
@@ -89,7 +67,7 @@
 
 int task_activate(FAR struct tcb_s *tcb)
 {
-  irqstate_t flags = irqsave();
+  irqstate_t flags = enter_critical_section();
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION
 
@@ -112,6 +90,6 @@ int task_activate(FAR struct tcb_s *tcb)
 #endif
 
   up_unblock_task(tcb);
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }

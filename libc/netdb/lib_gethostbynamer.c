@@ -51,8 +51,9 @@
 #include <arpa/inet.h>
 
 #include <nuttx/net/dns.h>
+#include <nuttx/net/loopback.h>
 
-#include "lib_internal.h"
+#include "libc.h"
 #include "netdb/lib_dns.h"
 
 #ifdef CONFIG_LIBC_NETDB
@@ -85,7 +86,7 @@ struct hostent_info_s
  *   name into the h_name field and its struct in_addr equivalent into the
  *   h_addr_list[0] field of the returned hostent structure.
  *
- * Input paramters:
+ * Input Parameters:
  *   stream - File stream of the opened hosts file with the file pointer
  *     positioned at the beginning of the next host entry.
  *   host - Caller provided location to return the host data.
@@ -111,7 +112,7 @@ static int lib_numeric_address(FAR const char *name, FAR struct hostent *host,
    * be big enough).
    */
 
- if (buflen <= sizeof(struct hostent_info_s))
+  if (buflen <= sizeof(struct hostent_info_s))
    {
      return -ERANGE;
    }
@@ -212,6 +213,94 @@ static int lib_numeric_address(FAR const char *name, FAR struct hostent *host,
 }
 
 /****************************************************************************
+ * Name: lib_localhost
+ *
+ * Description:
+ *   Check if the name is the reserved name for the local loopback device.
+ *
+ * Input Parameters:
+ *   stream - File stream of the opened hosts file with the file pointer
+ *     positioned at the beginning of the next host entry.
+ *   host - Caller provided location to return the host data.
+ *   buf - Caller provided buffer to hold string data associated with the
+ *     host data.
+ *   buflen - The size of the caller-provided buffer
+ *
+ * Returned Value:
+ *   Zero (0) is returned if the name is an numeric IP address.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_LOOPBACK
+static int lib_localhost(FAR const char *name, FAR struct hostent *host,
+                               FAR char *buf, size_t buflen)
+{
+  FAR struct hostent_info_s *info;
+  socklen_t addrlen;
+  FAR const char *src;
+  FAR char *dest;
+  int namelen;
+
+  if (strcmp(name, "localhost") == 0)
+    {
+      /* Yes.. it is the localhost */
+
+#ifdef CONFIG_NET_IPv4
+      /* Setup to transfer the IPv4 address */
+
+      addrlen          = sizeof(struct in_addr);
+      src              = (FAR const char *)&g_lo_ipv4addr;
+      host->h_addrtype = AF_INET;
+
+#else /* CONFIG_NET_IPv6 */
+      /* Setup to transfer the IPv6 address */
+
+      addrlen          = sizeof(struct in6_addr);
+      src              = (FAR const char *)&g_lo_ipv6addr;
+      host->h_addrtype = AF_INET6;
+#endif
+
+      /* Make sure that space remains to hold the hostent structure and
+       * the IP address.
+       */
+
+      if (buflen <= (sizeof(struct hostent_info_s) + addrlen))
+        {
+          return -ERANGE;
+        }
+
+      info             = (FAR struct hostent_info_s *)buf;
+      dest             = info->hi_data;
+      buflen          -= (sizeof(struct hostent_info_s) - 1);
+
+      memset(host, 0, sizeof(struct hostent));
+      memset(info, 0, sizeof(struct hostent_info_s));
+      memcpy(dest, src, addrlen);
+
+      info->hi_addrlist[0] = dest;
+      host->h_addr_list    = info->hi_addrlist;
+      host->h_length       = addrlen;
+
+      dest                += addrlen;
+      buflen              -= addrlen;
+
+      /* And copy name */
+
+      namelen = strlen(name);
+      if (addrlen + namelen + 1 > buflen)
+        {
+          return -ERANGE;
+        }
+
+      strncpy(dest, name, buflen);
+      return 0;
+    }
+
+  return 1;
+}
+#endif
+
+/****************************************************************************
  * Name: lib_find_answer
  *
  * Description:
@@ -236,6 +325,7 @@ static int lib_find_answer(FAR const char *name, FAR struct hostent *host,
 {
   FAR struct hostent_info_s *info;
   FAR char *ptr;
+  FAR void *addrdata;
   socklen_t addrlen;
   int addrtype;
   int namelen;
@@ -245,7 +335,7 @@ static int lib_find_answer(FAR const char *name, FAR struct hostent *host,
    * be big enough).
    */
 
- if (buflen <= sizeof(struct hostent_info_s))
+  if (buflen <= sizeof(struct hostent_info_s))
    {
      return -ERANGE;
    }
@@ -270,7 +360,7 @@ static int lib_find_answer(FAR const char *name, FAR struct hostent *host,
       return ret;
     }
 
- /* Get the address type; verify the address size. */
+  /* Get the address type; verify the address size. */
 
 #ifdef CONFIG_NET_IPv4
 #ifdef CONFIG_NET_IPv6
@@ -280,6 +370,7 @@ static int lib_find_answer(FAR const char *name, FAR struct hostent *host,
       DEBUGASSERT(addrlen == sizeof(struct sockaddr_in));
       addrlen  = sizeof(struct sockaddr_in);
       addrtype = AF_INET;
+      addrdata = &((FAR struct sockaddr_in *)ptr)->sin_addr;
     }
 #endif
 
@@ -291,12 +382,13 @@ static int lib_find_answer(FAR const char *name, FAR struct hostent *host,
       DEBUGASSERT(addrlen == sizeof(struct sockaddr_in6));
       addrlen  = sizeof(struct sockaddr_in6);
       addrtype = AF_INET6;
+      addrdata = &((FAR struct sockaddr_in6 *)ptr)->sin6_addr;
     }
 #endif
 
   /* Yes.. Return the address that we obtained from the DNS cache. */
 
-  info->hi_addrlist[0] = ptr;
+  info->hi_addrlist[0] = addrdata;
   host->h_addr_list    = info->hi_addrlist;
   host->h_addrtype     = addrtype;
   host->h_length       = addrlen;
@@ -377,6 +469,7 @@ static int lib_dns_lookup(FAR const char *name, FAR struct hostent *host,
 {
   FAR struct hostent_info_s *info;
   FAR char *ptr;
+  FAR void *addrdata;
   socklen_t addrlen;
   int addrtype;
   int namelen;
@@ -386,7 +479,7 @@ static int lib_dns_lookup(FAR const char *name, FAR struct hostent *host,
    * be big enough).
    */
 
- if (buflen <= sizeof(struct hostent_info_s))
+  if (buflen <= sizeof(struct hostent_info_s))
    {
      return -ERANGE;
    }
@@ -419,6 +512,7 @@ static int lib_dns_lookup(FAR const char *name, FAR struct hostent *host,
           DEBUGASSERT(addrlen == sizeof(struct sockaddr_in));
           addrlen  = sizeof(struct sockaddr_in);
           addrtype = AF_INET;
+          addrdata = &((FAR struct sockaddr_in *)ptr)->sin_addr;
         }
 #endif
 
@@ -430,12 +524,13 @@ static int lib_dns_lookup(FAR const char *name, FAR struct hostent *host,
           DEBUGASSERT(addrlen == sizeof(struct sockaddr_in6));
           addrlen  = sizeof(struct sockaddr_in6);
           addrtype = AF_INET6;
+          addrdata = &((FAR struct sockaddr_in6 *)ptr)->sin6_addr;
         }
 #endif
 
       /* Yes.. Return the address that we obtained from the DNS name server. */
 
-      info->hi_addrlist[0] = ptr;
+      info->hi_addrlist[0] = addrdata;
       host->h_addr_list    = info->hi_addrlist;
       host->h_addrtype     = addrtype;
       host->h_length       = addrlen;
@@ -465,7 +560,7 @@ static int lib_dns_lookup(FAR const char *name, FAR struct hostent *host,
  * Description:
  *   Try to look-up the host name from the network host file
  *
- * Input paramters:
+ * Input Parameters:
  *   name - The name of the host to find.
  *   host - Caller provided location to return the host data.
  *   buf - Caller provided buffer to hold string data associated with the
@@ -581,7 +676,7 @@ errorout_with_herrnocode:
       *h_errnop = herrnocode;
     }
 
- return ERROR;
+  return ERROR;
 }
 #endif /* CONFIG_NETDB_HOSTFILE */
 
@@ -645,6 +740,17 @@ int gethostbyname_r(FAR const char *name, FAR struct hostent *host,
       return OK;
     }
 
+#ifdef CONFIG_NET_LOOPBACK
+  /* Check for the local loopback host name */
+
+  if (lib_localhost(name, host, buf, buflen) == 0)
+    {
+      /* Yes.. we are done */
+
+      return OK;
+    }
+#endif
+
   /* Try to find the name in the HOSTALIASES environment variable */
   /* REVISIT: Not implemented */
 
@@ -687,7 +793,7 @@ int gethostbyname_r(FAR const char *name, FAR struct hostent *host,
       *h_errnop = HOST_NOT_FOUND;
     }
 
- return ERROR;
+  return ERROR;
 #endif
 }
 

@@ -39,7 +39,7 @@
 
 #include <assert.h>
 
-#include "lib_internal.h"
+#include "libc.h"
 
 /****************************************************************************
  * Private Functions

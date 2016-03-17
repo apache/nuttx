@@ -1,0 +1,11 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config DEV_LOOP
+	bool "Enable loop device"
+	default n
+	---help---
+		Supports the standard loop device that can be used to export a
+		file (or character device) as a block device.

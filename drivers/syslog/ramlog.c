@@ -59,7 +59,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/syslog/ramlog.h>
 
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 
 #ifdef CONFIG_RAMLOG
 
@@ -91,7 +91,7 @@ struct ramlog_dev_s
    */
 
 #ifndef CONFIG_DISABLE_POLL
-  struct pollfd *rl_fds[CONFIG_RAMLOG_NPOLLWAITERS];
+  FAR struct pollfd *rl_fds[CONFIG_RAMLOG_NPOLLWAITERS];
 #endif
 };
 
@@ -108,8 +108,10 @@ static ssize_t ramlog_addchar(FAR struct ramlog_dev_s *priv, char ch);
 
 /* Character driver methods */
 
-static ssize_t ramlog_read(FAR struct file *, FAR char *, size_t);
-static ssize_t ramlog_write(FAR struct file *, FAR const char *, size_t);
+static ssize_t ramlog_read(FAR struct file *filep, FAR char *buffer,
+                           size_t buflen);
+static ssize_t ramlog_write(FAR struct file *filep, FAR const char *buffer,
+                            size_t buflen);
 #ifndef CONFIG_DISABLE_POLL
 static int     ramlog_poll(FAR struct file *filep, FAR struct pollfd *fds,
                            bool setup);
@@ -170,7 +172,7 @@ static struct ramlog_dev_s g_sysdev =
 
 #ifndef CONFIG_DISABLE_POLL
 static void ramlog_pollnotify(FAR struct ramlog_dev_s *priv,
-            pollevent_t eventset)
+                              pollevent_t eventset)
 {
   FAR struct pollfd *fds;
   irqstate_t flags;
@@ -180,7 +182,7 @@ static void ramlog_pollnotify(FAR struct ramlog_dev_s *priv,
 
   for (i = 0; i < CONFIG_RAMLOG_NPOLLWAITERS; i++)
     {
-      flags = irqsave();
+      flags = enter_critical_section();
       fds = priv->rl_fds[i];
       if (fds)
         {
@@ -190,7 +192,7 @@ static void ramlog_pollnotify(FAR struct ramlog_dev_s *priv,
               sem_post(fds->sem);
             }
         }
-      irqrestore(flags);
+      leave_critical_section(flags);
     }
 }
 #else
@@ -208,7 +210,7 @@ static int ramlog_addchar(FAR struct ramlog_dev_s *priv, char ch)
 
   /* Disable interrupts (in case we are NOT called from interrupt handler) */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Calculate the write index AFTER the next byte is written */
 
@@ -224,7 +226,7 @@ static int ramlog_addchar(FAR struct ramlog_dev_s *priv, char ch)
     {
       /* Yes... Return an indication that nothing was saved in the buffer. */
 
-      irqrestore(flags);
+      leave_critical_section(flags);
       return -EBUSY;
     }
 
@@ -232,7 +234,7 @@ static int ramlog_addchar(FAR struct ramlog_dev_s *priv, char ch)
 
   priv->rl_buffer[priv->rl_head] = ch;
   priv->rl_head = nexthead;
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -242,8 +244,8 @@ static int ramlog_addchar(FAR struct ramlog_dev_s *priv, char ch)
 
 static ssize_t ramlog_read(FAR struct file *filep, FAR char *buffer, size_t len)
 {
-  struct inode *inode  = filep->f_inode;
-  struct ramlog_dev_s *priv;
+  FAR struct inode *inode = filep->f_inode;
+  FAR struct ramlog_dev_s *priv;
   ssize_t nread;
   char ch;
   int ret;
@@ -251,7 +253,7 @@ static ssize_t ramlog_read(FAR struct file *filep, FAR char *buffer, size_t len)
   /* Some sanity checking */
 
   DEBUGASSERT(inode && inode->i_private);
-  priv = inode->i_private;
+  priv = (FAR struct ramlog_dev_s *)inode->i_private;
 
   /* If the circular buffer is empty, then wait for something to be written
    * to it.  This function may NOT be called from an interrupt handler.
@@ -415,8 +417,8 @@ errout_without_sem:
 
 static ssize_t ramlog_write(FAR struct file *filep, FAR const char *buffer, size_t len)
 {
-  struct inode *inode = filep->f_inode;
-  struct ramlog_dev_s *priv;
+  FAR struct inode *inode = filep->f_inode;
+  FAR struct ramlog_dev_s *priv;
   ssize_t nwritten;
   char ch;
   int ret;
@@ -424,16 +426,16 @@ static ssize_t ramlog_write(FAR struct file *filep, FAR const char *buffer, size
   /* Some sanity checking */
 
   DEBUGASSERT(inode && inode->i_private);
-  priv = inode->i_private;
+  priv = (FAR struct ramlog_dev_s *)inode->i_private;
 
- /* Loop until all of the bytes have been written.  This function may be
-  * called from an interrupt handler!  Semaphores cannot be used!
-  *
-  * The write logic only needs to modify the rl_head index.  Therefore,
-  * there is a difference in the way that rl_head and rl_tail are protected:
-  * rl_tail is protected with a semaphore; rl_tail is protected by disabling
-  * interrupts.
-  */
+  /* Loop until all of the bytes have been written.  This function may be
+   * called from an interrupt handler!  Semaphores cannot be used!
+   *
+   * The write logic only needs to modify the rl_head index.  Therefore,
+   * there is a difference in the way that rl_head and rl_tail are protected:
+   * rl_tail is protected with a semaphore; rl_tail is protected by disabling
+   * interrupts.
+   */
 
   for (nwritten = 0; nwritten < len; nwritten++)
     {
@@ -468,7 +470,7 @@ static ssize_t ramlog_write(FAR struct file *filep, FAR const char *buffer, size
 
       /* Then output the character */
 
-      ret = ramlog_addchar(priv,ch);
+      ret = ramlog_addchar(priv, ch);
       if (ret < 0)
         {
           /* The buffer is full and nothing was saved. Break out of the
@@ -492,7 +494,7 @@ static ssize_t ramlog_write(FAR struct file *filep, FAR const char *buffer, size
 
       /* Are there threads waiting for read data? */
 
-      flags = irqsave();
+      flags = enter_critical_section();
 #ifndef CONFIG_RAMLOG_NONBLOCKING
       for (i = 0; i < priv->rl_nwaiters; i++)
         {
@@ -505,7 +507,7 @@ static ssize_t ramlog_write(FAR struct file *filep, FAR const char *buffer, size
       /* Notify all poll/select waiters that they can write to the FIFO */
 
       ramlog_pollnotify(priv, POLLIN);
-      irqrestore(flags);
+      leave_critical_section(flags);
     }
 #endif
 
@@ -534,7 +536,7 @@ int ramlog_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
   /* Some sanity checking */
 
   DEBUGASSERT(inode && inode->i_private);
-  priv = inode->i_private;
+  priv = (FAR struct ramlog_dev_s *)inode->i_private;
 
   /* Get exclusive access to the poll structures */
 
@@ -655,7 +657,7 @@ int ramlog_register(FAR const char *devpath, FAR char *buffer, size_t buflen)
   /* Allocate a RAM logging device structure */
 
   priv = (struct ramlog_dev_s *)kmm_zalloc(sizeof(struct ramlog_dev_s));
-  if (priv)
+  if (priv != NULL)
     {
       /* Initialize the non-zero values in the RAM logging device structure */
 

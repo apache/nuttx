@@ -34,6 +34,7 @@
 #
 ############################################################################
 
+############################################################################
 # Include SYSLOG drivers (only one should be enabled)
 
 ifeq ($(CONFIG_SYSLOG),y)
@@ -47,6 +48,10 @@ ifeq ($(CONFIG_RAMLOG),y)
   CSRCS += ramlog.c
 endif
 
+ifeq ($(CONFIG_DRIVER_NOTE),y)
+  CSRCS += note_driver.c
+endif
+
 # (Add other SYSLOG_CONSOLE drivers here)
 
 ifeq ($(CONFIG_SYSLOG_CONSOLE),y)
@@ -58,17 +63,32 @@ endif
 DEPPATH += --dep-path syslog
 VPATH += :syslog
 
-else
-
+############################################################################
 # The RAMLOG can be used even if system logging is not enabled.
 
-ifeq ($(CONFIG_RAMLOG),y)
+else ifeq ($(CONFIG_RAMLOG),y)
+
+CSRCS += ramlog.c
+
+ifeq ($(CONFIG_DRIVER_NOTE),y)
+  CSRCS += note_driver.c
+endif
 
 # Include RAMLOG build support
 
-CSRCS += ramlog.c
 DEPPATH += --dep-path syslog
 VPATH += :syslog
 
-endif
+############################################################################
+# The scheduler note driver can be used in any event.
+
+else ifeq ($(CONFIG_DRIVER_NOTE),y)
+
+CSRCS += note_driver.c
+
+# Include note driver build support
+
+DEPPATH += --dep-path syslog
+VPATH += :syslog
+
 endif

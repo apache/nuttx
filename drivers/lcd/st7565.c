@@ -990,14 +990,16 @@ FAR struct lcd_dev_s *st7565_initialize(FAR struct st7565_lcd_s *lcd,
   st7565_reset(priv, true);
 
   /* it seems too long but written in NHD‐C12864KGZ DISPLAY
-   * INITIALIZATION... */
+   * INITIALIZATION...
+   */
 
   up_mdelay(150);
 
   st7565_reset(priv, false);
 
   /* it seems too long but written in NHD‐C12864KGZ DISPLAY
-   * INITIALIZATION... */
+   * INITIALIZATION...
+   */
 
   up_mdelay(150);
 
@@ -1009,7 +1011,7 @@ FAR struct lcd_dev_s *st7565_initialize(FAR struct st7565_lcd_s *lcd,
 
   st7565_cmddata(priv, true);
 
-  /* reset by command in case of st7565_reset not implemeted */
+  /* Reset by command in case of st7565_reset not implemeted */
 
   (void)st7565_send_one_data(priv, ST7565_EXIT_SOFTRST);
 
@@ -1023,6 +1025,17 @@ FAR struct lcd_dev_s *st7565_initialize(FAR struct st7565_lcd_s *lcd,
   (void)st7565_send_one_data(priv, ST7565_SETEVMODE);
   (void)st7565_send_one_data(priv, ST7565_SETEVREG(15));
   (void)st7565_send_one_data(priv, ST7565_POWERCTRL_INT);
+  (void)st7565_send_one_data(priv, ST7565_SETSTARTLINE);
+
+#elif CONFIG_ERC_12864_3
+
+  (void)st7565_send_one_data(priv, ST7565_ADCNORMAL);
+  (void)st7565_send_one_data(priv, ST7565_SETCOMREVERSE);
+  (void)st7565_send_one_data(priv, ST7565_BIAS_1_9);
+  (void)st7565_send_one_data(priv, ST7565_POWERCTRL_INT);
+  (void)st7565_send_one_data(priv, ST7565_REG_RES_5_5);
+  (void)st7565_send_one_data(priv, ST7565_SETEVMODE);
+  (void)st7565_send_one_data(priv, ST7565_SETEVREG(0x24));
   (void)st7565_send_one_data(priv, ST7565_SETSTARTLINE);
 
 #else

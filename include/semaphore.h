@@ -85,7 +85,7 @@ struct semholder_s
 
 struct sem_s
 {
-  int16_t semcount;              /* >0 -> Num counts available */
+  volatile int16_t semcount;     /* >0 -> Num counts available */
                                  /* <0 -> Num tasks waiting for semaphore */
   /* If priority inheritance is enabled, then we have to keep track of which
    * tasks hold references to the semaphore.
@@ -115,7 +115,7 @@ typedef struct sem_s sem_t;
 #endif
 
 /****************************************************************************
- * Public Variables
+ * Public Data
  ****************************************************************************/
 
 /****************************************************************************

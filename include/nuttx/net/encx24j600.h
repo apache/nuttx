@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/net/encx24j600.h
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,31 +56,12 @@
  * CONFIG_ENCX24J600_FREQUENCY - Define to use a different bus frequency
  * CONFIG_ENCX24J600_NINTERFACES - Specifies the number of physical ENCX24J600
  *   devices that will be supported.
- * CONFIG_ENCX24J600_STATS - Collect network statistics
  * CONFIG_ENCX24J600_HALFDUPPLEX - Default is full duplex
  */
 
 /****************************************************************************
  * Public Types
  ****************************************************************************/
-
-/* This structure returns driver statistics (if enabled) */
-
-#ifdef CONFIG_ENCX24J600_STATS
-struct enc_stats_s
-{
-  uint8_t  maxpktcnt;         /* Max. number of buffered RX packets */
-  uint32_t txrequests;        /* Number of TX packets queued */
-  uint32_t txifs;             /* TXIF completion events */
-  uint32_t txabrts;           /* TXIF completions with ESTAT.TXABRT */
-  uint32_t txerifs;           /* TXERIF error events */
-  uint32_t txtimeouts;        /* S/W detected TX timeouts */
-  uint32_t pktifs;            /* PKTIF RX completion events */
-  uint32_t rxnotok;           /* PKTIF without RXSTAT_OK */
-  uint32_t rxpktlen;          /* PKTIF with bad pktlen */
-  uint32_t rxerifs;           /* RXERIF error evernts */
-};
-#endif
 
 /* The ENCX24J600 normal provides interrupts to the MCU via a GPIO pin.  The
  * following structure provides an MCU-independent mechanixm for controlling
@@ -150,30 +131,6 @@ extern "C"
 struct spi_dev_s; /* see nuttx/spi/spi.h */
 int enc_initialize(FAR struct spi_dev_s *spi,
                    FAR const struct enc_lower_s *lower, unsigned int devno);
-
-/****************************************************************************
- * Function: enc_stats
- *
- * Description:
- *   Return accumulated ENCX24J600 statistics.  Statistics are cleared after
- *   being returned.
- *
- * Parameters:
- *   devno - If more than one ENCX24J600 is supported, then this is the
- *           zero based number that identifies the ENCX24J600;
- *   stats - The user-provided location to return the statistics.
- *
- * Returned Value:
- *   OK on success; Negated errno on failure.
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-#ifdef CONFIG_ENCX24J600_STATS
-int enc_stats(unsigned int devno, struct enc_stats_s *stats);
-#endif
-
 #undef EXTERN
 #ifdef __cplusplus
 }

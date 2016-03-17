@@ -216,7 +216,7 @@ errout:
 
 static int task_spawn_proxy(int argc, FAR char *argv[])
 {
- int ret;
+  int ret;
 
   /* Perform file actions and/or set a custom signal mask.  We get here only
    * if the file_actions parameter to task_spawn[p] was non-NULL and/or the
@@ -421,7 +421,7 @@ int task_spawn(FAR pid_t *pid, FAR const char *name, main_t entry,
   proxy = task_create("task_spawn_proxy", param.sched_priority,
                       CONFIG_POSIX_SPAWN_PROXY_STACKSIZE,
                       (main_t)task_spawn_proxy,
-                      (FAR char * const*)NULL);
+                      (FAR char * const *)NULL);
   if (proxy < 0)
     {
       ret = get_errno();
@@ -430,22 +430,22 @@ int task_spawn(FAR pid_t *pid, FAR const char *name, main_t entry,
       goto errout_with_lock;
     }
 
-   /* Wait for the proxy to complete its job */
+  /* Wait for the proxy to complete its job */
 
 #ifdef CONFIG_SCHED_WAITPID
-   ret = waitpid(proxy, &status, 0);
-   if (ret < 0)
-     {
-       sdbg("ERROR: waitpid() failed: %d\n", errno);
-       goto errout_with_lock;
-     }
+  ret = waitpid(proxy, &status, 0);
+  if (ret < 0)
+    {
+      sdbg("ERROR: waitpid() failed: %d\n", errno);
+      goto errout_with_lock;
+    }
 #else
-   spawn_semtake(&g_spawn_execsem);
+  spawn_semtake(&g_spawn_execsem);
 #endif
 
-   /* Get the result and relinquish our access to the parameter structure */
+  /* Get the result and relinquish our access to the parameter structure */
 
-   ret = g_spawn_parms.result;
+  ret = g_spawn_parms.result;
 
 errout_with_lock:
 #ifdef CONFIG_SCHED_WAITPID

@@ -126,7 +126,7 @@ void icmpv6_solicit(FAR struct net_driver_s *dev,
   icmp->destipaddr[7] = ipaddr[7];
 
   /* Add out IPv6 address as the source address */
- 
+
   net_ipv6addr_copy(icmp->srcipaddr, dev->d_ipv6addr);
 
   /* Set up the ICMPv6 Neighbor Solicitation message */
@@ -174,7 +174,7 @@ void icmpv6_solicit(FAR struct net_driver_s *dev,
        * the four low-order octets OR'ed with the MAC 33:33:00:00:00:00,
        * so for example the IPv6 address FF02:DEAD:BEEF::1:3 would map
        * to the Ethernet MAC address 33:33:00:01:00:03.
-        *
+       *
        * NOTES:  This appears correct for the ICMPv6 Router Solicitation
        * Message, but the ICMPv6 Neighbor Solicitation message seems to
        * use 33:33:ff:01:00:03.

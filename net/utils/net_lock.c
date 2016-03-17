@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/utils/net_lock.c
  *
- *   Copyright (C) 2011-2012, 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012, 2014-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,6 +45,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/net/net.h>
 
@@ -197,7 +198,7 @@ int net_timedwait(sem_t *sem, FAR const struct timespec *abstime)
   irqstate_t   flags;
   int          ret;
 
-  flags = irqsave(); /* No interrupts */
+  flags = enter_critical_section(); /* No interrupts */
   sched_lock();      /* No context switches */
   if (g_holder == me)
     {
@@ -235,7 +236,7 @@ int net_timedwait(sem_t *sem, FAR const struct timespec *abstime)
     }
 
   sched_unlock();
-  irqrestore(flags);
+  leave_critical_section(flags);
   return ret;
 }
 

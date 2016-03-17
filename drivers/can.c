@@ -54,13 +54,48 @@
 #include <nuttx/arch.h>
 #include <nuttx/can.h>
 
-#include <arch/irq.h>
+#ifdef CONFIG_CAN_TXREADY
+#  include <nuttx/wqueue.h>
+#endif
+
+#include <nuttx/irq.h>
 
 #ifdef CONFIG_CAN
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+/* Configuration ************************************************************/
+
+#ifdef CONFIG_CAN_TXREADY
+#  if !defined(CONFIG_SCHED_WORKQUEUE)
+#    error Work queue support required in this configuration
+#    undef CONFIG_CAN_TXREADY
+#    undef CONFIG_CAN_TXREADY_LOPRI
+#    undef CONFIG_CAN_TXREADY_HIPRI
+#  elif defined(CONFIG_CAN_TXREADY_LOPRI)
+#    undef CONFIG_CAN_TXREADY_HIPRI
+#    ifdef CONFIG_SCHED_LPWORK
+#      define CANWORK LPWORK
+#    else
+#      error Low priority work queue support required in this configuration
+#      undef CONFIG_CAN_TXREADY
+#      undef CONFIG_CAN_TXREADY_LOPRI
+#    endif
+#  elif defined(CONFIG_CAN_TXREADY_HIPRI)
+#    ifdef CONFIG_SCHED_HPWORK
+#      define CANWORK HPWORK
+#    else
+#      error High priority work queue support required in this configuration
+#      undef CONFIG_CAN_TXREADY
+#      undef CONFIG_CAN_TXREADY_HIPRI
+#    endif
+#  else
+#    error No work queue selection
+#    undef CONFIG_CAN_TXREADY
+#  endif
+#endif
+
 /* Debug ********************************************************************/
 /* Non-standard debug that may be enabled just for testing CAN */
 
@@ -94,6 +129,9 @@
 static uint8_t        can_dlc2bytes(uint8_t dlc);
 #if 0 /* Not used */
 static uint8_t        can_bytes2dlc(uint8_t nbytes);
+#endif
+#ifdef CONFIG_CAN_TXREADY
+static void           can_txready_work(FAR void *arg);
 #endif
 
 /* Character driver methods */
@@ -247,6 +285,59 @@ static uint8_t can_bytes2dlc(FAR struct sam_can_s *priv, uint8_t nbytes)
 #endif
 
 /****************************************************************************
+ * Name: can_txready_work
+ *
+ * Description:
+ *   This function performs deferred processing from can_txready.  See the
+ *   discription of can_txready below for additionla information.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_CAN_TXREADY
+static void can_txready_work(FAR void *arg)
+{
+  FAR struct can_dev_s *dev = (FAR struct can_dev_s *)arg;
+  irqstate_t flags;
+  int ret;
+
+  canllvdbg("xmit head: %d queue: %d tail: %d\n",
+            dev->cd_xmit.tx_head, dev->cd_xmit.tx_queue,
+            dev->cd_xmit.tx_tail);
+
+  /* Verify that the xmit FIFO is not empty.  The following operations must
+   * be performed with interrupt disabled.
+   */
+
+  flags = enter_critical_section();
+  if (dev->cd_xmit.tx_head != dev->cd_xmit.tx_tail)
+    {
+      /* Send the next message in the FIFO. */
+
+      ret = can_xmit(dev);
+
+      /* If the message was successfully queued in the H/W FIFO, then
+       * can_txdone() should have been called.  If the S/W FIFO were
+       * full before then there should now be free space in the S/W FIFO.
+       */
+
+      if (ret >= 0)
+        {
+          /* Are there any threads waiting for space in the TX FIFO? */
+
+          if (dev->cd_ntxwaiters > 0)
+            {
+              /* Yes.. Inform them that new xmit space is available */
+
+              (void)sem_post(&dev->cd_xmit.tx_sem);
+            }
+        }
+    }
+
+  leave_critical_section(flags);
+}
+#endif
+
+/****************************************************************************
  * Name: can_open
  *
  * Description:
@@ -291,7 +382,7 @@ static int can_open(FAR struct file *filep)
             {
               /* Yes.. perform one time hardware initialization. */
 
-              irqstate_t flags = irqsave();
+              irqstate_t flags = enter_critical_section();
               ret = dev_setup(dev);
               if (ret == OK)
                 {
@@ -312,7 +403,7 @@ static int can_open(FAR struct file *filep)
                   dev->cd_ocount = 1;
                 }
 
-              irqrestore(flags);
+              leave_critical_section(flags);
             }
           else
             {
@@ -395,9 +486,9 @@ static int can_close(FAR struct file *filep)
 
           /* Free the IRQ and disable the CAN device */
 
-          flags = irqsave();       /* Disable interrupts */
+          flags = enter_critical_section();       /* Disable interrupts */
           dev_shutdown(dev);       /* Disable the CAN */
-          irqrestore(flags);
+          leave_critical_section(flags);
 
           sem_post(&dev->cd_closesem);
         }
@@ -434,7 +525,7 @@ static ssize_t can_read(FAR struct file *filep, FAR char *buffer,
     {
       /* Interrupts must be disabled while accessing the cd_recv FIFO */
 
-      flags = irqsave();
+      flags = enter_critical_section();
       while (dev->cd_recv.rx_head == dev->cd_recv.rx_tail)
         {
           /* The receive FIFO is empty -- was non-blocking mode selected? */
@@ -501,7 +592,7 @@ static ssize_t can_read(FAR struct file *filep, FAR char *buffer,
       ret = nread;
 
 return_with_irqdisabled:
-      irqrestore(flags);
+      leave_critical_section(flags);
     }
 
   return ret;
@@ -531,7 +622,15 @@ static int can_xmit(FAR struct can_dev_s *dev)
   if (dev->cd_xmit.tx_head == dev->cd_xmit.tx_tail)
     {
       DEBUGASSERT(dev->cd_xmit.tx_queue == dev->cd_xmit.tx_head);
+
+#ifndef CONFIG_CAN_TXREADY
+      /* We can disable CAN TX interrupts -- unless there is a H/W FIFO.  In
+       * that case, TX interrupts must stay enabled until the H/W FIFO is
+       * fully emptied.
+       */
+
       dev_txint(dev, false);
+#endif
       return -EIO;
     }
 
@@ -554,7 +653,7 @@ static int can_xmit(FAR struct can_dev_s *dev)
       DEBUGASSERT(dev->cd_xmit.tx_head != dev->cd_xmit.tx_tail);
 
       /* Increment the FIFO queue index before sending (because dev_send()
-       * might call can_txdone().
+       * might call can_txdone()).
        */
 
       tmpndx = dev->cd_xmit.tx_queue;
@@ -602,7 +701,7 @@ static ssize_t can_write(FAR struct file *filep, FAR const char *buffer,
 
   /* Interrupts must disabled throughout the following */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Check if the TX is inactive when we started. In certain race conditions,
    * there may be a pending interrupt to kick things back off, but we will
@@ -634,7 +733,7 @@ static ssize_t can_write(FAR struct file *filep, FAR const char *buffer,
         {
           /* The transmit FIFO is full  -- was non-blocking mode selected? */
 
-          if (filep->f_oflags & O_NONBLOCK)
+          if ((filep->f_oflags & O_NONBLOCK) != 0)
             {
               if (nsent == 0)
                 {
@@ -655,7 +754,7 @@ static ssize_t can_write(FAR struct file *filep, FAR const char *buffer,
 
           if (inactive)
             {
-              can_xmit(dev);
+              (void)can_xmit(dev);
             }
 
           /* Wait for a message to be sent */
@@ -698,21 +797,21 @@ static ssize_t can_write(FAR struct file *filep, FAR const char *buffer,
       nsent += msglen;
     }
 
- /* We get here after all messages have been added to the FIFO.  Check if
-  * we need to kick of the XMIT sequence.
-  */
+  /* We get here after all messages have been added to the FIFO.  Check if
+   * we need to kick of the XMIT sequence.
+   */
 
- if (inactive)
-   {
-     can_xmit(dev);
-   }
+  if (inactive)
+    {
+      (void)can_xmit(dev);
+    }
 
   /* Return the number of bytes that were sent */
 
   ret = nsent;
 
 return_with_irqdisabled:
-  irqrestore(flags);
+  leave_critical_section(flags);
   return ret;
 }
 
@@ -737,7 +836,7 @@ static inline ssize_t can_rtrread(FAR struct can_dev_s *dev,
 
   /* Disable interrupts through this operation */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Find an available slot in the pending RTR list */
 
@@ -767,7 +866,7 @@ static inline ssize_t can_rtrread(FAR struct can_dev_s *dev,
         }
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return ret;
 }
 
@@ -795,7 +894,7 @@ static int can_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
        */
 
       case CANIOC_RTR:
-        ret = can_rtrread(dev, (struct canioc_rtr_s*)((uintptr_t)arg));
+        ret = can_rtrread(dev, (FAR struct canioc_rtr_s *)((uintptr_t)arg));
         break;
 
       /* Not a "built-in" ioctl command.. perhaps it is unique to this
@@ -859,10 +958,13 @@ int can_register(FAR const char *path, FAR struct can_dev_s *dev)
  * Description:
  *   Called from the CAN interrupt handler when new read data is available
  *
- * Parameters:
+ * Input Parameters:
  *   dev  - CAN driver state structure
  *   hdr  - CAN message header
  *   data - CAN message data (if DLC > 0)
+ *
+ * Returned Value:
+ *   OK on success; a negated errno on failure.
  *
  * Assumptions:
  *   CAN interrupts are disabled.
@@ -983,16 +1085,71 @@ int can_receive(FAR struct can_dev_s *dev, FAR struct can_hdr_s *hdr,
  * Name: can_txdone
  *
  * Description:
- *   Called from the CAN interrupt handler at the completion of a send
- *   operation.
+ *   Called when the hardware has processed the outgoing TX message.  This
+ *   normally means that the CAN messages was sent out on the wire.  But
+ *   if the CAN hardware supports a H/W TX FIFO, then this call may mean
+ *   only that the CAN message has been added to the H/W FIFO.  In either
+ *   case, the upper-half CAN driver can remove the outgoing message from
+ *   the S/W FIFO and discard it.
  *
- * Parameters:
+ *   This function may be called in different contexts, depending upon the
+ *   nature of the underlying CAN hardware.
+ *
+ *   1. No H/W TX FIFO (CONFIG_CAN_TXREADY not defined)
+ *
+ *      This function is only called from the CAN interrupt handler at the
+ *      completion of a send operation.
+ *
+ *        can_write() -> can_xmit() -> dev_send()
+ *        CAN interrupt -> can_txdone()
+ *
+ *      If the CAN hardware is busy, then the call to dev_send() will
+ *      fail, the S/W TX FIFO will accumulate outgoing messages, and the
+ *      thread calling can_write() may eventually block waiting for space in
+ *      the S/W TX FIFO.
+ *
+ *      When the CAN hardware completes the transfer and processes the
+ *      CAN interrupt, the call to can_txdone() will make space in the S/W
+ *      TX FIFO and will awaken the waiting can_write() thread.
+ *
+ *   2a. H/W TX FIFO (CONFIG_CAN_TXREADY=y) and S/W TX FIFO not full
+ *
+ *      This function will be called back from dev_send() immediately when a
+ *      new CAN message is added to H/W TX FIFO:
+ *
+ *        can_write() -> can_xmit() -> dev_send() -> can_txdone()
+ *
+ *      When the H/W TX FIFO becomes full, dev_send() will fail and
+ *      can_txdone() will not be called.  In this case the S/W TX FIFO will
+ *      accumulate outgoing messages, and the thread calling can_write() may
+ *      eventually block waiting for space in the S/W TX FIFO.
+ *
+ *   2b. H/W TX FIFO (CONFIG_CAN_TXREADY=y) and S/W TX FIFO full
+ *
+ *      In this case, the thread calling can_write() is blocked waiting for
+ *      space in the S/W TX FIFO.  can_txdone() will be called, indirectly,
+ *      from can_txready_work() running on the thread of the work queue.
+ *
+ *        CAN interrupt -> can_txready() -> Schedule can_txready_work()
+ *        can_txready_work() -> can_xmit() -> dev_send() -> can_txdone()
+ *
+ *      The call dev_send() should not fail in this case and the subsequent
+ *      call to can_txdone() will make space in the S/W TX FIFO and will
+ *      awaken the waiting thread.
+ *
+ * Input Parameters:
  *   dev  - The specific CAN device
  *   hdr  - The 16-bit CAN header
  *   data - An array contain the CAN data.
  *
- * Return:
+ * Returned Value:
  *   OK on success; a negated errno on failure.
+ *
+ * Assumptions:
+ *   Interrupts are disabled.  This is required by can_xmit() which is called
+ *   by this function.  Interrupts are explicitly disabled when called
+ *   through can_write().  Interrupts are expected be disabled when called
+ *   from the CAN interrupt handler.
  *
  ****************************************************************************/
 
@@ -1007,6 +1164,12 @@ int can_txdone(FAR struct can_dev_s *dev)
 
   if (dev->cd_xmit.tx_head != dev->cd_xmit.tx_tail)
     {
+      /* The tx_queue index is incremented each time can_xmit() queues
+       * the transmission.  When can_txdone() is called, the tx_queue
+       * index should always have been advanced beyond the current tx_head
+       * index.
+       */
+
       DEBUGASSERT(dev->cd_xmit.tx_head != dev->cd_xmit.tx_queue);
 
       /* Remove the message at the head of the xmit FIFO */
@@ -1037,4 +1200,123 @@ int can_txdone(FAR struct can_dev_s *dev)
   return ret;
 }
 
+/****************************************************************************
+ * Name: can_txready
+ *
+ * Description:
+ *   Called from the CAN interrupt handler at the completion of a send
+ *   operation.  This interface is needed only for CAN hardware that
+ *   supports queing of outgoing messages in a H/W FIFO.
+ *
+ *   The CAN upper half driver also supports a queue of output messages in a
+ *   S/W FIFO.  Messages are added to that queue when when can_write() is
+ *   called and removed from the queue in can_txdone() when each TX message
+ *   is complete.
+ *
+ *   After each message is added to the S/W FIFO, the CAN upper half driver
+ *   will attempt to send the message by calling into the lower half driver.
+ *   That send will not be performed if the lower half driver is busy, i.e.,
+ *   if dev_txready() returns false.  In that case, the number of messages in
+ *   the S/W FIFO can grow.  If the S/W FIFO becomes full, then can_write()
+ *   will wait for space in the S/W FIFO.
+ *
+ *   If the CAN hardware does not support a H/W FIFO then busy means that
+ *   the hardware is actively sending the message and is guaranteed to
+ *   become non-busy (i.e, dev_txready()) when the send transfer completes
+ *   and can_txdone() is called.  So the call to can_txdone() means that the
+ *   transfer has completed and also that the hardware is ready to accept
+ *   another transfer.
+ *
+ *   If the CAN hardware supports a H/W FIFO, can_txdone() is not called
+ *   when the tranfer is complete, but rather when the transfer is queued in
+ *   the H/W FIFO.  When the H/W FIFO becomes full, then dev_txready() will
+ *   report false and the number of queued messages in the S/W FIFO will grow.
+ *
+ *   There is no mechanism in this case to inform the upper half driver when
+ *   the hardware is again available, when there is again space in the H/W
+ *   FIFO.  can_txdone() will not be called again.  If the S/W FIFO becomes
+ *   full, then the upper half driver will wait for space to become
+ *   available, but there is no event to awaken it and the driver will hang.
+ *
+ *   Enabling this feature adds support for the can_txready() interface.
+ *   This function is called from the lower half driver's CAN interrupt
+ *   handler each time a TX transfer completes.  This is a sure indication
+ *   that the H/W FIFO is no longer full.  can_txready() will then awaken
+ *   the can_write() logic and the hang condition is avoided.
+ *
+ * Input Parameters:
+ *   dev  - The specific CAN device
+ *
+ * Returned Value:
+ *   OK on success; a negated errno on failure.
+ *
+ * Assumptions:
+ *   Interrupts are disabled.  This function may execute in the context of
+ *   and interrupt handler.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_CAN_TXREADY
+int can_txready(FAR struct can_dev_s *dev)
+{
+  int ret = -ENOENT;
+
+  canllvdbg("xmit head: %d queue: %d tail: %d waiters: %d\n",
+            dev->cd_xmit.tx_head, dev->cd_xmit.tx_queue, dev->cd_xmit.tx_tail,
+            dev->cd_ntxwaiters);
+
+  /* Verify that the xmit FIFO is not empty.  This is safe because interrupts
+   * are always disabled when calling into can_xmit(); this cannot collide
+   * with ongoing activity from can_write().
+   */
+
+  if (dev->cd_xmit.tx_head != dev->cd_xmit.tx_tail)
+    {
+      /* Is work already scheduled? */
+
+      if (work_available(&dev->cd_work))
+        {
+          /* Yes... schedule to perform can_txready() work on the worker
+           * thread.  Although data structures are protected by disabling
+           * interrupts, the can_xmit() operations may involve semaphore
+           * operations and, hence, should not be done at the interrupt
+           * level.
+           */
+
+          ret = work_queue(CANWORK, &dev->cd_work, can_txready_work, dev, 0);
+        }
+      else
+        {
+          ret = -EBUSY;
+        }
+    }
+  else
+    {
+      /* There should not be any threads waiting for space in the S/W TX
+       * FIFO is it is empty.
+       *
+       * REVISIT: Assertion can fire in certain race conditions, i.e, when
+       * all waiters have been awakened but have not yet had a chance to
+       * decrement cd_ntxwaiters.
+       */
+
+      //DEBUGASSERT(dev->cd_ntxwaiters == 0);
+
+#if 0 /* REVISIT */
+      /* When the H/W FIFO has been emptied, we can disable further TX
+       * interrupts.
+       *
+       * REVISIT:  The fact that the S/W FIFO is empty does not mean that
+       * the H/W FIFO is also empty.  If we really want this to work this
+       * way, then we would probably need and additional parameter to tell
+       * us if the H/W FIFO is empty.
+       */
+
+      dev_txint(dev, false);
+#endif
+    }
+
+  return ret;
+}
+#endif /* CONFIG_CAN_TXREADY */
 #endif /* CONFIG_CAN */

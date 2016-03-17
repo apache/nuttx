@@ -1,7 +1,7 @@
-/************************************************************************
+/****************************************************************************
  *  sched/mqueue/mq_receive.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -44,35 +44,17 @@
 #include <errno.h>
 #include <mqueue.h>
 #include <debug.h>
+
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 
 #include "mqueue/mqueue.h"
 
-/************************************************************************
- * Pre-processor Definitions
- ************************************************************************/
-
-/************************************************************************
- * Private Type Declarations
- ************************************************************************/
-
-/************************************************************************
- * Public Variables
- ************************************************************************/
-
-/************************************************************************
- * Private Variables
- ************************************************************************/
-
-/************************************************************************
- * Private Functions
- ************************************************************************/
-
-/************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************
+/****************************************************************************
  * Name: mq_receive
  *
  * Description:
@@ -110,13 +92,13 @@
  *
  * Assumptions:
  *
- ************************************************************************/
+ ****************************************************************************/
 
 ssize_t mq_receive(mqd_t mqdes, FAR char *msg, size_t msglen,
                    FAR int *prio)
 {
   FAR struct mqueue_msg_s *mqmsg;
-  irqstate_t saved_state;
+  irqstate_t flags;
   ssize_t ret = ERROR;
 
   DEBUGASSERT(up_interrupt_context() == false);
@@ -143,12 +125,12 @@ ssize_t mq_receive(mqd_t mqdes, FAR char *msg, size_t msglen,
    * because messages can be sent from interrupt level.
    */
 
-  saved_state = irqsave();
+  flags = enter_critical_section();
 
   /* Get the message from the message queue */
 
   mqmsg = mq_waitreceive(mqdes);
-  irqrestore(saved_state);
+  leave_critical_section(flags);
 
   /* Check if we got a message from the message queue.  We might
    * not have a message if:

@@ -61,10 +61,10 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
- /* Open the device/file write-only, try to create (file) it if it doesn't
-  * exist, if the file that already exists, then append the new log data to
-  * end of the file.
-  */
+/* Open the device/file write-only, try to create (file) it if it doesn't
+ * exist, if the file that already exists, then append the new log data to
+ * end of the file.
+ */
 
 #define SYSLOG_OFLAGS (O_WRONLY | O_CREAT | O_APPEND)
 
@@ -108,7 +108,10 @@ struct syslog_dev_s
 /* This is the device structure for the console or syslogging function. */
 
 static struct syslog_dev_s g_sysdev;
-static const uint8_t       g_syscrlf[2]  = { '\r', '\n' };
+static const uint8_t g_syscrlf[2] =
+{
+  '\r', '\n'
+};
 
 /****************************************************************************
  * Private Functions
@@ -348,7 +351,7 @@ int syslog_initialize(void)
   g_sysdev.sl_state  = SYSLOG_OPENED;
   return OK;
 
- errout_with_inode:
+errout_with_inode:
   inode_release(inode);
   g_sysdev.sl_state = SYSLOG_FAILURE;
   return ret;

@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/netdev/netdev_ioctl.c
  *
- *   Copyright (C) 2007-2012, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2012, 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -57,12 +57,14 @@
 #include <netinet/in.h>
 
 #include <nuttx/net/netdev.h>
+#include <nuttx/net/arp.h>
 
 #ifdef CONFIG_NET_IGMP
 #  include "sys/sockio.h"
 #  include "nuttx/net/igmp.h"
 #endif
 
+#include "arp/arp.h"
 #include "socket/socket.h"
 #include "netdev/netdev.h"
 #include "devif/devif.h"
@@ -674,13 +676,6 @@ static int netdev_ifrioctl(FAR struct socket *psock, int cmd,
         }
         break;
 
-#ifdef CONFIG_NET_ARPIOCTLS
-      case SIOCSARP:  /* Set a ARP mapping */
-      case SIOCDARP:  /* Delete an ARP mapping */
-      case SIOCGARP:  /* Get an ARP mapping */
-# error "IOCTL Commands not implemented"
-#endif
-
 #ifdef CONFIG_NETDEV_PHY_IOCTL
 #ifdef CONFIG_ARCH_PHY_INTERRUPT
       case SIOCMIINOTIFY: /* Set up for PHY event notifications */
@@ -713,7 +708,7 @@ static int netdev_ifrioctl(FAR struct socket *psock, int cmd,
         {
           ret = -ENOTTY;
         }
-        break;;
+        break;
     }
 
   return ret;
@@ -799,6 +794,129 @@ static int netdev_imsfioctl(FAR struct socket *psock, int cmd,
         break;
 
       case SIOCGIPMSFILTER:  /* Retrieve source filter addresses */
+      default:
+        ret = -ENOTTY;
+        break;
+    }
+
+  return ret;
+}
+#endif
+
+/****************************************************************************
+ * Name: netdev_arpioctl
+ *
+ * Description:
+ *   Perform ARP table specific operations.
+ *
+ * Parameters:
+ *   psock  Socket structure
+ *   dev    Ethernet driver device structure
+ *   cmd    The ioctl command
+ *   req    The argument of the ioctl cmd
+ *
+ * Return:
+ *   >=0 on success (positive non-zero values are cmd-specific)
+ *   Negated errno returned on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_ARP
+static int netdev_arpioctl(FAR struct socket *psock, int cmd,
+                           FAR struct arpreq *req)
+{
+  int ret;
+
+  /* Execute the command */
+
+  switch (cmd)
+    {
+      case SIOCSARP:  /* Set an ARP mapping */
+        {
+          if (req != NULL &&
+              req->arp_pa.sa_family == AF_INET && 
+              req->arp_ha.sa_family == ARPHRD_ETHER)
+            {
+              FAR struct sockaddr_in *addr =
+                (FAR struct sockaddr_in *)&req->arp_pa;
+
+              /* Update any existing ARP table entry for this protocol
+               * address -OR- add a new ARP table entry if there is not.
+               */
+
+              ret = arp_update(addr->sin_addr.s_addr,
+                               (FAR uint8_t *)req->arp_ha.sa_data);
+            }
+          else
+            {
+              ret = -EINVAL;
+            }
+        }
+        break;
+
+      case SIOCDARP:  /* Delete an ARP mapping */
+        {
+          if (req != NULL && req->arp_pa.sa_family == AF_INET)
+            {
+              FAR struct sockaddr_in *addr =
+                (FAR struct sockaddr_in *)&req->arp_pa;
+
+              /* Find the existing ARP table entry for this protocol address. */
+
+              FAR struct arp_entry *entry = arp_find(addr->sin_addr.s_addr);
+              if (entry != NULL)
+                {
+                  /* The ARP table is fixed size; an entry is deleted
+                   * by nullifying its protocol address.
+                   */
+
+                  entry->at_ipaddr = 0;
+                  ret = OK;
+                }
+              else
+                {
+                  ret = -ENOENT;
+                }
+            }
+          else
+            {
+              ret = -EINVAL;
+            }
+        }
+        break;
+
+      case SIOCGARP:  /* Get an ARP mapping */
+        {
+          if (req != NULL && req->arp_pa.sa_family == AF_INET)
+            {
+              FAR struct sockaddr_in *addr =
+                (FAR struct sockaddr_in *)&req->arp_pa;
+
+              /* Find the existing ARP table entry for this protocol address. */
+
+              FAR struct arp_entry *entry = arp_find(addr->sin_addr.s_addr);
+              if (entry != NULL)
+                {
+                  /* Return the mapped hardware address. */
+
+                  req->arp_ha.sa_family = ARPHRD_ETHER;
+                  memcpy(req->arp_ha.sa_data,
+                         entry->at_ethaddr.ether_addr_octet,
+                         ETHER_ADDR_LEN);
+                  ret = OK;
+                }
+              else
+                {
+                  ret = -ENOENT;
+                }
+            }
+          else
+            {
+              ret = -EINVAL;
+            }
+        }
+        break;
+
       default:
         ret = -ENOTTY;
         break;
@@ -964,18 +1082,32 @@ int netdev_ioctl(int sockfd, int cmd, unsigned long arg)
 
   /* Execute the command */
 
-  ret = netdev_ifrioctl(psock, cmd, (FAR struct ifreq*)((uintptr_t)arg));
+  ret = netdev_ifrioctl(psock, cmd, (FAR struct ifreq *)((uintptr_t)arg));
+
 #ifdef CONFIG_NET_IGMP
+  /* Check for address filtering commands */
+
   if (ret == -ENOTTY)
     {
-
-      ret = netdev_imsfioctl(psock, cmd, (FAR struct ip_msfilter*)((uintptr_t)arg));
+      ret = netdev_imsfioctl(psock, cmd, (FAR struct ip_msfilter *)((uintptr_t)arg));
     }
 #endif
-#ifdef CONFIG_NET_ROUTE
+
+#ifdef CONFIG_NET_ARP
+  /* Check for ARP table IOCTL commands */
+
   if (ret == -ENOTTY)
     {
-      ret = netdev_rtioctl(psock, cmd, (FAR struct rtentry*)((uintptr_t)arg));
+      ret = netdev_arpioctl(psock, cmd, (FAR struct arpreq *)((uintptr_t)arg));
+    }
+#endif
+
+#ifdef CONFIG_NET_ROUTE
+  /* Check for Routing table IOCTL commands */
+
+  if (ret == -ENOTTY)
+    {
+      ret = netdev_rtioctl(psock, cmd, (FAR struct rtentry *)((uintptr_t)arg));
     }
 #endif
 

@@ -1,4 +1,4 @@
-/************************************************************************
+/****************************************************************************
  * sched/sched/sched_timerexpiration.c
  *
  *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
@@ -55,9 +55,9 @@
 
 #ifdef CONFIG_SCHED_TICKLESS
 
-/************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************/
+ ****************************************************************************/
 /* In the original design, it was planned that sched_timer_reasses() be
  * called whenever there was a change at the head of the ready-to-run
  * list.  That call was intended to establish a new time-slice or to
@@ -87,9 +87,9 @@
 #  define MAX(a,b) (((a) > (b)) ? (a) : (b))
 #endif
 
-/************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_SCHED_TICKLESS_LIMIT_MAX_SLEEP
 /* By default, the RTOS tickless logic assumes that range of times that can
@@ -108,10 +108,10 @@
 uint32_t g_oneshot_maxticks = UINT32_MAX;
 #endif
 
-/************************************************************************
- * Private Variables
- ************************************************************************/
-/* This is the duration of the currently active timer or, when 
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+/* This is the duration of the currently active timer or, when
  * sched_timer_expiration() is called, the duration of interval timer
  * that just expired.  The value zero means that no timer was active.
  */
@@ -133,11 +133,11 @@ static struct timespec g_sched_time;
 static struct timespec g_stop_time;
 #endif
 
-/************************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************
+/****************************************************************************
  * Name:  sched_process_scheduler
  *
  * Description:
@@ -159,13 +159,13 @@ static struct timespec g_stop_time;
  *   that a context switch is needed now, but cannot be performed because
  *   noswitches == true.
  *
- ************************************************************************/
+ ****************************************************************************/
 
 #if CONFIG_RR_INTERVAL > 0 || defined(CONFIG_SCHED_SPORADIC)
 static inline uint32_t sched_process_scheduler(uint32_t ticks, bool noswitches)
 {
-  FAR struct tcb_s *rtcb  = (FAR struct tcb_s*)g_readytorun.head;
-  FAR struct tcb_s *ntcb  = (FAR struct tcb_s*)g_readytorun.head;
+  FAR struct tcb_s *rtcb  = this_task();
+  FAR struct tcb_s *ntcb  = this_task();
   uint32_t ret = 0;
 
 #if CONFIG_RR_INTERVAL > 0
@@ -211,16 +211,16 @@ static inline uint32_t sched_process_scheduler(uint32_t ticks, bool noswitches)
   /* If a context switch occurred, then need to return delay remaining for
    * the new task at the head of the ready to run list.
    */
-  
-  ntcb = (FAR struct tcb_s*)g_readytorun.head;
+
+  ntcb = this_task();
 
   /* Check if the new task at the head of the ready-to-run has changed. */
 
   if (rtcb != ntcb)
     {
-       /* Recurse just to get the correct return value */
+      /* Recurse just to get the correct return value */
 
-       return sched_process_scheduler(0, true);
+      return sched_process_scheduler(0, true);
     }
 
   /* Returning zero means that there is no interesting event to be timed */
@@ -271,9 +271,9 @@ static unsigned int sched_timer_process(unsigned int ticks, bool noswitches)
       rettime = tmp;
     }
 
- /* Check for operations specific to scheduling policy of the currently
-  * active task.
-  */
+  /* Check for operations specific to scheduling policy of the currently
+   * active task.
+   */
 
   tmp = sched_process_scheduler(ticks, noswitches);
   if (tmp > 0 && tmp < cmptime)
@@ -317,7 +317,7 @@ static void sched_timer_start(unsigned int ticks)
     {
       struct timespec ts;
 
-#if CONFIG_SCHED_TICKLESS_LIMIT_MAX_SLEEP
+#ifdef CONFIG_SCHED_TICKLESS_LIMIT_MAX_SLEEP
       if (ticks > g_oneshot_maxticks)
         {
           ticks = g_oneshot_maxticks;
@@ -355,9 +355,9 @@ static void sched_timer_start(unsigned int ticks)
       ret = up_alarm_start(&ts);
 
 #else
-       /* [Re-]start the interval timer */
+      /* [Re-]start the interval timer */
 
-       ret = up_timer_start(&ts);
+      ret = up_timer_start(&ts);
 #endif
 
       if (ret < 0)
@@ -368,9 +368,9 @@ static void sched_timer_start(unsigned int ticks)
     }
 }
 
-/************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************/
+ ****************************************************************************/
 
 /****************************************************************************
  * Name:  sched_alarm_expiration

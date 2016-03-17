@@ -1,7 +1,7 @@
-/*****************************************************************************
+/****************************************************************************
  *  sched/group/group_create.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
-/*****************************************************************************
+/****************************************************************************
  * Included Files
- *****************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -44,6 +44,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
 
 #include "environ/environ.h"
@@ -51,29 +52,25 @@
 
 #ifdef HAVE_TASK_GROUP
 
-/*****************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- *****************************************************************************/
+ ****************************************************************************/
 /* Is this worth making a configuration option? */
 
 #define GROUP_INITIAL_MEMBERS 4
 
-/*****************************************************************************
- * Private Types
- *****************************************************************************/
-
-/*****************************************************************************
+/****************************************************************************
  * Private Data
- *****************************************************************************/
+ ****************************************************************************/
 /* This is counter that is used to generate unique task group IDs */
 
 #if defined(HAVE_GROUP_MEMBERS) || defined(CONFIG_ARCH_ADDRENV)
 static gid_t g_gidcounter;
 #endif
 
-/*****************************************************************************
+/****************************************************************************
  * Public Data
- *****************************************************************************/
+ ****************************************************************************/
 
 #if defined(HAVE_GROUP_MEMBERS) || defined(CONFIG_ARCH_ADDRENV)
 /* This is the head of a list of all group members */
@@ -81,11 +78,11 @@ static gid_t g_gidcounter;
 FAR struct task_group_s *g_grouphead;
 #endif
 
-/*****************************************************************************
+/****************************************************************************
  * Private Functions
- *****************************************************************************/
+ ****************************************************************************/
 
-/*****************************************************************************
+/****************************************************************************
  * Name: group_assigngid
  *
  * Description:
@@ -101,7 +98,7 @@ FAR struct task_group_s *g_grouphead;
  *   Called during task creation in a safe context.  No special precautions
  *   are required here.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #if defined(HAVE_GROUP_MEMBERS) || defined(CONFIG_ARCH_ADDRENV)
 static void group_assigngid(FAR struct task_group_s *group)
@@ -115,11 +112,11 @@ static void group_assigngid(FAR struct task_group_s *group)
 
   /* Loop until we create a unique ID */
 
-  for (;;)
+  for (; ; )
     {
       /* Increment the ID counter.  This is global data so be extra paranoid. */
 
-      flags = irqsave();
+      flags = enter_critical_section();
       gid = ++g_gidcounter;
 
       /* Check for overflow */
@@ -127,13 +124,13 @@ static void group_assigngid(FAR struct task_group_s *group)
       if (gid <= 0)
         {
           g_gidcounter = 1;
-          irqrestore(flags);
+          leave_critical_section(flags);
         }
       else
         {
           /* Does a task group with this ID already exist? */
 
-          irqrestore(flags);
+          leave_critical_section(flags);
           if (group_findbygid(gid) == NULL)
             {
               /* Now assign this ID to the group and return */
@@ -147,11 +144,11 @@ static void group_assigngid(FAR struct task_group_s *group)
 }
 #endif /* HAVE_GROUP_MEMBERS */
 
-/*****************************************************************************
+/****************************************************************************
  * Public Functions
- *****************************************************************************/
+ ****************************************************************************/
 
-/*****************************************************************************
+/****************************************************************************
  * Name: group_allocate
  *
  * Description:
@@ -174,7 +171,7 @@ static void group_assigngid(FAR struct task_group_s *group)
  *   Called during task creation in a safe context.  No special precautions
  *   are required here.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 int group_allocate(FAR struct task_tcb_s *tcb, uint8_t ttype)
 {
@@ -253,7 +250,7 @@ int group_allocate(FAR struct task_tcb_s *tcb, uint8_t ttype)
   return OK;
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: group_initialize
  *
  * Description:
@@ -272,7 +269,7 @@ int group_allocate(FAR struct task_tcb_s *tcb, uint8_t ttype)
  *   Called during task creation in a safe context.  No special precautions
  *   are required here.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 int group_initialize(FAR struct task_tcb_s *tcb)
 {
@@ -309,10 +306,10 @@ int group_initialize(FAR struct task_tcb_s *tcb)
 #if defined(HAVE_GROUP_MEMBERS) || defined(CONFIG_ARCH_ADDRENV)
   /* Add the initialized entry to the list of groups */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   group->flink = g_grouphead;
   g_grouphead = group;
-  irqrestore(flags);
+  leave_critical_section(flags);
 
 #endif
 

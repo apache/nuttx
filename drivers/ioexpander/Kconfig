@@ -3,13 +3,6 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
-config IOEXPANDER_MULTIPIN
-	bool "Support multi-pin access routines"
-	default n
-	---help---
-		This settings enable the definition of routines for
-		optimized simultaneous access to multiple pins.
-
 config IOEXPANDER_PCA9555
 	bool "PCA9555 I2C IO expander"
 	default n
@@ -22,13 +15,28 @@ if IOEXPANDER_PCA9555
 config PCA9555_MULTIPLE
 	bool "Multiple PCA9555 Devices"
 	default n
+	depends on EXPERIMENTAL
 	---help---
 		Can be defined to support multiple PCA9555 devices on board.
 
-config PCA9555_INT_DISABLE
-	bool "Disable PCA9555 Interrupt Support"
-	default y
+config PCA9555_INT_ENABLE
+	bool "Enable PCA9555 Interrupt Support"
+	default n
+	select IOEXPANDER_INT_ENABLE
 	---help---
-		Disable driver interrupt functionality
+		Enable driver interrupt functionality
 
 endif # IOEXPANDER_PCA9555
+
+config IOEXPANDER_INT_ENABLE
+	bool
+	default y if PCA9555_INT_ENABLE
+	---help---
+		This is the global INT supported flag for io expanders
+
+config IOEXPANDER_MULTIPIN
+	bool "Support multi-pin access routines"
+	default n
+	---help---
+		This settings enable the definition of routines for
+		optimized simultaneous access to multiple pins.

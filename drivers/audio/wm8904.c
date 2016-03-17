@@ -3,7 +3,7 @@
  *
  * Audio device driver for Wolfson Microelectronics WM8904 Audio codec.
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author:  Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -59,10 +59,11 @@
 #include <queue.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/clock.h>
 #include <nuttx/wqueue.h>
-#include <nuttx/i2c.h>
+#include <nuttx/i2c/i2c_master.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/audio/i2s.h>
@@ -71,14 +72,6 @@
 #include <nuttx/math.h>
 
 #include "wm8904.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
 
 /****************************************************************************
  * Private Function Prototypes
@@ -133,7 +126,7 @@ static int      wm8904_start(FAR struct audio_lowerhalf_s *dev);
 #ifndef CONFIG_AUDIO_EXCLUDE_STOP
 #ifdef CONFIG_AUDIO_MULTI_SESSION
 static int      wm8904_stop(FAR struct audio_lowerhalf_s *dev,
-                  FAR void* session);
+                  FAR void *session);
 #else
 static int      wm8904_stop(FAR struct audio_lowerhalf_s *dev);
 #endif
@@ -141,9 +134,9 @@ static int      wm8904_stop(FAR struct audio_lowerhalf_s *dev);
 #ifndef CONFIG_AUDIO_EXCLUDE_PAUSE_RESUME
 #ifdef CONFIG_AUDIO_MULTI_SESSION
 static int      wm8904_pause(FAR struct audio_lowerhalf_s *dev,
-                  FAR void* session);
+                  FAR void *session);
 static int      wm8904_resume(FAR struct audio_lowerhalf_s *dev,
-                  FAR void* session);
+                  FAR void *session);
 #else
 static int      wm8904_pause(FAR struct audio_lowerhalf_s *dev);
 static int      wm8904_resume(FAR struct audio_lowerhalf_s *dev);
@@ -232,7 +225,10 @@ const uint8_t g_sysclk_scaleb1[WM8904_BCLK_MAXDIV+1] =
 #ifndef CONFIG_WM8904_CLKDEBUG
 static
 #endif
-const uint8_t g_fllratio[WM8904_NFLLRATIO] = {1, 2, 4, 8, 16};
+const uint8_t g_fllratio[WM8904_NFLLRATIO] =
+{
+  1, 2, 4, 8, 16
+};
 
 /****************************************************************************
  * Private Functions
@@ -263,17 +259,19 @@ uint16_t wm8904_readreg(FAR struct wm8904_dev_s *priv, uint8_t regaddr)
 
       /* Set up to write the address */
 
-      msg[0].addr   = priv->lower->address;
-      msg[0].flags  = 0;
-      msg[0].buffer = &regaddr;
-      msg[0].length = 1;
+      msg[0].frequency = priv->lower->frequency;
+      msg[0].addr      = priv->lower->address;
+      msg[0].flags     = 0;
+      msg[0].buffer    = &regaddr;
+      msg[0].length    = 1;
 
       /* Followed by the read data */
 
-      msg[1].addr   = priv->lower->address;
-      msg[1].flags  = I2C_M_READ;
-      msg[1].buffer = data;
-      msg[1].length = 2;
+      msg[1].frequency = priv->lower->frequency;
+      msg[1].addr      = priv->lower->address;
+      msg[1].flags     = I2C_M_READ;
+      msg[1].buffer    = data;
+      msg[1].length    = 2;
 
       /* Read the register data.  The returned value is the number messages
        * completed.
@@ -287,10 +285,10 @@ uint16_t wm8904_readreg(FAR struct wm8904_dev_s *priv, uint8_t regaddr)
 
           auddbg("WARNING: I2C_TRANSFER failed: %d ... Resetting\n", ret);
 
-          ret = up_i2creset(priv->i2c);
+          ret = I2C_RESET(priv->i2c);
           if (ret < 0)
             {
-              auddbg("ERROR: up_i2creset failed: %d\n", ret);
+              auddbg("ERROR: I2C_RESET failed: %d\n", ret);
               break;
             }
 #else
@@ -329,7 +327,14 @@ uint16_t wm8904_readreg(FAR struct wm8904_dev_s *priv, uint8_t regaddr)
 static void wm8904_writereg(FAR struct wm8904_dev_s *priv, uint8_t regaddr,
                             uint16_t regval)
 {
+  struct i2c_config_s config;
   int retries;
+
+  /* Setup up the I2C configuration */
+
+  config.frequency = priv->lower->frequency;
+  config.address   = priv->lower->address;
+  config.addrlen   = 7;
 
   /* Try up to three times to read the register */
 
@@ -348,18 +353,18 @@ static void wm8904_writereg(FAR struct wm8904_dev_s *priv, uint8_t regaddr,
        * completed.
        */
 
-      ret = I2C_WRITE(priv->i2c, data, 3);
+      ret = i2c_write(priv->i2c, &config, data, 3);
       if (ret < 0)
         {
 #ifdef CONFIG_I2C_RESET
           /* Perhaps the I2C bus is locked up?  Try to shake the bus free */
 
-          auddbg("WARNING: I2C_TRANSFER failed: %d ... Resetting\n", ret);
+          auddbg("WARNING: i2c_write failed: %d ... Resetting\n", ret);
 
-          ret = up_i2creset(priv->i2c);
+          ret = I2C_RESET(priv->i2c);
           if (ret < 0)
             {
-              auddbg("ERROR: up_i2creset failed: %d\n", ret);
+              auddbg("ERROR: I2C_RESET failed: %d\n", ret);
               break;
             }
 #else
@@ -726,7 +731,7 @@ static void wm8904_setbitrate(FAR struct wm8904_dev_s *priv)
   minfout = WM8904_FVCO_MAX / WM8904_MAXOUTDIV;
   divndx = 0;
 
-  for (;;)
+  for (; ; )
     {
       /* Calculate the new value of Fout that we would need to provide
        * with this SYSCLK divider in place.
@@ -1312,7 +1317,7 @@ static void  wm8904_senddone(FAR struct i2s_dev_s *i2s,
    * against that possibility.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Add the completed buffer to the end of our doneq.  We do not yet
    * decrement the reference count.
@@ -1329,7 +1334,7 @@ static void  wm8904_senddone(FAR struct i2s_dev_s *i2s,
   /* REVISIT:  This can be overwritten */
 
   priv->result = result;
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   /* Now send a message to the worker thread, informing it that there are
    * buffers in the done queue that need to be cleaned up.
@@ -1364,13 +1369,13 @@ static void wm8904_returnbuffers(FAR struct wm8904_dev_s *priv)
    * use interrupt controls to protect against that possibility.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   while (dq_peek(&priv->doneq) != NULL)
     {
       /* Take the next buffer from the queue of completed transfers */
 
       apb = (FAR struct ap_buffer_s *)dq_remfirst(&priv->doneq);
-      irqrestore(flags);
+      leave_critical_section(flags);
 
       audvdbg("Returning: apb=%p curbyte=%d nbytes=%d flags=%04x\n",
               apb, apb->curbyte, apb->nbytes, apb->flags);
@@ -1405,10 +1410,10 @@ static void wm8904_returnbuffers(FAR struct wm8904_dev_s *priv)
 #else
       priv->dev.upper(priv->dev.priv, AUDIO_CALLBACK_DEQUEUE, apb, OK);
 #endif
-      flags = irqsave();
+      flags = enter_critical_section();
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -1456,9 +1461,9 @@ static int wm8904_sendbuffer(FAR struct wm8904_dev_s *priv)
        * to avoid a possible race condition.
        */
 
-      flags = irqsave();
+      flags = enter_critical_section();
       priv->inflight++;
-      irqrestore(flags);
+      leave_critical_section(flags);
 
       /* Send the entire audio buffer via I2S.  What is a reasonable timeout
        * to use?  This would depend on the bit rate and size of the buffer.
@@ -1585,7 +1590,7 @@ static int wm8904_start(FAR struct audio_lowerhalf_s *dev)
 
 #ifndef CONFIG_AUDIO_EXCLUDE_STOP
 #ifdef CONFIG_AUDIO_MULTI_SESSION
-static int wm8904_stop(FAR struct audio_lowerhalf_s *dev, FAR void* session)
+static int wm8904_stop(FAR struct audio_lowerhalf_s *dev, FAR void *session)
 #else
 static int wm8904_stop(FAR struct audio_lowerhalf_s *dev)
 #endif
@@ -1622,7 +1627,7 @@ static int wm8904_stop(FAR struct audio_lowerhalf_s *dev)
 
 #ifndef CONFIG_AUDIO_EXCLUDE_PAUSE_RESUME
 #ifdef CONFIG_AUDIO_MULTI_SESSION
-static int wm8904_pause(FAR struct audio_lowerhalf_s *dev, FAR void* session)
+static int wm8904_pause(FAR struct audio_lowerhalf_s *dev, FAR void *session)
 #else
 static int wm8904_pause(FAR struct audio_lowerhalf_s *dev)
 #endif
@@ -1651,7 +1656,7 @@ static int wm8904_pause(FAR struct audio_lowerhalf_s *dev)
 
 #ifndef CONFIG_AUDIO_EXCLUDE_PAUSE_RESUME
 #ifdef CONFIG_AUDIO_MULTI_SESSION
-static int wm8904_resume(FAR struct audio_lowerhalf_s *dev, FAR void* session)
+static int wm8904_resume(FAR struct audio_lowerhalf_s *dev, FAR void *session)
 #else
 static int wm8904_resume(FAR struct audio_lowerhalf_s *dev)
 #endif
@@ -2461,7 +2466,7 @@ static void wm8904_hw_reset(FAR struct wm8904_dev_s *priv)
  ****************************************************************************/
 
 FAR struct audio_lowerhalf_s *
-  wm8904_initialize(FAR struct i2c_dev_s *i2c, FAR struct i2s_dev_s *i2s,
+  wm8904_initialize(FAR struct i2c_master_s *i2c, FAR struct i2s_dev_s *i2s,
                     FAR const struct wm8904_lower_s *lower)
 {
   FAR struct wm8904_dev_s *priv;
@@ -2488,12 +2493,6 @@ FAR struct audio_lowerhalf_s *
       sem_init(&priv->pendsem, 0, 1);
       dq_init(&priv->pendq);
       dq_init(&priv->doneq);
-
-      /* Initialize I2C */
-
-      auddbg("address=%02x frequency=%d\n", lower->address, lower->frequency);
-      I2C_SETFREQUENCY(i2c, lower->frequency);
-      I2C_SETADDRESS(i2c, lower->address, 7);
 
       /* Software reset.  This puts all WM8904 registers back in their
        * default state.

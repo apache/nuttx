@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/sched/sched_setparam.c
  *
- *   Copyright (C) 2007, 2009, 2013, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2013, 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,6 +44,7 @@
 #include <assert.h>
 #include <errno.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 
 #include "clock/clock.h"
@@ -106,7 +107,7 @@ int sched_setparam(pid_t pid, FAR const struct sched_param *param)
 
   /* Check if the task to reprioritize is the calling task */
 
-  rtcb = (FAR struct tcb_s*)g_readytorun.head;
+  rtcb = this_task();
   if (pid == 0 || pid == rtcb->pid)
     {
       tcb = rtcb;
@@ -179,7 +180,7 @@ int sched_setparam(pid_t pid, FAR const struct sched_param *param)
 
       /* Stop/reset current sporadic scheduling */
 
-      flags = irqsave();
+      flags = enter_critical_section();
       ret = sched_sporadic_reset(tcb);
       if (ret >= 0)
         {
@@ -205,7 +206,7 @@ int sched_setparam(pid_t pid, FAR const struct sched_param *param)
 
       /* Restore interrupts and handler errors */
 
-      irqrestore(flags);
+      leave_critical_section(flags);
       if (ret < 0)
         {
           errcode = -ret;

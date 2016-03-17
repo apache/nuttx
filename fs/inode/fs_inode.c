@@ -73,13 +73,13 @@ struct inode_sem_s
 };
 
 /****************************************************************************
- * Private Variables
+ * Private Data
  ****************************************************************************/
 
 static struct inode_sem_s g_inode_sem;
 
 /****************************************************************************
- * Public Variables
+ * Public Data
  ****************************************************************************/
 
 FAR struct inode *g_root_inode = NULL;
@@ -111,7 +111,7 @@ static int _inode_compare(FAR const char *fname,
       return -1;
     }
 
-  for (;;)
+  for (; ; )
     {
       /* At end of node name? */
 
@@ -133,7 +133,7 @@ static int _inode_compare(FAR const char *fname,
             }
         }
 
-      /* At end of find name?*/
+      /* At end of find name? */
 
       else if (!*fname || *fname == '/')
         {
@@ -421,19 +421,19 @@ FAR const char *inode_nextname(FAR const char *name)
    * path segment.
    */
 
-   while (*name && *name != '/')
-     {
-       name++;
-     }
+  while (*name && *name != '/')
+    {
+      name++;
+    }
 
-   /* If we found the '/' delimiter, then the path segment we want begins at
-    * the next character (which might also be the NUL terminator).
-    */
+  /* If we found the '/' delimiter, then the path segment we want begins at
+   * the next character (which might also be the NUL terminator).
+   */
 
-   if (*name)
-     {
-       name++;
-     }
+  if (*name)
+    {
+      name++;
+    }
 
-   return name;
+  return name;
 }

@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/stdio.h
  *
- *   Copyright (C) 2007-2009, 2011, 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011, 2013-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -58,7 +58,13 @@
 
 #define FILENAME_MAX _POSIX_NAME_MAX
 
-/* File system error values *************************************************/
+/* The size of the I/O buffers */
+
+#if CONFIG_STDIO_BUFFER_SIZE > 0
+#  define BUFSIZ CONFIG_STDIO_BUFFER_SIZE
+#endif
+
+/* File system error values */
 
 #define EOF        (-1)
 
@@ -94,7 +100,7 @@
 
 #define L_tmpnam CONFIG_LIBC_MAX_TMPFILE
 
-/* the maximum number of unique temporary file names that can be generated */
+/* The maximum number of unique temporary file names that can be generated */
 
 #define TMP_MAX 56800235584ull
 
@@ -107,7 +113,7 @@
 typedef struct file_struct FILE;
 
 /****************************************************************************
- * Public Variables
+ * Public Data
  ****************************************************************************/
 
 #undef EXTERN
@@ -137,34 +143,40 @@ int    fgetc(FAR FILE *stream);
 int    fgetpos(FAR FILE *stream, FAR fpos_t *pos);
 char  *fgets(FAR char *s, int n, FAR FILE *stream);
 FAR FILE *fopen(FAR const char *path, FAR const char *type);
-int    fprintf(FAR FILE *stream, FAR const char *format, ...);
+int    fprintf(FAR FILE *stream, FAR const IPTR char *format, ...);
 int    fputc(int c, FAR FILE *stream);
 int    fputs(FAR const char *s, FAR FILE *stream);
 size_t fread(FAR void *ptr, size_t size, size_t n_items, FAR FILE *stream);
+FAR FILE *freopen(FAR const char *path, FAR const char *mode,
+         FAR FILE *stream);
 int    fseek(FAR FILE *stream, long int offset, int whence);
 int    fsetpos(FAR FILE *stream, FAR fpos_t *pos);
 long   ftell(FAR FILE *stream);
-size_t fwrite(FAR const void *ptr, size_t size, size_t n_items, FAR FILE *stream);
+size_t fwrite(FAR const void *ptr, size_t size, size_t n_items,
+         FAR FILE *stream);
 FAR char *gets(FAR char *s);
 FAR char *gets_s(FAR char *s, rsize_t n);
 int    ungetc(int c, FAR FILE *stream);
 
 /* Operations on the stdout stream, buffers, paths, and the whole printf-family */
 
-int    printf(FAR const char *format, ...);
+int    printf(FAR const IPTR char *format, ...);
 int    puts(FAR const char *s);
 int    rename(FAR const char *oldpath, FAR const char *newpath);
-int    sprintf(FAR char *buf, FAR const char *format, ...);
-int    asprintf (FAR char **ptr, FAR const char *fmt, ...);
-int    snprintf(FAR char *buf, size_t size, FAR const char *format, ...);
+int    sprintf(FAR char *buf, FAR const IPTR char *format, ...);
+int    asprintf (FAR char **ptr, FAR const IPTR char *fmt, ...);
+int    snprintf(FAR char *buf, size_t size,
+         FAR const IPTR char *format, ...);
 int    sscanf(FAR const char *buf, FAR const char *fmt, ...);
 void   perror(FAR const char *s);
 
-int    vprintf(FAR const char *format, va_list ap);
-int    vfprintf(FAR FILE *stream, const char *format, va_list ap);
-int    vsprintf(FAR char *buf, const char *format, va_list ap);
-int    avsprintf(FAR char **ptr, const char *fmt, va_list ap);
-int    vsnprintf(FAR char *buf, size_t size, const char *format, va_list ap);
+int    vprintf(FAR const IPTR FAR char *format, va_list ap);
+int    vfprintf(FAR FILE *stream, FAR const IPTR char *format,
+         va_list ap);
+int    vsprintf(FAR char *buf, FAR const IPTR char *format, va_list ap);
+int    vasprintf(FAR char **ptr, FAR const IPTR char *fmt, va_list ap);
+int    vsnprintf(FAR char *buf, size_t size, FAR const IPTR char *format,
+         va_list ap);
 int    vsscanf(FAR const char *buf, FAR const char *s, va_list ap);
 
 /* Operations on file descriptors including:
@@ -175,8 +187,8 @@ int    vsscanf(FAR const char *buf, FAR const char *s, va_list ap);
  */
 
 FAR FILE *fdopen(int fd, FAR const char *type);
-int    dprintf(int fd, FAR const char *fmt, ...);
-int    vdprintf(int fd, FAR const char *fmt, va_list ap);
+int    dprintf(int fd, FAR const IPTR char *fmt, ...);
+int    vdprintf(int fd, FAR const IPTR char *fmt, va_list ap);
 
 /* Operations on paths */
 

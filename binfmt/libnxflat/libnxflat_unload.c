@@ -79,14 +79,14 @@
  *
  ****************************************************************************/
 
-int nxflat_unload(struct nxflat_loadinfo_s *loadinfo)
+int nxflat_unload(FAR struct nxflat_loadinfo_s *loadinfo)
 {
   /* Release the memory segments */
   /* Release the I-Space mmap'ed file */
 
   if (loadinfo->ispace)
     {
-      munmap((void*)loadinfo->ispace, loadinfo->isize);
+      munmap((FAR void *)loadinfo->ispace, loadinfo->isize);
       loadinfo->ispace = 0;
     }
 

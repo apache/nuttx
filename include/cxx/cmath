@@ -51,7 +51,7 @@
 
 namespace std
 {
-#if CONFIG_HAVE_FLOAT
+#ifdef CONFIG_HAVE_FLOAT
   using ::acosf;
   using ::asinf;
   using ::atanf;
@@ -78,7 +78,7 @@ namespace std
   using ::tanhf;
 #endif
 
-#if CONFIG_HAVE_DOUBLE
+#ifdef CONFIG_HAVE_DOUBLE
   using ::acos;
   using ::asin;
   using ::atan;

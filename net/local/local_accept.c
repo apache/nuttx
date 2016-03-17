@@ -133,7 +133,7 @@ int psock_local_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
 
   /* Loop as necessary if we have to wait for a connection */
 
-  for (;;)
+  for (; ; )
     {
       /* Are there pending connections.  Remove the client from the
        * head of the waiting list.

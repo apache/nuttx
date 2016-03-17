@@ -51,7 +51,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/i2c.h>
+#include <nuttx/i2c/i2c_master.h>
 
 #if defined(CONFIG_INPUT) && defined(CONFIG_INPUT_TSC2007)
 
@@ -68,10 +68,6 @@
 /* Check for some required settings.  This can save the user a lot of time
  * in getting the right configuration.
  */
-
-#ifndef CONFIG_I2C_TRANSFER
-#  error "CONFIG_I2C_TRANSFER is required in the I2C configuration"
-#endif
 
 #ifdef CONFIG_DISABLE_SIGNALS
 #  error "Signals are required.  CONFIG_DISABLE_SIGNALS must not be selected."
@@ -160,7 +156,7 @@ extern "C"
  *
  ****************************************************************************/
 
-int tsc2007_register(FAR struct i2c_dev_s *dev,
+int tsc2007_register(FAR struct i2c_master_s *dev,
                      FAR struct tsc2007_config_s *config, int minor);
 
 #undef EXTERN

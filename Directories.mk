@@ -1,7 +1,7 @@
 ############################################################################
 # Directories.mk
 #
-#   Copyright (C) 2007-2012, 2014 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2007-2012, 2014, 2016 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -122,6 +122,12 @@ ifeq ($(CONFIG_AUDIO),y)
 NONFSDIRS += audio
 else
 OTHERDIRS += audio
+endif
+
+ifeq ($(CONFIG_DRIVERS_WIRELESS),y)
+NONFSDIRS += wireless
+else
+OTHERDIRS += wireless
 endif
 
 # CLEANDIRS are the directories that will clean in.  These are

@@ -41,12 +41,18 @@ ifneq ($(CONFIG_NSOCKET_DESCRIPTORS),0)
 
 # Socket descriptor support
 
-CSRCS += fs_close.c fs_read.c fs_write.c fs_ioctl.c fs_poll.c fs_select.c
+CSRCS += fs_close.c fs_read.c fs_write.c fs_ioctl.c
 
 # Support for network access using streams
 
 ifneq ($(CONFIG_NFILE_STREAMS),0)
 CSRCS += fs_fdopen.c
+endif
+
+# Support for poll() and select() (which derives from poll()
+
+ifneq ($(CONFIG_DISABLE_POLL),y)
+CSRCS += fs_poll.c fs_select.c
 endif
 
 # Support for sendfile()

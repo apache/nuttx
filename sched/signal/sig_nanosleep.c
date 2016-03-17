@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/signal/sig/nanosleep.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,29 +45,9 @@
 #include <errno.h>
 
 #include <nuttx/clock.h>
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 
 #include "clock/clock.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Type Declarations
- ****************************************************************************/
-
-/****************************************************************************
- * Global Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -124,7 +104,7 @@
 int nanosleep(FAR const struct timespec *rqtp, FAR struct timespec *rmtp)
 {
   irqstate_t flags;
-  uint32_t starttick;
+  systime_t starttick;
   sigset_t set;
   struct siginfo value;
   int errval;
@@ -143,7 +123,7 @@ int nanosleep(FAR const struct timespec *rqtp, FAR struct timespec *rmtp)
    * after the wait.
    */
 
-  flags     = irqsave();
+  flags     = enter_critical_section();
   starttick = clock_systimer();
 
   /* Set up for the sleep.  Using the empty set means that we are not
@@ -173,7 +153,7 @@ int nanosleep(FAR const struct timespec *rqtp, FAR struct timespec *rmtp)
     {
       /* The timeout "error" is the normal, successful result */
 
-      irqrestore(flags);
+      leave_critical_section(flags);
       return OK;
     }
 
@@ -183,8 +163,8 @@ int nanosleep(FAR const struct timespec *rqtp, FAR struct timespec *rmtp)
 
   if (rmtp)
     {
-      uint32_t elapsed;
-      uint32_t remaining;
+      systime_t elapsed;
+      systime_t remaining;
       int ticks;
 
       /* First get the number of clock ticks that we were requested to
@@ -214,7 +194,7 @@ int nanosleep(FAR const struct timespec *rqtp, FAR struct timespec *rmtp)
       (void)clock_ticks2time((int)remaining, rmtp);
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 
 errout:
   set_errno(errval);
