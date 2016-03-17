@@ -42,6 +42,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/sched_note.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/loop.h>
 #include <nuttx/fs/ioctl.h>
@@ -136,17 +137,22 @@ void up_initialize(void)
   /* Register devices */
 
 #if defined(CONFIG_DEV_NULL)
-  devnull_register();   /* Standard /dev/null */
+  devnull_register();       /* Standard /dev/null */
 #endif
 
 #if defined(CONFIG_DEV_ZERO)
-  devzero_register();   /* Standard /dev/zero */
+  devzero_register();       /* Standard /dev/zero */
 #endif
 
 #if defined(CONFIG_DEV_LOOP)
-  loop_register();      /* Standard /dev/loop */
+  loop_register();          /* Standard /dev/loop */
 #endif
 #endif /* CONFIG_NFILE_DESCRIPTORS */
+
+#if defined(CONFIG_SCHED_INSTRUMENTATION_BUFFER) && \
+    defined(CONFIG_DRIVER_NOTE)
+  note_register();          /* Non-standard /dev/note */
+#endif
 
 #if defined(USE_DEVCONSOLE)
   /* Start the sumulated UART device */
