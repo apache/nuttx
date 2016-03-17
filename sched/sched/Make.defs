@@ -82,6 +82,10 @@ else
 CSRCS += sched_processtimer.c
 endif
 
+ifeq ($(CONFIG_SCHED_INSTRUMENTATION_BUFFER),y)
+CSRCS += sched_note.c
+endif
+
 # Include sched build support
 
 DEPPATH += --dep-path sched

@@ -42,6 +42,7 @@
 #include <sys/types.h>
 
 #include <nuttx/spinlock.h>
+#include <nuttx/sched_note.h>
 #include <arch/irq.h>
 
 #include "sched/sched.h"

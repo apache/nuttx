@@ -53,6 +53,7 @@
 #include  <nuttx/mm/mm.h>
 #include  <nuttx/mm/shm.h>
 #include  <nuttx/kmalloc.h>
+#include  <nuttx/sched_note.h>
 #include  <nuttx/init.h>
 
 #include  "sched/sched.h"
@@ -708,8 +709,13 @@ void os_start(void)
   lib_initialize();
 
   /* IDLE Group Initialization **********************************************/
+  /* Announce that the CPU0 IDLE task has started */
+
+  sched_note_start(&g_idletcb[0].cmn);
 
 #ifdef CONFIG_SMP
+  /* Initialize the IDLE group for the IDLE task of each CPU */
+
   for (cpu = 0; cpu < CONFIG_SMP_NCPUS; cpu++)
 #endif
     {

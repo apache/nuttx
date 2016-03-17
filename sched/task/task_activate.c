@@ -44,6 +44,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/sched_note.h>
 
 /****************************************************************************
  * Public Functions

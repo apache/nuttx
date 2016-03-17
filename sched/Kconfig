@@ -370,10 +370,10 @@ config SPORADIC_INSTRUMENTATION
 		scheduler behavior. If enabled, then the board-specific logic must
 		provide the following functions:
 
-		void arch_sporadic_start(FAR struct tcb_s *tcb);
-		void arch_sporadic_lowpriority(FAR struct tcb_s *tcb);
-		void arch_sporadic_suspend(FAR struct tcb_s *tcb);
-		void arch_sporadic_resume(FAR struct tcb_s *tcb);
+			void arch_sporadic_start(FAR struct tcb_s *tcb);
+			void arch_sporadic_lowpriority(FAR struct tcb_s *tcb);
+			void arch_sporadic_suspend(FAR struct tcb_s *tcb);
+			void arch_sporadic_resume(FAR struct tcb_s *tcb);
 
 endif # SCHED_SPORADIC
 
@@ -605,7 +605,15 @@ config SCHED_INSTRUMENTATION
 			void sched_note_stop(FAR struct tcb_s *tcb);
 			void sched_note_switch(FAR struct tcb_s *pFromTcb, FAR struct tcb_s *pToTcb);
 
+		NOTE: These are internal OS interfaces and are called at at very
+		critical locations in the OS. There is very little that can be
+		done in these interfaces.  For example, normal devices may not be
+		used; syslog output cannot be performed.
+
+		An option is to use SCHED_INSTRUMENTATION_BUFFER below.
+
 if SCHED_INSTRUMENTATION
+
 config SCHED_INSTRUMENTATION_PREEMPTION
 	bool "Preemption monitor hooks"
 	default n
@@ -625,6 +633,38 @@ config SCHED_INSTRUMENTATION_CSECTION
 		specific logic must provide this additional logic.
 
 			void sched_note_csection(FAR struct tcb_s *tcb, bool state);
+
+config SCHED_INSTRUMENTATION_BUFFER
+	bool "Buffer instrumentation data in memory"
+	default n
+	---help---
+		If this option is selected, then in-memory buffering logic is
+		enabled to capature scheduler instrumentation data.  This has
+		the advantage that (1) the platform logic does not have to provide
+		the sched_note_* interaces described for the previous settings.
+		Instead, the buffering logic catches all of these.  It encodes
+		timestamps the scheduler note and adds the note to an in-memory,
+		circular buffer.  And (2) buffering the scheduler instrumentation
+		data (versus performing some output operation) minimizes the impact
+		of the instrumentation on the behavior of the system.
+
+		If the in-memory buffer becomes full, then older notes are
+		overwritten by newer notes.  The following interface is provided:
+
+			ssize_t sched_note_get(FAR uint8_t *buffer, size_t buflen);
+
+		Platform specific information must call this function and dispose
+		of it quickly so that overwriting of the tail of the circular buffer
+		does not occur.  See include/nuttx/sched_note.h for additional
+		information.
+
+config SCHED_NOTE_BUFSIZE
+	int "Instrumentation buffer size"
+	default 2048
+	depends on SCHED_INSTRUMENTATION_BUFFER
+	---help---
+		The size of the in-memory, circular instrumentation buffer (in
+		bytes).
 
 endif # SCHED_INSTRUMENTATION
 endmenu # Performance Monitoring

@@ -44,6 +44,8 @@
 #include <queue.h>
 #include <assert.h>
 
+#include <nuttx/sched_note.h>
+
 #include "sched/sched.h"
 
 /****************************************************************************

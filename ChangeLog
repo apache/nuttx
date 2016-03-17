@@ -11562,4 +11562,7 @@
 	* sched/tls and include/nuttx/tls.h:  Basic definitions needed to support
 	  thread local storage (TLS).  Not used anywhere yet (and may not be used
 	  in the near future either) (2016-03-10).
+	* sched/sched_note.c and include/nuttx/sched_note.c:  Add a configuration
+	  option to buffer RTOS instrumentation data in an in-memory buffer
+	  (2016-03-17).
 

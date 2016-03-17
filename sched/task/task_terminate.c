@@ -46,6 +46,7 @@
 
 #include <nuttx/sched.h>
 #include <nuttx/irq.h>
+#include <nuttx/sched_note.h>
 
 #include "sched/sched.h"
 #ifndef CONFIG_DISABLE_SIGNALS
