@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/sh/src/common/up_initialize.c
  *
- *   Copyright (C) 2008-2010, 2012-2013, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2010, 2012-2013, 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,6 +43,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
+#include <nuttx/sched_note.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/loop.h>
 #include <nuttx/net/loopback.h>
@@ -63,10 +64,6 @@
 #undef CONFIG_ARCH_CALIBRATION
 
 /****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -84,11 +81,13 @@
 static void up_calibratedelay(void)
 {
   int i;
+
   slldbg("Beginning 100s delay\n");
   for (i = 0; i < 100; i++)
     {
       up_mdelay(1000);
     }
+
   slldbg("End 100s delay\n");
 }
 #else
@@ -152,6 +151,11 @@ void up_initialize(void)
   loop_register();      /* Standard /dev/loop */
 #endif
 #endif /* CONFIG_NFILE_DESCRIPTORS */
+
+#if defined(CONFIG_SCHED_INSTRUMENTATION_BUFFER) && \
+    defined(CONFIG_DRIVER_NOTE)
+  note_register();      /* Non-standard /dev/note */
+#endif
 
   /* Initialize the serial device driver */
 

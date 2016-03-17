@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/z16/src/common/up_initialize.c
  *
- *   Copyright (C) 2008-2009, 2011-2013, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011-2013, 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,6 +43,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
+#include <nuttx/sched_note.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/loop.h>
 #include <nuttx/net/loopback.h>
@@ -57,10 +58,6 @@
 #include "up_internal.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Data
  ****************************************************************************/
 
@@ -70,14 +67,6 @@
  */
 
 volatile FAR chipreg_t *g_current_regs;
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
@@ -97,11 +86,13 @@ volatile FAR chipreg_t *g_current_regs;
 static void up_calibratedelay(void)
 {
   int i;
+
   lldbg("Beginning 100s delay\n");
   for (i = 0; i < 100; i++)
     {
       up_mdelay(1000);
     }
+
   lldbg("End 100s delay\n");
 }
 #else
@@ -171,6 +162,11 @@ void up_initialize(void)
   loop_register();      /* Standard /dev/loop */
 #endif
 #endif /* CONFIG_NFILE_DESCRIPTORS */
+
+#if defined(CONFIG_SCHED_INSTRUMENTATION_BUFFER) && \
+    defined(CONFIG_DRIVER_NOTE)
+  note_register();      /* Non-standard /dev/note */
+#endif
 
   /* Initialize the serial device driver */
 
