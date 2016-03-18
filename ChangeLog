@@ -11567,4 +11567,11 @@
 	  (2016-03-17).
 	* drivers/syslog/note_driver.c:  Add a character driver that will allow
 	  an appliation to read buffered scheduler instrumentation data (2016-03-17).
+	* arch/arm/src/samv7/sam_usbdevhs.c:  The USB drivr has had some issue that
+	  would occasionally cause loss of packets.  Back last December, a fix was
+	  put in for this but the fix apparently worsens the problem; now causing
+	  hangs.  The basic problem is that the number of busy banks (NBUSYBKS)
+	  status is not real time but is delayed.  This was fixed; now when the DMA
+	  completes and NBUSYBKS > 0, the NBUSYBK is interrupt is enabled and the
+	  operations are deferred until NBUSYBKS is truly zero (2016-03-17).
 
