@@ -53,22 +53,26 @@ choice
 config WINDOWS_NATIVE
 	bool "Windows Native"
 	---help---
-		Build natively in a CMD.exe environment with Windows style paths (like C:\cgywin\home)
+		Build natively in a CMD.exe environment with Windows style paths
+		(like C:\cgywin\home)
 
 config WINDOWS_CYGWIN
 	bool "Cygwin"
 	---help---
-		Build natively in a Cygwin environment with POSIX style paths (like /cygdrive/c/cgywin/home)
+		Build natively in a Cygwin environment with POSIX style paths (like
+		/cygdrive/c/cgywin/home)
 
 config WINDOWS_MSYS
 	bool "MSYS"
 	---help---
-		Build natively in a Cygwin environment with POSIX style paths (like /cygdrive/c/cgywin/home)
+		Build natively in a Cygwin environment with POSIX style paths (like
+		/cygdrive/c/cgywin/home)
 
 config WINDOWS_OTHER
 	bool "Windows POSIX-like environment"
 	---help---
-		Build natively in another POSIX-like environment.  Additional support may be necessary
+		Build natively in another POSIX-like environment.  Additional
+		support may be necessary
 
 endchoice
 
@@ -98,11 +102,11 @@ config APPS_DIR
 	default "..\apps" if WINDOWS_NATIVE
 	---help---
 		Identifies the directory that builds the
-		application to link with NuttX.  Default: ../apps This symbol must be assigned
-		to the path to the application build directory *relative* to
-		the NuttX top build directory. If you had an application
-		directory and the NuttX directory each in separate directory
-		trees like this:
+		application to link with NuttX.  Default: ../apps This symbol must
+		be assigned to the path to the application build directory
+		*relative* to the NuttX top build directory. If you had an
+		application directory and the NuttX directory each in separate
+		directory trees like this:
 
 			build
 			|-nuttx
@@ -157,7 +161,10 @@ config BUILD_PROTECTED
 	select LIB_SYSCALL
 	select BUILD_2PASS
 	---help---
-		Builds NuttX and selected applications as two "blobs":  A protected, privileged kernel blob and a separate unprivileged, user blob.  This require sue of the two pass build with each blob being build on each pass.
+		Builds NuttX and selected applications as two "blobs":  A protected,
+		privileged kernel blob and a separate unprivileged, user blob.  This
+		requires use of the two pass build with each blob being build on
+		each pass.
 
 		NOTE:  This build configuration requires that the platform support
 		a memory protection unit (MPU).  Support, however, may not be
@@ -250,16 +257,18 @@ config INTELHEX_BINARY
 	default n
 	---help---
 		Create the nuttx.hex in the Intel HEX binary format that is
-		used with many different loaders. This option will use the GNU objcopy program
-		and should not be selected if you are not using the GNU toolchain.
+		used with many different loaders. This option will use the GNU objcopy
+		program and should not be selected if you are not using the GNU
+		toolchain.
 
 config MOTOROLA_SREC
 	bool "Motorola S-Record binary format"
 	default n
 	---help---
 		Create the nuttx.srec in the Motorola S-Record binary format that is
-		used with many different loaders. This option will use the GNU objcopy program
-		and should not be selected if you are not using the GNU toolchain.
+		used with many different loaders. This option will use the GNU objcopy
+		program and should not be selected if you are not using the GNU
+		toolchain.
 
 config RAW_BINARY
 	bool "Raw binary format"
@@ -748,7 +757,8 @@ config DEBUG_OPTLEVEL
 	default "-O2"
 	depends on DEBUG_CUSTOMOPT
 	---help---
-		This string represents the custom optimization level that will be used if DEBUG_CUSTOMOPT.
+		This string represents the custom optimization level that will be
+		used if DEBUG_CUSTOMOPT.
 
 endmenu # Build Setup
 
