@@ -487,10 +487,10 @@ static inline int imx_gpio_configperiph(gpio_pinset_t pinset)
 
   /* Configure pin as a peripheral */
 
-  index = ((ioset & GPIO_PADMUX_MASK) >> GPIO_PADMUX_SHIFT);
+  index = ((pinset & GPIO_PADMUX_MASK) >> GPIO_PADMUX_SHIFT);
   regaddr = IMX_PADMUX_ADDRESS(index);
 
-  value = ((ioset & GPIO_ALT_MASK) >> GPIO_ALT_SHIFT);
+  value = ((pinset & GPIO_ALT_MASK) >> GPIO_ALT_SHIFT);
   regval = (value << PADMUX_MUXMODE_SHIFT);
 
   putreg32(regval, regaddr);
