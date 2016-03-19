@@ -334,14 +334,18 @@ config CDCACM_IFNOBASE
 
 config CDCACM_STRBASE
 	int "Offset the CDC/ACM string numbers"
-	default 0
+	default 4
 	---help---
 		If the CDC driver is part of a composite device, then this may need to
 		be defined to offset the CDC/ACM string numbers so that they are
 		unique and contiguous.  When used with the Mass Storage driver, the
-		correct value for this offset is zero (this value actuallly only needs
+		correct value for this offset is four (this value actuallly only needs
 		to be defined if names are provided for the Notification interface,
 		config CDCACM_NOTIFSTR, or the data interface, CDCACM_DATAIFSTR).
+
+		The default of four accounts for strings IDs 0-3 used by the composite
+		descriptors.  Any additional CDC/ACM string descripts must then begin
+		with string index four.
 
 endif
 
@@ -538,7 +542,7 @@ config USBMSC_IFNOBASE
 
 config USBMSC_STRBASE
 	int "Offset the mass storage string numbers"
-	default 2
+	default 4
 	depends on USBMSC_COMPOSITE
 	---help---
 		If the CDC driver is part of a composite device, then this may need to
@@ -546,6 +550,10 @@ config USBMSC_STRBASE
 		unique and contiguous.  When used with the CDC/ACM driver, the
 		correct value for this offset is four (or perhaps 5 or 6, depending
 		on if CDCACM_NOTIFSTR or CDCACM_DATAIFSTR are defined).
+
+		String IDS 0-3 are used by the composite descriptors.  This amount
+		may need to be incremented to account for string IDs used by other
+		members of the composite.
 
 config USBMSC_EP0MAXPACKET
 	int "Max packet size for endpoint 0"
