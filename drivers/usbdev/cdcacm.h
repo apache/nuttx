@@ -61,7 +61,7 @@
 #endif
 
 #if defined(CONFIG_CDCACM_COMPOSITE) && !defined(CONFIG_CDCACM_STRBASE)
-#  define CONFIG_CDCACM_STRBASE (4)
+#  define CONFIG_CDCACM_STRBASE    (0)
 #endif
 
 #if defined(CONFIG_CDCACM_COMPOSITE) && !defined(CONFIG_COMPOSITE_IAD)
@@ -82,11 +82,11 @@
 
 #ifndef CONFIG_CDCACM_COMPOSITE
 #  undef CONFIG_CDCACM_IFNOBASE
-#  define CONFIG_CDCACM_IFNOBASE 0
+#  define CONFIG_CDCACM_IFNOBASE   (0)
 #endif
 
 #ifndef CONFIG_CDCACM_IFNOBASE
-#  define CONFIG_CDCACM_IFNOBASE 0
+#  define CONFIG_CDCACM_IFNOBASE   (0)
 #endif
 
 /* Descriptors **************************************************************/
@@ -142,9 +142,9 @@
 #  define CDCACM_CONFIGSTRID       (4)
 
 #  define CDCACM_LASTBASESTRID     (4)
-#  undef CONFIG_CDCACM_STRBASE
-#  define CONFIG_CDCACM_STRBASE    (0)
+#  define CDCACM_STRBASE           (0)
 #else
+#  define CDCACM_STRBASE           CONFIG_CDCACM_STRBASE
 #  define CDCACM_LASTBASESTRID     CONFIG_CDCACM_STRBASE
 #endif
 
@@ -163,7 +163,7 @@
 #endif
 
 #define CDCACM_LASTSTRID           CDCACM_DATAIFSTRID
-#define CDCACM_NSTRIDS             (CDCACM_LASTSTRID - CONFIG_CDCACM_STRBASE)
+#define CDCACM_NSTRIDS             (CDCACM_LASTSTRID - CDCACM_STRBASE)
 
 /* Configuration descriptor size */
 
@@ -214,13 +214,13 @@
 
 /* Endpoint configuration ****************************************************/
 
-#define CDCACM_EPINTIN_ADDR        (USB_DIR_IN|CONFIG_CDCACM_EPINTIN)
+#define CDCACM_EPINTIN_ADDR        (USB_DIR_IN | CONFIG_CDCACM_EPINTIN)
 #define CDCACM_EPINTIN_ATTR        (USB_EP_ATTR_XFER_INT)
 
 #define CDCACM_EPOUTBULK_ADDR      (CONFIG_CDCACM_EPBULKOUT)
 #define CDCACM_EPOUTBULK_ATTR      (USB_EP_ATTR_XFER_BULK)
 
-#define CDCACM_EPINBULK_ADDR       (USB_DIR_IN|CONFIG_CDCACM_EPBULKIN)
+#define CDCACM_EPINBULK_ADDR       (USB_DIR_IN | CONFIG_CDCACM_EPBULKIN)
 #define CDCACM_EPINBULK_ATTR       (USB_EP_ATTR_XFER_BULK)
 
 /* Device driver definitions ************************************************/

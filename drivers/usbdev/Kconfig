@@ -88,23 +88,24 @@ config ARCH_USBDEV_STALLQUEUE
 		will enable some hokey and inefficient delay logic to workaround
 		the lack of queuing.
 
-config USBDEV_TRACE
+menuconfig USBDEV_TRACE
 	bool "Enable USB tracing for debug"
 	default n
 	---help---
 		Enables USB tracing for debug
 
+if USBDEV_TRACE
+
 config USBDEV_TRACE_NRECORDS
 	int "Number of trace entries to remember"
 	default 128
-	depends on USBDEV_TRACE
 	---help---
 		Number of trace entries to remember
 
 config USBDEV_TRACE_STRINGS
 	bool "Decode device controller events"
 	default n
-	depends on USBDEV_TRACE || DEBUG_USB
+	depends on DEBUG_USB
 	---help---
 		If USBDEV_TRACE_STRINGS is defined, then the USB device controller
 		driver must provide arrays of strings to support decoding of device-
@@ -119,15 +120,16 @@ config USBDEV_TRACE_STRINGS
 config USBDEV_TRACE_INITIALIDSET
 	bool "Initial enable bits"
 	default 0
-	depends on USBDEV_TRACE
 	---help---
 		This is the set of initial USB features that are enabled at boot
 		time.  See the event ID class bit definitions in
 		include/nuttx/usbdev_trace.h.
 
+endif # USBDEV_TRACE
+
 comment "USB Device Class Driver Options"
 
-config USBDEV_COMPOSITE
+menuconfig USBDEV_COMPOSITE
 	bool "USB composite device support"
 	default n
 	---help---
@@ -287,12 +289,12 @@ config PL2303_PRODUCTSTR
 	default "PL2303 Emulation"
 endif
 
-config CDCACM
-	bool "USB Modem (CDC ACM) support"
+menuconfig CDCACM
+	bool "USB Modem (CDC/ACM) support"
 	default n
 	select SERIAL_REMOVABLE
 	---help---
-		Enables USB Modem (CDC ACM) support
+		Enables USB Modem (CDC/ACM) support
 
 if CDCACM
 
@@ -311,7 +313,7 @@ config CDCACM_IFLOWCONTROL
 	---help---
 		Enable CDC/ACM RTS flow control
 
-config CDCACM_COMPOSITE
+menuconfig CDCACM_COMPOSITE
 	bool "CDC/ACM composite support"
 	default n
 	depends on USBDEV_COMPOSITE
@@ -319,10 +321,11 @@ config CDCACM_COMPOSITE
 		Configure the CDC serial driver as part of a composite driver
 		(only if USBDEV_COMPOSITE is also defined)
 
+if CDCACM_COMPOSITE
+
 config CDCACM_IFNOBASE
 	int "Offset the CDC/ACM interface numbers"
 	default 0
-	depends on CDCACM_COMPOSITE
 	---help---
 		If the CDC driver is part of a composite device, then this may need to
 		be defined to offset the CDC/ACM interface numbers so that they are
@@ -332,14 +335,15 @@ config CDCACM_IFNOBASE
 config CDCACM_STRBASE
 	int "Offset the CDC/ACM string numbers"
 	default 0
-	depends on CDCACM_COMPOSITE
 	---help---
 		If the CDC driver is part of a composite device, then this may need to
 		be defined to offset the CDC/ACM string numbers so that they are
 		unique and contiguous.  When used with the Mass Storage driver, the
-		correct value for this offset is four (this value actuallly only needs
+		correct value for this offset is zero (this value actuallly only needs
 		to be defined if names are provided for the Notification interface,
 		config CDCACM_NOTIFSTR, or the data interface, CDCACM_DATAIFSTR).
+
+endif
 
 config CDCACM_EP0MAXPACKET
 	int "Endpoint 0 max packet size"
@@ -484,9 +488,9 @@ config CDCACM_PRODUCTSTR
 	string "Product string"
 	default "CDC/ACM Serial"
 
-endif
+endif # CDCACM
 
-config USBMSC
+menuconfig USBMSC
 	bool "USB Mass storage class device"
 	default n
 	select FS_READABLE
