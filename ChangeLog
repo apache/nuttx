@@ -11575,6 +11575,6 @@
 	  completes and NBUSYBKS > 0, the NBUSYBK is interrupt is enabled and the
 	  operations are deferred until NBUSYBKS is truly zero (2016-03-17).
 	* net/tcp/tcp_timer.c:  Fix some logic when there are multiple network
-	  interfaces.  In this case, TCP timeout events can really only bei
+	  interfaces.  In this case, TCP timeout events can really only being
 	  processed when the poll from the correct device is received (2016-03-20).
 
