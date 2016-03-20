@@ -288,12 +288,6 @@ config NET_STATISTICS
 
 source "net/route/Kconfig"
 
-config NET_MULTICAST
-	bool "Multi-cast Tx support"
-	default n
-	---help---
-		Outgoing multi-cast address support
-
 config NET_HOSTNAME
 	string "Host name for current machine"
 	default ""
