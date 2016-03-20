@@ -311,6 +311,22 @@
 
 #warning "Missing Logic"
 
+/* DMA stream/channel configuration */
+
+#if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
+#  define DAC_DMA_CONTROL_WORD (DMA_SCR_MSIZE_16BITS | \
+                                DMA_SCR_PSIZE_16BITS | \
+                                DMA_SCR_MINC | \
+                                DMA_SCR_CIRC | \
+                                DMA_SCR_DIR_M2P)
+#else
+#  define DAC_DMA_CONTROL_WORD (DMA_CCR_MSIZE_16BITS | \
+                                DMA_CCR_PSIZE_16BITS | \
+                                DMA_CCR_MINC | \
+                                DMA_CCR_CIRC | \
+                                DMA_CCR_DIR)
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -349,14 +365,15 @@ struct stm32_chan_s
 /* DAC Register access */
 
 #ifdef HAVE_DMA
-static uint32_t tim_getreg(struct stm32_chan_s *chan, int offset);
-static void tim_putreg(struct stm32_chan_s *chan, int offset, uint32_t value);
+static uint32_t tim_getreg(FAR struct stm32_chan_s *chan, int offset);
+static void     tim_putreg(FAR struct stm32_chan_s *chan, int offset,
+                           uint32_t value);
 #endif
 
 /* Interrupt handler */
 
 #if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
-static int  dac_interrupt(int irq, void *context);
+static int  dac_interrupt(int irq, FAR void *context);
 #endif
 
 /* DAC methods */
@@ -371,9 +388,9 @@ static int  dac_ioctl(FAR struct dac_dev_s *dev, int cmd, unsigned long arg);
 /* Initialization */
 
 #ifdef HAVE_DMA
-static int  dac_timinit(struct stm32_chan_s *chan);
+static int  dac_timinit(FAR struct stm32_chan_s *chan);
 #endif
-static int  dac_chaninit(struct stm32_chan_s *chan);
+static int  dac_chaninit(FAR struct stm32_chan_s *chan);
 static int  dac_blockinit(void);
 
 /****************************************************************************
@@ -422,7 +439,7 @@ static struct stm32_chan_s g_dac2priv =
   .dmachan    = DAC2_DMA_CHAN,
   .timer      = CONFIG_STM32_DAC2_TIMER,
   .tsel       = DAC2_TSEL_VALUE,
-  .tbase      = DAC2_TIMER_BASE
+  .tbase      = DAC2_TIMER_BASE,
   .tfrequency = CONFIG_STM32_DAC2_TIMER_FREQUENCY,
 #endif
 };
@@ -456,12 +473,13 @@ static struct stm32_dac_s g_dacblock;
  *
  ****************************************************************************/
 
-static inline void stm32_dac_modify_cr(FAR struct stm32_chan_s *priv,
+static inline void stm32_dac_modify_cr(FAR struct stm32_chan_s *chan,
                                        uint32_t clearbits, uint32_t setbits)
 {
-  uint32_t cr = getreg32(STM32_DAC_CR);
-  modifyreg32(STM32_DAC_CR, clearbits << (priv->intf*16), setbits << (priv->intf*16));
-  uint32_t cr1 = getreg32(STM32_DAC_CR);
+  uint32_t shift;
+
+  shift = chan->intf * 16;
+  modifyreg32(STM32_DAC_CR, clearbits << shift, setbits << shift);
 }
 
 /****************************************************************************
@@ -480,7 +498,7 @@ static inline void stm32_dac_modify_cr(FAR struct stm32_chan_s *priv,
  ****************************************************************************/
 
 #ifdef HAVE_DMA
-static uint32_t tim_getreg(struct stm32_chan_s *chan, int offset)
+static uint32_t tim_getreg(FAR struct stm32_chan_s *chan, int offset)
 {
   return getreg32(chan->tbase + offset);
 }
@@ -502,7 +520,8 @@ static uint32_t tim_getreg(struct stm32_chan_s *chan, int offset)
  ****************************************************************************/
 
 #ifdef HAVE_DMA
-static void tim_putreg(struct stm32_chan_s *chan, int offset, uint32_t value)
+static void tim_putreg(FAR struct stm32_chan_s *chan, int offset,
+                       uint32_t value)
 {
   putreg32(value, chan->tbase + offset);
 }
@@ -517,8 +536,8 @@ static void tim_putreg(struct stm32_chan_s *chan, int offset, uint32_t value)
  * Input Parameters:
  *   priv - Driver state instance
  *   offset - The timer register offset
- *   clear_bits - Bits in the control register to be cleared
- *   set_bits - Bits in the control register to be set
+ *   clearbits - Bits in the control register to be cleared
+ *   setbits - Bits in the control register to be set
  *
  * Returned Value:
  *   None
@@ -526,10 +545,10 @@ static void tim_putreg(struct stm32_chan_s *chan, int offset, uint32_t value)
  ****************************************************************************/
 
 #ifdef HAVE_DMA
-static void tim_modifyreg(struct stm32_chan_s *chan, int offset,
-                          uint32_t clear_bits, uint32_t set_bits)
+static void tim_modifyreg(FAR struct stm32_chan_s *chan, int offset,
+                          uint32_t clearbits, uint32_t setbits)
 {
-  modifyreg32(chan->tbase + offset, clear_bits, set_bits);
+  modifyreg32(chan->tbase + offset, clearbits, setbits);
 }
 #endif
 
@@ -548,7 +567,7 @@ static void tim_modifyreg(struct stm32_chan_s *chan, int offset,
  ****************************************************************************/
 
 #if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
-static int dac_interrupt(int irq, void *context)
+static int dac_interrupt(int irq, FAR void *context)
 {
 #warning "Missing logic"
   return OK;
@@ -574,7 +593,6 @@ static int dac_interrupt(int irq, void *context)
 static void dac_reset(FAR struct dac_dev_s *dev)
 {
   irqstate_t flags;
-  uint32_t regval;
 
   /* Reset only the selected DAC channel; the other DAC channel must remain
    * functional.
@@ -605,8 +623,8 @@ static void dac_reset(FAR struct dac_dev_s *dev)
 
 static int dac_setup(FAR struct dac_dev_s *dev)
 {
-# warning "Missing logic"
-  return -ENOSYS;
+#warning "Missing logic"
+  return OK;
 }
 
 /****************************************************************************
@@ -625,7 +643,7 @@ static int dac_setup(FAR struct dac_dev_s *dev)
 
 static void dac_shutdown(FAR struct dac_dev_s *dev)
 {
-# warning "Missing logic"
+#warning "Missing logic"
 }
 
 /****************************************************************************
@@ -643,7 +661,7 @@ static void dac_shutdown(FAR struct dac_dev_s *dev)
 
 static void dac_txint(FAR struct dac_dev_s *dev, bool enable)
 {
-# warning "Missing logic"
+#warning "Missing logic"
 }
 
 /****************************************************************************
@@ -659,7 +677,7 @@ static void dac_txint(FAR struct dac_dev_s *dev, bool enable)
  *
  ****************************************************************************/
 
-static void dac_dmatxcallback(DMA_HANDLE handle, uint8_t isr, void *arg)
+static void dac_dmatxcallback(DMA_HANDLE handle, uint8_t isr, FAR void *arg)
 {
 }
 
@@ -678,7 +696,7 @@ static void dac_dmatxcallback(DMA_HANDLE handle, uint8_t isr, void *arg)
 
 static int dac_send(FAR struct dac_dev_s *dev, FAR struct dac_msg_s *msg)
 {
-  struct stm32_chan_s * chan = dev->ad_priv;
+  FAR struct stm32_chan_s *chan = dev->ad_priv;
 
   /* Enable DAC Channel */
 
@@ -703,15 +721,8 @@ static int dac_send(FAR struct dac_dev_s *dev, FAR struct dac_msg_s *msg)
        * - Peripheral Burst: single
        */
 
-      uint32_t ccr =
-          DMA_CCR_MSIZE_16BITS | /* Memory size */
-          DMA_CCR_PSIZE_16BITS | /* Peripheral size */
-          DMA_CCR_MINC |         /* Memory increment mode */
-          DMA_CCR_CIRC |         /* Circular buffer */
-          DMA_CCR_DIR;           /* Read from memory */
-
       stm32_dmasetup(chan->dma, chan->dro, (uint32_t)chan->dmabuffer,
-                     CONFIG_STM32_DAC_DMA_BUFFER_SIZE, ccr);
+                     CONFIG_STM32_DAC_DMA_BUFFER_SIZE, DAC_DMA_CONTROL_WORD);
 
       /* Enable DMA */
 
@@ -760,7 +771,7 @@ static int dac_send(FAR struct dac_dev_s *dev, FAR struct dac_msg_s *msg)
  *
  ****************************************************************************/
 
-static int  dac_ioctl(FAR struct dac_dev_s *dev, int cmd, unsigned long arg)
+static int dac_ioctl(FAR struct dac_dev_s *dev, int cmd, unsigned long arg)
 {
   return -ENOTTY;
 }
@@ -781,10 +792,12 @@ static int  dac_ioctl(FAR struct dac_dev_s *dev, int cmd, unsigned long arg)
  ****************************************************************************/
 
 #ifdef HAVE_DMA
-static int dac_timinit(struct stm32_chan_s *chan)
+static int dac_timinit(FAR struct stm32_chan_s *chan)
 {
+  uint32_t pclk;
   uint32_t prescaler;
-  uint32_t numerator;
+  uint32_t timclk;
+  uint32_t reload;
   uint32_t regaddr;
   uint32_t setbits;
 
@@ -796,46 +809,46 @@ static int dac_timinit(struct stm32_chan_s *chan)
    * default) will be enabled
    */
 
-  numerator = 2 * STM32_TIM27_FREQUENCY;
-  regaddr   = STM32_RCC_APB1ENR;
+  pclk    = STM32_TIM27_FREQUENCY;
+  regaddr = STM32_RCC_APB1ENR;
 
   switch (chan->timer)
     {
 #ifdef NEED_TIM2
       case 2:
-        setbits  = RCC_APB1ENR_TIM2EN;
+        setbits = RCC_APB1ENR_TIM2EN;
         break;
 #endif
 #ifdef NEED_TIM3
       case 3:
-        setbits  = RCC_APB1ENR_TIM3EN;
+        setbits = RCC_APB1ENR_TIM3EN;
         break;
 #endif
 #ifdef NEED_TIM4
       case 4:
-        setbits  = RCC_APB1ENR_TIM4EN;
+        setbits = RCC_APB1ENR_TIM4EN;
         break;
 #endif
 #ifdef NEED_TIM5
       case 5:
-        setbits  = RCC_APB1ENR_TIM5EN;
+        setbits = RCC_APB1ENR_TIM5EN;
         break;
 #endif
 #ifdef NEED_TIM6
       case 6:
-        setbits  = RCC_APB1ENR_TIM6EN;
-        break;
-#endif
-#ifdef NEED_TIM8
-      case 8:
-        regaddr   = STM32_RCC_APB2ENR;
-        setbits   = RCC_APB2ENR_TIM8EN;
-        numerator = 2 * STM32_TIM18_FREQUENCY
+        setbits = RCC_APB1ENR_TIM6EN;
         break;
 #endif
 #ifdef NEED_TIM7
       case 7:
-        setbits  = RCC_APB1ENR_TIM7EN;
+        setbits = RCC_APB1ENR_TIM7EN;
+        break;
+#endif
+#ifdef NEED_TIM8
+      case 8:
+        regaddr = STM32_RCC_APB2ENR;
+        setbits = RCC_APB2ENR_TIM8EN;
+        pclk    = STM32_TIM18_FREQUENCY;
         break;
 #endif
       default:
@@ -847,31 +860,65 @@ static int dac_timinit(struct stm32_chan_s *chan)
 
   modifyreg32(regaddr, 0, setbits);
 
-  /* Calculate the pre-scaler value */
-
-  prescaler = numerator / chan->tfrequency;
-
-  /* We need to decrement value for '1', but only, if we are allowed to
-   * not to cause underflow. Check for overflow.
+  /* Calculate optimal values for the timer prescaler and for the timer reload
+   * register.  If 'frequency' is the desired frequency, then
+   *
+   *   reload = timclk / frequency
+   *   timclk = pclk / presc
+   *
+   * Or,
+   *
+   *   reload = pclk / presc / frequency
+   *
+   * There are many solutions to this this, but the best solution will be the
+   * one that has the largest reload value and the smallest prescaler value.
+   * That is the solution that should give us the most accuracy in the timer
+   * control.  Subject to:
+   *
+   *   0 <= presc  <= 65536
+   *   1 <= reload <= 65535
+   *
+   * So presc = pclk / 65535 / frequency would be optimal.
+   *
+   * Example:
+   *
+   *  pclk      = 42 MHz
+   *  frequency = 100 Hz
+   *
+   *  prescaler = 42,000,000 / 65,535 / 100
+   *            = 6.4 (or 7 -- taking the ceiling always)
+   *  timclk    = 42,000,000 / 7
+   *            = 6,000,000
+   *  reload    = 6,000,000 / 100
+   *            = 60,000
    */
 
-  if (prescaler > 0)
+  prescaler = (pclk / chan->tfrequency + 65534) / 65535;
+  if (prescaler < 1)
     {
-      prescaler--;
+      prescaler = 1;
+    }
+  else if (prescaler > 65536)
+    {
+      prescaler = 65536;
     }
 
-  if (prescaler > 0xffff)
+  timclk = pclk / prescaler;
+
+  reload = timclk / chan->tfrequency;
+  if (reload < 1)
     {
-      prescaler = 0xffff;
+      reload = 1;
+    }
+  else if (reload > 65535)
+    {
+      reload = 65535;
     }
 
-  /* Set prescaler */
+  /* Set the reload and prescaler values */
 
-  tim_putreg(chan, STM32_BTIM_PSC_OFFSET, 0);
-
-  /* Set period */
-
-  tim_putreg(chan, STM32_BTIM_ARR_OFFSET, prescaler);
+  tim_putreg(chan, STM32_BTIM_ARR_OFFSET, (uint16_t)reload);
+  tim_putreg(chan, STM32_BTIM_PSC_OFFSET, (uint16_t)(prescaler - 1));
 
   /* Count mode up, auto reload */
 
@@ -908,9 +955,11 @@ static int dac_timinit(struct stm32_chan_s *chan)
  *
  ****************************************************************************/
 
-static int dac_chaninit(struct stm32_chan_s *chan)
+static int dac_chaninit(FAR struct stm32_chan_s *chan)
 {
   int ret;
+  uint16_t clearbits;
+  uint16_t setbits;
 
   /* Is the selected channel already in-use? */
 
@@ -942,14 +991,16 @@ static int dac_chaninit(struct stm32_chan_s *chan)
 
   stm32_dac_modify_cr(chan, DAC_CR_EN, 0);
 
-  uint16_t clear =
-      DAC_CR_TSEL_MASK | DAC_CR_MAMP_MASK | DAC_CR_WAVE_MASK | DAC_CR_BOFF;
-  uint16_t set =
+  clearbits = DAC_CR_TSEL_MASK |
+              DAC_CR_MAMP_MASK |
+              DAC_CR_WAVE_MASK |
+              DAC_CR_BOFF;
+  setbits =
       chan->tsel |           /* Set trigger source (SW or timer TRGO event) */
       DAC_CR_MAMP_AMP1 |     /* Set waveform characteristics */
       DAC_CR_WAVE_DISABLED | /* Set no noise */
       DAC_CR_BOFF;           /* Enable output buffer */
-  stm32_dac_modify_cr(chan, clear, set);
+  stm32_dac_modify_cr(chan, clearbits, setbits);
 
 #ifdef HAVE_DMA
   /* Determine if DMA is supported by this channel */
@@ -977,7 +1028,6 @@ static int dac_chaninit(struct stm32_chan_s *chan)
           adbg("Failed to initialize the DMA timer: %d\n", ret);
           return ret;
         }
-
     }
 #endif
 
@@ -1089,7 +1139,7 @@ FAR struct dac_dev_s *stm32_dacinitialize(int intf)
   if (ret < 0)
     {
       adbg("Failed to initialize the DAC block: %d\n", ret);
-      errno = ret;
+      errno = -ret;
       return NULL;
     }
 
@@ -1100,7 +1150,7 @@ FAR struct dac_dev_s *stm32_dacinitialize(int intf)
   if (ret < 0)
     {
       adbg("Failed to initialize DAC channel %d: %d\n", intf, ret);
-      errno = ret;
+      errno = -ret;
       return NULL;
     }
 

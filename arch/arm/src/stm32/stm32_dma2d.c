@@ -1997,7 +1997,7 @@ FAR struct dma2d_layer_s *up_dma2dcreatelayer(fb_coord_t width,
 
   if (ret != OK)
     {
-      errno = ret;
+      errno = -ret;
       return NULL;
     }
 

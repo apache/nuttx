@@ -1090,7 +1090,7 @@ static int pwm_timer(FAR struct stm32_pwmtimer_s *priv,
 #endif
 
   /* Calculate optimal values for the timer prescaler and for the timer reload
-   * register.  If' frequency' is the desired frequency, then
+   * register.  If 'frequency' is the desired frequency, then
    *
    *   reload = timclk / frequency
    *   timclk = pclk / presc
@@ -1118,7 +1118,7 @@ static int pwm_timer(FAR struct stm32_pwmtimer_s *priv,
    *            = 6.4 (or 7 -- taking the ceiling always)
    *  timclk    = 42,000,000 / 7
    *            = 6,000,000
-   *  reload    = 7,000,000 / 100
+   *  reload    = 6,000,000 / 100
    *            = 60,000
    */
 

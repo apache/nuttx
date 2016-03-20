@@ -479,12 +479,10 @@
 #define ATIM_CR2_CCDS             (1 << 3)  /* Bit 3:  Capture/Compare DMA Selection */
 #define ATIM_CR2_MMS_SHIFT        (4)       /* Bits 6-4: Master Mode Selection */
 #define ATIM_CR2_MMS_MASK         (7 << ATIM_CR2_MMS_SHIFT)
-#ifdef CONFIG_STM32_STM32F30XX
-#  define ATIM_CR2_MMS_RESET      (0 << ATIM_CR2_MMS_SHIFT) /* 000: Reset - TIMx_EGR UG bit is TRG9 */
+#  define ATIM_CR2_MMS_RESET      (0 << ATIM_CR2_MMS_SHIFT) /* 000: Reset - TIMx_EGR UG bit is TRGO */
 #  define ATIM_CR2_MMS_ENABLE     (1 << ATIM_CR2_MMS_SHIFT) /* 001: Enable - CNT_EN is TRGO */
-#  define ATIM_CR2_MMS_UPDATE     (2 << ATIM_CR2_MMS_SHIFT) /* 010: Update event is TRGH0*/
+#  define ATIM_CR2_MMS_UPDATE     (2 << ATIM_CR2_MMS_SHIFT) /* 010: Update event is TRGO */
 #  define ATIM_CR2_MMS_COMPP      (3 << ATIM_CR2_MMS_SHIFT) /* 010: Compare Pulse - CC1IF flag */
-#endif
 #  define ATIM_CR2_MMS_OC1REF     (4 << ATIM_CR2_MMS_SHIFT) /* 100: Compare OC1REF is TRGO */
 #  define ATIM_CR2_MMS_OC2REF     (5 << ATIM_CR2_MMS_SHIFT) /* 101: Compare OC2REF is TRGO */
 #  define ATIM_CR2_MMS_OC3REF     (6 << ATIM_CR2_MMS_SHIFT) /* 110: Compare OC3REF is TRGO */
@@ -966,14 +964,14 @@
 #define GTIM_CR2_CCDS             (1 << 3)  /* Bit 3: Capture/Compare DMA Selection (TIM2-5,1,&16 only) */
 #define GTIM_CR2_MMS_SHIFT        (4)       /* Bits 6-4: Master Mode Selection (not TIM16) */
 #define GTIM_CR2_MMS_MASK         (7 << GTIM_CR2_MMS_SHIFT)
-#  define GTIM_CR2_RESET          (0 << GTIM_CR2_MMS_SHIFT) /* 000: Reset */
-#  define GTIM_CR2_ENAB           (1 << GTIM_CR2_MMS_SHIFT) /* 001: Enable */
-#  define GTIM_CR2_UPDT           (2 << GTIM_CR2_MMS_SHIFT) /* 010: Update */
-#  define GTIM_CR2_CMPP           (3 << GTIM_CR2_MMS_SHIFT) /* 011: Compare Pulse */
-#  define GTIM_CR2_CMP1           (4 << GTIM_CR2_MMS_SHIFT) /* 100: Compare - OC1REF signal is used as trigger output (TRGO) */
-#  define GTIM_CR2_CMP2           (5 << GTIM_CR2_MMS_SHIFT) /* 101: Compare - OC2REF signal is used as trigger output (TRGO) */
-#  define GTIM_CR2_CMP3           (6 << GTIM_CR2_MMS_SHIFT) /* 110: Compare - OC3REF signal is used as trigger output (TRGO, TIM2-5 and TIM15 only) */
-#  define GTIM_CR2_CMP4           (7 << GTIM_CR2_MMS_SHIFT) /* 111: Compare - OC4REF signal is used as trigger output (TRGO, TIM2-5 and TIM15 only) */
+#  define GTIM_CR2_MMS_RESET      (0 << GTIM_CR2_MMS_SHIFT) /* 000: Reset */
+#  define GTIM_CR2_MMS_ENABLE     (1 << GTIM_CR2_MMS_SHIFT) /* 001: Enable */
+#  define GTIM_CR2_MMS_UPDATE     (2 << GTIM_CR2_MMS_SHIFT) /* 010: Update */
+#  define GTIM_CR2_MMS_COMPP      (3 << GTIM_CR2_MMS_SHIFT) /* 011: Compare Pulse */
+#  define GTIM_CR2_MMS_OC1REF     (4 << GTIM_CR2_MMS_SHIFT) /* 100: Compare - OC1REF signal is used as trigger output (TRGO) */
+#  define GTIM_CR2_MMS_OC2REF     (5 << GTIM_CR2_MMS_SHIFT) /* 101: Compare - OC2REF signal is used as trigger output (TRGO) */
+#  define GTIM_CR2_MMS_OC3REF     (6 << GTIM_CR2_MMS_SHIFT) /* 110: Compare - OC3REF signal is used as trigger output (TRGO, TIM2-5 and TIM15 only) */
+#  define GTIM_CR2_MMS_OC4REF     (7 << GTIM_CR2_MMS_SHIFT) /* 111: Compare - OC4REF signal is used as trigger output (TRGO, TIM2-5 and TIM15 only) */
 #define GTIM_CR2_TI1S             (1 << 7)  /* Bit 7: TI1 Selection (not TIM16) */
 #define GTIM_CR2_OIS1             (1 << 8)  /* Bit 8: COutput Idle state 1 (OC1 output) (TIM15-17 only) */
 #define GTIM_CR2_OIS1N            (1 << 9)  /* Bit 9: Output Idle state 1 (OC1N output) (TIM15-17 only) */
