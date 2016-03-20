@@ -716,7 +716,7 @@ config NET_HASH
 	---help---
 		Enable receipt of near-perfect match frames.
 
-config NET_MULTICAST
+config LPC17_MULTICAST
 	bool "Multicast"
 	default y if NET_IGMP
 	default n if !NET_IGMP

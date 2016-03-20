@@ -114,8 +114,8 @@
 
 /* If IGMP is enabled, then accept multi-cast frames. */
 
-#if defined(CONFIG_NET_IGMP) && !defined(CONFIG_NET_MULTICAST)
-#  define CONFIG_NET_MULTICAST 1
+#if defined(CONFIG_NET_IGMP) && !defined(CONFIG_LPC17_MULTICAST)
+#  define CONFIG_LPC17_MULTICAST 1
 #endif
 
 /* If the user did not specify a priority for Ethernet interrupts, set the
@@ -1781,7 +1781,7 @@ static int lpc17_ifup(struct net_driver_s *dev)
    */
 
   regval = ETH_RXFLCTRL_PERFEN | ETH_RXFLCTRL_BCASTEN;
-#ifdef CONFIG_NET_MULTICAST
+#ifdef CONFIG_LPC17_MULTICAST
   regval |= (ETH_RXFLCTRL_MCASTEN | ETH_RXFLCTRL_UCASTEN);
 #endif
 #ifdef CONFIG_NET_HASH

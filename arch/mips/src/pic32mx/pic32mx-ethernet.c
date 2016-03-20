@@ -110,8 +110,8 @@
 
 /* If IGMP is enabled, then accept multi-cast frames. */
 
-#if defined(CONFIG_NET_IGMP) && !defined(CONFIG_NET_MULTICAST)
-#  define CONFIG_NET_MULTICAST 1
+#if defined(CONFIG_NET_IGMP) && !defined(CONFIG_PIC32MX_MULTICAST)
+#  define CONFIG_PIC32MX_MULTICAST 1
 #endif
 
 /* Use defaults if the number of discriptors is not provided */
@@ -2109,7 +2109,7 @@ static int pic32mx_ifup(struct net_driver_s *dev)
    */
 
   regval  = ETH_RXFC_BCEN | ETH_RXFC_UCEN | ETH_RXFC_PMMODE_DISABLED;
-#ifdef CONFIG_NET_MULTICAST
+#ifdef CONFIG_PIC32MX_MULTICAST
   regval |= ETH_RXFC_MCEN;
 #endif
   pic32mx_putreg(regval, PIC32MX_ETH_RXFC);

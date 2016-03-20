@@ -411,7 +411,7 @@ config NET_HASH
 	---help---
 		Enable receipt of near-perfect match frames.
 
-config NET_MULTICAST
+config PIC32MZ_MULTICAST
 	bool "Multicast"
 	default y if NET_IGMP
 	depends on PIC32MZ_ETHERNET
