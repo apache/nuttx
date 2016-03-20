@@ -39,6 +39,9 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+#include <arch/stm32l4/chip.h>
+
 #include "stm32l4_pwr.h"
 #include "stm32l4_flash.h"
 
@@ -178,27 +181,27 @@ static inline void rcc_enableahb2(void)
 
   /* Enable GPIOA, GPIOB, .... GPIOI */
 
-#if STM32L4_NGPIO > 0
+#if STM32L4_NPORTS > 0
   regval |= (RCC_AHB2ENR_GPIOAEN
-#if STM32L4_NGPIO > 16
+#if STM32L4_NPORTS > 16
              | RCC_AHB2ENR_GPIOBEN
 #endif
-#if STM32L4_NGPIO > 32
+#if STM32L4_NPORTS > 32
              | RCC_AHB2ENR_GPIOCEN
 #endif
-#if STM32L4_NGPIO > 48
+#if STM32L4_NPORTS > 48
              | RCC_AHB2ENR_GPIODEN
 #endif
-#if STM32L4_NGPIO > 64
+#if STM32L4_NPORTS > 64
              | RCC_AHB2ENR_GPIOEEN
 #endif
-#if STM32L4_NGPIO > 80
+#if STM32L4_NPORTS > 80
              | RCC_AHB2ENR_GPIOFEN
 #endif
-#if STM32L4_NGPIO > 96
+#if STM32L4_NPORTS > 96
              | RCC_AHB2ENR_GPIOGEN
 #endif
-#if STM32L4_NGPIO > 112
+#if STM32L4_NPORTS > 112
              | RCC_AHB2ENR_GPIOHEN
 #endif
              );

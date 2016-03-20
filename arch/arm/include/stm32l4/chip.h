@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/include/stm32l4/chip.h
  *
- *   Copyright (C) 2015 Sebastien Lorquet. All rights reserved.
+ *   Copyright (C) 2016 Sebastien Lorquet. All rights reserved.
  *   Author: Sebastien Lorquet <sebastien@lorquet.fr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -87,7 +87,7 @@
 #  define STM32L4_NSAI                     2   /* SAI1-2 */
 #  define STM32L4_NSDMMC                   1   /* SDMMC interface */
 #  define STM32L4_NDMA                     2   /* DMA1-2 */
-#  define STM32L4_NGPIO                    8   /* 11 GPIO ports, GPIOA-H */
+#  define STM32L4_NPORTS                   8   /* 8 GPIO ports, GPIOA-H */
 #  define STM32L4_NADC                     3   /* 12-bit ADC1-3, 24 channels *except V series) */
 #  define STM32L4_NDAC                     2   /* 12-bit DAC1-2 */
 #  define STM32L4_NCRC                     1   /* CRC */

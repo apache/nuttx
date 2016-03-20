@@ -50,6 +50,7 @@
 #endif
 
 #include <nuttx/irq.h>
+#include <arch/stm32l4/chip.h>
 
 #include "chip.h"
 
@@ -255,7 +256,7 @@ extern "C"
 
 /* Base addresses for each GPIO block */
 
-EXTERN const uint32_t g_gpiobase[STM32L4_NGPIO_PORTS];
+EXTERN const uint32_t g_gpiobase[STM32L4_NPORTS];
 
 /************************************************************************************
  * Public Function Prototypes

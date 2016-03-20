@@ -48,6 +48,7 @@
 #include <debug.h>
 
 #include <arch/irq.h>
+#include <arch/stm32l4/chip.h>
 
 #include "up_arch.h"
 
@@ -59,42 +60,34 @@
 #endif
 
 /****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
  * Public Data
  ****************************************************************************/
 /* Base addresses for each GPIO block */
 
-const uint32_t g_gpiobase[STM32L4_NGPIO_PORTS] =
+const uint32_t g_gpiobase[STM32L4_NPORTS] =
 {
-#if STM32L4_NGPIO_PORTS > 0
+#if STM32L4_NPORTS > 0
   STM32L4_GPIOA_BASE,
 #endif
-#if STM32L4_NGPIO_PORTS > 1
+#if STM32L4_NPORTS > 1
   STM32L4_GPIOB_BASE,
 #endif
-#if STM32L4_NGPIO_PORTS > 2
+#if STM32L4_NPORTS > 2
   STM32L4_GPIOC_BASE,
 #endif
-#if STM32L4_NGPIO_PORTS > 3
+#if STM32L4_NPORTS > 3
   STM32L4_GPIOD_BASE,
 #endif
-#if STM32L4_NGPIO_PORTS > 4
+#if STM32L4_NPORTS > 4
   STM32L4_GPIOE_BASE,
 #endif
-#if STM32L4_NGPIO_PORTS > 5
+#if STM32L4_NPORTS > 5
   STM32L4_GPIOF_BASE,
 #endif
-#if STM32L4_NGPIO_PORTS > 6
+#if STM32L4_NPORTS > 6
   STM32L4_GPIOG_BASE,
 #endif
-#if STM32L4_NGPIO_PORTS > 7
+#if STM32L4_NPORTS > 7
   STM32L4_GPIOH_BASE,
 #endif
 };
@@ -158,7 +151,7 @@ int stm32l4_configgpio(uint32_t cfgset)
   /* Verify that this hardware supports the select GPIO port */
 
   port = (cfgset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
-  if (port >= STM32L4_NGPIO_PORTS)
+  if (port >= STM32L4_NPORTS)
     {
       return -EINVAL;
     }
@@ -402,7 +395,7 @@ void stm32l4_gpiowrite(uint32_t pinset, bool value)
   unsigned int pin;
 
   port = (pinset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
-  if (port < STM32L4_NGPIO_PORTS)
+  if (port < STM32L4_NPORTS)
     {
       /* Get the port base address */
 
@@ -443,7 +436,7 @@ bool stm32l4_gpioread(uint32_t pinset)
   unsigned int pin;
 
   port = (pinset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
-  if (port < STM32L4_NGPIO_PORTS)
+  if (port < STM32L4_NPORTS)
     {
       /* Get the port base address */
 

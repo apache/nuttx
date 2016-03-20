@@ -66,6 +66,12 @@ void imx_clockconfig(void)
    * from SDRAM.  In this case, some bootloader logic has already configured
    * clocking and SDRAM.  We are pretty much committed to using things the
    * way that the bootloader has left them.
+   *
+   * Clocking will be configured at 792 MHz initially when started via
+   * U-Boot.  The Linux kernel will uses the CPU frequency scaling code
+   * which will switch the processor frequency between 400 MHz and 1GHz based
+   * on load and temperature.  For now, NuttX simply leaves the clocking at
+   * 792MHz.
    */
 
 #ifndef CONFIG_IMX6_BOOT_SDRAM
