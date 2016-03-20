@@ -131,18 +131,51 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
   if (conn->tcpstateflags == TCP_TIME_WAIT ||
       conn->tcpstateflags == TCP_FIN_WAIT_2)
     {
+      unsigned int newtimer;
+
       /* Increment the connection timer */
 
-      conn->timer += hsec;
-      if (conn->timer >= TCP_TIME_WAIT_TIMEOUT)
+      newtimer = (unsigned int)conn->timer + hsec;
+
+      /* Check if the timer exceeds the timeout value */
+
+      if (newtimer >= TCP_TIME_WAIT_TIMEOUT)
         {
-          conn->tcpstateflags = TCP_CLOSED;
+          /* Set the timer to the maximum value */
 
-          /* Notify upper layers about the timeout */
+          conn->timer = TCP_TIME_WAIT_TIMEOUT;
 
-          result = tcp_callback(dev, conn, TCP_TIMEDOUT);
+#ifdef CONFIG_NETDEV_MULTINIC
+          /* The TCP connection was established and, hence, should be bound
+           * to a device. Make sure that the polling device is the one that
+           * we are bound to.
+           *
+           * If not, then we will catch the timeout on the next poll from
+           * the correct device.
+           */
 
-          nllvdbg("TCP state: TCP_CLOSED\n");
+          DEBUGASSERT(conn->dev != NULL);
+          if (dev != conn->dev)
+            {
+              nllvdbg("TCP: TCP_CLOSED pending\n");
+            }
+          else
+#endif
+            {
+              conn->tcpstateflags = TCP_CLOSED;
+
+              /* Notify upper layers about the timeout */
+
+              result = tcp_callback(dev, conn, TCP_TIMEDOUT);
+
+              nllvdbg("TCP state: TCP_CLOSED\n");
+            }
+        }
+      else
+        {
+          /* No timeout. Just update the incremented timer */
+
+          conn->timer = newtimer;
         }
     }
   else if (conn->tcpstateflags != TCP_CLOSED)
@@ -168,6 +201,22 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
 
               conn->timer = 0;
 
+#ifdef CONFIG_NETDEV_MULTINIC
+              /* The TCP is connected and, hence, should be bound to a
+               * device. Make sure that the polling device is the one that
+               * we are bound to.
+               *
+               * If not, then we will catch the timeout on the next poll
+               * from the correct device.
+               */
+
+              DEBUGASSERT(conn->dev != NULL);
+              if (dev != conn->dev)
+                {
+                  nllvdbg("TCP: TCP_CLOSED pending\n");
+                  goto done;
+                }
+#endif
               /* Should we close the connection? */
 
               if (
@@ -250,7 +299,9 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
             }
         }
 
-      /* The connection does not have outstanding data */
+      /* The connection does not have outstanding data.  Check if the TCP
+       * connection has been established.
+       */
 
       else if ((conn->tcpstateflags & TCP_STATE_MASK) == TCP_ESTABLISHED)
         {
@@ -258,9 +309,20 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
            * application for new data.
            */
 
-          result = tcp_callback(dev, conn, TCP_POLL);
-          tcp_appsend(dev, conn, result);
-          goto done;
+#ifdef CONFIG_NETDEV_MULTINIC
+          /* The TCP connection is established and, hence, should be bound
+           * to a device. Make sure that the polling device is the one that
+           * we are bound to.
+           */
+
+          DEBUGASSERT(conn->dev != NULL);
+          if (dev == conn->dev)
+#endif
+            {
+              result = tcp_callback(dev, conn, TCP_POLL);
+              tcp_appsend(dev, conn, result);
+              goto done;
+            }
         }
     }
 

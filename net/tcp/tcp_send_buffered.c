@@ -339,7 +339,7 @@ static uint16_t psock_send_interrupt(FAR struct net_driver_s *dev,
 
 #ifdef CONFIG_NETDEV_MULTINIC
   /* The TCP socket is connected and, hence, should be bound to a device.
-   * Make sure that the polling device is the own that we are bound to.
+   * Make sure that the polling device is the one that we are bound to.
    */
 
   DEBUGASSERT(conn->dev != NULL);

@@ -152,7 +152,7 @@ static void tcp_input(FAR struct net_driver_s *dev, unsigned int iplen)
         }
     }
 
-  /* If we didn't find and active connection that expected the packet,
+  /* If we didn't find an active connection that expected the packet,
    * either (1) this packet is an old duplicate, or (2) this is a SYN packet
    * destined for a connection in LISTEN. If the SYN flag isn't set,
    * it is an old packet and we send a RST.
