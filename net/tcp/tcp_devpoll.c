@@ -2,7 +2,7 @@
  * net/tcp/tcp_devpoll.c
  * Driver poll for the availability of TCP TX data
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Adapted for NuttX from logic in uIP which also has a BSD-like license:
@@ -97,7 +97,7 @@ void tcp_poll(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn)
        */
 
       DEBUGASSERT(conn->dev != NULL);
-      if (dev != conn->dev)
+      if (dev == conn->dev)
 #endif
         {
           /* Set up for the callback.  We can't know in advance if the
