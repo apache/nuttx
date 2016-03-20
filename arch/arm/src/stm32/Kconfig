@@ -5367,7 +5367,7 @@ if STM32_DAC1_DMA
 
 config STM32_DAC1_TIMER
 	int "DAC1 timer"
-	range 2 7
+	range 2 8
 
 config STM32_DAC1_TIMER_FREQUENCY
 	int "DAC1 timer frequency"
@@ -5390,7 +5390,7 @@ if STM32_DAC2_DMA
 config STM32_DAC2_TIMER
 	int "DAC2 timer"
 	default 0
-	range 2 7
+	range 2 8
 
 config STM32_DAC2_TIMER_FREQUENCY
 	int "DAC2 timer frequency"
