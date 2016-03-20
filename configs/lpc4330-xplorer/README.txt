@@ -821,8 +821,6 @@ LPC4330-Xplorer Configuration Options
     CONFIG_NET_DUMPPACKET - Dump all received and transmitted packets.
       Also needs CONFIG_DEBUG.
     CONFIG_NET_HASH - Enable receipt of near-perfect match frames.
-    CONFIG_NET_MULTICAST - Enable receipt of multicast (and unicast) frames.
-      Automatically set if CONFIG_NET_IGMP is selected.
 
   LPC43xx USB Device Configuration
 

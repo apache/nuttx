@@ -202,7 +202,7 @@ CONFIG_LPC17_UART1=y
 # Serial driver options
 #
 # CONFIG_UART1_RINGINDICATOR is not set
-# CONFIG_NET_MULTICAST is not set
+# CONFIG_LPC17_MULTICAST is not set
 
 #
 # Architecture Options

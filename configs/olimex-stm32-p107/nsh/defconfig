@@ -141,7 +141,6 @@ CONFIG_ARMV7M_HAVE_STACKCHECK=y
 # CONFIG_SERIAL_TERMIOS is not set
 # CONFIG_CAN_EXTID is not set
 # CONFIG_CAN_LOOPBACK is not set
-# CONFIG_NET_MULTICAST is not set
 
 #
 # STM32 Configuration Options

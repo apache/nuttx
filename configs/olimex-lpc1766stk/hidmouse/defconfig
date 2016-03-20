@@ -210,7 +210,7 @@ CONFIG_LPC17_UART0=y
 #
 # Serial driver options
 #
-# CONFIG_NET_MULTICAST is not set
+# CONFIG_LPC17_MULTICAST is not set
 
 #
 # USB host driver options

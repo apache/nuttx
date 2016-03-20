@@ -235,7 +235,6 @@ CONFIG_TIVA_GPIOG_IRQS=y
 # CONFIG_TIVA_BADCRC is not set
 # CONFIG_TIVA_DUMPPACKET is not set
 # CONFIG_TIVA_BOARDMAC is not set
-# CONFIG_NET_MULTICAST is not set
 
 #
 # Architecture Options

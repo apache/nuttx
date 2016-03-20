@@ -81,7 +81,6 @@ CONFIG_ARCH_RGMP=y
 # CONFIG_ARCH_Z16 is not set
 # CONFIG_ARCH_Z80 is not set
 CONFIG_ARCH="rgmp"
-# CONFIG_NET_MULTICAST is not set
 
 #
 # RGMP Configuration Options

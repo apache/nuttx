@@ -220,7 +220,7 @@ CONFIG_NET_NTXDESC=6
 CONFIG_NET_NRXDESC=6
 # CONFIG_NET_WOL is not set
 # CONFIG_NET_HASH is not set
-# CONFIG_NET_MULTICAST is not set
+# CONFIG_LPC17_MULTICAST is not set
 
 #
 # Architecture Options

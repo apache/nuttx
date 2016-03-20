@@ -210,7 +210,7 @@ CONFIG_NET_NTXDESC=13
 CONFIG_NET_NRXDESC=13
 # CONFIG_NET_WOL is not set
 # CONFIG_NET_HASH is not set
-# CONFIG_NET_MULTICAST is not set
+# CONFIG_LPC17_MULTICAST is not set
 
 #
 # Architecture Options

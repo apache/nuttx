@@ -63,7 +63,6 @@ CONFIG_ARCH_SIM=y
 # CONFIG_ARCH_Z16 is not set
 # CONFIG_ARCH_Z80 is not set
 CONFIG_ARCH="sim"
-# CONFIG_NET_MULTICAST is not set
 
 #
 # Simulation Configuration Options
