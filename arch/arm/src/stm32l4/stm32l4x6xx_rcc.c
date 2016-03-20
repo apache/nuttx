@@ -183,25 +183,25 @@ static inline void rcc_enableahb2(void)
 
 #if STM32L4_NPORTS > 0
   regval |= (RCC_AHB2ENR_GPIOAEN
-#if STM32L4_NPORTS > 16
+#if STM32L4_NPORTS > 1
              | RCC_AHB2ENR_GPIOBEN
 #endif
-#if STM32L4_NPORTS > 32
+#if STM32L4_NPORTS > 2
              | RCC_AHB2ENR_GPIOCEN
 #endif
-#if STM32L4_NPORTS > 48
+#if STM32L4_NPORTS > 3
              | RCC_AHB2ENR_GPIODEN
 #endif
-#if STM32L4_NPORTS > 64
+#if STM32L4_NPORTS > 4
              | RCC_AHB2ENR_GPIOEEN
 #endif
-#if STM32L4_NPORTS > 80
+#if STM32L4_NPORTS > 5
              | RCC_AHB2ENR_GPIOFEN
 #endif
-#if STM32L4_NPORTS > 96
+#if STM32L4_NPORTS > 6
              | RCC_AHB2ENR_GPIOGEN
 #endif
-#if STM32L4_NPORTS > 112
+#if STM32L4_NPORTS > 7
              | RCC_AHB2ENR_GPIOHEN
 #endif
              );
