@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/irq.h
  *
- *   Copyright (C) 2007-2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2011, 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -113,7 +113,7 @@ int irq_attach(int irq, xcpt_t isr);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SMP
+#if defined(CONFIG_SMP) || defined(CONFIG_SCHED_INSTRUMENTATION_CSECTION)
 irqstate_t enter_critical_section(void);
 #else
 #  define enter_critical_section(f) up_irq_save(f)
@@ -131,7 +131,7 @@ irqstate_t enter_critical_section(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SMP
+#if defined(CONFIG_SMP) || defined(CONFIG_SCHED_INSTRUMENTATION_CSECTION)
 void leave_critical_section(irqstate_t flags);
 #else
 #  define leave_critical_section(f) up_irq_restore(f)
@@ -144,4 +144,3 @@ void leave_critical_section(irqstate_t flags);
 #endif
 
 #endif /* __INCLUDE_NUTTX_IRQ_H */
-

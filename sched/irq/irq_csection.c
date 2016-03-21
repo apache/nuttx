@@ -48,11 +48,13 @@
 #include "sched/sched.h"
 #include "irq/irq.h"
 
-#ifdef CONFIG_SMP
+#if defined(CONFIG_SMP) || defined(CONFIG_SCHED_INSTRUMENTATION_CSECTION)
 
 /****************************************************************************
  * Public Data
  ****************************************************************************/
+
+#ifdef CONFIG_SMP
 /* This is the spinlock that enforces critical sections when interrupts are
  * disabled.
  */
@@ -63,6 +65,7 @@ volatile spinlock_t g_cpu_irqlock = SP_UNLOCKED;
 
 volatile spinlock_t g_cpu_irqsetlock;
 volatile cpu_set_t g_cpu_irqset;
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -78,6 +81,7 @@ volatile cpu_set_t g_cpu_irqset;
  *
  ****************************************************************************/
 
+#ifdef CONFIG_SMP
 irqstate_t enter_critical_section(void)
 {
   FAR struct tcb_s *rtcb;
@@ -96,6 +100,8 @@ irqstate_t enter_critical_section(void)
   /* Do we already have interrupts disabled? */
 
   rtcb = this_task();
+  DEBUGASSERT(rtcb != NULL);
+
   if (rtcb->irqcount > 0)
     {
       /* Yes... make sure that the spinlock is set and increment the IRQ
@@ -136,6 +142,26 @@ irqstate_t enter_critical_section(void)
 
   return up_irq_save();
 }
+#else /* defined(CONFIG_SCHED_INSTRUMENTATION_CSECTION) */
+irqstate_t enter_critical_section(void)
+{
+  /* Check if we were called from an interrupt handler */
+
+  if (!up_interrupt_context())
+    {
+      FAR struct tcb_s *rtcb = this_task();
+      DEBUGASSERT(rtcb != NULL);
+
+      /* No.. note that we have entered the critical section */
+
+      sched_note_csection(rtcb, true);
+    }
+
+  /* And disable interrupts */
+
+  return up_irq_save();
+}
+#endif
 
 /****************************************************************************
  * Name: leave_critical_section
@@ -146,6 +172,7 @@ irqstate_t enter_critical_section(void)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_SMP
 void leave_critical_section(irqstate_t flags)
 {
   /* Do nothing if called from an interrupt handler */
@@ -153,8 +180,7 @@ void leave_critical_section(irqstate_t flags)
   if (!up_interrupt_context())
     {
       FAR struct tcb_s *rtcb = this_task();
-
-      DEBUGASSERT(rtcb->irqcount > 0);
+      DEBUGASSERT(rtcb != 0 && rtcb->irqcount > 0);
 
       /* Will we still have interrupts disabled after decrementing the
        * count?
@@ -211,5 +237,25 @@ void leave_critical_section(irqstate_t flags)
       up_irq_restore(flags);
     }
 }
+#else /* defined(CONFIG_SCHED_INSTRUMENTATION_CSECTION) */
+void leave_critical_section(irqstate_t flags)
+{
+  /* Check if we were called from an interrupt handler */
 
-#endif /* CONFIG_SMP */
+  if (!up_interrupt_context())
+    {
+      FAR struct tcb_s *rtcb = this_task();
+      DEBUGASSERT(rtcb != NULL);
+
+      /* Note that we have left the critical section */
+
+      sched_note_csection(rtcb, false);
+    }
+
+  /* Restore the previous interrupt state. */
+
+  up_irq_restore(flags);
+}
+#endif
+
+#endif /* CONFIG_SMP || CONFIG_SCHED_INSTRUMENTATION_CSECTION*/

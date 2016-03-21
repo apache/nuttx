@@ -401,8 +401,6 @@ void sched_note_csection(FAR struct tcb_s *tcb, bool enter)
   note.ncs_count[1] = (uint8_t)((tcb->irqcount >> 8) & 0xff);
 #endif
 
-  note_systime((FAR struct note_common_s *)&note);
-
   /* Add the note to circular buffer */
 
   note_add((FAR const uint8_t *)&note, sizeof(struct note_csection_s));
@@ -450,7 +448,7 @@ ssize_t sched_note_get(FAR uint8_t *buffer, size_t buflen)
 
   /* Get the index to the tail of the circular buffer */
 
-  tail = g_note_info.ni_tail;
+  tail    = g_note_info.ni_tail;
   DEBUGASSERT(tail < CONFIG_SCHED_NOTE_BUFSIZE);
 
   /* Get the length of the note at the tail index */
@@ -467,7 +465,7 @@ ssize_t sched_note_get(FAR uint8_t *buffer, size_t buflen)
 
       note_remove();
 
-      /* and return and error */
+      /* and return an error */
 
       notelen = -EFBIG;
       goto errout_with_csection;
