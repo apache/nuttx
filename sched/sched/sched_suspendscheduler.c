@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/sched/sched_suspendscheduler.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,11 +45,12 @@
 #include <nuttx/arch.h>
 #include <nuttx/sched.h>
 #include <nuttx/clock.h>
+#include <nuttx/sched_note.h>
 
 #include "clock/clock.h"
 #include "sched/sched.h"
 
-#ifdef CONFIG_SCHED_SPORADIC
+#if defined(CONFIG_SCHED_SPORADIC) || defined(CONFIG_SCHED_INSTRUMENTATION)
 
 /****************************************************************************
  * Public Functions
@@ -73,10 +74,20 @@
 
 void sched_suspend_scheduler(FAR struct tcb_s *tcb)
 {
+#ifdef CONFIG_SCHED_SPORADIC
+  /* Perform sporadic schedule operations */
+
   if ((tcb->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_SPORADIC)
     {
       DEBUGVERIFY(sched_sporadic_suspend(tcb));
     }
+#endif
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION
+  /* Inidicate the the task has been suspended */
+
+  sched_note_suspend(tcb);
+#endif
 }
 
-#endif /* CONFIG_SCHED_SPORADIC */
+#endif /* CONFIG_SCHED_SPORADIC || CONFIG_SCHED_INSTRUMENTATION */

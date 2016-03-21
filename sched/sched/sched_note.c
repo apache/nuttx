@@ -67,12 +67,9 @@ struct note_info_s
 
 struct note_startalloc_s
 {
-  uint8_t nsa_length;
-  uint8_t nsa_type;
-  uint8_t nsa_systime[4];
-  uint8_t nsa_pid[2];
+  struct note_common_s nsa_cmn; /* Common note parameters */
 #if CONFIG_TASK_NAME_SIZE > 0
-  char    nsa_name[CONFIG_TASK_NAME_SIZE + 1];
+  char nsa_name[CONFIG_TASK_NAME_SIZE + 1];
 #endif
 };
 
@@ -267,6 +264,45 @@ static void note_add(FAR const uint8_t *note, uint8_t notelen)
 }
 
 /****************************************************************************
+ * Name: sched_note_switch
+ *
+ * Description:
+ *   Perform core logic for both sched_note_suspend and sched_note_resume
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   We are within a critical section.
+ *
+ ****************************************************************************/
+
+static void sched_note_switch(FAR struct tcb_s *tcb, uint8_t type)
+{
+  struct note_switch_s note;
+
+  /* Format the note */
+
+  note.nsw_cmn.nc_length   = sizeof(struct note_switch_s);
+  note.nsw_cmn.nc_type     = type;
+  note.nsw_cmn.nc_priority = tcb->sched_priority;
+#ifdef CONFIG_SMP
+  note.nsw_cmn.nc_cpu      = tcb->cpu;
+#endif
+  note.nsw_cmn.nc_pid[0]   = (uint8_t)(tcb->pid & 0xff);
+  note.nsw_cmn.nc_pid[1]   = (uint8_t)((tcb->pid >> 8) & 0xff);
+
+  note_systime((FAR struct note_common_s *)&note);
+
+  /* Add the note to circular buffer */
+
+  note_add((FAR const uint8_t *)&note, sizeof(struct note_switch_s));
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -312,10 +348,14 @@ void sched_note_start(FAR struct tcb_s *tcb)
 
   /* Finish formatting the note */
 
-  note.nsa_length = length;
-  note.nsa_type   = NOTE_START;
-  note.nsa_pid[0] = (uint8_t)(tcb->pid & 0xff);
-  note.nsa_pid[1] = (uint8_t)((tcb->pid >> 8) & 0xff);
+  note.nsa_cmn.nc_length   = length;
+  note.nsa_cmn.nc_type     = NOTE_START;
+  note.nsa_cmn.nc_priority = tcb->sched_priority;
+#ifdef CONFIG_SMP
+  note.nsa_cmn.nc_cpu      = tcb->cpu;
+#endif
+  note.nsa_cmn.nc_pid[0]   = (uint8_t)(tcb->pid & 0xff);
+  note.nsa_cmn.nc_pid[1]   = (uint8_t)((tcb->pid >> 8) & 0xff);
 
   note_systime((FAR struct note_common_s *)&note);
 
@@ -330,10 +370,14 @@ void sched_note_stop(FAR struct tcb_s *tcb)
 
   /* Format the note */
 
-  note.nsp_length = sizeof(struct note_stop_s);
-  note.nsp_type   = NOTE_STOP;
-  note.nsp_pid[0] = (uint8_t)(tcb->pid & 0xff);
-  note.nsp_pid[1] = (uint8_t)((tcb->pid >> 8) & 0xff);
+  note.nsp_cmn.nc_length   = sizeof(struct note_stop_s);
+  note.nsp_cmn.nc_type     = NOTE_STOP;
+  note.nsp_cmn.nc_priority = tcb->sched_priority;
+#ifdef CONFIG_SMP
+  note.nsp_cmn.nc_cpu      = tcb->cpu;
+#endif
+  note.nsp_cmn.nc_pid[0]   = (uint8_t)(tcb->pid & 0xff);
+  note.nsp_cmn.nc_pid[1]   = (uint8_t)((tcb->pid >> 8) & 0xff);
 
   note_systime((FAR struct note_common_s *)&note);
 
@@ -342,24 +386,14 @@ void sched_note_stop(FAR struct tcb_s *tcb)
   note_add((FAR const uint8_t *)&note, sizeof(struct note_stop_s));
 }
 
-void sched_note_switch(FAR struct tcb_s *fromtcb, FAR struct tcb_s *totcb)
+void sched_note_suspend(FAR struct tcb_s *tcb)
 {
-  struct note_switch_s note;
+  sched_note_switch(tcb, NOTE_SUSPEND);
+}
 
-  /* Format the note */
-
-  note.nsw_length    = sizeof(struct note_switch_s);
-  note.nsw_type      = NOTE_SWITCH;
-  note.nsw_pidout[0] = (uint8_t)(fromtcb->pid & 0xff);
-  note.nsw_pidout[1] = (uint8_t)((fromtcb->pid >> 8) & 0xff);
-  note.nsw_pidin[0]  = (uint8_t)(totcb->pid & 0xff);
-  note.nsw_pidin[1]  = (uint8_t)((totcb->pid >> 8) & 0xff);
-
-  note_systime((FAR struct note_common_s *)&note);
-
-  /* Add the note to circular buffer */
-
-  note_add((FAR const uint8_t *)&note, sizeof(struct note_switch_s));
+void sched_note_resume(FAR struct tcb_s *tcb)
+{
+  sched_note_switch(tcb, NOTE_RESUME);
 }
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
@@ -369,12 +403,16 @@ void sched_note_premption(FAR struct tcb_s *tcb, bool locked)
 
   /* Format the note */
 
-  note.npr_length    = sizeof(struct note_preempt_s);
-  note.npr_type      = locked ? NOTE_PREEMPT_LOCK : NOTE_PREEMPT_UNLOCK;
-  note.npr_pid[0]    = (uint8_t)(tcb->pid & 0xff);
-  note.npr_pid[1]    = (uint8_t)((tcb->pid >> 8) & 0xff);
-  note.npr_count[0]  = (uint8_t)(tcb->lockcount & 0xff);
-  note.npr_count[1]  = (uint8_t)((tcb->lockcount >> 8) & 0xff);
+  note.npr_cmn.nc_length   = sizeof(struct note_preempt_s);
+  note.npr_cmn.nc_type     = locked ? NOTE_PREEMPT_LOCK : NOTE_PREEMPT_UNLOCK;
+  note.npr_cmn.nc_priority = tcb->sched_priority;
+#ifdef CONFIG_SMP
+  note.npr_cmn.nc_cpu      = tcb->cpu;
+#endif
+  note.npr_cmn.nc_pid[0]   = (uint8_t)(tcb->pid & 0xff);
+  note.npr_cmn.nc_pid[1]   = (uint8_t)((tcb->pid >> 8) & 0xff);
+  note.npr_count[0]        = (uint8_t)(tcb->lockcount & 0xff);
+  note.npr_count[1]        = (uint8_t)((tcb->lockcount >> 8) & 0xff);
 
   note_systime((FAR struct note_common_s *)&note);
 
@@ -391,13 +429,17 @@ void sched_note_csection(FAR struct tcb_s *tcb, bool enter)
 
   /* Format the note */
 
-  note.ncs_length    = sizeof(struct note_preempt_s);
-  note.ncs_type      = enter ? NOTE_CSECTION_ENTER : NOTE_CSECTION_LEAVE;
-  note.ncs_pid[0]    = (uint8_t)(tcb->pid & 0xff);
-  note.ncs_pid[1]    = (uint8_t)((tcb->pid >> 8) & 0xff);
+  note.ncs_cmn.nc_length   = sizeof(struct note_preempt_s);
+  note.ncs_cmn.nc_type     = enter ? NOTE_CSECTION_ENTER : NOTE_CSECTION_LEAVE;
+  note.ncs_cmn.nc_priority = tcb->sched_priority;
 #ifdef CONFIG_SMP
-  note.ncs_count[0]  = (uint8_t)(tcb->irqcount & 0xff);
-  note.ncs_count[1]  = (uint8_t)((tcb->irqcount >> 8) & 0xff);
+  note.ncs_cmn.nc_cpu      = tcb->cpu;
+#endif
+  note.ncs_cmn.nc_pid[0]   = (uint8_t)(tcb->pid & 0xff);
+  note.ncs_cmn.nc_pid[1]   = (uint8_t)((tcb->pid >> 8) & 0xff);
+#ifdef CONFIG_SMP
+  note.ncs_count[0]        = (uint8_t)(tcb->irqcount & 0xff);
+  note.ncs_count[1]        = (uint8_t)((tcb->irqcount >> 8) & 0xff);
 #endif
 
   note_systime((FAR struct note_common_s *)&note);

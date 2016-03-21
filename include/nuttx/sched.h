@@ -815,7 +815,8 @@ void task_vforkabort(FAR struct task_tcb_s *child, int errcode);
  *
  ********************************************************************************/
 
-#if CONFIG_RR_INTERVAL > 0 || defined(CONFIG_SCHED_SPORADIC)
+#if CONFIG_RR_INTERVAL > 0 || defined(CONFIG_SCHED_SPORADIC) || \
+    defined(CONFIG_SCHED_INSTRUMENTATION)
 void sched_resume_scheduler(FAR struct tcb_s *tcb);
 #else
 #  define sched_resume_scheduler(tcb)
@@ -837,7 +838,7 @@ void sched_resume_scheduler(FAR struct tcb_s *tcb);
  *
  ********************************************************************************/
 
-#ifdef CONFIG_SCHED_SPORADIC
+#if defined(CONFIG_SCHED_SPORADIC) || defined(CONFIG_SCHED_INSTRUMENTATION)
 void sched_suspend_scheduler(FAR struct tcb_s *tcb);
 #else
 #  define sched_suspend_scheduler(tcb)

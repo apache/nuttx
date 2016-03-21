@@ -603,7 +603,8 @@ config SCHED_INSTRUMENTATION
 
 			void sched_note_start(FAR struct tcb_s *tcb);
 			void sched_note_stop(FAR struct tcb_s *tcb);
-			void sched_note_switch(FAR struct tcb_s *pFromTcb, FAR struct tcb_s *pToTcb);
+			void sched_note_suspend(FAR struct tcb_s *tcb);
+			void sched_note_resume(FAR struct tcb_s *tcb);
 
 		NOTE: These are internal OS interfaces and are called at at very
 		critical locations in the OS. There is very little that can be

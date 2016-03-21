@@ -43,8 +43,6 @@
 #include <queue.h>
 #include <assert.h>
 
-#include <nuttx/sched_note.h>
-
 #include "irq/irq.h"
 #include "sched/sched.h"
 
@@ -107,10 +105,6 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
 
   else if (sched_addprioritized(btcb, (FAR dq_queue_t *)&g_readytorun))
     {
-      /* Inform the instrumentation logic that we are switching tasks */
-
-      sched_note_switch(rtcb, btcb);
-
       /* The new btcb was added at the head of the ready-to-run list.  It
        * is now the new active task!
        */
@@ -286,11 +280,7 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
 
           /* The new btcb was added at the head of the ready-to-run list.  It
            * is now the new active task!
-           *
-           * Inform the instrumentation logic that we are switching tasks.
            */
-
-          sched_note_switch(rtcb, btcb);
 
           /* Assign the CPU and set the running state */
 

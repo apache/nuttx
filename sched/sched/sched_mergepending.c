@@ -44,8 +44,6 @@
 #include <queue.h>
 #include <assert.h>
 
-#include <nuttx/sched_note.h>
-
 #include "sched/sched.h"
 
 /****************************************************************************
@@ -123,11 +121,6 @@ bool sched_mergepending(void)
       if (!rprev)
         {
           /* Special case: Inserting ptcb at the head of the list */
-          /* Inform the instrumentation layer that we are switching tasks */
-
-          sched_note_switch(rtcb, ptcb);
-
-          /* Then insert at the head of the list */
 
           ptcb->flink       = rtcb;
           ptcb->blink       = NULL;

@@ -43,10 +43,12 @@
 
 #include <nuttx/sched.h>
 #include <nuttx/clock.h>
+#include <nuttx/sched_note.h>
 
 #include "sched/sched.h"
 
-#if CONFIG_RR_INTERVAL > 0 || defined(CONFIG_SCHED_SPORADIC)
+#if CONFIG_RR_INTERVAL > 0 || defined(CONFIG_SCHED_SPORADIC) || \
+    defined(CONFIG_SCHED_INSTRUMENTATION)
 
 /****************************************************************************
  * Public Functions
@@ -92,6 +94,13 @@ void sched_resume_scheduler(FAR struct tcb_s *tcb)
       DEBUGVERIFY(sched_sporadic_resume(tcb));
     }
 #endif
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION
+  /* Inidicate the the task has been resumed */
+
+  sched_note_resume(tcb);
+#endif
+
 }
 
-#endif /* CONFIG_RR_INTERVAL > 0 || CONFIG_SCHED_SPORADIC */
+#endif /* CONFIG_RR_INTERVAL > 0 || CONFIG_SCHED_SPORADIC || CONFIG_SCHED_INSTRUMENTATION */

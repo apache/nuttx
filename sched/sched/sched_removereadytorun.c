@@ -43,8 +43,6 @@
 #include <queue.h>
 #include <assert.h>
 
-#include <nuttx/sched_note.h>
-
 #include "irq/irq.h"
 #include "sched/sched.h"
 
@@ -94,9 +92,6 @@ bool sched_removereadytorun(FAR struct tcb_s *rtcb)
       FAR struct tcb_s *ntcb = (FAR struct tcb_s *)rtcb->flink;
       DEBUGASSERT(ntcb != NULL);
 
-      /* Inform the instrumentation layer that we are switching tasks */
-
-      sched_note_switch(rtcb, ntcb);
       ntcb->task_state = TSTATE_TASK_RUNNING;
       doswitch = true;
     }
@@ -224,9 +219,6 @@ bool sched_removereadytorun(FAR struct tcb_s *rtcb)
                       &g_cpu_irqlock);
         }
 
-      /* Inform the instrumentation layer that we are switching tasks */
-
-      sched_note_switch(rtcb, ntcb);
       ntcb->task_state = TSTATE_TASK_RUNNING;
 
       /* The task is running but the CPU that it was running on has been

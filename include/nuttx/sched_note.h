@@ -62,7 +62,8 @@ enum note_type_e
 {
   NOTE_START = 0,
   NOTE_STOP,
-  NOTE_SWITCH
+  NOTE_SUSPEND,
+  NOTE_RESUME
 #ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
   ,
   NOTE_PREEMPT_LOCK,
@@ -79,21 +80,23 @@ enum note_type_e
 
 struct note_common_s
 {
-  uint8_t nc_length;       /* Length of the note */
-  uint8_t nc_type;         /* See enum note_type_e */
-  uint8_t nc_systime[4];   /* Time when note buffered */
+  uint8_t nc_length;           /* Length of the note */
+  uint8_t nc_type;             /* See enum note_type_e */
+  uint8_t nc_priority;         /* Thread/task priority */
+#ifdef CONFIG_SMP
+  uint8_t nc_cpu;              /* CPU thread/task running on */
+#endif
+  uint8_t nc_pid[2];           /* ID of the thread/task */
+  uint8_t nc_systime[4];       /* Time when note buffered */
 };
 
 /* This is the specific form of the NOTE_START note */
 
 struct note_start_s
 {
-  uint8_t nst_length;      /* Length of the note */
-  uint8_t nst_type;        /* Must be NOTE_START */
-  uint8_t nst_systime[4];  /* Time when note buffered */
-  uint8_t nst_pid[2];      /* ID of the new thread/task */
+  struct note_common_s nst_cmn; /* Common note parameters */
 #if CONFIG_TASK_NAME_SIZE > 0
-  char    nst_name[1];     /* Start of the name of the thread/task */
+  char    nst_name[1];          /* Start of the name of the thread/task */
 #endif
 };
 
@@ -101,21 +104,14 @@ struct note_start_s
 
 struct note_stop_s
 {
-  uint8_t nsp_length;      /* Length of the note */
-  uint8_t nsp_type;        /* Must be NOTE_STOP */
-  uint8_t nsp_systime[4];  /* Time when note buffered */
-  uint8_t nsp_pid[2];      /* ID of the thread/task that stopped */
+  struct note_common_s nsp_cmn; /* Common note parameters */
 };
 
-/* This is the specific form of the NOTE_SWITCH note */
+/* This is the specific form of the NOTE_SUSPEND/NOTE_RESUME note */
 
 struct note_switch_s
 {
-  uint8_t nsw_length;      /* Length of the note */
-  uint8_t nsw_type;        /* Must be NOTE_SWITCH */
-  uint8_t nsw_systime[4];  /* Time when note buffered */
-  uint8_t nsw_pidout[2];   /* ID of the thread/task that was blocked */
-  uint8_t nsw_pidin[2];    /* ID of the thread/task that was started */
+  struct note_common_s nsw_cmn; /* Common note parameters */
 };
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
@@ -123,11 +119,8 @@ struct note_switch_s
 
 struct note_preempt_s
 {
-  uint8_t npr_length;      /* Length of the note */
-  uint8_t npr_type;        /* Must be NOTE_PREEMPT_LOCK or _UNLOCK */
-  uint8_t npr_systime[4];  /* Time when note buffered */
-  uint8_t npr_pid[2];      /* ID of the thread/task that change pre-emption */
-  uint8_t npr_count[2];    /* Count of nested locks */
+  struct note_common_s npr_cmn; /* Common note parameters */
+  uint8_t npr_count[2];         /* Count of nested locks */
 };
 #endif /* CONFIG_SCHED_INSTRUMENTATION_PREEMPTION */
 
@@ -136,12 +129,9 @@ struct note_preempt_s
 
 struct note_csection_s
 {
-  uint8_t ncs_length;      /* Length of the note */
-  uint8_t ncs_type;        /* Must be NOTE_CSECTION_ENTER or _LEAVE */
-  uint8_t ncs_systime[4];  /* Time when note buffered */
-  uint8_t ncs_pid[2];      /* ID of the thread/task that changed critical section */
+  struct note_common_s ncs_cmn; /* Common note parameters */
 #ifdef CONFIG_SMP
-  uint8_t ncs_count[2];    /* Count of nested csections */
+  uint8_t ncs_count[2];         /* Count of nested csections */
 #endif
 };
 #endif /* CONFIG_SCHED_INSTRUMENTATION_CSECTION */
@@ -173,7 +163,8 @@ struct note_csection_s
 
 void sched_note_start(FAR struct tcb_s *tcb);
 void sched_note_stop(FAR struct tcb_s *tcb);
-void sched_note_switch(FAR struct tcb_s *fromtcb, FAR struct tcb_s *totcb);
+void sched_note_suspend(FAR struct tcb_s *tcb);
+void sched_note_resume(FAR struct tcb_s *tcb);
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
 void sched_note_premption(FAR struct tcb_s *tcb, bool locked);
@@ -249,7 +240,8 @@ int note_register(void);
 
 #  define sched_note_start(t)
 #  define sched_note_stop(t)
-#  define sched_note_switch(t1, t2)
+#  define sched_note_suspend(t)
+#  define sched_note_resume(t)
 #  define sched_note_premption(t,l)
 #  define sched_note_csection(t,e)
 
