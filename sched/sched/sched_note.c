@@ -264,45 +264,6 @@ static void note_add(FAR const uint8_t *note, uint8_t notelen)
 }
 
 /****************************************************************************
- * Name: sched_note_switch
- *
- * Description:
- *   Perform core logic for both sched_note_suspend and sched_note_resume
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   We are within a critical section.
- *
- ****************************************************************************/
-
-static void sched_note_switch(FAR struct tcb_s *tcb, uint8_t type)
-{
-  struct note_switch_s note;
-
-  /* Format the note */
-
-  note.nsw_cmn.nc_length   = sizeof(struct note_switch_s);
-  note.nsw_cmn.nc_type     = type;
-  note.nsw_cmn.nc_priority = tcb->sched_priority;
-#ifdef CONFIG_SMP
-  note.nsw_cmn.nc_cpu      = tcb->cpu;
-#endif
-  note.nsw_cmn.nc_pid[0]   = (uint8_t)(tcb->pid & 0xff);
-  note.nsw_cmn.nc_pid[1]   = (uint8_t)((tcb->pid >> 8) & 0xff);
-
-  note_systime((FAR struct note_common_s *)&note);
-
-  /* Add the note to circular buffer */
-
-  note_add((FAR const uint8_t *)&note, sizeof(struct note_switch_s));
-}
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -388,12 +349,47 @@ void sched_note_stop(FAR struct tcb_s *tcb)
 
 void sched_note_suspend(FAR struct tcb_s *tcb)
 {
-  sched_note_switch(tcb, NOTE_SUSPEND);
+  struct note_suspend_s note;
+
+  /* Format the note */
+
+  note.nsu_cmn.nc_length   = sizeof(struct note_suspend_s);
+  note.nsu_cmn.nc_type     = NOTE_SUSPEND;
+  note.nsu_cmn.nc_priority = tcb->sched_priority;
+#ifdef CONFIG_SMP
+  note.nsu_cmn.nc_cpu      = tcb->cpu;
+#endif
+  note.nsu_cmn.nc_pid[0]   = (uint8_t)(tcb->pid & 0xff);
+  note.nsu_cmn.nc_pid[1]   = (uint8_t)((tcb->pid >> 8) & 0xff);
+  note.nsu_state           = tcb->task_state;
+
+  note_systime((FAR struct note_common_s *)&note);
+
+  /* Add the note to circular buffer */
+
+  note_add((FAR const uint8_t *)&note, sizeof(struct note_suspend_s));
 }
 
 void sched_note_resume(FAR struct tcb_s *tcb)
 {
-  sched_note_switch(tcb, NOTE_RESUME);
+  struct note_resume_s note;
+
+  /* Format the note */
+
+  note.nre_cmn.nc_length   = sizeof(struct note_resume_s);
+  note.nre_cmn.nc_type     = NOTE_RESUME;
+  note.nre_cmn.nc_priority = tcb->sched_priority;
+#ifdef CONFIG_SMP
+  note.nre_cmn.nc_cpu      = tcb->cpu;
+#endif
+  note.nre_cmn.nc_pid[0]   = (uint8_t)(tcb->pid & 0xff);
+  note.nre_cmn.nc_pid[1]   = (uint8_t)((tcb->pid >> 8) & 0xff);
+
+  note_systime((FAR struct note_common_s *)&note);
+
+  /* Add the note to circular buffer */
+
+  note_add((FAR const uint8_t *)&note, sizeof(struct note_resume_s));
 }
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION

@@ -302,7 +302,7 @@ static const struct proc_node_s * const g_level0info[] =
 
 /* This is the list of all group sub-directory nodes */
 
-static const struct proc_node_s * const g_groupinfo[] =
+static FAR const struct proc_node_s * const g_groupinfo[] =
 {
   &g_groupstatus,  /* Task group status */
   &g_groupfd       /* Group file descriptors */
@@ -311,7 +311,7 @@ static const struct proc_node_s * const g_groupinfo[] =
 
 /* Names of task/thread states */
 
-static const char *g_statenames[] =
+static FAR const char *g_statenames[] =
 {
   "Invalid",
   "Waiting,Unlock",
@@ -328,7 +328,7 @@ static const char *g_statenames[] =
 #endif
 };
 
-static const char *g_ttypenames[4] =
+static FAR const char *g_ttypenames[4] =
 {
   "Task",
   "pthread",

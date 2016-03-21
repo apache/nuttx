@@ -107,11 +107,19 @@ struct note_stop_s
   struct note_common_s nsp_cmn; /* Common note parameters */
 };
 
-/* This is the specific form of the NOTE_SUSPEND/NOTE_RESUME note */
+/* This is the specific form of the NOTE_SUSPEND note */
 
-struct note_switch_s
+struct note_suspend_s
 {
-  struct note_common_s nsw_cmn; /* Common note parameters */
+  struct note_common_s nsu_cmn; /* Common note parameters */
+  uint8_t nsu_state;            /* Task state */
+};
+
+/* This is the specific form of the NOTE_RESUME note */
+
+struct note_resume_s
+{
+  struct note_common_s nre_cmn; /* Common note parameters */
 };
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
