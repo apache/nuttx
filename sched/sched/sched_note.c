@@ -116,22 +116,35 @@ static inline unsigned int note_next(unsigned int ndx, unsigned int offset)
 }
 
 /****************************************************************************
- * Name: note_systime
+ * Name: note_common
  *
  * Description:
- *   Save the current system time in the note structure as a 32-bit value.
+ *   Fill in some of the common fields in the note structure.
  *
  * Input Parameters:
- *   note - The note structure to use
+ *   tcb  - The TCB containing the information
+ *   note - The common note structure to use
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-static void note_systime(FAR struct note_common_s *note)
+static void note_common(FAR struct tcb_s *tcb, FAR struct note_common_s *note,
+                        uint8_t length, uint8_t type)
 {
-  uint32_t systime = (uint32_t)clock_systimer();
+  uint32_t systime    = (uint32_t)clock_systimer();
+
+  /* Save all of the common fields */
+
+  note->nc_length     = length;
+  note->nc_type       = type;
+  note->nc_priority   = tcb->sched_priority;
+#ifdef CONFIG_SMP
+  note->nc_cpu        = tcb->cpu;
+#endif
+  note->nc_pid[0]     = (uint8_t)(tcb->pid & 0xff);
+  note->nc_pid[1]     = (uint8_t)((tcb->pid >> 8) & 0xff);
 
   /* Save the LS 32-bits of the system timer in little endian order */
 
@@ -309,16 +322,7 @@ void sched_note_start(FAR struct tcb_s *tcb)
 
   /* Finish formatting the note */
 
-  note.nsa_cmn.nc_length   = length;
-  note.nsa_cmn.nc_type     = NOTE_START;
-  note.nsa_cmn.nc_priority = tcb->sched_priority;
-#ifdef CONFIG_SMP
-  note.nsa_cmn.nc_cpu      = tcb->cpu;
-#endif
-  note.nsa_cmn.nc_pid[0]   = (uint8_t)(tcb->pid & 0xff);
-  note.nsa_cmn.nc_pid[1]   = (uint8_t)((tcb->pid >> 8) & 0xff);
-
-  note_systime((FAR struct note_common_s *)&note);
+  note_common(tcb, &note.nsa_cmn, length, NOTE_START);
 
   /* Add the note to circular buffer */
 
@@ -331,16 +335,7 @@ void sched_note_stop(FAR struct tcb_s *tcb)
 
   /* Format the note */
 
-  note.nsp_cmn.nc_length   = sizeof(struct note_stop_s);
-  note.nsp_cmn.nc_type     = NOTE_STOP;
-  note.nsp_cmn.nc_priority = tcb->sched_priority;
-#ifdef CONFIG_SMP
-  note.nsp_cmn.nc_cpu      = tcb->cpu;
-#endif
-  note.nsp_cmn.nc_pid[0]   = (uint8_t)(tcb->pid & 0xff);
-  note.nsp_cmn.nc_pid[1]   = (uint8_t)((tcb->pid >> 8) & 0xff);
-
-  note_systime((FAR struct note_common_s *)&note);
+  note_common(tcb, &note.nsp_cmn, sizeof(struct note_stop_s), NOTE_STOP);
 
   /* Add the note to circular buffer */
 
@@ -353,17 +348,8 @@ void sched_note_suspend(FAR struct tcb_s *tcb)
 
   /* Format the note */
 
-  note.nsu_cmn.nc_length   = sizeof(struct note_suspend_s);
-  note.nsu_cmn.nc_type     = NOTE_SUSPEND;
-  note.nsu_cmn.nc_priority = tcb->sched_priority;
-#ifdef CONFIG_SMP
-  note.nsu_cmn.nc_cpu      = tcb->cpu;
-#endif
-  note.nsu_cmn.nc_pid[0]   = (uint8_t)(tcb->pid & 0xff);
-  note.nsu_cmn.nc_pid[1]   = (uint8_t)((tcb->pid >> 8) & 0xff);
+  note_common(tcb, &note.nsu_cmn, sizeof(struct note_suspend_s), NOTE_SUSPEND);
   note.nsu_state           = tcb->task_state;
-
-  note_systime((FAR struct note_common_s *)&note);
 
   /* Add the note to circular buffer */
 
@@ -376,16 +362,7 @@ void sched_note_resume(FAR struct tcb_s *tcb)
 
   /* Format the note */
 
-  note.nre_cmn.nc_length   = sizeof(struct note_resume_s);
-  note.nre_cmn.nc_type     = NOTE_RESUME;
-  note.nre_cmn.nc_priority = tcb->sched_priority;
-#ifdef CONFIG_SMP
-  note.nre_cmn.nc_cpu      = tcb->cpu;
-#endif
-  note.nre_cmn.nc_pid[0]   = (uint8_t)(tcb->pid & 0xff);
-  note.nre_cmn.nc_pid[1]   = (uint8_t)((tcb->pid >> 8) & 0xff);
-
-  note_systime((FAR struct note_common_s *)&note);
+  note_common(tcb, &note.nre_cmn, sizeof(struct note_resume_s), NOTE_RESUME);
 
   /* Add the note to circular buffer */
 
@@ -399,18 +376,10 @@ void sched_note_premption(FAR struct tcb_s *tcb, bool locked)
 
   /* Format the note */
 
-  note.npr_cmn.nc_length   = sizeof(struct note_preempt_s);
-  note.npr_cmn.nc_type     = locked ? NOTE_PREEMPT_LOCK : NOTE_PREEMPT_UNLOCK;
-  note.npr_cmn.nc_priority = tcb->sched_priority;
-#ifdef CONFIG_SMP
-  note.npr_cmn.nc_cpu      = tcb->cpu;
-#endif
-  note.npr_cmn.nc_pid[0]   = (uint8_t)(tcb->pid & 0xff);
-  note.npr_cmn.nc_pid[1]   = (uint8_t)((tcb->pid >> 8) & 0xff);
-  note.npr_count[0]        = (uint8_t)(tcb->lockcount & 0xff);
-  note.npr_count[1]        = (uint8_t)((tcb->lockcount >> 8) & 0xff);
-
-  note_systime((FAR struct note_common_s *)&note);
+  note_common(tcb, &note.npr_cmn, sizeof(struct note_preempt_s),
+              locked ? NOTE_PREEMPT_LOCK : NOTE_PREEMPT_UNLOCK);
+  note.npr_count[0] = (uint8_t)(tcb->lockcount & 0xff);
+  note.npr_count[1] = (uint8_t)((tcb->lockcount >> 8) & 0xff);
 
   /* Add the note to circular buffer */
 
@@ -421,28 +390,22 @@ void sched_note_premption(FAR struct tcb_s *tcb, bool locked)
 #ifdef CONFIG_SCHED_INSTRUMENTATION_CSECTION
 void sched_note_csection(FAR struct tcb_s *tcb, bool enter)
 {
-  struct note_preempt_s note;
+  struct note_csection_s note;
 
   /* Format the note */
 
-  note.ncs_cmn.nc_length   = sizeof(struct note_preempt_s);
-  note.ncs_cmn.nc_type     = enter ? NOTE_CSECTION_ENTER : NOTE_CSECTION_LEAVE;
-  note.ncs_cmn.nc_priority = tcb->sched_priority;
+  note_common(tcb, &note.ncs_cmn, sizeof(struct note_csection_s),
+              enter ? NOTE_CSECTION_ENTER : NOTE_CSECTION_LEAVE);
 #ifdef CONFIG_SMP
-  note.ncs_cmn.nc_cpu      = tcb->cpu;
-#endif
-  note.ncs_cmn.nc_pid[0]   = (uint8_t)(tcb->pid & 0xff);
-  note.ncs_cmn.nc_pid[1]   = (uint8_t)((tcb->pid >> 8) & 0xff);
-#ifdef CONFIG_SMP
-  note.ncs_count[0]        = (uint8_t)(tcb->irqcount & 0xff);
-  note.ncs_count[1]        = (uint8_t)((tcb->irqcount >> 8) & 0xff);
+  note.ncs_count[0] = (uint8_t)(tcb->irqcount & 0xff);
+  note.ncs_count[1] = (uint8_t)((tcb->irqcount >> 8) & 0xff);
 #endif
 
   note_systime((FAR struct note_common_s *)&note);
 
   /* Add the note to circular buffer */
 
-  note_add((FAR const uint8_t *)&note, sizeof(struct note_preempt_s));
+  note_add((FAR const uint8_t *)&note, sizeof(struct note_csection_s));
 }
 #endif
 
