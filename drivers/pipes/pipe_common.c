@@ -55,6 +55,7 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
+#include <nuttx/fs/ioctl.h>
 #ifdef CONFIG_DEBUG
 #  include <nuttx/arch.h>
 #endif
@@ -78,18 +79,10 @@
 #endif
 
 /****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
 static void pipecommon_semtake(sem_t *sem);
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
@@ -746,32 +739,90 @@ errout:
 }
 #endif
 
-/****************************************************************************
+/************************************************************************************
  * Name: pipecommon_ioctl
- ****************************************************************************/
+ ************************************************************************************/
 
-int  pipecommon_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
+int pipecommon_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
-  FAR struct inode      *inode    = filep->f_inode;
-  FAR struct pipe_dev_s *dev      = inode->i_private;
+  FAR struct inode *inode = filep->f_inode;
+  struct pipe_dev_s *dev   = inode->i_private;
+  int ret = -EINVAL;
 
-  /* Only one command supported */
+#ifdef CONFIG_DEBUG
+  /* Some sanity checking */
 
-  if (cmd == PIPEIOC_POLICY)
+  if (dev == NULL)
     {
-      if (arg != 0)
-        {
-          PIPE_POLICY_1(dev->d_flags);
-        }
-      else
-        {
-          PIPE_POLICY_0(dev->d_flags);
-        }
+       return -EBADF;
+    }
+#endif
 
-      return OK;
+  pipecommon_semtake(&dev->d_bfsem);
+
+  switch (cmd)
+    {
+      case PIPEIOC_POLICY:
+        {
+          if (arg != 0)
+            {
+              PIPE_POLICY_1(dev->d_flags);
+            }
+          else
+            {
+              PIPE_POLICY_0(dev->d_flags);
+            }
+
+          ret = OK;
+        }
+        break;
+
+      case FIONREAD:
+        {
+          int count;
+
+          /* Determine the number of bytes available in the buffer */
+
+          if (dev->d_wrndx < dev->d_rdndx)
+            {
+              count = (CONFIG_DEV_PIPE_SIZE - dev->d_rdndx) + dev->d_wrndx;
+            }
+          else
+            {
+              count = dev->d_wrndx - dev->d_rdndx;
+            }
+
+          *(int *)arg = count;
+          ret = 0;
+        }
+        break;
+
+      case FIONWRITE:
+        {
+          int count;
+
+          /* Determine the number of bytes free in the buffer */
+
+          if (dev->d_wrndx < dev->d_rdndx)
+            {
+              count = (dev->d_rdndx - dev->d_wrndx) - 1;
+            }
+          else
+            {
+              count = ((CONFIG_DEV_PIPE_SIZE - dev->d_wrndx) + dev->d_rdndx) - 1;
+            }
+
+          *(int *)arg = count;
+          ret = 0;
+        }
+        break;
+
+      default:
+        break;
     }
 
-  return -ENOTTY;
+  sem_post(&dev->d_bfsem);
+  return ret;
 }
 
 /****************************************************************************
