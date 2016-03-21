@@ -83,10 +83,6 @@ void up_unblock_task(FAR struct tcb_s *tcb)
 
   sched_removeblocked(tcb);
 
-  /* Reset scheduler parameters */
-
-  sched_resume_scheduler(tcb);
-
   /* Add the task in the correct location in the prioritized
    * ready-to-run task list
    */
