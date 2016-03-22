@@ -44,6 +44,10 @@
 #include <queue.h>
 #include <assert.h>
 
+#ifdef CONFIG_SMP
+#  include <nuttx/spinlock.h>
+#endif
+
 #include "sched/sched.h"
 
 /****************************************************************************
@@ -184,15 +188,53 @@ bool sched_mergepending(void)
   FAR struct tcb_s *ptcb;
   bool ret = false;
 
-  /* Remove and process every TCB in the g_pendingtasks list */
+  /* Remove and process every TCB in the g_pendingtasks list.
+   *
+   * This function is only called in the context where locking is known to
+   * disabled on one CPU.  However, we must do nothing if pre-emption is
+   * still locked because of actions of other CPUs.
+   */
 
-  for (ptcb = (FAR struct tcb_s *)dq_remfirst((FAR dq_queue_t *)&g_pendingtasks);
-       ptcb != NULL;
-       ptcb = (FAR struct tcb_s *)dq_remfirst((FAR dq_queue_t *)&g_pendingtasks))
+  if (!spin_islocked(&g_cpu_schedlock))
     {
-      /* Add the pending task to the correct ready-to-run list */
+      while ((ptcb = (FAR struct tcb_s *)
+                dq_remfirst((FAR dq_queue_t *)&g_pendingtasks)) != NULL)
+        {
+          /* Add the pending task to the correct ready-to-run list.  These
+           * are prioritized lists; the g_pendingtasks list is accessed in
+           * highest priority order.  This means that the first
+           * CONFIG_SMP_NCPU tasks may be made to run but the remaining will
+           * simply be added to the g_readtorun list.
+           */
 
-      ret |= sched_addreadytorun(ptcb);
+          ret |= sched_addreadytorun(ptcb);
+
+          /* This operation could cause the scheduler to become locked.
+           * Check if that happened.
+           */
+
+          if (spin_islocked(&g_cpu_schedlock))
+            {
+              /* Yes.. then we may have incorrectly placed some TCBs in the
+               * g_readytorun list (unlikely, but possible).
+               *
+               * REVISIT:  This is awkward.  There is really not so much
+               * need for the pending task list in the SMP configuration.
+               * Perhaps it should just be eliminated?
+               */
+
+              while ((ptcb = (FAR struct tcb_s *)
+                       dq_remlast((FAR dq_queue_t *)&g_readytorun)) != NULL)
+                {
+                  (void)sched_addprioritized(ptcb,
+                                             (FAR dq_queue_t *)&g_pendingtasks);
+                }
+
+              /* And break out of the loop */
+
+              break;
+            }
+        }
     }
 
   return ret;

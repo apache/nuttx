@@ -143,6 +143,9 @@ volatile cpu_set_t g_cpu_lockset;
 int sched_lock(void)
 {
   FAR struct tcb_s *rtcb = this_task();
+#ifdef CONFIG_SMP
+  FAR struct tcb_s *ptcb;
+#endif
 
   /* Check for some special cases:  (1) rtcb may be NULL only during early
    * boot-up phases, and (2) sched_lock() should have no effect if called
@@ -169,8 +172,6 @@ int sched_lock(void)
            * different CPU may have the scheduler locked.  It is not
            * possible for some other task on this CPU to have the scheduler
            * locked (or we would not be executing!).
-           *
-           * If the scheduler is locked on another CPU, then we for the lock.
            */
 
           spin_setbit(&g_cpu_lockset, this_cpu(), &g_cpu_locksetlock,
@@ -194,6 +195,7 @@ int sched_lock(void)
 
       rtcb->lockcount++;
 
+
 #ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
       /* Check if we just acquired the lock */
 
@@ -202,6 +204,23 @@ int sched_lock(void)
           /* Note that we have pre-emption locked */
 
             sched_note_premption(rtcb, true);
+        }
+#endif
+
+#ifdef CONFIG_SMP
+      /* Move any tasks in the ready-to-run list to the pending task list
+       * where they will not be available to run until the scheduler is
+       * unlocked and sched_mergepending() is called.
+       *
+       * REVISIT:  This is awkward.  There is really not so much need for
+       * the pending task list in the SMP configuration.  Perhaps it should
+       * just be eliminated?
+       */
+
+      while ((ptcb = (FAR struct tcb_s *)
+                dq_remlast((FAR dq_queue_t *)&g_readytorun)) != NULL)
+        {
+          (void)sched_addprioritized(ptcb, (FAR dq_queue_t *)&g_pendingtasks);
         }
 #endif
     }

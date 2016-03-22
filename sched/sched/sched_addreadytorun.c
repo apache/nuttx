@@ -222,13 +222,16 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
     }
 
   /* If the selected state is TSTATE_TASK_RUNNING, then we would like to
-   * start running the task.  Be we cannot do that if pre-emption is disable.
+   * start running the task.  Be we cannot do that if pre-emption is
+   * disabled.  If the selected state is TSTATE_TASK_READYTORUN, then it
+   * should also go to the pending task list so that it will have a chance
+   * to be restarted when the scheduler is unlocked.
    */
 
-  if (spin_islocked(&g_cpu_schedlock) && task_state == TSTATE_TASK_RUNNING)
+  if (spin_islocked(&g_cpu_schedlock) && task_state != TSTATE_TASK_ASSIGNED)
     {
-      /* Preemption would occur!  Add the new ready-to-run task to the
-       * g_pendingtasks task list for now.
+      /* Add the new ready-to-run task to the g_pendingtasks task list for
+       * now.
        */
 
       sched_addprioritized(btcb, (FAR dq_queue_t *)&g_pendingtasks);
@@ -340,13 +343,24 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
 
               dq_rem((FAR dq_entry_t *)next, tasklist);
 
-              /* Add the task to the g_readytorun list.  It may be
-               * assigned to a different CPU the next time that it runs.
+              /* Add the task to the g_readytorun or to the g_pendingtasks
+               * list.  NOTE: That the above operations may cause the
+               * scheduler to become locked.  It may be assigned to a
+               * different CPU the next time that it runs.
                */
 
-              next->task_state = TSTATE_TASK_READYTORUN;
-              (void)sched_addprioritized(next,
-                                         (FAR dq_queue_t *)&g_readytorun);
+              if (spin_islocked(&g_cpu_schedlock))
+                {
+                  next->task_state = TSTATE_TASK_PENDING;
+                  tasklist         = (FAR dq_queue_t *)&g_pendingtasks;
+                }
+              else
+                {
+                  next->task_state = TSTATE_TASK_READYTORUN;
+                  tasklist         = (FAR dq_queue_t *)&g_readytorun;
+                }
+
+              (void)sched_addprioritized(next, tasklist);
             }
 
           doswitch = true;
