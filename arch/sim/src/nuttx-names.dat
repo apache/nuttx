@@ -60,6 +60,7 @@ setsockopt     NXsetsockopt
 sigaction      NXsigaction
 sighold        NXsighold
 sigprocmask    NXsigprocmask
+sigtimedwait   NXsigtimedwait
 sigrelse       NXsigrelse
 sleep          NXsleep
 socket         NXsocket
