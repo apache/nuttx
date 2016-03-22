@@ -627,7 +627,7 @@ config SCHED_INSTRUMENTATION_PREEMPTION
 config SCHED_INSTRUMENTATION_CSECTION
 	bool "Critical section monitor hooks"
 	default n
-	depends on EXPERIMENTAL
+	depends on EXPERIMENTAL || !SCHED_INSTRUMENTATION_BUFFER
 	---help---
 		Enables additional hooks for entry and exit from critical sections.
 		Interrupts are disabled while within a critical section.  Board-
@@ -636,11 +636,12 @@ config SCHED_INSTRUMENTATION_CSECTION
 			void sched_note_csection(FAR struct tcb_s *tcb, bool state);
 
 		NOTE: This option is marked EXPERIMENTAL because there is a logical
-		error in the design.  That error is that sched_note_get() calls
-		enter/leave_critical_section.  When the buffer note buffer has been
-		filled, each of these calls causes an entry to be removed from the
-		note buffer to make more space.  The end result is that every other
-		note is lost when dumping the note buffer.  Not very useful!
+		error in the design when this feature is used with
+		CONFIG_SCHED_INSTRUMENTATION_BUFFER.  That error is that
+		sched_note_get() calls enter_ and leave_critical_section.  That
+		means that each call to sched_note_get() causes two entries to be
+		added from the note buffer in order to remove one entry.  Not
+		very useful in its current state!
 
 config SCHED_INSTRUMENTATION_BUFFER
 	bool "Buffer instrumentation data in memory"
