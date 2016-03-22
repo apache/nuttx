@@ -89,10 +89,10 @@ bool sched_removereadytorun(FAR struct tcb_s *rtcb)
        * after the TCB being removed.
        */
 
-      FAR struct tcb_s *ntcb = (FAR struct tcb_s *)rtcb->flink;
-      DEBUGASSERT(ntcb != NULL);
+      FAR struct tcb_s *nxttcb = (FAR struct tcb_s *)rtcb->flink;
+      DEBUGASSERT(nxttcb != NULL);
 
-      ntcb->task_state = TSTATE_TASK_RUNNING;
+      nxttcb->task_state = TSTATE_TASK_RUNNING;
       doswitch = true;
     }
 
@@ -161,15 +161,16 @@ bool sched_removereadytorun(FAR struct tcb_s *rtcb)
 
   if (rtcb->blink == NULL && TLIST_ISRUNNABLE(rtcb->task_state))
     {
-      FAR struct tcb_s *ntcb;
+      FAR struct tcb_s *nxttcb;
+      FAR struct tcb_s *rtrtcb;
       int me;
 
       /* There must always be at least one task in the list (the IDLE task)
        * after the TCB being removed.
        */
 
-      ntcb = (FAR struct tcb_s *)rtcb->flink;
-      DEBUGASSERT(ntcb != NULL);
+      nxttcb = (FAR struct tcb_s *)rtcb->flink;
+      DEBUGASSERT(nxttcb != NULL);
 
       /* If we are modifying the head of some assigned task list other than
        * our own, we will need to stop that CPU.
@@ -181,11 +182,57 @@ bool sched_removereadytorun(FAR struct tcb_s *rtcb)
           DEBUGVERIFY(up_cpu_pause(cpu));
         }
 
+      /* The task is running but the CPU that it was running on has been
+       * paused.  We can now safely remove its TCB from the ready-to-run
+       * task list.  In the SMP case this may be either the g_readytorun()
+       * or the g_assignedtasks[cpu] list.
+       */
+
+      dq_rem((FAR dq_entry_t *)rtcb, tasklist);
+
+      /* Which task will go at the head of the list?  It will be either the
+       * next tcb in the assigned task list (nxttcb) or a TCB in the
+       * g_readytorun list.  We can only select a task from that list if
+       * the affinity mask includes the current CPU.
+       *
+       * REVISIT: What should we do, if anything, if pre-emption is locked
+       * by the another CPU?  Should just used nxttcb?  Should we select
+       * from the pending task list instead of the g_readytorun list?
+       */
+
+      for (rtrtcb = (FAR struct tcb_s *)g_readytorun.head;
+           rtrtcb != NULL && !CPU_ISSET(cpu, &rtrtcb->affinity);
+           rtrtcb = (FAR struct tcb_s *)rtrtcb->flink);
+
+      /* Did we find a task in the g_readytorun list?  Which task should
+       * we use? We decide strictly by the priority of the two tasks.
+       */
+
+      if (rtrtcb != NULL && rtrtcb->sched_priority >= nxttcb->sched_priority)
+        {
+          FAR struct tcb_s *tmptcb;
+
+          /* The TCB at the head of the ready to run list has the higher
+           * priority.  Remove that task from the head of the g_readytorun
+           * list and add to the head of the g_assignedtasks[cpu] list.
+           */
+
+          tmptcb = (FAR struct tcb_s *)
+            dq_remfirst((FAR dq_queue_t *)&g_readytorun);
+
+          DEBUGASSERT(tmptcb == rtrtcb);
+
+          dq_addfirst((FAR dq_entry_t *)tmptcb, tasklist);
+
+          tmptcb->cpu = cpu;
+          nxttcb = tmptcb;
+        }
+
       /* Will pre-emption be disabled after the switch?  If the lockcount is
        * greater than zero, then this task/this CPU holds the scheduler lock.
        */
 
-      if (ntcb->lockcount > 0)
+      if (nxttcb->lockcount > 0)
         {
           /* Yes... make sure that scheduling logic knows about this */
 
@@ -204,7 +251,7 @@ bool sched_removereadytorun(FAR struct tcb_s *rtcb)
        * than zero, then this task/this CPU holds the IRQ lock
        */
 
-      if (ntcb->irqcount > 0)
+      if (nxttcb->irqcount > 0)
         {
           /* Yes... make sure that scheduling logic knows about this */
 
@@ -213,21 +260,13 @@ bool sched_removereadytorun(FAR struct tcb_s *rtcb)
         }
       else
         {
-          /* No.. we may need to perform release our hold on the lock. */
+          /* No.. we may need to perform release our hold on the irq state. */
 
-          spin_setbit(&g_cpu_irqset, cpu, &g_cpu_irqsetlock,
+          spin_clrbit(&g_cpu_irqset, cpu, &g_cpu_irqsetlock,
                       &g_cpu_irqlock);
         }
 
-      ntcb->task_state = TSTATE_TASK_RUNNING;
-
-      /* The task is running but the CPU that it was running on has been
-       * paused.  We can now safely remove its TCB from the ready-to-run
-       * task list.  In the SMP case this may be either the g_readytorun()
-       * or the g_assignedtasks[cpu] list.
-       */
-
-      dq_rem((FAR dq_entry_t *)rtcb, tasklist);
+      nxttcb->task_state = TSTATE_TASK_RUNNING;
 
       /* All done, restart the other CPU (if it was paused). */
 
