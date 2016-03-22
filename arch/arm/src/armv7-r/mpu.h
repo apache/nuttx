@@ -392,7 +392,6 @@ static inline void mpu_control(bool enable)
   if (enable)
     {
       regval |= (SCTLR_M | SCTLR_BR);
-      cp15_wrsctlr(regval);
     }
   else
     {
