@@ -49,6 +49,8 @@
 #  include <debug.h>
 
 #  include "up_arch.h"
+#  include "cache.h"
+#  include "sctlr.h"
 #  include "cp15.h"
 #endif
 
@@ -66,7 +68,7 @@
 
 /* Region Base Address Register Definitions */
 
-#define MPU_RBAR_MASK            0xfffffffc
+#define MPU_RBAR_ADDR_MASK       0xfffffffc
 
 /* Region Size and Enable Register */
 
@@ -201,7 +203,7 @@ static inline unsigned int mpu_get_mpuir(void)
   unsigned int mpuir;
   __asm__ __volatile__
     (
-      "\tmrc " CP15_MPUIR(%0)
+      "\tmrc p15, 0, %0, c0, c0, 4"
       : "=r" (mpuir)
       :
       : "memory"
@@ -222,7 +224,7 @@ static inline void mpu_set_drbar(unsigned int drbar)
 {
   __asm__ __volatile__
     (
-      "\tmcr " CP15_DRBAR(%0)
+      "\tmcr p15, 0, %0, c6, c1, 0"
       :
       : "r" (drbar)
       : "memory"
@@ -241,7 +243,7 @@ static inline void mpu_set_drsr(unsigned int drsr)
 {
   __asm__ __volatile__
     (
-      "\tmcr " CP15_DRSR(%0)
+      "\tmcr p15, 0, %0, c6, c1, 2"
       :
       : "r" (drsr)
       : "memory"
@@ -260,7 +262,7 @@ static inline void mpu_set_dracr(unsigned int dracr)
 {
   __asm__ __volatile__
     (
-      "\tmcr " CP15_DRACR(%0)
+      "\tmcr p15, 0, %0, c6, c1, 4"
       :
       : "r" (dracr)
       : "memory"
@@ -280,7 +282,7 @@ static inline void mpu_set_irbar(unsigned int irbar)
 {
   __asm__ __volatile__
     (
-      "\tmcr " CP15_IRBAR(%0)
+      "\tmcr p15, 0, %0, c6, c1, 1"
       :
       : "r" (irbar)
       : "memory"
@@ -301,7 +303,7 @@ static inline void mpu_set_irsr(unsigned int irsr)
 {
   __asm__ __volatile__
     (
-      "\tmcr " CP15_IRSR(%0)
+      "\tmcr p15, 0, %0, c6, c1, 3"
       :
       : "r" (irsr)
       : "memory"
@@ -322,7 +324,7 @@ static inline void mpu_set_iracr(unsigned int iracr)
 {
   __asm__ __volatile__
     (
-      "\tmcr " CP15_IRACR(%0)
+      "\tmcr p15, 0, %0, c6, c1, 5"
       :
       : "r" (iracr)
       : "memory"
@@ -342,7 +344,7 @@ static inline void mpu_set_rgnr(unsigned int rgnr)
 {
   __asm__ __volatile__
     (
-      "\tmcr " CP15_RGNR(%0)
+      "\tmcr p15, 0, %0, c6, c2, 0"
       :
       : "r" (rgnr)
       : "memory"
@@ -422,7 +424,7 @@ static inline void mpu_priv_stronglyordered(uintptr_t base, size_t size)
 
   /* Select the region base address */
 
-  mpu_set_drbar(base & MPU_RBAR_ADDR_MASK) | region | MPU_RBAR_VALID);
+  mpu_set_drbar((base & MPU_RBAR_ADDR_MASK) | region | MPU_RBAR_VALID);
 
   /* Select the region size and the sub-region map */
 
