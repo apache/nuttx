@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/wqueue/work_signal.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -92,15 +92,19 @@ int work_signal(int qid)
 
       for (wndx = 0, i = 0; i < CONFIG_SCHED_LPNTHREADS; i++)
         {
-          if (g_lpwork.worker[i].busy)
+          /* Is this worker thread busy? */
+
+          if (!g_lpwork.worker[i].busy)
             {
+              /* No.. select this thread */
+
               wndx = i;
               break;
             }
         }
 
-      /* Use the process ID of the IDLE thread (or thread 0 is the are all
-       * busy)
+      /* Use the process ID of the IDLE worker thread (or the ID of worker
+       * thread 0 if all of the worker threads are busy).
        */
 
       pid = g_lpwork.worker[wndx].pid;

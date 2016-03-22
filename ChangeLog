@@ -11577,4 +11577,6 @@
 	* net/tcp/tcp_timer.c:  Fix some logic when there are multiple network
 	  interfaces.  In this case, TCP timeout events can really only being
 	  processed when the poll from the correct device is received (2016-03-20).
+	* sched/wqueue/kwork_signal.c:  Fix logic to find an IDLE worker thread;
+	  the test for busy was backward.  From Linfei Chen (2016-03-22).
 
