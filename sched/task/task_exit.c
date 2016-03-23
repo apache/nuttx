@@ -127,22 +127,7 @@ int task_exit(void)
   ret = task_terminate(dtcb->pid, true);
   rtcb->task_state = TSTATE_TASK_RUNNING;
 
-  /* If there are any pending tasks, then add them to the ready-to-run
-   * task list now
-   */
-
-  if (g_pendingtasks.head != NULL)
-    {
-      (void)sched_mergepending();
-    }
-
-  /* We can't use sched_unlock() to decrement the lock count because the
-   * sched_mergepending() call above might have changed the task at the
-   * head of the ready-to-run list.  Furthermore, we should not need to
-   * perform the unlock action anyway because we know that the pending
-   * task list is empty.  So all we really need to do is to decrement
-   * the lockcount on rctb.
-   */
+  /* Decrement the lockcount on rctb. */
 
   rtcb->lockcount--;
 
@@ -155,6 +140,15 @@ int task_exit(void)
                   &g_cpu_schedlock);
     }
 #endif
+
+  /* If there are any pending tasks, then add them to the ready-to-run
+   * task list now
+   */
+
+  if (g_pendingtasks.head != NULL)
+    {
+      (void)sched_mergepending();
+    }
 
   return ret;
 }

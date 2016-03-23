@@ -83,10 +83,11 @@ int task_restart(pid_t pid)
   FAR struct task_tcb_s *tcb;
   FAR dq_queue_t *tasklist;
   irqstate_t flags;
+  int err;
   int status;
 
-  /* Make sure this task does not become ready-to-run while
-   * we are futzing with its TCB
+  /* Make sure this task does not become ready-to-run while we are futzing
+   * with its TCB
    */
 
   sched_lock();
@@ -98,28 +99,9 @@ int task_restart(pid_t pid)
     {
       /* Not implemented */
 
-      set_errno(ENOSYS);
-      return ERROR;
+      err = ENOSYS;
+      goto errout_with_lock;
     }
-
-#ifdef CONFIG_SMP
-  /* There is currently no capability to restart a task that is actively
-   * running on another CPU either.  This is not the calling cast so if it
-   * is running, then it could only be running a a different CPU.
-   *
-   * Also, will need some interlocks to assure that no tasks are rescheduled
-   * on any other CPU while we do this.
-   */
-
-#warning Missing SMP logic
-  if (rtcb->task_state == TSTATE_TASK_RUNNING)
-    {
-      /* Not implemented */
-
-      set_errno(ENOSYS);
-      return ERROR;
-    }
-#endif
 
   /* We are restarting some other task than ourselves */
   /* Find for the TCB associated with matching pid  */
@@ -133,9 +115,28 @@ int task_restart(pid_t pid)
     {
       /* There is no TCB with this pid or, if there is, it is not a task. */
 
-      set_errno(ESRCH);
-      return ERROR;
+      err = ESRCH;
+      goto errout_with_lock;
     }
+
+#ifdef CONFIG_SMP
+  /* There is currently no capability to restart a task that is actively
+   * running on another CPU.  This is not the calling task so if it is
+   * running, then it could only be running a a different CPU.
+   *
+   * Also, we will need some interlocks to assure that no tasks are
+   * rescheduled on any other CPU while we do this.
+   */
+
+#warning Missing SMP logic
+  if (tcb->cmn.task_state == TSTATE_TASK_RUNNING)
+    {
+      /* Not implemented */
+
+      err = ENOSYS;
+      goto errout_with_lock;
+    }
+#endif /* CONFIG_SMP */
 
   /* Try to recover from any bad states */
 
@@ -196,10 +197,15 @@ int task_restart(pid_t pid)
   if (status != OK)
     {
       (void)task_delete(pid);
-      set_errno(-status);
-      return ERROR;
+      err = -status;
+      goto errout_with_lock;
     }
 
   sched_unlock();
   return OK;
+
+errout_with_lock:
+  set_errno(err);
+  sched_unlock();
+  return ERROR;
 }
