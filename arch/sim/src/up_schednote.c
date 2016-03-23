@@ -106,31 +106,44 @@ void sched_note_stop(FAR struct tcb_s *tcb)
 #endif
 }
 
-void sched_note_switch(FAR struct tcb_s *from, FAR struct tcb_s *to)
+void sched_note_suspend(FAR struct tcb_s *tcb)
 {
 #ifdef CONFIG_SMP
 #if CONFIG_TASK_NAME_SIZE > 0
   lowsyslog(LOG_INFO, "CPU%d: Suspend %s, TCB@%p, state=%d\n",
-            from->cpu, from->name, from, from->task_state);
-  lowsyslog(LOG_INFO, "CPU%d: Resume %s, TCB@%p, state=%d\n",
-            to->cpu, to->name, to, to->task_state);
+            tcb->cpu, tcb->name, tcb, tcb->task_state);
 #else
   lowsyslog(LOG_INFO, "CPU%d: Suspend TCB@%p, state=%d\n",
-            from->cpu, from, from->task_state);
-  lowsyslog(LOG_INFO, "CPU%d: Resume TCB@%p, state=%d\n",
-            to->cpu, to, to->task_state);
+            tcb->cpu, tcb, tcb->task_state);
 #endif
 #else
 #if CONFIG_TASK_NAME_SIZE > 0
   lowsyslog(LOG_INFO, "Suspend %s, TCB@%p, state=%d\n",
-            from->name, from, from->task_state);
-  lowsyslog(LOG_INFO, "Resume %s, TCB@%p, state=%d\n",
-            to->name, to, to->task_state);
+            tcb->name, tcb, tcb->task_state);
 #else
   lowsyslog(LOG_INFO, "Suspend TCB@%p, state=%d\n",
-            from, from->task_state);
+            tcb, tcb->task_state);
+#endif
+#endif
+}
+
+void sched_note_resume(FAR struct tcb_s *tcb)
+{
+#ifdef CONFIG_SMP
+#if CONFIG_TASK_NAME_SIZE > 0
+  lowsyslog(LOG_INFO, "CPU%d: Resume %s, TCB@%p, state=%d\n",
+            tcb->cpu, tcb->name, tcb, tcb->task_state);
+#else
+  lowsyslog(LOG_INFO, "CPU%d: Resume TCB@%p, state=%d\n",
+            tcb->cpu, tcb, tcb->task_state);
+#endif
+#else
+#if CONFIG_TASK_NAME_SIZE > 0
+  lowsyslog(LOG_INFO, "Resume %s, TCB@%p, state=%d\n",
+            tcb->name, tcb, tcb->task_state);
+#else
   lowsyslog(LOG_INFO, "Resume TCB@%p, state=%d\n",
-            to, to->task_state);
+            tcb, tcb->task_state);
 #endif
 #endif
 }
