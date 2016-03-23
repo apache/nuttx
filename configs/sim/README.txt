@@ -265,6 +265,13 @@ SMP
     -# CONFIG_SCHED_INSTRUMENTATION is not set
     +CONFIG_SCHED_INSTRUMENTATION=y
 
+  The SMP configuration will run with:
+
+    CONFIG_SMP_NCPUS=1
+
+  In this case there is, of course, no muli-CPU processing, but this does
+  verify the correctness of some the basic SMP logic.
+
   The NSH configuration can also be forced to run SMP, but suffers from
   the same quirky behavior.  I can be made reliable if you modify
   arch/sim/src/up_idle.c so that the IDLE loop only runs for CPU0.
