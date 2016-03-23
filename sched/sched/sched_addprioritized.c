@@ -73,6 +73,7 @@
  *   the head of the task list is changed.
  * - The caller must set the task_state field of the TCB to
  *   match the state associated with the list.
+ *
  ****************************************************************************/
 
 bool sched_addprioritized(FAR struct tcb_s *tcb, DSEG dq_queue_t *list)

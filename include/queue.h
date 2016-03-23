@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/queue.h
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,12 +46,45 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define sq_init(q) do { (q)->head = NULL; (q)->tail = NULL; } while (0)
-#define dq_init(q) do { (q)->head = NULL; (q)->tail = NULL; } while (0)
+#define sq_init(q) \
+  do \
+    { \
+      (q)->head = NULL; \
+      (q)->tail = NULL; \
+    } \
+  while (0)
 
-#define sq_next(p) ((p)->flink)
-#define dq_next(p) ((p)->flink)
-#define dq_prev(p) ((p)->blink)
+#define dq_init(q) \
+  do \
+    { \
+      (q)->head = NULL; \
+      (q)->tail = NULL; \
+    } \
+  while (0)
+
+#define sq_move(q1,q2) \
+  do \
+    { \
+      (q2)->head = (q1)->head; \
+      (q2)->tail = (q1)->tail; \
+      (q1)->head = NULL; \
+      (q1)->tail = NULL; \
+    } \
+  while (0)
+
+#define dq_move(q1,q2) \
+  do \
+    { \
+      (q2)->head = (q1)->head; \
+      (q2)->tail = (q1)->tail; \
+      (q1)->head = NULL; \
+      (q1)->tail = NULL; \
+    } \
+  while (0)
+
+#define sq_next(p)  ((p)->flink)
+#define dq_next(p)  ((p)->flink)
+#define dq_prev(p)  ((p)->blink)
 
 #define sq_empty(q) ((q)->head == NULL)
 #define dq_empty(q) ((q)->head == NULL)
@@ -113,13 +146,16 @@ void dq_addafter(FAR dq_entry_t *prev, FAR dq_entry_t *node,
 void dq_addbefore(FAR dq_entry_t *next, FAR dq_entry_t *node,
                   FAR dq_queue_t *queue);
 
-FAR sq_entry_t *sq_remafter(FAR sq_entry_t *node, FAR sq_queue_t *queue);
+void sq_cat(FAR sq_queue_t *queue1, FAR sq_queue_t *queue2);
+void dq_cat(FAR dq_queue_t *queue1, FAR dq_queue_t *queue2);
+
+FAR  sq_entry_t *sq_remafter(FAR sq_entry_t *node, FAR sq_queue_t *queue);
 void sq_rem(FAR sq_entry_t *node, FAR sq_queue_t *queue);
 void dq_rem(FAR dq_entry_t *node, FAR dq_queue_t *queue);
-FAR sq_entry_t *sq_remlast(FAR sq_queue_t *queue);
-FAR dq_entry_t *dq_remlast(FAR dq_queue_t *queue);
-FAR sq_entry_t *sq_remfirst(FAR sq_queue_t *queue);
-FAR dq_entry_t *dq_remfirst(FAR dq_queue_t *queue);
+FAR  sq_entry_t *sq_remlast(FAR sq_queue_t *queue);
+FAR  dq_entry_t *dq_remlast(FAR dq_queue_t *queue);
+FAR  sq_entry_t *sq_remfirst(FAR sq_queue_t *queue);
+FAR  dq_entry_t *dq_remfirst(FAR dq_queue_t *queue);
 
 #undef EXTERN
 #ifdef __cplusplus
