@@ -51,6 +51,12 @@
 #include "sched/sched.h"
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define ALL_CPUS ((cpu_set_t)-1)
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -185,8 +191,11 @@ bool sched_mergepending(void)
 #ifdef CONFIG_SMP
 bool sched_mergepending(void)
 {
+  FAR struct tcb_s *rtcb;
   FAR struct tcb_s *ptcb;
+  FAR struct tcb_s *tcb;
   bool ret = false;
+  int cpu;
 
   /* Remove and process every TCB in the g_pendingtasks list.
    *
@@ -197,17 +206,38 @@ bool sched_mergepending(void)
 
   if (!spin_islocked(&g_cpu_schedlock))
     {
-      while ((ptcb = (FAR struct tcb_s *)
-                dq_remfirst((FAR dq_queue_t *)&g_pendingtasks)) != NULL)
-        {
-          /* Add the pending task to the correct ready-to-run list.  These
-           * are prioritized lists; the g_pendingtasks list is accessed in
-           * highest priority order.  This means that the first
-           * CONFIG_SMP_NCPU tasks may be made to run but the remaining will
-           * simply be added to the g_readtorun list.
-           */
+      /* Find the CPU that is executing the lowest priority task */
 
-          ret |= sched_addreadytorun(ptcb);
+      ptcb = (FAR struct tcb_s *)dq_peek((FAR dq_queue_t *)&g_pendingtasks);
+      if (ptcb == NULL)
+        {
+          /* The pending task list is empty */
+
+          return ret;
+        }
+
+      cpu  = sched_cpu_select(ALL_CPUS /* ptcb->affinity */);
+      rtcb = current_task(cpu);
+
+      /* Loop while there is a higher priority task in the pending task list
+       * than in the lowest executing task.
+       *
+       * Normally, this loop should execute no more than CONFIG_SMP_NCPUS
+       * times.  That number could be larger, however, if the CPU affinity
+       * sets do not include all CPUs. In that case, the excess TCBs will
+       * end up in the g_readytorun list.
+       */
+
+      while (ptcb->sched_priority > rtcb->sched_priority)
+        {
+          /* Remove the task from the pending task list */
+
+          tcb = (FAR struct tcb_s *)dq_remfirst((FAR dq_queue_t *)&g_pendingtasks);
+          DEBUGASSERT(tcb == ptcb);
+
+          /* Add the pending task to the correct ready-to-run list. */
+
+          ret |= sched_addreadytorun(tcb);
 
           /* This operation could cause the scheduler to become locked.
            * Check if that happened.
@@ -216,25 +246,40 @@ bool sched_mergepending(void)
           if (spin_islocked(&g_cpu_schedlock))
             {
               /* Yes.. then we may have incorrectly placed some TCBs in the
-               * g_readytorun list (unlikely, but possible).
-               *
-               * REVISIT:  This is awkward.  There is really not so much
-               * need for the pending task list in the SMP configuration.
-               * Perhaps it should just be eliminated?
+               * g_readytorun list (unlikely, but possible).  We will have to
+               * move them back to the pending task list.
                */
 
-              while ((ptcb = (FAR struct tcb_s *)
-                       dq_remlast((FAR dq_queue_t *)&g_readytorun)) != NULL)
-                {
-                  (void)sched_addprioritized(ptcb,
-                                             (FAR dq_queue_t *)&g_pendingtasks);
-                }
+              sched_mergeprioritized((FAR dq_queue_t *)&g_readytorun,
+                                     (FAR dq_queue_t *)&g_pendingtasks);
 
-              /* And break out of the loop */
+              /* And return with the schedule locked and tasks in the
+               * pending task list.
+               */
 
-              break;
+              return ret;
             }
+
+          /* Set up for the next time through the loop */
+
+          ptcb = (FAR struct tcb_s *)dq_peek((FAR dq_queue_t *)&g_pendingtasks);
+          if (ptcb == NULL)
+            {
+              /* The pending task list is empty */
+
+              return ret;
+            }
+
+          cpu = sched_cpu_select(ALL_CPUS /* ptcb->affinity */);
+          rtcb = current_task(cpu);
         }
+
+      /* No more pending tasks can be made running.  Move any reamaining
+       * tasks in the pending task list to the ready-to-run task list.
+       */
+
+      sched_mergeprioritized((FAR dq_queue_t *)&g_pendingtasks,
+                             (FAR dq_queue_t *)&g_readytorun);
     }
 
   return ret;
