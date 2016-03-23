@@ -424,7 +424,7 @@ static inline void mpu_priv_stronglyordered(uintptr_t base, size_t size)
 
   /* Select the region base address */
 
-  mpu_set_drbar((base & MPU_RBAR_ADDR_MASK) | region | MPU_RBAR_VALID);
+  mpu_set_drbar(base & MPU_RBAR_ADDR_MASK);
 
   /* Select the region size and the sub-region map */
 
@@ -467,7 +467,7 @@ static inline void mpu_user_flash(uintptr_t base, size_t size)
 
   /* Select the region base address */
 
-  mpu_set_drbar((base & MPU_RBAR_ADDR_MASK) | region);
+  mpu_set_drbar(base & MPU_RBAR_ADDR_MASK);
 
   /* Select the region size and the sub-region map */
 
@@ -508,7 +508,7 @@ static inline void mpu_priv_flash(uintptr_t base, size_t size)
 
   /* Select the region base address */
 
-  mpu_set_drbar((base & MPU_RBAR_ADDR_MASK) | region);
+  mpu_set_drbar(base & MPU_RBAR_ADDR_MASK);
 
   /* Select the region size and the sub-region map */
 
@@ -548,7 +548,7 @@ static inline void mpu_user_intsram(uintptr_t base, size_t size)
 
   /* Select the region base address */
 
-  mpu_set_drbar((base & MPU_RBAR_ADDR_MASK) | region);
+  mpu_set_drbar(base & MPU_RBAR_ADDR_MASK);
 
   /* Select the region size and the sub-region map */
 
@@ -589,7 +589,7 @@ static inline void mpu_priv_intsram(uintptr_t base, size_t size)
 
   /* Select the region base address */
 
-  mpu_set_drbar((base & MPU_RBAR_ADDR_MASK) | region);
+  mpu_set_drbar(base & MPU_RBAR_ADDR_MASK);
 
   /* Select the region size and the sub-region map */
 
@@ -630,7 +630,7 @@ static inline void mpu_user_extsram(uintptr_t base, size_t size)
 
   /* Select the region base address */
 
-  mpu_set_drbar((base & MPU_RBAR_ADDR_MASK) | region);
+  mpu_set_drbar(base & MPU_RBAR_ADDR_MASK);
 
   /* Select the region size and the sub-region map */
 
@@ -672,7 +672,7 @@ static inline void mpu_priv_extsram(uintptr_t base, size_t size)
 
   /* Select the region base address */
 
-  mpu_set_drbar((base & MPU_RBAR_ADDR_MASK) | region);
+  mpu_set_drbar(base & MPU_RBAR_ADDR_MASK);
 
   /* Select the region size and the sub-region map */
 
@@ -714,7 +714,7 @@ static inline void mpu_peripheral(uintptr_t base, size_t size)
 
   /* Select the region base address */
 
-  mpu_set_drbar((base & MPU_RBAR_ADDR_MASK) | region);
+  mpu_set_drbar(base & MPU_RBAR_ADDR_MASK);
 
   /* Select the region size and the sub-region map */
 
