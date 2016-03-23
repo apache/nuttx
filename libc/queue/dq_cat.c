@@ -58,7 +58,7 @@ void dq_cat(FAR dq_queue_t *queue1, FAR dq_queue_t *queue2)
 
   /* If queue2 is empty, then just move queue1 to queue2 */
 
-  if (!dq_empty(queue2))
+  if (dq_empty(queue2))
     {
       dq_move(queue1, queue2);
     }

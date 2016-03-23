@@ -58,7 +58,7 @@ void sq_cat(FAR sq_queue_t *queue1, FAR sq_queue_t *queue2)
 
   /* If queue2 is empty, then just move queue1 to queue2 */
 
-  if (!sq_empty(queue2))
+  if (sq_empty(queue2))
     {
       sq_move(queue1, queue2);
     }
