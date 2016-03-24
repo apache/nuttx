@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated March 19, 2016)
+NuttX TODO List (Last updated March 23, 2016)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -14,7 +14,7 @@ nuttx/
   (3)  Signals (sched/signal, arch/)
   (2)  pthreads (sched/pthread)
   (0)  Message Queues (sched/mqueue)
-  (6)  Kernel/Protected Build
+  (7)  Kernel/Protected Build
   (3)  C++ Support
   (6)  Binary loaders (binfmt/)
  (12)  Network (net/, drivers/net)
@@ -455,6 +455,34 @@ o Kernel/Protected Build
 
                  http://git.busybox.net/busybox/tree/util-linux/mkfs_vfat.c
 
+  Status:      Open
+  Priority:    Medium/High -- the kernel build configuration is not fully fielded
+               yet.
+
+  Title:       apps/system PARTITIONING
+  Description: Several of the USB device helper applications in apps/system
+               violate OS/application partitioning and will fail on a kernel
+               or protected build.  These include directories:
+
+                 - apps/system/cdcacm
+                 - apps/system/composite
+                 - apps/system/usbmsc
+
+               These functions call directly into operating system functions
+               like:
+
+                 - usbmsc_archinitialize
+                 - composite_archinitialize
+                 - cdcacm_initialize
+                 - cdcacm_uninitialize
+                 - usbmsc_initialize
+                 - usbmsc_uninitialize
+                 - composite_initialize
+                 - composite-Uninitialize
+
+               Since the corrsponding device drivers may not be present, these
+               cannot be replaced with IOCTLs.  Perhaps they should be support
+               with new boardctl commands?
   Status:      Open
   Priority:    Medium/High -- the kernel build configuration is not fully fielded
                yet.
