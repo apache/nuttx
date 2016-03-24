@@ -211,7 +211,8 @@ int sched_lock(void)
        */
 
       sched_mergeprioritized((FAR dq_queue_t *)&g_readytorun,
-                             (FAR dq_queue_t *)&g_pendingtasks);
+                             (FAR dq_queue_t *)&g_pendingtasks,
+                             TSTATE_TASK_PENDING);
 #endif
     }
 

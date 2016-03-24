@@ -63,6 +63,7 @@
  *           will be empty upon return.
  *   list2 - That list that will contained the prioritized content of
  *           both lists upon return.
+ *   task_state - The task state/list index associated with list2.
  *
  * Return Value:
  *   None
@@ -74,16 +75,26 @@
  *
  ****************************************************************************/
 
-void sched_mergeprioritized(FAR dq_queue_t *list1, FAR dq_queue_t *list2)
+void sched_mergeprioritized(FAR dq_queue_t *list1, FAR dq_queue_t *list2,
+                            uint8_t task_state)
 {
+  FAR dq_queue_t clone;
   FAR struct tcb_s *tcb1;
   FAR struct tcb_s *tcb2;
+  FAR struct tcb_s *tmp;
 
   DEBUGASSERT(list1 != NULL && list2 != NULL);
 
-  /* Get the head of list1 and list2 */
+  /* Get a private copy of list1, clearing list1.  We do this early so that
+   * we can be assured that the list is stationary before we start any
+   * operations on it.
+   */
 
-  tcb1 = (FAR struct tcb_s *)dq_peek(list1);
+  dq_move(list1, &clone);
+
+  /* Get the TCB at the head of list1 */
+
+  tcb1 = (FAR struct tcb_s *)dq_peek(&clone);
   if (tcb1 == NULL)
     {
       /* Special case.. list1 is empty.  There is nothing to be done. */
@@ -91,42 +102,64 @@ void sched_mergeprioritized(FAR dq_queue_t *list1, FAR dq_queue_t *list2)
       return;
     }
 
+  /* Now the TCBs are no longer accessible and we can change the state on
+   * each TCB.  We go through extra precaution to assure that a TCB is never
+   * in a list with the wrong state.
+   */
+
+  for (tmp  = tcb1;
+       tmp != NULL;
+       tmp  = (FAR struct tcb_s *)dq_next((FAR dq_entry_t *)tmp))
+    {
+      tmp->task_state = task_state;
+    }
+
+  /* Get the head of list2 */
+
   tcb2 = (FAR struct tcb_s *)dq_peek(list2);
   if (tcb2 == NULL)
     {
       /* Special case.. list2 is empty.  Move list1 to list2. */
 
-      dq_move(list1, list2);
+      dq_move(&clone, list2);
       return;
     }
 
-  /* Now loop until all entries from list1 have been merged into list2 */
+  /* Now loop until all entries from list1 have been merged into list2. tcb1
+   * points at the TCB at the head of list1; tcb2 points to the TCB at the
+   * current working position in list2
+   */
 
-  while (tcb1 != NULL)
+  do
     {
-      /* Are we at the end of list2? */
+      /* Are we at the end of list2 with TCBs remaining to be merged in
+       * list1?
+       */
 
       if (tcb2 == NULL)
         {
           /* Yes..  Just append the remainder of list1 to the end of list2. */
 
-          tcb1->blink = NULL;
-          list1->head = (FAR dq_entry_t *)tcb1;
-          dq_cat(list1, list2);
+          dq_cat(&clone, list2);
           break;
         }
 
-      /* Which has higher priority? */
+      /* Which TCB has higher priority? */
 
       else if (tcb1->sched_priority > tcb2->sched_priority)
         {
           /* The TCB from list1 has higher priority than the TCB from list2.
-           * Insert the TCB from list1 before the TCB from list2.
+           * Remove the TCB from list1 and insert it before the TCB from
+           * list2.
            */
 
-          dq_addbefore((FAR dq_entry_t *)tcb2, (FAR dq_entry_t *)tcb2,
+          tmp = (FAR struct tcb_s *)dq_remfirst(&clone);
+          DEBUGASSERT(tmp == tcb1);
+
+          dq_addbefore((FAR dq_entry_t *)tcb2, (FAR dq_entry_t *)tmp,
                        list2);
-          tcb1 = (FAR struct tcb_s *)dq_next((FAR dq_entry_t *)tcb1);
+
+          tcb1 = (FAR struct tcb_s *)dq_peek(&clone);
         }
       else
         {
@@ -137,11 +170,5 @@ void sched_mergeprioritized(FAR dq_queue_t *list1, FAR dq_queue_t *list2)
           tcb2 = (FAR struct tcb_s *)dq_next((FAR dq_entry_t *)tcb2);
         }
     }
-
- /* All of the TCBs from list1 have been moved.  Now we can now mark list1
-  * empty.
-  */
- 
- dq_init(list1);
+  while (tcb1 != NULL);
 }
-

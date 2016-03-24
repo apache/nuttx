@@ -251,7 +251,8 @@ bool sched_mergepending(void)
                */
 
               sched_mergeprioritized((FAR dq_queue_t *)&g_readytorun,
-                                     (FAR dq_queue_t *)&g_pendingtasks);
+                                     (FAR dq_queue_t *)&g_pendingtasks,
+                                     TSTATE_TASK_PENDING);
 
               /* And return with the schedule locked and tasks in the
                * pending task list.
@@ -279,7 +280,8 @@ bool sched_mergepending(void)
        */
 
       sched_mergeprioritized((FAR dq_queue_t *)&g_pendingtasks,
-                             (FAR dq_queue_t *)&g_readytorun);
+                             (FAR dq_queue_t *)&g_readytorun,
+                             TSTATE_TASK_READYTORUN);
     }
 
   return ret;

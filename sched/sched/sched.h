@@ -370,8 +370,9 @@ extern volatile cpu_set_t g_cpu_lockset;
 
 bool sched_addreadytorun(FAR struct tcb_s *rtrtcb);
 bool sched_removereadytorun(FAR struct tcb_s *rtrtcb);
-bool sched_addprioritized(FAR struct tcb_s *newTcb, DSEG dq_queue_t *list);
-void sched_mergeprioritized(FAR dq_queue_t *list1, FAR dq_queue_t *list2);
+bool sched_addprioritized(FAR struct tcb_s *tcb, DSEG dq_queue_t *list);
+void sched_mergeprioritized(FAR dq_queue_t *list1, FAR dq_queue_t *list2,
+                            uint8_t task_state);
 bool sched_mergepending(void);
 void sched_addblocked(FAR struct tcb_s *btcb, tstate_t task_state);
 void sched_removeblocked(FAR struct tcb_s *btcb);
