@@ -63,7 +63,7 @@ ifeq ($(CONFIG_AJOYSTICK),y)
 endif
 endif
 
-ifeq ($(CONFIG_NSH_LIBRARY),y)
+ifeq ($(CONFIG_LIB_BOARDCTL),y)
 CSRCS += stm32_appinit.c
 endif
 
