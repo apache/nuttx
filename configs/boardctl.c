@@ -51,6 +51,7 @@
 
 #ifdef CONFIG_BOARDCTL_USBDEVCTRL
 #  include <nuttx/usb/cdcacm.h>
+#  include <nuttx/usb/pl2303.h>
 #  include <nuttx/usb/usbmsc.h>
 #  include <nuttx/usb/composite.h>
 #endif
@@ -108,6 +109,29 @@ static inline int boardctl_usbdevctrl(FAR struct boardioc_usbdev_ctrl_s *ctrl)
 
             default:
               ret = -EINVAL;
+              break;
+          }
+        break;
+#endif
+
+#ifdef CONFIG_PL2303
+      case BOARDIOC_USBDEV_PL2303:           /* PL2303 serial, not in a composite */
+        switch (ctrl->action)
+          {
+            case BOARDIOC_USBDEV_INITIALIZE: /* Initialize PL2303 serial device */
+              break;                         /* There is no PL2303 serial initialization */
+
+            case BOARDIOC_USBDEV_CONNECT:    /* Connect the CDC/ACM device */
+              ret = usbdev_serialinitialize(ctrl->instance);
+              break;
+
+            case BOARDIOC_USBDEV_DISCONNECT: /* There is no PL2303 serial disconnect */
+              ret = -ENOSYS;
+              break;
+
+            default:
+              ret = -EINVAL;
+              break;
           }
         break;
 #endif
@@ -139,6 +163,7 @@ static inline int boardctl_usbdevctrl(FAR struct boardioc_usbdev_ctrl_s *ctrl)
 
             default:
               ret = -EINVAL;
+              break;
           }
         break;
 #endif
@@ -173,6 +198,7 @@ static inline int boardctl_usbdevctrl(FAR struct boardioc_usbdev_ctrl_s *ctrl)
 
             default:
               ret = -EINVAL;
+              break;
           }
         break;
 #endif
