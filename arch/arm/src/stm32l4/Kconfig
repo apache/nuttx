@@ -415,7 +415,7 @@ config STM32L4_DISABLE_IDLE_SLEEP_DURING_DEBUG
 		as the ST-LINK2 with OpenOCD, if the ARM is put to sleep via the WFI
 		instruction, the debugger will disconnect, terminating the debug session.
 
-config STM32L4_CUSTOM_CLOCKCONFIG
+config ARCH_BOARD_STM32L4_CUSTOM_CLOCKCONFIG
         bool "Custom clock configuration"
 	default n
 	---help---

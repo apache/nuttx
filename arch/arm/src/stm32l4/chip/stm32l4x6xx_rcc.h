@@ -89,8 +89,8 @@
 #define STM32L4_RCC_ICSCR             (STM32L4_RCC_BASE+STM32L4_RCC_ICSCR_OFFSET)
 #define STM32L4_RCC_CFGR              (STM32L4_RCC_BASE+STM32L4_RCC_CFGR_OFFSET)
 #define STM32L4_RCC_PLLCFG            (STM32L4_RCC_BASE+STM32L4_RCC_PLLCFG_OFFSET)
-#define STM32L4_RCC_PLLSAI1CFG        (STM32L4_RCC_BASE+STM32L4_RCC_PLLSAI1CFGR_OFFSET)
-#define STM32L4_RCC_PLLSAI2CFG        (STM32L4_RCC_BASE+STM32L4_RCC_PLLSAI2CFGR_OFFSET)
+#define STM32L4_RCC_PLLSAI1CFG        (STM32L4_RCC_BASE+STM32L4_RCC_PLLSAI1CFG_OFFSET)
+#define STM32L4_RCC_PLLSAI2CFG        (STM32L4_RCC_BASE+STM32L4_RCC_PLLSAI2CFG_OFFSET)
 #define STM32L4_RCC_CIER              (STM32L4_RCC_BASE+STM32L4_RCC_CIER_OFFSET)
 #define STM32L4_RCC_CIFR              (STM32L4_RCC_BASE+STM32L4_RCC_CIFR_OFFSET)
 #define STM32L4_RCC_CICR              (STM32L4_RCC_BASE+STM32L4_RCC_CICR_OFFSET)
@@ -465,7 +465,7 @@
 #define RCC_AHB2ENR_OTGFSEN         (1 << 12) /* Bit 12: USB OTG FS module enable */
 #define RCC_AHB2ENR_ADCEN           (1 << 13) /* Bit 13: ADC interface enable (common to all ADCs) */
 #define RCC_AHB2ENR_AESEN           (1 << 16) /* Bit 16: AES Cryptographic module enable */
-#define RCC_AHB2ENR_RNGEN           (1 << 18)  /* Bit 6: Random number generator module enable */
+#define RCC_AHB2ENR_RNGEN           (1 << 18) /* Bit 18: Random number generator module enable */
 
 /* AHB3 Peripheral Clock enable register */
 
