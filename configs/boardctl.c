@@ -50,9 +50,9 @@
 #include <nuttx/binfmt/symtab.h>
 
 #ifdef CONFIG_BOARDCTL_USBDEVCTRL
-#  include <nuttx/usbdev/cdcacm.h>
-#  include <nuttx/usbdev/usbmsc.h>
-#  include <nuttx/usbdev/composite.h>
+#  include <nuttx/usb/cdcacm.h>
+#  include <nuttx/usb/usbmsc.h>
+#  include <nuttx/usb/composite.h>
 #endif
 
 #ifdef CONFIG_LIB_BOARDCTL
@@ -83,7 +83,7 @@ static inline int boardctl_usbdevctrl(FAR struct boardioc_usbdev_ctrl_s *ctrl)
 
   switch (ctrl->usbdev)
     {
-#if defined(CONFIG_CDCACM) && !defined(CONFIG_CDCACM_COMPOSITE)
+#ifdef CONFIG_CDCACM
       case BOARDIOC_USBDEV_CDCACM:           /* CDC/ACM, not in a composite */
         switch (ctrl->action)
           {
@@ -91,16 +91,18 @@ static inline int boardctl_usbdevctrl(FAR struct boardioc_usbdev_ctrl_s *ctrl)
               break;                         /* There is no CDC/ACM initialization */
 
             case BOARDIOC_USBDEV_CONNECT:    /* Connect the CDC/ACM device */
+#ifndef CONFIG_CDCACM_COMPOSITE
               {
                 DEBUGASSERT(ctrl->handle != NULL);
                 ret = cdcacm_initialize(ctrl->instance, ctrl->handle);
               }
+#endif
               break;
 
             case BOARDIOC_USBDEV_DISCONNECT: /* Disconnect the CDC/ACM device */
               {
-                DEBUGASSERT(ctrl->handle != NULL);
-                cdcacm_uninitialize(ctrl->handle);
+                DEBUGASSERT(ctrl->handle != NULL && *ctrl->handle != NULL);
+                cdcacm_uninitialize(*ctrl->handle);
               }
               break;
 
@@ -110,7 +112,7 @@ static inline int boardctl_usbdevctrl(FAR struct boardioc_usbdev_ctrl_s *ctrl)
         break;
 #endif
 
-#if defined(CONFIG_USBMSC) && !defined(CONFIG_USBMSC_COMPOSITE)
+#ifdef CONFIG_USBMSC
       case BOARDIOC_USBDEV_MSC:              /* Mass storage class */
         switch (ctrl->action)
           {
@@ -130,8 +132,8 @@ static inline int boardctl_usbdevctrl(FAR struct boardioc_usbdev_ctrl_s *ctrl)
 
             case BOARDIOC_USBDEV_DISCONNECT: /* Disconnect the USB MSC device */
               {
-                DEBUGASSERT(ctrl->handle != NULL);
-                usbmsc_uninitialize(ctrl->handle);
+                DEBUGASSERT(ctrl->handle != NULL && *ctrl->handle != NULL);
+                usbmsc_uninitialize(*ctrl->handle);
               }
               break;
 
@@ -154,8 +156,8 @@ static inline int boardctl_usbdevctrl(FAR struct boardioc_usbdev_ctrl_s *ctrl)
             case BOARDIOC_USBDEV_CONNECT:    /* Connect the Composite device */
               {
                 DEBUGASSERT(ctrl->handle != NULL);
-                *(ctrl->handle) = composite_initialize();
-                if (ctrl->handle == NULL)
+                *ctrl->handle = composite_initialize();
+                if (*ctrl->handle == NULL)
                   {
                     ret = -EIO;
                   }
@@ -164,8 +166,8 @@ static inline int boardctl_usbdevctrl(FAR struct boardioc_usbdev_ctrl_s *ctrl)
 
             case BOARDIOC_USBDEV_DISCONNECT: /* Disconnect the Composite device */
               {
-                DEBUGASSERT(ctrl->handle != NULL);
-                composite_uninitialize(ctrl->handle);
+                DEBUGASSERT(ctrl->handle != NULL && *ctrl->handle != NULL);
+                composite_uninitialize(*ctrl->handle);
               }
               break;
 
