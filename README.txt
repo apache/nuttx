@@ -1455,6 +1455,8 @@ nuttx/
  |   |   `- README.txt
  |   |- stm32f746g-disco/
  |   |   `- README.txt
+ |   |- stm32l476vg-disco/
+ |   |   `- README.txt
  |   |- stm32ldiscovery/
  |   |   `- README.txt
  |   |- stm32vldiscovery/
