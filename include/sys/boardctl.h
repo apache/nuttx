@@ -228,6 +228,9 @@ enum boardioc_usbdev_identifier_e
 #ifdef CONFIG_CDCACM
   , BOARDIOC_USBDEV_CDCACM        /* CDC/ACM */
 #endif
+#ifdef CONFIG_PL2303
+  , BOARDIOC_USBDEV_PL2303        /* PL2303 serial */
+#endif
 #ifdef CONFIG_USBMSC
   , BOARDIOC_USBDEV_MSC           /* Mass storage class */
 #endif

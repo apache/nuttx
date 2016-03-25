@@ -469,14 +469,12 @@ o Kernel/Protected Build
                These functions call directly into operating system functions
                like:
 
-                 - usbdev_serialinitialize - Called in apps/examples/usbserial,
-                   apps/examples/usbterm
                  - cdcacm_classobject - Called from apps/system/composite.
-                 - usbmsc_configure - Called fromo apps/system/usbmsc and
+                 - usbmsc_configure - Called from apps/system/usbmsc and
                    apps/system/composite
-                 - usbmsc_bindlun - Called fromo apps/system/usbmsc and
+                 - usbmsc_bindlun - Called from apps/system/usbmsc and
                    apps/system/composite
-                 - usbmsc_exportluns - Called fromo apps/system/usbmsc.
+                 - usbmsc_exportluns - Called from apps/system/usbmsc.
 
   Status:      Open
   Priority:    Medium/High -- the kernel build configuration is not fully fielded
