@@ -117,6 +117,12 @@
 #endif
 
 /****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static bool g_app_initialzed;
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -130,76 +136,84 @@
 
 int board_app_initialize(void)
 {
+  /* Check if already initialized */
+
+  if (g_app_initialzed)
+    {
+      return OK;
+    }
+
 #ifdef HAVE_SST25
-  FAR struct spi_dev_s *spi;
-  FAR struct mtd_dev_s *mtd;
-  int ret;
+  {
+    FAR struct spi_dev_s *spi;
+    FAR struct mtd_dev_s *mtd;
+    int ret;
 
-  /* Configure SPI-based devices */
+    /* Configure SPI-based devices */
+    /* Get the SPI port */
 
-  /* Get the SPI port */
+    syslog(LOG_INFO, "Initializing SPI port %d\n",
+           CONFIG_SPARK_FLASH_SPI);
 
-  syslog(LOG_INFO, "Initializing SPI port %d\n",
-         CONFIG_SPARK_FLASH_SPI);
+    spi = stm32_spibus_initialize(CONFIG_SPARK_FLASH_SPI);
+    if (!spi)
+      {
+        syslog(LOG_ERR, "ERROR: Failed to initialize SPI port %d\n",
+               CONFIG_SPARK_FLASH_SPI);
+        return -ENODEV;
+      }
 
-  spi = stm32_spibus_initialize(CONFIG_SPARK_FLASH_SPI);
-  if (!spi)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to initialize SPI port %d\n",
-             CONFIG_SPARK_FLASH_SPI);
-      return -ENODEV;
-    }
+    syslog(LOG_INFO, "Successfully initialized SPI port %d\n",
+           CONFIG_SPARK_FLASH_SPI);
 
-  syslog(LOG_INFO, "Successfully initialized SPI port %d\n",
-         CONFIG_SPARK_FLASH_SPI);
+    /* Now bind the SPI interface to the SST25 SPI FLASH driver */
 
-  /* Now bind the SPI interface to the SST25 SPI FLASH driver */
+    syslog(LOG_INFO, "Bind SPI to the SPI flash driver\n");
 
-  syslog(LOG_INFO, "Bind SPI to the SPI flash driver\n");
-
-  mtd = sst25_initialize(spi);
-  if (!mtd)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to bind SPI port %d to the SPI FLASH driver\n",
-             CONFIG_SPARK_FLASH_SPI);
-    }
-  else
-    {
-      syslog(LOG_INFO, "Successfully bound SPI port %d to the SPI FLASH driver\n",
-             CONFIG_SPARK_FLASH_SPI);
-    }
+    mtd = sst25_initialize(spi);
+    if (!mtd)
+      {
+        syslog(LOG_ERR, "ERROR: Failed to bind SPI port %d to the SPI FLASH driver\n",
+               CONFIG_SPARK_FLASH_SPI);
+      }
+    else
+      {
+        syslog(LOG_INFO, "Successfully bound SPI port %d to the SPI FLASH driver\n",
+               CONFIG_SPARK_FLASH_SPI);
+      }
 
 #ifndef CONFIG_SPARK_FLASH_PART
 
-  /* Use the FTL layer to wrap the MTD driver as a block driver */
+    /* Use the FTL layer to wrap the MTD driver as a block driver */
 
-  ret = ftl_initialize(CONFIG_SPARK_FLASH_MINOR, mtd);
-  if (ret < 0)
-    {
-      fdbg("ERROR: Initialize the FTL layer\n");
-      return ret;
-    }
+    ret = ftl_initialize(CONFIG_SPARK_FLASH_MINOR, mtd);
+    if (ret < 0)
+      {
+        fdbg("ERROR: Initialize the FTL layer\n");
+        return ret;
+      }
 
 #ifdef CONFIG_SPARK_MOUNT_FLASH
-  char  partname[16];
-  char  mntpoint[16];
-
-  /* mount -t vfat /dev/mtdblock0 /mnt/p0 */
-
-  snprintf(partname, sizeof(partname), "/dev/mtdblock%d",
-           CONFIG_SPARK_FLASH_MINOR);
-  snprintf(mntpoint, sizeof(mntpoint)-1, CONFIG_SPARK_FLASH_MOUNT_POINT,
-           CONFIG_SPARK_FLASH_MINOR);
-
-  /* Mount the file system at /mnt/pn  */
-
-  ret = mount(partname, mntpoint, "vfat", 0, NULL);
-  if (ret < 0)
     {
-      fdbg("ERROR: Failed to mount the FAT volume: %d\n", errno);
-      return ret;
-    }
+      char  partname[16];
+      char  mntpoint[16];
 
+      /* mount -t vfat /dev/mtdblock0 /mnt/p0 */
+
+      snprintf(partname, sizeof(partname), "/dev/mtdblock%d",
+               CONFIG_SPARK_FLASH_MINOR);
+      snprintf(mntpoint, sizeof(mntpoint)-1, CONFIG_SPARK_FLASH_MOUNT_POINT,
+               CONFIG_SPARK_FLASH_MINOR);
+
+     /* Mount the file system at /mnt/pn  */
+
+      ret = mount(partname, mntpoint, "vfat", 0, NULL);
+      if (ret < 0)
+        {
+          fdbg("ERROR: Failed to mount the FAT volume: %d\n", errno);
+          return ret;
+        }
+    }
 #endif
 #else
     {
@@ -265,19 +279,24 @@ int board_app_initialize(void)
         }
     }
 #endif /* CONFIG_SPARK_FLASH_PART */
-
+  }
 #endif /* HAVE_SST25 */
 
 #ifdef HAVE_USBMONITOR
-  /* Start the USB Monitor */
+  {
+    int ret;
 
-  ret = usbmonitor_start(0, NULL);
-  if (ret != OK)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to start USB monitor: %d\n", ret);
-    }
+    /* Start the USB Monitor */
+
+    ret = usbmonitor_start(0, NULL);
+    if (ret != OK)
+      {
+        syslog(LOG_ERR, "ERROR: Failed to start USB monitor: %d\n", ret);
+      }
+  }
 #endif
 
+  g_app_initialzed = true;
   return OK;
 }
 
@@ -290,15 +309,9 @@ int board_app_initialize(void)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_BOARDCTL_USBDEVCTRL
 int board_usbmsc_initialize(int port)
 {
-#if 1 /* defined(CONFIG_LIB_BOARDCTL) */
-  /* REVIST: CONFIG_LIB_BOARDCTL is not a sufficient condition to determine
-   * board_app_initialize() has already been called or not.
-   */
-
-  return OK;
-#else
   return board_app_initialize();
-#endif
 }
+#endif
