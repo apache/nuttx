@@ -63,7 +63,7 @@ endif
 endif
 
 ifeq ($(CONFIG_NSH_LIBRARY),y)
-CSRCS += stm32_nsh.c
+CSRCS += stm32_appinit.c
 endif
 
 include $(TOPDIR)/configs/Board.mk

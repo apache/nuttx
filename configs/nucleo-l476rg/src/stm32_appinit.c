@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/nucleo-l476rg/src/stm32_nsh.c
+ * configs/nucleo-l476rg/src/stm32_appinit.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
