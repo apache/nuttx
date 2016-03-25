@@ -46,6 +46,15 @@
  * Pre-processor Definitions
  ************************************************************************************/
 /* Clocking *************************************************************************/
+/* The Sabre-6Quad board has two crystals:
+ *
+ *   Y1    24     MHz CPU_XTALI/CPU_XTALO
+ *   QZ500 32.768 KHz RTC_XTALI/RTC_XTALO
+ */
+
+#define BOARD_CPUXTAL_FREQUENCY 24000000
+#define BAORD_RTCXTAL_FREQUENCY    32768
+
 /* Clocking will be configured at 792 MHz initially when started via U-Boot.  The
  * Linux kernel will use the CPU frequency scaling code which will switch the
  * processor frequency between 400 MHz and 1GHz based on load and temperature.
