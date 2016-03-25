@@ -1,7 +1,7 @@
 ############################################################################
 # configs/samv71-xult/src/Makefile
 #
-#   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -76,6 +76,10 @@ endif
 
 ifeq ($(CONFIG_USBMSC),y)
 CSRCS += sam_usbmsc.c
+endif
+
+ifeq ($(CONFIG_USBDEV_COMPOSITE),y)
+CSRCS += sam_composite.c
 endif
 
 ifeq ($(CONFIG_SAMV7_MCAN),y)

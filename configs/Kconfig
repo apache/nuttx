@@ -1903,6 +1903,13 @@ config BOARDCTL_OS_SYMTAB
 	---help---
 		Enables support for the BOARDIOC_OS_SYMTAB boardctl() command.
 
+config BOARDCTL_USBDEVCTRL
+	bool "Enable USB device controls"
+	default n
+	depends on USBDEV
+	---help---
+		Enables support for the BOARDIOC_USBDEV_CONTROL boardctl() command.
+
 config BOARDCTL_TSCTEST
 	bool "Enable touchscreen test interfaces"
 	default n

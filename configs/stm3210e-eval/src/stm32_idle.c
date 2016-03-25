@@ -126,9 +126,6 @@
 #if defined(CONFIG_PM) && defined(CONFIG_RTC_ALARM)
 static volatile bool g_alarmwakeup;               /* Wakeup Alarm indicator */
 #endif
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
