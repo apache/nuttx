@@ -220,6 +220,32 @@ int board_uniqueid(FAR uint8_t *uniqueid);
 #endif
 
 /****************************************************************************
+ * Name:  board_<usbdev>_initialize
+ *
+ * Description:
+ *   Initialize the USB device <usbdev> on the specified USB device port.
+ *
+ * Input Parameters:
+ *   port- The USB device port.
+ *
+ * Returned Value:
+ *   Zero is returned on success.  Otherwise, a negated errno value is
+ *   returned to indicate the nature of the failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_BOARDCTL_USBDEVCTRL
+#if defined(CONFIG_CDCACM) && !defined(CONFIG_CDCACM_COMPOSITE)
+#endif
+#if defined(CONFIG_USBMSC) && !defined(CONFIG_USBMSC_COMPOSITE)
+int board_usbmsc_initialize(int port);
+#endif
+#ifdef CONFIG_USBDEV_COMPOSITE
+int board_composite_initialize(int port);
+#endif
+#endif
+
+/****************************************************************************
  * Name: board_tsc_setup
  *
  * Description:

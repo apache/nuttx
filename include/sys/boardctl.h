@@ -93,6 +93,12 @@
  * CONFIGURATION: CONFIG_BOARDCTL_OS_SYMTAB
  * DEPENDENCIES:  None
  *
+ * CMD:           BOARDIOC_USBDEV_CONTROL
+ * DESCRIPTION:   Manage USB device classes
+ * ARG:           A pointer to an instance of struct boardioc_usbdev_ctrl_s
+ * CONFIGURATION: CONFIG_LIB_BOARDCTL && CONFIG_BOARDCTL_USBDEVCTRL
+ * DEPENDENCIES:  Board logic must provide board_<usbdev>_initialize()
+ *
  * CMD:           BOARDIOC_TSCTEST_SETUP
  * DESCRIPTION:   Touchscreen controller test configuration
  * ARG:           Touch controller device minor number
@@ -137,12 +143,13 @@
 #define BOARDIOC_UNIQUEID          _BOARDIOC(0x0004)
 #define BOARDIOC_APP_SYMTAB        _BOARDIOC(0x0005)
 #define BOARDIOC_OS_SYMTAB         _BOARDIOC(0x0006)
-#define BOARDIOC_TSCTEST_SETUP     _BOARDIOC(0x0007)
-#define BOARDIOC_TSCTEST_TEARDOWN  _BOARDIOC(0x0008)
-#define BOARDIOC_ADCTEST_SETUP     _BOARDIOC(0x0009)
-#define BOARDIOC_PWMTEST_SETUP     _BOARDIOC(0x000a)
-#define BOARDIOC_CAN_INITIALIZE    _BOARDIOC(0x000b)
-#define BOARDIOC_GRAPHICS_SETUP    _BOARDIOC(0x000c)
+#define BOARDIOC_USBDEV_CONTROL    _BOARDIOC(0x0007)
+#define BOARDIOC_TSCTEST_SETUP     _BOARDIOC(0x0008)
+#define BOARDIOC_TSCTEST_TEARDOWN  _BOARDIOC(0x0009)
+#define BOARDIOC_ADCTEST_SETUP     _BOARDIOC(0x000a)
+#define BOARDIOC_PWMTEST_SETUP     _BOARDIOC(0x000b)
+#define BOARDIOC_CAN_INITIALIZE    _BOARDIOC(0x000c)
+#define BOARDIOC_GRAPHICS_SETUP    _BOARDIOC(0x000d)
 
 /* If CONFIG_BOARDCTL_IOCTL=y, then boad-specific commands will be support.
  * In this case, all commands not recognized by boardctl() will be forwarded
@@ -188,6 +195,62 @@ struct boardioc_symtab_s
   FAR struct symtab_s *symtab;
   int nsymbols;
 };
+
+#ifdef CONFIG_BOARDCTL_USBDEVCTRL
+/* This structure provides the argument BOARDIOC_USBDEV_CONTROL and
+ * describes which device should be controlled and what should be
+ * done.
+ *
+ * enum boardioc_usbdev_identifier_e: Identifies the USB device class.
+ *   In the case of multiple instances of the USB device class, the
+ *   specific instance is identifed by the 'inst' field of the structure.
+ *
+ * enum boardioc_usbdev_action_e: Identifies the action to peform on
+ *   the USB device class instance.
+ *
+ * struct boardioc_usbdev_ctrl_s:
+ *   - usbdev: A value from enum boardioc_usbdev_identifier_e that
+ *     identifies the USB device class.
+ *   - action: The action to be performed on the USB device class.
+ *   - instance:  If there are multiple instances of the USB device
+ *     class, this identifies the particular instance.  This is normally
+ *     zero but could be non-zero if there are multiple USB device ports
+ *     supported by the board.  For CDC/ACM, this is the /dev/ttyACM minor
+ *     number; For other devices this would be a port number.
+ *   - handle:  This value is returned by the BOARDIOC_USBDEV_CONNECT
+ *     action and must be provided to the BOARDIOC_USBDEV_DISCONNECT
+ *     action.  It is not used with the BOARDIOC_USBDEV_INITIALIZE action.
+ */
+
+enum boardioc_usbdev_identifier_e
+{
+  BOARDIOC_USBDEV_NONE = 0        /* Not valid */
+#if defined(CONFIG_CDCACM) && !defined(CONFIG_CDCACM_COMPOSITE)
+  , BOARDIOC_USBDEV_CDCACM        /* CDC/ACM */
+#endif
+#ifdef CONFIG_USBMSC
+  , BOARDIOC_USBDEV_MSC           /* Mass storage class */
+#endif
+#ifdef CONFIG_USBDEV_COMPOSITE
+  , BOARDIOC_USBDEV_COMPOSITE     /* Composite device */
+#endif
+};
+
+enum boardioc_usbdev_action_e
+{
+  BOARDIOC_USBDEV_INITIALIZE = 0, /* Initialize USB device */
+  BOARDIOC_USBDEV_CONNECT,        /* Connect the USB device */
+  BOARDIOC_USBDEV_DISCONNECT,     /* Disconnect the USB device */
+};
+
+struct boardioc_usbdev_ctrl_s
+{
+  uint8_t usbdev;                 /* See enum boardioc_usbdev_identifier_e */
+  uint8_t action;                 /* See enum boardioc_usbdev_action_e */
+  uint8_t instance;               /* Identifies the USB device class instance */
+  FAR void **handle;              /* Connection handle */
+};
+#endif /* CONFIG_BOARDCTL_USBDEVCTRL */
 
 /****************************************************************************
  * Public Function Prototypes
