@@ -225,7 +225,7 @@ struct boardioc_symtab_s
 enum boardioc_usbdev_identifier_e
 {
   BOARDIOC_USBDEV_NONE = 0        /* Not valid */
-#if defined(CONFIG_CDCACM) && !defined(CONFIG_CDCACM_COMPOSITE)
+#ifdef CONFIG_CDCACM
   , BOARDIOC_USBDEV_CDCACM        /* CDC/ACM */
 #endif
 #ifdef CONFIG_USBMSC

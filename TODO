@@ -462,27 +462,22 @@ o Kernel/Protected Build
   Title:       apps/system PARTITIONING
   Description: Several of the USB device helper applications in apps/system
                violate OS/application partitioning and will fail on a kernel
-               or protected build.  These include directories:
-
-                 - apps/system/cdcacm
-                 - apps/system/composite
-                 - apps/system/usbmsc
+               or protected build.  Many of these have been fixed by adding
+               the BOARDIOC_USBDEV_CONTROL boarctl command.  But there are
+               still issues.
 
                These functions call directly into operating system functions
                like:
 
-                 - usbmsc_archinitialize
-                 - composite_archinitialize
-                 - cdcacm_initialize
-                 - cdcacm_uninitialize
-                 - usbmsc_initialize
-                 - usbmsc_uninitialize
-                 - composite_initialize
-                 - composite-Uninitialize
+                 - usbdev_serialinitialize - Called in apps/examples/usbserial,
+                   apps/examples/usbterm
+                 - cdcacm_classobject - Called from apps/system/composite.
+                 - usbmsc_configure - Called fromo apps/system/usbmsc and
+                   apps/system/composite
+                 - usbmsc_bindlun - Called fromo apps/system/usbmsc and
+                   apps/system/composite
+                 - usbmsc_exportluns - Called fromo apps/system/usbmsc.
 
-               Since the corrsponding device drivers may not be present, these
-               cannot be replaced with IOCTLs.  Perhaps they should be support
-               with new boardctl commands?
   Status:      Open
   Priority:    Medium/High -- the kernel build configuration is not fully fielded
                yet.

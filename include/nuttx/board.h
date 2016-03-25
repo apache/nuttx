@@ -235,11 +235,13 @@ int board_uniqueid(FAR uint8_t *uniqueid);
  ****************************************************************************/
 
 #ifdef CONFIG_BOARDCTL_USBDEVCTRL
-#if defined(CONFIG_CDCACM) && !defined(CONFIG_CDCACM_COMPOSITE)
+#ifdef CONFIG_CDCACM
 #endif
-#if defined(CONFIG_USBMSC) && !defined(CONFIG_USBMSC_COMPOSITE)
+
+#ifdef CONFIG_USBMSC
 int board_usbmsc_initialize(int port);
 #endif
+
 #ifdef CONFIG_USBDEV_COMPOSITE
 int board_composite_initialize(int port);
 #endif
