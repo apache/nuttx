@@ -25,7 +25,7 @@ config ARCH_BOARD_ARDUINO_MEGA2560
 	depends on ARCH_CHIP_ATMEGA2560
 	---help---
 		This option selects the Arduino Mega 2560 board featuring the Atmel
-		Atmega2560 MCU running at 16 MHz.        
+		Atmega2560 MCU running at 16 MHz.
 
 config ARCH_BOARD_ARDUINO_DUE
 	bool "Arduino Due"
@@ -970,7 +970,7 @@ config ARCH_BOARD_STM32F746G_DISCO
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
 	---help---
-		STMicro STM32F746G-DISCO development board featuring the STM32F746NGH6 
+		STMicro STM32F746G-DISCO development board featuring the STM32F746NGH6
 		MCU. The STM32F746NGH6  is a 216MHz Cortex-M7 operation with 1024Kb Flash
 		memory and 300Kb SRAM.
 
@@ -981,7 +981,7 @@ config ARCH_BOARD_STM32L476VG_DISCO
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
 	---help---
-		STMicro STM32L476VG_DISCO development board featuring the STM32L476VG 
+		STMicro STM32L476VG_DISCO development board featuring the STM32L476VG
 		MCU. The STM32L476VG  is a Cortex-M4 optimised for low-power operation
 		at up to 80MHz operation with 1024Kb Flash memory and 96+32Kb SRAM.
 
@@ -1428,7 +1428,7 @@ config ARCH_BOARD
 	default "tm4c1294-launchpad"       if ARCH_BOARD_TM4C1294_LAUNCHPAD
 	default "cc3200-launchpad"         if ARCH_BOARD_CC3200_LAUNCHPAD
 	default "twr-k60n512"              if ARCH_BOARD_TWR_K60N512
-        default "u-blox-c027"              if ARCH_BOARD_U_BLOX_C027
+	default "u-blox-c027"              if ARCH_BOARD_U_BLOX_C027
 	default "ubw32"                    if ARCH_BOARD_UBW32
 	default "us7032evb1"               if ARCH_BOARD_US7032EVB1
 	default "viewtool-stm32f107"       if ARCH_BOARD_VIEWTOOL_STM32F107

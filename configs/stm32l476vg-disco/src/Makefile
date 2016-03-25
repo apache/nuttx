@@ -46,10 +46,6 @@ ifeq ($(CONFIG_STM32_OTGFS),y)
 CSRCS += stm32_usb.c
 endif
 
-ifeq ($(CONFIG_HAVE_CXX),y)
-CSRCS += stm32_cxxinitialize.c
-endif
-
 ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += stm32_autoleds.c
 else
@@ -68,7 +64,7 @@ endif
 endif
 
 ifeq ($(CONFIG_NSH_LIBRARY),y)
-CSRCS += stm32_nsh.c
+CSRCS += stm32_appinit.c
 endif
 
 include $(TOPDIR)/configs/Board.mk

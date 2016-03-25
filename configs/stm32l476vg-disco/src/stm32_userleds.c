@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/stm32l476vg-disco/src/stm32_userleds.c
  *
- *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -71,10 +71,6 @@
 #endif
 
 /****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
@@ -118,6 +114,7 @@ static void led_pm_notify(struct pm_callback_s *cb , enum pm_state_e pmstate)
       case(PM_NORMAL):
         {
           /* Restore normal LEDs operation */
+
           //stm32l4_gpiowrite(GPIO_LED_RED, (ledset & BOARD_LED_RED_BIT) != 0);
           //stm32l4_gpiowrite(GPIO_LED_GRN, (ledset & BOARD_LED_GRN_BIT) != 0);
         }
@@ -126,6 +123,7 @@ static void led_pm_notify(struct pm_callback_s *cb , enum pm_state_e pmstate)
       case(PM_IDLE):
         {
           /* Entering IDLE mode - Turn leds off */
+
           stm32l4_gpiowrite(GPIO_LED_RED, 0);
           stm32l4_gpiowrite(GPIO_LED_GRN, 0);
         }
@@ -134,6 +132,7 @@ static void led_pm_notify(struct pm_callback_s *cb , enum pm_state_e pmstate)
       case(PM_STANDBY):
         {
           /* Entering STANDBY mode - Logic for PM_STANDBY goes here */
+
           stm32l4_gpiowrite(GPIO_LED_RED, 0);
           stm32l4_gpiowrite(GPIO_LED_GRN, 0);
         }
@@ -142,6 +141,7 @@ static void led_pm_notify(struct pm_callback_s *cb , enum pm_state_e pmstate)
       case(PM_SLEEP):
         {
           /* Entering SLEEP mode - Logic for PM_SLEEP goes here */
+
           stm32l4_gpiowrite(GPIO_LED_RED, 0);
           stm32l4_gpiowrite(GPIO_LED_GRN, 0);
         }
@@ -150,7 +150,6 @@ static void led_pm_notify(struct pm_callback_s *cb , enum pm_state_e pmstate)
       default:
         {
           /* Should not get here */
-
         }
         break;
     }
@@ -191,6 +190,7 @@ static int led_pm_prepare(struct pm_callback_s *cb , enum pm_state_e pmstate)
 void board_userled_initialize(void)
 {
   /* Configure LD4,5 GPIO for output */
+
   stm32l4_configgpio(GPIO_LED_RED);
   stm32l4_configgpio(GPIO_LED_GRN);
 }
@@ -201,11 +201,12 @@ void board_userled_initialize(void)
 
 void board_userled(int led, bool ledon)
 {
-  switch ( led )
+  switch (led)
   {
   case BOARD_LED_RED:
     stm32l4_gpiowrite(GPIO_LED_RED, ldeon);
     break;
+
   case BOARD_LED_GRN:
     stm32l4_gpiowrite(GPIO_LED_GRN, ldeon);
     break;

@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/stm32l476vg-disco/src/stm32_boot.c
  *
- *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           dev@ziggurat29.com
  *
@@ -50,14 +50,6 @@
 
 #include "up_arch.h"
 #include "stm32l476vg-disco.h"
-
-/************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
-
-/************************************************************************************
- * Private Data
- ************************************************************************************/
 
 /************************************************************************************
  * Public Functions
@@ -123,6 +115,5 @@ void board_initialize(void)
 #if defined(CONFIG_NSH_LIBRARY) && !defined(CONFIG_NSH_ARCHINIT)
   board_app_initialize();
 #endif
-
 }
 #endif

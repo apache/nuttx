@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/stm32l476vg-disco/src/stm32_autoleds.c
  *
- *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: dev@ziggurat29.com
  *
  * Redistribution and use in source and binary forms, with or without
@@ -71,14 +71,6 @@
 #endif
 
 /****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -89,6 +81,7 @@
 void board_autoled_initialize(void)
 {
   /* Configure LD4,5 GPIO for output */
+
   stm32l4_configgpio(GPIO_LED_RED);
   stm32l4_configgpio(GPIO_LED_GRN);
 }
@@ -106,6 +99,7 @@ void board_autoled_on(int led)
        * Since the LEDs were initially all OFF and since this state only
        * occurs one time, nothing need be done.
        */
+
       default:
       case LED_STARTED:
       case LED_HEAPALLOCATE:
@@ -116,6 +110,7 @@ void board_autoled_on(int led)
        *
        * This case will also occur only once.
        */
+
       case LED_STACKCREATED:
         break;
 
@@ -123,6 +118,7 @@ void board_autoled_on(int led)
        *
        * This case will occur many times.
        */
+
       case LED_INIRQ:
       case LED_SIGNAL:
       case LED_ASSERTION:
@@ -133,11 +129,12 @@ void board_autoled_on(int led)
        *
        * This case will also occur many times.
        */
+
       case LED_PANIC:
         stm32l4_gpiowrite(GPIO_LED_GRN, false);
         stm32l4_gpiowrite(GPIO_LED_RED, true);
         break;
-      
+
       case LED_IDLE:
         stm32l4_gpiowrite(GPIO_LED_GRN, true);
         stm32l4_gpiowrite(GPIO_LED_RED, false);
@@ -158,6 +155,7 @@ void board_autoled_off(int led)
        *
        * These cases should never happen.
        */
+
       default:
       case LED_STARTED:
       case LED_HEAPALLOCATE:
@@ -169,6 +167,7 @@ void board_autoled_off(int led)
        *
        * This case will occur many times.
        */
+
       case LED_INIRQ:
       case LED_SIGNAL:
       case LED_ASSERTION:
@@ -179,11 +178,12 @@ void board_autoled_off(int led)
        *
        * This case will also occur many times.
        */
+
       case LED_PANIC:
         stm32l4_gpiowrite(GPIO_LED_GRN, false);
         stm32l4_gpiowrite(GPIO_LED_RED, false);
         break;
-      
+
       case LED_IDLE:
         stm32l4_gpiowrite(GPIO_LED_GRN, false);
         stm32l4_gpiowrite(GPIO_LED_RED, false);
