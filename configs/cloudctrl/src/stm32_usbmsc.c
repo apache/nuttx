@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/cloudctrl/src/stm32_usbmsc.c
  *
- *   Copyright (C) 2012, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           Darcy Gong <darcy.gong@gmail.com>
  *
@@ -46,6 +46,8 @@
 #include <syslog.h>
 #include <errno.h>
 
+#include <nuttx/board.h>
+
 #include "stm32.h"
 
 /****************************************************************************
@@ -62,14 +64,14 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: usbmsc_archinitialize
+ * Name: board_usbmsc_initialize
  *
  * Description:
- *   Perform architecture specific initialization
+ *   Perform architecture specific initialization of the USB MSC device.
  *
  ****************************************************************************/
 
-int usbmsc_archinitialize(void)
+int board_usbmsc_initialize(int port)
 {
   /* If system/usbmsc is built as an NSH command, then SD slot should
    * already have been initized in board_app_initialize() (see stm32_appinit.c).

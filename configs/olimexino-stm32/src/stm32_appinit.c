@@ -78,7 +78,7 @@ int board_app_initialize(void)
 
 #ifdef CONFIG_USBMSC
 #if !defined(CONFIG_NSH_BUILTIN_APPS) && !defined(CONFIG_SYSTEM_USBMSC)
-  ret = usbmsc_archinitialize();
+  ret = board_usbmsc_initialize(0);
 #endif
 #endif
 

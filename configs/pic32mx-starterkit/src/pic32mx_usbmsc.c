@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/pic32mx-starterkit/src/up_usbmsc.c
  *
- *   Copyright (C) 2012, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,19 +38,16 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/board.h>
 
 #include "pic32mx-starterkit.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: usbmsc_archinitialize
+ * Name: board_usbmsc_initialize
  *
  * Description:
  *   Perform architecture specific initialization as needed to establish
@@ -58,7 +55,7 @@
  *
  ****************************************************************************/
 
-int usbmsc_archinitialize(void)
+int board_usbmsc_initialize(int port)
 {
   /* If system/usbmsc is built as an NSH command, then SD slot should
    * already have been initialized in board_app_initialize() (see

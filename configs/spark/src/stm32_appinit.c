@@ -281,9 +281,22 @@ int board_app_initialize(void)
   return OK;
 }
 
-int usbmsc_archinitialize(void)
+/****************************************************************************
+ * Name: board_usbmsc_initialize
+ *
+ * Description:
+ *   Perform architecture specific initialization as needed to establish
+ *   the mass storage device that will be exported by the USB MSC device.
+ *
+ ****************************************************************************/
+
+int board_usbmsc_initialize(int port)
 {
-#if defined(CONFIG_LIB_BOARDCTL)
+#if 1 /* defined(CONFIG_LIB_BOARDCTL) */
+  /* REVIST: CONFIG_LIB_BOARDCTL is not a sufficient condition to determine
+   * board_app_initialize() has already been called or not.
+   */
+
   return OK;
 #else
   return board_app_initialize();

@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/olimexino-stm32/src/stm32_usbmsc.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           David Sidrane <david_s5@nscdg.com>
  *
@@ -44,8 +44,9 @@
 #include <syslog.h>
 #include <errno.h>
 
-#include <nuttx/spi/spi.h>
+#include <nuttx/board.h>
 #include <nuttx/mmcsd.h>
+#include <nuttx/spi/spi.h>
 
 #include "stm32.h"
 #include "olimexino-stm32.h"
@@ -57,8 +58,6 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-/* Configuration ************************************************************/
 
 /* Configuration ************************************************************/
 
@@ -83,14 +82,14 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: usbmsc_archinitialize
+ * Name: board_usbmsc_initialize
  *
  * Description:
- *   Perform architecture specific initialization
+ *   Perform architecture specific initialization of the USB MSC device.
  *
  ****************************************************************************/
 
-int usbmsc_archinitialize(void)
+int board_usbmsc_initialize(int port)
 {
   /* If system/usbmsc is built as an NSH command, then SD slot should
    * already have been initialized in board_app_initialize() (see stm32_appinit.c).
