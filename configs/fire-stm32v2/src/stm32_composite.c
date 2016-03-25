@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/fire-stm32v2/src/stm32_composite.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Configure and register the STM32 SPI-based MMC/SD block driver.
@@ -43,6 +43,8 @@
 
 #include <stdio.h>
 
+#include <nuttx/board.h>
+
 #include "fire-stm32v2.h"
 
 /****************************************************************************
@@ -60,14 +62,14 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: composite_archinitialize
+ * Name: board_composite_initialize
  *
  * Description:
- *   Perform architecture specific initialization
+ *   Perform architecture specific initialization of a composite USB device.
  *
  ****************************************************************************/
 
-int composite_archinitialize(void)
+int board_composite_initialize(int port)
 {
   /* If system/composite is built as an NSH command, then SD slot should
    * already have been initialized in board_app_initialize() (see stm32_appinit.c).

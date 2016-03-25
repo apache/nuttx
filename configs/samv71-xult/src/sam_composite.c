@@ -59,7 +59,7 @@
 
 int board_composite_initialize(int port)
 {
-   return OK;
+  return OK;
 }
 
 #endif /* CONFIG_USBDEV_COMPOSITE */

@@ -228,21 +228,5 @@ int stm32_can_initialize(void);
 int usbmsc_archinitialize(void);
 #endif
 
-/****************************************************************************
- * Name: composite_archinitialize
- *
- * Description:
- *   Called from the application system/composite or the boards_nsh if the
- *   application is not included.
- *   Perform architecture specific initialization.  This function must
- *   configure the block device to export via USB.  This function must be
- *   provided by architecture-specific logic in order to use this add-on.
- *
- ****************************************************************************/
-
-#if !defined(CONFIG_NSH_BUILTIN_APPS) && !defined(CONFIG_SYSTEM_COMPOSITE)
-extern int composite_archinitialize(void);
-#endif
-
 #endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_OLIMEXINO_STM32_SRC_OLIMEXINO_STM32_H */

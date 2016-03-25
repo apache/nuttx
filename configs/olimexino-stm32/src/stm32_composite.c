@@ -44,8 +44,9 @@
 #include <syslog.h>
 #include <errno.h>
 
-#include <nuttx/spi/spi.h>
+#include <nuttx/board.h>
 #include <nuttx/mmcsd.h>
+#include <nuttx/spi/spi.h>
 
 #include "stm32.h"
 #include "olimexino-stm32.h"
@@ -81,14 +82,14 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: composite_archinitialize
+ * Name: board_composite_initialize
  *
  * Description:
- *   Perform architecture specific initialization
+ *   Perform architecture specific initialization of a composite USB device.
  *
  ****************************************************************************/
 
-int composite_archinitialize(void)
+int board_composite_initialize(int port)
 {
   /* If system/composite is built as an NSH command, then SD slot should
    * already have been initialized in board_app_initialize() (see stm32_appinit.c).

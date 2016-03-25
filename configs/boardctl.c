@@ -105,7 +105,7 @@ static inline int boardctl_usbdevctrl(FAR struct boardioc_usbdev_ctrl_s *ctrl)
               break;
 
             default:
-              return -EINVAL;
+              ret = -EINVAL;
           }
         break;
 #endif
@@ -123,7 +123,8 @@ static inline int boardctl_usbdevctrl(FAR struct boardioc_usbdev_ctrl_s *ctrl)
             case BOARDIOC_USBDEV_CONNECT:    /* Connect the USB MSC device */
               {
                 DEBUGASSERT(ctrl->handle != NULL);
-          ???
+#warning Missing logic
+                ret = -ENOSYS;
               }
               break;
 
@@ -135,7 +136,7 @@ static inline int boardctl_usbdevctrl(FAR struct boardioc_usbdev_ctrl_s *ctrl)
               break;
 
             default:
-              return -EINVAL;
+              ret = -EINVAL;
           }
         break;
 #endif
@@ -169,11 +170,15 @@ static inline int boardctl_usbdevctrl(FAR struct boardioc_usbdev_ctrl_s *ctrl)
               break;
 
             default:
-              return -EINVAL;
+              ret = -EINVAL;
           }
         break;
 #endif
+      default:
+        ret = -EINVAL;
+    }
 
+  return ret;
 }
 #endif
 
