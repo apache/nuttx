@@ -95,13 +95,17 @@ static const struct file_operations g_rngops =
 #ifndef CONFIG_DISABLE_POLL
   , 0              /* poll */
 #endif
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  , 0              /* unlink */
+#endif
+
 };
 
 /****************************************************************************
  * Private functions
  ****************************************************************************/
 
-static int stm32l4_rnginitialize()
+static int stm32l4_rnginitialize(void)
 {
   uint32_t regval;
 
@@ -131,7 +135,7 @@ static int stm32l4_rnginitialize()
   return OK;
 }
 
-static void stm32l4_rngenable()
+static void stm32l4_rngenable(void)
 {
   uint32_t regval;
 
@@ -142,8 +146,8 @@ static void stm32l4_rngenable()
   putreg32(regval, STM32L4_RNG_CR);
 
   /* XXX see stm32l4_rngdisable(), below; if interrupts are disabled there,
-    then they should also be enabled here (also, they should not be enabled
-    in stm32l4_rnginitialize())
+   * then they should also be enabled here (also, they should not be enabled
+   * in stm32l4_rnginitialize())
    */
 }
 
@@ -155,10 +159,10 @@ static void stm32l4_rngdisable()
   putreg32(regval, STM32L4_RNG_CR);
 
   /* XXX I believe it's appropriate to also disable the interrupt, and clear
-    any interrupt pending bit.  This 'disable' is called from within the
-    interrupt handler when the buffer has been finally filled, but if there
-    is still another interrupt pending, then the handler will be entered one
-    last time, and attempt to touch some now-invalid objects
+   * any interrupt pending bit.  This 'disable' is called from within the
+   * interrupt handler when the buffer has been finally filled, but if there
+   * is still another interrupt pending, then the handler will be entered one
+   * last time, and attempt to touch some now-invalid objects
    */
 }
 
@@ -170,14 +174,18 @@ static int stm32l4_rnginterrupt(int irq, void *context)
   rngsr = getreg32(STM32L4_RNG_SR);
   if (rngsr & RNG_SR_CEIS) /* Check for clock error int stat */
     {
-      /* clear it, we will try again. */
+      /* Clear it, we will try again. */
+
       putreg32(rngsr & ~RNG_SR_CEIS, STM32L4_RNG_SR);
       return OK;
     }
+
   if (rngsr & RNG_SR_SEIS) /* Check for seed error in int stat */
     {
       uint32_t crval;
-      /* clear seed error, then disable/enable the rng and try again. */
+
+      /* Clear seed error, then disable/enable the rng and try again. */
+
       putreg32(rngsr & ~RNG_SR_SEIS, STM32L4_RNG_SR);
       crval = getreg32(STM32L4_RNG_CR);
       crval &= ~RNG_CR_RNGEN;
@@ -186,9 +194,11 @@ static int stm32l4_rnginterrupt(int irq, void *context)
       putreg32(crval, STM32L4_RNG_CR);
       return OK;
     }
+
   if (!(rngsr & RNG_SR_DRDY)) /* Data ready must be set */
     {
       /* This random value is not valid, we will try again. */
+
       return OK;
     }
 
@@ -276,7 +286,8 @@ static ssize_t stm32l4_rngread(struct file *filep, char *buffer, size_t buflen)
 
       sem_wait(&g_rngdev.rd_readsem);
 
-      /* done with the operation semaphore */
+      /* Done with the operation semaphore */
+
       sem_destroy(&g_rngdev.rd_readsem);
 
       /* Free RNG via the device semaphore for next use */
