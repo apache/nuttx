@@ -299,4 +299,3 @@ int board_app_initialize(void)
   g_app_initialzed = true;
   return OK;
 }
-xxx
