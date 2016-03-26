@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: March 13, 2016</p>
+      <p>Last Updated: March 27, 2016</p>
     </td>
   </tr>
 </table>
@@ -1336,11 +1336,11 @@
 <h2>Released Versions</h2>
 <p>
   In addition to the ever-changing GIT repository, there are frozen released versions of NuttX available.
-  The current release is NuttX 7.14.
-  NuttX 7.14 is the 114<sup>th</sup> release of NuttX.
-  It was released on January 28, 2016, and is available for download from the
+  The current release is NuttX 7.15.
+  NuttX 7.15 is the 115<sup>th</sup> release of NuttX.
+  It was released on March 27, 2016, and is available for download from the
   <a href="https://bitbucket.org/patacongo/nuttx/downloads/">Bitbucket.org</a> website.
-  Note that the release consists of two tarballs:  <code>nuttx-7.14.tar.gz</code> and <code>apps-7.14.tar.gz</code>.
+  Note that the release consists of two tarballs:  <code>nuttx-7.15.tar.gz</code> and <code>apps-7.15.tar.gz</code>.
   Both may be needed (see the top-level <code>nuttx/README.txt</code> file for build information).
 </p>
 
@@ -1349,7 +1349,7 @@
 <ul>
   <li><b>nuttx</b>.
     <ul><p>
-      Release notes for NuttX 7.14 are available <a href="https://bitbucket.org/patacongo/nuttx/downloads/">here</a>.
+      Release notes for NuttX 7.15 are available <a href="https://bitbucket.org/patacongo/nuttx/downloads/">here</a>.
       Release notes for all released versions on NuttX are available in the <a href="https://bitbucket.org/patacongo/nuttx/src/master/ReleaseNotes" target="_blank">Bitbucket GIT</a>.
       The ChangeLog for all releases of NuttX is available in the ChangeLog file that can viewed in the <a href="https://bitbucket.org/patacongo/nuttx/src/master/ChangeLog" target="_blank">Bitbucket GIT</a>.
       The ChangeLog for the current release is at the bottom of that file.
@@ -1357,7 +1357,7 @@
   </li></ul>
   <li><b>apps</b>.
     <ul><p>
-      Release notes for NuttX 7.14 are available <a href="https://bitbucket.org/nuttx/apps/downloads/">here</a>.
+      Release notes for NuttX 7.15 are available <a href="https://bitbucket.org/nuttx/apps/downloads/">here</a>.
       Release notes for all released versions on NuttX are available in the <a href="https://bitbucket.org/patacongo/nuttx/src/master/ReleaseNotes" target="_blank">Bitbucket GIT</a>
       The ChangeLog for the all releases of <code>apps/</code> is available in the ChangeLog file that can viewed in the <a href="https://bitbucket.org/nuttx/apps/src/master/ChangeLog.txt" target="_blank">Bitbucket GIT</a>.
       The ChangeLog for the current release is at the bottom of that file.
@@ -1411,10 +1411,11 @@
       <li><a href="#armv4">Other ARMv4</a> (1)</li>
       <li><a href="#armcortexa5">ARM Cortex-A5</a> (3)</li>
       <li><a href="#armcortexa8">ARM Cortex-A8</a> (1)</li>
+      <li><a href="#armcortexa9">ARM Cortex-A9</a> (1)</li>
       <li><a href="#armcortexr4">ARM Cortex-R4</a> (1)</li>
       <li><a href="#armcortexm0">ARM Cortex-M0/M0+</a> (7)</li>
-      <li><a href="#armcortexm3">ARM Cortex-M3</a> (34)</li>
-      <li><a href="#armcortexm4">ARM Cortex-M4</a> (26)</li>
+      <li><a href="#armcortexm3">ARM Cortex-M3</a> (35)</li>
+      <li><a href="#armcortexm4">ARM Cortex-M4</a> (28)</li>
       <li><a href="#armcortexm7">ARM Cortex-M7</a> (4)</li>
     </ul>
   <li>Atmel AVR
@@ -1502,6 +1503,7 @@
     <ul>
       <li><a href="#m68hcs12">M68HCS12</a></li>
       <li><a href="#freescaleimx1">Freescale i.MX1</a> <small>(ARM920-T)</small></li>
+      <li><a href="#freescaleimx6">Freescale i.MX6</a> <small>(ARM Cortex-A9)</small></li>
       <li><a href="#freescalekl25z">FreeScale KL25Z</a> <small>(ARM Cortex-M0+)</small></li>
       <li><a href="#freescalekl26z">FreeScale KL26Z</a> <small>(ARM Cortex-M0+)</small></li>
       <li><a href="#kinetisk20">FreeScale Kinetis K20</a> <small>(ARM Cortex-M4)</small></li>
@@ -1588,6 +1590,8 @@
       <li><a href="#stm32f427x">STMicro STM32 F427/F437</a> <small>(STM32 F4 family, ARM Cortex-M4)</small></li>
       <li><a href="#stm32f429x">STMicro STM32 F429</a> <small>(STM32 F4 family, ARM Cortex-M4)</small></li>
       <li><a href="#stm32f446x">STMicro STM32 F446</a> <small>(STM32 F4 family, ARM Cortex-M4)</small></li>
+      <li><a href="#stm32f46xxx">STMicro STM32 F46xx</a> <small>(STM32 F4 family, ARM Cortex-M4)</small></li>
+      <li><a href="#stm32l476">STMicro STM32 L476</a> <small>(STM32 F4 family, ARM Cortex-M4)</small></li>
       <li><a href="#stm32f74x">STMicro STM32 F745/F746</a> <small>(STM32 F7 family, ARM Cortex-M7)</small></li>
       <li><a href="#stm32f75x">STMicro STM32 F756</a> <small>(STM32 F7 family, ARM Cortex-M7)</small></li>
     </ul>
@@ -2200,6 +2204,7 @@
     </p>
   </td>
 </tr>
+
 <tr>
   <td valign="top"><img height="20" width="20" src="favicon.ico"></td>
   <td bgcolor="#5eaee1">
@@ -2236,6 +2241,38 @@
     </ul>
   </td>
 </tr>
+
+<tr>
+  <td valign="top"><img height="20" width="20" src="favicon.ico"></td>
+  <td bgcolor="#5eaee1">
+    <a name="armcortexa9"><b>ARM Cortex-A9</b>.</a>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <a name="freescaleimx6"><b>NXP/Freescale i.MX6</b>.</a>
+      A port is underway for the following i.MX6 board
+    <p>
+    <ul>
+      <li>
+        <p>
+          <b>Sabre-6Quad</b>.
+          This is a port to the NXP/Freescale Sabre-6Quad board.
+          Refer to the NuttX board <a href="https://bitbucket.org/nuttx/boards/src/master/sabre-6quad/README.txt" target="_blank">README</a> file for further information.
+        </p>
+        <p>
+          <b>STATUS:</b>
+          The basic, minimal port is code complete and introduced in NuttX-7.15, but has not yet been tested.
+          I am still waiting for the reciept of the Sabre board.
+          Expect to see the verified Sabre-6Quad support (with SMP!) in NuttX-7.16.
+        </p>
+      </li>
+    </ul>
+  </td>
+</tr>
+
 <tr>
   <td valign="top"><img height="20" width="20" src="favicon.ico"></td>
   <td bgcolor="#5eaee1">
@@ -3221,7 +3258,7 @@ nsh>
       <a name="nxplpc176x"><b>NXP LPC1766, LPC1768, and LPC1769</b>.</a>
       Drivers are available for CAN, DAC, Ethernet, GPIO, GPIO interrupts, I2C, UARTs, SPI, SSP, USB host, and USB device.
       Additional drivers for the RTC, ADC, DAC, Timers, PWM and MCPWM were contributed by Max (himax) in NuttX-7.3.
-      Verified LPC17xx configurations are available for three boards.
+      Verified LPC17xx configurations are available for these boards:
       <ul>
         <li>
           The Nucleus 2G board from <a href="http://www.2g-eng.com/">2G Engineering</a> (LPC1768),
@@ -3240,6 +3277,9 @@ nsh>
         </li>
         <li>
           The <a href="http://micromint.com/">Micromint</a> Lincoln60 board with an NXP LPC1769.
+        </li>
+        <li>
+          A version of the LPCXPresso LPC1768 board with special support for the U-Blox model evaluation board.
         </li>
       </ul>
     </p>
@@ -3347,6 +3387,14 @@ nsh>
            This board configuration was contributed and made available in NuttX-6.20.
            As contributed board support, I am unsure of what all has been verfied and what has not.
            See the Microment website <a href="http://micromint.com/Products/lincoln60.html">Lincoln60</a> board and the NuttX board <a href="https://bitbucket.org/nuttx/boards/src/master/lincoln60/README.txt" target="_blank">README</a> file for further information about the Lincoln board.
+        </p>
+      </li>
+      <li>
+        <p><b>U-Blox Modem Evaluation (LPCXpresso LPC1768)</b></p>
+        <p>
+           This board configuration was contributed by Vladimir Komendantskiy and made available in NuttX-7.15.
+           This is a variant of the LPCXpresso LPC1768 board support with special provisions for the U-Blox Model Evaluation board.
+           See the NuttX board <a href="https://bitbucket.org/nuttx/boards/src/master/u-blox-c027/README.txt" target="_blank">README</a> file for further information about this port.
         </p>
       </li>
       </ol>
@@ -3757,6 +3805,63 @@ nsh>
     </p>
   </td>
 </tr>
+
+<tr>
+  <td><br></td>
+  <td><hr></td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <a name="stm32f46xxx"><b>STMicro STM32 F46xx</b>.</a>
+      Architecture-only support is available for the STM32 F46xx family (meaning that the parts are supported, but there is not example board supported in the system).
+      This support was contributed by Paul Alexander Patienc and made available in NuttX-7.15.
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td><br></td>
+  <td><hr></td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <a name="stm32l476"><b>STMicro STM32 L476</b>.</a>
+      Two boards are supported in this family:
+    </p>
+    <ul>
+      <li>
+        <p>
+          <b>Nucleo-L476RG</b>.
+          Board support for the STMicro NucleoL476RG board from ST Micro was contributed by Sebastien Lorquet in NuttX-7.15.  See the <a href="http://www.st.com/nucleo-l476rg" target="_blank">STMicro website</a> and the board <a href="https://bitbucket.org/nuttx/boards/src/master/nucleo-l476rg/README.txt" target="_blank">README</a> file for further information.
+        </p>
+      </li>
+      <li>
+        <p>
+          <b>STM32L476VG Discovery</b>.
+          Board support for the STMicro STM32L476VG Discovery board from ST Micro was contributed by Dave in NuttX-7.15.  See the <a href="http://www.st.com/stm32l476g-disco" target="_blank">STMicro website</a> and the board <a href="https://bitbucket.org/nuttx/boards/src/master/stm32l476vg-disco/README.txt" target="_blank">README</a> file for further information.
+        </p>
+      </li>
+    </ul>
+  <p><b>Status</b>:</p>
+  <ul>
+    <p>
+      <b>NuttX-7.15</b>.
+      Only the first initial release of support for this family is present.
+      This is an ongoing, work-in-progress.
+      It includes these basics:
+    </p>
+    <ul>
+      <li>RCC, clocking, Interrupts, System timer</li>
+      <li>UART, USART, Serial Console</li>
+      <li>GPIO, DMA, I2C, RNG, SPI</li>
+    </ul>
+  </td>
+</tr>
+
 <tr>
   <td><br></td>
   <td><hr></td>
