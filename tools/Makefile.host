@@ -75,8 +75,8 @@ default: mkconfig$(HOSTEXEEXT) mksyscall$(HOSTEXEEXT) mkdeps$(HOSTEXEEXT) \
     cnvwindeps$(HOSTEXEEXT)
 
 ifdef HOSTEXEEXT
-.PHONY: b16 bdf-converter cmpconfig clean configure mkconfig mkdeps \
-    cnvwindeps mksymtab mksyscall mkversion
+.PHONY: b16 bdf-converter cmpconfig clean configure kconfig2html mkconfig \
+    mkdeps cnvwindeps mksymtab mksyscall mkversion
 else
 .PHONY: clean
 endif
