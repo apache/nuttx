@@ -463,11 +463,11 @@ o Kernel/Protected Build
   Description: Several of the USB device helper applications in apps/system
                violate OS/application partitioning and will fail on a kernel
                or protected build.  Many of these have been fixed by adding
-               the BOARDIOC_USBDEV_CONTROL boarctl command.  But there are
+               the BOARDIOC_USBDEV_CONTROL boardctl() command.  But there are
                still issues.
 
-               These functions call directly into operating system functions
-               like:
+               These functions still call directly into operating system
+               functions:
 
                  - cdcacm_classobject - Called from apps/system/composite.
                  - usbmsc_configure - Called from apps/system/usbmsc and
@@ -863,8 +863,10 @@ o Network (net/, drivers/net)
   Title:       UNFINISHED CRYSTALLAN CS89X0 DRIVER
   Description: I started coding a CrystalLan CS89x0 driver (drivers/net/cs89x0.c),
                but never finished it.
-  Status:      Open
-  Priority:    Low unless you need it.
+  Status:      Closed.
+  Priority:    Low.  I don't plan to finish the CS89x0 driver.  It is just
+               history now.  The unfinished coded is retained in case someone
+               needs to resurrect it.
 
   Title:       INTERFACES TO LEAVE/JOIN IGMP MULTICAST GROUP
   Description: The interfaces used to leave/join IGMP multicast groups is non-standard.
