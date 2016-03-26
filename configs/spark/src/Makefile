@@ -1,7 +1,7 @@
 ############################################################################
 # configs/spark/src/Makefile
 #
-#   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2013, 2016 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #           Librae <librae8226@gmail.com>
 #
@@ -55,6 +55,10 @@ endif
 
 ifeq ($(CONFIG_USBDEV),y)
 CSRCS += stm32_usbdev.c
+endif
+
+ifeq ($(CONFIG_BOARDCTL_USBDEVCTRL),y)
+CSRCS += stm32_usbmsc.c
 endif
 
 ifeq ($(CONFIG_USBDEV_COMPOSITE),y)
