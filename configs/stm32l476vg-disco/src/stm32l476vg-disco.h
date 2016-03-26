@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/stm32l476vg-disco/src/stm32l476vg-disco.h
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Authors: Frank Bennett
  *            Gregory Nutt <gnutt@nuttx.org>
  *            Sebastien Lorquet <sebastien@lorquet.fr>
@@ -53,7 +53,6 @@
  ************************************************************************************/
 /* Configuration ********************************************************************/
 
-
 /* LED.
  * LD4: the red LED on PB2
  * LD5: the green LED on PE8
@@ -63,19 +62,19 @@
  */
 
 #define GPIO_LED_RED \
-  (GPIO_PORTB | GPIO_PIN2 | GPIO_OUTPUT_CLEAR | GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_PULLUP | \
-   GPIO_SPEED_50MHz)
+  (GPIO_PORTB | GPIO_PIN2 | GPIO_OUTPUT_CLEAR | GPIO_OUTPUT | GPIO_PUSHPULL | \
+   GPIO_PULLUP | GPIO_SPEED_50MHz)
 
 #define GPIO_LED_GRN \
-  (GPIO_PORTE | GPIO_PIN8 | GPIO_OUTPUT_CLEAR | GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_PULLUP | \
-   GPIO_SPEED_50MHz)
+  (GPIO_PORTE | GPIO_PIN8 | GPIO_OUTPUT_CLEAR | GPIO_OUTPUT | GPIO_PUSHPULL | \
+   GPIO_PULLUP | GPIO_SPEED_50MHz)
 
 /* Buttons
  *
-*  There is a 4 way d-pad 'joystick' with center button
+ *  There is a 4 way d-pad 'joystick' with center button
  *  connected to PA0,1,5,2,3
  *                 C L D R U
-  */
+ */
 
 #define MIN_IRQBUTTON   BUTTON_CENTER
 #define MAX_IRQBUTTON   BUTTON_UP
@@ -92,10 +91,9 @@
 #define GPIO_BTN_UP \
   (GPIO_INPUT |GPIO_PULLDOWN |GPIO_EXTI | GPIO_PORTA | GPIO_PIN3)
 
-
-
 /* SPI1 off */
 /* XXX is this used on disco? */
+
 #define GPIO_SPI1_MOSI_OFF (GPIO_INPUT | GPIO_PULLDOWN | \
                             GPIO_PORTE | GPIO_PIN15)
 #define GPIO_SPI1_MISO_OFF (GPIO_INPUT | GPIO_PULLDOWN | \
@@ -105,17 +103,14 @@
 #define GPIO_SPI1_NSS_OFF  (GPIO_INPUT | GPIO_PULLDOWN | \
                             GPIO_PORTE | GPIO_PIN12)
 
-
-
 /* Devices on the onboard I2C bus.
  *
  * Note that these are unshifted addresses.
  */
 
 /* XXX IS this 'unshifted'? */
+
 #define NUCLEO_I2C_OBDEV_CS43L22   0x94
-
-
 
 /************************************************************************************
  * Public Data
@@ -165,6 +160,5 @@ void stm32_usbinitialize(void);
 #ifdef CONFIG_ADC
 int board_adc_initialize(void);
 #endif
-
 
 #endif /* __CONFIGS_STM32L476VG_DISCO_SRC_STM32L476VG_DISCO_H */

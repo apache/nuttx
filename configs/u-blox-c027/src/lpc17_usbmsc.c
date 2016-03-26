@@ -45,8 +45,9 @@
 #include <syslog.h>
 #include <errno.h>
 
-#include <nuttx/spi/spi.h>
+#include <nuttx/board.h>
 #include <nuttx/mmcsd.h>
+#include <nuttx/spi/spi.h>
 
 #include "lpc17_ssp.h"
 
@@ -78,14 +79,15 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: usbmsc_archinitialize
+ * Name: board_usbmsc_initialize
  *
  * Description:
- *   Perform architecture specific initialization
+ *   Perform architecture specific initialization as needed to establish
+ *   the mass storage device that will be exported by the USB MSC device.
  *
  ****************************************************************************/
 
-int usbmsc_archinitialize(void)
+int board_usbmsc_initialize(int port)
 {
   FAR struct spi_dev_s *spi;
   int ret;

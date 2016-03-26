@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/olimexino-stm32/src/stm32_appinit.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           David Sidrane <david_s5@nscdg.com>
  *
@@ -61,17 +61,6 @@
 #include "olimexino-stm32.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -89,13 +78,13 @@ int board_app_initialize(void)
 
 #ifdef CONFIG_USBMSC
 #if !defined(CONFIG_NSH_BUILTIN_APPS) && !defined(CONFIG_SYSTEM_USBMSC)
-  ret = usbmsc_archinitialize();
+  ret = board_usbmsc_initialize(0);
 #endif
 #endif
 
 #ifdef CONFIG_USBDEV_COMPOSITE
 #if !defined(CONFIG_NSH_BUILTIN_APPS) && !defined(CONFIG_SYSTEM_COMPOSITE)
-  ret = composite_archinitialize();
+  ret = board_composite_initialize(0);
 #endif
 #endif
 

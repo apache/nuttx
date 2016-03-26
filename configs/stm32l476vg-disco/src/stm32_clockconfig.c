@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/stm32l476vg-disco/src/stm32_clockconfig.c
  *
- *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: dev@ziggurat29.com
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,17 +44,8 @@
 #include <arch/board/board.h>
 #include <arch/board/stm32l476vg-disco-clocking.h>
 
-
 #include "up_arch.h"
 #include "stm32l476vg-disco.h"
-
-/************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
-
-/************************************************************************************
- * Private Functions
- ************************************************************************************/
 
 /************************************************************************************
  * Public Functions
@@ -79,7 +70,7 @@ void stm32l4_board_clockconfig(void)
   uint32_t regval;
 
   /* Enable Internal High-Speed Clock (HSI) */
-  
+
   regval  = getreg32(STM32L4_RCC_CR);
   regval |= RCC_CR_HSION;           /* Enable HSI */
   putreg32(regval, STM32L4_RCC_CR);
@@ -91,7 +82,7 @@ void stm32l4_board_clockconfig(void)
     }
 
   /* Set the HCLK source/divider */
-  
+
   regval  = getreg32(STM32L4_RCC_CFGR);
   regval &= ~RCC_CFGR_HPRE_MASK;
   regval |= STM32L4_RCC_CFGR_HPRE;
@@ -126,7 +117,8 @@ void stm32l4_board_clockconfig(void)
   /* XXX The choice of clock source to PLL (all three) is independent
    * of the sys clock source choice, review the STM32L4_BOARD_USEHSI
    * name; probably split it into two, one for PLL source and one
-   * for sys clock source */
+   * for sys clock source.
+   */
 
   regval |= RCC_PLLCFG_PLLSRC_HSI;
   putreg32(regval, STM32L4_RCC_PLLCFG);
@@ -229,16 +221,17 @@ void stm32l4_board_clockconfig(void)
   stm32l4_rcc_enablelse();
 #endif
 
-  /*XXX sanity if sdmmc1 or usb or rng, then we need to set the clk48 source
+  /* XXX sanity if sdmmc1 or usb or rng, then we need to set the clk48 source
    * and then we can also do away with STM32L4_USE_CLK48, and give better
-   * warning messages */
-  /*XXX sanity if our STM32L4_CLK48_SEL is YYY then we need to have already
-   * enabled ZZZ */
+   * warning messages
+   *
+   * XXX sanity if our STM32L4_CLK48_SEL is YYY then we need to have already
+   * enabled ZZZ
+   */
 
   regval  = getreg32(STM32L4_RCC_CCIPR);
   regval &= RCC_CCIPR_CLK48SEL_MASK;
   regval |= STM32L4_CLK48_SEL;
   putreg32(regval, STM32L4_RCC_CCIPR);
-    
 }
 #endif

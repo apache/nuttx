@@ -286,7 +286,8 @@ CONFIG_ARCH_LEDS=y
 #
 # Board-Specific Options
 #
-# CONFIG_LIB_BOARDCTL is not set
+CONFIG_LIB_BOARDCTL=y
+CONFIG_BOARDCTL_USBDEVCTRL=y
 
 #
 # RTOS Features

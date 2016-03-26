@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/sam3u-ek/src/sam_usbmsc.c
  *
- *   Copyright (C) 2009, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Configure and register the SAM3U MMC/SD SDIO block driver.
@@ -45,6 +45,7 @@
 #include <syslog.h>
 #include <errno.h>
 
+#include <nuttx/board.h>
 #include <nuttx/sdio.h>
 #include <nuttx/mmcsd.h>
 
@@ -72,14 +73,15 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: usbmsc_archinitialize
+ * Name: board_usbmsc_initialize
  *
  * Description:
- *   Perform architecture specific initialization
+ *   Perform architecture specific initialization as needed to establish
+ *   the mass storage device that will be exported by the USB MSC device.
  *
  ****************************************************************************/
 
-int usbmsc_archinitialize(void)
+int board_usbmsc_initialize(int port)
 {
   FAR struct sdio_dev_s *sdio;
   int ret;

@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/stm32l476vg-disco/scripts/l476rg.ld
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           Sebastien Lorquet <sebastien@lorquet.fr>
  *           dev@ziggurat29.com

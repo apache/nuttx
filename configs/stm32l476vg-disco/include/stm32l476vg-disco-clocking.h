@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/stm32l476vg-disco/include/stm32l476vg-disco-clocking.h
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: dev@ziggurat29.com
  *
  * Redistribution and use in source and binary forms, with or without
@@ -68,12 +68,12 @@
 #define STM32L4_LSE_FREQUENCY     32768
 
 /* XXX review the STM32L4_BOARD_USEHSI usage, it has too much influence in
-   stm32l4x6xx_rcc.c.  I suspect it is fine for it to turn on and off that
-   ocillator, but really that's all it should do (e.g. it also controls
-   input of teh PLLs.  Also, it should be fine/desireable to support things
-   like turning on both HSI and MSI, because they plausibly can both be
-   used at the same time; currently those choices HSE/HSI16/MSI are
-   mutually exclusive.
+ * stm32l4x6xx_rcc.c.  I suspect it is fine for it to turn on and off that
+ * ocillator, but really that's all it should do (e.g. it also controls
+ * input of teh PLLs.  Also, it should be fine/desireable to support things
+ * like turning on both HSI and MSI, because they plausibly can both be
+ * used at the same time; currently those choices HSE/HSI16/MSI are
+ * mutually exclusive.
  */
 
 #define STM32L4_BOARD_USEHSI      1
@@ -84,11 +84,11 @@
 #define STM32L4_PLLCFG_PLLM             RCC_PLLCFG_PLLM(1)
 
 /* 'main' PLL config; we use this to generate our system clock via the R
- output.  We set it up as
- 16 MHz / 1 * 10 / 2 = 80 MHz
- XXX NOTE:  currently the main PLL is implicitly turned on and is implicitly
- the system clock; this should be configurable since not all applications may
- want things done this way.
+ *  output.  We set it up as 16 MHz / 1 * 10 / 2 = 80 MHz
+ *
+ * XXX NOTE:  currently the main PLL is implicitly turned on and is implicitly
+ * the system clock; this should be configurable since not all applications may
+ * want things done this way.
  */
 
 #define STM32L4_PLLCFG_PLLN             RCC_PLLCFG_PLLN(10)
@@ -100,14 +100,15 @@
 #define STM32L4_PLLCFG_PLLR_ENABLED
 
 /* 'SAIPLL1' is used to generate the 48 MHz clock, since we can't
-  do that with the main PLL's N value.  We set N = 13, and enable
-  the Q output (ultimately for CLK48) with /4.  So,
-  16 MHz / 1 * 12 / 4 = 48 MHz
-  XXX NOTE:  currently the SAIPLL /must/ be explicitly selected in the
-  menuconfig, or else all this is a moot point, and the various 48 MHz
-  peripherals will not work (RNG at present).  I would suggest removing
-  that option from Kconfig altogether, and simply making it an option
-  that is selected via a #define here, like all these other params.
+ * do that with the main PLL's N value.  We set N = 13, and enable
+ * the Q output (ultimately for CLK48) with /4.  So,
+ * 16 MHz / 1 * 12 / 4 = 48 MHz
+ *
+ * XXX NOTE:  currently the SAIPLL /must/ be explicitly selected in the
+ * menuconfig, or else all this is a moot point, and the various 48 MHz
+ * peripherals will not work (RNG at present).  I would suggest removing
+ * that option from Kconfig altogether, and simply making it an option
+ * that is selected via a #define here, like all these other params.
  */
 
 #define STM32L4_PLLSAI1CFG_PLLN         RCC_PLLSAI1CFG_PLLN(12)
@@ -170,7 +171,6 @@
  * Note: TIM1,8 are on APB2, others on APB1
  */
 /* REVISIT : this can be configured */
-
 
 /************************************************************************************
  * Public Data

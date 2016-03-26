@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/ea3131/src/lpc31_usbmsc.c
  *
- *   Copyright (C) 2010, 2013, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2013, 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Configure and register the SAM3U MMC/SD SDIO block driver.
@@ -46,6 +46,7 @@
 #include <errno.h>
 #include <stdlib.h>
 
+#include <nuttx/board.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/mkfatfs.h>
@@ -77,14 +78,14 @@ static struct fat_format_s g_fmt = FAT_FORMAT_INITIALIZER;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: usbmsc_archinitialize
+ * Name: board_usbmsc_initialize
  *
  * Description:
- *   Perform architecture specific initialization
+ *   Perform architecture specific initialization of the USB MSC device.
  *
  ****************************************************************************/
 
-int usbmsc_archinitialize(void)
+int board_usbmsc_initialize(int port)
 {
   uint8_t *pbuffer;
   int ret;

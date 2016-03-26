@@ -1,7 +1,7 @@
 /****************************************************************************
  * config/spark/src/stm32_composite.c
  *
- *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           David_s5 <david_s5@nscdg.com>
  *
@@ -46,6 +46,7 @@
 #include <errno.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/board.h>
 
 #ifdef CONFIG_MTD_SST25
 #  include <nuttx/spi/spi.h>
@@ -120,15 +121,15 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: do_composite_archinitialize
+ * Name: stm32_composite_initialize
  *
  * Description:
  *   Perform architecture specific initialization
  *
  ****************************************************************************/
 
-#if !defined(CONFIG_LIB_BOARDCTL) || !defined(CONFIG_NSH_BUILTIN_APPS)
-static int do_composite_archinitialize(void)
+#ifndef CONFIG_NSH_BUILTIN_APPS
+static int stm32_composite_initialize(void)
 {
 #ifdef HAVE_SST25
   FAR struct spi_dev_s *spi;
@@ -284,18 +285,18 @@ static int do_composite_archinitialize(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_app_initialize
+ * Name: board_composite_initialize
  *
  * Description:
- *   Perform architecture specific initialization
+ *   Perform architecture specific initialization of a composite USB device.
  *
  ****************************************************************************/
 
-int composite_archinitialize(void)
+int board_composite_initialize(int port)
 {
-#if defined(CONFIG_LIB_BOARDCTL) && defined(CONFIG_NSH_BUILTIN_APPS)
+#ifdef CONFIG_NSH_BUILTIN_APPS
   return OK;
 #else
-  return do_composite_archinitialize();
+  return stm32_composite_initialize();
 #endif
 }

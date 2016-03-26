@@ -1,11 +1,8 @@
 /****************************************************************************
- * configs/cloudctrl/src/stm32_usbmsc.c
+ * configs/maple/src/stm32_appinit.c
  *
- *   Copyright (C) 2012, 2013, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
- *           Darcy Gong <darcy.gong@gmail.com>
- *
- * Configure and register the STM32 SPI-based MMC/SD block driver.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -42,45 +39,25 @@
 
 #include <nuttx/config.h>
 
-#include <stdio.h>
-#include <syslog.h>
-#include <errno.h>
+#include <sys/types.h>
 
 #include <nuttx/board.h>
 
-#include "stm32.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-/* Configuration ************************************************************/
-
-#ifndef CONFIG_SYSTEM_USBMSC_DEVMINOR1
-#  define CONFIG_SYSTEM_USBMSC_DEVMINOR1 0
-#endif
+#include "maple.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_usbmsc_initialize
+ * Name: board_app_initialize
  *
  * Description:
- *   Perform architecture specific initialization of the USB MSC device.
+ *   Perform architecture specific initialization
  *
  ****************************************************************************/
 
-int board_usbmsc_initialize(int port)
+int board_app_initialize(void)
 {
-  /* If system/usbmsc is built as an NSH command, then SD slot should
-   * already have been initized in board_app_initialize() (see stm32_appinit.c).
-   * In this case, there is nothing further to be done here.
-   */
-
-#ifndef CONFIG_NSH_BUILTIN_APPS
-  return stm32_sdinitialize(CONFIG_SYSTEM_USBMSC_DEVMINOR1);
-#else
   return OK;
-#endif
 }

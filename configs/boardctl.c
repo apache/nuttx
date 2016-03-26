@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/boardctl.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,7 +49,166 @@
 #include <nuttx/module.h>
 #include <nuttx/binfmt/symtab.h>
 
+#ifdef CONFIG_BOARDCTL_USBDEVCTRL
+#  include <nuttx/usb/cdcacm.h>
+#  include <nuttx/usb/pl2303.h>
+#  include <nuttx/usb/usbmsc.h>
+#  include <nuttx/usb/composite.h>
+#endif
+
 #ifdef CONFIG_LIB_BOARDCTL
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: boardctl_usbdevctrl
+ *
+ * Description:
+ *   Handler the USB device control command.
+ *
+ * Input Parameters:
+ *   ctrl - Described the USB device control command.
+ *
+ * Returned Value:
+ *   On success zero (OK) is returned; -1 (ERROR) is returned on failure
+ *   with the errno variable to to indicate the nature of the failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_BOARDCTL_USBDEVCTRL
+static inline int boardctl_usbdevctrl(FAR struct boardioc_usbdev_ctrl_s *ctrl)
+{
+  int ret = OK;
+
+  switch (ctrl->usbdev)
+    {
+#ifdef CONFIG_CDCACM
+      case BOARDIOC_USBDEV_CDCACM:           /* CDC/ACM, not in a composite */
+        switch (ctrl->action)
+          {
+            case BOARDIOC_USBDEV_INITIALIZE: /* Initialize CDC/ACM device */
+              break;                         /* There is no CDC/ACM initialization */
+
+            case BOARDIOC_USBDEV_CONNECT:    /* Connect the CDC/ACM device */
+#ifndef CONFIG_CDCACM_COMPOSITE
+              {
+                DEBUGASSERT(ctrl->handle != NULL);
+                ret = cdcacm_initialize(ctrl->instance, ctrl->handle);
+              }
+#endif
+              break;
+
+            case BOARDIOC_USBDEV_DISCONNECT: /* Disconnect the CDC/ACM device */
+              {
+                DEBUGASSERT(ctrl->handle != NULL && *ctrl->handle != NULL);
+                cdcacm_uninitialize(*ctrl->handle);
+              }
+              break;
+
+            default:
+              ret = -EINVAL;
+              break;
+          }
+        break;
+#endif
+
+#ifdef CONFIG_PL2303
+      case BOARDIOC_USBDEV_PL2303:           /* PL2303 serial, not in a composite */
+        switch (ctrl->action)
+          {
+            case BOARDIOC_USBDEV_INITIALIZE: /* Initialize PL2303 serial device */
+              break;                         /* There is no PL2303 serial initialization */
+
+            case BOARDIOC_USBDEV_CONNECT:    /* Connect the CDC/ACM device */
+              ret = usbdev_serialinitialize(ctrl->instance);
+              break;
+
+            case BOARDIOC_USBDEV_DISCONNECT: /* There is no PL2303 serial disconnect */
+              ret = -ENOSYS;
+              break;
+
+            default:
+              ret = -EINVAL;
+              break;
+          }
+        break;
+#endif
+
+#ifdef CONFIG_USBMSC
+      case BOARDIOC_USBDEV_MSC:              /* Mass storage class */
+        switch (ctrl->action)
+          {
+            case BOARDIOC_USBDEV_INITIALIZE: /* Initialize USB MSC device */
+              {
+                ret = board_usbmsc_initialize(ctrl->instance);
+              }
+              break;
+
+            case BOARDIOC_USBDEV_CONNECT:    /* Connect the USB MSC device */
+              {
+                DEBUGASSERT(ctrl->handle != NULL);
+#warning Missing logic
+                ret = -ENOSYS;
+              }
+              break;
+
+            case BOARDIOC_USBDEV_DISCONNECT: /* Disconnect the USB MSC device */
+              {
+                DEBUGASSERT(ctrl->handle != NULL && *ctrl->handle != NULL);
+                usbmsc_uninitialize(*ctrl->handle);
+              }
+              break;
+
+            default:
+              ret = -EINVAL;
+              break;
+          }
+        break;
+#endif
+
+#ifdef CONFIG_USBDEV_COMPOSITE
+      case BOARDIOC_USBDEV_COMPOSITE:        /* Composite device */
+        switch (ctrl->action)
+          {
+            case BOARDIOC_USBDEV_INITIALIZE: /* Initialize Composite device */
+              {
+                ret = board_composite_initialize(ctrl->instance);
+              }
+              break;
+
+            case BOARDIOC_USBDEV_CONNECT:    /* Connect the Composite device */
+              {
+                DEBUGASSERT(ctrl->handle != NULL);
+                *ctrl->handle = composite_initialize();
+                if (*ctrl->handle == NULL)
+                  {
+                    ret = -EIO;
+                  }
+              }
+              break;
+
+            case BOARDIOC_USBDEV_DISCONNECT: /* Disconnect the Composite device */
+              {
+                DEBUGASSERT(ctrl->handle != NULL && *ctrl->handle != NULL);
+                composite_uninitialize(*ctrl->handle);
+              }
+              break;
+
+            default:
+              ret = -EINVAL;
+              break;
+          }
+        break;
+#endif
+      default:
+        ret = -EINVAL;
+    }
+
+  return ret;
+}
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -189,6 +348,25 @@ int boardctl(unsigned int cmd, uintptr_t arg)
          DEBUGASSERT(symdesc != NULL);
          mod_setsymtab(symdesc->symtab, symdesc->nsymbols);
          ret = OK;
+        }
+        break;
+#endif
+
+#ifdef CONFIG_BOARDCTL_USBDEVCTRL
+      /* CMD:           BOARDIOC_USBDEV_CONTROL
+       * DESCRIPTION:   Manage USB device classes
+       * ARG:           A pointer to an instance of struct boardioc_usbdev_ctrl_s
+       * CONFIGURATION: CONFIG_LIB_BOARDCTL && CONFIG_BOARDCTL_USBDEVCTRL
+       * DEPENDENCIES:  Board logic must provide board_<usbdev>_initialize()
+       */
+
+      case BOARDIOC_USBDEV_CONTROL:
+        {
+          FAR struct boardioc_usbdev_ctrl_s *ctrl =
+            (FAR struct boardioc_usbdev_ctrl_s *)arg;
+
+          DEBUGASSERT(ctrl != NULL);
+          ret = boardctl_usbdevctrl(ctrl);
         }
         break;
 #endif

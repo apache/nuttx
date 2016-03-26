@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/stm32l476vg-disco/include/board.h
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: dev@ziggurat29.com
  *
  * Redistribution and use in source and binary forms, with or without
@@ -55,7 +55,6 @@
 
 #include <arch/board/stm32l476vg-disco-clocking.h>
 
-
 /* DMA Channel/Stream Selections ****************************************************/
 /* Stream selections are arbitrary for now but might become important in the future
  * is we set aside more DMA channels/streams.
@@ -63,7 +62,7 @@
 
 /* Values defined in arch/arm/src/stm32l4/chip/stm32l4x6xx_dma.h */
 
-/*XXX are these used on disco? */
+/* XXX are these used on disco? */
 
 #if 0
 
@@ -125,7 +124,7 @@
 
 /*
  * XXX Is I2C2 used on Disco?
-*/
+ */
 
 #if 0
 
@@ -143,7 +142,7 @@
 
 /*
  * XXX is SPI1 used on Disco?
-*/
+ */
 
 #if 0
 
@@ -154,19 +153,17 @@
 #endif
 
 
-/*
- * SPI2 is used for several peripherals on the Discovery board, including
+/* SPI2 is used for several peripherals on the Discovery board, including
  * L3GD20 - 3 axis Gyroscope
  * LSM303CTR - eCompass, comprising an accelerometer and magnetometer
-*/
+ */
 
 #define GPIO_SPI2_MISO   GPIO_SPI2_MISO_3
 #define GPIO_SPI2_MOSI   GPIO_SPI2_MOSI_3
 #define GPIO_SPI2_SCK    GPIO_SPI2_SCK_3
 
-/*
- * PD7; gyroscope CS
-*/
+/* PD7; gyroscope CS */
+
 #define GPIO_SPI_CS_GYRO_OFF \
     (GPIO_INPUT | GPIO_PULLDOWN | GPIO_SPEED_2MHz | \
      GPIO_PORTD | GPIO_PIN7)
@@ -174,9 +171,8 @@
     (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_2MHz | \
      GPIO_OUTPUT_SET | GPIO_PORTD | GPIO_PIN7)
 
-/*
- * PE0; accelerometer CS
-*/
+/* PE0; accelerometer CS */
+
 #define GPIO_SPI_CS_ACCEL_OFF \
     (GPIO_INPUT | GPIO_PULLDOWN | GPIO_SPEED_2MHz | \
      GPIO_PORTE | GPIO_PIN0)
@@ -184,9 +180,8 @@
     (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_2MHz | \
      GPIO_OUTPUT_SET | GPIO_PORTE | GPIO_PIN0)
 
-/*
- * PC0; magnetometer CS
-*/
+/* PC0; magnetometer CS */
+
 #define GPIO_SPI_CS_MAGNETO_OFF \
     (GPIO_INPUT | GPIO_PULLDOWN | GPIO_SPEED_2MHz | \
      GPIO_PORTC | GPIO_PIN0)
@@ -194,16 +189,14 @@
     (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_2MHz | \
      GPIO_OUTPUT_SET | GPIO_PORTC | GPIO_PIN0)
 
-
-/*
- XXX these will need to be set up when these get implemented:
- PD2 gyro INT1
- PB8 gyro INT2/DRDY
-
- PE1 accel INT
- PC2 magneto DRDY
- PC1 magneto INT
-*/
+/* XXX these will need to be set up when these get implemented:
+ * PD2 gyro INT1
+ * PB8 gyro INT2/DRDY
+ *
+ * PE1 accel INT
+ * PC2 magneto DRDY
+ * PC1 magneto INT
+ */
 
 /* LEDs
  *
@@ -233,13 +226,13 @@
  *
  *   SYMBOL                Meaning                  BOARD_LED_GRN  BOARD_LED_RED
  *   -------------------  -----------------------  -----------    ------------
- *   LED_STARTED          NuttX has been started     
- *   LED_HEAPALLOCATE     Heap has been allocated    
- *   LED_IRQSENABLED      Interrupts enabled         
- *   LED_STACKCREATED     Idle stack created         
- *   LED_INIRQ            In an interrupt            
- *   LED_SIGNAL           In a signal handler        
- *   LED_ASSERTION        An assertion failed        
+ *   LED_STARTED          NuttX has been started
+ *   LED_HEAPALLOCATE     Heap has been allocated
+ *   LED_IRQSENABLED      Interrupts enabled
+ *   LED_STACKCREATED     Idle stack created
+ *   LED_INIRQ            In an interrupt
+ *   LED_SIGNAL           In a signal handler
+ *   LED_ASSERTION        An assertion failed
  *   LED_PANIC            The system has crashed                  Blinking
  *   LED_IDLE             MCU is is sleep mode       ON
  *

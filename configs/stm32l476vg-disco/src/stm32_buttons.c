@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/stm32l476vg-disco/src/stm32_buttons.c
  *
- *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: dev@ziggurat29.com
  *
  * Redistribution and use in source and binary forms, with or without
@@ -73,8 +73,8 @@ static int button_pm_prepare(struct pm_callback_s *cb, enum pm_state_e pmstate);
  * Private Data
  ****************************************************************************/
 
-/* Pin configuration for each STM32L476 Discovery button.  This array is indexed by
- * the BUTTON_* definitions in board.h
+/* Pin configuration for each STM32L476 Discovery button.  This array is
+ * indexed by the BUTTON_* definitions in board.h
  */
 
 static const uint32_t g_buttons[NUM_BUTTONS] =
@@ -100,7 +100,7 @@ static struct pm_callback_s g_buttonscb =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
- 
+
 /****************************************************************************
  * Name: button_pm_notify
  *
@@ -161,13 +161,14 @@ static void button_pm_notify(struct pm_callback_s *cb , enum pm_state_e pmstate)
  *
  ****************************************************************************/
 /* XXX it's not completely clear to me if this is appropriate; on the one
- hand, it seems to make sense that this would be the module to have the ISR
- for the buttons.  On the other hand, it will conflict with things done in
- the buttons example, which registers it's own ISR, and warns if it sees
- one already there.  I don't know if 'buttons' is overstepping it's bounds
- in the interst of providing a compact example, (like the I2C app directly
- talking to the bus), or if really that should be an expected thing to do.
+ * hand, it seems to make sense that this would be the module to have the ISR
+ * for the buttons.  On the other hand, it will conflict with things done in
+ * the buttons example, which registers it's own ISR, and warns if it sees
+ * one already there.  I don't know if 'buttons' is overstepping it's bounds
+ * in the interst of providing a compact example, (like the I2C app directly
+ * talking to the bus), or if really that should be an expected thing to do.
  */
+
 #if 0
 #ifdef CONFIG_ARCH_IRQBUTTONS
 static int button_handler(int irq, FAR void *context)
@@ -237,8 +238,10 @@ void board_button_initialize(void)
     {
       stm32l4_configgpio(g_buttons[i]);
 
-//It's not clear if this is correct; I think so, but then there are
-//conflicts with the 'buttons' sample app.
+  /* It's not clear if this is correct; I think so, but then there are
+   * conflicts with the 'buttons' sample app.
+   */
+
 #if 0
 #ifdef CONFIG_ARCH_IRQBUTTONS
       xcpt_t oldhandler = board_button_irq(i, button_handler);
@@ -250,10 +253,7 @@ void board_button_initialize(void)
         }
 #endif
 #endif
-
     }
-
-
 }
 
 /****************************************************************************
@@ -269,26 +269,27 @@ uint8_t board_buttons(void)
 
   for (i = 0; i < NUM_BUTTONS; i++)
     {
-       /* A HIGH value means that the key is pressed.
-        */
+      /* A HIGH value means that the key is pressed. */
 
-       bool pressed = stm32l4_gpioread(g_buttons[i]);
+      bool pressed = stm32l4_gpioread(g_buttons[i]);
 
-       /* Accumulate the set of depressed (not released) keys */
+      /* Accumulate the set of depressed (not released) keys */
 
-       if (pressed)
-         {
-            ret |= (1 << i);
-         }
+      if (pressed)
+        {
+          ret |= (1 << i);
+        }
     }
-  
-  /* if the user pressed any buttons, notify power management system we are active
-  */
+
+  /* if the user pressed any buttons, notify power management system we are
+   * active
+   */
+
 #ifdef CONFIG_PM
   if ( 0 != ret )
-  {
-    pm_activity ( CONFIG_PM_BUTTON_ACTIVITY );
-  }
+    {
+      pm_activity(CONFIG_PM_BUTTON_ACTIVITY);
+    }
 #endif
 
   return ret;
@@ -328,6 +329,7 @@ xcpt_t board_button_irq(int id, xcpt_t irqhandler)
     {
       oldhandler = stm32l4_gpiosetevent(g_buttons[id], true, true, true, irqhandler);
     }
+
   return oldhandler;
 }
 #endif

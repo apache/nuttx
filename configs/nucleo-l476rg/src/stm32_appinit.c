@@ -1,11 +1,8 @@
 /****************************************************************************
- * configs/cloudctrl/src/stm32_usbmsc.c
+ * configs/nucleo-l476rg/src/stm32_appinit.c
  *
- *   Copyright (C) 2012, 2013, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
- *           Darcy Gong <darcy.gong@gmail.com>
- *
- * Configure and register the STM32 SPI-based MMC/SD block driver.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -46,41 +43,99 @@
 #include <syslog.h>
 #include <errno.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/board.h>
+#include <nuttx/sdio.h>
+#include <nuttx/mmcsd.h>
 
-#include "stm32.h"
+#include <stm32l4.h>
+#include <stm32l4_uart.h>
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-/* Configuration ************************************************************/
+#include <arch/board/board.h>
 
-#ifndef CONFIG_SYSTEM_USBMSC_DEVMINOR1
-#  define CONFIG_SYSTEM_USBMSC_DEVMINOR1 0
-#endif
+#include "nucleo-l476rg.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_usbmsc_initialize
+ * Name: up_netinitialize
  *
  * Description:
- *   Perform architecture specific initialization of the USB MSC device.
+ *   Dummy function expected to start-up logic.
  *
  ****************************************************************************/
 
-int board_usbmsc_initialize(int port)
+#ifdef CONFIG_WL_CC3000
+void up_netinitialize(void)
 {
-  /* If system/usbmsc is built as an NSH command, then SD slot should
-   * already have been initized in board_app_initialize() (see stm32_appinit.c).
-   * In this case, there is nothing further to be done here.
+}
+#endif
+
+/****************************************************************************
+ * Name: board_app_initialize
+ *
+ * Description:
+ *   Perform architecture specific initialization
+ *
+ ****************************************************************************/
+
+int board_app_initialize(void)
+{
+#if defined(HAVE_MMCSD) || defined(CONFIG_AJOYSTICK)
+  int ret;
+#endif
+
+  /* Configure CPU load estimation */
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION
+  cpuload_initialize_once();
+#endif
+
+#ifdef HAVE_MMCSD
+  /* First, get an instance of the SDIO interface */
+
+  g_sdio = sdio_initialize(CONFIG_NSH_MMCSDSLOTNO);
+  if (!g_sdio)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize SDIO slot %d\n",
+             CONFIG_NSH_MMCSDSLOTNO);
+      return -ENODEV;
+    }
+
+  /* Now bind the SDIO interface to the MMC/SD driver */
+
+  ret = mmcsd_slotinitialize(CONFIG_NSH_MMCSDMINOR, g_sdio);
+  if (ret != OK)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to bind SDIO to the MMC/SD driver: %d\n",
+             ret);
+      return ret;
+    }
+
+  /* Then let's guess and say that there is a card in the slot. There is no
+   * card detect GPIO.
    */
 
-#ifndef CONFIG_NSH_BUILTIN_APPS
-  return stm32_sdinitialize(CONFIG_SYSTEM_USBMSC_DEVMINOR1);
-#else
-  return OK;
+  sdio_mediachange(g_sdio, true);
+
+  syslog(LOG_INFO, "[boot] Initialized SDIO\n");
 #endif
+
+#ifdef CONFIG_AJOYSTICK
+  /* Initialize and register the joystick driver */
+
+  ret = board_ajoy_initialize();
+  if (ret != OK)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to register the joystick driver: %d\n",
+             ret);
+      return ret;
+    }
+#endif
+
+  return OK;
 }

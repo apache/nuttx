@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/stm3210e-eval/src/stm32_composite.c
  *
- *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Configure and register the STM32 MMC/SD SDIO block driver.
@@ -47,13 +47,14 @@
 
 #include <nuttx/sdio.h>
 #include <nuttx/mmcsd.h>
+#include <nuttx/board.h>
 #include <nuttx/usb/composite.h>
 
 #include "stm32.h"
 
 /* There is nothing to do here if SDIO support is not selected. */
 
-#ifdef CONFIG_STM32_SDIO
+#if defined(CONFIG_STM32_SDIO) && defined(CONFIG_USBDEV_COMPOSITE)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -80,14 +81,14 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: composite_archinitialize
+ * Name: board_composite_initialize
  *
  * Description:
- *   Perform architecture specific initialization
+ *   Perform architecture specific initialization of a composite USB device.
  *
  ****************************************************************************/
 
-int composite_archinitialize(void)
+int board_composite_initialize(int port)
 {
   /* If system/composite is built as an NSH command, then SD slot should
    * already have been initialized in board_app_initialize() (see
@@ -141,4 +142,4 @@ int composite_archinitialize(void)
    return OK;
 }
 
-#endif /* CONFIG_STM32_SDIO */
+#endif /* CONFIG_STM32_SDIO && CONFIG_USBDEV_COMPOSITE */

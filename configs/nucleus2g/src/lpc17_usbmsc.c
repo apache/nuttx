@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/nucleus2g/src/lpc17_usbmsc.c
  *
- *   Copyright (C) 2010, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Configure and register the LPC17xx MMC/SD SPI block driver.
@@ -45,8 +45,9 @@
 #include <syslog.h>
 #include <errno.h>
 
-#include <nuttx/spi/spi.h>
+#include <nuttx/board.h>
 #include <nuttx/mmcsd.h>
+#include <nuttx/spi/spi.h>
 
 #include "lpc17_ssp.h"
 
@@ -77,14 +78,14 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: usbmsc_archinitialize
+ * Name: board_usbmsc_initialize
  *
  * Description:
- *   Perform architecture specific initialization
+ *   Perform architecture specific initialization of the USB MSC device.
  *
  ****************************************************************************/
 
-int usbmsc_archinitialize(void)
+int board_usbmsc_initialize(int port)
 {
   FAR struct spi_dev_s *spi;
   int ret;

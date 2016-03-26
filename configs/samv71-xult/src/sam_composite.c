@@ -1,11 +1,8 @@
 /****************************************************************************
- * configs/cloudctrl/src/stm32_usbmsc.c
+ * configs/samv71-xult/src/sam_composite.c
  *
- *   Copyright (C) 2012, 2013, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
- *           Darcy Gong <darcy.gong@gmail.com>
- *
- * Configure and register the STM32 SPI-based MMC/SD block driver.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -42,45 +39,27 @@
 
 #include <nuttx/config.h>
 
-#include <stdio.h>
-#include <syslog.h>
-#include <errno.h>
+#include <nuttx/usb/composite.h>
 
-#include <nuttx/board.h>
+#include "samv71-xult.h"
 
-#include "stm32.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-/* Configuration ************************************************************/
-
-#ifndef CONFIG_SYSTEM_USBMSC_DEVMINOR1
-#  define CONFIG_SYSTEM_USBMSC_DEVMINOR1 0
-#endif
+#ifdef CONFIG_USBDEV_COMPOSITE
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_usbmsc_initialize
+ * Name: board_composite_initialize
  *
  * Description:
- *   Perform architecture specific initialization of the USB MSC device.
+ *   Perform architecture specific initialization of a composite USB device.
  *
  ****************************************************************************/
 
-int board_usbmsc_initialize(int port)
+int board_composite_initialize(int port)
 {
-  /* If system/usbmsc is built as an NSH command, then SD slot should
-   * already have been initized in board_app_initialize() (see stm32_appinit.c).
-   * In this case, there is nothing further to be done here.
-   */
-
-#ifndef CONFIG_NSH_BUILTIN_APPS
-  return stm32_sdinitialize(CONFIG_SYSTEM_USBMSC_DEVMINOR1);
-#else
   return OK;
-#endif
 }
+
+#endif /* CONFIG_USBDEV_COMPOSITE */

@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/mcu123-lpc214x/src/lpc2148_composite.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Configure and register the LPC214x MMC/SD SPI block driver.
@@ -45,8 +45,9 @@
 #include <syslog.h>
 #include <errno.h>
 
-#include <nuttx/spi/spi.h>
+#include <nuttx/board.h>
 #include <nuttx/mmcsd.h>
+#include <nuttx/spi/spi.h>
 #include <nuttx/usb/composite.h>
 
 #include "lpc214x_spi.h"
@@ -71,14 +72,14 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: composite_archinitialize
+ * Name: board_composite_initialize
  *
  * Description:
- *   Perform architecture specific initialization
+ *   Perform architecture specific initialization of a composite USB device.
  *
  ****************************************************************************/
 
-int composite_archinitialize(void)
+int board_composite_initialize(int port)
 {
   /* If system/composite is built as an NSH command, then SD slot should
    * already have been initialized in board_app_initialize() (see lpc2148_appinit.c).
