@@ -689,7 +689,9 @@ static void stm32l4_stdclockconfig(void)
       /* XXX The choice of clock source to PLL (all three) is independent
        * of the sys clock source choice, review the STM32L4_BOARD_USEHSI
        * name; probably split it into two, one for PLL source and one
-       * for sys clock source */
+       * for sys clock source.
+       */
+
 #ifdef STM32L4_BOARD_USEHSI
       regval |= RCC_PLLCFG_PLLSRC_HSI;
 #else /* if STM32L4_BOARD_USEHSE */
@@ -743,7 +745,6 @@ static void stm32l4_stdclockconfig(void)
       while ((getreg32(STM32L4_RCC_CR) & RCC_CR_PLLSAI1RDY) == 0)
         {
         }
-
 #endif
 
 #ifdef CONFIG_STM32L4_SAI2PLL
@@ -754,8 +755,8 @@ static void stm32l4_stdclockconfig(void)
       /* Enable the SAI2 PLL */
       /* Set the PLL dividers and multipliers to configure the SAI2 PLL */
 
-      regval = (STM32L4_PLLSAI2CFG_PLLN | STM32L4_PLLSAI2CFG_PLLP
-                 | STM32L4_PLLSAI2CFG_PLLR);
+      regval = (STM32L4_PLLSAI2CFG_PLLN | STM32L4_PLLSAI2CFG_PLLP |
+                STM32L4_PLLSAI2CFG_PLLR);
 
 #ifdef STM32L4_PLLSAI2CFG_PLLP_ENABLED
       regval |= RCC_PLLSAI2CFG_PLLPEN;
@@ -777,7 +778,6 @@ static void stm32l4_stdclockconfig(void)
       while ((getreg32(STM32L4_RCC_CR) & RCC_CR_PLLSAI2RDY) == 0)
         {
         }
-
 #endif
 
       /* Enable FLASH prefetch, instruction cache, data cache, and 5 wait states */
@@ -819,18 +819,19 @@ static void stm32l4_stdclockconfig(void)
 #endif
 
 #if defined(STM32L4_USE_CLK48)
-      /*XXX sanity if sdmmc1 or usb or rng, then we need to set the clk48 source
+      /* XXX sanity if sdmmc1 or usb or rng, then we need to set the clk48 source
        * and then we can also do away with STM32L4_USE_CLK48, and give better
-       * warning messages */
-      /*XXX sanity if our STM32L4_CLK48_SEL is YYY then we need to have already
-       * enabled ZZZ */
+       * warning messages
+       *
+       * XXX sanity if our STM32L4_CLK48_SEL is YYY then we need to have already
+       * enabled ZZZ
+       */
 
       regval  = getreg32(STM32L4_RCC_CCIPR);
       regval &= RCC_CCIPR_CLK48SEL_MASK;
       regval |= STM32L4_CLK48_SEL;
       putreg32(regval, STM32L4_RCC_CCIPR);
 #endif
-
     }
 }
 #endif

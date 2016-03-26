@@ -416,7 +416,7 @@ config STM32L4_DISABLE_IDLE_SLEEP_DURING_DEBUG
 		instruction, the debugger will disconnect, terminating the debug session.
 
 config ARCH_BOARD_STM32L4_CUSTOM_CLOCKCONFIG
-        bool "Custom clock configuration"
+	bool "Custom clock configuration"
 	default n
 	---help---
 		Enables special, board-specific STM32 clock configuration.
