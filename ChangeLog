@@ -1040,7 +1040,7 @@
 	  development board.
 	* lib/lib_crc32.c: Add CRC32 logic by Gary S. Brown to lib/.  This is
 	  the larger (but faster) table look-up version of the CRC32 algorithm.
-	* confgs/ea3131/tools: Added a tool to create a image suitable for
+	* configs/ea3131/tools: Added a tool to create a image suitable for
 	  use with the LPC313x bootloader.
 	* configs/sam3u-3k/ostest: Completed verification of the basic NuttX
 	  OS test for the SAM3U.
@@ -1295,7 +1295,7 @@
 	  (all of the AVR32 is a work in progress).
 	* arch/avr/include/at32uc3 and arch/avr/src/at32uc3: Add support
 	  for the AVR32 UC3A/B family of AVR32 MCUs.
-	* confgs/avr32dev1: Add support for the Atmel AVR32DEV1 board featuring
+	* configs/avr32dev1: Add support for the Atmel AVR32DEV1 board featuring
 	  the AT32UC3B0256 MCU.  This board is produced by www.mcuzone.com.
 	* include/stdlib.h, lib/Makefile, lib/lib_abs.c, lib/lib_labs.c,
 	  lib_labs.c, lib_llabs.c, lib_imaxabs.c: Add abs(), labs(), llabs(), and
@@ -2006,7 +2006,7 @@
 	  (reported by Li Zhouy (Lzyy)).
 	* 8/18/2011: The basic port to the FreeScale Kinetics TWR-K60N512 board is
 	  now functional.
-	* confgs/twr-k60n512: Add Kinetics TWR-K60N512 NSH configuration.
+	* configs/twr-k60n512: Add Kinetics TWR-K60N512 NSH configuration.
 	* drivers/analog and include/nuttx/analog: Add ADC driver infrastructure
 	  and TI ADS1255 driver developed and submitted by Li Zhouy (Lzyy)).
 	* arch/arm/stm32/stm32_sdio.h and drivers/mmcsd/mmcsd.c:  Add logic to
@@ -2331,7 +2331,7 @@
 	* arch/arm/src/lpc17_can.c:  Several CAN driver improvements. Adds support for
 	  testing in loopback mode.  now uses all three transmit buffers for better
 	  performance.
-	* confgs/olimex-lpc1766stk/nsh:  Now supports the CAN loopback test as an
+	* configs/olimex-lpc1766stk/nsh:  Now supports the CAN loopback test as an
 	  optional "built-in" application.
 	* sched/irq_attach.c:  Fix an issue with disabling interrupts when they are
 	  detached.  For the PIC32, this can't be done because there is a 1-to-many
@@ -2374,7 +2374,7 @@
 	  one APB2 timer.
 	* arch/mips/src/pic32mx/pic32mx-ethernet.c:  The PIC32 Ethernet driver is
 	  code complete, but still untested.
-	* confgs/sim/*/Make.defs and arch/sim/src/Makefile:  Add support for building
+	* configs/sim/*/Make.defs and arch/sim/src/Makefile:  Add support for building
 	  a 32-bit executable on a 64-bit Linux target.
 	* configs/sure-pic32mx/src/up_leds.c:  Correct GPIOs used for LEDs. The wrong
 	  pins were being used.
@@ -3328,7 +3328,7 @@
 	  simple allocation of DMA I/O buffers.  The initial check-in
 	  is code complete but untested (not event built into the
 	  mm/Makefile yet.
-	* confgs/fire-stm32v2: The board port is basically functional.
+	* configs/fire-stm32v2: The board port is basically functional.
 	  Not all features have been verified.  The ENC28J60 network
 	  is not yet functional.
 	* configs/stm3240g-eval/discover:  A configuration for testing
@@ -3687,7 +3687,7 @@
 	* arch/arm/src/stm32/stm32f20xx_rcc.c and stm32f40xx_rcc.c: Added option
 	  CONFIG_STM32_FLASH_PREFETCH.  FLASH prefetch will now only be enabled
 	  if this option is selected.
-	* confgs/ez80f910200zco/ostest:  Now uses Kconfig/mconf configuration
+	* configs/ez80f910200zco/ostest:  Now uses Kconfig/mconf configuration
 	  tool. Updated to build in native Windows environment.  Other ez80f910200zco
 	  build scripts also updated.
 	* configs/z8f64200100kit/ostest: Update to same level as ez80 configurations.
@@ -5267,7 +5267,7 @@
 	* arch/arm/src/sama5/sam_boot.c:  Boot logic now initially
 	  configures DRAM as strongly ordered so that it can be initialized.
 	  After initialization, the page table entries are modified so
-	  that DRAM is fully cache-able (2018-8-2).
+	  that DRAM is fully cache-able (2016-8-2).
 	* arch/arm/src/sama5/chip/sam_mpddrc.h:  Correct typos in the
 	  SAMA5 DDR controller register definitions (2013-8-2).
 	* arch/arm/src/sama5/sam_irq.c:  Correct handling of spurious
@@ -11406,30 +11406,31 @@
 	  sem_tickwait() does not return an -1+errno, it returns a negated
 	  errno value.  Noted by Freddie Chopin.
 
-7.15 2016-xx-xx Gregory Nutt <gnutt@nuttx.org>
+7.15 2016-03-27 Gregory Nutt <gnutt@nuttx.org>
 
-	* drivers/analog/adc1242.c and include/nuttx/analog/adc1242.h:  Driver
+	* drivers/analog/ads1242.c and include/nuttx/analog/ads1242.h:  Driver
 	  for the  24-Bit Differential Input ADC ADS1242 that communicates via
 	  SPI with a MCU. Reading the ADC conversion result as well as configuring
 	  the ADC, setting the input channel, etc. is implemented via ioctl calls.
 	  However, it does not yet implement the standard ADC interface.  From
-	* configs/board/src/xyz_cxxinitialize.c:  Move CXX initialization logic
+	  Alexander Entinger (2016-01-29)
+	* configs/board/src/xyz_cxxinitialize.c:  Move C++ initialization logic
 	  out of the RTOS and into the application space, specifically to
 	  apps/platform/board, where it belongs (2016-01-29).
 	* drivers/modem/u-blox.c and include/nuttx/drivers/u-blox.h:  Add an upper
 	  half driver for the U-Blox Modem.  From Vladimir Komendantskiy
-	  (2018-01-30).
+	  (2016-01-30).
 	* arch/arm/src/lpc17xx: Backport lpc43xx I2C driver, replacing the
 	  lpc17xx I2C driver.  This gives us the I2C_TRANSFER method (2016-01-30).
 	* arch/arm/src/lpc11xx: Backport the lpc17xx I2C driver, replacing the
-	  lpc11xx I2C driver.  This gives us the I2C_TRANSFER method (2019-01-30).
+	  lpc11xx I2C driver.  This gives us the I2C_TRANSFER method (2016-01-30).
 	* arch/arm/src/lpc2378: Backo the Lpc17xx I2C driver, replacing the
-	  lpc2378 I2C driver.  This gives us the I2C_TRANSFER method (2019-01-30).
-	* confgs/u-blox-c027:  Support for the u-blox GSM and GPS module evaluation
+	  lpc2378 I2C driver.  This gives us the I2C_TRANSFER method (2016-01-30).
+	* configs/u-blox-c027:  Support for the u-blox GSM and GPS module evaluation
 	  board with NXP LPCExpresso LPC1768.  The GSM module is one of LISA-C200,
 	  LISA-U200 or SARA-G350. The GPS module is one of MAX-M7 or MAX-M8.  From
 	  Vladimir Komendantskiy (2016-01-31).
-	* drivers/, arch/, include/, numerous files:  May restructuring of the I2C
+	* drivers/, arch/, include/, numerous files:  Restructuring of the I2C
 	  interface necessary to eliminate some thread-safety issues inherent in
 	  the legacy I2C interface design.  This effects the interface definition,
 	  all I2C clients, and all low-level I2C drivers.  I have used caution,
@@ -11497,7 +11498,7 @@
 	  per thread but, rather, per task group.  I know, I preferred it the
 	  other way too, but this is more compliant with POSIX (2016-02-18).
 	* fs/ procfs/fs_procfsproc.c: Add support for showing CPU if SMP is
-	  is enabled (2016-02-19).
+	  enabled (2016-02-19).
 	* include/pthread.h, sched.h, sys/types.h and other files: Rename
 	  cpuset_t to cpu_set_t which is the type used in some non-standard
 	  Linux/GNU interfaces.  Move definitions of cpu_set_t to include/sys/types.h.
@@ -11517,7 +11518,7 @@
 	* sched/sched: Add sched_setaffinity() and sched_getaffinity() (2016-02-19).
 	* drivers/leds/rgbled.c: Add a driver to manage a RGB LED via PWM.  From
 	  Alan Carvalho de Assis (2016-02-22).
-	* arch/arm/src/stm32fcdiscovery: Add PWM support for the onboard RGB LED
+	* arch/arm/src/stm32f4discovery: Add PWM support for the onboard RGB LED
 	  From Alan Carvalho de Assis (2016-02-22).
 	* arch/arm/src/samv7: HSMCI driver can now be configured to handle unaligned
 	  data buffers (2016-02-22).
@@ -11549,7 +11550,7 @@
 	* include/nuttx/clock.h:  Missing parenteses in MSEC2TICK macro can
 	  cause wrong calculations.  From Stefan Kolb (2016-03-09).
 	* Build system:  Added a 'make olddefconfig' target that will refresh
-	  a .config file without interaction.  tools/refesh.sh no has a --silent
+	  a .config file without interaction.  tools/refesh.sh now has a --silent
 	  option so that it can be used in batch modes without human input
 	  (2016-03-09).
 	* tools/testbuild.sh:  .config files were not being updated because (a)
@@ -11566,8 +11567,8 @@
 	  option to buffer RTOS instrumentation data in an in-memory buffer
 	  (2016-03-17).
 	* drivers/syslog/note_driver.c:  Add a character driver that will allow
-	  an appliation to read buffered scheduler instrumentation data (2016-03-17).
-	* arch/arm/src/samv7/sam_usbdevhs.c:  The USB drivr has had some issue that
+	  an application to read buffered scheduler instrumentation data (2016-03-17).
+	* arch/arm/src/samv7/sam_usbdevhs.c:  The USB driver has had some issue that
 	  would occasionally cause loss of packets.  Back last December, a fix was
 	  put in for this but the fix apparently worsens the problem; now causing
 	  hangs.  The basic problem is that the number of busy banks (NBUSYBKS)
@@ -11582,3 +11583,7 @@
 	* include/sys/boardctl.h, configs/boardctl.c, and many configurations:  Add
 	  boardctl() support that will permit applications to control USB devices
 	  (2016-03-25).
+	* configs/stm32l476vg-disco: Add support for the STM32L476VG Discovery
+	  board.  From Dave (2016-03-25).
+
+7.16 2016-xx-xx Gregory Nutt <gnutt@nuttx.org>
