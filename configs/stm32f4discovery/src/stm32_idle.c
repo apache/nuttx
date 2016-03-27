@@ -116,7 +116,7 @@ static void stm32_idlepm(void)
 
   /* Decide, which power saving level can be obtained */
 
-  newstate = pm_checkstate();
+  newstate = pm_checkstate(PM_IDLE_DOMAIN);
 
   /* Check for state changes */
 
@@ -133,7 +133,7 @@ static void stm32_idlepm(void)
         {
           /* The new state change failed, revert to the preceding state */
 
-          (void)pm_changestatePM_IDLE_DOMAIN, oldstate);
+          (void)pm_changestate(PM_IDLE_DOMAIN, oldstate);
 
           /* No state change... */
 

@@ -283,7 +283,7 @@ static void stm32_idlepm(void)
     {
       /* Let the PM system decide, which power saving level can be obtained */
 
-      newstate = pm_checkstate();
+      newstate = pm_checkstate(PM_IDLE_DOMAIN);
     }
 
   /* Check for state changes */

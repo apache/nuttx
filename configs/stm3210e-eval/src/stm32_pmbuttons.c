@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/stm3210e-eval/src/stm32_pmbuttons.c
  *
- *   Copyright (C) 2012, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2015-2016 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            Diego Sanchez <dsanchez@nx-engineering.com>
  *
@@ -110,6 +110,8 @@
 #ifndef CONFIG_PM_BUTTON_ACTIVITY
 #  define CONFIG_PM_BUTTON_ACTIVITY 10
 #endif
+
+#define PM_IDLE_DOMAIN 0 /* Revisit */
 
 /* Miscellaneous Definitions ************************************************/
 
@@ -221,7 +223,7 @@ static void button_handler(int id, int irq)
    * special happened.
    */
 
-  pm_activity(CONFIG_PM_BUTTON_ACTIVITY);
+  pm_activity(PM_IDLE_DOMAIN, CONFIG_PM_BUTTON_ACTIVITY);
 }
 
 #if MIN_BUTTON < 1
