@@ -471,25 +471,7 @@ if PIPES
 source drivers/pipes/Kconfig
 endif # PIPES
 
-config PM
-	bool "Power management (PM) driver interfaces"
-	default n
-	---help---
-		Power management (PM) driver interfaces.  These interfaces are used
-		to manage power usage of a platform by monitoring driver activity
-		and by placing drivers into reduce power usage modes when the
-		drivers are not active.
-
-menuconfig POWER
-	bool "Power Management Support"
-	default n
-	---help---
-		Enable building of power-related devices (battery monitors, chargers,
-		etc).
-
-if POWER
 source drivers/power/Kconfig
-endif # POWER
 
 menuconfig SENSORS
 	bool "Sensor Device Support"
