@@ -39,6 +39,9 @@
 
 #include <nuttx/config.h>
 
+#include <stdint.h>
+#include <assert.h>
+
 #include <nuttx/power/pm.h>
 #include <nuttx/clock.h>
 #include <nuttx/irq.h>

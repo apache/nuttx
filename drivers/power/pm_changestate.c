@@ -39,6 +39,9 @@
 
 #include <nuttx/config.h>
 
+#include <queue.h>
+#include <assert.h>
+
 #include <nuttx/power/pm.h>
 #include <nuttx/irq.h>
 

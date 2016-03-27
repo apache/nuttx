@@ -210,7 +210,7 @@ EXTERN struct pm_global_s g_pmglobals;
  *
  ****************************************************************************/
 
-EXTERN void pm_update(int domain, int16_t accum);
+void pm_update(int domain, int16_t accum);
 
 #undef EXTERN
 #if defined(__cplusplus)
