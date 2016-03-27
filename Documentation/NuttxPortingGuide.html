@@ -5752,7 +5752,7 @@ enum pm_state_e pm_checkstate(void);
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/power/pm.h&gt;
- int pm_changestate(enum pm_state_e newstate);
+ int pm_changestate(int domain, enum pm_state_e newstate);
 </pre></ul>
 <p><b>Description:</b>
   This function is used by platform-specific power management logic.
@@ -5760,6 +5760,8 @@ enum pm_state_e pm_checkstate(void);
 </p>
 <p><b>Input Parameters:</b>
  <dl>
+   <dt><code>domain</code>
+   <dd>Identifies the domain of the new PM state
    <dt><code>newstate</code>
    <dd>Identifies the new PM state
  </dl>
@@ -5786,7 +5788,7 @@ enum pm_state_e pm_checkstate(void);
 <h4><a name="pmprepare">6.4.3.1 <code>prepare()</code></a></h4>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
-int (*prepare)(FAR struct pm_callback_s *cb, enum pm_state_e pmstate);
+int (*prepare)(FAR struct pm_callback_s *cb, int domain, enum pm_state_e pmstate);
 </pre></ul>
 <p><b>Description:</b>
    Request the driver to prepare for a new power state.
@@ -5799,6 +5801,8 @@ int (*prepare)(FAR struct pm_callback_s *cb, enum pm_state_e pmstate);
    <dt><code>cb</code>
    <dd>Returned to the driver.
    The driver version of the callback structure may include additional, driver-specific state data at the end of the structure.
+   <dt><code>domain</code>
+   <dd>Identifies the activity domain of the state change
    <dt><code>pmstate</code>
    <dd>Identifies the new PM state
  </dl>
@@ -5815,7 +5819,7 @@ int (*prepare)(FAR struct pm_callback_s *cb, enum pm_state_e pmstate);
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/power/pm.h&gt;
-void (*notify)(FAR struct pm_callback_s *cb, enum pm_state_e pmstate);
+void (*notify)(FAR struct pm_callback_s *cb, int domain, enum pm_state_e pmstate);
 </pre></ul>
 <p><b>Description:</b>
   Notify the driver of new power state.
@@ -5826,6 +5830,8 @@ void (*notify)(FAR struct pm_callback_s *cb, enum pm_state_e pmstate);
    <dt><code>cb</code>
    <dd>Returned to the driver.
    The driver version of the callback structure may include additional, driver-specific state data at the end of the structure.
+   <dt><code>domain</code>
+   <dd>Identifies the activity domain of the state change
    <dt><code>pmstate</code>
    <dd>Identifies the new PM state
  </dl>
