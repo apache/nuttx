@@ -141,8 +141,8 @@ void stm32l4_board_clockconfig(void)
 
   /* Set the PLL dividers and multipliers to configure the SAI1 PLL */
 
-  regval = (STM32L4_PLLSAI1CFG_PLLN | STM32L4_PLLSAI1CFG_PLLP
-             | STM32L4_PLLSAI1CFG_PLLQ | STM32L4_PLLSAI1CFG_PLLR);
+  regval  = (STM32L4_PLLSAI1CFG_PLLN | STM32L4_PLLSAI1CFG_PLLP |
+             STM32L4_PLLSAI1CFG_PLLQ | STM32L4_PLLSAI1CFG_PLLR);
   regval |= RCC_PLLSAI1CFG_PLLQEN;
   putreg32(regval, STM32L4_RCC_PLLSAI1CFG);
 
@@ -165,8 +165,8 @@ void stm32l4_board_clockconfig(void)
   /* Enable the SAI2 PLL */
   /* Set the PLL dividers and multipliers to configure the SAI2 PLL */
 
-  regval = (STM32L4_PLLSAI2CFG_PLLN | STM32L4_PLLSAI2CFG_PLLP
-             | STM32L4_PLLSAI2CFG_PLLR);
+  regval = (STM32L4_PLLSAI2CFG_PLLN | STM32L4_PLLSAI2CFG_PLLP |
+            STM32L4_PLLSAI2CFG_PLLR);
   putreg32(regval, STM32L4_RCC_PLLSAI2CFG);
 
   /* Enable the SAI1 PLL */
@@ -184,7 +184,8 @@ void stm32l4_board_clockconfig(void)
   /* Enable FLASH prefetch, instruction cache, data cache, and 5 wait states */
 
 #ifdef CONFIG_STM32L4_FLASH_PREFETCH
-  regval = (FLASH_ACR_LATENCY_4 | FLASH_ACR_ICEN | FLASH_ACR_DCEN | FLASH_ACR_PRFTEN);
+  regval = (FLASH_ACR_LATENCY_4 | FLASH_ACR_ICEN | FLASH_ACR_DCEN |
+            FLASH_ACR_PRFTEN);
 #else
   regval = (FLASH_ACR_LATENCY_4 | FLASH_ACR_ICEN | FLASH_ACR_DCEN);
 #endif
@@ -217,6 +218,7 @@ void stm32l4_board_clockconfig(void)
    * TODO: There is another case where the LSE needs to
    * be enabled: if the MCO1 pin selects LSE as source.
    */
+
   stm32l4_pwr_enableclk(true);
   stm32l4_rcc_enablelse();
 #endif
