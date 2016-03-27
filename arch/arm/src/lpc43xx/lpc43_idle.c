@@ -1,7 +1,7 @@
 /****************************************************************************
  *  arch/arm/src/lpc43/lpc43_idle.c
  *
- *   Copyright (C) 2012, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -64,9 +64,7 @@
 #  define END_IDLE()
 #endif
 
-/****************************************************************************
- * Private Data
- ****************************************************************************/
+#define PM_IDLE_DOMAIN 0 /* Revisit */
 
 /****************************************************************************
  * Private Functions
@@ -104,12 +102,12 @@ static void up_idlepm(void)
 
       /* Then force the global state change */
 
-      ret = pm_changestate(newstate);
+      ret = pm_changestate(PM_IDLE_DOMAIN, newstate);
       if (ret < 0)
         {
           /* The new state change failed, revert to the preceding state */
 
-          (void)pm_changestate(oldstate);
+          (void)pm_changestate(PM_IDLE_DOMAIN, oldstate);
         }
       else
         {

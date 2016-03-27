@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/stm32f7/stm32_serial.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -317,8 +317,10 @@ static void up_dma_rxcallback(DMA_HANDLE handle, uint8_t status, void *arg);
 #endif
 
 #ifdef CONFIG_PM
-static void up_pm_notify(struct pm_callback_s *cb, enum pm_state_e pmstate);
-static int  up_pm_prepare(struct pm_callback_s *cb, enum pm_state_e pmstate);
+static void up_pm_notify(struct pm_callback_s *cb, int domain,
+                         enum pm_state_e pmstate);
+static int  up_pm_prepare(struct pm_callback_s *cb, int domain,
+                          enum pm_state_e pmstate);
 #endif
 
 #ifdef CONFIG_STM32F7_USART1
@@ -2543,7 +2545,8 @@ static void up_dma_rxcallback(DMA_HANDLE handle, uint8_t status, void *arg)
  ****************************************************************************/
 
 #ifdef CONFIG_PM
-static void up_pm_notify(struct pm_callback_s *cb, enum pm_state_e pmstate)
+static void up_pm_notify(struct pm_callback_s *cb, int domain,
+                         enum pm_state_e pmstate)
 {
   switch (pmstate)
     {
@@ -2616,7 +2619,8 @@ static void up_pm_notify(struct pm_callback_s *cb, enum pm_state_e pmstate)
  ****************************************************************************/
 
 #ifdef CONFIG_PM
-static int up_pm_prepare(struct pm_callback_s *cb, enum pm_state_e pmstate)
+static int up_pm_prepare(struct pm_callback_s *cb, int domain,
+                         enum pm_state_e pmstate)
 {
   /* Logic to prepare for a reduced power state goes here. */
 
