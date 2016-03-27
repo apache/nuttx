@@ -621,14 +621,17 @@ static void stm32l4_stdclockconfig(void)
     {
 #warning todo: regulator voltage according to clock freq
 #if 0
-      /* Select regulator voltage output Scale 1 mode to support system
-       * frequencies up to 168 MHz.
+      /* ensure Power control is enabled before modifying it
        */
-
+      
       regval  = getreg32(STM32L4_RCC_APB1ENR);
       regval |= RCC_APB1ENR_PWREN;
       putreg32(regval, STM32L4_RCC_APB1ENR);
 
+      /* Select regulator voltage output Scale 1 mode to support system
+       * frequencies up to 168 MHz.
+       */
+      
       regval  = getreg32(STM32L4_PWR_CR);
       regval &= ~PWR_CR_VOS_MASK;
       regval |= PWR_CR_VOS_SCALE_1;
@@ -808,11 +811,26 @@ static void stm32l4_stdclockconfig(void)
       stm32l4_rcc_enablelsi();
 #endif
 
-#if defined(CONFIG_RTC_LSECLOCK)
+#if defined(STM32L4_USE_LSE)
       /* Low speed external clock source LSE
        *
        * TODO: There is another case where the LSE needs to
        * be enabled: if the MCO1 pin selects LSE as source.
+       * XXX and other cases, like automatic trimming of MSI for USB use
+       */
+
+      /* ensure Power control is enabled since it is indirectly required
+       * to alter the LSE parameters.
+       */
+      stm32l4_pwr_enableclk(true);
+
+      /* XXX other LSE settings must be made before turning on the oscillator
+       * and we need to ensure it is first off before doing so.
+       */
+
+      /* turn on the LSE oscillator
+       * XXX this will almost surely get moved since we also want to use
+       * this for automatically trimming MSI, etc.
        */
 
       stm32l4_rcc_enablelse();
