@@ -36,7 +36,7 @@ Timers   : TODO
 PM       : TODO, PWR registers defined
 FSMC     : TODO
 AES      : TODO
-RNG      : TODO
+RNG      : works
 CRC      : TODO (configurable polynomial)
 WWDG     : TODO
 IWDG     : TODO
@@ -55,6 +55,6 @@ OPAMP    : TODO (Analog operational amplifier)
 COMP     : TODO (Analog comparators)
 DFSDM    : TODO (Digital Filter and Sigma-Delta Modulator)
 LCD      : TODO (Segment LCD controller)
-SAIPLL   : TODO (PLL For Digital Audio interfaces)
+SAIPLL   : works (PLL For Digital Audio interfaces, and other things)
 SAI      : TODO (Digital Audio interfaces, I2S, SPDIF, etc)
 

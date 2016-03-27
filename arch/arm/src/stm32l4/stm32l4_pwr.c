@@ -1,8 +1,11 @@
 /************************************************************************************
- * arch/arm/src/stm32l4/stm32l4_pwr.h
+ * arch/arm/src/stm32l4/stm32l4_pwr.c
  *
- *   Copyright (C) 2009, 2013, 2015 Gregory Nutt. All rights reserved.
- *   Author: dev@ziggurat29.com
+ *   Copyright (C) 2011 Uros Platise. All rights reserved.
+ *   Copyright (C) 2013, 2015 Gregory Nutt. All rights reserved.
+ *   Authors: Uros Platise <uros.platise@isotel.eu>
+ *            Gregory Nutt <gnutt@nuttx.org>
+ *            dev@ziggurat29.com
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,34 +36,44 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32L4_STM32L4_PWR_H
-#define __ARCH_ARM_SRC_STM32L4_STM32L4_PWR_H
-
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/arch.h>
 
+#include <stdint.h>
 #include <stdbool.h>
+#include <errno.h>
 
-#include "chip.h"
-#include "chip/stm32l4_pwr.h"
+#include "up_arch.h"
+#include "stm32l4_pwr.h"
+#include "stm32l4_rcc.h"
+
 
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
 
-#ifndef __ASSEMBLY__
+/************************************************************************************
+ * Private Functions
+ ************************************************************************************/
 
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
+static inline uint16_t stm32l4_pwr_getreg(uint8_t offset)
 {
-#else
-#define EXTERN extern
-#endif
+  return (uint16_t)getreg32(STM32L4_PWR_BASE + (uint32_t)offset);
+}
+
+static inline void stm32l4_pwr_putreg(uint8_t offset, uint16_t value)
+{
+  putreg32((uint32_t)value, STM32L4_PWR_BASE + (uint32_t)offset);
+}
+
+static inline void stm32l4_pwr_modifyreg(uint8_t offset, uint16_t clearbits, uint16_t setbits)
+{
+  modifyreg32(STM32L4_PWR_BASE + (uint32_t)offset, (uint32_t)clearbits, (uint32_t)setbits);
+}
 
 /************************************************************************************
  * Public Functions
@@ -82,8 +95,34 @@ extern "C"
  *
  ************************************************************************************/
 
-bool stm32l4_pwr_enableclk(bool enable);
+bool stm32l4_pwr_enableclk(bool enable)
+{
+  uint32_t regval;
+  bool wasenabled;
+  
+  regval = getreg32(STM32L4_RCC_APB1ENR1);
+  wasenabled = ((regval & RCC_APB1ENR1_PWREN) != 0);
 
+  /* Power interface clock enable.
+   */
+
+  if (wasenabled && !enable)
+    {
+      /* Disable power interface clock */
+
+      regval &= ~RCC_APB1ENR1_PWREN;
+      putreg32(STM32L4_RCC_APB1ENR1, regval);
+    }
+  else if (!wasenabled && enable)
+    {
+      /* Enable power interface clock */
+
+      regval |= RCC_APB1ENR1_PWREN;
+      putreg32(STM32L4_RCC_APB1ENR1, regval);
+    }
+  
+  return wasenabled;
+}
 
 /************************************************************************************
  * Name: stm32l4_pwr_enablebkp
@@ -100,12 +139,36 @@ bool stm32l4_pwr_enableclk(bool enable);
  *
  ************************************************************************************/
 
-bool stm32l4_pwr_enablebkp(bool writable);
+bool stm32l4_pwr_enablebkp(bool writable)
+{
+  uint16_t regval;
+  bool waswritable;
 
-#undef EXTERN
-#if defined(__cplusplus)
+  /* Get the current state of the STM32 PWR control register */
+
+  regval      = stm32l4_pwr_getreg(STM32L4_PWR_CR1_OFFSET);
+  waswritable = ((regval & PWR_CR1_DBP) != 0);
+
+  /* Enable or disable the ability to write */
+
+  if (waswritable && !writable)
+    {
+      /* Disable backup domain access */
+
+      regval &= ~PWR_CR1_DBP;
+      stm32l4_pwr_putreg(STM32L4_PWR_CR1_OFFSET, regval);
+    }
+  else if (!waswritable && writable)
+    {
+      /* Enable backup domain access */
+
+      regval |= PWR_CR1_DBP;
+      stm32l4_pwr_putreg(STM32L4_PWR_CR1_OFFSET, regval);
+
+      /* Enable does not happen right away */
+
+      up_udelay(4);
+    }
+
+  return waswritable;
 }
-#endif
-
-#endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_STM32L4_STM32L4_PWR_H */
