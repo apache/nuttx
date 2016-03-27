@@ -210,14 +210,14 @@ void stm32l4_board_clockconfig(void)
    stm32l4_rcc_enablelsi();
 #endif
 
-#if defined(CONFIG_RTC_LSECLOCK)
+#if defined(STM32L4_USE_LSE)
 
   /* Low speed external clock source LSE
    *
    * TODO: There is another case where the LSE needs to
    * be enabled: if the MCO1 pin selects LSE as source.
    */
-
+  stm32l4_pwr_enableclk(true);
   stm32l4_rcc_enablelse();
 #endif
 
