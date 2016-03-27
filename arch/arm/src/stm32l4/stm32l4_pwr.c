@@ -2,7 +2,7 @@
  * arch/arm/src/stm32l4/stm32l4_pwr.c
  *
  *   Copyright (C) 2011 Uros Platise. All rights reserved.
- *   Copyright (C) 2013, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2015-2016 Gregory Nutt. All rights reserved.
  *   Authors: Uros Platise <uros.platise@isotel.eu>
  *            Gregory Nutt <gnutt@nuttx.org>
  *            dev@ziggurat29.com
@@ -51,11 +51,6 @@
 #include "stm32l4_pwr.h"
 #include "stm32l4_rcc.h"
 
-
-/************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
-
 /************************************************************************************
  * Private Functions
  ************************************************************************************/
@@ -103,8 +98,7 @@ bool stm32l4_pwr_enableclk(bool enable)
   regval = getreg32(STM32L4_RCC_APB1ENR1);
   wasenabled = ((regval & RCC_APB1ENR1_PWREN) != 0);
 
-  /* Power interface clock enable.
-   */
+  /* Power interface clock enable. */
 
   if (wasenabled && !enable)
     {

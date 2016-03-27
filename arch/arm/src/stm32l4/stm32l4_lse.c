@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/stm32l4/stm32l4_lse.c
  *
- *   Copyright (C) 2009, 2011, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: dev@ziggurat29.com
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,18 +46,6 @@
 #include "stm32l4_waste.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -88,8 +76,8 @@ void stm32l4_rcc_enablelse(void)
    * the RCC BDCR register.
    */
 
-  regval = getreg32(STM32L4_RCC_BDCR);
-  regval |= RCC_BDCR_LSEON|RCC_BDCR_LSEDRV_MIDHI;
+  regval  = getreg32(STM32L4_RCC_BDCR);
+  regval |= RCC_BDCR_LSEON | RCC_BDCR_LSEDRV_MIDHI;
   putreg32(regval,STM32L4_RCC_BDCR);
 
   /* Wait for the LSE clock to be ready */

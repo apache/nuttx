@@ -55,6 +55,12 @@
 #include "up_internal.h"
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define PM_IDLE_DOMAIN 0 /* Revisit */
+
+/****************************************************************************
  * Private Data
  ****************************************************************************/
 
@@ -149,10 +155,10 @@ void up_idle(void)
     static enum pm_state_e state = PM_NORMAL;
     enum pm_state_e newstate;
 
-    newstate = pm_checkstate();
+    newstate = pm_checkstate(PM_IDLE_DOMAIN);
     if (newstate != state)
       {
-        if (pm_changestate(newstate) == OK)
+        if (pm_changestate(PM_IDLE_DOMAIN, newstate) == OK)
           {
             state = newstate;
           }

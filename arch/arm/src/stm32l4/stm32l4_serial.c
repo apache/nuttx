@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/stm32l4/stm32l4_serial.c
  *
- *   Copyright (C) 2009-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -205,6 +205,7 @@
 
 #if defined(CONFIG_PM) && !defined(CONFIG_PM_SERIAL_ACTIVITY)
 #  define CONFIG_PM_SERIAL_ACTIVITY 10
+#  define PM_IDLE_DOMAIN             0 /* Revisit */
 #endif
 
 #ifdef USE_SERIALDRIVER
@@ -316,8 +317,10 @@ static void up_dma_rxcallback(DMA_HANDLE handle, uint8_t status, void *arg);
 #endif
 
 #ifdef CONFIG_PM
-static void up_pm_notify(struct pm_callback_s *cb, enum pm_state_e pmstate);
-static int  up_pm_prepare(struct pm_callback_s *cb, enum pm_state_e pmstate);
+static void up_pm_notify(struct pm_callback_s *cb, int domain,
+                         enum pm_state_e pmstate);
+static int  up_pm_prepare(struct pm_callback_s *cb, int domain,
+                          enum pm_state_e pmstate);
 #endif
 
 #ifdef CONFIG_STM32L4_USART1
@@ -1454,7 +1457,7 @@ static int up_interrupt_common(struct up_dev_s *priv)
   /* Report serial activity to the power management logic */
 
 #if defined(CONFIG_PM) && CONFIG_PM_SERIAL_ACTIVITY > 0
-  pm_activity(CONFIG_PM_SERIAL_ACTIVITY);
+  pm_activity(PM_IDLE_DOMAIN, CONFIG_PM_SERIAL_ACTIVITY);
 #endif
 
   /* Loop until there are no characters to be transferred or,
@@ -2255,7 +2258,8 @@ static void up_dma_rxcallback(DMA_HANDLE handle, uint8_t status, void *arg)
  ****************************************************************************/
 
 #ifdef CONFIG_PM
-static void up_pm_notify(struct pm_callback_s *cb, enum pm_state_e pmstate)
+static void up_pm_notify(struct pm_callback_s *cb, int domain,
+                         enum pm_state_e pmstate)
 {
   switch (pmstate)
     {
@@ -2328,7 +2332,8 @@ static void up_pm_notify(struct pm_callback_s *cb, enum pm_state_e pmstate)
  ****************************************************************************/
 
 #ifdef CONFIG_PM
-static int up_pm_prepare(struct pm_callback_s *cb, enum pm_state_e pmstate)
+static int up_pm_prepare(struct pm_callback_s *cb, int domain,
+                         enum pm_state_e pmstate)
 {
   /* Logic to prepare for a reduced power state goes here. */
 
