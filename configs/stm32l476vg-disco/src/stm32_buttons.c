@@ -65,8 +65,10 @@
 /* Button Power Management */
 
 #ifdef CONFIG_PM
-static void button_pm_notify(struct pm_callback_s *cb, enum pm_state_e pmstate);
-static int button_pm_prepare(struct pm_callback_s *cb, enum pm_state_e pmstate);
+static void button_pm_notify(struct pm_callback_s *cb, int domain,
+                             enum pm_state_e pmstate);
+static int button_pm_prepare(struct pm_callback_s *cb, int domain,
+                             enum pm_state_e pmstate);
 #endif
 
 /****************************************************************************
@@ -111,7 +113,8 @@ static struct pm_callback_s g_buttonscb =
  ****************************************************************************/
 
 #ifdef CONFIG_PM
-static void button_pm_notify(struct pm_callback_s *cb , enum pm_state_e pmstate)
+static void button_pm_notify(struct pm_callback_s *cb, int domain,
+                             enum pm_state_e pmstate)
 {
   switch (pmstate)
     {
@@ -201,7 +204,8 @@ static int button_handler(int irq, FAR void *context)
  ****************************************************************************/
 
 #ifdef CONFIG_PM
-static int button_pm_prepare(struct pm_callback_s *cb , enum pm_state_e pmstate)
+static int button_pm_prepare(struct pm_callback_s *cb, int domain,
+                             enum pm_state_e pmstate)
 {
   /* No preparation to change power modes is required by the Buttons driver.
    * We always accept the state change by returning OK.

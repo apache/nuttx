@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/stm3210e-eval/src/stm32_idle.c
  *
- *   Copyright (C) 2012, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2015-2016 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            Diego Sanchez <dsanchez@nx-engineering.com>
  *
@@ -118,6 +118,8 @@
 #    define CONFIG_PM_SLEEP_WAKEUP_NSEC 0
 #  endif
 #endif
+
+#define PM_IDLE_DOMAIN 0 /* Revisit */
 
 /****************************************************************************
  * Private Data
@@ -294,12 +296,12 @@ static void stm32_idlepm(void)
 
       /* Force the global state change */
 
-      ret = pm_changestate(newstate);
+      ret = pm_changestate(PM_IDLE_DOMAIN, newstate);
       if (ret < 0)
         {
           /* The new state change failed, revert to the preceding state */
 
-          (void)pm_changestate(oldstate);
+          (void)pm_changestate(PM_IDLE_DOMAIN, oldstate);
 
           /* No state change... */
 
