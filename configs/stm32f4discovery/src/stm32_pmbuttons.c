@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/stm32f4discovery/src/stm32_pm_buttons.c
  *
- *   Copyright (C) 2012, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2015-2016 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            Diego Sanchez <dsanchez@nx-engineering.com>
  *
@@ -73,6 +73,8 @@
 #  define CONFIG_PM_BUTTON_ACTIVITY 10
 #endif
 
+#define PM_IDLE_DOMAIN  0 /* Revisit */
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -111,7 +113,7 @@ static int button_handler(int irq, FAR void *context)
    * special happened.
    */
 
-  pm_activity(CONFIG_PM_BUTTON_ACTIVITY);
+  pm_activity(PM_IDLE_DOMAIN, CONFIG_PM_BUTTON_ACTIVITY);
   return OK;
 }
 #endif /* CONFIG_ARCH_IRQBUTTONS */

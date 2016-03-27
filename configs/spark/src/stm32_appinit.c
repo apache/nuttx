@@ -1,7 +1,7 @@
 /****************************************************************************
  * config/spark/src/stm32_appinit.c
  *
- *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           David_s5 <david_s5@nscdg.com>
  *
@@ -299,19 +299,3 @@ int board_app_initialize(void)
   g_app_initialzed = true;
   return OK;
 }
-
-/****************************************************************************
- * Name: board_usbmsc_initialize
- *
- * Description:
- *   Perform architecture specific initialization as needed to establish
- *   the mass storage device that will be exported by the USB MSC device.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_BOARDCTL_USBDEVCTRL
-int board_usbmsc_initialize(int port)
-{
-  return board_app_initialize();
-}
-#endif

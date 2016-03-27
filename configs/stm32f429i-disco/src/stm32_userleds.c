@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/stm32f429i-disco/src/stm32_userleds.c
  *
- *   Copyright (C) 2011, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -87,8 +87,10 @@ static uint32_t g_ledcfg[BOARD_NLEDS] =
 /* LED Power Management */
 
 #ifdef CONFIG_PM
-static void led_pm_notify(struct pm_callback_s *cb, enum pm_state_e pmstate);
-static int led_pm_prepare(struct pm_callback_s *cb, enum pm_state_e pmstate);
+static void led_pm_notify(struct pm_callback_s *cb, int domain,
+                          enum pm_state_e pmstate);
+static int led_pm_prepare(struct pm_callback_s *cb, int domain,
+                          enum pm_state_e pmstate);
 #endif
 
 
@@ -118,7 +120,8 @@ static struct pm_callback_s g_ledscb =
  ****************************************************************************/
 
 #ifdef CONFIG_PM
-static void led_pm_notify(struct pm_callback_s *cb , enum pm_state_e pmstate)
+static void led_pm_notify(struct pm_callback_s *cb, int domain,
+                          enum pm_state_e pmstate)
 {
   switch (pmstate)
     {
@@ -173,7 +176,8 @@ static void led_pm_notify(struct pm_callback_s *cb , enum pm_state_e pmstate)
  ****************************************************************************/
 
 #ifdef CONFIG_PM
-static int led_pm_prepare(struct pm_callback_s *cb , enum pm_state_e pmstate)
+static int led_pm_prepare(struct pm_callback_s *cb, int domain,
+                          enum pm_state_e pmstate)
 {
   /* No preparation to change power modes is required by the LEDs driver.
    * We always accept the state change by returning OK.

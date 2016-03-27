@@ -1,7 +1,7 @@
 /**************************************************************************************
  * configs/stm3210e-eval/src/stm32_lcd.c
  *
- *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * With power management enhancements by:
@@ -410,8 +410,10 @@ static int stm3210e_setcontrast(struct lcd_dev_s *dev, unsigned int contrast);
 /* LCD Power Management */
 
 #ifdef CONFIG_PM
-static void stm3210e_pm_notify(struct pm_callback_s *cb, enum pm_state_e pmstate);
-static int stm3210e_pm_prepare(struct pm_callback_s *cb, enum pm_state_e pmstate);
+static void stm3210e_pm_notify(struct pm_callback_s *cb, int domain,
+                               enum pm_state_e pmstate);
+static int stm3210e_pm_prepare(struct pm_callback_s *cb, int domain,
+                               enum pm_state_e pmstate);
 #endif
 
 /* Initialization */
@@ -1153,7 +1155,8 @@ static int stm3210e_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
  ****************************************************************************/
 
 #ifdef CONFIG_PM
-static void stm3210e_pm_notify(struct pm_callback_s *cb , enum pm_state_e pmstate)
+static void stm3210e_pm_notify(struct pm_callback_s *cb, int domain,
+                               enum pm_state_e pmstate)
 {
 #ifdef CONFIG_STM3210E_LCD_PWM
   uint32_t frac;
@@ -1290,7 +1293,8 @@ static void stm3210e_pm_notify(struct pm_callback_s *cb , enum pm_state_e pmstat
  ****************************************************************************/
 
 #ifdef CONFIG_PM
-static int stm3210e_pm_prepare(struct pm_callback_s *cb , enum pm_state_e pmstate)
+static int stm3210e_pm_prepare(struct pm_callback_s *cb, int domain,
+                               enum pm_state_e pmstate)
 {
   /* No preparation to change power modes is required by the LCD driver.  We always
    * accept the state change by returning OK.
