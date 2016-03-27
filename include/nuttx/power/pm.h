@@ -78,20 +78,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
-/* CONFIG_PM_NDOMAINS. Defines the number of "domains" that activity may be
- * monitored on.  For example, you may want to separately manage the power
- * from the Network domain, shutting down the network when it is not be used,
- * from the UI domain, shutting down the UI when it is not in use.
- */
-
-#ifndef CONFIG_PM_NDOMAINS
-#  define CONFIG_PM_NDOMAINS 1
-#endif
-
-#if CONFIG_PM_NDOMAINS < 1
-#  error CONFIG_PM_NDOMAINS invalid
-#endif
-
 /* CONFIG_IDLE_CUSTOM. Some architectures support this definition.  This,
  * if defined, will allow you replace the default IDLE loop with your
  * own, custom idle loop to support board-specific IDLE time power management
