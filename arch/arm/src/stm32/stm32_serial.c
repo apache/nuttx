@@ -252,6 +252,7 @@
 
 #if defined(CONFIG_PM) && !defined(CONFIG_PM_SERIAL_ACTIVITY)
 #  define CONFIG_PM_SERIAL_ACTIVITY 10
+#  define PM_IDLE_DOMAIN             0 /* Revisit */
 #endif
 
 #ifdef USE_SERIALDRIVER
@@ -1781,7 +1782,7 @@ static int up_interrupt_common(struct up_dev_s *priv)
   /* Report serial activity to the power management logic */
 
 #if defined(CONFIG_PM) && CONFIG_PM_SERIAL_ACTIVITY > 0
-  pm_activity(CONFIG_PM_SERIAL_ACTIVITY);
+  pm_activity(PM_IDLE_DOMAIN, CONFIG_PM_SERIAL_ACTIVITY);
 #endif
 
   /* Loop until there are no characters to be transferred or,
