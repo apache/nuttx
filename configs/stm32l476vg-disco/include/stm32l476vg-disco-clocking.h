@@ -134,6 +134,10 @@
 #define STM32L4_USE_CLK48
 #define STM32L4_CLK48_SEL         RCC_CCIPR_CLK48SEL_PLLSAI1
 
+/* enable the LSE oscillator, used automatically trim the MSI, and for RTC */
+
+#define STM32L4_USE_LSE
+
 /* AHB clock (HCLK) is SYSCLK (80MHz) */
 
 #define STM32L4_RCC_CFGR_HPRE     RCC_CFGR_HPRE_SYSCLK      /* HCLK  = SYSCLK / 1 */
