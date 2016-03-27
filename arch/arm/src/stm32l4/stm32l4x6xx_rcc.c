@@ -581,7 +581,7 @@ static void stm32l4_stdclockconfig(void)
 #  error STM32L4_BOARD_USEMSI not yet implemented in arch/arm/src/stm32l4/stm32l4x6xx_rcc.c
   /* setting MSIRANGE */
   /* setting MSIPLLEN */
-  
+
   regval  = getreg32(STM32L4_RCC_CR);
   regval |= RCC_CR_MSION;           /* Enable MSI */
   putreg32(regval, STM32L4_RCC_CR);
@@ -621,9 +621,8 @@ static void stm32l4_stdclockconfig(void)
     {
 #warning todo: regulator voltage according to clock freq
 #if 0
-      /* ensure Power control is enabled before modifying it
-       */
-      
+      /* Ensure Power control is enabled before modifying it. */
+
       regval  = getreg32(STM32L4_RCC_APB1ENR);
       regval |= RCC_APB1ENR_PWREN;
       putreg32(regval, STM32L4_RCC_APB1ENR);
@@ -631,7 +630,7 @@ static void stm32l4_stdclockconfig(void)
       /* Select regulator voltage output Scale 1 mode to support system
        * frequencies up to 168 MHz.
        */
-      
+
       regval  = getreg32(STM32L4_PWR_CR);
       regval &= ~PWR_CR_VOS_MASK;
       regval |= PWR_CR_VOS_SCALE_1;
