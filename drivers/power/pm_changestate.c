@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/power/pm_changestate.c
  *
- *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -77,6 +77,7 @@
  *   Prepare every driver for the state change.
  *
  * Input Parameters:
+ *   domain - Identifies the domain of the new PM state
  *   newstate - Identifies the new PM state
  *
  * Returned Value:
@@ -90,7 +91,7 @@
  *
  ****************************************************************************/
 
-static int pm_prepall(enum pm_state_e newstate)
+static int pm_prepall(int domain, enum pm_state_e newstate)
 {
   FAR sq_entry_t *entry;
   int ret = OK;
@@ -108,7 +109,7 @@ static int pm_prepall(enum pm_state_e newstate)
         {
           /* Yes.. prepare the driver */
 
-          ret = cb->prepare(cb, newstate);
+          ret = cb->prepare(cb, domain, newstate);
         }
     }
 
@@ -119,9 +120,11 @@ static int pm_prepall(enum pm_state_e newstate)
  * Name: pm_changeall
  *
  * Description:
+ *   domain - Identifies the domain of the new PM state
  *   Inform all drivers of the state change.
  *
  * Input Parameters:
+ *   domain - Identifies the domain of the new PM state
  *   newstate - Identifies the new PM state
  *
  * Returned Value:
@@ -132,7 +135,7 @@ static int pm_prepall(enum pm_state_e newstate)
  *
  ****************************************************************************/
 
-static inline void pm_changeall(enum pm_state_e newstate)
+static inline void pm_changeall(int domain, enum pm_state_e newstate)
 {
   FAR sq_entry_t *entry;
 
@@ -147,7 +150,7 @@ static inline void pm_changeall(enum pm_state_e newstate)
         {
           /* Yes.. notify the driver */
 
-          cb->notify(cb, newstate);
+          cb->notify(cb, domain, newstate);
         }
     }
 }
@@ -165,6 +168,7 @@ static inline void pm_changeall(enum pm_state_e newstate)
  *   drivers that have registered for power management event callbacks.
  *
  * Input Parameters:
+ *   domain - Identifies the domain of the new PM state
  *   newstate - Identifies the new PM state
  *
  * Returned Value:
@@ -183,10 +187,12 @@ static inline void pm_changeall(enum pm_state_e newstate)
  *
  ****************************************************************************/
 
-int pm_changestate(enum pm_state_e newstate)
+int pm_changestate(int domain, enum pm_state_e newstate)
 {
   irqstate_t flags;
   int ret;
+
+  DEBUGASSERT(domain >=0 && domain < CONFIG_PM_NDOMAINS);
 
   /* Disable interrupts throught this operation... changing driver states
    * could cause additional driver activity that might interfere with the
@@ -200,7 +206,7 @@ int pm_changestate(enum pm_state_e newstate)
    * drivers may refuse the state state change.
    */
 
-  ret = pm_prepall(newstate);
+  ret = pm_prepall(domain, newstate);
   if (ret != OK)
     {
       /* One or more drivers is not ready for this state change.  Revert to
@@ -208,14 +214,14 @@ int pm_changestate(enum pm_state_e newstate)
        */
 
       newstate = g_pmglobals.state;
-      (void)pm_prepall(newstate);
+      (void)pm_prepall(domain, newstate);
     }
 
   /* All drivers have agreed to the state change (or, one or more have
    * disagreed and the state has been reverted).  Set the new state.
    */
 
-  pm_changeall(newstate);
+  pm_changeall(domain, newstate);
   g_pmglobals.state = newstate;
 
   /* Restore the interrupt state */

@@ -78,6 +78,20 @@
  * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
+/* CONFIG_PM_NDOMAINS. Defines the number of "domains" that activity may be
+ * monitored on.  For example, you may want to separately manage the power
+ * from the Network domain, shutting down the network when it is not be used,
+ * from the UI domain, shutting down the UI when it is not in use.
+ */
+
+#ifndef CONFIG_PM_NDOMAINS
+#  define CONFIG_PM_NDOMAINS 1
+#endif
+
+#if CONFIG_PM_NDOMAINS < 1
+#  error CONFIG_PM_NDOMAINS invalid
+#endif
+
 /* CONFIG_IDLE_CUSTOM. Some architectures support this definition.  This,
  * if defined, will allow you replace the default IDLE loop with your
  * own, custom idle loop to support board-specific IDLE time power management
@@ -278,6 +292,7 @@ struct pm_callback_s
    *   cb      - Returned to the driver.  The driver version of the callback
    *             structure may include additional, driver-specific state
    *             data at the end of the structure.
+   *   domain  - Identifies the activity domain of the state change
    *   pmstate - Identifies the new PM state
    *
    * Returned Value:
@@ -292,7 +307,8 @@ struct pm_callback_s
    *
    **************************************************************************/
 
-  int (*prepare)(FAR struct pm_callback_s *cb, enum pm_state_e pmstate);
+  int (*prepare)(FAR struct pm_callback_s *cb, int domain,
+                 enum pm_state_e pmstate);
 
   /**************************************************************************
    * Name: notify
@@ -306,6 +322,7 @@ struct pm_callback_s
    *   cb      - Returned to the driver.  The driver version of the callback
    *             structure may include additional, driver-specific state
    *             data at the end of the structure.
+   *   domain  - Identifies the activity domain of the state change
    *   pmstate - Identifies the new PM state
    *
    * Returned Value:
@@ -316,7 +333,8 @@ struct pm_callback_s
    *
    **************************************************************************/
 
-  void (*notify)(FAR struct pm_callback_s *cb, enum pm_state_e pmstate);
+  void (*notify)(FAR struct pm_callback_s *cb, int domain,
+                 enum pm_state_e pmstate);
 };
 
 /****************************************************************************
@@ -444,6 +462,7 @@ enum pm_state_e pm_checkstate(void);
  *   drivers that have registered for power management event callbacks.
  *
  * Input Parameters:
+ *   domain - Identifies the domain of the new PM state
  *   newstate - Identifies the new PM state
  *
  * Returned Value:
@@ -462,7 +481,7 @@ enum pm_state_e pm_checkstate(void);
  *
  ****************************************************************************/
 
-int pm_changestate(enum pm_state_e newstate);
+int pm_changestate(int domain, enum pm_state_e newstate);
 
 #undef EXTERN
 #ifdef __cplusplus

@@ -26,6 +26,15 @@ config PM_SLICEMS
 		CONFIG_PM_SLICEMS provides the duration of that time slice in
 		milliseconds.  Default: 100 Milliseconds
 
+config PM_NDOMAINS
+	int "Number of PM activity domains"
+	default 1
+	---help---
+		Defines the number of "domains" that activity may be monitored on.
+		For example, you may want to separately manage the power from the
+		Network domain, shutting down the network when it is not be used,
+		from the UI domain, shutting down the UI when it is not in use.
+
 config PM_MEMORY
 	int "PM memory (msec)"
 	default 2

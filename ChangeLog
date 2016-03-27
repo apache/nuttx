@@ -11587,3 +11587,6 @@
 	  board.  From Dave (2016-03-25).
 
 7.16 2016-xx-xx Gregory Nutt <gnutt@nuttx.org>
+
+	* PM: Add activity domain to all PM driver callbacks (2016-03-27).
+
