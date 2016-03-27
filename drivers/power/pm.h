@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/power/pm
  *
- *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -96,12 +96,12 @@
 /****************************************************************************
  * Public Types
  ****************************************************************************/
-/* This structure encapsulates all of the global data used by the PM module */
+/* This describes the activity and state for one domain */
 
-struct pm_global_s
+struct pm_domain_s
 {
-  /* state       - The current state (as determined by an explicit call to
-   *             pm_changestate()
+  /* state       - The current state for this PM domain (as determined by an
+   *               explicit call to pm_changestate())
    * recommended - The recommended state based on the PM algorithm in
    *               function pm_update().
    * mndex       - The index to the next slot in the memory[] array to use.
@@ -138,6 +138,15 @@ struct pm_global_s
   /* stime - The time (in ticks) at the start of the current time slice */
 
   systime_t stime;
+};
+
+/* This structure encapsulates all of the global data used by the PM module */
+
+struct pm_global_s
+{
+  /* The activity/state information for each PM domain */
+
+  struct pm_domain_s domain[CONFIG_PM_NDOMAINS];
 
   /* This semaphore manages mutually exclusive access to the power management
    * registry.  It must be initialized to the value 1.
@@ -186,6 +195,7 @@ EXTERN struct pm_global_s g_pmglobals;
  *   update driver activity metrics and recommended states.
  *
  * Input Parameters:
+ *   domain - The domain associated with the accumulator.
  *   accum - The value of the activity accumulator at the end of the time
  *     slice.
  *
@@ -200,7 +210,7 @@ EXTERN struct pm_global_s g_pmglobals;
  *
  ****************************************************************************/
 
-EXTERN void pm_update(int16_t accum);
+EXTERN void pm_update(int domain, int16_t accum);
 
 #undef EXTERN
 #if defined(__cplusplus)

@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/power/pm_update.c
  *
- *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include <stdint.h>
 #include <assert.h>
 
 #include <nuttx/power/pm.h>
@@ -49,12 +50,20 @@
 #ifdef CONFIG_PM
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
  * Private Types
  ****************************************************************************/
+
+struct pm_worker_param_s
+{
+  uint8_t domndx;
+  int16_t accum;
+};
+
+union pm_worker_param_u
+{
+  struct pm_worker_param_s s;
+  uintptr_t i;
+};
 
 /****************************************************************************
  * Private Function Prototypes
@@ -134,7 +143,7 @@ static const uint16_t g_pmcount[3] =
  * Name: pm_worker
  *
  * Description:
- *   This worker function is queue at the end of a time slice in order to
+ *   This worker function is queued at the end of a time slice in order to
  *   update driver activity metrics and recommended states.
  *
  * Input Parameters:
@@ -151,22 +160,42 @@ static const uint16_t g_pmcount[3] =
 
 void pm_worker(FAR void *arg)
 {
-  int16_t accum = (int16_t)((intptr_t)arg);
+  union pm_worker_param_u parameter;
+  FAR struct pm_domain_s *pdom;
   int32_t Y;
+  int16_t accum;
   int index;
-
 #if CONFIG_PM_MEMORY > 1
   int32_t denom;
-  int i, j;
+  int i;
+  int j;
+#endif
 
+  /* Decode the domain and accumulator as a scaler value.
+   *
+   * REVISIT: domain will fit in a uint8_t and accum is int16_t.  Assuming
+   * that sizeof(FAR void *) >=3, the following will work.  It will not work
+   * for 16-bit addresses!
+   */
+
+  parameter.i = (uintptr_t)arg;
+  index       = parameter.s.domndx;
+  accum       = parameter.s.accum;
+
+  /* Get a convenience pointer to minimize all of the indexing */
+
+  DEBUGASSERT(domain >= 0 && domain < CONFIG_PM_NDOMAINS);
+  pdom        = &g_pmglobals.domain[index];
+
+#if CONFIG_PM_MEMORY > 1
   /* We won't bother to do anything until we have accumulated
    * CONFIG_PM_MEMORY-1 samples.
    */
 
-  if (g_pmglobals.mcnt < CONFIG_PM_MEMORY-1)
+  if (pdom->mcnt < CONFIG_PM_MEMORY-1)
     {
-      g_pmglobals.memory[g_pmglobals.mcnt] = accum;
-      g_pmglobals.mcnt++;
+      index = pdom->mcnt++;
+      pdom->memory[index] = accum;
       return;
     }
 
@@ -184,29 +213,32 @@ void pm_worker(FAR void *arg)
   denom = CONFIG_PM_COEFN;
 
   /* Then calculate Y +=  SUM(Ai*Yi), i = 1..n-1.  The oldest sample will
-   * reside at g_pmglobals.mndx (and this is the value that we will overwrite
+   * reside at the domain's mndx (and this is the value that we will overwrite
    * with the new value).
    */
 
-  for (i = 0, j =  g_pmglobals.mndx; i < CONFIG_PM_MEMORY-1; i++, j++)
+  for (i = 0, j = pdom->mndx;
+       i < CONFIG_PM_MEMORY-1;
+       i++, j++)
     {
       if (j >= CONFIG_PM_MEMORY-1)
         {
           j = 0;
         }
 
-      Y     += g_pmcoeffs[i] * g_pmglobals.memory[j];
+      Y     += g_pmcoeffs[i] * pdom->memory[j];
       denom += g_pmcoeffs[i];
     }
 
   /* Compute and save the new activity value */
 
   Y /= denom;
-  g_pmglobals.memory[g_pmglobals.mndx] = Y;
-  g_pmglobals.mndx++;
-  if (g_pmglobals.mndx >= CONFIG_PM_MEMORY-1)
+
+  index = pdom->mndx++;
+  pdom->memory[index] = Y;
+  if (pdom->mndx >= CONFIG_PM_MEMORY-1)
     {
-      g_pmglobals.mndx = 0;
+      pdom->mndx = 0;
     }
 
 #else
@@ -223,13 +255,13 @@ void pm_worker(FAR void *arg)
    * probably does apply for the IDLE state.
    */
 
-  if (g_pmglobals.state > PM_NORMAL)
+  if (pdom->state > PM_NORMAL)
     {
       /* Get the table index for the current state (which will be the
        * current state minus one)
        */
 
-      index = g_pmglobals.state - 1;
+      index = pdom->state - 1;
 
       /* Has the threshold to return to normal power consumption state been
        * exceeded?
@@ -239,8 +271,8 @@ void pm_worker(FAR void *arg)
         {
           /* Yes... reset the count and recommend the normal state. */
 
-          g_pmglobals.thrcnt = 0;
-          g_pmglobals.recommended = PM_NORMAL;
+          pdom->thrcnt      = 0;
+          pdom->recommended = PM_NORMAL;
           return;
         }
     }
@@ -251,7 +283,7 @@ void pm_worker(FAR void *arg)
    * surprised to be executing!).
    */
 
-  if (g_pmglobals.state < PM_SLEEP)
+  if (pdom->state < PM_SLEEP)
     {
       unsigned int nextstate;
 
@@ -259,8 +291,8 @@ void pm_worker(FAR void *arg)
        * be the current state)
        */
 
-      index     = g_pmglobals.state;
-      nextstate = g_pmglobals.state + 1;
+      index     = pdom->state;
+      nextstate = pdom->state + 1;
 
       /* Has the threshold to enter the next lower power consumption state
        * been exceeded?
@@ -270,26 +302,26 @@ void pm_worker(FAR void *arg)
         {
           /* No... reset the count and recommend the current state */
 
-          g_pmglobals.thrcnt      = 0;
-          g_pmglobals.recommended = g_pmglobals.state;
+          pdom->thrcnt      = 0;
+          pdom->recommended = pdom->state;
         }
 
       /* Yes.. have we already recommended this state? If so, do nothing */
 
-      else if (g_pmglobals.recommended < nextstate)
+      else if (pdom->recommended < nextstate)
         {
           /* No.. increment the count.  Has it passed the count required
            * for a state transition?
            */
 
-          if (++g_pmglobals.thrcnt >= g_pmcount[index])
+          if (++pdom->thrcnt >= g_pmcount[index])
             {
               /* Yes, recommend the new state and set up for the next
                * transition.
                */
 
-              g_pmglobals.thrcnt      = 0;
-              g_pmglobals.recommended = nextstate;
+              pdom->thrcnt      = 0;
+              pdom->recommended = nextstate;
             }
         }
     }
@@ -307,6 +339,7 @@ void pm_worker(FAR void *arg)
  *   update driver activity metrics and recommended states.
  *
  * Input Parameters:
+ *   domain - The PM domain associated with the accumulator
  *   accum - The value of the activity accumulator at the end of the time
  *     slice.
  *
@@ -323,13 +356,26 @@ void pm_worker(FAR void *arg)
  *
  ****************************************************************************/
 
-void pm_update(int16_t accum)
+void pm_update(int domain, int16_t accum)
 {
+  union pm_worker_param_u parameter;
+
+  /* Encode the domain and accumulator as a scaler value.
+   *
+   * REVISIT: domain will fit in a uint8_t and accum is int16_t.  Assuming
+   * that sizeof(FAR void *) >=3, the following will work.  It will not work
+   * for 16-bit addresses!
+   */
+
+  DEBUGASSERT(domain >= 0 && domain < CONFIG_PM_NDOMAINS);
+  parameter.s.domndx = (uint8_t)domain;
+  parameter.s.accum  = accum;
+
   /* The work will be performed on the worker thread */
 
   DEBUGASSERT(g_pmglobals.work.worker == NULL);
   (void)work_queue(HPWORK, &g_pmglobals.work, pm_worker,
-                   (FAR void *)((intptr_t)accum), 0);
+                   (FAR void *)parameter.i, 0);
 }
 
 #endif /* CONFIG_PM */

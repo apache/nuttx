@@ -11588,5 +11588,9 @@
 
 7.16 2016-xx-xx Gregory Nutt <gnutt@nuttx.org>
 
-	* PM: Add activity domain to all PM driver callbacks (2016-03-27).
-
+	* PM: Add activity domain to all PM interfaces and driver callbacks.  If
+	  CONFIG_PM_NDOMAINS == 1, then the legacy behavior is preserved.  If
+	  CONFIG_PM_NDOMAINS > 1, then multiple PM domains are supported.  This
+	  will allow separate control for certain power management groups.  For
+	  example, a network can be shut down without affect an ongoing UI (and
+	  vice versa) (2016-03-27).

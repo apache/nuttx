@@ -217,7 +217,7 @@ config PM_SLEEPEXIT_THRESH
 
 config PM_SLEEPENTER_COUNT
 	int "PM SLEEP enter count"
-	default 50
+	default 70
 	---help---
 		State changes then occur when the weight activity account crosses
 		threshold values for certain periods of time (time slice count).

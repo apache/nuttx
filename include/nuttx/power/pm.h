@@ -402,6 +402,7 @@ int pm_register(FAR struct pm_callback_s *callbacks);
  *   power states.
  *
  * Input Parameters:
+ *   domain - The domain of the PM activity
  *   priority - Activity priority, range 0-9.  Larger values correspond to
  *     higher priorities.  Higher priority activity can prevent the system
  *     from entering reduced power states for a longer period of time.
@@ -418,7 +419,7 @@ int pm_register(FAR struct pm_callback_s *callbacks);
  *
  ****************************************************************************/
 
-void pm_activity(int priority);
+void pm_activity(int domain, int priority);
 
 /****************************************************************************
  * Name: pm_checkstate
@@ -444,14 +445,14 @@ void pm_activity(int priority);
  *   is completed.
  *
  * Input Parameters:
- *   None
+ *   domain - The PM domain to check
  *
  * Returned Value:
  *   The recommended power management state.
  *
  ****************************************************************************/
 
-enum pm_state_e pm_checkstate(void);
+enum pm_state_e pm_checkstate(int domain);
 
 /****************************************************************************
  * Name: pm_changestate
@@ -501,10 +502,10 @@ int pm_changestate(int domain, enum pm_state_e newstate);
  */
 
 #  define pm_initialize()
-#  define pm_register(cb)       (0)
-#  define pm_activity(prio)
-#  define pm_checkstate()       (0)
-#  define pm_changestate(state)
+#  define pm_register(cb)             (0)
+#  define pm_activity(domain,prio)
+#  define pm_checkstate(domain)       (0)
+#  define pm_changestate(domain,state)
 
 #endif /* CONFIG_PM */
 #endif /* __INCLUDE_NUTTX_POWER_PM_H */

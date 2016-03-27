@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/power/pm_activity.c
  *
- *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,30 +48,6 @@
 #ifdef CONFIG_PM
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -85,6 +61,7 @@
  *   power states.
  *
  * Input Parameters:
+ *   domain - The domain of the PM activity
  *   priority - Activity priority, range 0-9.  Larger values correspond to
  *     higher priorities.  Higher priority activity can prevent the system
  *     from entering reduced power states for a longer period of time.
@@ -101,11 +78,17 @@
  *
  ****************************************************************************/
 
-void pm_activity(int priority)
+void pm_activity(int domain, int priority)
 {
+  FAR struct pm_domain_s *pdom;
   systime_t now;
   uint32_t accum;
   irqstate_t flags;
+
+  /* Get a convenience pointer to minimize all of the indexing */
+
+  DEBUGASSERT(domain >= 0 && domain < CONFIG_PM_NDOMAINS);
+  pdom = &g_pmglobals.domain[domain];
 
   /* Just increment the activity count in the current time slice. The priority
    * is simply the number of counts that are added.
@@ -116,7 +99,7 @@ void pm_activity(int priority)
       /* Add the priority to the accumulated counts in a critical section. */
 
       flags = enter_critical_section();
-      accum = (uint32_t)g_pmglobals.accum + priority;
+      accum = (uint32_t)pdom->accum + priority;
 
       /* Make sure that we do not overflow the underlying uint16_t representation */
 
@@ -127,7 +110,7 @@ void pm_activity(int priority)
 
       /* Save the updated count */
 
-      g_pmglobals.accum = (int16_t)accum;
+      pdom->accum = (int16_t)accum;
 
       /* Check the elapsed time.  In periods of low activity, time slicing is
        * controlled by IDLE loop polling; in periods of higher activity, time
@@ -138,7 +121,7 @@ void pm_activity(int priority)
        */
 
       now = clock_systimer();
-      if (now - g_pmglobals.stime >= TIME_SLICE_TICKS)
+      if (now - pdom->stime >= TIME_SLICE_TICKS)
         {
           int16_t tmp;
 
@@ -147,16 +130,16 @@ void pm_activity(int priority)
            * still disabled.
            */
 
-          tmp               = g_pmglobals.accum;
-          g_pmglobals.stime = now;
-          g_pmglobals.accum = 0;
+          tmp         = pdom->accum;
+          pdom->stime = now;
+          pdom->accum = 0;
 
           /* Reassessing the PM state may require some computation.  However,
            * the work will actually be performed on a worker thread at a user-
            * controlled priority.
            */
 
-          (void)pm_update(tmp);
+          (void)pm_update(domain, tmp);
         }
 
       leave_critical_section(flags);
@@ -164,4 +147,3 @@ void pm_activity(int priority)
 }
 
 #endif /* CONFIG_PM */
-
