@@ -5698,7 +5698,7 @@ Zero (<code>OK</code>) on success; otherwise a negated <code>errno</code> value 
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/power/pm.h&gt;
-void pm_activity(int priority);
+void pm_activity(int domain, int priority);
 </pre></ul>
 <p><b>Description:</b>
  This function is called by a device driver to indicate that it is performing meaningful activities (non-idle).
@@ -5706,6 +5706,8 @@ void pm_activity(int priority);
 </p>
 <p><b>Input Parameters:</b>
  <dl>
+   <dt><code>domain</code>
+   <dd>Identifies the domain of the new PM activity
    <dt><code>priority</code>
    <dd>
      Activity priority, range 0-9.
@@ -5725,7 +5727,7 @@ void pm_activity(int priority);
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/power/pm.h&gt;
-enum pm_state_e pm_checkstate(void);
+enum pm_state_e pm_checkstate(int domain);
 </pre></ul>
 <p><b>Description:</b>
   This function is called from the MCU-specific IDLE loop to monitor the power management conditions.
@@ -5742,7 +5744,10 @@ enum pm_state_e pm_checkstate(void);
   The IDLE loop may need to make these calls atomic by either disabling interrupts until the state change is completed.
 </p>
 <p><b>Input Parameters:</b>
-  None
+ <dl>
+   <dt><code>domain</code>
+   <dd>Identifies the PM domain to check
+ </dl>
 </p>
 <p><b>Returned Value:</b>
   The recommended power management state.
