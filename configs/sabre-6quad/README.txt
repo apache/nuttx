@@ -11,6 +11,7 @@ Contents
   - Platform Features
   - Serial Console
   - LEDs and Buttons
+  - Using U-Boot to Run NuttX
   - Configurations
 
 Status
@@ -28,6 +29,10 @@ that case).
 
 There is a lot of testing that could be done but, unfortunately, I still
 have no i.MX6 hardware to test on.
+
+2016-03-28: I now have a used MCIMX6Q-SDB which is similar to the target
+configuration described below except that it does not have the 10.1" LVDS
+display.  Next step:  Figure out how to run a copy of NuttX using U-Boot.
 
 Platform Features
 =================
@@ -179,6 +184,114 @@ apparently, running normally.  If the LED is flashing at approximately
 Buttons
 -------
 
+Using U-Boot to Run NuttX
+-------------------------
+
+The MCIMX6Q-SDB comes with a 8GB SD card containing the U-Boot and Android.
+You simply put the SD card in the SD card slot SD3 (on the bottom of the
+board next to the HDMI connect) and Android will boot.
+
+But we need some other way to boot NuttX.  Here are some things that I have
+experimented with.
+
+Building U-Boot (Attempt #1)
+----------------------------
+
+I have been unsuccessful getting building a working version of u-boot from
+scratch.  It builds, but it does not run.  Here are the things I did:
+
+1. Get a copy of the u-boot i.MX6 code via:
+
+    https://github.com/boundarydevices/u-boot-imx6/tree/production
+
+  or
+
+    $ git clone git://git.denx.de/u-boot.git
+
+2. Build U-Boot for the i.MX6Q Sabre using the following steps.  This
+   assumes that you have the path to your arm-none-eabi- toolchain at the
+   beginning of your PATH variable:
+
+    $ cd u-boot
+    $ export ARCH=arm
+    $ export CROSS_COMPILE=arm-none-eabi-
+    $ make mx6qsabresd_config
+    $ make
+
+  This should create a number of files, including u-boot.imx
+
+3. Format an SD card
+
+  Create a FAT16 partition at an offset of about 1MB into the SD card.
+  This is where we will put nuttx.bin.
+
+4. Put U-Boot on SD.  U-boot should reside at offset 1024B of your SD
+   card. To put it there, do:
+
+    $ dd if=u-boot.imx of=/dev/<your-sd-card> bs=1k seek=1
+    $ sync
+
+  Your SD card device is typically something in /dev/sd<X> or
+  /dev/mmcblk<X>. Note that you need write permissions on the SD card
+  for the command to succeed, so you might need to su - as root, or use
+  sudo, or do a chmod a+w as root on the SD card device node to grant
+  permissions to users.
+
+Using the Other SD Card Slot (Attempt #2)
+-----------------------------------------
+
+Another option is to use the version u-boot that came on the 8GB but put
+NuttX on another SD card inserted in the other SD card slot at the opposite
+corner of the board.
+
+To make a long story short:  This doesn't work.  As far as I can tell,
+U-Boot does not support any other other SC card except for mmc 2 with is the
+boot SD card slot.
+
+Replace Boot SD Card (Attempt #3)
+---------------------------------
+
+What if you remove the SD card after U-boot has booted, then then insert
+another SD card containing the nuttx.bin image?
+
+1. Build nuttx.bin and copy it only a FAT formated SD card.  Insert the SD
+   card containing NuttX into the "other" SD card slot.  Insert the 8GB SD
+   card with U-boot already on it in the normal, boot SD card slot.
+
+2. Connect the VCOM port using the USB port next to the boot SD card slot.
+
+3. Start a console at 11500 8N1 on the VCOM port
+
+4. Power up the board with the 8GB SD card in place.  U-Boot will start and
+   countdown before starting Linux.  Press enter to break into U-Boot before
+   Linux is started.
+
+5. Remove the 8GB U-Boot SD card; insert in its place.
+
+6. Rescan the SD card:
+
+  MX6Q SABRESD U-Boot > mmc dev 2
+  mmc2 is current device
+  MX6Q SABRESD U-Boot > mmc rescan
+  MX6Q SABRESD U-Boot > fatls mmc 2
+              system volume information/
+      87260   nuttx.bin
+
+  1 file(s), 1 dir(s)
+
+7. Then we can boot NuttX off the rescanned SD card:
+
+     MX6Q SABRESD U-Boot > fatload mmc 2 0x20010000 nuttx.bin
+     reading nuttx.bin
+
+     87260 bytes read
+     MX6Q SABRESD U-Boot > go 0x2001040
+     ## Starting application at 0x02001040 ...
+
+     MX6Q SABRESD U-Boot >
+
+   That seems to work okay and this is more than enough of this kind of
+   thing for a day.
 
 Configuration sub-directories
 -----------------------------
