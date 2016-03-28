@@ -184,7 +184,7 @@ void pm_worker(FAR void *arg)
 
   /* Get a convenience pointer to minimize all of the indexing */
 
-  DEBUGASSERT(domain >= 0 && domain < CONFIG_PM_NDOMAINS);
+  DEBUGASSERT(index >= 0 && index < CONFIG_PM_NDOMAINS);
   pdom        = &g_pmglobals.domain[index];
 
 #if CONFIG_PM_MEMORY > 1
