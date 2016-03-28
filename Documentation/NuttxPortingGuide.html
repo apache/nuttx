@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: March 13, 2016</p>
+      <p>Last Updated: March 28, 2016</p>
     </td>
   </tr>
 </table>
@@ -5580,12 +5580,13 @@ int kbd_decode(FAR struct lib_instream_s *stream, FAR struct kbd_getstate_s *sta
 
 <h3><a name="pmoverview">6.4.1 Overview</a></h3>
 <p>
+  <b>Power Management (PM) Sub-System</b>.
   NuttX supports a simple power management (PM) sub-system.  This sub-system:
 </p>
 <ul>
   <li>
     <p>
-      Monitors driver activity, and
+      Monitors activity from drivers (and from other parts of the syste), and
     </p>
   </li>
   <li>
@@ -5624,6 +5625,7 @@ int kbd_decode(FAR struct lib_instream_s *stream, FAR struct kbd_getstate_s *sta
   </li>
 </ul>
 <p>
+  <b>Low Power Consumption States</b>.
   Various &quot;sleep&quot; and low power consumption states have various names and are sometimes used in conflicting ways.
   In the NuttX PM logic, we will use the following terminology:
 </p>
@@ -5650,6 +5652,14 @@ int kbd_decode(FAR struct lib_instream_s *stream, FAR struct kbd_getstate_s *sta
 </dl>
 <p>
   These various states are represented with type <code>enum pm_state_e</code> in <code>include/nuttx/power/pm.h</code>.
+</p>
+
+<p>
+  <b>Power Management Domains</b>.
+  Each PM interfaces includes a integer <i>domain</i> number.
+  By default, only a single power domain is supported (<code>CONFIG_PM_NDOMAINS=1</code>).
+  But that is configurable; any number of PM domains can be supported.
+  Multiple PM domains might be useful, for example, if you would want to control power states associated with a network separately from power states associated with a user interface.
 </p>
 
 <h3><a name="pminterfaces">6.4.2 Interfaces</a></h3>
