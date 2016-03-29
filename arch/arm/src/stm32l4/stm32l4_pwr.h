@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/stm32l4/stm32l4_pwr.h
  *
- *   Copyright (C) 2009, 2013, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: dev@ziggurat29.com
  *
  * Redistribution and use in source and binary forms, with or without
@@ -83,7 +83,6 @@ extern "C"
  ************************************************************************************/
 
 bool stm32l4_pwr_enableclk(bool enable);
-
 
 /************************************************************************************
  * Name: stm32l4_pwr_enablebkp
