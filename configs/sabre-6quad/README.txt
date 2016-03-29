@@ -277,10 +277,18 @@ A little hokey, but not such a bad solution.
 Debugging with the Segger J-Link
 ================================
 
-This procedure works for debugging the boot-up sequence when there is a
+These procedures work for debugging the boot-up sequence when there is a
 single CPU running and not much else going on.  If you want to do higher
 level debugger, you will need something more capable.  NXP/Freescale suggest
 some other debuggers that you might want to consider.
+
+These instructions all assume that you have built NuttX with debug symbols
+enabled.  When debugging the nuttx.bin file on the SD card, it is also
+assumed the the nuttx ELF file with the debug symbol addresses is from the
+same build so that the symbols match up.
+
+Debugging the NuttX image on the SD card
+----------------------------------------
 
 1. Connect the J-Link to the 20-pin JTAG connector.
 
@@ -289,7 +297,7 @@ some other debuggers that you might want to consider.
    VCOM serial port at 115200 8N1.
 
    When you apply power to the board, you should see the U-Boot messages in
-   the terminal window.  Stop the U-Boot countdown to wait at the U-Boot
+   the terminal window.  Stop the U-Boot countdown to get to the U-Boot
    prompt.
 
 2. Start the Segger GDB server:
@@ -315,18 +323,20 @@ some other debuggers that you might want to consider.
      gdb> target connect localhost:2331
      gdb> mon halt
 
-4. Start U-boot and load NuttX:
+4. Start U-boot under GDB control:
 
    From GDB:
      gdb> mon reset
      gdb> mon go
 
-   Again, Stop the U-Boot countdown to get to the U-Boot prompt.
+   Again stop the U-Boot countdown to get to the U-Boot prompt.
 
-   Then from U-Boot:
+5. Load NuttX from the SD card into RAM
+
+   From U-Boot:
      MX6Q SABRESD U-Boot > fatload mmc 2:1 0x10800000 nuttx.bin
 
-5. Load symbols and set a breakpoint
+6. Load symbols and set a breakpoint
 
    From GDB:
      gdb> mon halt
@@ -338,12 +348,48 @@ some other debuggers that you might want to consider.
    of course, use a different symbol if you want to start debugging later
    in the boot sequence.
 
-6. Start NuttX
+7. Start NuttX
 
    From U-Boot:
      MX6Q SABRESD U-Boot > go 0x10800040
 
-7. You should hit the breakpoint and be off and debugging.
+8. You should hit the breakpoint that you set above and be off and
+   debugging.
+
+Debugging a Different NuttX Image
+---------------------------------
+
+Q: What if I want do run a different version of nuttx than the nuttx.bin
+   file on the SD card.  I just want to build and debug without futzing with
+   the SD card.  Can I do that?
+
+A: Yes with the following modifications to the prodecure above.
+
+   - Skip step 5, don't bother to load NuttX into RAM
+   - In step 6, load NuttX into RAM like this:
+
+       gdb> mon halt
+       gdb> load nuttx <-- Loads NuttX into RAM at 0x010800000
+       gdb> file nuttx
+       gdb> b __start
+       gdb> c
+
+   - Then after step 7, you should hit the breakpoint at the instruction you
+     just loaded at address 0x10800040.
+
+   - Or, in step 6, instead of continuing ('c') which will resume U-Boot,
+     even just:
+
+       gdb> mon halt
+       gdb> load nuttx <-- Loads NuttX into RAM at 0x010800000
+       gdb> file nuttx
+       gdb> mon set pc 0x10800040
+       gdb> s
+
+     The final single will then step into the freshly loaded program.
+     You can then forget about steps 7 and 8.
+
+     This is, in fact, my preferred way to debug.
 
 Configurations
 ==============
