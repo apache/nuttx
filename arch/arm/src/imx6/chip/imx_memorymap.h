@@ -469,7 +469,7 @@
 #define IMX_IPU1_SECSIZE       (4*1024*1024) /* 02600000-029fffff   4 MB IPU-1 */
 #define IMX_IPU2_SECSIZE       (4*1024*1024) /* 02a00000-02dfffff   4 MB IPU-2 */
 #define IMX_EIM_SECSIZE     MKULONG(CONFIG_IMX_EIM_SIZE) /* 08000000-0fffffff 128 MB EIM - (NOR/SRAM) */
-#define IMX_MMDCDDR_SECSIZE MKULONG(CONFIG_IMX_DDR_SIZE  /* 10000000-ffffffff 3840 MB MMDC-DDR Controller */
+#define IMX_MMDCDDR_SECSIZE MKULONG(CONFIG_IMX_DDR_SIZE) /* 10000000-ffffffff 3840 MB MMDC-DDR Controller */
                                              /* 10000000-7fffffff 1792 MB */
 
 /* Convert size in bytes to number of sections (in Mb). */

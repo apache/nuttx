@@ -93,6 +93,10 @@ config IMX6_SPI2
 
 endmenu # iMX Peripheral Selection
 
+config IMX_DDR_SIZE
+	int "Installed DRAM size (bytes)"
+	default 268435456
+
 choice
 	prompt "i.MX6 Boot Configuration"
 	default IMX6_BOOT_SDRAM

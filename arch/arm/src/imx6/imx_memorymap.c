@@ -151,6 +151,10 @@ const struct section_mapping_s g_section_mapping[] =
   { IMX_MMDCDDR_PSECTION,   IMX_MMDCDDR_VSECTION,   /* MMDC-DDR Controller */
     MMU_STRONGLY_ORDERED,   IMX_MMDCDDR_NSECTIONS
   },
+#else
+  { IMX_MMDCDDR_PSECTION,   IMX_MMDCDDR_VSECTION,   /* MMDC-DDR Controller */
+    IMX_MMDCDDR_MMUFLAGS,   IMX_MMDCDDR_NSECTIONS
+  },
 #endif
 
   /* LCDC Framebuffer.  This entry reprograms a part of one of the above
