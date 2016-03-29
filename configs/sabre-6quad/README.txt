@@ -194,8 +194,8 @@ board next to the HDMI connect) and Android will boot.
 But we need some other way to boot NuttX.  Here are some things that I have
 experimented with.
 
-Building U-Boot (Attempt #1)
-----------------------------
+Building U-Boot (Failed Attempt #1)
+-----------------------------------
 
 I have been unsuccessful getting building a working version of u-boot from
 scratch.  It builds, but it does not run.  Here are the things I did:
@@ -237,8 +237,8 @@ scratch.  It builds, but it does not run.  Here are the things I did:
   sudo, or do a chmod a+w as root on the SD card device node to grant
   permissions to users.
 
-Using the Other SD Card Slot (Attempt #2)
------------------------------------------
+Using the Other SD Card Slot (Failed Attempt #2)
+------------------------------------------------
 
 Another option is to use the version u-boot that came on the 8GB but put
 NuttX on another SD card inserted in the other SD card slot at the opposite
@@ -248,8 +248,8 @@ To make a long story short:  This doesn't work.  As far as I can tell,
 U-Boot does not support any other other SC card except for mmc 2 with is the
 boot SD card slot.
 
-Replace Boot SD Card (Attempt #3)
----------------------------------
+Replace Boot SD Card (Successful Attempt #3)
+--------------------------------------------
 
 What if you remove the SD card after U-boot has booted, then then insert
 another SD card containing the nuttx.bin image?
@@ -281,17 +281,50 @@ another SD card containing the nuttx.bin image?
 
 7. Then we can boot NuttX off the rescanned SD card:
 
-     MX6Q SABRESD U-Boot > fatload mmc 2 0x20010000 nuttx.bin
+     MX6Q SABRESD U-Boot > fatload mmc 2 0x10800000 nuttx.bin
      reading nuttx.bin
 
      87260 bytes read
-     MX6Q SABRESD U-Boot > go 0x2001040
-     ## Starting application at 0x02001040 ...
+     MX6Q SABRESD U-Boot > go 0x10800040
+     ## Starting application at 0x10800040 ...
 
-     MX6Q SABRESD U-Boot >
+   That seems to work okay.
 
-   That seems to work okay and this is more than enough of this kind of
-   thing for a day.
+Use the FAT Partition on the 8GB SD Card (Untested Idea #4)
+-----------------------------------------------------------
+
+Partition 4 on the SD card is an Android FAT file system.  So one thing you
+could do would be put the nuttx.bin file on that partition, then boot like:
+
+     MX6Q SABRESD U-Boot > fatload mmc 2:4 0x10800000 nuttx.bin
+
+SD Card Image Copy (Successful Attempt #5)
+-------------------------------------
+
+You can use the 'dd' command to copy the first couple of megabytes from the
+8GB SD card and copy that to another SD card.  You then have to use 'fdisk'
+to fix the partition table and to add a single FAT16 partition at an offset
+of 1MB or so.
+
+1. Insert the 8GB boot SD card into your PC: Copy the first 2Mb from the SD
+   card to a file:
+
+     $ dd if=/dev/sdh of=sdh.img bs=512 count=4096
+
+2. Remove the 8GB boot SD card and replace it with a fresh SD card.  Copy the
+   saved file to the first the new SD card:
+
+     $ dd of=/dev/sdh if=sdh.img bs=512 count=4096
+
+3. Then make a FAT16 partition at the end of the SD card.  You will also need
+   to format the partion for FAT.
+
+4. You can put nuttx.bin here and then boot very simply with:
+
+     MX6Q SABRESD U-Boot > fatload mmc 2:1 0x10800000 nuttx.bin
+     MX6Q SABRESD U-Boot > go 0x10800040
+
+A little hokey, but not such a bad solution.
 
 Configuration sub-directories
 -----------------------------
