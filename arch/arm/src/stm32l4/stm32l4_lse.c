@@ -88,7 +88,7 @@ void stm32l4_rcc_enablelse(void)
    * the RCC BDCR register.
    */
 
-  regval = getreg32(STM32L4_RCC_BDCR);
+  regval  = getreg32(STM32L4_RCC_BDCR);
   regval |= RCC_BDCR_LSEON;
   putreg32(regval,STM32L4_RCC_BDCR);
 
