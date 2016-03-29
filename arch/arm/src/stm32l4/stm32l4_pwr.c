@@ -105,16 +105,14 @@ bool stm32l4_pwr_enableclk(bool enable)
       /* Disable power interface clock */
 
       regval &= ~RCC_APB1ENR1_PWREN;
-      putreg32(regval, STM32L4_RCC_APB1ENR1);
-      regval = getreg32(STM32L4_RCC_APB1ENR1);
+      putreg32(STM32L4_RCC_APB1ENR1, regval);
     }
   else if (!wasenabled && enable)
     {
       /* Enable power interface clock */
 
       regval |= RCC_APB1ENR1_PWREN;
-      putreg32(regval, STM32L4_RCC_APB1ENR1);
-      regval = getreg32(STM32L4_RCC_APB1ENR1);
+      putreg32(STM32L4_RCC_APB1ENR1, regval);
     }
   
   return wasenabled;

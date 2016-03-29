@@ -77,7 +77,7 @@ void stm32l4_rcc_enablelse(void)
    */
 
   regval  = getreg32(STM32L4_RCC_BDCR);
-  regval |= RCC_BDCR_LSEON;
+  regval |= RCC_BDCR_LSEON | RCC_BDCR_LSEDRV_MIDHI;
   putreg32(regval,STM32L4_RCC_BDCR);
 
   /* Wait for the LSE clock to be ready */
