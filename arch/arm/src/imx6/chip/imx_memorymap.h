@@ -854,10 +854,19 @@
 
 /* Level 2 Page table start addresses.
  *
- * 16Kb of memory is reserved hold the page table for the virtual mappings.  A
+ * The maximum size of the L1 page table is:
+ *
+ *  (4GB address range / 1 MB per section ) * 4 bytes per entry = 16KB
+ *
+ * The maximum size of the L2 page table is:
+ *
+ *  (4GB address range / 4 KB per page ) * 4 bytes per entry = 4MB
+ *
+ * 16KB of memory is reserved hold the page table for the virtual mappings.  A
  * portion of this table is not accessible in the virtual address space (for
- * normal operation).   There is this large whole in the physcal address space
- * for which there will never be level 1 mappings:
+ * normal operation with a one-to-one address mapping).   There is this large
+ * hole in the physcal address space for which there will never be level 1
+ * mappings:
  *
  *   0x80000000-0xefffffff: Undefined (1.75 GB)
  *

@@ -143,14 +143,25 @@
 #define SCTLR_HA                 (1 << 17) /* Bit 17: Hardware management access disabled (2) */
                                            /* Bits 18-24: Reserved */
 #define SCTLR_EE                 (1 << 25) /* Bit 25: Determines the value the CPSR.E */
-                                           /* Bits 26-27: Reserved */
+                                           /* Bit 26: Reserved */
+#define SCTLR_NMFI               (1 << 27) /* Bit 27: Non-maskable FIQ support (Cortex-A9) */
 #define SCTLR_TRE                (1 << 28) /* Bit 28: TEX remap */
 #define SCTLR_AFE                (1 << 29) /* Bit 29: Access Flag Enable bit */
 #define SCTLR_TE                 (1 << 30) /* Bit 30: Thumb exception enable */
                                            /* Bit 31: Reserved */
 
 /* Auxiliary Control Register (ACTLR) */
-/* TODO: To be provided */
+
+#define ACTLR_FW                 (1 << 0)  /* Bit 0: Enable Cache/TLB maintenance broadcase */
+#define ACTLR_L2_PREFECTH        (1 << 1)  /* Bit 1: L2 pre-fetch hint enable */
+#define ACTLR_L1_PREFETCH        (1 << 2)  /* Bit 2: L1 Dside pre-fetch enable */
+#define ACTLR_LINE_ZERO          (1 << 3)  /* Bit 3: Enable write full line zero mode */
+                                           /* Bits 4-5: Reserved */
+#define ACTLR_SMP                (1 << 6)  /* Bit 6: Cortex-A9 taking part in coherency */
+#define ACTLR_EXCL               (1 << 7)  /* Bit 7: Exclusive cache bit */
+#define ACTLR_ALLOC_1WAY         (1 << 8)  /* Bit 8: Allocation in 1-way cache only */
+#define ACTLR_PARITY             (1 << 9)  /* Bit 9: Parity ON */
+                                           /* Bits 10-31: Reserved */
 
 /* Coprocessor Access Control Register (CPACR) */
 /* TODO: To be provided */
