@@ -12,6 +12,7 @@ Contents
   - Serial Console
   - LEDs and Buttons
   - Using U-Boot to Run NuttX
+  - Debugging with the Segger J-Link
   - Configurations
 
 Status
@@ -72,11 +73,11 @@ Debug:
   - JTAG connector (20-pin)
   - 1x Serial-to-USB connector (for JTAG)
 OS Support:
-  - Linux® and Android™ from our company
+  - Linux® and Android™ from NXP/Freescale
   - Others supported via third party (QNX, Windows Embedded)
 Tools Support:
-  - Manufacturing tool from our company
-  - IOMUX tool from our company
+  - Manufacturing tool from NXP/Freescale
+  - IOMUX tool from NXP/Freescale
   - Lauterbach, ARM (DS-5), IAR and Macraigor
 Additional Features:
   - Proprietary 3-axis accelerometer
@@ -94,65 +95,8 @@ A DEBUG VCOM is available MICRO USB AB 5 J509.  This corresponds to UART1
 from the i.MX6.  UART1 connects to J509 via the CSIO_DAT10 and CSIO_DAT11
 pins
 
-Configurations
-==============
-
-Information Common to All Configurations
-----------------------------------------
-Each Sabre-6Quad configuration is maintained in a sub-directory and
-can be selected as follow:
-
-  cd tools
-  ./configure.sh sabre-6quad/<subdir>
-  cd -
-  . ./setenv.sh
-
-Before sourcing the setenv.sh file above, you should examine it and perform
-edits as necessary so that TOOLCHAIN_BIN is the correct path to the directory
-than holds your toolchain binaries.
-
-And then build NuttX by simply typing the following.  At the conclusion of
-the make, the nuttx binary will reside in an ELF file called, simply, nuttx.
-
-  make oldconfig
-  make
-
-The <subdir> that is provided above as an argument to the tools/configure.sh
-must be is one of the following.
-
-NOTES:
-
-  1. These configurations use the mconf-based configuration tool.  To
-     change any of these configurations using that tool, you should:
-
-     a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
-        see additional README.txt files in the NuttX tools repository.
-
-     b. Execute 'make menuconfig' in nuttx/ in order to start the
-        reconfiguration process.
-
-  2. Unless stated otherwise, all configurations generate console
-     output on UART1 which is a available to the host PC from the USB
-     micro AB as a VCOM part.
-
-  3. All of these configurations are set up to build under Windows using the
-     "GNU Tools for ARM Embedded Processors" that is maintained by ARM
-     (unless stated otherwise in the description of the configuration).
-
-       https://launchpad.net/gcc-arm-embedded
-
-     That toolchain selection can easily be reconfigured using
-     'make menuconfig'.  Here are the relevant current settings:
-
-     Build Setup:
-       CONFIG_HOST_WINDOWS=y               : Window environment
-       CONFIG_WINDOWS_CYGWIN=y             : Cywin under Windows
-
-     System Type -> Toolchain:
-       CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y : GNU ARM EABI toolchain
-
 LEDs and Buttons
-----------------
+================
 
 LEDs
 ----
@@ -185,7 +129,7 @@ Buttons
 -------
 
 Using U-Boot to Run NuttX
--------------------------
+=========================
 
 The MCIMX6Q-SDB comes with a 8GB SD card containing the U-Boot and Android.
 You simply put the SD card in the SD card slot SD3 (on the bottom of the
@@ -316,8 +260,12 @@ of 1MB or so.
 
      $ dd of=/dev/sdh if=sdh.img bs=512 count=4096
 
-3. Then make a FAT16 partition at the end of the SD card.  You will also need
-   to format the partion for FAT.
+3. Then use 'fdisk' to:
+
+   - Remove all of the non-existent partitions created by the 'dd' copy.
+   - Make a single FAT16 partition at the end of the SD card.
+
+   You will also need to format the partion for FAT.
 
 4. You can put nuttx.bin here and then boot very simply with:
 
@@ -325,6 +273,134 @@ of 1MB or so.
      MX6Q SABRESD U-Boot > go 0x10800040
 
 A little hokey, but not such a bad solution.
+
+Debugging with the Segger J-Link
+================================
+
+This procedure works for debugging the boot-up sequence when there is a
+single CPU running and not much else going on.  If you want to do higher
+level debugger, you will need something more capable.  NXP/Freescale suggest
+some other debuggers that you might want to consider.
+
+1. Connect the J-Link to the 20-pin JTAG connector.
+
+2. Connect the "USB TO UART" USB VCOM port to the host PC.  Start a
+   terminal emulation program like TeraTerm on Minicom.  Select the USB
+   VCOM serial port at 115200 8N1.
+
+   When you apply power to the board, you should see the U-Boot messages in
+   the terminal window.  Stop the U-Boot countdown to wait at the U-Boot
+   prompt.
+
+2. Start the Segger GDB server:
+
+     Target:           MCIMX6Q6
+     Target Interface: JTAG
+
+   If the GDB server starts correctly you should see the following in the
+   Log output:
+
+     Waiting for GDB Connection
+
+3. In another Xterm terminal window, start arm-none-eabi-gdb and connect to
+   the GDB server.
+
+   From the Xterm Window:
+     $ arm-none-eabi-gdb
+
+   You will need to have the path to the arm-none-eabi-gdb program in your
+   PATH variable.
+
+   Then from GDB:
+     gdb> target connect localhost:2331
+     gdb> mon halt
+
+4. Start U-boot and load NuttX:
+
+   From GDB:
+     gdb> mon reset
+     gdb> mon go
+
+   Again, Stop the U-Boot countdown to get to the U-Boot prompt.
+
+   Then from U-Boot:
+     MX6Q SABRESD U-Boot > fatload mmc 2:1 0x10800000 nuttx.bin
+
+5. Load symbols and set a breakpoint
+
+   From GDB:
+     gdb> mon halt
+     gdb> file nuttx
+     gdb> b __start
+     gdb> c
+
+   __start is the entry point into the NuttX binary at 0x10800040.  You can,
+   of course, use a different symbol if you want to start debugging later
+   in the boot sequence.
+
+6. Start NuttX
+
+   From U-Boot:
+     MX6Q SABRESD U-Boot > go 0x10800040
+
+7. You should hit the breakpoint and be off and debugging.
+
+Configurations
+==============
+
+Information Common to All Configurations
+----------------------------------------
+Each Sabre-6Quad configuration is maintained in a sub-directory and
+can be selected as follow:
+
+  cd tools
+  ./configure.sh sabre-6quad/<subdir>
+  cd -
+  . ./setenv.sh
+
+Before sourcing the setenv.sh file above, you should examine it and perform
+edits as necessary so that TOOLCHAIN_BIN is the correct path to the directory
+than holds your toolchain binaries.
+
+And then build NuttX by simply typing the following.  At the conclusion of
+the make, the nuttx binary will reside in an ELF file called, simply, nuttx.
+
+  make oldconfig
+  make
+
+The <subdir> that is provided above as an argument to the tools/configure.sh
+must be is one of the following.
+
+NOTES:
+
+  1. These configurations use the mconf-based configuration tool.  To
+     change any of these configurations using that tool, you should:
+
+     a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+        see additional README.txt files in the NuttX tools repository.
+
+     b. Execute 'make menuconfig' in nuttx/ in order to start the
+        reconfiguration process.
+
+  2. Unless stated otherwise, all configurations generate console
+     output on UART1 which is a available to the host PC from the USB
+     micro AB as a VCOM part.
+
+  3. All of these configurations are set up to build under Windows using the
+     "GNU Tools for ARM Embedded Processors" that is maintained by ARM
+     (unless stated otherwise in the description of the configuration).
+
+       https://launchpad.net/gcc-arm-embedded
+
+     That toolchain selection can easily be reconfigured using
+     'make menuconfig'.  Here are the relevant current settings:
+
+     Build Setup:
+       CONFIG_HOST_WINDOWS=y               : Window environment
+       CONFIG_WINDOWS_CYGWIN=y             : Cywin under Windows
+
+     System Type -> Toolchain:
+       CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y : GNU ARM EABI toolchain
 
 Configuration sub-directories
 -----------------------------
