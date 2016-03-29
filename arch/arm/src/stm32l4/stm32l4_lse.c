@@ -62,7 +62,7 @@
 
 void stm32l4_rcc_enablelse(void)
 {
-  bool bkpenabled;
+  bool writable;
   uint32_t regval;
 
   /* The LSE is in the RTC domain and write access is denied to this domain
@@ -70,7 +70,7 @@ void stm32l4_rcc_enablelse(void)
    * register before to configuring the LSE.
    */
 
-  bkpenabled = stm32l4_pwr_enablebkp(true);
+  writable = stm32l4_pwr_enablebkp(true);
 
   /* Enable the External Low-Speed (LSE) oscillator by setting the LSEON bit
    * the RCC BDCR register.
@@ -89,8 +89,5 @@ void stm32l4_rcc_enablelse(void)
 
   /* Disable backup domain access if it was disabled on entry */
 
-  if (!bkpenabled)
-    {
-      (void)stm32l4_pwr_enablebkp(false);
-    }
+  (void)stm32l4_pwr_enablebkp(writable);
 }
