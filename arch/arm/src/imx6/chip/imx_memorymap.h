@@ -779,6 +779,8 @@
 #undef PGTABLE_IN_LOWSRAM
 #undef ARMV7A_PGTABLE_MAPPING /* We do not remap the page table */
 
+/* Check if the user has configured the page table address */
+
 #if !defined(PGTABLE_BASE_PADDR) || !defined(PGTABLE_BASE_VADDR)
 
   /* Sanity check.. if one is undefined, both should be undefined */
@@ -829,6 +831,30 @@
 #    define IDLE_STACK_VBASE      (PGTABLE_BASE_VADDR + PGTABLE_SIZE)
 
 #  endif /* CONFIG_ARCH_LOWVECTORS */
+
+  /* In either case, the page table lies in OCRAM.  If OCRAM is not the
+   * primary RAM region, then we will need to set-up a special mapping for
+   * the page table at boot time.
+   */
+
+#  if defined(CONFIG_BOOT_RUNFROMFLASH)
+  /* If we are running from FLASH, then the primary memory region is
+   * given by NUTTX_RAM_PADDR.
+   */
+
+#    if NUTTX_RAM_PADDR != SAM_OCRAM_PSECTION
+#      define ARMV7A_PGTABLE_MAPPING 1
+#    endif
+
+/* Otherwise, we are running from RAM and that RAM is also the primary
+ * RAM.  If that is not OCRAM, then we will need to create a mapping
+ * for the OCRAM at start-up.
+ */
+
+#  elif !defined(CONFIG_IMX6_BOOT_OCRAM)
+#    define ARMV7A_PGTABLE_MAPPING 1
+#  endif
+
 #else /* !PGTABLE_BASE_PADDR || !PGTABLE_BASE_VADDR */
 
   /* Sanity check.. if one is defined, both should be defined */

@@ -733,7 +733,7 @@
    */
 
 #  if defined(CONFIG_BOOT_RUNFROMFLASH)
-  /* If we are running from FLASH, than the primary memory region is
+  /* If we are running from FLASH, then the primary memory region is
    * given by NUTTX_RAM_PADDR.
    */
 
