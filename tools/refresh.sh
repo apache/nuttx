@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # refresh.sh
 #
 #   Copyright (C) 2014 Gregory Nutt. All rights reserved.

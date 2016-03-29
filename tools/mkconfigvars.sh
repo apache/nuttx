@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # mkconfivars.sh
 #
 #   Copyright (C) 2013 Gregory Nutt. All rights reserved.
