@@ -1,11 +1,9 @@
 /****************************************************************************
- * arch/arm/src/stm32l4/stm32l4_rtc.h
+ * arch/arm/src/stm32l4/stm32l4_rtc_lowerhalf.c
  *
- *   Copyright (C) 2011 Uros Platise. All rights reserved.
- *   Copyright (C) 2011-2013, 2015 Gregory Nutt. All rights reserved.
- *   Author: Uros Platise <uros.platise@isotel.eu> (Original for the F1)
- *           Gregory Nutt <gnutt@nuttx.org> (On-going support and development)
- *           dev@ziggurat29.com (adaptations for STM32L4)
+ *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *           dev@ziggurat29.com (adaptations for stm32l4)
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -40,139 +38,168 @@
  * Included Files
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32L4_STM32L4_RTC_H
-#define __ARCH_ARM_SRC_STM32L4_STM32L4_RTC_H
-
 #include <nuttx/config.h>
 
-#include "chip.h"
+#include <sys/types.h>
+#include <stdbool.h>
+#include <errno.h>
 
-#include "chip/stm32l4_rtcc.h"
+#include <nuttx/arch.h>
+#include <nuttx/timers/rtc.h>
+
+#include "chip.h"
+#include "stm32l4_rtc.h"
+
+#ifdef CONFIG_RTC_DRIVER
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define STM32_RTC_PRESCALER_SECOND  32767  /* Default prescaler to get a second base */
-#define STM32_RTC_PRESCALER_MIN         1  /* Maximum speed of 16384 Hz */
-
 /****************************************************************************
- * Public Types
+ * Private Types
  ****************************************************************************/
+/* This is the private type for the RTC state.  It must be cast compatible
+ * with struct rtc_lowerhalf_s.
+ */
 
-#ifndef __ASSEMBLY__
-
-/* The form of an alarm callback */
-
-typedef CODE void (*alarmcb_t)(void);
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
+struct stm32l4_lowerhalf_s
 {
-#else
-#define EXTERN extern
+  /* This is the contained reference to the read-only, lower-half
+   * operations vtable (which may lie in FLASH or ROM)
+   */
+
+  FAR const struct rtc_ops_s *ops;
+
+  /* Data following is private to this driver and not visible outside of
+   * this file.
+   */
+};
+
+/****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+/* Prototypes for static methods in struct rtc_ops_s */
+
+static int stm32l4_rdtime(FAR struct rtc_lowerhalf_s *lower,
+                        FAR struct rtc_time *rtctime);
+static int stm32l4_settime(FAR struct rtc_lowerhalf_s *lower,
+                         FAR const struct rtc_time *rtctime);
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+/* STM32 RTC driver operations */
+
+static const struct rtc_ops_s g_rtc_ops =
+{
+  .rdtime     = stm32l4_rdtime,
+  .settime    = stm32l4_settime,
+#ifdef CONFIG_RTC_ALARM
+  .almread    = NULL,
+  .almset     = NULL,
 #endif
+#ifdef CONFIG_RTC_PERIODIC
+  .irqpread   = NULL,
+  .irqpset    = NULL,
+#endif
+#ifdef CONFIG_RTC_ALARM
+  .aie        = NULL,
+#endif
+#ifdef CONFIG_RTC_ONESEC
+  .uie        = NULL,
+#endif
+#ifdef CONFIG_RTC_PERIODIC
+  .pie        = NULL,
+#endif
+#ifdef CONFIG_RTC_EPOCHYEAR
+  .rdepoch    = NULL,
+  .setepoch   = NULL,
+#endif
+#ifdef CONFIG_RTC_ALARM
+  .rdwkalm    = NULL,
+  .setwkalm   = NULL,
+#endif
+#ifdef CONFIG_RTC_IOCTL
+  .ioctl      = NULL,
+#endif
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  .destroy    = NULL,
+#endif
+};
+
+/* STM32L4 RTC device state */
+
+static struct stm32l4_lowerhalf_s g_rtc_lowerhalf =
+{
+  .ops        = &g_rtc_ops,
+};
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: stm32l4_rdtime
+ *
+ * Description:
+ *   Implements the rdtime() method of the RTC driver interface
+ *
+ * Input Parameters:
+ *   lower   - A reference to RTC lower half driver state structure
+ *   rcttime - The location in which to return the current RTC time.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned
+ *   on any failure.
+ *
+ ****************************************************************************/
+
+static int stm32l4_rdtime(FAR struct rtc_lowerhalf_s *lower,
+                        FAR struct rtc_time *rtctime)
+{
+  /* This operation depends on the fact that struct rtc_time is cast
+   * compatible with struct tm.
+   */
+
+  return up_rtc_getdatetime((FAR struct tm *)rtctime);
+}
+
+/****************************************************************************
+ * Name: stm32l4_settime
+ *
+ * Description:
+ *   Implements the settime() method of the RTC driver interface
+ *
+ * Input Parameters:
+ *   lower   - A reference to RTC lower half driver state structure
+ *   rcttime - The new time to set
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned
+ *   on any failure.
+ *
+ ****************************************************************************/
+
+static int stm32l4_settime(FAR struct rtc_lowerhalf_s *lower,
+                         FAR const struct rtc_time *rtctime)
+{
+  /* This operation depends on the fact that struct rtc_time is cast
+   * compatible with struct tm.
+   */
+
+  return stm32l4_rtc_setdatetime((FAR const struct tm *)rtctime);
+}
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32l4_rtc_getdatetime_with_subseconds
- *
- * Description:
- *   Get the current date and time from the date/time RTC.  This interface
- *   is only supported by the date/time RTC hardware implementation.
- *   It is used to replace the system timer.  It is only used by the RTOS
- *   during initialization to set up the system time when CONFIG_RTC and
- *   CONFIG_RTC_DATETIME are selected (and CONFIG_RTC_HIRES is not).
- *
- *   NOTE: Some date/time RTC hardware is capability of sub-second accuracy.
- *   That sub-second accuracy is returned through 'nsec'.
- *
- * Input Parameters:
- *   tp - The location to return the high resolution time value.
- *   nsec - The location to return the subsecond time value.
- *
- * Returned Value:
- *   Zero (OK) on success; a negated errno on failure
- *
- ****************************************************************************/
-
-#ifdef CONFIG_STM32_HAVE_RTC_SUBSECONDS
-int stm32l4_rtc_getdatetime_with_subseconds(FAR struct tm *tp, FAR long *nsec);
-#endif
-
-/****************************************************************************
- * Name: stm32l4_rtc_setdatetime
- *
- * Description:
- *   Set the RTC to the provided time. RTC implementations which provide
- *   up_rtc_getdatetime() (CONFIG_RTC_DATETIME is selected) should provide
- *   this function.
- *
- * Input Parameters:
- *   tp - the time to use
- *
- * Returned Value:
- *   Zero (OK) on success; a negated errno on failure
- *
- ****************************************************************************/
-
-#ifdef CONFIG_RTC_DATETIME
-struct tm;
-int stm32l4_rtc_setdatetime(FAR const struct tm *tp);
-#endif
-
-/****************************************************************************
- * Name: stm32l4_rtc_setalarm
- *
- * Description:
- *   Set up an alarm.
- *
- * Input Parameters:
- *   tp - the time to set the alarm
- *   callback - the function to call when the alarm expires.
- *
- * Returned Value:
- *   Zero (OK) on success; a negated errno on failure
- *
- ****************************************************************************/
-
-#ifdef CONFIG_RTC_ALARM
-struct timespec;
-int stm32l4_rtc_setalarm(FAR const struct timespec *tp, alarmcb_t callback);
-#endif
-
-/****************************************************************************
- * Name: stm32l4_rtc_cancelalarm
- *
- * Description:
- *   Cancel a pending alarm alarm
- *
- * Input Parameters:
- *   none
- *
- * Returned Value:
- *   Zero (OK) on success; a negated errno on failure
- *
- ****************************************************************************/
-
-#ifdef CONFIG_RTC_ALARM
-int stm32l4_rtc_cancelalarm(void);
-#endif
-
-/****************************************************************************
  * Name: stm32l4_rtc_lowerhalf
  *
  * Description:
- *   Instantiate the RTC lower half driver for the STM32L4.  General usage:
+ *   Instantiate the RTC lower half driver for the STM32.  General usage:
  *
  *     #include <nuttx/timers/rtc.h>
  *     #include "stm32l4_rtc.h>
@@ -190,14 +217,9 @@ int stm32l4_rtc_cancelalarm(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_RTC_DRIVER
-struct rtc_lowerhalf_s;
-FAR struct rtc_lowerhalf_s *stm32l4_rtc_lowerhalf(void);
-#endif
-
-#undef EXTERN
-#if defined(__cplusplus)
+FAR struct rtc_lowerhalf_s *stm32l4_rtc_lowerhalf(void)
+{
+  return (FAR struct rtc_lowerhalf_s *)&g_rtc_lowerhalf;
 }
-#endif
-#endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_STM32L4_STM32L4_RTC_H */
+
+#endif /* CONFIG_RTC_DRIVER */

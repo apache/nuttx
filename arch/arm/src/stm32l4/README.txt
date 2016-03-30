@@ -19,7 +19,7 @@ HSI      : OK
 HSE      : To be tested
 PLL      : Works @ 80 MHz
 MSI      : TODO
-LSE      : TODO, including calibration
+LSE      : works, but TODO autotrim of MSI, etc
 RCC      : All registers defined, peripherals enabled, basic clock working
 SYSCTL   : All registers defined
 USART    : Working in normal mode (no DMA, to be tested, code is written)
@@ -28,7 +28,7 @@ SRAM2    : Should work with enough MM regions
 FIREWALL : Code written, to be tested, requires support from ldscript
 SPI      : Code written, to be tested, including DMA
 I2C      : Registers defined
-RTC      : TODO
+RTC      : works
 QSPI     : TODO (port from stm32f7)
 CAN      : TODO
 OTGFS    : TODO
