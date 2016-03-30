@@ -105,7 +105,7 @@
  *
  * The module_clock is for all the state machines, writing RxFIFO, reading
  * TxFIFO, etc.  It must always be running when UART is sending or receiving
- * characters.This clock is used in order to allow frequency scaling on
+ * characters.  This clock is used in order to allow frequency scaling on
  * peripheral_clock without changing configuration of baud rate.
  *
  * The default ipg_perclk is 80MHz (max 80MHz).  ipg_perclk is gated by
@@ -166,7 +166,7 @@ void imx_lowsetup(void)
    */
 
   regval  = getreg32(IMX_CCM_CCGR5);
-  regval &= (CCM_CCGR5_CG12_MASK | CCM_CCGR5_CG13_MASK);
+  regval &= ~(CCM_CCGR5_CG12_MASK | CCM_CCGR5_CG13_MASK);
   regval |= (CCM_CCGR5_CG12(CCM_CCGR_ALLMODES) | CCM_CCGR5_CG13(CCM_CCGR_ALLMODES));
   putreg32(regval, IMX_CCM_CCGR5);
 
@@ -313,10 +313,15 @@ int imx_uart_configure(uint32_t base, FAR const struct uart_config_s *config)
   putreg32(0, base + UART_UCR3_OFFSET);
   putreg32(0, base + UART_UCR4_OFFSET);
 
-  /* Set up UCR2 */
+  /* Wait for the UART to come out of reset */
+
+  while ((getreg32(base + UART_UCR2_OFFSET) & UART_UCR2_SRST) == 0);
+
+  /* Set up UCR2, Clearing all bits that will be configured below. */
 
   ucr2  = getreg32(base + UART_UCR2_OFFSET);
-  ucr2 |= (UART_UCR2_SRST | UART_UCR2_IRTS);
+  ucr2 &= ~(UART_UCR2_WS   | UART_UCR2_STPB | UART_UCR2_PREN |
+            UART_UCR2_PROE | UART_UCR2_IRTS | UART_UCR2_CTSC);
 
   /* Select the number of data bits */
 
@@ -335,7 +340,7 @@ int imx_uart_configure(uint32_t base, FAR const struct uart_config_s *config)
 
   /* Select even/odd parity */
 
-  if (config->parity)
+  if (config->parity != 0)
     {
       DEBUGASSERT(config->parity == 1 || config->parity == 2);
       ucr2 |= UART_UCR2_PREN;
@@ -345,21 +350,13 @@ int imx_uart_configure(uint32_t base, FAR const struct uart_config_s *config)
         }
     }
 
-  /* Select RTS */
-
-#if 0
-  ucr2 &= ~UCR2_IRTS;
-  ucr2 |= UCR2_CTSC;
-#endif
-
   /* Setup hardware flow control */
 
   regval = 0;
+
 #if 0
   if (config->hwfc)
     {
-      ucr2 |= UART_UCR2_IRTS;
-
       /* CTS controled by Rx FIFO */
 
       ucr2 |= UART_UCR2_CTSC;
@@ -367,8 +364,18 @@ int imx_uart_configure(uint32_t base, FAR const struct uart_config_s *config)
       /* Set CTS trigger level */
 
       regval |= 30 << UART_UCR4_CTSTL_SHIFT;
+
+      /* REVISIT:  There are other relevant bits that must be managed in
+       * UCR1 and UCR3.
+       */
     }
+  else
 #endif
+    {
+      /* Ignore RTS */
+
+      ucr2 |= UART_UCR2_IRTS;
+    }
 
   putreg32(regval, base + UART_UCR4_OFFSET);
 
@@ -378,17 +385,26 @@ int imx_uart_configure(uint32_t base, FAR const struct uart_config_s *config)
 
   /* Set the baud.
    *
-   *   buad    = REFFREQ / (16 x NUM/DEM)
+   *   baud    = REFFREQ / (16 x NUM/DEN)
    *   baud * 16 / REFFREQ = NUM/DEN
-   *   UBIR    = NUM-1;
-   *   UMBR    = DEN-1
+   *   NUM     = baud
+   *   DEN     = REFFREQ / 16
+   *
    *   REFFREQ = PERCLK1 / DIV,   DIV=1..7
    *   DIV     = RFDIV[2:0]
+   *   DEN     = PERCLK1 / DIV / 16
+   *   DIV     = PERCLK / 16 / DEN
+   *
+   *   UBIR    = NUM-1;
+   *   UMBR    = DEN-1
    *
    * First, select a closest value we can for the divider
    */
 
   div = (IPG_PERCLK_FREQUENCY >> 4) / config->baud;
+
+  /* Range of reference clock divider (DIV) is 1..7 */
+
   if (div > 7)
     {
       div = 7;
@@ -404,7 +420,7 @@ int imx_uart_configure(uint32_t base, FAR const struct uart_config_s *config)
    */
 
   num = config->baud;
-  den = (IPG_PERCLK_FREQUENCY << 4) / div;
+  den = (IPG_PERCLK_FREQUENCY >> 4) / div;
 
   if (num > den)
     {
@@ -478,10 +494,23 @@ int imx_uart_configure(uint32_t base, FAR const struct uart_config_s *config)
   regval |= ((2 << UART_UFCR_TXTL_SHIFT) | (1 << UART_UFCR_RXTL_SHIFT));
   putreg32(regval, base + UART_UFCR_OFFSET);
 
+  /* Selected. Selects proper input pins for serial and Infrared input
+   * signal.  NOTE: In this chip, UARTs are used in MUXED mode, so that this
+   * bit should always be set.
+   */
+
+  putreg32(UART_UCR3_RXDMUXSEL, base + UART_UCR3_OFFSET);
+
   /* Enable the TX and RX */
 
   ucr2 |= (UART_UCR2_TXEN | UART_UCR2_RXEN);
   putreg32(ucr2, base + UART_UCR2_OFFSET);
+
+  /* Enable the UART */
+
+  regval  = getreg32(base + UART_UCR1_OFFSET);
+  regval |= UART_UCR1_UARTEN;
+  putreg32(regval, base + UART_UCR1_OFFSET);
 #endif
 
   return OK;

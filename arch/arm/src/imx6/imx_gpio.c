@@ -552,7 +552,7 @@ int imx_config_gpio(gpio_pinset_t pinset)
             {
               /* Convert the input to an output */
 
-              ret = imx_gpio_configperiph(pinset);
+              ret = imx_gpio_configoutput(pinset);
             }
         }
         break;
@@ -561,7 +561,7 @@ int imx_config_gpio(gpio_pinset_t pinset)
         {
           /* Configure the pin as a peripheral */
 
-          ret = imx_gpio_configinput(pinset);
+          ret = imx_gpio_configperiph(pinset);
         }
         break;
 

@@ -502,20 +502,16 @@ static int up_setup(struct uart_dev_s *dev)
         }
     }
 
-  /* Select RTS */
-
-#if 0
-  ucr2 &= ~UCR2_IRTS;
-  ucr2 |= UCR2_CTSC;
-#endif
-
   /* Setup hardware flow control */
 
   regval = 0;
+
 #if 0
   if (priv->hwfc)
     {
-      ucr2 |= UART_UCR2_IRTS;
+      /* Don't ignore RTS */
+
+      ucr2 &= ~UART_UCR2_IRTS;
 
       /* CTS controled by Rx FIFO */
 
@@ -537,11 +533,18 @@ static int up_setup(struct uart_dev_s *dev)
 
   /* Set the baud.
    *
+   *   baud    = REFFREQ / (16 x NUM/DEN)
    *   baud * 16 / REFFREQ = NUM/DEN
+   *   NUM     = baud
+   *   DEN     = REFFREQ / 16
+   *
+   *   REFFREQ = PERCLK1 / DIV,   DIV=1..7
+   *   DIV     = RFDIV[2:0]
+   *   DEN     = PERCLK1 / DIV / 16
+   *   DIV     = PERCLK / 16 / DEN
+   *
    *   UBIR    = NUM-1;
    *   UMBR    = DEN-1
-   *   REFFREQ = PERCLK1 / DIV
-   *   DIV     = RFDIV[2:0]
    *
    * First, select a closest value we can for the divider
    */
@@ -562,7 +565,7 @@ static int up_setup(struct uart_dev_s *dev)
    */
 
   num = priv->baud;
-  den = (IMX_PERCLK1_FREQ << 4) / div;
+  den = (IMX_PERCLK1_FREQ >> 4) / div;
 
   if (num > den)
     {
