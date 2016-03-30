@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <fixedmath.h>
 #include <assert.h>
 
 #include "up_arch.h"
@@ -300,11 +301,14 @@ void imx_lowsetup(void)
 int imx_uart_configure(uint32_t base, FAR const struct uart_config_s *config)
 {
 #ifndef CONFIG_SUPPRESS_UART_CONFIG
+  uint64_t tmp;
   uint32_t regval;
   uint32_t ucr2;
+  uint32_t refclk;
   uint32_t div;
   uint32_t num;
   uint32_t den;
+  b16_t ratio;
 
   /* Disable the UART */
 
@@ -383,86 +387,133 @@ int imx_uart_configure(uint32_t base, FAR const struct uart_config_s *config)
 
   putreg32(ucr2, base + UART_UCR2_OFFSET);
 
+  /* Select a reference clock divider.
+   * REVISIT:  For now we just use a divider of 2.  That might not be
+   * optimal for very high or very low baud settings.
+   */
+
+  div    = 2;
+  refclk = (IPG_PERCLK_FREQUENCY >> 1);
+
   /* Set the baud.
    *
-   *   baud    = REFFREQ / (16 x NUM/DEN)
-   *   baud * 16 / REFFREQ = NUM/DEN
-   *   NUM     = baud
-   *   DEN     = REFFREQ / 16
+   *   baud    = REFFREQ / (16 * NUM/DEN)
+   *   baud    = REFFREQ / 16 / RATIO
+   *   RATIO   = REFREQ / 16 / baud;
    *
-   *   REFFREQ = PERCLK1 / DIV,   DIV=1..7
-   *   DIV     = RFDIV[2:0]
-   *   DEN     = PERCLK1 / DIV / 16
-   *   DIV     = PERCLK / 16 / DEN
+   *   NUM     = SCALE * RATIO
+   *   DEN     = SCALE
    *
-   *   UBIR    = NUM-1;
-   *   UMBR    = DEN-1
-   *
-   * First, select a closest value we can for the divider
+   *   UMBR    = NUM-1
+   *   UBIR    = DEN-1;
    */
 
-  div = (IPG_PERCLK_FREQUENCY >> 4) / config->baud;
+  tmp   = ((uint64_t)refclk << (16 - 4)) / config->baud;
+  DEBUGASSERT(tmp < 0x0000000100000000LL);
+  ratio = (b16_t)tmp;
 
-  /* Range of reference clock divider (DIV) is 1..7 */
-
-  if (div > 7)
-    {
-      div = 7;
-    }
-  else if (div < 1)
-    {
-      div = 1;
-    }
-
-  /* Now find the numerator and denominator.  These must have
-   * the ratio baud/(PERCLK / div / 16), but the values cannot
-   * exceed 16 bits
+  /* Pick a scale factor that gives us about 14 bits of accuracy.
+   * REVISIT:  Why not go all the way to 16-bits?
    */
 
-  num = config->baud;
-  den = (IPG_PERCLK_FREQUENCY >> 4) / div;
-
-  if (num > den)
+  if (ratio < b16HALF)
     {
-      if (num > 0x00010000)
-        {
-          /* b16 is a scale such that b16*num = 0x10000 * 2**16 */
-
-          uint32_t b16 = 0x100000000LL / num;
-          num = 0x00010000;
-          den = (b16 * den) >> 16;
-        }
+      den = (1 << 15);
+      num = b16toi(ratio << 15);
+      DEBUGASSERT(num > 0);
     }
-  else
+  else if (ratio < b16ONE)
     {
-      if (den > 0x0000ffff)
-        {
-          /* b16 is a scale such that b16*den = 0x10000 * 2**16 */
+      den = (1 << 14);
+      num = b16toi(ratio << 14);
+    }
+  else if (ratio < itob16(2))
+    {
+      den = (1 << 13);
+      num = b16toi(ratio << 13);
+    }
+  else if (ratio < itob16(4))
+    {
+      den = (1 << 12);
+      num = b16toi(ratio << 12);
+    }
+  else if (ratio < itob16(8))
+    {
+      den = (1 << 11);
+      num = b16toi(ratio << 11);
+    }
+  else if (ratio < itob16(16))
+    {
+      den = (1 << 10);
+      num = b16toi(ratio << 10);
+    }
+  else if (ratio < itob16(32))
+    {
+      den = (1 << 9);
+      num = b16toi(ratio << 9);
+    }
+  else if (ratio < itob16(64))
+    {
+      den = (1 << 8);
+      num = b16toi(ratio << 8);
+    }
+  else if (ratio < itob16(128))
+    {
+      den = (1 << 7);
+      num = b16toi(ratio << 7);
+    }
+  else if (ratio < itob16(256))
+    {
+      den = (1 << 6);
+      num = b16toi(ratio << 6);
+    }
+  else if (ratio < itob16(512))
+    {
+      den = (1 << 5);
+      num = b16toi(ratio << 5);
+    }
+  else if (ratio < itob16(1024))
+    {
+      den = (1 << 4);
+      num = b16toi(ratio << 4);
+    }
+  else if (ratio < itob16(2048))
+    {
+      den = (1 << 3);
+      num = b16toi(ratio << 3);
+    }
+  else if (ratio < itob16(4096))
+    {
+      den = (1 << 2);
+      num = b16toi(ratio << 2);
+    }
+  else if (ratio < itob16(8192))
+    {
+      den = (1 << 1);
+      num = b16toi(ratio << 1);
+    }
+  else /* if (ratio < itob16(16384)) */
+    {
+      DEBUGASSERT(ratio < itob16(16384));
+      den = (1 << 0);
+      num = b16toi(ratio);
+    }
 
-          uint32_t b16 = 0x100000000LL / den;
-          num = (b16 * num) >> 16;
-          den = 0x00010000;
-        }
+  /* Reduce if possible without losing accuracy. */
+
+  while ((num & 1) == 0 && (den & 1) == 0)
+    {
+      num >>= 1;
+      den >>= 1;
     }
 
   /* The actual values are we write to the registers need to be
-   * decremented by 1.
+   * decremented by 1.  NOTE that the UBIR must be set before
+   * the UBMR.
    */
 
-  if (num > 0)
-    {
-      num--;
-    }
-
-  if (den > 0)
-    {
-      den--;
-    }
-
-  /* The UBIR must be set before the UBMR register */
-
-  putreg32(num, base + UART_UBIR_OFFSET);
-  putreg32(den, base + UART_UBMR_OFFSET);
+  putreg32(den - 1, base + UART_UBIR_OFFSET);
+  putreg32(num - 1, base + UART_UBMR_OFFSET);
 
   /* Fixup the divisor, the value in the UFCR regiser is
    *
