@@ -552,6 +552,7 @@ config SAM34_TRNG
 	bool "True Random Number Generator (TRNG)"
 	default n
 	depends on ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A || ARCH_CHIP_SAM4L
+	select ARCH_HAVE_RNG
 
 config SAM34_TWI
 	bool

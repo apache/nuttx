@@ -183,6 +183,7 @@ config KINETIS_RNGB
 	bool "Random number generator"
 	default n
 	depends on ARCH_FAMILY_K60
+	select ARCH_HAVE_RNG
 	---help---
 		Support the random number generator(K60 only)
 
