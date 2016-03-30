@@ -67,7 +67,8 @@
  *   PLLP                          : 0            (STM32L4_PLLCFG_PLLP)
  *   PLLQ                          : 0            (STM32L4_PLLCFG_PLLQ)
  *   PLLR                          : 2            (STM32L4_PLLCFG_PLLR)
-
+ *   PLLSAI1N                      : 12
+ *   PLLSAI1Q                      : 4
  *   Flash Latency(WS)             : 4
  *   Prefetch Buffer               : OFF
  *   48MHz for USB OTG FS,         : Doable if required using PLLSAI1 or MSI
@@ -186,7 +187,19 @@
  * DFSDM
  */
 
+/* prescaler common to all PLL inputs; will be 1 (XXX source is implicitly
+ as per comment above HSI) */
+
 #define STM32L4_PLLCFG_PLLM             RCC_PLLCFG_PLLM(1)
+
+/* 'main' PLL config; we use this to generate our system clock via the R
+ *  output.  We set it up as 16 MHz / 1 * 10 / 2 = 80 MHz
+ *
+ * XXX NOTE:  currently the main PLL is implicitly turned on and is implicitly
+ * the system clock; this should be configurable since not all applications may
+ * want things done this way.
+ */
+
 #define STM32L4_PLLCFG_PLLN             RCC_PLLCFG_PLLN(10)
 #define STM32L4_PLLCFG_PLLP             0
 #undef  STM32L4_PLLCFG_PLLP_ENABLED
@@ -195,20 +208,32 @@
 #define STM32L4_PLLCFG_PLLR             RCC_PLLCFG_PLLR(2)
 #define STM32L4_PLLCFG_PLLR_ENABLED
 
-#define STM32L4_PLLSAI1CFG_PLLM         RCC_PLLSAI1CFG_PLLM(1)
-#define STM32L4_PLLSAI1CFG_PLLN         RCC_PLLSAI1CFG_PLLN(10)
+/* 'SAIPLL1' is used to generate the 48 MHz clock, since we can't
+ * do that with the main PLL's N value.  We set N = 12, and enable
+ * the Q output (ultimately for CLK48) with /4.  So,
+ * 16 MHz / 1 * 12 / 4 = 48 MHz
+ *
+ * XXX NOTE:  currently the SAIPLL /must/ be explicitly selected in the
+ * menuconfig, or else all this is a moot point, and the various 48 MHz
+ * peripherals will not work (RNG at present).  I would suggest removing
+ * that option from Kconfig altogether, and simply making it an option
+ * that is selected via a #define here, like all these other params.
+ */
+
+#define STM32L4_PLLSAI1CFG_PLLN         RCC_PLLSAI1CFG_PLLN(12)
 #define STM32L4_PLLSAI1CFG_PLLP         0
 #undef  STM32L4_PLLSAI1CFG_PLLP_ENABLED
 #define STM32L4_PLLSAI1CFG_PLLQ         RCC_PLLSAI1CFG_PLLQ_4
 #define STM32L4_PLLSAI1CFG_PLLQ_ENABLED
-#define STM32L4_PLLSAI1CFG_PLLR         RCC_PLLSAI1CFG_PLLR(2)
+#define STM32L4_PLLSAI1CFG_PLLR         0
 #undef  STM32L4_PLLSAI1CFG_PLLR_ENABLED
 
-#define STM32L4_PLLSAI2CFG_PLLM         RCC_PLLSAI2CFG_PLLM(1)
-#define STM32L4_PLLSAI2CFG_PLLN         RCC_PLLSAI2CFG_PLLN(10)
+/* 'SAIPLL2' is not used in this application */
+
+#define STM32L4_PLLSAI2CFG_PLLN         RCC_PLLSAI2CFG_PLLN(8)
 #define STM32L4_PLLSAI2CFG_PLLP         0
 #undef  STM32L4_PLLSAI2CFG_PLLP_ENABLED
-#define STM32L4_PLLSAI2CFG_PLLR         RCC_PLLSAI2CFG_PLLR(2)
+#define STM32L4_PLLSAI2CFG_PLLR         0
 #undef  STM32L4_PLLSAI2CFG_PLLR_ENABLED
 
 #define STM32L4_SYSCLK_FREQUENCY  80000000ul
@@ -217,6 +242,10 @@
 
 #define STM32L4_USE_CLK48
 #define STM32L4_CLK48_SEL         RCC_CCIPR_CLK48SEL_PLLSAI1
+
+/* enable the LSE oscillator, used automatically trim the MSI, and for RTC */
+
+//#define STM32L4_USE_LSE           1
 
 /* AHB clock (HCLK) is SYSCLK (80MHz) */
 
