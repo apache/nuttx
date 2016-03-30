@@ -168,7 +168,7 @@ static void rtc_dumpregs(FAR const char *msg)
   rtclldbg("    TSDR: %08x\n", getreg32(STM32L4_RTC_TSDR));
   rtclldbg("   TSSSR: %08x\n", getreg32(STM32L4_RTC_TSSSR));
   rtclldbg("    CALR: %08x\n", getreg32(STM32L4_RTC_CALR));
-  rtclldbg("   TAFCR: %08x\n", getreg32(STM32L4_RTC_TAFCR));
+  rtclldbg("   TAFCR: %08x\n", getreg32(STM32L4_RTC_TAMPCR_OFFSET));
   rtclldbg("ALRMASSR: %08x\n", getreg32(STM32L4_RTC_ALRMASSR));
   rtclldbg("ALRMBSSR: %08x\n", getreg32(STM32L4_RTC_ALRMBSSR));
   rtclldbg("MAGICREG: %08x\n", getreg32(RTC_MAGIC_REG));
@@ -192,7 +192,7 @@ static void rtc_dumpregs(FAR const char *msg)
  ************************************************************************************/
 
 #ifdef CONFIG_DEBUG_RTC
-static void rtc_dumptime(FAR struct tm *tp, FAR const char *msg)
+static void rtc_dumptime(FAR const struct tm *tp, FAR const char *msg)
 {
   rtclldbg("%s:\n", msg);
   rtclldbg("  tm_sec: %08x\n", tp->tm_sec);
@@ -532,7 +532,7 @@ static void rtc_resume(void)
 
   /* Clear the EXTI Line 18 Pending bit (Connected internally to RTC Alarm) */
 
-  putreg32((1 << 18), STM32L4_EXTI_PR);
+  putreg32((1 << 18), STM32L4_EXTI1_PR);
 #endif
 }
 
