@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/stm32l4/chip/stm32l4_rtcc.h.h
+ * arch/arm/src/stm32l4/chip/stm32l4_rtcc.h
  *
  *   Copyright (C) 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: dev@ziggurat29.com
@@ -61,7 +61,6 @@
 #define STM32L4_RTC_ALRMASSR_OFFSET 0x0044 /* RTC alarm A sub second register */
 #define STM32L4_RTC_ALRMBSSR_OFFSET 0x0048 /* RTC alarm B sub second register */
 #define STM32L4_RTC_OR_OFFSET       0x004c /* RTC option register */
-
 
 #define STM32L4_RTC_BKR_OFFSET(n)   (0x0050+((n)<<2))
 #define STM32L4_RTC_BK0R_OFFSET     0x0050 /* RTC backup register 0 */

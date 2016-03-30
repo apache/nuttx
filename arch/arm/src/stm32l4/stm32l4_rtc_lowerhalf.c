@@ -53,12 +53,9 @@
 #ifdef CONFIG_RTC_DRIVER
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
  * Private Types
  ****************************************************************************/
+
 /* This is the private type for the RTC state.  It must be cast compatible
  * with struct rtc_lowerhalf_s.
  */
@@ -82,13 +79,14 @@ struct stm32l4_lowerhalf_s
 /* Prototypes for static methods in struct rtc_ops_s */
 
 static int stm32l4_rdtime(FAR struct rtc_lowerhalf_s *lower,
-                        FAR struct rtc_time *rtctime);
+                          FAR struct rtc_time *rtctime);
 static int stm32l4_settime(FAR struct rtc_lowerhalf_s *lower,
-                         FAR const struct rtc_time *rtctime);
+                           FAR const struct rtc_time *rtctime);
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* STM32 RTC driver operations */
 
 static const struct rtc_ops_s g_rtc_ops =
@@ -156,7 +154,7 @@ static struct stm32l4_lowerhalf_s g_rtc_lowerhalf =
  ****************************************************************************/
 
 static int stm32l4_rdtime(FAR struct rtc_lowerhalf_s *lower,
-                        FAR struct rtc_time *rtctime)
+                          FAR struct rtc_time *rtctime)
 {
   /* This operation depends on the fact that struct rtc_time is cast
    * compatible with struct tm.
@@ -182,7 +180,7 @@ static int stm32l4_rdtime(FAR struct rtc_lowerhalf_s *lower,
  ****************************************************************************/
 
 static int stm32l4_settime(FAR struct rtc_lowerhalf_s *lower,
-                         FAR const struct rtc_time *rtctime)
+                           FAR const struct rtc_time *rtctime)
 {
   /* This operation depends on the fact that struct rtc_time is cast
    * compatible with struct tm.

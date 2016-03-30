@@ -63,6 +63,7 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+
 /* Configuration ********************************************************************/
 /* This RTC implementation supports only date/time RTC hardware */
 
@@ -112,10 +113,6 @@
 #endif
 
 /************************************************************************************
- * Private Types
- ************************************************************************************/
-
-/************************************************************************************
  * Private Data
  ************************************************************************************/
 
@@ -136,6 +133,7 @@ volatile bool g_rtc_enabled = false;
 /************************************************************************************
  * Private Functions
  ************************************************************************************/
+
 /************************************************************************************
  * Name: rtc_dumpregs
  *
@@ -222,8 +220,7 @@ static void rtc_dumptime(FAR const struct tm *tp, FAR const char *msg)
 
 static void rtc_wprunlock(void)
 {
-  /* Enable write access to the backup domain.
-   */
+  /* Enable write access to the backup domain. */
 
   (void)stm32l4_pwr_enablebkp(true);
 
@@ -260,8 +257,7 @@ static inline void rtc_wprlock(void)
 
   putreg32(0xff, STM32L4_RTC_WPR);
 
-  /* Disable write access to the backup domain.
-   */
+  /* Disable write access to the backup domain. */
 
   (void)stm32l4_pwr_enablebkp(false);
 }
