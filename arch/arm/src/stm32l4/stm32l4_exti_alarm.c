@@ -4,6 +4,7 @@
  *   Copyright (C) 2009, 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           Diego Sanchez <dsanchez@nx-engineering.com>
+ *           dev@ziggurat29.com (adaptation to stm32l4)
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions

@@ -421,6 +421,28 @@ config ARCH_BOARD_STM32L4_CUSTOM_CLOCKCONFIG
 	---help---
 		Enables special, board-specific STM32 clock configuration.
 
+choice
+	prompt "RTC clock source"
+	default STM32L4_RTC_LSECLOCK
+	depends on RTC
+
+config STM32L4_RTC_LSECLOCK
+	bool "LSE clock"
+	---help---
+		Drive the RTC with the LSE clock
+
+config STM32L4_RTC_LSICLOCK
+	bool "LSI clock"
+	---help---
+		Drive the RTC with the LSI clock
+
+config STM32L4_RTC_HSECLOCK
+	bool "HSE clock"
+	---help---
+		Drive the RTC with the HSE clock, divided down to 1MHz.
+
+endchoice
+
 config STM32L4_SAI1PLL
 	bool "SAI1PLL"
 	default n
