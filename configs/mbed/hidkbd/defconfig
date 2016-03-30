@@ -693,7 +693,6 @@ CONFIG_EXAMPLES_HIDKBD_DEVNAME="/dev/kbda"
 #
 # SD Card
 #
-# CONFIG_SYSTEM_SDCARD is not set
 
 #
 # Sysinfo

@@ -550,7 +550,6 @@ CONFIG_EXAMPLES_HELLO=y
 #
 # SD Card
 #
-# CONFIG_SYSTEM_SDCARD is not set
 
 #
 # Sysinfo

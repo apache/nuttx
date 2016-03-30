@@ -653,7 +653,6 @@ CONFIG_EXAMPLES_NXFLAT=y
 #
 # SD Card
 #
-# CONFIG_SYSTEM_SDCARD is not set
 
 #
 # Sysinfo

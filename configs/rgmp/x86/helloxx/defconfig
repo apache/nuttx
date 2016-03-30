@@ -666,7 +666,6 @@ CONFIG_EXAMPLES_HELLOXX_CXXINITIALIZE=y
 #
 # SD Card
 #
-# CONFIG_SYSTEM_SDCARD is not set
 
 #
 # Sysinfo

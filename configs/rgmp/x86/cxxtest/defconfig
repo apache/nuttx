@@ -669,7 +669,6 @@ CONFIG_EXAMPLES_CXXTEST_CXXINITIALIZE=y
 #
 # SD Card
 #
-# CONFIG_SYSTEM_SDCARD is not set
 
 #
 # Sysinfo

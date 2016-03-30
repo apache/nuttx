@@ -720,7 +720,6 @@ CONFIG_NETUTILS_HTTPD_KEEPALIVE_DISABLE=y
 #
 # SD Card
 #
-# CONFIG_SYSTEM_SDCARD is not set
 
 #
 # Sysinfo

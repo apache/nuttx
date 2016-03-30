@@ -1108,7 +1108,6 @@ CONFIG_READLINE_ECHO=y
 #
 # SD Card
 #
-# CONFIG_SYSTEM_SDCARD is not set
 
 #
 # Sudoku

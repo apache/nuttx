@@ -779,7 +779,6 @@ CONFIG_NETUTILS_NETLIB=y
 #
 # SD Card
 #
-# CONFIG_SYSTEM_SDCARD is not set
 
 #
 # Sudoku

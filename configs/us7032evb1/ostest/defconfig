@@ -568,7 +568,6 @@ CONFIG_EXAMPLES_OSTEST_RR_RUNS=10
 #
 # SD Card
 #
-# CONFIG_SYSTEM_SDCARD is not set
 
 #
 # Sysinfo

@@ -478,7 +478,6 @@ CONFIG_INTERPRETERS_PRUN=y
 #
 # SD Card
 #
-# CONFIG_SYSTEM_SDCARD is not set
 
 #
 # Sysinfo
