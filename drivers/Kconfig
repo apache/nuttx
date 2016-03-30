@@ -27,7 +27,7 @@ config ARCH_HAVE_RNG
 
 config DEV_RANDOM
 	bool "Enable /dev/random"
-	default n
+	default y
 	depends on ARCH_HAVE_RNG
 
 source drivers/loop/Kconfig
