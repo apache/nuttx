@@ -724,11 +724,6 @@ configs/viewtool-stm32f107
   board may be fitted with either: (1) STM32F107VCT6 or (2) STM32F103VCT6.
   See http://www.viewtool.com/ for further information.
 
-configs/vsn
-  ISOTEL NetClamps VSN V1.2 ready2go sensor network platform based on the
-  STMicro STM32F103RET6.  Contributed by Uros Platise.  See
-  http://isotel.eu/NetClamps/
-
 configs/xtrs
   TRS80 Model 3.  This port uses a vintage computer based on the Z80.
   An emulator for this computer is available to run TRS80 programs on a
