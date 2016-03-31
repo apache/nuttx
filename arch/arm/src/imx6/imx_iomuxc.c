@@ -375,7 +375,7 @@ int imx_iomux_configure(uintptr_t padctl, iomux_pinset_t ioset)
 
   /* Select drive strength */
 
-  value = (ioset & PADCTL_DSE_MASK) >> PADCTL_DSE_SHIFT;
+  value = (ioset & IOMUX_DRIVE_MASK) >> IOMUX_DRIVE_SHIFT;
   regval |= PADCTL_DSE(value);
 
   /* Select spped */

@@ -86,7 +86,7 @@
  *   .... .... O... ....
  */
 
-#define IOMUX_CMOS_OUTPUT       (1 << 7)  /* Bit 7: 0=CMOS output */
+#define IOMUX_CMOS_OUTPUT       (0)       /* Bit 7: 0=CMOS output */
 #define IOMUX_OPENDRAIN         (1 << 7)  /* Bit 7: 1=Enable open-drain output */
 
 /* Output Drive Strength:

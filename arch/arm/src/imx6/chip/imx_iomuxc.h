@@ -2229,13 +2229,13 @@
 #define DRIVE_33OHM                           (7)       /* 20 Ohm @3.3V, 33 Ohm @1.8V */
 
 #define SPEED_LOW                             (0)       /* Low frequency (50 MHz) */
-#define SPEED_MEDIUM                          (1)       /* Medium frequency (100, 150 MHz) */
+#define SPEED_MEDIUM                          (2)       /* Medium frequency (100, 150 MHz) */
 #define SPEED_MAX                             (3)       /* Maximum frequency (100, 150, 200 MHz) */
 
-#define PULL_DOWN_100K                        (0) /* 100K Ohm Pull Down */
-#define PULL_UP_47K                           (1) /* 47K Ohm Pull Up */
-#define PULL_UP_100K                          (2) /* 100K Ohm Pull Up */
-#define PULL_UP_22K                           (3) /*  22K Ohm Pull Up */
+#define PULL_DOWN_100K                        (0)       /* 100K Ohm Pull Down */
+#define PULL_UP_47K                           (1)       /*  47K Ohm Pull Up */
+#define PULL_UP_100K                          (2)       /* 100K Ohm Pull Up */
+#define PULL_UP_22K                           (3)       /*  22K Ohm Pull Up */
 
 #define PADCTL_SRE                            (1 << 0)  /* Bit 0: Slew Rate Field */
 #define PADCTL_DSE_SHIFT                      (3)       /* Bits 3-5: Drive Strength Field */

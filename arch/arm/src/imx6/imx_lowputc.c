@@ -46,15 +46,16 @@
 #include "up_arch.h"
 
 #include "chip/imx_iomuxc.h"
-#include "chip/imx_pinmux.h"
 #include "chip/imx_ccm.h"
 #include "chip/imx_uart.h"
 #include "imx_config.h"
+#include "imx_iomuxc.h"
 #include "imx_gpio.h"
 #include "imx_lowputc.h"
 
 #include "up_internal.h"
 
+#include "chip/imx_pinmux.h"
 #include <arch/board/board.h> /* Include last:  has dependencies */
 
 /****************************************************************************
@@ -576,7 +577,9 @@ int imx_uart_configure(uint32_t base, FAR const struct uart_config_s *config)
  * Name: imx_lowputc
  *
  * Description:
- *   Output a byte with as few system dependencies as possible
+ *   Output a byte with as few system dependencies as possible.  This will even work
+ *   BEFORE the console is initialized if we are booting from U-Boot (and the same
+ *   UART is used for the console, of course.)
  *
  ************************************************************************************/
 

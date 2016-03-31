@@ -99,7 +99,9 @@ int imx_uart_configure(uint32_t base, FAR const struct uart_config_s *config);
  * Name: imx_lowputc
  *
  * Description:
- *   Output a byte with as few system dependencies as possible
+ *   Output a byte with as few system dependencies as possible.  This will even work
+ *   BEFORE the console is initialized if we are booting from U-Boot (and the same
+ *   UART is used for the console, of course.)
  *
  ************************************************************************************/
 
