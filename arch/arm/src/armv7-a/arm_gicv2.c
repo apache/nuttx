@@ -331,7 +331,7 @@ void arm_gic_initialize(void)
 
   /* Write the final ICCICR value */
 
-  putreg32(GIC_ICCICR_ENABLE, GIC_ICCICR);
+  putreg32(iccicr, GIC_ICCICR);
 
 #ifdef CONFIG_ARCH_TRUSTZONE_BOTH
   /* A processor in the secure state must then switch to the non-secure
