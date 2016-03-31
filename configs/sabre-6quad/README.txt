@@ -31,9 +31,13 @@ that case).
 There is a lot of testing that could be done but, unfortunately, I still
 have no i.MX6 hardware to test on.
 
-2016-03-28: I now have a used MCIMX6Q-SDB which is similar to the target
+2016-03-28:  I now have a used MCIMX6Q-SDB which is similar to the target
 configuration described below except that it does not have the 10.1" LVDS
 display.  Next step:  Figure out how to run a copy of NuttX using U-Boot.
+
+2016-03-31: Most all of the boot of the NSH configuration seems to be
+working.  It gets to NSH and NSH appears to run normally.  However, there is
+no output on the UART1 VCOM.
 
 Platform Features
 =================
@@ -390,6 +394,24 @@ A: Yes with the following modifications to the prodecure above.
      You can then forget about steps 7 and 8.
 
      This is, in fact, my preferred way to debug.
+
+   You can restart the debug session at any time at the gdb> prompt by:
+
+       gdb> mon reset
+       gdb> mon go
+
+   That will restart U-Boot and you have to press ENTER in the terminal
+   window to stop U-Boot.  Restarting U-Boot is a necesary part of the
+   restart process because you need to put the hardware back in its initial
+   state before running NuttX
+
+   Then this will restart the debug session just as before:
+
+       gdb> mon halt
+       gdb> load nuttx <-- Loads NuttX into RAM at 0x010800000
+       gdb> file nuttx
+       gdb> mon set pc 0x10800040
+       gdb> s
 
 Configurations
 ==============
