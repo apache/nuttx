@@ -327,10 +327,14 @@
 #define GIC_ICCIDR_PARTNO_MASK     (0xfff << GIC_ICCIDR_PARTNO_SHIFT)
 
 /* Distributor Registers */
-/* Distributor Control Register */
+/* Distributor Control Register -- without security extensions */
 
-#define GIC_ICDDCR_NONSECENAB      (1 << 0)  /* Bit 0: Enable distributor for Non-secure interrupts */
-#define GIC_ICDDCR_SECENABLE       (1 << 1)  /* Bit 1: Enable distributor for Secure interrupts */
+#define GIC_ICDDCR_ENABLE          (1 << 0)  /* Bit 0: Enable forwarding of interrupts */
+                                             /* Bits 1-31: Reserved */
+/* Distributor Control Register -- with security extensions */
+
+#define GIC_ICDDCR_ENABLEGRP0      (1 << 0)  /* Bit 0: Enable forwarding of Group 0 interrupts */
+#define GIC_ICDDCR_ENABLEGRP1      (1 << 1)  /* Bit 1: Enable forwarding of Group 1 interrupts */
                                              /* Bits 2-31: Reserved */
 /* Interrupt Controller Type Register */
 

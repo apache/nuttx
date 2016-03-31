@@ -169,6 +169,7 @@ void arm_gic0_initialize(void)
 void arm_gic_initialize(void)
 {
   uint32_t iccicr;
+  uint32_t icddcr;
 
   /* Initialize PPIs.  The following steps need to be done by all CPUs */
 
@@ -302,6 +303,7 @@ void arm_gic_initialize(void)
    */
 
   iccicr |= GIC_ICCICR_ENABLE;
+  icddcr  = GIC_ICDDCR_ENABLE;
 
 #elif defined(CONFIG_ARCH_TRUSTZONE_SECURE)
   /* Enable the Group 0 interrupts, FIQEn and disable Group 0/1
@@ -311,6 +313,7 @@ void arm_gic_initialize(void)
   iccicr |= (GIC_ICCICRS_ENABLEGRP0 | GIC_ICCICRS_FIQBYPDISGRP0 |
              GIC_ICCICRS_IRQBYPDISGRP0 | GIC_ICCICRS_FIQBYPDISGRP1 |
              GIC_ICCICRS_IRQBYPDISGRP1);
+  icddcr  = GIC_ICDDCR_ENABLEGRP0;
 
 #elif defined(CONFIG_ARCH_TRUSTZONE_BOTH)
   /* Enable the Group 0/1 interrupts, FIQEn and disable Group 0/1
@@ -320,16 +323,18 @@ void arm_gic_initialize(void)
   iccicr |= (GIC_ICCICRS_ENABLEGRP0 | GIC_ICCICRS_ENABLEGRP1 |
              GIC_ICCICRS_FIQBYPDISGRP0 | GIC_ICCICRS_IRQBYPDISGRP0 |
              GIC_ICCICRS_FIQBYPDISGRP1 | GIC_ICCICRS_IRQBYPDISGRP1);
+  icddcr  = (GIC_ICDDCR_ENABLEGRP0 | GIC_ICDDCR_ENABLEGRP1);
 
 #else /* defined(CONFIG_ARCH_TRUSTZONE_NONSECURE) */
   /* Enable the Group 1 interrupts and disable Group 1 bypass. */
 
   iccicr |= (GIC_ICCICRU_ENABLEGRP1 | GIC_ICCICRU_FIQBYPDISGRP1 |
              GIC_ICCICRU_IRQBYPDISGRP1);
+  icddcr  = GIC_ICDDCR_ENABLEGRP1;
 
 #endif
 
-  /* Write the final ICCICR value */
+  /* Write the final ICCICR value to enable the GIC. */
 
   putreg32(iccicr, GIC_ICCICR);
 
@@ -342,6 +347,12 @@ void arm_gic_initialize(void)
 
 #  warning Missing logic
 #endif
+
+  /* Write the ICDDCR value to enable the forwarding of interrupt by the
+   * distributor.
+   */
+
+  putreg32(icddcr, GIC_ICDDCR);
 }
 
 /****************************************************************************
