@@ -81,7 +81,7 @@ void imx_clockconfig(void)
   /* Make certain that the ipg_clk is enabled */
 
   regval  = getreg32(IMX_CCM_CCGR5);
-  regval &= (CCM_CCGR5_CG12_MASK);
+  regval &= ~(CCM_CCGR5_CG12_MASK);
   regval |= CCM_CCGR5_CG12(CCM_CCGR_ALLMODES);
   putreg32(regval, IMX_CCM_CCGR5);
 }

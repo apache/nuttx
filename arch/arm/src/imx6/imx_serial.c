@@ -540,8 +540,8 @@ static inline void imx_waittxready(struct imx_uart_s *priv)
 
 static int imx_setup(struct uart_dev_s *dev)
 {
-#ifndef CONFIG_SUPPRESS_UART_CONFIG
   struct imx_uart_s *priv = (struct imx_uart_s *)dev->priv;
+#ifndef CONFIG_SUPPRESS_UART_CONFIG
   struct uart_config_s config;
   int ret;
 

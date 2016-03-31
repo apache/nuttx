@@ -398,12 +398,14 @@ void up_boot(void)
    */
 
   imx_setupmappings();
+  imx_lowputc('A');
 
   /* Provide a special mapping for the OCRAM interrupt vector positioned in
    * high memory.
    */
 
   imx_vectormapping();
+  imx_lowputc('B');
 
 #ifdef CONFIG_ARCH_RAMFUNCS
   /* Copy any necessary code sections from FLASH to RAM.  The correct
@@ -417,11 +419,14 @@ void up_boot(void)
       *dest++ = *src++;
     }
 
+  imx_lowputc('C');
+
   /* Flush the copied RAM functions into physical RAM so that will
    * be available when fetched into the I-Cache.
    */
 
   arch_clean_dcache((uintptr_t)&_sramfuncs, (uintptr_t)&_eramfuncs)
+  imx_lowputc('D');
 #endif
 
   /* Setup up vector block.  _vector_start and _vector_end are exported from
@@ -429,19 +434,23 @@ void up_boot(void)
    */
 
   imx_copyvectorblock();
+  imx_lowputc('E');
 
   /* Disable the watchdog timer */
 
   imx_wdtdisable();
+  imx_lowputc('F');
 
   /* Initialize clocking to settings provided by board-specific logic */
 
   imx_clockconfig();
+  imx_lowputc('G');
 
 #ifdef CONFIG_ARCH_FPU
   /* Initialize the FPU */
 
   arm_fpuconfig();
+  imx_lowputc('H');
 #endif
 
   /* Perform board-specific initialization,  This must include:
@@ -455,6 +464,7 @@ void up_boot(void)
    */
 
   imx_board_initialize();
+  imx_lowputc('I');
 
 #ifdef NEED_SDRAM_REMAPPING
   /* SDRAM was configured in a temporary state to support low-level
@@ -463,6 +473,7 @@ void up_boot(void)
    */
 
   imx_remap();
+  imx_lowputc('J');
 #endif
 
 #ifdef CONFIG_BOOT_SDRAM_DATA
@@ -471,11 +482,13 @@ void up_boot(void)
    */
 
   arm_data_initialize();
+  imx_lowputc('K');
 #endif
 
   /* Perform common, low-level chip initialization (might do nothing) */
 
   imx_lowsetup();
+  imx_lowputc('L');
 
 #ifdef USE_EARLYSERIALINIT
   /* Perform early serial initialization if we are going to use the serial
@@ -483,5 +496,7 @@ void up_boot(void)
    */
 
   imx_earlyserialinit();
+  imx_lowputc('M');
 #endif
+  imx_lowputc('\n');
 }

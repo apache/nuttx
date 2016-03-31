@@ -95,4 +95,18 @@ void imx_lowsetup(void);
 int imx_uart_configure(uint32_t base, FAR const struct uart_config_s *config);
 #endif
 
+/************************************************************************************
+ * Name: imx_lowputc
+ *
+ * Description:
+ *   Output a byte with as few system dependencies as possible
+ *
+ ************************************************************************************/
+
+#if defined(IMX_HAVE_UART) && defined(CONFIG_DEBUG)
+void imx_lowputc(int ch);
+#else
+#  define imx_lowputc(ch)
+#endif
+
 #endif /* __ARCH_ARM_SRC_IMX6_IMX_LOWPUTC_H */

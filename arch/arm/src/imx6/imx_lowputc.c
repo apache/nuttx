@@ -53,6 +53,8 @@
 #include "imx_gpio.h"
 #include "imx_lowputc.h"
 
+#include "up_internal.h"
+
 #include <arch/board/board.h> /* Include last:  has dependencies */
 
 /****************************************************************************
@@ -158,6 +160,7 @@ static const struct uart_config_s g_console_config =
 
 void imx_lowsetup(void)
 {
+#ifndef CONFIG_SUPPRESS_UART_CONFIG
 #ifdef IMX_HAVE_UART
   uint32_t regval;
 
@@ -287,6 +290,7 @@ void imx_lowsetup(void)
   (void)imx_uart_configure(IMX_CONSOLE_VBASE, &g_console_config);
 #endif
 #endif /* IMX_HAVE_UART */
+#endif /* CONFIG_SUPPRESS_UART_CONFIG */
 }
 
 /************************************************************************************
@@ -567,3 +571,47 @@ int imx_uart_configure(uint32_t base, FAR const struct uart_config_s *config)
   return OK;
 }
 #endif /* IMX_HAVE_UART */
+
+/************************************************************************************
+ * Name: imx_lowputc
+ *
+ * Description:
+ *   Output a byte with as few system dependencies as possible
+ *
+ ************************************************************************************/
+
+#if defined(IMX_HAVE_UART) && defined(CONFIG_DEBUG)
+void imx_lowputc(int ch)
+{
+  /* Poll the TX fifo trigger level bit of the UART status register. When the TXFE
+   * bit is non-zero, the TX Buffer FIFO is empty.
+   */
+
+  while ((getreg32(IMX_CONSOLE_VBASE + UART_USR2_OFFSET) & UART_USR2_TXFE) == 0);
+
+  /* If the character to output is a newline, then pre-pend a carriage return */
+
+  if (ch == '\n')
+    {
+      /* Send the carrage return by writing it into the UART_TXD register. */
+
+      putreg32((uint32_t)'\r', IMX_CONSOLE_VBASE + UART_TXD_OFFSET);
+
+      /* Wait for the tranmsit regiser to be emptied. When the TXFE bit is non-zero,
+       * the TX Buffer FIFO is empty.
+       */
+
+      while ((getreg32(IMX_CONSOLE_VBASE + UART_USR2_OFFSET) & UART_USR2_TXFE) == 0);
+    }
+
+  /* Send the character by writing it into the UART_TXD register. */
+
+  putreg32((uint32_t)ch, IMX_CONSOLE_VBASE + UART_TXD_OFFSET);
+
+  /* Wait for the tranmsit regiser to be emptied. When the TXFE bit is non-zero,
+   * the TX Buffer FIFO is empty.
+   */
+
+  while ((getreg32(IMX_CONSOLE_VBASE + UART_USR2_OFFSET) & UART_USR2_TXFE) == 0);
+}
+#endif
