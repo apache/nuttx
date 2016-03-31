@@ -1240,10 +1240,11 @@ static void sam_ep_fifocon(unsigned int epno)
   /* Clear the NAK IN bit to stop NAKing IN tokens from the host.  We now
    * have data ready to go.
    *
-   * REVISIT: I don't think this is necessary,
+   * REVISIT: I don't think the USBHS_DEVEPTINT_NAKINI is necessary.
    */
 
-  sam_putreg(USBHS_DEVEPTINT_NAKINI, SAM_USBHS_DEVEPTICR(epno));
+  sam_putreg((USBHS_DEVEPTINT_NAKINI | USBHS_DEVEPTINT_TXINI),
+             SAM_USBHS_DEVEPTICR(epno));
 
   /* Enable the TXIN interrupt on the endpoint */
 
@@ -1391,8 +1392,9 @@ static int sam_req_write(struct sam_usbdev_s *priv, struct sam_ep_s *privep)
               sam_putreg(USBHS_DEVINT_PEP(epno), SAM_USBHS_DEVIDR);
             }
 
-          /* Disable the TXIN interrupt */
+          /* Clear and Disable the TXIN interrupt */
 
+          sam_putreg(USBHS_DEVEPTINT_TXINI, SAM_USBHS_DEVEPTICR(epno));
           sam_putreg(USBHS_DEVEPTINT_TXINI, SAM_USBHS_DEVEPTIDR(epno));
           return -ENOENT;
         }
@@ -2722,11 +2724,12 @@ static void sam_ep_interrupt(struct sam_usbdev_s *priv, int epno)
       if (privep->epstate == USBHS_EPSTATE_SENDING ||
           privep->epstate == USBHS_EPSTATE_EP0STATUSIN)
         {
-          /* Clear the pending TXINIT interrupt */
-
-          sam_putreg(USBHS_DEVEPTINT_TXINI, SAM_USBHS_DEVEPTICR(epno));
-
-          /* Continue/resume processing the write requests. */
+          /* The interrupt is cleared inside the sam_req_write after
+           * new data is written to the fifo or it is cleared and disabled
+           * after all requests are processed.
+           *
+           * Continue/resume processing the write requests.
+           */
 
           privep->epstate = USBHS_EPSTATE_IDLE;
           (void)sam_req_write(priv, privep);
@@ -3092,7 +3095,7 @@ static int sam_usbhs_interrupt(int irq, void *context)
        *     the speed running at the end of the reset (USBHS_DEVISR.EORST = 1).
        */
 
-      if ((pending & USBHS_DEVINT_EORST) != 0)
+      else if ((pending & USBHS_DEVINT_EORST) != 0)
         {
           /* Sample the USBHS SR register at the time of the EORST event. */
 
