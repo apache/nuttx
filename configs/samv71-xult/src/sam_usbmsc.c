@@ -45,7 +45,7 @@
 
 #include "samv71-xult.h"
 
-#if defined(CONFIG_USBMSC) && !defined(CONFIG_USBMSC_COMPOSITE)
+#if defined(CONFIG_USBMSC)
 
 /****************************************************************************
  * Public Functions

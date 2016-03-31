@@ -38,6 +38,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <sys/types.h>
 
 #include <nuttx/usb/composite.h>
 
