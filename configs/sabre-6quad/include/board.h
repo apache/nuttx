@@ -59,6 +59,27 @@
  * Linux kernel will use the CPU frequency scaling code which will switch the
  * processor frequency between 400 MHz and 1GHz based on load and temperature.
  *
+ * These are the frequencies reported with U-Boot starts up:
+ *
+ *   mx6q pll1      : 792MHz
+ *   mx6q pll2      : 528MHz
+ *   mx6q pll3      : 480MHz
+ *   mx6q pll8      :  50MHz
+ *
+ *   ipg clock      :  66000000Hz
+ *   ipg per clock  :  66000000Hz
+ *   uart clock     :  80000000Hz
+ *   cspi clock     :  60000000Hz
+ *   ahb clock      : 132000000Hz
+ *   axi clock      : 264000000Hz
+ *   emi_slow clock :  29333333Hz
+ *   ddr clock      : 528000000Hz
+ *   usdhc1 clock   : 198000000Hz
+ *   usdhc2 clock   : 198000000Hz
+ *   usdhc3 clock   : 198000000Hz
+ *   usdhc4 clock   : 198000000Hz
+ *   nfc clock      :  24000000Hz
+ *
  * For now, NuttX simply leaves the clocking at 792MHz.
  */
 
