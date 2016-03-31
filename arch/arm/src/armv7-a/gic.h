@@ -101,7 +101,7 @@
 #define GIC_MASK32(n)              (1 << GIC_SHIFT32(n))     /* 1-bit mask */
 
 /* GIC Register Offsets *****************************************************/
-/* Interrupt Interface registers */
+/* CPU Interface registers */
 
 #define GIC_ICCICR_OFFSET          0x0000    /* CPU Interface Control Register */
 #define GIC_ICCPMR_OFFSET          0x0004    /* Interrupt Priority Mask Register */
@@ -111,15 +111,31 @@
 #define GIC_ICCRPR_OFFSET          0x0014    /* Running interrupt */
 #define GIC_ICCHPIR_OFFSET         0x0018    /* Highest pending interrupt */
 #define GIC_ICCABPR_OFFSET         0x001c    /* Aliased Non-secure Binary Point Register */
+#define GIC_ICCAIAR_OFFSET         0x0020    /* Aliased Interrupt Acknowledge Register */
+#define GIC_ICCAEOIR_OFFSET        0x0024    /* Aliased End of Interrupt Register */
+#define GIC_ICCAHPIR_OFFSET        0x0028    /* Aliased Highest Priority Pending Interrupt Register */
+                                             /* 0x002c-0x003c: Reserved */
+                                             /* 0x0040-0x00cf: Implementation defined */
+#define GIC_ICCAPR1_OFFSET         0x00d0    /* Active Priorities Register 1 */
+#define GIC_ICCAPR2_OFFSET         0x00d4    /* Active Priorities Register 2 */
+#define GIC_ICCAPR3_OFFSET         0x00d8    /* Active Priorities Register 3 */
+#define GIC_ICCAPR4_OFFSET         0x00dc    /* Active Priorities Register 4 */
+#define GIC_ICCNSAPR1_OFFSET       0x00e0    /* Non-secure Active Priorities Register 1 */
+#define GIC_ICCNSAPR2_OFFSET       0x00e4    /* Non-secure Active Priorities Register 2 */
+#define GIC_ICCNSAPR3_OFFSET       0x00e8    /* Non-secure Active Priorities Register 3 */
+#define GIC_ICCNSAPR4_OFFSET       0x00ec    /* Non-secure Active Priorities Register 4 */
+                                             /* 0x00ed-0x00f8: Reserved */
 #define GIC_ICCIDR_OFFSET          0x00fc    /* CPU Interface Implementer ID Register */
+#define GIC_ICCDIR_OFFSET          0x1000    /* Deactivate Interrupt Register */
 
 /* Distributor Registers */
 
 #define GIC_ICDDCR_OFFSET          0x0000    /* Distributor Control Register */
 #define GIC_ICDICTR_OFFSET         0x0004    /* Interrupt Controller Type Register */
 #define GIC_ICDIIDR_OFFSET         0x0008    /* Distributor Implementer ID Register */
-
-/* 0x000c-0x007c: Reserved */
+                                             /* 0x000c-0x001c: Reserved */
+                                             /* 0x0020-0x003c: Implementation defined */
+                                             /* 0x0040-0x007c: Reserved */
 /* Interrupt Security Registers: 0x0080-0x009c */
 
 #define GIC_ICDISR_OFFSET(n)       (0x0080 + GIC_OFFSET32(n))
@@ -140,11 +156,14 @@
 
 #define GIC_ICDICPR_OFFSET(n)      (0x0280 + GIC_OFFSET32(n))
 
-/* Interrupt Active Bit Registers: 0x0300-0x31c */
+/* GICv2 Interrupt Set-Active Registers: 0x0300-0x31c */
 
-#define GIC_ICDABR_OFFSET(n)       (0x0300 + GIC_OFFSET32(n))
+#define GIC_ICDSAR_OFFSET(n)       (0x0300 + GIC_OFFSET32(n))
 
-/* 0x0380-0x03fc: Reserved */
+/* Interrupt Clear-Active Registers: 0x380-0x3fc */
+
+#define GIC_ICDCAR_OFFSET(n)       (0x0380 + GIC_OFFSET32(n))
+
 /* Interrupt Priority Registers: 0x0400-0x04fc */
 
 #define GIC_ICDIPR_OFFSET(n)       (0x0400 + GIC_OFFSET4(n))
@@ -159,6 +178,7 @@
 
 #define GIC_ICDICFR_OFFSET(n)      (0x0c00 + GIC_OFFSET16(n))
 
+/* 0x0d00-0x0dfc: Implementation defined */
 /* PPI Status Register: 0x0d00 */
 
 #define GIC_ICDPPISR_OFFSET        0x0d00    /* PPI Status Register */
@@ -167,16 +187,30 @@
 
 #define GIC_ICDSPISR_OFFSET(n)     (0x0d04 + GIC_OFFSET32(n))
 
-/* 0x0d80-0x0efc: Reserved */
+/* 0x0d80-0x0dfc: Reserved */
+/* Non-secure Access Control Registers, optional: 00xe00-0x0efc */
+
+#define GIC_ICDNSACR_OFFSET(n)     (0x0e00 + GIC_OFFSET32(n))
+
 /* Software Generated Interrupt Register: 0x0f00 */
 
 #define GIC_ICDSGIR_OFFSET         0x0f00    /* Software Generated Interrupt Register */
 
-/* 0x0f0c-0x0fcc: Reserved */
+/* 0x0f0c-0x0f0c: Reserved */
 /* Peripheral Identification Registers: 0x0fd0-0xfe8 */
 
 #define GIC_ICDPIDR_OFFSET(n)      (0x0fd0 + ((n) << 2))
 
+/* SGI Clear-Pending Registers: 0x0f10-0x0f1c */
+
+#define GIC_ICDSCPR_OFFSET(n)      (0x0f10 + GIC_OFFSET8(n))
+
+/* SGI Set-Pending Registers: 0x0f20-0x0f2c */
+
+#define GIC_ICDSSPR_OFFSET(n)      (0x0f20 + GIC_OFFSET8(n))
+
+/* 0x0f30-0x0fcc: Reserved */
+/* 0x0fd0-0x0ffc: Implementation defined */
 /* Component Identification Registers: 0x0ff0-0x0ffc */
 
 #define GIC_ICDCIDR_OFFSET(n)      (0x0ff0 + ((n) << 2))
@@ -185,12 +219,12 @@
 
 /* GIC Register Addresses ***************************************************/
 /* The Interrupt Controller is a single functional unit that is located in a
- * Cortex-A9 MPCore design. There is one interrupt interface per Cortex-A9
+ * Cortex-A9 MPCore design.  There is one interrupt interface per Cortex-A9
  * processor.  Registers are memory mapped and accessed through a chip-
  * specific private memory spaced (see mpcore.h).
  */
 
-/* Interrupt Interface registers */
+/* CPU Interface registers */
 
 #define GIC_ICCICR                 (MPCORE_ICC_VBASE+GIC_ICCICR_OFFSET)
 #define GIC_ICCPMR                 (MPCORE_ICC_VBASE+GIC_ICCPMR_OFFSET)
@@ -200,7 +234,19 @@
 #define GIC_ICCRPR                 (MPCORE_ICC_VBASE+GIC_ICCRPR_OFFSET)
 #define GIC_ICCHPIR                (MPCORE_ICC_VBASE+GIC_ICCHPIR_OFFSET)
 #define GIC_ICCABPR                (MPCORE_ICC_VBASE+GIC_ICCABPR_OFFSET)
+#define GIC_ICCAIAR                (MPCORE_ICC_VBASE+GIC_ICCAIAR_OFFSET)
+#define GIC_ICCAEOIR               (MPCORE_ICC_VBASE+GIC_ICCAEOIR_OFFSET)
+#define GIC_ICCAHPIR               (MPCORE_ICC_VBASE+GIC_ICCAHPIR_OFFSET)
+#define GIC_ICCAPR1                (MPCORE_ICC_VBASE+GIC_ICCAPR1_OFFSET)
+#define GIC_ICCAPR2                (MPCORE_ICC_VBASE+GIC_ICCAPR2_OFFSET)
+#define GIC_ICCAPR3                (MPCORE_ICC_VBASE+GIC_ICCAPR3_OFFSET)
+#define GIC_ICCAPR4                (MPCORE_ICC_VBASE+GIC_ICCAPR4_OFFSET)
+#define GIC_ICCNSAPR1              (MPCORE_ICC_VBASE+GIC_ICCNSAPR1_OFFSET)
+#define GIC_ICCNSAPR2              (MPCORE_ICC_VBASE+GIC_ICCNSAPR2_OFFSET)
+#define GIC_ICCNSAPR3              (MPCORE_ICC_VBASE+GIC_ICCNSAPR3_OFFSET)
+#define GIC_ICCNSAPR4              (MPCORE_ICC_VBASE+GIC_ICCNSAPR4_OFFSET)
 #define GIC_ICCIDR                 (MPCORE_ICC_VBASE+GIC_ICCIDR_OFFSET)
+#define GIC_ICCDIR                 (MPCORE_ICC_VBASE+GIC_ICCDIR_OFFSET)
 
 /* Distributor Registers */
 
@@ -212,19 +258,23 @@
 #define GIC_ICDICER(n)             (MPCORE_ICD_VBASE+GIC_ICDICER_OFFSET(n))
 #define GIC_ICDISPR(n)             (MPCORE_ICD_VBASE+GIC_ICDISPR_OFFSET(n))
 #define GIC_ICDICPR(n)             (MPCORE_ICD_VBASE+GIC_ICDICPR_OFFSET(n))
-#define GIC_ICDABR(n)              (MPCORE_ICD_VBASE+GIC_ICDABR_OFFSET(n))
+#define GIC_ICDSAR(n)              (MPCORE_ICD_VBASE+GIC_ICDSAR_OFFSET(n))
+#define GIC_ICDCAR(n)              (MPCORE_ICD_VBASE+GIC_ICDCAR_OFFSET(n))
 #define GIC_ICDIPR(n)              (MPCORE_ICD_VBASE+GIC_ICDIPR_OFFSET(n))
 #define GIC_ICDIPTR(n)             (MPCORE_ICD_VBASE+GIC_ICDIPTR_OFFSET(n))
 #define GIC_ICDICFR(n)             (MPCORE_ICD_VBASE+GIC_ICDICFR_OFFSET(n))
 #define GIC_ICDPPISR               (MPCORE_ICD_VBASE+GIC_ICDPPISR_OFFSET)
 #define GIC_ICDSPISR(n)            (MPCORE_ICD_VBASE+GIC_ICDSPISR_OFFSET(n))
+#define GIC_ICDNSACR(n)            (MPCORE_ICD_VBASE+GIC_ICDNSACR_OFFSET(n))
 #define GIC_ICDSGIR                (MPCORE_ICD_VBASE+GIC_ICDSGIR_OFFSET)
 #define GIC_ICDPIDR(n)             (MPCORE_ICD_VBASE+GIC_ICDPIDR_OFFSET(n))
+#define GIC_ICDSCPR(n)             (MPCORE_ICD_VBASE+GIC_ICDSCPR_OFFSET(n))
+#define GIC_ICDSSPR(n)             (MPCORE_ICD_VBASE+GIC_ICDSSPR_OFFSET(n))
 #define GIC_ICDCIDR(n)             (MPCORE_ICD_VBASE+GIC_ICDCIDR_OFFSET(n))
 
 /* GIC Register Bit Definitions *********************************************/
 
-/* Interrupt Interface registers */
+/* CPU Interface registers */
 /* CPU Interface Control Register -- without security extensions */
 
 #define GIC_ICCICR_ENABLE          (1 << 0)  /* Bit 0:  Enable the CPU interface for this GIC */
@@ -315,6 +365,29 @@
 #  define GIC_ICCHPIR_CPUSRC(n)    ((uint32_t)(n) << GIC_ICCHPIR_CPUSRC_SHIFT)
                                              /* Bits 13-31: Reserved */
 
+/* Aliased Interrupt Acknowledge Register */
+#define GIC_ICCAIAR_
+/* Aliased End of Interrupt Register */
+#define GIC_ICCAEOIR_
+/* Aliased Highest Priority Pending Interrupt Register */
+#define GIC_ICCAHPIR_
+/* Active Priorities Register 1 */
+#define GIC_ICCAPR1_
+/* Active Priorities Register 2 */
+#define GIC_ICCAPR2_
+/* Active Priorities Register 3 */
+#define GIC_ICCAPR3_
+/* Active Priorities Register 4 */
+#define GIC_ICCAPR4_
+/* Non-secure Active Priorities Register 1 */
+#define GIC_ICCNSAPR1_
+/* Non-secure Active Priorities Register 2 */
+#define GIC_ICCNSAPR2_
+/* Non-secure Active Priorities Register 3 */
+#define GIC_ICCNSAPR3_
+/* Non-secure Active Priorities Register 4 */
+#define GIC_ICCNSAPR4_
+
 /* CPU Interface Implementer ID Register */
 
 #define GIC_ICCIDR_IMPL_SHIFT      (0)       /* Bits 0-11:  Implementer */
@@ -325,6 +398,9 @@
 #define GIC_ICCIDR_ARCHNO_MASK     (15 << GIC_ICCIDR_ARCHNO_SHIFT)
 #define GIC_ICCIDR_PARTNO_SHIFT    (20)      /* Bits 20-31: Part number */
 #define GIC_ICCIDR_PARTNO_MASK     (0xfff << GIC_ICCIDR_PARTNO_SHIFT)
+
+/* Deactivate Interrupt Register */
+#define GIC_ICCDIR_
 
 /* Distributor Registers */
 /* Distributor Control Register -- without security extensions */
@@ -384,9 +460,13 @@
 
 #define GIC_ICDICPR_INT(n)         GIC_MASK32(n)
 
-/* Interrupt Active Bit */
+/* GICv2 Interrupt Set-Active Registers */
 
-#define GIC_ICDABR_INT(n)          GIC_MASK32(n)
+#define GIC_ICDSAR_INT(n)          GIC_MASK32(n)
+
+/* Interrupt Clear-Active Registers */
+
+#define GIC_ICDCAR_INT(n)          GIC_MASK32(n)
 
 /* Interrupt Priority Registers */
 
@@ -427,7 +507,11 @@
 
 /* SPI Status Registers */
 
-#define GIC_ICDSPISR_INT(n)         GIC_MASK32(n)
+#define GIC_ICDSPISR_INT(n)        GIC_MASK32(n)
+
+/* Non-secure Access Control Registers, optional */
+
+#define GIC_ICDNSACR_INT(n)        GIC_MASK32(n)
 
 /* Software Generated Interrupt Register */
 
@@ -444,6 +528,11 @@
 #  define GIC_ICDSGIR_TGTFILTER_LIST  (0 << GIC_ICDSGIR_TGTFILTER_SHIFT) /* Interrupt sent to CPUs CPU target list */
 #  define GIC_ICDSGIR_TGTFILTER_OTHER (1 << GIC_ICDSGIR_TGTFILTER_SHIFT) /* Interrupt is sent to all but requesting CPU */
 #  define GIC_ICDSGIR_TGTFILTER_THIS  (2 << GIC_ICDSGIR_TGTFILTER_SHIFT) /* Interrupt is sent to requesting CPU only */
+
+/* SGI Clear-Pending Registers */
+#define GIC_ICDSCPR_
+/* SGI Set-Pending Registers */
+#define GIC_ICDSSPR_
 
 /* Interrupt IDs ************************************************************/
 /* The Global Interrupt Controller (GIC) collects up to 224 interrupt

@@ -42,8 +42,10 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdint.h>
+#include <syslog.h>
 #include <assert.h>
 #include <errno.h>
+#include <debug.h>
 
 #include <nuttx/arch.h>
 #include <arch/irq.h>
@@ -55,7 +57,7 @@
 #ifdef CONFIG_ARMV7A_HAVE_GICv2
 
 /****************************************************************************
- * Public Functions
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -86,6 +88,275 @@ static inline unsigned int arm_gic_nlines(void)
 }
 
 /****************************************************************************
+ * Name: arm_gic_dump_cpu
+ *
+ * Description:
+ *   Dump CPU interface registers.
+ *
+ * Input Parameters:
+ *   all - True: Dump all IRQs; False: Dump only registers for this IRQ
+ *   irq - if all == false, then dump only this IRQ.
+ *   nlines - Number of interrupts to dump if all == true;
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DEBUG_IRQ
+static inline void arm_gic_dump_cpu(bool all, int irq, int nlines)
+{
+  lowsyslog(LOG_INFO, "  CPU Interface Registers:\n");
+  lowsyslog(LOG_INFO, "       ICR: %08x    PMR: %08x    BPR: %08x    IAR: %08x\n",
+            getreg32(GIC_ICCICR), getreg32(GIC_ICCPMR),
+            getreg32(GIC_ICCBPR), getreg32(GIC_ICCIAR));
+  lowsyslog(LOG_INFO, "       RPR: %08x   HPIR: %08x   ABPR: %08x\n",
+            getreg32(GIC_ICCRPR), getreg32(GIC_ICCHPIR),
+            getreg32(GIC_ICCABPR));
+  lowsyslog(LOG_INFO, "      AIAR: %08x  AHPIR: %08x    IDR: %08x\n",
+            getreg32(GIC_ICCAIAR), getreg32(GIC_ICCAHPIR),
+            getreg32(GIC_ICCIDR));
+  lowsyslog(LOG_INFO, "      APR1: %08x   APR2: %08x   APR3: %08x   APR4: %08x\n",
+            getreg32(GIC_ICCAPR1), getreg32(GIC_ICCAPR2),
+            getreg32(GIC_ICCAPR3), getreg32(GIC_ICCAPR4));
+  lowsyslog(LOG_INFO, "    NSAPR1: %08x NSAPR2: %08x NSAPR3: %08x NSAPR4: %08x\n",
+            getreg32(GIC_ICCNSAPR1), getreg32(GIC_ICCNSAPR2),
+            getreg32(GIC_ICCNSAPR3), getreg32(GIC_ICCNSAPR4));
+}
+#endif
+
+/****************************************************************************
+ * Name: arm_gic_dumpregs
+ *
+ * Description:
+ *   Dump registers with 4x8-bit per interrupt
+ *
+ * Input Parameters:
+ *   regaddr - First register address
+ *   nlines  - Number of interrupt lines
+ *   incr    - IRQs per 32-bit word
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DEBUG_IRQ
+static void arm_gic_dumpregs(uintptr_t regaddr, int nlines, int incr)
+{
+  unsigned int i;
+
+  incr <<= 2;
+  for (i = 0; i < nlines; i += incr)
+    {
+      lowsyslog(LOG_INFO, "         %08x %08x %08x %08x\n",
+                getreg32(regaddr), getreg32(regaddr + 4),
+                getreg32(regaddr + 8), getreg32(regaddr + 12));
+    }
+}
+#endif
+
+/****************************************************************************
+ * Name: arm_gic_dump4
+ *
+ * Description:
+ *   Dump registers with 4x8-bit per interrupt
+ *
+ * Input Parameters:
+ *   name    - Register name
+ *   regaddr - First register address
+ *   nlines  - Number of interrupt lines
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DEBUG_IRQ
+static inline void arm_gic_dump4(const char *name, uintptr_t regaddr,
+                                 int nlines)
+{
+  lowsyslog(LOG_INFO, "       %s\n", name);
+  arm_gic_dumpregs(regaddr, nlines, 4);
+}
+#endif
+
+/****************************************************************************
+ * Name: arm_gic_dump8
+ *
+ * Description:
+ *   Dump registers with 8x4-bit per interrupt
+ *
+ * Input Parameters:
+ *   name    - Register name
+ *   regaddr - First register address
+ *   nlines  - Number of interrupt lines
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DEBUG_IRQ
+static inline void arm_gic_dump8(const char *name, uintptr_t regaddr,
+                                 int nlines)
+{
+  lowsyslog(LOG_INFO, "       %s\n", name);
+  arm_gic_dumpregs(regaddr, nlines, 8);
+}
+#endif
+
+/****************************************************************************
+ * Name: arm_gic_dump16
+ *
+ * Description:
+ *   Dump registers with 16 x 2-bit per interrupt
+ *
+ * Input Parameters:
+ *   name    - Register name
+ *   regaddr - First register address
+ *   nlines  - Number of interrupt lines
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DEBUG_IRQ
+static inline void arm_gic_dump16(const char *name, uintptr_t regaddr,
+                                  int nlines)
+{
+  lowsyslog(LOG_INFO, "       %s\n", name);
+  arm_gic_dumpregs(regaddr, nlines, 16);
+}
+#endif
+
+/****************************************************************************
+ * Name: arm_gic_dump32
+ *
+ * Description:
+ *   Dump registers with 32 x 1-bit per interrupt
+ *
+ * Input Parameters:
+ *   name    - Register name
+ *   regaddr - First register address
+ *   nlines  - Number of interrupt lines
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DEBUG_IRQ
+static inline void arm_gic_dump32(const char *name, uintptr_t regaddr,
+                                  int nlines)
+{
+  lowsyslog(LOG_INFO, "       %s\n", name);
+  arm_gic_dumpregs(regaddr, nlines, 32);
+}
+#endif
+
+/****************************************************************************
+ * Name: arm_gic_dump_distributor
+ *
+ * Description:
+ *   Dump distributor interface registers.
+ *
+ * Input Parameters:
+ *   all    - True: Dump all IRQs; False: Dump only registers for this IRQ
+ *   irq    - if all == false, then dump only this IRQ.
+ *   nlines - Number of interrupts to dump if all == true;
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DEBUG_IRQ
+static inline void arm_gic_dump_distributor(bool all, int irq, int nlines)
+{
+  lowsyslog(LOG_INFO, "  Distributor Registers:\n");
+  lowsyslog(LOG_INFO, "       DCR: %08x   ICTR:   %08x IIDR: %08x  PPISR: %08x\n",
+        getreg32(GIC_ICDDCR), getreg32(GIC_ICDICTR),
+        getreg32(GIC_ICDIIDR), getreg32(GIC_ICDPPISR));
+
+  if (all)
+    {
+      arm_gic_dump32("ISR:",  GIC_ICDISR(0),  nlines);
+      arm_gic_dump32("ISER/ICER:", GIC_ICDISER(0), nlines);
+      arm_gic_dump32("ISPR/ICPR:", GIC_ICDISPR(0), nlines);
+      arm_gic_dump32("SAR/CAR:", GIC_ICDSAR(0), nlines);
+      arm_gic_dump4("IPR:", GIC_ICDIPR(0), nlines);
+      arm_gic_dump4("IPTR:", GIC_ICDIPTR(0), nlines);
+      arm_gic_dump16("ICFR:", GIC_ICDICFR(0), nlines);
+      arm_gic_dump32("SPISR:", GIC_ICDSPISR(0), nlines);
+      arm_gic_dump32("NSACR:", GIC_ICDNSACR(0), nlines);
+      arm_gic_dump8("SCPR/SSPR:", GIC_ICDSCPR(0), nlines);
+    }
+  else
+    {
+      lowsyslog(LOG_INFO, "       ISR: %08x   ISER:   %08x ISPR: %08x    SAR: %08x\n",
+                getreg32(GIC_ICDISR(irq)), getreg32(GIC_ICDISER(irq)),
+                getreg32(GIC_ICDISPR(irq)), getreg32(GIC_ICDSAR(irq)));
+      lowsyslog(LOG_INFO, "       IPR: %08x   IPTR:   %08x ICFR: %08x  SPISR: %08x\n",
+                getreg32(GIC_ICDIPR(irq)), getreg32(GIC_ICDIPTR(irq)),
+                getreg32(GIC_ICDICFR(irq)), getreg32(GIC_ICDSPISR(irq)));
+      lowsyslog(LOG_INFO, "       DCR: %08x   ICTR:   %08x IIDR: %08x  PPISR: %08x\n",
+                getreg32(GIC_ICDNSACR(irq)), getreg32(GIC_ICDSCPR(irq)));
+    }
+
+  lowsyslog(LOG_INFO, "       PIDR:\n");
+  lowsyslog(LOG_INFO, "         %08x %08x %08x %08x\n",
+            getreg32(GIC_ICDPIDR(0)), getreg32(GIC_ICDPIDR(1)),
+            getreg32(GIC_ICDPIDR(2)), getreg32(GIC_ICDPIDR(3)));
+  lowsyslog(LOG_INFO, "         %08x %08x %08x %08x\n",
+            getreg32(GIC_ICDPIDR(4)), getreg32(GIC_ICDPIDR(5)),
+            getreg32(GIC_ICDPIDR(6)));
+  lowsyslog(LOG_INFO, "       CIDR:\n");
+  lowsyslog(LOG_INFO, "         %08x %08x %08x %08x\n",
+            getreg32(GIC_ICDCIDR(0)), getreg32(GIC_ICDCIDR(1)),
+            getreg32(GIC_ICDCIDR(2)), getreg32(GIC_ICDCIDR(3)));
+}
+#endif
+
+/****************************************************************************
+ * Name: arm_gic_dump
+ *
+ * Description:
+ *   Return the number of interrupt lines supported by this GIC
+ *   implementation (include both PPIs (32) and SPIs).
+ *
+ * Input Parameters:
+ *   all - True: Dump all IRQs; False: Dump only registers for this IRQ
+ *   irq - if all == false, then dump only this IRQ.
+ *
+ * Returned Value:
+ *   The number of interrupt lines.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DEBUG_IRQ
+static void arm_gic_dump(const char *msg, bool all, int irq)
+{
+  unsigned int nlines = arm_gic_nlines();
+
+  if (all)
+    {
+      lowsyslog(LOG_INFO, "GIC: %s NLINES=%u\n", msg, nlines);
+    }
+  else
+    {
+      lowsyslog(LOG_INFO, "GIC: %s IRQ=%d\n", msg, irq);
+    }
+
+  arm_gic_dump_cpu(all, irq, nlines);
+  arm_gic_dump_distributor(all, irq, nlines);
+}
+#else
+#  define arm_gic_dump(m,a,i)
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -109,6 +380,8 @@ void arm_gic0_initialize(void)
 {
   unsigned int nlines = arm_gic_nlines();
   unsigned int irq;
+
+  arm_gic_dump("Entry arm_gic0_initialize", true, 0);
 
   /* Initialize SPIs.  The following should be done only by CPU0. */
 
@@ -150,6 +423,8 @@ void arm_gic0_initialize(void)
   DEBUGVERIFY(irq_attach(GIC_IRQ_SGI1, arm_start_handler));
   DEBUGVERIFY(irq_attach(GIC_IRQ_SGI2, arm_pause_handler));
 #endif
+
+  arm_gic_dump("Exit arm_gic0_initialize", true, 0);
 }
 
 /****************************************************************************
@@ -170,6 +445,8 @@ void arm_gic_initialize(void)
 {
   uint32_t iccicr;
   uint32_t icddcr;
+
+  arm_gic_dump("Entry arm_gic_initialize", true, 0);
 
   /* Initialize PPIs.  The following steps need to be done by all CPUs */
 
@@ -353,6 +630,7 @@ void arm_gic_initialize(void)
    */
 
   putreg32(icddcr, GIC_ICDDCR);
+  arm_gic_dump("Exit arm_gic_initialize", true, 0);
 }
 
 /****************************************************************************
@@ -434,6 +712,8 @@ void up_enable_irq(int irq)
 
       regaddr = GIC_ICDISER(irq);
       putreg32(GIC_ICDISER_INT(irq), regaddr);
+
+      arm_gic_dump("Exit up_enable_irq", false, irq);
     }
 }
 
@@ -468,6 +748,8 @@ void up_disable_irq(int irq)
 
       regaddr = GIC_ICDICER(irq);
       putreg32(GIC_ICDICER_INT(irq), regaddr);
+
+      arm_gic_dump("Exit up_disable_irq", false, irq);
     }
 }
 
@@ -503,6 +785,7 @@ int up_prioritize_irq(int irq, int priority)
       regval  |= GIC_ICDIPR_ID(irq, priority);
       putreg32(regval, regaddr);
 
+      arm_gic_dump("Exit up_prioritize_irq", false, irq);
       return OK;
     }
 
