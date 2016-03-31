@@ -124,14 +124,6 @@ static int stm32l4_rnginitialize(void)
       return -EAGAIN;
     }
 
-  /* Enable interrupts */
-
-  regval = getreg32(STM32L4_RNG_CR);
-  regval |=  RNG_CR_IE;
-  putreg32(regval, STM32L4_RNG_CR);
-
-  up_enable_irq(STM32L4_IRQ_RNG);
-
   return OK;
 }
 
@@ -141,29 +133,26 @@ static void stm32l4_rngenable(void)
 
   g_rngdev.rd_first = true;
 
-  regval = getreg32(STM32L4_RNG_CR);
+  /* Enable generation and interrupts */
+
+  regval  = getreg32(STM32L4_RNG_CR);
   regval |= RNG_CR_RNGEN;
+  regval |= RNG_CR_IE;
   putreg32(regval, STM32L4_RNG_CR);
 
-  /* XXX see stm32l4_rngdisable(), below; if interrupts are disabled there,
-   * then they should also be enabled here (also, they should not be enabled
-   * in stm32l4_rnginitialize())
-   */
+  up_enable_irq(STM32L4_IRQ_RNG);
 }
 
 static void stm32l4_rngdisable()
 {
   uint32_t regval;
-  regval = getreg32(STM32L4_RNG_CR);
+
+  up_disable_irq(STM32L4_IRQ_RNG);
+
+  regval  =  getreg32(STM32L4_RNG_CR);
+  regval &= ~RNG_CR_IE;
   regval &= ~RNG_CR_RNGEN;
   putreg32(regval, STM32L4_RNG_CR);
-
-  /* XXX I believe it's appropriate to also disable the interrupt, and clear
-   * any interrupt pending bit.  This 'disable' is called from within the
-   * interrupt handler when the buffer has been finally filled, but if there
-   * is still another interrupt pending, then the handler will be entered one
-   * last time, and attempt to touch some now-invalid objects
-   */
 }
 
 static int stm32l4_rnginterrupt(int irq, void *context)
