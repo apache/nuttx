@@ -36,8 +36,10 @@ configuration described below except that it does not have the 10.1" LVDS
 display.  Next step:  Figure out how to run a copy of NuttX using U-Boot.
 
 2016-03-31: Most all of the boot of the NSH configuration seems to be
-working.  It gets to NSH and NSH appears to run normally.  However, there is
-no output on the UART1 VCOM.
+working.  It gets to NSH and NSH appears to run normally.  Non-interrupt
+driver serial output to the VCOM console is working (llsyslog).  However,
+there does not appear to be any interrupt activity:  No timer interrupts,
+no interrupt driver serial console output (syslog, printf).
 
 Platform Features
 =================
