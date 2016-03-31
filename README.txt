@@ -1483,9 +1483,6 @@ nuttx/
  |   |   `- README.txt
  |   |- viewtool-stm32f107/
  |   |   `- README.txt
- |   |- vsn/
- |   |   |- src/README.txt
- |   |   `- README.txt
  |   |- xtrs/
  |   |   `- README.txt
  |   |- z16f2800100zcog/

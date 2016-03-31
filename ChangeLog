@@ -11594,3 +11594,7 @@
 	  will allow separate control for certain power management groups.  For
 	  example, a network can be shut down without affect an ongoing UI (and
 	  vice versa) (2016-03-27).
+	* apps/configs/vsn:  Removed the VSN configuration from the main NuttX
+	  repository.  The VSN can still be found in the Obsoleted repository
+	  (along with a full explanation in the README file there) (2016-03-29).
+
