@@ -276,7 +276,7 @@ static inline void arm_gic_dump32(const char *name, uintptr_t regaddr,
 static inline void arm_gic_dump_distributor(bool all, int irq, int nlines)
 {
   lowsyslog(LOG_INFO, "  Distributor Registers:\n");
-  lowsyslog(LOG_INFO, "       DCR: %08x   ICTR:   %08x IIDR: %08x  PPISR: %08x\n",
+  lowsyslog(LOG_INFO, "       DCR: %08x   ICTR: %08x   IIDR: %08x  PPISR: %08x\n",
         getreg32(GIC_ICDDCR), getreg32(GIC_ICDICTR),
         getreg32(GIC_ICDIIDR), getreg32(GIC_ICDPPISR));
 
@@ -295,13 +295,13 @@ static inline void arm_gic_dump_distributor(bool all, int irq, int nlines)
     }
   else
     {
-      lowsyslog(LOG_INFO, "       ISR: %08x   ISER:   %08x ISPR: %08x    SAR: %08x\n",
+      lowsyslog(LOG_INFO, "       ISR: %08x   ISER: %08x   ISPR: %08x    SAR: %08x\n",
                 getreg32(GIC_ICDISR(irq)), getreg32(GIC_ICDISER(irq)),
                 getreg32(GIC_ICDISPR(irq)), getreg32(GIC_ICDSAR(irq)));
-      lowsyslog(LOG_INFO, "       IPR: %08x   IPTR:   %08x ICFR: %08x  SPISR: %08x\n",
+      lowsyslog(LOG_INFO, "       IPR: %08x   IPTR: %08x   ICFR: %08x  SPISR: %08x\n",
                 getreg32(GIC_ICDIPR(irq)), getreg32(GIC_ICDIPTR(irq)),
                 getreg32(GIC_ICDICFR(irq)), getreg32(GIC_ICDSPISR(irq)));
-      lowsyslog(LOG_INFO, "       DCR: %08x   ICTR:   %08x IIDR: %08x  PPISR: %08x\n",
+      lowsyslog(LOG_INFO, "     NSACR: %08x   SCPR: %08x\n",
                 getreg32(GIC_ICDNSACR(irq)), getreg32(GIC_ICDSCPR(irq)));
     }
 
