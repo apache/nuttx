@@ -46,6 +46,7 @@
 #include <arch/irq.h>
 
 #include "up_arch.h"
+#include "chip/imx_ccm.h"
 #include "chip/imx_gpt.h"
 
 /****************************************************************************
@@ -143,11 +144,23 @@ int up_timerisr(int irq, uint32_t *regs)
 
 void up_timer_initialize(void)
 {
+  uint32_t regval;
   uint32_t cr;
 
   /* Disable GPT interrupts at the GIC */
 
   up_disable_irq(IMX_IRQ_GPT);
+
+  /* Make certain that the ipg_clock and ipg_clk_highfreq are enabled for
+   * the GPT module.  Here we set BOTH the ipg_clk and ipg_clk_highfreq so
+   * that clocking is on in all modes (except STOP).
+   */
+
+  regval  = getreg32(IMX_CCM_CCGR1);
+  regval &= ~(CCM_CCGR1_CG10_MASK | CCM_CCGR1_CG11_MASK);
+  regval |= (CCM_CCGR1_CG10(CCM_CCGR_ALLMODES) |
+             CCM_CCGR1_CG11(CCM_CCGR_ALLMODES));
+  putreg32(regval, IMX_CCM_CCGR1);
 
   /* Disable GPT by setting EN=0 in GPT_CR register */
 

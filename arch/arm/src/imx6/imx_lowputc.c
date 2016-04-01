@@ -165,14 +165,15 @@ void imx_lowsetup(void)
 #ifdef IMX_HAVE_UART
   uint32_t regval;
 
-  /* Make certain that the ipg_perclk is enabled.  The ipg_clk should already
-   * have been enabled.  Here we set BOTH the ipg_clk and ipg_perclk so that
-   * clocking is on in all modes (except STOP).
+  /* Make certain that the ipg_clock and ipg_perclk are enabled for the UART
+   * modules.  Here we set BOTH the ipg_clk and ipg_perclk so that clocking
+   * is on in all modes (except STOP).
    */
 
   regval  = getreg32(IMX_CCM_CCGR5);
   regval &= ~(CCM_CCGR5_CG12_MASK | CCM_CCGR5_CG13_MASK);
-  regval |= (CCM_CCGR5_CG12(CCM_CCGR_ALLMODES) | CCM_CCGR5_CG13(CCM_CCGR_ALLMODES));
+  regval |= (CCM_CCGR5_CG12(CCM_CCGR_ALLMODES) |
+             CCM_CCGR5_CG13(CCM_CCGR_ALLMODES));
   putreg32(regval, IMX_CCM_CCGR5);
 
 #ifdef CONFIG_IMX6_UART1

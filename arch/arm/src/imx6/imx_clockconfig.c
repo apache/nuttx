@@ -60,8 +60,6 @@
 
 void imx_clockconfig(void)
 {
-  uint32_t regval;
-
   /* Don't change the current basic clock configuration if we are running
    * from SDRAM.  In this case, some bootloader logic has already configured
    * clocking and SDRAM.  We are pretty much committed to using things the
@@ -77,11 +75,4 @@ void imx_clockconfig(void)
 #ifndef CONFIG_IMX6_BOOT_SDRAM
 #  warning Missing logic
 #endif
-
-  /* Make certain that the ipg_clk is enabled */
-
-  regval  = getreg32(IMX_CCM_CCGR5);
-  regval &= ~(CCM_CCGR5_CG12_MASK);
-  regval |= CCM_CCGR5_CG12(CCM_CCGR_ALLMODES);
-  putreg32(regval, IMX_CCM_CCGR5);
 }
