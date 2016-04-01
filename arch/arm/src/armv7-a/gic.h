@@ -49,8 +49,12 @@
  ****************************************************************************/
 
 #include "nuttx/config.h"
+
+#include <sys/types.h>
 #include <stdint.h>
+
 #include "mpcore.h"
+#include "up_arch.h"
 
 #ifdef CONFIG_ARMV7A_HAVE_GICv2
 
@@ -588,17 +592,100 @@
 
 #define GIC_IRQ_SPI              32  /* First SPI interrupt ID */
 
+/* General Macro Definitions ************************************************/
+/* Debug */
+
+#ifdef CONFIG_DEBUG_IRQ
+#  define gicdbg(format, ...)    dbg(format, ##__VA_ARGS__)
+#  define giclldbg(format, ...)  lldbg(format, ##__VA_ARGS__)
+#  define gicvdbg(format, ...)   vdbg(format, ##__VA_ARGS__)
+#  define gicllvdbg(format, ...) llvdbg(format, ##__VA_ARGS__)
+#else
+#  define gicdbg(x...)
+#  define giclldbg(x...)
+#  define gicvdbg(x...)
+#  define gicllvdbg(x...)
+#endif
+
+/****************************************************************************
+ * Inline Functions
+ ****************************************************************************/
+
+#ifndef __ASSEMBLY__
+
+/****************************************************************************
+ * Name: arm_gic_nlines
+ *
+ * Description:
+ *   Return the number of interrupt lines supported by this GIC
+ *   implementation (include both PPIs (32) and SPIs).
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   The number of interrupt lines.
+ *
+ ****************************************************************************/
+
+static inline unsigned int arm_gic_nlines(void)
+{
+  uint32_t regval;
+  uint32_t field;
+
+  /* Get the number of interrupt lines. */
+
+  regval = getreg32(GIC_ICDICTR);
+  field  = (regval & GIC_ICDICTR_ITLINES_MASK) >> GIC_ICDICTR_ITLINES_SHIFT;
+  return (field + 1) << 5;
+}
+
+/****************************************************************************
+ * Name: arm_cpu_sgi
+ *
+ * Description:
+ *   Perform a Software Generated Interrupt (SGI).  If CONFIG_SMP is
+ *   selected, then the SGI is sent to all CPUs specified in the CPU set.
+ *   That set may include the current CPU.
+ *
+ *   If CONFIG_SMP is not selected, the cpuset is ignored and SGI is sent
+ *   only to the current CPU.
+ *
+ * Input Paramters
+ *   sgi    - The SGI interrupt ID (0-15)
+ *   cpuset - The set of CPUs to receive the SGI
+ *
+ * Returned Value:
+ *   OK is always returned at present.
+ *
+ ****************************************************************************/
+
+static inline int arm_cpu_sgi(int sgi, unsigned int cpuset)
+{
+  uint32_t regval;
+
+#ifdef CONFIG_SMP
+  regval = GIC_ICDSGIR_INTID(sgi) |  GIC_ICDSGIR_CPUTARGET(cpuset) |
+           GIC_ICDSGIR_TGTFILTER_LIST;
+#else
+  regval = GIC_ICDSGIR_INTID(sgi) |  GIC_ICDSGIR_CPUTARGET(0) |
+           GIC_ICDSGIR_TGTFILTER_THIS;
+#endif
+
+  putreg32(regval, GIC_ICDSGIR);
+  return OK;
+}
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
-#ifndef __ASSEMBLY__
 #ifdef __cplusplus
-#define EXTERN extern "C"
+#  define EXTERN extern "C"
 extern "C"
 {
 #else
-#define EXTERN extern
+#  define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -653,28 +740,6 @@ void arm_gic_initialize(void);
 uint32_t *arm_decodeirq(uint32_t *regs);
 
 /****************************************************************************
- * Name: arm_cpu_sgi
- *
- * Description:
- *   Perform a Software Generated Interrupt (SGI).  If CONFIG_SMP is
- *   selected, then the SGI is sent to all CPUs specified in the CPU set.
- *   That set may include the current CPU.
- *
- *   If CONFIG_SMP is not selected, the cpuset is ignored and SGI is sent
- *   only to the current CPU.
- *
- * Input Paramters
- *   sgi    - The SGI interrupt ID (0-15)
- *   cpuset - The set of CPUs to receive the SGI
- *
- * Returned Value:
- *   OK is always retured at present.
- *
- ****************************************************************************/
-
-int arm_cpu_sgi(int sgi, unsigned int cpuset);
-
-/****************************************************************************
  * Name: arm_start_handler
  *
  * Description:
@@ -716,6 +781,28 @@ int arm_start_handler(int irq, FAR void *context);
 
 #ifdef CONFIG_SMP
 int arm_pause_handler(int irq, FAR void *context);
+#endif
+
+/****************************************************************************
+ * Name: arm_gic_dump
+ *
+ * Description:
+ *   Dump GIC registers to the SYSLOG device
+ *
+ * Input Parameters:
+ *   msg - Message to print with the register data
+ *   all - True: Dump all IRQs; False: Dump only registers for this IRQ
+ *   irq - if all == false, then dump only this IRQ.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DEBUG_IRQ
+void arm_gic_dump(const char *msg, bool all, int irq);
+#else
+#  define arm_gic_dump(m,a,i)
 #endif
 
 #undef EXTERN

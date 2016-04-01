@@ -80,6 +80,10 @@ ifeq ($(CONFIG_SMP),y)
 CMN_CSRCS += arm_cpuindex.c arm_cpustart.c arm_cpupause.c
 endif
 
+ifeq ($(CONFIG_DEBUG_IRQ),y)
+CMN_CSRCS += arm_gicv2_dump.c
+endif
+
 # Use common heap allocation for now (may need to be customized later)
 
 CMN_CSRCS += up_allocateheap.c
