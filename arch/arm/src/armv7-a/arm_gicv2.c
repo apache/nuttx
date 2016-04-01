@@ -86,9 +86,9 @@ void arm_gic0_initialize(void)
    *
    * 1. Which interrupts are non-secure (ICDISR).  All set to zero (group
    *    0).
-   * 2. Trigger mode of the SPI (ICDICFR). All fields set to 11->Edge
-   *    sensitive.
-   * 3. Innterrupt Clear-Enable (ICDICER)
+   * 2. Trigger mode of the SPI (ICDICFR). All fields set to 0b01->Level
+   *    sensitive, 1-N model.
+   * 3. Interrupt Clear-Enable (ICDICER)
    * 3. Priority of the SPI using the priority set register (ICDIPR).
    *    Priority values are 8-bit unsigned binary. A GIC supports a
    *    minimum of 16 and a maximum of 256 priority levels. Here all
@@ -101,7 +101,7 @@ void arm_gic0_initialize(void)
 
   for (irq = GIC_IRQ_SPI; irq < nlines; irq += 32)
     {
-      putreg32(0x00000000, GIC_ICDISR(irq));   /* SPIs secure */
+      putreg32(0x00000000, GIC_ICDISR(irq));   /* SPIs group 0 */
       putreg32(0xffffffff, GIC_ICDICER(irq));  /* SPIs disabled */
     }
 
@@ -109,7 +109,8 @@ void arm_gic0_initialize(void)
 
   for (irq = GIC_IRQ_SPI; irq < nlines; irq += 16)
     {
-      putreg32(0xffffffff, GIC_ICDICFR(irq));  /* SPIs edge triggered */
+    //putreg32(0xffffffff, GIC_ICDICFR(irq));  /* SPIs edge sensitive */
+      putreg32(0x55555555, GIC_ICDICFR(irq));  /* SPIs level sensitive */
     }
 
   /* Registers with 8-bits per interrupt */
