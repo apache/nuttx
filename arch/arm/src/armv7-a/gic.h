@@ -184,12 +184,10 @@
 
 /* 0x0d00-0x0dfc: Implementation defined */
 /* PPI Status Register: 0x0d00 */
-
-#define GIC_ICDPPISR_OFFSET        0x0d00    /* PPI Status Register */
-
 /* SPI Status Registers: 0x0d04-0x0d1c */
 
-#define GIC_ICDSPISR_OFFSET(n)     (0x0d04 + GIC_OFFSET32(n))
+#define GIC_ICDPPISR_OFFSET        0x0d00    /* PPI Status Register */
+#define GIC_ICDSPISR_OFFSET(n)     (0x0d00 + GIC_OFFSET32(n))
 
 /* 0x0d80-0x0dfc: Reserved */
 /* Non-secure Access Control Registers, optional: 00xe00-0x0efc */
@@ -290,7 +288,7 @@
 #define GIC_ICCICRU_FIQBYPDISGRP1  (1 << 5)  /* Bit 5:  FIQ disabled for CPU Group 1*/
 #define GIC_ICCICRU_IRQBYPDISGRP1  (1 << 6)  /* Bit 6:  IRQ disabled for CPU Group 1*/
                                              /* Bits 7-8: Reserved */
-#define GIC_ICCICRU_EOIMODENS      (1 << 9)  /* Bit 6:  Control EIOIR access (non-secure) */
+#define GIC_ICCICRU_EOIMODENS      (1 << 9)  /* Bit 9:  Control EIOIR access (non-secure) */
                                              /* Bits 10-31: Reserved */
 /* CPU Interface Control Register -- with security extensions, secure copy */
 

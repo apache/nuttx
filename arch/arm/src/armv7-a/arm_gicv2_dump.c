@@ -227,9 +227,9 @@ static inline void arm_gic_dump32(const char *name, uintptr_t regaddr,
 static inline void arm_gic_dump_distributor(bool all, int irq, int nlines)
 {
   lowsyslog(LOG_INFO, "  Distributor Registers:\n");
-  lowsyslog(LOG_INFO, "       DCR: %08x   ICTR: %08x   IIDR: %08x  PPISR: %08x\n",
+  lowsyslog(LOG_INFO, "       DCR: %08x   ICTR: %08x   IIDR: %08x\n",
         getreg32(GIC_ICDDCR), getreg32(GIC_ICDICTR),
-        getreg32(GIC_ICDIIDR), getreg32(GIC_ICDPPISR));
+        getreg32(GIC_ICDIIDR));
 
   if (all)
     {
@@ -240,7 +240,7 @@ static inline void arm_gic_dump_distributor(bool all, int irq, int nlines)
       arm_gic_dump4("IPR", GIC_ICDIPR(0), nlines);
       arm_gic_dump4("IPTR", GIC_ICDIPTR(0), nlines);
       arm_gic_dump16("ICFR", GIC_ICDICFR(0), nlines);
-      arm_gic_dump32("SPISR", GIC_ICDSPISR(0), nlines);
+      arm_gic_dump32("PPSIR/SPISR", GIC_ICDPPISR, nlines);
       arm_gic_dump32("NSACR", GIC_ICDNSACR(0), nlines);
       arm_gic_dump8("SCPR/SSPR", GIC_ICDSCPR(0), nlines);
     }

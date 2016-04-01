@@ -84,8 +84,8 @@ void arm_gic0_initialize(void)
 
   /* A processor in Secure State sets:
    *
-   * 1. Which interrupts are non-secure (ICDISR).
-   *    REVISIT: Which bit state corresponds to secure?
+   * 1. Which interrupts are non-secure (ICDISR).  All set to zero (group
+   *    0).
    * 2. Trigger mode of the SPI (ICDICFR). All fields set to 11->Edge
    *    sensitive.
    * 3. Innterrupt Clear-Enable (ICDICER)
@@ -108,7 +108,7 @@ void arm_gic0_initialize(void)
 
   /* Registers with 8-bits per interrupt */
 
-  for (irq = GIC_IRQ_SPI; irq < nlines; irq += 8)
+  for (irq = GIC_IRQ_SPI; irq < nlines; irq += 4)
     {
       putreg32(0x80808080, GIC_ICDIPR(irq));   /* SPI priority */
       putreg32(0x01010101, GIC_ICDIPTR(irq));  /* SPI on CPU0 */
