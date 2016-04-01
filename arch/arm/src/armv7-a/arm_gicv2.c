@@ -102,8 +102,14 @@ void arm_gic0_initialize(void)
   for (irq = GIC_IRQ_SPI; irq < nlines; irq += 32)
     {
       putreg32(0x00000000, GIC_ICDISR(irq));   /* SPIs secure */
-      putreg32(0xffffffff, GIC_ICDICFR(irq));  /* SPIs edge triggered */
       putreg32(0xffffffff, GIC_ICDICER(irq));  /* SPIs disabled */
+    }
+
+  /* Registers with 2-bits per interrupt */
+
+  for (irq = GIC_IRQ_SPI; irq < nlines; irq += 16)
+    {
+      putreg32(0xffffffff, GIC_ICDICFR(irq));  /* SPIs edge triggered */
     }
 
   /* Registers with 8-bits per interrupt */
