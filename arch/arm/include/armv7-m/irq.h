@@ -127,7 +127,7 @@ struct xcptcontext
    * are pending signals to be processed.
    */
 
-  void *sigdeliver; /* Actual type is sig_deliver_t */
+  FAR void *sigdeliver; /* Actual type is sig_deliver_t */
 
   /* These are saved copies of LR, PRIMASK, and xPSR used during
    * signal processing.

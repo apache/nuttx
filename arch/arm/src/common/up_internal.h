@@ -176,6 +176,26 @@
 
 #endif
 
+/* Toolchain dependent, linker defined section addresses */
+
+#if defined(__ICCARM__)
+#  define _START_TEXT  __sfb(".text")
+#  define _END_TEXT    __sfe(".text")
+#  define _START_BSS   __sfb(".bss")
+#  define _END_BSS     __sfe(".bss")
+#  define _DATA_INIT   __sfb(".data_init")
+#  define _START_DATA  __sfb(".data")
+#  define _END_DATA    __sfe(".data")
+#else
+#  define _START_TEXT  &_stext
+#  define _END_TEXT    &_etext
+#  define _START_BSS   &_sbss
+#  define _END_BSS     &_ebss
+#  define _DATA_INIT   &_eronly
+#  define _START_DATA  &_sdata
+#  define _END_DATA    &_edata
+#endif
+
 /* This is the value used to mark the stack for subsequent stack monitoring
  * logic.
  */

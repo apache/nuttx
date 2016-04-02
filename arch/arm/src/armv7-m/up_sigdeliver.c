@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/armv7-m/up_sigdeliver.c
  *
- *   Copyright (C) 2009-2010, 2013-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010, 2013-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -118,7 +118,7 @@ void up_sigdeliver(void)
    * more signal deliveries while processing the current pending signals.
    */
 
-  sigdeliver           = rtcb->xcp.sigdeliver;
+  sigdeliver           = (sig_deliver_t)rtcb->xcp.sigdeliver;
   rtcb->xcp.sigdeliver = NULL;
 
   /* Then restore the task interrupt state */

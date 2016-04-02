@@ -58,24 +58,6 @@
 #endif
 
 /****************************************************************************
- * Pre-processor definitions
- ****************************************************************************/
-
-#if defined(__ICCARM__)
-#  define _START_BSS  __sfb(".bss")
-#  define _END_BSS    __sfe(".bss")
-#  define _DATA_INIT  __sfb(".data_init")
-#  define _START_DATA __sfb(".data")
-#  define _END_DATA   __sfe(".data")
-#else
-#  define _START_BSS  &_sbss
-#  define _END_BSS    &_ebss
-#  define _DATA_INIT  &_eronly
-#  define _START_DATA &_sdata
-#  define _END_DATA   &_edata
-#endif
-
-/****************************************************************************
  * Private Function prototypes
  ****************************************************************************/
 

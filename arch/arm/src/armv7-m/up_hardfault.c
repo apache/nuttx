@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/armv7-m/up_hardfault.c
  *
- *   Copyright (C) 2009, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -113,15 +113,15 @@ int up_hardfault(int irq, FAR void *context)
    * FLASH region or in the user FLASH region.
    */
 
-  if (((uintptr_t)pc >= (uintptr_t)&_stext &&
-       (uintptr_t)pc <  (uintptr_t)&_etext) ||
+  if (((uintptr_t)pc >= (uintptr_t)_START_TEXT &&
+       (uintptr_t)pc <  (uintptr_t)_END_TEXT) ||
       ((uintptr_t)pc >= (uintptr_t)USERSPACE->us_textstart &&
        (uintptr_t)pc <  (uintptr_t)USERSPACE->us_textend))
 #else
   /* SVCalls are expected only from the base, kernel FLASH region */
 
-  if ((uintptr_t)pc >= (uintptr_t)&_stext &&
-      (uintptr_t)pc <  (uintptr_t)&_etext)
+  if ((uintptr_t)pc >= (uintptr_t)_START_TEXT &&
+      (uintptr_t)pc <  (uintptr_t)_END_TEXT)
 #endif
     {
       /* Fetch the instruction that caused the Hard fault */

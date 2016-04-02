@@ -139,7 +139,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                * delivered.
                */
 
-              tcb->xcp.sigdeliver       = sigdeliver;
+              tcb->xcp.sigdeliver       = (FAR void *)sigdeliver;
               tcb->xcp.saved_pc         = CURRENT_REGS[REG_PC];
 #ifdef CONFIG_ARMV7M_USEBASEPRI
               tcb->xcp.saved_basepri    = CURRENT_REGS[REG_BASEPRI];
@@ -185,7 +185,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
            * by the signal trampoline after the signal has been delivered.
            */
 
-          tcb->xcp.sigdeliver       = sigdeliver;
+          tcb->xcp.sigdeliver       = (FAR void *)sigdeliver;
           tcb->xcp.saved_pc         = tcb->xcp.regs[REG_PC];
 #ifdef CONFIG_ARMV7M_USEBASEPRI
           tcb->xcp.saved_basepri    = tcb->xcp.regs[REG_BASEPRI];
