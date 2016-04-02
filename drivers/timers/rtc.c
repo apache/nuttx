@@ -349,43 +349,6 @@ static int rtc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       break;
 
 #ifdef CONFIG_RTC_ALARM
-    /* RTC_RD_ALARM reads the alarm time
-     *
-     * Argument: A writeable reference to struct rtc_rdalarm_s to receive the
-     *           current alarm settings.
-     */
-
-    case RTC_RD_ALARM:
-      {
-        FAR struct rtc_rdalarm_s *alarminfo =
-          (FAR struct rtc_rdalarm_s *)((uintptr_t)arg);
-        int alarmid;
-
-        DEBUGASSERT(alarminfo != NULL);
-        alarmid = alarminfo->id;
-        DEBUGASSERT(alarmid >= 0 && alarmid < RTC_NALARMS);
-
-        /* Is the alarm active? */
-
-        if (upper->alarminfo[alarmid].active)
-          {
-            /* Yes, read the alarm */
-
-            if (ops->rdalarm)
-              {
-                ret = ops->rdalarm(upper->lower, alarminfo);
-              }
-          }
-        else
-          {
-            /* No.. decline the request to return the time. */
-
-            alarminfo->active = false;
-            ret = OK;
-          }
-      }
-      break;
-
     /* RTC_SET_ALARM sets the alarm time.
      *
      * Argument: A read-only reference to a struct rtc_time containing the
@@ -413,17 +376,19 @@ static int rtc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
             if (ops->cancelalarm)
               {
-                ret = ops->cancelalarm(upper->lower, alarmid);
+                (void)ops->cancelalarm(upper->lower, alarmid);
               }
+
+            upperinfo->active = false;
           }
 
-        upperinfo->active = false;
         if (ops->setalarm)
           {
             /* Save the signal info to be used to notify the caller when the
              * alarm expires.
              */
 
+            upperinfo->active   = true;
             upperinfo->signo    = alarminfo->signo;
             upperinfo->pid      = alarminfo->pid;
             upperinfo->sigvalue = alarminfo->sigvalue;
@@ -438,9 +403,9 @@ static int rtc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             /* Then set the alarm */
 
             ret = ops->setalarm(upper->lower, &lowerinfo);
-            if (ret >= 0)
+            if (ret < 0)
               {
-                upperinfo->active = true;
+                upperinfo->active = false;
               }
           }
       }

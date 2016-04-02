@@ -143,28 +143,20 @@
 
 #define RTC_SET_TIME       _RTCIOC(0x0002)
 
-/* RTC_RD_ALARM reads the alarm time (for RTCs that support alarms)
- *
- * Argument: A writeable reference to a struct rtc_rdalarm_s to receive the RTC's
- *           alarm time.
- */
-
-#define RTC_RD_ALARM       _RTCIOC(0x0003)
-
 /* RTC_SET_ALARM sets the alarm time (for RTCs that support alarms).
  *
  * Argument: A read-only reference to a struct rtc_setalarm_s containing the
  *           new alarm time to be set.
  */
 
-#define RTC_SET_ALARM      _RTCIOC(0x0004)
+#define RTC_SET_ALARM      _RTCIOC(0x0003)
 
 /* RTC_WKALRM_CANCEL cancel the alarm.
  *
  * Argument: An ALARM ID value that indicates which alarm should be canceled.
  */
 
-#define RTC_CANCEL_ALARM   _RTCIOC(0x005)
+#define RTC_CANCEL_ALARM   _RTCIOC(0x004)
 
 /* Architecture-specific RTC IOCTLS should begin at RTC_USER_IOCBASE.  For
  * example:
@@ -174,7 +166,7 @@
  *   etc.
  */
 
-#define RTC_USER_IOCBASE   0x0006
+#define RTC_USER_IOCBASE   0x0005
 
 /****************************************************************************
  * Public Types
@@ -269,17 +261,12 @@ struct rtc_ops_s
                       FAR const struct rtc_time *rtctime);
 
 #ifdef CONFIG_RTC_ALARM
-  /* rdalarm reads the current alarm time */
-
-  CODE int (*rdalarm)(FAR struct rtc_lowerhalf_s *lower,
-                      FAR struct rtc_rdalarm_s *alarminfo);
- 
   /* setalarm sets up a new alarm. */
 
   CODE int (*setalarm)(FAR struct rtc_lowerhalf_s *lower,
                        FAR const struct lower_setalarm_s *alarminfo);
 
-  /* cancelalarm cancels the alarm. */
+  /* cancelalarm cancels the current alarm. */
 
   CODE int (*cancelalarm)(FAR struct rtc_lowerhalf_s *lower, int alarmid);
 #endif
