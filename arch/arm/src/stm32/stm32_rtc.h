@@ -2,7 +2,7 @@
  * arch/arm/src/stm32/stm32_rtc.h
  *
  *   Copyright (C) 2011 Uros Platise. All rights reserved.
- *   Copyright (C) 2011-2013, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2013, 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Uros Platise <uros.platise@isotel.eu> (Original for the F1)
  *           Gregory Nutt <gnutt@nuttx.org> (On-going support and development)
  *
@@ -64,6 +64,14 @@
 #  include "chip/stm32_rtcc.h"
 #endif
 
+/* Alarm function differs from part to part */
+
+#ifdef CONFIG_STM32_STM32F40XX
+#  include "stm32f40xxx_alarm.h"
+#else
+#  include "stm32_alarm.h"
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -76,10 +84,6 @@
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
-
-/* The form of an alarm callback */
-
-typedef CODE void (*alarmcb_t)(void);
 
 /****************************************************************************
  * Public Data
@@ -143,44 +147,6 @@ int stm32_rtc_getdatetime_with_subseconds(FAR struct tm *tp, FAR long *nsec);
 #ifdef CONFIG_RTC_DATETIME
 struct tm;
 int stm32_rtc_setdatetime(FAR const struct tm *tp);
-#endif
-
-/****************************************************************************
- * Name: stm32_rtc_setalarm
- *
- * Description:
- *   Set up an alarm.
- *
- * Input Parameters:
- *   tp - the time to set the alarm
- *   callback - the function to call when the alarm expires.
- *
- * Returned Value:
- *   Zero (OK) on success; a negated errno on failure
- *
- ****************************************************************************/
-
-#ifdef CONFIG_RTC_ALARM
-struct timespec;
-int stm32_rtc_setalarm(FAR const struct timespec *tp, alarmcb_t callback);
-#endif
-
-/****************************************************************************
- * Name: stm32_rtc_cancelalarm
- *
- * Description:
- *   Cancel a pending alarm alarm
- *
- * Input Parameters:
- *   none
- *
- * Returned Value:
- *   Zero (OK) on success; a negated errno on failure
- *
- ****************************************************************************/
-
-#ifdef CONFIG_RTC_ALARM
-int stm32_rtc_cancelalarm(void);
 #endif
 
 /****************************************************************************

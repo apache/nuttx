@@ -1,8 +1,10 @@
 /****************************************************************************
- * arch/arm/src/stm32/stm32_rtc.c
+ * arch/arm/src/stm32/stm32_alarm.h
  *
- *   Copyright (C) 2011, 2015 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2011 Uros Platise. All rights reserved.
+ *   Copyright (C) 2011-2013, 2015-2016 Gregory Nutt. All rights reserved.
+ *   Author: Uros Platise <uros.platise@isotel.eu> (Original for the F1)
+ *           Gregory Nutt <gnutt@nuttx.org> (On-going support and development)
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,6 +35,9 @@
  *
  ****************************************************************************/
 
+#ifndef __ARCH_ARM_SRC_STM32_STM32_ALARM_H
+#define __ARCH_ARM_SRC_STM32_STM32_ALARM_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
@@ -41,47 +46,70 @@
 
 #include "chip.h"
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
+#ifdef CONFIG_RTC_ALARM
 
 /****************************************************************************
- * Private Types
+ * Public Types
  ****************************************************************************/
 
-/****************************************************************************
- * Private Data
- ****************************************************************************/
+#ifndef __ASSEMBLY__
 
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
+/* The form of an alarm callback */
+
+typedef CODE void (*alarmcb_t)(void);
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-/* This file is only a thin shell that includes the correct RTC implementation
- * for the selected STM32 family.  The correct file cannot be selected by
- * the make system because it needs the intelligence that only exists in
- * chip.h that can associate an STM32 part number with an STM32 family.
- */
-
-/* The STM32 F1 has a simple battery-backed counter for its RTC and has a
- * separate block for the BKP registers.
- */
-
-#if defined(CONFIG_STM32_STM32F10XX)
-#  include "stm32_rtcounter.c"
-
-/* The other families use a more traditional Realtime Clock/Calendar (RTCC) with
- * broken-out data/time in BCD format.  The backup registers are integrated into
- * the RTCC in these families.
- */
-
-#elif defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F20XX) || \
-      defined(CONFIG_STM32_STM32F30XX)
-#  include "stm32_rtcc.c"
-#elif defined(CONFIG_STM32_STM32F40XX)
-#  include "stm32f40xxx_rtcc.c"
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
 #endif
+
+/****************************************************************************
+ * Name: stm32_rtc_setalarm
+ *
+ * Description:
+ *   Set up an alarm.
+ *
+ * Input Parameters:
+ *   tp - the time to set the alarm
+ *   callback - the function to call when the alarm expires.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno on failure
+ *
+ ****************************************************************************/
+
+struct timespec;
+int stm32_rtc_setalarm(FAR const struct timespec *tp, alarmcb_t callback);
+
+/****************************************************************************
+ * Name: stm32_rtc_cancelalarm
+ *
+ * Description:
+ *   Cancel a pending alarm alarm
+ *
+ * Input Parameters:
+ *   none
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno on failure
+ *
+ ****************************************************************************/
+
+int stm32_rtc_cancelalarm(void);
+
+#undef EXTERN
+#if defined(__cplusplus)
+}
+#endif
+
+#endif /* __ASSEMBLY__ */
+#endif /* CONFIG_RTC_ALARM */
+#endif /* __ARCH_ARM_SRC_STM32_STM32_ALARM_H */
