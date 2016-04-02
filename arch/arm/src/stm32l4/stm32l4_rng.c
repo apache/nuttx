@@ -107,8 +107,6 @@ static const struct file_operations g_rngops =
 
 static int stm32l4_rnginitialize(void)
 {
-  uint32_t regval;
-
   vdbg("Initializing RNG\n");
 
   memset(&g_rngdev, 0, sizeof(struct rng_dev_s));
