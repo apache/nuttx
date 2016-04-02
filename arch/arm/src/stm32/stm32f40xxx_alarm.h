@@ -51,14 +51,14 @@
 typedef CODE void (*rtc_ext_cb_t)(void);
 
 /* These features are known to map to STM32 RTC from stm32F4xx and appear to
- * map to beyond stm32F4xx, & stm32L0xx there appears to be a small variant
+ * map to beyond stm32F4xx and stm32L0xx there appears to be a small variant
  * with stm32F3 but do not map to stm32F0, F1, F2
  */
 
 enum rtc_ext_type_e
 {
-  RTC_ALARMA_REL,              /* EXTI RTC_ALARM Event */
-  RTC_ALARMB_REL,              /* EXTI RTC_ALARM Event */
+  RTC_ALARMA_REL,              /* EXTI RTC_ALARM A Event */
+  RTC_ALARMB_REL,              /* EXTI RTC_ALARM B Event */
   RTC_EXT_LAST
 };
 

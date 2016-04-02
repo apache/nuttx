@@ -73,6 +73,11 @@ struct stm32_lowerhalf_s
   /* Data following is private to this driver and not visible outside of
    * this file.
    */
+
+#ifdef CONFIG_RTC_ALARM
+  volatile rtc_alarm_callback_t cb;  /* Callback when the alarm expires */
+  volatile FAR void *priv;           /* Private argurment to accompany callback */
+#endif
 };
 
 /****************************************************************************
@@ -86,8 +91,6 @@ static int stm32_settime(FAR struct rtc_lowerhalf_s *lower,
                          FAR const struct rtc_time *rtctime);
 
 #ifdef CONFIG_RTC_ALARM
-static int stm32_rdalarm(FAR struct rtc_lowerhalf_s *lower,
-                         FAR struct rtc_rdalarm_s *alarminfo);
 static int stm32_setalarm(FAR struct rtc_lowerhalf_s *lower,
                           FAR const struct lower_setalarm_s *alarminfo);
 static int stm32_cancelalarm(FAR struct rtc_lowerhalf_s *lower,
@@ -104,7 +107,6 @@ static const struct rtc_ops_s g_rtc_ops =
   .rdtime      = stm32_rdtime,
   .settime     = stm32_settime,
 #ifdef CONFIG_RTC_ALARM
-  .rdalarm     = stm32_rdalarm,
   .setalarm    = stm32_setalarm,
   .cancelalarm = stm32_cancelalarm,
 #endif
@@ -126,6 +128,48 @@ static struct stm32_lowerhalf_s g_rtc_lowerhalf =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: stm32_alarm_callback
+ *
+ * Description:
+ *   This is the function that is called from the RTC driver when the alarm
+ *   goes off.  It just invokes the upper half drivers callback.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RTC_ALARM
+#ifdef CONFIG_STM32_STM32F40XX
+#  warning Missing logic
+#else
+static void stm32_alarm_callback(void)
+{
+  /* Sample and clear the callback information to minimize the window in
+   * time in which race conditions can occur.
+   */
+
+  rtc_alarm_callback_t cb = (rtc_alarm_callback_t)g_rtc_lowerhalf.cb;
+  FAR void *priv          = (FAR void *)g_rtc_lowerhalf.priv ;
+
+  g_rtc_lowerhalf.cb      = NULL
+  g_rtc_lowerhalf.priv    = NULL
+
+  /* Perform the callback */
+
+  if (cb != NULL)
+    {
+      cb(priv, 0);
+    }
+
+}
+#endif
+#endif /* CONFIG_RTC_ALARM */
 
 /****************************************************************************
  * Name: stm32_rdtime
@@ -245,32 +289,6 @@ static int stm32_settime(FAR struct rtc_lowerhalf_s *lower,
 }
 
 /****************************************************************************
- * Name: stm32_rdalarm
- *
- * Description:
- *   Read the current alarm time.  This function implements the
- *   rdalarm() method of the RTC driver interface
- *
- * Input Parameters:
- *   lower - A reference to RTC lower half driver state structure
- *   alarminfo - Pointer to the location to return information about
- *     the alarm
- *
- * Returned Value:
- *   Zero (OK) is returned on success; a negated errno value is returned
- *   on any failure.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_RTC_ALARM
-static int stm32_rdalarm(FAR struct rtc_lowerhalf_s *lower,
-                         FAR struct rtc_rdalarm_s *alarminfo)
-{
-  return -ENOSYS;
-}
-#endif
-
-/****************************************************************************
  * Name: stm32_setalarm
  *
  * Description:
@@ -291,7 +309,46 @@ static int stm32_rdalarm(FAR struct rtc_lowerhalf_s *lower,
 static int stm32_setalarm(FAR struct rtc_lowerhalf_s *lower,
                           FAR const struct lower_setalarm_s *alarminfo)
 {
+#ifdef CONFIG_STM32_STM32F40XX
+  /* ID0-> Alarm A; ID1 -> Alarm B */
+
+  DEBUGASSERT(lower != NULL && alarminfo != NULL);
+  DEBUGASSERT(alarminfo->id == 0 || alarminfo->id == 1);
+
+# warning Missing logic
   return -ENOSYS;
+
+#else
+  int ret = -EINVAL;
+
+  DEBUGASSERT(lower != NULL && alarminfo != NULL && alarminfo->id == 0);
+
+  if (alarminfo->id == 0)
+    {
+      struct timespec ts;
+
+      /* Convert the RTC time to a timespec (1 second accuracy) */
+
+      ts.tv_sec   = mktime((FAR struct tm *)&alarminfo->time);
+      ts.tv_nsec  = 0;
+
+      /* Remember the callback information */
+
+      lower->cb   = alarminfo->cb;
+      lower->priv = alarminfo->priv;
+
+      /* And set the alarm */
+
+      ret = stm32_rtc_setalarm(&ts, stm32_alarm_callback);
+      if (ret < 0)
+        {
+          lower->cb   = NULL;
+          lower->priv = NULL;
+        }
+    }
+
+  return ret;
+#endif
 }
 #endif
 
@@ -315,7 +372,25 @@ static int stm32_setalarm(FAR struct rtc_lowerhalf_s *lower,
 #ifdef CONFIG_RTC_ALARM
 static int stm32_cancelalarm(FAR struct rtc_lowerhalf_s *lower, int alarmid)
 {
+#ifdef CONFIG_STM32_STM32F40XX
+  /* ID0-> Alarm A; ID1 -> Alarm B */
+
+  DEBUGASSERT(lower != NULL);
+  DEBUGASSERT(alarmid == 0 || alarmid == 1);
+
+# warning Missing logic
   return -ENOSYS;
+#else
+  DEBUGASSERT(lower != NULL);
+  DEBUGASSERT(alarmid == 0);
+
+  /* Nullify callback information to reduce window for race conditions */
+
+  lower->cb   = NULL;
+  lower->priv = NULL;
+
+  return stm32_rtc_cancelalarm();
+#endif
 }
 #endif
 
