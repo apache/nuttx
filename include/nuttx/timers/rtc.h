@@ -6,7 +6,7 @@
  *
  * With extensions, modifications by:
  *
- *   Copyright (C) 2011-2012, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012, 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregroy Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -107,6 +107,15 @@
 #  endif
 #endif
 
+#ifdef CONFIG_RTC_ALARM
+#  ifdef CONFIG_DISABLE_SIGNALS
+#    error RTC driver alarm support depends on signals
+#  endif
+#  ifndef CONFIG_RTC_NALARMS
+#    define CONFIG_RTC_NALARMS 1
+#  endif
+#endif
+
 /* The remainder of the contain of this header file is only valid if the
  * RTC upper half driver is built.
  */
@@ -134,132 +143,28 @@
 
 #define RTC_SET_TIME       _RTCIOC(0x0002)
 
-/* RTC_ALM_READ reads the alarm time (for RTCs that support alarms)
+/* RTC_RD_ALARM reads the alarm time (for RTCs that support alarms)
  *
- * Argument: A writeable reference to a struct rtc_time to receive the RTC's
+ * Argument: A writeable reference to a struct rtc_rdalarm_s to receive the RTC's
  *           alarm time.
  */
 
-#define RTC_ALM_READ       _RTCIOC(0x0003)
+#define RTC_RD_ALARM       _RTCIOC(0x0003)
 
-/* RTC_ALM_SET sets the alarm time (for RTCs that support alarms).
+/* RTC_SET_ALARM sets the alarm time (for RTCs that support alarms).
  *
- * Argument: A read-only reference to a struct rtc_time containing the
+ * Argument: A read-only reference to a struct rtc_setalarm_s containing the
  *           new alarm time to be set.
  */
 
-#define RTC_ALM_SET        _RTCIOC(0x0004)
+#define RTC_SET_ALARM      _RTCIOC(0x0004)
 
-/* RTC_IRQP_READ read the frequency for periodic interrupts (for RTCs that
- * support periodic interrupts)
+/* RTC_WKALRM_CANCEL cancel the alarm.
  *
- * Argument: A pointer to a writeable unsigned long value in which to
- *           receive the frequency value.
+ * Argument: An ALARM ID value that indicates which alarm should be canceled.
  */
 
-#define RTC_IRQP_READ      _RTCIOC(0x0005)
-
-/* RTC_IRQP_SET set the frequency for periodic interrupts (for RTCs that
- * support periodic interrupts)
- *
- * Argument: An unsigned long value providing the new periodic frequency
- */
-
-#define RTC_IRQP_SET       _RTCIOC(0x0006)
-
-/* RTC_AIE_ON enable alarm interrupts (for RTCs that support alarms)
- *
- * Argument: None
- */
-
-#define RTC_AIE_ON         _RTCIOC(0x0007)
-
-/* RTC_AIE_OFF disable the alarm interrupt (for RTCs that support alarms)
- *
- * Argument: None
- */
-
-#define RTC_AIE_OFF        _RTCIOC(0x0008)
-
-/* RTC_UIE_ON enable the interrupt on every clock update (for RTCs that
- * support this once-per-second interrupt).
- *
- * Argument: None
- */
-
-#define RTC_UIE_ON         _RTCIOC(0x0009)
-
-/* RTC_UIE_OFF disable the interrupt on every clock update (for RTCs that
- * support this once-per-second interrupt).
- *
- * Argument: None
- */
-
-#define RTC_UIE_OFF        _RTCIOC(0x000a)
-
-/* RTC_PIE_ON enable the periodic interrupt (for RTCs that support these
- * periodic interrupts).
- *
- * Argument: None
- */
-
-#define RTC_PIE_ON         _RTCIOC(0x000b)
-
-/* RTC_PIE_OFF disable the periodic interrupt (for RTCs that support these
- * periodic interrupts).
- *
- * Argument: None
- */
-
-#define RTC_PIE_OFF        _RTCIOC(0x000c)
-
-/* RTC_EPOCH_READ and RTC_EPOCH_SET.
- *
- * Many RTCs encode the year in an 8-bit register which is either interpreted
- * as an 8-bit binary number or as a BCD number. In both cases, the number is
- * interpreted relative to this RTC's Epoch. The RTC's Epoch is initialized to
- * 1900 on most systems but on Alpha and MIPS it might also be initialized to
- * 1952, 1980, or 2000, depending on the value of an RTC register for the year.
- * With some RTCs, these operations can be used to read or to set the RTC's
- * Epoch, respectively.
- */
-
-/* RTC_EPOCH_READ read the Epoch.
- *
- * Argument: A reference to a writeable unsigned low variable that will
- *           receive the Epoch value.
- */
-
-#define RTC_EPOCH_READ     _RTCIOC(0x000d)
-
-/* RTC_EPOCH_SET set the Epoch
- *
- * Argument: An unsigned long value containing the new Epoch value to be set.
- */
-
-#define RTC_EPOCH_SET      _RTCIOC(0x000e)
-
-/* RTC_WKALM_RD and RTC_WKALM_SET.
- *
- * Some RTCs support a more powerful alarm interface, using these ioctls to
- * read or write the RTC's alarm time (respectively) with the rtc_wkalrm.
- */
-
-/* RTC_WKALM_RD read the current alarm
- *
- * Argument: A writeable reference to struct rtc_wkalrm to receive the
- *           current alarm settings.
- */
-
-#define RTC_WKALM_RD       _RTCIOC(0x000f)
-
-/* RTC_WKALM_SET set the alarm.
- *
- * Argument: A read-only reference to struct rtc_wkalrm containing the
- *           new alarm settings.
- */
-
-#define RTC_WKALM_SET      _RTCIOC(0x0010)
+#define RTC_CANCEL_ALARM   _RTCIOC(0x005)
 
 /* Architecture-specific RTC IOCTLS should begin at RTC_USER_IOCBASE.  For
  * example:
@@ -269,7 +174,7 @@
  *   etc.
  */
 
-#define RTC_USER_IOCBASE   0x0011
+#define RTC_USER_IOCBASE   0x0006
 
 /****************************************************************************
  * Public Types
@@ -299,21 +204,42 @@ struct rtc_time
 };
 
 #ifdef CONFIG_RTC_ALARM
-/* Structure used with the RTC_WKALM_RD and RTC_WKALM_SET IOCTL commands.
- *
- * The enabled flag is used to enable or disable the alarm interrupt, or to
- * read its current status; when using these calls, RTC_AIE_ON and
- * RTC_AIE_OFF are not used. The pending flag is used by RTC_WKALM_RD to
- * report a pending interrupt . The time field is as used with RTC_ALM_READ
- * and RTC_ALM_SET except that the tm_mday, tm_mon, and tm_year fields are
- * also valid.
+/* Structure used with the RTC_RD_ALARM IOCTL command and with
+ * rdalarm() method.
  */
 
-struct rtc_wkalrm
+struct rtc_rdalarm_s
 {
-  unsigned char enabled;
-  unsigned char pending;
-  struct rtc_time time;
+  uint8_t id;               /* Indicates the alarm being queried */
+  bool active;              /* Alarm actively timing or disabled */
+  struct rtc_time time;     /* Current RTC time (if enabled) */
+};
+
+/* Structure used with the RTC_SETALARM IOCTL command. */
+
+struct rtc_setalarm_s
+{
+  uint8_t id;               /* Indicates the alarm to be set */
+  uint8_t signo;            /* Signal number for alarm notification */
+  pid_t pid;                /* Identifies task to be notified */
+  union sigval sigvalue;    /* Data passed with notification */
+  struct rtc_time time;     /* Alarm time */
+};
+
+/* Callback type used by the RTC harware to notify the RTC driver when the
+ * alarm expires.
+ */
+
+typedef CODE void (*rtc_alarm_callback_t)(FAR void *priv, int alarmid);
+
+/* Structure used with the setalarm method */
+
+struct lower_setalarm_s
+{
+  uint8_t id;               /* Indicates the alarm to be set */
+  rtc_alarm_callback_t cb;  /* Callback when the alarm expires */
+  FAR void *priv;           /* Private argurment to accompany callback */
+  struct rtc_time time;     /* Alarm time */
 };
 #endif
 
@@ -343,77 +269,19 @@ struct rtc_ops_s
                       FAR const struct rtc_time *rtctime);
 
 #ifdef CONFIG_RTC_ALARM
-  /* almread reads the alarm time (for RTCs that support alarms) */
+  /* rdalarm reads the current alarm time */
 
-  CODE int (*almread)(FAR struct rtc_lowerhalf_s *lower,
-                      FAR struct rtc_time *almtime);
+  CODE int (*rdalarm)(FAR struct rtc_lowerhalf_s *lower,
+                      FAR struct rtc_rdalarm_s *alarminfo);
  
-  /* almset sets the alarm time (for RTCs that support alarms). */
+  /* setalarm sets up a new alarm. */
 
-  CODE int (*almset)(FAR struct rtc_lowerhalf_s *lower,
-                     FAR const struct rtc_time *almtime);
-#endif
+  CODE int (*setalarm)(FAR struct rtc_lowerhalf_s *lower,
+                       FAR const struct lower_setalarm_s *alarminfo);
 
-#ifdef CONFIG_RTC_PERIODIC
-  /* irqpread the frequency for periodic interrupts (for RTCs that support
-   * periodic interrupts)
-   */
+  /* cancelalarm cancels the alarm. */
 
-  CODE int (*irqpread)(FAR struct rtc_lowerhalf_s *lower,
-                       FAR unsigned long *irqpfreq);
-
-  /* irqpset set the frequency for periodic interrupts (for RTCs that
-   * support periodic interrupts)
-   */
-
-  CODE int (*irqpset)(FAR struct rtc_lowerhalf_s *lower,
-                      unsigned long irqpfreq);
-#endif
-
-#ifdef CONFIG_RTC_ALARM
-  /* aie enable/disable alarm interrupts (for RTCs that support alarms) */
-
-  CODE int (*aie)(FAR struct rtc_lowerhalf_s *lower, bool enable);
-#endif
-
-#ifdef CONFIG_RTC_ONESEC
-  /* uie enable/disable the interrupt on every clock update (for RTCs that
-   * support this once-per-second interrupt).
-   */
-
-  CODE int (*uie)(FAR struct rtc_lowerhalf_s *lower, bool enable);
-#endif
-
-#ifdef CONFIG_RTC_PERIODIC
-  /* pie enable the periodic interrupt (for RTCs that support these periodic
-   * interrupts).
-   */
-
-  CODE int (*pie)(FAR struct rtc_lowerhalf_s *lower, bool enable);
-#endif
-
-#ifdef CONFIG_RTC_EPOCHYEAR
-  /* rdepoch read the Epoch. */
-
-  CODE int (*rdepoch)(FAR struct rtc_lowerhalf_s *lower,
-                      FAR unsigned long *epoch);
- 
-  /* setepoch set the Epoch */
-
-  CODE int (*setepoch)(FAR struct rtc_lowerhalf_s *lower,
-                       unsigned long epoch);
-#endif
-
-#ifdef CONFIG_RTC_ALARM
-  /* rdwkalm read the current alarm */
-
-  CODE int (*rdwkalm)(FAR struct rtc_lowerhalf_s *lower,
-                      FAR struct rtc_wkalrm *wkalrm);
-
-  /* setwkalm set the alarm. */
-
-  CODE int (*setwkalm)(FAR struct rtc_lowerhalf_s *lower,
-                       FAR const struct rtc_wkalrm *wkalrm);
+  CODE int (*cancelalarm)(FAR struct rtc_lowerhalf_s *lower, int alarmid);
 #endif
 
 #ifdef CONFIG_RTC_IOCTL
@@ -478,7 +346,9 @@ extern "C"
  *
  ****************************************************************************/
 
+#ifdef __KERNEL__
 int rtc_initialize(int minor, FAR struct rtc_lowerhalf_s *lower);
+#endif
 
 #undef EXTERN
 #if defined(__cplusplus)

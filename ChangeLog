@@ -11600,3 +11600,9 @@
 	* arch/arm/src/armv7-m and stm32:  Add support for the IAR toolchain for
 	  the limited case of the ARMv7-M architecture and the STM32 chip.  From
 	  Aleksandr Vyhovanec (2016-04-02).
+	* arch/arm/src/stm32/stm32f40xxx_rtc.c:  Add a custom RTC driver.  From
+	  Neil Hancock (2016-04-02).
+	* include/nuttx/timer/rtc.h and drivers/timers/rtc.c:  Simplify the RTC
+	  interface.  The old interface was way to complex and was not fully
+	  implemented anywhere (2016-04-02).
+

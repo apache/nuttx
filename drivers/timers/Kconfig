@@ -70,6 +70,12 @@ config RTC_ALARM
 		Enable if the RTC hardware supports setting of an alarm.  A callback
 		function will be executed when the alarm goes off.
 
+config RTC_NALARMS
+	int "Number of alarms"
+	default 1
+	---help---
+		Number of alarms supported by the hardware.
+
 config RTC_DRIVER
 	bool "RTC Driver Support"
 	default n
