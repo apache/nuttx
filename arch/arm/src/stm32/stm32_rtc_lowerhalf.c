@@ -85,6 +85,15 @@ static int stm32_rdtime(FAR struct rtc_lowerhalf_s *lower,
 static int stm32_settime(FAR struct rtc_lowerhalf_s *lower,
                          FAR const struct rtc_time *rtctime);
 
+#ifdef CONFIG_RTC_ALARM
+static int stm32_rdalarm(FAR struct rtc_lowerhalf_s *lower,
+                         FAR struct rtc_rdalarm_s *alarminfo);
+static int stm32_setalarm(FAR struct rtc_lowerhalf_s *lower,
+                          FAR const struct lower_setalarm_s *alarminfo);
+static int stm32_cancelalarm(FAR struct rtc_lowerhalf_s *lower,
+                             int alarmid);
+#endif
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -92,38 +101,18 @@ static int stm32_settime(FAR struct rtc_lowerhalf_s *lower,
 
 static const struct rtc_ops_s g_rtc_ops =
 {
-  .rdtime     = stm32_rdtime,
-  .settime    = stm32_settime,
+  .rdtime      = stm32_rdtime,
+  .settime     = stm32_settime,
 #ifdef CONFIG_RTC_ALARM
-  .almread    = NULL,
-  .almset     = NULL,
-#endif
-#ifdef CONFIG_RTC_PERIODIC
-  .irqpread   = NULL,
-  .irqpset    = NULL,
-#endif
-#ifdef CONFIG_RTC_ALARM
-  .aie        = NULL,
-#endif
-#ifdef CONFIG_RTC_ONESEC
-  .uie        = NULL,
-#endif
-#ifdef CONFIG_RTC_PERIODIC
-  .pie        = NULL,
-#endif
-#ifdef CONFIG_RTC_EPOCHYEAR
-  .rdepoch    = NULL,
-  .setepoch   = NULL,
-#endif
-#ifdef CONFIG_RTC_ALARM
-  .rdwkalm    = NULL,
-  .setwkalm   = NULL,
+  .rdalarm     = stm32_rdalarm,
+  .setalarm    = stm32_setalarm,
+  .cancelalarm = stm32_cancelalarm,
 #endif
 #ifdef CONFIG_RTC_IOCTL
-  .ioctl      = NULL,
+  .ioctl       = NULL,
 #endif
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  .destroy    = NULL,
+  .destroy     = NULL,
 #endif
 };
 
@@ -254,6 +243,81 @@ static int stm32_settime(FAR struct rtc_lowerhalf_s *lower,
   return up_rtc_settime(&ts);
 #endif
 }
+
+/****************************************************************************
+ * Name: stm32_rdalarm
+ *
+ * Description:
+ *   Read the current alarm time.  This function implements the
+ *   rdalarm() method of the RTC driver interface
+ *
+ * Input Parameters:
+ *   lower - A reference to RTC lower half driver state structure
+ *   alarminfo - Pointer to the location to return information about
+ *     the alarm
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned
+ *   on any failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RTC_ALARM
+static int stm32_rdalarm(FAR struct rtc_lowerhalf_s *lower,
+                         FAR struct rtc_rdalarm_s *alarminfo)
+{
+  return -ENOSYS;
+}
+#endif
+
+/****************************************************************************
+ * Name: stm32_setalarm
+ *
+ * Description:
+ *   Set a new alarm.  This function implements the setalarm() method of the
+ *   RTC driver interface
+ *
+ * Input Parameters:
+ *   lower - A reference to RTC lower half driver state structure
+ *   alarminfo - Provided information needed to set the alarm
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned
+ *   on any failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RTC_ALARM
+static int stm32_setalarm(FAR struct rtc_lowerhalf_s *lower,
+                          FAR const struct lower_setalarm_s *alarminfo)
+{
+  return -ENOSYS;
+}
+#endif
+
+/****************************************************************************
+ * Name: stm32_cancelalarm
+ *
+ * Description:
+ *   Cancel the current alarm.  This function implements the cancelalarm()
+ *   method of the RTC driver interface
+ *
+ * Input Parameters:
+ *   lower - A reference to RTC lower half driver state structure
+ *   alarminfo - Provided information needed to set the alarm
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned
+ *   on any failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RTC_ALARM
+static int stm32_cancelalarm(FAR struct rtc_lowerhalf_s *lower, int alarmid)
+{
+  return -ENOSYS;
+}
+#endif
 
 /****************************************************************************
  * Public Functions
