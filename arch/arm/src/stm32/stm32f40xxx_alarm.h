@@ -48,31 +48,41 @@
  * Public Types
  ****************************************************************************/
 
-typedef CODE void (*rtc_ext_cb_t)(void);
+typedef CODE void (*alm_callback_t)(FAR void *arg, unsigned int alarmid);
 
 /* These features are known to map to STM32 RTC from stm32F4xx and appear to
  * map to beyond stm32F4xx and stm32L0xx there appears to be a small variant
  * with stm32F3 but do not map to stm32F0, F1, F2
  */
 
-enum rtc_ext_type_e
+enum alm_id_e
 {
-  RTC_ALARMA_REL,              /* EXTI RTC_ALARM A Event */
-  RTC_ALARMB_REL,              /* EXTI RTC_ALARM B Event */
-  RTC_EXT_LAST
+  RTC_ALARMA = 0,              /* RTC ALARM A */
+  RTC_ALARMB,                  /* RTC ALARM B */
+  RTC_ALARM_LAST
 };
 
-union rtc_ext_param_u
-{
-  int alm_minutes;
+/* Structure used to pass parmaters to set a absolute alarm */
 
-  /* Other param can share the space */
+struct tm;                     /* Forward reference */
+struct alm_setalarm_s
+{
+  int as_id;                   /* enum alm_id_e */
+  struct tm as_time;           /* Alarm expiration time */
+  alm_callback_t as_cb;        /* Callback (if non-NULL) */
+  FAR void *as_arg;            /* Argument for callback */
 };
 
-struct up_alarm_update_s
+/* Structure used to pass parmaters to set an alaram relative to the
+ * current time.
+ */
+
+struct alm_setrelative_s
 {
-  int alm_type;                /* enum rtc_ext_type_e */
-  union rtc_ext_param_u param;
+  int asr_id;                  /* enum alm_id_e */
+  int asr_minutes;             /* Relative time in minutes */
+  alm_callback_t asr_cb;       /* Callback (if non-NULL) */
+  FAR void *asr_arg;           /* Argument for callback */
 };
 
 /****************************************************************************
@@ -80,40 +90,36 @@ struct up_alarm_update_s
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32_rtc_ext_set_cb
+ * Name: stm32_rtc_setalarm
  *
  * Description:
- *   Set up an alarm callback for alarm A /B
+ *   Set an alarm to an asbolute time using associated hardware.
  *
  * Input Parameters:
- *  callback - function address
- *
- * Returned Value:
- *  OK if completed else -1 if failed set the callback
- *
- ****************************************************************************/
-
-int stm32_rtc_ext_set_cb(int rtc_ext_type_e, rtc_ext_cb_t callback);
-
-/****************************************************************************
- * Name: stm32_rtc_ext_update
- *
- * Description:
- *   Set up the STM32 RTC hardware. This includes
- *   - two alarms  (ALARM A and ALARM B).
- *   - other functions that it can be extended to as required
- *
- * Input Parameters:
- *  alm_setup - the details of the alarm
- *      alm_type RTC_ALARMA_REL/RTC_ALARMB_REL - set a relative alarm in
- *      minutes using associated hardware all other types not implemented
+ *  alminfo - Information about the alarm configuration.
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
  *
  ****************************************************************************/
 
-int stm32_rtc_ext_update(struct up_alarm_update_s *alm_setup);
+int stm32_rtc_setalarm(struct alm_setalarm_s *alminfo);
+
+/****************************************************************************
+ * Name: stm32_rtc_setalarm_rel
+ *
+ * Description:
+ *   Set a relative alarm in minutes using associated hardware.
+ *
+ * Input Parameters:
+ *  alminfo - Information about the relative alarm configuration.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno on failure
+ *
+ ****************************************************************************/
+
+int stm32_rtc_setalarm_rel(struct alm_setrelative_s *alminfo);
 
 #endif /* CONFIG_RTC_ALARM */
 #endif /* __ARCH_ARM_SRC_STM32_STM32F40XXX_ALARM_H */

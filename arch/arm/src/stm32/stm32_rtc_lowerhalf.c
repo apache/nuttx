@@ -41,6 +41,7 @@
 
 #include <sys/types.h>
 #include <stdbool.h>
+#include <string.h>
 #include <errno.h>
 
 #include <nuttx/arch.h>
@@ -55,9 +56,27 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#ifdef CONFIG_STM32_STM32F40XX
+#  define STM32_NALARMS 2
+#else
+#  define STM32_NALARMS 1
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+
+#ifdef CONFIG_RTC_ALARM
+struct stm32_cbinfo_s
+{
+  volatile rtc_alarm_callback_t cb;  /* Callback when the alarm expires */
+  volatile FAR void *priv;           /* Private argurment to accompany callback */
+#ifdef CONFIG_STM32_STM32F40XX
+  uint8_t id;                        /* Identifies the alarm */
+#endif
+};
+#endif
+
 /* This is the private type for the RTC state.  It must be cast compatible
  * with struct rtc_lowerhalf_s.
  */
@@ -75,8 +94,9 @@ struct stm32_lowerhalf_s
    */
 
 #ifdef CONFIG_RTC_ALARM
-  volatile rtc_alarm_callback_t cb;  /* Callback when the alarm expires */
-  volatile FAR void *priv;           /* Private argurment to accompany callback */
+  /* Alarm callback information */
+
+  struct stm32_cbinfo_s cbinfo[STM32_NALARMS];
 #endif
 };
 
@@ -146,29 +166,61 @@ static struct stm32_lowerhalf_s g_rtc_lowerhalf =
 
 #ifdef CONFIG_RTC_ALARM
 #ifdef CONFIG_STM32_STM32F40XX
-#  warning Missing logic
-#else
-static void stm32_alarm_callback(void)
+static void stm32_alarm_callback(FAR void *arg, unsigned int alarmid)
 {
+  FAR struct stm32_lowerhalf_s *lower;
+  FAR struct stm32_cbinfo_s *cbinfo;
+  rtc_alarm_callback_t cb;
+  FAR void *priv;
+
+  DEBUGASSERT(priv != NULL);
+  DEBUGASSERT(alarmid == RTC_ALARMA || alarmid == RTC_ALARMB);
+
+  lower        = (struct stm32_lowerhalf_s *)arg;
+  cbinfo       = &lower->cbinfo[alarmid];
+
   /* Sample and clear the callback information to minimize the window in
    * time in which race conditions can occur.
    */
 
-  rtc_alarm_callback_t cb = (rtc_alarm_callback_t)g_rtc_lowerhalf.cb;
-  FAR void *priv          = (FAR void *)g_rtc_lowerhalf.priv ;
+  cb           = (rtc_alarm_callback_t)cbinfo->cb;
+  priv         = (FAR void *)cbinfo->priv;
 
-  g_rtc_lowerhalf.cb      = NULL
-  g_rtc_lowerhalf.priv    = NULL
+  cbinfo->cb   = NULL;
+  cbinfo->priv = NULL;
 
   /* Perform the callback */
 
   if (cb != NULL)
     {
-      cb(priv, 0);
+      cb(priv, alarmid);
     }
-
 }
-#endif
+
+#else
+static void stm32_alarm_callback(void)
+{
+  struct stm32_cbinfo_s *cbinfo = &g_rtc_lowerhalf.cbinfo[0];
+
+  /* Sample and clear the callback information to minimize the window in
+   * time in which race conditions can occur.
+   */
+
+  rtc_alarm_callback_t cb = (rtc_alarm_callback_t)cbinfo->cb;
+  FAR void *arg           = (FAR void *)cbinfo->priv;
+
+  cbinfo->cb              = NULL;
+  cbinfo->priv            = NULL;
+
+  /* Perform the callback */
+
+  if (cb != NULL)
+    {
+      cb(arg, 0);
+    }
+}
+
+#endif /* CONFIG_STM32_STM32F40XX */
 #endif /* CONFIG_RTC_ALARM */
 
 /****************************************************************************
@@ -310,13 +362,43 @@ static int stm32_setalarm(FAR struct rtc_lowerhalf_s *lower,
                           FAR const struct lower_setalarm_s *alarminfo)
 {
 #ifdef CONFIG_STM32_STM32F40XX
+  FAR struct stm32_lowerhalf_s *priv;
+  struct alm_setalarm_s lowerinfo;
+  struct stm32_cbinfo_s *cbinfo;
+  int ret = -EINVAL;
+
   /* ID0-> Alarm A; ID1 -> Alarm B */
 
   DEBUGASSERT(lower != NULL && alarminfo != NULL);
-  DEBUGASSERT(alarminfo->id == 0 || alarminfo->id == 1);
+  DEBUGASSERT(alarminfo->id == RTC_ALARMA || alarminfo->id == RTC_ALARMB);
+  priv = (FAR struct stm32_lowerhalf_s *)lower;
 
-# warning Missing logic
-  return -ENOSYS;
+  if (alarminfo->id == RTC_ALARMA || alarminfo->id == RTC_ALARMB)
+    {
+      /* Remember the callback information */
+
+      cbinfo            = &priv->cbinfo[alarminfo->id];
+      cbinfo->cb        = alarminfo->cb;
+      cbinfo->priv      = alarminfo->priv;
+      cbinfo->id        = alarminfo->id;
+
+      /* Set the alarm */
+
+      lowerinfo.as_id   = alarminfo->id;
+      lowerinfo.as_cb   = stm32_alarm_callback;
+      memcpy(&lowerinfo.as_time, &alarminfo->time, sizeof(struct tm));
+
+      /* And set the alarm */
+
+      ret = stm32_rtc_setalarm(&lowerinfo);
+      if (ret < 0)
+        {
+          cbinfo->cb   = NULL;
+          cbinfo->priv = NULL;
+        }
+    }
+
+  return ret;
 
 #else
   int ret = -EINVAL;
@@ -376,10 +458,11 @@ static int stm32_cancelalarm(FAR struct rtc_lowerhalf_s *lower, int alarmid)
   /* ID0-> Alarm A; ID1 -> Alarm B */
 
   DEBUGASSERT(lower != NULL);
-  DEBUGASSERT(alarmid == 0 || alarmid == 1);
+  DEBUGASSERT(alarminfo->id == RTC_ALARMA || alarminfo->id == RTC_ALARMB);
 
 # warning Missing logic
   return -ENOSYS;
+
 #else
   DEBUGASSERT(lower != NULL);
   DEBUGASSERT(alarmid == 0);
@@ -390,6 +473,7 @@ static int stm32_cancelalarm(FAR struct rtc_lowerhalf_s *lower, int alarmid)
   lower->priv = NULL;
 
   return stm32_rtc_cancelalarm();
+
 #endif
 }
 #endif
