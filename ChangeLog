@@ -11597,4 +11597,6 @@
 	* apps/configs/vsn:  Removed the VSN configuration from the main NuttX
 	  repository.  The VSN can still be found in the Obsoleted repository
 	  (along with a full explanation in the README file there) (2016-03-29).
-
+	* arch/arm/src/armv7-m and stm32:  Add support for the IAR toolchain for
+	  the limited case of the ARMv7-M architecture and the STM32 chip.  From
+	  Aleksandr Vyhovanec (2016-04-02).
