@@ -96,6 +96,10 @@
 #  define CONFIG_SAMV7_USBDEVHS_NDTDS 8
 #endif
 
+#ifndef CONFIG_USBDEV_DMA
+#  warning Currently CONFIG_USBDEV_DMA must be set to make all endpoints working
+#endif
+
 #if defined(CONFIG_USBDEV_DUALSPEED) && defined(CONFIG_SAMV7_USBDEVHS_LOWPOWER)
 #  error CONFIG_USBDEV_DUALSPEED must not be defined with full-speed only support
 #endif
@@ -1243,8 +1247,7 @@ static void sam_ep_fifocon(unsigned int epno)
    * REVISIT: I don't think the USBHS_DEVEPTINT_NAKINI is necessary.
    */
 
-  sam_putreg((USBHS_DEVEPTINT_NAKINI | USBHS_DEVEPTINT_TXINI),
-             SAM_USBHS_DEVEPTICR(epno));
+  sam_putreg(USBHS_DEVEPTINT_NAKINI, SAM_USBHS_DEVEPTICR(epno));
 
   /* Enable the TXIN interrupt on the endpoint */
 
@@ -2724,12 +2727,21 @@ static void sam_ep_interrupt(struct sam_usbdev_s *priv, int epno)
       if (privep->epstate == USBHS_EPSTATE_SENDING ||
           privep->epstate == USBHS_EPSTATE_EP0STATUSIN)
         {
-          /* The interrupt is cleared inside the sam_req_write after
-           * new data is written to the fifo or it is cleared and disabled
-           * after all requests are processed.
+          /* A control endpoint clears the TXIN bit after new data is written
+           * to the fifo inside the function "sam_ctrlep_write"
+           * (sam_req_write -> sam_req_wrsetup -> sam_ctrlep_write).
+           * All other Endpoints needs to clear the bit here.
+           *
+           * REVISIT: normally all other endpoints also have to reset the bit
+           *          at a later point.
            *
            * Continue/resume processing the write requests.
            */
+
+           if (eptype != USBHS_DEVEPTCFG_EPTYPE_CTRL)
+             {
+               sam_putreg(USBHS_DEVEPTINT_TXINI, SAM_USBHS_DEVEPTICR(epno));
+             }
 
           privep->epstate = USBHS_EPSTATE_IDLE;
           (void)sam_req_write(priv, privep);
