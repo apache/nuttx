@@ -280,7 +280,7 @@ void __start(void)
    * certain that there are no issues with the state of global variables.
    */
 
-  for (dest = _START_BSS; dest < __END_BSS; )
+  for (dest = _START_BSS; dest < _END_BSS; )
     {
       *dest++ = 0;
     }

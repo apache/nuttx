@@ -34,7 +34,7 @@
 ############################################################################
 
 -include $(TOPDIR)/Make.defs
--include chip/Make.defs
+-include chip$(DELIM)Make.defs
 
 ifeq ($(CONFIG_ARCH_CORTEXA5),y)        # Cortex-A5 is ARMv7-A
 ARCH_SUBDIR = armv7-a
@@ -167,9 +167,17 @@ VPATH += chip
 VPATH += common
 VPATH += $(ARCH_SUBDIR)
 
+ifeq ($(CONFIG_ARM_TOOLCHAIN_IAR),y)
+  VPATH += chip$(DELIM)iar
+  VPATH += $(ARCH_SUBDIR)$(DELIM)iar
+else # ifeq ($(CONFIG_ARM_TOOLCHAIN_GNU),y)
+  VPATH += chip$(DELIM)gnu
+  VPATH += $(ARCH_SUBDIR)$(DELIM)gnu
+endif
+
 all: $(HEAD_OBJ) $(BIN)
 
-.PHONY: board/libboard$(LIBEXT)
+.PHONY: board$(DELIM)libboard$(LIBEXT)
 
 $(AOBJS) $(UAOBJS) $(HEAD_OBJ): %$(OBJEXT): %.S
 	$(call ASSEMBLE, $<, $@)
@@ -183,10 +191,10 @@ $(BIN) $(KBIN): $(OBJS)
 $(UBIN): $(UOBJS)
 	$(call ARCHIVE, $@, $(UOBJS))
 
-board/libboard$(LIBEXT):
+board$(DELIM)libboard$(LIBEXT):
 	$(Q) $(MAKE) -C board TOPDIR="$(TOPDIR)" libboard$(LIBEXT) EXTRADEFINES=$(EXTRADEFINES)
 
-nuttx$(EXEEXT): $(HEAD_OBJ) board/libboard$(LIBEXT)
+nuttx$(EXEEXT): $(HEAD_OBJ) board$(DELIM)libboard$(LIBEXT)
 	$(Q) echo "LD: nuttx"
 	$(Q) $(LD) --entry=__start $(LDFLAGS) $(LIBPATHS) $(EXTRA_LIBPATHS) \
 		-o $(NUTTX) $(HEAD_OBJ) $(EXTRA_OBJS) \
@@ -194,26 +202,26 @@ nuttx$(EXEEXT): $(HEAD_OBJ) board/libboard$(LIBEXT)
 ifneq ($(CONFIG_WINDOWS_NATIVE),y)
 	$(Q) $(NM) $(NUTTX) | \
 	grep -v '\(compiled\)\|\(\$(OBJEXT)$$\)\|\( [aUw] \)\|\(\.\.ng$$\)\|\(LASH[RL]DI\)' | \
-	sort > $(TOPDIR)/System.map
+	sort > $(TOPDIR)$(DELIM)System.map
 endif
 
 # This is part of the top-level export target
 # Note that there may not be a head object if layout is handled
 # by the linker configuration.
 
-export_startup: board/libboard$(LIBEXT) $(STARTUP_OBJS)
+export_startup: board$(DELIM)libboard$(LIBEXT) $(STARTUP_OBJS)
 ifneq ($(STARTUP_OBJS),)
-	$(Q) if [ -d "$(EXPORT_DIR)/startup" ]; then \
-		cp -f $(STARTUP_OBJS) "$(EXPORT_DIR)/startup/."; \
+	$(Q) if [ -d "$(EXPORT_DIR)$(DELIM)startup" ]; then \
+		cp -f $(STARTUP_OBJS) "$(EXPORT_DIR)$(DELIM)startup$(DELIM)."; \
 	 else \
-		echo "$(EXPORT_DIR)/startup does not exist"; \
+		echo "$(EXPORT_DIR)$(DELIM)startup does not exist"; \
 	exit 1; \
 	fi
 endif
 
 # Dependencies
 
-.depend: Makefile chip/Make.defs $(SRCS)
+.depend: Makefile chip$(DELIM)Make.defs $(SRCS)
 ifeq ($(BOARDMAKE),y)
 	$(Q) $(MAKE) -C board TOPDIR="$(TOPDIR)" depend
 endif

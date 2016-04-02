@@ -1,5 +1,5 @@
 /************************************************************************************
- * nuttx/arch/arm/src/armv7-m/up_memcpy.S
+ * nuttx/arch/arm/src/armv7-m/gnu/up_memcpy.S
  *
  * armv7m-optimised memcpy, contributed by Mike Smith.  Apparently in the public
  * domain and is re-released here under the modified BSD license:

@@ -1,7 +1,7 @@
 /************************************************************************************
- * arch/arm/src/armv7-m/up_exception.S
+ * arch/arm/src/armv7-m/gnu/up_exception.S
  *
- *   Copyright (C) 2009-2013, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2013, 2015-2016 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2012 Michael Smith. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
