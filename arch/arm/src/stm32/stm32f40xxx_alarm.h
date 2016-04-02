@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32_STM32F0XXX_ALARM_H
-#define __ARCH_ARM_SRC_STM32_STM32F0XXX_ALARM_H
+#ifndef __ARCH_ARM_SRC_STM32_STM32F40XXX_ALARM_H
+#define __ARCH_ARM_SRC_STM32_STM32F40XXX_ALARM_H
 
 /****************************************************************************
  * Included Files
@@ -45,20 +45,10 @@
 #ifdef CONFIG_RTC_ALARM
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#define RTC_ALRMR_DIS_MASK            (RTC_ALRMR_MSK4 | RTC_ALRMR_MSK3 | \
-                                       RTC_ALRMR_MSK2 | RTC_ALRMR_MSK1)
-#define RTC_ALRMR_DIS_DATE_HOURS_MASK (RTC_ALRMR_MSK4 | RTC_ALRMR_MSK3)
-#define RTC_ALRMR_DIS_DATE_MASK       (RTC_ALRMR_MSK4 )
-
-/****************************************************************************
  * Public Types
  ****************************************************************************/
 
 typedef CODE void (*rtc_ext_cb_t)(void);
-typedef unsigned int rtc_alarmreg_t;
 
 /* These features are known to map to STM32 RTC from stm32F4xx and appear to
  * map to beyond stm32F4xx, & stm32L0xx there appears to be a small variant
@@ -115,8 +105,8 @@ int stm32_rtc_ext_set_cb(int rtc_ext_type_e, rtc_ext_cb_t callback);
  *
  * Input Parameters:
  *  alm_setup - the details of the alarm
- *      alm_type RTC_ALARMA_REL/RTC_ALARMB_REL - set a relative alarm in minutes using associated hardware
- *      all other types not implemented
+ *      alm_type RTC_ALARMA_REL/RTC_ALARMB_REL - set a relative alarm in
+ *      minutes using associated hardware all other types not implemented
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
@@ -126,4 +116,4 @@ int stm32_rtc_ext_set_cb(int rtc_ext_type_e, rtc_ext_cb_t callback);
 int stm32_rtc_ext_update(struct up_alarm_update_s *alm_setup);
 
 #endif /* CONFIG_RTC_ALARM */
-#endif /* __ARCH_ARM_SRC_STM32_STM32F0XXX_ALARM_H */
+#endif /* __ARCH_ARM_SRC_STM32_STM32F40XXX_ALARM_H */

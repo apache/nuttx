@@ -137,6 +137,11 @@
 
 #define THRESHOLD_SECS 57
 
+#define RTC_ALRMR_DIS_MASK            (RTC_ALRMR_MSK4 | RTC_ALRMR_MSK3 | \
+                                       RTC_ALRMR_MSK2 | RTC_ALRMR_MSK1)
+#define RTC_ALRMR_DIS_DATE_HOURS_MASK (RTC_ALRMR_MSK4 | RTC_ALRMR_MSK3)
+#define RTC_ALRMR_DIS_DATE_MASK       (RTC_ALRMR_MSK4 )
+
 /* Debug ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_RTC
@@ -150,6 +155,12 @@
 #  define rtclldbg(x...)
 #  define rtcllvdbg(x...)
 #endif
+
+/************************************************************************************
+ * Private Types
+ ************************************************************************************/
+
+typedef unsigned int rtc_alarmreg_t;
 
 /************************************************************************************
  * Private Data
@@ -1420,11 +1431,11 @@ int stm32_rtc_ext_update(struct up_alarm_update_s *alm_setup)
       switch (alm_setup->alm_type )
         {
           case RTC_ALARMA_REL:
-            rtchw_set_alrmar(alarmreg|RTC_ALRMR_DIS_DATE_MASK);
+            rtchw_set_alrmar(alarmreg | RTC_ALRMR_DIS_DATE_MASK);
             break;
 
           case RTC_ALARMB_REL:
-            rtchw_set_alrmbr(alarmreg|RTC_ALRMR_DIS_DATE_MASK);
+            rtchw_set_alrmbr(alarmreg | RTC_ALRMR_DIS_DATE_MASK);
             break;
         }
     }
