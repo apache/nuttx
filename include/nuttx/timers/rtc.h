@@ -180,7 +180,7 @@
  * structure be cast compatible with struct tm!  They must be interchangeable.
  */
 
-struct rtc_time 
+struct rtc_time
 {
   int tm_sec;     /* Seconds (0-61, allows for leap seconds) */
   int tm_min;     /* Minutes (0-59) */
