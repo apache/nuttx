@@ -1,8 +1,7 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32_start.c
- * arch/arm/src/chip/stm32_start.c
  *
- *   Copyright (C) 2009, 2011-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,6 +55,24 @@
 
 #ifdef CONFIG_ARCH_FPU
 #  include "nvic.h"
+#endif
+
+/****************************************************************************
+ * Pre-processor definitions
+ ****************************************************************************/
+
+#if defined(__ICCARM__)
+#  define _START_BSS  __sfb(".bss")
+#  define _END_BSS    __sfe(".bss")
+#  define _DATA_INIT  __sfb(".data_init")
+#  define _START_DATA __sfb(".data")
+#  define _END_DATA   __sfe(".data")
+#else
+#  define _START_BSS  &_sbss
+#  define _END_BSS    &_ebss
+#  define _DATA_INIT  &_eronly
+#  define _START_DATA &_sdata
+#  define _END_DATA   &_edata
 #endif
 
 /****************************************************************************
@@ -263,7 +280,7 @@ void __start(void)
    * certain that there are no issues with the state of global variables.
    */
 
-  for (dest = &_sbss; dest < &_ebss; )
+  for (dest = _START_BSS; dest < __END_BSS; )
     {
       *dest++ = 0;
     }
@@ -276,7 +293,7 @@ void __start(void)
    * end of all of the other read-only data (.text, .rodata) at _eronly.
    */
 
-  for (src = &_eronly, dest = &_sdata; dest < &_edata; )
+  for (src = _DATA_INIT, dest = _START_DATA; dest < _END_DATA; )
     {
       *dest++ = *src++;
     }
