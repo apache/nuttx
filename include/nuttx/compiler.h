@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/compiler.h
  *
- *   Copyright (C) 2007-2009, 2012-2013, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2012-2013, 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -471,6 +471,45 @@
 /* Structures and unions can be assigned and passed as values */
 
 # define CONFIG_CAN_PASS_STRUCTS 1
+
+/* ICCARM-specific definitions ***********************************************/
+
+#elif defined(__ICCARM__)
+
+# define CONFIG_CPP_HAVE_VARARGS 1 /* Supports variable argument macros */
+# define CONFIG_HAVE_FILENAME 1 /* Has __FILE__ */
+# define CONFIG_HAVE_FLOAT 1
+
+/* Indicate that a local variable is not used */
+
+# define UNUSED(a) ((void)(a))
+
+# define weak_alias(name, aliasname)
+# define weak_function        __weak
+# define weak_const_function
+# define noreturn_function
+# define farcall_function
+# define packed_struct
+# define reentrant_function
+# define naked_function
+# define inline_function
+# define noinline_function
+
+# define FAR
+# define NEAR
+# define DSEG
+# define CODE
+# define IPTR
+
+# define __asm__       asm
+# define __volatile__  volatile
+
+/* For operatots __sfb() and __sfe() */
+
+# pragma section = ".bss"
+# pragma section = ".data"
+# pragma section = ".data_init"
+# pragma section = ".text"
 
 /* Unknown compiler *********************************************************/
 
