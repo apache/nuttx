@@ -140,7 +140,7 @@
 #define RTC_ALRMR_DIS_MASK            (RTC_ALRMR_MSK4 | RTC_ALRMR_MSK3 | \
                                        RTC_ALRMR_MSK2 | RTC_ALRMR_MSK1)
 #define RTC_ALRMR_DIS_DATE_HOURS_MASK (RTC_ALRMR_MSK4 | RTC_ALRMR_MSK3)
-#define RTC_ALRMR_DIS_DATE_MASK       (RTC_ALRMR_MSK4 )
+#define RTC_ALRMR_DIS_DATE_MASK       (RTC_ALRMR_MSK4)
 
 /* Debug ****************************************************************************/
 
@@ -627,7 +627,7 @@ static int stm32_exti_rtc_alarm_cb_handler(int irq, void *context)
 
   if ((isr & RTC_ISR_ALRAF) != 0)
     {
-      cr  = getreg32(STM32_RTC_CR );
+      cr  = getreg32(STM32_RTC_CR);
       if ((cr & RTC_CR_ALRAIE) != 0)
         {
           if (g_alarmcb_a != NULL)
@@ -644,7 +644,7 @@ static int stm32_exti_rtc_alarm_cb_handler(int irq, void *context)
 
   if ((isr & RTC_ISR_ALRBF) != 0)
     {
-      cr  = getreg32(STM32_RTC_CR );
+      cr  = getreg32(STM32_RTC_CR);
       if ((cr & RTC_CR_ALRBIE) != 0)
         {
           if (g_alarmcb_b != NULL)
@@ -681,7 +681,7 @@ static int rtchw_check_alrawf(void)
 {
   volatile uint32_t timeout;
   uint32_t regval;
-  int ret_val = -ETIMEDOUT;
+  int ret = -ETIMEDOUT;
 
   /* Check RTC_ISR ALRAWF for access to alarm register,
    * Can take 2 RTCCLK cycles or timeout
@@ -693,19 +693,19 @@ static int rtchw_check_alrawf(void)
       regval = getreg32(STM32_RTC_ISR);
       if ((regval & RTC_ISR_ALRAWF) != 0)
         {
-          ret_val = OK;
+          ret = OK;
           break;
         }
     }
 
-  return ret_val;
+  return ret;
 }
 
 static int rtchw_check_alrbwf(void)
 {
   volatile uint32_t timeout;
   uint32_t regval;
-  int ret_val = -ETIMEDOUT;
+  int ret = -ETIMEDOUT;
 
   /* Check RTC_ISR ALRAWF for access to alarm register,
    * can take 2 RTCCLK cycles or timeout
@@ -717,12 +717,12 @@ static int rtchw_check_alrbwf(void)
       regval = getreg32(STM32_RTC_ISR);
       if ((regval & RTC_ISR_ALRBWF) != 0)
         {
-          ret_val = OK;
+          ret = OK;
           break;
         }
     }
 
-  return ret_val;
+  return ret;
 }
 
 /************************************************************************************
@@ -844,14 +844,14 @@ static int alarm_update_rel(struct up_alarm_update_s *alm_setup,  struct tm *ptp
   uint32_t alm_hr;
   uint32_t tmp1;
   uint32_t tmp2;
-  int ret_val = OK;
+  int ret = OK;
 
   /* Error checking */
 
   alm_min = alm_setup->param.alm_minutes;
   if (MAX_RTC_ALARM_REL_MINUTES < alm_min)
     {
-      ret_val = ERROR;
+      ret = ERROR;
       rtcvdbg("error min too large %d\n", alm_min);
       goto stm32_alarm_updt_rel_return;
     }
@@ -886,7 +886,7 @@ static int alarm_update_rel(struct up_alarm_update_s *alm_setup,  struct tm *ptp
    */
 
   alm_hr = alm_min/MINUTES_IN_HOUR;
-  if (0 < alm_hr )
+  if (0 < alm_hr)
     {
       hours_add(alm_hr);
       alm_min =- alm_hr * MINUTES_IN_HOUR;
@@ -900,7 +900,7 @@ static int alarm_update_rel(struct up_alarm_update_s *alm_setup,  struct tm *ptp
     }
 
 stm32_alarm_updt_rel_return:
-  return ret_val;
+  return ret;
 }
 
 /************************************************************************************
@@ -1404,18 +1404,18 @@ int up_rtc_settime(FAR const struct timespec *tp)
 
 int stm32_rtc_ext_update(struct up_alarm_update_s *alm_setup)
 {
-  int ret_val =ERROR;
   rtc_alarmreg_t alarmreg;
   struct tm tm_local;
+  int ret = ERROR;
 
   ASSERT(alm_setup);
-  DEBUGASSERT( RTC_EXT_LAST > alm_setup->alm_type );
+  DEBUGASSERT(RTC_EXT_LAST > alm_setup->alm_type);
 
   switch (alm_setup->alm_type)
     {
     case RTC_ALARMA_REL:
     case RTC_ALARMB_REL:
-      ret_val = alarm_update_rel(alm_setup, &tm_local);
+      ret = alarm_update_rel(alm_setup, &tm_local);
       break;
 
     default:
@@ -1423,12 +1423,12 @@ int stm32_rtc_ext_update(struct up_alarm_update_s *alm_setup)
       break;
   }
 
-  if (OK == ret_val)
+  if (OK == ret)
     {
-      rtc_dumptime(&tm_local,"new alarm time");
+      rtc_dumptime(&tm_local, "new alarm time");
       alarmreg = rtc_reg_alrmr_bin2bcd(tm_local);
 
-      switch (alm_setup->alm_type )
+      switch (alm_setup->alm_type)
         {
           case RTC_ALARMA_REL:
             rtchw_set_alrmar(alarmreg | RTC_ALRMR_DIS_DATE_MASK);
@@ -1440,7 +1440,7 @@ int stm32_rtc_ext_update(struct up_alarm_update_s *alm_setup)
         }
     }
 
-  return ret_val;
+  return ret;
 }
 
 /************************************************************************************
@@ -1459,7 +1459,7 @@ int stm32_rtc_ext_update(struct up_alarm_update_s *alm_setup)
 
 int stm32_rtc_ext_set_cb(int rtc_ext_type, rtc_ext_cb_t callback)
 {
-  int ret_val = OK;
+  int ret = OK;
 
   switch (rtc_ext_type)
     {
@@ -1472,11 +1472,11 @@ int stm32_rtc_ext_set_cb(int rtc_ext_type, rtc_ext_cb_t callback)
         break;
 
       default:
-        ret_val = ERROR;
+        ret = ERROR;
         break;
     }
 
-  return  ret_val;
+  return ret;
 }
 
 #endif
