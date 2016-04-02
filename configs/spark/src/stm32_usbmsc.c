@@ -45,8 +45,7 @@
 
 #include "spark.h"
 
-#if defined(CONFIG_USBMSC) && !defined(CONFIG_USBMSC_COMPOSITE) && \
-    defined(CONFIG_BOARDCTL_USBDEVCTRL)
+#if defined(CONFIG_USBMSC) && defined(CONFIG_BOARDCTL_USBDEVCTRL)
 
 /****************************************************************************
  * Public Functions
@@ -66,4 +65,4 @@ int board_usbmsc_initialize(int port)
   return board_app_initialize();
 }
 
-#endif /* CONFIG_USBMSC && !CONFIG_USBMSC_COMPOSITE && CONFIG_BOARDCTL_USBDEVCTRL */
+#endif /* CONFIG_USBMSC && CONFIG_BOARDCTL_USBDEVCTRL */
