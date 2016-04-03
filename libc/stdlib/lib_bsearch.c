@@ -95,7 +95,7 @@
  *   look at item 2, so we change 'lim' to 2 so that we will look at items
  *   0 & 1.  If 'lim' is even, the same applies.  If 'lim' is odd, moving
  *   right again involes halving 'lim', this time moving the base up one
- *   item past 'ptr': e.g., when 'lim' is 5 we change base to item 3 and
+ *   item past 'middle': e.g., when 'lim' is 5 we change base to item 3 and
  *   make 'lim' 2 so that we will look at items 3 and 4.  If 'lim' is
  *   even, however, we have to shrink it by one before halving: e.g.,
  *   when 'lim' is 4, we still looked at item 2, so we have to make 'lim'
@@ -107,29 +107,30 @@ FAR void *bsearch(FAR const void *key, FAR const void *base, size_t nel,
                   size_t width, CODE int (*compar)(FAR const void *,
                   FAR const void *))
 {
-  FAR const void *ptr;
-  size_t lim;
-  int cmp;
+  FAR const void *middle;  /* Current entry being tested */
+  FAR const char *lower;   /* The lower limit of the search region */
+  size_t lim;              /* The number of elements in the region */
+  int cmp;                 /* Boolean comparison result */
 
   DEBUGASSERT(key != NULL);
   DEBUGASSERT(base != NULL || nel == 0);
   DEBUGASSERT(compar != NULL);
 
-  for (lim = nel; lim != 0; lim >>= 1)
+  for (lim = nel, lower = (const char *)base; lim != 0; lim >>= 1)
     {
-      ptr   = base + (lim >> 1) * width;
-      cmp = (*compar)(key, ptr);
+      middle = lower + (lim >> 1) * width;
+      cmp    = (*compar)(key, middle);
 
       if (cmp == 0)
         {
-          return (FAR void *)ptr;
+          return (FAR void *)middle;
         }
 
       if (cmp > 0)
         {
-          /* key > ptr: move right (else move left) */
+          /* key > middle: move right (else move left) */
 
-          base = (FAR const char *)ptr + width;
+          lower = (FAR const char *)middle + width;
           lim--;
         }
     }
