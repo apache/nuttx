@@ -105,7 +105,7 @@ void (*sigset(int signo, void (*disp)(int)))(int)
         {
           /* Would happen if signo were invalid */
 
-          return SIG_ERR;
+          return (_sa_handler_t)SIG_ERR;
         }
     }
 
@@ -123,5 +123,5 @@ void (*sigset(int signo, void (*disp)(int)))(int)
      return oact.sa_handler;
    }
 
-  return SIG_ERR;
+  return (_sa_handler_t)SIG_ERR;
 }
