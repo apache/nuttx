@@ -577,7 +577,7 @@ int rtc_initialize(int minor, FAR struct rtc_lowerhalf_s *lower)
 
   /* Allocate an upper half container structure */
 
-  upper = (FAR struct rtc_upperhalf_s *)kmm_malloc(sizeof(struct rtc_upperhalf_s));
+  upper = (FAR struct rtc_upperhalf_s *)kmm_zalloc(sizeof(struct rtc_upperhalf_s));
   if (!upper)
     {
       return -ENOMEM;
