@@ -144,10 +144,10 @@
 /* Debug ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_RTC
-#  define rtcdbg             rtcdbg
-#  define rtcvdbg            rtcvdbg
-#  define rtclldbg           rctlldbg
-#  define rtcllvdbg          rtcllvdbg
+#  define rtcdbg             dbg
+#  define rtcvdbg            vdbg
+#  define rtclldbg           lldbg
+#  define rtcllvdbg          llvdbg
 #else
 #  define rtcdbg(x...)
 #  define rtcvdbg(x...)
@@ -1398,7 +1398,7 @@ int stm32_rtc_setalarm(FAR struct alm_setalarm_s *alminfo)
         break;
 
       default:
-        rtcvdbg("error unknown %d\n", alminfo->asr_id);
+        rtcvdbg("ERROR: Invalid ALARM%d\n", alminfo->as_id);
         break;
     }
 

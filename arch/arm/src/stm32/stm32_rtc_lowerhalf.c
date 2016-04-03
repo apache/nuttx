@@ -612,7 +612,7 @@ static int stm32_cancelalarm(FAR struct rtc_lowerhalf_s *lower, int alarmid)
   /* ID0-> Alarm A; ID1 -> Alarm B */
 
   DEBUGASSERT(lower != NULL);
-  DEBUGASSERT(alarminfo->id == RTC_ALARMA || alarminfo->id == RTC_ALARMB);
+  DEBUGASSERT(alarmid == RTC_ALARMA || alarmid == RTC_ALARMB);
 
 # warning Missing logic
   return -ENOSYS;
