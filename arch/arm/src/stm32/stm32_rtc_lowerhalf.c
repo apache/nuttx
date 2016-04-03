@@ -203,7 +203,7 @@ static void stm32_alarm_callback(FAR void *arg, unsigned int alarmid)
 #else
 static void stm32_alarm_callback(void)
 {
-  struct stm32_cbinfo_s *cbinfo = &g_rtc_lowerhalf.cbinfo[0];
+  FAR struct stm32_cbinfo_s *cbinfo = &g_rtc_lowerhalf.cbinfo[0];
 
   /* Sample and clear the callback information to minimize the window in
    * time in which race conditions can occur.
@@ -462,48 +462,128 @@ static int stm32_setrelative(FAR struct rtc_lowerhalf_s *lower,
                              FAR const struct lower_setrelative_s *alarminfo)
 {
 #ifdef CONFIG_STM32_STM32F40XX
-  FAR struct stm32_lowerhalf_s *priv;
-  struct alm_setrelative_s lowerinfo;
-  struct stm32_cbinfo_s *cbinfo;
+  struct lower_setalarm_s setalarm;
+  struct tm time;
+  time_t seconds;
   int ret = -EINVAL;
 
-  /* ID0-> Alarm A; ID1 -> Alarm B */
-
-  DEBUGASSERT(lower != NULL && alarminfo != NULL);
+  ASSERT(lower != NULL && alarminfo != NULL);
   DEBUGASSERT(alarminfo->id == RTC_ALARMA || alarminfo->id == RTC_ALARMB);
-  priv = (FAR struct stm32_lowerhalf_s *)lower;
 
-  if (alarminfo->id == RTC_ALARMA || alarminfo->id == RTC_ALARMB)
+  if ((alarminfo->id == RTC_ALARMA || alarminfo->id == RTC_ALARMB) &&
+      alarminfo->reltime > 0)
     {
-      /* Remember the callback information */
+      /* Disable pre-emption while we do this so that we don't have to worry
+       * about being suspended and working on an old time.
+       */
 
-      cbinfo                = &priv->cbinfo[alarminfo->id];
-      cbinfo->cb            = alarminfo->cb;
-      cbinfo->priv          = alarminfo->priv;
-      cbinfo->id            = alarminfo->id;
+      sched_lock();
 
-      /* Set the alarm */
+      /* Get the current time in broken out format */
 
-      lowerinfo.asr_id      = alarminfo->id;
-      lowerinfo.asr_minutes = alarminfo->reltime / 60;
-      lowerinfo.asr_cb      = stm32_alarm_callback;
-      lowerinfo.asr_arg     = priv;
-
-      /* And set the alarm */
-
-      ret = stm32_rtc_setalarm_rel(&lowerinfo);
-      if (ret < 0)
+      ret = up_rtc_getdatetime(&time);
+      if (ret >= 0)
         {
-          cbinfo->cb   = NULL;
-          cbinfo->priv = NULL;
+          /* Convert to seconds since the epoch */
+
+          seconds = mktime(&time);
+
+          /* Add the seconds offset */
+
+          seconds += alarminfo->reltime;
+
+          /* And convert the time back to broken out format */
+
+          (void)gmtime_r(&seconds, (FAR struct tm *)&setalarm.time);
+
+          /* The set the alarm using this absolute time */
+
+          setalarm.id   = alarminfo->id;
+          setalarm.cb   = alarminfo->cb;
+          setalarm.priv = alarminfo->priv;
+
+          ret = stm32_setalarm(lower, &setalarm);
         }
+
+      sched_unlock();
     }
 
   return ret;
 
 #else
-#  warning Missing logic
-  return -ENOSYS;
+  FAR struct stm32_lowerhalf_s *priv;
+  FAR struct stm32_cbinfo_s *cbinfo;
+#if defined(CONFIG_RTC_DATETIME)
+  struct tm time;
+#endif
+  FAR struct timespec ts;
+  int ret = -EINVAL;
+
+  DEBUGASSERT(lower != NULL && alarminfo != NULL && alarminfo->id == 0);
+  priv = (FAR struct stm32_lowerhalf_s *)lower;
+
+  if (alarminfo->id == 0 && alarminfo->reltime > 0)
+    {
+      /* Disable pre-emption while we do this so that we don't have to worry
+       * about being suspended and working on an old time.
+       */
+
+      sched_lock();
+
+      /* Get the current time in seconds */
+
+#if defined(CONFIG_RTC_DATETIME)
+      /* Get the broken out time and convert to seconds */
+
+      ret = up_rtc_getdatetime(&time);
+      if (ret < 0)
+        {
+          sched_unlock();
+          return ret;
+        }
+
+      ts.tv_sec  = mktime(&time);
+      ts.tv_nsec = 0;
+
+#elif defined(CONFIG_RTC_HIRES)
+      /* Get the higher resolution time */
+
+      ret = up_rtc_gettime(&ts);
+      if (ret < 0)
+        {
+          sched_unlock();
+          return ret;
+        }
+#else
+      /* The resolution of time is only 1 second */
+
+      ts.tv_sec  = up_rtc_time();
+      ts.tv_nsec = 0;
+#endif
+
+      /* Add the seconds offset */
+
+      ts.tv_sec += alarminfo->reltime;
+
+      /* Remember the callback information */
+
+      cbinfo            = &priv->cbinfo[0];
+      cbinfo->cb        = alarminfo->cb;
+      cbinfo->priv      = alarminfo->priv;
+
+      /* And set the alarm */
+
+      ret = stm32_rtc_setalarm(&ts, stm32_alarm_callback);
+      if (ret < 0)
+        {
+          cbinfo->cb   = NULL;
+          cbinfo->priv = NULL;
+        }
+
+      sched_unlock();
+    }
+
+  return ret;
 #endif
 }
 #endif

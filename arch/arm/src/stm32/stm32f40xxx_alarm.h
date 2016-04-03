@@ -41,6 +41,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <time.h>
 
 #ifdef CONFIG_RTC_ALARM
 
@@ -62,27 +63,14 @@ enum alm_id_e
   RTC_ALARM_LAST
 };
 
-/* Structure used to pass parmaters to set a absolute alarm */
+/* Structure used to pass parmaters to set an alarm */
 
-struct tm;                     /* Forward reference */
 struct alm_setalarm_s
 {
   int as_id;                   /* enum alm_id_e */
   struct tm as_time;           /* Alarm expiration time */
   alm_callback_t as_cb;        /* Callback (if non-NULL) */
   FAR void *as_arg;            /* Argument for callback */
-};
-
-/* Structure used to pass parmaters to set an alaram relative to the
- * current time.
- */
-
-struct alm_setrelative_s
-{
-  int asr_id;                  /* enum alm_id_e */
-  int asr_minutes;             /* Relative time in minutes */
-  alm_callback_t asr_cb;       /* Callback (if non-NULL) */
-  FAR void *asr_arg;           /* Argument for callback */
 };
 
 /****************************************************************************
@@ -103,23 +91,7 @@ struct alm_setrelative_s
  *
  ****************************************************************************/
 
-int stm32_rtc_setalarm(struct alm_setalarm_s *alminfo);
-
-/****************************************************************************
- * Name: stm32_rtc_setalarm_rel
- *
- * Description:
- *   Set a relative alarm in minutes using associated hardware.
- *
- * Input Parameters:
- *  alminfo - Information about the relative alarm configuration.
- *
- * Returned Value:
- *   Zero (OK) on success; a negated errno on failure
- *
- ****************************************************************************/
-
-int stm32_rtc_setalarm_rel(struct alm_setrelative_s *alminfo);
+int stm32_rtc_setalarm(FAR struct alm_setalarm_s *alminfo);
 
 #endif /* CONFIG_RTC_ALARM */
 #endif /* __ARCH_ARM_SRC_STM32_STM32F40XXX_ALARM_H */

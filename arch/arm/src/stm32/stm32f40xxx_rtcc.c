@@ -39,6 +39,7 @@
  ************************************************************************************/
 
 #include <stdbool.h>
+#include <sched.h>
 #include <time.h>
 #include <errno.h>
 #include <debug.h>
@@ -135,13 +136,10 @@
       time->tm_hour = (parm_hrs - HOURS_IN_DAY);\
     }
 
-#define THRESHOLD_SECS 57
-
 #define RTC_ALRMR_DIS_MASK            (RTC_ALRMR_MSK4 | RTC_ALRMR_MSK3 | \
                                        RTC_ALRMR_MSK2 | RTC_ALRMR_MSK1)
-#define RTC_ALRMR_DIS_DATE_HOURS_MASK (RTC_ALRMR_MSK4 | RTC_ALRMR_MSK3)
 #define RTC_ALRMR_DIS_DATE_MASK       (RTC_ALRMR_MSK4)
-#define ALARMAR_TIME_EN               (RTC_ALRMR_MSK4 | RTC_ALRMR_WDSEL)
+#define RTC_ALRMR_ENABLE              (0)
 
 /* Debug ****************************************************************************/
 
@@ -853,88 +851,6 @@ rtchw_set_alrmbr_exit:
 #endif
 
 /************************************************************************************
- * Name: stm32_offset_time
- *
- * Description:
- *   Set up an alarm.  Up to two alarms can be supported (ALARM A and ALARM B).
- *
- * Input Parameters:
- *   time - The location to return the offset time
- *
- * Returned Value:
- *   Zero (OK) on success; a negated errno on failure
- *
- ************************************************************************************/
-
-#ifdef CONFIG_RTC_ALARM
-static int stm32_offset_time(struct tm *time, unsigned int min)
-{
-  /*  This sets it accurately to alarm on every 10min 0sec */
-
-  uint32_t timereg;
-  uint32_t hour;
-  uint32_t tmp1;
-  uint32_t tmp2;
-  int ret = OK;
-
-  /* Error checking */
-
-  if (MAX_RTC_ALARM_REL_MINUTES < min)
-    {
-      rtcvdbg("error min too large %d\n", min);
-      ret = -EINVAL;
-      goto errout;
-    }
-
-  /* Current Time - bcd format */
-
-  timereg  = getreg32(STM32_RTC_TR);
-
-  /* Convert the RTC BCD to accessible form of tm
-   * Check if the seconds is close to the next minute
-   * which could result in setting a time that has already passed
-   * and if so go to the next minute
-   */
-
-  tmp1 = (timereg & (RTC_TR_SU_MASK | RTC_TR_ST_MASK)) >> RTC_TR_SU_SHIFT;
-  time->tm_sec = rtc_bcd2bin(tmp1);
-  if (THRESHOLD_SECS < time->tm_sec)
-    {
-      rtcvdbg("compensate for being close to the next minute %d\n", time->tm_sec);
-      min++;
-    }
-
-  time->tm_sec = 0;
-  tmp1 = (timereg & (RTC_ALRMR_MNU_MASK | RTC_ALRMR_MNT_MASK)) >> RTC_ALRMR_MNU_SHIFT;
-  time->tm_min = rtc_bcd2bin(tmp1);
-
-  tmp2 = (timereg & (RTC_ALRMR_HU_MASK | RTC_ALRMR_HT_MASK)) >> RTC_ALRMR_HU_SHIFT;
-  time->tm_hour = rtc_bcd2bin(tmp2);
-
-  /* Add next alarm time
-   * Update for next alarm in 1-MAX_RTC_ALARM_REL_MINUTES
-   */
-
-  hour = min / MINUTES_IN_HOUR;
-  if (0 < hour)
-    {
-      hours_add(hour);
-      min -= hour * MINUTES_IN_HOUR;
-    }
-
-  time->tm_min += min;
-  if ((time->tm_min) >  MINUTES_IN_HOUR - 1)
-    {
-      time->tm_min = 0;
-      hours_add(1);
-    }
-
-errout:
-  return ret;
-}
-#endif
-
-/************************************************************************************
  * Public Functions
  ************************************************************************************/
 
@@ -1430,7 +1346,7 @@ int up_rtc_settime(FAR const struct timespec *tp)
  ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
-int stm32_rtc_setalarm(struct alm_setalarm_s *alminfo)
+int stm32_rtc_setalarm(FAR struct alm_setalarm_s *alminfo)
 {
   FAR struct alm_cbinfo_s *cbinfo;
   rtc_alarmreg_t alarmreg;
@@ -1457,7 +1373,7 @@ int stm32_rtc_setalarm(struct alm_setalarm_s *alminfo)
           cbinfo->ac_cb  = alminfo->as_cb;
           cbinfo->ac_arg = alminfo->as_arg;
 
-          ret = rtchw_set_alrmar(alarmreg | ALARMAR_TIME_EN);
+          ret = rtchw_set_alrmar(alarmreg | RTC_ALRMR_ENABLE);
           if (ret < 0)
             {
               cbinfo->ac_cb  = NULL;
@@ -1472,7 +1388,7 @@ int stm32_rtc_setalarm(struct alm_setalarm_s *alminfo)
           cbinfo->ac_cb  = alminfo->as_cb;
           cbinfo->ac_arg = alminfo->as_arg;
 
-          ret = rtchw_set_alrmbr(alarmreg | ALARMAR_TIME_EN);
+          ret = rtchw_set_alrmbr(alarmreg | RTC_ALRMR_ENABLE);
           if (ret < 0)
             {
               cbinfo->ac_cb  = NULL;
@@ -1484,86 +1400,6 @@ int stm32_rtc_setalarm(struct alm_setalarm_s *alminfo)
       default:
         rtcvdbg("error unknown %d\n", alminfo->asr_id);
         break;
-    }
-
-  return ret;
-}
-#endif
-
-/****************************************************************************
- * Name: stm32_rtc_setalarm_rel
- *
- * Description:
- *   Set a relative alarm in minutes using associated hardware.
- *
- * Input Parameters:
- *  alminfo - Information about the relative alarm configuration.
- *
- * Returned Value:
- *   Zero (OK) on success; a negated errno on failure
- *
- ****************************************************************************/
-
-#ifdef CONFIG_RTC_ALARM
-int stm32_rtc_setalarm_rel(struct alm_setrelative_s *alminfo)
-{
-  FAR struct alm_cbinfo_s *cbinfo;
-  rtc_alarmreg_t alarmreg;
-  struct tm time;
-  int ret = -EINVAL;
-
-  ASSERT(alminfo != NULL);
-  DEBUGASSERT(RTC_ALARM_LAST > alminfo->asr_id);
-
-  switch (alminfo->asr_id)
-    {
-      case RTC_ALARMA:
-      case RTC_ALARMB:
-        ret = stm32_offset_time(&time, alminfo->asr_minutes);
-        break;
-
-      default:
-        rtcvdbg("error unknown %d\n", alminfo->asr_id);
-        break;
-    }
-
-  if (OK == ret)
-    {
-      rtc_dumptime(&time, "New alarm time");
-      alarmreg = rtc_reg_alrmr_bin2bcd(&time);
-
-      switch (alminfo->asr_id)
-        {
-          case RTC_ALARMA:
-            {
-              cbinfo         = &g_alarmcb[RTC_ALARMA];
-              cbinfo->ac_cb  = alminfo->asr_cb;
-              cbinfo->ac_arg = alminfo->asr_arg;
-
-              ret = rtchw_set_alrmar(alarmreg | RTC_ALRMR_DIS_DATE_MASK);
-              if (ret >= 0)
-                {
-                  cbinfo->ac_cb  = NULL;
-                  cbinfo->ac_arg = NULL;
-                }
-            }
-            break;
-
-          case RTC_ALARMB:
-            {
-              cbinfo         = &g_alarmcb[RTC_ALARMA];
-              cbinfo->ac_cb  = alminfo->asr_cb;
-              cbinfo->ac_arg = alminfo->asr_arg;
-
-              ret = rtchw_set_alrmbr(alarmreg | RTC_ALRMR_DIS_DATE_MASK);
-              if (ret >= 0)
-                {
-                  cbinfo->ac_cb  = NULL;
-                  cbinfo->ac_arg = NULL;
-                }
-            }
-            break;
-        }
     }
 
   return ret;
