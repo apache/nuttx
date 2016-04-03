@@ -151,12 +151,20 @@
 
 #define RTC_SET_ALARM      _RTCIOC(0x0003)
 
-/* RTC_WKALRM_CANCEL cancel the alarm.
+/* RTC_SET_RELATIVE sets the alarm time relative to the current time.
+ *
+ * Argument: A read-only reference to a struct rtc_setrelative_s containing the
+ *           new relative alarm time to be set.
+ */
+
+#define RTC_SET_RELATIVE   _RTCIOC(0x0004)
+
+/* RTC_SET_RELATIVE cancel the alarm.
  *
  * Argument: An ALARM ID value that indicates which alarm should be canceled.
  */
 
-#define RTC_CANCEL_ALARM   _RTCIOC(0x004)
+#define RTC_CANCEL_ALARM   _RTCIOC(0x0005)
 
 /* Architecture-specific RTC IOCTLS should begin at RTC_USER_IOCBASE.  For
  * example:
@@ -166,7 +174,7 @@
  *   etc.
  */
 
-#define RTC_USER_IOCBASE   0x0005
+#define RTC_USER_IOCBASE   0x0006
 
 /****************************************************************************
  * Public Types
@@ -207,7 +215,7 @@ struct rtc_rdalarm_s
   struct rtc_time time;     /* Current RTC time (if enabled) */
 };
 
-/* Structure used with the RTC_SETALARM IOCTL command. */
+/* Structure used with the RTC_SET_ALARM IOCTL command. */
 
 struct rtc_setalarm_s
 {
@@ -216,6 +224,17 @@ struct rtc_setalarm_s
   pid_t pid;                /* Identifies task to be notified */
   union sigval sigvalue;    /* Data passed with notification */
   struct rtc_time time;     /* Alarm time */
+};
+
+/* Structure used with the RTC_SET_RELATIVE IOCTL command. */
+
+struct rtc_setrelative_s
+{
+  uint8_t id;               /* Indicates the alarm to be set */
+  uint8_t signo;            /* Signal number for alarm notification */
+  pid_t pid;                /* Identifies task to be notified */
+  union sigval sigvalue;    /* Data passed with notification */
+  time_t reltime;           /* Relative time in seconds */
 };
 
 /* Callback type used by the RTC harware to notify the RTC driver when the
@@ -232,6 +251,16 @@ struct lower_setalarm_s
   rtc_alarm_callback_t cb;  /* Callback when the alarm expires */
   FAR void *priv;           /* Private argurment to accompany callback */
   struct rtc_time time;     /* Alarm time */
+};
+
+/* Structure used with the setrelative method */
+
+struct lower_setrelative_s
+{
+  uint8_t id;               /* Indicates the alarm to be set */
+  rtc_alarm_callback_t cb;  /* Callback when the alarm expires */
+  FAR void *priv;           /* Private argurment to accompany callback */
+  time_t reltime;           /* Relative time in seconds */
 };
 #endif
 
@@ -265,6 +294,11 @@ struct rtc_ops_s
 
   CODE int (*setalarm)(FAR struct rtc_lowerhalf_s *lower,
                        FAR const struct lower_setalarm_s *alarminfo);
+
+  /* setalarm sets up a new alarm relative to the current time. */
+
+  CODE int (*setrelative)(FAR struct rtc_lowerhalf_s *lower,
+                          FAR const struct lower_setrelative_s *alarminfo);
 
   /* cancelalarm cancels the current alarm. */
 

@@ -365,7 +365,7 @@ static int rtc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
         DEBUGASSERT(alarminfo != NULL);
         alarmid = alarminfo->id;
-        DEBUGASSERT(alarminfo->id >= 0 && alarminfo->id < RTC_NALARMS);
+        DEBUGASSERT(alarmid >= 0 && alarmid < RTC_NALARMS);
 
         /* Is the alarm active? */
 
@@ -403,6 +403,69 @@ static int rtc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             /* Then set the alarm */
 
             ret = ops->setalarm(upper->lower, &lowerinfo);
+            if (ret < 0)
+              {
+                upperinfo->active = false;
+              }
+          }
+      }
+      break;
+
+    /* RTC_SET_RELATIVE sets the alarm time relative to the current time.
+     *
+     * Argument: A read-only reference to a struct rtc_setrelative_s containing the
+     *           new relative alarm time to be set.
+     */
+
+
+    case RTC_SET_RELATIVE:
+      {
+        FAR const struct rtc_setrelative_s *alarminfo =
+          (FAR const struct rtc_setrelative_s *)((uintptr_t)arg);
+        FAR struct rtc_alarminfo_s *upperinfo;
+        struct lower_setrelative_s lowerinfo;
+        int alarmid;
+
+        DEBUGASSERT(alarminfo != NULL);
+        alarmid = alarminfo->id;
+        DEBUGASSERT(alarmid >= 0 && alarmid < RTC_NALARMS);
+
+        /* Is the alarm active? */
+
+        upperinfo = &upper->alarminfo[alarmid];
+        if (upperinfo->active)
+          {
+            /* Yes, cancel the alarm */
+
+            if (ops->cancelalarm)
+              {
+                (void)ops->cancelalarm(upper->lower, alarmid);
+              }
+
+            upperinfo->active = false;
+          }
+
+        if (ops->setrelative)
+          {
+            /* Save the signal info to be used to notify the caller when the
+             * alarm expires.
+             */
+
+            upperinfo->active   = true;
+            upperinfo->signo    = alarminfo->signo;
+            upperinfo->pid      = alarminfo->pid;
+            upperinfo->sigvalue = alarminfo->sigvalue;
+
+            /* Format the alarm info needed by the lower half driver */
+
+            lowerinfo.id        = alarmid;
+            lowerinfo.cb        = rtc_alarm_callback;
+            lowerinfo.priv      = (FAR void *)upper;
+            lowerinfo.reltime   = alarminfo->reltime;
+
+            /* Then set the alarm */
+
+            ret = ops->setrelative(upper->lower, &lowerinfo);
             if (ret < 0)
               {
                 upperinfo->active = false;
