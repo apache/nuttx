@@ -282,7 +282,7 @@ errout_with_errno:
   return -ret;
 
 #else
-  FAR struct time_t timer;
+  time_t timer;
 
   /* The resolution of time is only 1 second */
 
@@ -290,7 +290,7 @@ errout_with_errno:
 
   /* Convert the one second epoch time to a struct tm */
 
-  if (!gmtime_r(&timer, rtctime)
+  if (!gmtime_r(&timer, (FAR struct tm *)rtctime))
     {
       int errcode = get_errno();
       DEBUGASSERT(errcode > 0);
@@ -405,10 +405,12 @@ static int stm32_setalarm(FAR struct rtc_lowerhalf_s *lower,
   return ret;
 
 #else
+  FAR struct stm32_lowerhalf_s *priv;
   FAR struct stm32_cbinfo_s *cbinfo;
   int ret = -EINVAL;
 
   DEBUGASSERT(lower != NULL && alarminfo != NULL && alarminfo->id == 0);
+  priv = (FAR struct stm32_lowerhalf_s *)lower;
 
   if (alarminfo->id == 0)
     {
@@ -618,19 +620,20 @@ static int stm32_cancelalarm(FAR struct rtc_lowerhalf_s *lower, int alarmid)
   return -ENOSYS;
 
 #else
+  FAR struct stm32_lowerhalf_s *priv;
   FAR struct stm32_cbinfo_s *cbinfo;
 
   DEBUGASSERT(lower != NULL);
   DEBUGASSERT(alarmid == 0);
+  priv = (FAR struct stm32_lowerhalf_s *)lower;
 
   /* Nullify callback information to reduce window for race conditions */
 
-  cbinfo            = &priv->cbinfo[0];
-  cbinfo->cb        = alarminfo->cb;
-  cbinfo->priv      = alarminfo->priv;
+  cbinfo       = &priv->cbinfo[0];
+  cbinfo->cb   = NULL;
+  cbinfo->priv = NULL;
 
   return stm32_rtc_cancelalarm();
-
 #endif
 }
 #endif
