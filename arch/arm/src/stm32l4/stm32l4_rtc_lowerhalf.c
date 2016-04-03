@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/stm32l4/stm32l4_rtc_lowerhalf.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           dev@ziggurat29.com (adaptations for stm32l4)
  *
@@ -91,38 +91,18 @@ static int stm32l4_settime(FAR struct rtc_lowerhalf_s *lower,
 
 static const struct rtc_ops_s g_rtc_ops =
 {
-  .rdtime     = stm32l4_rdtime,
-  .settime    = stm32l4_settime,
+  .rdtime      = stm32l4_rdtime,
+  .settime     = stm32l4_settime,
 #ifdef CONFIG_RTC_ALARM
-  .almread    = NULL,
-  .almset     = NULL,
-#endif
-#ifdef CONFIG_RTC_PERIODIC
-  .irqpread   = NULL,
-  .irqpset    = NULL,
-#endif
-#ifdef CONFIG_RTC_ALARM
-  .aie        = NULL,
-#endif
-#ifdef CONFIG_RTC_ONESEC
-  .uie        = NULL,
-#endif
-#ifdef CONFIG_RTC_PERIODIC
-  .pie        = NULL,
-#endif
-#ifdef CONFIG_RTC_EPOCHYEAR
-  .rdepoch    = NULL,
-  .setepoch   = NULL,
-#endif
-#ifdef CONFIG_RTC_ALARM
-  .rdwkalm    = NULL,
-  .setwkalm   = NULL,
+  .setalarm    = NULL,
+  .setrelative = NULL,
+  .cancelalarm = NULL,
 #endif
 #ifdef CONFIG_RTC_IOCTL
-  .ioctl      = NULL,
+  .ioctl       = NULL,
 #endif
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  .destroy    = NULL,
+  .destroy     = NULL,
 #endif
 };
 
@@ -130,7 +110,7 @@ static const struct rtc_ops_s g_rtc_ops =
 
 static struct stm32l4_lowerhalf_s g_rtc_lowerhalf =
 {
-  .ops        = &g_rtc_ops,
+  .ops         = &g_rtc_ops,
 };
 
 /****************************************************************************

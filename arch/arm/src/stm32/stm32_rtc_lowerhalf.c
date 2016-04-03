@@ -113,6 +113,8 @@ static int stm32_settime(FAR struct rtc_lowerhalf_s *lower,
 #ifdef CONFIG_RTC_ALARM
 static int stm32_setalarm(FAR struct rtc_lowerhalf_s *lower,
                           FAR const struct lower_setalarm_s *alarminfo);
+static int stm32_setrelative(FAR struct rtc_lowerhalf_s *lower,
+                             FAR const struct lower_setrelative_s *alarminfo);
 static int stm32_cancelalarm(FAR struct rtc_lowerhalf_s *lower,
                              int alarmid);
 #endif
@@ -128,6 +130,7 @@ static const struct rtc_ops_s g_rtc_ops =
   .settime     = stm32_settime,
 #ifdef CONFIG_RTC_ALARM
   .setalarm    = stm32_setalarm,
+  .setrelative = stm32_setrelative,
   .cancelalarm = stm32_cancelalarm,
 #endif
 #ifdef CONFIG_RTC_IOCTL
@@ -363,8 +366,8 @@ static int stm32_setalarm(FAR struct rtc_lowerhalf_s *lower,
 {
 #ifdef CONFIG_STM32_STM32F40XX
   FAR struct stm32_lowerhalf_s *priv;
+  FAR struct stm32_cbinfo_s *cbinfo;
   struct alm_setalarm_s lowerinfo;
-  struct stm32_cbinfo_s *cbinfo;
   int ret = -EINVAL;
 
   /* ID0-> Alarm A; ID1 -> Alarm B */
@@ -386,6 +389,7 @@ static int stm32_setalarm(FAR struct rtc_lowerhalf_s *lower,
 
       lowerinfo.as_id   = alarminfo->id;
       lowerinfo.as_cb   = stm32_alarm_callback;
+      lowerinfo.as_arg  = priv;
       memcpy(&lowerinfo.as_time, &alarminfo->time, sizeof(struct tm));
 
       /* And set the alarm */
@@ -401,6 +405,7 @@ static int stm32_setalarm(FAR struct rtc_lowerhalf_s *lower,
   return ret;
 
 #else
+  FAR struct stm32_cbinfo_s *cbinfo;
   int ret = -EINVAL;
 
   DEBUGASSERT(lower != NULL && alarminfo != NULL && alarminfo->id == 0);
@@ -416,20 +421,89 @@ static int stm32_setalarm(FAR struct rtc_lowerhalf_s *lower,
 
       /* Remember the callback information */
 
-      lower->cb   = alarminfo->cb;
-      lower->priv = alarminfo->priv;
+      cbinfo            = &priv->cbinfo[0];
+      cbinfo->cb        = alarminfo->cb;
+      cbinfo->priv      = alarminfo->priv;
 
       /* And set the alarm */
 
       ret = stm32_rtc_setalarm(&ts, stm32_alarm_callback);
       if (ret < 0)
         {
-          lower->cb   = NULL;
-          lower->priv = NULL;
+          cbinfo->cb   = NULL;
+          cbinfo->priv = NULL;
         }
     }
 
   return ret;
+#endif
+}
+#endif
+
+/****************************************************************************
+ * Name: stm32_setrelative
+ *
+ * Description:
+ *   Set a new alarm relative to the current time.  This function implements
+ *   the setrelative() method of the RTC driver interface
+ *
+ * Input Parameters:
+ *   lower - A reference to RTC lower half driver state structure
+ *   alarminfo - Provided information needed to set the alarm
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned
+ *   on any failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RTC_ALARM
+static int stm32_setrelative(FAR struct rtc_lowerhalf_s *lower,
+                             FAR const struct lower_setrelative_s *alarminfo)
+{
+#ifdef CONFIG_STM32_STM32F40XX
+  FAR struct stm32_lowerhalf_s *priv;
+  struct alm_setrelative_s lowerinfo;
+  struct stm32_cbinfo_s *cbinfo;
+  int ret = -EINVAL;
+
+  /* ID0-> Alarm A; ID1 -> Alarm B */
+
+  DEBUGASSERT(lower != NULL && alarminfo != NULL);
+  DEBUGASSERT(alarminfo->id == RTC_ALARMA || alarminfo->id == RTC_ALARMB);
+  priv = (FAR struct stm32_lowerhalf_s *)lower;
+
+  if (alarminfo->id == RTC_ALARMA || alarminfo->id == RTC_ALARMB)
+    {
+      /* Remember the callback information */
+
+      cbinfo                = &priv->cbinfo[alarminfo->id];
+      cbinfo->cb            = alarminfo->cb;
+      cbinfo->priv          = alarminfo->priv;
+      cbinfo->id            = alarminfo->id;
+
+      /* Set the alarm */
+
+      lowerinfo.asr_id      = alarminfo->id;
+      lowerinfo.asr_minutes = alarminfo->reltime / 60;
+      lowerinfo.asr_cb      = stm32_alarm_callback;
+      lowerinfo.asr_arg     = priv;
+
+      /* And set the alarm */
+
+      ret = stm32_rtc_setalarm_rel(&lowerinfo);
+      if (ret < 0)
+        {
+          cbinfo->cb   = NULL;
+          cbinfo->priv = NULL;
+        }
+    }
+
+  return ret;
+
+#else
+#  warning Missing logic
+  return -ENOSYS;
 #endif
 }
 #endif
@@ -464,13 +538,16 @@ static int stm32_cancelalarm(FAR struct rtc_lowerhalf_s *lower, int alarmid)
   return -ENOSYS;
 
 #else
+  FAR struct stm32_cbinfo_s *cbinfo;
+
   DEBUGASSERT(lower != NULL);
   DEBUGASSERT(alarmid == 0);
 
   /* Nullify callback information to reduce window for race conditions */
 
-  lower->cb   = NULL;
-  lower->priv = NULL;
+  cbinfo            = &priv->cbinfo[0];
+  cbinfo->cb        = alarminfo->cb;
+  cbinfo->priv      = alarminfo->priv;
 
   return stm32_rtc_cancelalarm();
 
