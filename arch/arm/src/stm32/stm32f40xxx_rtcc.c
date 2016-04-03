@@ -607,7 +607,7 @@ static void rtc_resume(void)
 }
 
 /************************************************************************************
- * Name: stm32_exti_rtc_alarm_cb_handler
+ * Name: stm32_rtc_alarm_handler
  *
  * Description:
  *   RTC ALARM interrupt service routine through the EXTI line
@@ -621,7 +621,7 @@ static void rtc_resume(void)
  *
  ************************************************************************************/
 
-static int stm32_exti_rtc_alarm_cb_handler(int irq, void *context)
+static int stm32_rtc_alarm_handler(int irq, void *context)
 {
   FAR struct alm_cbinfo_s *cbinfo;
   alm_callback_t cb;
@@ -1067,7 +1067,7 @@ int up_rtc_initialize(void)
    * 3. Configure the RTC to generate RTC alarms (Alarm A or Alarm B).
    */
 
-  stm32_exti_alarm(true, false , true, stm32_exti_rtc_alarm_cb_handler);
+  stm32_exti_alarm(true, false, true, stm32_rtc_alarm_handler);
 #endif
 
   g_rtc_enabled = true;
