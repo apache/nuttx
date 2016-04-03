@@ -175,7 +175,7 @@ static void rtc_alarm_callback(FAR void *priv, int alarmid)
   FAR struct rtc_upperhalf_s *upper = (FAR struct rtc_upperhalf_s *)priv;
   FAR struct rtc_alarminfo_s *alarminfo;
 
-  DEBUGASSERT(upper != NULL && id >=0 && ID < CONFIG_RTC_NALARMS);
+  DEBUGASSERT(upper != NULL && alarmid >= 0 && alarmid < CONFIG_RTC_NALARMS);
   alarminfo = &upper->alarminfo[alarmid];
 
   /* Do we think that the alaram is active?  It might be due to some
@@ -365,7 +365,7 @@ static int rtc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
         DEBUGASSERT(alarminfo != NULL);
         alarmid = alarminfo->id;
-        DEBUGASSERT(alarmid >= 0 && alarmid < RTC_NALARMS);
+        DEBUGASSERT(alarmid >= 0 && alarmid < CONFIG_RTC_NALARMS);
 
         /* Is the alarm active? */
 
@@ -428,7 +428,7 @@ static int rtc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
         DEBUGASSERT(alarminfo != NULL);
         alarmid = alarminfo->id;
-        DEBUGASSERT(alarmid >= 0 && alarmid < RTC_NALARMS);
+        DEBUGASSERT(alarmid >= 0 && alarmid < CONFIG_RTC_NALARMS);
 
         /* Is the alarm active? */
 
@@ -484,7 +484,7 @@ static int rtc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       {
         int alarmid = (int)arg;
 
-        DEBUGASSERT(alarmid >= 0 && alarmid < RTC_NALARMS);
+        DEBUGASSERT(alarmid >= 0 && alarmid < CONFIG_RTC_NALARMS);
         if (ops->cancelalarm)
           {
             ret = ops->cancelalarm(upper->lower, alarmid);
