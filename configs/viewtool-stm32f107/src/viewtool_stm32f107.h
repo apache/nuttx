@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/viewtool-stm32f107/src/viewtool_stm32f107.h
  *
- *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,8 +50,9 @@
 /* Configuration ************************************************************/
 /* Assume that everything is supported */
 
-#define HAVE_USBDEV   1
-#define HAVE_MMCSD    1
+#define HAVE_USBDEV     1
+#define HAVE_MMCSD      1
+#define HAVE_RTC_DRIVER 1
 
 /* Handle chip differences */
 
@@ -90,6 +91,12 @@
 /* Default MMC/SD slot number/device minor number */
 
 #define VIEWTOOL_MMCSD_SLOTNO 0
+
+/* Check if we can support the RTC driver */
+
+#if !defined(CONFIG_RTC) || !defined(CONFIG_RTC_DRIVER)
+#  undef HAVE_RTC_DRIVER
+#endif
 
 /* GPIO Configuration *******************************************************/
 /* LEDs

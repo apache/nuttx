@@ -61,6 +61,11 @@
 #  include "stm32_usbhost.h"
 #endif
 
+#ifdef CONFIG_RTC_DRIVER
+#  include <nuttx/timers/rtc.h>
+#  include "stm32_rtc.h"
+#endif
+
 #include "stm32.h"
 #include "stm32_i2c.h"
 #include "stm3240g-eval.h"
@@ -77,9 +82,10 @@
 
 /* Assume that we support everything until convinced otherwise */
 
-#define HAVE_MMCSD    1
-#define HAVE_USBDEV   1
-#define HAVE_USBHOST  1
+#define HAVE_MMCSD      1
+#define HAVE_USBDEV     1
+#define HAVE_USBHOST    1
+#define HAVE_RTC_DRIVER 1
 
 /* Can't support MMC/SD features if mountpoints are disabled or if SDIO support
  * is not enabled.
@@ -125,6 +131,12 @@
 
 #ifndef CONFIG_USBHOST
 #  undef HAVE_USBHOST
+#endif
+
+/* Check if we can support the RTC driver */
+
+#if !defined(CONFIG_RTC) || !defined(CONFIG_RTC_DRIVER)
+#  undef HAVE_RTC_DRIVER
 #endif
 
 /****************************************************************************
@@ -201,6 +213,9 @@ static void stm32_i2ctool(void)
 
 int board_app_initialize(void)
 {
+#ifdef HAVE_RTC_DRIVER
+  FAR struct rtc_lowerhalf_s *lower;
+#endif
 #ifdef CONFIG_STM32_SPI1
   FAR struct spi_dev_s *spi;
   FAR struct mtd_dev_s *mtd;
@@ -208,13 +223,37 @@ int board_app_initialize(void)
 #ifdef HAVE_MMCSD
   FAR struct sdio_dev_s *sdio;
 #endif
-#if defined(HAVE_MMCSD) || defined(HAVE_USBHOST)
+#if defined(HAVE_MMCSD) || defined(HAVE_USBHOST) || defined(HAVE_RTC_DRIVER)
   int ret;
 #endif
 
   /* Register I2C drivers on behalf of the I2C tool */
 
   stm32_i2ctool();
+
+#ifdef HAVE_RTC_DRIVER
+  /* Instantiate the STM32 lower-half RTC driver */
+
+  lower = stm32_rtc_lowerhalf();
+  if (!lower)
+    {
+      sdbg("ERROR: Failed to instantiate the RTC lower-half driver\n");
+      return -ENOMEM;
+    }
+  else
+    {
+      /* Bind the lower half driver and register the combined RTC driver
+       * as /dev/rtc0
+       */
+
+      ret = rtc_initialize(0, lower);
+      if (ret < 0)
+        {
+          sdbg("ERROR: Failed to bind/register the RTC driver: %d\n", ret);
+          return ret;
+        }
+    }
+#endif
 
   /* Configure SPI-based devices */
 
