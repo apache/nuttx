@@ -49,6 +49,8 @@
 #include <nuttx/compiler.h>
 
 #include <stdbool.h>
+#include <signal.h>
+#include <time.h>
 
 #include <nuttx/fs/ioctl.h>
 
