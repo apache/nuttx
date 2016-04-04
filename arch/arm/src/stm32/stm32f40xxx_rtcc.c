@@ -787,7 +787,7 @@ static int rtchw_set_alrmar(rtc_alarmreg_t alarmreg)
   ret = rtchw_check_alrawf();
   if (ret != OK)
     {
-      goto rtchw_set_alrmar_exit;
+      goto errout_with_wprunlock;
     }
 
   /* Set the RTC Alarm register */
@@ -802,7 +802,7 @@ static int rtchw_set_alrmar(rtc_alarmreg_t alarmreg)
   cr |= (RTC_CR_ALRAE | RTC_CR_ALRAIE);
   putreg32(cr, STM32_RTC_CR);
 
-rtchw_set_alrmar_exit:
+errout_with_wprunlock:
   rtc_wprlock();
   return ret;
 }
@@ -1402,6 +1402,126 @@ int stm32_rtc_setalarm(FAR struct alm_setalarm_s *alminfo)
         break;
     }
 
+  return ret;
+}
+#endif
+
+/****************************************************************************
+ * Name: stm32_rtc_cancelalarm
+ *
+ * Description:
+ *   Cancel an alaram.
+ *
+ * Input Parameters:
+ *  alarmid - Identifies the alarm to be cancelled
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno on failure
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RTC_ALARM
+int stm32_rtc_cancelalarm(enum alm_id_e alarmid)
+{
+  int ret = -EINVAL;
+
+  DEBUGASSERT(RTC_ALARM_LAST > alarmid);
+
+  /* Cancel the alarm in hardware and disable interrupts */
+
+  switch (alarmid)
+    {
+      case RTC_ALARMA:
+        {
+          /* Cancel the global callback function */
+
+           g_alarmcb[alarmid].ac_cb  = NULL;
+           g_alarmcb[alarmid].ac_arg = NULL;
+
+          /* Need to follow RTC register wrote protection.
+           * Disable the write protection for RTC registers
+           */
+
+          rtc_wprunlock();
+
+#if 0
+          /* Set Initialization mode */
+
+          ret = rtc_enterinit();
+          if (ret < 0)
+            {
+              goto errout_with_wprunlock;
+            }
+#endif
+
+          /* Disable RTC alarm and interrupt */
+
+          modifyreg32(STM32_RTC_CR, (RTC_CR_ALRAE | RTC_CR_ALRAIE), 0);
+
+          ret = rtchw_check_alrawf();
+          if (ret < 0)
+            {
+              goto errout_with_wprunlock;
+            }
+
+          /* Unset the alarm */
+
+          putreg32(-1, STM32_RTC_ALRMAR);
+          rtc_wprlock();
+          ret = OK;
+        }
+        break;
+
+      case RTC_ALARMB:
+        {
+          /* Cancel the global callback function */
+
+           g_alarmcb[alarmid].ac_cb  = NULL;
+           g_alarmcb[alarmid].ac_arg = NULL;
+
+          /* Need to follow RTC register wrote protection.
+           * Disable the write protection for RTC registers
+           */
+
+          rtc_wprunlock();
+
+#if 0
+          /* Set Initialization mode */
+
+          ret = rtc_enterinit();
+          if (ret < 0)
+            {
+              goto errout_with_wprunlock;
+            }
+#endif
+
+          /* Disable RTC alarm and interrupt */
+
+          modifyreg32(STM32_RTC_CR, (RTC_CR_ALRBE | RTC_CR_ALRBIE), 0);
+
+          ret = rtchw_check_alrbwf();
+          if (ret < 0)
+            {
+              goto errout_with_wprunlock;
+            }
+
+          /* Unset the alarm */
+
+          putreg32(-1, STM32_RTC_ALRMBR);
+          rtc_wprlock();
+          ret = OK;
+        }
+        break;
+
+      default:
+        rtcvdbg("ERROR: Invalid ALARM%d\n", alminfo->as_id);
+        break;
+    }
+
+  return ret;
+
+errout_with_wprunlock:
+  rtc_wprlock();
   return ret;
 }
 #endif

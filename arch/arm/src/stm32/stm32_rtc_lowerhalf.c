@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32_rtc_lowerhalf.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,6 +32,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
+
+/* REVISIT:  This driver is *not* thread-safe! */
 
 /****************************************************************************
  * Included Files
@@ -490,9 +492,11 @@ static int stm32_setrelative(FAR struct rtc_lowerhalf_s *lower,
 
           seconds = mktime(&time);
 
-          /* Add the seconds offset */
+          /* Add the seconds offset.  Add one to the number of seconds
+           * because we are unsure of the phase of the timer.
+           */
 
-          seconds += alarminfo->reltime;
+          seconds += (alarminfo->reltime + 1);
 
           /* And convert the time back to broken out format */
 
@@ -563,15 +567,17 @@ static int stm32_setrelative(FAR struct rtc_lowerhalf_s *lower,
       ts.tv_nsec = 0;
 #endif
 
-      /* Add the seconds offset */
+      /* Add the seconds offset.  Add one to the number of seconds because
+       * we are unsure of the phase of the timer.
+       */
 
-      ts.tv_sec += alarminfo->reltime;
+      ts.tv_sec   += (alarminfo->reltime + 1);
 
       /* Remember the callback information */
 
-      cbinfo            = &priv->cbinfo[0];
-      cbinfo->cb        = alarminfo->cb;
-      cbinfo->priv      = alarminfo->priv;
+      cbinfo       = &priv->cbinfo[0];
+      cbinfo->cb   = alarminfo->cb;
+      cbinfo->priv = alarminfo->priv;
 
       /* And set the alarm */
 
