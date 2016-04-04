@@ -769,8 +769,7 @@ static int rtchw_check_alrbwf(void)
 #ifdef CONFIG_RTC_ALARM
 static int rtchw_set_alrmar(rtc_alarmreg_t alarmreg)
 {
-  int ret= -EBUSY;
-  uint32_t cr;
+  int ret = -EBUSY;
 
   /* Need to follow RTC register wrote protection
    * Disable the write protection for RTC registers
@@ -807,8 +806,7 @@ errout_with_wprunlock:
 #ifdef CONFIG_RTC_ALARM
 static int rtchw_set_alrmbr(rtc_alarmreg_t alarmreg)
 {
-  uint32_t cr;
-  int ret= -EBUSY;
+  int ret = -EBUSY;
 
   /* Need to follow RTC register wrote protection
    * Disable the write protection for RTC registers
