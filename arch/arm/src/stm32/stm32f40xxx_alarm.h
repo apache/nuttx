@@ -93,5 +93,21 @@ struct alm_setalarm_s
 
 int stm32_rtc_setalarm(FAR struct alm_setalarm_s *alminfo);
 
+/****************************************************************************
+ * Name: stm32_rtc_cancelalarm
+ *
+ * Description:
+ *   Cancel an alaram.
+ *
+ * Input Parameters:
+ *  alarmid - Identifies the alarm to be cancelled
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno on failure
+ *
+ ****************************************************************************/
+
+int stm32_rtc_cancelalarm(enum alm_id_e alarmid);
+
 #endif /* CONFIG_RTC_ALARM */
 #endif /* __ARCH_ARM_SRC_STM32_STM32F40XXX_ALARM_H */

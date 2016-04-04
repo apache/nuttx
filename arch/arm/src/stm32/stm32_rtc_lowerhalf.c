@@ -617,13 +617,30 @@ static int stm32_setrelative(FAR struct rtc_lowerhalf_s *lower,
 static int stm32_cancelalarm(FAR struct rtc_lowerhalf_s *lower, int alarmid)
 {
 #ifdef CONFIG_STM32_STM32F40XX
-  /* ID0-> Alarm A; ID1 -> Alarm B */
+  FAR struct stm32_lowerhalf_s *priv;
+  FAR struct stm32_cbinfo_s *cbinfo;
+  int ret = -EINVAL;
 
   DEBUGASSERT(lower != NULL);
   DEBUGASSERT(alarmid == RTC_ALARMA || alarmid == RTC_ALARMB);
+  priv = (FAR struct stm32_lowerhalf_s *)lower;
 
-# warning Missing logic
-  return -ENOSYS;
+  /* ID0-> Alarm A; ID1 -> Alarm B */
+
+  if (alarmid == RTC_ALARMA || alarmid == RTC_ALARMB)
+    {
+      /* Nullify callback information to reduce window for race conditions */
+
+      cbinfo       = &priv->cbinfo[alarmid];
+      cbinfo->cb   = NULL;
+      cbinfo->priv = NULL;
+
+      /* Then cancel the alarm */
+
+      ret = stm32_rtc_cancelalarm((enum alm_id_e)alarmid);
+    }
+
+  return ret;
 
 #else
   FAR struct stm32_lowerhalf_s *priv;
@@ -638,6 +655,8 @@ static int stm32_cancelalarm(FAR struct rtc_lowerhalf_s *lower, int alarmid)
   cbinfo       = &priv->cbinfo[0];
   cbinfo->cb   = NULL;
   cbinfo->priv = NULL;
+
+  /* Then cancel the alarm */
 
   return stm32_rtc_cancelalarm();
 #endif
