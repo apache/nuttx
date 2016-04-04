@@ -621,6 +621,7 @@ static void rtc_resume(void)
  *
  ************************************************************************************/
 
+#ifdef CONFIG_RTC_ALARM
 static int stm32_rtc_alarm_handler(int irq, void *context)
 {
   FAR struct alm_cbinfo_s *cbinfo;
@@ -684,6 +685,7 @@ static int stm32_rtc_alarm_handler(int irq, void *context)
 
   return ret;
 }
+#endif
 
 /************************************************************************************
  * Name: rtchw_check_alrXwf X= a or B
