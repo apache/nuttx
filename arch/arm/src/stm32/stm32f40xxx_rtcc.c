@@ -780,9 +780,7 @@ static int rtchw_set_alrmar(rtc_alarmreg_t alarmreg)
 
   /* Disable RTC alarm & Interrupt */
 
-  cr  = getreg32(STM32_RTC_CR);
-  cr &= ~(RTC_CR_ALRAE | RTC_CR_ALRAIE); /* Alarm A disable & Int A disable */
-  putreg32(cr, STM32_RTC_CR);
+  modifyreg32(STM32_RTC_CR, (RTC_CR_ALRAE | RTC_CR_ALRAIE), 0);
 
   ret = rtchw_check_alrawf();
   if (ret != OK)
@@ -793,14 +791,12 @@ static int rtchw_set_alrmar(rtc_alarmreg_t alarmreg)
   /* Set the RTC Alarm register */
 
   putreg32(alarmreg, STM32_RTC_ALRMAR);
-  rtcvdbg("  ALRMAR1: %08x:%08x\n",
+  rtcvdbg("  TR: %08x ALRMAR: %08x\n",
           getreg32(STM32_RTC_TR), getreg32(STM32_RTC_ALRMAR));
 
   /* Enable RTC alarm */
 
-  cr  = getreg32(STM32_RTC_CR);
-  cr |= (RTC_CR_ALRAE | RTC_CR_ALRAIE);
-  putreg32(cr, STM32_RTC_CR);
+  modifyreg32(STM32_RTC_CR, 0, (RTC_CR_ALRAE | RTC_CR_ALRAIE));
 
 errout_with_wprunlock:
   rtc_wprlock();
@@ -822,9 +818,7 @@ static int rtchw_set_alrmbr(rtc_alarmreg_t alarmreg)
 
   /* Disable RTC alarm B & Interrupt B */
 
-  cr  = getreg32(STM32_RTC_CR);
-  cr &= ~(RTC_CR_ALRBE | RTC_CR_ALRBIE);
-  putreg32(cr, STM32_RTC_CR);
+  modifyreg32(STM32_RTC_CR, (RTC_CR_ALRBE | RTC_CR_ALRBIE), 0);
 
   ret = rtchw_check_alrbwf();
   if (ret != OK)
@@ -835,14 +829,12 @@ static int rtchw_set_alrmbr(rtc_alarmreg_t alarmreg)
   /* Set the RTC Alarm register */
 
   putreg32(alarmreg, STM32_RTC_ALRMBR);
-  rtcvdbg("  ALRMAR1: %08x:%08x\n",
-          getreg32(STM32_RTC_TR), getreg32(STM32_RTC_ALRMAR));
+  rtcvdbg("  TR: %08x ALRMBR: %08x\n",
+          getreg32(STM32_RTC_TR), getreg32(STM32_RTC_ALRMBR));
 
   /* Enable RTC alarm B */
 
-  cr  = getreg32(STM32_RTC_CR);
-  cr |= (RTC_CR_ALRBE | RTC_CR_ALRBIE);
-  putreg32(cr, STM32_RTC_CR);
+  modifyreg32(STM32_RTC_CR, 0, (RTC_CR_ALRBE | RTC_CR_ALRBIE));
 
 rtchw_set_alrmbr_exit:
   rtc_wprlock();
