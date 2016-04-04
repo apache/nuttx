@@ -1444,16 +1444,6 @@ int stm32_rtc_cancelalarm(enum alm_id_e alarmid)
 
           rtc_wprunlock();
 
-#if 0
-          /* Set Initialization mode */
-
-          ret = rtc_enterinit();
-          if (ret < 0)
-            {
-              goto errout_with_wprunlock;
-            }
-#endif
-
           /* Disable RTC alarm and interrupt */
 
           modifyreg32(STM32_RTC_CR, (RTC_CR_ALRAE | RTC_CR_ALRAIE), 0);
@@ -1484,16 +1474,6 @@ int stm32_rtc_cancelalarm(enum alm_id_e alarmid)
            */
 
           rtc_wprunlock();
-
-#if 0
-          /* Set Initialization mode */
-
-          ret = rtc_enterinit();
-          if (ret < 0)
-            {
-              goto errout_with_wprunlock;
-            }
-#endif
 
           /* Disable RTC alarm and interrupt */
 
