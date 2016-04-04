@@ -73,6 +73,7 @@ config RTC_ALARM
 config RTC_NALARMS
 	int "Number of alarms"
 	default 1
+	depends on RTC_ALARM
 	---help---
 		Number of alarms supported by the hardware.
 
