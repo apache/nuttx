@@ -94,7 +94,8 @@ int stm32_bringup(void)
 #ifdef HAVE_RTC_DRIVER
   FAR struct rtc_lowerhalf_s *lower;
 #endif
-#if defined(CONFIG_CAN) || defined(CONFIG_ADC) || defined(HAVE_RTC_DRIVER)
+#if defined(CONFIG_CAN) || defined(CONFIG_ADC) || defined(HAVE_SDIO) || \
+    defined(HAVE_RTC_DRIVER)
   int ret;
 #endif
 
@@ -115,6 +116,17 @@ int stm32_bringup(void)
   if (ret != OK)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize ADC: %d\n", ret);
+    }
+#endif
+
+#ifdef HAVE_SDIO
+  /* Initialize the SDIO block driver */
+
+  ret = stm32_sdio_initialize();
+  if (ret != OK)
+    {
+      fdbg("ERROR: Failed to initialize MMC/SD driver: %d\n", ret);
+      return ret;
     }
 #endif
 

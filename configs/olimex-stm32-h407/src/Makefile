@@ -76,6 +76,10 @@ ifeq ($(CONFIG_CAN),y)
 CSRCS += stm32_can.c
 endif
 
+ifeq ($(CONFIG_STM32_SDIO),y)
+CSRCS += stm32_sdio.c
+endif
+
 ifeq ($(CONFIG_ARCH_FPU),y)
 CSRCS += stm32_ostest.c
 endif

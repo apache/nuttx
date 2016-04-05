@@ -52,6 +52,7 @@
 #define HAVE_USBDEV     1
 #define HAVE_USBHOST    1
 #define HAVE_USBMONITOR 1
+#define HAVE_SDIO       1
 #define HAVE_RTC_DRIVER 1
 #
 /* Can't support USB host or device features if USB OTG HS is not enabled */
@@ -83,6 +84,49 @@
 
 #if !defined(CONFIG_STM32_CAN1) && !defined(CONFIG_STM32_CAN2)
 #  undef CONFIG_CAN
+#endif
+
+/* Can't support MMC/SD features if mountpoints are disabled or if SDIO support
+ * is not enabled.  Can't support MMC/SD features if the upper half MMC/SD SDIO
+ * driver is not enabled.
+ */
+
+#if defined(CONFIG_DISABLE_MOUNTPOINT) || !defined(CONFIG_STM32_SDIO)
+#  undef HAVE_SDIO
+#endif
+
+#if !defined(CONFIG_MMCSD_SDIO)
+#  undef HAVE_SDIO
+#endif
+
+#undef  SDIO_MINOR     /* Any minor number, default 0 */
+#define SDIO_SLOTNO 0  /* Only one slot */
+
+#ifdef HAVE_SDIO
+
+#  if defined(CONFIG_NSH_MMCSDSLOTNO) && CONFIG_NSH_MMCSDSLOTNO != 0
+#    warning Only one MMC/SD slot, slot 0
+#    define CONFIG_NSH_MMCSDSLOTNO SDIO_SLOTNO
+#  endif
+
+#  if defined(CONFIG_NSH_MMCSDMINOR)
+#    define SDIO_MINOR CONFIG_NSH_MMCSDMINOR
+#  else
+#    define SDIO_MINOR 0
+#  endif
+
+  /* SD card bringup does not work if performed on the IDLE thread because it
+   * will cause waiting.  Use either:
+   *
+   *  CONFIG_LIB_BOARDCTL=y, OR
+   *  CONFIG_BOARD_INITIALIZE=y && CONFIG_BOARD_INITTHREAD=y
+   */
+
+#  if defined(CONFIG_BOARD_INITIALIZE) && !defined(CONFIG_LIB_BOARDCTL) && \
+     !defined(CONFIG_BOARD_INITTHREAD)
+#    warning SDIO initialization cannot be perfomed on the IDLE thread
+#    undef HAVE_SDIO
+#  endif
 #endif
 
 /* Check if we can support the RTC driver */
@@ -135,6 +179,22 @@
                            GPIO_PUSHPULL | GPIO_PORTB | GPIO_PIN5)
 #endif
 
+/* MicroSD SDIO
+ *
+ * ---------- --------  -------  ---------------------------
+ * PIO        SIGNAL    Pulled   Comments
+ * ---------- --------  -------  -----------------------
+ * --         NCD                Card detect, combined with pins settings CD/PC11
+ * PC9        DAT1      UP 33K    Also interrupt
+ * PC8        DAT0      UP 33K   "        " "" "    "
+ * PC12       CLK        ----    "        " "" "    "
+ * PD2        CMD       UP 33K   "        " "" "    "
+ * PC11       CD/DAT3   DOWN 1M  "        " "" "    "
+ * PC10       DAT2      UP 33K   Also Read wait operation
+ * --         WrProtect          Not Supported
+ * ---------- --------  -------  ----------------------
+ */
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -168,6 +228,18 @@
  ****************************************************************************/
 
 int stm32_bringup(void);
+
+/****************************************************************************
+ * Name: stm32_sdio_initialize
+ *
+ * Description:
+ *   Initialize SDIO-based MMC/SD card support
+ *
+ ****************************************************************************/
+
+#if defined(HAVE_SDIO)
+int stm32_sdio_initialize(void);
+#endif
 
 /****************************************************************************
  * Name: stm32_usbinitialize
