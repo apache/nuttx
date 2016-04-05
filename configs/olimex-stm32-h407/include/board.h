@@ -153,11 +153,11 @@
 
 /* Timers driven from APB2 will be twice PCLK2 */
 
-#define STM32_APB2_TIM1_CLKIN   (2*STM32_PCLK2_FREQUENCY)
-#define STM32_APB2_TIM8_CLKIN   (2*STM32_PCLK2_FREQUENCY)
-#define STM32_APB2_TIM9_CLKIN   (2*STM32_PCLK2_FREQUENCY)
-#define STM32_APB2_TIM10_CLKIN  (2*STM32_PCLK2_FREQUENCY)
-#define STM32_APB2_TIM11_CLKIN  (2*STM32_PCLK2_FREQUENCY)
+#define STM32_APB2_TIM1_CLKIN   (2 * STM32_PCLK2_FREQUENCY)
+#define STM32_APB2_TIM8_CLKIN   (2 * STM32_PCLK2_FREQUENCY)
+#define STM32_APB2_TIM9_CLKIN   (2 * STM32_PCLK2_FREQUENCY)
+#define STM32_APB2_TIM10_CLKIN  (2 * STM32_PCLK2_FREQUENCY)
+#define STM32_APB2_TIM11_CLKIN  (2 * STM32_PCLK2_FREQUENCY)
 
 /* Timer Frequencies, if APBx is set to 1, frequency is same to APBx
  * otherwise frequency is 2xAPBx.
@@ -165,7 +165,37 @@
  */
 
 #define STM32_TIM18_FREQUENCY   STM32_HCLK_FREQUENCY
-#define STM32_TIM27_FREQUENCY   STM32_HCLK_FREQUENCY
+#define STM32_TIM27_FREQUENCY   (STM32_HCLK_FREQUENCY / 2)
+
+/* SDIO dividers.  Note that slower clocking is required when DMA is disabled
+ * in order to avoid RX overrun/TX underrun errors due to delayed responses
+ * to service FIFOs in interrupt driven mode.  These values have not been
+ * tuned!!!
+ *
+ * SDIOCLK=48MHz, SDIO_CK=SDIOCLK/(118+2)=400 KHz
+ */
+
+#define SDIO_INIT_CLKDIV        (118 << SDIO_CLKCR_CLKDIV_SHIFT)
+
+/* DMA ON:  SDIOCLK=48MHz, SDIO_CK=SDIOCLK/(1+2)=16 MHz
+ * DMA OFF: SDIOCLK=48MHz, SDIO_CK=SDIOCLK/(2+2)=12 MHz
+ */
+
+#ifdef CONFIG_SDIO_DMA
+#  define SDIO_MMCXFR_CLKDIV    (1 << SDIO_CLKCR_CLKDIV_SHIFT)
+#else
+#  define SDIO_MMCXFR_CLKDIV    (2 << SDIO_CLKCR_CLKDIV_SHIFT)
+#endif
+
+/* DMA ON:  SDIOCLK=48MHz, SDIO_CK=SDIOCLK/(1+2)=16 MHz
+ * DMA OFF: SDIOCLK=48MHz, SDIO_CK=SDIOCLK/(2+2)=12 MHz
+ */
+
+#ifdef CONFIG_SDIO_DMA
+#  define SDIO_SDXFR_CLKDIV     (1 << SDIO_CLKCR_CLKDIV_SHIFT)
+#else
+#  define SDIO_SDXFR_CLKDIV     (2 << SDIO_CLKCR_CLKDIV_SHIFT)
+#endif
 
 /* LED definitions ******************************************************************/
 /* If CONFIG_ARCH_LEDS is not defined, then the user can control the status LED in any
@@ -179,7 +209,7 @@
 
 /* LED bits for use with board_userled_all() */
 
-#define BOARD_LED_STATUS_BIT    (1 << BOARD_LED1)
+#define BOARD_LED_STATUS_BIT  (1 << BOARD_LED_STATUS)
 
 /* If CONFIG_ARCH_LEDs is defined, then NuttX will control the status LED of the
  * Olimex STM32-H405.  The following definitions describe how NuttX controls the LEDs:
@@ -205,6 +235,7 @@
 /* Alternate function pin selections ************************************************/
 
 /* USART3: */
+
 #if 0
 #define GPIO_USART3_RX    GPIO_USART3_RX_1  /* PB11 */
 #define GPIO_USART3_TX    GPIO_USART3_TX_1  /* PB10 */
@@ -221,10 +252,21 @@
 
 /* CAN: */
 
-#define GPIO_CAN1_RX      GPIO_CAN1_RX_2   /* PB8 */
-#define GPIO_CAN1_TX      GPIO_CAN1_TX_2   /* PB9 */
-#define GPIO_CAN2_RX      GPIO_CAN1_RX_2   /* PB5 */
-#define GPIO_CAN2_TX      GPIO_CAN1_TX_2   /* PB6 */
+#define GPIO_CAN1_RX      GPIO_CAN1_RX_2    /* PB8 */
+#define GPIO_CAN1_TX      GPIO_CAN1_TX_2    /* PB9 */
+#define GPIO_CAN2_RX      GPIO_CAN1_RX_2    /* PB5 */
+#define GPIO_CAN2_TX      GPIO_CAN1_TX_2    /* PB6 */
+
+/* DMA Channl/Stream Selections *****************************************************/
+/* Stream selections are arbitrary for now but might become important in the future
+ * if we set aside more DMA channels/streams.
+ *
+ * SDIO DMA
+ *   DMAMAP_SDIO_1 = Channel 4, Stream 3
+ *   DMAMAP_SDIO_2 = Channel 4, Stream 6
+ */
+
+#define DMAMAP_SDIO DMAMAP_SDIO_1
 
 /************************************************************************************
  * Public Data
