@@ -409,7 +409,7 @@ static inline void mpu_control(bool enable)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_ARMV7M_HAVE_ICACHE) || defined(CONFIG_ARMV7M_DCACHE)
+#if defined(CONFIG_ARMV7R_HAVE_ICACHE) || defined(CONFIG_ARMV7R_DCACHE)
 static inline void mpu_priv_stronglyordered(uintptr_t base, size_t size)
 {
   unsigned int region = mpu_allocregion();
