@@ -105,7 +105,9 @@ int stm32_bringup(void)
   ret = stm32_can_initialize();
   if (ret != OK)
     {
-      syslog(LOG_ERR, "ERROR: Failed to initialize CAN: %d\n", ret);
+      syslog(LOG_ERR,
+             "ERROR: Failed to initialize CAN: %d\n",
+             ret);
     }
 #endif
 
@@ -115,7 +117,9 @@ int stm32_bringup(void)
   ret = stm32_adc_initialize();
   if (ret != OK)
     {
-      syslog(LOG_ERR, "ERROR: Failed to initialize ADC: %d\n", ret);
+      syslog(LOG_ERR,
+             "ERROR: Failed to initialize ADC: %d\n",
+             ret);
     }
 #endif
 
@@ -125,8 +129,9 @@ int stm32_bringup(void)
   ret = stm32_sdio_initialize();
   if (ret != OK)
     {
-      fdbg("ERROR: Failed to initialize MMC/SD driver: %d\n", ret);
-      return ret;
+      syslog(LOG_ERR,
+             "ERROR: Failed to initialize MMC/SD driver: %d\n",
+             ret);
     }
 #endif
 
@@ -138,8 +143,9 @@ int stm32_bringup(void)
   ret = stm32_usbhost_initialize();
   if (ret != OK)
     {
-      syslog(LOG_ERR, "ERROR: Failed to initialize USB host: %d\n", ret);
-      return ret;
+      syslog(LOG_ERR,
+             "ERROR: Failed to initialize USB host: %d\n",
+             ret);
     }
 #endif
 
@@ -149,7 +155,9 @@ int stm32_bringup(void)
   ret = usbmonitor_start(0, NULL);
   if (ret != OK)
     {
-      syslog(LOG_ERR, "ERROR: Failed to start USB monitor: %d\n", ret);
+      syslog(LOG_ERR,
+             "ERROR: Failed to start USB monitor: %d\n",
+             ret);
     }
 #endif
 
