@@ -47,28 +47,71 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+/* Configuration ************************************************************/
 
-/* Olimex-STM32-P407 GPIOs ****************************************************/
+#define HAVE_USBDEV     1
+#define HAVE_USBHOST    1
+#define HAVE_USBMONITOR 1
+#define HAVE_RTC_DRIVER 1
+#
+/* Can't support USB host or device features if USB OTG HS is not enabled */
+
+#ifndef CONFIG_STM32_OTGHS
+#  undef HAVE_USBDEV
+#  undef HAVE_USBHOST
+#  undef HAVE_USBMONITOR
+#endif
+
+/* Can't support USB device monitor if USB device is not enabled */
+
+#ifndef CONFIG_USBDEV
+#  undef HAVE_USBDEV
+#  undef HAVE_USBMONITOR
+#endif
+
+/* Can't support USB host is USB host is not enabled */
+
+#ifndef CONFIG_USBHOST
+#  undef HAVE_USBHOST
+#endif
+
+/* Check if we should enable the USB monitor before starting NSH */
+
+#if !defined(CONFIG_USBDEV_TRACE) || !defined(CONFIG_SYSTEM_USBMONITOR)
+#  undef HAVE_USBMONITOR
+#endif
+
+#if !defined(CONFIG_STM32_CAN1) && !defined(CONFIG_STM32_CAN2)
+#  undef CONFIG_CAN
+#endif
+
+/* Check if we can support the RTC driver */
+
+#if !defined(CONFIG_RTC) || !defined(CONFIG_RTC_DRIVER)
+#  undef HAVE_RTC_DRIVER
+#endif
+
+/* Olimex-STM32-P407 GPIOs **************************************************/
 /* LEDs */
 
-#define GPIO_LED_STATUS (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
-                         GPIO_OUTPUT_CLEAR|GPIO_PORTC|GPIO_PIN12)
+#define GPIO_LED_STATUS    (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | \
+                            GPIO_OUTPUT_CLEAR | GPIO_PORTC | GPIO_PIN12)
 
 /* BUTTONS -- NOTE that all have EXTI interrupts configured */
 
-#define MIN_IRQBUTTON   BUTTON_BUT
-#define MAX_IRQBUTTON   BUTTON_BUT
-#define NUM_IRQBUTTONS  1
+#define MIN_IRQBUTTON      BUTTON_BUT
+#define MAX_IRQBUTTON      BUTTON_BUT
+#define NUM_IRQBUTTONS     1
 
-#define GPIO_BTN_BUT   (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTA|GPIO_PIN0)
+#define GPIO_BTN_BUT      (GPIO_INPUT | GPIO_FLOAT | GPIO_EXTI | GPIO_PORTA | \
+                           GPIO_PIN0)
 
 /* USB OTG FS - USB-A connector
  *
  * PC4  OTG_FS_VBUS VBUS sensing
  */
 
-//#define GPIO_OTGFS_VBUS  (GPIO_INPUT|GPIO_FLOAT|GPIO_PORTC|GPIO_PIN4)
-//#define GPIO_OTGFS_VBUS  (GPIO_INPUT|GPIO_FLOAT|GPIO_PORTC|GPIO_PIN4)
+#define GPIO_OTGFS_VBUS   (GPIO_INPUT | GPIO_FLOAT | GPIO_PORTC | GPIO_PIN4)
 
 /* USB OTG HS - miniUSB connector
  *
@@ -77,62 +120,87 @@
  * PB5  OTG_HS_Overcurrent
  */
 
-#define GPIO_OTGHS_VBUS (GPIO_INPUT|GPIO_FLOAT|GPIO_SPEED_100MHz|GPIO_OPENDRAIN|GPIO_PORTB|GPIO_PIN13)
-#define GPIO_OTGHS_PWRON (GPIO_OUTPUT|GPIO_OUTPUT_SET|GPIO_FLOAT|GPIO_SPEED_100MHz|GPIO_PUSHPULL|GPIO_PORTA|GPIO_PIN8)
+#define GPIO_OTGHS_VBUS   (GPIO_INPUT | GPIO_FLOAT | GPIO_SPEED_100MHz | \
+                           GPIO_OPENDRAIN | GPIO_PORTB | GPIO_PIN13)
+#define GPIO_OTGHS_PWRON  (GPIO_OUTPUT | GPIO_OUTPUT_SET | GPIO_FLOAT | \
+                           GPIO_SPEED_100MHz | GPIO_PUSHPULL | GPIO_PORTA | GPIO_PIN8)
 
 #ifdef CONFIG_USBHOST
-#  define GPIO_OTGHS_OVER  (GPIO_INPUT|GPIO_EXTI|GPIO_FLOAT|GPIO_SPEED_100MHz|GPIO_PUSHPULL|GPIO_PORTB|GPIO_PIN5)
+#  define GPIO_OTGHS_OVER (GPIO_INPUT | GPIO_EXTI | GPIO_FLOAT | \
+                           GPIO_SPEED_100MHz | GPIO_PUSHPULL | GPIO_PORTB | \
+                           GPIO_PIN5)
 
 #else
-#  define GPIO_OTGHS_OVER  (GPIO_INPUT|GPIO_FLOAT|GPIO_SPEED_100MHz|GPIO_PUSHPULL|GPIO_PORTB|GPIO_PIN5)
+#  define GPIO_OTGHS_OVER (GPIO_INPUT | GPIO_FLOAT | GPIO_SPEED_100MHz | \
+                           GPIO_PUSHPULL | GPIO_PORTB | GPIO_PIN5)
 #endif
 
-/****************************************************************************************************
+/****************************************************************************
  * Public Types
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************************
+/****************************************************************************
  * Public data
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
+ * Name: stm32_bringup
+ *
+ * Description:
+ *   Perform architecture specific initialization
+ *
+ *   CONFIG_LIB_BOARDCTL=y:
+ *     If CONFIG_NSH_ARCHINITIALIZE=y:
+ *       Called from the NSH library (or other application)
+ *     Otherse, assumed to be called from some other application.
+ *
+ *   Otherwise CONFIG_BOARD_INITIALIZE=y:
+ *     Called from board_initialize().
+ *
+ *   Otherise, bad news:  Never called
+ *
+ ****************************************************************************/
+
+int stm32_bringup(void);
+
+/****************************************************************************
  * Name: stm32_usbinitialize
  *
  * Description:
- *   Called from stm32_usbinitialize very early in initialization to setup USB-related
- *   GPIO pins for the Olimex-STM32-H405 board.
+ *   Called from stm32_usbinitialize very early in initialization to setup
+ *   USB-related GPIO pins for the Olimex-STM32-H405 board.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_STM32_OTGFS) || defined(CONFIG_STM32_OTGHS)
 void weak_function stm32_usbinitialize(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_adc_initialize
  *
  * Description:
  *   Called at application startup time to initialize the ADC functionality.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_ADC
 int stm32_adc_initialize(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_can_initialize
  *
  * Description:
  *   Called at application startup time to initialize the CAN functionality.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_CAN) && (defined(CONFIG_STM32_CAN1) || defined(CONFIG_STM32_CAN2))
 int stm32_can_initialize(void);
