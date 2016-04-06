@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/olimex-stm32-h407/src/stm32_appinit.c
+ * config/olimex-stm32-h407/src/stm32_bringup.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -57,18 +57,22 @@
 #include "stm32.h"
 #include "olimex-stm32-h407.h"
 
-#ifdef CONFIG_LIB_BOARDCTL
+/* Conditional logic in olimex-stm32-h407.h will determine if certain features
+ * are supported.  Tests for these features need to be made after including
+ * olimex-stm32-h407.h.
+ */
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
+#ifdef HAVE_RTC_DRIVER
+#  include <nuttx/timers/rtc.h>
+#  include "stm32_rtc.h"
+#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_app_initialize
+ * Name: stm32_bringup
  *
  * Description:
  *   Perform architecture specific initialization
@@ -78,11 +82,109 @@
  *       Called from the NSH library (or other application)
  *     Otherse, assumed to be called from some other application.
  *
+ *   Otherwise CONFIG_BOARD_INITIALIZE=y:
+ *     Called from board_initialize().
+ *
+ *   Otherise, bad news:  Never called
+ *
  ****************************************************************************/
 
-int board_app_initialize(void)
+int stm32_bringup(void)
 {
-  return stm32_bringup();
-}
+#ifdef HAVE_RTC_DRIVER
+  FAR struct rtc_lowerhalf_s *lower;
+#endif
+#if defined(CONFIG_CAN) || defined(CONFIG_ADC) || defined(HAVE_SDIO) || \
+    defined(HAVE_RTC_DRIVER)
+  int ret;
+#endif
 
-#endif /* CONFIG_LIB_BOARDCTL */
+#ifdef CONFIG_CAN
+  /* Configure on-board CAN if CAN support has been selected. */
+
+  ret = stm32_can_initialize();
+  if (ret != OK)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to initialize CAN: %d\n",
+             ret);
+    }
+#endif
+
+#ifdef CONFIG_ADC
+  /* Configure on-board ADCs if ADC support has been selected. */
+
+  ret = stm32_adc_initialize();
+  if (ret != OK)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to initialize ADC: %d\n",
+             ret);
+    }
+#endif
+
+#ifdef HAVE_SDIO
+  /* Initialize the SDIO block driver */
+
+  ret = stm32_sdio_initialize();
+  if (ret != OK)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to initialize MMC/SD driver: %d\n",
+             ret);
+    }
+#endif
+
+#ifdef HAVE_USBHOST
+  /* Initialize USB host operation.  stm32_usbhost_initialize() starts a thread
+   * will monitor for USB connection and disconnection events.
+   */
+
+  ret = stm32_usbhost_initialize();
+  if (ret != OK)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to initialize USB host: %d\n",
+             ret);
+    }
+#endif
+
+#ifdef HAVE_USBMONITOR
+  /* Start the USB Monitor */
+
+  ret = usbmonitor_start(0, NULL);
+  if (ret != OK)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to start USB monitor: %d\n",
+             ret);
+    }
+#endif
+
+#ifdef HAVE_RTC_DRIVER
+  /* Instantiate the STM32 lower-half RTC driver */
+
+  lower = stm32_rtc_lowerhalf();
+  if (!lower)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to instantiate the RTC lower-half driver\n");
+    }
+  else
+    {
+      /* Bind the lower half driver and register the combined RTC driver
+       * as /dev/rtc0
+       */
+
+      ret = rtc_initialize(0, lower);
+      if (ret < 0)
+        {
+          syslog(LOG_ERR,
+                 "ERROR: Failed to bind/register the RTC driver: %d\n",
+                 ret);
+        }
+    }
+#endif
+
+  return OK;
+}
