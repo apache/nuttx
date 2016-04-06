@@ -244,7 +244,7 @@ NXFLAT Toolchain
   the NXFLAT tools, then you will still have to build a portion of the buildroot
   tools -- just the NXFLAT tools.  The buildroot with the NXFLAT tools can
   be downloaded from the NuttX Bitbucket download site
-  (https://bitbucket.org/patacongo/nuttx/downloads/).
+  (https://bitbucket.org/nuttx/nuttx/downloads/).
 
   This GNU toolchain builds and executes in the Linux or Cygwin environment.
 

@@ -292,7 +292,7 @@ NuttX buildroot Toolchain
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
   If NuttX buildroot toolchain source tarball cne can be downloaded from the
-  NuttX Bitbucket download site (https://bitbucket.org/patacongo/nuttx/downloads/).
+  NuttX Bitbucket download site (https://bitbucket.org/nuttx/nuttx/downloads/).
   This GNU toolchain builds and executes in the Linux or Cygwin environment.
 
   1. You must have already configured Nuttx in <some-dir>/nuttx.

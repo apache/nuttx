@@ -239,7 +239,7 @@ NuttX EABI "buildroot" Toolchain
   different from the default in your PATH variable).
 
   If you have no Cortex-M0 toolchain, one can be downloaded from the NuttX
-  Bitbucket download site (https://bitbucket.org/patacongo/nuttx/downloads/).
+  Bitbucket download site (https://bitbucket.org/nuttx/nuttx/downloads/).
   This GNU toolchain builds and executes in the Linux or Cygwin environment.
 
   1. You must have already configured Nuttx in <some-dir>/nuttx.
@@ -300,7 +300,7 @@ NXFLAT Toolchain
   the NXFLAT tools, then you will still have to build a portion of the buildroot
   tools -- just the NXFLAT tools.  The buildroot with the NXFLAT tools can
   be downloaded from the NuttX Bitbucket download site
-  (https://bitbucket.org/patacongo/nuttx/downloads/).
+  (https://bitbucket.org/nuttx/nuttx/downloads/).
 
   This GNU toolchain builds and executes in the Linux or Cygwin environment.
 
