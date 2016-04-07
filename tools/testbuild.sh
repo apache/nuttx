@@ -1,7 +1,7 @@
 #!/bin/bash
-# version.sh
+# testbuild.sh
 #
-#   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2016 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -180,7 +180,7 @@ function configure {
     fi
 
     if [ "X$toolchain" != "X" ]; then
-        setting=`grep TOOLCHAIN $nuttx/.config | grep =y`
+        setting=`grep TOOLCHAIN $nuttx/.config | grep -v CONFIG_ARM_TOOLCHAIN_GNU | grep =y`
         varname=`echo $setting | cut -d'=' -f1`
         if [ ! -z "varname" ]; then
             echo "  Disabling $varname"
