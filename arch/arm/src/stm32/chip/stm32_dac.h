@@ -87,7 +87,8 @@
 /* These definitions may be used for 16-bit values of either channel */
 
 #define DAC_CR_EN                (1 << 0)  /* Bit 0:  DAC channel enable */
-#define DAC_CR_BOFF              (1 << 1)  /* Bit 1:  DAC channel output buffer disable */
+#define DAC_CR_BOFF              (1 << 1)  /* Bit 1:  1=DAC channel output buffer disable */
+#define DAC_CR_BOFF_EN           (0 << 1)  /* Bit 1:  0=DAC channel output buffer enable */
 #define DAC_CR_TEN               (1 << 2)  /* Bit 2:  DAC channel trigger enable */
 #define DAC_CR_TSEL_SHIFT        (3)       /* Bits 3-5: DAC channel trigger selection */
 #define DAC_CR_TSEL_MASK         (7 << DAC_CR_TSEL_SHIFT)

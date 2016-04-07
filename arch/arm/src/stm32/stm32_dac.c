@@ -999,7 +999,7 @@ static int dac_chaninit(FAR struct stm32_chan_s *chan)
       chan->tsel |           /* Set trigger source (SW or timer TRGO event) */
       DAC_CR_MAMP_AMP1 |     /* Set waveform characteristics */
       DAC_CR_WAVE_DISABLED | /* Set no noise */
-      DAC_CR_BOFF;           /* Enable output buffer */
+      DAC_CR_BOFF_EN;        /* Enable output buffer */
   stm32_dac_modify_cr(chan, clearbits, setbits);
 
 #ifdef HAVE_DMA
