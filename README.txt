@@ -168,7 +168,7 @@ Downloading from Repositories
     instructions for cloning the core NuttX RTOS (corresponding to the nuttx
     tarball discussed above)::
 
-      git clone https://bitbucket.org/patacongo/nuttx.git nuttx
+      git clone https://bitbucket.org/nuttx/nuttx.git nuttx
 
     And the semi-optional apps/ application directory and be cloned like:
 

@@ -11605,4 +11605,5 @@
 	* include/nuttx/timer/rtc.h and drivers/timers/rtc.c:  Simplify the RTC
 	  interface.  The old interface was way to complex and was not fully
 	  implemented anywhere (2016-04-02).
+	* Moved NuttX repository to https://bitbucket.org/nuttx/nuttx (2016-04-06).
 
