@@ -181,28 +181,6 @@ Downloading from Repositories
         |         |
       nuttx/     apps/
 
-  Initialize Sub-Modules
-
-    The NuttX repository contains GIT sub-modules for the Documentation/,
-    arch/, and configs/ directories. These may need to be individually
-    initialized:
-
-      cd nuttx
-      git submodule init
-      git submodule update
-
-    This command can be used later to refresh all submodules with the
-    latest files:
-
-      git submodule foreach git pull
-
-    The submodules use the Bitbucket.org HTTPS address.  If you have SSH
-    access to the NuttX team repositories, you can switch to SSH by
-    modifying the URLs in:
-
-      nuttx/.git/modules/configs/config, and
-      nuttx/.git/modules/Documentation/config
-
   Configuring the Clones
 
     The following steps need to be performed for each of the repositories.
@@ -272,21 +250,6 @@ Related Repositories
 
     Yes, this really is a Pascal compiler.  The Pascal p-code run-time and
     pcode debugger can be built as a part of NuttX.
-
-  These repositories are GIT sub-modules and logically a part of the base
-  NuttX repository.
-
-  * https://bitbucket.org/nuttx/boards
-
-    This repository contains the board support for logic for all boards
-    supported by NuttX.  This repository is a Sub-Module of NuttX and will
-    appear as nuttx/configs when the NuttX repository is cloned.
-
-  * https://bitbucket.org/nuttx/documentation
-
-    The repository contains all NuttX documentation.  It is also a NuttX
-    sub-module and will appear at nuttx/Documentation in the NuttX source
-    tree.
 
 Notes about Header Files
 ------------------------
