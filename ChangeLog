@@ -11606,4 +11606,10 @@
 	  interface.  The old interface was way to complex and was not fully
 	  implemented anywhere (2016-04-02).
 	* Moved NuttX repository to https://bitbucket.org/nuttx/nuttx (2016-04-06).
+	* arch/arm/src/armv7-m/iar:  Convert more assembly language files for
+	  use with the IAR toolchain.  From Kha Vo (2016-04-08)
+	* Fix miscellaneous build issues for the IAR compiler.  From Kha Vo
+	  (2016-04-08).
+	* tools/ide_exporter.py:  IDE exported Python script for use with the
+	  IAR toolchain.  From Kha Vo (2016-04-08).
 
