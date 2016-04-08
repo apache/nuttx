@@ -384,13 +384,23 @@ static int rtc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
         if (ops->setalarm)
           {
+            pid_t pid;
+
+            /* A PID of zero means to signal the calling task */
+
+            pid = alarminfo->pid;
+            if (pid == 0)
+              {
+                pid = getpid();
+              }
+
             /* Save the signal info to be used to notify the caller when the
              * alarm expires.
              */
 
             upperinfo->active   = true;
             upperinfo->signo    = alarminfo->signo;
-            upperinfo->pid      = alarminfo->pid;
+            upperinfo->pid      = pid;
             upperinfo->sigvalue = alarminfo->sigvalue;
 
             /* Format the alarm info needed by the lower half driver */
@@ -447,13 +457,23 @@ static int rtc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
         if (ops->setrelative)
           {
+            pid_t pid;
+
+            /* A PID of zero means to signal the calling task */
+
+            pid = alarminfo->pid;
+            if (pid == 0)
+              {
+                pid = getpid();
+              }
+
             /* Save the signal info to be used to notify the caller when the
              * alarm expires.
              */
 
             upperinfo->active   = true;
             upperinfo->signo    = alarminfo->signo;
-            upperinfo->pid      = alarminfo->pid;
+            upperinfo->pid      = pid;
             upperinfo->sigvalue = alarminfo->sigvalue;
 
             /* Format the alarm info needed by the lower half driver */

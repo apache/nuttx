@@ -223,7 +223,7 @@ struct rtc_setalarm_s
 {
   uint8_t id;               /* Indicates the alarm to be set */
   uint8_t signo;            /* Signal number for alarm notification */
-  pid_t pid;                /* Identifies task to be notified */
+  pid_t pid;                /* Identifies task to be notified (0=caller) */
   union sigval sigvalue;    /* Data passed with notification */
   struct rtc_time time;     /* Alarm time */
 };
@@ -234,7 +234,7 @@ struct rtc_setrelative_s
 {
   uint8_t id;               /* Indicates the alarm to be set */
   uint8_t signo;            /* Signal number for alarm notification */
-  pid_t pid;                /* Identifies task to be notified */
+  pid_t pid;                /* Identifies task to be notified (0=caller) */
   union sigval sigvalue;    /* Data passed with notification */
   time_t reltime;           /* Relative time in seconds */
 };
