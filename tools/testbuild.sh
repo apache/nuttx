@@ -180,7 +180,7 @@ function configure {
     fi
 
     if [ "X$toolchain" != "X" ]; then
-        setting=`grep TOOLCHAIN $nuttx/.config | grep -v CONFIG_ARM_TOOLCHAIN_GNU | grep =y`
+        setting=`grep TOOLCHAIN $nuttx/.config | grep -v CONFIG_ARM_TOOLCHAIN_GNU=y | grep =y`
         varname=`echo $setting | cut -d'=' -f1`
         if [ ! -z "varname" ]; then
             echo "  Disabling $varname"
