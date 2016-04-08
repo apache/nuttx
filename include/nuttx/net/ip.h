@@ -100,6 +100,7 @@
 
 typedef uint16_t net_ipv6addr_t[8];
 
+#if defined(CONFIG_NET_IPv4) || defined(CONFIG_NET_IPv6)
 /* Describes and address in either the IPv4 or IPv6 domain */
 
 union ip_addr_u
@@ -116,7 +117,9 @@ union ip_addr_u
   net_ipv6addr_t ipv6;
 #endif
 };
+#endif
 
+#if defined(CONFIG_NET_IPv4) || defined(CONFIG_NET_IPv6)
 /* Describes address binding for a PF_INET or PF_INET6 socket */
 
 union ip_binding_u
@@ -145,6 +148,7 @@ union ip_binding_u
   } ipv6;
 #endif /* CONFIG_NET_IPv6 */
 };
+#endif
 
 #ifdef CONFIG_NET_IPv4
 /* The IPv4 header */
