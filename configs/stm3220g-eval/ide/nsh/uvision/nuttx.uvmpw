@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<ProjectWorkspace xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="project_mpw.xsd">
+
+  <SchemaVersion>1.0</SchemaVersion>
+
+  <Header>### uVision Project, (C) Keil Software</Header>
+
+  <WorkspaceName>WorkSpace</WorkspaceName>
+
+  <project>
+    <PathAndName>.\libboard.uvproj</PathAndName>
+  </project>
+
+  <project>
+    <PathAndName>.\libmm.uvproj</PathAndName>
+  </project>
+
+  <project>
+    <PathAndName>.\libfs.uvproj</PathAndName>
+  </project>
+
+  <project>
+    <PathAndName>.\libdrivers.uvproj</PathAndName>
+  </project>
+
+  <project>
+    <PathAndName>.\libarch.uvproj</PathAndName>
+  </project>
+
+  <project>
+    <PathAndName>.\libbinfmt.uvproj</PathAndName>
+  </project>
+
+  <project>
+    <PathAndName>.\libsched.uvproj</PathAndName>
+  </project>
+
+  <project>
+    <PathAndName>.\libapps.uvproj</PathAndName>
+  </project>
+
+  <project>
+    <PathAndName>.\libc.uvproj</PathAndName>
+  </project>
+
+  <project>
+    <PathAndName>.\libnet.uvproj</PathAndName>
+  </project>
+
+  <project>
+    <PathAndName>.\nuttx_main.uvproj</PathAndName>
+    <NodeIsActive>1</NodeIsActive>
+  </project>
+
+</ProjectWorkspace>

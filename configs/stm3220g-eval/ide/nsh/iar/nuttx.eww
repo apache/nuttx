@@ -1,0 +1,37 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<workspace>
+  <batchBuild/>
+  <project>
+    <path>$WS_DIR$/libboard.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$/libmm.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$/libfs.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$/libdrivers.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$/libarch.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$/libbinfmt.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$/libsched.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$/libapps.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$/libc.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$/libnet.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$/nuttx_main.ewp</path>
+  </project>
+</workspace>
