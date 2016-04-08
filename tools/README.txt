@@ -444,6 +444,13 @@ define.bat
   The define.bat script is a counterpart for use in the native Windows
   build.
 
+ide_exporter.py
+---------------
+
+  This Python script will help to create nuttx project in the IAR and
+  uVision IDEs.  These are few simple the steps to export the IDE
+  workspaces.  See for example configs/stm3220g-eval/README.txt.
+
 incdir.sh
 incdir.bat
 ---------

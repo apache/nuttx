@@ -187,7 +187,7 @@ IDEs
 
   Export nuttx to IAR or uVision workspace
   ----------------------------------------
-  The script nuttx/toos/ide_exporter.py will help to create nuttx project in
+  The script nuttx/tools/ide_exporter.py will help to create nuttx project in
   these IDEs.  Here are few simple the steps to export the IDE workspaces:
 
   1) Start the NuttX build from the Cygwin command line before trying to
@@ -227,8 +227,8 @@ IDEs
         ./tools/ide_exporter.py makelog_f2nsh_c  uvision_gcc ./configs/stm3220g-eval/ide/template/uvision_gcc/ -o ./configs/stm3220g-eval/ide/nsh/uvision
 
   3) Limitations:
-     - iar supports C only. Iar C++ does not compatible with g++ so disable
-       C++ if you want to use iar.
+     - IAR supports C only. Iar C++ does not compatible with g++ so disable
+       C++ if you want to use IAR.
      - uvision_armcc : nuttx asm (inline and .asm) can't be compiled with
        armcc so do not use this option.
      - uvision_gcc : uvision project that uses gcc. Need to specify path to
@@ -240,14 +240,14 @@ IDEs
   4) Template projects' constrains:
      - mcu, core, link script shall be configured in template project
      - Templates' name are fixed:
-        - template_nuttx.eww  : iar nuttx workspace template
-        - template_nuttx_lib.ewp : iar nuttx library project template
-        - template_nuttx_main.ewp : iar nuttx main project template
+        - template_nuttx.eww  : IAR nuttx workspace template
+        - template_nuttx_lib.ewp : IAR nuttx library project template
+        - template_nuttx_main.ewp : IAR nuttx main project template
         - template_nuttx.uvmpw : uVision workspace
         - template_nuttx_lib.uvproj : uVision library project
         - template_nuttx_main.uvproj : uVision main project
      - iar:
-        - Library option shall be set to 'None' so that iar could use nuttx libc
+        - Library option shall be set to 'None' so that IAR could use nuttx libc
         - __ASSEMBLY__ symbol shall be defined in assembler
      - uVision_gcc:
         - There should be one fake .S file in projects that has been defined __ASSEMBLY__ in assembler.
@@ -265,9 +265,9 @@ IDEs
             - Select the MCU for main and lib project
             - Correct the path to ld script if needed
         2) iar:
-            - Check if the arch supportes iar (only armv7-m is supprt iar now)
+            - Check if the arch supportes IAR (only armv7-m is support IAR now)
             - Select the MCU for main and lib project
-            - Add new ld script file for iar
+            - Add new ld script file for IAR
 
 NuttX EABI "buildroot" Toolchain
 ================================
