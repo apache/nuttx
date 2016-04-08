@@ -1404,6 +1404,8 @@ nuttx/
  |   |   |- RIDE/README.txt
  |   |   `- README.txt
  |   |- stm3220g-eval/
+ |   |   |-ide/nsh/iar/README.txt
+ |   |   |-ide/nsh/uvision/README.txt
  |   |   `- README.txt
  |   |- stm3240g-eval/
  |   |   `- README.txt
