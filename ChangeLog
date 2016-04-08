@@ -11612,4 +11612,8 @@
 	  (2016-04-08).
 	* tools/ide_exporter.py:  IDE exported Python script for use with the
 	  IAR toolchain.  From Kha Vo (2016-04-08).
+	* STM3220G-EVAL:  Add support for both the IAR and uVision GCC IDEs
+	  From Kha Vo (2016-04-08).
+	* STM32F429I Discovery:  Add support for the uVision GCC IDE.   From
+	  Kha Vo (2016-04-08).
 
