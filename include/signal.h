@@ -191,7 +191,7 @@
 
 /* System V name compatibility */
 
-#define sigset(s) signal(s)
+#define sigset(s,f) signal(s,f)
 
 /********************************************************************************
  * Public Type Definitions
