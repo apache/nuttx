@@ -1,0 +1,53 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_Z16
+comment "Z16 Configuration Options"
+
+choice
+	prompt "ZNEO chip selection"
+	default ARCH_CHIP_Z16F2811
+
+config ARCH_CHIP_Z16F2810
+	bool "Z16F2810"
+	select ARCH_CHIP_Z16F
+	select ARCH_HAVE_IRQPRIO
+	---help---
+		ZiLOG Z16F2810
+
+config ARCH_CHIP_Z16F2811
+	bool "Z16F2811"
+	select ARCH_CHIP_Z16F
+	select ARCH_HAVE_IRQPRIO
+	---help---
+		ZiLOG Z16F2811
+
+config ARCH_CHIP_Z16F3211
+	bool "Z16F3211"
+	select ARCH_CHIP_Z16F
+	select ARCH_HAVE_IRQPRIO
+	---help---
+		ZiLOG Z16F321
+
+config ARCH_CHIP_Z16F6411
+	bool "Z16F6411"
+	select ARCH_CHIP_Z16F
+	select ARCH_HAVE_IRQPRIO
+	---help---
+		ZiLOG Z16F6411
+
+endchoice
+
+config ARCH_CHIP_Z16F
+	bool
+
+config ARCH_CHIP
+	string
+	default "z16f"		if ARCH_CHIP_Z16F
+
+source arch/z16/src/common/Kconfig
+source arch/z16/src/z16f/Kconfig
+
+endif

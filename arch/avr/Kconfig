@@ -1,0 +1,67 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_AVR
+
+choice
+	prompt "Atmel AVR chip selection"
+	default ARCH_CHIP_AT32UC3B0256
+
+config ARCH_CHIP_ATMEGA
+	bool "ATMega family"
+	select ARCH_FAMILY_AVR
+	select MM_SMALL
+	---help---
+		Atmel ATMega family of 8-bit AVRs.
+
+config ARCH_CHIP_AT90USB
+	bool "AT90USB family"
+	select ARCH_FAMILY_AVR
+	select MM_SMALL
+	---help---
+		Atmel AT90USB family of 8-bit AVRs.
+
+config ARCH_CHIP_AT32UC3
+	bool "AVR32 AT32UC3* family"
+	select ARCH_FAMILY_AVR32
+	---help---
+		Atmel AT32UC3A/B/C family of 32-bit AVR32s.
+
+endchoice
+
+config ARCH_FAMILY_AVR
+	bool
+	default n
+	select ARCH_HAVE_STACKCHECK
+
+config ARCH_FAMILY_AVR32
+	bool
+	default n
+
+config ARCH_FAMILY
+	string
+	default "avr"		if ARCH_FAMILY_AVR
+	default "avr32"		if ARCH_FAMILY_AVR32
+
+config ARCH_CHIP
+	string
+	default "atmega"	if ARCH_CHIP_ATMEGA
+	default "at90usb"	if ARCH_CHIP_AT90USB
+	default "at32uc3"	if ARCH_CHIP_AT32UC3
+
+source arch/avr/src/common/Kconfig
+
+if ARCH_FAMILY_AVR
+source arch/avr/src/avr/Kconfig
+source arch/avr/src/at90usb/Kconfig
+source arch/avr/src/atmega/Kconfig
+endif
+
+if ARCH_FAMILY_AVR32
+source arch/avr/src/avr32/Kconfig
+source arch/avr/src/at32uc3/Kconfig
+endif
+
+endif # ARCH_AVR

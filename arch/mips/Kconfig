@@ -1,0 +1,74 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_MIPS
+choice
+	prompt "MIPS chip selection"
+	default ARCH_CHIP_PIC32MX
+
+config ARCH_CHIP_PIC32MX
+	bool "PIC32MX"
+	select ARCH_MIPS32
+	select ARCH_HAVE_IRQPRIO
+	select ARCH_VECNOTIRQ
+	select ARCH_HAVE_RAMFUNCS
+	select ARCH_HAVE_SERIAL_TERMIOS
+	---help---
+		Microchip PIC32MX (MIPS32)
+
+config ARCH_CHIP_PIC32MZ
+	bool "PIC32MZ"
+	select ARCH_MIPS32
+	select ARCH_HAVE_IRQPRIO
+	select ARCH_VECNOTIRQ
+	select ARCH_HAVE_RAMFUNCS
+	select ARCH_HAVE_SERIAL_TERMIOS
+	---help---
+		Microchip PIC32MZ (MIPS32)
+
+endchoice
+
+config ARCH_MIPS32
+	bool
+	default n
+	select ARCH_HAVE_VFORK
+
+config ARCH_MIPS_24KC
+	bool
+	default n
+
+config ARCH_MIPS_M14K
+	bool
+	default n
+	select ARCH_HAVE_MICROMIPS
+
+config ARCH_HAVE_MICROMIPS
+	bool
+	default n
+
+config MIPS_MICROMIPS
+	bool "Use microMIPS ISA"
+	default n
+	depends on ARCH_HAVE_MICROMIPS
+	---help---
+		The processor supports both the MIPS32 ISA and the microMIPS ISA.
+		If this option is selected, the microMIPS ISA will be used.
+		Otherwise, the MIPS32 ISA will be used.
+
+config ARCH_FAMILY
+	string
+	default "mips32"	if ARCH_MIPS32
+
+config ARCH_CHIP
+	string
+	default "pic32mx"	if ARCH_CHIP_PIC32MX
+	default "pic32mz"	if ARCH_CHIP_PIC32MZ
+
+source arch/mips/src/common/Kconfig
+source arch/mips/src/mips32/Kconfig
+source arch/mips/src/pic32mx/Kconfig
+source arch/mips/src/pic32mz/Kconfig
+
+endif

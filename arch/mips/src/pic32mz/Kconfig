@@ -1,0 +1,542 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_CHIP_PIC32MZ
+comment "PIC32MZ Configuration Options"
+
+choice
+	prompt "PIC32MZ chip selection"
+	default ARCH_CHIP_PIC32MZ460F512L
+
+config ARCH_CHIP_PIC32MZ2048ECH
+	bool "PIC32MZ2048ECH"
+	select ARCH_CHIP_PIC32MZEC
+	---help---
+		Microchip PIC32MZ2048ECH (MIPS32 M14K)
+
+config ARCH_CHIP_PIC32MZ2048ECM
+	bool "PIC32MZ2048ECM"
+	select ARCH_CHIP_PIC32MZEC
+	---help---
+		Microchip PIC32MZ2048ECM with Crypto Engine (MIPS32 M14K)
+
+endchoice
+
+config ARCH_CHIP_PIC32MZEC
+	bool
+	default n
+	select ARCH_MIPS_M14K
+
+config PIC32MZ_MVEC
+	bool
+	default n
+
+config PIC32MZ_SPI
+	bool
+	default n
+
+config PIC32MZ_T1
+	bool
+	default y
+
+menu "PIC32MZ Peripheral Support"
+
+config PIC32MZ_WDT
+	bool "Watchdog timer (WDT)"
+	default n
+
+config PIC32MZ_T2
+	bool "Timer 2 (T2)"
+	default n
+
+config PIC32MZ_T3
+	bool "Timer 3 (T3)"
+	default n
+
+config PIC32MZ_T4
+	bool "Timer 4 (T4)"
+	default n
+
+config PIC32MZ_T5
+	bool "Timer 5 (T5)"
+	default n
+
+config PIC32MZ_T6
+	bool "Timer 6 (T6)"
+	default n
+
+config PIC32MZ_T7
+	bool "Timer 7 (T7)"
+	default n
+
+config PIC32MZ_T8
+	bool "Timer 8 (T8)"
+	default n
+
+config PIC32MZ_T9
+	bool "Timer 9 (T9)"
+	default n
+
+config PIC32MZ_IC1
+	bool "Input Capture 1 (IC1)"
+	default n
+
+config PIC32MZ_IC2
+	bool "Input Capture 2 (IC2)"
+	default n
+
+config PIC32MZ_IC3
+	bool "Input Capture 3 (IC3)"
+	default n
+
+config PIC32MZ_IC4
+	bool "Input Capture 4 (IC4)"
+	default n
+
+config PIC32MZ_IC5
+	bool "Input Capture 5 (IC5)"
+	default n
+
+config PIC32MZ_OC1
+	bool "Output Compare 1 (OC1)"
+	default n
+
+config PIC32MZ_OC2
+	bool "Output Compare 2 (OC2)"
+	default n
+
+config PIC32MZ_OC3
+	bool "Output Compare 3 (OC3)"
+	default n
+
+config PIC32MZ_OC4
+	bool "Output Compare 4 (OC4)"
+	default n
+
+config PIC32MZ_OC5
+	bool "Output Compare 5 (OC5)"
+	default n
+
+config PIC32MZ_I2C1
+	bool "I2C1"
+	default n
+
+config PIC32MZ_I2C2
+	bool "I2C2"
+	default n
+
+config PIC32MZ_I2C3
+	bool "I2C3"
+	default n
+
+config PIC32MZ_I2C4
+	bool "I2C4"
+	default n
+
+config PIC32MZ_I2C5
+	bool "I2C5"
+	default n
+
+config PIC32MZ_SPI1
+	bool "SPI1"
+	default n
+	select PIC32MZ_SPI
+
+config PIC32MZ_SPI2
+	bool "SPI2"
+	default n
+	select PIC32MZ_SPI
+
+config PIC32MZ_SPI3
+	bool "SPI3"
+	default n
+	select PIC32MZ_SPI
+
+config PIC32MZ_SPI4
+	bool "SPI4"
+	default n
+	select PIC32MZ_SPI
+
+config PIC32MZ_SPI5
+	bool "SPI5"
+	default n
+	select PIC32MZ_SPI
+
+config PIC32MZ_SPI6
+	bool "SPI6"
+	default n
+	select PIC32MZ_SPI
+
+config PIC32MZ_UART1
+	bool "UART1"
+	default n
+	select ARCH_HAVE_UART1
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config PIC32MZ_UART2
+	bool "UART2"
+	default n
+	select ARCH_HAVE_UART2
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config PIC32MZ_UART3
+	bool "UART3"
+	default n
+	select ARCH_HAVE_UART3
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config PIC32MZ_UART4
+	bool "UART4"
+	default n
+	select ARCH_HAVE_UART4
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config PIC32MZ_UART5
+	bool "UART5"
+	default n
+	select ARCH_HAVE_UART5
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config PIC32MZ_UART6
+	bool "UART6"
+	default n
+	select ARCH_HAVE_UART6
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config PIC32MZ_ADC
+	bool "ADC1"
+	default n
+
+config PIC32MZ_PMP
+	bool "Parallel Master Port (PMP)"
+	default n
+
+config PIC32MZ_CM1
+	bool "Comparator 1 (CM1)"
+	default n
+
+config PIC32MZ_CM2
+	bool "Comparator 2 (CM2)"
+	default n
+
+config PIC32MZ_CM3
+	bool "Comparator 3 (CM3)"
+	default n
+
+config PIC32MZ_RTCC
+	bool "Real-Time Clock and Calendar (RTCC)"
+	default n
+
+config PIC32MZ_DMA
+	bool "DMA"
+	default n
+	select ARCH_DMA
+
+config PIC32MZ_FLASH
+	bool "FLASH"
+	default n
+
+config PIC32MZ_USBDEV
+	bool "USB device"
+	default n
+
+config PIC32MZ_USBHOST
+	bool "USB host"
+	default n
+
+config PIC32MZ_CAN1
+	bool "Controller area network 1 (CAN1)"
+	default n
+
+config PIC32MZ_CAN2
+	bool "Controller area network 2 (CAN2)"
+	default n
+
+config PIC32MZ_ETHERNET
+	bool "Ethernet"
+	default n
+	select NETDEVICES
+	select ARCH_HAVE_PHY
+	select ARCH_HAVE_NETDEV_STATISTICS
+
+config PIC32MZ_CTMU
+	bool "Charge Time Measurement Unit (CMTU)"
+	default n
+
+endmenu # PIC32MX Peripheral Support
+
+menuconfig PIC32MZ_GPIOIRQ
+	bool "GPIO Interrupt Support"
+	default n
+	---help---
+		Build in support for interrupts based on GPIO inputs from IOPorts
+
+if PIC32MZ_GPIOIRQ
+
+config PIC32MZ_GPIOIRQ_PORTA
+	bool "I/O PORTA Interrupt Support"
+	default n
+
+config PIC32MZ_GPIOIRQ_PORTB
+	bool "I/O PORTB Interrupt Support"
+	default n
+
+config PIC32MZ_GPIOIRQ_PORTC
+	bool "I/O PORTC Interrupt Support"
+	default n
+
+config PIC32MZ_GPIOIRQ_PORTD
+	bool "I/O PORTD Interrupt Support"
+	default n
+
+config PIC32MZ_GPIOIRQ_PORTE
+	bool "I/O PORTE Interrupt Support"
+	default n
+
+config PIC32MZ_GPIOIRQ_PORTF
+	bool "I/O PORTF Interrupt Support"
+	default n
+
+config PIC32MZ_GPIOIRQ_PORTG
+	bool "I/O PORTG Interrupt Support"
+	default n
+
+config PIC32MZ_GPIOIRQ_PORTH
+	bool "I/O PORTH Interrupt Support"
+	default n
+
+config PIC32MZ_GPIOIRQ_PORTJ
+	bool "I/O PORTJ Interrupt Support"
+	default n
+
+config PIC32MZ_GPIOIRQ_PORTK
+	bool "I/O PORTK Interrupt Support"
+	default n
+
+endif # PIC32MZ_GPIOIRQ
+
+menu "SPI Driver Configuration"
+	depends on PIC32MZ_SPI
+
+config PIC32MZ_SPI_INTERRUPTS
+	bool "SPI Interrupt Driven"
+	default n
+	depends on EXPERIMENTAL
+
+config PIC32MZ_SPI_ENHBUF
+	bool "SPI Enhanced Buffer Mode"
+	default n
+	depends on EXPERIMENTAL
+
+config PIC32MZ_SPI_REGDEBUG
+	bool "SPI Register level debug"
+	depends on DEBUG
+	default n
+	---help---
+		Output detailed register-level SPI device debug information.
+		Requires also DEBUG.
+
+endmenu # SPI Driver Configuration
+
+config PIC32MZ_T1_SOSC
+	bool
+	default n
+	depends on PIC32MZ_T1
+
+menu "PIC32MZ PHY/Ethernet device driver settings"
+	depends on PIC32MZ_ETHERNET
+
+config PHY_AUTONEG
+	bool "Auto-negotiation"
+	default y
+	depends on PIC32MZ_ETHERNET
+	---help---
+		Enable auto-negotiation
+
+config PHY_SPEED100
+	bool "100Mbps speed"
+	default n
+	depends on PIC32MZ_ETHERNET && !PHY_AUTONEG
+	---help---
+		Select 100Mbit vs. 10Mbit speed.
+
+config PHY_FDUPLEX
+	bool "Full duplex"
+	default n
+	depends on PIC32MZ_ETHERNET && !PHY_AUTONEG
+	---help---
+		Select full (vs. half) duplex
+
+config NET_NTXDESC
+	int "Number Tx descriptors"
+	default 2
+	depends on PIC32MZ_ETHERNET
+	---help---
+		Configured number of Tx descriptors. Default: 2
+
+config NET_NRXDESC
+	int "Number Rx descriptors"
+	default 4
+	depends on PIC32MZ_ETHERNET
+	---help---
+		Configured number of Rx descriptors. Default: 4
+
+config NET_PRIORITY
+	int ""
+	default 28
+	depends on PIC32MZ_ETHERNET
+	---help---
+		Ethernet interrupt priority.  The is default is the higest priority.
+
+config NET_WOL
+	bool "Wake-up on LAN"
+	default n
+	depends on PIC32MZ_ETHERNET
+	---help---
+		Enable Wake-up on LAN (not fully implemented).
+
+config NET_REGDEBUG
+	bool "Register level debug"
+	default n
+	depends on PIC32MZ_ETHERNET && DEBUG
+	---help---
+		Enabled low level register debug.  Also needs DEBUG.
+
+config NET_HASH
+	bool "Hash"
+	default n
+	depends on PIC32MZ_ETHERNET
+	---help---
+		Enable receipt of near-perfect match frames.
+
+config PIC32MZ_MULTICAST
+	bool "Multicast"
+	default y if NET_IGMP
+	depends on PIC32MZ_ETHERNET
+	---help---
+		Enable receipt of multicast (and unicast) frames. Automatically set if
+		NET_IGMP is selected.
+
+endmenu # PIC32MZ PHY/Ethernet device driver settings
+
+menu "Device Configuration 0 (DEVCFG0)"
+
+config PIC32MZ_DEBUGGER_ENABLE
+	bool "Background debugger enable"
+	default y if DEBUG
+	default n if !DEBUG
+	---help---
+		Background Debugger Enable
+
+config PIC32MZ_JTAG_ENABLE
+	bool "JTAG enable"
+	default n
+	---help---
+		JTAG Enable
+
+config PIC32MZ_ICESEL_CH2
+	bool "ICE channel 2"
+	default n
+	---help---
+		In-Circuit Emulator/Debugger Communication Channel Select. Default: Channel (PG2)
+
+config PIC32MZ_TRACE_ENABLE
+	bool "Trace enable"
+	default y if DEBUG
+	default n if !DEBUG
+	---help---
+		Trace Enable
+
+config PIC32MZ_ECC_OPTION
+	int "PIC32 ECC control"
+	default 3
+	range 0 3
+	---help---
+		0: Flash ECC enabled (locked)
+		1: Dynamic Flash ECC enabled (locked) */
+		2: ECC / dynamic ECC disabled (locked) */
+		3: ECC / dynamic ECC disabled (writable) */
+
+endmenu # Device configuration 0 (DEVCFG0)
+
+menu "Device Configuration 1 (DEVCFG1)"
+
+config PIC32MZ_OSCIOFNC
+	int "CLKO Enable"
+	default 1
+	range 0 1
+	---help---
+		Enable CLK0 output on power up.  Options:
+
+		1: CLKO output disabled
+		0: CLKO output signal active on the OSC2 pin
+
+config PIC32MZ_WDTENABLE
+	bool "Watchdog enable"
+	default 0
+	---help---
+		Enabled watchdog on power up.
+
+		1: Watchdog enabled, cannot be disabled
+		0:  Watchdog disabled, can be enabled
+
+endmenu # Device Configuration 2 (DEVCFG2)
+
+menu "Device Configuration 3 (DEVCFG3)"
+
+config PIC32MZ_USERID
+	hex "User ID"
+	default 0x584e
+	---help---
+		User-provided ID visible in DEVCFG3
+
+config PIC32MZ_FMIIEN
+	int "Ethernet MII"
+	default 1
+	range 0 1
+	---help---
+		Ethernet MII enable selection
+
+		0 = RMII enabled
+		1 = MII enabled
+
+config PIC32MZ_PGL1WAY
+	int
+	default 0
+	range 0 1
+
+config PIC32MZ_PMDL1WAY
+	int
+	default 0
+	range 0 1
+
+config PIC32MZ_IOL1WAY
+	int
+	default 0
+	range 0 1
+
+config PIC32MZ_FETHIO
+	int "Ethernet I/O pins"
+	default 1
+	range 0 1
+	---help---
+		Ethernet I/O pin selection
+
+		0 = Alternate Ethernet I/O pins
+		1 = Default Ethernet I/O pins
+
+config PIC32MZ_FUSBIDIO
+	int "USB USBID selection"
+	default 0 if !PIC32MZ_ETHERNET
+	default 1 if PIC32MZ_ETHERNET
+	range 0 1
+	---help---
+		USB USBID selection
+
+		0 = USBID pin is controlled by the port function
+		1 = USBID pin is controlled by the USB module
+
+endmenu # Device Configuration 3 (DEVCFG3)
+endif

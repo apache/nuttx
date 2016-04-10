@@ -1,0 +1,191 @@
+############################################################################
+# arch/arm/src/armv6-m/Toolchain.defs
+#
+#   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+#   Author: Gregory Nutt <gnutt@nuttx.org>
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+#
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in
+#    the documentation and/or other materials provided with the
+#    distribution.
+# 3. Neither the name NuttX nor the names of its contributors may be
+#    used to endorse or promote products derived from this software
+#    without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+# COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+# OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+# AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+#
+############################################################################
+
+# Setup for the selected toolchain
+
+#
+# Handle old-style chip-specific toolchain names in the absence of
+# a new-style toolchain specification, force the selection of a single
+# toolchain and allow the selected toolchain to be overridden by a
+# command-line selection.
+#
+
+ifeq ($(filter y, $(CONFIG_ARMV6M_TOOLCHAIN_ATOLLIC)),y)
+  CONFIG_ARMV6M_TOOLCHAIN ?= ATOLLIC
+endif
+
+ifeq ($(filter y, $(CONFIG_ARMV6M_TOOLCHAIN_BUILDROOT)),y)
+  CONFIG_ARMV6M_TOOLCHAIN ?= BUILDROOT
+endif
+
+ifeq ($(filter y, $(CONFIG_ARMV6M_TOOLCHAIN_CODEREDL)),y)
+  CONFIG_ARMV6M_TOOLCHAIN ?= CODEREDL
+endif
+
+ifeq ($(filter y, $(CONFIG_ARMV6M_TOOLCHAIN_CODEREDW)),y)
+  CONFIG_ARMV6M_TOOLCHAIN ?= CODEREDW
+endif
+
+ifeq ($(filter y, $(CONFIG_ARMV6M_TOOLCHAIN_CODESOURCERYL)),y)
+  CONFIG_ARMV6M_TOOLCHAIN ?= CODESOURCERYL
+endif
+
+ifeq ($(filter y, $(CONFIG_ARMV6M_TOOLCHAIN_CODESOURCERYW)),y)
+  CONFIG_ARMV6M_TOOLCHAIN ?= CODESOURCERYW
+endif
+
+ifeq ($(filter y, $(CONFIG_ARMV6M_TOOLCHAIN_DEVKITARM)),y)
+  CONFIG_ARMV6M_TOOLCHAIN ?= DEVKITARM
+endif
+
+ifeq ($(filter y, $(CONFIG_ARMV6M_TOOLCHAIN_GNU_EABIL)),y)
+  CONFIG_ARMV6M_TOOLCHAIN ?= GNU_EABIL
+endif
+
+ifeq ($(filter y, $(CONFIG_ARMV6M_TOOLCHAIN_GNU_EABIW)),y)
+  CONFIG_ARMV6M_TOOLCHAIN ?= GNU_EABIW
+endif
+
+#
+# Supported toolchains
+#
+# TODO - It's likely that all of these toolchains now support the
+#        CortexM0.  Since they are all GCC-based, we could almost
+#        certainly simplify this further.
+#
+# Each toolchain definition should set:
+#
+#  CROSSDEV         The GNU toolchain triple (command prefix)
+#  ARCROSSDEV       If required, an alternative prefix used when
+#                   invoking ar and nm.
+#  ARCHCPUFLAGS     CPU-specific flags selecting the instruction set
+#                   options, etc.
+#  MAXOPTIMIZATION  The maximum optimization level that results in
+#                   reliable code generation.
+#
+
+ifeq ($(CONFIG_DEBUG_CUSTOMOPT),y)
+  MAXOPTIMIZATION := $(CONFIG_DEBUG_OPTLEVEL)
+endif
+
+# Atollic toolchain under Windows
+
+ifeq ($(CONFIG_ARMV6M_TOOLCHAIN),ATOLLIC)
+  CROSSDEV ?= arm-atollic-eabi-
+  ARCROSSDEV ?= arm-atollic-eabi-
+  ifeq ($(CONFIG_WINDOWS_CYGWIN),y)
+    WINTOOL = y
+  endif
+  ARCHCPUFLAGS = -mcpu=cortex-m0 -mthumb -mfloat-abi=soft
+endif
+
+# NuttX buildroot under Linux or Cygwin
+
+ifeq ($(CONFIG_ARMV6M_TOOLCHAIN),BUILDROOT)
+  CROSSDEV ?= arm-nuttx-eabi-
+  ARCROSSDEV ?= arm-nuttx-eabi-
+  ARCHCPUFLAGS = -mcpu=cortex-m0 -mthumb -mfloat-abi=soft
+endif
+
+# Code Red RedSuite under Linux
+
+ifeq ($(CONFIG_ARMV6M_TOOLCHAIN),CODEREDL)
+  CROSSDEV ?= arm-none-eabi-
+  ARCROSSDEV ?= arm-none-eabi-
+  ARCHCPUFLAGS = -mcpu=cortex-m0 -mthumb -mfloat-abi=soft
+endif
+
+# Code Red RedSuite under Windows
+
+ifeq ($(CONFIG_ARMV6M_TOOLCHAIN),CODEREDW)
+  CROSSDEV ?= arm-none-eabi-
+  ARCROSSDEV ?= arm-none-eabi-
+  ifeq ($(CONFIG_WINDOWS_CYGWIN),y)
+    WINTOOL = y
+  endif
+  ARCHCPUFLAGS = -mcpu=cortex-m0 -mthumb -mfloat-abi=soft
+endif
+
+# CodeSourcery under Linux
+
+ifeq ($(CONFIG_ARMV6M_TOOLCHAIN),CODESOURCERYL)
+  CROSSDEV ?= arm-none-eabi-
+  ARCROSSDEV ?= arm-none-eabi-
+  ARCHCPUFLAGS = -mcpu=cortex-m0 -mthumb -mfloat-abi=soft
+endif
+
+# CodeSourcery under Windows
+
+ifeq ($(CONFIG_ARMV6M_TOOLCHAIN),CODESOURCERYW)
+  CROSSDEV ?= arm-none-eabi-
+  ARCROSSDEV ?= arm-none-eabi-
+  ifeq ($(CONFIG_WINDOWS_CYGWIN),y)
+    WINTOOL = y
+  endif
+  ARCHCPUFLAGS = -mcpu=cortex-m0 -mthumb -mfloat-abi=soft
+endif
+
+# devkitARM under Windows
+
+ifeq ($(CONFIG_ARMV6M_TOOLCHAIN),DEVKITARM)
+  CROSSDEV ?= arm-eabi-
+  ARCROSSDEV ?= arm-eabi-
+  ifeq ($(CONFIG_WINDOWS_CYGWIN),y)
+    WINTOOL = y
+  endif
+  ARCHCPUFLAGS = -mcpu=cortex-m0 -mthumb -mfloat-abi=soft
+endif
+
+# Generic GNU EABI toolchain on OS X, Linux or any typical Posix system
+
+ifeq ($(CONFIG_ARMV6M_TOOLCHAIN),GNU_EABIL)
+  CROSSDEV ?= arm-none-eabi-
+  ARCROSSDEV ?= arm-none-eabi-
+  ARCHCPUFLAGS = -mcpu=cortex-m0 -mthumb -mfloat-abi=soft
+endif
+
+ifeq ($(CONFIG_ARMV6M_TOOLCHAIN),GNU_EABIW)
+  CROSSDEV ?= arm-none-eabi-
+  ARCROSSDEV ?= arm-none-eabi-
+  ifeq ($(CONFIG_WINDOWS_CYGWIN),y)
+    WINTOOL = y
+  endif
+  ARCHCPUFLAGS = -mcpu=cortex-m0 -mthumb -mfloat-abi=soft
+endif
+
+# Individual tools may limit the optimizatin level but, by default, the
+# optimization level will be set to to -Os
+
+MAXOPTIMIZATION ?= -Os

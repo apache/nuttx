@@ -1,0 +1,46 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_RGMP
+comment "RGMP Configuration Options"
+
+choice
+	prompt "RGMP Architecture"
+	default RGMP_SUBARCH_X86
+
+config RGMP_SUBARCH_ARM
+	bool "ARM"
+	---help---
+		RGMP ARM architecture"
+
+config RGMP_SUBARCH_X86
+	bool "x86"
+	---help---
+		RGMP x86 architecture"
+
+endchoice # RGMP Architecture
+
+config RGMP_SUBARCH
+	string
+	default "arm"		if RGMP_SUBARCH_ARM
+	default "x86"		if RGMP_SUBARCH_X86
+
+menu "x86 Peripheral Selections"
+	depends on RGMP_SUBARCH_X86
+
+config COM1
+	bool "COM1"
+
+config COM2
+	bool "COM1"
+
+config COM3
+	bool "COM1"
+
+config COM4
+	bool "COM1"
+
+endmenu # x86 Peripheral Selections
+endif # ARCH_RGMP

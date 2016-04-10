@@ -1,0 +1,23 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_M16C
+
+config M16C_UART0
+	bool "UART0"
+	select ARCH_HAVE_UART0
+	default n
+
+config M16C_UART1
+	bool "UART1"
+	select ARCH_HAVE_UART1
+	default n
+
+config M16C_UART2
+	bool "UART2"
+	select ARCH_HAVE_UART2
+	default n
+
+endif

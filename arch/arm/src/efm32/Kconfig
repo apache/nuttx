@@ -1,0 +1,610 @@
+#
+# arch/arm/src/efm32/Kconfig
+#
+
+if ARCH_CHIP_EFM32
+
+comment "EFM32 Configuration Options"
+
+choice
+	prompt "EFM32 Chip Selection"
+	default ARCH_CHIP_EFM32TG840F32
+
+config ARCH_CHIP_EFM32TG840F32
+	bool "EFM32TG840F32"
+	select EFM32_EFM32TG
+	select ARCH_CORTEXM3
+	---help---
+		This chip is a Tiny Gecko with 32 KB flash and 4 KB RAM in a QFN64
+		package
+
+config ARCH_CHIP_EFM32G880F128
+	bool "EFM32G880F128"
+	select EFM32_EFM32G
+	select ARCH_CORTEXM3
+	---help---
+		This chip is a Gecko with 128KiB flash and 16KiB RAM in a LQFP100
+		package
+
+config ARCH_CHIP_EFM32G890F128
+	bool "EFM32G890F128"
+	select EFM32_EFM32G
+	select ARCH_CORTEXM3
+	---help---
+		This chip is a Gecko with 128KiB flash and 16KiB RAM in a BGA112
+		package
+
+config ARCH_CHIP_EFM32GG332F1024
+	bool "EFM32GG332F1024"
+	select EFM32_EFM32GG
+	select ARCH_CORTEXM3
+	---help---
+		This chip is a Giant Gecko with 1024KiB flash and 128KiB RAM in a
+		QFP64 package.
+
+config ARCH_CHIP_EFM32GG990F1024
+	bool "EFM32GG990F1024"
+	select EFM32_EFM32GG
+	select ARCH_CORTEXM3
+	---help---
+		This chip is a Giant Gecko with 1024KiB flash and 128KiB RAM in a
+		BGA112 package.
+
+endchoice
+
+# These hidden selections represent automatically selected MCU families and,
+# in turn, select general capabilities of the MCU family
+
+config EFM32_EFM32TG
+	bool
+	default n
+
+config EFM32_EFM32G
+	bool
+	default n
+	select EFM32_HAVE_USART2
+	select EFM32_HAVE_UART0
+	select EFM32_HAVE_LEUART1
+
+config EFM32_EFM32GG
+	bool
+	default n
+	select EFM32_HAVE_USART2
+	select EFM32_HAVE_UART0
+	select EFM32_HAVE_UART1
+	select EFM32_HAVE_LEUART1
+	select EFM32_HAVE_OTGFS
+
+menu "EFM32 Peripheral Support"
+
+# These "hidden" settings determine is a peripheral option is available for
+# the selection MCU
+
+config EFM32_HAVE_USART2
+	bool
+	default n
+
+config EFM32_HAVE_UART0
+	bool
+	default n
+
+config EFM32_HAVE_UART1
+	bool
+	default n
+
+config EFM32_HAVE_LEUART1
+	bool
+	default n
+
+config EFM32_HAVE_OTGFS
+	bool
+	default n
+
+# When there are multiple instances of a device, these "hidden" settings
+# will automatically be selected and will represent the 'OR' of the
+# instances selected.
+
+config EFM32_USART_ISUART
+	bool
+	default n
+
+config EFM32_USART_ISSPI
+	bool
+	default n
+
+config EFM32_UART
+	bool
+	default n
+
+config EFM32_LEUART
+	bool
+	default n
+	select MCU_SERIAL
+
+# Then, these are the actual, selectable peripheral options
+
+config EFM32_DMA
+	bool "DMA"
+	default n
+	select ARCH_DMA
+
+config EFM32_RMU
+	bool "Reset Management Unit (RMU) "
+	default n
+
+config EFM32_FLASHPROG
+	bool "Enable Erase/Write flash function (MSC) "
+	default n
+	select ARCH_HAVE_RAMFUNCS
+
+config EFM32_RMU_DEBUG
+	bool "Reset Management Unit (RMU) DEBUG "
+	default n
+	depends on EFM32_RMU && DEBUG
+
+config EFM32_I2C0
+	bool "I2C0"
+	default n
+
+config EFM32_I2C1
+	bool "I2C1"
+	default n
+
+config EFM32_BITBAND
+	bool "BITBAND"
+	default n
+
+config EFM32_USART0
+	bool "USART0"
+	default n
+	select ARCH_HAVE_USART0
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config EFM32_USART1
+	bool "USART1"
+	default n
+	select ARCH_HAVE_USART1
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config EFM32_USART2
+	bool "USART2"
+	default n
+	depends on EFM32_HAVE_USART2
+	select ARCH_HAVE_USART2
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config EFM32_UART0
+	bool "UART0"
+	default n
+	select ARCH_HAVE_UART0
+	select EFM32_UART
+
+config EFM32_UART1
+	bool "UART1"
+	default n
+	select ARCH_HAVE_UART1
+	select EFM32_UART
+
+config EFM32_LEUART0
+	bool "Low energy UART0"
+	default n
+	select ARCH_HAVE_OTHER_UART
+	select EFM32_LEUART
+
+config EFM32_LEUART1
+	bool "Low energy UART1"
+	default n
+	depends on EFM32_HAVE_LEUART1
+	select ARCH_HAVE_OTHER_UART
+	select EFM32_LEUART
+
+config EFM32_OTGFS
+	bool "USB Full-Speed OTG"
+	default n
+	depends on EFM32_HAVE_OTGFS && EXPERIMENTAL
+	select USBHOST_HAVE_ASYNCH if USBHOST
+
+config EFM32_TIMER0
+	bool "TIMER0"
+	default n
+	select ARCH_HAVE_TIMER0
+	select EFM32_TIMER
+
+config EFM32_TIMER1
+	bool "TIMER1"
+	default n
+	select ARCH_HAVE_TIMER1
+	select EFM32_TIMER
+
+config EFM32_TIMER2
+	bool "TIMER2"
+	default n
+	select ARCH_HAVE_TIMER2
+	select EFM32_TIMER
+
+config EFM32_TIMER3
+	bool "TIMER3"
+	default n
+	select ARCH_HAVE_TIMER3
+	select EFM32_TIMER
+
+endmenu # EFM32 Peripheral Support
+
+config EFM32_GPIO_IRQ
+	bool "GPIO pin interrupts"
+	---help---
+		Enable support for interrupting GPIO pins
+
+config EFM32_LECLOCK
+	bool "Enable LE clocking (unconditionally)"
+	default n
+	---help---
+		Even you don't use core clock LE as source for LFA or LFB, to read
+		are write any register not clocked by HFPERCLK or HFCORECLK,
+		HFCORECLKLE should be enabled.
+
+if EFM32_DMA
+
+config EFM32_DMA_ALTDSEC
+	int "Enable alternate descriptors"
+	default 8
+	depends on EXPERIMENTAL
+	---help---
+		Enable support for alternate descriptors.  Not fully implemented.
+
+endif
+
+choice
+	prompt "USART0 Mode"
+	default EFM32_USART0_ISUART
+	depends on EFM32_USART0
+
+config EFM32_USART0_ISUART
+	bool "USART0 is a UART"
+	select USART0_ISUART
+	select EFM32_USART_ISUART
+
+config EFM32_USART0_ISSPI
+	bool "USART0 is SPI"
+	select EFM32_USART_ISSPI
+
+endchoice # USART0 Mode
+
+choice
+	prompt "USART1 Mode"
+	default EFM32_USART1_ISUART
+	depends on EFM32_USART1
+
+config EFM32_USART1_ISUART
+	bool "USART1 is a UART"
+	select USART1_ISUART
+	select EFM32_USART_ISUART
+
+config EFM32_USART1_ISSPI
+	bool "USART1 is SPI"
+	select EFM32_USART_ISSPI
+
+endchoice # USART1 Mode
+
+choice
+	prompt "USART2 Mode"
+	default EFM32_USART2_ISUART
+	depends on EFM32_USART2
+
+config EFM32_USART2_ISUART
+	bool "USART2 is a UART"
+	select USART2_ISUART
+	select EFM32_USART_ISUART
+
+config EFM32_USART2_ISSPI
+	bool "USART2 is SPI"
+	select EFM32_USART_ISSPI
+
+endchoice # USART2 Mode
+
+choice
+	prompt "LEUART Serial Console"
+	default NO_LEUART_SERIAL_CONSOLE
+	depends on DEV_CONSOLE && EFM32_LEUART
+
+config LEUART0_SERIAL_CONSOLE
+	bool "Use LEUART0 as the serial console"
+	depends on EFM32_LEUART0
+	select OTHER_SERIAL_CONSOLE
+	---help---
+		Use the LEUART0 device as the serial console
+
+config LEUART1_SERIAL_CONSOLE
+	bool "Use LEUART1 as the serial console"
+	depends on EFM32_LEUART1
+	select OTHER_SERIAL_CONSOLE
+	---help---
+		Use the LEUART0 device as the serial console
+
+config NO_LEUART_SERIAL_CONSOLE
+	bool "No LEUART serial console"
+	---help---
+		No serial console OR some other serial device provides the serial console
+
+endchoice # LEUART Serial Console
+
+menu "LEUART0 Configuration"
+	depends on EFM32_LEUART0
+
+config LEUART0_RXBUFSIZE
+	int "Receive buffer size"
+	default 64
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.
+
+config LEUART0_TXBUFSIZE
+	int "Transmit buffer size"
+	default 64
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.
+
+config LEUART0_BAUD
+	int "BAUD rate"
+	default 2400
+	---help---
+		The configured BAUD of the UART.
+
+config LEUART0_BITS
+	int "Character size"
+	default 8
+	range 8 9
+	---help---
+		The number of bits.  Must be either 8 or 9.
+
+config LEUART0_PARITY
+	int "Parity setting"
+	range 0 2
+	default 0
+	---help---
+		0=no parity, 1=odd parity, 2=even parity
+
+config LEUART0_2STOP
+	int "use 2 stop bits"
+	default 0
+	range 0 1
+	---help---
+		1=Two stop bits
+
+endmenu # LEUART0 Configuration
+
+menu "LEUART1 Configuration"
+	depends on EFM32_LEUART1
+
+config LEUART1_RXBUFSIZE
+	int "Receive buffer size"
+	default 64
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.
+
+config LEUART1_TXBUFSIZE
+	int "Transmit buffer size"
+	default 64
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.
+
+config LEUART1_BAUD
+	int "BAUD rate"
+	default 2400
+	---help---
+		The configured BAUD of the UART.
+
+config LEUART1_BITS
+	int "Character size"
+	default 8
+	range 8 9
+	---help---
+		The number of bits.  Must be either 8 or 9.
+
+config LEUART1_PARITY
+	int "Parity setting"
+	range 0 2
+	default 0
+	---help---
+		0=no parity, 1=odd parity, 2=even parity
+
+config LEUART1_2STOP
+	int "use 2 stop bits"
+	default 0
+	range 0 1
+	---help---
+		1=Two stop bits
+
+endmenu # LEUART1 Configuration
+
+if EFM32_USART_ISSPI
+menu "SPI Configuration"
+
+config EFM32_SPI_DMA
+	bool "SPI DMA support"
+	default n
+	depends on EFM32_DMA
+	---help---
+		Select to enable DMA SPI transfers
+
+if EFM32_SPI_DMA
+
+config EFM32_SPI_DMA_TIMEO_NSEC
+	int "Per word timeout (nsec)"
+	default 500
+	---help---
+		A timeout will be be used to detect hung DMA transfers.  The timeout
+		will vary as a function of the number of words transferred.  This
+		value provides the per-word timeout value in nanoseconds.
+
+config EFM32_SPI_DMA_MINSIZE
+	int "Minimum DMA size"
+	default 16
+	---help---
+		DMA is particularly helpful for the case of large SPI transfers.
+		Smaller SPI transfer may be more efficiently performed without DMA.
+		This option determines a threshold:  For transfers of this size and
+		below, DMA will not be used.  A value of zero will force all DMA-
+		based transfers.
+
+endif # EFM32_SPI_DMA
+endmenu # SPI Configuration
+endif # EFM32_USART_ISSPI
+
+menu "USB FS Host Configuration"
+	depends on USBHOST && EFM32_OTGFS
+
+config EFM32_OTGFS_RXFIFO_SIZE
+	int "Rx Packet Size"
+	default 128
+	---help---
+		Size of the RX FIFO in 32-bit words. Default 128 (512 bytes)
+
+config EFM32_OTGFS_NPTXFIFO_SIZE
+	int "Non-periodic Tx FIFO Size"
+	default 96
+	---help---
+		Size of the non-periodic Tx FIFO in 32-bit words.  Default 96 (384 bytes)
+
+config EFM32_OTGFS_PTXFIFO_SIZE
+	int "Periodic Tx FIFO size"
+	default 128
+	---help---
+		Size of the periodic Tx FIFO in 32-bit words.  Default 96 (384 bytes)
+
+config EFM32_OTGFS_DESCSIZE
+	int "Descriptor Size"
+	default 128
+	---help---
+		Maximum size to allocate for descriptor memory descriptor.  Default: 128
+
+config EFM32_OTGFS_SOFINTR
+	bool "Enable SOF interrupts"
+	default n
+	---help---
+		Enable SOF interrupts.  Why would you ever want to do that?
+
+endmenu
+
+config EFM32_TIMER0
+	bool "TIMER0"
+	default n
+	depends on EFM32_HAVE_TIMER0
+
+config EFM32_TIMER0_PWM
+	bool "TIMER0 PWM"
+	default n
+	depends on EFM32_TIMER0
+	select ARCH_HAVE_PWM_PULSECOUNT
+	---help---
+		Reserve timer 0 for use by PWM
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to generate modulated outputs for such things as motor control.
+		If EFM32_TIMER0 is defined then THIS following may also be defined
+		to indicate that the timer is intended to be used for pulsed output
+		modulation.
+
+config EFM32_TIMER0_CHANNEL
+	int "TIMER0 PWM Output Channel"
+	default 0
+	range 0 2
+	depends on EFM32_TIMER0_PWM
+	---help---
+		If TIMER0 is enabled for PWM usage, you also need specifies the timer output
+		channel {0,1,2}
+
+config EFM32_TIMER1
+	bool "TIMER1"
+	default n
+	depends on EFM32_HAVE_TIMER1
+
+config EFM32_TIMER1_PWM
+	bool "TIMER1 PWM"
+	default n
+	depends on EFM32_TIMER1
+	select ARCH_HAVE_PWM_PULSECOUNT
+	---help---
+		Reserve timer 0 for use by PWM
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to generate modulated outputs for such things as motor control.
+		If EFM32_TIMER1 is defined then THIS following may also be defined
+		to indicate that the timer is intended to be used for pulsed output
+		modulation.
+
+config EFM32_TIMER1_CHANNEL
+	int "TIMER1 PWM Output Channel"
+	default 0
+	range 0 2
+	depends on EFM32_TIMER1_PWM
+	---help---
+		If TIMER1 is enabled for PWM usage, you also need specifies the timer output
+		channel {0,1,2}
+
+config EFM32_TIMER2
+	bool "TIMER2"
+	default n
+	depends on EFM32_HAVE_TIMER2
+
+config EFM32_TIMER2_PWM
+	bool "TIMER2 PWM"
+	default n
+	depends on EFM32_TIMER2
+	select ARCH_HAVE_PWM_PULSECOUNT
+	---help---
+		Reserve timer 0 for use by PWM
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to generate modulated outputs for such things as motor control.
+		If EFM32_TIMER2 is defined then THIS following may also be defined
+		to indicate that the timer is intended to be used for pulsed output
+		modulation.
+
+config EFM32_TIMER2_CHANNEL
+	int "TIMER2 PWM Output Channel"
+	default 0
+	range 0 2
+	depends on EFM32_TIMER2_PWM
+	---help---
+		If TIMER2 is enabled for PWM usage, you also need specifies the timer output
+		channel {0,1,2}
+
+config EFM32_TIMER3
+	bool "TIMER3"
+	default n
+	depends on EFM32_HAVE_TIMER3
+
+config EFM32_TIMER3_PWM
+	bool "TIMER3 PWM"
+	default n
+	depends on EFM32_TIMER3
+	select ARCH_HAVE_PWM_PULSECOUNT
+	---help---
+		Reserve timer 0 for use by PWM
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to generate modulated outputs for such things as motor control.
+		If EFM32_TIMER3 is defined then THIS following may also be defined
+		to indicate that the timer is intended to be used for pulsed output
+		modulation.
+
+config EFM32_TIMER3_CHANNEL
+	int "TIMER3 PWM Output Channel"
+	default 0
+	range 0 2
+	depends on EFM32_TIMER3_PWM
+	---help---
+		If TIMER3 is enabled for PWM usage, you also need specifies the timer output
+		channel {0,1,2}
+
+config EFM32_RTC_BURTC
+	bool "Use BURTC as RTC"
+	default n
+	---help---
+		Enable RTC with EFM32 BURTC
+
+endif # ARCH_CHIP_EFM32

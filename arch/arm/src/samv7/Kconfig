@@ -1,0 +1,2509 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_CHIP_SAMV7
+
+comment "SAMV7 Configuration Options"
+
+# Chip Selection
+
+choice
+	prompt "Atmel SAMV7 Chip Selection"
+	default ARCH_CHIP_SAMV71Q21
+
+config ARCH_CHIP_SAME70Q19
+	bool "SAME70Q19"
+	select ARCH_CHIP_SAME70Q
+
+config ARCH_CHIP_SAME70Q20
+	bool "SAME70Q20"
+	select ARCH_CHIP_SAME70Q
+
+config ARCH_CHIP_SAME70Q21
+	bool "SAME70Q21"
+	select ARCH_CHIP_SAME70Q
+
+config ARCH_CHIP_SAME70N19
+	bool "SAME70N10"
+	select ARCH_CHIP_SAME70N
+
+config ARCH_CHIP_SAME70N20
+	bool "SAME70N20"
+	select ARCH_CHIP_SAME70N
+
+config ARCH_CHIP_SAME70N21
+	bool "SAME70N21"
+	select ARCH_CHIP_SAME70N
+
+config ARCH_CHIP_SAME70J19
+	bool "SAME70J10"
+	select ARCH_CHIP_SAME70J
+
+config ARCH_CHIP_SAME70J20
+	bool "SAME70J20"
+	select ARCH_CHIP_SAME70J
+
+config ARCH_CHIP_SAME70J21
+	bool "SAME70J21"
+	select ARCH_CHIP_SAME70J
+
+config ARCH_CHIP_SAMV71Q19
+	bool "SAMV71Q19"
+	select ARCH_CHIP_SAMV71Q
+
+config ARCH_CHIP_SAMV71Q20
+	bool "SAMV71Q20"
+	select ARCH_CHIP_SAMV71Q
+
+config ARCH_CHIP_SAMV71Q21
+	bool "SAMV71Q21"
+	select ARCH_CHIP_SAMV71Q
+
+config ARCH_CHIP_SAMV71N19
+	bool "SAMV71N19"
+	select ARCH_CHIP_SAMV71N
+
+config ARCH_CHIP_SAMV71N20
+	bool "SAMV71N20"
+	select ARCH_CHIP_SAMV71N
+
+config ARCH_CHIP_SAMV71N21
+	bool "SAMV71N21"
+	select ARCH_CHIP_SAMV71N
+
+config ARCH_CHIP_SAMV71J19
+	bool "SAMV71J19"
+	select ARCH_CHIP_SAMV71J
+
+config ARCH_CHIP_SAMV71J20
+	bool "SAMV71J20"
+	select ARCH_CHIP_SAMV71J
+
+config ARCH_CHIP_SAMV71J21
+	bool "SAMV71J21"
+	select ARCH_CHIP_SAMV71J
+
+endchoice # Atmel SAMV7 Chip Selection
+
+config ARCH_CHIP_SAME70
+	bool
+	default n
+	select ARCH_HAVE_FPU
+	select ARCH_HAVE_DPFPU # REVISIT
+	select ARMV7M_HAVE_ICACHE
+	select ARMV7M_HAVE_DCACHE
+	select ARMV7M_HAVE_ITCM
+	select ARMV7M_HAVE_DTCM
+
+config ARCH_CHIP_SAME70Q
+	bool
+	default n
+	select ARCH_CHIP_SAME70
+	select SAMV7_HAVE_MCAN1
+	select SAMV7_HAVE_DAC1
+	select SAMV7_HAVE_EBI
+	select SAMV7_HAVE_HSMCI0
+	select SAMV7_HAVE_SDRAMC
+	select SAMV7_HAVE_SPI0
+	select SAMV7_HAVE_SPI1
+	select SAMV7_HAVE_TWIHS2
+	select SAMV7_HAVE_USBHS
+	select SAMV7_HAVE_USART0
+	select SAMV7_HAVE_USART1
+	select SAMV7_HAVE_USART2
+
+config ARCH_CHIP_SAME70N
+	bool
+	default n
+	select ARCH_CHIP_SAME70
+	select SAMV7_HAVE_MCAN1
+	select SAMV7_HAVE_DAC1
+	select SAMV7_HAVE_HSMCI0
+	select SAMV7_HAVE_SPI0
+	select SAMV7_HAVE_TWIHS2
+	select SAMV7_HAVE_USBHS
+	select SAMV7_HAVE_USART0
+	select SAMV7_HAVE_USART1
+	select SAMV7_HAVE_USART2
+
+config ARCH_CHIP_SAME70J
+	bool
+	default n
+	select ARCH_CHIP_SAME70
+	select SAMV7_QSPI_IS_SPI
+	select SAMV7_HAVE_USBFS
+	select SAMV7_HAVE_ISI8
+
+config ARCH_CHIP_SAMV71
+	bool
+	default n
+	select ARCH_HAVE_FPU
+	select ARCH_HAVE_DPFPU # REVISIT
+	select ARMV7M_HAVE_ICACHE
+	select ARMV7M_HAVE_DCACHE
+	select ARMV7M_HAVE_ITCM
+	select ARMV7M_HAVE_DTCM
+	select SAMV7_HAVE_MEDIALB
+
+config ARCH_CHIP_SAMV71Q
+	bool
+	default n
+	select ARCH_CHIP_SAMV71
+	select SAMV7_HAVE_MCAN1
+	select SAMV7_HAVE_DAC1
+	select SAMV7_HAVE_EBI
+	select SAMV7_HAVE_HSMCI0
+	select SAMV7_HAVE_SDRAMC
+	select SAMV7_HAVE_SPI0
+	select SAMV7_HAVE_SPI1
+	select SAMV7_HAVE_TWIHS2
+	select SAMV7_HAVE_USBHS
+	select SAMV7_HAVE_USART0
+	select SAMV7_HAVE_USART1
+	select SAMV7_HAVE_USART2
+
+config ARCH_CHIP_SAMV71N
+	bool
+	default n
+	select ARCH_CHIP_SAMV71
+	select SAMV7_HAVE_MCAN1
+	select SAMV7_HAVE_DAC1
+	select SAMV7_HAVE_HSMCI0
+	select SAMV7_HAVE_SPI0
+	select SAMV7_HAVE_TWIHS2
+	select SAMV7_HAVE_USBHS
+	select SAMV7_HAVE_USART0
+	select SAMV7_HAVE_USART1
+	select SAMV7_HAVE_USART2
+
+config ARCH_CHIP_SAMV71J
+	bool
+	default n
+	select ARCH_CHIP_SAMV71
+	select SAMV7_QSPI_IS_SPI
+	select SAMV7_HAVE_USBFS
+	select SAMV7_HAVE_ISI8
+
+# Chip Capabilities
+
+config SAMV7_MCAN
+	bool
+	default n
+
+config SAMV7_HAVE_MCAN1
+	bool
+	default n
+
+config SAMV7_HAVE_DAC1
+	bool
+	default n
+
+config SAMV7_HAVE_EBI
+	bool
+	default n
+
+config SAMV7_EMAC
+	bool
+	default n
+	select ARMV7M_DCACHE_WRITETHROUGH if ARMV7M_DCACHE
+	select ARCH_HAVE_NETDEV_STATISTICS
+	---help---
+		NOTE that write-through caching is automatically selected.  This is
+		to work around issues with the RX and TX descriptors with are 8-bytes
+		in size.  But the D-Cache cache line size is 32-bytes.  That means
+		that you cannot reload, clean or invalidate a descriptor without also
+		effecting three neighboring descriptors.  Setting write through mode
+		eliminates the need for cleaning.  If only reloading and invalidating
+		are done, then there is no problem.
+
+config SAMV7_HSMCI
+	bool
+	default n
+
+config SAMV7_HAVE_HSMCI0
+	bool
+	default n
+
+config SAMV7_HAVE_ISI8
+	bool
+	default n
+
+config SAMV7_HAVE_MEDIALB
+	bool
+	default n
+
+config SAMV7_HAVE_SDRAMC
+	bool
+	default n
+
+config SAMV7_HAVE_SPI0
+	bool
+	default n
+
+config SAMV7_HAVE_SPI1
+	bool
+	default n
+
+config SAMV7_QSPI_IS_SPI
+	bool
+	default n
+
+config SAMV7_SSC
+	bool
+	default n
+
+config SAMV7_HAVE_TC
+	bool
+	default n
+
+config SAMV7_HAVE_TWIHS2
+	bool
+	default n
+
+config SAMV7_HAVE_USBFS
+	bool
+	default n
+
+config SAMV7_HAVE_USBHS
+	bool
+	default n
+
+config SAMV7_HAVE_USART0
+	bool
+	default n
+
+config SAMV7_HAVE_USART1
+	bool
+	default n
+
+config SAMV7_HAVE_USART2
+	bool
+	default n
+
+config SAMV7_SPI
+	bool
+	default n
+
+config SAMV7_SPI_MASTER
+	bool
+	default n
+
+config SAMV7_SPI_SLAVE
+	bool
+	default n
+
+# Peripheral Selection
+
+menu "SAMV7 Peripheral Selection"
+
+config SAMV7_ACC
+	bool "Analog Comparator (ACC)"
+	default n
+
+config SAMV7_ADC
+	bool "12-bit ADC Controller (ADC)"
+	default n
+
+config SAMV7_AFEC0
+	bool "Analog Front End 0 (AFEC0)"
+	default n
+
+config SAMV7_AFEC1
+	bool "Analog Front End 1 (AFEC1)"
+	default n
+
+config SAMV7_MCAN0
+	bool "CAN controller 0 (MCAN0)"
+	default n
+	select CAN
+	select ARCH_HAVE_CAN_ERRORS
+	select CAN_TXREADY
+	select SAMV7_MCAN
+
+config SAMV7_MCAN1
+	bool "CAN controller 1 (MCAN1)"
+	default n
+	depends on SAMV7_HAVE_MCAN1
+	select CAN
+	select ARCH_HAVE_CAN_ERRORS
+	select CAN_TXREADY
+	select SAMV7_MCAN
+
+config SAMV7_DAC0
+	bool "Digital To Analog Converter 0 (DAC0)"
+	default n
+
+config SAMV7_DAC1
+	bool "Digital To Analog Converter 1 (DAC1)"
+	default n
+	depends on SAMV7_HAVE_DAC1
+
+config SAMV7_EBI
+	bool "External Bus Interface (EBI)"
+	default n
+	depends on SAMV7_HAVE_EBI
+
+config SAMV7_EMAC0
+	bool "Ethernet MAC (GMAC)"
+	default n
+	select SAMV7_EMAC
+	select NETDEVICES
+	select ARCH_HAVE_PHY
+
+config SAMV7_XDMAC
+	bool "Central DMA (XDMA)"
+	default n
+	select ARCH_DMA
+
+config SAMV7_HSMCI0
+	bool "High Speed Multimedia Card Interface (HSMCI)"
+	default n
+	depends on SAMV7_HAVE_HSMCI0
+	select SAMV7_HSMCI
+	select ARCH_HAVE_SDIO
+	select MMCSD
+
+config SAMV7_ISI
+	bool "Image Sensor Interface (ISI)"
+	default n
+
+config SAMV7_MLB
+	bool "Media LB Interface"
+	default n
+	depends on SAMV7_HAVE_MEDIALB
+
+config SAMV7_PWM0
+	bool "Pulse Width Modulation Controller 0 (PWM0)"
+	default n
+
+config SAMV7_PWM1
+	bool "Pulse Width Modulation Controller 0 (PWM1)"
+	default n
+
+config SAMV7_QSPI
+	bool "Quad SPI (QSPI)"
+	default n
+	select ARCH_USE_MPU
+	select ARM_MPU
+
+config SAMV7_RTC
+	bool "Real Time Clock (RTC)"
+	default n
+
+config SAMV7_RTT
+	bool "Real Time Timer (RTT)"
+	default n
+
+config SAMV7_SDRAMC
+	bool "SDRAM Controller (SDRAMC)"
+	default n
+	depends on SAMV7_HAVE_SDRAMC
+
+config SAMV7_SMC
+	bool "Static Memory Controller (SMC)"
+	default n
+
+config SAMV7_SPI0
+	bool "Serial Peripheral Interface 0 (SPI0)"
+	default n
+	depends on SAMV7_HAVE_SPI0
+	select SAMV7_SPI
+	select SPI
+
+config SAMV7_SPI1
+	bool "Serial Peripheral Interface 1 (SPI1)"
+	default n
+	depends on SAMV7_HAVE_SPI1
+	select SAMV7_SPI
+	select SPI
+
+config SAMV7_SSC0
+	bool "Synchronous Serial Controller (SSC)"
+	default n
+	select SAMV7_SSC
+
+config SAMV7_TC0
+	bool "Timer Counter 0 (ch. 0, 1, 2) (TC0)"
+	default n
+	select SAMV7_HAVE_TC
+
+config SAMV7_TC1
+	bool "Timer Counter 1 (ch. 3, 4, 5) (TC1)"
+	default n
+	select SAMV7_HAVE_TC
+
+config SAMV7_TC2
+	bool "Timer Counter 2 (ch. 6, 7, 8) (TC2)"
+	default n
+	select SAMV7_HAVE_TC
+
+config SAMV7_TC3
+	bool "Timer Counter 3 (ch. 9, 10, 11) (TC2)"
+	default n
+	select SAMV7_HAVE_TC
+
+config SAMV7_TRNG
+	bool "True Random Number Generator (TRNG)"
+	default n
+	select ARCH_HAVE_RNG
+
+config SAMV7_TWIHS0
+	bool "Two-wire Interface 0 (TWIHS0)"
+	default n
+
+config SAMV7_TWIHS1
+	bool "Two-wire Interface 1 (TWIHS1)"
+	default n
+
+config SAMV7_TWIHS2
+	bool "Two-wire Interface 2 (TWIHS2)"
+	default n
+	depends on SAMV7_HAVE_TWIHS2
+
+config SAMV7_UART0
+	bool "UART 0"
+	default y
+	select ARCH_HAVE_UART0
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config SAMV7_UART1
+	bool "UART 1"
+	default n
+	select ARCH_HAVE_UART1
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config SAMV7_UART2
+	bool "UART 2"
+	default y
+	select ARCH_HAVE_UART2
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config SAMV7_UART3
+	bool "UART 3"
+	default n
+	select ARCH_HAVE_UART3
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config SAMV7_UART4
+	bool "UART 4"
+	default y
+	select ARCH_HAVE_UART4
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config SAMV7_USBDEVFS
+	bool "USB Device Full Speed (USBFS)"
+	default n
+	depends on SAMV7_HAVE_USBFS
+	select USBDEV
+
+config SAMV7_USBDEVHS
+	bool "USB Device High Speed (USBHS)"
+	default n
+	depends on SAMV7_HAVE_USBHS
+	select USBDEV
+
+config SAMV7_USBHOSTFS
+	bool "USB Host Full Speed (USBFS)"
+	default n
+	depends on SAMV7_HAVE_USBFS
+	select USBHOST
+
+config SAMV7_USBHOSTHS
+	bool "USB Host High Speed (USBHS)"
+	default n
+	depends on SAMV7_HAVE_USBHS
+	select USBHOST
+
+config SAMV7_USART0
+	bool "USART 0"
+	default n
+	depends on SAMV7_HAVE_USART0
+	select ARCH_HAVE_USART0
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config SAMV7_USART1
+	bool "USART 1"
+	default n
+	depends on SAMV7_HAVE_USART1
+	select ARCH_HAVE_USART1
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config SAMV7_USART2
+	bool "USART 2"
+	default n
+	depends on SAMV7_HAVE_USART2
+	select ARCH_HAVE_USART2
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config SAMV7_WDT
+	bool "Watchdog Timer (WDT)"
+	default n
+	select WATCHDOG
+
+config SAMV7_RSWDT
+	bool "Reinforced Safety Watchdog Timer (RSWDT)"
+	default n
+	select WATCHDOG
+
+endmenu # SAMV7 Peripheral Selection
+
+menuconfig SAMV7_GPIO_IRQ
+	bool "GPIO pin interrupts"
+	---help---
+		Enable support for interrupting GPIO pins
+
+if SAMV7_GPIO_IRQ
+
+config SAMV7_GPIOA_IRQ
+	bool "GPIOA interrupts"
+	default n
+
+config SAMV7_GPIOB_IRQ
+	bool "GPIOB interrupts"
+	default n
+
+config SAMV7_GPIOC_IRQ
+	bool "GPIOC interrupts"
+	default n
+
+config SAMV7_GPIOD_IRQ
+	bool "GPIOD interrupts"
+	default n
+
+config SAMV7_GPIOE_IRQ
+	bool "GPIOE interrupts"
+	default n
+
+endif # SAMV7_GPIO_IRQ
+
+if SAMV7_WDT || SAMV7_RSWDT
+
+menu "Watchdog Configuration"
+
+if SAMV7_WDT
+
+comment "Watchdog Configuration"
+
+config SAMV7_WDT_INTERRUPT
+	bool "Interrupt on timeout"
+	default n
+	---help---
+		The normal behavior is to reset everything when a watchdog timeout
+		occurs.  An alternative behavior is to simply interrupt when the
+		timeout occurs.  This setting enables that alternative behavior.
+
+config SAMV7_WDT_DEBUGHALT
+	bool "Halt on DEBUG"
+	default y if DEBUG
+	default n if !DEBUG
+	---help---
+		Halt the watchdog timer in the debug state
+
+config SAMV7_WDT_IDLEHALT
+	bool "Halt in IDLE"
+	default y
+	---help---
+		Halt the watchdog timer in the IDLE state
+
+config SAMV7_WDT_REGDEBUG
+	bool "Register level debug"
+	default n
+	depends on DEBUG
+	---help---
+		Enable low-level register debug output
+
+endif # SAMV7_WDT
+
+if SAMV7_RSWDT
+
+comment "Reinforced Safety Watchdog Configuration"
+
+config SAMV7_RSWDT_INTERRUPT
+	bool "Interrupt on timeout"
+	default n
+	---help---
+		The normal behavior is to reset everything when a watchdog timeout
+		occurs.  An alternative behavior is to simply interrupt when the
+		timeout occurs.  This setting enables that alternative behavior.
+
+config SAMV7_RSWDT_DEBUGHALT
+	bool "Halt on DEBUG"
+	default y if DEBUG
+	default n if !DEBUG
+	---help---
+		Halt the watchdog timer in the debug state
+
+config SAMV7_RSWDT_IDLEHALT
+	bool "Halt in IDLE"
+	default y
+	---help---
+		Halt the watchdog timer in the IDLE state
+
+config SAMV7_RSWDT_REGDEBUG
+	bool "Register level debug"
+	default n
+	depends on DEBUG
+	---help---
+		Enable low-level register debug output
+
+endif # SAMV7_RSWDT
+
+endmenu # Watchdog configuration
+
+endif # SAMV7_WDT || SAMV7_RSWDT
+
+menuconfig SAMV7_PROGMEM
+	bool "FLASH program memory"
+	---help---
+		Enable support FLASH interfaces as defined in include/nuttx/progmem.h
+
+if SAMV7_PROGMEM
+
+config SAMV7_PROGMEM_NSECTORS
+	int "Number of 128KB sectors"
+	default 4
+	range 1 15
+	---help---
+		This is the number of 128KB FLASH sectors at the end of the program
+		flash memory that will be reserved for use with by the interfaces
+		prototyped in include/nuttx/progmem.h
+
+endif # SAMV7_PROGMEM
+
+menu "SDRAM Configuration"
+	depends on SAMV7_SDRAMC
+
+config SAMV7_SDRAMSIZE
+	int "SDRAM size (bytes)"
+	default 0
+	---help---
+		This is the usable size of the SDRAM.  This may be a value less that
+		the actual size of the SDRAM if, for some reason, you wish to
+		reserve the end of SDRAM memory for some other purpose.
+
+config SAMV7_SDRAMHEAP
+	bool "SDRAM heap"
+	default y
+	---help---
+		Add the first SAMV7_SDRAMSIZE bytes of SDRAM to the heap.  NOTE that
+		this requires also that MM_REGIONS be incremented to support another memory region.
+
+endmenu # SDRAM Configuration
+
+menu "SPI Device Driver Configuration"
+	depends on SAMV7_SPI
+
+choice
+	prompt "SPI0 Configuration"
+	default SAMV7_SPI0_MASTER
+	depends on SAMV7_SPI0
+
+config SAMV7_SPI0_MASTER
+	bool "Master"
+	select SAMV7_SPI_MASTER
+	---help---
+		Configure SPI0 as an SPI master driver.  Default: Master
+
+config SAMV7_SPI0_SLAVE
+	bool "Slave"
+	depends on EXPERIMENTAL
+	select SAMV7_SPI_SLAVE
+	---help---
+		Configure SPI0 as an SPI slave driver.  Default: Master
+
+endchoice # SPI0 Configuration
+
+choice
+	prompt "SPI1 Configuration"
+	default SAMV7_SPI1_MASTER
+	depends on SAMV7_SPI1
+
+config SAMV7_SPI1_MASTER
+	bool "Master"
+	select SAMV7_SPI_MASTER
+	---help---
+		Configure SPI1 as an SPI master driver.  Default: Master
+
+config SAMV7_SPI1_SLAVE
+	bool "Slave"
+	depends on EXPERIMENTAL
+	select SAMV7_SPI_SLAVE
+	---help---
+		Configure SPI1 as an SPI slave driver.  Default: Master
+
+endchoice # SPI1 Configuration
+
+if SAMV7_SPI_MASTER
+comment "SPI Master Configuration"
+
+config SAMV7_SPI_CS_DECODING
+	bool "SPI Peripheral Chip Select Decoding"
+	default n
+	---help---
+		Use Peripheral Chip Select Decoding on SPI Master
+
+config SAMV7_SPI_DMA
+	bool "SPI DMA"
+	default n
+	depends on SAMV7_XDMAC
+	---help---
+		Use DMA to improve SPI transfer performance.
+
+config SAMV7_SPI_DMATHRESHOLD
+	int "SPI DMA threshold"
+	default 4
+	depends on SAMV7_SPI_DMA
+	---help---
+		When SPI DMA is enabled, small DMA transfers will still be performed
+		by polling logic.  But we need a threshold value to determine what
+		is small.  That value is provided by SAMV7_SPI_DMATHRESHOLD.
+
+config SAMV7_SPI_DMADEBUG
+	bool "SPI DMA transfer debug"
+	depends on SAMV7_SPI_DMA && DEBUG && DEBUG_DMA
+	default n
+	---help---
+		Enable special debug instrumentation analyze SPI DMA data transfers.
+		This logic is as non-invasive as possible:  It samples DMA
+		registers at key points in the data transfer and then dumps all of
+		the registers at the end of the transfer.
+
+endif # SAMV7_SPI_MASTER
+
+if SAMV7_SPI_SLAVE
+comment "SPI Slave Configuration"
+
+config SAMV7_SPI_SLAVE_QSIZE
+	int "Output queue size"
+	default 8
+	---help---
+		The number of words that an be retained in the controller driver's
+		output queue.
+
+endif # SAMV7_SPI_SLAVE
+
+config SAMV7_SPI_REGDEBUG
+	bool "SPI Register level debug"
+	depends on DEBUG
+	default n
+	---help---
+		Output detailed register-level SPI device debug information.
+		Requires also DEBUG.
+
+endmenu # SPI device driver options
+
+menu "QSPI Device Driver Configuration"
+	depends on SAMV7_QSPI && !SAMV7_QSPI_IS_SPI
+
+config SAMV7_QSPI_DLYBS
+	int "Delay Before QSCK (nsec)"
+	default 0
+
+config SAMV7_QSPI_DLYBCT
+	int "Delay Between Consecutive Transfers (nsec)"
+	default 0
+
+config SAMV7_QSPI_DMA
+	bool "QSPI DMA"
+	default n
+	depends on SAMV7_XDMAC
+	---help---
+		Use DMA to improve SPI transfer performance.
+
+config SAMV7_QSPI_DMATHRESHOLD
+	int "QSPI DMA threshold"
+	default 4
+	depends on SAMV7_QSPI_DMA
+	---help---
+		When ASPI DMA is enabled, small DMA transfers will still be performed
+		by polling logic.  But we need a threshold value to determine what
+		is small.  That value is provided by SAMV7_QSPI_DMATHRESHOLD.
+
+config SAMV7_QSPI_DMADEBUG
+	bool "QSPI DMA transfer debug"
+	depends on SAMV7_QSPI_DMA && DEBUG && DEBUG_DMA
+	default n
+	---help---
+		Enable special debug instrumentation analyze QSPI DMA data transfers.
+		This logic is as non-invasive as possible:  It samples DMA
+		registers at key points in the data transfer and then dumps all of
+		the registers at the end of the transfer.
+
+config SAMV7_QSPI_REGDEBUG
+	bool "QSPI Register level debug"
+	depends on DEBUG
+	default n
+	---help---
+		Output detailed register-level QSPI device debug information.
+		Requires also DEBUG.
+
+endmenu # QSPI device driver options
+
+menu "TWIHS device driver options"
+	depends on SAMV7_TWIHS0 || SAMV7_TWIHS1 || SAMV7_TWIHS2
+
+config SAMV7_TWIHS0_FREQUENCY
+	int "TWIHS0 Frequency"
+	default 100000
+	depends on SAMV7_TWIHS0
+
+config SAMV7_TWIHS1_FREQUENCY
+	int "TWIHS1 Frequency"
+	default 100000
+	depends on SAMV7_TWIHS1
+
+config SAMV7_TWIHS2_FREQUENCY
+	int "TWIHS2 Frequency"
+	default 100000
+	depends on SAMV7_TWIHS2
+
+config SAMV7_TWIHS_REGDEBUG
+	bool "TWIHS register level debug"
+	depends on DEBUG
+	default n
+	---help---
+		Output detailed register-level TWIHS device debug information.
+		Very invasive! Requires also DEBUG.
+
+endmenu # TWIHS device driver options
+
+menu "SSC Configuration"
+	depends on SAMV7_SSC
+
+config SAMV7_SSC_MAXINFLIGHT
+	int "SSC queue size"
+	default 16
+	---help---
+		This is the total number of transfers, both RX and TX, that can be
+		enqueue before the caller is required to wait.  This setting
+		determines the number certain queue data structures that will be
+		pre-allocated.
+
+if SAMV7_SSC0
+comment "SSC0 Configuration"
+
+config SAMV7_SSC0_DATALEN
+	int "Data width (bits)"
+	default 16
+	---help---
+		Data width in bits.  This is a default value and may be change
+		via the I2S interface
+
+config SAMV7_SSC0_RX
+	bool "Enable I2C receiver"
+	default n
+	---help---
+		Enable I2S receipt logic
+
+if SAMV7_SSC0_RX
+
+choice
+	prompt "Receiver clock source"
+	default SAMV7_SSC0_RX_MCKDIV
+
+config SAMV7_SSC0_RX_RKINPUT
+	bool "RK input"
+	---help---
+		The SSC receiver clock is an external clock provided on the RK input
+		pin.  Sample rate determined by the external clock frequency.
+
+config SAMV7_SSC0_RX_TXCLK
+	bool "Transmitter Clock"
+	---help---
+		The SSC receiver clock is transmitter clock.  RX sample rate is the same
+		as the TX sample rate.
+
+config SAMV7_SSC0_RX_MCKDIV
+	bool "MCK/2"
+	---help---
+		The SSC receiver clock is the MCK/2 divided by a up to 4095.  Desired
+		sample rate must be provided below.
+
+endchoice # Receiver clock source
+
+if !SAMV7_SSC0_RX_RKINPUT
+choice
+	prompt "Receiver output clock"
+	default SAMV7_SSC0_RX_RKOUTPUT_NONE
+
+config SAMV7_SSC0_RX_RKOUTPUT_NONE
+	bool "None"
+
+config SAMV7_SSC0_RX_RKOUTPUT_CONT
+	bool "Continuous"
+
+config SAMV7_SSC0_RX_RKOUTPUT_XFR
+	bool "Only during transfers"
+
+endchoice # Receiver output clock
+endif # !SAMV7_SSC0_RX_RKINPUT
+
+config SAMV7_SSC0_RX_FSLEN
+	int "Receive Frame Sync Length"
+	default 1
+	range 1 255
+	---help---
+		This setting determines the pulse length of the Receive Frame Sync
+		signal in units of receive clock periods.
+
+config SAMV7_SSC0_RX_STTDLY
+	int "Receive Start Delay Length"
+	default 0
+	range 0 255
+	---help---
+		This setting determines the pulse length to the start of data in
+		receive clock periods.  It must be greater than or equal to the RX
+		frame synch length.  Zero means no start delay.
+
+endif # SAMV7_SSC0_RX
+
+config SAMV7_SSC0_TX
+	bool "Enable I2C transmitter"
+	default n
+	---help---
+		Enable I2S transmission logic
+
+if SAMV7_SSC0_TX
+
+choice
+	prompt "Transmitter clock source"
+	default SAMV7_SSC0_TX_MCKDIV
+
+config SAMV7_SSC0_TX_TKINPUT
+	bool "TK input"
+	---help---
+		The SSC transmitter clock is an external clock provided on the TK input
+		pin.  Sample rate determined by the external clock frequency.
+
+config SAMV7_SSC0_TX_RXCLK
+	bool "Receiver Clock"
+	---help---
+		The SSC transmitter clock is receiver clock.  TX sample rate is the same
+		as the RX sample rate.
+
+config SAMV7_SSC0_TX_MCKDIV
+	bool "MCK/2"
+	---help---
+		The SSC transmitter clock is the MCK/2 divided by a up to 4095.  Desired
+		sample rate must be provided below.
+
+endchoice # Transmitter clock source
+
+if !SAMV7_SSC0_TX_TKINPUT
+choice
+	prompt "Transmitter output clock"
+	default SAMV7_SSC0_TX_TKOUTPUT_NONE
+
+config SAMV7_SSC0_TX_TKOUTPUT_NONE
+	bool "None"
+
+config SAMV7_SSC0_TX_TKOUTPUT_CONT
+	bool "Continuous"
+
+config SAMV7_SSC0_TX_TKOUTPUT_XFR
+	bool "Only during transfers"
+
+endchoice # Receiver output clock
+endif # !SAMV7_SSC0_TX_TKINPUT
+
+config SAMV7_SSC0_TX_FSLEN
+	int "Transmit Frame Sync Length"
+	default 1
+	range 0 255
+	---help---
+		This setting defines the length of the Transmit Frame Sync signal in
+		units of transmit clock periods.  A value of zero disables this
+		feature.  In that case the TD line is driven with the default value
+		during the Transmit Frame Sync signal.
+
+config SAMV7_SSC0_TX_STTDLY
+	int "Transmit Start Delay Length"
+	default 0
+	range 0 255
+	---help---
+		This setting determines the pulse length to the start of data in
+		transmit clock periods.  It must be greater than or equal to the RX
+		frame synch length.  Zero means no start delay.
+
+endif # SAMV7_SSC0_TX
+
+config SAMV7_SSC0_MCKDIV_SAMPLERATE
+	int "Sample rate"
+	default 48000
+	depends on SAMV7_SSC0_RX_MCKDIV || SAMV7_SSC0_TX_MCKDIV
+	---help---
+		If the either the receiver or transmitter clock is provided by MCK/2 divided
+		down, then the sample rate must be provided.  The bit rate will be the product
+		of the sample rate and the data width.  The SSC driver will determine the best
+		divider to obtain that bit rate (up to 4095).  If the bit rate can be realized
+		by dividing down the MCK/2, a compile time error will occur.
+
+config SAMV7_SSC0_LOOPBACK
+	bool "Loopback mode"
+	default n
+	depends on SAMV7_SSC0_TX && SAMV7_SSC0_RX
+	---help---
+		If both the receiver and transmitter are enabled, then the SSC can
+		be configured in loopback mode.  This setting selects SSC loopback
+		and will cause the LOOP bit to be set in the SSC_RFMR register. In
+		this case, RD is connected to TD, RF is connected to TF and RK is
+		connected to TK.
+
+endif # SAMV7_SSC0
+
+if SAMV7_SSC1
+comment "SSC1 Configuration"
+
+config SAMV7_SSC1_DATALEN
+	int "Data width (bits)"
+	default 16
+	---help---
+		Data width in bits.  This is a default value and may be change
+		via the I2S interface
+
+config SAMV7_SSC1_RX
+	bool "Enable I2C receiver"
+	default n
+	---help---
+		Enable I2S receipt logic
+
+if SAMV7_SSC1_RX
+
+choice
+	prompt "Receiver clock source"
+	default SAMV7_SSC1_RX_MCKDIV
+
+config SAMV7_SSC1_RX_RKINPUT
+	bool "RK input"
+	---help---
+		The SSC receiver clock is an external clock provided on the RK input
+		pin.  Sample rate determined by the external clock frequency.
+
+config SAMV7_SSC1_RX_TXCLK
+	bool "Transmitter Clock"
+	---help---
+		The SSC receiver clock is transmitter clock.  RX sample rate is the same
+		as the TX sample rate.
+
+config SAMV7_SSC1_RX_MCKDIV
+	bool "MCK/2"
+	---help---
+		The SSC receiver clock is the MCK/2 divided by a up to 4095.  Desired
+		sample rate must be provided below.
+
+endchoice # Receiver clock source
+
+if !SAMV7_SSC1_RX_RKINPUT
+choice
+	prompt "Receiver output clock"
+	default SAMV7_SSC1_RX_RKOUTPUT_NONE
+
+config SAMV7_SSC1_RX_RKOUTPUT_NONE
+	bool "None"
+
+config SAMV7_SSC1_RX_RKOUTPUT_CONT
+	bool "Continuous"
+
+config SAMV7_SSC1_RX_RKOUTPUT_XFR
+	bool "Only during transfers"
+
+endchoice # Receiver output clock
+endif # !SAMV7_SSC1_RX_RKINPUT
+
+config SAMV7_SSC1_RX_FSLEN
+	int "Receive Frame Sync Length"
+	default 1
+	range 1 255
+	---help---
+		This setting determines the pulse length of the Receive Frame Sync
+		signal in units of receive clock periods.
+
+config SAMV7_SSC1_RX_STTDLY
+	int "Receive Start Delay Length"
+	default 0
+	range 0 255
+	---help---
+		This setting determines the pulse length to the start of data of
+		receive clock periods.  It must be greater than or equal to the RX
+		frame synch length.  Zero means no start delay.
+
+endif # SAMV7_SSC1_RX
+
+config SAMV7_SSC1_TX
+	bool "Enable I2C transmitter"
+	default n
+	---help---
+		Enable I2S transmission logic
+
+if SAMV7_SSC1_TX
+
+choice
+	prompt "Transmitter clock source"
+	default SAMV7_SSC1_TX_MCKDIV
+
+config SAMV7_SSC1_TX_TKINPUT
+	bool "TK input"
+	---help---
+		The SSC transmitter clock is an external clock provided on the TK input
+		pin.  Sample rate determined by the external clock frequency.
+
+config SAMV7_SSC1_TX_RXCLK
+	bool "Receiver Clock"
+	---help---
+		The SSC transmitter clock is receiver clock.  TX sample rate is the same
+		as the RX sample rate.
+
+config SAMV7_SSC1_TX_MCKDIV
+	bool "MCK/2"
+	---help---
+		The SSC transmitter clock is the MCK/2 divided by a up to 4095.  Desired
+		sample rate must be provided below.
+
+endchoice # Transmitter clock source
+
+if !SAMV7_SSC1_TX_TKINPUT
+choice
+	prompt "Transmitter output clock"
+	default SAMV7_SSC1_TX_TKOUTPUT_NONE
+
+config SAMV7_SSC1_TX_TKOUTPUT_NONE
+	bool "None"
+
+config SAMV7_SSC1_TX_TKOUTPUT_CONT
+	bool "Continuous"
+
+config SAMV7_SSC1_TX_TKOUTPUT_XFR
+	bool "Only during transfers"
+
+endchoice # Receiver output clock
+endif # !SAMV7_SSC1_TX_TKINPUT
+
+config SAMV7_SSC1_TX_FSLEN
+	int "Receive Frame Sync Length"
+	default 1
+	range 0 255
+	---help---
+		This setting defines the length of the Transmit Frame Sync signal in
+		units of transmit clock periods.  A value of zero disables this
+		feature.  In that case the TD line is driven with the default value
+		during the Transmit Frame Sync signal.
+
+config SAMV7_SSC1_TX_STTDLY
+	int "Transmit Start Delay Length"
+	default 0
+	range 0 255
+	---help---
+		This setting determines the pulse length to the start of data in
+		transmit clock periods.  It must be greater than or equal to the RX
+		frame synch length.  Zero means no start delay.
+
+endif # SAMV7_SSC1_TX
+
+config SAMV7_SSC1_MCKDIV_SAMPLERATE
+	int "Sample rate"
+	default 48000
+	depends on SAMV7_SSC1_RX_MCKDIV || SAMV7_SSC1_TX_MCKDIV
+	---help---
+		If the either the receiver or transmitter clock is provided by MCK/2 divided
+		down, then the sample rate must be provided.  The bit rate will be the product
+		of the sample rate and the data width.  The SSC driver will determine the best
+		divider to obtain that bit rate (up to 4095).  If the bit rate can be realized
+		by dividing down the MCK/2, a compile time error will occur.
+
+config SAMV7_SSC1_LOOPBACK
+	bool "Loopback mode"
+	default n
+	depends on SAMV7_SSC1_TX && SAMV7_SSC1_RX
+	---help---
+		If both the receiver and transmitter are enabled, then the SSC can
+		be configured in loopback mode.  This setting selects SSC loopback
+		and will cause the LOOP bit to be set in the SSC_RFMR register. In
+		this case, RD is connected to TD, RF is connected to TF and RK is
+		connected to TK.
+
+endif # SAMV7_SSC1
+
+config SAMV7_SSC_DMADEBUG
+	bool "SSC DMA transfer debug"
+	depends on DEBUG && DEBUG_DMA
+	default n
+	---help---
+		Enable special debug instrumentation analyze SSC DMA data transfers.
+		This logic is as non-invasive as possible:  It samples DMA
+		registers at key points in the data transfer and then dumps all of
+		the registers at the end of the transfer.
+
+config SAMV7_SSC_REGDEBUG
+	bool "SSC Register level debug"
+	depends on DEBUG
+	default n
+	---help---
+		Output detailed register-level SSC device debug information.
+		Very invasive! Requires also DEBUG.
+
+config SAMV7_SSC_QDEBUG
+	bool "SSC Queue debug"
+	depends on DEBUG_I2S
+	default n
+	---help---
+		Enable instrumentation to debug audio buffer queue logic.
+
+config SAMV7_SSC_DUMPBUFFERS
+	bool "Dump Buffers"
+	depends on DEBUG_I2S
+	default n
+	---help---
+		Enable instrumentation to dump TX and RX buffers.
+
+endmenu # SSC Configuration
+
+if SAMV7_HAVE_TC
+menu "Timer/counter Configuration"
+
+if SAMV7_TC0
+
+config SAMV7_TC0_CLK0
+	bool "Enable TC0 channel 0 clock input pin"
+	default n
+
+config SAMV7_TC0_TIOA0
+	bool "Enable TC0 channel 0 output A"
+	default n
+
+config SAMV7_TC0_TIOB0
+	bool "Enable TC0 channel 0 output B"
+	default n
+
+config SAMV7_TC0_CLK1
+	bool "Enable TC0 channel 1 clock input pin"
+	default n
+
+config SAMV7_TC0_TIOA1
+	bool "Enable TC0 channel 1 output A"
+	default n
+
+config SAMV7_TC0_TIOB1
+	bool "Enable TC0 channel 1 output B"
+	default n
+
+config SAMV7_TC0_CLK2
+	bool "Enable TC0 channel 2 clock input pin"
+	default n
+
+config SAMV7_TC0_TIOA2
+	bool "Enable TC0 channel 2 output A"
+	default n
+
+config SAMV7_TC0_TIOB2
+	bool "Enable TC0 channel 2 output B"
+	default n
+
+endif # SAMV7_TC0
+
+if SAMV7_TC1
+
+config SAMV7_TC1_CLK3
+	bool "Enable TC1 channel 3 clock input pin"
+	default n
+
+config SAMV7_TC1_TIOA3
+	bool "Enable TC1 channel 3 output A"
+	default n
+
+config SAMV7_TC1_TIOB3
+	bool "Enable TC1 channel 3 output B"
+	default n
+
+config SAMV7_TC1_CLK4
+	bool "Enable TC1 channel 4 clock input pin"
+	default n
+
+config SAMV7_TC1_TIOA4
+	bool "Enable TC1 channel 4 output A"
+	default n
+
+config SAMV7_TC1_TIOB4
+	bool "Enable TC1 channel 4 output B"
+	default n
+
+config SAMV7_TC1_CLK5
+	bool "Enable TC1 channel 5 clock input pin"
+	default n
+
+config SAMV7_TC1_TIOA5
+	bool "Enable TC1 channel 5 output A"
+	default n
+
+config SAMV7_TC1_TIOB5
+	bool "Enable TC1 channel 5 output B"
+	default n
+
+endif # SAMV7_TC1
+
+if SAMV7_TC2
+
+config SAMV7_TC2_CLK6
+	bool "Enable TC2 channel 6 clock input pin"
+	default n
+
+config SAMV7_TC2_TIOA6
+	bool "Enable TC2 channel 6 output A"
+	default n
+
+config SAMV7_TC2_TIOB6
+	bool "Enable TC2 channel 6 output B"
+	default n
+
+config SAMV7_TC2_CLK7
+	bool "Enable TC2 channel 7 clock input pin"
+	default n
+
+config SAMV7_TC2_TIOA7
+	bool "Enable TC2 channel 7 output A"
+	default n
+
+config SAMV7_TC2_TIOB7
+	bool "Enable TC2 channel 7 output B"
+	default n
+
+config SAMV7_TC2_CLK8
+	bool "Enable TC2 channel 8 clock input pin"
+	default n
+
+config SAMV7_TC2_TIOA8
+	bool "Enable TC2 channel 8 output A"
+	default n
+
+config SAMV7_TC2_TIOB8
+	bool "Enable TC2 channel 8 output B"
+	default n
+
+endif # SAMV7_TC2
+
+if SAMV7_TC3
+config SAMV7_TC3_CLK9
+	bool "Enable TC3 channel 9 clock input pin"
+	default n
+
+config SAMV7_TC3_TIOA9
+	bool "Enable TC3 channel 9 output A"
+	default n
+
+config SAMV7_TC3_TIOB9
+	bool "Enable TC3 channel 9 output B"
+	default n
+
+config SAMV7_TC3_CLK10
+	bool "Enable TC3 channel 10 clock input pin"
+	default n
+
+config SAMV7_TC3_TIOA10
+	bool "Enable TC3 channel 10 output A"
+	default n
+
+config SAMV7_TC3_TIOB10
+	bool "Enable TC3 channel 10 output B"
+	default n
+
+config SAMV7_TC3_CLK11
+	bool "Enable TC3 channel 11 clock input pin"
+	default n
+
+config SAMV7_TC3_TIOA11
+	bool "Enable TC3 channel 11 output A"
+	default n
+
+config SAMV7_TC3_TIOB11
+	bool "Enable TC3 channel 11 output B"
+	default n
+
+endif # SAMV7_TC3
+
+config SAMV7_ONESHOT
+	bool "TC one-shot wrapper"
+	default n if !SCHED_TICKLESS
+	default y if SCHED_TICKLESS
+	---help---
+		Enable a wrapper around the low level timer/counter functions to
+		support one-shot timer.
+
+config SAMV7_FREERUN
+	bool "TC free-running wrapper"
+	default n if !SCHED_TICKLESS
+	default y if SCHED_TICKLESS
+	---help---
+		Enable a wrapper around the low level timer/counter functions to
+		support a free-running timer.
+
+if SCHED_TICKLESS
+
+config SAMV7_TICKLESS_ONESHOT
+	int "Tickless one-shot timer channel"
+	default 0
+	range 0 8
+	---help---
+		If the Tickless OS feature is enabled, the one clock must be
+		assigned to provided the one-shot timer needed by the OS.
+
+config SAMV7_TICKLESS_FREERUN
+	int "Tickless free-running timer channel"
+	default 1
+	range 0 8
+	---help---
+		If the Tickless OS feature is enabled, the one clock must be
+		assigned to provided the free-running timer needed by the OS.
+
+endif
+
+config SAMV7_TC_DEBUG
+	bool "TC debug"
+	depends on DEBUG
+	default n
+	---help---
+		Output high level Timer/Counter device debug information.
+		Requires also DEBUG.  If this option AND DEBUG_VERBOSE are
+		enabled, then the system will be overwhelmed the timer debug
+		output.  If DEBUG_VERBOSE is disabled, then debug output will
+		only indicate if/when timer-related errors occur.  This
+		latter mode is completely usable.
+
+config SAMV7_TC_REGDEBUG
+	bool "TC register level debug"
+	depends on DEBUG
+	default n
+	---help---
+		Output detailed register-level Timer/Counter device debug
+		information. Very invasive! Requires also DEBUG.
+
+endmenu # Timer/counter Configuration
+endif # SAMV7_HAVE_TC
+
+menu "HSMCI device driver options"
+	depends on SAMV7_HSMCI
+
+config SAMV7_HSMCI_RDPROOF
+	bool "Read Proof Enable"
+	default n
+	---help---
+		Enabling Read Proof allows to stop the HSMCI Clock during read
+		access if the internal FIFO is full. This will guarantee data
+		integrity, not bandwidth.
+
+config SAMV7_HSMCI_WRPROOF
+	bool "Write Proof Enable"
+	default n
+	---help---
+		Enabling Write Proof allows to stop the HSMCI Clock during write
+		access if the internal FIFO is full. This will guarantee data
+		integrity, not bandwidth.
+
+config SAMV7_HSMCI_UNALIGNED
+	bool "Unaligned I/O buffers"
+	default n
+	---help---
+		This option enables additional logic to handle unaligned buffers for
+		read and write SDIO operations.  Normally this support is not
+		required because the HSCMI driver functions like a block driver and,
+		for example, when used with the FAT file system only transfers
+		aligned blocks of data.
+
+		But under certain circumstances, the FAT file system WILL read
+		directly into the user buffer and then strict 32-bit alignment is
+		required.  That condition is:  When the user reads from the
+		beginning of a sector and at least a whole sector is being read.
+
+		This option is not recommended.  There are better ways to handle
+		the unalaigned case:
+
+			# CONFIG_SAMV7_HSMCI_UNALIGNED is not set
+				Just return -EFAULT if unaligned
+			CONFIG_FAT_DIRECT_RETRY=y
+				If -EFAULT is returned, then try again with aligned
+				sector buffers.
+
+config SAMV7_HSMCI_XFRDEBUG
+	bool "HSMCI transfer debug"
+	depends on DEBUG_FS && DEBUG_VERBOSE
+	default n
+	---help---
+		Enable special debug instrumentation analyze HSMCI data transfers.
+		This logic is as non-invasive as possible:  It samples HSMCI
+		registers at key points in the data transfer and then dumps all of
+		the registers at the end of the transfer.  If DEBUG_DMA is also
+		enabled, then DMA register will be collected as well.  Requires also
+		DEBUG_FS and DEBUG_VERBOSE.
+
+config SAMV7_HSMCI_CMDDEBUG
+	bool "HSMCI command debug"
+	depends on DEBUG_FS && DEBUG_VERBOSE
+	default n
+	---help---
+		Enable special debug instrumentation analyze HSMCI commands. This
+		logic is as non-invasive as possible:  It samples HSMCI registers at
+		key points in the data transfer and then dumps all of the registers
+		at the end of the transfer.  If DEBUG_DMA is also enabled, then DMA
+		register will be collected as well.  Requires also DEBUG_FS and
+		DEBUG_VERBOSE.
+
+config SAMV7_HSMCI_REGDEBUG
+	bool "HSMCI Register level debug"
+	depends on DEBUG
+	default n
+	---help---
+		Output detailed register-level HSCMI device debug information.
+		Very invasive! Requires also DEBUG.
+
+endmenu # HSMCI device driver options
+
+menu "EMAC device driver options"
+	depends on SAMV7_EMAC0
+
+config SAMV7_EMAC0_NRXBUFFERS
+	int "Number of RX buffers"
+	default 16
+	---help---
+		EMAC buffer memory is segmented into 128 byte units (not
+		configurable).  This setting provides the number of such 128 byte
+		units used for reception.  This is also equal to the number of RX
+		descriptors that will be allocated  The selected value must be an
+		even power of 2.
+
+config SAMV7_EMAC0_NTXBUFFERS
+	int "Number of TX buffers"
+	default 8
+	---help---
+		EMAC buffer memory is segmented into full Ethernet packets (size
+		NET_BUFSIZE bytes).  This setting provides the number of such packets
+		that can be in flight.  This is also equal to the number of TX
+		descriptors that will be allocated.
+
+config SAMV7_EMAC0_PHYADDR
+	int "PHY address"
+	default 1
+	---help---
+		The 5-bit address of the PHY on the board.  Default: 1
+
+config SAMV7_EMAC0_PHYINIT
+	bool "Board-specific PHY Initialization"
+	default n
+	---help---
+		Some boards require specialized initialization of the PHY before it can be used.
+		This may include such things as configuring GPIOs, resetting the PHY, etc.  If
+		SAMV7_EMAC0_PHYINIT is defined in the configuration then the board specific logic must
+		provide sam_phyinitialize();  The SAMV7 EMAC driver will call this function
+		one time before it first uses the PHY.
+
+choice
+	prompt "PHY interface"
+	default SAMV7_EMAC0_MII
+
+config SAMV7_EMAC0_MII
+	bool "MII"
+	---help---
+		Support Ethernet MII interface (vs RMII).
+
+config SAMV7_EMAC0_RMII
+	bool "RMII"
+	depends on !ARCH_CHIP_SAM4E
+	---help---
+		Support Ethernet RMII interface (vs MII).
+
+endchoice # PHY interface
+
+config SAMV7_EMAC0_CLAUSE45
+	bool "Clause 45 MII"
+	depends on SAMV7_EMAC0_MII
+	---help---
+		MDIO was originally defined in Clause 22 of IEEE RFC802.3. In the
+		original specification, a single MDIO interface is able to access up
+		to 32 registers in 32 different PHY devices.  To meet the needs the
+		expanding needs of 10-Gigabit Ethernet devices, Clause 45 of the
+		802.3ae specification provided the following additions to MDIO:
+
+		- Ability to access 65,536 registers in 32 different devices on
+		  32 different ports
+		- Additional OP-code and ST-code for Indirect Address register
+		  access for 10 Gigabit Ethernet
+		- End-to-end fault signaling
+		- Multiple loopback points
+		- Low voltage electrical specification
+
+		By default, Clause 22 PHYs will be supported unless this option is
+		selected.
+
+config SAMV7_EMAC0_AUTONEG
+	bool "Use autonegotiation"
+	default y
+	---help---
+		Use PHY autonegotiation to determine speed and mode
+
+config SAMV7_EMAC0_ETHFD
+	bool "Full duplex"
+	default n
+	depends on !SAMV7_EMAC0_AUTONEG
+	---help---
+		If SAMV7_EMAC0_AUTONEG is not defined, then this may be defined to select full duplex
+		mode. Default: half-duplex
+
+config SAMV7_EMAC0_ETH100MBPS
+	bool "100 Mbps"
+	default n
+	depends on !SAMV7_EMAC0_AUTONEG
+	---help---
+		If SAMV7_EMAC0_AUTONEG is not defined, then this may be defined to select 100 MBps
+		speed.  Default: 10 Mbps
+
+config SAMV7_EMAC0_PHYSR
+	int "PHY Status Register Address (decimal)"
+	depends on SAMV7_EMAC0_AUTONEG
+	---help---
+		This must be provided if SAMV7_EMAC0_AUTONEG is defined.  The PHY status register
+		address may diff from PHY to PHY.  This configuration sets the address of
+		the PHY status register.
+
+config SAMV7_EMAC0_PHYSR_ALTCONFIG
+	bool "PHY Status Alternate Bit Layout"
+	default n
+	depends on SAMV7_EMAC0_AUTONEG
+	---help---
+		Different PHYs present speed and mode information in different ways.  Some
+		will present separate information for speed and mode (this is the default).
+		Those PHYs, for example, may provide a 10/100 Mbps indication and a separate
+		full/half duplex indication. This options selects an alternative representation
+		where speed and mode information are combined.  This might mean, for example,
+		separate bits for 10HD, 100HD, 10FD and 100FD.
+
+if SAMV7_EMAC0_AUTONEG
+if SAMV7_EMAC0_PHYSR_ALTCONFIG
+
+config SAMV7_EMAC0_PHYSR_ALTMODE
+	hex "PHY Mode Mask"
+	---help---
+		This must be provided if SAMV7_EMAC0_AUTONEG is defined.  This provide bit mask
+		for isolating the speed and full/half duplex mode bits.
+
+config SAMV7_EMAC0_PHYSR_10HD
+	hex "10MBase-T Half Duplex Value"
+	---help---
+		This must be provided if SAMV7_EMAC0_AUTONEG is defined.  This is the value
+		under the bit mask that represents the 10Mbps, half duplex setting.
+
+config SAMV7_EMAC0_PHYSR_100HD
+	hex "100Base-T Half Duplex Value"
+	---help---
+		This must be provided if SAMV7_EMAC0_AUTONEG is defined.  This is the value
+		under the bit mask that represents the 100Mbps, half duplex setting.
+
+config SAMV7_EMAC0_PHYSR_10FD
+	hex "10Base-T Full Duplex Value"
+	---help---
+		This must be provided if SAMV7_EMAC0_AUTONEG is defined.  This is the value
+		under the bit mask that represents the 10Mbps, full duplex setting.
+
+config SAMV7_EMAC0_PHYSR_100FD
+	hex "100Base-T Full Duplex Value"
+	---help---
+		This must be provided if SAMV7_EMAC0_AUTONEG is defined.  This is the value
+		under the bit mask that represents the 100Mbps, full duplex setting.
+
+endif # SAMV7_EMAC0_PHYSR_ALTCONFIG
+if !SAMV7_EMAC0_PHYSR_ALTCONFIG
+
+config SAMV7_EMAC0_PHYSR_SPEED
+	hex "PHY Speed Mask"
+	---help---
+		This must be provided if SAMV7_EMAC0_AUTONEG is defined.  This provides bit mask
+		for isolating the 10 or 100MBps speed indication.
+
+config SAMV7_EMAC0_PHYSR_100MBPS
+	hex "PHY 100Mbps Speed Value"
+	---help---
+		This must be provided if SAMV7_EMAC0_AUTONEG is defined.  This provides the value
+		of the speed bit(s) indicating 100MBps speed.
+
+config SAMV7_EMAC0_PHYSR_MODE
+	hex "PHY Mode Mask"
+	---help---
+		This must be provided if SAMV7_EMAC0_AUTONEG is defined.  This provides the
+		bit mask for isolating the full or half duplex mode bits.
+
+config SAMV7_EMAC0_PHYSR_FULLDUPLEX
+	hex "PHY Full Duplex Mode Value"
+	---help---
+		This must be provided if SAMV7_EMAC0_AUTONEG is defined.  This provides the
+		value of the mode bits indicating full duplex mode.
+
+endif # !SAMV7_EMAC0_PHYSR_ALTCONFIG
+endif # SAMV7_EMAC0_AUTONEG
+
+# These apply to both EMAC0 and EMAC1 (but are in the EMAC0 menu for now
+# because there is not yet any SAMV7 chip that supports two Ethernet MACS
+
+config SAMV7_EMAC0_ISETH0
+	bool
+	default y
+
+config SAMV7_EMAC_PREALLOCATE
+	bool "Preallocate buffers"
+	default n
+	---help---
+		Buffer an descriptor many may either be allocated from the memory
+		pool or pre-allocated to lie in .bss.  This options selected pre-
+		allocated buffer memory.
+
+config SAMV7_EMAC_NBC
+	bool "Disable Broadcast"
+	default n
+	---help---
+		Select to disable receipt of broadcast packets.
+
+config SAMV7_EMAC_DEBUG
+	bool "Force EMAC0/1 DEBUG"
+	default n
+	depends on DEBUG && !DEBUG_NET
+	---help---
+		This option will force debug output from EMAC driver even without
+		network debug output enabled.  This is not normally something
+		that would want to do but is convenient if you are debugging the
+		driver and do not want to get overloaded with other
+		network-related debug output.
+
+config SAMV7_EMAC_REGDEBUG
+	bool "Register-Level Debug"
+	default n
+	depends on DEBUG
+	---help---
+		Enable very low-level register access debug.  Depends on DEBUG.
+
+endmenu # EMAC0 device driver options
+
+menu "USB High Speed Device Controller driver (DCD) options"
+	depends on SAMV7_USBDEVHS
+
+config SAMV7_USBDEVHS_LOWPOWER
+	bool "Low-power mode"
+	default n
+	---help---
+		The USBHS can work in two modes:
+
+		- Normal mode where High speed, Full speed and Low speed are
+		  available.
+		- Low-power mode where only Full speed and Low speed are available.
+
+		This options selects the low-power mode.  In order to use high speed
+		mode, this option must be disabled and USBDEV_DUALSPEED must be
+		enabled.
+
+config SAMV7_USBHS_SCATTERGATHER
+	bool
+	default n
+	depends on EXPERIMENTAL
+	---help---
+		Scatter gather DMA is not yet supported
+
+config SAMV7_USBHS_NDTDS
+	int "Number of USBHS DMA transfer descriptors"
+	default 8
+	---help---
+		DMA transfer descriptors are allocated in a pool at boot time.  This
+		setting provides the number of DMA transfer descriptors to be
+		allocated.
+
+config SAMV7_USBHS_PREALLOCATE
+	bool "Pre-allocate DMA transfer descriptors"
+	default y
+	---help---
+		If this option is selected then DMA transfer descriptors will be
+		pre-allocated in .bss.  Otherwise, the descriptors will be allocated
+		at start-up time with kmm_malloc().  This might be important if a larger
+		memory pool is available after startup.
+
+config SAMV7_USBHS_REGDEBUG
+	bool "Enable low-level USBHS register debug"
+	default n
+	depends on DEBUG
+
+endmenu # USB High Speed Device Controller driver (DCD) options
+
+if SAMV7_MCAN
+
+config SAMV7_MCAN_QUEUE_MODE
+	bool "MCAN QUEUE mode (vs FIFO mode)"
+	default n
+
+menu "MCAN device driver options"
+
+choice
+	prompt "MCAN clock source (PCK5)"
+	default SAMV7_MCAN_CLKSRC_MCK
+
+config SAMV7_MCAN_CLKSRC_SLOW
+	bool "Slow clock"
+
+config SAMV7_MCAN_CLKSRC_MAIN
+	bool "Main clock"
+
+config SAMV7_MCAN_CLKSRC_PLLA
+	bool "PLLA clock"
+
+config SAMV7_MCAN_CLKSRC_UPLL
+	bool "UPLL clock"
+
+config SAMV7_MCAN_CLKSRC_MCK
+	bool "Master clock"
+
+endchoice # MCAN clock source
+
+config SAMV7_MCAN_CLKSRC_PRESCALER
+	int "MCAN clock prescaler"
+	default 1
+	range 1 1024
+	---help---
+		The frequency associated with time quanta is derived by dividing
+		down the input frequency. This setting provides prescaler/divider
+		must lie the range of 1 to 1024.
+
+menu "MCAN0 device driver options"
+	depends on SAMV7_MCAN0
+
+choice
+	prompt "MCAN0 mode"
+	default SAMV7_MCAN0_ISO11899_1
+
+config SAMV7_MCAN0_ISO11899_1
+	bool "ISO11898-1"
+	---help---
+		Enable ISO11898-1 mode
+
+config SAMV7_MCAN0_FD
+	bool "FD"
+	depends on CAN_FD
+	---help---
+		Enable FD mode
+
+config SAMV7_MCAN0_FD_BSW
+	bool "FD with fast bit rate switching"
+	depends on CAN_FD
+	---help---
+		Enable FD mode with fast bit rate switching mode.
+
+endchoice # MCAN0 mode
+
+config SAMV7_MCAN0_LOOPBACK
+	bool "Enable MCAN0 loopback mode"
+	default n
+	---help---
+		Enable the MCAN0 local loopback mode for testing purposes.
+
+config SAMV7_MCAN0_BITRATE
+	int "MCAN0 bitrate"
+	default 500000
+	---help---
+		MCAN0 bitrate in bits per second.  Required if SAMV7_MCAN0 is defined.
+
+config SAMV7_MCAN0_PROPSEG
+	int "MCAN0 PropSeg"
+	default 2
+	range 1 63
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+
+config SAMV7_MCAN0_PHASESEG1
+	int "MCAN0 PhaseSeg1"
+	default 11
+	range 1 63
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+
+config SAMV7_MCAN0_PHASESEG2
+	int "MCAN0 PhaseSeg2"
+	default 11
+	range 1 63
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+
+config SAMV7_MCAN0_FSJW
+	int "MCAN0 synchronization jump width"
+	default 4
+	range 1 5
+	---help---
+		The duration of a synchronization jump is Tcan_clk x FSJW.
+
+config SAMV7_MCAN0_FBITRATE
+	int "MCAN0 fast bitrate"
+	default 2000000
+	---help---
+		MCAN0 bitrate in bits per second.  Required if SAMV7_MCAN0 is
+		defined.
+
+config SAMV7_MCAN0_FPROPSEG
+	int "MCAN0 fast PropSeg"
+	default 2
+	range 1 63
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+
+config SAMV7_MCAN0_FPHASESEG1
+	int "MCAN0 fast PhaseSeg1"
+	default 4
+	range 1 63
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+
+config SAMV7_MCAN0_FPHASESEG2
+	int "MCAN0 fast PhaseSeg2"
+	default 4
+	range 1 63
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+
+config SAMV7_MCAN0_FFSJW
+	int "MCAN0 fast synchronization jump width"
+	default 2
+	range 1 5
+	---help---
+		The duration of a synchronization jump is Tcan_clk x FSJW.
+
+config SAMV7_MCAN0_NSTDFILTERS
+	int "MCAN0 number of standard filters"
+	default 8
+	range 0 128
+	---help---
+		Number of standard message ID filters.
+
+config SAMV7_MCAN0_NEXTFILTERS
+	int "MCAN0 number of extended filters"
+	default 8
+	range 0 64
+	depends on CAN_EXTID
+	---help---
+		Number of extended message ID filters.
+
+choice
+	prompt "MCAN0 RX FIFO0 element size"
+	default SAMV7_MCAN0_RXFIFO0_8BYTES
+
+config SAMV7_MCAN0_RXFIFO0_8BYTES
+	bool "8 bytes"
+
+config SAMV7_MCAN0_RXFIFO0_12BYTES
+	bool "12 bytes"
+	depends on SAMV7_MCAN0_FD
+
+config SAMV7_MCAN0_RXFIFO0_16BYTES
+	bool "16 bytes"
+	depends on SAMV7_MCAN0_FD
+
+config SAMV7_MCAN0_RXFIFO0_20BYTES
+	bool "20 bytes"
+	depends on SAMV7_MCAN0_FD
+
+config SAMV7_MCAN0_RXFIFO0_24BYTES
+	bool "24 bytes"
+	depends on SAMV7_MCAN0_FD
+
+config SAMV7_MCAN0_RXFIFO0_32BYTES
+	bool "32 bytes"
+	depends on SAMV7_MCAN0_FD
+
+config SAMV7_MCAN0_RXFIFO0_48BYTES
+	bool "48 bytes"
+	depends on SAMV7_MCAN0_FD
+
+config SAMV7_MCAN0_RXFIFO0_64BYTES
+	bool "64 bytes"
+	depends on SAMV7_MCAN0_FD
+
+endchoice # MCAN0 RX buffer element size
+
+config SAMV7_MCAN0_RXFIFO0_SIZE
+	int "MCAN0 RX FIFO0 size"
+	default 8
+	range 1 64
+	---help---
+		Number of receive FIFO 0 elements.  Zero disables FIFO 0.
+
+choice
+	prompt "MCAN0 RX FIFO1 element size"
+	default SAMV7_MCAN0_RXFIFO1_8BYTES
+
+config SAMV7_MCAN0_RXFIFO1_8BYTES
+	bool "8 bytes"
+
+config SAMV7_MCAN0_RXFIFO1_12BYTES
+	bool "12 bytes"
+	depends on SAMV7_MCAN0_FD
+
+config SAMV7_MCAN0_RXFIFO1_16BYTES
+	bool "16 bytes"
+	depends on SAMV7_MCAN0_FD
+
+config SAMV7_MCAN0_RXFIFO1_20BYTES
+	bool "20 bytes"
+	depends on SAMV7_MCAN0_FD
+
+config SAMV7_MCAN0_RXFIFO1_24BYTES
+	bool "24 bytes"
+	depends on SAMV7_MCAN0_FD
+
+config SAMV7_MCAN0_RXFIFO1_32BYTES
+	bool "32 bytes"
+	depends on SAMV7_MCAN0_FD
+
+config SAMV7_MCAN0_RXFIFO1_48BYTES
+	bool "48 bytes"
+	depends on SAMV7_MCAN0_FD
+
+config SAMV7_MCAN0_RXFIFO1_64BYTES
+	bool "64 bytes"
+	depends on SAMV7_MCAN0_FD
+
+endchoice # MCAN0 RX buffer element size
+
+config SAMV7_MCAN0_RXFIFO1_SIZE
+	int "MCAN0 RX FIFO1 size"
+	default 4
+	range 1 64
+	---help---
+		Number of receive FIFO 1 elements for MCAN0.  Zero disables FIFO 1.
+
+choice
+	prompt "MCAN0 RX buffer element size"
+	default SAMV7_MCAN0_RXBUFFER_8BYTES
+
+config SAMV7_MCAN0_RXBUFFER_8BYTES
+	bool "8 bytes"
+
+config SAMV7_MCAN0_RXBUFFER_12BYTES
+	bool "12 bytes"
+	depends on SAMV7_MCAN0_FD
+
+config SAMV7_MCAN0_RXBUFFER_16BYTES
+	bool "16 bytes"
+	depends on SAMV7_MCAN0_FD
+
+config SAMV7_MCAN0_RXBUFFER_20BYTES
+	bool "20 bytes"
+	depends on SAMV7_MCAN0_FD
+
+config SAMV7_MCAN0_RXBUFFER_24BYTES
+	bool "24 bytes"
+	depends on SAMV7_MCAN0_FD
+
+config SAMV7_MCAN0_RXBUFFER_32BYTES
+	bool "32 bytes"
+	depends on SAMV7_MCAN0_FD
+
+config SAMV7_MCAN0_RXBUFFER_48BYTES
+	bool "48 bytes"
+	depends on SAMV7_MCAN0_FD
+
+config SAMV7_MCAN0_RXBUFFER_64BYTES
+	bool "64 bytes"
+	depends on SAMV7_MCAN0_FD
+
+endchoice # MCAN0 RX buffer element size
+
+config SAMV7_MCAN0_DEDICATED_RXBUFFER_SIZE
+	int "MCAN0 dedicated RX buffer size"
+	default 0
+	range 0 64
+	depends on EXPERIMENTAL
+	---help---
+		Number of dedicated RX buffer elements for MCAN0.
+
+		NOTE: Dedicated RX buffers are not used in the current MCAN design.
+
+choice
+	prompt "MCAN0 TX buffer element size"
+	default SAMV7_MCAN0_TXBUFFER_8BYTES
+
+config SAMV7_MCAN0_TXBUFFER_8BYTES
+	bool "8 bytes"
+
+config SAMV7_MCAN0_TXBUFFER_12BYTES
+	bool "12 bytes"
+	depends on SAMV7_MCAN0_FD
+
+config SAMV7_MCAN0_TXBUFFER_16BYTES
+	bool "16 bytes"
+	depends on SAMV7_MCAN0_FD
+
+config SAMV7_MCAN0_TXBUFFER_20BYTES
+	bool "20 bytes"
+	depends on SAMV7_MCAN0_FD
+
+config SAMV7_MCAN0_TXBUFFER_24BYTES
+	bool "24 bytes"
+	depends on SAMV7_MCAN0_FD
+
+config SAMV7_MCAN0_TXBUFFER_32BYTES
+	bool "32 bytes"
+	depends on SAMV7_MCAN0_FD
+
+config SAMV7_MCAN0_TXBUFFER_48BYTES
+	bool "48 bytes"
+	depends on SAMV7_MCAN0_FD
+
+config SAMV7_MCAN0_TXBUFFER_64BYTES
+	bool "64 bytes"
+	depends on SAMV7_MCAN0_FD
+
+endchoice # MCAN0 TX buffer element size
+
+config SAMV7_MCAN0_DEDICATED_TXBUFFER_SIZE
+	int "MCAN0 dedicated TX buffer size"
+	default 0
+	range 0 32
+	depends on EXPERIMENTAL
+	---help---
+		Number of dedicated TX buffer elements for MCAN0.
+
+		NOTE: Dedicated TX buffers are not used in the current MCAN design.
+
+config SAMV7_MCAN0_TXFIFOQ_SIZE
+	int "MCAN0 TX FIFO queue size"
+	default 4
+	range 1 32
+	---help---
+		Number of dedicated TX buffer elements for MCAN0.
+
+config SAMV7_MCAN0_TXEVENTFIFO_SIZE
+	int "MCAN0 TX event FIFO size"
+	default 0
+	range 0 32
+	depends on EXPERIMENTAL
+	---help---
+		Number of TX event FIFO elements for MCAN0.  Zero disables TX event FIFO.
+
+endmenu # MCAN0 device driver options
+
+menu "MCAN1 device driver options"
+	depends on SAMV7_MCAN1
+
+choice
+	prompt "MCAN1 mode"
+	default SAMV7_MCAN1_ISO11899_1
+
+config SAMV7_MCAN1_ISO11899_1
+	bool "ISO11898-1"
+	---help---
+		Enable ISO11898-1 mode
+
+config SAMV7_MCAN1_FD
+	bool "FD"
+	depends on CAN_FD
+	---help---
+		Enable FD mode
+
+config SAMV7_MCAN1_FD_BSW
+	bool "FD with fast bit rate switching"
+	depends on CAN_FD
+	---help---
+		Enable FD mode with fast bit rate switching mode.
+
+endchoice # MCAN0 mode
+
+config SAMV7_MCAN1_LOOPBACK
+	bool "Enable MCAN1 loopback mode"
+	default n
+	---help---
+		Enable the MCAN1 local loopback mode for testing purposes.
+
+config SAMV7_MCAN1_BITRATE
+	int "MCAN1 bitrate"
+	default 500000
+	---help---
+		MCAN1 bitrate in bits per second.  Required if SAMV7_MCAN1 is
+		defined.
+
+config SAMV7_MCAN1_PROPSEG
+	int "MCAN1 PropSeg"
+	default 2
+	range 1 63
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+
+config SAMV7_MCAN1_PHASESEG1
+	int "MCAN1 PhaseSeg1"
+	default 11
+	range 1 63
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+
+config SAMV7_MCAN1_PHASESEG2
+	int "MCAN1 PhaseSeg2"
+	default 11
+	range 1 63
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+
+config SAMV7_MCAN1_FSJW
+	int "MCAN1 synchronization jump width"
+	default 4
+	range 1 5
+	---help---
+		The duration of a synchronization jump is Tcan_clk x FSJW.
+
+config SAMV7_MCAN1_FBITRATE
+	int "MCAN1 fast bitrate"
+	default 2000000
+	---help---
+		MCAN1 bitrate in bits per second.  Required if SAMV7_MCAN1 is
+		defined.
+
+config SAMV7_MCAN1_FPROPSEG
+	int "MCAN1 fast PropSeg"
+	default 2
+	range 1 63
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+
+config SAMV7_MCAN1_FPHASESEG1
+	int "MCAN1 fast PhaseSeg1"
+	default 4
+	range 1 63
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+
+config SAMV7_MCAN1_FPHASESEG2
+	int "MCAN1 fast PhaseSeg2"
+	default 4
+	range 1 63
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+
+config SAMV7_MCAN1_FFSJW
+	int "MCAN1 fast synchronization jump width"
+	default 2
+	range 1 5
+	---help---
+		The duration of a synchronization jump is Tcan_clk x FSJW.
+
+config SAMV7_MCAN1_NSTDFILTERS
+	int "MCAN1 number of standard filters"
+	default 8
+	range 0 128
+	---help---
+		Number of standard message ID filters.
+
+config SAMV7_MCAN1_NEXTFILTERS
+	int "MCAN1 number of extended filters"
+	default 8
+	range 0 64
+	depends on CAN_EXTID
+	---help---
+		Number of extended message ID filters.
+
+choice
+	prompt "MCAN1 RX FIFO0 element size"
+	default SAMV7_MCAN1_RXFIFO0_8BYTES
+
+config SAMV7_MCAN1_RXFIFO0_8BYTES
+	bool "8 bytes"
+
+config SAMV7_MCAN1_RXFIFO0_12BYTES
+	bool "12 bytes"
+	depends on SAMV7_MCAN1_FD
+
+config SAMV7_MCAN1_RXFIFO0_16BYTES
+	bool "16 bytes"
+	depends on SAMV7_MCAN1_FD
+
+config SAMV7_MCAN1_RXFIFO0_20BYTES
+	bool "20 bytes"
+	depends on SAMV7_MCAN1_FD
+
+config SAMV7_MCAN1_RXFIFO0_24BYTES
+	bool "24 bytes"
+	depends on SAMV7_MCAN1_FD
+
+config SAMV7_MCAN1_RXFIFO0_32BYTES
+	bool "32 bytes"
+	depends on SAMV7_MCAN1_FD
+
+config SAMV7_MCAN1_RXFIFO0_48BYTES
+	bool "48 bytes"
+	depends on SAMV7_MCAN1_FD
+
+config SAMV7_MCAN1_RXFIFO0_64BYTES
+	bool "64 bytes"
+	depends on SAMV7_MCAN1_FD
+
+endchoice # MCAN1 RX buffer element size
+
+config SAMV7_MCAN1_RXFIFO0_SIZE
+	int "MCAN1 RX FIFO0 size"
+	default 8
+	range 1 64
+	---help---
+		Number of receive FIFO 0 elements.  Zero disables FIFO 0.
+
+choice
+	prompt "MCAN1 RX FIFO1 element size"
+	default SAMV7_MCAN1_RXFIFO1_8BYTES
+
+config SAMV7_MCAN1_RXFIFO1_8BYTES
+	bool "8 bytes"
+
+config SAMV7_MCAN1_RXFIFO1_12BYTES
+	bool "12 bytes"
+	depends on SAMV7_MCAN1_FD
+
+config SAMV7_MCAN1_RXFIFO1_16BYTES
+	bool "16 bytes"
+	depends on SAMV7_MCAN1_FD
+
+config SAMV7_MCAN1_RXFIFO1_20BYTES
+	bool "20 bytes"
+	depends on SAMV7_MCAN1_FD
+
+config SAMV7_MCAN1_RXFIFO1_24BYTES
+	bool "24 bytes"
+	depends on SAMV7_MCAN1_FD
+
+config SAMV7_MCAN1_RXFIFO1_32BYTES
+	bool "32 bytes"
+	depends on SAMV7_MCAN1_FD
+
+config SAMV7_MCAN1_RXFIFO1_48BYTES
+	bool "48 bytes"
+	depends on SAMV7_MCAN1_FD
+
+config SAMV7_MCAN1_RXFIFO1_64BYTES
+	bool "64 bytes"
+	depends on SAMV7_MCAN1_FD
+
+endchoice # MCAN1 RX buffer element size
+
+config SAMV7_MCAN1_RXFIFO1_SIZE
+	int "MCAN1 RX FIFO1 size"
+	default 4
+	range 1 64
+	---help---
+		Number of receive FIFO 1 elements for MCAN1.  Zero disables FIFO 1.
+
+choice
+	prompt "MCAN1 RX buffer element size"
+	default SAMV7_MCAN1_RXBUFFER_8BYTES
+
+config SAMV7_MCAN1_RXBUFFER_8BYTES
+	bool "8 bytes"
+
+config SAMV7_MCAN1_RXBUFFER_12BYTES
+	bool "12 bytes"
+	depends on SAMV7_MCAN1_FD
+
+config SAMV7_MCAN1_RXBUFFER_16BYTES
+	bool "16 bytes"
+	depends on SAMV7_MCAN1_FD
+
+config SAMV7_MCAN1_RXBUFFER_20BYTES
+	bool "20 bytes"
+	depends on SAMV7_MCAN1_FD
+
+config SAMV7_MCAN1_RXBUFFER_24BYTES
+	bool "24 bytes"
+	depends on SAMV7_MCAN1_FD
+
+config SAMV7_MCAN1_RXBUFFER_32BYTES
+	bool "32 bytes"
+	depends on SAMV7_MCAN1_FD
+
+config SAMV7_MCAN1_RXBUFFER_48BYTES
+	bool "48 bytes"
+	depends on SAMV7_MCAN1_FD
+
+config SAMV7_MCAN1_RXBUFFER_64BYTES
+	bool "64 bytes"
+	depends on SAMV7_MCAN1_FD
+
+endchoice # MCAN1 RX buffer element size
+
+config SAMV7_MCAN1_DEDICATED_RXBUFFER_SIZE
+	int "MCAN1 dedicated RX buffer size"
+	default 0
+	range 0 64
+	depends on EXPERIMENTAL
+	---help---
+		Number of dedicated RX buffer elements for MCAN1.
+
+		NOTE: Dedicated RX buffers are not used in the current MCAN design.
+
+choice
+	prompt "MCAN1 TX buffer element size"
+	default SAMV7_MCAN1_TXBUFFER_8BYTES
+
+config SAMV7_MCAN1_TXBUFFER_8BYTES
+	bool "8 bytes"
+
+config SAMV7_MCAN1_TXBUFFER_12BYTES
+	bool "12 bytes"
+	depends on SAMV7_MCAN1_FD
+
+config SAMV7_MCAN1_TXBUFFER_16BYTES
+	bool "16 bytes"
+	depends on SAMV7_MCAN1_FD
+
+config SAMV7_MCAN1_TXBUFFER_20BYTES
+	bool "20 bytes"
+	depends on SAMV7_MCAN1_FD
+
+config SAMV7_MCAN1_TXBUFFER_24BYTES
+	bool "24 bytes"
+	depends on SAMV7_MCAN1_FD
+
+config SAMV7_MCAN1_TXBUFFER_32BYTES
+	bool "32 bytes"
+	depends on SAMV7_MCAN1_FD
+
+config SAMV7_MCAN1_TXBUFFER_48BYTES
+	bool "48 bytes"
+	depends on SAMV7_MCAN1_FD
+
+config SAMV7_MCAN1_TXBUFFER_64BYTES
+	bool "64 bytes"
+	depends on SAMV7_MCAN1_FD
+
+endchoice # MCAN1 TX buffer element size
+
+config SAMV7_MCAN1_TXEVENTFIFO_SIZE
+	int "MCAN1 TX event FIFO size"
+	default 0
+	range 0 32
+	depends on EXPERIMENTAL
+	---help---
+		Number of TX event FIFO elements for MCAN1.  Zero disables TX event FIFO.
+
+config SAMV7_MCAN1_DEDICATED_TXBUFFER_SIZE
+	int "MCAN1 dedicated TX buffer size"
+	default 0
+	range 0 32
+	depends on EXPERIMENTAL
+	---help---
+		Number of dedicated TX buffer elements for MCAN1.
+
+		NOTE: Dedicated TX buffers are not used in the current MCAN design.
+
+config SAMV7_MCAN1_TXFIFOQ_SIZE
+	int "MCAN1 TX FIFO queue"
+	default 4
+	range 1 32
+	---help---
+		Number of dedicated TX buffer elements for MCAN1.
+
+endmenu # MCAN1 device driver options
+
+config SAMV7_MCAN_REGDEBUG
+	bool "CAN Register level debug"
+	depends on DEBUG
+	default n
+	---help---
+		Output detailed register-level CAN device debug information.
+		Requires also DEBUG.
+
+endmenu # CAN device driver options
+endif # SAMV7_MCAN
+endif # ARCH_CHIP_SAMV7

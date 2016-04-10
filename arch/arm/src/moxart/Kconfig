@@ -1,0 +1,18 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+comment "MoxART Configuration Options"
+
+config UART_MOXA_MODE_REG
+	hex "16550 UART mode register address"
+	default 0x982000E0
+
+config UART_MOXA_IRQ_STATUS_REG
+	hex "16550 UART shared IRQ status register address"
+	default 0x982000C0
+
+config UART_MOXA_SHARED_IRQ
+	int "16550 UART shared IRQ number"
+	default 31

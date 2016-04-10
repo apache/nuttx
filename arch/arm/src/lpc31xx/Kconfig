@@ -1,0 +1,317 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+comment "LPC31xx Configuration Options"
+
+choice
+	prompt "LPC31 Chip Selection"
+	default ARCH_CHIP_LPC3131
+	depends on ARCH_CHIP_LPC31XX
+
+config ARCH_CHIP_LPC3130
+	bool "LPC3130"
+	select ARCH_HAVE_EXTNAND
+	select ARCH_HAVE_EXTSRAM0
+	select ARCH_HAVE_EXTSRAM1
+	select ARCH_HAVE_EXTDRAM
+
+config ARCH_CHIP_LPC3131
+	bool "LPC3131"
+	select ARCH_HAVE_EXTNAND
+	select ARCH_HAVE_EXTSRAM0
+	select ARCH_HAVE_EXTSRAM1
+	select ARCH_HAVE_EXTDRAM
+
+config ARCH_CHIP_LPC3152
+	bool "LPC3152"
+	select ARCH_HAVE_EXTNAND
+	select ARCH_HAVE_EXTSRAM0
+	select ARCH_HAVE_EXTSRAM1
+	select ARCH_HAVE_EXTDRAM
+
+config ARCH_CHIP_LPC3154
+	bool "LPC3154"
+	select ARCH_HAVE_EXTNAND
+	select ARCH_HAVE_EXTSRAM0
+	select ARCH_HAVE_EXTSRAM1
+	select ARCH_HAVE_EXTDRAM
+
+endchoice # LPC31xx Configuration Options
+
+config LPC31_SDRAMHCLK
+	int "External SDRAM HCLK"
+	depends on LPC31_EXTSDRAM
+	---help---
+		The SDRAM HCLK may be specified here (if not, it will be calculated).
+
+menu "LPC31xx Peripheral Support"
+
+config LPC31_UART
+	bool "UART"
+	default n
+	select ARCH_HAVE_UART
+
+config LPC31_SPI
+	bool "SPI"
+	default n
+
+config LPC31_USBOTG
+	bool "USB OTG"
+	default n
+	select USBHOST_HAVE_ASYNCH
+
+config LPC31_MCI
+	bool "MCI"
+	default n
+	select ARCH_HAVE_SDIO
+
+endmenu # LPC31xx Peripheral Support
+
+menu "External Memory Configuration"
+
+config ARCH_HAVE_EXTNAND
+	bool
+
+config ARCH_HAVE_EXTDRAM
+	bool
+
+config ARCH_HAVE_EXTSRAM0
+	bool
+
+config ARCH_HAVE_EXTSRAM1
+	bool
+
+config LPC31_EXTNAND
+	bool "Configure external NAND"
+	default n
+	depends on ARCH_HAVE_EXTNAND
+	---help---
+		Configure external NAND memory and, if applicable, map then external
+		NAND into the memory map.
+
+if LPC31_EXTNAND
+
+config LPC31_EXTNANDSIZE
+	int "External NAND size"
+	default 0
+	---help---
+		Size of the external NAND in bytes.
+
+endif # LPC31_EXTNAND
+
+config LPC31_EXTDRAM
+	bool "Configure external DRAM"
+	default n
+	depends on ARCH_HAVE_EXTDRAM
+	select ARCH_HAVE_SDRAM
+	---help---
+		Configure external DRAM memory and, if applicable, map then external
+		DRAM into the memory map.
+
+if LPC31_EXTDRAM
+
+config LPC31_EXTDRAMSIZE
+	int "External SDRAM size"
+	default 0
+	---help---
+		Size of the external SDRAM in bytes.
+
+choice
+	prompt "SDRAM Width Selection"
+	default LPC31_SDRAM_16BIT
+
+config LPC31_SDRAM_8BIT
+	bool "8-bit"
+
+config LPC31_SDRAM_16BIT
+	bool "16-bit"
+
+config LPC31_SDRAM_32BIT
+	bool "32-bit"
+
+endchoice # SDRAM Width Selection
+
+config LPC31_EXTDRAMHEAP
+	bool "Add external SDRAM to the heap"
+	default y
+	---help---
+		Add the external SDRAM into the heap.
+
+endif # LPC31_EXTDRAM
+
+config LPC31_EXTSRAM0
+	bool "Configure external SRAM (Bank 0)"
+	default n
+	depends on ARCH_HAVE_EXTSRAM0
+	---help---
+		Configure external SRAM Bank 0 memory and, if applicable, map then
+		external SRAM Bank 0 into the memory map.
+
+if LPC31_EXTSRAM0
+
+config LPC31_EXTSRAM0SIZE
+	int "External SRAM size"
+	default 0
+	---help---
+		Size of the external SRAM Bank 0 in bytes.
+
+config LPC31_EXTSRAM0HEAP
+	bool "Add external SRAM (Bank 0) to the heap"
+	default y
+	---help---
+		Add external SRAM Bank 0 into the heap.
+
+endif # LPC31_EXTSRAM0
+
+config LPC31_EXTSRAM1
+	bool "Configure external SRAM (Bank 1)"
+	default n
+	depends on ARCH_HAVE_EXTSRAM1
+	---help---
+		Configure external SRAM Bank 1 memory and, if applicable, map then
+		external SRAM Bank 1 into the memory map.
+
+if LPC31_EXTSRAM1
+
+config LPC31_EXTSRAM1SIZE
+	int "External SRAM1 size"
+	default 0
+	---help---
+		Size of the external SRAM Bank 1 in bytes.
+
+config LPC31_EXTSRAM1HEAP
+	bool "Add external SRAM (Bank 1) to the heap"
+	default y
+	---help---
+		Add external SRAM Bank 1 into the heap.
+
+endif # LPC31_EXTSRAM1
+endmenu # External Memory Configuration
+
+menu "LPC31xx UART Configuration"
+	depends on LPC31_UART
+
+config LPC31_UART_PRECALCULATED
+	bool "Use pre-calculated BAD configuration"
+	default n
+
+if LPC31_UART_PRECALCULATED
+
+config LPC31_UART_DIVADDVAL
+	int "BAUD pre-scaler divisor"
+	---help---
+		BAUD pre-scaler divisor
+
+config LPC31_UART_DIVISOR
+	int "BAUD divisor"
+	---help---
+		BAUD divisor
+
+config LPC31_UART_MULVAL
+	int "BAUD multiplier"
+	---help---
+		BAUD multiplier
+
+endif # LPC31_UART_PRECALCULATED
+endmenu # LPC31xx UART Configuration
+
+if LPC31_USBOTG && USBDEV
+
+menu "USB device controller driver (DCD) options"
+
+config LPC31_USBDEV_EP0_MAXSIZE
+	int "EP0 Max packet size"
+	default 64
+	---help---
+		Endpoint 0 maximum packet size.  Default: 64
+
+config LPC31_USBDEV_FRAME_INTERRUPT
+	bool "USB frame interrupt"
+	default n
+	---help---
+		Handle USB Start-Of-Frame events.  Enable reading SOF from interrupt
+		handler vs. simply reading on demand. Probably a bad idea... Unless
+		there is some issue with sampling the SOF from hardware asynchronously.
+
+config LPC31_USBDEV_DMA
+	bool "Enable USB device DMA"
+	default n
+	---help---
+		Enable lpc31xx-specific DMA support
+
+config LPC31_USBDEV_REGDEBUG
+	bool "Register level debug"
+	depends on DEBUG
+	default n
+	---help---
+		Output detailed register-level USB device debug information.  Requires also DEBUG.
+
+endmenu # USB device driver controller (DCD) options
+endif # LPC31_USBOTG && USBDEV
+
+if LPC31_USBOTG && USBHOST
+
+menu "USB host controller driver (HCD) options"
+
+config LPC31_EHCI_SDIS
+	bool "Stream disable"
+	default n
+	---help---
+		Selecting this option ensures that overruns/underruns of the latency
+		FIFO are eliminated for low bandwidth systems where the RX and TX
+		buffers are sufficient to contain the entire packet. Enabling stream
+		disable also has the effect of ensuring the the TX latency is filled
+		to capacity before the packet is launched onto the USB.
+
+		Note: Time duration to pre-fill the FIFO becomes significant when stream disable is active.
+
+config LPC31_EHCI_NQHS
+	int "Number of Queue Head (QH) structures"
+	default 4
+	---help---
+		Configurable number of Queue Head (QH) structures.  The default is
+		one per Root hub port plus one for EP0 (4).
+
+config LPC31_EHCI_NQTDS
+	int "Number of Queue Element Transfer Descriptor (qTDs)"
+	default 6
+	---help---
+		Configurable number of Queue Element Transfer Descriptor (qTDs).
+		The default is one per root hub plus three from EP0 (6).
+
+config LPC31_EHCI_BUFSIZE
+	int "Size of one request/descriptor buffer"
+	default 128
+	---help---
+		The size of one request/descriptor buffer in bytes.  The TD buffe
+		size must be an even number of 32-bit words and must be large enough
+		to hangle the largest transfer via a SETUP request.
+
+config LPC31_EHCI_PREALLOCATE
+	bool "Preallocate descriptor pool"
+	default y
+	---help---
+		Select this option to pre-allocate EHCI queue and descriptor
+		structure pools in .bss.  Otherwise, these pools will be
+		dynamically allocated using kmm_memalign().
+
+config LPC31_EHCI_REGDEBUG
+	bool "Enable low-level EHCI register debug"
+	default n
+	depends on DEBUG
+
+endmenu # USB host controller driver (HCD) options
+endif # LPC31_USBOTG && USBHOST
+
+menu "SPI device driver options"
+
+config LPC31_SPI_REGDEBUG
+	bool "SPI Register level debug"
+	depends on LPC31_SPI && DEBUG
+	default n
+	---help---
+		Output detailed register-level SPI device debug information.  Requires also DEBUG.
+
+endmenu # SPI device driver options

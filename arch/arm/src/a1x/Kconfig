@@ -1,0 +1,391 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_CHIP_A1X
+
+comment "A1x Configuration Options"
+
+choice
+	prompt "Allwinner A1X Chip Selection"
+	default ARCH_CHIP_A10
+
+config ARCH_CHIP_A10
+	bool "A10"
+
+endchoice
+
+menu "Allwinner A1X Peripheral Support"
+
+config A1X_UART0
+	bool "UART 0"
+	default n
+	select ARCH_HAVE_UART0
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config A1X_UART1
+	bool "UART 1"
+	default n
+	select ARCH_HAVE_UART1
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config A1X_UART2
+	bool "UART 2"
+	default n
+	select ARCH_HAVE_UART2
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config A1X_UART3
+	bool "UART 3"
+	default n
+	select ARCH_HAVE_UART3
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config A1X_UART4
+	bool "UART 4"
+	default n
+	select ARCH_HAVE_UART4
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config A1X_UART5
+	bool "UART 5"
+	default n
+	select ARCH_HAVE_UART5
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config A1X_UART6
+	bool "UART 6"
+	default n
+	select ARCH_HAVE_UART6
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config A1X_UART7
+	bool "UART 7"
+	default n
+	select ARCH_HAVE_UART7
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config A1X_IR0
+	bool "IR 0"
+	default n
+
+config A1X_IR1
+	bool "IR 1"
+	default n
+
+config A1X_TWI0
+	bool "TWI 0"
+	default n
+
+config A1X_TWI1
+	bool "TWI 1"
+	default n
+
+config A1X_TWI2
+	bool "TWI 2"
+	default n
+
+config A1X_SPI0
+	bool "SPI 0"
+	default n
+
+config A1X_SPI1
+	bool "SPI 1"
+	default n
+
+config A1X_SPI2
+	bool "SPI 2"
+	default n
+
+config A1X_SPI3
+	bool "SPI3"
+	default n
+
+config A1X_NC
+	bool "NC"
+	default n
+
+config A1X_AC97
+	bool "AC97"
+	default n
+
+config A1X_TS
+	bool "TS"
+	default n
+
+config A1X_IIS
+	bool "Digital Audio Controller"
+	default n
+
+config A1X_KEYPAD
+	bool "Keypad"
+	default n
+
+config A1X_TIMER1
+	bool "Timer 1"
+	default n
+
+config A1X_TIMER2
+	bool "Timer 2"
+	default n
+
+config A1X_TIMER3
+	bool "Timer 3"
+	default n
+
+config A1X_TIMER4
+	bool "Timer 4"
+	default n
+
+config A1X_TIMER5
+	bool "Timer 5"
+	default n
+
+config A1X_IRQ_Alarm
+	bool "Alarm"
+	default n
+
+config A1X_IRQ_WD
+	bool "Watchdog"
+	default n
+
+config A1X_CAN
+	bool "CAN Bus controller"
+	default n
+
+config A1X_DMA
+	bool "DMA"
+	default n
+
+config A1X_PIO
+	bool "PIO"
+	default n
+
+config A1X_TOUCH
+	bool "Touch Panel"
+	default n
+
+config A1X_AUDIO
+	bool "Analog Audio Codec"
+	default n
+
+config A1X_LRADC
+	bool "LRADC"
+	default n
+
+config A1X_SDMMC0
+	bool "SD/MMC Host Controller 0"
+	default n
+
+config A1X_SDMMC1
+	bool "SD/MMC Host Controller 1"
+	default n
+
+config A1X_SDMMC2
+	bool "SD/MMC Host Controller 2"
+	default n
+
+config A1X_SDMMC3
+	bool "SD/MMC Host Controller 3"
+	default n
+
+config A1X_NAND
+	bool "NAND Flash Controller (NFC)"
+	default n
+
+config A1X_USB0
+	bool "USB 0"
+	default n
+
+config A1X_USB1
+	bool "USB 1"
+	default n
+
+config A1X_USB2
+	bool "USB 2"
+	default n
+
+config A1X_USB3
+	bool "USB 3"
+	default n
+
+config A1X_USB4
+	bool "USB 4"
+	default n
+
+config A1X_SCR
+	bool "SCR"
+	default n
+
+config A1X_CSI0
+	bool "CSI 0"
+	default n
+
+config A1X_CSI1
+	bool "CSI 1"
+	default n
+
+config A1X_LCDC0
+	bool "LCD Controller 0"
+	default n
+
+config A1X_LCDC1
+	bool "LCD Controller 1"
+	default n
+
+config A1X_MP
+	bool "MP"
+	default n
+
+config A1X_DEFE0
+	bool "DE-FE0"
+	default n
+
+config A1X_IRQ_DEBE0
+	bool "DE-BE0"
+	default n
+
+config A1X_DEFE1
+	bool "DE-FE1"
+	default n
+
+config A1X_IRQ_DEBE1
+	bool "DE-BE1"
+	default n
+
+config A1X_PMU
+	bool "PMU"
+	default n
+
+config A1X_TZASC
+	bool "TZASC"
+	default n
+
+config A1X_PATA
+	bool "PATA"
+	default n
+
+config A1X_VE
+	bool "VE"
+	default n
+
+config A1X_SS
+	bool "Security System"
+	default n
+
+config A1X_EMAC
+	bool "EMAC"
+	default n
+
+config A1X_HDMI
+	bool "HDMI"
+	default n
+
+config A1X_TVE
+	bool "TV encoder 0/1"
+	default n
+
+config A1X_ACE
+	bool "ACE"
+	default n
+
+config A1X_TVD
+	bool "TV decoder"
+	default n
+
+config A1X_PS20
+	bool "PS2-0"
+	default n
+
+config A1X_PS21
+	bool "PS2-1"
+	default n
+
+config A1X_PLE
+	bool "PLE"
+	default n
+
+config A1X_IRQ_PERFMU
+	bool "Performance monitor"
+	default n
+
+config A1X_GPU
+	bool "GPU"
+	default n
+
+endmenu
+
+config A1X_PIO_IRQ
+	bool "External PIO interrupts"
+	default n
+	---help---
+		Select to enable support for 32 external PIO interrupts.  These will
+		be handled through a second level of interrupt decoding and will
+		otherwise appear as any other interrupt.
+
+choice
+	prompt "Boot device"
+	default A1X_BOOT_SDCARD
+
+config A1X_BOOT_NAND
+	bool "NAND FLASH"
+
+config A1X_BOOT_SPINOR
+	bool "SPI NOR FLASH"
+
+config A1X_BOOT_SDCARD
+	bool "SD card"
+
+config A1X_BOOT_USB
+	bool "USB"
+
+endchoice # Boot device
+
+config A1X_DDR_MAPOFFSET
+	int "Installed SDRAM offset"
+	default 0
+	---help---
+		The size of the installed SRAM memory is required in order to
+		properly configure memory mapping.  The mapping will begin at the
+		start of SDRAM plus A1X_DDR_MAPOFFSET and extend for DDR_MAPSIZE
+		bytes.  NOTE typically A1X_MAP_OFFSET is zero and A1X_DDR_MAPSIZE is
+		the full, installed size of the DRAM.  But these values can be
+		modified to set aside memory at the beginning or end of SRAM that is
+		unmapped (or mapped differently).  NOTE also that this value relates
+		closely to other settings:
+
+			RAM_START and RAM_VSTART give this physical and virtual addresses
+			of the start of usable memory (begining with .text).  NOTE that
+			this may not necessarily be the actual start of the mapped SDRAM
+			region.  It will be larger if NuttX begins at an offset from
+			beginning of mapped SDRAM (which is the normal case).
+
+			RAM_SIZE gives the size of the .text, .data, and .bss sections
+			plus the size of the available heap.  NOTE that RAM_SIZE may not
+			include all of SDRAM up to the end of mapped region.
+
+config A1X_DDR_MAPSIZE
+	int "Installed SDRAM size"
+	default 1073741824
+	---help---
+		The size of the installed SRAM memory is required in order to
+		properly configure memory mapping.  The mapping will begin at the
+		start of SDRAM plus A1X_DDR_MAPOFFSET and extend for DDR_MAPSIZE
+		bytes.  NOTE typically A1X_MAP_OFFSET is zero and A1X_DDR_MAPSIZE is
+		the full, installed size of the DRAM.  But these values can be
+		modified to set aside memory at the beginning or end of SRAM that is
+		unmapped (or mapped differently).  NOTE also that this value relates
+		closely to other settings:
+
+			RAM_START and RAM_VSTART give this physical and virtual addresses
+			of the start of usable memory (begining with .text).  NOTE that
+			this may not necessarily be the actual start of the mapped SDRAM
+			region.  It will be larger if NuttX begins at an offset from
+			beginning of mapped SDRAM (which is the normal case).
+
+			RAM_SIZE gives the size of the .text, .data, and .bss sections
+			plus the size of the available heap.  NOTE that RAM_SIZE may not
+			include all of SDRAM up to the end of mapped region.
+
+endif # ARCH_CHIP_A1X

@@ -1,0 +1,403 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+comment "NUC100/120 Configuration Options"
+
+choice
+	prompt "Nuvoton NUC1xx Chip Selection"
+	default ARCH_CHIP_NUC120LE3AN
+	depends on ARCH_CHIP_NUC1XX
+
+config ARCH_CHIP_NUC100LC1BN
+	bool "NUC100LC1BN"
+	select ARCH_FAMILY_NUC100
+	select ARCH_NUC_LOWDENSITY
+	---help---
+		Nuvoton NUC100 low density chip: Flash 32K SRAM 4K, LQFP48 package
+
+config ARCH_CHIP_NUC100LD1BN
+	bool "NUC100LD1BN"
+	select ARCH_FAMILY_NUC100
+	select ARCH_NUC_LOWDENSITY
+	---help---
+		Nuvoton NUC100 low density chip: Flash 64K SRAM 4K, LQFP48 package
+
+config ARCH_CHIP_NUC100LD2BN
+	bool "NUC100LD2BN"
+	select ARCH_FAMILY_NUC100
+	select ARCH_NUC_LOWDENSITY
+	---help---
+		Nuvoton NUC100 low density chip: Flash 64K SRAM 8K, LQFP48 package
+
+config ARCH_CHIP_NUC100RC1BN
+	bool "NUC100RC1BN"
+	select ARCH_FAMILY_NUC100
+	select ARCH_NUC_LOWDENSITY
+	---help---
+		Nuvoton NUC100 low density chip: Flash 32K SRAM 4K, LQFP64 package
+
+config ARCH_CHIP_NUC100RD1BN
+	bool "NUC100RD1BN"
+	select ARCH_FAMILY_NUC100
+	select ARCH_NUC_LOWDENSITY
+	---help---
+		Nuvoton NUC100 low density chip: Flash 64K SRAM 4K, LQFP64 package
+
+config ARCH_CHIP_NUC100RD2BN
+	bool "NUC100RD2BN"
+	select ARCH_FAMILY_NUC100
+	select ARCH_NUC_LOWDENSITY
+	---help---
+		Nuvoton NUC100 low density chip: Flash 64K SRAM 8K, LQFP64 package
+
+config ARCH_CHIP_NUC100LD3AN
+	bool "NUC100LD3AN"
+	select ARCH_FAMILY_NUC100
+	select ARCH_NUC_MEDIUMDENSITY
+	---help---
+		Nuvoton NUC100 medium density chip: Flash 64K SRAM 16K, LQFP48 package
+
+config ARCH_CHIP_NUC100LE3AN
+	bool "NUC100LE3AN"
+	select ARCH_FAMILY_NUC100
+	select ARCH_NUC_MEDIUMDENSITY
+	---help---
+		Nuvoton NUC100 medium density chip: Flash 128K SRAM 16K, LQFP48 package
+
+config ARCH_CHIP_NUC100RD3AN
+	bool "NUC100RD3AN"
+	select ARCH_FAMILY_NUC100
+	select ARCH_NUC_MEDIUMDENSITY
+	select NUC_HAVE_UART2
+	---help---
+		Nuvoton NUC100 medium density chip: Flash 64K SRAM 16K, LQFP64 package
+
+config ARCH_CHIP_NUC100RE3AN
+	bool "NUC100RE3AN"
+	select ARCH_FAMILY_NUC100
+	select ARCH_NUC_MEDIUMDENSITY
+	select NUC_HAVE_UART2
+	---help---
+		Nuvoton NUC100 medium density chip: Flash 128K SRAM 16K, LQFP64 package
+
+config ARCH_CHIP_NUC100VD2AN
+	bool "NUC100VD2AN"
+	select ARCH_FAMILY_NUC100
+	select ARCH_NUC_MEDIUMDENSITY
+	select NUC_HAVE_UART2
+	---help---
+		Nuvoton NUC100 medium density chip: Flash 64K SRAM 8K, LQFP100 package
+
+config ARCH_CHIP_NUC100VD3AN
+	bool "NUC100VD3AN"
+	select ARCH_FAMILY_NUC100
+	select ARCH_NUC_MEDIUMDENSITY
+	select NUC_HAVE_UART2
+	---help---
+		Nuvoton NUC100 medium density chip: Flash 64K SRAM 16K, LQFP100 package
+
+config ARCH_CHIP_NUC100VE3AN
+	bool "NUC100VE3AN"
+	select ARCH_FAMILY_NUC100
+	select ARCH_NUC_MEDIUMDENSITY
+	select NUC_HAVE_UART2
+	---help---
+		Nuvoton NUC100 medium density chip: Flash 128K SRAM 8K, LQFP100 package
+
+config ARCH_CHIP_NUC120LC1BN
+	bool "NUC120LC1BN"
+	select ARCH_FAMILY_NUC120
+	select ARCH_NUC_LOWDENSITY
+	---help---
+		Nuvoton NUC120 low density chip: Flash 32K SRAM 4K, LQFP48 package
+
+config ARCH_CHIP_NUC120LD1BN
+	bool "NUC120LD1BN"
+	select ARCH_FAMILY_NUC120
+	select ARCH_NUC_LOWDENSITY
+	---help---
+		Nuvoton NUC120 low density chip: Flash 64K SRAM 4K, LQFP48 package
+
+config ARCH_CHIP_NUC120LD2BN
+	bool "NUC120LD2BN"
+	select ARCH_FAMILY_NUC120
+	select ARCH_NUC_LOWDENSITY
+	---help---
+		Nuvoton NUC120 low density chip: Flash 64K SRAM 8K, LQFP48 package
+
+config ARCH_CHIP_NUC120RC1BN
+	bool "NUC120RC1BN"
+	select ARCH_FAMILY_NUC120
+	select ARCH_NUC_LOWDENSITY
+	---help---
+		Nuvoton NUC120 low density chip: Flash 32K SRAM 4K, LQFP64 package
+
+config ARCH_CHIP_NUC120RD1BN
+	bool "NUC120RD1BN"
+	select ARCH_FAMILY_NUC120
+	select ARCH_NUC_LOWDENSITY
+	---help---
+		Nuvoton NUC120 low density chip: Flash 64K SRAM 4K, LQFP64 package
+
+config ARCH_CHIP_NUC120RD2BN
+	bool "NUC120RD2BN"
+	select ARCH_FAMILY_NUC120
+	select ARCH_NUC_LOWDENSITY
+	---help---
+		Nuvoton NUC120 low density chip: Flash 64K SRAM 8K, LQFP64 package
+
+config ARCH_CHIP_NUC120LD3AN
+	bool "NUC120LD3AN"
+	select ARCH_FAMILY_NUC120
+	select ARCH_NUC_MEDIUMDENSITY
+	---help---
+		Nuvoton NUC120 medium density chip: Flash 64K SRAM 16K, LQFP48 package
+
+config ARCH_CHIP_NUC120LE3AN
+	bool "NUC120LE3AN"
+	select ARCH_FAMILY_NUC120
+	select ARCH_NUC_MEDIUMDENSITY
+	---help---
+		Nuvoton NUC120 medium density chip: Flash 128K SRAM 16K, LQFP48 package
+
+config ARCH_CHIP_NUC120RD3AN
+	bool "NUC120RD3AN"
+	select ARCH_FAMILY_NUC120
+	select ARCH_NUC_MEDIUMDENSITY
+	---help---
+		Nuvoton NUC120 medium density chip: Flash 64K SRAM 16K, LQFP64 package
+
+config ARCH_CHIP_NUC120RE3AN
+	bool "NUC120RE3AN"
+	select ARCH_FAMILY_NUC120
+	select ARCH_NUC_MEDIUMDENSITY
+	---help---
+		Nuvoton NUC120 medium density chip: Flash 128K SRAM 16K, LQFP64 package
+
+config ARCH_CHIP_NUC120VD2AN
+	bool "NUC120VD2AN"
+	select ARCH_FAMILY_NUC120
+	select ARCH_NUC_MEDIUMDENSITY
+	select NUC_HAVE_UART2
+	---help---
+		Nuvoton NUC120 medium density chip: Flash 64K SRAM 8K, LQFP100 package
+
+config ARCH_CHIP_NUC120VD3AN
+	bool "NUC120VD3AN"
+	select ARCH_FAMILY_NUC120
+	select ARCH_NUC_MEDIUMDENSITY
+	select NUC_HAVE_UART2
+	---help---
+		Nuvoton NUC120 medium density chip: Flash 64K SRAM 16K, LQFP100 package
+
+config ARCH_CHIP_NUC120VE3AN
+	bool "NUC120VE3AN"
+	select ARCH_FAMILY_NUC120
+	select ARCH_NUC_MEDIUMDENSITY
+	select NUC_HAVE_UART2
+	---help---
+		Nuvoton NUC120 medium density chip: Flash 128K SRAM 16K, LQFP100 package
+
+endchoice
+
+config ARCH_FAMILY_NUC100
+	bool
+
+config ARCH_FAMILY_NUC120
+	bool
+
+config ARCH_NUC_LOWDENSITY
+	bool
+
+config ARCH_NUC_MEDIUMDENSITY
+	bool
+
+config NUC_HAVE_UART2
+	bool
+
+menu "NUC1XX Peripheral Support"
+
+config NUC_PDMA
+	bool "Peripheral DMA"
+	default n
+
+config NUC_FMC
+	bool "Flash memory"
+	default n
+
+config NUC_EBI
+	bool "External bus interface"
+	default n
+
+config NUC_WDT
+	bool "Watchdog timer"
+	default n
+
+config NUC_RTC
+	bool "Real time clock (RTC)"
+	default n
+
+config NUC_TMR0
+	bool "Timer0"
+	default n
+
+config NUC_TMR1
+	bool "Timer1"
+	default n
+
+config NUC_TIMR2
+	bool "Timer2"
+	default n
+
+config NUC_TIMR3
+	bool "Timer3"
+	default n
+
+config NUC_I2C0
+	bool "I2C0 interface"
+	default n
+
+config NUC_I2C1
+	bool "I2C1 interface"
+	default n
+
+config NUC_SPI0
+	bool "SPI0 master/slave"
+	default n
+
+config NUC_SPI1
+	bool "SPI1 master/slave"
+	default n
+
+config NUC_SPI2
+	bool "SPI2 master/slave"
+	default n
+
+config NUC_SPI3
+	bool "SPI3 master/slave"
+	default n
+
+config NUC_PWM0
+	bool "PWM0"
+	default n
+
+config NUC_PWM1
+	bool "PWM1"
+	default n
+
+config NUC_PWM2
+	bool "PWM2"
+	default n
+
+config NUC_PWM3
+	bool "PWM3"
+	default n
+
+config NUC_PWM4
+	bool "PWM4"
+	default n
+
+config NUC_PWM5
+	bool "PWM5"
+	default n
+
+config NUC_PWM6
+	bool "PWM6"
+	default n
+
+config NUC_PWM7
+	bool "PWM7"
+	default n
+
+config NUC_UART0
+	bool "UART0"
+	default y
+	select ARCH_HAVE_UART0
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config NUC_UART1
+	bool "UART1"
+	default n
+	select ARCH_HAVE_UART1
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config NUC_UART2
+	bool "UART2"
+	default n
+	depends on NUC_HAVE_UART2
+	select ARCH_HAVE_UART2
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config NUC_USBD
+	bool "USB 2.0 FS device controller"
+	default n
+	depends on ARCH_FAMILY_NUC120
+
+config NUC_ACMP
+	bool "Analog comparator"
+	default n
+
+config NUC_ADC
+	bool "Analog-digital-converter (ADC)"
+	default n
+
+config NUC_PS2
+	bool "PS/2 interface"
+	default n
+
+config NUC_I2S
+	bool "I2S interface"
+	default n
+
+endmenu
+
+config NUC_XTALLO
+	bool
+
+config NUC_INTHI
+	bool
+
+choice
+	prompt "SysTick clock source"
+	default NUC_SYSTICK_CORECLK
+
+config NUC_SYSTICK_CORECLK
+	bool "Cortex-M0 core clock"
+
+config NUC_SYSTICK_XTALHI
+	bool "High speed XTAL clock"
+
+config NUC_SYSTICK_XTALLO
+	bool "Low speed XTAL clock"
+	select NUC_XTALLO
+
+config NUC_SYSTICK_XTALHId2
+	bool "High speed XTAL clock/2"
+
+config NUC_SYSTICK_HCLKd2
+	bool "HCLK/2"
+
+config NUC_SYSTICK_INTHId2
+	bool "Internal high speed clock/2"
+	select NUC_INTHI
+
+endchoice
+
+choice
+	prompt "NUC UART clock source"
+	default NUC_UARTCLK_INTHI
+	depends on NUC_UART0 || NUC_UART1 || NUC_UART2
+
+config NUC_UARTCLK_XTALHI
+	bool "External 4-24MHz high speed crystal"
+
+config NUC_UARTCLK_PLL
+	bool "PLL output"
+
+config NUC_UARTCLK_INTHI
+	bool "Internal 22.1184 high speed clock"
+	select NUC_INTHI
+
+endchoice

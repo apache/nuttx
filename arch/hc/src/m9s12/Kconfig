@@ -1,0 +1,43 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_HSC12
+comment "M9S12 Configuration Options"
+
+menu "M9S12 Peripheral Selection"
+
+config HCS12_SCI0
+	bool "SCI0"
+	default n
+	select ARCH_HAVE_SCI0
+
+config HCS12_SCI1
+	bool "SCI1"
+	default n
+	select ARCH_HAVE_SCI1
+
+endmenu # M9S12 Peripheral Selection
+
+menu "HSC12 Build Options"
+
+config HCS12_SERIALMON
+	bool "Freescale serial bootloader"
+	default n
+	---help---
+		Indicates that the target systems uses the Freescale serial
+		bootloader.
+
+config HCS12_NONBANKED
+	bool "Non-banked"
+	default n
+	---help---
+		Indicates that the target systems does not support banking.
+		Only short calls are made; one fixed page is presented in the
+		paging window.  Only 48Kb of FLASH is usable in this configuration:
+		pages 3e, 3d, then 3f will appear as a contiguous address space
+		in memory.
+
+endmenu # HSC12 Build Options
+endif # ARCH_HSC12

@@ -1,0 +1,647 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_CHIP_STM32F7
+
+comment "STM32 F7 Configuration Options"
+
+choice
+	prompt "STM32 F7 Chip Selection"
+	default ARCH_CHIP_STM32F746
+	depends on ARCH_CHIP_STM32F7
+
+config ARCH_CHIP_STM32F745
+	bool "STM32F745xx"
+	select STM32F7_STM32F74XX
+	---help---
+		STM32 F7 Cortex M7, 512 or 1024Kb FLASH, 335 (240++16+54) Kb SRAM
+
+config ARCH_CHIP_STM32F746
+	bool "STM32F746xx"
+	select STM32F7_STM32F74XX
+	select STM32F7_HAVE_LTDC
+	---help---
+		STM32 F7 Cortex M7, 512 or 1024Kb FLASH, 335 (240++16+54) Kb SRAM
+
+config ARCH_CHIP_STM32F756
+	bool "STM32F756xx"
+	select STM32F7_STM32F75XX
+	select STM32F7_HAVE_LTDC
+	---help---
+		STM32 F7 Cortex M7, 512 or 1024Kb FLASH, 335 (240++16+54) Kb SRAM
+
+endchoice # STM32 F7 Chip Selection
+
+config STM32F7_STM32F74XX
+	bool
+	default n
+	select ARCH_HAVE_FPU
+	select ARCH_HAVE_DPFPU # REVISIT
+	select ARMV7M_HAVE_ICACHE
+	select ARMV7M_HAVE_DCACHE
+	select ARMV7M_HAVE_ITCM
+	select ARMV7M_HAVE_DTCM
+
+config STM32F7_STM32F75XX
+	bool
+	default n
+	select ARCH_HAVE_FPU
+	select ARCH_HAVE_DPFPU # REVISIT
+	select ARMV7M_HAVE_ICACHE
+	select ARMV7M_HAVE_DCACHE
+	select ARMV7M_HAVE_ITCM
+	select ARMV7M_HAVE_DTCM
+
+choice
+	prompt "Embedded FLASH size"
+	default STM32F7_FLASH_1024KB
+
+config STM32F7_FLASH_512KB
+	bool "512 KB"
+
+config STM32F7_FLASH_1024KB
+	bool "1024 KB"
+
+endchoice # Embedded FLASH size
+
+menu "STM32 Peripheral Support"
+
+# These "hidden" settings determine is a peripheral option is available for the
+# selection MCU
+
+config STM32F7_HAVE_LTDC
+	bool
+	default n
+
+# These "hidden" settings are the OR of individual peripheral selections
+# indicating that the general capabilitiy is required.
+
+config STM32F7_ADC
+	bool
+	default n
+
+config STM32F7_CAN
+	bool
+	default n
+
+config STM32F7_DAC
+	bool
+	default n
+
+config STM32F7_DMA
+	bool
+	default n
+
+config STM32F7_I2C
+	bool
+	default n
+
+config STM32F7_SAI
+	bool
+	default n
+
+config STM32F7_SPI
+	bool
+	default n
+
+config STM32F7_USART
+	bool
+	default n
+
+# These are the peripheral selections proper
+
+config STM32F7_ADC1
+	bool "ADC1"
+	default n
+	select STM32F7_ADC
+
+config STM32F7_ADC2
+	bool "ADC2"
+	default n
+	select STM32F7_ADC
+
+config STM32F7_ADC3
+	bool "ADC3"
+	default n
+	select STM32F7_ADC
+
+config STM32F7_BKPSRAM
+	bool "Enable BKP RAM Domain"
+	default n
+
+config STM32F7_CAN1
+	bool "CAN1"
+	default n
+	select CAN
+	select STM32F7_CAN
+
+config STM32F7_CAN2
+	bool "CAN2"
+	default n
+	select CAN
+	select STM32F7_CAN
+
+config STM32F7_CEC
+	bool "CEC"
+	default n
+	depends on STM32F7_VALUELINE
+
+config STM32F7_CRC
+	bool "CRC"
+	default n
+
+config STM32F7_CRYP
+	bool "CRYP"
+	default n
+
+config STM32F7_DMA1
+	bool "DMA1"
+	default n
+	select STM32F7_DMA
+	select ARCH_DMA
+
+config STM32F7_DMA2
+	bool "DMA2"
+	default n
+	select STM32F7_DMA
+	select ARCH_DMA
+
+config STM32F7_DAC1
+	bool "DAC1"
+	default n
+	select STM32F7_DAC
+
+config STM32F7_DAC2
+	bool "DAC2"
+	default n
+	select STM32F7_DAC
+
+config STM32F7_DCMI
+	bool "DCMI"
+	default n
+
+config STM32F7_ETHMAC
+	bool "Ethernet MAC"
+	default n
+	select NETDEVICES
+	select ARCH_HAVE_PHY
+
+config STM32F7_FSMC
+	bool "FSMC"
+	default n
+
+config STM32F7_I2C1
+	bool "I2C1"
+	default n
+	select STM32F7_I2C
+
+config STM32F7_CEC
+	bool "HDMI-CEC"
+	default n
+
+config STM32F7_I2C2
+	bool "I2C2"
+	default n
+	select STM32F7_I2C
+
+config STM32F7_I2C3
+	bool "I2C3"
+	default n
+	select STM32F7_I2C
+
+config STM32F7_LPTIM1
+	bool "Low-power timer 1"
+	default n
+
+config STM32F7_LTDC
+	bool "LTDC"
+	default n
+	depends on STM32F7_HAVE_LTDC
+	---help---
+		The STM32 LTDC is an LCD-TFT Display Controller available on
+		the STM32F429 and STM32F439 devices.  It is a standard parallel
+		video interface (HSYNC, VSYNC, etc.) for controlling TFT
+		LCD displays.
+
+config STM32F7_DMA2D
+	bool "DMA2D"
+	default n
+	---help---
+		The STM32 DMA2D is an Chrom-Art Accelerator for image manipulation
+		available on the STM32 F7 devices.
+
+config STM32F7_OTGFS
+	bool "OTG FS"
+	default n
+	select USBHOST_HAVE_ASYNCH if USBHOST
+
+config STM32F7_OTGHS
+	bool "OTG HS"
+	default n
+	select USBHOST_HAVE_ASYNCH if USBHOST
+
+config STM32F7_QUADSPI
+	bool "QuadSPI"
+	default n
+
+config STM32F7_SAI1
+config STM32F7_RNG
+	bool "RNG"
+	default n
+	select ARCH_HAVE_RNG
+
+config STM32F7_SAI1
+	bool "SAI1"
+	default n
+	select STM32F7_SAI
+
+config STM32F7_SAI2
+	bool "SAI2"
+	default n
+	select STM32F7_SAI
+
+config STM32F7_SDMMC1
+	bool "SDMMC1"
+	default n
+	select ARCH_HAVE_SDIO
+
+config STM32F7_SPDIFRX
+	bool "SPDIFRX"
+	default n
+
+config STM32F7_SPI1
+	bool "SPI1"
+	default n
+	select SPI
+	select STM32F7_SPI
+
+config STM32F7_SPI2
+	bool "SPI2"
+	default n
+	select SPI
+	select STM32F7_SPI
+
+config STM32F7_SPI3
+	bool "SPI3"
+	default n
+	select SPI
+	select STM32F7_SPI
+
+config STM32F7_SPI4
+	bool "SPI4"
+	default n
+	select SPI
+	select STM32F7_SPI
+
+config STM32F7_SPI5
+	bool "SPI5"
+	default n
+	select SPI
+	select STM32F7_SPI
+
+config STM32F7_SPI6
+	bool "SPI6"
+	default n
+	select SPI
+	select STM32F7_SPI
+
+config STM32F7_TIM1
+	bool "TIM1"
+	default n
+
+config STM32F7_TIM2
+	bool "TIM2"
+	default n
+
+config STM32F7_TIM3
+	bool "TIM3"
+	default n
+
+config STM32F7_TIM4
+	bool "TIM4"
+	default n
+
+config STM32F7_TIM5
+	bool "TIM5"
+	default n
+
+config STM32F7_TIM6
+	bool "TIM6"
+	default n
+
+config STM32F7_TIM7
+	bool "TIM7"
+	default n
+
+config STM32F7_TIM8
+	bool "TIM8"
+	default n
+
+config STM32F7_TIM9
+	bool "TIM9"
+	default n
+
+config STM32F7_TIM10
+	bool "TIM10"
+	default n
+
+config STM32F7_TIM11
+	bool "TIM11"
+	default n
+
+config STM32F7_TIM12
+	bool "TIM12"
+	default n
+
+config STM32F7_TIM13
+	bool "TIM13"
+	default n
+
+config STM32F7_TIM14
+	bool "TIM14"
+	default n
+
+config STM32F7_TIM15
+	bool "TIM15"
+	default n
+
+config STM32F7_USART1
+	bool "USART1"
+	default n
+	select ARCH_HAVE_USART1
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select STM32F7_USART
+
+config STM32F7_USART2
+	bool "USART2"
+	default n
+	select ARCH_HAVE_USART2
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select STM32F7_USART
+
+config STM32F7_USART3
+	bool "USART3"
+	default n
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select ARCH_HAVE_USART3
+	select STM32F7_USART
+
+config STM32F7_UART4
+	bool "UART4"
+	default n
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select ARCH_HAVE_UART4
+	select STM32F7_USART
+
+config STM32F7_UART5
+	bool "UART5"
+	default n
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select ARCH_HAVE_UART5
+	select STM32F7_USART
+
+config STM32F7_USART6
+	bool "USART6"
+	default n
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select ARCH_HAVE_USART6
+	select STM32F7_USART
+
+config STM32F7_UART7
+	bool "UART7"
+	default n
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select ARCH_HAVE_UART7
+	select STM32F7_USART
+
+config STM32F7_UART8
+	bool "UART8"
+	default n
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select ARCH_HAVE_UART8
+	select STM32F7_USART
+
+config STM32F7_IWDG
+	bool "IWDG"
+	default n
+	select WATCHDOG
+
+config STM32F7_WWDG
+	bool "WWDG"
+	default n
+	select WATCHDOG
+
+endmenu
+
+config STM32F7_CUSTOM_CLOCKCONFIG
+        bool "Custom clock configuration"
+	default n
+	---help---
+		Enables special, board-specific STM32 clock configuration.
+
+config STM32F7_DTCM_PROCFS
+	bool "DTCM SRAM PROCFS support"
+	default n
+	depends on ARMV7M_DTCM && FS_PROCFS
+	---help---
+		Select to build in support for /proc/dtcm.  Reading from /proc/dtcm
+		will provide statistics about DTCM memory use similar to what you
+		would get from mallinfo() for the user heap.
+
+if STM32F7_ETHMAC
+menu "Ethernet MAC configuration"
+
+config STM32F7_PHYADDR
+	int "PHY address"
+	default 1
+	---help---
+		The 5-bit address of the PHY on the board.  Default: 1
+
+config STM32F7_PHYINIT
+	bool "Board-specific PHY Initialization"
+	default n
+	---help---
+		Some boards require specialized initialization of the PHY before it can be used.
+		This may include such things as configuring GPIOs, resetting the PHY, etc.  If
+		STM32F7_PHYINIT is defined in the configuration then the board specific logic must
+		provide stm32_phyinitialize();  The STM32 Ethernet driver will call this function
+		one time before it first uses the PHY.
+
+config STM32F7_MII
+	bool "Use MII interface"
+	default n
+	---help---
+		Support Ethernet MII interface.
+
+choice
+	prompt "MII clock configuration"
+	default STM32F7_MII_EXTCLK
+	depends on STM32F7_MII
+
+config STM32F7_MII_MCO1
+	bool "Use MC01 as MII clock"
+	---help---
+		Use MCO1 to clock the MII interface.
+
+config STM32F7_MII_MCO2
+	bool "Use MC02 as MII clock"
+	---help---
+		Use MCO2 to clock the MII interface.
+
+config STM32F7_MII_EXTCLK
+	bool "External MII clock"
+	---help---
+		Clocking is provided by external logic.
+
+endchoice
+
+config STM32F7_AUTONEG
+	bool "Use autonegotiation"
+	default y
+	---help---
+		Use PHY autonegotiation to determine speed and mode
+
+config STM32F7_ETHFD
+	bool "Full duplex"
+	default n
+	depends on !STM32F7_AUTONEG
+	---help---
+		If STM32F7_AUTONEG is not defined, then this may be defined to select full duplex
+		mode. Default: half-duplex
+
+config STM32F7_ETH100MBPS
+	bool "100 Mbps"
+	default n
+	depends on !STM32F7_AUTONEG
+	---help---
+		If STM32F7_AUTONEG is not defined, then this may be defined to select 100 MBps
+		speed.  Default: 10 Mbps
+
+config STM32F7_PHYSR
+	int "PHY Status Register Address (decimal)"
+	depends on STM32F7_AUTONEG
+	---help---
+		This must be provided if STM32F7_AUTONEG is defined.  The PHY status register
+		address may diff from PHY to PHY.  This configuration sets the address of
+		the PHY status register.
+
+config STM32F7_PHYSR_ALTCONFIG
+	bool "PHY Status Alternate Bit Layout"
+	default n
+	depends on STM32F7_AUTONEG
+	---help---
+		Different PHYs present speed and mode information in different ways.  Some
+		will present separate information for speed and mode (this is the default).
+		Those PHYs, for example, may provide a 10/100 Mbps indication and a separate
+		full/half duplex indication. This options selects an alternative representation
+		where speed and mode information are combined.  This might mean, for example,
+		separate bits for 10HD, 100HD, 10FD and 100FD.
+
+config STM32F7_PHYSR_SPEED
+	hex "PHY Speed Mask"
+	depends on STM32F7_AUTONEG && !STM32F7_PHYSR_ALTCONFIG
+	---help---
+		This must be provided if STM32F7_AUTONEG is defined.  This provides bit mask
+		for isolating the 10 or 100MBps speed indication.
+
+config STM32F7_PHYSR_100MBPS
+	hex "PHY 100Mbps Speed Value"
+	depends on STM32F7_AUTONEG && !STM32F7_PHYSR_ALTCONFIG
+	---help---
+		This must be provided if STM32F7_AUTONEG is defined.  This provides the value
+		of the speed bit(s) indicating 100MBps speed.
+
+config STM32F7_PHYSR_MODE
+	hex "PHY Mode Mask"
+	depends on STM32F7_AUTONEG && !STM32F7_PHYSR_ALTCONFIG
+	---help---
+		This must be provided if STM32F7_AUTONEG is defined.  This provide bit mask
+		for isolating the full or half duplex mode bits.
+
+config STM32F7_PHYSR_FULLDUPLEX
+	hex "PHY Full Duplex Mode Value"
+	depends on STM32F7_AUTONEG && !STM32F7_PHYSR_ALTCONFIG
+	---help---
+		This must be provided if STM32F7_AUTONEG is defined.  This provides the
+		value of the mode bits indicating full duplex mode.
+
+config STM32F7_PHYSR_ALTMODE
+	hex "PHY Mode Mask"
+	depends on STM32F7_AUTONEG && STM32F7_PHYSR_ALTCONFIG
+	---help---
+		This must be provided if STM32F7_AUTONEG is defined.  This provide bit mask
+		for isolating the speed and full/half duplex mode bits.
+
+config STM32F7_PHYSR_10HD
+	hex "10MBase-T Half Duplex Value"
+	depends on STM32F7_AUTONEG && STM32F7_PHYSR_ALTCONFIG
+	---help---
+		This must be provided if STM32F7_AUTONEG is defined.  This is the value
+		under the bit mask that represents the 10Mbps, half duplex setting.
+
+config STM32F7_PHYSR_100HD
+	hex "100Base-T Half Duplex Value"
+	depends on STM32F7_AUTONEG && STM32F7_PHYSR_ALTCONFIG
+	---help---
+		This must be provided if STM32F7_AUTONEG is defined.  This is the value
+		under the bit mask that represents the 100Mbps, half duplex setting.
+
+config STM32F7_PHYSR_10FD
+	hex "10Base-T Full Duplex Value"
+	depends on STM32F7_AUTONEG && STM32F7_PHYSR_ALTCONFIG
+	---help---
+		This must be provided if STM32F7_AUTONEG is defined.  This is the value
+		under the bit mask that represents the 10Mbps, full duplex setting.
+
+config STM32F7_PHYSR_100FD
+	hex "100Base-T Full Duplex Value"
+	depends on STM32F7_AUTONEG && STM32F7_PHYSR_ALTCONFIG
+	---help---
+		This must be provided if STM32F7_AUTONEG is defined.  This is the value
+		under the bit mask that represents the 100Mbps, full duplex setting.
+
+config STM32F7_ETH_PTP
+	bool "Precision Time Protocol (PTP)"
+	default n
+	---help---
+		Precision Time Protocol (PTP).  Not supported but some hooks are indicated
+		with this condition.
+
+config STM32F7_RMII
+	bool
+	default y if !STM32F7_MII
+
+choice
+	prompt "RMII clock configuration"
+	default STM32F7_RMII_EXTCLK
+	depends on STM32F7_RMII
+
+config STM32F7_RMII_MCO1
+	bool "Use MC01 as RMII clock"
+	---help---
+		Use MCO1 to clock the RMII interface.
+
+config STM32F7_RMII_MCO2
+	bool "Use MC02 as RMII clock"
+	---help---
+		Use MCO2 to clock the RMII interface.
+
+config STM32F7_RMII_EXTCLK
+	bool "External RMII clock"
+	---help---
+		Clocking is provided by external logic.
+
+endchoice
+
+config STM32F7_ETHMAC_REGDEBUG
+	bool "Register-Level Debug"
+	default n
+	depends on DEBUG
+	---help---
+		Enable very low-level register access debug.  Depends on DEBUG.
+
+endmenu
+endif # STM32F7_ETHMAC
+endif # ARCH_CHIP_STM32F7

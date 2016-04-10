@@ -1,0 +1,678 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_CHIP_STM32L4
+
+comment "STM32L4 Configuration Options"
+
+choice
+	prompt "STM32 L4 Chip Selection"
+	default ARCH_CHIP_STM32L476RG
+	depends on ARCH_CHIP_STM32L4
+
+config ARCH_CHIP_STM32L476RG
+	bool "STM32L476RG"
+	select STM32L4_STM32L476XX
+	select STM32L4_FLASH_1024KB
+	---help---
+		STM32 L4 Cortex M4, 1024Kb FLASH, 96+32 Kb SRAM
+
+config ARCH_CHIP_STM32L476RE
+	bool "STM32L476RE"
+	select STM32L4_STM32L476XX
+	select STM32L4_FLASH_512KB
+	---help---
+		STM32 L4 Cortex M4, 512 FLASH, 96+32 Kb SRAM
+
+config ARCH_CHIP_STM32L486
+	bool "STM32L486xx"
+	select STM32L4_STM32L486XX
+	select STM32L4_HAVE_AES
+	---help---
+		STM32 L4 Cortex M4, AES, 1024Kb FLASH, 96+32 Kb SRAM
+
+endchoice # STM32 L4 Chip Selection
+
+# Chip families
+
+config STM32L4_STM32L476XX
+	bool
+	default n
+	select ARCH_HAVE_FPU
+	select ARCH_HAVE_DPFPU # REVISIT
+	select ARMV7M_HAVE_ITCM
+	select ARMV7M_HAVE_DTCM
+
+config STM32L4_STM32L486XX
+	bool
+	default n
+	select ARCH_HAVE_FPU
+	select ARCH_HAVE_DPFPU # REVISIT
+	select ARMV7M_HAVE_ITCM
+	select ARMV7M_HAVE_DTCM
+	select STM32L4_FLASH_1024KB
+
+choice
+	prompt "Embedded FLASH size"
+	default STM32L4_FLASH_1024KB
+
+config STM32L4_FLASH_256KB
+	bool "256 KB"
+
+config STM32L4_FLASH_512KB
+	bool "512 KB"
+
+config STM32L4_FLASH_1024KB
+	bool "1024 KB"
+
+endchoice # Embedded FLASH size
+
+menu "STM32L4 Peripheral Support"
+
+# These "hidden" settings determine is a peripheral option is available for the
+# selection MCU
+
+config STM32L4_HAVE_LTDC
+	bool
+	default n
+
+# These "hidden" settings are the OR of individual peripheral selections
+# indicating that the general capabilitiy is required.
+
+config STM32L4_ADC
+	bool
+	default n
+
+config STM32L4_CAN
+	bool
+	default n
+
+config STM32L4_DAC
+	bool
+	default n
+
+config STM32L4_DMA
+	bool
+	default n
+
+config STM32L4_I2C
+	bool
+	default n
+
+config STM32L4_SAI
+	bool
+	default n
+
+config STM32L4_SPI
+	bool
+	default n
+
+config STM32L4_USART
+	bool
+	default n
+
+config STM32L4_LPTIM
+    bool
+    default n
+
+# These are the peripheral selections proper
+
+comment "AHB1 Peripherals"
+
+config STM32L4_DMA1
+	bool "DMA1"
+	default n
+	select STM32L4_DMA
+	select ARCH_DMA
+
+config STM32L4_DMA2
+	bool "DMA2"
+	default n
+	select STM32L4_DMA
+	select ARCH_DMA
+
+
+config STM32L4_CRC
+	bool "CRC"
+	default n
+
+config STM32L4_TSC
+	bool "TSC"
+	default n
+
+comment "AHB2 Peripherals"
+
+config STM32L4_OTGFS
+	bool "OTG FS"
+	default n
+	select USBHOST_HAVE_ASYNCH if USBHOST
+
+config STM32L4_ADC1
+	bool "ADC1"
+	default n
+	select STM32L4_ADC
+
+config STM32L4_ADC2
+	bool "ADC2"
+	default n
+	select STM32L4_ADC
+
+config STM32L4_ADC3
+	bool "ADC3"
+	default n
+	select STM32L4_ADC
+
+config STM32L4_AES
+	bool "AES"
+	default n
+
+config STM32L4_RNG
+	bool "RNG"
+	default n
+	select ARCH_HAVE_RNG
+
+comment "AHB3 Peripherals"
+
+config STM32L4_FMC
+	bool "FMC"
+	default n
+
+config STM32L4_QUADSPI
+	bool "QuadSPI"
+	default n
+
+comment "APB1 Peripherals"
+
+config STM32L4_PWR
+	bool "PWR"
+	default n
+
+config STM32L4_TIM2
+	bool "TIM2"
+	default n
+
+config STM32L4_TIM3
+	bool "TIM3"
+	default n
+
+config STM32L4_TIM4
+	bool "TIM4"
+	default n
+
+config STM32L4_TIM5
+	bool "TIM5"
+	default n
+
+config STM32L4_TIM6
+	bool "TIM6"
+	default n
+
+config STM32L4_TIM7
+	bool "TIM7"
+	default n
+
+config STM32L4_LCD
+    bool "LCD"
+    default n
+
+config STM32L4_SPI2
+	bool "SPI2"
+	default n
+	select SPI
+	select STM32L4_SPI
+
+config STM32L4_SPI3
+	bool "SPI3"
+	default n
+	select SPI
+	select STM32L4_SPI
+
+config STM32L4_USART1
+	bool "USART1"
+	default n
+	select ARCH_HAVE_USART1
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select STM32L4_USART
+
+config STM32L4_USART2
+	bool "USART2"
+	default n
+	select ARCH_HAVE_USART2
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select STM32L4_USART
+
+config STM32L4_USART3
+	bool "USART3"
+	default n
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select ARCH_HAVE_USART3
+	select STM32L4_USART
+
+config STM32L4_UART4
+	bool "UART4"
+	default n
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select ARCH_HAVE_UART4
+	select STM32L4_USART
+
+config STM32L4_UART5
+	bool "UART5"
+	default n
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select ARCH_HAVE_UART5
+	select STM32L4_USART
+
+config STM32L4_I2C1
+	bool "I2C1"
+	default n
+	select STM32L4_I2C
+
+config STM32L4_I2C2
+	bool "I2C2"
+	default n
+	select STM32L4_I2C
+
+config STM32L4_I2C3
+	bool "I2C3"
+	default n
+	select STM32L4_I2C
+
+config STM32L4_CAN1
+	bool "CAN1"
+	default n
+	select CAN
+	select STM32L4_CAN
+
+config STM32L4_DAC1
+	bool "DAC1"
+	default n
+	select STM32L4_DAC
+
+config STM32L4_DAC2
+	bool "DAC2"
+	default n
+	select STM32L4_DAC
+
+config STM32L4_OPAMP
+    bool "OPAMP"
+    default n
+
+config STM32L4_LPTIM1
+	bool "LPTIM1"
+	default n
+    select STM32L4_LPTIM
+
+config STM32L4_LPUART1
+	bool "LPUART1"
+	default n
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select ARCH_HAVE_LPUART1
+
+config STM32L4_SWPMI
+    bool "SWPMI"
+    default n
+
+config STM32L4_LPTIM2
+	bool "LPTIM2"
+	default n
+    select STM32L4_LPTIM
+
+comment "APB2 Peripherals"
+
+config STM32L4_SYSCFG
+	bool "SYSCFG"
+	default y
+
+config STM32L4_FIREWALL
+	bool "FIREWALL"
+	default y
+	depends on STM32L4_SYSCFG
+
+config STM32L4_SDMMC1
+	bool "SDMMC1"
+	default n
+	select ARCH_HAVE_SDIO
+
+config STM32L4_TIM1
+	bool "TIM1"
+	default n
+
+config STM32L4_SPI1
+	bool "SPI1"
+	default n
+	select SPI
+	select STM32L4_SPI
+
+config STM32L4_TIM8
+	bool "TIM8"
+	default n
+
+config STM32L4_USART1
+	bool "USART1"
+	default n
+	select ARCH_HAVE_USART1
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select STM32L4_USART
+
+config STM32L4_TIM15
+	bool "TIM15"
+	default n
+
+config STM32L4_TIM16
+	bool "TIM16"
+	default n
+
+config STM32L4_TIM17
+	bool "TIM17"
+	default n
+
+config STM32L4_SAI1
+	bool "SAI1"
+	default n
+	select STM32L4_SAI
+
+config STM32L4_SAI2
+	bool "SAI2"
+	default n
+	select STM32L4_SAI
+
+config STM32L4_DFSDM
+    bool "DFSDM"
+    default n
+
+comment "Other Peripherals"
+
+config STM32L4_BKPSRAM
+	bool "Enable BKP RAM Domain"
+	default n
+
+config STM32L4_IWDG
+	bool "IWDG"
+	default n
+	select WATCHDOG
+
+config STM32L4_WWDG
+	bool "WWDG"
+	default n
+	select WATCHDOG
+
+endmenu
+
+config STM32L4_FLASH_PREFETCH
+	bool "Enable FLASH Pre-fetch"
+	default y
+	---help---
+	Enable FLASH prefetch
+
+config STM32L4_DISABLE_IDLE_SLEEP_DURING_DEBUG
+	bool "Disable IDLE Sleep (WFI) in debug mode"
+	default n
+	---help---
+		In debug configuration, disables the WFI instruction in the IDLE loop
+		to prevent the JTAG from disconnecting.  With some JTAG debuggers, such
+		as the ST-LINK2 with OpenOCD, if the ARM is put to sleep via the WFI
+		instruction, the debugger will disconnect, terminating the debug session.
+
+config ARCH_BOARD_STM32L4_CUSTOM_CLOCKCONFIG
+	bool "Custom clock configuration"
+	default n
+	---help---
+		Enables special, board-specific STM32 clock configuration.
+
+choice
+	prompt "RTC clock source"
+	default STM32L4_RTC_LSECLOCK
+	depends on RTC
+
+config STM32L4_RTC_LSECLOCK
+	bool "LSE clock"
+	---help---
+		Drive the RTC with the LSE clock
+
+config STM32L4_RTC_LSICLOCK
+	bool "LSI clock"
+	---help---
+		Drive the RTC with the LSI clock
+
+config STM32L4_RTC_HSECLOCK
+	bool "HSE clock"
+	---help---
+		Drive the RTC with the HSE clock, divided down to 1MHz.
+
+endchoice
+
+config STM32L4_SAI1PLL
+	bool "SAI1PLL"
+	default n
+	---help---
+		The STM32L476 has a separate PLL for the SAI1 block.
+		Set this true and provide configuration parameters in
+		board.h to use this PLL.
+
+config STM32L4_SAI2PLL
+	bool "SAI2PLL"
+	default n
+	---help---
+		The STM32L476 has a separate PLL for the SAI2 block.
+		Set this true and provide configuration parameters in
+		board.h to use this PLL.
+
+config STM32L4_USART
+	bool
+
+menu "U[S]ART Configuration"
+	depends on STM32L4_USART
+
+config USART1_RS485
+	bool "RS-485 on USART1"
+	default n
+	depends on STM32L4_USART1
+	---help---
+		Enable RS-485 interface on USART1. Your board config will have to
+		provide GPIO_USART1_RS485_DIR pin definition. Currently it cannot be
+		used with USART1_RXDMA.
+
+config USART1_RS485_DIR_POLARITY
+	int "USART1 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	depends on USART1_RS485
+	---help---
+		Polarity of DIR pin for RS-485 on USART1. Set to state on DIR pin which
+		enables TX (0 - low / nTXEN, 1 - high / TXEN).
+
+config USART1_RXDMA
+	bool "USART1 Rx DMA"
+	default n
+	depends on STM32L4_USART1 && ( STM32L4_DMA1 || STM32L4_DMA2 )
+	---help---
+		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+config USART2_RS485
+	bool "RS-485 on USART2"
+	default n
+	depends on STM32L4_USART2
+	---help---
+		Enable RS-485 interface on USART2. Your board config will have to
+		provide GPIO_USART2_RS485_DIR pin definition. Currently it cannot be
+		used with USART2_RXDMA.
+
+config USART2_RS485_DIR_POLARITY
+	int "USART2 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	depends on USART2_RS485
+	---help---
+		Polarity of DIR pin for RS-485 on USART2. Set to state on DIR pin which
+		enables TX (0 - low / nTXEN, 1 - high / TXEN).
+
+config USART2_RXDMA
+	bool "USART2 Rx DMA"
+	default n
+	depends on STM32L4_USART2 && STM32L4_DMA1
+	---help---
+		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+config USART3_RS485
+	bool "RS-485 on USART3"
+	default n
+	depends on STM32L4_USART3
+	---help---
+		Enable RS-485 interface on USART3. Your board config will have to
+		provide GPIO_USART3_RS485_DIR pin definition. Currently it cannot be
+		used with USART3_RXDMA.
+
+config USART3_RS485_DIR_POLARITY
+	int "USART3 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	depends on USART3_RS485
+	---help---
+		Polarity of DIR pin for RS-485 on USART3. Set to state on DIR pin which
+		enables TX (0 - low / nTXEN, 1 - high / TXEN).
+
+config USART3_RXDMA
+	bool "USART3 Rx DMA"
+	default n
+	depends on STM32L4_USART3 && STM32L4_DMA1
+	---help---
+		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+config UART4_RS485
+	bool "RS-485 on UART4"
+	default n
+	depends on STM32L4_UART4
+	---help---
+		Enable RS-485 interface on UART4. Your board config will have to
+		provide GPIO_UART4_RS485_DIR pin definition. Currently it cannot be
+		used with UART4_RXDMA.
+
+config UART4_RS485_DIR_POLARITY
+	int "UART4 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	depends on UART4_RS485
+	---help---
+		Polarity of DIR pin for RS-485 on UART4. Set to state on DIR pin which
+		enables TX (0 - low / nTXEN, 1 - high / TXEN).
+
+config UART4_RXDMA
+	bool "UART4 Rx DMA"
+	default n
+	depends on STM32L4_UART4 && STM32L4_DMA2
+	---help---
+		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+config UART5_RS485
+	bool "RS-485 on UART5"
+	default n
+	depends on STM32L4_UART5
+	---help---
+		Enable RS-485 interface on UART5. Your board config will have to
+		provide GPIO_UART5_RS485_DIR pin definition. Currently it cannot be
+		used with UART5_RXDMA.
+
+config UART5_RS485_DIR_POLARITY
+	int "UART5 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	depends on UART5_RS485
+	---help---
+		Polarity of DIR pin for RS-485 on UART5. Set to state on DIR pin which
+		enables TX (0 - low / nTXEN, 1 - high / TXEN).
+
+config UART5_RXDMA
+	bool "UART5 Rx DMA"
+	default n
+	depends on STM32L4_UART5 && STM32L4_DMA2
+	---help---
+		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+config SERIAL_DISABLE_REORDERING
+	bool "Disable reordering of ttySx devices."
+	depends on STM32L4_USART1 || STM32L4_USART2 || STM32L4_USART3 || STM32L4_UART4 || STM32L4_UART5
+	default n
+	---help---
+		NuttX per default reorders the serial ports (/dev/ttySx) so that the
+		console is always on /dev/ttyS0. If more than one UART is in use this
+		can, however, have the side-effect that all port mappings
+		(hardware USART1 -> /dev/ttyS0) change if the console is moved to another
+		UART. This is in particular relevant if a project uses the USB console
+		in some configs and a serial console in other configs, but does not
+		want the side effect of having all serial port names change when just
+		the console is moved from serial to USB.
+
+config STM32L4_FLOWCONTROL_BROKEN
+	bool "Use Software UART RTS flow control"
+	depends on STM32L4_USART
+	default n
+	---help---
+		Enable UART RTS flow control using Software. Because STM
+		Current STM32 have broken HW based RTS behavior (they assert
+		nRTS after every byte received)  Enable this setting workaround
+		this issue by useing software based management of RTS
+
+endmenu
+
+menu "SPI Configuration"
+	depends on STM32L4_SPI
+
+config STM32L4_SPI_INTERRUPTS
+	bool "Interrupt driver SPI"
+	default n
+	---help---
+		Select to enable interrupt driven SPI support. Non-interrupt-driven,
+		poll-waiting is recommended if the interrupt rate would be to high in
+		the interrupt driven case.
+
+config STM32L4_SPI_DMA
+	bool "SPI DMA"
+	default n
+	---help---
+		Use DMA to improve SPI transfer performance.  Cannot be used with STM32L4_SPI_INTERRUPT.
+
+endmenu
+
+menu "I2C Configuration"
+	depends on STM32L4_I2C
+
+config STM32L4_I2C_DYNTIMEO
+	bool "Use dynamic timeouts"
+	default n
+	depends on STM32L4_I2C
+
+config STM32L4_I2C_DYNTIMEO_USECPERBYTE
+	int "Timeout Microseconds per Byte"
+	default 500
+	depends on STM32L4_I2C_DYNTIMEO
+
+config STM32L4_I2C_DYNTIMEO_STARTSTOP
+	int "Timeout for Start/Stop (Milliseconds)"
+	default 1000
+	depends on STM32L4_I2C_DYNTIMEO
+
+config STM32L4_I2CTIMEOSEC
+	int "Timeout seconds"
+	default 0
+	depends on STM32L4_I2C
+
+config STM32L4_I2CTIMEOMS
+	int "Timeout Milliseconds"
+	default 500
+	depends on STM32L4_I2C && !STM32L4_I2C_DYNTIMEO
+
+config STM32L4_I2CTIMEOTICKS
+	int "Timeout for Done and Stop (ticks)"
+	default 500
+	depends on STM32L4_I2C && !STM32L4_I2C_DYNTIMEO
+
+config STM32L4_I2C_DUTY16_9
+	bool "Frequency with Tlow/Thigh = 16/9 "
+	default n
+	depends on STM32L4_I2C
+
+endmenu
+
+endif # ARCH_CHIP_STM32L4

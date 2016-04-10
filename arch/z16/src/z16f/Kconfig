@@ -1,0 +1,39 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_CHIP_Z16F
+comment "Z16F Configuration Options"
+
+menu "Z16F Peripheral Selection"
+
+config Z16F_ESPI
+	bool "ESPI"
+	default n
+	select SPI
+
+# UART0/1 always enabled
+
+config Z16F_UART0
+	bool "UART0"
+	default y
+	select ARCH_HAVE_UART0
+
+config Z16F_UART1
+	bool "UART1"
+	default y
+	select ARCH_HAVE_UART1
+
+endmenu # Z16F Peripheral Selection
+
+menu "Z16F ESPI Configuration"
+	depends on Z16F_ESPI
+
+config Z16F_ESPI_REGDEBUG
+	bool "ESPI register-level debug"
+	default n
+	depends on DEBUG
+
+endmenu # Z16F ESPI Configuration
+endif # ARCH_CHIP_Z16F

@@ -1,0 +1,112 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+comment "C5471 Configuration Options"
+
+menu "IrDA UART Configuration"
+
+config UART_IRDA_BAUD
+	int "IrDA UART BAUD"
+	default 115200
+
+config UART_IRDA_PARITY
+	int "IrDA UART parity"
+	default 0
+	---help---
+		IrDA UART parity.  0=None, 1=Odd, 2=Even.  Default: None
+
+config UART_IRDA_BITS
+	int "IrDA UART number of bits"
+	default 8
+	---help---
+		IrDA UART number of bits.  Default: 8
+
+config UART_IRDA_2STOP
+	int "IrDA UART two stop bits"
+	default 0
+	---help---
+		0=1 stop bit, 1=Two stop bits.  Default: 1 stop bit
+
+config UART_IRDA_RXBUFSIZE
+	int "IrDA UART Rx buffer size"
+	default 256
+	---help---
+		IrDA UART Rx buffer size.  Default: 256
+
+config UART_IRDA_TXBUFSIZE
+	int "IrDA UART Tx buffer size"
+	default 256
+	---help---
+		IrDA UART Tx buffer size.  Default: 256
+
+endmenu # IrDA UART Configuration
+
+menu "Modem UART Configuration"
+
+config UART_MODEM_BAUD
+	int "IrDA UART BAUD"
+	default 115200
+
+config UART_MODEM_PARITY
+	int "IrDA UART parity"
+	default 0
+	---help---
+		IrDA UART parity.  0=None, 1=Odd, 2=Even.  Default: None
+
+config UART_MODEM_BITS
+	int "IrDA UART number of bits"
+	default 8
+	---help---
+		IrDA UART number of bits.  Default: 8
+
+config UART_MODEM_2STOP
+	int "IrDA UART two stop bits"
+	default 0
+	---help---
+		0=1 stop bit, 1=Two stop bits.  Default: 1 stop bit
+
+config UART_MODEM_RXBUFSIZE
+	int "IrDA UART Rx buffer size"
+	default 256
+	---help---
+		IrDA UART Rx buffer size.  Default: 256
+
+config UART_MODEM_TXBUFSIZE
+	int "IrDA UART Tx buffer size"
+	default 256
+	---help---
+		IrDA UART Tx buffer size.  Default: 256
+
+endmenu # Modem UART Configuration
+
+choice
+	prompt "Ethernet PHY"
+	default C5471_PHY_LU3X31T_T64
+
+config C5471_PHY_NONE
+	bool "None"
+
+config C5471_PHY_AC101L
+	bool "AC101L"
+
+config C5471_PHY_LU3X31T_T64
+	bool "LU3X31T T64"
+
+endchoice
+
+choice
+	prompt "PHY mode"
+	default C5471_AUTONEGOTIATION
+
+config C5471_AUTONEGOTIATION
+	bool "Autonegotiation"
+
+config C5471_BASET100
+	bool "100BaseT FullDuplex"
+
+config C5471_BASET10
+	bool "10BaseT FullDuplex"
+
+endchoice

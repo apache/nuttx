@@ -1,0 +1,628 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+comment "LPC43xx Configuration Options"
+
+choice
+	prompt "LPC43XX Chip Selection"
+	default ARCH_CHIP_LPC4330FET100
+	depends on ARCH_CHIP_LPC43XX
+
+config ARCH_CHIP_LPC4310FBD144
+	bool "LPC4310FBD144"
+
+config ARCH_CHIP_LPC4310FET100
+	bool "LPC4310FET100"
+
+config ARCH_CHIP_LPC4320FBD144
+	bool "LPC4320FBD144"
+
+config ARCH_CHIP_LPC4320FET100
+	bool "LPC4320FET100"
+
+config ARCH_CHIP_LPC4330FBD144
+	bool "LPC4330FBD144"
+
+config ARCH_CHIP_LPC4330FET100
+	bool "LPC4330FET100"
+
+config ARCH_CHIP_LPC4330FET180
+	bool "LPC4330FET180"
+
+config ARCH_CHIP_LPC4330FET256
+	bool "LPC4330FET256"
+
+config ARCH_CHIP_LPC4337JBD144
+	bool "LPC4337JBD144"
+
+config ARCH_CHIP_LPC4350FBD208
+	bool "LPC4350FBD208"
+
+config ARCH_CHIP_LPC4350FET180
+	bool "LPC4350FET180"
+
+config ARCH_CHIP_LPC4350FET256
+	bool "LPC4350FET256"
+
+config ARCH_CHIP_LPC4353FBD208
+	bool "LPC4353FBD208"
+
+config ARCH_CHIP_LPC4353FET180
+	bool "LPC4353FET180"
+
+config ARCH_CHIP_LPC4353FET256
+	bool "LPC4353FET256"
+
+config ARCH_CHIP_LPC4357FET180
+	bool "LPC4357FET180"
+
+config ARCH_CHIP_LPC4357FBD208
+	bool "LPC4357FBD208"
+
+config ARCH_CHIP_LPC4357FET256
+	bool "LPC4357FET256"
+
+config ARCH_CHIP_LPC4370FET100
+	bool "LPC4370FET100"
+
+endchoice # LPC43XX Chip Selection
+
+config ARCH_FAMILY_LPC4310
+	bool
+	default y if ARCH_CHIP_LPC4310FBD144 || ARCH_CHIP_LPC4310FET100
+	select ARCH_HAVE_TICKLESS
+
+config ARCH_FAMILY_LPC4320
+	bool
+	default y if ARCH_CHIP_LPC4320FBD144 || ARCH_CHIP_LPC4320FET100
+	select ARCH_HAVE_TICKLESS
+
+config ARCH_FAMILY_LPC4330
+	bool
+	default y if ARCH_CHIP_LPC4330FBD144 || ARCH_CHIP_LPC4330FET100 || ARCH_CHIP_LPC4330FET180 || ARCH_CHIP_LPC4330FET256
+	select ARCH_HAVE_TICKLESS
+
+config ARCH_FAMILY_LPC4337
+	bool
+	default y if ARCH_CHIP_LPC4337JBD144
+	select ARCH_HAVE_TICKLESS
+
+config ARCH_FAMILY_LPC4350
+	bool
+	default y if ARCH_CHIP_LPC4350FBD208 || ARCH_CHIP_LPC4350FET180 || ARCH_CHIP_LPC4350FET256
+	select ARCH_HAVE_TICKLESS
+
+config ARCH_FAMILY_LPC4353
+	bool
+	default y if ARCH_CHIP_LPC4353FBD208 || ARCH_CHIP_LPC4353FET180 || ARCH_CHIP_LPC4353FET256
+	select ARCH_HAVE_TICKLESS
+
+config ARCH_FAMILY_LPC4357
+	bool
+	default y if ARCH_CHIP_LPC4357FET180 || ARCH_CHIP_LPC4357FBD208 || ARCH_CHIP_LPC4357FET256
+	select ARCH_HAVE_TICKLESS
+
+config ARCH_FAMILY_LPC4370
+	bool
+	default y if ARCH_CHIP_LPC4370FET100
+	select ARCH_HAVE_TICKLESS
+
+choice
+	prompt "LPC43XX Boot Configuration"
+	default LPC43_BOOT_SRAM
+	depends on ARCH_CHIP_LPC43XX
+	---help---
+		The startup code needs to know if the code is running from internal FLASH,
+		external FLASH, SPIFI, or SRAM in order to initialize properly.  Note that
+		a boot device is not specified for cases where the code is copied into SRAM;
+		those cases are all covered by LPC43_BOOT_SRAM.
+
+config LPC43_BOOT_SRAM
+	bool "Running from SRAM"
+
+config LPC43_BOOT_SPIFI
+	bool "Running from QuadFLASH"
+
+config LPC43_BOOT_FLASHA
+	bool "Running in internal FLASHA"
+
+config LPC43_BOOT_FLASHB
+	bool "Running in internal FLASHA"
+
+config LPC43_BOOT_CS0FLASH
+	bool "Running in external FLASH CS0"
+
+config LPC43_BOOT_CS1FLASH
+	bool "Running in external FLASH CS1"
+
+config LPC43_BOOT_CS2FLASH
+	bool "Running in external FLASH CS2"
+
+config LPC43_BOOT_CS3FLASH
+	bool "Running in external FLASH CS3"
+
+endchoice # LPC43XX Boot Configuration
+
+menu "LPC43xx Peripheral Support"
+
+config LPC43_ADC0
+	bool "ADC0"
+	default n
+
+config LPC43_ADC1
+	bool "ADC1"
+	default n
+
+config LPC43_ATIMER
+	bool "Alarm timer"
+	default n
+
+config LPC43_CAN1
+	bool "C_CAN1"
+	default n
+
+config LPC43_CAN2
+	bool "C_CAN1"
+	default n
+
+config LPC43_DAC
+	bool "DAC"
+	default n
+
+config LPC43_EMC
+	bool "External Memory Controller (EMC)"
+	default n
+
+config LPC43_ETHERNET
+	bool "Ethernet"
+	default n
+
+config LPC43_EVNTMNTR
+	bool "Event Monitor"
+	default n
+
+config LPC43_GPDMA
+	bool "GPDMA"
+	default n
+
+config LPC43_I2C0
+	bool "I2C0"
+	default n
+
+config LPC43_I2C1
+	bool "I2C1"
+	default n
+
+config LPC43_I2S0
+	bool "I2S0"
+	default n
+
+config LPC43_I2S1
+	bool "I2S1"
+	default n
+
+config LPC43_LCD
+	bool "LCD"
+	default n
+
+config LPC43_MCPWM
+	bool "Motor Control PWM (MCPWM)"
+	default n
+
+config LPC43_QEI
+	bool "Quadrature Controller Interface (QEI)"
+	default n
+
+config LPC43_RIT
+	bool "Repetitive Interrupt Timer (RIT)"
+	default n
+
+config LPC43_RIT_RES
+	int  "Interrupt schedule resolution (nS)"
+	default 250
+	depends on LPC43_RIT
+
+config LPC43_RTC
+	bool "Real Time Clock (RTC)"
+	default n
+
+config LPC43_SCT
+	bool "State Configurable Timer (SCT)"
+	default n
+
+config LPC43_SDMMC
+	bool "SD/MMC"
+	default n
+
+config LPC43_SPI
+	bool "SPI"
+	default n
+
+config LPC43_SPIFI
+	bool "SPI Flash Interface (SPIFI)"
+	default n
+
+config LPC43_SSP0
+	bool "SSP0"
+	default n
+
+config LPC43_SSP1
+	bool "SSP1"
+	default n
+
+config LPC43_TMR0
+	bool "ADC1"
+	default n
+
+config LPC43_TMR1
+	bool "Timer 1"
+	default n
+
+config LPC43_TMR2
+	bool "Timer 2"
+	default n
+
+config LPC43_TMR3
+	bool "Timer 3"
+	default n
+
+config LPC43_USART0
+	bool "USART0"
+	default n
+	select ARCH_HAVE_USART0
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config LPC43_UART1
+	bool "UART1"
+	default n
+	select ARCH_HAVE_UART1
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config LPC43_USART2
+	bool "USART2"
+	default n
+	select ARCH_HAVE_USART2
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config LPC43_USART3
+	bool "USART3"
+	default n
+	select ARCH_HAVE_USART3
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config LPC43_USBOTG
+	bool "USB EHCI"
+	default n
+	select USBHOST_HAVE_ASYNCH
+
+config LPC43_USB0
+	bool "USB0"
+	default n
+
+config LPC43_USB1
+	bool "USB1"
+	default n
+
+config LPC43_WWDT
+	bool "Windowing Watchdog Timer (WWDT)"
+	default n
+
+endmenu # LPC43xx Peripheral Support
+
+if LPC43_ETHERNET
+menu "Ethernet MAC configuration"
+
+config LPC43_PHYADDR
+	int "PHY address"
+	default 1
+	---help---
+		The 5-bit address of the PHY on the board.  Default: 1
+
+config LPC43_PHYINIT
+	bool "Board-specific PHY Initialization"
+	default n
+	---help---
+		Some boards require specialized initialization of the PHY before it can be used.
+		This may include such things as configuring GPIOs, resetting the PHY, etc.  If
+		LPC43_PHYINIT is defined in the configuration then the board specific logic must
+		provide lpc43_phyinitialize();  The LPC43 Ethernet driver will call this function
+		one time before it first uses the PHY.
+
+config LPC43_MII
+	bool "Use MII interface"
+	default n
+	---help---
+		Support Ethernet MII interface.
+
+config LPC43_AUTONEG
+	bool "Use autonegotiation"
+	default y
+	---help---
+		Use PHY autonegotiation to determine speed and mode
+
+config LPC43_ETHFD
+	bool "Full duplex"
+	default n
+	depends on !LPC43_AUTONEG
+	---help---
+		If LPC43_AUTONEG is not defined, then this may be defined to select full duplex
+		mode. Default: half-duplex
+
+config LPC43_ETH100MBPS
+	bool "100 Mbps"
+	default n
+	depends on !LPC43_AUTONEG
+	---help---
+		If LPC43_AUTONEG is not defined, then this may be defined to select 100 MBps
+		speed.  Default: 10 Mbps
+
+config LPC43_PHYSR
+	int "PHY Status Register Address (decimal)"
+	depends on LPC43_AUTONEG
+	---help---
+		This must be provided if LPC43_AUTONEG is defined.  The PHY status register
+		address may diff from PHY to PHY.  This configuration sets the address of
+		the PHY status register.
+
+config LPC43_PHYSR_ALTCONFIG
+	bool "PHY Status Alternate Bit Layout"
+	default n
+	depends on LPC43_AUTONEG
+	---help---
+		Different PHYs present speed and mode information in different ways.  Some
+		will present separate information for speed and mode (this is the default).
+		Those PHYs, for example, may provide a 10/100 Mbps indication and a separate
+		full/half duplex indication. This options selects an alternative representation
+		where speed and mode information are combined.  This might mean, for example,
+		separate bits for 10HD, 100HD, 10FD and 100FD.
+
+config LPC43_PHYSR_SPEED
+	hex "PHY Speed Mask"
+	depends on LPC43_AUTONEG && !LPC43_PHYSR_ALTCONFIG
+	---help---
+		This must be provided if LPC43_AUTONEG is defined.  This provides bit mask
+		for isolating the 10 or 100MBps speed indication.
+
+config LPC43_PHYSR_100MBPS
+	hex "PHY 100Mbps Speed Value"
+	depends on LPC43_AUTONEG && !LPC43_PHYSR_ALTCONFIG
+	---help---
+		This must be provided if LPC43_AUTONEG is defined.  This provides the value
+		of the speed bit(s) indicating 100MBps speed.
+
+config LPC43_PHYSR_MODE
+	hex "PHY Mode Mask"
+	depends on LPC43_AUTONEG && !LPC43_PHYSR_ALTCONFIG
+	---help---
+		This must be provided if LPC43_AUTONEG is defined.  This provide bit mask
+		for isolating the full or half duplex mode bits.
+
+config LPC43_PHYSR_FULLDUPLEX
+	hex "PHY Full Duplex Mode Value"
+	depends on LPC43_AUTONEG && !LPC43_PHYSR_ALTCONFIG
+	---help---
+		This must be provided if LPC43_AUTONEG is defined.  This provides the
+		value of the mode bits indicating full duplex mode.
+
+config LPC43_PHYSR_ALTMODE
+	hex "PHY Mode Mask"
+	depends on LPC43_AUTONEG && LPC43_PHYSR_ALTCONFIG
+	---help---
+		This must be provided if LPC43_AUTONEG is defined.  This provide bit mask
+		for isolating the speed and full/half duplex mode bits.
+
+config LPC43_PHYSR_10HD
+	hex "10MBase-T Half Duplex Value"
+	depends on LPC43_AUTONEG && LPC43_PHYSR_ALTCONFIG
+	---help---
+		This must be provided if LPC43_AUTONEG is defined.  This is the value
+		under the bit mask that represents the 10Mbps, half duplex setting.
+
+config LPC43_PHYSR_100HD
+	hex "100Base-T Half Duplex Value"
+	depends on LPC43_AUTONEG && LPC43_PHYSR_ALTCONFIG
+	---help---
+		This must be provided if LPC43_AUTONEG is defined.  This is the value
+		under the bit mask that represents the 100Mbps, half duplex setting.
+
+config LPC43_PHYSR_10FD
+	hex "10Base-T Full Duplex Value"
+	depends on LPC43_AUTONEG && LPC43_PHYSR_ALTCONFIG
+	---help---
+		This must be provided if LPC43_AUTONEG is defined.  This is the value
+		under the bit mask that represents the 10Mbps, full duplex setting.
+
+config LPC43_PHYSR_100FD
+	hex "100Base-T Full Duplex Value"
+	depends on LPC43_AUTONEG && LPC43_PHYSR_ALTCONFIG
+	---help---
+		This must be provided if LPC43_AUTONEG is defined.  This is the value
+		under the bit mask that represents the 100Mbps, full duplex setting.
+
+config LPC43_RMII
+	bool
+	default y if !LPC43_MII
+
+config LPC43_ETHERNET_REGDEBUG
+	bool "Register-Level Debug"
+	default n
+	depends on DEBUG
+	---help---
+		Enable very low-level register access debug.  Depends on DEBUG.
+
+endmenu # Ethernet MAC configuration
+endif # LPC43_ETHERNET
+
+menu "RS-485 Configuration"
+if LPC43_USART0
+
+config USART0_RS485MODE
+	bool "RS-485 on USART0"
+	default n
+	---help---
+		Enable RS-485 interface on USART0.
+
+config USART0_RS485_DTRDIR
+	bool "USART0 DTR for DIR"
+	default n
+	---help---
+		Use the USART DTR pin for the DIR pin
+
+endif # LPC43_USART0
+
+if LPC43_UART1
+
+config UART1_RS485MODE
+	bool "RS-485 on UART1"
+	default n
+	---help---
+		Enable RS-485 interface on USRT1.
+
+config UART1_RS485_DTRDIR
+	bool "UART1 DTR for DIR"
+	default n
+	---help---
+		Use the UART DTR pin for the DIR pin
+
+endif # LPC43_USART0
+
+if LPC43_USART2
+
+config USART2_RS485MODE
+	bool "RS-485 on USART2"
+	default n
+	---help---
+		Enable RS-485 interface on USART2.
+
+config USART2_RS485_DTRDIR
+	bool "USART2 DTR for DIR"
+	default n
+	---help---
+		Use the USART DTR pin for the DIR pin
+
+endif # LPC43_USART2
+
+if LPC43_USART3
+
+config USART3_RS485MODE
+	bool "RS-485 on USART3"
+	default n
+	---help---
+		Enable RS-485 interface on USART3.
+
+config USART3_RS485_DTRDIR
+	bool "USART3 DTR for DIR"
+	default n
+	---help---
+		Use the USART DTR pin for the DIR pin
+
+endif # LPC43_USART3
+endmenu # RS-485 Configuration
+
+if LPC43_I2C0
+menu "I2C Configution"
+
+config LPC43_I2C0_SUPERFAST
+	bool "I2C0 super fast mode"
+	default n
+	depends on LPC43_I2C0
+
+endmenu # I2C Configution
+endif # LPC43_I2C0
+
+if LPC43_USBOTG && USBHOST
+menu "USB host controller driver (HCD) options"
+
+config LPC43_EHCI_NQHS
+	int "Number of Queue Head (QH) structures"
+	default 4
+	---help---
+		Configurable number of Queue Head (QH) structures.  The default is
+		one per Root hub port plus one for EP0 (4).
+
+config LPC43_EHCI_NQTDS
+	int "Number of Queue Element Transfer Descriptor (qTDs)"
+	default 6
+	---help---
+		Configurable number of Queue Element Transfer Descriptor (qTDs).
+		The default is one per root hub plus three from EP0 (6).
+
+config LPC43_EHCI_BUFSIZE
+	int "Size of one request/descriptor buffer"
+	default 128
+	---help---
+		The size of one request/descriptor buffer in bytes.  The TD buffe
+		size must be an even number of 32-bit words and must be large enough
+		to hangle the largest transfer via a SETUP request.
+
+config LPC43_EHCI_PREALLOCATE
+	bool "Preallocate descriptor pool"
+	default y
+	---help---
+		Select this option to pre-allocate EHCI queue and descriptor
+		structure pools in .bss.  Otherwise, these pools will be
+		dynamically allocated using kmm_memalign().
+
+endmenu # USB host controller driver (HCD) options
+endif # LPC43_USBOTG && USBHOST
+
+if LPC43_USBOTG && USBHOST
+
+menu "USB host controller driver (HCD) options"
+
+config LPC43_EHCI_NQHS
+	int "Number of Queue Head (QH) structures"
+	default 4
+	---help---
+		Configurable number of Queue Head (QH) structures.  The default is
+		one per Root hub port plus one for EP0 (4).
+
+config LPC43_EHCI_NQTDS
+	int "Number of Queue Element Transfer Descriptor (qTDs)"
+	default 6
+	---help---
+		Configurable number of Queue Element Transfer Descriptor (qTDs).
+		The default is one per root hub plus three from EP0 (6).
+
+config LPC43_EHCI_BUFSIZE
+	int "Size of one request/descriptor buffer"
+	default 128
+	---help---
+		The size of one request/descriptor buffer in bytes.  The TD buffe
+		size must be an even number of 32-bit words and must be large enough
+		to hangle the largest transfer via a SETUP request.
+
+config LPC43_EHCI_PREALLOCATE
+	bool "Preallocate descriptor pool"
+	default y
+	---help---
+		Select this option to pre-allocate EHCI queue and descriptor
+		structure pools in .bss.  Otherwise, these pools will be
+		dynamically allocated using kmm_memalign().
+
+endmenu # USB host controller driver (HCD) options
+endif # LPC43_USBOTG && USBHOST
+
+if LPC43_USB0 || LPC43_USB1
+
+menu "USB device controller driver (DCD) options"
+
+config LPC43_USB0DEV_NOVBUS
+	bool "No USB0 VBUS sensing"
+	default n
+	depends on LPC43_USB0 && USBDEV
+
+config LPC43_USB1_ULPI
+	bool "USB1 with ULPI"
+	default n
+	depends on LPC43_USB1
+
+config LPC43_USB1DEV_NOVBUS
+	bool "No USB1 VBUS sensing"
+	default n
+	depends on LPC43_USB1 && USBDEV
+
+endmenu # USB device controller driver (DCD) options
+endif # LPC43_USB0 || LPC43_USB1

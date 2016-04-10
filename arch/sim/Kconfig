@@ -1,0 +1,259 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_SIM
+comment "Simulation Configuration Options"
+
+choice
+	prompt "Host CPU Type"
+	default HOST_X86_64
+
+config HOST_X86_64
+	bool "x86_64"
+
+config HOST_X86
+	bool "x86"
+
+endchoice # Host CPU Type
+
+config SIM_M32
+	bool "Build 32-bit simulation on 64-bit machine"
+	default n
+	depends on HOST_X86_64
+	---help---
+		Simulation context switching is based on logic like setjmp and longjmp.  This
+		context switching is only available for 32-bit targets.  On 64-bit machines,
+		this context switching will fail.
+
+		The workaround on 64-bit machines for now is to build for a 32-bit target on the
+		64-bit machine.  The workaround for this issue has been included in NuttX 6.15 and
+		beyond.  For thoses versions, you must add SIM_M32=y to the .config file in
+		order to enable building a 32-bit image on a 64-bit platform.
+
+config SIM_CYGWIN_DECORATED
+	bool "Decorated Cygwin names"
+	default n
+	depends on WINDOWS_CYGWIN
+	---help---
+		Older versions of Cygwin toolsdecorated C symbol names by adding an
+		underscore to the beginning of the symbol name.  Newer versions of
+		Cygwin do not seem to do this.
+
+		How do you know if you need this option?  You could look at the generated
+		symbol tables to see if there are underscore characters at the beginning
+		of the symbol names.  Or, if you need this option, the simulation will not
+		run:  It will crash early, probably in some function due to the failure to
+		allocate memory.
+
+choice
+	prompt "X64_64 ABI"
+	default SIM_X8664_SYSTEMV if HOST_LINUX
+	default SIM_X8664_MICROSOFT if HOST_WINDOWS
+	depends on HOST_X86_64 && !SIM_32
+
+config SIM_X8664_SYSTEMV
+	bool "System V AMD64 ABI"
+	---help---
+		The calling convention of the System V AMD64 ABI is followed on Solaris,
+		Linux, FreeBSD, Mac OS X, and other UNIX-like or POSIX-compliant operating
+		systems. The first six integer or pointer arguments are passed in registers
+		RDI, RSI, RDX, RCX, R8, and R9, while XMM0, XMM1, XMM2, XMM3, XMM4, XMM5,
+		XMM6 and XMM7 are used for floating point arguments. For system calls, R10
+		is used instead of RCX.   As in the Microsoft x64 calling convention,
+		additional arguments are passed on the stack and the return value is stored
+		in RAX.
+
+		Registers RBP, RBX, and R12-R15 are callee-save registers; all others must
+		be saved by the caller if they wish to preserve their values.
+
+		Unlike the Microsoft calling convention, a shadow space is not provided; on
+		function entry, the return address is adjacent to the seventh integer argument
+		on the stack.
+
+config SIM_X8664_MICROSOFT
+	bool "Microsoft x64 calling convention"
+	---help---
+		The Microsoft x64 calling convention is followed on Microsoft Windows and
+		pre-boot UEFI (for long mode on x86-64). It uses registers RCX, RDX, R8,
+		R9 for the first four integer or pointer arguments (in that order), and
+		XMM0, XMM1, XMM2, XMM3 are used for floating point arguments. Additional
+		arguments are pushed onto the stack (right to left). Integer return
+		values (similar to x86) are returned in RAX if 64 bits or less. Floating
+		point return values are returned in XMM0. Parameters less than 64 bits
+		long are not zero extended; the high bits are not zeroed.
+
+endchoice
+
+config SIM_WALLTIME
+	bool "Execution simulation in near real-time"
+	default n
+	---help---
+		NOTE:  In order to facility fast testing, the sim target's IDLE loop, by default,
+		calls the system timer "interrupt handler" as fast as possible.  As a result, there
+		really are no noticeable delays when a task sleeps.  However, the task really does
+		sleep -- but the time scale is wrong.  If you want behavior that is closer to
+		normal timing, then you can define SIM_WALLTIME=y in your configuration
+		file.  This configuration setting will cause the sim target's IDLE loop to delay
+		on each call so that the system "timer interrupt" is called at a rate approximately
+		correct for the system timer tick rate.  With this definition in the configuration,
+		sleep() behavior is more or less normal.
+
+config SIM_LCDDRIVER
+	bool "Build a simulated LCD driver"
+	default y
+	depends on NX && NX_LCDDRIVER
+	---help---
+		Build a simulated LCD driver"
+
+config SIM_FRAMEBUFFER
+	bool "Build a simulated frame buffer driver"
+	default n
+	depends on !NX_LCDDRIVER
+	---help---
+		Build a simulated frame buffer driver"
+
+if SIM_FRAMEBUFFER
+
+config SIM_X11FB
+	bool "Use X11 window"
+	default n
+	---help---
+		Use an X11 graphics window to simulate the graphics device"
+
+config SIM_X11NOSHM
+	bool "Don't use shared memory with X11"
+	default n
+	depends on SIM_X11FB
+	---help---
+		Don't use shared memory with the X11 graphics device emulation."
+
+config SIM_FBHEIGHT
+	int "Display height"
+	default 240
+	---help---
+		Simulated display height.  Default: 240
+
+config SIM_FBWIDTH
+	int "Display width"
+	default 320 if SIM_LCDDRIVER
+	default 480 if SIM_FRAMEBUFFER
+	---help---
+		Simulated width of the display.  Default: 320 or 480
+
+config SIM_FBBPP
+	int "Pixel depth in bits"
+	default 8
+	---help---
+		Pixel depth in bits.  Valid choices are 4, 8, 16, 24, or 32.
+		If you use the X11 display emulation, the selected BPP must match the BPP
+		of your graphics hardware (probably 32 bits).  Default: 8
+
+endif # SIM_FRAMEBUFFER
+
+if SIM_X11FB && INPUT
+choice
+	prompt "X11 Simulated Input Device"
+	default SIM_NOINPUT
+
+config SIM_TOUCHSCREEN
+	bool "X11 mouse-based touchscreen emulation"
+	---help---
+		Support an X11 mouse-based touchscreen emulation.  Also needs INPUT=y
+
+config SIM_AJOYSTICK
+	bool "X11 mouse-based analog joystick emulation"
+	---help---
+		Support an X11 mouse-based anallog joystick emulation.  Also needs INPUT=y`
+
+config SIM_NOINPUT
+	bool "No input device"
+
+endchoice # X11 Simulated Input Device
+endif # SIM_X11FB && INPUT
+
+config SIM_TCNWAITERS
+	bool "Maximum number poll() waiters"
+	default 4
+	depends on !POLL_DISABLE && SIM_TOUCHSCREEN
+	---help---
+		The maximum number of threads that can be waiting on poll() for a touchscreen event.
+		Default: 4
+
+config SIM_SPIFLASH
+	bool "Simulated SPI FLASH with SMARTFS"
+	default n
+	select FS_SMARTFS
+	select MTD_SMART
+	---help---
+		Adds a simulated SPI FLASH that responds to standard M25 style
+		commands on the SPI bus.
+
+choice
+	prompt "Simulated SPI FLASH Size"
+	default SIM_SPIFLASH_1M
+	depends on SIM_SPIFLASH
+
+config SIM_SPIFLASH_1M
+	bool "1 MBit (128K Byte)"
+
+config SIM_SPIFLASH_8M
+	bool "8 MBit (1M Byte)"
+
+config SIM_SPIFLASH_32M
+	bool "32 MBit (4M Byte)"
+
+config SIM_SPIFLASH_64M
+	bool "64 MBit (8M Byte)"
+
+config SIM_SPIFLASH_128M
+	bool "128 MBit (16M Byte)"
+
+endchoice
+
+config SIM_SPIFLASH_MANUFACTURER
+	hex "Hex ID of the FLASH manufacturer code"
+	default 0x20
+	depends on SIM_SPIFLASH
+	---help---
+		Allows the simulated FLASH Manufacturer ID to be set.
+
+config SIM_SPIFLASH_MEMORY_TYPE
+	hex "Hex ID of the FLASH Memory Type code"
+	default 0x20
+	depends on SIM_SPIFLASH
+	---help---
+		Allows the simulated FLASH Memory Type code to be set.
+
+config SIM_SPIFLASH_SECTORSIZE
+	int "FLASH Sector Erase Size"
+	default 65536
+	depends on SIM_SPIFLASH
+	---help---
+		Sets the large sector erase size that the part simulates.
+		This driver simulates SPI devices that have both a large
+		sector erase as well as a "sub-sector" (per the datasheet)
+		erase size (typically 4K bytes).
+
+config SIM_SPIFLASH_SUBSECTORSIZE
+	int "FLASH Sub-Sector Erase Size"
+	default 4096
+	depends on SIM_SPIFLASH
+	---help---
+		Sets the smaller sub-sector erase size supported by the
+		FLASH emulation
+
+config SIM_SPIFLASH_PAGESIZE
+	int "FLASH Write / Program Page Size"
+	default 256
+	depends on SIM_SPIFLASH
+	---help---
+		Sets the size of a page program operation.  The page size
+		represents the maximum number of bytes that can be sent
+		for a program operation.  If more bytes than this are
+		sent on a single Page Program, then the address will
+		"wrap" causing the initial data sent to be overwritten.
+		This is consistent with standard SPI FLASH operation.
+
+endif

@@ -1,0 +1,162 @@
+############################################################################
+# arch/arm/src/armv7-r/Toolchain.defs
+#
+#   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+#   Author: Gregory Nutt <gnutt@nuttx.org>
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+#
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in
+#    the documentation and/or other materials provided with the
+#    distribution.
+# 3. Neither the name NuttX nor the names of its contributors may be
+#    used to endorse or promote products derived from this software
+#    without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+# COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+# OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+# AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+#
+############################################################################
+
+# Setup for the selected toolchain
+
+#
+# Select and allow the selected toolchain to be overridden by a command-line
+#selection.
+#
+
+ifeq ($(filter y, \
+      $(CONFIG_ARMV7R_TOOLCHAIN_BUILDROOT) \
+    ),y)
+  CONFIG_ARMV7R_TOOLCHAIN ?= BUILDROOT
+endif
+
+ifeq ($(filter y, \
+      $(CONFIG_ARMV7R_TOOLCHAIN_CODESOURCERYL) \
+    ),y)
+  CONFIG_ARMV7R_TOOLCHAIN ?= CODESOURCERYL
+endif
+
+ifeq ($(filter y, \
+      $(CONFIG_ARMV7R_TOOLCHAIN_CODESOURCERYW) \
+    ),y)
+  CONFIG_ARMV7R_TOOLCHAIN ?= CODESOURCERYW
+endif
+
+ifeq ($(filter y, \
+      $(CONFIG_ARMV7R_TOOLCHAIN_DEVKITARM) \
+    ),y)
+  CONFIG_ARMV7R_TOOLCHAIN ?= DEVKITARM
+endif
+
+ifeq ($(filter y, \
+      $(CONFIG_ARMV7R_TOOLCHAIN_GNU_EABIL) \
+    ),y)
+  CONFIG_ARMV7R_TOOLCHAIN ?= GNU_EABIL
+endif
+
+ifeq ($(filter y, \
+      $(CONFIG_ARMV7R_TOOLCHAIN_GNU_EABIW) \
+    ),y)
+  CONFIG_ARMV7R_TOOLCHAIN ?= GNU_EABIW
+endif
+
+#
+# Supported toolchains
+#
+# Each toolchain definition should set:
+#
+#  CROSSDEV         The GNU toolchain triple (command prefix)
+#  ARCROSSDEV       If required, an alternative prefix used when
+#                   invoking ar and nm.
+#  ARCHCPUFLAGS     CPU-specific flags selecting the instruction set
+#                   FPU options, etc.
+#  MAXOPTIMIZATION  The maximum optimization level that results in
+#                   reliable code generation.
+#
+
+ifeq ($(CONFIG_DEBUG_CUSTOMOPT),y)
+  MAXOPTIMIZATION := $(CONFIG_DEBUG_OPTLEVEL)
+endif
+
+ifeq ($(CONFIG_ENDIAN_BIG),y)
+  TARGET_ARCH := armeb
+else
+  TARGET_ARCH := arm
+endif
+
+# NuttX buildroot under Linux or Cygwin
+
+ifeq ($(CONFIG_ARMV7R_TOOLCHAIN),BUILDROOT)
+ifeq ($(CONFIG_ARMV7R_OABI_TOOLCHAIN),y)
+  CROSSDEV ?= $(TARGET_ARCH)-nuttx-elf-
+  ARCROSSDEV ?= $(TARGET_ARCH)-nuttx-elf-
+else
+  CROSSDEV ?= $(TARGET_ARCH)-nuttx-eabi-
+  ARCROSSDEV ?= $(TARGET_ARCH)-nuttx-eabi-
+endif
+  MAXOPTIMIZATION ?= -Os
+endif
+
+# CodeSourcery under Linux
+
+ifeq ($(CONFIG_ARMV7R_TOOLCHAIN),CODESOURCERYL)
+  CROSSDEV ?= $(TARGET_ARCH)-none-eabi-
+  ARCROSSDEV ?= $(TARGET_ARCH)-none-eabi-
+  MAXOPTIMIZATION ?= -O2
+endif
+
+# CodeSourcery under Windows
+
+ifeq ($(CONFIG_ARMV7R_TOOLCHAIN),CODESOURCERYW)
+  CROSSDEV ?= $(TARGET_ARCH)-none-eabi-
+  ARCROSSDEV ?= $(TARGET_ARCH)-none-eabi-
+  MAXOPTIMIZATION ?= -O2
+  ifeq ($(CONFIG_WINDOWS_CYGWIN),y)
+    WINTOOL = y
+  endif
+endif
+
+# devkitARM under Windows
+
+ifeq ($(CONFIG_ARMV7R_TOOLCHAIN),DEVKITARM)
+  CROSSDEV ?= $(TARGET_ARCH)-eabi-
+  ARCROSSDEV ?= $(TARGET_ARCH)-eabi-
+  ifeq ($(CONFIG_WINDOWS_CYGWIN),y)
+    WINTOOL = y
+  endif
+endif
+
+# Generic GNU EABI toolchain on OS X, Linux or any typical Posix system
+
+ifeq ($(CONFIG_ARMV7R_TOOLCHAIN),GNU_EABIL)
+  CROSSDEV ?= $(TARGET_ARCH)-none-eabi-
+  ARCROSSDEV ?= $(TARGET_ARCH)-none-eabi-
+  MAXOPTIMIZATION ?= -Os
+endif
+
+# Generic GNU EABI toolchain under Windows
+
+ifeq ($(CONFIG_ARMV7R_TOOLCHAIN),GNU_EABIW)
+  CROSSDEV ?= $(TARGET_ARCH)-none-eabi-
+  ARCROSSDEV ?= $(TARGET_ARCH)-none-eabi-
+  MAXOPTIMIZATION ?= -Os
+  ifeq ($(CONFIG_WINDOWS_CYGWIN),y)
+    WINTOOL = y
+  endif
+endif

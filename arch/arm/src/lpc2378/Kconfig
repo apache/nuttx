@@ -1,0 +1,191 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+comment "LPC2378 Configuration Options"
+
+choice
+	prompt "Memory Execution Mode"
+	default LPC2378_DEFAULT_MODE
+
+config LPC2378_EXTMEM_MODE
+	bool "External Memory Mode"
+	depends on EXPERIMENTAL # Not used
+	---help---
+		Code executes from external memory starting at address 0x8000:0000.
+
+config LPC2378_RAM_MODE
+	bool "RAM Memory Mode"
+	depends on EXPERIMENTAL # Not used
+	---help---
+		Code executes from on-chip RAM at address 0x4000:0000.
+
+config LPC2378_DEFAULT_MODE
+	bool "Default Memory Mode"
+	---help---
+		Executes from 0x0000:0000.  In non-default modes, the MEMAP register
+		is set override the settings of the CPU configuration pins.
+
+endchoice
+
+config LPC2378_CODE_BASE
+	hex "Execution Base Address"
+	default 0x00000000
+	---help---
+		This must match the expected address for the selected "Memory
+		Execution Address":
+
+		LPC2378_EXTMEM_MODE:  0x8000:0000
+		LPC2378_RAM_MODE:     0x4000:0000
+		LPC2378_DEFAULT_MODE: 0x0000:0000
+
+config LPC2378_PLL_SETUP
+	bool "Configure the PLL"
+	default y
+
+config LPC2378_PLL_CLKSRC
+	int "PLL clock source"
+	default 1
+	range 0 2
+	depends on LPC2378_PLL_SETUP
+	---help---
+		PLL clock source
+
+config LPC2378_MAM_SETUP
+	bool "Configure the Memory Accelerator Module (MAM)"
+	default y
+
+config LPC2378_MAMCR_VALUE
+	int "Memory accelerator mode"
+	default 1
+	range 0 2
+	---help---
+		Memory accelerator mode:
+
+		OFF		0
+		PART	1
+		FULL	2
+
+config LPC2378_MAMTIM_VALUE
+	int "Memory accelerator timing value"
+	default 3
+	---help---
+		Memory accelerator timing value
+
+config LPC2378_APBDIV_SETUP
+	bool "Configure the APB Divider"
+	default y
+	depends on EXPERIMENTAL # Not used
+
+config LPC2378_APBDIV_VALUE
+	int "APB Divisor"
+	default 1
+	depends on EXPERIMENTAL # Not used
+
+config LPC2378_EMC_SETUP
+	bool "Configure EMC"
+	default n
+	depends on EXPERIMENTAL # Not used
+
+config LPC2378_BCFG0_SETUP
+	bool "Configure BCFG0"
+	default n
+	depends on EXPERIMENTAL # Not used
+
+config LPC2378_BCFG1_SETUP
+	bool "Configure BCFG1"
+	default n
+	depends on EXPERIMENTAL # Not used
+
+config LPC2378_BCFG2_SETUP
+	bool "Configure BCFG2"
+	default n
+	depends on EXPERIMENTAL # Not used
+
+config BCFG3_SETUP
+	bool "Configure BCFG3"
+	default n
+	depends on EXPERIMENTAL # Not used
+
+config LPC2378_ADC_SETUP
+	bool "Configure ADC"
+	default y
+	depends on EXPERIMENTAL # Not used
+
+menu "LPC2378 Peripheral Support"
+
+config LPC2378_UART0
+	bool "UART0"
+	default n
+	select ARCH_HAVE_UART0
+
+config LPC2378_UART1
+	bool "UART1"
+	default n
+	select ARCH_HAVE_UART1
+
+config LPC2378_UART2
+	bool "UART2"
+	default n
+	select ARCH_HAVE_UART2
+
+config LPC2378_UART3
+	bool "UART3"
+	default n
+	select ARCH_HAVE_UART3
+
+config LPC2378_USBDEV
+	bool "USB Device"
+	default n
+	depends on USBDEV
+
+config LPC2378_I2C0
+	bool "I2C0"
+	default n
+	select I2C
+
+config LPC2378_I2C1
+	bool "I2C1"
+	default n
+	select I2C
+
+config LPC2378_I2C2
+	bool "I2C2"
+	default n
+	select I2C
+
+config LPC2378_SPI
+	bool "SPI"
+	default n
+	select SPI
+
+endmenu
+
+if LPC2378_USBDEV
+menu "LPC2378 USB Device Configuration"
+
+config LPC2378_USBDEV_DMA
+	bool "USB Device DMA Support"
+	default n
+
+config LPC2378_USBDEV_NDMADESCRIPTORS
+	int "Number of USB DMA Descriptors"
+	default 8
+	depends on LPC2378_USBDEV_DMA
+
+config LPC2378_USBDEV_EPFAST_INTERRUPT
+	bool "USB Device Fast Endpoint Interrupts"
+	default n
+
+config LPC2378_USBDEV_FRAME_INTERRUPT
+	bool "USB Device Frame Interrupts"
+	default n
+
+config LPC2378_USBDEV_REGDEBUG
+	bool "USB Device Register-Level Debug Output"
+	default n
+	depends on DEBUG
+
+endmenu
+endif

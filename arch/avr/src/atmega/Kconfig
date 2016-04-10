@@ -1,0 +1,55 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_CHIP_ATMEGA
+comment "ATMega Configuration Options"
+
+choice
+	prompt "Atmel ATmega chip selection"
+	default ARCH_CHIP_ATMEGA128
+
+config ARCH_CHIP_ATMEGA128
+	bool "ATMega128"
+	---help---
+		Atmel ATMega128 8-bit AVR.
+
+config ARCH_CHIP_ATMEGA1284P
+	bool "ATMega1284P"
+	---help---
+		Atmel ATMega1284P 8-bit AVR.
+
+config ARCH_CHIP_ATMEGA2560
+	bool "ATMega2560"
+	---help---
+		Atmel ATMega2560 8-bit AVR.
+
+endchoice # ATMega Configuration Options
+
+menu "ATMega Peripheral Selections"
+
+config AVR_USART0
+	bool "USART0"
+	select ARCH_HAVE_USART0
+
+config AVR_USART1
+	bool "USART1"
+	select ARCH_HAVE_USART1
+
+endmenu # ATMega Peripheral Selections
+
+menu "Low level USART driver options"
+	depends on AVR_USART0 || AVR_USART1
+
+config SERIAL_TERMIOS
+	bool "Serial driver TERMIOS supported"
+	depends on AVR_USART0 || AVR_USART1
+	default n
+	---help---
+		Serial driver supports termios.h interfaces (tcsetattr, tcflush, etc.).
+		If this is not defined, then the terminal settings (baud, parity, etc).
+		are not configurable at runtime; serial streams cannot be flushed, etc..
+
+endmenu
+endif

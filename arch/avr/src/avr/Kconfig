@@ -1,0 +1,86 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_FAMILY_AVR
+comment "AVR Configuration Options"
+
+choice
+	prompt "Toolchain"
+	default AVR_WINAVR_TOOLCHAIN if HOST_WINDOWS
+	default AVR_BUILDROOT_TOOLCHAIN if HOST_LINUX
+	default AVR_CROSSPACK_TOOLCHAIN if HOST_OSX
+
+config AVR_WINAVR_TOOLCHAIN
+	bool "WinAVR"
+	depends on HOST_WINDOWS
+	---help---
+		For Cygwin development environment on Windows machines, you
+		can use WinAVR: http://sourceforge.net/projects/winavr/files/
+
+		It is assumed in some places that WinAVR is installed at
+		C:/WinAVR. Edit the setenv.sh file if this is not the case.
+
+		WARNING: There is an incompatible version of cygwin.dll in
+		the WinAVR/bin directory! Make sure that the path to the
+		correct cygwin.dll file precedes the path to the WinAVR
+		binaries!
+
+config AVR_ATMEL_AVR_TOOLCHAIN
+	bool "Atmel AVR Toolchain"
+	depends on HOST_WINDOWS
+	---help---
+                Atmel provides GNU Toolchain for AVR development. It can
+                be obtained by installing Atmel Studio 6 and later or
+                as standalone package from Atmel.
+
+config AVR_LINUXGCC_TOOLCHAIN
+	bool "Linux GCC"
+	depends on HOST_LINUX
+	---help---
+		For Linux, there are widely available avr-gcc packages. On
+		Ubuntu, use: sudo apt-get install gcc-avr gdb-avr avr-libc
+
+config AVR_CROSSPACK_TOOLCHAIN
+	bool "CrossPack-AVR"
+	depends on HOST_OSX
+	---help---
+		For OS X, the AVR CrossPack toolchain is supported:
+		http://www.obdev.at/products/crosspack/index.html
+
+		It is assumed that /usr/local/CrossPack-AVR/bin is on the
+		user's path. Edit the setenv.sh file if this is not the
+		case.
+
+config AVR_BUILDROOT_TOOLCHAIN
+	bool "Buildroot"
+	depends on HOST_LINUX || HOST_WINDOWS
+	---help---
+		There is a DIY buildroot version for the AVR boards here:
+		http://sourceforge.net/projects/nuttx/files/buildroot/. See
+		the following section for details on building this toolchain.
+
+		It is assumed in some places that buildroot toolchain is
+		available at ../buildroot/build_avr. Edit the setenv.sh
+		file if this is not the case.
+
+endchoice # Toolchain
+
+menu "Atmel AVR Toolchain options"
+	depends on AVR_ATMEL_AVR_TOOLCHAIN
+
+config AVR_HAS_MEMX_PTR
+	bool "Enable in-flash static const stings"
+	depends on AVR_ATMEL_AVR_TOOLCHAIN
+	select ARCH_DEBUG_H
+	default y
+	---help---
+		Enabling this option (recommended) will place all constant
+		strings used for debugging and assertion in program memory
+		and allow the corresponding routines to get the strings
+		directly from there. This will dramatically decrease amount
+		of RAM needed to hold this static data.
+
+endmenu # Atmel AVR Toolchain options
+endif # ARCH_FAMILY_AVR

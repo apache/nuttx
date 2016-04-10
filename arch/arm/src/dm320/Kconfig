@@ -1,0 +1,22 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_CHIP_DM320
+comment "DM320 Configuration Options"
+
+menu "DM320 Peripheral Selections"
+
+config DM320_UART0
+	bool
+	default y
+	select ARCH_HAVE_UART0
+
+config DM320_UART1
+	bool
+	default y
+	select ARCH_HAVE_UART1
+
+endmenu # DM320 Peripheral Selections
+endif # ARCH_CHIP_DM320

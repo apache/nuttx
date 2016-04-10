@@ -1,0 +1,254 @@
+############################################################################
+# arch/mips/src/mips32/Toolchain.defs
+#
+#   Copyright (C) 2012-2013, 2015 Gregory Nutt. All rights reserved.
+#   Author: Gregory Nutt <gnutt@nuttx.org>
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+#
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in
+#    the documentation and/or other materials provided with the
+#    distribution.
+# 3. Neither the name NuttX nor the names of its contributors may be
+#    used to endorse or promote products derived from this software
+#    without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+# COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+# OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+# AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+#
+############################################################################
+
+# Setup for the selected toolchain
+
+#
+# Handle old-style chip-specific toolchain names in the absence of
+# a new-style toolchain specification, force the selection of a single
+# toolchain and allow the selected toolchain to be overridden by a
+# command-line selection.
+#
+
+ifeq ($(filter y, \
+      $(CONFIG_MIPS32_TOOLCHAIN_PINGUINOL) \
+      $(CONFIG_MIPS32_TOOLCHAIN_GNU_ELF) \
+    ),y)
+  CONFIG_MIPS32_TOOLCHAIN ?= GNU_ELF
+endif
+
+ifeq ($(filter y, \
+      $(CONFIG_MIPS32_TOOLCHAIN_MICROCHIPL_XC32) \
+    ),y)
+  CONFIG_MIPS32_TOOLCHAIN ?= MICROCHIPL_XC32
+endif
+
+ifeq ($(filter y, \
+      $(CONFIG_MIPS32_TOOLCHAIN_MICROCHIPL) \
+    ),y)
+  CONFIG_MIPS32_TOOLCHAIN ?= MICROCHIPL
+endif
+
+ifeq ($(filter y, \
+      $(CONFIG_MIPS32_TOOLCHAIN_MICROCHIPL_LITE) \
+    ),y)
+  CONFIG_MIPS32_TOOLCHAIN ?= MICROCHIPL_LITE
+endif
+
+ifeq ($(filter y, \
+      $(CONFIG_MIPS32_TOOLCHAIN_MICROCHIPW_XC32) \
+    ),y)
+  CONFIG_MIPS32_TOOLCHAIN ?= MICROCHIPW_XC32
+endif
+
+ifeq ($(filter y, \
+      $(CONFIG_MIPS32_TOOLCHAIN_MICROCHIPW) \
+    ),y)
+  CONFIG_MIPS32_TOOLCHAIN ?= MICROCHIPW
+endif
+
+ifeq ($(filter y, \
+      $(CONFIG_MIPS32_TOOLCHAIN_MICROCHIPW_LITE) \
+    ),y)
+  CONFIG_MIPS32_TOOLCHAIN ?= MICROCHIPW_LITE
+endif
+
+ifeq ($(filter y, \
+      $(CONFIG_MIPS32_TOOLCHAIN_MICROCHIPOPENL) \
+    ),y)
+  CONFIG_MIPS32_TOOLCHAIN ?= MICROCHIPOPENL
+endif
+
+ifeq ($(filter y, \
+      $(CONFIG_MIPS32_TOOLCHAIN_PINGUINOW) \
+    ),y)
+  CONFIG_MIPS32_TOOLCHAIN ?= PINGUINOW
+endif
+
+#
+# Supported toolchains
+#
+# Each toolchain definition should set:
+#
+#  CROSSDEV         The GNU toolchain triple (command prefix)
+#  ARCROSSDEV       If required, an alternative prefix used when
+#                   invoking ar and nm.
+#  ARCHCPUFLAGS     CPU-specific flags selecting the instruction set
+#                   FPU options, etc.
+#  MAXOPTIMIZATION  The maximum optimization level that results in
+#                   reliable code generation.
+#
+
+ifeq ($(CONFIG_DEBUG_CUSTOMOPT),y)
+  MAXOPTIMIZATION := $(CONFIG_DEBUG_OPTLEVEL)
+endif
+
+# Pick correct MIPS architecture selection
+
+ifeq ($(CONFIG_ARCH_MIPS_M14K),y)
+  MIPS_MARCH = m14k
+  MIPS_MPROCESSOR = elf32pic32mz
+else
+  MIPS_MARCH = 24kc
+  MIPS_MPROCESSOR = elf32pic32mx
+endif
+
+# Handle builds for the microMIPS ISA.  Interlinking may be
+# necessary to integrate with MIPS32 ISA libraries.
+
+ifeq ($(CONFIG_MIPS_MICROMIPS),y)
+# MIPS_MICROMIPS = -mmicromips
+# MIPS_MICROMIPS = -mmicromips -minterlink-mips16 -mno-jals
+  MIPS_MICROMIPS = -mmicromips -minterlink-compressed
+else
+  MIPS_MICROMIPS =
+endif
+
+# Generic GNU mip32 toolchain on OS X or Linux
+# including Pinguino mips-elf toolchain
+
+ifeq ($(CONFIG_MIPS32_TOOLCHAIN),GNU_ELF)
+  CROSSDEV ?= mips-elf-
+  MAXOPTIMIZATION ?= -O2
+  ARCHCPUFLAGS = -mlong32 -membedded-data -msoft-float -march=$(MIPS_MARCH) $(MIPS_MICROMIPS) -EL
+  ARCHPICFLAGS = -fpic -membedded-pic
+  LDFLAGS += -nostartfiles -nodefaultlibs
+  LDSCRIPT = mips-elf-debug.ld
+endif
+
+# Microchip XC32 toolchain under Linux
+
+ifeq ($(CONFIG_MIPS32_TOOLCHAIN),MICROCHIPL_XC32)
+  CROSSDEV ?= xc32-
+ifeq ($(CONFIG_MIPS32_TOOLCHAIN_MICROCHIP_XC32_LICENSED),y)
+  MAXOPTIMIZATION ?= -O2
+endif
+  ARCHCPUFLAGS = -mprocessor=$(MIPS_MPROCESSOR) -march=$(MIPS_MARCH) -EL $(MIPS_MICROMIPS) -msmart-io=0
+  LDFLAGS += -nostartfiles -nodefaultlibs
+  LDSCRIPT = xc32-debug.ld
+endif
+
+# Microchip C32 toolchain under Linux
+
+ifeq ($(CONFIG_MIPS32_TOOLCHAIN),MICROCHIPL)
+  CROSSDEV ?= pic32-
+  # CROSSDEV ?= xc32-
+  MAXOPTIMIZATION ?= -O2
+  ARCHCPUFLAGS = -mprocessor=$(MIPS_MPROCESSOR) $(MIPS_MICROMIPS) -mno-float -mlong32 -membedded-data
+  ARCHPICFLAGS = -fpic -membedded-pic
+  LDFLAGS += -nostartfiles -nodefaultlibs
+  LDSCRIPT = xc32-debug.ld
+endif
+
+# Microchip XC32 toolchain under Windows
+
+ifeq ($(CONFIG_MIPS32_TOOLCHAIN),MICROCHIPW_XC32)
+  CROSSDEV ?= xc32-
+  ifeq ($(CONFIG_WINDOWS_CYGWIN),y)
+    WINTOOL = y
+  endif
+ifeq ($(CONFIG_MIPS32_TOOLCHAIN_MICROCHIP_XC32_LICENSED),y)
+  MAXOPTIMIZATION ?= -O2
+endif
+  ARCHCPUFLAGS = -mprocessor=$(MIPS_MPROCESSOR) -march=$(MIPS_MARCH) -EL $(MIPS_MICROMIPS) -msmart-io=0
+  LDFLAGS += -nostartfiles -nodefaultlibs
+  LDSCRIPT = xc32-debug.ld
+endif
+
+# Microchip C32 toolchain under Windows
+
+ifeq ($(CONFIG_MIPS32_TOOLCHAIN),MICROCHIPW)
+  CROSSDEV ?= pic32-
+  ifeq ($(CONFIG_WINDOWS_CYGWIN),y)
+    WINTOOL = y
+  endif
+  MAXOPTIMIZATION ?= -O2
+  ARCHCPUFLAGS = -mprocessor=$(MIPS_MPROCESSOR) $(MIPS_MICROMIPS) -mno-float -mlong32 -membedded-data
+  ARCHPICFLAGS = -fpic -membedded-pic
+  LDFLAGS += -nostartfiles -nodefaultlibs
+  LDSCRIPT = c32-debug.ld
+endif
+
+# Microchip C32 toolchain under Linux
+
+ifeq ($(CONFIG_MIPS32_TOOLCHAIN),MICROCHIPL_LITE)
+  CROSSDEV ?= pic32-
+  # MAXOPTIMIZATION ?= -O2
+  ARCHCPUFLAGS = -mprocessor=$(MIPS_MPROCESSOR) $(MIPS_MICROMIPS) -mno-float -mlong32 -membedded-data
+  ARCHPICFLAGS = -fpic -membedded-pic
+  LDFLAGS += -nostartfiles -nodefaultlibs
+  LDSCRIPT = xc32-debug.ld
+endif
+
+# Microchip C32 toolchain under Windows
+
+ifeq ($(CONFIG_MIPS32_TOOLCHAIN),MICROCHIPW_LITE)
+  CROSSDEV ?= pic32-
+  # CROSSDEV ?= xc32-
+  ifeq ($(CONFIG_WINDOWS_CYGWIN),y)
+    WINTOOL = y
+  endif
+  # MAXOPTIMIZATION ?= -O2
+  ARCHCPUFLAGS = -mprocessor=$(MIPS_MPROCESSOR) $(MIPS_MICROMIPS) -mno-float -mlong32 -membedded-data
+  ARCHPICFLAGS = -fpic -membedded-pic
+  LDFLAGS += -nostartfiles -nodefaultlibs
+  LDSCRIPT = c32-debug.ld
+endif
+
+# microchipOpen toolchain under Linux
+
+ifeq ($(CONFIG_MIPS32_TOOLCHAIN),MICROCHIPOPENL)
+  CROSSDEV ?= mypic32-
+  # MAXOPTIMIZATION ?= -O2
+  ARCHCPUFLAGS = -mprocessor=$(MIPS_MPROCESSOR) $(MIPS_MICROMIPS) -mno-float -mlong32 -membedded-data
+  ARCHPICFLAGS = -fpic -membedded-pic
+  LDFLAGS += -nostartfiles -nodefaultlibs
+  LDSCRIPT = c32-debug.ld
+endif
+
+# Pinguino mips-elf toolchain under Windows
+
+ifeq ($(CONFIG_MIPS32_TOOLCHAIN),PINGUINOW)
+  #CROSSDEV ?= mips-
+  CROSSDEV ?= p32-
+  ifeq ($(CONFIG_WINDOWS_CYGWIN),y)
+    WINTOOL = y
+  endif
+  MAXOPTIMIZATION ?= -O2
+  ARCHCPUFLAGS = -mlong32 -membedded-data -msoft-float -march=$(MIPS_MARCH) $(MIPS_MICROMIPS) -EL
+  ARCHPICFLAGS = -fpic -membedded-pic
+  LDFLAGS += -nostartfiles -nodefaultlibs
+  LDSCRIPT = mips-elf-debug.ld
+endif

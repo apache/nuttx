@@ -1,0 +1,126 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_CHIP_IMX6
+
+menu "iMX.6 Chip Selection"
+
+choice
+	prompt "iMX.6 Core Configuration"
+	default IMX6_6QUAD
+
+config ARCH_CHIP_IMX6_6SOLOLITE
+	bool "i.MX 6SoloLite"
+	select ARMV7A_HAVE_GICv2
+	select ARMV7A_HAVE_GTM
+	select ARMV7A_HAVE_PTM
+
+config ARCH_CHIP_IMX6_6SOLO
+	bool "i.MX 6Solo"
+	select ARMV7A_HAVE_GICv2
+	select ARMV7A_HAVE_GTM
+	select ARMV7A_HAVE_PTM
+
+config ARCH_CHIP_IMX6_6DUALLITE
+	bool "i.MX 6DualLite"
+	select ARCH_HAVE_MULTICPU
+	select ARMV7A_HAVE_GICv2
+	select ARMV7A_HAVE_GTM
+	select ARMV7A_HAVE_PTM
+
+config ARCH_CHIP_IMX6_6DUAL
+	bool "i.MX 6Dual"
+	select ARCH_HAVE_MULTICPU
+	select ARMV7A_HAVE_GICv2
+	select ARMV7A_HAVE_GTM
+	select ARMV7A_HAVE_PTM
+
+config ARCH_CHIP_IMX6_6QUAD
+	bool "i.MX 6Quad"
+	select ARCH_HAVE_MULTICPU
+	select ARMV7A_HAVE_GICv2
+	select ARMV7A_HAVE_GTM
+	select ARMV7A_HAVE_PTM
+
+endchoice # iMX.6 Chip Selection
+
+config IMX6_HAVE_HDCP
+	bool "HDCP enabled"
+	default n
+	---help---
+		HDCP - High-bandwidth Digital Content Protection
+
+endmenu # "iMX.6 Chip Selection"
+
+menu "iMX.6 Peripheral Selection"
+
+config IMX6_UART1
+	bool "UART1"
+	default n
+	select ARCH_HAVE_UART1
+
+config IMX6_UART2
+	bool "UART2"
+	default n
+	select ARCH_HAVE_UART2
+
+config IMX6_UART3
+	bool "UART3"
+	default n
+	select ARCH_HAVE_UART3
+
+config IMX6_UART4
+	bool "UART4"
+	default n
+	select ARCH_HAVE_UART4
+
+config IMX6_UART5
+	bool "UART5"
+	default n
+	select ARCH_HAVE_UART5
+
+config IMX6_SPI1
+	bool "SPI1"
+	default n
+	select SPI
+
+config IMX6_SPI2
+	bool "SPI2"
+	default n
+	select SPI
+
+endmenu # iMX Peripheral Selection
+
+config IMX_DDR_SIZE
+	int "Installed DRAM size (bytes)"
+	default 268435456
+
+choice
+	prompt "i.MX6 Boot Configuration"
+	default IMX6_BOOT_SDRAM
+	---help---
+		The startup code needs to know if the code is running from internal SRAM,
+		external SRAM, or CS0-3 in order to initialize properly.  Note that the
+		boot device is not specified for cases where the code is copied into
+		RAM.
+
+config IMX6_BOOT_OCRAM
+	bool "Running from internal OCRAM"
+	select BOOT_RUNFROMISRAM
+
+config IMX6_BOOT_SDRAM
+	bool "Running from external SDRAM"
+	select BOOT_RUNFROMSDRAM
+
+config IMX6_BOOT_NOR
+	bool "Running from external NOR FLASH"
+	select BOOT_RUNFROMFLASH
+
+config IMX6_BOOT_SRAM
+	bool "Running from external SRAM"
+	select BOOT_RUNFROMEXTSRAM
+
+endchoice # i.MX6 Boot Configuration
+endif # ARCH_CHIP_IMX6

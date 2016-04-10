@@ -1,0 +1,76 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_MIPS32
+comment "MIPS32 Configuration Options"
+
+choice
+	prompt "Toolchain Selection"
+	default MIPS32_TOOLCHAIN_MICROCHIPW_LITE if HOST_WINDOWS
+	default MIPS32_TOOLCHAIN_GNU_ELF if !HOST_WINDOWS
+
+config MIPS32_TOOLCHAIN_GNU_ELF
+	bool "Generic GNU ELF toolchain"
+	---help---
+		This option should work for any modern GNU toolchain (GCC 4.5 or newer)
+		configured for mips32-elf.
+
+config MIPS32_TOOLCHAIN_MICROCHIPL_XC32
+	bool "Microchip XC32 toolchain under Linux"
+	depends on HOST_LINUX
+
+config MIPS32_TOOLCHAIN_MICROCHIPL
+	bool "Microchip C32 toolchain under Linux"
+	depends on HOST_LINUX
+
+config MIPS32_TOOLCHAIN_MICROCHIPL_LITE
+	bool "Microchip C32 toolchain under Linux (Lite edition)"
+	depends on HOST_LINUX
+
+config MIPS32_TOOLCHAIN_MICROCHIPW_XC32
+	bool "Microchip XC32 toolchain under Windows"
+	depends on HOST_WINDOWS
+
+config MIPS32_TOOLCHAIN_MICROCHIPW
+	bool "Microchip C32 toolchain under Windows"
+	depends on HOST_WINDOWS
+
+config MIPS32_TOOLCHAIN_MICROCHIPW_LITE
+	bool "Microchip C32 toolchain under Windows (Lite edition)"
+	depends on HOST_WINDOWS
+
+config MIPS32_TOOLCHAIN_MICROCHIPOPENL
+	bool "microchipOpen toolchain under Linux"
+	depends on HOST_LINUX
+
+config MIPS32_TOOLCHAIN_PINGUINOW
+	bool "Pinguino mips-elf toolchain under Windows"
+	depends on HOST_WINDOWS
+
+config MIPS32_TOOLCHAIN_PINGUINOL
+	bool "Pinguino mips-elf toolchain under OS X or Linux"
+	depends on HOST_LINUX || HOST_OSX
+
+endchoice
+
+config MIPS32_TOOLCHAIN_MICROCHIP_XC32_LICENSED
+	bool "Licensed Microchip XC32 toolchain"
+	default n
+	depends on MIPS32_TOOLCHAIN_MICROCHIPL_XC32 || MIPS32_TOOLCHAIN_MICROCHIPW_XC32
+	---help---
+		The free, unlicensed XC32 compiler will not support either
+		optimization or the microMIPs ISA.  If you are using a licensed,
+		XC32 compiler then select this option so that the build system will
+		suppport higher levels of optimization.
+
+config MIPS32_FRAMEPOINTER
+	bool "ABI Uses Frame Pointer"
+	default n
+	depends on ARCH_HAVE_VFORK
+	---help---
+		Register r30 may be a frame pointer in some ABIs.  Or may just be
+		saved register s8.  It makes a difference for vfork handling.
+
+endif

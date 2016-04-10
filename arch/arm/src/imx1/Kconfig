@@ -1,0 +1,45 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_CHIP_IMX1
+
+# choice "iMX.1 Chip Selection"
+
+menu "iMX.1 Peripheral Selection"
+
+config IMX1_UART1
+	bool "UART1"
+	default n
+	select ARCH_HAVE_UART1
+
+config IMX1_UART2
+	bool "UART2"
+	default n
+	select ARCH_HAVE_UART2
+
+config IMX1_UART3
+	bool "UART3"
+	default n
+	select ARCH_HAVE_UART3
+
+config IMX1_SPI1
+	bool "SPI1"
+	default n
+	select SPI
+
+config IMX1_SPI2
+	bool "SPI2"
+	default n
+	select SPI
+
+endmenu # iMX Peripheral Selection
+
+config RAM_NUTTXENTRY
+	hex "NuttX entry point"
+	default 0x01004000
+	---help---
+		The virtual address of the NuttX entry point
+
+endif # ARCH_CHIP_IMX1

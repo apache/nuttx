@@ -1,0 +1,5046 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_CHIP_SAMA5
+
+comment "SAMA5 Configuration Options"
+
+# Chip Capabilities
+
+config SAMA5_HAVE_AESB
+	bool
+	default n
+
+config SAMA5_HAVE_ICM
+	bool
+	default n
+
+config SAMA5_HAVE_RXLP
+	bool
+	default n
+
+config SAMA5_HAVE_UART0
+	bool
+	default n
+
+config SAMA5_HAVE_UART1
+	bool
+	default n
+
+config SAMA5_HAVE_UART2
+	bool
+	default n
+
+config SAMA5_HAVE_UART3
+	bool
+	default n
+
+config SAMA5_HAVE_UART4
+	bool
+	default n
+
+config SAMA5_HAVE_USART0
+	bool
+	default n
+
+config SAMA5_HAVE_USART1
+	bool
+	default n
+
+config SAMA5_HAVE_USART2
+	bool
+	default n
+
+config SAMA5_HAVE_USART3
+	bool
+	default n
+
+config SAMA5_HAVE_USART4
+	bool
+	default n
+
+config SAMA5_HAVE_FLEXCOM0
+	bool
+	default n
+
+config SAMA5_HAVE_FLEXCOM1
+	bool
+	default n
+
+config SAMA5_HAVE_FLEXCOM2
+	bool
+	default n
+
+config SAMA5_HAVE_FLEXCOM3
+	bool
+	default n
+
+config SAMA5_HAVE_FLEXCOM4
+	bool
+	default n
+
+config SAMA5_HAVE_CAN0
+	bool
+	default n
+
+config SAMA5_HAVE_CAN1
+	bool
+	default n
+
+config SAMA5_HAVE_DMA
+	bool
+	default n
+
+config SAMA5_HAVE_DDR32
+	bool
+	default n
+
+config SAMA5_HAVE_XDMA
+	bool
+	default n
+
+config SAMA5_HAVE_LCDC
+	bool
+	default n
+
+config SAMA5_HAVE_GMAC
+	bool
+	default n
+
+config SAMA5_HAVE_EMACA
+	bool
+	default n
+
+config SAMA5_HAVE_EMACB
+	bool
+	default n
+
+config SAMA5_HAVE_EMAC1
+	bool
+	default n
+
+config SAMA5_HAVE_HSMCI2
+	bool
+	default n
+
+config SAMA5_HAVE_PIOE
+	bool
+	default n
+
+config SAMA5_HAVE_SAIC
+	bool
+	default n
+
+config SAMA5_HAVE_SBM
+	bool
+	default n
+
+config SAMA5_HAVE_SFC
+	bool
+	default n
+
+config SAMA5_HAVE_SPI2
+	bool
+	default n
+
+config SAMA5_HAVE_TC
+	bool
+	default n
+
+config SAMA5_HAVE_TC1
+	bool
+	default n
+
+config SAMA5_HAVE_TC2
+	bool
+	default n
+
+config SAMA5_HAVE_TWI3
+	bool
+	default n
+
+config SAMA5_HAVE_VDEC
+	bool
+	default n
+
+# Summary configuratinos
+
+config SAMA5_FLEXCOM
+	bool
+	default n
+
+config SAMA5_FLEXCOM_USART
+	bool
+	default n
+
+config SAMA5_FLEXCOM_SPI
+	bool
+	default n
+
+config SAMA5_FLEXCOM_TWI
+	bool
+	default n
+
+# Chip Selection
+
+config ARCH_CHIP_SAMA5D2
+	bool
+	default n
+	select ARMV7A_HAVE_L2CC_PL310
+	select SAMA5_HAVE_AESB
+	select ARCH_NAND_HWECC
+	select SAMA5_HAVE_EMACB
+	select SAMA5_HAVE_ICM
+	select SAMA5_HAVE_LCDC
+	select SAMA5_HAVE_RXLP
+	select SAMA5_HAVE_UART0
+	select SAMA5_HAVE_UART1
+	select SAMA5_HAVE_UART2
+	select SAMA5_HAVE_UART3
+	select SAMA5_HAVE_UART4
+	select SAMA5_HAVE_FLEXCOM0
+	select SAMA5_HAVE_FLEXCOM1
+	select SAMA5_HAVE_FLEXCOM2
+	select SAMA5_HAVE_FLEXCOM3
+	select SAMA5_HAVE_FLEXCOM4
+	select SAMA5_HAVE_QSPI
+	select SAMA5_HAVE_XDMA
+	select SAMA5_HAVE_SAIC
+	select SAMA5_HAVE_SFC
+	select SAMA5_HAVE_SPI2
+	select SAMA5_HAVE_TC1
+	select ARCH_HAVE_TRUSTZONE
+
+config ARCH_CHIP_SAMA5D3
+	bool
+	default n
+	select SAMA5_HAVE_DMA
+	select SAMA5_HAVE_PIOE
+	select SAMA5_HAVE_USART0
+	select SAMA5_HAVE_USART1
+	select SAMA5_HAVE_USART2
+	select SAMA5_HAVE_USART3
+
+config ARCH_CHIP_SAMA5D4
+	bool
+	default n
+	select ARMV7A_HAVE_L2CC_PL310
+	select ARCH_NAND_HWECC
+	select SAMA5_HAVE_AESB
+	select SAMA5_HAVE_EMACB
+	select SAMA5_HAVE_EMAC1
+	select SAMA5_HAVE_ICM
+	select SAMA5_HAVE_LCDC
+	select SAMA5_HAVE_UART0
+	select SAMA5_HAVE_UART1
+	select SAMA5_HAVE_USART0
+	select SAMA5_HAVE_USART1
+	select SAMA5_HAVE_USART2
+	select SAMA5_HAVE_USART3
+	select SAMA5_HAVE_USART4
+	select SAMA5_HAVE_XDMA
+	select SAMA5_HAVE_PIOE
+	select SAMA5_HAVE_SAIC
+	select SAMA5_HAVE_SBM
+	select SAMA5_HAVE_SFC
+	select SAMA5_HAVE_SPI2
+	select SAMA5_HAVE_TC1
+	select SAMA5_HAVE_TC2
+	select ARCH_HAVE_TRUSTZONE
+	select SAMA5_HAVE_TWI3
+
+choice
+	prompt "Atmel AT91SAMA5 Chip Selection"
+	default ARCH_CHIP_ATSAMA5D33
+
+config ARCH_CHIP_ATSAMA5D21
+	bool "Atmel ATSAMA5D21"
+	select ARCH_CHIP_SAMA5D2
+
+config ARCH_CHIP_ATSAMA5D22
+	bool "Atmel ATSAMA5D22"
+	select ARCH_CHIP_SAMA5D2
+	select SAMA5_HAVE_CAN0
+
+config ARCH_CHIP_ATSAMA5D23
+	bool "Atmel ATSAMA5D23"
+	select ARCH_CHIP_SAMA5D2
+	select SAMA5_HAVE_CAN0
+
+config ARCH_CHIP_ATSAMA5D24
+	bool "Atmel ATSAMA5D24"
+	select ARCH_CHIP_SAMA5D2
+	select SAMA5_HAVE_DDR32
+
+config ARCH_CHIP_ATSAMA5D26
+	bool "Atmel ATSAMA5D26"
+	select ARCH_CHIP_SAMA5D2
+	select SAMA5_HAVE_DDR32
+
+config ARCH_CHIP_ATSAMA5D27
+	bool "Atmel ATSAMA5D27"
+	select ARCH_CHIP_SAMA5D2
+	select SAMA5_HAVE_CAN0
+	select SAMA5_HAVE_CAN1
+	select SAMA5_HAVE_DDR32
+
+config ARCH_CHIP_ATSAMA5D28
+	bool "Atmel ATSAMA5D28"
+	select ARCH_CHIP_SAMA5D2
+	select SAMA5_HAVE_CAN0
+	select SAMA5_HAVE_CAN1
+	select SAMA5_HAVE_DDR32
+
+config ARCH_CHIP_ATSAMA5D31
+	bool "Atmel ATSAMA5D31"
+	select ARCH_CHIP_SAMA5D3
+	select SAMA5_HAVE_EMACA
+	select SAMA5_HAVE_HSMCI2
+	select SAMA5_HAVE_LCDC
+	select SAMA5_HAVE_UART0
+	select SAMA5_HAVE_UART1
+	select ARCH_NAND_HWECC
+
+config ARCH_CHIP_ATSAMA5D33
+	bool "Atmel ATSAMA5D33"
+	select ARCH_CHIP_SAMA5D3
+	select SAMA5_HAVE_GMAC
+	select SAMA5_HAVE_LCDC
+	select ARCH_NAND_HWECC
+
+config ARCH_CHIP_ATSAMA5D34
+	bool "Atmel ATSAMA5D34"
+	select ARCH_CHIP_SAMA5D3
+	select SAMA5_HAVE_GMAC
+	select SAMA5_HAVE_HSMCI2
+	select SAMA5_HAVE_LCDC
+	select SAMA5_HAVE_CAN0
+	select SAMA5_HAVE_CAN1
+	select ARCH_NAND_HWECC
+
+config ARCH_CHIP_ATSAMA5D35
+	bool "Atmel ATSAMA5D35"
+	select ARCH_CHIP_SAMA5D3
+	select SAMA5_HAVE_EMACA
+	select SAMA5_HAVE_GMAC
+	select SAMA5_HAVE_HSMCI2
+	select SAMA5_HAVE_UART0
+	select SAMA5_HAVE_UART1
+	select SAMA5_HAVE_CAN0
+	select SAMA5_HAVE_CAN1
+	select SAMA5_HAVE_TC1
+	select ARCH_NAND_HWECC
+
+config ARCH_CHIP_ATSAMA5D36
+	bool "Atmel ATSAMA5D356"
+	select ARCH_CHIP_SAMA5D3
+	select SAMA5_HAVE_EMACA
+	select SAMA5_HAVE_GMAC
+	select SAMA5_HAVE_HSMCI2
+	select SAMA5_HAVE_LCDC
+	select SAMA5_HAVE_UART0
+	select SAMA5_HAVE_UART1
+	select SAMA5_HAVE_CAN0
+	select SAMA5_HAVE_CAN1
+	select SAMA5_HAVE_TC1
+	select ARCH_NAND_HWECC
+
+config ARCH_CHIP_ATSAMA5D41
+	bool "Atmel ATSAMA5D41"
+	select ARCH_CHIP_SAMA5D4
+
+config ARCH_CHIP_ATSAMA5D42
+	bool "Atmel ATSAMA5D42"
+	select ARCH_CHIP_SAMA5D4
+	select SAMA5_HAVE_DDR32
+
+config ARCH_CHIP_ATSAMA5D43
+	bool "Atmel ATSAMA5D43"
+	select ARCH_CHIP_SAMA5D4
+	select SAMA5_HAVE_VDEC
+
+config ARCH_CHIP_ATSAMA5D44
+	bool "Atmel ATSAMA5D44"
+	select ARCH_CHIP_SAMA5D4
+	select SAMA5_HAVE_DDR32
+	select SAMA5_HAVE_VDEC
+
+endchoice # Atmel AT91SAMA5 Chip Selection
+
+menu "SAMA5 Peripheral Support"
+
+config SAMA5_AES
+	bool "Advanced Encryption Standard (AES)"
+	default n
+
+config SAMA5_TDES
+	bool "Triple Data Encryption Standard (TDES)"
+	default n
+
+config SAMA5_AESB
+	bool "Advanced Encryption Bridge (AESB)"
+	default n
+	depends on SAMA5_HAVE_AESB
+
+config SAMA5_DBGU
+	bool "Debug Unit (DBGU)"
+	default n
+	select ARCH_HAVE_OTHER_UART
+
+config SAMA5_PIT
+	bool "Periodic Interval Timer (PIT)"
+	default n
+
+config SAMA5_WDT
+	bool "Watchdog timer (WDT)"
+	default n
+	select WATCHDOG
+
+config SAMA5_RTC
+	bool "Real time clock calendar (RTC)"
+	default n
+	select RTC
+	select RTC_DATETIME
+
+config SAMA5_ICM
+	bool "Integrity Check Monitor (ICM)"
+	default n
+	depends on SAMA5_HAVE_ICM
+
+config SAMA5_HSMC
+	bool "Static Memory Controller (HSMC)"
+	default n
+
+config SAMA5_SMD
+	bool "SMD Soft Modem (SMD)"
+	default n
+
+config SAMA5_SAIC
+	bool "Secure Advanced Interrupt Controller (SAIC)"
+	default n
+	depends on SAMA5_HAVE_SAIC
+	select ARMV7A_DECODEFIQ
+
+config SAMA5_RXLP
+	bool "Low power asynchronous receiver"
+	default y
+	depends on SAMA5_HAVE_RXLP
+
+config SAMA5_UART0
+	bool "UART 0"
+	default y
+	depends on SAMA5_HAVE_UART0
+	select ARCH_HAVE_UART0
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config SAMA5_UART1
+	bool "UART 1"
+	default n
+	depends on SAMA5_HAVE_UART1
+	select ARCH_HAVE_UART1
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config SAMA5_UART2
+	bool "UART 2"
+	default n
+	depends on SAMA5_HAVE_UART2
+	select ARCH_HAVE_UART2
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config SAMA5_UART3
+	bool "UART 3"
+	default n
+	depends on SAMA5_HAVE_UART3
+	select ARCH_HAVE_UART3
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config SAMA5_UART4
+	bool "UART 4"
+	default n
+	depends on SAMA5_HAVE_UART4
+	select ARCH_HAVE_UART1
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config SAMA5_USART0
+	bool "USART 0"
+	default n
+	depends on SAMA5_HAVE_USART0
+	select ARCH_HAVE_USART0
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config SAMA5_USART1
+	bool "USART 1"
+	default n
+	depends on SAMA5_HAVE_USART1
+	select ARCH_HAVE_USART1
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config SAMA5_USART2
+	bool "USART 2"
+	default n
+	depends on SAMA5_HAVE_USART2
+	select ARCH_HAVE_USART2
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config SAMA5_USART3
+	bool "USART 3"
+	default n
+	depends on SAMA5_HAVE_USART3
+	select ARCH_HAVE_USART3
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config SAMA5_USART4
+	bool "USART 4"
+	default n
+	depends on SAMA5_HAVE_USART4
+	select ARCH_HAVE_USART4
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config SAMA5_FLEXCOM0
+	bool "FLEXCOM 0"
+	default n
+	depends on SAMA5_HAVE_FLEXCOM0
+	select SAMA5_FLEXCOM
+
+config SAMA5_FLEXCOM1
+	bool "FLEXCOM 1"
+	default n
+	depends on SAMA5_HAVE_FLEXCOM1
+	select SAMA5_FLEXCOM
+
+config SAMA5_FLEXCOM2
+	bool "FLEXCOM 2"
+	default n
+	depends on SAMA5_HAVE_FLEXCOM2
+	select SAMA5_FLEXCOM
+
+config SAMA5_FLEXCOM3
+	bool "FLEXCOM 3"
+	default n
+	depends on SAMA5_HAVE_FLEXCOM3
+	select SAMA5_FLEXCOM
+
+config SAMA5_FLEXCOM4
+	bool "FLEXCOM 4"
+	default n
+	depends on SAMA5_HAVE_FLEXCOM4
+	select SAMA5_FLEXCOM
+
+config SAMA5_TWI0
+	bool "Two-Wire Interface 0 (TWI0)"
+	default n
+
+config SAMA5_TWI1
+	bool "Two-Wire Interface 1 (TWI1)"
+	default n
+
+config SAMA5_TWI2
+	bool "Two-Wire Interface 2 (TWI2)"
+	default n
+
+config SAMA5_TWI3
+	bool "Two-Wire Interface 3 (TWI3)"
+	default n
+	depends on SAMA5_HAVE_TWI3
+
+config SAMA5_HSMCI0
+	bool "High Speed Multimedia Card Interface 0 (HSMCI0)"
+	default n
+	select ARCH_HAVE_SDIO
+
+config SAMA5_HSMCI1
+	bool "High Speed Multimedia Card Interface 1 (HSMCI1)"
+	default n
+	select ARCH_HAVE_SDIO
+
+config SAMA5_HSMCI2
+	bool "High Speed Multimedia Card Interface 2 (HSMCI2)"
+	default n
+	depends on SAMA5_HAVE_HSMCI2
+	select ARCH_HAVE_SDIO
+
+config SAMA5_SBM
+	bool "Secure Box Module (SBM)"
+	default n
+	depends on SAMA5_HAVE_SBM
+
+config SAMA5_SFC
+	bool "Secure Fuse Controller (SFC)"
+	default n
+	depends on SAMA5_HAVE_SFC
+
+config SAMA5_SPI0
+	bool "Serial Peripheral Interface 0 (SPI0)"
+	default n
+
+config SAMA5_SPI1
+	bool "Serial Peripheral Interface 1 (SPI1)"
+	default n
+
+config SAMA5_SPI2
+	bool "Serial Peripheral Interface 2 (SPI2)"
+	default n
+	depends on SAMA5_HAVE_SPI2
+
+config SAMA5_TC0
+	bool "Timer Counter 0 (ch. 0, 1, 2) (TC0)"
+	default n
+	select SAMA5_HAVE_TC
+
+config SAMA5_TC1
+	bool "Timer Counter 1 (ch. 3, 4, 5) (TC1)"
+	default n
+	depends on SAMA5_HAVE_TC1
+	select SAMA5_HAVE_TC
+
+config SAMA5_TC2
+	bool "Timer Counter 2 (ch. 6, 7, 8) (TC2)"
+	default n
+	depends on SAMA5_HAVE_TC2
+	select SAMA5_HAVE_TC
+
+config SAMA5_PWM
+	bool "Pulse Width Modulation Controller (PWM)"
+	default n
+	select PWM
+
+config SAMA5_ADC
+	bool "Touch Screen / ADC Controller (ADC)"
+	default n
+	select ANALOG
+	select ADC
+
+config SAMA5_DMAC0
+	bool "DMA Controller 0 (DMAC0)"
+	default n
+	select ARCH_DMA
+	depends on SAMA5_HAVE_DMA
+
+config SAMA5_DMAC1
+	bool "DMA Controller 1 (DMAC1)"
+	default n
+	select ARCH_DMA
+	depends on SAMA5_HAVE_DMA
+
+config SAMA5_XDMAC0
+	bool "XDMA Controller (XDMAC0, always secure)"
+	default n
+	select ARCH_DMA
+	depends on SAMA5_HAVE_XDMA
+
+config SAMA5_XDMAC1
+	bool "XDMA Controller (XDMAC1, never secure)"
+	default n
+	select ARCH_DMA
+	depends on SAMA5_HAVE_XDMA
+
+config SAMA5_UHPHS
+	bool "USB Host High Speed (UHPHS)"
+	default n
+
+config SAMA5_UDPHS
+	bool "USB Device High Speed (UDPHS)"
+	default n
+
+config SAMA5_GMAC
+	bool "Gigabit Ethernet MAC (GMAC)"
+	default n
+	depends on SAMA5_HAVE_GMAC
+	select NETDEVICES
+	select NETDEV_MULTINIC if SAMA5_EMAC
+	select ARCH_HAVE_PHY
+
+config SAMA5_EMACA
+	bool "10/100MBps Ethernet MAC (EMAC)"
+	default n
+	depends on SAMA5_HAVE_EMACA
+	select NETDEVICES
+	select NETDEV_MULTINIC if SAMA5_GMAC
+	select ARCH_HAVE_PHY
+
+config SAMA5_EMACB
+	bool
+	default n
+
+config SAMA5_EMAC0
+	bool "10/100MBps Ethernet MAC (EMAC0)"
+	default n
+	depends on SAMA5_HAVE_EMACB
+	select SAMA5_EMACB
+	select NETDEVICES
+	select NETDEV_MULTINIC if SAMA5_EMAC1
+	select ARCH_HAVE_PHY
+
+config SAMA5_EMAC1
+	bool "10/100MBps Ethernet MAC (EMAC1)"
+	default n
+	depends on SAMA5_HAVE_EMACB && SAMA5_HAVE_EMAC1
+	select SAMA5_EMACB
+	select NETDEVICES
+	select NETDEV_MULTINIC if SAMA5_EMAC0
+	select ARCH_HAVE_PHY
+
+config SAMA5_LCDC
+	bool "LCD Controller (LCDC)"
+	default n
+	depends on SAMA5_HAVE_LCDC
+
+config SAMA5_ISI
+	bool "Image Sensor Interface (ISI)"
+	default n
+
+config SAMA5_SSC0
+	bool "Synchronous Serial Controller 0 (SSC0)"
+	default n
+	select I2S
+	depends on SAMA5_DMAC0 || SAMA5_XDMAC0 || SAMA5_XDMAC1
+	select AUDIO
+
+config SAMA5_SSC1
+	bool "Synchronous Serial Controller 1 (SSC1)"
+	default n
+	select I2S
+	depends on SAMA5_DMAC1 || SAMA5_XDMAC0 || SAMA5_XDMAC1
+	select AUDIO
+
+config SAMA5_CAN0
+	bool "CAN controller 0 (CAN0)"
+	default n
+	select CAN
+	depends on SAMA5_HAVE_CAN0
+
+config SAMA5_CAN1
+	bool "CAN controller 1 (CAN1)"
+	default n
+	select CAN
+	depends on SAMA5_HAVE_CAN1
+
+config SAMA5_SHA
+	bool "Secure Hash Algorithm (SHA)"
+	default n
+
+config SAMA5_TRNG
+	bool "True Random Number Generator (TRNG)"
+	default n
+	select ARCH_HAVE_RNG
+
+config SAMA5_ARM
+	bool "Performance Monitor Unit (ARM)"
+	default n
+
+config SAMA5_FUSE
+	bool "Fuse Controller (FUSE)"
+	default n
+
+config SAMA5_MPDDRC
+	bool "MPDDR controller (MPDDRC)"
+	default n
+
+config SAMA5_VDEC
+	bool "Video decoder (VDEC)"
+	default n
+	depends on SAMA5_HAVE_VDEC
+
+endmenu # SAMA5 Peripheral Support
+
+config SAMA5_PIO_IRQ
+	bool "PIO pin interrupts"
+	---help---
+		Enable support for interrupting PIO pins
+
+if SAMA5_PIO_IRQ
+
+config SAMA5_PIOA_IRQ
+	bool "PIOA interrupts"
+	default n
+
+config SAMA5_PIOB_IRQ
+	bool "PIOB interrupts"
+	default n
+
+config SAMA5_PIOC_IRQ
+	bool "PIOC interrupts"
+	default n
+
+config SAMA5_PIOD_IRQ
+	bool "PIOD interrupts"
+	default n
+
+config SAMA5_PIOE_IRQ
+	bool "PIOE interrupts"
+	default n
+	depends on SAMA5_HAVE_PIOE
+
+endif # PIO_IRQ
+
+menu "Flexcom Configuration"
+	depends on SAMA5_FLEXCOM
+
+choice
+	prompt "FLEXCOM0 Configuration"
+	default SAMA5_FLEXCOM0_USART
+	depends on SAMA5_FLEXCOM0
+
+config SAMA5_FLEXCOM0_USART
+	bool "USART"
+	select SAMA5_FLEXCOM_USART
+	select ARCH_HAVE_USART0
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config SAMA5_FLEXCOM0_SPI
+	bool "SPI"
+	select SAMA5_FLEXCOM_SPI
+
+config SAMA5_FLEXCOM0_SPI
+	bool "TWI"
+	select SAMA5_FLEXCOM_TWI
+
+endchoice # FLEXCOM0 Configuration
+
+choice
+	prompt "FLEXCOM1 Configuration"
+	default SAMA5_FLEXCOM1_USART
+	depends on SAMA5_FLEXCOM1
+
+config SAMA5_FLEXCOM1_USART
+	bool "USART"
+	select SAMA5_FLEXCOM_USART
+	select ARCH_HAVE_USART1
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config SAMA5_FLEXCOM1_SPI
+	bool "SPI"
+	select SAMA5_FLEXCOM_SPI
+
+config SAMA5_FLEXCOM1_SPI
+	bool "TWI"
+	select SAMA5_FLEXCOM_TWI
+
+endchoice # FLEXCOM1 Configuration
+
+choice
+	prompt "FLEXCOM2 Configuration"
+	default SAMA5_FLEXCOM2_USART
+	depends on SAMA5_FLEXCOM2
+
+config SAMA5_FLEXCOM2_USART
+	bool "USART"
+	select SAMA5_FLEXCOM_USART
+	select ARCH_HAVE_USART2
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config SAMA5_FLEXCOM2_SPI
+	bool "SPI"
+	select SAMA5_FLEXCOM_SPI
+
+config SAMA5_FLEXCOM2_SPI
+	bool "TWI"
+	select SAMA5_FLEXCOM_TWI
+
+endchoice # FLEXCOM2 Configuration
+
+choice
+	prompt "FLEXCOM3 Configuration"
+	default SAMA5_FLEXCOM3_USART
+	depends on SAMA5_FLEXCOM3
+
+config SAMA5_FLEXCOM3_USART
+	bool "USART"
+	select SAMA5_FLEXCOM_USART
+
+config SAMA5_FLEXCOM3_SPI
+	bool "SPI"
+	select SAMA5_FLEXCOM_SPI
+	select ARCH_HAVE_USART3
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config SAMA5_FLEXCOM3_SPI
+	bool "TWI"
+	select SAMA5_FLEXCOM_TWI
+
+endchoice # FLEXCOM3 Configuration
+
+choice
+	prompt "FLEXCOM4 Configuration"
+	default SAMA5_FLEXCOM4_USART
+	depends on SAMA5_FLEXCOM4
+
+config SAMA5_FLEXCOM4_USART
+	bool "USART"
+	select SAMA5_FLEXCOM_USART
+	select ARCH_HAVE_USART4
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config SAMA5_FLEXCOM4_SPI
+	bool "SPI"
+	select SAMA5_FLEXCOM_SPI
+
+config SAMA5_FLEXCOM4_SPI
+	bool "TWI"
+	select SAMA5_FLEXCOM_TWI
+
+endchoice # FLEXCOM4 Configuration
+endmenu # Flexcom Configuration
+
+menu "DBGU Configuration"
+	depends on SAMA5_DBGU
+
+config SAMA5_DBGU_CONSOLE
+	bool "DBGU serial console"
+	---help---
+		Select to use the DBGU as the serial console.
+
+config SAMA5_DBGU_RXBUFSIZE
+	int "Receive buffer size"
+	default 256
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.
+
+config SAMA5_DBGU_TXBUFSIZE
+	int "Transmit buffer size"
+	default 256
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.
+
+config SAMA5_DBGU_NOCONFIG
+	bool "Suppress DBGU configuration"
+	default n
+	depends on SAMA5_BOOT_SDRAM && SAMA5_DBGU_CONSOLE
+	---help---
+		The DBGU is often used by bootloaders to provide the bootloader
+		interface.  If the DBGU is also used as the NuttX console, then it
+		would be best to avoid reconfiguring the DBGU so that the user
+		experience is seamless going from the bootloader to the NuttX
+		console.
+
+if !SAMA5_DBGU_NOCONFIG
+
+config SAMA5_DBGU_BAUD
+	int "BAUD rate"
+	default 115200
+	---help---
+		The configured BAUD of the UART.
+
+config SAMA5_DBGU_PARITY
+	int "Parity setting"
+	default 0
+	range 0 2
+	---help---
+		0=no parity, 1=odd parity, 2=even parity
+
+endif # !SAMA5_DBGU_NOCONFIG
+endmenu #DBGU Configuration
+
+if SAMA5_LCDC
+menu "LCDC Configuration"
+
+config SAMA5_LCDC_BACKLIGHT
+	bool "Backlight support"
+	default y
+
+config SAMA5_LCDC_DEFBACKLIGHT
+	hex "Default backlight level"
+	default 0xf0
+
+config SAMA5_LCDC_BACKCOLOR
+	hex "Background color"
+	default 0x0
+
+config SAMA5_LCDC_FB_VBASE
+	hex "Framebuffer memory start address (virtual)"
+	---help---
+		If you are using the the LCDC, then you must provide the virtual
+		address of the start of the framebuffer.  This address must be
+		aligned to a 1MB bounder (i.e., the last five "digits" of the
+		hexadecimal address must be zero).
+
+config SAMA5_LCDC_FB_PBASE
+	hex "Framebuffer memory start address (virtual)"
+	---help---
+		If you are using the the LCDC, then you must provide the physical
+		address of the start of the framebuffer.  This address must be
+		aligned to a 1MB bounder (i.e., the last five "digits" of the
+		hexadecimal address must be zero).
+
+config SAMA5_LCDC_FB_SIZE
+	int "Framebuffer memory size (bytes)"
+	default 0
+
+comment "Base layer configuration"
+
+choice
+	prompt "Base layer rotation"
+	default SAMA5_LCDC_BASE_ROT0
+
+config SAMA5_LCDC_BASE_ROT0
+	bool "No rotation"
+
+config SAMA5_LCDC_BASE_ROT90
+	bool "90 degrees"
+
+config SAMA5_LCDC_BASE_ROT180
+	bool "180 degrees"
+
+config SAMA5_LCDC_BASE_ROT270
+	bool "270 degrees"
+
+endchoice # Base layer rotation
+
+choice
+	prompt "Base layer color format"
+	default SAMA5_LCDC_BASE_RGB565
+
+config SAMA5_LCDC_BASE_RGB444
+	bool "12 bpp RGB 444"
+
+config SAMA5_LCDC_BASE_ARGB4444
+	bool "16 bpp ARGB 4444"
+
+config SAMA5_LCDC_BASE_RGBA4444
+	bool "16 bpp RGBA 4444"
+
+config SAMA5_LCDC_BASE_RGB565
+	bool "16 bpp RGB 565"
+
+config SAMA5_LCDC_BASE_TRGB1555
+	bool "16 bpp TRGB 1555"
+
+config SAMA5_LCDC_BASE_RGB666
+	bool "18 bpp RGB 666"
+
+config SAMA5_LCDC_BASE_RGB666P
+	bool "18 bpp RGB 666 packed"
+
+config SAMA5_LCDC_BASE_TRGB1666
+	bool "19 bpp TRGB 1666"
+
+config SAMA5_LCDC_BASE_TRGBP
+	bool "19 bpp TRGB 1666 packed"
+
+config SAMA5_LCDC_BASE_RGB888
+	bool "24 bpp RGB 888"
+
+config SAMA5_LCDC_BASE_RGB888P
+	bool "24 bpp RGB 888 packed"
+
+config SAMA5_LCDC_BASE_TRGB1888
+	bool "25 bpp TRGB 1888"
+
+config SAMA5_LCDC_BASE_ARGB8888
+	bool "32 bpp ARGB 8888"
+
+config SAMA5_LCDC_BASE_RGBA8888
+	bool "32 bpp RGBA 8888"
+
+endchoice # Base layer color format
+
+menuconfig SAMA5_LCDC_OVR1
+	bool "Enable overlay 1 window"
+	default n
+	depends on EXPERIMENTAL
+
+if SAMA5_LCDC_OVR1
+
+config SAMA5_LCDC_OVR1_MAXHEIGHT
+	int "Overlay 1 height (rows)"
+	default 480
+
+config SAMA5_LCDC_OVR1_MAXWIDTH
+	int "Overlay 1 width (pixels)"
+	default 800
+
+config SAMA5_LCDC_OVR1_BOTTOMUP
+	bool "Raster bottom-up"
+	default n
+
+config SAMA5_LCDC_OVR1_RIGHTLEFT
+	bool "Raster right-to-left"
+	default n
+
+choice
+	prompt "Overlay 1 rotation"
+	default SAMA5_LCDC_OVR1_ROT0
+
+config SAMA5_LCDC_OVR1_ROT0
+	bool "No rotation"
+
+config SAMA5_LCDC_OVR1_ROT90
+	bool "90 degrees"
+
+config SAMA5_LCDC_OVR1_ROT180
+	bool "180 degrees"
+
+config SAMA5_LCDC_OVR1_ROT270
+	bool "270 degrees"
+
+endchoice # Overlay 1 rotation
+
+choice
+	prompt "Overlay 1 color format"
+	default SAMA5_LCDC_OVR1_RGB565
+
+config SAMA5_LCDC_OVR1_RGB444
+	bool "12 bpp RGB 444"
+
+config SAMA5_LCDC_OVR1_ARGB4444
+	bool "16 bpp ARGB 4444"
+
+config SAMA5_LCDC_OVR1_RGBA4444
+	bool "16 bpp RGBA 4444"
+
+config SAMA5_LCDC_OVR1_RGB565
+	bool "16 bpp RGB 565"
+
+config SAMA5_LCDC_OVR1_TRGB1555
+	bool "16 bpp TRGB 1555"
+
+config SAMA5_LCDC_OVR1_RGB666
+	bool "18 bpp RGB 666"
+
+config SAMA5_LCDC_OVR1_RGB666P
+	bool "18 bpp RGB 666 packed"
+
+config SAMA5_LCDC_OVR1_TRGB1666
+	bool "19 bpp TRGB 1666"
+
+config SAMA5_LCDC_OVR1_TRGBP
+	bool "19 bpp TRGB 1666 packed"
+
+config SAMA5_LCDC_OVR1_RGB888
+	bool "24 bpp RGB 888"
+
+config SAMA5_LCDC_OVR1_RGB888P
+	bool "24 bpp RGB 888 packed"
+
+config SAMA5_LCDC_OVR1_TRGB1888
+	bool "25 bpp TRGB 1888"
+
+config SAMA5_LCDC_OVR1_ARGB8888
+	bool "32 bpp ARGB 8888"
+
+config SAMA5_LCDC_OVR1_RGBA8888
+	bool "32 bpp RGBA 8888"
+
+endchoice # Base layer color format
+endif # SAMA5_LCDC_OVR1
+
+menuconfig SAMA5_LCDC_OVR2
+	bool "Enable overlay 2 window"
+	default n
+	depends on EXPERIMENTAL
+
+if SAMA5_LCDC_OVR2
+
+config SAMA5_LCDC_OVR2_MAXHEIGHT
+	int "Overlay 2 height (rows)"
+	default 480
+
+config SAMA5_LCDC_OVR2_MAXWIDTH
+	int "Overlay 2 width (pixels)"
+	default 800
+
+config SAMA5_LCDC_OVR2_BOTTOMUP
+	bool "Raster bottom-up"
+	default n
+
+config SAMA5_LCDC_OVR2_RIGHTLEFT
+	bool "Raster right-to-left"
+	default n
+
+choice
+	prompt "Overlay 2 rotation"
+	default SAMA5_LCDC_OVR2_ROT0
+
+config SAMA5_LCDC_OVR2_ROT0
+	bool "No rotation"
+
+config SAMA5_LCDC_OVR2_ROT90
+	bool "90 degrees"
+
+config SAMA5_LCDC_OVR2_ROT180
+	bool "180 degrees"
+
+config SAMA5_LCDC_OVR2_ROT270
+	bool "270 degrees"
+
+endchoice # Overlay 2 rotation
+
+choice
+	prompt "Overlay 2 layer color format"
+	default SAMA5_LCDC_OVR2_RGB565
+
+config SAMA5_LCDC_OVR2_RGB444
+	bool "12 bpp RGB 444"
+
+config SAMA5_LCDC_OVR2_ARGB4444
+	bool "16 bpp ARGB 4444"
+
+config SAMA5_LCDC_OVR2_RGBA4444
+	bool "16 bpp RGBA 4444"
+
+config SAMA5_LCDC_OVR2_RGB565
+	bool "16 bpp RGB 565"
+
+config SAMA5_LCDC_OVR2_TRGB1555
+	bool "16 bpp TRGB 1555"
+
+config SAMA5_LCDC_OVR2_RGB666
+	bool "18 bpp RGB 666"
+
+config SAMA5_LCDC_OVR2_RGB666P
+	bool "18 bpp RGB 666 packed"
+
+config SAMA5_LCDC_OVR2_TRGB1666
+	bool "19 bpp TRGB 1666"
+
+config SAMA5_LCDC_OVR2_TRGBP
+	bool "19 bpp TRGB 1666 packed"
+
+config SAMA5_LCDC_OVR2_RGB888
+	bool "24 bpp RGB 888"
+
+config SAMA5_LCDC_OVR2_RGB888P
+	bool "24 bpp RGB 888 packed"
+
+config SAMA5_LCDC_OVR2_TRGB1888
+	bool "25 bpp TRGB 1888"
+
+config SAMA5_LCDC_OVR2_ARGB8888
+	bool "32 bpp ARGB 8888"
+
+config SAMA5_LCDC_OVR2_RGBA8888
+	bool "32 bpp RGBA 8888"
+
+endchoice # Base layer color format
+endif # SAMA5 LCDC_OVR2
+
+config SAMA5_LCDC_HEO
+	bool "High end overlay (HEO) window"
+	default n
+	depends on EXPERIMENTAL
+
+if SAMA5_LCDC_HEO
+
+config SAMA5_LCDC_HEO_MAXHEIGHT
+	int "HEO layer height (rows)"
+	default 480
+
+config SAMA5_LCDC_HEO_MAXWIDTH
+	int "HEO layer width (pixels)"
+	default 800
+
+config SAMA5_LCDC_HEO_BOTTOMUP
+	bool "Raster bottom-up"
+	default n
+
+config SAMA5_LCDC_HEO_RIGHTLEFT
+	bool "Raster right-to-left"
+	default n
+
+choice
+	prompt "HEO layer rotation"
+	default SAMA5_LCDC_HEO_ROT0
+
+config SAMA5_LCDC_HEO_ROT0
+	bool "No rotation"
+
+config SAMA5_LCDC_HEO_ROT90
+	bool "90 degrees"
+
+config SAMA5_LCDC_HEO_ROT180
+	bool "180 degrees"
+
+config SAMA5_LCDC_HEO_ROT270
+	bool "270 degrees"
+
+endchoice # HEO layer rotation
+
+choice
+	prompt "HEO layer color format"
+	default SAMA5_LCDC_HEO_RGB565
+
+config SAMA5_LCDC_HEO_RGB444
+	bool "12 bpp RGB 444"
+
+config SAMA5_LCDC_HEO_ARGB4444
+	bool "16 bpp ARGB 4444"
+
+config SAMA5_LCDC_HEO_RGBA4444
+	bool "16 bpp RGBA 4444"
+
+config SAMA5_LCDC_HEO_RGB565
+	bool "16 bpp RGB 565"
+
+config SAMA5_LCDC_HEO_TRGB1555
+	bool "16 bpp TRGB 1555"
+
+config SAMA5_LCDC_HEO_RGB666
+	bool "18 bpp RGB 666"
+
+config SAMA5_LCDC_HEO_RGB666P
+	bool "18 bpp RGB 666 packed"
+
+config SAMA5_LCDC_HEO_TRGB1666
+	bool "19 bpp TRGB 1666"
+
+config SAMA5_LCDC_HEO_TRGBP
+	bool "19 bpp TRGB 1666 packed"
+
+config SAMA5_LCDC_HEO_RGB888
+	bool "24 bpp RGB 888"
+
+config SAMA5_LCDC_HEO_RGB888P
+	bool "24 bpp RGB 888 packed"
+
+config SAMA5_LCDC_HEO_TRGB1888
+	bool "25 bpp TRGB 1888"
+
+config SAMA5_LCDC_HEO_ARGB8888
+	bool "32 bpp ARGB 8888"
+
+config SAMA5_LCDC_HEO_RGBA8888
+	bool "32 bpp RGBA 8888"
+
+endchoice # Base layer color format
+endif # SAMA5_LCDC_HEO
+
+config SAMA5_LCDC_HCR
+	bool "Enable hardware cursor (HCR)"
+	default n
+	depends on EXPERIMENTAL && FB_HWCURSOR
+
+if SAMA5_LCDC_HCR
+
+config SAMA5_LCDC_HCR_MAXHEIGHT
+	int "Hardware cursor height (rows)"
+	default 32
+
+config SAMA5_LCDC_HCR_MAXWIDTH
+	int "Hardware cursor width (pixels)"
+	default 32
+
+choice
+	prompt "Hardware cursor rotation"
+	default SAMA5_LCDC_HCR_ROT0
+
+config SAMA5_LCDC_HCR_ROT0
+	bool "No rotation"
+
+config SAMA5_LCDC_HCR_ROT90
+	bool "90 degrees"
+
+config SAMA5_LCDC_HCR_ROT180
+	bool "180 degrees"
+
+config SAMA5_LCDC_HCR_ROT270
+	bool "270 degrees"
+
+endchoice # Hardware cursor rotation
+
+choice
+	prompt "Hardware cursor layer color format"
+	default SAMA5_LCDC_HCR_RGB565
+
+config SAMA5_LCDC_HCR_RGB444
+	bool "12 bpp RGB 444"
+
+config SAMA5_LCDC_HCR_ARGB4444
+	bool "16 bpp ARGB 4444"
+
+config SAMA5_LCDC_HCR_RGBA4444
+	bool "16 bpp RGBA 4444"
+
+config SAMA5_LCDC_HCR_RGB565
+	bool "16 bpp RGB 565"
+
+config SAMA5_LCDC_HCR_TRGB1555
+	bool "16 bpp TRGB 1555"
+
+config SAMA5_LCDC_HCR_RGB666
+	bool "18 bpp RGB 666"
+
+config SAMA5_LCDC_HCR_RGB666P
+	bool "18 bpp RGB 666 packed"
+
+config SAMA5_LCDC_HCR_TRGB1666
+	bool "19 bpp TRGB 1666"
+
+config SAMA5_LCDC_HCR_TRGBP
+	bool "19 bpp TRGB 1666 packed"
+
+config SAMA5_LCDC_HCR_RGB888
+	bool "24 bpp RGB 888"
+
+config SAMA5_LCDC_HCR_RGB888P
+	bool "24 bpp RGB 888 packed"
+
+config SAMA5_LCDC_HCR_TRGB1888
+	bool "25 bpp TRGB 1888"
+
+config SAMA5_LCDC_HCR_ARGB8888
+	bool "32 bpp ARGB 8888"
+
+config SAMA5_LCDC_HCR_RGBA8888
+	bool "32 bpp RGBA 8888"
+
+endchoice # Base layer color format
+endif # SAMA5_LCDC_HCR
+
+config SAMA5_LCDC_REGDEBUG
+	bool "Register-Level Debug"
+	default n
+	depends on DEBUG
+	---help---
+		Enable very low-level register access debug.  Depends on DEBUG.
+
+endmenu # LCDC configuration
+endif # SAMA5_LCDC
+
+if SAMA5_GMAC
+
+menu "GMAC device driver options"
+
+config SAMA5_GMAC_NRXBUFFERS
+	int "Number of RX buffers"
+	default 16
+	---help---
+		GMAC buffer memory is segmented into 128 byte units (not
+		configurable).  This setting provides the number of such 128 byte
+		units used for reception.  This is also equal to the number of RX
+		descriptors that will be allocated  The selected value must be an
+		even power of 2.
+
+config SAMA5_GMAC_NTXBUFFERS
+	int "Number of TX buffers"
+	default 8
+	---help---
+		GMAC buffer memory is segmented into full Ethernet packets (size
+		NET_BUFSIZE bytes).  This setting provides the number of such packets
+		that can be in flight.  This is also equal to the number of TX
+		descriptors that will be allocated.
+
+config SAMA5_GMAC_PREALLOCATE
+	bool "Preallocate buffers"
+	default n
+	---help---
+		Buffer an descriptor many may either be allocated from the memory
+		pool or pre-allocated to lie in .bss.  This options selected pre-
+		allocated buffer memory.
+
+config SAMA5_GMAC_NBC
+	bool "Disable Broadcast"
+	default n
+	---help---
+		Select to disable receipt of broadcast packets.
+
+config SAMA5_GMAC_PHYADDR
+	int "PHY address"
+	default 1
+	---help---
+		The 5-bit address of the PHY on the board.  Default: 1
+
+config SAMA5_GMAC_PHYINIT
+	bool "Board-specific PHY Initialization"
+	default n
+	---help---
+		Some boards require specialized initialization of the PHY before it can be used.
+		This may include such things as configuring GPIOs, resetting the PHY, etc.  If
+		SAMA5_GMAC_PHYINIT is defined in the configuration then the board specific logic must
+		provide sam_phyinitialize();  The SAMA5 GMAC driver will call this function
+		one time before it first uses the PHY.
+
+config SAMA5_GMAC_AUTONEG
+	bool "Use autonegotiation"
+	default y
+	---help---
+		Use PHY autonegotiation to determine speed and mode
+
+if !SAMA5_GMAC_AUTONEG
+
+config SAMA5_GMAC_ETHFD
+	bool "Full duplex"
+	default n
+	---help---
+		If SAMA5_GMAC_AUTONEG is not defined, then this may be defined to
+		select full duplex mode. Default: half-duplex
+
+choice
+	prompt "GMAC Speed"
+	default SAMA5_GMAC_ETH100MBPS
+	---help---
+		If autonegotiation is not used, then you must select the fixed speed
+		of the PHY
+
+config SAMA5_GMAC_ETH10MBPS
+	bool "10 Mbps"
+	---help---
+		If SAMA5_GMAC_AUTONEG is not defined, then this may be defined to select 10 MBps
+		speed.  Default: 100 Mbps
+
+config SAMA5_GMAC_ETH100MBPS
+	bool "100 Mbps"
+	---help---
+		If SAMA5_GMAC_AUTONEG is not defined, then this may be defined to select 100 MBps
+		speed.  Default: 100 Mbps
+
+config SAMA5_GMAC_ETH1000MBPS
+	bool "1000 Mbps"
+	---help---
+		If SAMA5_GMAC_AUTONEG is not defined, then this may be defined to select 1000 MBps
+		speed.  Default: 100 Mbps
+
+endchoice # GMAC speed
+endif # !SAMA5_GMAC_AUTONEG
+
+config SAMA5_GMAC_REGDEBUG
+	bool "Register-Level Debug"
+	default n
+	depends on DEBUG
+	---help---
+		Enable very low-level register access debug.  Depends on DEBUG.
+
+endmenu # GMAC device driver options
+endif # SAMA5_GMAC
+
+if SAMA5_EMACA
+
+menu "EMAC device driver options"
+
+config SAMA5_EMAC_NRXBUFFERS
+	int "Number of RX buffers"
+	default 16
+	---help---
+		EMAC buffer memory is segmented into 128 byte units (not
+		configurable).  This setting provides the number of such 128 byte
+		units used for reception.  This is also equal to the number of RX
+		descriptors that will be allocated  The selected value must be an
+		even power of 2.
+
+config SAMA5_EMAC_NTXBUFFERS
+	int "Number of TX buffers"
+	default 8
+	---help---
+		EMAC buffer memory is segmented into full Ethernet packets (size
+		NET_BUFSIZE bytes).  This setting provides the number of such packets
+		that can be in flight.  This is also equal to the number of TX
+		descriptors that will be allocated.
+
+config SAMA5_EMAC_PHYADDR
+	int "PHY address"
+	default 1
+	---help---
+		The 5-bit address of the PHY on the board.  Default: 1
+
+config SAMA5_EMAC_PHYINIT
+	bool "Board-specific PHY Initialization"
+	default n
+	---help---
+		Some boards require specialized initialization of the PHY before it can be used.
+		This may include such things as configuring GPIOs, resetting the PHY, etc.  If
+		SAMA5_EMAC_PHYINIT is defined in the configuration then the board specific logic must
+		provide sam_phyinitialize();  The SAMA5 EMAC driver will call this function
+		one time before it first uses the PHY.
+
+config SAMA5_EMAC_MII
+	bool "Use MII interface"
+	default n
+	---help---
+		Support Ethernet MII interface (vs RMII).
+
+config SAMA5_EMAC_RMII
+	bool
+	default y if !SAMA5_EMAC_MII
+	default n if SAMA5_EMAC_MII
+
+config SAMA5_EMAC_AUTONEG
+	bool "Use autonegotiation"
+	default y
+	---help---
+		Use PHY autonegotiation to determine speed and mode
+
+config SAMA5_EMAC_ETHFD
+	bool "Full duplex"
+	default n
+	depends on !SAMA5_EMAC_AUTONEG
+	---help---
+		If SAMA5_EMAC_AUTONEG is not defined, then this may be defined to select full duplex
+		mode. Default: half-duplex
+
+config SAMA5_EMAC_ETH100MBPS
+	bool "100 Mbps"
+	default n
+	depends on !SAMA5_EMAC_AUTONEG
+	---help---
+		If SAMA5_EMAC_AUTONEG is not defined, then this may be defined to select 100 MBps
+		speed.  Default: 10 Mbps
+
+config SAMA5_EMAC_PHYSR
+	int "PHY Status Register Address (decimal)"
+	depends on SAMA5_EMAC_AUTONEG
+	---help---
+		This must be provided if SAMA5_EMAC_AUTONEG is defined.  The PHY status register
+		address may diff from PHY to PHY.  This configuration sets the address of
+		the PHY status register.
+
+config SAMA5_EMAC_PHYSR_ALTCONFIG
+	bool "PHY Status Alternate Bit Layout"
+	default n
+	depends on SAMA5_EMAC_AUTONEG
+	---help---
+		Different PHYs present speed and mode information in different ways.  Some
+		will present separate information for speed and mode (this is the default).
+		Those PHYs, for example, may provide a 10/100 Mbps indication and a separate
+		full/half duplex indication. This options selects an alternative representation
+		where speed and mode information are combined.  This might mean, for example,
+		separate bits for 10HD, 100HD, 10FD and 100FD.
+
+if SAMA5_EMAC_AUTONEG
+if SAMA5_EMAC_PHYSR_ALTCONFIG
+
+config SAMA5_EMAC_PHYSR_ALTMODE
+	hex "PHY Mode Mask"
+	---help---
+		This must be provided if SAMA5_EMAC_AUTONEG is defined.  This provide bit mask
+		for isolating the speed and full/half duplex mode bits.
+
+config SAMA5_EMAC_PHYSR_10HD
+	hex "10MBase-T Half Duplex Value"
+	---help---
+		This must be provided if SAMA5_EMAC_AUTONEG is defined.  This is the value
+		under the bit mask that represents the 10Mbps, half duplex setting.
+
+config SAMA5_EMAC_PHYSR_100HD
+	hex "100Base-T Half Duplex Value"
+	---help---
+		This must be provided if SAMA5_EMAC_AUTONEG is defined.  This is the value
+		under the bit mask that represents the 100Mbps, half duplex setting.
+
+config SAMA5_EMAC_PHYSR_10FD
+	hex "10Base-T Full Duplex Value"
+	---help---
+		This must be provided if SAMA5_EMAC_AUTONEG is defined.  This is the value
+		under the bit mask that represents the 10Mbps, full duplex setting.
+
+config SAMA5_EMAC_PHYSR_100FD
+	hex "100Base-T Full Duplex Value"
+	---help---
+		This must be provided if SAMA5_EMAC_AUTONEG is defined.  This is the value
+		under the bit mask that represents the 100Mbps, full duplex setting.
+
+endif # SAMA5_EMAC_PHYSR_ALTCONFIG
+if !SAMA5_EMAC_PHYSR_ALTCONFIG
+
+config SAMA5_EMAC_PHYSR_SPEED
+	hex "PHY Speed Mask"
+	---help---
+		This must be provided if SAMA5_EMAC_AUTONEG is defined.  This provides bit mask
+		for isolating the 10 or 100MBps speed indication.
+
+config SAMA5_EMAC_PHYSR_100MBPS
+	hex "PHY 100Mbps Speed Value"
+	---help---
+		This must be provided if SAMA5_EMAC_AUTONEG is defined.  This provides the value
+		of the speed bit(s) indicating 100MBps speed.
+
+config SAMA5_EMAC_PHYSR_MODE
+	hex "PHY Mode Mask"
+	---help---
+		This must be provided if SAMA5_EMAC_AUTONEG is defined.  This provide bit mask
+		for isolating the full or half duplex mode bits.
+
+config SAMA5_EMAC_PHYSR_FULLDUPLEX
+	hex "PHY Full Duplex Mode Value"
+	---help---
+		This must be provided if SAMA5_EMAC_AUTONEG is defined.  This provides the
+		value of the mode bits indicating full duplex mode.
+
+endif # !SAMA5_EMAC_PHYSR_ALTCONFIG
+endif # SAMA5_EMAC_AUTONEG
+
+config SAMA5_EMACA_PREALLOCATE
+	bool "Preallocate buffers"
+	default n
+	---help---
+		Buffer an descriptor many may either be allocated from the memory
+		pool or pre-allocated to lie in .bss.  This options selected pre-
+		allocated buffer memory.
+
+config SAMA5_EMACA_NBC
+	bool "Disable Broadcast"
+	default n
+	---help---
+		Select to disable receipt of broadcast packets.
+
+config SAMA5_EMACA_REGDEBUG
+	bool "Register-Level Debug"
+	default n
+	depends on DEBUG
+	---help---
+		Enable very low-level register access debug.  Depends on DEBUG.
+
+endmenu # EMAC device driver options
+endif # SAMA5_EMACA
+
+if SAMA5_EMACB
+
+menu "EMAC device driver options"
+
+if SAMA5_EMAC0
+
+menu "EMAC0 device driver options"
+
+config SAMA5_EMAC0_NRXBUFFERS
+	int "Number of RX buffers"
+	default 16
+	---help---
+		EMAC buffer memory is segmented into 128 byte units (not
+		configurable).  This setting provides the number of such 128 byte
+		units used for reception.  This is also equal to the number of RX
+		descriptors that will be allocated  The selected value must be an
+		even power of 2.
+
+config SAMA5_EMAC0_NTXBUFFERS
+	int "Number of TX buffers"
+	default 8
+	---help---
+		EMAC buffer memory is segmented into full Ethernet packets (size
+		NET_BUFSIZE bytes).  This setting provides the number of such packets
+		that can be in flight.  This is also equal to the number of TX
+		descriptors that will be allocated.
+
+config SAMA5_EMAC0_PHYADDR
+	int "PHY address"
+	default 1
+	---help---
+		The 5-bit address of the PHY on the board.  Default: 1
+
+config SAMA5_EMAC0_PHYINIT
+	bool "Board-specific PHY Initialization"
+	default n
+	---help---
+		Some boards require specialized initialization of the PHY before it can be used.
+		This may include such things as configuring GPIOs, resetting the PHY, etc.  If
+		SAMA5_EMAC0_PHYINIT is defined in the configuration then the board specific logic must
+		provide sam_phyinitialize();  The SAMA5 EMAC driver will call this function
+		one time before it first uses the PHY.
+
+choice
+	prompt "PHY interface"
+	default SAMA5_EMAC0_MII
+
+config SAMA5_EMAC0_MII
+	bool "MII"
+	---help---
+		Support Ethernet MII interface (vs RMII).
+
+config SAMA5_EMAC0_RMII
+	bool "RMII"
+	depends on !ARCH_CHIP_SAM4E
+	---help---
+		Support Ethernet RMII interface (vs MII).
+
+endchoice # PHY interface
+
+config SAMA5_EMAC0_CLAUSE45
+	bool "Clause 45 MII"
+	depends on SAMA5_EMAC0_MII
+	---help---
+		MDIO was originally defined in Clause 22 of IEEE RFC802.3. In the
+		original specification, a single MDIO interface is able to access up
+		to 32 registers in 32 different PHY devices.  To meet the needs the
+		expanding needs of 10-Gigabit Ethernet devices, Clause 45 of the
+		802.3ae specification provided the following additions to MDIO:
+
+		- Ability to access 65,536 registers in 32 different devices on
+		  32 different ports
+		- Additional OP-code and ST-code for Indirect Address register
+		  access for 10 Gigabit Ethernet
+		- End-to-end fault signaling
+		- Multiple loopback points
+		- Low voltage electrical specification
+
+		By default, Clause 22 PHYs will be supported unless this option is
+		selected.
+
+config SAMA5_EMAC0_AUTONEG
+	bool "Use autonegotiation"
+	default y
+	---help---
+		Use PHY autonegotiation to determine speed and mode
+
+config SAMA5_EMAC0_ETHFD
+	bool "Full duplex"
+	default n
+	depends on !SAMA5_EMAC0_AUTONEG
+	---help---
+		If SAMA5_EMAC0_AUTONEG is not defined, then this may be defined to select full duplex
+		mode. Default: half-duplex
+
+config SAMA5_EMAC0_ETH100MBPS
+	bool "100 Mbps"
+	default n
+	depends on !SAMA5_EMAC0_AUTONEG
+	---help---
+		If SAMA5_EMAC0_AUTONEG is not defined, then this may be defined to select 100 MBps
+		speed.  Default: 10 Mbps
+
+config SAMA5_EMAC0_PHYSR
+	int "PHY Status Register Address (decimal)"
+	depends on SAMA5_EMAC0_AUTONEG
+	---help---
+		This must be provided if SAMA5_EMAC0_AUTONEG is defined.  The PHY status register
+		address may diff from PHY to PHY.  This configuration sets the address of
+		the PHY status register.
+
+config SAMA5_EMAC0_PHYSR_ALTCONFIG
+	bool "PHY Status Alternate Bit Layout"
+	default n
+	depends on SAMA5_EMAC0_AUTONEG
+	---help---
+		Different PHYs present speed and mode information in different ways.  Some
+		will present separate information for speed and mode (this is the default).
+		Those PHYs, for example, may provide a 10/100 Mbps indication and a separate
+		full/half duplex indication. This options selects an alternative representation
+		where speed and mode information are combined.  This might mean, for example,
+		separate bits for 10HD, 100HD, 10FD and 100FD.
+
+if SAMA5_EMAC0_AUTONEG
+if SAMA5_EMAC0_PHYSR_ALTCONFIG
+
+config SAMA5_EMAC0_PHYSR_ALTMODE
+	hex "PHY Mode Mask"
+	---help---
+		This must be provided if SAMA5_EMAC0_AUTONEG is defined.  This provide bit mask
+		for isolating the speed and full/half duplex mode bits.
+
+config SAMA5_EMAC0_PHYSR_10HD
+	hex "10MBase-T Half Duplex Value"
+	---help---
+		This must be provided if SAMA5_EMAC0_AUTONEG is defined.  This is the value
+		under the bit mask that represents the 10Mbps, half duplex setting.
+
+config SAMA5_EMAC0_PHYSR_100HD
+	hex "100Base-T Half Duplex Value"
+	---help---
+		This must be provided if SAMA5_EMAC0_AUTONEG is defined.  This is the value
+		under the bit mask that represents the 100Mbps, half duplex setting.
+
+config SAMA5_EMAC0_PHYSR_10FD
+	hex "10Base-T Full Duplex Value"
+	---help---
+		This must be provided if SAMA5_EMAC0_AUTONEG is defined.  This is the value
+		under the bit mask that represents the 10Mbps, full duplex setting.
+
+config SAMA5_EMAC0_PHYSR_100FD
+	hex "100Base-T Full Duplex Value"
+	---help---
+		This must be provided if SAMA5_EMAC0_AUTONEG is defined.  This is the value
+		under the bit mask that represents the 100Mbps, full duplex setting.
+
+endif # SAMA5_EMAC0_PHYSR_ALTCONFIG
+if !SAMA5_EMAC0_PHYSR_ALTCONFIG
+
+config SAMA5_EMAC0_PHYSR_SPEED
+	hex "PHY Speed Mask"
+	---help---
+		This must be provided if SAMA5_EMAC0_AUTONEG is defined.  This provides bit mask
+		for isolating the 10 or 100MBps speed indication.
+
+config SAMA5_EMAC0_PHYSR_100MBPS
+	hex "PHY 100Mbps Speed Value"
+	---help---
+		This must be provided if SAMA5_EMAC0_AUTONEG is defined.  This provides the value
+		of the speed bit(s) indicating 100MBps speed.
+
+config SAMA5_EMAC0_PHYSR_MODE
+	hex "PHY Mode Mask"
+	---help---
+		This must be provided if SAMA5_EMAC0_AUTONEG is defined.  This provides the
+		bit mask for isolating the full or half duplex mode bits.
+
+config SAMA5_EMAC0_PHYSR_FULLDUPLEX
+	hex "PHY Full Duplex Mode Value"
+	---help---
+		This must be provided if SAMA5_EMAC0_AUTONEG is defined.  This provides the
+		value of the mode bits indicating full duplex mode.
+
+endif # !SAMA5_EMAC0_PHYSR_ALTCONFIG
+endif # SAMA5_EMAC0_AUTONEG
+endmenu # EMAC0 device driver options
+endif # SAMA5_EMAC0
+
+if SAMA5_EMAC1
+
+menu "EMAC1 device driver options"
+
+config SAMA5_EMAC1_NRXBUFFERS
+	int "Number of RX buffers"
+	default 16
+	---help---
+		EMAC buffer memory is segmented into 128 byte units (not
+		configurable).  This setting provides the number of such 128 byte
+		units used for reception.  This is also equal to the number of RX
+		descriptors that will be allocated  The selected value must be an
+		even power of 2.
+
+config SAMA5_EMAC1_NTXBUFFERS
+	int "Number of TX buffers"
+	default 8
+	---help---
+		EMAC buffer memory is segmented into full Ethernet packets (size
+		NET_BUFSIZE bytes).  This setting provides the number of such packets
+		that can be in flight.  This is also equal to the number of TX
+		descriptors that will be allocated.
+
+config SAMA5_EMAC1_PHYADDR
+	int "PHY address"
+	default 1
+	---help---
+		The 5-bit address of the PHY on the board.  Default: 1
+
+config SAMA5_EMAC1_PHYINIT
+	bool "Board-specific PHY Initialization"
+	default n
+	---help---
+		Some boards require specialized initialization of the PHY before it can be used.
+		This may include such things as configuring GPIOs, resetting the PHY, etc.  If
+		SAMA5_EMAC1_PHYINIT is defined in the configuration then the board specific logic must
+		provide sam_phyinitialize();  The SAMA5 EMAC driver will call this function
+		one time before it first uses the PHY.
+
+choice
+	prompt "PHY interface"
+	default SAMA5_EMAC1_MII
+
+config SAMA5_EMAC1_MII
+	bool "MII"
+	---help---
+		Support Ethernet MII interface (vs RMII).
+
+config SAMA5_EMAC1_RMII
+	bool "RMII"
+	depends on !ARCH_CHIP_SAM4E
+	---help---
+		Support Ethernet RMII interface (vs MII).
+
+endchoice # PHY interface
+
+config SAMA5_EMAC1_CLAUSE45
+	bool "Clause 45 MII"
+	depends on SAMA5_EMAC1_MII
+	---help---
+		MDIO was originally defined in Clause 22 of IEEE RFC802.3. In the
+		original specification, a single MDIO interface is able to access up
+		to 32 registers in 32 different PHY devices.  To meet the needs the
+		expanding needs of 10-Gigabit Ethernet devices, Clause 45 of the
+		802.3ae specification provided the following additions to MDIO:
+
+		- Ability to access 65,536 registers in 32 different devices on
+		  32 different ports
+		- Additional OP-code and ST-code for Indirect Address register
+		  access for 10 Gigabit Ethernet
+		- End-to-end fault signaling
+		- Multiple loopback points
+		- Low voltage electrical specification
+
+		By default, Clause 22 PHYs will be supported unless this option is
+		selected.
+
+config SAMA5_EMAC1_AUTONEG
+	bool "Use autonegotiation"
+	default y
+	---help---
+		Use PHY autonegotiation to determine speed and mode
+
+config SAMA5_EMAC1_ETHFD
+	bool "Full duplex"
+	default n
+	depends on !SAMA5_EMAC1_AUTONEG
+	---help---
+		If SAMA5_EMAC1_AUTONEG is not defined, then this may be defined to select full duplex
+		mode. Default: half-duplex
+
+config SAMA5_EMAC1_ETH100MBPS
+	bool "100 Mbps"
+	default n
+	depends on !SAMA5_EMAC1_AUTONEG
+	---help---
+		If SAMA5_EMAC1_AUTONEG is not defined, then this may be defined to select 100 MBps
+		speed.  Default: 10 Mbps
+
+config SAMA5_EMAC1_PHYSR
+	int "PHY Status Register Address (decimal)"
+	depends on SAMA5_EMAC1_AUTONEG
+	---help---
+		This must be provided if SAMA5_EMAC1_AUTONEG is defined.  The PHY status register
+		address may diff from PHY to PHY.  This configuration sets the address of
+		the PHY status register.
+
+config SAMA5_EMAC1_PHYSR_ALTCONFIG
+	bool "PHY Status Alternate Bit Layout"
+	default n
+	depends on SAMA5_EMAC1_AUTONEG
+	---help---
+		Different PHYs present speed and mode information in different ways.  Some
+		will present separate information for speed and mode (this is the default).
+		Those PHYs, for example, may provide a 10/100 Mbps indication and a separate
+		full/half duplex indication. This options selects an alternative representation
+		where speed and mode information are combined.  This might mean, for example,
+		separate bits for 10HD, 100HD, 10FD and 100FD.
+
+if SAMA5_EMAC1_AUTONEG
+if SAMA5_EMAC1_PHYSR_ALTCONFIG
+
+config SAMA5_EMAC1_PHYSR_ALTMODE
+	hex "PHY Mode Mask"
+	---help---
+		This must be provided if SAMA5_EMAC1_AUTONEG is defined.  This provide bit mask
+		for isolating the speed and full/half duplex mode bits.
+
+config SAMA5_EMAC1_PHYSR_10HD
+	hex "10MBase-T Half Duplex Value"
+	---help---
+		This must be provided if SAMA5_EMAC1_AUTONEG is defined.  This is the value
+		under the bit mask that represents the 10Mbps, half duplex setting.
+
+config SAMA5_EMAC1_PHYSR_100HD
+	hex "100Base-T Half Duplex Value"
+	---help---
+		This must be provided if SAMA5_EMAC1_AUTONEG is defined.  This is the value
+		under the bit mask that represents the 100Mbps, half duplex setting.
+
+config SAMA5_EMAC1_PHYSR_10FD
+	hex "10Base-T Full Duplex Value"
+	---help---
+		This must be provided if SAMA5_EMAC1_AUTONEG is defined.  This is the value
+		under the bit mask that represents the 10Mbps, full duplex setting.
+
+config SAMA5_EMAC1_PHYSR_100FD
+	hex "100Base-T Full Duplex Value"
+	---help---
+		This must be provided if SAMA5_EMAC1_AUTONEG is defined.  This is the value
+		under the bit mask that represents the 100Mbps, full duplex setting.
+
+endif # SAMA5_EMAC1_PHYSR_ALTCONFIG
+if !SAMA5_EMAC1_PHYSR_ALTCONFIG
+
+config SAMA5_EMAC1_PHYSR_SPEED
+	hex "PHY Speed Mask"
+	---help---
+		This must be provided if SAMA5_EMAC1_AUTONEG is defined.  This provides bit mask
+		for isolating the 10 or 100MBps speed indication.
+
+config SAMA5_EMAC1_PHYSR_100MBPS
+	hex "PHY 100Mbps Speed Value"
+	---help---
+		This must be provided if SAMA5_EMAC1_AUTONEG is defined.  This provides the value
+		of the speed bit(s) indicating 100MBps speed.
+
+config SAMA5_EMAC1_PHYSR_MODE
+	hex "PHY Mode Mask"
+	---help---
+		This must be provided if SAMA5_EMAC1_AUTONEG is defined.  This provide bit mask
+		for isolating the full or half duplex mode bits.
+
+config SAMA5_EMAC1_PHYSR_FULLDUPLEX
+	hex "PHY Full Duplex Mode Value"
+	---help---
+		This must be provided if SAMA5_EMAC1_AUTONEG is defined.  This provides the
+		value of the mode bits indicating full duplex mode.
+
+endif # !SAMA5_EMAC1_PHYSR_ALTCONFIG
+endif # SAMA5_EMAC1_AUTONEG
+endmenu # EMAC1 device driver options
+endif # SAMA5_EMAC1
+
+# These apply to both EMAC0 and EMAC1
+
+config SAMA5_EMACB_PREALLOCATE
+	bool "Preallocate buffers"
+	default n
+	---help---
+		Buffer an descriptor many may either be allocated from the memory
+		pool or pre-allocated to lie in .bss.  This options selected pre-
+		allocated buffer memory.
+
+config SAMA5_EMACB_NBC
+	bool "Disable Broadcast"
+	default n
+	---help---
+		Select to disable receipt of broadcast packets.
+
+config SAMA5_EMACB_DEBUG
+	bool "Force EMAC0/1 DEBUG"
+	default n
+	depends on DEBUG && !DEBUG_NET
+	---help---
+		This option will force debug output from EMAC driver even without
+		network debug output enabled.  This is not normally something
+		that would want to do but is convenient if you are debugging the
+		driver and do not want to get overloaded with other
+		network-related debug output.
+
+config SAMA5_EMACB_REGDEBUG
+	bool "Register-Level Debug"
+	default n
+	depends on DEBUG
+	---help---
+		Enable very low-level register access debug.  Depends on DEBUG.
+
+endmenu # EMAC device driver options
+endif # SAMA5_EMACB
+
+if SAMA5_EMACA || SAMA5_EMAC0 || SAMA5_EMAC1 || SAMA5_GMAC
+choice
+	prompt "Which device is eth0"
+	default SAMA5_GMAC_ISETH0 if SAMA5_GMAC
+	default SAMA5_EMAC_ISETH0 if SAMA5_EMACA && !SAMA5_GMAC
+	default SAMA5_EMAC0_ISETH0 if SAMA5_EMAC0 && !SAM_EMAC && !SAMA5_GMAC
+	default SAMA5_EMAC1_ISETH0 if SAMA5_EMAC1 && !SAM_EMAC && !SAMA5_EMAC0 && !SAMA5_GMAC
+
+config SAMA5_EMAC_ISETH0
+	bool "EMAC is eth0"
+	depends on SAMA5_EMACA
+
+config SAMA5_EMAC0_ISETH0
+	bool "EMAC0 is eth0"
+	depends on SAMA5_EMAC0
+
+config SAMA5_EMAC1_ISETH0
+	bool "EMAC1 is eth0"
+	depends on SAMA5_EMAC1
+
+config SAMA5_GMAC_ISETH0
+    bool "GMAC is ETH0"
+	depends on SAMA5_GMAC
+
+endchoice # Which device is eth0
+endif # SAMA4_EMAC || SAMA5_EMAC0 || SAMA5_EMAC1 || SAMA5_GMAC
+
+if SAMA5_CAN0 || SAMA5_CAN1
+
+menu "CAN device driver options"
+
+if SAMA5_CAN0
+
+config SAMA5_CAN0_BAUD
+	int "CAN0 BAUD"
+	default 250000
+	depends on SAMA5_CAN0
+	---help---
+		CAN0 BAUD rate.  Required if SAMA5_CAN0 is defined.
+
+config SAMA5_CAN0_NRECVMB
+	int "Number of receive mailboxes"
+	default 1
+	range 1 3
+	---help---
+		The SAMA5 CAN0 peripheral supports 8 mailboxes that can be used for
+		sending and receiving messages.  Up the three of these can be set
+		aside statically for message reception.  The remainder can be
+		configured dynamically to send CAN messages.  Multiple receive
+		mailboxes might needed to either (1) receive bursts of messages, or
+		(2) to support multiple groups of messages filtered on message ID.
+
+		NOTE:  The maximum of 3 is a completely arbitrary design decision
+		and can certainly be changed if you need more.
+
+config SAMA5_CAN0_ADDR0
+	hex "Mailbox 0 address"
+	---help---
+		This setting defines the address for receive mailbox 0.  If CAN_EXTID
+		is defined, this should be a 29-bit extended CAN address; otherwise
+		it should be an 11-bit standard CAN address.
+
+config SAMA5_CAN0_MASK0
+	hex "Mailbox 0 address mask"
+	default 0x7fff if !CAN_EXTID
+	default 0x1fffffff if CAN_EXTID
+	---help---
+		This setting defines the address mask for receive mailbox 0.  And
+		address matching SAMA5_CAN0_ADDR0 under this mask are accepted.  The
+		default, all ones, forces an exact match.  A value of zero will accept
+		any address.
+
+		If CAN_EXTID is defined, this should be a 29-bit extended CAN address
+		mask; otherwise it should be an 11-bit standard CAN address.
+
+config SAMA5_CAN0_ADDR1
+	hex "Mailbox 1 address"
+	---help---
+		This setting defines the address for receive mailbox 1.  If CAN_EXTID
+		is defined, this should be a 29-bit extended CAN address; otherwise
+		it should be an 11-bit standard CAN address.
+
+		This setting is ignored if SAMA5_CAN0_NRECVMB is less than 2.
+
+config SAMA5_CAN0_MASK1
+	hex "Mailbox 1 address mask"
+	default 0x7fff if !CAN_EXTID
+	default 0x1fffffff if CAN_EXTID
+	---help---
+		This setting defines the address mask for receive mailbox 1.  And
+		address matching SAMA5_CAN0_ADDR1 under this mask are accepted.  The
+		default, all ones, forces an exact match.  A value of zero will accept
+		any address.
+
+		If CAN_EXTID is defined, this should be a 29-bit extended CAN address
+		mask; otherwise it should be an 11-bit standard CAN address.
+
+		This setting is ignored if SAMA5_CAN0_NRECVMB is less than 2.
+
+config SAMA5_CAN0_ADDR2
+	hex "Mailbox 2 address"
+	---help---
+		This setting defines the address for receive mailbox 2.  If CAN_EXTID
+		is defined, this should be a 29-bit extended CAN address; otherwise
+		it should be an 11-bit standard CAN address.
+
+		This setting is ignored if SAMA5_CAN0_NRECVMB is less than 3.
+
+config SAMA5_CAN0_MASK2
+	hex "Mailbox 1 address mask"
+	default 0x7fff if !CAN_EXTID
+	default 0x1fffffff if CAN_EXTID
+	---help---
+		This setting defines the address mask for receive mailbox 2.  And
+		address matching SAMA5_CAN0_ADDR2 under this mask are accepted.  The
+		default, all ones, forces an exact match.  A value of zero will accept
+		any address.
+
+		If CAN_EXTID is defined, this should be a 29-bit extended CAN address
+		mask; otherwise it should be an 11-bit standard CAN address.
+
+		This setting is ignored if SAMA5_CAN0_NRECVMB is less than 2.
+
+endif # SAMA5_CAN0
+
+if SAMA5_CAN1
+
+config SAMA5_CAN1_BAUD
+	int "CAN1 BAUD"
+	default 250000
+	depends on SAMA5_CAN1
+	---help---
+		CAN1 BAUD rate.  Required if SAMA5_CAN1 is defined.
+
+config SAMA5_CAN1_NRECVMB
+	int "Number of receive mailboxes"
+	default 1
+	range 1 3
+	---help---
+		The SAMA5 CAN1 peripheral supports 8 mailboxes that can be used for
+		sending and receiving messages.  Up the three of these can be set
+		aside statically for message reception.  The remainder can be
+		configured dynamically to send CAN messages.  Multiple receive
+		mailboxes might needed to either (1) receive bursts of messages, or
+		(2) to support multiple groups of messages filtered on message ID.
+
+		NOTE:  The maximum of 3 is a completely arbitrary design decision
+		and can certainly be changed if you need more.
+
+config SAMA5_CAN1_ADDR0
+	hex "Mailbox 0 address"
+	---help---
+		This setting defines the address for receive mailbox 0.  If CAN_EXTID
+		is defined, this should be a 29-bit extended CAN address; otherwise
+		it should be an 11-bit standard CAN address.
+
+config SAMA5_CAN1_MASK0
+	hex "Mailbox 0 address mask"
+	default 0x7fff if !CAN_EXTID
+	default 0x1fffffff if CAN_EXTID
+	---help---
+		This setting defines the address mask for receive mailbox 0.  And
+		address matching SAMA5_CAN1_ADDR0 under this mask are accepted.  The
+		default, all ones, forces an exact match.  A value of zero will accept
+		any address.
+
+		If CAN_EXTID is defined, this should be a 29-bit extended CAN address
+		mask; otherwise it should be an 11-bit standard CAN address.
+
+config SAMA5_CAN1_ADDR1
+	hex "Mailbox 1 address"
+	---help---
+		This setting defines the address for receive mailbox 1.  If CAN_EXTID
+		is defined, this should be a 29-bit extended CAN address; otherwise
+		it should be an 11-bit standard CAN address.
+
+		This setting is ignored if SAMA5_CAN0_NRECVMB is less than 2.
+
+config SAMA5_CAN1_MASK1
+	hex "Mailbox 1 address mask"
+	default 0x7fff if !CAN_EXTID
+	default 0x1fffffff if CAN_EXTID
+	---help---
+		This setting defines the address mask for receive mailbox 1.  And
+		address matching SAMA5_CAN1_ADDR1 under this mask are accepted.  The
+		default, all ones, forces an exact match.  A value of zero will accept
+		any address.
+
+		If CAN_EXTID is defined, this should be a 29-bit extended CAN address
+		mask; otherwise it should be an 11-bit standard CAN address.
+
+		This setting is ignored if SAMA5_CAN1_NRECVMB is less than 2.
+
+config SAMA5_CAN1_ADDR2
+	hex "Mailbox 2 address"
+	---help---
+		This setting defines the address for receive mailbox 2.  If CAN_EXTID
+		is defined, this should be a 29-bit extended CAN address; otherwise
+		it should be an 11-bit standard CAN address.
+
+		This setting is ignored if SAMA5_CAN1_NRECVMB is less than 3.
+
+config SAMA5_CAN1_MASK2
+	hex "Mailbox 2 address mask"
+	default 0x7fff if !CAN_EXTID
+	default 0x1fffffff if CAN_EXTID
+	---help---
+		This setting defines the address mask for receive mailbox 2.  And
+		address matching SAMA5_CAN1_ADDR2 under this mask are accepted.  The
+		default, all ones, forces an exact match.  A value of zero will accept
+		any address.
+
+		If CAN_EXTID is defined, this should be a 29-bit extended CAN address
+		mask; otherwise it should be an 11-bit standard CAN address.
+
+		This setting is ignored if SAMA5_CAN1_NRECVMB is less than 3.
+
+endif # SAMA5_CAN1
+
+config SAMA5_CAN_AUTOBAUD
+	bool "Enable auto-baud"
+	default n
+	depends on EXPERIMENTAL
+	---help---
+		Enable the SAMA5 auto-baud feature.  NOTE:  This feature is not yet
+		fully implemented.
+
+config SAMA5_CAN_REGDEBUG
+	bool "CAN Register level debug"
+	depends on DEBUG
+	default n
+	---help---
+		Output detailed register-level CAN device debug information.
+		Requires also DEBUG.
+
+endmenu # CAN device driver options
+endif # SAMA5_CAN0 || SAMA5_CAN1
+
+if SAMA5_SPI0 || SAMA5_SPI1
+
+menu "SPI device driver options"
+
+config SAMA5_SPI_DMA
+	bool "SPI DMA"
+	default n
+	depends on (SAMA5_DMAC0 && SAMA5_SPI0) || (SAMA5_DMAC1 && SAMA5_SPI1)
+	---help---
+		Use DMA to improve SPI transfer performance.
+
+config SAMA5_SPI_DMATHRESHOLD
+	int "SPI DMA threshold"
+	default 4
+	depends on SAMA5_SPI_DMA
+	---help---
+		When SPI DMA is enabled, small DMA transfers will still be performed
+		by polling logic.  But we need a threshold value to determine what
+		is small.  That value is provided by SAMA5_SPI_DMATHRESHOLD.
+
+config SAMA5_SPI_DMADEBUG
+	bool "SPI DMA transfer debug"
+	depends on SAMA5_SPI_DMA && DEBUG && DEBUG_DMA
+	default n
+	---help---
+		Enable special debug instrumentation analyze SPI DMA data transfers.
+		This logic is as non-invasive as possible:  It samples DMA
+		registers at key points in the data transfer and then dumps all of
+		the registers at the end of the transfer.
+
+config SAMA5_SPI_REGDEBUG
+	bool "SPI Register level debug"
+	depends on DEBUG
+	default n
+	---help---
+		Output detailed register-level SPI device debug information.
+		Requires also DEBUG.
+
+endmenu # SPI device driver options
+endif # SAMA5_SPI0 || SAMA5_SPI1
+
+if SAMA5_TWI0 || SAMA5_TWI1 || SAMA5_TWI2 || SAMA5_TWI3
+
+menu "TWI device driver options"
+
+config SAMA5_TWI0_FREQUENCY
+	int "TWI0 Frequency"
+	default 100000
+	depends on SAMA5_TWI0
+
+config SAMA5_TWI1_FREQUENCY
+	int "TWI1 Frequency"
+	default 100000
+	depends on SAMA5_TWI1
+
+config SAMA5_TWI2_FREQUENCY
+	int "TWI2 Frequency"
+	default 100000
+	depends on SAMA5_TWI2
+
+config SAMA5_TWI3_FREQUENCY
+	int "TWI3 Frequency"
+	default 100000
+	depends on SAMA5_TWI3
+
+config SAMA5_TWI_REGDEBUG
+	bool "TWI register level debug"
+	depends on DEBUG
+	default n
+	---help---
+		Output detailed register-level TWI device debug information.
+		Very invasive! Requires also DEBUG.
+
+endmenu # TWI device driver options
+endif # SAMA5_TWI0 || SAMA5_TWI1 || SAMA5_TWI2 || SAMA5_TWI3
+
+if SAMA5_SSC0 || SAMA5_SSC1
+menu "SSC Configuration"
+
+config SAMA5_SSC_MAXINFLIGHT
+	int "SSC queue size"
+	default 16
+	---help---
+		This is the total number of transfers, both RX and TX, that can be
+		enqueue before the caller is required to wait.  This setting
+		determines the number certain queue data structures that will be
+		pre-allocated.
+
+if SAMA5_SSC0
+comment "SSC0 Configuration"
+
+config SAMA5_SSC0_DATALEN
+	int "Data width (bits)"
+	default 16
+	---help---
+		Data width in bits.  This is a default value and may be change
+		via the I2S interface
+
+config SAMA5_SSC0_RX
+	bool "Enable I2C receiver"
+	default n
+	---help---
+		Enable I2S receipt logic
+
+if SAMA5_SSC0_RX
+
+choice
+	prompt "Receiver clock source"
+	default SAMA5_SSC0_RX_MCKDIV
+
+config SAMA5_SSC0_RX_RKINPUT
+	bool "RK input"
+	---help---
+		The SSC receiver clock is an external clock provided on the RK input
+		pin.  Sample rate determined by the external clock frequency.
+
+config SAMA5_SSC0_RX_TXCLK
+	bool "Transmitter Clock"
+	---help---
+		The SSC receiver clock is transmitter clock.  RX sample rate is the same
+		as the TX sample rate.
+
+config SAMA5_SSC0_RX_MCKDIV
+	bool "MCK/2"
+	---help---
+		The SSC receiver clock is the MCK/2 divided by a up to 4095.  Desired
+		sample rate must be provided below.
+
+endchoice # Receiver clock source
+
+if !SAMA5_SSC0_RX_RKINPUT
+choice
+	prompt "Receiver output clock"
+	default SAMA5_SSC0_RX_RKOUTPUT_NONE
+
+config SAMA5_SSC0_RX_RKOUTPUT_NONE
+	bool "None"
+
+config SAMA5_SSC0_RX_RKOUTPUT_CONT
+	bool "Continuous"
+
+config SAMA5_SSC0_RX_RKOUTPUT_XFR
+	bool "Only during transfers"
+
+endchoice # Receiver output clock
+endif # !SAMA5_SSC0_RX_RKINPUT
+
+config SAMA5_SSC0_RX_FSLEN
+	int "Receive Frame Sync Length"
+	default 1
+	range 1 255
+	---help---
+		This setting determines the pulse length of the Receive Frame Sync
+		signal in units of receive clock periods.
+
+config SAMA5_SSC0_RX_STTDLY
+	int "Receive Start Delay Length"
+	default 0
+	range 0 255
+	---help---
+		This setting determines the pulse length to the start of data in
+		receive clock periods.  It must be greater than or equal to the RX
+		frame synch length.  Zero means no start delay.
+
+endif # SAMA5_SSC0_RX
+
+config SAMA5_SSC0_TX
+	bool "Enable I2C transmitter"
+	default n
+	---help---
+		Enable I2S transmission logic
+
+if SAMA5_SSC0_TX
+
+choice
+	prompt "Transmitter clock source"
+	default SAMA5_SSC0_TX_MCKDIV
+
+config SAMA5_SSC0_TX_TKINPUT
+	bool "TK input"
+	---help---
+		The SSC transmitter clock is an external clock provided on the TK input
+		pin.  Sample rate determined by the external clock frequency.
+
+config SAMA5_SSC0_TX_RXCLK
+	bool "Receiver Clock"
+	---help---
+		The SSC transmitter clock is receiver clock.  TX sample rate is the same
+		as the RX sample rate.
+
+config SAMA5_SSC0_TX_MCKDIV
+	bool "MCK/2"
+	---help---
+		The SSC transmitter clock is the MCK/2 divided by a up to 4095.  Desired
+		sample rate must be provided below.
+
+endchoice # Transmitter clock source
+
+if !SAMA5_SSC0_TX_TKINPUT
+choice
+	prompt "Transmitter output clock"
+	default SAMA5_SSC0_TX_TKOUTPUT_NONE
+
+config SAMA5_SSC0_TX_TKOUTPUT_NONE
+	bool "None"
+
+config SAMA5_SSC0_TX_TKOUTPUT_CONT
+	bool "Continuous"
+
+config SAMA5_SSC0_TX_TKOUTPUT_XFR
+	bool "Only during transfers"
+
+endchoice # Receiver output clock
+endif # !SAMA5_SSC0_TX_TKINPUT
+
+config SAMA5_SSC0_TX_FSLEN
+	int "Transmit Frame Sync Length"
+	default 1
+	range 0 255
+	---help---
+		This setting define the length of the Transmit Frame Sync signal in
+		units of transmit clock periods.  A value of zero disables this
+		feature.  In that case the TD line is driven with the default value
+		during the Transmit Frame Sync signal.
+
+config SAMA5_SSC0_TX_STTDLY
+	int "Transmit Start Delay Length"
+	default 0
+	range 0 255
+	---help---
+		This setting determines the pulse length to the start of data in
+		transmit clock periods.  It must be greater than or equal to the RX
+		frame synch length.  Zero means no start delay.
+
+endif # SAMA5_SSC0_TX
+
+config SAMA5_SSC0_MCKDIV_SAMPLERATE
+	int "Sample rate"
+	default 48000
+	depends on SAMA5_SSC0_RX_MCKDIV || SAMA5_SSC0_TX_MCKDIV
+	---help---
+		If the either the receiver or transmitter clock is provided by MCK/2 divided
+		down, then the sample rate must be provided.  The bit rate will be the product
+		of the sample rate and the data width.  The SSC driver will determine the best
+		divider to obtain that bit rate (up to 4095).  If the bit rate can be realized
+		by dividing down the MCK/2, a compile time error will occur.
+
+config SAMA5_SSC0_LOOPBACK
+	bool "Loopback mode"
+	default n
+	depends on SAMA5_SSC0_TX && SAMA5_SSC0_RX
+	---help---
+		If both the receiver and transmitter are enabled, then the SSC can
+		be configured in loopback mode.  This setting selects SSC loopback
+		and will cause the LOOP bit to be set in the SSC_RFMR register. In
+		this case, RD is connected to TD, RF is connected to TF and RK is
+		connected to TK.
+
+endif # SAMA5_SSC0
+
+if SAMA5_SSC1
+comment "SSC1 Configuration"
+
+config SAMA5_SSC1_DATALEN
+	int "Data width (bits)"
+	default 16
+	---help---
+		Data width in bits.  This is a default value and may be change
+		via the I2S interface
+
+config SAMA5_SSC1_RX
+	bool "Enable I2C receiver"
+	default n
+	---help---
+		Enable I2S receipt logic
+
+if SAMA5_SSC1_RX
+
+choice
+	prompt "Receiver clock source"
+	default SAMA5_SSC1_RX_MCKDIV
+
+config SAMA5_SSC1_RX_RKINPUT
+	bool "RK input"
+	---help---
+		The SSC receiver clock is an external clock provided on the RK input
+		pin.  Sample rate determined by the external clock frequency.
+
+config SAMA5_SSC1_RX_TXCLK
+	bool "Transmitter Clock"
+	---help---
+		The SSC receiver clock is transmitter clock.  RX sample rate is the same
+		as the TX sample rate.
+
+config SAMA5_SSC1_RX_MCKDIV
+	bool "MCK/2"
+	---help---
+		The SSC receiver clock is the MCK/2 divided by a up to 4095.  Desired
+		sample rate must be provided below.
+
+endchoice # Receiver clock source
+
+if !SAMA5_SSC1_RX_RKINPUT
+choice
+	prompt "Receiver output clock"
+	default SAMA5_SSC1_RX_RKOUTPUT_NONE
+
+config SAMA5_SSC1_RX_RKOUTPUT_NONE
+	bool "None"
+
+config SAMA5_SSC1_RX_RKOUTPUT_CONT
+	bool "Continuous"
+
+config SAMA5_SSC1_RX_RKOUTPUT_XFR
+	bool "Only during transfers"
+
+endchoice # Receiver output clock
+endif # !SAMA5_SSC1_RX_RKINPUT
+
+config SAMA5_SSC1_RX_FSLEN
+	int "Receive Frame Sync Length"
+	default 1
+	range 1 255
+	---help---
+		This setting determines the pulse length of the Receive Frame Sync
+		signal in units of receive clock periods.
+
+config SAMA5_SSC1_RX_STTDLY
+	int "Receive Start Delay Length"
+	default 0
+	range 0 255
+	---help---
+		This setting determines the pulse length to the start of data of
+		receive clock periods.  It must be greater than or equal to the RX
+		frame synch length.  Zero means no start delay.
+
+endif # SAMA5_SSC1_RX
+
+config SAMA5_SSC1_TX
+	bool "Enable I2C transmitter"
+	default n
+	---help---
+		Enable I2S transmission logic
+
+if SAMA5_SSC1_TX
+
+choice
+	prompt "Transmitter clock source"
+	default SAMA5_SSC1_TX_MCKDIV
+
+config SAMA5_SSC1_TX_TKINPUT
+	bool "TK input"
+	---help---
+		The SSC transmitter clock is an external clock provided on the TK input
+		pin.  Sample rate determined by the external clock frequency.
+
+config SAMA5_SSC1_TX_RXCLK
+	bool "Receiver Clock"
+	---help---
+		The SSC transmitter clock is receiver clock.  TX sample rate is the same
+		as the RX sample rate.
+
+config SAMA5_SSC1_TX_MCKDIV
+	bool "MCK/2"
+	---help---
+		The SSC transmitter clock is the MCK/2 divided by a up to 4095.  Desired
+		sample rate must be provided below.
+
+endchoice # Transmitter clock source
+
+if !SAMA5_SSC1_TX_TKINPUT
+choice
+	prompt "Transmitter output clock"
+	default SAMA5_SSC1_TX_TKOUTPUT_NONE
+
+config SAMA5_SSC1_TX_TKOUTPUT_NONE
+	bool "None"
+
+config SAMA5_SSC1_TX_TKOUTPUT_CONT
+	bool "Continuous"
+
+config SAMA5_SSC1_TX_TKOUTPUT_XFR
+	bool "Only during transfers"
+
+endchoice # Receiver output clock
+endif # !SAMA5_SSC1_TX_TKINPUT
+
+config SAMA5_SSC1_TX_FSLEN
+	int "Receive Frame Sync Length"
+	default 1
+	range 0 255
+	---help---
+		This setting define the length of the Transmit Frame Sync signal in
+		units of transmit clock periods.  A value of zero disables this
+		feature.  In that case the TD line is driven with the default value
+		during the Transmit Frame Sync signal.
+
+config SAMA5_SSC1_TX_STTDLY
+	int "Transmit Start Delay Length"
+	default 0
+	range 0 255
+	---help---
+		This setting determines the pulse length to the start of data in
+		transmit clock periods.  It must be greater than or equal to the RX
+		frame synch length.  Zero means no start delay.
+
+endif # SAMA5_SSC1_TX
+
+config SAMA5_SSC1_MCKDIV_SAMPLERATE
+	int "Sample rate"
+	default 48000
+	depends on SAMA5_SSC1_RX_MCKDIV || SAMA5_SSC1_TX_MCKDIV
+	---help---
+		If the either the receiver or transmitter clock is provided by MCK/2 divided
+		down, then the sample rate must be provided.  The bit rate will be the product
+		of the sample rate and the data width.  The SSC driver will determine the best
+		divider to obtain that bit rate (up to 4095).  If the bit rate can be realized
+		by dividing down the MCK/2, a compile time error will occur.
+
+config SAMA5_SSC1_LOOPBACK
+	bool "Loopback mode"
+	default n
+	depends on SAMA5_SSC1_TX && SAMA5_SSC1_RX
+	---help---
+		If both the receiver and transmitter are enabled, then the SSC can
+		be configured in loopback mode.  This setting selects SSC loopback
+		and will cause the LOOP bit to be set in the SSC_RFMR register. In
+		this case, RD is connected to TD, RF is connected to TF and RK is
+		connected to TK.
+
+endif # SAMA5_SSC1
+
+config SAMA5_SSC_DMADEBUG
+	bool "SSC DMA transfer debug"
+	depends on DEBUG && DEBUG_DMA
+	default n
+	---help---
+		Enable special debug instrumentation analyze SSC DMA data transfers.
+		This logic is as non-invasive as possible:  It samples DMA
+		registers at key points in the data transfer and then dumps all of
+		the registers at the end of the transfer.
+
+config SAMA5_SSC_REGDEBUG
+	bool "SSC Register level debug"
+	depends on DEBUG
+	default n
+	---help---
+		Output detailed register-level SSC device debug information.
+		Very invasive! Requires also DEBUG.
+
+config SAMA5_SSC_QDEBUG
+	bool "SSC Queue debug"
+	depends on DEBUG_I2S
+	default n
+	---help---
+		Enable instrumentation to debug audio buffer queue logic.
+
+config SAMA5_SSC_DUMPBUFFERS
+	bool "Dump Buffers"
+	depends on DEBUG_I2S
+	default n
+	---help---
+		Enable instrumentation to dump TX and RX buffers.
+
+endmenu # SSC Configuration
+endif # SAMA5_SSC0 || SAMA5_SSC1
+
+if SAMA5_HSMCI0 || SAMA5_HSMCI1 || SAMA5_HSMCI2
+menu "HSMCI device driver options"
+
+if SAMA5_XDMAC0 || SAMA5_XDMAC1
+
+choice
+	prompt "HSMCI0 XDMAC Selection"
+	default SAMA5_HSMCI0_XDMAC0 if SAMA5_XDMAC0
+	default SAMA5_HSMCI0_XDMAC1 if !SAMA5_XDMAC0 && SAMA5_XDMAC1
+	depends on SAMA5_HSMCI0
+
+config SAMA5_HSMCI0_XDMAC0
+	bool "XDMAC0 (always secure)"
+	depends on SAMA5_XDMAC0
+
+config SAMA5_HSMCI0_XDMAC1
+	bool "XDMAC1 (never secure)"
+	depends on SAMA5_XDMAC1
+
+endchoice # HSMCI0 XDMAC Selection
+
+choice
+	prompt "HSMCI1 XDMAC Selection"
+	default SAMA5_HSMCI1_XDMAC0 if SAMA5_XDMAC0
+	default SAMA5_HSMCI1_XDMAC1 if !SAMA5_XDMAC0 && SAMA5_XDMAC1
+	depends on SAMA5_HSMCI1
+
+config SAMA5_HSMCI1_XDMAC0
+	bool "XDMAC0 (always secure)"
+	depends on SAMA5_XDMAC0
+
+config SAMA5_HSMCI1_XDMAC1
+	bool "XDMAC1 (never secure)"
+	depends on SAMA5_XDMAC1
+
+endchoice # HSMCI1 XDMAC Selection
+
+# There is no HSMCI2 on the platforms that support XDMAC
+endif # SAMA5_XDMAC0 || SAMA5_XDMAC1
+
+config SAMA5_HSMCI_RDPROOF
+	bool "Read Proof Enable"
+	default n
+	---help---
+		Enabling Read Proof allows to stop the HSMCI Clock during read
+		access if the internal FIFO is full. This will guarantee data
+		integrity, not bandwidth.
+
+config SAMA5_HSMCI_WRPROOF
+	bool "Write Proof Enable"
+	default n
+	---help---
+		Enabling Write Proof allows to stop the HSMCI Clock during write
+		access if the internal FIFO is full. This will guarantee data
+		integrity, not bandwidth.
+
+config SAMA5_HSMCI_XFRDEBUG
+	bool "HSMCI transfer debug"
+	depends on DEBUG_FS && DEBUG_VERBOSE
+	default n
+	---help---
+		Enable special debug instrumentation analyze HSMCI data transfers.
+		This logic is as non-invasive as possible:  It samples HSMCI
+		registers at key points in the data transfer and then dumps all of
+		the registers at the end of the transfer.  If DEBUG_DMA is also
+		enabled, then DMA register will be collected as well.  Requires also
+		DEBUG_FS and DEBUG_VERBOSE.
+
+config SAMA5_HSMCI_CMDDEBUG
+	bool "HSMCI command debug"
+	depends on DEBUG_FS && DEBUG_VERBOSE
+	default n
+	---help---
+		Enable special debug instrumentation analyze HSMCI commands. This
+		logic is as non-invasive as possible:  It samples HSMCI registers at
+		key points in the data transfer and then dumps all of the registers
+		at the end of the transfer.  If DEBUG_DMA is also enabled, then DMA
+		register will be collected as well.  Requires also DEBUG_FS and
+		DEBUG_VERBOSE.
+
+config SAMA5_HSMCI_REGDEBUG
+	bool "HSMCI Register level debug"
+	depends on DEBUG
+	default n
+	---help---
+		Output detailed register-level HSCMI device debug information.
+		Very invasive! Requires also DEBUG.
+
+endmenu # HSMCI device driver options
+endif # SAMA5_HSMCI0 || SAMA5_HSMCI1 || SAMA5_HSMCI2
+
+if SAMA5_UDPHS
+menu "USB High Speed Device Controller driver (DCD) options"
+
+config SAMA5_UDPHS_SCATTERGATHER
+	bool
+	default n
+	depends on EXPERIMENTAL
+	---help---
+		Scatter gather DMA is not yet supported
+
+config SAMA5_UDPHS_NDTDS
+	int "Number of UDPHS DMA transfer descriptors"
+	default 8
+	---help---
+		DMA transfer descriptors are allocated in a pool at boot time.  This
+		setting provides the number of DMA transfer descriptors to be
+		allocated.
+
+config SAMA5_UDPHS_PREALLOCATE
+	bool "Pre-allocate DMA transfer descriptors"
+	default y
+	---help---
+		If this option is selected then DMA transfer descriptors will be
+		pre-allocated in .bss.  Otherwise, the descriptors will be allocated
+		at start-up time with kmm_malloc().  This might be important if a larger
+		memory pool is available after startup.
+
+config SAMA5_UDPHS_REGDEBUG
+	bool "Enable low-level UDPHS register debug"
+	default n
+	depends on DEBUG
+
+endmenu # USB High Speed Device Controller driver (DCD) options
+endif # SAMA5_UDPHS
+
+if SAMA5_UHPHS
+menu "USB High Speed Host Controller driver (HCD) options"
+
+config SAMA5_OHCI
+	bool "Full/low speed OHCI support"
+	default n
+	select USBHOST
+	select USBHOST_HAVE_ASYNCH
+	---help---
+		Build support for the SAMA5 USB full speed Open Host Controller
+		Interface (OHCI).
+
+if SAMA5_OHCI
+config SAMA5_OHCI_NEDS
+	int "Number of endpoint descriptors"
+	default 6
+
+config SAMA5_OHCI_NTDS
+	int "Number of transfer descriptors"
+	default 9
+
+config SAMA5_OHCI_TDBUFFERS
+	int "Number of transfer descriptor buffers"
+	default 6
+
+config SAMA5_OHCI_TDBUFSIZE
+	int "Size of one transfer descriptor buffer"
+	default 128
+	---help---
+		The size of one transfer descriptor (TD) buffer in bytes.  The TD
+		buffer size must be an even number of 32-bit words
+
+config SAMA5_OHCI_REGDEBUG
+	bool "Enable low-level OHCI register debug"
+	default n
+	depends on DEBUG
+
+endif # SAMA5_OHCI
+
+config SAMA5_EHCI
+	bool "High speed EHCI support"
+	default n
+	select USBHOST
+	select USBHOST_HAVE_ASYNCH
+	---help---
+		Build support for the SAMA5 USB high speed Enhanced Host Controller
+		Interface (EHCI).  If low/full speed is needed too, then you must
+		also enable the OHCI controller.
+
+if SAMA5_EHCI
+
+config SAMA5_EHCI_NQHS
+	int "Number of Queue Head (QH) structures"
+	default 4
+	---help---
+		Configurable number of Queue Head (QH) structures.  The default is
+		one per Root hub port plus one for EP0 (4).
+
+config SAMA5_EHCI_NQTDS
+	int "Number of Queue Element Transfer Descriptor (qTDs)"
+	default 6
+	---help---
+		Configurable number of Queue Element Transfer Descriptor (qTDs).
+		The default is one per root hub plus three from EP0 (6).
+
+config SAMA5_EHCI_BUFSIZE
+	int "Size of one request/descriptor buffer"
+	default 128
+	---help---
+		The size of one request/descriptor buffer in bytes.  The TD buffe
+		size must be an even number of 32-bit words and must be large enough
+		to hangle the largest transfer via a SETUP request.
+
+config SAMA5_EHCI_PREALLOCATE
+	bool "Preallocate descriptor pool"
+	default y
+	---help---
+		Select this option to pre-allocate EHCI queue and descriptor
+		structure pools in .bss.  Otherwise, these pools will be
+		dynamically allocated using kmm_memalign().
+
+config SAMA5_EHCI_REGDEBUG
+	bool "Enable low-level EHCI register debug"
+	default n
+	depends on DEBUG
+
+endif # SAMA5_EHCI
+
+if SAMA5_OHCI || SAMA5_EHCI
+
+config SAMA5_UHPHS_RHPORT1
+	bool "Use Port A"
+	default y
+	depends on !SAMA5_UDPHS
+
+config SAMA5_UHPHS_RHPORT2
+	bool "Use Port B"
+	default y
+
+config SAMA5_UHPHS_RHPORT3
+	bool "Use Port C"
+	default y
+
+endif # SAMA5_OHCI || SAMA5_EHCI
+
+endmenu # USB High Speed Host Controller driver (HCD) options
+endif # SAMA5_UHPHS
+
+if SAMA5_ADC
+menu "ADC configuration"
+
+config SAMA5_ADC_HAVE_CHAN
+	bool
+	default n
+
+menu "ADC Channel selection"
+
+config SAMA5_ADC_CHAN0
+	bool "Channel 0"
+	default n
+	depends on !SAMA5_TSD
+	select SAMA5_ADC_HAVE_CHAN
+	---help---
+		Enable ADC sampling on ADC channel 0
+
+config SAMA5_ADC_CHAN1
+	bool "Channel 1"
+	default n
+	depends on !SAMA5_TSD
+	select SAMA5_ADC_HAVE_CHAN
+	---help---
+		Enable ADC sampling on ADC channel 1
+
+config SAMA5_ADC_CHAN2
+	bool "Channel 2"
+	default n
+	depends on !SAMA5_TSD
+	select SAMA5_ADC_HAVE_CHAN
+	---help---
+		Enable ADC sampling on ADC channel 2
+
+config SAMA5_ADC_CHAN3
+	bool "Channel 3"
+	default n
+	depends on !SAMA5_TSD
+	select SAMA5_ADC_HAVE_CHAN
+	---help---
+		Enable ADC sampling on ADC channel 3
+
+config SAMA5_ADC_CHAN4
+	bool "Channel 4"
+	default n
+	depends on !SAMA5_TSD || !SAMA5_TSD_5WIRE
+	select SAMA5_ADC_HAVE_CHAN
+	---help---
+		Enable ADC sampling on ADC channel 4
+
+config SAMA5_ADC_CHAN5
+	bool "Channel 5"
+	default n
+	select SAMA5_ADC_HAVE_CHAN
+	---help---
+		Enable ADC sampling on ADC channel 5
+
+config SAMA5_ADC_CHAN6
+	bool "Channel 6"
+	default n
+	select SAMA5_ADC_HAVE_CHAN
+	---help---
+		Enable ADC sampling on ADC channel 6
+
+config SAMA5_ADC_CHAN7
+	bool "Channel 7"
+	default n
+	select SAMA5_ADC_HAVE_CHAN
+	---help---
+		Enable ADC sampling on ADC channel 7
+
+config SAMA5_ADC_CHAN8
+	bool "Channel 8"
+	default n
+	select SAMA5_ADC_HAVE_CHAN
+	---help---
+		Enable ADC sampling on ADC channel 8
+
+config SAMA5_ADC_CHAN9
+	bool "Channel 9"
+	default n
+	select SAMA5_ADC_HAVE_CHAN
+	---help---
+		Enable ADC sampling on ADC channel 9
+
+config SAMA5_ADC_CHAN10
+	bool "Channel 10"
+	default n
+	select SAMA5_ADC_HAVE_CHAN
+	---help---
+		Enable ADC sampling on ADC channel 10
+
+config SAMA5_ADC_CHAN11
+	bool "Channel 11"
+	default n
+	select SAMA5_ADC_HAVE_CHAN
+	---help---
+		Enable ADC sampling on ADC channel 11
+
+endmenu # ADC Channel selection
+
+if SAMA5_ADC_HAVE_CHAN
+
+config SAMA5_ADC_DMA
+	bool "DMA Support"
+	default n
+	depends on SAMA5_DMAC1
+	---help---
+		Enable DMA transfers of converted data.  This option is only
+		useful if you have numerous DMA channels enabled.  The end result
+		is that there will be one DMA interrupt per conversion sequence vs.
+		one interrupt per conversion.
+
+config SAMA5_ADC_DMASAMPLES
+	int "Number of DMA samples"
+	default 2
+	depends on SAMA5_ADC_DMA
+	---help---
+		If DMA is enabled, then this will specify the number of sample to
+		collect before the DMA completes.  This is actually the number of
+		triggers; the number of collected samples will be this value times
+		the number of channels that are enabled.  You should also enable the
+		sequencer if you are DMAing multiple channels.
+
+		A value of "1" would DMA one set of samples.  That is not advised.
+		In that case the processing and data transfer overhead would be
+		greater than if DMA were disabled.  A value of 2 or more should be
+		selected.
+
+		The DMA logic uses ping-pong buffers, so the total buffering
+		requirement will be
+
+			2 Buffers * Number_of_ADC_Channels * SAMA5_ADC_DMASAMPLES * sizeof(uint16_t)
+
+		So, for example, if you had 8 ADC channels and 8 triggers per DMA
+		transfer, then the total DMA buffering requirment would be:
+
+			2 * 8 * 8 * 2 = 256 bytes.
+
+config SAMA5_ADC_AUTOCALIB
+	bool "ADC auto-calibration"
+	default n
+	---help---
+		Perform ADC auto-calibration during the ADC initialization sequence
+
+config SAMA5_ADC_SEQUENCER
+	bool "ADC sequencer"
+	default n
+	---help---
+		Enable the sequencer to perform ADC conversions.  Recommended if you
+		enable several ADC channels.
+
+config SAMA5_ADC_ANARCH
+	bool "Analog changes"
+	default n
+	---help---
+		This option allows you to select different gain, offset, and single
+		vs. differential modes for each channel.
+
+if SAMA5_ADC_ANARCH
+
+menu "Channel gain"
+
+config SAMA5_ADC_GAIN0
+	int "Channel 0 gain"
+	default 1
+	depends on SAMA5_ADC_CHAN0
+	range 0 3
+	---help---
+		Valid gain settings are {0, 1, 2, 3} which may be interpreted as
+		either {1, 1, 2, 4} if the channel is configured for single ended
+		mode or as {0.5, 1, 2, 2} if the channel is configured for
+		differential mode.
+
+config SAMA5_ADC_GAIN1
+	int "Channel 1 gain"
+	default 1
+	depends on SAMA5_ADC_CHAN1
+	range 0 3
+	---help---
+		Valid gain settings are {0, 1, 2, 3} which may be interpreted as
+		either {1, 1, 2, 4} if the channel is configured for single ended
+		mode or as {0.5, 1, 2, 2} if the channel is configured for
+		differential mode.
+
+config SAMA5_ADC_GAIN2
+	int "Channel 2 gain"
+	default 1
+	depends on SAMA5_ADC_CHAN2
+	range 0 3
+	---help---
+		Valid gain settings are {0, 1, 2, 3} which may be interpreted as
+		either {1, 1, 2, 4} if the channel is configured for single ended
+		mode or as {0.5, 1, 2, 2} if the channel is configured for
+		differential mode.
+
+config SAMA5_ADC_GAIN3
+	int "Channel 3 gain"
+	default 1
+	depends on SAMA5_ADC_CHAN3
+	range 0 3
+	---help---
+		Valid gain settings are {0, 1, 2, 3} which may be interpreted as
+		either {1, 1, 2, 4} if the channel is configured for single ended
+		mode or as {0.5, 1, 2, 2} if the channel is configured for
+		differential mode.
+
+config SAMA5_ADC_GAIN4
+	int "Channel 4 gain"
+	default 1
+	depends on SAMA5_ADC_CHAN4
+	range 0 3
+	---help---
+		Valid gain settings are {0, 1, 2, 3} which may be interpreted as
+		either {1, 1, 2, 4} if the channel is configured for single ended
+		mode or as {0.5, 1, 2, 2} if the channel is configured for
+		differential mode.
+
+config SAMA5_ADC_GAIN5
+	int "Channel 5 gain"
+	default 1
+	depends on SAMA5_ADC_CHAN5
+	range 0 3
+	---help---
+		Valid gain settings are {0, 1, 2, 3} which may be interpreted as
+		either {1, 1, 2, 4} if the channel is configured for single ended
+		mode or as {0.5, 1, 2, 2} if the channel is configured for
+		differential mode.
+
+config SAMA5_ADC_GAIN6
+	int "Channel 6 gain"
+	default 1
+	depends on SAMA5_ADC_CHAN6
+	range 0 3
+	---help---
+		Valid gain settings are {0, 1, 2, 3} which may be interpreted as
+		either {1, 1, 2, 4} if the channel is configured for single ended
+		mode or as {0.5, 1, 2, 2} if the channel is configured for
+		differential mode.
+
+config SAMA5_ADC_GAIN7
+	int "Channel 7 gain"
+	default 1
+	depends on SAMA5_ADC_CHAN7
+	range 0 3
+	---help---
+		Valid gain settings are {0, 1, 2, 3} which may be interpreted as
+		either {1, 1, 2, 4} if the channel is configured for single ended
+		mode or as {0.5, 1, 2, 2} if the channel is configured for
+		differential mode.
+
+config SAMA5_ADC_GAIN8
+	int "Channel 8 gain"
+	default 1
+	depends on SAMA5_ADC_CHAN8
+	range 0 3
+	---help---
+		Valid gain settings are {0, 1, 2, 3} which may be interpreted as
+		either {1, 1, 2, 4} if the channel is configured for single ended
+		mode or as {0.5, 1, 2, 2} if the channel is configured for
+		differential mode.
+
+config SAMA5_ADC_GAIN9
+	int "Channel 9 gain"
+	default 1
+	depends on SAMA5_ADC_CHAN9
+	range 0 3
+	---help---
+		Valid gain settings are {0, 1, 2, 3} which may be interpreted as
+		either {1, 1, 2, 4} if the channel is configured for single ended
+		mode or as {0.5, 1, 2, 2} if the channel is configured for
+		differential mode.
+
+config SAMA5_ADC_GAIN10
+	int "Channel 10 gain"
+	default 1
+	depends on SAMA5_ADC_CHAN10
+	range 0 3
+	---help---
+		Valid gain settings are {0, 1, 2, 3} which may be interpreted as
+		either {1, 1, 2, 4} if the channel is configured for single ended
+		mode or as {0.5, 1, 2, 2} if the channel is configured for
+		differential mode.
+
+config SAMA5_ADC_GAIN11
+	int "Channel 11 gain"
+	default 1
+	depends on SAMA5_ADC_CHAN11
+	range 0 3
+	---help---
+		Valid gain settings are {0, 1, 2, 3} which may be interpreted as
+		either {1, 1, 2, 4} if the channel is configured for single ended
+		mode or as {0.5, 1, 2, 2} if the channel is configured for
+		differential mode.
+
+endmenu # Channel gain
+
+menu "Channel offsets"
+
+config SAMA5_ADC_OFFSET0
+	bool "Channel 0 offset"
+	default n
+	depends on SAMA5_ADC_CHAN0
+	---help---
+		Center the channel 0 analog signal on Vrefin/2 before the gain
+		scaling.
+
+config SAMA5_ADC_OFFSET1
+	bool "Channel 1 offset"
+	default n
+	depends on SAMA5_ADC_CHAN1
+	---help---
+		Center the channel 1 analog signal on Vrefin/2 before the gain
+		scaling.
+
+config SAMA5_ADC_OFFSET2
+	bool "Channel 2 offset"
+	default n
+	depends on SAMA5_ADC_CHAN2
+	---help---
+		Center the channel 2 analog signal on Vrefin/2 before the gain
+		scaling.
+
+config SAMA5_ADC_OFFSET3
+	bool "Channel 3 offset"
+	default n
+	depends on SAMA5_ADC_CHAN3
+	---help---
+		Center the channel 3 analog signal on Vrefin/2 before the gain
+		scaling.
+
+config SAMA5_ADC_OFFSET4
+	bool "Channel 4 offset"
+	default n
+	depends on SAMA5_ADC_CHAN4
+	---help---
+		Center the channel 4 analog signal on Vrefin/2 before the gain
+		scaling.
+
+config SAMA5_ADC_OFFSET5
+	bool "Channel 5 offset"
+	default n
+	depends on SAMA5_ADC_CHAN5
+	---help---
+		Center the channel 5 analog signal on Vrefin/2 before the gain
+		scaling.
+
+config SAMA5_ADC_OFFSET6
+	bool "Channel 6 offset"
+	default n
+	depends on SAMA5_ADC_CHAN6
+	---help---
+		Center the channel 6 analog signal on Vrefin/2 before the gain
+		scaling.
+
+config SAMA5_ADC_OFFSET7
+	bool "Channel 7 offset"
+	default n
+	depends on SAMA5_ADC_CHAN7
+	---help---
+		Center the channel 7 analog signal on Vrefin/2 before the gain
+		scaling.
+
+config SAMA5_ADC_OFFSET8
+	bool "Channel 8 offset"
+	default n
+	depends on SAMA5_ADC_CHAN8
+	---help---
+		Center the channel 8 analog signal on Vrefin/2 before the gain
+		scaling.
+
+config SAMA5_ADC_OFFSET9
+	bool "Channel 9 offset"
+	default n
+	depends on SAMA5_ADC_CHAN9
+	---help---
+		Center the channel 9 analog signal on Vrefin/2 before the gain
+		scaling.
+
+config SAMA5_ADC_OFFSET10
+	bool "Channel 10 offset"
+	default n
+	depends on SAMA5_ADC_CHAN10
+	---help---
+		Center the channel 10 analog signal on Vrefin/2 before the gain
+		scaling.
+
+config SAMA5_ADC_OFFSET11
+	bool "Channel 11 offset"
+	default n
+	depends on SAMA5_ADC_CHAN11
+	---help---
+		Center the channel 11 analog signal on Vrefin/2 before the gain
+		scaling.
+
+endmenu # Channel offsets
+
+menu "Channel differential mode"
+
+config SAMA5_ADC_DIFFMODE0
+	bool "Channel 0 differential mode"
+	default n
+	depends on SAMA5_ADC_CHAN0
+	---help---
+		Selects differential (vs. single-ended mode) for ADC channel 0
+
+config SAMA5_ADC_DIFFMODE1
+	bool "Channel 1 differential mode"
+	default n
+	depends on SAMA5_ADC_CHAN1
+	---help---
+		Selects differential (vs. single-ended mode) for ADC channel 1
+
+config SAMA5_ADC_DIFFMODE2
+	bool "Channel 2 differential mode"
+	default n
+	depends on SAMA5_ADC_CHAN2
+	---help---
+		Selects differential (vs. single-ended mode) for ADC channel 2
+
+config SAMA5_ADC_DIFFMODE3
+	bool "Channel 3 differential mode"
+	default n
+	depends on SAMA5_ADC_CHAN3
+	---help---
+		Selects differential (vs. single-ended mode) for ADC channel 3
+
+config SAMA5_ADC_DIFFMODE4
+	bool "Channel 4 differential mode"
+	default n
+	depends on SAMA5_ADC_CHAN4
+	---help---
+		Selects differential (vs. single-ended mode) for ADC channel 4
+
+config SAMA5_ADC_DIFFMODE5
+	bool "Channel 5 differential mode"
+	default n
+	depends on SAMA5_ADC_CHAN5
+	---help---
+		Selects differential (vs. single-ended mode) for ADC channel 5
+
+config SAMA5_ADC_DIFFMODE6
+	bool "Channel 6 differential mode"
+	default n
+	depends on SAMA5_ADC_CHAN6
+	---help---
+		Selects differential (vs. single-ended mode) for ADC channel 6
+
+config SAMA5_ADC_DIFFMODE7
+	bool "Channel 7 differential mode"
+	default n
+	depends on SAMA5_ADC_CHAN7
+	---help---
+		Selects differential (vs. single-ended mode) for ADC channel 7
+
+config SAMA5_ADC_DIFFMODE8
+	bool "Channel 8 differential mode"
+	default n
+	depends on SAMA5_ADC_CHAN8
+	---help---
+		Selects differential (vs. single-ended mode) for ADC channel 8
+
+config SAMA5_ADC_DIFFMODE9
+	bool "Channel 9 differential mode"
+	default n
+	depends on SAMA5_ADC_CHAN9
+	---help---
+		Selects differential (vs. single-ended mode) for ADC channel 9
+
+config SAMA5_ADC_DIFFMODE10
+	bool "Channel 10 differential mode"
+	default n
+	depends on SAMA5_ADC_CHAN10
+	---help---
+		Selects differential (vs. single-ended mode) for ADC channel 10
+
+config SAMA5_ADC_DIFFMODE11
+	bool "Channel 11 differential mode"
+	default n
+	depends on SAMA5_ADC_CHAN11
+	---help---
+		Selects differential (vs. single-ended mode) for ADC channel 11
+
+endmenu # Differential mode
+endif # SAMA5_ADC_ANARCH
+
+if !SAMA5_ADC_ANARCH
+
+config SAMA5_ADC_GAIN
+	int "Analog gain"
+	default 1
+	depends on SAMA5_ADC_CHAN0
+	range 0 3
+	---help---
+		Valid gain settings are {0, 1, 2, 3} which may be interpreted as
+		either {1, 1, 2, 4} if the channels are configured for single ended
+		mode or as {0.5, 1, 2, 2} if the channels are configured for
+		differential mode.
+
+config SAMA5_ADC_OFFSET
+	bool "Offset"
+	default n
+	---help---
+		Center the analog signal on Vrefin/2 before the gain scaling.
+
+config SAMA5_ADC_DIFFMODE
+	bool "Differential mode"
+	default n
+	---help---
+		Selects differential (vs. single-ended mode)
+
+endif # !SAMA5_ADC_ANARCH
+
+menu "ADC Trigger Selection"
+
+choice
+	prompt "ADC trigger mode"
+	default SAMA5_ADC_SWTRIG
+	---help---
+		Select the event that will trigger the A-to-D conversion sequence.
+
+config SAMA5_ADC_SWTRIG
+	bool "Software trigger"
+	---help---
+		A-to-D Conversion is initiated only by sofware via an ioctl()
+
+config SAMA5_ADC_ADTRG
+	bool "External trigger via the ADTRG pin"
+	---help---
+		A-to-D Conversion is initiated an event on the ADTRG pin.
+
+config SAMA5_ADC_TIOATRIG
+	bool "TC0 output A trigger"
+	depends on SAMA5_TC0
+	---help---
+		A-to-D Conversion is initiated the A output from one of
+		Timer/Counter 0 channels.
+
+endchoice # Trigger mode
+
+choice
+	prompt "ADTRG edge"
+	default SAMA5_ADC_ADTRG_BOTH
+	depends on SAMA5_ADC_ADTRG
+
+config SAMA5_ADC_ADTRG_RISING
+	bool "Rising edge"
+	---help---
+		Trigger A-to-D conversion on the rising edge of the ADTRG signal.
+
+config SAMA5_ADC_ADTRG_FALLING
+	bool "Falling edge"
+	---help---
+		Trigger A-to-D conversion on the falling edge of the ADTRG signal.
+
+config SAMA5_ADC_ADTRG_BOTH
+	bool "Both edges"
+	---help---
+		Trigger A-to-D conversion on both edges of the ADTRG signal
+
+endchoice # ADTRG edge
+
+if SAMA5_ADC_TIOATRIG
+
+config SAMA5_ADC_TIOAFREQ
+	int "ADC sampling frequency"
+	default 1
+	---help---
+		This setting provides the rate at which the timer will driver ADC
+		sampling.
+
+choice
+	prompt "TC0 channel"
+	default SAMA5_ADC_TIOA0TRIG
+
+config SAMA5_ADC_TIOA0TRIG
+	bool "TC0 Channel 0 Output A"
+	select SAMA5_TC0_TIOA0
+	---help---
+		A-to-D conversion is triggered by the TC0 channel 0 output A signal.
+		This output must be enabled independently in the Timer/Counter
+		driver configuration for this to work.
+
+config SAMA5_ADC_TIOA1TRIG
+	bool "TC0 Channel 1 Output A"
+	select SAMA5_TC0_TIOA1
+	---help---
+		A-to-D conversion is triggered by the TC0 channel 1 output A signal.
+		This output must be enabled independently in the Timer/Counter
+		driver configuration for this to work.
+
+config SAMA5_ADC_TIOA2TRIG
+	bool "TC0 Channel 2 Output A"
+	select SAMA5_TC0_TIOA2
+	---help---
+		A-to-D conversion is triggered by the TC0 channel 2 output A signal.
+		This output must be enabled independently in the Timer/Counter
+		driver configuration for this to work.
+
+endchoice # TC0 channel
+
+choice
+	prompt "TIOAx edge"
+	default SAMA5_ADC_TIOA_BOTH
+	depends on SAMA5_ADC_TIOATRIG
+
+config SAMA5_ADC_TIOA_RISING
+	bool "Rising edge"
+	---help---
+		Trigger A-to-D conversion on the rising edge of the TIOAx signal.
+
+config SAMA5_ADC_TIOA_FALLING
+	bool "Falling edge"
+	---help---
+		Trigger A-to-D conversion on the falling edge of the TIOAx signal.
+
+config SAMA5_ADC_TIOA_BOTH
+	bool "Both edges"
+	---help---
+		Trigger A-to-D conversion on both edges of the TIOAx signal
+
+endchoice # ADTRG edge
+endif # SAMA5_ADC_TIOATRIG
+endmenu # ADC Trigger Selection
+endif # SAMA5_ADC_HAVE_CHAN
+
+config SAMA5_ADC_REGDEBUG
+	bool "Enable register-level ADC/touchscreen debug"
+	default n
+	depends on DEBUG
+	---help---
+		Enable very low register-level debug output.
+
+endmenu # ADC Configuration
+
+menu "Touchscreen configuration"
+
+config SAMA5_TSD
+	bool "Touchscreen support"
+	default n
+#	depends on !SAMA5_ADC_HAVE_CHAN || EXPERIMENTAL
+	select INPUT
+	---help---
+		Configure the ADC to support a touchscreen
+
+if SAMA5_TSD
+
+choice
+	prompt "Touchscreen interface"
+	default SAMA5_TSD_4WIRE
+	---help---
+		Select the type of physical interface to the touchscreen
+
+config SAMA5_TSD_4WIRE
+	bool "4-wire interface (with pressure)"
+
+config SAMA5_TSD_4WIRENPM
+	bool "4-wire interface (without pressure)"
+
+config SAMA5_TSD_5WIRE
+	bool "5-wire interface"
+
+endchoice # Touchscreen interface
+
+config SAMA5_TSD_SWAPXY
+	bool "Swap X/Y"
+	default n
+	---help---
+		Reverse the meaning of X and Y to handle different LCD orientations.
+
+config SAMA5_TSD_THRESHX
+	int "X threshold"
+	default 12
+	---help---
+		New touch positions will only be reported when the X or Y data
+		changes by these thresholds. This trades reduces data rate for some
+		loss in dragging accuracy.  For 12-bit values so the raw ranges are
+		0-4095. So for example, if your display is 320x240, then THRESHX=13
+		and THRESHY=17 would correspond to one pixel.  Default: 12
+
+config SAMA5_TSD_THRESHY
+	int "Y threshold"
+	default 12
+	---help---
+		New touch positions will only be reported when the X or Y data
+		changes by these thresholds. This trades reduces data rate for some
+		loss in dragging accuracy.  For 12-bit values so the raw ranges are
+		0-4095. So for example, if your display is 320x240, then THRESHX=13
+		and THRESHY=17 would correspond to one pixel.  Default: 12
+
+config SAMA_TSD_RXP
+	int "X-panel resistance"
+	default 6
+	depends on SAMA5_TSD_4WIRE
+	---help---
+		The method to measure the pressure (Rp) applied to the touchscreen is
+		based on the known resistance of the X-Panel resistance (Rxp).
+
+config SAMA5_TSD_NPOLLWAITERS
+	int "Number poll waiters"
+	default 4
+	depends on !DISABLE_POLL
+	---help---
+		Maximum number of threads that can be waiting on poll()
+
+endif # SAMA5_TSD
+endmenu # Touchscreen Configuration
+endif # SAMA5_ADC
+
+if SAMA5_HAVE_TC
+menu "Timer/counter Configuration"
+
+if SAMA5_TC0
+
+config SAMA5_TC0_CLK0
+	bool "Enable TC0 channel 0 clock input pin"
+	default n
+
+config SAMA5_TC0_TIOA0
+	bool "Enable TC0 channel 0 output A"
+	default n
+
+config SAMA5_TC0_TIOB0
+	bool "Enable TC0 channel 0 output B"
+	default n
+
+config SAMA5_TC0_CLK1
+	bool "Enable TC0 channel 1 clock input pin"
+	default n
+
+config SAMA5_TC0_TIOA1
+	bool "Enable TC0 channel 1 output A"
+	default n
+
+config SAMA5_TC0_TIOB1
+	bool "Enable TC0 channel 1 output B"
+	default n
+
+config SAMA5_TC0_CLK2
+	bool "Enable TC0 channel 2 clock input pin"
+	default n
+
+config SAMA5_TC0_TIOA2
+	bool "Enable TC0 channel 2 output A"
+	default n
+
+config SAMA5_TC0_TIOB2
+	bool "Enable TC0 channel 2 output B"
+	default n
+
+endif # SAMA5_TC0
+
+if SAMA5_TC1
+
+config SAMA5_TC1_CLK3
+	bool "Enable TC1 channel 3 clock input pin"
+	default n
+
+config SAMA5_TC1_TIOA3
+	bool "Enable TC1 channel 3 output A"
+	default n
+
+config SAMA5_TC1_TIOB3
+	bool "Enable TC1 channel 3 output B"
+	default n
+
+config SAMA5_TC1_CLK4
+	bool "Enable TC1 channel 4 clock input pin"
+	default n
+
+config SAMA5_TC1_TIOA4
+	bool "Enable TC1 channel 4 output A"
+	default n
+
+config SAMA5_TC1_TIOB4
+	bool "Enable TC1 channel 4 output B"
+	default n
+
+config SAMA5_TC1_CLK5
+	bool "Enable TC1 channel 5 clock input pin"
+	default n
+
+config SAMA5_TC1_TIOA5
+	bool "Enable TC1 channel 5 output A"
+	default n
+
+config SAMA5_TC1_TIOB5
+	bool "Enable TC1 channel 5 output B"
+	default n
+
+endif # SAMA5_TC1
+
+if SAMA5_TC2
+
+config SAMA5_TC2_CLK6
+	bool "Enable TC2 channel 6 clock input pin"
+	default n
+
+config SAMA5_TC2_TIOA6
+	bool "Enable TC2 channel 6 output A"
+	default n
+
+config SAMA5_TC2_TIOB6
+	bool "Enable TC2 channel 6 output B"
+	default n
+
+config SAMA5_TC2_CLK7
+	bool "Enable TC2 channel 7 clock input pin"
+	default n
+
+config SAMA5_TC2_TIOA7
+	bool "Enable TC2 channel 7 output A"
+	default n
+
+config SAMA5_TC2_TIOB7
+	bool "Enable TC2 channel 7 output B"
+	default n
+
+config SAMA5_TC2_CLK8
+	bool "Enable TC2 channel 8 clock input pin"
+	default n
+
+config SAMA5_TC2_TIOA8
+	bool "Enable TC2 channel 8 output A"
+	default n
+
+config SAMA5_TC2_TIOB8
+	bool "Enable TC2 channel 8 output B"
+	default n
+
+endif # SAMA5_TC2
+
+config SAMA5_ONESHOT
+	bool "TC one-shot wrapper"
+	default n if !SCHED_TICKLESS
+	default y if SCHED_TICKLESS
+	---help---
+		Enable a wrapper around the low level timer/counter functions to
+		support one-shot timer.
+
+config SAMA5_FREERUN
+	bool "TC free-running wrapper"
+	default n if !SCHED_TICKLESS
+	default y if SCHED_TICKLESS
+	---help---
+		Enable a wrapper around the low level timer/counter functions to
+		support a free-running timer.
+
+if SCHED_TICKLESS
+
+config SAMA5_TICKLESS_ONESHOT
+	int "Tickless one-shot timer channel"
+	default 0
+	range 0 8
+	---help---
+		If the Tickless OS feature is enabled, the one clock must be
+		assigned to provided the one-shot timer needed by the OS.
+
+config SAMA5_TICKLESS_FREERUN
+	int "Tickless free-running timer channel"
+	default 1
+	range 0 8
+	---help---
+		If the Tickless OS feature is enabled, the one clock must be
+		assigned to provided the free-running timer needed by the OS.
+
+endif
+
+config SAMA5_TC_DEBUG
+	bool "TC debug"
+	depends on DEBUG
+	default n
+	---help---
+		Output high level Timer/Counter device debug information.
+		Requires also DEBUG.  If this option AND DEBUG_VERBOSE are
+		enabled, then the system will be overwhelmed the timer debug
+		output.  If DEBUG_VERBOSE is disabled, then debug output will
+		only indicate if/when timer-related errors occur.  This
+		latter mode is completely usable.
+
+config SAMA5_TC_REGDEBUG
+	bool "TC register level debug"
+	depends on DEBUG
+	default n
+	---help---
+		Output detailed register-level Timer/Counter device debug
+		information. Very invasive! Requires also DEBUG.
+
+endmenu # Timer/counter Configuration
+endif # SAMA5_HAVE_TC
+
+if SAMA5_PWM
+menu "PWM configuration"
+
+config SAMA5_PWM_CLKA
+	bool "Enable PWM CLKA"
+	default n
+	---help---
+		Enable the PWM CLKA source.
+
+config SAMA5_PWM_CLKA_FREQUENCY
+	int "CLKA frequency"
+	default 1000
+	depends on SAMA5_PWM_CLKA
+	---help---
+		If the CLKA source is enabled, then you must also provide the
+		frequency of the CLKA.  This frequency will be derived from from MCK
+		using a prescaler and divider.  Therefore, a wide range of
+		frequencies are possible.
+
+config SAMA5_PWM_CLKB
+	bool "Enable PWM CLKB"
+	default n
+	---help---
+		Enable the PWM CLKB source.
+
+config SAMA5_PWM_CLKB_FREQUENCY
+	int "CLKB frequency"
+	default 1000
+	depends on SAMA5_PWM_CLKB
+	---help---
+		If the CLKB source is enabled, then you must also provide the
+		frequency of the CLKB.  This frequency will be derived from from MCK
+		using a prescaler and divider.  Therefore, a wide range of
+		frequencies are possible.
+
+config SAMA5_PWM_CHAN0
+	bool "Enable PWM channel 0"
+	default n
+
+if SAMA5_PWM_CHAN0
+
+choice
+	prompt "PWM channel 0 clock source"
+	default SAMA5_PWM_CHAN0_MCK
+
+config SAMA5_PWM_CHAN0_MCK
+	bool "MCK (divided)"
+
+config SAMA5_PWM_CHAN0_CLKA
+	bool "CLKA"
+	depends on SAMA5_PWM_CLKA
+
+config SAMA5_PWM_CHAN0_CLKB
+	bool "CLKB"
+	depends on SAMA5_PWM_CLKB
+
+endchoice # PWM channel 0 clock source
+
+config SAMA5_PWM_CHAN0_MCKDIV
+	int "MCK divider"
+	default 1
+	depends on SAMA5_PWM_CHAN0_MCK
+	---help---
+		If source clock for the PWM channel is the MCK, then you must also
+		specify the MCK divider to use with the MCK.  The only valid options
+		are 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, and 1024.  Other
+		selections will cause compile time errors.
+
+config SAMA5_PWM_CHAN0_OUTPUTH
+	bool "Configure OUTPUT H pin"
+	default y
+
+config SAMA5_PWM_CHAN0_OUTPUTL
+	bool "Configure OUTPUT L pin"
+	default n
+
+config SAMA5_PWM_CHAN0_FAULTINPUT
+	bool "Configure Fault Input pin"
+	default n
+
+endif # SAMA5_PWM_CHAN0
+
+config SAMA5_PWM_CHAN1
+	bool "Enable PWM channel 1"
+	default n
+
+if SAMA5_PWM_CHAN1
+
+choice
+	prompt "PWM channel 1 clock source"
+	default SAMA5_PWM_CHAN1_MCK
+
+config SAMA5_PWM_CHAN1_MCK
+	bool "MCK (divided)"
+
+config SAMA5_PWM_CHAN1_CLKA
+	bool "CLKA"
+	depends on SAMA5_PWM_CLKA
+
+config SAMA5_PWM_CHAN1_CLKB
+	bool "CLKB"
+	depends on SAMA5_PWM_CLKB
+
+endchoice # PWM channel 1 clock source
+
+config SAMA5_PWM_CHAN1_MCKDIV
+	int "MCK divider"
+	default 1
+	depends on SAMA5_PWM_CHAN1_MCK
+	---help---
+		If source clock for the PWM channel is the MCK, then you must also
+		specify the MCK divider to use with the MCK.  The only valid options
+		are 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, and 1024.  Other
+		selections will cause compile time errors.
+
+config SAMA5_PWM_CHAN1_OUTPUTH
+	bool "Configure OUTPUT H pin"
+	default y
+
+config SAMA5_PWM_CHAN1_OUTPUTL
+	bool "Configure OUTPUT L pin"
+	default n
+
+config SAMA5_PWM_CHAN1_FAULTINPUT
+	bool "Configure Fault Input pin"
+	default n
+
+endif # SAMA5_PWM_CHAN1
+
+config SAMA5_PWM_CHAN2
+	bool "Enable PWM channel 2"
+	default n
+
+if SAMA5_PWM_CHAN2
+
+choice
+	prompt "PWM channel 2 clock source"
+	default SAMA5_PWM_CHAN2_MCK
+
+config SAMA5_PWM_CHAN2_MCK
+	bool "MCK (divided)"
+
+config SAMA5_PWM_CHAN2_CLKA
+	bool "CLKA"
+	depends on SAMA5_PWM_CLKA
+
+config SAMA5_PWM_CHAN2_CLKB
+	bool "CLKB"
+	depends on SAMA5_PWM_CLKB
+
+endchoice # PWM channel 2 clock source
+
+config SAMA5_PWM_CHAN2_MCKDIV
+	int "MCK divider"
+	default 1
+	depends on SAMA5_PWM_CHAN2_MCK
+	---help---
+		If source clock for the PWM channel is the MCK, then you must also
+		specify the MCK divider to use with the MCK.  The only valid options
+		are 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, and 1024.  Other
+		selections will cause compile time errors.
+
+config SAMA5_PWM_CHAN2_OUTPUTH
+	bool "Configure OUTPUT H pin"
+	default y
+
+config SAMA5_PWM_CHAN2_OUTPUTL
+	bool "Configure OUTPUT L pin"
+	default n
+
+config SAMA5_PWM_CHAN2_FAULTINPUT
+	bool "Configure Fault Input pin"
+	default n
+
+endif # SAMA5_PWM_CHAN2
+
+config SAMA5_PWM_CHAN3
+	bool "Enable PWM channel 3"
+	default n
+
+if SAMA5_PWM_CHAN3
+
+choice
+	prompt "PWM channel 3 clock source"
+	default SAMA5_PWM_CHAN3_MCK
+
+config SAMA5_PWM_CHAN3_MCK
+	bool "MCK (divided)"
+
+config SAMA5_PWM_CHAN3_CLKA
+	bool "CLKA"
+	depends on SAMA5_PWM_CLKA
+
+config SAMA5_PWM_CHAN3_CLKB
+	bool "CLKB"
+	depends on SAMA5_PWM_CLKB
+
+endchoice # PWM channel 3 clock source
+
+config SAMA5_PWM_CHAN3_MCKDIV
+	int "MCK divider"
+	default 1
+	depends on SAMA5_PWM_CHAN3_MCK
+	---help---
+		If source clock for the PWM channel is the MCK, then you must also
+		specify the MCK divider to use with the MCK.  The only valid options
+		are 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, and 1024.  Other
+		selections will cause compile time errors.
+
+config SAMA5_PWM_CHAN3_OUTPUTH
+	bool "Configure OUTPUT H pin"
+	default y
+
+config SAMA5_PWM_CHAN3_OUTPUTL
+	bool "Configure OUTPUT L pin"
+	default n
+
+config SAMA5_PWM_CHAN3_FAULTINPUT
+	bool "Configure Fault Input pin"
+	default n
+
+endif # SAMA5_PWM_CHAN3
+
+config SAMA5_PWM_REGDEBUG
+	bool "Enable register-level PWM debug"
+	default n
+	depends on DEBUG
+	---help---
+		Enable very low register-level debug output.
+
+endmenu # PWM configuration
+endif # SAMA5_PWM
+
+if SAMA5_WDT
+
+menu "Watchdog Configuration"
+
+config SAMA5_WDT_INTERRUPT
+	bool "Interrupt on timeout"
+	default n
+	---help---
+		The normal behavior is to reset everything when a watchdog timeout
+		occurs.  An alternative behavior is to simply interrupt when the
+		timeout occurs.  This setting enables that alternative behavior.
+
+config SAMA5_WDT_DEBUGHALT
+	bool "Halt on DEBUG"
+	default y if DEBUG
+	default n if !DEBUG
+	---help---
+		Halt the watchdog timer in the debug state
+
+config SAMA5_WDT_IDLEHALT
+	bool "Halt in IDLE"
+	default y
+	---help---
+		Halt the watchdog timer in the IDLE state
+
+config SAMA5_WDT_REGDEBUG
+	bool "Register level debug"
+	default n
+	depends on DEBUG
+	---help---
+		Enable low-level register debug output
+
+endmenu # Watchdog configuration
+endif # SAMA5_WDT
+
+menu "External Memory Configuration"
+
+config SAMA5_DDRCS
+	bool "External DDR-SDRAM Memory"
+	default n
+	depends on SAMA5_MPDDRC
+	select ARCH_HAVE_SDRAM
+	---help---
+		Build in support for DDR-SDRAM memory resources.
+
+if SAMA5_DDRCS
+
+config SAMA5_DDRCS_SIZE
+	int "DDR-SDRAM Memory size"
+	default 0
+	---help---
+		Mapped size of the DDR-SDRAM memory region.
+
+choice
+	prompt "DDR-SDRAM Memory Type"
+	default SAMA5_DDRCS_LPDDR1
+	---help---
+		Select the type of DDR-SDRAM memory present
+
+config SAMA5_DDRCS_LPDDR1
+	bool "Low-power DDR1-SDRAM (LPDDR1)"
+
+config SAMA5_DDRCS_LPDDR2
+	bool "Low-power DDR2-SDRAM-S4 (LPDDR2)"
+
+endchoice # DDR-SDRAM Memory Type
+endif # SAMA5_DDRCS
+
+config SAMA5_EBICS0
+	bool "External CS0 Memory"
+	default n
+	depends on SAMA5_HSMC
+	---help---
+		Build in support for memory resources in the chip select 0 (CS0)
+		memory region.
+
+if SAMA5_EBICS0
+
+config SAMA5_EBICS0_SIZE
+	int "CS0 Memory size"
+	default 0
+	---help---
+		Mapped size of the memory region at CS0.
+
+choice
+	prompt "CS0 Memory Type"
+	default SAMA5_EBICS0_NOR
+	---help---
+		Select the type of memory present on CS0
+
+config SAMA5_EBICS0_SRAM
+	bool "SRAM"
+
+config SAMA5_EBICS0_PSRAM
+	bool "PSRAM"
+
+config SAMA5_EBICS0_PROM
+	bool "PROM"
+
+config SAMA5_EBICS0_EEPROM
+	bool "EEPROM"
+
+config SAMA5_EBICS0_EPROM
+	bool "EPROM"
+
+config SAMA5_EBICS0_LCD
+	bool "LCD"
+
+config SAMA5_EBICS0_NOR
+	bool "NOR Flash"
+
+# CS0 cannot support NAND
+# config SAMA5_EBICS0_NAND
+#	bool "NAND Flash"
+#	select MTD
+#	select MTD_NAND
+#	select SAMA5_HAVE_NAND
+
+endchoice # CS0 Memory Type
+
+# CS0 cannot support NAND
+# choice
+#	prompt "NAND ECC type"
+#	default SAMA5_EBICS0_ECCNONE
+#	depends on SAMA5_EBICS0_NAND
+#
+# config SAMA5_EBICS0_ECCNONE
+# 	bool "No ECC"
+# 	---help---
+# 		Only raw transfers to/from NAND are supported
+#
+# config SAMA5_EBICS0_SWECC
+#	bool "Software ECC"
+#	depends on MTD_NAND_SWECC
+#	---help---
+#		ECC is performed by higher level software logic
+#
+# config SAMA5_EBICS0_PMECC
+#	bool "NAND H/W PMECC Support"
+#	depends on MTD_NAND_HWECC
+#	select SAMA5_HAVE_PMECC
+#	---help---
+#		Enable hardware assisted support for ECC calculations
+#
+# config SAMA5_EBICS0_CHIPECC
+#	bool "Embedded chip ECC"
+#	depends on MTD_NAND_EMBEDDEDECC
+#	---help---
+#		Some NAND devices have internal, embedded ECC function.
+#
+# endchoice # NAND ECC type
+endif # SAMA5_EBICS0
+
+config SAMA5_EBICS1
+	bool "External CS1 Memory"
+	default n
+	depends on SAMA5_HSMC
+	---help---
+		Build in support for memory resources in the chip select 1 (CS1)
+		memory region.
+
+if SAMA5_EBICS1
+
+config SAMA5_EBICS1_SIZE
+	int "CS1 Memory size"
+	default 0
+	---help---
+		Mapped size of the memory region at CS1.
+
+choice
+	prompt "CS1 Memory Type"
+	default SAMA5_EBICS1_NOR
+	---help---
+		Select the type of memory present on CS1
+
+config SAMA5_EBICS1_SRAM
+	bool "SRAM"
+
+config SAMA5_EBICS1_PSRAM
+	bool "PSRAM"
+
+config SAMA5_EBICS1_PROM
+	bool "PROM"
+
+config SAMA5_EBICS1_EEPROM
+	bool "EEPROM"
+
+config SAMA5_EBICS1_EPROM
+	bool "EPROM"
+
+config SAMA5_EBICS1_LCD
+	bool "LCD"
+
+config SAMA5_EBICS1_NOR
+	bool "NOR Flash"
+
+# CS1 cannot support NAND
+# config SAMA5_EBICS1_NAND
+#	bool "NAND Flash"
+#	select MTD
+#	select MTD_NAND
+#	select SAMA5_HAVE_NAND
+
+endchoice # CS1 Memory Type
+
+# CS1 cannot support NAND
+# choice
+#	prompt "NAND ECC type"
+#	default SAMA5_EBICS1_ECCNONE
+#	depends on SAMA5_EBICS1_NAND
+#
+# config SAMA5_EBICS1_ECCNONE
+#	bool "No ECC"
+#	---help---
+#		Only raw transfers to/from NAND are supported
+#
+# config SAMA5_EBICS1_SWECC
+#	bool "Software ECC"
+#	depends on MTD_NAND_SWECC
+#	---help---
+#		ECC is performed by higher level software logic
+#
+# config SAMA5_EBICS1_PMECC
+#	bool "NAND H/W PMECC Support"
+#	depends on MTD_NAND_HWECC
+#	select SAMA5_HAVE_PMECC
+#	---help---
+#		Enable hardware assisted support for ECC calculations
+#
+# config SAMA5_EBICS1_CHIPECC
+#	bool "Embedded chip ECC"
+#	depends on MTD_NAND_EMBEDDEDECC
+#	---help---
+#		Some NAND devices have internal, embedded ECC function.
+#
+# endchoice # NAND ECC type
+endif # SAMA5_EBICS1
+
+config SAMA5_EBICS2
+	bool "External CS2 Memory"
+	depends on SAMA5_HSMC
+	default n
+	---help---
+		Build in support for memory resources in the chip select 2 (CS2)
+		memory region.
+
+if SAMA5_EBICS2
+
+config SAMA5_EBICS2_SIZE
+	int "CS2 Memory size"
+	default 0
+	---help---
+		Mapped size of the memory region at CS2.
+
+choice
+	prompt "CS2 Memory Type"
+	default SAMA5_EBICS2_NOR
+	---help---
+		Select the type of memory present on CS2
+
+config SAMA5_EBICS2_SRAM
+	bool "SRAM"
+
+config SAMA5_EBICS2_PSRAM
+	bool "PSRAM"
+
+config SAMA5_EBICS2_PROM
+	bool "PROM"
+
+config SAMA5_EBICS2_EEPROM
+	bool "EEPROM"
+
+config SAMA5_EBICS2_EPROM
+	bool "EPROM"
+
+config SAMA5_EBICS2_LCD
+	bool "LCD"
+
+config SAMA5_EBICS2_NOR
+	bool "NOR Flash"
+
+# CS2 cannot support NAND
+# config SAMA5_EBICS2_NAND
+#	bool "NAND Flash"
+#	select MTD
+#	select MTD_NAND
+#	select SAMA5_HAVE_NAND
+
+endchoice # CS2 Memory Type
+
+# CS2 cannot support NAND
+# choice
+#	prompt "NAND ECC type"
+#	default SAMA5_EBICS2_ECCNONE
+#	depends on SAMA5_EBICS2_NAND
+#
+# config SAMA5_EBICS2_ECCNONE
+#	bool "No ECC"
+#	---help---
+#		Only raw transfers to/from NAND are supported
+#
+# config SAMA5_EBICS2_SWECC
+#	bool "Software ECC"
+#	depends on MTD_NAND_SWECC
+#	---help---
+#		ECC is performed by higher level software logic
+#
+# config SAMA5_EBICS2_PMECC
+#	bool "NAND H/W PMECC Support"
+#	depends on MTD_NAND_HWECC
+#	select SAMA5_HAVE_PMECC
+#	---help---
+#		Enable hardware assisted support for ECC calculations
+#
+# config SAMA5_EBICS2_CHIPECC
+#	bool "Embedded chip ECC"
+#	depends on MTD_NAND_EMBEDDEDECC
+#	---help---
+#		Some NAND devices have internal, embedded ECC function.
+#
+# endchoice # NAND ECC type
+endif # SAMA5_EBICS2
+
+config SAMA5_EBICS3
+	bool "External CS3 Memory"
+	default n
+	depends on SAMA5_HSMC
+	---help---
+		Build in support for memory resources in the chip select 3 (CS3)
+		memory region.
+
+if SAMA5_EBICS3
+
+config SAMA5_EBICS3_SIZE
+	int "CS3 Memory size"
+	default 0
+	---help---
+		Mapped size of the memory region at CS3.
+
+choice
+	prompt "CS3 Memory Type"
+	default SAMA5_EBICS3_NOR
+	---help---
+		Select the type of memory present on CS3
+
+config SAMA5_EBICS3_SRAM
+	bool "SRAM"
+
+config SAMA5_EBICS3_PSRAM
+	bool "PSRAM"
+
+config SAMA5_EBICS3_PROM
+	bool "PROM"
+
+config SAMA5_EBICS3_EEPROM
+	bool "EEPROM"
+
+config SAMA5_EBICS3_EPROM
+	bool "EPROM"
+
+config SAMA5_EBICS3_LCD
+	bool "LCD"
+
+config SAMA5_EBICS3_NOR
+	bool "NOR Flash"
+
+config SAMA5_EBICS3_NAND
+	bool "NAND Flash"
+	select MTD
+	select MTD_NAND
+	select SAMA5_HAVE_NAND
+
+endchoice # CS3 Memory Type
+
+choice
+	prompt "NAND ECC type"
+	default SAMA5_EBICS3_ECCNONE
+	depends on SAMA5_EBICS3_NAND
+
+config SAMA5_EBICS3_ECCNONE
+	bool "No ECC"
+	---help---
+		Only raw transfers to/from NAND are supported
+
+config SAMA5_EBICS3_SWECC
+	bool "Software ECC"
+	depends on MTD_NAND_SWECC
+	---help---
+		ECC is performed by higher level software logic
+
+config SAMA5_EBICS3_PMECC
+	bool "NAND H/W PMECC Support"
+	depends on MTD_NAND_HWECC
+	select SAMA5_HAVE_PMECC
+	---help---
+		Enable hardware assisted support for ECC calculations
+
+config SAMA5_EBICS3_CHIPECC
+	bool "Embedded chip ECC"
+	depends on MTD_NAND_EMBEDDEDECC
+	---help---
+		Some NAND devices have internal, embedded ECC function.
+
+endchoice # NAND ECC type
+endif # SAMA5_EBICS3
+
+config SAMA5_HAVE_NAND
+bool
+default n
+
+config SAMA5_HAVE_PMECC
+bool
+default n
+
+if SAMA5_HAVE_NAND
+
+config SAMA5_NAND_DMA
+	bool "NAND DMA Transfers"
+	default y
+	depends on SAMA5_DMAC0
+	---help---
+		Use memory-to-memory DMA to perform NAND data transfers.  NOTE that
+		DMAC0 must be selected (DMAC1 cannot access NFC SRAM).
+
+config SAMA5_NAND_DMA_THRESHOLD
+	int "DMA threshold"
+	default 784
+	depends on SAMA5_NAND_DMA
+	---help---
+		Defines a threshold value for performing memory-to-memory DMA.
+
+		If memory-to-memory DMAs are used, then two context switches will
+		occur:  (1) when the NAND logic waits for the DMA to complete, and
+		(2) again when the DMA completes and the NAND logic is re-awakened.
+		Each context switch will required saving and restoring a set of
+		registers defining the task state.  Those register include the PSR,
+		16 general purpose registers, and 32 floating point registers or
+		about 196 bytes per task state.  That is then 392*2 bytes per
+		context and 784 bytes for both.  Plus there is processing overhead.
+		So certainly, there is no reason to use a memory-to-memory DMA
+		transfer for much smaller blocks of data.
+
+config SAMA5_NAND_READYBUSY
+	bool "NAND Ready/Busy"
+	default n
+	---help---
+		Board logic supports and interface to detect NAND Busy/Ready signal.
+		If defined, the board must provide:
+
+			bool board_nand_busy(int cs);
+
+config SAMA5_NAND_CE
+	bool "NAND Chip Enable"
+	default n
+	---help---
+		Board logic supports and interface to control the NAND Chip Enable signal.
+		If defined, the board must provide:
+
+			void board_nand_ce(int cs, bool enable);
+
+if SAMA5_HAVE_PMECC
+
+config MTD_NAND_MAX_PMECCSIZE
+	int "Max H/W ECC size"
+	default 200
+	---help---
+		Maximum HW ECC size
+
+config SAMA5_PMECC_TRIMPAGE
+	bool "Trim page support"
+	default n
+	---help---
+		Support page trimming.  This behavior was found to fix both UBI and
+		JFFS2 images written to cleanly erased NAND partitions.  NOTE:
+		Nothing in the code base now uses these trim pages.  Option support
+		is provided in case it becomes necessary in the future.
+
+config SAMA5_PMECC_EMBEDDEDALGO
+	bool "ROM ECC detection/correction"
+	default y
+	---help---
+		The SAMA5D3 ROM code embeds the software used in the process of ECC
+		detection/correction: function pmecc_correctionalgo(). If this
+		option is selected, the ROM code will be used.  If not, then the an
+		implementation pmecc_correctionalgo() will be built into the NuttX
+		image.
+
+config SAMA5_PMECC_EMBEDDEDALGO_ADDR
+	hex "Address of ROM ECC detection/correction"
+	default 0x00104510
+	depends on SAMA5_PMECC_EMBEDDEDALGO
+	---help---
+		The ROM code embeds the software used in the process of ECC
+		detection/correction at this address.  Don't change this address
+		unless you know what you are doing.
+
+config SAMA5_PMECC_GALOIS_ROMTABLES
+	bool "ROM Galois Tables"
+	default y
+	---help---
+		Support the PMECC algorithm using Galois tables in ROM.
+
+if SAMA5_PMECC_GALOIS_ROMTABLES
+
+config SAMA5_PMECC_GALOIS_TABLE512_ROMADDR
+	hex "Address of Galois Table 512"
+	default 0x00110000
+	---help---
+		Address of Galois Field Table 512 mapping in ROM.  Don't change this
+		address unless you know what you are doing.
+
+config SAMA5_PMECC_GALOIS_TABLE1024_ROMADDR
+	hex "Address of Galois Table 1024"
+	default 0x00118000
+	---help---
+		Address of Galois Field Table 1024 mapping in ROM.  Don't change this
+		address unless you know what you are doing.
+
+endif # SAMA5_PMECC_GALOIS_ROMTABLES
+
+config SAMA5_PMECC_GALOIS_CUSTOM
+	bool "Custom Galois Tables"
+	default n
+	---help---
+		Build in support to build Galois tables on-the-fly.  No current used
+		by any NuttX logic.
+
+endif # SAMA5_HAVE_PMECC
+
+config SAMA5_NAND_DMADEBUG
+	bool "NAND DMA transfer debug"
+	depends on SAMA5_NAND_DMA && DEBUG && DEBUG_DMA
+	default n
+	---help---
+		Enable special debug instrumentation analyze NAND DMA data transfers.
+		This logic is as non-invasive as possible:  It samples DMA
+		registers at key points in the data transfer and then dumps all of
+		the registers at the end of the transfer.
+
+config SAMA5_NAND_REGDEBUG
+	bool "Register-Level NAND Debug"
+	default n
+	depends on DEBUG && DEBUG_FS
+	---help---
+		Enable very low-level register access debug.  Depends on DEBUG and
+		DEBUG_FS.
+
+config SAMA5_NAND_DUMP
+	bool "NAND data dump"
+	default n
+	depends on DEBUG && DEBUG_FS
+	---help---
+		Dump the contents of all data read and written to FLAH.  Depends on
+		DEBUG and DEBUG_FS.
+
+endif # SAMA5_HAVE_NAND
+endmenu # External Memory Configuration
+
+choice
+	prompt "SAMA5 Boot Configuration"
+	default SAMA5_BOOT_ISRAM
+	---help---
+		The startup code needs to know if the code is running from internal SRAM,
+		external SRAM, or CS0-3 in order to initialize properly.  Note that the
+		boot device is not specified for cases where the code is copied into
+		internal SRAM; those cases are all covered by SAMA5_BOOT_ISRAM.
+
+config SAMA5_BOOT_ISRAM
+	bool "Running from internal SRAM"
+
+config SAMA5_BOOT_SDRAM
+	bool "Running from external SDRAM"
+
+config SAMA5_BOOT_CS0FLASH
+	bool "Running in external FLASH CS0"
+	depends on SAMA5_EBICS0_NOR
+	select ARCH_HAVE_RAMFUNCS
+
+config SAMA5_BOOT_CS0SRAM
+	bool "Running in external FLASH CS0"
+	depends on SAMA5_EBICS0_SRAM || SAMA5_EBICS0_PSRAM
+
+config SAMA5_BOOT_CS1FLASH
+	bool "Running in external FLASH CS1"
+	depends on SAMA5_EBICS1_NOR
+
+config SAMA5_BOOT_CS1SRAM
+	bool "Running in external FLASH CS1"
+	depends on SAMA5_EBICS1_SRAM || SAMA5_EBICS1_PSRAM
+
+config SAMA5_BOOT_CS2FLASH
+	bool "Running in external FLASH CS2"
+	depends on SAMA5_EBICS2_NOR
+
+config SAMA5_BOOT_CS2SRAM
+	bool "Running in external FLASH CS2"
+	depends on SAMA5_EBICS2_SRAM || SAMA5_EBICS2_PSRAM
+
+config SAMA5_BOOT_CS2FLASH
+	bool "Running in external FLASH CS3"
+	depends on SAMA5_EBICS3_NOR
+
+config SAMA5_BOOT_CS3SRAM
+	bool "Running in external FLASH CS3"
+	depends on SAMA5_EBICS3_SRAM || SAMA5_EBICS3_PSRAM
+
+endchoice # SAMA5 Boot Configuration
+
+menu "Heap Configuration"
+
+config SAMA5_ISRAM_HEAP
+	bool "Include ISRAM in heap"
+	default y
+	depends on !SAMA5_BOOT_ISRAM
+	---help---
+		Include the internal SRAM memory in the heap.
+
+		NOTE:  MM_REGIONS must also be set to indicate the total number of
+		memory regions to be added to the heap.
+
+		*** DO NOT SELECT THIS OPTION IF YOU ARE EXECUTING FROM INTERNAL SRAM!! **
+		In this case, the remaining ISRAM will automatically be added to the
+		heap (using RAM_END).
+
+		*** RAMFUNCS WARNING **
+		If you execute from NOR FLASH, RAM functions will be enabled.  The
+		RAM functions will be positioned in SRAM in the same location as the
+		ISRAM heap and, as a result, those RAM functions will be destroyed
+		after the heap is initialized.  That is not a problem now since
+		these RAM functions are only used in the early boot phase.  If,
+		however, you should wish to preserve the RAM functions, then you
+		should also disable SAMA5_ISRAM_HEAP so that the RAM functions are
+		preserved beyond the boot phase.
+
+config SAMA5_DDRCS_HEAP
+	bool "Include DDR-SDRAM in heap"
+	default y
+	depends on SAMA5_DDRCS && !SAMA5_BOOT_SDRAM
+	---help---
+		Include a portion of DDR-SDRAM memory in the heap.
+
+		NOTE:  MM_REGIONS must also be set to indicate the total number of
+		memory regions to be added to the heap.
+
+		*** DO NOT SELECT THIS OPTION IF YOU ARE EXECUTING FROM SDRAM!!**
+		In this case, the remaining SDRAM will automatically be added to the
+		heap.
+
+if SAMA5_DDRCS_HEAP
+
+config SAMA5_DDRCS_HEAP_OFFSET
+	int "DDR-SDRAM heap offset"
+	default 0
+	---help---
+		Preserve this number of bytes at the beginning of SDRAM.  The
+		portion of DRAM beginning at this offset from the DDRCS base will
+		be added to the heap.
+
+		NOTE:  If you are using a page cache in DRAM (via SAMA5_DDRCS_PGHEAP),
+		then the memory regions defined by SAMA5_DDRCS_HEAP_OFFSET and
+		SAMA5_DDRCS_HEAP_SIZE must not overlap the memory region defined by
+		SAMA5_DDRCS_PGHEAP_OFFSET and SAMA5_DDRCS_PGHEAP_SIZE.
+
+config SAMA5_DDRCS_HEAP_SIZE
+	int "DDR-SDRAM heap size"
+	default 0
+	---help---
+		Add the region of DDR-SDRAM beginning at SAMA5_DDRCS_HEAP_OFFSET
+		and of size SAMA5_DDRCS_HEAP_SIZE to the heap.
+
+		NOTE:  If you are using a page cache in DRAM (via SAMA5_DDRCS_PGHEAP),
+		then the memory regions defined by SAMA5_DDRCS_HEAP_OFFSET and
+		SAMA5_DDRCS_HEAP_SIZE must not overlap the memory region defined by
+		SAMA5_DDRCS_PGHEAP_OFFSET and SAMA5_DDRCS_PGHEAP_SIZE.
+
+endif # SAMA5_DDRCS_HEAP
+
+config SAMA5_DDRCS_RESERVE
+	bool "Reserve DDR-SDRAM"
+	default n
+	depends on SAMA5_BOOT_SDRAM
+	---help---
+		This option is available only we are executing out of SDRAM.  In
+		this case, by default, all of DRAM available from the end of the
+		program through the end of DRAM (RAM_START + RAM_END) is
+		automatically added to the heap.  However, there are certain cases
+		where you may want to reserve a block of DRAM for other purposes
+		such a large DMA buffer or an LCD framebuffer or a page cache.  In
+		those cases, you can select this option to specify the end of the
+		DRAM memory to add to the heap; DRAM after this address will not
+		be part of the heap and so will be available for other purposes.
+
+		NOTE:  There is way to reserve memory before the start of the
+		program in DRAM using this mechanism.  That configuration is
+		possible, but not using this configuration setting.
+
+if SAMA5_DDRCS_RESERVE
+
+config SAMA5_DDRCS_HEAP_END
+	hex "DDR-SDRAM heap end"
+	default 0x30000000
+	---help---
+		Add the region of DDR-SDRAM beginning at the first available byte
+		after the memory used by the DRAM probably through this virtual
+		address (minus one).  This will reserve the memory starting at
+		this address through RAM_SIZE + RAM_END for other purposes.
+
+		NOTE:  If you are using a page cache in DRAM (via SAMA5_DDRCS_PGHEAP),
+		then the memory regions below by SAMA5_DDRCS_HEAP_END must not
+		overlap the memory region defined by SAMA5_DDRCS_PGHEAP_OFFSET and
+		SAMA5_DDRCS_PGHEAP_SIZE.
+
+endif # SAMA5_DDRCS_RESERVE
+
+config SAMA5_DDRCS_PGHEAP
+	bool "Include DDR-SDRAM in page cache"
+	default y
+	depends on (SAMA5_DDRCS || SAMA5_BOOT_SDRAM) && ARCH_ADDRENV
+	---help---
+		Include a portion of DDR-SDRAM memory in the page cache.
+
+if SAMA5_DDRCS_PGHEAP
+
+config SAMA5_DDRCS_PGHEAP_OFFSET
+	hex "DDR-SDRAM heap offset"
+	default 0x0
+	---help---
+		Preserve this number of bytes at the beginning of SDRAM.  The
+		portion of DRAM beginning at this offset from the DDRCS base will
+		be added to the heap.
+
+		If you are executing from DRAM, then you must have already reserved
+		this region with SAMA5_DDRCS_RESERVE, setting SAMA5_DDRCS_HEAP_END
+		so that this page cache region defined by SAMA5_DDRCS_PGHEAP_OFFSET
+		and SAMA5_DDRCS_PGHEAP_SIZE does not overlap the the region of DRAM
+		that is added to the heap.  If you are not executing from DRAM, then
+		you must have excluding this page cache region from the heap ether
+		by (1) not selecting SAMA5_DDRCS_HEAP, or (2) selecting
+		SAMA5_DDRCS_HEAP_OFFSET and SAMA5_DDRCS_HEAP_SIZE so that the page
+		cache region does not overlapy the region of DRAM that is added to
+		the heap.
+
+config SAMA5_DDRCS_PGHEAP_SIZE
+	int "DDR-SDRAM heap size"
+	default 0
+	---help---
+		Add the region of DDR-SDRAM beginning at SAMA5_DDRCS_PGHEAP_OFFSET
+		and of size SAMA5_DDRCS_PGHEAP_SIZE to the heap.
+
+		If you are executing from DRAM, then you must have already reserved
+		this region with SAMA5_DDRCS_RESERVE, setting SAMA5_DDRCS_HEAP_END
+		so that this page cache region defined by SAMA5_DDRCS_PGHEAP_OFFSET
+		and SAMA5_DDRCS_PGHEAP_SIZE does not overlap the the region of DRAM
+		that is added to the heap.  If you are not executing from DRAM, then
+		you must have excluding this page cache region from the heap ether
+		by (1) not selecting SAMA5_DDRCS_HEAP, or (2) selecting
+		SAMA5_DDRCS_HEAP_OFFSET and SAMA5_DDRCS_HEAP_SIZE so that the page
+		cache region does not overlapy the region of DRAM that is added to
+		the heap.
+
+endif # SAMA5_DDRCS_PGHEAP
+
+config SAMA5_EBICS0_HEAP
+	bool "Include EBICS0 SRAM/PSRAM in heap"
+	default y
+	depends on (SAMA5_EBICS0_SRAM || SAMA5_EBICS0_PSRAM) && !SAMA5_BOOT_CS0SRAM
+	---help---
+		Include the CS0 SRAM/PSREAM memory in the heap.
+
+		NOTE:  MM_REGIONS must also be set to indicate the total number of
+		memory regions to be added to the heap.
+
+		*** DO NOT SELECT THIS OPTION IF YOU ARE EXECUTING FROM CS0 SRAM!!**
+		In this case, the remaining SRAM will automatically be added to the
+		heap (using RAM_END).
+
+if SAMA5_EBICS0_HEAP
+config SAMA5_EBICS0_HEAP_OFFSET
+	int "EBICS0 RAM offset"
+	default 0
+	---help---
+		Preserve this number of bytes at the beginning of RAM.  The
+		portion of RAM beginning at this offset from the EBICS0 base will
+		be added to the heap.
+
+config SAMA5_EBICS0_HEAP_SIZE
+	int "EBICS0 RAM size"
+	default 0
+	---help---
+		Add the region of RAM beginning at SAMA5_EBICS0_HEAP_OFFSET
+		and of size SAMA5_EBICS0_HEAP_SIZE to the heap.
+
+endif #SAMA5_EBICS0_HEAP
+
+config SAMA5_EBICS1_HEAP
+	bool "Include EBICS1 SRAM/PSRAM in heap"
+	default y
+	depends on (SAMA5_EBICS1_SRAM || SAMA5_EBICS1_PSRAM) && !SAMA5_BOOT_CS1SRAM
+	---help---
+		Include the CS1 SRAM/PSREAM memory in the heap.
+
+		NOTE:  MM_REGIONS must also be set to indicate the total number of
+		memory regions to be added to the heap.
+
+		*** DO NOT SELECT THIS OPTION IF YOU ARE EXECUTING FROM CS1 SRAM!!**
+		In this case, the remaining SRAM will automatically be added to the
+		heap (using RAM_END).
+
+if SAMA5_EBICS1_HEAP
+config SAMA5_EBICS1_HEAP_OFFSET
+	int "EBICS1 RAM offset"
+	default 0
+	---help---
+		Preserve this number of bytes at the beginning of RAM.  The
+		portion of DRAM beginning at this offset from the EBICS1 base will
+		be added to the heap.
+
+config SAMA5_EBICS1_HEAP_SIZE
+	int "EBICS1 RAM size"
+	default 0
+	---help---
+		Add the region of RAM beginning at SAMA5_EBICS1_HEAP_OFFSET
+		and of size SAMA5_EBICS1_HEAP_SIZE to the heap.
+
+endif #SAMA5_EBICS1_HEAP
+
+config SAMA5_EBICS2_HEAP
+	bool "Include EBICS2 SRAM/PSRAM in heap"
+	default y
+	depends on (SAMA5_EBICS2_SRAM || SAMA5_EBICS2_PSRAM) && !SAMA5_BOOT_CS2SRAM
+	---help---
+		Include the CS2 SRAM/PSREAM memory in the heap.
+
+		NOTE:  MM_REGIONS must also be set to indicate the total number of
+		memory regions to be added to the heap.
+
+		*** DO NOT SELECT THIS OPTION IF YOU ARE EXECUTING FROM CS2 SRAM!!**
+		In this case, the remaining SRAM will automatically be added to the
+		heap (using RAM_END).
+
+if SAMA5_EBICS2_HEAP
+config SAMA5_EBICS2_HEAP_OFFSET
+	int "EBICS2 RAM offset"
+	default 0
+	---help---
+		Preserve this number of bytes at the beginning of RAM.  The
+		portion of DRAM beginning at this offset from the EBICS2 base will
+		be added to the heap.
+
+config SAMA5_EBICS2_HEAP_SIZE
+	int "EBICS2 RAM size"
+	default 0
+	---help---
+		Add the region of RAM beginning at SAMA5_EBICS2_HEAP_OFFSET
+		and of size SAMA5_EBICS2_HEAP_SIZE to the heap.
+
+endif #SAMA5_EBICS2_HEAP
+
+config SAMA5_EBICS3_HEAP
+	bool "Include EBICS3 SRAM/PSRAM in heap"
+	default y
+	depends on (SAMA5_EBICS3_SRAM || SAMA5_EBICS3_PSRAM) && !SAMA5_BOOT_CS3SRAM
+	---help---
+		Include the CS3 SRAM/PSREAM memory in the heap.
+
+		*** DO NOT SELECT THIS OPTION IF YOU ARE EXECUTING FROM CS3 SRAM!!**
+		In this case, the remaining SRAM will automatically be added to the
+		heap (using RAM_END).
+
+if SAMA5_EBICS3_HEAP
+config SAMA5_EBICS3_HEAP_OFFSET
+	int "EBICS3 RAM offset"
+	default 0
+	---help---
+		Preserve this number of bytes at the beginning of RAM.  The
+		portion of DRAM beginning at this offset from the EBICS3 base will
+		be added to the heap.
+
+config SAMA5_EBICS3_HEAP_SIZE
+	int "EBICS3 RAM size"
+	default 0
+	---help---
+		Add the region of RAM beginning at SAMA5_EBICS3_HEAP_OFFSET
+		and of size SAMA5_EBICS3_HEAP_SIZE to the heap.
+
+endif #SAMA5_EBICS3_HEAP
+endmenu # Heap Configuration
+endif # ARCH_CHIP_SAMA5

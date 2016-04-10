@@ -1,0 +1,984 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+comment "LPC17xx Configuration Options"
+
+choice
+	prompt "NXP LPC17XX Chip Selection"
+	default ARCH_CHIP_LPC1768
+	depends on ARCH_CHIP_LPC17XX
+
+config ARCH_CHIP_LPC1751
+	bool "LPC1751"
+	select ARCH_FAMILY_LPC175X
+
+config ARCH_CHIP_LPC1752
+	bool "LPC1752"
+	select ARCH_FAMILY_LPC175X
+
+config ARCH_CHIP_LPC1754
+	bool "LPC1754"
+	select ARCH_FAMILY_LPC175X
+
+config ARCH_CHIP_LPC1756
+	bool "LPC1756"
+	select ARCH_FAMILY_LPC175X
+
+config ARCH_CHIP_LPC1758
+	bool "LPC1758"
+	select ARCH_FAMILY_LPC175X
+
+config ARCH_CHIP_LPC1759
+	bool "LPC1759"
+	select ARCH_FAMILY_LPC175X
+
+config ARCH_CHIP_LPC1764
+	bool "LPC1764"
+	select ARCH_FAMILY_LPC176X
+
+config ARCH_CHIP_LPC1765
+	bool "LPC1765"
+	select ARCH_FAMILY_LPC176X
+
+config ARCH_CHIP_LPC1766
+	bool "LPC1766"
+	select ARCH_FAMILY_LPC176X
+
+config ARCH_CHIP_LPC1767
+	bool "LPC1767"
+	select ARCH_FAMILY_LPC176X
+
+config ARCH_CHIP_LPC1768
+	bool "LPC1768"
+	select ARCH_FAMILY_LPC176X
+
+config ARCH_CHIP_LPC1769
+	bool "LPC1769"
+	select ARCH_FAMILY_LPC176X
+
+config ARCH_CHIP_LPC1773
+	bool "LPC1773"
+	select ARCH_FAMILY_LPC177X
+	select ARCH_HAVE_SPIFI
+
+config ARCH_CHIP_LPC1774
+	bool "LPC1774"
+	select ARCH_FAMILY_LPC177X
+
+config ARCH_CHIP_LPC1776
+	bool "LPC1776"
+	select ARCH_FAMILY_LPC177X
+
+config ARCH_CHIP_LPC1777
+	bool "LPC1777"
+	select ARCH_FAMILY_LPC177X
+
+config ARCH_CHIP_LPC1778
+	bool "LPC1778"
+	select ARCH_FAMILY_LPC177X
+
+config ARCH_CHIP_LPC1785
+	bool "LPC1785"
+	select ARCH_FAMILY_LPC178X
+
+config ARCH_CHIP_LPC1786
+	bool "LPC1786"
+	select ARCH_FAMILY_LPC178X
+
+config ARCH_CHIP_LPC1787
+	bool "LPC1787"
+	select ARCH_FAMILY_LPC178X
+
+config ARCH_CHIP_LPC1788
+	bool "LPC1788"
+	select ARCH_FAMILY_LPC178X
+
+endchoice
+
+config ARCH_FAMILY_LPC175X
+	bool
+
+config ARCH_FAMILY_LPC176X
+	bool
+
+config ARCH_FAMILY_LPC177X
+	bool
+
+config ARCH_FAMILY_LPC178X
+	bool
+
+config ARCH_HAVE_SPIFI
+	bool
+
+menu "LPC17xx Peripheral Support"
+
+config LPC17_MAINOSC
+	bool "Main oscillator"
+	default y
+
+config LPC17_PLL0
+	bool "PLL0"
+	default y
+
+config LPC17_PLL1
+	bool "PLL1"
+	default y
+
+config LPC17_EMC
+	bool "EMC"
+	default y
+	depends on ARCH_FAMILY_LPC178X
+	select ARCH_HAVE_EXTNAND
+	select ARCH_HAVE_EXTSRAM0
+	select ARCH_HAVE_EXTDRAM
+	select ARCH_HAVE_EXTNOR
+
+config LPC17_ETHERNET
+	bool "Ethernet"
+	select NETDEVICES
+	select ARCH_HAVE_PHY
+	select ARCH_HAVE_NETDEV_STATISTICS
+	default n
+
+config LPC17_LCD
+	bool "LCD controller"
+	default n
+	depends on ARCH_FAMILY_LPC177X || ARCH_FAMILY_LPC178X
+
+config LPC17_USBHOST
+	bool "USB host"
+	select USBHOST
+	select USBHOST_HAVE_ASYNCH
+	default n
+
+config LPC17_USBDEV
+	bool "USB Device"
+	select USBDEV
+	default n
+
+config LPC17_USBOTG
+	bool "USB OTG"
+	default n
+	depends on LPC17_USBHOST && LPC17_USBDEV
+
+config LPC17_SDCARD
+	bool "SD Card Interface"
+	depends on ARCH_FAMILY_LPC177X || ARCH_FAMILY_LPC178X
+	select ARCH_HAVE_SDIO
+	default n
+
+config LPC17_UART0
+	bool "UART0"
+	default n
+	select ARCH_HAVE_UART0
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config LPC17_UART1
+	bool "UART1"
+	default n
+	select ARCH_HAVE_UART1
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config LPC17_UART2
+	bool "UART2"
+	default n
+	select ARCH_HAVE_UART2
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config LPC17_UART3
+	bool "UART3"
+	default n
+	select ARCH_HAVE_UART3
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config LPC17_UART4
+	bool "UART4"
+	default n
+	select ARCH_HAVE_UART4
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config LPC17_CAN1
+	bool "CAN1"
+	select ARCH_HAVE_UART4
+	default n
+
+config LPC17_CAN2
+	bool "CAN2"
+	default n
+
+config LPC17_SPI
+	bool "SPI"
+	default n
+	depends on ARCH_FAMILY_LPC175X || ARCH_FAMILY_LPC176X
+
+config LPC17_SSP0
+	bool "SSP0"
+	default n
+
+config LPC17_SSP1
+	bool "SSP1"
+	default n
+
+config LPC17_SSP2
+	bool "SSP1"
+	default n
+	depends on ARCH_FAMILY_LPC177X || ARCH_FAMILY_LPC178X
+
+config LPC17_SPIFI
+	bool "SPIFI Interface"
+	depends on ARCH_HAVE_SPIFI
+	default n
+
+config LPC17_I2C0
+	bool "I2C0"
+	default n
+
+config LPC17_I2C1
+	bool "I2C1"
+	default n
+
+config LPC17_I2C2
+	bool "I2C2"
+	default n
+
+config LPC17_I2S
+	bool "I2S"
+	default n
+
+config LPC17_TMR0
+	bool "Timer 0"
+	default n
+
+config LPC17_MAT0_PIN
+	int "TIM1 MAT0 Output Pin"
+	default 1
+	range 1 4
+	depends on LPC17_TMR0
+	---help---
+		If TIM1 is enabled for PWM usage, you also need specifies the timer output
+		channel {1,..,4}
+
+config LPC17_TMR1
+	bool "Timer 1"
+	default n
+
+config LPC17_TMR2
+	bool "Timer 2"
+	default n
+
+config LPC17_TMR3
+	bool "Timer 3"
+	default n
+
+config LPC17_RIT
+	bool "RIT"
+	default n
+
+config LPC17_PWM0
+	bool "PWM0"
+	default n
+
+config LPC17_PWM1
+	bool "PWM1"
+	default n
+	depends on ARCH_FAMILY_LPC177X || ARCH_FAMILY_LPC178X || ARCH_FAMILY_LPC176X
+
+config LPC17_PWM1_PIN
+	int "TIM1 PWM Output Pin"
+	default 1
+	range 1 4
+	depends on LPC17_PWM1
+	---help---
+		If TIM1 is enabled for PWM usage, you also need specifies the timer output
+		channel {1,..,4}
+
+config LPC17_MCPWM
+	bool "MCPWM"
+	default n
+	depends on ARCH_FAMILY_LPC175X || ARCH_FAMILY_LPC176X
+
+config LPC17_MCPWM1_PIN
+	int "TIM1 MCPWM Output Pin"
+	default 1
+	range 1 4
+	depends on LPC17_MCPWM
+	---help---
+		If TIM1 is enabled for PWM usage, you also need specifies the timer output
+		channel {1,..,4}
+
+config LPC17_QEI
+	bool "QEI"
+	default n
+
+config LPC17_RTC
+	bool "RTC"
+	default n
+
+config LPC17_RTCEV
+	bool "RTC event monitor"
+	default n
+	depends on LPC17_RTC
+
+config LPC17_WDT
+	bool "WDT"
+	default n
+
+config LPC17_ADC
+	bool "ADC"
+	default n
+
+config LPC17_DAC
+	bool "DAC"
+	default n
+
+config LPC17_GPDMA
+	bool "GPDMA"
+	default n
+	select ARCH_DMA
+
+config LPC17_CRC
+	bool "CRC engine"
+	default n
+	depends on ARCH_FAMILY_LPC177X || ARCH_FAMILY_LPC178X
+
+config LPC17_FLASH
+	bool "FLASH"
+	default n
+
+config LPC17_EEPROM
+	bool "EEPROM"
+	default n
+	depends on ARCH_FAMILY_LPC177X || ARCH_FAMILY_LPC178X
+
+endmenu
+
+menu "External Memory Configuration"
+
+config ARCH_HAVE_EXTNAND
+	bool
+
+config ARCH_HAVE_EXTNOR
+	bool
+
+config ARCH_HAVE_EXTDRAM
+	bool
+
+config ARCH_HAVE_EXTSRAM0
+	bool
+
+config LPC17_EXTNAND
+	bool "Configure external NAND"
+	default n
+	depends on ARCH_HAVE_EXTNAND
+	---help---
+		Configure external NAND memory and, if applicable, map then external
+		NAND into the memory map.
+
+if LPC17_EXTNAND
+
+config LPC17_EXTNANDSIZE
+	int "External NAND size"
+	default 0
+	---help---
+		Size of the external NAND in bytes.
+
+endif
+
+config LPC17_EXTNOR
+	bool "Configure external NOR memory"
+	default n
+	depends on ARCH_HAVE_EXTNOR
+	---help---
+		Configure external NOR memory and, if applicable, map then external
+		NOR into the memory map.
+
+if LPC17_EXTNOR
+
+config LPC17_EXTNORSIZE
+	int "External NOR size"
+	default 0
+	---help---
+		Size of the external NOR in bytes.
+
+endif
+
+config LPC17_EXTDRAM
+	bool "Configure external DRAM"
+	default n
+	depends on ARCH_HAVE_EXTDRAM
+	select ARCH_HAVE_SDRAM
+	---help---
+		Configure external DRAM memory and, if applicable, map then external
+		DRAM into the memory map.
+
+if LPC17_EXTDRAM
+
+config LPC17_EXTDRAMSIZE
+	int "External SDRAM size"
+	default 0
+	---help---
+		Size of the external SDRAM in bytes.
+
+choice
+	prompt "SDRAM Width Selection"
+	default LPC17_SDRAM_16BIT
+
+config LPC17_SDRAM_8BIT
+	bool "8-bit"
+
+config LPC17_SDRAM_16BIT
+	bool "16-bit"
+
+config LPC17_SDRAM_32BIT
+	bool "32-bit"
+
+endchoice
+
+config LPC17_EXTDRAMHEAP
+	bool "Add external SDRAM to the heap"
+	default y
+	---help---
+		Add the external SDRAM into the heap.
+
+endif
+
+config LPC17_EXTSRAM0
+	bool "Configure external SRAM (Bank 0)"
+	default n
+	depends on ARCH_HAVE_EXTSRAM0
+	---help---
+		Configure external SRAM Bank 0 memory and, if applicable, map then
+		external SRAM Bank 0 into the memory map.
+
+if LPC17_EXTSRAM0
+
+config LPC17_EXTSRAM0SIZE
+	int "External SRAM size"
+	default 0
+	---help---
+		Size of the external SRAM Bank 0 in bytes.
+
+config LPC17_EXTSRAM0HEAP
+	bool "Add external SRAM (Bank 0) to the heap"
+	default y
+	---help---
+		Add external SRAM Bank 0 into the heap.
+
+endif
+endmenu
+
+menu "Serial driver options"
+	depends on LPC17_UART0 || LPC17_UART1 || LPC17_UART2 || LPC17_UART3 || LPC17_UART4
+
+config UART1_RINGINDICATOR
+	bool "UART1 ring indicator"
+	depends on LPC17_UART1
+	default n
+	---help---
+		Enable UART1 ring indicator
+
+endmenu
+
+menu "ADC driver options"
+	depends on LPC17_ADC
+
+config ADC0_AVERAGE
+	int "ADC0 average"
+	default 200
+
+config ADC0_MASK
+	int "ADC0 mask"
+	default 1
+
+config ADC0_SPS
+	int "ADC0 SPS"
+	default 1000
+
+config ADC_CHANLIST
+	bool "Use ADC channel list"
+	default n
+	---help---
+		The errata that states: "A/D Global Data register should not be used
+		with burst mode or hardware triggering".  If this option is selected,
+		then the ADC driver will grab from the individual channel registers
+		rather than from the global data register as this is the stated
+		workaround in the errata.
+
+		The ADC interrupt will trigger on conversion complete on the last
+		channel listed in the array g_adc_chanlist[] (as opposed to
+		triggering interrupt from the global DONE flag).
+
+		If this option is enabled, then the platform specific code must do
+		two things:  (1) define ADC_NCHANNELS in the configuration file and
+		(2) provide an array g_adc_chanlist[] with the channel numbers
+		matching the ADC0_MASK within the board-specific library.
+
+config ADC_BURSTMODE
+    bool "One interrupt at the end of all ADC cconversions"
+    default n
+    ---help---
+        Select this if you want to generate only one interrupt once all selected channels has been converted by the ADC
+
+config ADC_NCHANNELS
+	int "ADC0 number of channels"
+	depends on ADC_CHANLIST
+	default 0
+	---help---
+		If ADC_CHANLIST is enabled, then the platform specific code
+		must do two things:  (1) define ADC_NCHANNELS in the configuration
+		file and (2) provide an array g_adc_chanlist[] with the channel
+		numbers matching the ADC0_MASK within the board-specific library.
+
+endmenu
+
+menu "CAN driver options"
+	depends on LPC17_CAN1 || LPC17_CAN2
+
+config CAN_EXTID
+	bool "CAN extended IDs"
+	default n
+	---help---
+		Enables support for the 29-bit extended ID.  Default Standard 11-bit IDs.
+
+config CAN1_BAUD
+	int "CAN1 BAUD"
+	depends on LPC17_CAN1
+	---help---
+		CAN1 BAUD rate.  Required if LPC17_CAN1 is defined.
+
+config CAN2_BAUD
+	int "CAN2 BAUD"
+	depends on LPC17_CAN2
+	---help---
+		CAN2 BAUD rate.  Required if LPC17_CAN2 is defined.
+
+config CAN1_DIVISOR
+	int "CAN1 CCLK divisor"
+	depends on LPC17_CAN1
+	default 4
+	---help---
+		CAN1 is clocked at CCLK divided by this number. (the CCLK frequency is divided
+		by this number to get the CAN clock). Options = {1,2,4,6}. Default: 4.
+
+config CAN2_DIVISOR
+	int "CAN2 CCLK divisor"
+	depends on LPC17_CAN2
+	default 4
+	---help---
+		CAN2 is clocked at CCLK divided by this number. (the CCLK frequency is divided
+		by this number to get the CAN clock). Options = {1,2,4,6}. Default: 4.
+
+config CAN_TSEG1
+	int "TSEG1 quanta"
+	default 6
+	---help---
+		The number of CAN time quanta in segment 1. Default: 6
+
+config CAN_TSEG2
+	int "TSEG2 quanta"
+	default 4
+	---help---
+		The number of CAN time quanta in segment 2. Default: 7
+
+config CAN_SAM
+	bool "CAN sampling"
+	default n
+	---help---
+		The bus is sampled 3 times (recommended for low to medium speed buses to spikes on the bus-line).
+
+config CAN_LOOPBACK
+	bool "CAN looopback mode"
+	default n
+	---help---
+		Enable CAN loopback mode
+
+config CAN_REGDEBUG
+	bool "Register level debug"
+	depends on DEBUG
+	default n
+	---help---
+		Output detailed register-level CAN debug information.  Requires also DEBUG and DEBUG_CAN.
+
+endmenu
+
+config GPIO_IRQ
+	bool "GPIO interrupt support"
+	default n
+	---help---
+		Enable support for GPIO interrupts
+
+menu "I2C driver options"
+	depends on LPC17_I2C0 || LPC17_I2C1 || LPC17_I2C2
+
+config LPC17_I2C0_FREQUENCY
+	int "I2C0 frequency"
+	depends on LPC17_I2C0
+	default 100000
+
+config LPC17_I2C1_FREQUENCY
+	int "I2C1 frequency"
+	depends on LPC17_I2C1
+	default 100000
+
+config LPC17_I2C2_FREQUENCY
+	int "I2C2 frequency"
+	depends on LPC17_I2C2
+	default 100000
+
+endmenu
+
+menu "SDIO Configuration"
+	depends on LPC17_SDCARD
+
+config SDIO_DMA
+	bool "Support DMA data transfers"
+	default y if LPC17_GPDMA
+	depends on LPC17_GPDMA
+	---help---
+		Support DMA data transfers.
+		Enable SD card DMA data transfers.  This is a marginally optional.
+		For most usages, SD accesses will cause data overruns if used without
+		DMA.  Requires LPC17_SDCARD and config LPC17_GPDMA.
+
+config SDIO_WIDTH_D1_ONLY
+	bool "Use D1 only"
+	default n
+	---help---
+		Select 1-bit transfer mode.  This may be selected to force the driver
+		operate with only a single data line (the default is to use all
+		4 SD data lines).Default: 4-bit transfer mode.
+
+endmenu
+
+menu "Ethernet driver options"
+	depends on LPC17_ETHERNET
+
+config PHY_AUTONEG
+	bool "Autonegiation"
+	---help---
+		Enable auto-negotion
+
+config PHY_SPEED100
+	bool "100Mbit/Sec"
+	depends on !PHY_AUTONEG
+	---help---
+		Select 100Mbit vs. 10Mbit speed.
+
+config PHY_FDUPLEX
+	bool "Full duplex"
+	depends on !PHY_AUTONEG
+	---help---
+		Select full (vs. half) duplex
+
+config NET_EMACRAM_SIZE
+	int "EMAC RAM Size"
+	default 16384
+	---help---
+		Size of EMAC RAM.  Default: 16384 bytes
+
+config NET_NTXDESC
+	int "Number of Tx descriptors"
+	default 13
+	---help---
+		Configured number of Tx descriptors. Default: 13
+
+config NET_NRXDESC
+	int "Number of Rx descriptors"
+	default 13
+	---help---
+		Configured number of Rx descriptors. Default: 13
+
+config NET_PRIORITY
+	int "Ethernet interrupt priority"
+	default 128
+	depends on ARCH_IRQPRIO && EXPERIMENTAL
+	---help---
+		Ethernet interrupt priority.  The default is the default priority (128).
+
+config NET_WOL
+	bool "Wake-up on LAN"
+	default n
+	---help---
+		Enable Wake-up on Lan (not fully implemented).
+
+config NET_REGDEBUG
+	bool "Ethernet register-level debug"
+	depends on DEBUG
+	default n
+	---help---
+		Enable low level register debug.  Also needs DEBUG.
+
+config NET_HASH
+	bool "Hashing"
+	default n
+	---help---
+		Enable receipt of near-perfect match frames.
+
+config LPC17_MULTICAST
+	bool "Multicast"
+	default y if NET_IGMP
+	default n if !NET_IGMP
+	---help---
+		Enable receipt of multicast (and unicast) frames. Automatically set
+		if NET_IGMP is selected.
+endmenu
+
+menu "LCD device driver options"
+	depends on LPC17_LCD
+
+config LPC17_LCD_VRAMBASE
+	hex "Video RAM base address"
+	default 0xa0010000
+	---help---
+		Base address of the video RAM frame buffer.  The default is
+		(LPC17_EXTDRAM_CS0 + 0x00010000)
+
+config LPC17_LCD_REFRESH_FREQ
+	int "LCD refesh rate (Hz)"
+	default 50
+	---help---
+		LCD refesh rate (Hz)
+
+config LPC17_LCD_BACKLIGHT
+	bool "Enable backlight"
+	default y
+	---help---
+		Enable backlight support.  If LPC17_LCD_BACKLIGHT is selected, then
+		the board-specific logic must provide this lpc17_backlight()
+		interface so that the LCD driver can turn the backlight on and off
+		as necessary.  You should select this option and implement
+		lpc17_backlight() if your board provides GPIO control over the
+		backlight.  This interface provides only ON/OFF control of the
+		backlight.  If you want finer control over the backlight level (for
+		example, using PWM), then this interface would need to be extended.
+
+config LPC17_LCD_TFTPANEL
+	bool "TFT Panel"
+	default y
+	---help---
+		TFT Panel vs. STN display.  STN display panels require algorithmic
+		pixel pattern generation to provide pseudo gray scaling on
+		monochrome displays, or color creation on color displays.  TFT
+		display panels require the digital color value of each pixel to be
+		applied to the display data inputs.
+
+config LPC17_LCD_MONOCHROME
+	bool "Monochrome LCD"
+	default n
+	depends on !LPC17_LCD_TFTPANEL
+	---help---
+		STN LCD monochrome/color selection.  Selects monochrome LCD.  This
+		selection has no meaning for a TFT panel.
+
+choice
+	prompt "Bits per pixel"
+	default LPC17_LCD_BPP24 if LPC17_LCD_TFTPANEL
+	default LPC17_LCD_BPP16_565 if !LPC17_LCD_TFTPANEL
+
+config LPC17_LCD_BPP1
+	bool "1 bit per pixel"
+
+config LPC17_LCD_BPP2
+	bool "2 bit per pixel"
+
+config LPC17_LCD_BPP4
+	bool "4 bit per pixel"
+
+config LPC17_LCD_BPP8
+	bool "8 bit per pixel"
+
+config LPC17_LCD_BPP16
+	bool "16 bit per pixel"
+	depends on !LPC17_LCD_MONOCHROME
+
+config LPC17_LCD_BPP24
+	bool "24 bit per pixel"
+	depends on LPC17_LCD_TFTPANEL
+
+config LPC17_LCD_BPP16_565
+	bool "16 bpp, 5:6:5 mode"
+	depends on !LPC17_LCD_MONOCHROME
+
+config LPC17_LCD_BPP12_444
+	bool "12 bpp, 4:4:4 mode"
+	depends on !LPC17_LCD_MONOCHROME
+
+endchoice
+
+config LPC17_LCD_BACKCOLOR
+	hex "Initial background color"
+	default 0x0
+	---help---
+		Initial background color
+
+config LPC17_LCD_HWIDTH
+	int "Display width (pixels)"
+	default 480
+	---help---
+		Horizontal width the display in pixels
+
+config LPC17_LCD_HPULSE
+	int "Horizontal pulse"
+	default 2
+
+config LPC17_LCD_HFRONTPORCH
+	int "Horizontal front porch"
+	default 5
+
+config LPC17_LCD_HBACKPORCH
+	int "Horizontal back porch"
+	default 40
+
+config LPC17_LCD_VHEIGHT
+	int "Display height (rows)"
+	default 272
+	---help---
+		Vertical height of the display in rows
+
+config LPC17_LCD_VPULSE
+	int "Vertical pulse"
+	default 2
+
+config LPC17_LCD_VFRONTPORCH
+	int "Vertical front porch"
+	default 8
+
+config LPC17_LCD_VBACKPORCH
+	int "Vertical back porch"
+	default 8
+
+endmenu
+
+menu "USB device driver options"
+	depends on LPC17_USBDEV
+
+config LPC17_USBDEV_EP0_MAXSIZE
+	int "EP0 Max packet size"
+	default 64
+	---help---
+		Endpoint 0 maximum packet size.  Default: 64
+
+config LPC17_USBDEV_FRAME_INTERRUPT
+	bool "USB frame interrupt"
+	default n
+	---help---
+		Handle USB Start-Of-Frame events.  Enable reading SOF from interrupt
+		handler vs. simply reading on demand. Probably a bad idea... Unless
+		there is some issue with sampling the SOF from hardware asynchronously.
+
+config LPC17_USBDEV_EPFAST_INTERRUPT
+	bool "EP fast interrupt handling"
+	default n
+	---help---
+		Enable high priority interrupts.  I have no idea why you might want to do that
+
+config LPC17_USBDEV_NDMADESCRIPTORS
+	int "Number of DMA descriptors"
+	default 8
+	---help---
+		Number of DMA descriptors to allocate in SRAM.  Default: 8
+
+config LPC17_USBDEV_DMA
+	bool "Enable USB device DMA"
+	default n
+	---help---
+		Enable lpc17xx-specific DMA support
+
+config LPC17_USBDEV_NOVBUS
+	bool "Disable VBUS support"
+	default n
+	---help---
+		Define if the hardware implementation does not support the VBUS signal
+
+config LPC17_USBDEV_NOLED
+	bool "Disable USB device LCD support"
+	default n
+	---help---
+		Define if the hardware implementation does not support the LED output
+
+config LPC17_USBDEV_REGDEBUG
+	bool "Register level debug"
+	depends on DEBUG
+	default n
+	---help---
+		Output detailed register-level USB device debug information.  Requires also DEBUG.
+
+endmenu
+
+menu "USB host driver options"
+	depends on LPC17_USBHOST
+
+config USBHOST_OHCIRAM_SIZE
+	int "OHCI RAM Size"
+	default 16384
+	---help---
+		Total size of OHCI RAM (in AHB SRAM Bank 1).  Default: 16384
+
+config USBHOST_NEDS
+	int "Number of Endpoint Descriptors"
+	default 2
+	---help---
+		Number of endpoint descriptors.  Default: 2
+
+config USBHOST_NTDS
+	int "Number of transfer descriptors"
+	default 3
+	---help---
+		Number of transfer descriptors. Default: 3
+
+config USBHOST_TDBUFFERS
+	int "Number of descriptor buffers"
+	default 2
+	---help---
+		Number of transfer descriptor buffers.  Default: 2
+
+config USBHOST_TDBUFSIZE
+	int "Descriptor buffer size"
+	default 128
+	---help---
+		Size of one transfer descriptor buffer.  Default 128
+
+config USBHOST_IOBUFSIZE
+	int "I/O buffer size"
+	default 512
+	---help---
+		Size of one end-user I/O buffer.  This can be zero if the application
+		can guarantee that all end-user I/O buffers reside in AHB SRAM.
+
+config LPC17_USBHOST_NPREALLOC
+	int "Max concurrent transfers"
+	default 8 if USBHOST_HUB
+	default 4 if !USBHOST_HUB
+	---help---
+		This number represents a number of pre-allocated structures to support
+		concurrent data transfers.  This number limits that number of concurrent
+		asynchronous IN endpoint transfer that can be supported.
+
+config USBHOST_BULK_DISABLE
+	bool "Disable bulk EPs"
+	default n
+	---help---
+		Disable support for bulk endpoints.
+
+config USBHOST_INT_DISABLE
+	bool "Disable interrupt EPs"
+	default n
+	---help---
+		Disable support for interrupt endpoints.
+
+config USBHOST_ISOC_DISABLE
+	bool "Disable isochronous EPs"
+	default n
+	---help---
+		Disable support for isochronous endpoints.
+
+config LPC17_USBHOST_REGDEBUG
+	bool "Register level debug"
+	depends on DEBUG
+	default n
+	---help---
+		Output detailed register-level USB host debug information.  Requires also DEBUG.
+
+endmenu

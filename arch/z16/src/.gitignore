@@ -1,0 +1,10 @@
+/Make.dep
+/.depend
+/board
+/chip
+/nuttx.linkcmd
+/*.asm
+/*.obj
+/*.lib
+/*.map
+/*.lst

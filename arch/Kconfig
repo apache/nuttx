@@ -1,0 +1,860 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+choice
+	prompt "CPU Architecture"
+	default ARCH_ARM
+
+config ARCH_ARM
+	bool "ARM"
+	select ARCH_HAVE_INTERRUPTSTACK
+	select ARCH_HAVE_TLS
+	select ARCH_HAVE_VFORK
+	select ARCH_HAVE_STACKCHECK
+	select ARCH_HAVE_CUSTOMOPT
+	---help---
+		The ARM architectures
+
+config ARCH_AVR
+	bool "AVR"
+	select ARCH_NOINTC
+	select ARCH_HAVE_INTERRUPTSTACK
+	select ARCH_HAVE_CUSTOMOPT
+	---help---
+		Atmel 8-bit bit AVR and 32-bit AVR32 architectures
+
+config ARCH_HC
+	bool "Freescale HC"
+	select ARCH_NOINTC
+	select ARCH_HAVE_INTERRUPTSTACK
+	---help---
+		Freescale HC architectures (M9S12)
+
+config ARCH_MIPS
+	bool "MIPS"
+	select ARCH_HAVE_INTERRUPTSTACK
+	select ARCH_HAVE_CUSTOMOPT
+	---help---
+		MIPS architectures (PIC32)
+
+config ARCH_RGMP
+	bool "RGMP"
+	---help---
+		RTOS and GPOS on Multi-Processor (RGMP) architecture.  See
+		http://rgmp.sourceforge.net/wiki/index.php/Main_Page.
+
+config ARCH_SH
+	bool "Renesas"
+	select ARCH_NOINTC
+	select ARCH_HAVE_INTERRUPTSTACK
+	---help---
+		Renesas architectures (SH and M16C).
+
+config ARCH_SIM
+	bool "Simulation"
+	select ARCH_HAVE_MULTICPU
+	select ARCH_HAVE_TLS
+	select ARCH_HAVE_TICKLESS
+	select ARCH_HAVE_POWEROFF
+	---help---
+		Linux/Cywgin user-mode simulation.
+
+config ARCH_X86
+	bool "x86"
+	---help---
+		Intel x86 architectures.
+
+config ARCH_Z16
+	bool "ZNEO"
+	select ARCH_HAVE_HEAP2
+	---help---
+		ZiLOG ZNEO 16-bit architectures (z16f).
+
+config ARCH_Z80
+	bool "z80"
+	select ARCH_HAVE_HEAP2
+	---help---
+		ZiLOG 8-bit architectures (z80, ez80, z8).
+
+endchoice
+
+config ARCH
+	string
+	default "arm"	if ARCH_ARM
+	default "avr"	if ARCH_AVR
+	default "hc"	if ARCH_HC
+	default "mips"	if ARCH_MIPS
+	default "rgmp"	if ARCH_RGMP
+	default "sh"	if ARCH_SH
+	default "sim"	if ARCH_SIM
+	default "x86"	if ARCH_X86
+	default "z16"	if ARCH_Z16
+	default "z80"	if ARCH_Z80
+
+source arch/arm/Kconfig
+source arch/avr/Kconfig
+source arch/hc/Kconfig
+source arch/mips/Kconfig
+source arch/rgmp/Kconfig
+source arch/sh/Kconfig
+source arch/sim/Kconfig
+source arch/x86/Kconfig
+source arch/z16/Kconfig
+source arch/z80/Kconfig
+
+comment "Architecture Options"
+
+config ARCH_NOINTC
+	bool
+	default n
+
+config ARCH_VECNOTIRQ
+	bool
+	default n
+
+config ARCH_DMA
+	bool
+	default n
+
+config ARCH_HAVE_IRQPRIO
+	bool
+	default n
+
+config ARCH_L2CACHE
+	bool
+	default n
+
+config ARCH_HAVE_COHERENT_DCACHE
+	bool
+	default n
+
+config ARCH_HAVE_ADDRENV
+	bool
+	default n
+
+config ARCH_NEED_ADDRENV_MAPPING
+	bool
+	default n
+
+config ARCH_HAVE_MULTICPU
+	bool
+	default n
+
+config ARCH_HAVE_VFORK
+	bool
+	default n
+
+config ARCH_HAVE_MMU
+	bool
+	default n
+
+config ARCH_HAVE_MPU
+	bool
+	default n
+
+config ARCH_NAND_HWECC
+	bool
+	default n
+
+config ARCH_HAVE_EXTCLK
+	bool
+	default n
+
+config ARCH_HAVE_POWEROFF
+	bool
+	default n
+
+config ARCH_HAVE_RESET
+	bool
+	default n
+
+config ARCH_USE_MMU
+	bool "Enable MMU"
+	default n
+	depends on ARCH_HAVE_MMU
+	---help---
+		The architecture supports supports an MMU.  Enable this option in
+		order to enable use of the MMU.  For most architectures, this is
+		not really an option:  It is required to use the MMU.  In those
+		cases, this selection will always be forced.
+
+config ARCH_USE_MPU
+	bool "Enable MPU"
+	default n
+	depends on ARCH_HAVE_MPU
+	---help---
+		The architecture supports supports an MPU.  Enable this option in
+		order to enable use of the MPU.  For most architectures, this option
+		is enabled by other, platform-specific logic.  In those cases, this
+		selection will always be forced.
+
+menuconfig ARCH_ADDRENV
+	bool "Address environments"
+	default n
+	depends on ARCH_HAVE_ADDRENV
+	---help---
+		Support per-task address environments using the MMU... i.e., support
+		"processes"
+
+if ARCH_ADDRENV && ARCH_NEED_ADDRENV_MAPPING
+
+config ARCH_TEXT_VBASE
+	hex "Virtual .text base"
+	---help---
+		The virtual address of the beginning the .text region
+
+config ARCH_DATA_VBASE
+	hex "Virtual .bss/.data base"
+	---help---
+		The virtual address of the beginning of the .bss/.data region.
+
+config ARCH_HEAP_VBASE
+	hex "Virtual heap base"
+	---help---
+		The virtual address of the beginning of the heap region.
+
+config ARCH_SHM_VBASE
+	hex "Shared memory base"
+	depends on MM_SHM
+	---help---
+		The virtual address of the beginning of the shared memory region.
+
+config ARCH_TEXT_NPAGES
+	int "Max .text pages"
+	default 1
+	---help---
+		The maximum number of pages that can allocated for the .text region.
+		This, along with knowledge of the page size, determines the size of
+		the .text virtual address space. Default is 1.
+
+config ARCH_DATA_NPAGES
+	int "Max .bss/.data pages"
+	default 1
+	---help---
+		The maximum number of pages that can allocated for the .bss/.data
+		region. This, along with knowledge of the page size, determines the
+		size of the .bss/.data virtual address space. Default is 1.
+
+config ARCH_HEAP_NPAGES
+	int "Max heap pages"
+	default 1
+	---help---
+		The maximum number of pages that can allocated for the heap region.
+		This, along with knowledge of the page size, determines the size of
+		the heap virtual address space. Default is 1.
+
+if MM_SHM
+
+config ARCH_SHM_MAXREGIONS
+	int "Max shared memory regions"
+	default 1
+	---help---
+		The maximum number of regions that can allocated for the shared
+		memory space.  This hard-coded value permits static allocation of
+		the shared memory data structures and serves no other purpose.
+		Default is 1.
+
+		The size of the virtual shared memory address space is then
+		determined by the product of the maximum number of regions, the
+		maximum number of pages per region, and the configured size of
+		each page.
+
+config ARCH_SHM_NPAGES
+	int "Max shared memory pages"
+	default 1
+	---help---
+		The maximum number of pages that can allocated per region for the shared memory
+		region. Default is 1.
+
+		The size of the virtual shared memory address space is then
+		determined by the product of the maximum number of regions, the
+		maximum number of pages per region, and the configured size of
+		each page.
+
+endif # MM_SHM
+
+config ARCH_STACK_DYNAMIC
+	bool "Dynamic user stack"
+	default n
+	depends on BUILD_KERNEL && EXPERIMENTAL
+	---help---
+		Select this option if the user process stack resides in its own
+		address space.  The naming of this selection implies that dynamic
+		stack allocation is supported.  Certainly this option must be set if
+		dynamic stack allocation is supported by a platform.  But the more
+		general meaning of this configuration environment is simply that the
+		stack has its own address space.
+
+		NOTE:  This option not yet fully implemented in the code base.
+		Hence, it is marked EXPERIMENTAL:  Do not enable it unless you plan
+		finish the implementation.
+
+if ARCH_STACK_DYNAMIC
+
+config ARCH_STACK_VBASE
+	hex "Virtual stack base"
+	---help---
+		The virtual address of the beginning the stack region
+
+config ARCH_STACK_NPAGES
+	int "Max. stack pages"
+	default 1
+	---help---
+		The maximum number of pages that can allocated for the stack region.
+		This, along with knowledge of the page size, determines the size of
+		the stack virtual address space. Default is 1.
+
+endif # ARCH_STACK_DYNAMIC
+
+config ARCH_KERNEL_STACK
+	bool "Kernel process stack"
+	default n if !LIBC_EXECFUNCS
+	default y if LIBC_EXECFUNCS
+	depends on BUILD_KERNEL
+	---help---
+		It this option is selected, then every user process will have two
+		stacks:  A large, potentially dynamically sized user stack and small
+		kernel stack that is used during system call process.
+
+		If this option is not selected, then kernel system calls will simply
+		use the caller's user stack.  So, in most cases, this option is not
+		required.  However, this option is *required* if both BUILD_KERNEL
+		and LIBC_EXECFUNCS are selected.  Why?  Because when we instantiate
+		and initialize the address environment of the new user process, we
+		will temporarily lose the address environment of the old user
+		process, including its stack contents.  The kernel C logic will
+		crash immediately with no valid stack in place.
+
+		When this option is selected, the smaller kernel stack stays in
+		place during system call processing event though the original user
+		stack may or may not be accessible.
+
+if ARCH_KERNEL_STACK
+
+config ARCH_KERNEL_STACKSIZE
+	int "Kernel stack size"
+	default 1568
+	---help---
+		The common size of each process' kernel stack
+
+endif # ARCH_KERNEL_STACK
+
+config ARCH_PGPOOL_MAPPING
+	bool "Have page pool mapping"
+	default n
+	---help---
+		If there is a MMU mapping in place for the page pool memory, then
+		this mapping can be utilized to simplify some page table operations.
+		Otherwise, a temporary mapping will have to be established each time
+		it is necessary to modify the contents of a page.
+
+if ARCH_PGPOOL_MAPPING
+
+config ARCH_PGPOOL_PBASE
+	hex "Page pool physical address"
+	default 0x0
+	---help---
+		The physical address of the start of the page pool memory.  This
+		setting is probably equivalent to other platform specific definitions
+		but is required again in order to modularize the common address
+		environment logic.
+
+config ARCH_PGPOOL_VBASE
+	hex "Page pool virtual address"
+	default 0x0
+	---help---
+		The virtual address of the start of the page pool memory.  This
+		setting is probably equivalent to other platform specific definitions
+		but is required again in order to modularize the common address
+		environment logic.
+
+config ARCH_PGPOOL_SIZE
+	int "Page pool size (byes)"
+	default 0
+	---help---
+		The size of the page pool memory in bytes.  This setting is probably
+		equivalent  to other platform specific definitions but is required again
+		in order to modularize the common address environment logic.
+
+endif # ARCH_PGPOOL_MAPPING
+endif # ARCH_ADDRENV && ARCH_NEED_ADDRENV_MAPPING
+
+menuconfig PAGING
+	bool "On-demand paging"
+	default n
+	depends on ARCH_USE_MMU && !ARCH_ROMPGTABLE
+	---help---
+		If set =y in your configation file, this setting will enable the on-demand
+		paging feature as described in http://www.nuttx.org/NuttXDemandPaging.html.
+
+if PAGING
+
+config PAGING_PAGESIZE
+	int "Page size (bytes)"
+	default 4096
+	---help---
+		The size of one managed page.  This must be a value supported by the
+		processor's memory management unit
+
+config PAGING_NLOCKED
+	int "Number of locked pages"
+	default 48
+	---help---
+		This is the number of locked pages in the memory map.
+
+config PAGING_CUSTOM_BASE
+	bool "Custom paging base address"
+	default n
+	---help---
+		By default, the page begins at RAM_START/VSTART.  That base address
+		can be changed if this value is selected.
+
+if PAGING_CUSTOM_BASE
+
+config PAGING_LOCKED_PBASE
+	hex "Physical base address"
+
+config PAGING_LOCKED_VBASE
+	hex "Virtual base address"
+
+endif # PAGING_CUSTOM_BASE
+
+config PAGING_NPPAGED
+	int "Number of physical pages"
+	default 256
+	---help---
+		This is the number of physical pages available to support the paged
+		text region.
+
+config PAGING_NVPAGED
+	int "Number of virtual pages"
+	default 1024
+	---help---
+		This actual size of the virtual paged text region (in pages).  This
+		is also the number of virtual pages required to span the entire
+		paged region. The on-demand paging  feature is intended to support
+		only the case where the virtual paged text area is much larger the
+		available physical pages.  Otherwise, why would you enable on-demand paging?
+
+config PAGING_NDATA
+	int "Number of data pages"
+	default 256
+	---help---
+		This is the number of data pages in the memory map.  The data region
+		will extend to the end of RAM unless overridden by a setting in the
+		configuration file.
+
+		NOTE:  In some architectures, it may be necessary to take some memory
+		from the end of RAM for page tables or other system usage.  The
+		configuration settings and linker directives must be cognizant of
+		that: PAGING_NDATA should be defined to prevent the data region from
+		extending all the way to the end of memory.
+
+config PAGING_DEFPRIO
+	int "Page fill worker thread priority"
+	default 100
+	---help---
+		The default, minimum priority of the page fill worker thread.  The
+		priority of the page fill work thread will be boosted  boosted
+		dynamically so that it matches the priority of the task on behalf
+		of which it performs the fill.  This defines the minimum priority
+		that will be used. Default: 100.
+
+config PAGING_STACKSIZE
+	int "Page fill worker thread stack size"
+	default 1024
+	---help---
+		Defines the size of the allocated stack for the page fill worker
+		thread. Default: 1024.
+
+config PAGING_BLOCKINGFILL
+	bool "Blocking fill"
+	default n
+	---help---
+		The architecture specific up_fillpage() function may be blocking
+		or non-blocking.  If defined, this setting indicates that the
+		up_fillpage() implementation will block until the transfer is
+		completed. Default:  Undefined (non-blocking).
+
+config PAGING_WORKPERIOD
+	int "Work period (usec)"
+	default 500000
+	---help---
+		The page fill worker thread will wake periodically even if there
+		is no mapping to do.  This selection controls that wake-up period
+		(in microseconds).  This wake-up a failsafe that will handle any
+		cases where a single is lost (that would really be a bug and
+		shouldn't happen!) and also supports timeouts for case of non-
+		blocking, asynchronous fills (see CONFIG_PAGING_TIMEOUT_TICKS).
+
+config PAGING_TIMEOUT
+	bool "Paging timeout"
+	default n
+	---help---
+		If defined, the implementation will monitor the (asynchronous) page
+		fill logic.  If the fill takes longer than than a timeout value,
+		then a fatal error will be declared. Default: No timeouts monitored
+
+config PAGING_TIMEOUT_TICKS
+	int "Paging timeout ticks"
+	default 10
+	depends on PAGING_TIMEOUT
+	---help---
+		If PAGING_TIMEOUT is defined, then implementation will monitor the
+		(asynchronous) page fill logic.  If the fill takes longer than this
+		number if microseconds, then a fatal error will be declared.
+		Default: No timeouts monitored
+
+endif # PAGING
+
+config ARCH_IRQPRIO
+	bool "Prioritized interrupt support"
+	default n
+	depends on ARCH_HAVE_IRQPRIO
+	---help---
+		Enable support for prioritized interrupts.
+
+		NOTE: The use of interrupt priorities implies that you also have
+		support for nested interrupts.  Most architectures do not support
+		nesting of interrupts or, if they do, they only supported nested
+		interrupts with certain configuration options.  So this selection
+		should be used with caution.
+
+config ARCH_STACKDUMP
+	bool "Dump stack on assertions"
+	default n
+	---help---
+		Enable to do stack dumps after assertions
+
+config ARCH_USBDUMP
+	bool "Dump USB trace data"
+	default n
+	depends on USBDEV_TRACE
+	---help---
+		Enable to do USB trace after assertions
+
+config ENDIAN_BIG
+	bool "Big Endian Architecture"
+	default n
+	---help---
+		Select if architecture operates using big-endian byte ordering.
+
+config ARCH_IDLE_CUSTOM
+	bool "Custom IDLE loop"
+	default n
+	---help---
+		Each architecture provides a "default" IDLE loop that exits when the
+		MCU has nothing else to do.  This default IDLE loop can be replaced
+		by a custom, board-specific IDLE loop by setting this option.  Such
+		a custom IDLE loop may do things like a continuous built-in test or
+		perhaps or IDLE low power operations.
+
+		NOTE: As of this writing, this capability is only supported by the
+		STM32.  However, the implementation is trivial:  If CONFIG_ARCH_IDLE_CUSTOM,
+		then the default IDLE loop file is not included in the MCU-specific
+		Make.defs file.
+
+config ARCH_CUSTOM_PMINIT
+	bool "Custom PM initialization"
+	default n
+	depends on PM
+	---help---
+		Each architecture provides default power management (PM)
+		initialization that is called automatically when the system is
+		started. This default PM initialization can be replaced by custom,
+		board-specific PM initialization by setting this option.  Such a
+		custom initialization may do additional PM-related initialization
+		that is unique to the board power management requirements.
+
+		NOTE: As of this writing, this capability is only supported by the
+		STM32.  However, the implementation is trivial:  If CONFIG_ARCH_CUSTOM_PMINIT,
+		then the default PM initialization is not included in the MCU-specific
+		Make.defs file.
+
+config ARCH_HAVE_RAMFUNCS
+	bool
+	default n
+
+config ARCH_RAMFUNCS
+	bool "Copy functions to RAM on startup"
+	default y
+	depends on ARCH_HAVE_RAMFUNCS
+	---help---
+		Copy some functions to RAM at boot time.  This is done in some
+		architectures to improve performance.  In other cases, it is done
+		so that FLASH can be reconfigured while the MCU executes out of
+		SRAM.
+
+config ARCH_HAVE_RAMVECTORS
+	bool
+	default n
+
+config ARCH_RAMVECTORS
+	bool "Support RAM interrupt vectors"
+	default n
+	depends on ARCH_HAVE_RAMVECTORS
+	---help---
+		If ARCH_RAMVECTORS is defined, then the architecture will support
+		modifiable vectors in a RAM-based vector table.
+
+comment "Board Settings"
+
+config BOARD_LOOPSPERMSEC
+	int "Delay loops per millisecond"
+	default 5000
+	---help---
+		Simple delay loops are used by some logic, especially during boot-up,
+		driver initialization.  These delay loops must be calibrated for each
+		board in order to assure accurate timing by the delay loops.
+
+config ARCH_CALIBRATION
+	bool "Calibrate delay loop"
+	default n
+	---help---
+		Enables some built in instrumentation that causes a 100 second delay
+		during boot-up.  This 100 second delay serves no purpose other than it
+		allows you to calibrate BOARD_LOOPSPERMSEC.  You simply use a stop
+		watch to measure the actual delay then adjust BOARD_LOOPSPERMSEC until
+		the actual delay is 100 seconds.
+
+comment "Interrupt options"
+
+config ARCH_HAVE_INTERRUPTSTACK
+	bool
+	default n
+
+config ARCH_INTERRUPTSTACK
+	int "Interrupt Stack Size"
+	depends on ARCH_HAVE_INTERRUPTSTACK
+	default 0
+	---help---
+		This architecture supports an interrupt stack. If defined, this symbol
+		will be the size of the interrupt stack in bytes.  If not defined (or
+		defined to be zero), the user task stacks will be used during interrupt
+		handling.
+
+config ARCH_HAVE_HIPRI_INTERRUPT
+	bool
+	default n
+
+config ARCH_HIPRI_INTERRUPT
+	bool "High priority interrupts"
+	default n
+	depends on ARCH_HAVE_HIPRI_INTERRUPT && ARCH_HAVE_IRQPRIO
+	select ARMV7M_USEBASEPRI
+	select ARCH_IRQPRIO
+	---help---
+		NOTE: This description is currently unique to the Cortex-M family
+		which is the only family that currently supports this feature.  The
+		general feature is not conceptually unique to the Cortex-M but it
+		is extended to any other family, then this discussion will have to
+		be generalized.
+
+		If ARMV7M_USEBASEPRI is selected, then interrupts will be disabled
+		by setting the BASEPRI register to NVIC_SYSH_DISABLE_PRIORITY so
+		that most interrupts will not have execution priority.  SVCall must
+		have execution priority in all cases.
+
+		In the normal cases, interrupts are not nest-able and all interrupts
+		run at an execution priority between NVIC_SYSH_PRIORITY_MIN and
+		NVIC_SYSH_PRIORITY_MAX (with NVIC_SYSH_PRIORITY_MAX reserved for
+		SVCall).
+
+		If, in addition, ARCH_HIPRI_INTERRUPT is defined, then special high
+		priority interrupts are supported.  These are not "nested" in the
+		normal sense of the word.  These high priority interrupts can
+		interrupt normal processing but execute outside of OS (although they
+		can "get back into the game" via a PendSV interrupt).
+
+		How do you specify a high priority interrupt?  You need to do two
+		things:
+
+			1) You need to change the address in the vector table so that
+			   the high priority interrupt vectors to your special C
+			   interrupt handler.  There are two ways to do this:
+
+			   a) If you select CONFIG_ARCH_RAMVECTORS, then vectors will
+			      be kept in RAM and the system will support the interface:
+
+			      int up_ramvec_attach(int irq, up_vector_t vector)
+
+			      that can be used to attach your C interrupt handler to the
+			      vector at run time.
+
+			   b) Alternatively, you could keep your vectors in FLASH but in
+			      order to this, you would have to develop your own custom
+			      vector table.
+
+			2) Then set the priority of your interrupt to NVIC to
+			   NVIC_SYSH_HIGH_PRIORITY using the standard interface:
+
+			   int up_prioritize_irq(int irq, int priority)
+
+		NOTE: ARCH_INTERRUPTSTACK must be set in kernel mode (BUILD_KERNEL).
+		In kernel mode without an interrupt stack, the interrupt handler
+		will set the MSP to the stack pointer of the interrupted thread.  If
+		the interrupted thread was a privileged thread, that will be the MSP
+		otherwise it will be the PSP.  If the PSP is used, then the value of
+		the MSP will be invalid when the interrupt handler returns because
+		it will be a pointer to an old position in the unprivileged stack.
+		Then when the high priority interrupt occurs and uses this stale MSP,
+		there will most likely be a system failure.
+
+		If the interrupt stack is selected, on the other hand, then the
+		interrupt handler will always set the the MSP to the interrupt
+		stack.  So when the high priority interrupt occurs, it will either
+		use the MSP of the last privileged thread to run or, in the case of
+		the nested interrupt, the interrupt stack if no privileged task has
+		run
+
+config ARCH_INT_DISABLEALL
+	bool "Disable high priority interrupts"
+	default y
+	depends on ARCH_HIPRI_INTERRUPT && EXPERIMENTAL
+	---help---
+		If ARCH_HIPRI_INTERRUPT is defined, then special high priority
+		interrupts are supported.  These are not "nested" in the normal
+		sense of the word.  These high priority interrupts can interrupt
+		normal processing but execute outside of OS (although they can "get
+		back into the game" via a PendSV interrupt).
+
+		In the normal course of things, interrupts must occasionally be
+		disabled using the up_irq_save() inline function to prevent contention
+		in use of resources that may be shared between interrupt level and
+		non-interrupt level logic.  Now the question arises, if
+		ARCH_HIPRI_INTERRUPT, do we disable all interrupts (except SVCall),
+		or do we only disable the "normal" interrupts.  Since the high
+		priority interrupts cannot interact with the OS, you may want to
+		permit the high priority interrupts even if interrupts are
+		disabled.  The setting ARCH_INT_DISABLEALL can be used to select
+		either behavior:
+
+		----------------------------+--------------+----------------------------
+		CONFIG_ARCH_HIPRI_INTERRUPT |      NO      |             YES
+		----------------------------+--------------+--------------+-------------
+		CONFIG_ARCH_INT_DISABLEALL  |     N/A      |     YES      |      NO
+		----------------------------+--------------+--------------+-------------
+		                            |              |              |    SVCall
+		                            |    SVCall    |    SVCall    |    HIGH
+		Disable here and below --------> MAXNORMAL ---> HIGH --------> MAXNORMAL
+		                            |              |    MAXNORMAL |
+		----------------------------+--------------+--------------+-------------
+
+		NOTE: This does not work now because interrupts get disabled in the
+		standard interrupt handling, prohibiting nesting.  Fix is simple:  Need
+		to used more priority levels so that we can make a cleaner distinction
+		with the standard interrupt handler.
+
+comment "Boot options"
+
+choice
+	prompt "Boot Mode"
+	default BOOT_RUNFROMFLASH
+
+config BOOT_RUNFROMEXTSRAM
+	bool "Run from external SRAM"
+	---help---
+		Some configuration support booting and running from external SRAM.
+
+config BOOT_RUNFROMFLASH
+	bool "Boot and run from flash"
+	---help---
+		Most configurations support XIP operation from FLASH but must copy
+		initialized .data sections to RAM. (This is the default).
+
+config BOOT_RUNFROMISRAM
+	bool "Boot and run from internal SRAM"
+	---help---
+		Some configuration support booting and running from internal SRAM.
+
+config BOOT_RUNFROMSDRAM
+	bool "Boot and run from external SDRAM"
+	---help---
+		Some configuration support booting and running from external SDRAM.
+
+config BOOT_COPYTORAM
+	bool "Boot from FLASH but copy to ram"
+	---help---
+		Some configurations boot in FLASH but copy themselves entirely into
+		RAM for better performance.
+
+endchoice
+
+menu "Boot Memory Configuration"
+
+config RAM_START
+	hex "Primary RAM start address (physical)"
+	default 0x0
+	help
+		The physical start address of primary installed RAM.  "Primary" RAM
+		refers to the RAM that you link program code into.  If program code
+		does not execute out of RAM but from FLASH, then you may designate
+		any block of RAM as "primary."
+
+config RAM_VSTART
+	hex "Primary RAM start address (virtual)"
+	default 0x0
+	depends on ARCH_USE_MMU
+	help
+		The virtual start address of installed primary RAM. "Primary" RAM
+		refers to the RAM that you link program code into.  If program code
+		does not execute out of RAM but from FLASH, then you may designate
+		any block of RAM as "primary."
+
+config RAM_SIZE
+	int "Primary RAM size"
+	default 0
+	help
+		The size in bytes of the installed primary RAM. "Primary" RAM
+		refers to the RAM that you link program code into.  If program code
+		does not execute out of RAM but from FLASH, then you may designate
+		any block of RAM as "primary."
+
+if BOOT_RUNFROMFLASH && ARCH_USE_MMU
+
+config FLASH_START
+	hex "Boot FLASH start address (physical)"
+	default 0x0
+	help
+		The physical start address of installed boot FLASH.  "Boot" FLASH
+		refers to the FLASH that you link program code into.
+
+config FLASH_VSTART
+	hex "Boot FLASH start address (virtual)"
+	default 0x0
+	help
+		The virtual start address of installed boot FLASH.  "Boot" FLASH
+		refers to the FLASH that you link program code into.
+
+config FLASH_SIZE
+	int "Boot FLASH size"
+	default 0
+	help
+		The size in bytes of the installed boot FLASH.  "Boot" FLASH
+		refers to the FLASH that you link program code into.
+
+endif # BOOT_RUNFROMFLASH && ARCH_USE_MMU
+
+config ARCH_HAVE_SDRAM
+	bool
+	default n
+
+config BOOT_SDRAM_DATA
+	bool "Data in SDRAM"
+	default n
+	depends on ARCH_HAVE_SDRAM && !BOOT_RUNFROMSDRAM
+	---help---
+		This selection should be set if data lies in SDRAM (vs. SRAM) and if
+		SDRAM was not previously initialized by a loader.  Obviously, this
+		does not apply if we booting from SDRAM because SDRAM must have been
+		initialized priority to loading NuttX into SDRAM.
+
+		In the case where SDRAM must be initialized by NuttX, the
+		initialization sequence is a little different: Normally, .data and
+		.bss must be initialized before starting the system.  But in this
+		case SDRAM must be configured by board-specific logic before the
+		.data and .bss sections can be initialized.
+
+endmenu # Boot Memory Configuration

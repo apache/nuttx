@@ -1,0 +1,358 @@
+/****************************************************************************
+ * arch/arm/src/stm32l4/stm32l4_exti_gpio.c
+ *
+ *   Copyright (C) 2009, 2011-2012, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011 Uros Platise. All rights reserved.
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *           Uros Platise <uros.platise@isotel.eu>
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in
+ *    the documentation and/or other materials provided with the
+ *    distribution.
+ * 3. Neither the name NuttX nor the names of its contributors may be
+ *    used to endorse or promote products derived from this software
+ *    without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+ * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+ * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ *
+ ****************************************************************************/
+
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#include <nuttx/config.h>
+#include <nuttx/irq.h>
+#include <nuttx/arch.h>
+
+#include <stdint.h>
+#include <stdbool.h>
+#include <errno.h>
+#include <debug.h>
+
+#include <arch/irq.h>
+
+#include "up_arch.h"
+#include "chip.h"
+#include "stm32l4_gpio.h"
+#include "stm32l4_exti.h"
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+/* Interrupt handlers attached to each EXTI */
+
+static xcpt_t stm32l4_exti_callbacks[16];
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Interrupt Service Routines - Dispatchers
+ ****************************************************************************/
+
+static int stm32l4_exti0_isr(int irq, void *context)
+{
+  int ret = OK;
+
+  /* Clear the pending interrupt */
+
+  putreg32(0x0001, STM32L4_EXTI1_PR);
+
+  /* And dispatch the interrupt to the handler */
+
+  if (stm32l4_exti_callbacks[0])
+    {
+      ret = stm32l4_exti_callbacks[0](irq, context);
+    }
+
+  return ret;
+}
+
+static int stm32l4_exti1_isr(int irq, void *context)
+{
+  int ret = OK;
+
+  /* Clear the pending interrupt */
+
+  putreg32(0x0002, STM32L4_EXTI1_PR);
+
+  /* And dispatch the interrupt to the handler */
+
+  if (stm32l4_exti_callbacks[1])
+    {
+      ret = stm32l4_exti_callbacks[1](irq, context);
+    }
+
+  return ret;
+}
+
+static int stm32l4_exti2_isr(int irq, void *context)
+{
+  int ret = OK;
+
+  /* Clear the pending interrupt */
+
+  putreg32(0x0004, STM32L4_EXTI1_PR);
+
+  /* And dispatch the interrupt to the handler */
+
+  if (stm32l4_exti_callbacks[2])
+    {
+      ret = stm32l4_exti_callbacks[2](irq, context);
+    }
+
+  return ret;
+}
+
+static int stm32l4_exti3_isr(int irq, void *context)
+{
+  int ret = OK;
+
+  /* Clear the pending interrupt */
+
+  putreg32(0x0008, STM32L4_EXTI1_PR);
+
+  /* And dispatch the interrupt to the handler */
+
+  if (stm32l4_exti_callbacks[3])
+    {
+      ret = stm32l4_exti_callbacks[3](irq, context);
+    }
+
+  return ret;
+}
+
+static int stm32l4_exti4_isr(int irq, void *context)
+{
+  int ret = OK;
+
+  /* Clear the pending interrupt */
+
+  putreg32(0x0010, STM32L4_EXTI1_PR);
+
+  /* And dispatch the interrupt to the handler */
+
+  if (stm32l4_exti_callbacks[4])
+    {
+      ret = stm32l4_exti_callbacks[4](irq, context);
+    }
+
+  return ret;
+}
+
+static int stm32l4_exti_multiisr(int irq, void *context, int first, int last)
+{
+  uint32_t pr;
+  int pin;
+  int ret = OK;
+
+  /* Examine the state of each pin in the group */
+
+  pr = getreg32(STM32L4_EXTI1_PR);
+
+  /* And dispatch the interrupt to the handler */
+
+  for (pin = first; pin <= last; pin++)
+    {
+      /* Is an interrupt pending on this pin? */
+
+      uint32_t mask = (1 << pin);
+      if ((pr & mask) != 0)
+        {
+          /* Clear the pending interrupt */
+
+          putreg32(mask, STM32L4_EXTI1_PR);
+
+          /* And dispatch the interrupt to the handler */
+
+          if (stm32l4_exti_callbacks[pin])
+            {
+              int tmp = stm32l4_exti_callbacks[pin](irq, context);
+              if (tmp != OK)
+                {
+                  ret = tmp;
+                }
+            }
+        }
+    }
+
+  return ret;
+}
+
+static int stm32l4_exti95_isr(int irq, void *context)
+{
+  return stm32l4_exti_multiisr(irq, context, 5, 9);
+}
+
+static int stm32l4_exti1510_isr(int irq, void *context)
+{
+  return stm32l4_exti_multiisr(irq, context, 10, 15);
+}
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: stm32l4_gpiosetevent
+ *
+ * Description:
+ *   Sets/clears GPIO based event and interrupt triggers.
+ *
+ * Parameters:
+ *  - pinset:      GPIO pin configuration
+ *  - risingedge:  Enables interrupt on rising edges
+ *  - fallingedge: Enables interrupt on falling edges
+ *  - event:       Generate event when set
+ *  - func:        When non-NULL, generate interrupt
+ *
+ * Returns:
+ *   The previous value of the interrupt handler function pointer.  This
+ *   value may, for example, be used to restore the previous handler when
+ *   multiple handlers are used.
+ *
+ ****************************************************************************/
+
+xcpt_t stm32l4_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
+                          bool event, xcpt_t func)
+{
+  uint32_t pin = pinset & GPIO_PIN_MASK;
+  uint32_t exti = STM32L4_EXTI1_BIT(pin);
+  int      irq;
+  xcpt_t   handler;
+  xcpt_t   oldhandler = NULL;
+  int      nshared;
+  xcpt_t  *shared_cbs;
+  int      i;
+
+  /* Select the interrupt handler for this EXTI pin */
+
+  if (pin < 5)
+    {
+      irq        = pin + STM32L4_IRQ_EXTI0;
+      nshared    = 1;
+      shared_cbs = &stm32l4_exti_callbacks[pin];
+      switch (pin)
+        {
+          case 0:
+            handler = stm32l4_exti0_isr;
+            break;
+
+          case 1:
+            handler = stm32l4_exti1_isr;
+            break;
+
+          case 2:
+            handler = stm32l4_exti2_isr;
+            break;
+
+          case 3:
+            handler = stm32l4_exti3_isr;
+            break;
+
+          default:
+            handler = stm32l4_exti4_isr;
+            break;
+        }
+    }
+  else if (pin < 10)
+    {
+      irq        = STM32L4_IRQ_EXTI95;
+      handler    = stm32l4_exti95_isr;
+      shared_cbs = &stm32l4_exti_callbacks[5];
+      nshared    = 5;
+    }
+  else
+    {
+      irq        = STM32L4_IRQ_EXTI1510;
+      handler    = stm32l4_exti1510_isr;
+      shared_cbs = &stm32l4_exti_callbacks[10];
+      nshared    = 6;
+    }
+
+  /* Get the previous GPIO IRQ handler; Save the new IRQ handler. */
+
+  oldhandler = stm32l4_exti_callbacks[pin];
+  stm32l4_exti_callbacks[pin] = func;
+
+  /* Install external interrupt handlers */
+
+  if (func)
+    {
+      irq_attach(irq, handler);
+      up_enable_irq(irq);
+    }
+  else
+    {
+      /* Only disable IRQ if shared handler does not have any active
+       * callbacks.
+       */
+
+      for (i = 0; i < nshared; i++)
+        {
+          if (shared_cbs[i] != NULL)
+            {
+              break;
+            }
+        }
+
+      if (i == nshared)
+        {
+          up_disable_irq(irq);
+        }
+    }
+
+  /* Configure GPIO, enable EXTI line enabled if event or interrupt is
+   * enabled.
+   */
+
+  if (event || func)
+    {
+      pinset |= GPIO_EXTI;
+    }
+
+  stm32l4_configgpio(pinset);
+
+  /* Configure rising/falling edges */
+
+  modifyreg32(STM32L4_EXTI1_RTSR,
+              risingedge ? 0 : exti,
+              risingedge ? exti : 0);
+  modifyreg32(STM32L4_EXTI1_FTSR,
+              fallingedge ? 0 : exti,
+              fallingedge ? exti : 0);
+
+  /* Enable Events and Interrupts */
+
+  modifyreg32(STM32L4_EXTI1_EMR,
+              event ? 0 : exti,
+              event ? exti : 0);
+  modifyreg32(STM32L4_EXTI1_IMR,
+              func ? 0 : exti,
+              func ? exti : 0);
+
+  /* Return the old IRQ handler */
+
+  return oldhandler;
+}

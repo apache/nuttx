@@ -1,0 +1,159 @@
+############################################################################
+# arch/arm/src/stm32l4/Make.defs
+#
+#   Copyright (C) 2015 Sebastien Lorquet. All rights reserved.
+#   Author: Sebastien Lorquet <sebastien@lorquet.fr>
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+#
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in
+#    the documentation and/or other materials provided with the
+#    distribution.
+# 3. Neither the name NuttX nor the names of its contributors may be
+#    used to endorse or promote products derived from this software
+#    without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+# COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+# OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+# AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+#
+############################################################################
+
+# The start-up, "head", file.  Only common vectors are support so there
+# isn't one.
+
+HEAD_ASRC =
+
+# Common ARM and Cortex-M4 files (copied from stm32/Make.defs)
+
+CMN_UASRCS =
+CMN_UCSRCS =
+
+CMN_ASRCS  = up_saveusercontext.S up_fullcontextrestore.S up_switchcontext.S
+CMN_ASRCS += vfork.S
+
+CMN_CSRCS  = up_assert.c up_blocktask.c up_copyfullstate.c
+CMN_CSRCS += up_createstack.c up_mdelay.c up_udelay.c up_exit.c
+CMN_CSRCS += up_initialize.c up_initialstate.c up_interruptcontext.c
+CMN_CSRCS += up_memfault.c up_modifyreg8.c up_modifyreg16.c up_modifyreg32.c
+CMN_CSRCS += up_releasepending.c up_releasestack.c up_reprioritizertr.c
+CMN_CSRCS += up_schedulesigaction.c up_sigdeliver.c up_stackframe.c
+CMN_CSRCS += up_systemreset.c up_unblocktask.c up_usestack.c up_doirq.c
+CMN_CSRCS += up_hardfault.c up_svcall.c up_vfork.c
+
+# Configuration-dependent common files
+
+ifeq ($(CONFIG_ARMV7M_STACKCHECK),y)
+CMN_CSRCS += up_stackcheck.c
+endif
+
+ifeq ($(CONFIG_ARMV7M_CMNVECTOR),y)
+ifeq ($(CONFIG_ARMV7M_LAZYFPU),y)
+CMN_ASRCS += up_lazyexception.S
+else
+CMN_ASRCS += up_exception.S
+endif
+CMN_CSRCS += up_vectors.c
+endif
+
+ifeq ($(CONFIG_ARCH_FPU),y)
+CMN_ASRCS += up_fpu.S
+ifneq ($(CONFIG_ARMV7M_CMNVECTOR),y)
+CMN_CSRCS += up_copyarmstate.c
+else ifeq ($(CONFIG_ARMV7M_LAZYFPU),y)
+CMN_CSRCS += up_copyarmstate.c
+endif
+endif
+
+ifeq ($(CONFIG_ARCH_RAMVECTORS),y)
+CMN_CSRCS += up_ramvec_initialize.c up_ramvec_attach.c
+endif
+
+ifeq ($(CONFIG_ARCH_MEMCPY),y)
+CMN_ASRCS += up_memcpy.S
+endif
+
+ifeq ($(CONFIG_BUILD_PROTECTED),y)
+CMN_CSRCS += up_mpu.c up_task_start.c up_pthread_start.c
+ifneq ($(CONFIG_DISABLE_SIGNALS),y)
+CMN_CSRCS += up_signal_dispatch.c
+CMN_UASRCS += up_signal_handler.S
+endif
+endif
+
+ifeq ($(CONFIG_STACK_COLORATION),y)
+CMN_CSRCS += up_checkstack.c
+endif
+
+ifeq ($(CONFIG_ELF),y)
+CMN_CSRCS += up_elf.c up_coherent_dcache.c
+else ifeq ($(CONFIG_MODULE),y)
+CMN_CSRCS += up_elf.c up_coherent_dcache.c
+endif
+
+ifeq ($(CONFIG_STACK_COLORATION),y)
+CMN_CSRCS += up_checkstack.c
+endif
+
+# Required STM32L4 files
+
+CHIP_ASRCS  =
+CHIP_CSRCS  = stm32l4_allocateheap.c stm32l4_exti_gpio.c stm32l4_gpio.c
+CHIP_CSRCS += stm32l4_idle.c stm32l4_irq.c stm32l4_lowputc.c stm32l4_rcc.c
+CHIP_CSRCS += stm32l4_serial.c stm32l4_start.c stm32l4_waste.c
+CHIP_CSRCS += stm32l4_spi.c stm32l4_i2c.c stm32l4_lse.c stm32l4_pwr.c
+
+ifneq ($(CONFIG_SCHED_TICKLESS),y)
+CHIP_CSRCS += stm32l4_timerisr.c
+endif
+
+ifeq ($(CONFIG_BUILD_PROTECTED),y)
+CHIP_CSRCS += stm32l4_userspace.c stm32l4_mpuinit.c
+endif
+
+ifeq ($(CONFIG_ARMV7M_DTCM),y)
+CHIP_CSRCS += stm32l4_dtcm.c
+ifeq ($(CONFIG_STM32L4_DTCM_PROCFS),y)
+CHIP_CSRCS += stm32l4_procfs_dtcm.c
+endif
+endif
+
+ifeq ($(CONFIG_STM32L4_DMA),y)
+CHIP_CSRCS += stm32l4_dma.c
+endif
+
+ifeq ($(CONFIG_STM32L4_PWR),y)
+CHIP_CSRCS += stm32l4_exti_pwr.c
+endif
+
+ifeq ($(CONFIG_RTC),y)
+CHIP_CSRCS += stm32l4_rtcc.c
+ifeq ($(CONFIG_RTC_ALARM),y)
+CHIP_CSRCS += stm32l4_exti_alarm.c
+endif
+ifeq ($(CONFIG_RTC_DRIVER),y)
+CHIP_CSRCS += stm32l4_rtc_lowerhalf.c
+endif
+endif
+
+ifeq ($(CONFIG_DEBUG),y)
+CHIP_CSRCS += stm32l4_dumpgpio.c
+endif
+
+ifeq ($(CONFIG_STM32L4_RNG),y)
+CHIP_CSRCS += stm32l4_rng.c
+endif

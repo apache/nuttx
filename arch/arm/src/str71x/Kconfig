@@ -1,0 +1,210 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+comment "STR71x Configuration Options"
+
+menu "STR71x Peripheral Selections"
+
+config STR71X_ADC12
+	bool "ADC12"
+	default n
+	select ADC
+
+config STR71X_BSPI0
+	bool "BSPI0"
+	default n
+	select STR71X_GPIO0
+	select SPI
+
+config STR71X_BSPI1
+	bool "BSPI1"
+	default n
+	select STR71X_GPIO0
+	select SPI
+
+config STR71X_CAN
+	bool "CAN"
+	default n
+	select CAN
+
+config STR71X_CKOUT
+	bool "CKOUT"
+	default n
+
+config STR71X_GPIO0
+	bool "GPIO0"
+	default y
+
+config STR71X_GPIO1
+	bool "GPIO1"
+	default n
+
+config STR71X_GPIO2
+	bool "GPIO2"
+	default n
+
+config STR71X_HDLC
+	bool "HDLC"
+	default n
+
+config STR71X_I2C0
+	bool "I2C0"
+	default n
+	select I2C
+
+config STR71X_I2C1
+	bool "I2C1"
+	default n
+	select I2C
+
+config STR71X_RTC
+	bool "RTC"
+	default n
+	select RTC
+
+config STR71X_TIM1
+	bool "TIM1"
+	default n
+
+config STR71X_TIM2
+	bool "TIM2"
+	default n
+
+config STR71X_TIM3
+	bool "TIM3"
+	default n
+
+config STR71X_UART0
+	bool "UART0"
+	default n
+	select STR71X_GPIO0
+	select ARCH_HAVE_UART0
+
+config STR71X_UART1
+	bool "UART1"
+	default n
+	select STR71X_GPIO0
+	select ARCH_HAVE_UART1
+
+config STR71X_UART2
+	bool "UART2"
+	default n
+	select STR71X_GPIO0
+	select ARCH_HAVE_UART2
+
+config STR71X_UART3
+	bool "UART3"
+	default n
+	select STR71X_GPIO0
+	select ARCH_HAVE_UART3
+
+config STR71X_USB
+	bool "USB"
+	default n
+	select USBDEV
+
+config STR71X_XTI
+	bool "XTI"
+
+endmenu #STR71x Peripheral Selections
+
+config STR71X_DISABLE_PERIPHINIT
+	bool "Disable peripheral interrupts"
+	default n
+
+menu "STR71x EMI Configuration"
+
+config STR71X_BANK0
+	bool "Bank 0"
+	default n
+	select STR71X_HAVE_EXTMEM
+
+if STR71X_BANK0
+
+config STR71X_BANK0_SIZE
+	int "Bank 0 size"
+	default 16
+	---help---
+		The only valid options are 8 and 16
+
+config STR71X_BANK0_WAITSTATES
+	int "Bank 0 wait states"
+	default 0
+	range 0 15
+
+endif # STR71X_BANK0
+
+config STR71X_BANK1
+	bool "Bank 1"
+	default n
+	select STR71X_HAVE_EXTMEM
+
+if STR71X_BANK1
+
+config STR71X_BANK1_SIZE
+	int "Bank 1 size"
+	default 16
+	---help---
+		The only valid options are 8 and 16
+
+config STR71X_BANK1_WAITSTATES
+	int "Bank 1 wait states"
+	default 0
+	range 0 15
+
+endif # STR71X_BANK1
+
+config STR71X_BANK2
+	bool "Bank 2"
+	default n
+	select STR71X_HAVE_EXTMEM
+
+if STR71X_BANK2
+
+config STR71X_BANK2_SIZE
+	int "Bank 2 size"
+	default 16
+	---help---
+		The only valid options are 8 and 16
+
+config STR71X_BANK2_WAITSTATES
+	int "Bank 2 wait states"
+	default 0
+	range 0 15
+
+endif # STR71X_BANK2
+
+config STR71X_BANK3
+	bool "Bank 3"
+	default n
+	select STR71X_HAVE_EXTMEM
+
+if STR71X_BANK3
+
+config STR71X_BANK3_SIZE
+	int "Bank 3 size"
+	default 16
+	---help---
+		The only valid options are 8 and 16
+
+config STR71X_BANK3_WAITSTATES
+	int "Bank 3 wait states"
+	default 0
+	range 0 15
+
+endif # STR71X_BANK3
+
+config STR71X_HAVE_EXTMEM
+	bool
+	default n
+
+config STR71X_BIGEXTMEM
+	bool "Big external memory"
+	default n
+	depends on STR71X_HAVE_EXTMEM
+	---help---
+		Needed if the address space is > 1MB
+
+endmenu # STR71x EMI Configuration

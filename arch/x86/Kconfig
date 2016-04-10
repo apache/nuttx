@@ -1,0 +1,52 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_X86
+comment "x86 Configuration Options"
+
+choice
+	prompt "x86 chip selection"
+	default ARCH_I486
+
+config ARCH_I486
+	bool "i486"
+	select ARCH_X86_HAVE_32BIT
+	---help---
+		Intel i486 architecture
+
+endchoice
+
+config ARCH_CHIP_QEMU
+	bool "Qemu x86 emulation"
+	default n
+	---help---
+		Intel i486 architecture
+
+config ARCH_CHIP
+	string
+	default "qemu" if ARCH_CHIP_QEMU
+
+config ARCH_X86_HAVE_32BIT
+	bool
+	default n
+
+config ARCH_X86_M32
+	bool "Build 32-bit system with a 64-bit machine"
+	default n
+	depends on ARCH_X86_HAVE_32BIT
+	---help---
+		If you are building for a 32-bit target using a native 64-bit
+		toolchain, then you need to add compilation options to select the
+		32-bit target.  Selecting this option will add the -m32 option to
+		the compiler command line.
+
+source arch/x86/src/common/Kconfig
+if ARCH_I486
+source arch/x86/src/i486/Kconfig
+endif # ARCH_I486
+if ARCH_CHIP_QEMU
+source arch/x86/src/qemu/Kconfig
+endif # ARCH_CHIP_QEMU
+endif # ARCH_X86
