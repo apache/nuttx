@@ -1,7 +1,7 @@
 /********************************************************************************
  * include/signal.h
  *
- *   Copyright (C) 2007-2009, 2011, 2013-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011, 2013-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -189,6 +189,10 @@
 #  define SIG_HOLD      ((CODE void*)0)
 #endif
 
+/* System V name compatibility */
+
+#define sigset(s) signal(s)
+
 /********************************************************************************
  * Public Type Definitions
  ********************************************************************************/
@@ -250,8 +254,9 @@ typedef struct siginfo siginfo_t;
  * These should be used only internally within the NuttX signal logic.
  */
 
-typedef CODE void (*_sa_handler_t)(int);
-typedef CODE void (*_sa_sigaction_t)(int, FAR siginfo_t *, FAR void *);
+typedef CODE void (*_sa_handler_t)(int signo);
+typedef CODE void (*_sa_sigaction_t)(int signo, FAR siginfo_t *siginfo,
+                                     FAR void *context);
 
 /* The following structure defines the action to take for given signal */
 
@@ -291,8 +296,8 @@ int sigdelset(FAR sigset_t *set, int signo);
 int sigismember(FAR const sigset_t *set, int signo);
 int sigaction(int sig, FAR const struct sigaction *act,
               FAR struct sigaction *oact);
-void (*sigset(int signo, void (*disp)(int)))(int);
 int sigignore(int signo);
+CODE void (*signal(int sig, CODE void (*func)(int signo)))(int signo);
 int sigprocmask(int how, FAR const sigset_t *set, FAR sigset_t *oset);
 int sigpause(int signo);
 int sigrelse(int signo);

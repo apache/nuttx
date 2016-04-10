@@ -11615,5 +11615,10 @@
 	* STM3220G-EVAL:  Add support for both the IAR and uVision GCC IDEs
 	  From Kha Vo (2016-04-08).
 	* STM32F429I Discovery:  Add support for the uVision GCC IDE.   From
-	  Kha Vo (2016-04-08).
-
+	* Kha Vo (2016-04-08).
+	* libc/signal and include/signal.h: Rename sigset() to signal().
+	  sigset() is the System V function; signal() is the obsoleted POSIX
+	  name.  These seem to be equivalent.  Neither are relevant in modern
+	  POSIX programming but the name signal() probably has the better
+	  credentials.  sigset() is now relegated to a #define in signal.h that
+	  makes it equivalent to signal() (2016-04-10).

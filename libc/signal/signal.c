@@ -1,7 +1,7 @@
 /****************************************************************************
- * libc/signal/sig_set.c
+ * libc/signal/signal.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,39 +44,39 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sigset
+ * Name: signal
  *
  * Description:
- *   The sigset() function will modify signal dispositions. The 'signo'
- *   argument specifies the signal. The 'disp' argument specifies the
+ *   The signal() function will modify signal dispositions. The 'signo'
+ *   argument specifies the signal. The 'func' argument specifies the
  *   signal's disposition, which may be SIG_DFL, SIG_IGN, or the address
- *   of a signal handler. If 'disp' is the address of a signal handler, the
+ *   of a signal handler. If 'func' is the address of a signal handler, the
  *   system will add 'signo' to the calling process' signal mask before
  *   executing the signal handler; when the signal handler returns, the
  *   system will restore the calling process' signal mask to its state prior
  *   to the delivery of the signal.  'signo' will be removed from the calling
  *   process' signal mask.
  *
- *   NOTE:  The value SIG_HOLD for 'disp' is not supported.  It should work
- *   like this:  If 'disp' is equal to SIG_HOLD, 'signo' will be added to,
+ *   NOTE:  The value SIG_HOLD for 'func' is not supported.  It should work
+ *   like this:  If 'func' is equal to SIG_HOLD, 'signo' will be added to,
  *   not removed from, the calling process' signal mask and 'signo''s
  *   disposition will remain unchanged.
  *
  * Input Parameters:
  *   signo - Identifies the signal to operate on
- *   disp  - The new disposition of the signal
+ *   func  - The new disposition of the signal
  *
  * Returned Value:
- *   Upon successful completion, sigset() will the previous disposition of
+ *   Upon successful completion, signal() will the previous disposition of
  *   the signal. Otherwise, SIG_ERR will be returned and errno set to
  *   indicate the error.
  *
- *   NOTE: sigset() would return SIG_HOLD if the signal had been blocked and
+ *   NOTE: signal() would return SIG_HOLD if the signal had been blocked and
  *   the signal's previous disposition if it had not been blocked.
  *
  ****************************************************************************/
 
-void (*sigset(int signo, void (*disp)(int)))(int)
+CODE void (*signal(int signo, CODE void (*func)(int signo)))(int signo)
 {
   struct sigaction act;
   struct sigaction oact;
@@ -84,7 +84,7 @@ void (*sigset(int signo, void (*disp)(int)))(int)
 
   /* Initialize the sigaction structure */
 
-  act.sa_handler = disp;
+  act.sa_handler = func;
   act.sa_flags   = 0;
   (void)sigemptyset(&act.sa_mask);
 
@@ -94,7 +94,7 @@ void (*sigset(int signo, void (*disp)(int)))(int)
    * and cannot be distinguished.
    */
 
-  if (disp != SIG_DFL /* && disp != SIG_IGN */)
+  if (func != SIG_DFL /* && func != SIG_IGN */)
     {
       /* Add the signal to the set of signals to be ignored when the signal
        * handler executes.
@@ -113,7 +113,7 @@ void (*sigset(int signo, void (*disp)(int)))(int)
 
   ret = sigaction(signo, &act, &oact);
 
-  /* Upon successful completion, sigset() will the signal's previous
+  /* Upon successful completion, signal() will the signal's previous
    * disposition. Otherwise, SIG_ERR will be returned and errno set to
    * indicate the error.
    */
