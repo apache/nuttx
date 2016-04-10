@@ -1,0 +1,10 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_OLIMEX_EFM32G880F128_STK
+
+#comment "EFM32 G8XX STK Hardware Configuration"
+
+endif # ARCH_BOARD_OLIMEX_EFM32G880F128_STK

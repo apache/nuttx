@@ -1,0 +1,483 @@
+README.txt
+==========
+
+This directory holds a port of NuttX to the NXP/Freescale Sabre board
+featuring the iMX 6Quad CPU.
+
+Contents
+========
+
+  - Status
+  - Platform Features
+  - Serial Console
+  - LEDs and Buttons
+  - Using U-Boot to Run NuttX
+  - Debugging with the Segger J-Link
+  - Configurations
+
+Status
+======
+
+2016-02-28: The i.MX6Q port is just beginning. A few files have been
+populated with the port is a long way from being complete or even ready to
+begin any kind of testing.
+
+2016-03-12: The i.MX6Q port is code complete including initial
+implementation of logic needed for CONFIG_SMP=y  .  There is no clock
+configuration logic.  This is probably not an issue if we are loaded into
+SDRAM by a bootloader (because we cannot change the clocking anyway in
+that case).
+
+There is a lot of testing that could be done but, unfortunately, I still
+have no i.MX6 hardware to test on.
+
+2016-03-28:  I now have a used MCIMX6Q-SDB which is similar to the target
+configuration described below except that it does not have the 10.1" LVDS
+display.  Next step:  Figure out how to run a copy of NuttX using U-Boot.
+
+2016-03-31: Most all of the boot of the NSH configuration seems to be
+working.  It gets to NSH and NSH appears to run normally.  Non-interrupt
+driver serial output to the VCOM console is working (llsyslog).  However,
+there does not appear to be any interrupt activity:  No timer interrupts,
+no interrupt driver serial console output (syslog, printf).
+
+Platform Features
+=================
+
+Processor:
+  - i.MX 6Quad or 6DualLite 1 GHz ARM Cortex-A9 processor
+Memory/storage:
+  - 1 GB DDR3 SDRAM up to 533 MHz (1066 MTPS) memory
+  - 8 GB eMMC flash
+  - 4 MB SPI NOR flash
+Display:
+  - 10.1" 1024 x 768 LVDS display with integrated P-cap sensing
+  - HDMI connector
+  - LVDS connector (for optional second display)
+  - LCD expansion connector (parallel, 24-bit)
+  - EPDC expansion connector (for 6DualLite only)
+  - MIPI DSI connector (two data lanes, 1 GHz each)
+User Interface:
+  - 10.1" capacitive multitouch display
+  - Buttons: power, reset, volume
+Power Management:
+  - Proprietary PF0100 PMIC
+Audio:
+  - Audio codec
+  - 2x digital microphones
+  - 2x 3.5 mm audio ports
+  - Dual 1 watt speakers
+Expansion Connector:
+  - Camera MIPI CSI port
+  - I2C, SPI signals
+Connectivity:
+  - 2x full-size SD/MMC card slots
+  - 7-pin SATA data connector
+  - 10/100/1000 Ethernet port
+  - 1x USB 2.0 OTG port (micro USB)
+Debug:
+  - JTAG connector (20-pin)
+  - 1x Serial-to-USB connector (for JTAG)
+OS Support:
+  - Linux® and Android™ from NXP/Freescale
+  - Others supported via third party (QNX, Windows Embedded)
+Tools Support:
+  - Manufacturing tool from NXP/Freescale
+  - IOMUX tool from NXP/Freescale
+  - Lauterbach, ARM (DS-5), IAR and Macraigor
+Additional Features:
+  - Proprietary 3-axis accelerometer
+  - Proprietary 3D magnetometer
+  - Ambient light sensor
+  - GPS receiver module
+  - 2x 5MP cameras
+  - Battery charger
+  - Battery connectors (battery not included)
+
+Serial Console
+==============
+
+A DEBUG VCOM is available MICRO USB AB 5 J509.  This corresponds to UART1
+from the i.MX6.  UART1 connects to J509 via the CSIO_DAT10 and CSIO_DAT11
+pins
+
+LEDs and Buttons
+================
+
+LEDs
+----
+A single LED is available driven GPIO1_IO02.  On the schematic this is
+USR_DEF_RED_LED signal to pin T1 (GPIO_2).  This signal is shared with
+KEY_ROW6 (ALT2).  A low value illuminates the LED.
+
+This LED is not used by the board port unless CONFIG_ARCH_LEDS is
+defined.  In that case, the usage by the board port is defined in
+include/board.h and src/sam_autoleds.c. The LED is used to encode
+OS-related events as follows:
+
+  ------------------- ----------------------- ------
+  SYMBOL              Meaning                 LED
+  ------------------- ----------------------- ------
+  LED_STARTED         NuttX has been started  OFF
+  LED_HEAPALLOCATE    Heap has been allocated OFF
+  LED_IRQSENABLED     Interrupts enabled      OFF
+  LED_STACKCREATED    Idle stack created      ON
+  LED_INIRQ           In an interrupt         N/C
+  LED_SIGNAL          In a signal handler     N/C
+  LED_ASSERTION       An assertion failed     N/C
+  LED_PANIC           The system has crashed  FLASH
+
+Thus if the LED is statically on, NuttX has successfully  booted and is,
+apparently, running normally.  If the LED is flashing at approximately
+2Hz, then a fatal error has been detected and the system has halted.
+
+Buttons
+-------
+
+Using U-Boot to Run NuttX
+=========================
+
+The MCIMX6Q-SDB comes with a 8GB SD card containing the U-Boot and Android.
+You simply put the SD card in the SD card slot SD3 (on the bottom of the
+board next to the HDMI connect) and Android will boot.
+
+But we need some other way to boot NuttX.  Here are some things that I have
+experimented with.
+
+Building U-Boot (Failed Attempt #1)
+-----------------------------------
+
+I have been unsuccessful getting building a working version of u-boot from
+scratch.  It builds, but it does not run.  Here are the things I did:
+
+1. Get a copy of the u-boot i.MX6 code via:
+
+    https://github.com/boundarydevices/u-boot-imx6/tree/production
+
+  or
+
+    $ git clone git://git.denx.de/u-boot.git
+
+2. Build U-Boot for the i.MX6Q Sabre using the following steps.  This
+   assumes that you have the path to your arm-none-eabi- toolchain at the
+   beginning of your PATH variable:
+
+    $ cd u-boot
+    $ export ARCH=arm
+    $ export CROSS_COMPILE=arm-none-eabi-
+    $ make mx6qsabresd_config
+    $ make
+
+  This should create a number of files, including u-boot.imx
+
+3. Format an SD card
+
+  Create a FAT16 partition at an offset of about 1MB into the SD card.
+  This is where we will put nuttx.bin.
+
+4. Put U-Boot on SD.  U-boot should reside at offset 1024B of your SD
+   card. To put it there, do:
+
+    $ dd if=u-boot.imx of=/dev/<your-sd-card> bs=1k seek=1
+    $ sync
+
+  Your SD card device is typically something in /dev/sd<X> or
+  /dev/mmcblk<X>. Note that you need write permissions on the SD card
+  for the command to succeed, so you might need to su - as root, or use
+  sudo, or do a chmod a+w as root on the SD card device node to grant
+  permissions to users.
+
+Using the Other SD Card Slot (Failed Attempt #2)
+------------------------------------------------
+
+Another option is to use the version u-boot that came on the 8GB but put
+NuttX on another SD card inserted in the other SD card slot at the opposite
+corner of the board.
+
+To make a long story short:  This doesn't work.  As far as I can tell,
+U-Boot does not support any other other SC card except for mmc 2 with is the
+boot SD card slot.
+
+Replace Boot SD Card (Successful Attempt #3)
+--------------------------------------------
+
+What if you remove the SD card after U-boot has booted, then then insert
+another SD card containing the nuttx.bin image?
+
+1. Build nuttx.bin and copy it only a FAT formated SD card.  Insert the SD
+   card containing NuttX into the "other" SD card slot.  Insert the 8GB SD
+   card with U-boot already on it in the normal, boot SD card slot.
+
+2. Connect the VCOM port using the USB port next to the boot SD card slot.
+
+3. Start a console at 11500 8N1 on the VCOM port
+
+4. Power up the board with the 8GB SD card in place.  U-Boot will start and
+   countdown before starting Linux.  Press enter to break into U-Boot before
+   Linux is started.
+
+5. Remove the 8GB U-Boot SD card; insert in its place.
+
+6. Rescan the SD card:
+
+  MX6Q SABRESD U-Boot > mmc dev 2
+  mmc2 is current device
+  MX6Q SABRESD U-Boot > mmc rescan
+  MX6Q SABRESD U-Boot > fatls mmc 2
+              system volume information/
+      87260   nuttx.bin
+
+  1 file(s), 1 dir(s)
+
+7. Then we can boot NuttX off the rescanned SD card:
+
+     MX6Q SABRESD U-Boot > fatload mmc 2 0x10800000 nuttx.bin
+     reading nuttx.bin
+
+     87260 bytes read
+     MX6Q SABRESD U-Boot > go 0x10800040
+     ## Starting application at 0x10800040 ...
+
+   That seems to work okay.
+
+Use the FAT Partition on the 8GB SD Card (Untested Idea #4)
+-----------------------------------------------------------
+
+Partition 4 on the SD card is an Android FAT file system.  So one thing you
+could do would be put the nuttx.bin file on that partition, then boot like:
+
+     MX6Q SABRESD U-Boot > fatload mmc 2:4 0x10800000 nuttx.bin
+
+SD Card Image Copy (Successful Attempt #5)
+-------------------------------------
+
+You can use the 'dd' command to copy the first couple of megabytes from the
+8GB SD card and copy that to another SD card.  You then have to use 'fdisk'
+to fix the partition table and to add a single FAT16 partition at an offset
+of 1MB or so.
+
+1. Insert the 8GB boot SD card into your PC: Copy the first 2Mb from the SD
+   card to a file:
+
+     $ dd if=/dev/sdh of=sdh.img bs=512 count=4096
+
+2. Remove the 8GB boot SD card and replace it with a fresh SD card.  Copy the
+   saved file to the first the new SD card:
+
+     $ dd of=/dev/sdh if=sdh.img bs=512 count=4096
+
+3. Then use 'fdisk' to:
+
+   - Remove all of the non-existent partitions created by the 'dd' copy.
+   - Make a single FAT16 partition at the end of the SD card.
+
+   You will also need to format the partion for FAT.
+
+4. You can put nuttx.bin here and then boot very simply with:
+
+     MX6Q SABRESD U-Boot > fatload mmc 2:1 0x10800000 nuttx.bin
+     MX6Q SABRESD U-Boot > go 0x10800040
+
+A little hokey, but not such a bad solution.
+
+Debugging with the Segger J-Link
+================================
+
+These procedures work for debugging the boot-up sequence when there is a
+single CPU running and not much else going on.  If you want to do higher
+level debugger, you will need something more capable.  NXP/Freescale suggest
+some other debuggers that you might want to consider.
+
+These instructions all assume that you have built NuttX with debug symbols
+enabled.  When debugging the nuttx.bin file on the SD card, it is also
+assumed the the nuttx ELF file with the debug symbol addresses is from the
+same build so that the symbols match up.
+
+Debugging the NuttX image on the SD card
+----------------------------------------
+
+1. Connect the J-Link to the 20-pin JTAG connector.
+
+2. Connect the "USB TO UART" USB VCOM port to the host PC.  Start a
+   terminal emulation program like TeraTerm on Minicom.  Select the USB
+   VCOM serial port at 115200 8N1.
+
+   When you apply power to the board, you should see the U-Boot messages in
+   the terminal window.  Stop the U-Boot countdown to get to the U-Boot
+   prompt.
+
+2. Start the Segger GDB server:
+
+     Target:           MCIMX6Q6
+     Target Interface: JTAG
+
+   If the GDB server starts correctly you should see the following in the
+   Log output:
+
+     Waiting for GDB Connection
+
+3. In another Xterm terminal window, start arm-none-eabi-gdb and connect to
+   the GDB server.
+
+   From the Xterm Window:
+     $ arm-none-eabi-gdb
+
+   You will need to have the path to the arm-none-eabi-gdb program in your
+   PATH variable.
+
+   Then from GDB:
+     gdb> target connect localhost:2331
+     gdb> mon halt
+
+4. Start U-boot under GDB control:
+
+   From GDB:
+     gdb> mon reset
+     gdb> mon go
+
+   Again stop the U-Boot countdown to get to the U-Boot prompt.
+
+5. Load NuttX from the SD card into RAM
+
+   From U-Boot:
+     MX6Q SABRESD U-Boot > fatload mmc 2:1 0x10800000 nuttx.bin
+
+6. Load symbols and set a breakpoint
+
+   From GDB:
+     gdb> mon halt
+     gdb> file nuttx
+     gdb> b __start
+     gdb> c
+
+   __start is the entry point into the NuttX binary at 0x10800040.  You can,
+   of course, use a different symbol if you want to start debugging later
+   in the boot sequence.
+
+7. Start NuttX
+
+   From U-Boot:
+     MX6Q SABRESD U-Boot > go 0x10800040
+
+8. You should hit the breakpoint that you set above and be off and
+   debugging.
+
+Debugging a Different NuttX Image
+---------------------------------
+
+Q: What if I want do run a different version of nuttx than the nuttx.bin
+   file on the SD card.  I just want to build and debug without futzing with
+   the SD card.  Can I do that?
+
+A: Yes with the following modifications to the prodecure above.
+
+   - Skip step 5, don't bother to load NuttX into RAM
+   - In step 6, load NuttX into RAM like this:
+
+       gdb> mon halt
+       gdb> load nuttx <-- Loads NuttX into RAM at 0x010800000
+       gdb> file nuttx
+       gdb> b __start
+       gdb> c
+
+   - Then after step 7, you should hit the breakpoint at the instruction you
+     just loaded at address 0x10800040.
+
+   - Or, in step 6, instead of continuing ('c') which will resume U-Boot,
+     even just:
+
+       gdb> mon halt
+       gdb> load nuttx <-- Loads NuttX into RAM at 0x010800000
+       gdb> file nuttx
+       gdb> mon set pc 0x10800040
+       gdb> s
+
+     The final single will then step into the freshly loaded program.
+     You can then forget about steps 7 and 8.
+
+     This is, in fact, my preferred way to debug.
+
+   You can restart the debug session at any time at the gdb> prompt by:
+
+       gdb> mon reset
+       gdb> mon go
+
+   That will restart U-Boot and you have to press ENTER in the terminal
+   window to stop U-Boot.  Restarting U-Boot is a necesary part of the
+   restart process because you need to put the hardware back in its initial
+   state before running NuttX
+
+   Then this will restart the debug session just as before:
+
+       gdb> mon halt
+       gdb> load nuttx <-- Loads NuttX into RAM at 0x010800000
+       gdb> file nuttx
+       gdb> mon set pc 0x10800040
+       gdb> s
+
+Configurations
+==============
+
+Information Common to All Configurations
+----------------------------------------
+Each Sabre-6Quad configuration is maintained in a sub-directory and
+can be selected as follow:
+
+  cd tools
+  ./configure.sh sabre-6quad/<subdir>
+  cd -
+  . ./setenv.sh
+
+Before sourcing the setenv.sh file above, you should examine it and perform
+edits as necessary so that TOOLCHAIN_BIN is the correct path to the directory
+than holds your toolchain binaries.
+
+And then build NuttX by simply typing the following.  At the conclusion of
+the make, the nuttx binary will reside in an ELF file called, simply, nuttx.
+
+  make oldconfig
+  make
+
+The <subdir> that is provided above as an argument to the tools/configure.sh
+must be is one of the following.
+
+NOTES:
+
+  1. These configurations use the mconf-based configuration tool.  To
+     change any of these configurations using that tool, you should:
+
+     a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+        see additional README.txt files in the NuttX tools repository.
+
+     b. Execute 'make menuconfig' in nuttx/ in order to start the
+        reconfiguration process.
+
+  2. Unless stated otherwise, all configurations generate console
+     output on UART1 which is a available to the host PC from the USB
+     micro AB as a VCOM part.
+
+  3. All of these configurations are set up to build under Windows using the
+     "GNU Tools for ARM Embedded Processors" that is maintained by ARM
+     (unless stated otherwise in the description of the configuration).
+
+       https://launchpad.net/gcc-arm-embedded
+
+     That toolchain selection can easily be reconfigured using
+     'make menuconfig'.  Here are the relevant current settings:
+
+     Build Setup:
+       CONFIG_HOST_WINDOWS=y               : Window environment
+       CONFIG_WINDOWS_CYGWIN=y             : Cywin under Windows
+
+     System Type -> Toolchain:
+       CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y : GNU ARM EABI toolchain
+
+Configuration sub-directories
+-----------------------------
+
+  nsh
+  ---
+    This is a NuttShell (NSH) configuration that uses the NSH library
+    at apps/nshlib with the start logic at apps/examples/nsh.
+
+    NOTES:

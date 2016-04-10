@@ -1,0 +1,46 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_TM4C123G_LAUNCHPAD
+
+config TM4C123G_LAUNCHPAD_AT24_BLOCKMOUNT
+	bool "AT24 Serial EEPROM auto-mount"
+	default n
+	depends on NSH_ARCHINIT && TIVA_I2C0 && MTD_AT24XX
+	---help---
+		Automatically initialize the AT24 SPI EEPROM driver when NSH starts.
+
+		The Serial EEPROM was mounted on an external adaptor board and
+		connected to the LaunchPad thusly:
+
+		- VCC -- VCC
+		- GND -- GND
+		- PB2 -- SCL
+		- PB3  -- SDA
+
+choice
+	prompt "AT24 serial EPPROM configuration"
+	default TM4C123G_LAUNCHPAD_AT24_FTL
+	depends on TM4C123G_LAUNCHPAD_AT24_BLOCKMOUNT
+
+config TM4C123G_LAUNCHPAD_AT24_FTL
+	bool "Create AT24 block driver"
+	---help---
+		Create the MTD driver for the AT24 and "wrap" the AT24 as a standard
+		block driver that could then, for example, be mounted using FAT or
+		any other file system.  Any file system may be used, but there will
+		be no wear-leveling.
+
+config TM4C123G_LAUNCHPAD_AT24_NXFFS
+	bool "Create AT24 NXFFS file system"
+	depends on FS_NXFFS
+	---help---
+		Create the MTD driver for the AT24 and mount the AT24 device as
+		a wear-leveling, NuttX FLASH file system (NXFFS).  The downside of
+		NXFFS is that it can be very slow.
+
+endchoice # AT24 serial EPPROM configuration
+
+endif

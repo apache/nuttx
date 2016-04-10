@@ -1,0 +1,187 @@
+diff --git a/apps/nshlib/nsh_console.c b/apps/nshlib/nsh_console.c
+index ba7dbe7..45e4ab1 100644
+--- a/apps/nshlib/nsh_console.c
++++ b/apps/nshlib/nsh_console.c
+@@ -46,6 +46,7 @@
+ #include <unistd.h>
+ #include <fcntl.h>
+ #include <string.h>
++#include <stdarg.h>
+ #include <assert.h>
+ #include <errno.h>
+ #include <debug.h>
+@@ -79,8 +80,13 @@ static FAR struct nsh_vtbl_s *nsh_consoleclone(FAR struct nsh_vtbl_s *vtbl);
+ static void nsh_consolerelease(FAR struct nsh_vtbl_s *vtbl);
+ static ssize_t nsh_consolewrite(FAR struct nsh_vtbl_s *vtbl,
+   FAR const void *buffer, size_t nbytes);
++#if 0
+ static int nsh_consoleoutput(FAR struct nsh_vtbl_s *vtbl,
+   FAR const char *fmt, ...);
++#else
++static int nsh_consolevoutput(FAR struct nsh_vtbl_s *vtbl,
++  FAR const char *fmt, va_list ap);
++#endif
+ static FAR char *nsh_consolelinebuffer(FAR struct nsh_vtbl_s *vtbl);
+ 
+ #if CONFIG_NFILE_DESCRIPTORS > 0
+@@ -213,6 +219,7 @@ static ssize_t nsh_consolewrite(FAR struct nsh_vtbl_s *vtbl, FAR const void *buf
+  *
+  ****************************************************************************/
+ 
++#if 0
+ static int nsh_consoleoutput(FAR struct nsh_vtbl_s *vtbl,
+                              FAR const char *fmt, ...)
+ {
+@@ -263,6 +270,51 @@ static int nsh_consoleoutput(FAR struct nsh_vtbl_s *vtbl,
+ #endif
+ }
+ 
++#else
++static int nsh_consolevoutput(FAR struct nsh_vtbl_s *vtbl, FAR const char *fmt, va_list ap)
++{
++#if CONFIG_NFILE_DESCRIPTORS > 0
++  FAR struct console_stdio_s *pstate = (FAR struct console_stdio_s *)vtbl;
++  int ret;
++
++  /* The stream is open in a lazy fashion.  This is done because the file
++   * descriptor may be opened on a different task than the stream.  The
++   * actual open will then occur with the first output from the new task.
++   */
++
++  if (nsh_openifnotopen(pstate) != 0)
++   {
++     return ERROR;
++   }
++
++  ret = vfprintf(pstate->cn_outstream, fmt, ap);
++
++  return ret;
++#else
++  char *str;
++
++  /* Use vasprintf() to allocate a buffer and fill it with the formatted
++   * data
++   */
++
++  str = NULL;
++  (void)vasprintf(&str, fmt, ap);
++
++  /* Was a string allocated? */
++
++  if (str)
++    {
++      /* Yes.. Print then free the allocated string */
++
++      printf("%s", str);
++      free(str);
++    }
++
++  return 0;
++#endif
++}
++#endif
++
+ /****************************************************************************
+  * Name: nsh_consolelinebuffer
+  *
+@@ -452,7 +504,11 @@ FAR struct console_stdio_s *nsh_newconsole(void)
+       pstate->cn_vtbl.release    = nsh_consolerelease;
+ #endif
+       pstate->cn_vtbl.write      = nsh_consolewrite;
++#if 0
+       pstate->cn_vtbl.output     = nsh_consoleoutput;
++#else
++      pstate->cn_vtbl.voutput    = nsh_consolevoutput;
++#endif
+       pstate->cn_vtbl.linebuffer = nsh_consolelinebuffer;
+       pstate->cn_vtbl.exit       = nsh_consoleexit;
+ 
+@@ -489,3 +545,15 @@ FAR struct console_stdio_s *nsh_newconsole(void)
+     }
+   return pstate;
+ }
++
++int nsh_output(FAR struct nsh_vtbl_s *vtbl, FAR const char *fmt, ...)
++{
++  va_list ap;
++  int ret;
++
++  va_start(ap, fmt);
++  ret = vtbl->voutput(vtbl, fmt, ap);
++  va_end(ap);
++
++  return ret;
++}
+diff --git a/apps/nshlib/nsh_console.h b/apps/nshlib/nsh_console.h
+index c78362f..207f9b9 100644
+--- a/apps/nshlib/nsh_console.h
++++ b/apps/nshlib/nsh_console.h
+@@ -47,6 +47,7 @@
+ #include <stdio.h>
+ #include <stdint.h>
+ #include <stdbool.h>
++#include <stdarg.h>
+ #include <errno.h>
+ 
+ /****************************************************************************
+@@ -62,11 +63,13 @@
+ #define nsh_undirect(v,s)      (v)->undirect(v,s)
+ #define nsh_exit(v,s)          (v)->exit(v,s)
+ 
++#if 0
+ #ifdef CONFIG_CPP_HAVE_VARARGS
+ # define nsh_output(v, ...)    (v)->output(v, ##__VA_ARGS__)
+ #else
+ # define nsh_output            vtbl->output
+ #endif
++#endif
+ 
+ /* Size of info to be saved in call to nsh_redirect */
+ 
+@@ -107,7 +110,11 @@ struct nsh_vtbl_s
+   void (*release)(FAR struct nsh_vtbl_s *vtbl);
+ #endif
+   ssize_t (*write)(FAR struct nsh_vtbl_s *vtbl, FAR const void *buffer, size_t nbytes);
++#if 0
+   int (*output)(FAR struct nsh_vtbl_s *vtbl, FAR const char *fmt, ...);
++#else
++  int (*voutput)(FAR struct nsh_vtbl_s *vtbl, FAR const char *fmt, va_list ap);
++#endif
+   FAR char *(*linebuffer)(FAR struct nsh_vtbl_s *vtbl);
+ #if CONFIG_NFILE_DESCRIPTORS > 0
+   void (*redirect)(FAR struct nsh_vtbl_s *vtbl, int fd, FAR uint8_t *save);
+@@ -159,5 +166,6 @@ struct console_stdio_s
+ /* Defined in nsh_console.c *************************************************/
+ 
+ FAR struct console_stdio_s *nsh_newconsole(void);
++int nsh_output(FAR struct nsh_vtbl_s *vtbl, FAR const char *fmt, ...);
+ 
+ #endif /* __APPS_NSHLIB_NSH_CONSOLE_H */
+diff --git a/nuttx/include/wdog.h b/nuttx/include/nuttx/wdog.h
+index 0aa3584..ac4a36a 100644
+--- a/nuttx/include/nuttx/wdog.h
++++ b/nuttx/include/nuttx/wdog.h
+@@ -74,7 +74,23 @@ typedef union wdparm_u wdparm_t;
+  * watchdog function expires.  Up to four parameters may be passed.
+  */
+ 
++#if 0
+ typedef CODE void (*wdentry_t)(int argc, uint32_t arg1, ...);
++#elif CONFIG_MAX_WDOGPARMS < 1
++typedef CODE void (*wdentry_t)(int argc);
++#elif CONFIG_MAX_WDOGPARMS < 2
++typedef CODE void (*wdentry_t)(int argc, uint32_t arg1);
++#elif CONFIG_MAX_WDOGPARMS < 3
++typedef CODE void (*wdentry_t)(int argc, uint32_t arg1, uint32_t arg2);
++#elif CONFIG_MAX_WDOGPARMS < 4
++typedef CODE void (*wdentry_t)(int argc, uint32_t arg1, uint32_t arg2,
++                               uint32_t arg3);
++#elif CONFIG_MAX_WDOGPARMS < 5
++typedef CODE void (*wdentry_t)(int argc, uint32_t arg1, uint32_t arg2,
++                               uint32_t arg3, uint32_t arg4);
++#else
++#  error Ooops.  CONFIG_MAX_WDOGPARMS > 4
++#endif
+ 
+ /* Watchdog 'handle' */
+ 

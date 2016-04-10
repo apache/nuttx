@@ -1,0 +1,22 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_EFM32GG_STK3700
+
+comment "EFM32GG-STK3700 Hardware Configuration"
+
+config EFM32GG_STK3700_BCEN
+	bool "Enable BC_EN"
+	default n
+	---help---
+		The kit contains a board controller that is responsible for
+		performing various board level tasks, such as handling the debugger
+		and the Advanced Energy Monitor. An interface is provided between
+		the EFM32 and the board controller in the form of a UART connection.
+		The connection is enabled by setting the EFM_BC_EN (PF7) line high,
+		and using the lines EFM_BC_TX (PE0) and EFM_BC_RX (PE1) for
+		communicating.
+
+endif # ARCH_BOARD_EFM32GG_STK3700

@@ -1,0 +1,12 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_TEENSY_3X
+
+config TEENSY_3X_OVERCLOCK
+	bool "Overclock"
+	default n
+
+endif

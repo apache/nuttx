@@ -1,0 +1,33 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_EA3152
+
+if PAGING
+
+config EA3152_PAGING_MINOR
+	int "Page device minor number"
+	default 0
+
+config EA3152_PAGING_MOUNTPT
+	string "Page device mount point"
+	default "/mnt/pgsrc"
+
+config EA3152_PAGING_BINOFFSET
+	int "Volume offset"
+	default 0
+
+config EA3152_PAGING_SDSLOT
+	int "SD page device slot number"
+	default 0
+	depends on MMCSD
+
+config EA3152_PAGING_SPIPORT
+	int "SD SPI port number"
+	default 0
+	depends on SPI
+
+endif # PAGING
+endif # ARCH_BOARD_EA3152

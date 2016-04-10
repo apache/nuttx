@@ -1,0 +1,48 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_SPARK
+
+config SPARK_FLASH
+	bool "MTD driver for onboard 2M FLASH"
+	default y
+	select MTD
+	select MTD_SST25
+	select FS_FAT
+	select STM32_SPI2
+	select MTD_BYTE_WRITE
+	---help---
+		Configures an MTD device for use with the onboard flash
+
+config SPARK_FLASH_SPI
+	int "Flash SPI bus number"
+	default 2
+	depends on SPARK_FLASH
+	---help---
+		Selects the SPI bus number identying that SPI interface that
+		connects the Flash to the MCU.
+
+config SPARK_FLASH_MINOR
+	int "Minor number for the FLASH /dev/fat entry"
+	default 0
+	depends on SPARK_FLASH
+	---help---
+		Sets the minor number for the FLASH MTD /dev entry
+
+config SPARK_FLASH_PART
+	bool "Enable partition support on FLASH"
+	default n
+	depends on SPARK_FLASH
+	---help---
+		Enables creation of partitions on the FLASH
+
+config SPARK_FLASH_PART_LIST
+	string "Flash partition size list"
+	default "512,1536"
+	depends on SPARK_FLASH_PART
+	---help---
+		Comma separated list of partition sizes in KB
+
+endif

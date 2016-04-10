@@ -1,0 +1,292 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_SAMA5D3X_EK
+
+choice
+	prompt "CPU Frequency"
+	default SAMA5D3xEK_396MHZ
+
+config SAMA5D3xEK_384MHZ
+	bool "384 MHz"
+
+config SAMA5D3xEK_396MHZ
+	bool "396 MHz"
+
+config SAMA5D3xEK_528MHZ
+	bool "528 MHz"
+
+endchoice # CPU Frequency
+
+choice
+	prompt "SAMA5D3x-EK DRAM Type"
+	default SAMA5D3xEK_MT47H128M16RT
+	depends on SAMA5_DDRCS
+
+config SAMA5D3xEK_MT47H128M16RT
+	bool "MT47H128M16RT"
+	---help---
+		Micron 2Gbit x16 DDR2-1066 128Mb
+
+config SAMA5D3xEK_MT47H64M16HR
+	bool "MT47H64M16HR"
+	---help---
+		Micron 1Gbit x16 DDR2-800 64Mb
+
+endchoice # SAMA5D3x-EK DRAM Type
+
+config SAMA5D3xEK_NOREDLED
+	bool "Red LED not available"
+	default n
+	---help---
+		By default, both the blue LED and the red LED are used by the
+		SAMA5D3x-EK board logic.  However, the PIO associated with the red
+		LED (PE24) has other board functions.  For example, PE24 is also the
+		ISI_RST reset signal to the camera interface.  So when PE24 is not
+		available to control the red LED, this configuration variable should
+		be set so that the LED logic will only used the blue LED.
+
+config SAMA5D3xEK_NOR_MAIN
+	bool "Build nor_main"
+	default n
+	depends on SAMA5_BOOT_ISRAM
+	---help---
+		nor_main is a tiny program that runs in ISRAM.  nor_main will enable
+		NOR flash then either (1) jump to the program in NOR flash or (2)
+		wait for you to break in with GDB to debug the NOR program.
+
+config SAMA5D3xEK_NOR_START
+	bool "Start NOR program"
+	default n
+	depends on SAMA5D3xEK_NOR_MAIN
+	---help---
+		The default behavior of the NOR boot program is to initialize the
+		NOR FLASH at CS0, then patiently wait for you to break into the
+		program with GDB.  An alternative behavior is enabled with this
+		option:  If SAMA5D3xEK_NOR_START is defined, then it will not wait but
+		will, instead, immediately start the program in NOR FLASH.
+
+config SAMA5D3XEK_NAND_BLOCKMOUNT
+	bool "NAND FLASH auto-mount"
+	default n
+	depends on NSH_ARCHINIT && SAMA5_EBICS3_NAND
+	---help---
+		Automatically initialize the NAND FLASH driver when NSH starts.
+
+choice
+	prompt "NAND FLASH configuration"
+	default SAMA5D3xEK_NAND_NXFFS
+	depends on SAMA5D3XEK_NAND_BLOCKMOUNT
+
+config SAMA5D3xEK_NAND_FTL
+	bool "Create NAND FLASH block driver"
+	depends on MTD && MTD_NAND
+	---help---
+		Create the MTD driver for the NAND and "wrap" the NAND as a standard
+		block driver that could then, for example, be mounted using FAT or
+		any other file system.  Any file system may be used, but there will
+		be no wear-leveling.
+
+		NOTE: This options is not currently recommended.  There is not now
+		NuttX file system that can handle the NAND back blocks or performs
+		wear-leveling other than NXFFS and NXFFS does not use a block driver
+		but, rather, operates directly upon the NAND MTD device.
+
+config SAMA5D3xEK_NAND_NXFFS
+	bool "Create NAND FLASH NXFFS file system"
+	depends on MTD && MTD_NAND && FS_NXFFS && NXFFS_NAND
+	---help---
+		Create the MTD driver for the NAND and mount the NAND device as
+		a wear-leveling, NuttX FLASH file system (NXFFS).  The downside of
+		NXFFS is that it can be very slow.
+
+		NOTE: NXFFS is recommended because (1) it can handle the NAND back
+		blocks and (1) performs wear-leveling.
+
+endchoice # NAND FLASH configuration
+
+config SAMA5D3xEK_AT25_BLOCKMOUNT
+	bool "AT25 serial FLASH auto-mount"
+	default n
+	depends on NSH_ARCHINIT && SAMA5_SPI0 && MTD_AT25
+	---help---
+		Automatically initialize the AT25 SPI FLASH driver when NSH starts.
+
+choice
+	prompt "AT25 serial FLASH configuration"
+	default SAMA5D3xEK_AT25_FTL
+	depends on SAMA5D3xEK_AT25_BLOCKMOUNT
+
+config SAMA5D3xEK_AT25_FTL
+	bool "Create AT25 Serial FLASH block driver"
+	---help---
+		Create the MTD driver for the AT25 and "wrap" the AT25 as a standard
+		block driver that could then, for example, be mounted using FAT or
+		any other file system.  Any file system may be used, but there will
+		be no wear-leveling.
+
+config SAMA5D3xEK_AT25_NXFFS
+	bool "Create AT25 serial FLASH NXFFS file system"
+	depends on FS_NXFFS
+	---help---
+		Create the MTD driver for the AT25 and mount the AT25 device as
+		a wear-leveling, NuttX FLASH file system (NXFFS).  The downside of
+		NXFFS is that it can be very slow.
+
+endchoice # AT25 serial FLASH configuration
+
+config SAMA5D3xEK_AT24_BLOCKMOUNT
+	bool "AT24 Serial EEPROM auto-mount"
+	default n
+	depends on NSH_ARCHINIT && SAMA5_TWI0 && MTD_AT24XX
+	---help---
+		Automatically initialize the AT24 SPI EEPROM driver when NSH starts.
+
+		The Serial EEPROM was mounted on an external adaptor board and
+		connected to the SAMA5D3x-EK thusly:
+
+		- VCC -- VCC
+		- GND -- GND
+		- TWCK0(PA31) -- SCL
+		- TWD0(PA30)  -- SDA
+
+		By default, PA30 and PA31 are SWJ-DP pins, it can be used as a pin
+		for TWI peripheral in the end application.
+
+choice
+	prompt "AT24 serial EPPROM configuration"
+	default SAMA5D3xEK_AT24_FTL
+	depends on SAMA5D3xEK_AT24_BLOCKMOUNT
+
+config SAMA5D3xEK_AT24_FTL
+	bool "Create AT24 block driver"
+	---help---
+		Create the MTD driver for the AT24 and "wrap" the AT24 as a standard
+		block driver that could then, for example, be mounted using FAT or
+		any other file system.  Any file system may be used, but there will
+		be no wear-leveling.
+
+config SAMA5D3xEK_AT24_NXFFS
+	bool "Create AT24 NXFFS file system"
+	depends on FS_NXFFS
+	---help---
+		Create the MTD driver for the AT24 and mount the AT24 device as
+		a wear-leveling, NuttX FLASH file system (NXFFS).  The downside of
+		NXFFS is that it can be very slow.
+
+endchoice # AT24 serial EPPROM configuration
+
+config SAMA5D3xEK_USBHOST_STACKSIZE
+	int "USB host waiter stack size"
+	default 1536 if USBHOST_HUB
+	default 1024 if !USBHOST_HUB
+	depends on USBHOST
+
+config SAMA5D3xEK_USBHOST_PRIO
+	int "USB host waiter task priority"
+	default 100
+	depends on USBHOST
+
+config SAMA5D3xEK_TSD_DEVMINOR
+	int "Touchscreen device minor"
+	default 0
+	depends on SAMA5_TSD
+	---help---
+		This touchscreen will be register as /dev/inputN where the value of
+		N is provided by this configuration setting.
+
+config SAMA5D3xEK_CHANNEL
+	int "PWM channel number"
+	default 0 if SAMA5_PWM_CHAN0
+	default 1 if SAMA5_PWM_CHAN1
+	default 2 if SAMA5_PWM_CHAN2
+	default 3 if SAMA5_PWM_CHAN3
+	range 0 3
+	depends on PWM && SAMA5_PWM
+	---help---
+		Selects the PWM channel number that will be used to perform the PWM
+		test.  See apps/examples/pwm.
+
+if AUDIO_I2SCHAR && (SAMA5_SSC0 || SAMA5_SSC1)
+
+if SAMA5_SSC0 && SAMA5_SSC1
+
+config SAMA5D3xEK_SSC_PORT
+	int "SSC port number"
+	default 0
+	range 0 1
+	---help---
+		Specify the I2S port to use, i.e., 0 for SSC0 or 1 for SSC1
+
+endif # SAMA5_SSC0 && SAMA5_SSC1
+
+if SAMA5_SSC0 && !SAMA5_SSC1
+
+config SAMA5D3xEK_SSC_PORT
+	int
+	default 0
+
+endif # SAMA5_SSC0 && !SAMA5_SSC1
+
+if !SAMA5_SSC0 && SAMA5_SSC1
+
+config SAMA5D3xEK_SSC_PORT
+	int
+	default 1
+
+endif # SAMA5_SSC0 && !SAMA5_SSC1
+
+config SAMA5D3xEK_I2SCHAR_MINOR
+	int "I2S character driver minor number"
+	default 0
+	---help---
+		The minor device number to use when registering the I2S character
+		device.  The driver will be registered at /dev/is2charN where N is
+		the value provided by this setting.
+
+endif # AUDIO_I2SCHAR && (SAMA5_SSC0 || SAMA5_SSC1)
+
+if VIDEO_OV2640
+
+config SAMA5D3xEK_OV2640_DEMO
+	bool "SAMA5 OV2640 camera demo"
+	default n
+	select SAMA5D3xEK_NOREDLED
+	---help---
+		Enable the SAMA5 OV2640 camera demo
+
+endif # VIDEO_OV2640
+
+config SAMA5D3xEK_SLOWCLOCK
+	bool
+	default y if SCHED_TICKLESS
+	default n if !SCHED_TICKLESS
+
+if AUDIO_WM8904
+
+config SAMA5D3xEK_WM8904_I2CFREQUENCY
+	int "WM8904 I2C Frequency"
+	default 400000
+	range 1 400000
+	---help---
+		This option selects the I2C frequency to use when communicating with
+		the WM8904 device.  The default, 400KHz, is the maximum supported by
+		the WM8904.  If you have problems communicating with the WM8904,
+		then you might want to try lowering this rate.
+
+choice
+	prompt "WM8904 MCLK source"
+	default SAMA5D3xEK_WM8904_SRCMAIN
+
+config SAMA5D3xEK_WM8904_SRCMAIN
+	bool "Main Clock (12MHz)"
+	select SAMA5D3xEK_SLOWCLOCK
+
+config SAMA5D3xEK_WM8904_SRCSCK
+	bool "Slow XTAL (32.768KHz)"
+
+endchoice # WM8904 MCLK source
+endif # AUDIO_WM8904
+endif # ARCH_BOARD_SAMA5D3X_EK

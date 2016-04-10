@@ -1,0 +1,23 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_SAMA5D2_XULT
+
+choice
+	prompt "CPU Frequency"
+	default SAMA5D2XULT_396MHZ
+
+config SAMA5D2XULT_384MHZ
+	bool "384 MHz"
+
+config SAMA5D2XULT_396MHZ
+	bool "396 MHz"
+
+config SAMA5D2XULT_528MHZ
+	bool "528 MHz"
+
+endchoice # CPU Frequency
+
+endif # ARCH_BOARD_SAMA5D2_XULT

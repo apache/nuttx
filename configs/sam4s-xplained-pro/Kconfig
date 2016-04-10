@@ -1,0 +1,23 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_SAM4S_XPLAINED_PRO
+
+config SAM4S_XPLAINED_PRO_CDCACM_DEVMINOR
+	int "CDC/ACM Device Minor"
+	default 0
+	depends on SAM34_UDP && USBDEV && CDCACM
+
+config SAM4S_XPLAINED_PRO_SCHED_TIMER_DEVPATH
+    string "Scheduler Timer Device Path"
+	default "/dev/rtt0"
+	depends on TIMER && SYSTEMTICK_EXTCLK
+
+config SAM4S_XPLAINED_PRO_CPULOAD_TIMER_DEVPATH
+    string "CPU Load Timer Device Path"
+	default "/dev/tc0"
+	depends on TIMER && SCHED_CPULOAD && SCHED_CPULOAD_EXTCLK
+
+endif

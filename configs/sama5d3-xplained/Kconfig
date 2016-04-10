@@ -1,0 +1,176 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_SAMA5D3_XPLAINED
+
+choice
+	prompt "CPU Frequency"
+	default SAMA5D3XPLAINED_396MHZ
+
+config SAMA5D3XPLAINED_384MHZ
+	bool "384 MHz"
+
+config SAMA5D3XPLAINED_396MHZ
+	bool "396 MHz"
+
+config SAMA5D3XPLAINED_528MHZ
+	bool "528 MHz"
+
+endchoice # CPU Frequency
+
+config SAMA5D3XPLAINED_SLOWCLOCK
+	bool
+	default y if SCHED_TICKLESS
+	default n if !SCHED_TICKLESS
+
+choice
+	prompt "SAMA5D3-Xplained DRAM Type"
+	default SAMA5D3XPLAINED_MT47H128M16RT
+	depends on SAMA5_DDRCS
+
+config SAMA5D3XPLAINED_MT47H128M16RT
+	bool "MT47H128M16RT"
+	---help---
+		Micron 2Gbit x16 DDR2-1066 128Mb
+
+config SAMA5D3XPLAINED_MT47H64M16HR
+	bool "MT47H64M16HR"
+	---help---
+		Micron 1Gbit x16 DDR2-800 64Mb
+
+endchoice # SAMA5D3-Xplained DRAM Type
+
+config SAMA5D3XPLAINED_NAND_BLOCKMOUNT
+	bool "NAND FLASH auto-mount"
+	default n
+	depends on NSH_ARCHINIT && SAMA5_EBICS3_NAND
+	---help---
+		Automatically initialize the NAND FLASH driver when NSH starts.
+
+choice
+	prompt "NAND FLASH configuration"
+	default SAMA5D3XPLAINED_NAND_NXFFS
+	depends on SAMA5D3XPLAINED_NAND_BLOCKMOUNT
+
+config SAMA5D3XPLAINED_NAND_FTL
+	bool "Create NAND FLASH block driver"
+	depends on MTD && MTD_NAND
+	---help---
+		Create the MTD driver for the NAND and "wrap" the NAND as a standard
+		block driver that could then, for example, be mounted using FAT or
+		any other file system.  Any file system may be used, but there will
+		be no wear-leveling.
+
+		NOTE: This options is not currently recommended.  There is not now
+		NuttX file system that can handle the NAND back blocks or performs
+		wear-leveling other than NXFFS and NXFFS does not use a block driver
+		but, rather, operates directly upon the NAND MTD device.
+
+config SAMA5D3XPLAINED_NAND_NXFFS
+	bool "Create NAND FLASH NXFFS file system"
+	depends on MTD && MTD_NAND && FS_NXFFS && NXFFS_NAND
+	---help---
+		Create the MTD driver for the NAND and mount the NAND device as
+		a wear-leveling, NuttX FLASH file system (NXFFS).  The downside of
+		NXFFS is that it can be very slow.
+
+		NOTE: NXFFS is recommended because (1) it can handle the NAND back
+		blocks and (1) performs wear-leveling.
+
+endchoice # NAND FLASH configuration
+
+config SAMA5D3XPLAINED_AT25_AUTOMOUNT
+	bool "AT25 serial FLASH auto-mount"
+	default n
+	depends on NSH_ARCHINIT && SAMA5_SPI0 && MTD_AT25
+	---help---
+		Automatically initialize the AT25 SPI FLASH driver when NSH starts.
+
+choice
+	prompt "AT25 serial FLASH configuration"
+	default SAMA5D3XPLAINED_AT25_FTL
+	depends on SAMA5D3XPLAINED_AT25_AUTOMOUNT
+
+config SAMA5D3XPLAINED_AT25_FTL
+	bool "Create AT25 Serial FLASH block driver"
+	---help---
+		Create the MTD driver for the AT25 and "wrap" the AT25 as a standard
+		block driver that could then, for example, be mounted using FAT or
+		any other file system.  Any file system may be used, but there will
+		be no wear-leveling.
+
+config SAMA5D3XPLAINED_AT25_NXFFS
+	bool "Create AT25 serial FLASH NXFFS file system"
+	depends on FS_NXFFS
+	---help---
+		Create the MTD driver for the AT25 and mount the AT25 device as
+		a wear-leveling, NuttX FLASH file system (NXFFS).  The downside of
+		NXFFS is that it can be very slow.
+
+endchoice # AT25 serial FLASH configuration
+
+config SAMA5D3XPLAINED_USBHOST_STACKSIZE
+	int "USB host waiter stack size"
+	default 1536 if USBHOST_HUB
+	default 1024 if !USBHOST_HUB
+	depends on USBHOST
+
+config SAMA5D3XPLAINED_USBHOST_PRIO
+	int "USB host waiter task priority"
+	default 100
+	depends on USBHOST
+
+config SAMA5D3XPLAINED_CHANNEL
+	int "PWM channel number"
+	default 0 if SAMA5_PWM_CHAN0
+	default 1 if SAMA5_PWM_CHAN1
+	default 2 if SAMA5_PWM_CHAN2
+	default 3 if SAMA5_PWM_CHAN3
+	range 0 3
+	depends on PWM && SAMA5_PWM
+	---help---
+		Selects the PWM channel number that will be used to perform the PWM
+		test.  See apps/examples/pwm.
+
+if AUDIO_I2SCHAR && (SAMA5_SSC0 || SAMA5_SSC1)
+
+if SAMA5_SSC0 && SAMA5_SSC1
+
+config SAMA5D3XPLAINED_SSC_PORT
+	int "SSC port number"
+	default 0
+	range 0 1
+	---help---
+		Specify the I2S port to use, i.e., 0 for SSC0 or 1 for SSC1
+
+endif # SAMA5_SSC0 && SAMA5_SSC1
+
+if SAMA5_SSC0 && !SAMA5_SSC1
+
+config SAMA5D3XPLAINED_SSC_PORT
+	int
+	default 0
+
+endif # SAMA5_SSC0 && !SAMA5_SSC1
+
+if !SAMA5_SSC0 && SAMA5_SSC1
+
+config SAMA5D3XPLAINED_SSC_PORT
+	int
+	default 1
+
+endif # SAMA5_SSC0 && !SAMA5_SSC1
+
+config SAMA5D3XPLAINED_I2SCHAR_MINOR
+	int "I2S character driver minor number"
+	default 0
+	---help---
+		The minor device number to use when registering the I2S character
+		device.  The driver will be registered at /dev/is2charN where N is
+		the value provided by this setting.
+
+endif # AUDIO_I2SCHAR && (SAMA5_SSC0 || SAMA5_SSC1)
+
+endif # ARCH_BOARD_SAMA5D3_XPLAINED

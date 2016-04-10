@@ -1,0 +1,240 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_STM32F429I_DISCO
+
+config STM32F429I_DISCO_FLASH
+	bool "MTD driver for external 8Mbyte SST25 FLASH on SPI4"
+	default n
+	select MTD
+	select MTD_SST25XX
+	select MTD_SMART
+	select FS_SMARTFS
+	select STM32_SPI4
+	select MTD_BYTE_WRITE
+	---help---
+		Configures an MTD device for use with the onboard flash
+
+config STM32F429I_DISCO_FLASH_MINOR
+	int "Minor number for the FLASH /dev/smart entry"
+	default 0
+	depends on STM32F429I_DISCO_FLASH
+	---help---
+		Sets the minor number for the FLASH MTD /dev entry
+
+config STM32F429I_DISCO_FLASH_PART
+	bool "Enable partition support on FLASH"
+	default n
+	depends on STM32F429I_DISCO_FLASH
+	---help---
+		Enables creation of partitions on the FLASH
+
+config STM32F429I_DISCO_FLASH_CONFIG_PART
+	bool "Create application config data partition on FLASH"
+	default y
+	depends on STM32F429I_DISCO_FLASH_PART
+	depends on PLATFORM_CONFIGDATA
+	---help---
+		Enables creation of a /dev/config partition on the FLASH
+
+config STM32F429I_DISCO_FLASH_CONFIG_PART_NUMBER
+	int "Index number of config partition (in list below)"
+	default 0
+	depends on STM32F429I_DISCO_FLASH_CONFIG_PART
+	---help---
+		Specifies the index number of the config data partition
+		from the partition list.
+
+config STM32F429I_DISCO_FLASH_PART_LIST
+	string "Flash partition size list"
+	default "4,8188"
+	depends on STM32F429I_DISCO_FLASH_PART
+	---help---
+		Comma separated list of partition sizes in KB.
+
+config STM32F429I_DISCO_FLASH_PART_NAMES
+	string "Flash partition name list"
+	default "config,rfs"
+	depends on STM32F429I_DISCO_FLASH_PART
+	depends on MTD_PARTITION_NAMES
+	---help---
+		Comma separated list of partition names.
+
+config STM32F429I_DISCO_RAMMTD
+	bool "MTD driver for SMARTFS RAM disk"
+	default n
+	select MTD
+	select RAMMTD
+	---help---
+		Configures an MTD based RAM device for use with SMARTFS.
+
+config STM32F429I_DISCO_RAMMTD_MINOR
+	int "Minor number for RAM /dev/smart entry"
+	default 1
+	depends on STM32F429I_DISCO_RAMMTD
+	---help---
+		Sets the minor number for the RAM MTD /dev entry
+
+config STM32F429I_DISCO_RAMMTD_SIZE
+	int "Size in KB of the RAM device to create"
+	default 32
+	depends on STM32F429I_DISCO_RAMMTD
+	---help---
+		Sets the size of static RAM allocation for the SMART RAM device
+
+config STM32F429IDISCO_USBHOST_STACKSIZE
+	int "USB host waiter stack size"
+	default 1024
+	depends on USBHOST
+
+config STM32F429IDISCO_USBHOST_PRIO
+	int "USB host waiter task priority"
+	default 100
+	depends on USBHOST
+
+config PM_BUTTONS
+	bool "PM Button support"
+	default n
+	depends on PM && ARCH_IRQBUTTONS
+	---help---
+		Enable PM button EXTI interrupts to support PM testing
+
+config PM_BUTTON_ACTIVITY
+	int "Button PM activity weight"
+	default 10
+	depends on PM_BUTTONS
+	---help---
+		The activity weight to report to the power management subsystem when a button is pressed.
+
+config PM_ALARM_SEC
+	int "PM_STANDBY delay (seconds)"
+	default 15
+	depends on PM && RTC_ALARM
+	---help---
+		Number of seconds to wait in PM_STANDBY before going to PM_STANDBY mode.
+
+config PM_ALARM_NSEC
+	int "PM_STANDBY delay (nanoseconds)"
+	default 0
+	depends on PM && RTC_ALARM
+	---help---
+		Number of additional nanoseconds to wait in PM_STANDBY before going to PM_STANDBY mode.
+
+config PM_SLEEP_WAKEUP
+	bool "PM_SLEEP wake-up alarm"
+	default n
+	depends on PM && RTC_ALARM
+	---help---
+		Wake-up of PM_SLEEP mode after a delay and resume normal operation.
+
+config PM_SLEEP_WAKEUP_SEC
+	int "PM_SLEEP delay (seconds)"
+	default 10
+	depends on PM && RTC_ALARM
+	---help---
+		Number of seconds to wait in PM_SLEEP before going to PM_STANDBY mode.
+
+config PM_SLEEP_WAKEUP_NSEC
+	int "PM_SLEEP delay (nanoseconds)"
+	default 0
+	depends on PM && RTC_ALARM
+	---help---
+		Number of additional nanoseconds to wait in PM_SLEEP before going to PM_STANDBY mode.
+
+menuconfig STM32F429I_DISCO_ILI9341
+	bool "LCD driver for ILI9341 Liquid Crystal Display Controller"
+	default n
+	---help---
+		Enables  support for a connected display based on ili9341 LCD Single Chip
+		Driver. This sub driver supports only communication with the display driver
+		connected via 4-wire serial (spi) mcu interface.
+
+if STM32F429I_DISCO_ILI9341
+
+choice
+	prompt "LCD Interface Type"
+	default STM32F429I_DISCO_ILI9341_NONE if !LCD_ILI9341 && !STM32_LTDC
+	default STM32F429I_DISCO_ILI9341_LCDIFACE if LCD_ILI9341 && !STM32_LTDC
+	default STM32F429I_DISCO_ILI9341_FBIFACE if STM32_LTDC
+
+config STM32F429I_DISCO_ILI9341_NONE
+	bool "No LCD interface"
+
+config STM32F429I_DISCO_ILI9341_LCDIFACE
+	bool "Enable support for nuttx LCD interface"
+	depends on LCD_ILI9341
+	---help---
+		Enable lcd driver support for the nuttx lcd interface.
+
+config STM32F429I_DISCO_ILI9341_FBIFACE
+	bool "Enable support for nuttx framebuffer interface"
+	depends on STM32_LTDC
+	---help---
+		Enable lcd driver support for the nuttx framebuffer interface to displaying
+		data via ltdc controller of the stm32f429i mcu.
+
+endchoice # LCD Interface Type
+
+if STM32F429I_DISCO_ILI9341_LCDIFACE
+
+config STM32F429I_DISCO_ILI9341_LCDDEVICE
+	int "LCD interface"
+	default 0
+	range 0 1
+	depends on STM32F429I_DISCO_ILI9341_LCDIFACE
+	---help---
+		Define the lcd interface which should be used. This must be
+		corresponding to the configured ili9341 LCD device in the driver
+		section.
+
+config STM32F429I_DISCO_ILI9341_SPIFREQUENCY
+	int "SPI frequency"
+	default 12000000
+	---help---
+		Define the bus frequency of the SPI device.
+
+config STM32F429I_DISCO_ILI9341_SPIBITS16
+	bool "Enable 16 bit pixel read/write"
+	default n
+	---help---
+		This enables faster 16-bit SPI mode for transmitting or receiving pixel data
+		to or from the display gram. But uses default 8-bit SPI mode for all other
+		display operations.
+
+endif # STM32F429I_DISCO_ILI9341_LCDIFACE
+
+if STM32F429I_DISCO_ILI9341_FBIFACE
+
+choice
+	prompt "LCD Orientation"
+	default STM32F429I_DISCO_ILI9341_FBIFACE_PORTRAIT
+	---help---
+		Configure display orientation.
+
+config STM32F429I_DISCO_ILI9341_FBIFACE_LANDSCAPE
+	bool "Landscape orientation"
+	---help---
+		Define for "landscape" orientation support.
+
+config STM32F429I_DISCO_ILI9341_FBIFACE_PORTRAIT
+	bool "Portrait orientation"
+	---help---
+		Define for "portrait" orientation support.
+
+config STM32F429I_DISCO_ILI9341_FBIFACE_RLANDSCAPE
+	bool "Reverse landscape orientation"
+	---help---
+		Define for "reverse landscape" orientation support.
+
+config STM32F429I_DISCO_ILI9341_FBIFACE_RORTRAIT
+	bool "Reverse portrait display"
+	---help---
+		Define for "reverse portrait" orientation support.
+
+endchoice
+
+endif # STM32F429I_DISCO_ILI9341_FBIFACE
+endif # STM32F429I_DISCO_ILI9341
+endif # ARCH_BOARD_STM32F429I_DISCO

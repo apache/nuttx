@@ -1,0 +1,75 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_STM3240G_EVAL
+
+config STM3240G_LCD
+	bool "Support STM3240G-EVAL LCD"
+	default y
+	depends on LCD && STM32_FSMC
+	---help---
+		Enable support for the LCD on the STM3240G-EVAL board.  See additional,
+		LCD-common settings in the drivers/lcd Kconfig file.
+
+if STM3240G_LCD
+
+config STM3240G_LCD_RDSHIFT
+	int "LCD data shift"
+	default 5
+	---help---
+		When reading 16-bit gram data, there appears to be a shift in the returned
+		data.  This value fixes the offset.  Default 5.
+
+config STM3240G_ILI9320_DISABLE
+	bool "Disable LCD_ILI9320 (and LCD_ILI9321) support"
+	default n
+	---help---
+		The LCD driver dynamically selects the LCD based on the reported LCD
+		ID value.  However, code size can be reduced by suppressing support for
+		individual LCDs using this option.
+
+config STM3240G_ILI9325_DISABLE
+	bool "Disable LCD_ILI9325 support"
+	default n
+	---help---
+		The LCD driver dynamically selects the LCD based on the reported LCD
+		ID value.  However, code size can be reduced by suppressing support for
+		individual LCDs using this option
+
+endif # STM3240G_LCD
+
+if BOARD_INITIALIZE
+
+config STM3240G_BOARDINIT_PRIO
+	int "Board initialization thread priority"
+	default 196
+	---help---
+		If BOARD_INITIALIZE initialize is defined, then the function
+		board_initialize() will be called to perform board-specific
+		initialization. board_initialize() runs on the IDLE thread.
+		Depending on the features that are enabled, this  board
+		initialization logic may need to start a kernel thread that has
+		more capability than the IDLE thread.  This setting then provides
+		the priority of the board initialization thread.
+
+		NOTE:  STM3240G_BOARDINIT_PRIO should have a relatively high
+		priority to assure that board level initialization completes
+		before the application requires the initialized board services.
+		Default: 196
+
+config STM3240G_BOARDINIT_STACK
+	int "Board initialization thread Size"
+	default 2048
+	---help---
+		If BOARD_INITIALIZE initialize is defined, then the function
+		board_initialize() will be called to perform board-specific
+		initialization. board_initialize() runs on the IDLE thread.
+		Depending on the features that are enabled, this  board
+		initialization logic may need to start a kernel thread that has
+		more capability than the IDLE thread.  This setting then provides
+		the size of the stack to use with the initialization kernel thread.
+
+endif # BOARD_INITIALIZE
+endif # ARCH_BOARD_STM3240G_EVAL

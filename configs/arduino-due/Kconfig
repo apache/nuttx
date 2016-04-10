@@ -1,0 +1,24 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_ARDUINO_DUE
+
+config ADRUINO_DUE_REV3
+	bool "Rev 3"
+	default n
+	---help---
+		This port was performed on the Aduino Due Rev 2 board.  Differences
+		with the Arduino Due Rev 3 board have been reported.  This selection
+		will enable work arounds specifically for the Rev 3 board.
+
+config ARDUINO_ITHEAD_TFT
+	bool "ITEAD 2.4 inch TFT w/Touch"
+	default n
+	---help---
+		Select this option if you have the ITEAD 2.4" TFT module installed.
+		This will enable support for the peripherals on that module
+		including the SD card, TFT LCD, and touchscreen controller.
+
+endif

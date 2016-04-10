@@ -1,0 +1,40 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_SUREPIC32MX
+
+choice
+	prompt "Select Sure PIC32MX Board"
+	default ARCH_DBDP11215
+
+config ARCH_DBDP11215
+	bool "DB_DP11215 PIC32 Storage Demo Board"
+	select ARCH_HAVE_LEDS
+	---help---
+		DB_DP11215 PIC32 Storage Demo Board
+
+		- PIC32MX44F512H
+		- SD card slot
+		- RS-2323 Interface
+		- USB (MINI-B)
+		- 2x16 LCD display
+		- Three tactile switches
+		- Four user LEDs
+
+config ARCH_DBDP11212
+	bool "DB-DP11212 PIC32 General Purpose Demo Board"
+	---help---
+		DB-DP11212 PIC32 General Purpose Demo Board
+
+		- PIC32MX44F512H
+		- LM75A temperature sensor and temperature resistor (NTC-SMD thermistor)
+		- SPI FLASH: AT25DF041A
+		- USB (MINI-B)
+		- 2x16 LCD display
+		- 4 digit, 8 segment LED display
+		- Three tactile switches
+
+endchoice
+endif

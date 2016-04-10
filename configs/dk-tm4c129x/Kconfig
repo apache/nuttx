@@ -1,0 +1,75 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_DK_TM4C129X
+if TIMER && TIVA_TIMER32_PERIODIC
+
+config DK_TM4C129X_TIMER
+	bool
+	default n
+
+choice
+	prompt "Timer driver selection"
+	default DK_TM4C129X_TIMER_NONE
+
+config DK_TM4C129X_TIMER_NONE
+	bool "None"
+
+config DK_TM4C129X_TIMER0
+	bool "Timer 0"
+	depends on TIVA_TIMER0
+	select DK_TM4C129X_TIMER
+
+config DK_TM4C129X_TIMER1
+	bool "Timer 1"
+	depends on TIVA_TIMER1
+	select DK_TM4C129X_TIMER
+
+config DK_TM4C129X_TIMER2
+	bool "Timer 2"
+	depends on TIVA_TIMER2
+	select DK_TM4C129X_TIMER
+
+config DK_TM4C129X_TIMER3
+	bool "Timer 3"
+	depends on TIVA_TIMER3
+	select DK_TM4C129X_TIMER
+
+config DK_TM4C129X_TIMER4
+	bool "Timer 4"
+	depends on TIVA_TIMER4
+	select DK_TM4C129X_TIMER
+
+config DK_TM4C129X_TIMER5
+	bool "Timer 5"
+	depends on TIVA_TIMER5
+	select DK_TM4C129X_TIMER
+
+config DK_TM4C129X_TIMER6
+	bool "Timer 6"
+	depends on TIVA_TIMER6
+	select DK_TM4C129X_TIMER
+
+config DK_TM4C129X_TIMER7
+	bool "Timer 7"
+	depends on TIVA_TIMER7
+	select DK_TM4C129X_TIMER
+
+endchoice # Timer driver selection
+
+if DK_TM4C129X_TIMER
+
+config DK_TM4C129X_TIMER_DEVNAME
+	string "Timer device name"
+	default "/dev/timer0"
+
+config DK_TM4C129X_TIMER_ALTCLK
+	bool "Use alternate clock source"
+	default n
+	depends on EXPERIMENTAL
+
+endif # DK_TM4C129X_TIMER
+endif # TIVA_TIMER32_PERIODIC
+endif # ARCH_BOARD_DK_TM4C129X

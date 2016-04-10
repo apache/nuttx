@@ -1,0 +1,38 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_VIEWTOOL_STM32F107
+
+config VIEWTOOL_HIGHPRI
+	bool "High priority interrupt test"
+	default n
+	depends on ARCH_CHIP_STM32F103VC && ARCH_HIPRI_INTERRUPT
+	---help---
+		This selection enables building of the custom test for the Cortex-M
+		high priority, nested interrupts.  ARCH_HIPRI_INTERRUPT must first
+		be enabled.  This test is only implemented on the STM32F103VCT6
+		(ARCH_CHIP_STM32F103VC) but should be easily ported to other STM32
+		architectures.
+
+if VIEWTOOL_HIGHPRI
+
+config VIEWTOOL_TIM6_FREQUENCY
+	int "TIM6 Frequency"
+	default 36000000
+	---help---
+		TIM6 is used to drive the high priority, nested interrupt in the
+		test enabled with VIEWTOOL_HIGHPRI.  This setting specifies the
+		frequency of the TIM6 input clock.
+
+config VIEWTOOL_TIM6_PERIOD
+	int "TIM6 Period"
+	default 36000
+	---help---
+		TIM6 is used to drive the high priority, nested interrupt in the
+		test enabled with VIEWTOOL_HIGHPRI.  This setting specifies
+		period of the TIM6 interrupt in units of VIEWTOOL_TIM6_FREQUENCY.
+
+endif # VIEWTOOL_HIGHPRI
+endif # ARCH_BOARD_VIEWTOOL_STM32F107

@@ -1,0 +1,65 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_SAM4L_XPLAINED
+
+menu "SAM4L Xplained Pro Modules"
+
+config SAM4L_XPLAINED_SLCD1MODULE
+	bool "SLCD1 Module"
+	default n
+	---help---
+		The SLCD 1 module is attached.  This module provides a segment LCD
+		that connects directly to the "EXT5 SEGMENT LCD" connector.  When
+		the SLCD is connected, EXT2 is not available for other modules.
+
+config SAM4L_XPLAINED_IOMODULE
+	bool "I/O1 Module"
+	default n
+	---help---
+		The I/O 1 module is attached.  This module provides an MMC/SD card
+		slot.
+
+if SAM4L_XPLAINED_IOMODULE
+
+choice
+	prompt "I/O1 Module Location"
+	default SAM4L_XPLAINED_IOMODULE_EXT1
+
+config SAM4L_XPLAINED_IOMODULE_EXT1
+	bool "EXT1"
+
+config SAM4L_XPLAINED_IOMODULE_EXT2
+	bool "EXT2"
+	depends on !SAM4L_XPLAINED_SLCD1MODULE
+
+endchoice
+endif
+
+config SAM4L_XPLAINED_OLED1MODULE
+	bool "OLED1 Module"
+	default n
+	---help---
+		The OLED 1 module is attached.  This module provides an OLED plus 3
+		additional switches and 3 additional LEDs.
+
+if SAM4L_XPLAINED_OLED1MODULE
+
+choice
+	prompt "OLED1 Module Location"
+	default SAM4L_XPLAINED_OLED1MODULE_EXT1
+
+config SAM4L_XPLAINED_OLED1MODULE_EXT1
+	bool "EXT1"
+
+config SAM4L_XPLAINED_OLED1MODULE_EXT2
+	bool "EXT2"
+	depends on !SAM4L_XPLAINED_SLCD1MODULE
+
+endchoice
+endif
+
+endmenu
+endif

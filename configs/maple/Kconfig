@@ -1,0 +1,33 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_MAPLE
+
+choice
+	prompt "Select board type"
+	default MAPLE_STANDARD if ARCH_CHIP_STM32F103RB
+	default MAPLE_MINI if ARCH_CHIP_STM32F103CB
+	---help---
+		Select the board hosting the architure.  You must first select the
+		exact MCU part number, then the boards supporting that part will
+		be available for selection.  Use ARCH_BOARD_CUSTOM to create a new
+		board configuration.
+
+config MAPLE_STANDARD
+	bool "Maple"
+	depends on ARCH_CHIP_STM32F103RB
+	---help---
+		This version is the standard maple board, with STM32F103RBT6.
+
+config MAPLE_MINI
+	bool "Maple Mini"
+	depends on ARCH_CHIP_STM32F103CB
+	---help---
+		This version is a mini layout of the normal one, with STM32F103CBT6.
+		It has different bootloader, memory size, and pin layout.
+
+endchoice
+
+endif

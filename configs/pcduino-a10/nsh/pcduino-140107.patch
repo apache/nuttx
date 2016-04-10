@@ -1,0 +1,93 @@
+diff --git a/nuttx/arch/arm/src/a1x/a1x_boot.c b/nuttx/arch/arm/src/a1x/a1x_boot.c
+index 3cc6323..ad42790 100644
+--- a/nuttx/arch/arm/src/a1x/a1x_boot.c
++++ b/nuttx/arch/arm/src/a1x/a1x_boot.c
+@@ -312,12 +312,14 @@ void up_boot(void)
+    * for all IO regions (Including the vector region).
+    */
+ 
++lowsyslog(LOG_INFO, "Calling a1x_setupmappings\n"); // REMOVE ME
+   a1x_setupmappings();
+ 
+   /* Provide a special mapping for the IRAM interrupt vector positioned in
+    * high memory.
+    */
+ 
++lowsyslog(LOG_INFO, "Calling a1x_vectormapping\n"); // REMOVE ME
+   a1x_vectormapping();
+ 
+ #endif /* CONFIG_ARCH_ROMPGTABLE */
+@@ -326,16 +328,19 @@ void up_boot(void)
+    * arm_vector.S
+    */
+ 
++lowsyslog(LOG_INFO, "Calling a1x_copyvectorblock\n"); // REMOVE ME
+   a1x_copyvectorblock();
+ 
+   /* Initialize the FPU */
+ 
+ #ifdef CONFIG_ARCH_FPU
++lowsyslog(LOG_INFO, "Calling arm_fpuconfig\n"); // REMOVE ME
+   arm_fpuconfig();
+ #endif
+ 
+   /* Perform common, low-level chip initialization (might do nothing) */
+ 
++lowsyslog(LOG_INFO, "Calling a1x_lowsetup\n"); // REMOVE ME
+   a1x_lowsetup();
+ 
+   /* Perform early serial initialization if we are going to use the serial
+@@ -343,6 +348,7 @@ void up_boot(void)
+    */
+ 
+ #ifdef USE_EARLYSERIALINIT
++lowsyslog(LOG_INFO, "Calling up_earlyserialinit\n"); // REMOVE ME
+   up_earlyserialinit();
+ #endif
+ 
+@@ -353,6 +359,7 @@ void up_boot(void)
+    */
+ 
+ #ifdef CONFIG_BUILD_PROTECTED
++lowsyslog(LOG_INFO, "Calling a1x_userspace\n"); // REMOVE ME
+   a1x_userspace();
+ #endif
+ 
+@@ -362,5 +369,7 @@ void up_boot(void)
+    * - Configuration of board specific resources (PIOs, LEDs, etc).
+    */
+ 
++lowsyslog(LOG_INFO, "Calling a1x_boardinitialize\n"); // REMOVE ME
+   a1x_boardinitialize();
++lowsyslog(LOG_INFO, "Returning\n"); // REMOVE ME
+ }
+diff --git a/nuttx/arch/arm/src/armv7-a/arm_head.S b/nuttx/arch/arm/src/armv7-a/arm_head.S
+index bce82d5..924bd24 100644
+--- a/nuttx/arch/arm/src/armv7-a/arm_head.S
++++ b/nuttx/arch/arm/src/armv7-a/arm_head.S
+@@ -220,6 +220,12 @@ __start:
+ 	teq		r0, r2
+ 	bne		.Lpgtableclear
+ 
++	movw	r1, #0x0416 // REMOVE ME
++	movt	r1, #0x01c0
++	movw	r2, #0x4070
++	movt	r2, #0x0000
++	str		r1, [r2]
++
+ #ifdef ARMV7A_PGTABLE_MAPPING
+ 	/* If the page table does not lie in the same address space as does the
+ 	 * mapped RAM in either case.  So we will need to create a special
+diff --git a/nuttx/arch/arm/src/armv7-a/arm_mmu.c b/nuttx/arch/arm/src/armv7-a/arm_mmu.c
+index f82490c..5c16e48 100644
+--- a/nuttx/arch/arm/src/armv7-a/arm_mmu.c
++++ b/nuttx/arch/arm/src/armv7-a/arm_mmu.c
+@@ -94,7 +94,7 @@ void mmu_l1_setentry(uint32_t paddr, uint32_t vaddr, uint32_t mmuflags)
+ 
+   /* Invalidate the TLB cache associated with virtual address range */
+ 
+-  mmu_invalidate_region(vaddr, 1024*1024);
++//  mmu_invalidate_region(vaddr, 1024*1024);
+ }
+ #endif
+ 

@@ -1,0 +1,16 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_HYMINI_STM32V
+
+config LCD_R61505U
+	bool "LCD Based on R61505U LCD Controller"
+	default n
+	depends on NX_LCDDRIVER && !LCD_SSD1289
+	---help---
+		Enables HY-Mini STM32v support for any LCD based on the R61505U,
+		LCD Controller.
+
+endif

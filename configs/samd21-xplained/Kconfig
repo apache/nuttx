@@ -1,0 +1,82 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_SAMD21_XPLAINED
+
+menu "SAMD21 Xplained Pro Modules"
+
+config SAMD21_XPLAINED_IOMODULE
+	bool "I/O1 Module"
+	default n
+	---help---
+		The I/O 1 module is attached.  This module provides an MMC/SD card
+		slot.
+
+if SAMD21_XPLAINED_IOMODULE
+
+choice
+	prompt "I/O1 Module Location"
+	default SAMD21_XPLAINED_IOMODULE_EXT1
+
+config SAMD21_XPLAINED_IOMODULE_EXT1
+	bool "EXT1"
+
+config SAMD21_XPLAINED_IOMODULE_EXT2
+	bool "EXT2"
+
+endchoice
+endif
+
+config SAMD21_XPLAINED_OLED1MODULE
+	bool "OLED1 Module"
+	default n
+	---help---
+		The OLED 1 module is attached.  This module provides an OLED plus 3
+		additional switches and 3 additional LEDs.
+
+if SAMD21_XPLAINED_OLED1MODULE
+
+choice
+	prompt "OLED1 Module Location"
+	default SAMD21_XPLAINED_OLED1MODULE_EXT1
+
+config SAMD21_XPLAINED_OLED1MODULE_EXT1
+	bool "EXT1"
+
+config SAMD21_XPLAINED_OLED1MODULE_EXT2
+	bool "EXT2"
+
+endchoice
+endif
+endmenu
+
+if USART4_SERIAL_CONSOLE
+choice
+	prompt "USART 4 Connection"
+	default SAMD21_XPLAINED_USART4_EXT3
+
+config SAMD21_XPLAINED_USART4_EXT1
+	bool "EXT1"
+	depends on !SAMD21_XPLAINED_OLED1MODULE_EXT1 && !SAMD21_XPLAINED_IOMODULE_EXT1
+	---help---
+		Select this option if the serial console is on SERCOM4 connected via
+		EXT1.  The RX will be on PB9 and TX signal will be on PB8.
+
+config SAMD21_XPLAINED_USART4_EXT2
+	bool "EXT2"
+	depends on !SAMD21_XPLAINED_OLED1MODULE_EXT2 && !SAMD21_XPLAINED_IOMODULE_EXT2
+	---help---
+		Select this option if the serial console is on SERCOM4 connected via
+		EXT2.  The RX will be on PB13 and TX signal will be on PB12.
+
+config SAMD21_XPLAINED_USART4_EXT3
+	bool "EXT3"
+	---help---
+		Select this option if the serial console is on SERCOM4 connect via
+		EXT3.  The RX will be on PB11 and TX signal will be on PB10.
+
+endchoice
+endif
+endif

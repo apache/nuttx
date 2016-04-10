@@ -1,0 +1,56 @@
+ - implement flash driver
+   - see arch/arm/src/stm32/stm32_flash.c and related
+     - both banks could be mapped with care taken not to erase the active code.
+       - perhaps the MPU could block code corruption?
+
+   - once implemented, the free() cmd replacement can show flash information.
+
+ - Seen crashes when running serial ports below 921600
+
+    - COM34 (UART1, ttyS1) runs the smoothest with 'serialblaster' test...
+    the other two (UART0, USART1) seem to stutter...
+
+   - created a cpuhog test. Each instance takes a semaphore, burns cpu for 6ms and then releases
+     the sem to exercises semaphores passing and a busy cpu. The first two instances become a
+     producer/consumer pair using a pipe (FIFO) to exercise the fileio data passing.
+       -> no crashes with 8 instances running. (No MMU, No BASEPRI)
+       -> no crashes with 8 instances running. (MMU + BASEPRI)
+          -> not however that the serial ports are very finicky with BASEPRI enabled!
+            This setup sends single charactes for each produced or consumed block,
+            and doesn't seem to have any issues:
+              NuttShell (NSH)
+              nsh> cpuhog > /dev/ttyS1 &
+              cpuhog [5:50]
+              nsh> cpuhog > /dev/ttyS2 &
+              cpuhog [7:50]
+              nsh> cpuhog &
+              cpuhog [8:50]
+              nsh> cpuhog 2
+              cpuhog &
+              cpuhog [9:50]
+              nsh> cpuhog 3
+              cpuhog &
+              cpuhog [10:50]
+              nsh> cpuhog 4
+              cpuhog &
+              cpuhog [11:50]
+              nsh> cpuhog 5
+
+              nsh> cpuhog &
+              cpuhog [12:50]
+              nsh> cpuhog 6
+
+              nsh> cpuhog &
+              cpuhog [13:50]
+              nsh> cpuhog 7
+
+ - USB serial not quite stable when pushing lots of data
+
+ - UARTs don't use DMA. We may need this for high baudrates.
+   - Inbound hardware flow control requires dma.
+
+Current Test:
+
+40mA:   120Mhz (240 MHz PLL) with SDCard mounted, UART0+UART1+USART1 enabled, USB Device availible (but nothing plugged in)
+37.8mA: 120Mhz (120 MHz PLL) with SDCard mounted, UART0+UART1+USART1 enabled
+16.9mA:  "" with WFI added to up_idle()

@@ -1,0 +1,115 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_SAML21_XPLAINED
+
+menu "CPU Clock Configuration"
+
+choice
+	prompt "OSC16M Frequency"
+	default SAML21_XPLAINED_OSC16M_4MHZ
+
+config SAML21_XPLAINED_OSC16M_4MHZ
+	bool "4 MHz"
+
+config SAML21_XPLAINED_OSC16M_8MHZ
+	bool "8 MHz"
+
+config SAML21_XPLAINED_OSC16M_12MHZ
+	bool "12 MHz"
+
+config SAML21_XPLAINED_OSC16M_16MHZ
+	bool "16 MHz"
+
+endchoice # OSC16M Frequency
+
+config SAML21_XPLAINED_XOSC32K
+	bool "Enable XOSC32K"
+	default n
+
+config SAML21_XPLAINED_DFLL
+	bool "Use DFLL"
+	default n
+
+choice
+	prompt "DFLL Clock Source"
+	default SAML21_XPLAINED_DFLL_OSC16MSRC
+	depends on SAML21_XPLAINED_DFLL
+
+config SAML21_XPLAINED_DFLL_OSC16MSRC
+	bool "OSC16M"
+
+config SAML21_XPLAINED_DFLL_XOSC32KSRC
+	bool "XOSCK32K"
+	select SAML21_XPLAINED_XOSC32K
+
+endchoice # DFLL Clock Source
+
+choice
+	prompt "DFLL Operating Mode"
+	default SAML21_XPLAINED_DFLL_OPENLOOP
+	depends on SAML21_XPLAINED_DFLL
+
+config SAML21_XPLAINED_DFLL_OPENLOOP
+	bool "DFLL Open Loop Mode"
+
+config SAML21_XPLAINED_DFLL_CLOSEDLOOP
+	bool "DFLL Closed Loop Mode"
+
+config SAML21_XPLAINED_DFLL_RECOVERY
+	bool "DFLL USB Recovery Mode"
+	depends on EXPERIMENTAL
+
+endchoice # DLL Operating Mode
+endmenu # CPU Clock Configuration
+
+menu "SAML21 Xplained Pro Modules"
+
+config SAML21_XPLAINED_IOMODULE
+	bool "I/O1 Module"
+	default n
+	---help---
+		The I/O 1 module is attached.  This module provides an MMC/SD card
+		slot.
+
+if SAML21_XPLAINED_IOMODULE
+
+choice
+	prompt "I/O1 Module Location"
+	default SAML21_XPLAINED_IOMODULE_EXT1
+
+config SAML21_XPLAINED_IOMODULE_EXT1
+	bool "EXT1"
+
+config SAML21_XPLAINED_IOMODULE_EXT2
+	bool "EXT2"
+
+endchoice
+endif
+
+config SAML21_XPLAINED_OLED1MODULE
+	bool "OLED1 Module"
+	default n
+	---help---
+		The OLED 1 module is attached.  This module provides an OLED plus 3
+		additional switches and 3 additional LEDs.
+
+if SAML21_XPLAINED_OLED1MODULE
+
+choice
+	prompt "OLED1 Module Location"
+	default SAML21_XPLAINED_OLED1MODULE_EXT1
+
+config SAML21_XPLAINED_OLED1MODULE_EXT1
+	bool "EXT1"
+
+config SAML21_XPLAINED_OLED1MODULE_EXT2
+	bool "EXT2"
+
+endchoice
+endif
+endmenu
+
+endif # ARCH_BOARD_SAML21_XPLAINED

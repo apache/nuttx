@@ -1,0 +1,114 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_MIKROE_STM32F4
+
+config MIKROE_FLASH
+	bool "MTD driver for onboard 1M FLASH"
+	default n
+	select MTD
+	select MTD_M25P
+	select MTD_SMART
+	select FS_SMARTFS
+	select STM32_SPI3
+	select MTD_BYTE_WRITE
+	---help---
+		Configures an MTD device for use with the onboard flash
+
+config MIKROE_FLASH_MINOR
+	int "Minor number for the FLASH /dev/smart entry"
+	default 0
+	depends on MIKROE_FLASH
+	---help---
+		Sets the minor number for the FLASH MTD /dev entry
+
+config MIKROE_FLASH_PART
+	bool "Enable partition support on FLASH"
+	default n
+	depends on MIKROE_FLASH
+	---help---
+		Enables creation of partitions on the FLASH
+
+config MIKROE_FLASH_CONFIG_PART
+	bool "Create application config data partition on FLASH"
+	default y
+	depends on MIKROE_FLASH_PART
+	depends on PLATFORM_CONFIGDATA
+	---help---
+		Enables creation of a /dev/config partition on the FLASH
+
+config MIKROE_FLASH_CONFIG_PART_NUMBER
+	int "Index number of config partition (in list below)"
+	default 0
+	depends on MIKROE_FLASH_CONFIG_PART
+	---help---
+		Specifies the index number of the config data partition
+		from the partition list.
+
+config MIKROE_FLASH_PART_LIST
+	string "Flash partition size list"
+	default "8,248,768"
+	depends on MIKROE_FLASH_PART
+	---help---
+		Comma separated list of partition sizes in KB.
+
+config MIKROE_RAMMTD
+	bool "MTD driver for SMARTFS RAM disk"
+	default n
+	select MTD
+	select RAMMTD
+	---help---
+		Configures an MTD based RAM device for use with SMARTFS.
+
+config MIKROE_RAMMTD_MINOR
+	int "Minor number for RAM /dev/smart entry"
+	default 1
+	depends on MIKROE_RAMMTD
+	---help---
+		Sets the minor number for the RAM MTD /dev entry
+
+config MIKROE_RAMMTD_SIZE
+	int "Size in KB of the RAM device to create"
+	default 32
+	depends on MIKROE_RAMMTD
+	---help---
+		Sets the size of static RAM allocation for the SMART RAM device
+
+config PM_ALARM_SEC
+	int "PM_STANDBY delay (seconds)"
+	default 15
+	depends on PM && RTC_ALARM
+	---help---
+		Number of seconds to wait in PM_STANDBY before going to PM_STANDBY mode.
+
+config PM_ALARM_NSEC
+	int "PM_STANDBY delay (nanoseconds)"
+	default 0
+	depends on PM && RTC_ALARM
+	---help---
+		Number of additional nanoseconds to wait in PM_STANDBY before going to PM_STANDBY mode.
+
+config PM_SLEEP_WAKEUP
+	bool "PM_SLEEP wake-up alarm"
+	default n
+	depends on PM && RTC_ALARM
+	---help---
+		Wake-up of PM_SLEEP mode after a delay and resume normal operation.
+
+config PM_SLEEP_WAKEUP_SEC
+	int "PM_SLEEP delay (seconds)"
+	default 10
+	depends on PM && RTC_ALARM
+	---help---
+		Number of seconds to wait in PM_SLEEP before going to PM_STANDBY mode.
+
+config PM_SLEEP_WAKEUP_NSEC
+	int "PM_SLEEP delay (nanoseconds)"
+	default 0
+	depends on PM && RTC_ALARM
+	---help---
+		Number of additional nanoseconds to wait in PM_SLEEP before going to PM_STANDBY mode.
+
+endif

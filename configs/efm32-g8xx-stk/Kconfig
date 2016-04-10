@@ -1,0 +1,20 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_EFM32G8XXSTK
+
+comment "EFM32 G8XX STK Hardware Configuration"
+
+config EFM32G8STK_BCEN
+	bool "Enable BC_EN"
+	default n
+	---help---
+		The control MCU acts as a board controller (BC). There is a UART
+		connection between the EFM and the BC. The connection is made by
+		setting the EFM_BC_EN (PD13) line high. The EFM can then use the
+		BSP to send commands to the BC. When EFM_BC_EN is low, EFM_BC_TX
+		and EFM_BC_RX can be used by other applications.
+
+endif # ARCH_BOARD_EFM32G8XXSTK
