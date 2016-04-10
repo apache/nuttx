@@ -1,0 +1,57 @@
+AIC    Advanced Interrupt Controller (Atmel SAM)
+ADC    Analog to Digital Conversion
+ARP    Address Resolution Protocol (networking)
+BCH    Block to Character
+BINFMT Binary Format (Dynamic Loader)
+CAN    Controller Area Network
+CP15   Coprocessor 15 (ARM)
+DEVIF  Device Interface (networking)
+DAC    Digital to Analog Conversion
+DEV    Device
+DMA    Direct Memory Access (hardware)
+DMAC   DMA Controller (hardware)
+DRAM   Dynamic RAM
+FAT    File Allocation Table (file systems)
+FTL    FLASH Translation Layer (MTD)
+HSMCI  High Speed Memory Card Interface (Atmel)
+I/O    Input/Output
+IP     Internet Protocol (version 4?) (networking)
+IPv6   Internet Protocol Version 6 (networking)
+IRQ    Interrupt Request
+I2C    Inter-Integrated Circuit
+I2S    Inter IC Sound
+ICMP   Internet Control Message Protocol (networking)
+IOB    I/O Buffer (networking)
+LIBC   The "C" Library
+MCI    Memory Card Interface
+MM     Memory Management/Manager
+MMAP   Memory Map
+MMC    Multi-Media Card
+MMCSD  See MMC and SD
+MTD    Memory Technology Device
+NFS    Network File System
+NETDEV Network Device (networking)
+NSH    NuttShell
+NX     NuttX, the NuttX Graphics server (graphics)
+NXFFS  NuttX Flash File System
+NXWM   The NuttX Window Manager (graphics)
+PID    Peripheral ID (Atmel SAM)
+PWM    Pulse Width Modulation
+PKT    "Raw" Packet socket (networking)
+RAM    Random Access Memory
+RTC    Real Time Clock
+RTCC   Real Time Clock/Calendar
+SAIC   Secure Advanced Interrupt Controller (Atmel SAM)
+SD     Secure Digital
+SDIO   Secure Digital I/O
+SMC    Static Memory Controller (hardware)
+SPI    Serial Periperhal Interface
+TCP    Transmission Control Protocol (networking)
+TSC    Touchscreen Controller
+TWI    Two-Wire Interface
+UDP    User Datagram Protocol (networking)
+UART   Universal Asynchronous Receiver/Transmitter
+USB    Universal Serial Bus
+USART  Universal Synchronous/Asynchronous Receiver/Transmitter
+WDT    Watchdog Timer
+XDMAC  Extended DMA Controller (Atmel)
