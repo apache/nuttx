@@ -181,17 +181,10 @@
  * functions that deal with signal disposition.
  */
 
-#define SIG_ERR         ((CODE void*)-1)
-#define SIG_DFL         ((CODE void*)0)
-#define SIG_IGN         ((CODE void*)0)
-
-#if 0 /* Not yet supported */
-#  define SIG_HOLD      ((CODE void*)0)
-#endif
-
-/* System V name compatibility */
-
-#define sigset(s,f) signal(s,f)
+#define SIG_ERR         ((CODE void *)-1)  /* And error occurred */
+#define SIG_DFL         ((CODE void *)0)   /* Default is SIG_IGN for all signals */
+#define SIG_IGN         ((CODE void *)0)   /* Ignore the signal */
+#define SIG_HOLD        ((CODE void *)1)   /* Used only with sigset() */
 
 /********************************************************************************
  * Public Type Definitions
@@ -289,29 +282,30 @@ extern "C"
 #endif
 
 int kill(pid_t, int);
-int sigemptyset(FAR sigset_t *set);
-int sigfillset(FAR sigset_t *set);
-int sigaddset(FAR sigset_t *set, int signo);
-int sigdelset(FAR sigset_t *set, int signo);
-int sigismember(FAR const sigset_t *set, int signo);
 int sigaction(int sig, FAR const struct sigaction *act,
               FAR struct sigaction *oact);
+int sigaddset(FAR sigset_t *set, int signo);
+int sigdelset(FAR sigset_t *set, int signo);
+int sigemptyset(FAR sigset_t *set);
+int sigfillset(FAR sigset_t *set);
+int sighold(int signo);
+int sigismember(FAR const sigset_t *set, int signo);
 int sigignore(int signo);
 CODE void (*signal(int sig, CODE void (*func)(int signo)))(int signo);
 int sigprocmask(int how, FAR const sigset_t *set, FAR sigset_t *oset);
 int sigpause(int signo);
-int sigrelse(int signo);
 int sigpending(FAR sigset_t *set);
-int sighold(int signo);
-int sigsuspend(FAR const sigset_t *sigmask);
-int sigwaitinfo(FAR const sigset_t *set, FAR struct siginfo *value);
-int sigtimedwait(FAR const sigset_t *set, FAR struct siginfo *value,
-                 FAR const struct timespec *timeout);
 #ifdef CONFIG_CAN_PASS_STRUCTS
 int sigqueue(int pid, int signo, union sigval value);
 #else
 int sigqueue(int pid, int signo, FAR void *sival_ptr);
 #endif
+int sigrelse(int signo);
+CODE void (*sigset(int sig, CODE void (*func)(int signo)))(int signo);
+int sigtimedwait(FAR const sigset_t *set, FAR struct siginfo *value,
+                 FAR const struct timespec *timeout);
+int sigsuspend(FAR const sigset_t *sigmask);
+int sigwaitinfo(FAR const sigset_t *set, FAR struct siginfo *value);
 
 #undef EXTERN
 #ifdef __cplusplus

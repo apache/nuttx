@@ -47,8 +47,8 @@
  * Name: sigrelse
  *
  * Description:
- *   The sigrelse() function will remove 'signo' to the calling process' signal
- *   mask.
+ *   The sigrelse() function will remove 'signo' from the calling process'
+ *   signal mask.
  *
  ****************************************************************************/
 

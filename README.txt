@@ -439,7 +439,7 @@ Refreshing Configurations
   be?  Enter ? in response to the 'make oldconfig' prompt and it will show
   you the help text that goes with the option.
 
-  If you don't want to make any decisions are are willing to just accep the
+  If you don't want to make any decisions are are willing to just accept the
   recommended default value for each new configuration item, an even easier
   way is:
 
