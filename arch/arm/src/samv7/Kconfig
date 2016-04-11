@@ -664,7 +664,7 @@ if SAMV7_PROGMEM
 config SAMV7_PROGMEM_NSECTORS
 	int "Number of 128KB sectors"
 	default 4
-	range 1 15
+	range 1 16
 	---help---
 		This is the number of 128KB FLASH sectors at the end of the program
 		flash memory that will be reserved for use with by the interfaces
