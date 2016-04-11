@@ -44,34 +44,70 @@
 #include <assert.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/sched.h>
 #include <nuttx/mqueue.h>
 
 #include "inode/inode.h"
 #include "mqueue/mqueue.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Type Declarations
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: mq_close_group
+ *
+ * Description:
+ *   This function is used to indicate that all threads in the group are
+ *   finished with the specified message queue mqdes.  The mq_close_group()
+ *   deallocates any system resources allocated by the system for use by
+ *   this task for its message queue.
+ *
+ * Parameters:
+ *   mqdes - Message queue descriptor.
+ *   group - Group that has the open descriptor.
+ *
+ * Return Value:
+ *   0 (OK) if the message queue is closed successfully,
+ *   otherwise, -1 (ERROR).
+ *
+ ****************************************************************************/
+
+int mq_close_group(mqd_t mqdes, FAR struct task_group_s *group)
+{
+  FAR struct mqueue_inode_s *msgq;
+  FAR struct inode *inode;
+
+  DEBUGASSERT(mqdes != NULL && group != NULL);
+
+  /* Verify the inputs */
+
+   if (mqdes)
+     {
+       sched_lock();
+
+       /* Find the message queue associated with the message descriptor */
+
+       msgq = mqdes->msgq;
+       DEBUGASSERT(msgq && msgq->inode);
+
+       /* Close/free the message descriptor */
+
+       mq_desclose_group(mqdes, group);
+
+       /* Get the inode from the message queue structure */
+
+       inode = msgq->inode;
+       DEBUGASSERT(inode->u.i_mqueue == msgq);
+
+       /* Decrement the reference count on the inode, possibly freeing it */
+
+       mq_inode_release(inode);
+       sched_unlock();
+     }
+
+  return OK;
+}
 
 /****************************************************************************
  * Name: mq_close
@@ -103,37 +139,23 @@
 
 int mq_close(mqd_t mqdes)
 {
-  FAR struct mqueue_inode_s *msgq;
-  FAR struct inode *inode;
+  FAR struct tcb_s *rtcb = (FAR struct tcb_s *)sched_self();
+  int ret;
 
-  /* Verify the inputs */
+  /* Lock the scheduler to prevent any asynchrounous task delete operation
+   * (unlikely).
+   */
 
-   if (mqdes)
-     {
-       sched_lock();
+  sched_lock();
 
-       /* Find the message queue associated with the message descriptor */
+  rtcb = (FAR struct tcb_s *)sched_self();
+  DEBUGASSERT(mqdes != NULL && rtcb != NULL && rtcb->group != NULL);
 
-       msgq = mqdes->msgq;
-       DEBUGASSERT(msgq && msgq->inode);
-
-       /* Close/free the message descriptor */
-
-       mq_desclose(mqdes);
-
-       /* Get the inode from the message queue structure */
-
-       inode = msgq->inode;
-       DEBUGASSERT(inode->u.i_mqueue == msgq);
-
-       /* Decrement the reference count on the inode, possibly freeing it */
-
-       mq_inode_release(inode);
-       sched_unlock();
-     }
-
-  return OK;
+  ret = mq_close_group(mqdes, rtcb->group);
+  sched_unlock();
+  return ret;
 }
+
 
 /****************************************************************************
  * Name: mq_inode_release
