@@ -76,8 +76,7 @@ CODE void (*signal(int signo, CODE void (*func)(int signo)))(int signo)
   struct sigaction oact;
   int ret;
 
-  DEBUGASSERT(GOOD_SIGNO(signo) && func != NULL);
-  DEBUGASSERT(func != SIG_ERR && func != SIG_HOLD);
+  DEBUGASSERT(GOOD_SIGNO(signo) && func != SIG_ERR && func != SIG_HOLD);
 
   /* Initialize the sigaction structure */
 

@@ -115,7 +115,7 @@ CODE void (*sigset(int signo, CODE void (*func)(int signo)))(int signo)
   sigset_t set;
   int ret;
 
-  DEBUGASSERT(GOOD_SIGNO(signo) && func != NULL);
+  DEBUGASSERT(GOOD_SIGNO(signo) && func != SIG_ERR);
 
   (void)sigemptyset(&set);
   (void)sigaddset(&set, signo);
