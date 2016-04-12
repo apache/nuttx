@@ -77,8 +77,8 @@
 #  warning "Large Non-DMA transfer may result in RX overrun failures"
 #endif
 
-#ifndef CONFIG_SCHED_WORKQUEUE
-#  error "Callback support requires CONFIG_SCHED_WORKQUEUE"
+#if !defined(CONFIG_SCHED_WORKQUEUE) || !defined(CONFIG_SCHED_HPWORK)
+#  error "Callback support requires CONFIG_SCHED_WORKQUEUE and CONFIG_SCHED_HPWORK"
 #endif
 
 #ifndef CONFIG_KINETIS_SDHC_PRIO
@@ -86,7 +86,7 @@
 #endif
 
 #ifndef CONFIG_KINETIS_SDHC_DMAPRIO
-#  define CONFIG_KINETIS_SDHC_DMAPRIO    DMA_CCR_PRIMED
+#  define CONFIG_KINETIS_SDHC_DMAPRIO DMA_CCR_PRIMED
 #endif
 
 #if !defined(CONFIG_DEBUG_FS) || !defined(CONFIG_DEBUG_VERBOSE)
