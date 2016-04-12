@@ -414,15 +414,6 @@ config ARCH_BOARD_NTOSD_DM320
 		STATUS: This port is code complete, verified, and included in the
 		NuttX 0.2.1 release.
 
-config  ARCH_BOARD_NUCLEUS2G
-	bool "Nucleus 2G board"
-	depends on ARCH_CHIP_LPC1768
-	select ARCH_HAVE_LEDS
-	---help---
-		This port uses the Nucleus 2G board (with Babel CAN board).  This board
-		features an NXP LPC1768 processor.  See the 2G website (http://www.2g-eng.com/)
-		for more information about the Nucleus 2G.
-
 config ARCH_BOARD_LPC1766STK
 	bool "Olimex LPC1766-STK board"
 	depends on ARCH_CHIP_LPC1766
@@ -1354,7 +1345,6 @@ config ARCH_BOARD
 	default "mx1ads"                   if ARCH_BOARD_MX1ADS
 	default "ne64badge"                if ARCH_BOARD_NE64BADGE
 	default "ntosd-dm320"              if ARCH_BOARD_NTOSD_DM320
-	default "nucleus2g"                if ARCH_BOARD_NUCLEUS2G
 	default "nutiny-nuc120"            if ARCH_BOARD_NUTINY_NUC120
 	default "olimex-efm32g880f128-stk" if ARCH_BOARD_OLIMEX_EFM32G880F128_STK
 	default "olimex-lpc1766stk"        if ARCH_BOARD_LPC1766STK
@@ -1625,9 +1615,6 @@ source "configs/ne64badge/Kconfig"
 endif
 if ARCH_BOARD_NTOSD_DM320
 source "configs/ntosd-dm320/Kconfig"
-endif
-if ARCH_BOARD_NUCLEUS2G
-source "configs/nucleus2g/Kconfig"
 endif
 if ARCH_BOARD_NUTINY_NUC120
 source "configs/nutiny-nuc120/Kconfig"

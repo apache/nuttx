@@ -31,6 +31,9 @@ that case).
 There is a lot of testing that could be done but, unfortunately, I still
 have no i.MX6 hardware to test on.
 
+In additional to the unexpected issues, I do expect to run into some
+cache coherency issues when I get to testing an SMP configuration.
+
 2016-03-28:  I now have a used MCIMX6Q-SDB which is similar to the target
 configuration described below except that it does not have the 10.1" LVDS
 display.  Next step:  Figure out how to run a copy of NuttX using U-Boot.

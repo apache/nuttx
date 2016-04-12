@@ -1319,8 +1319,6 @@ nuttx/
  |   |   `- README.txt
  |   |- nucleo-f4x1re/
  |   |   `- README.txt
- |   |- nucleus2g/
- |   |   `- README.txt
  |   |- nutiny-nuc120/
  |   |   `- README.txt
  |   |- olimex-efm32g880f129-stk/

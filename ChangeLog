@@ -11622,3 +11622,10 @@
 	  POSIX programming but the name signal() probably has the better
 	  credentials.  sigset() is now relegated to a #define in signal.h that
 	  makes it equivalent to signal() (2016-04-10).
+	* configs/nucleus2g:  Removed the Nucleus2G configuration.  There has
+	  not been any activity with the commercial board in a few years and it
+	  no longer appears to be available from the 2g-eng.com website.
+	  Since the board is commercial and no longer publically available, it
+	  no longer qualifies for inclusion in the open source repositories.
+	  The code as of this data is still available in the Obsoleted
+	  repository at configs/nucleus2g (2016-04-12).
