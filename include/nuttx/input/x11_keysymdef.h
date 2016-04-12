@@ -102,7 +102,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#  define XK_VoidSymbol                0xffffff  /* Void symbol */
+#define XK_VoidSymbol                  0xffffff  /* Void symbol */
 
 #ifdef XK_MISCELLANY
 
