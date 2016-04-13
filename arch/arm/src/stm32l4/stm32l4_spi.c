@@ -55,8 +55,7 @@
  *
  ****************************************************c********************************/
 
-/*
- * This driver is ported from the stm32 one, which only supports 8 and 16 bits
+/* This driver is ported from the stm32 one, which only supports 8 and 16 bits
  * transfers. The STM32L4 family supports frame size from 4 to 16 bits, but we do not
  * support that yet. For the moment, we replace uses of the CR1_DFF bit with a check
  * of the CR2_DS[0..3] bits. If the value is SPI_CR2_DS_16BIT it means 16 bits, else 8 bits.
@@ -90,11 +89,13 @@
 #include "stm32l4_dma.h"
 #include "stm32l4_spi.h"
 
-#if defined(CONFIG_STM32L4_SPI1) || defined(CONFIG_STM32L4_SPI2) || defined(CONFIG_STM32L4_SPI3)
+#if defined(CONFIG_STM32L4_SPI1) || defined(CONFIG_STM32L4_SPI2) || \
+    defined(CONFIG_STM32L4_SPI3)
 
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+
 /* Configuration ********************************************************************/
 /* SPI interrupts */
 
@@ -414,22 +415,62 @@ static inline uint16_t spi_getreg(FAR struct stm32l4_spidev_s *priv, uint8_t off
  *
  ************************************************************************************/
 
-static inline void spi_putreg(FAR struct stm32l4_spidev_s *priv, uint8_t offset, uint16_t value)
+static inline void spi_putreg(FAR struct stm32l4_spidev_s *priv, uint8_t offset,
+                              uint16_t value)
 {
   putreg16(value, priv->spibase + offset);
+}
+
+/************************************************************************************
+ * Name: spi_getreg8
+ *
+ * Description:
+ *   Get the contents of the SPI register at offset
+ *
+ * Input Parameters:
+ *   priv   - private SPI device structure
+ *   offset - offset to the register of interest
+ *
+ * Returned Value:
+ *   The contents of the 8-bit register
+ *
+ ************************************************************************************/
+
+static inline uint8_t spi_getreg8(FAR struct stm32l4_spidev_s *priv, uint8_t offset)
+{
+  return getreg8(priv->spibase + offset);
+}
+
+/************************************************************************************
+ * Name: spi_putreg8
+ *
+ * Description:
+ *   Write a 8-bit value to the SPI register at offset
+ *
+ * Input Parameters:
+ *   priv   - private SPI device structure
+ *   offset - offset to the register of interest
+ *   value  - the 8-bit value to be written
+ *
+ ************************************************************************************/
+
+static inline void spi_putreg8(FAR struct stm32l4_spidev_s *priv, uint8_t offset,
+                               uint8_t value)
+{
+  putreg8(value, priv->spibase + offset);
 }
 
 /************************************************************************************
  * Name: spi_readword
  *
  * Description:
- *   Read one byte from SPI
+ *   Read one word (TWO bytes!) from SPI
  *
  * Input Parameters:
  *   priv - Device-specific state data
  *
  * Returned Value:
- *   Byte as read
+ *   Word as read
  *
  ************************************************************************************/
 
@@ -445,14 +486,39 @@ static inline uint16_t spi_readword(FAR struct stm32l4_spidev_s *priv)
 }
 
 /************************************************************************************
- * Name: spi_writeword
+ * Name: spi_readbyte
  *
  * Description:
- *   Write one byte to SPI
+ *   Read one byte from SPI
  *
  * Input Parameters:
  *   priv - Device-specific state data
- *   byte - Byte to send
+ *
+ * Returned Value:
+ *   Byte as read
+ *
+ ************************************************************************************/
+
+static inline uint8_t spi_readbyte(FAR struct stm32l4_spidev_s *priv)
+{
+  /* Wait until the receive buffer is not empty */
+
+  while ((spi_getreg(priv, STM32L4_SPI_SR_OFFSET) & SPI_SR_RXNE) == 0);
+
+  /* Then return the received byte */
+
+  return spi_getreg8(priv, STM32L4_SPI_DR_OFFSET);
+}
+
+/************************************************************************************
+ * Name: spi_writeword
+ *
+ * Description:
+ *   Write one 16-bit frame to the SPI FIFO
+ *
+ * Input Parameters:
+ *   priv - Device-specific state data
+ *   byte - Word to send
  *
  * Returned Value:
  *   None
@@ -471,6 +537,32 @@ static inline void spi_writeword(FAR struct stm32l4_spidev_s *priv, uint16_t wor
 }
 
 /************************************************************************************
+ * Name: spi_writebyte
+ *
+ * Description:
+ *   Write one 8-bit frame to the SPI FIFO
+ *
+ * Input Parameters:
+ *   priv - Device-specific state data
+ *   byte - Byte to send
+ *
+ * Returned Value:
+ *   None
+ *
+ ************************************************************************************/
+
+static inline void spi_writebyte(FAR struct stm32l4_spidev_s *priv, uint8_t byte)
+{
+  /* Wait until the transmit buffer is empty */
+
+  while ((spi_getreg(priv, STM32L4_SPI_SR_OFFSET) & SPI_SR_TXE) == 0);
+
+  /* Then send the byte */
+
+  spi_putreg8(priv, STM32L4_SPI_DR_OFFSET, byte);
+}
+
+/************************************************************************************
  * Name: spi_16bitmode
  *
  * Description:
@@ -486,7 +578,22 @@ static inline void spi_writeword(FAR struct stm32l4_spidev_s *priv, uint16_t wor
 
 static inline bool spi_16bitmode(FAR struct stm32l4_spidev_s *priv)
 {
-  return ((spi_getreg(priv, STM32L4_SPI_CR2_OFFSET) & SPI_CR2_DS_MASK) == SPI_CR2_DS_16BIT);
+  uint8_t bits = priv->nbits;
+
+  /* Get the real number of bits */
+
+  if (bits < 0)
+    {
+      bits = -bits;
+    }
+
+  return (bits > 8);
+
+  /* Should we read the hardware regs? seems to be equivalent ~~ sebastien lorquet
+   * (20160413)
+   */
+
+//  return ((spi_getreg(priv, STM32L4_SPI_CR2_OFFSET) & SPI_CR2_DS_MASK) == SPI_CR2_DS_16BIT);
 }
 
 /************************************************************************************
@@ -761,11 +868,12 @@ static inline void spi_dmatxstart(FAR struct stm32l4_spidev_s *priv)
 
 static void spi_modifycr(uint32_t addr, FAR struct stm32l4_spidev_s *priv, uint16_t setbits, uint16_t clrbits)
 {
-  uint16_t cr1;
-  cr1 = spi_getreg(priv, addr);
-  cr1 &= ~clrbits;
-  cr1 |= setbits;
-  spi_putreg(priv, addr, cr1);
+  uint16_t cr;
+
+  cr  = spi_getreg(priv, addr);
+  cr &= ~clrbits;
+  cr |= setbits;
+  spi_putreg(priv, addr, cr);
 }
 
 /************************************************************************************
@@ -1007,6 +1115,7 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
   FAR struct stm32l4_spidev_s *priv = (FAR struct stm32l4_spidev_s *)dev;
   uint16_t setbits1, setbits2;
   uint16_t clrbits1, clrbits2;
+  int savbits = nbits;
 
   spivdbg("nbits=%d\n", nbits);
 
@@ -1014,11 +1123,10 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
 
   if (nbits != priv->nbits)
     {
-
       /* Yes... Set CR1/2 appropriately */
+      /* Negative sign means LSBFIRST, set this in CR1*/
 
-      /* negative sign means LSBFIRST, set this in CR1*/
-      if(nbits<0)
+      if (nbits < 0)
         {
           setbits1 = SPI_CR1_LSBFIRST;
           clrbits1 = 0;
@@ -1030,14 +1138,28 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
           clrbits1 = SPI_CR1_LSBFIRST;
         }
 
-      /* set the number of bits (valid range 4-16) */
-      if(nbits<4 || nbits>16)
+      /* Set the number of bits (valid range 4-16) */
+
+      if (nbits < 4 || nbits > 16)
         {
           return;
         }
 
       clrbits2 = SPI_CR2_DS_MASK;
       setbits2 = SPI_CR2_DS_VAL(nbits);
+
+      /* If nbits is <=8, then we are in byte mode and FRXTH shall be set
+       * (else, transaction will not complete).
+       */
+
+      if (nbits < 9)
+        {
+          setbits2 |= SPI_CR2_FRXTH; /* RX FIFO Threshold = 1 byte */
+        }
+      else
+        {
+          clrbits2 |= SPI_CR2_FRXTH; /* RX FIFO Threshold = 2 bytes */
+        }
 
       spi_modifycr(STM32L4_SPI_CR1_OFFSET, priv, 0, SPI_CR1_SPE);
       spi_modifycr(STM32L4_SPI_CR1_OFFSET, priv, setbits1, clrbits1);
@@ -1046,7 +1168,7 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
 
       /* Save the selection so the subsequence re-configurations will be faster */
 
-      priv->nbits = nbits;
+      priv->nbits = savbits; // nbits has been clobbered... save the signed value.
     }
 }
 
@@ -1074,16 +1196,38 @@ static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
 
   DEBUGASSERT(priv && priv->spibase);
 
-  spi_writeword(priv, wd);
-  ret = spi_readword(priv);
+  /* According to the number of bits, access data register as word or byte
+   * This is absolutely required because of packing. With <=8 bit frames,
+   * two bytes are received by a 16-bit read of the data register!
+   */
 
-  /* Check and clear any error flags (Reading from the SR clears the error flags) */
+  if (spi_16bitmode(priv))
+    {
+      spi_writeword(priv, wd);
+      ret = spi_readword(priv);
+    }
+  else
+    {
+      spi_writebyte(priv, (uint8_t)(wd & 0xFF));
+      ret = (uint16_t)spi_readbyte(priv);
+    }
+
+  /* Check and clear any error flags (Reading from the SR clears the error
+   * flags).
+   */
 
   regval = spi_getreg(priv, STM32L4_SPI_SR_OFFSET);
 
-  spivdbg("Sent: %04x Return: %04x Status: %02x\n", wd, ret, regval);
-  UNUSED(regval);
+  if (spi_16bitmode(priv))
+    {
+      spivdbg("Sent: %04x Return: %04x Status: %02x\n", wd, ret, regval);
+    }
+  else
+    {
+      spivdbg("Sent: %02x Return: %02x Status: %02x\n", wd, ret, regval);
+    }
 
+  UNUSED(regval);
   return ret;
 }
 
@@ -1341,7 +1485,7 @@ static void spi_bus_initialize(FAR struct stm32l4_spidev_s *priv)
   spi_modifycr(STM32L4_SPI_CR1_OFFSET, priv, setbits, clrbits);
 
   clrbits = SPI_CR2_DS_MASK;
-  setbits = SPI_CR2_DS_8BIT;
+  setbits = SPI_CR2_DS_8BIT | SPI_CR2_FRXTH; /* FRXTH must be high in 8-bit mode */
   spi_modifycr(STM32L4_SPI_CR2_OFFSET, priv, setbits, clrbits);
 
   priv->frequency = 0;
