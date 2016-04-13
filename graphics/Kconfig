@@ -721,4 +721,7 @@ config NXSTART_VPLANE
 
 endif # NX_NXSTART
 endif # NX_MULTIUSER
+
+source "graphics/vnc/Kconfig"
+
 endif # NX

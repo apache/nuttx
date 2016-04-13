@@ -1,0 +1,15 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+menuconfig VNCSERVER
+	bool "VNC server"
+	default n
+	depends on NET_TCP && !NX_LCDDRIVER && EXPERIMENTAL
+	---help---
+		Enable support for a VNC Remote Frame Buffer (RFB) server.
+
+if VNCSERVER
+
+endif # VNCSERVER
