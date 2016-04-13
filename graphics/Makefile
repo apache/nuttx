@@ -1,7 +1,7 @@
 ############################################################################
 # graphics/Makefile
 #
-#   Copyright (C) 2008-2009, 2011-2012 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2008-2009, 2011-2012, 2016 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -35,54 +35,31 @@
 
 -include $(TOPDIR)/Make.defs
 
-DEPPATH		= --dep-path .
+DEPPATH = --dep-path .
 
 ifeq ($(WINTOOL),y)
-INCDIROPT	= -w
+INCDIROPT = -w
 endif
+
+ASRCS =
+CSRCS =
+VPATH =
 
 include nxglib/Make.defs
-DEPPATH		+= --dep-path nxglib
-CFLAGS		+= ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)/graphics/nxglib}
-
 include nxbe/Make.defs
-DEPPATH		+= --dep-path nxbe
-CFLAGS		+= ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)/graphics/nxbe}
-
-ifeq ($(CONFIG_NX_MULTIUSER),y)
 include nxmu/Make.defs
-DEPPATH		+= --dep-path nxmu
-CFLAGS		+= ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)/graphics/nxmu}
-else
 include nxsu/Make.defs
-DEPPATH		+= --dep-path nxsu
-CFLAGS		+= ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)/graphics/nxsu}
-endif
-
-ifeq ($(CONFIG_NXTERM),y)
 include nxterm/Make.defs
-DEPPATH		+= --dep-path nxterm
-CFLAGS		+= ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)/graphics/nxterm}
-endif
 
-ASRCS		= $(NXGLIB_ASRCS) $(NXBE_ASRCS) $(NX_ASRCS) $(NXTK_ASRCS) $(NXTERM_ASRCS)
-AOBJS		= $(ASRCS:.S=$(OBJEXT))
+AOBJS = $(ASRCS:.S=$(OBJEXT))
+COBJS = $(CSRCS:.c=$(OBJEXT))
 
-CSRCS		= $(NXGLIB_CSRCS) $(NXBE_CSRCS) $(NX_CSRCS) $(NXTK_CSRCS) $(NXTERM_CSRCS)
-COBJS		= $(CSRCS:.c=$(OBJEXT))
+SRCS = $(ASRCS) $(CSRCS)
+OBJS = $(AOBJS) $(COBJS)
 
-SRCS		= $(ASRCS) $(CSRCS)
-OBJS		= $(AOBJS) $(COBJS)
+BIN = libgraphics$(LIBEXT)
 
-BIN		= libgraphics$(LIBEXT)
-
-ifeq ($(CONFIG_NX_MULTIUSER),y)
-VPATH		= nxglib:nxbe:nxmu:nxterm
-else
-VPATH		= nxglib:nxbe:nxsu:nxterm
-endif
-
-all:	mklibgraphics
+all: mklibgraphics
 .PHONY : context depend clean distclean mklibgraphics gensources gen1bppsources \
 	 gen2bppsource gen4bppsource gen8bppsource gen16bppsource gen24bppsource \
 	 gen32bppsources

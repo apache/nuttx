@@ -33,16 +33,23 @@
 #
 ############################################################################
 
-NXTERM_ASRCS  =
-NXTERM_CSRCS  = nx_register.c nxterm_driver.c nxterm_font.c nxterm_putc.c
-NXTERM_CSRCS += nxterm_redraw.c nxterm_register.c nxterm_scroll.c
-NXTERM_CSRCS += nxterm_vt100.c nxterm_unregister.c nxtk_register.c
-NXTERM_CSRCS += nxtool_register.c
+ifeq ($(CONFIG_NXTERM),y)
+
+CSRCS += nx_register.c nxterm_driver.c nxterm_font.c nxterm_putc.c
+CSRCS += nxterm_redraw.c nxterm_register.c nxterm_scroll.c
+CSRCS += nxterm_vt100.c nxterm_unregister.c nxtk_register.c
+CSRCS += nxtool_register.c
 
 ifeq ($(CONFIG_NXTERM_NXKBDIN),y)
-NXTERM_CSRCS += nxterm_kbdin.c
+CSRCS += nxterm_kbdin.c
 endif
 
 ifeq ($(CONFIG_DEBUG),y)
-NXTERM_CSRCS += nxterm_sem.c
+CSRCS += nxterm_sem.c
+endif
+
+DEPPATH += --dep-path nxterm
+CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)/graphics/nxterm}
+VPATH += :nxterm
+
 endif

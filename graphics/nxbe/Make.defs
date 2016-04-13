@@ -1,7 +1,7 @@
 ############################################################################
 # graphics/nxbe/Make.defs
 #
-#   Copyright (C) 2008, 2011 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2008, 2011, 2016 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -33,9 +33,12 @@
 #
 ############################################################################
 
-NXBE_ASRCS	=
-NXBE_CSRCS	= nxbe_bitmap.c nxbe_configure.c nxbe_colormap.c nxbe_clipper.c \
-		  nxbe_closewindow.c  nxbe_fill.c nxbe_filltrapezoid.c \
-		  nxbe_getrectangle.c nxbe_lower.c nxbe_move.c nxbe_raise.c \
-		  nxbe_redraw.c nxbe_redrawbelow.c nxbe_setpixel.c nxbe_setposition.c \
-		  nxbe_setsize.c nxbe_visible.c
+CSRCS += nxbe_bitmap.c nxbe_configure.c nxbe_colormap.c nxbe_clipper.c
+CSRCS += nxbe_closewindow.c  nxbe_fill.c nxbe_filltrapezoid.c
+CSRCS += nxbe_getrectangle.c nxbe_lower.c nxbe_move.c nxbe_raise.c
+CSRCS += nxbe_redraw.c nxbe_redrawbelow.c nxbe_setpixel.c nxbe_setposition.c
+CSRCS += nxbe_setsize.c nxbe_visible.c
+
+DEPPATH += --dep-path nxbe
+CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)/graphics/nxbe}
+VPATH += :nxbe

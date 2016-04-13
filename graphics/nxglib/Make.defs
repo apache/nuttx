@@ -1,7 +1,7 @@
 ############################################################################
 # graphics/nxglib/Make.defs
 #
-#   Copyright (C) 2008, 2010-2011, 2013 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2008, 2010-2011, 2013, 2016 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -33,37 +33,37 @@
 #
 ############################################################################
 
-NXGLIB_ASRCS  =
+CSRCS += nxglib_setpixel_1bpp.c nxglib_setpixel_2bpp.c
+CSRCS += nxglib_setpixel_4bpp.c nxglib_setpixel_8bpp.c
+CSRCS += nxglib_setpixel_16bpp.c nxglib_setpixel_24bpp.c
+CSRCS += nxglib_setpixel_32bpp.c
 
-SETP_CSRCS    = nxglib_setpixel_1bpp.c nxglib_setpixel_2bpp.c
-SETP_CSRCS   += nxglib_setpixel_4bpp.c nxglib_setpixel_8bpp.c
-SETP_CSRCS   += nxglib_setpixel_16bpp.c nxglib_setpixel_24bpp.c
-SETP_CSRCS   += nxglib_setpixel_32bpp.c
+CSRCS += nxglib_fillrectangle_1bpp.c nxglib_fillrectangle_2bpp.c
+CSRCS += nxglib_fillrectangle_4bpp.c nxglib_fillrectangle_8bpp.c
+CSRCS += nxglib_fillrectangle_16bpp.c nxglib_fillrectangle_24bpp.c
+CSRCS += nxglib_fillrectangle_32bpp.c
 
-RFILL_CSRCS   = nxglib_fillrectangle_1bpp.c nxglib_fillrectangle_2bpp.c
-RFILL_CSRCS  += nxglib_fillrectangle_4bpp.c nxglib_fillrectangle_8bpp.c
-RFILL_CSRCS  += nxglib_fillrectangle_16bpp.c nxglib_fillrectangle_24bpp.c
-RFILL_CSRCS  += nxglib_fillrectangle_32bpp.c
+CSRCS += nxglib_getrectangle_1bpp.c nxglib_getrectangle_2bpp.c
+CSRCS += nxglib_getrectangle_4bpp.c nxglib_getrectangle_8bpp.c
+CSRCS += nxglib_getrectangle_16bpp.c nxglib_getrectangle_24bpp.c
+CSRCS += nxglib_getrectangle_32bpp.c
 
-RGET_CSRCS    = nxglib_getrectangle_1bpp.c nxglib_getrectangle_2bpp.c
-RGET_CSRCS   += nxglib_getrectangle_4bpp.c nxglib_getrectangle_8bpp.c
-RGET_CSRCS   += nxglib_getrectangle_16bpp.c nxglib_getrectangle_24bpp.c
-RGET_CSRCS   += nxglib_getrectangle_32bpp.c
+CSRCS += nxglib_filltrapezoid_1bpp.c nxglib_filltrapezoid_2bpp.c
+CSRCS += nxglib_filltrapezoid_4bpp.c nxglib_filltrapezoid_8bpp.c
+CSRCS += nxglib_filltrapezoid_16bpp.c nxglib_filltrapezoid_24bpp.c
+CSRCS += nxglib_filltrapezoid_32bpp.c
 
-TFILL_CSRCS   = nxglib_filltrapezoid_1bpp.c nxglib_filltrapezoid_2bpp.c
-TFILL_CSRCS  += nxglib_filltrapezoid_4bpp.c nxglib_filltrapezoid_8bpp.c
-TFILL_CSRCS  += nxglib_filltrapezoid_16bpp.c nxglib_filltrapezoid_24bpp.c
-TFILL_CSRCS  += nxglib_filltrapezoid_32bpp.c
+CSRCS += nxglib_moverectangle_1bpp.c nxglib_moverectangle_2bpp.c
+CSRCS += nxglib_moverectangle_4bpp.c nxglib_moverectangle_8bpp.c
+CSRCS += nxglib_moverectangle_16bpp.c nxglib_moverectangle_24bpp.c
+CSRCS += nxglib_moverectangle_32bpp.c
 
-RMOVE_CSRCS   = nxglib_moverectangle_1bpp.c nxglib_moverectangle_2bpp.c
-RMOVE_CSRCS  += nxglib_moverectangle_4bpp.c nxglib_moverectangle_8bpp.c
-RMOVE_CSRCS  += nxglib_moverectangle_16bpp.c nxglib_moverectangle_24bpp.c
-RMOVE_CSRCS  += nxglib_moverectangle_32bpp.c
+CSRCS += nxglib_copyrectangle_1bpp.c nxglib_copyrectangle_2bpp.c
+CSRCS += nxglib_copyrectangle_4bpp.c nxglib_copyrectangle_8bpp.c
+CSRCS += nxglib_copyrectangle_16bpp.c nxglib_copyrectangle_24bpp.c
+CSRCS += nxglib_copyrectangle_32bpp.c
 
-RCOPY_CSRCS   = nxglib_copyrectangle_1bpp.c nxglib_copyrectangle_2bpp.c
-RCOPY_CSRCS  += nxglib_copyrectangle_4bpp.c nxglib_copyrectangle_8bpp.c
-RCOPY_CSRCS  += nxglib_copyrectangle_16bpp.c nxglib_copyrectangle_24bpp.c
-RCOPY_CSRCS  += nxglib_copyrectangle_32bpp.c
-
-NXGLIB_CSRCS  = $(SETP_CSRCS) $(RFILL_CSRCS) $(RGET_CSRCS) $(TFILL_CSRCS)
-NXGLIB_CSRCS += $(RMOVE_CSRCS) $(RCOPY_CSRCS)
+DEPPATH += --dep-path nxglib
+CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)/graphics/nxglib}
+#VPATH += :nxglib
+VPATH = nxglib
