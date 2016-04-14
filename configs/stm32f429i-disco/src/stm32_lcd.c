@@ -512,18 +512,23 @@ int board_lcd_initialize(void)
 #endif /* CONFIG_STM32F429I_DISCO_ILI9341_LCDIFACE */
 
 #ifdef CONFIG_STM32_LTDC
-/************************************************************************************
+/****************************************************************************
  * Name: up_fbinitialize
  *
  * Description:
- *   The generic method to initialize the framebuffer device
+ *   Initialize the framebuffer video hardware associated with the display.
  *
- * Return:
- *   OK - On succes
+ * Input parameters:
+ *   display - In the case of hardware with multiple displays, this
+ *     specifies the display.  Normally this is zero.
  *
- ************************************************************************************/
+ * Returned Value:
+ *   Zero is returned on success; a negated errno value is returned on any
+ *   failure.
+ *
+ ****************************************************************************/
 
-int up_fbinitialize(void)
+int up_fbinitialize(int display)
 {
 #ifdef CONFIG_STM32F429I_DISCO_ILI9341_FBIFACE
   int ret;
@@ -546,34 +551,45 @@ int up_fbinitialize(void)
 #endif
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: up_fbgetvplane
  *
  * Description:
- *   The generic method to get the videoplane.
+ *   Return a a reference to the framebuffer object for the specified video
+ *   plane of the specified plane.  Many OSDs support multiple planes of video.
  *
- * Paramater:
- *   vplane - Number othe video plane
+ * Input parameters:
+ *   display - In the case of hardware with multiple displays, this
+ *     specifies the display.  Normally this is zero.
+ *   vplane - Identifies the plane being queried.
  *
- * Return:
- *   Reference to the fb_vtable_s on success otherwise NULL.
+ * Returned Value:
+ *   A non-NULL pointer to the frame buffer access structure is returned on
+ *   success; NULL is returned on any failure.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-FAR struct fb_vtable_s *up_fbgetvplane(int vplane)
+FAR struct fb_vtable_s *up_fbgetvplane(int display, int vplane)
 {
   return stm32_ltdcgetvplane(vplane);
 }
 
-/************************************************************************************
- * Name: up_uninitialize
+/****************************************************************************
+ * Name: up_fbuninitialize
  *
  * Description:
- *   The generic method to uninitialize the framebuffer device
+ *   Uninitialize the framebuffer support for the specified display.
  *
- ************************************************************************************/
+ * Input Parameters:
+ *   display - In the case of hardware with multiple displays, this
+ *     specifies the display.  Normally this is zero.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
 
-void fb_uninitialize(void)
+void up_fbuninitialize(int display)
 {
   stm32_ltdcuninitialize();
 }

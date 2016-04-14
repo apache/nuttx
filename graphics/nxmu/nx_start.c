@@ -1,7 +1,7 @@
 /****************************************************************************
  * graphics/nxmu/nx_start.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -128,16 +128,18 @@ int nx_server(int argc, char *argv[])
   (void)dev->setpower(dev, ((3*CONFIG_LCD_MAXPOWER + 3)/4));
 
 #else /* CONFIG_NX_LCDDRIVER */
-  /* Initialize the frame buffer device */
+  /* Initialize the frame buffer device.
+   * REVISIT: display == 0 is assumed.
+   */
 
-  ret = up_fbinitialize();
+  ret = up_fbinitialize(0);
   if (ret < 0)
     {
       gdbg("ERROR: up_fbinitialize failed: %d\n", ret);
       return EXIT_FAILURE;
     }
 
-  dev = up_fbgetvplane(CONFIG_NXSTART_VPLANE);
+  dev = up_fbgetvplane(0, CONFIG_NXSTART_VPLANE);
   if (!dev)
     {
       gdbg("ERROR: up_fbgetvplane failed, vplane=%d\n", CONFIG_NXSTART_VPLANE);

@@ -9309,7 +9309,7 @@
 	  adds support for initializing of the ltdc controller and the lcd
 	  device connected on the stm32f429i-disco. The following methods are
 	  provided for the generic fb interface: up_fbinitialize,
-	  up_fbgetvplane, and fb_uninitialize. The following methods are
+	  up_fbgetvplane, and up_fbuninitialize. The following methods are
 	  provided for the ltdc interface: up_ltdcgetlayer. From Marco Krahl
 	  (2014-12-19).
 	* zrch/arm/src/stm32/Kconfig: Add configuration option for ltdc.  This
@@ -11647,3 +11647,6 @@
 	  output and the low-level psock interfaces for network I/O.  This
 	  saves a little memory which might be important for small footprint
 	  configurations (2015-04-14).
+	* Framebuffer driver:  Add a display number to each interface in order
+	  to support multiple display devices (2015-04-14).
+

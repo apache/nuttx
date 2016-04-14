@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/stm32f429i-disco/src/stm32_boot.c
  *
- *   Copyright (C) 2011-2012, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012, 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -134,7 +134,7 @@ void board_initialize(void)
 #ifdef CONFIG_STM32F429I_DISCO_ILI9341_FBIFACE
   /* Initialize the framebuffer driver */
 
-  up_fbinitialize();
+  up_fbinitialize(0);
 #endif
 
 #ifdef CONFIG_STM32F429I_DISCO_ILI9341_LCDIFACE

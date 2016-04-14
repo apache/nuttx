@@ -3533,7 +3533,7 @@ struct fb_vtable_s *stm32_ltdcgetvplane(int vplane)
 }
 
 /****************************************************************************
- * Name: fb_uninitialize
+ * Name: stm32_ltdcuninitialize
  *
  * Description:
  *   Uninitialize the framebuffer driver.  Bad things will happen if you
