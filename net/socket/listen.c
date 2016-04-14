@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/socket/listen.c
  *
- *   Copyright (C) 2007-2009, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 201-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,6 +42,7 @@
 
 #include <sys/socket.h>
 #include <errno.h>
+#include <assert.h>
 #include <debug.h>
 
 #include "tcp/tcp.h"
@@ -53,17 +54,17 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: listen
+ * Function: psock_listen
  *
  * Description:
- *   To accept connections, a socket is first created with socket(), a
- *   willingness to accept incoming connections and a queue limit for incoming
- *   connections are specified with listen(), and then the connections are
- *   accepted with accept(). The listen() call applies only to sockets of
- *   type SOCK_STREAM or SOCK_SEQPACKET.
+ *   To accept connections, a socket is first created with psock_socket(), a
+ *   willingness to accept incoming connections and a queue limit for
+ *   incoming connections are specified with psock_listen(), and then the
+ *   connections are accepted with psock_accept(). The psock_listen() call
+ *   applies only to sockets of type SOCK_STREAM or SOCK_SEQPACKET.
  *
  * Parameters:
- *   sockfd   Socket descriptor of the bound socket
+ *   psock    Reference to an internal, boound socket structure.
  *   backlog  The maximum length the queue of pending connections may grow.
  *            If a connection request arrives with the queue full, the client
  *            may receive an error with an indication of ECONNREFUSED or,
@@ -76,44 +77,16 @@
  *
  *   EADDRINUSE
  *     Another socket is already listening on the same port.
- *   EBADF
- *     The argument 'sockfd' is not a valid descriptor.
- *   ENOTSOCK
- *     The argument 'sockfd' is not a socket.
  *   EOPNOTSUPP
  *     The socket is not of a type that supports the listen operation.
  *
- * Assumptions:
- *
  ****************************************************************************/
 
-int listen(int sockfd, int backlog)
+int psock_listen(FAR struct socket *psock, int backlog)
 {
-  FAR struct socket *psock = sockfd_socket(sockfd);
   int err;
 
-  /* Verify that the sockfd corresponds to valid, allocated socket */
-
-  if (!psock || psock->s_crefs <= 0)
-    {
-      /* It is not a valid socket description.  Distinguish between the cases
-       * where sockfd is a just invalid and when it is a valid file descriptor used
-       * in the wrong context.
-       */
-
-#if CONFIG_NFILE_DESCRIPTORS > 0
-      if ((unsigned int)sockfd < CONFIG_NFILE_DESCRIPTORS)
-        {
-          err = ENOTSOCK;
-        }
-      else
-#endif
-        {
-          err = EBADF;
-        }
-
-      goto errout;
-    }
+  DEBUGASSERT(psock != NULL);
 
   /* Verify that the sockfd corresponds to a connected SOCK_STREAM */
 
@@ -179,6 +152,75 @@ int listen(int sockfd, int backlog)
 errout:
   set_errno(err);
   return ERROR;
+}
+
+/****************************************************************************
+ * Function: listen
+ *
+ * Description:
+ *   To accept connections, a socket is first created with socket(), a
+ *   willingness to accept incoming connections and a queue limit for incoming
+ *   connections are specified with listen(), and then the connections are
+ *   accepted with accept(). The listen() call applies only to sockets of
+ *   type SOCK_STREAM or SOCK_SEQPACKET.
+ *
+ * Parameters:
+ *   sockfd   Socket descriptor of the bound socket
+ *   backlog  The maximum length the queue of pending connections may grow.
+ *            If a connection request arrives with the queue full, the client
+ *            may receive an error with an indication of ECONNREFUSED or,
+ *            if the underlying protocol supports retransmission, the request
+ *            may be ignored so that retries succeed.
+ *
+ * Returned Value:
+ *   On success, zero is returned. On error, -1 is returned, and errno is set
+ *   appropriately.
+ *
+ *   EADDRINUSE
+ *     Another socket is already listening on the same port.
+ *   EBADF
+ *     The argument 'sockfd' is not a valid descriptor.
+ *   ENOTSOCK
+ *     The argument 'sockfd' is not a socket.
+ *   EOPNOTSUPP
+ *     The socket is not of a type that supports the listen operation.
+ *
+ ****************************************************************************/
+
+int listen(int sockfd, int backlog)
+{
+  FAR struct socket *psock = sockfd_socket(sockfd);
+  int err;
+
+  /* Verify that the sockfd corresponds to valid, allocated socket */
+
+  if (psock == NULL || psock->s_crefs <= 0)
+    {
+      /* It is not a valid socket description.  Distinguish between the
+       * cases where sockfd is a just invalid and when it is a valid file
+       * descriptor used in the wrong context.
+       */
+
+#if CONFIG_NFILE_DESCRIPTORS > 0
+      if ((unsigned int)sockfd < CONFIG_NFILE_DESCRIPTORS)
+        {
+          err = ENOTSOCK;
+        }
+      else
+#endif
+        {
+          err = EBADF;
+        }
+
+      set_errno(err);
+      return ERROR;
+    }
+
+  /* The let psock_listen to the work. If psock_listen() fails, it will have
+   * set the errno variable.
+   */
+
+  return psock_listen(psock, backlog);
 }
 
 #endif /* CONFIG_NET && CONFIG_NSOCKET_DESCRIPTORS */

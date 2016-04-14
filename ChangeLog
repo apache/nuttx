@@ -11629,3 +11629,17 @@
 	  no longer qualifies for inclusion in the open source repositories.
 	  The code as of this data is still available in the Obsoleted
 	  repository at configs/nucleus2g (2016-04-12).
+	* arch/arm/src/stm32l4: Fix the STM32L4 SPI driver.  That SPI driver is
+	  quite different. They now handle frames of arbitrary size between 4
+	  and 16 bits. It was broken before a new bit has to be set (rx fifo
+	  threshold) to handle <= 8-bit transactions. If not set, the default is
+	  16-bit packed >=8-bit frames and the RXNE bit is never set (it is set
+	  when 16-bits are received). weird things as always.
+	  This also add 8-bit access routines to the data register, because a
+	  16-bit access to the data register when the frame size is below 9 bits
+	  is interpreted as a packed dual frame exchange. Sebastien Lorquet
+	  (2016-04-13).
+	* net/sockets/listen.c and accept.c and include/nuttx/net:  Separate
+	  out psock_listen() and psock_accepti() for internal OS usage
+	  (2016-04-14).
+
