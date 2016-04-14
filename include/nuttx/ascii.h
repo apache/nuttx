@@ -90,7 +90,7 @@
 #define ASCII_DOLLAR     0x24 /* Dollar sign ($) */
 #define ASCII_PERCENT    0x25 /* Percent sign (%) */
 #define ASCII_AMPERSAND  0x26 /* Ampersand (&) */
-#define ASCII_RSQUOTE    0x27 /* Closing single quote (') */
+#define ASCII_SQUOTE     0x27 /* Single quote (') */
 #define ASCII_APOSTROPHE 0x27 /* Apostrophe (') */
 #define ASCII_LPAREN     0x28 /* Opening parenthesis (() */
 #define ASCII_RPAREN     0x29 /* Closing parenthesis ()) */
@@ -156,7 +156,7 @@
 #define ASCII_CIRCUMFLEX 0x5e /* Circumflex (^) */
 #define ASCII_UNDERSCORE 0x5f /* Underscore (_) */
 
-#define ASCII_RSQUOT     0x60 /* Closing single quote */
+#define ASCII_RSQUOTE    0x60 /* Closing single quote */
 #define ASCII_a          0x61 /* Lower case letters */
 #define ASCII_b          0x62 /* "   " "  " "     " */
 #define ASCII_c          0x63 /* "   " "  " "     " */
