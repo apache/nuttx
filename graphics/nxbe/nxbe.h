@@ -1,7 +1,7 @@
 /****************************************************************************
  * graphics/nxbe/nxbe.h
  *
- *   Copyright (C) 2008-2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2011, 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -75,27 +75,27 @@ struct nxbe_plane_s
 {
   /* Raster operation callbacks for this bits-per-pixel value */
 
-  void (*setpixel)(FAR NX_PLANEINFOTYPE *pinfo,
-                   FAR const struct nxgl_point_s *pos,
-                   nxgl_mxpixel_t color);
-  void (*fillrectangle)(FAR NX_PLANEINFOTYPE *pinfo,
-                        FAR const struct nxgl_rect_s *rect,
+  CODE void (*setpixel)(FAR NX_PLANEINFOTYPE *pinfo,
+                        FAR const struct nxgl_point_s *pos,
                         nxgl_mxpixel_t color);
-  void (*getrectangle)(FAR NX_PLANEINFOTYPE *pinfo,
-                       FAR const struct nxgl_rect_s *rect,
-                       FAR void *dest, unsigned int deststride);
-  void (*filltrapezoid)(FAR NX_PLANEINFOTYPE *pinfo,
-                        FAR const struct nxgl_trapezoid_s *trap,
-                        FAR const struct nxgl_rect_s *bounds,
-                        nxgl_mxpixel_t color);
-  void (*moverectangle)(FAR NX_PLANEINFOTYPE *pinfo,
-                        FAR const struct nxgl_rect_s *rect,
-                        FAR struct nxgl_point_s *offset);
-  void (*copyrectangle)(FAR NX_PLANEINFOTYPE *pinfo,
-                        FAR const struct nxgl_rect_s *dest,
-                        FAR const void *src,
-                        FAR const struct nxgl_point_s *origin,
-                        unsigned int srcstride);
+  CODE void (*fillrectangle)(FAR NX_PLANEINFOTYPE *pinfo,
+                             FAR const struct nxgl_rect_s *rect,
+                             nxgl_mxpixel_t color);
+  CODE void (*getrectangle)(FAR NX_PLANEINFOTYPE *pinfo,
+                            FAR const struct nxgl_rect_s *rect,
+                           FAR void *dest, unsigned int deststride);
+  CODE void (*filltrapezoid)(FAR NX_PLANEINFOTYPE *pinfo,
+                             FAR const struct nxgl_trapezoid_s *trap,
+                             FAR const struct nxgl_rect_s *bounds,
+                             nxgl_mxpixel_t color);
+  CODE void (*moverectangle)(FAR NX_PLANEINFOTYPE *pinfo,
+                            FAR const struct nxgl_rect_s *rect,
+                             FAR struct nxgl_point_s *offset);
+  CODE void (*copyrectangle)(FAR NX_PLANEINFOTYPE *pinfo,
+                             FAR const struct nxgl_rect_s *dest,
+                             FAR const void *src,
+                             FAR const struct nxgl_point_s *origin,
+                             unsigned int srcstride);
 
   /* Framebuffer plane info describing destination video plane */
 
