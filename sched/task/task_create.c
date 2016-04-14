@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/task/task_create.c
  *
- *   Copyright (C) 2007-2010, 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2010, 2013-2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -85,7 +85,8 @@
  ****************************************************************************/
 
 static int thread_create(FAR const char *name, uint8_t ttype, int priority,
-                         int stack_size, main_t entry, FAR char * const argv[])
+                         int stack_size, main_t entry,
+                         FAR char * const argv[])
 {
   FAR struct task_tcb_s *tcb;
   pid_t pid;
@@ -115,14 +116,20 @@ static int thread_create(FAR const char *name, uint8_t ttype, int priority,
     }
 #endif
 
-  /* Associate file descriptors with the new task */
-
 #if CONFIG_NFILE_DESCRIPTORS > 0 || CONFIG_NSOCKET_DESCRIPTORS > 0
-  ret = group_setuptaskfiles(tcb);
-  if (ret < OK)
+  /* Associate file descriptors with the new task.  Exclude kernel threads;
+   * kernel threads do not have file or socket descriptors.  They must use
+   * SYSLOG for output and the low-level psock interfaces for network I/O.
+   */
+
+  if (ttype != TCB_FLAG_TTYPE_KERNEL)
     {
-      errcode = -ret;
-      goto errout_with_tcb;
+      ret = group_setuptaskfiles(tcb);
+      if (ret < OK)
+        {
+          errcode = -ret;
+          goto errout_with_tcb;
+        }
     }
 #endif
 
@@ -228,7 +235,8 @@ errout:
 int task_create(FAR const char *name, int priority,
                 int stack_size, main_t entry, FAR char * const argv[])
 {
-  return thread_create(name, TCB_FLAG_TTYPE_TASK, priority, stack_size, entry, argv);
+  return thread_create(name, TCB_FLAG_TTYPE_TASK, priority, stack_size,
+                       entry, argv);
 }
 #endif
 
@@ -251,5 +259,6 @@ int task_create(FAR const char *name, int priority,
 int kernel_thread(FAR const char *name, int priority,
                   int stack_size, main_t entry, FAR char * const argv[])
 {
-  return thread_create(name, TCB_FLAG_TTYPE_KERNEL, priority, stack_size, entry, argv);
+  return thread_create(name, TCB_FLAG_TTYPE_KERNEL, priority, stack_size,
+                       entry, argv);
 }
