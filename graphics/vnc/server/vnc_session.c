@@ -1,5 +1,5 @@
 /****************************************************************************
- * graphics/vnc/server/vnc_server.h
+ * graphics/vnc/vnc_session.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,9 +33,6 @@
  *
  ****************************************************************************/
 
-#ifndef __GRAPHICS_VNC_SERVER_VNC_SERVER_H
-#define __GRAPHICS_VNC_SERVER_VNC_SERVER_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
@@ -43,58 +40,49 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <string.h>
+#include <errno.h>
 
-#include <nuttx/video/fb.h>
-#include <nuttx/nx/nxglib.h>
-#include <nuttx/nx/nx.h>
+#include <arpa/inet.h>
+#include <netinet/in.h>
+
+#include <nuttx/kmalloc.h>
 #include <nuttx/net/net.h>
 
+#include "vnc_server.h"
+
 /****************************************************************************
- * Pre-processor Definitions
+ * Private Functions
  ****************************************************************************/
 
-/* RFB Port Number */
-
-#define RFB_PORT_BASE       5900
-#define RFB_MAX_DISPLAYS    100
-#define RFB_DISPLAY_PORT(d) (RFB_PORT_BASE + (d))
-
 /****************************************************************************
- * Public Types
+ * Name: vnc_initialize_session
+ *
+ * Description:
+ *  [Re-]initialize a VNC session
+ *
+ * Input Parameters:
+ *   session - the VNC session to be initialized
+ *
+ * Returned Value:
+ *   None
+ *
  ****************************************************************************/
 
-/* This enumeration indicates the state of the VNC server */
-
-enum vnc_server_e
+static void vnc_initialize_session(FAR struct vnc_session_s *session)
 {
-  VNCSERVER_UNINITIALIZED = 0, /* Initial state */
-  VNCSERVER_INITIALIZED,       /* State structured initialized, but not connected */
-  VNCSERVER_CONNECTED,         /* Connect to a client, but not yet configured */
-  VNCSERVER_CONFIGURED,        /* Configured and ready to transfer graphics */
-  VNCSERVER_SCANNING,          /* Running and activly transferring graphics */
-  VNCSERVER_STOPPING           /* The server has been asked to stop */
-};
+  /* Initialize the session.  Set all values to 0 == NULL == false. */
 
-struct vnc_session_s
-{
-  /* NX graphics system */
+  memset(session, 0, sizeof(struct vnc_session_s));
 
-  NXHANDLE handle;             /* NX graphics handle */
+  /* Then initialize only non-zero values */
+  /* Initialized, not connected */
 
-  /* Connection data */
-
-  struct socket listen;        /* Listen socket */
-  struct socket connect;       /* Connected socket */
-  volatile uint8_t state;      /* See enum vnc_server_e */
-
-  /* Display geometry and color characteristics */
-
-  uint8_t colorfmt;            /* See include/nuttx/fb.h */
-  struct nxgl_size_s screen;   /* Size of the screen in pixels x rows */
-};
+  session->state = VNCSERVER_INITIALIZED;
+}
 
 /****************************************************************************
- * Public Function Prototypes
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -113,7 +101,59 @@ struct vnc_session_s
  *
  ****************************************************************************/
 
-int vnc_connect(FAR struct vnc_session_s *session, int port);
+int vnc_connect(FAR struct vnc_session_s *session, int port)
+{
+  struct sockaddr_in addr;
+  int ret;
+
+  /* Create a listening socket */
+
+  addr.sin_family = AF_INET;
+  addr.sin_port = htons(port);
+  addr.sin_addr.s_addr = INADDR_ANY;
+
+  ret = psock_socket(AF_INET, SOCK_STREAM, 0, &session->listen);
+  if (ret < 0)
+    {
+      ret = -get_errno();
+      return ret;
+    }
+
+  /* Bind the listening socket to a local address */
+
+  ret = psock_bind(&session->listen, (struct sockaddr *)&addr,
+                   sizeof(struct sockaddr_in));
+  if (ret < 0)
+    {
+      ret = -get_errno();
+      goto errout_with_listener;
+    }
+
+  /* Listen for a connection */
+
+  ret = psock_listen(&session->listen, 5);
+  if (ret < 0)
+    {
+      ret = -get_errno();
+      goto errout_with_listener;
+    }
+
+  /* Connect to the client */
+
+  ret = psock_accept(&session->listen, NULL, NULL, &session->connect);
+  if (ret < 0)
+    {
+      ret = -get_errno();
+      goto errout_with_listener;
+    }
+
+  session->state = VNCSERVER_CONNECTED;
+  return OK;
+
+errout_with_listener:
+  psock_close(&session->listen);
+  return ret;
+}
 
 /****************************************************************************
  * Name: vnc_create_session
@@ -130,7 +170,24 @@ int vnc_connect(FAR struct vnc_session_s *session, int port);
  *
  ****************************************************************************/
 
-FAR struct vnc_session_s *vnc_create_session(void);
+FAR struct vnc_session_s *vnc_create_session(void)
+{
+  FAR struct vnc_session_s *session;
+
+  /* Allocate the session */
+
+  session = (FAR struct vnc_session_s *)
+    kmm_zalloc(sizeof(struct vnc_session_s));
+
+  /* Initialize the session */
+
+  if (session != NULL)
+    {
+      vnc_initialize_session(session);
+    }
+
+  return session;
+}
 
 /****************************************************************************
  * Name: vnc_release_session
@@ -149,23 +206,15 @@ FAR struct vnc_session_s *vnc_create_session(void);
  *
  ****************************************************************************/
 
-void vnc_release_session(FAR struct vnc_session_s *session);
+void vnc_release_session(FAR struct vnc_session_s *session)
+{
+  /* Close any open sockets */
 
-/****************************************************************************
- * Name: vnc_session
- *
- * Description:
- *  This function encapsulates the entire VNC session.
- *
- * Input Parameters:
- *   session - An instance of the session structure allocated by
- *     vnc_create_session().
- *
- * Returned Value:
- *   At present, always returns OK
- *
- ****************************************************************************/
+  if (session->state >= VNCSERVER_CONNECTED)
+    {
+      psock_close(&session->connect);
+      psock_close(&session->listen);
+    }
 
-int vnc_session(FAR struct vnc_session_s *session);
-
-#endif /* __GRAPHICS_VNC_SERVER_VNC_SERVER_H */
+  vnc_initialize_session(session);
+}
