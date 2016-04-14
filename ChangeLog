@@ -11642,4 +11642,8 @@
 	* net/sockets/listen.c and accept.c and include/nuttx/net:  Separate
 	  out psock_listen() and psock_accepti() for internal OS usage
 	  (2016-04-14).
-
+	* fs/inode/, fs/vfs/, and sched/task/:  File and socket descriptors are
+	  no longer allocated for kernel threads.  They must use SYSLOG for
+	  output and the low-level psock interfaces for network I/O.  This
+	  saves a little memory which might be important for small footprint
+	  configurations (2015-04-14).

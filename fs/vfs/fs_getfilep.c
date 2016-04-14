@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/vfs/fs_getfilep.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -91,12 +91,14 @@ FAR struct file *fs_getfilep(int fd)
 
   list = sched_getfiles();
 
-  /* The file list can be NULL under one obscure cornercase:  When memory
-   * management debug output is enabled.  Then there may be attempts to
-   * write to stdout from malloc before the group data has been allocated.
+  /* The file list can be NULL under two cases:  (1) One is an obscure
+   * cornercase:  When memory management debug output is enabled.  Then
+   * there may be attempts to write to stdout from malloc before the group
+   * data has been allocated.  The other other is (2) if this is a kernel
+   * thread.  Kernel threads have no allocated file descriptors.
    */
 
-  if (!list)
+  if (list == NULL)
     {
       errcode = EAGAIN;
       goto errout;

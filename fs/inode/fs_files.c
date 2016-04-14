@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/inode/fs_files.c
  *
- *   Copyright (C) 2007-2009, 2011-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,22 +50,6 @@
 #include <nuttx/kmalloc.h>
 
 #include "inode/inode.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
@@ -222,9 +206,18 @@ int file_dup2(FAR struct file *filep1, FAR struct file *filep2)
     }
 
   list = sched_getfiles();
-  DEBUGASSERT(list);
 
-  _files_semtake(list);
+  /* The file list can be NULL under two cases:  (1) One is an obscure
+   * cornercase:  When memory management debug output is enabled.  Then
+   * there may be attempts to write to stdout from malloc before the group
+   * data has been allocated.  The other other is (2) if this is a kernel
+   * thread.  Kernel threads have no allocated file descriptors.
+   */
+
+  if (list != NULL)
+    {
+      _files_semtake(list);
+    }
 
   /* If there is already an inode contained in the new file structure,
    * close the file and release the inode.
@@ -278,7 +271,11 @@ int file_dup2(FAR struct file *filep1, FAR struct file *filep2)
         }
     }
 
-  _files_semgive(list);
+  if (list != NULL)
+    {
+      _files_semgive(list);
+    }
+
   return OK;
 
 /* Handler various error conditions */
@@ -291,7 +288,11 @@ errout_with_inode:
 
 errout_with_ret:
   err              = -ret;
-  _files_semgive(list);
+
+  if (list != NULL)
+    {
+      _files_semgive(list);
+    }
 
 errout:
   set_errno(err);
@@ -312,8 +313,10 @@ int files_allocate(FAR struct inode *inode, int oflags, off_t pos, int minfd)
   FAR struct filelist *list;
   int i;
 
+  /* Get the file descriptor list.  It should not be NULL in this context. */
+
   list = sched_getfiles();
-  DEBUGASSERT(list);
+  DEBUGASSERT(list != NULL);
 
   _files_semtake(list);
   for (i = minfd; i < CONFIG_NFILE_DESCRIPTORS; i++)
@@ -349,10 +352,12 @@ int files_close(int fd)
   FAR struct filelist *list;
   int                  ret;
 
-  /* Get the thread-specific file list */
+  /* Get the thread-specific file list.  It should never be NULL in this
+   * context.
+   */
 
   list = sched_getfiles();
-  DEBUGASSERT(list);
+  DEBUGASSERT(list != NULL);
 
   /* If the file was properly opened, there should be an inode assigned */
 
