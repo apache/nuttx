@@ -37,6 +37,10 @@ ifeq ($(CONFIG_VNCSERVER),y)
 
 CSRCS += vnc_server.c vnc_session.c vnc_fbdev.c
 
+ifeq ($(CONFIG_NX_KBD),y)
+CSRCS += vnc_keymap.c
+endif
+
 DEPPATH += --dep-path vnc/server
 CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)/graphics/vnc/server}
 VPATH += :vnc/server

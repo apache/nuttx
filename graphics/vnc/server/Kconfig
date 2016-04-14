@@ -28,4 +28,12 @@ config VNCSERVER_STACKSIZE
 	int "VNC server stack size"
 	default 2048
 
+config VNCSERVER_KBDENCODE
+	bool "Encode keyboard input"
+	default n
+	depends on NXTERM_NXKBDIN
+	---help---
+		Use a special encoding of keyboard characters as defined in
+		include/nuttx/input/kbd_coded.h.
+
 endif # VNCSERVER

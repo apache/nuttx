@@ -120,7 +120,9 @@ int vnc_server(int argc, FAR char *argv[])
         {
           gvdbg("New VNC connection\n");
 
-          /* Start the VNC session */
+          /* Start the VNC session.  This function does not return until the
+           * session has been terminated (or an error occurs).
+           */
 
           (void)vnc_session(session);
 
@@ -158,7 +160,7 @@ FAR struct vnc_session_s *vnc_find_session(int display)
 
   if (display >= 0 && display < RFB_MAX_DISPLAYS)
     {
-      session = &g_vnc_sessions[display];
+      session = g_vnc_sessions[display];
     }
 
   return session;

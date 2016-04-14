@@ -226,6 +226,27 @@ int vnc_session(FAR struct vnc_session_s *session);
 
 FAR struct vnc_session_s *vnc_find_session(int display);
 
+/****************************************************************************
+ * Name: vnc_key_map
+ *
+ * Description:
+ *   Map the receive X11 keysym into something understood by NuttX and route
+ *   that through NX to the appropriate window.
+ *
+ * Input Parameters:
+ *   session - An instance of the session structure allocated by
+ *     vnc_create_session().
+ *   keysym  - The X11 keysym value (see include/nuttx/inputx11_keysymdef)
+ *   keydown - True: Key pressed; False: Key released
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void vnc_key_map(FAR struct vnc_session_s *session, uint32_t keysym,
+                 bool keydown);
+
 #undef EXTERN
 #ifdef __cplusplus
 }
