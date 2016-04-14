@@ -46,6 +46,16 @@
 #include "vnc_server.h"
 
 /****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+/* Given a display number as an index, the following array can be used to
+ * look-up the session structure for that display.
+ */
+
+static FAR struct vnc_session_s *g_vnc_sessions[RFB_MAX_DISPLAYS];
+
+/****************************************************************************
  * Pubic Functions
  ****************************************************************************/
 
@@ -95,6 +105,8 @@ int vnc_server(int argc, FAR char *argv[])
       return EXIT_FAILURE;
     }
 
+  g_vnc_sessions[display] = session;
+
   /* Loop... handling each each VNC client connection to this display.  Only
    * a single client is allowed for each display.
    */
@@ -119,4 +131,35 @@ int vnc_server(int argc, FAR char *argv[])
     }
 
   return EXIT_FAILURE; /* We won't get here */
+}
+
+/****************************************************************************
+ * Name: vnc_find_session
+ *
+ * Description:
+ *  Return the session structure associated with this display.
+ *
+ * Input Parameters:
+ *   display - The display number of interest.
+ *
+ * Returned Value:
+ *   Returns the instance of the session structure allocated by
+ *   vnc_create_session() for this display.  NULL will be returned if the
+ *   server has not yet been started or if the display number is out of
+ *   range.
+ *
+ ****************************************************************************/
+
+FAR struct vnc_session_s *vnc_find_session(int display)
+{
+  FAR struct vnc_session_s *session = NULL;
+
+  DEBUGASSERT(display >= 0 && display < RFB_MAX_DISPLAYS);
+
+  if (display >= 0 && display < RFB_MAX_DISPLAYS)
+    {
+      session = &g_vnc_sessions[display];
+    }
+
+  return session;
 }

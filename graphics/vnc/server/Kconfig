@@ -12,4 +12,20 @@ menuconfig VNCSERVER
 
 if VNCSERVER
 
+config VNCSERVER_NDISPLAYS
+	int "Number of displays"
+	default 1
+	range 1 99
+	---help---
+		Specifies the number of RFB displays supported by the server.
+		Normally this should be one.
+
+config VNCSERVER_PRIO
+	int "VNC server thread priority"
+	default 100
+
+config VNCSERVER_STACKSIZE
+	int "VNC server stack size"
+	default 2048
+
 endif # VNCSERVER

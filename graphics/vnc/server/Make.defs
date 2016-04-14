@@ -35,7 +35,7 @@
 
 ifeq ($(CONFIG_VNCSERVER),y)
 
-CSRCS += vnc_server.c vnc_session.c
+CSRCS += vnc_server.c vnc_session.c vnc_fbdev.c
 
 DEPPATH += --dep-path vnc/server
 CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)/graphics/vnc/server}

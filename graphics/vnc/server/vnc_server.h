@@ -52,11 +52,24 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+/* Configuration */
+
+#ifndef CONFIG_VNCSERVER_NDISPLAYS
+#  define CONFIG_VNCSERVER_NDISPLAYS 1
+#endif
+
+#ifndef CONFIG_VNCSERVER_PRIO
+#  define CONFIG_VNCSERVER_PRIO 100
+#endif
+
+#ifndef CONFIG_VNCSERVER_STACKSIZE
+#  define CONFIG_VNCSERVER_STACKSIZE 2048
+#endif
 
 /* RFB Port Number */
 
 #define RFB_PORT_BASE       5900
-#define RFB_MAX_DISPLAYS    100
+#define RFB_MAX_DISPLAYS    CONFIG_VNCSERVER_NDISPLAYS
 #define RFB_DISPLAY_PORT(d) (RFB_PORT_BASE + (d))
 
 /****************************************************************************
@@ -98,6 +111,30 @@ struct vnc_session_s
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
+
+/****************************************************************************
+ * Name: vnc_server
+ *
+ * Description:
+ *  The VNC server daemon.  This daemon is implemented as a kernel thread.
+ *
+ * Input Parameters:
+ *   Standard kernel thread arguments (all ignored)
+ *
+ * Returned Value:
+ *   This function does not return.
+ *
+ ****************************************************************************/
+
+int vnc_server(int argc, FAR char *argv[]);
 
 /****************************************************************************
  * Name: vnc_connect
@@ -169,5 +206,29 @@ void vnc_release_session(FAR struct vnc_session_s *session);
  ****************************************************************************/
 
 int vnc_session(FAR struct vnc_session_s *session);
+
+/****************************************************************************
+ * Name: vnc_find_session
+ *
+ * Description:
+ *  Return the session structure associated with this display.
+ *
+ * Input Parameters:
+ *   display - The display number of interest.
+ *
+ * Returned Value:
+ *   Returns the instance of the session structure allocated by
+ *   vnc_create_session() for this display.  NULL will be returned if the
+ *   server has not yet been started or if the display number is out of
+ *   range.
+ *
+ ****************************************************************************/
+
+FAR struct vnc_session_s *vnc_find_session(int display);
+
+#undef EXTERN
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __GRAPHICS_VNC_SERVER_VNC_SERVER_H */
