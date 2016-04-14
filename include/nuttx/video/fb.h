@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/video/fb.h
  *
- *   Copyright (C) 2008-2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2011, 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -360,23 +360,64 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_fbinitialize, up_fbuninitialize, up_fbgetvplane
+ * If an architecture supports a framebuffer, then it must provide the
+ * following APIs to access the framebuffer.
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: up_fbinitialize
  *
  * Description:
- *   If an architecture supports a framebuffer, then it must provide APIs
- *   to access the framebuffer as follows:
+ *   Initialize the framebuffer video hardware associated with the display.
  *
- *   up_fbinitialize   - Initialize the framebuffer video hardware
- *   up_fbgetvplane    - Return a a reference to the framebuffer object for
- *                       the specified video plane.  Most OSDs support
- *                       multiple planes of video.
- *   up_fbuninitialize - Uninitialize the framebuffer support
+ * Input parameters:
+ *   display - In the case of hardware with multiple displays, this
+ *     specifies the display.  Normally this is zero.
+ *
+ * Returned Value:
+ *   Zero is returned on success; a negated errno value is returned on any
+ *   failure.
  *
  ****************************************************************************/
 
-int up_fbinitialize(void);
-FAR struct fb_vtable_s *up_fbgetvplane(int vplane);
-void fb_uninitialize(void);
+int up_fbinitialize(int display);
+
+/****************************************************************************
+ * Name: up_fbgetvplane
+ *
+ * Description:
+ *   Return a a reference to the framebuffer object for the specified video
+ *   plane of the specified plane.  Many OSDs support multiple planes of video.
+ *
+ * Input parameters:
+ *   display - In the case of hardware with multiple displays, this
+ *     specifies the display.  Normally this is zero.
+ *   vplane - Identifies the plane being queried.
+ *
+ * Returned Value:
+ *   A non-NULL pointer to the frame buffer access structure is returned on
+ *   success; NULL is returned on any failure.
+ *
+ ****************************************************************************/
+
+FAR struct fb_vtable_s *up_fbgetvplane(int display, int vplane);
+
+/****************************************************************************
+ * Name: up_fbuninitialize
+ *
+ * Description:
+ *   Uninitialize the framebuffer support for the specified display.
+ *
+ * Input Parameters:
+ *   display - In the case of hardware with multiple displays, this
+ *     specifies the display.  Normally this is zero.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void up_fbuninitialize(int display);
 
 #undef EXTERN
 #ifdef __cplusplus

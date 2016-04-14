@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/sama5/sam_lcd.c
  *
- *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -2893,14 +2893,22 @@ static void sam_show_hcr(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sam_fbinitialize
+ * Name: up_fbinitialize
  *
  * Description:
- *   Initialize the framebuffer video hardware
+ *   Initialize the framebuffer video hardware associated with the display.
+ *
+ * Input parameters:
+ *   display - In the case of hardware with multiple displays, this
+ *     specifies the display.  Normally this is zero.
+ *
+ * Returned Value:
+ *   Zero is returned on success; a negated errno value is returned on any
+ *   failure.
  *
  ****************************************************************************/
 
-int up_fbinitialize(void)
+int up_fbinitialize(int display)
 {
 #if defined(CONFIG_SAMA5_LCDC_OVR1) && defined(CONFIG_SAMA5_LCDC_HEO)
   uint32_t regval;
@@ -2984,21 +2992,24 @@ int up_fbinitialize(void)
 }
 
 /****************************************************************************
- * Name: sam_fbgetvplane
+ * Name: up_fbgetvplane
  *
  * Description:
  *   Return a a reference to the framebuffer object for the specified video
- *   plane.
+ *   plane of the specified plane.  Many OSDs support multiple planes of video.
  *
  * Input parameters:
- *   None
+ *   display - In the case of hardware with multiple displays, this
+ *     specifies the display.  Normally this is zero.
+ *   vplane - Identifies the plane being queried.
  *
- * Returned value:
- *   Reference to the framebuffer object (NULL on failure)
+ * Returned Value:
+ *   A non-NULL pointer to the frame buffer access structure is returned on
+ *   success; NULL is returned on any failure.
  *
  ****************************************************************************/
 
-struct fb_vtable_s *up_fbgetvplane(int vplane)
+FAR struct fb_vtable_s *up_fbgetvplane(int display, int vplane)
 {
   gvdbg("vplane: %d\n", vplane);
   if (vplane == 0)
@@ -3012,15 +3023,21 @@ struct fb_vtable_s *up_fbgetvplane(int vplane)
 }
 
 /****************************************************************************
- * Name: fb_uninitialize
+ * Name: up_fbuninitialize
  *
  * Description:
- *   Uninitialize the framebuffer driver.  Bad things will happen if you
- *   call this without first calling fb_initialize()!
+ *   Uninitialize the framebuffer support for the specified display.
+ *
+ * Input Parameters:
+ *   display - In the case of hardware with multiple displays, this
+ *     specifies the display.  Normally this is zero.
+ *
+ * Returned Value:
+ *   None
  *
  ****************************************************************************/
 
-void fb_uninitialize(void)
+void up_fbuninitialize(int display)
 {
   /* Disable the LCD controller */
 

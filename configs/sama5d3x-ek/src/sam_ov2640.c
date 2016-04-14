@@ -85,14 +85,14 @@ static inline FAR struct fb_vtable_s *ov2640_lcd_initialize(void)
 
   /* Initialize the frame buffer device */
 
-  ret = up_fbinitialize();
+  ret = up_fbinitialize(0);
   if (ret < 0)
     {
       gdbg("ERROR: up_fbinitialize failed: %d\n", -ret);
       return NULL;
     }
 
-  vplane = up_fbgetvplane(0);
+  vplane = up_fbgetvplane(0, 0);
   if (!vplane)
     {
       gdbg("ERROR: up_fbgetvplane failed\n");

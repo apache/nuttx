@@ -677,8 +677,8 @@ nx11
         the simulation is built and can only be eliminated by calling
         up_simtouchscreen(0) from your application.
 
-     b. You must first up_fbinitialize() before calling up_simtouchscreen()
-        or you will get a crash.
+     b. You must first call up_fbinitialize(0) before calling
+        up_simtouchscreen() or you will get a crash.
 
      c. Call sim_tcunininitializee() when you are finished with the
         simulated touchscreen.

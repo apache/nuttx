@@ -1,7 +1,7 @@
 /****************************************************************************
  * config/sim/src/sim_touchscreen.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -104,14 +104,14 @@ int board_tsc_setup(int minor)
    */
 
   ivdbg("Initializing framebuffer\n");
-  ret = up_fbinitialize();
+  ret = up_fbinitialize(0);
   if (ret < 0)
     {
       idbg("up_fbinitialize failed: %d\n", -ret);
       goto errout;
     }
 
-  dev = up_fbgetvplane(0);
+  dev = up_fbgetvplane(0, 0);
   if (!dev)
     {
       idbg("up_fbgetvplane 0 failed\n");
@@ -156,7 +156,7 @@ errout_with_nx:
   nx_close(g_simtc.hnx);
   goto errout;
 errout_with_fb:
-  fb_uninitialize();
+  up_fbuninitialize(0);
 errout:
   return ret;
 }
