@@ -90,7 +90,9 @@ struct vnc_session_s
   /* Display geometry and color characteristics */
 
   uint8_t colorfmt;            /* See include/nuttx/fb.h */
+  uint8_t bpp;                 /* Bits per pixel */
   struct nxgl_size_s screen;   /* Size of the screen in pixels x rows */
+  FAR uint8_t *fb;             /* Allocated local frame buffer */
 };
 
 /****************************************************************************

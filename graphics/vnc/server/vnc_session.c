@@ -216,5 +216,12 @@ void vnc_release_session(FAR struct vnc_session_s *session)
       psock_close(&session->listen);
     }
 
+  /* Free the allocated framebuffer */
+
+  if (session->fb)
+    {
+      kmm_free(session->fb);
+    }
+
   vnc_initialize_session(session);
 }
