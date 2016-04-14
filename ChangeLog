@@ -11639,3 +11639,7 @@
 	  16-bit access to the data register when the frame size is below 9 bits
 	  is interpreted as a packed dual frame exchange. Sebastien Lorquet
 	  (2016-04-13).
+	* net/sockets/listen.c and accept.c and include/nuttx/net:  Separate
+	  out psock_listen() and psock_accepti() for internal OS usage
+	  (2016-04-14).
+
