@@ -11649,4 +11649,6 @@
 	  configurations (2015-04-14).
 	* Framebuffer driver:  Add a display number to each interface in order
 	  to support multiple display devices (2015-04-14).
+	* drivers/wireless/nrf24l01.c: Fix backward calculation of relative
+	  frequency.  Noted by Henry Zhang (2015-04-15).
 
