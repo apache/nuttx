@@ -356,6 +356,19 @@
 void weak_function stm32_spidev_initialize(void);
 
 /****************************************************************************
+ * Name: stm32_bh1750initialize
+ *
+ * Description:
+ *   Called to configure an I2C and to register BH1750FVI for the stm32f4discovery
+ *   board.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_BH1750FVI
+int stm32_bh1750initialize(FAR const char *devpath);
+#endif
+
+/****************************************************************************
  * Name: stm32_bmp180initialize
  *
  * Description:
