@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/mtd/ftl.c
  *
- *   Copyright (C) 2009, 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011-2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -115,6 +115,9 @@ static const struct block_operations g_bops =
 #endif
   ftl_geometry, /* geometry */
   ftl_ioctl     /* ioctl    */
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  , 0           /* unlink   */
+#endif
 };
 
 /****************************************************************************
