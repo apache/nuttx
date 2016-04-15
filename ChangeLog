@@ -11651,4 +11651,5 @@
 	  to support multiple display devices (2015-04-14).
 	* drivers/wireless/nrf24l01.c: Fix backward calculation of relative
 	  frequency.  Noted by Henry Zhang (2015-04-15).
-
+	* drivers/sensors/h1750fvi.c:  Add a character driver for Rohm Ambient
+	  Light Sensor BH1750FVI.  From Alan Carvalho de Assi (2016-04-15).

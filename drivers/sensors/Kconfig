@@ -11,6 +11,13 @@ config AS5048B
 	---help---
 		Enable driver support for the AMS AS5048B magnetic rotary encoder.
 
+config BH1750FVI
+	bool "Rohm BH1750FVI Ambient Light Sensor support"
+	default n
+	select I2C
+	---help---
+		Enable driver support for the Rohm BH1750FVI light sensor.
+
 config BMP180
 	bool "Bosch BMP180 Barometer Sensor support"
 	default n

@@ -100,5 +100,3 @@ void lib_meminstream(FAR struct lib_meminstream_s *instream,
   instream->buffer      = bufstart;   /* Start of buffer */
   instream->buflen      = buflen;     /* Length of the buffer */
 }
-
-

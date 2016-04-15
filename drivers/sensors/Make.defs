@@ -61,6 +61,10 @@ ifeq ($(CONFIG_ADXL345_I2C),y)
   CSRCS += adxl345_i2c.c
 endif
 
+ifeq ($(CONFIG_BH1750FVI),y)
+  CSRCS += bh1750fvi.c
+endif
+
 ifeq ($(CONFIG_BMP180),y)
   CSRCS += bmp180.c
 endif
