@@ -53,13 +53,20 @@
 
 #include "vnc_server.h"
 
+#ifdef CONFIG_NX_KBD
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define FIRST_PRTCHAR ASCII_SPACE
-#define LAST_PRTCHAR  ASCII_TILDE
-#define NPRTCHARS     (ASCII_TILDE + ASCII_SPACE - 1)
+#define FIRST_PRTCHAR   ASCII_SPACE
+#define LAST_PRTCHAR    ASCII_TILDE
+#define NPRTCHARS       (ASCII_TILDE + ASCII_SPACE - 1)
+
+#define ISPRINTABLE(c)  ((c) >= FIRST_PRTCHAR && (c) <= LAST_PRTCHAR)
+#define ISLOWERCASE(c)  ((c) >= ASCII_a && (c) <= ASCII_z)
+#define ISUPPERCASE(c)  ((c) >= ASCII_A && (c) <= ASCII_Z)
+#define ISALPHABETIC(c) (ISLOWERCASE(c) || ISUPPERCASE(c))
 
 /****************************************************************************
  * Private types
@@ -271,6 +278,126 @@ static bool g_modstate[NMODIFIERS];
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: vnc_kbd_encode
+ *
+ * Description:
+ *   Encode one escape sequence command into the proivded buffer.
+ *
+ * Input Parameters:
+ *   buffer     - The location to write the sequence
+ *   keycode    - The command to be added to the output stream.
+ *   terminator - Escape sequence terminating character.
+ *
+ * Returned Value:
+ *   Number of bytes written
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_VNCSERVER_KBDENCODE
+static inline int vnc_kbd_encode(FAR uint8_t *buffer, uint8_t keycode,
+                                 uint8_t terminator)
+{
+  *buffer++ = ASCII_ESC;
+  *buffer++ = ASCII_LBRACKET;
+  *buffer++ = keycode;
+  *buffer   = terminator;
+  return 4;
+}
+#endif
+
+/****************************************************************************
+ * Name: vnc_kbd_press
+ *
+ * Description:
+ *   Indicates a normal key press event.  Put one byte of normal keyboard
+ *   data into the user provided buffer.
+ *
+ * Input Parameters:
+ *   buffer - The location to write the sequence
+ *   ch     - The character to be added to the output stream.
+ *
+ * Returned Value:
+ *   Number of bytes written
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_VNCSERVER_KBDENCODE
+static inline void vnc_kbd_press(FAR uint8_t *buffer, uint8_t ch)
+{
+  *buffer = ch;
+  return 1;
+}
+#endif
+
+/****************************************************************************
+ * Name: vnc_kbd_release
+ *
+ * Description:
+ *   Encode the release of a normal key.
+ *
+ * Input Parameters:
+ *   buffer  - The location to write the sequence
+ *   ch - The character associated with the key that was releared.
+ *
+ * Returned Value:
+ *   Number of bytes written
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_VNCSERVER_KBDENCODE
+static inline void vnc_kbd_release(FAR uint8_t *buffer, uint8_t ch)
+{
+  return vnc_kbd_encode(buffer, ch, ('a' + KBD_RELEASE));
+}
+#endif
+
+/****************************************************************************
+ * Name: vnc_kbd_specpress
+ *
+ * Description:
+ *   Denotes a special key press event.  Put one special keyboard command
+ *   into the user provided buffer.
+ *
+ * Input Parameters:
+ *   buffer  - The location to write the sequence
+ *   keycode - The command to be added to the output stream.
+ *
+ * Returned Value:
+ *   Number of bytes written
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_VNCSERVER_KBDENCODE
+static inline void vnc_kbd_specpress(FAR uint8_t *buffer, uint8_t keycode)
+{
+  return vnc_kbd_encode(buffer, keycode, stream, ('a' + KBD_SPECPRESS));
+}
+#endif
+
+/****************************************************************************
+ * Name: vnc_kbd_specrel
+ *
+ * Description:
+ *   Denotes a special key release event.  Put one special keyboard
+ *   command into the user provided buffer.
+ *
+ * Input Parameters:
+ *   buffer  - The location to write the sequence
+ *   keycode - The command to be added to the output stream.
+ *
+ * Returned Value:
+ *   Number of bytes written
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_VNCSERVER_KBDENCODE
+static inline void vnc_kbd_specrel(FAR uint8_t *buffer, uint8_t keycode)
+{
+  return vnc_kbd_encode(buffer, keycode, stream, ('a' + KBD_SPECREL));
+}
+#endif
+
+/****************************************************************************
  * Name: vnc_kbd_lookup
  *
  * Description:
@@ -351,8 +478,11 @@ static int vnc_kbd_ascii(uint32_t keysym)
 void vnc_key_map(FAR struct vnc_session_s *session, uint32_t keysym,
                  bool keydown)
 {
+#ifdef CONFIG_VNCSERVER_KBDENCODE
+  uint8_t buffer[4]
+  int nch;
+#endif
   int16_t keych;
-  uint8_t ch;
   int ret;
 
   /* Check for modifier keys */
@@ -363,6 +493,17 @@ void vnc_key_map(FAR struct vnc_session_s *session, uint32_t keysym,
       g_modstate[keych] = keydown;
       return;
     }
+
+#ifndef CONFIG_VNCSERVER_KBDENCODE
+  /* If we are not encoding key presses, then we have to ignore key release
+   * events.
+   */
+
+  if (!keydown)
+    {
+      return;
+    }
+#endif
 
   /* Try to convert the keycode to an ASCII value */
 
@@ -382,10 +523,11 @@ void vnc_key_map(FAR struct vnc_session_s *session, uint32_t keysym,
 
       /* Other modifiers apply only to printable characters */
 
-      else if (keych >= FIRST_PRTCHAR && keych <= LAST_PRTCHAR)
+      else if (ISPRINTABLE(keych))
         {
-          /* If Shift Lock is selected, then the case of all characters
-           * should be reversed (unless the Shift key is also pressed)
+          /* If Shift Lock is selected, then the case of all printable
+           * characters should be reversed (unless the Shift key is also
+           * pressed)
            */
 
           if (g_modstate[MOD_SHIFTLOCK])
@@ -398,12 +540,12 @@ void vnc_key_map(FAR struct vnc_session_s *session, uint32_t keysym,
                 }
             }
 
-          /* If Caps Lock is selected, then the case of printable
+          /* If Caps Lock is selected, then the case of alphabetic
            * characters should be reversed (unless the Shift key is also
            * pressed)
            */
 
-          else if (g_modstate[MOD_CAPSLOCK])
+          else if (g_modstate[MOD_CAPSLOCK] && ISALPHABETIC(keych))
             {
               if (g_modstate[MOD_SHIFT])
                 {
@@ -413,8 +555,9 @@ void vnc_key_map(FAR struct vnc_session_s *session, uint32_t keysym,
                 }
             }
 
-          /* If only the Shift Key is pressed, then the case of all
-           * characters should be reversed.
+          /* If (1) only the Shift Key is pressed or (2) the Shift key is
+           * pressed with Caps Lock, but the character is not alphabetic,
+           * then the case of all printable characters should be reversed.
            */
 
           else if (g_modstate[MOD_SHIFT])
@@ -425,18 +568,30 @@ void vnc_key_map(FAR struct vnc_session_s *session, uint32_t keysym,
 
 #ifdef CONFIG_VNCSERVER_KBDENCODE
       /* Encode the normal character */
-#warning Missing logic
+
+      if (keydown)
+        {
+          nch = vnc_kbd_press(buffer, keych);
+        }
+      else
+        {
+          nch = vnc_kbd_release(buffer, keych);
+        }
 
       /* Inject the normal character sequence into NX */
-#warning Missing logic
-#else
-      /* Inject the key press into NX */
 
-      ch = (uint8_t)keych;
-      ret = nx_kbdin(session->handle, 1, &ch);
+      ret = nx_kbdin(session->handle, nch, buffer);
       if (ret < 0)
         {
           gdbg("ERROR: nx_kbdin() failed: %d\n", ret)
+        }
+#else
+      /* Inject the single key press into NX */
+
+     ret = nx_kbdchin(session->handle,(uint8_t)keych);
+      if (ret < 0)
+        {
+          gdbg("ERROR: nx_kbdchin() failed: %d\n", ret)
         }
 #endif
     }
@@ -451,9 +606,27 @@ void vnc_key_map(FAR struct vnc_session_s *session, uint32_t keysym,
       keych = vnc_kbd_lookup(g_modifiers, G_MODIFIERS_NELEM, keysym);
       if (keych >= 0)
         {
+          /* Encode the speical character */
+
+          if (keydown)
+            {
+              nch = vnc_kbd_specpress(buffer, keych);
+            }
+          else
+            {
+              nch = vnc_kbd_specrel(buffer, keych);
+            }
+
           /* Inject the special character sequence into NX */
-#warning Missing logic
+
+          ret = nx_kbdin(session->handle, nch, buffer);
+          if (ret < 0)
+            {
+              gdbg("ERROR: nx_kbdin() failed: %d\n", ret)
+            }
         }
     }
 #endif
 }
+
+#endif /* CONFIG_NX_KBD */

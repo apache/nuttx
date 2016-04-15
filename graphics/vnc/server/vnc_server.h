@@ -244,8 +244,10 @@ FAR struct vnc_session_s *vnc_find_session(int display);
  *
  ****************************************************************************/
 
+#ifdef CONFIG_NX_KBD
 void vnc_key_map(FAR struct vnc_session_s *session, uint32_t keysym,
                  bool keydown);
+#endif
 
 #undef EXTERN
 #ifdef __cplusplus
