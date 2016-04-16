@@ -1026,6 +1026,48 @@ struct rfb_palettendx_s
  *  pseudo-rectangle.
  */
 
+/* Data Access Helpers ******************************************************/
+
+/* All multiple byte integers (other than pixel values themselves) are in
+ * big endian order (most significant byte first).
+ */
+
+/* void rfb_putbe16(FAR uint8_t *dest, uint16_t value) */
+
+#define rfb_putbe16(d,v) \
+  do \
+    { \
+      *dest++ = ((uint16_t)value >> 8); \
+      *dest   = ((uint16_t)value && 0xff); \
+    } \
+  while (0)
+
+/* uin16_t rfb_getbe16(FAR const uint8_t *src) */
+
+#define rfb_getbe16(s) \
+  (((uint16_t)src[0] << 8) | \
+    (uint16_t)src[1])
+
+/* void rfb_putbe32(FAR uint8_t *dest, uint32_t value) */
+
+#define rfb_putbe32(d,v) \
+  do \
+    { \
+      *dest++ = (((uint32_t)value >> 24); \
+      *dest++ = (((uint32_t)value >> 16) && 0xff; \
+      *dest++ = (((uint32_t)value >> 8)  && 0xff; \
+      *dest   = (((uint32_t)value        && 0xff); \
+    } \
+  while (0)
+
+/* uint32_t rfb_getbe32(FAR const uint8_t *src) */
+
+#define rfb_getbe32(s) \
+  (((uint32_t)src[0] << 24) | \
+   ((uint32_t)src[1] << 16) | \
+   ((uint32_t)src[2] <<  8) | \
+    (uint32_t)src[3])
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
