@@ -49,4 +49,8 @@ config VNCSERVER_KBDENCODE
 		Use a special encoding of keyboard characters as defined in
 		include/nuttx/input/kbd_coded.h.
 
+config VNCSERVER_IOBUFFER_SIZE
+	int "I/O buffer size
+	default 80
+
 endif # VNCSERVER

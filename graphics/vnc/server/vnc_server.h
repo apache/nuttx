@@ -75,11 +75,25 @@
 #  define CONFIG_VNCSERVER_STACKSIZE 2048
 #endif
 
+#ifndef CONFIG_VNCSERVER_IOBUFFER_SIZE
+#  define CONFIG_VNCSERVER_IOBUFFER_SIZE 80
+#endif
+
 /* RFB Port Number */
 
 #define RFB_PORT_BASE       5900
 #define RFB_MAX_DISPLAYS    CONFIG_VNCSERVER_NDISPLAYS
 #define RFB_DISPLAY_PORT(d) (RFB_PORT_BASE + (d))
+
+/* Miscellaneous */
+
+#ifndef MIN
+#  define MIN(a,b) (((a) < (b)) ? (a) : (b))
+#endif
+
+#ifndef MAX
+#  define MAX(a,b) (((a) > (b)) ? (a) : (b))
+#endif
 
 /****************************************************************************
  * Public Types
@@ -115,6 +129,10 @@ struct vnc_session_s
   uint8_t bpp;                 /* Bits per pixel */
   struct nxgl_size_s screen;   /* Size of the screen in pixels x rows */
   FAR uint8_t *fb;             /* Allocated local frame buffer */
+ 
+  /* I/O buffer for misc network send/receive */
+
+  uint8_t iobuf[CONFIG_VNCSERVER_IOBUFFER_SIZE];
 };
 
 /****************************************************************************

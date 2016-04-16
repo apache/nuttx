@@ -48,6 +48,16 @@
 #include "vnc_server.h"
 
 /****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+#if defined(CONFIG_VNCSERVER_PROTO3p3)
+static const char g_vncproto[] = RFB_PROTOCOL_VERSION_3p3;
+#elif defined(CONFIG_VNCSERVER_PROTO3p8)
+static const char g_vncproto[] = RFB_PROTOCOL_VERSION_3p8;
+#endif
+
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -93,13 +103,60 @@ static void nvc_xyz(FAR struct vnc_session_s *session)
 #ifdef CONFIG_VNCSERVER_PROTO3p3
 int vnc_negotiate(FAR struct vnc_session_s *session)
 {
+  ssize_t nrecvd;
+  size_t len;
+  int errcode;
+
+  /* Inform the client of the VNC protocol */
+
+  len = strlen(g_vncproto);
+  nrecvd = psock_send(&session->connect, g_vncproto, len, 0);
+  if (nrecvd < 0)
+    {
+      goto errout_with_errno;
+    }
+
+  nrecvd = psock_recv(&session->connect, session->iobuf, len, 0);
+  if (nrecvd <= 0)
+    {
+      goto errout_with_errno;
+    }
+
+  /* Tell the client that we won't use any stinkin' security */
+
   return OK;
+
+errout_with_errno:
+  errcode = get_errno();
+
+errout_with_errcode:
+  DEBUGASSERT(errcode > 0);
+  return -errcode;
 }
 #endif
 
 #ifdef CONFIG_VNCSERVER_PROTO3p8
 int vnc_negotiate(FAR struct vnc_session_s *session)
 {
+  ssize_t nbytes;
+
+  /* Inform the client of the VNC protocol */
+
+  len = strlen(g_vncproto);
+  nrecvd = psock_send(&session->connect, g_vncproto, len, 0);
+  if (nrecvd < 0)
+    {
+      goto errout_with_errno;
+    }
+
+  nrecvd = psock_recv(&session->connect, session->iobuf, len, 0);
+  if (nrecvd <= 0)
+    {
+      goto errout_with_errno;
+    }
+
+  /* Offer the client a choice of security -- where None is the only option. */
+
   return OK;
 }
 #endif
