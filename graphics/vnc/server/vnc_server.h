@@ -251,6 +251,25 @@ FAR struct vnc_session_s *vnc_create_session(void);
 void vnc_release_session(FAR struct vnc_session_s *session);
 
 /****************************************************************************
+ * Name: vnc_negotiate
+ *
+ * Description:
+ *  Perform the VNC initialize sequency after a client has sucessfully
+ *  connected to the server.  Negotiate security, framebuffer and color
+ *  properties.
+ *
+ * Input Parameters:
+ *   session - An instance of the session structure allocated by
+ *     vnc_create_session().
+ *
+ * Returned Value:
+ *   Returns zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int vnc_negotiate(FAR struct vnc_session_s *session);
+
+/****************************************************************************
  * Name: vnc_session
  *
  * Description:

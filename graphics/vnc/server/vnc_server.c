@@ -120,16 +120,26 @@ int vnc_server(int argc, FAR char *argv[])
         {
           gvdbg("New VNC connection\n");
 
-          /* Start the VNC session.  This function does not return until the
-           * session has been terminated (or an error occurs).
-           */
+          ret = vnc_negotiate(session);
+          if (ret < 0)
+            {
+              gdbg("ERROR: Failed to negotiate security/framebuffer: %d\n",
+                   ret);
+            }
+          else
+            {
+              /* Start the VNC session.  This function does not return until
+               * the session has been terminated (or an error occurs).
+               */
 
-          (void)vnc_session(session);
-
-          /* Re-initialize the session structure for re-use */
-
-          vnc_release_session(session);
+              ret = vnc_session(session);
+              gvdbg("Session terminated with %d\n", ret);
+            }
         }
+
+      /* Re-initialize the session structure for re-use */
+
+      vnc_release_session(session);
     }
 
   return EXIT_FAILURE; /* We won't get here */
