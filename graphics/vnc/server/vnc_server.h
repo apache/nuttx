@@ -52,7 +52,16 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration */
+
+#if !defined(CONFIG_VNCSERVER_PROTO3p3) && !defined(CONFIG_VNCSERVER_PROTO3p8)
+#  error No VNC protocol selected
+#endif
+
+#if defined(CONFIG_VNCSERVER_PROTO3p3) && defined(CONFIG_VNCSERVER_PROTO3p8)
+#  error Too many VNC protocols selected
+#endif
 
 #ifndef CONFIG_VNCSERVER_NDISPLAYS
 #  define CONFIG_VNCSERVER_NDISPLAYS 1

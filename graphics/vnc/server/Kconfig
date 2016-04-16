@@ -12,6 +12,19 @@ menuconfig VNCSERVER
 
 if VNCSERVER
 
+choice
+	prompt "VNC server protocol"
+	default VNCSERVER_PROTO3p3
+
+config VNCSERVER_PROTO3p3
+	bool "Version 3.3"
+
+config VNCSERVER_PROTO3p3
+	bool "Version 3.8"
+	depends on EXPERIMENTAL
+
+endchoice # VNC server protocol
+
 config VNCSERVER_NDISPLAYS
 	int "Number of displays"
 	default 1
