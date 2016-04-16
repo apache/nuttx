@@ -116,7 +116,7 @@ struct rfb_supported_sectypes_s
 };
 
 #define SIZEOF_RFB_SUPPORTED_SECTYPES_S(n) \
-  (sizeof(struct rfb_supported_sectypes_s) + (n) - 1);
+  (sizeof(struct rfb_supported_sectypes_s) + (n) - 1)
 
 /* "If the server listed at least one valid security type supported by the
  *  client, the client sends back a single byte indicating which security
@@ -141,7 +141,7 @@ struct rfb_sectype_connfail_s
 };
 
 #define SIZEOF_RFB_SECTYPE_CONNFAIL_S(n) \
-  (sizeof(struct rfb_sectype_connfail_s) + (n) - 1);
+  (sizeof(struct rfb_sectype_connfail_s) + (n) - 1)
 
 /* "Version 3.3 The server decides the security type and sends a single
  *  word:"
@@ -188,7 +188,7 @@ struct rfb_sectype_fail_s
 };
 
 #define SIZEOF_RFB_SECTYPE_FAIL_S(n) \
-  (sizeof(struct rfb_sectype_fail_s) + (n) - 1);
+  (sizeof(struct rfb_sectype_fail_s) + (n) - 1)
 
 /* "Version 3.3 and 3.7 If unsuccessful, the server closes the connection." */
 
@@ -240,8 +240,8 @@ struct rfb_response_s
  *  give exclusive access to this client by disconnecting all other clients."
  */
 
-#defin RFB_FLAG_SHARED    0
-#defin RFB_FLAG_EXCLUSIVE 1
+#define RFB_FLAG_SHARED    0
+#define RFB_FLAG_EXCLUSIVE 1
 
 struct rfb_clientinit_s
 {
@@ -280,7 +280,7 @@ struct rfb_serverinit_s
 };
 
 #define SIZEOF_RFB_SERVERINIT_S(n) \
-  (sizeof(struct rfb_serverinit_s) + (n) - 1);
+  (sizeof(struct rfb_serverinit_s) + (n) - 1)
 
 /* "Server-pixel-format specifies the server’s natural pixel format. This
  *  pixel format will be used unless the client requests a different format
@@ -317,31 +317,14 @@ struct rfb_serverinit_s
 
 /* 6.4 Client to Server Messages ********************************************/
 
-/* "The client to server message types defined in this document are:
- *
- * "Number   Name
- *   0       SetPixelFormat
- *   2       SetEncodings
- *   3       FramebufferUpdateRequest
- *   4       KeyEvent
- *   5       PointerEvent
- *   6       ClientCutText
- *
- * "Other registered message types are:
- *
- * "Number   Name
- *  255      Anthony Liguori
- *  254, 127 VMWare
- *  253      gii
- *  252      tight
- *  251      Pierre Ossman SetDesktopSize
- *  250      Colin Dean xvp
- *  249      OLIVE Call Control
- *
- * "Note that before sending a message not defined in this document a client
- *  must have determined that the server supports the relevant extension by 
- *  receiving some extension-specific confirmation from the server.
- */
+/* "The client to server message types defined in this document are: */
+
+#define RFB_SETPIXELFMTT_MSG  0  /* SetPixelFormat */
+#define RFB_SETENCODINGS_MSG  2  /* SetEncodings */
+#define RFB_FBUPDATEREQ_MSG   3  /* FramebufferUpdateRequest */
+#define RFB_KEYEVENT_MSG      4  /* KeyEvent */
+#define RFB_POINTEREVENT_MSG  5  /* PointerEvent */
+#define RFB_CLIENTCUTTEXT_MSG 6  /* ClientCutText */
 
 /* 6.4.1 SetPixelFormat
  *
@@ -393,7 +376,7 @@ struct rfb_setencodings_s
 };
 
 #define SIZEOF_RFB_SERVERINIT_S(n) \
-  (sizeof(struct rfb_serverinit_s) + (((n) - 1) << 2));
+  (sizeof(struct rfb_serverinit_s) + (((n) - 1) << 2))
 
 /* 6.4.3 FramebufferUpdateRequest
  *
@@ -534,13 +517,514 @@ struct rfb_clientcuttext_s
 };
 
 #define SIZEOF_RFB_CLIENTCUTTEXT_S(n) \
-  (sizeof(struct rfb_clientcuttext_s) + (n) - 1);
+  (sizeof(struct rfb_clientcuttext_s) + (n) - 1)
 
 /* 6.5 Server to Client Messages ********************************************/
 
+/* "The server to client message types defined in this document are:" */
+
+#define RFB_FBUPDATE_MSG       0 /* FramebufferUpdate */
+#define RFB_SETCOLORMAP_MSG    1 /* SetColourMapEntries */
+#define RFB_BELL_MSG           2 /* Bell */
+#define RFB_SERVERCUTTEXT_MSG  3 /* ServerCutText */
+
+/* 6.5.1 FramebufferUpdate
+ *
+ * "A framebuffer update consists of a sequence of rectangles of pixel data
+ *  which the client should put into its framebuffer. It is sent in response
+ *  to a FramebufferUpdateRequest from the client. Note that there may be an
+ *  indefinite period between the FramebufferUpdateRequest and the
+ *  FramebufferUpdate."
+ */
+
+struct rfb_rectangle_s
+{
+  uint8_t xpos[2];               /* U16 X position */
+  uint8_t ypos[2];               /* U16 Y position */
+  uint8_t width[2];              /* U16 Width */
+  uint8_t height[2];             /* U16 Height */
+  uint8_t encoding[4];           /* S32 Encoding type */
+  uint8_t data[1];               /* Pixel data, actual size varies */
+};
+
+#define SIZEOF_RFB_RECTANGES(n,d) \
+  (sizeof(struct rfb_framebufferupdate_s) + (d) - 1)
+
+struct rfb_framebufferupdate_s
+{
+  uint8_t msgtype;                /* U8  Message type */
+  uint8_t padding;
+  uint8_t nrect[2];               /* U16 Number of rectangles */
+  struct rfb_rectangle_s rect[1]; /* Actual number is nrect */
+};
+
+#define SIZEOF_RFB_FRAMEBUFFERUPDATE_S(n,r) \
+  (sizeof(struct rfb_framebufferupdate_s) + (r) - sizeof(rfb_rectangle_s))
+
+/* 6.5.2 SetColourMapEntries
+ *
+ * "When the pixel format uses a 'colour map', this message tells the client
+ *  that the specified pixel values should be mapped to the given RGB
+ *  intensities."
+ */
+
+struct rfb_rgb_s
+{
+  uint8_t r[2];                  /* U16 red */
+  uint8_t g[2];                  /* U16 green */
+  uint8_t b[2];                  /* U16 blue */
+};
+
+#define RFB_RGB_SIZE(n) \
+  ((n) * sizeof(struct rfb_rgb_s))
+
+struct rfb_setcolourmapentries_s
+{
+  uint8_t msgtype;                /* U8  Message type */
+  uint8_t padding;
+  uint8_t first[2];               /* U16 First colour */
+  uint8_t ncolors[2];             /* U16 Number of colours */
+  struct rfb_rgb_s color[1];      /*     Colors, actual number is ncolors */
+};
+
+#define SIZEOF_RFB_SETCOLOURMAPENTRIES_S(n,r) \
+  (sizeof(struct rfb_setcolourmapentries_s) + RFB_RGB_SIZE((n) - 1))
+
+/* 6.5.3 Bell
+ *
+ * "Ring a bell on the client if it has one.
+ */
+
+struct rfb_bell_s
+{
+  uint8_t msgtype;                /* U8  Message type */
+};
+
+/* 6.5.4 ServerCutText
+ *
+ * "The server has new ISO 8859-1 (Latin-1) text in its cut buffer. Ends of
+ *  lines are represented by the linefeed / newline character (value 10)
+ *  alone. No carriage-return (value 13) is needed. There is currently no
+ *  way to transfer text outside the Latin-1 character set.
+ */
+
+struct rfb_servercuttext_s
+{
+  uint8_t msgtype;               /* U8  Message type */
+  uint8_t padding[3];
+  uint8_t length[2];             /* U8  Length */
+  uint8_t text[1];               /* U8  Text, actual length is Length */
+};
+
+#define SIZEOF_RFB_SERVERCUTTEXT_S(n) \
+  (sizeof(struct rfb_servercuttext_s) + (n) - 1)
+
 /* 6.6 Encodings ************************************************************/
 
+/* The encodings defined in this document are: */
+
+#define RFB_ENCODING_RAW       0  /* Raw */
+#define RFB_ENCODING_COPYRECT  1  /* CopyRect */
+#define RFB_ENCODING_RRE       2  /* RRE */
+#define RFB_ENCODING_HEXTILE   5  /* Hextile */
+#define RFB_ENCODING_ZRLE     16  /* ZRLE */
+#define RFB_ENCODING_CURSOR  -239 /* Cursor pseudo-encoding */
+#define RFB_ENCODING_DESKTOP -223 /* DesktopSize pseudo-encoding */
+
+/* 6.6.1 Raw encoding
+ *
+ * "The simplest encoding type is raw pixel data. In this case the data
+ *  consists of width x height pixel values (where width and height are the
+ *  width and height of the rectangle).  The values simply represent each
+ *  pixel in left-to-right scanline order. All RFB clients must be able to
+ *  cope with pixel data in this raw encoding, and RFB servers should only
+ *  produce raw encoding unless the client specifically asks for some other
+ *  encoding type.
+ */
+
+/* 6.6.2 CopyRect encoding
+ *
+ * "The CopyRect (copy rectangle) encoding is a very simple and efficient
+ *  encoding which can be used when the client already has the same pixel
+ *  data elsewhere in its framebuffer.  The encoding on the wire simply
+ *  consists of an X,Y coordinate. This gives a position in the framebuffer
+ *  from which the client can copy the rectangle of pixel data. This can be
+ *  used in a variety of situations, the most obvious of which are when the
+ *  user moves a window across the screen, and when the contents of a window
+ *  are scrolled. A less obvious use is for optimising drawing of text or
+ *  other repeating patterns. An intelligent server may be able to send a
+ *  pattern explicitly only once, and knowing the previous position of the
+ *  pattern in the framebuffer, send subsequent occurrences of the same
+ *  pattern using the CopyRect encoding."
+ */
+
+struct rfb_copyrect_encoding_s
+{
+  uint8_t xpos[2];               /* U16 Source x position */
+  uint8_t ypos[2];               /* U16 Source y position */
+};
+
+/* 6.6.3 RRE encoding
+ *
+ * "RRE stands for rise-and-run-length encoding and as its name implies, it
+ *  is essentially a two-dimensional analogue of run-length encoding.
+ *  RRE-encoded rectangles arrive at the client in a form which can be
+ *  rendered immediately and efficiently by the simplest of graphics
+ *  engines. RRE is not appropriate for complex desktops, but can be
+ *  useful in some situations.
+ *
+ * "The basic idea behind RRE is the partitioning of a rectangle of pixel
+ *  data into rectangular subregions (subrectangles) each of which consists
+ *  of pixels of a single value and the union of which comprises the
+ *  original rectangular region. The near-optimal partition of a given
+ *  rectangle into such subrectangles is relatively easy to compute.
+ *
+ * "The encoding consists of a background pixel value, Vb (typically the
+ *  most prevalent pixel value in the rectangle) and a count N, followed
+ *  by a list of N subrectangles, each of which consists of a tuple
+ *  < v, x, y, w, h > where v (6= Vb) is the pixel value, (x, y) are the
+ *  coordinates of the subrectangle relative to the top-left corner of the
+ *  rectangle, and (w, h) are the width and height of the subrectangle. The
+ *  client can render the original rectangle by drawing a filled rectangle
+ *  of the background pixel value and then drawing a filled rectangle
+ *  corresponding to each subrectangle. On the wire, the data begins with
+ *  the header:"
+ */
+
+struct rfb_rrehdr16_s
+{
+  uint8_t nsubrects[4];          /* U32 Number of sub-rectangle */
+  uint8_t pixel[2];              /* U16 Background pixel */
+};
+
+struct rfb_rrehdr32_s
+{
+  uint8_t nsubrects[4];          /* U32 Number of sub-rectangle */
+  uint8_t pixel[4];              /* U32 Background pixel */
+};
+
+/* "This is followed by number-of-subrectangles instances of the following
+ *  structure:"
+ */
+
+struct rfb_rrerect16_s
+{
+  uint8_t pixel[2];              /* U16 sub-rect pixel value */
+  uint8_t xpos[2];               /* U16 X position */
+  uint8_t ypos[2];               /* U16 Y position */
+  uint8_t width[2];              /* U16 Width */
+  uint8_t height[2];             /* U16 Height */
+};
+
+/* 6.6.4 Hextile encoding
+ *
+ * "Hextile is a variation on the RRE idea. Rectangles are split up into
+ *  16x16 tiles, allowing the dimensions of the subrectangles to be
+ *  specified in 4 bits each, 16 bits in total. The rectangle is split
+ *  into tiles starting at the top left going in left-to-right, top-to-
+ *  bottom order. The encoded contents of the tiles simply follow one another
+ *  in the predetermined order. If the width of the whole rectangle is not
+ *  an exact multiple of 16 then the width of the last tile in each row will
+ *  be correspondingly smaller. Similarly if the height of the whole
+ *  rectangle is not an exact multiple of 16 then the height of each tile in
+ *  the final row will also be smaller.
+ *
+ * "Each tile is either encoded as raw pixel data, or as a variation on RRE.
+ *  Each tile has a background pixel value, as before. The background pixel
+ *  value does not need to be explicitly specified for a given tile if it is
+ *  the same as the background of the previous tile. However the background
+ *  pixel value may not be carried over if the previous tile was Raw. If all
+ *  of the subrectangles of a tile have the same pixel value, this can be
+ *  specified once as a foreground pixel value for the whole tile. As with
+ *  the background, the foreground pixel value can be left unspecified,
+ *  meaning it is carried over from the previous tile. The foreground pixel
+ *  value may not be carried over if the previous tile had the Raw or
+ *  SubrectsColoured bits set. It may, however, be carried over from a
+ *  previous tile with the AnySubrects bit clear, as long as that tile
+ *  itself carried over a valid foreground from its previous tile.
+ *
+ * "So the data consists of each tile encoded in order. Each tile begins
+ *  with a subencoding type byte, which is a mask made up of a number of
+ *  bits:"
+ */
+
+#define RFB_SUBENCODING_RAW      1  /* Raw */
+#define RFB_SUBENCODING_BACK     2  /* BackgroundSpecified*/
+#define RFB_SUBENCODING_FORE     4  /* ForegroundSpecified*/
+#define RFB_SUBENCODING_ANY      8  /* AnySubrects*/
+#define RFB_SUBENCODING_COLORED  16 /* SubrectsColoured*/
+
+/* "If the Raw bit is set then the other bits are irrelevant; width x height
+ *  pixel values follow (where width and height are the width and height of
+ *  the tile). Otherwise the other bits in the mask are as follows:
+ *
+ * "BackgroundSpecified - if set, a pixel value follows which specifies the
+*   background colour for this tile:"
+*/
+
+struct rfb_backpixel16_s
+{
+  uint8_t pixel[2];              /* U16 Background pixel value */
+};
+
+struct rfb_backpixel32_s
+{
+  uint8_t pixel[4];              /* U32 Background pixel value */
+};
+
+/* "The first non-raw tile in a rectangle must have this bit set. If this
+ *  bit isn’t set then the background is the same as the last tile.
+ *
+ * "ForegroundSpecified - if set, a pixel value follows which specifies the
+ *  foreground colour to be used for all subrectangles in this tile:"
+ */
+
+struct rfb_forepixel16_s
+{
+  uint8_t pixel[2];              /* U16 Foreground pixel value */
+};
+
+struct rfb_forepixel32_s
+{
+  uint8_t pixel[4];              /* U32 Foreground pixel value */
+};
+
+/* "If this bit is set then the SubrectsColoured bit must be zero.
+ *
+ * "AnySubrects - if set, a single byte follows giving the number of
+ *  subrectangles following:"
+ */
+
+struct rfb_nrects_s
+{
+  uint8_t nsubrects;             /* U8  Number of sub-rectangles */
+};
+
+/* "If not set, there are no subrectangles (i.e. the whole tile is just
+ *  solid background colour).
+ *
+ * "SubrectsColoured - if set then each subrectangle is preceded by a pixel
+ *  value giving the colour of that subrectangle, so a subrectangle is:"
+ */
+
+struct rfb_subrectscolored16_s
+{
+  uint8_t pixel[2];              /* U16 Sub-rect pixel value */
+  uint8_t xy;                    /* U8  X and y position */
+  uint8_t wh;                    /* U8  Width and height */
+};
+
+struct rfb_subrectscolored32_s
+{
+  uint8_t pixel[4];              /* U32 Sub-rect pixel value */
+  uint8_t xy;                    /* U8  X and y position */
+  uint8_t wh;                    /* U8  Width and height */
+};
+
+/* "If not set, all subrectangles are the same colour, the foreground
+ *  colour; if the ForegroundSpecified bit wasn’t set then the foreground
+ *  is the same as the last tile. A subrectangle is:"
+ */
+
+struct rfb_subrect_s
+{
+  uint8_t xy;                    /* U8  X and y position */
+  uint8_t wh;                    /* U8  Width and height */
+};
+
+/* "The position and size of each subrectangle is specified in two bytes,
+ *  x-and-y-position and width-and-height. The most-significant four bits of
+ *  x-and-y-position specify the X position, the least-significant specify
+ *  the Y position. The most-significant four bits of width-and-height
+ *  specify the width minus one, the least-significant specify the height
+ *  minus one."
+ */
+
+/* 6.6.5 ZRLE encoding
+ *
+ * "ZRLE stands for Zlib1 Run-Length Encoding, and combines zlib
+ *  compression, tiling, palettisation and run-length encoding. On the wire,
+ *  the rectangle begins with a 4-byte length field, and is followed by that
+ *  many bytes of zlib-compressed data. A single zlib 'stream' object is
+ *  used for a given RFB protocol connection, so that ZRLE rectangles must
+ *  be encoded and decoded strictly in order."
+ */
+
+struct rfb_srle_s
+{
+  uint8_t length[4];             /* U32 Length */
+  uint8_t data[1];               /* U8  zlibData, actual size is length */  
+};
+
+#define SIZEOF_RFB_SRLE_S(n,r) \
+  (sizeof(struct rfb_srle_s) + (n) - 1)
+
+/* "The zlibData when uncompressed represents tiles of 64x64 pixels in
+ *  left-to-right, top-to-bottom order, similar to hextile. If the width of
+ *  the rectangle is not an exact multiple of 64 then the width of the last
+ *  tile in each row is smaller, and if the height of the rectangle is not
+ *  an exact multiple of 64 then the height of each tile in the final row
+ *  is smaller.
+ *
+ * "ZRLE makes use of a new type CPIXEL (compressed pixel). This is the same
+ *  as a PIXEL for the agreed pixel format, except where true-colour-flag is
+ *  non-zero, bitsper-pixel is 32, depth is 24 or less and all of the bits
+ *  making up the red, green and blue intensities fit in either the least
+ *  significant 3 bytes or the most significant 3 bytes. In this case a
+ *  CPIXEL is only 3 bytes long, and contains the least significant or the
+ *  most significant 3 bytes as appropriate. bytesPerCPixel is the number of
+ *  bytes in a CPIXEL.
+ *
+ * "Each tile begins with a subencoding type byte. The top bit of this byte
+ *  is set if the tile has been run-length encoded, clear otherwise. The
+ *  bottom seven bits indicate the size of the palette used - zero means no
+ *  palette, one means that the tile is of a single colour, 2 to 127
+ *  indicate a palette of that size. The possible values of subencoding are:"
+ */ 
+
+#define RFB_SUBENCODING_RAW      0   /* Raw pixel data */
+#define RFB_SUBENCODING_SOLID    1   /* A solid tile of a single color */
+#define RFB_SUBENCODING_PACKED1  2   /* Packed palette types */
+#define RFB_SUBENCODING_PACKED2  3
+#define RFB_SUBENCODING_PACKED3  4
+#define RFB_SUBENCODING_PACKED4  5
+#define RFB_SUBENCODING_PACKED5  6
+#define RFB_SUBENCODING_PACKED6  7
+#define RFB_SUBENCODING_PACKED7  8
+#define RFB_SUBENCODING_PACKED8  9
+#define RFB_SUBENCODING_PACKED9  10
+#define RFB_SUBENCODING_PACKED10 11
+#define RFB_SUBENCODING_PACKED11 12
+#define RFB_SUBENCODING_PACKED12 13
+#define RFB_SUBENCODING_PACKED13 14
+#define RFB_SUBENCODING_PACKED14 15
+#define RFB_SUBENCODING_PACKED15 16
+#define RFB_SUBENCODING_RLE      128 /* Plain RLE */
+#define RFB_SUBENCODING_PALRLE   129 /* Palette RLE */
+
+
+/* "Raw pixel data. width x height pixel values follow (where width and
+ *  height are the width and height of the tile):"
+ */
+
+struct rfb_rawpixel16_s
+{
+  uint8_t pixels[2];             /* Actual size is 2*w*h */
+};
+
+#define SIZEOF_RFB_RAWPIXEL16_S(n,r) \
+  (sizeof(struct rfb_rawpixel16_s) + (((n) - 1) << 1))
+
+struct rfb_rawpixel32_s
+{
+  uint8_t pixels[4];             /* Actual size is 4*w*h */
+};
+
+#define SIZEOF_RFB_RAWPIXEL32_S(n,r) \
+  (sizeof(struct rfb_rawpixel32_s) + (((n) - 1) << 2))
+
+/* "A solid tile consisting of a single colour. The pixel value follows:" */
+
+struct rfb_solid16_s
+{
+  uint8_t pixels[2];             /* Pixel value */
+};
+
+struct rfb_solid32_s
+{
+  uint8_t pixels[4];             /* Pixel value */
+};
+
+/* "Packed palette types. Followed by the palette, consisting of
+ *  paletteSize(= subencoding) pixel values. Then the packed pixels follow,
+ *  each pixel represented as a bit field yielding an index into the palette
+ *  (0 meaning the first palette entry). For paletteSize 2, a 1-bit field is
+ *  used, for paletteSize 3 or 4 a 2-bit field is used and for paletteSize
+ *  from 5 to 16 a 4-bit field is used. The bit fields are packed into bytes,
+ *  the most significant bits representing the leftmost pixel (i.e. big
+ *  endian). For tiles not a multiple of 8, 4 or 2 pixels wide (as
+ *  appropriate), padding bits are used to align each row to an exact number
+ *  of bytes."
+ *
+ * REVISIT:  Difficult to represent since it is a variable length array of
+ * RGB pixels follow by the variable length array of packed pixels.
+ */
+
+/* "Plain RLE. Consists of a number of runs, repeated until the tile is
+ *  done. Runs may continue from the end of one row to the beginning of the
+ *  next. Each run is a represented by a single pixel value followed by the
+ *  length of the run. The length is represented as one or more bytes. The
+ *  length is calculated as one more than the sum of all the bytes
+ *  representing the length. Any byte value other than 255 indicates the
+ *  final byte. So for example length 1 is represented as [0], 255 as [254],
+ *  256 as [255,0], 257 as [255,1], 510 as [255,254], 511 as [255,255,0] and
+ *  so on."
+ *
+ * REVISIT:  Difficult to represent.  Consists of (1) a color value, (2)
+ * a variable length array of data, followed by (3) the run length.
+ */
+
+/* "Palette RLE. Followed by the palette, consisting of paletteSize =
+ *  (subencoding − 128) pixel values:"
+ */
+
+struct rfb_palette16_s
+{
+  uint8_t palette[2];            /* Actual size is 2*palleteSize */
+};
+
+struct rfb_palette32_s
+{
+  uint8_t palette[4];            /* Actual size is 4*palleteSize */
+};
+
+/* Then as with plain RLE, consists of a number of runs, repeated until the
+ * tile is done. A run of length one is represented simply by a palette index:
+ */
+
+struct rfb_palettendx_s
+{
+  uint8_t index;                /* U8  Palette Index */
+};
+
+/* A run of length more than one is represented by a palette index with the
+ * top bit set, followed by the length of the run as for plain RLE."
+ *
+ * REVISIT:  See comment with similar plain RLE representation.
+ */
+
 /* 6.7 Pseudo-Encodings *****************************************************/
+
+/* 6.7.1 Cursor pseudo-encoding
+ *
+ * "A client which requests the Cursor pseudo-encoding is declaring that it
+ *  is capable of drawing a mouse cursor locally. This can significantly
+ *  improve perceived performance over slow links. The server sets the
+ *  cursor shape by sending a pseudo-rectangle with the Cursor pseudo-
+ *  encoding as part of an update. The pseudo-rectangle’s x-position and
+ *  y-position indicate the hotspot of the cursor, and width and height
+ *  indicate the width and height of the cursor in pixels. The data consists
+ *  of width x height pixel values followed by a bitmask. The bitmask
+ *  consists of left-to-right, top-to-bottom scanlines, where each scanline
+ *  is padded to a whole number of bytes floor((width + 7)/8). Within each
+ *  byte the most significant bit represents the leftmost pixel, with a
+ *  1-bit meaning the corresponding pixel in the cursor is valid."
+ *
+ * REVISIT:  Also difficult to represent:  A variable length pixel arry 
+ * followed by a variable length bit mask.
+ */
+
+/* 6.7.2 DesktopSize pseudo-encoding
+ *
+ * "A client which requests the DesktopSize pseudo-encoding is declaring
+ *  that it is capable of coping with a change in the framebuffer width
+ *  and/or height. The server changes the desktop size by sending a
+ *  pseudo-rectangle with the DesktopSize pseudo-encoding as the last
+ *  rectangle in an update. The pseudo-rectangle’s x-position and y-position
+ *  are ignored, and width and height indicate the new width and height of
+ *  the framebuffer. There is no further data associated with the
+ *  pseudo-rectangle.
+ */
 
 /****************************************************************************
  * Public Function Prototypes
