@@ -51,15 +51,6 @@
 #include "vnc_server.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* Framebuffer characteristics in bytes */
-
-#define FB_WIDTH(s)  (((s)->screen.w * (s)->bpp + 7) / 8)
-#define FB_SIZE(s)   (FB_WIDTH(s) * (s)->screen.h)
-
-/****************************************************************************
  * Private Types
  ****************************************************************************/
 
@@ -207,8 +198,8 @@ static int up_getplaneinfo(FAR struct fb_vtable_s *vtable, int planeno,
       DEBUGASSERT(session->fb != NULL);
 
       pinfo->fbmem    = (FAR void *)&session->fb;
-      pinfo->fblen    = FB_SIZE(session);
-      pinfo->stride   = FB_WIDTH(session);
+      pinfo->fblen    = (uint32_t)session->stride * CONFIG_VNCSERVER_SCREENWIDTH;
+      pinfo->stride   = (fb_coord_t)session->stride;
       pinfo->bpp      = session->bpp;
 
       return OK;

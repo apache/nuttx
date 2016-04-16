@@ -67,6 +67,38 @@
 #  define CONFIG_VNCSERVER_NDISPLAYS 1
 #endif
 
+#if defined(CONFIG_VNCSERVER_COLORFMT_RGB16)
+#  define RFB_BITSPERPIXEL 16
+#  define RFB_PIXELDEPTH   16
+#  define RFB_TRUECOLOR    1
+#  define RFB_RMAX         0x1f
+#  define RFB_GMAX         0x3f
+#  define RFB_BMAX         0x1f
+#  define RFB_RSHIFT       11
+#  define RFB_GSHIFT       5
+#  define RFB_BSHIFT       0
+#elif defined(CONFIG_VNCSERVER_COLORFMT_RGB32)
+#  define RFB_BITSPERPIXEL 32
+#  define RFB_PIXELDEPTH   24
+#  define RFB_TRUECOLOR    1
+#  define RFB_RMAX         0xff
+#  define RFB_GMAX         0xff
+#  define RFB_BMAX         0xff
+#  define RFB_RSHIFT       16
+#  define RFB_GSHIFT       8
+#  define RFB_BSHIFT       0
+#else
+#  error Unspecified color format
+#endif
+
+#ifndef CONFIG_VNCSERVER_SCREENWIDTH
+#  define CONFIG_VNCSERVER_SCREENWIDTH 320
+#endif
+
+#ifndef CONFIG_VNCSERVER_SCREENHEIGHT
+#  define CONFIG_VNCSERVER_SCREENHEIGHT 240
+#endif
+
 #ifndef CONFIG_VNCSERVER_PRIO
 #  define CONFIG_VNCSERVER_PRIO 100
 #endif
@@ -88,11 +120,11 @@
 /* Miscellaneous */
 
 #ifndef MIN
-#  define MIN(a,b) (((a) < (b)) ? (a) : (b))
+#  define MIN(a,b)          (((a) < (b)) ? (a) : (b))
 #endif
 
 #ifndef MAX
-#  define MAX(a,b) (((a) > (b)) ? (a) : (b))
+#  define MAX(a,b)          (((a) > (b)) ? (a) : (b))
 #endif
 
 /****************************************************************************
@@ -127,6 +159,7 @@ struct vnc_session_s
 
   uint8_t colorfmt;            /* See include/nuttx/fb.h */
   uint8_t bpp;                 /* Bits per pixel */
+  size_t stride;               /* Width of a row in bytes */
   struct nxgl_size_s screen;   /* Size of the screen in pixels x rows */
   FAR uint8_t *fb;             /* Allocated local frame buffer */
  

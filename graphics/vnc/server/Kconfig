@@ -41,6 +41,26 @@ config VNCSERVER_STACKSIZE
 	int "VNC server stack size"
 	default 2048
 
+choice
+	prompt "VNC color format"
+	default VNCSERVER_COLORFMT_RGB16
+
+config VNCSERVER_COLORFMT_RGB16
+	bool "RGB16 5:6:5"
+
+config VNCSERVER_COLORFMT_RGB32
+	bool "RGB24 (32-bit) or RGB32 (w/tranparency)"
+
+endchoice # VNC color format
+
+config VNCSERVER_SCREENWIDTH
+	int "Framebuffer width (pixels)"
+	default 320
+
+config VNCSERVER_SCREENHEIGHT
+	int "Framebuffer height (rows)"
+	default 240
+
 config VNCSERVER_KBDENCODE
 	bool "Encode keyboard input"
 	default n
