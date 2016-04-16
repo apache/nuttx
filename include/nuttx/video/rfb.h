@@ -167,7 +167,7 @@ struct rfb_sectype_s
  */
 
 #define RFB_SECTYPE_SUCCESS 0
-#define RFB_SECTYPE_FAILE   1
+#define RFB_SECTYPE_FAIL    1
 
 struct rfb_sectype_result_s
 {
@@ -319,7 +319,7 @@ struct rfb_serverinit_s
 
 /* "The client to server message types defined in this document are: */
 
-#define RFB_SETPIXELFMTT_MSG  0  /* SetPixelFormat */
+#define RFB_SETPIXELFMT_MSG   0  /* SetPixelFormat */
 #define RFB_SETENCODINGS_MSG  2  /* SetEncodings */
 #define RFB_FBUPDATEREQ_MSG   3  /* FramebufferUpdateRequest */
 #define RFB_KEYEVENT_MSG      4  /* KeyEvent */
@@ -1037,36 +1037,38 @@ struct rfb_palettendx_s
 #define rfb_putbe16(d,v) \
   do \
     { \
-      *dest++ = ((uint16_t)value >> 8); \
-      *dest   = ((uint16_t)value && 0xff); \
+      FAR uint32_t *dest = (d); \
+      *dest++ = ((uint16_t)(v) >> 8); \
+      *dest   = ((uint16_t)(v) & 0xff); \
     } \
   while (0)
 
 /* uin16_t rfb_getbe16(FAR const uint8_t *src) */
 
 #define rfb_getbe16(s) \
-  (((uint16_t)src[0] << 8) | \
-    (uint16_t)src[1])
+  (((uint16_t)((s)[0]) << 8) | \
+    (uint16_t)((s)[1]))
 
 /* void rfb_putbe32(FAR uint8_t *dest, uint32_t value) */
 
 #define rfb_putbe32(d,v) \
   do \
     { \
-      *dest++ = (((uint32_t)value >> 24); \
-      *dest++ = (((uint32_t)value >> 16) && 0xff; \
-      *dest++ = (((uint32_t)value >> 8)  && 0xff; \
-      *dest   = (((uint32_t)value        && 0xff); \
+      FAR uint32_t *dest = (d); \
+      *dest++ = ((uint32_t)(v) >> 24); \
+      *dest++ = ((uint32_t)(v) >> 16) & 0xff; \
+      *dest++ = ((uint32_t)(v) >> 8)  & 0xff; \
+      *dest   = ((uint32_t)(v)        & 0xff); \
     } \
   while (0)
 
 /* uint32_t rfb_getbe32(FAR const uint8_t *src) */
 
 #define rfb_getbe32(s) \
-  (((uint32_t)src[0] << 24) | \
-   ((uint32_t)src[1] << 16) | \
-   ((uint32_t)src[2] <<  8) | \
-    (uint32_t)src[3])
+  (((uint32_t)((s)[0]) << 24) | \
+   ((uint32_t)((s)[1]) << 16) | \
+   ((uint32_t)((s)[2]) <<  8) | \
+    (uint32_t)((s)[3]))
 
 /****************************************************************************
  * Public Function Prototypes
