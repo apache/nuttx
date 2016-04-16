@@ -52,6 +52,10 @@ ifeq ($(CONFIG_STM32_OTGFS),y)
 CSRCS += stm32_usb.c
 endif
 
+ifeq ($(CONFIG_BH1750FVI),y)
+CSRCS += stm32_bh1750fvi.c
+endif
+
 ifeq ($(CONFIG_BMP180),y)
 CSRCS += stm32_bmp180.c
 endif

@@ -98,6 +98,10 @@ int stm32_bringup(void)
 #endif
   int ret = OK;
 
+#ifdef CONFIG_BH1750FVI
+  stm32_bh1750initialize("/dev/light0");
+#endif
+
 #ifdef CONFIG_ZEROCROSS
   /* Configure the zero-crossing driver */
 
