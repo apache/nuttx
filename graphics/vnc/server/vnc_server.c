@@ -120,6 +120,11 @@ int vnc_server(int argc, FAR char *argv[])
         {
           gvdbg("New VNC connection\n");
 
+          /* Perform the VNC initialization sequence after the client has
+           * sucessfully connected to the server.  Negotiate security,
+           * framebuffer and color properties.
+           */
+
           ret = vnc_negotiate(session);
           if (ret < 0)
             {

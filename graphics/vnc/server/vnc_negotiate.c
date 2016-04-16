@@ -69,7 +69,7 @@ static const char g_vncproto[] = RFB_PROTOCOL_VERSION_3p8;
  * Name: vnc_negotiate
  *
  * Description:
- *  Perform the VNC initialize sequency after a client has sucessfully
+ *  Perform the VNC initialization sequence after the client has sucessfully
  *  connected to the server.  Negotiate security, framebuffer and color
  *  properties.
  *
