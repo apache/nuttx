@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/mqueue.h
  *
- *   Copyright (C) 2007, 2009, 2011, 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011, 2014-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -111,6 +111,10 @@ extern "C"
 #define EXTERN extern
 #endif
 
+struct mq_attr;       /* Forward reference */
+struct tcb_s;         /* Forward reference */
+struct task_group_s;  /* Forward reference */
+
 /****************************************************************************
  * Name: mq_msgqfree
  *
@@ -150,7 +154,6 @@ void mq_msgqfree(FAR struct mqueue_inode_s *msgq);
  *
  ****************************************************************************/
 
-struct mq_attr;
 FAR struct mqueue_inode_s *mq_msgqalloc(mode_t mode,
                                         FAR struct mq_attr *attr);
 
@@ -171,12 +174,32 @@ FAR struct mqueue_inode_s *mq_msgqalloc(mode_t mode,
  *
  ****************************************************************************/
 
-struct tcb_s;
-mqd_t mq_descreate(FAR struct tcb_s* mtcb, FAR struct mqueue_inode_s* msgq,
+mqd_t mq_descreate(FAR struct tcb_s *mtcb, FAR struct mqueue_inode_s *msgq,
                    int oflags);
 
 /****************************************************************************
- * Name: mq_desclose
+ * Name: mq_close_group
+ *
+ * Description:
+ *   This function is used to indicate that all threads in the group are
+ *   finished with the specified message queue mqdes.  The mq_close_group()
+ *   deallocates any system resources allocated by the system for use by
+ *   this task for its message queue.
+ *
+ * Parameters:
+ *   mqdes - Message queue descriptor.
+ *   group - Group that has the open descriptor.
+ *
+ * Return Value:
+ *   0 (OK) if the message queue is closed successfully,
+ *   otherwise, -1 (ERROR).
+ *
+ ****************************************************************************/
+
+int mq_close_group(mqd_t mqdes, FAR struct task_group_s *group);
+
+/****************************************************************************
+ * Name: mq_desclose_group
  *
  * Description:
  *   This function performs the portion of the mq_close operation related
@@ -184,16 +207,17 @@ mqd_t mq_descreate(FAR struct tcb_s* mtcb, FAR struct mqueue_inode_s* msgq,
  *
  * Parameters:
  *   mqdes - Message queue descriptor.
+ *   group - Group that has the open descriptor.
  *
  * Return Value:
- *   None
+ *   None.
  *
  * Assumptions:
  * - Called only from mq_close() with the scheduler locked.
  *
  ****************************************************************************/
 
-void mq_desclose(mqd_t mqdes);
+void mq_desclose_group(mqd_t mqdes, FAR struct task_group_s *group);
 
 #undef EXTERN
 #ifdef __cplusplus

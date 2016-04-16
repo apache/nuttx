@@ -9309,7 +9309,7 @@
 	  adds support for initializing of the ltdc controller and the lcd
 	  device connected on the stm32f429i-disco. The following methods are
 	  provided for the generic fb interface: up_fbinitialize,
-	  up_fbgetvplane, and fb_uninitialize. The following methods are
+	  up_fbgetvplane, and up_fbuninitialize. The following methods are
 	  provided for the ltdc interface: up_ltdcgetlayer. From Marco Krahl
 	  (2014-12-19).
 	* zrch/arm/src/stm32/Kconfig: Add configuration option for ltdc.  This
@@ -11622,3 +11622,36 @@
 	  POSIX programming but the name signal() probably has the better
 	  credentials.  sigset() is now relegated to a #define in signal.h that
 	  makes it equivalent to signal() (2016-04-10).
+	* configs/nucleus2g:  Removed the Nucleus2G configuration.  There has
+	  not been any activity with the commercial board in a few years and it
+	  no longer appears to be available from the 2g-eng.com website.
+	  Since the board is commercial and no longer publically available, it
+	  no longer qualifies for inclusion in the open source repositories.
+	  The code as of this data is still available in the Obsoleted
+	  repository at configs/nucleus2g (2016-04-12).
+	* arch/arm/src/stm32l4: Fix the STM32L4 SPI driver.  That SPI driver is
+	  quite different. They now handle frames of arbitrary size between 4
+	  and 16 bits. It was broken before a new bit has to be set (rx fifo
+	  threshold) to handle <= 8-bit transactions. If not set, the default is
+	  16-bit packed >=8-bit frames and the RXNE bit is never set (it is set
+	  when 16-bits are received). weird things as always.
+	  This also add 8-bit access routines to the data register, because a
+	  16-bit access to the data register when the frame size is below 9 bits
+	  is interpreted as a packed dual frame exchange. Sebastien Lorquet
+	  (2016-04-13).
+	* net/sockets/listen.c and accept.c and include/nuttx/net:  Separate
+	  out psock_listen() and psock_accepti() for internal OS usage
+	  (2016-04-14).
+	* fs/inode/, fs/vfs/, and sched/task/:  File and socket descriptors are
+	  no longer allocated for kernel threads.  They must use SYSLOG for
+	  output and the low-level psock interfaces for network I/O.  This
+	  saves a little memory which might be important for small footprint
+	  configurations (2015-04-14).
+	* Framebuffer driver:  Add a display number to each interface in order
+	  to support multiple display devices (2015-04-14).
+	* drivers/wireless/nrf24l01.c: Fix backward calculation of relative
+	  frequency.  Noted by Henry Zhang (2015-04-15).
+	* drivers/sensors/h1750fvi.c:  Add a character driver for Rohm Ambient
+	  Light Sensor BH1750FVI.  From Alan Carvalho de Assi (2016-04-15).
+	* configs/stm32f4discovery: Integrate BH1750FVI driver in the
+	  STM32F4Discovery board.  From Alan Carvalho de Assi (2016-04-15).

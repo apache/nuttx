@@ -1590,7 +1590,7 @@ int nrf24l01_setradiofreq(FAR struct nrf24l01_dev_s *dev, uint32_t freq)
 
   CHECK_ARGS(dev && freq >= NRF24L01_MIN_FREQ && freq <= NRF24L01_MAX_FREQ);
 
-  value = NRF24L01_MIN_FREQ - freq;
+  value = freq - NRF24L01_MIN_FREQ;
   nrf24l01_lock(dev->spi);
   nrf24l01_writeregbyte(dev, NRF24L01_RF_CH, value);
   nrf24l01_unlock(dev->spi);

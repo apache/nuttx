@@ -401,11 +401,6 @@ configs/nucleo-f4x1re
 configs/nucleo-f303re
   STMicro ST Nucleo F303RE board.  Contributed by Paul Alexander Patience.
 
-configs/nucleus2g
-  This port uses the Nucleus 2G board (with Babel CAN board).  This board
-  features an NXP LPC1768 processor.  See the 2G website (http://www.2g-eng.com/)
-  for more information about the Nucleus 2G.
-
 configs/nutiny-nuc120
   This is the port of NuttX to the NuvoTon NuTiny-SDK-NUC120 board.  This
   board has the NUC120LE3AN chip with a built-in NuLink debugger.

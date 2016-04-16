@@ -66,9 +66,10 @@ void sq_rem(FAR sq_entry_t *node, sq_queue_t *queue)
       else
         {
           FAR sq_entry_t *prev;
+
           for (prev = (FAR sq_entry_t *)queue->head;
-              prev && prev->flink != node;
-              prev = prev->flink);
+               prev && prev->flink != node;
+               prev = prev->flink);
 
           if (prev)
             {

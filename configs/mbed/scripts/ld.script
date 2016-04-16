@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/nucleus2g/mbed/ld.script
+ * configs/mbed/scripts/ld.script
  *
  *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -52,6 +52,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Is it better to allocate the struct inode_path_s from the heap? or
  * from the stack?  This decision depends on how often this is down and
  * how much stack space you can afford.

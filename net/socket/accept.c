@@ -59,17 +59,17 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: accept
+ * Function: psock_accept
  *
  * Description:
- *   The accept function is used with connection-based socket types
+ *   The psock_accept function is used with connection-based socket types
  *   (SOCK_STREAM, SOCK_SEQPACKET and SOCK_RDM). It extracts the first
  *   connection request on the queue of pending connections, creates a new
  *   connected socket with mostly the same properties as 'sockfd', and
  *   allocates a new socket descriptor for the socket, which is returned. The
  *   newly created socket is no longer in the listening state. The original
  *   socket 'sockfd' is unaffected by this call.  Per file descriptor flags
- *   are not inherited across an accept.
+ *   are not inherited across an psock_accept.
  *
  *   The 'sockfd' argument is a socket descriptor that has been created with
  *   socket(), bound to a local address with bind(), and is listening for
@@ -81,26 +81,24 @@
  *   actual length of the address returned.
  *
  *   If no pending connections are present on the queue, and the socket is
- *   not marked as non-blocking, accept blocks the caller until a connection
- *   is present. If the socket is marked non-blocking and no pending
- *   connections are present on the queue, accept returns EAGAIN.
+ *   not marked as non-blocking, psock_accept blocks the caller until a
+ *   connection is present. If the socket is marked non-blocking and no
+ *   pending connections are present on the queue, psock_accept returns
+ *   EAGAIN.
  *
  * Parameters:
- *   sockfd   The listening socket descriptor
+ *   psock    Reference to the listening socket structure
  *   addr     Receives the address of the connecting client
  *   addrlen  Input: allocated size of 'addr', Return: returned size of 'addr'
+ *   newsock  Location to return the accepted socket information.
  *
  * Returned Value:
- *  Returns -1 on error. If it succeeds, it returns a non-negative integer
- *  that is a descriptor for the accepted socket.
+ *  Returns 0 (OK) on success.  On failure, it returns -1 (ERROR) with the
+ *  errno variable set to indicate the nature of the error.
  *
  * EAGAIN or EWOULDBLOCK
  *   The socket is marked non-blocking and no connections are present to
  *   be accepted.
- * EBADF
- *   The descriptor is invalid.
- * ENOTSOCK
- *  The descriptor references a file, not a socket.
  * EOPNOTSUPP
  *   The referenced socket is not of type SOCK_STREAM.
  * EINTR
@@ -124,42 +122,17 @@
  * EPERM
  *   Firewall rules forbid connection.
  *
- * Assumptions:
- *
  ****************************************************************************/
 
-int accept(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen)
+int psock_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
+                 FAR socklen_t *addrlen, FAR struct socket *newsock)
 {
-  FAR struct socket *psock = sockfd_socket(sockfd);
-  FAR struct socket *pnewsock;
-  int newfd;
   int err;
   int ret;
 
-  /* Verify that the sockfd corresponds to valid, allocated socket */
+  DEBUGASSERT(psock != NULL);
 
-  if (!psock || psock->s_crefs <= 0)
-    {
-      /* It is not a valid socket description.  Distinguish between the cases
-       * where sockfd is a just valid and when it is a valid file descriptor used
-       * in the wrong context.
-       */
-
-#if CONFIG_NFILE_DESCRIPTORS > 0
-      if ((unsigned int)sockfd < CONFIG_NFILE_DESCRIPTORS)
-        {
-          err = ENOTSOCK;
-        }
-      else
-#endif
-        {
-          err = EBADF;
-        }
-
-      goto errout;
-    }
-
-  /* We have a socket descriptor, but it is a stream? */
+  /* Is the socket a stream? */
 
   if (psock->s_type != SOCK_STREAM)
     {
@@ -232,28 +205,10 @@ int accept(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen)
         }
     }
 
-  /* Allocate a socket descriptor for the new connection now (so that it
-   * cannot fail later)
-   */
-
-  newfd = sockfd_allocate(0);
-  if (newfd < 0)
-    {
-      err = ENFILE;
-      goto errout;
-    }
-
-  pnewsock = sockfd_socket(newfd);
-  if (!pnewsock)
-    {
-      err = ENFILE;
-      goto errout_with_socket;
-    }
-
   /* Initialize the socket structure. */
 
-  pnewsock->s_domain = psock->s_domain;
-  pnewsock->s_type   = SOCK_STREAM;
+  newsock->s_domain = psock->s_domain;
+  newsock->s_type   = SOCK_STREAM;
 
   /* Perform the correct accept operation for this address domain */
 
@@ -264,11 +219,11 @@ int accept(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen)
     {
       /* Perform the local accept operation (with the network unlocked) */
 
-      ret = psock_local_accept(psock, addr, addrlen, &pnewsock->s_conn);
+      ret = psock_local_accept(psock, addr, addrlen, &newsock->s_conn);
       if (ret < 0)
         {
           err = -ret;
-          goto errout_with_socket;
+          goto errout;
         }
     }
 #endif /* CONFIG_NET_LOCAL_STREAM */
@@ -283,19 +238,19 @@ int accept(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen)
       /* Perform the local accept operation (with the network locked) */
 
       state = net_lock();
-      ret = psock_tcp_accept(psock, addr, addrlen, &pnewsock->s_conn);
+      ret = psock_tcp_accept(psock, addr, addrlen, &newsock->s_conn);
       if (ret < 0)
         {
           net_unlock(state);
           err = -ret;
-          goto errout_with_socket;
+          goto errout;
         }
 
       /* Begin monitoring for TCP connection events on the newly connected
        * socket
        */
 
-      ret = net_startmonitor(pnewsock);
+      ret = net_startmonitor(newsock);
       if (ret < 0)
         {
           /* net_startmonitor() can only fail on certain race conditions
@@ -314,12 +269,145 @@ int accept(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen)
 
   /* Mark the new socket as connected. */
 
-  pnewsock->s_flags |= _SF_CONNECTED;
-  pnewsock->s_flags &= ~_SF_CLOSED;
-  return newfd;
+  newsock->s_flags |= _SF_CONNECTED;
+  newsock->s_flags &= ~_SF_CLOSED;
+  return OK;
 
 errout_after_accept:
-  psock_close(pnewsock);
+  psock_close(newsock);
+
+errout:
+  set_errno(err);
+  return ERROR;
+}
+
+/****************************************************************************
+ * Function: accept
+ *
+ * Description:
+ *   The accept function is used with connection-based socket types
+ *   (SOCK_STREAM, SOCK_SEQPACKET and SOCK_RDM). It extracts the first
+ *   connection request on the queue of pending connections, creates a new
+ *   connected socket with mostly the same properties as 'sockfd', and
+ *   allocates a new socket descriptor for the socket, which is returned. The
+ *   newly created socket is no longer in the listening state. The original
+ *   socket 'sockfd' is unaffected by this call.  Per file descriptor flags
+ *   are not inherited across an accept.
+ *
+ *   The 'sockfd' argument is a socket descriptor that has been created with
+ *   socket(), bound to a local address with bind(), and is listening for
+ *   connections after a call to listen().
+ *
+ *   On return, the 'addr' structure is filled in with the address of the
+ *   connecting entity. The 'addrlen' argument initially contains the size
+ *   of the structure pointed to by 'addr'; on return it will contain the
+ *   actual length of the address returned.
+ *
+ *   If no pending connections are present on the queue, and the socket is
+ *   not marked as non-blocking, accept blocks the caller until a connection
+ *   is present. If the socket is marked non-blocking and no pending
+ *   connections are present on the queue, accept returns EAGAIN.
+ *
+ * Parameters:
+ *   sockfd   The listening socket descriptor
+ *   addr     Receives the address of the connecting client
+ *   addrlen  Input: allocated size of 'addr', Return: returned size of 'addr'
+ *
+ * Returned Value:
+ *  Returns -1 on error. If it succeeds, it returns a non-negative integer
+ *  that is a descriptor for the accepted socket.
+ *
+ * EAGAIN or EWOULDBLOCK
+ *   The socket is marked non-blocking and no connections are present to
+ *   be accepted.
+ * EBADF
+ *   The descriptor is invalid.
+ * ENOTSOCK
+ *  The descriptor references a file, not a socket.
+ * EOPNOTSUPP
+ *   The referenced socket is not of type SOCK_STREAM.
+ * EINTR
+ *   The system call was interrupted by a signal that was caught before
+ *   a valid connection arrived.
+ * ECONNABORTED
+ *   A connection has been aborted.
+ * EINVAL
+ *   Socket is not listening for connections.
+ * EMFILE
+ *   The per-process limit of open file descriptors has been reached.
+ * ENFILE
+ *   The system maximum for file descriptors has been reached.
+ * EFAULT
+ *   The addr parameter is not in a writable part of the user address
+ *   space.
+ * ENOBUFS or ENOMEM
+ *   Not enough free memory.
+ * EPROTO
+ *   Protocol error.
+ * EPERM
+ *   Firewall rules forbid connection.
+ *
+ ****************************************************************************/
+
+int accept(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen)
+{
+  FAR struct socket *psock = sockfd_socket(sockfd);
+  FAR struct socket *newsock;
+  int newfd;
+  int err;
+  int ret;
+
+  /* Verify that the sockfd corresponds to valid, allocated socket */
+
+  if (psock == NULL || psock->s_crefs <= 0)
+    {
+      /* It is not a valid socket description.  Distinguish between the cases
+       * where sockfd is a just valid and when it is a valid file descriptor used
+       * in the wrong context.
+       */
+
+#if CONFIG_NFILE_DESCRIPTORS > 0
+      if ((unsigned int)sockfd < CONFIG_NFILE_DESCRIPTORS)
+        {
+          err = ENOTSOCK;
+        }
+      else
+#endif
+        {
+          err = EBADF;
+        }
+
+      goto errout;
+    }
+
+  /* Allocate a socket descriptor for the new connection now (so that it
+   * cannot fail later)
+   */
+
+  newfd = sockfd_allocate(0);
+  if (newfd < 0)
+    {
+      err = ENFILE;
+      goto errout;
+    }
+
+  newsock = sockfd_socket(newfd);
+  if (newsock == NULL)
+    {
+      err = ENFILE;
+      goto errout_with_socket;
+    }
+
+  ret = psock_accept(psock, addr, addrlen, newsock);
+  if (ret < 0)
+    {
+      /* The errno value has already been set */
+
+      sockfd_release(newfd);
+      return ERROR;
+    }
+
+  return newfd;
 
 errout_with_socket:
   sockfd_release(newfd);

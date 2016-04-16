@@ -1,8 +1,8 @@
 /************************************************************************************
- * configs/nucleus2g/src/lpc17_boot.c
+ * configs/stm32f4discovery/src/stm32_bh1750fvi.c
  *
- *   Copyright (C) 2010, 2012, 2015 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2016 Alan Carvalho de Assis. All rights reserved.
+ *   Author: Alan Carvalho de Assis <acassis@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -39,79 +39,67 @@
 
 #include <nuttx/config.h>
 
+#include <errno.h>
 #include <debug.h>
 
-#include <nuttx/board.h>
-#include <arch/board/board.h>
+#include <nuttx/spi/spi.h>
+#include <nuttx/sensors/bh1750fvi.h>
 
-#include "up_arch.h"
-#include "up_internal.h"
+#include "stm32.h"
+#include "stm32_i2c.h"
+#include "stm32f4discovery.h"
 
-#include "lpc17_ssp.h"
-#include "lpc17_gpio.h"
-
-#include "nucleus2g.h"
+#if defined(CONFIG_I2C) && defined(CONFIG_BH1750FVI)
 
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
 
-/************************************************************************************
- * Private Functions
- ************************************************************************************/
+#define BH1750FVI_I2C_PORTNO 1   /* On I2C1 */
 
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
 
 /************************************************************************************
- * Name: lpc17_boardinitialize
+ * Name: stm32_bh1750initialize
  *
  * Description:
- *   All LPC17xx architectures must provide the following entry point.  This entry point
- *   is called early in the initialization -- after all memory has been configured
- *   and mapped but before any devices have been initialized.
+ *   Initialize and register the MPL115A Pressure Sensor driver.
+ *
+ * Input parameters:
+ *   devpath - The full path to the driver to register. E.g., "/dev/light0"
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
  *
  ************************************************************************************/
 
-void lpc17_boardinitialize(void)
+int stm32_bh1750initialize(FAR const char *devpath)
 {
-  /* Enable +5V needed for CAN */
+  FAR struct i2c_master_s *i2c;
+  int ret;
 
-#if defined(CONFIG_LPC17_CAN1) || defined(CONFIG_LPC17_CAN2)
-  lpc17_configgpio(NUCLEUS2G_5V_ENABLE);
-#else
-  lpc17_configgpio(NUCLEUS2G_5V_DISABLE);
-#endif
+  sndbg("Initializing BH1750FVI!\n");
 
-  /* If UART0 is used, enabled the MAX232 driver */
+  /* Initialize I2C */
 
-#ifdef CONFIG_LPC17_UART0
-  lpc17_configgpio(NUCLEUS2G_232_ENABLE);
-#else
-  lpc17_configgpio(NUCLEUS2G_232_POWERSAVE);
-#endif
+  i2c = stm32_i2cbus_initialize(BH1750FVI_I2C_PORTNO);
 
-  /* Configure SSP chip selects if 1) at least one SSP is enabled, and 2) the weak
-   * function nucleus2g_sspdev_initialize() has been brought into the link.
-   */
-
-#if defined(CONFIG_LPC17_SSP0) || defined(CONFIG_LPC17_SSP1)
-  if (nucleus2g_sspdev_initialize)
+  if (!i2c)
     {
-      nucleus2g_sspdev_initialize();
+      return -ENODEV;
     }
-#endif
 
-  /* Configure on-board LEDs if LED support has been selected. */
+  /* Then register the barometer sensor */
 
-#ifdef CONFIG_ARCH_LEDS
-  board_autoled_initialize();
-#endif
+  ret = bh1750fvi_register(devpath, i2c, BH1750FVI_I2C_ADDR);
+  if (ret < 0)
+    {
+      sndbg("Error registering BM180\n");
+    }
 
-  /* Configure the relay outptus for use on the BMS master board */
-
-#ifdef CONFIG_ARCH_BOARD_NUCLEUS2G_BMS
-  up_relayinit();
-#endif
+  return ret;
 }
+
+#endif /* CONFIG_I2C && CONFIG_BH1750FVI && CONFIG_STM32_I2C1 */
