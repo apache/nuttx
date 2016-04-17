@@ -512,7 +512,7 @@ struct rfb_clientcuttext_s
 {
   uint8_t msgtype;               /* U8  Message type */
   uint8_t padding[3];
-  uint8_t length[2];             /* U8  Length */
+  uint8_t length[4];             /* U32 Length */
   uint8_t text[1];               /* U8  Text, actual length is Length */
 };
 
@@ -612,7 +612,7 @@ struct rfb_servercuttext_s
 {
   uint8_t msgtype;               /* U8  Message type */
   uint8_t padding[3];
-  uint8_t length[2];             /* U8  Length */
+  uint8_t length[4];             /* U32 Length */
   uint8_t text[1];               /* U8  Text, actual length is Length */
 };
 
