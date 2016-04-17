@@ -159,9 +159,12 @@ static int up_getvideoinfo(FAR struct fb_vtable_s *vtable,
           return -ENOTCONN;
         }
 
-      /* Return the requested video info */
+      /* Return the requested video info.  We are committed to using the
+       * configured color format in the framebuffer, but performing color
+       * conversions on the fly for the remote framebuffer as necessary.
+       */
 
-      vinfo->fmt     = session->colorfmt;
+      vinfo->fmt     = RFB_COLORFMT;
       vinfo->xres    = session->screen.w;
       vinfo->yres    = session->screen.h;
       vinfo->nplanes = 1;
@@ -197,10 +200,15 @@ static int up_getplaneinfo(FAR struct fb_vtable_s *vtable, int planeno,
 
       DEBUGASSERT(session->fb != NULL);
 
-      pinfo->fbmem    = (FAR void *)&session->fb;
+      /* Return the requested plane info.  We are committed to using the
+       * configured bits-per-pixels in the framebuffer, but performing color
+       * conversions on the fly for the remote framebuffer as necessary.
+       */
+
+      pinfo->fbmem    = (FAR void *)session->fb;
       pinfo->fblen    = (uint32_t)session->stride * CONFIG_VNCSERVER_SCREENWIDTH;
       pinfo->stride   = (fb_coord_t)session->stride;
-      pinfo->bpp      = session->bpp;
+      pinfo->bpp      = RFB_BITSPERPIXEL;
 
       return OK;
     }

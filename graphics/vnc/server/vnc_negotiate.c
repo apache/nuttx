@@ -275,14 +275,16 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
   session->screen.w = CONFIG_VNCSERVER_SCREENWIDTH;
   session->screen.h = CONFIG_VNCSERVER_SCREENHEIGHT;
 
-  /* Now allocate the framebuffer memory */
+  /* Now allocate the framebuffer memory.  We rely on the fact that
+   * the KMM allocator will align memory to 32-bits or better.
+   */
 
   len               = (session->bpp + 7) >> 3;
   session->stride   = len * CONFIG_VNCSERVER_SCREENWIDTH;
   alloc             = (size_t)session->stride * CONFIG_VNCSERVER_SCREENHEIGHT;
 
   session->fb       = (FAR uint8_t *)kmm_zalloc(alloc);
-  if (session->fb)
+  if (session->fb == NULL)
     {
       gdbg("ERROR: Failed to allocate framebuffer memory: %lu\n",
            (unsigned long)alloc);

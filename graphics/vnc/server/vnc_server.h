@@ -68,6 +68,7 @@
 #endif
 
 #if defined(CONFIG_VNCSERVER_COLORFMT_RGB16)
+#  define RFB_COLORFMT     FB_FMT_RGB16_565
 #  define RFB_BITSPERPIXEL 16
 #  define RFB_PIXELDEPTH   16
 #  define RFB_TRUECOLOR    1
@@ -78,6 +79,7 @@
 #  define RFB_GSHIFT       5
 #  define RFB_BSHIFT       0
 #elif defined(CONFIG_VNCSERVER_COLORFMT_RGB32)
+#  define RFB_COLORFMT     FB_FMT_RGB32
 #  define RFB_BITSPERPIXEL 32
 #  define RFB_PIXELDEPTH   24
 #  define RFB_TRUECOLOR    1
