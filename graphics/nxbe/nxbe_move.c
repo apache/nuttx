@@ -79,7 +79,7 @@ static void nxbe_clipmovesrc(FAR struct nxbe_clipops_s *cops,
   struct nxbe_move_s *info = (struct nxbe_move_s *)cops;
   struct nxgl_point_s offset;
 #ifdef CONFIG_NX_UPDATE
-  FAR const struct nxgl_rect_s *update;
+  struct nxgl_rect_s update;
 #endif
 
   if (info->offset.x != 0 || info->offset.y != 0)

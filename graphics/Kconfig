@@ -57,7 +57,7 @@ config NX_WRITEONLY
 		defined.
 
 config NX_UPDATE
-	bool "Display update hooks'
+	bool "Display update hooks"
 	default n
 	---help---
 		Enable a callout to inform some external module that the display has

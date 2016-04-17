@@ -49,11 +49,11 @@
  ****************************************************************************/
 
 #ifndef MIN
-#  define MIN(a,b) (((a) < (b)) ? (a) : (b)
+#  define MIN(a,b) (((a) < (b)) ? (a) : (b))
 #endif
 
 #ifndef MAX
-#  define MAX(a,b) (((a) > (b)) ? (a) : (b)
+#  define MAX(a,b) (((a) > (b)) ? (a) : (b))
 #endif
 
 /****************************************************************************
@@ -86,7 +86,7 @@ static void nxbe_clipfilltrapezoid(FAR struct nxbe_clipops_s *cops,
 {
   struct nxbe_filltrap_s *fillinfo = (struct nxbe_filltrap_s *)cops;
 #ifdef CONFIG_NX_UPDATE
-  FAR const struct nxgl_rect_s *update;
+  struct nxgl_rect_s update;
 #endif
 
   /* Draw the trapezond */
