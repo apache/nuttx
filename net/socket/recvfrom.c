@@ -261,7 +261,7 @@ static inline void recvfrom_newtcpdata(FAR struct net_driver_s *dev,
 
   size_t recvlen = recvfrom_newdata(dev, pstate);
 
-  /* If there is more data left in the packet that we could not buffer, than
+  /* If there is more data left in the packet that we could not buffer, then
    * add it to the read-ahead buffers.
    */
 

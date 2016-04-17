@@ -39,7 +39,12 @@
 
 #include <nuttx/config.h>
 
+#include <assert.h>
 #include <errno.h>
+#include <debug.h>
+
+#include <nuttx/net/net.h>
+#include <nuttx/video/rfb.h>
 
 #include "vnc_server.h"
 
@@ -67,6 +72,64 @@
 
 int vnc_receiver(FAR struct vnc_session_s *session)
 {
+  ssize_t nrecvd;
+  int errcode;
+
+  /* Loop until the client disconnects or an unhandled error occurs */
+
+  for (; ; )
+    {
+      /* Set up to read one byte which should be the message type of the
+       * next Client-to-Server message.  We will block here until the message
+       * is received.
+       */
+
+      nrecvd = psock_recv(&session->connect, session->inbuf, 1, 0);
+      if (nrecvd < 0)
+        {
+          errcode = get_errno();
+          gdbg("ERROR: Receive byte failed: %d\n", errcode);
+          DEBUGASSERT(errcode > 0);
+          return -errcode;
+        }
+
+      DEBUGASSERT(nrecvd == 1);
+
+      /* The single byte received should be the message type.  Handle the
+       * message according to this message type.
+       */
+
+      switch (session->inbuf[0])
+        {
+          case RFB_SETPIXELFMT_MSG:    /* SetPixelFormat */
 #warning Missing logic
+            break;
+
+          case RFB_SETENCODINGS_MSG:   /* SetEncodings */
+#warning Missing logic
+            break;
+
+          case RFB_FBUPDATEREQ_MSG:    /* FramebufferUpdateRequest */
+#warning Missing logic
+            break;
+
+          case RFB_KEYEVENT_MSG:       /* KeyEvent */
+#warning Missing logic
+            break;
+
+          case RFB_POINTEREVENT_MSG:   /* PointerEvent */
+#warning Missing logic
+            break;
+
+          case RFB_CLIENTCUTTEXT_MSG:  /* ClientCutText */
+#warning Missing logic
+            break;
+
+          default:
+            gdbg("ERROR: Unsynchronized, msgtype=%d\n", session->inbuf[0]);
+            return -EPROTO;
+        }
+    }
+
   return -ENOSYS;
 }

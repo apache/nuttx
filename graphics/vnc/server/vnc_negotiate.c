@@ -109,7 +109,7 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
   /* Receive the echo of the protocol string */
 
   nrecvd = psock_recv(&session->connect, session->inbuf, len, 0);
-  if (nrecvd <= 0)
+  if (nrecvd < 0)
     {
       errcode = get_errno();
       gdbg("ERROR: Receive protocol confirmation failed: %d\n", errcode);
