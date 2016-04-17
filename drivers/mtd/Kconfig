@@ -16,7 +16,7 @@ config MTD_PARTITION
 		accesses do not extend outside of the partition.
 
 		A FLASH device may be broken up into several partitions managed,
-		each managed by a separate MTD driver.  The MTD parition interface
+		each managed by a separate MTD driver.  The MTD partition interface
 		is described in:
 
 			include/nuttx/mtd/mtd.h
@@ -43,7 +43,7 @@ config MTD_SECT512
 		If enabled, a MTD driver will be created that will convert the
 		sector size of any other MTD driver to a 512 byte "apparent" sector
 		size.  The managed MTD driver in this case must have an erase block
-		size that is greater than 512B and an event multiple of 512B.
+		size that is greater than 512B and an even multiple of 512B.
 
 if MTD_SECT512
 
@@ -142,7 +142,7 @@ config MTD_CONFIG_RAM_CONSOLIDATE
 		(For configurations that have only a single erase block assigned
 		to the config device, RAM consolidation is the ONLY option.)
 
-		Another apporach is to allow the driver to use the entire MTD
+		Another approach is to allow the driver to use the entire MTD
 		device (or partition) to save config data, and then allocate a
 		RAM buffer (the size of one erase block) to perform the
 		consolidation.  Enabling this feature basically trades off RAM
@@ -266,7 +266,7 @@ config RAMMTD_FLASHSIM
 		RAMMTD_FLASHSIM will add some extra logic to improve the level of
 		FLASH simulation.
 
-endif
+endif # RAMMTD
 
 config FILEMTD
 	bool "File-based MTD driver"
@@ -288,7 +288,7 @@ config FILEMTD_ERASESTATE
 	hex "Simulated erase state"
 	default 0xff
 
-endif
+endif # FILEMTD
 
 config MTD_AT24XX
 	bool "I2C-based AT24xx eeprom"
@@ -305,7 +305,7 @@ config AT24XX_MULTI
 	default n
 	---help---
 		Build in additional support for multiple AT24XX devices, each with
-		dynamically allocated device structures wiath a separate I2C
+		dynamically allocated device structures with a separate I2C
 		addresses (but otherwise identical -- support for multiple, different
 		AT24xx, devices not yet supported).
 
@@ -334,7 +334,7 @@ config AT24XX_EXTENDED
 	bool "Extended memory"
 	default n
 	---help---
-		If the device supports extended memory, then this operion may be set
+		If the device supports extended memory, then this operation may be set
 		to enabled the MTDIOC_EXTENDED ioctl() operation.  When the
 		extended operation is selected, calls to the driver read method will
 		return data from the extended memory region.
@@ -353,11 +353,11 @@ config AT24XX_FREQUENCY
 	int "AT24xx I2C bus frequency"
 	default 100000
 	---help---
-	   Set the I2C frequency to use when accessing the AT24CXX EEPROM. This value
-	   must represent a valid I2C speed (normally less than 400.000) or the driver
-	   might fail.
+		Set the I2C frequency to use when accessing the AT24CXX EEPROM. This value
+		must represent a valid I2C speed (normally less than 400.000) or the driver
+		might fail.
 
-endif
+endif # MTD_AT24XX
 
 config MTD_AT25
 	bool "SPI-based AT25 FLASH"
@@ -374,7 +374,7 @@ config AT25_SPIFREQUENCY
 	int "AT25 SPI Frequency"
 	default 20000000
 
-endif
+endif # MTD_AT25
 
 config MTD_AT45DB
 	bool "SPI-based AT45DB flash"
@@ -395,7 +395,7 @@ config AT45DB_PWRSAVE
 	bool "Enable power save"
 	default n
 
-endif
+endif # MTD_AT45DB
 
 config MTD_M25P
 	bool "SPI-based M25P FLASH"
@@ -437,7 +437,7 @@ config M25P_SUBSECTOR_ERASE
 		size (4K vs 64K).  This option enables support for sub-sector erase.
 		The SMART file system can take advantage of this option if it is enabled.
 
-endif
+endif # MTD_M25P
 
 config MTD_S25FL1
 	bool "QuadSPI-based S25FL1 FLASH"
@@ -482,14 +482,44 @@ config S25FL1_SCRAMBLE
 	bool "Scramble data"
 	default n
 	---help---
-		Requires drviver support for data scrambling/descrambling.
+		Requires driver support for data scrambling/descrambling.
 
 config S25FL1_SCRAMBLE_KEY
 	hex "Scramble key"
 	default 0x0baddead
 	depends on S25FL1_SCRAMBLE
 
-endif
+endif # MTD_S25FL1
+
+config MTD_N25QXXX
+	bool "QuadSPI-based Micron N25QXXX family FLASH"
+	default n
+	---help---
+		Support the N25Q016A, N25Q032A, N25Q064A, N25Q128A, N25Q256A
+		
+
+if MTD_N25QXXX
+
+config N25QXXX_QSPIMODE
+	int "N25QXXX QuadSPI Mode"
+	default 0
+	---help---
+		This device can operate in SPI mode 0 or 3.
+
+config N25QXXX_QSPI_FREQUENCY
+	int "N25QXXX QuadSPI Frequency"
+	default 108000000
+	---help---
+		- Clock frequency for all SPI commands except for Read Data
+		  command (0x03)
+		- Clock frequency for Read Data command (0x03): 54 MHz
+		In this implementation, only "Quad" reads are performed.
+
+config N25QXXX_SECTOR512
+	bool "Simulate 512 byte Erase Blocks"
+	default n
+
+endif # MTD_N25QXXX
 
 config MTD_SMART
 	bool "Sector Mapped Allocation for Really Tiny (SMART) Flash support"
@@ -553,7 +583,7 @@ config MTD_SMART_CONVERT_WEAR_FORMAT
 		CRC versions use a different header format and require a mksmartfs on the
 		device even if an existing format is there.
 
-endif
+endif # MTD_SMART_WEAR_LEVEL && !SMART_CRC_16
 
 config MTD_SMART_ENABLE_CRC
 	bool "Enable Sector CRC error detection"
@@ -588,7 +618,7 @@ config SMART_CRC_8
 config SMART_CRC_16
 	bool "CRC-16"
 
-endchoice
+endchoice # CRC level selection
 
 config MTD_SMART_MINIMIZE_RAM
 	bool "Minimize SMART RAM usage using logical sector cache"
@@ -676,7 +706,7 @@ config RAMTRON_SETSPEED
 		Select an option to provide an ioctl, MTDIOC_SETSPEED call that
 		supports dynamic selection of the RAMTRON bus speed.
 
-endif
+endif # MTD_RAMTRON
 
 config MTD_SST25
 	bool "SPI-based SST25 FLASH"
@@ -715,7 +745,7 @@ config SST25_SLOWREAD
 	bool
 	default n
 
-endif
+endif # MTD_SST25
 
 config MTD_SST25XX
 	bool "SPI-based SST25XX FLASH (64-MBit and larger)"
@@ -751,7 +781,7 @@ config SST25XX_MEMORY_TYPE
 		The memory type for SST25VF065 series is 0x25, but this can be modified if needed
 		to support compatible devices from different manufacturers.
 
-endif
+endif # MTD_SST25XX
 
 config MTD_SST39FV
 	bool "SST39FV NOR FLASH"
@@ -770,7 +800,7 @@ config SST39VF_BASE_ADDRESS
 	---help---
 		This is the address where the SST29VF FLASH can be found in memory.
 
-endif
+endif # MTD_SST39FV
 
 config MTD_W25
 	bool "SPI-based W25 FLASH"
@@ -799,4 +829,4 @@ config W25_SLOWREAD
 	bool
 	default n
 
-endif
+endif # MTD_W25
