@@ -208,6 +208,7 @@ static int up_getplaneinfo(FAR struct fb_vtable_s *vtable, int planeno,
       pinfo->fbmem    = (FAR void *)session->fb;
       pinfo->fblen    = RFB_SIZE;
       pinfo->stride   = RFB_STRIDE;
+      pinfo->display  = fbinfo->display;
       pinfo->bpp      = RFB_BITSPERPIXEL;
 
       return OK;
