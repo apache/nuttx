@@ -406,7 +406,7 @@ static inline void vnc_kbd_specrel(FAR uint8_t *buffer, uint8_t keycode)
  ****************************************************************************/
 
 static int vnc_kbd_lookup(FAR const struct vnc_keymap_s *table,
-                          unsigned int nelem, uint32_t keysym)
+                          unsigned int nelem, uint16_t keysym)
 {
   int i;
 
@@ -435,7 +435,7 @@ static int vnc_kbd_lookup(FAR const struct vnc_keymap_s *table,
  *
  ****************************************************************************/
 
-static int vnc_kbd_ascii(uint32_t keysym)
+static int vnc_kbd_ascii(uint16_t keysym)
 {
   /* ISO/IEC 8859-1 Latin1 matches C ASCII in this range: */
 
@@ -475,7 +475,7 @@ static int vnc_kbd_ascii(uint32_t keysym)
  *
  ****************************************************************************/
 
-void vnc_key_map(FAR struct vnc_session_s *session, uint32_t keysym,
+void vnc_key_map(FAR struct vnc_session_s *session, uint16_t keysym,
                  bool keydown)
 {
 #ifdef CONFIG_VNCSERVER_KBDENCODE

@@ -329,7 +329,7 @@ int vnc_receiver(FAR struct vnc_session_s *session);
  ****************************************************************************/
 
 #ifdef CONFIG_NX_KBD
-void vnc_key_map(FAR struct vnc_session_s *session, uint32_t keysym,
+void vnc_key_map(FAR struct vnc_session_s *session, uint16_t keysym,
                  bool keydown);
 #endif
 

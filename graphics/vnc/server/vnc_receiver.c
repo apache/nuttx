@@ -53,6 +53,49 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: vnc_read_remainder
+ *
+ * Description:
+ *   After receiving the first byte of a client-to-server message, this
+ *   reads in the remainder of the message.
+ *
+ * Input Parameters:
+ *   session - An instance of the session structure.
+ *   msglen  - The full length of the message
+ *
+ * Returned Value:
+ *   At present, always returns OK
+ *
+ ****************************************************************************/
+
+int vnc_read_remainder(FAR struct vnc_session_s *session, size_t msglen,
+                       size_t offset)
+{
+  ssize_t nrecvd;
+  size_t ntotal;
+  int errcode;
+
+  /* Loop until the rest of the message is recieved. */
+
+  for (ntotal = 0; ntotal < msglen; offset += nrecvd, ntotal += nrecvd)
+    {
+      /* Receive more of the message */
+
+      nrecvd = psock_recv(&session->connect, &session->inbuf[offset],
+                          msglen - ntotal, 0);
+      if (nrecvd < 0)
+        {
+          errcode = get_errno();
+          gdbg("ERROR: Receive message failed: %d\n", errcode);
+          DEBUGASSERT(errcode > 0);
+          return -errcode;
+        }
+    }
+
+  return OK;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -60,7 +103,7 @@
  * Name: vnc_receiver
  *
  * Description:
- *  This function handles all Client-to-Server messages.
+ *   This function handles all Client-to-Server messages.
  *
  * Input Parameters:
  *   session - An instance of the session structure.
@@ -74,6 +117,7 @@ int vnc_receiver(FAR struct vnc_session_s *session)
 {
   ssize_t nrecvd;
   int errcode;
+  int ret;
 
   /* Loop until the client disconnects or an unhandled error occurs */
 
@@ -102,27 +146,217 @@ int vnc_receiver(FAR struct vnc_session_s *session)
       switch (session->inbuf[0])
         {
           case RFB_SETPIXELFMT_MSG:    /* SetPixelFormat */
+            {
+              /* Read the rest of the SetPixelFormat message */
+
+              ret = vnc_read_remainder(session,
+                                       sizeof(struct rfb_setpixelformat_s) - 1,
+                                       1);
+              if (ret < 0)
+                {
+                  gdbg("ERROR: Failed to read SetPixelFormat message: %d\n",
+                       ret);
+                }
+              else
+                {
 #warning Missing logic
+                }
+            }
             break;
 
           case RFB_SETENCODINGS_MSG:   /* SetEncodings */
+            {
+              FAR struct rfb_setencodings_s *encodings;
+              uint32_t nencodings;
+
+              /* Read the SetEncodings message without the following
+               * encodings.
+               */
+
+              ret = vnc_read_remainder(session,
+                                       SIZEOF_RFB_SERVERINIT_S(0) - 1,
+                                       1);
+              if (ret < 0)
+                {
+                  gdbg("ERROR: Failed to read SetEncodings message: %d\n",
+                       ret);
+                }
+              else
+                {
+                  /* Read the following encodings */
+
+                  encodings  = (FAR struct rfb_setencodings_s *)session->inbuf;
+                  nencodings = rfb_getbe32(encodings->nencodings);
+
+                  ret = vnc_read_remainder(session,
+                                           nencodings * sizeof(uint32_t),
+                                           SIZEOF_RFB_SERVERINIT_S(0));
+                  if (ret < 0)
+                    {
+                      gdbg("ERROR: Failed to read encodings: %d\n",
+                           ret);
+                    }
+                  else
+                    {
 #warning Missing logic
+                    }
+                }
+            }
             break;
 
           case RFB_FBUPDATEREQ_MSG:    /* FramebufferUpdateRequest */
-#warning Missing logic
+            {
+              FAR struct rfb_fbupdatereq_s *update;
+              struct nxgl_rect_s rect;
+
+              /* Read the rest of the SetPixelFormat message */
+
+              ret = vnc_read_remainder(session,
+                                       sizeof(struct rfb_fbupdatereq_s) - 1,
+                                       1);
+              if (ret < 0)
+                {
+                  gdbg("ERROR: Failed to read FramebufferUpdateRequest message: %d\n",
+                       ret);
+                }
+              else
+                {
+                  /* Enqueue the update */
+
+                  update = (FAR struct rfb_fbupdatereq_s *)session->inbuf;
+
+                  rect.pt1.x = rfb_getbe16(update->xpos);
+                  rect.pt1.y = rfb_getbe16(update->ypos);
+                  rect.pt2.x = rect.pt1.x + rfb_getbe16(update->width);
+                  rect.pt2.y = rect.pt1.y + rfb_getbe16(update->height);
+
+                  ret = vnc_update_rectangle(session, &rect);
+                  if (ret < 0)
+                    {
+                      gdbg("ERROR: Failed to queue update: %d\n", ret);
+                    }
+                }
+            }
             break;
 
           case RFB_KEYEVENT_MSG:       /* KeyEvent */
-#warning Missing logic
+            {
+              FAR struct rfb_keyevent_s *keyevent;
+
+              /* Read the rest of the KeyEvent message */
+
+              ret = vnc_read_remainder(session,
+                                       sizeof(struct rfb_keyevent_s) - 1,
+                                       1);
+              if (ret < 0)
+                {
+                  gdbg("ERROR: Failed to read KeyEvent message: %d\n",
+                       ret);
+                }
+              else
+                {
+                  /* Inject the key press/release event into NX */
+
+                  keyevent = (FAR struct rfb_keyevent_s *)session->inbuf;
+                  vnc_key_map(session, rfb_getbe16(keyevent->key),
+                              (bool)keyevent->down);
+                }
+            }
             break;
 
           case RFB_POINTEREVENT_MSG:   /* PointerEvent */
-#warning Missing logic
+            {
+#ifdef CONFIG_NX_XYINPUT
+              FAR struct rfb_pointerevent_s *event;
+              uint8_t buttons;
+#endif
+
+              /* Read the rest of the PointerEvent message */
+
+              ret = vnc_read_remainder(session,
+                                       sizeof(struct rfb_pointerevent_s) - 1,
+                                       1);
+              if (ret < 0)
+                {
+                  gdbg("ERROR: Failed to read PointerEvent message: %d\n",
+                       ret);
+                }
+#ifdef CONFIG_NX_XYINPUT
+              else
+                {
+                  event = (FAR struct rfb_pointerevent_s *)session->inbuf;
+
+                 /* Map buttons bitmap.  Bits 0-7 are buttons 1-8, 0=up,
+                  * 1=down.  By convention Bit 0 = left button, Bit 1 =
+                  * middle button, and Bit 2 = right button.
+                  */
+
+                  buttons = 0;
+                  if ((event->buttons & (1 << 0)) != 0)
+                    {
+                      buttons |= NX_MOUSE_LEFTBUTTON;
+                    }
+
+                  if ((event->buttons & (1 << 1)) != 0)
+                    {
+                      buttons |= NX_MOUSE_CENTERBUTTON;
+                    }
+
+                  if ((event->buttons & (1 << 2)) != 0)
+                    {
+                      buttons |= NX_MOUSE_RIGHTBUTTON;
+                    }
+
+                  ret = nx_mousein(session->handle,
+                                   (nxgl_coord_t)rfb_getbe16(event->xpos),
+                                   (nxgl_coord_t)rfb_getbe16(event->ypos),
+                                   buttons);
+                  if (ret < 0)
+                    {
+                      gdbg("ERROR: nx_mousein failed: %d\n", ret);
+                    }
+                }
+#endif
+            }
             break;
 
           case RFB_CLIENTCUTTEXT_MSG:  /* ClientCutText */
+            {
+              FAR struct rfb_clientcuttext_s *cuttext;
+              uint32_t length;
+
+              /* Read the ClientCutText message without the following
+               * text.
+               */
+
+              ret = vnc_read_remainder(session,
+                                       SIZEOF_RFB_CLIENTCUTTEXT_S(0) - 1,
+                                       1);
+              if (ret < 0)
+                {
+                  gdbg("ERROR: Failed to read ClientCutText message: %d\n",
+                       ret);
+                }
+              else
+                {
+                  /* Read the following text */
+
+                  cuttext = (FAR struct rfb_clientcuttext_s *)session->inbuf;
+                  length  = rfb_getbe32(cuttext->length);
+
+                  ret = vnc_read_remainder(session, length,
+                                           SIZEOF_RFB_CLIENTCUTTEXT_S(0));
+                  if (ret < 0)
+                    {
+                      gdbg("ERROR: Failed to read text: %d\n",
+                           ret);
+                    }
+                  else
+                    {
 #warning Missing logic
+                    }
+                }
+            }
             break;
 
           default:
