@@ -1,7 +1,7 @@
 /****************************************************************************
  * graphics/nxbe/nxbe_bitmap.c
  *
- *   Copyright (C) 2008-2009, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -75,8 +75,17 @@ static void nxs_clipcopy(FAR struct nxbe_clipops_s *cops,
                          FAR const struct nxgl_rect_s *rect)
 {
   struct nx_bitmap_s *bminfo = (struct nx_bitmap_s *)cops;
+
+  /* Copy the rectangular region */
+
   plane->copyrectangle(&plane->pinfo, rect, bminfo->src,
                        &bminfo->origin, bminfo->stride);
+
+#ifdef CONFIG_NX_UPDATE
+  /* Notify external logic that the display has been updated */
+
+  nx_notify_rectangle(&plane->pinfo, rect);
+#endif
 }
 
 /****************************************************************************
@@ -106,8 +115,8 @@ static void nxs_clipcopy(FAR struct nxbe_clipops_s *cops,
  ****************************************************************************/
 
 void nxbe_bitmap(FAR struct nxbe_window_s *wnd, FAR const struct nxgl_rect_s *dest,
-                FAR const void *src[CONFIG_NX_NPLANES],
-                FAR const struct nxgl_point_s *origin, unsigned int stride)
+                 FAR const void *src[CONFIG_NX_NPLANES],
+                 FAR const struct nxgl_point_s *origin, unsigned int stride)
 {
   struct nx_bitmap_s info;
   struct nxgl_rect_s bounds;
@@ -153,6 +162,7 @@ void nxbe_bitmap(FAR struct nxbe_window_s *wnd, FAR const struct nxgl_rect_s *de
 
   nxgl_rectintersect(&remaining, &bounds, &wnd->bounds);
   nxgl_rectintersect(&remaining, &remaining, &wnd->be->bkgd.bounds);
+
   if (nxgl_nullrect(&remaining))
     {
       return;
@@ -177,4 +187,3 @@ void nxbe_bitmap(FAR struct nxbe_window_s *wnd, FAR const struct nxgl_rect_s *de
                    &info.cops, &wnd->be->plane[i]);
     }
 }
-

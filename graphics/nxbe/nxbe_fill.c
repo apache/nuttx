@@ -1,7 +1,7 @@
 /****************************************************************************
  * graphics/nxbe/nxbe_fill.c
  *
- *   Copyright (C) 2008-2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <nuttx/nx/nxglib.h>
+#include <nuttx/nx/nx.h>
 
 #include "nxbe.h"
 
@@ -71,7 +72,16 @@ static void nxbe_clipfill(FAR struct nxbe_clipops_s *cops,
                         FAR const struct nxgl_rect_s *rect)
 {
   struct nxbe_fill_s *fillinfo = (struct nxbe_fill_s *)cops;
+
+  /* Draw the rectangle */
+    
   plane->fillrectangle(&plane->pinfo, rect, fillinfo->color);
+
+#ifdef CONFIG_NX_UPDATE
+  /* Notify external logic that the display has been updated */
+
+  nx_notify_rectangle(&plane->pinfo, rect);
+#endif
 }
 
 /****************************************************************************
