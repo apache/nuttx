@@ -524,7 +524,7 @@ FAR struct mtd_dev_s *s25fl1_initialize(FAR struct qspi_dev_s *qspi,
 
 struct qspi_dev_s; /* Forward reference */
 FAR struct mtd_dev_s *n25qxxx_initialize(FAR struct qspi_dev_s *qspi,
-                                        bool unprotect);
+                                         bool unprotect);
 
 /****************************************************************************
  * Name: up_flashinitialize

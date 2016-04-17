@@ -266,7 +266,7 @@ config RAMMTD_FLASHSIM
 		RAMMTD_FLASHSIM will add some extra logic to improve the level of
 		FLASH simulation.
 
-endif
+endif # RAMMTD
 
 config FILEMTD
 	bool "File-based MTD driver"
@@ -288,7 +288,7 @@ config FILEMTD_ERASESTATE
 	hex "Simulated erase state"
 	default 0xff
 
-endif
+endif # FILEMTD
 
 config MTD_AT24XX
 	bool "I2C-based AT24xx eeprom"
@@ -353,11 +353,11 @@ config AT24XX_FREQUENCY
 	int "AT24xx I2C bus frequency"
 	default 100000
 	---help---
-	   Set the I2C frequency to use when accessing the AT24CXX EEPROM. This value
-	   must represent a valid I2C speed (normally less than 400.000) or the driver
-	   might fail.
+		Set the I2C frequency to use when accessing the AT24CXX EEPROM. This value
+		must represent a valid I2C speed (normally less than 400.000) or the driver
+		might fail.
 
-endif
+endif # MTD_AT24XX
 
 config MTD_AT25
 	bool "SPI-based AT25 FLASH"
@@ -374,7 +374,7 @@ config AT25_SPIFREQUENCY
 	int "AT25 SPI Frequency"
 	default 20000000
 
-endif
+endif # MTD_AT25
 
 config MTD_AT45DB
 	bool "SPI-based AT45DB flash"
@@ -395,7 +395,7 @@ config AT45DB_PWRSAVE
 	bool "Enable power save"
 	default n
 
-endif
+endif # MTD_AT45DB
 
 config MTD_M25P
 	bool "SPI-based M25P FLASH"
@@ -437,7 +437,7 @@ config M25P_SUBSECTOR_ERASE
 		size (4K vs 64K).  This option enables support for sub-sector erase.
 		The SMART file system can take advantage of this option if it is enabled.
 
-endif
+endif # MTD_M25P
 
 config MTD_S25FL1
 	bool "QuadSPI-based S25FL1 FLASH"
@@ -489,7 +489,7 @@ config S25FL1_SCRAMBLE_KEY
 	default 0x0baddead
 	depends on S25FL1_SCRAMBLE
 
-endif
+endif # MTD_S25FL1
 
 config MTD_N25QXXX
 	bool "QuadSPI-based Micron N25QXXX family FLASH"
@@ -519,7 +519,7 @@ config N25QXXX_SECTOR512
 	bool "Simulate 512 byte Erase Blocks"
 	default n
 
-endif
+endif # MTD_N25QXXX
 
 config MTD_SMART
 	bool "Sector Mapped Allocation for Really Tiny (SMART) Flash support"
@@ -583,7 +583,7 @@ config MTD_SMART_CONVERT_WEAR_FORMAT
 		CRC versions use a different header format and require a mksmartfs on the
 		device even if an existing format is there.
 
-endif
+endif # MTD_SMART_WEAR_LEVEL && !SMART_CRC_16
 
 config MTD_SMART_ENABLE_CRC
 	bool "Enable Sector CRC error detection"
@@ -618,7 +618,7 @@ config SMART_CRC_8
 config SMART_CRC_16
 	bool "CRC-16"
 
-endchoice
+endchoice # CRC level selection
 
 config MTD_SMART_MINIMIZE_RAM
 	bool "Minimize SMART RAM usage using logical sector cache"
@@ -706,7 +706,7 @@ config RAMTRON_SETSPEED
 		Select an option to provide an ioctl, MTDIOC_SETSPEED call that
 		supports dynamic selection of the RAMTRON bus speed.
 
-endif
+endif # MTD_RAMTRON
 
 config MTD_SST25
 	bool "SPI-based SST25 FLASH"
@@ -745,7 +745,7 @@ config SST25_SLOWREAD
 	bool
 	default n
 
-endif
+endif # MTD_SST25
 
 config MTD_SST25XX
 	bool "SPI-based SST25XX FLASH (64-MBit and larger)"
@@ -781,7 +781,7 @@ config SST25XX_MEMORY_TYPE
 		The memory type for SST25VF065 series is 0x25, but this can be modified if needed
 		to support compatible devices from different manufacturers.
 
-endif
+endif # MTD_SST25XX
 
 config MTD_SST39FV
 	bool "SST39FV NOR FLASH"
@@ -800,7 +800,7 @@ config SST39VF_BASE_ADDRESS
 	---help---
 		This is the address where the SST29VF FLASH can be found in memory.
 
-endif
+endif # MTD_SST39FV
 
 config MTD_W25
 	bool "SPI-based W25 FLASH"
@@ -829,4 +829,4 @@ config W25_SLOWREAD
 	bool
 	default n
 
-endif
+endif # MTD_W25

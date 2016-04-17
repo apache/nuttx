@@ -2,7 +2,7 @@
  * drivers/mtd/n25qxxx.c
  * Driver for QuadSPI-based N25QxxxA
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: dev@ziggurat29.com
  *
  * Redistribution and use in source and binary forms, with or without
@@ -59,6 +59,7 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+
 /* Configuration ********************************************************************/
 /* QuadSPI Mode.  Per data sheet, either Mode 0 or Mode 3 may be used. */
 
@@ -66,23 +67,22 @@
 #  define CONFIG_N25QXXX_QSPIMODE QSPIDEV_MODE0
 #endif
 
-/* QuadSPI Frequency per data sheet::
- *
+/* QuadSPI Frequency per data sheet:
  *
  * In this implementation, only "Quad" reads are performed.
  */
 
 #ifndef CONFIG_N25QXXX_QSPI_FREQUENCY
-/* if you haven't specified frequency, default to 40 MHz which will work with all
-   commands.
+/* If you haven't specified frequency, default to 40 MHz which will work with all
+ * commands.
  */
 #  define CONFIG_N25QXXX_QSPI_FREQUENCY 40000000
 #endif
 
 #ifndef CONFIG_N25QXXX_DUMMIES
-/* if you haven't specified the number of dummy cycles for quad reads, provide a
-   reasonable default.  The actual number of dummies needed is clock and IO command
-   dependent.
+/* If you haven't specified the number of dummy cycles for quad reads, provide a
+ * reasonable default.  The actual number of dummies needed is clock and IO command
+ * dependent.
  */
 #  define CONFIG_N25QXXX_DUMMIES 6
 #endif
@@ -175,10 +175,11 @@
 
 /* Chip Geometries ******************************************************************/
 /* All members of the family support uniform 4K-byte 'sub sectors'; they also support
-   64k (and sometimes 32k) 'sectors' proper, but we won't be using those here.
+ * 64k (and sometimes 32k) 'sectors' proper, but we won't be using those here.
  */
 
 /* N25Q016 (2 MB) memory capacity */
+
 #define N25Q016_SECTOR_SIZE         (4*1024)
 #define N25Q016_SECTOR_SHIFT        (12)
 #define N25Q016_SECTOR_COUNT        (512)
@@ -186,6 +187,7 @@
 #define N25Q016_PAGE_SHIFT          (8)
 
 /* N25Q032 (4 MB) memory capacity */
+
 #define N25Q032_SECTOR_SIZE         (4*1024)
 #define N25Q032_SECTOR_SHIFT        (12)
 #define N25Q032_SECTOR_COUNT        (1024)
@@ -193,6 +195,7 @@
 #define N25Q032_PAGE_SHIFT          (8)
 
 /* N25Q064 (8 MB) memory capacity */
+
 #define N25Q064_SECTOR_SIZE         (4*1024)
 #define N25Q064_SECTOR_SHIFT        (12)
 #define N25Q064_SECTOR_COUNT        (2048)
@@ -200,6 +203,7 @@
 #define N25Q064_PAGE_SHIFT          (8)
 
 /* N25Q128 (16 MB) memory capacity */
+
 #define N25Q128_SECTOR_SIZE         (4*1024)
 #define N25Q128_SECTOR_SHIFT        (12)
 #define N25Q128_SECTOR_COUNT        (4096)
@@ -207,6 +211,7 @@
 #define N25Q128_PAGE_SHIFT          (8)
 
 /* N25Q256 (32 MB) memory capacity */
+
 #define N25Q256_SECTOR_SIZE         (4*1024)
 #define N25Q256_SECTOR_SHIFT        (12)
 #define N25Q256_SECTOR_COUNT        (8196)
@@ -214,6 +219,7 @@
 #define N25Q256_PAGE_SHIFT          (8)
 
 /* N25Q512 (64 MB) memory capacity */
+
 #define N25Q512_SECTOR_SIZE         (4*1024)
 #define N25Q512_SECTOR_SHIFT        (12)
 #define N25Q512_SECTOR_COUNT        (16384)
@@ -221,6 +227,7 @@
 #define N25Q512_PAGE_SHIFT          (8)
 
 /* N25Q00 (128 MB) memory capacity */
+
 #define N25Q00_SECTOR_SIZE          (4*1024)
 #define N25Q00_SECTOR_SHIFT         (12)
 #define N25Q00_SECTOR_COUNT         (32768)
@@ -233,17 +240,17 @@
 #define N25QXXX_CACHE_DIRTY         (1 << 1)  /* 1=Cache is dirty */
 #define N25QXXX_CACHE_ERASED        (1 << 2)  /* 1=Backing FLASH is erased */
 
-#define IS_VALID(p)                ((((p)->flags) & N25QXXX_CACHE_VALID) != 0)
-#define IS_DIRTY(p)                ((((p)->flags) & N25QXXX_CACHE_DIRTY) != 0)
-#define IS_ERASED(p)               ((((p)->flags) & N25QXXX_CACHE_DIRTY) != 0)
+#define IS_VALID(p)                 ((((p)->flags) & N25QXXX_CACHE_VALID) != 0)
+#define IS_DIRTY(p)                 ((((p)->flags) & N25QXXX_CACHE_DIRTY) != 0)
+#define IS_ERASED(p)                ((((p)->flags) & N25QXXX_CACHE_DIRTY) != 0)
 
-#define SET_VALID(p)               do { (p)->flags |= N25QXXX_CACHE_VALID; } while (0)
-#define SET_DIRTY(p)               do { (p)->flags |= N25QXXX_CACHE_DIRTY; } while (0)
-#define SET_ERASED(p)              do { (p)->flags |= N25QXXX_CACHE_DIRTY; } while (0)
+#define SET_VALID(p)                do { (p)->flags |= N25QXXX_CACHE_VALID; } while (0)
+#define SET_DIRTY(p)                do { (p)->flags |= N25QXXX_CACHE_DIRTY; } while (0)
+#define SET_ERASED(p)               do { (p)->flags |= N25QXXX_CACHE_DIRTY; } while (0)
 
-#define CLR_VALID(p)               do { (p)->flags &= ~N25QXXX_CACHE_VALID; } while (0)
-#define CLR_DIRTY(p)               do { (p)->flags &= ~N25QXXX_CACHE_DIRTY; } while (0)
-#define CLR_ERASED(p)              do { (p)->flags &= ~N25QXXX_CACHE_DIRTY; } while (0)
+#define CLR_VALID(p)                do { (p)->flags &= ~N25QXXX_CACHE_VALID; } while (0)
+#define CLR_DIRTY(p)                do { (p)->flags &= ~N25QXXX_CACHE_DIRTY; } while (0)
+#define CLR_ERASED(p)               do { (p)->flags &= ~N25QXXX_CACHE_DIRTY; } while (0)
 
 /* 512 byte sector support **********************************************************/
 
@@ -336,10 +343,6 @@ static ssize_t n25qxxx_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbyt
 static int  n25qxxx_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg);
 
 /************************************************************************************
- * Private Data
- ************************************************************************************/
-
-/************************************************************************************
  * Private Functions
  ************************************************************************************/
 
@@ -354,15 +357,16 @@ static void n25qxxx_lock(FAR struct qspi_dev_s *qspi)
    * transfers.  The bus should be locked before the chip is selected.
    *
    * This is a blocking call and will not return until we have exclusive access to
-   * the QuadSPI buss.  We will retain that exclusive access until the bus is unlocked.
+   * the QuadSPI buss.  We will retain that exclusive access until the bus is
+   * unlocked.
    */
 
   (void)QSPI_LOCK(qspi, true);
 
-  /* After locking the QuadSPI bus, the we also need call the setfrequency, setbits, and
-   * setmode methods to make sure that the QuadSPI is properly configured for the device.
-   * If the QuadSPI buss is being shared, then it may have been left in an incompatible
-   * state.
+  /* After locking the QuadSPI bus, the we also need call the setfrequency, setbits,
+   * and setmode methods to make sure that the QuadSPI is properly configured for
+   * the device. If the QuadSPI buss is being shared, then it may have been left in
+   * an incompatible state.
    */
 
   QSPI_SETMODE(qspi, CONFIG_N25QXXX_QSPIMODE);
@@ -480,11 +484,11 @@ static uint8_t n25qxxx_read_status(FAR struct n25qxxx_dev_s *priv)
 static void n25qxxx_write_status(FAR struct n25qxxx_dev_s *priv)
 {
   n25qxxx_write_enable(priv);
-  
+
   /* take care to mask of the SRP bit; it is one-time-programmable */
-  
+
   priv->cmdbuf[0] &= ~STATUS_SRP0_MASK;
-  
+
   n25qxxx_command_write(priv->qspi, N25QXXX_WRITE_STATUS,
                        (FAR const void *)priv->cmdbuf, 1);
   n25qxxx_write_disable(priv);
@@ -584,31 +588,37 @@ static inline int n25qxxx_readid(struct n25qxxx_dev_s *priv)
         priv->pageshift   = N25Q016_PAGE_SHIFT;
         priv->nsectors    = N25Q016_SECTOR_COUNT;
         break;
+
       case N25Q032_JEDEC_CAPACITY:
         priv->sectorshift = N25Q032_SECTOR_SHIFT;
         priv->pageshift   = N25Q032_PAGE_SHIFT;
         priv->nsectors    = N25Q032_SECTOR_COUNT;
         break;
+
       case N25Q064_JEDEC_CAPACITY:
         priv->sectorshift = N25Q064_SECTOR_SHIFT;
         priv->pageshift   = N25Q064_PAGE_SHIFT;
         priv->nsectors    = N25Q064_SECTOR_COUNT;
         break;
+
       case N25Q128_JEDEC_CAPACITY:
         priv->sectorshift = N25Q128_SECTOR_SHIFT;
         priv->pageshift   = N25Q128_PAGE_SHIFT;
         priv->nsectors    = N25Q128_SECTOR_COUNT;
         break;
+
       case N25Q256_JEDEC_CAPACITY:
         priv->sectorshift = N25Q256_SECTOR_SHIFT;
         priv->pageshift   = N25Q256_PAGE_SHIFT;
         priv->nsectors    = N25Q256_SECTOR_COUNT;
         break;
+
       case N25Q512_JEDEC_CAPACITY:
         priv->sectorshift = N25Q512_SECTOR_SHIFT;
         priv->pageshift   = N25Q512_PAGE_SHIFT;
         priv->nsectors    = N25Q512_SECTOR_COUNT;
         break;
+
       case N25Q00_JEDEC_CAPACITY:
         priv->sectorshift = N25Q00_SECTOR_SHIFT;
         priv->pageshift   = N25Q00_PAGE_SHIFT;
@@ -658,13 +668,14 @@ static int n25qxxx_protect(FAR struct n25qxxx_dev_s *priv,
    * necessary to protect the range of sectors.
    */
 
-  priv->cmdbuf[0] |= (STATUS_BP3_MASK|STATUS_BP_MASK);
+  priv->cmdbuf[0] |= (STATUS_BP3_MASK | STATUS_BP_MASK);
   n25qxxx_write_status(priv);
 
   /* Check the new status */
 
   priv->cmdbuf[0] = n25qxxx_read_status(priv);
-  if ((priv->cmdbuf[0] & (STATUS_BP3_MASK|STATUS_BP_MASK)) != (STATUS_BP3_MASK|STATUS_BP_MASK))
+  if ((priv->cmdbuf[0] & (STATUS_BP3_MASK | STATUS_BP_MASK)) !=
+      (STATUS_BP3_MASK | STATUS_BP_MASK))
     {
       return -EACCES;
     }
@@ -695,8 +706,9 @@ static int n25qxxx_unprotect(FAR struct n25qxxx_dev_s *priv,
   if ((priv->cmdbuf[0] & STATUS_SRP0_MASK) == STATUS_SRP0_LOCKED)
     {
       /* the SRP bit is one time programmable; if it's set, there's nothing that
-         you can do to unset it.
+       * you can do to unset it.
        */
+
       return -EACCES;
     }
 
@@ -715,7 +727,7 @@ static int n25qxxx_unprotect(FAR struct n25qxxx_dev_s *priv,
     {
       return -EACCES;
     }
-    
+
   return OK;
 }
 
@@ -738,11 +750,11 @@ static bool n25qxxx_isprotected(FAR struct n25qxxx_dev_s *priv, uint8_t status,
     {
       bp |= 8;
     }
-  
+
   /* the BP field is essentially the power-of-two of the number of 64k sectors,
-     saturated to the device size.
+   * saturated to the device size.
    */
-  
+
   if ( 0 == bp )
     {
       return false;
@@ -1215,8 +1227,6 @@ static ssize_t n25qxxx_bread(FAR struct mtd_dev_s *dev, off_t startblock,
 #endif
 
   return nbytes;
-
-return 0;
 }
 
 /************************************************************************************
@@ -1254,8 +1264,6 @@ static ssize_t n25qxxx_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
   n25qxxx_unlock(priv->qspi);
 
   return ret < 0 ? ret : nblocks;
-
-return 0;
 }
 
 /************************************************************************************
@@ -1284,8 +1292,6 @@ static ssize_t n25qxxx_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbyt
 
   fvdbg("return nbytes: %d\n", (int)nbytes);
   return (ssize_t)nbytes;
-
-return 0;
 }
 
 /************************************************************************************
@@ -1448,8 +1454,10 @@ FAR struct mtd_dev_s *n25qxxx_initialize(FAR struct qspi_dev_s *qspi, bool unpro
           goto errout_with_readbuf;
         }
 
-        /* specify the number of dummy cycles via the 'volatile configuration register' */
-        
+        /* Specify the number of dummy cycles via the 'volatile configuration
+         * register'
+         */
+
         priv->cmdbuf[0] = n25qxxx_read_volcfg(priv);
         priv->cmdbuf[0] &= 0x0f;
         priv->cmdbuf[0] |= (CONFIG_N25QXXX_DUMMIES<<4);
