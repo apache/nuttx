@@ -42,6 +42,7 @@
 #include <sched.h>
 #include <pthread.h>
 #include <assert.h>
+#include <errno.h>
 
 #include "vnc_server.h"
 
@@ -75,7 +76,7 @@ static FAR void *vnc_updater(FAR void *arg)
 #warning Missing logic
     }
 
-  return NULL; 
+  return NULL;
 }
 
 /****************************************************************************
@@ -169,3 +170,31 @@ int vnc_stop_updater(FAR struct vnc_session_s *session)
   return OK;
 }
 
+/****************************************************************************
+ * Name: vnc_update_rectangle
+ *
+ * Description:
+ *  Queue an update of the specified rectangular region on the display.
+ *
+ * Input Parameters:
+ *   session - An instance of the session structure.
+ *   rect    - The rectanglular region to be updated.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure.
+ *
+ ****************************************************************************/
+
+int vnc_update_rectangle(FAR struct vnc_session_s *session,
+                         FAR const struct nxgl_rect_s *rect)
+{
+   /* Make sure that the rectangle has a area */
+
+   if (!nxgl_nullrect(rect))
+     {
+#warning Missing logic
+     }
+
+  return -ENOSYS;
+}

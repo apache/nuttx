@@ -56,6 +56,14 @@
 
 /* Configuration */
 
+#ifndef CONFIG_NET_TCP_READAHEAD
+#  error CONFIG_NET_TCP_READAHEAD must be set to use VNC
+#endif
+
+#ifndef CONFIG_NX_UPDATE
+#  error CONFIG_NX_UPDATE must be set to use VNC
+#endif
+
 #if !defined(CONFIG_VNCSERVER_PROTO3p3) && !defined(CONFIG_VNCSERVER_PROTO3p8)
 #  error No VNC protocol selected
 #endif
@@ -267,6 +275,25 @@ int vnc_start_updater(FAR struct vnc_session_s *session);
  ****************************************************************************/
 
 int vnc_stop_updater(FAR struct vnc_session_s *session);
+
+/****************************************************************************
+ * Name: vnc_update_rectangle
+ *
+ * Description:
+ *  Queue an update of the specified rectangular region on the display.
+ *
+ * Input Parameters:
+ *   session - An instance of the session structure.
+ *   rect    - The rectanglular region to be updated.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure.
+ *
+ ****************************************************************************/
+
+int vnc_update_rectangle(FAR struct vnc_session_s *session,
+                         FAR const struct nxgl_rect_s *rect);
 
 /****************************************************************************
  * Name: vnc_receiver

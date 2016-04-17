@@ -8,6 +8,7 @@ menuconfig VNCSERVER
 	default n
 	depends on NET_TCP && !NX_LCDDRIVER && EXPERIMENTAL
 	select NET_TCP_READAHEAD
+	select NX_UPDATE
 	---help---
 		Enable support for a VNC Remote Frame Buffer (RFB) server.
 
