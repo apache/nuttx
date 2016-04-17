@@ -218,6 +218,7 @@ struct fb_planeinfo_s
   FAR void  *fbmem;       /* Start of frame buffer memory */
   uint32_t   fblen;       /* Length of frame buffer memory in bytes */
   fb_coord_t stride;      /* Length of a line in bytes */
+  uint8_t    display;     /* Display number */
   uint8_t    bpp;         /* Bits per pixel */
 };
 

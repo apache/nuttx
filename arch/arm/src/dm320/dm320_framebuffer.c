@@ -1010,10 +1010,11 @@ static int dm320_getvid0planeinfo(FAR struct fb_vtable_s *vtable, int planeno,
     }
 #endif
 
-  pinfo->fbmem  = g_vid0base;
-  pinfo->fblen  = DM320_VID0_FBLEN;
-  pinfo->stride = DM320_VID0_STRIDE;
-  pinfo->bpp    = DM320_VID0_BPP;
+  pinfo->fbmem   = g_vid0base;
+  pinfo->fblen   = DM320_VID0_FBLEN;
+  pinfo->stride  = DM320_VID0_STRIDE;
+  pinfo->display = 0;
+  pinfo->bpp     = DM320_VID0_BPP;
   return OK;
 }
 #endif
@@ -1056,10 +1057,11 @@ static int dm320_getvid1planeinfo(FAR struct fb_vtable_s *vtable, int planeno,
     }
 #endif
 
-  pinfo->fbmem  = g_vid1base;
-  pinfo->fblen  = DM320_VID1_FBLEN;
-  pinfo->stride = DM320_VID1_STRIDE;
-  pinfo->bpp    = DM320_VID1_BPP;
+  pinfo->fbmem   = g_vid1base;
+  pinfo->fblen   = DM320_VID1_FBLEN;
+  pinfo->stride  = DM320_VID1_STRIDE;
+  pinfo->display = 1;
+  pinfo->bpp     = DM320_VID1_BPP;
   return OK;
 }
 #endif
@@ -1106,10 +1108,11 @@ static int dm320_getosd0planeinfo(FAR struct fb_vtable_s *vtable, int planeno,
     }
 #endif
 
-  pinfo->fbmem  = g_osd0base;
-  pinfo->fblen  = DM320_OSD0_FBLEN;
-  pinfo->stride = DM320_OSD0_STRIDE;
-  pinfo->bpp    = DM320_OSD0_BPP;
+  pinfo->fbmem   = g_osd0base;
+  pinfo->fblen   = DM320_OSD0_FBLEN;
+  pinfo->stride  = DM320_OSD0_STRIDE;
+  pinfo->display = 2;
+  pinfo->bpp     = DM320_OSD0_BPP;
   return OK;
 }
 #endif
@@ -1156,10 +1159,11 @@ static int dm320_getosd1planeinfo(FAR struct fb_vtable_s *vtable, int planeno,
     }
 #endif
 
-  pinfo->fbmem  = g_osd1base;
-  pinfo->fblen  = DM320_OSD1_FBLEN;
-  pinfo->stride = DM320_OSD1_STRIDE;
-  pinfo->bpp    = DM320_OSD1_BPP;
+  pinfo->fbmem   = g_osd1base;
+  pinfo->fblen   = DM320_OSD1_FBLEN;
+  pinfo->stride  = DM320_OSD1_STRIDE;
+  pinfo->display = 3;
+  pinfo->bpp     = DM320_OSD1_BPP;
   return OK;
 }
 #endif

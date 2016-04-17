@@ -196,20 +196,21 @@ static uint8_t g_runbuffer[FB_STRIDE];
 
 static const struct fb_videoinfo_s g_videoinfo =
 {
-  .fmt     = FB_FMT,                    /* Color format: RGB16-565: RRRR RGGG GGGB BBBB */
-  .xres    = CONFIG_SIM_FBWIDTH,        /* Horizontal resolution in pixel columns */
-  .yres    = CONFIG_SIM_FBHEIGHT,       /* Vertical resolution in pixel rows */
-  .nplanes = 1,                         /* Number of color planes supported */
+  .fmt     = FB_FMT,                     /* Color format: RGB16-565: RRRR RGGG GGGB BBBB */
+  .xres    = CONFIG_SIM_FBWIDTH,         /* Horizontal resolution in pixel columns */
+  .yres    = CONFIG_SIM_FBHEIGHT,        /* Vertical resolution in pixel rows */
+  .nplanes = 1,                          /* Number of color planes supported */
 };
 
 /* This is the standard, NuttX Plane information object */
 
 static const struct lcd_planeinfo_s g_planeinfo =
 {
-  .putrun = sim_putrun,                 /* Put a run into LCD memory */
-  .getrun = sim_getrun,                 /* Get a run from LCD memory */
-  .buffer = (FAR uint8_t *)g_runbuffer, /* Run scratch buffer */
-  .bpp    = CONFIG_SIM_FBBPP,           /* Bits-per-pixel */
+  .putrun  = sim_putrun,                 /* Put a run into LCD memory */
+  .getrun  = sim_getrun,                 /* Get a run from LCD memory */
+  .buffer  = (FAR uint8_t *)g_runbuffer, /* Run scratch buffer */
+  .display = 0,                          /* Display number */
+  .bpp     = CONFIG_SIM_FBBPP,           /* Bits-per-pixel */
 };
 
 /* This is the standard, NuttX LCD driver object */

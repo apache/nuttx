@@ -2047,17 +2047,18 @@ FAR struct dma2d_layer_s *up_dma2dcreatelayer(fb_coord_t width,
 
               /* Initialize the videoinfo structure */
 
-              vinfo->fmt     = fmt;
-              vinfo->xres    = width;
-              vinfo->yres    = height;
-              vinfo->nplanes = 1;
+              vinfo->fmt      = fmt;
+              vinfo->xres     = width;
+              vinfo->yres     = height;
+              vinfo->nplanes  = 1;
 
               /* Initialize the planeinfo structure */
 
-              pinfo->fbmem  = fbmem;
-              pinfo->fblen  = fblen;
-              pinfo->stride = stride;
-              pinfo->bpp    = bpp;
+              pinfo->fbmem   = fbmem;
+              pinfo->fblen   = fblen;
+              pinfo->stride  = stride;
+              pinfo->display = 0;
+              pinfo->bpp     = bpp;
 
               /* Bind the layer to the identifier */
 

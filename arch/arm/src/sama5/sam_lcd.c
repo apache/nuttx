@@ -1122,10 +1122,11 @@ static int sam_base_getplaneinfo(struct fb_vtable_s *vtable, int planeno,
   gvdbg("vtable=%p planeno=%d pinfo=%p\n", vtable, planeno, pinfo);
   if (vtable && planeno == 0 && pinfo)
     {
-      pinfo->fbmem  = (void *)LAYER_BASE.framebuffer;
-      pinfo->fblen  = SAMA5_BASE_FBSIZE;
-      pinfo->stride = SAMA5_BASE_STRIDE,
-      pinfo->bpp    = LAYER_BASE.bpp;
+      pinfo->fbmem   = (void *)LAYER_BASE.framebuffer;
+      pinfo->fblen   = SAMA5_BASE_FBSIZE;
+      pinfo->stride  = SAMA5_BASE_STRIDE;
+      pinfo->display = 0;
+      pinfo->bpp     = LAYER_BASE.bpp;
       return OK;
     }
 

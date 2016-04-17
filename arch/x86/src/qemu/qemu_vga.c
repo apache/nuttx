@@ -368,10 +368,11 @@ static int vga_getvideoinfo(FAR struct lcd_dev_s *dev,
 static int vga_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
                             FAR struct lcd_planeinfo_s *pinfo)
 {
-  pinfo->putrun = vga_putrun;       /* Put a run into LCD memory */
-  pinfo->getrun = vga_getrun;       /* Get a run from LCD memory */
-  pinfo->buffer = g_runbuffer;      /* Run scratch buffer */
-  pinfo->bpp    = VGA_BPP;          /* Bits-per-pixel */
+  pinfo->putrun  = vga_putrun;      /* Put a run into LCD memory */
+  pinfo->getrun  = vga_getrun;      /* Get a run from LCD memory */
+  pinfo->buffer  = g_runbuffer;     /* Run scratch buffer */
+  pinfo->display = 0;
+  pinfo->bpp     = VGA_BPP;         /* Bits-per-pixel */
   return OK;
 }
 

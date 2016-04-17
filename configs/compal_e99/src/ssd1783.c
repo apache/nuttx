@@ -148,7 +148,8 @@ static uint16_t g_runbuffer[LCD_XRES];
 /* This structure describes the overall LCD video controller */
 
 static const struct fb_videoinfo_s g_videoinfo =
-{ .fmt = LCD_COLORFMT, /* Color format: RGB16-565: RRRR RGGG GGGB BBBB */
+{
+  .fmt = LCD_COLORFMT, /* Color format: RGB16-565: RRRR RGGG GGGB BBBB */
   .xres = LCD_XRES, /* Horizontal resolution in pixel columns */
   .yres = LCD_YRES, /* Vertical resolutiSend a command list to the LCD panelon in pixel rows */
   .nplanes = 1, /* Number of color planes supported */
@@ -157,7 +158,8 @@ static const struct fb_videoinfo_s g_videoinfo =
 /* This is the standard, NuttX Plane information object */
 
 static const struct lcd_planeinfo_s g_planeinfo =
-{ .putrun = lcd_putrun, /* Put a run into LCD memory */
+{
+  .putrun = lcd_putrun, /* Put a run into LCD memory */
 //  .getrun = lcd_getrun, /* Get a run from LCD memory */
   .buffer = (uint8_t*) g_runbuffer, /* Run scratch buffer */
   .bpp = LCD_BPP, /* Bits-per-pixel */
@@ -166,7 +168,8 @@ static const struct lcd_planeinfo_s g_planeinfo =
 /* This is the standard, NuttX LCD driver object */
 
 static struct ssd1783_dev_s g_lcddev =
-{ .dev =
+{
+  .dev =
   {
     /* LCD Configuration */
 
