@@ -34,11 +34,19 @@ config VNCSERVER_NDISPLAYS
 		Normally this should be one.
 
 config VNCSERVER_PRIO
-	int "VNC server thread priority"
+	int "VNC server task priority"
 	default 100
 
 config VNCSERVER_STACKSIZE
 	int "VNC server stack size"
+	default 2048
+
+config VNCSERVER_UPDATER_PRIO
+	int "VNC updater thread priority"
+	default 100
+
+config VNCSERVER_UPDATER_STACKSIZE
+	int "VNC updater thread stack size"
 	default 2048
 
 choice

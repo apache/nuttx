@@ -45,7 +45,6 @@
 #include <assert.h>
 #include <debug.h>
 
-#include <nuttx/kmalloc.h>
 #include <nuttx/video/fb.h>
 #include <nuttx/video/rfb.h>
 
@@ -74,8 +73,7 @@ static const char g_vncproto[] = RFB_PROTOCOL_VERSION_3p8;
  *  properties.
  *
  * Input Parameters:
- *   session - An instance of the session structure allocated by
- *     vnc_create_session().
+ *   session - An instance of the session structure.
  *
  * Returned Value:
  *   Returns zero (OK) on success; a negated errno value on failure.
@@ -91,7 +89,6 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
   FAR struct rfb_setpixelformat_s *setformat;
   ssize_t nsent;
   ssize_t nrecvd;
-  size_t alloc;
   size_t len;
   int errcode;
 
@@ -111,7 +108,7 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
 
   /* Receive the echo of the protocol string */
 
-  nrecvd = psock_recv(&session->connect, session->iobuf, len, 0);
+  nrecvd = psock_recv(&session->connect, session->inbuf, len, 0);
   if (nrecvd <= 0)
     {
       errcode = get_errno();
@@ -128,7 +125,7 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
    *  word:"
    */
 
-  sectype = (FAR struct rfb_sectype_s *)session->iobuf;
+  sectype = (FAR struct rfb_sectype_s *)session->outbuf;
   rfb_putbe32(sectype->type, RFB_SECTYPE_NONE);
 
   nsent = psock_send(&session->connect, sectype,
@@ -153,7 +150,7 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
    * In this implementation, the sharing flag is ignored.
    */
 
-  nrecvd = psock_recv(&session->connect, session->iobuf,
+  nrecvd = psock_recv(&session->connect, session->inbuf,
                       sizeof(struct rfb_clientinit_s), 0);
   if (nrecvd < 0)
     {
@@ -172,7 +169,7 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
    *  framebuffer, its pixel format and the name associated with the desktop:
    */
 
-  serverinit          = (FAR struct rfb_serverinit_s *)session->iobuf;
+  serverinit          = (FAR struct rfb_serverinit_s *)session->outbuf;
 
   rfb_putbe16(serverinit->width, CONFIG_VNCSERVER_SCREENWIDTH);
   rfb_putbe16(serverinit->height, CONFIG_VNCSERVER_SCREENHEIGHT);
@@ -207,7 +204,7 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
    * This may override some of our framebuffer settings.
    */
 
-  setformat = (FAR struct rfb_setpixelformat_s *)session->iobuf;
+  setformat = (FAR struct rfb_setpixelformat_s *)session->inbuf;
 
   nrecvd = psock_recv(&session->connect, setformat,
                       sizeof(struct rfb_setpixelformat_s), 0);
@@ -272,30 +269,11 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
       return -ENOSYS;
     }
 
-  session->screen.w = CONFIG_VNCSERVER_SCREENWIDTH;
-  session->screen.h = CONFIG_VNCSERVER_SCREENHEIGHT;
-
-  /* Now allocate the framebuffer memory.  We rely on the fact that
-   * the KMM allocator will align memory to 32-bits or better.
-   */
-
-  len               = (session->bpp + 7) >> 3;
-  session->stride   = len * CONFIG_VNCSERVER_SCREENWIDTH;
-  alloc             = (size_t)session->stride * CONFIG_VNCSERVER_SCREENHEIGHT;
-
-  session->fb       = (FAR uint8_t *)kmm_zalloc(alloc);
-  if (session->fb == NULL)
-    {
-      gdbg("ERROR: Failed to allocate framebuffer memory: %lu\n",
-           (unsigned long)alloc);
-      return -ENOMEM;
-    }
-
   /* Receive supported encoding types from client, but ignore them.
    * we will do only raw format.
    */
 
-  (void)psock_recv(&session->connect, session->iobuf,
+  (void)psock_recv(&session->connect, session->inbuf,
                    CONFIG_VNCSERVER_IOBUFFER_SIZE, 0);
 
   session->state = VNCSERVER_CONFIGURED;
@@ -326,7 +304,7 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
 
   /* Receive the echo of the protocol string */
 
-  nrecvd = psock_recv(&session->connect, session->iobuf, len, 0);
+  nrecvd = psock_recv(&session->connect, session->inbuf, len, 0);
   if (nrecvd <= 0)
     {
       errcode = get_errno();

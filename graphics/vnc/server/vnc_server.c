@@ -39,11 +39,24 @@
 
 #include "nuttx/config.h"
 
+#include <stdint.h>
 #include <stdlib.h>
+#include <string.h>
 #include <assert.h>
+#include <errno.h>
 #include <debug.h>
 
+#include <arpa/inet.h>
+#include <netinet/in.h>
+
+#include <nuttx/kmalloc.h>
+#include <nuttx/net/net.h>
+
 #include "vnc_server.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
 
 /****************************************************************************
  * Private Data
@@ -54,6 +67,116 @@
  */
 
 static FAR struct vnc_session_s *g_vnc_sessions[RFB_MAX_DISPLAYS];
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: vnc_reset_session
+ *
+ * Description:
+ *  Conclude the current VNC session.  This function re-initializes the
+ *  session structure; it does not free either the session structure nor
+ *  the framebuffer so that they may be re-used.
+ *
+ * Input Parameters:
+ *   session - An instance of the session structure.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void vnc_reset_session(FAR struct vnc_session_s *session,
+                              FAR uint8_t *fb)
+{
+  /* Close any open sockets */
+
+  if (session->state >= VNCSERVER_CONNECTED)
+    {
+      psock_close(&session->connect);
+      psock_close(&session->listen);
+    }
+
+  /* [Re-]nitialize the session.  Set all values to 0 == NULL == false. */
+
+  memset(session, 0, sizeof(struct vnc_session_s));
+
+  /* Then initialize only non-zero values */
+
+  session->fb    = fb;
+  session->state = VNCSERVER_INITIALIZED;
+}
+
+/****************************************************************************
+ * Name: vnc_connect
+ *
+ * Description:
+ *  Wait for a connection from the VNC client
+ *
+ * Input Parameters:
+ *   session - An instance of the session structure.
+ *   port    - The listen port to use
+ *
+ * Returned Value:
+ *   Returns zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int vnc_connect(FAR struct vnc_session_s *session, int port)
+{
+  struct sockaddr_in addr;
+  int ret;
+
+  /* Create a listening socket */
+
+  addr.sin_family = AF_INET;
+  addr.sin_port = htons(port);
+  addr.sin_addr.s_addr = INADDR_ANY;
+
+  ret = psock_socket(AF_INET, SOCK_STREAM, 0, &session->listen);
+  if (ret < 0)
+    {
+      ret = -get_errno();
+      return ret;
+    }
+
+  /* Bind the listening socket to a local address */
+
+  ret = psock_bind(&session->listen, (struct sockaddr *)&addr,
+                   sizeof(struct sockaddr_in));
+  if (ret < 0)
+    {
+      ret = -get_errno();
+      goto errout_with_listener;
+    }
+
+  /* Listen for a connection */
+
+  ret = psock_listen(&session->listen, 5);
+  if (ret < 0)
+    {
+      ret = -get_errno();
+      goto errout_with_listener;
+    }
+
+  /* Connect to the client */
+
+  ret = psock_accept(&session->listen, NULL, NULL, &session->connect);
+  if (ret < 0)
+    {
+      ret = -get_errno();
+      goto errout_with_listener;
+    }
+
+  session->state = VNCSERVER_CONNECTED;
+  return OK;
+
+errout_with_listener:
+  psock_close(&session->listen);
+  return ret;
+}
 
 /****************************************************************************
  * Pubic Functions
@@ -76,6 +199,7 @@ static FAR struct vnc_session_s *g_vnc_sessions[RFB_MAX_DISPLAYS];
 int vnc_server(int argc, FAR char *argv[])
 {
   FAR struct vnc_session_s *session;
+  FAR uint8_t *fb;
   int display;
   int ret;
 
@@ -96,13 +220,25 @@ int vnc_server(int argc, FAR char *argv[])
       return EXIT_FAILURE;
     }
 
+  /* Allocate the framebuffer memory.  We rely on the fact that
+   * the KMM allocator will align memory to 32-bits or better.
+   */
+
+  fb = (FAR uint8_t *)kmm_zalloc(RFB_SIZE);
+  if (fb == NULL)
+    {
+      gdbg("ERROR: Failed to allocate framebuffer memory: %lu\n",
+           (unsigned long)alloc);
+      return -ENOMEM;
+    }
+
   /* Allocate a session structure for this display */
 
-  session = vnc_create_session();
+  session = kmm_zalloc(sizeof(struct vnc_session_s));
   if (session == NULL)
     {
       gdbg("ERROR: Failed to allocate session\n");
-      return EXIT_FAILURE;
+      goto errout_with_fb;
     }
 
   g_vnc_sessions[display] = session;
@@ -113,6 +249,12 @@ int vnc_server(int argc, FAR char *argv[])
 
   for (; ; )
     {
+      /* Release the last sesstion and [Re-]initialize the session structure
+       * for the next connection.
+       */
+
+      vnc_reset_session(session, fb);
+
       /* Establish a connection with the VNC client */
 
       ret = vnc_connect(session, RFB_DISPLAY_PORT(display));
@@ -130,24 +272,42 @@ int vnc_server(int argc, FAR char *argv[])
             {
               gdbg("ERROR: Failed to negotiate security/framebuffer: %d\n",
                    ret);
+              continue;
             }
-          else
-            {
-              /* Start the VNC session.  This function does not return until
-               * the session has been terminated (or an error occurs).
-               */
 
-              ret = vnc_session(session);
-              gvdbg("Session terminated with %d\n", ret);
+          /* Start the VNC updater thread that sends all Server-to-Client
+           * messages.
+           */
+
+          ret = vnc_start_updater(session);
+          if (ret < 0)
+            {
+              gdbg("ERROR: Failed to start updater thread: %d\n", ret);
+              continue;
+            }
+
+          /* Start the VNC receiver on this this.  The VNC receiver handles
+           * all Client-to-Server messages.  The VNC receiver function does
+           * not return until the session has been terminated (or an error
+           * occurs).
+           */
+
+          ret = vnc_receiver(session);
+          gvdbg("Session terminated with %d\n", ret);
+
+          /* Stop the VNC updater thread. */
+
+          ret = vnc_stop_updater(session);
+          if (ret < 0)
+            {
+              gdbg("ERROR: Failed to stop updater thread: %d\n", ret);
             }
         }
-
-      /* Re-initialize the session structure for re-use */
-
-      vnc_release_session(session);
     }
 
-  return EXIT_FAILURE; /* We won't get here */
+errout_with_fb:
+  kmm_free(fb);
+  return EXIT_FAILURE;
 }
 
 /****************************************************************************
@@ -160,10 +320,9 @@ int vnc_server(int argc, FAR char *argv[])
  *   display - The display number of interest.
  *
  * Returned Value:
- *   Returns the instance of the session structure allocated by
- *   vnc_create_session() for this display.  NULL will be returned if the
- *   server has not yet been started or if the display number is out of
- *   range.
+ *   Returns the instance of the session structure for this display.  NULL
+ *   will be returned if the server has not yet been started or if the
+ *   display number is out of range.
  *
  ****************************************************************************/
 

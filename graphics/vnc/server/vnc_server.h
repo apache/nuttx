@@ -43,6 +43,7 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <pthread.h>
 
 #include <nuttx/video/fb.h>
 #include <nuttx/nx/nxglib.h>
@@ -109,9 +110,23 @@
 #  define CONFIG_VNCSERVER_STACKSIZE 2048
 #endif
 
+#ifndef CONFIG_VNCSERVER_UPDATER_PRIO
+#  define CONFIG_VNCSERVER_UPDATER_PRIO 100
+#endif
+
+#ifndef CONFIG_VNCSERVER_UPDATER_STACKSIZE
+#  define CONFIG_VNCSERVER_UPDATER_STACKSIZE 2048
+#endif
+
 #ifndef CONFIG_VNCSERVER_IOBUFFER_SIZE
 #  define CONFIG_VNCSERVER_IOBUFFER_SIZE 80
 #endif
+
+/* Local framebuffer characteristics in bytes */
+
+#define RFB_BYTESPERPIXEL   ((RFB_BITSPERPIXEL + 7) >> 8)
+#define RFB_STRIDE          (RFB_BYTESPERPIXEL * CONFIG_VNCSERVER_SCREENWIDTH)
+#define RFB_SIZE            (RFB_STRIDE * CONFIG_VNCSERVER_SCREENHEIGHT)
 
 /* RFB Port Number */
 
@@ -141,7 +156,7 @@ enum vnc_server_e
   VNCSERVER_INITIALIZED,       /* State structured initialized, but not connected */
   VNCSERVER_CONNECTED,         /* Connect to a client, but not yet configured */
   VNCSERVER_CONFIGURED,        /* Configured and ready to transfer graphics */
-  VNCSERVER_SCANNING,          /* Running and activly transferring graphics */
+  VNCSERVER_RUNNING,           /* Running and activly transferring graphics */
   VNCSERVER_STOPPING           /* The server has been asked to stop */
 };
 
@@ -159,15 +174,18 @@ struct vnc_session_s
 
   /* Display geometry and color characteristics */
 
-  uint8_t colorfmt;            /* See include/nuttx/fb.h */
-  uint8_t bpp;                 /* Bits per pixel */
-  size_t stride;               /* Width of a row in bytes */
-  struct nxgl_size_s screen;   /* Size of the screen in pixels x rows */
+  uint8_t colorfmt;            /* Remote color format (See include/nuttx/fb.h) */
+  uint8_t bpp;                 /* Remote bits per pixel */
   FAR uint8_t *fb;             /* Allocated local frame buffer */
  
-  /* I/O buffer for misc network send/receive */
+  /* Updater information */
 
-  uint8_t iobuf[CONFIG_VNCSERVER_IOBUFFER_SIZE];
+  pthread_t updater;           /* Updater thread ID */
+
+  /* I/O buffers for misc network send/receive */
+
+  uint8_t inbuf[CONFIG_VNCSERVER_IOBUFFER_SIZE];
+  uint8_t outbuf[CONFIG_VNCSERVER_IOBUFFER_SIZE];
 };
 
 /****************************************************************************
@@ -199,60 +217,6 @@ extern "C"
 int vnc_server(int argc, FAR char *argv[]);
 
 /****************************************************************************
- * Name: vnc_connect
- *
- * Description:
- *  Wait for a connection from the VNC client
- *
- * Input Parameters:
- *   session - An instance of the session structure allocated by
- *     vnc_create_session().
- *   port    - The listen port to use
- *
- * Returned Value:
- *   Returns zero (OK) on success; a negated errno value on failure.
- *
- ****************************************************************************/
-
-int vnc_connect(FAR struct vnc_session_s *session, int port);
-
-/****************************************************************************
- * Name: vnc_create_session
- *
- * Description:
- *  Create a new, unconnected session
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   On success, this function returns the allocated and initialize session
- *   structure.  NULL is returned on failure.
- *
- ****************************************************************************/
-
-FAR struct vnc_session_s *vnc_create_session(void);
-
-/****************************************************************************
- * Name: vnc_release_session
- *
- * Description:
- *  Conclude the current VNC session and free most resources.  This function
- *  re-initializes the session structure; it does not free it so that it
- *  can be re-used.
- *
- * Input Parameters:
- *   session - An instance of the session structure allocated by
- *     vnc_create_session().
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void vnc_release_session(FAR struct vnc_session_s *session);
-
-/****************************************************************************
  * Name: vnc_negotiate
  *
  * Description:
@@ -261,8 +225,7 @@ void vnc_release_session(FAR struct vnc_session_s *session);
  *  properties.
  *
  * Input Parameters:
- *   session - An instance of the session structure allocated by
- *     vnc_create_session().
+ *   session - An instance of the session structure.
  *
  * Returned Value:
  *   Returns zero (OK) on success; a negated errno value on failure.
@@ -272,40 +235,54 @@ void vnc_release_session(FAR struct vnc_session_s *session);
 int vnc_negotiate(FAR struct vnc_session_s *session);
 
 /****************************************************************************
- * Name: vnc_session
+ * Name: vnc_start_updater
  *
  * Description:
- *  This function encapsulates the entire VNC session.
+ *  Start the updater thread
  *
  * Input Parameters:
- *   session - An instance of the session structure allocated by
- *     vnc_create_session().
+ *   session - An instance of the session structure.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure.
+ *
+ ****************************************************************************/
+
+int vnc_start_updater(FAR struct vnc_session_s *session);
+
+/****************************************************************************
+ * Name: vnc_stop_updater
+ *
+ * Description:
+ *  Stop the updater thread
+ *
+ * Input Parameters:
+ *   session - An instance of the session structure.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure.
+ *
+ ****************************************************************************/
+
+int vnc_stop_updater(FAR struct vnc_session_s *session);
+
+/****************************************************************************
+ * Name: vnc_receiver
+ *
+ * Description:
+ *  This function handles all Client-to-Server messages.
+ *
+ * Input Parameters:
+ *   session - An instance of the session structure.
  *
  * Returned Value:
  *   At present, always returns OK
  *
  ****************************************************************************/
 
-int vnc_session(FAR struct vnc_session_s *session);
-
-/****************************************************************************
- * Name: vnc_find_session
- *
- * Description:
- *  Return the session structure associated with this display.
- *
- * Input Parameters:
- *   display - The display number of interest.
- *
- * Returned Value:
- *   Returns the instance of the session structure allocated by
- *   vnc_create_session() for this display.  NULL will be returned if the
- *   server has not yet been started or if the display number is out of
- *   range.
- *
- ****************************************************************************/
-
-FAR struct vnc_session_s *vnc_find_session(int display);
+int vnc_receiver(FAR struct vnc_session_s *session);
 
 /****************************************************************************
  * Name: vnc_key_map
@@ -315,8 +292,7 @@ FAR struct vnc_session_s *vnc_find_session(int display);
  *   that through NX to the appropriate window.
  *
  * Input Parameters:
- *   session - An instance of the session structure allocated by
- *     vnc_create_session().
+ *   session - An instance of the session structure.
  *   keysym  - The X11 keysym value (see include/nuttx/inputx11_keysymdef)
  *   keydown - True: Key pressed; False: Key released
  *
@@ -329,6 +305,24 @@ FAR struct vnc_session_s *vnc_find_session(int display);
 void vnc_key_map(FAR struct vnc_session_s *session, uint32_t keysym,
                  bool keydown);
 #endif
+
+/****************************************************************************
+ * Name: vnc_find_session
+ *
+ * Description:
+ *  Return the session structure associated with this display.
+ *
+ * Input Parameters:
+ *   display - The display number of interest.
+ *
+ * Returned Value:
+ *   Returns the instance of the session structure for this display.  NULL
+ *   will be returned if the server has not yet been started or if the
+ *   display number is out of range.
+ *
+ ****************************************************************************/
+
+FAR struct vnc_session_s *vnc_find_session(int display);
 
 #undef EXTERN
 #ifdef __cplusplus

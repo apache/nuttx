@@ -35,7 +35,7 @@
 
 ifeq ($(CONFIG_VNCSERVER),y)
 
-CSRCS += vnc_server.c vnc_session.c vnc_negotiate.c vnc_fbdev.c
+CSRCS += vnc_server.c vnc_negotiate.c vnc_updater.c vnc_receiver.c vnc_fbdev.c
 
 ifeq ($(CONFIG_NX_KBD),y)
 CSRCS += vnc_keymap.c

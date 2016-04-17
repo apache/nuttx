@@ -153,7 +153,7 @@ static int up_getvideoinfo(FAR struct fb_vtable_s *vtable,
   if (fbinfo != NULL && vinfo != NULL)
     {
       session = vnc_find_session(fbinfo->display);
-      if (session == NULL || session->state != VNCSERVER_SCANNING)
+      if (session == NULL || session->state != VNCSERVER_RUNNING)
         {
           gdbg("ERROR: session is not connected\n");
           return -ENOTCONN;
@@ -165,8 +165,8 @@ static int up_getvideoinfo(FAR struct fb_vtable_s *vtable,
        */
 
       vinfo->fmt     = RFB_COLORFMT;
-      vinfo->xres    = session->screen.w;
-      vinfo->yres    = session->screen.h;
+      vinfo->xres    = CONFIG_VNCSERVER_SCREENWIDTH;
+      vinfo->yres    = CONFIG_VNCSERVER_SCREENHEIGHT;
       vinfo->nplanes = 1;
 
       return OK;
@@ -192,7 +192,7 @@ static int up_getplaneinfo(FAR struct fb_vtable_s *vtable, int planeno,
   if (fbinfo != NULL && pinfo != NULL && planeno == 0)
     {
       session = vnc_find_session(fbinfo->display);
-      if (session == NULL || session->state != VNCSERVER_SCANNING)
+      if (session == NULL || session->state != VNCSERVER_RUNNING)
         {
           gdbg("ERROR: session is not connected\n");
           return -ENOTCONN;
@@ -206,8 +206,8 @@ static int up_getplaneinfo(FAR struct fb_vtable_s *vtable, int planeno,
        */
 
       pinfo->fbmem    = (FAR void *)session->fb;
-      pinfo->fblen    = (uint32_t)session->stride * CONFIG_VNCSERVER_SCREENWIDTH;
-      pinfo->stride   = (fb_coord_t)session->stride;
+      pinfo->fblen    = RFB_SIZE;
+      pinfo->stride   = RFB_STRIDE;
       pinfo->bpp      = RFB_BITSPERPIXEL;
 
       return OK;
@@ -236,7 +236,7 @@ static int up_getcmap(FAR struct fb_vtable_s *vtable,
   if (fbinfo != NULL && cmap != NULL)
     {
       session = vnc_find_session(fbinfo->display);
-      if (session == NULL || session->state != VNCSERVER_SCANNING)
+      if (session == NULL || session->state != VNCSERVER_RUNNING)
         {
           gdbg("ERROR: session is not connected\n");
           return -ENOTCONN;
@@ -271,7 +271,7 @@ static int up_putcmap(FAR struct fb_vtable_s *vtable, FAR const struct fb_cmap_s
   if (fbinfo != NULL && cmap != NULL)
     {
       session = vnc_find_session(fbinfo->display);
-      if (session == NULL || session->state != VNCSERVER_SCANNING)
+      if (session == NULL || session->state != VNCSERVER_RUNNING)
         {
           gdbg("ERROR: session is not connected\n");
           return -ENOTCONN;
@@ -307,7 +307,7 @@ static int up_getcursor(FAR struct fb_vtable_s *vtable,
   if (fbinfo != NULL && attrib != NULL)
     {
       session = vnc_find_session(fbinfo->display);
-      if (session == NULL || session->state != VNCSERVER_SCANNING)
+      if (session == NULL || session->state != VNCSERVER_RUNNING)
         {
           gdbg("ERROR: session is not connected\n");
           return -ENOTCONN;
@@ -341,7 +341,7 @@ static int up_setcursor(FAR struct fb_vtable_s *vtable,
   if (fbinfo != NULL && settings != NULL)
     {
       session = vnc_find_session(fbinfo->display);
-      if (session == NULL || session->state != VNCSERVER_SCANNING)
+      if (session == NULL || session->state != VNCSERVER_RUNNING)
         {
           gdbg("ERROR: session is not connected\n");
           return -ENOTCONN;
@@ -451,7 +451,7 @@ FAR struct fb_vtable_s *up_fbgetvplane(int display, int vplane)
 
   /* Verify that the session is still valid */
 
-  if (session->state != VNCSERVER_SCANNING)
+  if (session->state != VNCSERVER_RUNNING)
     {
       return NULL;
     }
