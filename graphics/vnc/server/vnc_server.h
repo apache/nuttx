@@ -43,9 +43,12 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <semaphore.h>
 #include <pthread.h>
+#include <queue.h>
 
 #include <nuttx/video/fb.h>
+#include <nuttx/video/rfb.h>
 #include <nuttx/nx/nxglib.h>
 #include <nuttx/nx/nx.h>
 #include <nuttx/net/net.h>
@@ -126,9 +129,20 @@
 #  define CONFIG_VNCSERVER_UPDATER_STACKSIZE 2048
 #endif
 
-#ifndef CONFIG_VNCSERVER_IOBUFFER_SIZE
-#  define CONFIG_VNCSERVER_IOBUFFER_SIZE 80
+#ifndef CONFIG_VNCSERVER_INBUFFER_SIZE
+#  define CONFIG_VNCSERVER_INBUFFER_SIZE 80
 #endif
+
+#ifndef CONFIG_VNCSERVER_NUPDATES
+#  define CONFIG_VNCSERVER_NUPDATES 48
+#endif
+
+#ifndef CONFIG_VNCSERVER_UPDATE_BUFSIZE
+#  define CONFIG_VNCSERVER_UPDATE_BUFSIZE 4096
+#endif
+
+#define VNCSERVER_UPDATE_BUFSIZE \
+  (CONFIG_VNCSERVER_UPDATE_BUFSIZE + SIZEOF_RFB_FRAMEBUFFERUPDATE_S(0))
 
 /* Local framebuffer characteristics in bytes */
 
@@ -168,6 +182,16 @@ enum vnc_server_e
   VNCSERVER_STOPPING           /* The server has been asked to stop */
 };
 
+/* This structure is used to queue FrameBufferUpdate event.  It includes a
+ * pointer to support singly linked list.
+ */
+
+struct vnc_fbupdate_s
+{
+  FAR struct vnc_fbupdate_s *flink;
+  struct nxgl_rect_s rect;     /* The enqueued update rectangle */
+};
+
 struct vnc_session_s
 {
   /* NX graphics system */
@@ -185,15 +209,23 @@ struct vnc_session_s
   uint8_t colorfmt;            /* Remote color format (See include/nuttx/fb.h) */
   uint8_t bpp;                 /* Remote bits per pixel */
   FAR uint8_t *fb;             /* Allocated local frame buffer */
- 
+
   /* Updater information */
 
   pthread_t updater;           /* Updater thread ID */
 
+  /* Update list information */
+
+  struct vnc_fbupdate_s updpool[CONFIG_VNCSERVER_NUPDATES];
+  sq_queue_t updfree;
+  sq_queue_t updqueue;
+  sem_t exclsem;
+  sem_t updsem;
+
   /* I/O buffers for misc network send/receive */
 
-  uint8_t inbuf[CONFIG_VNCSERVER_IOBUFFER_SIZE];
-  uint8_t outbuf[CONFIG_VNCSERVER_IOBUFFER_SIZE];
+  uint8_t inbuf[CONFIG_VNCSERVER_INBUFFER_SIZE];
+  uint8_t outbuf[VNCSERVER_UPDATE_BUFSIZE];
 };
 
 /****************************************************************************

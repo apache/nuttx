@@ -39,8 +39,11 @@
 
 #include <nuttx/config.h>
 
+#include <semaphore.h>
 #include <sched.h>
+#include <string.h>
 #include <pthread.h>
+#include <queue.h>
 #include <assert.h>
 #include <errno.h>
 
@@ -49,6 +52,81 @@
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: vnc_alloc_update
+ *
+ * Description:
+ *  Allocate one update structure by taking it from the freelist.
+ *
+ * Input Parameters:
+ *   session - A reference to the VNC session structure.
+ *
+ * Returned Value:
+ *   A non-NULL structure pointer should always be returned.  This function
+ *   will wait if no structure is available.
+ *
+ ****************************************************************************/
+
+static FAR struct vnc_fbupdate_s *
+vnc_alloc_update(FAR struct vnc_session_s *session)
+{
+  FAR struct vnc_fbupdate_s *update;
+
+  /* Reserve one element from the free list.  Lock the scheduler to assure
+   * that the sq_remfirst() and the successful return for sem_wait are
+   * atomic.  Of course, the scheduler will be unlocked while we wait.
+   */
+
+  sched_lock();
+  while (sem_wait(&session->updsem) < 0)
+    {
+      DEBUGASSERT(get_errno() == EINTR);
+    }
+
+  /* It is reserved.. go get it */
+
+  update = (FAR struct vnc_fbupdate_s *)sq_remfirst(&session->updfree);
+  sched_unlock();
+
+  DEBUGASSERT(update != NULL);
+  return update;
+}
+
+/****************************************************************************
+ * Name: vnc_free_update
+ *
+ * Description:
+ *  Free one update structure by returning it from the freelist.
+ *
+ * Input Parameters:
+ *   Standard pthread arguments.
+ *
+ * Returned Value:
+ *   NULL is always returned.
+ *
+ ****************************************************************************/
+
+static void vnc_free_update(FAR struct vnc_session_s *session,
+                            FAR struct vnc_fbupdate_s *update)
+{
+  /* Reserve one element from the free list.  Lock the scheduler to assure
+   * that the sq_addlast() and the sem_post() are atomic.
+   */
+
+  sched_lock();
+
+  /* Put the entry into the free list */
+
+  sq_addlast((FAR sq_entry_t *)update, &session->updfree);
+
+  /* Post the semaphore to indicate the availability of one more update */
+
+  sem_post(&session->updsem);
+  DEBUGASSERT(session->updsem.semcount <= CONFIG_VNCSERVER_NUPDATES);
+
+  sched_unlock();
+}
 
 /****************************************************************************
  * Name: vnc_updater
@@ -189,12 +267,29 @@ int vnc_stop_updater(FAR struct vnc_session_s *session)
 int vnc_update_rectangle(FAR struct vnc_session_s *session,
                          FAR const struct nxgl_rect_s *rect)
 {
-   /* Make sure that the rectangle has a area */
+  FAR struct vnc_fbupdate_s *update;
 
-   if (!nxgl_nullrect(rect))
-     {
-#warning Missing logic
-     }
+  /* Make sure that the rectangle has a area */
+
+  if (!nxgl_nullrect(rect))
+    {
+      /* Allocate an update structure... waiting if necessary */
+
+      update = vnc_alloc_update(session);
+      DEBUGASSERT(update != NULL);
+
+      /* Copy the rectangle into the update structure */
+
+      memcpy(&update->rect, rect, sizeof(struct nxgl_rect_s));
+
+      /* Add the upate to the end of the update queue.  Lock the scheduler
+       * to assure that the sq_addlast() is atomic.
+       */
+
+      sched_lock();
+      sq_addlast((FAR sq_entry_t *)update, &session->updqueue);
+      sched_unlock();
+    }
 
   return -ENOSYS;
 }

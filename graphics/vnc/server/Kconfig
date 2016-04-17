@@ -71,6 +71,26 @@ config VNCSERVER_SCREENHEIGHT
 	int "Framebuffer height (rows)"
 	default 240
 
+config VNCSERVER_NUPDATES
+	int "Number of pre-allocate update structures"
+	default 48
+	---help---
+		This setting provides the number of pre-allocated update structures
+		that will be used.  Dynamic memory allocations are never made.  In
+		the likely event that we run out of update structures, the graphics
+		subsystem will pause and wait for the next structures to be released.
+
+		Overhead is 12-bytes per update structure.
+
+config VNCSERVER_UPDATE_BUFSIZE
+	int "Max update buffer size (bytes)"
+	default 4096
+	---help---
+		A single buffer is pre-allocated for rendering updates.  This
+		setting specifies the maximum in bytes of that update buffer.  For
+		example, an update buffers of 32 pixels at 32-bits per pixel and
+		32-rows would yield a buffer size of 4096.
+
 config VNCSERVER_KBDENCODE
 	bool "Encode keyboard input"
 	default n
@@ -79,8 +99,8 @@ config VNCSERVER_KBDENCODE
 		Use a special encoding of keyboard characters as defined in
 		include/nuttx/input/kbd_coded.h.
 
-config VNCSERVER_IOBUFFER_SIZE
-	int "I/O buffer size
+config VNCSERVER_INBUFFER_SIZE
+	int "Input buffer size
 	default 80
 
 endif # VNCSERVER

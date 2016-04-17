@@ -41,7 +41,9 @@
 
 #include <stdint.h>
 #include <stdlib.h>
+#include <semaphore.h>
 #include <string.h>
+#include <queue.h>
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
@@ -50,6 +52,7 @@
 #include <netinet/in.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/net/net.h>
 
 #include "vnc_server.h"
@@ -91,6 +94,10 @@ static FAR struct vnc_session_s *g_vnc_sessions[RFB_MAX_DISPLAYS];
 static void vnc_reset_session(FAR struct vnc_session_s *session,
                               FAR uint8_t *fb)
 {
+  FAR struct vnc_fbupdate_s *curr;
+  FAR struct vnc_fbupdate_s *next;
+  int i;
+
   /* Close any open sockets */
 
   if (session->state >= VNCSERVER_CONNECTED)
@@ -99,12 +106,29 @@ static void vnc_reset_session(FAR struct vnc_session_s *session,
       psock_close(&session->listen);
     }
 
-  /* [Re-]nitialize the session.  Set all values to 0 == NULL == false. */
+  /* [Re-]initialize the session. */
+  /* Put all of the pre-allocated update structures into the freelist */
 
-  memset(session, 0, sizeof(struct vnc_session_s));
+  sq_init(&session->updqueue);
 
-  /* Then initialize only non-zero values */
+  session->updfree.head =
+    (FAR sq_entry_t *)&session->updpool[0];
+  session->updfree.tail =
+    (FAR sq_entry_t *)&session->updpool[CONFIG_VNCSERVER_NUPDATES-1];
 
+  next = &session->updpool[0];
+  for (i = 1; i < CONFIG_VNCSERVER_NUPDATES-1; i++)
+    {
+      curr = next;
+      next = &session->updpool[i];
+      curr->flink = next;
+    }
+
+  next->flink = NULL;
+
+  /* Set the INITIALIZED state */
+
+  sem_reset(&session->updsem, CONFIG_VNCSERVER_NUPDATES);
   session->fb    = fb;
   session->state = VNCSERVER_INITIALIZED;
 }
@@ -242,6 +266,7 @@ int vnc_server(int argc, FAR char *argv[])
     }
 
   g_vnc_sessions[display] = session;
+  sem_init(&session->updsem, 0, CONFIG_VNCSERVER_NUPDATES);
 
   /* Loop... handling each each VNC client connection to this display.  Only
    * a single client is allowed for each display.

@@ -274,7 +274,7 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
    */
 
   (void)psock_recv(&session->connect, session->inbuf,
-                   CONFIG_VNCSERVER_IOBUFFER_SIZE, 0);
+                   CONFIG_VNCSERVER_INBUFFER_SIZE, 0);
 
   session->state = VNCSERVER_CONFIGURED;
   return OK;
