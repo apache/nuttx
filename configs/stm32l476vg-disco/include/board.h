@@ -122,9 +122,7 @@
 #define GPIO_I2C1_SDA_GPIO \
    (GPIO_OUTPUT|GPIO_OPENDRAIN|GPIO_SPEED_50MHz|GPIO_OUTPUT_SET|GPIO_PORTB|GPIO_PIN7)
 
-/*
- * XXX Is I2C2 used on Disco?
- */
+/* XXX Is I2C2 used on Disco? */
 
 #if 0
 
@@ -146,18 +144,19 @@
 #define GPIO_QSPI_IO3        (GPIO_QSPI_BK1_IO3_2 | GPIO_FLOAT | GPIO_PUSHPULL | GPIO_SPEED_100MHz)
 #define GPIO_QSPI_SCK        (GPIO_QSPI_CLK_2 | GPIO_FLOAT | GPIO_PUSHPULL | GPIO_SPEED_100MHz)
 
-//XXX hmm, elsewhere
-//#define QSPI_USE_INTERRUPTS  1
-//XXX hmm, better? (2^(23+1)); this is the value that goes into FSIZE
-//#define QSPI_FLASH_SIZE      23
+#if 0
+/* XXX hmm, elsewhere */
 
+#define QSPI_USE_INTERRUPTS  1
 
-/* SPI
- */
+/* XXX hmm, better? (2^(23+1)); this is the value that goes into FSIZE */
 
-/*
- * XXX is SPI1 used on Disco?
- */
+#define QSPI_FLASH_SIZE      23
+#endif
+
+/* SPI */
+
+/* XXX is SPI1 used on Disco? */
 
 #if 0
 
@@ -166,7 +165,6 @@
 #define GPIO_SPI1_SCK    GPIO_SPI1_SCK_1
 
 #endif
-
 
 /* SPI2 is used for several peripherals on the Discovery board, including
  * L3GD20 - 3 axis Gyroscope
