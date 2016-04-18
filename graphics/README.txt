@@ -112,6 +112,10 @@ nuttx/../NxWidgets
   The NxWidgets code is provided as a separate package located outside of the
   NuttX source tree (probably at this location).
 
+graphics/vnc
+  The future home of the VNC Remote Frame Buffer (RFB) server and client
+  implementations.
+
 Installing New Fonts
 ^^^^^^^^^^^^^^^^^^^^
 
@@ -295,6 +299,8 @@ CONFIG_NXTK_AUTORAISE
 CONFIG_NXFONTS_CHARBITS
   The number of bits in the character set.  Current options are only 7 and 8.
   The default is 7.
+CONFIG_VNCSERVER and CONFIG_VNCCLIENT
+  Enable the VNC RFB server and client, respecitively.
 
 Font Selections
 ---------------
