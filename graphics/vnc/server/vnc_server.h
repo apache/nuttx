@@ -383,6 +383,35 @@ void vnc_key_map(FAR struct vnc_session_s *session, uint16_t keysym,
 
 FAR struct vnc_session_s *vnc_find_session(int display);
 
+
+/****************************************************************************
+ * Name: vnc_convert_rgbNN
+ *
+ * Description:
+ *  Convert the native framebuffer color format (either RGB16 5:6:5 or RGB32
+ *  8:8:8) to the remote framebuffer color format (either RGB16 5:6:5,
+ *  RGB16 5:5:5, or RGB32 8:8:)
+ *
+ * Input Parameters:
+ *   pixel - The src color in local framebuffer format.
+ *
+ * Returned Value:
+ *   The pixel in the remote framebuffer color format.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_VNCSERVER_COLORFMT_RGB16)
+uint16_t vnc_convert_rgb16_555(uint16_t rgb);
+uint16_t vnc_convert_rgb16_565(uint16_t rgb);
+uint32_t vnc_convert_rgb32_888(uint16_t rgb);
+#elif defined(CONFIG_VNCSERVER_COLORFMT_RGB32)
+uint16_t vnc_convert_rgb16_555(uint32_t rgb);
+uint16_t vnc_convert_rgb16_565(uint32_t rgb);
+uint32_t vnc_convert_rgb32_888(uint32_t rgb);
+#else
+#  error Unspecified color format
+#endif
+
 #undef EXTERN
 #ifdef __cplusplus
 }

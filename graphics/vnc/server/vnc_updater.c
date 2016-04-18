@@ -228,21 +228,27 @@ static FAR void *vnc_updater(FAR void *arg)
   FAR struct rfb_framebufferupdate_s *update;
   FAR struct rfb_rectangle_s *destrect;
   FAR struct vnc_fbupdate_s *srcrect;
+  FAR const uint8_t *srcdata;
   FAR uint8_t *destdata;
+  nxgl_coord_t srcwidth;
+  nxgl_coord_t srcheight;
+  nxgl_coord_t destwidth;
+  nxgl_coord_t destheight;
+  nxgl_coord_t deststride;
+  nxgl_coord_t updwidth;
+  nxgl_coord_t updheight;
   nxgl_coord_t width;
-  nxgl_coord_t height;
-  nxgl_coord_t stride;
+  nxgl_coord_t x;
+  nxgl_coord_t y;
   unsigned int bytesperpixel;
   unsigned int maxwidth;
-  unsigned int maxheight;
 
   DEBUGASSERT(session != NULL);
-  update       = (FAR struct rfb_framebufferupdate_s *)session->outbuf;
-  destrect     = update->rect;
-  destdata     = destrect->data;
+  update        = (FAR struct rfb_framebufferupdate_s *)session->outbuf;
+  destrect      = update->rect;
 
   bytesperpixel = (session->bpp + 7) >> 3;
-  maxwidth     = CONFIG_VNCSERVER_UPDATE_BUFSIZE / bytesperpixel;
+  maxwidth      = CONFIG_VNCSERVER_UPDATE_BUFSIZE / bytesperpixel;
 
   while (session->state == VNCSERVER_RUNNING)
     {
@@ -253,42 +259,104 @@ static FAR void *vnc_updater(FAR void *arg)
       srcrect = vnc_remove_queue(session);
       DEBUGASSERT(srcrect != NULL);
 
-      /* Format the rectangle header.  We may have to send several update
-       * messages if the pre-allocated outbuf is smaller than the rectangle.
+      /* Get with width and height of the source and destination rectangles.
+       * The source rectangle many be larger than the destination rectangle.
+       * In that case, we will have to emit multiple rectangles.
        */
 
       DEBUGASSERT(srcrect->rect.pt1.x <= srcrect->rect.pt2.x);
-      width     = srcrect->rect.pt2.x - srcrect->rect.pt1.x + 1;
-      stride    = width * bytesperpixel;
+      srcwidth = srcrect->rect.pt2.x - srcrect->rect.pt1.x + 1;
 
       DEBUGASSERT(srcrect->rect.pt1.y <= srcrect->rect.pt2.y);
-      height    = srcrect->rect.pt2.y - srcrect->rect.pt1.y + 1;
+      srcheight = srcrect->rect.pt2.y - srcrect->rect.pt1.y + 1;
 
-      maxheight = CONFIG_VNCSERVER_UPDATE_BUFSIZE / stride;
+      srcdata = session->fb +
+                RFB_STRIDE * srcrect->rect.pt1.y +
+                RFB_BYTESPERPIXEL * srcrect->rect.pt1.x;
 
-      while (height > 0)
+      deststride = srcwidth * bytesperpixel;
+      if (deststride > maxwidth)
         {
-          /* Determine the part of the rectangle that we can send on this
-           * loop.
+          deststride = maxwidth;
+        }
+
+      destwidth  = deststride / bytesperpixel;
+      destheight = CONFIG_VNCSERVER_UPDATE_BUFSIZE / deststride;
+
+      if (destheight > srcheight)
+        {
+          destheight = srcheight;
+        }
+
+      /* Format the rectangle header.  We may have to send several update
+       * messages if the pre-allocated outbuf is smaller than the rectangle.
+       *
+       * Loop until all rows have been output.  Start with the top row and
+       * transfer rectangles horizontally across the each group of
+       * destheight rows.
+       */
+
+      for (y = srcrect->rect.pt1.y;
+           srcheight > 0;
+           srcheight -= updheight, y += updheight)
+        {
+          /* Destination rectangle start address */
+
+          destdata  = destrect->data;
+
+          /* updheight = Height to update on this pass through the loop.
+           * This will be destheight unless fewer than that number of rows
+           * remain.
            */
+
+          updheight = destheight;
+          if (updheight > srcheight)
+            {
+              updheight = srcheight;
+            }
+
+          /* Loop until this row has been ouput.  Start with the leftmost
+           * pixel and transfer rectangles horizontally with width of
+           * destwidth until all srcwidth columns have been transferred.
+           */
+
+          for (width = srcwidth, x = srcrect->rect.pt1.x;
+               width > 0;
+               width -= updwidth, x += updwidth)
+            {
+              /* updwidth = Width to update on this pass through the loop.
+               * This will be destwidth unless fewer than that number of
+               * columns remain.
+               */
+
+              updwidth = destwidth;
+              if (updwidth > width)
+                {
+                  updwidth = width;
+                }
+
+              /* Format the FramebufferUpdate message */
+
+              update->msgtype = RFB_FBUPDATE_MSG;
+              update->padding = 0;
+              rfb_putbe16(update->nrect, 1);
+
+              rfb_putbe16(destrect->xpos, x);
+              rfb_putbe16(destrect->ypos, y);
+              rfb_putbe16(destrect->width, updwidth);
+              rfb_putbe16(destrect->height, updheight);
+              rfb_putbe16(destrect->encoding, RFB_ENCODING_RAW);
+
+              /* Transfer the frame buffer data into the rectangle,
+               * performing the necessary color conversions.
+               */
 #warning Missing logic
 
-          /* Format the FramebufferUpdate message */
+              /* Update the src and destination addresses */
 
-          update->msgtype = RFB_FBUPDATE_MSG;
-          update->padding = 0;
-          rfb_putbe16(update->nrect, 1);
-
-          rfb_putbe16(destrect->xpos, srcrect->rect.pt1.x);
-          rfb_putbe16(destrect->ypos, srcrect->rect.pt1.y);
-          rfb_putbe16(destrect->width, width);
-          rfb_putbe16(destrect->height, height);
-          rfb_putbe16(destrect->encoding, RFB_ENCODING_RAW);
-
-          /* Transfer the frame buffer data into the rectangle, performing
-           * the necessary color conversions.
-           */
-#warning Missing logic
+              srcdata  += RFB_STRIDE;
+              destdata += updwidth * bytesperpixel;
+            }
         }
 
       vnc_free_update(session, srcrect);
