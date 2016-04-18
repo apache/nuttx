@@ -62,14 +62,14 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Private Data
+ * Public Data
  ****************************************************************************/
 
 /* Given a display number as an index, the following array can be used to
  * look-up the session structure for that display.
  */
 
-static FAR struct vnc_session_s *g_vnc_sessions[RFB_MAX_DISPLAYS];
+FAR struct vnc_session_s *g_vnc_sessions[RFB_MAX_DISPLAYS];
 
 /****************************************************************************
  * Private Functions
@@ -281,6 +281,7 @@ int vnc_server(int argc, FAR char *argv[])
        */
 
       vnc_reset_session(session, fb);
+      sem_reset(&g_fbsem[display], 0);
 
       /* Establish a connection with the VNC client */
 
@@ -313,7 +314,13 @@ int vnc_server(int argc, FAR char *argv[])
               continue;
             }
 
-          /* Start the VNC receiver on this this.  The VNC receiver handles
+          /* Let the framebuffer driver know that we are ready to preform
+           * updates.
+           */
+
+          sem_post(&g_fbsem[display]);
+
+          /* Run the VNC receiver on this trhead.  The VNC receiver handles
            * all Client-to-Server messages.  The VNC receiver function does
            * not return until the session has been terminated (or an error
            * occurs).

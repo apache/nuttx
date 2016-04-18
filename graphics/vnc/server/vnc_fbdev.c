@@ -80,7 +80,7 @@ struct vnc_fbinfo_s
  * configuration of each color plane.
  */
 
-static int up_getvideoinfo(FAR struct fb_vtable_s *vtable, 
+static int up_getvideoinfo(FAR struct fb_vtable_s *vtable,
                            FAR struct fb_videoinfo_s *vinfo);
 static int up_getplaneinfo(FAR struct fb_vtable_s *vtable, int planeno,
                            FAR struct fb_planeinfo_s *pinfo);
@@ -123,15 +123,20 @@ static struct fb_cursorsize_s g_csize;
 #endif
 #endif
 
-/* The framebuffer object -- There is no private state information in this simple
- * framebuffer simulation.
- */
+/* The framebuffer objects, one for each configured display. */
 
 static struct vnc_fbinfo_s g_fbinfo[RFB_MAX_DISPLAYS];
 
 /****************************************************************************
  * Public Data
  ****************************************************************************/
+
+/* Used to synchronize the server thread with the framebuffer driver.
+ * NOTE:  This depends on the fact that all zero is correct initial state
+ * for the semaphores.
+ */
+
+sem_t g_fbsem[RFB_MAX_DISPLAYS];
 
 /****************************************************************************
  * Private Functions
@@ -324,7 +329,7 @@ static int up_getcursor(FAR struct fb_vtable_s *vtable,
 #endif
 
 /****************************************************************************
- * Name:
+ * Name: up_setcursor
  ****************************************************************************/
 
 #ifdef CONFIG_FB_HWCURSOR
@@ -375,6 +380,57 @@ static int up_setcursor(FAR struct fb_vtable_s *vtable,
 #endif
 
 /****************************************************************************
+ * Name: vnc_wait_server
+ *
+ * Description:
+ *   Wait for the server to be connected to the VNC client.  We can do
+ *   nothing until that connection is established.
+ *
+ * Input parameters:
+ *   display - In the case of hardware with multiple displays, this
+ *     specifies the display.  Normally this is zero.
+ *
+ * Returned Value:
+ *   Zero is returned on success; a negated errno value is returned on any
+ *   failure.
+ *
+ ****************************************************************************/
+
+static inline int vnc_wait_server(int display)
+{
+  /* Check if there has been a session allocated yet.  This is one of the
+   * first things that the VNC server will do with the kernel thread is
+   * started.  But we might be here before the thread has gotten that far.
+   *
+   * If it has been allocated, then wait until it is in the RUNNING state.
+   * The RUNNING state indicates that the server has started, it has
+   * established a connection with the VNC client, it is negotiated
+   * encodings and framebuffer characteristics, and it has started the
+   * updater thread.  The server is now ready to recieve Client-to-Server
+   * messages and to perform remote framebuffer updates.
+   */
+
+ while (g_vnc_sessions[display] == NULL ||
+        g_vnc_sessions[display]->state != VNCSERVER_RUNNING)
+   {
+     /* The server is not yet running.  Wait for the server to post the FB
+      * semaphore.  In certain error situations, the server may post the
+      * semaphore, then reset it to zero.  There are are certainly race
+      * conditions here, but I think none that are fatal.
+      */
+
+     while (sem_wait(&g_fbsem[display]) < 0)
+       {
+         /* sem_wait() should fail only if it is interrupt by a signal. */
+
+         DEBUGASSERT(get_errno() == EINTR);
+       }
+   }
+
+  return OK;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -408,23 +464,33 @@ int up_fbinitialize(int display)
   gvdbg("Starting the VNC server for display %d\n", display);
   DEBUGASSERT(display >= 0 && display < RFB_MAX_DISPLAYS);
 
-  (void)itoa(display, str, 10);
-  argv[0] = str;
-  argv[1] = NULL;
+  /* Check if the server is already running */
 
-  pid = kernel_thread("vnc_server", CONFIG_VNCSERVER_PRIO,
-                       CONFIG_VNCSERVER_STACKSIZE,
-                       (main_t)vnc_server, argv);
-  if (pid < 0)
+  if (g_vnc_sessions[display] != NULL)
     {
-      gdbg("ERROR: Failed to start the VNC server: %d\n", (int)pid);
-      return (int)pid;
+      DEBUGASSERT(g_vnc_sessions[display]->state >= VNCSERVER_INITIALIZED);
+    }
+  else
+    {
+      /* Format the kernel thread arguments (ASCII.. yech) */
+
+      (void)itoa(display, str, 10);
+      argv[0] = str;
+      argv[1] = NULL;
+
+      pid = kernel_thread("vnc_server", CONFIG_VNCSERVER_PRIO,
+                           CONFIG_VNCSERVER_STACKSIZE,
+                           (main_t)vnc_server, argv);
+      if (pid < 0)
+        {
+          gdbg("ERROR: Failed to start the VNC server: %d\n", (int)pid);
+          return (int)pid;
+        }
     }
 
   /* Wait for the VNC client to connect and for the RFB to be ready */
-#warning Missing logic
 
-  return OK;
+  return vnc_wait_server(display);
 }
 
 /****************************************************************************
@@ -503,6 +569,7 @@ FAR struct fb_vtable_s *up_fbgetvplane(int display, int vplane)
 
 void up_fbuninitialize(int display)
 {
+#if 0 /* Do nothing */
   FAR struct vnc_session_s *session = vnc_find_session(display);
   FAR struct vnc_fbinfo_s *fbinfo;
 
@@ -511,6 +578,7 @@ void up_fbuninitialize(int display)
 #warning Missing logic
   UNUSED(session);
   UNUSED(fbinfo);
+#endif
 }
 
 /****************************************************************************

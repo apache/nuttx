@@ -159,7 +159,7 @@ int vnc_receiver(FAR struct vnc_session_s *session)
                 }
               else
                 {
-#warning Missing logic
+                  /* REVISIT: SetPixelFormat is currently ignored */
                 }
             }
             break;
@@ -198,7 +198,7 @@ int vnc_receiver(FAR struct vnc_session_s *session)
                     }
                   else
                     {
-#warning Missing logic
+                      /* REVISIT: SetEncodings is currently ignored */
                     }
                 }
             }
@@ -353,7 +353,7 @@ int vnc_receiver(FAR struct vnc_session_s *session)
                     }
                   else
                     {
-#warning Missing logic
+                      /* REVISIT: ClientCutText is currently ignored */
                     }
                 }
             }

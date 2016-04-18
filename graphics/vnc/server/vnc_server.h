@@ -230,7 +230,7 @@ struct vnc_session_s
 };
 
 /****************************************************************************
- * Public Function Prototypes
+ * Public Data
  ****************************************************************************/
 
 #ifdef __cplusplus
@@ -240,6 +240,20 @@ extern "C"
 #else
 #define EXTERN extern
 #endif
+
+/* Given a display number as an index, the following array can be used to
+ * look-up the session structure for that display.
+ */
+
+EXTERN FAR struct vnc_session_s *g_vnc_sessions[RFB_MAX_DISPLAYS];
+
+/* Used to synchronize the server thread with the framebuffer driver. */
+
+EXTERN sem_t g_fbsem[RFB_MAX_DISPLAYS];
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
 
 /****************************************************************************
  * Name: vnc_server
