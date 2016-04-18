@@ -735,6 +735,7 @@ static struct stm32_ltdcdev_s g_ltdc =
               .fbmem    = (uint8_t *)STM32_LTDC_BUFFER_L1,
               .fblen    = STM32_L1_FBSIZE,
               .stride   = STM32_L1_STRIDE,
+              .display  = 0,
               .bpp      = STM32_LTDC_L1_BPP
             },
           .vinfo =
@@ -761,6 +762,7 @@ static struct stm32_ltdcdev_s g_ltdc =
               .fbmem    = (uint8_t *)STM32_LTDC_BUFFER_L2,
               .fblen    = STM32_L2_FBSIZE,
               .stride   = STM32_L2_STRIDE,
+              .display  = 1,
               .bpp      = STM32_LTDC_L2_BPP
             },
           .vinfo =

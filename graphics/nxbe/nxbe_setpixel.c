@@ -1,7 +1,7 @@
 /****************************************************************************
  * graphics/nxbe/nxbe_setpixel.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <nuttx/nx/nxglib.h>
+#include <nuttx/nx/nx.h>
 
 #include "nxbe.h"
 
@@ -71,7 +72,16 @@ static void nxbe_clipfill(FAR struct nxbe_clipops_s *cops,
                           FAR const struct nxgl_rect_s *rect)
 {
   struct nxbe_setpixel_s *fillinfo = (struct nxbe_setpixel_s *)cops;
+
+  /* Set the pixel */
+  
   plane->setpixel(&plane->pinfo, &rect->pt1, fillinfo->color);
+
+#ifdef CONFIG_NX_UPDATE
+  /* Notify external logic that the display has been updated */
+
+  nx_notify_rectangle(&plane->pinfo, rect);
+#endif
 }
 
 /****************************************************************************
@@ -79,7 +89,7 @@ static void nxbe_clipfill(FAR struct nxbe_clipops_s *cops,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxbe_fill
+ * Name: nxbe_setpixel
  *
  * Description:
  *  Fill the specified rectangle in the window with the specified color
@@ -95,8 +105,8 @@ static void nxbe_clipfill(FAR struct nxbe_clipops_s *cops,
  ****************************************************************************/
 
 void nxbe_setpixel(FAR struct nxbe_window_s *wnd,
-               FAR const struct nxgl_point_s *pos,
-               nxgl_mxpixel_t color[CONFIG_NX_NPLANES])
+                   FAR const struct nxgl_point_s *pos,
+                   nxgl_mxpixel_t color[CONFIG_NX_NPLANES])
 {
   struct nxbe_setpixel_s info;
   struct nxgl_rect_s rect;

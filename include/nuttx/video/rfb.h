@@ -251,7 +251,7 @@ struct rfb_clientinit_s
 /* 6.3.2 ServerInit
  *
  * "After receiving the ClientInit message, the server sends a ServerInit
- *  message. This tells the client the width and height of the server’s 
+ *  message. This tells the client the width and height of the server’s
  *  framebuffer, its pixel format and the name associated with the desktop:
  */
 
@@ -512,7 +512,7 @@ struct rfb_clientcuttext_s
 {
   uint8_t msgtype;               /* U8  Message type */
   uint8_t padding[3];
-  uint8_t length[2];             /* U8  Length */
+  uint8_t length[4];             /* U32 Length */
   uint8_t text[1];               /* U8  Text, actual length is Length */
 };
 
@@ -547,7 +547,7 @@ struct rfb_rectangle_s
   uint8_t data[1];               /* Pixel data, actual size varies */
 };
 
-#define SIZEOF_RFB_RECTANGES(n,d) \
+#define SIZEOF_RFB_RECTANGES(d) \
   (sizeof(struct rfb_framebufferupdate_s) + (d) - 1)
 
 struct rfb_framebufferupdate_s
@@ -558,8 +558,8 @@ struct rfb_framebufferupdate_s
   struct rfb_rectangle_s rect[1]; /* Actual number is nrect */
 };
 
-#define SIZEOF_RFB_FRAMEBUFFERUPDATE_S(n,r) \
-  (sizeof(struct rfb_framebufferupdate_s) + (r) - sizeof(rfb_rectangle_s))
+#define SIZEOF_RFB_FRAMEBUFFERUPDATE_S(r) \
+  (sizeof(struct rfb_framebufferupdate_s) + (r) - sizeof(struct rfb_rectangle_s))
 
 /* 6.5.2 SetColourMapEntries
  *
@@ -612,7 +612,7 @@ struct rfb_servercuttext_s
 {
   uint8_t msgtype;               /* U8  Message type */
   uint8_t padding[3];
-  uint8_t length[2];             /* U8  Length */
+  uint8_t length[4];             /* U32 Length */
   uint8_t text[1];               /* U8  Text, actual length is Length */
 };
 
@@ -853,7 +853,7 @@ struct rfb_subrect_s
 struct rfb_srle_s
 {
   uint8_t length[4];             /* U32 Length */
-  uint8_t data[1];               /* U8  zlibData, actual size is length */  
+  uint8_t data[1];               /* U8  zlibData, actual size is length */
 };
 
 #define SIZEOF_RFB_SRLE_S(n,r) \
@@ -880,7 +880,7 @@ struct rfb_srle_s
  *  bottom seven bits indicate the size of the palette used - zero means no
  *  palette, one means that the tile is of a single colour, 2 to 127
  *  indicate a palette of that size. The possible values of subencoding are:"
- */ 
+ */
 
 #define RFB_SUBENCODING_RAW      0   /* Raw pixel data */
 #define RFB_SUBENCODING_SOLID    1   /* A solid tile of a single color */
@@ -1010,7 +1010,7 @@ struct rfb_palettendx_s
  *  byte the most significant bit represents the leftmost pixel, with a
  *  1-bit meaning the corresponding pixel in the cursor is valid."
  *
- * REVISIT:  Also difficult to represent:  A variable length pixel arry 
+ * REVISIT:  Also difficult to represent:  A variable length pixel array
  * followed by a variable length bit mask.
  */
 
