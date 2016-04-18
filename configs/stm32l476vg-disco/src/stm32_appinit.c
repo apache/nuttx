@@ -125,9 +125,9 @@ int board_app_initialize(void)
 
   (void)ret;
   
+#ifdef CONFIG_SCHED_INSTRUMENTATION
   /* Configure CPU load estimation */
 
-#ifdef CONFIG_SCHED_INSTRUMENTATION
   cpuload_initialize_once();
 #endif
 
