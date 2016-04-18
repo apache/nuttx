@@ -2308,3 +2308,22 @@ Configuration sub-directories
       - Line spacing in the NxTerm window is too much.  This is probably
         a font-related issue too.
 
+  vnc:
+
+    This is a special version of an NSH configuration.  It has networking
+    and graphics enabled.  It is configured to use the VNC server to provide
+    a remote desktop for use with VNC client on a PC.  It includes the
+    graphics text at apps/examples/nximage.
+
+    NOTES:
+
+    1. The RAMLOG is enabled so all debug output will go to the RAMLOG and
+       can be view using the NSH dmesg command.  No debug output is enabled
+       in the default configuration, however.
+
+    2. Network confiration:  IP address 10.0.0.2.  The is easily changed
+       via 'make menuconfig'.  The VNC server address is 10.0.0.2:5900.
+
+    3. The default (local) framebuffer configuration is 320x240 with 16-bit
+       RGB color.
+
