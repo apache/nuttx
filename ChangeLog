@@ -11652,6 +11652,14 @@
 	* drivers/wireless/nrf24l01.c: Fix backward calculation of relative
 	  frequency.  Noted by Henry Zhang (2015-04-15).
 	* drivers/sensors/h1750fvi.c:  Add a character driver for Rohm Ambient
-	  Light Sensor BH1750FVI.  From Alan Carvalho de Assi (2016-04-15).
+	  Light Sensor BH1750FVI.  From Alan Carvalho de Assis (2016-04-15).
 	* configs/stm32f4discovery: Integrate BH1750FVI driver in the
-	  STM32F4Discovery board.  From Alan Carvalho de Assi (2016-04-15).
+	  STM32F4Discovery board.  From Alan Carvalho de Assis (2016-04-15).
+	* drivers/mtd: Add MTD support for Micron N25Qxxx family of QSPI flash.
+	  From Dave dev@ziggurat29.com (2016-04-17).
+	* arch/arm/src/stm32l: Add a QSPI driver. From Dave dev@ziggurat29.com
+	  (2016-04-18).
+	* configs/stm32l476vb-disco:  Add support for QSPI based N25Qxxx flash.
+	  From Dave dev@ziggurat29.com (2016-04-18).
+	* graphics/vnc:  Add support for a VNC server.  This logic is code
+	  complete, but untested and so not ready for primetime (2016-04-18).
