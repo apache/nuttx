@@ -583,7 +583,7 @@ void vnc_key_map(FAR struct vnc_session_s *session, uint16_t keysym,
       ret = nx_kbdin(session->handle, nch, buffer);
       if (ret < 0)
         {
-          gdbg("ERROR: nx_kbdin() failed: %d\n", ret)
+          gdbg("ERROR: nx_kbdin() failed: %d\n", ret);
         }
 #else
       /* Inject the single key press into NX */
@@ -591,7 +591,7 @@ void vnc_key_map(FAR struct vnc_session_s *session, uint16_t keysym,
      ret = nx_kbdchin(session->handle,(uint8_t)keych);
       if (ret < 0)
         {
-          gdbg("ERROR: nx_kbdchin() failed: %d\n", ret)
+          gdbg("ERROR: nx_kbdchin() failed: %d\n", ret);
         }
 #endif
     }

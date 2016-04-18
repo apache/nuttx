@@ -224,7 +224,7 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
     }
   else if (setformat->msgtype != RFB_SETPIXELFMT_MSG)
     {
-      gdbg("ERROR: Not a SetFormat message: %d\n", (int)setformat->type);
+      gdbg("ERROR: Not a SetFormat message: %d\n", (int)setformat->msgtype);
       return -EPROTO;
     }
 

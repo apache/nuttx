@@ -252,8 +252,8 @@ int vnc_server(int argc, FAR char *argv[])
   fb = (FAR uint8_t *)kmm_zalloc(RFB_SIZE);
   if (fb == NULL)
     {
-      gdbg("ERROR: Failed to allocate framebuffer memory: %lu\n",
-           (unsigned long)alloc);
+      gdbg("ERROR: Failed to allocate framebuffer memory: %lu KB\n",
+           (unsigned long)(RFB_SIZE / 1024));
       return -ENOMEM;
     }
 
