@@ -74,12 +74,12 @@ vnc_alloc_update(FAR struct vnc_session_s *session)
   FAR struct vnc_fbupdate_s *update;
 
   /* Reserve one element from the free list.  Lock the scheduler to assure
-   * that the sq_remfirst() and the successful return for sem_wait are
+   * that the sq_remfirst() and the successful return from sem_wait are
    * atomic.  Of course, the scheduler will be unlocked while we wait.
    */
 
   sched_lock();
-  while (sem_wait(&session->updsem) < 0)
+  while (sem_wait(&session->freesem) < 0)
     {
       DEBUGASSERT(get_errno() == EINTR);
     }
@@ -100,10 +100,10 @@ vnc_alloc_update(FAR struct vnc_session_s *session)
  *  Free one update structure by returning it from the freelist.
  *
  * Input Parameters:
- *   Standard pthread arguments.
+ *   session - A reference to the VNC session structure.
  *
  * Returned Value:
- *   NULL is always returned.
+ *   None
  *
  ****************************************************************************/
 
@@ -122,8 +122,87 @@ static void vnc_free_update(FAR struct vnc_session_s *session,
 
   /* Post the semaphore to indicate the availability of one more update */
 
-  sem_post(&session->updsem);
-  DEBUGASSERT(session->updsem.semcount <= CONFIG_VNCSERVER_NUPDATES);
+  sem_post(&session->freesem);
+  DEBUGASSERT(session->freesem.semcount <= CONFIG_VNCSERVER_NUPDATES);
+
+  sched_unlock();
+}
+
+/****************************************************************************
+ * Name: vnc_remove_queue
+ *
+ * Description:
+ *  Remove one entry from the list of queued rectangles, waiting if
+ *  necessary if the queue is empty.
+ *
+ * Input Parameters:
+ *   session - A reference to the VNC session structure.
+ *
+ * Returned Value:
+ *   A non-NULL structure pointer should always be returned.  This function
+ *   will wait if no structure is available.
+ *
+ ****************************************************************************/
+
+static FAR struct vnc_fbupdate_s *
+vnc_remove_queue(FAR struct vnc_session_s *session)
+{
+  FAR struct vnc_fbupdate_s *rect;
+
+  /* Reserve one element from the list of queued rectangle.  Lock the
+   * scheduler to assure that the sq_remfirst() and the successful return
+   * from sem_wait are atomic.  Of course, the scheduler will be unlocked
+   * while we wait.
+   */
+
+  sched_lock();
+  while (sem_wait(&session->queuesem) < 0)
+    {
+      DEBUGASSERT(get_errno() == EINTR);
+    }
+
+  /* It is reserved.. go get it */
+
+  rect = (FAR struct vnc_fbupdate_s *)sq_remfirst(&session->updqueue);
+  sched_unlock();
+
+  DEBUGASSERT(rect != NULL);
+  return rect;
+}
+
+/****************************************************************************
+ * Name: vnc_add_queue
+ *
+ * Description:
+ *   Add one rectangle entry to the list of queued rectangles to be updated.
+ *
+ * Input Parameters:
+ *   Standard pthread arguments.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void vnc_add_queue(FAR struct vnc_session_s *session,
+                            FAR struct vnc_fbupdate_s *rect)
+{
+  /* Lock the scheduler to assure that the sq_addlast() and the sem_post()
+   * are atomic.
+   */
+
+  sched_lock();
+
+  /* Put the entry into the list of queued rectangles. */
+
+  sq_addlast((FAR sq_entry_t *)rect, &session->updqueue);
+
+  /* Post the semaphore to indicate the availability of one more rectangle
+   * in the queue.  This may wakeup the updater.
+   */
+
+  sem_post(&session->queuesem);
+  DEBUGASSERT(session->queuesem.semcount <= CONFIG_VNCSERVER_NUPDATES);
 
   sched_unlock();
 }
@@ -146,12 +225,73 @@ static void vnc_free_update(FAR struct vnc_session_s *session,
 static FAR void *vnc_updater(FAR void *arg)
 {
   FAR struct vnc_session_s *session = (FAR struct vnc_session_s *)arg;
+  FAR struct rfb_framebufferupdate_s *update;
+  FAR struct rfb_rectangle_s *destrect;
+  FAR struct vnc_fbupdate_s *srcrect;
+  FAR uint8_t *destdata;
+  nxgl_coord_t width;
+  nxgl_coord_t height;
+  nxgl_coord_t stride;
+  unsigned int bytesperpixel;
+  unsigned int maxwidth;
+  unsigned int maxheight;
 
   DEBUGASSERT(session != NULL);
+  update       = (FAR struct rfb_framebufferupdate_s *)session->outbuf;
+  destrect     = update->rect;
+  destdata     = destrect->data;
+
+  bytesperpixel = (session->bpp + 7) >> 3;
+  maxwidth     = CONFIG_VNCSERVER_UPDATE_BUFSIZE / bytesperpixel;
 
   while (session->state == VNCSERVER_RUNNING)
     {
+      /* Get the next queued rectangle update.  This call will block until an
+       * upate is available for the case where the update queue is empty.
+       */
+
+      srcrect = vnc_remove_queue(session);
+      DEBUGASSERT(srcrect != NULL);
+
+      /* Format the rectangle header.  We may have to send several update
+       * messages if the pre-allocated outbuf is smaller than the rectangle.
+       */
+
+      DEBUGASSERT(srcrect->rect.pt1.x <= srcrect->rect.pt2.x);
+      width     = srcrect->rect.pt2.x - srcrect->rect.pt1.x + 1;
+      stride    = width * bytesperpixel;
+
+      DEBUGASSERT(srcrect->rect.pt1.y <= srcrect->rect.pt2.y);
+      height    = srcrect->rect.pt2.y - srcrect->rect.pt1.y + 1;
+
+      maxheight = CONFIG_VNCSERVER_UPDATE_BUFSIZE / stride;
+
+      while (height > 0)
+        {
+          /* Determine the part of the rectangle that we can send on this
+           * loop.
+           */
 #warning Missing logic
+
+          /* Format the FramebufferUpdate message */
+
+          update->msgtype = RFB_FBUPDATE_MSG;
+          update->padding = 0;
+          rfb_putbe16(update->nrect, 1);
+
+          rfb_putbe16(destrect->xpos, srcrect->rect.pt1.x);
+          rfb_putbe16(destrect->ypos, srcrect->rect.pt1.y);
+          rfb_putbe16(destrect->width, width);
+          rfb_putbe16(destrect->height, height);
+          rfb_putbe16(destrect->encoding, RFB_ENCODING_RAW);
+
+          /* Transfer the frame buffer data into the rectangle, performing
+           * the necessary color conversions.
+           */
+#warning Missing logic
+        }
+
+      vnc_free_update(session, srcrect);
     }
 
   return NULL;
@@ -282,13 +422,9 @@ int vnc_update_rectangle(FAR struct vnc_session_s *session,
 
       memcpy(&update->rect, rect, sizeof(struct nxgl_rect_s));
 
-      /* Add the upate to the end of the update queue.  Lock the scheduler
-       * to assure that the sq_addlast() is atomic.
-       */
+      /* Add the upate to the end of the update queue. */
 
-      sched_lock();
-      sq_addlast((FAR sq_entry_t *)update, &session->updqueue);
-      sched_unlock();
+      vnc_add_queue(session, update);
     }
 
   return -ENOSYS;

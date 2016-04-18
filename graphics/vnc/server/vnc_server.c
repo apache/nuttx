@@ -128,7 +128,8 @@ static void vnc_reset_session(FAR struct vnc_session_s *session,
 
   /* Set the INITIALIZED state */
 
-  sem_reset(&session->updsem, CONFIG_VNCSERVER_NUPDATES);
+  sem_reset(&session->freesem, CONFIG_VNCSERVER_NUPDATES);
+  sem_reset(&session->queuesem, 0);
   session->fb    = fb;
   session->state = VNCSERVER_INITIALIZED;
 }
@@ -266,7 +267,8 @@ int vnc_server(int argc, FAR char *argv[])
     }
 
   g_vnc_sessions[display] = session;
-  sem_init(&session->updsem, 0, CONFIG_VNCSERVER_NUPDATES);
+  sem_init(&session->freesem, 0, CONFIG_VNCSERVER_NUPDATES);
+  sem_init(&session->queuesem, 0, 0);
 
   /* Loop... handling each each VNC client connection to this display.  Only
    * a single client is allowed for each display.

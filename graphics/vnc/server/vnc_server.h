@@ -219,8 +219,8 @@ struct vnc_session_s
   struct vnc_fbupdate_s updpool[CONFIG_VNCSERVER_NUPDATES];
   sq_queue_t updfree;
   sq_queue_t updqueue;
-  sem_t exclsem;
-  sem_t updsem;
+  sem_t freesem;
+  sem_t queuesem;
 
   /* I/O buffers for misc network send/receive */
 
