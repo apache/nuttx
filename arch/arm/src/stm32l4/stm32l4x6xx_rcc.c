@@ -259,7 +259,7 @@ static inline void rcc_enableahb3(void)
 #endif
 
 
-#ifdef CONFIG_STM32L4_QUADSPI
+#ifdef CONFIG_STM32L4_QSPI
   /* QuadSPI module clock enable */
 
   regval |= RCC_AHB3ENR_QSPIEN;
