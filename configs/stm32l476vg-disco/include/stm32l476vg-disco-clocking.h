@@ -67,6 +67,8 @@
 #define STM32L4_LSI_FREQUENCY     32000
 #define STM32L4_LSE_FREQUENCY     32768
 
+#define BOARD_AHB_FREQUENCY       80000000ul
+
 /* XXX review the STM32L4_BOARD_USEHSI usage, it has too much influence in
  * stm32l4x6xx_rcc.c.  I suspect it is fine for it to turn on and off that
  * ocillator, but really that's all it should do (e.g. it also controls
