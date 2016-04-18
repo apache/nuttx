@@ -179,9 +179,38 @@ config STM32L4_FMC
 	bool "FMC"
 	default n
 
-config STM32L4_QUADSPI
+config STM32L4_QSPI
 	bool "QuadSPI"
 	default n
+	---help---
+		The STM32L4 QSPI block is intended to support one serial NOR flash device
+
+if STM32L4_QSPI
+
+config STM32L4_QSPI_FLASH_SIZE
+	int "Size of attached serial flash, bytes"
+	default 16777216
+	range 1 2147483648
+	---help---
+		The STM32L4 QSPI peripheral requires the size of the Flash be specified
+
+config STM32L4_QSPI_FIFO_THESHOLD
+	int "Number of bytes before asserting FIFO threshold flag"
+	default 4
+	range 1 16
+	---help---
+		The STM32L4 QSPI peripheral requires that the FIFO threshold be specified
+		I would leave it at the default value of 4 unless you know what you are doing.
+
+config STM32L4_QSPI_CSHT
+	int "Number of cycles Chip Select must be inactive between transactions"
+	default 1
+	range 1 8
+	---help---
+		The STM32L4 QSPI peripheral requires that it be specified the minimum number
+		of AHB cycles that Chip Select be held inactive between transactions.
+		
+endif
 
 comment "APB1 Peripherals"
 

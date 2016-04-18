@@ -157,3 +157,7 @@ endif
 ifeq ($(CONFIG_STM32L4_RNG),y)
 CHIP_CSRCS += stm32l4_rng.c
 endif
+
+ifeq ($(CONFIG_STM32L4_QSPI),y)
+CHIP_CSRCS += stm32l4_qspi.c
+endif
