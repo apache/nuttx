@@ -47,7 +47,25 @@
 #include <assert.h>
 #include <errno.h>
 
+#include <nuttx/video/rgbcolors.h>
+
 #include "vnc_server.h"
+
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+/* Color conversion functions */
+
+#if defined(CONFIG_VNCSERVER_COLORFMT_RGB16)
+typedef CODE uint16_t(*vnc_convert16_t)(uint16_t rgb);
+typedef CODE uint32_t(*vnc_convert32_t)(uint16_t rgb);
+#elif defined(CONFIG_VNCSERVER_COLORFMT_RGB32)
+typedef CODE uint16_t(*vnc_convert16_t)(uint32_t rgb);
+typedef CODE uint32_t(*vnc_convert32_t)(uint32_t rgb);
+#else
+#  error Unspecified/unsupported color format
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -177,7 +195,8 @@ vnc_remove_queue(FAR struct vnc_session_s *session)
  *   Add one rectangle entry to the list of queued rectangles to be updated.
  *
  * Input Parameters:
- *   Standard pthread arguments.
+ *   session - A reference to the VNC session structure.
+ *   rect    - The rectangle to be added to the queue.
  *
  * Returned Value:
  *   None
@@ -185,7 +204,7 @@ vnc_remove_queue(FAR struct vnc_session_s *session)
  ****************************************************************************/
 
 static void vnc_add_queue(FAR struct vnc_session_s *session,
-                            FAR struct vnc_fbupdate_s *rect)
+                          FAR struct vnc_fbupdate_s *rect)
 {
   /* Lock the scheduler to assure that the sq_addlast() and the sem_post()
    * are atomic.
@@ -208,6 +227,278 @@ static void vnc_add_queue(FAR struct vnc_session_s *session,
 }
 
 /****************************************************************************
+ * Name: vnc_convert_rgbNN
+ *
+ * Description:
+ *  Convert the native framebuffer color format (either RGB16 5:6:5 or RGB32
+ *  8:8:8) to the remote framebuffer color format (either RGB16 5:6:5,
+ *  RGB16 5:5:5, or RGB32 8:8:)
+ *
+ * Input Parameters:
+ *   pixel - The src color in local framebuffer format.
+ *
+ * Returned Value:
+ *   The pixel in the remote framebuffer color format.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_VNCSERVER_COLORFMT_RGB16)
+
+uint16_t vnc_convert_rgb16_555(uint16_t rgb)
+{
+  /* 111111
+   * 54321098 76543210
+   * -----------------
+   * RRRRRGGG GGGBBBBB
+   * .RRRRRGG GGGBBBBB
+   */
+
+  return (((rgb >> 1) & ~0x1f) | (rgb & 0x1f));
+}
+
+uint16_t vnc_convert_rgb16_565(uint16_t rgb)
+{
+  /* Identity mapping */
+
+  return rgb;
+}
+
+uint32_t vnc_convert_rgb32_888(uint16_t rgb)
+{
+  /* 33222222 22221111 111111
+   * 10987654 32109876 54321098 76543210
+   * ----------------------------------
+   *                   RRRRRGGG GGGBBBBB
+   *          RRRRR... GGGGGG.. BBBBB...
+   */
+
+  return (((uint32_t)rgb << 8) & 0x00f80000) |
+         (((uint32_t)rgb << 6) & 0x0000fc00) |
+         (((uint32_t)rgb << 3) & 0x000000f8);
+}
+
+#elif defined(CONFIG_VNCSERVER_COLORFMT_RGB32)
+uint16_t vnc_convert_rgb16_555(uint32_t rgb)
+{
+  /* 33222222 22221111 111111
+   * 10987654 32109876 54321098 76543210
+   * ----------------------------------
+   *          RRRRR... GGGGG... BBBBB...
+   *                   .RRRRRGG GGGBBBBB
+   */
+
+  return (uint16_t)
+    (((rgb >> 9) & 0x00007c00) |
+     ((rgb >> 6) & 0x000003e0) |
+     ((rgb >> 3) & 0x0000001f));
+}
+
+uint16_t vnc_convert_rgb16_565(uint32_t rgb)
+{
+  /* 33222222 22221111 111111
+   * 10987654 32109876 54321098 76543210
+   * ----------------------------------
+   *          RRRRR... GGGGGG.. BBBBB...
+   *                   RRRRRGGG GGGBBBBB
+   */
+
+  return (uint16_t)
+    (((rgb >> 8) & 0x0000f800) |
+     ((rgb >> 5) & 0x000007e0) |
+     ((rgb >> 3) & 0x0000001f));
+}
+
+uint32_t vnc_convert_rgb32_888(uint32_t rgb)
+{
+  /* Identity mapping */
+
+  return rgb;
+}
+#else
+#  error Unspecified/unsupported color format
+#endif
+
+/****************************************************************************
+ * Name: vnc_copy16
+ *
+ * Description:
+ *   Copy a 16/32-bit pixels from the source rectangle to a 16-bit pixel
+ *   destination rectangle.
+ *
+ * Input Parameters:
+ *   session      - A reference to the VNC session structure.
+ *   row,col      - The upper left X/Y (pixel/row) position of the rectangle
+ *   width,height - The width (pixels) and height (rows of the rectangle)
+ *   convert      - The function to use to convert from the local framebuffer
+ *                  color format to the remote framebuffer color format.
+ *
+ * Returned Value:
+ *   The size of the transfer in bytes.
+ *
+ ****************************************************************************/
+
+static size_t vnc_copy16(FAR struct vnc_session_s *session,
+                         nxgl_coord_t row, nxgl_coord_t col, 
+                         nxgl_coord_t height, nxgl_coord_t width,
+                         vnc_convert16_t convert)
+{
+#if defined(CONFIG_VNCSERVER_COLORFMT_RGB16)
+  FAR struct rfb_framebufferupdate_s *update;
+  FAR const uint16_t *srcleft;
+  FAR const uint16_t *src;
+  FAR uint16_t *dest;
+  nxgl_coord_t x;
+  nxgl_coord_t y;
+
+  /* Destination rectangle start address */
+
+  update = (FAR struct rfb_framebufferupdate_s *)session->outbuf;
+  dest   = (FAR uint16_t *)update->rect[0].data;
+
+  /* Source rectangle start address (left/top)*/
+
+  srcleft = (FAR uint16_t *)(session->fb + RFB_STRIDE * y + RFB_BYTESPERPIXEL * x);
+
+  /* Transfer each row from the source buffer into the update buffer */
+
+  for (y = 0; y < row; y++)
+    {
+      src = srcleft;
+      for (y = 0; y < row; y++)
+        {
+          *dest++ = convert(*src);
+          src++;
+        }
+
+      srcleft = (FAR uint16_t *)((uintptr_t)srcleft + RFB_STRIDE);
+    }
+
+  return (size_t)((uintptr_t)dest - (uintptr_t)update->rect[0].data);
+
+#elif defined(CONFIG_VNCSERVER_COLORFMT_RGB32)
+  FAR struct rfb_framebufferupdate_s *update;
+  FAR const uint32_t *srcleft;
+  FAR const uint32_t *src;
+  FAR uint16_t *dest;
+  nxgl_coord_t x;
+  nxgl_coord_t y;
+
+  /* Destination rectangle start address */
+
+  update = (FAR struct rfb_framebufferupdate_s *)session->outbuf;
+  dest   = (FAR uint16_t *)update->rect[0].data;
+
+  /* Source rectangle start address */
+
+  srcleft = (FAR uint32_t *)(session->fb + RFB_STRIDE * y + RFB_BYTESPERPIXEL * x);
+
+  for (y = 0; y < row; y++)
+    {
+      src = srcleft;
+      for (y = 0; y < row; y++)
+        {
+          *dest++ = convert(*src);
+          src++;
+        }
+
+      srcleft = (FAR uint32_t *)((uintptr_t)srcleft + RFB_STRIDE);
+    }
+
+  return (size_t)((uintptr_t)dest - (uintptr_t)update->rect[0].data);
+#endif
+}
+
+/****************************************************************************
+ * Name: vnc_copy32
+ *
+ * Description:
+ *   Copy a 16/32-bit pixels from the source rectangle to a 32-bit pixel
+ *   destination rectangle.
+ *
+ * Input Parameters:
+ *   session      - A reference to the VNC session structure.
+ *   row,col      - The upper left X/Y (pixel/row) position of the rectangle
+ *   width,height - The width (pixels) and height (rows of the rectangle)
+ *   convert      - The function to use to convert from the local framebuffer
+ *                  color format to the remote framebuffer color format.
+ *
+ * Returned Value:
+ *   The size of the transfer in bytes.
+ *
+ ****************************************************************************/
+
+static size_t vnc_copy32(FAR struct vnc_session_s *session,
+                         nxgl_coord_t row, nxgl_coord_t col, 
+                         nxgl_coord_t height, nxgl_coord_t width,
+                         vnc_convert32_t convert)
+{
+#if defined(CONFIG_VNCSERVER_COLORFMT_RGB16)
+  FAR struct rfb_framebufferupdate_s *update;
+  FAR const uint16_t *srcleft;
+  FAR const uint16_t *src;
+  FAR uint32_t *dest;
+  nxgl_coord_t x;
+  nxgl_coord_t y;
+
+  /* Destination rectangle start address */
+
+  update = (FAR struct rfb_framebufferupdate_s *)session->outbuf;
+  dest   = (FAR uint32_t *)update->rect[0].data;
+
+  /* Source rectangle start address (left/top)*/
+
+  srcleft = (FAR uint16_t *)(session->fb + RFB_STRIDE * y + RFB_BYTESPERPIXEL * x);
+
+  /* Transfer each row from the source buffer into the update buffer */
+
+  for (y = 0; y < row; y++)
+    {
+      src = srcleft;
+      for (y = 0; y < row; y++)
+        {
+          *dest++ = convert(*src);
+          src++;
+        }
+
+      srcleft = (FAR uint16_t *)((uintptr_t)srcleft + RFB_STRIDE);
+    }
+
+  return (size_t)((uintptr_t)srcleft - (uintptr_t)update->rect[0].data);
+
+#elif defined(CONFIG_VNCSERVER_COLORFMT_RGB32)
+  FAR struct rfb_framebufferupdate_s *update;
+  FAR const uint32_t *srcleft;
+  FAR const uint32_t *src;
+  FAR uint32_t *dest;
+  nxgl_coord_t x;
+  nxgl_coord_t y;
+
+  /* Destination rectangle start address */
+
+  update = (FAR struct rfb_framebufferupdate_s *)session->outbuf;
+  dest   = (FAR uint32_t *)update->rect[0].data;
+
+  /* Source rectangle start address */
+
+  srcleft = (FAR uint32_t *)(session->fb + RFB_STRIDE * y + RFB_BYTESPERPIXEL * x);
+
+  for (y = 0; y < row; y++)
+    {
+      src = srcleft;
+      for (y = 0; y < row; y++)
+        {
+          *dest++ = convert(*src);
+          src++;
+        }
+
+      srcleft = (FAR uint32_t *)((uintptr_t)srcleft + RFB_STRIDE);
+    }
+
+  return (size_t)((uintptr_t)srcleft - (uintptr_t)update->rect[0].data);
+#endif
+}
+
+/****************************************************************************
  * Name: vnc_updater
  *
  * Description:
@@ -226,10 +517,11 @@ static FAR void *vnc_updater(FAR void *arg)
 {
   FAR struct vnc_session_s *session = (FAR struct vnc_session_s *)arg;
   FAR struct rfb_framebufferupdate_s *update;
+
   FAR struct rfb_rectangle_s *destrect;
   FAR struct vnc_fbupdate_s *srcrect;
-  FAR const uint8_t *srcdata;
-  FAR uint8_t *destdata;
+  FAR const uint8_t *srcrow;
+  FAR const uint8_t *src;
   nxgl_coord_t srcwidth;
   nxgl_coord_t srcheight;
   nxgl_coord_t destwidth;
@@ -242,6 +534,17 @@ static FAR void *vnc_updater(FAR void *arg)
   nxgl_coord_t y;
   unsigned int bytesperpixel;
   unsigned int maxwidth;
+  size_t size;
+  ssize_t nsent;
+
+  union
+  {
+    vnc_convert16_t bpp16;
+    vnc_convert32_t bpp32;
+  } convert;
+  bool color32 = false;
+
+  /* Set up some constant pointers and values */
 
   DEBUGASSERT(session != NULL);
   update        = (FAR struct rfb_framebufferupdate_s *)session->outbuf;
@@ -249,6 +552,34 @@ static FAR void *vnc_updater(FAR void *arg)
 
   bytesperpixel = (session->bpp + 7) >> 3;
   maxwidth      = CONFIG_VNCSERVER_UPDATE_BUFSIZE / bytesperpixel;
+
+  /* Set up the color conversion */
+
+  switch (session->colorfmt)
+    {
+      case FB_FMT_RGB16_555:
+        convert.bpp16 = vnc_convert_rgb16_555;
+        break;
+
+      case FB_FMT_RGB16_565:
+        convert.bpp16 = vnc_convert_rgb16_565;
+        break;
+
+      case FB_FMT_RGB32:
+        convert.bpp32 = vnc_convert_rgb32_888;
+        color32 = true;
+        break;
+
+      default:
+        gdbg("ERROR: Unrecognized color format: %d\n", session->colorfmt);
+        goto errout;
+    }
+
+  /* Then loop, processing updates until we are asked to stop.
+   * REVISIT: Probably need some kind of signal mechanism to wake up
+   * vnc_remove_queue() in order to stop.  Or perhaps a special STOP
+   * message in the queue?
+   */
 
   while (session->state == VNCSERVER_RUNNING)
     {
@@ -270,9 +601,9 @@ static FAR void *vnc_updater(FAR void *arg)
       DEBUGASSERT(srcrect->rect.pt1.y <= srcrect->rect.pt2.y);
       srcheight = srcrect->rect.pt2.y - srcrect->rect.pt1.y + 1;
 
-      srcdata = session->fb +
-                RFB_STRIDE * srcrect->rect.pt1.y +
-                RFB_BYTESPERPIXEL * srcrect->rect.pt1.x;
+      srcrow = session->fb +
+               RFB_STRIDE * srcrect->rect.pt1.y +
+               RFB_BYTESPERPIXEL * srcrect->rect.pt1.x;
 
       deststride = srcwidth * bytesperpixel;
       if (deststride > maxwidth)
@@ -290,20 +621,18 @@ static FAR void *vnc_updater(FAR void *arg)
 
       /* Format the rectangle header.  We may have to send several update
        * messages if the pre-allocated outbuf is smaller than the rectangle.
+       * Each update contains a small "sub-rectangle" of the origin update.
        *
-       * Loop until all rows have been output.  Start with the top row and
-       * transfer rectangles horizontally across the each group of
-       * destheight rows.
+       * Loop until all sub-rectangles have been output.  Start with the
+       * top row and transfer rectangles horizontally across each swath.
+       * The height of the swath is destwidth (the last may be shorter).
        */
 
       for (y = srcrect->rect.pt1.y;
            srcheight > 0;
-           srcheight -= updheight, y += updheight)
+           srcheight -= updheight, y += updheight,
+           srcrow += RFB_STRIDE * updheight)
         {
-          /* Destination rectangle start address */
-
-          destdata  = destrect->data;
-
           /* updheight = Height to update on this pass through the loop.
            * This will be destheight unless fewer than that number of rows
            * remain.
@@ -315,14 +644,16 @@ static FAR void *vnc_updater(FAR void *arg)
               updheight = srcheight;
             }
 
-          /* Loop until this row has been ouput.  Start with the leftmost
-           * pixel and transfer rectangles horizontally with width of
-           * destwidth until all srcwidth columns have been transferred.
+          /* Loop until this horizontal swath has sent to the VNC client.
+           * Start with the leftmost pixel and transfer rectangles
+           * horizontally with width of destwidth until all srcwidth
+           * columns have been transferred (the last rectangle may be
+           * narrower).
            */
 
-          for (width = srcwidth, x = srcrect->rect.pt1.x;
+          for (width = srcwidth, x = srcrect->rect.pt1.x, src = srcrow;
                width > 0;
-               width -= updwidth, x += updwidth)
+               width -= updwidth, x += updwidth, src += updwidth)
             {
               /* updwidth = Width to update on this pass through the loop.
                * This will be destwidth unless fewer than that number of
@@ -333,6 +664,21 @@ static FAR void *vnc_updater(FAR void *arg)
               if (updwidth > width)
                 {
                   updwidth = width;
+                }
+
+              /* Transfer the frame buffer data into the rectangle,
+               * performing the necessary color conversions.
+               */
+
+              if (color32)
+                {
+                  size = vnc_copy32(session, y, x, updheight, updwidth,
+                                    convert.bpp32);
+                }
+              else
+                {
+                  size = vnc_copy16(session, y, x, updheight, updwidth,
+                                    convert.bpp16);
                 }
 
               /* Format the FramebufferUpdate message */
@@ -347,21 +693,28 @@ static FAR void *vnc_updater(FAR void *arg)
               rfb_putbe16(destrect->height, updheight);
               rfb_putbe16(destrect->encoding, RFB_ENCODING_RAW);
 
-              /* Transfer the frame buffer data into the rectangle,
-               * performing the necessary color conversions.
-               */
-#warning Missing logic
+              DEBUGASSERT(size <= CONFIG_VNCSERVER_UPDATE_BUFSIZE);
 
-              /* Update the src and destination addresses */
+              /* Then send the update packet to the VNC client */
 
-              srcdata  += RFB_STRIDE;
-              destdata += updwidth * bytesperpixel;
+              size += SIZEOF_RFB_FRAMEBUFFERUPDATE_S(0);
+              nsent = psock_send(&session->connect, session->outbuf, size, 0);
+              if (nsent < 0)
+                {
+                  gdbg("ERROR: Send FrameBufferUpdate failed: %d\n",
+                       get_errno());
+                  goto errout;
+                }
+
+              DEBUGASSERT(nsent == size);
             }
         }
 
       vnc_free_update(session, srcrect);
     }
 
+errout:
+  session->state = VNCSERVER_STOPPED;
   return NULL;
 }
 
