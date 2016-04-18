@@ -146,7 +146,7 @@
 
 /* Local framebuffer characteristics in bytes */
 
-#define RFB_BYTESPERPIXEL   ((RFB_BITSPERPIXEL + 7) >> 8)
+#define RFB_BYTESPERPIXEL   ((RFB_BITSPERPIXEL + 7) >> 3)
 #define RFB_STRIDE          (RFB_BYTESPERPIXEL * CONFIG_VNCSERVER_SCREENWIDTH)
 #define RFB_SIZE            (RFB_STRIDE * CONFIG_VNCSERVER_SCREENHEIGHT)
 
@@ -229,6 +229,16 @@ struct vnc_session_s
   uint8_t outbuf[VNCSERVER_UPDATE_BUFSIZE];
 };
 
+/* This structure is used to communicate start-up status between the server
+ * the framebuffer driver.
+ */
+
+struct fb_startup_s
+{
+  sem_t fbsem;                  /* Framebuffer driver will wait on this */
+  int16_t result;               /* OK: successfully initialized */
+};
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -249,7 +259,7 @@ EXTERN FAR struct vnc_session_s *g_vnc_sessions[RFB_MAX_DISPLAYS];
 
 /* Used to synchronize the server thread with the framebuffer driver. */
 
-EXTERN sem_t g_fbsem[RFB_MAX_DISPLAYS];
+EXTERN struct fb_startup_s g_fbstartup[RFB_MAX_DISPLAYS];
 
 /****************************************************************************
  * Public Function Prototypes

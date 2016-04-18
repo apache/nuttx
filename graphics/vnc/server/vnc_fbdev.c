@@ -46,6 +46,7 @@
 #include <debug.h>
 
 #include <nuttx/kthread.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/video/fb.h>
 
 #include "vnc_server.h"
@@ -136,7 +137,7 @@ static struct vnc_fbinfo_s g_fbinfo[RFB_MAX_DISPLAYS];
  * for the semaphores.
  */
 
-sem_t g_fbsem[RFB_MAX_DISPLAYS];
+struct fb_startup_s g_fbstartup[RFB_MAX_DISPLAYS];
 
 /****************************************************************************
  * Private Functions
@@ -398,6 +399,9 @@ static int up_setcursor(FAR struct fb_vtable_s *vtable,
 
 static inline int vnc_wait_server(int display)
 {
+  int errcode;
+  int result;
+
   /* Check if there has been a session allocated yet.  This is one of the
    * first things that the VNC server will do with the kernel thread is
    * started.  But we might be here before the thread has gotten that far.
@@ -412,20 +416,38 @@ static inline int vnc_wait_server(int display)
 
  while (g_vnc_sessions[display] == NULL ||
         g_vnc_sessions[display]->state != VNCSERVER_RUNNING)
-   {
-     /* The server is not yet running.  Wait for the server to post the FB
-      * semaphore.  In certain error situations, the server may post the
-      * semaphore, then reset it to zero.  There are are certainly race
-      * conditions here, but I think none that are fatal.
-      */
+    {
+      /* The server is not yet running.  Wait for the server to post the FB
+       * semaphore.  In certain error situations, the server may post the
+       * semaphore, then reset it to zero.  There are are certainly race
+       * conditions here, but I think none that are fatal.
+       */
 
-     while (sem_wait(&g_fbsem[display]) < 0)
-       {
-         /* sem_wait() should fail only if it is interrupt by a signal. */
+      while (sem_wait(&g_fbstartup[display].fbsem) < 0)
+        {
+          errcode = get_errno();
 
-         DEBUGASSERT(get_errno() == EINTR);
-       }
-   }
+          /* sem_wait() should fail only if it is interrupt by a signal. */
+
+          DEBUGASSERT(errcode == EINTR);
+          if (errcode != EINTR)
+            {
+              DEBUGASSERT(errcode > 0);
+              return -errcode;
+            }
+        }
+
+      /* We were awakened.  A result of -EBUSY means that the negotiation
+       * is not complete.  Why would we be awakened in that case?  Some
+       * counting semaphore screw-up?
+       */
+
+      result = g_fbstartup[display].result;
+      if (result != -EBUSY)
+        {
+          return result;
+        }
+    }
 
   return OK;
 }
@@ -465,6 +487,9 @@ int up_fbinitialize(int display)
   DEBUGASSERT(display >= 0 && display < RFB_MAX_DISPLAYS);
 
   /* Check if the server is already running */
+
+  g_fbstartup[display].result = -EBUSY;
+  sem_reset(&g_fbstartup[display].fbsem, 0);
 
   if (g_vnc_sessions[display] != NULL)
     {

@@ -107,6 +107,12 @@ static void vnc_reset_session(FAR struct vnc_session_s *session,
     }
 
   /* [Re-]initialize the session. */
+
+  memset(&session->connect, 0, sizeof(struct socket));
+  session->connect.s_crefs = 1;
+  memset(&session->listen, 0, sizeof(struct socket));
+  session->listen.s_crefs = 1;
+
   /* Put all of the pre-allocated update structures into the freelist */
 
   sq_init(&session->updqueue);
@@ -235,14 +241,16 @@ int vnc_server(int argc, FAR char *argv[])
   if (argc != 2)
     {
       gdbg("ERROR: Unexpected number of arguments: %d\n", argc);
-      return EXIT_FAILURE;
+      ret = -EINVAL;
+      goto errout_with_post;
     }
 
   display = atoi(argv[1]);
   if (display < 0 || display >= RFB_MAX_DISPLAYS)
     {
       gdbg("ERROR: Invalid display number: %d\n", display);
-      return EXIT_FAILURE;
+      ret = -EINVAL;
+      goto errout_with_post;
     }
 
   /* Allocate the framebuffer memory.  We rely on the fact that
@@ -254,7 +262,8 @@ int vnc_server(int argc, FAR char *argv[])
     {
       gdbg("ERROR: Failed to allocate framebuffer memory: %lu KB\n",
            (unsigned long)(RFB_SIZE / 1024));
-      return -ENOMEM;
+      ret = -ENOMEM;
+      goto errout_with_post;
     }
 
   /* Allocate a session structure for this display */
@@ -263,6 +272,7 @@ int vnc_server(int argc, FAR char *argv[])
   if (session == NULL)
     {
       gdbg("ERROR: Failed to allocate session\n");
+      ret = -ENOMEM;
       goto errout_with_fb;
     }
 
@@ -276,12 +286,13 @@ int vnc_server(int argc, FAR char *argv[])
 
   for (; ; )
     {
-      /* Release the last sesstion and [Re-]initialize the session structure
+      /* Release the last session and [Re-]initialize the session structure
        * for the next connection.
        */
 
       vnc_reset_session(session, fb);
-      sem_reset(&g_fbsem[display], 0);
+      g_fbstartup[display].result = -EBUSY;
+      sem_reset(&g_fbstartup[display].fbsem, 0);
 
       /* Establish a connection with the VNC client */
 
@@ -318,7 +329,8 @@ int vnc_server(int argc, FAR char *argv[])
            * updates.
            */
 
-          sem_post(&g_fbsem[display]);
+          g_fbstartup[display].result = OK;
+          sem_post(&g_fbstartup[display].fbsem);
 
           /* Run the VNC receiver on this trhead.  The VNC receiver handles
            * all Client-to-Server messages.  The VNC receiver function does
@@ -341,6 +353,10 @@ int vnc_server(int argc, FAR char *argv[])
 
 errout_with_fb:
   kmm_free(fb);
+
+errout_with_post:
+  g_fbstartup[display].result = ret;
+  sem_post(&g_fbstartup[display].fbsem);
   return EXIT_FAILURE;
 }
 

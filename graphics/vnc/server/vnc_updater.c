@@ -338,7 +338,7 @@ uint32_t vnc_convert_rgb32_888(uint32_t rgb)
  ****************************************************************************/
 
 static size_t vnc_copy16(FAR struct vnc_session_s *session,
-                         nxgl_coord_t row, nxgl_coord_t col, 
+                         nxgl_coord_t row, nxgl_coord_t col,
                          nxgl_coord_t height, nxgl_coord_t width,
                          vnc_convert16_t convert)
 {
@@ -357,14 +357,14 @@ static size_t vnc_copy16(FAR struct vnc_session_s *session,
 
   /* Source rectangle start address (left/top)*/
 
-  srcleft = (FAR uint16_t *)(session->fb + RFB_STRIDE * y + RFB_BYTESPERPIXEL * x);
+  srcleft = (FAR uint16_t *)(session->fb + RFB_STRIDE * row + RFB_BYTESPERPIXEL * col);
 
   /* Transfer each row from the source buffer into the update buffer */
 
-  for (y = 0; y < row; y++)
+  for (y = 0; y < height; y++)
     {
       src = srcleft;
-      for (y = 0; y < row; y++)
+      for (x = 0; x < width; x++)
         {
           *dest++ = convert(*src);
           src++;
@@ -390,12 +390,12 @@ static size_t vnc_copy16(FAR struct vnc_session_s *session,
 
   /* Source rectangle start address */
 
-  srcleft = (FAR uint32_t *)(session->fb + RFB_STRIDE * y + RFB_BYTESPERPIXEL * x);
+  srcleft = (FAR uint32_t *)(session->fb + RFB_STRIDE * row + RFB_BYTESPERPIXEL * col);
 
-  for (y = 0; y < row; y++)
+  for (y = 0; y < height; y++)
     {
       src = srcleft;
-      for (y = 0; y < row; y++)
+      for (x = 0; x < width; x++)
         {
           *dest++ = convert(*src);
           src++;
@@ -428,7 +428,7 @@ static size_t vnc_copy16(FAR struct vnc_session_s *session,
  ****************************************************************************/
 
 static size_t vnc_copy32(FAR struct vnc_session_s *session,
-                         nxgl_coord_t row, nxgl_coord_t col, 
+                         nxgl_coord_t row, nxgl_coord_t col,
                          nxgl_coord_t height, nxgl_coord_t width,
                          vnc_convert32_t convert)
 {
@@ -447,14 +447,14 @@ static size_t vnc_copy32(FAR struct vnc_session_s *session,
 
   /* Source rectangle start address (left/top)*/
 
-  srcleft = (FAR uint16_t *)(session->fb + RFB_STRIDE * y + RFB_BYTESPERPIXEL * x);
+  srcleft = (FAR uint16_t *)(session->fb + RFB_STRIDE * row + RFB_BYTESPERPIXEL * col);
 
   /* Transfer each row from the source buffer into the update buffer */
 
-  for (y = 0; y < row; y++)
+  for (y = 0; y < height; y++)
     {
       src = srcleft;
-      for (y = 0; y < row; y++)
+      for (x = 0; x < width; x++)
         {
           *dest++ = convert(*src);
           src++;
@@ -480,12 +480,12 @@ static size_t vnc_copy32(FAR struct vnc_session_s *session,
 
   /* Source rectangle start address */
 
-  srcleft = (FAR uint32_t *)(session->fb + RFB_STRIDE * y + RFB_BYTESPERPIXEL * x);
+  srcleft = (FAR uint32_t *)(session->fb + RFB_STRIDE * row + RFB_BYTESPERPIXEL * col);
 
-  for (y = 0; y < row; y++)
+  for (y = 0; y < height; y++)
     {
       src = srcleft;
-      for (y = 0; y < row; y++)
+      for (x = 0; x < width; x++)
         {
           *dest++ = convert(*src);
           src++;
