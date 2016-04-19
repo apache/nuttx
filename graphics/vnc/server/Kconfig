@@ -16,14 +16,14 @@ if VNCSERVER
 
 choice
 	prompt "VNC server protocol"
-	default VNCSERVER_PROTO3p3
+	default VNCSERVER_PROTO3p8
 
 config VNCSERVER_PROTO3p3
 	bool "Version 3.3"
+	depends on EXPERIMENTAL
 
 config VNCSERVER_PROTO3p8
 	bool "Version 3.8"
-	depends on EXPERIMENTAL
 
 endchoice # VNC server protocol
 
@@ -66,10 +66,24 @@ endchoice # VNC color format
 config VNCSERVER_SCREENWIDTH
 	int "Framebuffer width (pixels)"
 	default 320
+	---help---
+		This setting defines the width in pixels of the local framebuffer.
+
+			Memory usage: PixelWidth * ScreenWidth * ScreenHeight
+
+		So, for example, a 320x240 screen with RGB16 pixels would require
+		2x320x240 = 150 KB of RAM.
 
 config VNCSERVER_SCREENHEIGHT
 	int "Framebuffer height (rows)"
 	default 240
+	---help---
+		This setting defines the height in rows of the local framebuffer.
+
+			Memory usage: PixelWidth * ScreenWidth * ScreenHeight
+
+		So, for example, a 320x240 screen with RGB16 pixels would require
+		2x320x240 = 150 KB of RAM.
 
 config VNCSERVER_NUPDATES
 	int "Number of pre-allocate update structures"

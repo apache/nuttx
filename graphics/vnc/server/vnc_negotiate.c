@@ -62,6 +62,7 @@
 static const char g_vncproto[] = RFB_PROTOCOL_VERSION_3p3;
 #elif defined(CONFIG_VNCSERVER_PROTO3p8)
 static const char g_vncproto[] = RFB_PROTOCOL_VERSION_3p8;
+static const char g_nosecurity[] = "No security types are supported";
 #endif
 
 /****************************************************************************
@@ -84,10 +85,16 @@ static const char g_vncproto[] = RFB_PROTOCOL_VERSION_3p8;
  *
  ****************************************************************************/
 
-#ifdef CONFIG_VNCSERVER_PROTO3p3
 int vnc_negotiate(FAR struct vnc_session_s *session)
 {
+#ifdef CONFIG_VNCSERVER_PROTO3p3
   FAR struct rfb_sectype_s *sectype;
+#else /* ifdef CONFIG_VNCSERVER_PROTO3p8 */
+  FAR struct rfb_supported_sectypes_s *sectypes;
+  FAR struct rfb_selected_sectype_s *sectype;
+  FAR struct rfb_sectype_result_s *secresult;
+  FAR struct rfb_sectype_fail_s *secfail;
+#endif
   FAR struct rfb_serverinit_s *serverinit;
   FAR struct rfb_pixelfmt_s *pixelfmt;
   FAR struct rfb_setpixelformat_s *setformat;
@@ -148,13 +155,13 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
 
   DEBUGASSERT(nrecvd == len);
 
-  /* Tell the client that we won't use any stinkin' security.
-   *
-   * "Version 3.3 The server decides the security type and sends a single
-   *  word:"
+#ifdef CONFIG_VNCSERVER_PROTO3p3
+  /* Version 3.3: The server decides the security type and sends a single
+   * word containing the security type:  Tell the client that we won't use
+   * any stinkin' security.
    */
 
-  gvdbg("Send security type (None)\n");
+  gvdbg("Send SecurityType\n");
 
   sectype = (FAR struct rfb_sectype_s *)session->outbuf;
   rfb_putbe32(sectype->type, RFB_SECTYPE_NONE);
@@ -170,6 +177,110 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
     }
 
   DEBUGASSERT(nsent == sizeof(struct rfb_sectype_s));
+
+#else /* ifdef CONFIG_VNCSERVER_PROTO3p8 */
+  /* Version 3.8: Offer the client a choice of security -- where None is the
+   * only option offered.
+   */
+
+  gvdbg("Send SupportedSecurityTypes\n");
+
+  sectypes         = (FAR struct rfb_supported_sectypes_s *)session->outbuf;
+  sectypes->ntypes = 1;
+  sectypes->type[0] = RFB_SECTYPE_NONE;
+
+  nsent = psock_send(&session->connect, sectypes,
+                     SIZEOF_RFB_SUPPORTED_SECTYPES_S(1), 0);
+  if (nsent < 0)
+    {
+      errcode = get_errno();
+      gdbg("ERROR: Send SupportedSecurityTypes failed: %d\n", errcode);
+      DEBUGASSERT(errcode > 0);
+      return -errcode;
+    }
+
+  DEBUGASSERT(nsent == SIZEOF_RFB_SUPPORTED_SECTYPES_S(1));
+
+  /* If the server listed at least one valid security type supported by the
+   * client, the client sends back a single byte indicating which security
+   * type is to be used on the connection.
+   */
+
+  gvdbg("Receive SecurityType\n");
+
+  sectype = (FAR struct rfb_selected_sectype_s *)session->inbuf;
+
+  nrecvd = psock_recv(&session->connect, sectype,
+                      sizeof(struct rfb_selected_sectype_s), 0);
+  if (nrecvd < 0)
+    {
+      errcode = get_errno();
+      gdbg("ERROR: Receive SecurityType failed: %d\n", errcode);
+      DEBUGASSERT(errcode > 0);
+      return -errcode;
+    }
+
+  DEBUGASSERT(nrecvd == sizeof(struct rfb_selected_sectype_s));
+
+  gvdbg("Send SecurityResult\n");
+
+  secresult = (FAR struct rfb_sectype_result_s *)session->outbuf;
+
+  if (sectype->type != RFB_SECTYPE_NONE)
+    {
+      gdbg("ERROR: Received unsupported SecurityType: %d\n", sectype->type);
+
+      /* REVISIT: Should send the reason string here */
+
+      rfb_putbe32(secresult->result, RFB_SECTYPE_FAIL);
+
+      nsent = psock_send(&session->connect, secresult,
+                         sizeof(struct rfb_sectype_result_s), 0);
+      if (nsent < 0)
+        {
+          errcode = get_errno();
+          gdbg("ERROR: Send SecurityResult failed: %d\n", errcode);
+          DEBUGASSERT(errcode > 0);
+          return -errcode;
+        }
+
+      DEBUGASSERT(nsent == sizeof(struct rfb_sectype_result_s));
+
+      gvdbg("Send failure reason\n");
+
+      secfail = (FAR struct rfb_sectype_fail_s *)session->outbuf;
+      len     = strlen(g_nosecurity);
+      rfb_putbe32(secfail->len, len);
+      memcpy(secfail->str, g_nosecurity, len);
+
+      nsent = psock_send(&session->connect, secfail,
+                         SIZEOF_RFB_SECTYPE_FAIL_S(len), 0);
+      if (nsent < 0)
+        {
+          errcode = get_errno();
+          gdbg("ERROR: Send failure reason failed: %d\n", errcode);
+          DEBUGASSERT(errcode > 0);
+          return -errcode;
+        }
+
+      DEBUGASSERT(nsent == SIZEOF_RFB_SECTYPE_FAIL_S(len));
+      return -EPROTONOSUPPORT;
+    }
+
+  rfb_putbe32(secresult->result, RFB_SECTYPE_SUCCESS);
+
+  nsent = psock_send(&session->connect, secresult,
+                     sizeof(struct rfb_sectype_result_s), 0);
+  if (nsent < 0)
+    {
+      errcode = get_errno();
+      gdbg("ERROR: Send SecurityResult failed: %d\n", errcode);
+      DEBUGASSERT(errcode > 0);
+      return -errcode;
+    }
+
+  DEBUGASSERT(nsent == sizeof(struct rfb_sectype_result_s));
+#endif
 
   /* Receive the ClientInit message
    *
@@ -198,11 +309,11 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
   /* Send the ServerInit message
    *
    * "After receiving the ClientInit message, the server sends a ServerInit
-   *  message. This tells the client the width and height of the server’s 
+   *  message. This tells the client the width and height of the server’s
    *  framebuffer, its pixel format and the name associated with the desktop:
    */
 
-  gvdbg("Receive ServerInit\n");
+  gvdbg("Send ServerInit\n");
 
   serverinit          = (FAR struct rfb_serverinit_s *)session->outbuf;
 
@@ -248,7 +359,7 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
   if (nrecvd < 0)
     {
       errcode = get_errno();
-      gdbg("ERROR: Receive SetFormat failed: %d\n", errcode);
+      gdbg("ERROR: Receive SetPixelFormat failed: %d\n", errcode);
       DEBUGASSERT(errcode > 0);
       return -errcode;
     }
@@ -261,7 +372,7 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
     }
   else if (setformat->msgtype != RFB_SETPIXELFMT_MSG)
     {
-      gdbg("ERROR: Not a SetFormat message: %d\n", (int)setformat->msgtype);
+      gdbg("ERROR: Not a SetPixelFormat message: %d\n", (int)setformat->msgtype);
       return -EPROTO;
     }
 
@@ -318,66 +429,3 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
   session->state = VNCSERVER_CONFIGURED;
   return OK;
 }
-#endif
-
-#ifdef CONFIG_VNCSERVER_PROTO3p8
-int vnc_negotiate(FAR struct vnc_session_s *session)
-{
-  ssize_t nsent;
-  ssize_t nrecvd;
-  size_t len;
-
-#ifdef CONFIG_NET_SOCKOPTS
-  struct timeval tv;
-  int ret;
-
-  /* Set a receive timeout so that we don't hang if the client does not
-   * respond according to RFB 3.3 protocol.
-   */
-
-  tv.tv_sec  = 5;
-  tv.tv_usec = 0;
-  ret = psock_setsockopt(&session->connect, SOL_SOCKET, SO_RCVTIMEO,
-                         &tv, sizeof(struct timeval));
-  if (ret < 0)
-    {
-      errcode = get_errno();
-      gdbg("ERROR: Failed to set receive timeout: %d\n", errcode);
-      DEBUGASSERT(errcode > 0);
-      return -errcode;
-    }
-#endif
-
-  /* Inform the client of the VNC protocol version */
-
-  len = strlen(g_vncproto);
-  nsent = psock_send(&session->connect, g_vncproto, len, 0);
-  if (nsent < 0)
-    {
-      errcode = get_errno();
-      gdbg("ERROR: Send ProtocolVersion failed: %d\n", errcode);
-      DEBUGASSERT(errcode > 0);
-      return -errcode;
-    }
-
-  DEBUGASSERT(nsent == len);
-
-  /* Receive the echo of the protocol string */
-
-  nrecvd = psock_recv(&session->connect, session->inbuf, len, 0);
-  if (nrecvd <= 0)
-    {
-      errcode = get_errno();
-      gdbg("ERROR: Receive protocol confirmation failed: %d\n", errcode);
-      DEBUGASSERT(errcode > 0);
-      return -errcode;
-    }
-
-  DEBUGASSERT(nrecvd == len);
-
-  /* Offer the client a choice of security -- where None is the only option. */
-#warning Missing logic
-
-  return OK;
-}
-#endif
