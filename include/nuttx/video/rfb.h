@@ -1039,9 +1039,9 @@ struct rfb_palettendx_s
 #define rfb_putbe16(d,v) \
   do \
     { \
-      FAR uint8_t *dest = (d); \
-      *dest++ = ((uint16_t)(v) >> 8); \
-      *dest   = ((uint16_t)(v) & 0xff); \
+      register FAR uint8_t *__d = (FAR uint8_t *)(d); \
+      *__d++ = ((uint16_t)(v) >> 8); \
+      *__d   = ((uint16_t)(v) & 0xff); \
     } \
   while (0)
 
@@ -1056,11 +1056,11 @@ struct rfb_palettendx_s
 #define rfb_putbe32(d,v) \
   do \
     { \
-      FAR uint8_t *dest = (d); \
-      *dest++ = ((uint32_t)(v) >> 24); \
-      *dest++ = ((uint32_t)(v) >> 16) & 0xff; \
-      *dest++ = ((uint32_t)(v) >> 8)  & 0xff; \
-      *dest   = ((uint32_t)(v)        & 0xff); \
+      register FAR uint8_t *__d = (FAR uint8_t *)(d); \
+      *__d++ = ((uint32_t)(v) >> 24); \
+      *__d++ = ((uint32_t)(v) >> 16) & 0xff; \
+      *__d++ = ((uint32_t)(v) >> 8)  & 0xff; \
+      *__d   = ((uint32_t)(v)        & 0xff); \
     } \
   while (0)
 
