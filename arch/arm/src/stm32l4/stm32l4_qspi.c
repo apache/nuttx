@@ -124,14 +124,13 @@
 # error QSPI DMA support not yet implemented
 #endif
 
-#ifdef QSPI_USE_INTERRUPTS
-# error QSPI Interrupt support not yet implemented
-#endif
+/* QSPI dma is not yet implemented */
 
-/* QSPI interrupts and dma are not yet implemented */
-
-#undef QSPI_USE_INTERRUPTS
 #undef CONFIG_STM32L4_QSPI_DMA
+
+/* QSPI Interrupt mode is implemented */
+
+#define QSPI_USE_INTERRUPTS
 
 /* Sanity check that board.h defines requisite QSPI pinmap options for */
 
@@ -181,6 +180,8 @@ struct stm32l4_qspidev_s
 #ifdef QSPI_USE_INTERRUPTS
   xcpt_t handler;              /* Interrupt handler */
   uint8_t irq;                 /* Interrupt number */
+  sem_t op_sem;                /* Block until complete */
+  struct qspi_xctnspec_s* xctn; /* context of transaction in progress*/
 #endif
 
 #ifdef CONFIG_STM32L4_QSPI_DMA
@@ -227,8 +228,14 @@ struct qspi_xctnspec_s
   uint32_t datasize;      /* number of data bytes (0xffffffff == undefined) */
   FAR void *buffer;       /* Data buffer */
 
-  uint32_t isddr;         /* true if 'double data rate' */
-  uint32_t issioo;        /* true if 'send instruction only once' mode */
+  uint8_t isddr;          /* true if 'double data rate' */
+  uint8_t issioo;         /* true if 'send instruction only once' mode */
+  
+#ifdef QSPI_USE_INTERRUPTS
+  uint8_t function;       /* functional mode; to distinguish a read or write */
+  int8_t disposition;     /* how it all turned out */
+  uint32_t idxnow;        /* index into databuffer of current byte in transfer */
+#endif
 };
 
 /****************************************************************************
@@ -265,6 +272,7 @@ static void     qspi_dumpgpioconfig(const char *msg);
 
 #ifdef QSPI_USE_INTERRUPTS
 static int     qspi0_interrupt(int irq, void *context);
+
 #endif
 
 /* QSPI methods */
@@ -313,7 +321,7 @@ static struct stm32l4_qspidev_s g_qspi0dev =
   .base              = STM32L4_QSPI_BASE,
 #ifdef QSPI_USE_INTERRUPTS
   .handler           = qspi0_interrupt,
-  .irq               = STM32L4_IRQ_QSPI,
+  .irq               = STM32L4_IRQ_QUADSPI,
 #endif
   .intf              = 0,
 #ifdef CONFIG_STM32L4_QSPI_DMA
@@ -672,6 +680,12 @@ static int qspi_setupxctnfromcmd(struct qspi_xctnspec_s *xctn,
       xctn->isddr = 0;
     }
 
+#if defined(QSPI_USE_INTERRUPTS)
+  xctn->function = QSPICMD_ISWRITE(cmdinfo->flags) ? CCR_FMODE_INDWR : CCR_FMODE_INDRD;
+  xctn->disposition = - EIO;
+  xctn->idxnow = 0;
+#endif
+
   return OK;
 }
 
@@ -792,6 +806,13 @@ static int qspi_setupxctnfrommem(struct qspi_xctnspec_s *xctn,
   /* XXX III double data rate option bits */
 
   xctn->isddr = 0;
+
+#if defined(QSPI_USE_INTERRUPTS)
+  xctn->function = QSPIMEM_ISWRITE(meminfo->flags) ? CCR_FMODE_INDWR : CCR_FMODE_INDRD;
+  xctn->disposition = - EIO;
+  xctn->idxnow = 0;
+#endif
+
   return OK;
 }
 
@@ -824,6 +845,28 @@ static void qspi_waitstatusflags(struct stm32l4_qspidev_s *priv,
     {
       while (((regval = qspi_getreg(priv, STM32L4_QUADSPI_SR_OFFSET)) & mask));
     }
+}
+
+/****************************************************************************
+ * Name: qspi_abort
+ *
+ * Description:
+ *   Abort any transaction in progress
+ *
+ * Input Parameters:
+ *   priv  - The QSPI controller to dump
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void qspi_abort(struct stm32l4_qspidev_s *priv)
+{
+  uint32_t regval;
+  regval  = qspi_getreg(priv, STM32L4_QUADSPI_CR_OFFSET);
+  regval |= QSPI_CR_ABORT;
+  qspi_putreg(priv, regval, STM32L4_QUADSPI_CR_OFFSET);
 }
 
 /****************************************************************************
@@ -885,6 +928,208 @@ static void qspi_ccrconfig(struct stm32l4_qspidev_s *priv,
     }
 }
 
+#if defined(QSPI_USE_INTERRUPTS)
+/****************************************************************************
+ * Name: qspi0_interrupt
+ *
+ * Description:
+ *   Interrupt handler; we handle all QSPI cases -- reads, writes,
+ *   automatic status polling, etc.
+ *
+ * Input Parameters:
+ *   irq  - 
+ *   context  - 
+ *
+ * Returned Value:
+ *   OK means we handled it
+ *
+ ****************************************************************************/
+
+static int qspi0_interrupt(int irq, void *context)
+{
+  uint32_t status;
+  uint32_t cr;
+  uint32_t regval;
+  
+  /* let's find out what is going on */
+  
+  status  = qspi_getreg(&g_qspi0dev, STM32L4_QUADSPI_SR_OFFSET);
+  cr  = qspi_getreg(&g_qspi0dev, STM32L4_QUADSPI_CR_OFFSET);
+  
+  /* is it 'FIFO Threshold'? */
+  
+  if((status & QSPI_SR_FTF) && (cr & QSPI_CR_FTIE))
+    {
+      volatile uint32_t *datareg = (volatile uint32_t*)(g_qspi0dev.base + STM32L4_QUADSPI_DR_OFFSET);
+      if(g_qspi0dev.xctn->function == CCR_FMODE_INDWR)
+        {
+          /* Write data until we have no more or have no place to put it */
+          
+          while((regval = qspi_getreg(&g_qspi0dev, STM32L4_QUADSPI_SR_OFFSET)) & QSPI_SR_FTF)
+            {
+              if (g_qspi0dev.xctn->idxnow < g_qspi0dev.xctn->datasize)
+                {
+                  *(volatile uint8_t *)datareg = ((uint8_t *)g_qspi0dev.xctn->buffer)[g_qspi0dev.xctn->idxnow];
+                  ++g_qspi0dev.xctn->idxnow;
+                }
+              else
+                {
+                  /* fresh out of data to write */
+                  
+                  break;
+                }
+            }
+        }
+      else if(g_qspi0dev.xctn->function == CCR_FMODE_INDRD)
+        {
+          /* Read data until we have no more or have no place to put it */
+          
+          while((regval = qspi_getreg(&g_qspi0dev, STM32L4_QUADSPI_SR_OFFSET)) & QSPI_SR_FTF)
+            {
+              if (g_qspi0dev.xctn->idxnow < g_qspi0dev.xctn->datasize)
+                {
+                  ((uint8_t *)g_qspi0dev.xctn->buffer)[g_qspi0dev.xctn->idxnow] = *(volatile uint8_t *)datareg;
+                  ++g_qspi0dev.xctn->idxnow;
+                }
+              else
+                {
+                  /* no room at the inn */
+                  
+                  break;
+                }
+            }
+        }
+    }
+
+  /* is it 'Transfer Complete'? */
+  
+  if((status & QSPI_SR_TCF) && (cr & QSPI_CR_TCIE))
+  {
+    /* acknowledge interrupt */
+    
+    qspi_putreg(&g_qspi0dev, QSPI_FCR_CTCF, STM32L4_QUADSPI_FCR);
+
+    /* Disable the QSPI FIFO Threshold, Transfer Error and Transfer complete Interrupts */
+    
+    regval  = qspi_getreg(&g_qspi0dev, STM32L4_QUADSPI_CR_OFFSET);
+    regval &= ~(QSPI_CR_TEIE | QSPI_CR_TCIE | QSPI_CR_FTIE);
+    qspi_putreg(&g_qspi0dev, regval, STM32L4_QUADSPI_CR_OFFSET);
+    
+    /* do the last bit of read if needed */
+    
+    if(g_qspi0dev.xctn->function == CCR_FMODE_INDRD)
+      {
+        volatile uint32_t *datareg = (volatile uint32_t*)(g_qspi0dev.base + STM32L4_QUADSPI_DR_OFFSET);
+
+        /* Read any remaining data */
+        
+        while(((regval = qspi_getreg(&g_qspi0dev, STM32L4_QUADSPI_SR_OFFSET)) & QSPI_SR_FLEVEL_MASK) != 0)
+          {
+            if (g_qspi0dev.xctn->idxnow < g_qspi0dev.xctn->datasize)
+              {
+                ((uint8_t *)g_qspi0dev.xctn->buffer)[g_qspi0dev.xctn->idxnow] = *(volatile uint8_t *)datareg;
+                ++g_qspi0dev.xctn->idxnow;
+              }
+            else
+              {
+                /* no room at the inn */
+                break;
+              }
+          }
+      }
+
+    /* use 'abort' to ditch any stray fifo contents and clear BUSY flag */
+    
+    qspi_abort(&g_qspi0dev);
+
+    /* set success status */
+    
+    g_qspi0dev.xctn->disposition = OK;
+    
+    /* signal complete */
+    
+    sem_post(&g_qspi0dev.op_sem);
+  }
+
+  /* is it 'Status Match'? */
+  
+  if((status & QSPI_SR_SMF) && (cr & QSPI_CR_SMIE))
+    {
+      /* acknowledge interrupt */
+      
+      qspi_putreg(&g_qspi0dev, QSPI_FCR_CSMF, STM32L4_QUADSPI_FCR);
+     
+      /* If 'automatic poll mode stop' is activated, we're done */
+      
+      if(cr & QSPI_CR_APMS)
+        {
+          /* Disable the QSPI Transfer Error and Status Match Interrupts */
+          
+          regval  = qspi_getreg(&g_qspi0dev, STM32L4_QUADSPI_CR_OFFSET);
+          regval &= ~(QSPI_CR_TEIE | QSPI_CR_SMIE);
+          qspi_putreg(&g_qspi0dev, regval, STM32L4_QUADSPI_CR_OFFSET);
+
+          /* set success status */
+          
+          g_qspi0dev.xctn->disposition = OK;
+          
+          /* signal complete */
+          
+          sem_post(&g_qspi0dev.op_sem);
+        }
+      else
+        {
+          /* XXX if it's NOT auto stop; something needs to happen here; a callback?*/
+        }
+    }
+
+  /* is it' Transfer Error'? :( */
+  
+  if((status & QSPI_SR_TEF) && (cr & QSPI_CR_TEIE))
+    {
+      /* acknowledge interrupt */
+      
+      qspi_putreg(&g_qspi0dev, QSPI_FCR_CTEF, STM32L4_QUADSPI_FCR);
+      
+      /* Disable all the QSPI Interrupts */
+      
+      regval  = qspi_getreg(&g_qspi0dev, STM32L4_QUADSPI_CR_OFFSET);
+      regval &= ~(QSPI_CR_TEIE | QSPI_CR_TCIE | QSPI_CR_FTIE | QSPI_CR_SMIE | QSPI_CR_TOIE);
+      qspi_putreg(&g_qspi0dev, regval, STM32L4_QUADSPI_CR_OFFSET);
+
+      /* set error status */
+      
+      g_qspi0dev.xctn->disposition = - EIO;
+
+      /* signal complete */
+      
+      sem_post(&g_qspi0dev.op_sem);
+    }
+
+  /* is it 'Timeout'? (: */
+  
+  if((status & QSPI_SR_TOF) && (cr & QSPI_CR_TOIE))
+    {
+      /* acknowledge interrupt */
+      
+      qspi_putreg(&g_qspi0dev, QSPI_FCR_CTOF, STM32L4_QUADSPI_FCR);
+      
+      /* set error status */
+      
+      g_qspi0dev.xctn->disposition = - ETIMEDOUT;
+      
+      /* signal complete */
+      
+      sem_post(&g_qspi0dev.op_sem);
+    }
+
+  return OK;
+}
+
+#elif defined(CONFIG_STM32L4_QSPI_DMA)
+  /* XXX III dma mode */
+
+#else
 /****************************************************************************
  * Name: qspi_receive_blocking
  *
@@ -949,9 +1194,7 @@ static int qspi_receive_blocking(struct stm32l4_qspidev_s *priv,
 
           /* Use Abort to clear the busy flag, and ditch any extra bytes in fifo */
 
-          regval  = qspi_getreg(priv, STM32L4_QUADSPI_CR_OFFSET);
-          regval |= QSPI_CR_ABORT;
-          qspi_putreg(priv, regval, STM32L4_QUADSPI_CR_OFFSET);
+          qspi_abort(priv);
         }
     }
   else
@@ -983,7 +1226,6 @@ static int qspi_transmit_blocking(struct stm32l4_qspidev_s *priv,
   int ret = OK;
   volatile uint32_t *datareg = (volatile uint32_t*)(priv->base + STM32L4_QUADSPI_DR_OFFSET);
   uint8_t *src = (uint8_t*)xctn->buffer;
-  uint32_t regval;
 
   if (src != NULL)
     {
@@ -1010,11 +1252,9 @@ static int qspi_transmit_blocking(struct stm32l4_qspidev_s *priv,
           qspi_waitstatusflags(priv, QSPI_SR_TCF, 1);
           qspi_putreg(priv, QSPI_FCR_CTCF, STM32L4_QUADSPI_FCR);
 
-          /* Use Abort to cler the Busy flag */
+          /* Use Abort to clear the Busy flag */
 
-          regval  = qspi_getreg(priv, STM32L4_QUADSPI_CR_OFFSET);
-          regval |= QSPI_CR_ABORT;
-          qspi_putreg(priv, regval, STM32L4_QUADSPI_CR_OFFSET);
+          qspi_abort(priv);
         }
     }
   else
@@ -1025,28 +1265,6 @@ static int qspi_transmit_blocking(struct stm32l4_qspidev_s *priv,
   return ret;
 }
 
-#ifdef QSPI_USE_INTERRUPTS
-/****************************************************************************
- * Name: qspi0_interrupt
- *
- * Description:
- *   XXX
- *
- * Input Parameters:
- *   irq  - XXX
- *   context  - xxx
- *
- * Returned Value:
- *   XXX
- *
- ****************************************************************************/
-
-static int qspi0_interrupt(int irq, void *context)
-{
-  /* XXX III needs implementation */
-  (void)g_qspi0dev;
-  return OK;
-}
 #endif
 
 /****************************************************************************
@@ -1111,20 +1329,11 @@ static int qspi_lock(struct qspi_dev_s *dev, bool lock)
  *
  ****************************************************************************/
 
-/*XXX partial*/
 static uint32_t qspi_setfrequency(struct qspi_dev_s *dev, uint32_t frequency)
 {
   struct stm32l4_qspidev_s *priv = (struct stm32l4_qspidev_s *)dev;
   uint32_t actual;
   uint32_t prescaler;
-#if 0
-#if CONFIG_STM32L4_QSPI_DLYBS > 0
-  uint32_t dlybs;
-#endif
-#if CONFIG_STM32L4_QSPI_DLYBCT > 0
-  uint32_t dlybct;
-#endif
-#endif
   uint32_t regval;
 
   qspivdbg("frequency=%d\n", frequency);
@@ -1132,6 +1341,7 @@ static uint32_t qspi_setfrequency(struct qspi_dev_s *dev, uint32_t frequency)
 
   /* Wait till BUSY flag reset */
 
+  qspi_abort(priv);
   qspi_waitstatusflags(priv, QSPI_SR_BUSY, 0);
 
   /* Check if the requested frequency is the same as the frequency selection */
@@ -1316,6 +1526,7 @@ static int qspi_command(struct qspi_dev_s *dev,
 
   /* Wait 'till non-busy */
 
+  qspi_abort(priv);
   qspi_waitstatusflags(priv, QSPI_SR_BUSY, 0);
 
   /* Clear flags */
@@ -1323,9 +1534,83 @@ static int qspi_command(struct qspi_dev_s *dev,
   qspi_putreg(priv, QSPI_FCR_CTEF | QSPI_FCR_CTCF | QSPI_FCR_CSMF | QSPI_FCR_CTOF,
               STM32L4_QUADSPI_FCR);
 
-  /* XXX III this is for polling mode; support interrupt and dma modes also
-   * and 'autopolling'
-   */
+#ifdef QSPI_USE_INTERRUPTS
+  /* interrupt mode will need access to the transaction context */
+  
+  priv->xctn = &xctn;
+
+  if (QSPICMD_ISDATA(cmdinfo->flags))
+    {
+      DEBUGASSERT(cmdinfo->buffer != NULL && cmdinfo->buflen > 0);
+      DEBUGASSERT(IS_ALIGNED(cmdinfo->buffer));
+
+      if (QSPICMD_ISWRITE(cmdinfo->flags))
+        {
+          uint32_t regval;
+          
+          /* Set up the Communications Configuration Register as per command info */
+
+          qspi_ccrconfig(priv, &xctn, CCR_FMODE_INDWR);
+
+          /* Enable 'Transfer Error' 'FIFO Threshhold' and 'Transfer Complete' interrupts */
+          
+          regval  = qspi_getreg(priv, STM32L4_QUADSPI_CR_OFFSET);
+          regval |= (QSPI_CR_TEIE | QSPI_CR_FTIE | QSPI_CR_TCIE);
+          qspi_putreg(priv, regval, STM32L4_QUADSPI_CR_OFFSET);
+        }
+      else
+        {
+          uint32_t regval;
+          uint32_t addrval;
+          
+          addrval = qspi_getreg(priv, STM32L4_QUADSPI_AR_OFFSET);
+          
+          /* Set up the Communications Configuration Register as per command info */
+
+          qspi_ccrconfig(priv, &xctn, CCR_FMODE_INDRD);
+
+          /* Start the transfer by re-writing the address in AR register */
+          
+          qspi_putreg(priv, addrval, STM32L4_QUADSPI_AR_OFFSET);
+
+          /* Enable 'Transfer Error' 'FIFO Threshhold' and 'Transfer Complete' interrupts */
+          
+          regval  = qspi_getreg(priv, STM32L4_QUADSPI_CR_OFFSET);
+          regval |= (QSPI_CR_TEIE | QSPI_CR_FTIE | QSPI_CR_TCIE);
+          qspi_putreg(priv, regval, STM32L4_QUADSPI_CR_OFFSET);
+        }
+    }
+  else
+    {
+      uint32_t regval;
+      
+      /* We have no data phase, the command will execute as soon as we emit the CCR */
+
+      /* Enable 'Transfer Error' and 'Transfer Complete' interrupts */
+      
+      regval  = qspi_getreg(priv, STM32L4_QUADSPI_CR_OFFSET);
+      regval |= (QSPI_CR_TEIE | QSPI_CR_TCIE);
+      qspi_putreg(priv, regval, STM32L4_QUADSPI_CR_OFFSET);
+
+      /* Set up the Communications Configuration Register as per command info */
+
+      qspi_ccrconfig(priv, &xctn, CCR_FMODE_INDRD);
+    }
+  
+  /* Wait for the interrupt routine to finish it's magic */
+  
+  sem_wait(&priv->op_sem);
+  MEMORY_SYNC();
+  
+  /* convey the result */
+  
+  ret = xctn.disposition;
+
+#elif defined(CONFIG_STM32L4_QSPI_DMA)
+  /* XXX III dma mode (and 'autopolling'?) */
+  
+#else
+  /* polling mode */
 
   /* Set up the Communications Configuration Register as per command info */
 
@@ -1341,18 +1626,10 @@ static int qspi_command(struct qspi_dev_s *dev,
 
       if (QSPICMD_ISWRITE(cmdinfo->flags))
         {
-          /* XXX III we are going to do polling; revisit when we get
-           * interrupt and/or DMA up.
-           */
-
           ret = qspi_transmit_blocking(priv, &xctn);
         }
       else
         {
-          /* XXX III we are going to do polling; revisit when we get
-           * interrupt and/or DMA up.
-           */
-
           ret = qspi_receive_blocking(priv, &xctn);
         }
 
@@ -1363,12 +1640,12 @@ static int qspi_command(struct qspi_dev_s *dev,
       ret = OK;
     }
 
-  /* XXX III this is for polling mode; support interrupt and dma modes also */
-
   /* Wait for Transfer complete, and not busy */
 
   qspi_waitstatusflags(priv, QSPI_SR_TCF,1);
   qspi_waitstatusflags(priv, QSPI_SR_BUSY,0);
+  
+#endif
 
   return ret;
 }
@@ -1407,6 +1684,7 @@ static int qspi_memory(struct qspi_dev_s *dev,
 
   /* Wait 'till non-busy */
 
+  qspi_abort(priv);
   qspi_waitstatusflags(priv, QSPI_SR_BUSY, 0);
 
   /* Clear flags */
@@ -1414,34 +1692,81 @@ static int qspi_memory(struct qspi_dev_s *dev,
   qspi_putreg(priv, QSPI_FCR_CTEF | QSPI_FCR_CTCF | QSPI_FCR_CSMF | QSPI_FCR_CTOF,
               STM32L4_QUADSPI_FCR);
 
-  /* XXX III this is for polling mode; support interrupt and dma modes also
-   * nd 'autopolling'
-   */
+#ifdef QSPI_USE_INTERRUPTS
+  /* interrupt mode will need access to the transaction context */
+  
+  priv->xctn = &xctn;
+
+  DEBUGASSERT(meminfo->buffer != NULL && meminfo->buflen > 0);
+  DEBUGASSERT(IS_ALIGNED(meminfo->buffer));
+
+  if (QSPIMEM_ISWRITE(meminfo->flags))
+    {
+      uint32_t regval;
+      
+      /* Set up the Communications Configuration Register as per command info */
+
+      qspi_ccrconfig(priv, &xctn, CCR_FMODE_INDWR);
+
+      /* Enable 'Transfer Error' 'FIFO Threshhold' and 'Transfer Complete' interrupts */
+      
+      regval  = qspi_getreg(priv, STM32L4_QUADSPI_CR_OFFSET);
+      regval |= (QSPI_CR_TEIE | QSPI_CR_FTIE | QSPI_CR_TCIE);
+      qspi_putreg(priv, regval, STM32L4_QUADSPI_CR_OFFSET);
+    }
+  else
+    {
+      uint32_t regval;
+      uint32_t addrval;
+      
+      addrval = qspi_getreg(priv, STM32L4_QUADSPI_AR_OFFSET);
+      
+      /* Set up the Communications Configuration Register as per command info */
+
+      qspi_ccrconfig(priv, &xctn, CCR_FMODE_INDRD);
+
+      /* Start the transfer by re-writing the address in AR register */
+      
+      qspi_putreg(priv, addrval, STM32L4_QUADSPI_AR_OFFSET);
+
+      /* Enable 'Transfer Error' 'FIFO Threshhold' and 'Transfer Complete' interrupts */
+      
+      regval  = qspi_getreg(priv, STM32L4_QUADSPI_CR_OFFSET);
+      regval |= (QSPI_CR_TEIE | QSPI_CR_FTIE | QSPI_CR_TCIE);
+      qspi_putreg(priv, regval, STM32L4_QUADSPI_CR_OFFSET);
+    }
+
+  /* Wait for the interrupt routine to finish it's magic */
+  
+  sem_wait(&priv->op_sem);
+  MEMORY_SYNC();
+
+  /* convey the result */
+  
+  ret = xctn.disposition;
+
+#elif defined(CONFIG_STM32L4_QSPI_DMA)
+  /* XXX III dma mode (and 'autopolling'?) */
+  
+#else
+  /* polling mode */
 
   /* Set up the Communications Configuration Register as per command info */
 
   qspi_ccrconfig(priv, &xctn,
-                 QSPICMD_ISWRITE(meminfo->flags) ? CCR_FMODE_INDWR : CCR_FMODE_INDRD);
+                 QSPIMEM_ISWRITE(meminfo->flags) ? CCR_FMODE_INDWR : CCR_FMODE_INDRD);
 
   /* Transfer data */
 
   DEBUGASSERT(meminfo->buffer != NULL && meminfo->buflen > 0);
   DEBUGASSERT(IS_ALIGNED(meminfo->buffer));
 
-  if (QSPICMD_ISWRITE(meminfo->flags))
+  if (QSPIMEM_ISWRITE(meminfo->flags))
     {
-      /* XXX III we are going to do polling; revisit when we get interrupt
-       * and/or DMA up.
-       */
-
       ret = qspi_transmit_blocking(priv, &xctn);
     }
   else
     {
-      /* XXX III we are going to do polling; revisit when we get interrupt
-       * and/or DMA up.
-       */
-
       ret = qspi_receive_blocking(priv, &xctn);
     }
   MEMORY_SYNC();
@@ -1464,12 +1789,12 @@ static int qspi_memory(struct qspi_dev_s *dev,
     }
 #endif
 
-  /* XXX III this is for polling mode; support interrupt and dma modes also */
-
   /* Wait for Transfer complete, and not busy */
 
   qspi_waitstatusflags(priv, QSPI_SR_TCF,1);
   qspi_waitstatusflags(priv, QSPI_SR_BUSY,0);
+  
+#endif
 
   return ret;
 }
@@ -1543,9 +1868,7 @@ static int qspi_hw_initialize(struct stm32l4_qspidev_s *priv)
 
   /* Disable the QSPI; abort anything happening, disable, wait for not busy */
 
-  regval  = qspi_getreg(priv, STM32L4_QUADSPI_CR_OFFSET);
-  regval |= QSPI_CR_ABORT;
-  qspi_putreg(priv, regval, STM32L4_QUADSPI_CR_OFFSET);
+  qspi_abort(priv);
 
   regval  = qspi_getreg(priv, STM32L4_QUADSPI_CR_OFFSET);
   regval &= ~(QSPI_CR_EN);
@@ -1709,6 +2032,11 @@ struct qspi_dev_s *stm32l4_qspi_initialize(int intf)
           qspidbg("ERROR: Failed to attach irq %d\n", priv->irq);
           goto errout_with_dmadog;
         }
+
+      /* Initialize the semaphore that blocks until the operation completes */
+
+       sem_init(&priv->op_sem, 0, 0);
+
 #endif
 
       /* Perform hardware initialization.  Puts the QSPI into an active

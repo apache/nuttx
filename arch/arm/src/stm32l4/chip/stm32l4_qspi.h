@@ -95,8 +95,8 @@
 #define QSPI_CR_DMAEN              (1 << 2)   /* Bit 2:  DMA enable */
 #define QSPI_CR_TCEN               (1 << 3)   /* Bit 3:  Timeout counter enable */
 #define QSPI_CR_SSHIFT             (1 << 4)   /* Bit 4:  Sample shift */
-#define QSPI_CR_FTHRES_SHIFT       (8)        /* Bits 8-15: FIFO threshold level */
-#define QSPI_CR_FTHRES_MASK        (0xff << QSPI_CR_FTHRES_SHIFT)
+#define QSPI_CR_FTHRES_SHIFT       (8)        /* Bits 8-11: FIFO threshold level */
+#define QSPI_CR_FTHRES_MASK        (0x0f << QSPI_CR_FTHRES_SHIFT)
 #define QSPI_CR_TEIE               (1 << 16)  /* Bit 16:  Transfer error interrupt enable */
 #define QSPI_CR_TCIE               (1 << 17)  /* Bit 17:  Transfer complete interrupt enable */
 #define QSPI_CR_FTIE               (1 << 18)  /* Bit 18:  FIFO threshold interrupt enable */
