@@ -319,7 +319,9 @@ int vnc_receiver(FAR struct vnc_session_s *session)
                        ret);
                 }
 #ifdef CONFIG_NX_XYINPUT
-              else
+              /* REVISIT:  How will be get the NX handle? */
+
+              else if (session->handle != NULL)
                 {
                   event = (FAR struct rfb_pointerevent_s *)session->inbuf;
 

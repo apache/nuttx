@@ -665,11 +665,7 @@ static FAR void *vnc_updater(FAR void *arg)
 {
   FAR struct vnc_session_s *session = (FAR struct vnc_session_s *)arg;
   FAR struct rfb_framebufferupdate_s *update;
-
-  FAR struct rfb_rectangle_s *destrect;
   FAR struct vnc_fbupdate_s *srcrect;
-  FAR const uint8_t *srcrow;
-  FAR const uint8_t *src;
   nxgl_coord_t srcwidth;
   nxgl_coord_t srcheight;
   nxgl_coord_t destwidth;
@@ -691,16 +687,13 @@ static FAR void *vnc_updater(FAR void *arg)
     vnc_convert16_t bpp16;
     vnc_convert32_t bpp32;
   } convert;
-  uint8_t bpp;
 
   DEBUGASSERT(session != NULL);
   gvdbg("Updater running for Display %d\n", session->display);
 
-  /* Set up some constant pointers and values */
+  /* Set up some constant pointers and values for convenience */
 
   update        = (FAR struct rfb_framebufferupdate_s *)session->outbuf;
-  destrect      = update->rect;
-
   bytesperpixel = (session->bpp + 7) >> 3;
   maxwidth      = CONFIG_VNCSERVER_UPDATE_BUFSIZE / bytesperpixel;
 
@@ -710,27 +703,22 @@ static FAR void *vnc_updater(FAR void *arg)
     {
       case FB_FMT_RGB8_222:
         convert.bpp8 = vnc_convert_rgb8_222;
-        bpp = 8;
         break;
 
       case FB_FMT_RGB8_332:
         convert.bpp8 = vnc_convert_rgb8_332;
-        bpp = 8;
         break;
 
       case FB_FMT_RGB16_555:
         convert.bpp16 = vnc_convert_rgb16_555;
-        bpp = 16;
         break;
 
       case FB_FMT_RGB16_565:
         convert.bpp16 = vnc_convert_rgb16_565;
-        bpp = 16;
         break;
 
       case FB_FMT_RGB32:
         convert.bpp32 = vnc_convert_rgb32_888;
-        bpp = 32;
         break;
 
       default:
@@ -764,10 +752,6 @@ static FAR void *vnc_updater(FAR void *arg)
       DEBUGASSERT(srcrect->rect.pt1.y <= srcrect->rect.pt2.y);
       srcheight = srcrect->rect.pt2.y - srcrect->rect.pt1.y + 1;
 
-      srcrow = session->fb +
-               RFB_STRIDE * srcrect->rect.pt1.y +
-               RFB_BYTESPERPIXEL * srcrect->rect.pt1.x;
-
       deststride = srcwidth * bytesperpixel;
       if (deststride > maxwidth)
         {
@@ -793,8 +777,7 @@ static FAR void *vnc_updater(FAR void *arg)
 
       for (y = srcrect->rect.pt1.y;
            srcheight > 0;
-           srcheight -= updheight, y += updheight,
-           srcrow += RFB_STRIDE * updheight)
+           srcheight -= updheight, y += updheight)
         {
           /* updheight = Height to update on this pass through the loop.
            * This will be destheight unless fewer than that number of rows
@@ -814,9 +797,9 @@ static FAR void *vnc_updater(FAR void *arg)
            * narrower).
            */
 
-          for (width = srcwidth, x = srcrect->rect.pt1.x, src = srcrow;
+          for (width = srcwidth, x = srcrect->rect.pt1.x;
                width > 0;
-               width -= updwidth, x += updwidth, src += updwidth)
+               width -= updwidth, x += updwidth)
             {
               /* updwidth = Width to update on this pass through the loop.
                * This will be destwidth unless fewer than that number of
@@ -833,12 +816,12 @@ static FAR void *vnc_updater(FAR void *arg)
                * performing the necessary color conversions.
                */
 
-              if (bpp == 8)
+              if (session->bpp == 8)
                 {
                   size = vnc_copy8(session, y, x, updheight, updwidth,
                                    convert.bpp8);
                 }
-              else if (bpp == 16)
+              else if (session->bpp == 16)
                 {
                   size = vnc_copy16(session, y, x, updheight, updwidth,
                                     convert.bpp16);
@@ -855,11 +838,11 @@ static FAR void *vnc_updater(FAR void *arg)
               update->padding = 0;
               rfb_putbe16(update->nrect, 1);
 
-              rfb_putbe16(destrect->xpos, x);
-              rfb_putbe16(destrect->ypos, y);
-              rfb_putbe16(destrect->width, updwidth);
-              rfb_putbe16(destrect->height, updheight);
-              rfb_putbe16(destrect->encoding, RFB_ENCODING_RAW);
+              rfb_putbe16(update->rect[0].xpos, x);
+              rfb_putbe16(update->rect[0].ypos, y);
+              rfb_putbe16(update->rect[0].width, updwidth);
+              rfb_putbe16(update->rect[0].height, updheight);
+              rfb_putbe32(update->rect[0].encoding, RFB_ENCODING_RAW);
 
               DEBUGASSERT(size <= CONFIG_VNCSERVER_UPDATE_BUFSIZE);
 
@@ -1018,5 +1001,9 @@ int vnc_update_rectangle(FAR struct vnc_session_s *session,
       vnc_add_queue(session, update);
     }
 
-  return -ENOSYS;
+  /* Since we ignore bad rectangles and wait for updata structures, there is
+   * really no way a failure can occur.
+   */
+
+  return OK;
 }
