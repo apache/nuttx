@@ -45,6 +45,10 @@
 #include <assert.h>
 #include <debug.h>
 
+#ifdef CONFIG_NET_SOCKOPTS
+#  include <sys/time.h>
+#endif
+
 #include <nuttx/video/fb.h>
 #include <nuttx/video/rfb.h>
 
@@ -91,6 +95,27 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
   ssize_t nrecvd;
   size_t len;
   int errcode;
+
+#ifdef CONFIG_NET_SOCKOPTS
+  struct timeval tv;
+  int ret;
+
+  /* Set a receive timeout so that we don't hang if the client does not
+   * respond according to RFB 3.3 protocol.
+   */
+
+  tv.tv_sec  = 5;
+  tv.tv_usec = 0;
+  ret = psock_setsockopt(&session->connect, SOL_SOCKET, SO_RCVTIMEO,
+                         &tv, sizeof(struct timeval));
+  if (ret < 0)
+    {
+      errcode = get_errno();
+      gdbg("ERROR: Failed to set receive timeout: %d\n", errcode);
+      DEBUGASSERT(errcode > 0);
+      return -errcode;
+    }
+#endif
 
   /* Inform the client of the VNC protocol version */
 
@@ -301,6 +326,27 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
   ssize_t nsent;
   ssize_t nrecvd;
   size_t len;
+
+#ifdef CONFIG_NET_SOCKOPTS
+  struct timeval tv;
+  int ret;
+
+  /* Set a receive timeout so that we don't hang if the client does not
+   * respond according to RFB 3.3 protocol.
+   */
+
+  tv.tv_sec  = 5;
+  tv.tv_usec = 0;
+  ret = psock_setsockopt(&session->connect, SOL_SOCKET, SO_RCVTIMEO,
+                         &tv, sizeof(struct timeval));
+  if (ret < 0)
+    {
+      errcode = get_errno();
+      gdbg("ERROR: Failed to set receive timeout: %d\n", errcode);
+      DEBUGASSERT(errcode > 0);
+      return -errcode;
+    }
+#endif
 
   /* Inform the client of the VNC protocol version */
 
