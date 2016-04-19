@@ -119,6 +119,9 @@ int vnc_receiver(FAR struct vnc_session_s *session)
   int errcode;
   int ret;
 
+  DEBUGASSERT(session);
+  gvdbg("Receiver running for Display %d\n", session->display);
+
   /* Loop until the client disconnects or an unhandled error occurs */
 
   for (; ; )

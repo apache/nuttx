@@ -445,6 +445,18 @@ static inline int vnc_wait_server(int display)
       result = g_fbstartup[display].result;
       if (result != -EBUSY)
         {
+#ifdef CONFIG_DEBUG
+          if (result < 0)
+            {
+              DEBUGASSERT(g_vnc_sessions[display] == NULL);
+              gdbg("ERROR: VNC server startup failed: %d\n", result);
+            }
+          else
+            {
+              DEBUGASSERT(g_vnc_sessions[display] != NULL &&
+                          g_vnc_sessions[display]->state == VNCSERVER_RUNNING);
+            }
+#endif
           return result;
         }
     }

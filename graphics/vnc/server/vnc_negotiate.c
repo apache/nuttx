@@ -94,6 +94,8 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
 
   /* Inform the client of the VNC protocol version */
 
+  gvdbg("Send protocol version: %s\n", g_vncproto);
+
   len = strlen(g_vncproto);
   nsent = psock_send(&session->connect, g_vncproto, len, 0);
   if (nsent < 0)
@@ -107,6 +109,8 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
   DEBUGASSERT(nsent == len);
 
   /* Receive the echo of the protocol string */
+
+  gvdbg("Receive echo from VNC client\n");
 
   nrecvd = psock_recv(&session->connect, session->inbuf, len, 0);
   if (nrecvd < 0)
@@ -124,6 +128,8 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
    * "Version 3.3 The server decides the security type and sends a single
    *  word:"
    */
+
+  gvdbg("Send security type (None)\n");
 
   sectype = (FAR struct rfb_sectype_s *)session->outbuf;
   rfb_putbe32(sectype->type, RFB_SECTYPE_NONE);
@@ -150,6 +156,8 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
    * In this implementation, the sharing flag is ignored.
    */
 
+  gvdbg("Receive ClientInit\n");
+
   nrecvd = psock_recv(&session->connect, session->inbuf,
                       sizeof(struct rfb_clientinit_s), 0);
   if (nrecvd < 0)
@@ -162,12 +170,14 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
 
   DEBUGASSERT(nrecvd == sizeof(struct rfb_clientinit_s));
 
-  /* Send the ClientInit message
+  /* Send the ServerInit message
    *
    * "After receiving the ClientInit message, the server sends a ServerInit
    *  message. This tells the client the width and height of the server’s 
    *  framebuffer, its pixel format and the name associated with the desktop:
    */
+
+  gvdbg("Receive ServerInit\n");
 
   serverinit          = (FAR struct rfb_serverinit_s *)session->outbuf;
 
@@ -203,6 +213,8 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
   /* We now expect to receive the SetPixelFormat message from the client.
    * This may override some of our framebuffer settings.
    */
+
+  gvdbg("Receive SetPixelFormat\n");
 
   setformat = (FAR struct rfb_setpixelformat_s *)session->inbuf;
 
@@ -272,6 +284,8 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
   /* Receive supported encoding types from client, but ignore them.
    * we will do only raw format.
    */
+
+  gvdbg("Receive encoding types\n");
 
   (void)psock_recv(&session->connect, session->inbuf,
                    CONFIG_VNCSERVER_INBUFFER_SIZE, 0);

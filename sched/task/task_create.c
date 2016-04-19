@@ -117,12 +117,14 @@ static int thread_create(FAR const char *name, uint8_t ttype, int priority,
 #endif
 
 #if CONFIG_NFILE_DESCRIPTORS > 0 || CONFIG_NSOCKET_DESCRIPTORS > 0
+#if 0 /* No... there are side effects */
   /* Associate file descriptors with the new task.  Exclude kernel threads;
    * kernel threads do not have file or socket descriptors.  They must use
    * SYSLOG for output and the low-level psock interfaces for network I/O.
    */
 
   if (ttype != TCB_FLAG_TTYPE_KERNEL)
+#endif
     {
       ret = group_setuptaskfiles(tcb);
       if (ret < OK)

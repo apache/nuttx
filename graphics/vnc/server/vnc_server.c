@@ -58,10 +58,6 @@
 #include "vnc_server.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Data
  ****************************************************************************/
 
@@ -92,7 +88,7 @@ FAR struct vnc_session_s *g_vnc_sessions[RFB_MAX_DISPLAYS];
  ****************************************************************************/
 
 static void vnc_reset_session(FAR struct vnc_session_s *session,
-                              FAR uint8_t *fb)
+                              FAR uint8_t *fb, int display)
 {
   FAR struct vnc_fbupdate_s *curr;
   FAR struct vnc_fbupdate_s *next;
@@ -136,8 +132,9 @@ static void vnc_reset_session(FAR struct vnc_session_s *session,
 
   sem_reset(&session->freesem, CONFIG_VNCSERVER_NUPDATES);
   sem_reset(&session->queuesem, 0);
-  session->fb    = fb;
-  session->state = VNCSERVER_INITIALIZED;
+  session->fb      = fb;
+  session->display = display;
+  session->state   = VNCSERVER_INITIALIZED;
 }
 
 /****************************************************************************
@@ -159,6 +156,8 @@ static int vnc_connect(FAR struct vnc_session_s *session, int port)
 {
   struct sockaddr_in addr;
   int ret;
+
+  gvdbg("Connecting display %d\n", session->display);
 
   /* Create a listening socket */
 
@@ -194,6 +193,8 @@ static int vnc_connect(FAR struct vnc_session_s *session, int port)
 
   /* Connect to the client */
 
+  gvdbg("Acception connection for display %d\n", session->display);
+
   ret = psock_accept(&session->listen, NULL, NULL, &session->connect);
   if (ret < 0)
     {
@@ -201,6 +202,7 @@ static int vnc_connect(FAR struct vnc_session_s *session, int port)
       goto errout_with_listener;
     }
 
+  gvdbg("Display %d connected\n", session->display);
   session->state = VNCSERVER_CONNECTED;
   return OK;
 
@@ -234,6 +236,7 @@ int vnc_server(int argc, FAR char *argv[])
   int display;
   int ret;
 
+  gvdbg("Server Started\n");
   DEBUGASSERT(session != NULL);
 
   /* A single argument is expected:  A diplay port number in ASCII form */
@@ -252,6 +255,8 @@ int vnc_server(int argc, FAR char *argv[])
       ret = -EINVAL;
       goto errout_with_post;
     }
+
+  gvdbg("Display %d\n", display);
 
   /* Allocate the framebuffer memory.  We rely on the fact that
    * the KMM allocator will align memory to 32-bits or better.
@@ -290,7 +295,7 @@ int vnc_server(int argc, FAR char *argv[])
        * for the next connection.
        */
 
-      vnc_reset_session(session, fb);
+      vnc_reset_session(session, fb, display);
       g_fbstartup[display].result = -EBUSY;
       sem_reset(&g_fbstartup[display].fbsem, 0);
 

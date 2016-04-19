@@ -544,9 +544,11 @@ static FAR void *vnc_updater(FAR void *arg)
   } convert;
   bool color32 = false;
 
+  DEBUGASSERT(session != NULL);
+  gvdbg("Updater running for Display %d\n", session->display);
+
   /* Set up some constant pointers and values */
 
-  DEBUGASSERT(session != NULL);
   update        = (FAR struct rfb_framebufferupdate_s *)session->outbuf;
   destrect      = update->rect;
 
@@ -742,6 +744,8 @@ int vnc_start_updater(FAR struct vnc_session_s *session)
   pthread_attr_t attr;
   struct sched_param param;
   int status;
+
+  gvdbg("Starting updater for Display %d\n", session->display);
 
   /* Create thread that is gonna send rectangles to the client */
 
