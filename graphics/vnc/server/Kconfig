@@ -98,12 +98,15 @@ config VNCSERVER_NUPDATES
 
 config VNCSERVER_UPDATE_BUFSIZE
 	int "Max update buffer size (bytes)"
-	default 4096
+	default 1024
 	---help---
 		A single buffer is pre-allocated for rendering updates.  This
 		setting specifies the maximum in bytes of that update buffer.  For
-		example, an update buffers of 32 pixels at 32-bits per pixel and
-		32-rows would yield a buffer size of 4096.
+		example, an update buffers of 32 pixels at 8-bits per pixel and
+		32-rows would yield a buffer size of 1024!
+
+		Ideally, this buffer should fit in one network packet to avoid
+		accessive re-assembly of partial TCP packets.
 
 config VNCSERVER_KBDENCODE
 	bool "Encode keyboard input"

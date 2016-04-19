@@ -52,6 +52,12 @@
 #include "vnc_server.h"
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#undef VNCSERVER_SEM_DEBUG
+
+/****************************************************************************
  * Private Types
  ****************************************************************************/
 
@@ -70,14 +76,72 @@ typedef CODE uint32_t(*vnc_convert32_t)(uint32_t rgb);
 #endif
 
 /****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+#ifdef VNCSERVER_SEM_DEBUG
+static sem_t g_dbgsem = SEM_INITIALIZER(1);
+#endif
+
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: vnc_sem_debug
+ *
+ * Description:
+ *   Dump information about the freesem to verify that it is sync.
+ *
+ * Input Parameters:
+ *   session - A reference to the VNC session structure.
+ *
+ * Returned Value:
+ *   A non-NULL structure pointer should always be returned.  This function
+ *   will wait if no structure is available.
+ *
+ ****************************************************************************/
+
+#ifdef VNCSERVER_SEM_DEBUG
+static void vnc_sem_debug(FAR struct vnc_session_s *session,
+                          FAR const char *msg, unsigned int unattached)
+{
+  FAR struct vnc_fbupdate_s *update;
+  unsigned int nqueued;
+  unsigned int nfree;
+
+  while (sem_wait(&g_dbgsem) < 0)
+    {
+      DEBUGASSERT(get_errno() == EINTR);
+    }
+
+  /* Count structures in the list */
+
+  for (nqueued = 0, update = (FAR struct vnc_fbupdate_s *)session->updqueue.head;
+       update != NULL;
+       nqueued++, update = update->flink);
+
+  for (nfree = 0, update = (FAR struct vnc_fbupdate_s *)session->updfree.head;
+       update != NULL;
+       nfree++, update = update->flink);
+
+  syslog(LOG_INFO, "FREESEM DEBUG: %s\n", msg);
+  syslog(LOG_INFO, "  freesem:    %d\n", session->freesem.semcount);
+  syslog(LOG_INFO, "  queued:     %u\n", nqueued);
+  syslog(LOG_INFO, "  free:       %u\n", nfree);
+  syslog(LOG_INFO, "  unattached: %u\n", unattached);
+
+  sem_post(&g_dbgsem);
+}
+#else
+#  define vnc_sem_debug(s,m,u)
+#endif
 
 /****************************************************************************
  * Name: vnc_alloc_update
  *
  * Description:
- *  Allocate one update structure by taking it from the freelist.
+ *   Allocate one update structure by taking it from the freelist.
  *
  * Input Parameters:
  *   session - A reference to the VNC session structure.
@@ -99,6 +163,8 @@ vnc_alloc_update(FAR struct vnc_session_s *session)
    */
 
   sched_lock();
+  vnc_sem_debug(session, "Before alloc", 0);
+
   while (sem_wait(&session->freesem) < 0)
     {
       DEBUGASSERT(get_errno() == EINTR);
@@ -107,6 +173,8 @@ vnc_alloc_update(FAR struct vnc_session_s *session)
   /* It is reserved.. go get it */
 
   update = (FAR struct vnc_fbupdate_s *)sq_remfirst(&session->updfree);
+
+  vnc_sem_debug(session, "After alloc", 1);
   sched_unlock();
 
   DEBUGASSERT(update != NULL);
@@ -135,6 +203,7 @@ static void vnc_free_update(FAR struct vnc_session_s *session,
    */
 
   sched_lock();
+  vnc_sem_debug(session, "Before free", 1);
 
   /* Put the entry into the free list */
 
@@ -143,6 +212,8 @@ static void vnc_free_update(FAR struct vnc_session_s *session,
   /* Post the semaphore to indicate the availability of one more update */
 
   sem_post(&session->freesem);
+
+  vnc_sem_debug(session, "After free", 0);
   DEBUGASSERT(session->freesem.semcount <= CONFIG_VNCSERVER_NUPDATES);
 
   sched_unlock();
@@ -176,6 +247,8 @@ vnc_remove_queue(FAR struct vnc_session_s *session)
    */
 
   sched_lock();
+  vnc_sem_debug(session, "Before remove", 0);
+
   while (sem_wait(&session->queuesem) < 0)
     {
       DEBUGASSERT(get_errno() == EINTR);
@@ -184,6 +257,8 @@ vnc_remove_queue(FAR struct vnc_session_s *session)
   /* It is reserved.. go get it */
 
   rect = (FAR struct vnc_fbupdate_s *)sq_remfirst(&session->updqueue);
+
+  vnc_sem_debug(session, "After remove", 0);
   sched_unlock();
 
   DEBUGASSERT(rect != NULL);
@@ -213,6 +288,7 @@ static void vnc_add_queue(FAR struct vnc_session_s *session,
    */
 
   sched_lock();
+  vnc_sem_debug(session, "Before add", 1);
 
   /* Put the entry into the list of queued rectangles. */
 
@@ -223,6 +299,8 @@ static void vnc_add_queue(FAR struct vnc_session_s *session,
    */
 
   sem_post(&session->queuesem);
+
+  vnc_sem_debug(session, "After add", 0);
   DEBUGASSERT(session->queuesem.semcount <= CONFIG_VNCSERVER_NUPDATES);
 
   sched_unlock();
@@ -666,6 +744,7 @@ static FAR void *vnc_updater(FAR void *arg)
   FAR struct vnc_session_s *session = (FAR struct vnc_session_s *)arg;
   FAR struct rfb_framebufferupdate_s *update;
   FAR struct vnc_fbupdate_s *srcrect;
+  FAR const uint8_t *src;
   nxgl_coord_t srcwidth;
   nxgl_coord_t srcheight;
   nxgl_coord_t destwidth;
@@ -849,15 +928,21 @@ static FAR void *vnc_updater(FAR void *arg)
               /* Then send the update packet to the VNC client */
 
               size += SIZEOF_RFB_FRAMEBUFFERUPDATE_S(0);
-              nsent = psock_send(&session->connect, session->outbuf, size, 0);
-              if (nsent < 0)
-                {
-                  gdbg("ERROR: Send FrameBufferUpdate failed: %d\n",
-                       get_errno());
-                  goto errout;
-                }
+              src   = session->outbuf;
 
-              DEBUGASSERT(nsent == size);
+              while (size > 0)
+                {
+                  nsent = psock_send(&session->connect, src, size, 0);
+                  if (nsent < 0)
+                    {
+                       gdbg("ERROR: Send FrameBufferUpdate failed: %d\n",
+                            get_errno());
+                      goto errout;
+                    }
+
+                  src  += nsent;
+                  size -= nsent;
+                }
             }
         }
 

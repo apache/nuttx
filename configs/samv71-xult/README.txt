@@ -2317,13 +2317,9 @@ Configuration sub-directories
 
     NOTES:
 
-    1. The RAMLOG is enabled so all debug output will go to the RAMLOG and
-       can be view using the NSH dmesg command.  No debug output is enabled
-       in the default configuration, however.
-
-    2. Network confiration:  IP address 10.0.0.2.  The is easily changed
+    1. Network configuration:  IP address 10.0.0.2.  The is easily changed
        via 'make menuconfig'.  The VNC server address is 10.0.0.2:5900.
 
-    3. The default (local) framebuffer configuration is 320x240 with 16-bit
+    2. The default (local) framebuffer configuration is 320x240 with 16-bit
        RGB color.
 
