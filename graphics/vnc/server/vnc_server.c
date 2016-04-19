@@ -193,7 +193,7 @@ static int vnc_connect(FAR struct vnc_session_s *session, int port)
 
   /* Connect to the client */
 
-  gvdbg("Acception connection for display %d\n", session->display);
+  gvdbg("Accepting connection for Display %d\n", session->display);
 
   ret = psock_accept(&session->listen, NULL, NULL, &session->connect);
   if (ret < 0)
@@ -236,9 +236,6 @@ int vnc_server(int argc, FAR char *argv[])
   int display;
   int ret;
 
-  gvdbg("Server Started\n");
-  DEBUGASSERT(session != NULL);
-
   /* A single argument is expected:  A diplay port number in ASCII form */
 
   if (argc != 2)
@@ -256,7 +253,7 @@ int vnc_server(int argc, FAR char *argv[])
       goto errout_with_post;
     }
 
-  gvdbg("Display %d\n", display);
+  gvdbg("Server started for Display %d\n", display);
 
   /* Allocate the framebuffer memory.  We rely on the fact that
    * the KMM allocator will align memory to 32-bits or better.

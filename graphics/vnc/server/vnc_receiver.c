@@ -150,6 +150,8 @@ int vnc_receiver(FAR struct vnc_session_s *session)
         {
           case RFB_SETPIXELFMT_MSG:    /* SetPixelFormat */
             {
+              gvdbg("Received SetPixelFormat\n");
+
               /* Read the rest of the SetPixelFormat message */
 
               ret = vnc_read_remainder(session,
@@ -171,6 +173,8 @@ int vnc_receiver(FAR struct vnc_session_s *session)
             {
               FAR struct rfb_setencodings_s *encodings;
               uint32_t nencodings;
+
+              gvdbg("Received SetEncodings\n");
 
               /* Read the SetEncodings message without the following
                * encodings.
@@ -212,6 +216,8 @@ int vnc_receiver(FAR struct vnc_session_s *session)
               FAR struct rfb_fbupdatereq_s *update;
               struct nxgl_rect_s rect;
 
+              gvdbg("Received FramebufferUpdateRequest\n");
+
               /* Read the rest of the SetPixelFormat message */
 
               ret = vnc_read_remainder(session,
@@ -246,6 +252,8 @@ int vnc_receiver(FAR struct vnc_session_s *session)
             {
               FAR struct rfb_keyevent_s *keyevent;
 
+              gvdbg("Received KeyEvent\n");
+
               /* Read the rest of the KeyEvent message */
 
               ret = vnc_read_remainder(session,
@@ -273,6 +281,7 @@ int vnc_receiver(FAR struct vnc_session_s *session)
               FAR struct rfb_pointerevent_s *event;
               uint8_t buttons;
 #endif
+              gvdbg("Received PointerEvent\n");
 
               /* Read the rest of the PointerEvent message */
 
@@ -327,6 +336,8 @@ int vnc_receiver(FAR struct vnc_session_s *session)
             {
               FAR struct rfb_clientcuttext_s *cuttext;
               uint32_t length;
+
+              gvdbg("Received ClientCutText\n");
 
               /* Read the ClientCutText message without the following
                * text.
