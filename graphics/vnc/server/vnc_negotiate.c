@@ -310,7 +310,13 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
    *
    * "After receiving the ClientInit message, the server sends a ServerInit
    *  message. This tells the client the width and height of the server’s
-   *  framebuffer, its pixel format and the name associated with the desktop:
+   *  framebuffer, its pixel format and the name associated with the desktop:"
+   *
+   * RealVNC client supports this resolutions:
+   *   Full (all availlable colors) - Max resolution of the platform (TrueColor)
+   *   Medium (256 colors) - 256 colors (Paletted)
+   *   Low (64 colors) - RGB8 2:2:2 (default, TrueColor)
+   *   Very Low (8 colors) - RGB3 1:1:1 (TrueColor)
    */
 
   gvdbg("Send ServerInit\n");
@@ -389,7 +395,17 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
       return -ENOSYS;
     }
 
-  if (pixelfmt->bpp == 16 && pixelfmt->depth == 15)
+  if (pixelfmt->bpp == 8 && pixelfmt->depth == 6)
+    {
+      session->colorfmt = FB_FMT_RGB8_222;
+      session->bpp      = 8;
+    }
+  else if (pixelfmt->bpp == 8 && pixelfmt->depth == 8)
+    {
+      session->colorfmt = FB_FMT_RGB8_332;
+      session->bpp      = 8;
+    }
+  else if (pixelfmt->bpp == 16 && pixelfmt->depth == 15)
     {
       session->colorfmt = FB_FMT_RGB16_555;
       session->bpp      = 16;

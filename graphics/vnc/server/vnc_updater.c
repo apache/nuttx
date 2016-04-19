@@ -58,9 +58,11 @@
 /* Color conversion functions */
 
 #if defined(CONFIG_VNCSERVER_COLORFMT_RGB16)
+typedef CODE uint8_t(*vnc_convert8_t)(uint16_t rgb);
 typedef CODE uint16_t(*vnc_convert16_t)(uint16_t rgb);
 typedef CODE uint32_t(*vnc_convert32_t)(uint16_t rgb);
 #elif defined(CONFIG_VNCSERVER_COLORFMT_RGB32)
+typedef CODE uint8_t(*vnc_convert8_t)(uint32_t rgb);
 typedef CODE uint16_t(*vnc_convert16_t)(uint32_t rgb);
 typedef CODE uint32_t(*vnc_convert32_t)(uint32_t rgb);
 #else
@@ -244,6 +246,34 @@ static void vnc_add_queue(FAR struct vnc_session_s *session,
 
 #if defined(CONFIG_VNCSERVER_COLORFMT_RGB16)
 
+uint8_t vnc_convert_rgb8_222(uint16_t rgb)
+{
+  /* 111111
+   * 54321098 76543210
+   * -----------------
+   * RRRRRGGG GGGBBBBB
+   *          ..RRGGBB
+   */
+
+  return (uint8_t)(((rgb >> 10) & 0x0030)  |
+                   ((rgb >> 7)  & 0x000c)  |
+                   ((rgb >> 3)  & 0x0003));
+}
+
+uint8_t vnc_convert_rgb8_332(uint16_t rgb)
+{
+  /* 111111
+   * 54321098 76543210
+   * -----------------
+   * RRRRRGGG GGGBBBBB
+   *          RRRGGGBB
+   */
+
+  return (uint8_t)(((rgb >> 8) & 0x0070)  |
+                   ((rgb >> 6) & 0x001c)  |
+                   ((rgb >> 3) & 0x0003));
+}
+
 uint16_t vnc_convert_rgb16_555(uint16_t rgb)
 {
   /* 111111
@@ -278,12 +308,40 @@ uint32_t vnc_convert_rgb32_888(uint16_t rgb)
 }
 
 #elif defined(CONFIG_VNCSERVER_COLORFMT_RGB32)
+uint8_t vnc_convert_rgb8_222(uint16_t rgb)
+{
+  /* 33222222 22221111 111111
+   * 10987654 32109876 54321098 76543210
+   * -----------------------------------
+   *          RRRRRRRR GGGGGGGG BBBBBBBB
+   *                            ..RRGGBB
+   */
+
+  return (uint8_t)(((rgb >> 18) & 0x0030)  |
+                   ((rgb >> 12) & 0x000c)  |
+                    (rgb >> 6)  & 0x0003));
+}
+
+uint8_t vnc_convert_rgb8_332(uint16_t rgb)
+{
+  /* 33222222 22221111 111111
+   * 10987654 32109876 54321098 76543210
+   * -----------------------------------
+   *          RRRRRRRR GGGGGGGG BBBBBBBB
+   *                            RRRGGGBB
+   */
+
+  return (uint8_t)(((rgb >> 16) & 0x0070)  |
+                   ((rgb >> 11) & 0x001c)  |
+                    (rgb >> 6)  & 0x0003));
+}
+
 uint16_t vnc_convert_rgb16_555(uint32_t rgb)
 {
   /* 33222222 22221111 111111
    * 10987654 32109876 54321098 76543210
-   * ----------------------------------
-   *          RRRRR... GGGGG... BBBBB...
+   * -----------------------------------
+   *          RRRRRRRR GGGGGGGG BBBBBBBB
    *                   .RRRRRGG GGGBBBBB
    */
 
@@ -297,8 +355,8 @@ uint16_t vnc_convert_rgb16_565(uint32_t rgb)
 {
   /* 33222222 22221111 111111
    * 10987654 32109876 54321098 76543210
-   * ----------------------------------
-   *          RRRRR... GGGGGG.. BBBBB...
+   * -----------------------------------
+   *          RRRRRRRR GGGGGGGG BBBBBBBB
    *                   RRRRRGGG GGGBBBBB
    */
 
@@ -317,6 +375,96 @@ uint32_t vnc_convert_rgb32_888(uint32_t rgb)
 #else
 #  error Unspecified/unsupported color format
 #endif
+
+/****************************************************************************
+ * Name: vnc_copy8
+ *
+ * Description:
+ *   Copy a 16/32-bit pixels from the source rectangle to a 8-bit pixel
+ *   destination rectangle.
+ *
+ * Input Parameters:
+ *   session      - A reference to the VNC session structure.
+ *   row,col      - The upper left X/Y (pixel/row) position of the rectangle
+ *   width,height - The width (pixels) and height (rows of the rectangle)
+ *   convert      - The function to use to convert from the local framebuffer
+ *                  color format to the remote framebuffer color format.
+ *
+ * Returned Value:
+ *   The size of the transfer in bytes.
+ *
+ ****************************************************************************/
+
+static size_t vnc_copy8(FAR struct vnc_session_s *session,
+                         nxgl_coord_t row, nxgl_coord_t col,
+                         nxgl_coord_t height, nxgl_coord_t width,
+                         vnc_convert8_t convert)
+{
+#if defined(CONFIG_VNCSERVER_COLORFMT_RGB16)
+  FAR struct rfb_framebufferupdate_s *update;
+  FAR const uint16_t *srcleft;
+  FAR const uint16_t *src;
+  FAR uint8_t *dest;
+  nxgl_coord_t x;
+  nxgl_coord_t y;
+
+  /* Destination rectangle start address */
+
+  update = (FAR struct rfb_framebufferupdate_s *)session->outbuf;
+  dest   = (FAR uint8_t *)update->rect[0].data;
+
+  /* Source rectangle start address (left/top)*/
+
+  srcleft = (FAR uint16_t *)(session->fb + RFB_STRIDE * row + RFB_BYTESPERPIXEL * col);
+
+  /* Transfer each row from the source buffer into the update buffer */
+
+  for (y = 0; y < height; y++)
+    {
+      src = srcleft;
+      for (x = 0; x < width; x++)
+        {
+          *dest++ = convert(*src);
+          src++;
+        }
+
+      srcleft = (FAR uint16_t *)((uintptr_t)srcleft + RFB_STRIDE);
+    }
+
+  return (size_t)((uintptr_t)dest - (uintptr_t)update->rect[0].data);
+
+#elif defined(CONFIG_VNCSERVER_COLORFMT_RGB32)
+  FAR struct rfb_framebufferupdate_s *update;
+  FAR const uint32_t *srcleft;
+  FAR const uint32_t *src;
+  FAR uint8_t *dest;
+  nxgl_coord_t x;
+  nxgl_coord_t y;
+
+  /* Destination rectangle start address */
+
+  update = (FAR struct rfb_framebufferupdate_s *)session->outbuf;
+  dest   = (FAR uint8_t *)update->rect[0].data;
+
+  /* Source rectangle start address */
+
+  srcleft = (FAR uint32_t *)(session->fb + RFB_STRIDE * row + RFB_BYTESPERPIXEL * col);
+
+  for (y = 0; y < height; y++)
+    {
+      src = srcleft;
+      for (x = 0; x < width; x++)
+        {
+          *dest++ = convert(*src);
+          src++;
+        }
+
+      srcleft = (FAR uint32_t *)((uintptr_t)srcleft + RFB_STRIDE);
+    }
+
+  return (size_t)((uintptr_t)dest - (uintptr_t)update->rect[0].data);
+#endif
+}
 
 /****************************************************************************
  * Name: vnc_copy16
@@ -539,10 +687,11 @@ static FAR void *vnc_updater(FAR void *arg)
 
   union
   {
+    vnc_convert8_t bpp8;
     vnc_convert16_t bpp16;
     vnc_convert32_t bpp32;
   } convert;
-  bool color32 = false;
+  uint8_t bpp;
 
   DEBUGASSERT(session != NULL);
   gvdbg("Updater running for Display %d\n", session->display);
@@ -559,17 +708,29 @@ static FAR void *vnc_updater(FAR void *arg)
 
   switch (session->colorfmt)
     {
+      case FB_FMT_RGB8_222:
+        convert.bpp8 = vnc_convert_rgb8_222;
+        bpp = 8;
+        break;
+
+      case FB_FMT_RGB8_332:
+        convert.bpp8 = vnc_convert_rgb8_332;
+        bpp = 8;
+        break;
+
       case FB_FMT_RGB16_555:
         convert.bpp16 = vnc_convert_rgb16_555;
+        bpp = 16;
         break;
 
       case FB_FMT_RGB16_565:
         convert.bpp16 = vnc_convert_rgb16_565;
+        bpp = 16;
         break;
 
       case FB_FMT_RGB32:
         convert.bpp32 = vnc_convert_rgb32_888;
-        color32 = true;
+        bpp = 32;
         break;
 
       default:
@@ -672,15 +833,20 @@ static FAR void *vnc_updater(FAR void *arg)
                * performing the necessary color conversions.
                */
 
-              if (color32)
+              if (bpp == 8)
                 {
-                  size = vnc_copy32(session, y, x, updheight, updwidth,
-                                    convert.bpp32);
+                  size = vnc_copy8(session, y, x, updheight, updwidth,
+                                   convert.bpp8);
                 }
-              else
+              else if (bpp == 16)
                 {
                   size = vnc_copy16(session, y, x, updheight, updwidth,
                                     convert.bpp16);
+                }
+              else
+                {
+                  size = vnc_copy32(session, y, x, updheight, updwidth,
+                                    convert.bpp32);
                 }
 
               /* Format the FramebufferUpdate message */
