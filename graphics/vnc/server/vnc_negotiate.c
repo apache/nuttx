@@ -322,6 +322,7 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
   rfb_putbe32(serverinit->namelen, 0);
 
   pixelfmt            = &serverinit->format;
+
   pixelfmt->bpp       = RFB_BITSPERPIXEL;
   pixelfmt->depth     = RFB_PIXELDEPTH;
   pixelfmt->bigendian = 0;
