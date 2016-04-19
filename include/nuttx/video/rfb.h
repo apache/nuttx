@@ -375,8 +375,8 @@ struct rfb_setencodings_s
   uint8_t encodings[4];          /* S32 Encoding type, size = 4*nencodings */
 };
 
-#define SIZEOF_RFB_SERVERINIT_S(n) \
-  (sizeof(struct rfb_serverinit_s) + (((n) - 1) << 2))
+#define SIZEOF_RFB_SETENCODINGS_S(n) \
+  (sizeof(struct rfb_setencodings_s) + (((n) - 1) << 2))
 
 /* 6.4.3 FramebufferUpdateRequest
  *
