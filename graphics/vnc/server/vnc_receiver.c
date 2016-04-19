@@ -43,6 +43,10 @@
 #include <errno.h>
 #include <debug.h>
 
+#ifdef CONFIG_NET_SOCKOPTS
+#  include <sys/time.h>
+#endif
+
 #include <nuttx/net/net.h>
 #include <nuttx/video/rfb.h>
 
@@ -115,12 +119,33 @@ int vnc_read_remainder(FAR struct vnc_session_s *session, size_t msglen,
 
 int vnc_receiver(FAR struct vnc_session_s *session)
 {
+#ifdef CONFIG_NET_SOCKOPTS
+  struct timeval tv;
+#endif
   ssize_t nrecvd;
   int errcode;
   int ret;
 
   DEBUGASSERT(session);
   gvdbg("Receiver running for Display %d\n", session->display);
+
+#ifdef CONFIG_NET_SOCKOPTS
+  /* Disable the receive timeout so that we will wait indefinitely for the
+   * next Client-to-Server message.
+   */
+
+  tv.tv_sec  = 0;
+  tv.tv_usec = 0;
+  ret = psock_setsockopt(&session->connect, SOL_SOCKET, SO_RCVTIMEO,
+                         &tv, sizeof(struct timeval));
+  if (ret < 0)
+    {
+      errcode = get_errno();
+      gdbg("ERROR: Failed to disable receive timeout: %d\n", errcode);
+      DEBUGASSERT(errcode > 0);
+      return -errcode;
+    }
+#endif
 
   /* Loop until the client disconnects or an unhandled error occurs */
 
