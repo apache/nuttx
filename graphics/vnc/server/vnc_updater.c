@@ -759,6 +759,7 @@ static FAR void *vnc_updater(FAR void *arg)
   unsigned int maxwidth;
   size_t size;
   ssize_t nsent;
+  uint8_t colorfmt;
 
   union
   {
@@ -795,7 +796,8 @@ static FAR void *vnc_updater(FAR void *arg)
 
       /* Set up the color conversion */
 
-      switch (session->colorfmt)
+      colorfmt = session->colorfmt;
+      switch (colorfmt)
         {
           case FB_FMT_RGB8_222:
             convert.bpp8 = vnc_convert_rgb8_222;
@@ -854,10 +856,13 @@ static FAR void *vnc_updater(FAR void *arg)
        * Loop until all sub-rectangles have been output.  Start with the
        * top row and transfer rectangles horizontally across each swath.
        * The height of the swath is destwidth (the last may be shorter).
+       *
+       * NOTE that the loop also terminates of the color format changes
+       * asynchronously.
        */
 
       for (y = srcrect->rect.pt1.y;
-           srcheight > 0;
+           srcheight > 0 && colorfmt == session->colorfmt;
            srcheight -= updheight, y += updheight)
         {
           /* updheight = Height to update on this pass through the loop.
@@ -876,10 +881,13 @@ static FAR void *vnc_updater(FAR void *arg)
            * horizontally with width of destwidth until all srcwidth
            * columns have been transferred (the last rectangle may be
            * narrower).
+           *
+           * NOTE that the loop also terminates of the color format
+           * changes asynchronously.
            */
 
           for (width = srcwidth, x = srcrect->rect.pt1.x;
-               width > 0;
+               width > 0 && colorfmt == session->colorfmt;
                width -= updwidth, x += updwidth)
             {
               /* updwidth = Width to update on this pass through the loop.
@@ -928,26 +936,38 @@ static FAR void *vnc_updater(FAR void *arg)
 
               DEBUGASSERT(size <= CONFIG_VNCSERVER_UPDATE_BUFSIZE);
 
-              /* Then send the update packet to the VNC client */
+              /* We are ready to send the update packet to the VNC client */
 
-              size += SIZEOF_RFB_FRAMEBUFFERUPDATE_S(0);
+              size += SIZEOF_RFB_FRAMEBUFFERUPDATE_S(SIZEOF_RFB_RECTANGE_S(0));
               src   = session->outbuf;
 
-              do
-                {
-                  nsent = psock_send(&session->connect, src, size, 0);
-                  if (nsent < 0)
-                    {
-                       gdbg("ERROR: Send FrameBufferUpdate failed: %d\n",
-                            get_errno());
-                      goto errout;
-                    }
+              /* At the very last most, make certain that the color format
+               * has not changed asynchronously.
+               */
 
-                  DEBUGASSERT(nsent <= size);
-                  src  += nsent;
-                  size -= nsent;
+              if (colorfmt == session->colorfmt)
+                {
+                  /* Okay send until all of the bytes are out.  This may
+                   * loop for the case where TCP write buffering is enabled
+                   * and there are a limited number of IOBs available.
+                   */
+
+                  do
+                    {
+                      nsent = psock_send(&session->connect, src, size, 0);
+                      if (nsent < 0)
+                        {
+                           gdbg("ERROR: Send FrameBufferUpdate failed: %d\n",
+                                get_errno());
+                          goto errout;
+                        }
+
+                      DEBUGASSERT(nsent <= size);
+                      src  += nsent;
+                      size -= nsent;
+                    }
+                  while (size > 0);
                 }
-              while (size > 0);
             }
         }
 

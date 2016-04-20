@@ -208,8 +208,8 @@ struct vnc_session_s
   /* Display geometry and color characteristics */
 
   uint8_t display;             /* Display number (for debug) */
-  uint8_t colorfmt;            /* Remote color format (See include/nuttx/fb.h) */
-  uint8_t bpp;                 /* Remote bits per pixel */
+  volatile uint8_t colorfmt;   /* Remote color format (See include/nuttx/fb.h) */
+  volatile uint8_t bpp;        /* Remote bits per pixel */
   FAR uint8_t *fb;             /* Allocated local frame buffer */
 
   /* Updater information */

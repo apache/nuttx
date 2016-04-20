@@ -547,8 +547,8 @@ struct rfb_rectangle_s
   uint8_t data[1];               /* Pixel data, actual size varies */
 };
 
-#define SIZEOF_RFB_RECTANGES(d) \
-  (sizeof(struct rfb_framebufferupdate_s) + (d) - 1)
+#define SIZEOF_RFB_RECTANGE_S(d) \
+  (sizeof(struct rfb_rectangle_s) + (d) - 1)
 
 struct rfb_framebufferupdate_s
 {
