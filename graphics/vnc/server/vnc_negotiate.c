@@ -383,10 +383,51 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
       return -EPROTO;
     }
 
-  /* Check if the client request format is one that we can handle. */
+  /* Instantiate the client pixel format, verifying that the client request format
+   * is one that we can handle.
+   */
 
-  pixelfmt = &setformat->format;
+  ret = vnc_client_pixelformat(session, &setformat->format);
+  if (ret < 0)
+    {
+      /* We do not support this pixel format */
 
+      gdbg("ERROR: PixelFormat not supported\n");
+      return ret;
+    }
+
+  /* Receive supported encoding types from client, but ignore them.
+   * we will do only raw format.
+   */
+
+  gvdbg("Receive encoding types\n");
+
+  (void)psock_recv(&session->connect, session->inbuf,
+                   CONFIG_VNCSERVER_INBUFFER_SIZE, 0);
+
+  session->state = VNCSERVER_CONFIGURED;
+  return OK;
+}
+
+/****************************************************************************
+ * Name: vnc_client_pixelformat
+ *
+ * Description:
+ *  A Client-to-Sever SetPixelFormat message has been received.  We need to
+ *  immediately switch the output color format that we generate.
+ *
+ * Input Parameters:
+ *   session - An instance of the session structure.
+ *   pixelfmt - The pixel from from the received SetPixelFormat message
+ *
+ * Returned Value:
+ *   Returns zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int vnc_client_pixelformat(FAR struct vnc_session_s *session,
+                           FAR struct rfb_pixelfmt_s *pixelfmt)
+{
   if (pixelfmt->truecolor == 0)
     {
       /* At present, we support only TrueColor formats */
@@ -397,26 +438,31 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
 
   if (pixelfmt->bpp == 8 && pixelfmt->depth == 6)
     {
+      gvdbg("Client pixel format: RGB8 2:2:2\n");
       session->colorfmt = FB_FMT_RGB8_222;
       session->bpp      = 8;
     }
   else if (pixelfmt->bpp == 8 && pixelfmt->depth == 8)
     {
+      gvdbg("Client pixel format: RGB8 3:3:2\n");
       session->colorfmt = FB_FMT_RGB8_332;
       session->bpp      = 8;
     }
   else if (pixelfmt->bpp == 16 && pixelfmt->depth == 15)
     {
+      gvdbg("Client pixel format: RGB16 5:5:5\n");
       session->colorfmt = FB_FMT_RGB16_555;
       session->bpp      = 16;
     }
   else if (pixelfmt->bpp == 16 && pixelfmt->depth == 16)
     {
+      gvdbg("Client pixel format: RGB16 5:6:5\n");
       session->colorfmt = FB_FMT_RGB16_565;
       session->bpp      = 16;
     }
   else if (pixelfmt->bpp == 32 && pixelfmt->depth == 24)
     {
+      gvdbg("Client pixel format: RGB32 8:8:8\n");
       session->colorfmt = FB_FMT_RGB32;
       session->bpp      = 32;
     }
@@ -434,15 +480,5 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
       return -ENOSYS;
     }
 
-  /* Receive supported encoding types from client, but ignore them.
-   * we will do only raw format.
-   */
-
-  gvdbg("Receive encoding types\n");
-
-  (void)psock_recv(&session->connect, session->inbuf,
-                   CONFIG_VNCSERVER_INBUFFER_SIZE, 0);
-
-  session->state = VNCSERVER_CONFIGURED;
   return OK;
 }

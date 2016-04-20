@@ -189,7 +189,17 @@ int vnc_receiver(FAR struct vnc_session_s *session)
                 }
               else
                 {
-                  /* REVISIT: SetPixelFormat is currently ignored */
+                  FAR struct rfb_setpixelformat_s *setformat =
+                    (FAR struct rfb_setpixelformat_s *)session->inbuf;
+
+                  ret = vnc_client_pixelformat(session, &setformat->format);
+                  if (ret < 0)
+                    {
+                      /* We do not support this pixel format */
+                      /* REVISIT:  We are going to be putting garbage on the RFB */
+
+                      gdbg("ERROR: PixelFormat not supported\n");
+                    }
                 }
             }
             break;

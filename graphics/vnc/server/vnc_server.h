@@ -301,6 +301,25 @@ int vnc_server(int argc, FAR char *argv[]);
 int vnc_negotiate(FAR struct vnc_session_s *session);
 
 /****************************************************************************
+ * Name: vnc_client_pixelformat
+ *
+ * Description:
+ *  A Client-to-Sever SetPixelFormat message has been received.  We need to
+ *  immediately switch the output color format that we generate.
+ *
+ * Input Parameters:
+ *   session - An instance of the session structure.
+ *   pixelfmt - The pixel from from the received SetPixelFormat message
+ *
+ * Returned Value:
+ *   Returns zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int vnc_client_pixelformat(FAR struct vnc_session_s *session,
+                           FAR struct rfb_pixelfmt_s *pixelfmt);
+
+/****************************************************************************
  * Name: vnc_start_updater
  *
  * Description:

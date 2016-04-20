@@ -2323,3 +2323,19 @@ Configuration sub-directories
     2. The default (local) framebuffer configuration is 320x240 with 16-bit
        RGB color.
 
+    3. There are complicated interactions between VNC and the network
+       configuration.  The CONFIG_VNCSERVER_UPDATE_BUFSIZE determines the
+       size of update messages.  That is 1024 bytes in that configuration
+       (the full message with the header will be a little larger).  The
+       MTU (CONFIG_NET_ETH_MTU) is set to 590 so that a full update will
+       require several packets.i
+
+       Write buffering also effects network performance.  This will break
+       up the large updates into small (196 byte) groups.  When we run out
+       of read-ahead buffers, then partial updates may be sent causing a
+       loss of synchronization.
+
+    4. Hint: If you are debugging using the RealVNC clint, turn off all
+       mouse/keyboard inputs in the options/input menu.  That will make
+       things a little clearer.
+

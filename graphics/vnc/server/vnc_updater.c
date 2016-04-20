@@ -770,42 +770,7 @@ static FAR void *vnc_updater(FAR void *arg)
   DEBUGASSERT(session != NULL);
   gvdbg("Updater running for Display %d\n", session->display);
 
-  /* Set up some constant pointers and values for convenience */
-
-  update        = (FAR struct rfb_framebufferupdate_s *)session->outbuf;
-  bytesperpixel = (session->bpp + 7) >> 3;
-  maxwidth      = CONFIG_VNCSERVER_UPDATE_BUFSIZE / bytesperpixel;
-
-  /* Set up the color conversion */
-
-  switch (session->colorfmt)
-    {
-      case FB_FMT_RGB8_222:
-        convert.bpp8 = vnc_convert_rgb8_222;
-        break;
-
-      case FB_FMT_RGB8_332:
-        convert.bpp8 = vnc_convert_rgb8_332;
-        break;
-
-      case FB_FMT_RGB16_555:
-        convert.bpp16 = vnc_convert_rgb16_555;
-        break;
-
-      case FB_FMT_RGB16_565:
-        convert.bpp16 = vnc_convert_rgb16_565;
-        break;
-
-      case FB_FMT_RGB32:
-        convert.bpp32 = vnc_convert_rgb32_888;
-        break;
-
-      default:
-        gdbg("ERROR: Unrecognized color format: %d\n", session->colorfmt);
-        goto errout;
-    }
-
-  /* Then loop, processing updates until we are asked to stop.
+  /* Loop, processing updates until we are asked to stop.
    * REVISIT: Probably need some kind of signal mechanism to wake up
    * vnc_remove_queue() in order to stop.  Or perhaps a special STOP
    * message in the queue?
@@ -819,6 +784,43 @@ static FAR void *vnc_updater(FAR void *arg)
 
       srcrect = vnc_remove_queue(session);
       DEBUGASSERT(srcrect != NULL);
+
+      /* Set up characteristics of the client pixel format to use on this
+       * update.  These can change at any time if a SetPixelFormat is
+       * received asynchronously.
+       */
+
+      bytesperpixel = (session->bpp + 7) >> 3;
+      maxwidth      = CONFIG_VNCSERVER_UPDATE_BUFSIZE / bytesperpixel;
+
+      /* Set up the color conversion */
+
+      switch (session->colorfmt)
+        {
+          case FB_FMT_RGB8_222:
+            convert.bpp8 = vnc_convert_rgb8_222;
+            break;
+
+          case FB_FMT_RGB8_332:
+            convert.bpp8 = vnc_convert_rgb8_332;
+            break;
+
+          case FB_FMT_RGB16_555:
+            convert.bpp16 = vnc_convert_rgb16_555;
+            break;
+
+          case FB_FMT_RGB16_565:
+            convert.bpp16 = vnc_convert_rgb16_565;
+            break;
+
+          case FB_FMT_RGB32:
+            convert.bpp32 = vnc_convert_rgb32_888;
+            break;
+
+          default:
+            gdbg("ERROR: Unrecognized color format: %d\n", session->colorfmt);
+            goto errout;
+        }
 
       /* Get with width and height of the source and destination rectangles.
        * The source rectangle many be larger than the destination rectangle.
@@ -895,17 +897,17 @@ static FAR void *vnc_updater(FAR void *arg)
                * performing the necessary color conversions.
                */
 
-              if (session->bpp == 8)
+              if (bytesperpixel == 1)
                 {
                   size = vnc_copy8(session, y, x, updheight, updwidth,
                                    convert.bpp8);
                 }
-              else if (session->bpp == 16)
+              else if (bytesperpixel == 2)
                 {
                   size = vnc_copy16(session, y, x, updheight, updwidth,
                                     convert.bpp16);
                 }
-              else
+              else /* bytesperpixel == 4 */
                 {
                   size = vnc_copy32(session, y, x, updheight, updwidth,
                                     convert.bpp32);
@@ -913,6 +915,7 @@ static FAR void *vnc_updater(FAR void *arg)
 
               /* Format the FramebufferUpdate message */
 
+              update          = (FAR struct rfb_framebufferupdate_s *)session->outbuf;
               update->msgtype = RFB_FBUPDATE_MSG;
               update->padding = 0;
               rfb_putbe16(update->nrect, 1);
@@ -930,7 +933,7 @@ static FAR void *vnc_updater(FAR void *arg)
               size += SIZEOF_RFB_FRAMEBUFFERUPDATE_S(0);
               src   = session->outbuf;
 
-              while (size > 0)
+              do
                 {
                   nsent = psock_send(&session->connect, src, size, 0);
                   if (nsent < 0)
@@ -940,9 +943,11 @@ static FAR void *vnc_updater(FAR void *arg)
                       goto errout;
                     }
 
+                  DEBUGASSERT(nsent <= size);
                   src  += nsent;
                   size -= nsent;
                 }
+              while (size > 0);
             }
         }
 
