@@ -240,6 +240,22 @@ struct fb_startup_s
   int16_t result;               /* OK: successfully initialized */
 };
 
+/* The size of the color type in the local framebuffer */
+
+#if defined(CONFIG_VNCSERVER_COLORFMT_RGB16)
+typedef uint16_t lfb_color_t;
+#elif defined(CONFIG_VNCSERVER_COLORFMT_RGB32)
+typedef uint32_t lfb_color_t;
+#else
+#  error Unspecified/unsupported color format
+#endif
+
+/* Color conversion function pointer types */
+
+typedef CODE uint8_t  (*vnc_convert8_t) (lfb_color_t rgb);
+typedef CODE uint16_t (*vnc_convert16_t)(lfb_color_t rgb);
+typedef CODE uint32_t (*vnc_convert32_t)(lfb_color_t rgb);
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -389,6 +405,26 @@ int vnc_update_rectangle(FAR struct vnc_session_s *session,
 int vnc_receiver(FAR struct vnc_session_s *session);
 
 /****************************************************************************
+ * Name: vnc_raw
+ *
+ * Description:
+ *  As a fallback, send the framebuffer update using the RAW encoding which
+ *  must be supported by all VNC clients.
+ *
+ * Input Parameters:
+ *   pixel - The src color in local framebuffer format.
+ *   rect  - Describes the rectangle in the local framebuffer.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; A negated errno value is returned on failure that
+ *   indicates the the natture of the failure.  A failure is only returned
+ *   in cases of a network failure and unexpected internal failures.
+ *
+ ****************************************************************************/
+
+int vnc_raw(FAR struct vnc_session_s *session, FAR struct nxgl_rect_s *rect);
+
+/****************************************************************************
  * Name: vnc_key_map
  *
  * Description:
@@ -427,6 +463,28 @@ void vnc_key_map(FAR struct vnc_session_s *session, uint16_t keysym,
  ****************************************************************************/
 
 FAR struct vnc_session_s *vnc_find_session(int display);
+
+/****************************************************************************
+ * Name: vnc_convert_rgbNN
+ *
+ * Description:
+ *  Convert the native framebuffer color format (either RGB16 5:6:5 or RGB32
+ *  8:8:8) to the remote framebuffer color format (either RGB16 5:6:5,
+ *  RGB16 5:5:5, or RGB32 8:8:)
+ *
+ * Input Parameters:
+ *   rgb - The RGB src color in local framebuffer color format.
+ *
+ * Returned Value:
+ *   The pixel in the remote framebuffer color format.
+ *
+ ****************************************************************************/
+
+uint8_t  vnc_convert_rgb8_222(lfb_color_t rgb);
+uint8_t  vnc_convert_rgb8_332(lfb_color_t rgb);
+uint16_t vnc_convert_rgb16_555(lfb_color_t rgb);
+uint16_t vnc_convert_rgb16_565(lfb_color_t rgb);
+uint32_t vnc_convert_rgb32_888(lfb_color_t rgb);
 
 #undef EXTERN
 #ifdef __cplusplus
