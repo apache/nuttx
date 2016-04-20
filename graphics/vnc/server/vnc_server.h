@@ -210,6 +210,7 @@ struct vnc_session_s
   uint8_t display;             /* Display number (for debug) */
   volatile uint8_t colorfmt;   /* Remote color format (See include/nuttx/fb.h) */
   volatile uint8_t bpp;        /* Remote bits per pixel */
+  volatile bool rre;           /* Remote supports RRE encoding */
   FAR uint8_t *fb;             /* Allocated local frame buffer */
 
   /* Updater information */
@@ -336,6 +337,25 @@ int vnc_client_pixelformat(FAR struct vnc_session_s *session,
                            FAR struct rfb_pixelfmt_s *pixelfmt);
 
 /****************************************************************************
+ * Name: vnc_client_encodings
+ *
+ * Description:
+ *   Pick out any mutually supported encodings from the Client-to-Server
+ *   SetEncodings message
+ *
+ * Input Parameters:
+ *   session   - An instance of the session structure.
+ *   encodings - The received SetEncodings message
+ *
+ * Returned Value:
+ *   At present, always returns OK
+ *
+ ****************************************************************************/
+
+int vnc_client_encodings(FAR struct vnc_session_s *session,
+                         FAR struct rfb_setencodings_s *encodings);
+
+/****************************************************************************
  * Name: vnc_start_updater
  *
  * Description:
@@ -405,6 +425,30 @@ int vnc_update_rectangle(FAR struct vnc_session_s *session,
 int vnc_receiver(FAR struct vnc_session_s *session);
 
 /****************************************************************************
+ * Name: vnc_rre
+ *
+ * Description:
+ *  This function does not really do RRE encoding.  It just checks if the
+ *  update region is one color then uses the RRE encoding format to send
+ *  the constant color rectangle.
+ *
+ * Input Parameters:
+ *   session - An instance of the session structure.
+ *   rect  - Describes the rectangle in the local framebuffer.
+ *
+ * Returned Value:
+ *   Zero is returned if RRE coding was not performed (but not error was)
+ *   encountered.  Otherwise, eith the size of the framebuffer update
+ *   message is returned on success or a negated errno value is returned on
+ *   failure that indicates the the nature of the failure.  A failure is
+ *   only returned in cases of a network failure and unexpected internal
+ *   failures.
+ *
+ ****************************************************************************/
+
+int vnc_rre(FAR struct vnc_session_s *session, FAR struct nxgl_rect_s *rect);
+
+/****************************************************************************
  * Name: vnc_raw
  *
  * Description:
@@ -412,12 +456,12 @@ int vnc_receiver(FAR struct vnc_session_s *session);
  *  must be supported by all VNC clients.
  *
  * Input Parameters:
- *   pixel - The src color in local framebuffer format.
+ *   session - An instance of the session structure.
  *   rect  - Describes the rectangle in the local framebuffer.
  *
  * Returned Value:
  *   Zero (OK) on success; A negated errno value is returned on failure that
- *   indicates the the natture of the failure.  A failure is only returned
+ *   indicates the the nature of the failure.  A failure is only returned
  *   in cases of a network failure and unexpected internal failures.
  *
  ****************************************************************************/
@@ -485,6 +529,33 @@ uint8_t  vnc_convert_rgb8_332(lfb_color_t rgb);
 uint16_t vnc_convert_rgb16_555(lfb_color_t rgb);
 uint16_t vnc_convert_rgb16_565(lfb_color_t rgb);
 uint32_t vnc_convert_rgb32_888(lfb_color_t rgb);
+
+/****************************************************************************
+ * Name: vnc_colors
+ *
+ * Description:
+ *  Test the update rectangle to see if it contains complex colors.  If it
+ *  contains only a few colors, then it may be a candidate for some type
+ *  run-length encoding.
+ *
+ * Input Parameters:
+ *   session   - An instance of the session structure.
+ *   rect      - The update region in the local frame buffer.
+ *   maxcolors - The maximum number of colors that should be returned.  This
+ *               currently cannot exceed eight.
+ *   colors    - The top 'maxcolors' most frequency colors are returned.
+ *
+ * Returned Value:
+ *   The number of valid colors in the colors[] array are returned, the
+ *   first entry being the most frequent.  A negated errno value is returned
+ *   if the colors cannot be determined.  This would be the case if the color
+ *   depth is > 8 and there are more than 'maxcolors' colors in the update
+ *   rectangle.
+ *
+ ****************************************************************************/
+
+int vnc_colors(FAR struct vnc_session_s *session, FAR struct nxgl_rect_s *rect,
+               unsigned int maxcolors, FAR lfb_color_t *colors);
 
 #undef EXTERN
 #ifdef __cplusplus

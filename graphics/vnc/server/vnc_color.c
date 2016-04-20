@@ -40,6 +40,8 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <assert.h>
+#include <errno.h>
 
 #include "vnc_server.h"
 
@@ -195,3 +197,164 @@ uint32_t vnc_convert_rgb32_888(lfb_color_t rgb)
 #else
 #  error Unspecified/unsupported color format
 #endif
+
+/****************************************************************************
+ * Name: vnc_colors
+ *
+ * Description:
+ *  Test the update rectangle to see if it contains complex colors.  If it
+ *  contains only a few colors, then it may be a candidate for some type
+ *  run-length encoding.
+ *
+ * Input Parameters:
+ *   session   - An instance of the session structure.
+ *   rect      - The update region in the local frame buffer.
+ *   maxcolors - The maximum number of colors that should be returned.  This
+ *               currently cannot exceed eight.
+ *   colors    - The top 'maxcolors' most frequency colors are returned.
+ *
+ * Returned Value:
+ *   The number of valid colors in the colors[] array are returned, the
+ *   first entry being the most frequent.  A negated errno value is returned
+ *   if the colors cannot be determined.  This would be the case if the color
+ *   depth is > 8 and there are more than 'maxcolors' colors in the update
+ *   rectangle.
+ *
+ ****************************************************************************/
+
+int vnc_colors(FAR struct vnc_session_s *session, FAR struct nxgl_rect_s *rect,
+               unsigned int maxcolors, FAR lfb_color_t *colors)
+{
+#if RFB_PIXELDEPTH > 8
+  FAR const lfb_color_t *rowstart;
+  FAR const lfb_color_t *pixptr;
+  lfb_color_t pixel;
+  unsigned int counts[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+  nxgl_coord_t x;
+  nxgl_coord_t y;
+  int ncolors = 0;
+  int pixndx;
+  int maxndx;
+  int cmpndx;
+
+  DEBUGASSERT(session != NULL && rect != NULL && maxcolors <= 8 && colors != NULL);
+
+  /* Pointer to the first pixel in the first row in the local framebuffer */
+
+  rowstart = (FAR lfb_color_t *)
+    (session->fb + RFB_STRIDE * rect->pt1.y + RFB_BYTESPERPIXEL * rect->pt1.x);
+
+  /* Loop for each row in the rectangle */
+
+  for (y = rect->pt1.y; y <= rect->pt2.y; y++)
+    {
+      /* Loop for each column in the row */
+
+      pixptr = rowstart;
+      for (x = rect->pt1.x; x <= rect->pt2.x; x++)
+        {
+          /* Compare this pix to all of the others we have seen */
+
+          pixel = *pixptr++;
+          for (pixndx = 0; pixndx < ncolors; pixndx++)
+            {
+              if (colors[pixndx] == pixel)
+                {
+                  break;
+                }
+            }
+
+          /* Have we seen this color before? */
+
+          if (pixndx < ncolors)
+            {
+              /* Yes.. just increment the count of the number of times we
+               * have seen it.
+               */
+
+              counts[pixndx]++;
+            }
+
+           /* Do we have space for another color? */
+
+          else if (ncolors >= maxcolors)
+            {
+              /* No, then bail.  We don't have enough memory to deal with
+               * large number of colors.
+               */
+
+              return -E2BIG;
+            }
+
+          /* Add the new color to the list of colors that we have found */
+
+          else
+            {
+              colors[ncolors] = pixel;
+              counts[ncolors] = 1;
+              ncolors++;
+            }
+        }
+
+      /* Set the point to the start of the next row */
+
+      rowstart = (FAR lfb_color_t *)((uintptr_t)rowstart + RFB_STRIDE);
+    }
+
+  /* Now sort the colors by how often we saw them with the most frequent
+   * color in the first position.
+   */
+
+  /* Loop for colors N={0..(ncolors-1)} */
+
+  for (pixndx = 0; pixndx < ncolors - 1; pixndx++)
+    {
+      /* Compare color N with with colors M={(N_1)..ncolors} */
+
+      maxndx = pixndx;
+      for (cmpndx = maxndx + 1; cmpndx < ncolors; cmpndx++)
+        {
+          /* Have we seen color M more often that color N? */
+
+          if (counts[cmpndx] > counts[maxndx])
+            {
+              /* Yes.. then color M has been seen more frequently */
+
+              maxndx = cmpndx;
+            }
+        }
+
+      /* Do nothing if color N is the most often seen */
+
+      if (maxndx != pixndx)
+        {
+          /* Otherwise swap color N and color M */
+          /* Remember color N */
+
+          lfb_color_t tmpcolor = colors[pixndx];
+          int tmpcount         = counts[pixndx];
+
+          /* Set color N to color M */
+
+          colors[pixndx]       = colors[maxndx];
+          counts[pixndx]       = counts[maxndx];
+
+          /* Set color M to color N */
+
+          colors[maxndx]       = tmpcolor;
+          counts[maxndx]       = tmpcount;
+        }
+    }
+
+  /* And return the number of colors that we found */
+
+  return ncolors;
+
+#else
+  /* For small colors, we can keep a local array for all color formats and
+   * always return the exact result, no matter now many colors.  OR we could
+   * just remove this conditional compilation and live with 8 colors max.
+   */
+#  error No support for small colors
+#endif
+}

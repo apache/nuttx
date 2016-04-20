@@ -98,6 +98,7 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
   FAR struct rfb_serverinit_s *serverinit;
   FAR struct rfb_pixelfmt_s *pixelfmt;
   FAR struct rfb_setpixelformat_s *setformat;
+  FAR struct rfb_setencodings_s *encodings;
   ssize_t nsent;
   ssize_t nrecvd;
   size_t len;
@@ -396,14 +397,35 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
       return ret;
     }
 
-  /* Receive supported encoding types from client, but ignore them.
-   * we will do only raw format.
-   */
+  /* Receive supported encoding types from client. */
 
   gvdbg("Receive encoding types\n");
 
-  (void)psock_recv(&session->connect, session->inbuf,
+  encodings = (FAR struct rfb_setencodings_s *)session->inbuf;
+
+  nrecvd = psock_recv(&session->connect, encodings,
                    CONFIG_VNCSERVER_INBUFFER_SIZE, 0);
+  if (nrecvd < 0)
+    {
+      errcode = get_errno();
+      gdbg("ERROR: Receive SetEncodings failed: %d\n", errcode);
+      DEBUGASSERT(errcode > 0);
+      return -errcode;
+    }
+
+  if (nrecvd > 0 && encodings->msgtype == RFB_SETENCODINGS_MSG)
+    {
+      DEBUGASSERT(nrecvd >=  SIZEOF_RFB_SETENCODINGS_S(0));
+
+      /* Pick out any mutually supported encodings */
+
+      ret = vnc_client_encodings(session, encodings);
+      if (ret < 0)
+        {
+          gdbg("ERROR: vnc_set_encodings failed: %d\n", ret);
+          return ret;
+        }
+    }
 
   session->state = VNCSERVER_CONFIGURED;
   return OK;

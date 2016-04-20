@@ -75,7 +75,7 @@ static size_t vnc_copy8(FAR struct vnc_session_s *session,
                          vnc_convert8_t convert)
 {
   FAR struct rfb_framebufferupdate_s *update;
-  FAR const uint16_t *srcleft;
+  FAR const lfb_color_t *srcleft;
   FAR const lfb_color_t *src;
   FAR uint8_t *dest;
   nxgl_coord_t x;
@@ -133,7 +133,7 @@ static size_t vnc_copy16(FAR struct vnc_session_s *session,
                          vnc_convert16_t convert)
 {
   FAR struct rfb_framebufferupdate_s *update;
-  FAR const uint16_t *srcleft;
+  FAR const lfb_color_t *srcleft;
   FAR const lfb_color_t *src;
   FAR uint16_t *dest;
   nxgl_coord_t x;
@@ -142,11 +142,11 @@ static size_t vnc_copy16(FAR struct vnc_session_s *session,
   /* Destination rectangle start address */
 
   update = (FAR struct rfb_framebufferupdate_s *)session->outbuf;
-  dest   = (FAR lfb_color_t *)update->rect[0].data;
+  dest   = (FAR uint16_t *)update->rect[0].data;
 
   /* Source rectangle start address (left/top)*/
 
-  srcleft = (FAR uint16_t *)(session->fb + RFB_STRIDE * row + RFB_BYTESPERPIXEL * col);
+  srcleft = (FAR lfb_color_t *)(session->fb + RFB_STRIDE * row + RFB_BYTESPERPIXEL * col);
 
   /* Transfer each row from the source buffer into the update buffer */
 
@@ -190,7 +190,7 @@ static size_t vnc_copy32(FAR struct vnc_session_s *session,
                          vnc_convert32_t convert)
 {
   FAR struct rfb_framebufferupdate_s *update;
-  FAR const uint16_t *srcleft;
+  FAR const lfb_color_t *srcleft;
   FAR const lfb_color_t *src;
   FAR uint32_t *dest;
   nxgl_coord_t x;
@@ -234,12 +234,12 @@ static size_t vnc_copy32(FAR struct vnc_session_s *session,
  *  must be supported by all VNC clients.
  *
  * Input Parameters:
- *   pixel - The src color in local framebuffer format.
+ *   session - An instance of the session structure.
  *   rect  - Describes the rectangle in the local framebuffer.
  *
  * Returned Value:
  *   Zero (OK) on success; A negated errno value is returned on failure that
- *   indicates the the natture of the failure.  A failure is only returned
+ *   indicates the the nature of the failure.  A failure is only returned
  *   in cases of a network failure and unexpected internal failures.
  *
  ****************************************************************************/

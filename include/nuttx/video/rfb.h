@@ -716,6 +716,15 @@ struct rfb_rrerect16_s
   uint8_t height[2];             /* U16 Height */
 };
 
+struct rfb_rrerect32_s
+{
+  uint8_t pixel[4];              /* U32 sub-rect pixel value */
+  uint8_t xpos[2];               /* U16 X position */
+  uint8_t ypos[2];               /* U16 Y position */
+  uint8_t width[2];              /* U16 Width */
+  uint8_t height[2];             /* U16 Height */
+};
+
 /* 6.6.4 Hextile encoding
  *
  * "Hextile is a variation on the RRE idea. Rectangles are split up into

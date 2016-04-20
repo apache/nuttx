@@ -325,9 +325,15 @@ static FAR void *vnc_updater(FAR void *arg)
       srcrect = vnc_remove_queue(session);
       DEBUGASSERT(srcrect != NULL);
 
-      /* Perform the framebuffer update using the RAW encoding */
+      /* Attempt to use RRE encoding */
 
-      ret = vnc_raw(session, &srcrect->rect);
+      ret = vnc_rre(session, &srcrect->rect);
+      if (ret == 0)
+        {
+          /* Perform the framebuffer update using the default RAW encoding */
+
+          ret = vnc_raw(session, &srcrect->rect);
+        }
 
       /* Release the update structure */
 
@@ -469,13 +475,27 @@ int vnc_update_rectangle(FAR struct vnc_session_s *session,
       update = vnc_alloc_update(session);
       DEBUGASSERT(update != NULL);
 
-      /* Copy the rectangle into the update structure */
+      /* Clip and copy the rectangle into the update structure */
 
-      memcpy(&update->rect, rect, sizeof(struct nxgl_rect_s));
+      update->rect.pt1.x = MAX(rect->pt1.x, 0);
+      update->rect.pt1.y = MAX(rect->pt1.y, 0);
+      update->rect.pt2.x = MIN(rect->pt2.x, (CONFIG_VNCSERVER_SCREENWIDTH - 1));
+      update->rect.pt2.y = MIN(rect->pt2.y, (CONFIG_VNCSERVER_SCREENHEIGHT - 1));
 
-      /* Add the upate to the end of the update queue. */
+      /* Make sure that the rectangle still has area after clipping */
 
-      vnc_add_queue(session, update);
+      if (nxgl_nullrect(rect))
+        {
+          /* No.. free the structure and ignore the update */
+
+          vnc_free_update(session, update);
+        }
+      else
+        {
+          /* Yes.. add the upate to the end of the update queue. */
+
+          vnc_add_queue(session, update);
+        }
     }
 
   /* Since we ignore bad rectangles and wait for updata structures, there is

@@ -240,7 +240,13 @@ int vnc_receiver(FAR struct vnc_session_s *session)
                     }
                   else
                     {
-                      /* REVISIT: SetEncodings is currently ignored */
+                      /* Pick out any mutually supported encodings */
+
+                      ret = vnc_client_encodings(session, encodings);
+                      if (ret < 0)
+                        {
+                          gdbg("ERROR: vnc_set_encodings failed: %d\n", ret);
+                        }
                     }
                 }
             }
@@ -417,4 +423,54 @@ int vnc_receiver(FAR struct vnc_session_s *session)
     }
 
   return -ENOSYS;
+}
+
+/****************************************************************************
+ * Name: vnc_client_encodings
+ *
+ * Description:
+ *   Pick out any mutually supported encodings from the Client-to-Server
+ *   SetEncodings message
+ *
+ * Input Parameters:
+ *   session   - An instance of the session structure.
+ *   encodings - The received SetEncodings message
+ *
+ * Returned Value:
+ *   At present, always returns OK
+ *
+ ****************************************************************************/
+
+int vnc_client_encodings(FAR struct vnc_session_s *session,
+                         FAR struct rfb_setencodings_s *encodings)
+{
+  uint32_t encoding;
+  unsigned int nencodings;
+  unsigned int i;
+
+  DEBUGASSERT(session != NULL && encodings != NULL);
+
+  /* Assume that there are no common encodings (other than RAW) */
+
+  session->rre = false;
+
+  /* Loop for each client supported encoding */
+
+  nencodings = rfb_getbe32(encodings->nencodings);
+  for (i = 0; i < nencodings; i++)
+    {
+      /* Get the next encoding */
+
+      encoding = rfb_getbe32(&encodings->encodings[i << 2]);
+
+      /* Only a limited support for of RRE is vailable now. */
+
+      if (encoding == RFB_ENCODING_RRE)
+        {
+          session->rre = true;
+          return OK;
+        }
+    }
+
+  return OK;
 }
