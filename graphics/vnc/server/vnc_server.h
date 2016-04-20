@@ -79,14 +79,25 @@
 #  define CONFIG_VNCSERVER_NDISPLAYS 1
 #endif
 
-#if defined(CONFIG_VNCSERVER_COLORFMT_RGB16)
+#if defined(CONFIG_VNCSERVER_COLORFMT_RGB8)
+#  define RFB_COLORFMT     FB_FMT_RGB8_332
+#  define RFB_BITSPERPIXEL 8
+#  define RFB_PIXELDEPTH   8
+#  define RFB_TRUECOLOR    1
+#  define RFB_RMAX         0x07
+#  define RFB_GMAX         0x07
+#  define RFB_BMAX         0x03
+#  define RFB_RSHIFT       5
+#  define RFB_GSHIFT       2
+#  define RFB_BSHIFT       0
+#elif defined(CONFIG_VNCSERVER_COLORFMT_RGB16)
 #  define RFB_COLORFMT     FB_FMT_RGB16_565
 #  define RFB_BITSPERPIXEL 16
 #  define RFB_PIXELDEPTH   16
 #  define RFB_TRUECOLOR    1
-#  define RFB_RMAX         0x1f
-#  define RFB_GMAX         0x3f
-#  define RFB_BMAX         0x1f
+#  define RFB_RMAX         0x001f
+#  define RFB_GMAX         0x003f
+#  define RFB_BMAX         0x001f
 #  define RFB_RSHIFT       11
 #  define RFB_GSHIFT       5
 #  define RFB_BSHIFT       0
@@ -95,9 +106,9 @@
 #  define RFB_BITSPERPIXEL 32
 #  define RFB_PIXELDEPTH   24
 #  define RFB_TRUECOLOR    1
-#  define RFB_RMAX         0xff
-#  define RFB_GMAX         0xff
-#  define RFB_BMAX         0xff
+#  define RFB_RMAX         0x000000ff
+#  define RFB_GMAX         0x000000ff
+#  define RFB_BMAX         0x000000ff
 #  define RFB_RSHIFT       16
 #  define RFB_GSHIFT       8
 #  define RFB_BSHIFT       0
@@ -111,6 +122,10 @@
 
 #ifndef CONFIG_VNCSERVER_SCREENHEIGHT
 #  define CONFIG_VNCSERVER_SCREENHEIGHT 240
+#endif
+
+#ifndef CONFIG_VNCSERVER_NAME
+#  define CONFIG_VNCSERVER_NAME "NuttX"
 #endif
 
 #ifndef CONFIG_VNCSERVER_PRIO
@@ -243,7 +258,9 @@ struct fb_startup_s
 
 /* The size of the color type in the local framebuffer */
 
-#if defined(CONFIG_VNCSERVER_COLORFMT_RGB16)
+#if defined(CONFIG_VNCSERVER_COLORFMT_RGB8)
+typedef uint8_t lfb_color_t;
+#elif defined(CONFIG_VNCSERVER_COLORFMT_RGB16)
 typedef uint16_t lfb_color_t;
 #elif defined(CONFIG_VNCSERVER_COLORFMT_RGB32)
 typedef uint32_t lfb_color_t;
@@ -512,12 +529,13 @@ FAR struct vnc_session_s *vnc_find_session(int display);
  * Name: vnc_convert_rgbNN
  *
  * Description:
- *  Convert the native framebuffer color format (either RGB16 5:6:5 or RGB32
- *  8:8:8) to the remote framebuffer color format (either RGB16 5:6:5,
- *  RGB16 5:5:5, or RGB32 8:8:)
+ *  Convert the native framebuffer color format (either RGB8 3:3:2,
+ *  RGB16 5:6:5, or RGB32 8:8:8) to the remote framebuffer color format
+ *  (either RGB8 2:2:2, RGB8 3:3:2, RGB16 5:5:5, RGB16 5:6:5, or RGB32
+ *  8:8:8)
  *
  * Input Parameters:
- *   rgb - The RGB src color in local framebuffer color format.
+ *   pixel - The src color in local framebuffer format.
  *
  * Returned Value:
  *   The pixel in the remote framebuffer color format.

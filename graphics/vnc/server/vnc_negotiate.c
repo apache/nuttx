@@ -64,6 +64,7 @@ static const char g_vncproto[] = RFB_PROTOCOL_VERSION_3p3;
 static const char g_vncproto[] = RFB_PROTOCOL_VERSION_3p8;
 static const char g_nosecurity[] = "No security types are supported";
 #endif
+static const char g_vncname[] = CONFIG_VNCSERVER_NAME;
 
 /****************************************************************************
  * Public Functions
@@ -326,7 +327,6 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
 
   rfb_putbe16(serverinit->width, CONFIG_VNCSERVER_SCREENWIDTH);
   rfb_putbe16(serverinit->height, CONFIG_VNCSERVER_SCREENHEIGHT);
-  rfb_putbe32(serverinit->namelen, 0);
 
   pixelfmt            = &serverinit->format;
 
@@ -343,8 +343,12 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
   pixelfmt->gshift    = RFB_GSHIFT;
   pixelfmt->bshift    = RFB_BSHIFT;
 
+  len                 = strlen(g_vncname);
+  rfb_putbe32(serverinit->namelen, len);
+  memcpy(serverinit->name, g_vncname, len);
+
   nsent = psock_send(&session->connect, serverinit,
-                     SIZEOF_RFB_SERVERINIT_S(0), 0);
+                     SIZEOF_RFB_SERVERINIT_S(len), 0);
   if (nsent < 0)
     {
       errcode = get_errno();
@@ -352,7 +356,7 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
       return -errcode;
     }
 
-  DEBUGASSERT(nsent == SIZEOF_RFB_SERVERINIT_S(0));
+  DEBUGASSERT(nsent == SIZEOF_RFB_SERVERINIT_S(len));
 
   /* We now expect to receive the SetPixelFormat message from the client.
    * This may override some of our framebuffer settings.

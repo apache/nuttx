@@ -35,6 +35,10 @@ config VNCSERVER_NDISPLAYS
 		Specifies the number of RFB displays supported by the server.
 		Normally this should be one.
 
+config VNCSERVER_NAME
+	string "VNC display name"
+	default "NuttX"
+
 config VNCSERVER_PRIO
 	int "VNC server task priority"
 	default 100
@@ -55,11 +59,14 @@ choice
 	prompt "VNC color format"
 	default VNCSERVER_COLORFMT_RGB16
 
+config VNCSERVER_COLORFMT_RGB8
+	bool "RGB8 3:3:2"
+
 config VNCSERVER_COLORFMT_RGB16
 	bool "RGB16 5:6:5"
 
 config VNCSERVER_COLORFMT_RGB32
-	bool "RGB24 (32-bit) or RGB32 (w/tranparency)"
+	bool "RGB32 8:8:8"
 
 endchoice # VNC color format
 
