@@ -291,6 +291,8 @@ int vnc_rre(FAR struct vnc_session_s *session, FAR struct nxgl_rect_s *rect)
                 }
 
               DEBUGASSERT(nsent == nbytes);
+              updvdbg("Sent {(%d, %d),(%d, %d)}\n",
+                      rect->pt1.x, rect->pt1.y, rect->pt2.x, rect->pt2.y);
               return nbytes;
             }
 

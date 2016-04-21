@@ -47,6 +47,8 @@
 #include <assert.h>
 #include <errno.h>
 
+#include <nuttx/semaphore.h>
+
 #include "vnc_server.h"
 
 /****************************************************************************
@@ -62,6 +64,20 @@
 #ifdef VNCSERVER_SEM_DEBUG
 static sem_t g_dbgsem = SEM_INITIALIZER(1);
 #endif
+
+/* A rectangle represent the entire local framebuffer */
+
+static const struct nxgl_rect_s g_wholescreen =
+{
+  {
+    0,
+    0
+  },
+  {
+    CONFIG_VNCSERVER_SCREENWIDTH - 1,
+    CONFIG_VNCSERVER_SCREENHEIGHT - 1
+  }
+};
 
 /****************************************************************************
  * Private Functions
@@ -325,6 +341,10 @@ static FAR void *vnc_updater(FAR void *arg)
       srcrect = vnc_remove_queue(session);
       DEBUGASSERT(srcrect != NULL);
 
+      updvdbg("Dequeued {(%d, %d),(%d, %d)}\n",
+              srcrect->rect.pt1.x, srcrect->rect.pt1.y,
+              srcrect->rect.pt2.x, srcrect->rect.pt2.y);
+
       /* Attempt to use RRE encoding */
 
       ret = vnc_rre(session, &srcrect->rect);
@@ -465,37 +485,58 @@ int vnc_update_rectangle(FAR struct vnc_session_s *session,
                          FAR const struct nxgl_rect_s *rect)
 {
   FAR struct vnc_fbupdate_s *update;
+  struct nxgl_rect_s intersection;
 
-  /* Make sure that the rectangle has a area */
+  /* Clip rectangle to the screen dimensions */
 
-  if (!nxgl_nullrect(rect))
+ nxgl_rectintersect(&intersection, rect, &g_wholescreen);
+
+  /* Make sure that the clipped rectangle has a area */
+
+  if (!nxgl_nullrect(&intersection))
     {
+      /* Check for a whole screen update.  The RealVNC client sends a lot
+       * of these (especially when it is confused)
+       */
+
+      sched_lock();
+      if (memcmp(&intersection, &g_wholescreen, sizeof(struct nxgl_rect_s)) == 0)
+        {
+          FAR struct vnc_fbupdate_s *curr;
+          FAR struct vnc_fbupdate_s *next;
+
+          /* Yes.. discard all of the previously queued updates */
+
+          updvdbg("Whole screen update...\n");
+
+          curr = (FAR struct vnc_fbupdate_s *)session->updqueue.head;
+          sq_init(&session->updqueue);
+          sem_reset(&session->queuesem, 0);
+
+          for (; curr != NULL; curr = next)
+            {
+              next = curr->flink;
+              vnc_free_update(session, curr);
+            }
+        }
+
       /* Allocate an update structure... waiting if necessary */
 
       update = vnc_alloc_update(session);
       DEBUGASSERT(update != NULL);
 
-      /* Clip and copy the rectangle into the update structure */
+      /* Copy the clipped rectangle into the update structure */
 
-      update->rect.pt1.x = MAX(rect->pt1.x, 0);
-      update->rect.pt1.y = MAX(rect->pt1.y, 0);
-      update->rect.pt2.x = MIN(rect->pt2.x, (CONFIG_VNCSERVER_SCREENWIDTH - 1));
-      update->rect.pt2.y = MIN(rect->pt2.y, (CONFIG_VNCSERVER_SCREENHEIGHT - 1));
+      nxgl_rectcopy(&update->rect, &intersection);
 
-      /* Make sure that the rectangle still has area after clipping */
+      /* Add the upate to the end of the update queue. */
 
-      if (nxgl_nullrect(rect))
-        {
-          /* No.. free the structure and ignore the update */
+      vnc_add_queue(session, update);
+      sched_unlock();
 
-          vnc_free_update(session, update);
-        }
-      else
-        {
-          /* Yes.. add the upate to the end of the update queue. */
-
-          vnc_add_queue(session, update);
-        }
+      updvdbg("Queued {(%d, %d),(%d, %d)}\n",
+              intersection.pt1.x, intersection.pt1.y,
+              intersection.pt2.x, intersection.pt2.y);
     }
 
   /* Since we ignore bad rectangles and wait for updata structures, there is

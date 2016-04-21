@@ -181,6 +181,34 @@
 #  define MAX(a,b)          (((a) > (b)) ? (a) : (b))
 #endif
 
+/* Debug */
+
+#ifdef CONFIG_VNCSERVER_UPDATE_DEBUG
+#  ifdef CONFIG_CPP_HAVE_VARARGS
+#    define upddbg(format, ...)    dbg(format, ##__VA_ARGS__)
+#    define updlldbg(format, ...)  lldbg(format, ##__VA_ARGS__)
+#    define updvdbg(format, ...)   vdbg(format, ##__VA_ARGS__)
+#    define updllvdbg(format, ...) llvdbg(format, ##__VA_ARGS__)
+#  else
+#   define upddbg                  dbg
+#   define updlldbg                lldbg
+#   define updvdbg                 vdbg
+#   define updllvdbg               llvdbg
+#  endif
+#else
+#  ifdef CONFIG_CPP_HAVE_VARARGS
+#    define upddbg(x...)
+#    define updlldbg(x...)
+#    define updvdbg(x...)
+#    define updllvdbg(x...)
+#  else
+#    define upddbg                 (void)
+#    define updlldbg               (void)
+#    define updvdbg                (void)
+#    define updllvdbg              (void)
+#  endif
+#endif
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
