@@ -1131,6 +1131,48 @@ struct rfb_palettendx_s
    ((uint32_t)((s)[2]) <<  8) | \
     (uint32_t)((s)[3]))
 
+/* There are also cases where the client may request pixel data in its
+ * little-endian format.
+ */
+
+/* void rfb_putle16(FAR uint8_t *dest, uint16_t value) */
+
+#define rfb_putle16(d,v) \
+  do \
+    { \
+      register FAR uint8_t *__d = (FAR uint8_t *)(d); \
+      *__d++ = ((uint16_t)(v) & 0xff); \
+      *__d   = ((uint16_t)(v) >> 8); \
+    } \
+  while (0)
+
+/* uin16_t rfb_getle16(FAR const uint8_t *src) */
+
+#define rfb_getle16(s) \
+  (((uint16_t)((s)[1]) << 8) | \
+    (uint16_t)((s)[0]))
+
+/* void rfb_putle32(FAR uint8_t *dest, uint32_t value) */
+
+#define rfb_putle32(d,v) \
+  do \
+    { \
+      register FAR uint8_t *__d = (FAR uint8_t *)(d); \
+      *__d++ = ((uint32_t)(v)        & 0xff); \
+      *__d++ = ((uint32_t)(v) >> 8)  & 0xff; \
+      *__d++ = ((uint32_t)(v) >> 16) & 0xff; \
+      *__d   = ((uint32_t)(v) >> 24); \
+    } \
+  while (0)
+
+/* uint32_t rfb_getle32(FAR const uint8_t *src) */
+
+#define rfb_getle32(s) \
+  (((uint32_t)((s)[3]) << 24) | \
+   ((uint32_t)((s)[2]) << 16) | \
+   ((uint32_t)((s)[1]) <<  8) | \
+    (uint32_t)((s)[0]))
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/

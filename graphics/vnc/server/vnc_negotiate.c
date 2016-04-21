@@ -466,37 +466,43 @@ int vnc_client_pixelformat(FAR struct vnc_session_s *session,
   if (pixelfmt->bpp == 8 && pixelfmt->depth == 6)
     {
       gvdbg("Client pixel format: RGB8 2:2:2\n");
-      session->colorfmt = FB_FMT_RGB8_222;
-      session->bpp      = 8;
+      session->colorfmt  = FB_FMT_RGB8_222;
+      session->bpp       = 8;
+      session->bigendian = false;
     }
   else if (pixelfmt->bpp == 8 && pixelfmt->depth == 8)
     {
       gvdbg("Client pixel format: RGB8 3:3:2\n");
-      session->colorfmt = FB_FMT_RGB8_332;
-      session->bpp      = 8;
+      session->colorfmt  = FB_FMT_RGB8_332;
+      session->bpp       = 8;
+      session->bigendian = false;
     }
   else if (pixelfmt->bpp == 16 && pixelfmt->depth == 15)
     {
       gvdbg("Client pixel format: RGB16 5:5:5\n");
-      session->colorfmt = FB_FMT_RGB16_555;
-      session->bpp      = 16;
+      session->colorfmt  = FB_FMT_RGB16_555;
+      session->bpp       = 16;
+      session->bigendian = (pixelfmt->bigendian != 0) ? true : false;
     }
   else if (pixelfmt->bpp == 16 && pixelfmt->depth == 16)
     {
       gvdbg("Client pixel format: RGB16 5:6:5\n");
-      session->colorfmt = FB_FMT_RGB16_565;
-      session->bpp      = 16;
+      session->colorfmt  = FB_FMT_RGB16_565;
+      session->bpp       = 16;
+      session->bigendian = (pixelfmt->bigendian != 0) ? true : false;
     }
   else if (pixelfmt->bpp == 32 && pixelfmt->depth == 24)
     {
       gvdbg("Client pixel format: RGB32 8:8:8\n");
-      session->colorfmt = FB_FMT_RGB32;
-      session->bpp      = 32;
+      session->colorfmt  = FB_FMT_RGB32;
+      session->bpp       = 32;
+      session->bigendian = (pixelfmt->bigendian != 0) ? true : false;
     }
   else if (pixelfmt->bpp == 32 && pixelfmt->depth == 32)
     {
-      session->colorfmt = FB_FMT_RGB32;
-      session->bpp      = 32;
+      session->colorfmt  = FB_FMT_RGB32;
+      session->bpp       = 32;
+      session->bigendian = (pixelfmt->bigendian != 0) ? true : false;
     }
   else
     {

@@ -135,14 +135,16 @@ static size_t vnc_copy16(FAR struct vnc_session_s *session,
   FAR struct rfb_framebufferupdate_s *update;
   FAR const lfb_color_t *srcleft;
   FAR const lfb_color_t *src;
-  FAR uint16_t *dest;
+  FAR uint8_t *dest;
+  uint16_t pixel;
   nxgl_coord_t x;
   nxgl_coord_t y;
+  bool bigendian;
 
   /* Destination rectangle start address */
 
   update = (FAR struct rfb_framebufferupdate_s *)session->outbuf;
-  dest   = (FAR uint16_t *)update->rect[0].data;
+  dest   = (FAR uint8_t *)update->rect[0].data;
 
   /* Source rectangle start address (left/top)*/
 
@@ -150,12 +152,24 @@ static size_t vnc_copy16(FAR struct vnc_session_s *session,
 
   /* Transfer each row from the source buffer into the update buffer */
 
+  bigendian = session->bigendian;
   for (y = 0; y < height; y++)
     {
       src = srcleft;
       for (x = 0; x < width; x++)
         {
-          *dest++ = convert(*src);
+          pixel = convert(*src);
+
+          if (bigendian)
+            {
+              rfb_putbe16(dest, pixel);
+            }
+          else
+            {
+              rfb_putle16(dest, pixel);
+            }
+
+          dest += sizeof(uint16_t);
           src++;
         }
 
@@ -192,14 +206,16 @@ static size_t vnc_copy32(FAR struct vnc_session_s *session,
   FAR struct rfb_framebufferupdate_s *update;
   FAR const lfb_color_t *srcleft;
   FAR const lfb_color_t *src;
-  FAR uint32_t *dest;
+  FAR uint8_t *dest;
   nxgl_coord_t x;
   nxgl_coord_t y;
+  uint32_t pixel;
+  bool bigendian;
 
   /* Destination rectangle start address */
 
   update = (FAR struct rfb_framebufferupdate_s *)session->outbuf;
-  dest   = (FAR uint32_t *)update->rect[0].data;
+  dest   = (FAR uint8_t *)update->rect[0].data;
 
   /* Source rectangle start address (left/top)*/
 
@@ -207,12 +223,24 @@ static size_t vnc_copy32(FAR struct vnc_session_s *session,
 
   /* Transfer each row from the source buffer into the update buffer */
 
+  bigendian = session->bigendian;
   for (y = 0; y < height; y++)
     {
       src = srcleft;
       for (x = 0; x < width; x++)
         {
-          *dest++ = convert(*src);
+          pixel = convert(*src);
+
+          if (bigendian)
+            {
+              rfb_putbe32(dest, pixel);
+            }
+          else
+            {
+              rfb_putle32(dest, pixel);
+            }
+
+          dest += sizeof(uint32_t);
           src++;
         }
 

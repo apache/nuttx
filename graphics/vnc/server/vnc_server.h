@@ -253,6 +253,7 @@ struct vnc_session_s
   uint8_t display;             /* Display number (for debug) */
   volatile uint8_t colorfmt;   /* Remote color format (See include/nuttx/fb.h) */
   volatile uint8_t bpp;        /* Remote bits per pixel */
+  volatile bool bigendian;     /* Remote expect data in big-endian format */
   volatile bool rre;           /* Remote supports RRE encoding */
   FAR uint8_t *fb;             /* Allocated local frame buffer */
 
