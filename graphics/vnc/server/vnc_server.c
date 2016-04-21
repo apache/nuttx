@@ -90,8 +90,6 @@ FAR struct vnc_session_s *g_vnc_sessions[RFB_MAX_DISPLAYS];
 static void vnc_reset_session(FAR struct vnc_session_s *session,
                               FAR uint8_t *fb, int display)
 {
-  FAR struct vnc_fbupdate_s *curr;
-  FAR struct vnc_fbupdate_s *next;
   int i;
 
   /* Close any open sockets */
@@ -112,21 +110,12 @@ static void vnc_reset_session(FAR struct vnc_session_s *session,
   /* Put all of the pre-allocated update structures into the freelist */
 
   sq_init(&session->updqueue);
+  sq_init(&session->updfree);
 
-  session->updfree.head =
-    (FAR sq_entry_t *)&session->updpool[0];
-  session->updfree.tail =
-    (FAR sq_entry_t *)&session->updpool[CONFIG_VNCSERVER_NUPDATES-1];
-
-  next = &session->updpool[0];
-  for (i = 1; i < CONFIG_VNCSERVER_NUPDATES-1; i++)
+  for (i = 0; i < CONFIG_VNCSERVER_NUPDATES; i++)
     {
-      curr = next;
-      next = &session->updpool[i];
-      curr->flink = next;
+      sq_addlast((FAR sq_entry_t *)&session->updpool[i], &session->updfree);
     }
-
-  next->flink = NULL;
 
   /* Set the INITIALIZED state */
 

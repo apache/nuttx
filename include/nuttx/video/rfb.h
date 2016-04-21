@@ -375,8 +375,8 @@ struct rfb_setencodings_s
   uint8_t encodings[4];          /* S32 Encoding type, size = 4*nencodings */
 };
 
-#define SIZEOF_RFB_SERVERINIT_S(n) \
-  (sizeof(struct rfb_serverinit_s) + (((n) - 1) << 2))
+#define SIZEOF_RFB_SETENCODINGS_S(n) \
+  (sizeof(struct rfb_setencodings_s) + (((n) - 1) << 2))
 
 /* 6.4.3 FramebufferUpdateRequest
  *
@@ -547,8 +547,8 @@ struct rfb_rectangle_s
   uint8_t data[1];               /* Pixel data, actual size varies */
 };
 
-#define SIZEOF_RFB_RECTANGES(d) \
-  (sizeof(struct rfb_framebufferupdate_s) + (d) - 1)
+#define SIZEOF_RFB_RECTANGE_S(d) \
+  (sizeof(struct rfb_rectangle_s) + (d) - 1)
 
 struct rfb_framebufferupdate_s
 {
@@ -710,6 +710,15 @@ struct rfb_rrehdr32_s
 struct rfb_rrerect16_s
 {
   uint8_t pixel[2];              /* U16 sub-rect pixel value */
+  uint8_t xpos[2];               /* U16 X position */
+  uint8_t ypos[2];               /* U16 Y position */
+  uint8_t width[2];              /* U16 Width */
+  uint8_t height[2];             /* U16 Height */
+};
+
+struct rfb_rrerect32_s
+{
+  uint8_t pixel[4];              /* U32 sub-rect pixel value */
   uint8_t xpos[2];               /* U16 X position */
   uint8_t ypos[2];               /* U16 Y position */
   uint8_t width[2];              /* U16 Width */
@@ -1029,7 +1038,9 @@ struct rfb_palettendx_s
 /* Data Access Helpers ******************************************************/
 
 /* All multiple byte integers (other than pixel values themselves) are in
- * big endian order (most significant byte first).
+ * big endian order (most significant byte first).  The following do not
+ * depend on the endianness of the target nor that they depend on any data
+ * alignment.
  */
 
 /* void rfb_putbe16(FAR uint8_t *dest, uint16_t value) */
@@ -1037,9 +1048,9 @@ struct rfb_palettendx_s
 #define rfb_putbe16(d,v) \
   do \
     { \
-      FAR uint32_t *dest = (d); \
-      *dest++ = ((uint16_t)(v) >> 8); \
-      *dest   = ((uint16_t)(v) & 0xff); \
+      register FAR uint8_t *__d = (FAR uint8_t *)(d); \
+      *__d++ = ((uint16_t)(v) >> 8); \
+      *__d   = ((uint16_t)(v) & 0xff); \
     } \
   while (0)
 
@@ -1054,11 +1065,11 @@ struct rfb_palettendx_s
 #define rfb_putbe32(d,v) \
   do \
     { \
-      FAR uint32_t *dest = (d); \
-      *dest++ = ((uint32_t)(v) >> 24); \
-      *dest++ = ((uint32_t)(v) >> 16) & 0xff; \
-      *dest++ = ((uint32_t)(v) >> 8)  & 0xff; \
-      *dest   = ((uint32_t)(v)        & 0xff); \
+      register FAR uint8_t *__d = (FAR uint8_t *)(d); \
+      *__d++ = ((uint32_t)(v) >> 24); \
+      *__d++ = ((uint32_t)(v) >> 16) & 0xff; \
+      *__d++ = ((uint32_t)(v) >> 8)  & 0xff; \
+      *__d   = ((uint32_t)(v)        & 0xff); \
     } \
   while (0)
 

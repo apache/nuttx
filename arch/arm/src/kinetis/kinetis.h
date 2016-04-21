@@ -221,7 +221,7 @@
  * (restricted to inputs).
  */
 
-#define _PIN_INT_SHIFT         (20)
+#define _PIN_INT_SHIFT         (19)
 #define _PIN_INT_MASK          (31 << _PIN_INT_SHIFT)
 
 #define _PIN_INTDMA_MASK       (3 << _PIN_INT_SHIFT)

@@ -379,16 +379,28 @@ void kinetis_pinirqenable(uint32_t pinset)
             regval |= PORT_PCR_IRQC_RISING;
             break;
 
-          case PIN_INT_BOTH : /* Interrupt on falling edge */
+          case PIN_INT_FALLING : /* Interrupt on falling edge */
             regval |= PORT_PCR_IRQC_FALLING;
             break;
 
-          case PIN_DMA_FALLING : /* nterrupt on either edge */
+          case PIN_INT_BOTH : /* Interrupt on either edge */
             regval |= PORT_PCR_IRQC_BOTH;
             break;
 
-          case PIN_INT_ONE : /* IInterrupt when logic one */
+          case PIN_INT_ONE : /* Interrupt when logic one */
             regval |= PORT_PCR_IRQC_ONE;
+            break;
+
+          case PIN_DMA_RISING : /* DMA on rising edge */
+            regval |= PORT_PCR_IRQC_DMARISING;
+            break;
+
+          case PIN_DMA_FALLING : /* DMA on falling edge */
+            regval |= PORT_PCR_IRQC_DMAFALLING;
+            break;
+
+          case PIN_DMA_BOTH : /* DMA on either edge */
+            regval |= PORT_PCR_IRQC_DMABOTH;
             break;
 
           default:

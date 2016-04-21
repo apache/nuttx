@@ -130,9 +130,19 @@
 #define EP0                 (0)
 #define SAM_EPSET_ALL       (0xffff)  /* All endpoints */
 #define SAM_EPSET_NOTEP0    (0xfffe)  /* All endpoints except EP0 */
-#define SAM_EPSET_DMA       (0x01fe)  /* All endpoints that support DMA transfers */
 #define SAM_EP_BIT(ep)      (1 << (ep))
 #define SAM_EP0_MAXPACKET   (64)      /* EP0 Max. packet size */
+
+#ifdef CONFIG_SAMV7_USBHS_EP7DMA_WAR
+/* Normally EP1..7 should support DMA (0x1fe), but according an ERRATA in
+ * "Atmel-11296D-ATARM-SAM E70-Datasheet_19-Jan-16" only the EP1..6 support
+ * the DMA transfer (0x7e)
+ */
+
+#  define SAM_EPSET_DMA     (0x007e)  /* All endpoints that support DMA transfers */
+#else
+#  define SAM_EPSET_DMA     (0x01fe)  /* All endpoints that support DMA transfers */
+#endif
 
 /* DMA FIFO */
 
@@ -517,7 +527,7 @@ static int    sam_usbhs_interrupt(int irq, void *context);
 static void   sam_ep_reset(struct sam_usbdev_s *priv, uint8_t epno);
 static void   sam_epset_reset(struct sam_usbdev_s *priv, uint16_t epset);
 static inline struct sam_ep_s *
-              sam_ep_reserve(struct sam_usbdev_s *priv, uint8_t epset);
+              sam_ep_reserve(struct sam_usbdev_s *priv, uint16_t epset);
 static inline void
               sam_ep_unreserve(struct sam_usbdev_s *priv,
                 struct sam_ep_s *privep);
@@ -3394,12 +3404,12 @@ static void sam_epset_reset(struct sam_usbdev_s *priv, uint16_t epset)
  * Name: sam_ep_reserve
  *
  * Description:
- *   Find and un-reserved endpoint number and reserve it for the caller.
+ *   Find an un-reserved endpoint number and reserve it for the caller.
  *
  ****************************************************************************/
 
 static inline struct sam_ep_s *
-sam_ep_reserve(struct sam_usbdev_s *priv, uint8_t epset)
+sam_ep_reserve(struct sam_usbdev_s *priv, uint16_t epset)
 {
   struct sam_ep_s *privep = NULL;
   irqstate_t flags;
@@ -3415,7 +3425,7 @@ sam_ep_reserve(struct sam_usbdev_s *priv, uint8_t epset)
 
       for (epndx = 1; epndx < SAM_USBHS_NENDPOINTS; epndx++)
         {
-          uint8_t bit = SAM_EP_BIT(epndx);
+          uint16_t bit = SAM_EP_BIT(epndx);
           if ((epset & bit) != 0)
             {
               /* Mark the endpoint no longer available */
