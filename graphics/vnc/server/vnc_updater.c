@@ -253,11 +253,18 @@ vnc_remove_queue(FAR struct vnc_session_s *session)
   /* It is reserved.. go get it */
 
   rect = (FAR struct vnc_fbupdate_s *)sq_remfirst(&session->updqueue);
+  DEBUGASSERT(rect != NULL);
+
+  /* Check if we just removed the whole screen update from the queue */
+
+  if (session->nwhupd > 0 && rect->whupd)
+    {
+      session->nwhupd--;
+      updvdbg("Whole screen update: nwhupd=%d\n", session->nwhupd);
+    }
 
   vnc_sem_debug(session, "After remove", 0);
   sched_unlock();
-
-  DEBUGASSERT(rect != NULL);
   return rect;
 }
 
@@ -486,6 +493,7 @@ int vnc_update_rectangle(FAR struct vnc_session_s *session,
 {
   FAR struct vnc_fbupdate_s *update;
   struct nxgl_rect_s intersection;
+  bool whupd;
 
   /* Clip rectangle to the screen dimensions */
 
@@ -499,44 +507,58 @@ int vnc_update_rectangle(FAR struct vnc_session_s *session,
        * of these (especially when it is confused)
        */
 
+      whupd = (memcmp(&intersection, &g_wholescreen,
+                      sizeof(struct nxgl_rect_s)) == 0);
+
+      /* Ignore all updates if there is a queue whole screen update */
+
       sched_lock();
-      if (memcmp(&intersection, &g_wholescreen, sizeof(struct nxgl_rect_s)) == 0)
+      if (session->nwhupd == 0)
         {
-          FAR struct vnc_fbupdate_s *curr;
-          FAR struct vnc_fbupdate_s *next;
+          /* Is this a new whole screen update */
 
-          /* Yes.. discard all of the previously queued updates */
-
-          updvdbg("Whole screen update...\n");
-
-          curr = (FAR struct vnc_fbupdate_s *)session->updqueue.head;
-          sq_init(&session->updqueue);
-          sem_reset(&session->queuesem, 0);
-
-          for (; curr != NULL; curr = next)
+          if (whupd)
             {
-              next = curr->flink;
-              vnc_free_update(session, curr);
+              FAR struct vnc_fbupdate_s *curr;
+              FAR struct vnc_fbupdate_s *next;
+
+              /* Yes.. discard all of the previously queued updates */
+
+              updvdbg("New whole screen update...\n");
+
+              curr = (FAR struct vnc_fbupdate_s *)session->updqueue.head;
+              sq_init(&session->updqueue);
+              sem_reset(&session->queuesem, 0);
+
+              for (; curr != NULL; curr = next)
+                {
+                  next = curr->flink;
+                  vnc_free_update(session, curr);
+                }
+
+              session->nwhupd = 1;
             }
+
+          /* Allocate an update structure... waiting if necessary */
+
+          update = vnc_alloc_update(session);
+          DEBUGASSERT(update != NULL);
+
+          /* Copy the clipped rectangle into the update structure */
+
+          update->whupd = whupd;
+          nxgl_rectcopy(&update->rect, &intersection);
+
+          /* Add the upate to the end of the update queue. */
+
+          vnc_add_queue(session, update);
+
+          updvdbg("Queued {(%d, %d),(%d, %d)}\n",
+                  intersection.pt1.x, intersection.pt1.y,
+                  intersection.pt2.x, intersection.pt2.y);
         }
 
-      /* Allocate an update structure... waiting if necessary */
-
-      update = vnc_alloc_update(session);
-      DEBUGASSERT(update != NULL);
-
-      /* Copy the clipped rectangle into the update structure */
-
-      nxgl_rectcopy(&update->rect, &intersection);
-
-      /* Add the upate to the end of the update queue. */
-
-      vnc_add_queue(session, update);
       sched_unlock();
-
-      updvdbg("Queued {(%d, %d),(%d, %d)}\n",
-              intersection.pt1.x, intersection.pt1.y,
-              intersection.pt2.x, intersection.pt2.y);
     }
 
   /* Since we ignore bad rectangles and wait for updata structures, there is

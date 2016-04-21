@@ -233,6 +233,7 @@ enum vnc_server_e
 struct vnc_fbupdate_s
 {
   FAR struct vnc_fbupdate_s *flink;
+  bool whupd;                  /* True: whole screen update */
   struct nxgl_rect_s rect;     /* The enqueued update rectangle */
 };
 
@@ -247,6 +248,7 @@ struct vnc_session_s
   struct socket listen;        /* Listen socket */
   struct socket connect;       /* Connected socket */
   volatile uint8_t state;      /* See enum vnc_server_e */
+  volatile uint8_t nwhupd;     /* Number of whole screen updates queued */
 
   /* Display geometry and color characteristics */
 
