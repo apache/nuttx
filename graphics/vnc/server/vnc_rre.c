@@ -50,34 +50,118 @@
  * Private Types
  ****************************************************************************/
 
-struct rre_data_s
+struct rre_encode8_s
 {
-#if RFB_BITSPERPIXEL == 16
-  struct rfb_rrehdr16_s hdr;    /*    Header with background pixel */
-  struct rfb_rrerect16_s srect; /*    Sub-rectangle */
-#elif RFB_BITSPERPIXEL == 32
-  struct rfb_rrehdr32_s hdr;    /*    Header with background pixel */
-  struct rfb_rrerect32_s srect; /*    Sub-rectangle */
-#endif
+  struct rfb_rrehdr8_s hdr;
+  struct rfb_rrerect8_s rect;
 };
 
-struct rre_rectangle_s
+struct rre_encode16_s
 {
-  uint8_t xpos[2];              /* U16 X position */
-  uint8_t ypos[2];              /* U16 Y position */
-  uint8_t width[2];             /* U16 Width */
-  uint8_t height[2];            /* U16 Height */
-  uint8_t encoding[4];          /* S32 Encoding type = RFB_ENCODING_RRE */
-  struct rre_data_s data;       /* Pixel data, actual size varies */
+  struct rfb_rrehdr16_s hdr;
+  struct rfb_rrerect16_s rect;
 };
 
-struct rre_framebufferupdate_s
+struct rre_encode32_s
 {
-  uint8_t msgtype;              /* U8  Message type = RFB_FBUPDATE_MSG*/
-  uint8_t padding;
-  uint8_t nrect[2];             /* U16 Number of rectangles  = 1*/
-  struct rre_rectangle_s rect;  /*     RRE encoded rectangle */
+  struct rfb_rrehdr32_s hdr;
+  struct rfb_rrerect32_s rect;
 };
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: vnc_rreNN
+ *
+ * Description:
+ *  Encode a single RRE sub-rectangle, NN=bits-per-pixel
+ *
+ * Input Parameters:
+ *   session - An instance of the session structure.
+ *   dest    - The locate to save the RRE encoded data
+ *   rect    - Describes the rectangle in the local framebuffer.
+ *   bgcolor - The local color of the pixel data
+ *
+ * Returned Value:
+ *   The size of the framebuffer update message is returned..
+ *
+ ****************************************************************************/
+
+ssize_t vnc_rre8(FAR struct vnc_session_s *session,
+                 FAR struct rre_encode8_s *dest,
+                 FAR struct nxgl_rect_s *rect,
+                 uint8_t bgcolor)
+{
+  nxgl_coord_t width;
+  nxgl_coord_t height;
+
+  rfb_putbe32(dest->hdr.nsubrects, 1);
+  dest->hdr.pixel = bgcolor;
+
+  dest->rect.pixel = bgcolor;
+  rfb_putbe16(dest->rect.xpos,   rect->pt1.x);
+  rfb_putbe16(dest->rect.ypos,   rect->pt1.y);
+
+  width  = rect->pt2.x - rect->pt1.x + 1;
+  height = rect->pt2.y - rect->pt1.y + 1;
+
+  rfb_putbe16(dest->rect.width,  width);
+  rfb_putbe16(dest->rect.height, height);
+
+  return sizeof(struct rre_encode8_s);
+}
+
+ssize_t vnc_rre16(FAR struct vnc_session_s *session,
+                  FAR struct rre_encode16_s *dest,
+                  FAR struct nxgl_rect_s *rect,
+                  uint16_t bgcolor)
+{
+  nxgl_coord_t width;
+  nxgl_coord_t height;
+
+  rfb_putbe32(dest->hdr.nsubrects, 1);
+  rfb_putbe16(dest->hdr.pixel,   bgcolor);
+
+  rfb_putbe16(dest->rect.pixel,  bgcolor);
+  rfb_putbe16(dest->rect.xpos,   rect->pt1.x);
+  rfb_putbe16(dest->rect.xpos,   rect->pt1.x);
+  rfb_putbe16(dest->rect.ypos,   rect->pt1.y);
+
+  width  = rect->pt2.x - rect->pt1.x + 1;
+  height = rect->pt2.y - rect->pt1.y + 1;
+
+  rfb_putbe16(dest->rect.width,  width);
+  rfb_putbe16(dest->rect.height, height);
+
+  return sizeof(struct rre_encode16_s);
+}
+
+ssize_t vnc_rre32(FAR struct vnc_session_s *session,
+                  FAR struct rre_encode32_s *dest,
+                  FAR struct nxgl_rect_s *rect,
+                  uint32_t bgcolor)
+{
+  nxgl_coord_t width;
+  nxgl_coord_t height;
+
+  rfb_putbe32(dest->hdr.nsubrects, 1);
+  rfb_putbe32(dest->hdr.pixel,   bgcolor);
+
+  rfb_putbe32(dest->rect.pixel,  bgcolor);
+  rfb_putbe16(dest->rect.xpos,   rect->pt1.x);
+  rfb_putbe16(dest->rect.xpos,   rect->pt1.x);
+  rfb_putbe16(dest->rect.ypos,   rect->pt1.y);
+
+  width  = rect->pt2.x - rect->pt1.x + 1;
+  height = rect->pt2.y - rect->pt1.y + 1;
+
+  rfb_putbe16(dest->rect.width,  width);
+  rfb_putbe16(dest->rect.height, height);
+
+  return sizeof(struct rre_encode32_s);
+}
 
 /****************************************************************************
  * Public Functions
@@ -97,22 +181,21 @@ struct rre_framebufferupdate_s
  *
  * Returned Value:
  *   Zero is returned if RRE coding was not performed (but not error was)
- *   encountered.  Otherwise, eith the size of the framebuffer update
- *   message is returned on success or a negated errno value is returned on
- *   failure that indicates the the nature of the failure.  A failure is
- *   only returned in cases of a network failure and unexpected internal
- *   failures.
+ *   encountered.  Otherwise, the size of the framebuffer update message
+ *   is returned on success or a negated errno value is returned on failure
+ *   that indicates the the nature of the failure.  A failure is only
+ *   returned in cases of a network failure and unexpected internal failures.
  *
  ****************************************************************************/
 
 int vnc_rre(FAR struct vnc_session_s *session, FAR struct nxgl_rect_s *rect)
 {
-  FAR struct rre_framebufferupdate_s *rre;
-  FAR struct rre_rectangle_s *rrect;
-  FAR struct rre_data_s *rdata;
+  FAR struct rfb_framebufferupdate_s *rre;
+  FAR struct rfb_rectangle_s *rrect;
   lfb_color_t bgcolor;
   nxgl_coord_t width;
   nxgl_coord_t height;
+  size_t nbytes;
   ssize_t nsent;
   int ret;
 
@@ -125,38 +208,66 @@ int vnc_rre(FAR struct vnc_session_s *session, FAR struct nxgl_rect_s *rect)
       ret = vnc_colors(session, rect, 1, &bgcolor);
       if (ret == 1)
         {
-          width         = rect->pt2.x - rect->pt1.x + 1;
-          height        = rect->pt2.y - rect->pt1.y + 1;
+          width  = rect->pt2.x - rect->pt1.x + 1;
+          height = rect->pt2.y - rect->pt1.y + 1;
 
           /* Format the FrameBuffer Update with a single RRE encoded
            * rectangle.
            */
 
-          rre           = (FAR struct rre_framebufferupdate_s *)session->outbuf;
+          rre           = (FAR struct rfb_framebufferupdate_s *)session->outbuf;
           rre->msgtype  = RFB_FBUPDATE_MSG;
           rre->padding  = 0;
           rfb_putbe16(rre->nrect,          1);
 
-          rrect         = (FAR struct rre_rectangle_s *)&rre->rect;
+          rrect         = (FAR struct rfb_rectangle_s *)&rre->rect;
           rfb_putbe16(rrect->xpos,         rect->pt1.x);
           rfb_putbe16(rrect->ypos,         rect->pt1.y);
           rfb_putbe16(rrect->width,        width);
           rfb_putbe16(rrect->height,       height);
           rfb_putbe32(rrect->encoding,     RFB_ENCODING_RRE);
 
-          rdata         = (FAR struct rre_data_s *)&rrect->data;
-          rfb_putbe32(rdata->hdr.nsubrects, 1);
-#if RFB_BITSPERPIXEL == 16
-          rfb_putbe16(rdata->hdr.pixel,    bgcolor);
-          rfb_putbe16(rdata->srect.pixel,  bgcolor);
-#elif RFB_BITSPERPIXEL == 32
-          rfb_putbe32(rdata->hdr.pixel,    bgcolor);
-          rfb_putbe32(rdata->srect.pixel,  bgcolor);
-#endif
-          rfb_putbe16(rdata->srect.xpos,   rect->pt1.x);
-          rfb_putbe16(rdata->srect.ypos,   rect->pt1.y);
-          rfb_putbe16(rdata->srect.width,  width);
-          rfb_putbe16(rdata->srect.height, height);
+          /* The sub-rectangle encoding depends of the remote pixel width */
+
+          nbytes = SIZEOF_RFB_FRAMEBUFFERUPDATE_S(SIZEOF_RFB_RECTANGE_S(0));
+
+          switch (session->colorfmt)
+            {
+              case FB_FMT_RGB8_222:
+                nbytes += vnc_rre8(session,
+                                   (FAR struct rre_encode8_s *)rrect->data,
+                                   rect, vnc_convert_rgb8_222(bgcolor));
+                break;
+
+              case FB_FMT_RGB8_332:
+                nbytes += vnc_rre8(session,
+                                   (FAR struct rre_encode8_s *)rrect->data,
+                                   rect, vnc_convert_rgb8_332(bgcolor));
+                break;
+
+              case FB_FMT_RGB16_555:
+                nbytes += vnc_rre16(session,
+                                    (FAR struct rre_encode16_s *)rrect->data,
+                                    rect, vnc_convert_rgb16_555(bgcolor));
+                break;
+
+              case FB_FMT_RGB16_565:
+                nbytes += vnc_rre16(session,
+                                    (FAR struct rre_encode16_s *)rrect->data,
+                                    rect, vnc_convert_rgb16_565(bgcolor));
+                break;
+
+              case FB_FMT_RGB32:
+                nbytes += vnc_rre32(session,
+                                    (FAR struct rre_encode32_s *)rrect->data,
+                                    rect, vnc_convert_rgb32_888(bgcolor));
+                break;
+
+              default:
+                gdbg("ERROR: Unrecognized color format: %d\n",
+                     session->colorfmt);
+                return -EINVAL;
+            }
 
           /* At the very last most, make certain that the supported encoding
            * has not changed asynchronously.
@@ -169,8 +280,7 @@ int vnc_rre(FAR struct vnc_session_s *session, FAR struct nxgl_rect_s *rect)
                * and there are a limited number of IOBs available.
                */
 
-              nsent = psock_send(&session->connect, rre,
-                                 sizeof(struct rre_framebufferupdate_s), 0);
+              nsent = psock_send(&session->connect, rre, nbytes, 0);
               if (nsent < 0)
                 {
                   int errcode = get_errno();
@@ -180,8 +290,8 @@ int vnc_rre(FAR struct vnc_session_s *session, FAR struct nxgl_rect_s *rect)
                   return -errcode;
                 }
 
-              DEBUGASSERT(nsent == sizeof(struct rre_framebufferupdate_s));
-              return sizeof(struct rre_framebufferupdate_s);
+              DEBUGASSERT(nsent == nbytes);
+              return nbytes;
             }
 
           return -EINVAL;

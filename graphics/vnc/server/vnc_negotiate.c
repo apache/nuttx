@@ -384,12 +384,13 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
     }
   else if (setformat->msgtype != RFB_SETPIXELFMT_MSG)
     {
-      gdbg("ERROR: Not a SetPixelFormat message: %d\n", (int)setformat->msgtype);
+      gdbg("ERROR: Not a SetPixelFormat message: %d\n",
+           (int)setformat->msgtype);
       return -EPROTO;
     }
 
-  /* Instantiate the client pixel format, verifying that the client request format
-   * is one that we can handle.
+  /* Instantiate the client pixel format, verifying that the client request
+   * format is one that we can handle.
    */
 
   ret = vnc_client_pixelformat(session, &setformat->format);
@@ -408,7 +409,7 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
   encodings = (FAR struct rfb_setencodings_s *)session->inbuf;
 
   nrecvd = psock_recv(&session->connect, encodings,
-                   CONFIG_VNCSERVER_INBUFFER_SIZE, 0);
+                      CONFIG_VNCSERVER_INBUFFER_SIZE, 0);
   if (nrecvd < 0)
     {
       errcode = get_errno();
@@ -419,7 +420,7 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
 
   if (nrecvd > 0 && encodings->msgtype == RFB_SETENCODINGS_MSG)
     {
-      DEBUGASSERT(nrecvd >=  SIZEOF_RFB_SETENCODINGS_S(0));
+      DEBUGASSERT(nrecvd >= SIZEOF_RFB_SETENCODINGS_S(0));
 
       /* Pick out any mutually supported encodings */
 
