@@ -2328,7 +2328,7 @@ Configuration sub-directories
        size of update messages.  That is 1024 bytes in that configuration
        (the full message with the header will be a little larger).  The
        MTU (CONFIG_NET_ETH_MTU) is set to 590 so that a full update will
-       require several packets.i
+       require several packets.
 
        Write buffering also effects network performance.  This will break
        up the large updates into small (196 byte) groups.  When we run out
@@ -2339,3 +2339,13 @@ Configuration sub-directories
        mouse/keyboard inputs in the options/input menu.  That will make
        things a little clearer.
 
+    STATUS:
+      2016-04-21:  I have gottent he apps/examples/nximage to work
+        with lots issues with GRAPHICS and UPDATER debug ON.  There
+        are reliability problems and it hangs at the end of the test.
+        If I turn UPDATE debug off (only), then the display output is
+        corrupted and I get a hardfault.
+
+        Mostly likely, the UPDATER debug output slows the updates and
+        avoids some kind of race condition with the networking. Oddly,
+        it does not work at all if I turn off TCP write buffering.
