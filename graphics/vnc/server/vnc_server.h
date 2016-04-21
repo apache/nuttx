@@ -49,6 +49,7 @@
 
 #include <nuttx/video/fb.h>
 #include <nuttx/video/rfb.h>
+#include <nuttx/video/vnc.h>
 #include <nuttx/nx/nxglib.h>
 #include <nuttx/nx/nx.h>
 #include <nuttx/net/net.h>
@@ -239,10 +240,6 @@ struct vnc_fbupdate_s
 
 struct vnc_session_s
 {
-  /* NX graphics system */
-
-  NXHANDLE handle;             /* NX graphics handle */
-
   /* Connection data */
 
   struct socket listen;        /* Listen socket */
@@ -258,6 +255,12 @@ struct vnc_session_s
   volatile bool bigendian;     /* Remote expect data in big-endian format */
   volatile bool rre;           /* Remote supports RRE encoding */
   FAR uint8_t *fb;             /* Allocated local frame buffer */
+
+  /* VNC client input support */
+
+  vnc_kbdout_t kbdout;         /* Callout when keyboard input is received */
+  vnc_mouseout_t mouseout;     /* Callout when keyboard input is received */
+  FAR void *arg;               /* Argument that accompanies the callouts */
 
   /* Updater information */
 
@@ -283,7 +286,8 @@ struct vnc_session_s
 
 struct fb_startup_s
 {
-  sem_t fbsem;                  /* Framebuffer driver will wait on this */
+  sem_t fbinit;                 /* Wait for session creation */
+  sem_t fbconnect;              /* Wait for client connection */
   int16_t result;               /* OK: successfully initialized */
 };
 
@@ -536,24 +540,6 @@ int vnc_raw(FAR struct vnc_session_s *session, FAR struct nxgl_rect_s *rect);
 void vnc_key_map(FAR struct vnc_session_s *session, uint16_t keysym,
                  bool keydown);
 #endif
-
-/****************************************************************************
- * Name: vnc_find_session
- *
- * Description:
- *  Return the session structure associated with this display.
- *
- * Input Parameters:
- *   display - The display number of interest.
- *
- * Returned Value:
- *   Returns the instance of the session structure for this display.  NULL
- *   will be returned if the server has not yet been started or if the
- *   display number is out of range.
- *
- ****************************************************************************/
-
-FAR struct vnc_session_s *vnc_find_session(int display);
 
 /****************************************************************************
  * Name: vnc_convert_rgbNN

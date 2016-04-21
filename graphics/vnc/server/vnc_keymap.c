@@ -481,9 +481,10 @@ void vnc_key_map(FAR struct vnc_session_s *session, uint16_t keysym,
 #ifdef CONFIG_VNCSERVER_KBDENCODE
   uint8_t buffer[4]
   int nch;
+#else
+  uint8_t buffer;
 #endif
   int16_t keych;
-  int ret;
 
   /* Check for modifier keys */
 
@@ -504,6 +505,14 @@ void vnc_key_map(FAR struct vnc_session_s *session, uint16_t keysym,
       return;
     }
 #endif
+
+  /* If no external keyboard input handler has been provided, then we have to drop the keyboard input.
+   */
+
+  if (session->kbdout == NULL)
+    {
+      return;
+    }
 
   /* Try to convert the keycode to an ASCII value */
 
@@ -580,19 +589,12 @@ void vnc_key_map(FAR struct vnc_session_s *session, uint16_t keysym,
 
       /* Inject the normal character sequence into NX */
 
-      ret = nx_kbdin(session->handle, nch, buffer);
-      if (ret < 0)
-        {
-          gdbg("ERROR: nx_kbdin() failed: %d\n", ret);
-        }
+      session->kbdout(session->arg, nch, buffer);
 #else
       /* Inject the single key press into NX */
 
-     ret = nx_kbdchin(session->handle,(uint8_t)keych);
-      if (ret < 0)
-        {
-          gdbg("ERROR: nx_kbdchin() failed: %d\n", ret);
-        }
+      buffer = (uint8_t)keych;
+      session->kbdout(session->arg, 1, &buffer);
 #endif
     }
 
@@ -619,11 +621,7 @@ void vnc_key_map(FAR struct vnc_session_s *session, uint16_t keysym,
 
           /* Inject the special character sequence into NX */
 
-          ret = nx_kbdin(session->handle, nch, buffer);
-          if (ret < 0)
-            {
-              gdbg("ERROR: nx_kbdin() failed: %d\n", ret)
-            }
+          session->kbdout(session->arg, nch, buffer);
         }
     }
 #endif

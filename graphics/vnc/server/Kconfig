@@ -118,7 +118,7 @@ config VNCSERVER_UPDATE_BUFSIZE
 config VNCSERVER_KBDENCODE
 	bool "Encode keyboard input"
 	default n
-	depends on NXTERM_NXKBDIN
+	depends on LIB_KBDCODEC
 	---help---
 		Use a special encoding of keyboard characters as defined in
 		include/nuttx/input/kbd_coded.h.

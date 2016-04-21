@@ -337,7 +337,7 @@ int vnc_receiver(FAR struct vnc_session_s *session)
 #ifdef CONFIG_NX_XYINPUT
               /* REVISIT:  How will be get the NX handle? */
 
-              else if (session->handle != NULL)
+              else if (session->mouseout != NULL)
                 {
                   event = (FAR struct rfb_pointerevent_s *)session->inbuf;
 
@@ -362,14 +362,10 @@ int vnc_receiver(FAR struct vnc_session_s *session)
                       buttons |= NX_MOUSE_RIGHTBUTTON;
                     }
 
-                  ret = nx_mousein(session->handle,
-                                   (nxgl_coord_t)rfb_getbe16(event->xpos),
-                                   (nxgl_coord_t)rfb_getbe16(event->ypos),
-                                   buttons);
-                  if (ret < 0)
-                    {
-                      gdbg("ERROR: nx_mousein failed: %d\n", ret);
-                    }
+                  session->mouseout(session->arg,
+                                    (nxgl_coord_t)rfb_getbe16(event->xpos),
+                                    (nxgl_coord_t)rfb_getbe16(event->ypos),
+                                    buttons);
                 }
 #endif
             }
