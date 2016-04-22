@@ -69,6 +69,10 @@
 
 /* spi frequency based on arch/arm/src/stm32/stm32_spi.c */
 
+#ifndef CONFIG_STM32F429I_DISCO_ILI9341_SPIFREQUENCY
+#  define CONFIG_STM32F429I_DISCO_ILI9341_SPIFREQUENCY      20000000
+#endif
+
 #if CONFIG_STM32F429I_DISCO_ILI9341_SPIFREQUENCY >= \
                                         (STM32_PCLK1_FREQUENCY >> 1)
 #  define ILI93414WS_SPI_BR         SPI_CR1_FPCLCKd2    /* 000: fPCLK/2 */
