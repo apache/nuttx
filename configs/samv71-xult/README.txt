@@ -2320,7 +2320,7 @@ Configuration sub-directories
     1. Network configuration:  IP address 10.0.0.2.  The is easily changed
        via 'make menuconfig'.  The VNC server address is 10.0.0.2:5900.
 
-    2. The default (local) framebuffer configuration is 320x240 with 16-bit
+    2. The default (local) framebuffer configuration is 320x240 with 8-bit
        RGB color.
 
     3. There are complicated interactions between VNC and the network
@@ -2339,13 +2339,44 @@ Configuration sub-directories
        mouse/keyboard inputs in the options/input menu.  That will make
        things a little clearer.
 
+    5. To select 16-bits per pixel RGB15 5:6:5
+
+         CONFIG_NX_DISABLE_8BPP=y
+         # CONFIG_NX_DISABLE_16BPP is not set
+
+         # CONFIG_VNCSERVER_COLORFMT_RGB8 is not set
+         CONFIG_VNCSERVER_COLORFMT_RGB16=y
+
+         CONFIG_EXAMPLES_NXIMAGE_BPP=16
+
+       To re-select 8-bits per pixel RGB8 3:3:3
+
+         # CONFIG_NX_DISABLE_8BPP is not set
+         CONFIG_NX_DISABLE_16BPP=y
+
+         CONFIG_VNCSERVER_COLORFMT_RGB8=y
+         # CONFIG_VNCSERVER_COLORFMT_RGB16 is not set
+
+         # CONFIG_EXAMPLES_NXIMAGE_GREYSCALE is not set
+         CONFIG_EXAMPLES_NXIMAGE_BPP=8
+
     STATUS:
-      2016-04-21:  I have gottent he apps/examples/nximage to work
-        with lots issues with GRAPHICS and UPDATER debug ON.  There
-        are reliability problems and it hangs at the end of the test.
-        If I turn UPDATE debug off (only), then the display output is
-        corrupted and I get a hardfault.
+      2016-04-21:  I have gotten the apps/examples/nximage to work with
+        lots issues with verbose GRAPHICS and UPDATER debug ON.  There are
+        reliability problems and it hangs at the end of the test.  But if
+        I turn UPDATE debug off (only), then the display output is
+        corrupted. I have also see hardfaults.
 
         Mostly likely, the UPDATER debug output slows the updates and
         avoids some kind of race condition with the networking. Oddly,
         it does not work at all if I turn off TCP write buffering.
+
+      2016-04-22:  I added a 100 MS delay at the beginning of the
+        updater loop and it made no difference.  This seems to eliminate
+        the suspected networking race condition.
+
+        The default configuration now uses RGB8 which needs a lot less
+        SRAM for the local frame buffer and does not the color quality
+        in the remote display (since it is also 8 BPP).  At 8 BPP, the
+        remote display is correct (although I still do see problems with
+        hangs).

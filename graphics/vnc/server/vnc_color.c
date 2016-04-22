@@ -265,9 +265,14 @@ uint32_t vnc_convert_rgb32_888(lfb_color_t rgb)
  * Name: vnc_colors
  *
  * Description:
- *  Test the update rectangle to see if it contains complex colors.  If it
- *  contains only a few colors, then it may be a candidate for some type
- *  run-length encoding.
+ *   Test the update rectangle to see if it contains complex colors.  If it
+ *   contains only a few colors, then it may be a candidate for some type
+ *   run-length encoding.
+ *
+ *   REVISIT:  This function is imperfect:  It will fail if there are more
+ *   than 8 colors in the region.  For small colors, we can keep a local
+ *   array for all color formats and always return the exact result, no
+ *   matter now many colors.
  *
  * Input Parameters:
  *   session   - An instance of the session structure.
@@ -280,15 +285,13 @@ uint32_t vnc_convert_rgb32_888(lfb_color_t rgb)
  *   The number of valid colors in the colors[] array are returned, the
  *   first entry being the most frequent.  A negated errno value is returned
  *   if the colors cannot be determined.  This would be the case if the color
- *   depth is > 8 and there are more than 'maxcolors' colors in the update
- *   rectangle.
+ *   there are more than 'maxcolors' colors in the update rectangle.
  *
  ****************************************************************************/
 
 int vnc_colors(FAR struct vnc_session_s *session, FAR struct nxgl_rect_s *rect,
                unsigned int maxcolors, FAR lfb_color_t *colors)
 {
-#if RFB_PIXELDEPTH > 8
   FAR const lfb_color_t *rowstart;
   FAR const lfb_color_t *pixptr;
   lfb_color_t pixel;
@@ -412,12 +415,4 @@ int vnc_colors(FAR struct vnc_session_s *session, FAR struct nxgl_rect_s *rect,
   /* And return the number of colors that we found */
 
   return ncolors;
-
-#else
-  /* For small colors, we can keep a local array for all color formats and
-   * always return the exact result, no matter now many colors.  OR we could
-   * just remove this conditional compilation and live with 8 colors max.
-   */
-#  error No support for small colors
-#endif
 }
