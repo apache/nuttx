@@ -680,7 +680,7 @@ xcpt_t board_button_irq(int id, xcpt_t irqhandler);
  ****************************************************************************/
 
 #ifdef CONFIG_BOARD_CRASHDUMP
-void board_crashdump(uint32_t currentsp, void *tcb, uint8_t *filename,
+void board_crashdump(uint32_t currentsp, void *tcb, const uint8_t *filename,
                      int lineno);
 #endif
 
