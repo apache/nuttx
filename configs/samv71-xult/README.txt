@@ -2349,7 +2349,7 @@ Configuration sub-directories
 
          CONFIG_EXAMPLES_NXIMAGE_BPP=16
 
-       To re-select 8-bits per pixel RGB8 3:3:3
+       To re-select 8-bits per pixel RGB8 3:3:2
 
          # CONFIG_NX_DISABLE_8BPP is not set
          CONFIG_NX_DISABLE_16BPP=y
@@ -2362,10 +2362,10 @@ Configuration sub-directories
 
     STATUS:
       2016-04-21:  I have gotten the apps/examples/nximage to work with
-        lots issues with verbose GRAPHICS and UPDATER debug ON.  There are
-        reliability problems and it hangs at the end of the test.  But if
-        I turn UPDATE debug off (only), then the display output is
-        corrupted. I have also see hardfaults.
+        lots issues with 16-bit RGB and verbose GRAPHICS and UPDATER debug
+        ON.  There are reliability problems and it hangs at the end of the
+        test.  But if I turn UPDATE debug off (only), then the display
+        output is corrupted. I have also see hardfaults.
 
         Mostly likely, the UPDATER debug output slows the updates and
         avoids some kind of race condition with the networking. Oddly,
@@ -2373,10 +2373,11 @@ Configuration sub-directories
 
       2016-04-22:  I added a 100 MS delay at the beginning of the
         updater loop and it made no difference.  This seems to eliminate
-        the suspected networking race condition.
+        the suspected networking race condition.  I am thinking now
+        either some data overrun or VNC protocol/timing issue?
 
         The default configuration now uses RGB8 which needs a lot less
-        SRAM for the local frame buffer and does not the color quality
-        in the remote display (since it is also 8 BPP).  At 8 BPP, the
-        remote display is correct (although I still do see problems with
-        hangs).
+        SRAM for the local frame buffer and does not degrade the color
+        quality in the remote display (since it is also 8 BPP).  At 8
+        BPP, the remote display is correct even with both GRAPHICS and
+        UPDATER debug OFF -- and there is no hang!
