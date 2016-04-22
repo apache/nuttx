@@ -11665,4 +11665,11 @@
 	  complete, but untested and so not ready for primetime (2016-04-18).
 	* configs/samv71-xult/vnc:  Add a configuration that will be used to
 	  verify VNC (also untested) (2016-04-18).
+	* drivers/ioexpander: Fix an error in the PCA9555 driver: Under certain
+	  error conditions, interrupts were not being re-enabled.  Sebastien
+	  Lorquet (2016-04-20).
+	* arch/arm/src/stm32 and configs/stm32f429i-disco:  Correct some bad
+	  commits that broke the LTDC display example.  From Marco Krahl
+          (2016-04-22).
+
 
