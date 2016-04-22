@@ -180,7 +180,7 @@ void vnc_mouseout(FAR void *arg, nxgl_coord_t x, nxgl_coord_t y,
  *
  ****************************************************************************/
 
-/* int vnc_default_fbinitialize(nt display, NXHANDLE handle); */
+/* int vnc_default_fbinitialize(int display, NXHANDLE handle); */
 
 #if defined(CONFIG_NX_KBD) && defined(CONFIG_NX_XYINPUT)
 

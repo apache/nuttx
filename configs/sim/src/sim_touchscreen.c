@@ -50,6 +50,10 @@
 #include <nuttx/nx/nx.h>
 #include <nuttx/nx/nxglib.h>
 
+#ifdef CONFIG_VNCSERVER
+#  include <nuttx/video/vnc.h>
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -129,6 +133,17 @@ int board_tsc_setup(int minor)
       idbg("nx_open failed: %d\n", ret);
       goto errout_with_fb;
     }
+
+#ifdef CONFIG_VNCSERVER
+  /* Setup the VNC server to support keyboard/mouse inputs */
+
+  ret = vnc_default_fbinitialize(0, g_simtc.hnx);
+  if (ret < 0)
+    {
+      idbg("vnc_default_fbinitialize failed: %d\n", ret);
+      goto errout_with_fb;
+    }
+#endif
 
   /* Set the background to the configured background color */
 
