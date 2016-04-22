@@ -49,6 +49,9 @@
 
 #include <nuttx/net/net.h>
 #include <nuttx/video/rfb.h>
+#include <nuttx/video/vnc.h>
+#include <nuttx/nx/nx.h>
+#include <nuttx/nx/nxglib.h>
 
 #include "vnc_server.h"
 
@@ -470,3 +473,31 @@ int vnc_client_encodings(FAR struct vnc_session_s *session,
 
   return OK;
 }
+
+/****************************************************************************
+ * Function: vnc_mouse
+ *
+ * Description:
+ *   This is the default keyboard/mouse callout function.  This is simply a
+ *   wrapper around nx_mousein().  When
+ *   configured using vnc_fbinitialize(), the 'arg' must be the correct
+ *   NXHANDLE value.
+ *
+ * Parameters:
+ *   See vnc_mouseout_t and vnc_kbdout_t typde definitions above.  These
+ *   callouts have arguments that match the inputs to nx_kbdin() and
+ *   nx_mousein() (if arg is really of type NXHANDLE).
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NX_XYINPUT
+void vnc_mouseout(FAR void *arg, nxgl_coord_t x, nxgl_coord_t y,
+                  uint8_t buttons)
+{
+  DEBUGASSERT(arg != NULL);
+  (void)nx_mousein((NXHANDLE)arg, x, y, buttons);
+}
+#endif
