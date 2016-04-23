@@ -64,7 +64,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#undef VNCSERVER_SEM_DEBUG
+#undef VNCSERVER_SEM_DEBUG          /* Define to dump queue/semaphore state */
+#undef VNCSERVER_SEM_DEBUG_SILENT   /* Define to dump only suspicious conditions */
 
 /****************************************************************************
  * Private Data
@@ -112,8 +113,14 @@ static void vnc_sem_debug(FAR struct vnc_session_s *session,
                           FAR const char *msg, unsigned int unattached)
 {
   FAR struct vnc_fbupdate_s *update;
-  unsigned int nqueued;
-  unsigned int nfree;
+  int nqueued;
+  int nfree;
+  int freesem;
+  int queuesem;
+  int freecount;
+  int queuecount;
+  int freewaiting;
+  int queuewaiting;
 
   while (sem_wait(&g_dbgsem) < 0)
     {
@@ -122,19 +129,40 @@ static void vnc_sem_debug(FAR struct vnc_session_s *session,
 
   /* Count structures in the list */
 
-  for (nqueued = 0, update = (FAR struct vnc_fbupdate_s *)session->updqueue.head;
-       update != NULL;
-       nqueued++, update = update->flink);
+  nqueued      = sq_count(&session->updqueue);
+  nfree        = sq_count(&session->updfree);
 
-  for (nfree = 0, update = (FAR struct vnc_fbupdate_s *)session->updfree.head;
-       update != NULL;
-       nfree++, update = update->flink);
+  freesem      = session->freesem.semcount;
+  queuesem     = session->queuesem.semcount;
 
-  syslog(LOG_INFO, "FREESEM DEBUG: %s\n", msg);
-  syslog(LOG_INFO, "  freesem:    %d\n", session->freesem.semcount);
-  syslog(LOG_INFO, "  queued:     %u\n", nqueued);
-  syslog(LOG_INFO, "  free:       %u\n", nfree);
-  syslog(LOG_INFO, "  unattached: %u\n", unattached);
+  freecount    = freesem  > 0 ? freesem   : 0;
+  queuecount   = queuesem > 0 ? queuesem  : 0;
+
+  freewaiting  = freesem  < 0 ? -freesem  : 0;
+  queuewaiting = queuesem < 0 ? -queuesem : 0;
+
+#ifdef VNCSERVER_SEM_DEBUG_SILENT
+  /* This dumps most false alarms in the case where:
+   *
+   * - Updater was waiting on a semaphore (count is -1)
+   * - New update added to the queue (queue count is 1)
+   * - queuesem posted.  Wakes up Updater and the count is 0.
+   */
+
+  if ((nqueued + nfree) != (freecount + queuecount))
+#endif
+    {
+      syslog(LOG_INFO, "FREESEM DEBUG:    %s\n", msg);
+      syslog(LOG_INFO, "  Free list:\n");
+      syslog(LOG_INFO, "    semcount:     %d\n", freecount);
+      syslog(LOG_INFO, "    queued nodes: %u\n", nfree);
+      syslog(LOG_INFO, "    waiting:      %u\n", freewaiting);
+      syslog(LOG_INFO, "  Qeued Updates:\n");
+      syslog(LOG_INFO, "    semcount:     %d\n", queuecount);
+      syslog(LOG_INFO, "    queued nodes: %u\n", nqueued);
+      syslog(LOG_INFO, "    waiting:      %u\n", queuewaiting);
+      syslog(LOG_INFO, "  Unqueued:       %u\n", unattached);
+    }
 
   sem_post(&g_dbgsem);
 }
@@ -262,6 +290,8 @@ vnc_remove_queue(FAR struct vnc_session_s *session)
   /* It is reserved.. go get it */
 
   rect = (FAR struct vnc_fbupdate_s *)sq_remfirst(&session->updqueue);
+
+  vnc_sem_debug(session, "After remove", 0);
   DEBUGASSERT(rect != NULL);
 
   /* Check if we just removed the whole screen update from the queue */
@@ -272,7 +302,6 @@ vnc_remove_queue(FAR struct vnc_session_s *session)
       updvdbg("Whole screen update: nwhupd=%d\n", session->nwhupd);
     }
 
-  vnc_sem_debug(session, "After remove", 0);
   sched_unlock();
   return rect;
 }
