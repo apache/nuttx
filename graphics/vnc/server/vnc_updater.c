@@ -490,6 +490,7 @@ int vnc_stop_updater(FAR struct vnc_session_s *session)
  * Input Parameters:
  *   session - An instance of the session structure.
  *   rect    - The rectanglular region to be updated.
+ *   change  - True: Frame buffer data has changed
  *
  * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is returned on
@@ -498,7 +499,7 @@ int vnc_stop_updater(FAR struct vnc_session_s *session)
  ****************************************************************************/
 
 int vnc_update_rectangle(FAR struct vnc_session_s *session,
-                         FAR const struct nxgl_rect_s *rect)
+                         FAR const struct nxgl_rect_s *rect, bool change)
 {
   FAR struct vnc_fbupdate_s *update;
   struct nxgl_rect_s intersection;
@@ -506,7 +507,7 @@ int vnc_update_rectangle(FAR struct vnc_session_s *session,
 
   /* Clip rectangle to the screen dimensions */
 
- nxgl_rectintersect(&intersection, rect, &g_wholescreen);
+  nxgl_rectintersect(&intersection, rect, &g_wholescreen);
 
   /* Make sure that the clipped rectangle has a area */
 
@@ -519,19 +520,33 @@ int vnc_update_rectangle(FAR struct vnc_session_s *session,
       whupd = (memcmp(&intersection, &g_wholescreen,
                       sizeof(struct nxgl_rect_s)) == 0);
 
-      /* Ignore all updates if there is a queue whole screen update */
+      /* Ignore any client update requests if there have been no changes to
+       * the framebuffer since the last whole screen update.
+       */
 
       sched_lock();
+      if (!change && !session->change)
+        {
+          /* No.. ignore the client update.  We have nothing new to report. */
+
+          sched_unlock();
+          return OK;
+        }
+
+      /* Ignore all updates if there is a queued whole screen update */
+
       if (session->nwhupd == 0)
         {
-          /* Is this a new whole screen update */
+          /* No whole screen updates in the queue.  Is this a new whole
+           * screen update?
+           */
 
           if (whupd)
             {
+              /* Yes.. Discard all of the previously queued updates */
+
               FAR struct vnc_fbupdate_s *curr;
               FAR struct vnc_fbupdate_s *next;
-
-              /* Yes.. discard all of the previously queued updates */
 
               updvdbg("New whole screen update...\n");
 
@@ -545,7 +560,20 @@ int vnc_update_rectangle(FAR struct vnc_session_s *session,
                   vnc_free_update(session, curr);
                 }
 
+              /* One whole screen update will be queued.  There have been
+               * no frame buffer data changes since this update was queued.
+               */
+
               session->nwhupd = 1;
+              session->change = false;
+            }
+          else
+            {
+              /* We are not updating the whole screen.  Remember if this
+               * update (OR a preceding update) was due to a data change.
+               */
+
+              session->change |= change;
             }
 
           /* Allocate an update structure... waiting if necessary */

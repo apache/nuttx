@@ -176,6 +176,10 @@ int vnc_receiver(FAR struct vnc_session_s *session)
           return -errcode;
         }
 
+      /* REVISIT: This assertion sometimes fires when there is a client
+       * disconnection.
+       */
+
       DEBUGASSERT(nrecvd == 1);
 
       /* The single byte received should be the message type.  Handle the
@@ -218,7 +222,7 @@ int vnc_receiver(FAR struct vnc_session_s *session)
           case RFB_SETENCODINGS_MSG:   /* SetEncodings */
             {
               FAR struct rfb_setencodings_s *encodings;
-              uint32_t nencodings;
+              unsigned int nencodings;
 
               gvdbg("Received SetEncodings\n");
 
@@ -239,7 +243,7 @@ int vnc_receiver(FAR struct vnc_session_s *session)
                   /* Read the following encodings */
 
                   encodings  = (FAR struct rfb_setencodings_s *)session->inbuf;
-                  nencodings = rfb_getbe32(encodings->nencodings);
+                  nencodings = rfb_getbe16(encodings->nencodings);
 
                   ret = vnc_read_remainder(session,
                                            nencodings * sizeof(uint32_t),
@@ -291,7 +295,7 @@ int vnc_receiver(FAR struct vnc_session_s *session)
                   rect.pt2.x = rect.pt1.x + rfb_getbe16(update->width);
                   rect.pt2.y = rect.pt1.y + rfb_getbe16(update->height);
 
-                  ret = vnc_update_rectangle(session, &rect);
+                  ret = vnc_update_rectangle(session, &rect, false);
                   if (ret < 0)
                     {
                       gdbg("ERROR: Failed to queue update: %d\n", ret);
@@ -463,7 +467,7 @@ int vnc_client_encodings(FAR struct vnc_session_s *session,
 
   /* Loop for each client supported encoding */
 
-  nencodings = rfb_getbe32(encodings->nencodings);
+  nencodings = rfb_getbe16(encodings->nencodings);
   for (i = 0; i < nencodings; i++)
     {
       /* Get the next encoding */
@@ -475,10 +479,10 @@ int vnc_client_encodings(FAR struct vnc_session_s *session,
       if (encoding == RFB_ENCODING_RRE)
         {
           session->rre = true;
-          return OK;
         }
     }
 
+  session->change = true;
   return OK;
 }
 

@@ -877,7 +877,7 @@ void nx_notify_rectangle(FAR NX_PLANEINFOTYPE *pinfo,
     {
       /* Queue the rectangular update */
 
-      ret = vnc_update_rectangle(session, rect);
+      ret = vnc_update_rectangle(session, rect, true);
       if (ret < 0)
         {
           gdbg("ERROR: vnc_update_rectangle failed: %d\n", ret);

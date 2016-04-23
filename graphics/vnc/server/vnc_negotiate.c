@@ -521,5 +521,6 @@ int vnc_client_pixelformat(FAR struct vnc_session_s *session,
       return -ENOSYS;
     }
 
+  session->change = true;
   return OK;
 }
