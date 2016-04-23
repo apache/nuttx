@@ -121,7 +121,7 @@
 #define DMA_NSAMPLES     5
 
 #ifdef CONFIG_STM32L4_QSPI_DMA
-# error QSPI DMA support not yet implemented
+#  error QSPI DMA support not yet implemented
 #endif
 
 /* QSPI dma is not yet implemented */
@@ -136,16 +136,22 @@
 
 #if (!defined(GPIO_QSPI_CS) || !defined(GPIO_QSPI_IO0) || !defined(GPIO_QSPI_IO1) || \
     !defined(GPIO_QSPI_IO2) || !defined(GPIO_QSPI_IO3) || !defined(GPIO_QSPI_SCK))
-# error you must define QSPI pinmapping options for GPIO_QSPI_CS GPIO_QSPI_IO0 \
+#  error you must define QSPI pinmapping options for GPIO_QSPI_CS GPIO_QSPI_IO0 \
     GPIO_QSPI_IO1 GPIO_QSPI_IO2 GPIO_QSPI_IO3 GPIO_QSPI_SCK in your board.h
 #endif
 
+#ifdef CONFIG_STM32L4_QSPI_DMA
+#  if !defined(DMACHAN_QUADSPI)
+#    error QSPI DMA channel must be specified via DMACHAN_QUADSPI in your board.h
+#  endif
+#endif
+
 #ifndef BOARD_AHB_FREQUENCY
-# error your board.h needs to define the value of BOARD_AHB_FREQUENCY
+#  error your board.h needs to define the value of BOARD_AHB_FREQUENCY
 #endif
 
 #if !defined(CONFIG_STM32L4_QSPI_FLASH_SIZE) || 0 == CONFIG_STM32L4_QSPI_FLASH_SIZE
-# error you must specify a positive flash size via CONFIG_STM32L4_QSPI_FLASH_SIZE
+#  error you must specify a positive flash size via CONFIG_STM32L4_QSPI_FLASH_SIZE
 #endif
 
 /* Clocking *****************************************************************/
@@ -176,6 +182,7 @@ struct stm32l4_qspidev_s
   uint8_t intf;                 /* QSPI controller number (0) */
   bool initialized;             /* TRUE: Controller has been initialized */
   sem_t exclsem;                /* Assures mutually exclusive access to QSPI */
+  bool memmap;                  /* TRUE: Controller is in memory mapped mode */
 
 #ifdef QSPI_USE_INTERRUPTS
   xcpt_t handler;               /* Interrupt handler */
@@ -1101,7 +1108,11 @@ static int qspi0_interrupt(int irq, void *context)
       regval &= ~(QSPI_CR_TEIE | QSPI_CR_TCIE | QSPI_CR_FTIE | QSPI_CR_SMIE | QSPI_CR_TOIE);
       qspi_putreg(&g_qspi0dev, regval, STM32L4_QUADSPI_CR_OFFSET);
 
-      /* Set error status */
+      /* Set error status; 'transfer error' means that, in 'indirect mode',
+       * an invalid address is attempted to be accessed.  'Invalid' is
+       * presumably relative to the FSIZE field in CCR; the manual is not
+       * explicit, but what else could it be?
+       */
       
       g_qspi0dev.xctn->disposition = - EIO;
 
@@ -1110,7 +1121,7 @@ static int qspi0_interrupt(int irq, void *context)
       sem_post(&g_qspi0dev.op_sem);
     }
 
-  /* Is it 'Timeout'? (: */
+  /* Is it 'Timeout'? */
   
   if ((status & QSPI_SR_TOF) && (cr & QSPI_CR_TOIE))
     {
@@ -1118,13 +1129,17 @@ static int qspi0_interrupt(int irq, void *context)
       
       qspi_putreg(&g_qspi0dev, QSPI_FCR_CTOF, STM32L4_QUADSPI_FCR);
       
-      /* Set error status */
-      
-      g_qspi0dev.xctn->disposition = - ETIMEDOUT;
-      
-      /* Signal complete */
-      
-      sem_post(&g_qspi0dev.op_sem);
+      /* XXX this interrupt simply means that, in 'memory mapped mode',
+       * the QSPI memory has not been accessed for a while, and the
+       * IP block was configured to automatically de-assert CS after
+       * a timeout.  And now we're being informed that has happened.
+       *
+       * But who cares?  If someone does, perhaps a user callback is
+       * appropriate, or some signal?  Either way, realize the xctn
+       * member is /not/ valid, so you can't set the disposition
+       * field.  Also, note signaling completion has no meaning here
+       * because in memory mapped mode no one holds the semaphore.
+       */
     }
 
   return OK;
@@ -1340,6 +1355,15 @@ static uint32_t qspi_setfrequency(struct qspi_dev_s *dev, uint32_t frequency)
   uint32_t prescaler;
   uint32_t regval;
 
+  if (priv->memmap)
+    {
+      /* XXX we have no better return here, but the caller will find out
+       * in their subsequent calls.
+       */
+
+      return 0;
+    }
+
   qspivdbg("frequency=%d\n", frequency);
   DEBUGASSERT(priv);
 
@@ -1424,6 +1448,14 @@ static void qspi_setmode(struct qspi_dev_s *dev, enum qspi_mode_e mode)
   struct stm32l4_qspidev_s *priv = (struct stm32l4_qspidev_s *)dev;
   uint32_t regval;
 
+  if (priv->memmap)
+  {
+    /* XXX we have no better return here, but the caller will find out
+     * in their subsequent calls.
+     */
+    return;
+  }
+  
   qspivdbg("mode=%d\n", mode);
 
   /* Has the mode changed? */
@@ -1518,6 +1550,16 @@ static int qspi_command(struct qspi_dev_s *dev,
   struct qspi_xctnspec_s xctn;
   int ret;
 
+  /* Reject commands issued while in memory mapped mode, which will
+   * automatically cancel the memory mapping.  You must exit the
+   * memory mapped mode first.
+   */
+   
+  if (priv->memmap)
+    {
+      return -EBUSY;
+    }
+  
   /* Set up the transaction descriptor as per command info */
 
   ret = qspi_setupxctnfromcmd(&xctn, cmdinfo);
@@ -1689,6 +1731,16 @@ static int qspi_memory(struct qspi_dev_s *dev,
   struct qspi_xctnspec_s xctn;
   int ret;
 
+  /* Reject commands issued while in memory mapped mode, which will
+   * automatically cancel the memory mapping.  You must exit the
+   * memory mapped mode first.
+   */
+   
+  if (priv->memmap)
+    {
+      return -EBUSY;
+    }
+  
   /* Set up the transaction descriptor as per command info */
 
   ret = qspi_setupxctnfrommem(&xctn, meminfo);
@@ -2080,6 +2132,7 @@ struct qspi_dev_s *stm32l4_qspi_initialize(int intf)
       /* Enable interrupts at the NVIC */
 
       priv->initialized = true;
+      priv->memmap = false;
 #ifdef QSPI_USE_INTERRUPTS
       up_enable_irq(priv->irq);
 #endif
@@ -2100,4 +2153,122 @@ errout_with_dmadog:
   sem_destroy(&priv->exclsem);
   return NULL;
 }
+
+/****************************************************************************
+ * Name: stm32l4_qspi_enter_memorymapped
+ *
+ * Description:
+ *   Put the QSPI device into memory mapped mode
+ *
+ * Input Parameter:
+ *   dev - QSPI device
+ *   meminfo - parameters like for a memory transfer used for reading
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void stm32l4_qspi_enter_memorymapped(struct qspi_dev_s* dev,
+                                     const struct qspi_meminfo_s *meminfo,
+                                     uint32_t lpto)
+{
+  struct stm32l4_qspidev_s *priv = (struct stm32l4_qspidev_s *)dev;
+  uint32_t regval;
+  struct qspi_xctnspec_s xctn;
+
+  /* lock during this mode change */
+  
+  qspi_lock(dev, true);
+  
+  if (priv->memmap)
+    {
+      qspi_lock(dev, false);
+      return;
+    }
+  
+  /* Abort anything in-progress */
+  
+  qspi_abort(priv);
+
+  /* Wait till BUSY flag reset */
+
+  qspi_waitstatusflags(priv, QSPI_SR_BUSY, 0);
+
+  /* if we want the 'low-power timeout counter' */
+  
+  if (lpto > 0)
+    {
+      /* Set the Low Power Timeout value (automatically de-assert
+       * CS if memory is not accessed for a while)
+       */
+      
+      qspi_putreg(priv, lpto, STM32L4_QUADSPI_LPTR_OFFSET);
+      
+      /* Clear Timeout interrupt */
+      
+      qspi_putreg(&g_qspi0dev, QSPI_FCR_CTOF, STM32L4_QUADSPI_FCR);
+      
+#ifdef QSPI_USE_INTERRUPTS
+      /* Enable Timeout interrupt */
+      
+      regval  = qspi_getreg(priv, STM32L4_QUADSPI_CR_OFFSET);
+      regval |= (QSPI_CR_TCEN | QSPI_CR_TOIE);
+      qspi_putreg(priv, regval, STM32L4_QUADSPI_CR_OFFSET);
+#endif
+    }
+  else
+    {
+      regval  = qspi_getreg(priv, STM32L4_QUADSPI_CR_OFFSET);
+      regval &= ~QSPI_CR_TCEN;
+      qspi_putreg(priv, regval, STM32L4_QUADSPI_CR_OFFSET);
+    }
+
+  /* create a transaction object */
+  
+  qspi_setupxctnfrommem(&xctn, meminfo);
+  priv->xctn = NULL;
+
+  /* set it into the ccr */
+  
+  qspi_ccrconfig(priv, &xctn, CCR_FMODE_MEMMAP);
+  priv->memmap = true;
+  
+  /* we should be in memory mapped mode now */
+  
+  qspi_dumpregs(priv, "After memory mapped:");
+
+  /* finished this mode change */
+  
+  qspi_lock(dev, false);
+}
+
+/****************************************************************************
+ * Name: stm32l4_qspi_exit_memorymapped
+ *
+ * Description:
+ *   Take the QSPI device out of memory mapped mode
+ *
+ * Input Parameter:
+ *   dev - QSPI device
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void stm32l4_qspi_exit_memorymapped(struct qspi_dev_s* dev)
+{
+  struct stm32l4_qspidev_s *priv = (struct stm32l4_qspidev_s *)dev;
+  
+  qspi_lock(dev, true);
+  
+  /* A simple abort is sufficient */
+  
+  qspi_abort(priv);
+  priv->memmap = false;
+  
+  qspi_lock(dev, false);
+}
+
 #endif /* CONFIG_STM32L4_QSPI */
