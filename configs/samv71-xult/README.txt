@@ -2499,6 +2499,15 @@ Configuration sub-directories
          the vnc configuration.  That probably all applies here as well.
 
          Only some initial testing has been performed: The configuration
-         does not work.  No crashes or errors are reported, but the VNC
-         client window stays black.  I have not yet dug into this.
+         does not work.  The NuttX VNC server is crashing because of this
+         assertion:
+
+           while (sem_wait(&session->queuesem) < 0)
+           ...
+           rect = (FAR struct vnc_fbupdate_s *)sq_remfirst(&session->updqueue);
+           DEBUGASSERT(rect != NULL);
+
+        I would think that could mean only that the semaphore counting is
+        out of sync with the number of updates in the queue.
+
  
