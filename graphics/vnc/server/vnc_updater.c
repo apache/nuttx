@@ -47,6 +47,15 @@
 #include <assert.h>
 #include <errno.h>
 
+#if defined(CONFIG_VNCSERVER_DEBUG) && !defined(CONFIG_DEBUG_GRAPHICS)
+#  undef  CONFIG_DEBUG
+#  undef  CONFIG_DEBUG_VERBOSE
+#  define CONFIG_DEBUG          1
+#  define CONFIG_DEBUG_VERBOSE  1
+#  define CONFIG_DEBUG_GRAPHICS 1
+#endif
+#include <debug.h>
+
 #include <nuttx/semaphore.h>
 
 #include "vnc_server.h"
