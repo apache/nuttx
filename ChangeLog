@@ -11671,5 +11671,7 @@
 	* arch/arm/src/stm32 and configs/stm32f429i-disco:  Correct some bad
 	  commits that broke the LTDC display example.  From Marco Krahl
           (2016-04-22).
-
+	* configs/samv71-xult/vnwwm:  Add a more complex NxWM configuration
+	  to support further VNC testing (particularly of VNC keyboard and
+          mouse intputs).  Initial configuration is not functional (2016-04-23).
 

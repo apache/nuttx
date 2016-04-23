@@ -2206,25 +2206,25 @@ Configuration sub-directories
 
        The NxWM window manager can be found here:
 
-         nuttx-git/NxWidgets/nxwm
+         NxWidgets/nxwm
 
        The NxWM unit test can be found at:
 
-         nuttx-git/NxWidgets/UnitTests/nxwm
+         NxWidgets/UnitTests/nxwm
 
        Documentation for installing the NxWM unit test can be found here:
 
-         nuttx-git/NxWidgets/UnitTests/README.txt
+         NxWidgets/UnitTests/README.txt
 
     2. Here is the quick summary of the build steps.  These steps assume
-       that you have the entire NuttX GIT in some directory ~/nuttx-git.
-       You may have these components installed elsewhere.  In that case, you
+       that you have the entire NuttX GIT in some directory HOME. You may
+       have these components installed elsewhere.  In that case, you
        will need to adjust all of the paths in the following accordingly:
 
-       a. Install the nxwm configuration
+       a. Install the VNC nxwm configuration
 
-          $ cd ~/nuttx-git/nuttx/tools
-          $ ./configure.sh samv71-xult/nxwm
+          $ cd HOME/nuttx/tools
+          $ ./configure.sh samv71-xult/vnc
 
        b. Make the build context (only)
 
@@ -2241,27 +2241,27 @@ Configuration sub-directories
 
        c. Install the nxwm unit test
 
-          $ cd ~/nuttx-git/NxWidgets
-          $ tools/install.sh ~/nuttx-git/apps nxwm
+          $ cd HOME/NxWidgets
+          $ tools/install.sh HOME/apps nxwm
           Creating symbolic link
-           - To ~/nuttx-git/NxWidgets/UnitTests/nxwm
-           - At ~/nuttx-git/apps/external
+           - To HOME/NxWidgets/UnitTests/nxwm
+           - At HOME/apps/external
 
        d. Build the NxWidgets library
 
-          $ cd ~/nuttx-git/NxWidgets/libnxwidgets
-          $ make TOPDIR=~/nuttx-git/nuttx
+          $ cd HOME/NxWidgets/libnxwidgets
+          $ make TOPDIR=HOME/nuttx
           ...
 
        e. Build the NxWM library
 
-          $ cd ~/nuttx-git/NxWidgets/nxwm
-          $ make TOPDIR=~/nuttx-git/nuttx
+          $ cd HOME/NxWidgets/nxwm
+          $ make TOPDIR=HOME/nuttx
           ...
 
        f. Built NuttX with the installed unit test as the application
 
-          $ cd ~/nuttx-git/nuttx
+          $ cd HOME/nuttx
           $ make
 
     3. Reading from the LCD is not currently functional.  The following
@@ -2381,3 +2381,132 @@ Configuration sub-directories
         quality in the remote display (since it is also 8 BPP).  At 8
         BPP, the remote display is correct even with both GRAPHICS and
         UPDATER debug OFF -- and there is no hang!
+
+     2106-04-23:  The NxImage example at apps/examplex/nximage.  This was
+        selected because it is a very simple graphics test.  Continued
+        testing, however, requires a more complex configuration.  Hence,
+        the vnxwm configuration was created.
+
+  vnxwm:
+
+    This is a special configuration setup for the NxWM window manager
+    UnitTest.  It provides an interactive windowing experience via a remote
+    VNC client window running on your PC.  The SAMV71-XULT is connected to
+    the PC via Ethernet.
+
+    NOTES:
+
+    1. The NxWM window manager is a tiny window manager tailored for use
+       with smaller LCDs.  It supports a task, a start window, and
+       multiple application windows with toolbars.  However, to make the
+       best use of the visible LCD space, only one application window is
+       visible at at time.
+
+       The NxWM window manager can be found here:
+
+         NxWidgets/nxwm
+
+       The NxWM unit test can be found at:
+
+         NxWidgets/UnitTests/nxwm
+
+       Documentation for installing the NxWM unit test can be found here:
+
+         NxWidgets/UnitTests/README.txt
+
+    2. Here is the quick summary of the build steps.  These steps assume
+       that you have the entire NuttX GIT in some directory HOME. You may
+       have these components installed elsewhere.  In that case, you
+       will need to adjust all of the paths in the following accordingly:
+
+       a. Install the nxwm configuration
+
+          $ cd HOME/nuttx/tools
+          $ ./configure.sh samv71-xult/nxwm
+
+       b. Make the build context (only)
+
+          $ cd ..
+          $ . ./setenv.sh
+          $ make context
+          ...
+
+          NOTE: the use of the setenv.sh file is optional.  All that it will
+          do is to adjust your PATH variable so that the build system can find
+          your tools.  If you use it, you will most likely need to modify the
+          script so that it has the correct path to your tool binaries
+          directory.
+
+       c. Install the nxwm unit test
+
+          $ cd HOME/NxWidgets
+          $ tools/install.sh HOME/apps nxwm
+          Creating symbolic link
+           - To HOME/NxWidgets/UnitTests/nxwm
+           - At HOME/apps/external
+
+       d. Build the NxWidgets library
+
+          $ cd HOME/NxWidgets/libnxwidgets
+          $ make TOPDIR=HOME/nuttx
+          ...
+
+       e. Build the NxWM library
+
+          $ cd HOME/NxWidgets/nxwm
+          $ make TOPDIR=HOME/nuttx
+          ...
+
+       f. Built NuttX with the installed unit test as the application
+
+          $ cd HOME/nuttx
+          $ make
+
+    3. Network configuration:  IP address 10.0.0.2.  The is easily changed
+       via 'make menuconfig'.  The VNC server address is 10.0.0.2:5900.
+
+    4. The default (local) framebuffer configuration is 320x240 with 8-bit
+       RGB color.
+
+       I had some problems at 16-bits per pixle (see STATUS below).  To
+       select 16-bits per pixel RGB15 5:6:5
+
+         CONFIG_NX_DISABLE_8BPP=y
+         # CONFIG_NX_DISABLE_16BPP is not set
+
+         # CONFIG_VNCSERVER_COLORFMT_RGB8 is not set
+         CONFIG_VNCSERVER_COLORFMT_RGB16=y
+
+         CONFIG_EXAMPLES_NXIMAGE_BPP=16
+
+       To re-select 8-bits per pixel RGB8 3:3:2
+
+         # CONFIG_NX_DISABLE_8BPP is not set
+         CONFIG_NX_DISABLE_16BPP=y
+
+         CONFIG_VNCSERVER_COLORFMT_RGB8=y
+         # CONFIG_VNCSERVER_COLORFMT_RGB16 is not set
+
+         # CONFIG_EXAMPLES_NXIMAGE_GREYSCALE is not set
+         CONFIG_EXAMPLES_NXIMAGE_BPP=8
+
+    5. There are complicated interactions between VNC and the network
+       configuration.  The CONFIG_VNCSERVER_UPDATE_BUFSIZE determines the
+       size of update messages.  That is 1024 bytes in that configuration
+       (the full message with the header will be a little larger).  The
+       MTU (CONFIG_NET_ETH_MTU) is set to 590 so that a full update will
+       require several packets.
+
+       Write buffering also effects network performance.  This will break
+       up the large updates into small (196 byte) groups.  When we run out
+       of read-ahead buffers, then partial updates may be sent causing a
+       loss of synchronization.
+
+    STATUS:
+       2106-04-23:  Configuration created.  See status up to this data in
+         the vnc configuration.  That probably all applies here as well.
+
+         Only some initial testing has been performed: The configuration
+         does not work.  No crashes or errors are reported, but the VNC
+         client window stays black.  I have not yet dug into this.
+ 
