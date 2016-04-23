@@ -371,7 +371,7 @@ struct rfb_setencodings_s
 {
   uint8_t msgtype;               /* U8  Message type */
   uint8_t padding;
-  uint8_t nencodings[2];         /* U32 Number of encodings */
+  uint8_t nencodings[2];         /* U16 Number of encodings */
   uint8_t encodings[4];          /* S32 Encoding type, size = 4*nencodings */
 };
 

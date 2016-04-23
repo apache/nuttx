@@ -129,9 +129,11 @@ static void vnc_reset_session(FAR struct vnc_session_s *session,
 
   sem_reset(&session->freesem, CONFIG_VNCSERVER_NUPDATES);
   sem_reset(&session->queuesem, 0);
+
   session->fb      = fb;
   session->display = display;
   session->state   = VNCSERVER_INITIALIZED;
+  session->change  = true;
 }
 
 /****************************************************************************
@@ -344,6 +346,7 @@ int vnc_server(int argc, FAR char *argv[])
 
           ret = vnc_receiver(session);
           gvdbg("Session terminated with %d\n", ret);
+          UNUSED(ret);
 
           /* Stop the VNC updater thread. */
 

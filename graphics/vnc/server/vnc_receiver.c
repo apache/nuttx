@@ -176,9 +176,15 @@ int vnc_receiver(FAR struct vnc_session_s *session)
           return -errcode;
         }
 
-      /* REVISIT: This assertion sometimes fires when there is a client
-       * disconnection.
+      /* A return value of zero means that the connection was gracefully
+       * closed by the VNC client.
        */
+
+      else if (nrecvd == 0)
+        {
+          gdbg("Connection closed\n", errcode);
+          return OK;
+        }
 
       DEBUGASSERT(nrecvd == 1);
 
