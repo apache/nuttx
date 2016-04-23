@@ -133,7 +133,12 @@ static void vnc_reset_session(FAR struct vnc_session_s *session,
   session->fb      = fb;
   session->display = display;
   session->state   = VNCSERVER_INITIALIZED;
+  session->nwhupd  = 0;
   session->change  = true;
+
+  /* Careful not to disturb the keyboard/mouse callouts set by
+   * vnc_fbinitialize().  Client related data left in garbage state.
+   */
 }
 
 /****************************************************************************
