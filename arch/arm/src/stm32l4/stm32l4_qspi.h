@@ -97,6 +97,42 @@ extern "C"
 struct qspi_dev_s;
 FAR struct qspi_dev_s *stm32l4_qspi_initialize(int intf);
 
+/****************************************************************************
+ * Name: stm32l4_qspi_enter_memorymapped
+ *
+ * Description:
+ *   Put the QSPI device into memory mapped mode
+ *
+ * Input Parameter:
+ *   dev - QSPI device
+ *   meminfo - parameters like for a memory transfer used for reading
+ *   lpto - number of cycles to wait to automatically de-assert CS
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void stm32l4_qspi_enter_memorymapped(struct qspi_dev_s* dev,
+                                     const struct qspi_meminfo_s *meminfo,
+                                     uint32_t lpto);
+
+/****************************************************************************
+ * Name: stm32l4_qspi_exit_memorymapped
+ *
+ * Description:
+ *   Take the QSPI device out of memory mapped mode
+ *
+ * Input Parameter:
+ *   dev - QSPI device
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void stm32l4_qspi_exit_memorymapped(struct qspi_dev_s* dev);
+
 #undef EXTERN
 #if defined(__cplusplus)
 }
