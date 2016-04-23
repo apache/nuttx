@@ -121,7 +121,7 @@
 #define DMA_NSAMPLES     5
 
 #ifdef CONFIG_STM32L4_QSPI_DMA
-# error QSPI DMA support not yet implemented
+#  error QSPI DMA support not yet implemented
 #endif
 
 /* QSPI dma is not yet implemented */
@@ -136,22 +136,22 @@
 
 #if (!defined(GPIO_QSPI_CS) || !defined(GPIO_QSPI_IO0) || !defined(GPIO_QSPI_IO1) || \
     !defined(GPIO_QSPI_IO2) || !defined(GPIO_QSPI_IO3) || !defined(GPIO_QSPI_SCK))
-# error you must define QSPI pinmapping options for GPIO_QSPI_CS GPIO_QSPI_IO0 \
+#  error you must define QSPI pinmapping options for GPIO_QSPI_CS GPIO_QSPI_IO0 \
     GPIO_QSPI_IO1 GPIO_QSPI_IO2 GPIO_QSPI_IO3 GPIO_QSPI_SCK in your board.h
 #endif
 
 #ifdef CONFIG_STM32L4_QSPI_DMA
-#if !defined(DMACHAN_QUADSPI)
-# error QSPI DMA channel must be specified via DMACHAN_QUADSPI in your board.h
-#endif
+#  if !defined(DMACHAN_QUADSPI)
+#    error QSPI DMA channel must be specified via DMACHAN_QUADSPI in your board.h
+#  endif
 #endif
 
 #ifndef BOARD_AHB_FREQUENCY
-# error your board.h needs to define the value of BOARD_AHB_FREQUENCY
+#  error your board.h needs to define the value of BOARD_AHB_FREQUENCY
 #endif
 
 #if !defined(CONFIG_STM32L4_QSPI_FLASH_SIZE) || 0 == CONFIG_STM32L4_QSPI_FLASH_SIZE
-# error you must specify a positive flash size via CONFIG_STM32L4_QSPI_FLASH_SIZE
+#  error you must specify a positive flash size via CONFIG_STM32L4_QSPI_FLASH_SIZE
 #endif
 
 /* Clocking *****************************************************************/
@@ -1355,13 +1355,14 @@ static uint32_t qspi_setfrequency(struct qspi_dev_s *dev, uint32_t frequency)
   uint32_t prescaler;
   uint32_t regval;
 
- if (priv->memmap)
-  {
-    /* XXX we have no better return here, but the caller will find out
-     * in their subsequent calls.
-     */
-    return 0;
-  }
+  if (priv->memmap)
+    {
+      /* XXX we have no better return here, but the caller will find out
+       * in their subsequent calls.
+       */
+
+      return 0;
+    }
 
   qspivdbg("frequency=%d\n", frequency);
   DEBUGASSERT(priv);
@@ -1555,9 +1556,9 @@ static int qspi_command(struct qspi_dev_s *dev,
    */
    
   if (priv->memmap)
-  {
-    return -EBUSY;
-  }
+    {
+      return -EBUSY;
+    }
   
   /* Set up the transaction descriptor as per command info */
 
@@ -1736,9 +1737,9 @@ static int qspi_memory(struct qspi_dev_s *dev,
    */
    
   if (priv->memmap)
-  {
-    return -EBUSY;
-  }
+    {
+      return -EBUSY;
+    }
   
   /* Set up the transaction descriptor as per command info */
 
@@ -2181,10 +2182,10 @@ void stm32l4_qspi_enter_memorymapped(struct qspi_dev_s* dev,
   qspi_lock(dev, true);
   
   if (priv->memmap)
-  {
-    qspi_lock(dev, false);
-    return;
-  }
+    {
+      qspi_lock(dev, false);
+      return;
+    }
   
   /* Abort anything in-progress */
   
