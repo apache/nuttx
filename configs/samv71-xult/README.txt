@@ -2364,28 +2364,20 @@ Configuration sub-directories
       2016-04-21:  I have gotten the apps/examples/nximage to work with
         lots issues with 16-bit RGB and verbose GRAPHICS and UPDATER debug
         ON.  There are reliability problems and it hangs at the end of the
-        test.  But if I turn UPDATE debug off (only), then the display
-        output is corrupted. I have also see hardfaults.
+        test.
 
-        Mostly likely, the UPDATER debug output slows the updates and
-        avoids some kind of race condition with the networking. Oddly,
-        it does not work at all if I turn off TCP write buffering.
-
-      2016-04-22:  I added a 100 MS delay at the beginning of the
-        updater loop and it made no difference.  This seems to eliminate
-        the suspected networking race condition.  I am thinking now
-        either some data overrun or VNC protocol/timing issue?
-
-        The default configuration now uses RGB8 which needs a lot less
-        SRAM for the local frame buffer and does not degrade the color
+      2016-04-22:  The default configuration now uses RGB8 which needs a lot
+        less SRAM for the local frame buffer and does not degrade the color
         quality in the remote display (since it is also 8 BPP).  At 8
         BPP, the remote display is correct even with both GRAPHICS and
         UPDATER debug OFF -- and there is no hang!
 
-     2106-04-23:  The NxImage example at apps/examplex/nximage.  This was
-        selected because it is a very simple graphics test.  Continued
-        testing, however, requires a more complex configuration.  Hence,
-        the vnxwm configuration was created.
+     2106-04-23:  The NxImage test was selected because it is a very simple
+        graphics test.  Continued testing, however, requires a more complex
+        configuration.  Hence, the vnxwm configuration was created.
+        
+        A memory clobber error was fixed and this probably corrects some of
+        the reliability problems noted on 2016-04-21.
 
   vnxwm:
 
