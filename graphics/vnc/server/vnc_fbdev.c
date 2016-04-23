@@ -489,7 +489,7 @@ static inline int vnc_wait_start(int display)
    */
 
  while (g_vnc_sessions[display] == NULL ||
-        g_vnc_sessions[display]->state != VNCSERVER_UNINITIALIZED)
+        g_vnc_sessions[display]->state == VNCSERVER_UNINITIALIZED)
     {
       /* The server is not yet running.  Wait for the server to post the FB
        * semaphore.  In certain error situations, the server may post the
