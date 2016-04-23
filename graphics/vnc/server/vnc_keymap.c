@@ -48,6 +48,8 @@
 #define XK_LATIN1     1
 #define XK_XKB_KEYS   1
 
+#include <nuttx/nx/nx.h>
+#include <nuttx/video/vnc.h>
 #include <nuttx/input/x11_keysymdef.h>
 #include <nuttx/input/kbd_codec.h>
 
@@ -481,9 +483,10 @@ void vnc_key_map(FAR struct vnc_session_s *session, uint16_t keysym,
 #ifdef CONFIG_VNCSERVER_KBDENCODE
   uint8_t buffer[4]
   int nch;
+#else
+  uint8_t buffer;
 #endif
   int16_t keych;
-  int ret;
 
   /* Check for modifier keys */
 
@@ -504,6 +507,14 @@ void vnc_key_map(FAR struct vnc_session_s *session, uint16_t keysym,
       return;
     }
 #endif
+
+  /* If no external keyboard input handler has been provided, then we have to drop the keyboard input.
+   */
+
+  if (session->kbdout == NULL)
+    {
+      return;
+    }
 
   /* Try to convert the keycode to an ASCII value */
 
@@ -580,19 +591,12 @@ void vnc_key_map(FAR struct vnc_session_s *session, uint16_t keysym,
 
       /* Inject the normal character sequence into NX */
 
-      ret = nx_kbdin(session->handle, nch, buffer);
-      if (ret < 0)
-        {
-          gdbg("ERROR: nx_kbdin() failed: %d\n", ret);
-        }
+      session->kbdout(session->arg, nch, buffer);
 #else
       /* Inject the single key press into NX */
 
-     ret = nx_kbdchin(session->handle,(uint8_t)keych);
-      if (ret < 0)
-        {
-          gdbg("ERROR: nx_kbdchin() failed: %d\n", ret);
-        }
+      buffer = (uint8_t)keych;
+      session->kbdout(session->arg, 1, &buffer);
 #endif
     }
 
@@ -619,14 +623,32 @@ void vnc_key_map(FAR struct vnc_session_s *session, uint16_t keysym,
 
           /* Inject the special character sequence into NX */
 
-          ret = nx_kbdin(session->handle, nch, buffer);
-          if (ret < 0)
-            {
-              gdbg("ERROR: nx_kbdin() failed: %d\n", ret)
-            }
+          session->kbdout(session->arg, nch, buffer);
         }
     }
 #endif
+}
+
+/****************************************************************************
+ * Function: vnc_kbdout
+ *
+ * Description:
+ *   This is the default keyboard callout function.  This is simply wrappers around nx_kdbout(), respectively.  When configured using vnc_fbinitialize(), the 'arg' must be the correct NXHANDLE value.
+ *
+ * Parameters:
+ *   arg - The NXHANDLE from the NX graphics subsystem
+ *   nch - Number of characters
+ *   ch  - An array of input characters.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void vnc_kbdout(FAR void *arg, uint8_t nch, FAR const uint8_t *ch)
+{
+  DEBUGASSERT(arg != NULL);
+  (void)nx_kbdin((NXHANDLE)arg, nch, ch);
 }
 
 #endif /* CONFIG_NX_KBD */

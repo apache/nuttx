@@ -11376,7 +11376,7 @@
 	  I2C_READ and I2C_WRITE which are not thread safe (2016-01-26).
 	* SPI: Rename the STM32 up_spiinitialize() to stm32_spibus_initialize()
 	  (2016-01-26).
-	* SPI: Rename the SAM up_spiinitialize() to stm32_spibus_initialize()
+	* SPI: Rename the SAM up_spiinitialize() to sam_spibus_initialize()
 	  (2016-01-26).
 	* SPI: Rename the Tiva up_spiinitialize() to tiva_spibus_intialize()
 	  (2016-01-26).
@@ -11665,4 +11665,13 @@
 	  complete, but untested and so not ready for primetime (2016-04-18).
 	* configs/samv71-xult/vnc:  Add a configuration that will be used to
 	  verify VNC (also untested) (2016-04-18).
+	* drivers/ioexpander: Fix an error in the PCA9555 driver: Under certain
+	  error conditions, interrupts were not being re-enabled.  Sebastien
+	  Lorquet (2016-04-20).
+	* arch/arm/src/stm32 and configs/stm32f429i-disco:  Correct some bad
+	  commits that broke the LTDC display example.  From Marco Krahl
+          (2016-04-22).
+	* configs/samv71-xult/vnwwm:  Add a more complex NxWM configuration
+	  to support further VNC testing (particularly of VNC keyboard and
+          mouse intputs).  Initial configuration is not functional (2016-04-23).
 

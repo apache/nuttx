@@ -41,6 +41,14 @@
 
 #include <assert.h>
 #include <errno.h>
+
+#if defined(CONFIG_VNCSERVER_DEBUG) && !defined(CONFIG_DEBUG_GRAPHICS)
+#  undef  CONFIG_DEBUG
+#  undef  CONFIG_DEBUG_VERBOSE
+#  define CONFIG_DEBUG          1
+#  define CONFIG_DEBUG_VERBOSE  1
+#  define CONFIG_DEBUG_GRAPHICS 1
+#endif
 #include <debug.h>
 
 #ifdef CONFIG_NET_SOCKOPTS
@@ -49,6 +57,9 @@
 
 #include <nuttx/net/net.h>
 #include <nuttx/video/rfb.h>
+#include <nuttx/video/vnc.h>
+#include <nuttx/nx/nx.h>
+#include <nuttx/nx/nxglib.h>
 
 #include "vnc_server.h"
 
@@ -165,6 +176,16 @@ int vnc_receiver(FAR struct vnc_session_s *session)
           return -errcode;
         }
 
+      /* A return value of zero means that the connection was gracefully
+       * closed by the VNC client.
+       */
+
+      else if (nrecvd == 0)
+        {
+          gdbg("Connection closed\n", errcode);
+          return OK;
+        }
+
       DEBUGASSERT(nrecvd == 1);
 
       /* The single byte received should be the message type.  Handle the
@@ -207,7 +228,7 @@ int vnc_receiver(FAR struct vnc_session_s *session)
           case RFB_SETENCODINGS_MSG:   /* SetEncodings */
             {
               FAR struct rfb_setencodings_s *encodings;
-              uint32_t nencodings;
+              unsigned int nencodings;
 
               gvdbg("Received SetEncodings\n");
 
@@ -228,7 +249,7 @@ int vnc_receiver(FAR struct vnc_session_s *session)
                   /* Read the following encodings */
 
                   encodings  = (FAR struct rfb_setencodings_s *)session->inbuf;
-                  nencodings = rfb_getbe32(encodings->nencodings);
+                  nencodings = rfb_getbe16(encodings->nencodings);
 
                   ret = vnc_read_remainder(session,
                                            nencodings * sizeof(uint32_t),
@@ -280,7 +301,7 @@ int vnc_receiver(FAR struct vnc_session_s *session)
                   rect.pt2.x = rect.pt1.x + rfb_getbe16(update->width);
                   rect.pt2.y = rect.pt1.y + rfb_getbe16(update->height);
 
-                  ret = vnc_update_rectangle(session, &rect);
+                  ret = vnc_update_rectangle(session, &rect, false);
                   if (ret < 0)
                     {
                       gdbg("ERROR: Failed to queue update: %d\n", ret);
@@ -337,7 +358,7 @@ int vnc_receiver(FAR struct vnc_session_s *session)
 #ifdef CONFIG_NX_XYINPUT
               /* REVISIT:  How will be get the NX handle? */
 
-              else if (session->handle != NULL)
+              else if (session->mouseout != NULL)
                 {
                   event = (FAR struct rfb_pointerevent_s *)session->inbuf;
 
@@ -362,14 +383,10 @@ int vnc_receiver(FAR struct vnc_session_s *session)
                       buttons |= NX_MOUSE_RIGHTBUTTON;
                     }
 
-                  ret = nx_mousein(session->handle,
-                                   (nxgl_coord_t)rfb_getbe16(event->xpos),
-                                   (nxgl_coord_t)rfb_getbe16(event->ypos),
-                                   buttons);
-                  if (ret < 0)
-                    {
-                      gdbg("ERROR: nx_mousein failed: %d\n", ret);
-                    }
+                  session->mouseout(session->arg,
+                                    (nxgl_coord_t)rfb_getbe16(event->xpos),
+                                    (nxgl_coord_t)rfb_getbe16(event->ypos),
+                                    buttons);
                 }
 #endif
             }
@@ -456,7 +473,7 @@ int vnc_client_encodings(FAR struct vnc_session_s *session,
 
   /* Loop for each client supported encoding */
 
-  nencodings = rfb_getbe32(encodings->nencodings);
+  nencodings = rfb_getbe16(encodings->nencodings);
   for (i = 0; i < nencodings; i++)
     {
       /* Get the next encoding */
@@ -468,9 +485,37 @@ int vnc_client_encodings(FAR struct vnc_session_s *session,
       if (encoding == RFB_ENCODING_RRE)
         {
           session->rre = true;
-          return OK;
         }
     }
 
+  session->change = true;
   return OK;
 }
+
+/****************************************************************************
+ * Function: vnc_mouse
+ *
+ * Description:
+ *   This is the default keyboard/mouse callout function.  This is simply a
+ *   wrapper around nx_mousein().  When
+ *   configured using vnc_fbinitialize(), the 'arg' must be the correct
+ *   NXHANDLE value.
+ *
+ * Parameters:
+ *   See vnc_mouseout_t and vnc_kbdout_t typde definitions above.  These
+ *   callouts have arguments that match the inputs to nx_kbdin() and
+ *   nx_mousein() (if arg is really of type NXHANDLE).
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NX_XYINPUT
+void vnc_mouseout(FAR void *arg, nxgl_coord_t x, nxgl_coord_t y,
+                  uint8_t buttons)
+{
+  DEBUGASSERT(arg != NULL);
+  (void)nx_mousein((NXHANDLE)arg, x, y, buttons);
+}
+#endif

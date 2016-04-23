@@ -43,11 +43,20 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+
+#if defined(CONFIG_VNCSERVER_DEBUG) && !defined(CONFIG_DEBUG_GRAPHICS)
+#  undef  CONFIG_DEBUG
+#  undef  CONFIG_DEBUG_VERBOSE
+#  define CONFIG_DEBUG          1
+#  define CONFIG_DEBUG_VERBOSE  1
+#  define CONFIG_DEBUG_GRAPHICS 1
+#endif
 #include <debug.h>
 
 #include <nuttx/kthread.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/video/fb.h>
+#include <nuttx/video/vnc.h>
 
 #include "vnc_server.h"
 
@@ -158,7 +167,9 @@ static int up_getvideoinfo(FAR struct fb_vtable_s *vtable,
   DEBUGASSERT(fbinfo != NULL && vinfo != NULL);
   if (fbinfo != NULL && vinfo != NULL)
     {
-      session = vnc_find_session(fbinfo->display);
+      DEBUGASSERT(fbinfo->display >= 0 && fbinfo->display < RFB_MAX_DISPLAYS);
+      session = g_vnc_sessions[fbinfo->display];
+
       if (session == NULL || session->state != VNCSERVER_RUNNING)
         {
           gdbg("ERROR: session is not connected\n");
@@ -197,7 +208,9 @@ static int up_getplaneinfo(FAR struct fb_vtable_s *vtable, int planeno,
   DEBUGASSERT(fbinfo != NULL && pinfo != NULL && planeno == 0);
   if (fbinfo != NULL && pinfo != NULL && planeno == 0)
     {
-      session = vnc_find_session(fbinfo->display);
+      DEBUGASSERT(fbinfo->display >= 0 && fbinfo->display < RFB_MAX_DISPLAYS);
+      session = g_vnc_sessions[fbinfo->display];
+
       if (session == NULL || session->state != VNCSERVER_RUNNING)
         {
           gdbg("ERROR: session is not connected\n");
@@ -242,7 +255,9 @@ static int up_getcmap(FAR struct fb_vtable_s *vtable,
 
   if (fbinfo != NULL && cmap != NULL)
     {
-      session = vnc_find_session(fbinfo->display);
+      DEBUGASSERT(fbinfo->display >= 0 && fbinfo->display < RFB_MAX_DISPLAYS);
+      session = g_vnc_sessions[fbinfo->display];
+
       if (session == NULL || session->state != VNCSERVER_RUNNING)
         {
           gdbg("ERROR: session is not connected\n");
@@ -277,7 +292,9 @@ static int up_putcmap(FAR struct fb_vtable_s *vtable, FAR const struct fb_cmap_s
 
   if (fbinfo != NULL && cmap != NULL)
     {
-      session = vnc_find_session(fbinfo->display);
+      DEBUGASSERT(fbinfo->display >= 0 && fbinfo->display < RFB_MAX_DISPLAYS);
+      session = g_vnc_sessions[fbinfo->display];
+
       if (session == NULL || session->state != VNCSERVER_RUNNING)
         {
           gdbg("ERROR: session is not connected\n");
@@ -313,7 +330,9 @@ static int up_getcursor(FAR struct fb_vtable_s *vtable,
 
   if (fbinfo != NULL && attrib != NULL)
     {
-      session = vnc_find_session(fbinfo->display);
+      DEBUGASSERT(fbinfo->display >= 0 && fbinfo->display < RFB_MAX_DISPLAYS);
+      session = g_vnc_sessions[fbinfo->display];
+
       if (session == NULL || session->state != VNCSERVER_RUNNING)
         {
           gdbg("ERROR: session is not connected\n");
@@ -347,7 +366,9 @@ static int up_setcursor(FAR struct fb_vtable_s *vtable,
 
   if (fbinfo != NULL && settings != NULL)
     {
-      session = vnc_find_session(fbinfo->display);
+      DEBUGASSERT(fbinfo->display >= 0 && fbinfo->display < RFB_MAX_DISPLAYS);
+      session = g_vnc_sessions[fbinfo->display];
+
       if (session == NULL || session->state != VNCSERVER_RUNNING)
         {
           gdbg("ERROR: session is not connected\n");
@@ -381,7 +402,121 @@ static int up_setcursor(FAR struct fb_vtable_s *vtable,
 #endif
 
 /****************************************************************************
- * Name: vnc_wait_server
+ * Name: vnc_start_server
+ *
+ * Description:
+ *   Start the VNC server.
+ *
+ * Input parameters:
+ *   display - In the case of hardware with multiple displays, this
+ *     specifies the display.  Normally this is zero.
+ *
+ * Returned Value:
+ *   Zero is returned on success; a negated errno value is returned on any
+ *   failure.
+ *
+ ****************************************************************************/
+
+static int vnc_start_server(int display)
+{
+  FAR char *argv[2];
+  char str[8];
+  pid_t pid;
+
+  DEBUGASSERT(display >= 0 && display < RFB_MAX_DISPLAYS);
+
+  /* Check if the server is already running */
+
+  if (g_vnc_sessions[display] != NULL)
+    {
+      DEBUGASSERT(g_vnc_sessions[display]->state >= VNCSERVER_INITIALIZED);
+      return OK;
+    }
+
+  /* Start the VNC server kernel thread. */
+
+  gvdbg("Starting the VNC server for display %d\n", display);
+
+  g_fbstartup[display].result = -EBUSY;
+  sem_reset(&g_fbstartup[display].fbinit, 0);
+  sem_reset(&g_fbstartup[display].fbconnect, 0);
+
+  /* Format the kernel thread arguments (ASCII.. yech) */
+
+  (void)itoa(display, str, 10);
+  argv[0] = str;
+  argv[1] = NULL;
+
+  pid = kernel_thread("vnc_server", CONFIG_VNCSERVER_PRIO,
+                       CONFIG_VNCSERVER_STACKSIZE,
+                       (main_t)vnc_server, argv);
+  if (pid < 0)
+    {
+      gdbg("ERROR: Failed to start the VNC server: %d\n", (int)pid);
+      return (int)pid;
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: vnc_wait_start
+ *
+ * Description:
+ *   Wait for the server to be started.
+ *
+ * Input parameters:
+ *   display - In the case of hardware with multiple displays, this
+ *     specifies the display.  Normally this is zero.
+ *
+ * Returned Value:
+ *   Zero is returned on success; a negated errno value is returned on any
+ *   failure.
+ *
+ ****************************************************************************/
+
+static inline int vnc_wait_start(int display)
+{
+  int errcode;
+
+  /* Check if there has been a session allocated yet.  This is one of the
+   * first things that the VNC server will do with the kernel thread is
+   * started.  But we might be here before the thread has gotten that far.
+   *
+   * If it has been allocated, then wait until it is in the INIITIALIZED
+   * state.  The INITIAILIZED states indicates tht the session structure
+   * has been allocated and fully initialized.
+   */
+
+ while (g_vnc_sessions[display] == NULL ||
+        g_vnc_sessions[display]->state != VNCSERVER_UNINITIALIZED)
+    {
+      /* The server is not yet running.  Wait for the server to post the FB
+       * semaphore.  In certain error situations, the server may post the
+       * semaphore, then reset it to zero.  There are are certainly race
+       * conditions here, but I think none that are fatal.
+       */
+
+      while (sem_wait(&g_fbstartup[display].fbinit) < 0)
+        {
+          errcode = get_errno();
+
+          /* sem_wait() should fail only if it is interrupt by a signal. */
+
+          DEBUGASSERT(errcode == EINTR);
+          if (errcode != EINTR)
+            {
+              DEBUGASSERT(errcode > 0);
+              return -errcode;
+            }
+        }
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: vnc_wait_connect
  *
  * Description:
  *   Wait for the server to be connected to the VNC client.  We can do
@@ -397,7 +532,7 @@ static int up_setcursor(FAR struct fb_vtable_s *vtable,
  *
  ****************************************************************************/
 
-static inline int vnc_wait_server(int display)
+static inline int vnc_wait_connect(int display)
 {
   int errcode;
   int result;
@@ -423,7 +558,7 @@ static inline int vnc_wait_server(int display)
        * conditions here, but I think none that are fatal.
        */
 
-      while (sem_wait(&g_fbstartup[display].fbsem) < 0)
+      while (sem_wait(&g_fbstartup[display].fbconnect) < 0)
         {
           errcode = get_errno();
 
@@ -486,48 +621,119 @@ static inline int vnc_wait_server(int display)
 
 int up_fbinitialize(int display)
 {
-  FAR char *argv[2];
-  char str[8];
-  pid_t pid;
+  int ret;
 
-  /* Start the VNC server kernel thread.
-   * REVISIT: There is no protection for the case where this function is
-   * called more that once.
-   */
-
-  gvdbg("Starting the VNC server for display %d\n", display);
   DEBUGASSERT(display >= 0 && display < RFB_MAX_DISPLAYS);
 
-  /* Check if the server is already running */
+  /* Start the VNC server kernel thread. */
 
-  g_fbstartup[display].result = -EBUSY;
-  sem_reset(&g_fbstartup[display].fbsem, 0);
-
-  if (g_vnc_sessions[display] != NULL)
+  ret = vnc_start_server(display);
+  if (ret < 0)
     {
-      DEBUGASSERT(g_vnc_sessions[display]->state >= VNCSERVER_INITIALIZED);
-    }
-  else
-    {
-      /* Format the kernel thread arguments (ASCII.. yech) */
-
-      (void)itoa(display, str, 10);
-      argv[0] = str;
-      argv[1] = NULL;
-
-      pid = kernel_thread("vnc_server", CONFIG_VNCSERVER_PRIO,
-                           CONFIG_VNCSERVER_STACKSIZE,
-                           (main_t)vnc_server, argv);
-      if (pid < 0)
-        {
-          gdbg("ERROR: Failed to start the VNC server: %d\n", (int)pid);
-          return (int)pid;
-        }
+      gvdbg("ERROR: vnc_start_server() failed: %d\n", ret);
+      return ret;
     }
 
   /* Wait for the VNC client to connect and for the RFB to be ready */
 
-  return vnc_wait_server(display);
+  ret = vnc_wait_connect(display);
+  if (ret < 0)
+    {
+      gvdbg("ERROR: vnc_wait_connect() failed: %d\n", ret);
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Function: vnc_fbinitialize
+ *
+ * Description:
+ *   Initialize the VNC frame buffer driver.  The VNC frame buffer driver
+ *   supports two initialization interfaces:  The standard up_fbinitialize()
+ *   that will be called from the graphics layer and this speical
+ *   initialization function that can be used only by VNC aware OS logic.
+ *
+ *   The two initialization functions may be called separated or together in
+ *   either order.  The difference is that standard up_fbinitialize(), if
+ *   used by itself, will not have any remote mouse or keyboard inputs that
+ *   are reported to the VNC framebuffer driver from the remote VNC client.
+ *
+ *   In the standard graphics architecture, the keyboard/mouse inputs are
+ *   received by some appliation/board specific logic at the highest level
+ *   in the architecture via input drivers.  The received keyboard/mouse
+ *   input data must then be "injected" into NX where it can they can be
+ *   assigned to the window that has focus.  They will eventually be
+ *   received by the Window instances via NX callback methods.
+ *
+ *   NX is a middleware layer in the architecture, below the
+ *   application/board specific logic but above the driver level logic.  The
+ *   frame buffer driver, on the other hand lies at the very lowest level in
+ *   the graphics architecture.  It cannot call upward into the application
+ *   nor can it call upward into NX.  So, some other logic.
+ *
+ *   vnc_fbinitialize() provides an optional, alternative initialization
+ *   function.  It is optional becuase it need not be called.  If it is not
+ *   called, however, keyboard/mouse inputs from the remote VNC client will
+ *   be lost.  By calling vnc_fbinitialize(), you can provide callout
+ *   functions that can be received by logic higher in the architure.  This
+ *   higher level level callouts can then call nx_kbdin() or nx_mousein() on
+ *   behalf of the VNC server.
+ *
+ * Parameters:
+ *   display - In the case of hardware with multiple displays, this
+ *     specifies the display.  Normally this is zero.
+ *   kbdout - If non-NULL, then the pointed-to function will be called to
+ *     handle all keyboard input as it is received.  This may be either raw,
+ *     ASCII keypress input or encoded keyboard input as determined by
+ *     CONFIG_VNCSERVER_KBDENCODE.  See include/nuttx/input/kbd_codec.h.
+ *   mouseout - If non-NULL, then the pointed-to function will be called to
+ *     handle all mouse input as it is received.
+ *   arg - An opaque user provided argument that will be provided when the
+ *    callouts are performed.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success.  Otherwise, a negated errno value is
+ *   returned to indicate the nature of the failure.
+ *
+ ****************************************************************************/
+
+int vnc_fbinitialize(int display, vnc_kbdout_t kbdout,
+                     vnc_mouseout_t mouseout, FAR void *arg)
+{
+  FAR struct vnc_session_s *session;
+  int ret;
+
+  DEBUGASSERT(display >= 0 && display < RFB_MAX_DISPLAYS);
+
+  /* Start the VNC server kernel thread. */
+
+  ret = vnc_start_server(display);
+  if (ret < 0)
+    {
+      gvdbg("ERROR: vnc_start_server() failed: %d\n", ret);
+      return ret;
+    }
+
+  /* Wait for the VNC server to start and complete initialization. */
+
+  ret = vnc_wait_start(display);
+  if (ret < 0)
+    {
+      gvdbg("ERROR: vnc_wait_start() failed: %d\n", ret);
+      return ret;
+    }
+
+  /* Save the input callout function information in the session structure. */
+
+  session           = g_vnc_sessions[display];
+  DEBUGASSERT(session != NULL);
+
+  session->kbdout   = kbdout;
+  session->mouseout = mouseout;
+  session->arg      = arg;
+
+  return OK;
 }
 
 /****************************************************************************
@@ -550,12 +756,15 @@ int up_fbinitialize(int display)
 
 FAR struct fb_vtable_s *up_fbgetvplane(int display, int vplane)
 {
-  FAR struct vnc_session_s *session = vnc_find_session(display);
+  FAR struct vnc_session_s *session;
   FAR struct vnc_fbinfo_s *fbinfo;
+
+  DEBUGASSERT(display >= 0 && display < RFB_MAX_DISPLAYS);
+  session = g_vnc_sessions[display];
 
   /* Verify that the session is still valid */
 
-  if (session->state != VNCSERVER_RUNNING)
+  if (session == NULL || session->state != VNCSERVER_RUNNING)
     {
       return NULL;
     }
@@ -607,14 +816,21 @@ FAR struct fb_vtable_s *up_fbgetvplane(int display, int vplane)
 void up_fbuninitialize(int display)
 {
 #if 0 /* Do nothing */
-  FAR struct vnc_session_s *session = vnc_find_session(display);
+  FAR struct vnc_session_s *session;
   FAR struct vnc_fbinfo_s *fbinfo;
 
-  DEBUGASSERT(session != NULL);
-  fbinfo = &g_fbinfo[display];
+  DEBUGASSERT(display >= 0 && display < RFB_MAX_DISPLAYS);
+  session = g_vnc_sessions[display];
+
+  /* Verify that the session is still valid */
+
+  if (session != NULL)
+    {
+      fbinfo = &g_fbinfo[display];
 #warning Missing logic
-  UNUSED(session);
-  UNUSED(fbinfo);
+      UNUSED(session);
+      UNUSED(fbinfo);
+    }
 #endif
 }
 
@@ -653,7 +869,7 @@ void nx_notify_rectangle(FAR NX_PLANEINFOTYPE *pinfo,
    */
 
   DEBUGASSERT(pinfo->display >= 0 && pinfo->display < RFB_MAX_DISPLAYS);
-  session = vnc_find_session(pinfo->display);
+  session = g_vnc_sessions[pinfo->display];
 
   /* Verify that the session is still valid */
 
@@ -661,7 +877,7 @@ void nx_notify_rectangle(FAR NX_PLANEINFOTYPE *pinfo,
     {
       /* Queue the rectangular update */
 
-      ret = vnc_update_rectangle(session, rect);
+      ret = vnc_update_rectangle(session, rect, true);
       if (ret < 0)
         {
           gdbg("ERROR: vnc_update_rectangle failed: %d\n", ret);

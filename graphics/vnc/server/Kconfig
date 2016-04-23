@@ -118,13 +118,29 @@ config VNCSERVER_UPDATE_BUFSIZE
 config VNCSERVER_KBDENCODE
 	bool "Encode keyboard input"
 	default n
-	depends on NXTERM_NXKBDIN
+	depends on LIB_KBDCODEC
 	---help---
 		Use a special encoding of keyboard characters as defined in
 		include/nuttx/input/kbd_coded.h.
 
 config VNCSERVER_INBUFFER_SIZE
-	int "Input buffer size
+	int "Input buffer size"
 	default 80
+
+config VNCSERVER_DEBUG
+	bool "VNC Server debug"
+	default n
+	depends on DEBUG && !DEBUG_GRAPHICS
+	---help---
+		Normally VNC debug output is selected with DEBUG_GRAPHICS.  The VNC
+		server server suupport this special option to enable GRAPHICS debug
+		output for the VNC server while GRAPHICS debug is disabled.  This
+		provides an cleaner, less cluttered output when you only wish to
+		debug the VNC server versus enabling DEBUG_GRAPHICS globally.
+
+config VNCSERVER_UPDATE_DEBUG
+	bool "Detailed updater debug"
+	default n
+	depends on DEBUG_GRAPHICS || VNCSERVER_DEBUG
 
 endif # VNCSERVER

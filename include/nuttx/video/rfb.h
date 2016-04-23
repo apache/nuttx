@@ -370,8 +370,8 @@ struct rfb_setpixelformat_s
 struct rfb_setencodings_s
 {
   uint8_t msgtype;               /* U8  Message type */
-  uint8_t padding[3];
-  uint8_t nencodings[4];         /* U32 Number of encodings */
+  uint8_t padding;
+  uint8_t nencodings[2];         /* U16 Number of encodings */
   uint8_t encodings[4];          /* S32 Encoding type, size = 4*nencodings */
 };
 
@@ -691,6 +691,12 @@ struct rfb_copyrect_encoding_s
  *  the header:"
  */
 
+struct rfb_rrehdr8_s
+{
+  uint8_t nsubrects[4];          /* U32 Number of sub-rectangle */
+  uint8_t pixel;                 /* U8  Background pixel */
+};
+
 struct rfb_rrehdr16_s
 {
   uint8_t nsubrects[4];          /* U32 Number of sub-rectangle */
@@ -706,6 +712,15 @@ struct rfb_rrehdr32_s
 /* "This is followed by number-of-subrectangles instances of the following
  *  structure:"
  */
+
+struct rfb_rrerect8_s
+{
+  uint8_t pixel;                 /* U8  sub-rect pixel value */
+  uint8_t xpos[2];               /* U16 X position */
+  uint8_t ypos[2];               /* U16 Y position */
+  uint8_t width[2];              /* U16 Width */
+  uint8_t height[2];             /* U16 Height */
+};
 
 struct rfb_rrerect16_s
 {
@@ -771,6 +786,11 @@ struct rfb_rrerect32_s
 *   background colour for this tile:"
 */
 
+struct rfb_backpixel8_s
+{
+  uint8_t pixel;                 /* U8  Background pixel value */
+};
+
 struct rfb_backpixel16_s
 {
   uint8_t pixel[2];              /* U16 Background pixel value */
@@ -787,6 +807,11 @@ struct rfb_backpixel32_s
  * "ForegroundSpecified - if set, a pixel value follows which specifies the
  *  foreground colour to be used for all subrectangles in this tile:"
  */
+
+struct rfb_forepixel8_s
+{
+  uint8_t pixel;                 /* U8  Foreground pixel value */
+};
 
 struct rfb_forepixel16_s
 {
@@ -815,6 +840,13 @@ struct rfb_nrects_s
  * "SubrectsColoured - if set then each subrectangle is preceded by a pixel
  *  value giving the colour of that subrectangle, so a subrectangle is:"
  */
+
+struct rfb_subrectscolored8_s
+{
+  uint8_t pixel;                 /* U8  Sub-rect pixel value */
+  uint8_t xy;                    /* U8  X and y position */
+  uint8_t wh;                    /* U8  Width and height */
+};
 
 struct rfb_subrectscolored16_s
 {
@@ -916,6 +948,14 @@ struct rfb_srle_s
  *  height are the width and height of the tile):"
  */
 
+struct rfb_rawpixel8_s
+{
+  uint8_t pixels[1];             /* Actual size is w*h */
+};
+
+#define SIZEOF_RFB_RAWPIXEL8_S(n,r) \
+  (sizeof(struct rfb_rawpixel8_s) + (n) - 1)
+
 struct rfb_rawpixel16_s
 {
   uint8_t pixels[2];             /* Actual size is 2*w*h */
@@ -933,6 +973,11 @@ struct rfb_rawpixel32_s
   (sizeof(struct rfb_rawpixel32_s) + (((n) - 1) << 2))
 
 /* "A solid tile consisting of a single colour. The pixel value follows:" */
+
+struct rfb_solid8_s
+{
+  uint8_t pixels;                /* Pixel value */
+};
 
 struct rfb_solid16_s
 {
@@ -976,6 +1021,11 @@ struct rfb_solid32_s
 /* "Palette RLE. Followed by the palette, consisting of paletteSize =
  *  (subencoding − 128) pixel values:"
  */
+
+struct rfb_palette8_s
+{
+  uint8_t palette[1];            /* Actual size is palleteSize */
+};
 
 struct rfb_palette16_s
 {
@@ -1080,6 +1130,48 @@ struct rfb_palettendx_s
    ((uint32_t)((s)[1]) << 16) | \
    ((uint32_t)((s)[2]) <<  8) | \
     (uint32_t)((s)[3]))
+
+/* There are also cases where the client may request pixel data in its
+ * little-endian format.
+ */
+
+/* void rfb_putle16(FAR uint8_t *dest, uint16_t value) */
+
+#define rfb_putle16(d,v) \
+  do \
+    { \
+      register FAR uint8_t *__d = (FAR uint8_t *)(d); \
+      *__d++ = ((uint16_t)(v) & 0xff); \
+      *__d   = ((uint16_t)(v) >> 8); \
+    } \
+  while (0)
+
+/* uin16_t rfb_getle16(FAR const uint8_t *src) */
+
+#define rfb_getle16(s) \
+  (((uint16_t)((s)[1]) << 8) | \
+    (uint16_t)((s)[0]))
+
+/* void rfb_putle32(FAR uint8_t *dest, uint32_t value) */
+
+#define rfb_putle32(d,v) \
+  do \
+    { \
+      register FAR uint8_t *__d = (FAR uint8_t *)(d); \
+      *__d++ = ((uint32_t)(v)        & 0xff); \
+      *__d++ = ((uint32_t)(v) >> 8)  & 0xff; \
+      *__d++ = ((uint32_t)(v) >> 16) & 0xff; \
+      *__d   = ((uint32_t)(v) >> 24); \
+    } \
+  while (0)
+
+/* uint32_t rfb_getle32(FAR const uint8_t *src) */
+
+#define rfb_getle32(s) \
+  (((uint32_t)((s)[3]) << 24) | \
+   ((uint32_t)((s)[2]) << 16) | \
+   ((uint32_t)((s)[1]) <<  8) | \
+    (uint32_t)((s)[0]))
 
 /****************************************************************************
  * Public Function Prototypes

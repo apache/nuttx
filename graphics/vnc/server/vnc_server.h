@@ -49,6 +49,7 @@
 
 #include <nuttx/video/fb.h>
 #include <nuttx/video/rfb.h>
+#include <nuttx/video/vnc.h>
 #include <nuttx/nx/nxglib.h>
 #include <nuttx/nx/nx.h>
 #include <nuttx/net/net.h>
@@ -181,6 +182,34 @@
 #  define MAX(a,b)          (((a) > (b)) ? (a) : (b))
 #endif
 
+/* Debug */
+
+#ifdef CONFIG_VNCSERVER_UPDATE_DEBUG
+#  ifdef CONFIG_CPP_HAVE_VARARGS
+#    define upddbg(format, ...)    dbg(format, ##__VA_ARGS__)
+#    define updlldbg(format, ...)  lldbg(format, ##__VA_ARGS__)
+#    define updvdbg(format, ...)   vdbg(format, ##__VA_ARGS__)
+#    define updllvdbg(format, ...) llvdbg(format, ##__VA_ARGS__)
+#  else
+#   define upddbg                  dbg
+#   define updlldbg                lldbg
+#   define updvdbg                 vdbg
+#   define updllvdbg               llvdbg
+#  endif
+#else
+#  ifdef CONFIG_CPP_HAVE_VARARGS
+#    define upddbg(x...)
+#    define updlldbg(x...)
+#    define updvdbg(x...)
+#    define updllvdbg(x...)
+#  else
+#    define upddbg                 (void)
+#    define updlldbg               (void)
+#    define updvdbg                (void)
+#    define updllvdbg              (void)
+#  endif
+#endif
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -205,28 +234,34 @@ enum vnc_server_e
 struct vnc_fbupdate_s
 {
   FAR struct vnc_fbupdate_s *flink;
+  bool whupd;                  /* True: whole screen update */
   struct nxgl_rect_s rect;     /* The enqueued update rectangle */
 };
 
 struct vnc_session_s
 {
-  /* NX graphics system */
-
-  NXHANDLE handle;             /* NX graphics handle */
-
   /* Connection data */
 
   struct socket listen;        /* Listen socket */
   struct socket connect;       /* Connected socket */
   volatile uint8_t state;      /* See enum vnc_server_e */
+  volatile uint8_t nwhupd;     /* Number of whole screen updates queued */
+  volatile bool change;        /* True: Frambebuffer data change since last whole screen update */
 
   /* Display geometry and color characteristics */
 
   uint8_t display;             /* Display number (for debug) */
   volatile uint8_t colorfmt;   /* Remote color format (See include/nuttx/fb.h) */
   volatile uint8_t bpp;        /* Remote bits per pixel */
-  volatile bool rre;           /* Remote supports RRE encoding */
+  volatile bool bigendian;     /* True: Remote expect data in big-endian format */
+  volatile bool rre;           /* True: Remote supports RRE encoding */
   FAR uint8_t *fb;             /* Allocated local frame buffer */
+
+  /* VNC client input support */
+
+  vnc_kbdout_t kbdout;         /* Callout when keyboard input is received */
+  vnc_mouseout_t mouseout;     /* Callout when keyboard input is received */
+  FAR void *arg;               /* Argument that accompanies the callouts */
 
   /* Updater information */
 
@@ -252,7 +287,8 @@ struct vnc_session_s
 
 struct fb_startup_s
 {
-  sem_t fbsem;                  /* Framebuffer driver will wait on this */
+  sem_t fbinit;                 /* Wait for session creation */
+  sem_t fbconnect;              /* Wait for client connection */
   int16_t result;               /* OK: successfully initialized */
 };
 
@@ -415,6 +451,7 @@ int vnc_stop_updater(FAR struct vnc_session_s *session);
  * Input Parameters:
  *   session - An instance of the session structure.
  *   rect    - The rectanglular region to be updated.
+ *   change  - True: Frame buffer data has changed
  *
  * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is returned on
@@ -423,7 +460,8 @@ int vnc_stop_updater(FAR struct vnc_session_s *session);
  ****************************************************************************/
 
 int vnc_update_rectangle(FAR struct vnc_session_s *session,
-                         FAR const struct nxgl_rect_s *rect);
+                         FAR const struct nxgl_rect_s *rect,
+                         bool change);
 
 /****************************************************************************
  * Name: vnc_receiver
@@ -455,11 +493,10 @@ int vnc_receiver(FAR struct vnc_session_s *session);
  *
  * Returned Value:
  *   Zero is returned if RRE coding was not performed (but not error was)
- *   encountered.  Otherwise, eith the size of the framebuffer update
- *   message is returned on success or a negated errno value is returned on
- *   failure that indicates the the nature of the failure.  A failure is
- *   only returned in cases of a network failure and unexpected internal
- *   failures.
+ *   encountered.  Otherwise, the size of the framebuffer update message
+ *   is returned on success or a negated errno value is returned on failure
+ *   that indicates the the nature of the failure.  A failure is only
+ *   returned in cases of a network failure and unexpected internal failures.
  *
  ****************************************************************************/
 
@@ -506,24 +543,6 @@ int vnc_raw(FAR struct vnc_session_s *session, FAR struct nxgl_rect_s *rect);
 void vnc_key_map(FAR struct vnc_session_s *session, uint16_t keysym,
                  bool keydown);
 #endif
-
-/****************************************************************************
- * Name: vnc_find_session
- *
- * Description:
- *  Return the session structure associated with this display.
- *
- * Input Parameters:
- *   display - The display number of interest.
- *
- * Returned Value:
- *   Returns the instance of the session structure for this display.  NULL
- *   will be returned if the server has not yet been started or if the
- *   display number is out of range.
- *
- ****************************************************************************/
-
-FAR struct vnc_session_s *vnc_find_session(int display);
 
 /****************************************************************************
  * Name: vnc_convert_rgbNN

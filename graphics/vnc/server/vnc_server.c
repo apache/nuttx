@@ -46,6 +46,14 @@
 #include <queue.h>
 #include <assert.h>
 #include <errno.h>
+
+#if defined(CONFIG_VNCSERVER_DEBUG) && !defined(CONFIG_DEBUG_GRAPHICS)
+#  undef  CONFIG_DEBUG
+#  undef  CONFIG_DEBUG_VERBOSE
+#  define CONFIG_DEBUG          1
+#  define CONFIG_DEBUG_VERBOSE  1
+#  define CONFIG_DEBUG_GRAPHICS 1
+#endif
 #include <debug.h>
 
 #include <arpa/inet.h>
@@ -121,9 +129,11 @@ static void vnc_reset_session(FAR struct vnc_session_s *session,
 
   sem_reset(&session->freesem, CONFIG_VNCSERVER_NUPDATES);
   sem_reset(&session->queuesem, 0);
+
   session->fb      = fb;
   session->display = display;
   session->state   = VNCSERVER_INITIALIZED;
+  session->change  = true;
 }
 
 /****************************************************************************
@@ -271,6 +281,11 @@ int vnc_server(int argc, FAR char *argv[])
   sem_init(&session->freesem, 0, CONFIG_VNCSERVER_NUPDATES);
   sem_init(&session->queuesem, 0, 0);
 
+  /* Inform any waiter that we have started */
+
+  vnc_reset_session(session, fb, display);
+  sem_post(&g_fbstartup[display].fbinit);
+
   /* Loop... handling each each VNC client connection to this display.  Only
    * a single client is allowed for each display.
    */
@@ -283,7 +298,7 @@ int vnc_server(int argc, FAR char *argv[])
 
       vnc_reset_session(session, fb, display);
       g_fbstartup[display].result = -EBUSY;
-      sem_reset(&g_fbstartup[display].fbsem, 0);
+      sem_reset(&g_fbstartup[display].fbconnect, 0);
 
       /* Establish a connection with the VNC client */
 
@@ -321,7 +336,7 @@ int vnc_server(int argc, FAR char *argv[])
            */
 
           g_fbstartup[display].result = OK;
-          sem_post(&g_fbstartup[display].fbsem);
+          sem_post(&g_fbstartup[display].fbconnect);
 
           /* Run the VNC receiver on this trhead.  The VNC receiver handles
            * all Client-to-Server messages.  The VNC receiver function does
@@ -331,6 +346,7 @@ int vnc_server(int argc, FAR char *argv[])
 
           ret = vnc_receiver(session);
           gvdbg("Session terminated with %d\n", ret);
+          UNUSED(ret);
 
           /* Stop the VNC updater thread. */
 
@@ -347,36 +363,6 @@ errout_with_fb:
 
 errout_with_post:
   g_fbstartup[display].result = ret;
-  sem_post(&g_fbstartup[display].fbsem);
+  sem_post(&g_fbstartup[display].fbconnect);
   return EXIT_FAILURE;
-}
-
-/****************************************************************************
- * Name: vnc_find_session
- *
- * Description:
- *  Return the session structure associated with this display.
- *
- * Input Parameters:
- *   display - The display number of interest.
- *
- * Returned Value:
- *   Returns the instance of the session structure for this display.  NULL
- *   will be returned if the server has not yet been started or if the
- *   display number is out of range.
- *
- ****************************************************************************/
-
-FAR struct vnc_session_s *vnc_find_session(int display)
-{
-  FAR struct vnc_session_s *session = NULL;
-
-  DEBUGASSERT(display >= 0 && display < RFB_MAX_DISPLAYS);
-
-  if (display >= 0 && display < RFB_MAX_DISPLAYS)
-    {
-      session = g_vnc_sessions[display];
-    }
-
-  return session;
 }

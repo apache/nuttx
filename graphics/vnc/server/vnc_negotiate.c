@@ -43,6 +43,14 @@
 #include <string.h>
 #include <errno.h>
 #include <assert.h>
+
+#if defined(CONFIG_VNCSERVER_DEBUG) && !defined(CONFIG_DEBUG_GRAPHICS)
+#  undef  CONFIG_DEBUG
+#  undef  CONFIG_DEBUG_VERBOSE
+#  define CONFIG_DEBUG          1
+#  define CONFIG_DEBUG_VERBOSE  1
+#  define CONFIG_DEBUG_GRAPHICS 1
+#endif
 #include <debug.h>
 
 #ifdef CONFIG_NET_SOCKOPTS
@@ -154,6 +162,11 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
       DEBUGASSERT(errcode > 0);
       return -errcode;
     }
+  else if (nrecvd == 0)
+    {
+      gdbg("Connection closed\n");
+      return -ECONNABORTED;
+    }
 
   DEBUGASSERT(nrecvd == len);
 
@@ -220,6 +233,11 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
       gdbg("ERROR: Receive SecurityType failed: %d\n", errcode);
       DEBUGASSERT(errcode > 0);
       return -errcode;
+    }
+  else if (nrecvd == 0)
+    {
+      gdbg("Connection closed\n");
+      return -ECONNABORTED;
     }
 
   DEBUGASSERT(nrecvd == sizeof(struct rfb_selected_sectype_s));
@@ -305,6 +323,11 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
       DEBUGASSERT(errcode > 0);
       return -errcode;
     }
+  else if (nrecvd == 0)
+    {
+      gdbg("Connection closed\n");
+      return -ECONNABORTED;
+    }
 
   DEBUGASSERT(nrecvd == sizeof(struct rfb_clientinit_s));
 
@@ -375,6 +398,11 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
       DEBUGASSERT(errcode > 0);
       return -errcode;
     }
+  else if (nrecvd == 0)
+    {
+      gdbg("Connection closed\n");
+      return -ECONNABORTED;
+    }
   else if (nrecvd != sizeof(struct rfb_setpixelformat_s))
     {
       /* Must not be a SetPixelFormat message? */
@@ -384,12 +412,13 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
     }
   else if (setformat->msgtype != RFB_SETPIXELFMT_MSG)
     {
-      gdbg("ERROR: Not a SetPixelFormat message: %d\n", (int)setformat->msgtype);
+      gdbg("ERROR: Not a SetPixelFormat message: %d\n",
+           (int)setformat->msgtype);
       return -EPROTO;
     }
 
-  /* Instantiate the client pixel format, verifying that the client request format
-   * is one that we can handle.
+  /* Instantiate the client pixel format, verifying that the client request
+   * format is one that we can handle.
    */
 
   ret = vnc_client_pixelformat(session, &setformat->format);
@@ -408,7 +437,7 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
   encodings = (FAR struct rfb_setencodings_s *)session->inbuf;
 
   nrecvd = psock_recv(&session->connect, encodings,
-                   CONFIG_VNCSERVER_INBUFFER_SIZE, 0);
+                      CONFIG_VNCSERVER_INBUFFER_SIZE, 0);
   if (nrecvd < 0)
     {
       errcode = get_errno();
@@ -416,10 +445,15 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
       DEBUGASSERT(errcode > 0);
       return -errcode;
     }
-
-  if (nrecvd > 0 && encodings->msgtype == RFB_SETENCODINGS_MSG)
+  else if (nrecvd == 0)
     {
-      DEBUGASSERT(nrecvd >=  SIZEOF_RFB_SETENCODINGS_S(0));
+      gdbg("Connection closed\n");
+      return -ECONNABORTED;
+    }
+
+  if (encodings->msgtype == RFB_SETENCODINGS_MSG)
+    {
+      DEBUGASSERT(nrecvd >= SIZEOF_RFB_SETENCODINGS_S(0));
 
       /* Pick out any mutually supported encodings */
 
@@ -465,37 +499,43 @@ int vnc_client_pixelformat(FAR struct vnc_session_s *session,
   if (pixelfmt->bpp == 8 && pixelfmt->depth == 6)
     {
       gvdbg("Client pixel format: RGB8 2:2:2\n");
-      session->colorfmt = FB_FMT_RGB8_222;
-      session->bpp      = 8;
+      session->colorfmt  = FB_FMT_RGB8_222;
+      session->bpp       = 8;
+      session->bigendian = false;
     }
   else if (pixelfmt->bpp == 8 && pixelfmt->depth == 8)
     {
       gvdbg("Client pixel format: RGB8 3:3:2\n");
-      session->colorfmt = FB_FMT_RGB8_332;
-      session->bpp      = 8;
+      session->colorfmt  = FB_FMT_RGB8_332;
+      session->bpp       = 8;
+      session->bigendian = false;
     }
   else if (pixelfmt->bpp == 16 && pixelfmt->depth == 15)
     {
       gvdbg("Client pixel format: RGB16 5:5:5\n");
-      session->colorfmt = FB_FMT_RGB16_555;
-      session->bpp      = 16;
+      session->colorfmt  = FB_FMT_RGB16_555;
+      session->bpp       = 16;
+      session->bigendian = (pixelfmt->bigendian != 0) ? true : false;
     }
   else if (pixelfmt->bpp == 16 && pixelfmt->depth == 16)
     {
       gvdbg("Client pixel format: RGB16 5:6:5\n");
-      session->colorfmt = FB_FMT_RGB16_565;
-      session->bpp      = 16;
+      session->colorfmt  = FB_FMT_RGB16_565;
+      session->bpp       = 16;
+      session->bigendian = (pixelfmt->bigendian != 0) ? true : false;
     }
   else if (pixelfmt->bpp == 32 && pixelfmt->depth == 24)
     {
       gvdbg("Client pixel format: RGB32 8:8:8\n");
-      session->colorfmt = FB_FMT_RGB32;
-      session->bpp      = 32;
+      session->colorfmt  = FB_FMT_RGB32;
+      session->bpp       = 32;
+      session->bigendian = (pixelfmt->bigendian != 0) ? true : false;
     }
   else if (pixelfmt->bpp == 32 && pixelfmt->depth == 32)
     {
-      session->colorfmt = FB_FMT_RGB32;
-      session->bpp      = 32;
+      session->colorfmt  = FB_FMT_RGB32;
+      session->bpp       = 32;
+      session->bigendian = (pixelfmt->bigendian != 0) ? true : false;
     }
   else
     {
@@ -506,5 +546,6 @@ int vnc_client_pixelformat(FAR struct vnc_session_s *session,
       return -ENOSYS;
     }
 
+  session->change = true;
   return OK;
 }

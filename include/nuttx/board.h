@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/board.h
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,7 +46,8 @@
  *    definitions provide the common interface between NuttX and the
  *    architecture-specific implementation in arch/
  *
- *    These definitions are retained in the the header file nuttx/include/arch.h
+ *    These definitions are retained in the the header file
+ *    nuttx/include/arch.h
  *
  *    NOTE: up_ is supposed to stand for microprocessor; the u is like the
  *    Greek letter micron: µ. So it would be µP which is a common shortening
@@ -680,7 +681,8 @@ xcpt_t board_button_irq(int id, xcpt_t irqhandler);
  ****************************************************************************/
 
 #ifdef CONFIG_BOARD_CRASHDUMP
-void board_crashdump(uint32_t currentsp, void *tcb, uint8_t *filename,
+void board_crashdump(uintptr_t currentsp, FAR void *tcb,
+                     FAR const uint8_t *filename,
                      int lineno);
 #endif
 
