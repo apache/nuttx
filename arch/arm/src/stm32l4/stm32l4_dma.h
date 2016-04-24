@@ -3,6 +3,8 @@
  *
  *   Copyright (C) 2009, 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *           Sebastien Lorquet <sebastien@lorquet.fr>
+ *           dev@ziggurat29.com
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -57,13 +59,11 @@
  * DMA callback function (see dma_callback_t).
  */
 
-#  define DMA_STATUS_FEIF         0                     /* (Not available in F1) */
-#  define DMA_STATUS_DMEIF        0                     /* (Not available in F1) */
 #  define DMA_STATUS_TEIF         DMA_CHAN_TEIF_BIT     /* Channel Transfer Error */
 #  define DMA_STATUS_HTIF         DMA_CHAN_HTIF_BIT     /* Channel Half Transfer */
 #  define DMA_STATUS_TCIF         DMA_CHAN_TCIF_BIT     /* Channel Transfer Complete */
 
-#define DMA_STATUS_ERROR          (DMA_STATUS_FEIF|DMA_STATUS_DMEIF|DMA_STATUS_TEIF)
+#define DMA_STATUS_ERROR          (DMA_STATUS_TEIF)
 #define DMA_STATUS_SUCCESS        (DMA_STATUS_TCIF|DMA_STATUS_HTIF)
 
 /************************************************************************************
@@ -71,7 +71,7 @@
  ************************************************************************************/
 
 /* DMA_HANDLE provides an opaque are reference that can be used to represent a DMA
- * channel (F1) or a DMA stream (F4).
+ * channel.
  */
 
 typedef FAR void *DMA_HANDLE;
@@ -81,7 +81,7 @@ typedef FAR void *DMA_HANDLE;
  *   completion of the DMA.
  *
  * Input Parameters:
- *   handle - Refers tot he DMA channel or stream
+ *   handle - Refers tot he DMA channel
  *   status - A bit encoded value that provides the completion status.  See the
  *            DMASTATUS_* definitions above.
  *   arg    - A user-provided value that was provided when stm32l4_dmastart() was
@@ -93,11 +93,12 @@ typedef void (*dma_callback_t)(DMA_HANDLE handle, uint8_t status, void *arg);
 #ifdef CONFIG_DEBUG_DMA
 struct stm32l4_dmaregs_s
 {
-  uint32_t isr;
-  uint32_t ccr;
-  uint32_t cndtr;
-  uint32_t cpar;
-  uint32_t cmar;
+  uint32_t isr;       /* Interrupt Status Register; each channel gets 4 bits */
+  uint32_t cselr;     /* Channel Selection Register; chooses peripheral bound */
+  uint32_t ccr;       /* Channel Configuration Register; determines functionality */
+  uint32_t cndtr;     /* Channel Count Register; determines number of transfers */
+  uint32_t cpar;      /* Channel Peripheral Address Register; determines start */
+  uint32_t cmar;      /* Channel Memory Address Register; determines start */
 };
 #endif
 
@@ -126,7 +127,7 @@ extern "C"
  * Description:
  *   Allocate a DMA channel.  This function gives the caller mutually
  *   exclusive access to the DMA channel specified by the 'chan' argument.
- *   DMA channels are shared on the STM32:  Devices sharing the same DMA
+ *   DMA channels are shared on the STM32L4:  Devices sharing the same DMA
  *   channel cannot do DMA concurrently!  See the DMACHAN_* definitions in
  *   stm32l4_dma.h.
  *
@@ -142,10 +143,8 @@ extern "C"
  *
  * Input parameter:
  *   chan - Identifies the stream/channel resource
- *     For the STM32 F1, this is simply the channel number as provided by
- *     the DMACHAN_* definitions in chip/stm32f10xxx_dma.h.
- *     For the STM32 F4, this is a bit encoded value as provided by the
- *     the DMAMAP_* definitions in chip/stm32f40xxx_dma.h
+ *     This is a bit encoded value as provided by the DMACHAN_* definitions
+ *     in chip/stm32l4x6xx_dma.h
  *
  * Returned Value:
  *   Provided that 'chan' is valid, this function ALWAYS returns a non-NULL,
@@ -153,8 +152,8 @@ extern "C"
  *   assert if debug is enabled or do something ignorant otherwise).
  *
  * Assumptions:
- *   - The caller does not hold he DMA channel.
- *   - The caller can wait for the DMA channel to be freed if it is no
+ *   - The caller does not hold the DMA channel.
+ *   - The caller can wait for the DMA channel to be freed if it is not
  *     available.
  *
  ****************************************************************************/
