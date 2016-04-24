@@ -23,13 +23,13 @@ LSE      : works, but TODO autotrim of MSI, etc
 RCC      : All registers defined, peripherals enabled, basic clock working
 SYSCTL   : All registers defined
 USART    : Working in normal mode (no DMA, to be tested, code is written)
-DMA      : Ported from STM32, code written, to be tested
+DMA      : works; at least tested with QSPI
 SRAM2    : Should work with enough MM regions
 FIREWALL : Code written, to be tested, requires support from ldscript
 SPI      : Code written, to be tested, including DMA
 I2C      : Registers defined
 RTC      : works
-QSPI     : TODO (port from stm32f7)
+QSPI     : works in polling, interrupt, DMA, and also memory-mapped modes
 CAN      : TODO
 OTGFS    : TODO
 Timers   : TODO

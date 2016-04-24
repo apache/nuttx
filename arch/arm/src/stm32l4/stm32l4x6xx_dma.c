@@ -3,6 +3,8 @@
  *
  *   Copyright (C) 2009, 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *           Sebastien Lorquet <sebastien@lorquet.fr>
+ *           dev@ziggurat29.com
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -306,16 +308,17 @@ static int stm32l4_dmainterrupt(int irq, void *context)
 
   isr = dmabase_getreg(dmach, STM32L4_DMA_ISR_OFFSET) & DMA_ISR_CHAN_MASK(dmach->chan);
 
-  /* Clear the interrupts we are handling */
-
-  dmabase_putreg(dmach, STM32L4_DMA_IFCR_OFFSET, isr);
-
   /* Invoke the callback */
 
   if (dmach->callback)
     {
       dmach->callback(dmach, isr >> DMA_ISR_CHAN_SHIFT(dmach->chan), dmach->arg);
     }
+
+  /* Clear the interrupts we are handling */
+
+  dmabase_putreg(dmach, STM32L4_DMA_IFCR_OFFSET, isr);
+
   return OK;
 }
 
@@ -387,9 +390,9 @@ void weak_function up_dmainitialize(void)
  *   version.  Feel free to do that if that is what you need.
  *
  * Input parameter:
- *   chndx - Identifies the stream/channel resource. For the STM32 F1, this
- *     is simply the channel number as provided by the DMACHAN_* definitions
- *     in chip/stm32f10xxx_dma.h.
+ *   chan - Identifies the stream/channel resource
+ *     This is a bit encoded value as provided by the DMACHAN_* definitions
+ *     in chip/stm32l4x6xx_dma.h
  *
  * Returned Value:
  *   Provided that 'chndx' is valid, this function ALWAYS returns a non-NULL,
@@ -471,6 +474,9 @@ void stm32l4_dmasetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
   struct stm32l4_dma_s *dmach = (struct stm32l4_dma_s *)handle;
   uint32_t regval;
 
+  DEBUGASSERT(handle != NULL);
+  DEBUGASSERT(ntransfers<65536);
+  
   /* Then DMA_CNDTRx register can only be modified if the DMA channel is
    * disabled.
    */
@@ -514,7 +520,12 @@ void stm32l4_dmasetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
   regval |= ccr;
   dmachan_putreg(dmach, STM32L4_DMACHAN_CCR_OFFSET, regval);
 
-#warning TODO define peripheral by using dmach->function
+  /* define peripheral indicated in dmach->function */
+
+  regval  = dmabase_getreg(dmach, STM32L4_DMA_CSELR_OFFSET);
+  regval &= (0x0f << (dmach->chan << 2));
+  regval |= (dmach->function << (dmach->chan << 2));
+  dmabase_putreg(dmach, STM32L4_DMA_CSELR_OFFSET, regval);
 }
 
 /****************************************************************************
@@ -641,7 +652,9 @@ bool stm32l4_dmacapable(uint32_t maddr, uint32_t count, uint32_t ccr)
    * Transfers to/from memory performed by the DMA controller are
    * required to be aligned to their size.
    *
-   * See ST RM0090 rev4, section 9.3.11
+   * Datasheet 3.13 claims
+   *   "Access to Flash, SRAM, APB and AHB peripherals as source
+   *   and destination"
    *
    * Compute mend inline to avoid a possible non-constant integer
    * multiply.
@@ -682,13 +695,14 @@ bool stm32l4_dmacapable(uint32_t maddr, uint32_t count, uint32_t ccr)
 
   switch (maddr & STM32L4_REGION_MASK)
     {
-#if defined(CONFIG_STM32L4_STM32F10XX)
+      case STM32L4_PERIPH_BASE:
+      case STM32L4_FSMC_BASE:
       case STM32L4_FSMC_BANK1:
       case STM32L4_FSMC_BANK2:
       case STM32L4_FSMC_BANK3:
       case STM32L4_FSMC_BANK4:
-#endif
       case STM32L4_SRAM_BASE:
+      case STM32L4_SRAM2_BASE:
       case STM32L4_CODE_BASE:
         /* All RAM and flash is supported */
 
@@ -719,13 +733,14 @@ void stm32l4_dmasample(DMA_HANDLE handle, struct stm32l4_dmaregs_s *regs)
   struct stm32l4_dma_s *dmach = (struct stm32l4_dma_s *)handle;
   irqstate_t flags;
 
-  flags       = irqsave();
+  flags       = enter_critical_section();
   regs->isr   = dmabase_getreg(dmach, STM32L4_DMA_ISR_OFFSET);
+  regs->cselr = dmabase_getreg(dmach, STM32L4_DMA_CSELR_OFFSET);
   regs->ccr   = dmachan_getreg(dmach, STM32L4_DMACHAN_CCR_OFFSET);
   regs->cndtr = dmachan_getreg(dmach, STM32L4_DMACHAN_CNDTR_OFFSET);
   regs->cpar  = dmachan_getreg(dmach, STM32L4_DMACHAN_CPAR_OFFSET);
   regs->cmar  = dmachan_getreg(dmach, STM32L4_DMACHAN_CMAR_OFFSET);
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 #endif
 
@@ -748,7 +763,8 @@ void stm32l4_dmadump(DMA_HANDLE handle, const struct stm32l4_dmaregs_s *regs,
   uint32_t dmabase = DMA_BASE(dmach->base);
 
   dmadbg("DMA Registers: %s\n", msg);
-  dmadbg("   ISRC[%08x]: %08x\n", dmabase + STM32L4_DMA_ISR_OFFSET, regs->isr);
+  dmadbg("    ISR[%08x]: %08x\n", dmabase + STM32L4_DMA_ISR_OFFSET, regs->isr);
+  dmadbg("  CSELR[%08x]: %08x\n", dmabase + STM32L4_DMA_CSELR_OFFSET, regs->cselr);
   dmadbg("    CCR[%08x]: %08x\n", dmach->base + STM32L4_DMACHAN_CCR_OFFSET, regs->ccr);
   dmadbg("  CNDTR[%08x]: %08x\n", dmach->base + STM32L4_DMACHAN_CNDTR_OFFSET, regs->cndtr);
   dmadbg("   CPAR[%08x]: %08x\n", dmach->base + STM32L4_DMACHAN_CPAR_OFFSET, regs->cpar);

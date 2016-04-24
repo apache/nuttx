@@ -45,6 +45,8 @@
 #include <syslog.h>
 #include <errno.h>
 #include <debug.h>
+#include <string.h>
+#include <stdlib.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
@@ -57,6 +59,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/ramdisk.h>
 #include <nuttx/fs/nxffs.h>
+#include <nuttx/fs/mkfatfs.h>
 #include <nuttx/binfmt/elf.h>
 #include <nuttx/i2c/i2c_master.h>
 
@@ -193,6 +196,7 @@ int board_app_initialize(void)
 #ifdef HAVE_N25QXXX_SMARTFS
       /* Configure the device with no partition support */
 
+      SYSLOG("doing smart_initialize()\n");
       ret = smart_initialize(N25QXXX_SMART_MINOR, mtd, NULL);
       if (ret != OK)
         {
@@ -202,6 +206,7 @@ int board_app_initialize(void)
 #elif defined(HAVE_N25QXXX_NXFFS)
       /* Initialize to provide NXFFS on the N25QXXX MTD interface */
 
+      SYSLOG("doing nxffs_initialize()\n");
       ret = nxffs_initialize(mtd);
       if (ret < 0)
         {
@@ -237,9 +242,9 @@ int board_app_initialize(void)
       /* NOTE:  for this to work, you will need to make sure that
        * CONFIG_FS_WRITABLE is set in the config.  It's not a user-
        * visible setting, but you can make it set by selecting an
-       * arbitrary writeable file system (you don't have to actually
+       * arbitrary writable file system (you don't have to actually
        * use it, just select it so that the block device created via
-       * ftl_initialize() will be writeable).  Personally, I chose FAT,
+       * ftl_initialize() will be writable).  Personally, I chose FAT,
        * because SMARTFS and NXFFS will cause the other code branches
        * above to become active.
        */
@@ -257,3 +262,12 @@ int board_app_initialize(void)
   return OK;
 }
 #endif /* CONFIG_LIB_BOARDCTL */
+
+
+
+#ifdef CONFIG_BOARDCTL_IOCTL
+int board_ioctl(unsigned int cmd, uintptr_t arg)
+{
+    return OK;
+}
+#endif
