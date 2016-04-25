@@ -2498,9 +2498,13 @@ Configuration sub-directories
        2106-04-23:  Configuration created.  See status up to this data in
          the vnc configuration.  That probably all applies here as well.
 
-         Only some initial testing has been performed: The configuration
-         does not work.  The NuttX VNC server is crashing because of this
-         assertion:
+         Only some initial testing has been performed:  The configuration
+         is partially functional.  Menus do appear and mouse input is
+         probably working correctly.
+
+         But there are a lot of instabilities.  I see assertions of
+         various kinds and the RealVNC client often crashes as well.
+         Some of the assertions I see are:
 
            while (sem_wait(&session->queuesem) < 0)
            ...
@@ -2510,4 +2514,5 @@ Configuration sub-directories
         I would think that could mean only that the semaphore counting is
         out of sync with the number of updates in the queue.
 
- 
+        But also the assertion at devif/devif_iobsend.c line: 102 which
+        probably means some kind of memory corruption.
