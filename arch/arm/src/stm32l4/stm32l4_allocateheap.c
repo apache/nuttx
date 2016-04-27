@@ -62,13 +62,13 @@
  ****************************************************************************/
 /* Internal SRAM is available in all members of the STM32L4 family. The
  * following definitions must be provided to specify the size and
- * location of internal(system) SRAM:
+ * location of internal (system) SRAM1 and SRAM2:
  *
  * SRAM1_END     0x20018000
  * SRAM2_START   0x10000000
  * SRAM2_END     0x10008000
  *
- * In addition to internal SRAM, SRAM may also be available through the FSMC.
+ * In addition to internal SRAM, memory may also be available through the FSMC.
  * In order to use FSMC SRAM, the following additional things need to be
  * present in the NuttX configuration file:
  *
@@ -80,15 +80,14 @@
  * CONFIG_HEAP2_SIZE          : The size of the SRAM in the FSMC
  *                              address space
  * CONFIG_MM_REGIONS          : Must be set to a large enough value to
- *                              include the FSMC SRAM (as determined by
- *                              the rules provided below)
+ *                              include the additional regions.
  */
 
 #ifndef CONFIG_STM32L4_FSMC
 #  undef CONFIG_STM32L4_FSMC_SRAM
 #endif
 
-/* MSTM32L4x6xx have 128Kib in two banks, both accessible to DMA:
+/* STM32L4x6xx have 128Kib in two banks, both accessible to DMA:
  *
  *   1) 96KiB of System SRAM beginning at address 0x2000:0000 - 0x2001:8000
  *   2) 32KiB of System SRAM beginning at address 0x1000:0000 - 0x1000:8000
@@ -105,55 +104,21 @@
 #define SRAM2_START 0x10000000
 #define SRAM2_END   0x10008000
 
-/* Allocations according to the number of memory regions:
- *
- * 1 region available: 
- *  - map it to SRAM1
- *  - warn that SRAM2 is not available for heap
- *  - if FMC is enabled, warn that it is not available for heap
- *
- * 2 regions available: map them to SRAM1 and SRAM2
- * - map region 1 to SRAM1
- * - map region 2 to SRAM2
- * - if FMC is enabled, warn that it is not available for heap
- *
- * 3 or more regions
- *
- * - map them to SRAM1, SRAM2, FMC
- */
-
-#if CONFIG_MM_REGIONS < 1
-#  warning heap is not usable
-
-#elif CONFIG_MM_REGIONS < 2
-
-#  warning SRAM2 (32k) is NOT available for heap, only SRAM1 (96k) : not enough MM regions
-#  undef SRAM2_START
-#  undef SRAM2_END
-
-#  if defined(CONFIG_STM32L4_FSMC_SRAM)
-#    warning FMC SRAM is NOT available for heap : not enough MM regions (1)
-#    undef CONFIG_STM32L4_FSMC_SRAM
+#if defined(STM32L4_SRAM2_HEAP) && defined(CONFIG_STM32L4_FSMC_SRAM_HEAP)
+#  if CONFIG_MM_REGIONS < 3
+#    error you need at least 3 memory manager regions to support SRAM2 and FSMC
 #  endif
-
-#elif CONFIG_MM_REGIONS < 3
-
-#  if defined(CONFIG_STM32L4_FSMC_SRAM)
-#    warning FMC SRAM is NOT available for heap : not enough MM regions (2)
-#    undef CONFIG_STM32L4_FSMC_SRAM
-#  endif
-
-#elif CONFIG_MM_REGIONS > 3
-
-/*Everything can be mapped but some entries wont be used -> warn and correct*/
-#  warning "CONFIG_MM_REGIONS > 3 but I don't know what some of the region(s) are"
-#  undef CONFIG_MM_REGIONS
-#  define CONFIG_MM_REGIONS 3
-
-#else
-/*Everything can be mapped*/
 #endif
 
+#if defined(STM32L4_SRAM2_HEAP) || defined(CONFIG_STM32L4_FSMC_SRAM_HEAP)
+#  if CONFIG_MM_REGIONS < 2
+#    error you need at least 2 memory manager regions to support SRAM2 or FSMC
+#  endif
+#endif
+
+#if CONFIG_MM_REGIONS < 1
+#  warning you have no heap; malloc() will fail.  are you sure?
+#endif
 
 /* If FSMC SRAM is going to be used as heap, then verify that the starting
  * address and size of the external SRAM region has been provided in the
@@ -338,6 +303,8 @@ void up_allocate_kheap(FAR void **heap_start, size_t *heap_size)
 void up_addregion(void)
 {
 
+#ifdef CONFIG_STM32L4_SRAM2_HEAP
+
 #if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
 
   /* Allow user-mode access to the SRAM2 heap */
@@ -354,7 +321,9 @@ void up_addregion(void)
 
   kumm_addregion((FAR void *)SRAM2_START, SRAM2_END-SRAM2_START);
 
-#ifdef CONFIG_STM32L4_FSMC_SRAM
+#endif
+
+#ifdef CONFIG_STM32L4_FSMC_SRAM_HEAP
 #if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
 
   /* Allow user-mode access to the FSMC SRAM user heap memory */

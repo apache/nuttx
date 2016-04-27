@@ -523,7 +523,7 @@ void stm32l4_dmasetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
   /* define peripheral indicated in dmach->function */
 
   regval  = dmabase_getreg(dmach, STM32L4_DMA_CSELR_OFFSET);
-  regval &= (0x0f << (dmach->chan << 2));
+  regval &= ~(0x0f << (dmach->chan << 2));
   regval |= (dmach->function << (dmach->chan << 2));
   dmabase_putreg(dmach, STM32L4_DMA_CSELR_OFFSET, regval);
 }
