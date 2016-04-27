@@ -69,6 +69,34 @@ config STM32L4_FLASH_1024KB
 
 endchoice # Embedded FLASH size
 
+comment "SRAM2 Options"
+
+config STM32L4_SRAM2_HEAP
+	bool "SRAM2 is used for heap"
+	default n
+	select STM32L4_SRAM2_INIT
+	---help---
+		The STM32L4 SRAM2 region has special properties (power, protection, parity)
+		which may be used by the application for special purposes.  But if these
+		special properties are not needed, it may be instead added to the heap for
+		use by malloc().
+		NOTE: you must also select an appropriate number of memory regions in the
+		'Memory Management' section.
+
+config STM32L4_SRAM2_INIT
+	bool "SRAM2 is initialized to zero"
+	default n
+	---help---
+		The STM32L4 SRAM2 region has parity checking.  However, when the system
+		powers on, the memory is in an unknown state, and reads from uninitialized
+		memory can trigger parity faults from the random data.  This can be
+		avoided by first writing to all locations to force the parity into a valid
+		state.
+		However, if the SRAM2 is being used for it's battery-backed capability,
+		this may be undesireable (because it will destroy the contents).  In that
+		case, the board should handle the initialization itself at the appropriate
+		time.
+
 menu "STM32L4 Peripheral Support"
 
 # These "hidden" settings determine is a peripheral option is available for the
