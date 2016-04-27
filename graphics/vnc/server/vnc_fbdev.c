@@ -43,6 +43,14 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+
+#if defined(CONFIG_VNCSERVER_DEBUG) && !defined(CONFIG_DEBUG_GRAPHICS)
+#  undef  CONFIG_DEBUG
+#  undef  CONFIG_DEBUG_VERBOSE
+#  define CONFIG_DEBUG          1
+#  define CONFIG_DEBUG_VERBOSE  1
+#  define CONFIG_DEBUG_GRAPHICS 1
+#endif
 #include <debug.h>
 
 #include <nuttx/kthread.h>
@@ -481,7 +489,7 @@ static inline int vnc_wait_start(int display)
    */
 
  while (g_vnc_sessions[display] == NULL ||
-        g_vnc_sessions[display]->state != VNCSERVER_UNINITIALIZED)
+        g_vnc_sessions[display]->state == VNCSERVER_UNINITIALIZED)
     {
       /* The server is not yet running.  Wait for the server to post the FB
        * semaphore.  In certain error situations, the server may post the
@@ -869,7 +877,7 @@ void nx_notify_rectangle(FAR NX_PLANEINFOTYPE *pinfo,
     {
       /* Queue the rectangular update */
 
-      ret = vnc_update_rectangle(session, rect);
+      ret = vnc_update_rectangle(session, rect, true);
       if (ret < 0)
         {
           gdbg("ERROR: vnc_update_rectangle failed: %d\n", ret);

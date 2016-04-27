@@ -135,6 +135,8 @@ extern "C"
 #define EXTERN extern
 #endif
 
+/* Add nodes to queues */
+
 void sq_addfirst(FAR sq_entry_t *node, FAR sq_queue_t *queue);
 void dq_addfirst(FAR dq_entry_t *node, FAR dq_queue_t *queue);
 void sq_addlast(FAR sq_entry_t *node, FAR sq_queue_t *queue);
@@ -146,8 +148,12 @@ void dq_addafter(FAR dq_entry_t *prev, FAR dq_entry_t *node,
 void dq_addbefore(FAR dq_entry_t *next, FAR dq_entry_t *node,
                   FAR dq_queue_t *queue);
 
+/* Combine queues */
+
 void sq_cat(FAR sq_queue_t *queue1, FAR sq_queue_t *queue2);
 void dq_cat(FAR dq_queue_t *queue1, FAR dq_queue_t *queue2);
+
+/* Remove nodes from queues */
 
 FAR  sq_entry_t *sq_remafter(FAR sq_entry_t *node, FAR sq_queue_t *queue);
 void sq_rem(FAR sq_entry_t *node, FAR sq_queue_t *queue);
@@ -156,6 +162,11 @@ FAR  sq_entry_t *sq_remlast(FAR sq_queue_t *queue);
 FAR  dq_entry_t *dq_remlast(FAR dq_queue_t *queue);
 FAR  sq_entry_t *sq_remfirst(FAR sq_queue_t *queue);
 FAR  dq_entry_t *dq_remfirst(FAR dq_queue_t *queue);
+
+/* Count nodes in queues */
+
+size_t sq_count(FAR sq_queue_t *queue);
+size_t dq_count(FAR dq_queue_t *queue);
 
 #undef EXTERN
 #ifdef __cplusplus

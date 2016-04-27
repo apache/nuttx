@@ -48,6 +48,8 @@
 #define XK_LATIN1     1
 #define XK_XKB_KEYS   1
 
+#include <nuttx/nx/nx.h>
+#include <nuttx/video/vnc.h>
 #include <nuttx/input/x11_keysymdef.h>
 #include <nuttx/input/kbd_codec.h>
 
@@ -625,6 +627,28 @@ void vnc_key_map(FAR struct vnc_session_s *session, uint16_t keysym,
         }
     }
 #endif
+}
+
+/****************************************************************************
+ * Function: vnc_kbdout
+ *
+ * Description:
+ *   This is the default keyboard callout function.  This is simply wrappers around nx_kdbout(), respectively.  When configured using vnc_fbinitialize(), the 'arg' must be the correct NXHANDLE value.
+ *
+ * Parameters:
+ *   arg - The NXHANDLE from the NX graphics subsystem
+ *   nch - Number of characters
+ *   ch  - An array of input characters.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void vnc_kbdout(FAR void *arg, uint8_t nch, FAR const uint8_t *ch)
+{
+  DEBUGASSERT(arg != NULL);
+  (void)nx_kbdin((NXHANDLE)arg, nch, ch);
 }
 
 #endif /* CONFIG_NX_KBD */

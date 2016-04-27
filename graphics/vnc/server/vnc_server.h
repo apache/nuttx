@@ -246,14 +246,15 @@ struct vnc_session_s
   struct socket connect;       /* Connected socket */
   volatile uint8_t state;      /* See enum vnc_server_e */
   volatile uint8_t nwhupd;     /* Number of whole screen updates queued */
+  volatile bool change;        /* True: Frambebuffer data change since last whole screen update */
 
   /* Display geometry and color characteristics */
 
   uint8_t display;             /* Display number (for debug) */
   volatile uint8_t colorfmt;   /* Remote color format (See include/nuttx/fb.h) */
   volatile uint8_t bpp;        /* Remote bits per pixel */
-  volatile bool bigendian;     /* Remote expect data in big-endian format */
-  volatile bool rre;           /* Remote supports RRE encoding */
+  volatile bool bigendian;     /* True: Remote expect data in big-endian format */
+  volatile bool rre;           /* True: Remote supports RRE encoding */
   FAR uint8_t *fb;             /* Allocated local frame buffer */
 
   /* VNC client input support */
@@ -450,6 +451,7 @@ int vnc_stop_updater(FAR struct vnc_session_s *session);
  * Input Parameters:
  *   session - An instance of the session structure.
  *   rect    - The rectanglular region to be updated.
+ *   change  - True: Frame buffer data has changed
  *
  * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is returned on
@@ -458,7 +460,8 @@ int vnc_stop_updater(FAR struct vnc_session_s *session);
  ****************************************************************************/
 
 int vnc_update_rectangle(FAR struct vnc_session_s *session,
-                         FAR const struct nxgl_rect_s *rect);
+                         FAR const struct nxgl_rect_s *rect,
+                         bool change);
 
 /****************************************************************************
  * Name: vnc_receiver

@@ -46,6 +46,14 @@
 #include <queue.h>
 #include <assert.h>
 #include <errno.h>
+
+#if defined(CONFIG_VNCSERVER_DEBUG) && !defined(CONFIG_DEBUG_GRAPHICS)
+#  undef  CONFIG_DEBUG
+#  undef  CONFIG_DEBUG_VERBOSE
+#  define CONFIG_DEBUG          1
+#  define CONFIG_DEBUG_VERBOSE  1
+#  define CONFIG_DEBUG_GRAPHICS 1
+#endif
 #include <debug.h>
 
 #include <arpa/inet.h>
@@ -121,9 +129,16 @@ static void vnc_reset_session(FAR struct vnc_session_s *session,
 
   sem_reset(&session->freesem, CONFIG_VNCSERVER_NUPDATES);
   sem_reset(&session->queuesem, 0);
+
   session->fb      = fb;
   session->display = display;
   session->state   = VNCSERVER_INITIALIZED;
+  session->nwhupd  = 0;
+  session->change  = true;
+
+  /* Careful not to disturb the keyboard/mouse callouts set by
+   * vnc_fbinitialize().  Client related data left in garbage state.
+   */
 }
 
 /****************************************************************************
@@ -336,6 +351,7 @@ int vnc_server(int argc, FAR char *argv[])
 
           ret = vnc_receiver(session);
           gvdbg("Session terminated with %d\n", ret);
+          UNUSED(ret);
 
           /* Stop the VNC updater thread. */
 

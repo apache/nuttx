@@ -43,6 +43,14 @@
 #include <string.h>
 #include <errno.h>
 #include <assert.h>
+
+#if defined(CONFIG_VNCSERVER_DEBUG) && !defined(CONFIG_DEBUG_GRAPHICS)
+#  undef  CONFIG_DEBUG
+#  undef  CONFIG_DEBUG_VERBOSE
+#  define CONFIG_DEBUG          1
+#  define CONFIG_DEBUG_VERBOSE  1
+#  define CONFIG_DEBUG_GRAPHICS 1
+#endif
 #include <debug.h>
 
 #ifdef CONFIG_NET_SOCKOPTS
@@ -154,6 +162,11 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
       DEBUGASSERT(errcode > 0);
       return -errcode;
     }
+  else if (nrecvd == 0)
+    {
+      gdbg("Connection closed\n");
+      return -ECONNABORTED;
+    }
 
   DEBUGASSERT(nrecvd == len);
 
@@ -220,6 +233,11 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
       gdbg("ERROR: Receive SecurityType failed: %d\n", errcode);
       DEBUGASSERT(errcode > 0);
       return -errcode;
+    }
+  else if (nrecvd == 0)
+    {
+      gdbg("Connection closed\n");
+      return -ECONNABORTED;
     }
 
   DEBUGASSERT(nrecvd == sizeof(struct rfb_selected_sectype_s));
@@ -305,6 +323,11 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
       DEBUGASSERT(errcode > 0);
       return -errcode;
     }
+  else if (nrecvd == 0)
+    {
+      gdbg("Connection closed\n");
+      return -ECONNABORTED;
+    }
 
   DEBUGASSERT(nrecvd == sizeof(struct rfb_clientinit_s));
 
@@ -375,6 +398,11 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
       DEBUGASSERT(errcode > 0);
       return -errcode;
     }
+  else if (nrecvd == 0)
+    {
+      gdbg("Connection closed\n");
+      return -ECONNABORTED;
+    }
   else if (nrecvd != sizeof(struct rfb_setpixelformat_s))
     {
       /* Must not be a SetPixelFormat message? */
@@ -417,8 +445,13 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
       DEBUGASSERT(errcode > 0);
       return -errcode;
     }
+  else if (nrecvd == 0)
+    {
+      gdbg("Connection closed\n");
+      return -ECONNABORTED;
+    }
 
-  if (nrecvd > 0 && encodings->msgtype == RFB_SETENCODINGS_MSG)
+  if (encodings->msgtype == RFB_SETENCODINGS_MSG)
     {
       DEBUGASSERT(nrecvd >= SIZEOF_RFB_SETENCODINGS_S(0));
 
@@ -513,5 +546,6 @@ int vnc_client_pixelformat(FAR struct vnc_session_s *session,
       return -ENOSYS;
     }
 
+  session->change = true;
   return OK;
 }
