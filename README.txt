@@ -833,13 +833,28 @@ Re-building
   a file in one of the linked (i.e., copied) directories, re-build NuttX,
   and then not see your changes when you run the program.  That is because
   build is still using the version of the file in the copied directory, not
-  your modified file! To work around this annoying behavior, do the
-  following when you re-build:
+  your modified file!
+
+  Older versions of NuttX did not support dependiencies in this
+  configuration.  So a simple work around this annoying behavior in this
+  case was the following when you re-build:
 
      make clean_context all
 
   This 'make' command will remove of the copied directories, re-copy them,
   then make NuttX.
+
+  However, more recent versions of NuttX do support dependencies for the
+  Cygwin build.  As a result, the above command will cause everything to be
+  rebuilt (beause it removes and will cause recreating the
+  include/nuttx/config.h header file).  A much less gracefully but still
+  effective command in this case is the following for the ARM configuration:
+
+    rm -rf arch/arm/src/chip arch/arm/src/board
+
+  This "kludge" simple removes the copied directories.  These directories
+  will be re-created when you do a normal 'make' and your edits will then be
+  effective.
 
 Build Targets and Options
 -------------------------

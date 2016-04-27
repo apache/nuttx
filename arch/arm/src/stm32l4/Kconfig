@@ -69,6 +69,34 @@ config STM32L4_FLASH_1024KB
 
 endchoice # Embedded FLASH size
 
+comment "SRAM2 Options"
+
+config STM32L4_SRAM2_HEAP
+	bool "SRAM2 is used for heap"
+	default n
+	select STM32L4_SRAM2_INIT
+	---help---
+		The STM32L4 SRAM2 region has special properties (power, protection, parity)
+		which may be used by the application for special purposes.  But if these
+		special properties are not needed, it may be instead added to the heap for
+		use by malloc().
+		NOTE: you must also select an appropriate number of memory regions in the
+		'Memory Management' section.
+
+config STM32L4_SRAM2_INIT
+	bool "SRAM2 is initialized to zero"
+	default n
+	---help---
+		The STM32L4 SRAM2 region has parity checking.  However, when the system
+		powers on, the memory is in an unknown state, and reads from uninitialized
+		memory can trigger parity faults from the random data.  This can be
+		avoided by first writing to all locations to force the parity into a valid
+		state.
+		However, if the SRAM2 is being used for it's battery-backed capability,
+		this may be undesireable (because it will destroy the contents).  In that
+		case, the board should handle the initialization itself at the appropriate
+		time.
+
 menu "STM32L4 Peripheral Support"
 
 # These "hidden" settings determine is a peripheral option is available for the
@@ -79,7 +107,7 @@ config STM32L4_HAVE_LTDC
 	default n
 
 # These "hidden" settings are the OR of individual peripheral selections
-# indicating that the general capabilitiy is required.
+# indicating that the general capability is required.
 
 config STM32L4_ADC
 	bool
@@ -132,7 +160,6 @@ config STM32L4_DMA2
 	default n
 	select STM32L4_DMA
 	select ARCH_DMA
-
 
 config STM32L4_CRC
 	bool "CRC"
@@ -209,7 +236,119 @@ config STM32L4_QSPI_CSHT
 	---help---
 		The STM32L4 QSPI peripheral requires that it be specified the minimum number
 		of AHB cycles that Chip Select be held inactive between transactions.
-		
+
+choice
+	prompt "Transfer technique"
+	default STM32L4_QSPI_DMA
+	---help---
+		You can choose between using polling, interrupts, or DMA to transfer data
+		over the QSPI interface.
+
+config STM32L4_QSPI_POLLING
+	bool "Polling"
+	---help---
+		Use conventional register I/O with status polling to transfer data.
+
+config STM32L4_QSPI_INTERRUPTS
+	bool "Interrupts"
+	---help---
+		User interrupt driven I/O transfers.
+
+config STM32L4_QSPI_DMA
+	bool "DMA"
+	depends on STM32L4_DMA
+	---help---
+		Use DMA to improve QSPI transfer performance.
+
+endchoice
+
+choice
+	prompt "DMA Channel"
+	default STM32L4_QSPI_DMA_CHAN_1_5
+	depends on STM32L4_DMA
+	---help---
+		You can choose between two DMA channels for use with QSPI:
+		either DMA1 channel 5, or DMA2 channel 7.
+		If you only see one choice here, it is probably because
+		you have not also enabled the associated DMA controller.
+
+config STM32L4_QSPI_DMA_CHAN_1_5
+	bool "DMA1 Channel 5"
+	depends on STM32L4_DMA1
+	---help---
+		Use DMA1 channel 5 for QSPI.
+
+config STM32L4_QSPI_DMA_CHAN_2_7
+	bool "DMA2 Channel 7"
+	depends on STM32L4_DMA2
+	---help---
+		Use DMA2 channel 7 for QSPI.
+
+endchoice
+
+choice
+	prompt "DMA Priority"
+	default STM32L4_QSPI_DMAPRIORITY_MEDIUM
+	depends on STM32L4_DMA
+	---help---
+		The DMA controller supports priority levels.  You are probably fine
+		with the default of 'medium' except for special cases.  In the event
+		of contention between to channels at the same priority, the lower
+		numbered channel has hardware priority over the higher numbered one.
+
+config STM32L4_QSPI_DMAPRIORITY_VERYHIGH
+	bool "Very High priority"
+	depends on STM32L4_DMA
+	---help---
+		'Highest' priority.
+
+config STM32L4_QSPI_DMAPRIORITY_HIGH
+	bool "High priority"
+	depends on STM32L4_DMA
+	---help---
+		'High' priority.
+
+config STM32L4_QSPI_DMAPRIORITY_MEDIUM
+	bool "Medium priority"
+	depends on STM32L4_DMA
+	---help---
+		'Medium' priority.
+
+config STM32L4_QSPI_DMAPRIORITY_LOW
+	bool "Low priority"
+	depends on STM32L4_DMA
+	---help---
+		'Low' priority.
+
+endchoice
+
+config STM32L4_QSPI_DMATHRESHOLD
+	int "QSPI DMA threshold"
+	default 4
+	depends on STM32L4_QSPI_DMA
+	---help---
+		When QSPI DMA is enabled, small DMA transfers will still be performed
+		by polling logic.  This value is the threshold below which transfers
+		will still be performed by conventional register status polling.
+
+config STM32L4_QSPI_DMADEBUG
+	bool "QSPI DMA transfer debug"
+	depends on STM32L4_QSPI_DMA && DEBUG && DEBUG_DMA
+	default n
+	---help---
+		Enable special debug instrumentation to analyze QSPI DMA data transfers.
+		This logic is as non-invasive as possible:  It samples DMA
+		registers at key points in the data transfer and then dumps all of
+		the registers at the end of the transfer.
+
+config STM32L4_QSPI_REGDEBUG
+	bool "QSPI Register level debug"
+	depends on DEBUG
+	default n
+	---help---
+		Output detailed register-level QSPI device debug information.
+		Requires also DEBUG.
+
 endif
 
 comment "APB1 Peripherals"

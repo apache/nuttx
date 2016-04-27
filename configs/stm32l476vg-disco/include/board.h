@@ -144,16 +144,6 @@
 #define GPIO_QSPI_IO3        (GPIO_QSPI_BK1_IO3_2 | GPIO_FLOAT | GPIO_PUSHPULL | GPIO_SPEED_100MHz)
 #define GPIO_QSPI_SCK        (GPIO_QSPI_CLK_2 | GPIO_FLOAT | GPIO_PUSHPULL | GPIO_SPEED_100MHz)
 
-#if 0
-/* XXX hmm, elsewhere */
-
-#define QSPI_USE_INTERRUPTS  1
-
-/* XXX hmm, better? (2^(23+1)); this is the value that goes into FSIZE */
-
-#define QSPI_FLASH_SIZE      23
-#endif
-
 /* SPI */
 
 /* XXX is SPI1 used on Disco? */
