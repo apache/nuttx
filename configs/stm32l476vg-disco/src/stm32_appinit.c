@@ -212,9 +212,8 @@ FAR struct mtd_dev_s *mtd_temp;
       g_mtd_fs = mtd_temp;
         
 #ifdef CONFIG_MTD_PARTITION
-      /* Setup a partition of 256KiB for our file system.
-       *
-       */
+      /* Setup a partition of 256KiB for our file system. */
+
 #if defined(CONFIG_N25QXXX_SECTOR512)
       mtd_temp = mtd_partition(g_mtd_fs, 0, 512);
 #else
@@ -225,6 +224,7 @@ FAR struct mtd_dev_s *mtd_temp;
           SYSLOG("ERROR: mtd_partition failed\n");
           return ret;
         }
+
       g_mtd_fs = mtd_temp;
 #endif
 
@@ -265,8 +265,6 @@ FAR struct mtd_dev_s *mtd_temp;
 }
 #endif /* CONFIG_LIB_BOARDCTL */
 
-
-
 #ifdef CONFIG_BOARDCTL_IOCTL
 int board_ioctl(unsigned int cmd, uintptr_t arg)
 {
@@ -277,7 +275,7 @@ int board_ioctl(unsigned int cmd, uintptr_t arg)
         {
           struct qspi_meminfo_s meminfo;
 
-          /* set up the meminfo like a regular memory transaction, many of the fields
+          /* Set up the meminfo like a regular memory transaction, many of the fields
            * are not used, the others are to set up for the 'read' command that will
            * automatically be issued by the controller as needed.
            * 6 = CONFIG_N25QXXX_DUMMIES;
