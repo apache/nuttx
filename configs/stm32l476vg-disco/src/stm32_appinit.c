@@ -55,6 +55,7 @@
 #include <stm32l4_uart.h>
 
 #include <arch/board/board.h>
+#include <arch/board/boardctl.h>
 
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/ramdisk.h>
@@ -75,7 +76,7 @@
 #  include "stm32l4_rtc.h"
 #endif
 
-#if defined(HAVE_N25QXXX) || defined(HAVE_PROGMEM_CHARDEV)
+#if defined(HAVE_N25QXXX)
 #  include <nuttx/mtd/mtd.h>
 #endif
 
@@ -97,6 +98,23 @@
 #endif
 
 /****************************************************************************
+ * Private Type Definitions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+
+ /****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+#ifdef HAVE_N25QXXX
+FAR struct qspi_dev_s *g_qspi;
+FAR struct mtd_dev_s *g_mtd_fs;
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -112,15 +130,12 @@
 int board_app_initialize(void)
 {
 #ifdef HAVE_RTC_DRIVER
-  FAR struct rtc_lowerhalf_s *lower;
+  FAR struct rtc_lowerhalf_s *rtclower;
 #endif
-#ifdef HAVE_N25QXXX
-  FAR struct qspi_dev_s *qspi;
+#if defined(HAVE_N25QXXX)
+FAR struct mtd_dev_s *mtd_temp;
 #endif
-#if defined(HAVE_N25QXXX) || defined(HAVE_PROGMEM_CHARDEV)
-  FAR struct mtd_dev_s *mtd;
-#endif
-#if defined(HAVE_N25QXXX_CHARDEV) || defined(HAVE_PROGMEM_CHARDEV)
+#if defined(HAVE_N25QXXX_CHARDEV)
   char blockdev[18];
   char chardev[12];
 #endif
@@ -152,8 +167,8 @@ int board_app_initialize(void)
 #ifdef HAVE_RTC_DRIVER
   /* Instantiate the STM32 lower-half RTC driver */
 
-  lower = stm32l4_rtc_lowerhalf();
-  if (!lower)
+  rtclower = stm32l4_rtc_lowerhalf();
+  if (!rtclower)
     {
       sdbg("ERROR: Failed to instantiate the RTC lower-half driver\n");
       return -ENOMEM;
@@ -164,7 +179,7 @@ int board_app_initialize(void)
        * as /dev/rtc0
        */
 
-      ret = rtc_initialize(0, lower);
+      ret = rtc_initialize(0, rtclower);
       if (ret < 0)
         {
           sdbg("ERROR: Failed to bind/register the RTC driver: %d\n", ret);
@@ -176,10 +191,11 @@ int board_app_initialize(void)
 #ifdef HAVE_N25QXXX
   /* Create an instance of the STM32L4 QSPI device driver */
 
-  qspi = stm32l4_qspi_initialize(0);
-  if (!qspi)
+  g_qspi = stm32l4_qspi_initialize(0);
+  if (!g_qspi)
     {
-      SYSLOG("ERROR: sam_qspi_initialize failed\n");
+      SYSLOG("ERROR: stm32l4_qspi_initialize failed\n");
+      return ret;
     }
   else
     {
@@ -187,45 +203,34 @@ int board_app_initialize(void)
        * N25QXXX device.
        */
 
-      mtd = n25qxxx_initialize(qspi, true);
-      if (!mtd)
+      mtd_temp = n25qxxx_initialize(g_qspi, true);
+      if (!mtd_temp)
         {
           SYSLOG("ERROR: n25qxxx_initialize failed\n");
-        }
-
-#ifdef HAVE_N25QXXX_SMARTFS
-      /* Configure the device with no partition support */
-
-      SYSLOG("doing smart_initialize()\n");
-      ret = smart_initialize(N25QXXX_SMART_MINOR, mtd, NULL);
-      if (ret != OK)
-        {
-          SYSLOG("ERROR: Failed to initialize SmartFS: %d\n", ret);
-        }
-
-#elif defined(HAVE_N25QXXX_NXFFS)
-      /* Initialize to provide NXFFS on the N25QXXX MTD interface */
-
-      SYSLOG("doing nxffs_initialize()\n");
-      ret = nxffs_initialize(mtd);
-      if (ret < 0)
-        {
-         SYSLOG("ERROR: NXFFS initialization failed: %d\n", ret);
-        }
-
-      /* Mount the file system at /mnt/n25qxxx */
-
-      ret = mount(NULL, "/mnt/n25qxxx", "nxffs", 0, NULL);
-      if (ret < 0)
-        {
-          SYSLOG("ERROR: Failed to mount the NXFFS volume: %d\n", errno);
           return ret;
         }
+      g_mtd_fs = mtd_temp;
+        
+#ifdef CONFIG_MTD_PARTITION
+      /* Setup a partition of 256KiB for our file system.
+       *
+       */
+#if defined(CONFIG_N25QXXX_SECTOR512)
+      mtd_temp = mtd_partition(g_mtd_fs, 0, 512);
+#else
+      mtd_temp = mtd_partition(g_mtd_fs, 0, 64);
+#endif
+      if (!g_mtd_fs)
+        {
+          SYSLOG("ERROR: mtd_partition failed\n");
+          return ret;
+        }
+      g_mtd_fs = mtd_temp;
+#endif
 
-#else /* if  defined(HAVE_N25QXXX_CHARDEV) */
       /* Use the FTL layer to wrap the MTD driver as a block driver */
 
-      ret = ftl_initialize(N25QXXX_MTD_MINOR, mtd);
+      ret = ftl_initialize(N25QXXX_MTD_MINOR, g_mtd_fs);
       if (ret < 0)
         {
           SYSLOG("ERROR: Failed to initialize the FTL layer: %d\n", ret);
@@ -244,9 +249,7 @@ int board_app_initialize(void)
        * visible setting, but you can make it set by selecting an
        * arbitrary writable file system (you don't have to actually
        * use it, just select it so that the block device created via
-       * ftl_initialize() will be writable).  Personally, I chose FAT,
-       * because SMARTFS and NXFFS will cause the other code branches
-       * above to become active.
+       * ftl_initialize() will be writable).
        */
 
       ret = bchdev_register(blockdev, chardev, false);
@@ -255,7 +258,6 @@ int board_app_initialize(void)
           SYSLOG("ERROR: bchdev_register %s failed: %d\n", chardev, ret);
           return ret;
         }
-#endif
     }
 #endif
 
@@ -268,6 +270,43 @@ int board_app_initialize(void)
 #ifdef CONFIG_BOARDCTL_IOCTL
 int board_ioctl(unsigned int cmd, uintptr_t arg)
 {
+  switch(cmd)
+    {
+#ifdef HAVE_N25QXXX
+      case BIOC_ENTER_MEMMAP:
+        {
+          struct qspi_meminfo_s meminfo;
+
+          /* set up the meminfo like a regular memory transaction, many of the fields
+           * are not used, the others are to set up for the 'read' command that will
+           * automatically be issued by the controller as needed.
+           * 6 = CONFIG_N25QXXX_DUMMIES;
+           * 0xeb = N25QXXX_FAST_READ_QUADIO;
+           */
+          
+          meminfo.flags   = QSPIMEM_READ | QSPIMEM_QUADIO;
+          meminfo.addrlen = 3;
+          meminfo.dummies = 6;    //CONFIG_N25QXXX_DUMMIES;
+          meminfo.cmd     = 0xeb;//N25QXXX_FAST_READ_QUADIO;
+          meminfo.addr    = 0;
+          meminfo.buflen  = 0;
+          meminfo.buffer  = NULL;
+          
+          stm32l4_qspi_enter_memorymapped(g_qspi, &meminfo, 80000000);
+        }
+        break;
+      
+      case BIOC_EXIT_MEMMAP:
+        stm32l4_qspi_exit_memorymapped(g_qspi);
+        break;
+      
+#endif
+      
+      default:
+          return -EINVAL;
+        break;
+    }
+
     return OK;
 }
 #endif
