@@ -5433,7 +5433,12 @@ int smart_initialize(int minor, FAR struct mtd_dev_s *mtd, FAR const char *partn
 
       /* Do a scan of the device */
 
-      smart_scan(dev);
+      ret = smart_scan(dev);
+      if (ret < 0)
+        {
+          fdbg("smart_scan failed: %d\n", -ret);
+          goto errout;
+        }
     }
 
 #ifdef CONFIG_SMART_DEV_LOOP
