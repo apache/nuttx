@@ -298,7 +298,7 @@ int mount(FAR const char *source, FAR const char *target,
        * incremented.
        */
 
-      DEBUGASSERT(mountpt_inode->u.i_mops == NULL);
+      DEBUGASSERT(mountpt_inode->u.i_mops != NULL);
     }
   else
 #endif
