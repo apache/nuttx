@@ -920,6 +920,7 @@ static ssize_t proc_groupfd(FAR struct proc_file_s *procfile,
 
 #if CONFIG_NFILE_DESCRIPTORS > 0 /* Guaranteed to be true */
   linesize   = snprintf(procfile->line, STATUS_LINELEN, "\n%-3s %-8s %s\n",
+                        "FD", "POS", "OFLAGS");
   copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining, &offset);
 
   totalsize += copysize;

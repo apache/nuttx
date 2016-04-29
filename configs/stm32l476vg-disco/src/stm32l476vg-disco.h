@@ -59,7 +59,6 @@
 #define HAVE_N25QXXX_NXFFS    1
 #define HAVE_N25QXXX_SMARTFS  1
 #define HAVE_N25QXXX_CHARDEV  1
-#define HAVE_PROGMEM_CHARDEV  1
 
 #if !defined(CONFIG_FS_PROCFS)
 #  undef HAVE_PROC
@@ -106,12 +105,6 @@
 
 #if defined(HAVE_N25QXXX_NXFFS) || defined(HAVE_N25QXXX_SMARTFS)
 #  undef HAVE_N25QXXX_CHARDEV
-#endif
-
-/* On-chip Programming Memory */
-
-#if !defined(CONFIG_STM32L4_PROGMEM) || !defined(CONFIG_MTD_PROGMEM)
-#  undef HAVE_PROGMEM_CHARDEV
 #endif
 
 /* If both the N25QXXX FLASH and SmartFS, then this is the minor device
