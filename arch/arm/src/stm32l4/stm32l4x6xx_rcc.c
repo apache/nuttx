@@ -594,7 +594,7 @@ static void stm32l4_stdclockconfig(void)
   /* setting MSIRANGE */
 
   regval  = getreg32(STM32L4_RCC_CR);
-  regval |= (STM32L4_BOARD_MSIRANGE | RCC_CR_MSION);    /* Enable MSI and frequ */
+  regval |= (STM32L4_BOARD_MSIRANGE | RCC_CR_MSION);    /* Enable MSI and frequency */
   putreg32(regval, STM32L4_RCC_CR);
 
   /* Wait until the MSI is ready (or until a timeout elapsed) */
@@ -854,7 +854,7 @@ static void stm32l4_stdclockconfig(void)
        * and we need to ensure it is first off before doing so.
        */
 
-      /* turn on the LSE oscillator
+      /* Turn on the LSE oscillator
        * XXX this will almost surely get moved since we also want to use
        * this for automatically trimming MSI, etc.
        */
@@ -862,7 +862,7 @@ static void stm32l4_stdclockconfig(void)
       stm32l4_rcc_enablelse();
 
 #  if defined(STM32L4_BOARD_USEMSI)
-      /* now that LSE is up, auto trim the MSI */
+      /* Now that LSE is up, auto trim the MSI */
 
       regval  = getreg32(STM32L4_RCC_CR);
       regval |= RCC_CR_MSIPLLEN;
