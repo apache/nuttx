@@ -120,8 +120,8 @@
 
 /* Clock control register */
 
-#define RCC_CR_MSION                (1 << 0)  /* Bit 0: Internal Medium Speed clock enable */
-#define RCC_CR_MSIRDY               (1 << 1)  /* Bit 1: Internal Medium Speed clock ready flag */
+#define RCC_CR_MSION                (1 << 0)  /* Bit 0: Internal Multi Speed clock enable */
+#define RCC_CR_MSIRDY               (1 << 1)  /* Bit 1: Internal Multi Speed clock ready flag */
 #define RCC_CR_MSIPLLEN             (1 << 2)  /* Bit 2: MSI clock PLL enable */
 #define RCC_CR_MSIRGSEL             (1 << 3)  /* Bit 2: MSI clock range selection */
 #define RCC_CR_MSIRANGE_SHIFT       (4)       /* Bits 7-4: MSI clock range */
@@ -161,9 +161,9 @@
 #define RCC_CR_HSITRIM_MASK         (0x1f << RCC_CR_HSITRIM_SHIFT)
 #define RCC_CR_HSICAL_SHIFT         (16)      /* Bits 23-16: Internal High Speed clock Calibration */
 #define RCC_CR_HSICAL_MASK          (0xff << RCC_CR_HSICAL_SHIFT)
-#define RCC_CR_MSITRIM_SHIFT        (8)       /* Bits 15-8: Internal Medium Speed clock trimming */
+#define RCC_CR_MSITRIM_SHIFT        (8)       /* Bits 15-8: Internal Multi Speed clock trimming */
 #define RCC_CR_MSITRIM_MASK         (0xff << RCC_CR_MSITRIM_SHIFT)
-#define RCC_CR_MSICAL_SHIFT         (0)       /* Bits 7-0: Internal Menium Speed clock Calibration */
+#define RCC_CR_MSICAL_SHIFT         (0)       /* Bits 7-0: Internal Multi Speed clock Calibration */
 #define RCC_CR_MSICAL_MASK          (0xff << RCC_CR_MSICAL_SHIFT)
 
 /* Clock configuration register */
