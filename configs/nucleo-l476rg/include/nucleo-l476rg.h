@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/nucleo-l476rg/include/nucleo-l476rg.h
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,18 +50,18 @@
  ************************************************************************************/
 
 #if 1
-#define HSI_CLOCK_CONFIG            /* HSI-16 clock configuration */
+#  define HSI_CLOCK_CONFIG          /* HSI-16 clock configuration */
 #elif 0
-/* make sure you installed one! */
-#define HSE_CLOCK_CONFIG            /* HSE with 8 MHz xtal */
+/* Make sure you installed one! */
+
+#  define HSE_CLOCK_CONFIG          /* HSE with 8 MHz xtal */
 #else
-#define MSI_CLOCK_CONFIG            /* MSI @ 4 MHz autotrimmed via LSE */
+#  define MSI_CLOCK_CONFIG          /* MSI @ 4 MHz autotrimmed via LSE */
 #endif
 
 /* Clocking *************************************************************************/
 
 #if defined(HSI_CLOCK_CONFIG)
-
 /* The NUCLEOL476RG supports both HSE and LSE crystals (X2 and X3).  However, as
  * shipped, the X3 crystal is not populated.  Therefore the Nucleo-L476RG
  * will need to run off the 16MHz HSI clock, or the 32khz-synced MSI.
@@ -304,7 +304,7 @@
 
 #elif defined(HSE_CLOCK_CONFIG)
 
-/* use the HSE */
+/* Use the HSE */
 
 #define STM32L4_BOARD_USEHSE      1
 
@@ -312,7 +312,7 @@
 
 /* XXX pll source mux = hse */
 
-/* prescaler common to all PLL inputs */
+/* Prescaler common to all PLL inputs */
 
 #define STM32L4_PLLCFG_PLLM             RCC_PLLCFG_PLLM(1)
 
@@ -346,22 +346,22 @@
 
 #define STM32L4_SYSCLK_FREQUENCY  80000000ul
 
-/* enable CLK48; get it from PLLSAI1 */
+/* Enable CLK48; get it from PLLSAI1 */
 
 #define STM32L4_USE_CLK48
 #define STM32L4_CLK48_SEL         RCC_CCIPR_CLK48SEL_PLLSAI1
 
-/* enable LSE (for the RTC) */
+/* Enable LSE (for the RTC) */
 
 #define STM32L4_USE_LSE           1
 
-/* configure the HCLK divisor (for the AHB bus, core, memory, and DMA */
+/* Configure the HCLK divisor (for the AHB bus, core, memory, and DMA */
 
 #define STM32L4_RCC_CFGR_HPRE     RCC_CFGR_HPRE_SYSCLK      /* HCLK  = SYSCLK / 1 */
 #define STM32L4_HCLK_FREQUENCY    STM32L4_SYSCLK_FREQUENCY
 #define STM32L4_BOARD_HCLK        STM32L4_HCLK_FREQUENCY      /* Same as above, to satisfy compiler */
 
-/* configure the APB1 prescaler */
+/* Configure the APB1 prescaler */
 
 #define STM32L4_RCC_CFGR_PPRE1    RCC_CFGR_PPRE1_HCLK       /* PCLK1 = HCLK / 1 */
 #define STM32L4_PCLK1_FREQUENCY   (STM32L4_HCLK_FREQUENCY/1)
@@ -373,7 +373,7 @@
 #define STM32L4_APB1_TIM6_CLKIN   (2*STM32L4_PCLK1_FREQUENCY)
 #define STM32L4_APB1_TIM7_CLKIN   (2*STM32L4_PCLK1_FREQUENCY)
 
-/* configure the APB2 prescaler */
+/* Configure the APB2 prescaler */
 
 #define STM32L4_RCC_CFGR_PPRE2    RCC_CFGR_PPRE2_HCLK       /* PCLK2 = HCLK / 1 */
 #define STM32L4_PCLK2_FREQUENCY   (STM32L4_HCLK_FREQUENCY/1)
@@ -383,7 +383,7 @@
 
 #elif defined(MSI_CLOCK_CONFIG)
 
-/* use the MSI; frequ = 4 MHz; autotrim from LSE */
+/* Use the MSI; frequ = 4 MHz; autotrim from LSE */
 
 #define STM32L4_BOARD_USEMSI      1
 #define STM32L4_BOARD_MSIRANGE    RCC_CR_MSIRANGE_4M
@@ -426,22 +426,22 @@
 
 #define STM32L4_SYSCLK_FREQUENCY  80000000ul
 
-/* enable CLK48; get it from PLLSAI1 */
+/* Enable CLK48; get it from PLLSAI1 */
 
 #define STM32L4_USE_CLK48
 #define STM32L4_CLK48_SEL         RCC_CCIPR_CLK48SEL_PLLSAI1
 
-/* enable LSE (for the RTC) */
+/* Enable LSE (for the RTC) */
 
 #define STM32L4_USE_LSE           1
 
-/* configure the HCLK divisor (for the AHB bus, core, memory, and DMA */
+/* Configure the HCLK divisor (for the AHB bus, core, memory, and DMA */
 
 #define STM32L4_RCC_CFGR_HPRE     RCC_CFGR_HPRE_SYSCLK      /* HCLK  = SYSCLK / 1 */
 #define STM32L4_HCLK_FREQUENCY    STM32L4_SYSCLK_FREQUENCY
 #define STM32L4_BOARD_HCLK        STM32L4_HCLK_FREQUENCY      /* Same as above, to satisfy compiler */
 
-/* configure the APB1 prescaler */
+/* Configure the APB1 prescaler */
 
 #define STM32L4_RCC_CFGR_PPRE1    RCC_CFGR_PPRE1_HCLK       /* PCLK1 = HCLK / 1 */
 #define STM32L4_PCLK1_FREQUENCY   (STM32L4_HCLK_FREQUENCY/1)
@@ -453,7 +453,7 @@
 #define STM32L4_APB1_TIM6_CLKIN   (2*STM32L4_PCLK1_FREQUENCY)
 #define STM32L4_APB1_TIM7_CLKIN   (2*STM32L4_PCLK1_FREQUENCY)
 
-/* configure the APB2 prescaler */
+/* Configure the APB2 prescaler */
 
 #define STM32L4_RCC_CFGR_PPRE2    RCC_CFGR_PPRE2_HCLK       /* PCLK2 = HCLK / 1 */
 #define STM32L4_PCLK2_FREQUENCY   (STM32L4_HCLK_FREQUENCY/1)
