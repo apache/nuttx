@@ -525,13 +525,20 @@ static int rtc_setup(void)
 #ifdef CONFIG_STM32L4_RTC_HSECLOCK
       /* For a 1 MHz clock this yields 0.9999360041 Hz on the second
        * timer - which is pretty close.
+       * NOTE: max HSE is 4 MHz if it is to be used with RTC
        */
 
       putreg32(((uint32_t)7812 << RTC_PRER_PREDIV_S_SHIFT) |
               ((uint32_t)0x7f << RTC_PRER_PREDIV_A_SHIFT),
               STM32L4_RTC_PRER);
-#else
-      /* Correct values for 32.768 KHz LSE clock and inaccurate LSI clock */
+#elif defined(CONFIG_STM32L4_RTC_LSICLOCK)
+      /* Suitable values for 32.000 KHz LSI clock (29.5 - 34 KHz, though) */
+
+      putreg32(((uint32_t)0xf9 << RTC_PRER_PREDIV_S_SHIFT) |
+              ((uint32_t)0x7f << RTC_PRER_PREDIV_A_SHIFT),
+              STM32L4_RTC_PRER);
+#else /* defined(CONFIG_STM32L4_RTC_LSECLOCK) */
+      /* Correct values for 32.768 KHz LSE clock */
 
       putreg32(((uint32_t)0xff << RTC_PRER_PREDIV_S_SHIFT) |
               ((uint32_t)0x7f << RTC_PRER_PREDIV_A_SHIFT),
@@ -631,7 +638,7 @@ static int stm32l4_rtc_alarm_handler(int irq, void *context)
             }
 
           isr  = getreg32(STM32L4_RTC_ISR) & ~RTC_ISR_ALRAF;
-          putreg32(isr, STM32L4_RTC_CR);
+          putreg32(isr, STM32L4_RTC_ISR);
         }
     }
 
@@ -655,7 +662,7 @@ static int stm32l4_rtc_alarm_handler(int irq, void *context)
             }
 
           isr  = getreg32(STM32L4_RTC_ISR) & ~RTC_ISR_ALRBF;
-          putreg32(isr, STM32L4_RTC_CR);
+          putreg32(isr, STM32L4_RTC_ISR);
         }
     }
 
@@ -1355,6 +1362,8 @@ int stm32l4_rtc_setalarm(FAR struct alm_setalarm_s *alminfo)
         rtcvdbg("ERROR: Invalid ALARM%d\n", alminfo->as_id);
         break;
     }
+
+  rtc_dumpregs("After alarm setting");
 
   return ret;
 }
