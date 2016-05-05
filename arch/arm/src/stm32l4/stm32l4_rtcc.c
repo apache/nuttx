@@ -636,10 +636,12 @@ static int stm32l4_rtc_alarm_handler(int irq, void *context)
 
               cb(arg, RTC_ALARMA);
             }
-
-          isr  = getreg32(STM32L4_RTC_ISR) & ~RTC_ISR_ALRAF;
-          putreg32(isr, STM32L4_RTC_ISR);
         }
+
+      /* note, bits 8-13 do /not/ require the write enable procedure */
+
+      isr  = getreg32(STM32L4_RTC_ISR) & ~RTC_ISR_ALRAF;
+      putreg32(isr, STM32L4_RTC_ISR);
     }
 
   if ((isr & RTC_ISR_ALRBF) != 0)
@@ -660,10 +662,12 @@ static int stm32l4_rtc_alarm_handler(int irq, void *context)
 
               cb(arg, RTC_ALARMB);
             }
-
-          isr  = getreg32(STM32L4_RTC_ISR) & ~RTC_ISR_ALRBF;
-          putreg32(isr, STM32L4_RTC_ISR);
         }
+
+      /* note, bits 8-13 do /not/ require the write enable procedure */
+
+      isr  = getreg32(STM32L4_RTC_ISR) & ~RTC_ISR_ALRBF;
+      putreg32(isr, STM32L4_RTC_ISR);
     }
 
   return ret;
@@ -754,6 +758,7 @@ static int rtchw_check_alrbwf(void)
 #ifdef CONFIG_RTC_ALARM
 static int rtchw_set_alrmar(rtc_alarmreg_t alarmreg)
 {
+  int isr;
   int ret = -EBUSY;
 
   /* Need to allow RTC register write
@@ -778,6 +783,11 @@ static int rtchw_set_alrmar(rtc_alarmreg_t alarmreg)
   rtcvdbg("  TR: %08x ALRMAR: %08x\n",
           getreg32(STM32L4_RTC_TR), getreg32(STM32L4_RTC_ALRMAR));
 
+  /* ensure Alarm A flag reset; this is edge triggered */
+  
+  isr  = getreg32(STM32L4_RTC_ISR) & ~RTC_ISR_ALRAF;
+  putreg32(isr, STM32L4_RTC_ISR);
+
   /* Enable RTC alarm A */
 
   modifyreg32(STM32L4_RTC_CR, 0, (RTC_CR_ALRAE | RTC_CR_ALRAIE));
@@ -791,6 +801,7 @@ errout_with_wprunlock:
 #ifdef CONFIG_RTC_ALARM
 static int rtchw_set_alrmbr(rtc_alarmreg_t alarmreg)
 {
+  int isr;
   int ret = -EBUSY;
 
   /* Need to allow RTC register write
@@ -814,6 +825,11 @@ static int rtchw_set_alrmbr(rtc_alarmreg_t alarmreg)
   putreg32(alarmreg, STM32L4_RTC_ALRMBR);
   rtcvdbg("  TR: %08x ALRMBR: %08x\n",
           getreg32(STM32L4_RTC_TR), getreg32(STM32L4_RTC_ALRMBR));
+
+  /* ensure Alarm B flag reset; this is edge triggered */
+  
+  isr  = getreg32(STM32L4_RTC_ISR) & ~RTC_ISR_ALRBF;
+  putreg32(isr, STM32L4_RTC_ISR);
 
   /* Enable RTC alarm B */
 
@@ -1420,6 +1436,7 @@ int stm32l4_rtc_cancelalarm(enum alm_id_e alarmid)
           /* Unset the alarm */
 
           putreg32(-1, STM32L4_RTC_ALRMAR);
+          modifyreg32(STM32L4_RTC_ISR, RTC_ISR_ALRAF, 0);
           rtc_wprlock();
           ret = OK;
         }
@@ -1451,6 +1468,7 @@ int stm32l4_rtc_cancelalarm(enum alm_id_e alarmid)
           /* Unset the alarm */
 
           putreg32(-1, STM32L4_RTC_ALRMBR);
+          modifyreg32(STM32L4_RTC_ISR, RTC_ISR_ALRBF, 0);
           rtc_wprlock();
       ret = OK;
     }
