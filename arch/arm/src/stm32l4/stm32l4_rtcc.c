@@ -114,8 +114,8 @@
    (rtc_bin2bcd((tm)->tm_min)  << RTC_ALRMR_MNU_SHIFT) | \
    (rtc_bin2bcd((tm)->tm_hour) << RTC_ALRMR_HU_SHIFT))
 
-#define RTC_ALRMR_ENABLE              (0)
-
+/* need to ignore DATE/DOW part of alarm; rtc_reg_alrmr_bin2bcd only encodes hms */
+#define RTC_ALRMR_ENABLE              (0x80000000)
 
 /* Debug ****************************************************************************/
 
@@ -527,7 +527,7 @@ static int rtc_setup(void)
        * timer - which is pretty close.
        */
 
-      putreg32(((uint32_t)7182 << RTC_PRER_PREDIV_S_SHIFT) |
+      putreg32(((uint32_t)7812 << RTC_PRER_PREDIV_S_SHIFT) |
               ((uint32_t)0x7f << RTC_PRER_PREDIV_A_SHIFT),
               STM32L4_RTC_PRER);
 #else
