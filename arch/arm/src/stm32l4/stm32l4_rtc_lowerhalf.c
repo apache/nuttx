@@ -34,8 +34,6 @@
  *
  ****************************************************************************/
 
-/* REVISIT:  This driver is *not* thread-safe! */
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
@@ -89,6 +87,8 @@ struct stm32l4_lowerhalf_s
   /* Data following is private to this driver and not visible outside of
    * this file.
    */
+
+  sem_t devsem;         /* Threads can only exclusively access the RTC */
 
 #ifdef CONFIG_RTC_ALARM
   /* Alarm callback information */
@@ -218,12 +218,25 @@ static void stm32l4_alarm_callback(FAR void *arg, unsigned int alarmid)
 static int stm32l4_rdtime(FAR struct rtc_lowerhalf_s *lower,
                           FAR struct rtc_time *rtctime)
 {
+  FAR struct stm32l4_lowerhalf_s *priv;
+  int ret;
+
+  priv = (FAR struct stm32l4_lowerhalf_s *)lower;
+
+  if (sem_wait(&priv->devsem) != OK)
+   {
+     return -errno;
+   }
+
   /* This operation depends on the fact that struct rtc_time is cast
    * compatible with struct tm.
    */
 
-  return up_rtc_getdatetime((FAR struct tm *)rtctime);
+  ret = up_rtc_getdatetime((FAR struct tm *)rtctime);
 
+  sem_post(&priv->devsem);
+  
+  return ret;
 }
 
 /****************************************************************************
@@ -245,11 +258,25 @@ static int stm32l4_rdtime(FAR struct rtc_lowerhalf_s *lower,
 static int stm32l4_settime(FAR struct rtc_lowerhalf_s *lower,
                            FAR const struct rtc_time *rtctime)
 {
+  FAR struct stm32l4_lowerhalf_s *priv;
+  int ret;
+
+  priv = (FAR struct stm32l4_lowerhalf_s *)lower;
+
+  if (sem_wait(&priv->devsem) != OK)
+   {
+     return -errno;
+   }
+
    /* This operation depends on the fact that struct rtc_time is cast
    * compatible with struct tm.
    */
 
-  return stm32l4_rtc_setdatetime((FAR const struct tm *)rtctime);
+  ret = stm32l4_rtc_setdatetime((FAR const struct tm *)rtctime);
+  
+  sem_post(&priv->devsem);
+
+  return ret;
 }
 
 /****************************************************************************
@@ -284,6 +311,11 @@ static int stm32l4_setalarm(FAR struct rtc_lowerhalf_s *lower,
   DEBUGASSERT(alarminfo->id == RTC_ALARMA || alarminfo->id == RTC_ALARMB);
   priv = (FAR struct stm32l4_lowerhalf_s *)lower;
 
+  if (sem_wait(&priv->devsem) != OK)
+   {
+     return -errno;
+   }
+
   if (alarminfo->id == RTC_ALARMA || alarminfo->id == RTC_ALARMB)
     {
       /* Remember the callback information */
@@ -310,7 +342,7 @@ static int stm32l4_setalarm(FAR struct rtc_lowerhalf_s *lower,
         }
     }
 
-
+  sem_post(&priv->devsem);
 
   return ret;
 }
@@ -417,6 +449,11 @@ static int stm32l4_cancelalarm(FAR struct rtc_lowerhalf_s *lower, int alarmid)
   DEBUGASSERT(alarmid == RTC_ALARMA || alarmid == RTC_ALARMB);
   priv = (FAR struct stm32l4_lowerhalf_s *)lower;
 
+  if (sem_wait(&priv->devsem) != OK)
+   {
+     return -errno;
+   }
+
   /* ID0-> Alarm A; ID1 -> Alarm B */
 
   if (alarmid == RTC_ALARMA || alarmid == RTC_ALARMB)
@@ -431,6 +468,8 @@ static int stm32l4_cancelalarm(FAR struct rtc_lowerhalf_s *lower, int alarmid)
 
       ret = stm32l4_rtc_cancelalarm((enum alm_id_e)alarmid);
     }
+
+  sem_post(&priv->devsem);
 
   return ret;
 }
@@ -464,6 +503,8 @@ static int stm32l4_cancelalarm(FAR struct rtc_lowerhalf_s *lower, int alarmid)
 
 FAR struct rtc_lowerhalf_s *stm32l4_rtc_lowerhalf(void)
 {
+  sem_init(&g_rtc_lowerhalf.devsem, 0, 1);
+
   return (FAR struct rtc_lowerhalf_s *)&g_rtc_lowerhalf;
 }
 
