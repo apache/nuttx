@@ -1,7 +1,7 @@
 #!/bin/bash
 # tools/mkexport.sh
 #
-#   Copyright (C) 2011-2012, 2014 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2011-2012, 2014, 2016 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -113,6 +113,12 @@ fi
 if [ ! -f "${TOPDIR}/.version" ]; then
 	echo "MK: File ${TOPDIR}/.version does not exist"
 	exit 1
+fi
+
+# Check if the make environment variable has been defined
+
+if [ -z "${MAKE}" ]; then
+	MAKE=`which make`
 fi
 
 # Get the version string
