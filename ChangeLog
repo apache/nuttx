@@ -11670,8 +11670,38 @@
 	  Lorquet (2016-04-20).
 	* arch/arm/src/stm32 and configs/stm32f429i-disco:  Correct some bad
 	  commits that broke the LTDC display example.  From Marco Krahl
-          (2016-04-22).
-	* configs/samv71-xult/vnwwm:  Add a more complex NxWM configuration
+	  (2016-04-22).
+	* configs/samv71-xult/vncwwm:  Add a more complex NxWM configuration
 	  to support further VNC testing (particularly of VNC keyboard and
-          mouse intputs).  Initial configuration is not functional (2016-04-23).
-
+	  mouse inputs).  Initial configuration is not functional (2016-04-23).
+	* arch/arm/src/stm32l4: Add support for QSPI DMA. From Dave
+	  dev@ziggurat29.com (2016-04-24).
+	* configs/stm32l476vg-disco: Update stm32l4 disco board to reflect QSPI
+	  DMA support. From Dave dev@ziggurat29.com (2016-04-24).
+	* arch/arm/src/stm32l4: Add configuration options to allow SRAM2 to be
+	  used for heap, or not at all, and to zero-init it on OS start, or not
+	  at all. From Dave dev@ziggurat29.com (2016-04-24).
+	* drviers/mtd/smart.c:  Return code of smart_scan not checked, can
+	  cause success result in failure case, leading to 'dev' pointer being
+	  invalid. From Dave dev@ziggurat29.com (2016-04-27).
+	* arch/arm/src/stm32l4: Add support for QSPI memory mapped mode. From
+	  Dave dev@ziggurat29.com (2016-04-27).
+	* configs/stm32l476vg-disco: Add board ioctls for allowing user
+	  application to cause QSPI memory mapped mode to be engaged and
+	  disengaged.  Also partitioned QSPI flash for file system and other 
+	 (eventually xip).  From Dave dev@ziggurat29.com (2016-04-27).
+	* fs/mount: Fix a backward debug assertion.  Noted by David Sidrane
+	  (2016-04-29).
+	* arch/arm/src/stm32l4: Add support for HSE and MSI clocks, and auto
+	  trim of MSI to LSE (needed for USB).  From Dave dev@ziggurat29.com
+	  (2016-04-29).
+	* arch/arm/src/stm32l4: Add support for unique id function to arch;
+	  modified board to support unique id boardctl.  From Dave
+	  dev@ziggurat29.com (2016-05-03).
+	* Makefile.unix and tools/mkexport.sh: Pass toplevel make to the
+	  script to allow -j greater than 1.  From David Sidrane (2016-05-04).
+	* arch/arm/src/stm32, sm32f7, stm32l4: Fix typo in variable name in
+	  serial BREAK logic.  Review other serial implementations for similar
+	  naming problems. (2016-05-05).
+	* arch/arm/src/samv7:  Fix typo in MATRIX register definitions.  From
+	  Stefan Kolb (2016-05-06).
