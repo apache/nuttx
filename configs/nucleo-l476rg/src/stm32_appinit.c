@@ -55,6 +55,11 @@
 
 #include "nucleo-l476rg.h"
 
+#ifdef HAVE_RTC_DRIVER
+#  include <nuttx/timers/rtc.h>
+#  include "stm32l4_rtc.h"
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -83,14 +88,41 @@ void up_netinitialize(void)
 
 int board_app_initialize(void)
 {
-#if defined(HAVE_MMCSD) || defined(CONFIG_AJOYSTICK)
-  int ret;
+#ifdef HAVE_RTC_DRIVER
+  FAR struct rtc_lowerhalf_s *rtclower;
 #endif
+  int ret;
+
+  (void)ret;
 
   /* Configure CPU load estimation */
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION
   cpuload_initialize_once();
+#endif
+
+#ifdef HAVE_RTC_DRIVER
+  /* Instantiate the STM32L4 lower-half RTC driver */
+
+  rtclower = stm32l4_rtc_lowerhalf();
+  if (!rtclower)
+    {
+      sdbg("ERROR: Failed to instantiate the RTC lower-half driver\n");
+      return -ENOMEM;
+    }
+  else
+    {
+      /* Bind the lower half driver and register the combined RTC driver
+       * as /dev/rtc0
+       */
+
+      ret = rtc_initialize(0, rtclower);
+      if (ret < 0)
+        {
+          sdbg("ERROR: Failed to bind/register the RTC driver: %d\n", ret);
+          return ret;
+        }
+    }
 #endif
 
 #ifdef HAVE_MMCSD
