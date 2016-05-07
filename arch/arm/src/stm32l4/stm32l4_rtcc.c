@@ -99,8 +99,6 @@
 
 #define SYNCHRO_TIMEOUT  (0x00020000)
 #define INITMODE_TIMEOUT (0x00010000)
-#define RTC_MAGIC        CONFIG_RTC_MAGIC
-#define RTC_MAGIC_REG    STM32L4_RTC_BKR(CONFIG_RTC_MAGIC_REG)
 
 /* BCD conversions */
 
@@ -213,7 +211,6 @@ static void rtc_dumpregs(FAR const char *msg)
   rtclldbg("  TAMPCR: %08x\n", getreg32(STM32L4_RTC_TAMPCR));
   rtclldbg("ALRMASSR: %08x\n", getreg32(STM32L4_RTC_ALRMASSR));
   rtclldbg("ALRMBSSR: %08x\n", getreg32(STM32L4_RTC_ALRMBSSR));
-  rtclldbg("MAGICREG: %08x\n", getreg32(RTC_MAGIC_REG));
 }
 #else
 #  define rtc_dumpregs(msg)
@@ -253,6 +250,31 @@ static void rtc_dumptime(FAR const struct tm *tp, FAR const char *msg)
 #else
 #  define rtc_dumptime(tp, msg)
 #endif
+
+/************************************************************************************
+ * Name: rtc_is_inits
+ *
+ * Description:
+ *    Returns 'true' if the RTC has been initialized (according to the RTC itself).
+ *    It will be 'false' if the RTC has never been initialized since first time power
+ *    up, and the counters are stopped until it is first initialized.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   bool -- true if the INITS flag is set in the ISR.
+ *
+ ************************************************************************************/
+
+static bool rtc_is_inits(void)
+{
+  uint32_t regval;
+
+  regval = getreg32(STM32L4_RTC_ISR);
+
+  return (regval & RTC_ISR_INITS) ? true : false;
+}
 
 /************************************************************************************
  * Name: rtc_wprunlock
@@ -483,81 +505,6 @@ static int rtc_bcd2bin(uint32_t value)
 }
 
 /************************************************************************************
- * Name: rtc_setup
- *
- * Description:
- *   Performs first time configuration of the RTC.  A special value written into
- *   back-up register 0 will prevent this function from being called on sub-sequent
- *   resets or power up.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   Zero (OK) on success; a negated errno on failure
- *
- ************************************************************************************/
-
-static int rtc_setup(void)
-{
-  uint32_t regval;
-  int ret;
-
-  /* Disable the write protection for RTC registers */
-
-  rtc_wprunlock();
-
-  /* Set Initialization mode */
-
-  ret = rtc_enterinit();
-  if (ret == OK)
-    {
-      /* Set the 24 hour format by clearing the FMT bit in the RTC
-       * control register
-       */
-
-      regval = getreg32(STM32L4_RTC_CR);
-      regval &= ~RTC_CR_FMT;
-      putreg32(regval, STM32L4_RTC_CR);
-
-      /* Configure RTC pre-scaler with the required values */
-
-#ifdef CONFIG_STM32L4_RTC_HSECLOCK
-      /* For a 1 MHz clock this yields 0.9999360041 Hz on the second
-       * timer - which is pretty close.
-       * NOTE: max HSE is 4 MHz if it is to be used with RTC
-       */
-
-      putreg32(((uint32_t)7812 << RTC_PRER_PREDIV_S_SHIFT) |
-              ((uint32_t)0x7f << RTC_PRER_PREDIV_A_SHIFT),
-              STM32L4_RTC_PRER);
-#elif defined(CONFIG_STM32L4_RTC_LSICLOCK)
-      /* Suitable values for 32.000 KHz LSI clock (29.5 - 34 KHz, though) */
-
-      putreg32(((uint32_t)0xf9 << RTC_PRER_PREDIV_S_SHIFT) |
-              ((uint32_t)0x7f << RTC_PRER_PREDIV_A_SHIFT),
-              STM32L4_RTC_PRER);
-#else /* defined(CONFIG_STM32L4_RTC_LSECLOCK) */
-      /* Correct values for 32.768 KHz LSE clock */
-
-      putreg32(((uint32_t)0xff << RTC_PRER_PREDIV_S_SHIFT) |
-              ((uint32_t)0x7f << RTC_PRER_PREDIV_A_SHIFT),
-              STM32L4_RTC_PRER);
-#endif
-
-      /* Exit RTC initialization mode */
-
-      rtc_exitinit();
-    }
-
-  /* Re-enable the write protection for RTC registers */
-
-  rtc_wprlock();
-
-  return ret;
-}
-
-/************************************************************************************
  * Name: rtc_resume
  *
  * Description:
@@ -585,7 +532,7 @@ static void rtc_resume(void)
 
   /* Clear the EXTI Line 18 Pending bit (Connected internally to RTC Alarm) */
 
-  putreg32((1 << 18), STM32L4_EXTI1_PR);
+  putreg32(EXTI1_RTC_ALARM, STM32L4_EXTI1_PR);
 #endif
 }
 
@@ -614,14 +561,19 @@ static int stm32l4_rtc_alarm_handler(int irq, void *context)
   uint32_t cr;
   int ret = OK;
 
-  isr  = getreg32(STM32L4_RTC_ISR);
+  /* Enable write access to the backup domain (RTC registers, RTC
+   * backup data registers and backup SRAM).
+   */
+
+  (void)stm32l4_pwr_enablebkp(true);
 
   /* Check for EXTI from Alarm A or B and handle according */
 
-  if ((isr & RTC_ISR_ALRAF) != 0)
+  cr  = getreg32(STM32L4_RTC_CR);
+  if ((cr & RTC_CR_ALRAIE) != 0)
     {
-      cr  = getreg32(STM32L4_RTC_CR);
-      if ((cr & RTC_CR_ALRAIE) != 0)
+      isr  = getreg32(STM32L4_RTC_ISR);
+      if ((isr & RTC_ISR_ALRAF) != 0)
         {
           cbinfo = &g_alarmcb[RTC_ALARMA];
           if (cbinfo->ac_cb != NULL)
@@ -636,18 +588,20 @@ static int stm32l4_rtc_alarm_handler(int irq, void *context)
 
               cb(arg, RTC_ALARMA);
             }
+
+          /* note, bits 8-13 do /not/ require the write enable procedure */
+
+          isr  = getreg32(STM32L4_RTC_ISR);
+          isr &= ~RTC_ISR_ALRAF;
+          putreg32(isr, STM32L4_RTC_ISR);
         }
-
-      /* note, bits 8-13 do /not/ require the write enable procedure */
-
-      isr  = getreg32(STM32L4_RTC_ISR) & ~RTC_ISR_ALRAF;
-      putreg32(isr, STM32L4_RTC_ISR);
     }
 
-  if ((isr & RTC_ISR_ALRBF) != 0)
+  cr  = getreg32(STM32L4_RTC_CR);
+  if ((cr & RTC_CR_ALRBIE) != 0)
     {
-      cr  = getreg32(STM32L4_RTC_CR);
-      if ((cr & RTC_CR_ALRBIE) != 0)
+      isr  = getreg32(STM32L4_RTC_ISR);
+      if ((isr & RTC_ISR_ALRBF) != 0)
         {
           cbinfo = &g_alarmcb[RTC_ALARMB];
           if (cbinfo->ac_cb != NULL)
@@ -662,13 +616,20 @@ static int stm32l4_rtc_alarm_handler(int irq, void *context)
 
               cb(arg, RTC_ALARMB);
             }
+
+          /* note, bits 8-13 do /not/ require the write enable procedure */
+
+          isr  = getreg32(STM32L4_RTC_ISR);
+          isr &= ~RTC_ISR_ALRBF;
+          putreg32(isr, STM32L4_RTC_ISR);
         }
-
-      /* note, bits 8-13 do /not/ require the write enable procedure */
-
-      isr  = getreg32(STM32L4_RTC_ISR) & ~RTC_ISR_ALRBF;
-      putreg32(isr, STM32L4_RTC_ISR);
     }
+
+  /* Disable write access to the backup domain (RTC registers, RTC backup
+   * data registers and backup SRAM).
+   */
+
+  (void)stm32l4_pwr_enablebkp(false);
 
   return ret;
 }
@@ -771,6 +732,13 @@ static int rtchw_set_alrmar(rtc_alarmreg_t alarmreg)
 
   modifyreg32(STM32L4_RTC_CR, (RTC_CR_ALRAE | RTC_CR_ALRAIE), 0);
 
+  /* Ensure Alarm A flag reset; this is edge triggered */
+  
+  isr  = getreg32(STM32L4_RTC_ISR) & ~RTC_ISR_ALRAF;
+  putreg32(isr, STM32L4_RTC_ISR);
+
+  /* Wait for Alarm A to be writable */
+  
   ret = rtchw_check_alrawf();
   if (ret != OK)
     {
@@ -780,13 +748,9 @@ static int rtchw_set_alrmar(rtc_alarmreg_t alarmreg)
   /* Set the RTC Alarm A register */
 
   putreg32(alarmreg, STM32L4_RTC_ALRMAR);
+  putreg32(0, STM32L4_RTC_ALRMASSR);
   rtcvdbg("  TR: %08x ALRMAR: %08x\n",
           getreg32(STM32L4_RTC_TR), getreg32(STM32L4_RTC_ALRMAR));
-
-  /* ensure Alarm A flag reset; this is edge triggered */
-  
-  isr  = getreg32(STM32L4_RTC_ISR) & ~RTC_ISR_ALRAF;
-  putreg32(isr, STM32L4_RTC_ISR);
 
   /* Enable RTC alarm A */
 
@@ -814,22 +778,25 @@ static int rtchw_set_alrmbr(rtc_alarmreg_t alarmreg)
 
   modifyreg32(STM32L4_RTC_CR, (RTC_CR_ALRBE | RTC_CR_ALRBIE), 0);
 
+  /* Ensure Alarm B flag reset; this is edge triggered */
+  
+  isr  = getreg32(STM32L4_RTC_ISR) & ~RTC_ISR_ALRBF;
+  putreg32(isr, STM32L4_RTC_ISR);
+
+  /* Wait for Alarm B to be writable */
+  
   ret = rtchw_check_alrbwf();
   if (ret != OK)
     {
       goto rtchw_set_alrmbr_exit;
     }
 
-  /* Set the RTC Alarm register */
+  /* Set the RTC Alarm B register */
 
   putreg32(alarmreg, STM32L4_RTC_ALRMBR);
+  putreg32(0, STM32L4_RTC_ALRMBSSR);
   rtcvdbg("  TR: %08x ALRMBR: %08x\n",
           getreg32(STM32L4_RTC_TR), getreg32(STM32L4_RTC_ALRMBR));
-
-  /* ensure Alarm B flag reset; this is edge triggered */
-  
-  isr  = getreg32(STM32L4_RTC_ISR) & ~RTC_ISR_ALRBF;
-  putreg32(isr, STM32L4_RTC_ISR);
 
   /* Enable RTC alarm B */
 
@@ -862,183 +829,148 @@ rtchw_set_alrmbr_exit:
 
 int up_rtc_initialize(void)
 {
+  bool init_stat;
   uint32_t regval;
-  uint32_t tr_bkp;
-  uint32_t dr_bkp;
   int ret;
-  int maxretry = 10;
-  int nretry = 0;
 
-  /* Clocking for the PWR block must be provided.
+  rtc_dumpregs("Before Initialization");
+
+  /* See if the clock has already been initialized; since it is battery
+   * backed, we don't need or want to re-initialize on each reset.
    */
 
-  rtc_dumpregs("On reset");
+  init_stat = rtc_is_inits();
 
-  /* Select the clock source */
-  /* Save the token before losing it when resetting */
-
-  regval = getreg32(RTC_MAGIC_REG);
-
-  (void)stm32l4_pwr_enablebkp(true);
-
-  if (regval != RTC_MAGIC)
+  if(!init_stat)
     {
-      /* We might be changing RTCSEL - to ensure such changes work, we must reset the
-       * backup domain (having backed up the RTC_MAGIC token)
-       */
-
-      modifyreg32(STM32L4_RCC_BDCR, 0, RCC_BDCR_BDRST);
-      modifyreg32(STM32L4_RCC_BDCR, RCC_BDCR_BDRST, 0);
-
-      /* Some boards do not have the external 32khz oscillator installed, for those
-       * boards we must fall back to the crummy internal RC clock or the external high
-       * rate clock (which for the STM32L4 must not exceed 4MHz).
-       */
-
-#ifdef CONFIG_STM32L4_RTC_HSECLOCK
-      /* Use the HSE clock as the input to the RTC block */
-
-      modifyreg32(STM32L4_RCC_BDCR, RCC_BDCR_RTCSEL_MASK, RCC_BDCR_RTCSEL_HSE);
-
-#elif defined(CONFIG_STM32L4_RTC_LSICLOCK)
-      /* Use the LSI clock as the input to the RTC block */
-
-      modifyreg32(STM32L4_RCC_BDCR, RCC_BDCR_RTCSEL_MASK, RCC_BDCR_RTCSEL_LSI);
-
-#elif defined(CONFIG_STM32L4_RTC_LSECLOCK)
-      /* Use the LSE clock as the input to the RTC block */
-
-      modifyreg32(STM32L4_RCC_BDCR, RCC_BDCR_RTCSEL_MASK, RCC_BDCR_RTCSEL_LSE);
-
-#endif
-      /* Enable the RTC Clock by setting the RTCEN bit in the RCC register */
-
-      modifyreg32(STM32L4_RCC_BDCR, 0, RCC_BDCR_RTCEN);
-    }
-  else /* The RTC is already in use: check if the clock source is changed */
-    {
-#if defined(CONFIG_STM32L4_RTC_HSECLOCK) || defined(CONFIG_STM32L4_RTC_LSICLOCK) || \
-    defined(CONFIG_STM32L4_RTC_LSECLOCK)
-
-      uint32_t clksrc = getreg32(STM32L4_RCC_BDCR);
-
-#if defined(CONFIG_STM32L4_RTC_HSECLOCK)
-      if ((clksrc & RCC_BDCR_RTCSEL_MASK) != RCC_BDCR_RTCSEL_HSE)
-#elif defined(CONFIG_STM32L4_RTC_LSICLOCK)
-      if ((clksrc & RCC_BDCR_RTCSEL_MASK) != RCC_BDCR_RTCSEL_LSI)
-#elif defined(CONFIG_STM32L4_RTC_LSECLOCK)
-      if ((clksrc & RCC_BDCR_RTCSEL_MASK) != RCC_BDCR_RTCSEL_LSE)
-#endif
-#endif
-        {
-          tr_bkp = getreg32(STM32L4_RTC_TR);
-          dr_bkp = getreg32(STM32L4_RTC_DR);
-          modifyreg32(STM32L4_RCC_BDCR, 0, RCC_BDCR_BDRST);
-          modifyreg32(STM32L4_RCC_BDCR, RCC_BDCR_BDRST, 0);
-
-#if defined(CONFIG_STM32L4_RTC_HSECLOCK)
-          /* Change to the new clock as the input to the RTC block */
-
-          modifyreg32(STM32L4_RCC_BDCR, RCC_BDCR_RTCSEL_MASK, RCC_BDCR_RTCSEL_HSE);
-
-#elif defined(CONFIG_STM32L4_RTC_LSICLOCK)
-          modifyreg32(STM32L4_RCC_BDCR, RCC_BDCR_RTCSEL_MASK, RCC_BDCR_RTCSEL_LSI);
-
-#elif defined(CONFIG_STM32L4_RTC_LSECLOCK)
-          modifyreg32(STM32L4_RCC_BDCR, RCC_BDCR_RTCSEL_MASK, RCC_BDCR_RTCSEL_LSE);
-#endif
-
-          putreg32(tr_bkp, STM32L4_RTC_TR);
-          putreg32(dr_bkp, STM32L4_RTC_DR);
-
-          /* Remember that the RTC is initialized */
-
-          putreg32(RTC_MAGIC, RTC_MAGIC_REG);
-
-          /* Enable the RTC Clock by setting the RTCEN bit in the RCC register */
-
-          modifyreg32(STM32L4_RCC_BDCR, 0, RCC_BDCR_RTCEN);
-        }
-    }
-
-  (void)stm32l4_pwr_enablebkp(false);
-
-  /* Loop, attempting to initialize/resume the RTC.  This loop is necessary
-   * because it seems that occasionally it takes longer to initialize the RTC
-   * (the actual failure is in rtc_synchwait()).
-   */
-
-  do
-    {
-      /* Wait for the RTC Time and Date registers to be synchronized with RTC APB
-       * clock.
-       */
-
-      ret = rtc_synchwait();
-
-      /* Check that rtc_syncwait() returned successfully */
-
-      switch (ret)
-        {
-          case OK:
-            {
-              rtclldbg("rtc_syncwait() okay\n");
-              break;
-            }
-
-          default:
-            {
-              rtclldbg("rtc_syncwait() failed (%d)\n", ret);
-              break;
-            }
-        }
-    }
-  while (ret != OK && ++nretry < maxretry);
-
-  /* Check if the one-time initialization of the RTC has already been
-   * performed. We can determine this by checking if the magic number
-   * has been writing to to back-up date register DR0.
-   */
-
-  if (regval != RTC_MAGIC)
-    {
-      rtclldbg("Do setup\n");
-
-      /* Perform the one-time setup of the LSE clocking to the RTC */
-
-      ret = rtc_setup();
-
       /* Enable write access to the backup domain (RTC registers, RTC
        * backup data registers and backup SRAM).
        */
 
       (void)stm32l4_pwr_enablebkp(true);
 
-      /* Remember that the RTC is initialized */
+#if 0
+      /* Do not reset the backup domain; you will lose your clock setup done in *rcc.c */
 
-      putreg32(RTC_MAGIC, RTC_MAGIC_REG);
+      modifyreg32(STM32L4_RCC_BDCR, 0, RCC_BDCR_BDRST);
+      modifyreg32(STM32L4_RCC_BDCR, RCC_BDCR_BDRST, 0);
+#endif
+
+#if defined(CONFIG_STM32L4_RTC_HSECLOCK)
+      modifyreg32(STM32L4_RCC_BDCR, RCC_BDCR_RTCSEL_MASK, RCC_BDCR_RTCSEL_HSE);
+#elif defined(CONFIG_STM32L4_RTC_LSICLOCK)
+      modifyreg32(STM32L4_RCC_BDCR, RCC_BDCR_RTCSEL_MASK, RCC_BDCR_RTCSEL_LSI);
+#elif defined(CONFIG_STM32L4_RTC_LSECLOCK)
+      modifyreg32(STM32L4_RCC_BDCR, RCC_BDCR_RTCSEL_MASK, RCC_BDCR_RTCSEL_LSE);
+#endif
+
+      /* Enable the RTC Clock by setting the RTCEN bit in the RCC register */
+
+      modifyreg32(STM32L4_RCC_BDCR, 0, RCC_BDCR_RTCEN);
+
+      /* Disable the write protection for RTC registers */
+
+      rtc_wprunlock();
+
+      /* Set Initialization mode */
+
+      if (OK != rtc_enterinit())
+        {
+          /* Enable the write protection for RTC registers */
+
+          rtc_wprlock();
+
+          /* Disable write access to the backup domain (RTC registers, RTC backup
+           * data registers and backup SRAM).
+           */
+
+          (void)stm32l4_pwr_enablebkp(false);
+
+          rtc_dumpregs("After Failed Initialization");
+
+          return -1;
+        }
+      else
+        {
+          /* Clear RTC_CR FMT, OSEL and POL Bits */
+
+          regval = getreg32(STM32L4_RTC_CR);
+          regval &= ~(RTC_CR_FMT | RTC_CR_OSEL_MASK | RTC_CR_POL);
+
+          /* Configure RTC pre-scaler with the required values */
+
+#ifdef CONFIG_STM32L4_RTC_HSECLOCK
+          /* The HSE is divided by 32 prior to the prescaler we set here.
+           * 1953
+           * NOTE: max HSE/32 is 4 MHz if it is to be used with RTC
+           */
+
+          /* For a 1 MHz clock this yields 0.9999360041 Hz on the second
+           * timer - which is pretty close.
+           */
+
+          putreg32(((uint32_t)7812 << RTC_PRER_PREDIV_S_SHIFT) |
+                  ((uint32_t)0x7f << RTC_PRER_PREDIV_A_SHIFT),
+                  STM32L4_RTC_PRER);
+#elif defined(CONFIG_STM32L4_RTC_LSICLOCK)
+          /* Suitable values for 32.000 KHz LSI clock (29.5 - 34 KHz, though) */
+
+          putreg32(((uint32_t)0xf9 << RTC_PRER_PREDIV_S_SHIFT) |
+                  ((uint32_t)0x7f << RTC_PRER_PREDIV_A_SHIFT),
+                  STM32L4_RTC_PRER);
+#else /* defined(CONFIG_STM32L4_RTC_LSECLOCK) */
+          /* Correct values for 32.768 KHz LSE clock */
+
+          putreg32(((uint32_t)0xff << RTC_PRER_PREDIV_S_SHIFT) |
+                  ((uint32_t)0x7f << RTC_PRER_PREDIV_A_SHIFT),
+                  STM32L4_RTC_PRER);
+#endif
+
+          /* Wait for the RTC Time and Date registers to be synchronized with RTC APB
+           * clock.
+           */
+
+          ret = rtc_synchwait();
+          (void)ret;
+
+          /* Exit Initialization mode */
+          
+          rtc_exitinit();
+
+          /* Enable the write protection for RTC registers */
+          
+          rtc_wprlock();
+
+          /* Disable write access to the backup domain (RTC registers, RTC backup
+           * data registers and backup SRAM).
+           */
+
+          (void)stm32l4_pwr_enablebkp(false);
+        }
     }
   else
     {
-      rtclldbg("Do resume\n");
+      /* Enable write access to the backup domain (RTC registers, RTC
+       * backup data registers and backup SRAM).
+       */
 
-      /* RTC already set-up, just resume normal operation */
+      (void)stm32l4_pwr_enablebkp(true);
+
+      /* Disable the write protection for RTC registers */
+
+      //rtc_wprunlock();
 
       rtc_resume();
-      rtc_dumpregs("Did resume");
-    }
+      
+      /* Enable the write protection for RTC registers */
+      
+      //rtc_wprlock();
+      
+      /* Disable write access to the backup domain (RTC registers, RTC backup
+       * data registers and backup SRAM).
+       */
 
-  /* Disable write access to the backup domain (RTC registers, RTC backup
-   * data registers and backup SRAM).
-   */
-
-  (void)stm32l4_pwr_enablebkp(false);
-
-  if (ret != OK && nretry > 0)
-    {
-      rtclldbg("setup/resume ran %d times and failed with %d\n",
-                nretry, ret);
-      return -ETIMEDOUT;
+      (void)stm32l4_pwr_enablebkp(false);
     }
 
 #ifdef CONFIG_RTC_ALARM
@@ -1059,8 +991,11 @@ int up_rtc_initialize(void)
 
   g_rtc_enabled = true;
   rtc_dumpregs("After Initialization");
+
   return OK;
 }
+
+
 
 /************************************************************************************
  * Name: stm32l4_rtc_getdatetime_with_subseconds
