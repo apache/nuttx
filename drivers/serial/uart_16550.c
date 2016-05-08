@@ -520,6 +520,7 @@ static inline void u16550_restoreuartint(FAR struct u16550_s *priv, uint32_t ier
 static inline void u16550_enablebreaks(FAR struct u16550_s *priv, bool enable)
 {
   uint32_t lcr = u16550_serialin(priv, UART_LCR_OFFSET);
+
   if (enable)
     {
       lcr |= UART_LCR_BRK;
@@ -528,6 +529,7 @@ static inline void u16550_enablebreaks(FAR struct u16550_s *priv, bool enable)
     {
       lcr &= ~UART_LCR_BRK;
     }
+
   u16550_serialout(priv, UART_LCR_OFFSET, lcr);
 }
 

@@ -551,6 +551,7 @@ static inline void up_restoreuartint(struct up_dev_s *priv, uint32_t ier)
 static inline void up_enablebreaks(struct up_dev_s *priv, bool enable)
 {
   uint32_t lcr = up_serialin(priv, LPC43_UART_LCR_OFFSET);
+
   if (enable)
     {
       lcr |= UART_LCR_BRK;
@@ -559,6 +560,7 @@ static inline void up_enablebreaks(struct up_dev_s *priv, bool enable)
     {
       lcr &= ~UART_LCR_BRK;
     }
+
   up_serialout(priv, LPC43_UART_LCR_OFFSET, lcr);
 }
 
