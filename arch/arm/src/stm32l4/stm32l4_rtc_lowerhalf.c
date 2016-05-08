@@ -100,6 +100,7 @@ struct stm32l4_lowerhalf_s
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
 /* Prototypes for static methods in struct rtc_ops_s */
 
 static int stm32l4_rdtime(FAR struct rtc_lowerhalf_s *lower,
@@ -179,7 +180,7 @@ static void stm32l4_alarm_callback(FAR void *arg, unsigned int alarmid)
   lower        = (struct stm32l4_lowerhalf_s *)arg;
   cbinfo       = &lower->cbinfo[alarmid];
 
-   /* Sample and clear the callback information to minimize the window in
+  /* Sample and clear the callback information to minimize the window in
    * time in which race conditions can occur.
    */
 
@@ -195,7 +196,6 @@ static void stm32l4_alarm_callback(FAR void *arg, unsigned int alarmid)
     {
       cb(priv, alarmid);
     }
-
 }
 #endif /* CONFIG_RTC_ALARM */
 
@@ -298,7 +298,7 @@ static int stm32l4_settime(FAR struct rtc_lowerhalf_s *lower,
 
 #ifdef CONFIG_RTC_ALARM
 static int stm32l4_setalarm(FAR struct rtc_lowerhalf_s *lower,
-                          FAR const struct lower_setalarm_s *alarminfo)
+                            FAR const struct lower_setalarm_s *alarminfo)
 {
   FAR struct stm32l4_lowerhalf_s *priv;
   FAR struct stm32l4_cbinfo_s *cbinfo;
@@ -367,7 +367,7 @@ static int stm32l4_setalarm(FAR struct rtc_lowerhalf_s *lower,
 
 #ifdef CONFIG_RTC_ALARM
 static int stm32l4_setrelative(FAR struct rtc_lowerhalf_s *lower,
-                             FAR const struct lower_setrelative_s *alarminfo)
+                               FAR const struct lower_setrelative_s *alarminfo)
 {
   struct lower_setalarm_s setalarm;
   struct tm time;
@@ -380,7 +380,7 @@ static int stm32l4_setrelative(FAR struct rtc_lowerhalf_s *lower,
   if ((alarminfo->id == RTC_ALARMA || alarminfo->id == RTC_ALARMB) &&
       alarminfo->reltime > 0)
     {
-      /* Disable preemption while we do this so that we don't have to worry
+      /* Disable pre-emption while we do this so that we don't have to worry
        * about being suspended and working on an old time.
        */
 

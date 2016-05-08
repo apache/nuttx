@@ -112,7 +112,8 @@
    (rtc_bin2bcd((tm)->tm_min)  << RTC_ALRMR_MNU_SHIFT) | \
    (rtc_bin2bcd((tm)->tm_hour) << RTC_ALRMR_HU_SHIFT))
 
-/* need to ignore DATE/DOW part of alarm; rtc_reg_alrmr_bin2bcd only encodes hms */
+/* Need to ignore DATE/DOW part of alarm; rtc_reg_alrmr_bin2bcd only encodes hms */
+
 #define RTC_ALRMR_ENABLE              (0x80000000)
 
 /* Debug ****************************************************************************/
@@ -995,8 +996,6 @@ int up_rtc_initialize(void)
   return OK;
 }
 
-
-
 /************************************************************************************
  * Name: stm32l4_rtc_getdatetime_with_subseconds
  *
@@ -1324,7 +1323,7 @@ int stm32l4_rtc_setalarm(FAR struct alm_setalarm_s *alminfo)
  * Name: stm32l4_rtc_cancelalarm
  *
  * Description:
- *   Cancel an alaram.
+ *   Cancel an alarm.
  *
  * Input Parameters:
  *  alarmid - Identifies the alarm to be cancelled
@@ -1378,7 +1377,7 @@ int stm32l4_rtc_cancelalarm(enum alm_id_e alarmid)
         break;
 
       case RTC_ALARMB:
-    {
+        {
           /* Cancel the global callback function */
 
            g_alarmcb[alarmid].ac_cb  = NULL;
@@ -1405,8 +1404,8 @@ int stm32l4_rtc_cancelalarm(enum alm_id_e alarmid)
           putreg32(-1, STM32L4_RTC_ALRMBR);
           modifyreg32(STM32L4_RTC_ISR, RTC_ISR_ALRBF, 0);
           rtc_wprlock();
-      ret = OK;
-    }
+          ret = OK;
+        }
         break;
 
       default:
