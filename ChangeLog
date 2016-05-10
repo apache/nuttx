@@ -11705,3 +11705,13 @@
 	  naming problems. (2016-05-05).
 	* arch/arm/src/samv7:  Fix typo in MATRIX register definitions.  From
 	  Stefan Kolb (2016-05-06).
+	* arch/arm/src/stm32l4: Problem with resetting backup domain clears
+	  clocking options set up before in *rcc.c use INITS flag to avoid magic
+	  reg value to detect power up reset state of RTC correct a problem
+	  clearing interrupt flags (they weren't) which prevented an alarm from
+	  ever being used more than once per reset cycl.e  From Dave
+	  dev@ziggurat29.com (2016-05-07).
+	* arch/arm/src/tiva: Fix a bug of GPIO falling-edge interrupt for tiva.
+	  From Young (2016-05-07).
+	* drivrs/mtd:  Add a driver for SST26F spi/qspi flash devices (SPI mode
+	  only).  From Sebastien Lorquet (2016-05-10).
