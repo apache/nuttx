@@ -11715,3 +11715,5 @@
 	  From Young (2016-05-07).
 	* drivrs/mtd:  Add a driver for SST26F spi/qspi flash devices (SPI mode
 	  only).  From Sebastien Lorquet (2016-05-10).
+	* Several Makefiles: Add .PHONY definitions to prevent 'clean up to date'
+	  message weirdness (2016-05-10).

@@ -1,7 +1,7 @@
 ############################################################################
 # nxflat/Makefile
 #
-#   Copyright (C) 2007-2009, 2012-2015 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2007-2009, 2012-2016 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -80,6 +80,7 @@ BINFMT_OBJS = $(BINFMT_AOBJS) $(BINFMT_COBJS)
 BIN = libbinfmt$(LIBEXT)
 
 all: $(BIN)
+.PHONY: depend clean distclean
 
 $(BINFMT_AOBJS): %$(OBJEXT): %.S
 	$(call ASSEMBLE, $<, $@)
