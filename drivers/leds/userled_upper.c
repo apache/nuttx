@@ -63,10 +63,10 @@
 
 #ifndef CONFIG_DEBUG
 #  undef CONFIG_DEBUG_VERBOSE
-#  undef CONFIG_DEBUG_DISCRETE
+#  undef CONFIG_DEBUG_LEDS
 #endif
 
-#ifdef CONFIG_DEBUG_DISCRETE
+#ifdef CONFIG_DEBUG_LEDS
 #  define ddbg lldbg
 #  ifdef CONFIG_DEBUG_VERBOSE
 #    define dvdbg lldbg
