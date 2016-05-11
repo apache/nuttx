@@ -99,7 +99,7 @@ int main(int argc, char **argv, char **envp)
   printf("#ifndef __INCLUDE_NUTTX_CONFIG_H\n");
   printf("#define __INCLUDE_NUTTX_CONFIG_H\n\n");
   generate_definitions(stream);
-  printf("/n#endif /* __INCLUDE_NUTTX_CONFIG_H */\n");
+  printf("\n#endif /* __INCLUDE_NUTTX_CONFIG_H */\n");
   fclose(stream);
 
   /* Exit (without bothering to clean up allocations) */
