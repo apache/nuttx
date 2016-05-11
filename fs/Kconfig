@@ -51,9 +51,9 @@ config FS_WRITABLE
 	default n
 	---help---
 		Automatically selected if any writable file system is selected.  If
-		not selected, disable support for writing will be disabled in all
-		block drivers and also the block-to-character (BCH) layer and the
-		MTD FTL layer.
+		not selected, support for writing will be disabled in all block
+		drivers and also the block-to-character (BCH) layer and the MTD FTL
+		layer.
 
 		This selection can also be manually selected.  You might want to do
 		this if there are no writable file systems enabled, but you still
