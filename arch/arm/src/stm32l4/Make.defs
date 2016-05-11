@@ -114,7 +114,7 @@ endif
 CHIP_ASRCS  =
 CHIP_CSRCS  = stm32l4_allocateheap.c stm32l4_exti_gpio.c stm32l4_gpio.c
 CHIP_CSRCS += stm32l4_idle.c stm32l4_irq.c stm32l4_lowputc.c stm32l4_rcc.c
-CHIP_CSRCS += stm32l4_serial.c stm32l4_start.c stm32l4_waste.c
+CHIP_CSRCS += stm32l4_serial.c stm32l4_start.c stm32l4_waste.c stm32l4_uid.c
 CHIP_CSRCS += stm32l4_spi.c stm32l4_i2c.c stm32l4_lse.c stm32l4_pwr.c
 
 ifneq ($(CONFIG_SCHED_TICKLESS),y)

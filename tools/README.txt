@@ -135,6 +135,12 @@ mkexport.sh and Makefile.export
   Makefile.export is used only by the mkexport.sh script to parse out
   options from the top-level Make.defs file.
 
+  USAGE: tools/mkexport.sh [-d] [-z] [-u] [-w|wy|wn] -t <top-dir> [-x <lib-ext>] -l "lib1 [lib2 [lib3 ...]]"
+
+  Thais script also depends on the environment variable MAKE which is set
+  in the top-level Makefile before starting mkexport.sh.  If MAKE is not
+  defined, the script will set it to `which make`.
+
 mkfsdata.pl
 -----------
 

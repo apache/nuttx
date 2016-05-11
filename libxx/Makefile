@@ -1,7 +1,7 @@
 ############################################################################
 # libxx/Makefile
 #
-#   Copyright (C) 2009, 2012 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2009, 2012, 2016 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -88,6 +88,7 @@ OBJS = $(AOBJS) $(COBJS) $(CXXOBJS)
 BIN = libcxx$(LIBEXT)
 
 all: $(BIN)
+.PHONY: depend clean distclean
 
 $(AOBJS): %$(OBJEXT): %.S
 	$(call ASSEMBLE, $<, $@)

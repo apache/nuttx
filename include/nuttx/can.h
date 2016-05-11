@@ -219,7 +219,8 @@
 #  define CAN_ERROR_BUSOFF        (1 << 6) /* Bit 6: Bus off */
 #  define CAN_ERROR_BUSERROR      (1 << 7) /* Bit 7: Bus error */
 #  define CAN_ERROR_RESTARTED     (1 << 8) /* Bit 8: Controller restarted */
-                                           /* Bits 9-10: Available */
+#  define CAN_ERROR_INTERNAL      (1 << 9) /* Bit 9: Stack internal error (See CAN_ERROR5_* definitions) */
+                                           /* Bit 10: Available */
 
 /* The remaining definitions described the error report payload that follows the
  * CAN header.
@@ -294,6 +295,11 @@
 #  define CANL_ERROR4_SHORT2VCC   0x30
 #  define CANL_ERROR4_SHORT2GND   0x40
 #  define CANL_ERROR4_SHORT2CANH  0x50
+
+/* Data[5]: Error status of stack internals */
+
+#  define CAN_ERROR5_UNSPEC       0x00     /* Unspecified error */
+#  define CAN_ERROR5_RXOVERFLOW   (1 << 0) /* Bit 0: RX buffer overflow */
 
 #endif /* CONFIG_CAN_ERRORS */
 
@@ -494,6 +500,9 @@ struct can_dev_s
   uint8_t              cd_npendrtr;      /* Number of pending RTR messages */
   volatile uint8_t     cd_ntxwaiters;    /* Number of threads waiting to enqueue a message */
   volatile uint8_t     cd_nrxwaiters;    /* Number of threads waiting to receive a message */
+#ifdef CONFIG_CAN_ERRORS
+  uint8_t              cd_error;         /* Flags to indicate internal device errors */
+#endif
   sem_t                cd_closesem;      /* Locks out new opens while close is in progress */
   struct can_txfifo_s  cd_xmit;          /* Describes transmit FIFO */
   struct can_rxfifo_s  cd_recv;          /* Describes receive FIFO */

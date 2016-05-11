@@ -1274,7 +1274,6 @@ config BOARD_CUSTOM_LEDS
 	bool "Custom board LEDs"
 	default n
 	select ARCH_HAVE_LEDS
-	select ARCH_LEDS
 
 config BOARD_CUSTOM_BUTTONS
 	bool "Custom board buttons"

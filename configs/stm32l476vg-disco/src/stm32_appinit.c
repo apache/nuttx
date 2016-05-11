@@ -53,6 +53,7 @@
 
 #include <stm32l4.h>
 #include <stm32l4_uart.h>
+#include <stm32l4_uid.h>
 
 #include <arch/board/board.h>
 #include <arch/board/boardctl.h>
@@ -306,5 +307,18 @@ int board_ioctl(unsigned int cmd, uintptr_t arg)
     }
 
     return OK;
+}
+#endif
+
+#if defined(CONFIG_BOARDCTL_UNIQUEID)
+int board_uniqueid(uint8_t *uniqueid)
+{
+  if (uniqueid == 0)
+    {
+      return -EINVAL;
+    }
+
+  stm32l4_get_uniqueid(uniqueid);
+  return OK;
 }
 #endif

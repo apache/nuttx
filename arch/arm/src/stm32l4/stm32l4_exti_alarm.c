@@ -55,20 +55,12 @@
 #include "stm32l4_exti.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
  * Private Data
  ****************************************************************************/
 
 /* Interrupt handlers attached to the ALARM EXTI */
 
 static xcpt_t stm32l4_exti_callback;
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
@@ -86,16 +78,16 @@ static int stm32l4_exti_alarm_isr(int irq, void *context)
 {
   int ret = OK;
 
-  /* Clear the pending EXTI interrupt */
-
-  putreg32(EXTI1_RTC_ALARM, STM32L4_EXTI1_PR);
-
-  /* And dispatch the interrupt to the handler */
+  /* Dispatch the interrupt to the handler */
 
   if (stm32l4_exti_callback)
     {
       ret = stm32l4_exti_callback(irq, context);
     }
+
+  /* Clear the pending EXTI interrupt */
+
+  putreg32(EXTI1_RTC_ALARM, STM32L4_EXTI1_PR);
 
   return ret;
 }

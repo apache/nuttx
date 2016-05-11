@@ -57,9 +57,10 @@
 
 #define HSERDY_TIMEOUT (100 * CONFIG_BOARD_LOOPSPERMSEC)
 
-/* Same for HSI */
+/* Same for HSI and MSI */
 
 #define HSIRDY_TIMEOUT HSERDY_TIMEOUT
+#define MSIRDY_TIMEOUT HSERDY_TIMEOUT
 
 /* HSE divisor to yield ~1MHz RTC clock */
 
@@ -578,13 +579,37 @@ static void stm32l4_stdclockconfig(void)
 #elif defined(STM32L4_BOARD_USEMSI)
   /* Enable Internal Multi-Speed Clock (MSI) */
 
-#  error STM32L4_BOARD_USEMSI not yet implemented in arch/arm/src/stm32l4/stm32l4x6xx_rcc.c
+  /* Wait until the MSI is either off or ready (or until a timeout elapsed) */
+
+  for (timeout = MSIRDY_TIMEOUT; timeout > 0; timeout--)
+    {
+      if ((regval = getreg32(STM32L4_RCC_CR)), (regval & RCC_CR_MSIRDY) || ~(regval & RCC_CR_MSION))
+        {
+          /* If so, then break-out with timeout > 0 */
+
+          break;
+        }
+    }
+
   /* setting MSIRANGE */
-  /* setting MSIPLLEN */
 
   regval  = getreg32(STM32L4_RCC_CR);
-  regval |= RCC_CR_MSION;           /* Enable MSI */
+  regval |= (STM32L4_BOARD_MSIRANGE | RCC_CR_MSION);    /* Enable MSI and frequency */
   putreg32(regval, STM32L4_RCC_CR);
+
+  /* Wait until the MSI is ready (or until a timeout elapsed) */
+
+  for (timeout = MSIRDY_TIMEOUT; timeout > 0; timeout--)
+    {
+      /* Check if the MSIRDY flag is the set in the CR */
+
+      if ((getreg32(STM32L4_RCC_CR) & RCC_CR_MSIRDY) != 0)
+        {
+          /* If so, then break-out with timeout > 0 */
+
+          break;
+        }
+    }
 
 #elif defined(STM32L4_BOARD_USEHSE)
   /* Enable External High-Speed Clock (HSE) */
@@ -696,6 +721,8 @@ static void stm32l4_stdclockconfig(void)
 
 #ifdef STM32L4_BOARD_USEHSI
       regval |= RCC_PLLCFG_PLLSRC_HSI;
+#elif defined(STM32L4_BOARD_USEMSI)
+      regval |= RCC_PLLCFG_PLLSRC_MSI;
 #else /* if STM32L4_BOARD_USEHSE */
       regval |= RCC_PLLCFG_PLLSRC_HSE;
 #endif
@@ -827,12 +854,20 @@ static void stm32l4_stdclockconfig(void)
        * and we need to ensure it is first off before doing so.
        */
 
-      /* turn on the LSE oscillator
+      /* Turn on the LSE oscillator
        * XXX this will almost surely get moved since we also want to use
        * this for automatically trimming MSI, etc.
        */
 
       stm32l4_rcc_enablelse();
+
+#  if defined(STM32L4_BOARD_USEMSI)
+      /* Now that LSE is up, auto trim the MSI */
+
+      regval  = getreg32(STM32L4_RCC_CR);
+      regval |= RCC_CR_MSIPLLEN;
+      putreg32(regval, STM32L4_RCC_CR);
+#  endif
 #endif
 
 #if defined(STM32L4_USE_CLK48)

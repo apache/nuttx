@@ -661,9 +661,9 @@ static inline void tiva_interrupt(uint32_t pinset)
     {
       case GPIO_INT_FALLINGEDGE:
         {
-          isset  = pin;
+          isclr  = pin;
           ibeclr = pin;
-          ievset = pin;
+          ievclr = pin;
         }
         break;
 

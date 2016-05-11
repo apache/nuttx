@@ -1,7 +1,7 @@
 #!/bin/bash
 # tools/mkexport.sh
 #
-#   Copyright (C) 2011-2012, 2014 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2011-2012, 2014, 2016 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -115,6 +115,12 @@ if [ ! -f "${TOPDIR}/.version" ]; then
 	exit 1
 fi
 
+# Check if the make environment variable has been defined
+
+if [ -z "${MAKE}" ]; then
+	MAKE=`which make`
+fi
+
 # Get the version string
 
 source "${TOPDIR}/.version"
@@ -162,7 +168,7 @@ grep -v "WINTOOL[ \t]*=[ \t]y" "${TOPDIR}/Make.defs"  > "${EXPORTDIR}/Make.defs"
 
 # Extract information from the Make.defs file.  A Makefile can do this best
 
-make -C "${TOPDIR}/tools" -f Makefile.export TOPDIR="${TOPDIR}" EXPORTDIR="${EXPORTDIR}"
+${MAKE} -C "${TOPDIR}/tools" -f Makefile.export TOPDIR="${TOPDIR}" EXPORTDIR="${EXPORTDIR}"
 source "${EXPORTDIR}/makeinfo.sh"
 rm -f "${EXPORTDIR}/makeinfo.sh"
 rm -f "${EXPORTDIR}/Make.defs"
@@ -236,7 +242,7 @@ cp -LR -p "${TOPDIR}/include" "${EXPORTDIR}/." || \
 
 # Copy the startup object file(s)
 
-make -C ${ARCHDIR} export_startup TOPDIR=${TOPDIR} EXPORT_DIR="${EXPORTDIR}"
+${MAKE} -C ${ARCHDIR} export_startup TOPDIR=${TOPDIR} EXPORT_DIR="${EXPORTDIR}"
 
 # Copy architecture-specific header files into the arch export sub-directory.
 # This is tricky because each architecture does things in a little different

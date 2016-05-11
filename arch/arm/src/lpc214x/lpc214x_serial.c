@@ -272,6 +272,7 @@ static inline void up_waittxready(struct up_dev_s *priv)
 static inline void up_enablebreaks(struct up_dev_s *priv, bool enable)
 {
   uint8_t lcr = up_serialin(priv, LPC214X_UART_LCR_OFFSET);
+
   if (enable)
     {
       lcr |= LPC214X_LCR_BREAK_ENABLE;
@@ -280,6 +281,7 @@ static inline void up_enablebreaks(struct up_dev_s *priv, bool enable)
     {
       lcr &= ~LPC214X_LCR_BREAK_ENABLE;
     }
+
   up_serialout(priv, LPC214X_UART_LCR_OFFSET, lcr);
 }
 

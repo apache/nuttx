@@ -51,9 +51,9 @@
 
 /* Clocking *************************************************************************/
 
-/* The stm32l476vg-disco supports both HSE and LSE crystals (X2 and X3).  However, as
- * shipped, the HSE X2 crystal is not populated.  Therefore the stm32l476vg-disco
- * will need to run off the 16MHz HSI clock, or the 32khz-synced MSI.
+/* The stm32l476vg-disco supports both HSE and LSE crystals.  As shipped, the HSE
+ * crystal is not populated.  Therefore the stm32l476vg-disco will need to run off the
+ * 16MHz HSI clock, or the 32khz-synced MSI, unless you install the HSE xtal.
  */
 
 /* HSI - 16 MHz RC factory-trimmed
@@ -69,18 +69,27 @@
 
 #define BOARD_AHB_FREQUENCY       80000000ul
 
-/* XXX review the STM32L4_BOARD_USEHSI usage, it has too much influence in
- * stm32l4x6xx_rcc.c.  I suspect it is fine for it to turn on and off that
- * ocillator, but really that's all it should do (e.g. it also controls
- * input of teh PLLs.  Also, it should be fine/desireable to support things
- * like turning on both HSI and MSI, because they plausibly can both be
- * used at the same time; currently those choices HSE/HSI16/MSI are
- * mutually exclusive.
+/* XXX there needs to be independent selections for the System Clock Mux and
+ * the PLL Source Mux; currently System Clock Mux always is PLL, and PLL
+ * Source Mux is chosen by the following define.  This is probably OK in many
+ * cases, but should be separated to support other power configurations.
  */
 
-#define STM32L4_BOARD_USEHSI      1
+#if 0
+#  define HSI_CLOCK_CONFIG          /* HSI-16 clock configuration */
+#elif 0
+/* Make sure you actually installed one! */
 
-/* prescaler common to all PLL inputs; will be 1 (XXX source is implicitly
+#  define HSE_CLOCK_CONFIG          /* HSE with 8 MHz xtal */
+#else
+#  define MSI_CLOCK_CONFIG          /* MSI @ 4 MHz autotrimmed via LSE */
+#endif
+
+#if defined(HSI_CLOCK_CONFIG)
+
+#define STM32L4_BOARD_USEHSI           1
+
+/* Prescaler common to all PLL inputs; will be 1 (XXX source is implicitly
  as per comment above HSI) */
 
 #define STM32L4_PLLCFG_PLLM             RCC_PLLCFG_PLLM(1)
@@ -136,7 +145,7 @@
 #define STM32L4_USE_CLK48         1
 #define STM32L4_CLK48_SEL         RCC_CCIPR_CLK48SEL_PLLSAI1
 
-/* enable the LSE oscillator, used automatically trim the MSI, and for RTC */
+/* Enable the LSE oscillator, used automatically trim the MSI, and for RTC */
 
 #define STM32L4_USE_LSE           1
 
@@ -177,6 +186,167 @@
  * Note: TIM1,8 are on APB2, others on APB1
  */
 /* REVISIT : this can be configured */
+
+#elif defined(HSE_CLOCK_CONFIG)
+
+/* Use the HSE */
+
+#define STM32L4_BOARD_USEHSE      1
+
+/* XXX sysclk mux = pllclk */
+
+/* XXX pll source mux = hse */
+
+/* Prescaler common to all PLL inputs */
+
+#define STM32L4_PLLCFG_PLLM             RCC_PLLCFG_PLLM(1)
+
+/* 'main' PLL config; we use this to generate our system clock */
+
+#define STM32L4_PLLCFG_PLLN             RCC_PLLCFG_PLLN(20)
+#define STM32L4_PLLCFG_PLLP             0
+#undef  STM32L4_PLLCFG_PLLP_ENABLED
+#define STM32L4_PLLCFG_PLLQ             0
+#undef STM32L4_PLLCFG_PLLQ_ENABLED
+#define STM32L4_PLLCFG_PLLR             RCC_PLLCFG_PLLR_2
+#define STM32L4_PLLCFG_PLLR_ENABLED
+
+/* 'SAIPLL1' is used to generate the 48 MHz clock */
+
+#define STM32L4_PLLSAI1CFG_PLLN         RCC_PLLSAI1CFG_PLLN(12)
+#define STM32L4_PLLSAI1CFG_PLLP         0
+#undef  STM32L4_PLLSAI1CFG_PLLP_ENABLED
+#define STM32L4_PLLSAI1CFG_PLLQ         RCC_PLLSAI1CFG_PLLQ_2
+#define STM32L4_PLLSAI1CFG_PLLQ_ENABLED
+#define STM32L4_PLLSAI1CFG_PLLR         0
+#undef  STM32L4_PLLSAI1CFG_PLLR_ENABLED
+
+/* 'SAIPLL2' is not used in this application */
+
+#define STM32L4_PLLSAI2CFG_PLLN         RCC_PLLSAI2CFG_PLLN(8)
+#define STM32L4_PLLSAI2CFG_PLLP         0
+#undef  STM32L4_PLLSAI2CFG_PLLP_ENABLED
+#define STM32L4_PLLSAI2CFG_PLLR         0
+#undef  STM32L4_PLLSAI2CFG_PLLR_ENABLED
+
+#define STM32L4_SYSCLK_FREQUENCY  80000000ul
+
+/* Enable CLK48; get it from PLLSAI1 */
+
+#define STM32L4_USE_CLK48
+#define STM32L4_CLK48_SEL         RCC_CCIPR_CLK48SEL_PLLSAI1
+
+/* Enable LSE (for the RTC) */
+
+#define STM32L4_USE_LSE           1
+
+/* Configure the HCLK divisor (for the AHB bus, core, memory, and DMA */
+
+#define STM32L4_RCC_CFGR_HPRE     RCC_CFGR_HPRE_SYSCLK      /* HCLK  = SYSCLK / 1 */
+#define STM32L4_HCLK_FREQUENCY    STM32L4_SYSCLK_FREQUENCY
+#define STM32L4_BOARD_HCLK        STM32L4_HCLK_FREQUENCY      /* Same as above, to satisfy compiler */
+
+/* Configure the APB1 prescaler */
+
+#define STM32L4_RCC_CFGR_PPRE1    RCC_CFGR_PPRE1_HCLK       /* PCLK1 = HCLK / 1 */
+#define STM32L4_PCLK1_FREQUENCY   (STM32L4_HCLK_FREQUENCY/1)
+
+#define STM32L4_APB1_TIM2_CLKIN   (2*STM32L4_PCLK1_FREQUENCY)
+#define STM32L4_APB1_TIM3_CLKIN   (2*STM32L4_PCLK1_FREQUENCY)
+#define STM32L4_APB1_TIM4_CLKIN   (2*STM32L4_PCLK1_FREQUENCY)
+#define STM32L4_APB1_TIM5_CLKIN   (2*STM32L4_PCLK1_FREQUENCY)
+#define STM32L4_APB1_TIM6_CLKIN   (2*STM32L4_PCLK1_FREQUENCY)
+#define STM32L4_APB1_TIM7_CLKIN   (2*STM32L4_PCLK1_FREQUENCY)
+
+/* Configure the APB2 prescaler */
+
+#define STM32L4_RCC_CFGR_PPRE2    RCC_CFGR_PPRE2_HCLK       /* PCLK2 = HCLK / 1 */
+#define STM32L4_PCLK2_FREQUENCY   (STM32L4_HCLK_FREQUENCY/1)
+
+#define STM32L4_APB2_TIM1_CLKIN   (2*STM32L4_PCLK2_FREQUENCY)
+#define STM32L4_APB2_TIM8_CLKIN   (2*STM32L4_PCLK2_FREQUENCY)
+
+#elif defined(MSI_CLOCK_CONFIG)
+
+/* Use the MSI; frequ = 4 MHz; autotrim from LSE */
+
+#define STM32L4_BOARD_USEMSI      1
+#define STM32L4_BOARD_MSIRANGE    RCC_CR_MSIRANGE_4M
+
+/* XXX sysclk mux = pllclk */
+
+/* XXX pll source mux = msi */
+
+/* Prescaler common to all PLL inputs */
+
+#define STM32L4_PLLCFG_PLLM             RCC_PLLCFG_PLLM(1)
+
+/* 'main' PLL config; we use this to generate our system clock */
+
+#define STM32L4_PLLCFG_PLLN             RCC_PLLCFG_PLLN(40)
+#define STM32L4_PLLCFG_PLLP             0
+#undef  STM32L4_PLLCFG_PLLP_ENABLED
+#define STM32L4_PLLCFG_PLLQ             0
+#undef STM32L4_PLLCFG_PLLQ_ENABLED
+#define STM32L4_PLLCFG_PLLR             RCC_PLLCFG_PLLR_2
+#define STM32L4_PLLCFG_PLLR_ENABLED
+
+/* 'SAIPLL1' is used to generate the 48 MHz clock */
+
+#define STM32L4_PLLSAI1CFG_PLLN         RCC_PLLSAI1CFG_PLLN(24)
+#define STM32L4_PLLSAI1CFG_PLLP         0
+#undef  STM32L4_PLLSAI1CFG_PLLP_ENABLED
+#define STM32L4_PLLSAI1CFG_PLLQ         RCC_PLLSAI1CFG_PLLQ_2
+#define STM32L4_PLLSAI1CFG_PLLQ_ENABLED
+#define STM32L4_PLLSAI1CFG_PLLR         0
+#undef  STM32L4_PLLSAI1CFG_PLLR_ENABLED
+
+/* 'SAIPLL2' is not used in this application */
+
+#define STM32L4_PLLSAI2CFG_PLLN         RCC_PLLSAI2CFG_PLLN(8)
+#define STM32L4_PLLSAI2CFG_PLLP         0
+#undef  STM32L4_PLLSAI2CFG_PLLP_ENABLED
+#define STM32L4_PLLSAI2CFG_PLLR         0
+#undef  STM32L4_PLLSAI2CFG_PLLR_ENABLED
+
+#define STM32L4_SYSCLK_FREQUENCY  80000000ul
+
+/* Enable CLK48; get it from PLLSAI1 */
+
+#define STM32L4_USE_CLK48
+#define STM32L4_CLK48_SEL         RCC_CCIPR_CLK48SEL_PLLSAI1
+
+/* Enable LSE (for the RTC) */
+
+#define STM32L4_USE_LSE           1
+
+/* Configure the HCLK divisor (for the AHB bus, core, memory, and DMA */
+
+#define STM32L4_RCC_CFGR_HPRE     RCC_CFGR_HPRE_SYSCLK      /* HCLK  = SYSCLK / 1 */
+#define STM32L4_HCLK_FREQUENCY    STM32L4_SYSCLK_FREQUENCY
+#define STM32L4_BOARD_HCLK        STM32L4_HCLK_FREQUENCY      /* Same as above, to satisfy compiler */
+
+/* Configure the APB1 prescaler */
+
+#define STM32L4_RCC_CFGR_PPRE1    RCC_CFGR_PPRE1_HCLK       /* PCLK1 = HCLK / 1 */
+#define STM32L4_PCLK1_FREQUENCY   (STM32L4_HCLK_FREQUENCY/1)
+
+#define STM32L4_APB1_TIM2_CLKIN   (2*STM32L4_PCLK1_FREQUENCY)
+#define STM32L4_APB1_TIM3_CLKIN   (2*STM32L4_PCLK1_FREQUENCY)
+#define STM32L4_APB1_TIM4_CLKIN   (2*STM32L4_PCLK1_FREQUENCY)
+#define STM32L4_APB1_TIM5_CLKIN   (2*STM32L4_PCLK1_FREQUENCY)
+#define STM32L4_APB1_TIM6_CLKIN   (2*STM32L4_PCLK1_FREQUENCY)
+#define STM32L4_APB1_TIM7_CLKIN   (2*STM32L4_PCLK1_FREQUENCY)
+
+/* Configure the APB2 prescaler */
+
+#define STM32L4_RCC_CFGR_PPRE2    RCC_CFGR_PPRE2_HCLK       /* PCLK2 = HCLK / 1 */
+#define STM32L4_PCLK2_FREQUENCY   (STM32L4_HCLK_FREQUENCY/1)
+
+#define STM32L4_APB2_TIM1_CLKIN   (2*STM32L4_PCLK2_FREQUENCY)
+#define STM32L4_APB2_TIM8_CLKIN   (2*STM32L4_PCLK2_FREQUENCY)
+
+#endif
 
 /************************************************************************************
  * Public Data

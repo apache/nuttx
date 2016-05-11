@@ -104,13 +104,13 @@
 #define SRAM2_START 0x10000000
 #define SRAM2_END   0x10008000
 
-#if defined(STM32L4_SRAM2_HEAP) && defined(CONFIG_STM32L4_FSMC_SRAM_HEAP)
+#if defined(CONFIG_STM32L4_SRAM2_HEAP) && defined(CONFIG_STM32L4_FSMC_SRAM_HEAP)
 #  if CONFIG_MM_REGIONS < 3
 #    error you need at least 3 memory manager regions to support SRAM2 and FSMC
 #  endif
 #endif
 
-#if defined(STM32L4_SRAM2_HEAP) || defined(CONFIG_STM32L4_FSMC_SRAM_HEAP)
+#if defined(CONFIG_STM32L4_SRAM2_HEAP) || defined(CONFIG_STM32L4_FSMC_SRAM_HEAP)
 #  if CONFIG_MM_REGIONS < 2
 #    error you need at least 2 memory manager regions to support SRAM2 or FSMC
 #  endif
