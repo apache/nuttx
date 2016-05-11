@@ -131,7 +131,7 @@ static int group_signal_handler(pid_t pid, FAR void *arg)
           /* Limit to one thread */
 
           info->atcb = tcb;
-          if (info->ptcb != NULL);
+          if (info->ptcb != NULL)
             {
               return 1; /* Terminate the search */
             }
