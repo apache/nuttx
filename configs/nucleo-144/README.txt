@@ -5,7 +5,7 @@ This README discusses issues unique to NuttX configurations for the ST
 Nucleo F746ZG board from ST Micro.  See
 
 http://www.st.com/web/catalog/tools/FM116/CL1620/SC959/SS1532/LN1847/PF261636
-  
+
 The Nucleo F746ZG order part number is NUCLEO-F746ZG. It is clumped together
 under the STM32 Nucleo-144 board family. This does provide uniformity in the
 documentation from ST and should allow us to quickly change configurations
@@ -25,28 +25,28 @@ NUCLEO-F746ZG:
                   216 MHz, MPU, and DSP instructions.
   Memory:         1024 KB Flash 320KB of SRAM (including 64KB of data TCM RAM)
                   + 16KB of instruction TCM RAM + 4KB of backup SRAM
-  ADC:            3×12-bit, 2.4 MSPS ADC: up to 24 channels and 7.2 MSPS in 
+  ADC:            3×12-bit, 2.4 MSPS ADC: up to 24 channels and 7.2 MSPS in
                   triple interleaved mode
   DMA:            16-stream DMA controllers with FIFOs and burst support
   Timers:         Up to 18 timers: up to thirteen 16-bit (1x 16-bit lowpower),
                   two 32-bit timers, 2x watchdogs, SysTick
   GPIO:           114 I/O ports with interrupt capability
-  LCD:            LCD-TFT Controllerwith (DMA2D), Parallel interface 
+  LCD:            LCD-TFT Controllerwith (DMA2D), Parallel interface
   I2C:            4 × I2C interfaces (SMBus/PMBus)
   U[S]ARTs:       4 USARTs, 4 UARTs (27 Mbit/s, ISO7816 interface, LIN, IrDA,
                   modem control)
-  SPI/12Ss:       6/3 (simplex) (up to 50 Mbit/s), 3 with muxed simplex I2S 
-                  for audio class accuracy via internal audio PLL or external 
+  SPI/12Ss:       6/3 (simplex) (up to 50 Mbit/s), 3 with muxed simplex I2S
+                  for audio class accuracy via internal audio PLL or external
                   clock
   QSPI:           Dual mode Quad-SPI
   SAIs:           2 Serial Audio Interfaces
   CAN:             2 X CAN interface
   SDMMC interface
   SPDIFRX interface
-  USB:            USB 2.0 full-speed device/host/OTG controller with on-chip 
+  USB:            USB 2.0 full-speed device/host/OTG controller with on-chip
                   PHY
-  10/100 Ethernet: MAC with dedicated DMA: supports IEEE 1588v2 hardware, 
-  				   MII/RMII
+  10/100 Ethernet: MAC with dedicated DMA: supports IEEE 1588v2 hardware,
+                     MII/RMII
   Camera Interface: 8/14 Bit
   CRC calculation unit
   TRG:            True random number generator
@@ -54,12 +54,12 @@ NUCLEO-F746ZG:
 
 Board features:
 
-  Peripherals:    8 leds, 2 push button (3 LEDs, 1 button) under software 
+  Peripherals:    8 leds, 2 push button (3 LEDs, 1 button) under software
                   control
-  Debug:          STLINK/V2-1 debugger/programmer Uses a STM32F103CB to 
+  Debug:          STLINK/V2-1 debugger/programmer Uses a STM32F103CB to
                   provide a ST-Link for programming, debug similar to the
-                  OpenOcd FTDI function - USB to JTAG front-end. 
-                  
+                  OpenOcd FTDI function - USB to JTAG front-end.
+
   Expansion I/F   ST Zio  an Extended Ardino and Morpho Headers
 
 See https://developer.mbed.org/platforms/ST-Nucleo-F746ZG  form additional information about this board.
@@ -85,11 +85,11 @@ Development Environment
 
   All testing has been conducted using the GNU toolchain from ARM for Linux.
   found here https://launchpad.net/gcc-arm-embedded/4.9/4.9-2015-q3-update/+download/gcc-arm-none-eabi-4_9-2015q3-20150921-linux.tar.bz2
-  
+
   If you change the default toolchain, then you may also have to modify the PATH in
   the setenv.h file if your make cannot find the tools.
 
-  
+
 IDEs
 ====
 
@@ -117,25 +117,25 @@ Basic configuration & build steps
    - Refreshes the .config file with the latest features addes sice this writting
      $ make oldconfig
    - Select the features you want in the build.
-	 $ make menuconfig
-   - Builds Nuttx with the features you selected.	 
-	 $ make
+     $ make menuconfig
+   - Builds Nuttx with the features you selected.
+     $ make
 
 Hardware
 ========
 
   GPIO - there are 144 I/O lines on the STM32F746ZGT6 with various pins pined out
   on the Nucleo F746ZG
-  
+
   See https://developer.mbed.org/platforms/ST-Nucleo-F746ZG/ for slick graphic
   pinouts.
-  
+
   Keep in mind that:
    1) The I/O is 3.3 Volt not 5 Volt like on the Arduino products.
    2) The Nucleo-144 board family has 3 pages of Solder Bridges AKA Solder
       Blobs (SB) that can alter the factory configuration. We will note SB
       in effect but will assume the facitory defualt settings.
-  
+
   Our main concern is establishing a console and LED utilization for
   debugging. Because so many pins can be multiplexed with so many functions,
   the above mentioned graphic is super helpful in indentifying a serial port
@@ -145,10 +145,10 @@ Hardware
   or choose a completely different U[S]ART to use as the console.
   In that Case, You will need to edit the include/board.h to select different
   U[S]ART and / or pin selections.
-  
 
-  Serial 
-  ----
+
+  Serial
+  ------
 
   SERIAL_RX         PE_0
   SERIAL_TX         PE_1
@@ -156,12 +156,12 @@ Hardware
   Buttons
   -------
   B1 USER: the user button is connected to the I/O PC13 (Tamper support, SB173
-           ON and SB180 OFF)  
+           ON and SB180 OFF)
 
   LEDs
   ----
   The Board provides a 3 user LEDs, LD1-LD3
-  LED1 (Green)      PB_0  (SB120 ON and SB119 OFF) 
+  LED1 (Green)      PB_0  (SB120 ON and SB119 OFF)
   LED2 (Blue)       PB_7  (SB139 ON)
   LED3 (Red)        PB_14 (SP118 ON)
 
@@ -176,33 +176,33 @@ Hardware
     SYMBOL                Meaning    RED  GREEN BLUE
     -------------------  -----------------------  -----------
 
-	LED_STARTED             0        OFF  OFF   OFF 
-	LED_HEAPALLOCATE        0        OFF  OFF   OFF 
-	LED_IRQSENABLED         0        OFF  OFF   OFF 
-	LED_STACKCREATED        1        OFF  ON    OFF 
-	LED_INIRQ               2        NC   NC    ON  (momentary)
-	LED_SIGNAL              2        NC   NC    ON  (momentary)
-	LED_ASSERTION           3        ON   NC    NC  (momentary)
-	LED_PANIC               4        ON   OFF   OFF (flashing 2Hz)
+    LED_STARTED             0        OFF  OFF   OFF
+    LED_HEAPALLOCATE        0        OFF  OFF   OFF
+    LED_IRQSENABLED         0        OFF  OFF   OFF
+    LED_STACKCREATED        1        OFF  ON    OFF
+    LED_INIRQ               2        NC   NC    ON  (momentary)
+    LED_SIGNAL              2        NC   NC    ON  (momentary)
+    LED_ASSERTION           3        ON   NC    NC  (momentary)
+    LED_PANIC               4        ON   OFF   OFF (flashing 2Hz)
 
 OFF - means that the OS is still initializing. Initialization is very fast so
     if you see this at all, it probably means that the system is hanging up
     somewhere in the initialization phases.
 
 GREEN - This means that the OS completed initialization.
- 
+
 BLUE - Whenever and interrupt or signal handler is entered, the BLUE LED is
    illuminated and extinguished when the interrupt or signal handler exits.
- 
+
 RED - If a recovered assertion occurs, the RED LED will be illuminated
    briefly while the assertion is handled.  You will probably never see this.
- 
-Flashing RED - In the event of a fatal crash, all other LEDs will be 
-extinguished and RED LED will FLASH at a 2Hz rate.
- 
 
-  Thus if the GREEN LED is lit, NuttX has successfully booted and is, 
-  apparently, running normally.  If the RED LED is flashing at 
+Flashing RED - In the event of a fatal crash, all other LEDs will be
+extinguished and RED LED will FLASH at a 2Hz rate.
+
+
+  Thus if the GREEN LED is lit, NuttX has successfully booted and is,
+  apparently, running normally.  If the RED LED is flashing at
   approximately 2Hz, then a fatal error has been detected and the system has
   halted.
 
@@ -214,19 +214,19 @@ Serial Consoles
   Pins and Connectors:
          GPIO  Connector NAME
     RXD: PE0   CN11 pin 64, PE0
-    		   CN10 pin 33, D34
+               CN10 pin 33, D34
 
     TXD: PE1   CN11 pin 61, PE1
 
   You must use a 3.3 TTL to RS-232 converter or a USB to 3.3V TTL
 
-    Nucleo 144           FTDI TTL-232R-3V3 
+    Nucleo 144           FTDI TTL-232R-3V3
     -----------         ------------
     TXD - CN11 pin 64 - RXD - Pin 5 (Yellow)
     RXD - CN11 pin 61 - TXD - Pin 4 (Orange)
     GND   CN11 pin 63   GND   Pin 1  (Black)
 
-	*Note you will be reverse RX/TX
+    *Note you will be reverse RX/TX
 
   Use make menuconfig to configure USART8 as the console:
 
@@ -248,8 +248,8 @@ Serial Consoles
 
   Solder Bridges.  This configuration requires:
 
-	PD8 USART3 TX SB5 ON and SB7 OFF (Default)
-	PD9 USART3 RX SB6 ON and SB4 OFF (Default)
+    PD8 USART3 TX SB5 ON and SB7 OFF (Default)
+    PD9 USART3 RX SB6 ON and SB4 OFF (Default)
 
   Configuring USART3 is the same as given above but add the S and #3.
 
@@ -280,9 +280,9 @@ Configurations
        a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
           see additional README.txt files in the NuttX tools repository.
 
-       b. If this is the intall configuration then Execute 
-       	  'cd tools && ./configure.sh stm32f746g-disco/nsh && cd ..'
-          in nuttx/ in order to start configuration process. 
+       b. If this is the intall configuration then Execute
+             'cd tools && ./configure.sh stm32f746g-disco/nsh && cd ..'
+          in nuttx/ in order to start configuration process.
           Caution: Doing this step more than once will overwrite .config with
           the contents of the stm32f746g-disco/nsh/defconfig file.
 
@@ -291,7 +291,7 @@ Configurations
 
        d. Execute 'make menuconfig' in nuttx/ in order to start the
           reconfiguration process.
-          
+
        e. Save the .config file to reuse it in the future starting at step d.
 
     2. By default, this configuration uses the ARM GNU toolchain
