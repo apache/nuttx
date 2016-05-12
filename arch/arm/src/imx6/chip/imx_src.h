@@ -92,6 +92,7 @@
 /* SRC Register Bit Definitions *********************************************************************/
 
 /* SRC Control Register: Reset value 0x00000521 */
+
 #define SRC_SCR_WARM_RESET_ENABLE  (1 << 0)  /* Bit 0:  WARM reset enable bit */
 #define SRC_SCR_SW_GPU_RST         (1 << 1)  /* Bit 1:  Software reset for GPU */
 #define SRC_SCR_SW_VPU_RST         (1 << 2)  /* Bit 2:  Software reset for VPU */
@@ -193,18 +194,18 @@
 /* SRC General Purpose Register 5:  32-bit PERSISTENT_ENTRY2: core2 entry function for waking-up from low power mode */
 /* SRC General Purpose Register 6:  32-bit PERSISTENT_ARG2:  core1 entry function argument */
 /* SRC General Purpose Register 7:  32-bit PERSISTENT_ENTRY3: core3 entry function for waking-up from low power mode */
-/* SRC General Purpose Register 8:  32-bit PERSISTENT_ARG3:  core1 entry function argument */
+/* SRC General Purpose Register 8:  32-bit PERSISTENT_ARG3:  core3 entry function argument */
 /* SRC General Purpose Register 9:  Reserved */
 
 /* SRC General Purpose Register 10 */
 
-#define SRC_GPR10_RW1_SHIFT          (0)  /* Bits 0-24: General purpose R/W bits */
+#define SRC_GPR10_RW1_SHIFT          (0)       /* Bits 0-24: General purpose R/W bits */
 #define SRC_GPR10_RW1_MASK           (0x01ffffff << SRC_GPR10_RW1_SHIFT)
 #  define SRC_GPR10_RW1(n)           ((uint32_t)(n) << SRC_GPR10_RW1_SHIFT)
 #define SRC_GPR10_CORE1_ERROR_STATUS (1 << 25) /* Bit 25: core1 error status bit */
 #define SRC_GPR10_CORE2_ERROR_STATUS (1 << 26) /* Bit 26: core2 error status bit */
 #define SRC_GPR10_CORE3_ERROR_STATUS (1 << 27) /* Bit 27: core3 error status bit */
-#define SRC_GPR10_RW2_SHIFT          (28)  /* Bits 28-31: General purpose R/W bits */
+#define SRC_GPR10_RW2_SHIFT          (28)      /* Bits 28-31: General purpose R/W bits */
 #define SRC_GPR10_RW2_MASK           (15 << SRC_GPR10_RW2_SHIFT)
 #  define SRC_GPR10_RW2(n)           ((uint32_t)(n) << SRC_GPR10_RW2_SHIFT)
 
