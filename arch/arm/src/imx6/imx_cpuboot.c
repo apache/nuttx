@@ -43,10 +43,13 @@
 #include <assert.h>
 
 #include <nuttx/arch.h>
+#include <arch/irq.h>
 
 #include "up_arch.h"
+#include "up_internal.h"
 
 #include "chip/imx_src.h"
+#include "sctlr.h"
 #include "smp.h"
 #include "gic.h"
 
@@ -119,6 +122,14 @@ static const cpu_start_t g_cpu_boot[CONFIG_SMP_NCPUS] =
   __cpu3_start
 #endif
 };
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+/* Symbols defined via the linker script */
+
+extern uint32_t _vector_start; /* Beginning of vector block */
 
 /****************************************************************************
  * Public Functions
@@ -251,6 +262,33 @@ void arm_cpu_boot(int cpu)
 
   arm_gic_initialize();
 
+#ifdef CONFIG_ARCH_LOWVECTORS
+  /* If CONFIG_ARCH_LOWVECTORS is defined, then the vectors located at the
+   * beginning of the .text region must appear at address at the address
+   * specified in the VBAR.  There are two ways to accomplish this:
+   *
+   *   1. By explicitly mapping the beginning of .text region with a page
+   *      table entry so that the virtual address zero maps to the beginning
+   *      of the .text region.  VBAR == 0x0000:0000.
+   *
+   *   2. Set the Cortex-A5 VBAR register so that the vector table address
+   *      is moved to a location other than 0x0000:0000.
+   *
+   *  The second method is used by this logic.
+   */
+
+  /* Set the VBAR register to the address of the vector table */
+
+  DEBUGASSERT((((uintptr_t)&_vector_start) & ~VBAR_MASK) == 0);
+  cp15_wrvbar((uint32_t)&_vector_start);
+#endif /* CONFIG_ARCH_LOWVECTORS */
+
+#ifndef CONFIG_SUPPRESS_INTERRUPTS
+  /* And finally, enable interrupts */
+
+  (void)up_irq_enable();
+#endif
+
   /* The next thing that we expect to happen is for logic running on CPU0
    * to call up_cpu_start() which generate an SGI and a context switch to
    * the configured NuttX IDLE task.
@@ -261,5 +299,4 @@ void arm_cpu_boot(int cpu)
       asm("WFI");
     }
 }
-
 #endif /* CONFIG_SMP */
