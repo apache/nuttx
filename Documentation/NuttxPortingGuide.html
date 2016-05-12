@@ -154,9 +154,8 @@
       <a href="#uptestset">4.7.1 <code>up_testset()</code></a><br>
       <a href="#upcpuindex">4.7.2 <code>up_cpu_index()</code></a><br>
       <a href="#upcpustart">4.7.3 <code>up_cpu_start()</code></a><br>
-      <a href="#upcpuinitialize">4.7.4 <code>up_cpu_initialize()</code></a><br>
-      <a href="#upcpupause">4.7.5 <code>up_cpu_pause()</code></a><br>
-      <a href="#upcpuresume">4.7.6 <code>up_cpu_resume()</code></a>
+      <a href="#upcpupause">4.7.4 <code>up_cpu_pause()</code></a><br>
+      <a href="#upcpuresume">4.7.5 <code>up_cpu_resume()</code></a>
     </ul>
     <a href="#exports">4.8 APIs Exported by NuttX to Architecture-Specific Logic</a>
     <ul>
@@ -3722,34 +3721,7 @@ int up_cpu_start(int cpu);
   </p>
 </ul>
 
-<h3><a name="upcpuinitialize">4.7.4 <code>up_cpu_initialize()</code></a></h3>
-<p><b>Function Prototype</b>:<p>
-<ul><pre>
-#include &lt;nuttx/arch.h&gt;
-#ifdef CONFIG_SMP
-int up_cpu_initialize(void);
-#endif
-</pre></ul>
-
-<p><b>Description</b>:</p>
-<ul>
-  <p>
-    After the CPU has been started (via <code>up_cpu_start()</code>) the system will call back into the architecture-specific code with this function on the thread of execution of the newly started CPU.
-    This gives the architecture-specific a chance to perform ny initial, CPU-specific initialize on that thread.
-  </p>
-</ul>
-<p><b>Input Parameters</b>:</p>
-<ul>
-  None
-</ul>
-<p><b>Returned Value</b>:</p>
-<ul>
-  <p>
-    Zero (<code>OK</code>) is returned on success; a negated <code>errno</code> value on failure.
-  </p>
-</ul>
-
-<h3><a name="upcpupause">4.7.5 <code>up_cpu_pause()</code></a></h3>
+<h3><a name="upcpupause">4.7.4 <code>up_cpu_pause()</code></a></h3>
 <p><b>Function Prototype</b>:<p>
 <ul><pre>
 #include &lt;nuttx/arch.h&gt;
@@ -3781,7 +3753,7 @@ int up_cpu_pause(int cpu);
   </p>
 </ul>
 
-<h3><a name="upcpuresume">4.7.6 <code>up_cpu_resume()</code></a></h3>
+<h3><a name="upcpuresume">4.7.5 <code>up_cpu_resume()</code></a></h3>
 <p><b>Function Prototype</b>:<p>
 <ul><pre>
 #include &lt;nuttx/arch.h&gt;

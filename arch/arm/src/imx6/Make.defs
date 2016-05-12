@@ -145,5 +145,5 @@ CHIP_CSRCS += imx_timerisr.c imx_gpio.c imx_iomuxc.c
 CHIP_CSRCS += imx_serial.c imx_lowputc.c
 
 ifeq ($(CONFIG_SMP),y)
-CHIP_CSRCS += imx_cpuinit.c
+CHIP_CSRCS += imx_cpuboot.c
 endif

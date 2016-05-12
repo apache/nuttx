@@ -98,13 +98,7 @@ void os_idle_trampoline(void)
 {
 #ifdef CONFIG_SCHED_INSTRUMENTATION
   FAR struct tcb_s *tcb = this_task();
-#endif
 
-  /* Perform architecture-specific initialization for this CPU */
-
-  up_cpu_initialize();
-
-#ifdef CONFIG_SCHED_INSTRUMENTATION
   /* Announce that the IDLE task has started */
 
   sched_note_start(tcb);

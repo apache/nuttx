@@ -1,5 +1,6 @@
 /****************************************************************************
- * arch/arm/src/imx6/imx_clockconfig.c
+ * arch/arm/src/armv7-a/smp.h
+ * Common ARM support for SMP on multi-core CPUs.
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,46 +34,77 @@
  *
  ****************************************************************************/
 
+#ifndef __ARCH_ARM_SRC_ARMV7_A_SMP_H
+#define __ARCH_ARM_SRC_ARMV7_A_SMP_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <nuttx/arch.h>
-
-#include "gic.h"
-
 #ifdef CONFIG_SMP
 
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_cpu_initialize
+ * Name: __cpu[n]_start
  *
  * Description:
- *   After the CPU has been started (via up_cpu_start()) the system will
- *   call back into the architecture-specific code with this function on the
- *   thread of execution of the newly started CPU.  This gives the
- *   architecture-specific a chance to perform ny initial, CPU-specific
- *   initialize on that thread.
+ *   Boot functions for each CPU (other than CPU0).  These functions set up
+ *   the ARM operating mode, the initial stack, and configure co-processor
+ *   registers.  At the end of the boot, arm_cpu_boot() is called.
  *
- * Input Parameters:
+ *   These functions are provided by the common ARMv7-A logic.
+ *
+ * Input parameters:
  *   None
  *
  * Returned Value:
- *   Zero on success; a negated errno value on failure.
+ *   Do not return.
  *
  ****************************************************************************/
 
-int up_cpu_initialize(void)
-{
-  /* Initialize the Generic Interrupt Controller (GIC) for CPUn (n != 0) */
+#if CONFIG_SMP_NCPUS > 1
+void __cpu1_start(void);
+#endif
 
-  arm_gic_initialize();
-  return OK;
-}
+#if CONFIG_SMP_NCPUS > 2
+void __cpu2_start(void);
+#endif
 
-#endif /* CONFIG_SMP */
+#if CONFIG_SMP_NCPUS > 3
+void __cpu3_start(void);
+#endif
+
+#if CONFIG_SMP_NCPUS > 4
+#  error This logic needs to extended for CONFIG_SMP_NCPUS > 4
+#endif
+
+/****************************************************************************
+ * Name: arm_cpu_boot
+ *
+ * Description:
+ *   Continues the C-level initialization started by the assembly language
+ *   __cpu[n]_start function.  At a minimum, this function needs to initialize
+ *   interrupt handling and, perhaps, wait on WFI for arm_cpu_start() to
+ *   issue an SGI.
+ *
+ *   This function must be provided by the each ARMv7-A MCU and implement
+ *   MCU-specific initialization logic.
+ *
+ * Input parameters:
+ *   cpu - The CPU index.  This is the same value that would be obtained by
+ *      calling up_cpu_index();
+ *
+ * Returned Value:
+ *   Does not return.
+ *
+ ****************************************************************************/
+
+void arm_cpu_boot(int cpu);
+
+#endif  /* CONFIG_SMP */
+#endif  /* __ARCH_ARM_SRC_ARMV7_A_SMP_H */

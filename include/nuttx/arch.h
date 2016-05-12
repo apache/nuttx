@@ -1754,28 +1754,6 @@ int up_cpu_start(int cpu);
 #endif
 
 /****************************************************************************
- * Name: up_cpu_initialize
- *
- * Description:
- *   After the CPU has been started (via up_cpu_start()) the system will
- *   call back into the architecture-specific code with this function on the
- *   thread of execution of the newly started CPU.  This gives the
- *   architecture-specific a chance to perform ny initial, CPU-specific
- *   initialize on that thread.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   Zero on success; a negated errno value on failure.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SMP
-int up_cpu_initialize(void);
-#endif
-
-/****************************************************************************
  * Name: up_cpu_pause
  *
  * Description:

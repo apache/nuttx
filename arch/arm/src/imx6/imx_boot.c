@@ -400,6 +400,13 @@ void arm_boot(void)
   imx_setupmappings();
   imx_lowputc('A');
 
+  /* Make sure that all other CPUs are in the disabled state.  This is a
+   * formality because the other CPUs are actually running then we have
+   * probably already crashed.
+   */
+
+  imx_cpu_disable();
+
   /* Provide a special mapping for the OCRAM interrupt vector positioned in
    * high memory.
    */
@@ -498,5 +505,13 @@ void arm_boot(void)
   imx_earlyserialinit();
   imx_lowputc('M');
 #endif
+
+  /* Now we can enable all other CPUs.  The enabled CPUs will start execution
+   * at __cpuN_start and, after very low-level CPU initialzation has been
+   * performed, will branch to arm_cpu_boot() (see arch/arm/src/armv7-a/smp.h)
+   */
+
+  imx_cpu_enable();
+  imx_lowputc('N');
   imx_lowputc('\n');
 }
