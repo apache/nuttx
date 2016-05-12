@@ -333,14 +333,14 @@ static void up_copyvectorblock(void)
  ************************************************************************************/
 
 /************************************************************************************
- * Name: up_boot
+ * Name: arm_boot
  *
  * Description:
  *   Complete boot operations started in up_head.S
  *
  ************************************************************************************/
 
-void up_boot(void)
+void arm_boot(void)
 {
   /* __start provided the basic MMU mappings for SRAM.  Now provide mappings for all
    * IO regions (Including the vector region).

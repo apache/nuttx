@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/teensy-lc/src/up_boot.c
+ * configs/teensy-lc/src/kl_boardinitialize.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

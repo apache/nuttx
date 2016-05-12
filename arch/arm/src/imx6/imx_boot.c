@@ -320,7 +320,7 @@ static inline void imx_wdtdisable(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_boot
+ * Name: arm_boot
  *
  * Description:
  *   Complete boot operations started in arm_head.S
@@ -386,7 +386,7 @@ static inline void imx_wdtdisable(void)
  *
  ****************************************************************************/
 
-void up_boot(void)
+void arm_boot(void)
 {
 #ifdef CONFIG_ARCH_RAMFUNCS
   const uint32_t *src;

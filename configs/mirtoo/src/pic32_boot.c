@@ -70,7 +70,7 @@
  * Description:
  *   When mounted on the DTX1-4000L EV-kit1 board, serial output is avaiable through
  *   an FT230X device via the FUNC0 and FUNC1 module outputs.  If CONFIG_PIC32MX_UART2
- *   is enabled, the src/up_boot will configure the UART2 pins as follows.
+ *   is enabled, the src/pic32_boot will configure the UART2 pins as follows.
  *
  *   ---------- ------ ----- ------ -------------------------
  *      BOARD   OUTPUT  PIN  SIGNAL NOTES
@@ -78,7 +78,7 @@
  *   FT230X RXD  FUNC0 RPB11  U2RX  UART2 RX (Also PGEC2)
  *   FT230X TXD  FUNC1 RPB10  U2TX  UART2 TX (Also PGED2)
  *
- *   If CONFIG_PIC32MX_UART1 is enabled, the src/up_boot will configure the UART
+ *   If CONFIG_PIC32MX_UART1 is enabled, the src/pic32_boot will configure the UART
  *   pins as follows.  This will support communictions (via an external RS-232
  *   driver) through X3 pins 4 and 5:
  *

@@ -157,10 +157,6 @@ extern uint32_t g_intstackbase;
  * Public Functions
  ****************************************************************************/
 
-/* Start-up functions */
-
-void up_boot(void);
-
 /* Context switching functions */
 
 void up_copystate(uint8_t *dest, uint8_t *src);
