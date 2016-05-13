@@ -271,7 +271,7 @@ static inline void up_configbaud(void)
  * Name: lpc31_lowsetup
  *
  * Description:
- *   Called early in up_boot.  Performs chip-common low level initialization.
+ *   Called early in arm_boot.  Performs chip-common low level initialization.
  *
  ****************************************************************************/
 

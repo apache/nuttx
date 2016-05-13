@@ -2,7 +2,7 @@ diff --git a/nuttx/arch/arm/src/a1x/a1x_boot.c b/nuttx/arch/arm/src/a1x/a1x_boot
 index 3cc6323..ad42790 100644
 --- a/nuttx/arch/arm/src/a1x/a1x_boot.c
 +++ b/nuttx/arch/arm/src/a1x/a1x_boot.c
-@@ -312,12 +312,14 @@ void up_boot(void)
+@@ -312,12 +312,14 @@ void arm_boot(void)
     * for all IO regions (Including the vector region).
     */
  
@@ -17,7 +17,7 @@ index 3cc6323..ad42790 100644
    a1x_vectormapping();
  
  #endif /* CONFIG_ARCH_ROMPGTABLE */
-@@ -326,16 +328,19 @@ void up_boot(void)
+@@ -326,16 +328,19 @@ void arm_boot(void)
     * arm_vector.S
     */
  
@@ -37,7 +37,7 @@ index 3cc6323..ad42790 100644
    a1x_lowsetup();
  
    /* Perform early serial initialization if we are going to use the serial
-@@ -343,6 +348,7 @@ void up_boot(void)
+@@ -343,6 +348,7 @@ void arm_boot(void)
     */
  
  #ifdef USE_EARLYSERIALINIT
@@ -45,7 +45,7 @@ index 3cc6323..ad42790 100644
    up_earlyserialinit();
  #endif
  
-@@ -353,6 +359,7 @@ void up_boot(void)
+@@ -353,6 +359,7 @@ void arm_boot(void)
     */
  
  #ifdef CONFIG_BUILD_PROTECTED
@@ -53,7 +53,7 @@ index 3cc6323..ad42790 100644
    a1x_userspace();
  #endif
  
-@@ -362,5 +369,7 @@ void up_boot(void)
+@@ -362,5 +369,7 @@ void arm_boot(void)
     * - Configuration of board specific resources (PIOs, LEDs, etc).
     */
  

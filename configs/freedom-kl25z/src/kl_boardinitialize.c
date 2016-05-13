@@ -1,6 +1,5 @@
 /************************************************************************************
- * configs/freedom-kl25z/src/up_boot.c
- * arch/arm/src/board/up_boot.c
+ * configs/freedom-kl25z/src/kl_boardinitialize.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

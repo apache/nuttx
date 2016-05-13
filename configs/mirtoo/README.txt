@@ -530,7 +530,7 @@ UART Usage
 
   When mounted on the DTX1-4000L EV-kit1 board, serial output is avaiable through
   an FT230X device via the FUNC0 and FUNC1 module outputs.  If CONFIG_PIC32MX_UART2
-  is enabled, the src/up_boot will configure the UART2 pins as follows:
+  is enabled, the src/pic32_boot will configure the UART2 pins as follows:
 
     ---------- ------ ----- ------ -------------------------
        BOARD   MODULE  PIN  SIGNAL NOTES
@@ -542,7 +542,7 @@ UART Usage
   for UART2 if you are also debugging with the ICD3.  In that case, you may need
   to switch to UART1.
 
-  If CONFIG_PIC32MX_UART1 is enabled, the src/up_boot will configure the UART
+  If CONFIG_PIC32MX_UART1 is enabled, the src/pic32_boot will configure the UART
   pins as follows.  This will support communictions (via an external RS-232
   driver) through X3 pins 4 and 5:
 

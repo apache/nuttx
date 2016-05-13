@@ -234,7 +234,7 @@ void pic32mx_uartconfigure(uintptr_t uart_base, uint32_t baudrate,
  *
  * Description:
  *   This function must be provided by the board-specific logic in the  directory
- *   configs/<board-name>/up_boot.c.
+ *   configs/<board-name>/pic32_boot.c.
  *
  ************************************************************************************/
 
