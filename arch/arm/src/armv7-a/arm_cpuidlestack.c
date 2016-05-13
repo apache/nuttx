@@ -100,7 +100,7 @@ static FAR const uint32_t *g_cpu_stackalloc[CONFIG_SMP_NCPUS] =
  *      In this case, a new stack will need to be created for the IDLE
  *      thread and this function is then equivalent to:
  *
- *      up_create_stack(tcb, stack_size, TCB_FLAG_TTYPE_KERNEL);
+ *      return up_create_stack(tcb, stack_size, TCB_FLAG_TTYPE_KERNEL);
  *
  *   The following TCB fields must be initialized by this function:
  *

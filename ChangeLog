@@ -11727,5 +11727,5 @@
 	  in all SAM DMA logic, unionfs, OS signalling logic,
 	* configs/nucleo-144: Basic port for the Nucleo-144 board with the
 	  STM32F746ZG MCU.  From Kconstantin Berezenko (2015-05-12).
-	* arch/arm-src/armv7-a:  Complete logic to initialize each CPUn, n > 0,
-	  when CONFIG_SMP=y (2016-05-13).
+	* arch/arm-src/armv7-a:  Complete re-design of logic to initialize each
+	  CPUn, n > 0, when CONFIG_SMP=y (2016-05-13).
