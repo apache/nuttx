@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/sama5d4-ek/scripts/dramboot.ld
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -54,7 +54,8 @@ ENTRY(_stext)
 
 SECTIONS
 {
-	.text : {
+	.text :
+	{
 		_stext = ABSOLUTE(.);
 		*(.vectors)
 		*(.text .text.*)
@@ -72,13 +73,15 @@ SECTIONS
 		_etext = ABSOLUTE(.);
 	} > sdram
 
-	.init_section : {
+	.init_section :
+	{
 		_sinit = ABSOLUTE(.);
 		*(.init_array .init_array.*)
 		_einit = ABSOLUTE(.);
 	} > sdram
 
-	.ARM.extab : {
+	.ARM.extab :
+	{
 		*(.ARM.extab*)
 	} > sdram
 
@@ -91,7 +94,8 @@ SECTIONS
 	} > sdram
 	PROVIDE_HIDDEN (__exidx_end = .);
 
-	.data : {
+	.data :
+	{
 		_sdata = ABSOLUTE(.);
 		*(.data .data.*)
 		*(.gnu.linkonce.d.*)
@@ -99,7 +103,8 @@ SECTIONS
 		_edata = ABSOLUTE(.);
 	} > sdram
 
-	.bss : {
+	.bss :
+	{
 		_sbss = ABSOLUTE(.);
 		*(.bss .bss.*)
 		*(.gnu.linkonce.b.*)
@@ -107,7 +112,17 @@ SECTIONS
 		_ebss = ABSOLUTE(.);
 	} > sdram
 
+	/* Uninitialized data */
+
+	.noinit :
+	{
+		_snoinit = ABSOLUTE(.);
+		*(.noinit*)
+		_enoinit = ABSOLUTE(.);
+	} > sdram
+
 	/* Stabs debugging sections. */
+
 	.stab 0 : { *(.stab) }
 	.stabstr 0 : { *(.stabstr) }
 	.stab.excl 0 : { *(.stab.excl) }

@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/sama5d3x-ek/scripts/nor-ddram.ld
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -60,7 +60,8 @@ ENTRY(_stext)
 
 SECTIONS
 {
-	.text : {
+	.text :
+	{
 		_stext = ABSOLUTE(.);
 		*(.vectors)
 		*(.text .text.*)
@@ -78,13 +79,15 @@ SECTIONS
 		_etext = ABSOLUTE(.);
 	} > norflash
 
-	.init_section : {
+	.init_section :
+	{
 		_sinit = ABSOLUTE(.);
 		*(.init_array .init_array.*)
 		_einit = ABSOLUTE(.);
 	} > norflash
 
-	.ARM.extab : {
+	.ARM.extab :
+	{
 		*(.ARM.extab*)
 	} > norflash
 
@@ -97,7 +100,8 @@ SECTIONS
 	} > norflash
 	PROVIDE_HIDDEN (__exidx_end = .);
 
-	.data : {
+	.data :
+	{
 		_sdata = ABSOLUTE(.);
 		*(.data .data.*)
 		*(.gnu.linkonce.d.*)
@@ -107,7 +111,8 @@ SECTIONS
 
 	_eronly = LOADADDR(.data);
 
-	.bss : {
+	.bss :
+	{
 		_sbss = ABSOLUTE(.);
 		*(.bss .bss.*)
 		*(.gnu.linkonce.b.*)
@@ -115,7 +120,17 @@ SECTIONS
 		_ebss = ABSOLUTE(.);
 	} > sdram
 
+	/* Uninitialized data */
+
+	.noinit :
+	{
+		_snoinit = ABSOLUTE(.);
+		*(.noinit*)
+		_enoinit = ABSOLUTE(.);
+	} > sdram
+
 	/* Stabs debugging sections. */
+
 	.stab 0 : { *(.stab) }
 	.stabstr 0 : { *(.stabstr) }
 	.stab.excl 0 : { *(.stab.excl) }
