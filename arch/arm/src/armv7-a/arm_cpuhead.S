@@ -45,6 +45,8 @@
 #include "cp15.h"
 #include "sctlr.h"
 #include "mmu.h"
+#include "smp.h"
+
 #include "chip.h"
 #include "up_internal.h"
 
@@ -114,7 +116,7 @@ __cpu1_start:
 	b		.Lcpu_start
 
 .Lcpu1_stackpointer:
-	.long	.Lcpu1_stackbottom
+	.long	.Lcpu1_stacktop
 	.size	__cpu1_start, .-__cpu1_start
 
 #if CONFIG_SMP_NCPUS > 2
@@ -132,7 +134,7 @@ __cpu2_start:
 	b		.Lcpu_start
 
 .Lcpu2_stackpointer:
-	.long	.Lcpu2_stackbottom
+	.long	.Lcpu2_stacktop
 	.size	__cpu2_start, .-__cpu2_start
 
 #if CONFIG_SMP_NCPUS > 3
@@ -150,7 +152,7 @@ __cpu3_start:
 	b		.Lcpu_start
 
 .Lcpu3_stackpointer:
-	.long	.Lcpu3_stackbottom
+	.long	.Lcpu3_stacktop
 	.size	__cpu3_start, .-__cpu3_start
 
 #if CONFIG_SMP_NCPUS > 4
@@ -168,7 +170,7 @@ __cpu3_start:
  *   Common CPUn startup logic (n > 0)
  *
  * On input:
- *   SP = Set to bottom of CPU IDLE stack (virtual)
+ *   SP = Set to top of CPU IDLE stack (virtual)
  *   R5 = CPU number
  *
  ****************************************************************************/
@@ -395,7 +397,7 @@ __cpu3_start:
  *   absolute addresses; this is not position independent.
  *
  * On input:
- *   SP = Set to bottom of CPU IDLE stack (virtual)
+ *   SP = Set to top of CPU IDLE stack (virtual)
  *   R5 = CPU number
  *
  ****************************************************************************/
@@ -438,7 +440,7 @@ __cpu3_start:
 #ifdef CONFIG_STACK_COLORATION
 	.type	.Lstkinit, %object
 .Lstkinit:
-	.long	((CONFIG_IDLETHREAD_STACKSIZE + 7) & ~7) >> 2)
+	.long	SMP_STACK_WORDS
 	.long	STACK_COLOR				/* Stack coloration word */
 	.size	.Lstkinit, . -.Lstkinit
 #endif
@@ -451,30 +453,33 @@ __cpu3_start:
 
 #if CONFIG_SMP_NCPUS > 1
 	.align	8
-	.type	.Lcpu1_idlestack, object
+	.globl	g_cpu1_idlestack
+	.type	g_cpu1_idlestack, object
 
-.Lcpu1_idlestack:
-	.space	((CONFIG_SMP_IDLETHREAD_STACKSIZE + 7) & ~7)
-.Lcpu1_stackbottom:
-	.size	.Lcpu1_idlestack, .Lcpu1_stackbottom-.Lcpu1_idlestack
+g_cpu1_idlestack:
+	.space	SMP_STACK_SIZE
+.Lcpu1_stacktop:
+	.size	g_cpu1_idlestack, .Lcpu1_stacktop-g_cpu1_idlestack
 
 #if CONFIG_SMP_NCPUS > 2
 	.align	8
-	.type	.Lcpu2_idlestack, object
+	.globl	g_cpu2_idlestack
+	.type	g_cpu2_idlestack, object
 
-.Lcpu2_idlestack:
-	.space	((CONFIG_SMP_IDLETHREAD_STACKSIZE + 7) & ~7)
-.Lcpu2_stackbottom:
-	.size	.Lcpu2_idlestack, .Lcpu2_stackbottom-.Lcpu2_idlestack
+g_cpu2_idlestack:
+	.space	SMP_STACK_SIZE
+.Lcpu2_stacktop:
+	.size	g_cpu2_idlestack, .Lcpu2_stacktop-g_cpu2_idlestack
 
 #if CONFIG_SMP_NCPUS > 3
 	.align	8
-	.type	.Lcpu3_idlestack, object
+	.globl	g_cpu3_idlestack
+	.type	g_cpu3_idlestack, object
 
-.Lcpu3_idlestack:
-	.space	((CONFIG_SMP_IDLETHREAD_STACKSIZE + 7) & ~7)
-.Lcpu3_stackbottom:
-	.size	.Lcpu3_idlestack, .Lcpu3_stackbottom-.Lcpu3_idlestack
+g_cpu3_idlestack:
+	.space	SMP_STACK_SIZE
+.Lcpu3_stacktop:
+	.size	g_cpu3_idlestack, .Lcpu3_stacktop-g_cpu3_idlestack
 
 #if CONFIG_SMP_NCPUS > 4
 #  error This logic needs to extended for CONFIG_SMP_NCPUS > 4

@@ -309,7 +309,7 @@ static void imx_copyvectorblock(void)
 #ifndef CONFIG_IMX6_WDT
 static inline void imx_wdtdisable(void)
 {
-#  warning REVISIT WDT initialization
+  /* REVISIT: WDT initialization */
 }
 #else
 #  define imx_wdtdisable()

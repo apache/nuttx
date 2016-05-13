@@ -46,6 +46,40 @@
 #ifdef CONFIG_SMP
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* ARM requires at least a 4-byte stack alignment.  For use with EABI and
+ * floating point, the stack must be aligned to 8-byte addresses.  We will
+ * always use the EABI stack alignment
+ */
+
+#define SMP_STACK_ALIGNMENT  8
+#define SMP_STACK_MASK       7
+#define SMP_STACK_SIZE       ((CONFIG_SMP_IDLETHREAD_STACKSIZE + 7) & ~7)
+#define SMP_STACK_WORDS      (SMP_STACK_SIZE >> 2)
+#define SMP_STACK_TOP        (SMP_STACK_SIZE - 8)
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+#ifndef __ASSEMBLY__
+
+#if CONFIG_SMP_NCPUS > 1
+extern uint32_t g_cpu1_idlestack[SMP_STACK_WORDS];
+#if CONFIG_SMP_NCPUS > 2
+extern uint32_t g_cpu2_idlestack[SMP_STACK_WORDS];
+#if CONFIG_SMP_NCPUS > 3
+extern uint32_t g_cpu3_idlestack[SMP_STACK_WORDS];
+#if CONFIG_SMP_NCPUS > 4
+#  error This logic needs to extended for CONFIG_SMP_NCPUS > 4
+#endif /* CONFIG_SMP_NCPUS > 4 */
+#endif /* CONFIG_SMP_NCPUS > 3 */
+#endif /* CONFIG_SMP_NCPUS > 2 */
+#endif /* CONFIG_SMP_NCPUS > 1 */
+
+/****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
@@ -106,5 +140,6 @@ void __cpu3_start(void);
 
 void arm_cpu_boot(int cpu);
 
+#endif  /* __ASSEMBLY__ */
 #endif  /* CONFIG_SMP */
 #endif  /* __ARCH_ARM_SRC_ARMV7_A_SMP_H */

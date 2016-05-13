@@ -70,7 +70,7 @@ ifeq ($(CONFIG_SPINLOCK),y)
 endif
 
 ifeq ($(CONFIG_SMP),y)
-  CSRCS += up_smpsignal.c up_smphook.c
+  CSRCS += up_smpsignal.c up_smphook.c up_cpuidlestack.c
   HOSTSRCS += up_simsmp.c
 endif
 
