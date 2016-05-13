@@ -11718,6 +11718,14 @@
 	* Several Makefiles: Add .PHONY definitions to prevent 'clean up to date'
 	  message weirdness when 'make clean' is done with no .config or Make.defs
 	  file (2016-05-10).
+	* include/nuttx/can.h and drivers/can.c:  Improve CAN error reporting.
+	  From Frank Benkert (2016-05-11).
+	* fs/Kconfig:  Allow CONFIG_FS_WRITABLE to be manually selectable
+	  (2016-05-11).
+	* Various file:  Search for places where a stray semicolon following an
+	  if condition cause the if body to be executed unconditionally.  Fixes
+	  in all SAM DMA logic, unionfs, OS signalling logic,
 	* configs/nucleo-144: Basic port for the Nucleo-144 board with the
 	  STM32F746ZG MCU.  From Kconstantin Berezenko (2015-05-12).
-
+	* arch/arm-src/armv7-a:  Complete logic to initialize each CPUn, n > 0,
+	  when CONFIG_SMP=y (2016-05-13).
