@@ -49,6 +49,9 @@ ifeq ($(CONFIG_PAGING),y)
 CMN_ASRCS  = arm_pghead.S
 else
 CMN_ASRCS  = arm_head.S
+ifeq ($(CONFIG_SMP),y)
+CMN_ASRCS += arm_cpuhead.S
+endif
 endif
 
 # Common assembly language files
