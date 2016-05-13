@@ -647,6 +647,17 @@ config ARCH_BOARD_PIRELLI_DPL10
 		This directory contains the board support for Pirelli dpl10 phones.  The
 		additions were made by Craig Comstock (with help form Alan Carvalho de Assis).
 
+config ARCH_BOARD_NUCLEO_144
+	bool "STMicro NUCLEO-144"
+	depends on ARCH_CHIP_STM32F746
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		STMicro Nucleo-144 development board featuring the STM32F746ZGT6U
+		MCU. The STM32F746ZGT6U is a 216MHz Cortex-M7 operation with 1024Kb Flash
+		memory and 300Kb SRAM.
+
 config ARCH_BOARD_NUCLEO_F303RE
 	bool "STM32F303 Nucleo F303RE"
 	depends on ARCH_CHIP_STM32F303RE
@@ -963,7 +974,7 @@ config ARCH_BOARD_STM32F746G_DISCO
 	---help---
 		STMicro STM32F746G-DISCO development board featuring the STM32F746NGH6
 		MCU. The STM32F746NGH6  is a 216MHz Cortex-M7 operation with 1024Kb Flash
-		memory and 300Kb SRAM.
+		memory and 320Kb SRAM.
 
 config ARCH_BOARD_STM32L476VG_DISCO
 	bool "STMicro STM32F746VG-Discovery board"
@@ -1363,6 +1374,7 @@ config ARCH_BOARD
 	default "pic32mx7mmb"              if ARCH_BOARD_PIC32MX7MMB
 	default "pic32mz-starterkit"       if ARCH_BOARD_PIC32MZ_STARTERKIT
 	default "pirelli_dpl10"            if ARCH_BOARD_PIRELLI_DPL10
+	default "nucleo-144"               if ARCH_BOARD_NUCLEO_144
 	default "nucleo-f303re"            if ARCH_BOARD_NUCLEO_F303RE
 	default "nucleo-f4x1re"            if ARCH_BOARD_NUCLEO_F401RE || ARCH_BOARD_NUCLEO_F411RE
 	default "nucleo-l476rg"            if ARCH_BOARD_NUCLEO_L476RG
@@ -1668,6 +1680,9 @@ source "configs/pic32mz-starterkit/Kconfig"
 endif
 if ARCH_BOARD_PIRELLI_DPL10
 source "configs/pirelli_dpl10/Kconfig"
+endif
+if ARCH_BOARD_NUCLEO_144
+source "configs/nucleo-144/Kconfig"
 endif
 if ARCH_BOARD_NUCLEO_F303RE
 source "configs/nucleo-f303re/Kconfig"

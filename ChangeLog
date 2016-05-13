@@ -11718,3 +11718,6 @@
 	* Several Makefiles: Add .PHONY definitions to prevent 'clean up to date'
 	  message weirdness when 'make clean' is done with no .config or Make.defs
 	  file (2016-05-10).
+	* configs/nucleo-144: Basic port for the Nucleo-144 board with the
+	  STM32F746ZG MCU.  From Kconstantin Berezenko (2015-05-12).
+

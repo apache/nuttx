@@ -1332,6 +1332,8 @@ nuttx/
  |   |- ntosd-dm320/
  |   |   |- doc/README.txt
  |   |   `- README.txt
+ |   |- nucleo-144/
+ |   |   `- README.txt
  |   |- nucleo-f4x1re/
  |   |   `- README.txt
  |   |- nutiny-nuc120/
