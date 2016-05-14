@@ -262,6 +262,30 @@ FAR struct mtd_dev_s *mtd_temp;
     }
 #endif
 
+#ifdef HAVE_USBHOST
+  /* Initialize USB host operation.  stm32l4_usbhost_initialize() starts a thread
+   * will monitor for USB connection and disconnection events.
+   */
+
+  ret = stm32l4_usbhost_initialize();
+  if (ret != OK)
+    {
+      udbg("ERROR: Failed to initialize USB host: %d\n", ret);
+      return ret;
+    }
+#endif
+
+#ifdef HAVE_USBMONITOR
+  /* Start the USB Monitor */
+
+  ret = usbmonitor_start(0, NULL);
+  if (ret != OK)
+    {
+      udbg("ERROR: Failed to start USB monitor: %d\n", ret);
+      return ret;
+    }
+#endif
+
   return OK;
 }
 #endif /* CONFIG_LIB_BOARDCTL */
