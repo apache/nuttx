@@ -516,7 +516,8 @@ static int stm32_tim_setmode(FAR struct stm32_tim_dev_s *dev, stm32_tim_mode_t m
         val |= ATIM_CR1_OPM;
         break;
 
-      default: return ERROR;
+      default:
+        return ERROR;
     }
 
   stm32_tim_reload_counter(dev);
@@ -548,7 +549,10 @@ static int stm32_tim_setchannel(FAR struct stm32_tim_dev_s *dev, uint8_t channel
 
   /* Further we use range as 0..3; if channel=0 it will also overflow here */
 
-  if (--channel > 4) return ERROR;
+  if (--channel > 4)
+    {
+      return ERROR;
+    }
 
   /* Assume that channel is disabled and polarity is active high */
 
@@ -699,7 +703,8 @@ static int stm32_tim_setchannel(FAR struct stm32_tim_dev_s *dev, uint8_t channel
               stm32_tim_gpioconfig(GPIO_TIM4_CH4OUT, mode);
               break;
 #endif
-            default: return ERROR;
+            default:
+              return ERROR;
           }
         break;
 #endif
@@ -727,7 +732,8 @@ static int stm32_tim_setchannel(FAR struct stm32_tim_dev_s *dev, uint8_t channel
               stm32_tim_gpioconfig(GPIO_TIM5_CH4OUT, mode);
               break;
 #endif
-            default: return ERROR;
+            default:
+              return ERROR;
           }
         break;
 #endif
@@ -753,7 +759,8 @@ static int stm32_tim_setchannel(FAR struct stm32_tim_dev_s *dev, uint8_t channel
             case 3:
               stm32_tim_gpioconfig(GPIO_TIM1_CH4OUT, mode); break;
 #endif
-            default: return ERROR;
+            default:
+              return ERROR;
           }
         break;
 #endif

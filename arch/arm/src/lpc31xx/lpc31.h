@@ -154,7 +154,7 @@ static inline void gpio_outputhigh(uint32_t ioconfig, uint32_t bit)
  * Name: lpc31_lowsetup
  *
  * Description:
- *   Called early in up_boot.  Performs chip-common low level initialization.
+ *   Called early in arm_boot.  Performs chip-common low level initialization.
  *
  ************************************************************************************/
 

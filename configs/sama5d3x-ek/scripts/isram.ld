@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/sama5d3x-ek/scripts/isram.ld
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,7 +51,8 @@ ENTRY(_stext)
 
 SECTIONS
 {
-	.text : {
+	.text :
+	{
 		_stext = ABSOLUTE(.);
 		*(.vectors)
 		*(.text .text.*)
@@ -69,13 +70,15 @@ SECTIONS
 		_etext = ABSOLUTE(.);
 	} > isram
 
-	.init_section : {
+	.init_section :
+	{
 		_sinit = ABSOLUTE(.);
 		*(.init_array .init_array.*)
 		_einit = ABSOLUTE(.);
 	} > isram
 
-	.ARM.extab : {
+	.ARM.extab :
+	{
 		*(.ARM.extab*)
 	} > isram
 
@@ -88,7 +91,8 @@ SECTIONS
 	} > isram
 	PROVIDE_HIDDEN (__exidx_end = .);
 
-	.data : {
+	.data :
+	{
 		_sdata = ABSOLUTE(.);
 		*(.data .data.*)
 		*(.gnu.linkonce.d.*)
@@ -96,7 +100,8 @@ SECTIONS
 		_edata = ABSOLUTE(.);
 	} > isram
 
-	.bss : {
+	.bss :
+	{
 		_sbss = ABSOLUTE(.);
 		*(.bss .bss.*)
 		*(.gnu.linkonce.b.*)
@@ -104,7 +109,17 @@ SECTIONS
 		_ebss = ABSOLUTE(.);
 	} > isram
 
+	/* Uninitialized data */
+
+	.noinit :
+	{
+		_snoinit = ABSOLUTE(.);
+		*(.noinit*)
+		_enoinit = ABSOLUTE(.);
+	} > isram
+
 	/* Stabs debugging sections. */
+
 	.stab 0 : { *(.stab) }
 	.stabstr 0 : { *(.stabstr) }
 	.stab.excl 0 : { *(.stab.excl) }

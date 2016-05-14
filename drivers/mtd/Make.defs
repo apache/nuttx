@@ -88,6 +88,10 @@ ifeq ($(CONFIG_MTD_SST25XX),y)
 CSRCS += sst25xx.c
 endif
 
+ifeq ($(CONFIG_MTD_SST26),y)
+CSRCS += sst26.c
+endif
+
 ifeq ($(CONFIG_MTD_SST39FV),y)
 CSRCS += sst39vf.c
 endif

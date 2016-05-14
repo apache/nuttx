@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/sama5d3x-ek/scripts/pg-isram.ld
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -79,7 +79,8 @@ ENTRY(_stext)
 
 SECTIONS
 {
-	.locked : {
+	.locked :
+	{
 		_slocked = ABSOLUTE(.);
 		*(.vectors)
 		up_head.o locked.r (.text .text.*)
@@ -95,7 +96,8 @@ SECTIONS
 		_elocked = ABSOLUTE(.);
 	} >locked
 
-	.init_section : {
+	.init_section :
+	{
 		_sinit = ABSOLUTE(.);
 		*(.init_array .init_array.*)
 		_einit = ABSOLUTE(.);
@@ -110,7 +112,8 @@ SECTIONS
 	} > isram
 	PROVIDE_HIDDEN (__exidx_end = .);
 
-	.paged : {
+	.paged :
+	{
 		_spaged = ABSOLUTE(.);
 		*(.text .text.*)
 		*(.fixup)
@@ -127,7 +130,8 @@ SECTIONS
 		_epaged = ABSOLUTE(.);
 	} > paged
 
-	.data : {
+	.data :
+	{
 		_sdata = ABSOLUTE(.);
 		*(.data .data.*)
 		*(.gnu.linkonce.d.*)
@@ -135,14 +139,26 @@ SECTIONS
 		_edata = ABSOLUTE(.);
 	} > data AT > locked
 
-	.bss : {
+	.bss :
+	{
 		_sbss = ABSOLUTE(.);
 		*(.bss .bss.*)
 		*(.gnu.linkonce.b.*)
 		*(COMMON)
 		_ebss = ABSOLUTE(.);
 	} > data
-					/* Stabs debugging sections.	*/
+
+	/* Uninitialized data */
+
+	.noinit :
+	{
+		_snoinit = ABSOLUTE(.);
+		*(.noinit*)
+		_enoinit = ABSOLUTE(.);
+	} > data
+
+	/* Stabs debugging sections. */
+
 	.stab 0 : { *(.stab) }
 	.stabstr 0 : { *(.stabstr) }
 	.stab.excl 0 : { *(.stab.excl) }

@@ -783,6 +783,39 @@ config SST25XX_MEMORY_TYPE
 
 endif # MTD_SST25XX
 
+config MTD_SST26
+	bool "SPI/QSPI-based SST26XX FLASHes (16,32,64-MBit)"
+	default n
+	select SPI
+	---help---
+		These part are also different from SST25 and SST25XX, they support both SPI and QSPI.
+
+if MTD_SST26
+
+config SST26_SPIMODE
+	int "SST26 (Q)SPI Mode"
+	default 0
+
+config SST26_SPIFREQUENCY
+	int "SST26 (Q)SPI Frequency"
+	default 64000000
+
+config SST26_MANUFACTURER
+	hex "Manufacturers ID"
+	default 0xBF
+	---help---
+		Various manufacturers may have produced the parts.  0xBF is the manufacturer ID
+		for the parts manufactured by SST.
+
+config SST26_MEMORY_TYPE
+	hex "Memory type ID"
+	default 0x26
+	---help---
+		The memory type for SST26VF0xx series is 0x26, but this can be modified if needed
+		to support compatible devices from different manufacturers.
+
+endif # MTD_SST26
+
 config MTD_SST39FV
 	bool "SST39FV NOR FLASH"
 	default n

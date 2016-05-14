@@ -62,6 +62,7 @@ OBJS = $(AOBJS) $(COBJS)
 BIN = libaudio$(LIBEXT)
 
 all: $(BIN)
+.PHONY: depend clean distclean
 
 $(AOBJS): %$(OBJEXT): %.S
 	$(call ASSEMBLE, $<, $@)

@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/sama5d2-xult/scripts/gnu-elf.ld
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -74,6 +74,15 @@ SECTIONS
       *(.data.*)
       *(.gnu.linkonce.d*)
       _edata = . ;
+    }
+
+  /* Uninitialized data */
+
+  .noinit :
+    {
+      _snoinit = . ;
+      *(.noinit*)
+      _enoinit = . ;
     }
 
   /* C++ support. For each global and static local C++ object,

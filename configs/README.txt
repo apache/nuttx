@@ -392,6 +392,11 @@ configs/ntosd-dm320
   STATUS: This port is code complete, verified, and included in the
   NuttX 0.2.1 release.
 
+configs/nucleo-144
+  STMicro Nucleo-144 development board featuring the STM32F746ZGT6U MCU. The
+  STM32F746ZGT6U is a 216MHz Cortex-M7 operation with 1024Kb Flash memory
+  and 300Kb SRAM.
+
 configs/nucleo-f4x1re
   STMicro ST Nucleo F401RE and F411RE boards.  See
   http://mbed.org/platforms/ST-Nucleo-F401RE and

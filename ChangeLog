@@ -11700,8 +11700,32 @@
 	  dev@ziggurat29.com (2016-05-03).
 	* Makefile.unix and tools/mkexport.sh: Pass top-level make to the
 	  script to allow -j greater than 1.  From David Sidrane (2016-05-04).
-	* arch/arm/src/stm32, sm32f7, stm32l4: Fix typo in variable name in
+	* arch/arm/src/stm32, stm32f7, stm32l4: Fix typo in variable name in
 	  serial BREAK logic.  Review other serial implementations for similar
 	  naming problems. (2016-05-05).
 	* arch/arm/src/samv7:  Fix typo in MATRIX register definitions.  From
 	  Stefan Kolb (2016-05-06).
+	* arch/arm/src/stm32l4: Problem with resetting backup domain clears
+	  clocking options set up before in *rcc.c use INITS flag to avoid magic
+	  reg value to detect power up reset state of RTC correct a problem
+	  clearing interrupt flags (they weren't) which prevented an alarm from
+	  ever being used more than once per reset cycle.  From Dave
+	  dev@ziggurat29.com (2016-05-07).
+	* arch/arm/src/tiva: Fix a bug of GPIO falling-edge interrupt for tiva.
+	  From Young (2016-05-07).
+	* drivrs/mtd:  Add a driver for SST26F spi/qspi flash devices (SPI mode
+	  only).  From Sebastien Lorquet (2016-05-10).
+	* Several Makefiles: Add .PHONY definitions to prevent 'clean up to date'
+	  message weirdness when 'make clean' is done with no .config or Make.defs
+	  file (2016-05-10).
+	* include/nuttx/can.h and drivers/can.c:  Improve CAN error reporting.
+	  From Frank Benkert (2016-05-11).
+	* fs/Kconfig:  Allow CONFIG_FS_WRITABLE to be manually selectable
+	  (2016-05-11).
+	* Various file:  Search for places where a stray semicolon following an
+	  if condition cause the if body to be executed unconditionally.  Fixes
+	  in all SAM DMA logic, unionfs, OS signalling logic,
+	* configs/nucleo-144: Basic port for the Nucleo-144 board with the
+	  STM32F746ZG MCU.  From Kconstantin Berezenko (2015-05-12).
+	* arch/arm-src/armv7-a:  Complete re-design of logic to initialize each
+	  CPUn, n > 0, when CONFIG_SMP=y (2016-05-13).

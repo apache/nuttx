@@ -522,6 +522,44 @@ static ssize_t can_read(FAR struct file *filep, FAR char *buffer,
       /* Interrupts must be disabled while accessing the cd_recv FIFO */
 
       flags = enter_critical_section();
+
+#ifdef CONFIG_CAN_ERRORS
+      /* Check for internal errors */
+
+      if (dev->cd_error != 0)
+        {
+          FAR struct can_msg_s *msg;
+
+          /* Detected an internal driver error.  Generate a
+           * CAN_ERROR_MESSAGE
+           */
+
+          if (buflen < CAN_MSGLEN(CAN_ERROR_DLC))
+            {
+              goto return_with_irqdisabled;
+            }
+
+          msg                   = (FAR struct can_msg_s *)buffer;
+          msg->cm_hdr.ch_id     = CAN_ERROR_INTERNAL;
+          msg->cm_hdr.ch_dlc    = CAN_ERROR_DLC;
+          msg->cm_hdr.ch_rtr    = 0;
+          msg->cm_hdr.ch_error  = 1;
+#ifdef CONFIG_CAN_EXTID
+          msg->cm_hdr.ch_extid  = 0;
+#endif
+          msg->cm_hdr.ch_unused = 0;
+          memset(&(msg->cm_data), 0, CAN_ERROR_DLC);
+          msg->cm_data[5]       = dev->cd_error;
+
+          /* Reset the error flag */
+
+          dev->cd_error         = 0;
+
+          ret = CAN_MSGLEN(CAN_ERROR_DLC);
+          goto return_with_irqdisabled;
+        }
+#endif /* CONFIG_CAN_ERRORS */
+
       while (dev->cd_recv.rx_head == dev->cd_recv.rx_tail)
         {
           /* The receive FIFO is empty -- was non-blocking mode selected? */
@@ -540,6 +578,7 @@ static ssize_t can_read(FAR struct file *filep, FAR char *buffer,
               ret = sem_wait(&dev->cd_recv.rx_sem);
             }
           while (ret >= 0 && dev->cd_recv.rx_head == dev->cd_recv.rx_tail);
+
           dev->cd_nrxwaiters--;
 
           if (ret < 0)
@@ -927,6 +966,9 @@ int can_register(FAR const char *path, FAR struct can_dev_s *dev)
   dev->cd_ntxwaiters = 0;
   dev->cd_nrxwaiters = 0;
   dev->cd_npendrtr   = 0;
+#ifdef CONFIG_CAN_ERRORS
+  dev->cd_error      = 0;
+#endif
 
   sem_init(&dev->cd_xmit.tx_sem, 0, 0);
   sem_init(&dev->cd_recv.rx_sem, 0, 0);
@@ -1073,6 +1115,14 @@ int can_receive(FAR struct can_dev_s *dev, FAR struct can_hdr_s *hdr,
 
       err = OK;
     }
+#ifdef CONFIG_CAN_ERRORS
+  else
+    {
+      /* Report rx overflow error */
+
+      dev->cd_error |= CAN_ERROR5_RXOVERFLOW;
+    }
+#endif
 
   return err;
 }

@@ -2159,7 +2159,7 @@ int sam_dmatxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
       /* Set up the maximum size transfer */
 
       ret = sam_txbuffer(dmach, paddr, maddr, maxtransfer);
-      if (ret == OK);
+      if (ret == OK)
         {
           /* Decrement the number of bytes left to transfer */
 
@@ -2238,7 +2238,7 @@ int sam_dmarxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
       /* Set up the maximum size transfer */
 
       ret = sam_rxbuffer(dmach, paddr, maddr, maxtransfer);
-      if (ret == OK);
+      if (ret == OK)
         {
           /* Decrement the number of bytes left to transfer */
 

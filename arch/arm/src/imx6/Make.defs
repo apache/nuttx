@@ -49,6 +49,9 @@ ifeq ($(CONFIG_PAGING),y)
 CMN_ASRCS  = arm_pghead.S
 else
 CMN_ASRCS  = arm_head.S
+ifeq ($(CONFIG_SMP),y)
+CMN_ASRCS += arm_cpuhead.S
+endif
 endif
 
 # Common assembly language files
@@ -77,7 +80,7 @@ CMN_CSRCS += arm_schedulesigaction.c arm_sigdeliver.c arm_syscall.c
 CMN_CSRCS += arm_unblocktask.c arm_undefinedinsn.c
 
 ifeq ($(CONFIG_SMP),y)
-CMN_CSRCS += arm_cpuindex.c arm_cpustart.c arm_cpupause.c
+CMN_CSRCS += arm_cpuindex.c arm_cpustart.c arm_cpupause.c arm_cpuidlestack.c
 endif
 
 ifeq ($(CONFIG_DEBUG_IRQ),y)
@@ -145,5 +148,5 @@ CHIP_CSRCS += imx_timerisr.c imx_gpio.c imx_iomuxc.c
 CHIP_CSRCS += imx_serial.c imx_lowputc.c
 
 ifeq ($(CONFIG_SMP),y)
-CHIP_CSRCS += imx_cpuinit.c
+CHIP_CSRCS += imx_cpuboot.c
 endif

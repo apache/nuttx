@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/sama5d3x-ek/scripts/nor-isram.ld
  *
- *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,7 +56,8 @@ ENTRY(_stext)
 
 SECTIONS
 {
-	.text : {
+	.text :
+	{
 		_stext = ABSOLUTE(.);
 		*(.vectors)
 		*(.text .text.*)
@@ -74,13 +75,15 @@ SECTIONS
 		_etext = ABSOLUTE(.);
 	} > norflash
 
-	.init_section : {
+	.init_section :
+	{
 		_sinit = ABSOLUTE(.);
 		*(.init_array .init_array.*)
 		_einit = ABSOLUTE(.);
 	} > norflash
 
-	.ARM.extab : {
+	.ARM.extab :
+	{
 		*(.ARM.extab*)
 	} > norflash
 
@@ -93,7 +96,8 @@ SECTIONS
 	} > norflash
 	PROVIDE_HIDDEN (__exidx_end = .);
 
-	.data : {
+	.data :
+	{
 		_sdata = ABSOLUTE(.);
 		*(.data .data.*)
 		*(.gnu.linkonce.d.*)
@@ -103,7 +107,8 @@ SECTIONS
 
 	_eronly = LOADADDR(.data);
 
-	.bss : {
+	.bss :
+	{
 		_sbss = ABSOLUTE(.);
 		*(.bss .bss.*)
 		*(.gnu.linkonce.b.*)
@@ -111,7 +116,8 @@ SECTIONS
 		_ebss = ABSOLUTE(.);
 	} > isram
 
-	.ramfunc ALIGN(4): {
+	.ramfunc ALIGN(4):
+	{
 		_sramfuncs = ABSOLUTE(.);
 		*(.ramfunc  .ramfunc.*)
 		_eramfuncs = ABSOLUTE(.);
@@ -119,7 +125,17 @@ SECTIONS
 
 	 _framfuncs = LOADADDR(.ramfunc);
 
+	/* Uninitialized data */
+
+	.noinit :
+	{
+		_snoinit = ABSOLUTE(.);
+		*(.noinit*)
+		_enoinit = ABSOLUTE(.);
+	} > isram
+
 	/* Stabs debugging sections. */
+
 	.stab 0 : { *(.stab) }
 	.stabstr 0 : { *(.stabstr) }
 	.stab.excl 0 : { *(.stab.excl) }

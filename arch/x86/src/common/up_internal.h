@@ -192,7 +192,6 @@ void x86_boardinitialize(void);
 
 /* Defined in files with the same name as the function */
 
-void up_boot(void);
 void up_copystate(uint32_t *dest, uint32_t *src);
 void up_savestate(uint32_t *regs);
 void up_decodeirq(uint32_t *regs);

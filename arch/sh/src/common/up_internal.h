@@ -155,7 +155,6 @@ extern uint32_t g_idle_topstack;
 
 /* Defined in files with the same name as the function */
 
-void up_boot(void);
 void up_copystate(uint32_t *dest, uint32_t *src);
 void up_dataabort(uint32_t *regs);
 void up_decodeirq(uint32_t *regs);
