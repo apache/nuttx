@@ -211,7 +211,16 @@ void arm_gic_initialize(void)
 
 #endif
 
-#if defined(CONFIG_ARCH_TRUSTZONE_SECURE) || defined(CONFIG_ARCH_TRUSTZONE_BOTH)
+#if defined(CONFIG_ARCH_TRUSTZONE_SECURE)
+  /* Set FIQn=1 if secure interrupts are to signal using nfiq_c.
+   *
+   * NOTE:  Only for processors that operate in secure state.
+   * REVISIT: Do I need to do this?
+   */
+
+  //iccicr |= GIC_ICCICRS_FIQEN;
+
+#elif defined(CONFIG_ARCH_TRUSTZONE_BOTH)
   /* Set FIQn=1 if secure interrupts are to signal using nfiq_c.
    *
    * NOTE:  Only for processors that operate in secure state.
@@ -221,25 +230,35 @@ void arm_gic_initialize(void)
   iccicr |= GIC_ICCICRS_FIQEN;
 #endif
 
-#if defined(ONFIG_ARCH_TRUSTZONE_BOTH)
+#if defined(CONFIG_ARCH_TRUSTZONE_SECURE)
   /* Program the AckCtl bit to select the required interrupt acknowledge
    * behavior.
    *
    * NOTE: Only for processors that operate in both secure and non-secure
    * state.
-   * REVISIT: I don't yet fully understand this setting.
+   * REVISIT: This is here only for superstituous reasons.  I don't think
+   * I need this setting in this configuration.
    */
 
-  // iccicr |= GIC_ICCICRS_ACKTCTL;
+   iccicr |= GIC_ICCICRS_ACKTCTL;
+
+#elif defined(CONFIG_ARCH_TRUSTZONE_BOTH)
+  /* Program the AckCtl bit to select the required interrupt acknowledge
+   * behavior.
+   *
+   * NOTE: Only for processors that operate in both secure and non-secure
+   * state.
+   */
+
+   iccicr |= GIC_ICCICRS_ACKTCTL;
 
   /* Program the SBPR bit to select the required binary pointer behavior.
    *
    * NOTE: Only for processors that operate in both secure and non-secure
    * state.
-   * REVISIT: I don't yet fully understand this setting.
    */
 
-  // iccicr |= GIC_ICCICRS_CBPR;
+   iccicr |= GIC_ICCICRS_CBPR;
 #endif
 
 #if defined(CONFIG_ARCH_TRUSTZONE_SECURE) || defined(CONFIG_ARCH_TRUSTZONE_BOTH)
@@ -291,9 +310,15 @@ void arm_gic_initialize(void)
    * bypass.
    */
 
+#if 0 /* REVISIT -- I don't know why this needs to be like this */
   iccicr |= (GIC_ICCICRS_ENABLEGRP0 | GIC_ICCICRS_FIQBYPDISGRP0 |
              GIC_ICCICRS_IRQBYPDISGRP0 | GIC_ICCICRS_FIQBYPDISGRP1 |
              GIC_ICCICRS_IRQBYPDISGRP1);
+#else
+  iccicr |= (GIC_ICCICRS_ENABLEGRP0 | GIC_ICCICRS_ENABLEGRP1 |
+             GIC_ICCICRS_FIQBYPDISGRP0 | GIC_ICCICRS_IRQBYPDISGRP0 |
+             GIC_ICCICRS_FIQBYPDISGRP1 | GIC_ICCICRS_IRQBYPDISGRP1);
+#endif
   icddcr  = GIC_ICDDCR_ENABLEGRP0;
 
 #elif defined(CONFIG_ARCH_TRUSTZONE_BOTH)
