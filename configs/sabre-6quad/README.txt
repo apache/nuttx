@@ -484,3 +484,27 @@ Configuration sub-directories
     at apps/nshlib with the start logic at apps/examples/nsh.
 
     NOTES:
+
+    1. This configuration assumes that we are loaded into SDRAM and
+       started via U-Boot.
+
+    2. The serial console is configured by default for use UART1, the
+       USB VCOM port (UART1), same as the serial port used by U-Boot.
+       You will need to reconfigure if you want to use a different UART.
+
+    3. NSH built-in applications are supported, but no built-in
+       applications are enabled.
+
+       Binary Formats:
+         CONFIG_BUILTIN=y           : Enable support for built-in programs
+
+       Application Configuration:
+         CONFIG_NSH_BUILTIN_APPS=y  : Enable starting apps from NSH command line
+
+    4. The RAMLOG is enabled.  All SYSLOG (DEBUG) output will go to the
+       RAMLOG and will not be visible unless you use the nsh 'dmesg'
+       command.  To disable this RAMLOG feature, disable the following:
+
+       File Systems:    CONFIG_SYSLOG
+       Device Drivers:  CONFIG_RAMLOG
+
