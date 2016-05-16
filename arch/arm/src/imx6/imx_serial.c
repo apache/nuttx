@@ -57,6 +57,7 @@
 #include "up_arch.h"
 #include "up_internal.h"
 
+#include "gic.h"
 #include "chip/imx_uart.h"
 #include "imx_config.h"
 #include "imx_lowputc.h"
@@ -613,6 +614,10 @@ static int imx_attach(struct uart_dev_s *dev)
   ret = irq_attach(priv->irq, priv->handler);
   if (ret == OK)
     {
+      /* Configure as a (high) level interrupt */
+
+      (void)arm_gic_irq_trigger(priv->irq, false);
+
       /* Enable the interrupt (RX and TX interrupts are still disabled
        * in the UART
        */

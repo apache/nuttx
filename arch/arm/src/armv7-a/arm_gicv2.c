@@ -523,4 +523,56 @@ int up_prioritize_irq(int irq, int priority)
   return -EINVAL;
 }
 
+/****************************************************************************
+ * Name: arm_gic_irq_trigger
+ *
+ * Description:
+ *   Set the trigger type for the specificd IRQ source and the current CPU.
+ *
+ *   Since this API is not supported on all architectures, it should be
+ *   avoided in common implementations where possible.
+ *
+ * Input Paramters:
+ *   irq - The interrupt request to modify.
+ *   edge - False: Active HIGH level sensitive, True: Rising edge sensitive
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value is returned on any failure.
+ *
+ ****************************************************************************/
+
+int arm_gic_irq_trigger(int irq, bool edge)
+{
+  uintptr_t regaddr;
+  uint32_t regval;
+  uint32_t intcfg;
+
+  if (irq > GIC_IRQ_SGI15 && irq < NR_IRQS)
+    {
+      /* Get the address of the Interrupt Configuration Register for this
+       * irq.
+       */
+
+      regaddr = GIC_ICDICFR(irq);
+
+      /* Get the new Interrupt configuration bit setting */
+
+      intcfg = (edge ? (INT_ICDICFR_EDGE | INT_ICDICFR_1N) : INT_ICDICFR_1N);
+
+      /* Write the correct interrupt trigger to the Interrupt Configuration
+       * Register.
+       */
+
+      regval  = getreg32(regaddr);
+      regval &= ~GIC_ICDICFR_ID_MASK(irq);
+      regval |= GIC_ICDICFR_ID(irq, intcfg);
+      putreg32(regval, regaddr);
+
+      return OK;
+    }
+
+  return -EINVAL;
+}
+
+
 #endif /* CONFIG_ARMV7A_HAVE_GICv2 */

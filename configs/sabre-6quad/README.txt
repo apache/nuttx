@@ -46,6 +46,14 @@ no interrupt driver serial console output (syslog, printf).
 
 2016-05-16:  I know get serial interrupts (but not timer interrupts).  This
 involves a few changes to GIC bit settings that I do not fully understand.
+With this change, the NSH serial console works:
+
+  MX6Q SABRESD U-Boot > ABEFGHILMN
+
+  NuttShell (NSH)
+  nsh>
+
+But there are still no timer interrupts.
 
 Platform Features
 =================

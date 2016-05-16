@@ -46,6 +46,7 @@
 #include <arch/irq.h>
 
 #include "up_arch.h"
+#include "gic.h"
 #include "chip/imx_ccm.h"
 #include "chip/imx_gpt.h"
 
@@ -234,6 +235,10 @@ void up_timer_initialize(void)
 
   cr |= GPT_CR_EN;
   putreg32(cr, IMX_GPT_CR);
+
+  /* Configure as a (rising) edge-triggered interrupt */
+
+  (void)arm_gic_irq_trigger(IMX_IRQ_GPT, true);
 
   /* Attach the timer interrupt vector */
 
