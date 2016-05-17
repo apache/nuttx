@@ -56,7 +56,11 @@ With this change, the NSH serial console works:
 But there are still no timer interrupts.  LEDs do not appear to be working.
 
 2016-05-17:  Timer interrupts now work.  This turned out to be just a minor
-bit setting error in the timer configuration.
+bit setting error in the timer configuration.  Timer appears to be too fast
+be about a factor of three, however.
+
+LEDs were not working simply because board_autoled_initialize() was not being
+called in the board startup logic.
 
 Platform Features
 =================
