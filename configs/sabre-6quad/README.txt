@@ -56,11 +56,11 @@ With this change, the NSH serial console works:
 But there are still no timer interrupts.  LEDs do not appear to be working.
 
 2016-05-17:  Timer interrupts now work.  This turned out to be just a minor
-bit setting error in the timer configuration.  Timer appears to be too fast
-be about a factor of three, however.
+bit setting error in the timer configuration.  LEDs were not working simply
+because board_autoled_initialize() was not being called in the board startup
+logic.
 
-LEDs were not working simply because board_autoled_initialize() was not being
-called in the board startup logic.
+At this point, I would say that the basic NSH port is complete.
 
 Platform Features
 =================
@@ -129,7 +129,7 @@ LEDs
 ----
 A single LED is available driven GPIO1_IO02.  On the schematic this is
 USR_DEF_RED_LED signal to pin T1 (GPIO_2).  This signal is shared with
-KEY_ROW6 (ALT2).  A low value illuminates the LED.
+KEY_ROW6 (ALT2).  A high value illuminates the LED.
 
 This LED is not used by the board port unless CONFIG_ARCH_LEDS is
 defined.  In that case, the usage by the board port is defined in
