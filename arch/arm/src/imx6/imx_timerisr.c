@@ -77,10 +77,25 @@
  * We should be able to use a prescaler of 1.
  */
 
-#define GPT_PR_VALUE      1
-#define GPT_OCR3_VALUE   ((GPT_CLOCK + ((1*CLK_TCK) >> 1)) / (1*CLK_TCK))
-#define GPT_OCR2_VALUE   ((GPT_CLOCK + ((2*CLK_TCK) >> 1)) / (2*CLK_TCK))
-#define GPT_OCR1_VALUE   ((GPT_CLOCK + ((3*CLK_TCK) >> 1)) / (3*CLK_TCK))
+#define GPT_PR_VALUE     1
+
+/* Timer counter comparison settings:
+ *
+ * - OCR3 will interrupt at CLK_TCK ticks/second after the timer counter
+ *   has been reset.
+ * - OCR2 will interrupt at 2*CLK_TCK ticks/second after the timer counter
+ *   has been reset.
+ * - OCR2 will interrupt at 3*CLK_TCK ticks/second after the timer counter
+ *   has been reset and then will reset the timer, starting the 3 interrupt
+ *   sequence again.
+ *
+ * Using three comparisons virtually eliminates the possibility of timer
+ * interrupt overrun.
+ */
+
+#define GPT_OCR3_VALUE   ((1 * GPT_CLOCK + (CLK_TCK >> 1)) / CLK_TCK)
+#define GPT_OCR2_VALUE   ((2 * GPT_CLOCK + (CLK_TCK >> 1)) / CLK_TCK)
+#define GPT_OCR1_VALUE   ((3 * GPT_CLOCK + (CLK_TCK >> 1)) / CLK_TCK)
 
 /****************************************************************************
  * Private Functions
