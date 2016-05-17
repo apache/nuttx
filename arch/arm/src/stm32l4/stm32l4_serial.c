@@ -208,6 +208,23 @@
 #  define PM_IDLE_DOMAIN             0 /* Revisit */
 #endif
 
+/*
+ * Keep track if a Break was set
+ *
+ * Note:
+ *
+ * 1) This value is set in the priv->ie but never written to the control
+ *    register. It must not collide with USART_CR1_USED_INTS or USART_CR3_EIE
+ * 2) USART_CR3_EIE is also carried in the up_dev_s ie member.
+ *
+ * see up_restoreusartint where the masking is done.
+ */
+
+#ifdef CONFIG_STM32L4_SERIALBRK_BSDCOMPAT
+# define USART_CR1_IE_BREAK_INPROGRESS_SHFTS 15
+# define USART_CR1_IE_BREAK_INPROGRESS (1 << USART_CR1_IE_BREAK_INPROGRESS_SHFTS)
+#endif
+
 #ifdef USE_SERIALDRIVER
 #ifdef HAVE_UART
 
@@ -1720,30 +1737,75 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
       break;
 #endif /* CONFIG_SERIAL_TERMIOS */
 
-#ifdef CONFIG_USART_BREAKS
+#ifdef CONFIG_STM32L4_USART_BREAKS
+# ifdef CONFIG_STM32L4_SERIALBRK_BSDCOMPAT
     case TIOCSBRK:  /* BSD compatibility: Turn break on, unconditionally */
       {
-        uint32_t cr2;
         irqstate_t flags;
+        uint32_t tx_break;
 
         flags = enter_critical_section();
-        cr2   = up_serialin(priv, STM32L4_USART_CR2_OFFSET);
-        up_serialout(priv, STM32L4_USART_CR2_OFFSET, cr2 | USART_CR2_LINEN);
+
+        /* Disable any further tx activity */
+
+        priv->ie |= USART_CR1_IE_BREAK_INPROGRESS;
+
+        up_txint(dev, false);
+
+        /* Configure TX as a GPIO output pin and Send a break signal*/
+
+        tx_break = GPIO_OUTPUT | (~(GPIO_MODE_MASK|GPIO_OUTPUT_SET) & priv->tx_gpio);
+        stm32_configgpio(tx_break);
+
         leave_critical_section(flags);
       }
       break;
 
     case TIOCCBRK:  /* BSD compatibility: Turn break off, unconditionally */
       {
-        uint32_t cr2;
+        uint32_t cr1;
         irqstate_t flags;
 
         flags = enter_critical_section();
-        cr2   = up_serialin(priv, STM32L4_USART_CR2_OFFSET);
-        up_serialout(priv, STM32L4_USART_CR2_OFFSET, cr2 & ~USART_CR2_LINEN);
+
+        /* Configure TX back to U(S)ART */
+
+        stm32_configgpio(priv->tx_gpio);
+
+        priv->ie &= ~USART_CR1_IE_BREAK_INPROGRESS;
+
+        /* Enable further tx activity */
+
+        up_txint(dev, true);
+
         leave_critical_section(flags);
       }
       break;
+# else
+    case TIOCSBRK:  /* No BSD compatibility: Turn break on for M bit times */
+      {
+        uint32_t cr1;
+        irqstate_t flags;
+
+        flags = enter_critical_section();
+        cr1   = up_serialin(priv, STM32_USART_CR1_OFFSET);
+        up_serialout(priv, STM32_USART_CR1_OFFSET, cr1 | USART_CR1_SBK);
+        leave_critical_section(flags);
+      }
+      break;
+
+    case TIOCCBRK:  /* No BSD compatibility: May turn off break too soon */
+      {
+        uint32_t cr1;
+        irqstate_t flags;
+
+        flags = enter_critical_section();
+        cr1   = up_serialin(priv, STM32_USART_CR1_OFFSET);
+        up_serialout(priv, STM32_USART_CR1_OFFSET, cr1 & ~USART_CR1_SBK);
+        leave_critical_section(flags);
+      }
+      break;
+# endif
 #endif
 
     default:
@@ -2130,6 +2192,12 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
       if (priv->rs485_dir_gpio != 0)
         {
           ie |= USART_CR1_TCIE;
+        }
+#  endif
+#  ifdef CONFIG_STM32L4_SERIALBRK_BSDCOMPAT
+      if (priv->ie & USART_CR1_IE_BREAK_INPROGRESS)
+        {
+          return;
         }
 #  endif
 
