@@ -11729,3 +11729,7 @@
 	  STM32F746ZG MCU.  From Kconstantin Berezenko (2015-05-12).
 	* arch/arm-src/armv7-a:  Complete re-design of logic to initialize each
 	  CPUn, n > 0, when CONFIG_SMP=y (2016-05-13).
+	* arch/arm/src/imx6 and configs/sabre-6quad:  The basic i.MX6 port is
+	  complete.  This is a very minimal port at present and probably still
+	  has some as-of-yet-undiscovered issues (2016-05-17).
+
