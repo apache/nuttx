@@ -2060,24 +2060,24 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
 #ifdef CONFIG_USART_BREAKS
     case TIOCSBRK:  /* BSD compatibility: Turn break on, unconditionally */
       {
-        uint32_t cr2;
+        uint32_t cr1;
         irqstate_t flags;
 
         flags = enter_critical_section();
-        cr2   = up_serialin(priv, STM32_USART_CR2_OFFSET);
-        up_serialout(priv, STM32_USART_CR2_OFFSET, cr2 | USART_CR2_LINEN);
+        cr1   = up_serialin(priv, STM32_USART_CR1_OFFSET);
+        up_serialout(priv, STM32_USART_CR1_OFFSET, cr1 | USART_CR1_SBK);
         leave_critical_section(flags);
       }
       break;
 
     case TIOCCBRK:  /* BSD compatibility: Turn break off, unconditionally */
       {
-        uint32_t cr2;
+        uint32_t cr1;
         irqstate_t flags;
 
         flags = enter_critical_section();
-        cr2   = up_serialin(priv, STM32_USART_CR2_OFFSET);
-        up_serialout(priv, STM32_USART_CR2_OFFSET, cr2 & ~USART_CR2_LINEN);
+        cr1   = up_serialin(priv, STM32_USART_CR1_OFFSET);
+        up_serialout(priv, STM32_USART_CR1_OFFSET, cr1 & ~USART_CR1_SBK);
         leave_critical_section(flags);
       }
       break;
