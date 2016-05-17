@@ -53,7 +53,10 @@ With this change, the NSH serial console works:
   NuttShell (NSH)
   nsh>
 
-But there are still no timer interrupts.
+But there are still no timer interrupts.  LEDs do not appear to be working.
+
+2016-05-17:  Timer interrupts now work.  This turned out to be just a minor
+bit setting error in the timer configuration.
 
 Platform Features
 =================

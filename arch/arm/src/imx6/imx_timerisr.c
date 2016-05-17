@@ -165,7 +165,7 @@ void up_timer_initialize(void)
 
   /* Disable GPT by setting EN=0 in GPT_CR register */
 
-  cr = getreg32(IMX_GPT_CR);
+  cr  = getreg32(IMX_GPT_CR);
   cr &= ~GPT_CR_EN;
   putreg32(cr, IMX_GPT_CR);
 
@@ -221,7 +221,7 @@ void up_timer_initialize(void)
    */
 
   cr &= ~GPT_CR_FFR;
-  putreg32(cr | GPT_CR_SWR, IMX_GPT_CR);
+  putreg32(cr, IMX_GPT_CR);
 
   /* Set ENMOD=1 in GPT_CR register, to bring GPT counter to 0x00000000.  If
    * the ENMOD bit is 1, then the Main Counter and Prescaler Counter values
