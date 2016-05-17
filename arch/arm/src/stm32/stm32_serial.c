@@ -255,8 +255,7 @@
 #  define PM_IDLE_DOMAIN             0 /* Revisit */
 #endif
 
-/*
- * Keep track if a Break was set
+/* Keep track if a Break was set
  *
  * Note:
  *
@@ -264,12 +263,12 @@
  *    register. It must not collide with USART_CR1_USED_INTS or USART_CR3_EIE
  * 2) USART_CR3_EIE is also carried in the up_dev_s ie member.
  *
- * see up_restoreusartint where the masking is done.
+ * See up_restoreusartint where the masking is done.
  */
 
 #ifdef CONFIG_STM32_SERIALBRK_BSDCOMPAT
-# define USART_CR1_IE_BREAK_INPROGRESS_SHFTS 15
-# define USART_CR1_IE_BREAK_INPROGRESS (1 << USART_CR1_IE_BREAK_INPROGRESS_SHFTS)
+#  define USART_CR1_IE_BREAK_INPROGRESS_SHFTS 15
+#  define USART_CR1_IE_BREAK_INPROGRESS (1 << USART_CR1_IE_BREAK_INPROGRESS_SHFTS)
 #endif
 
 #ifdef USE_SERIALDRIVER
@@ -2075,7 +2074,7 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
 #endif /* CONFIG_SERIAL_TERMIOS */
 
 #ifdef CONFIG_STM32_USART_BREAKS
-# ifdef CONFIG_STM32_SERIALBRK_BSDCOMPAT
+#  ifdef CONFIG_STM32_SERIALBRK_BSDCOMPAT
     case TIOCSBRK:  /* BSD compatibility: Turn break on, unconditionally */
       {
         irqstate_t flags;
@@ -2100,7 +2099,6 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
 
     case TIOCCBRK:  /* BSD compatibility: Turn break off, unconditionally */
       {
-        uint32_t cr1;
         irqstate_t flags;
 
         flags = enter_critical_section();
@@ -2118,7 +2116,7 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
         leave_critical_section(flags);
       }
       break;
-# else
+#  else
     case TIOCSBRK:  /* No BSD compatibility: Turn break on for M bit times */
       {
         uint32_t cr1;
@@ -2142,7 +2140,7 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
         leave_critical_section(flags);
       }
       break;
-# endif
+#  endif
 #endif
 
     default:
@@ -2531,6 +2529,7 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
           ie |= USART_CR1_TCIE;
         }
 #  endif
+
 #  ifdef CONFIG_STM32_SERIALBRK_BSDCOMPAT
       if (priv->ie & USART_CR1_IE_BREAK_INPROGRESS)
         {

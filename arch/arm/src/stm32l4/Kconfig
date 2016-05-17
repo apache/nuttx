@@ -802,7 +802,7 @@ config STM32L4_SERIALBRK_BSDCOMPAT
 		on because the SW starts the break and then the HW automatically clears
 		the break. This makes it is difficult to sent a long break.
 
-endmenu
+endmenu # U[S]ART Configuration
 
 menu "SPI Configuration"
 	depends on STM32L4_SPI

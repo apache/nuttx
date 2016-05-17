@@ -681,7 +681,8 @@ config STM32F7_SERIALBRK_BSDCOMPAT
 		The current STM32 U[S]ARTS have no way to leave the break (TX=LOW)
 		on because the SW starts the break and then the HW automatically clears
 		the break. This makes it is difficult to sent a long break.
-endmenu
+
+endmenu # U[S]ART Configuration
 
 config STM32F7_CUSTOM_CLOCKCONFIG
         bool "Custom clock configuration"
