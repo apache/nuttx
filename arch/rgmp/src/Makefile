@@ -1,7 +1,7 @@
 ############################################################################
 # arch/rgmp/src/Makefile
 #
-#   Copyright (C) 2011-2012, 2014 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2011-2012, 2014, 2016 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -39,25 +39,30 @@ include $(CONFIG_RGMP_SUBARCH)/Make.defs
 RGMP_ARCH_ASRCS := $(addprefix $(CONFIG_RGMP_SUBARCH)/,$(RGMP_ARCH_ASRCS))
 RGMP_ARCH_CSRCS := $(addprefix $(CONFIG_RGMP_SUBARCH)/,$(RGMP_ARCH_CSRCS))
 
-CPPFLAGS	+= -I$(TOPDIR)/sched -I$(TOPDIR)/fs $(EXTRADEFINES)
-CFLAGS		+= -I$(TOPDIR)/sched -I$(TOPDIR)/fs $(EXTRADEFINES)
-CXXFLAGS	+= -I$(TOPDIR)/sched -I$(TOPDIR)/fs $(EXTRADEFINES)
+CPPFLAGS += -I$(TOPDIR)/sched -I$(TOPDIR)/fs $(EXTRADEFINES)
+CFLAGS += -I$(TOPDIR)/sched -I$(TOPDIR)/fs $(EXTRADEFINES)
+CXXFLAGS += -I$(TOPDIR)/sched -I$(TOPDIR)/fs $(EXTRADEFINES)
 
-ASRCS		= $(RGMP_ARCH_ASRCS)
-CSRCS		= nuttx.c cxx.c $(RGMP_ARCH_CSRCS)
-AOBJS		= $(ASRCS:.S=$(OBJEXT))
-COBJS		= $(CSRCS:.c=$(OBJEXT))
+ASRCS = $(RGMP_ARCH_ASRCS)
+CSRCS = nuttx.c cxx.c $(RGMP_ARCH_CSRCS)
+AOBJS = $(ASRCS:.S=$(OBJEXT))
+COBJS = $(CSRCS:.c=$(OBJEXT))
 
-SRCS		= $(ASRCS) $(CSRCS)
-OBJS		= $(AOBJS) $(COBJS)
+SRCS = $(ASRCS) $(CSRCS)
+OBJS = $(AOBJS) $(COBJS)
 
-LINKSRCS    = rgmp.c bridge.c
-LINKOBJS    = $(LINKSRCS:.c=$(OBJEXT))
+LINKSRCS = rgmp.c bridge.c
+LINKOBJS = $(LINKSRCS:.c=$(OBJEXT))
 
-LDFLAGS		+= -T$(RGMPLKSCPT)
-LDLIBS		= $(patsubst %.a,%,$(patsubst lib%,-l%,$(LINKLIBS)))
-LIBPATHS		+= -L"$(TOPDIR)/lib" -L$(RGMPLIBDIR)
-LDLIBS		+= -lrgmp $(shell "$(CC)" -print-libgcc-file-name)
+# Override in Make.defs if linker is not 'ld'
+
+LDSTARTGROUP ?= --start-group
+LDENDGROUP ?= --end-group
+
+LDFLAGS += -T$(RGMPLKSCPT)
+LDLIBS = $(patsubst %.a,%,$(patsubst lib%,-l%,$(LINKLIBS)))
+LIBPATHS += -L"$(TOPDIR)/lib" -L$(RGMPLIBDIR)
+LDLIBS += -lrgmp $(shell "$(CC)" -print-libgcc-file-name)
 
 all: libarch$(LIBEXT)
 
@@ -79,7 +84,7 @@ libarch$(LIBEXT): $(OBJS)
 
 nuttx$(EXEEXT): $(LINKOBJS)
 	@echo "LD:  nuttx$(EXEEXT)"
-	@$(LD) $(LDFLAGS) $(LIBPATHS) $(LINKOBJS) --start-group $(LDLIBS) $(EXTRA_LIBS) --end-group -o $(TOPDIR)/$@
+	@$(LD) $(LDFLAGS) $(LIBPATHS) $(LINKOBJS) $(LDSTARTGROUP) $(LDLIBS) $(EXTRA_LIBS) $(LDENDGROUP) -o $(TOPDIR)/$@
 	@$(OBJDUMP) -S $(TOPDIR)/$@ > $(TOPDIR)/nuttx.asm
 	@$(NM) -n $(TOPDIR)/$@ > $(TOPDIR)/nuttx.sym
 	@$(OBJCOPY) -S -O binary $(TOPDIR)/$@ nuttx.img
