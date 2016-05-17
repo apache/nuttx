@@ -47,6 +47,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/sched.h>
+#include <nuttx/sched_note.h>
 
 #include "group/group.h"
 #include "sched/sched.h"

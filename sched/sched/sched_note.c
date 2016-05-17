@@ -516,7 +516,6 @@ ssize_t sched_note_size(void)
   ssize_t notelen;
   size_t circlen;
 
-  DEBUGASSERT(buffer != NULL);
   flags = enter_critical_section();
 
   /* Verify that the circular buffer is not empty */

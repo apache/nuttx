@@ -13,6 +13,7 @@ Contents
   - LEDs and Buttons
   - Using U-Boot to Run NuttX
   - Debugging with the Segger J-Link
+  - SMP
   - Configurations
 
 Status
@@ -435,6 +436,22 @@ A: Yes with the following modifications to the prodecure above.
        gdb> file nuttx
        gdb> mon set pc 0x10800040
        gdb> s
+
+SMP
+===
+
+The i.MX6 6Quad has 4 CPUs.  Support is included for testing an SMP
+configuration.  That configuration is still not yet ready for usage but can
+be enabled with the following configuration settings:
+
+  Build Setup:
+    CONFIG_EXPERIMENTAL=y
+
+  RTOS Features -> Tasks and Scheduling
+    CONFIG_SPINLOCK=y
+    CONFIG_SMP=y
+    CONFIG_SMP_NCPUS=4
+    CONFIG_SMP_IDLETHREAD_STACKSIZE=2048
 
 Configurations
 ==============
