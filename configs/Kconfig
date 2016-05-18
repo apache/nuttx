@@ -906,6 +906,13 @@ config ARCH_BOARD_STM32_TINY
 		STM32F103C8T6 micro-controller chip, and is (always ?) bundled with
 		an nRF24L01+ wireless module.
 
+config ARCH_BOARD_STM32F103_MINIMUM
+	bool "STM32F103C8T6 Minimum ARM Development Board"
+	depends on ARCH_CHIP_STM32F103C8
+	select ARCH_HAVE_LEDS
+	---help---
+		A configuration for the STM32F103 Minimum board.
+
 config ARCH_BOARD_STM3210E_EVAL
 	bool "STMicro STM3210E-EVAL development board"
 	depends on ARCH_CHIP_STM32F103ZE
@@ -1399,6 +1406,7 @@ config ARCH_BOARD
 	default "skp16c26"                 if ARCH_BOARD_SKP16C26
 	default "spark"                    if ARCH_BOARD_SPARK
 	default "stm32_tiny"               if ARCH_BOARD_STM32_TINY
+	default "stm32f103-minimum"        if ARCH_BOARD_STM32F103_MINIMUM
 	default "stm3210e-eval"            if ARCH_BOARD_STM3210E_EVAL
 	default "stm3220g-eval"            if ARCH_BOARD_STM3220G_EVAL
 	default "stm3240g-eval"            if ARCH_BOARD_STM3240G_EVAL
@@ -1755,6 +1763,9 @@ source "configs/spark/Kconfig"
 endif
 if ARCH_BOARD_STM32_TINY
 source "configs/stm32_tiny/Kconfig"
+endif
+if ARCH_BOARD_STM32F103_MINIMUM
+source "configs/stm32f103-minimum/Kconfig"
 endif
 if ARCH_BOARD_STM3210E_EVAL
 source "configs/stm3210e-eval/Kconfig"
