@@ -41,6 +41,7 @@
 
 #include <sys/types.h>
 
+#include <nuttx/init.h>
 #include <nuttx/spinlock.h>
 #include <nuttx/sched_note.h>
 #include <arch/irq.h>
@@ -86,54 +87,50 @@ irqstate_t enter_critical_section(void)
 {
   FAR struct tcb_s *rtcb;
 
-  /* Do nothing if called from an interrupt handler */
+  /* Check if we were called from an interrupt handler and that the tasks
+   * lists have been initialized.
+   */
 
-  if (up_interrupt_context())
+  if (!up_interrupt_context() && g_os_initstate >= OSINIT_TASKLISTS)
     {
-      /* The value returned does not matter.  We assume only that it is a
-       * scalar here.
-       */
+      /* Do we already have interrupts disabled? */
 
-      return (irqstate_t)0;
-    }
+      rtcb = this_task();
+      DEBUGASSERT(rtcb != NULL);
 
-  /* Do we already have interrupts disabled? */
+      if (rtcb->irqcount > 0)
+        {
+          /* Yes... make sure that the spinlock is set and increment the IRQ
+           * lock count.
+           */
 
-  rtcb = this_task();
-  DEBUGASSERT(rtcb != NULL);
+          DEBUGASSERT(g_cpu_irqlock == SP_LOCKED && rtcb->irqcount < INT16_MAX);
+          rtcb->irqcount++;
+        }
+      else
+        {
+          /* NO.. Take the spinlock to get exclusive access and set the lock
+           * count to 1.
+           *
+           * We must avoid that case where a context occurs between taking the
+           * g_cpu_irqlock and disabling interrupts.  Also interrupts disables
+           * must follow a stacked order.  We cannot other context switches to
+           * re-order the enabling/disabling of interrupts.
+           *
+           * The scheduler accomplishes this by treating the irqcount like
+           * lockcount:  Both will disable pre-emption.
+           */
 
-  if (rtcb->irqcount > 0)
-    {
-      /* Yes... make sure that the spinlock is set and increment the IRQ
-       * lock count.
-       */
-
-      DEBUGASSERT(g_cpu_irqlock == SP_LOCKED && rtcb->irqcount < INT16_MAX);
-      rtcb->irqcount++;
-    }
-  else
-    {
-      /* NO.. Take the spinlock to get exclusive access and set the lock
-       * count to 1.
-       *
-       * We must avoid that case where a context occurs between taking the
-       * g_cpu_irqlock and disabling interrupts.  Also interrupts disables
-       * must follow a stacked order.  We cannot other context switches to
-       * re-order the enabling/disabling of interrupts.
-       *
-       * The scheduler accomplishes this by treating the irqcount like
-       * lockcount:  Both will disable pre-emption.
-       */
-
-      spin_setbit(&g_cpu_irqset, this_cpu(), &g_cpu_irqsetlock,
-                  &g_cpu_irqlock);
-      rtcb->irqcount = 1;
+          spin_setbit(&g_cpu_irqset, this_cpu(), &g_cpu_irqsetlock,
+                      &g_cpu_irqlock);
+          rtcb->irqcount = 1;
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_CSECTION
-      /* Note that we have entered the critical section */
+          /* Note that we have entered the critical section */
 
-      sched_note_csection(rtcb, true);
+          sched_note_csection(rtcb, true);
 #endif
+        }
     }
 
   /* Then disable interrupts (they may already be disabled, be we need to
@@ -145,9 +142,11 @@ irqstate_t enter_critical_section(void)
 #else /* defined(CONFIG_SCHED_INSTRUMENTATION_CSECTION) */
 irqstate_t enter_critical_section(void)
 {
-  /* Check if we were called from an interrupt handler */
+  /* Check if we were called from an interrupt handler and that the tasks
+   * lists have been initialized.
+   */
 
-  if (!up_interrupt_context())
+  if (!up_interrupt_context() && g_os_initstate >= OSINIT_TASKLISTS)
     {
       FAR struct tcb_s *rtcb = this_task();
       DEBUGASSERT(rtcb != NULL);
@@ -175,9 +174,11 @@ irqstate_t enter_critical_section(void)
 #ifdef CONFIG_SMP
 void leave_critical_section(irqstate_t flags)
 {
-  /* Do nothing if called from an interrupt handler */
+  /* Check if we were called from an interrupt handler and that the tasks
+   * lists have been initialized.
+   */
 
-  if (!up_interrupt_context())
+  if (!up_interrupt_context() && g_os_initstate >= OSINIT_TASKLISTS)
     {
       FAR struct tcb_s *rtcb = this_task();
       DEBUGASSERT(rtcb != 0 && rtcb->irqcount > 0);
@@ -229,20 +230,22 @@ void leave_critical_section(irqstate_t flags)
                 }
             }
         }
-
-      /* Restore the previous interrupt state which may still be interrupts
-       * disabled (but we don't have a mechanism to verify that now)
-       */
-
-      up_irq_restore(flags);
     }
+
+  /* Restore the previous interrupt state which may still be interrupts
+   * disabled (but we don't have a mechanism to verify that now)
+   */
+
+  up_irq_restore(flags);
 }
 #else /* defined(CONFIG_SCHED_INSTRUMENTATION_CSECTION) */
 void leave_critical_section(irqstate_t flags)
 {
-  /* Check if we were called from an interrupt handler */
+  /* Check if we were called from an interrupt handler and that the tasks
+   * lists have been initialized.
+   */
 
-  if (!up_interrupt_context())
+  if (!up_interrupt_context() && g_os_initstate >= OSINIT_TASKLISTS)
     {
       FAR struct tcb_s *rtcb = this_task();
       DEBUGASSERT(rtcb != NULL);
