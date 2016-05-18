@@ -45,7 +45,7 @@ driver serial output to the VCOM console is working (llsyslog).  However,
 there does not appear to be any interrupt activity:  No timer interrupts,
 no interrupt driver serial console output (syslog, printf).
 
-2016-05-16:  I know get serial interrupts (but not timer interrupts).  This
+2016-05-16:  I now get serial interrupts (but not timer interrupts).  This
 involves a few changes to GIC bit settings that I do not fully understand.
 With this change, the NSH serial console works:
 
