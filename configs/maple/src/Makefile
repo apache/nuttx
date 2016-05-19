@@ -52,10 +52,6 @@ endif
 ifeq ($(CONFIG_USBMSC),y)
 endif
 
-ifeq ($(CONFIG_WATCHDOG),y)
-CSRCS += stm32_watchdog.c
-endif
-
 ifeq ($(CONFIG_LIB_BOARDCTL),y)
 CSRCS += stm32_appinit.c
 endif

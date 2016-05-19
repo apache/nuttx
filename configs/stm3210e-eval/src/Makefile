@@ -68,10 +68,6 @@ ifeq ($(CONFIG_CAN),y)
 CSRCS += stm32_can.c
 endif
 
-ifeq ($(CONFIG_WATCHDOG),y)
-CSRCS += stm32_watchdog.c
-endif
-
 ifeq ($(CONFIG_ARCH_CUSTOM_PMINIT),y)
 CSRCS += stm32_pm.c
 endif

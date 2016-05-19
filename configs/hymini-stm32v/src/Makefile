@@ -59,8 +59,4 @@ ifeq ($(CONFIG_USBMSC),y)
 CSRCS += stm32_usbmsc.c
 endif
 
-ifeq ($(CONFIG_WATCHDOG),y)
-CSRCS += stm32_watchdog.c
-endif
-
 include $(TOPDIR)/configs/Board.mk
