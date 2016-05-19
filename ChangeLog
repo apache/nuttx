@@ -11732,4 +11732,21 @@
 	* arch/arm/src/imx6 and configs/sabre-6quad:  The basic i.MX6 port is
 	  complete.  This is a very minimal port at present and probably still
 	  has some as-of-yet-undiscovered issues (2016-05-17).
-
+	* arch/*/Makefile: Add definitions that can be overrided to use GCC
+	  instead of LD in the final link.  From Paul Alexander Patience
+	  (2016-05-18) .
+	* arch/arm/src/stm32, stm32l4, and stm32f7 serial:  Add support for
+	  compliant BSD-style breaks. From David Sidrane (2016-05-18).
+	* enter/leave_critical_section() may attempt to access task lists before
+	  they have been initialized in the SMP configuration (2016-05-18).
+	* configs/stm32f103-minimum: Add support for this minimual STM32F103CBT6
+	  "blue" board.  From Alan Carvalho de Assis (2016-05-18).
+	* arch/arm/src/sam* Watchdogs:  Rename up_wdginitialize() to something
+	  more appropriate for an internal, MCU-specific function (2016-05-18).
+	* configs/*/src/*_watchdog.c:  Remove all implementations of
+	  up_wdginitialize() which was only used by apps/examples/watchdog.
+	  That internal OS function is no longer called from application code.
+	  If you want to use the watchdog example, you will need to configure
+	  the watchdog driver by calling the appropriate, MCU-specific driver
+	  configuration function from your board initialization logic
+	  (2016-05-18).
