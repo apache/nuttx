@@ -843,4 +843,28 @@ config STM32L4_I2C_DUTY16_9
 
 endmenu
 
+menu "CAN driver configuration"
+	depends on STM32L4_CAN1
+
+config CAN1_BAUD
+	int "CAN1 BAUD"
+	default 250000
+	depends on STM32L4_CAN1
+	---help---
+		CAN1 BAUD rate.  Required if STM32L4_CAN1 is defined.
+
+config CAN_TSEG1
+	int "TSEG1 quanta"
+	default 6
+	---help---
+		The number of CAN time quanta in segment 1. Default: 6
+
+config CAN_TSEG2
+	int "TSEG2 quanta"
+	default 7
+	---help---
+		The number of CAN time quanta in segment 2. Default: 7
+endmenu
+
+
 endif # ARCH_CHIP_STM32L4
