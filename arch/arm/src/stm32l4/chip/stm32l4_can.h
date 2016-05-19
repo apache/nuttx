@@ -4,6 +4,10 @@
  *   Copyright (C) 2009, 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
+ *   Adaptations for stm32l4:
+ *   Copyright (C) 2016 Sebastien Lorquet. All rights reserved.
+ *   Author: Sebastien Lorquet <sebastien@lorquet.fr>
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -61,12 +65,7 @@
 
 /* Number of filters depends on silicon */
 
-#if defined(CONFIG_STM32L4_CONNECTIVITYLINE) || defined(CONFIG_STM32L4_STM32F20XX) || \
-    defined(CONFIG_STM32L4_STM32F30XX) || defined(CONFIG_STM32L4_STM32F40XX)
-#  define CAN_NFILTERS 28
-#else
-#  define CAN_NFILTERS 14
-#endif
+#define CAN_NFILTERS 14
 
 /* Register Offsets *****************************************************************/
 
