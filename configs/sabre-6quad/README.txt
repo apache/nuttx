@@ -67,6 +67,10 @@ At this point, I would say that the basic NSH port is complete.
 that the NSH configuration works with CONFIG_SMP_NCPUS=1.  Not a very
 interesting case, but this does exercise a lot of the basic SMP logic.
 
+When more than one CPU is configured, then there are certain failures that
+appear to be stack corruption problem.  See the open issues below under
+SMP.
+
 Platform Features
 =================
 
@@ -456,6 +460,13 @@ be enabled with the following configuration settings:
     CONFIG_SMP=y
     CONFIG_SMP_NCPUS=4
     CONFIG_SMP_IDLETHREAD_STACKSIZE=2048
+
+Open Issues:
+
+1. Currently all device interrupts are handled on CPU0 only.  Critical sections will
+   attempt to disable interrupts but will now disable interrupts only on the current
+   CPU (which may not be CPU0).  Perhaps that should be a spinlock to prohibit
+   execution of interrupts on CPU0 when other CPUs are in a critical section?
 
 Configurations
 ==============
