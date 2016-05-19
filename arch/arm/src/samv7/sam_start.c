@@ -58,6 +58,7 @@
 #include "sam_mpuinit.h"
 #include "sam_userspace.h"
 #include "sam_start.h"
+#include "sam_gpio.h"
 
 /****************************************************************************
  * Pre-processor Definitions
