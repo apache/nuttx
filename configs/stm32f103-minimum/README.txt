@@ -8,32 +8,91 @@ This board is available from several vendors on the net, and may
 be sold under different names or no name at all. It is based on a
 STM32F103C8T6 and has a DIP-40 form-factor.
 
-This is the board pinout based on its form-factor:
+There are two versions of very similar boards:  One is red and one is
+blue.  See http://www.stm32duino.com/viewtopic.php?f=28&t=117
 
-      USB
-      ___
------/ _ \-----
-|B12       GND|
-|B13       GND|
-|B14      3.3V|
-|B15       RST|
-|A8        B11|
-|A9        B10|
-|A10        B1|
-|A11        B0|
-|A12        A7|
-|A15        A6|
-|B3         A5|
-|B4         A4|
-|B5         A3|
-|B6         A2|
-|B7         A1|
-|B8         A0|
-|B9        C15|
-|5V        C14|
-|GND       C13|
-|3.3V       VB|
-|_____________|
+The Red Board:
+
+  Good things about the red board:
+
+  - 1.5k pull up resistor on the PA12 pin (USB D+) which you can
+    programatically drag down for automated USB reset.
+  - large power capacitors and LDO power.
+
+  Problems with the red board:
+
+  - Silk screen is barely readable, the text is chopped off on some of
+    the pins
+  - USB connector only has two anchor points and it is directly soldered
+    on the surface
+  - Small reset button with hardly any resistance
+
+The Blue Board:
+
+  Good things about the blue board:
+
+  - Four soldered anchor point on the USB connector. What you can't tell
+    from this picture is that there is a notch in the pcb board and the USB
+    connector sits down inside it some. This provides some lateral stability
+    that takes some of the stress off the solder points.
+  - It has nice clear readable silkscreen printing.
+  - It also a larger reset button.
+
+  Problems with the blue board:
+
+  - Probably won't work as a USB device if it has a 10k pull-up on PA12. You
+    have to check the pull up on PA12 (USB D+). If it has a 10k pull-up
+    resistor, you will need to replace it with a 1.5k one to use the native
+    USB.
+  - Puny voltage regulator probably 100mA.
+
+  A schematic for the blue board is available here:
+  http://www.stm32duino.com/download/file.php?id=276
+
+Both Boards:
+
+  Nice features common to both:
+
+  - SWD pins broken out and easily connected (VCC, GND, SWDIO, SWCLK)
+  - USB 5V is broken out with easy access.
+  - User LED on PC13
+  - Power LED
+  - You can probably use more flash (128k) than officially documented for
+    the chip (stm32f103c8t6 64k), I was able to load 115k of flash on mine
+    and it seemed to work.
+
+  Problems with both boards:
+
+  - No preloaded bootloader * to me this isn't really a problem as the
+    entire 64k of flash is available for use
+  - No user button
+
+This is the board pinout based on its form-factor for the Blue board:
+
+        USB
+        ___
+  -----/ _ \-----
+  |B12       GND|
+  |B13       GND|
+  |B14      3.3V|
+  |B15       RST|
+  |A8        B11|
+  |A9        B10|
+  |A10        B1|
+  |A11        B0|
+  |A12        A7|
+  |A15        A6|
+  |B3         A5|
+  |B4         A4|
+  |B5         A3|
+  |B6         A2|
+  |B7         A1|
+  |B8         A0|
+  |B9        C15|
+  |5V        C14|
+  |GND       C13|
+  |3.3V       VB|
+  |_____________|
 
 Contents
 ========
@@ -57,24 +116,24 @@ succesfully, and is blinking on panic / assertion failed.
 UARTs
 =====
 
-UART/USART PINS
----------------
+  UART/USART PINS
+  ---------------
 
-USART1
-  RX      PA10
-  TX      PA9
-USART2
-  CK      PA4
-  CTS     PA0
-  RTS     PA1
-  RX      PA3
-  TX      PA2
-USART3
-  CK      PB12
-  CTS     PB13
-  RTS     PB14
-  RX      PB11
-  TX      PB10
+  USART1
+    RX      PA10
+    TX      PA9
+  USART2
+    CK      PA4
+    CTS     PA0
+    RTS     PA1
+    RX      PA3
+    TX      PA2
+  USART3
+    CK      PB12
+    CTS     PB13
+    RTS     PB14
+    RX      PB11
+    TX      PB10
 
 Default USART/UART Configuration
 --------------------------------
@@ -84,26 +143,26 @@ USART1 (RX & TX only) is available through pins PA9 (TX) and PA10 (RX).
 Timer Inputs/Outputs
 ====================
 
-TIM1
-  CH1     PA8
-  CH2     PA9*
-  CH3     PA10*
-  CH4     PA11*
-TIM2
-  CH1     PA0*, PA15, PA5
-  CH2     PA1, PB3
-  CH3     PA2, PB10*
-  CH4     PA3, PB11
-TIM3
-  CH1     PA6, PB4
-  CH2     PA7, PB5*
-  CH3     PB0
-  CH4     PB1*
-TIM4
-  CH1     PB6*
-  CH2     PB7
-  CH3     PB8
-  CH4     PB9*
+  TIM1
+    CH1     PA8
+    CH2     PA9*
+    CH3     PA10*
+    CH4     PA11*
+  TIM2
+    CH1     PA0*, PA15, PA5
+    CH2     PA1, PB3
+    CH3     PA2, PB10*
+    CH4     PA3, PB11
+  TIM3
+    CH1     PA6, PB4
+    CH2     PA7, PB5*
+    CH3     PB0
+    CH4     PB1*
+  TIM4
+    CH1     PB6*
+    CH2     PB7
+    CH3     PB8
+    CH4     PB9*
 
  * Indicates pins that have other on-board functions and should be used only
    with care (See board datasheet).
