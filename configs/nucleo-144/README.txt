@@ -6,6 +6,23 @@ Nucleo-144 board.  See
 
 http://www.st.com/content/ccc/resource/technical/document/data_brief/group0/7b/df/1d/e9/64/55/43/8d/DM00247910/files/DM00247910.pdf/jcr:content/translations/en.DM00247910.pdf
 
+Contents
+========
+
+  - Nucleo-144 Boards
+  - Nucleo F746ZG
+  - Development Environment
+  - IDEs
+  - Basic configuaration & build steps
+  - Hardware
+    - Button
+    - LED
+    - U[S]ARTs and Serial Consoles
+  - Configurations
+
+Nucleo-144 Boards:
+=================
+
 The Nucleo-144 is a standard board for use with several STM32 parts in the
 LQFP144 package.  Variants include
 
@@ -32,14 +49,29 @@ software development tools and take note of the Powering options for the
 board (6.3 Power supply and power selection) and the Solder bridges based
 hardware configuration changes that are configurable (6.11 Solder bridges).
 
-At present only the STNucleo F746ZG board from ST Micro is supported.  See
+Common Board Features:
+---------------------
+
+  Peripherals:    8 leds, 2 push button (3 LEDs, 1 button) under software
+                  control
+  Debug:          STLINK/V2-1 debugger/programmer Uses a STM32F103CB to
+                  provide a ST-Link for programming, debug similar to the
+                  OpenOcd FTDI function - USB to JTAG front-end.
+
+  Expansion I/F   ST Zio and Extended Ardino and Morpho Headers
+
+Nucleo F746ZG
+=============
+
+At present only the ST Nucleo F746ZG board from ST Micro is supported.  See
 
 http://www.st.com/content/st_com/en/products/evaluation-tools/product-evaluation-tools/mcu-eval-tools/stm32-mcu-eval-tools/stm32-mcu-nucleo/nucleo-f746zg.html
 
 The Nucleo F746ZG order part number is NUCLEO-F746ZG. It is one member of
 the STM32 Nucleo-144 board family.
 
-NUCLEO-F746ZG:
+NUCLEO-F746ZG Features:
+----------------------
 
   Microprocessor: STM32F746ZGT6 Core: ARM 32-bit Cortex®-M7 CPU with FPU,
                   L1-cache: 4KB data cache and 4KB instruction cache, up to
@@ -61,42 +93,20 @@ NUCLEO-F746ZG:
                   clock
   QSPI:           Dual mode Quad-SPI
   SAIs:           2 Serial Audio Interfaces
-  CAN:             2 X CAN interface
+  CAN:            2 X CAN interface
   SDMMC interface
   SPDIFRX interface
   USB:            USB 2.0 full-speed device/host/OTG controller with on-chip
                   PHY
   10/100 Ethernet: MAC with dedicated DMA: supports IEEE 1588v2 hardware,
-                     MII/RMII
+                   MII/RMII
   Camera Interface: 8/14 Bit
   CRC calculation unit
   TRG:            True random number generator
   RTC
 
-Board features:
-
-  Peripherals:    8 leds, 2 push button (3 LEDs, 1 button) under software
-                  control
-  Debug:          STLINK/V2-1 debugger/programmer Uses a STM32F103CB to
-                  provide a ST-Link for programming, debug similar to the
-                  OpenOcd FTDI function - USB to JTAG front-end.
-
-  Expansion I/F   ST Zio  an Extended Ardino and Morpho Headers
-
 See https://developer.mbed.org/platforms/ST-Nucleo-F746ZG  form additional
 information about this board.
-
-Contents
-========
-
-  - Development Environment
-  - IDEs
-  - Basic configuaration & build steps
-  - Hardware
-    - Button
-    - LED
-    - U[S]ARTs and Serial Consoles
-  - Configurations
 
 Development Environment
 =======================
@@ -111,7 +121,6 @@ Development Environment
   If you change the default toolchain, then you may also have to modify the PATH in
   the setenv.h file if your make cannot find the tools.
 
-
 IDEs
 ====
 
@@ -125,7 +134,6 @@ IDEs
   under Linux.  Under Windows, you will need to set up the "Cygwin GCC" empty
   makefile project in order to work with Windows (Google for "Eclipse Cygwin" -
   there is a lot of help on the internet).
-
 
 Basic configuration & build steps
 ==================================
@@ -167,7 +175,6 @@ Hardware
   or choose a completely different U[S]ART to use as the console.
   In that Case, You will need to edit the include/board.h to select different
   U[S]ART and / or pin selections.
-
 
   Serial
   ------
@@ -282,7 +289,6 @@ Serial Consoles
   -------
   As shipped, SB4 and SB7 are open and SB5 and SB6 closed, so the
   virtual COM port is enabled.
-
 
 Configurations
 ==============
