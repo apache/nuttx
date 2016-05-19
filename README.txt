@@ -1332,6 +1332,8 @@ nuttx/
  |   |- ntosd-dm320/
  |   |   |- doc/README.txt
  |   |   `- README.txt
+ |   |- nucleo-144/
+ |   |   `- README.txt
  |   |- nucleo-f4x1re/
  |   |   `- README.txt
  |   |- nutiny-nuc120/
@@ -1423,6 +1425,8 @@ nuttx/
  |   |- stm3240g-eval/
  |   |   `- README.txt
  |   |- stm32_tiny/
+ |   |   `- README.txt
+ |   |- stm32f103-minumum/
  |   |   `- README.txt
  |   |- stm32f3discovery/
  |   |   `- README.txt

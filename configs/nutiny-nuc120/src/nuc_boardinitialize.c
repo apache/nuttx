@@ -1,6 +1,5 @@
 /************************************************************************************
- * configs/nutiny-nuc120/src/up_boot.c
- * arch/arm/src/board/up_boot.c
+ * configs/nutiny-nuc120/src/nuc_boardinitialize.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

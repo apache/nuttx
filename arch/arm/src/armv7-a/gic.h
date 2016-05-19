@@ -495,7 +495,7 @@
 #define INT_ICDICFR_EDGE           2         /* Bit n+2: 1=Edge sensitive */
 
 #define GIC_ICDICFR_ID_SHIFT(n)    GIC_SHIFT16(n)
-#define GIC_ICDICFR_ID_MASK(n)     GIC_MASK16(n
+#define GIC_ICDICFR_ID_MASK(n)     GIC_MASK16(n)
 #  define GIC_ICDICFR_ID(n,c)      ((uint32_t)(c) << GIC_SHIFT16(n))
 
 /* PPI Status Register */
@@ -719,6 +719,26 @@ void arm_gic0_initialize(void);
  ****************************************************************************/
 
 void arm_gic_initialize(void);
+
+/****************************************************************************
+ * Name: arm_gic_irq_trigger
+ *
+ * Description:
+ *   Set the trigger type for the specificd IRQ source and the current CPU.
+ *
+ *   Since this API is not supported on all architectures, it should be
+ *   avoided in common implementations where possible.
+ *
+ * Input Paramters:
+ *   irq - The interrupt request to modify.
+ *   edge - False: Active HIGH level sensitive, True: Rising edge sensitive
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value is returned on any failure.
+ *
+ ****************************************************************************/
+
+int arm_gic_irq_trigger(int irq, bool edge);
 
 /****************************************************************************
  * Name: arm_decodeirq

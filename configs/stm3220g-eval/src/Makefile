@@ -72,10 +72,6 @@ ifeq ($(CONFIG_LIB_BOARDCTL),y)
 CSRCS += stm32_appinit.c
 endif
 
-ifeq ($(CONFIG_WATCHDOG),y)
-CSRCS += stm32_watchdog.c
-endif
-
 ifeq ($(CONFIG_INPUT_STMPE811),y)
 CSRCS += stm32_stmpe811.c
 endif

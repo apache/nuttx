@@ -140,9 +140,9 @@ fi
 # consequence, the 1-time initialization code takes up precious memory
 # in the locked memory region.
 #
-# up_boot is a low-level initialization function called by __start:
+# arm_boot is a low-level initialization function called by __start:
 
-echo "EXTERN(up_boot)" >>ld-locked.inc
+echo "EXTERN(arm_boot)" >>ld-locked.inc
 
 # All of the initialization functions that are called by os_start up to
 # the point where the page fill worker thread is started must also be
@@ -150,7 +150,7 @@ echo "EXTERN(up_boot)" >>ld-locked.inc
 
 answer=$(checkzero CONFIG_TASK_NAME_SIZE)
 if [ "$answer" = n ]; then
-	echo "EXTERN(up_boot)" >>ld-locked.inc
+	echo "EXTERN(arm_boot)" >>ld-locked.inc
 fi
 
 echo "EXTERN(dq_addfirst)" >>ld-locked.inc

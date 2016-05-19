@@ -1,9 +1,8 @@
 /************************************************************************************
- * configs/cloudctrl/src/stm32_watchdog.c
+ * configs/stm32f103-minimum/src/stm32f103_minimum.h
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *           Darcy Gong <darcy.gong@gmail.com>
+ *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Author: Laurent Latil <laurent@latil.nom.fr>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -34,103 +33,70 @@
  *
  ************************************************************************************/
 
+#ifndef __CONFIGS_STM32F103_MINIMUM_SRC_STM32F103_MINIMUM_H
+#define __CONFIGS_STM32F103_MINIMUM_SRC_STM32F103_MINIMUM_H
+
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
 #include <nuttx/config.h>
-
-#include <errno.h>
-#include <debug.h>
-
-#include <nuttx/timers/watchdog.h>
-#include <arch/board/board.h>
-
-#include "stm32_wdg.h"
-
-#ifdef CONFIG_WATCHDOG
+#include <nuttx/compiler.h>
+#include <stdint.h>
 
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
-/* Configuration *******************************************************************/
-/* Wathdog hardware should be enabled */
 
-#if !defined(CONFIG_STM32_WWDG) && !defined(CONFIG_STM32_IWDG)
-#  warning "One of CONFIG_STM32_WWDG or CONFIG_STM32_IWDG must be defined"
+/* How many SPI modules does this chip support? The LM3S6918 supports 2 SPI
+ * modules (others may support more -- in such case, the following must be
+ * expanded).
+ */
+
+#if STM32_NSPI < 1
+#  undef CONFIG_STM32_SPI1
+#  undef CONFIG_STM32_SPI2
+#elif STM32_NSPI < 2
+#  undef CONFIG_STM32_SPI2
 #endif
 
-/* Select the path to the registered watchdog timer device */
+/* GPIOs **************************************************************/
+/* LEDs */
 
-#ifndef CONFIG_STM32_WDG_DEVPATH
-#  ifdef CONFIG_EXAMPLES_WATCHDOG_DEVPATH
-#    define CONFIG_STM32_WDG_DEVPATH CONFIG_EXAMPLES_WATCHDOG_DEVPATH
-#  else
-#    define CONFIG_STM32_WDG_DEVPATH "/dev/watchdog0"
-#  endif
-#endif
+#define GPIO_LED        (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
+                         GPIO_OUTPUT_CLEAR|GPIO_PORTC|GPIO_PIN13)
 
-/* Use the un-calibrated LSI frequency if we have nothing better */
+/* USB Soft Connect Pullup: PC.13 */
 
-#if defined(CONFIG_STM32_IWDG) && !defined(CONFIG_STM32_LSIFREQ)
-#  define CONFIG_STM32_LSIFREQ STM32_LSI_FREQUENCY
-#endif
-
-/* Debug ***************************************************************************/
-/* Non-standard debug that may be enabled just for testing the watchdog timer */
-
-#ifndef CONFIG_DEBUG
-#  undef CONFIG_DEBUG_WATCHDOG
-#endif
-
-#ifdef CONFIG_DEBUG_WATCHDOG
-#  define wdgdbg                 dbg
-#  define wdglldbg               lldbg
-#  ifdef CONFIG_DEBUG_VERBOSE
-#    define wdgvdbg              vdbg
-#    define wdgllvdbg            llvdbg
-#  else
-#    define wdgvdbg(x...)
-#    define wdgllvdbg(x...)
-#  endif
-#else
-#  define wdgdbg(x...)
-#  define wdglldbg(x...)
-#  define wdgvdbg(x...)
-#  define wdgllvdbg(x...)
-#endif
-
-/************************************************************************************
- * Private Functions
- ************************************************************************************/
+#define GPIO_USB_PULLUP (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
+                         GPIO_OUTPUT_SET|GPIO_PORTC|GPIO_PIN13)
 
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
 
-/****************************************************************************
- * Name: up_wdginitialize()
+#ifndef __ASSEMBLY__
+
+/************************************************************************************
+ * Name: stm32_spidev_initialize
  *
  * Description:
- *   Perform architecuture-specific initialization of the Watchdog hardware.
- *   This interface must be provided by all configurations using
- *   apps/examples/watchdog
+ *   Called to configure SPI chip select GPIO pins for the Hy-Mini STM32v board.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
-int up_wdginitialize(void)
-{
-  /* Initialize tha register the watchdog timer device */
+void stm32_spidev_initialize(void);
 
-#if defined(CONFIG_STM32_WWDG)
-  stm32_wwdginitialize(CONFIG_STM32_WDG_DEVPATH);
-  return OK;
-#elif defined(CONFIG_STM32_IWDG)
-  stm32_iwdginitialize(CONFIG_STM32_WDG_DEVPATH, CONFIG_STM32_LSIFREQ);
-  return OK;
-#else
-  return -ENODEV;
-#endif
-}
+/************************************************************************************
+ * Name: stm32_usbinitialize
+ *
+ * Description:
+ *   Called to setup USB-related GPIO pins for the Hy-Mini STM32v board.
+ *
+ ************************************************************************************/
 
-#endif /* CONFIG_WATCHDOG */
+void stm32_usbinitialize(void);
+
+#endif /* __ASSEMBLY__ */
+#endif /* __CONFIGS_STM32F103_MINIMUM_SRC_STM32F103_MINIMUM_H */
+

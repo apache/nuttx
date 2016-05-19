@@ -530,6 +530,10 @@ void os_start(void)
       up_initial_state(&g_idletcb[cpu].cmn);
     }
 
+  /* Task lists are initialized */
+
+  g_os_initstate = OSINIT_TASKLISTS;
+
   /* Initialize RTOS facilities *********************************************/
   /* Initialize the semaphore facility.  This has to be done very early
    * because many subsystems depend upon fully functional semaphores.

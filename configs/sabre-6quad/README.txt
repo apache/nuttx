@@ -13,6 +13,7 @@ Contents
   - LEDs and Buttons
   - Using U-Boot to Run NuttX
   - Debugging with the Segger J-Link
+  - SMP
   - Configurations
 
 Status
@@ -43,6 +44,32 @@ working.  It gets to NSH and NSH appears to run normally.  Non-interrupt
 driver serial output to the VCOM console is working (llsyslog).  However,
 there does not appear to be any interrupt activity:  No timer interrupts,
 no interrupt driver serial console output (syslog, printf).
+
+2016-05-16:  I now get serial interrupts (but not timer interrupts).  This
+involves a few changes to GIC bit settings that I do not fully understand.
+With this change, the NSH serial console works:
+
+  MX6Q SABRESD U-Boot > ABEFGHILMN
+
+  NuttShell (NSH)
+  nsh>
+
+But there are still no timer interrupts.  LEDs do not appear to be working.
+
+2016-05-17:  Timer interrupts now work.  This turned out to be just a minor
+bit setting error in the timer configuration.  LEDs were not working simply
+because board_autoled_initialize() was not being called in the board startup
+logic.
+
+At this point, I would say that the basic NSH port is complete.
+
+2016-05-18: Started looking at the SMP configuration.  Initially, I verfied
+that the NSH configuration works with CONFIG_SMP_NCPUS=1.  Not a very
+interesting case, but this does exercise a lot of the basic SMP logic.
+
+When more than one CPU is configured, then there are certain failures that
+appear to be stack corruption problem.  See the open issues below under
+SMP.
 
 Platform Features
 =================
@@ -111,7 +138,7 @@ LEDs
 ----
 A single LED is available driven GPIO1_IO02.  On the schematic this is
 USR_DEF_RED_LED signal to pin T1 (GPIO_2).  This signal is shared with
-KEY_ROW6 (ALT2).  A low value illuminates the LED.
+KEY_ROW6 (ALT2).  A high value illuminates the LED.
 
 This LED is not used by the board port unless CONFIG_ARCH_LEDS is
 defined.  In that case, the usage by the board port is defined in
@@ -418,6 +445,29 @@ A: Yes with the following modifications to the prodecure above.
        gdb> mon set pc 0x10800040
        gdb> s
 
+SMP
+===
+
+The i.MX6 6Quad has 4 CPUs.  Support is included for testing an SMP
+configuration.  That configuration is still not yet ready for usage but can
+be enabled with the following configuration settings:
+
+  Build Setup:
+    CONFIG_EXPERIMENTAL=y
+
+  RTOS Features -> Tasks and Scheduling
+    CONFIG_SPINLOCK=y
+    CONFIG_SMP=y
+    CONFIG_SMP_NCPUS=4
+    CONFIG_SMP_IDLETHREAD_STACKSIZE=2048
+
+Open Issues:
+
+1. Currently all device interrupts are handled on CPU0 only.  Critical sections will
+   attempt to disable interrupts but will now disable interrupts only on the current
+   CPU (which may not be CPU0).  Perhaps that should be a spinlock to prohibit
+   execution of interrupts on CPU0 when other CPUs are in a critical section?
+
 Configurations
 ==============
 
@@ -484,3 +534,27 @@ Configuration sub-directories
     at apps/nshlib with the start logic at apps/examples/nsh.
 
     NOTES:
+
+    1. This configuration assumes that we are loaded into SDRAM and
+       started via U-Boot.
+
+    2. The serial console is configured by default for use UART1, the
+       USB VCOM port (UART1), same as the serial port used by U-Boot.
+       You will need to reconfigure if you want to use a different UART.
+
+    3. NSH built-in applications are supported, but no built-in
+       applications are enabled.
+
+       Binary Formats:
+         CONFIG_BUILTIN=y           : Enable support for built-in programs
+
+       Application Configuration:
+         CONFIG_NSH_BUILTIN_APPS=y  : Enable starting apps from NSH command line
+
+    4. The RAMLOG is enabled.  All SYSLOG (DEBUG) output will go to the
+       RAMLOG and will not be visible unless you use the nsh 'dmesg'
+       command.  To disable this RAMLOG feature, disable the following:
+
+       File Systems:    CONFIG_SYSLOG
+       Device Drivers:  CONFIG_RAMLOG
+

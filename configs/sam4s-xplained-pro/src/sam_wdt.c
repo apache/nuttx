@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/sam4s-xplained-pro/src/up_watchdog.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            Bob Doiron
  *
@@ -164,7 +164,7 @@ errout:
 #endif
 
 /****************************************************************************
- * Name: up_wdginitialize()
+ * Name: sam_watchdog_initialize()
  *
  * Description:
  *   Perform architecture-specific initialization of the Watchdog hardware.
@@ -173,7 +173,7 @@ errout:
  *
  ****************************************************************************/
 
-int up_wdginitialize(void)
+int sam_watchdog_initialize(void)
 {
 #if (defined(CONFIG_SAM34_WDT) && !defined(CONFIG_WDT_DISABLE_ON_RESET))
   int fd;

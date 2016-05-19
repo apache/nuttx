@@ -92,10 +92,6 @@ ifeq ($(CONFIG_QENCODER),y)
 CSRCS += stm32_qencoder.c
 endif
 
-ifeq ($(CONFIG_WATCHDOG),y)
-CSRCS += stm32_watchdog.c
-endif
-
 ifeq ($(CONFIG_NSH_LIBRARY),y)
 CSRCS += stm32_appinit.c
 endif

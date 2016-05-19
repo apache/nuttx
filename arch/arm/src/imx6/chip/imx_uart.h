@@ -195,10 +195,10 @@
 #define UART_UCR1_RRDYEN       (1 << 9)  /* Bit 9: Receiver ready interrupt enable */
 #define UART_UCR1_ICD_SHIFT    10        /* Bit 10-11: Idle condition detect */
 #define UART_UCR1_ICD_MASK     (3 << UART_UCR1_ICD_SHIFT)
-# define UART_UCR1_ICD_4FRMS   (0 << UART_UCR1_ICD_SHIFT) /* Idle for more than 4 frames */
-# define UART_UCR1_ICD_8FRMS   (1 << UART_UCR1_ICD_SHIFT) /* Idle for more than 8 frames */
-# define UART_UCR1_ICD_16FRMS  (2 << UART_UCR1_ICD_SHIFT) /* Idle for more than 16 frames */
-# define UART_UCR1_ICD_32FRMS  (3 << UART_UCR1_ICD_SHIFT) /* Idle for more than 32 frames */
+#  define UART_UCR1_ICD_4FRMS  (0 << UART_UCR1_ICD_SHIFT) /* Idle for more than 4 frames */
+#  define UART_UCR1_ICD_8FRMS  (1 << UART_UCR1_ICD_SHIFT) /* Idle for more than 8 frames */
+#  define UART_UCR1_ICD_16FRMS (2 << UART_UCR1_ICD_SHIFT) /* Idle for more than 16 frames */
+#  define UART_UCR1_ICD_32FRMS (3 << UART_UCR1_ICD_SHIFT) /* Idle for more than 32 frames */
 #define UART_UCR1_IDEN         (1 << 12) /* Bit 12: Idle condition detected interrupt enable */
 #define UART_UCR1_TRDYEN       (1 << 13) /* Bit 13: Transmitter ready interrupt enable */
 #define UART_UCR1_ADBR         (1 << 14) /* Bit 14: Automatic detection of baud rate */

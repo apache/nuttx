@@ -650,8 +650,8 @@ __start:
 
 	/* Initialize .bss and .data ONLY if .bss and .data lie in SRAM that is
 	 * ready to use.  Other memory, such as SDRAM, must be initialized before
-	 * it can be used.  up_boot() will perform that memory initialization and
-	 * .bss and .data can be initialized after up_boot() returns.
+	 * it can be used.  arm_boot() will perform that memory initialization and
+	 * .bss and .data can be initialized after arm_boot() returns.
 	 */
 
 	/* Set up the stack pointer and clear the frame pointer */
@@ -662,18 +662,18 @@ __start:
 #ifndef CONFIG_BOOT_SDRAM_DATA
 	/* Initialize .bss and .data ONLY if .bss and .data lie in SRAM that is
 	 * ready to use.  Other memory, such as SDRAM, must be initialized before
-	 * it can be used.  up_boot() will perform that memory initialization and
-	 * .bss and .data can be initialized after up_boot() returns.
+	 * it can be used.  arm_boot() will perform that memory initialization and
+	 * .bss and .data can be initialized after arm_boot() returns.
 	 */
 
 	bl		arm_data_initialize
 #endif
 
 	/* Perform early C-level, platform-specific initialization.  Logic
-	 * within up_boot() must configure SDRAM and call arm_ram_initailize.
+	 * within arm_boot() must configure SDRAM and call arm_ram_initailize.
 	 */
 
-	bl		up_boot
+	bl		arm_boot
 
 #ifdef CONFIG_STACK_COLORATION
 	/* Write a known value to the IDLE thread stack to support stack

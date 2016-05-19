@@ -609,7 +609,7 @@ __start:
 
 	/* Perform early C-level, platform-specific initialization */
 
-	bl		up_boot
+	bl		arm_boot
 
 #ifdef CONFIG_STACK_COLORATION
 	/* Write a known value to the IDLE thread stack to support stack

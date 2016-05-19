@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/imx6/imx_clockconfig.c
+ * configs/nucleo-144/src/stm32_buttons.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,40 +39,74 @@
 
 #include <nuttx/config.h>
 
-#include <nuttx/arch.h>
+#include <nuttx/irq.h>
+#include <nuttx/board.h>
 
-#include "gic.h"
+#include "stm32_gpio.h"
+#include "nucleo-144.h"
 
-#ifdef CONFIG_SMP
+#ifdef CONFIG_ARCH_BUTTONS
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_cpu_initialize
+ * Name: board_button_initialize
  *
  * Description:
- *   After the CPU has been started (via up_cpu_start()) the system will
- *   call back into the architecture-specific code with this function on the
- *   thread of execution of the newly started CPU.  This gives the
- *   architecture-specific a chance to perform ny initial, CPU-specific
- *   initialize on that thread.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   Zero on success; a negated errno value on failure.
+ *   board_button_initialize() must be called to initialize button resources.
+ *   After that, board_buttons() may be called to collect the current state
+ *   of all buttons or board_button_irq() may be called to register button
+ *   interrupt handlers.
  *
  ****************************************************************************/
 
-int up_cpu_initialize(void)
+void board_button_initialize(void)
 {
-  /* Initialize the Generic Interrupt Controller (GIC) for CPUn (n != 0) */
-
-  arm_gic_initialize();
-  return OK;
+  stm32_configgpio(GPIO_BTN_USER);
 }
 
-#endif /* CONFIG_SMP */
+/****************************************************************************
+ * Name: board_buttons
+ ****************************************************************************/
+
+uint8_t board_buttons(void)
+{
+  return stm32_gpioread(GPIO_BTN_USER) ? 1 : 0;
+}
+
+/************************************************************************************
+ * Button support.
+ *
+ * Description:
+ *   board_button_initialize() must be called to initialize button resources.  After
+ *   that, board_buttons() may be called to collect the current state of all
+ *   buttons or board_button_irq() may be called to register button interrupt
+ *   handlers.
+ *
+ *   After board_button_initialize() has been called, board_buttons() may be called to
+ *   collect the state of all buttons.  board_buttons() returns an 8-bit bit set
+ *   with each bit associated with a button.  See the BUTTON_*_BIT
+ *   definitions in board.h for the meaning of each bit.
+ *
+ *   board_button_irq() may be called to register an interrupt handler that will
+ *   be called when a button is depressed or released.  The ID value is a
+ *   button enumeration value that uniquely identifies a button resource. See the
+ *   BUTTON_* definitions in board.h for the meaning of enumeration
+ *   value.  The previous interrupt handler address is returned (so that it may
+ *   restored, if so desired).
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_ARCH_IRQBUTTONS
+xcpt_t board_button_irq(int id, xcpt_t irqhandler)
+{
+#warning Missing logic
+}
+#endif
+#endif /* CONFIG_ARCH_BUTTONS */

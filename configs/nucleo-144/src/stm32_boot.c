@@ -1,7 +1,7 @@
 /************************************************************************************
- * configs/spark/src/stm32_watchdog.c
+ * configs/nucleo-144/src/stm32_boot.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,65 +39,17 @@
 
 #include <nuttx/config.h>
 
-#include <errno.h>
 #include <debug.h>
 
-#include <nuttx/timers/watchdog.h>
+#include <nuttx/board.h>
 #include <arch/board/board.h>
 
-#include "stm32_wdg.h"
-
-#ifdef CONFIG_WATCHDOG
+#include "up_arch.h"
+#include "nucleo-144.h"
 
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
-/* Configuration *******************************************************************/
-/* Wathdog hardware should be enabled */
-
-#if !defined(CONFIG_STM32_WWDG) && !defined(CONFIG_STM32_IWDG)
-#  warning "One of CONFIG_STM32_WWDG or CONFIG_STM32_IWDG must be defined"
-#endif
-
-/* Select the path to the registered watchdog timer device */
-
-#ifndef CONFIG_STM32_WDG_DEVPATH
-#  ifdef CONFIG_EXAMPLES_WATCHDOG_DEVPATH
-#    define CONFIG_STM32_WDG_DEVPATH CONFIG_EXAMPLES_WATCHDOG_DEVPATH
-#  else
-#    define CONFIG_STM32_WDG_DEVPATH "/dev/watchdog0"
-#  endif
-#endif
-
-/* Use the un-calibrated LSI frequency if we have nothing better */
-
-#if defined(CONFIG_STM32_IWDG) && !defined(CONFIG_STM32_LSIFREQ)
-#  define CONFIG_STM32_LSIFREQ STM32_LSI_FREQUENCY
-#endif
-
-/* Debug ***************************************************************************/
-/* Non-standard debug that may be enabled just for testing the watchdog timer */
-
-#ifndef CONFIG_DEBUG
-#  undef CONFIG_DEBUG_WATCHDOG
-#endif
-
-#ifdef CONFIG_DEBUG_WATCHDOG
-#  define wdgdbg                 dbg
-#  define wdglldbg               lldbg
-#  ifdef CONFIG_DEBUG_VERBOSE
-#    define wdgvdbg              vdbg
-#    define wdgllvdbg            llvdbg
-#  else
-#    define wdgvdbg(x...)
-#    define wdgllvdbg(x...)
-#  endif
-#else
-#  define wdgdbg(x...)
-#  define wdglldbg(x...)
-#  define wdgvdbg(x...)
-#  define wdgllvdbg(x...)
-#endif
 
 /************************************************************************************
  * Private Functions
@@ -107,31 +59,61 @@
  * Public Functions
  ************************************************************************************/
 
-/****************************************************************************
- * Name: up_wdginitialize()
+/************************************************************************************
+ * Name: stm32_boardinitialize
  *
  * Description:
- *   Perform architecuture-specific initialization of the Watchdog hardware.
- *   This interface must be provided by all configurations using
- *   apps/examples/watchdog
+ *   All STM32 architectures must provide the following entry point.  This entry point
+ *   is called early in the initialization -- after all memory has been configured
+ *   and mapped but before any devices have been initialized.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
-int up_wdginitialize(void)
+void stm32_boardinitialize(void)
 {
-  /* Initialize and register the watchdog timer device */
+#if defined(CONFIG_STM32F7_SPI1) || defined(CONFIG_STM32F7_SPI2) || \
+    defined(CONFIG_STM32F7_SPI3) || defined(CONFIG_STM32F7_SPI4) || \
+    defined(CONFIG_STM32F7_SPI5)
+  /* Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak function
+   * stm32_spidev_initialize() has been brought into the link.
+   */
 
-#if defined(CONFIG_STM32_WWDG)
-  stm32_wwdginitialize(CONFIG_STM32_WDG_DEVPATH);
-  return OK;
+  if (stm32_spidev_initialize)
+    {
+      stm32_spidev_initialize();
+    }
+#endif
 
-#elif defined(CONFIG_STM32_IWDG)
-  stm32_iwdginitialize(CONFIG_STM32_WDG_DEVPATH, CONFIG_STM32_LSIFREQ);
-  return OK;
+#ifdef CONFIG_ARCH_LEDS
+  /* Configure on-board LEDs if LED support has been selected. */
 
-#else
-  return -ENODEV;
+  board_autoled_initialize();
 #endif
 }
 
-#endif /* CONFIG_WATCHDOG */
+/************************************************************************************
+ * Name: board_initialize
+ *
+ * Description:
+ *   If CONFIG_BOARD_INITIALIZE is selected, then an additional initialization call
+ *   will be performed in the boot-up sequence to a function called
+ *   board_initialize().  board_initialize() will be called immediately after
+ *   up_initialize() is called and just before the initial application is started.
+ *   This additional initialization phase may be used, for example, to initialize
+ *   board-specific device drivers.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_BOARD_INITIALIZE
+void board_initialize(void)
+{
+#if defined(CONFIG_NSH_LIBRARY) && !defined(CONFIG_LIB_BOARDCTL)
+  /* Perform NSH initialization here instead of from the NSH.  This
+   * alternative NSH initialization is necessary when NSH is ran in user-space
+   * but the initialization function must run in kernel space.
+   */
+
+  (void)board_app_initialize();
+#endif
+}
+#endif

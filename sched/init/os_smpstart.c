@@ -47,6 +47,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/sched.h>
+#include <nuttx/sched_note.h>
 
 #include "group/group.h"
 #include "sched/sched.h"
@@ -98,13 +99,7 @@ void os_idle_trampoline(void)
 {
 #ifdef CONFIG_SCHED_INSTRUMENTATION
   FAR struct tcb_s *tcb = this_task();
-#endif
 
-  /* Perform architecture-specific initialization for this CPU */
-
-  up_cpu_initialize();
-
-#ifdef CONFIG_SCHED_INSTRUMENTATION
   /* Announce that the IDLE task has started */
 
   sched_note_start(tcb);
@@ -209,8 +204,7 @@ int os_smp_start(void)
       FAR struct tcb_s *tcb = current_task(cpu);
       DEBUGASSERT(tcb != NULL);
 
-      ret = up_create_stack(tcb, CONFIG_SMP_IDLETHREAD_STACKSIZE,
-                            TCB_FLAG_TTYPE_KERNEL);
+      ret = up_cpu_idlestack(cpu, tcb, CONFIG_SMP_IDLETHREAD_STACKSIZE);
       if (ret < 0)
         {
           sdbg("ERROR: Failed to allocate stack for CPU%d\n", cpu);

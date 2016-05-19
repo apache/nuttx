@@ -211,7 +211,16 @@ void arm_gic_initialize(void)
 
 #endif
 
-#if defined(CONFIG_ARCH_TRUSTZONE_SECURE) || defined(CONFIG_ARCH_TRUSTZONE_BOTH)
+#if defined(CONFIG_ARCH_TRUSTZONE_SECURE)
+  /* Set FIQn=1 if secure interrupts are to signal using nfiq_c.
+   *
+   * NOTE:  Only for processors that operate in secure state.
+   * REVISIT: Do I need to do this?
+   */
+
+  //iccicr |= GIC_ICCICRS_FIQEN;
+
+#elif defined(CONFIG_ARCH_TRUSTZONE_BOTH)
   /* Set FIQn=1 if secure interrupts are to signal using nfiq_c.
    *
    * NOTE:  Only for processors that operate in secure state.
@@ -221,25 +230,35 @@ void arm_gic_initialize(void)
   iccicr |= GIC_ICCICRS_FIQEN;
 #endif
 
-#if defined(ONFIG_ARCH_TRUSTZONE_BOTH)
+#if defined(CONFIG_ARCH_TRUSTZONE_SECURE)
   /* Program the AckCtl bit to select the required interrupt acknowledge
    * behavior.
    *
    * NOTE: Only for processors that operate in both secure and non-secure
    * state.
-   * REVISIT: I don't yet fully understand this setting.
+   * REVISIT: This is here only for superstituous reasons.  I don't think
+   * I need this setting in this configuration.
    */
 
-  // iccicr |= GIC_ICCICRS_ACKTCTL;
+   iccicr |= GIC_ICCICRS_ACKTCTL;
+
+#elif defined(CONFIG_ARCH_TRUSTZONE_BOTH)
+  /* Program the AckCtl bit to select the required interrupt acknowledge
+   * behavior.
+   *
+   * NOTE: Only for processors that operate in both secure and non-secure
+   * state.
+   */
+
+   iccicr |= GIC_ICCICRS_ACKTCTL;
 
   /* Program the SBPR bit to select the required binary pointer behavior.
    *
    * NOTE: Only for processors that operate in both secure and non-secure
    * state.
-   * REVISIT: I don't yet fully understand this setting.
    */
 
-  // iccicr |= GIC_ICCICRS_CBPR;
+   iccicr |= GIC_ICCICRS_CBPR;
 #endif
 
 #if defined(CONFIG_ARCH_TRUSTZONE_SECURE) || defined(CONFIG_ARCH_TRUSTZONE_BOTH)
@@ -291,9 +310,15 @@ void arm_gic_initialize(void)
    * bypass.
    */
 
+#if 0 /* REVISIT -- I don't know why this needs to be like this */
   iccicr |= (GIC_ICCICRS_ENABLEGRP0 | GIC_ICCICRS_FIQBYPDISGRP0 |
              GIC_ICCICRS_IRQBYPDISGRP0 | GIC_ICCICRS_FIQBYPDISGRP1 |
              GIC_ICCICRS_IRQBYPDISGRP1);
+#else
+  iccicr |= (GIC_ICCICRS_ENABLEGRP0 | GIC_ICCICRS_ENABLEGRP1 |
+             GIC_ICCICRS_FIQBYPDISGRP0 | GIC_ICCICRS_IRQBYPDISGRP0 |
+             GIC_ICCICRS_FIQBYPDISGRP1 | GIC_ICCICRS_IRQBYPDISGRP1);
+#endif
   icddcr  = GIC_ICDDCR_ENABLEGRP0;
 
 #elif defined(CONFIG_ARCH_TRUSTZONE_BOTH)
@@ -497,5 +522,57 @@ int up_prioritize_irq(int irq, int priority)
 
   return -EINVAL;
 }
+
+/****************************************************************************
+ * Name: arm_gic_irq_trigger
+ *
+ * Description:
+ *   Set the trigger type for the specificd IRQ source and the current CPU.
+ *
+ *   Since this API is not supported on all architectures, it should be
+ *   avoided in common implementations where possible.
+ *
+ * Input Paramters:
+ *   irq - The interrupt request to modify.
+ *   edge - False: Active HIGH level sensitive, True: Rising edge sensitive
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value is returned on any failure.
+ *
+ ****************************************************************************/
+
+int arm_gic_irq_trigger(int irq, bool edge)
+{
+  uintptr_t regaddr;
+  uint32_t regval;
+  uint32_t intcfg;
+
+  if (irq > GIC_IRQ_SGI15 && irq < NR_IRQS)
+    {
+      /* Get the address of the Interrupt Configuration Register for this
+       * irq.
+       */
+
+      regaddr = GIC_ICDICFR(irq);
+
+      /* Get the new Interrupt configuration bit setting */
+
+      intcfg = (edge ? (INT_ICDICFR_EDGE | INT_ICDICFR_1N) : INT_ICDICFR_1N);
+
+      /* Write the correct interrupt trigger to the Interrupt Configuration
+       * Register.
+       */
+
+      regval  = getreg32(regaddr);
+      regval &= ~GIC_ICDICFR_ID_MASK(irq);
+      regval |= GIC_ICDICFR_ID(irq, intcfg);
+      putreg32(regval, regaddr);
+
+      return OK;
+    }
+
+  return -EINVAL;
+}
+
 
 #endif /* CONFIG_ARMV7A_HAVE_GICv2 */

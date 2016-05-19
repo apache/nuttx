@@ -55,7 +55,8 @@ ENTRY(_stext)
 
 SECTIONS
 {
-	.text : {
+	.text :
+	{
 		_stext = ABSOLUTE(.);
 		*(.vectors)
 		*(.text .text.*)
@@ -73,13 +74,15 @@ SECTIONS
 		_etext = ABSOLUTE(.);
 	} > ddr3
 
-	.init_section : {
+	.init_section :
+	{
 		_sinit = ABSOLUTE(.);
 		*(.init_array .init_array.*)
 		_einit = ABSOLUTE(.);
 	} > ddr3
 
-	.ARM.extab : {
+	.ARM.extab :
+	{
 		*(.ARM.extab*)
 	} > ddr3
 
@@ -92,7 +95,10 @@ SECTIONS
 	} > ddr3
 	PROVIDE_HIDDEN (__exidx_end = .);
 
-	.data : {
+	/* Uninitialized data */
+
+	.data :
+	{
 		_sdata = ABSOLUTE(.);
 		*(.data .data.*)
 		*(.gnu.linkonce.d.*)
@@ -100,12 +106,20 @@ SECTIONS
 		_edata = ABSOLUTE(.);
 	} > ddr3
 
-	.bss : {
+	.bss :
+	{
 		_sbss = ABSOLUTE(.);
 		*(.bss .bss.*)
 		*(.gnu.linkonce.b.*)
 		*(COMMON)
 		_ebss = ABSOLUTE(.);
+	} > ddr3
+
+	.noinit :
+	{
+		_snoinit = ABSOLUTE(.);
+		*(.noinit*)
+		_enoinit = ABSOLUTE(.);
 	} > ddr3
 
 	/* Stabs debugging sections. */

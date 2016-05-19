@@ -289,7 +289,7 @@ static void a1x_copyvectorblock(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_boot
+ * Name: arm_boot
  *
  * Description:
  *   Complete boot operations started in arm_head.S
@@ -305,7 +305,7 @@ static void a1x_copyvectorblock(void)
  *
  ****************************************************************************/
 
-void up_boot(void)
+void arm_boot(void)
 {
 #ifndef CONFIG_ARCH_ROMPGTABLE
   /* __start provided the basic MMU mappings for SRAM.  Now provide mappings
