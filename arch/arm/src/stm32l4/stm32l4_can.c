@@ -59,7 +59,6 @@
 #include "up_internal.h"
 #include "up_arch.h"
 
-
 #include "chip.h"
 #include "stm32l4.h"
 #include "stm32l4_can.h"
@@ -69,6 +68,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Delays *******************************************************************/
 /* Time out for INAK bit */
 
@@ -313,7 +313,6 @@ static uint32_t can_getfreg(struct stm32l4_can_s *priv, int offset)
 #ifdef CONFIG_CAN_REGDEBUG
 static void can_vputreg(uint32_t addr, uint32_t value)
 {
-
   /* Show the register value being written */
 
   lldbg("%08x<-%08x\n", addr, value);
@@ -592,6 +591,7 @@ static int can_setup(FAR struct can_dev_s *dev)
       canlldbg("CAN%d filter initialization failed: %d\n", priv->port, ret);
       return ret;
     }
+
   can_dumpfiltregs(priv, "After filter initialization");
 
   /* Attach the CAN RX FIFO 0 interrupt and TX interrupts.  The others are not used */
@@ -688,6 +688,7 @@ static void can_rxint(FAR struct can_dev_s *dev, bool enable)
     {
       regval &= ~CAN_IER_FMPIE0;
     }
+
   can_putreg(priv, STM32L4_CAN_IER_OFFSET, regval);
 }
 
@@ -880,6 +881,7 @@ static int can_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
             }
         }
     }
+
   can_putreg(priv, STM32L4_CAN_TDLR_OFFSET(txmb), regval);
 
   regval = 0;
@@ -906,6 +908,7 @@ static int can_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
             }
         }
     }
+
   can_putreg(priv, STM32L4_CAN_TDHR_OFFSET(txmb), regval);
 
   /* Enable the transmit mailbox empty interrupt (may already be enabled) */
@@ -952,6 +955,7 @@ static bool can_txready(FAR struct can_dev_s *dev)
     {
       return true;
     }
+
   return false;
 }
 
@@ -987,6 +991,7 @@ static bool can_txempty(FAR struct can_dev_s *dev)
     {
       return true;
     }
+
   return false;
 }
 
@@ -1288,6 +1293,7 @@ static int can_bittiming(struct stm32l4_can_s *priv)
 
       ts1 = (tmp - 1) >> 1;
       ts2 = tmp - ts1 - 1;
+
       if (ts1 == ts2 && ts1 > 1 && ts2 < CAN_BTR_TSEG2_MAX)
         {
           ts1--;
@@ -1439,6 +1445,7 @@ static int can_cellinit(struct stm32l4_can_s *priv)
       canlldbg("ERROR: Timed out waiting to exit initialization mode: %08x\n", regval);
       return -ETIMEDOUT;
     }
+
   return OK;
 }
 
@@ -1589,4 +1596,3 @@ FAR struct can_dev_s *stm32l4_caninitialize(int port)
 }
 
 #endif /* CONFIG_CAN && (CONFIG_STM32L4_CAN1 || CONFIG_STM32L4_CAN2) */
-

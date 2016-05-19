@@ -58,7 +58,7 @@ Common Board Features:
                   provide a ST-Link for programming, debug similar to the
                   OpenOcd FTDI function - USB to JTAG front-end.
 
-  Expansion I/F   ST Zio and Extended Ardino and Morpho Headers
+  Expansion I/F:  ST Zio and Extended Ardino and Morpho Headers
 
 Nucleo F746ZG
 =============
