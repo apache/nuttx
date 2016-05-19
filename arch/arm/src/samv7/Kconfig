@@ -549,6 +549,75 @@ config SAMV7_RSWDT
 
 endmenu # SAMV7 Peripheral Selection
 
+choice
+	prompt "JTAG IO Configuration"
+	default SAMV7_JTAG_FULL_ENABLE
+	---help---
+		JTAG Enable settings (by default the IO for JTAG-DP and SW-DP are
+		enabled)
+
+config SAMV7_JTAG_DISABLE
+	bool "Disable all JTAG IO"
+	---help---
+		JTAG Enable settings (by default the IO for JTAG-DP and SW-DP are
+		enabled)
+
+		When JTAG is disabled PB4-BP7 is assigned as a GPIO and can be
+		configured for use as GPIO or a Peripheral
+
+config SAMV7_JTAG_FULL_ENABLE
+	bool "Enable full JTAG IO to use JTAG-DP + SW-DP"
+	---help---
+		The JTAG IO is configured for both JTAG-DP + SW-DP"
+
+		PB4 is TDI
+		PB5 is TDO/TRACESWO
+		PB6 is TMS/SWDIO
+		PB7 is TCK/SWCLK
+
+config SAMV7_JTAG_FULL_SW_ENABLE
+	bool "Set JTAG-DP IO disabled and Full SW-DP IO enabled"
+	---help---
+		JTAG  IO is configured for SW-DP with Trace"
+
+		PB5 is TDO/TRACESWO
+		PB6 is TMS/SWDIO
+		PB7 is TCK/SWCLK
+
+config SAMV7_JTAG_SW_ENABLE
+	bool "Set JTAG-DP IO disabled and SW-DP IO enabled"
+	---help---
+		JTAG  IO is configured for SW-DP without Trace "
+
+		PB6 is TMS/SWDIO
+		PB7 is TCK/SWCLK
+
+endchoice # JTAG IO Configuration
+
+choice
+	prompt "ERASE Pin Configuration"
+	default SAMV7_ERASE_ENABLE
+	---help---
+		ERASE Pin Enable settings (by default ERASE pin is enabled)
+
+config SAMV7_ERASE_DISABLE
+	bool "Disable ERASE Pin"
+	---help---
+		ERASE Pin Enable settings (by default ERASE pin is enabled)
+
+		When the ERASE pin is disabled PB12 is assigned as a GPIO and can be
+		configured for use as GPIO or a Peripheral.
+
+		N.B. a low level must be ensured at startup to prevent Flash erase before
+		the user application sets PB12 into PIO mode,
+
+config SAMV7_ERASE_ENABLE
+	bool "Enable ERASE Pin"
+	---help---
+		The ERASE pin is configured to reinitialize the Flash content.
+
+endchoice
+
 menuconfig SAMV7_GPIO_IRQ
 	bool "GPIO pin interrupts"
 	---help---

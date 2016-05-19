@@ -357,6 +357,7 @@ void __start(void)
 
   sam_clockconfig();
   sam_fpuconfig();
+  sam_gpioinit();
   sam_lowsetup();
 
   /* Enable/disable tightly coupled memories */
