@@ -78,6 +78,9 @@
 #    define SYSIO_BITS (MATRIX_CCFG_SYSIO_SYSIO4 | MATRIX_CCFG_SYSIO_SYSIO5)
 #  endif
 #endif
+#if !defined(SYSIO_BITS)
+#   define SYSIO_BITS 0
+#endif
 
 /****************************************************************************
  * Private Data
