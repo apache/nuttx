@@ -648,7 +648,7 @@ static int sam_ioctl(FAR struct watchdog_lowerhalf_s *lower, int cmd,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_wdginitialize
+ * Name: sam_rswdt_initialize
  *
  * Description:
  *   Initialize the RSWDT watchdog time.  The watchdog timer is initialized and
@@ -663,7 +663,7 @@ static int sam_ioctl(FAR struct watchdog_lowerhalf_s *lower, int cmd,
  *
  ****************************************************************************/
 
-int up_wdginitialize(void)
+int sam_rswdt_initialize(void)
 {
   FAR struct sam_lowerhalf_s *priv = &g_wdtdev;
 
