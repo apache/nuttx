@@ -1,22 +1,43 @@
 README
 ======
 
-This README discusses issues unique to NuttX configurations for the ST
-Nucleo F746ZG board from ST Micro.  See
+This README discusses issues unique to NuttX configurations for the STMicro
+Nucleo-144 board.  See
 
-http://www.st.com/web/catalog/tools/FM116/CL1620/SC959/SS1532/LN1847/PF261636
+http://www.st.com/content/ccc/resource/technical/document/data_brief/group0/7b/df/1d/e9/64/55/43/8d/DM00247910/files/DM00247910.pdf/jcr:content/translations/en.DM00247910.pdf
 
-The Nucleo F746ZG order part number is NUCLEO-F746ZG. It is clumped together
-under the STM32 Nucleo-144 board family. This does provide uniformity in the
-documentation from ST and should allow us to quickly change configurations
-but just cloning this configuration and changing the CPU choice and board
-init. Unfortunately for the developer, the CPU specific information must be
-extracted from the common information in the documentation.
+The Nucleo-144 is a standard board for use with several STM32 parts in the
+LQFP144 package.  Variants include
+
+  STM32 Part    Board Variant Name
+  ------------- ------------------
+  STM32F207ZGT6 NUCLEO-F207ZG
+  STM32F303ZET6 NUCLEO-F303ZE
+  STM32F429ZIT6 NUCLEO-F429ZI
+  STM32F446ZET6 NUCLEO-F446ZE
+  STM32F746ZGT6 NUCLEO-F746ZG
+  STM32F767ZIT6 NUCLEO-F767ZI
+  ------------- ------------------
+
+This directory is intended to support all Nucleo-144 variants since the
+boards are identical, differing only in the installed part.  This common
+board design provides uniformity in the documentation from ST and should
+allow us to quickly change configurations by just cloning a configuration
+and changing the CPU choice and board initialization.  Unfortunately for
+the developer, the CPU specific information must be extracted from the
+common information in the documentation.
 
 Please read the User Manaul UM1727: Getting started with STM32 Nucleo board
 software development tools and take note of the Powering options for the
 board (6.3 Power supply and power selection) and the Solder bridges based
 hardware configuration changes that are configurable (6.11 Solder bridges).
+
+At present only the STNucleo F746ZG board from ST Micro is supported.  See
+
+http://www.st.com/content/st_com/en/products/evaluation-tools/product-evaluation-tools/mcu-eval-tools/stm32-mcu-eval-tools/stm32-mcu-nucleo/nucleo-f746zg.html
+
+The Nucleo F746ZG order part number is NUCLEO-F746ZG. It is one member of
+the STM32 Nucleo-144 board family.
 
 NUCLEO-F746ZG:
 
@@ -62,7 +83,8 @@ Board features:
 
   Expansion I/F   ST Zio  an Extended Ardino and Morpho Headers
 
-See https://developer.mbed.org/platforms/ST-Nucleo-F746ZG  form additional information about this board.
+See https://developer.mbed.org/platforms/ST-Nucleo-F746ZG  form additional
+information about this board.
 
 Contents
 ========
