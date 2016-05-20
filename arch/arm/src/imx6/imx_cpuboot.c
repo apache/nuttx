@@ -51,6 +51,7 @@
 #include "chip/imx_src.h"
 #include "sctlr.h"
 #include "smp.h"
+#include "fpu.h"
 #include "gic.h"
 
 #ifdef CONFIG_SMP
@@ -258,6 +259,12 @@ void imx_cpu_enable(void)
 
 void arm_cpu_boot(int cpu)
 {
+#ifdef CONFIG_ARCH_FPU
+  /* Initialize the FPU */
+
+  arm_fpuconfig();
+#endif
+
   /* Initialize the Generic Interrupt Controller (GIC) for CPUn (n != 0) */
 
   arm_gic_initialize();

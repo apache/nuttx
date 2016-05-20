@@ -73,7 +73,7 @@
 
 int arm_start_handler(int irq, FAR void *context)
 {
-  FAR struct tcb_s *tcb = this_task();
+  FAR struct tcb_s *tcb;
 
   /* Invalidate CPUn L1 so that is will be reloaded from coherent L2. */
 
@@ -81,6 +81,7 @@ int arm_start_handler(int irq, FAR void *context)
 
   /* Reset scheduler parameters */
 
+  tcb = this_task();
   sched_resume_scheduler(tcb);
 
   /* Then switch contexts. This instantiates the exception context of the

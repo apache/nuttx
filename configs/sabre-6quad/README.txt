@@ -468,12 +468,41 @@ Open Issues:
    CPU (which may not be CPU0).  Perhaps that should be a spinlock to prohibit
    execution of interrupts on CPU0 when other CPUs are in a critical section?
 
-2. Cache Concurency.  This is a difficult problem.  There is logic in place now to
+2. Cache Concurency.  This is a complex problem.  There is logic in place now to
    clean CPU0 D-cache before starting a new CPU and for invalidating the D-Cache
-   when the new CPU is started.
+   when the new CPU is started.  REVISIT:  Seems that this should not be necessary.
+   If the Shareable bit set in the MMU mappings and my understanding is that this
+   should keep cache coherency at least within a cluster.  I need to study more
+   how the inner and outer shareable attribute works to control cacheing
 
-   But there are many, many more cache coherency issues.  This could, in face, be
-   a showstopping issue.
+   But there may are many, many more such cache coherency issues if I cannot find
+   a systematic way to manage cache coherency.
+
+   http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.dht0008a/CJABEHDA.html
+   http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.den0024a/CEGDBEJE.html
+
+   Try:
+
+    --- mmu.h.orig  2016-05-20 13:09:34.773462000 -0600
+    +++ mmu.h       2016-05-20 13:03:13.261978100 -0600
+    @@ -572,8 +572,14 @@
+
+     #define MMU_ROMFLAGS         (PMD_TYPE_SECT | PMD_SECT_AP_R1 | PMD_CACHEABLE | \
+                                   PMD_SECT_DOM(0))
+    -#define MMU_MEMFLAGS         (PMD_TYPE_SECT | PMD_SECT_AP_RW1 | PMD_CACHEABLE | \
+    +#ifdef CONFIG_SMP
+    +
+    +#  define MMU_MEMFLAGS       (PMD_TYPE_SECT | PMD_SECT_AP_RW1 | PMD_CACHEABLE | \
+    +                              PMD_SECT_S | PMD_SECT_DOM(0))
+    +#else
+    +#  define MMU_MEMFLAGS       (PMD_TYPE_SECT | PMD_SECT_AP_RW1 | PMD_CACHEABLE | \
+                                   PMD_SECT_DOM(0))
+    +#endif
+     #define MMU_IOFLAGS          (PMD_TYPE_SECT | PMD_SECT_AP_RW1 | PMD_DEVICE | \
+                                   PMD_SECT_DOM(0) | PMD_SECT_XN)
+     #define MMU_STRONGLY_ORDERED (PMD_TYPE_SECT | PMD_SECT_AP_RW1 | \
+
+3. Assertions.  On a fatal assertions, other CPUs need to be stopped.
 
 Configurations
 ==============
