@@ -3,6 +3,7 @@
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Author: Mark Olsson <post@markolsson.se>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -46,9 +47,11 @@
 # include <stdint.h>
 #endif
 
+#ifdef __KERNEL__
 #include "stm32_rcc.h"
 #ifdef CONFIG_STM32F7_SDMMC1
 #  include "stm32_sdmmc.h"
+#endif
 #endif
 
 /************************************************************************************
@@ -226,13 +229,19 @@
 /* LED index values for use with board_userled() */
 
 #define BOARD_LED1        0
-#define BOARD_NLEDS       1
+#define BOARD_LED2        1
+#define BOARD_LED3        2
+#define BOARD_NLEDS       3
 
 #define BOARD_LD1         BOARD_LED1
+#define BOARD_LD2         BOARD_LED2
+#define BOARD_LD3         BOARD_LED3
 
 /* LED bits for use with board_userled_all() */
 
 #define BOARD_LED1_BIT    (1 << BOARD_LED1)
+#define BOARD_LED2_BIT    (1 << BOARD_LED2)
+#define BOARD_LED3_BIT    (1 << BOARD_LED3)
 
 /* If CONFIG_ARCH_LEDS is defined, the usage by the board port is defined in
  * include/board.h and src/stm32_leds.c. The LEDs are used to encode OS-related
