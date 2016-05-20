@@ -504,6 +504,10 @@ Open Issues:
 
 3. Assertions.  On a fatal assertions, other CPUs need to be stopped.
 
+4. Caching probabaly interferes with spinlocks as they are currently implemented.
+   Waiting on a cached copy of the spinlock may result in a hang or a failure to
+   wait.
+
 Configurations
 ==============
 
