@@ -76,11 +76,11 @@
 
 #define LED_DRIVER_PATH "/dev/userleds"
 
-/* Pushbutton B1, labelled "User", is connected to GPIO PI11.  A high value will be sensed when the
+/* Pushbutton B1, labelled "User", is connected to GPIO PC13.  A high value will be sensed when the
  * button is depressed. Note that the EXTI interrupt is configured.
  */
 
-#define GPIO_BTN_USER      (GPIO_INPUT | GPIO_FLOAT | GPIO_EXTI | GPIO_PORTI | GPIO_PIN11)
+#define GPIO_BTN_USER      (GPIO_INPUT | GPIO_FLOAT | GPIO_EXTI | GPIO_PORTC | GPIO_PIN13)
 
 /****************************************************************************************************
  * Public data
