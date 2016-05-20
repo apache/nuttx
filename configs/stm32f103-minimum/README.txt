@@ -100,6 +100,7 @@ Contents
   - LEDs
   - UARTs
   - Timer Inputs/Outputs
+  - Using 128KiB of Flash instead of 64KiB
   - STM32F103 Minimum - specific Configuration Options
   - Configurations
 
@@ -167,8 +168,75 @@ Timer Inputs/Outputs
  * Indicates pins that have other on-board functions and should be used only
    with care (See board datasheet).
 
+Using 128KiB of Flash instead of 64KiB
+======================================
+
+Some people figured out that the STM32F103C8T6 has 128KiB of internal memory
+instead of 64KiB as documented in the datasheet and reported by its internal
+register.
+
+In order to enable 128KiB you need modify the linker script to reflect this
+new size. Open the configs/stm32f103-minimum/scripts/ld.script and replace:
+
+  flash (rx) : ORIGIN = 0x08000000, LENGTH = 64K
+
+with
+
+  flash (rx) : ORIGIN = 0x08000000, LENGTH = 128K
+
+Enable many NuttX features (ie. many filesystems and applications) to get a
+large binary image with more than 64K.
+
+We will use OpenOCD to write the firmware in the STM32F103C8T6 Flash. Use a
+up to dated OpenOCD version (ie. openocd-0.9).
+
+You will need to create a copy of original openocd/scripts/target/stm32f1x.cfg
+to openocd/scripts/target/stm32f103c8t6.cfg and edit the later file replacing:
+
+  flash bank $_FLASHNAME stm32f1x 0x08000000 0 0 0 $_TARGETNAME
+
+with
+
+  flash bank $_FLASHNAME stm32f1x 0x08000000 0x20000 0 0 $_TARGETNAME
+
+We will use OpenOCD with STLink-V2 programmer, but it will work with other
+programmers (JLink, Versaloon, or some based on FTDI FT232, etc).
+
+Open a terminal and execute:
+
+  $ sudo openocd -f interface/stlink-v2.cfg -f target/stm32f103c8t6.cfg
+
+Now in other terminal execute:
+
+  $ telnet localhost 4444
+
+  Trying 127.0.0.1...
+  Connected to localhost.
+  Escape character is '^]'.
+  Open On-Chip Debugger
+
+  > reset halt
+  stm32f1x.cpu: target state: halted
+  target halted due to debug-request, current mode: Thread
+  xPSR: 0x01000000 pc: 0x080003ac msp: 0x20000d78
+
+  > flash write_image erase nuttx.bin 0x08000000
+  auto erase enabled
+  device id = 0x20036410
+  ignoring flash probed value, using configured bank size
+  flash size = 128kbytes
+  stm32f1x.cpu: target state: halted
+  target halted due to breakpoint, current mode: Thread
+  xPSR: 0x61000000 pc: 0x2000003a msp: 0x20000d78
+  wrote 92160 bytes from file nuttx.bin in 4.942194s (18.211 KiB/s)
+
+  > reset run
+  > exit
+
+Now NuttX should start normally.
+
 STM32F103 Minimum - specific Configuration Options
-===============================================
+==================================================
 
     CONFIG_ARCH - Identifies the arch/ subdirectory.  This should
        be set to:
