@@ -297,8 +297,11 @@
  *   -- ----- --------- -----
  */
 
-#define GPIO_USART6_RX GPIO_USART6_RX_1
-#define GPIO_USART6_TX GPIO_USART6_TX_1
+ #define GPIO_USART6_RX GPIO_USART6_RX_1
+ #define GPIO_USART6_TX GPIO_USART6_TX_1
+
+ #define GPIO_USART3_RX GPIO_USART3_RX_3
+ #define GPIO_USART3_TX GPIO_USART3_TX_3
 
 /* The STM32 F7 connects to a SMSC LAN8742A PHY using these pins:
  *

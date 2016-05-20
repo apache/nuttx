@@ -142,9 +142,9 @@ Basic configuration & build steps
   be modified to point to the correct path to the Cortex-M7 GCC toolchain (if
   different from the default in your PATH variable).
 
-   - Configures nuttx creating .config file in the nuttx directory
+   - Configures nuttx creating .config file in the nuttx directory.
      $ cd tools && ./configure.sh nucleo-f746zg/nsh && cd ..
-   - Refreshes the .config file with the latest features addes sice this writting
+   - Refreshes the .config file with the latest available configurations.
      $ make oldconfig
    - Select the features you want in the build.
      $ make menuconfig
@@ -155,7 +155,7 @@ Hardware
 ========
 
   GPIO - there are 144 I/O lines on the STM32F746ZGT6 with various pins pined out
-  on the Nucleo F746ZG
+  on the Nucleo F746ZG.
 
   See https://developer.mbed.org/platforms/ST-Nucleo-F746ZG/ for slick graphic
   pinouts.
@@ -293,42 +293,80 @@ Serial Consoles
 Configurations
 ==============
 
-  nsh:
-  ---------
-    Configures the NuttShell (nsh) located at apps/examples/nsh for the
-    Nucleo-144 boards.  The Configuration enables the serial interfaces
-    on UART8.  Support for builtin applications is enabled, but in the base
-    configuration no builtin applications are selected (see NOTES below).
+nsh:
+---------
+  Configures the NuttShell (nsh) located at apps/examples/nsh for the
+  Nucleo-144 boards.  The Configuration enables the serial interfaces
+  on UART6.  Support for builtin applications is enabled, but in the base
+  configuration no builtin applications are selected (see NOTES below).
 
-    NOTES:
+  NOTES:
 
-    1. This configuration uses the mconf-based configuration tool.  To
-       change this configuration using that tool, you should:
+  1. This configuration uses the mconf-based configuration tool.  To
+     change this configuration using that tool, you should:
 
-       a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
-          see additional README.txt files in the NuttX tools repository.
+     a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+        see additional README.txt files in the NuttX tools repository.
 
-       b. If this is the intall configuration then Execute
-             'cd tools && ./configure.sh stm32f746g-disco/nsh && cd ..'
-          in nuttx/ in order to start configuration process.
-          Caution: Doing this step more than once will overwrite .config with
-          the contents of the stm32f746g-disco/nsh/defconfig file.
+     b. If this is the intall configuration then Execute
+           'cd tools && ./configure.sh nucleo-144/nsh && cd ..'
+        in nuttx/ in order to start configuration process.
+        Caution: Doing this step more than once will overwrite .config with
+        the contents of the nucleo-144/nsh/defconfig file.
 
-       c. Execute 'make oldconfig' in nuttx/ in order to refresh the
-          configuration.
+     c. Execute 'make oldconfig' in nuttx/ in order to refresh the
+        configuration.
 
-       d. Execute 'make menuconfig' in nuttx/ in order to start the
-          reconfiguration process.
+     d. Execute 'make menuconfig' in nuttx/ in order to start the
+        reconfiguration process.
 
-       e. Save the .config file to reuse it in the future starting at step d.
+     e. Save the .config file to reuse it in the future starting at step d.
 
-    2. By default, this configuration uses the ARM GNU toolchain
-       for Linux.  That can easily be reconfigured, of course.
+  2. By default, this configuration uses the ARM GNU toolchain
+     for Linux.  That can easily be reconfigured, of course.
 
-       CONFIG_HOST_LINUX=y                     : Builds under Linux
-       CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIL=y     : ARM GNU for Linux
+     CONFIG_HOST_LINUX=y                     : Builds under Linux
+     CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIL=y     : ARM GNU for Linux
 
-    3. Although the default console is USART3 (which would correspond to
-       the Virtual COM port) I have done all testing with the console
-       device configured for UART8 (see instruction above under "Serial
-       Consoles).
+  3. Although the default console is USART3 (which would correspond to
+     the Virtual COM port) I have done all testing with the console
+     device configured for UART8 (see instruction above under "Serial
+     Consoles).
+
+evalos:
+---------
+  This configuration is designed to test the features of the board.
+    - Configures the NuttShell (nsh) located at apps/examples/nsh for the
+      Nucleo-144 boards. The console is available on serial interface USART3,
+      which is accessible over the USB ST-Link interface.
+    - Configures nsh with advanced features such as autocompletion.
+    - Configures the on-board LEDs to work with the 'leds' example app.
+    - Configures the 'helloxx' example app.
+
+  NOTES:
+
+  1. This configuration uses the mconf-based configuration tool.  To
+    change this configuration using that tool, you should:
+
+    a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+       see additional README.txt files in the NuttX tools repository.
+
+    b. If this is the intall configuration then Execute
+          'cd tools && ./configure.sh nucleo-144/evalos && cd ..'
+       in nuttx/ in order to start configuration process.
+       Caution: Doing this step more than once will overwrite .config with
+       the contents of the nucleo-144/evalos/defconfig file.
+
+    c. Execute 'make oldconfig' in nuttx/ in order to refresh the
+       configuration.
+
+    d. Execute 'make menuconfig' in nuttx/ in order to start the
+       reconfiguration process.
+
+    e. Save the .config file to reuse it in the future starting at step d.
+
+  2. By default, this configuration uses the ARM GNU toolchain
+    for Linux.  That can easily be reconfigured, of course.
+
+    CONFIG_HOST_LINUX=y                     : Builds under Linux
+    CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIL=y     : ARM GNU for Linux
