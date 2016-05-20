@@ -994,6 +994,16 @@ config ARCH_BOARD_STM32L476VG_DISCO
 		MCU. The STM32L476VG  is a Cortex-M4 optimised for low-power operation
 		at up to 80MHz operation with 1024Kb Flash memory and 96+32Kb SRAM.
 
+config ARCH_BOARD_STM32F411E_DISCO
+	bool "STMicro STM32F411E-Discovery board"
+	depends on ARCH_CHIP_STM32F411VE
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		This is a minimal configuration that supports low-level test of the
+		STMicro STM32F411E-Discovery Board.
+
 config ARCH_BOARD_STM32L_DISCOVERY
 	bool "STMicro STM32L-Discovery board"
 	depends on ARCH_CHIP_STM32L152RB
@@ -1415,6 +1425,7 @@ config ARCH_BOARD
 	default "stm32f429i-disco"         if ARCH_BOARD_STM32F429I_DISCO
 	default "stm32f746g-disco"         if ARCH_BOARD_STM32F746G_DISCO
 	default "stm32l476vg-disco"        if ARCH_BOARD_STM32L476VG_DISCO
+	default "stm32f411e-disco"         if ARCH_BOARD_STM32F411E_DISCO
 	default "stm32ldiscovery"          if ARCH_BOARD_STM32L_DISCOVERY
 	default "stm32vldiscovery"         if ARCH_BOARD_STM32VL_DISCOVERY
 	default "mikroe-stm32f4"           if ARCH_BOARD_MIKROE_STM32F4
