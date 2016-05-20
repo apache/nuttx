@@ -45,10 +45,6 @@
 #include <nuttx/leds/userled.h>
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -64,13 +60,17 @@
 
 int board_app_initialize(void)
 {
+#if !defined(CONFIG_ARCH_LEDS) && defined(CONFIG_USERLED_LOWER)
   int ret;
 
   /* Register the LED driver */
+
   ret = userled_lower_initialize(LED_DRIVER_PATH);
   if (ret < 0)
-  {
-    syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
-  }
-  return 1;
+    {
+      syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
+    }
+#endif
+
+  return OK;
 }

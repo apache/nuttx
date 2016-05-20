@@ -69,6 +69,7 @@
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* This array maps an LED number to GPIO pin configuration */
 
 static const uint32_t g_ledcfg[3] =
@@ -96,10 +97,11 @@ void board_userled_initialize(void)
   int i;
 
   /* Configure LED1-3 GPIOs for output */
+
   for (i = 0; i < 3; i++)
-  {
-    stm32_configgpio(g_ledcfg[i]);
-  }
+    {
+      stm32_configgpio(g_ledcfg[i]);
+    }
 }
 
 /****************************************************************************
@@ -134,11 +136,13 @@ void board_userled(int led, bool ledon)
 void board_userled_all(uint8_t ledset)
 {
   int i;
+
   /* Configure LED1-3 GPIOs for output */
+
   for (i = 0; i < 3; i++)
-  {
-    stm32_gpiowrite(g_ledcfg[i], (ledset & (1 << i)) != 0);
-  }
+    {
+      stm32_gpiowrite(g_ledcfg[i], (ledset & (1 << i)) != 0);
+    }
 }
 
 #endif /* !CONFIG_ARCH_LEDS */

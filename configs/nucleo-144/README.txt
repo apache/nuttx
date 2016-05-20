@@ -294,7 +294,7 @@ Configurations
 ==============
 
 nsh:
----------
+----
   Configures the NuttShell (nsh) located at apps/examples/nsh for the
   Nucleo-144 boards.  The Configuration enables the serial interfaces
   on UART6.  Support for builtin applications is enabled, but in the base
@@ -334,7 +334,7 @@ nsh:
      Consoles).
 
 evalos:
----------
+-------
   This configuration is designed to test the features of the board.
     - Configures the NuttShell (nsh) located at apps/examples/nsh for the
       Nucleo-144 boards. The console is available on serial interface USART3,
