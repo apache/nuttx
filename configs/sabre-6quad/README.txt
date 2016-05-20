@@ -468,6 +468,13 @@ Open Issues:
    CPU (which may not be CPU0).  Perhaps that should be a spinlock to prohibit
    execution of interrupts on CPU0 when other CPUs are in a critical section?
 
+2. Cache Concurency.  This is a difficult problem.  There is logic in place now to
+   clean CPU0 D-cache before starting a new CPU and for invalidating the D-Cache
+   when the new CPU is started.
+
+   But there are many, many more cache coherency issues.  This could, in face, be
+   a showstopping issue.
+
 Configurations
 ==============
 

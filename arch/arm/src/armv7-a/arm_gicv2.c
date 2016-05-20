@@ -166,12 +166,12 @@ void arm_gic_initialize(void)
 
   /* Registers with 8-bits per interrupt */
 
-  putreg32(0x80808080, GIC_ICDIPR(0));         /* SGI[3:0] priority */
-  putreg32(0x80808080, GIC_ICDIPR(4));         /* SGI[4:7] priority */
-  putreg32(0x80808080, GIC_ICDIPR(8));         /* SGI[8:11] priority */
-  putreg32(0x80808080, GIC_ICDIPR(12));        /* SGI[12:15] priority */
-  putreg32(0x80000000, GIC_ICDIPR(24));        /* PPI[0] priority */
-  putreg32(0x80808080, GIC_ICDIPR(28));        /* PPI[1:4] priority */
+  putreg32(0x80808080, GIC_ICDIPR(0));      /* SGI[3:0] priority */
+  putreg32(0x80808080, GIC_ICDIPR(4));      /* SGI[4:7] priority */
+  putreg32(0x80808080, GIC_ICDIPR(8));      /* SGI[8:11] priority */
+  putreg32(0x80808080, GIC_ICDIPR(12));     /* SGI[12:15] priority */
+  putreg32(0x80000000, GIC_ICDIPR(24));     /* PPI[0] priority */
+  putreg32(0x80808080, GIC_ICDIPR(28));     /* PPI[1:4] priority */
 
   /* Set the binary point register.
    *
@@ -527,7 +527,7 @@ int up_prioritize_irq(int irq, int priority)
  * Name: arm_gic_irq_trigger
  *
  * Description:
- *   Set the trigger type for the specificd IRQ source and the current CPU.
+ *   Set the trigger type for the specified IRQ source and the current CPU.
  *
  *   Since this API is not supported on all architectures, it should be
  *   avoided in common implementations where possible.

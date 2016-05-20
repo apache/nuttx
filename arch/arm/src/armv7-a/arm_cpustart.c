@@ -46,6 +46,7 @@
 
 #include "up_internal.h"
 #include "gic.h"
+#include "cp15_cacheops.h"
 #include "sched/sched.h"
 
 #ifdef CONFIG_SMP
@@ -73,6 +74,10 @@
 int arm_start_handler(int irq, FAR void *context)
 {
   FAR struct tcb_s *tcb = this_task();
+
+  /* Invalidate CPUn L1 so that is will be reloaded from coherent L2. */
+
+  cp15_invalidate_dcache_all();
 
   /* Reset scheduler parameters */
 
@@ -117,6 +122,10 @@ int arm_start_handler(int irq, FAR void *context)
 int up_cpu_start(int cpu)
 {
   DEBUGASSERT(cpu >= 0 && cpu < CONFIG_SMP_NCPUS && cpu != this_cpu());
+
+  /* Make the content of CPU0 L1 cache has been written to coherent L2 */
+
+  cp15_clean_dcache(CONFIG_RAM_START, CONFIG_RAM_END - 1);
 
   /* Execute SGI1 */
 
