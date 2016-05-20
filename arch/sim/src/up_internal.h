@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/sim/src/up_internal.h
  *
- *   Copyright (C) 2007, 2009, 2011-2012, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011-2012, 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,6 +46,7 @@
 #ifndef __ASSEMBLY__
 #  include <sys/types.h>
 #  include <stdbool.h>
+#  include <netinet/in.h>
 
 #  include <nuttx/irq.h>
 #  include <arch/irq.h>
@@ -308,10 +309,14 @@ int sim_ajoy_initialize(void);
 void tapdev_init(void);
 unsigned int tapdev_read(unsigned char *buf, unsigned int buflen);
 void tapdev_send(unsigned char *buf, unsigned int buflen);
+void tapdev_ifup(in_addr_t ifaddr);
+void tapdev_ifdown(void);
 
-#define netdev_init()           tapdev_init()
-#define netdev_read(buf,buflen) tapdev_read(buf,buflen)
-#define netdev_send(buf,buflen) tapdev_send(buf,buflen)
+#  define netdev_init()           tapdev_init()
+#  define netdev_read(buf,buflen) tapdev_read(buf,buflen)
+#  define netdev_send(buf,buflen) tapdev_send(buf,buflen)
+#  define netdev_ifup(ifaddr)     tapdev_ifup(ifaddr)
+#  define netdev_ifdown()         tapdev_ifdown()
 #endif
 
 /* up_wpcap.c *************************************************************/
@@ -321,9 +326,11 @@ void wpcap_init(void);
 unsigned int wpcap_read(unsigned char *buf, unsigned int buflen);
 void wpcap_send(unsigned char *buf, unsigned int buflen);
 
-#define netdev_init()           wpcap_init()
-#define netdev_read(buf,buflen) wpcap_read(buf,buflen)
-#define netdev_send(buf,buflen) wpcap_send(buf,buflen)
+#  define netdev_init()           wpcap_init()
+#  define netdev_read(buf,buflen) wpcap_read(buf,buflen)
+#  define netdev_send(buf,buflen) wpcap_send(buf,buflen)
+#  define netdev_ifup(ifaddr)     {}
+#  define netdev_ifdown()         {}
 #endif
 
 /* up_netdriver.c *********************************************************/

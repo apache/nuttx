@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/sim/src/up_tapdev.c
  *
- *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Based on code from uIP which also has a BSD-like license:
@@ -56,30 +56,25 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
+#include <time.h>
 
-#include <linux/if.h>
+#ifdef CONFIG_SIM_NET_HOST_ROUTE
+#  include <net/route.h>
+#endif
+
+#include <net/if.h>
+#include <linux/sockios.h>
 #include <linux/if_tun.h>
 #include <linux/net.h>
+#include <netinet/in.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define TAPDEV_DEBUG    1
+//#define TAPDEV_DEBUG  1
 
-#define DEVTAP          "/dev/net/tun"
-
-#ifndef CONFIG_EXAMPLES_WEBSERVER_DHCPC
-#  define TAP_IPADDR0   192
-#  define TAP_IPADDR1   168
-#  define TAP_IPADDR2   0
-#  define TAP_IPADDR3   128
-#else
-#  define TAP_IPADDR0   0
-#  define TAP_IPADDR1   0
-#  define TAP_IPADDR2   0
-#  define TAP_IPADDR3   0
-#endif
+#define DEVTAP        "/dev/net/tun"
 
 /* Syslog priority (must match definitions in nuttx/include/syslog.h) */
 
@@ -102,10 +97,6 @@ struct sel_arg_struct
 };
 
 /****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
  * NuttX Domain Public Function Prototypes
  ****************************************************************************/
 
@@ -117,9 +108,14 @@ int netdriver_setmacaddr(unsigned char *macaddr);
  ****************************************************************************/
 
 #ifdef TAPDEV_DEBUG
-static int gdrop = 0;
+static int  gdrop = 0;
 #endif
-static int gtapdevfd;
+static int  gtapdevfd;
+static char gdevname[IFNAMSIZ];
+
+#ifdef CONFIG_SIM_NET_HOST_ROUTE
+static struct rtentry ghostroute;
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -145,32 +141,32 @@ static inline void dump_ethhdr(const char *msg, unsigned char *buf, int buflen)
 
 static int up_setmacaddr(void)
 {
-  int sockfd;
+  unsigned char mac[7];
   int ret = -1;
 
-  /* Get a socket (only so that we get access to the INET subsystem) */
+  /* Assign a random locally-created MAC address.
+   *
+   * This previously took the address from the TAP interface; that was
+   * incorrect, as that hardware address belongs to the host system.  Packets
+   * destined for the application aren't guaranteed to reach it if you do
+   * that, as the host may handle them at its discretion.
+   *
+   * With a unique MAC address, we get ALL the packets.
+   *
+   * TODO:  The generated MAC address should be checked to see if it
+   *        conflicts with something else on the network.
+   */
 
-  sockfd = socket(PF_INET, SOCK_DGRAM, 0);
-  if (sockfd >= 0)
-    {
-      struct ifreq req;
-      memset(&req, 0, sizeof(struct ifreq));
+  srand(time(NULL));
+  mac[0] = 0x42;
+  mac[1] = rand() % 256;
+  mac[2] = rand() % 256;
+  mac[3] = rand() % 256;
+  mac[4] = rand() % 256;
+  mac[5] = rand() % 256;
+  mac[6] = 0;
 
-      /* Put the driver name into the request */
-
-      strncpy(req.ifr_name, "tap0", IFNAMSIZ);
-
-      /* Perform the ioctl to get the MAC address */
-
-      ret = ioctl(sockfd, SIOCGIFHWADDR, (unsigned long)&req);
-      if (!ret)
-        {
-          /* Set the MAC address */
-
-          ret = netdriver_setmacaddr((unsigned char *)&req.ifr_hwaddr.sa_data);
-        }
-    }
-
+  ret = netdriver_setmacaddr(mac);
   return ret;
 }
 
@@ -181,8 +177,11 @@ static int up_setmacaddr(void)
 void tapdev_init(void)
 {
   struct ifreq ifr;
-  char buf[1024];
   int ret;
+
+#ifdef CONFIG_SIM_NET_BRIDGE
+  int sockfd;
+#endif
 
   /* Open the tap device */
 
@@ -204,11 +203,37 @@ void tapdev_init(void)
       return;
    }
 
-  /* Assign an IPv4 address to the tap device */
+  /* Save the tap device name */
 
-  snprintf(buf, sizeof(buf), "/sbin/ifconfig tap0 inet %d.%d.%d.%d\n",
-           TAP_IPADDR0, TAP_IPADDR1, TAP_IPADDR2, TAP_IPADDR3);
-  system(buf);
+  strncpy(gdevname, ifr.ifr_name, IFNAMSIZ);
+
+#ifdef CONFIG_SIM_NET_BRIDGE
+  /* Get a socket with which to manipulate the tap device; the remaining
+   * ioctl calls unfortunately won't work on the tap device fd.
+   */
+
+  sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+  if (sockfd < 0)
+    {
+      syslog(LOG_ERR, "TAPDEV: Can't open socket: %d\n", -sockfd);
+      return;
+    }
+
+  /* Assign the tap device to a bridge */
+
+  memset(&ifr, 0, sizeof(ifr));
+  strncpy(ifr.ifr_name, CONFIG_SIM_NET_BRIDGE_DEVICE, IFNAMSIZ);
+  ifr.ifr_ifindex = if_nametoindex(gdevname);
+
+  ret = ioctl(sockfd, SIOCBRADDIF, &ifr);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "TAPDEV: ioctl failed (can't add interface %s to bridge %s): %d\n",
+             devname, CONFIG_SIM_NET_BRIDGE_DEVICE, -ret);
+    }
+
+  close(sockfd);
+#endif
 
   /* Set the MAC address */
 
@@ -273,9 +298,101 @@ void tapdev_send(unsigned char *buf, unsigned int buflen)
       syslog(LOG_ERR, "TAPDEV: write failed: %d", -ret);
       exit(1);
     }
+
   dump_ethhdr("write", buf, buflen);
 }
 
+void tapdev_ifup(in_addr_t ifaddr)
+{
+  struct ifreq ifr;
+  int          sockfd;
+  int          ret;
+
+#ifdef CONFIG_SIM_NET_HOST_ROUTE
+  struct sockaddr_in *addr;
+#endif
+
+  /* Get a socket with which to manipulate the tap device */
+
+  sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+  if (sockfd < 0)
+    {
+      syslog(LOG_ERR, "TAPDEV: Can't open socket: %d\n", -sockfd);
+      return;
+    }
+
+  /* Bring the TAP interface up */
+
+  strncpy(ifr.ifr_name, gdevname, IFNAMSIZ);
+
+  ret = ioctl(sockfd, SIOCGIFFLAGS, (unsigned long)&ifr);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "TAPDEV: ioctl failed (can't get interface flags): %d\n", -ret);
+      close(sockfd);
+      return;
+    }
+
+  ifr.ifr_flags |= IFF_UP;
+  ret = ioctl(sockfd, SIOCSIFFLAGS, (unsigned long)&ifr);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "TAPDEV: ioctl failed (can't set interface flags): %d\n", -ret);
+      close(sockfd);
+      return;
+    }
+
+#ifdef CONFIG_SIM_NET_HOST_ROUTE
+  /* Add host route */
+
+  memset(&ghostroute, 0, sizeof(ghostroute));
+
+  addr = (struct sockaddr_in *)&ghostroute.rt_dst;
+  addr->sin_family = AF_INET;
+  addr->sin_addr.s_addr = ifaddr;
+
+  ghostroute.rt_dev    = gdevname;
+  ghostroute.rt_flags  = RTF_UP | RTF_HOST;
+  ghostroute.rt_metric = 0;
+
+  ret = ioctl(sockfd, SIOCADDRT, (unsigned long)&ghostroute);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "TAPDEV: ioctl failed (can't add host route): %d\n", -ret);
+      close(sockfd);
+      return;
+    }
+#endif
+
+  close(sockfd);
+}
+
+void tapdev_ifdown(void)
+{
+#ifdef CONFIG_SIM_NET_HOST_ROUTE
+  int sockfd;
+  int ret;
+
+  if (((struct sockaddr_in *)&ghostroute.rt_dst)->sin_addr.s_addr != 0)
+    {
+      /* Get a socket with which to manipulate the tap device */
+
+      sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+      if (sockfd < 0)
+        {
+          syslog(LOG_ERR, "TAPDEV: Can't open socket: %d\n", -sockfd);
+          return;
+        }
+
+      ret = ioctl(sockfd, SIOCDELRT, (unsigned long)&ghostroute);
+      if (ret < 0)
+        {
+          syslog(LOG_ERR, "TAPDEV: ioctl failed (can't delete host route): %d\n", -ret);
+        }
+
+      close(sockfd);
+    }
+#endif
+}
+
 #endif /* !__CYGWIN__ */
-
-

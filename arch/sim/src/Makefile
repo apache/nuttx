@@ -120,6 +120,13 @@ ifeq ($(CONFIG_NET_ETHERNET),y)
   HOSTCFLAGS += -DNETDEV_BUFSIZE=$(CONFIG_NET_ETH_MTU)
 ifneq ($(HOSTOS),Cygwin)
   HOSTSRCS += up_tapdev.c up_netdev.c
+ifeq ($(CONFIG_SIM_NET_BRIDGE),y)
+  HOSTCFLAGS += -DCONFIG_SIM_NET_BRIDGE
+  HOSTCFLAGS += -DCONFIG_SIM_NET_BRIDGE_DEVICE=\"$(CONFIG_SIM_NET_BRIDGE_DEVICE)\"
+endif
+ifeq ($(CONFIG_SIM_NET_HOST_ROUTE),y)
+  HOSTCFLAGS += -DCONFIG_SIM_NET_HOST_ROUTE
+endif
 else
   HOSTSRCS += up_wpcap.c up_netdev.c
   DRVLIB = /lib/w32api/libws2_32.a /lib/w32api/libiphlpapi.a
