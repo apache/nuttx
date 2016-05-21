@@ -229,7 +229,7 @@ void tapdev_init(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "TAPDEV: ioctl failed (can't add interface %s to bridge %s): %d\n",
-             devname, CONFIG_SIM_NET_BRIDGE_DEVICE, -ret);
+             gdevname, CONFIG_SIM_NET_BRIDGE_DEVICE, -ret);
     }
 
   close(sockfd);
