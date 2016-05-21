@@ -95,7 +95,6 @@
  *   PLL output clock frequency = VCO frequency / PLLP,             PLLP = 2, 4, 6, or 8
  *   USB OTG FS clock frequency = VCO frequency / PLLQ,             2 <= PLLQ <= 15
  *
-
  * There is no config for 100 MHz and 48 MHz for usb,
  * so we would like to have SYSYCLK=96MHz and we must have the USB clock= 48MHz.
  *
@@ -112,7 +111,6 @@
  *   USB OTG FS and SDIO Clock
  *           = PLL_VCO / PLLQ
  *           = 384,000,000 / 8 = 48,000,000
- *
  */
 
 #define STM32_PLLCFG_PLLM       RCC_PLLCFG_PLLM(4)

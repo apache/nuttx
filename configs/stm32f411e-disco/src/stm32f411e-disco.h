@@ -122,16 +122,4 @@ void stm32_spidev_initialize(void);
 
 void stm32_usbinitialize(void);
 
-/************************************************************************************
- * Name: board_adc_initialize
- *
- * Description:
- *   Initialize and register the ADC driver(s)
- *
- ************************************************************************************/
-
-#ifdef CONFIG_ADC
-int board_adc_initialize(void);
-#endif
-
 #endif /* __CONFIGS_STM32F411E_DISCO_SRC_STM32F411E_DISCO_H */

@@ -963,6 +963,16 @@ config ARCH_BOARD_STM32F4_DISCOVERY
 	---help---
 		STMicro STM32F4-Discovery board based on the STMicro STM32F407VGT6 MCU.
 
+config ARCH_BOARD_STM32F411E_DISCO
+	bool "STMicro STM32F411E-Discovery board"
+	depends on ARCH_CHIP_STM32F411VE
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		This is a minimal configuration that supports low-level test of the
+		STMicro STM32F411E-Discovery Board.
+
 config ARCH_BOARD_STM32F429I_DISCO
 	bool "STMicro STM32F429I-Discovery board"
 	depends on ARCH_CHIP_STM32F429Z
@@ -993,16 +1003,6 @@ config ARCH_BOARD_STM32L476VG_DISCO
 		STMicro STM32L476VG_DISCO development board featuring the STM32L476VG
 		MCU. The STM32L476VG  is a Cortex-M4 optimised for low-power operation
 		at up to 80MHz operation with 1024Kb Flash memory and 96+32Kb SRAM.
-
-config ARCH_BOARD_STM32F411E_DISCO
-	bool "STMicro STM32F411E-Discovery board"
-	depends on ARCH_CHIP_STM32F411VE
-	select ARCH_HAVE_LEDS
-	select ARCH_HAVE_BUTTONS
-	select ARCH_HAVE_IRQBUTTONS
-	---help---
-		This is a minimal configuration that supports low-level test of the
-		STMicro STM32F411E-Discovery Board.
 
 config ARCH_BOARD_STM32L_DISCOVERY
 	bool "STMicro STM32L-Discovery board"
@@ -1422,10 +1422,10 @@ config ARCH_BOARD
 	default "stm3240g-eval"            if ARCH_BOARD_STM3240G_EVAL
 	default "stm32f3discovery"         if ARCH_BOARD_STM32F3_DISCOVERY
 	default "stm32f4discovery"         if ARCH_BOARD_STM32F4_DISCOVERY
+	default "stm32f411e-disco"         if ARCH_BOARD_STM32F411E_DISCO
 	default "stm32f429i-disco"         if ARCH_BOARD_STM32F429I_DISCO
 	default "stm32f746g-disco"         if ARCH_BOARD_STM32F746G_DISCO
 	default "stm32l476vg-disco"        if ARCH_BOARD_STM32L476VG_DISCO
-	default "stm32f411e-disco"         if ARCH_BOARD_STM32F411E_DISCO
 	default "stm32ldiscovery"          if ARCH_BOARD_STM32L_DISCOVERY
 	default "stm32vldiscovery"         if ARCH_BOARD_STM32VL_DISCOVERY
 	default "mikroe-stm32f4"           if ARCH_BOARD_MIKROE_STM32F4
@@ -1789,6 +1789,9 @@ source "configs/stm3240g-eval/Kconfig"
 endif
 if ARCH_BOARD_STM32F4_DISCOVERY
 source "configs/stm32f4discovery/Kconfig"
+endif
+if ARCH_BOARD_STM32F411E_DISCO
+source "configs/stm32f411e-disco/Kconfig"
 endif
 if ARCH_BOARD_STM32F429I_DISCO
 source "configs/stm32f429i-disco/Kconfig"

@@ -43,8 +43,8 @@
 
 MEMORY
 {
-    flash (rx) : ORIGIN = 0x08000000, LENGTH = 512K
-    sram (rwx) : ORIGIN = 0x20000000, LENGTH = 128K
+	flash (rx) : ORIGIN = 0x08000000, LENGTH = 512K
+	sram (rwx) : ORIGIN = 0x20000000, LENGTH = 128K
 }
 
 OUTPUT_ARCH(arm)
@@ -104,6 +104,7 @@ SECTIONS
 	} > sram
 
 	/* Stabs debugging sections. */
+
 	.stab 0 : { *(.stab) }
 	.stabstr 0 : { *(.stabstr) }
 	.stab.excl 0 : { *(.stab.excl) }

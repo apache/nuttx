@@ -643,6 +643,10 @@ configs/stm32f103-minimum
 configs/stm32f4discovery
   STMicro STM32F4-Discovery board based on the STMIcro STM32F407VGT6 MCU.
 
+configs/stm32f411e-disco
+  This is a minimal configuration that supports low-level test of the
+  STMicro STM32F411E-Discovery Board.
+
 configs/stm32f429i-disco
   STMicro STM32F429I-Discovery board based on the STMicro STM32F429ZIT6 MCU.
 

@@ -1432,6 +1432,8 @@ nuttx/
  |   |   `- README.txt
  |   |- stm32f4discovery/
  |   |   `- README.txt
+ |   |- stm32f411e-disco/
+ |   |   `- README.txt
  |   |- stm32f429i-disco/
  |   |   |- ide/ltcd/uvision/README.txt
  |   |   |- ltdc/README.txt

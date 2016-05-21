@@ -51,14 +51,6 @@
 #include "stm32f411e-disco.h"
 
 /************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
-
-/************************************************************************************
- * Private Data
- ************************************************************************************/
-
-/************************************************************************************
  * Public Functions
  ************************************************************************************/
 
@@ -74,26 +66,26 @@
 
 void stm32_boardinitialize(void)
 {
+#ifdef CONFIG_ARCH_LEDS
   /* Configure on-board LEDs if LED support has been selected. */
 
-#ifdef CONFIG_ARCH_LEDS
   board_autoled_initialize();
 #endif
 
+#if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2) || defined(CONFIG_STM32_SPI3)
   /* Configure SPI chip selects if 1) SP2 is not disabled, and 2) the weak function
    * stm32_spidev_initialize() has been brought into the link.
    */
 
-#if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2) || defined(CONFIG_STM32_SPI3)
   stm32_spidev_initialize();
 #endif
 
+#if defined(CONFIG_USBDEV) && defined(CONFIG_STM32_USB)
   /* Initialize USB is 1) USBDEV is selected, 2) the USB controller is not
    * disabled, and 3) the weak function stm32_usbinitialize() has been brought
    * into the build.
    */
 
-#if defined(CONFIG_USBDEV) && defined(CONFIG_STM32_USB)
   stm32_usbinitialize();
 #endif
 }
@@ -114,12 +106,12 @@ void stm32_boardinitialize(void)
 #ifdef CONFIG_BOARD_INITIALIZE
 void board_initialize(void)
 {
+#if defined(CONFIG_NSH_LIBRARY) && !defined(CONFIG_LIB_BOARDCTL)
   /* Perform NSH initialization here instead of from the NSH.  This
    * alternative NSH initialization is necessary when NSH is ran in user-space
    * but the initialization function must run in kernel space.
    */
 
-#if defined(CONFIG_NSH_LIBRARY) && !defined(CONFIG_LIB_BOARDCTL)
   board_app_initialize();
 #endif
 
