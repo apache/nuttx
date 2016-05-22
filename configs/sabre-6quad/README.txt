@@ -71,6 +71,10 @@ When more than one CPU is configured, then there are certain failures that
 appear to be stack corruption problem.  See the open issues below under
 SMP.
 
+2016-05-22: In a simple NSH case, SMP does not seem to be working.  But there
+are known SMP open issues so I assume if the tasking were stressed more there
+would be additional failures.  See the open issues below under SMP.
+
 Platform Features
 =================
 

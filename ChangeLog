@@ -11750,3 +11750,7 @@
 	  the watchdog driver by calling the appropriate, MCU-specific driver
 	  configuration function from your board initialization logic
 	  (2016-05-18).
+	* i.MX6 Sabre-6Quad: Basic SMP NSH configuration is now working.  But
+	  this is probably only because the SMP NSH case does not stress the
+	  logic.  There are know outstanding SMP issues as noted in the
+	  Sabre-6Quad README.txt file (2016-05-22).
