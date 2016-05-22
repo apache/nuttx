@@ -1,5 +1,5 @@
 #!/bin/bash
-# configs/sabre-6quad/nsh/setenv.sh
+# configs/sabre-6quad/smp/setenv.sh
 #
 #   Copyright (C) 2016 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
