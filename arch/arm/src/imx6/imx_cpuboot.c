@@ -53,6 +53,7 @@
 #include "smp.h"
 #include "fpu.h"
 #include "gic.h"
+#include "cp15_cacheops.h"
 
 #ifdef CONFIG_SMP
 
@@ -295,6 +296,10 @@ void arm_cpu_boot(int cpu)
 
   (void)up_irq_enable();
 #endif
+
+  /* Invalidate CPUn L1 so that is will be reloaded from coherent L2. */
+
+  cp15_invalidate_dcache_all();
 
   /* The next thing that we expect to happen is for logic running on CPU0
    * to call up_cpu_start() which generate an SGI and a context switch to

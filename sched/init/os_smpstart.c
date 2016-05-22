@@ -210,6 +210,14 @@ int os_smp_start(void)
           sdbg("ERROR: Failed to allocate stack for CPU%d\n", cpu);
           return ret;
         }
+
+      /* Reinitialize the processor-specific portion of the TCB.  This is
+       * the second time this has been called for this CPU, but the stack
+       * was not yet initialized on the first call so we need to do it
+       * again.
+       */
+
+      up_initial_state(tcb);
     }
 
   /* Then start all of the other CPUs after we have completed the memory
