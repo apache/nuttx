@@ -11750,6 +11750,15 @@
 	  the watchdog driver by calling the appropriate, MCU-specific driver
 	  configuration function from your board initialization logic
 	  (2016-05-18).
+	* arch/srm/src/stm32l4: Add CAN support for STM32L4.  From Sebastien
+	  Lorquet (2016-05-19).
+	* arch/arm/src/samv7: Adds a JTAG config and ERASE config to  Kconfig to
+	  set the CCFG_SYSIO SYSIO Pins.  From Davide Sidrane (2016-05-19).
+	* arch/sim/src:  Enhance networking support for the simulation under Linux.
+	  Includes updated support for Linux TUN/TAP, and the addition of support
+	  for Linux bridge devices.  From Steve (2016-05-20).
+	* configs/stm32f411e-disco:  Add basic configuration for stm32f411e-disco
+	  board with STM32F411VE chip.  From Konstantin Berezenko (2016-05-20).
 	* i.MX6 Sabre-6Quad: Basic SMP NSH configuration is now working.  But
 	  this is probably only because the SMP NSH case does not stress the
 	  logic.  There are know outstanding SMP issues as noted in the

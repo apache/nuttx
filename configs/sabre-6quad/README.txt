@@ -512,6 +512,8 @@ Open Issues:
    Waiting on a cached copy of the spinlock may result in a hang or a failure to
    wait.
 
+5. Do spinlocks need to go into a special "strongly ordered" memory region?
+
 Configurations
 ==============
 
