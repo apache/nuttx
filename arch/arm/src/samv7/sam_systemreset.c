@@ -65,23 +65,23 @@
 
 void up_systemreset(void)
 {
-  uint32_t regval;
+  uint32_t rstcr;
 #if defined(CONFIG_SAMV7_EXTRESET_ERST) && CONFIG_SAMV7_EXTRESET_ERST != 0
   uint32_t rstmr;
 #endif
 
-  regval  = (RSTC_CR_PROCRST | RSTC_CR_KEY);
+  rstcr  = (RSTC_CR_PROCRST | RSTC_CR_KEY);
 
 #if defined(CONFIG_SAMV7_EXTRESET_ERST) && CONFIG_SAMV7_EXTRESET_ERST != 0
-  regval |= RSTC_CR_EXTRST;
+  rstcr |= RSTC_CR_EXTRST;
 
-  rstmr  = gettreg32(SAM_RSTC_MR);
+  rstmr  = getreg32(SAM_RSTC_MR);
   rstmr &= ~RSTC_MR_ERSTL_MASK;
   rstmr &= RSTC_MR_ERSTL(CONFIG_SAMV7_EXTRESET_ERST) | RSTC_MR_KEY;
-  putreg32(regval, SAM_RSTC_MR);
+  putreg32(rstmr, SAM_RSTC_MR);
 #endif
 
-  putreg32(regval, SAM_RSTC_CR);
+  putreg32(rstcr, SAM_RSTC_CR);
 
   /* Wait for the reset */
 
