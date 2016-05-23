@@ -20,106 +20,109 @@ Status
 ======
 
 2016-02-28: The i.MX6Q port is just beginning. A few files have been
-populated with the port is a long way from being complete or even ready to
-begin any kind of testing.
+  populated with the port is a long way from being complete or even ready to
+  begin any kind of testing.
 
 2016-03-12: The i.MX6Q port is code complete including initial
-implementation of logic needed for CONFIG_SMP=y  .  There is no clock
-configuration logic.  This is probably not an issue if we are loaded into
-SDRAM by a bootloader (because we cannot change the clocking anyway in
-that case).
+  implementation of logic needed for CONFIG_SMP=y  .  There is no clock
+  configuration logic.  This is probably not an issue if we are loaded into
+  SDRAM by a bootloader (because we cannot change the clocking anyway in
+  that case).
 
-There is a lot of testing that could be done but, unfortunately, I still
-have no i.MX6 hardware to test on.
+  There is a lot of testing that could be done but, unfortunately, I still
+  have no i.MX6 hardware to test on.
 
-In additional to the unexpected issues, I do expect to run into some
-cache coherency issues when I get to testing an SMP configuration.
+  In additional to the unexpected issues, I do expect to run into some
+  cache coherency issues when I get to testing an SMP configuration.
 
 2016-03-28:  I now have a used MCIMX6Q-SDB which is similar to the target
-configuration described below except that it does not have the 10.1" LVDS
-display.  Next step:  Figure out how to run a copy of NuttX using U-Boot.
+  configuration described below except that it does not have the 10.1" LVDS
+  display.  Next step:  Figure out how to run a copy of NuttX using U-Boot.
 
 2016-03-31: Most all of the boot of the NSH configuration seems to be
-working.  It gets to NSH and NSH appears to run normally.  Non-interrupt
-driver serial output to the VCOM console is working (llsyslog).  However,
-there does not appear to be any interrupt activity:  No timer interrupts,
-no interrupt driver serial console output (syslog, printf).
+  working.  It gets to NSH and NSH appears to run normally.  Non-interrupt
+  driver serial output to the VCOM console is working (llsyslog).  However,
+  there does not appear to be any interrupt activity:  No timer interrupts,
+  no interrupt driver serial console output (syslog, printf).
 
 2016-05-16:  I now get serial interrupts (but not timer interrupts).  This
-involves a few changes to GIC bit settings that I do not fully understand.
-With this change, the NSH serial console works:
+  involves a few changes to GIC bit settings that I do not fully understand.
+  With this change, the NSH serial console works:
 
-  MX6Q SABRESD U-Boot > ABEFGHILMN
+    MX6Q SABRESD U-Boot > ABEFGHILMN
 
-  NuttShell (NSH)
-  nsh>
+    NuttShell (NSH)
+    nsh>
 
-But there are still no timer interrupts.  LEDs do not appear to be working.
+  But there are still no timer interrupts.  LEDs do not appear to be working.
 
 2016-05-17:  Timer interrupts now work.  This turned out to be just a minor
-bit setting error in the timer configuration.  LEDs were not working simply
-because board_autoled_initialize() was not being called in the board startup
-logic.
+  bit setting error in the timer configuration.  LEDs were not working simply
+  because board_autoled_initialize() was not being called in the board startup
+  logic.
 
-At this point, I would say that the basic NSH port is complete.
+  At this point, I would say that the basic NSH port is complete.
 
 2016-05-18: Started looking at the SMP configuration.  Initially, I verfied
-that the NSH configuration works with CONFIG_SMP_NCPUS=1.  Not a very
-interesting case, but this does exercise a lot of the basic SMP logic.
+  that the NSH configuration works with CONFIG_SMP_NCPUS=1.  Not a very
+  interesting case, but this does exercise a lot of the basic SMP logic.
 
-When more than one CPU is configured, then there are certain failures that
-appear to be stack corruption problem.  See the open issues below under
-SMP.
+  When more than one CPU is configured, then there are certain failures that
+  appear to be stack corruption problem.  See the open issues below under
+  SMP.
 
 2016-05-22: In a simple NSH case, SMP does not seem to be working.  But there
-are known SMP open issues so I assume if the tasking were stressed more there
-would be additional failures.  See the open issues below under SMP.
+  are known SMP open issues so I assume if the tasking were stressed more there
+  would be additional failures.  See the open issues below under SMP.
 
-An smp configuration was added.  This is not quite the same as the configuration that I used for testing.  I enabled DEBUG output, ran with only 2 CPUS, and disabled the RAMLOG:
+  An smp configuration was added.  This is not quite the same as the
+  configuration that I used for testing.  I enabled DEBUG output, ran with
+  only 2 CPUS, and disabled the RAMLOG:
 
-  +CONFIG_DEBUG=y
-  +CONFIG_DEBUG_VERBOSE=y
-  +CONFIG_DEBUG_SCHED=y
-  +CONFIG_DEBUG_SYMBOLS=y
+    +CONFIG_DEBUG=y
+    +CONFIG_DEBUG_VERBOSE=y
+    +CONFIG_DEBUG_SCHED=y
+    +CONFIG_DEBUG_SYMBOLS=y
 
-  -CONFIG_DEBUG_FULLOPT=y
-  +CONFIG_DEBUG_NOOPT=y
+    -CONFIG_DEBUG_FULLOPT=y
+    +CONFIG_DEBUG_NOOPT=y
 
-  -CONFIG_SMP_NCPUS=4
-  +CONFIG_SMP_NCPUS=2
+    -CONFIG_SMP_NCPUS=4
+    +CONFIG_SMP_NCPUS=2
 
-  -CONFIG_RAMLOG=y
-  -CONFIG_RAMLOG_SYSLOG=y
-  -CONFIG_RAMLOG_BUFSIZE=16384
-  -CONFIG_RAMLOG_NONBLOCKING=y
-  -CONFIG_RAMLOG_NPOLLWAITERS=4
-  -CONFIG_SYSLOG=y
+    -CONFIG_RAMLOG=y
+    -CONFIG_RAMLOG_SYSLOG=y
+    -CONFIG_RAMLOG_BUFSIZE=16384
+    -CONFIG_RAMLOG_NONBLOCKING=y
+    -CONFIG_RAMLOG_NPOLLWAITERS=4
+    -CONFIG_SYSLOG=y
 
-I would also disable debug output from CPU0 so that I could better see the debug output from CPU1:
+  I would also disable debug output from CPU0 so that I could better see the
+  debug output from CPU1:
 
-  $ diff -u libc/syslog/lib_lowsyslog.c libc/syslog/lib_lowsyslog.c.SAVE
-  --- libc/syslog/lib_lowsyslog.c 2016-05-22 14:56:35.130096500 -0600
-  +++ libc/syslog/lib_lowsyslog.c.SAVE    2016-05-20 13:36:22.588330100 -0600
-  @@ -126,7 +126,0 @@
-   {
-     va_list ap;
-     int ret;
-  +if (up_cpu_index() == 0) return 17; // REMOVE ME
+    $ diff -u libc/syslog/lib_lowsyslog.c libc/syslog/lib_lowsyslog.c.SAVE
+    --- libc/syslog/lib_lowsyslog.c 2016-05-22 14:56:35.130096500 -0600
+    +++ libc/syslog/lib_lowsyslog.c.SAVE    2016-05-20 13:36:22.588330100 -0600
+    @@ -126,7 +126,0 @@
+     {
+       va_list ap;
+       int ret;
+    +if (up_cpu_index() == 0) return 17; // REMOVE ME
+      
+       /* Let lowvsyslog do the work */
+    
+       va_start(ap, fmt);
   
-     /* Let lowvsyslog do the work */
-  
-     va_start(ap, fmt);
-  
-  $ diff -u libc/syslog/lib_syslog.c libc/syslog/lib_syslog.c.SAVE
-  --- libc/syslog/lib_syslog.c    2016-05-22 14:56:35.156098100 -0600
-  +++ libc/syslog/lib_syslog.c.SAVE       2016-05-20 13:36:15.331284000 -0600
-  @@ -192,6 +192,7 @@
-   {
-     va_list ap;
-     int ret;
-  +if (up_cpu_index() == 0) return 17; // REMOVE ME
-  
-     /* Let vsyslog do the work */
+    $ diff -u libc/syslog/lib_syslog.c libc/syslog/lib_syslog.c.SAVE
+    --- libc/syslog/lib_syslog.c    2016-05-22 14:56:35.156098100 -0600
+    +++ libc/syslog/lib_syslog.c.SAVE       2016-05-20 13:36:15.331284000 -0600
+    @@ -192,6 +192,7 @@
+     {
+       va_list ap;
+       int ret;
+    +if (up_cpu_index() == 0) return 17; // REMOVE ME
+    
+       /* Let vsyslog do the work */
 
 Platform Features
 =================
