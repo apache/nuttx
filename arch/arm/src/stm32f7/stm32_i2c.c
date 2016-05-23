@@ -96,9 +96,8 @@
 
 #include "up_arch.h"
 
-#include "stm32f7_rcc.h"
-#include "stm32f7_i2c.h"
-#include "stm32f7_waste.h"
+#include "stm32_rcc.h"
+#include "stm32_i2c.h"
 
 /* At least one I2C peripheral must be enabled */
 
