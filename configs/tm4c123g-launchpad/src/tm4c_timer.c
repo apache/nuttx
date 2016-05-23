@@ -62,14 +62,14 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: tiva_timer_initialize
+ * Name: tiva_timer_configure
  *
  * Description:
  *   Configure the timer driver for the timer example application.
  *
  ****************************************************************************/
 
-int tiva_timer_initialize(void)
+int tiva_timer_configure(void)
 {
   static bool initialized = false;
   int ret = OK;
