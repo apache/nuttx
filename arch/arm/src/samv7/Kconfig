@@ -618,6 +618,28 @@ config SAMV7_ERASE_ENABLE
 
 endchoice
 
+menuconfig SAMV7_SYSTEMRESET
+	bool "Enable System Reset"
+	select ARCH_HAVE_RESET
+	---help---
+		Enable up_systemreset
+
+if SAMV7_SYSTEMRESET
+
+config SAMV7_EXTRESET_ERST
+	int "Drive External nRST duration"
+	default 0
+	range 0 16
+	---help---
+		Define if the external reset (nRST) will be generated in up_systemreset
+		and for how long:
+
+		- A value of 0 will not drive the external reset
+		- A value of 1-6 will drive the external reset for 2^SAMV7_EXTRESET_ERST
+		  slow clock cycles.
+
+endif # SAMV7_SYSTEMRESET
+
 menuconfig SAMV7_GPIO_IRQ
 	bool "GPIO pin interrupts"
 	---help---
