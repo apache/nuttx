@@ -77,8 +77,8 @@ void up_systemreset(void)
 
   rstmr  = gettreg32(SAM_RSTC_MR);
   rstmr &= ~RSTC_MR_ERSTL_MASK;
-  rstmr &= RSTC_MR_ERSTL(CONFIG_SAMV7_EXTRESET_ERST) | RSTC_MR_KEY;
-  putreg32(regval, SAM_RSTC_MR);
+  rstmr &= RSTC_MR_ERSTL(CONFIG_SAMV7_EXTRESET_ERST-1) | RSTC_MR_KEY;
+  putreg32(rstmr, SAM_RSTC_MR);
 #endif
 
   putreg32(regval, SAM_RSTC_CR);
