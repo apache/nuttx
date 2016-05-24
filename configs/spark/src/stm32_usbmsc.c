@@ -62,7 +62,7 @@
 
 int board_usbmsc_initialize(int port)
 {
-  return board_app_initialize();
+  return board_app_initialize(0);
 }
 
 #endif /* CONFIG_USBMSC && CONFIG_BOARDCTL_USBDEVCTRL */
