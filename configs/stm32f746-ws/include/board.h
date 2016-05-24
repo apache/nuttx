@@ -195,8 +195,13 @@
  *   -- ----- --------- -----
  */
 
- #define GPIO_USART6_RX GPIO_USART6_RX_1
- #define GPIO_USART6_TX GPIO_USART6_TX_1
+#define GPIO_USART6_RX GPIO_USART6_RX_1
+#define GPIO_USART6_TX GPIO_USART6_TX_1
+
+#define GPIO_SPI2_SCK  GPIO_SPI2_SCK_5
+#define GPIO_SPI2_MISO GPIO_SPI2_MISO_2
+#define GPIO_SPI2_MOSI GPIO_SPI2_MOSI_2
+
 
 /************************************************************************************
  * Public Data

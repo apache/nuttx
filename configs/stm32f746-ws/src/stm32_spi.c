@@ -55,7 +55,7 @@
 
 #if defined(CONFIG_STM32F7_SPI1) || defined(CONFIG_STM32F7_SPI2) || \
     defined(CONFIG_STM32F7_SPI3) || defined(CONFIG_STM32F7_SPI4) || \
-    defined(CONFIG_STM32F7_SPI5)
+    defined(CONFIG_STM32F7_SPI5) || defined(CONFIG_STM32F7_SPI6)
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -91,7 +91,7 @@ void weak_function stm32_spidev_initialize(void)
 }
 
 /****************************************************************************
- * Name:  stm32_spi1/2/3/4/5select and stm32_spi1/2/3/4/5status
+ * Name:  stm32_spi1-6 select and stm32_spi1-6 status
  *
  * Description:
  *   The external functions, stm32_spi1/2/3select and stm32_spi1/2/3status must be
@@ -175,6 +175,18 @@ uint8_t stm32_spi5status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 }
 #endif
 
+#ifdef CONFIG_STM32F7_SPI6
+void stm32_spi6select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
+{
+  spidbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+}
+
+uint8_t stm32_spi6status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+{
+  return 0;
+}
+#endif
+
 /****************************************************************************
  * Name: stm32_spi1cmddata
  *
@@ -234,5 +246,12 @@ int stm32_spi5cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
 }
 #endif
 
+#ifdef CONFIG_STM32F7_SPI6
+int stm32_spi6cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
+{
+  return -ENODEV;
+}
+#endif
+
 #endif /* CONFIG_SPI_CMDDATA */
-#endif /* CONFIG_STM32F7_SPI1 || ... CONFIG_STM32F7_SPI5 */
+#endif /* CONFIG_STM32F7_SPI1 || ... CONFIG_STM32F7_SPI6 */
