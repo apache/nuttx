@@ -11763,3 +11763,27 @@
 	  this is probably only because the SMP NSH case does not stress the
 	  logic.  There are know outstanding SMP issues as noted in the
 	  Sabre-6Quad README.txt file (2016-05-22).
+	* configs/sabre-6quad: Add an SMP configuration; Enable procfs in all
+	  configurations (2016-05-22).
+	* include/nuttx/crypto/aes.h:  Modifications to the crypto API needed
+	  for LPC43xx.  From Alexander Vasiljev (2016-05-23).
+	* arch/arm/src/lpc32xx:  Add AES support.  From Alexander Vasiljev
+	  (2016-05-24).
+	* configs/*/src/tiva_timer.c:  Tiva boards:  Fix a naming collision,
+	  rename board-specific function from tiva_timer_initialize() to
+	  tiva_timer_configure() to remove conflict (2016-05-23).
+	* arch/arm/src/sam*:  Ensure that the TWIHS (i2c) hw get's its clock
+	  set when the sequence of sam_i2cbus_initialize(),
+	  sam_i2cbus_uninitialize(), then sam_i2cbus_initialize() or twi_reset()
+	  is called.  I found this a while back in the stm32 family, so there
+	  may be more arch-es with this sort of bug. I suppose any driver that
+	  has the notion of "do not set the freq if it is already set" could be
+	  suspect.  From David Sidrane (2016-05-23).
+	* arch/arm/src/samv7: Add the up_systemreset interface to the samv7
+	  arch.  The approach is slightly different in that: 1) It enables
+	  ARCH_HAVE_RESET and allows the user to set if, and for how long, to
+	  drive External nRST signal. It also does not contain a default
+	  board_reset, as that really should be done in the config's src if
+	  CONFIG_BOARDCTL_RESET is defined.  From David Sidrane (2016-05-23).
+	* arch/arm/include/lpc43xx and src/lpc43xx: Adds definitions for the
+	  LPC4337jet100 chip.  From Alexander Vasiljev (2016-05-24).
