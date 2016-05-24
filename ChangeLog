@@ -11787,3 +11787,5 @@
 	  CONFIG_BOARDCTL_RESET is defined.  From David Sidrane (2016-05-23).
 	* arch/arm/include/lpc43xx and src/lpc43xx: Adds definitions for the
 	  LPC4337jet100 chip.  From Alexander Vasiljev (2016-05-24).
+	* Many files:  Add an argument to board_app_initialize() (2016-05-24).
+
