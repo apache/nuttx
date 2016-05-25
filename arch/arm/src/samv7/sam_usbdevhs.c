@@ -3259,15 +3259,6 @@ static void sam_suspend(struct sam_usbdev_s *priv)
       priv->prevstate = priv->devstate;
       priv->devstate  = USBHS_DEVSTATE_SUSPENDED;
 
-      /* Disable clocking to the USBHS peripheral
-       *
-       * NOTE: The Atmel sample code disables USB clocking here (via the PMC
-       * CKGR_UCKR).  However, we cannot really do that here because that
-       * clocking is also needed by the UHPHS host.
-       */
-
-      sam_usbhs_disableclk();
-
       /* Let the board-specific logic know that we have entered the
        * suspend state.  This may trigger additional reduced power
        * consumption measures.
