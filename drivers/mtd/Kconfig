@@ -814,6 +814,11 @@ config SST26_MEMORY_TYPE
 		The memory type for SST26VF0xx series is 0x26, but this can be modified if needed
 		to support compatible devices from different manufacturers.
 
+config SST26_DEBUG
+	bool "Debug output from the SST26 driver"
+	depends on DEBUG_FS
+	default n
+
 endif # MTD_SST26
 
 config MTD_SST39FV
