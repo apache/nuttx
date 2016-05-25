@@ -43,12 +43,12 @@ config SH1_ITU4
 config SH1_SCI0
 	bool "SCI0"
 	default n
-	select ARCH_HAVE_SCI0
+	select SCI0_SERIALDRIVER
 
 config SH1_SCI1
 	bool "SCI1"
 	default n
-	select ARCH_HAVE_SCI1
+	select SCI1_SERIALDRIVER
 
 config SH1_PCU
 	bool "PCU"

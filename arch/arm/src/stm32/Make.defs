@@ -211,6 +211,10 @@ ifeq ($(CONFIG_DAC),y)
 CHIP_CSRCS += stm32_dac.c
 endif
 
+ifeq ($(CONFIG_STM32_1WIREDRIVER),y)
+CHIP_CSRCS += stm32_1wire.c
+endif
+
 ifeq ($(CONFIG_STM32_RNG),y)
 CHIP_CSRCS += stm32_rng.c
 endif

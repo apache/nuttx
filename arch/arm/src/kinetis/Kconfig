@@ -131,42 +131,42 @@ config KINETIS_FLEXBUS
 config KINETIS_UART0
 	bool "UART0"
 	default n
-	select ARCH_HAVE_UART0
+	select UART0_SERIALDRIVER
 	---help---
 		Support UART0
 
 config KINETIS_UART1
 	bool "UART1"
 	default n
-	select ARCH_HAVE_UART1
+	select UART1_SERIALDRIVER
 	---help---
 		Support UART1
 
 config KINETIS_UART2
 	bool "UART2"
 	default n
-	select ARCH_HAVE_UART2
+	select UART2_SERIALDRIVER
 	---help---
 		Support UART2
 
 config KINETIS_UART3
 	bool "UART3"
 	default n
-	select ARCH_HAVE_UART3
+	select UART3_SERIALDRIVER
 	---help---
 		Support UART3
 
 config KINETIS_UART4
 	bool "UART4"
 	default n
-	select ARCH_HAVE_UART4
+	select UART4_SERIALDRIVER
 	---help---
 		Support UART4
 
 config KINETIS_UART5
 	bool "UART5"
 	default n
-	select ARCH_HAVE_UART5
+	select UART5_SERIALDRIVER
 	---help---
 		Support UART5
 

@@ -167,19 +167,19 @@
 #  elif defined(CONFIG_SAMA5_UART4)
 #    define TTYS0_DEV           g_uart1port  /* UART4 is ttyS0 */
 #    define UART4_ASSIGNED      1
-#  elif defined(CONFIG_USART0_ISUART)
+#  elif defined(CONFIG_USART0_SERIALDRIVER)
 #    define TTYS0_DEV           g_usart0port /* USART0 is ttyS0 */
 #    define USART0_ASSIGNED     1
-#  elif defined(CONFIG_USART1_ISUART)
+#  elif defined(CONFIG_USART1_SERIALDRIVER)
 #    define TTYS0_DEV           g_usart1port /* USART1 is ttyS0 */
 #    define USART1_ASSIGNED     1
-#  elif defined(CONFIG_USART2_ISUART)
+#  elif defined(CONFIG_USART2_SERIALDRIVER)
 #    define TTYS0_DEV           g_usart2port /* USART2 is ttyS0 */
 #    define USART2_ASSIGNED     1
-#  elif defined(CONFIG_USART3_ISUART)
+#  elif defined(CONFIG_USART3_SERIALDRIVER)
 #    define TTYS0_DEV           g_usart3port /* USART3 is ttyS0 */
 #    define USART3_ASSIGNED     1
-#  elif defined(CONFIG_USART4_ISUART)
+#  elif defined(CONFIG_USART4_SERIALDRIVER)
 #    define TTYS0_DEV           g_usart4port /* USART4 is ttyS0 */
 #    define USART4_ASSIGNED     4
 #  endif
@@ -202,19 +202,19 @@
 #elif defined(CONFIG_SAMA5_UART4) && !defined(UART4_ASSIGNED)
 #  define TTYS1_DEV           g_uart1port  /* UART4 is ttyS1 */
 #  define UART4_ASSIGNED      1
-#elif defined(CONFIG_USART0_ISUART) && !defined(USART0_ASSIGNED)
+#elif defined(CONFIG_USART0_SERIALDRIVER) && !defined(USART0_ASSIGNED)
 #  define TTYS1_DEV           g_usart0port /* USART0 is ttyS1 */
 #  define USART0_ASSIGNED     1
-#elif defined(CONFIG_USART1_ISUART) && !defined(USART1_ASSIGNED)
+#elif defined(CONFIG_USART1_SERIALDRIVER) && !defined(USART1_ASSIGNED)
 #  define TTYS1_DEV           g_usart1port /* USART1 is ttyS1 */
 #  define USART1_ASSIGNED     1
-#elif defined(CONFIG_USART2_ISUART) && !defined(USART2_ASSIGNED)
+#elif defined(CONFIG_USART2_SERIALDRIVER) && !defined(USART2_ASSIGNED)
 #  define TTYS1_DEV           g_usart2port /* USART2 is ttyS1 */
 #  define USART2_ASSIGNED     1
-#elif defined(CONFIG_USART3_ISUART) && !defined(USART3_ASSIGNED)
+#elif defined(CONFIG_USART3_SERIALDRIVER) && !defined(USART3_ASSIGNED)
 #  define TTYS1_DEV           g_usart3port /* USART3 is ttyS1 */
 #  define USART3_ASSIGNED     1
-#elif defined(CONFIG_USART4_ISUART) && !defined(USART4_ASSIGNED)
+#elif defined(CONFIG_USART4_SERIALDRIVER) && !defined(USART4_ASSIGNED)
 #  define TTYS1_DEV           g_usart4port /* USART4 is ttyS1 */
 #  define USART4_ASSIGNED     1
 #endif
@@ -236,19 +236,19 @@
 #elif defined(CONFIG_SAMA5_UART4) && !defined(UART4_ASSIGNED)
 #  define TTYS2_DEV           g_uart1port  /* UART4 is ttyS2 */
 #  define UART4_ASSIGNED      1
-#elif defined(CONFIG_USART0_ISUART) && !defined(USART0_ASSIGNED)
+#elif defined(CONFIG_USART0_SERIALDRIVER) && !defined(USART0_ASSIGNED)
 #  define TTYS2_DEV           g_usart0port /* USART0 is ttyS2 */
 #  define USART0_ASSIGNED     1
-#elif defined(CONFIG_USART1_ISUART) && !defined(USART1_ASSIGNED)
+#elif defined(CONFIG_USART1_SERIALDRIVER) && !defined(USART1_ASSIGNED)
 #  define TTYS2_DEV           g_usart1port /* USART1 is ttyS2 */
 #  define USART1_ASSIGNED     1
-#elif defined(CONFIG_USART2_ISUART) && !defined(USART2_ASSIGNED)
+#elif defined(CONFIG_USART2_SERIALDRIVER) && !defined(USART2_ASSIGNED)
 #  define TTYS2_DEV           g_usart2port /* USART2 is ttyS2 */
 #  define USART2_ASSIGNED     1
-#elif defined(CONFIG_USART3_ISUART) && !defined(USART3_ASSIGNED)
+#elif defined(CONFIG_USART3_SERIALDRIVER) && !defined(USART3_ASSIGNED)
 #  define TTYS2_DEV           g_usart3port /* USART3 is ttyS2 */
 #  define USART3_ASSIGNED     1
-#elif defined(CONFIG_USART4_ISUART) && !defined(USART4_ASSIGNED)
+#elif defined(CONFIG_USART4_SERIALDRIVER) && !defined(USART4_ASSIGNED)
 #  define TTYS2_DEV           g_usart4port /* USART4 is ttyS2 */
 #  define USART4_ASSIGNED     1
 #endif
@@ -267,19 +267,19 @@
 #elif defined(CONFIG_SAMA5_UART4) && !defined(UART4_ASSIGNED)
 #  define TTYS3_DEV           g_uart1port  /* UART4 is ttyS3 */
 #  define UART4_ASSIGNED      1
-#elif defined(CONFIG_USART0_ISUART) && !defined(USART0_ASSIGNED)
+#elif defined(CONFIG_USART0_SERIALDRIVER) && !defined(USART0_ASSIGNED)
 #  define TTYS3_DEV           g_usart0port /* USART0 is ttyS3 */
 #  define USART0_ASSIGNED     1
-#elif defined(CONFIG_USART1_ISUART) && !defined(USART1_ASSIGNED)
+#elif defined(CONFIG_USART1_SERIALDRIVER) && !defined(USART1_ASSIGNED)
 #  define TTYS3_DEV           g_usart1port /* USART1 is ttyS3 */
 #  define USART1_ASSIGNED     1
-#elif defined(CONFIG_USART2_ISUART) && !defined(USART2_ASSIGNED)
+#elif defined(CONFIG_USART2_SERIALDRIVER) && !defined(USART2_ASSIGNED)
 #  define TTYS3_DEV           g_usart2port /* USART2 is ttyS3 */
 #  define USART2_ASSIGNED     1
-#elif defined(CONFIG_USART3_ISUART) && !defined(USART3_ASSIGNED)
+#elif defined(CONFIG_USART3_SERIALDRIVER) && !defined(USART3_ASSIGNED)
 #  define TTYS3_DEV           g_usart3port /* USART3 is ttyS3 */
 #  define USART3_ASSIGNED     1
-#elif defined(CONFIG_USART4_ISUART) && !defined(USART4_ASSIGNED)
+#elif defined(CONFIG_USART4_SERIALDRIVER) && !defined(USART4_ASSIGNED)
 #  define TTYS3_DEV           g_usart4port /* USART4 is ttyS3 */
 #  define USART4_ASSIGNED     1
 #endif
@@ -295,19 +295,19 @@
 #elif defined(CONFIG_SAMA5_UART4) && !defined(UART4_ASSIGNED)
 #  define TTYS4_DEV           g_uart1port  /* UART4 is ttyS4 */
 #  define UART4_ASSIGNED      1
-#elif defined(CONFIG_USART0_ISUART) && !defined(USART0_ASSIGNED)
+#elif defined(CONFIG_USART0_SERIALDRIVER) && !defined(USART0_ASSIGNED)
 #  define TTYS4_DEV           g_usart0port /* USART0 is ttyS4 */
 #  define USART0_ASSIGNED     1
-#elif defined(CONFIG_USART1_ISUART) && !defined(USART1_ASSIGNED)
+#elif defined(CONFIG_USART1_SERIALDRIVER) && !defined(USART1_ASSIGNED)
 #  define TTYS4_DEV           g_usart1port /* USART1 is ttyS4 */
 #  define USART1_ASSIGNED     1
-#elif defined(CONFIG_USART2_ISUART) && !defined(USART2_ASSIGNED)
+#elif defined(CONFIG_USART2_SERIALDRIVER) && !defined(USART2_ASSIGNED)
 #  define TTYS4_DEV           g_usart2port /* USART2 is ttyS4 */
 #  define USART2_ASSIGNED     1
-#elif defined(CONFIG_USART3_ISUART) && !defined(USART3_ASSIGNED)
+#elif defined(CONFIG_USART3_SERIALDRIVER) && !defined(USART3_ASSIGNED)
 #  define TTYS4_DEV           g_usart3port /* USART3 is ttyS4 */
 #  define USART3_ASSIGNED     1
-#elif defined(CONFIG_USART4_ISUART) && !defined(USART4_ASSIGNED)
+#elif defined(CONFIG_USART4_SERIALDRIVER) && !defined(USART4_ASSIGNED)
 #  define TTYS4_DEV           g_usart4port /* USART4 is ttyS4 */
 #  define USART4_ASSIGNED     1
 #endif
@@ -320,19 +320,19 @@
 #if defined(CONFIG_SAMA5_UART4) && !defined(UART4_ASSIGNED)
 #  define TTYS5_DEV           g_uart4port  /* UART4 is ttyS5 */
 #  define UART1_ASSIGNED      1
-#elif defined(CONFIG_USART0_ISUART) && !defined(USART0_ASSIGNED)
+#elif defined(CONFIG_USART0_SERIALDRIVER) && !defined(USART0_ASSIGNED)
 #  define TTYS5_DEV           g_usart0port /* USART0 is ttyS5 */
 #  define USART0_ASSIGNED     1
-#elif defined(CONFIG_USART1_ISUART) && !defined(USART1_ASSIGNED)
+#elif defined(CONFIG_USART1_SERIALDRIVER) && !defined(USART1_ASSIGNED)
 #  define TTYS5_DEV           g_usart1port /* USART1 is ttyS5 */
 #  define USART1_ASSIGNED     1
-#elif defined(CONFIG_USART2_ISUART) && !defined(USART2_ASSIGNED)
+#elif defined(CONFIG_USART2_SERIALDRIVER) && !defined(USART2_ASSIGNED)
 #  define TTYS5_DEV           g_usart2port /* USART2 is ttyS5 */
 #  define USART2_ASSIGNED     1
-#elif defined(CONFIG_USART3_ISUART) && !defined(USART3_ASSIGNED)
+#elif defined(CONFIG_USART3_SERIALDRIVER) && !defined(USART3_ASSIGNED)
 #  define TTYS5_DEV           g_usart3port /* USART3 is ttyS5 */
 #  define USART3_ASSIGNED     1
-#elif defined(CONFIG_USART4_ISUART) && !defined(USART4_ASSIGNED)
+#elif defined(CONFIG_USART4_SERIALDRIVER) && !defined(USART4_ASSIGNED)
 #  define TTYS5_DEV           g_usart4port /* USART4 is ttyS5 */
 #  define USART4_ASSIGNED     1
 #endif
@@ -342,19 +342,19 @@
  * could also be the console.
  */
 
-#if defined(CONFIG_USART0_ISUART) && !defined(USART0_ASSIGNED)
+#if defined(CONFIG_USART0_SERIALDRIVER) && !defined(USART0_ASSIGNED)
 #  define TTYS6_DEV           g_usart0port /* USART0 is ttyS6 */
 #  define USART0_ASSIGNED     1
-#elif defined(CONFIG_USART1_ISUART) && !defined(USART1_ASSIGNED)
+#elif defined(CONFIG_USART1_SERIALDRIVER) && !defined(USART1_ASSIGNED)
 #  define TTYS6_DEV           g_usart1port /* USART1 is ttyS6 */
 #  define USART1_ASSIGNED     1
-#elif defined(CONFIG_USART2_ISUART) && !defined(USART2_ASSIGNED)
+#elif defined(CONFIG_USART2_SERIALDRIVER) && !defined(USART2_ASSIGNED)
 #  define TTYS6_DEV           g_usart2port /* USART2 is ttyS6 */
 #  define USART2_ASSIGNED     1
-#elif defined(CONFIG_USART3_ISUART) && !defined(USART3_ASSIGNED)
+#elif defined(CONFIG_USART3_SERIALDRIVER) && !defined(USART3_ASSIGNED)
 #  define TTYS6_DEV           g_usart3port /* USART3 is ttyS6 */
 #  define USART3_ASSIGNED     1
-#elif defined(CONFIG_USART4_ISUART) && !defined(USART4_ASSIGNED)
+#elif defined(CONFIG_USART4_SERIALDRIVER) && !defined(USART4_ASSIGNED)
 #  define TTYS6_DEV           g_usart4port /* USART4 is ttyS6 */
 #  define USART4_ASSIGNED     1
 #endif
@@ -364,16 +364,16 @@
  * USART1-4 could also be the console.
  */
 
-#if defined(CONFIG_USART1_ISUART) && !defined(USART1_ASSIGNED)
+#if defined(CONFIG_USART1_SERIALDRIVER) && !defined(USART1_ASSIGNED)
 #  define TTYS7_DEV           g_usart1port /* USART1 is ttyS7 */
 #  define USART1_ASSIGNED      1
-#elif defined(CONFIG_USART2_ISUART) && !defined(USART2_ASSIGNED)
+#elif defined(CONFIG_USART2_SERIALDRIVER) && !defined(USART2_ASSIGNED)
 #  define TTYS7_DEV           g_usart2port /* USART2 is ttyS7 */
 #  define USART2_ASSIGNED      1
-#elif defined(CONFIG_USART3_ISUART) && !defined(USART3_ASSIGNED)
+#elif defined(CONFIG_USART3_SERIALDRIVER) && !defined(USART3_ASSIGNED)
 #  define TTYS7_DEV           g_usart3port /* USART3 is ttyS7 */
 #  define USART3_ASSIGNED      1
-#elif defined(CONFIG_USART4_ISUART) && !defined(USART4_ASSIGNED)
+#elif defined(CONFIG_USART4_SERIALDRIVER) && !defined(USART4_ASSIGNED)
 #  define TTYS7_DEV           g_usart4port /* USART4 is ttyS7 */
 #  define USART4_ASSIGNED      1
 #endif
@@ -383,13 +383,13 @@
  * USART2-4 could also be the console.
  */
 
-#if defined(CONFIG_USART2_ISUART) && !defined(USART2_ASSIGNED)
+#if defined(CONFIG_USART2_SERIALDRIVER) && !defined(USART2_ASSIGNED)
 #  define TTYS8_DEV           g_usart2port /* USART2 is ttyS8 */
 #  define USART2_ASSIGNED      1
-#elif defined(CONFIG_USART3_ISUART) && !defined(USART3_ASSIGNED)
+#elif defined(CONFIG_USART3_SERIALDRIVER) && !defined(USART3_ASSIGNED)
 #  define TTYS8_DEV           g_usart3port /* USART3 is ttyS8 */
 #  define USART3_ASSIGNED      1
-#elif defined(CONFIG_USART4_ISUART) && !defined(USART4_ASSIGNED)
+#elif defined(CONFIG_USART4_SERIALDRIVER) && !defined(USART4_ASSIGNED)
 #  define TTYS8_DEV           g_usart4port /* USART4 is ttyS8 */
 #  define USART4_ASSIGNED      1
 #endif
@@ -399,10 +399,10 @@
  * USART3-4 could also be the console.
  */
 
-#if defined(CONFIG_USART3_ISUART) && !defined(USART3_ASSIGNED)
+#if defined(CONFIG_USART3_SERIALDRIVER) && !defined(USART3_ASSIGNED)
 #  define TTYS9_DEV           g_usart3port /* USART3 is ttyS9 */
 #  define USART3_ASSIGNED      1
-#elif defined(CONFIG_USART4_ISUART) && !defined(USART4_ASSIGNED)
+#elif defined(CONFIG_USART4_SERIALDRIVER) && !defined(USART4_ASSIGNED)
 #  define TTYS9_DEV           g_usart4port /* USART4 is ttyS9 */
 #  define USART4_ASSIGNED      1
 #endif
@@ -451,19 +451,19 @@ static int  up_uart3_interrupt(int irq, void *context);
 #ifdef CONFIG_SAMA5_UART4
 static int  up_uart4_interrupt(int irq, void *context);
 #endif
-#ifdef CONFIG_USART0_ISUART
+#ifdef CONFIG_USART0_SERIALDRIVER
 static int  up_usart0_interrupt(int irq, void *context);
 #endif
-#ifdef CONFIG_USART1_ISUART
+#ifdef CONFIG_USART1_SERIALDRIVER
 static int  up_usart1_interrupt(int irq, void *context);
 #endif
-#ifdef CONFIG_USART2_ISUART
+#ifdef CONFIG_USART2_SERIALDRIVER
 static int  up_usart2_interrupt(int irq, void *context);
 #endif
-#ifdef CONFIG_USART3_ISUART
+#ifdef CONFIG_USART3_SERIALDRIVER
 static int  up_usart3_interrupt(int irq, void *context);
 #endif
-#ifdef CONFIG_USART4_ISUART
+#ifdef CONFIG_USART4_SERIALDRIVER
 static int  up_usart4_interrupt(int irq, void *context);
 #endif
 
@@ -525,23 +525,23 @@ static char g_uart3txbuffer[CONFIG_UART3_TXBUFSIZE];
 static char g_uart4rxbuffer[CONFIG_UART4_RXBUFSIZE];
 static char g_uart4txbuffer[CONFIG_UART4_TXBUFSIZE];
 #endif
-#ifdef CONFIG_USART0_ISUART
+#ifdef CONFIG_USART0_SERIALDRIVER
 static char g_usart0rxbuffer[CONFIG_USART0_RXBUFSIZE];
 static char g_usart0txbuffer[CONFIG_USART0_TXBUFSIZE];
 #endif
-#ifdef CONFIG_USART1_ISUART
+#ifdef CONFIG_USART1_SERIALDRIVER
 static char g_usart1rxbuffer[CONFIG_USART1_RXBUFSIZE];
 static char g_usart1txbuffer[CONFIG_USART1_TXBUFSIZE];
 #endif
-#ifdef CONFIG_USART2_ISUART
+#ifdef CONFIG_USART2_SERIALDRIVER
 static char g_usart2rxbuffer[CONFIG_USART2_RXBUFSIZE];
 static char g_usart2txbuffer[CONFIG_USART2_TXBUFSIZE];
 #endif
-#ifdef CONFIG_USART3_ISUART
+#ifdef CONFIG_USART3_SERIALDRIVER
 static char g_usart3rxbuffer[CONFIG_USART3_RXBUFSIZE];
 static char g_usart3txbuffer[CONFIG_USART3_TXBUFSIZE];
 #endif
-#ifdef CONFIG_USART4_ISUART
+#ifdef CONFIG_USART4_SERIALDRIVER
 static char g_usart4rxbuffer[CONFIG_USART4_RXBUFSIZE];
 static char g_usart4txbuffer[CONFIG_USART4_TXBUFSIZE];
 #endif
@@ -753,7 +753,7 @@ static uart_dev_t g_uart4port =
 
 /* This describes the state of the USART0 port. */
 
-#ifdef CONFIG_USART0_ISUART
+#ifdef CONFIG_USART0_SERIALDRIVER
 static struct up_dev_s g_usart0priv =
 {
   .handler        = up_usart0_interrupt,
@@ -787,7 +787,7 @@ static uart_dev_t g_usart0port =
 
 /* This describes the state of the USART1 port. */
 
-#ifdef CONFIG_USART1_ISUART
+#ifdef CONFIG_USART1_SERIALDRIVER
 static struct up_dev_s g_usart1priv =
 {
   .handler        = up_usart1_interrupt,
@@ -821,7 +821,7 @@ static uart_dev_t g_usart1port =
 
 /* This describes the state of the USART2 port. */
 
-#ifdef CONFIG_USART2_ISUART
+#ifdef CONFIG_USART2_SERIALDRIVER
 static struct up_dev_s g_usart2priv =
 {
   .handler        = up_usart2_interrupt,
@@ -855,7 +855,7 @@ static uart_dev_t g_usart2port =
 
 /* This describes the state of the USART3 port. */
 
-#ifdef CONFIG_USART3_ISUART
+#ifdef CONFIG_USART3_SERIALDRIVER
 static struct up_dev_s g_usart3priv =
 {
   .handler        = up_usart3_interrupt,
@@ -889,7 +889,7 @@ static uart_dev_t g_usart3port =
 
 /* This describes the state of the USART4 port. */
 
-#ifdef CONFIG_USART4_ISUART
+#ifdef CONFIG_USART4_SERIALDRIVER
 static struct up_dev_s g_usart4priv =
 {
   .handler        = up_usart4_interrupt,
@@ -1073,31 +1073,31 @@ static int  up_uart4_interrupt(int irq, void *context)
   return up_interrupt(&g_uart4port);
 }
 #endif
-#ifdef CONFIG_USART0_ISUART
+#ifdef CONFIG_USART0_SERIALDRIVER
 static int  up_usart0_interrupt(int irq, void *context)
 {
   return up_interrupt(&g_usart0port);
 }
 #endif
-#ifdef CONFIG_USART1_ISUART
+#ifdef CONFIG_USART1_SERIALDRIVER
 static int  up_usart1_interrupt(int irq, void *context)
 {
   return up_interrupt(&g_usart1port);
 }
 #endif
-#ifdef CONFIG_USART2_ISUART
+#ifdef CONFIG_USART2_SERIALDRIVER
 static int  up_usart2_interrupt(int irq, void *context)
 {
   return up_interrupt(&g_usart2port);
 }
 #endif
-#ifdef CONFIG_USART3_ISUART
+#ifdef CONFIG_USART3_SERIALDRIVER
 static int  up_usart3_interrupt(int irq, void *context)
 {
   return up_interrupt(&g_usart3port);
 }
 #endif
-#ifdef CONFIG_USART4_ISUART
+#ifdef CONFIG_USART4_SERIALDRIVER
 static int  up_usart4_interrupt(int irq, void *context)
 {
   return up_interrupt(&g_usart4port);

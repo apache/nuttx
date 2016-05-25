@@ -347,165 +347,114 @@ endif
 # MCU serial peripheral driver?
 #
 
-config ARCH_HAVE_UART
+config UART_SERIALDRIVER
 	bool
 	default n
 	select MCU_SERIAL
 
-config ARCH_HAVE_UART0
+config UART0_SERIALDRIVER
 	bool
 	default n
 	select MCU_SERIAL
 
-config ARCH_HAVE_UART1
+config UART1_SERIALDRIVER
 	bool
 	default n
 	select MCU_SERIAL
 
-config ARCH_HAVE_UART2
+config UART2_SERIALDRIVER
 	bool
 	default n
 	select MCU_SERIAL
 
-config ARCH_HAVE_UART3
+config UART3_SERIALDRIVER
 	bool
 	default n
 	select MCU_SERIAL
 
-config ARCH_HAVE_UART4
+config UART4_SERIALDRIVER
 	bool
 	default n
 	select MCU_SERIAL
 
-config ARCH_HAVE_UART5
+config UART5_SERIALDRIVER
 	bool
 	default n
 	select MCU_SERIAL
 
-config ARCH_HAVE_UART6
+config UART6_SERIALDRIVER
 	bool
 	default n
 	select MCU_SERIAL
 
-config ARCH_HAVE_UART7
+config UART7_SERIALDRIVER
 	bool
 	default n
 	select MCU_SERIAL
 
-config ARCH_HAVE_UART8
+config UART8_SERIALDRIVER
 	bool
 	default n
 	select MCU_SERIAL
 
-config ARCH_HAVE_SCI0
+config SCI0_SERIALDRIVER
 	bool
 	default n
 	select MCU_SERIAL
 
-config ARCH_HAVE_SCI1
+config SCI1_SERIALDRIVER
 	bool
 	default n
 	select MCU_SERIAL
 
-config ARCH_HAVE_USART0
-	bool
-	default n
-
-config ARCH_HAVE_USART1
-	bool
-	default n
-
-config ARCH_HAVE_USART2
-	bool
-	default n
-
-config ARCH_HAVE_USART3
-	bool
-	default n
-
-config ARCH_HAVE_USART4
-	bool
-	default n
-
-config ARCH_HAVE_USART5
-	bool
-	default n
-
-config ARCH_HAVE_USART6
-	bool
-	default n
-
-config ARCH_HAVE_USART7
-	bool
-	default n
-
-config ARCH_HAVE_USART8
-	bool
-	default n
-
-config ARCH_HAVE_OTHER_UART
+config USART0_SERIALDRIVER
 	bool
 	default n
 	select MCU_SERIAL
 
-#
-# USARTn configuration.  Is the USART configured to behave like a UART?
-#
-
-comment "USART Configuration"
-
-config USART0_ISUART
-	bool "USART0 is a UART"
-	default y
-	depends on ARCH_HAVE_USART0
+config USART1_SERIALDRIVER
+	bool
+	default n
 	select MCU_SERIAL
 
-config USART1_ISUART
-	bool "USART1 is a UART"
-	default y
-	depends on ARCH_HAVE_USART1
+config USART2_SERIALDRIVER
+	bool
+	default n
 	select MCU_SERIAL
 
-config USART2_ISUART
-	bool "USART2 is a UART"
-	default y
-	depends on ARCH_HAVE_USART2
+config USART3_SERIALDRIVER
+	bool
+	default n
 	select MCU_SERIAL
 
-config USART3_ISUART
-	bool "USART3 is a UART"
-	default y
-	depends on ARCH_HAVE_USART3
+config USART4_SERIALDRIVER
+	bool
+	default n
 	select MCU_SERIAL
 
-config USART4_ISUART
-	bool "USART4 is a UART"
-	default y
-	depends on ARCH_HAVE_USART4
+config USART5_SERIALDRIVER
+	bool
+	default n
 	select MCU_SERIAL
 
-config USART5_ISUART
-	bool "USART5 is a UART"
-	default y
-	depends on ARCH_HAVE_USART5
+config USART6_SERIALDRIVER
+	bool
+	default n
 	select MCU_SERIAL
 
-config USART6_ISUART
-	bool "USART6 is a UART"
-	default y
-	depends on ARCH_HAVE_USART6
+config USART7_SERIALDRIVER
+	bool
+	default n
 	select MCU_SERIAL
 
-config USART7_ISUART
-	bool "USART7 is a UART"
-	default y
-	depends on ARCH_HAVE_USART7
+config USART8_SERIALDRIVER
+	bool
+	default n
 	select MCU_SERIAL
 
-config USART8_ISUART
-	bool "USART8 is a UART"
-	default y
-	depends on ARCH_HAVE_USART8
+config OTHER_UART_SERIALDRIVER
+	bool
+	default n
 	select MCU_SERIAL
 
 config MCU_SERIAL
@@ -609,94 +558,94 @@ config SERIAL_TERMIOS
 
 choice
 	prompt "Serial console"
-	default NO_SERIAL_CONSOLE if !ARCH_HAVE_OTHER_UART
-	default OTHER_SERIAL_CONSOLE if ARCH_HAVE_OTHER_UART
+	default NO_SERIAL_CONSOLE if !OTHER_UART_SERIALDRIVER
+	default OTHER_SERIAL_CONSOLE if OTHER_UART_SERIALDRIVER
 	depends on MCU_SERIAL
 	#depends on DEV_CONSOLE - We may have serial console with no file system at all
 
 config UART_SERIAL_CONSOLE
 	bool "UART"
-	depends on ARCH_HAVE_UART
+	depends on UART_SERIALDRIVER
 
 config UART0_SERIAL_CONSOLE
 	bool "UART0"
-	depends on ARCH_HAVE_UART0
+	depends on UART0_SERIALDRIVER
 
 config USART0_SERIAL_CONSOLE
 	bool "USART0"
-	depends on USART0_ISUART
+	depends on USART0_SERIALDRIVER
 
 config UART1_SERIAL_CONSOLE
 	bool "UART1"
-	depends on ARCH_HAVE_UART1
+	depends on UART1_SERIALDRIVER
 
 config USART1_SERIAL_CONSOLE
 	bool "USART1"
-	depends on USART1_ISUART
+	depends on USART1_SERIALDRIVER
 
 config UART2_SERIAL_CONSOLE
 	bool "UART2"
-	depends on ARCH_HAVE_UART2
+	depends on UART2_SERIALDRIVER
 
 config USART2_SERIAL_CONSOLE
 	bool "USART2"
-	depends on USART2_ISUART
+	depends on USART2_SERIALDRIVER
 
 config UART3_SERIAL_CONSOLE
 	bool "UART3"
-	depends on ARCH_HAVE_UART3
+	depends on UART3_SERIALDRIVER
 
 config USART3_SERIAL_CONSOLE
 	bool "USART3"
-	depends on ARCH_HAVE_USART3
+	depends on USART3_SERIALDRIVER
 
 config UART4_SERIAL_CONSOLE
 	bool "UART4"
-	depends on ARCH_HAVE_UART4
+	depends on UART4_SERIALDRIVER
 
 config USART4_SERIAL_CONSOLE
 	bool "USART4"
-	depends on USART4_ISUART
+	depends on USART4_SERIALDRIVER
 
 config UART5_SERIAL_CONSOLE
 	bool "UART5"
-	depends on ARCH_HAVE_UART5
+	depends on UART5_SERIALDRIVER
 
 config USART5_SERIAL_CONSOLE
 	bool "USART5"
-	depends on USART5_ISUART
+	depends on USART5_SERIALDRIVER
 
 config UART6_SERIAL_CONSOLE
 	bool "UART6"
-	depends on ARCH_HAVE_UART6
+	depends on UART6_SERIALDRIVER
 
 config USART6_SERIAL_CONSOLE
 	bool "USART6"
-	depends on USART6_ISUART
+	depends on USART6_SERIALDRIVER
 
 config UART7_SERIAL_CONSOLE
 	bool "UART7"
-	depends on ARCH_HAVE_UART7
+	depends on UART7_SERIALDRIVER
 
 config USART7_SERIAL_CONSOLE
 	bool "USART7"
-	depends on USART7_ISUART
+	depends on USART7_SERIALDRIVER
 
 config UART8_SERIAL_CONSOLE
 	bool "UART8"
-	depends on ARCH_HAVE_UART8
+	depends on UART8_SERIALDRIVER
 
 config USART8_SERIAL_CONSOLE
 	bool "USART8"
-	depends on USART8_ISUART
+	depends on USART8_SERIALDRIVER
 
 config SCI0_SERIAL_CONSOLE
 	bool "SCI0"
-	depends on ARCH_HAVE_SCI0
+	depends on SCI0_SERIALDRIVER
 
 config SCI1_SERIAL_CONSOLE
 	bool "SCI1"
-	depends on ARCH_HAVE_SCI1
+	depends on SCI1_SERIALDRIVER
 
 config OTHER_SERIAL_CONSOLE
 	bool "Other serial console"
@@ -711,7 +660,7 @@ endchoice
 #
 
 menu "UART Configuration"
-	depends on ARCH_HAVE_UART
+	depends on UART_SERIALDRIVER
 
 config UART_RXBUFSIZE
 	int "Receive buffer size"
@@ -776,7 +725,7 @@ config UART_DMA
 endmenu
 
 menu "UART0 Configuration"
-	depends on ARCH_HAVE_UART0
+	depends on UART0_SERIALDRIVER
 
 config UART0_RXBUFSIZE
 	int "Receive buffer size"
@@ -841,7 +790,7 @@ config UART0_DMA
 endmenu
 
 menu "USART0 Configuration"
-	depends on USART0_ISUART
+	depends on USART0_SERIALDRIVER
 
 config USART0_RXBUFSIZE
 	int "Receive buffer size"
@@ -906,7 +855,7 @@ config USART0_DMA
 endmenu
 
 menu "UART1 Configuration"
-	depends on ARCH_HAVE_UART1
+	depends on UART1_SERIALDRIVER
 
 config UART1_RXBUFSIZE
 	int "Receive buffer size"
@@ -971,7 +920,7 @@ config UART1_DMA
 endmenu
 
 menu "USART1 Configuration"
-	depends on USART1_ISUART
+	depends on USART1_SERIALDRIVER
 
 config USART1_RXBUFSIZE
 	int "Receive buffer size"
@@ -1036,7 +985,7 @@ config USART1_DMA
 endmenu
 
 menu "UART2 Configuration"
-	depends on ARCH_HAVE_UART2
+	depends on UART2_SERIALDRIVER
 
 config UART2_RXBUFSIZE
 	int "Receive buffer size"
@@ -1101,7 +1050,7 @@ config UART2_DMA
 endmenu
 
 menu "USART2 Configuration"
-	depends on USART2_ISUART
+	depends on USART2_SERIALDRIVER
 
 config USART2_RXBUFSIZE
 	int "Receive buffer size"
@@ -1165,7 +1114,7 @@ config USART2_DMA
 endmenu
 
 menu "UART3 Configuration"
-	depends on ARCH_HAVE_UART3
+	depends on UART3_SERIALDRIVER
 
 config UART3_RXBUFSIZE
 	int "Receive buffer size"
@@ -1230,7 +1179,7 @@ config UART3_DMA
 endmenu
 
 menu "USART3 Configuration"
-	depends on USART3_ISUART
+	depends on USART3_SERIALDRIVER
 
 config USART3_RXBUFSIZE
 	int "Receive buffer size"
@@ -1295,7 +1244,7 @@ config USART3_DMA
 endmenu
 
 menu "UART4 Configuration"
-	depends on ARCH_HAVE_UART4
+	depends on UART4_SERIALDRIVER
 
 config UART4_RXBUFSIZE
 	int "Receive buffer size"
@@ -1360,7 +1309,7 @@ config UART4_DMA
 endmenu
 
 menu "USART4 Configuration"
-	depends on USART4_ISUART
+	depends on USART4_SERIALDRIVER
 
 config USART4_RXBUFSIZE
 	int "Receive buffer size"
@@ -1425,7 +1374,7 @@ config USART4_DMA
 endmenu
 
 menu "UART5 Configuration"
-	depends on ARCH_HAVE_UART5
+	depends on UART5_SERIALDRIVER
 
 config UART5_RXBUFSIZE
 	int "Receive buffer size"
@@ -1490,7 +1439,7 @@ config UART5_DMA
 endmenu
 
 menu "USART5 Configuration"
-	depends on USART5_ISUART
+	depends on USART5_SERIALDRIVER
 
 config USART5_RXBUFSIZE
 	int "Receive buffer size"
@@ -1555,7 +1504,7 @@ config USART5_DMA
 endmenu
 
 menu "USART6 Configuration"
-	depends on USART6_ISUART
+	depends on USART6_SERIALDRIVER
 
 config USART6_RXBUFSIZE
 	int "Receive buffer size"
@@ -1620,7 +1569,7 @@ config USART6_DMA
 endmenu
 
 menu "UART6 Configuration"
-	depends on ARCH_HAVE_UART6
+	depends on UART6_SERIALDRIVER
 
 config UART6_RXBUFSIZE
 	int "Receive buffer size"
@@ -1685,7 +1634,7 @@ config UART6_DMA
 endmenu
 
 menu "USART7 Configuration"
-	depends on USART7_ISUART
+	depends on USART7_SERIALDRIVER
 
 config USART7_RXBUFSIZE
 	int "Receive buffer size"
@@ -1750,7 +1699,7 @@ config USART7_DMA
 endmenu
 
 menu "UART7 Configuration"
-	depends on ARCH_HAVE_UART7
+	depends on UART7_SERIALDRIVER
 
 config UART7_RXBUFSIZE
 	int "Receive buffer size"
@@ -1815,7 +1764,7 @@ config UART7_DMA
 endmenu
 
 menu "USART8 Configuration"
-	depends on USART8_ISUART
+	depends on USART8_SERIALDRIVER
 
 config USART8_RXBUFSIZE
 	int "Receive buffer size"
@@ -1880,7 +1829,7 @@ config USART8_DMA
 endmenu
 
 menu "UART8 Configuration"
-	depends on ARCH_HAVE_UART8
+	depends on UART8_SERIALDRIVER
 
 config UART8_RXBUFSIZE
 	int "Receive buffer size"
@@ -1945,7 +1894,7 @@ config UART8_DMA
 endmenu
 
 menu "SCI0 Configuration"
-	depends on ARCH_HAVE_SCI0
+	depends on SCI0_SERIALDRIVER
 
 config SCI0_RXBUFSIZE
 	int "SCI0 receive buffer size"
@@ -1989,7 +1938,7 @@ config SCI0_2STOP
 endmenu # SCI0 Configuration
 
 menu "SCI1 Configuration"
-	depends on ARCH_HAVE_SCI1
+	depends on SCI1_SERIALDRIVER
 
 config SCI1_RXBUFSIZE
 	int "SCI1 receive buffer size"

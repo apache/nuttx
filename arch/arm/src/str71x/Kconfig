@@ -80,25 +80,25 @@ config STR71X_UART0
 	bool "UART0"
 	default n
 	select STR71X_GPIO0
-	select ARCH_HAVE_UART0
+	select UART0_SERIALDRIVER
 
 config STR71X_UART1
 	bool "UART1"
 	default n
 	select STR71X_GPIO0
-	select ARCH_HAVE_UART1
+	select UART1_SERIALDRIVER
 
 config STR71X_UART2
 	bool "UART2"
 	default n
 	select STR71X_GPIO0
-	select ARCH_HAVE_UART2
+	select UART2_SERIALDRIVER
 
 config STR71X_UART3
 	bool "UART3"
 	default n
 	select STR71X_GPIO0
-	select ARCH_HAVE_UART3
+	select UART3_SERIALDRIVER
 
 config STR71X_USB
 	bool "USB"
