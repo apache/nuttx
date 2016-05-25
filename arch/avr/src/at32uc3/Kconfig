@@ -73,18 +73,18 @@ menu "AT32U3 Peripheral Selections"
 config AVR32_USART0
 	bool "USART0"
 	default n
-	select ARCH_HAVE_USART0
+	select USART0_SERIALDRIVER
 
 config AVR32_USART1
 	bool "USART1"
 	default n
-	select ARCH_HAVE_USART1
+	select USART1_SERIALDRIVER
 
 config AVR32_USART2
 	bool "USART2"
 	default n
 	depends on ARCH_CHIP_AT32UC3B0
-	select ARCH_HAVE_USART2
+	select USART2_SERIALDRIVER
 
 endmenu # AT32U3 Peripheral Selections
 

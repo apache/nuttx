@@ -407,39 +407,39 @@ config ARCH_HAVE_SCI1
 	default n
 	select MCU_SERIAL
 
-config ARCH_HAVE_USART0
+config USART0_SERIALDRIVER
 	bool
 	default n
 
-config ARCH_HAVE_USART1
+config USART1_SERIALDRIVER
 	bool
 	default n
 
-config ARCH_HAVE_USART2
+config USART2_SERIALDRIVER
 	bool
 	default n
 
-config ARCH_HAVE_USART3
+config USART3_SERIALDRIVER
 	bool
 	default n
 
-config ARCH_HAVE_USART4
+config USART4_SERIALDRIVER
 	bool
 	default n
 
-config ARCH_HAVE_USART5
+config USART5_SERIALDRIVER
 	bool
 	default n
 
-config ARCH_HAVE_USART6
+config USART6_SERIALDRIVER
 	bool
 	default n
 
-config ARCH_HAVE_USART7
+config USART7_SERIALDRIVER
 	bool
 	default n
 
-config ARCH_HAVE_USART8
+config USART8_SERIALDRIVER
 	bool
 	default n
 
@@ -457,55 +457,55 @@ comment "USART Configuration"
 config USART0_ISUART
 	bool "USART0 is a UART"
 	default y
-	depends on ARCH_HAVE_USART0
+	depends on USART0_SERIALDRIVER
 	select MCU_SERIAL
 
 config USART1_ISUART
 	bool "USART1 is a UART"
 	default y
-	depends on ARCH_HAVE_USART1
+	depends on USART1_SERIALDRIVER
 	select MCU_SERIAL
 
 config USART2_ISUART
 	bool "USART2 is a UART"
 	default y
-	depends on ARCH_HAVE_USART2
+	depends on USART2_SERIALDRIVER
 	select MCU_SERIAL
 
 config USART3_ISUART
 	bool "USART3 is a UART"
 	default y
-	depends on ARCH_HAVE_USART3
+	depends on USART3_SERIALDRIVER
 	select MCU_SERIAL
 
 config USART4_ISUART
 	bool "USART4 is a UART"
 	default y
-	depends on ARCH_HAVE_USART4
+	depends on USART4_SERIALDRIVER
 	select MCU_SERIAL
 
 config USART5_ISUART
 	bool "USART5 is a UART"
 	default y
-	depends on ARCH_HAVE_USART5
+	depends on USART5_SERIALDRIVER
 	select MCU_SERIAL
 
 config USART6_ISUART
 	bool "USART6 is a UART"
 	default y
-	depends on ARCH_HAVE_USART6
+	depends on USART6_SERIALDRIVER
 	select MCU_SERIAL
 
 config USART7_ISUART
 	bool "USART7 is a UART"
 	default y
-	depends on ARCH_HAVE_USART7
+	depends on USART7_SERIALDRIVER
 	select MCU_SERIAL
 
 config USART8_ISUART
 	bool "USART8 is a UART"
 	default y
-	depends on ARCH_HAVE_USART8
+	depends on USART8_SERIALDRIVER
 	select MCU_SERIAL
 
 config MCU_SERIAL
@@ -648,7 +648,7 @@ config UART3_SERIAL_CONSOLE
 
 config USART3_SERIAL_CONSOLE
 	bool "USART3"
-	depends on ARCH_HAVE_USART3
+	depends on USART3_SERIALDRIVER
 
 config UART4_SERIAL_CONSOLE
 	bool "UART4"

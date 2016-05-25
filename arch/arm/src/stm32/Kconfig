@@ -2160,14 +2160,14 @@ config STM32_TSC
 config STM32_USART1
 	bool "USART1"
 	default n
-	select ARCH_HAVE_USART1
+	select USART1_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
 	select STM32_USART
 
 config STM32_USART2
 	bool "USART2"
 	default n
-	select ARCH_HAVE_USART2
+	select USART2_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
 	select STM32_USART
 
@@ -2176,7 +2176,7 @@ config STM32_USART3
 	default n
 	depends on STM32_HAVE_USART3
 	select ARCH_HAVE_SERIAL_TERMIOS
-	select ARCH_HAVE_USART3
+	select USART3_SERIALDRIVER
 	select STM32_USART
 
 config STM32_UART4
@@ -2200,7 +2200,7 @@ config STM32_USART6
 	default n
 	depends on STM32_HAVE_USART6
 	select ARCH_HAVE_SERIAL_TERMIOS
-	select ARCH_HAVE_USART6
+	select USART6_SERIALDRIVER
 	select STM32_USART
 
 config STM32_UART7

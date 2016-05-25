@@ -520,21 +520,21 @@ config SAMV7_USART0
 	bool "USART 0"
 	default n
 	depends on SAMV7_HAVE_USART0
-	select ARCH_HAVE_USART0
+	select USART0_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
 
 config SAMV7_USART1
 	bool "USART 1"
 	default n
 	depends on SAMV7_HAVE_USART1
-	select ARCH_HAVE_USART1
+	select USART1_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
 
 config SAMV7_USART2
 	bool "USART 2"
 	default n
 	depends on SAMV7_HAVE_USART2
-	select ARCH_HAVE_USART2
+	select USART2_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
 
 config SAMV7_WDT
