@@ -567,24 +567,24 @@ static void lcd_init(FAR struct pcf8574_lcd_dev_s *priv)
   latch_nybble(priv, 0x20>>4, false);
 
   /* Function set: DL=0;Interface is 4 bits, N=1 (2 Lines), F=0 (5x8 dots font) */
-  
+
   lcd_putcmd(priv, 0x28);
 
   /* Display Off: D=0 (Display off), C=0 (Cursor Off), B=0 (Blinking Off) */
-  
+
   lcd_putcmd(priv, 0x08);
 
   /* Display Clear */
-  
+
   lcd_putcmd(priv, CMD_CLEAR);
   up_udelay(DELAY_US_HOMECLEAR);  /* clear needs extra time */
 
   /* Entry Mode Set: I/D=1 (Increment), S=0 (No shift) */
-  
+
   lcd_putcmd(priv, 0x06);
 
   /* Display On, Cursor Off */
-  
+
   lcd_putcmd(priv, 0x0C);
 }
 
@@ -610,7 +610,7 @@ static void lcd_create_char(FAR struct pcf8574_lcd_dev_s *priv,
 {
   int nIdx;
   uint8_t addr;
-  
+
   (void)lcd_read_busy_addr(priv, &addr);
   lcd_putcmd(priv, CMD_SET_CGADDR | (idxchar << 3));  /* set CGRAM address */
 
@@ -737,7 +737,7 @@ static void lcd_codec_action(FAR struct pcf8574_lcd_dev_s *priv,
         {
           if (count <= 0) /* silly case */
             break;
-            
+
           else
             {
               uint8_t row;
@@ -817,12 +817,12 @@ static void lcd_codec_action(FAR struct pcf8574_lcd_dev_s *priv,
             {
               end = priv->cfg.cols;
             }
-          
+
           for (nIdx = col; nIdx < end; ++nIdx)
             {
               lcd_putdata(priv, ' ');
             }
-          
+
           lcd_set_curpos(priv, row, col);
           }
         break;
@@ -841,12 +841,12 @@ static void lcd_codec_action(FAR struct pcf8574_lcd_dev_s *priv,
           uint8_t nIdx;
 
           lcd_get_curpos(priv, &row, &col);
-          
+
           for (nIdx = col; nIdx < priv->cfg.cols; ++nIdx)
             {
               lcd_putdata(priv, ' ');
             }
-          
+
           lcd_set_curpos(priv, row, col);
         }
         break;
@@ -932,7 +932,7 @@ static void lcd_codec_action(FAR struct pcf8574_lcd_dev_s *priv,
           lcd_set_curpos(priv, row, 0);
         }
         break;
-        
+
       case SLCDCODE_END:             /* Cursor end */
         {
           uint8_t row;
@@ -1356,7 +1356,7 @@ int pcf8574_lcd_backpack_register(FAR const char *devpath,
 {
   FAR struct pcf8574_lcd_dev_s *priv;
   int ret;
-  
+
   /* Sanity check on geometry */
 
   if (cfg->rows < 1 || cfg->rows > 4)

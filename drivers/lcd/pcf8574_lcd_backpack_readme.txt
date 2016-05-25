@@ -91,7 +91,7 @@ E.g.:
 
     #include <nuttx/i2c/i2c_master.h>
     #include "pcf8574_lcd_backpack.h"
-    
+
     #define MJKDZ_I2C_PORTNO 1
     #define MJKDZ_DEVICE_NAME "/dev/lcd0"
 
@@ -242,4 +242,4 @@ Troubleshooting
   range of voltages at this pin is very narrow, and outside that
   range there will be nothing visible on the display, so most of the
   turn range of the pot is non-useful.  Much of human life has been
-  wasted in the rediscovery of this farcically idiotic 
+  wasted in the rediscovery of this farcically idiotic
