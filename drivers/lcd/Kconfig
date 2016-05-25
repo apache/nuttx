@@ -1003,3 +1003,18 @@ config LCD_LCD1602
 		NOTE:  There is no common implementation of the LCD1602 driver.
 		Rather, there are board-by-board implementations.  See, for example,
 		configs/pcblogic-pic32mx/src/up_lcd1602.c.
+
+config LCD_BACKPACK
+	bool "PCF8574 LCD Backpack"
+	default n
+	depends on I2C
+	select LIB_SLCDCODEC
+	---help---
+		Enable support for PCF8574 LCD Backpack driver. This driver supports
+		an interface board that is based on the PCF8574 io expander and
+		supports the HD44780-based (or compatible) LCD modules.  There are
+		a myriad of different vendors of such, but they are principally the
+		same, save wiring and minor features like jumpers for I2C addresses.
+		This driver supports known and unknown variants.
+
+		See pcf8574_lcd_backpack_readme.txt

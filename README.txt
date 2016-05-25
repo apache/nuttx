@@ -1491,7 +1491,8 @@ nuttx/
  |   |- eeprom/
  |   |   `- README.txt
  |   |- lcd/
- |   |   `- README.txt
+ |   |   | README.txt
+ |   |   `- pcf8574_lcd_backpack_readme.txt
  |   |- mtd/
  |   |   `- README.txt
  |   |- sensors/

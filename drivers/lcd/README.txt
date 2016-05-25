@@ -149,6 +149,11 @@ Re-usable LCD drivers reside in the drivers/lcd directory:
       configs/stm32f4discovery
       configs/sam4l-xplained
 
+  Segment LCDS (SLCDs):
+  ---------------------
+
+  pcf8574_lcd_backpack.c:  See pcf8574_lcd_backpack_readme.txt.
+
 Examples: configs/
 ==================
 
