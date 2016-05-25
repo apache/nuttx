@@ -92,12 +92,12 @@ menu "LPC214x Peripheral Support"
 config LPC214X_UART0
 	bool
 	default y
-	select ARCH_HAVE_UART0
+	select UART0_SERIALDRIVER
 
 config LPC214X_UART1
 	bool
 	default y
-	select ARCH_HAVE_UART1
+	select UART1_SERIALDRIVER
 
 config LPC214X_USBDEV
 	bool "USB Device"

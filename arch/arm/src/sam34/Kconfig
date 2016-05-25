@@ -453,7 +453,7 @@ config SAM34_PICOUART
 	bool "PicoUART"
 	default n
 	depends on ARCH_CHIP_SAM4L
-	select ARCH_HAVE_UART
+	select UART_SERIALDRIVER
 
 config SAM34_PWM
 	bool "Pulse Width Modulation (PWM) Controller"
@@ -609,14 +609,14 @@ config SAM34_UART0
 	bool "UART 0"
 	default y
 	depends on ARCH_CHIP_SAM3U || ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A || ARCH_CHIP_SAM4CM || ARCH_CHIP_SAM4S || ARCH_CHIP_SAM4E
-	select ARCH_HAVE_UART0
+	select UART0_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
 
 config SAM34_UART1
 	bool "UART 1"
 	default n
 	depends on ARCH_CHIP_SAM4CM || ARCH_CHIP_SAM4S || ARCH_CHIP_SAM4E
-	select ARCH_HAVE_UART1
+	select UART1_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
 
 if SAM34_UART1 && ARCH_CHIP_SAM4CM

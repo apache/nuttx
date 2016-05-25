@@ -422,14 +422,14 @@ config STM32L4_UART4
 	bool "UART4"
 	default n
 	select ARCH_HAVE_SERIAL_TERMIOS
-	select ARCH_HAVE_UART4
+	select UART4_SERIALDRIVER
 	select STM32L4_USART
 
 config STM32L4_UART5
 	bool "UART5"
 	default n
 	select ARCH_HAVE_SERIAL_TERMIOS
-	select ARCH_HAVE_UART5
+	select UART5_SERIALDRIVER
 	select STM32L4_USART
 
 config STM32L4_I2C1

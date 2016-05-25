@@ -47,21 +47,21 @@ config KL_FLEXBUS
 config KL_UART0
 	bool "UART0"
 	default n
-	select ARCH_HAVE_UART0
+	select UART0_SERIALDRIVER
 	---help---
 		Support UART0
 
 config KL_UART1
 	bool "UART1"
 	default n
-	select ARCH_HAVE_UART1
+	select UART1_SERIALDRIVER
 	---help---
 		Support UART1
 
 config KL_UART2
 	bool "UART2"
 	default n
-	select ARCH_HAVE_UART2
+	select UART2_SERIALDRIVER
 	---help---
 		Support UART2
 

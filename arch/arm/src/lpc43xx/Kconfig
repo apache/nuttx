@@ -280,7 +280,7 @@ config LPC43_USART0
 config LPC43_UART1
 	bool "UART1"
 	default n
-	select ARCH_HAVE_UART1
+	select UART1_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
 
 config LPC43_USART2

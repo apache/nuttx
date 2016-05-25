@@ -55,7 +55,7 @@ config LPC11_PLL
 
 config LPC11_UART0
 	bool "UART0"
-	select ARCH_HAVE_UART0
+	select UART0_SERIALDRIVER
 	default y
 
 config LPC11_CAN0

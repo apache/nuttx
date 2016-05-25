@@ -176,13 +176,13 @@ config EFM32_USART2
 config EFM32_UART0
 	bool "UART0"
 	default n
-	select ARCH_HAVE_UART0
+	select UART0_SERIALDRIVER
 	select EFM32_UART
 
 config EFM32_UART1
 	bool "UART1"
 	default n
-	select ARCH_HAVE_UART1
+	select UART1_SERIALDRIVER
 	select EFM32_UART
 
 config EFM32_LEUART0

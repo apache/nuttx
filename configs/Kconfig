@@ -1163,7 +1163,7 @@ config ARCH_BOARD_VIEWTOOL_STM32F107
 config ARCH_BOARD_XTRS
 	bool "XTRS TRS80 Model 3 emulation"
 	depends on ARCH_CHIP_Z80
-	select ARCH_HAVE_UART
+	select UART_SERIALDRIVER
 	---help---
 		TRS80 Model 3.  This port uses a vintage computer based on the Z80.
 		An emulator for this computer is available to run TRS80 programs on a
@@ -1181,7 +1181,7 @@ config ARCH_BOARD_Z16F2800100ZCOG
 config ARCH_BOARD_Z80SIM
 	bool "Z80 Instruction Set Simulator"
 	depends on ARCH_CHIP_Z80
-	select ARCH_HAVE_UART
+	select UART_SERIALDRIVER
 	---help---
 		z80 Microcontroller.  This port uses a Z80 instruction set simulator
 		called z80sim.  This port also uses the SDCC toolchain

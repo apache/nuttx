@@ -392,14 +392,14 @@ config STM32F7_UART4
 	bool "UART4"
 	default n
 	select ARCH_HAVE_SERIAL_TERMIOS
-	select ARCH_HAVE_UART4
+	select UART4_SERIALDRIVER
 	select STM32F7_USART
 
 config STM32F7_UART5
 	bool "UART5"
 	default n
 	select ARCH_HAVE_SERIAL_TERMIOS
-	select ARCH_HAVE_UART5
+	select UART5_SERIALDRIVER
 	select STM32F7_USART
 
 config STM32F7_USART6
@@ -413,14 +413,14 @@ config STM32F7_UART7
 	bool "UART7"
 	default n
 	select ARCH_HAVE_SERIAL_TERMIOS
-	select ARCH_HAVE_UART7
+	select UART7_SERIALDRIVER
 	select STM32F7_USART
 
 config STM32F7_UART8
 	bool "UART8"
 	default n
 	select ARCH_HAVE_SERIAL_TERMIOS
-	select ARCH_HAVE_UART8
+	select UART8_SERIALDRIVER
 	select STM32F7_USART
 
 config STM32F7_IWDG

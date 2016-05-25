@@ -2184,7 +2184,7 @@ config STM32_UART4
 	default n
 	depends on STM32_HAVE_UART4
 	select ARCH_HAVE_SERIAL_TERMIOS
-	select ARCH_HAVE_UART4
+	select UART4_SERIALDRIVER
 	select STM32_USART
 
 config STM32_UART5
@@ -2192,7 +2192,7 @@ config STM32_UART5
 	default n
 	depends on STM32_HAVE_UART5
 	select ARCH_HAVE_SERIAL_TERMIOS
-	select ARCH_HAVE_UART5
+	select UART5_SERIALDRIVER
 	select STM32_USART
 
 config STM32_USART6
@@ -2208,7 +2208,7 @@ config STM32_UART7
 	default n
 	depends on STM32_HAVE_UART7
 	select ARCH_HAVE_SERIAL_TERMIOS
-	select ARCH_HAVE_UART7
+	select UART7_SERIALDRIVER
 	select STM32_USART
 
 config STM32_UART8
@@ -2216,7 +2216,7 @@ config STM32_UART8
 	default n
 	depends on STM32_HAVE_UART8
 	select ARCH_HAVE_SERIAL_TERMIOS
-	select ARCH_HAVE_UART8
+	select UART8_SERIALDRIVER
 	select STM32_USART
 
 config STM32_USB
