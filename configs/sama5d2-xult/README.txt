@@ -849,11 +849,11 @@ REVISIT: Unverified, cloned text from the SAMA5D4-EK README.txt
     CONFIG_SAMA5_PIOC_IRQ    - Support PIOD interrupts
     CONFIG_SAMA5_PIOD_IRQ    - Support PIOD interrupts
 
-    CONFIG_USART0_ISUART     - Flexcom0 is configured as a UART
-    CONFIG_USART1_ISUART     - Flexcom1 is configured as a UART
-    CONFIG_USART2_ISUART     - Flexcom2 is configured as a UART
-    CONFIG_USART3_ISUART     - Flexcom3 is configured as a UART
-    CONFIG_USART4_ISUART     - Flexcom4 is configured as a UART
+    CONFIG_USART0_SERIALDRIVER - Flexcom0 is configured as a UART
+    CONFIG_USART1_SERIALDRIVER - Flexcom1 is configured as a UART
+    CONFIG_USART2_SERIALDRIVER - Flexcom2 is configured as a UART
+    CONFIG_USART3_SERIALDRIVER - Flexcom3 is configured as a UART
+    CONFIG_USART4_SERIALDRIVER - Flexcom4 is configured as a UART
 
   AT91SAMA5 specific device driver settings
 
