@@ -39,7 +39,11 @@
 
 #include <nuttx/config.h>
 
+#include <sys/types.h>
+#include <sys/mount.h>
 #include <stdio.h>
+#include <string.h>
+#include <fcntl.h>
 #include <syslog.h>
 #include <errno.h>
 
@@ -116,6 +120,21 @@ int board_app_initialize(uintptr_t arg)
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION
   cpuload_initialize_once();
+#endif
+
+#ifdef HAVE_PROC
+  /* mount the proc filesystem */
+
+  syslog(LOG_INFO, "Mounting procfs to /proc\n");
+
+  ret = mount(NULL, CONFIG_NSH_PROC_MOUNTPOINT, "procfs", 0, NULL);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to mount the PROC filesystem: %d (%d)\n",
+             ret, errno);
+      return ret;
+    }
 #endif
 
 #ifdef HAVE_RTC_DRIVER
