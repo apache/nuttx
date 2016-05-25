@@ -104,7 +104,7 @@
 /* At least one I2C peripheral must be enabled */
 
 #if defined(CONFIG_STM32F7_I2C1) || defined(CONFIG_STM32F7_I2C2) || defined(CONFIG_STM32F7_I2C3)
-/* This implementation is for the STM32 F1, F2, and F4 only */
+/* This implementation is for the STM32F7 only */
 
 
 /************************************************************************************
@@ -1078,40 +1078,33 @@ static void stm32f7_i2c_setclock(FAR struct stm32f7_i2c_priv_s *priv, uint32_t f
 
       /* Update timing and control registers */
 
-      /* TODO: speed/timing calcs */
-#warning "check set filters before timing, see RM0316"
+      /* TODO: speed/timing calcs, at the moment 45Mhz = STM32_PCLK1_FREQUENCY, analog filter is on,
+	  digital off from STM32F0-F3_AN4235_V1.0.1 */
 
-      /* values from 100khz at 8mhz i2c clock */
-
-      /* prescaler */
-      /* t_presc= (presc+1)*t_i2cclk */
-      /* RM0316 */
-
-      if (frequency == 10000)
+      if (frequency == 100000)
         {
-          presc        = 0x01;
-          scl_l_period = 0xc7;
-          scl_h_period = 0xc3;
-          h_time       = 0x02;
-          s_time       = 0x04;
+          presc        = 0x06;
+          s_time       = 0x02;
+          h_time       = 0x00;
+          scl_h_period = 0x1e;
+          scl_l_period = 0x2b;
+          
         }
-     else if (frequency == 100000)
+     else if (frequency == 400000)
         {
-          /* values from datasheet with clock 8mhz */
-
-          presc        = 0x01;
-          scl_l_period = 0x13;
-          scl_h_period = 0x0f;
-          h_time       = 0x02;
-          s_time       = 0x04;
+          presc        = 0x00;
+          s_time       = 0x0A;
+          h_time       = 0x00;
+          scl_h_period = 0x1b;
+          scl_l_period = 0x5b;
         }
       else
         {
           presc        = 0x00;
-          scl_l_period = 0x09;
-          scl_h_period = 0x03;
-          h_time       = 0x01;
-          s_time       = 0x03;
+          s_time       = 0x08;
+          h_time       = 0x00;
+          scl_h_period = 0x09;
+          scl_l_period = 0x1c;
         }
 
       uint32_t timingr =
@@ -1122,10 +1115,6 @@ static void stm32f7_i2c_setclock(FAR struct stm32f7_i2c_priv_s *priv, uint32_t f
         (scl_l_period << I2C_TIMINGR_SCLL_SHIFT);
 
       stm32f7_i2c_putreg32(priv, STM32F7_I2C_TIMINGR_OFFSET, timingr);
-
-      /* Bit 14 of OAR1 must be configured and kept at 1 */
-
-      stm32f7_i2c_putreg(priv, STM32F7_I2C_OAR1_OFFSET, I2C_OAR1_OA1EN);
 
       /* Re-enable the peripheral (or not) */
 
