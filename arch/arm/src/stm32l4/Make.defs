@@ -1,7 +1,7 @@
 ############################################################################
 # arch/arm/src/stm32l4/Make.defs
 #
-#   Copyright (C) 2015 Sebastien Lorquet. All rights reserved.
+#   Copyright (C) 2015-2016 Sebastien Lorquet. All rights reserved.
 #   Author: Sebastien Lorquet <sebastien@lorquet.fr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -161,3 +161,8 @@ endif
 ifeq ($(CONFIG_STM32L4_QSPI),y)
 CHIP_CSRCS += stm32l4_qspi.c
 endif
+
+ifeq ($(CONFIG_STM32L4_CAN),y)
+CHIP_CSRCS += stm32l4_can.c
+endif
+

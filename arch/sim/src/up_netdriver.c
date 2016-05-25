@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/sim/src/up_netdriver.c
  *
- *   Copyright (C) 2007, 2009-2012, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009-2012, 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Based on code from uIP which also has a BSD-like license:
@@ -186,21 +186,32 @@ void netdriver_loop(void)
        */
 
       eth = BUF;
-      if (g_sim_dev.d_len > ETH_HDRLEN &&
-          up_comparemac(eth->dest, &g_sim_dev.d_mac) == 0)
+      if (g_sim_dev.d_len > ETH_HDRLEN)
         {
+         int is_ours;
+
+         /* Figure out if this ethernet frame is addressed to us.  This affects
+           * what we're willing to receive.   Note that in promiscuous mode, the
+           * up_comparemac will always return 0.
+           */
+
+         is_ours = (up_comparemac(eth->dest, &g_sim_dev.d_mac) == 0);
+
 #ifdef CONFIG_NET_PKT
           /* When packet sockets are enabled, feed the frame into the packet
            * tap.
            */
 
-          pkt_input(&g_sim_dev);
+          if (is_ours)
+            {
+              pkt_input(&g_sim_dev);
+            }
 #endif
 
           /* We only accept IP packets of the configured type and ARP packets */
 
 #ifdef CONFIG_NET_IPv4
-          if (eth->type == HTONS(ETHTYPE_IP))
+          if (eth->type == HTONS(ETHTYPE_IP) && is_ours)
             {
               nllvdbg("IPv4 frame\n");
 
@@ -241,7 +252,7 @@ void netdriver_loop(void)
           else
 #endif
 #ifdef CONFIG_NET_IPv6
-          if (eth->type == HTONS(ETHTYPE_IP6))
+          if (eth->type == HTONS(ETHTYPE_IP6) && is_ours)
             {
               nllvdbg("Iv6 frame\n");
 
@@ -304,7 +315,20 @@ void netdriver_loop(void)
       timer_reset(&g_periodic_timer);
       devif_timer(&g_sim_dev, sim_txpoll);
     }
+
   sched_unlock();
+}
+
+int netdriver_ifup(struct net_driver_s *dev)
+{
+  netdev_ifup(dev->d_ipaddr);
+  return OK;
+}
+
+int netdriver_ifdown(struct net_driver_s *dev)
+{
+  netdev_ifdown();
+  return OK;
 }
 
 int netdriver_init(void)
@@ -313,6 +337,11 @@ int netdriver_init(void)
 
   timer_set(&g_periodic_timer, 500);
   netdev_init();
+
+  /* Set callbacks */
+
+  g_sim_dev.d_ifup   = netdriver_ifup;
+  g_sim_dev.d_ifdown = netdriver_ifdown;
 
   /* Register the device with the OS so that socket IOCTLs can be performed */
 

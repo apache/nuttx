@@ -90,6 +90,9 @@ int up_cryptoinitialize(void);
 int up_aesinitialize(void);
 int aes_cypher(FAR void *out, FAR const void *in, uint32_t size, FAR const void *iv,
                FAR const void *key, uint32_t keysize, int mode, int encrypt);
+int aes_init(FAR const void *iv, FAR const void *key, uint32_t keysize, int mode,
+               int encrypt);
+int aes_update(FAR const void *out, uint32_t *outl, FAR const void *in, uint32_t inl);
 #endif
 
 #if defined(CONFIG_CRYPTO_ALGTEST)

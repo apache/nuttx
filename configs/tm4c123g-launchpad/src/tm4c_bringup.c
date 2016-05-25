@@ -77,10 +77,10 @@ int tm4c_bringup(void)
 #ifdef CONFIG_TIVA_TIMER
   /* Initialize the timer driver */
 
-  ret = tiva_timer_initialize();
+  ret = tiva_timer_configure();
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: tiva_timer_initialize failed: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: tiva_timer_configure failed: %d\n", ret);
       return ret;
     }
 #endif /* CONFIG_TIVA_TIMER */

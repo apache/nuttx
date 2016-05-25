@@ -1,8 +1,9 @@
 /************************************************************************************
- * configs/spark/src/stm32_watchdog.c
+ * configs/stm32f411e-disco/src/stm32f411e-disco.h
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Authors: Frank Bennett
+ *            Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,105 +34,92 @@
  *
  ************************************************************************************/
 
+#ifndef __CONFIGS_STM32F411E_DISCO_SRC_STM32F411E_DISCO_H
+#define __CONFIGS_STM32F411E_DISCO_SRC_STM32F411E_DISCO_H
+
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/compiler.h>
 
-#include <errno.h>
-#include <debug.h>
-
-#include <nuttx/timers/watchdog.h>
-#include <arch/board/board.h>
-
-#include "stm32_wdg.h"
-
-#ifdef CONFIG_WATCHDOG
+#include <stdint.h>
 
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
-/* Configuration *******************************************************************/
-/* Wathdog hardware should be enabled */
+/* Configuration ********************************************************************/
 
-#if !defined(CONFIG_STM32_WWDG) && !defined(CONFIG_STM32_IWDG)
-#  warning "One of CONFIG_STM32_WWDG or CONFIG_STM32_IWDG must be defined"
-#endif
+/* LED.  User LD2: the green LED is a user LED connected to Arduino signal D13
+ * corresponding to MCU I/O PA5 (pin 21) or PB13 (pin 34) depending on the STM32
+ * target.
+ *
+ * - When the I/O is HIGH value, the LED is on.
+ * - When the I/O is LOW, the LED is off.
+ */
 
-/* Select the path to the registered watchdog timer device */
+#define GPIO_LD2 \
+  (GPIO_PORTD | GPIO_PIN12 | GPIO_OUTPUT_CLEAR | GPIO_OUTPUT | GPIO_PULLUP | \
+   GPIO_SPEED_50MHz)
 
-#ifndef CONFIG_STM32_WDG_DEVPATH
-#  ifdef CONFIG_EXAMPLES_WATCHDOG_DEVPATH
-#    define CONFIG_STM32_WDG_DEVPATH CONFIG_EXAMPLES_WATCHDOG_DEVPATH
-#  else
-#    define CONFIG_STM32_WDG_DEVPATH "/dev/watchdog0"
-#  endif
-#endif
+/* Buttons
+ *
+ * B1 USER: the user button is connected to the I/O PA0 of the STM32
+ * microcontroller.
+ */
 
-/* Use the un-calibrated LSI frequency if we have nothing better */
+#define MIN_IRQBUTTON   BUTTON_USER
+#define MAX_IRQBUTTON   BUTTON_USER
+#define NUM_IRQBUTTONS  1
 
-#if defined(CONFIG_STM32_IWDG) && !defined(CONFIG_STM32_LSIFREQ)
-#  define CONFIG_STM32_LSIFREQ STM32_LSI_FREQUENCY
-#endif
+#define GPIO_BTN_USER \
+  (GPIO_INPUT |GPIO_FLOAT |GPIO_EXTI | GPIO_PORTA | GPIO_PIN0)
 
-/* Debug ***************************************************************************/
-/* Non-standard debug that may be enabled just for testing the watchdog timer */
+/* SPI1 off */
 
-#ifndef CONFIG_DEBUG
-#  undef CONFIG_DEBUG_WATCHDOG
-#endif
-
-#ifdef CONFIG_DEBUG_WATCHDOG
-#  define wdgdbg                 dbg
-#  define wdglldbg               lldbg
-#  ifdef CONFIG_DEBUG_VERBOSE
-#    define wdgvdbg              vdbg
-#    define wdgllvdbg            llvdbg
-#  else
-#    define wdgvdbg(x...)
-#    define wdgllvdbg(x...)
-#  endif
-#else
-#  define wdgdbg(x...)
-#  define wdglldbg(x...)
-#  define wdgvdbg(x...)
-#  define wdgllvdbg(x...)
-#endif
+#define GPIO_SPI1_MOSI_OFF (GPIO_INPUT | GPIO_PULLDOWN | \
+                            GPIO_PORTA | GPIO_PIN7)
+#define GPIO_SPI1_MISO_OFF (GPIO_INPUT | GPIO_PULLDOWN | \
+                            GPIO_PORTA | GPIO_PIN6)
+#define GPIO_SPI1_SCK_OFF  (GPIO_INPUT | GPIO_PULLDOWN | \
+                            GPIO_PORTA | GPIO_PIN5)
 
 /************************************************************************************
- * Private Functions
+ * Public Data
  ************************************************************************************/
+
+/* Global driver instances */
+
+#ifdef CONFIG_STM32_SPI1
+extern struct spi_dev_s *g_spi1;
+#endif
+#ifdef CONFIG_STM32_SPI2
+extern struct spi_dev_s *g_spi2;
+#endif
 
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
 
-/****************************************************************************
- * Name: up_wdginitialize()
+/************************************************************************************
+ * Name: stm32_spidev_initialize
  *
  * Description:
- *   Perform architecuture-specific initialization of the Watchdog hardware.
- *   This interface must be provided by all configurations using
- *   apps/examples/watchdog
+ *   Called to configure SPI chip select GPIO pins.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
-int up_wdginitialize(void)
-{
-  /* Initialize and register the watchdog timer device */
+void stm32_spidev_initialize(void);
 
-#if defined(CONFIG_STM32_WWDG)
-  stm32_wwdginitialize(CONFIG_STM32_WDG_DEVPATH);
-  return OK;
+/************************************************************************************
+ * Name: stm32_usbinitialize
+ *
+ * Description:
+ *   Called to setup USB-related GPIO pins.
+ *
+ ************************************************************************************/
 
-#elif defined(CONFIG_STM32_IWDG)
-  stm32_iwdginitialize(CONFIG_STM32_WDG_DEVPATH, CONFIG_STM32_LSIFREQ);
-  return OK;
+void stm32_usbinitialize(void);
 
-#else
-  return -ENODEV;
-#endif
-}
-
-#endif /* CONFIG_WATCHDOG */
+#endif /* __CONFIGS_STM32F411E_DISCO_SRC_STM32F411E_DISCO_H */

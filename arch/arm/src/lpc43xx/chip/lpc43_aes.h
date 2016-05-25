@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/lpc43xx/chip/lpc43_aes.h
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,6 +45,7 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+
 /* The AES is controlled through a set of simple API calls located in the LPC43xx
  * ROM.  This value holds the pointer to the AES driver table.
  */
@@ -86,17 +87,32 @@ struct lpc43_aes_s
 
   /* Loads 128-bit AES software defined user key (16 bytes) */
 
-  void (*aes_LoadKeySW)(unsigned char *key);
+  void (*aes_LoadKeySW)(const unsigned char *key);
 
   /* Loads 128-bit AES initialization vector (16 bytes) */
 
-  void (*aes_LoadIV_SW)(unsigned char *iv);
+  void (*aes_LoadIV_SW)(const unsigned char *iv);
 
   /* Loads 128-bit AES IC specific initialization vector, which is used to decrypt
    * a boot image.
    */
 
   void (*aes_LoadIV_IC)(void);
+
+  /* Process data */
+
+  unsigned int (*aes_Operate)(unsigned char* out, const unsigned char* in, unsigned blocks);
+};
+
+enum lpc43_aes_errorcodes_e
+{
+  AES_API_ERR_BASE = 0x30000,
+  AES_API_ERR_WRONG_CMD,
+  AES_API_ERR_NOT_SUPPORTED,
+  AES_API_ERR_KEY_ALREADY_PROGRAMMED,
+  AES_API_ERR_DMA_CHANNEL_CFG,
+  AES_API_ERR_DMA_MUX_CFG,
+  AES_API_ERR_DMA_BUSY
 };
 
 /************************************************************************************

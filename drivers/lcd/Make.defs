@@ -103,6 +103,10 @@ ifeq ($(CONFIG_LCD_RA8875),y)
   CSRCS += ra8875.c
 endif
 
+ifeq ($(CONFIG_LCD_BACKPACK),y)
+  CSRCS += pcf8574_lcd_backpack.c
+endif
+
 # Include LCD driver build support
 
 DEPPATH += --dep-path lcd

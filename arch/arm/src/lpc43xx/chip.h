@@ -141,6 +141,10 @@
 #  define  ARMV7M_PERIPHERAL_INTERRUPTS 53
 #  include "chip/lpc435357_memorymap.h"
 #  include "chip/lpc4357fet256_pinconfig.h"
+#elif defined(CONFIG_ARCH_CHIP_LPC4337JET100)
+#  define  ARMV7M_PERIPHERAL_INTERRUPTS 53
+#  include "chip/lpc435357_memorymap.h"
+#  include "chip/lpc4337jet100_pinconfig.h"
 #else
 #  error "Unsupported LPC43xx chip"
 #endif

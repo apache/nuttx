@@ -66,6 +66,46 @@ extern "C"
  * Public Functions
  ****************************************************************************/
 
+/****************************************************************************
+ * Name: sam_wdt_initialize()
+ *
+ * Description:
+ *   Perform architecture-specific initialization of the WDT hardware.
+ *   This interface should be provided by all configurations using
+ *   to avoid exposed platform-dependent logic.
+ *
+ *   At a minimum, this function should call watchdog_register().
+ *
+ * Input parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int sam_wdt_initialize(void);
+
+/****************************************************************************
+ * Name: sam_rswdt_initialize()
+ *
+ * Description:
+ *   Perform architecture-specific initialization of the RSWDT hardware.
+ *   This interface should be provided by all configurations using
+ *   to avoid exposed platform-dependent logic.
+ *
+ *   At a minimum, this function should call watchdog_register().
+ *
+ * Input parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int sam_rswdt_initialize(void);
+
 #undef EXTERN
 #if defined(__cplusplus)
 }

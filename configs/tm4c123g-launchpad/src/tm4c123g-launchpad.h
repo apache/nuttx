@@ -226,7 +226,7 @@ int tm4c_at24_automount(int minor);
 #endif
 
 /****************************************************************************
- * Name: tiva_timer_initialize
+ * Name: tiva_timer_configure
  *
  * Description:
  *   Configure the timer driver
@@ -234,7 +234,7 @@ int tm4c_at24_automount(int minor);
  ****************************************************************************/
 
 #ifdef CONFIG_TIVA_TIMER
-int tiva_timer_initialize(void);
+int tiva_timer_configure(void);
 #endif
 
 /************************************************************************************

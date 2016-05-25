@@ -266,6 +266,24 @@ static inline int sam_gpio_pinmask(gpio_pinset_t cfgset)
  ************************************************************************************/
 
 /************************************************************************************
+ * Function:  sam_gpioinit
+ *
+ * Description:
+ *   Based on configuration within the .config file, it does:
+ *    - Remaps positions of alternative functions for GPIO.
+ *
+ *   Typically called from sam_start().
+ *
+ ************************************************************************************/
+
+#if !defined(CONFIG_SAMV7_ERASE_ENABLE) || \
+    !defined(CONFIG_SAMV7_JTAG_FULL_ENABLE)
+void sam_gpioinit(void);
+#else
+#  define sam_gpioinit()
+#endif
+
+/************************************************************************************
  * Name: sam_gpioirqinitialize
  *
  * Description:

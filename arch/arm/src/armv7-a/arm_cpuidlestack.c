@@ -47,7 +47,7 @@
 #include "smp.h"
 #include "up_internal.h"
 
-#if defined(CONFIG_SMP) && CONFIG_SMP_NCPUS > 1
+#ifdef CONFIG_SMP
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -61,6 +61,7 @@
  * Private Data
  ****************************************************************************/
 
+#if CONFIG_SMP_NCPUS > 1
 static FAR const uint32_t *g_cpu_stackalloc[CONFIG_SMP_NCPUS] =
 {
     0
@@ -72,6 +73,7 @@ static FAR const uint32_t *g_cpu_stackalloc[CONFIG_SMP_NCPUS] =
 #endif /* CONFIG_SMP_NCPUS > 3 */
 #endif /* CONFIG_SMP_NCPUS > 2 */
 };
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -122,6 +124,7 @@ static FAR const uint32_t *g_cpu_stackalloc[CONFIG_SMP_NCPUS] =
 
 int up_cpu_idlestack(int cpu, FAR struct tcb_s *tcb, size_t stack_size)
 {
+#if CONFIG_SMP_NCPUS > 1
   uintptr_t stack_alloc;
   uintptr_t top_of_stack;
 
@@ -138,8 +141,9 @@ int up_cpu_idlestack(int cpu, FAR struct tcb_s *tcb, size_t stack_size)
   tcb->adj_stack_size  = SMP_STACK_SIZE;
   tcb->stack_alloc_ptr = (FAR uint32_t *)stack_alloc;
   tcb->adj_stack_ptr   = (FAR uint32_t *)top_of_stack;
+#endif
 
   return OK;
 }
 
-#endif /* CONFIG_SMP && CONFIG_SMP_NCPUS > 1 */
+#endif /* CONFIG_SMP */

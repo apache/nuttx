@@ -782,7 +782,27 @@ config STM32L4_FLOWCONTROL_BROKEN
 		nRTS after every byte received)  Enable this setting workaround
 		this issue by useing software based management of RTS
 
-endmenu
+config STM32L4_USART_BREAKS
+	bool "Add TIOxSBRK to support sending Breaks"
+	depends on STM32_USART
+	default n
+	---help---
+		Add TIOCxBRK routines to send a line break per the STM32 manual, the
+		break will be a pulse based on the value M. This is not a BSD compatible
+		break.
+
+config STM32L4_SERIALBRK_BSDCOMPAT
+	bool "Use GPIO To send Break"
+	depends on STM32_USART && STM32_USART_BREAKS
+	default n
+	---help---
+		Enable using GPIO on the TX pin to send a BSD compatible break:
+		TIOCSBRK will start the break and TIOCCBRK will end the break.
+		The current STM32 U[S]ARTS have no way to leave the break (TX=LOW)
+		on because the SW starts the break and then the HW automatically clears
+		the break. This makes it is difficult to sent a long break.
+
+endmenu # U[S]ART Configuration
 
 menu "SPI Configuration"
 	depends on STM32L4_SPI
@@ -841,6 +861,29 @@ config STM32L4_I2C_DUTY16_9
 	default n
 	depends on STM32L4_I2C
 
+endmenu
+
+menu "CAN driver configuration"
+	depends on STM32L4_CAN1
+
+config CAN1_BAUD
+	int "CAN1 BAUD"
+	default 250000
+	depends on STM32L4_CAN1
+	---help---
+		CAN1 BAUD rate.  Required if STM32L4_CAN1 is defined.
+
+config CAN_TSEG1
+	int "TSEG1 quanta"
+	default 6
+	---help---
+		The number of CAN time quanta in segment 1. Default: 6
+
+config CAN_TSEG2
+	int "TSEG2 quanta"
+	default 7
+	---help---
+		The number of CAN time quanta in segment 2. Default: 7
 endmenu
 
 endif # ARCH_CHIP_STM32L4

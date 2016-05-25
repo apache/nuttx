@@ -1,0 +1,24 @@
+/*
+ * Debug support for low-power modes
+ * To enter low-power mode, the instruction WFI or WFE must be executed.
+ * The MCU implements several low-power modes which can either deactivate the CPU clock
+ * or reduce the power of the CPU.
+ * The core does not allow FCLK or HCLK to be turned off during a debug session. As these
+ * are required for the debugger connection, during a debug, they must remain active. The
+ * MCU integrates special means to allow the user to debug software in low-power modes.
+ * For this, the debugger host must first set some debug configuration registers to change the
+ * low-power mode behavior:
+ *   In Sleep mode, DBG_SLEEP bit of DBGMCU_CR register must be previously set by
+ *   the debugger. This will feed HCLK with the same clock that is provided to FCLK
+ *   (system clock previously configured by the software).
+ * 	 In Stop mode, the bit DBG_STOP must be previously set by the debugger. This will
+ *   enable the internal RC oscillator clock to feed FCLK and HCLK in STOP mode.
+ */
+
+execUserExecutionStarted()
+{
+  if (!__driverType("sim"))
+  {
+    __writeMemory32(__readMemory32(0xE0042004, "Memory") | 0x3, 0xE0042004, "Memory"); // Set DBG_SLEEP and DBG_STOP in DBGMCU_CR
+  }
+}

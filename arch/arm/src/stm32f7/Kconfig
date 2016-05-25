@@ -435,6 +435,255 @@ config STM32F7_WWDG
 
 endmenu
 
+menu "U[S]ART Configuration"
+	depends on STM32F7_USART
+
+config USART1_RS485
+	bool "RS-485 on USART1"
+	default n
+	depends on STM32F7_USART1
+	---help---
+		Enable RS-485 interface on USART1. Your board config will have to
+		provide GPIO_USART1_RS485_DIR pin definition. Currently it cannot be
+		used with USART1_RXDMA.
+
+config USART1_RS485_DIR_POLARITY
+	int "USART1 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	depends on USART1_RS485
+	---help---
+		Polarity of DIR pin for RS-485 on USART1. Set to state on DIR pin which
+		enables TX (0 - low / nTXEN, 1 - high / TXEN).
+
+config USART1_RXDMA
+	bool "USART1 Rx DMA"
+	default n
+	depends on STM32F7_USART1 && STM32F7_DMA1
+	---help---
+		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+config USART2_RS485
+	bool "RS-485 on USART2"
+	default n
+	depends on STM32F7_USART2
+	---help---
+		Enable RS-485 interface on USART2. Your board config will have to
+		provide GPIO_USART2_RS485_DIR pin definition. Currently it cannot be
+		used with USART2_RXDMA.
+
+config USART2_RS485_DIR_POLARITY
+	int "USART2 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	depends on USART2_RS485
+	---help---
+		Polarity of DIR pin for RS-485 on USART2. Set to state on DIR pin which
+		enables TX (0 - low / nTXEN, 1 - high / TXEN).
+
+config USART2_RXDMA
+	bool "USART2 Rx DMA"
+	default n
+	depends on STM32F7_USART2 && STM32F7_DMA1
+	---help---
+		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+config USART3_RS485
+	bool "RS-485 on USART3"
+	default n
+	depends on STM32F7_USART3
+	---help---
+		Enable RS-485 interface on USART3. Your board config will have to
+		provide GPIO_USART3_RS485_DIR pin definition. Currently it cannot be
+		used with USART3_RXDMA.
+
+config USART3_RS485_DIR_POLARITY
+	int "USART3 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	depends on USART3_RS485
+	---help---
+		Polarity of DIR pin for RS-485 on USART3. Set to state on DIR pin which
+		enables TX (0 - low / nTXEN, 1 - high / TXEN).
+
+config USART3_RXDMA
+	bool "USART3 Rx DMA"
+	default n
+	depends on STM32F7_USART3 && STM32F7_DMA1
+	---help---
+		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+config UART4_RS485
+	bool "RS-485 on UART4"
+	default n
+	depends on STM32F7_UART4
+	---help---
+		Enable RS-485 interface on UART4. Your board config will have to
+		provide GPIO_UART4_RS485_DIR pin definition. Currently it cannot be
+		used with UART4_RXDMA.
+
+config UART4_RS485_DIR_POLARITY
+	int "UART4 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	depends on UART4_RS485
+	---help---
+		Polarity of DIR pin for RS-485 on UART4. Set to state on DIR pin which
+		enables TX (0 - low / nTXEN, 1 - high / TXEN).
+
+config UART4_RXDMA
+	bool "UART4 Rx DMA"
+	default n
+	depends on STM32F7_UART4 && STM32F7_DMA1
+	---help---
+		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+config UART5_RS485
+	bool "RS-485 on UART5"
+	default n
+	depends on STM32F7_UART5
+	---help---
+		Enable RS-485 interface on UART5. Your board config will have to
+		provide GPIO_UART5_RS485_DIR pin definition. Currently it cannot be
+		used with UART5_RXDMA.
+
+config UART5_RS485_DIR_POLARITY
+	int "UART5 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	depends on UART5_RS485
+	---help---
+		Polarity of DIR pin for RS-485 on UART5. Set to state on DIR pin which
+		enables TX (0 - low / nTXEN, 1 - high / TXEN).
+
+config UART5_RXDMA
+	bool "UART5 Rx DMA"
+	default n
+	depends on STM32F7_UART5 && STM32F7_DMA1
+	---help---
+		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+config USART6_RS485
+	bool "RS-485 on USART6"
+	default n
+	depends on STM32F7_USART6
+	---help---
+		Enable RS-485 interface on USART6. Your board config will have to
+		provide GPIO_USART6_RS485_DIR pin definition. Currently it cannot be
+		used with USART6_RXDMA.
+
+config USART6_RS485_DIR_POLARITY
+	int "USART6 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	depends on USART6_RS485
+	---help---
+		Polarity of DIR pin for RS-485 on USART6. Set to state on DIR pin which
+		enables TX (0 - low / nTXEN, 1 - high / TXEN).
+
+config USART6_RXDMA
+	bool "USART6 Rx DMA"
+	default n
+	depends on STM32F7_USART6 && STM32F7_DMA2
+	---help---
+		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+config UART7_RS485
+	bool "RS-485 on UART7"
+	default n
+	depends on STM32F7_UART7
+	---help---
+		Enable RS-485 interface on UART7. Your board config will have to
+		provide GPIO_UART7_RS485_DIR pin definition. Currently it cannot be
+		used with UART7_RXDMA.
+
+config UART7_RS485_DIR_POLARITY
+	int "UART7 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	depends on UART7_RS485
+	---help---
+		Polarity of DIR pin for RS-485 on UART7. Set to state on DIR pin which
+		enables TX (0 - low / nTXEN, 1 - high / TXEN).
+
+config UART7_RXDMA
+	bool "UART7 Rx DMA"
+	default n
+	depends on STM32F7_UART7 && STM32F7_DMA2
+	---help---
+		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+config UART8_RS485
+	bool "RS-485 on UART8"
+	default n
+	depends on STM32F7_UART8
+	---help---
+		Enable RS-485 interface on UART8. Your board config will have to
+		provide GPIO_UART8_RS485_DIR pin definition. Currently it cannot be
+		used with UART8_RXDMA.
+
+config UART8_RS485_DIR_POLARITY
+	int "UART8 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	depends on UART8_RS485
+	---help---
+		Polarity of DIR pin for RS-485 on UART8. Set to state on DIR pin which
+		enables TX (0 - low / nTXEN, 1 - high / TXEN).
+
+config UART8_RXDMA
+	bool "UART8 Rx DMA"
+	default n
+	depends on STM32F7_UART8 && STM32F7_DMA2
+	---help---
+		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+config SERIAL_DISABLE_REORDERING
+	bool "Disable reordering of ttySx devices."
+	depends on STM32F7_USART1 || STM32F7_USART2 || STM32F7_USART3 || STM32F7_UART4 || STM32F7_UART5 || STM32F7_USART6 || STM32F7_UART7 || STM32F7_UART8
+	default n
+	---help---
+		NuttX per default reorders the serial ports (/dev/ttySx) so that the
+		console is always on /dev/ttyS0. If more than one UART is in use this
+		can, however, have the side-effect that all port mappings
+		(hardware USART1 -> /dev/ttyS0) change if the console is moved to another
+		UART. This is in particular relevant if a project uses the USB console
+		in some configs and a serial console in other configs, but does not
+		want the side effect of having all serial port names change when just
+		the console is moved from serial to USB.
+
+config STM32F7_FLOWCONTROL_BROKEN
+	bool "Use Software UART RTS flow control"
+	depends on STM32F7_USART
+	default n
+	---help---
+		Enable UART RTS flow control using Software. Because STM
+		Current STM32 have broken HW based RTS behavior (they assert
+		nRTS after every byte received)  Enable this setting workaround
+		this issue by useing software based management of RTS
+
+config STM32F7_USART_BREAKS
+	bool "Add TIOxSBRK to support sending Breaks"
+	depends on STM32F7_USART
+	default n
+	---help---
+		Add TIOCxBRK routines to send a line break per the STM32 manual, the
+		break will be a pulse based on the value M. This is not a BSD compatible
+		break.
+
+config STM32F7_SERIALBRK_BSDCOMPAT
+	bool "Use GPIO To send Break"
+	depends on STM32F7_USART && STM32F7_USART_BREAKS
+	default n
+	---help---
+		Enable using GPIO on the TX pin to send a BSD compatible break:
+		TIOCSBRK will start the break and TIOCCBRK will end the break.
+		The current STM32 U[S]ARTS have no way to leave the break (TX=LOW)
+		on because the SW starts the break and then the HW automatically clears
+		the break. This makes it is difficult to sent a long break.
+
+endmenu # U[S]ART Configuration
+
 config STM32F7_CUSTOM_CLOCKCONFIG
         bool "Custom clock configuration"
 	default n

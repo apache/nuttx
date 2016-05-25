@@ -161,7 +161,7 @@ int tm4c_bringup(void)
 #ifdef HAVE_TIMER
   /* Initialize the timer driver */
 
-  ret = tiva_timer_initialize();
+  ret = tiva_timer_configure();
   if (ret < 0)
     {
       dbg("ERROR: Failed to initialize timer driver: %d\n", ret);

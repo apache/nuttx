@@ -58,6 +58,7 @@
 #include "sam_mpuinit.h"
 #include "sam_userspace.h"
 #include "sam_start.h"
+#include "sam_gpio.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -357,6 +358,7 @@ void __start(void)
 
   sam_clockconfig();
   sam_fpuconfig();
+  sam_gpioinit();
   sam_lowsetup();
 
   /* Enable/disable tightly coupled memories */
