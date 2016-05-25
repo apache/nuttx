@@ -42,61 +42,11 @@
 
 #include <nuttx/config.h>
 
-#include "chip.h"
-
-#if defined(CONFIG_STM32_STM32L15XX)
-#  include "chip/stm32l15xxx_uart.h"
-#elif defined(CONFIG_STM32_STM32F10XX)
-#  include "chip/stm32f10xxx_uart.h"
-#elif defined(CONFIG_STM32_STM32F20XX)
-#  include "chip/stm32f20xxx_uart.h"
-#elif defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX)
-#  include "chip/stm32f30xxx_uart.h"
-#elif defined(CONFIG_STM32_STM32F40XX)
-#  include "chip/stm32f40xxx_uart.h"
-#else
-#  error "Unsupported STM32 UART"
-#endif
+#include "stm32_uart.h"
 
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
-
-/* Check 1-Wire and U(S)ART conflicting */
-
-#if defined(CONFIG_STM32_1WIRE1) && defined(CONFIG_STM32_USART1)
-#  undef CONFIG_STM32_1WIRE1
-#endif
-#if defined(CONFIG_STM32_1WIRE2) && defined(CONFIG_STM32_USART2)
-#  undef CONFIG_STM32_1WIRE2
-#endif
-#if defined(CONFIG_STM32_1WIRE3) && defined(CONFIG_STM32_USART3)
-#  undef CONFIG_STM32_1WIRE3
-#endif
-#if defined(CONFIG_STM32_1WIRE4) && defined(CONFIG_STM32_UART4)
-#  undef CONFIG_STM32_1WIRE4
-#endif
-#if defined(CONFIG_STM32_1WIRE5) && defined(CONFIG_STM32_UART5)
-#  undef CONFIG_STM32_1WIRE5
-#endif
-#if defined(CONFIG_STM32_1WIRE6) && defined(CONFIG_STM32_USART6)
-#  undef CONFIG_STM32_1WIRE6
-#endif
-#if defined(CONFIG_STM32_1WIRE7) && defined(CONFIG_STM32_UART7)
-#  undef CONFIG_STM32_1WIRE7
-#endif
-#if defined(CONFIG_STM32_1WIRE8) && defined(CONFIG_STM32_UART8)
-#  undef CONFIG_STM32_1WIRE8
-#endif
-
-/* Is there a 1-Wire enabled? */
-
-#if defined(CONFIG_STM32_1WIRE1) || defined(CONFIG_STM32_1WIRE2) || \
-    defined(CONFIG_STM32_1WIRE3) || defined(CONFIG_STM32_1WIRE4) || \
-    defined(CONFIG_STM32_1WIRE5) || defined(CONFIG_STM32_1WIRE6) || \
-    defined(CONFIG_STM32_1WIRE7) || defined(CONFIG_STM32_1WIRE8)
-#  define HAVE_1WIRE 1
-#endif
 
 /************************************************************************************
  * Public Types

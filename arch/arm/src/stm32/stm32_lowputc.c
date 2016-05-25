@@ -436,7 +436,7 @@ void up_lowputc(char ch)
 
 void stm32_lowsetup(void)
 {
-#if defined(HAVE_UART)
+#if defined(HAVE_SERIALDRIVER)
   uint32_t mapr;
 #if defined(HAVE_CONSOLE) && !defined(CONFIG_SUPPRESS_UART_CONFIG)
   uint32_t cr;
@@ -559,7 +559,7 @@ void stm32_lowsetup(void)
   putreg32(cr, STM32_CONSOLE_BASE + STM32_USART_CR1_OFFSET);
 
 #endif /* HAVE_CONSOLE && !CONFIG_SUPPRESS_UART_CONFIG */
-#endif /* HAVE_UART */
+#endif /* HAVE_SERIALDRIVER */
 }
 
 #elif defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F20XX) || \
@@ -568,7 +568,7 @@ void stm32_lowsetup(void)
 
 void stm32_lowsetup(void)
 {
-#if defined(HAVE_UART)
+#if defined(HAVE_SERIALDRIVER)
 #if defined(HAVE_CONSOLE) && !defined(CONFIG_SUPPRESS_UART_CONFIG)
   uint32_t cr;
 #endif
@@ -638,7 +638,7 @@ void stm32_lowsetup(void)
   putreg32(cr, STM32_CONSOLE_BASE + STM32_USART_CR1_OFFSET);
 
 #endif /* HAVE_CONSOLE && !CONFIG_SUPPRESS_UART_CONFIG */
-#endif /* HAVE_UART */
+#endif /* HAVE_SERIALDRIVER */
 }
 
 #else

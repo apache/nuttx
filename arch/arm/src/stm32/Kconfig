@@ -2160,63 +2160,47 @@ config STM32_TSC
 config STM32_USART1
 	bool "USART1"
 	default n
-	select USART1_SERIALDRIVER
-	select ARCH_HAVE_SERIAL_TERMIOS
 	select STM32_USART
 
 config STM32_USART2
 	bool "USART2"
 	default n
-	select USART2_SERIALDRIVER
-	select ARCH_HAVE_SERIAL_TERMIOS
 	select STM32_USART
 
 config STM32_USART3
 	bool "USART3"
 	default n
 	depends on STM32_HAVE_USART3
-	select ARCH_HAVE_SERIAL_TERMIOS
-	select USART3_SERIALDRIVER
 	select STM32_USART
 
 config STM32_UART4
 	bool "UART4"
 	default n
 	depends on STM32_HAVE_UART4
-	select ARCH_HAVE_SERIAL_TERMIOS
-	select UART4_SERIALDRIVER
 	select STM32_USART
 
 config STM32_UART5
 	bool "UART5"
 	default n
 	depends on STM32_HAVE_UART5
-	select ARCH_HAVE_SERIAL_TERMIOS
-	select UART5_SERIALDRIVER
 	select STM32_USART
 
 config STM32_USART6
 	bool "USART6"
 	default n
 	depends on STM32_HAVE_USART6
-	select ARCH_HAVE_SERIAL_TERMIOS
-	select USART6_SERIALDRIVER
 	select STM32_USART
 
 config STM32_UART7
 	bool "UART7"
 	default n
 	depends on STM32_HAVE_UART7
-	select ARCH_HAVE_SERIAL_TERMIOS
-	select UART7_SERIALDRIVER
 	select STM32_USART
 
 config STM32_UART8
 	bool "UART8"
 	default n
 	depends on STM32_HAVE_UART8
-	select ARCH_HAVE_SERIAL_TERMIOS
-	select UART8_SERIALDRIVER
 	select STM32_USART
 
 config STM32_USB
@@ -5414,13 +5398,37 @@ endmenu
 config STM32_USART
 	bool
 
+config STM32_SERIALDRIVER
+	bool
+
+config STM32_1WIREDRIVER
+	bool
+
 menu "U[S]ART Configuration"
 	depends on STM32_USART
+
+choice
+	prompt "USART1 Driver Configuration"
+	default STM32_USART1_SERIALDRIVER
+	depends on STM32_USART1
+
+config STM32_USART1_SERIALDRIVER
+	bool "Standard serial driver"
+	select USART1_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select STM32_SERIALDRIVER
+
+config STM32_USART1_1WIREDRIVER
+	bool "1-Wire driver"
+	select STM32_1WIREDRIVER
+
+endchoice # USART1 Driver Configuration
+
+if STM32_USART1_SERIALDRIVER
 
 config USART1_RS485
 	bool "RS-485 on USART1"
 	default n
-	depends on STM32_USART1
 	---help---
 		Enable RS-485 interface on USART1. Your board config will have to
 		provide GPIO_USART1_RS485_DIR pin definition. Currently it cannot be
@@ -5438,14 +5446,34 @@ config USART1_RS485_DIR_POLARITY
 config USART1_RXDMA
 	bool "USART1 Rx DMA"
 	default n
-	depends on STM32_USART1 && (((STM32_STM32F10XX || STM32_STM32L15XX) && STM32_DMA1) || (!STM32_STM32F10XX && STM32_DMA2))
+	depends on (((STM32_STM32F10XX || STM32_STM32L15XX) && STM32_DMA1) || (!STM32_STM32F10XX && STM32_DMA2))
 	---help---
 		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+endif # STM32_USART1_SERIALDRIVER
+
+choice
+	prompt "USART2 Driver Configuration"
+	default STM32_USART2_SERIALDRIVER
+	depends on STM32_USART2
+
+config STM32_USART2_SERIALDRIVER
+	bool "Standard serial driver"
+	select USART2_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select STM32_SERIALDRIVER
+
+config STM32_USART2_1WIREDRIVER
+	bool "1-Wire driver"
+	select STM32_1WIREDRIVER
+
+endchoice # USART2 Driver Configuration
+
+if STM32_USART2_SERIALDRIVER
 
 config USART2_RS485
 	bool "RS-485 on USART2"
 	default n
-	depends on STM32_USART2
 	---help---
 		Enable RS-485 interface on USART2. Your board config will have to
 		provide GPIO_USART2_RS485_DIR pin definition. Currently it cannot be
@@ -5463,14 +5491,34 @@ config USART2_RS485_DIR_POLARITY
 config USART2_RXDMA
 	bool "USART2 Rx DMA"
 	default n
-	depends on STM32_USART2 && STM32_DMA1
+	depends on STM32_DMA1
 	---help---
 		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+endif # STM32_USART2_SERIALDRIVER
+
+choice
+	prompt "USART3 Driver Configuration"
+	default STM32_USART3_SERIALDRIVER
+	depends on STM32_USART3
+
+config STM32_USART3_SERIALDRIVER
+	bool "Standard serial driver"
+	select USART3_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select STM32_SERIALDRIVER
+
+config STM32_USART3_1WIREDRIVER
+	bool "1-Wire driver"
+	select STM32_1WIREDRIVER
+
+endchoice # USART3 Driver Configuration
+
+if STM32_USART3_SERIALDRIVER
 
 config USART3_RS485
 	bool "RS-485 on USART3"
 	default n
-	depends on STM32_USART3
 	---help---
 		Enable RS-485 interface on USART3. Your board config will have to
 		provide GPIO_USART3_RS485_DIR pin definition. Currently it cannot be
@@ -5488,14 +5536,34 @@ config USART3_RS485_DIR_POLARITY
 config USART3_RXDMA
 	bool "USART3 Rx DMA"
 	default n
-	depends on STM32_USART3 && STM32_DMA1
+	depends on STM32_DMA1
 	---help---
 		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+endif # STM32_USART3_SERIALDRIVER
+
+choice
+	prompt "UART4 Driver Configuration"
+	default STM32_UART4_SERIALDRIVER
+	depends on STM32_UART4
+
+config STM32_UART4_SERIALDRIVER
+	bool "Standard serial driver"
+	select UART4_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select STM32_SERIALDRIVER
+
+config STM32_UART4_1WIREDRIVER
+	bool "1-Wire driver"
+	select STM32_1WIREDRIVER
+
+endchoice # UART1 Driver Configuration
+
+if STM32_UART4_SERIALDRIVER
 
 config UART4_RS485
 	bool "RS-485 on UART4"
 	default n
-	depends on STM32_UART4
 	---help---
 		Enable RS-485 interface on UART4. Your board config will have to
 		provide GPIO_UART4_RS485_DIR pin definition. Currently it cannot be
@@ -5513,14 +5581,34 @@ config UART4_RS485_DIR_POLARITY
 config UART4_RXDMA
 	bool "UART4 Rx DMA"
 	default n
-	depends on STM32_UART4 && STM32_DMA1
+	depends on STM32_DMA1
 	---help---
 		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+endif # STM32_UART4_SERIALDRIVER
+
+choice
+	prompt "UART5 Driver Configuration"
+	default STM32_UART5_SERIALDRIVER
+	depends on STM32_UART5
+
+config STM32_UART5_SERIALDRIVER
+	bool "Standard serial driver"
+	select UART5_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select STM32_SERIALDRIVER
+
+config STM32_UART5_1WIREDRIVER
+	bool "1-Wire driver"
+	select STM32_1WIREDRIVER
+
+endchoice # UART5 Driver Configuration
+
+if STM32_UART5_SERIALDRIVER
 
 config UART5_RS485
 	bool "RS-485 on UART5"
 	default n
-	depends on STM32_UART5
 	---help---
 		Enable RS-485 interface on UART5. Your board config will have to
 		provide GPIO_UART5_RS485_DIR pin definition. Currently it cannot be
@@ -5538,14 +5626,34 @@ config UART5_RS485_DIR_POLARITY
 config UART5_RXDMA
 	bool "UART5 Rx DMA"
 	default n
-	depends on STM32_UART5 && STM32_DMA1
+	depends on STM32_DMA1
 	---help---
 		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+endif # STM32_UART5_SERIALDRIVER
+
+choice
+	prompt "USART6 Driver Configuration"
+	default STM32_USART6_SERIALDRIVER
+	depends on STM32_USART6
+
+config STM32_USART6_SERIALDRIVER
+	bool "Standard serial driver"
+	select USART6_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select STM32_SERIALDRIVER
+
+config STM32_USART6_1WIREDRIVER
+	bool "1-Wire driver"
+	select STM32_1WIREDRIVER
+
+endchoice # USART6 Driver Configuration
+
+if STM32_USART6_SERIALDRIVER
 
 config USART6_RS485
 	bool "RS-485 on USART6"
 	default n
-	depends on STM32_USART6
 	---help---
 		Enable RS-485 interface on USART6. Your board config will have to
 		provide GPIO_USART6_RS485_DIR pin definition. Currently it cannot be
@@ -5563,14 +5671,34 @@ config USART6_RS485_DIR_POLARITY
 config USART6_RXDMA
 	bool "USART6 Rx DMA"
 	default n
-	depends on STM32_USART6 && STM32_DMA2
+	depends on STM32_DMA2
 	---help---
 		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+endif # STM32_USART6_SERIALDRIVER
+
+choice
+	prompt "UART7 Driver Configuration"
+	default STM32_UART7_SERIALDRIVER
+	depends on STM32_UART7
+
+config STM32_UART7_SERIALDRIVER
+	bool "Standard serial driver"
+	select UART7_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select STM32_SERIALDRIVER
+
+config STM32_UART7_1WIREDRIVER
+	bool "1-Wire driver"
+	select STM32_1WIREDRIVER
+
+endchoice # UART7 Driver Configuration
+
+if STM32_UART7_SERIALDRIVER
 
 config UART7_RS485
 	bool "RS-485 on UART7"
 	default n
-	depends on STM32_UART7
 	---help---
 		Enable RS-485 interface on UART7. Your board config will have to
 		provide GPIO_UART7_RS485_DIR pin definition. Currently it cannot be
@@ -5588,14 +5716,34 @@ config UART7_RS485_DIR_POLARITY
 config UART7_RXDMA
 	bool "UART7 Rx DMA"
 	default n
-	depends on STM32_UART7 && STM32_DMA2
+	depends on STM32_DMA2
 	---help---
 		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+endif # STM32_UART7_SERIALDRIVER
+
+choice
+	prompt "UART8 Driver Configuration"
+	default STM32_UART8_SERIALDRIVER
+	depends on STM32_UART7
+
+config STM32_UART8_SERIALDRIVER
+	bool "Standard serial driver"
+	select UART8_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select STM32_SERIALDRIVER
+
+config STM32_UART8_1WIREDRIVER
+	bool "1-Wire driver"
+	select STM32_1WIREDRIVER
+
+endchoice # UART8 Driver Configuration
+
+if STM32_UART8_SERIALDRIVER
 
 config UART8_RS485
 	bool "RS-485 on UART8"
 	default n
-	depends on STM32_UART8
 	---help---
 		Enable RS-485 interface on UART8. Your board config will have to
 		provide GPIO_UART8_RS485_DIR pin definition. Currently it cannot be
@@ -5613,9 +5761,13 @@ config UART8_RS485_DIR_POLARITY
 config UART8_RXDMA
 	bool "UART8 Rx DMA"
 	default n
-	depends on STM32_UART8 && STM32_DMA2
+	depends on STM32_DMA2
 	---help---
 		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+endif # STM32_UART8_SERIALDRIVER
+
+if STM32_SERIALDRIVER
 
 config SERIAL_DISABLE_REORDERING
 	bool "Disable reordering of ttySx devices."
@@ -5661,8 +5813,6 @@ config STM32_SERIALBRK_BSDCOMPAT
 		on because the SW starts the break and then the HW automatically clears
 		the break. This makes it is difficult to sent a long break.
 
-endmenu # U[S]ART Configuration
-
 config STM32_USART_SINGLEWIRE
 	bool "Single Wire Support"
 	default n
@@ -5670,6 +5820,9 @@ config STM32_USART_SINGLEWIRE
 	---help---
 		Enable single wire UART support.  The option enables support for the
 		TIOCSSINGLEWIRE ioctl in the STM32 serial driver.
+
+endif # STM32_SERIALDRIVER
+endmenu # U[S]ART Configuration
 
 menu "SPI Configuration"
 	depends on STM32_SPI
