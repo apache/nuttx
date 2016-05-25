@@ -397,12 +397,12 @@ config UART8_SERIALDRIVER
 	default n
 	select MCU_SERIAL
 
-config ARCH_HAVE_SCI0
+config SCI0_SERIALDRIVER
 	bool
 	default n
 	select MCU_SERIAL
 
-config ARCH_HAVE_SCI1
+config SCI1_SERIALDRIVER
 	bool
 	default n
 	select MCU_SERIAL
@@ -692,11 +692,11 @@ config USART8_SERIAL_CONSOLE
 
 config SCI0_SERIAL_CONSOLE
 	bool "SCI0"
-	depends on ARCH_HAVE_SCI0
+	depends on SCI0_SERIALDRIVER
 
 config SCI1_SERIAL_CONSOLE
 	bool "SCI1"
-	depends on ARCH_HAVE_SCI1
+	depends on SCI1_SERIALDRIVER
 
 config OTHER_SERIAL_CONSOLE
 	bool "Other serial console"
@@ -1945,7 +1945,7 @@ config UART8_DMA
 endmenu
 
 menu "SCI0 Configuration"
-	depends on ARCH_HAVE_SCI0
+	depends on SCI0_SERIALDRIVER
 
 config SCI0_RXBUFSIZE
 	int "SCI0 receive buffer size"
@@ -1989,7 +1989,7 @@ config SCI0_2STOP
 endmenu # SCI0 Configuration
 
 menu "SCI1 Configuration"
-	depends on ARCH_HAVE_SCI1
+	depends on SCI1_SERIALDRIVER
 
 config SCI1_RXBUFSIZE
 	int "SCI1 receive buffer size"

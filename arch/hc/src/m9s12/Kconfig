@@ -11,12 +11,12 @@ menu "M9S12 Peripheral Selection"
 config HCS12_SCI0
 	bool "SCI0"
 	default n
-	select ARCH_HAVE_SCI0
+	select SCI0_SERIALDRIVER
 
 config HCS12_SCI1
 	bool "SCI1"
 	default n
-	select ARCH_HAVE_SCI1
+	select SCI1_SERIALDRIVER
 
 endmenu # M9S12 Peripheral Selection
 
