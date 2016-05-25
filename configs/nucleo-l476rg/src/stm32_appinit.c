@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/nucleo-l476rg/src/stm32_appinit.c
  *
- *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -123,7 +123,7 @@ int board_app_initialize(uintptr_t arg)
 #endif
 
 #ifdef HAVE_PROC
-  /* mount the proc filesystem */
+  /* Mount the proc filesystem */
 
   syslog(LOG_INFO, "Mounting procfs to /proc\n");
 
