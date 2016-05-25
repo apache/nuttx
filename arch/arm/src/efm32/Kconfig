@@ -188,14 +188,14 @@ config EFM32_UART1
 config EFM32_LEUART0
 	bool "Low energy UART0"
 	default n
-	select ARCH_HAVE_OTHER_UART
+	select OTHER_UART_SERIALDRIVER
 	select EFM32_LEUART
 
 config EFM32_LEUART1
 	bool "Low energy UART1"
 	default n
 	depends on EFM32_HAVE_LEUART1
-	select ARCH_HAVE_OTHER_UART
+	select OTHER_UART_SERIALDRIVER
 	select EFM32_LEUART
 
 config EFM32_OTGFS

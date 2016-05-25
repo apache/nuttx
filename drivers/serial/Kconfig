@@ -443,7 +443,7 @@ config USART8_SERIALDRIVER
 	bool
 	default n
 
-config ARCH_HAVE_OTHER_UART
+config OTHER_UART_SERIALDRIVER
 	bool
 	default n
 	select MCU_SERIAL
@@ -609,8 +609,8 @@ config SERIAL_TERMIOS
 
 choice
 	prompt "Serial console"
-	default NO_SERIAL_CONSOLE if !ARCH_HAVE_OTHER_UART
-	default OTHER_SERIAL_CONSOLE if ARCH_HAVE_OTHER_UART
+	default NO_SERIAL_CONSOLE if !OTHER_UART_SERIALDRIVER
+	default OTHER_SERIAL_CONSOLE if OTHER_UART_SERIALDRIVER
 	depends on MCU_SERIAL
 	#depends on DEV_CONSOLE - We may have serial console with no file system at all
 
