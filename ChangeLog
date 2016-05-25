@@ -11787,7 +11787,18 @@
 	  CONFIG_BOARDCTL_RESET is defined.  From David Sidrane (2016-05-23).
 	* arch/arm/include/lpc43xx and src/lpc43xx: Adds definitions for the
 	  LPC4337jet100 chip.  From Alexander Vasiljev (2016-05-24).
-	* Many files:  Add an argument to board_app_initialize() (2016-05-24).
+	* Many files:  board_app_initialize() now accepts an argument that may
+	  be used to support initialization in different configurations
+	  (2016-05-24).
+	* arch/arm/src/samv7: Remove disabling of whole USB on suspend of USBHS.
+	  This fix removes the disabling of the whole USB peripheral on suspend
+	  interrupt. Its enough to freeze the clock instead. When disabling the
+	  whole peripheral, the next wakeup-interrupt comes up with an disabled
+	  clocking. The unfreeze clock has no effect, because the master clock
+	  is disabled. This makes all registers, including the IDR unwriteable
+	  and the IRQ falls in an endless loop blocking the whole system.
+	  Furthermore the disabling of the peripheral clock prevents hotplugging
+	  or reconnecting the USB.  From  Frank Benkert  (2015-05-25).
 	* drivers/lcd: Add support for PCF8574 LCD Backpack driver. This driver
 	  supports an interface board that is based on the PCF8574 io expander
 	  and supports the HD44780-based (or compatible) LCD modules.  There
@@ -11795,3 +11806,7 @@
 	  the same, save wiring and minor features like jumpers for I2C
 	  addresses. This driver supports known and unknown variants.  From
 	  Dave (ziggurat29, 2013-6-26).
+	* arch/arm/stm32:  Add support for a custom 1-wire driver.  The serial
+	  driver already supports a 1-wire interface, but this driver uses the
+	  same serial logic to implement a lower half driver much like the I2C
+	  lower half driver.  From Aleksandr Vyhovanec (2015-05-25).
