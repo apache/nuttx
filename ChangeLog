@@ -11788,4 +11788,10 @@
 	* arch/arm/include/lpc43xx and src/lpc43xx: Adds definitions for the
 	  LPC4337jet100 chip.  From Alexander Vasiljev (2016-05-24).
 	* Many files:  Add an argument to board_app_initialize() (2016-05-24).
-
+	* drivers/lcd: Add support for PCF8574 LCD Backpack driver. This driver
+	  supports an interface board that is based on the PCF8574 io expander
+	  and supports the HD44780-based (or compatible) LCD modules.  There
+	  are a myriad of different vendors of such, but they are principally
+	  the same, save wiring and minor features like jumpers for I2C
+	  addresses. This driver supports known and unknown variants.  From
+	  Dave (ziggurat29, 2013-6-26).
