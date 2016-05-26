@@ -65,14 +65,17 @@ static int     devzero_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
 static const struct file_operations devzero_fops =
 {
-  0,             /* open */
-  0,             /* close */
+  NULL,          /* open */
+  NULL,          /* close */
   devzero_read,  /* read */
   devzero_write, /* write */
-  0,             /* seek */
-  0              /* ioctl */
+  NULL,          /* seek */
+  NULL           /* ioctl */
 #ifndef CONFIG_DISABLE_POLL
   , devzero_poll /* poll */
+#endif
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  , NULL         /* unlink */
 #endif
 };
 

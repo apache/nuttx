@@ -49,7 +49,7 @@ FAR char *strstr(FAR const char *str, FAR const char *substr)
 {
   FAR const char *candidate; /* Candidate in str with matching start character */
   char ch;                   /* First character of the substring */
-  int len;                   /* The length of the substring */
+  size_t len;                /* The length of the substring */
 
   /* Special case the empty substring */
 
