@@ -83,6 +83,9 @@ struct max31855_dev_s
  * Private Function Prototypes
  ****************************************************************************/
 
+static void max31855_lock(FAR struct spi_dev_s *spi);
+static void max31855_unlock(FAR struct spi_dev_s *spi);
+
 /* Character driver methods */
 
 static int     max31855_open(FAR struct file *filep);
@@ -112,6 +115,37 @@ static const struct file_operations g_max31855fops =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: max31855_lock
+ *
+ * Description:
+ *   Lock and configure the SPI bus.
+ *
+ ****************************************************************************/
+
+static void max31855_lock(FAR struct spi_dev_s *spi)
+{
+  (void)SPI_LOCK(spi, true);
+  SPI_SETMODE(spi, SPIDEV_MODE0);
+  SPI_SETBITS(spi, 8);
+  (void)SPI_HWFEATURES(spi, 0);
+  SPI_SETFREQUENCY(spi, 400000);
+}
+
+/****************************************************************************
+ * Name: max31855_unlock
+ *
+ * Description:
+ *   Unlock the SPI bus.
+ *
+ ****************************************************************************/
+
+static void max31855_unlock(FAR struct spi_dev_s *spi)
+{
+  (void)SPI_LOCK(spi, false);
+}
+
 /****************************************************************************
  * Name: max31855_open
  *
@@ -167,6 +201,7 @@ static ssize_t max31855_read(FAR struct file *filep, FAR char *buffer, size_t bu
 
   /* Enable MAX31855's chip select */
 
+  max31855_lock(priv->spi);
   SPI_SELECT(priv->spi, SPIDEV_TEMPERATURE, true);
 
   /* Read temperature */
@@ -176,6 +211,7 @@ static ssize_t max31855_read(FAR struct file *filep, FAR char *buffer, size_t bu
   /* Disable MAX31855's chip select */
 
   SPI_SELECT(priv->spi, SPIDEV_TEMPERATURE, false);
+  max31855_unlock(priv->spi);
 
   regval  = (regmsb & 0xFF000000) >> 24;
   regval |= (regmsb & 0xFF0000) >> 8;
