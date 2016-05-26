@@ -86,7 +86,7 @@ void stm32_boardinitialize(void)
     }
 #endif
 
-#ifdef CONFIG_CANUTILS_UAVCAN
+#ifdef CONFIG_CANUTILS_LIBUAVCAN
   (void)stm32_configgpio(GPIO_CAN1_RX);
   (void)stm32_configgpio(GPIO_CAN1_TX);
 #endif

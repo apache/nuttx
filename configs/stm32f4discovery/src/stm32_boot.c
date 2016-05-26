@@ -104,10 +104,10 @@ void stm32_boardinitialize(void)
     }
 #endif
 
-#ifdef CONFIG_CANUTILS_UAVCAN
+#ifdef CONFIG_CANUTILS_LIBUAVCAN
   (void)stm32_configgpio(GPIO_CAN1_RX);
   (void)stm32_configgpio(GPIO_CAN1_TX);
-#  if CONFIG_UAVCAN_STM32_NUM_IFACES > 1
+#  if CONFIG_LIBUAVCAN_STM32_NUM_IFACES > 1
   (void)stm32_configgpio(GPIO_CAN2_RX);
   (void)stm32_configgpio(GPIO_CAN2_TX);
 #  endif
