@@ -70,14 +70,17 @@ static int     lowconsole_ioctl(struct file *filep, int cmd, unsigned long arg);
 
 static const struct file_operations g_consoleops =
 {
-  0,                /* open */
-  0,                /* close */
+  NULL,             /* open */
+  NULL,             /* close */
   lowconsole_read,  /* read */
   lowconsole_write, /* write */
-  0,                /* seek */
+  NULL,             /* seek */
   lowconsole_ioctl  /* ioctl */
 #ifndef CONFIG_DISABLE_POLL
-  , 0               /* poll */
+  , NULL            /* poll */
+#endif
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  , NULL            /* unlink */
 #endif
 };
 

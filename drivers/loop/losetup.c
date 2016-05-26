@@ -107,16 +107,19 @@ static int     loop_geometry(FAR struct inode *inode,
 
 static const struct block_operations g_bops =
 {
-  loop_open,     /* open     */
-  loop_close,    /* close    */
-  loop_read,     /* read     */
+  loop_open,     /* open */
+  loop_close,    /* close */
+  loop_read,     /* read */
 #ifdef CONFIG_FS_WRITABLE
-  loop_write,    /* write    */
+  loop_write,    /* write */
 #else
-  NULL,          /* write    */
+  NULL,          /* write */
 #endif
   loop_geometry, /* geometry */
-  NULL           /* ioctl    */
+  NULL           /* ioctl */
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  , NULL         /* unlink */
+#endif
 };
 
 /****************************************************************************
