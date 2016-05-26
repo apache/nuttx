@@ -364,7 +364,6 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/* fs_inode.c ***************************************************************/
 /****************************************************************************
  * Name: fs_initialize
  *
@@ -376,7 +375,6 @@ extern "C"
 
 void fs_initialize(void);
 
-/* fs_foreachmountpoint.c ***************************************************/
 /****************************************************************************
  * Name: foreach_mountpoint
  *
@@ -401,7 +399,6 @@ void fs_initialize(void);
 int foreach_mountpoint(foreach_mountpoint_t handler, FAR void *arg);
 #endif
 
-/* fs_registerdriver.c ******************************************************/
 /****************************************************************************
  * Name: register_driver
  *
@@ -428,7 +425,6 @@ int foreach_mountpoint(foreach_mountpoint_t handler, FAR void *arg);
 int register_driver(FAR const char *path, FAR const struct file_operations *fops,
                     mode_t mode, FAR void *priv);
 
-/* fs_registerblockdriver.c *************************************************/
 /****************************************************************************
  * Name: register_blockdriver
  *
@@ -458,7 +454,6 @@ int register_blockdriver(FAR const char *path,
                          FAR void *priv);
 #endif
 
-/* fs_unregisterdriver.c ****************************************************/
 /****************************************************************************
  * Name: unregister_driver
  *
@@ -469,7 +464,6 @@ int register_blockdriver(FAR const char *path,
 
 int unregister_driver(const char *path);
 
-/* fs_unregisterblockdriver.c ***********************************************/
 /****************************************************************************
  * Name: unregister_blockdriver
  *
@@ -480,7 +474,6 @@ int unregister_driver(const char *path);
 
 int unregister_blockdriver(const char *path);
 
-/* fs_open.c ****************************************************************/
 /****************************************************************************
  * Name: inode_checkflags
  *
@@ -491,7 +484,6 @@ int unregister_blockdriver(const char *path);
 
 int inode_checkflags(FAR struct inode *inode, int oflags);
 
-/* fs_files.c ***************************************************************/
 /****************************************************************************
  * Name: files_initlist
  *
@@ -529,7 +521,6 @@ void files_releaselist(FAR struct filelist *list);
 int file_dup2(FAR struct file *filep1, FAR struct file *filep2);
 #endif
 
-/* fs_filedup.c *************************************************************/
 /****************************************************************************
  * Name: fs_dupfd OR dup
  *
@@ -561,7 +552,6 @@ int fs_dupfd(int fd, int minfd);
 
 int file_dup(FAR struct file *filep, int minfd);
 
-/* fs_filedup2.c ************************************************************/
 /****************************************************************************
  * Name: fs_dupfd2 OR dup2
  *
@@ -584,7 +574,6 @@ int fs_dupfd2(int fd1, int fd2);
 #endif
 #endif
 
-/* fs_openblockdriver.c *****************************************************/
 /****************************************************************************
  * Name: open_blockdriver
  *
@@ -613,7 +602,6 @@ int open_blockdriver(FAR const char *pathname, int mountflags,
                      FAR struct inode **ppinode);
 #endif
 
-/* fs_closeblockdriver.c ****************************************************/
 /****************************************************************************
  * Name: close_blockdriver
  *
@@ -635,7 +623,6 @@ int open_blockdriver(FAR const char *pathname, int mountflags,
 int close_blockdriver(FAR struct inode *inode);
 #endif
 
-/* fs/vfs/fs_ioctl.c ********************************************************/
 /****************************************************************************
  * Name: fs_ioctl
  *
@@ -669,7 +656,6 @@ int close_blockdriver(FAR struct inode *inode);
 int fs_ioctl(int fd, int req, unsigned long arg);
 #endif
 
-/* fs_fdopen.c **************************************************************/
 /****************************************************************************
  * Name: fs_fdopen
  *
@@ -684,7 +670,6 @@ struct tcb_s; /* Forward reference */
 FAR struct file_struct *fs_fdopen(int fd, int oflags, FAR struct tcb_s *tcb);
 #endif
 
-/* libc/stdio/lib_fflush.c *************************************************/
 /****************************************************************************
  * Name: lib_flushall
  *
@@ -698,7 +683,6 @@ FAR struct file_struct *fs_fdopen(int fd, int oflags, FAR struct tcb_s *tcb);
 int lib_flushall(FAR struct streamlist *list);
 #endif
 
-/* libc/misc/lib_sendfile.c *************************************************/
 /****************************************************************************
  * Name: lib_sendfile
  *
@@ -711,7 +695,6 @@ int lib_flushall(FAR struct streamlist *list);
 ssize_t lib_sendfile(int outfd, int infd, off_t *offset, size_t count);
 #endif
 
-/* fs/fs_getfilep.c *********************************************************/
 /****************************************************************************
  * Name: fs_getfilep
  *
@@ -734,7 +717,6 @@ ssize_t lib_sendfile(int outfd, int infd, off_t *offset, size_t count);
 FAR struct file *fs_getfilep(int fd);
 #endif
 
-/* fs/fs_read.c *************************************************************/
 /****************************************************************************
  * Name: file_read
  *
@@ -749,7 +731,6 @@ FAR struct file *fs_getfilep(int fd);
 ssize_t file_read(FAR struct file *filep, FAR void *buf, size_t nbytes);
 #endif
 
-/* fs/fs_write.c ************************************************************/
 /****************************************************************************
  * Name: file_write
  *
@@ -764,7 +745,6 @@ ssize_t file_read(FAR struct file *filep, FAR void *buf, size_t nbytes);
 ssize_t file_write(FAR struct file *filep, FAR const void *buf, size_t nbytes);
 #endif
 
-/* fs/fs_pread.c ************************************************************/
 /****************************************************************************
  * Name: file_pread
  *
@@ -780,7 +760,6 @@ ssize_t file_pread(FAR struct file *filep, FAR void *buf, size_t nbytes,
                    off_t offset);
 #endif
 
-/* fs/fs_pwrite.c ***********************************************************/
 /****************************************************************************
  * Name: file_pwrite
  *
@@ -796,7 +775,6 @@ ssize_t file_pwrite(FAR struct file *filep, FAR const void *buf,
                     size_t nbytes, off_t offset);
 #endif
 
-/* fs/fs_lseek.c ************************************************************/
 /****************************************************************************
  * Name: file_seek
  *
@@ -811,7 +789,6 @@ ssize_t file_pwrite(FAR struct file *filep, FAR const void *buf,
 off_t file_seek(FAR struct file *filep, off_t offset, int whence);
 #endif
 
-/* fs/fs_fsync.c ************************************************************/
 /****************************************************************************
  * Name: file_fsync
  *
@@ -826,7 +803,6 @@ off_t file_seek(FAR struct file *filep, off_t offset, int whence);
 int file_fsync(FAR struct file *filep);
 #endif
 
-/* fs/fs_fcntl.c ************************************************************/
 /****************************************************************************
  * Name: file_vfcntl
  *
@@ -841,7 +817,6 @@ int file_fsync(FAR struct file *filep);
 int file_vfcntl(FAR struct file *filep, int cmd, va_list ap);
 #endif
 
-/* fs/fs_poll.c *************************************************************/
 /****************************************************************************
  * Function: file_poll
  *
@@ -864,7 +839,6 @@ int file_vfcntl(FAR struct file *filep, int cmd, va_list ap);
 int file_poll(int fd, FAR struct pollfd *fds, bool setup);
 #endif
 
-/* drivers/dev_null.c *******************************************************/
 /****************************************************************************
  * Name: devnull_register
  *
@@ -875,7 +849,6 @@ int file_poll(int fd, FAR struct pollfd *fds, bool setup);
 
 void devnull_register(void);
 
-/* crypto/cryptodev.c *******************************************************/
 /****************************************************************************
  * Name: devcrypto_register
  *
@@ -886,7 +859,6 @@ void devnull_register(void);
 
 void devcrypto_register(void);
 
-/* drivers/dev_zero.c *******************************************************/
 /****************************************************************************
  * Name: devzero_register
  *
@@ -897,7 +869,6 @@ void devcrypto_register(void);
 
 void devzero_register(void);
 
-/* drivers/bch/bchdev_register.c ********************************************/
 /****************************************************************************
  * Name: bchdev_register
  *
@@ -910,7 +881,6 @@ void devzero_register(void);
 int bchdev_register(FAR const char *blkdev, FAR const char *chardev,
                     bool readonly);
 
-/* drivers/bch/bchdev_unregister.c ******************************************/
 /****************************************************************************
  * Name: bchdev_unregister
  *
@@ -926,7 +896,6 @@ int bchdev_unregister(FAR const char *chardev);
  * are incompatible.  One and only one access method should be implemented.
  */
 
-/* drivers/bch/bchlib_setup.c ***********************************************/
 /****************************************************************************
  * Name: bchlib_setup
  *
@@ -938,7 +907,6 @@ int bchdev_unregister(FAR const char *chardev);
 
 int bchlib_setup(FAR const char *blkdev, bool readonly, FAR void **handle);
 
-/* drivers/bch/bchlib_teardown.c ********************************************/
 /****************************************************************************
  * Name: bchlib_teardown
  *
@@ -950,7 +918,6 @@ int bchlib_setup(FAR const char *blkdev, bool readonly, FAR void **handle);
 
 int bchlib_teardown(FAR void *handle);
 
-/* drivers/bch/bchlib_read.c ************************************************/
 /****************************************************************************
  * Name: bchlib_read
  *
@@ -963,7 +930,6 @@ int bchlib_teardown(FAR void *handle);
 ssize_t bchlib_read(FAR void *handle, FAR char *buffer, size_t offset,
                     size_t len);
 
-/* drivers/bch/bchlib_write.c ***********************************************/
 /****************************************************************************
  * Name: bchlib_write
  *

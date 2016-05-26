@@ -122,6 +122,7 @@ int close(int fd)
       err = -ret;
       goto errout;
     }
+
   return OK;
 
 #endif

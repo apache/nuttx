@@ -416,7 +416,10 @@ int sam_ajoy_initialization(void)
       return ret;
     }
 
-  /* Open the ADC driver for reading */
+  /* Open the ADC driver for reading.
+   * REVISIT:  This can't work!  The file descriptor is only valid in the
+   * task that opened the file.  Not useful for a sharable driver.
+   */
 
   g_adcfd = open("/dev/adc0", O_RDONLY);
   if (g_adcfd < 0)
