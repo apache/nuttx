@@ -1,9 +1,10 @@
 /****************************************************************************
  * drivers/analog/adc.c
  *
+ *   Copyright (C) 2008-2009, 2016 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2011 Li Zhuoyi. All rights reserved.
  *   Author: Li Zhuoyi <lzyy.cn@gmail.com>
- *   History: 0.1 2011-08-04 initial version
+ *           Gregory Nutt <gnutt@nuttx.org>
  *
  * Derived from drivers/can.c
  *
@@ -70,12 +71,14 @@ static int     adc_close(FAR struct file *filep);
 static ssize_t adc_read(FAR struct file *fielp, FAR char *buffer,
                         size_t buflen);
 static int     adc_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
+static int     adc_receive(FAR struct adc_dev_s *dev, uint8_t ch,
+                           int32_t data);
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static const struct file_operations adc_fops =
+static const struct file_operations g_adc_fops =
 {
   adc_open,     /* open */
   adc_close,    /* close */
@@ -86,6 +89,11 @@ static const struct file_operations adc_fops =
 #ifndef CONFIG_DISABLE_POLL
   , 0           /* poll */
 #endif
+};
+
+static const struct adc_callback_s g_adc_callback =
+{
+  adc_receive   /* au_receive */
 };
 
 /****************************************************************************
@@ -362,14 +370,10 @@ static int adc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 }
 
 /****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Name: adc_receive
  ****************************************************************************/
 
-int adc_receive(FAR struct adc_dev_s *dev, uint8_t ch, int32_t data)
+static int adc_receive(FAR struct adc_dev_s *dev, uint8_t ch, int32_t data)
 {
   FAR struct adc_fifo_s *fifo = &dev->ad_recv;
   int                    nexttail;
@@ -409,11 +413,29 @@ int adc_receive(FAR struct adc_dev_s *dev, uint8_t ch, int32_t data)
 }
 
 /****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
  * Name: adc_register
  ****************************************************************************/
 
 int adc_register(FAR const char *path, FAR struct adc_dev_s *dev)
 {
+  int ret;
+
+  DEBUGASSERT(path != NULL && dev != NULL);
+
+  /* Bind the upper-half callbacks to the lower half ADC driver */
+
+  DEBUGASSERT(dev->ad_ops != NULL && dev->ad_ops->ao_bind != NULL);
+  ret = dev->ad_ops->ao_bind(dev, &g_adc_callback);
+  if (ret < 0)
+    {
+      adbg("ERROR: Failed to bind callbacks: %d\n", ret)
+      return ret;
+    }
+
   /* Initialize the ADC device structure */
 
   dev->ad_ocount = 0;
@@ -421,7 +443,19 @@ int adc_register(FAR const char *path, FAR struct adc_dev_s *dev)
   sem_init(&dev->ad_recv.af_sem, 0, 0);
   sem_init(&dev->ad_closesem, 0, 1);
 
+  /* Reset the ADC hardware */
+
+  DEBUGASSERT(dev->ad_ops->ao_reset != NULL);
   dev->ad_ops->ao_reset(dev);
 
-  return register_driver(path, &adc_fops, 0444, dev);
+  /* Register the ADC character driver */
+
+  ret = register_driver(path, &g_adc_fops, 0444, dev);
+  if (ret < 0)
+    {
+      sem_destroy(&dev->ad_recv.af_sem);
+      sem_destroy(&dev->ad_closesem);
+    }
+
+  return ret;
 }

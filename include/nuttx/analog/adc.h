@@ -75,12 +75,35 @@
 /************************************************************************************
  * Public Types
  ************************************************************************************/
+/* These are callbacks to notify the upper-half driver of ADC events */
+
+struct adc_dev_s;
+struct adc_callback_s
+{
+  /* This method is called from the lower half, platform-specific ADC logic when
+   * new ADC sample data is available.
+   *
+   * Input Parameters:
+   *   dev  - The ADC device structure that was previously registered by adc_register()
+   *   ch   - And ID for the ADC channel number that generated the data
+   *   data - The actual converted data from the channel.
+   *
+   * Returned Value:
+   *   Zero on success; a negated errno value on failure.
+   */
+
+  CODE int (*au_receive)(FAR struct adc_dev_s *dev, uint8_t ch, int32_t data);
+};
+
+/* This describes on ADC message */
 
 struct adc_msg_s
 {
   uint8_t      am_channel;               /* The 8-bit ADC Channel */
   int32_t      am_data;                  /* ADC convert result (4 bytes) */
 } packed_struct;
+
+/* This describes a FIFO of ADC messages */
 
 struct adc_fifo_s
 {
@@ -99,6 +122,13 @@ struct adc_fifo_s
 struct adc_dev_s;
 struct adc_ops_s
 {
+  /* Bind the upper-half driver callbacks to the lower-half implementation.  This
+   * must be called early in order to receive ADC event notifications.
+   */
+
+  CODE int (*ao_bind)(FAR struct adc_dev_s *dev,
+                      FAR const struct adc_callback_s *callback);
+
   /* Reset the ADC device.  Called early to initialize the hardware. This
    * is called, before ao_setup() and on error conditions.
    */
@@ -187,25 +217,6 @@ extern "C"
  ************************************************************************************/
 
 int adc_register(FAR const char *path, FAR struct adc_dev_s *dev);
-
-/************************************************************************************
- * Name: adc_receive
- *
- * Description:
- *   This function is called from the lower half, platform-specific ADC logic when
- *   new ADC sample data is available.
- *
- * Input Parameters:
- *   dev - The ADC device structure that was previously registered by adc_register()
- *   ch  - And ID for the ADC channel number that generated the data
- *   data - The actualy converted data from the channel.
- *
- * Returned Value:
- *   Zero on success; a negated errno value on failure.
- *
- ************************************************************************************/
-
-int adc_receive(FAR struct adc_dev_s *dev, uint8_t ch, int32_t data);
 
 /************************************************************************************
  * Platform-Independent "Lower Half" ADC Driver Interfaces

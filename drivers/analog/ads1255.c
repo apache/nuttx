@@ -1,10 +1,10 @@
 /************************************************************************************
  * arch/drivers/analog/ads1255.c
  *
+ *   Copyright (C) 2010, 2016 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2011 Li Zhuoyi. All rights reserved.
  *   Author: Li Zhuoyi <lzyy.cn@gmail.com>
- *   History: 0.1 2011-08-05 initial version
- *            0.2 2011-08-25 fix bug in g_adcdev (cd_ops -> ad_ops,cd_priv -> ad_priv)
+ *           Gregory Nutt <gnutt@nuttx.org>
  *
  * This file is a part of NuttX:
  *
@@ -47,6 +47,7 @@
 #include <stdbool.h>
 #include <semaphore.h>
 #include <errno.h>
+#include <assert.h>
 #include <debug.h>
 
 #include <arch/board/board.h>
@@ -105,8 +106,9 @@
  * ad_private Types
  ****************************************************************************/
 
-struct up_dev_s
+struct ads1255_dev_s
 {
+  FAR const struct adc_callback_s *cb;
   uint8_t channel;
   uint32_t sps;
   uint8_t pga;
@@ -123,6 +125,8 @@ struct up_dev_s
 
 /* ADC methods */
 
+static int  adc_bind(FAR struct adc_dev_s *dev,
+                     FAR const struct adc_callback_s *callback);
 static void adc_reset(FAR struct adc_dev_s *dev);
 static int  adc_setup(FAR struct adc_dev_s *dev);
 static void adc_shutdown(FAR struct adc_dev_s *dev);
@@ -143,7 +147,7 @@ static const struct adc_ops_s g_adcops =
   .ao_ioctl = adc_ioctl         /* ao_read */
 };
 
-static struct up_dev_s g_adcpriv =
+static struct ads1255_dev_s g_adcpriv =
 {
   .mux  = (const uint8_t [])
   {
@@ -190,16 +194,44 @@ static uint8_t getspsreg(uint16_t sps)
 }
 
 /****************************************************************************
- * ad_private Functions
+ * Private Functions
  ****************************************************************************/
-/* Reset the ADC device.  Called early to initialize the hardware. This
- * is called, before ao_setup() and on error conditions.
- */
+
+/****************************************************************************
+ * Name: adc_bind
+ *
+ * Description:
+ *   Bind the upper-half driver callbacks to the lower-half implementation.  This
+ *   must be called early in order to receive ADC event notifications.
+ *
+ ****************************************************************************/
+
+static int adc_bind(FAR struct adc_dev_s *dev,
+                    FAR const struct adc_callback_s *callback)
+{
+  FAR struct ads1255_dev_s *priv = (FAR struct ads1255_dev_s *)dev->ad_priv;
+
+  DEBUGASSERT(priv != NULL);
+  priv->cb = callback;
+  return OK;
+}
+
+/****************************************************************************
+ * Name: adc_reset
+ *
+ * Description:
+ *   Reset the ADC device.  Called early to initialize the hardware. This
+ *   is called, before ao_setup() and on error conditions.
+ *
+ ****************************************************************************/
 
 static void adc_reset(FAR struct adc_dev_s *dev)
 {
-  FAR struct up_dev_s *priv = (FAR struct up_dev_s *)dev->ad_priv;
-  FAR struct spi_dev_s *spi = priv->spi;
+  FAR struct ads1255_dev_s *priv = (FAR struct ads1255_dev_s *)dev->ad_priv;
+  FAR struct spi_dev_s *spi;
+
+  DEBUGASSERT(priv != NULL && priv->spi != NULL);
+  spi = priv->spi;
 
   SPI_SETMODE(spi, SPIDEV_MODE1);
   SPI_SETBITS(spi, 8);
@@ -213,18 +245,27 @@ static void adc_reset(FAR struct adc_dev_s *dev)
   SPI_SELECT(spi, priv->devno, false);
 }
 
-/* Configure the ADC. This method is called the first time that the ADC
- * device is opened.  This will occur when the port is first opened.
- * This setup includes configuring and attaching ADC interrupts.  Interrupts
- * are all disabled upon return.
- */
+/****************************************************************************
+ * Name: adc_setup
+ *
+ * Description:
+ *   Configure the ADC. This method is called the first time that the ADC
+ *   device is opened.  This will occur when the port is first opened.
+ *   This setup includes configuring and attaching ADC interrupts.  Interrupts
+ *   are all disabled upon return.
+ *
+ ****************************************************************************/
 
-static int  adc_setup(FAR struct adc_dev_s *dev)
+static int adc_setup(FAR struct adc_dev_s *dev)
 {
-  FAR struct up_dev_s *priv = (FAR struct up_dev_s *)dev->ad_priv;
-  FAR struct spi_dev_s *spi = priv->spi;
-  int ret = irq_attach(priv->irq, adc_interrupt);
+  FAR struct ads1255_dev_s *priv = (FAR struct ads1255_dev_s *)dev->ad_priv;
+  FAR struct spi_dev_s *spi;
+  int ret;
 
+  DEBUGASSERT(priv != NULL && priv->spi != NULL);
+  spi = priv->spi;
+
+  ret = irq_attach(priv->irq, adc_interrupt);
   if (ret == OK)
     {
       SPI_SELECT(spi, priv->devno, true);
@@ -251,22 +292,39 @@ static int  adc_setup(FAR struct adc_dev_s *dev)
   return ret;
 }
 
-/* Disable the ADC.  This method is called when the ADC device is closed.
- * This method reverses the operation the setup method.
- */
+/****************************************************************************
+ * Name: adc_shutdown
+ *
+ * Description:
+ *   Disable the ADC.  This method is called when the ADC device is closed.
+ *   This method reverses the operation the setup method.
+ *
+ ****************************************************************************/
 
 static void adc_shutdown(FAR struct adc_dev_s *dev)
 {
-  FAR struct up_dev_s *priv = (FAR struct up_dev_s *)dev->ad_priv;
+  FAR struct ads1255_dev_s *priv = (FAR struct ads1255_dev_s *)dev->ad_priv;
+
+  DEBUGASSERT(priv != NULL);
+
   up_disable_irq(priv->irq);
   irq_detach(priv->irq);
 }
 
-/* Call to enable or disable RX interrupts */
+/****************************************************************************
+ * Name: adc_rxint
+ *
+ * Description:
+ *   Call to enable or disable RX interrupts
+ *
+ ****************************************************************************/
 
 static void adc_rxint(FAR struct adc_dev_s *dev, bool enable)
 {
-  FAR struct up_dev_s *priv = (FAR struct up_dev_s *)dev->ad_priv;
+  FAR struct ads1255_dev_s *priv = (FAR struct ads1255_dev_s *)dev->ad_priv;
+
+  DEBUGASSERT(priv != NULL);
+
   if (enable)
     {
       up_enable_irq(priv->irq);
@@ -277,20 +335,41 @@ static void adc_rxint(FAR struct adc_dev_s *dev, bool enable)
     }
 }
 
-/* All ioctl calls will be routed through this method */
+/****************************************************************************
+ * Name: adc_ioctl
+ *
+ * Description:
+ *   All ioctl calls will be routed through this method
+ *
+ ****************************************************************************/
 
-static int  adc_ioctl(FAR struct adc_dev_s *dev, int cmd, unsigned long arg)
+static int adc_ioctl(FAR struct adc_dev_s *dev, int cmd, unsigned long arg)
 {
   dbg("Fix me:Not Implemented\n");
   return 0;
 }
 
+/****************************************************************************
+ * Name: adc_interrupt
+ *
+ * Description:
+ *   ADC interrupt handler
+ *
+ ****************************************************************************/
+
 static int adc_interrupt(int irq, void *context)
 {
-  FAR struct up_dev_s *priv = (FAR struct up_dev_s *)g_adcdev.ad_priv;
-  FAR struct spi_dev_s *spi = priv->spi;
+  FAR struct ads1255_dev_s *priv = (FAR struct ads1255_dev_s *)g_adcdev.ad_priv;
+  FAR struct spi_dev_s *spi;
   unsigned char buf[4];
   unsigned char ch;
+
+  DEBUGASSERT(priv != NULL && priv->spi != NULL);
+  spi = priv->spi;
+
+  /* REVISIT: Cannot perform SPI operations from an interrupt handler!
+   * Need to use the high priority work queue.
+   */
 
   SPI_SELECT(spi, priv->devno, true);
   SPI_SEND(spi, ADS125X_RDATA);
@@ -316,7 +395,16 @@ static int adc_interrupt(int irq, void *context)
   SPI_SEND(spi, ADS125X_WAKEUP);
   SPI_SELECT(spi, priv->devno, false);
 
-  adc_receive(&g_adcdev, priv->channel, *(int32_t *)buf);
+  /* Verify that the upper-half driver has bound its callback functions */
+
+  if (priv->cb != NULL)
+    {
+      /* Perform the data received callback */
+
+      DEBUGASSERT(priv->cb->au_receive != NULL);
+      priv->cb->au_receive(&g_adcdev, priv->channel, *(int32_t *)buf);
+    }
+
   return OK;
 }
 
@@ -341,10 +429,13 @@ static int adc_interrupt(int irq, void *context)
 FAR struct adc_dev_s *up_ads1255initialize(FAR struct spi_dev_s *spi,
                                            unsigned int devno)
 {
-  FAR struct up_dev_s *priv = (FAR struct up_dev_s *)g_adcdev.ad_priv;
+  FAR struct ads1255_dev_s *priv = (FAR struct ads1255_dev_s *)g_adcdev.ad_priv;
+
+  DEBUGASSERT(spi != NULL);
 
   /* Driver state data */
 
+  priv->cb       = NULL;
   priv->spi      = spi;
   priv->devno    = devno;
   return &g_adcdev;
