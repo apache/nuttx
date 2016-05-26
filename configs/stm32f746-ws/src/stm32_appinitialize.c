@@ -40,9 +40,38 @@
 
 #include <nuttx/config.h>
 #include <syslog.h>
+#include <debug.h>
+#include <nuttx/i2c/i2c_master.h>
+#include <nuttx/leds/userled.h>
 
 #include "stm32f746-ws.h"
-#include <nuttx/leds/userled.h>
+#include "stm32_i2c.h"
+
+static void stm32f7_i2c_register(int bus)
+{
+  FAR struct i2c_master_s *i2c;
+  int ret;
+
+  i2c = stm32f7_i2cbus_initialize(bus);
+  if (i2c == NULL)
+    {
+      dbg("ERROR: Failed to get I2C%d interface\n", bus);
+    }
+  else
+    {
+      ret = i2c_register(i2c, bus);
+      if (ret < 0)
+        {
+          dbg("ERROR: Failed to register I2C%d driver: %d\n", bus, ret);
+          stm32f7_i2cbus_uninitialize(i2c);
+        }
+    }
+}
+
+static void stm32f7_i2ctool(void)
+{
+  stm32f7_i2c_register(1);
+}
 
 /****************************************************************************
  * Public Functions
@@ -60,6 +89,9 @@
 
 int board_app_initialize(void)
 {
+  /* Register I2C drivers on behalf of the I2C tool */
+
+  stm32f7_i2ctool();
 
   return OK;
 }
