@@ -46,6 +46,7 @@ config ADC_ADS125X
 	bool "TI ADS1255/ADS1256 support"
 	default n
 	select SPI
+	select SCHED_HPWORK
 
 if ADC_ADS125X
 

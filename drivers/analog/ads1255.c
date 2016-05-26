@@ -39,6 +39,10 @@
  *
  ************************************************************************************/
 
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
 #include <nuttx/config.h>
 
 #include <stdio.h>
@@ -50,12 +54,16 @@
 #include <assert.h>
 #include <debug.h>
 
-#include <arch/board/board.h>
 #include <nuttx/arch.h>
+#include <nuttx/wqueue.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/analog/adc.h>
 
 #if defined(CONFIG_ADC_ADS1255)
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
 
 #define ADS125X_BUFON   0x02
 #define ADS125X_BUFOFF  0x00
@@ -103,12 +111,14 @@
 #endif
 
 /****************************************************************************
- * ad_private Types
+ * Private Types
  ****************************************************************************/
 
 struct ads1255_dev_s
 {
   FAR const struct adc_callback_s *cb;
+  FAR struct spi_dev_s *spi;      /* Cached SPI device reference */
+  struct work_s work;
   uint8_t channel;
   uint32_t sps;
   uint8_t pga;
@@ -116,11 +126,10 @@ struct ads1255_dev_s
   const uint8_t *mux;
   int irq;
   int devno;
-  FAR struct spi_dev_s *spi;      /* Cached SPI device reference */
 };
 
 /****************************************************************************
- * ad_private Function Prototypes
+ * Private Function Prototypes
  ****************************************************************************/
 
 /* ADC methods */
@@ -132,10 +141,14 @@ static int  adc_setup(FAR struct adc_dev_s *dev);
 static void adc_shutdown(FAR struct adc_dev_s *dev);
 static void adc_rxint(FAR struct adc_dev_s *dev, bool enable);
 static int  adc_ioctl(FAR struct adc_dev_s *dev, int cmd, unsigned long arg);
+
+/* Interrupt handling */
+
+static void adc_worker(FAR void *arg);
 static int  adc_interrupt(int irq, void *context);
 
 /****************************************************************************
- * ad_private Data
+ * Private Data
  ****************************************************************************/
 
 static const struct adc_ops_s g_adcops =
@@ -351,16 +364,16 @@ static int adc_ioctl(FAR struct adc_dev_s *dev, int cmd, unsigned long arg)
 }
 
 /****************************************************************************
- * Name: adc_interrupt
+ * Name: adc_worker
  *
  * Description:
- *   ADC interrupt handler
+ *   ADC interrupt work
  *
  ****************************************************************************/
 
-static int adc_interrupt(int irq, void *context)
+static void adc_worker(FAR void *arg)
 {
-  FAR struct ads1255_dev_s *priv = (FAR struct ads1255_dev_s *)g_adcdev.ad_priv;
+  FAR struct ads1255_dev_s *priv = (FAR struct ads1255_dev_s *)arg;
   FAR struct spi_dev_s *spi;
   unsigned char buf[4];
   unsigned char ch;
@@ -406,6 +419,34 @@ static int adc_interrupt(int irq, void *context)
       priv->cb->au_receive(&g_adcdev, priv->channel, *(int32_t *)buf);
     }
 
+  /* Re-enable ADC interrupts */
+
+  up_enable_irq(priv->irq);
+}
+
+/****************************************************************************
+ * Name: adc_interrupt
+ *
+ * Description:
+ *   ADC interrupt handler
+ *
+ ****************************************************************************/
+
+static int adc_interrupt(int irq, void *context)
+{
+  FAR struct ads1255_dev_s *priv = (FAR struct ads1255_dev_s *)g_adcdev.ad_priv;
+
+  DEBUGASSERT(priv != NULL);
+
+  /* Disable further ADC interrupts until the worker thread has executed. */
+
+  up_disable_irq(priv->irq);
+
+  /* Schedule the ADC work for the worker thread.  Whent he sample has been
+   * processed, the ADC interrupt will be re-enabled.
+   */
+
+  DEBUGVERIFY(work_queue(HPWORK, &priv->work, adc_worker, priv, 0));
   return OK;
 }
 
