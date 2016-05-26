@@ -644,7 +644,6 @@ static int adc_interrupt(int irq, void *context)
 
 FAR struct adc_dev_s *lpc17_adcinitialize(void)
 {
-  g_adcdev.cb = NULL;
   return &g_adcdev;
 }
 
