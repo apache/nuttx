@@ -132,6 +132,9 @@ struct ads1255_dev_s
  * Private Function Prototypes
  ****************************************************************************/
 
+static void adc_lock(FAR struct spi_dev_s *spi);
+static void adc_unlock(FAR struct spi_dev_s *spi);
+
 /* ADC methods */
 
 static int  adc_bind(FAR struct adc_dev_s *dev,
@@ -212,6 +215,36 @@ static uint8_t getspsreg(uint16_t sps)
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: adc_lock
+ *
+ * Description:
+ *   Lock and configure the SPI bus.
+ *
+ ****************************************************************************/
+
+static void adc_lock(FAR struct spi_dev_s *spi)
+{
+  (void)SPI_LOCK(spi, true);
+  SPI_SETMODE(spi, SPIDEV_MODE1);
+  SPI_SETBITS(spi, 8);
+  (void)SPI_HWFEATURES(spi, 0);
+  SPI_SETFREQUENCY(spi, CONFIG_ADS1255_FREQUENCY);
+}
+
+/****************************************************************************
+ * Name: adc_unlock
+ *
+ * Description:
+ *   Unlock the SPI bus.
+ *
+ ****************************************************************************/
+
+static void adc_unlock(FAR struct spi_dev_s *spi)
+{
+  (void)SPI_LOCK(spi, false);
+}
+
+/****************************************************************************
  * Name: adc_bind
  *
  * Description:
@@ -247,16 +280,16 @@ static void adc_reset(FAR struct adc_dev_s *dev)
   DEBUGASSERT(priv != NULL && priv->spi != NULL);
   spi = priv->spi;
 
-  SPI_SETMODE(spi, SPIDEV_MODE1);
-  SPI_SETBITS(spi, 8);
-  (void)SPI_HWFEATURES(spi, 0);
-  SPI_SETFREQUENCY(spi, CONFIG_ADS1255_FREQUENCY);
+  adc_lock(spi);
   usleep(1000);
+
   SPI_SELECT(spi, priv->devno, true);
   SPI_SEND(spi, ADS125X_WREG + 0x03);    /* WRITE SPS REG */
   SPI_SEND(spi, 0x00);                 /* count=1 */
   SPI_SEND(spi, 0x63);
   SPI_SELECT(spi, priv->devno, false);
+
+  adc_unlock(spi);
 }
 
 /****************************************************************************
@@ -282,6 +315,8 @@ static int adc_setup(FAR struct adc_dev_s *dev)
   ret = irq_attach(priv->irq, adc_interrupt);
   if (ret == OK)
     {
+      adc_lock(spi);
+
       SPI_SELECT(spi, priv->devno, true);
       SPI_SEND(spi, ADS125X_WREG);         /* WRITE REG from 0 */
       SPI_SEND(spi, 0x03);                 /* count=4+1 */
@@ -300,6 +335,8 @@ static int adc_setup(FAR struct adc_dev_s *dev)
       usleep(1000);
       SPI_SEND(spi, ADS125X_SELFCAL);
       SPI_SELECT(spi, priv->devno, false);
+
+      adc_unlock(spi);
       up_enable_irq(priv->irq);
     }
 
@@ -385,6 +422,8 @@ static void adc_worker(FAR void *arg)
    * Need to use the high priority work queue.
    */
 
+  adc_lock(spi);
+
   SPI_SELECT(spi, priv->devno, true);
   SPI_SEND(spi, ADS125X_RDATA);
   up_udelay(10);
@@ -408,6 +447,8 @@ static void adc_worker(FAR void *arg)
   up_udelay(2);
   SPI_SEND(spi, ADS125X_WAKEUP);
   SPI_SELECT(spi, priv->devno, false);
+
+  adc_unlock(spi);
 
   /* Verify that the upper-half driver has bound its callback functions */
 
