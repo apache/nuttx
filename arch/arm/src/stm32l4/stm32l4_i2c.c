@@ -1,22 +1,14 @@
 /************************************************************************************
- * arch/arm/src/stm32l4/stm32f3xx_i2c.c
+ * arch/arm/src/stm32l4/stm32l4_i2c.c
  * STM32L4 I2C driver - based on STM32F3 I2C Hardware Layer - Device Driver
  *
  *   Copyright (C) 2011 Uros Platise. All rights reserved.
  *   Author: Uros Platise <uros.platise@isotel.eu>
- *
- * With extensions and modifications for the F1, F2, and F4 by:
- *
  *   Copyright (C) 2011-2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregroy Nutt <gnutt@nuttx.org>
- *
- * And this version for the STM32 F3 by
- *
  *   Author: John Wharington
- *
- * Modified for STM32L4 by
- *
  *   Author: Sebastien Lorquet
+ *   Author: dev@ziggurat29.com
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -96,6 +88,7 @@
 
 #include "up_arch.h"
 
+#include "stm32l4_gpio.h"
 #include "stm32l4_rcc.h"
 #include "stm32l4_i2c.h"
 #include "stm32l4_waste.h"
@@ -103,9 +96,6 @@
 /* At least one I2C peripheral must be enabled */
 
 #if defined(CONFIG_STM32L4_I2C1) || defined(CONFIG_STM32L4_I2C2) || defined(CONFIG_STM32L4_I2C3)
-/* This implementation is for the STM32 F1, F2, and F4 only */
-
-#if defined(CONFIG_STM32L4_STM32F30XX)
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -138,11 +128,9 @@
 #endif
 
 #define I2C_OUTPUT \
-  (GPIO_OUTPUT | GPIO_OUTPUT_SET | GPIO_CNF_OUTOD | GPIO_MODE_50MHz)
+  (GPIO_OUTPUT | GPIO_OUTPUT_SET | GPIO_OPENDRAIN | GPIO_SPEED_50MHz)
 #define MKI2C_OUTPUT(p) \
   (((p) & (GPIO_PORT_MASK | GPIO_PIN_MASK)) | I2C_OUTPUT)
-
-/* Register setting unique to the STM32F30xx */
 
 #define I2C_CR1_TXRX \
   (I2C_CR1_RXIE | I2C_CR1_TXIE)
@@ -246,7 +234,7 @@ struct stm32l4_i2c_priv_s
 {
   const struct i2c_ops_s *ops; /* Standard I2C operations */
   const struct stm32l4_i2c_config_s *config; /* Port configuration */
-  int refs;                    /* Referernce count */
+  int refs;                    /* Reference count */
   sem_t sem_excl;              /* Mutual exclusion semaphore */
 #ifndef CONFIG_I2C_POLLED
   sem_t sem_isr;               /* Interrupt wait semaphore */
@@ -279,15 +267,10 @@ struct stm32l4_i2c_priv_s
  * Private Function Prototypes
  ************************************************************************************/
 
-static inline uint16_t stm32l4_i2c_getreg(FAR struct stm32l4_i2c_priv_s *priv,
-                                        uint8_t offset);
-static inline void stm32l4_i2c_putreg(FAR struct stm32l4_i2c_priv_s *priv, uint8_t offset,
-                                    uint16_t value);
-static inline void stm32l4_i2c_putreg32(FAR struct stm32l4_i2c_priv_s *priv, uint8_t offset,
-                                    uint32_t value);
-static inline void stm32l4_i2c_modifyreg(FAR struct stm32l4_i2c_priv_s *priv,
-                                       uint8_t offset, uint16_t clearbits,
-                                       uint16_t setbits);
+static inline uint32_t stm32l4_i2c_getreg32(FAR struct stm32l4_i2c_priv_s *priv,
+                                            uint8_t offset);
+static inline void stm32l4_i2c_putreg32(FAR struct stm32l4_i2c_priv_s *priv,
+                                        uint8_t offset, uint32_t value);
 static inline void stm32l4_i2c_modifyreg32(FAR struct stm32l4_i2c_priv_s *priv,
                                          uint8_t offset, uint32_t clearbits,
                                          uint32_t setbits);
@@ -302,13 +285,14 @@ static inline void stm32l4_i2c_sem_init(FAR struct stm32l4_i2c_priv_s *priv);
 static inline void stm32l4_i2c_sem_destroy(FAR struct stm32l4_i2c_priv_s *priv);
 #ifdef CONFIG_I2C_TRACE
 static void stm32l4_i2c_tracereset(FAR struct stm32l4_i2c_priv_s *priv);
-static void stm32l4_i2c_tracenew(FAR struct stm32l4_i2c_priv_s *priv, uint32_t status);
+static void stm32l4_i2c_tracenew(FAR struct stm32l4_i2c_priv_s *priv,
+                                 uint32_t status);
 static void stm32l4_i2c_traceevent(FAR struct stm32l4_i2c_priv_s *priv,
-                               enum stm32l4_trace_e event, uint32_t parm);
+                                   enum stm32l4_trace_e event, uint32_t parm);
 static void stm32l4_i2c_tracedump(FAR struct stm32l4_i2c_priv_s *priv);
 #endif /* CONFIG_I2C_TRACE */
 static void stm32l4_i2c_setclock(FAR struct stm32l4_i2c_priv_s *priv,
-                               uint32_t frequency);
+                                 uint32_t frequency);
 static inline void stm32l4_i2c_sendstart(FAR struct stm32l4_i2c_priv_s *priv);
 static inline void stm32l4_i2c_clrstart(FAR struct stm32l4_i2c_priv_s *priv);
 static inline void stm32l4_i2c_sendstop(FAR struct stm32l4_i2c_priv_s *priv);
@@ -327,8 +311,8 @@ static int stm32l4_i2c3_isr(int irq, void *context);
 #endif
 static int stm32l4_i2c_init(FAR struct stm32l4_i2c_priv_s *priv);
 static int stm32l4_i2c_deinit(FAR struct stm32l4_i2c_priv_s *priv);
-static int stm32l4_i2c_transfer(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s *msgs,
-                              int count);
+static int stm32l4_i2c_transfer(FAR struct i2c_master_s *dev,
+                                FAR struct i2c_msg_s *msgs, int count);
 #ifdef CONFIG_I2C_RESET
 static int stm32l4_i2c_reset(FAR struct i2c_master_s *dev);
 #endif
@@ -351,8 +335,8 @@ const struct i2c_ops_s stm32l4_i2c_ops =
 static const struct stm32l4_i2c_config_s stm32l4_i2c1_config =
 {
   .base       = STM32L4_I2C1_BASE,
-  .clk_bit    = RCC_APB1ENR_I2C1EN,
-  .reset_bit  = RCC_APB1RSTR_I2C1RST,
+  .clk_bit    = RCC_APB1ENR1_I2C1EN,
+  .reset_bit  = RCC_APB1RSTR1_I2C1RST,
   .scl_pin    = GPIO_I2C1_SCL,
   .sda_pin    = GPIO_I2C1_SDA,
 #ifndef CONFIG_I2C_POLLED
@@ -442,20 +426,6 @@ struct stm32l4_i2c_priv_s stm32l4_i2c3_priv =
  ************************************************************************************/
 
 /************************************************************************************
- * Name: stm32l4_i2c_getreg
- *
- * Description:
- *   Get a 16-bit register value by offset
- *
- ************************************************************************************/
-
-static inline uint16_t stm32l4_i2c_getreg(FAR struct stm32l4_i2c_priv_s *priv,
-                                        uint8_t offset)
-{
-  return getreg16(priv->config->base + offset);
-}
-
-/************************************************************************************
  * Name: stm32l4_i2c_getreg32
  *
  * Description:
@@ -470,20 +440,6 @@ static inline uint32_t stm32l4_i2c_getreg32(FAR struct stm32l4_i2c_priv_s *priv,
 }
 
 /************************************************************************************
- * Name: stm32l4_i2c_putreg
- *
- * Description:
- *  Put a 16-bit register value by offset
- *
- ************************************************************************************/
-
-static inline void stm32l4_i2c_putreg(FAR struct stm32l4_i2c_priv_s *priv, uint8_t offset,
-                                    uint16_t value)
-{
-  putreg16(value, priv->config->base + offset);
-}
-
-/************************************************************************************
  * Name: stm32l4_i2c_putreg32
  *
  * Description:
@@ -495,21 +451,6 @@ static inline void stm32l4_i2c_putreg32(FAR struct stm32l4_i2c_priv_s *priv,
                                       uint8_t offset, uint32_t value)
 {
   putreg32(value, priv->config->base + offset);
-}
-
-/************************************************************************************
- * Name: stm32l4_i2c_modifyreg
- *
- * Description:
- *   Modify a 16-bit register value by offset
- *
- ************************************************************************************/
-
-static inline void stm32l4_i2c_modifyreg(FAR struct stm32l4_i2c_priv_s *priv,
-                                       uint8_t offset, uint16_t clearbits,
-                                       uint16_t setbits)
-{
-  modifyreg16(priv->config->base + offset, clearbits, setbits);
 }
 
 /************************************************************************************
@@ -615,7 +556,6 @@ static inline int stm32l4_i2c_sem_waitdone(FAR struct stm32l4_i2c_priv_s *priv)
 {
   struct timespec abstime;
   irqstate_t flags;
-  uint32_t regval;
   int ret;
 
   flags = enter_critical_section();
@@ -866,7 +806,7 @@ static inline void stm32l4_i2c_sem_waitstop(FAR struct stm32l4_i2c_priv_s *priv)
 
       /* Check for timeout error */
 
-      sr = stm32l4_i2c_getreg(priv, STM32L4_I2C_ISR_OFFSET);
+      sr = stm32l4_i2c_getreg32(priv, STM32L4_I2C_ISR_OFFSET);
       if ((sr & I2C_INT_TIMEOUT) != 0)
         {
           return;
@@ -1065,6 +1005,28 @@ static void stm32l4_i2c_setclock(FAR struct stm32l4_i2c_priv_s *priv, uint32_t f
   uint8_t scl_h_period;
   uint8_t scl_l_period;
 
+  /* XXX haque; these are the only freqs we support at the moment, until we can
+   * compute the values ourself.
+   */
+
+  if (frequency == 10000)
+    {
+    }
+  else if (frequency == 100000)
+    {
+    }
+  else if (frequency == 400000)
+    {
+    }
+  else
+    {
+#if 1
+      frequency = 1000000;
+#else
+      frequency = 500000;
+#endif
+    }
+
   /* Has the I2C bus frequency changed? */
 
   if (frequency != priv->frequency)
@@ -1079,41 +1041,101 @@ static void stm32l4_i2c_setclock(FAR struct stm32l4_i2c_priv_s *priv, uint32_t f
 
       /* Update timing and control registers */
 
-      /* TODO: speed/timing calcs */
-#warning "check set filters before timing, see RM0316"
-
-      /* values from 100khz at 8mhz i2c clock */
-
-      /* prescaler */
-      /* t_presc= (presc+1)*t_i2cclk */
-      /* RM0316 */
+      /* TODO: speed/timing calcs, taking into consideration
+       * STM32L4_PCLK1_FREQUENCY, or SYSCLK, or HSI16
+       * clock source, RCC_CCIPR, I2CxSEL, 0 = PCKL, 1 = SCLK, 2 = HSI16, 3 = reserved
+#warning "check set filters before timing, see RM0351 35.4.4 p 1112"
+       * analog filter; suppress spikes up to 50 ns in fast-mode and fast-mode plus
+       * ANFOFF cr1
+       * DNF cr1; 1-15 I2CCLK periods
+       */
+      /* RM0351 35.4.9 p 1140 */
 
       if (frequency == 10000)
         {
-          presc        = 0x01;
-          scl_l_period = 0xc7;
-          scl_h_period = 0xc3;
-          h_time       = 0x02;
-          s_time       = 0x04;
+#if 1
+          /* 10 KHz values from I2C timing tool with clock 80mhz */
+
+          presc        = 0x0b;    /* PRESC - (+1) prescale I2CCLK */
+          scl_l_period = 0xff;    /* SCLL - SCL low period in master mode */
+          scl_h_period = 0xba;    /* SCLH - SCL high period in master mode */
+          h_time       = 0x00;    /* SDADEL - (+1) data hold time after SCL falling edge */
+          s_time       = 0x01;    /* SCLDEL - (+1) data setup time from SDA edge to SCL rising edge */
+
+#else
+          /* 10 KHz values from datasheet with clock 8mhz */
+
+          presc        = 0x03;    /* PRESC - (+1) prescale I2CCLK */
+          scl_l_period = 0xc7;    /* SCLL - SCL low period in master mode */
+          scl_h_period = 0xc3;    /* SCLH - SCL high period in master mode */
+          h_time       = 0x02;    /* SDADEL - (+1) data hold time after SCL falling edge */
+          s_time       = 0x04;    /* SCLDEL - (+1) data setup time from SDA edge to SCL rising edge */
+#endif
         }
      else if (frequency == 100000)
         {
-          /* values from datasheet with clock 8mhz */
+#if 1
+          /* 100 KHz values from I2C timing tool with clock 80mhz */
+
+          presc        = 0x01;    /* PRESC - (+1) prescale I2CCLK */
+          scl_l_period = 0xe7;    /* SCLL - SCL low period in master mode */
+          scl_h_period = 0x9b;    /* SCLH - SCL high period in master mode */
+          h_time       = 0x00;    /* SDADEL - (+1) data hold time after SCL falling edge */
+          s_time       = 0x0d;    /* SCLDEL - (+1) data setup time from SDA edge to SCL rising edge */
+#else
+          /* 100 KHz values from datasheet with clock 8mhz */
 
           presc        = 0x01;
           scl_l_period = 0x13;
           scl_h_period = 0x0f;
           h_time       = 0x02;
           s_time       = 0x04;
+#endif
         }
-      else
+      else if (frequency == 400000)
         {
+#if 1
+          /* 400 KHz values from I2C timing tool for clock of 80mhz */
+
+          presc        = 0x01;    /* PRESC - (+1) prescale I2CCLK */
+          scl_l_period = 0x43;    /* SCLL - SCL low period in master mode */
+          scl_h_period = 0x13;    /* SCLH - SCL high period in master mode */
+          h_time       = 0x00;    /* SDADEL - (+1) data hold time after SCL falling edge */
+          s_time       = 0x07;    /* SCLDEL - (+1) data setup time from SDA edge to SCL rising edge */
+#else
+          /* 400 KHz values from datasheet for clock of 8mhz */
+
           presc        = 0x00;
           scl_l_period = 0x09;
           scl_h_period = 0x03;
           h_time       = 0x01;
           s_time       = 0x03;
+#endif
         }
+      else
+      {
+#if 1
+          /* 1000 KHhz values from I2C timing tool for clock of 80mhz */
+
+          presc        = 0x01;    /* PRESC - (+1) prescale I2CCLK */
+          scl_l_period = 0x14;    /* SCLL - SCL low period in master mode */
+          scl_h_period = 0x13;    /* SCLH - SCL high period in master mode */
+          h_time       = 0x00;    /* SDADEL - (+1) data hold time after SCL falling edge */
+          s_time       = 0x05;    /* SCLDEL - (+1) data setup time from SDA edge to SCL rising edge */
+
+          frequency = 1000000;
+#else
+          /* 500 KHhz values from datasheet for clock of 8mhz */
+
+          presc        = 0x00;
+          scl_l_period = 0x06;
+          scl_h_period = 0x03;
+          h_time       = 0x00;
+          s_time       = 0x01;
+
+          frequency = 500000;
+#endif
+      }
 
       uint32_t timingr =
         (presc << I2C_TIMINGR_PRESC_SHIFT) |
@@ -1123,10 +1145,6 @@ static void stm32l4_i2c_setclock(FAR struct stm32l4_i2c_priv_s *priv, uint32_t f
         (scl_l_period << I2C_TIMINGR_SCLL_SHIFT);
 
       stm32l4_i2c_putreg32(priv, STM32L4_I2C_TIMINGR_OFFSET, timingr);
-
-      /* Bit 14 of OAR1 must be configured and kept at 1 */
-
-      stm32l4_i2c_putreg(priv, STM32L4_I2C_OAR1_OFFSET, I2C_OAR1_ONE);
 
       /* Re-enable the peripheral (or not) */
 
@@ -1318,7 +1336,7 @@ static int stm32l4_i2c_isr(struct stm32l4_i2c_priv_s *priv)
           /* Send a byte */
 
           stm32l4_i2c_traceevent(priv, I2CEVENT_SENDBYTE, priv->dcnt);
-          stm32l4_i2c_putreg(priv, STM32L4_I2C_TXDR_OFFSET, *priv->ptr++);
+          stm32l4_i2c_putreg32(priv, STM32L4_I2C_TXDR_OFFSET, *priv->ptr++);
           priv->dcnt--;
         }
     }
@@ -1354,7 +1372,7 @@ static int stm32l4_i2c_isr(struct stm32l4_i2c_priv_s *priv)
 #endif
           /* Receive a byte */
 
-          *priv->ptr++ = stm32l4_i2c_getreg(priv, STM32L4_I2C_RXDR_OFFSET);
+          *priv->ptr++ = (uint8_t) stm32l4_i2c_getreg32(priv, STM32L4_I2C_RXDR_OFFSET);
 
           /* Disable acknowledge when last byte is to be received */
 
@@ -1554,9 +1572,9 @@ static int stm32l4_i2c_init(FAR struct stm32l4_i2c_priv_s *priv)
 
   /* Enable power and reset the peripheral */
 
-  modifyreg32(STM32L4_RCC_APB1ENR, 0, priv->config->clk_bit);
-  modifyreg32(STM32L4_RCC_APB1RSTR, 0, priv->config->reset_bit);
-  modifyreg32(STM32L4_RCC_APB1RSTR, priv->config->reset_bit, 0);
+  modifyreg32(STM32L4_RCC_APB1ENR1, 0, priv->config->clk_bit);
+  modifyreg32(STM32L4_RCC_APB1RSTR1, 0, priv->config->reset_bit);
+  modifyreg32(STM32L4_RCC_APB1RSTR1, priv->config->reset_bit, 0);
 
   /* Configure pins */
 
@@ -1588,8 +1606,8 @@ static int stm32l4_i2c_init(FAR struct stm32l4_i2c_priv_s *priv)
 
   priv->frequency = 0;
 
-  /* TODO: f303 i2c clock source RCC_CFGR3 */
-  /* RCC_CFGR3_I2C1SW (default is HSI clock) */
+  /* TODO: i2c clock source RCC_CCIPR */
+  /* RCC_CCIPR I2CxSEL (default is PCLK clock) */
 
   stm32l4_i2c_setclock(priv, 100000);
 
@@ -1629,7 +1647,7 @@ static int stm32l4_i2c_deinit(FAR struct stm32l4_i2c_priv_s *priv)
 
   /* Disable clocking */
 
-  modifyreg32(STM32L4_RCC_APB1ENR, priv->config->clk_bit, 0);
+  modifyreg32(STM32L4_RCC_APB1ENR1, priv->config->clk_bit, 0);
   return OK;
 }
 
@@ -1713,8 +1731,8 @@ static int stm32l4_i2c_transfer(FAR struct i2c_master_s *dev, FAR struct i2c_msg
       status = stm32l4_i2c_getstatus(priv);
       ret = -ETIMEDOUT;
 
-      i2cdbg("Timed out: CR1: %04x status: %08x\n",
-             stm32l4_i2c_getreg(priv, STM32L4_I2C_CR1_OFFSET), status);
+      i2cdbg("Timed out: CR1: %08x status: %08x\n",
+             stm32l4_i2c_getreg32(priv, STM32L4_I2C_CR1_OFFSET), status);
 
       /* "Note: When the STOP, START or PEC bit is set, the software must
        *  not perform any write access to I2C_CR1 before this bit is
@@ -1836,6 +1854,7 @@ static int stm32l4_i2c_transfer(FAR struct i2c_master_s *dev, FAR struct i2c_msg
 #ifdef CONFIG_I2C_RESET
 static int stm32l4_i2c_reset(FAR struct i2c_master_s * dev)
 {
+  FAR struct stm32l4_i2c_priv_s *priv = (struct stm32l4_i2c_priv_s *)dev;
   unsigned int clock_count;
   unsigned int stretch_count;
   uint32_t scl_gpio;
@@ -1962,7 +1981,7 @@ out:
 FAR struct i2c_master_s *stm32l4_i2cbus_initialize(int port)
 {
   struct stm32l4_i2c_priv_s * priv = NULL;  /* private data of device with multiple instances */
-  irqtate_t flags;
+  irqstate_t flags;
 
 #if STM32L4_PCLK1_FREQUENCY < 4000000
 #   warning STM32L4_I2C_INIT: Peripheral clock must be at least 4 MHz to support 400 kHz operation.
@@ -2054,6 +2073,5 @@ int stm32l4_i2cbus_uninitialize(FAR struct i2c_master_s * dev)
   return OK;
 }
 
-#endif /* CONFIG_STM32L4_STM32F30XX */
 #endif /* CONFIG_STM32L4_I2C1 || CONFIG_STM32L4_I2C2 || CONFIG_STM32L4_I2C3 */
 

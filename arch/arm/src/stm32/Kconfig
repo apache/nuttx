@@ -5407,6 +5407,8 @@ config STM32_1WIREDRIVER
 menu "U[S]ART Configuration"
 	depends on STM32_USART
 
+comment "U[S]ART Device Configuration"
+
 choice
 	prompt "USART1 Driver Configuration"
 	default STM32_USART1_SERIALDRIVER
@@ -5768,6 +5770,8 @@ config UART8_RXDMA
 endif # STM32_UART8_SERIALDRIVER
 
 if STM32_SERIALDRIVER
+
+comment "Serial Driver Configuration"
 
 config SERIAL_DISABLE_REORDERING
 	bool "Disable reordering of ttySx devices."
