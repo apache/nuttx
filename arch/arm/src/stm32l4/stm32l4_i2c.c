@@ -268,9 +268,9 @@ struct stm32l4_i2c_priv_s
  ************************************************************************************/
 
 static inline uint32_t stm32l4_i2c_getreg32(FAR struct stm32l4_i2c_priv_s *priv,
-                                          uint8_t offset);
-static inline void stm32l4_i2c_putreg32(FAR struct stm32l4_i2c_priv_s *priv, uint8_t offset,
-                                    uint32_t value);
+                                            uint8_t offset);
+static inline void stm32l4_i2c_putreg32(FAR struct stm32l4_i2c_priv_s *priv,
+                                        uint8_t offset, uint32_t value);
 static inline void stm32l4_i2c_modifyreg32(FAR struct stm32l4_i2c_priv_s *priv,
                                          uint8_t offset, uint32_t clearbits,
                                          uint32_t setbits);
@@ -285,13 +285,14 @@ static inline void stm32l4_i2c_sem_init(FAR struct stm32l4_i2c_priv_s *priv);
 static inline void stm32l4_i2c_sem_destroy(FAR struct stm32l4_i2c_priv_s *priv);
 #ifdef CONFIG_I2C_TRACE
 static void stm32l4_i2c_tracereset(FAR struct stm32l4_i2c_priv_s *priv);
-static void stm32l4_i2c_tracenew(FAR struct stm32l4_i2c_priv_s *priv, uint32_t status);
+static void stm32l4_i2c_tracenew(FAR struct stm32l4_i2c_priv_s *priv,
+                                 uint32_t status);
 static void stm32l4_i2c_traceevent(FAR struct stm32l4_i2c_priv_s *priv,
-                               enum stm32l4_trace_e event, uint32_t parm);
+                                   enum stm32l4_trace_e event, uint32_t parm);
 static void stm32l4_i2c_tracedump(FAR struct stm32l4_i2c_priv_s *priv);
 #endif /* CONFIG_I2C_TRACE */
 static void stm32l4_i2c_setclock(FAR struct stm32l4_i2c_priv_s *priv,
-                               uint32_t frequency);
+                                 uint32_t frequency);
 static inline void stm32l4_i2c_sendstart(FAR struct stm32l4_i2c_priv_s *priv);
 static inline void stm32l4_i2c_clrstart(FAR struct stm32l4_i2c_priv_s *priv);
 static inline void stm32l4_i2c_sendstop(FAR struct stm32l4_i2c_priv_s *priv);
@@ -310,8 +311,8 @@ static int stm32l4_i2c3_isr(int irq, void *context);
 #endif
 static int stm32l4_i2c_init(FAR struct stm32l4_i2c_priv_s *priv);
 static int stm32l4_i2c_deinit(FAR struct stm32l4_i2c_priv_s *priv);
-static int stm32l4_i2c_transfer(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s *msgs,
-                              int count);
+static int stm32l4_i2c_transfer(FAR struct i2c_master_s *dev,
+                                FAR struct i2c_msg_s *msgs, int count);
 #ifdef CONFIG_I2C_RESET
 static int stm32l4_i2c_reset(FAR struct i2c_master_s *dev);
 #endif
@@ -1004,22 +1005,27 @@ static void stm32l4_i2c_setclock(FAR struct stm32l4_i2c_priv_s *priv, uint32_t f
   uint8_t scl_h_period;
   uint8_t scl_l_period;
 
-  /* XXX haque; these are the only freqs we support at the moment, until we can compute the values ourself */
+  /* XXX haque; these are the only freqs we support at the moment, until we can
+   * compute the values ourself.
+   */
 
   if (frequency == 10000)
-    {}
+    {
+    }
   else if (frequency == 100000)
-    {}
+    {
+    }
   else if (frequency == 400000)
-    {}
+    {
+    }
   else
-  {
+    {
 #if 1
       frequency = 1000000;
 #else
       frequency = 500000;
 #endif
-  }
+    }
 
   /* Has the I2C bus frequency changed? */
 
