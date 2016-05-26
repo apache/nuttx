@@ -1645,15 +1645,22 @@ static void adc_dmaconvcallback(DMA_HANDLE handle, uint8_t isr, FAR void *arg)
   FAR struct stm32_dev_s *priv = (FAR struct stm32_dev_s *)dev->ad_priv;
   int i;
 
-  for (i = 0; i < priv->nchannels; i++)
-    {
-      adc_receive(dev, priv->current, priv->dmabuffer[priv->current]);
-      priv->current++;
-      if (priv->current >= priv->nchannels)
-        {
-          /* Restart the conversion sequence from the beginning */
+  /* Verify that the upper-half driver has bound its callback functions */
 
-          priv->current = 0;
+  if (priv->cb != NULL)
+    {
+      DEBUGASSERT(priv->cb->au_receive != NULL);
+
+      for (i = 0; i < priv->nchannels; i++)
+        {
+          priv->cb->au_receive(dev, priv->current, priv->dmabuffer[priv->current]);
+          priv->current++;
+          if (priv->current >= priv->nchannels)
+            {
+              /* Restart the conversion sequence from the beginning */
+
+              priv->current = 0;
+            }
         }
     }
 
