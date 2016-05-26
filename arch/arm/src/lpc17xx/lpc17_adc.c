@@ -51,6 +51,7 @@
 #include <stdbool.h>
 #include <semaphore.h>
 #include <errno.h>
+#include <assert.h>
 #include <debug.h>
 
 #include <arch/board/board.h>
@@ -100,6 +101,8 @@ struct up_dev_s
  * Private Function Prototypes
  ****************************************************************************/
 
+static void adc_receive(FAR struct up_dev_s *priv, uint8_t ch, int32_t data);
+
 /* ADC methods */
 
 static int  adc_bind(FAR struct adc_dev_s *dev,
@@ -141,6 +144,27 @@ static struct adc_dev_s g_adcdev =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: adc_receive
+ *
+ * Description:
+ *   Provide received ADC dat to the upper-half driver.
+ *
+ ****************************************************************************/
+
+static void adc_receive(FAR struct up_dev_s *priv, uint8_t ch, int32_t data)
+{
+  /* Verify that the upper-half driver has bound its callback functions. */
+
+  if (priv->cb != NULL)
+    {
+      /* Perform the data received callback */
+
+      DEBUGASSERT(priv->cb->au_receive != NULL);
+      priv->cb->au_receive(&g_adcdev, ch, data);
+    }
+}
 
 /****************************************************************************
  * Name: adc_bind
@@ -408,19 +432,7 @@ static int adc_interrupt(int irq, void *context)
             {
               value           = priv->buf[ch] / priv->count[ch];
               value         <<= 15;
-
-              /* Verify that the upper-half driver has bound its callback
-               * functions.
-               */
-
-              if (priv->cb != NULL)
-                {
-                  /* Perform the data received callback */
-
-                  DEBUGASSERT(priv->cb->au_receive != NULL);
-                  priv->cb->au_receive(&g_adcdev, ch, value);
-                }
-
+              adc_receive(priv, ch, value);
               priv->buf[ch]   = 0;
               priv->count[ch] = 0;
             }
@@ -445,7 +457,7 @@ static int adc_interrupt(int irq, void *context)
     {
       value            = priv->buf[ch] / priv->count[ch];
       value          <<= 15;
-      adc_receive(&g_adcdev, ch, value);
+      adc_receive(priv, ch, value);
       priv->buf[ch]    = 0;
       priv->count[ch]  = 0;
     }
@@ -482,7 +494,7 @@ static int adc_interrupt(int irq, void *context)
 #else /* CONFIG_ADC_WORKER_THREAD */
       if ((regVal) & (1 << 31))
         {
-          adc_receive(&g_adcdev, 0, (regVal >> 4) & 0xFFF);
+          adc_receive(priv, 0, (regVal >> 4) & 0xFFF);
         }
 
 #endif /* CONFIG_ADC_WORKER_THREAD */
@@ -509,7 +521,7 @@ static int adc_interrupt(int irq, void *context)
 #else /* CONFIG_ADC_WORKER_THREAD */
           if ((regVal) & (1 << 31))
             {
-              adc_receive(&g_adcdev, 1, (regVal >> 4) & 0xFFF);
+              adc_receive(priv, 1, (regVal >> 4) & 0xFFF);
             }
 
 #endif /* CONFIG_ADC_WORKER_THREAD */
@@ -536,7 +548,7 @@ static int adc_interrupt(int irq, void *context)
 #else /* CONFIG_ADC_WORKER_THREAD */
           if ((regVal) & (1 << 31))
             {
-              adc_receive(&g_adcdev, 2, (regVal >> 4) & 0xFFF);
+              adc_receive(priv, 2, (regVal >> 4) & 0xFFF);
             }
 
 #endif /* CONFIG_ADC_WORKER_THREAD */
@@ -548,7 +560,7 @@ static int adc_interrupt(int irq, void *context)
           regVal = getreg32(LPC17_ADC_DR3);
           if ((regVal) & (1 << 31))
             {
-              adc_receive(&g_adcdev, 3, (regVal >> 4) & 0xFFF);
+              adc_receive(priv, 3, (regVal >> 4) & 0xFFF);
             }
         }
 
@@ -557,7 +569,7 @@ static int adc_interrupt(int irq, void *context)
           regVal = getreg32(LPC17_ADC_DR4);
           if ((regVal) & (1 << 31))
             {
-              adc_receive(&g_adcdev, 4, (regVal >> 4) & 0xFFF);
+              adc_receive(priv, 4, (regVal >> 4) & 0xFFF);
             }
         }
 
@@ -566,7 +578,7 @@ static int adc_interrupt(int irq, void *context)
           regVal = getreg32(LPC17_ADC_DR5);
           if ((regVal) & (1 << 31))
             {
-              adc_receive(&g_adcdev, 5, (regVal >> 4) & 0xFFF);
+              adc_receive(priv, 5, (regVal >> 4) & 0xFFF);
             }
         }
 
@@ -575,7 +587,7 @@ static int adc_interrupt(int irq, void *context)
           regVal = getreg32(LPC17_ADC_DR6);
           if ((regVal) & (1 << 31))
             {
-              adc_receive(&g_adcdev, 6, (regVal >> 4) & 0xFFF);
+              adc_receive(priv, 6, (regVal >> 4) & 0xFFF);
             }
         }
 
@@ -584,7 +596,7 @@ static int adc_interrupt(int irq, void *context)
           regVal = getreg32(LPC17_ADC_DR7);
           if ((regVal) & (1 << 31))
             {
-              adc_receive(&g_adcdev, 7, (regVal >> 4) & 0xFFF);
+              adc_receive(priv, 7, (regVal >> 4) & 0xFFF);
             }
         }
 
