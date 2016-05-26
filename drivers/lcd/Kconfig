@@ -3,7 +3,23 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
-comment "Common LCD Settings"
+menu "LCD Driver Support"
+
+menuconfig LCD
+	bool "Graphic LCD Driver Support"
+	default n
+	select NX_LCDDRIVER if NX
+	---help---
+		Drivers for parallel and serial LCD and OLED type devices.  These
+		drivers support interfaces as defined in include/nuttx/lcd/lcd.h
+
+		This selection is necessary to enable support for LCD drivers in
+		drivers/lcd as well as for board-specific LCD drivers in the configs/
+		subdirectories.
+
+if LCD
+
+comment "Common Graphipc LCD Settings"
 
 config LCD_CONSOLE
 	bool "LCD console output"
@@ -990,8 +1006,21 @@ config LCD_RA8875_EXTENDED
 		driver anyway.
 
 endif # LCD_RA8875
+endif # LCD
 
-comment "Alphanumeric/Segment LCD Devices"
+menuconfig SLCD
+	bool "Alphanumeric/Segment LCD Devices"
+	default n
+	---help---
+		Drivers for Alphanumeric ans Segment LCDs (SLCDs).  These
+		drivers support interfaces as defined in include/nuttx/lcd/slcd_ioctl.h
+		amd slcd_codec.h
+
+		This selection is necessary to enable support for SLCD drivers in
+		drivers/lcd as well as for board-specific LCD drivers in the configs/
+		subdirectories.
+
+if SLCD
 
 config LCD_LCD1602
 	bool "LCD 1602"
@@ -1018,3 +1047,6 @@ config LCD_BACKPACK
 		This driver supports known and unknown variants.
 
 		See pcf8574_lcd_backpack_readme.txt
+
+endif # SLCD
+endmenu # LCD Driver Support

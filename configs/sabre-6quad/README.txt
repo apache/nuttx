@@ -555,7 +555,10 @@ Open Issues:
                                    PMD_SECT_DOM(0) | PMD_SECT_XN)
      #define MMU_STRONGLY_ORDERED (PMD_TYPE_SECT | PMD_SECT_AP_RW1 | \
 
-3. Assertions.  On a fatal assertions, other CPUs need to be stopped.
+3. Assertions.  On a fatal assertions, other CPUs need to be stopped.  The SCR,
+   however, only supports disabling CPUs 1 through 3.  Perhaps if the assertion
+   occurs on CPUn, n > 0, then it should use and SGI to perform the assertion
+   on CPU0 always.  From CPU0, CPU1-3 can be disabled.
 
 4. Caching probabaly interferes with spinlocks as they are currently implemented.
    Waiting on a cached copy of the spinlock may result in a hang or a failure to
