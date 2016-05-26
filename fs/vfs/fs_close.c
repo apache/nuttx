@@ -105,7 +105,7 @@ int close(int fd)
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
   /* Close the driver or mountpoint.  NOTES: (1) there is no
-   * exclusion mechanism here , the driver or mountpoint must be
+   * exclusion mechanism here, the driver or mountpoint must be
    * able to handle concurrent operations internally, (2) The driver
    * may have been opened numerous times (for different file
    * descriptors) and must also handle being closed numerous times.

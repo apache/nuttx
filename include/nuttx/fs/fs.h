@@ -532,7 +532,7 @@ int file_dup2(FAR struct file *filep1, FAR struct file *filep2);
  *   function IS dup().
  *
  *   This alternative naming is used when dup could operate on both file and
- *   socket descritors to avoid drawing unused socket support into the link.
+ *   socket descriptors to avoid drawing unused socket support into the link.
  *
  ****************************************************************************/
 
@@ -573,6 +573,52 @@ int fs_dupfd2(int fd1, int fd2);
 #  define fs_dupfd2(fd1, fd2) dup2(fd1, fd2)
 #endif
 #endif
+
+/****************************************************************************
+ * Name: file_detach
+ *
+ * Description:
+ *   This function is used to device drivers to create a task-independent
+ *   handle to an entity in the file system.  file_detach() duplicates the
+ *   'struct file' that underlies the file descriptor, then closes the file
+ *   descriptor.
+ *
+ *   This function will fail if fd is not a valid file descriptor.  In
+ *   particular, it will fail if fd is a socket descriptor.
+ *
+ * Input Parameters:
+ *   fd    - The file descriptor to be detached.  This descriptor will be
+ *           closed and invalid if the file was successfully detached.
+ *   filep - A pointer to a user provided memory location in which to
+ *           received the duplicated, detached file structure.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; A negated errno value is returned on
+ *   any failure to indicate the nature of the failure.
+ *
+ ****************************************************************************/
+
+#if CONFIG_NFILE_DESCRIPTORS > 0
+int file_detach(int fd, FAR struct file *filep);
+#endif
+
+/****************************************************************************
+ * Name: file_close_detached
+ *
+ * Description:
+ *   Close a file that was previously detached with file_detach().
+ *
+ * Input Parameters:
+ *   filep - A pointer to a user provided memory location containing the
+ *           open file data returned by file_detach().
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; A negated errno value is returned on
+ *   any failure to indicate the nature of the failure.
+ *
+ ****************************************************************************/
+
+int file_close_detached(FAR struct file *filep);
 
 /****************************************************************************
  * Name: open_blockdriver
