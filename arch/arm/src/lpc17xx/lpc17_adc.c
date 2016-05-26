@@ -2,8 +2,9 @@
  * arch/arm/src/lpc17xx/lpc17_adc.c
  *
  *   Copyright (C) 2011 Li Zhuoyi. All rights reserved.
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Li Zhuoyi <lzyy.cn@gmail.com>
- *   History: 0.1 2011-08-05 initial version
+ *           Gregory Nutt <gnutt@nuttx.org>
  *
  * This file is a part of NuttX:
  *
@@ -87,6 +88,7 @@
 
 struct up_dev_s
 {
+  FAR const struct adc_callback_s *cb;
   uint8_t  mask;
   uint32_t sps;
   int      irq;
@@ -100,6 +102,8 @@ struct up_dev_s
 
 /* ADC methods */
 
+static int  adc_bind(FAR struct adc_dev_s *dev,
+                     FAR const struct adc_callback_s *callback);
 static void adc_reset(FAR struct adc_dev_s *dev);
 static int  adc_setup(FAR struct adc_dev_s *dev);
 static void adc_shutdown(FAR struct adc_dev_s *dev);
@@ -113,6 +117,7 @@ static int  adc_interrupt(int irq, void *context);
 
 static const struct adc_ops_s g_adcops =
 {
+  .ao_bind     = adc_bind,
   .ao_reset    = adc_reset,
   .ao_setup    = adc_setup,
   .ao_shutdown = adc_shutdown,
@@ -136,6 +141,25 @@ static struct adc_dev_s g_adcdev =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: adc_bind
+ *
+ * Description:
+ *   Bind the upper-half driver callbacks to the lower-half implementation.  This
+ *   must be called early in order to receive ADC event notifications.
+ *
+ ****************************************************************************/
+
+static int adc_bind(FAR struct adc_dev_s *dev,
+                    FAR const struct adc_callback_s *callback)
+{
+  FAR struct up_dev_s *priv = (FAR struct up_dev_s *)dev->ad_priv;
+
+  DEBUGASSERT(priv != NULL);
+  priv->cb = callback;
+  return OK;
+}
 
 /****************************************************************************
  * Name: adc_reset
@@ -384,7 +408,19 @@ static int adc_interrupt(int irq, void *context)
             {
               value           = priv->buf[ch] / priv->count[ch];
               value         <<= 15;
-              adc_receive(&g_adcdev, ch, value);
+
+              /* Verify that the upper-half driver has bound its callback
+               * functions.
+               */
+
+              if (priv->cb != NULL)
+                {
+                  /* Perform the data received callback */
+
+                  DEBUGASSERT(priv->cb->au_receive != NULL);
+                  priv->cb->au_receive(&g_adcdev, ch, value);
+                }
+
               priv->buf[ch]   = 0;
               priv->count[ch] = 0;
             }
@@ -596,6 +632,7 @@ static int adc_interrupt(int irq, void *context)
 
 FAR struct adc_dev_s *lpc17_adcinitialize(void)
 {
+  g_adcdev.cb = NULL;
   return &g_adcdev;
 }
 

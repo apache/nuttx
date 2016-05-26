@@ -140,11 +140,12 @@ static int  adc_interrupt(int irq, void *context);
 
 static const struct adc_ops_s g_adcops =
 {
-  .ao_reset = adc_reset,        /* ao_reset */
-  .ao_setup = adc_setup,        /* ao_setup */
+  .ao_bind     = adc_bind,      /* ao_bind */
+  .ao_reset    = adc_reset,     /* ao_reset */
+  .ao_setup    = adc_setup,     /* ao_setup */
   .ao_shutdown = adc_shutdown,  /* ao_shutdown */
-  .ao_rxint = adc_rxint,        /* ao_rxint */
-  .ao_ioctl = adc_ioctl         /* ao_read */
+  .ao_rxint    = adc_rxint,     /* ao_rxint */
+  .ao_ioctl    = adc_ioctl      /* ao_read */
 };
 
 static struct ads1255_dev_s g_adcpriv =
