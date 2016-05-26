@@ -37,7 +37,7 @@
 
 ifeq ($(CONFIG_NX_LCDDRIVER),y)
 
-# Include LCD drivers
+# Include Graphics LCD drivers
 
 ifeq ($(CONFIG_LCD_P14201),y)
   CSRCS += p14201.c
@@ -103,6 +103,22 @@ ifeq ($(CONFIG_LCD_RA8875),y)
   CSRCS += ra8875.c
 endif
 
+# Include Alphanumeric/Segment LCD drivers too
+
+ifeq ($(CONFIG_LCD_BACKPACK),y)
+  CSRCS += pcf8574_lcd_backpack.c
+endif
+
+# Include LCD driver build support
+
+DEPPATH += --dep-path lcd
+VPATH += :lcd
+CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)lcd}
+
+else ifeq ($(CONFIG_SLCD),y)
+
+# Include Alphanumeric/Segment LCD drivers only
+
 ifeq ($(CONFIG_LCD_BACKPACK),y)
   CSRCS += pcf8574_lcd_backpack.c
 endif
@@ -113,4 +129,3 @@ DEPPATH += --dep-path lcd
 VPATH += :lcd
 CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)lcd}
 endif
-

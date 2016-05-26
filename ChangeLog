@@ -11810,3 +11810,6 @@
 	  driver already supports a 1-wire interface, but this driver uses the
 	  same serial logic to implement a lower half driver much like the I2C
 	  lower half driver.  From Aleksandr Vyhovanec (2015-05-25).
+	* fs/: Add logic to detach a file structure from a file descriptor.
+	  This is for use only within the OS.  It permits an open file or driver
+	  to be used across multiple threads (2016-05-26).
