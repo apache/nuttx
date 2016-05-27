@@ -1,10 +1,10 @@
 /************************************************************************************
  * include/nuttx/analog/adc.h
  *
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2011 Li Zhuoyi. All rights reserved.
  *   Author: Li Zhuoyi <lzyy.cn@gmail.com>
- *   History: 0.1 2011-08-04 initial version
- *            0.2 remove ao_read
+ *           Gregory Nutt <gnutt@nuttx.org>
  *
  * Derived from include/nuttx/can.h
  *
@@ -186,11 +186,7 @@ struct adc_dev_s
 };
 
 /************************************************************************************
- * Public Data
- ************************************************************************************/
-
-/************************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ************************************************************************************/
 
 #if defined(__cplusplus)
@@ -201,6 +197,7 @@ extern "C"
 /************************************************************************************
  * "Upper-Half" ADC Driver Interfaces
  ************************************************************************************/
+
 /************************************************************************************
  * Name: adc_register
  *
@@ -228,6 +225,7 @@ int adc_register(FAR const char *path, FAR struct adc_dev_s *dev);
 /************************************************************************************
  * Platform-Independent "Lower Half" ADC Driver Interfaces
  ************************************************************************************/
+
 /************************************************************************************
  * Name: up_ads1255initialize
  *
@@ -236,7 +234,8 @@ int adc_register(FAR const char *path, FAR struct adc_dev_s *dev);
  *
  ************************************************************************************/
 
-FAR struct adc_dev_s *up_ads1255initialize(FAR struct spi_dev_s *spi, unsigned int devno);
+FAR struct adc_dev_s *up_ads1255initialize(FAR struct spi_dev_s *spi,
+                                           unsigned int devno);
 
 #if defined(__cplusplus)
 }
