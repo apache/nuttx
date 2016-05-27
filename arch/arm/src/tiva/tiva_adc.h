@@ -166,15 +166,10 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Inline Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
-/* Only allow access to upper level ADC drivers if they are enabled */
-#ifdef CONFIG_ADC
+#ifdef CONFIG_TIVA_ADC
 
 /****************************************************************************
  * Driver Function Prototypes
@@ -228,7 +223,7 @@ void tiva_adc_lock(FAR struct tiva_adc_s *priv, int sse);
 
 void tiva_adc_unlock(FAR struct tiva_adc_s *priv, int sse);
 
-#endif /* CONFIG_ADC */
+#endif /* CONFIG_TIVA_ADC */
 
 /****************************************************************************
  * Library Function Prototypes

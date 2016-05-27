@@ -65,9 +65,9 @@
 #include "efm32.h"
 #include "efm32_adc.h"
 
-/* ADC "upper half" support must be enabled */
+/* ADC "lower half" support must be enabled */
 
-#ifdef CONFIG_ADC
+#ifdef CONFIG_EFM32_ADC
 
 /* Some ADC peripheral must be enabled */
 
@@ -1316,4 +1316,4 @@ struct adc_dev_s *efm32_adcinitialize(int intf, const uint8_t *chanlist, int nch
 
 #endif /* CONFIG_EFM32_EFM32GG */
 #endif /* CONFIG_EFM32_ADC1 */
-#endif /* CONFIG_ADC */
+#endif /* CONFIG_EFM32_ADC */

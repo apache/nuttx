@@ -82,7 +82,7 @@
 #include "chip/tiva_pinmap.h"
 #include "chip/tiva_syscontrol.h"
 
-#if defined (CONFIG_TIVA_ADC) && defined (CONFIG_ADC)
+#ifdef CONFIG_TIVA_ADC
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -1086,4 +1086,4 @@ static void tiva_adc_dump_dev(void)
 }
 #endif
 
-#endif /* CONFIG_TIVA_ADC && CONFIG_ADC */
+#endif /* CONFIG_TIVA_ADC */

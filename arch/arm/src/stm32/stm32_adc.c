@@ -69,7 +69,7 @@
 
 /* ADC "upper half" support must be enabled */
 
-#ifdef CONFIG_ADC
+#ifdef CONFIG_STM32_ADC
 
 /* Some ADC peripheral must be enabled */
 
@@ -3046,4 +3046,4 @@ struct adc_dev_s *stm32_adcinitialize(int intf, FAR const uint8_t *chanlist,
 #endif /* CONFIG_STM32_ADC1 || CONFIG_STM32_ADC2 ||
         * CONFIG_STM32_ADC3 || CONFIG_STM32_ADC4
         */
-#endif /* CONFIG_ADC */
+#endif /* CONFIG_STM32_ADC */
