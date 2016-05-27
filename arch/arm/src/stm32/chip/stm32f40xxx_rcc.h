@@ -356,7 +356,8 @@
 #define RCC_APB2RSTR_SDIORST        (1 << 11) /* Bit 11: SDIO reset */
 #define RCC_APB2RSTR_SPI1RST        (1 << 12) /* Bit 12: SPI1 reset */
 #if defined(CONFIG_STM32_STM32F427) || defined(CONFIG_STM32_STM32F429) || \
-    defined(CONFIG_STM32_STM32F446) || defined(CONFIG_STM32_STM32F469)
+    defined(CONFIG_STM32_STM32F446) || defined(CONFIG_STM32_STM32F469) || \
+    defined(CONFIG_STM32_STM32F411)
 #  define RCC_APB2RSTR_SPI4RST      (1 << 13) /* Bit 13: SPI4 reset */
 #endif
 #define RCC_APB2RSTR_SYSCFGRST      (1 << 14) /* Bit 14: System configuration controller reset */
@@ -364,8 +365,11 @@
 #define RCC_APB2RSTR_TIM10RST       (1 << 17) /* Bit 17: TIM10 reset */
 #define RCC_APB2RSTR_TIM11RST       (1 << 18) /* Bit 18: TIM11 reset */
 #if defined(CONFIG_STM32_STM32F427) || defined(CONFIG_STM32_STM32F429) || \
-    defined(CONFIG_STM32_STM32F469)
+    defined(CONFIG_STM32_STM32F469) || defined(CONFIG_STM32_STM32F411)
 #  define RCC_APB2RSTR_SPI5RST      (1 << 20) /* Bit 20: SPI 5 reset */
+#endif
+#if defined(CONFIG_STM32_STM32F427) || defined(CONFIG_STM32_STM32F429) || \
+    defined(CONFIG_STM32_STM32F469)
 #  define RCC_APB2RSTR_SPI6RST      (1 << 21) /* Bit 21: SPI 6 reset */
 #endif
 #if defined(CONFIG_STM32_STM32F427) || defined(CONFIG_STM32_STM32F429) || \
@@ -500,7 +504,8 @@
 #define RCC_APB2ENR_SDIOEN          (1 << 11) /* Bit 11: SDIO clock enable */
 #define RCC_APB2ENR_SPI1EN          (1 << 12) /* Bit 12: SPI1 clock enable */
 #if defined(CONFIG_STM32_STM32F427) || defined(CONFIG_STM32_STM32F429) || \
-    defined(CONFIG_STM32_STM32F446) || defined(CONFIG_STM32_STM32F469)
+    defined(CONFIG_STM32_STM32F446) || defined(CONFIG_STM32_STM32F469) || \
+    defined(CONFIG_STM32_STM32F411)
 #  define RCC_APB2ENR_SPI4EN        (1 << 13) /* Bit 13: SPI4 clock enable */
 #endif
 #define RCC_APB2ENR_SYSCFGEN        (1 << 14) /* Bit 14: System configuration controller clock enable */
@@ -508,8 +513,11 @@
 #define RCC_APB2ENR_TIM10EN         (1 << 17) /* Bit 17: TIM10 clock enable */
 #define RCC_APB2ENR_TIM11EN         (1 << 18) /* Bit 18: TIM11 clock enable */
 #if defined(CONFIG_STM32_STM32F427) || defined(CONFIG_STM32_STM32F429) || \
-    defined(CONFIG_STM32_STM32F469)
+    defined(CONFIG_STM32_STM32F469) || defined(CONFIG_STM32_STM32F411)
 #  define RCC_APB2ENR_SPI5EN        (1 << 20) /* Bit 20: SPI5 clock enable */
+#endif
+#if defined(CONFIG_STM32_STM32F427) || defined(CONFIG_STM32_STM32F429) || \
+    defined(CONFIG_STM32_STM32F469)
 #  define RCC_APB2ENR_SPI6EN        (1 << 21) /* Bit 21: SPI6 clock enable */
 #endif
 #if defined(CONFIG_STM32_STM32F427) || defined(CONFIG_STM32_STM32F429) || \
@@ -649,7 +657,8 @@
 #define RCC_APB2LPENR_SDIOLPEN      (1 << 11) /* Bit 11: SDIO clock enable during Sleep mode */
 #define RCC_APB2LPENR_SPI1LPEN      (1 << 12) /* Bit 12: SPI1 clock enable during Sleep mode */
 #if defined(CONFIG_STM32_STM32F427) || defined(CONFIG_STM32_STM32F429) || \
-    defined(CONFIG_STM32_STM32F446) || defined(CONFIG_STM32_STM32F469)
+    defined(CONFIG_STM32_STM32F446) || defined(CONFIG_STM32_STM32F469) || \
+    defined(CONFIG_STM32_STM32F411)
 #  define RCC_APB2LPENR_SPI4LPEN    (1 << 13) /* Bit 13: SPI4 clock enable during Sleep mode */
 #endif
 #define RCC_APB2LPENR_SYSCFGLPEN    (1 << 14) /* Bit 14: System configuration controller clock enable during Sleep mode */
@@ -657,8 +666,11 @@
 #define RCC_APB2LPENR_TIM10LPEN     (1 << 17) /* Bit 17: TIM10 clock enable during Sleep mode */
 #define RCC_APB2LPENR_TIM11LPEN     (1 << 18) /* Bit 18: TIM11 clock enable during Sleep mode */
 #if defined(CONFIG_STM32_STM32F427) || defined(CONFIG_STM32_STM32F429) || \
-    defined(CONFIG_STM32_STM32F469)
+    defined(CONFIG_STM32_STM32F469) || defined(CONFIG_STM32_STM32F411)
 #  define RCC_APB2LPENR_SPI5LPEN    (1 << 20) /* Bit 20: SPI5 clock enable during Sleep mode */
+#endif
+#if defined(CONFIG_STM32_STM32F427) || defined(CONFIG_STM32_STM32F429) || \
+    defined(CONFIG_STM32_STM32F469)
 #  define RCC_APB2LPENR_SPI6LPEN    (1 << 21) /* Bit 21: SPI6 clock enable during Sleep mode */
 #endif
 #if defined(CONFIG_STM32_STM32F427) || defined(CONFIG_STM32_STM32F429) || \
