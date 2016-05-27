@@ -1,11 +1,11 @@
-NuttX TODO List (Last updated March 31, 2016)
+NuttX TODO List (Last updated May 27, 2016)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
 standards, things that could be improved, and ideas for enhancements.  This
 TODO list does not include issues associated with individual boar ports. See
-altheso individual README.txt files in the configs/ sub-directories for
-issues reated to each board port.
+also the individual README.txt files in the configs/ sub-directories for
+issues related to each board port.
 
 nuttx/
 
@@ -70,7 +70,7 @@ o Task/Scheduler (sched/)
   Title:       GET_ENVIRON_PTR()
   Description: get_environ_ptr() (sched/sched_getenvironptr.c) is not implemented.
                The representation of the environment strings selected for
-               NutX is not compatible with the operation.  Some significant
+               NuttX is not compatible with the operation.  Some significant
                re-design would be required to implement this function and that
                effort is thought to be not worth the result.
   Status:      Open.  No change is planned.
@@ -81,7 +81,7 @@ o Task/Scheduler (sched/)
   Status:      Open
   Priority:    Low -- There is no plan to implement this.
 
-  Title:       INCOMPATIBILITES WITH execv() AND execl()
+  Title:       INCOMPATIBILITIES WITH execv() AND execl()
   Description: Simplified 'execl()' and 'execv()' functions are provided by
                NuttX.  NuttX does not support processes and hence the concept
                of overlaying a tasks process image with a new process image
@@ -175,7 +175,7 @@ o Task/Scheduler (sched/)
                Yahoo! Groups message 7726: "I think that the system
                 should be required to handle pthread_cancel safely in
                 all cases.  In the NuttX model, a task is like a Unix
-                process and a pthread is like a Unix thread.  Cancelling
+                process and a pthread is like a Unix thread.  Canceling
                 threads should always be safe (or at least as unsafe) as
                 under Unix because the model is complete for pthreads...
 
@@ -188,7 +188,7 @@ o Task/Scheduler (sched/)
 
                "The patch I just incorporated is also insufficient.  It
                 works only if the serial driver is shut down when the
-                thread is cancelled.  But what if there are other open
+                thread is canceled.  But what if there are other open
                 references to the driver?  Then the driver will not be
                 shut down, the semaphores will not be re-initialized, and
                 the semaphore counts will still be off by one.
@@ -202,7 +202,7 @@ o Task/Scheduler (sched/)
                hooks so that given a semaphore it can traverse all
                holders.  What is needed would be logic so that given
                a task, you can traverse all semaphores held by the task,
-               releasing each semaphore cound held by the exiting task.
+               releasing each semaphore count held by the exiting task.
                Nothing like this exists now so that solution is not
                imminent.
 
@@ -228,16 +228,15 @@ o Task/Scheduler (sched/)
                hidden behind simple accessor functions and so the internal
                data structures can be changed if need with very little impact.
 
-
-               Explicity refereence to the list strucutre are hidden behnid
+               Explicitly reference to the list structure are hidden behind
                the macro this_task().
 
   Status:      Open
   Priority:    Low.  Things are just the way that we want them for the way
                that NuttX is used today.
 
-o Memory Managment (mm/)
-  ^^^^^^^^^^^^^^^^^^^^^^
+o Memory Management (mm/)
+  ^^^^^^^^^^^^^^^^^^^^^^^
 
   Title:       FREE MEMORY ON TASK EXIT
   Description: Add an option to free all memory allocated by a task when the
@@ -390,7 +389,7 @@ o pthreads (sched/pthreads)
   Priority:    Low -- about zero, probably not that useful. Priority inheritance is
                already supported and is a much better solution.  And it turns out
                that priority protection is just about as complex as priority inheritance.
-               Exerpted from my post in a Linked-In discussion:
+               Excerpted from my post in a Linked-In discussion:
 
                "I started to implement this HLS/"PCP" semaphore in an RTOS that I
                work with (http://www.nuttx.org) and I discovered after doing the
@@ -784,7 +783,7 @@ o Binary loaders (binfmt/)
                to get fixed as needed for Windows native tool builds.
 
   Title:       TOOLCHAIN COMPATIBILITY PROBLEM
-  Descripton:  The older 4.3.3 compiler generates GOTOFF relocations to the constant
+  Description: The older 4.3.3 compiler generates GOTOFF relocations to the constant
                strings, like:
 
                .L3:
@@ -794,7 +793,7 @@ o Binary loaders (binfmt/)
                   .word   .LC3(GOTOFF)
                   .word   .LC4(GOTOFF)
 
-               Where .LC0, LC1, LC2, LC3, and .LC4 are the labels correponding to strings in
+               Where .LC0, LC1, LC2, LC3, and .LC4 are the labels corresponding to strings in
                the .rodata.str1.1 section.  One consequence of this is that .rodata must reside
                in D-Space since it will addressed relative to the GOT (see the section entitled
                "Read-Only Data in RAM" at
@@ -880,7 +879,7 @@ o Network (net/, drivers/net)
                RFC3678 (IGMPv3) suggests ioctl() commands to do this (SIOCSIPMSFILTER) but
                also status that those APIs are historic.  NuttX implements these ioctl
                commands, but is non-standard because:  (1) It does not support IGMPv3, and
-               (2) it looks up drivers by their device name (eg., "eth0") vs IP address.
+               (2) it looks up drivers by their device name (e.g., "eth0") vs IP address.
 
                Linux uses setsockopt() to control multicast group membership using the
                IP_ADD_MEMBERSHIP and IP_DROP_MEMBERSHIP options.  It also looks up drivers
@@ -896,7 +895,7 @@ o Network (net/, drivers/net)
                that connection may time out.  How should this be handled?  Should the
                connection be removed from the backlog if it is times out or is closed?
                Or should it remain in the backlog with a status indication so that accept()
-               can fail when it encounteres the invalid connection?
+               can fail when it encounters the invalid connection?
   Status:      Open
   Priority:    Medium.  Important on slow applications that will not accept
                connections promptly.
@@ -975,7 +974,7 @@ o Network (net/, drivers/net)
                it is no longer needed.  Perhaps there should be a delayed
                call to unlink() (using a watchdog or the work queue).  If
                the driver is re-opened, the delayed unlink could be
-               cancelled?  Needs more thought.
+               canceled?  Needs more thought.
                NOTE: This is not an issue for Unix domain streams sockets:
                The end-of-life of the FIFO is well determined when sockets
                are disconnected and support for that case is fully implemented.
@@ -1020,7 +1019,7 @@ o USB (drivers/usbdev, drivers/usbhost)
                that involves delays.  This needs to be redesigned to eliminate these
                delays.  See logic conditioned on CONFIG_USBMSC_RACEWAR.
 
-               If queuing of stall requests is supported by DCD then this workaround
+               If queuing of stall requests is supported by the DCD then this workaround
                is not required.  In this case, (1) the stall is not sent until all
                write requests preceding the stall request are sent, (2) the stall is
                sent, and then after the stall is cleared, (3) all write requests
@@ -1135,7 +1134,7 @@ o USB (drivers/usbdev, drivers/usbhost)
   Priority:    Medium-Low
 
   Title:       USB CDC/ACM HOST CLASS DRIVER
-  Desciption:  A CDC/ACM host class driver has been added.  This has been
+  Description: A CDC/ACM host class driver has been added.  This has been
                testing by running the USB CDC/ACM host on an Olimex
                LPC1766STK and using the configs/stm3210e-eval/usbserial
                configuration (using the CDC/ACM device side driver).  There
@@ -1374,7 +1373,7 @@ o File system / Generic drivers (fs/, drivers/)
   Priority:    Medium
 
   Title:       UNIFIED DESCRIPTOR REPRESENTATION
-  Descripton:  There are two separate ranges of descriptors for file and
+  Description: There are two separate ranges of descriptors for file and
                socket descriptors: if a descriptor is in one range then it is
                recognized as a file descriptor; if it is in another range
                then it is recognized as a socket descriptor.  These separate
@@ -1410,7 +1409,7 @@ o File system / Generic drivers (fs/, drivers/)
   Status:      Open
   Priority:    Low
 
-  Title:       FAT LONG FILENAME COMPATIBILTY
+  Title:       FAT LONG FILENAME COMPATIBILITY
   Description: Recently there have been reports that file with long file
                names created by NuttX don't have long file names when viewed
                on Windows.  The long file name support has been around for a
@@ -1423,7 +1422,7 @@ o File system / Generic drivers (fs/, drivers/)
   Description: I have seen cases where (1) long file names are enabled,
                but (2) a short file name is created like:
 
-                 nsh> echo "This is another thest" >/mnt/sdcard/another.txt
+                 nsh> echo "This is another test" >/mnt/sdcard/another.txt
 
                But then on subsequent 'ls' operations, the file does not appear:
 
@@ -1472,7 +1471,7 @@ o File system / Generic drivers (fs/, drivers/)
 
                4) When comparing the checksum in the long file name
                   entry with the checksum of the short file name, the
-                  checksum fails and the entire directlry sequence is
+                  checksum fails and the entire directory sequence is
                   ignored by readder() logic.  This the file does not
                   appear in the 'ls'.
 
@@ -1539,7 +1538,7 @@ o Graphics subsystem (graphics/)
   Priority:    Low, the need has not yet arisen.
 
   Title:       PER-WINDOW FRAMEBUFFERS
-  Description: One of the most awkard things to handle in the NX windowing
+  Description: One of the most awkward things to handle in the NX windowing
                system is the re-draw callback.  This is difficult because it
                requires ad hoc, custom logic to be able to do the redrawing
                in most cases.
@@ -1765,7 +1764,7 @@ o ARM (arch/arm/)
 
                But this has not been proven to be a solution.
 
-               UPDATE:  Other ARM architectures have a similer issue.
+               UPDATE:  Other ARM architectures have a similar issue.
 
   Status:      Open
   Priority:    Low.  The conditions of continuous interrupts is really the problem.
@@ -1823,7 +1822,7 @@ o NuttShell (NSH) (apps/nshlib)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   Title:       IFCONFIG AND MULTIPLE NETWORK INTERFACES
-  Descripton:  The ifconfig command will not behave correctly if an interface
+  Description: The ifconfig command will not behave correctly if an interface
                is provided and there are multiple interfaces.  It should only
                show status for the single interface on the command line; it will
                still show status for all interfaces.
