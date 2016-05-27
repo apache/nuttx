@@ -169,11 +169,13 @@ struct adc_ops_s
 
 struct adc_dev_s
 {
+#ifdef CONFIG_ADC
   uint8_t                     ad_ocount;     /* The number of times the device has been opened */
   uint8_t                     ad_nrxwaiters; /* Number of threads waiting to enqueue a message */
   sem_t                       ad_closesem;   /* Locks out new opens while close is in progress */
   sem_t                       ad_recvsem;    /* Used to wakeup user waiting for space in ad_recv.buffer */
   struct adc_fifo_s           ad_recv;       /* Describes receive FIFO */
+#endif
   FAR const struct adc_ops_s *ad_ops;        /* Arch-specific operations */
   FAR void                   *ad_priv;       /* Used by the arch-specific logic */
 };
