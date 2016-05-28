@@ -131,36 +131,36 @@
 
 /* Control Register */
 
-#define ECSPI_CONREG_EN              (1 << 0)  /* Bit 0:  SPI Block enable control */
-#define ECSPI_CONREG_HT              (1 << 1)  /* Bit 1:  Hardware trigger enable */
-#define ECSPI_CONREG_XCH             (1 << 2)  /* Bit 2:  SPI Exchange bit */
-#define ECSPI_CONREG_SMC             (1 << 3)  /* Bit 3:  Start mode control */
-#define ECSPI_CONREG_CHMODE_SHIFT    (4)      /* Bits 4-7: SPI Channel mode */
-#define ECSPI_CONREG_CHMODE_MASK     (15 << ECSPI_CONREG_CHMODE_SHIFT)
-#  define ECSPI_CONREG_CH0MASTER     (1 << ECSPI_CONREG_CHMODE_SHIFT) /* Channel 0 master mode */
-#  define ECSPI_CONREG_CH1MASTER     (2 << ECSPI_CONREG_CHMODE_SHIFT) /* Channel 1 master mode */
-#  define ECSPI_CONREG_CH2MASTER     (4 << ECSPI_CONREG_CHMODE_SHIFT) /* Channel 2 master mode */
-#  define ECSPI_CONREG_CH3MASTER     (8 << ECSPI_CONREG_CHMODE_SHIFT) /* Channel 3 master mode */
-#define ECSPI_CONREG_POSTDIV_SHIFT   (8)      /* Bits 8-11: SPI Post divider */
-#define ECSPI_CONREG_POSTDIV_MASK    (15 << ECSPI_CONREG_POSTDIV_SHIFT)
-#  define ECSPI_CONREG_POSTDIV(n)    ((uint32_t)(n) << ECSPI_CONREG_POSTDIV_SHIFT)
-#define ECSPI_CONREG_PREDIV_SHIFT    (12)      /* Bits 12-15: SPI Pre divider */
-#define ECSPI_CONREG_PREDIV_MASK     (15 << ECSPI_CONREG_PREDIV_SHIFT)
-#  define ECSPI_CONREG_PREDIV(n)     ((uint32_t)(n) << ECSPI_CONREG_PREDIV_SHIFT)
-#define ECSPI_CONREG_DRCTL_SHIFT     16  /* Bits 16-17: SPI Data ready control */
-#define ECSPI_CONREG_DRCTL_MASK      (3 << ECSPI_CONREG_DRCTL_SHIFT)
-#  define ECSPI_CONREG_DRCTL_IGNRDY  (0 << ECSPI_CONREG_DRCTL_SHIFT)
-#  define ECSPI_CONREG_DRCTL_FALLING (1 << ECSPI_CONREG_DRCTL_SHIFT)
-#  define ECSPI_CONREG_DRCTL_ACTVLOW (2 << ECSPI_CONREG_DRCTL_SHIFT)
-#define ECSPI_CONREG_CHSEL_SHIFT     (18)      /* Bits 18-19: SPI Channel select bits */
-#define ECSPI_CONREG_CHSEL_MASK      (3 << ECSPI_CONREG_CHSEL_SHIFT)
-#  define ECSPI_CONREG_CHSEL_SS0     (0 << ECSPI_CONREG_CHSEL_SHIFT) /* Channel 0 select (SS0) */
-#  define ECSPI_CONREG_CHSEL_SS1     (1 << ECSPI_CONREG_CHSEL_SHIFT) /* Channel 1 select (SS1) */
-#  define ECSPI_CONREG_CHSEL_SS2     (2 << ECSPI_CONREG_CHSEL_SHIFT) /* Channel 2 select (SS2) */
-#  define ECSPI_CONREG_CHSEL_SS3     (3 << ECSPI_CONREG_CHSEL_SHIFT) /* Channel 3 select (SS3) */
-#define ECSPI_CONREG_BURSTLEN_SHIFT  (20)      /* Bits 20-31: Burst length */
-#define ECSPI_CONREG_BURSTLEN_MASK   (0xfff << ECSPI_CONREG_BURSTLEN_SHIFT)
-#  define ECSPI_CONREG_BURSTLEN(n)   ((uint32_t)(n) << ECSPI_CONREG_BURSTLEN_SHIFT)
+#define ECSPI_CONREG_EN               (1 << 0)  /* Bit 0:  SPI Block enable control */
+#define ECSPI_CONREG_HT               (1 << 1)  /* Bit 1:  Hardware trigger enable */
+#define ECSPI_CONREG_XCH              (1 << 2)  /* Bit 2:  SPI Exchange bit */
+#define ECSPI_CONREG_SMC              (1 << 3)  /* Bit 3:  Start mode control */
+#define ECSPI_CONREG_CHMODE_SHIFT     (4)      /* Bits 4-7: SPI Channel mode */
+#define ECSPI_CONREG_CHMODE_MASK      (15 << ECSPI_CONREG_CHMODE_SHIFT)
+#  define ECSPI_CONREG_CH0MASTER      (1 << ECSPI_CONREG_CHMODE_SHIFT) /* Channel 0 master mode */
+#  define ECSPI_CONREG_CH1MASTER      (2 << ECSPI_CONREG_CHMODE_SHIFT) /* Channel 1 master mode */
+#  define ECSPI_CONREG_CH2MASTER      (4 << ECSPI_CONREG_CHMODE_SHIFT) /* Channel 2 master mode */
+#  define ECSPI_CONREG_CH3MASTER      (8 << ECSPI_CONREG_CHMODE_SHIFT) /* Channel 3 master mode */
+#define ECSPI_CONREG_POSTDIV_SHIFT    (8)      /* Bits 8-11: SPI Post divider */
+#define ECSPI_CONREG_POSTDIV_MASK     (15 << ECSPI_CONREG_POSTDIV_SHIFT)
+#  define ECSPI_CONREG_POSTDIV(n)     ((uint32_t)(n) << ECSPI_CONREG_POSTDIV_SHIFT)
+#define ECSPI_CONREG_PREDIV_SHIFT     (12)      /* Bits 12-15: SPI Pre divider */
+#define ECSPI_CONREG_PREDIV_MASK      (15 << ECSPI_CONREG_PREDIV_SHIFT)
+#  define ECSPI_CONREG_PREDIV(n)      ((uint32_t)(n) << ECSPI_CONREG_PREDIV_SHIFT)
+#define ECSPI_CONREG_DRCTL_SHIFT      16  /* Bits 16-17: SPI Data ready control */
+#define ECSPI_CONREG_DRCTL_MASK       (3 << ECSPI_CONREG_DRCTL_SHIFT)
+#  define ECSPI_CONREG_DRCTL_IGNRDY   (0 << ECSPI_CONREG_DRCTL_SHIFT)
+#  define ECSPI_CONREG_DRCTL_FALLING  (1 << ECSPI_CONREG_DRCTL_SHIFT)
+#  define ECSPI_CONREG_DRCTL_ACTVLOW  (2 << ECSPI_CONREG_DRCTL_SHIFT)
+#define ECSPI_CONREG_CHSEL_SHIFT      (18)      /* Bits 18-19: SPI Channel select bits */
+#define ECSPI_CONREG_CHSEL_MASK       (3 << ECSPI_CONREG_CHSEL_SHIFT)
+#  define ECSPI_CONREG_CHSEL_SS0      (0 << ECSPI_CONREG_CHSEL_SHIFT) /* Channel 0 select (SS0) */
+#  define ECSPI_CONREG_CHSEL_SS1      (1 << ECSPI_CONREG_CHSEL_SHIFT) /* Channel 1 select (SS1) */
+#  define ECSPI_CONREG_CHSEL_SS2      (2 << ECSPI_CONREG_CHSEL_SHIFT) /* Channel 2 select (SS2) */
+#  define ECSPI_CONREG_CHSEL_SS3      (3 << ECSPI_CONREG_CHSEL_SHIFT) /* Channel 3 select (SS3) */
+#define ECSPI_CONREG_BURSTLEN_SHIFT   (20)      /* Bits 20-31: Burst length */
+#define ECSPI_CONREG_BURSTLEN_MASK    (0xfff << ECSPI_CONREG_BURSTLEN_SHIFT)
+#  define ECSPI_CONREG_BURSTLEN(n)    ((uint32_t)(n) << ECSPI_CONREG_BURSTLEN_SHIFT)
 
 /* Configuration Register */
 
