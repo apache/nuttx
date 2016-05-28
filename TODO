@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated May 27, 2016)
+NuttX TODO List (Last updated May 28, 2016)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -7,14 +7,14 @@ TODO list does not include issues associated with individual boar ports. See
 also the individual README.txt files in the configs/ sub-directories for
 issues related to each board port.
 
-nuttx/
+nuttx/:
 
  (13)  Task/Scheduler (sched/)
   (1)  Memory Management (mm/)
   (3)  Signals (sched/signal, arch/)
   (2)  pthreads (sched/pthread)
   (0)  Message Queues (sched/mqueue)
-  (8)  Kernel/Protected Build
+  (9)  Kernel/Protected Build
   (3)  C++ Support
   (6)  Binary loaders (binfmt/)
  (12)  Network (net/, drivers/net)
@@ -23,16 +23,16 @@ nuttx/
  (11)  Libraries (libc/, libm/)
  (11)  File system/Generic drivers (fs/, drivers/)
   (8)  Graphics subsystem (graphics/)
-  (1)  Pascal add-on (pcode/)
   (1)  Build system / Toolchains
-  (4)  Linux/Cywgin simulation (arch/sim)
+  (3)  Linux/Cywgin simulation (arch/sim)
   (4)  ARM (arch/arm/)
 
-apps/
+apps/ and other Add-Ons:
 
   (3)  Network Utilities (apps/netutils/)
   (2)  NuttShell (NSH) (apps/nshlib)
   (1)  System libraries apps/system (apps/system)
+  (1)  Pascal add-on (pcode/)
   (4)  Other Applications & Tests (apps/examples/)
 
 o Task/Scheduler (sched/)
@@ -588,8 +588,21 @@ o Kernel/Protected Build
                interrupt level callbacks into applications.  This, of course,
                will never work in anything but a non-secure, flat build.
   Status:      Open
-  Priority:    Medium.  The driver is only usable with all of its features in a FLAT build.
-  
+  Priority:    Medium.  The driver is only usable with all of its features
+               in a FLAT build.
+
+  Title:       USER MODE TASKS CAN MODIFY PRIVILEGED TASKS
+  Description: Certain interfaces, such as sched_setparam(),
+               sched_setscheduler(), etc. can be used by user mode tasks to
+               modify the behavior of priviledged kernel threads.
+               task_delete() could even be used to kill a kernel thread.
+               For a truly secure system.  Privileges need to be checked in
+               every interface that permits one thread to modify the
+               properties of another thread.
+  Status:      Open
+  Priority:    Low for most embedded systems but would be a critical need if
+               NuttX were used in a secure system.
+
 o C++ Support
   ^^^^^^^^^^^
 
@@ -1566,26 +1579,6 @@ o Graphics subsystem (graphics/)
   Priority:    Low, not a serious issue but worth noting.  There is no plan
                to change this behavior.
 
-o Pascal Add-On (pcode/)
-  ^^^^^^^^^^^^^^^^^^^^^^
-
-  Title:       P-CODES IN MEMORY UNTESTED
-  Description: Need APIs to verify execution of P-Code from memory buffer.
-  Status:      Open
-  Priority:    Low
-
-  Title:       SMALLER LOADER AND OBJECT FORMAT
-  Description: Loader and object format may be too large for some small
-               memory systems.  Consider ways to reduce memory footprint.
-  Status:      Open
-  Priority:    Medium
-
-  Title:       PDBG
-  Description: Move the the pascal p-code debugger into the NuttX apps/ tree
-               where it can be used from the NSH command line.
-  Status:      Open
-  Priority:    Low
-
 o Build system
   ^^^^^^^^^^^^
 
@@ -1607,15 +1600,6 @@ o Other drivers (drivers/)
 
 o Linux/Cywgin simulation (arch/sim)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-  Title:       SIMULATOR NETWORKING SUPPORT
-  Description: I never did get networking to work on the sim Linux target.  On Linux,
-               it tries to use the tap device (/dev/net/tun) to emulate an Ethernet
-               NIC, but I never got it correctly integrated with the NuttX networking.
-               NOTE: On Cygwin, the build uses the Cygwin WPCAP library and is, at
-               least, partially functional (it has never been rigorously tested).
-  Status:      Open
-  Priority:    Low (unless you want to test networking features on the simulation).
 
   Title:       SIMULATOR HAS NO INTERRUPTS (NON-PREMPTIBLE)
   Description: The current simulator implementation is has no interrupts and, hence,
@@ -1846,6 +1830,26 @@ o System libraries apps/system (apps/system)
   Status:      Open
   Priority:    Low (unless you are using mixed C-buffered I/O with readline and
                fgetc, for example).
+
+o Pascal Add-On (pcode/)
+  ^^^^^^^^^^^^^^^^^^^^^^
+
+  Title:       P-CODES IN MEMORY UNTESTED
+  Description: Need APIs to verify execution of P-Code from memory buffer.
+  Status:      Open
+  Priority:    Low
+
+  Title:       SMALLER LOADER AND OBJECT FORMAT
+  Description: Loader and object format may be too large for some small
+               memory systems.  Consider ways to reduce memory footprint.
+  Status:      Open
+  Priority:    Medium
+
+  Title:       PDBG
+  Description: Move the the pascal p-code debugger into the NuttX apps/ tree
+               where it can be used from the NSH command line.
+  Status:      Open
+  Priority:    Low
 
 o Other Applications & Tests (apps/examples/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
