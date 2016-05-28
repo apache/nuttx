@@ -33,18 +33,15 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_IMX6_ECSPI_H
-#define __ARCH_ARM_IMX6_ECSPI_H
+#ifndef __ARCH_ARM_IMX6_CHIP_ECSPI_H
+#define __ARCH_ARM_IMX6_CHIP_ECSPI_H
 
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
-#ifndef __ASSEMBLY__
-#  include <stdint.h>
-#  include <stdbool.h>
-#  include <nuttx/spi/spi.h>
-#endif
+#include <nuttx/config.h>
+#include "chip/imx_memorymap.h"
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -52,83 +49,83 @@
 
 /* ECSPI Register Offsets ***********************************************************/
 
-#define ECSPI_RXDATA_OFFSET         0x0000 /* Receive Data Register */
-#define ECSPI_TXDATA_OFFSET         0x0004 /* Transmit Data Register */
-#define ECSPI_CONREG_OFFSET         0x0008 /* Control Register */
-#define ECSPI_CONFIGREG_OFFSET      0x000c /* Configuration Register */
-#define ECSPI_INTREG_OFFSET         0x0010 /* Interrupt Control Register */
-#define ECSPI_DMAREG_OFFSET         0x0014 /* DMA Control Register */
-#define ECSPI_STATREG_OFFSET        0x0018 /* Status Register */
-#define ECSPI_PERIODREG_OFFSET      0x001c /* Sample Period Control Register */
-#define ECSPI_TESTREG_OFFSET        0x0020 /* Test Control Register */
-#define ECSPI_MSGDATA_OFFSET        0x0040 /* Message Data Register */
+#define ECSPI_RXDATA_OFFSET           0x0000 /* Receive Data Register */
+#define ECSPI_TXDATA_OFFSET           0x0004 /* Transmit Data Register */
+#define ECSPI_CONREG_OFFSET           0x0008 /* Control Register */
+#define ECSPI_CONFIGREG_OFFSET        0x000c /* Configuration Register */
+#define ECSPI_INTREG_OFFSET           0x0010 /* Interrupt Control Register */
+#define ECSPI_DMAREG_OFFSET           0x0014 /* DMA Control Register */
+#define ECSPI_STATREG_OFFSET          0x0018 /* Status Register */
+#define ECSPI_PERIODREG_OFFSET        0x001c /* Sample Period Control Register */
+#define ECSPI_TESTREG_OFFSET          0x0020 /* Test Control Register */
+#define ECSPI_MSGDATA_OFFSET          0x0040 /* Message Data Register */
 
 /* ECSPI Register Addresses *********************************************************/
 
 /* ECSPI1 */
 
-#define IMX_ECSPI1_RXDATA           (IMX_ECSPI1_VBASE + ECSPI_RXDATA_OFFSET)
-#define IMX_ECSPI1_TXDATA           (IMX_ECSPI1_VBASE + ECSPI_TXDATA_OFFSET)
-#define IMX_ECSPI1_CONREG           (IMX_ECSPI1_VBASE + ECSPI_CONREG_OFFSET)
-#define IMX_ECSPI1_CONFIGREG        (IMX_ECSPI1_VBASE + ECSPI_CONFIGREG_OFFSET)
-#define IMX_ECSPI1_INTREG           (IMX_ECSPI1_VBASE + ECSPI_INTREG_OFFSET)
-#define IMX_ECSPI1_DMAREG           (IMX_ECSPI1_VBASE + ECSPI_DMAREG_OFFSET)
-#define IMX_ECSPI1_STATREG          (IMX_ECSPI1_VBASE + ECSPI_STATREG_OFFSET)
-#define IMX_ECSPI1_PERIODREG        (IMX_ECSPI1_VBASE + ECSPI_PERIODREG_OFFSET)
-#define IMX_ECSPI1_TESTREG          (IMX_ECSPI1_VBASE + ECSPI_TESTREG_OFFSET)
-#define IMX_ECSPI1_MSGDATA          (IMX_ECSPI1_VBASE + ECSPI_MSGDATA_OFFSET)
+#define IMX_ECSPI1_RXDATA             (IMX_ECSPI1_VBASE + ECSPI_RXDATA_OFFSET)
+#define IMX_ECSPI1_TXDATA             (IMX_ECSPI1_VBASE + ECSPI_TXDATA_OFFSET)
+#define IMX_ECSPI1_CONREG             (IMX_ECSPI1_VBASE + ECSPI_CONREG_OFFSET)
+#define IMX_ECSPI1_CONFIGREG          (IMX_ECSPI1_VBASE + ECSPI_CONFIGREG_OFFSET)
+#define IMX_ECSPI1_INTREG             (IMX_ECSPI1_VBASE + ECSPI_INTREG_OFFSET)
+#define IMX_ECSPI1_DMAREG             (IMX_ECSPI1_VBASE + ECSPI_DMAREG_OFFSET)
+#define IMX_ECSPI1_STATREG            (IMX_ECSPI1_VBASE + ECSPI_STATREG_OFFSET)
+#define IMX_ECSPI1_PERIODREG          (IMX_ECSPI1_VBASE + ECSPI_PERIODREG_OFFSET)
+#define IMX_ECSPI1_TESTREG            (IMX_ECSPI1_VBASE + ECSPI_TESTREG_OFFSET)
+#define IMX_ECSPI1_MSGDATA            (IMX_ECSPI1_VBASE + ECSPI_MSGDATA_OFFSET)
 
 /* ECSPI2 */
 
-#define IMX_ECSPI2_RXDATA           (IMX_ECSPI2_VBASE + ECSPI_RXDATA_OFFSET)
-#define IMX_ECSPI2_TXDATA           (IMX_ECSPI2_VBASE + ECSPI_TXDATA_OFFSET)
-#define IMX_ECSPI2_CONREG           (IMX_ECSPI2_VBASE + ECSPI_CONREG_OFFSET)
-#define IMX_ECSPI2_CONFIGREG        (IMX_ECSPI2_VBASE + ECSPI_CONFIGREG_OFFSET)
-#define IMX_ECSPI2_INTREG           (IMX_ECSPI2_VBASE + ECSPI_INTREG_OFFSET)
-#define IMX_ECSPI2_DMAREG           (IMX_ECSPI2_VBASE + ECSPI_DMAREG_OFFSET)
-#define IMX_ECSPI2_STATREG          (IMX_ECSPI2_VBASE + ECSPI_STATREG_OFFSET)
-#define IMX_ECSPI2_PERIODREG        (IMX_ECSPI2_VBASE + ECSPI_PERIODREG_OFFSET)
-#define IMX_ECSPI2_TESTREG          (IMX_ECSPI2_VBASE + ECSPI_TESTREG_OFFSET)
-#define IMX_ECSPI2_MSGDATA          (IMX_ECSPI2_VBASE + ECSPI_MSGDATA_OFFSET)
+#define IMX_ECSPI2_RXDATA             (IMX_ECSPI2_VBASE + ECSPI_RXDATA_OFFSET)
+#define IMX_ECSPI2_TXDATA             (IMX_ECSPI2_VBASE + ECSPI_TXDATA_OFFSET)
+#define IMX_ECSPI2_CONREG             (IMX_ECSPI2_VBASE + ECSPI_CONREG_OFFSET)
+#define IMX_ECSPI2_CONFIGREG          (IMX_ECSPI2_VBASE + ECSPI_CONFIGREG_OFFSET)
+#define IMX_ECSPI2_INTREG             (IMX_ECSPI2_VBASE + ECSPI_INTREG_OFFSET)
+#define IMX_ECSPI2_DMAREG             (IMX_ECSPI2_VBASE + ECSPI_DMAREG_OFFSET)
+#define IMX_ECSPI2_STATREG            (IMX_ECSPI2_VBASE + ECSPI_STATREG_OFFSET)
+#define IMX_ECSPI2_PERIODREG          (IMX_ECSPI2_VBASE + ECSPI_PERIODREG_OFFSET)
+#define IMX_ECSPI2_TESTREG            (IMX_ECSPI2_VBASE + ECSPI_TESTREG_OFFSET)
+#define IMX_ECSPI2_MSGDATA            (IMX_ECSPI2_VBASE + ECSPI_MSGDATA_OFFSET)
 
 /* ECSPI3 */
 
-#define IMX_ECSPI3_RXDATA           (IMX_ECSPI3_VBASE + ECSPI_RXDATA_OFFSET)
-#define IMX_ECSPI3_TXDATA           (IMX_ECSPI3_VBASE + ECSPI_TXDATA_OFFSET)
-#define IMX_ECSPI3_CONREG           (IMX_ECSPI3_VBASE + ECSPI_CONREG_OFFSET)
-#define IMX_ECSPI3_CONFIGREG        (IMX_ECSPI3_VBASE + ECSPI_CONFIGREG_OFFSET)
-#define IMX_ECSPI3_INTREG           (IMX_ECSPI3_VBASE + ECSPI_INTREG_OFFSET)
-#define IMX_ECSPI3_DMAREG           (IMX_ECSPI3_VBASE + ECSPI_DMAREG_OFFSET)
-#define IMX_ECSPI3_STATREG          (IMX_ECSPI3_VBASE + ECSPI_STATREG_OFFSET)
-#define IMX_ECSPI3_PERIODREG        (IMX_ECSPI3_VBASE + ECSPI_PERIODREG_OFFSET)
-#define IMX_ECSPI3_TESTREG          (IMX_ECSPI3_VBASE + ECSPI_TESTREG_OFFSET)
-#define IMX_ECSPI3_MSGDATA          (IMX_ECSPI3_VBASE + ECSPI_MSGDATA_OFFSET)
+#define IMX_ECSPI3_RXDATA             (IMX_ECSPI3_VBASE + ECSPI_RXDATA_OFFSET)
+#define IMX_ECSPI3_TXDATA             (IMX_ECSPI3_VBASE + ECSPI_TXDATA_OFFSET)
+#define IMX_ECSPI3_CONREG             (IMX_ECSPI3_VBASE + ECSPI_CONREG_OFFSET)
+#define IMX_ECSPI3_CONFIGREG          (IMX_ECSPI3_VBASE + ECSPI_CONFIGREG_OFFSET)
+#define IMX_ECSPI3_INTREG             (IMX_ECSPI3_VBASE + ECSPI_INTREG_OFFSET)
+#define IMX_ECSPI3_DMAREG             (IMX_ECSPI3_VBASE + ECSPI_DMAREG_OFFSET)
+#define IMX_ECSPI3_STATREG            (IMX_ECSPI3_VBASE + ECSPI_STATREG_OFFSET)
+#define IMX_ECSPI3_PERIODREG          (IMX_ECSPI3_VBASE + ECSPI_PERIODREG_OFFSET)
+#define IMX_ECSPI3_TESTREG            (IMX_ECSPI3_VBASE + ECSPI_TESTREG_OFFSET)
+#define IMX_ECSPI3_MSGDATA            (IMX_ECSPI3_VBASE + ECSPI_MSGDATA_OFFSET)
 
 /* ECSPI4 */
 
-#define IMX_ECSPI4_RXDATA           (IMX_ECSPI4_VBASE + ECSPI_RXDATA_OFFSET)
-#define IMX_ECSPI4_TXDATA           (IMX_ECSPI4_VBASE + ECSPI_TXDATA_OFFSET)
-#define IMX_ECSPI4_CONREG           (IMX_ECSPI4_VBASE + ECSPI_CONREG_OFFSET)
-#define IMX_ECSPI4_CONFIGREG        (IMX_ECSPI4_VBASE + ECSPI_CONFIGREG_OFFSET)
-#define IMX_ECSPI4_INTREG           (IMX_ECSPI4_VBASE + ECSPI_INTREG_OFFSET)
-#define IMX_ECSPI4_DMAREG           (IMX_ECSPI4_VBASE + ECSPI_DMAREG_OFFSET)
-#define IMX_ECSPI4_STATREG          (IMX_ECSPI4_VBASE + ECSPI_STATREG_OFFSET)
-#define IMX_ECSPI4_PERIODREG        (IMX_ECSPI4_VBASE + ECSPI_PERIODREG_OFFSET)
-#define IMX_ECSPI4_TESTREG          (IMX_ECSPI4_VBASE + ECSPI_TESTREG_OFFSET)
-#define IMX_ECSPI4_MSGDATA          (IMX_ECSPI4_VBASE + ECSPI_MSGDATA_OFFSET)
+#define IMX_ECSPI4_RXDATA             (IMX_ECSPI4_VBASE + ECSPI_RXDATA_OFFSET)
+#define IMX_ECSPI4_TXDATA             (IMX_ECSPI4_VBASE + ECSPI_TXDATA_OFFSET)
+#define IMX_ECSPI4_CONREG             (IMX_ECSPI4_VBASE + ECSPI_CONREG_OFFSET)
+#define IMX_ECSPI4_CONFIGREG          (IMX_ECSPI4_VBASE + ECSPI_CONFIGREG_OFFSET)
+#define IMX_ECSPI4_INTREG             (IMX_ECSPI4_VBASE + ECSPI_INTREG_OFFSET)
+#define IMX_ECSPI4_DMAREG             (IMX_ECSPI4_VBASE + ECSPI_DMAREG_OFFSET)
+#define IMX_ECSPI4_STATREG            (IMX_ECSPI4_VBASE + ECSPI_STATREG_OFFSET)
+#define IMX_ECSPI4_PERIODREG          (IMX_ECSPI4_VBASE + ECSPI_PERIODREG_OFFSET)
+#define IMX_ECSPI4_TESTREG            (IMX_ECSPI4_VBASE + ECSPI_TESTREG_OFFSET)
+#define IMX_ECSPI4_MSGDATA            (IMX_ECSPI4_VBASE + ECSPI_MSGDATA_OFFSET)
 
 /* ECSPI5 */
 
-#define IMX_ECSPI5_RXDATA           (IMX_ECSPI5_VBASE + ECSPI_RXDATA_OFFSET)
-#define IMX_ECSPI5_TXDATA           (IMX_ECSPI5_VBASE + ECSPI_TXDATA_OFFSET)
-#define IMX_ECSPI5_CONREG           (IMX_ECSPI5_VBASE + ECSPI_CONREG_OFFSET)
-#define IMX_ECSPI5_CONFIGREG        (IMX_ECSPI5_VBASE + ECSPI_CONFIGREG_OFFSET)
-#define IMX_ECSPI5_INTREG           (IMX_ECSPI5_VBASE + ECSPI_INTREG_OFFSET)
-#define IMX_ECSPI5_DMAREG           (IMX_ECSPI5_VBASE + ECSPI_DMAREG_OFFSET)
-#define IMX_ECSPI5_STATREG          (IMX_ECSPI5_VBASE + ECSPI_STATREG_OFFSET)
-#define IMX_ECSPI5_PERIODREG        (IMX_ECSPI5_VBASE + ECSPI_PERIODREG_OFFSET)
-#define IMX_ECSPI5_TESTREG          (IMX_ECSPI5_VBASE + ECSPI_TESTREG_OFFSET)
-#define IMX_ECSPI5_MSGDATA          (IMX_ECSPI5_VBASE + ECSPI_MSGDATA_OFFSET)
+#define IMX_ECSPI5_RXDATA             (IMX_ECSPI5_VBASE + ECSPI_RXDATA_OFFSET)
+#define IMX_ECSPI5_TXDATA             (IMX_ECSPI5_VBASE + ECSPI_TXDATA_OFFSET)
+#define IMX_ECSPI5_CONREG             (IMX_ECSPI5_VBASE + ECSPI_CONREG_OFFSET)
+#define IMX_ECSPI5_CONFIGREG          (IMX_ECSPI5_VBASE + ECSPI_CONFIGREG_OFFSET)
+#define IMX_ECSPI5_INTREG             (IMX_ECSPI5_VBASE + ECSPI_INTREG_OFFSET)
+#define IMX_ECSPI5_DMAREG             (IMX_ECSPI5_VBASE + ECSPI_DMAREG_OFFSET)
+#define IMX_ECSPI5_STATREG            (IMX_ECSPI5_VBASE + ECSPI_STATREG_OFFSET)
+#define IMX_ECSPI5_PERIODREG          (IMX_ECSPI5_VBASE + ECSPI_PERIODREG_OFFSET)
+#define IMX_ECSPI5_TESTREG            (IMX_ECSPI5_VBASE + ECSPI_TESTREG_OFFSET)
+#define IMX_ECSPI5_MSGDATA            (IMX_ECSPI5_VBASE + ECSPI_MSGDATA_OFFSET)
 
 /* ECSPI Register Bit Definitions ***************************************************/
 
@@ -208,17 +205,19 @@
 #  define ECSPI_CONFIGREG_HTLEN(n)    ((uint32_t)(n) << ECSPI_CONFIGREG_HTLEN_SHIFT)
                                                 /* Bits 29-31: Reserved */
 
-/* Interrupt Control Register and Status Register */
+/* Common Interrupt Control Register and Status Register */
 
-#define ECSPI_INTREG_TE               (1 << 0)  /* Bit 0:  TXFIFO Empty Interrupt */
-#define ECSPI_INTREG_TDR              (1 << 1)  /* Bit 1:  TXFIFO Data Request Interrupt */
-#define ECSPI_INTREG_TF               (1 << 2)  /* Bit 2:  TXFIFO Full Interrupt */
-#define ECSPI_INTREG_RR               (1 << 3)  /* Bit 3:  RXFIFO Data Ready Interrupt */
-#define ECSPI_INTREG_RDR              (1 << 4)  /* Bit 4:  RXFIFO Data Request Interrupt enable */
-#define ECSPI_INTREG_RF               (1 << 5)  /* Bit 5:  RXFIFO Full Interrupt */
-#define ECSPI_INTREG_RO               (1 << 6)  /* Bit 6:  RXFIFO Overflow Interrupt */
-#define ECSPI_INTREG_TC               (1 << 7)  /* Bit 7:  Transfer Completed Interrupt enable */
+#define ECSPI_INT_TE                  (1 << 0)  /* Bit 0:  TXFIFO Empty Interrupt */
+#define ECSPI_INT_TDR                 (1 << 1)  /* Bit 1:  TXFIFO Data Request Interrupt */
+#define ECSPI_INT_TF                  (1 << 2)  /* Bit 2:  TXFIFO Full Interrupt */
+#define ECSPI_INT_RR                  (1 << 3)  /* Bit 3:  RXFIFO Data Ready Interrupt */
+#define ECSPI_INT_RDR                 (1 << 4)  /* Bit 4:  RXFIFO Data Request Interrupt enable */
+#define ECSPI_INT_RF                  (1 << 5)  /* Bit 5:  RXFIFO Full Interrupt */
+#define ECSPI_INT_RO                  (1 << 6)  /* Bit 6:  RXFIFO Overflow Interrupt */
+#define ECSPI_INT_TC                  (1 << 7)  /* Bit 7:  Transfer Completed Interrupt enable */
                                                 /* Bits 8-31: Reserved */
+
+#define ECSPI_INT_ALL                 0x000000ff
 
 /* ECSPI DMA Control Register */
 
@@ -237,7 +236,7 @@
 #define ECSPI_DMAREG_RXLEN_MASK       (0x3f << ECSPI_DMAREG_RXLEN_SHIFT)
 #  define ECSPI_DMAREG_RXLEN(n)       ((uint32_t)(n) << ECSPI_DMAREG_RXLEN_SHIFT)
                                                 /* Bit 30: Reserved */
-#define ECSPI_DMAREG_RXTDEN           (1 << 31) /* Bit 31: RXFIFO Tail DMA request enable
+#define ECSPI_DMAREG_RXTDEN           (1 << 31) /* Bit 31: RXFIFO Tail DMA request enable */
 
 /* ECSPI Sample Period Control Register */
 
@@ -268,77 +267,8 @@
  * Public Data
  ************************************************************************************/
 
-#ifndef __ASSEMBLY__
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif /* __cplusplus */
-
 /************************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ************************************************************************************/
 
-struct spi_dev_s; /* Forward reference */
-enum spi_dev_e;   /* Forward reference */
-
-/************************************************************************************
- * Name: imx_spibus_initialize
- *
- * Description:
- *   Initialize common parts the selected SPI port.  Initialization of
- *   chip select GPIOs must have been performed by board specific logic
- *   prior to calling this function.  Specifically:  GPIOs should have
- *   been configured for output, and all chip selects disabled.
- *
- *   One GPIO, SS (PB2 on the eZ8F091) is reserved as a chip select.  However,
- *   If multiple devices on on the bus, then multiple chip selects will be
- *   required.  Theregore, all GPIO chip management is deferred to board-
- *   specific logic.
- *
- * Input Parameter:
- *   Port number (for hardware that has mutiple SPI interfaces)
- *
- * Returned Value:
- *   Valid SPI device structre reference on succcess; a NULL on failure
- *
- ************************************************************************************/
-
-FAR struct spi_dev_s *imx_spibus_initialize(int port);
-
-/************************************************************************************
- * The external functions, imx_spiselect, imx_spistatus, and imx_cmddaa must be
- * provided by board-specific logic.  These are implementations of the select and
- * status methods of the SPI interface defined by struct spi_ops_s (see
- * include/nuttx/spi/spi.h).  All other methods (including imx_spibus_initialize()) are
- * provided by common logic.  To use this common SPI logic on your board:
- *
- *   1. Provide imx_spiselect() and imx_spistatus() functions in your board-specific
- *      logic.  This function will perform chip selection and status operations using
- *      GPIOs in the way your board is configured.
- *   2. If CONFIG_SPI_CMDDATA is defined in your NuttX configuration, provide the
- *      imx_spicmddata() function in your board-specific logic.  This function will
- *      perform cmd/data selection operations using GPIOs in the way your board is
- *      configured.
- *   3. Add a call to imx_spibus_initialize() in your low level initialization logic
- *   4. The handle returned by imx_spibus_initialize() may then be used to bind the
- *      SPI driver to higher level logic (e.g., calling  mmcsd_spislotinitialize(),
- *      for example, will bind the SPI driver to the SPI MMC/SD driver).
- *
- ************************************************************************************/
-
-void imx_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
-uint8_t imx_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
-#ifdef CONFIG_SPI_CMDDATA
-int imx_spicmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
-#endif
-
-#undef EXTERN
-#ifdef __cplusplus
-}
-#endif /* __cplusplus */
-#endif /* __ASSEMBLY__ */
-
-#endif  /* __ARCH_ARM_IMX6_ECSPI_H */
+#endif  /* __ARCH_ARM_IMX6_CHIP_ECSPI_H */
