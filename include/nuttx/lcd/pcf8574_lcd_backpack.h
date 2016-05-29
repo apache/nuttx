@@ -58,12 +58,15 @@
  * Pretty much anything on the market except 4x40, which really consists of two
  * separate 2x40 controllers, and the I2C backpack doesn't support those due
  * to the second 'E' line being needed.
+ * Additionally, you still need to set the (row,col) geometry explicitly, since
+ * there is not a means of determining this dynamically.
  * Consider these 'informative'.
- * XXX Note, actual testing has been done on LCD_I2C_BACKPACK_CFG_MJKDZ only,
- * the others come from online research.
+ * XXX Note, actual testing has been done on LCD_I2C_BACKPACK_CFG_MJKDZ
+ * and LCD_I2C_BACKPACK_CFG_SAINSMART only, the others come from online
+ * research.
  */
 
-/* board marked 'mjkdz' */
+/* board marked 'mjkdz' and Arduino-IIC-LCD GY-LCD-V1 */
 
 #define LCD_I2C_BACKPACK_CFG_MJKDZ {0x20,4,5,6,0,1,2,3,7,false,0,0}
 

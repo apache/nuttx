@@ -63,9 +63,9 @@
 
 /* timing characteristics of the LCD interface */
 
-#define DELAY_US_NYBBLE0    200
-#define DELAY_US_NYBBLE1    100
-#define DELAY_US_WRITE      35
+#define DELAY_US_NYBBLE0    20
+#define DELAY_US_NYBBLE1    10
+#define DELAY_US_WRITE      40
 #define DELAY_US_HOMECLEAR  1500
 
 /* HD44780 commands */
@@ -259,7 +259,7 @@ static inline uint8_t rc2addr(FAR struct pcf8574_lcd_dev_s *priv,
        * of first line, and fourth line is a continuation of second.
        */
 
-      return (row - 2) * 0x40 + (col - priv->cfg.cols);
+      return (row - 2) * 0x40 + (col + priv->cfg.cols);
     }
 }
 
@@ -383,9 +383,14 @@ static void latch_nybble(FAR struct pcf8574_lcd_dev_s *priv, uint8_t nybble,
   en_bit = 1 << priv->cfg.en;
   rs_bit = rs ? (1 << priv->cfg.rs) : 0;
 
-  /* Put the nybble, preserving backlight, reset R/~W and set EN and maybe RS */
+  /* Put the nybble, preserving backlight, reset R/~W and maybe RS */
 
-  lcddata = prepare_nybble(priv, nybble) | priv->bl_bit | en_bit | rs_bit;
+  lcddata = prepare_nybble(priv, nybble) | priv->bl_bit | rs_bit;
+  pca8574_write(priv, lcddata);
+
+  /* Now set EN */
+
+  lcddata |= en_bit;
   pca8574_write(priv, lcddata);
   up_udelay(DELAY_US_NYBBLE0);  /* setup */
 
@@ -419,9 +424,14 @@ static uint8_t load_nybble(FAR struct pcf8574_lcd_dev_s *priv, bool rs)
   rs_bit = rs ? (1 << priv->cfg.rs) : 0;
   rw_bit = 1 << priv->cfg.rw;
 
-  /* Put highs on the data lines, preserve, set R/~W and set EN and maybe RS */
+  /* Put highs on the data lines, preserve, set R/~W and maybe RS */
 
-  lcddata = prepare_nybble(priv, 0x0f) | priv->bl_bit | en_bit | rw_bit | rs_bit;
+  lcddata = prepare_nybble(priv, 0x0f) | priv->bl_bit | rw_bit | rs_bit;
+  pca8574_write(priv, lcddata);
+
+  /* Now set EN */
+
+  lcddata |= en_bit;
   pca8574_write(priv, lcddata);
   up_udelay(DELAY_US_NYBBLE0);  /* setup */
 
@@ -538,7 +548,7 @@ static void lcd_init(FAR struct pcf8574_lcd_dev_s *priv)
 {
   /* Wait for more than 15 ms after Vcc for the LCD to stabilize */
 
-  usleep(20000);
+  usleep(50000);
 
   /* Perform the init sequence.  This sequence of commands is constructed so
    * that it will get the device into nybble mode irrespective of what state
@@ -548,7 +558,7 @@ static void lcd_init(FAR struct pcf8574_lcd_dev_s *priv)
    * the remainder of operations.
    */
 
-  /* Send Command 0x30, set 8-bit mode, and wait > 4.1 ms*/
+  /* Send Command 0x30, set 8-bit mode, and wait > 4.1 ms */
 
   latch_nybble(priv, 0x30>>4, false);
   usleep(5000);
@@ -556,15 +566,17 @@ static void lcd_init(FAR struct pcf8574_lcd_dev_s *priv)
   /* Send Command 0x30, set 8-bit mode, and wait > 100 us */
 
   latch_nybble(priv, 0x30>>4, false);
-  usleep(200);
+  usleep(5000);
 
   /* Send Command 0x30, set 8-bit mode */
 
   latch_nybble(priv, 0x30>>4, false);
+  usleep(200);
 
   /* now Function set: Set interface to be 4 bits long (only 1 cycle write for the first time). */
 
   latch_nybble(priv, 0x20>>4, false);
+  usleep(5000);
 
   /* Function set: DL=0;Interface is 4 bits, N=1 (2 Lines), F=0 (5x8 dots font) */
 
