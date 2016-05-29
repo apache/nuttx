@@ -47,6 +47,7 @@
 
 #include "sam_tc.h"
 #include "sam_freerun.h"
+
 #ifdef CONFIG_SAMV7_ONESHOT
 
 /****************************************************************************
