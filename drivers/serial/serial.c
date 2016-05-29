@@ -103,6 +103,9 @@ static const struct file_operations g_serialops =
 #ifndef CONFIG_DISABLE_POLL
   , uart_poll /* poll */
 #endif
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  , NULL      /* unlink */
+#endif
 };
 
 /************************************************************************************
@@ -487,7 +490,7 @@ static ssize_t uart_write(FAR struct file *filep, FAR const char *buffer,
            * interrupted transfer.
            */
 
-          if (buflen < nwritten)
+          if (buflen < (size_t)nwritten)
             {
               /* Some data was transferred.  Return the number of bytes that
                * were successfully transferred.
@@ -557,7 +560,7 @@ static ssize_t uart_read(FAR struct file *filep, FAR char *buffer, size_t buflen
    * data from the end of the buffer.
    */
 
-  while (recvd < buflen)
+  while ((size_t)recvd < buflen)
     {
 #ifdef CONFIG_SERIAL_REMOVABLE
       /* If the removable device is no longer connected, refuse to read any

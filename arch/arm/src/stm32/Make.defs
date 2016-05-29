@@ -203,7 +203,7 @@ CHIP_CSRCS += stm32_rtc_lowerhalf.c
 endif
 endif
 
-ifeq ($(CONFIG_ADC),y)
+ifeq ($(CONFIG_STM32_ADC),y)
 CHIP_CSRCS += stm32_adc.c
 endif
 

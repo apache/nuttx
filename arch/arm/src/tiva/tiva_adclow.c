@@ -1,8 +1,10 @@
 /****************************************************************************
  * arch/arm/src/tiva/tiva_adclow.c
  *
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2015 TRD2 Inc. All rights reserved.
  *   Author: Calvin Maguranis <calvin.maguranis@trd2inc.com>
+ *           Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
  *
@@ -67,8 +69,8 @@
 #include <stdbool.h>
 #include <semaphore.h>
 #include <errno.h>
-#include <debug.h>
 #include <assert.h>
+#include <debug.h>
 
 #include <arch/board/board.h>
 
@@ -80,7 +82,7 @@
 #include "chip/tiva_pinmap.h"
 #include "chip/tiva_syscontrol.h"
 
-#if defined (CONFIG_TIVA_ADC) && defined (CONFIG_ADC)
+#ifdef CONFIG_TIVA_ADC
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -135,6 +137,8 @@
 
 /* Upper level ADC driver ***************************************************/
 
+static int  tiva_adc_bind(FAR struct adc_dev_s *dev,
+                          FAR const struct adc_callback_s *callback);
 static void tiva_adc_reset(struct adc_dev_s *dev);
 static int  tiva_adc_setup(struct adc_dev_s *dev);
 static void tiva_adc_shutdown(struct adc_dev_s *dev);
@@ -149,6 +153,7 @@ static int  tiva_adc_ioctl(struct adc_dev_s *dev, int cmd, unsigned long arg);
 
 static const struct adc_ops_s g_adcops =
 {
+  .ao_bind     = tiva_adc_bind,
   .ao_reset    = tiva_adc_reset,
   .ao_setup    = tiva_adc_setup,
   .ao_shutdown = tiva_adc_shutdown,
@@ -163,6 +168,7 @@ static const struct adc_ops_s g_adcops =
 struct tiva_adc_s
 {
   struct adc_dev_s *dev;
+  const struct adc_callback_s *cb;
   bool cfg;              /* Configuration state */
   bool ena;              /* Operation state */
   uint8_t devno;         /* ADC device number */
@@ -374,6 +380,25 @@ static void tiva_adc_irqinitialize(struct tiva_adc_cfg_s *cfg)
 }
 
 /****************************************************************************
+ * Name: tiva_adc_bind
+ *
+ * Description:
+ *   Bind the upper-half driver callbacks to the lower-half implementation.  This
+ *   must be called early in order to receive ADC event notifications.
+ *
+ ****************************************************************************/
+
+static int tiva_adc_bind(FAR struct adc_dev_s *dev,
+                         FAR const struct adc_callback_s *callback)
+{
+  struct tiva_adc_s *priv = (struct tiva_adc_s *)dev->ad_priv;
+
+  DEBUGASSERT(priv != NULL);
+  priv->cb = callback;
+  return OK;
+}
+
+/****************************************************************************
  * Name: tiva_adc_reset
  *
  * Description:
@@ -559,11 +584,20 @@ static int tiva_adc_ioctl(struct adc_dev_s *dev, int cmd, unsigned long arg)
 
           fifo_count = tiva_adc_sse_data(priv->devno, sse, buf);
 
-          for (i = 0; i < fifo_count; ++i)
+          /* Verify that the upper-half driver has bound its callback functions */
+
+          if (priv->cb != NULL)
             {
-              (void)adc_receive(dev,
-                                tiva_adc_get_ain(priv->devno, sse, i),
-                                buf[i]);
+              DEBUGASSERT(priv->cb->au_receive != NULL);
+
+              for (i = 0; i < fifo_count; ++i)
+                {
+                  /* Perform the data received callback */
+
+                  priv->cb->au_receive(dev,
+                                       tiva_adc_get_ain(priv->devno, sse, i),
+                                       buf[i]);
+                }
             }
 
           /* Release our lock on the ADC structure */
@@ -651,18 +685,28 @@ static void tiva_adc_read(void *arg)
       /* This is a serious error: indicates invalid pointer indirection
        * and should cause a full system stop.
        */
+
       alldbg("PANIC!!! Invalid ADC device number given %d\n", sse->adc);
       PANIC();
       return;
     }
 
-  for (i = 0; i < fifo_count; ++i)
+  /* Verify that the upper-half driver has bound its callback functions */
+
+  if (priv->cb != NULL)
     {
-      (void)adc_receive(dev,
-                        tiva_adc_get_ain(sse->adc, sse->num, i),
-                        buf[i]);
-      avdbg("AIN%d=0x%04x\n",
-             tiva_adc_get_ain(sse->adc, sse->num, i), buf[i]);
+      DEBUGASSERT(priv->cb->au_receive != NULL);
+
+      for (i = 0; i < fifo_count; ++i)
+        {
+          /* Perform the data received callback */
+
+          priv->cb->au_receive(dev,
+                               tiva_adc_get_ain(sse->adc, sse->num, i),
+                               buf[i]);
+          avdbg("AIN%d = 0x%04x\n",
+                tiva_adc_get_ain(sse->adc, sse->num, i), buf[i]);
+        }
     }
 
   /* Exit, re-enabling ADC interrupts */
@@ -858,6 +902,7 @@ int tiva_adc_initialize(const char *devpath, struct tiva_adc_cfg_s *cfg,
   /* Now we are initialized */
 
   adc->ena = true;
+  adc->cb  = NULL;
 
 #ifdef CONFIG_DEBUG_ANALOG
   tiva_adc_runtimeobj_vals();
@@ -1041,4 +1086,4 @@ static void tiva_adc_dump_dev(void)
 }
 #endif
 
-#endif /* CONFIG_TIVA_ADC && CONFIG_ADC */
+#endif /* CONFIG_TIVA_ADC */
