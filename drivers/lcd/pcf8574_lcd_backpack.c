@@ -86,6 +86,8 @@
 #  define lcdvdbg(x...)
 #endif
 
+#define MAX_OPENCNT     (255)                  /* Limit of uint8_t */
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -95,6 +97,8 @@ struct pcf8574_lcd_dev_s
   FAR struct i2c_master_s *i2c;               /* I2C interface */
   struct pcf8574_lcd_backpack_config_s cfg;   /* gpio configuration */
   uint8_t bl_bit;                             /* current backlight bit */
+  uint8_t refs;                               /* Number of references */
+  uint8_t unlinked;                           /* We are unlinked, so teardown on last close */
   sem_t sem_excl;                             /* mutex */
 };
 
@@ -117,11 +121,15 @@ static ssize_t pcf8574_lcd_read(FAR struct file *filep, FAR char *buffer,
                                 size_t buflen);
 static ssize_t pcf8574_lcd_write(FAR struct file *filep,
                                  FAR const char *buffer, size_t buflen);
+static off_t pcf8574_lcd_seek(FAR struct file *filep, off_t offset, int whence);
 static int pcf8574_lcd_ioctl(FAR struct file *filep, int cmd,
                              unsigned long arg);
 #ifndef CONFIG_DISABLE_POLL
 static int pcf8574lcd_poll(FAR struct file *filep, FAR struct pollfd *fds,
                            bool setup);
+#endif
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+static int pcf8574_lcd_unlink(FAR struct inode *inode);
 #endif
 
 /****************************************************************************
@@ -134,12 +142,14 @@ static const struct file_operations g_pcf8574_lcd_fops =
   pcf8574_lcd_close,           /* close */
   pcf8574_lcd_read,            /* read */
   pcf8574_lcd_write,           /* write */
-  0,                           /* seek */
+  pcf8574_lcd_seek,            /* seek */
   pcf8574_lcd_ioctl,           /* ioctl */
 #ifndef CONFIG_DISABLE_POLL
   pcf8574lcd_poll,             /* poll */
 #endif
-  0                            /* unlink */
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  pcf8574_lcd_unlink           /* unlink */
+#endif
 };
 
 /****************************************************************************
@@ -1001,6 +1011,53 @@ static int lcd_getstream(FAR struct lib_instream_s *instream)
 }
 
 /****************************************************************************
+ * Name: lcd_fpos_to_curpos
+ *
+ * Description:
+ *   Convert a file logical offset to a screen cursor pos (row,col).  This
+ *   discounts 'synthesized' line feeds at the end of screen lines.
+ *
+ ****************************************************************************/
+
+static void lcd_fpos_to_curpos(FAR struct pcf8574_lcd_dev_s *priv,
+                              off_t fpos, uint8_t *row, uint8_t *col, bool* onlf)
+{
+  int virtcols;
+  
+  virtcols = (priv->cfg.cols + 1);
+  
+  /* Determine if this is a 'virtual' position (on the synthetic LF) */
+
+  *onlf = (priv->cfg.cols == fpos % virtcols);
+
+  /* Adjust off any preceding synthetic LF's to get linear position */
+  
+  fpos -= fpos / virtcols;
+  
+  /* Compute row/col from linear position */
+  
+  *row = fpos / priv->cfg.cols;
+  *col = fpos % priv->cfg.cols;
+}
+
+/****************************************************************************
+ * Name: lcd_curpos_to_fpos
+ *
+ * Description:
+ *   Convert a screen cursor pos (row,col) to a file logical offset.  This
+ *   includes 'synthesized' line feeds at the end of screen lines.
+ *
+ ****************************************************************************/
+
+static void lcd_curpos_to_fpos(FAR struct pcf8574_lcd_dev_s *priv,
+                              uint8_t row, uint8_t col, off_t* fpos)
+{
+  /* the logical file position is the linear position plus any synthetic LF */
+  
+  *fpos = (row * priv->cfg.cols) + col + row;
+}
+
+/****************************************************************************
  * Name: pcf8574_lcd_open
  *
  * Description:
@@ -1010,6 +1067,22 @@ static int lcd_getstream(FAR struct lib_instream_s *instream)
 
 static int pcf8574_lcd_open(FAR struct file *filep)
 {
+  FAR struct inode *inode = filep->f_inode;
+  FAR struct pcf8574_lcd_dev_s *priv = (FAR struct pcf8574_lcd_dev_s *)inode->i_private;
+
+  /* Increment the reference count */
+
+  sem_wait(&priv->sem_excl);
+  if (priv->refs == MAX_OPENCNT)
+    {
+      return -EMFILE;
+    }
+  else
+    {
+      priv->refs++;
+    }
+
+  sem_post(&priv->sem_excl);
   return OK;
 }
 
@@ -1023,7 +1096,35 @@ static int pcf8574_lcd_open(FAR struct file *filep)
 
 static int pcf8574_lcd_close(FAR struct file *filep)
 {
-  return OK;
+  FAR struct inode *inode = filep->f_inode;
+  FAR struct pcf8574_lcd_dev_s *priv = (FAR struct pcf8574_lcd_dev_s *)inode->i_private;
+  int ret;
+
+  /* Decrement the reference count */
+
+  sem_wait(&priv->sem_excl);
+
+  if (priv->refs == 0)
+    {
+      ret = -EIO;
+    }
+  else
+    {
+      priv->refs--;
+
+      /* If we had previously unlinked, but there were open references at the
+       * time, we need to do the final teardown now.
+       */
+      
+      if (priv->refs == 0 && priv->unlinked)
+        {
+          /* We have no real teardown at present */
+        }
+      ret = OK;
+    }
+
+  sem_post(&priv->sem_excl);
+  return ret;
 }
 
 /****************************************************************************
@@ -1031,7 +1132,8 @@ static int pcf8574_lcd_close(FAR struct file *filep)
  *
  * Description:
  *  This simply reads as much of the display memory as possible.  This is
- *  probably not very interesting.
+ *  generally not very interesting, but we do it in a way that allows us to
+ *  'cat' the LCD contents via the shell.
  *
  ****************************************************************************/
 
@@ -1044,22 +1146,44 @@ static ssize_t pcf8574_lcd_read(FAR struct file *filep, FAR char *buffer,
   uint8_t addr;
   uint8_t row;
   uint8_t col;
+  bool onlf;
 
   sem_wait(&priv->sem_excl);
 
   /* Get current cursor position so we can restore it */
 
   (void)lcd_read_busy_addr(priv, &addr);
-  addr2rc(priv, addr, &row, &col);
 
-  /* Just read the entire display into the given buffer, as much as possible */
+  /* Convert file position to row/col address and position DDADDR there */
+
+  lcd_fpos_to_curpos(priv, filep->f_pos, &row, &col, &onlf);
+  lcd_set_curpos(priv, row, col);
+
+  /* Read as much of the display as possible */
 
   nIdx = 0;
-  row = 0;
-  col = 0;
-
   while (nIdx < buflen && row < priv->cfg.rows)
   {
+    /* Synthesize end-of-line LF and advance to start of next row */
+    
+    if (onlf)
+      {
+        /* Synthesize LF for all but last row */
+        
+        if ( row < priv->cfg.rows-1)
+          {
+            buffer[nIdx] = '\x0a';
+            onlf = false;
+            ++filep->f_pos;
+            ++nIdx;
+          }
+        ++row;
+        col = 0;
+        continue;
+      }
+
+    /* If we are at start of line we will need to update DDRAM address */
+
     if (0 == col)
       {
         lcd_set_curpos(priv, row, 0);
@@ -1067,12 +1191,15 @@ static ssize_t pcf8574_lcd_read(FAR struct file *filep, FAR char *buffer,
 
     buffer[nIdx] = lcd_getdata(priv);
 
+    ++filep->f_pos;
     ++nIdx;
     ++col;
+
+    /* If we are now at the end of a line, we setup for the synthetic LF */
+
     if (priv->cfg.cols == col)
       {
-        ++row;
-        col = 0;
+        onlf = true;
       }
   }
 
@@ -1226,8 +1353,60 @@ static ssize_t pcf8574_lcd_write(FAR struct file *filep,
         }
     }
 
+  /* Wherever we wound up, update our logical file pos to reflect it */
+
+  lcd_curpos_to_fpos(priv, row, col, &filep->f_pos);
+
   sem_post(&priv->sem_excl);
   return buflen;
+}
+
+/****************************************************************************
+ * Name: pcf8574_lcd_seek
+ *
+ * Description:
+ *   Seek the logical file pointer to the specified position.  This is
+ *   probably not very interesting except possibly for (SEEK_SET, 0) to
+ *   rewind the pointer for a subsequent read().
+ *   The file pointer is logical, and includes synthesized LF chars at the
+ *   end of the display lines.
+ *
+ ****************************************************************************/
+
+static off_t pcf8574_lcd_seek(FAR struct file *filep, off_t offset, int whence)
+{
+  FAR struct inode *inode = filep->f_inode;
+  FAR struct pcf8574_lcd_dev_s *priv = (FAR struct pcf8574_lcd_dev_s *)inode->i_private;
+  int maxpos;
+
+  sem_wait(&priv->sem_excl);
+
+  maxpos = priv->cfg.rows * priv->cfg.cols + (priv->cfg.rows - 1);
+  switch (whence)
+    {
+    case SEEK_CUR:
+      filep->f_pos += offset;
+      if (filep->f_pos > maxpos)
+        filep->f_pos = maxpos;
+      break;
+
+    case SEEK_SET:
+      filep->f_pos = offset;
+      if (filep->f_pos > maxpos)
+        filep->f_pos = maxpos;
+      break;
+
+    case SEEK_END:
+      filep->f_pos = maxpos;
+      break;
+
+    default:
+      /* Return EINVAL if the whence argument is invalid */
+      filep->f_pos = -EINVAL;
+    }
+
+  sem_post(&priv->sem_excl);
+  return filep->f_pos;
 }
 
 /****************************************************************************
@@ -1350,6 +1529,32 @@ static int pcf8574lcd_poll(FAR struct file *filep, FAR struct pollfd *fds,
 #endif
 
 /****************************************************************************
+ * Name: pcf8574_lcd_unlink
+ ****************************************************************************/
+
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+static int pcf8574_lcd_unlink(FAR struct inode *inode)
+{
+  FAR struct pcf8574_lcd_dev_s *priv = (FAR struct pcf8574_lcd_dev_s *)inode->i_private;
+  int ret = OK;
+
+  sem_wait(&priv->sem_excl);
+
+  priv->unlinked = true;
+
+  /* If there are no open references to the driver then tear it down now */
+  if (priv->refs == 0)
+    {
+      /* We have no real teardown at present */
+      ret = OK;
+    }
+
+  sem_post(&priv->sem_excl);
+  return ret;
+}
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -1395,6 +1600,8 @@ int pcf8574_lcd_backpack_register(FAR const char *devpath,
   priv->i2c = i2c;
   priv->cfg = *cfg;
   priv->bl_bit = priv->cfg.bl_active_high ? 0 : (1 << priv->cfg.bl);
+  priv->refs = 0;
+  priv->unlinked = false;
   sem_init(&priv->sem_excl, 0, 1);
 
   /* Initialize */
