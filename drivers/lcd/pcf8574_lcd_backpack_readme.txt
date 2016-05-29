@@ -225,7 +225,7 @@ Example of programming a character image:
 Now character '\x04' will display as an 'up arrow'.
 
 Note, you might consider avoiding the use of code point 0x00 unless
-absolutely needed, because the embedded nul character can cause
+you absolutely need it, because the embedded nul character can cause
 problems.  The driver, and write() apis are binary, and unaffected,
 but things like printf() and puts() assume C-style strings, and are
 affected.
@@ -237,9 +237,16 @@ Troubleshooting
   bus timeouts that suggest a non-responsive slave.
 * Check your board wiring and configuration specification.  Buzz
   out the lines if you have to.
-* Con't forget to check the 'contrast' potentiometer.  The voltage
-  at the central wiper should be approximately 0.29 V.  The useful
-  range of voltages at this pin is very narrow, and outside that
-  range there will be nothing visible on the display, so most of the
-  turn range of the pot is non-useful.  Much of human life has been
-  wasted in the rediscovery of this farcically idiotic
+* Remember to set the (ros,cols) geometry in pcf8574_lcd_backpack_config_s
+  before registration of the driver, since this cannot be determined
+  programmatically.
+* If the driver registration step seems to 'hang' it could be the I2C
+  driver performing retries due to no response from the LCD backpack.  Check
+  the address.  Turning on debug output for I2C can help make this visible.
+* Don't forget to check the 'contrast' potentiometer.  The voltage at the
+  central wiper should be approximately 0.3 V - 2.4 V, but the actual value
+  is is dependent on the physics of the attached LCD module.  The useful
+  range of voltages at this pin for any given LCD is quite narrow, and
+  outside that range there will be nothing visible on the display, so most
+  of the turn range of the pot is non-useful.  It's less 'contrast' and
+  more 'LCD segment drive bias'.
