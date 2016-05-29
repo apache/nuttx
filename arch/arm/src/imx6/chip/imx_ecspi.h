@@ -141,10 +141,26 @@
 #  define ECSPI_CONREG_CH1MASTER      (2 << ECSPI_CONREG_CHMODE_SHIFT) /* Channel 1 master mode */
 #  define ECSPI_CONREG_CH2MASTER      (4 << ECSPI_CONREG_CHMODE_SHIFT) /* Channel 2 master mode */
 #  define ECSPI_CONREG_CH3MASTER      (8 << ECSPI_CONREG_CHMODE_SHIFT) /* Channel 3 master mode */
-#define ECSPI_CONREG_POSTDIV_SHIFT    (8)      /* Bits 8-11: SPI Post divider */
+#define ECSPI_CONREG_POSTDIV_SHIFT    (8)      /* Bits 8-11: SPI Post divider (exponent) */
 #define ECSPI_CONREG_POSTDIV_MASK     (15 << ECSPI_CONREG_POSTDIV_SHIFT)
-#  define ECSPI_CONREG_POSTDIV(n)     ((uint32_t)(n) << ECSPI_CONREG_POSTDIV_SHIFT)
-#define ECSPI_CONREG_PREDIV_SHIFT     (12)      /* Bits 12-15: SPI Pre divider */
+#  define ECSPI_CONREG_POSTDIV_EXP(n) ((uint32_t)(n) << ECSPI_CONREG_POSTDIV_SHIFT)
+#  define ECSPI_CONREG_POSTDIV_1      (0  << ECSPI_CONREG_POSTDIV_SHIFT) /* Divide by 2*0 */
+#  define ECSPI_CONREG_POSTDIV_2      (1  << ECSPI_CONREG_POSTDIV_SHIFT) /* Divide by 2*1 */
+#  define ECSPI_CONREG_POSTDIV_4      (2  << ECSPI_CONREG_POSTDIV_SHIFT) /* Divide by 2*2 */
+#  define ECSPI_CONREG_POSTDIV_8      (3  << ECSPI_CONREG_POSTDIV_SHIFT) /* Divide by 2*3 */
+#  define ECSPI_CONREG_POSTDIV_16     (4  << ECSPI_CONREG_POSTDIV_SHIFT) /* Divide by 2*4 */
+#  define ECSPI_CONREG_POSTDIV_32     (5  << ECSPI_CONREG_POSTDIV_SHIFT) /* Divide by 2*5 */
+#  define ECSPI_CONREG_POSTDIV_64     (6  << ECSPI_CONREG_POSTDIV_SHIFT) /* Divide by 2*6 */
+#  define ECSPI_CONREG_POSTDIV_128    (7  << ECSPI_CONREG_POSTDIV_SHIFT) /* Divide by 2*7 */
+#  define ECSPI_CONREG_POSTDIV_256    (8  << ECSPI_CONREG_POSTDIV_SHIFT) /* Divide by 2*8 */
+#  define ECSPI_CONREG_POSTDIV_512    (9  << ECSPI_CONREG_POSTDIV_SHIFT) /* Divide by 2*9 */
+#  define ECSPI_CONREG_POSTDIV_1024   (10 << ECSPI_CONREG_POSTDIV_SHIFT) /* Divide by 2*10 */
+#  define ECSPI_CONREG_POSTDIV_2048   (11 << ECSPI_CONREG_POSTDIV_SHIFT) /* Divide by 2*11 */
+#  define ECSPI_CONREG_POSTDIV_4096   (12 << ECSPI_CONREG_POSTDIV_SHIFT) /* Divide by 2*12 */
+#  define ECSPI_CONREG_POSTDIV_8192   (13 << ECSPI_CONREG_POSTDIV_SHIFT) /* Divide by 2*13 */
+#  define ECSPI_CONREG_POSTDIV_16384  (14 << ECSPI_CONREG_POSTDIV_SHIFT) /* Divide by 2*14 */
+#  define ECSPI_CONREG_POSTDIV_32768  (15 << ECSPI_CONREG_POSTDIV_SHIFT) /* Divide by 2*15 */
+#define ECSPI_CONREG_PREDIV_SHIFT     (12)      /* Bits 12-15: SPI Pre divider (minus 1) */
 #define ECSPI_CONREG_PREDIV_MASK      (15 << ECSPI_CONREG_PREDIV_SHIFT)
 #  define ECSPI_CONREG_PREDIV(n)      ((uint32_t)(n) << ECSPI_CONREG_PREDIV_SHIFT)
 #define ECSPI_CONREG_DRCTL_SHIFT      16  /* Bits 16-17: SPI Data ready control */
