@@ -432,7 +432,7 @@ int adc_register(FAR const char *path, FAR struct adc_dev_s *dev)
   ret = dev->ad_ops->ao_bind(dev, &g_adc_callback);
   if (ret < 0)
     {
-      adbg("ERROR: Failed to bind callbacks: %d\n", ret)
+      adbg("ERROR: Failed to bind callbacks: %d\n", ret);
       return ret;
     }
 
