@@ -599,6 +599,12 @@ o Kernel/Protected Build
                For a truly secure system.  Privileges need to be checked in
                every interface that permits one thread to modify the
                properties of another thread.
+
+               NOTE:  It would be a simple matter to simply disable user
+               threads from modifying privileged threads.  However, you
+               might also want to be able to modify privileged threads from
+               user tasks with certain permissions.  Permissions is a much
+               more complex issue.
   Status:      Open
   Priority:    Low for most embedded systems but would be a critical need if
                NuttX were used in a secure system.

@@ -150,3 +150,7 @@ CHIP_CSRCS += imx_serial.c imx_lowputc.c
 ifeq ($(CONFIG_SMP),y)
 CHIP_CSRCS += imx_cpuboot.c
 endif
+
+ifeq ($(CONFIG_IMX6_ECSPI),y)
+CHIP_CSRCS += imx_ecspi.c
+endif

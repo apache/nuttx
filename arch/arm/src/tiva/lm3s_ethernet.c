@@ -187,9 +187,9 @@ struct tiva_driver_s
   WDOG_ID  ld_txpoll;          /* TX poll timer */
   WDOG_ID  ld_txtimeout;       /* TX timeout timer */
 
-  /* This holds the information visible to uIP/NuttX */
+  /* This holds the information visible to the NuttX network */
 
-  struct net_driver_s ld_dev;  /* Interface understood by uIP */
+  struct net_driver_s ld_dev;  /* Interface understood by the network */
 };
 
 /****************************************************************************
@@ -558,7 +558,7 @@ static int tiva_transmit(struct tiva_driver_s *priv)
  * Function: tiva_txpoll
  *
  * Description:
- *   The transmitter is available, check if uIP has any outgoing packets ready
+ *   The transmitter is available, check if the network has any outgoing packets ready
  *   to send.  This is a callback from devif_poll().  devif_poll() may be called:
  *
  *   1. When the preceding TX packet send is complete,
@@ -677,7 +677,7 @@ static void tiva_receive(struct tiva_driver_s *priv)
       /* Check if the pktlen is valid.  It should be large enough to hold
        * an Ethernet header and small enough to fit entirely in the I/O
        * buffer.  Six is subtracted to acount for the 2-byte length/type
-       * and 4 byte FCS that are not copied into the uIP packet.
+       * and 4 byte FCS that are not copied into the network packet.
        */
 
       if (pktlen > (CONFIG_NET_ETH_MTU + 6) || pktlen <= (ETH_HDRLEN + 6))
@@ -752,7 +752,7 @@ static void tiva_receive(struct tiva_driver_s *priv)
             }
         }
 
-      /* Pass the packet length to uIP MINUS 2 bytes for the length and
+      /* Pass the packet length to the network MINUS 2 bytes for the length and
        * 4 bytes for the FCS.
        */
 
@@ -905,7 +905,7 @@ static void tiva_txdone(struct tiva_driver_s *priv)
 
   DEBUGASSERT((tiva_ethin(priv, TIVA_MAC_TR_OFFSET) & MAC_TR_NEWTX) == 0);
 
-  /* Then poll uIP for new XMIT data */
+  /* Then poll the network for new XMIT data */
 
   (void)devif_poll(&priv->ld_dev, tiva_txpoll);
 }
@@ -1033,7 +1033,7 @@ static void tiva_txtimeout(int argc, uint32_t arg, ...)
   tiva_ifdown(&priv->ld_dev);
   tiva_ifup(&priv->ld_dev);
 
-  /* Then poll uIP for new XMIT data */
+  /* Then poll the network for new XMIT data */
 
   (void)devif_poll(&priv->ld_dev, tiva_txpoll);
 }
@@ -1069,7 +1069,7 @@ static void tiva_polltimer(int argc, uint32_t arg, ...)
 
   if ((tiva_ethin(priv, TIVA_MAC_TR_OFFSET) & MAC_TR_NEWTX) == 0)
     {
-      /* If so, update TCP timing states and poll uIP for new XMIT data */
+      /* If so, update TCP timing states and poll the network for new XMIT data */
 
       (void)devif_timer(&priv->ld_dev, tiva_txpoll);
 
@@ -1353,7 +1353,7 @@ static int tiva_txavail(struct net_driver_s *dev)
   flags = enter_critical_section();
   if (priv->ld_bifup && (tiva_ethin(priv, TIVA_MAC_TR_OFFSET) & MAC_TR_NEWTX) == 0)
     {
-      /* If the interface is up and we can use the Tx FIFO, then poll uIP
+      /* If the interface is up and we can use the Tx FIFO, then poll the network
        * for new Tx data
        */
 
