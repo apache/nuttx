@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/samv7/sam_lowputc.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -348,19 +348,26 @@ void sam_lowsetup(void)
 #ifdef CONFIG_SAMV7_USART1
   (void)sam_configgpio(GPIO_USART1_RXD);
   (void)sam_configgpio(GPIO_USART1_TXD);
-#ifdef CONFIG_USART1_OFLOWCONTROL
+#  ifdef CONFIG_USART1_OFLOWCONTROL
   (void)sam_configgpio(GPIO_USART1_CTS);
-#endif
-#ifdef CONFIG_USART1_IFLOWCONTROL
+#  endif
+#  ifdef CONFIG_USART1_IFLOWCONTROL
   (void)sam_configgpio(GPIO_USART1_RTS);
-#endif
+#  endif
+
   /* To use the USART1 as an USART, the SYSIO Pin4 must be bound to PB4
    * instead of TDI
    */
 
+#  if defined(CONFIG_SAMV7_JTAG_FULL_ENABLE)
+#    warning CONFIG_SAMV7_JTAG_FULL_ENABLE is incompatible with CONFIG_SAMV7_USART1.
+#    warning The SYSIO Pin4 must be bound to PB4 to use USART1
+#  endif
+
   uint32_t sysioreg = getreg32(SAM_MATRIX_CCFG_SYSIO);
   sysioreg |= MATRIX_CCFG_SYSIO_SYSIO4;
   putreg32(sysioreg, SAM_MATRIX_CCFG_SYSIO);
+
 #endif
 
 #ifdef CONFIG_SAMV7_USART2

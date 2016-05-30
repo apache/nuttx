@@ -1,7 +1,7 @@
 ############################################################################
 # arch/mips/src/Makefile
 #
-#   Copyright (C) 2011-2012, 2014 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2011-2012, 2014, 2016 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -80,6 +80,11 @@ COBJS = $(CSRCS:.c=$(OBJEXT))
 SRCS = $(ASRCS) $(CSRCS)
 OBJS = $(AOBJS) $(COBJS)
 
+# Override in Make.defs if linker is not 'ld'
+
+LDSTARTGROUP ?= --start-group
+LDENDGROUP ?= --end-group
+
 LDFLAGS += $(ARCHSCRIPT)
 EXTRA_LIBS ?=
 LINKLIBS ?=
@@ -136,7 +141,7 @@ board/libboard$(LIBEXT):
 nuttx$(EXEEXT): $(HEAD_OBJ) board/libboard$(LIBEXT)
 	@echo "LD: nuttx"
 	$(Q) $(LD) --entry=__start $(LDFLAGS) $(LIBPATHS) -o $(NUTTX)$(EXEEXT) $(HEAD_OBJ) $(EXTRA_OBJS) \
-		--start-group $(LDLIBS) $(EXTRA_LIBS) $(LIBGCC) --end-group
+		$(LDSTARTGROUP) $(LDLIBS) $(EXTRA_LIBS) $(LIBGCC) $(LDENDGROUP)
 ifneq ($(CONFIG_WINDOWS_NATIVE),y)
 	$(Q) $(NM) $(NUTTX)$(EXEEXT) | \
 	grep -v '\(compiled\)\|\(\$(OBJEXT)$$\)\|\( [aUw] \)\|\(\.\.ng$$\)\|\(LASH[RL]DI\)' | \

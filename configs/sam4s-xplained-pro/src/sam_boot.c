@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/sam4s-xplained-pro/src/sam_boot.c
  *
- *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -97,7 +97,7 @@ void board_initialize(void)
 #if (defined(CONFIG_SAM34_WDT) && !defined(CONFIG_WDT_DISABLE_ON_RESET))
   /* Configure watchdog timer and enable kicker kernel thread. */
 
-  DEBUGASSERT(up_wdginitialize() >= 0);
+  DEBUGASSERT(sam_watchdog_initialize() >= 0);
 #endif
 
 #ifndef CONFIG_ARCH_LEDS

@@ -80,10 +80,6 @@ ifeq ($(CONFIG_ADC),y)
 CSRCS += stm32_adc.c
 endif
 
-ifeq ($(CONFIG_WATCHDOG),y)
-CSRCS += stm32_watchdog.c
-endif
-
 # NOTE: SSD1289 is not supported on the board
 
 ifeq ($(CONFIG_LCD_SSD1289),y)

@@ -1,0 +1,136 @@
+NETWORK SUPPORT ON LINUX
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+The simulation uses the TUN/TAP driver under Linux to provide network support.
+It can operate in one of two modes: host routed, or bridged.  In the host
+routed case no special configuration is necessary, but by default the
+simulation will only be accessible to the host on which it runs.
+
+Bridge mode is recommended where possible.  It requires slightly more effort
+to set up, but is much more flexible, and is likely to be easier to maintain 
+in the end.
+
+
+HOST ROUTE MODE
+^^^^^^^^^^^^^^^
+
+If CONFIG_SIM_NET_HOST_ROUTE is enabled, the simulation will create and
+maintain a host route from the assigned IP address to the instance's tap
+device.  This route will be updated if the application changes the
+simulation's IP address.  Note that you will not see the simulation's IP
+address on the TAP device if you run ifconfig on the host.
+
+No special setup is required.  Simply assign your simulation a free IP address
+on the same network as your host, and everything will Just Work.  Note that if
+you assign an IP that is already in use on your network, your host won't be
+able to see it until the simulation is stopped.  The host route will force all
+traffic destined for that IP to be sent to the tap interface.
+
+NOTE:  If you configure an IP address that is not on the same subnet as your
+       host, additional manual setup will be required.  This is not 
+       recommended; you should use bridge mode instead.
+
+
+BRIDGE MODE
+^^^^^^^^^^^
+
+BASIC USAGE
+-----------
+If CONFIG_SIM_NET_BRIDGE is enabled, the simulation's tap interface will
+automatically be added to the Linux bridge device specified by the
+CONFIG_SIM_NET_BRIDGE_DEVICE configuration option.  Note that this MUST be a
+pre-existing bridge device, or the initialization will fail.  The simulation
+will NOT create the bridge for you.
+
+To create the bridge, first install the bridge utilities package for your
+platform (the bridge-utils RPM in RedHat, for example).  Then execute a
+command like the following:
+
+  # brctl addbr nuttx0
+
+This will create the nuttx0 bridge.  Once created, the bridge may be used by
+one or more simulations.  You only need one bridge per host; if you start
+multiple simulations, they will all be added to the same bridge and can talk
+amongst themselves.
+
+
+OPTION 1:  ROUTING LOCAL TRAFFIC TO THE BRIDGE
+----------------------------------------------
+If you want the host to be able to talk to your simluations, you will
+also need to assign the bridge an IP address (this will be the default
+gateway you assign to your simluations) and add a network route.  Note
+that the subnet chosen should not already be in use.  For example, if
+you want to use the 172.26.23.0/24 subnet for your simluations, you
+would do something like the following:
+
+  # brctl addbr nuttx0
+  # ifconfig nuttx0 172.26.23.1/24
+
+The standard Linux ifconfig utility will automatically add the appropriate
+network route, so no further effort is needed.
+
+
+OPTION 2:  LIVE NETWORK ACCESS
+------------------------------
+There are two main methods of giving your simulations access to your network
+at large.  One is to set up your Linux host as a router and configure your
+network so that it knows where to find the appropriate subnet.  This is far
+too complex for most use cases, so you can safely ignore it unless you have
+specific needs.
+
+The recommended method is to add a real interface to the bridge you're using
+with NuttX.  For example, if you have a secondary eth1 interface on your host,
+you can simply connect it to the network you want your simulations to access,
+and run the following command:
+
+  # brctl addif nuttx0 eth1
+
+From that point on, your simulations will be directly connected to the same
+network as your eth1 interface.  Note that your bridge will generally not need
+an IP address in this case.
+
+If you only have a single interface, you can configure your system so that eth0
+(or other primary interface) is on the bridge.  To do this, you would execute 
+commands like the following from the system console:
+
+  # brctl addbr nuttx0
+  # brctl addif nuttx0 eth0
+  # ifconfig nuttx0 <host-ip-address/netmask>
+  # route add -net default gw ...
+  
+The rest of your network configuration would remain the same; your host's IP
+address has simply moved from being assigned directly to the ethernet interface,
+to being assigned to the bridge that contains that interface.  The connection 
+will operate as normal.  NuttX simulations will join the bridge as with the
+previous example.
+
+In either of the live access scenarios presented here, the default gateway you
+configure in your simluation should be the normal one for the network you're 
+accessing, whether or not the bridge has an IP address.  The bridge is acting
+as an ethernet hub; your simluation has direct access to the normal gateway as
+if the simluation were a device physically connected to the network.
+
+
+CONFIGURING AT STARTUP
+----------------------
+Most Linux distributions have a mechanism for configuring a bridge at startup. 
+See your distribution's documentation for more information.
+
+
+NOTES
+^^^^^
+
+  o Users of VMware ESXi should be aware that the bridge will place the contained
+    ethernet interface into promiscuous mode (don't ask me why).  ESXi will
+    reject this by default, and nothing will work.  To fix this, edit the 
+    properties of the relevant vSwitch or VLAN, select the Security tab, and
+    set "Promiscuous Mode" to "Accept".
+
+    If anyone knows a better way to deal with this, or if I'm misunderstanding
+    what's happening there, please do tell.
+
+    I don't know if VMware's consumer products have similar issues or not.
+
+
+-- Steve <steve@floating.io>
+   http://floating.io

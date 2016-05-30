@@ -18,12 +18,12 @@ config Z16F_ESPI
 config Z16F_UART0
 	bool "UART0"
 	default y
-	select ARCH_HAVE_UART0
+	select UART0_SERIALDRIVER
 
 config Z16F_UART1
 	bool "UART1"
 	default y
-	select ARCH_HAVE_UART1
+	select UART1_SERIALDRIVER
 
 endmenu # Z16F Peripheral Selection
 

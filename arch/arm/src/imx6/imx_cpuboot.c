@@ -51,7 +51,9 @@
 #include "chip/imx_src.h"
 #include "sctlr.h"
 #include "smp.h"
+#include "fpu.h"
 #include "gic.h"
+#include "cp15_cacheops.h"
 
 #ifdef CONFIG_SMP
 
@@ -68,44 +70,44 @@ typedef CODE void (*cpu_start_t)(void);
 #if 0 /* Not used */
 static const uint32_t g_cpu_reset[CONFIG_SMP_NCPUS] =
 {
-  0,
+    SRC_SCR_CORE0_RST
 #if CONFIG_SMP_NCPUS > 1
-  SRC_SCR_CORE1_RST,
+  , SRC_SCR_CORE1_RST
 #endif
 #if CONFIG_SMP_NCPUS > 2
-  SRC_SCR_CORE2_RST,
+  , SRC_SCR_CORE2_RST
 #endif
 #if CONFIG_SMP_NCPUS > 3
-  SRC_SCR_CORE3_RST
+  , SRC_SCR_CORE3_RST
 #endif
 };
 #endif
 
 static const uint32_t g_cpu_ctrl[CONFIG_SMP_NCPUS] =
 {
-  0,
+    0
 #if CONFIG_SMP_NCPUS > 1
-  SRC_SCR_CORE1_ENABLE,
+  , SRC_SCR_CORE1_ENABLE
 #endif
 #if CONFIG_SMP_NCPUS > 2
-  SRC_SCR_CORE2_ENABLE,
+  , SRC_SCR_CORE2_ENABLE
 #endif
 #if CONFIG_SMP_NCPUS > 3
-  SRC_SCR_CORE3_ENABLE
+  , SRC_SCR_CORE3_ENABLE
 #endif
 };
 
 static const uintptr_t g_cpu_gpr[CONFIG_SMP_NCPUS] =
 {
-  0,
+    IMX_SRC_GPR1
 #if CONFIG_SMP_NCPUS > 1
-  IMX_SRC_GPR3,
+  , IMX_SRC_GPR3
 #endif
 #if CONFIG_SMP_NCPUS > 2
-  IMX_SRC_GPR5,
+  , IMX_SRC_GPR5
 #endif
 #if CONFIG_SMP_NCPUS > 3
-  IMX_SRC_GPR7
+  , IMX_SRC_GPR7
 #endif
 };
 
@@ -258,6 +260,12 @@ void imx_cpu_enable(void)
 
 void arm_cpu_boot(int cpu)
 {
+#ifdef CONFIG_ARCH_FPU
+  /* Initialize the FPU */
+
+  arm_fpuconfig();
+#endif
+
   /* Initialize the Generic Interrupt Controller (GIC) for CPUn (n != 0) */
 
   arm_gic_initialize();
@@ -288,6 +296,10 @@ void arm_cpu_boot(int cpu)
 
   (void)up_irq_enable();
 #endif
+
+  /* Invalidate CPUn L1 so that is will be reloaded from coherent L2. */
+
+  cp15_invalidate_dcache_all();
 
   /* The next thing that we expect to happen is for logic running on CPU0
    * to call up_cpu_start() which generate an SGI and a context switch to

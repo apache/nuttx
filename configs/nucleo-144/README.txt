@@ -1,24 +1,77 @@
 README
 ======
 
-This README discusses issues unique to NuttX configurations for the ST
-Nucleo F746ZG board from ST Micro.  See
+This README discusses issues unique to NuttX configurations for the STMicro
+Nucleo-144 board.  See
 
-http://www.st.com/web/catalog/tools/FM116/CL1620/SC959/SS1532/LN1847/PF261636
+http://www.st.com/content/ccc/resource/technical/document/data_brief/group0/7b/df/1d/e9/64/55/43/8d/DM00247910/files/DM00247910.pdf/jcr:content/translations/en.DM00247910.pdf
 
-The Nucleo F746ZG order part number is NUCLEO-F746ZG. It is clumped together
-under the STM32 Nucleo-144 board family. This does provide uniformity in the
-documentation from ST and should allow us to quickly change configurations
-but just cloning this configuration and changing the CPU choice and board
-init. Unfortunately for the developer, the CPU specific information must be
-extracted from the common information in the documentation.
+Contents
+========
+
+  - Nucleo-144 Boards
+  - Nucleo F746ZG
+  - Development Environment
+  - IDEs
+  - Basic configuaration & build steps
+  - Hardware
+    - Button
+    - LED
+    - U[S]ARTs and Serial Consoles
+  - Configurations
+
+Nucleo-144 Boards:
+=================
+
+The Nucleo-144 is a standard board for use with several STM32 parts in the
+LQFP144 package.  Variants include
+
+  STM32 Part    Board Variant Name
+  ------------- ------------------
+  STM32F207ZGT6 NUCLEO-F207ZG
+  STM32F303ZET6 NUCLEO-F303ZE
+  STM32F429ZIT6 NUCLEO-F429ZI
+  STM32F446ZET6 NUCLEO-F446ZE
+  STM32F746ZGT6 NUCLEO-F746ZG
+  STM32F767ZIT6 NUCLEO-F767ZI
+  ------------- ------------------
+
+This directory is intended to support all Nucleo-144 variants since the
+boards are identical, differing only in the installed part.  This common
+board design provides uniformity in the documentation from ST and should
+allow us to quickly change configurations by just cloning a configuration
+and changing the CPU choice and board initialization.  Unfortunately for
+the developer, the CPU specific information must be extracted from the
+common information in the documentation.
 
 Please read the User Manaul UM1727: Getting started with STM32 Nucleo board
 software development tools and take note of the Powering options for the
 board (6.3 Power supply and power selection) and the Solder bridges based
 hardware configuration changes that are configurable (6.11 Solder bridges).
 
-NUCLEO-F746ZG:
+Common Board Features:
+---------------------
+
+  Peripherals:    8 leds, 2 push button (3 LEDs, 1 button) under software
+                  control
+  Debug:          STLINK/V2-1 debugger/programmer Uses a STM32F103CB to
+                  provide a ST-Link for programming, debug similar to the
+                  OpenOcd FTDI function - USB to JTAG front-end.
+
+  Expansion I/F:  ST Zio and Extended Ardino and Morpho Headers
+
+Nucleo F746ZG
+=============
+
+At present only the ST Nucleo F746ZG board from ST Micro is supported.  See
+
+http://www.st.com/content/st_com/en/products/evaluation-tools/product-evaluation-tools/mcu-eval-tools/stm32-mcu-eval-tools/stm32-mcu-nucleo/nucleo-f746zg.html
+
+The Nucleo F746ZG order part number is NUCLEO-F746ZG. It is one member of
+the STM32 Nucleo-144 board family.
+
+NUCLEO-F746ZG Features:
+----------------------
 
   Microprocessor: STM32F746ZGT6 Core: ARM 32-bit Cortex®-M7 CPU with FPU,
                   L1-cache: 4KB data cache and 4KB instruction cache, up to
@@ -40,41 +93,20 @@ NUCLEO-F746ZG:
                   clock
   QSPI:           Dual mode Quad-SPI
   SAIs:           2 Serial Audio Interfaces
-  CAN:             2 X CAN interface
+  CAN:            2 X CAN interface
   SDMMC interface
   SPDIFRX interface
   USB:            USB 2.0 full-speed device/host/OTG controller with on-chip
                   PHY
   10/100 Ethernet: MAC with dedicated DMA: supports IEEE 1588v2 hardware,
-                     MII/RMII
+                   MII/RMII
   Camera Interface: 8/14 Bit
   CRC calculation unit
   TRG:            True random number generator
   RTC
 
-Board features:
-
-  Peripherals:    8 leds, 2 push button (3 LEDs, 1 button) under software
-                  control
-  Debug:          STLINK/V2-1 debugger/programmer Uses a STM32F103CB to
-                  provide a ST-Link for programming, debug similar to the
-                  OpenOcd FTDI function - USB to JTAG front-end.
-
-  Expansion I/F   ST Zio  an Extended Ardino and Morpho Headers
-
-See https://developer.mbed.org/platforms/ST-Nucleo-F746ZG  form additional information about this board.
-
-Contents
-========
-
-  - Development Environment
-  - IDEs
-  - Basic configuaration & build steps
-  - Hardware
-    - Button
-    - LED
-    - U[S]ARTs and Serial Consoles
-  - Configurations
+See https://developer.mbed.org/platforms/ST-Nucleo-F746ZG  form additional
+information about this board.
 
 Development Environment
 =======================
@@ -88,7 +120,6 @@ Development Environment
 
   If you change the default toolchain, then you may also have to modify the PATH in
   the setenv.h file if your make cannot find the tools.
-
 
 IDEs
 ====
@@ -104,7 +135,6 @@ IDEs
   makefile project in order to work with Windows (Google for "Eclipse Cygwin" -
   there is a lot of help on the internet).
 
-
 Basic configuration & build steps
 ==================================
 
@@ -112,9 +142,9 @@ Basic configuration & build steps
   be modified to point to the correct path to the Cortex-M7 GCC toolchain (if
   different from the default in your PATH variable).
 
-   - Configures nuttx creating .config file in the nuttx directory
+   - Configures nuttx creating .config file in the nuttx directory.
      $ cd tools && ./configure.sh nucleo-f746zg/nsh && cd ..
-   - Refreshes the .config file with the latest features addes sice this writting
+   - Refreshes the .config file with the latest available configurations.
      $ make oldconfig
    - Select the features you want in the build.
      $ make menuconfig
@@ -125,7 +155,7 @@ Hardware
 ========
 
   GPIO - there are 144 I/O lines on the STM32F746ZGT6 with various pins pined out
-  on the Nucleo F746ZG
+  on the Nucleo F746ZG.
 
   See https://developer.mbed.org/platforms/ST-Nucleo-F746ZG/ for slick graphic
   pinouts.
@@ -145,7 +175,6 @@ Hardware
   or choose a completely different U[S]ART to use as the console.
   In that Case, You will need to edit the include/board.h to select different
   U[S]ART and / or pin selections.
-
 
   Serial
   ------
@@ -231,7 +260,7 @@ Serial Consoles
   Use make menuconfig to configure USART8 as the console:
 
     CONFIG_STM32F7_UART8=y
-    CONFIG_USART8_ISUART=y
+    CONFIG_USART8_SERIALDRIVER=y
     CONFIG_USART8_SERIAL_CONSOLE=y
     CONFIG_UART8_RXBUFSIZE=256
     CONFIG_UART8_TXBUFSIZE=256
@@ -261,46 +290,83 @@ Serial Consoles
   As shipped, SB4 and SB7 are open and SB5 and SB6 closed, so the
   virtual COM port is enabled.
 
-
 Configurations
 ==============
 
-  nsh:
-  ---------
-    Configures the NuttShell (nsh) located at apps/examples/nsh for the
-    Nucleo-144 boards.  The Configuration enables the serial interfaces
-    on UART8.  Support for builtin applications is enabled, but in the base
-    configuration no builtin applications are selected (see NOTES below).
+nsh:
+----
+  Configures the NuttShell (nsh) located at apps/examples/nsh for the
+  Nucleo-144 boards.  The Configuration enables the serial interfaces
+  on UART6.  Support for builtin applications is enabled, but in the base
+  configuration no builtin applications are selected (see NOTES below).
 
-    NOTES:
+  NOTES:
 
-    1. This configuration uses the mconf-based configuration tool.  To
-       change this configuration using that tool, you should:
+  1. This configuration uses the mconf-based configuration tool.  To
+     change this configuration using that tool, you should:
 
-       a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
-          see additional README.txt files in the NuttX tools repository.
+     a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+        see additional README.txt files in the NuttX tools repository.
 
-       b. If this is the intall configuration then Execute
-             'cd tools && ./configure.sh stm32f746g-disco/nsh && cd ..'
-          in nuttx/ in order to start configuration process.
-          Caution: Doing this step more than once will overwrite .config with
-          the contents of the stm32f746g-disco/nsh/defconfig file.
+     b. If this is the intall configuration then Execute
+           'cd tools && ./configure.sh nucleo-144/nsh && cd ..'
+        in nuttx/ in order to start configuration process.
+        Caution: Doing this step more than once will overwrite .config with
+        the contents of the nucleo-144/nsh/defconfig file.
 
-       c. Execute 'make oldconfig' in nuttx/ in order to refresh the
-          configuration.
+     c. Execute 'make oldconfig' in nuttx/ in order to refresh the
+        configuration.
 
-       d. Execute 'make menuconfig' in nuttx/ in order to start the
-          reconfiguration process.
+     d. Execute 'make menuconfig' in nuttx/ in order to start the
+        reconfiguration process.
 
-       e. Save the .config file to reuse it in the future starting at step d.
+     e. Save the .config file to reuse it in the future starting at step d.
 
-    2. By default, this configuration uses the ARM GNU toolchain
-       for Linux.  That can easily be reconfigured, of course.
+  2. By default, this configuration uses the ARM GNU toolchain
+     for Linux.  That can easily be reconfigured, of course.
 
-       CONFIG_HOST_LINUX=y                     : Builds under Linux
-       CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIL=y     : ARM GNU for Linux
+     CONFIG_HOST_LINUX=y                     : Builds under Linux
+     CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIL=y     : ARM GNU for Linux
 
-    3. Although the default console is USART3 (which would correspond to
-       the Virtual COM port) I have done all testing with the console
-       device configured for UART8 (see instruction above under "Serial
-       Consoles).
+  3. Although the default console is USART3 (which would correspond to
+     the Virtual COM port) I have done all testing with the console
+     device configured for UART8 (see instruction above under "Serial
+     Consoles).
+
+evalos:
+-------
+  This configuration is designed to test the features of the board.
+    - Configures the NuttShell (nsh) located at apps/examples/nsh for the
+      Nucleo-144 boards. The console is available on serial interface USART3,
+      which is accessible over the USB ST-Link interface.
+    - Configures nsh with advanced features such as autocompletion.
+    - Configures the on-board LEDs to work with the 'leds' example app.
+    - Configures the 'helloxx' example app.
+
+  NOTES:
+
+  1. This configuration uses the mconf-based configuration tool.  To
+    change this configuration using that tool, you should:
+
+    a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+       see additional README.txt files in the NuttX tools repository.
+
+    b. If this is the intall configuration then Execute
+          'cd tools && ./configure.sh nucleo-144/evalos && cd ..'
+       in nuttx/ in order to start configuration process.
+       Caution: Doing this step more than once will overwrite .config with
+       the contents of the nucleo-144/evalos/defconfig file.
+
+    c. Execute 'make oldconfig' in nuttx/ in order to refresh the
+       configuration.
+
+    d. Execute 'make menuconfig' in nuttx/ in order to start the
+       reconfiguration process.
+
+    e. Save the .config file to reuse it in the future starting at step d.
+
+  2. By default, this configuration uses the ARM GNU toolchain
+    for Linux.  That can easily be reconfigured, of course.
+
+    CONFIG_HOST_LINUX=y                     : Builds under Linux
+    CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIL=y     : ARM GNU for Linux

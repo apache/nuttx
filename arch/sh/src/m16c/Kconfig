@@ -7,17 +7,17 @@ if ARCH_M16C
 
 config M16C_UART0
 	bool "UART0"
-	select ARCH_HAVE_UART0
+	select UART0_SERIALDRIVER
 	default n
 
 config M16C_UART1
 	bool "UART1"
-	select ARCH_HAVE_UART1
+	select UART1_SERIALDRIVER
 	default n
 
 config M16C_UART2
 	bool "UART2"
-	select ARCH_HAVE_UART2
+	select UART2_SERIALDRIVER
 	default n
 
 endif

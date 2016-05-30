@@ -96,7 +96,7 @@ void board_initialize(void)
    */
 
 #if defined(CONFIG_NSH_LIBRARY) && !defined(CONFIG_LIB_BOARDCTL)
-  (void)board_app_initialize();
+  (void)board_app_initialize(0);
 #endif
 }
 #endif /* CONFIG_BOARD_INITIALIZE */

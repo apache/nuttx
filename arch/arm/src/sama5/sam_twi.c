@@ -1200,6 +1200,7 @@ static void twi_hw_initialize(struct twi_dev_s *priv, uint32_t frequency)
 
   /* Set the initial TWI data transfer frequency */
 
+  priv->frequency = 0;
   twi_setfrequency(priv, frequency);
 
   /* Enable Interrupts */

@@ -77,10 +77,6 @@ ifeq ($(CONFIG_ARCH_FPU),y)
 CSRCS += stm32_ostest.c
 endif
 
-ifeq ($(CONFIG_WATCHDOG),y)
-CSRCS += stm32_watchdog.c
-endif
-
 ifeq ($(CONFIG_INPUT_STMPE811),y)
 CSRCS += stm32_stmpe811.c
 endif

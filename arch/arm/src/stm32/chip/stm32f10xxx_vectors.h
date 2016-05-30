@@ -110,7 +110,7 @@ UNUSED(STM32_IRQ_RESERVED6)                       /* Vector 16+49: Reserved 6 */
 VECTOR(stm32_tim5, STM32_IRQ_TIM5)                /* Vector 16+50: TIM5 global interrupt */
 VECTOR(stm32_spi3, STM32_IRQ_SPI3)                /* Vector 16+51: SPI3 global interrupt */
 VECTOR(stm32_uart4, STM32_IRQ_UART4)              /* Vector 16+52: USART2 global interrupt */
-VECTOR(stm32_uart5, STM32_IRQ_UART5)              /* Vector 16+53: USART5 global interrupt */
+VECTOR(stm32_uart5, STM32_IRQ_UART5)              /* Vector 16+53: UART5 global interrupt */
 VECTOR(stm32_tim6, STM32_IRQ_TIM6)                /* Vector 16+54: TIM6 global interrupt */
 VECTOR(stm32_tim7, STM32_IRQ_TIM7)                /* Vector 16+55: TIM7 global interrupt */
 VECTOR(stm32_dma2ch1, STM32_IRQ_DMA2CH1)          /* Vector 16+56: DMA2 Channel 1 global interrupt */

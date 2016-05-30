@@ -1,5 +1,5 @@
 #!/bin/bash
-# configs/sabre-6quad/nsh/Make.defs
+# configs/sabre-6quad/nsh/setenv.sh
 #
 #   Copyright (C) 2016 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -54,32 +54,61 @@ config IMX6_HAVE_HDCP
 
 endmenu # "iMX.6 Chip Selection"
 
+config IMX6_ECSPI
+	bool
+	default n
+
 menu "iMX.6 Peripheral Selection"
+
+config IMX6_ECSPI1
+	bool "ECSPI1"
+	default n
+	select IMX6_ECSPI
+
+config IMX6_ECSPI2
+	bool "ECSPI2"
+	default n
+	select IMX6_ECSPI
+
+config IMX6_ECSPI3
+	bool "ECSPI3"
+	default n
+	select IMX6_ECSPI
+
+config IMX6_ECSPI4
+	bool "ECSPI4"
+	default n
+	select IMX6_ECSPI
+
+config IMX6_ECSPI5
+	bool "ECSPI5"
+	default n
+	select IMX6_ECSPI
 
 config IMX6_UART1
 	bool "UART1"
 	default n
-	select ARCH_HAVE_UART1
+	select UART1_SERIALDRIVER
 
 config IMX6_UART2
 	bool "UART2"
 	default n
-	select ARCH_HAVE_UART2
+	select UART2_SERIALDRIVER
 
 config IMX6_UART3
 	bool "UART3"
 	default n
-	select ARCH_HAVE_UART3
+	select UART3_SERIALDRIVER
 
 config IMX6_UART4
 	bool "UART4"
 	default n
-	select ARCH_HAVE_UART4
+	select UART4_SERIALDRIVER
 
 config IMX6_UART5
 	bool "UART5"
 	default n
-	select ARCH_HAVE_UART5
+	select UART5_SERIALDRIVER
 
 config IMX6_SPI1
 	bool "SPI1"

@@ -203,12 +203,16 @@ CHIP_CSRCS += stm32_rtc_lowerhalf.c
 endif
 endif
 
-ifeq ($(CONFIG_ADC),y)
+ifeq ($(CONFIG_STM32_ADC),y)
 CHIP_CSRCS += stm32_adc.c
 endif
 
 ifeq ($(CONFIG_DAC),y)
 CHIP_CSRCS += stm32_dac.c
+endif
+
+ifeq ($(CONFIG_STM32_1WIREDRIVER),y)
+CHIP_CSRCS += stm32_1wire.c
 endif
 
 ifeq ($(CONFIG_STM32_RNG),y)

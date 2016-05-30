@@ -344,7 +344,10 @@ int arp_send(in_addr_t ipaddr)
        * its single argument to lookup the network interface.
        */
 
-      dev->d_txavail(dev);
+      if (dev->d_txavail)
+        {
+          dev->d_txavail(dev);
+        }
 
       /* Wait for the send to complete or an error to occur: NOTES: (1)
        * net_lockedwait will also terminate if a signal is received, (2)

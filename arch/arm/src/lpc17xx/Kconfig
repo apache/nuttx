@@ -172,36 +172,36 @@ config LPC17_SDCARD
 config LPC17_UART0
 	bool "UART0"
 	default n
-	select ARCH_HAVE_UART0
+	select UART0_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
 
 config LPC17_UART1
 	bool "UART1"
 	default n
-	select ARCH_HAVE_UART1
+	select UART1_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
 
 config LPC17_UART2
 	bool "UART2"
 	default n
-	select ARCH_HAVE_UART2
+	select UART2_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
 
 config LPC17_UART3
 	bool "UART3"
 	default n
-	select ARCH_HAVE_UART3
+	select UART3_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
 
 config LPC17_UART4
 	bool "UART4"
 	default n
-	select ARCH_HAVE_UART4
+	select UART4_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
 
 config LPC17_CAN1
 	bool "CAN1"
-	select ARCH_HAVE_UART4
+	select UART4_SERIALDRIVER
 	default n
 
 config LPC17_CAN2

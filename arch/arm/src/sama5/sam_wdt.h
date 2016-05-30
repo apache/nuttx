@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/sama5/sam_wdt.h
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -65,6 +65,26 @@ extern "C"
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: sam_wdt_initialize()
+ *
+ * Description:
+ *   Perform architecture-specific initialization of the Watchdog hardware.
+ *   This interface should be provided by all configurations using
+ *   to avoid exposed platform-dependent logic.
+ *
+ *   At a minimum, this function should call watchdog_register().
+ *
+ * Input parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int sam_wdt_initialize(void);
 
 #undef EXTERN
 #if defined(__cplusplus)

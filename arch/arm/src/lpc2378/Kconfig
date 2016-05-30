@@ -118,22 +118,22 @@ menu "LPC2378 Peripheral Support"
 config LPC2378_UART0
 	bool "UART0"
 	default n
-	select ARCH_HAVE_UART0
+	select UART0_SERIALDRIVER
 
 config LPC2378_UART1
 	bool "UART1"
 	default n
-	select ARCH_HAVE_UART1
+	select UART1_SERIALDRIVER
 
 config LPC2378_UART2
 	bool "UART2"
 	default n
-	select ARCH_HAVE_UART2
+	select UART2_SERIALDRIVER
 
 config LPC2378_UART3
 	bool "UART3"
 	default n
-	select ARCH_HAVE_UART3
+	select UART3_SERIALDRIVER
 
 config LPC2378_USBDEV
 	bool "USB Device"

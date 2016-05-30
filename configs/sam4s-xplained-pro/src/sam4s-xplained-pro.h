@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/sam4s-xplained-pro/src/sam4s-xplained-pro.h
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            Bob Doiron
  *
@@ -228,6 +228,22 @@ int sam_timerinitialize(void);
 #else
 #  define sam_timerinitialize() (0)
 #endif
+
+/****************************************************************************
+ * Name: sam_watchdog_initialize()
+ *
+ * Description:
+ *   Perform architecture-specific initialization of the Watchdog hardware.
+ *
+ * Input parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int sam_watchdog_initialize(void);
 
 #endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_SAM4S_XPLAINED_SRC_SAM4S_XPLAINED_H */

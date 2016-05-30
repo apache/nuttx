@@ -58,6 +58,7 @@
 #include <nuttx/clock.h>
 
 #include "sam4cm_oneshot.h"
+#include "sam4cm_freerun.h"
 
 #ifdef CONFIG_SAM34_ONESHOT
 
@@ -106,10 +107,11 @@ static void sam_oneshot_handler(TC_HANDLE tch, void *arg, uint32_t sr)
 
   /* Forward the event, clearing out any vestiges */
 
-  oneshot_handler  = (oneshot_handler_t)oneshot->handler;
-  oneshot->handler = NULL;
-  oneshot_arg      = (void *)oneshot->arg;
-  oneshot->arg     = NULL;
+  oneshot_handler      = (oneshot_handler_t)oneshot->handler;
+  oneshot->handler     = NULL;
+  oneshot_arg          = (void *)oneshot->arg;
+  oneshot->arg         = NULL;
+  oneshot->start_count = 0;
 
   oneshot_handler(oneshot_arg);
 }
@@ -206,10 +208,11 @@ int sam_oneshot_initialize(struct sam_oneshot_s *oneshot, int chan,
    * success.
    */
 
-  oneshot->chan       = chan;
-  oneshot->running    = false;
-  oneshot->handler    = NULL;
-  oneshot->arg        = NULL;
+  oneshot->chan        = chan;
+  oneshot->running     = false;
+  oneshot->handler     = NULL;
+  oneshot->arg         = NULL;
+  oneshot->start_count = 0;
   return OK;
 }
 
@@ -248,8 +251,8 @@ int sam_oneshot_max_delay(struct sam_oneshot_s *oneshot, uint64_t *usec)
  *
  ****************************************************************************/
 
-int sam_oneshot_start(struct sam_oneshot_s *oneshot, oneshot_handler_t handler,
-                      void *arg, const struct timespec *ts)
+int sam_oneshot_start(struct sam_oneshot_s *oneshot, struct sam_freerun_s *freerun,
+                      oneshot_handler_t handler, void *arg, const struct timespec *ts)
 {
   uint64_t usec;
   uint64_t regval;
@@ -267,7 +270,7 @@ int sam_oneshot_start(struct sam_oneshot_s *oneshot, oneshot_handler_t handler,
       /* Yes.. then cancel it */
 
       tcvdbg("Already running... cancelling\n");
-      (void)sam_oneshot_cancel(oneshot, NULL);
+      (void)sam_oneshot_cancel(oneshot, freerun, NULL);
     }
 
   /* Save the new handler and its argument */
@@ -306,6 +309,26 @@ int sam_oneshot_start(struct sam_oneshot_s *oneshot, oneshot_handler_t handler,
 
   sam_tc_start(oneshot->tch);
 
+  /* The function sam_tc_start() starts the timer/counter by setting the
+   * bits TC_CCR_CLKEN and TC_CCR_SWTRG in the channel control register.
+   * The first one enables the timer/counter the latter performs an
+   * software trigger, which starts the clock and sets the counter
+   * register to zero. This reset is performed with the next valid edge
+   * of the selected clock. Thus it can take up USEC_PER_TICK microseconds
+   * until the counter register becomes zero.
+   *
+   * If the timer is canceled within this period the counter register holds
+   * the counter value for the last timer/counter run. To circumvent this
+   * the counter value of the freerun timer/counter is stored at each start
+   * of the oneshot timer/counter.
+   *
+   * The function up_timer_gettime() could also be used for this but it takes
+   * too long. If up_timer_gettime() is called within this function the problem
+   * vanishes at least if compiled with no optimisation.
+   */
+
+  oneshot->start_count = sam_tc_getcounter(freerun->tch);
+
   /* Enable interrupts.  We should get the callback when the interrupt
    * occurs.
    */
@@ -340,7 +363,8 @@ int sam_oneshot_start(struct sam_oneshot_s *oneshot, oneshot_handler_t handler,
  *
  ****************************************************************************/
 
-int sam_oneshot_cancel(struct sam_oneshot_s *oneshot, struct timespec *ts)
+int sam_oneshot_cancel(struct sam_oneshot_s *oneshot, struct sam_freerun_s *freerun,
+                       struct timespec *ts)
 {
   irqstate_t flags;
   uint64_t usec;
@@ -380,6 +404,17 @@ int sam_oneshot_cancel(struct sam_oneshot_s *oneshot, struct timespec *ts)
 
   count = sam_tc_getcounter(oneshot->tch);
   rc    = sam_tc_getregister(oneshot->tch, TC_REGC);
+
+  /* In the case the timer/counter was canceled very short after its start,
+   * the counter register can hold the wrong value (the value of the last
+   * run). To prevent this the counter value is set to zero if not at
+   * least on tick passed since the start of the timer/counter.
+   */
+
+  if (count > 0 && sam_tc_getcounter(freerun->tch) == oneshot->start_count)
+    {
+      count = 0;
+    }
 
   /* Now we can disable the interrupt and stop the timer. */
 
@@ -428,6 +463,14 @@ int sam_oneshot_cancel(struct sam_oneshot_s *oneshot, struct timespec *ts)
 
           usec        = (((uint64_t)(rc - count)) * USEC_PER_SEC) /
                         sam_tc_divfreq(oneshot->tch);
+
+          /* Each time the timer/counter is canceled the time calculated from
+           * the two registers (counter and REGC) is accurate up to an error
+           * between 0 and USEC_PER_TICK microseconds. To correct this error
+           * one tick which means USEC_PER_TICK microseconds are subtracted.
+           */
+
+          usec        = usec > USEC_PER_TICK ? usec - USEC_PER_TICK : 0;
 
           /* Return the time remaining in the correct form */
 

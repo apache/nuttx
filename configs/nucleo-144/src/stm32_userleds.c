@@ -3,6 +3,7 @@
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Author: Mark Olsson <post@markolsson.se>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -42,6 +43,8 @@
 #include <stdbool.h>
 #include <debug.h>
 
+#include <arch/board/board.h>
+
 #include "stm32_gpio.h"
 #include "nucleo-144.h"
 
@@ -64,6 +67,17 @@
 #endif
 
 /****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+/* This array maps an LED number to GPIO pin configuration */
+
+static const uint32_t g_ledcfg[3] =
+{
+  GPIO_LD1, GPIO_LD2, GPIO_LD3
+};
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -80,7 +94,14 @@
 
 void board_userled_initialize(void)
 {
-  stm32_configgpio(GPIO_LD1);
+  int i;
+
+  /* Configure LED1-3 GPIOs for output */
+
+  for (i = 0; i < 3; i++)
+    {
+      stm32_configgpio(g_ledcfg[i]);
+    }
 }
 
 /****************************************************************************
@@ -95,10 +116,10 @@ void board_userled_initialize(void)
 
 void board_userled(int led, bool ledon)
 {
-  if (led == BOARD_STATUS_LED)
-    {
-      stm32_gpiowrite(GPIO_LD1, !ledon);
-    }
+  if ((unsigned)led < 3)
+  {
+    stm32_gpiowrite(g_ledcfg[led], ledon);
+  }
 }
 
 /****************************************************************************
@@ -114,7 +135,14 @@ void board_userled(int led, bool ledon)
 
 void board_userled_all(uint8_t ledset)
 {
-  stm32_gpiowrite(GPIO_LD1, (ledset & BOARD_STATUS_LED_BIT) != 0);
+  int i;
+
+  /* Configure LED1-3 GPIOs for output */
+
+  for (i = 0; i < 3; i++)
+    {
+      stm32_gpiowrite(g_ledcfg[i], (ledset & (1 << i)) != 0);
+    }
 }
 
 #endif /* !CONFIG_ARCH_LEDS */

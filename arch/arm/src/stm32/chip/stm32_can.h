@@ -75,8 +75,11 @@
 #define STM32_CAN_MCR_OFFSET      0x0000  /* CAN master control register */
 #define STM32_CAN_MSR_OFFSET      0x0004  /* CAN master status register */
 #define STM32_CAN_TSR_OFFSET      0x0008  /* CAN transmit status register */
+
+#define STM32_CAN_RFR_OFFSET(m)   (0x000c+((m)<<2))
 #define STM32_CAN_RF0R_OFFSET     0x000c  /* CAN receive FIFO 0 register */
 #define STM32_CAN_RF1R_OFFSET     0x0010  /* CAN receive FIFO 1 register */
+
 #define STM32_CAN_IER_OFFSET      0x0014  /* CAN interrupt enable register */
 #define STM32_CAN_ESR_OFFSET      0x0018  /* CAN error status register */
 #define STM32_CAN_BTR_OFFSET      0x001c  /* CAN bit timing register */
@@ -127,8 +130,8 @@
 #define STM32_CAN_FFA1R_OFFSET    0x0214  /* CAN filter FIFO assignment register */
 #define STM32_CAN_FA1R_OFFSET     0x021c  /* CAN filter activation register */
 
-/* There are 14 or 28 filter banks (depending) on the device.  Each filter bank is
- * composed of two 32-bit registers, CAN_FiR:
+/* There are 14 or 28 filter banks (depending) on the device.
+ * Each filter bank is composed of two 32-bit registers, CAN_FiR:
  *  F0R1 Offset 0x240
  *  F0R2 Offset 0x244
  *  F1R1 Offset 0x248
@@ -445,7 +448,7 @@
 
 /* CAN filter master register */
 
-#define CAN_FMR_FINIT             (1 << 0)  /* Bit 0:  Filter Init Mode */
+#define CAN_FMR_FINIT             (1 << 0)  /* Bit 0: Filter Init Mode */
 #if defined(CONFIG_STM32_CONNECTIVITYLINE) || defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
 #  define CAN_FMR_CAN2SB_SHIFT    (8)       /* Bits 13-8: CAN2 start bank */
 #  define CAN_FMR_CAN2SB_MASK     (0x3f << CAN_FMR_CAN2SB_SHIFT)

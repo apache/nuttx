@@ -69,10 +69,6 @@ ifeq ($(CONFIG_WL_CC3000),y)
 CSRCS += stm32_wireless.c
 endif
 
-ifeq ($(CONFIG_WATCHDOG),y)
-CSRCS += stm32_watchdog.c
-endif
-
 ifeq ($(CONFIG_CC3000_PROBES),)
 CSRCS += stm32_io.c
 endif

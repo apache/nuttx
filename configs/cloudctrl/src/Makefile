@@ -73,10 +73,6 @@ ifeq ($(CONFIG_ADC),y)
 CSRCS += stm32_adc.c
 endif
 
-ifeq ($(CONFIG_WATCHDOG),y)
-CSRCS += stm32_watchdog.c
-endif
-
 ifeq ($(CONFIG_STM32_PHYINIT),y)
 CSRCS += stm32_phyinit.c
 endif
