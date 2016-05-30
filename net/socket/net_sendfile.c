@@ -402,7 +402,7 @@ static uint16_t sendfile_interrupt(FAR struct net_driver_s *dev, FAR void *pvcon
 
           dev->d_sndlen = sndlen;
 
-          /* Set the sequence number for this packet.  NOTE:  uIP updates
+          /* Set the sequence number for this packet.  NOTE:  The network updates
            * sndseq on recept of ACK *before* this function is called.  In that
            * case sndseq will point to the next unacknowledge byte (which might
            * have already been sent).  We will overwrite the value of sndseq

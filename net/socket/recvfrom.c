@@ -1692,8 +1692,8 @@ static ssize_t tcp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
         }
     }
 
-  /* In general, this uIP-based implementation will not support non-blocking
-   * socket operations... except in a few cases:  Here for TCP receive with read-ahead
+  /* In general, this implementation will not support non-blocking socket
+   * operations... except in a few cases:  Here for TCP receive with read-ahead
    * enabled.  If this socket is configured as non-blocking then return EAGAIN
    * if no data was obtained from the read-ahead buffers.
    */

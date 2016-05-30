@@ -382,7 +382,7 @@ void arp_notify(in_addr_t ipaddr);
  *
  * Assumptions
  *   Interrupts are disabled; Returned value will become unstable when
- *   interrupts are re-enabled or if any other uIP APIs are called.
+ *   interrupts are re-enabled or if any other network APIs are called.
  *
  ****************************************************************************/
 

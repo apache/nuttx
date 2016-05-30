@@ -91,7 +91,7 @@ int net_foreachroute(route_handler_t handler, FAR void *arg)
       ret = handler(route, arg);
     }
 
-  /* Unlock uIP */
+  /* Unlock the network */
 
   net_unlock(save);
   return ret;
@@ -122,7 +122,7 @@ int net_foreachroute_ipv6(route_handler_ipv6_t handler, FAR void *arg)
       ret = handler(route, arg);
     }
 
-  /* Unlock uIP */
+  /* Unlock the network */
 
   net_unlock(save);
   return ret;

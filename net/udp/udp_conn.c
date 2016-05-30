@@ -76,7 +76,7 @@
  * Private Data
  ****************************************************************************/
 
-/* The array containing all uIP UDP connections. */
+/* The array containing all UDP connections. */
 
 struct udp_conn_s g_udp_connections[CONFIG_NET_UDP_CONNS];
 

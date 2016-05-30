@@ -147,7 +147,7 @@ uint16_t tcp_callback(FAR struct net_driver_s *dev,
                       FAR struct tcp_conn_s *conn, uint16_t flags)
 {
   /* Preserve the TCP_ACKDATA, TCP_CLOSE, and TCP_ABORT in the response.
-   * These is needed by uIP to handle responses and buffer state.  The
+   * These is needed by the network to handle responses and buffer state.  The
    * TCP_NEWDATA indication will trigger the ACK response, but must be
    * explicitly set in the callback.
    */

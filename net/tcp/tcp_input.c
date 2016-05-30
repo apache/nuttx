@@ -376,7 +376,7 @@ found:
       ackseq = tcp_getsequence(tcp->ackno);
 
       /* Check how many of the outstanding bytes have been acknowledged. For
-       * a most uIP send operation, this should always be true.  However,
+       * most send operations, this should always be true.  However,
        * the send() API sends data ahead when it can without waiting for
        * the ACK.  In this case, the 'ackseq' could be less than then the
        * new sequence number.
