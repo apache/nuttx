@@ -11813,3 +11813,59 @@
 	* fs/: Add logic to detach a file structure from a file descriptor.
 	  This is for use only within the OS.  It permits an open file or driver
 	  to be used across multiple threads (2016-05-26).
+	* arch/arm/src/stm32l4: Get I2C working for STM32L4.  From Dave
+	  (ziggurat29) (2016-05-25).
+	* fs/ and include/nuttx/fs: Add logic to detach a file structure from a
+	  file descriptor.  This is for use only within the OS.  It permits an
+	  open file or driver to be used across multiple threads.  (2016-05-26).
+	* drivers/analog/adc.c, include/nuttx/analog/adc.h, and all ADC lower
+	  half drivers:  No longer uses global adc_receive() call.  Added a new
+	  bind() method to the ADC interface.  Now the ADC upper half driver
+	  will register its receipt-of-data callback.  This change allows the
+	  ADC lower half driver to be used with a differ ADC upper half
+	  (2016-05-26).
+	* drivers/analog/ads1255.c: Must not do SPI access from interrupt
+	  handler.  Use the worker thread instead.  Must also lock the SPI bus
+	  before using it. (2015-05-26).
+	* drivers/:  Several SPI-based drivers modified.  All drivers that use
+	  SPI must call SPI_LOCK and SPI_UNLOCK.  This is not optional
+	  (2016-05-26).
+	* drivers/sensosrs:  Fix a bug in crc computation for ms583730.
+	  Implement POSIX read (2016-05-27).
+	* arch/arm/src/samv7: This is a fix to a problem in the handling of the
+	  oneshot timer. Due to a wrong assumption concerning the behavior
+	  directly after the start of the timer/counter the function
+	  sam_oneshot_cancel(…) calculates the wrong remaining time. The code
+	  assumes that the counter register is zero directly after the start of
+	  the timer, but this is not true. To start the time/counter a software
+	  trigger is invoked, this trigger starts the timer/count and sets the
+	  counter register to zero, but the reset of the counter register is not
+	  performed instantly. According to the datasheet: "The counter can be
+	  reset by a trigger. In this case, the counter value passes to zero on
+	  the next valid edge of the selected clock.” Thus the counter is set to
+	  zero between 0 and USEC_PER_TICK microseconds after the clock was
+	  started.
+	  In my fix I use the freerun count value to determine if at least one
+	  tick passed since the start of the timer and thus if the value of the
+	  oneshot counter is correct. I also tried to use the function
+	  up_timer_gettime(…) to achieve this but, at least if compiled with no
+	  optimization the problem vanishes without using the value of the
+	  function, the function call takes too long.
+	  Another problem treated in the fix is that if the oneshot timer/counter
+	  is canceled, we only know the remaining time with a precision of
+	  USEC_PER_TICK microseconds. This means the calculated remaining time
+	  is between 0 and USEC_PER_TICK microseconds  too long. To fix this I
+	  subtract one tick if the calculated remaining time is greater than one
+	  tick and otherwise set the remaining time to zero. By doing so the
+	  measured times are much more precise as without it.  From Stefan Kolb
+	  (2016-05-27).
+	* arch/arm/src/sama5:  Stefan Kolb's change to the SAMV7 Oneshot Timer
+	  should also be applied to the SAMA5 oneshot time since the drivers are
+	  identical (2016-05-27).
+	* arch/arm/src/stm32l4: Add support for SPI 4 and 5 on stm32f411 chips.
+	  From Konstantin Berezenko (2016-05-27).
+	* arch/arm/src/sam34:  Stefan Kolb's change to the SAMV7 Oneshot Timer
+	  should also be applied to the SAM3/4 oneshot time since the drivers
+	  are identical (2016-05-29).
+	* arch/arm/src/stm32: Allow to not use all channel in a lower part of
+	  PWM.  From Pierre-noel Bouteville (2016-05-30).
