@@ -1314,6 +1314,15 @@ static int pwm_timer(FAR struct stm32_pwmtimer_s *priv,
       duty = info->channels[i].duty;
       channel = info->channels[i].channel;
 
+      /* A value of zero means to skip this channel */
+
+      if (channel == 0)
+        {
+          continue;
+        }
+
+      /* Find the channel */
+
       for (j = 0; j < PWM_NCHANNELS; j++)
         {
           if (priv->channels[j].channel == channel)
