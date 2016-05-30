@@ -127,7 +127,7 @@ struct e1000_dev
   WDOG_ID txpoll;             /* TX poll timer */
   WDOG_ID txtimeout;          /* TX timeout timer */
 
-  /* This holds the information visible to uIP/NuttX */
+  /* This holds the information visible to the NuttX network */
 
   struct net_driver_s netdev; /* Interface understood by networking layer */
 };
@@ -462,7 +462,7 @@ static int e1000_transmit(struct e1000_dev *e1000)
  * Function: e1000_txpoll
  *
  * Description:
- *   The transmitter is available, check if uIP has any outgoing packets ready
+ *   The transmitter is available, check if the network has any outgoing packets ready
  *   to send.  This is a callback from devif_poll().  devif_poll() may be called:
  *
  *   1. When the preceding TX packet send is complete,
@@ -570,7 +570,7 @@ static void e1000_receive(struct e1000_dev *e1000)
           goto next;
         }
 
-      /* Check if the packet is a valid size for the uIP buffer configuration */
+      /* Check if the packet is a valid size for the network buffer configuration */
 
       /* get the number of actual data-bytes in this packet */
 
@@ -728,7 +728,7 @@ static void e1000_txtimeout(int argc, uint32_t arg, ...)
 
   e1000_init(e1000);
 
-  /* Then poll uIP for new XMIT data */
+  /* Then poll the network for new XMIT data */
 
   (void)devif_poll(&e1000->netdev, e1000_txpoll);
 }
@@ -765,7 +765,7 @@ static void e1000_polltimer(int argc, uint32_t arg, ...)
       return;
     }
 
-  /* If so, update TCP timing states and poll uIP for new XMIT data. Hmmm..
+  /* If so, update TCP timing states and poll the network for new XMIT data. Hmmm..
    * might be bug here.  Does this mean if there is a transmit in progress,
    * we will missing TCP time state updates?
    */

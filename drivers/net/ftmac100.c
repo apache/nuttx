@@ -171,9 +171,9 @@ struct ftmac100_driver_s
   struct work_s ft_work;       /* For deferring work to the work queue */
 #endif
 
-  /* This holds the information visible to uIP/NuttX */
+  /* This holds the information visible to the NuttX network */
 
-  struct net_driver_s ft_dev;  /* Interface understood by uIP */
+  struct net_driver_s ft_dev;  /* Interface understood by the network */
 };
 
 /****************************************************************************
@@ -331,7 +331,7 @@ static int ftmac100_transmit(FAR struct ftmac100_driver_s *priv)
  * Function: ftmac100_txpoll
  *
  * Description:
- *   The transmitter is available, check if uIP has any outgoing packets
+ *   The transmitter is available, check if the network has any outgoing packets
  *   ready to send.  This is a callback from devif_poll().  devif_poll() may
  *   be called:
  *
@@ -849,7 +849,7 @@ static void ftmac100_txdone(FAR struct ftmac100_driver_s *priv)
   (void)wd_start(priv->ft_txpoll, FTMAC100_WDDELAY, ftmac100_poll_expiry, 1,
                  (wdparm_t)priv);
 
-  /* Then poll uIP for new XMIT data */
+  /* Then poll the network for new XMIT data */
 
   (void)devif_poll(&priv->ft_dev, ftmac100_txpoll);
 }
@@ -1089,7 +1089,7 @@ static inline void ftmac100_txtimeout_process(FAR struct ftmac100_driver_s *priv
 
   nvdbg("TXTIMEOUT\n");
 
-  /* Then poll uIP for new XMIT data */
+  /* Then poll the network for new XMIT data */
 
   (void)devif_poll(&priv->ft_dev, ftmac100_txpoll);
 }
@@ -1195,7 +1195,7 @@ static inline void ftmac100_poll_process(FAR struct ftmac100_driver_s *priv)
    * the TX poll if he are unable to accept another packet for transmission.
    */
 
-  /* If so, update TCP timing states and poll uIP for new XMIT data. Hmmm..
+  /* If so, update TCP timing states and poll the network for new XMIT data. Hmmm..
    * might be bug here.  Does this mean if there is a transmit in progress,
    * we will missing TCP time state updates?
    */
@@ -1421,7 +1421,7 @@ static inline void ftmac100_txavail_process(FAR struct ftmac100_driver_s *priv)
     {
       /* Check if there is room in the hardware to hold another outgoing packet. */
 
-      /* If so, then poll uIP for new XMIT data */
+      /* If so, then poll the network for new XMIT data */
 
       (void)devif_poll(&priv->ft_dev, ftmac100_txpoll);
     }
