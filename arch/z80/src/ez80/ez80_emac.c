@@ -325,9 +325,9 @@ struct ez80emac_driver_s
   struct ez80mac_statistics_s stat;
 #endif
 
-  /* This holds the information visible to uIP/NuttX */
+  /* This holds the information visible to the NuttX network */
 
-  struct net_driver_s dev;  /* Interface understood by uIP */
+  struct net_driver_s dev;  /* Interface understood by the network */
 };
 
 /****************************************************************************
@@ -1055,8 +1055,9 @@ static int ez80emac_transmit(struct ez80emac_driver_s *priv)
  * Function: ez80emac_txpoll
  *
  * Description:
- *   The transmitter is available, check if uIP has any outgoing packets ready
- *   to send.  This is a callback from devif_poll().  devif_poll() may be called:
+ *   The transmitter is available, check if the network has any outgoing
+ *   packets ready to send.  This is a callback from devif_poll().
+ *   devif_poll() may be called:
  *
  *   1. When the preceding TX packet send is complete,
  *   2. When the preceding TX packet send timesout and the interface is reset
@@ -1228,7 +1229,7 @@ static int ez80emac_receive(struct ez80emac_driver_s *priv)
         }
 
       /* We have a good packet. Check if the packet is a valid size
-       * for the uIP buffer configuration (I routinely see
+       * for the network buffer configuration (I routinely see
        */
 
       if (rxdesc->pktsize > CONFIG_NET_ETH_MTU)
@@ -1669,7 +1670,7 @@ static void ez80emac_txtimeout(int argc, uint32_t arg, ...)
   ez80emac_ifup(&priv->dev);
   leave_critical_section(flags);
 
-  /* Then poll uIP for new XMIT data */
+  /* Then poll the network for new XMIT data */
 
   (void)devif_poll(&priv->dev, ez80emac_txpoll);
 }
@@ -1695,7 +1696,7 @@ static void ez80emac_polltimer(int argc, uint32_t arg, ...)
 {
   struct ez80emac_driver_s *priv = (struct ez80emac_driver_s *)arg;
 
-  /* Poll uIP for new XMIT data */
+  /* Poll the network for new XMIT data */
 
   (void)devif_timer(&priv->dev, ez80emac_txpoll);
 
@@ -1882,7 +1883,7 @@ static int ez80emac_txavail(struct net_driver_s *dev)
 
       /* Check if there is room in the hardware to hold another outgoing packet. */
 
-      /* If so, then poll uIP for new XMIT data */
+      /* If so, then poll the network for new XMIT data */
 
       (void)devif_poll(&priv->dev, ez80emac_txpoll);
     }
@@ -2256,7 +2257,7 @@ errout:
  *   Add one MAC address to the multi-cast hash table
  *
  * Parameters:
- *   dev    - Reference to the uIP driver state structure
+ *   dev    - Reference to the network driver state structure
  *   mac    - The MAC address to add
  *   enable - true: Enable filtering on this address; false: disable
  *

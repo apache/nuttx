@@ -93,7 +93,7 @@ has a similar BSD style license:
 IGMP
 ^^^^
 
-IGMP support, if enabled in uIP, adds additional logic by Steve Reynolds:
+IGMP support, if enabled, adds additional logic by Steve Reynolds:
 
   Copyright (c) 2002 CITEL Technologies Ltd.
   All rights reserved.
