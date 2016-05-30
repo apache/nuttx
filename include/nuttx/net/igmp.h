@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/net/igmp.h
  * The definitions in this header file are intended only for internal use
- * by the NuttX port of the uIP stack.
+ * by the NuttX network stack.
  *
  *   Copyright (C) 2010, 2012, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
