@@ -5,7 +5,7 @@
  *   Copyright (C) 2007, 2009-2012, 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
- * Derived from uIP with has a similar BSD-styple license:
+ * Derived from uIP with has a similar BSD-style license:
  *
  *   Author: Adam Dunkels <adam@dunkels.com>
  *   Copyright (c) 2001-2003, Adam Dunkels.
