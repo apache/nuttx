@@ -322,8 +322,8 @@
 #  define LPC43_NADC10_CHANNELS    (8)         /* Eight ADC channels */
 #  undef  LPC43_NADC12                         /* No 12-bit ADC controllers */
 #elif defined(CONFIG_ARCH_CHIP_LPC4337JBD144)
-#  define LPC43_FLASH_BANKA_SIZE   (512*1025)  /* 1024Kb FLASH */
-#  define LPC43_FLASH_BANKB_SIZE   (512*1025)
+#  define LPC43_FLASH_BANKA_SIZE   (512*1024)  /* 1024Kb FLASH */
+#  define LPC43_FLASH_BANKB_SIZE   (512*1024)
 #  define LPC43_LOCSRAM_BANK0_SIZE (32*1024)   /* 72Kb Local SRAM */
 #  define LPC43_LOCSRAM_BANK1_SIZE (40*1024)
 #  define LPC43_AHBSRAM_BANK0_SIZE (48*1024)   /* 64Kb AHB SRAM */
@@ -426,8 +426,8 @@
 #  define LPC43_NADC10_CHANNELS    (8)         /* Eight ADC channels */
 #  undef  LPC43_NADC12                         /* No 12-bit ADC controllers */
 #elif defined(CONFIG_ARCH_CHIP_LPC4353FBD208)
-#  define LPC43_FLASH_BANKA_SIZE   (256*1025)  /* 512Kb FLASH */
-#  define LPC43_FLASH_BANKB_SIZE   (256*1025)
+#  define LPC43_FLASH_BANKA_SIZE   (256*1024)  /* 512Kb FLASH */
+#  define LPC43_FLASH_BANKB_SIZE   (256*1024)
 #  define LPC43_LOCSRAM_BANK0_SIZE (32*1024)   /* 72Kb Local SRAM */
 #  define LPC43_LOCSRAM_BANK1_SIZE (40*1024)
 #  define LPC43_AHBSRAM_BANK0_SIZE (48*1024)   /* 64Kb AHB SRAM */
@@ -452,8 +452,8 @@
 #  define LPC43_NADC10_CHANNELS    (8)         /* Eight ADC channels */
 #  undef  LPC43_NADC12                         /* No 12-bit ADC controllers */
 #elif defined(CONFIG_ARCH_CHIP_LPC4353FET180)
-#  define LPC43_FLASH_BANKA_SIZE   (256*1025)  /* 512Kb FLASH */
-#  define LPC43_FLASH_BANKB_SIZE   (256*1025)
+#  define LPC43_FLASH_BANKA_SIZE   (256*1024)  /* 512Kb FLASH */
+#  define LPC43_FLASH_BANKB_SIZE   (256*1024)
 #  define LPC43_LOCSRAM_BANK0_SIZE (32*1024)   /* 72Kb Local SRAM */
 #  define LPC43_LOCSRAM_BANK1_SIZE (40*1024)
 #  define LPC43_AHBSRAM_BANK0_SIZE (48*1024)   /* 64Kb AHB SRAM */
@@ -478,8 +478,8 @@
 #  define LPC43_NADC10_CHANNELS    (8)         /* Eight ADC channels */
 #  undef  LPC43_NADC12                         /* No 12-bit ADC controllers */
 #elif defined(CONFIG_ARCH_CHIP_LPC4353FET256)
-#  define LPC43_FLASH_BANKA_SIZE   (256*1025)  /* 512Kb FLASH */
-#  define LPC43_FLASH_BANKB_SIZE   (256*1025)
+#  define LPC43_FLASH_BANKA_SIZE   (256*1024)  /* 512Kb FLASH */
+#  define LPC43_FLASH_BANKB_SIZE   (256*1024)
 #  define LPC43_LOCSRAM_BANK0_SIZE (32*1024)   /* 72Kb Local SRAM */
 #  define LPC43_LOCSRAM_BANK1_SIZE (40*1024)
 #  define LPC43_AHBSRAM_BANK0_SIZE (48*1024)   /* 64Kb AHB SRAM */
@@ -504,8 +504,8 @@
 #  define LPC43_NADC10_CHANNELS    (8)         /* Eight ADC channels */
 #  undef  LPC43_NADC12                         /* No 12-bit ADC controllers */
 #elif defined(CONFIG_ARCH_CHIP_LPC4357FET180)
-#  define LPC43_FLASH_BANKA_SIZE   (512*1025)  /* 1024Kb FLASH */
-#  define LPC43_FLASH_BANKB_SIZE   (512*1025)
+#  define LPC43_FLASH_BANKA_SIZE   (512*1024)  /* 1024Kb FLASH */
+#  define LPC43_FLASH_BANKB_SIZE   (512*1024)
 #  define LPC43_LOCSRAM_BANK0_SIZE (32*1024)   /* 72Kb Local SRAM */
 #  define LPC43_LOCSRAM_BANK1_SIZE (40*1024)
 #  define LPC43_AHBSRAM_BANK0_SIZE (48*1024)   /* 64Kb AHB SRAM */
@@ -530,8 +530,8 @@
 #  define LPC43_NADC10_CHANNELS    (8)         /* Eight ADC channels */
 #  undef  LPC43_NADC12                         /* No 12-bit ADC controllers */
 #elif defined(CONFIG_ARCH_CHIP_LPC4357FBD208)
-#  define LPC43_FLASH_BANKA_SIZE   (512*1025)  /* 1024Kb FLASH */
-#  define LPC43_FLASH_BANKB_SIZE   (512*1025)
+#  define LPC43_FLASH_BANKA_SIZE   (512*1024)  /* 1024Kb FLASH */
+#  define LPC43_FLASH_BANKB_SIZE   (512*1024)
 #  define LPC43_LOCSRAM_BANK0_SIZE (32*1024)   /* 72Kb Local SRAM */
 #  define LPC43_LOCSRAM_BANK1_SIZE (40*1024)
 #  define LPC43_AHBSRAM_BANK0_SIZE (48*1024)   /* 64Kb AHB SRAM */
@@ -556,8 +556,8 @@
 #  define LPC43_NADC10_CHANNELS    (8)         /* Eight ADC channels */
 #  undef  LPC43_NADC12                         /* No 12-bit ADC controllers */
 #elif defined(CONFIG_ARCH_CHIP_LPC4357FET256)
-#  define LPC43_FLASH_BANKA_SIZE   (512*1025)  /* 1024Kb FLASH */
-#  define LPC43_FLASH_BANKB_SIZE   (512*1025)
+#  define LPC43_FLASH_BANKA_SIZE   (512*1024)  /* 1024Kb FLASH */
+#  define LPC43_FLASH_BANKB_SIZE   (512*1024)
 #  define LPC43_LOCSRAM_BANK0_SIZE (32*1024)   /* 72Kb Local SRAM */
 #  define LPC43_LOCSRAM_BANK1_SIZE (40*1024)
 #  define LPC43_AHBSRAM_BANK0_SIZE (48*1024)   /* 64Kb AHB SRAM */
