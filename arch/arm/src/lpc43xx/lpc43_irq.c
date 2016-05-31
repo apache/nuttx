@@ -255,9 +255,9 @@ static int lpc43_irqinfo(int irq, uintptr_t *regaddr, uint32_t *bit,
            *regaddr = (NVIC_IRQ0_31_ENABLE + offset);
            *bit     = 1 << (irq - LPC43_IRQ_EXTINT);
         }
-#if LPC43M4_IRQ_NIRQS > 95
+#if LPC43M4_IRQ_NEXTINT > 95
 #  error Extension to interrupt logic needed
-#elif LPC43M4_IRQ_NIRQS > 63
+#elif LPC43M4_IRQ_NEXTINT > 63
       else if (irq < (LPC43_IRQ_EXTINT + 64))
         {
            /* Interrupt in range {32-63} */
@@ -272,7 +272,7 @@ static int lpc43_irqinfo(int irq, uintptr_t *regaddr, uint32_t *bit,
            *regaddr = (NVIC_IRQ64_95_ENABLE + offset);
            *bit     = 1 << (irq - LPC43_IRQ_EXTINT - 64);
         }
-#else /* if LPC43M4_IRQ_NIRQS > 31 */
+#else /* if LPC43M4_IRQ_NEXTINT > 31 */
       else if (irq < LPC43M4_IRQ_NIRQS)
         {
            /* Interrupt in range {32-LPC43M4_IRQ_NIRQS}, LPC43M4_IRQ_NIRQS <= 63 */
@@ -344,9 +344,9 @@ void up_irqinitialize(void)
   /* Disable all interrupts */
 
   putreg32(0, NVIC_IRQ0_31_ENABLE);
-#if LPC43M4_IRQ_NIRQS > 31
+#if LPC43M4_IRQ_NEXTINT > 31
   putreg32(0, NVIC_IRQ32_63_ENABLE);
-#if LPC43M4_IRQ_NIRQS > 63
+#if LPC43M4_IRQ_NEXTINT > 63
   putreg32(0, NVIC_IRQ64_95_ENABLE);
 #endif
 #endif
