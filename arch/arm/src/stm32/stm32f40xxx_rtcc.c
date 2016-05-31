@@ -219,7 +219,7 @@ static int rtchw_set_alrmbr(rtc_alarmreg_t alarmreg);
 #ifdef CONFIG_DEBUG_RTC
 static void rtc_dumpregs(FAR const char *msg)
 {
-  rtclldbg("%s:\n", msg);
+  rtclldbg("*** %s:\n", msg);
   rtclldbg("      TR: %08x\n", getreg32(STM32_RTC_TR));
   rtclldbg("      DR: %08x\n", getreg32(STM32_RTC_DR));
   rtclldbg("      CR: %08x\n", getreg32(STM32_RTC_CR));
@@ -240,6 +240,12 @@ static void rtc_dumpregs(FAR const char *msg)
   rtclldbg("ALRMASSR: %08x\n", getreg32(STM32_RTC_ALRMASSR));
   rtclldbg("ALRMBSSR: %08x\n", getreg32(STM32_RTC_ALRMBSSR));
   rtclldbg("MAGICREG: %08x\n", getreg32(RTC_MAGIC_REG));
+  int rtc_state =
+		  ((getreg32(STM32_EXTI_RTSR) & EXTI_RTC_ALARM) ? 0x1000 : 0) |
+		  ((getreg32(STM32_EXTI_FTSR) & EXTI_RTC_ALARM) ? 0x0100 : 0) |
+		  ((getreg32(STM32_EXTI_IMR)  & EXTI_RTC_ALARM) ? 0x0010 : 0) |
+		  ((getreg32(STM32_EXTI_EMR)  & EXTI_RTC_ALARM) ? 0x0001 : 0);
+  rtclldbg("EXTI (RTSR FTSR ISR EVT): %01x\n",rtc_state);
 }
 #else
 #  define rtc_dumpregs(msg)
@@ -600,9 +606,9 @@ static void rtc_resume(void)
   regval &= ~(RTC_ISR_ALRAF | RTC_ISR_ALRBF);
   putreg32(regval, STM32_RTC_ISR);
 
-  /* Clear the EXTI Line 17 Pending bit (Connected internally to RTC Alarm) */
+  /* Clear the RTC Alarm Pending bit */
 
-  putreg32((1 << 17), STM32_EXTI_PR);
+  putreg32((1 << EXTI_RTC_ALARM ), STM32_EXTI_PR);
 #endif
 }
 
@@ -876,8 +882,6 @@ int up_rtc_initialize(void)
    * maximum performance.
    */
 
-  rtc_dumpregs("On reset");
-
   /* Select the clock source */
   /* Save the token before losing it when resetting */
 
@@ -902,16 +906,19 @@ int up_rtc_initialize(void)
 #ifdef CONFIG_RTC_HSECLOCK
       /* Use the HSE clock as the input to the RTC block */
 
+      rtc_dumpregs("On reset HSE");
       modifyreg32(STM32_RCC_XXX, RCC_XXX_RTCSEL_MASK, RCC_XXX_RTCSEL_HSE);
 
 #elif defined(CONFIG_RTC_LSICLOCK)
       /* Use the LSI clock as the input to the RTC block */
 
+      rtc_dumpregs("On reset LSI");
       modifyreg32(STM32_RCC_XXX, RCC_XXX_RTCSEL_MASK, RCC_XXX_RTCSEL_LSI);
 
 #elif defined(CONFIG_RTC_LSECLOCK)
       /* Use the LSE clock as the input to the RTC block */
 
+      rtc_dumpregs("On reset LSE");
       modifyreg32(STM32_RCC_XXX, RCC_XXX_RTCSEL_MASK, RCC_XXX_RTCSEL_LSE);
 
 #endif
@@ -925,6 +932,8 @@ int up_rtc_initialize(void)
     defined(CONFIG_RTC_LSECLOCK)
 
       uint32_t clksrc = getreg32(STM32_RCC_XXX);
+
+      rtc_dumpregs("On reset warm");
 
 #if defined(CONFIG_RTC_HSECLOCK)
       if ((clksrc & RCC_XXX_RTCSEL_MASK) != RCC_XXX_RTCSEL_HSE)
@@ -1060,10 +1069,13 @@ int up_rtc_initialize(void)
    */
 
   stm32_exti_alarm(true, false, true, stm32_rtc_alarm_handler);
+  rtc_dumpregs("After InitExtiAlarm");
+#else
+  rtc_dumpregs("After Initialization");
 #endif
 
   g_rtc_enabled = true;
-  rtc_dumpregs("After Initialization");
+
   return OK;
 }
 
@@ -1365,13 +1377,14 @@ int stm32_rtc_setalarm(FAR struct alm_setalarm_s *alminfo)
           cbinfo->ac_cb  = alminfo->as_cb;
           cbinfo->ac_arg = alminfo->as_arg;
 
-          ret = rtchw_set_alrmar(alarmreg | RTC_ALRMR_ENABLE);
+          ret = rtchw_set_alrmar(alarmreg | RTC_ALRMR_ENABLE | RTC_ALRMR_DIS_DATE_MASK);
           if (ret < 0)
             {
               cbinfo->ac_cb  = NULL;
               cbinfo->ac_arg = NULL;
             }
         }
+        rtc_dumpregs("Set AlarmA");
         break;
 
       case RTC_ALARMB:
@@ -1380,13 +1393,14 @@ int stm32_rtc_setalarm(FAR struct alm_setalarm_s *alminfo)
           cbinfo->ac_cb  = alminfo->as_cb;
           cbinfo->ac_arg = alminfo->as_arg;
 
-          ret = rtchw_set_alrmbr(alarmreg | RTC_ALRMR_ENABLE);
+          ret = rtchw_set_alrmbr(alarmreg | RTC_ALRMR_ENABLE | RTC_ALRMR_DIS_DATE_MASK);
           if (ret < 0)
             {
               cbinfo->ac_cb  = NULL;
               cbinfo->ac_arg = NULL;
             }
         }
+        rtc_dumpregs("Set AlarmB");
         break;
 
       default:
@@ -1486,7 +1500,7 @@ int stm32_rtc_cancelalarm(enum alm_id_e alarmid)
         break;
 
       default:
-        rtcvdbg("ERROR: Invalid ALARM%d\n", alminfo->as_id);
+        rtcvdbg("ERROR: Invalid ALARM%d\n", alarmid);
         break;
     }
 
