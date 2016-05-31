@@ -103,9 +103,6 @@ extern const struct mountpt_operations fat_operations;
 #ifdef CONFIG_FS_ROMFS
 extern const struct mountpt_operations romfs_operations;
 #endif
-#ifdef CONFIG_FS_TMPFS
-extern const struct mountpt_operations tmpfs_operations;
-#endif
 #ifdef CONFIG_FS_SMARTFS
 extern const struct mountpt_operations smartfs_operations;
 #endif
@@ -128,6 +125,9 @@ static const struct fsmap_t g_bdfsmap[] =
 #ifdef NONBDFS_SUPPORT
 #ifdef CONFIG_FS_NXFFS
 extern const struct mountpt_operations nxffs_operations;
+#endif
+#ifdef CONFIG_FS_TMPFS
+extern const struct mountpt_operations tmpfs_operations;
 #endif
 #ifdef CONFIG_NFS
 extern const struct mountpt_operations nfs_operations;
@@ -298,7 +298,7 @@ int mount(FAR const char *source, FAR const char *target,
        * incremented.
        */
 
-      DEBUGASSERT(mountpt_inode->u.i_mops == NULL);
+      DEBUGASSERT(mountpt_inode->u.i_mops != NULL);
     }
   else
 #endif

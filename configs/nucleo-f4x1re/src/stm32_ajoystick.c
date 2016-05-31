@@ -46,6 +46,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/fs/fs.h>
 #include <nuttx/input/ajoystick.h>
 
 #include "stm32_gpio.h"
@@ -109,10 +110,6 @@
 #endif
 
 /****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
@@ -158,9 +155,9 @@ static const struct ajoy_lowerhalf_s g_ajoylower =
 };
 
 #ifndef NO_JOYSTICK_ADC
-/* Descriptor for the open ADC driver */
+/* Thread-independent file structure for the open ADC driver */
 
-static int g_adcfd = -1;
+static struct file g_adcfile;
 #endif
 
 /* Current interrupt handler and argument */
@@ -209,7 +206,7 @@ static int ajoy_sample(FAR const struct ajoy_lowerhalf_s *lower,
    * channels are enabled).
    */
 
-  nread = read(g_adcfd, adcmsg, MAX_ADC_CHANNELS * sizeof(struct adc_msg_s));
+  nread = file_read(&g_adcfile, adcmsg, MAX_ADC_CHANNELS * sizeof(struct adc_msg_s));
   if (nread < 0)
     {
       int errcode = get_errno();
@@ -454,6 +451,8 @@ int board_ajoy_initialize(void)
   int i;
 
 #ifndef NO_JOYSTICK_ADC
+  int fd;
+
   ivdbg("Initialize ADC driver: /dev/adc0\n");
 
   /* Initialize ADC.  We will need this to read the ADC inputs */
@@ -465,14 +464,26 @@ int board_ajoy_initialize(void)
       return ret;
     }
 
-  /* Open the ADC driver for reading */
+  /* Open the ADC driver for reading. */
 
-  g_adcfd = open("/dev/adc0", O_RDONLY);
-  if (g_adcfd < 0)
+  fd = open("/dev/adc0", O_RDONLY);
+  if (fd < 0)
     {
       int errcode = get_errno();
       idbg("ERROR: Failed to open /dev/adc0: %d\n", errcode);
       return -errcode;
+    }
+
+  /* Detach the file structure from the file descriptor so that it can be
+   * used on any thread.
+   */
+
+  ret = file_detach(fd, &g_adcfile);
+  if (ret < 0)
+    {
+      idbg("ERROR: Failed to detach from file descriptor: %d\n", ret);
+      (void)close(fd);
+      return ret;
     }
 #endif
 
@@ -497,8 +508,7 @@ int board_ajoy_initialize(void)
     {
       idbg("ERROR: ajoy_register failed: %d\n", ret);
 #ifndef NO_JOYSTICK_ADC
-      close(g_adcfd);
-      g_adcfd = -1;
+      file_close_detached(&g_adcfile);
 #endif
     }
 

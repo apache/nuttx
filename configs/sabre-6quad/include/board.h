@@ -88,7 +88,7 @@
  *
  * A single LED is available driven GPIO1_IO02.  On the schematic this is
  * USR_DEF_RED_LED signal to pin T1 (GPIO_2).  This signal is shared with KEY_ROW6
- * (ALT2).  A low value illuminates the LED.
+ * (ALT2).  A high value illuminates the LED.
  */
 
 /* LED index values for use with board_userled() */

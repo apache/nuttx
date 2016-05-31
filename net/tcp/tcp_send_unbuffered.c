@@ -518,7 +518,7 @@ static uint16_t tcpsend_interrupt(FAR struct net_driver_s *dev,
 
       if ((pstate->snd_sent - pstate->snd_acked + sndlen) < conn->winsize)
         {
-          /* Set the sequence number for this packet.  NOTE:  uIP updates
+          /* Set the sequence number for this packet.  NOTE:  The network updates
            * sndseq on receipt of ACK *before* this function is called.  In that
            * case sndseq will point to the next unacknowledged byte (which might
            * have already been sent).  We will overwrite the value of sndseq

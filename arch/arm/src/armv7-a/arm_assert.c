@@ -334,7 +334,13 @@ static void up_dumpstate(void)
     }
 #endif
 
-  /* Then dump the registers (if available) */
+#ifdef CONFIG_SMP
+  /* Show the CPU number */
+
+  lldbg("CPU%d:\n", up_cpu_index());
+#endif
+
+  /* Then dump the CPU registers (if available) */
 
   up_registerdump();
 

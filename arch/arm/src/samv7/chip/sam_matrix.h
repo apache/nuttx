@@ -101,7 +101,7 @@
                                                 /* 0x006c8-0x00fc: Reserved */
 #define SAM_MATRIX_MRCR_OFFSET           0x0100 /* Master Remap Control Register */
                                                 /* 0x0104-0x010c: Reserved */
-#define SAM_MATRIX_CAN0_OFFSET           0x0100 /* Master Remap Control Register */
+#define SAM_MATRIX_CAN0_OFFSET           0x0110 /* CAN0 Configuration Register */
 #define SAM_MATRIX_CCFG_SYSIO_OFFSET     0x0114 /* System I/O Configuration Register */
                                                 /* 0x0118-0x0120: Reserved */
 #define SAM_MATRIX_CCFG_SMCNFCS_OFFSET   0x0124 /* SMC Chip Select NAND Flash Assignment Register */

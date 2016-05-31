@@ -150,6 +150,10 @@ ifeq ($(CONFIG_SAMV7_RSWDT),y)
 CHIP_CSRCS += sam_rswdt.c
 endif
 
+ifeq ($(CONFIG_SAMV7_SYSTEMRESET),y)
+CHIP_CSRCS += sam_systemreset.c
+endif
+
 ifeq ($(CONFIG_SAMV7_SPI_MASTER),y)
 CHIP_CSRCS += sam_spi.c
 endif

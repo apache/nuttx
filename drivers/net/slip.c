@@ -146,11 +146,11 @@ struct slip_driver_s
   uint16_t      rxlen;      /* The number of bytes in rxbuf */
   pid_t         rxpid;      /* Receiver thread ID */
   pid_t         txpid;      /* Transmitter thread ID */
-  sem_t         waitsem;    /* Mutually exclusive access to uIP */
+  sem_t         waitsem;    /* Mutually exclusive access to the network */
 
-  /* This holds the information visible to uIP/NuttX */
+  /* This holds the information visible to the NuttX network */
 
-  struct net_driver_s dev;  /* Interface understood by uIP */
+  struct net_driver_s dev;  /* Interface understood by the network */
   uint8_t rxbuf[CONFIG_NET_SLIP_MTU + 2];
   uint8_t txbuf[CONFIG_NET_SLIP_MTU + 2];
 };
@@ -378,7 +378,7 @@ static int slip_transmit(FAR struct slip_driver_s *priv)
  * Function: slip_txpoll
  *
  * Description:
- *   Check if uIP has any outgoing packets ready to send.  This is a
+ *   Check if the network has any outgoing packets ready to send.  This is a
  *   callback from devif_poll().  devif_poll() may be called:
  *
  *   1. When the preceding TX packet send is complete, or
@@ -471,7 +471,7 @@ static void slip_txtask(int argc, FAR char *argv[])
 
       if (priv->bifup)
         {
-          /* Get exclusive access to uIP (if it it is already being used
+          /* Get exclusive access to the network (if it it is already being used
            * slip_rxtask, then we have to wait).
            */
 
@@ -725,7 +725,7 @@ static int slip_rxtask(int argc, FAR char *argv[])
         {
           NETDEV_RXIPV4(&priv->dev);
 
-          /* Handle the IP input.  Get exclusive access to uIP. */
+          /* Handle the IP input.  Get exclusive access to the network. */
 
           slip_semtake(priv);
           priv->dev.d_buf = priv->rxbuf;

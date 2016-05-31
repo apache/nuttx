@@ -31,11 +31,11 @@ menu "ATMega Peripheral Selections"
 
 config AVR_USART0
 	bool "USART0"
-	select ARCH_HAVE_USART0
+	select USART0_SERIALDRIVER
 
 config AVR_USART1
 	bool "USART1"
-	select ARCH_HAVE_USART1
+	select USART1_SERIALDRIVER
 
 endmenu # ATMega Peripheral Selections
 

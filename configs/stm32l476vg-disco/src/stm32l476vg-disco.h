@@ -53,6 +53,77 @@
  ************************************************************************************/
 /* Configuration ********************************************************************/
 
+#define HAVE_PROC             1
+#define HAVE_RTC_DRIVER       1
+#define HAVE_N25QXXX          1
+#define HAVE_N25QXXX_NXFFS    1
+#define HAVE_N25QXXX_SMARTFS  1
+#define HAVE_N25QXXX_CHARDEV  1
+
+#if !defined(CONFIG_FS_PROCFS)
+#  undef HAVE_PROC
+#endif
+
+#if defined(HAVE_PROC) && defined(CONFIG_DISABLE_MOUNTPOINT)
+#  warning Mountpoints disabled.  No procfs support
+#  undef HAVE_PROC
+#endif
+
+/* Check if we can support the RTC driver */
+
+#if !defined(CONFIG_RTC) || !defined(CONFIG_RTC_DRIVER)
+#  undef HAVE_RTC_DRIVER
+#endif
+
+/* N25QXXX QuadSPI FLASH */
+
+#ifndef CONFIG_MTD_N25QXXX
+#  undef HAVE_N25QXXX
+#  undef HAVE_N25QXXX_NXFFS
+#  undef HAVE_N25QXXX_SMARTFS
+#  undef HAVE_N25QXXX_CHARDEV
+#endif
+
+#ifndef CONFIG_STM32L4_QSPI
+#  undef HAVE_N25QXXX
+#  undef HAVE_N25QXXX_NXFFS
+#  undef HAVE_N25QXXX_SMARTFS
+#  undef HAVE_N25QXXX_CHARDEV
+#endif
+
+#ifndef CONFIG_FS_NXFFS
+#  undef HAVE_N25QXXX_NXFFS
+#endif
+
+#if !defined(CONFIG_MTD_SMART) || !defined(CONFIG_FS_SMARTFS)
+#  undef HAVE_N25QXXX_SMARTFS
+#endif
+
+#if defined(HAVE_N25QXXX_NXFFS) && defined(HAVE_N25QXXX_SMARTFS)
+#  undef HAVE_N25QXXX_NXFFS
+#endif
+
+#if defined(HAVE_N25QXXX_NXFFS) || defined(HAVE_N25QXXX_SMARTFS)
+#  undef HAVE_N25QXXX_CHARDEV
+#endif
+
+/* If both the N25QXXX FLASH and SmartFS, then this is the minor device
+ * number of the Smart block driver (/dev/smartN)
+ */
+
+#define N25QXXX_SMART_MINOR 0
+
+/* If the N25QXXX FLASH is enabled but not SmartFS, then the N25QXXX will be
+ * wrapped as a character device.  This is the minor number of both the
+ * block device (/dev/mtdblockN) and the character device (/dev/mtdN).
+ */
+
+#define N25QXXX_MTD_MINOR 0
+
+/* This is the on-chip progmem memroy driver minor number */
+
+#define PROGMEM_MTD_MINOR 1
+
 /* LED.
  * LD4: the red LED on PB2
  * LD5: the green LED on PE8
@@ -110,7 +181,7 @@
 
 /* XXX IS this 'unshifted'? */
 
-#define NUCLEO_I2C_OBDEV_CS43L22   0x94
+#define DISCO_I2C_OBDEV_CS43L22   0x94
 
 /************************************************************************************
  * Public Data

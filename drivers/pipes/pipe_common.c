@@ -92,7 +92,7 @@ static void pipecommon_semtake(sem_t *sem);
  * Name: pipecommon_semtake
  ****************************************************************************/
 
-static void pipecommon_semtake(sem_t *sem)
+static void pipecommon_semtake(FAR sem_t *sem)
 {
   while (sem_wait(sem) != 0)
     {
@@ -109,7 +109,8 @@ static void pipecommon_semtake(sem_t *sem)
  ****************************************************************************/
 
 #ifndef CONFIG_DISABLE_POLL
-static void pipecommon_pollnotify(FAR struct pipe_dev_s *dev, pollevent_t eventset)
+static void pipecommon_pollnotify(FAR struct pipe_dev_s *dev,
+                                  pollevent_t eventset)
 {
   int i;
 
@@ -120,7 +121,7 @@ static void pipecommon_pollnotify(FAR struct pipe_dev_s *dev, pollevent_t events
 
   for (i = 0; i < CONFIG_DEV_PIPE_NPOLLWAITERS; i++)
     {
-      struct pollfd *fds = dev->d_fds[i];
+      FAR struct pollfd *fds = dev->d_fds[i];
       if (fds)
         {
           fds->revents |= eventset & (fds->events | POLLERR | POLLHUP);
@@ -158,7 +159,7 @@ FAR struct pipe_dev_s *pipecommon_allocdev(void)
 
   /* Allocate a private structure to manage the pipe */
 
-  dev = (struct pipe_dev_s *)kmm_malloc(sizeof(struct pipe_dev_s));
+  dev = (FAR struct pipe_dev_s *)kmm_malloc(sizeof(struct pipe_dev_s));
   if (dev)
     {
       /* Initialize the private structure */
@@ -190,10 +191,10 @@ void pipecommon_freedev(FAR struct pipe_dev_s *dev)
 
 int pipecommon_open(FAR struct file *filep)
 {
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct pipe_dev_s *dev = inode->i_private;
-  int sval;
-  int ret;
+  FAR struct inode      *inode = filep->f_inode;
+  FAR struct pipe_dev_s *dev   = inode->i_private;
+  int                    sval;
+  int                    ret;
 
   DEBUGASSERT(dev != NULL);
 
@@ -302,9 +303,9 @@ int pipecommon_open(FAR struct file *filep)
 
 int pipecommon_close(FAR struct file *filep)
 {
-  struct inode      *inode = filep->f_inode;
-  struct pipe_dev_s *dev   = inode->i_private;
-  int                sval;
+  FAR struct inode      *inode = filep->f_inode;
+  FAR struct pipe_dev_s *dev   = inode->i_private;
+  int                    sval;
 
   DEBUGASSERT(dev && dev->d_refs > 0);
 
@@ -408,14 +409,14 @@ int pipecommon_close(FAR struct file *filep)
 
 ssize_t pipecommon_read(FAR struct file *filep, FAR char *buffer, size_t len)
 {
-  struct inode      *inode  = filep->f_inode;
-  struct pipe_dev_s *dev    = inode->i_private;
+  FAR struct inode      *inode  = filep->f_inode;
+  FAR struct pipe_dev_s *dev    = inode->i_private;
 #ifdef CONFIG_DEV_PIPEDUMP
-  FAR uint8_t       *start  = (FAR uint8_t *)buffer;
+  FAR uint8_t           *start  = (FAR uint8_t *)buffer;
 #endif
-  ssize_t            nread  = 0;
-  int                sval;
-  int                ret;
+  ssize_t                nread  = 0;
+  int                    sval;
+  int                    ret;
 
   DEBUGASSERT(dev);
 
@@ -467,7 +468,7 @@ ssize_t pipecommon_read(FAR struct file *filep, FAR char *buffer, size_t len)
   /* Then return whatever is available in the pipe (which is at least one byte) */
 
   nread = 0;
-  while (nread < len && dev->d_wrndx != dev->d_rdndx)
+  while ((size_t)nread < len && dev->d_wrndx != dev->d_rdndx)
     {
       *buffer++ = dev->d_buffer[dev->d_rdndx];
       if (++dev->d_rdndx >= CONFIG_DEV_PIPE_SIZE)
@@ -497,14 +498,15 @@ ssize_t pipecommon_read(FAR struct file *filep, FAR char *buffer, size_t len)
  * Name: pipecommon_write
  ****************************************************************************/
 
-ssize_t pipecommon_write(FAR struct file *filep, FAR const char *buffer, size_t len)
+ssize_t pipecommon_write(FAR struct file *filep, FAR const char *buffer,
+                         size_t len)
 {
-  struct inode      *inode    = filep->f_inode;
-  struct pipe_dev_s *dev      = inode->i_private;
-  ssize_t            nwritten = 0;
-  ssize_t            last;
-  int                nxtwrndx;
-  int                sval;
+  FAR struct inode      *inode    = filep->f_inode;
+  FAR struct pipe_dev_s *dev      = inode->i_private;
+  ssize_t                nwritten = 0;
+  ssize_t                last;
+  int                    nxtwrndx;
+  int                    sval;
 
   DEBUGASSERT(dev);
   pipe_dumpbuffer("To PIPE:", (FAR uint8_t *)buffer, len);
@@ -559,7 +561,8 @@ ssize_t pipecommon_write(FAR struct file *filep, FAR const char *buffer, size_t 
 
           /* Is the write complete? */
 
-          if (++nwritten >= len)
+          nwritten++;
+          if ((size_t)nwritten >= len)
             {
               /* Yes.. Notify all of the waiting readers that more data is available */
 
@@ -717,7 +720,7 @@ int pipecommon_poll(FAR struct file *filep, FAR struct pollfd *fds,
     {
       /* This is a request to tear down the poll. */
 
-      struct pollfd **slot = (struct pollfd **)fds->priv;
+      FAR struct pollfd **slot = (FAR struct pollfd **)fds->priv;
 
 #ifdef CONFIG_DEBUG
       if (!slot)
@@ -745,9 +748,9 @@ errout:
 
 int pipecommon_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
-  FAR struct inode *inode = filep->f_inode;
-  struct pipe_dev_s *dev   = inode->i_private;
-  int ret = -EINVAL;
+  FAR struct inode      *inode = filep->f_inode;
+  FAR struct pipe_dev_s *dev   = inode->i_private;
+  int                    ret   = -EINVAL;
 
 #ifdef CONFIG_DEBUG
   /* Some sanity checking */
@@ -792,7 +795,7 @@ int pipecommon_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
               count = dev->d_wrndx - dev->d_rdndx;
             }
 
-          *(int *)arg = count;
+          *(FAR int *)arg = count;
           ret = 0;
         }
         break;
@@ -812,7 +815,7 @@ int pipecommon_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
               count = ((CONFIG_DEV_PIPE_SIZE - dev->d_wrndx) + dev->d_rdndx) - 1;
             }
 
-          *(int *)arg = count;
+          *(FAR int *)arg = count;
           ret = 0;
         }
         break;

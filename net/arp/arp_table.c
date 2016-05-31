@@ -260,7 +260,7 @@ void arp_hdr_update(FAR uint16_t *pipaddr, FAR uint8_t *ethaddr)
  *
  * Assumptions
  *   Interrupts are disabled; Returned value will become unstable when
- *   interrupts are re-enabled or if any other uIP APIs are called.
+ *   interrupts are re-enabled or if any other network APIs are called.
  *
  ****************************************************************************/
 

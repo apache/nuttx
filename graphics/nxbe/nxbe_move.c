@@ -1,7 +1,7 @@
 /****************************************************************************
  * graphics/nxbe/nxbe_move.c
  *
- *   Copyright (C) 2008-2009, 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011-2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,10 +47,6 @@
 #include "nxfe.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
  * Private Types
  ****************************************************************************/
 
@@ -62,14 +58,6 @@ struct nxbe_move_s
   struct nxgl_rect_s        srcrect;
   uint8_t                   order;
 };
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
@@ -90,6 +78,9 @@ static void nxbe_clipmovesrc(FAR struct nxbe_clipops_s *cops,
 {
   struct nxbe_move_s *info = (struct nxbe_move_s *)cops;
   struct nxgl_point_s offset;
+#ifdef CONFIG_NX_UPDATE
+  struct nxgl_rect_s update;
+#endif
 
   if (info->offset.x != 0 || info->offset.y != 0)
     {
@@ -98,7 +89,20 @@ static void nxbe_clipmovesrc(FAR struct nxbe_clipops_s *cops,
       offset.x = rect->pt1.x + info->offset.x;
       offset.y = rect->pt1.y + info->offset.y;
 
+      /* Move the source rectangle to the destination position */
+
       plane->moverectangle(&plane->pinfo, rect, &offset);
+
+#ifdef CONFIG_NX_UPDATE
+      /* Notify external logic that the display has been updated */
+
+      update.pt1.x = offset.x;
+      update.pt1.y = offset.y;
+      update.pt2.x = rect->pt2.x + info->offset.x;
+      update.pt2.y = rect->pt2.y + info->offset.y;
+
+      nx_notify_rectangle(&plane->pinfo, &update);
+#endif
     }
 }
 

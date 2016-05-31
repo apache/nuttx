@@ -102,9 +102,9 @@ extern "C"
  ****************************************************************************/
 
 /* If CONFIG_NET_ARPIOCTLS is defined then the semi-standard ioctl commands
- * described above are supported.  If not, you can call the uIP ARP interfaces
- * directly in a very non-standard way.  See include/nuttx/net/arp.h for
- * prototypes.
+ * described above are supported.  If not, you can call the network ARP
+ * interfaces directly in a very non-standard way.  See
+ * include/nuttx/net/arp.h for prototypes.
  */
 
 #undef EXTERN

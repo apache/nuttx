@@ -585,9 +585,9 @@ struct stm32_ethmac_s
   struct work_s        work;        /* For deferring work to the work queue */
 #endif
 
-  /* This holds the information visible to uIP/NuttX */
+  /* This holds the information visible to the NuttX network */
 
-  struct net_driver_s  dev;         /* Interface understood by uIP */
+  struct net_driver_s  dev;         /* Interface understood by the network */
 
   /* Used to track transmit and receive descriptors */
 
@@ -993,7 +993,7 @@ static int stm32_transmit(FAR struct stm32_ethmac_s *priv)
   struct eth_txdesc_s *txdesc;
   struct eth_txdesc_s *txfirst;
 
-  /* The internal (optimal) uIP buffer size may be configured to be larger
+  /* The internal (optimal) network buffer size may be configured to be larger
    * than the Ethernet buffer size.
    */
 
@@ -1179,7 +1179,7 @@ static int stm32_transmit(FAR struct stm32_ethmac_s *priv)
  * Function: stm32_txpoll
  *
  * Description:
- *   The transmitter is available, check if uIP has any outgoing packets ready
+ *   The transmitter is available, check if the network has any outgoing packets ready
  *   to send.  This is a callback from devif_poll().  devif_poll() may be called:
  *
  *   1. When the preceding TX packet send is complete,
@@ -1321,7 +1321,7 @@ static void stm32_dopoll(FAR struct stm32_ethmac_s *priv)
   if ((priv->txhead->tdes0 & ETH_TDES0_OWN) == 0 &&
        priv->txhead->tdes2 == 0)
     {
-      /* If we have the descriptor, then poll uIP for new XMIT data.
+      /* If we have the descriptor, then poll the network for new XMIT data.
        * Allocate a buffer for the poll.
        */
 
@@ -1585,7 +1585,7 @@ static int stm32_recvframe(FAR struct stm32_ethmac_s *priv)
               buffer = stm32_allocbuffer(priv);
 
               /* Take the buffer from the RX descriptor of the first free
-               * segment, put it into the uIP device structure, then replace
+               * segment, put it into the network device structure, then replace
                * the buffer in the RX descriptor with the newly allocated
                * buffer.
                */
@@ -1667,7 +1667,7 @@ static void stm32_receive(FAR struct stm32_ethmac_s *priv)
       pkt_input(&priv->dev);
 #endif
 
-      /* Check if the packet is a valid size for the uIP buffer configuration
+      /* Check if the packet is a valid size for the network buffer configuration
        * (this should not happen)
        */
 
@@ -1955,7 +1955,7 @@ static void stm32_txdone(FAR struct stm32_ethmac_s *priv)
       stm32_disableint(priv, ETH_DMAINT_TI);
     }
 
-  /* Then poll uIP for new XMIT data */
+  /* Then poll the network for new XMIT data */
 
   stm32_dopoll(priv);
 }
@@ -2321,7 +2321,7 @@ static inline void stm32_poll_process(FAR struct stm32_ethmac_s *priv)
 
       if (dev->d_buf)
         {
-          /* Update TCP timing states and poll uIP for new XMIT data.
+          /* Update TCP timing states and poll the network for new XMIT data.
            */
 
           (void)devif_timer(dev, stm32_txpoll);
@@ -2551,7 +2551,7 @@ static inline void stm32_txavail_process(FAR struct stm32_ethmac_s *priv)
 
   if (priv->ifup)
     {
-      /* Poll uIP for new XMIT data */
+      /* Poll the network for new XMIT data */
 
       stm32_dopoll(priv);
     }

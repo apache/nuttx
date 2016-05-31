@@ -414,48 +414,48 @@ config TIVA_I2C9
 
 config TIVA_UART0
 	bool "UART0"
-	select ARCH_HAVE_UART0
+	select UART0_SERIALDRIVER
 	default n
 
 config TIVA_UART1
 	bool "UART1"
-	select ARCH_HAVE_UART1
+	select UART1_SERIALDRIVER
 	default n
 
 config TIVA_UART2
 	bool "UART2"
-	select ARCH_HAVE_UART2
+	select UART2_SERIALDRIVER
 	default n
 
 config TIVA_UART3
 	bool "UART3"
 	default n
 	depends on TIVA_HAVE_UART3
-	select ARCH_HAVE_UART3
+	select UART3_SERIALDRIVER
 
 config TIVA_UART4
 	bool "UART4"
 	default n
 	depends on TIVA_HAVE_UART4
-	select ARCH_HAVE_UART4
+	select UART4_SERIALDRIVER
 
 config TIVA_UART5
 	bool "UART5"
 	default n
 	depends on TIVA_HAVE_UART5
-	select ARCH_HAVE_UART5
+	select UART5_SERIALDRIVER
 
 config TIVA_UART6
 	bool "UART6"
 	default n
 	depends on TIVA_HAVE_UART6
-	select ARCH_HAVE_UART6
+	select UART6_SERIALDRIVER
 
 config TIVA_UART7
 	bool "UART7"
 	default n
 	depends on TIVA_HAVE_UART7
-	select ARCH_HAVE_UART7
+	select UART7_SERIALDRIVER
 
 config TIVA_SSI0
 	bool "SSI0"

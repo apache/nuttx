@@ -331,9 +331,9 @@ struct c5471_driver_s
   uint32_t c_rxdropped;      /* Packets dropped because of size */
 #endif
 
-  /* This holds the information visible to uIP/NuttX */
+  /* This holds the information visible to the NuttX network */
 
-  struct net_driver_s c_dev;  /* Interface understood by uIP */
+  struct net_driver_s c_dev;  /* Interface understood by the network */
 };
 
 /****************************************************************************
@@ -960,7 +960,7 @@ static int c5471_transmit(struct c5471_driver_s *c5471)
  * Function: c5471_txpoll
  *
  * Description:
- *   The transmitter is available, check if uIP has any outgoing packets ready
+ *   The transmitter is available, check if the network has any outgoing packets ready
  *   to send.  This is a callback from devif_poll().  devif_poll() may be called:
  *
  *   1. When the preceding TX packet send is complete,
@@ -1162,7 +1162,7 @@ static void c5471_receive(struct c5471_driver_s *c5471)
   int j = 0;
 
   /* Walk the newly received packet contained within the EIM and transfer
-   * its contents to the uIP buffer. This frees up the memory contained within
+   * its contents to the network buffer. This frees up the memory contained within
    * the EIM for additional packets that might be received later from the network.
    */
 
@@ -1185,7 +1185,7 @@ static void c5471_receive(struct c5471_driver_s *c5471)
       framelen   = (getreg32(c5471->c_txcpudesc) & EIM_TXDESC_BYTEMASK);
       packetlen += framelen;
 
-      /* Check if the received packet will fit within the uIP packet buffer */
+      /* Check if the received packet will fit within the network packet buffer */
 
       if (packetlen < (CONFIG_NET_ETH_MTU + 4))
         {
@@ -1234,7 +1234,7 @@ static void c5471_receive(struct c5471_driver_s *c5471)
       c5471_inctxcpu(c5471);
     }
 
-  /* Adjust the packet length to remove the CRC bytes that uIP doesn't care about. */
+  /* Adjust the packet length to remove the CRC bytes that the network doesn't care about. */
 
   packetlen -= 4;
 
@@ -1244,8 +1244,8 @@ static void c5471_receive(struct c5471_driver_s *c5471)
   c5471->c_rxpackets++;
 #endif
 
-  /* If we successfully transferred the data into the uIP buffer, then pass it on
-   * to uIP for processing.
+  /* If we successfully transferred the data into the network buffer, then pass it on
+   * to the network for processing.
    */
 
   if (packetlen > 0 && packetlen < CONFIG_NET_ETH_MTU)
@@ -1496,7 +1496,7 @@ static void c5471_txdone(struct c5471_driver_s *c5471)
 
   wd_cancel(c5471->c_txtimeout);
 
-  /* Then poll uIP for new XMIT data */
+  /* Then poll the network for new XMIT data */
 
   (void)devif_poll(&c5471->c_dev, c5471_txpoll);
 }
@@ -1615,7 +1615,7 @@ static void c5471_txtimeout(int argc, uint32_t arg, ...)
   c5471_ifdown(&c5471->c_dev);
   c5471_ifup(&c5471->c_dev);
 
-  /* Then poll uIP for new XMIT data */
+  /* Then poll the network for new XMIT data */
 
   (void)devif_poll(&c5471->c_dev, c5471_txpoll);
 }
@@ -1647,7 +1647,7 @@ static void c5471_polltimer(int argc, uint32_t arg, ...)
 
   if ((EIM_TXDESC_OWN_HOST & getreg32(c5471->c_rxcpudesc)) == 0)
     {
-      /* If so, update TCP timing states and poll uIP for new XMIT data */
+      /* If so, update TCP timing states and poll the network for new XMIT data */
 
       (void)devif_timer(&c5471->c_dev, c5471_txpoll);
     }
@@ -1811,7 +1811,7 @@ static int c5471_txavail(struct net_driver_s *dev)
 
       if ((EIM_TXDESC_OWN_HOST & getreg32(c5471->c_rxcpudesc)) == 0)
         {
-          /* If so, then poll uIP for new XMIT data */
+          /* If so, then poll the network for new XMIT data */
 
           (void)devif_poll(&c5471->c_dev, c5471_txpoll);
         }

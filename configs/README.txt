@@ -392,6 +392,11 @@ configs/ntosd-dm320
   STATUS: This port is code complete, verified, and included in the
   NuttX 0.2.1 release.
 
+configs/nucleo-144
+  STMicro Nucleo-144 development board featuring the STM32F746ZGT6U MCU. The
+  STM32F746ZGT6U is a 216MHz Cortex-M7 operation with 1024Kb Flash memory
+  and 300Kb SRAM.
+
 configs/nucleo-f4x1re
   STMicro ST Nucleo F401RE and F411RE boards.  See
   http://mbed.org/platforms/ST-Nucleo-F401RE and
@@ -632,8 +637,15 @@ configs/stm3240g-eval
   microcontroller (ARM Cortex-M4 with FPU).  This port uses a GNU Cortex-M4
   toolchain (such as CodeSourcery).
 
+configs/stm32f103-minimum
+  Generic STM32F103C8T6 Minimum ARM Development Board.
+
 configs/stm32f4discovery
   STMicro STM32F4-Discovery board based on the STMIcro STM32F407VGT6 MCU.
+
+configs/stm32f411e-disco
+  This is a minimal configuration that supports low-level test of the
+  STMicro STM32F411E-Discovery Board.
 
 configs/stm32f429i-disco
   STMicro STM32F429I-Discovery board based on the STMicro STM32F429ZIT6 MCU.

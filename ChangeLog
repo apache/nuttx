@@ -10401,7 +10401,7 @@
 	* arch/arm/src/efm32/efm32_rtc_burtc.c: Updated EFM32 RTC driver from
 	  Pierre-noel Bouteville (2015-05-19).
 	* arch/arm/src/tiva/chip/tm4c_memorymap.h, tm4c_pinmap.h, and vectors.h.
-	  configs/tm4c1294-launchpad/include/board.h and src/tm4c_autoleds.c: 
+	  configs/tm4c1294-launchpad/include/board.h and src/tm4c_autoleds.c:
 	  Fixes for Tiva TM4C1294NCPDT.  From Frank Sautter.  (2015-05-20).
 	* configs/tm4c1294-launchpad/include/board.h:  Added TM4C1294NCPDT
 	  EN0_LED2 (10/100-Base-Tx); removed all booster pack pin definitions.
@@ -11376,7 +11376,7 @@
 	  I2C_READ and I2C_WRITE which are not thread safe (2016-01-26).
 	* SPI: Rename the STM32 up_spiinitialize() to stm32_spibus_initialize()
 	  (2016-01-26).
-	* SPI: Rename the SAM up_spiinitialize() to stm32_spibus_initialize()
+	* SPI: Rename the SAM up_spiinitialize() to sam_spibus_initialize()
 	  (2016-01-26).
 	* SPI: Rename the Tiva up_spiinitialize() to tiva_spibus_intialize()
 	  (2016-01-26).
@@ -11625,13 +11625,13 @@
 	* configs/nucleus2g:  Removed the Nucleus2G configuration.  There has
 	  not been any activity with the commercial board in a few years and it
 	  no longer appears to be available from the 2g-eng.com website.
-	  Since the board is commercial and no longer publically available, it
+	  Since the board is commercial and no longer publicly available, it
 	  no longer qualifies for inclusion in the open source repositories.
 	  The code as of this data is still available in the Obsoleted
 	  repository at configs/nucleus2g (2016-04-12).
 	* arch/arm/src/stm32l4: Fix the STM32L4 SPI driver.  That SPI driver is
 	  quite different. They now handle frames of arbitrary size between 4
-	  and 16 bits. It was broken before a new bit has to be set (rx fifo
+	  and 16 bits. It was broken before a new bit has to be set (RX fifo
 	  threshold) to handle <= 8-bit transactions. If not set, the default is
 	  16-bit packed >=8-bit frames and the RXNE bit is never set (it is set
 	  when 16-bits are received). weird things as always.
@@ -11652,6 +11652,220 @@
 	* drivers/wireless/nrf24l01.c: Fix backward calculation of relative
 	  frequency.  Noted by Henry Zhang (2015-04-15).
 	* drivers/sensors/h1750fvi.c:  Add a character driver for Rohm Ambient
-	  Light Sensor BH1750FVI.  From Alan Carvalho de Assi (2016-04-15).
+	  Light Sensor BH1750FVI.  From Alan Carvalho de Assis (2016-04-15).
 	* configs/stm32f4discovery: Integrate BH1750FVI driver in the
-	  STM32F4Discovery board.  From Alan Carvalho de Assi (2016-04-15).
+	  STM32F4Discovery board.  From Alan Carvalho de Assis (2016-04-15).
+	* drivers/mtd: Add MTD support for Micron N25Qxxx family of QSPI flash.
+	  From Dave dev@ziggurat29.com (2016-04-17).
+	* arch/arm/src/stm32l: Add a QSPI driver. From Dave dev@ziggurat29.com
+	  (2016-04-18).
+	* configs/stm32l476vb-disco:  Add support for QSPI based N25Qxxx flash.
+	  From Dave dev@ziggurat29.com (2016-04-18).
+	* graphics/vnc:  Add support for a VNC server.  This logic is code
+	  complete, but untested and so not ready for prime time (2016-04-18).
+	* configs/samv71-xult/vnc:  Add a configuration that will be used to
+	  verify VNC (also untested) (2016-04-18).
+	* drivers/ioexpander: Fix an error in the PCA9555 driver: Under certain
+	  error conditions, interrupts were not being re-enabled.  Sebastien
+	  Lorquet (2016-04-20).
+	* arch/arm/src/stm32 and configs/stm32f429i-disco:  Correct some bad
+	  commits that broke the LTDC display example.  From Marco Krahl
+	  (2016-04-22).
+	* configs/samv71-xult/vncwwm:  Add a more complex NxWM configuration
+	  to support further VNC testing (particularly of VNC keyboard and
+	  mouse inputs).  Initial configuration is not functional (2016-04-23).
+	* arch/arm/src/stm32l4: Add support for QSPI DMA. From Dave
+	  dev@ziggurat29.com (2016-04-24).
+	* configs/stm32l476vg-disco: Update stm32l4 disco board to reflect QSPI
+	  DMA support. From Dave dev@ziggurat29.com (2016-04-24).
+	* arch/arm/src/stm32l4: Add configuration options to allow SRAM2 to be
+	  used for heap, or not at all, and to zero-initialize it on OS start,
+	  or not at all. From Dave dev@ziggurat29.com (2016-04-24).
+	* drivers/mtd/smart.c:  Return code of smart_scan not checked, can
+	  cause success result in failure case, leading to 'dev' pointer being
+	  invalid. From Dave dev@ziggurat29.com (2016-04-27).
+	* arch/arm/src/stm32l4: Add support for QSPI memory mapped mode. From
+	  Dave dev@ziggurat29.com (2016-04-27).
+	* configs/stm32l476vg-disco: Add board ioctls for allowing user
+	  application to cause QSPI memory mapped mode to be engaged and
+	  disengaged.  Also partitioned QSPI flash for file system and other
+	 (eventually xip).  From Dave dev@ziggurat29.com (2016-04-27).
+	* fs/mount: Fix a backward debug assertion.  Noted by David Sidrane
+	  (2016-04-29).
+	* arch/arm/src/stm32l4: Add support for HSE and MSI clocks, and auto
+	  trim of MSI to LSE (needed for USB).  From Dave dev@ziggurat29.com
+	  (2016-04-29).
+	* arch/arm/src/stm32l4: Add support for unique id function to arch;
+	  modified board to support unique id boardctl.  From Dave
+	  dev@ziggurat29.com (2016-05-03).
+	* Makefile.unix and tools/mkexport.sh: Pass top-level make to the
+	  script to allow -j greater than 1.  From David Sidrane (2016-05-04).
+	* arch/arm/src/stm32, stm32f7, stm32l4: Fix typo in variable name in
+	  serial BREAK logic.  Review other serial implementations for similar
+	  naming problems. (2016-05-05).
+	* arch/arm/src/samv7:  Fix typo in MATRIX register definitions.  From
+	  Stefan Kolb (2016-05-06).
+	* arch/arm/src/stm32l4: Problem with resetting backup domain clears
+	  clocking options set up before in *rcc.c use INITS flag to avoid magic
+	  reg value to detect power up reset state of RTC correct a problem
+	  clearing interrupt flags (they weren't) which prevented an alarm from
+	  ever being used more than once per reset cycle.  From Dave
+	  dev@ziggurat29.com (2016-05-07).
+	* arch/arm/src/tiva: Fix a bug of GPIO falling-edge interrupt for tiva.
+	  From Young (2016-05-07).
+	* drivrs/mtd:  Add a driver for SST26F spi/qspi flash devices (SPI mode
+	  only).  From Sebastien Lorquet (2016-05-10).
+	* Several Makefiles: Add .PHONY definitions to prevent 'clean up to date'
+	  message weirdness when 'make clean' is done with no .config or Make.defs
+	  file (2016-05-10).
+	* include/nuttx/can.h and drivers/can.c:  Improve CAN error reporting.
+	  From Frank Benkert (2016-05-11).
+	* fs/Kconfig:  Allow CONFIG_FS_WRITABLE to be manually selectable
+	  (2016-05-11).
+	* Various file:  Search for places where a stray semicolon following an
+	  if condition cause the if body to be executed unconditionally.  Fixes
+	  in all SAM DMA logic, unionfs, OS signalling logic,
+	* configs/nucleo-144: Basic port for the Nucleo-144 board with the
+	  STM32F746ZG MCU.  From Kconstantin Berezenko (2015-05-12).
+	* arch/arm-src/armv7-a:  Complete re-design of logic to initialize each
+	  CPUn, n > 0, when CONFIG_SMP=y (2016-05-13).
+	* arch/arm/src/imx6 and configs/sabre-6quad:  The basic i.MX6 port is
+	  complete.  This is a very minimal port at present and probably still
+	  has some as-of-yet-undiscovered issues (2016-05-17).
+	* arch/*/Makefile: Add definitions that can be overrided to use GCC
+	  instead of LD in the final link.  From Paul Alexander Patience
+	  (2016-05-18) .
+	* arch/arm/src/stm32, stm32l4, and stm32f7 serial:  Add support for
+	  compliant BSD-style breaks. From David Sidrane (2016-05-18).
+	* enter/leave_critical_section() may attempt to access task lists before
+	  they have been initialized in the SMP configuration (2016-05-18).
+	* configs/stm32f103-minimum: Add support for this minimual STM32F103CBT6
+	  "blue" board.  From Alan Carvalho de Assis (2016-05-18).
+	* arch/arm/src/sam* Watchdogs:  Rename up_wdginitialize() to something
+	  more appropriate for an internal, MCU-specific function (2016-05-18).
+	* configs/*/src/*_watchdog.c:  Remove all implementations of
+	  up_wdginitialize() which was only used by apps/examples/watchdog.
+	  That internal OS function is no longer called from application code.
+	  If you want to use the watchdog example, you will need to configure
+	  the watchdog driver by calling the appropriate, MCU-specific driver
+	  configuration function from your board initialization logic
+	  (2016-05-18).
+	* arch/srm/src/stm32l4: Add CAN support for STM32L4.  From Sebastien
+	  Lorquet (2016-05-19).
+	* arch/arm/src/samv7: Adds a JTAG config and ERASE config to  Kconfig to
+	  set the CCFG_SYSIO SYSIO Pins.  From Davide Sidrane (2016-05-19).
+	* arch/sim/src:  Enhance networking support for the simulation under Linux.
+	  Includes updated support for Linux TUN/TAP, and the addition of support
+	  for Linux bridge devices.  From Steve (2016-05-20).
+	* configs/stm32f411e-disco:  Add basic configuration for stm32f411e-disco
+	  board with STM32F411VE chip.  From Konstantin Berezenko (2016-05-20).
+	* i.MX6 Sabre-6Quad: Basic SMP NSH configuration is now working.  But
+	  this is probably only because the SMP NSH case does not stress the
+	  logic.  There are know outstanding SMP issues as noted in the
+	  Sabre-6Quad README.txt file (2016-05-22).
+	* configs/sabre-6quad: Add an SMP configuration; Enable procfs in all
+	  configurations (2016-05-22).
+	* include/nuttx/crypto/aes.h:  Modifications to the crypto API needed
+	  for LPC43xx.  From Alexander Vasiljev (2016-05-23).
+	* arch/arm/src/lpc32xx:  Add AES support.  From Alexander Vasiljev
+	  (2016-05-24).
+	* configs/*/src/tiva_timer.c:  Tiva boards:  Fix a naming collision,
+	  rename board-specific function from tiva_timer_initialize() to
+	  tiva_timer_configure() to remove conflict (2016-05-23).
+	* arch/arm/src/sam*:  Ensure that the TWIHS (i2c) hw get's its clock
+	  set when the sequence of sam_i2cbus_initialize(),
+	  sam_i2cbus_uninitialize(), then sam_i2cbus_initialize() or twi_reset()
+	  is called.  I found this a while back in the stm32 family, so there
+	  may be more arch-es with this sort of bug. I suppose any driver that
+	  has the notion of "do not set the freq if it is already set" could be
+	  suspect.  From David Sidrane (2016-05-23).
+	* arch/arm/src/samv7: Add the up_systemreset interface to the samv7
+	  arch.  The approach is slightly different in that: 1) It enables
+	  ARCH_HAVE_RESET and allows the user to set if, and for how long, to
+	  drive External nRST signal. It also does not contain a default
+	  board_reset, as that really should be done in the config's src if
+	  CONFIG_BOARDCTL_RESET is defined.  From David Sidrane (2016-05-23).
+	* arch/arm/include/lpc43xx and src/lpc43xx: Adds definitions for the
+	  LPC4337jet100 chip.  From Alexander Vasiljev (2016-05-24).
+	* Many files:  board_app_initialize() now accepts an argument that may
+	  be used to support initialization in different configurations
+	  (2016-05-24).
+	* arch/arm/src/samv7: Remove disabling of whole USB on suspend of USBHS.
+	  This fix removes the disabling of the whole USB peripheral on suspend
+	  interrupt. Its enough to freeze the clock instead. When disabling the
+	  whole peripheral, the next wakeup-interrupt comes up with an disabled
+	  clocking. The unfreeze clock has no effect, because the master clock
+	  is disabled. This makes all registers, including the IDR unwriteable
+	  and the IRQ falls in an endless loop blocking the whole system.
+	  Furthermore the disabling of the peripheral clock prevents hotplugging
+	  or reconnecting the USB.  From  Frank Benkert  (2015-05-25).
+	* drivers/lcd: Add support for PCF8574 LCD Backpack driver. This driver
+	  supports an interface board that is based on the PCF8574 io expander
+	  and supports the HD44780-based (or compatible) LCD modules.  There
+	  are a myriad of different vendors of such, but they are principally
+	  the same, save wiring and minor features like jumpers for I2C
+	  addresses. This driver supports known and unknown variants.  From
+	  Dave (ziggurat29, 2013-6-26).
+	* arch/arm/stm32:  Add support for a custom 1-wire driver.  The serial
+	  driver already supports a 1-wire interface, but this driver uses the
+	  same serial logic to implement a lower half driver much like the I2C
+	  lower half driver.  From Aleksandr Vyhovanec (2015-05-25).
+	* fs/: Add logic to detach a file structure from a file descriptor.
+	  This is for use only within the OS.  It permits an open file or driver
+	  to be used across multiple threads (2016-05-26).
+	* arch/arm/src/stm32l4: Get I2C working for STM32L4.  From Dave
+	  (ziggurat29) (2016-05-25).
+	* fs/ and include/nuttx/fs: Add logic to detach a file structure from a
+	  file descriptor.  This is for use only within the OS.  It permits an
+	  open file or driver to be used across multiple threads.  (2016-05-26).
+	* drivers/analog/adc.c, include/nuttx/analog/adc.h, and all ADC lower
+	  half drivers:  No longer uses global adc_receive() call.  Added a new
+	  bind() method to the ADC interface.  Now the ADC upper half driver
+	  will register its receipt-of-data callback.  This change allows the
+	  ADC lower half driver to be used with a differ ADC upper half
+	  (2016-05-26).
+	* drivers/analog/ads1255.c: Must not do SPI access from interrupt
+	  handler.  Use the worker thread instead.  Must also lock the SPI bus
+	  before using it. (2015-05-26).
+	* drivers/:  Several SPI-based drivers modified.  All drivers that use
+	  SPI must call SPI_LOCK and SPI_UNLOCK.  This is not optional
+	  (2016-05-26).
+	* drivers/sensosrs:  Fix a bug in crc computation for ms583730.
+	  Implement POSIX read (2016-05-27).
+	* arch/arm/src/samv7: This is a fix to a problem in the handling of the
+	  oneshot timer. Due to a wrong assumption concerning the behavior
+	  directly after the start of the timer/counter the function
+	  sam_oneshot_cancel(…) calculates the wrong remaining time. The code
+	  assumes that the counter register is zero directly after the start of
+	  the timer, but this is not true. To start the time/counter a software
+	  trigger is invoked, this trigger starts the timer/count and sets the
+	  counter register to zero, but the reset of the counter register is not
+	  performed instantly. According to the datasheet: "The counter can be
+	  reset by a trigger. In this case, the counter value passes to zero on
+	  the next valid edge of the selected clock.” Thus the counter is set to
+	  zero between 0 and USEC_PER_TICK microseconds after the clock was
+	  started.
+	  In my fix I use the freerun count value to determine if at least one
+	  tick passed since the start of the timer and thus if the value of the
+	  oneshot counter is correct. I also tried to use the function
+	  up_timer_gettime(…) to achieve this but, at least if compiled with no
+	  optimization the problem vanishes without using the value of the
+	  function, the function call takes too long.
+	  Another problem treated in the fix is that if the oneshot timer/counter
+	  is canceled, we only know the remaining time with a precision of
+	  USEC_PER_TICK microseconds. This means the calculated remaining time
+	  is between 0 and USEC_PER_TICK microseconds  too long. To fix this I
+	  subtract one tick if the calculated remaining time is greater than one
+	  tick and otherwise set the remaining time to zero. By doing so the
+	  measured times are much more precise as without it.  From Stefan Kolb
+	  (2016-05-27).
+	* arch/arm/src/sama5:  Stefan Kolb's change to the SAMV7 Oneshot Timer
+	  should also be applied to the SAMA5 oneshot time since the drivers are
+	  identical (2016-05-27).
+	* arch/arm/src/stm32l4: Add support for SPI 4 and 5 on stm32f411 chips.
+	  From Konstantin Berezenko (2016-05-27).
+	* arch/arm/src/sam34:  Stefan Kolb's change to the SAMV7 Oneshot Timer
+	  should also be applied to the SAM3/4 oneshot time since the drivers
+	  are identical (2016-05-29).
+	* arch/arm/src/stm32: Allow to not use all channel in a lower part of
+	  PWM.  From Pierre-noel Bouteville (2016-05-30).

@@ -901,6 +901,7 @@ static void twi_hw_initialize(struct twi_dev_s *priv, unsigned int pid,
 
   /* Set the initial TWI data transfer frequency */
 
+  priv->i2cfreq = 0;
   twi_setfrequency(priv, frequency);
 }
 

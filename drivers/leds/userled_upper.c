@@ -63,10 +63,10 @@
 
 #ifndef CONFIG_DEBUG
 #  undef CONFIG_DEBUG_VERBOSE
-#  undef CONFIG_DEBUG_DISCRETE
+#  undef CONFIG_DEBUG_LEDS
 #endif
 
-#ifdef CONFIG_DEBUG_DISCRETE
+#ifdef CONFIG_DEBUG_LEDS
 #  define ddbg lldbg
 #  ifdef CONFIG_DEBUG_VERBOSE
 #    define dvdbg lldbg
@@ -140,12 +140,15 @@ static const struct file_operations userled_fops =
 {
   userled_open,  /* open */
   userled_close, /* close */
-  0,             /* read */
+  NULL,          /* read */
   userled_write, /* write */
-  0,             /* seek */
+  NULL,          /* seek */
   userled_ioctl  /* ioctl */
 #ifndef CONFIG_DISABLE_POLL
-  , 0            /* poll */
+  , NULL         /* poll */
+#endif
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  , NULL         /* unlink */
 #endif
 };
 
@@ -441,7 +444,7 @@ static int userled_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
             /* Check that a valid LED is being set */
 
-            if (led < 8 * sizeof(userled_set_t) &&
+            if ((size_t)led < 8 * sizeof(userled_set_t) &&
                 (priv->lu_supported & (1 << led)) != 0)
               {
                 /* Update the LED state */

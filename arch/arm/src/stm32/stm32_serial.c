@@ -255,8 +255,24 @@
 #  define PM_IDLE_DOMAIN             0 /* Revisit */
 #endif
 
+/* Keep track if a Break was set
+ *
+ * Note:
+ *
+ * 1) This value is set in the priv->ie but never written to the control
+ *    register. It must not collide with USART_CR1_USED_INTS or USART_CR3_EIE
+ * 2) USART_CR3_EIE is also carried in the up_dev_s ie member.
+ *
+ * See up_restoreusartint where the masking is done.
+ */
+
+#ifdef CONFIG_STM32_SERIALBRK_BSDCOMPAT
+#  define USART_CR1_IE_BREAK_INPROGRESS_SHFTS 15
+#  define USART_CR1_IE_BREAK_INPROGRESS (1 << USART_CR1_IE_BREAK_INPROGRESS_SHFTS)
+#endif
+
 #ifdef USE_SERIALDRIVER
-#ifdef HAVE_UART
+#ifdef HAVE_SERIALDRIVER
 
 /****************************************************************************
  * Private Types
@@ -370,28 +386,28 @@ static int  up_pm_prepare(struct pm_callback_s *cb, int domain,
                           enum pm_state_e pmstate);
 #endif
 
-#ifdef CONFIG_STM32_USART1
+#ifdef CONFIG_STM32_USART1_SERIALDRIVER
 static int up_interrupt_usart1(int irq, void *context);
 #endif
-#ifdef CONFIG_STM32_USART2
+#ifdef CONFIG_STM32_USART2_SERIALDRIVER
 static int up_interrupt_usart2(int irq, void *context);
 #endif
-#ifdef CONFIG_STM32_USART3
+#ifdef CONFIG_STM32_USART3_SERIALDRIVER
 static int up_interrupt_usart3(int irq, void *context);
 #endif
-#ifdef CONFIG_STM32_UART4
+#ifdef CONFIG_STM32_UART4_SERIALDRIVER
 static int up_interrupt_uart4(int irq, void *context);
 #endif
-#ifdef CONFIG_STM32_UART5
+#ifdef CONFIG_STM32_UART5_SERIALDRIVER
 static int up_interrupt_uart5(int irq, void *context);
 #endif
-#ifdef CONFIG_STM32_USART6
+#ifdef CONFIG_STM32_USART6_SERIALDRIVER
 static int up_interrupt_usart6(int irq, void *context);
 #endif
-#ifdef CONFIG_STM32_UART7
+#ifdef CONFIG_STM32_UART7_SERIALDRIVER
 static int up_interrupt_uart7(int irq, void *context);
 #endif
-#ifdef CONFIG_STM32_UART8
+#ifdef CONFIG_STM32_UART8_SERIALDRIVER
 static int up_interrupt_uart8(int irq, void *context);
 #endif
 
@@ -443,7 +459,7 @@ static const struct uart_ops_s g_uart_dma_ops =
 
 /* I/O buffers */
 
-#ifdef CONFIG_STM32_USART1
+#ifdef CONFIG_STM32_USART1_SERIALDRIVER
 static char g_usart1rxbuffer[CONFIG_USART1_RXBUFSIZE];
 static char g_usart1txbuffer[CONFIG_USART1_TXBUFSIZE];
 # ifdef CONFIG_USART1_RXDMA
@@ -451,7 +467,7 @@ static char g_usart1rxfifo[RXDMA_BUFFER_SIZE];
 # endif
 #endif
 
-#ifdef CONFIG_STM32_USART2
+#ifdef CONFIG_STM32_USART2_SERIALDRIVER
 static char g_usart2rxbuffer[CONFIG_USART2_RXBUFSIZE];
 static char g_usart2txbuffer[CONFIG_USART2_TXBUFSIZE];
 # ifdef CONFIG_USART2_RXDMA
@@ -459,7 +475,7 @@ static char g_usart2rxfifo[RXDMA_BUFFER_SIZE];
 # endif
 #endif
 
-#ifdef CONFIG_STM32_USART3
+#ifdef CONFIG_STM32_USART3_SERIALDRIVER
 static char g_usart3rxbuffer[CONFIG_USART3_RXBUFSIZE];
 static char g_usart3txbuffer[CONFIG_USART3_TXBUFSIZE];
 # ifdef CONFIG_USART3_RXDMA
@@ -467,7 +483,7 @@ static char g_usart3rxfifo[RXDMA_BUFFER_SIZE];
 # endif
 #endif
 
-#ifdef CONFIG_STM32_UART4
+#ifdef CONFIG_STM32_UART4_SERIALDRIVER
 static char g_uart4rxbuffer[CONFIG_UART4_RXBUFSIZE];
 static char g_uart4txbuffer[CONFIG_UART4_TXBUFSIZE];
 # ifdef CONFIG_UART4_RXDMA
@@ -475,7 +491,7 @@ static char g_uart4rxfifo[RXDMA_BUFFER_SIZE];
 # endif
 #endif
 
-#ifdef CONFIG_STM32_UART5
+#ifdef CONFIG_STM32_UART5_SERIALDRIVER
 static char g_uart5rxbuffer[CONFIG_UART5_RXBUFSIZE];
 static char g_uart5txbuffer[CONFIG_UART5_TXBUFSIZE];
 # ifdef CONFIG_UART5_RXDMA
@@ -483,7 +499,7 @@ static char g_uart5rxfifo[RXDMA_BUFFER_SIZE];
 # endif
 #endif
 
-#ifdef CONFIG_STM32_USART6
+#ifdef CONFIG_STM32_USART6_SERIALDRIVER
 static char g_usart6rxbuffer[CONFIG_USART6_RXBUFSIZE];
 static char g_usart6txbuffer[CONFIG_USART6_TXBUFSIZE];
 # ifdef CONFIG_USART6_RXDMA
@@ -491,7 +507,7 @@ static char g_usart6rxfifo[RXDMA_BUFFER_SIZE];
 # endif
 #endif
 
-#ifdef CONFIG_STM32_UART7
+#ifdef CONFIG_STM32_UART7_SERIALDRIVER
 static char g_uart7rxbuffer[CONFIG_UART7_RXBUFSIZE];
 static char g_uart7txbuffer[CONFIG_UART7_TXBUFSIZE];
 # ifdef CONFIG_UART7_RXDMA
@@ -499,7 +515,7 @@ static char g_uart7rxfifo[RXDMA_BUFFER_SIZE];
 # endif
 #endif
 
-#ifdef CONFIG_STM32_UART8
+#ifdef CONFIG_STM32_UART8_SERIALDRIVER
 static char g_uart8rxbuffer[CONFIG_UART8_RXBUFSIZE];
 static char g_uart8txbuffer[CONFIG_UART8_TXBUFSIZE];
 # ifdef CONFIG_UART8_RXDMA
@@ -509,7 +525,7 @@ static char g_uart8rxfifo[RXDMA_BUFFER_SIZE];
 
 /* This describes the state of the STM32 USART1 ports. */
 
-#ifdef CONFIG_STM32_USART1
+#ifdef CONFIG_STM32_USART1_SERIALDRIVER
 static struct up_dev_s g_usart1priv =
 {
   .dev =
@@ -571,7 +587,7 @@ static struct up_dev_s g_usart1priv =
 
 /* This describes the state of the STM32 USART2 port. */
 
-#ifdef CONFIG_STM32_USART2
+#ifdef CONFIG_STM32_USART2_SERIALDRIVER
 static struct up_dev_s g_usart2priv =
 {
   .dev =
@@ -633,7 +649,7 @@ static struct up_dev_s g_usart2priv =
 
 /* This describes the state of the STM32 USART3 port. */
 
-#ifdef CONFIG_STM32_USART3
+#ifdef CONFIG_STM32_USART3_SERIALDRIVER
 static struct up_dev_s g_usart3priv =
 {
   .dev =
@@ -695,7 +711,7 @@ static struct up_dev_s g_usart3priv =
 
 /* This describes the state of the STM32 UART4 port. */
 
-#ifdef CONFIG_STM32_UART4
+#ifdef CONFIG_STM32_UART4_SERIALDRIVER
 static struct up_dev_s g_uart4priv =
 {
   .dev =
@@ -761,7 +777,7 @@ static struct up_dev_s g_uart4priv =
 
 /* This describes the state of the STM32 UART5 port. */
 
-#ifdef CONFIG_STM32_UART5
+#ifdef CONFIG_STM32_UART5_SERIALDRIVER
 static struct up_dev_s g_uart5priv =
 {
   .dev =
@@ -827,7 +843,7 @@ static struct up_dev_s g_uart5priv =
 
 /* This describes the state of the STM32 USART6 port. */
 
-#ifdef CONFIG_STM32_USART6
+#ifdef CONFIG_STM32_USART6_SERIALDRIVER
 static struct up_dev_s g_usart6priv =
 {
   .dev =
@@ -889,7 +905,7 @@ static struct up_dev_s g_usart6priv =
 
 /* This describes the state of the STM32 UART7 port. */
 
-#ifdef CONFIG_STM32_UART7
+#ifdef CONFIG_STM32_UART7_SERIALDRIVER
 static struct up_dev_s g_uart7priv =
 {
   .dev =
@@ -924,11 +940,11 @@ static struct up_dev_s g_uart7priv =
   .usartbase      = STM32_UART7_BASE,
   .tx_gpio        = GPIO_UART7_TX,
   .rx_gpio        = GPIO_UART7_RX,
-#if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_USART7_OFLOWCONTROL)
+#if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_UART7_OFLOWCONTROL)
   .oflow          = true,
   .cts_gpio       = GPIO_UART7_CTS,
 #endif
-#if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_USART7_IFLOWCONTROL)
+#if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_UART7_IFLOWCONTROL)
   .iflow          = true,
   .rts_gpio       = GPIO_UART7_RTS,
 #endif
@@ -951,7 +967,7 @@ static struct up_dev_s g_uart7priv =
 
 /* This describes the state of the STM32 UART8 port. */
 
-#ifdef CONFIG_STM32_UART8
+#ifdef CONFIG_STM32_UART8_SERIALDRIVER
 static struct up_dev_s g_uart8priv =
 {
   .dev =
@@ -986,11 +1002,11 @@ static struct up_dev_s g_uart8priv =
   .usartbase      = STM32_UART8_BASE,
   .tx_gpio        = GPIO_UART8_TX,
   .rx_gpio        = GPIO_UART8_RX,
-#if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_USART8_OFLOWCONTROL)
+#if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_UART8_OFLOWCONTROL)
   .oflow          = true,
   .cts_gpio       = GPIO_UART8_CTS,
 #endif
-#if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_USART8_IFLOWCONTROL)
+#if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_UART8_IFLOWCONTROL)
   .iflow          = true,
   .rts_gpio       = GPIO_UART8_RTS,
 #endif
@@ -1015,28 +1031,28 @@ static struct up_dev_s g_uart8priv =
 
 static struct up_dev_s * const uart_devs[STM32_NUSART] =
 {
-#ifdef CONFIG_STM32_USART1
+#ifdef CONFIG_STM32_USART1_SERIALDRIVER
   [0] = &g_usart1priv,
 #endif
-#ifdef CONFIG_STM32_USART2
+#ifdef CONFIG_STM32_USART2_SERIALDRIVER
   [1] = &g_usart2priv,
 #endif
-#ifdef CONFIG_STM32_USART3
+#ifdef CONFIG_STM32_USART3_SERIALDRIVER
   [2] = &g_usart3priv,
 #endif
-#ifdef CONFIG_STM32_UART4
+#ifdef CONFIG_STM32_UART4_SERIALDRIVER
   [3] = &g_uart4priv,
 #endif
-#ifdef CONFIG_STM32_UART5
+#ifdef CONFIG_STM32_UART5_SERIALDRIVER
   [4] = &g_uart5priv,
 #endif
-#ifdef CONFIG_STM32_USART6
+#ifdef CONFIG_STM32_USART6_SERIALDRIVER
   [5] = &g_usart6priv,
 #endif
-#ifdef CONFIG_STM32_UART7
+#ifdef CONFIG_STM32_UART7_SERIALDRIVER
   [6] = &g_uart7priv,
 #endif
-#ifdef CONFIG_STM32_UART8
+#ifdef CONFIG_STM32_UART8_SERIALDRIVER
   [7] = &g_uart8priv,
 #endif
 };
@@ -1360,49 +1376,49 @@ static void up_set_apb_clock(struct uart_dev_s *dev, bool on)
     {
     default:
       return;
-#ifdef CONFIG_STM32_USART1
+#ifdef CONFIG_STM32_USART1_SERIALDRIVER
     case STM32_USART1_BASE:
       rcc_en = RCC_APB2ENR_USART1EN;
       regaddr = STM32_RCC_APB2ENR;
       break;
 #endif
-#ifdef CONFIG_STM32_USART2
+#ifdef CONFIG_STM32_USART2_SERIALDRIVER
     case STM32_USART2_BASE:
       rcc_en = RCC_APB1ENR_USART2EN;
       regaddr = STM32_RCC_APB1ENR;
       break;
 #endif
-#ifdef CONFIG_STM32_USART3
+#ifdef CONFIG_STM32_USART3_SERIALDRIVER
     case STM32_USART3_BASE:
       rcc_en = RCC_APB1ENR_USART3EN;
       regaddr = STM32_RCC_APB1ENR;
       break;
 #endif
-#ifdef CONFIG_STM32_UART4
+#ifdef CONFIG_STM32_UART4_SERIALDRIVER
     case STM32_UART4_BASE:
       rcc_en = RCC_APB1ENR_UART4EN;
       regaddr = STM32_RCC_APB1ENR;
       break;
 #endif
-#ifdef CONFIG_STM32_UART5
+#ifdef CONFIG_STM32_UART5_SERIALDRIVER
     case STM32_UART5_BASE:
       rcc_en = RCC_APB1ENR_UART5EN;
       regaddr = STM32_RCC_APB1ENR;
       break;
 #endif
-#ifdef CONFIG_STM32_USART6
+#ifdef CONFIG_STM32_USART6_SERIALDRIVER
     case STM32_USART6_BASE:
       rcc_en = RCC_APB2ENR_USART6EN;
       regaddr = STM32_RCC_APB2ENR;
       break;
 #endif
-#ifdef CONFIG_STM32_UART7
+#ifdef CONFIG_STM32_UART7_SERIALDRIVER
     case STM32_UART7_BASE:
       rcc_en = RCC_APB1ENR_UART7EN;
       regaddr = STM32_RCC_APB1ENR;
       break;
 #endif
-#ifdef CONFIG_STM32_UART8
+#ifdef CONFIG_STM32_UART8_SERIALDRIVER
     case STM32_UART8_BASE:
       rcc_en = RCC_APB1ENR_UART8EN;
       regaddr = STM32_RCC_APB1ENR;
@@ -1897,11 +1913,12 @@ static int up_interrupt_common(struct up_dev_s *priv)
 
 static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
 {
-#if defined(CONFIG_SERIAL_TERMIOS) || defined(CONFIG_SERIAL_TIOCSERGSTRUCT)
+#if defined(CONFIG_SERIAL_TERMIOS) || defined(CONFIG_SERIAL_TIOCSERGSTRUCT) \
+    || defined(CONFIG_STM32F7_SERIALBRK_BSDCOMPAT)
   struct inode      *inode = filep->f_inode;
   struct uart_dev_s *dev   = inode->i_private;
 #endif
-#ifdef CONFIG_SERIAL_TERMIOS
+#if defined(CONFIG_SERIAL_TERMIOS) || defined(CONFIG_STM32F7_SERIALBRK_BSDCOMPAT)
   struct up_dev_s   *priv  = (struct up_dev_s *)dev->priv;
 #endif
   int                ret    = OK;
@@ -2057,12 +2074,26 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
       break;
 #endif /* CONFIG_SERIAL_TERMIOS */
 
-#ifdef CONFIG_USART_BREAKS
+#ifdef CONFIG_STM32_USART_BREAKS
+#  ifdef CONFIG_STM32_SERIALBRK_BSDCOMPAT
     case TIOCSBRK:  /* BSD compatibility: Turn break on, unconditionally */
       {
-        irqstate_t flags = enter_critical_section();
-        uint32_t cr2 = up_serialin(priv, STM32_USART_CR2_OFFSET);
-        up_serialout(priv, STM32_USART_CR2_OFFSET, cr2 | USART_CR2_LINEN);
+        irqstate_t flags;
+        uint32_t tx_break;
+
+        flags = enter_critical_section();
+
+        /* Disable any further tx activity */
+
+        priv->ie |= USART_CR1_IE_BREAK_INPROGRESS;
+
+        up_txint(dev, false);
+
+        /* Configure TX as a GPIO output pin and Send a break signal*/
+
+        tx_break = GPIO_OUTPUT | (~(GPIO_MODE_MASK|GPIO_OUTPUT_SET) & priv->tx_gpio);
+        stm32_configgpio(tx_break);
+
         leave_critical_section(flags);
       }
       break;
@@ -2070,12 +2101,47 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
     case TIOCCBRK:  /* BSD compatibility: Turn break off, unconditionally */
       {
         irqstate_t flags;
+
         flags = enter_critical_section();
-        uint32_t cr1 = up_serialin(priv, STM32_USART_CR2_OFFSET);
-        up_serialout(priv, STM32_USART_CR2_OFFSET, cr2 & ~USART_CR2_LINEN);
+
+        /* Configure TX back to U(S)ART */
+
+        stm32_configgpio(priv->tx_gpio);
+
+        priv->ie &= ~USART_CR1_IE_BREAK_INPROGRESS;
+
+        /* Enable further tx activity */
+
+        up_txint(dev, true);
+
         leave_critical_section(flags);
       }
       break;
+#  else
+    case TIOCSBRK:  /* No BSD compatibility: Turn break on for M bit times */
+      {
+        uint32_t cr1;
+        irqstate_t flags;
+
+        flags = enter_critical_section();
+        cr1   = up_serialin(priv, STM32_USART_CR1_OFFSET);
+        up_serialout(priv, STM32_USART_CR1_OFFSET, cr1 | USART_CR1_SBK);
+        leave_critical_section(flags);
+      }
+      break;
+
+    case TIOCCBRK:  /* No BSD compatibility: May turn off break too soon */
+      {
+        uint32_t cr1;
+        irqstate_t flags;
+
+        flags = enter_critical_section();
+        cr1   = up_serialin(priv, STM32_USART_CR1_OFFSET);
+        up_serialout(priv, STM32_USART_CR1_OFFSET, cr1 & ~USART_CR1_SBK);
+        leave_critical_section(flags);
+      }
+      break;
+#  endif
 #endif
 
     default:
@@ -2465,6 +2531,13 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
         }
 #  endif
 
+#  ifdef CONFIG_STM32_SERIALBRK_BSDCOMPAT
+      if (priv->ie & USART_CR1_IE_BREAK_INPROGRESS)
+        {
+          return;
+        }
+#  endif
+
       up_restoreusartint(priv, ie);
 
       /* Fake a TX interrupt here by just calling uart_xmitchars() with
@@ -2506,56 +2579,56 @@ static bool up_txready(struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32_USART1
+#ifdef CONFIG_STM32_USART1_SERIALDRIVER
 static int up_interrupt_usart1(int irq, void *context)
 {
   return up_interrupt_common(&g_usart1priv);
 }
 #endif
 
-#ifdef CONFIG_STM32_USART2
+#ifdef CONFIG_STM32_USART2_SERIALDRIVER
 static int up_interrupt_usart2(int irq, void *context)
 {
   return up_interrupt_common(&g_usart2priv);
 }
 #endif
 
-#ifdef CONFIG_STM32_USART3
+#ifdef CONFIG_STM32_USART3_SERIALDRIVER
 static int up_interrupt_usart3(int irq, void *context)
 {
   return up_interrupt_common(&g_usart3priv);
 }
 #endif
 
-#ifdef CONFIG_STM32_UART4
+#ifdef CONFIG_STM32_UART4_SERIALDRIVER
 static int up_interrupt_uart4(int irq, void *context)
 {
   return up_interrupt_common(&g_uart4priv);
 }
 #endif
 
-#ifdef CONFIG_STM32_UART5
+#ifdef CONFIG_STM32_UART5_SERIALDRIVER
 static int up_interrupt_uart5(int irq, void *context)
 {
   return up_interrupt_common(&g_uart5priv);
 }
 #endif
 
-#ifdef CONFIG_STM32_USART6
+#ifdef CONFIG_STM32_USART6_SERIALDRIVER
 static int up_interrupt_usart6(int irq, void *context)
 {
   return up_interrupt_common(&g_usart6priv);
 }
 #endif
 
-#ifdef CONFIG_STM32_UART7
+#ifdef CONFIG_STM32_UART7_SERIALDRIVER
 static int up_interrupt_uart7(int irq, void *context)
 {
   return up_interrupt_common(&g_uart7priv);
 }
 #endif
 
-#ifdef CONFIG_STM32_UART8
+#ifdef CONFIG_STM32_UART8_SERIALDRIVER
 static int up_interrupt_uart8(int irq, void *context)
 {
   return up_interrupt_common(&g_uart8priv);
@@ -2698,7 +2771,7 @@ static int up_pm_prepare(struct pm_callback_s *cb, int domain,
   return OK;
 }
 #endif
-#endif /* HAVE_UART */
+#endif /* HAVE_SERIALDRIVER */
 #endif /* USE_SERIALDRIVER */
 
 /****************************************************************************
@@ -2720,7 +2793,7 @@ static int up_pm_prepare(struct pm_callback_s *cb, int domain,
 #ifdef USE_EARLYSERIALINIT
 void up_earlyserialinit(void)
 {
-#ifdef HAVE_UART
+#ifdef HAVE_SERIALDRIVER
   unsigned i;
 
   /* Disable all USART interrupts */
@@ -2753,7 +2826,7 @@ void up_earlyserialinit(void)
 
 void up_serialinit(void)
 {
-#ifdef HAVE_UART
+#ifdef HAVE_SERIALDRIVER
   char devname[16];
   unsigned i;
   unsigned minor = 0;

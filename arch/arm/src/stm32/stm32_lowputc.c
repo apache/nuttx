@@ -273,9 +273,9 @@
 #    define USART_CR3_CLRBITS \
       (USART_CR3_EIE | USART_CR3_IREN | USART_CR3_IRLP | USART_CR3_HDSEL | \
        USART_CR3_NACK | USART_CR3_SCEN | USART_CR3_DMAR | USART_CR3_DMAT | \
-       USART_CR3_RTSE | USART_CR3_CTSE | USART_CR3_CTSIE | USART_CR1_ONEBIT | \
-       USART_CR1_OVRDIS | USART_CR1_DDRE | USART_CR1_DEM | USART_CR1_DEP | \
-       USART_CR1_SCARCNT_MASK | USART_CR1_WUS_MASK | USART_CR1_WUFIE)
+       USART_CR3_RTSE | USART_CR3_CTSE | USART_CR3_CTSIE | USART_CR3_ONEBIT | \
+       USART_CR3_OVRDIS | USART_CR3_DDRE | USART_CR3_DEM | USART_CR3_DEP | \
+       USART_CR3_SCARCNT_MASK | USART_CR3_WUS_MASK | USART_CR3_WUFIE)
 #  else
 #    define USART_CR3_CLRBITS \
       (USART_CR3_CTSIE | USART_CR3_CTSE | USART_CR3_RTSE | USART_CR3_EIE)
@@ -436,7 +436,7 @@ void up_lowputc(char ch)
 
 void stm32_lowsetup(void)
 {
-#if defined(HAVE_UART)
+#if defined(HAVE_SERIALDRIVER)
   uint32_t mapr;
 #if defined(HAVE_CONSOLE) && !defined(CONFIG_SUPPRESS_UART_CONFIG)
   uint32_t cr;
@@ -559,7 +559,7 @@ void stm32_lowsetup(void)
   putreg32(cr, STM32_CONSOLE_BASE + STM32_USART_CR1_OFFSET);
 
 #endif /* HAVE_CONSOLE && !CONFIG_SUPPRESS_UART_CONFIG */
-#endif /* HAVE_UART */
+#endif /* HAVE_SERIALDRIVER */
 }
 
 #elif defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F20XX) || \
@@ -568,7 +568,7 @@ void stm32_lowsetup(void)
 
 void stm32_lowsetup(void)
 {
-#if defined(HAVE_UART)
+#if defined(HAVE_SERIALDRIVER)
 #if defined(HAVE_CONSOLE) && !defined(CONFIG_SUPPRESS_UART_CONFIG)
   uint32_t cr;
 #endif
@@ -638,7 +638,7 @@ void stm32_lowsetup(void)
   putreg32(cr, STM32_CONSOLE_BASE + STM32_USART_CR1_OFFSET);
 
 #endif /* HAVE_CONSOLE && !CONFIG_SUPPRESS_UART_CONFIG */
-#endif /* HAVE_UART */
+#endif /* HAVE_SERIALDRIVER */
 }
 
 #else

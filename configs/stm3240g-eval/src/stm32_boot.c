@@ -161,7 +161,7 @@ static int board_initthread(int argc, char *argv[])
    * but the initialization function must run in kernel space.
    */
 
-  ret = board_app_initialize();
+  ret = board_app_initialize(0);
   if (ret < 0)
     {
       gdbg("ERROR: board_app_initialize failed: %d\n", ret);

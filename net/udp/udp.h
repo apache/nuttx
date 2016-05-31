@@ -74,7 +74,7 @@
  * Public Type Definitions
  ****************************************************************************/
 
-/* Representation of a uIP UDP connection */
+/* Representation of a UDP connection */
 
 struct devif_callback_s;  /* Forward reference */
 struct udp_hdr_s;         /* Forward reference */

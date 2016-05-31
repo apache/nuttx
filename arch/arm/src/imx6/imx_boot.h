@@ -51,22 +51,10 @@
 #include "chip.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Types
- ****************************************************************************/
-
-/****************************************************************************
- * Inline Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -78,8 +66,49 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Public Function Prototypes
+ * Name: imx_cpu_disable
+ *
+ * Description:
+ *   Called from CPU0 to make sure that all other CPUs are in the disabled
+ *   state.  This is a formality because the other CPUs are actually running
+ *   then we have probably already crashed.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
  ****************************************************************************/
+
+#ifdef CONFIG_SMP
+void imx_cpu_disable(void);
+#else
+#  define imx_cpu_disable()
+#endif
+
+/****************************************************************************
+ * Name: imx_cpu_enable
+ *
+ * Description:
+ *   Called from CPU0 to enable all other CPUs.  The enabled CPUs will start
+ *   execution at __cpuN_start and, after very low-level CPU initialzation
+ *   has been performed, will branch to arm_cpu_boot()
+ *   (see arch/arm/src/armv7-a/smp.h)
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SMP
+void imx_cpu_enable(void);
+#else
+#  define imx_cpu_enable()
+#endif
 
 /****************************************************************************
  * Name: imx_board_initialize

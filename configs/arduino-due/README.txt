@@ -822,10 +822,10 @@ Arduino DUE-specific Configuration Options
     CONFIG_SAM34_GPIOD_IRQ
     CONFIG_SAM34_GPIOE_IRQ
     CONFIG_SAM34_GPIOF_IRQ
-    CONFIG_USART0_ISUART
-    CONFIG_USART1_ISUART
-    CONFIG_USART2_ISUART
-    CONFIG_USART3_ISUART
+    CONFIG_USART0_SERIALDRIVER
+    CONFIG_USART1_SERIALDRIVER
+    CONFIG_USART2_SERIALDRIVER
+    CONFIG_USART3_SERIALDRIVER
 
   ST91SAM4S specific device driver settings
 
@@ -885,7 +885,7 @@ Configurations
        Board Selection -> Peripheral
          CONFIG_SAM34_UART0=n              : Disable UART0.  Can't use with this shield
          CONFIG_SAM34_USART0=y             : Enable USART0
-         CONFIG_USART0_ISUART=y
+         CONFIG_USART0_SERIALDRIVER=y
 
        Device Drivers -> Serial
          CONFIG_USART0_SERIAL_CONSOLE=y    : Configure the console on USART0
@@ -966,7 +966,7 @@ Configuration sub-directories
        Board Selection -> Peripheral
          CONFIG_SAM34_UART0=n              : Disable UART0.  Can't use with this shield
          CONFIG_SAM34_USART0=y             : Enable USART0
-         CONFIG_USART0_ISUART=y
+         CONFIG_USART0_SERIALDRIVER=y
 
        Device Drivers -> Serial
          CONFIG_USART0_SERIAL_CONSOLE=y    : Configure the console on USART0

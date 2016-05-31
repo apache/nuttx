@@ -153,6 +153,7 @@ static const struct fb_planeinfo_s g_planeinfo =
   .fbmem    = (FAR void *)CONFIG_LPC17_LCD_VRAMBASE,
   .fblen    = LPC17_FBSIZE,
   .stride   = LPC17_STRIDE,
+  .display  = 0,
   .bpp      = LPC17_BPP,
 };
 

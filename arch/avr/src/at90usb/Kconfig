@@ -41,7 +41,7 @@ config AVR_SPI
 config AVR_USART1
 	bool "USART1"
 	default n
-	select ARCH_HAVE_USART1
+	select USART1_SERIALDRIVER
 
 config AVR_USBDEV
 	bool "USB device"

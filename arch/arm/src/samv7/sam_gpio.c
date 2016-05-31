@@ -54,14 +54,33 @@
 
 #include "sam_gpio.h"
 #include "chip/sam_pio.h"
+#include "chip/sam_matrix.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/****************************************************************************
- * Private Types
- ****************************************************************************/
+#if !defined(CONFIG_SAMV7_ERASE_ENABLE) || \
+    !defined(CONFIG_SAMV7_JTAG_FULL_ENABLE)
+#  if defined(CONFIG_SAMV7_ERASE_DISABLE)
+#    define SYSIO_ERASE_BIT MATRIX_CCFG_SYSIO_SYSIO12
+#  else
+#    define SYSIO_ERASE_BIT 0
+#  endif
+#  if defined(CONFIG_SAMV7_JTAG_DISABLE)
+#    define SYSIO_BITS (MATRIX_CCFG_SYSIO_SYSIO4 | MATRIX_CCFG_SYSIO_SYSIO5 | \
+               MATRIX_CCFG_SYSIO_SYSIO6 | MATRIX_CCFG_SYSIO_SYSIO7)
+#  endif
+#  if defined(CONFIG_SAMV7_JTAG_FULL_SW_ENABLE)
+#    define SYSIO_BITS MATRIX_CCFG_SYSIO_SYSIO4
+#  endif
+#  if defined(CONFIG_SAMV7_JTAG_SW_ENABLE)
+#    define SYSIO_BITS (MATRIX_CCFG_SYSIO_SYSIO4 | MATRIX_CCFG_SYSIO_SYSIO5)
+#  endif
+#endif
+#if !defined(SYSIO_BITS)
+#   define SYSIO_BITS 0
+#endif
 
 /****************************************************************************
  * Private Data
@@ -70,7 +89,7 @@
 #ifdef CONFIG_DEBUG_GPIO
 static const char g_portchar[SAMV7_NPIO] =
 {
-  'A'
+    'A'
 #if SAMV7_NPIO > 1
   , 'B'
 #endif
@@ -401,6 +420,33 @@ static inline int sam_configperiph(uintptr_t base, uint32_t pin,
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Function:  sam_gpioinit
+ *
+ * Description:
+ *   Based on configuration within the .config file, it does:
+ *    - Configures the CCFG_SYSIO bits.
+ *
+ *   Typically called from sam_start().
+ *
+ * Assumptions:
+ *   This function is called early in the initialization sequence so that
+ *   no mutual exlusion is necessary.
+ *
+ ****************************************************************************/
+
+#if !defined(CONFIG_SAMV7_ERASE_ENABLE) || \
+    !defined(CONFIG_SAMV7_JTAG_FULL_ENABLE)
+void sam_gpioinit(void)
+{
+  uint32_t regval;
+
+  regval  = getreg32(SAM_MATRIX_CCFG_SYSIO);
+  regval |= (SYSIO_ERASE_BIT | SYSIO_BITS);
+  putreg32(regval, SAM_MATRIX_CCFG_SYSIO);
+}
+#endif
 
 /****************************************************************************
  * Name: sam_configgpio

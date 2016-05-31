@@ -46,6 +46,7 @@
 #include <arch/irq.h>
 
 #include "up_arch.h"
+#include "gic.h"
 #include "chip/imx_ccm.h"
 #include "chip/imx_gpt.h"
 
@@ -76,10 +77,25 @@
  * We should be able to use a prescaler of 1.
  */
 
-#define GPT_PR_VALUE      1
-#define GPT_OCR3_VALUE   ((GPT_CLOCK + ((1*CLK_TCK) >> 1)) / (1*CLK_TCK))
-#define GPT_OCR2_VALUE   ((GPT_CLOCK + ((2*CLK_TCK) >> 1)) / (2*CLK_TCK))
-#define GPT_OCR1_VALUE   ((GPT_CLOCK + ((3*CLK_TCK) >> 1)) / (3*CLK_TCK))
+#define GPT_PR_VALUE     1
+
+/* Timer counter comparison settings:
+ *
+ * - OCR3 will interrupt at CLK_TCK ticks/second after the timer counter
+ *   has been reset.
+ * - OCR2 will interrupt at 2*CLK_TCK ticks/second after the timer counter
+ *   has been reset.
+ * - OCR2 will interrupt at 3*CLK_TCK ticks/second after the timer counter
+ *   has been reset and then will reset the timer, starting the 3 interrupt
+ *   sequence again.
+ *
+ * Using three comparisons virtually eliminates the possibility of timer
+ * interrupt overrun.
+ */
+
+#define GPT_OCR3_VALUE   ((1 * GPT_CLOCK + (CLK_TCK >> 1)) / CLK_TCK)
+#define GPT_OCR2_VALUE   ((2 * GPT_CLOCK + (CLK_TCK >> 1)) / CLK_TCK)
+#define GPT_OCR1_VALUE   ((3 * GPT_CLOCK + (CLK_TCK >> 1)) / CLK_TCK)
 
 /****************************************************************************
  * Private Functions
@@ -164,7 +180,7 @@ void up_timer_initialize(void)
 
   /* Disable GPT by setting EN=0 in GPT_CR register */
 
-  cr = getreg32(IMX_GPT_CR);
+  cr  = getreg32(IMX_GPT_CR);
   cr &= ~GPT_CR_EN;
   putreg32(cr, IMX_GPT_CR);
 
@@ -220,7 +236,7 @@ void up_timer_initialize(void)
    */
 
   cr &= ~GPT_CR_FFR;
-  putreg32(cr | GPT_CR_SWR, IMX_GPT_CR);
+  putreg32(cr, IMX_GPT_CR);
 
   /* Set ENMOD=1 in GPT_CR register, to bring GPT counter to 0x00000000.  If
    * the ENMOD bit is 1, then the Main Counter and Prescaler Counter values
@@ -234,6 +250,10 @@ void up_timer_initialize(void)
 
   cr |= GPT_CR_EN;
   putreg32(cr, IMX_GPT_CR);
+
+  /* Configure as a (rising) edge-triggered interrupt */
+
+  (void)arm_gic_irq_trigger(IMX_IRQ_GPT, true);
 
   /* Attach the timer interrupt vector */
 

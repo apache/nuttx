@@ -492,7 +492,7 @@ static inline void up_waittxready(struct up_dev_s *priv)
     {
       /* Check the TI bit in the CI register.  1=Transmit buffer empty */
 
-      if ((up_serialin(priv, M16C_UART_C1) & UART_C1_TI) != 0);
+      if ((up_serialin(priv, M16C_UART_C1) & UART_C1_TI) != 0)
        {
           /* The transmit buffer is empty... return */
           break;

@@ -86,9 +86,9 @@ struct cs89x0_driver_s
   uint32_t  cs_txunderrun;     /* Count of Tx underrun errors */
 #endif
 
-  /* This holds the information visible to uIP/NuttX */
+  /* This holds the information visible to the NuttX network */
 
-  struct net_driver_s cs_dev;  /* Interface understood by uIP */
+  struct net_driver_s cs_dev;  /* Interface understood by the network */
 };
 
 /****************************************************************************

@@ -155,10 +155,10 @@ struct i2c_master_s;
 struct i2c_msg_s;
 struct i2c_ops_s
 {
-  int (*transfer)(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s *msgs,
-                  int count);
+  CODE int (*transfer)(FAR struct i2c_master_s *dev,
+                       FAR struct i2c_msg_s *msgs, int count);
 #ifdef CONFIG_I2C_RESET
-  int (*reset)(FAR struct i2c_master_s *dev);
+  CODE int (*reset)(FAR struct i2c_master_s *dev);
 #endif
 };
 

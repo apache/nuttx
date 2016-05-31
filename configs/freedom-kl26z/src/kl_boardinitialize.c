@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/freedom-kl26z/src/up_boot.c
+ * configs/freedom-kl26z/src/kl_boardinitialize.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -124,7 +124,7 @@ void board_initialize(void)
    */
 
 #if defined(CONFIG_NSH_LIBRARY) && !defined(CONFIG_LIB_BOARDCTL)
-  (void)board_app_initialize();
+  (void)board_app_initialize(0);
 #endif
 }
 #endif

@@ -50,18 +50,6 @@
 #ifdef CONFIG_PAGING
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -88,7 +76,7 @@ void up_pginitialize(void)
 {
   /* None needed at present.  This file is just retained in case the need
    * arises in the future.  Nothing calls up_pginitialize() now.  If needed,
-   * if should be called early in up_boot.c to assure that all paging is
+   * if should be called early in arm_boot.c to assure that all paging is
    * ready.
    */
 }

@@ -87,6 +87,12 @@ enum ms58xx_model_e
   MS58XX_MODEL_MS5837_30 = 7
 };
 
+struct ms58xx_measure_s
+{
+  int32_t temperature;  /* in Degree   x100    */
+  int32_t pressure;     /* in mBar     x10     */
+};
+
 struct i2c_master_s;
 
 /****************************************************************************

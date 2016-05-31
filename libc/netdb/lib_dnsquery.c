@@ -2,8 +2,8 @@
  * libc/netdb/lib_dnsquery.c
  * DNS host name to IP address resolver.
  *
- * The uIP DNS resolver functions are used to lookup a hostname and
- * map it to a numerical IP address.
+ * The DNS resolver functions are used to lookup a hostname and map it to a
+ * numerical IP address.
  *
  *   Copyright (C) 2007, 2009, 2012, 2014-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

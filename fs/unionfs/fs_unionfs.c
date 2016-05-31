@@ -1506,7 +1506,7 @@ static int unionfs_closedir(FAR struct inode *mountpt,
     {
       /* Was this file system opened? */
 
-      if (fu->fu_lower[i] != NULL);
+      if (fu->fu_lower[i] != NULL)
         {
           um = &ui->ui_fs[i];
 

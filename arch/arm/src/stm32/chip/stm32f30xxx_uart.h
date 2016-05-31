@@ -218,19 +218,19 @@
 #define USART_CR3_RTSE            (1 << 8)  /* Bit 8:  RTS Enable */
 #define USART_CR3_CTSE            (1 << 9)  /* Bit 9:  CTS Enable */
 #define USART_CR3_CTSIE           (1 << 10) /* Bit 10: CTS Interrupt Enable */
-#define USART_CR1_ONEBIT          (1 << 11) /* Bit 11: One sample bit method enable */
-#define USART_CR1_OVRDIS          (1 << 12) /* Bit 12: Overrun Disable */
-#define USART_CR1_DDRE            (1 << 13) /* Bit 13: DMA Disable on Reception Error */
-#define USART_CR1_DEM             (1 << 14) /* Bit 14: Driver enable mode */
-#define USART_CR1_DEP             (1 << 15) /* Bit 15: Driver enable polarity selection */
-#define USART_CR1_SCARCNT_SHIFT   (17)      /* Bit 17-19: Smartcard auto-retry count */
-#define USART_CR1_SCARCNT_MASK    (7 << USART_CR1_SCARCNT_SHIFT)
-#define USART_CR1_WUS_SHIFT       (20)      /* Bit 20-21: Wakeup from Stop mode interrupt */
-#define USART_CR1_WUS_MASK        (3 << USART_CR1_WUS_SHIFT)
-#  define USART_CR1_WUS_ADDRMAT   (0 << USART_CR1_WUS_SHIFT) /* Active on address match */
-#  define USART_CR1_WUS_STARTBIT  (2 << USART_CR1_WUS_SHIFT) /* Active on Start bit */
-#  define USART_CR1_WUS_RXNE      (3 << USART_CR1_WUS_SHIFT) /* Active on RXNE */
-#define USART_CR1_WUFIE           (1 << 22) /* Bit 22:  Wakeup from Stop mode interrupt enable */
+#define USART_CR3_ONEBIT          (1 << 11) /* Bit 11: One sample bit method enable */
+#define USART_CR3_OVRDIS          (1 << 12) /* Bit 12: Overrun Disable */
+#define USART_CR3_DDRE            (1 << 13) /* Bit 13: DMA Disable on Reception Error */
+#define USART_CR3_DEM             (1 << 14) /* Bit 14: Driver enable mode */
+#define USART_CR3_DEP             (1 << 15) /* Bit 15: Driver enable polarity selection */
+#define USART_CR3_SCARCNT_SHIFT   (17)      /* Bit 17-19: Smartcard auto-retry count */
+#define USART_CR3_SCARCNT_MASK    (7 << USART_CR3_SCARCNT_SHIFT)
+#define USART_CR3_WUS_SHIFT       (20)      /* Bit 20-21: Wakeup from Stop mode interrupt */
+#define USART_CR3_WUS_MASK        (3 << USART_CR3_WUS_SHIFT)
+#  define USART_CR3_WUS_ADDRMAT   (0 << USART_CR3_WUS_SHIFT) /* Active on address match */
+#  define USART_CR3_WUS_STARTBIT  (2 << USART_CR3_WUS_SHIFT) /* Active on Start bit */
+#  define USART_CR3_WUS_RXNE      (3 << USART_CR3_WUS_SHIFT) /* Active on RXNE */
+#define USART_CR3_WUFIE           (1 << 22) /* Bit 22:  Wakeup from Stop mode interrupt enable */
 
 /* Baud Rate Register */
 

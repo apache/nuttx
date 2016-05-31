@@ -43,6 +43,7 @@
 #ifndef __ARCH_ARM_SRC_STM32L4_STM32L4_RTC_H
 #define __ARCH_ARM_SRC_STM32L4_STM32L4_RTC_H
 
+#include <time.h>
 #include <nuttx/config.h>
 
 #include "chip.h"
@@ -62,9 +63,30 @@
 
 #ifndef __ASSEMBLY__
 
+#ifdef CONFIG_RTC_ALARM
+
 /* The form of an alarm callback */
 
-typedef CODE void (*alarmcb_t)(void);
+typedef CODE void (*alm_callback_t)(FAR void *arg, unsigned int alarmid);
+
+enum alm_id_e
+{
+  RTC_ALARMA = 0,              /* RTC ALARM A */
+  RTC_ALARMB,                  /* RTC ALARM B */
+  RTC_ALARM_LAST
+};
+
+/* Structure used to pass parmaters to set an alarm */
+
+struct alm_setalarm_s
+{
+  int as_id;                   /* enum alm_id_e */
+  struct tm as_time;           /* Alarm expiration time */
+  alm_callback_t as_cb;        /* Callback (if non-NULL) */
+  FAR void *as_arg;            /* Argument for callback */
+};
+
+#endif /* CONFIG_RTC_ALARM */
 
 /****************************************************************************
  * Public Data
@@ -93,8 +115,7 @@ extern "C"
  *   during initialization to set up the system time when CONFIG_RTC and
  *   CONFIG_RTC_DATETIME are selected (and CONFIG_RTC_HIRES is not).
  *
- *   NOTE: Some date/time RTC hardware is capability of sub-second accuracy.
- *   That sub-second accuracy is returned through 'nsec'.
+ *   NOTE: The sub-second accuracy is returned through 'nsec'.
  *
  * Input Parameters:
  *   tp - The location to return the high resolution time value.
@@ -130,43 +151,39 @@ struct tm;
 int stm32l4_rtc_setdatetime(FAR const struct tm *tp);
 #endif
 
+#ifdef CONFIG_RTC_ALARM
 /****************************************************************************
  * Name: stm32l4_rtc_setalarm
  *
  * Description:
- *   Set up an alarm.
+ *   Set an alarm to an asbolute time using associated hardware.
  *
  * Input Parameters:
- *   tp - the time to set the alarm
- *   callback - the function to call when the alarm expires.
+ *  alminfo - Information about the alarm configuration.
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
  *
  ****************************************************************************/
 
-#ifdef CONFIG_RTC_ALARM
-struct timespec;
-int stm32l4_rtc_setalarm(FAR const struct timespec *tp, alarmcb_t callback);
-#endif
+int stm32l4_rtc_setalarm(FAR struct alm_setalarm_s *alminfo);
 
 /****************************************************************************
  * Name: stm32l4_rtc_cancelalarm
  *
  * Description:
- *   Cancel a pending alarm alarm
+ *   Cancel an alaram.
  *
  * Input Parameters:
- *   none
+ *  alarmid - Identifies the alarm to be cancelled
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
  *
  ****************************************************************************/
 
-#ifdef CONFIG_RTC_ALARM
-int stm32l4_rtc_cancelalarm(void);
-#endif
+int stm32l4_rtc_cancelalarm(enum alm_id_e alarmid);
+#endif /* CONFIG_RTC_ALARM */
 
 /****************************************************************************
  * Name: stm32l4_rtc_lowerhalf

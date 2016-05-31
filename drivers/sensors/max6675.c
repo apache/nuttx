@@ -80,6 +80,9 @@ struct max6675_dev_s
  * Private Function Prototypes
  ****************************************************************************/
 
+static void    max6675_lock(FAR struct spi_dev_s *spi)
+static void    max6675_unlock(FAR struct spi_dev_s *spi)
+
 /* Character driver methods */
 
 static int     max6675_open(FAR struct file *filep);
@@ -108,6 +111,37 @@ static const struct file_operations g_max6675fops =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: max6675_lock
+ *
+ * Description:
+ *   Lock and configure the SPI bus.
+ *
+ ****************************************************************************/
+
+static void max6675_lock(FAR struct spi_dev_s *spi)
+{
+  (void)SPI_LOCK(spi, true);
+  SPI_SETMODE(spi, SPIDEV_MODE0);
+  SPI_SETBITS(spi, 8);
+  (void)SPI_HWFEATURES(spi, 0);
+  SPI_SETFREQUENCY(spi, 400000);
+}
+
+/****************************************************************************
+ * Name: max6675_unlock
+ *
+ * Description:
+ *   Unlock the SPI bus.
+ *
+ ****************************************************************************/
+
+static void max6675_unlock(FAR struct spi_dev_s *spi)
+{
+  (void)SPI_LOCK(spi, false);
+}
+
 /****************************************************************************
  * Name: max6675_open
  *
@@ -163,6 +197,7 @@ static ssize_t max6675_read(FAR struct file *filep, FAR char *buffer, size_t buf
 
   /* Enable MAX6675's chip select */
 
+  max6675_lock(priv->spi);
   SPI_SELECT(priv->spi, SPIDEV_TEMPERATURE, true);
 
   /* Read temperature */
@@ -172,6 +207,7 @@ static ssize_t max6675_read(FAR struct file *filep, FAR char *buffer, size_t buf
   /* Disable MAX6675's chip select */
 
   SPI_SELECT(priv->spi, SPIDEV_TEMPERATURE, false);
+  max6675_unlock(priv->spi);
 
   regval  = (regmsb & 0xFF00) >> 8;
   regval |= (regmsb & 0xFF) << 8;

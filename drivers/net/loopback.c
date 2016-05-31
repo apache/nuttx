@@ -99,9 +99,9 @@ struct lo_driver_s
   WDOG_ID lo_polldog;          /* TX poll timer */
   struct work_s lo_work;       /* For deferring work to the work queue */
 
-  /* This holds the information visible to uIP/NuttX */
+  /* This holds the information visible to the NuttX network */
 
-  struct net_driver_s lo_dev;  /* Interface understood by uIP */
+  struct net_driver_s lo_dev;  /* Interface understood by the network */
 };
 
 /****************************************************************************

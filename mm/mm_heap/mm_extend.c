@@ -74,9 +74,9 @@ void mm_extend(FAR struct mm_heap_s *heap, FAR void *mem, size_t size,
 
   DEBUGASSERT(heap && mem);
 #if CONFIG_MM_REGIONS > 1
-  DEBUGASSERT(size >= MIN_EXTEND && (unsigned)region < heap->mm_nregions);
+  DEBUGASSERT(size >= MIN_EXTEND && (size_t)region < (size_t)heap->mm_nregions);
 #else
-  DEBUGASSERT(size >= MIN_EXTEND && (unsigned)region == 0);
+  DEBUGASSERT(size >= MIN_EXTEND && region == 0);
 #endif
 
   /* Make sure that the memory region are properly aligned */

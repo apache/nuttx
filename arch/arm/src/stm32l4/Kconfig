@@ -69,6 +69,34 @@ config STM32L4_FLASH_1024KB
 
 endchoice # Embedded FLASH size
 
+comment "SRAM2 Options"
+
+config STM32L4_SRAM2_HEAP
+	bool "SRAM2 is used for heap"
+	default n
+	select STM32L4_SRAM2_INIT
+	---help---
+		The STM32L4 SRAM2 region has special properties (power, protection, parity)
+		which may be used by the application for special purposes.  But if these
+		special properties are not needed, it may be instead added to the heap for
+		use by malloc().
+		NOTE: you must also select an appropriate number of memory regions in the
+		'Memory Management' section.
+
+config STM32L4_SRAM2_INIT
+	bool "SRAM2 is initialized to zero"
+	default n
+	---help---
+		The STM32L4 SRAM2 region has parity checking.  However, when the system
+		powers on, the memory is in an unknown state, and reads from uninitialized
+		memory can trigger parity faults from the random data.  This can be
+		avoided by first writing to all locations to force the parity into a valid
+		state.
+		However, if the SRAM2 is being used for it's battery-backed capability,
+		this may be undesireable (because it will destroy the contents).  In that
+		case, the board should handle the initialization itself at the appropriate
+		time.
+
 menu "STM32L4 Peripheral Support"
 
 # These "hidden" settings determine is a peripheral option is available for the
@@ -79,7 +107,7 @@ config STM32L4_HAVE_LTDC
 	default n
 
 # These "hidden" settings are the OR of individual peripheral selections
-# indicating that the general capabilitiy is required.
+# indicating that the general capability is required.
 
 config STM32L4_ADC
 	bool
@@ -133,7 +161,6 @@ config STM32L4_DMA2
 	select STM32L4_DMA
 	select ARCH_DMA
 
-
 config STM32L4_CRC
 	bool "CRC"
 	default n
@@ -179,9 +206,150 @@ config STM32L4_FMC
 	bool "FMC"
 	default n
 
-config STM32L4_QUADSPI
+config STM32L4_QSPI
 	bool "QuadSPI"
 	default n
+	---help---
+		The STM32L4 QSPI block is intended to support one serial NOR flash device
+
+if STM32L4_QSPI
+
+config STM32L4_QSPI_FLASH_SIZE
+	int "Size of attached serial flash, bytes"
+	default 16777216
+	range 1 2147483648
+	---help---
+		The STM32L4 QSPI peripheral requires the size of the Flash be specified
+
+config STM32L4_QSPI_FIFO_THESHOLD
+	int "Number of bytes before asserting FIFO threshold flag"
+	default 4
+	range 1 16
+	---help---
+		The STM32L4 QSPI peripheral requires that the FIFO threshold be specified
+		I would leave it at the default value of 4 unless you know what you are doing.
+
+config STM32L4_QSPI_CSHT
+	int "Number of cycles Chip Select must be inactive between transactions"
+	default 1
+	range 1 8
+	---help---
+		The STM32L4 QSPI peripheral requires that it be specified the minimum number
+		of AHB cycles that Chip Select be held inactive between transactions.
+
+choice
+	prompt "Transfer technique"
+	default STM32L4_QSPI_DMA
+	---help---
+		You can choose between using polling, interrupts, or DMA to transfer data
+		over the QSPI interface.
+
+config STM32L4_QSPI_POLLING
+	bool "Polling"
+	---help---
+		Use conventional register I/O with status polling to transfer data.
+
+config STM32L4_QSPI_INTERRUPTS
+	bool "Interrupts"
+	---help---
+		User interrupt driven I/O transfers.
+
+config STM32L4_QSPI_DMA
+	bool "DMA"
+	depends on STM32L4_DMA
+	---help---
+		Use DMA to improve QSPI transfer performance.
+
+endchoice
+
+choice
+	prompt "DMA Channel"
+	default STM32L4_QSPI_DMA_CHAN_1_5
+	depends on STM32L4_DMA
+	---help---
+		You can choose between two DMA channels for use with QSPI:
+		either DMA1 channel 5, or DMA2 channel 7.
+		If you only see one choice here, it is probably because
+		you have not also enabled the associated DMA controller.
+
+config STM32L4_QSPI_DMA_CHAN_1_5
+	bool "DMA1 Channel 5"
+	depends on STM32L4_DMA1
+	---help---
+		Use DMA1 channel 5 for QSPI.
+
+config STM32L4_QSPI_DMA_CHAN_2_7
+	bool "DMA2 Channel 7"
+	depends on STM32L4_DMA2
+	---help---
+		Use DMA2 channel 7 for QSPI.
+
+endchoice
+
+choice
+	prompt "DMA Priority"
+	default STM32L4_QSPI_DMAPRIORITY_MEDIUM
+	depends on STM32L4_DMA
+	---help---
+		The DMA controller supports priority levels.  You are probably fine
+		with the default of 'medium' except for special cases.  In the event
+		of contention between to channels at the same priority, the lower
+		numbered channel has hardware priority over the higher numbered one.
+
+config STM32L4_QSPI_DMAPRIORITY_VERYHIGH
+	bool "Very High priority"
+	depends on STM32L4_DMA
+	---help---
+		'Highest' priority.
+
+config STM32L4_QSPI_DMAPRIORITY_HIGH
+	bool "High priority"
+	depends on STM32L4_DMA
+	---help---
+		'High' priority.
+
+config STM32L4_QSPI_DMAPRIORITY_MEDIUM
+	bool "Medium priority"
+	depends on STM32L4_DMA
+	---help---
+		'Medium' priority.
+
+config STM32L4_QSPI_DMAPRIORITY_LOW
+	bool "Low priority"
+	depends on STM32L4_DMA
+	---help---
+		'Low' priority.
+
+endchoice
+
+config STM32L4_QSPI_DMATHRESHOLD
+	int "QSPI DMA threshold"
+	default 4
+	depends on STM32L4_QSPI_DMA
+	---help---
+		When QSPI DMA is enabled, small DMA transfers will still be performed
+		by polling logic.  This value is the threshold below which transfers
+		will still be performed by conventional register status polling.
+
+config STM32L4_QSPI_DMADEBUG
+	bool "QSPI DMA transfer debug"
+	depends on STM32L4_QSPI_DMA && DEBUG && DEBUG_DMA
+	default n
+	---help---
+		Enable special debug instrumentation to analyze QSPI DMA data transfers.
+		This logic is as non-invasive as possible:  It samples DMA
+		registers at key points in the data transfer and then dumps all of
+		the registers at the end of the transfer.
+
+config STM32L4_QSPI_REGDEBUG
+	bool "QSPI Register level debug"
+	depends on DEBUG
+	default n
+	---help---
+		Output detailed register-level QSPI device debug information.
+		Requires also DEBUG.
+
+endif
 
 comment "APB1 Peripherals"
 
@@ -232,14 +400,14 @@ config STM32L4_SPI3
 config STM32L4_USART1
 	bool "USART1"
 	default n
-	select ARCH_HAVE_USART1
+	select USART1_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
 	select STM32L4_USART
 
 config STM32L4_USART2
 	bool "USART2"
 	default n
-	select ARCH_HAVE_USART2
+	select USART2_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
 	select STM32L4_USART
 
@@ -247,21 +415,21 @@ config STM32L4_USART3
 	bool "USART3"
 	default n
 	select ARCH_HAVE_SERIAL_TERMIOS
-	select ARCH_HAVE_USART3
+	select USART3_SERIALDRIVER
 	select STM32L4_USART
 
 config STM32L4_UART4
 	bool "UART4"
 	default n
 	select ARCH_HAVE_SERIAL_TERMIOS
-	select ARCH_HAVE_UART4
+	select UART4_SERIALDRIVER
 	select STM32L4_USART
 
 config STM32L4_UART5
 	bool "UART5"
 	default n
 	select ARCH_HAVE_SERIAL_TERMIOS
-	select ARCH_HAVE_UART5
+	select UART5_SERIALDRIVER
 	select STM32L4_USART
 
 config STM32L4_I2C1
@@ -352,7 +520,7 @@ config STM32L4_TIM8
 config STM32L4_USART1
 	bool "USART1"
 	default n
-	select ARCH_HAVE_USART1
+	select USART1_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
 	select STM32L4_USART
 
@@ -614,7 +782,27 @@ config STM32L4_FLOWCONTROL_BROKEN
 		nRTS after every byte received)  Enable this setting workaround
 		this issue by useing software based management of RTS
 
-endmenu
+config STM32L4_USART_BREAKS
+	bool "Add TIOxSBRK to support sending Breaks"
+	depends on STM32_USART
+	default n
+	---help---
+		Add TIOCxBRK routines to send a line break per the STM32 manual, the
+		break will be a pulse based on the value M. This is not a BSD compatible
+		break.
+
+config STM32L4_SERIALBRK_BSDCOMPAT
+	bool "Use GPIO To send Break"
+	depends on STM32_USART && STM32_USART_BREAKS
+	default n
+	---help---
+		Enable using GPIO on the TX pin to send a BSD compatible break:
+		TIOCSBRK will start the break and TIOCCBRK will end the break.
+		The current STM32 U[S]ARTS have no way to leave the break (TX=LOW)
+		on because the SW starts the break and then the HW automatically clears
+		the break. This makes it is difficult to sent a long break.
+
+endmenu # U[S]ART Configuration
 
 menu "SPI Configuration"
 	depends on STM32L4_SPI
@@ -673,6 +861,29 @@ config STM32L4_I2C_DUTY16_9
 	default n
 	depends on STM32L4_I2C
 
+endmenu
+
+menu "CAN driver configuration"
+	depends on STM32L4_CAN1
+
+config CAN1_BAUD
+	int "CAN1 BAUD"
+	default 250000
+	depends on STM32L4_CAN1
+	---help---
+		CAN1 BAUD rate.  Required if STM32L4_CAN1 is defined.
+
+config CAN_TSEG1
+	int "TSEG1 quanta"
+	default 6
+	---help---
+		The number of CAN time quanta in segment 1. Default: 6
+
+config CAN_TSEG2
+	int "TSEG2 quanta"
+	default 7
+	---help---
+		The number of CAN time quanta in segment 2. Default: 7
 endmenu
 
 endif # ARCH_CHIP_STM32L4

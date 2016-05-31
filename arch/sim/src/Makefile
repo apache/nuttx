@@ -1,7 +1,7 @@
 ############################################################################
 # arch/sim/src/Makefile
 #
-#   Copyright (C) 2007, 2008, 2011-2012, 2014 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2007, 2008, 2011-2012, 2014, 2016 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -70,7 +70,7 @@ ifeq ($(CONFIG_SPINLOCK),y)
 endif
 
 ifeq ($(CONFIG_SMP),y)
-  CSRCS += up_smpsignal.c up_smphook.c
+  CSRCS += up_smpsignal.c up_smphook.c up_cpuidlestack.c
   HOSTSRCS += up_simsmp.c
 endif
 
@@ -120,6 +120,13 @@ ifeq ($(CONFIG_NET_ETHERNET),y)
   HOSTCFLAGS += -DNETDEV_BUFSIZE=$(CONFIG_NET_ETH_MTU)
 ifneq ($(HOSTOS),Cygwin)
   HOSTSRCS += up_tapdev.c up_netdev.c
+ifeq ($(CONFIG_SIM_NET_BRIDGE),y)
+  HOSTCFLAGS += -DCONFIG_SIM_NET_BRIDGE
+  HOSTCFLAGS += -DCONFIG_SIM_NET_BRIDGE_DEVICE=\"$(CONFIG_SIM_NET_BRIDGE_DEVICE)\"
+endif
+ifeq ($(CONFIG_SIM_NET_HOST_ROUTE),y)
+  HOSTCFLAGS += -DCONFIG_SIM_NET_HOST_ROUTE
+endif
 else
   HOSTSRCS += up_wpcap.c up_netdev.c
   DRVLIB = /lib/w32api/libws2_32.a /lib/w32api/libiphlpapi.a
@@ -153,6 +160,11 @@ OBJS = $(AOBJS) $(COBJS) $(HOSTOBJS)
 ifeq ($(CONFIG_SIM_X11FB),y)
   STDLIBS += -lX11 -lXext
 endif
+
+# Override in Make.defs if linker is not 'ld'
+
+LDSTARTGROUP ?= --start-group
+LDENDGROUP ?= --end-group
 
 EXTRA_LIBS ?=
 EXTRA_LIBPATHS ?=
@@ -245,7 +257,7 @@ endif
 
 nuttx.rel : libarch$(LIBEXT) board/libboard$(LIBEXT) $(HOSTOS)-names.dat $(LINKOBJS)
 	$(Q) echo "LD:  nuttx.rel"
-	$(Q) $(LD) -r $(LDLINKFLAGS) $(RELPATHS) $(EXTRA_LIBPATHS) -o $@ $(REQUIREDOBJS) --start-group $(RELLIBS) $(EXTRA_LIBS) --end-group
+	$(Q) $(LD) -r $(LDLINKFLAGS) $(RELPATHS) $(EXTRA_LIBPATHS) -o $@ $(REQUIREDOBJS) $(LDSTARTGROUP) $(RELLIBS) $(EXTRA_LIBS) $(LDENDGROUP)
 	$(Q) $(OBJCOPY) --redefine-syms=$(HOSTOS)-names.dat $@
 
 # Generate the final NuttX binary by linking the host-specific objects with the NuttX

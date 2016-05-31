@@ -522,9 +522,9 @@ struct lpc43_ethmac_s
   struct work_s        work;        /* For deferring work to the work queue */
 #endif
 
-  /* This holds the information visible to uIP/NuttX */
+  /* This holds the information visible to the NuttX network */
 
-  struct net_driver_s  dev;         /* Interface understood by uIP */
+  struct net_driver_s  dev;         /* Interface understood by the network */
 
   /* Used to track transmit and receive descriptors */
 
@@ -928,7 +928,7 @@ static int lpc43_transmit(FAR struct lpc43_ethmac_s *priv)
   struct eth_txdesc_s *txdesc;
   struct eth_txdesc_s *txfirst;
 
-  /* The internal (optimal) uIP buffer size may be configured to be larger
+  /* The internal (optimal) network buffer size may be configured to be larger
    * than the Ethernet buffer size.
    */
 
@@ -1114,7 +1114,7 @@ static int lpc43_transmit(FAR struct lpc43_ethmac_s *priv)
  * Function: lpc43_txpoll
  *
  * Description:
- *   The transmitter is available, check if uIP has any outgoing packets ready
+ *   The transmitter is available, check if the network has any outgoing packets ready
  *   to send.  This is a callback from devif_poll().  devif_poll() may be called:
  *
  *   1. When the preceding TX packet send is complete,
@@ -1520,7 +1520,7 @@ static int lpc43_recvframe(FAR struct lpc43_ethmac_s *priv)
               buffer = lpc43_allocbuffer(priv);
 
               /* Take the buffer from the RX descriptor of the first free
-               * segment, put it into the uIP device structure, then replace
+               * segment, put it into the network device structure, then replace
                * the buffer in the RX descriptor with the newly allocated
                * buffer.
                */
@@ -1602,7 +1602,7 @@ static void lpc43_receive(FAR struct lpc43_ethmac_s *priv)
       pkt_input(&priv->dev);
 #endif
 
-      /* Check if the packet is a valid size for the uIP buffer configuration
+      /* Check if the packet is a valid size for the network buffer configuration
        * (this should not happen)
        */
 
@@ -1888,7 +1888,7 @@ static void lpc43_txdone(FAR struct lpc43_ethmac_s *priv)
       lpc43_disableint(priv, ETH_DMAINT_TI);
     }
 
-  /* Then poll uIP for new XMIT data */
+  /* Then poll the network for new XMIT data */
 
   lpc43_dopoll(priv);
 }
@@ -2120,7 +2120,7 @@ static inline void lpc43_txtimeout_process(FAR struct lpc43_ethmac_s *priv)
   lpc43_ifdown(&priv->dev);
   lpc43_ifup(&priv->dev);
 
-  /* Then poll uIP for new XMIT data */
+  /* Then poll the network for new XMIT data */
 
   lpc43_dopoll(priv);
 }

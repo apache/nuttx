@@ -137,6 +137,7 @@ static const struct fb_planeinfo_s g_planeinfo =
   .fbmem    = (FAR void *)&g_fb,
   .fblen    = FB_SIZE,
   .stride   = FB_WIDTH,
+  .display  = 0,
   .bpp      = CONFIG_SIM_FBBPP,
 };
 #else

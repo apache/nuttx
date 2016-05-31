@@ -1,10 +1,10 @@
 /****************************************************************************
  * include/nuttx/net/netconfig.h
- * Configuration options for NuttX uIP-based networking.
+ * Configuration options for NuttX networking.
  *
- * This file is used for tweaking various configuration options for
- * uIP. This is most assuring the correct default values are provided and
- * that configured options are valid.
+ * This file is used for tweaking various configuration options for the
+ * network. This is most assuring the correct default values are provided
+ * and that configured options are valid.
  *
  * Note: Network configuration options the netconfig.h should not be changed,
  * but rather the per-project defconfig file.
@@ -72,8 +72,8 @@
 
 /* Layer 2 Configuration Options ********************************************/
 
-/* The default data link layer for uIP is Ethernet.  If CONFIG_NET_SLIP is
- * defined in the NuttX header file, then SLIP will be supported.  The basic
+/* The default data link laye is Ethernet.  If CONFIG_NET_SLIP is defined in
+ * the NuttX header file, then SLIP will be supported.  The basic
  * differences between the SLIP and Ethernet configurations is that when SLIP
  * is selected:
  *
@@ -204,7 +204,7 @@
 
 /* IP configuration options */
 
-/* The IP TTL (time to live) of IP packets sent by uIP.
+/* The IP TTL (time to live) of IP packets sent by the network stack.
  *
  * This should normally not be changed.
  */
@@ -494,7 +494,7 @@
 #ifndef CONFIG_NET_ARPTAB_SIZE
 /* The size of the ARP table.
  *
- * This option should be set to a larger value if this uIP node will
+ * This option should be set to a larger value if this network node will
  * have many connections from the local network.
  */
 
@@ -532,7 +532,7 @@
 /* Statistics datatype
  *
  * This typedef defines the dataype used for keeping statistics in
- * uIP.
+ * the network.
  */
 
 typedef uint16_t net_stats_t;

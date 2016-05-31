@@ -1,7 +1,7 @@
 /****************************************************************************
  * graphics/nxbe/nxbe_filltrapezoid.c
  *
- *   Copyright (C) 2008-2009, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,6 +48,14 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#ifndef MIN
+#  define MIN(a,b) (((a) < (b)) ? (a) : (b))
+#endif
+
+#ifndef MAX
+#  define MAX(a,b) (((a) > (b)) ? (a) : (b))
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -58,14 +66,6 @@ struct nxbe_filltrap_s
   struct nxgl_trapezoid_s trap;
   nxgl_mxpixel_t color;
 };
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
@@ -85,7 +85,26 @@ static void nxbe_clipfilltrapezoid(FAR struct nxbe_clipops_s *cops,
                                    FAR const struct nxgl_rect_s *rect)
 {
   struct nxbe_filltrap_s *fillinfo = (struct nxbe_filltrap_s *)cops;
+#ifdef CONFIG_NX_UPDATE
+  struct nxgl_rect_s update;
+#endif
+
+  /* Draw the trapezond */
+
   plane->filltrapezoid(&plane->pinfo, &fillinfo->trap, rect, fillinfo->color);
+
+#ifdef CONFIG_NX_UPDATE
+  /* Notify external logic that the display has been updated */
+
+  update.pt1.x = MIN(MAX(fillinfo->trap.top.x1, rect->pt1.x),
+                     MAX(fillinfo->trap.bot.x1, rect->pt1.x));
+  update.pt1.y = MAX(fillinfo->trap.top.y, rect->pt1.y);
+  update.pt2.x = MAX(MIN(fillinfo->trap.top.x2, rect->pt2.x),
+                     MIN(fillinfo->trap.bot.x2, rect->pt2.x));
+  update.pt2.y = MIN(fillinfo->trap.bot.y, rect->pt2.y);
+
+  nx_notify_rectangle(&plane->pinfo, &update);
+#endif
 }
 
 /****************************************************************************

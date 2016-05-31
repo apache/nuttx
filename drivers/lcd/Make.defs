@@ -33,11 +33,9 @@
 #
 ############################################################################
 
-# Don't build anything if there is no NX support for LCD drivers
-
 ifeq ($(CONFIG_NX_LCDDRIVER),y)
 
-# Include LCD drivers
+# Include support for Graphics LCD drivers
 
 ifeq ($(CONFIG_LCD_P14201),y)
   CSRCS += p14201.c
@@ -102,11 +100,25 @@ endif
 ifeq ($(CONFIG_LCD_RA8875),y)
   CSRCS += ra8875.c
 endif
+endif # CONFIG_NX_LCDDRIVER
 
-# Include LCD driver build support
+ifeq ($(CONFIG_SLCD),y)
 
-DEPPATH += --dep-path lcd
-VPATH += :lcd
-CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)lcd}
+# Include support for Alphanumeric/Segment LCD drivers
+
+ifeq ($(CONFIG_LCD_BACKPACK),y)
+  CSRCS += pcf8574_lcd_backpack.c
 endif
+endif # CONFIG_SLCD
 
+# Include LCD driver build support (the nested if-then-else implements an OR)
+
+ifeq ($(CONFIG_NX_LCDDRIVER),y)
+  DEPPATH += --dep-path lcd
+  VPATH += :lcd
+  CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)lcd}
+else ifeq ($(CONFIG_SLCD),y)
+  DEPPATH += --dep-path lcd
+  VPATH += :lcd
+  CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)lcd}
+endif

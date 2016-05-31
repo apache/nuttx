@@ -13,9 +13,9 @@ config NET_PKT
 
 		Packet sockets allow receiving and transmitting frames without
 		a transport protocol in between. Frames received are copied into
-		a packet socket tap before they enter uIP. Data written into a
-		packet socket will bypass uIP altogether and be placed in the
-		transmission buffer of the network interface driver.
+		a packet socket tap before they enter the network. Data written into
+		a packet socket will bypass the network altogether and be placed in
+		the transmission buffer of the network interface driver.
 
 if NET_PKT
 

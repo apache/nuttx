@@ -2,8 +2,10 @@
  * drivers/sensors/ads1242.c
  * Character driver for the MCP3426 Differential Input 16 Bit Delta/Sigma ADC
  *
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2015 DS-Automotion GmbH. All rights reserved.
  *   Author: Alexander Entinger <a.entinger@ds-automotion.com>
+ *           Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -70,6 +72,8 @@ struct ads1242_dev_s
 
 /* SPI Helpers */
 
+static void    ads1242_lock(FAR struct spi_dev_s *spi);
+static void    ads1242_unlock(FAR struct spi_dev_s *spi);
 static void    ads1242_reset(FAR struct ads1242_dev_s *dev);
 static void    ads1242_performSelfGainCalibration(
                  FAR struct ads1242_dev_s *dev);
@@ -129,18 +133,49 @@ static const struct file_operations g_ads1242_fops =
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: ads1242_lock
+ *
+ * Description:
+ *   Lock and configure the SPI bus.
+ *
+ ****************************************************************************/
+
+static void ads1242_lock(FAR struct spi_dev_s *spi)
+{
+  (void)SPI_LOCK(spi, true);
+  SPI_SETMODE(spi, ADS1242_SPI_MODE);
+  SPI_SETBITS(spi, 8);
+  (void)SPI_HWFEATURES(spi, 0);
+  SPI_SETFREQUENCY(spi, ADS1242_SPI_FREQUENCY);
+}
+
+/****************************************************************************
+ * Name: ads1242_unlock
+ *
+ * Description:
+ *   Unlock the SPI bus.
+ *
+ ****************************************************************************/
+
+static void ads1242_unlock(FAR struct spi_dev_s *spi)
+{
+  (void)SPI_LOCK(spi, false);
+}
+
+/****************************************************************************
  * Name: ads1242_reset
  ****************************************************************************/
 
 static void ads1242_reset(FAR struct ads1242_dev_s *dev)
 {
+  ads1242_lock(dev->spi);
+
   SPI_SELECT(dev->spi, 0, true);        /* Set nADC_SPI_CS to low which selects the ADS1242 */
-
   SPI_SEND(dev->spi, ADS1242_CMD_RESET);/* Issue reset command */
-
   SPI_SELECT(dev->spi, 0, false);       /* Set nADC_SPI_CS to high which deselects the ADS1242 */
-
   up_mdelay(100);                       /* Wait a little so the device has time to perform a proper reset */
+
+  ads1242_unlock(dev->spi);
 }
 
 /****************************************************************************
@@ -149,11 +184,13 @@ static void ads1242_reset(FAR struct ads1242_dev_s *dev)
 
 static void ads1242_performSelfGainCalibration(FAR struct ads1242_dev_s *dev)
 {
+  ads1242_lock(dev->spi);
+
   SPI_SELECT(dev->spi, 0, true);
-
   SPI_SEND(dev->spi, ADS1242_CMD_SELF_GAIN_CALIB);
-
   SPI_SELECT(dev->spi, 0, false);
+
+  ads1242_unlock(dev->spi);
 }
 
 /****************************************************************************
@@ -162,11 +199,13 @@ static void ads1242_performSelfGainCalibration(FAR struct ads1242_dev_s *dev)
 
 static void ads1242_performSelfOffsetCalibration(FAR struct ads1242_dev_s *dev)
 {
+  ads1242_lock(dev->spi);
+
   SPI_SELECT(dev->spi, 0, true);
-
   SPI_SEND(dev->spi, ADS1242_CMD_SELF_OFFSET_CALIB);
-
   SPI_SELECT(dev->spi, 0, false);
+
+  ads1242_unlock(dev->spi);
 }
 
 /****************************************************************************
@@ -176,11 +215,13 @@ static void ads1242_performSelfOffsetCalibration(FAR struct ads1242_dev_s *dev)
 static void
 ads1242_performSystemOffsetCalibration(FAR struct ads1242_dev_s *dev)
 {
+  ads1242_lock(dev->spi);
+
   SPI_SELECT(dev->spi, 0, true);
-
   SPI_SEND(dev->spi, ADS1242_CMD_SYSTEM_OFFSET_CALIB);
-
   SPI_SELECT(dev->spi, 0, false);
+
+  ads1242_unlock(dev->spi);
 }
 
 /****************************************************************************
@@ -190,8 +231,9 @@ ads1242_performSystemOffsetCalibration(FAR struct ads1242_dev_s *dev)
 static void ads1242_read_conversion_result(FAR struct ads1242_dev_s *dev,
                                            FAR uint32_t *conversion_result)
 {
-  SPI_SELECT(dev->spi, 0, true);
+  ads1242_lock(dev->spi);
 
+  SPI_SELECT(dev->spi, 0, true);
   SPI_SEND(dev->spi, ADS1242_CMD_READ_DATA);
 
   /* Delay between last SCLK edge for DIN and first SCLK edge for DOUT:
@@ -212,6 +254,8 @@ static void ads1242_read_conversion_result(FAR struct ads1242_dev_s *dev,
    *conversion_result |= ((uint32_t)(SPI_SEND(dev->spi, 0xFF))) << 0;
 
   SPI_SELECT(dev->spi, 0, false);
+
+  ads1242_unlock(dev->spi);
 }
 
 /****************************************************************************
@@ -227,11 +271,15 @@ static void ads1242_read_conversion_result(FAR struct ads1242_dev_s *dev,
 static void ads1242_write_reg(FAR struct ads1242_dev_s *dev,
                               uint8_t const reg_addr, uint8_t const reg_value)
 {
+  ads1242_lock(dev->spi);
+
   SPI_SELECT(dev->spi, 0, true);
   SPI_SEND(dev->spi, ADS1242_CMD_WRITE_REGISTER | reg_addr);
   SPI_SEND(dev->spi, 0x00); /* Write 1 Byte */
   SPI_SEND(dev->spi, reg_value);
   SPI_SELECT(dev->spi, 0, false);
+
+  ads1242_unlock(dev->spi);
 }
 
 /****************************************************************************
@@ -248,6 +296,8 @@ static void ads1242_write_reg(FAR struct ads1242_dev_s *dev,
 static void ads1242_read_reg(FAR struct ads1242_dev_s *dev,
                              uint8_t const reg_addr, FAR uint8_t *reg_value)
 {
+  ads1242_lock(dev->spi);
+
   SPI_SELECT(dev->spi, 0, true);
   SPI_SEND(dev->spi, ADS1242_CMD_READ_REGISTER | reg_addr);
   SPI_SEND(dev->spi, 0x00);  /* Read 1 Byte */
@@ -261,6 +311,8 @@ static void ads1242_read_reg(FAR struct ads1242_dev_s *dev,
   *reg_value = SPI_SEND(dev->spi, 0xFF);
 
   SPI_SELECT(dev->spi, 0, false);
+
+  ads1242_unlock(dev->spi);
 }
 
 /****************************************************************************
@@ -561,14 +613,6 @@ int ads1242_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
       dbg ("Failed to register driver: %d\n", ret);
       kmm_free(priv);
     }
-
-  /* setup SPI frequency */
-
-  SPI_SETFREQUENCY(spi, ADS1242_SPI_FREQUENCY);
-
-  /* Setup SPI mode */
-
-  SPI_SETMODE(spi, ADS1242_SPI_MODE);
 
   return ret;
 }

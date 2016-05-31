@@ -121,7 +121,7 @@ void board_initialize(void)
    */
 
 #if defined(CONFIG_NSH_LIBRARY) && !defined(CONFIG_NSH_ARCHINIT)
-  board_app_initialize();
+  board_app_initialize(0);
 #endif
 
   /* CC3000 wireless initialization */

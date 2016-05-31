@@ -120,19 +120,19 @@
 #    define FLEXUS4_ASSIGNED    1
 #else
 #  undef CONSOLE_DEV                          /* No console */
-#  if defined(CONFIG_USART0_ISUART)
+#  if defined(CONFIG_USART0_SERIALDRIVER)
 #    define TTYFC0_DEV          g_flexus0port /* FLEXUS0 is ttyFC0 */
 #    define FLEXUS0_ASSIGNED    1
-#  elif defined(CONFIG_USART1_ISUART)
+#  elif defined(CONFIG_USART1_SERIALDRIVER)
 #    define TTYFC0_DEV          g_flexus1port /* FLEXUS1 is ttyFC0 */
 #    define FLEXUS1_ASSIGNED    1
-#  elif defined(CONFIG_USART2_ISUART)
+#  elif defined(CONFIG_USART2_SERIALDRIVER)
 #    define TTYFC0_DEV          g_flexus2port /* FLEXUS2 is ttyFC0 */
 #    define FLEXUS2_ASSIGNED    1
-#  elif defined(CONFIG_USART3_ISUART)
+#  elif defined(CONFIG_USART3_SERIALDRIVER)
 #    define TTYFC0_DEV          g_flexus3port /* FLEXUS3 is ttyFC0 */
 #    define FLEXUS3_ASSIGNED    1
-#  elif defined(CONFIG_USART4_ISUART)
+#  elif defined(CONFIG_USART4_SERIALDRIVER)
 #    define TTYFC0_DEV          g_flexus4port /* FLEXUS4 is ttyFC0 */
 #    define FLEXUS4_ASSIGNED    4
 #  endif
@@ -140,19 +140,19 @@
 
 /* Pick ttyFC1.  This could be any of USART0-4 excluding the console UART. */
 
-#if defined(CONFIG_USART0_ISUART) && !defined(FLEXUS0_ASSIGNED)
+#if defined(CONFIG_USART0_SERIALDRIVER) && !defined(FLEXUS0_ASSIGNED)
 #  define TTYFC1_DEV           g_flexus0port /* FLEXUS0 is ttyFC1 */
 #  define FLEXUS0_ASSIGNED     1
-#elif defined(CONFIG_USART1_ISUART) && !defined(FLEXUS1_ASSIGNED)
+#elif defined(CONFIG_USART1_SERIALDRIVER) && !defined(FLEXUS1_ASSIGNED)
 #  define TTYFC1_DEV           g_flexus1port /* FLEXUS1 is ttyFC1 */
 #  define FLEXUS1_ASSIGNED     1
-#elif defined(CONFIG_USART2_ISUART) && !defined(FLEXUS2_ASSIGNED)
+#elif defined(CONFIG_USART2_SERIALDRIVER) && !defined(FLEXUS2_ASSIGNED)
 #  define TTYFC1_DEV           g_flexus2port /* FLEXUS2 is ttyFC1 */
 #  define FLEXUS2_ASSIGNED     1
-#elif defined(CONFIG_USART3_ISUART) && !defined(FLEXUS3_ASSIGNED)
+#elif defined(CONFIG_USART3_SERIALDRIVER) && !defined(FLEXUS3_ASSIGNED)
 #  define TTYFC1_DEV           g_flexus3port /* FLEXUS3 is ttyFC1 */
 #  define FLEXUS3_ASSIGNED     1
-#elif defined(CONFIG_USART4_ISUART) && !defined(FLEXUS4_ASSIGNED)
+#elif defined(CONFIG_USART4_SERIALDRIVER) && !defined(FLEXUS4_ASSIGNED)
 #  define TTYFC1_DEV           g_flexus4port /* FLEXUS4 is ttyFC1 */
 #  define FLEXUS4_ASSIGNED     1
 #endif
@@ -162,16 +162,16 @@
  * could also be the console.
  */
 
-#if defined(CONFIG_USART1_ISUART) && !defined(FLEXUS1_ASSIGNED)
+#if defined(CONFIG_USART1_SERIALDRIVER) && !defined(FLEXUS1_ASSIGNED)
 #  define TTYFC2_DEV           g_flexus1port /* FLEXUS1 is ttyFC2 */
 #  define FLEXUS1_ASSIGNED     1
-#elif defined(CONFIG_USART2_ISUART) && !defined(FLEXUS2_ASSIGNED)
+#elif defined(CONFIG_USART2_SERIALDRIVER) && !defined(FLEXUS2_ASSIGNED)
 #  define TTYFC2_DEV           g_flexus2port /* FLEXUS2 is ttyFC2 */
 #  define FLEXUS2_ASSIGNED     1
-#elif defined(CONFIG_USART3_ISUART) && !defined(FLEXUS3_ASSIGNED)
+#elif defined(CONFIG_USART3_SERIALDRIVER) && !defined(FLEXUS3_ASSIGNED)
 #  define TTYFC2_DEV           g_flexus3port /* FLEXUS3 is ttyFC2 */
 #  define FLEXUS3_ASSIGNED     1
-#elif defined(CONFIG_USART4_ISUART) && !defined(USART4_ASSIGNED)
+#elif defined(CONFIG_USART4_SERIALDRIVER) && !defined(USART4_ASSIGNED)
 #  define TTYFC2_DEV           g_flexus4port /* FLEXUS4 is ttyFC2 */
 #  define FLEXUS4_ASSIGNED     1
 #endif
@@ -181,13 +181,13 @@
  * FLEXUS2-4 could also be the console.
  */
 
-#if defined(CONFIG_USART2_ISUART) && !defined(FLEXUS2_ASSIGNED)
+#if defined(CONFIG_USART2_SERIALDRIVER) && !defined(FLEXUS2_ASSIGNED)
 #  define TTYFC3_DEV           g_flexus2port /* FLEXUS2 is ttyFC3 */
 #  define FLEXUS2_ASSIGNED     1
-#elif defined(CONFIG_USART3_ISUART) && !defined(FLEXUS3_ASSIGNED)
+#elif defined(CONFIG_USART3_SERIALDRIVER) && !defined(FLEXUS3_ASSIGNED)
 #  define TTYFC3_DEV           g_flexus3port /* FLEXUS3 is ttyFC3 */
 #  define FLEXUS3_ASSIGNED     1
-#elif defined(CONFIG_USART4_ISUART) && !defined(FLEXUS4_ASSIGNED)
+#elif defined(CONFIG_USART4_SERIALDRIVER) && !defined(FLEXUS4_ASSIGNED)
 #  define TTYFC3_DEV           g_flexus4port /* FLEXUS4 is ttyFC3 */
 #  define FLEXUS4_ASSIGNED     1
 #endif
@@ -197,10 +197,10 @@
  * USART3-4 could also be the console.
  */
 
-#if defined(CONFIG_USART3_ISUART) && !defined(USART3_ASSIGNED)
+#if defined(CONFIG_USART3_SERIALDRIVER) && !defined(USART3_ASSIGNED)
 #  define TTYFC4_DEV           g_flexus3port /* USART3 is ttyFC4 */
 #  define USART3_ASSIGNED     1
-#elif defined(CONFIG_USART4_ISUART) && !defined(USART4_ASSIGNED)
+#elif defined(CONFIG_USART4_SERIALDRIVER) && !defined(USART4_ASSIGNED)
 #  define TTYFC4_DEV           g_flexus4port /* USART4 is ttyFC4 */
 #  define USART4_ASSIGNED     1
 #endif
@@ -234,19 +234,19 @@ struct flexus_dev_s
  ****************************************************************************/
 
 static int  flexus_interrupt(struct uart_dev_s *dev);
-#ifdef CONFIG_USART0_ISUART
+#ifdef CONFIG_USART0_SERIALDRIVER
 static int  flexus0_interrupt(int irq, void *context);
 #endif
-#ifdef CONFIG_USART1_ISUART
+#ifdef CONFIG_USART1_SERIALDRIVER
 static int  flexus1_interrupt(int irq, void *context);
 #endif
-#ifdef CONFIG_USART2_ISUART
+#ifdef CONFIG_USART2_SERIALDRIVER
 static int  flexus2_interrupt(int irq, void *context);
 #endif
-#ifdef CONFIG_USART3_ISUART
+#ifdef CONFIG_USART3_SERIALDRIVER
 static int  flexus3_interrupt(int irq, void *context);
 #endif
-#ifdef CONFIG_USART4_ISUART
+#ifdef CONFIG_USART4_SERIALDRIVER
 static int  flexus4_interrupt(int irq, void *context);
 #endif
 
@@ -288,30 +288,30 @@ static const struct uart_ops_s g_flexus_ops =
 
 /* I/O buffers */
 
-#ifdef CONFIG_USART0_ISUART
+#ifdef CONFIG_USART0_SERIALDRIVER
 static char g_flexus0rxbuffer[CONFIG_USART0_RXBUFSIZE];
 static char g_flexus0txbuffer[CONFIG_USART0_TXBUFSIZE];
 #endif
-#ifdef CONFIG_USART1_ISUART
+#ifdef CONFIG_USART1_SERIALDRIVER
 static char g_flexus1rxbuffer[CONFIG_USART1_RXBUFSIZE];
 static char g_flexus1txbuffer[CONFIG_USART1_TXBUFSIZE];
 #endif
-#ifdef CONFIG_USART2_ISUART
+#ifdef CONFIG_USART2_SERIALDRIVER
 static char g_flexus2rxbuffer[CONFIG_USART2_RXBUFSIZE];
 static char g_flexus2txbuffer[CONFIG_USART2_TXBUFSIZE];
 #endif
-#ifdef CONFIG_USART3_ISUART
+#ifdef CONFIG_USART3_SERIALDRIVER
 static char g_flexus3rxbuffer[CONFIG_USART3_RXBUFSIZE];
 static char g_flexus3txbuffer[CONFIG_USART3_TXBUFSIZE];
 #endif
-#ifdef CONFIG_USART4_ISUART
+#ifdef CONFIG_USART4_SERIALDRIVER
 static char g_flexus4rxbuffer[CONFIG_USART4_RXBUFSIZE];
 static char g_flexus4txbuffer[CONFIG_USART4_TXBUFSIZE];
 #endif
 
 /* This describes the state of the USART0 port. */
 
-#ifdef CONFIG_USART0_ISUART
+#ifdef CONFIG_USART0_SERIALDRIVER
 static struct flexus_dev_s g_flexus0priv =
 {
   .handler        = flexus0_interrupt,
@@ -345,7 +345,7 @@ static uart_dev_t g_flexus0port =
 
 /* This describes the state of the USART1 port. */
 
-#ifdef CONFIG_USART1_ISUART
+#ifdef CONFIG_USART1_SERIALDRIVER
 static struct flexus_dev_s g_flexus1priv =
 {
   .handler        = flexus1_interrupt,
@@ -379,7 +379,7 @@ static uart_dev_t g_flexus1port =
 
 /* This describes the state of the USART2 port. */
 
-#ifdef CONFIG_USART2_ISUART
+#ifdef CONFIG_USART2_SERIALDRIVER
 static struct flexus_dev_s g_flexus2priv =
 {
   .handler        = flexus2_interrupt,
@@ -413,7 +413,7 @@ static uart_dev_t g_flexus2port =
 
 /* This describes the state of the USART3 port. */
 
-#ifdef CONFIG_USART3_ISUART
+#ifdef CONFIG_USART3_SERIALDRIVER
 static struct flexus_dev_s g_flexus3priv =
 {
   .handler        = flexus3_interrupt,
@@ -447,7 +447,7 @@ static uart_dev_t g_flexus3port =
 
 /* This describes the state of the USART4 port. */
 
-#ifdef CONFIG_USART4_ISUART
+#ifdef CONFIG_USART4_SERIALDRIVER
 static struct flexus_dev_s g_flexus4priv =
 {
   .handler        = flexus4_interrupt,
@@ -613,31 +613,31 @@ static int flexus_interrupt(struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_USART0_ISUART
+#ifdef CONFIG_USART0_SERIALDRIVER
 static int  flexus0_interrupt(int irq, void *context)
 {
   return flexus_interrupt(&g_flexus0port);
 }
 #endif
-#ifdef CONFIG_USART1_ISUART
+#ifdef CONFIG_USART1_SERIALDRIVER
 static int  flexus1_interrupt(int irq, void *context)
 {
   return flexus_interrupt(&g_flexus1port);
 }
 #endif
-#ifdef CONFIG_USART2_ISUART
+#ifdef CONFIG_USART2_SERIALDRIVER
 static int  flexus2_interrupt(int irq, void *context)
 {
   return flexus_interrupt(&g_flexus2port);
 }
 #endif
-#ifdef CONFIG_USART3_ISUART
+#ifdef CONFIG_USART3_SERIALDRIVER
 static int  flexus3_interrupt(int irq, void *context)
 {
   return flexus_interrupt(&g_flexus3port);
 }
 #endif
-#ifdef CONFIG_USART4_ISUART
+#ifdef CONFIG_USART4_SERIALDRIVER
 static int  flexus4_interrupt(int irq, void *context)
 {
   return flexus_interrupt(&g_flexus4port);

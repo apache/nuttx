@@ -79,6 +79,8 @@
  * 0x2001:7fff - End of internal SRAM and end of heap
  */
 
+#define SRAM2_START 0x10000000
+#define SRAM2_END   0x10008000
 #define IDLE_STACK ((uintptr_t)&_ebss+CONFIG_IDLETHREAD_STACKSIZE-4)
 #define HEAP_BASE  ((uintptr_t)&_ebss+CONFIG_IDLETHREAD_STACKSIZE)
 
@@ -285,6 +287,24 @@ void __start(void)
   /* Set the stack limit before we attempt to call any functions */
 
   __asm__ volatile ("sub r10, sp, %0" : : "r" (CONFIG_IDLETHREAD_STACKSIZE - 64) : );
+#endif
+
+#ifdef CONFIG_STM32L4_SRAM2_INIT
+  /* The SRAM2 region is parity checked, but upon power up, it will be in
+   * a random state and probably invalid with respect to parity, potentially
+   * generating faults if accessed.  If elected, we will write zeros to the
+   * memory, forcing the parity to be set to a valid state.
+   * NOTE:  this is optional because this may be inappropriate, especially
+   * if the memory is being used for it's battery backed purpose.  In that
+   * case, the first-time initialization needs to be performed by the board
+   * under application-specific circumstances.  On the other hand, if we're
+   * using this memory for, say, additional heap space, then this is handy.
+   */
+  
+  for (dest = (uint32_t *)SRAM2_START; dest < (uint32_t *)SRAM2_END; )
+    {
+      *dest++ = 0;
+    }
 #endif
 
   /* Configure the UART so that we can get debug output as soon as possible */

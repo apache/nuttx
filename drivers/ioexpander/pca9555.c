@@ -427,7 +427,7 @@ static int pca9555_getmultibits(FAR struct pca9555_dev_s *pca, uint8_t addr,
         {
           return -ENXIO;
         }
-      else if(pin > 7)
+      else if (pin > 7)
         {
           index = 1;
           pin  -= 8;
@@ -486,7 +486,7 @@ static int pca9555_multiwritepin(FAR struct ioexpander_dev_s *dev,
           pca9555_unlock(pca);
           return -ENXIO;
         }
-      else if(pin > 7)
+      else if (pin > 7)
         {
           index = 2;
           pin  -= 8;
@@ -574,41 +574,35 @@ static int pca9555_multireadbuf(FAR struct ioexpander_dev_s *dev,
 
 static void pca9555_irqworker(void *arg)
 {
+  FAR struct pca9555_dev_s *pca = (FAR struct pca9555_dev_s *)arg;
   uint8_t addr = PCA9555_REG_INPUT;
   uint8_t buf[2];
-  int ret, bits;
-  FAR struct pca9555_dev_s *pca = (FAR struct pca9555_dev_s *)arg;
+  unsigned int bits;
+  int ret;
 
   /* Read inputs */
 
   ret = pca9555_writeread(pca, &addr, 1, buf, 2);
-  if (ret != OK)
+  if (ret == OK)
     {
-      return;
-    }
+      bits = ((unsigned int)buf[0] << 8) | buf[1];
 
-  bits = (buf[0] << 8) | buf[1];
+      /* If signal PID is registered, enqueue signal. */
 
-  /* If signal PID is registered, enqueue signal. */
-
-  if (pca->dev.sigpid)
-    {
+      if (pca->dev.sigpid)
+        {
 #ifdef CONFIG_CAN_PASS_STRUCTS
-      union sigval value;
-      value.sival_int = bits;
-      ret = sigqueue(pca->dev.sigpid, pca->dev.sigval, value);
+          union sigval value;
+          value.sival_int = (int)bits;
+          ret = sigqueue(pca->dev.sigpid, pca->dev.sigval, value);
 #else
-      ret = sigqueue(pca->dev.sigpid, pca->dev.sigval, (FAR void *)bits);
+          ret = sigqueue(pca->dev.sigpid, pca->dev.sigval,
+                         (FAR void *)bits);
 #endif
-      dbg("pca signal %04X (sig %d to pid %d)\n",
-          bits, pca->dev.sigval, pca->dev.sigpid);
-    }
-  else
-    {
-      dbg("no handler registered\n");
+        }
     }
 
-  /* Re-enable */
+  /* Re-enable interrupts */
 
   pca->config->enable(pca->config, TRUE);
 }
@@ -642,15 +636,20 @@ static int pca9555_interrupt(int irq, FAR void *context)
    * a good thing to do in any event.
    */
 
-  DEBUGASSERT(work_available(&pca->dev.work));
-
   /* Notice that further GPIO interrupts are disabled until the work is
    * actually performed.  This is to prevent overrun of the worker thread.
-   * Interrupts are re-enabled in pca9555_irqworker() when the work is completed.
+   * Interrupts are re-enabled in pca9555_irqworker() when the work is
+   * completed.
    */
 
-  pca->config->enable(pca->config, FALSE);
-  return work_queue(HPWORK, &pca->dev.work, pca9555_irqworker, (FAR void *)pca, 0);
+  if (work_available(&pca->dev.work))
+    {
+      pca->config->enable(pca->config, FALSE);
+      work_queue(HPWORK, &pca->dev.work, pca9555_irqworker,
+                 (FAR void *)pca, 0);
+    }
+
+  return OK;
 }
 
 #endif

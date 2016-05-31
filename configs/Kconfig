@@ -647,6 +647,17 @@ config ARCH_BOARD_PIRELLI_DPL10
 		This directory contains the board support for Pirelli dpl10 phones.  The
 		additions were made by Craig Comstock (with help form Alan Carvalho de Assis).
 
+config ARCH_BOARD_NUCLEO_144
+	bool "STMicro NUCLEO-144"
+	depends on ARCH_CHIP_STM32F746
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		STMicro Nucleo-144 development board featuring the STM32F746ZGT6U
+		MCU. The STM32F746ZGT6U is a 216MHz Cortex-M7 operation with 1024Kb Flash
+		memory and 300Kb SRAM.
+
 config ARCH_BOARD_NUCLEO_F303RE
 	bool "STM32F303 Nucleo F303RE"
 	depends on ARCH_CHIP_STM32F303RE
@@ -895,6 +906,13 @@ config ARCH_BOARD_STM32_TINY
 		STM32F103C8T6 micro-controller chip, and is (always ?) bundled with
 		an nRF24L01+ wireless module.
 
+config ARCH_BOARD_STM32F103_MINIMUM
+	bool "STM32F103C8T6 Minimum ARM Development Board"
+	depends on ARCH_CHIP_STM32F103C8
+	select ARCH_HAVE_LEDS
+	---help---
+		A configuration for the STM32F103 Minimum board.
+
 config ARCH_BOARD_STM3210E_EVAL
 	bool "STMicro STM3210E-EVAL development board"
 	depends on ARCH_CHIP_STM32F103ZE
@@ -945,6 +963,16 @@ config ARCH_BOARD_STM32F4_DISCOVERY
 	---help---
 		STMicro STM32F4-Discovery board based on the STMicro STM32F407VGT6 MCU.
 
+config ARCH_BOARD_STM32F411E_DISCO
+	bool "STMicro STM32F411E-Discovery board"
+	depends on ARCH_CHIP_STM32F411VE
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		This is a minimal configuration that supports low-level test of the
+		STMicro STM32F411E-Discovery Board.
+
 config ARCH_BOARD_STM32F429I_DISCO
 	bool "STMicro STM32F429I-Discovery board"
 	depends on ARCH_CHIP_STM32F429Z
@@ -963,7 +991,7 @@ config ARCH_BOARD_STM32F746G_DISCO
 	---help---
 		STMicro STM32F746G-DISCO development board featuring the STM32F746NGH6
 		MCU. The STM32F746NGH6  is a 216MHz Cortex-M7 operation with 1024Kb Flash
-		memory and 300Kb SRAM.
+		memory and 320Kb SRAM.
 
 config ARCH_BOARD_STM32L476VG_DISCO
 	bool "STMicro STM32F746VG-Discovery board"
@@ -1135,7 +1163,7 @@ config ARCH_BOARD_VIEWTOOL_STM32F107
 config ARCH_BOARD_XTRS
 	bool "XTRS TRS80 Model 3 emulation"
 	depends on ARCH_CHIP_Z80
-	select ARCH_HAVE_UART
+	select UART_SERIALDRIVER
 	---help---
 		TRS80 Model 3.  This port uses a vintage computer based on the Z80.
 		An emulator for this computer is available to run TRS80 programs on a
@@ -1153,7 +1181,7 @@ config ARCH_BOARD_Z16F2800100ZCOG
 config ARCH_BOARD_Z80SIM
 	bool "Z80 Instruction Set Simulator"
 	depends on ARCH_CHIP_Z80
-	select ARCH_HAVE_UART
+	select UART_SERIALDRIVER
 	---help---
 		z80 Microcontroller.  This port uses a Z80 instruction set simulator
 		called z80sim.  This port also uses the SDCC toolchain
@@ -1274,7 +1302,6 @@ config BOARD_CUSTOM_LEDS
 	bool "Custom board LEDs"
 	default n
 	select ARCH_HAVE_LEDS
-	select ARCH_LEDS
 
 config BOARD_CUSTOM_BUTTONS
 	bool "Custom board buttons"
@@ -1364,6 +1391,7 @@ config ARCH_BOARD
 	default "pic32mx7mmb"              if ARCH_BOARD_PIC32MX7MMB
 	default "pic32mz-starterkit"       if ARCH_BOARD_PIC32MZ_STARTERKIT
 	default "pirelli_dpl10"            if ARCH_BOARD_PIRELLI_DPL10
+	default "nucleo-144"               if ARCH_BOARD_NUCLEO_144
 	default "nucleo-f303re"            if ARCH_BOARD_NUCLEO_F303RE
 	default "nucleo-f4x1re"            if ARCH_BOARD_NUCLEO_F401RE || ARCH_BOARD_NUCLEO_F411RE
 	default "nucleo-l476rg"            if ARCH_BOARD_NUCLEO_L476RG
@@ -1388,11 +1416,13 @@ config ARCH_BOARD
 	default "skp16c26"                 if ARCH_BOARD_SKP16C26
 	default "spark"                    if ARCH_BOARD_SPARK
 	default "stm32_tiny"               if ARCH_BOARD_STM32_TINY
+	default "stm32f103-minimum"        if ARCH_BOARD_STM32F103_MINIMUM
 	default "stm3210e-eval"            if ARCH_BOARD_STM3210E_EVAL
 	default "stm3220g-eval"            if ARCH_BOARD_STM3220G_EVAL
 	default "stm3240g-eval"            if ARCH_BOARD_STM3240G_EVAL
 	default "stm32f3discovery"         if ARCH_BOARD_STM32F3_DISCOVERY
 	default "stm32f4discovery"         if ARCH_BOARD_STM32F4_DISCOVERY
+	default "stm32f411e-disco"         if ARCH_BOARD_STM32F411E_DISCO
 	default "stm32f429i-disco"         if ARCH_BOARD_STM32F429I_DISCO
 	default "stm32f746g-disco"         if ARCH_BOARD_STM32F746G_DISCO
 	default "stm32l476vg-disco"        if ARCH_BOARD_STM32L476VG_DISCO
@@ -1670,6 +1700,9 @@ endif
 if ARCH_BOARD_PIRELLI_DPL10
 source "configs/pirelli_dpl10/Kconfig"
 endif
+if ARCH_BOARD_NUCLEO_144
+source "configs/nucleo-144/Kconfig"
+endif
 if ARCH_BOARD_NUCLEO_F303RE
 source "configs/nucleo-f303re/Kconfig"
 endif
@@ -1742,6 +1775,9 @@ endif
 if ARCH_BOARD_STM32_TINY
 source "configs/stm32_tiny/Kconfig"
 endif
+if ARCH_BOARD_STM32F103_MINIMUM
+source "configs/stm32f103-minimum/Kconfig"
+endif
 if ARCH_BOARD_STM3210E_EVAL
 source "configs/stm3210e-eval/Kconfig"
 endif
@@ -1753,6 +1789,9 @@ source "configs/stm3240g-eval/Kconfig"
 endif
 if ARCH_BOARD_STM32F4_DISCOVERY
 source "configs/stm32f4discovery/Kconfig"
+endif
+if ARCH_BOARD_STM32F411E_DISCO
+source "configs/stm32f411e-disco/Kconfig"
 endif
 if ARCH_BOARD_STM32F429I_DISCO
 source "configs/stm32f429i-disco/Kconfig"

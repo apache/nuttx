@@ -13,36 +13,116 @@ Contents
   - LEDs and Buttons
   - Using U-Boot to Run NuttX
   - Debugging with the Segger J-Link
+  - SMP
   - Configurations
 
 Status
 ======
 
 2016-02-28: The i.MX6Q port is just beginning. A few files have been
-populated with the port is a long way from being complete or even ready to
-begin any kind of testing.
+  populated with the port is a long way from being complete or even ready to
+  begin any kind of testing.
 
 2016-03-12: The i.MX6Q port is code complete including initial
-implementation of logic needed for CONFIG_SMP=y  .  There is no clock
-configuration logic.  This is probably not an issue if we are loaded into
-SDRAM by a bootloader (because we cannot change the clocking anyway in
-that case).
+  implementation of logic needed for CONFIG_SMP=y  .  There is no clock
+  configuration logic.  This is probably not an issue if we are loaded into
+  SDRAM by a bootloader (because we cannot change the clocking anyway in
+  that case).
 
-There is a lot of testing that could be done but, unfortunately, I still
-have no i.MX6 hardware to test on.
+  There is a lot of testing that could be done but, unfortunately, I still
+  have no i.MX6 hardware to test on.
 
-In additional to the unexpected issues, I do expect to run into some
-cache coherency issues when I get to testing an SMP configuration.
+  In additional to the unexpected issues, I do expect to run into some
+  cache coherency issues when I get to testing an SMP configuration.
 
 2016-03-28:  I now have a used MCIMX6Q-SDB which is similar to the target
-configuration described below except that it does not have the 10.1" LVDS
-display.  Next step:  Figure out how to run a copy of NuttX using U-Boot.
+  configuration described below except that it does not have the 10.1" LVDS
+  display.  Next step:  Figure out how to run a copy of NuttX using U-Boot.
 
 2016-03-31: Most all of the boot of the NSH configuration seems to be
-working.  It gets to NSH and NSH appears to run normally.  Non-interrupt
-driver serial output to the VCOM console is working (llsyslog).  However,
-there does not appear to be any interrupt activity:  No timer interrupts,
-no interrupt driver serial console output (syslog, printf).
+  working.  It gets to NSH and NSH appears to run normally.  Non-interrupt
+  driver serial output to the VCOM console is working (llsyslog).  However,
+  there does not appear to be any interrupt activity:  No timer interrupts,
+  no interrupt driver serial console output (syslog, printf).
+
+2016-05-16:  I now get serial interrupts (but not timer interrupts).  This
+  involves a few changes to GIC bit settings that I do not fully understand.
+  With this change, the NSH serial console works:
+
+    MX6Q SABRESD U-Boot > ABEFGHILMN
+
+    NuttShell (NSH)
+    nsh>
+
+  But there are still no timer interrupts.  LEDs do not appear to be working.
+
+2016-05-17:  Timer interrupts now work.  This turned out to be just a minor
+  bit setting error in the timer configuration.  LEDs were not working simply
+  because board_autoled_initialize() was not being called in the board startup
+  logic.
+
+  At this point, I would say that the basic NSH port is complete.
+
+2016-05-18: Started looking at the SMP configuration.  Initially, I verfied
+  that the NSH configuration works with CONFIG_SMP_NCPUS=1.  Not a very
+  interesting case, but this does exercise a lot of the basic SMP logic.
+
+  When more than one CPU is configured, then there are certain failures that
+  appear to be stack corruption problem.  See the open issues below under
+  SMP.
+
+2016-05-22: In a simple NSH case, SMP does not seem to be working.  But there
+  are known SMP open issues so I assume if the tasking were stressed more there
+  would be additional failures.  See the open issues below under SMP.
+
+  An smp configuration was added.  This is not quite the same as the
+  configuration that I used for testing.  I enabled DEBUG output, ran with
+  only 2 CPUS, and disabled the RAMLOG:
+
+    +CONFIG_DEBUG=y
+    +CONFIG_DEBUG_VERBOSE=y
+    +CONFIG_DEBUG_SCHED=y
+    +CONFIG_DEBUG_SYMBOLS=y
+
+    -CONFIG_DEBUG_FULLOPT=y
+    +CONFIG_DEBUG_NOOPT=y
+
+    -CONFIG_SMP_NCPUS=4
+    +CONFIG_SMP_NCPUS=2
+
+    -CONFIG_RAMLOG=y
+    -CONFIG_RAMLOG_SYSLOG=y
+    -CONFIG_RAMLOG_BUFSIZE=16384
+    -CONFIG_RAMLOG_NONBLOCKING=y
+    -CONFIG_RAMLOG_NPOLLWAITERS=4
+    -CONFIG_SYSLOG=y
+
+  I would also disable debug output from CPU0 so that I could better see the
+  debug output from CPU1:
+
+    $ diff -u libc/syslog/lib_lowsyslog.c libc/syslog/lib_lowsyslog.c.SAVE
+    --- libc/syslog/lib_lowsyslog.c 2016-05-22 14:56:35.130096500 -0600
+    +++ libc/syslog/lib_lowsyslog.c.SAVE    2016-05-20 13:36:22.588330100 -0600
+    @@ -126,7 +126,0 @@
+     {
+       va_list ap;
+       int ret;
+    +if (up_cpu_index() == 0) return 17; // REMOVE ME
+      
+       /* Let lowvsyslog do the work */
+    
+       va_start(ap, fmt);
+  
+    $ diff -u libc/syslog/lib_syslog.c libc/syslog/lib_syslog.c.SAVE
+    --- libc/syslog/lib_syslog.c    2016-05-22 14:56:35.156098100 -0600
+    +++ libc/syslog/lib_syslog.c.SAVE       2016-05-20 13:36:15.331284000 -0600
+    @@ -192,6 +192,7 @@
+     {
+       va_list ap;
+       int ret;
+    +if (up_cpu_index() == 0) return 17; // REMOVE ME
+    
+       /* Let vsyslog do the work */
 
 Platform Features
 =================
@@ -111,7 +191,7 @@ LEDs
 ----
 A single LED is available driven GPIO1_IO02.  On the schematic this is
 USR_DEF_RED_LED signal to pin T1 (GPIO_2).  This signal is shared with
-KEY_ROW6 (ALT2).  A low value illuminates the LED.
+KEY_ROW6 (ALT2).  A high value illuminates the LED.
 
 This LED is not used by the board port unless CONFIG_ARCH_LEDS is
 defined.  In that case, the usage by the board port is defined in
@@ -418,6 +498,74 @@ A: Yes with the following modifications to the prodecure above.
        gdb> mon set pc 0x10800040
        gdb> s
 
+SMP
+===
+
+The i.MX6 6Quad has 4 CPUs.  Support is included for testing an SMP
+configuration.  That configuration is still not yet ready for usage but can
+be enabled with the following configuration settings:
+
+  Build Setup:
+    CONFIG_EXPERIMENTAL=y
+
+  RTOS Features -> Tasks and Scheduling
+    CONFIG_SPINLOCK=y
+    CONFIG_SMP=y
+    CONFIG_SMP_NCPUS=4
+    CONFIG_SMP_IDLETHREAD_STACKSIZE=2048
+
+Open Issues:
+
+1. Currently all device interrupts are handled on CPU0 only.  Critical sections will
+   attempt to disable interrupts but will now disable interrupts only on the current
+   CPU (which may not be CPU0).  Perhaps that should be a spinlock to prohibit
+   execution of interrupts on CPU0 when other CPUs are in a critical section?
+
+2. Cache Concurency.  This is a complex problem.  There is logic in place now to
+   clean CPU0 D-cache before starting a new CPU and for invalidating the D-Cache
+   when the new CPU is started.  REVISIT:  Seems that this should not be necessary.
+   If the Shareable bit set in the MMU mappings and my understanding is that this
+   should keep cache coherency at least within a cluster.  I need to study more
+   how the inner and outer shareable attribute works to control cacheing
+
+   But there may are many, many more such cache coherency issues if I cannot find
+   a systematic way to manage cache coherency.
+
+   http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.dht0008a/CJABEHDA.html
+   http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.den0024a/CEGDBEJE.html
+
+   Try:
+
+    --- mmu.h.orig  2016-05-20 13:09:34.773462000 -0600
+    +++ mmu.h       2016-05-20 13:03:13.261978100 -0600
+    @@ -572,8 +572,14 @@
+
+     #define MMU_ROMFLAGS         (PMD_TYPE_SECT | PMD_SECT_AP_R1 | PMD_CACHEABLE | \
+                                   PMD_SECT_DOM(0))
+    -#define MMU_MEMFLAGS         (PMD_TYPE_SECT | PMD_SECT_AP_RW1 | PMD_CACHEABLE | \
+    +#ifdef CONFIG_SMP
+    +
+    +#  define MMU_MEMFLAGS       (PMD_TYPE_SECT | PMD_SECT_AP_RW1 | PMD_CACHEABLE | \
+    +                              PMD_SECT_S | PMD_SECT_DOM(0))
+    +#else
+    +#  define MMU_MEMFLAGS       (PMD_TYPE_SECT | PMD_SECT_AP_RW1 | PMD_CACHEABLE | \
+                                   PMD_SECT_DOM(0))
+    +#endif
+     #define MMU_IOFLAGS          (PMD_TYPE_SECT | PMD_SECT_AP_RW1 | PMD_DEVICE | \
+                                   PMD_SECT_DOM(0) | PMD_SECT_XN)
+     #define MMU_STRONGLY_ORDERED (PMD_TYPE_SECT | PMD_SECT_AP_RW1 | \
+
+3. Assertions.  On a fatal assertions, other CPUs need to be stopped.  The SCR,
+   however, only supports disabling CPUs 1 through 3.  Perhaps if the assertion
+   occurs on CPUn, n > 0, then it should use and SGI to perform the assertion
+   on CPU0 always.  From CPU0, CPU1-3 can be disabled.
+
+4. Caching probabaly interferes with spinlocks as they are currently implemented.
+   Waiting on a cached copy of the spinlock may result in a hang or a failure to
+   wait.
+
+5. Do spinlocks need to go into a special "strongly ordered" memory region?
+
 Configurations
 ==============
 
@@ -484,3 +632,40 @@ Configuration sub-directories
     at apps/nshlib with the start logic at apps/examples/nsh.
 
     NOTES:
+
+    1. This configuration assumes that we are loaded into SDRAM and
+       started via U-Boot.
+
+    2. The serial console is configured by default for use UART1, the
+       USB VCOM port (UART1), same as the serial port used by U-Boot.
+       You will need to reconfigure if you want to use a different UART.
+
+    3. NSH built-in applications are supported, but no built-in
+       applications are enabled.
+
+       Binary Formats:
+         CONFIG_BUILTIN=y           : Enable support for built-in programs
+
+       Application Configuration:
+         CONFIG_NSH_BUILTIN_APPS=y  : Enable starting apps from NSH command line
+
+    4. The RAMLOG is enabled.  All SYSLOG (DEBUG) output will go to the
+       RAMLOG and will not be visible unless you use the nsh 'dmesg'
+       command.  To disable this RAMLOG feature, disable the following:
+
+       File Systems:    CONFIG_SYSLOG
+       Device Drivers:  CONFIG_RAMLOG
+
+
+  smp
+  ---
+    This is a configuration of testing the SMP configuration.  It is
+    essentially equivalent to the SMP configuration except has SMP enabled.
+
+    NOTES:
+
+    1. See the notest for the nsh configuration.  Since this configuration
+       is essentially the same all of those comments apply.
+
+    2. SMP is not fully functional.  See the STATUS and SMP sections above
+       for detailed SMP-related issues.

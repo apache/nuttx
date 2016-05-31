@@ -268,6 +268,7 @@ static inline void up_waittxready(struct up_dev_s *priv)
 static inline void up_enablebreaks(struct up_dev_s *priv, bool enable)
 {
   uint16_t lcr = up_serialin(priv, UART_LCR);
+
   if (enable)
     {
       lcr |= UART_LCR_BOC;
@@ -276,6 +277,7 @@ static inline void up_enablebreaks(struct up_dev_s *priv, bool enable)
     {
       lcr &= ~UART_LCR_BOC;
     }
+
   up_serialout(priv, UART_LCR, lcr);
 }
 

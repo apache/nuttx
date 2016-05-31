@@ -902,6 +902,32 @@ int nx_bitmap(NXWINDOW hwnd, FAR const struct nxgl_rect_s *dest,
               FAR const struct nxgl_point_s *origin, unsigned int stride);
 
 /****************************************************************************
+ * Name: nx_notify_rectangle
+ *
+ * Description:
+ *   When CONFIG_NX_UPDATE=y, then the graphics system will callout to
+ *   inform some external module that the display has been updated.  This
+ *   would be useful in a couple for cases.
+ *
+ *   - When a serial LCD is used, but a framebuffer is used to access the
+ *     LCD.  In this case, the update callout can be used to refresh the
+ *     affected region of the display.
+ *
+ *   - When VNC is enabled.  This is case, this callout is necessary to
+ *     update the remote frame buffer to match the local framebuffer.
+ *
+ * When this feature is enabled, some external logic must provide this
+ * interface.  This is the function that will handle the notification.  It
+ * receives the rectangular region that was updated on the provided plane.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NX_UPDATE
+void nx_notify_rectangle(FAR NX_PLANEINFOTYPE *pinfo,
+                         FAR const struct nxgl_rect_s *rect);
+#endif
+
+/****************************************************************************
  * Name: nx_kbdin
  *
  * Description:

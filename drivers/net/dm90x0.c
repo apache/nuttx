@@ -309,7 +309,7 @@ struct dm9x_driver_s
   void (*dm_write)(const uint8_t *ptr, int len);
   void (*dm_discard)(int len);
 
-  /* This holds the information visible to uIP/NuttX */
+  /* This holds the information visible to the NuttX network */
 
   struct net_driver_s dm_dev;
 };
@@ -737,7 +737,7 @@ static int dm9x_transmit(struct dm9x_driver_s *dm9x)
  * Function: dm9x_txpoll
  *
  * Description:
- *   The transmitter is available, check if uIP has any outgoing packets ready
+ *   The transmitter is available, check if the network has any outgoing packets ready
  *   to send.  This is a callback from devif_poll().  devif_poll() may be called:
  *
  *   1. When the preceding TX packet send is complete,
@@ -873,7 +873,7 @@ static void dm9x_receive(FAR struct dm9x_driver_s *dm9x)
           dm9x->dm_discard(rx.desc.rx_len);
         }
 
-      /* Also check if the packet is a valid size for the uIP configuration */
+      /* Also check if the packet is a valid size for the network configuration */
 
       else if (rx.desc.rx_len < ETH_HDRLEN || rx.desc.rx_len > (CONFIG_NET_ETH_MTU + 2))
         {
@@ -886,7 +886,7 @@ static void dm9x_receive(FAR struct dm9x_driver_s *dm9x)
         }
       else
         {
-          /* Good packet... Copy the packet data out of SRAM and pass it one to uIP */
+          /* Good packet... Copy the packet data out of SRAM and pass it one to the network */
 
           dm9x->dm_dev.d_len = rx.desc.rx_len;
           dm9x->dm_read(dm9x->dm_dev.d_buf, rx.desc.rx_len);
@@ -1065,7 +1065,7 @@ static void dm9x_txdone(struct dm9x_driver_s *dm9x)
       wd_cancel(dm9x->dm_txtimeout);
     }
 
-  /* Then poll uIP for new XMIT data */
+  /* Then poll the network for new XMIT data */
 
   (void)devif_poll(&dm9x->dm_dev, dm9x_txpoll);
 }
@@ -1222,7 +1222,7 @@ static void dm9x_txtimeout(int argc, uint32_t arg, ...)
 
   dm9x_reset(dm9x);
 
-  /* Then poll uIP for new XMIT data */
+  /* Then poll the network for new XMIT data */
 
   (void)devif_poll(&dm9x->dm_dev, dm9x_txpoll);
 }
@@ -1264,7 +1264,7 @@ static void dm9x_polltimer(int argc, uint32_t arg, ...)
 
   if (dm9x->dm_ntxpending < 1 || (dm9x->dm_b100M && dm9x->dm_ntxpending < 2))
     {
-      /* If so, update TCP timing states and poll uIP for new XMIT data */
+      /* If so, update TCP timing states and poll the network for new XMIT data */
 
       (void)devif_timer(&dm9x->dm_dev, dm9x_txpoll);
     }
@@ -1470,7 +1470,7 @@ static int dm9x_txavail(struct net_driver_s *dev)
 
       if (dm9x->dm_ntxpending < 1 || (dm9x->dm_b100M && dm9x->dm_ntxpending < 2))
         {
-          /* If so, then poll uIP for new XMIT data */
+          /* If so, then poll the network for new XMIT data */
 
           (void)devif_poll(&dm9x->dm_dev, dm9x_txpoll);
         }

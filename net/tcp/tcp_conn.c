@@ -73,7 +73,7 @@
  * Private Data
  ****************************************************************************/
 
-/* The array containing all uIP TCP connections. */
+/* The array containing all TCP connections. */
 
 static struct tcp_conn_s g_tcp_connections[CONFIG_NET_TCP_CONNS];
 

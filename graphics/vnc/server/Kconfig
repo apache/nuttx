@@ -1,0 +1,146 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+menuconfig VNCSERVER
+	bool "VNC server"
+	default n
+	depends on NET_TCP && !NX_LCDDRIVER && EXPERIMENTAL
+	select NET_TCP_READAHEAD
+	select NX_UPDATE
+	---help---
+		Enable support for a VNC Remote Frame Buffer (RFB) server.
+
+if VNCSERVER
+
+choice
+	prompt "VNC server protocol"
+	default VNCSERVER_PROTO3p8
+
+config VNCSERVER_PROTO3p3
+	bool "Version 3.3"
+	depends on EXPERIMENTAL
+
+config VNCSERVER_PROTO3p8
+	bool "Version 3.8"
+
+endchoice # VNC server protocol
+
+config VNCSERVER_NDISPLAYS
+	int "Number of displays"
+	default 1
+	range 1 99
+	---help---
+		Specifies the number of RFB displays supported by the server.
+		Normally this should be one.
+
+config VNCSERVER_NAME
+	string "VNC display name"
+	default "NuttX"
+
+config VNCSERVER_PRIO
+	int "VNC server task priority"
+	default 100
+
+config VNCSERVER_STACKSIZE
+	int "VNC server stack size"
+	default 2048
+
+config VNCSERVER_UPDATER_PRIO
+	int "VNC updater thread priority"
+	default 100
+
+config VNCSERVER_UPDATER_STACKSIZE
+	int "VNC updater thread stack size"
+	default 2048
+
+choice
+	prompt "VNC color format"
+	default VNCSERVER_COLORFMT_RGB16
+
+config VNCSERVER_COLORFMT_RGB8
+	bool "RGB8 3:3:2"
+
+config VNCSERVER_COLORFMT_RGB16
+	bool "RGB16 5:6:5"
+
+config VNCSERVER_COLORFMT_RGB32
+	bool "RGB32 8:8:8"
+
+endchoice # VNC color format
+
+config VNCSERVER_SCREENWIDTH
+	int "Framebuffer width (pixels)"
+	default 320
+	---help---
+		This setting defines the width in pixels of the local framebuffer.
+
+			Memory usage: PixelWidth * ScreenWidth * ScreenHeight
+
+		So, for example, a 320x240 screen with RGB16 pixels would require
+		2x320x240 = 150 KB of RAM.
+
+config VNCSERVER_SCREENHEIGHT
+	int "Framebuffer height (rows)"
+	default 240
+	---help---
+		This setting defines the height in rows of the local framebuffer.
+
+			Memory usage: PixelWidth * ScreenWidth * ScreenHeight
+
+		So, for example, a 320x240 screen with RGB16 pixels would require
+		2x320x240 = 150 KB of RAM.
+
+config VNCSERVER_NUPDATES
+	int "Number of pre-allocate update structures"
+	default 48
+	---help---
+		This setting provides the number of pre-allocated update structures
+		that will be used.  Dynamic memory allocations are never made.  In
+		the likely event that we run out of update structures, the graphics
+		subsystem will pause and wait for the next structures to be released.
+
+		Overhead is 12-bytes per update structure.
+
+config VNCSERVER_UPDATE_BUFSIZE
+	int "Max update buffer size (bytes)"
+	default 1024
+	---help---
+		A single buffer is pre-allocated for rendering updates.  This
+		setting specifies the maximum in bytes of that update buffer.  For
+		example, an update buffers of 32 pixels at 8-bits per pixel and
+		32-rows would yield a buffer size of 1024!
+
+		Ideally, this buffer should fit in one network packet to avoid
+		accessive re-assembly of partial TCP packets.
+
+config VNCSERVER_KBDENCODE
+	bool "Encode keyboard input"
+	default n
+	depends on LIB_KBDCODEC
+	---help---
+		Use a special encoding of keyboard characters as defined in
+		include/nuttx/input/kbd_coded.h.
+
+config VNCSERVER_INBUFFER_SIZE
+	int "Input buffer size"
+	default 80
+
+config VNCSERVER_DEBUG
+	bool "VNC Server debug"
+	default n
+	depends on DEBUG && !DEBUG_GRAPHICS
+	---help---
+		Normally VNC debug output is selected with DEBUG_GRAPHICS.  The VNC
+		server server suupport this special option to enable GRAPHICS debug
+		output for the VNC server while GRAPHICS debug is disabled.  This
+		provides an cleaner, less cluttered output when you only wish to
+		debug the VNC server versus enabling DEBUG_GRAPHICS globally.
+
+config VNCSERVER_UPDATE_DEBUG
+	bool "Detailed updater debug"
+	default n
+	depends on DEBUG_GRAPHICS || VNCSERVER_DEBUG
+
+endif # VNCSERVER

@@ -103,7 +103,7 @@ void sam_boardinitialize(void)
 
 #ifdef CONFIG_SAMV7_SDRAMC
   /* Configure SDRAM if it has been enabled in the NuttX configuration.
-   * Here we assume, of course, that we are not running out SDRAM.
+   * Here we assume, of course, that we are not running out of SDRAM.
    */
 
   sam_sdram_config();

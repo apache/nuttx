@@ -477,6 +477,18 @@ FAR struct mtd_dev_s *sst25_initialize(FAR struct spi_dev_s *dev);
 FAR struct mtd_dev_s *sst25xx_initialize(FAR struct spi_dev_s *dev);
 
 /****************************************************************************
+ * Name: sst26_initialize_spi
+ *
+ * Description:
+ *   Initializes the driver for SPI-based SST26 FLASH
+ *
+ *   Supports SST26VF016 SST26VF032 SST26VF064
+ *
+ ****************************************************************************/
+
+FAR struct mtd_dev_s *sst26_initialize_spi(FAR struct spi_dev_s *dev);
+
+/****************************************************************************
  * Name: sst39vf_initialize
  *
  * Description:
@@ -512,6 +524,19 @@ FAR struct mtd_dev_s *w25_initialize(FAR struct spi_dev_s *dev);
 struct qspi_dev_s; /* Forward reference */
 FAR struct mtd_dev_s *s25fl1_initialize(FAR struct qspi_dev_s *qspi,
                                         bool unprotect);
+
+/****************************************************************************
+ * Name: n25qxxx_initialize
+ *
+ * Description:
+ *   Create an initialize MTD device instance for the QuadSPI-based N25Qxxx
+ *   FLASH part from Micron.
+ *
+ ****************************************************************************/
+
+struct qspi_dev_s; /* Forward reference */
+FAR struct mtd_dev_s *n25qxxx_initialize(FAR struct qspi_dev_s *qspi,
+                                         bool unprotect);
 
 /****************************************************************************
  * Name: up_flashinitialize

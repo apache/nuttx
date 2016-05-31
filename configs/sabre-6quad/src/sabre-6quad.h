@@ -57,12 +57,12 @@
  *
  * A single LED is available driven GPIO1_IO02.  On the schematic this is
  * USR_DEF_RED_LED signal to pin T1 (GPIO_2).  This signal is shared with KEY_ROW6
- * (ALT2).  A low value illuminates the LED.
+ * (ALT2).  A high value illuminates the LED.
  */
 
 #define IOMUX_LED  (IOMUX_PULL_NONE | IOMUX_CMOS_OUTPUT | IOMUX_DRIVE_40OHM | \
                     IOMUX_SPEED_MEDIUM | IOMUX_SLEW_SLOW)
-#define GPIO_LED   (GPIO_OUTPUT | GPIO_OUTPUT_ONE | GPIO_PORT1 | GPIO_PIN2 | \
+#define GPIO_LED   (GPIO_OUTPUT | GPIO_OUTPUT_ZERO | GPIO_PORT1 | GPIO_PIN2 | \
                     IOMUX_LED)
 
 /************************************************************************************

@@ -331,7 +331,7 @@ EXTERN uint32_t _eramfuncs;       /* Copy destination end address in RAM */
 
 /* Low level initialization provided by board-level logic ******************/
 
-void up_boot(void);
+void arm_boot(void);
 
 /* Context switching */
 

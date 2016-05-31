@@ -220,7 +220,7 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
   if (tcb->stack_alloc_ptr)
     {
 #if defined(CONFIG_TLS) && defined(CONFIG_STACK_COLORATION)
-      uinptr_t stack_base;
+      uintptr_t stack_base;
 #endif
       size_t top_of_stack;
       size_t size_of_stack;
@@ -264,7 +264,7 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
        * water marks.
        */
 
-      stackbase  = (uintptr_t)tcb->stack_alloc_ptr + sizeof(struct tls_info_s);
+      stack_base = (uintptr_t)tcb->stack_alloc_ptr + sizeof(struct tls_info_s);
       stack_size = tcb->adj_stack_size - sizeof(struct tls_info_s);
       up_stack_color((FAR void *)stack_base, stack_size);
 
