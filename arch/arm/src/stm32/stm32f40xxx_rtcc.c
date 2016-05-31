@@ -219,7 +219,9 @@ static int rtchw_set_alrmbr(rtc_alarmreg_t alarmreg);
 #ifdef CONFIG_DEBUG_RTC
 static void rtc_dumpregs(FAR const char *msg)
 {
-  rtclldbg("*** %s:\n", msg);
+  int rtc_state;
+
+  rtclldbg("%s:\n", msg);
   rtclldbg("      TR: %08x\n", getreg32(STM32_RTC_TR));
   rtclldbg("      DR: %08x\n", getreg32(STM32_RTC_DR));
   rtclldbg("      CR: %08x\n", getreg32(STM32_RTC_CR));
@@ -240,11 +242,12 @@ static void rtc_dumpregs(FAR const char *msg)
   rtclldbg("ALRMASSR: %08x\n", getreg32(STM32_RTC_ALRMASSR));
   rtclldbg("ALRMBSSR: %08x\n", getreg32(STM32_RTC_ALRMBSSR));
   rtclldbg("MAGICREG: %08x\n", getreg32(RTC_MAGIC_REG));
-  int rtc_state =
-		  ((getreg32(STM32_EXTI_RTSR) & EXTI_RTC_ALARM) ? 0x1000 : 0) |
-		  ((getreg32(STM32_EXTI_FTSR) & EXTI_RTC_ALARM) ? 0x0100 : 0) |
-		  ((getreg32(STM32_EXTI_IMR)  & EXTI_RTC_ALARM) ? 0x0010 : 0) |
-		  ((getreg32(STM32_EXTI_EMR)  & EXTI_RTC_ALARM) ? 0x0001 : 0);
+
+  rtc_state =
+    ((getreg32(STM32_EXTI_RTSR) & EXTI_RTC_ALARM) ? 0x1000 : 0) |
+    ((getreg32(STM32_EXTI_FTSR) & EXTI_RTC_ALARM) ? 0x0100 : 0) |
+    ((getreg32(STM32_EXTI_IMR)  & EXTI_RTC_ALARM) ? 0x0010 : 0) |
+    ((getreg32(STM32_EXTI_EMR)  & EXTI_RTC_ALARM) ? 0x0001 : 0);
   rtclldbg("EXTI (RTSR FTSR ISR EVT): %01x\n",rtc_state);
 }
 #else
@@ -1075,7 +1078,6 @@ int up_rtc_initialize(void)
 #endif
 
   g_rtc_enabled = true;
-
   return OK;
 }
 
@@ -1377,14 +1379,20 @@ int stm32_rtc_setalarm(FAR struct alm_setalarm_s *alminfo)
           cbinfo->ac_cb  = alminfo->as_cb;
           cbinfo->ac_arg = alminfo->as_arg;
 
+          /* REVIST: Note that the alarm time is forced to lie within 24
+           * hours by using the flag RTC_ALRMR_DIS_DATE_MASK.  If this mask
+           * is not et then the date tens:units need to be set up.
+           */
+
           ret = rtchw_set_alrmar(alarmreg | RTC_ALRMR_ENABLE | RTC_ALRMR_DIS_DATE_MASK);
           if (ret < 0)
             {
               cbinfo->ac_cb  = NULL;
               cbinfo->ac_arg = NULL;
             }
+
+          rtc_dumpregs("Set AlarmA");
         }
-        rtc_dumpregs("Set AlarmA");
         break;
 
       case RTC_ALARMB:
@@ -1393,14 +1401,20 @@ int stm32_rtc_setalarm(FAR struct alm_setalarm_s *alminfo)
           cbinfo->ac_cb  = alminfo->as_cb;
           cbinfo->ac_arg = alminfo->as_arg;
 
+          /* REVIST: Note that the alarm time is forced to lie within 24
+           * hours by using the flag RTC_ALRMR_DIS_DATE_MASK.  If this mask
+           * is not et then the date tens:units need to be set up.
+           */
+
           ret = rtchw_set_alrmbr(alarmreg | RTC_ALRMR_ENABLE | RTC_ALRMR_DIS_DATE_MASK);
           if (ret < 0)
             {
               cbinfo->ac_cb  = NULL;
               cbinfo->ac_arg = NULL;
             }
+
+          rtc_dumpregs("Set AlarmB");
         }
-        rtc_dumpregs("Set AlarmB");
         break;
 
       default:
