@@ -108,7 +108,11 @@
 # define RCC_XXX_RTCSEL_LSI  RCC_BDCR_RTCSEL_LSI
 # define RCC_XXX_RTCSEL_HSE  RCC_BDCR_RTCSEL_HSE
 
-/* BCD conversions */
+/* BCD conversions.
+ * FIXME:  rtc_reg_alrmr_bin2bcd() sets only the hour, minute, seconds
+ * field.  It does not set the month or year fields.  This breaks the
+ * alarm for times > 24 hours.  THIS NEEDS TO BE FIXED!!!
+ */
 
 #define rtc_reg_tr_bin2bcd(tp) \
   ((rtc_bin2bcd((tp)->tm_sec)  << RTC_TR_SU_SHIFT) | \
