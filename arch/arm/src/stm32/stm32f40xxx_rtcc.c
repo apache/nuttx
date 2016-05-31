@@ -1365,7 +1365,11 @@ int stm32_rtc_setalarm(FAR struct alm_setalarm_s *alminfo)
 
   rtc_dumptime(&alminfo->as_time, "New alarm time");
 
-  /* Break out the values to the HW alarm register format */
+  /* Break out the values to the HW alarm register format.
+   * REVISIT:  rtc_reg_alrmr_bin2bcd() sets only the hour, minute, seconds
+   * field.  It does not set the month or year fields.  This breaks the
+   * alarm for times > 24 hours.  THIS NEEDS TO BE FIXED!!!
+   */
 
   alarmreg = rtc_reg_alrmr_bin2bcd(&alminfo->as_time);
 
@@ -1381,7 +1385,8 @@ int stm32_rtc_setalarm(FAR struct alm_setalarm_s *alminfo)
 
           /* REVIST: Note that the alarm time is forced to lie within 24
            * hours by using the flag RTC_ALRMR_DIS_DATE_MASK.  If this mask
-           * is not et then the date tens:units need to be set up.
+           * is not set then the date tens:units need to be set up.  See the
+           * rtc_reg_alrmr_bin2bcd() macro.
            */
 
           ret = rtchw_set_alrmar(alarmreg | RTC_ALRMR_ENABLE | RTC_ALRMR_DIS_DATE_MASK);
@@ -1403,7 +1408,8 @@ int stm32_rtc_setalarm(FAR struct alm_setalarm_s *alminfo)
 
           /* REVIST: Note that the alarm time is forced to lie within 24
            * hours by using the flag RTC_ALRMR_DIS_DATE_MASK.  If this mask
-           * is not et then the date tens:units need to be set up.
+           * is not set then the date tens:units need to be set up.  See the
+           * rtc_reg_alrmr_bin2bcd() macro.
            */
 
           ret = rtchw_set_alrmbr(alarmreg | RTC_ALRMR_ENABLE | RTC_ALRMR_DIS_DATE_MASK);
