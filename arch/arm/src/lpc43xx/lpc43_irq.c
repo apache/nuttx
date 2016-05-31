@@ -344,7 +344,12 @@ void up_irqinitialize(void)
   /* Disable all interrupts */
 
   putreg32(0, NVIC_IRQ0_31_ENABLE);
+#if LPC43M4_IRQ_NIRQS > 31
   putreg32(0, NVIC_IRQ32_63_ENABLE);
+#if LPC43M4_IRQ_NIRQS > 63
+  putreg32(0, NVIC_IRQ64_95_ENABLE);
+#endif
+#endif
 
   /* Make sure that we are using the correct vector table.  The default
    * vector address is 0x0000:0000 but if we are executing code that is
