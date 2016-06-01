@@ -58,8 +58,6 @@
 #include <nuttx/wireless/ieee802154/ieee802154.h>
 #include <nuttx/wireless/ieee802154/ieee802154_radio.h>
 
-#include <nuttx/ieee802154/ieee802154_dev.h>
-
 #include "at86rf23x.h"
 
 /************************************************************************************
@@ -98,13 +96,13 @@
 /*
  * AT86RF23x device instance
  *
- * Make sure that struct ieee802154_dev_s remains first.  If not it will break the
+ * Make sure that struct ieee802154_radio_s remains first.  If not it will break the
  * code
  *
  */
 struct at86rf23x_dev_s
 {
-  struct ieee802154_dev_s           	ieee;      /* Public device instance */
+  struct ieee802154_radio_s           	ieee;      /* Public device instance */
   FAR struct spi_dev_s              	*spi;      /* Saved SPI interface instance */
   struct work_s                     	irqwork;   /* Interrupt continuation work queue support */
   FAR const struct at86rf23x_lower_s 	*lower;    /* Low-level MCU-specific support */
@@ -143,26 +141,26 @@ static void    at86rf23x_irqworker(FAR void *arg);
 static int     at86rf23x_interrupt(int irq, FAR void *context);
 
 /* Driver operations */
-static int     at86rf23x_setchannel  (FAR struct ieee802154_dev_s *ieee, uint8_t chan);
-static int     at86rf23x_getchannel  (FAR struct ieee802154_dev_s *ieee, FAR uint8_t *chan);
-static int     at86rf23x_setpanid    (FAR struct ieee802154_dev_s *ieee, uint16_t panid);
-static int     at86rf23x_getpanid    (FAR struct ieee802154_dev_s *ieee, FAR uint16_t *panid);
-static int     at86rf23x_setsaddr    (FAR struct ieee802154_dev_s *ieee, uint16_t saddr);
-static int     at86rf23x_getsaddr    (FAR struct ieee802154_dev_s *ieee, FAR uint16_t *saddr);
-static int     at86rf23x_seteaddr    (FAR struct ieee802154_dev_s *ieee, FAR uint8_t *eaddr);
-static int     at86rf23x_geteaddr    (FAR struct ieee802154_dev_s *ieee, FAR uint8_t *eaddr);
-static int     at86rf23x_setpromisc  (FAR struct ieee802154_dev_s *ieee, bool promisc);
-static int     at86rf23x_getpromisc  (FAR struct ieee802154_dev_s *ieee, FAR bool *promisc);
-static int     at86rf23x_setdevmode  (FAR struct ieee802154_dev_s *ieee, uint8_t mode);
-static int     at86rf23x_getdevmode  (FAR struct ieee802154_dev_s *ieee, FAR uint8_t *mode);
-static int     at86rf23x_settxpower  (FAR struct ieee802154_dev_s *ieee, int32_t txpwr);
-static int     at86rf23x_gettxpower  (FAR struct ieee802154_dev_s *ieee, FAR int32_t *txpwr);
-static int     at86rf23x_setcca      (FAR struct ieee802154_dev_s *ieee, FAR struct ieee802154_cca_s *cca);
-static int     at86rf23x_getcca      (FAR struct ieee802154_dev_s *ieee, FAR struct ieee802154_cca_s *cca);
-static int     at86rf23x_ioctl       (FAR struct ieee802154_dev_s *ieee, int cmd, unsigned long arg);
-static int     at86rf23x_energydetect(FAR struct ieee802154_dev_s *ieee, FAR uint8_t *energy);
-static int     at86rf23x_rxenable    (FAR struct ieee802154_dev_s *ieee, bool state, FAR struct ieee802154_packet_s *packet);
-static int     at86rf23x_transmit    (FAR struct ieee802154_dev_s *ieee, FAR struct ieee802154_packet_s *packet);
+static int     at86rf23x_setchannel  (FAR struct ieee802154_radio_s *ieee, uint8_t chan);
+static int     at86rf23x_getchannel  (FAR struct ieee802154_radio_s *ieee, FAR uint8_t *chan);
+static int     at86rf23x_setpanid    (FAR struct ieee802154_radio_s *ieee, uint16_t panid);
+static int     at86rf23x_getpanid    (FAR struct ieee802154_radio_s *ieee, FAR uint16_t *panid);
+static int     at86rf23x_setsaddr    (FAR struct ieee802154_radio_s *ieee, uint16_t saddr);
+static int     at86rf23x_getsaddr    (FAR struct ieee802154_radio_s *ieee, FAR uint16_t *saddr);
+static int     at86rf23x_seteaddr    (FAR struct ieee802154_radio_s *ieee, FAR uint8_t *eaddr);
+static int     at86rf23x_geteaddr    (FAR struct ieee802154_radio_s *ieee, FAR uint8_t *eaddr);
+static int     at86rf23x_setpromisc  (FAR struct ieee802154_radio_s *ieee, bool promisc);
+static int     at86rf23x_getpromisc  (FAR struct ieee802154_radio_s *ieee, FAR bool *promisc);
+static int     at86rf23x_setdevmode  (FAR struct ieee802154_radio_s *ieee, uint8_t mode);
+static int     at86rf23x_getdevmode  (FAR struct ieee802154_radio_s *ieee, FAR uint8_t *mode);
+static int     at86rf23x_settxpower  (FAR struct ieee802154_radio_s *ieee, int32_t txpwr);
+static int     at86rf23x_gettxpower  (FAR struct ieee802154_radio_s *ieee, FAR int32_t *txpwr);
+static int     at86rf23x_setcca      (FAR struct ieee802154_radio_s *ieee, FAR struct ieee802154_cca_s *cca);
+static int     at86rf23x_getcca      (FAR struct ieee802154_radio_s *ieee, FAR struct ieee802154_cca_s *cca);
+static int     at86rf23x_ioctl       (FAR struct ieee802154_radio_s *ieee, int cmd, unsigned long arg);
+static int     at86rf23x_energydetect(FAR struct ieee802154_radio_s *ieee, FAR uint8_t *energy);
+static int     at86rf23x_rxenable    (FAR struct ieee802154_radio_s *ieee, bool state, FAR struct ieee802154_packet_s *packet);
+static int     at86rf23x_transmit    (FAR struct ieee802154_radio_s *ieee, FAR struct ieee802154_packet_s *packet);
 
 
 /* These are pointers to ALL registered at86rf23x devices.
@@ -174,7 +172,7 @@ static int     at86rf23x_transmit    (FAR struct ieee802154_dev_s *ieee, FAR str
 
 static struct at86rf23x_dev_s g_at86rf23x_devices[1];
 
-static const struct ieee802154_devops_s at86rf23x_devops =
+static const struct ieee802154_radioops_s at86rf23x_devops =
 {
   .setchannel = at86rf23x_setchannel,
   .getchannel = at86rf23x_getchannel,
@@ -636,7 +634,7 @@ static int at86rf23x_setTRXstate(FAR struct at86rf23x_dev_s *dev, uint8_t state,
  *
  *
  ****************************************************************************/
-static int at86rf23x_setchannel(FAR struct ieee802154_dev_s *ieee, uint8_t chan)
+static int at86rf23x_setchannel(FAR struct ieee802154_radio_s *ieee, uint8_t chan)
 {
   FAR struct at86rf23x_dev_s *dev = (FAR struct at86rf23x_dev_s *)ieee;
   uint8_t state;
@@ -683,7 +681,7 @@ static int at86rf23x_setchannel(FAR struct ieee802154_dev_s *ieee, uint8_t chan)
  *
  *
  ****************************************************************************/
-static int at86rf23x_getchannel(FAR struct ieee802154_dev_s *ieee, FAR uint8_t *chan)
+static int at86rf23x_getchannel(FAR struct ieee802154_radio_s *ieee, FAR uint8_t *chan)
 {
   FAR struct at86rf23x_dev_s *dev = (FAR struct at86rf23x_dev_s *)ieee;
 
@@ -703,7 +701,7 @@ static int at86rf23x_getchannel(FAR struct ieee802154_dev_s *ieee, FAR uint8_t *
  *   Define the PAN ID for the network.
  *
  ****************************************************************************/
-static int at86rf23x_setpanid(FAR struct ieee802154_dev_s *ieee, uint16_t panid)
+static int at86rf23x_setpanid(FAR struct ieee802154_radio_s *ieee, uint16_t panid)
 {
   FAR struct at86rf23x_dev_s *dev = (struct at86rf23x_dev_s *)ieee;
   uint8_t *pan = (uint8_t *)&panid;
@@ -721,7 +719,7 @@ static int at86rf23x_setpanid(FAR struct ieee802154_dev_s *ieee, uint16_t panid)
  *   Define the PAN ID for the network.
  *
  ****************************************************************************/
-static int at86rf23x_getpanid(FAR struct ieee802154_dev_s *ieee, FAR uint16_t *panid)
+static int at86rf23x_getpanid(FAR struct ieee802154_radio_s *ieee, FAR uint16_t *panid)
 {
   FAR struct at86rf23x_dev_s *dev = (struct at86rf23x_dev_s *)ieee;
   uint8_t *pan = (uint8_t *)panid;
@@ -739,7 +737,7 @@ static int at86rf23x_getpanid(FAR struct ieee802154_dev_s *ieee, FAR uint16_t *p
  *   Define the Short Address for the device.
  *
  ****************************************************************************/
-static int at86rf23x_setsaddr(FAR struct ieee802154_dev_s *ieee, uint16_t saddr)
+static int at86rf23x_setsaddr(FAR struct ieee802154_radio_s *ieee, uint16_t saddr)
 {
   FAR struct at86rf23x_dev_s *dev = (struct at86rf23x_dev_s *)ieee;
   uint8_t *addr = (uint8_t *)&saddr;
@@ -757,7 +755,7 @@ static int at86rf23x_setsaddr(FAR struct ieee802154_dev_s *ieee, uint16_t saddr)
  *   Get the short address of the device.
  *
  ****************************************************************************/
-static int at86rf23x_getsaddr(FAR struct ieee802154_dev_s *ieee, FAR uint16_t *saddr)
+static int at86rf23x_getsaddr(FAR struct ieee802154_radio_s *ieee, FAR uint16_t *saddr)
 {
   FAR struct at86rf23x_dev_s *dev = (struct at86rf23x_dev_s *)ieee;
   uint8_t *addr = (uint8_t *)saddr;
@@ -775,7 +773,7 @@ static int at86rf23x_getsaddr(FAR struct ieee802154_dev_s *ieee, FAR uint16_t *s
  *   Set the IEEE address of the device.
  *
  ****************************************************************************/
-static int at86rf23x_seteaddr(FAR struct ieee802154_dev_s *ieee, FAR uint8_t *eaddr)
+static int at86rf23x_seteaddr(FAR struct ieee802154_radio_s *ieee, FAR uint8_t *eaddr)
 {
   FAR struct at86rf23x_dev_s *dev = (struct at86rf23x_dev_s *)ieee;
   /* TODO: Check if we need to pay attention to endianness */
@@ -798,7 +796,7 @@ static int at86rf23x_seteaddr(FAR struct ieee802154_dev_s *ieee, FAR uint8_t *ea
  *   Get the IEEE address of the device.
  *
  ****************************************************************************/
-static int at86rf23x_geteaddr(FAR struct ieee802154_dev_s *ieee, FAR uint8_t *eaddr)
+static int at86rf23x_geteaddr(FAR struct ieee802154_radio_s *ieee, FAR uint8_t *eaddr)
 {
   FAR struct at86rf23x_dev_s *dev = (struct at86rf23x_dev_s *)ieee;
   /* TODO: Check if we need to pay attention to endianness */
@@ -821,7 +819,7 @@ static int at86rf23x_geteaddr(FAR struct ieee802154_dev_s *ieee, FAR uint8_t *ea
  *   enable/disable promiscuous mode.
  *
  ****************************************************************************/
-static int at86rf23x_setpromisc(FAR struct ieee802154_dev_s *ieee, bool promisc)
+static int at86rf23x_setpromisc(FAR struct ieee802154_radio_s *ieee, bool promisc)
 {
   FAR struct at86rf23x_dev_s *dev = (struct at86rf23x_dev_s *)ieee;
 
@@ -841,7 +839,7 @@ static int at86rf23x_setpromisc(FAR struct ieee802154_dev_s *ieee, bool promisc)
  *   Check if the device is in promiscuous mode.
  *
  ****************************************************************************/
-static int at86rf23x_getpromisc(FAR struct ieee802154_dev_s *ieee, FAR bool *promisc)
+static int at86rf23x_getpromisc(FAR struct ieee802154_radio_s *ieee, FAR bool *promisc)
 {
   FAR struct at86rf23x_dev_s *dev = (struct at86rf23x_dev_s *)ieee;
 
@@ -857,7 +855,7 @@ static int at86rf23x_getpromisc(FAR struct ieee802154_dev_s *ieee, FAR bool *pro
  *   Check if the device is in promiscuous mode.
  *
  ****************************************************************************/
-static int at86rf23x_setdevmode(FAR struct ieee802154_dev_s *ieee, uint8_t mode)
+static int at86rf23x_setdevmode(FAR struct ieee802154_radio_s *ieee, uint8_t mode)
 {
   FAR struct at86rf23x_dev_s *dev = (struct at86rf23x_dev_s *)ieee;
 
@@ -891,7 +889,7 @@ static int at86rf23x_setdevmode(FAR struct ieee802154_dev_s *ieee, uint8_t mode)
  *   get the device mode type of the radio.
  *
  ****************************************************************************/
-static int at86rf23x_getdevmode  (FAR struct ieee802154_dev_s *ieee, FAR uint8_t *mode)
+static int at86rf23x_getdevmode  (FAR struct ieee802154_radio_s *ieee, FAR uint8_t *mode)
 {
   FAR struct at86rf23x_dev_s *dev = (struct at86rf23x_dev_s *)ieee;
   int val;
@@ -900,11 +898,11 @@ static int at86rf23x_getdevmode  (FAR struct ieee802154_dev_s *ieee, FAR uint8_t
 
   if(val == 1)
     {
-      mode = IEEE802154_MODE_PANCOORD;
+      *mode = IEEE802154_MODE_PANCOORD;
     }
   else
     {
-      mode = IEEE802154_MODE_DEVICE;
+      *mode = IEEE802154_MODE_DEVICE;
     }
 
   return OK;
@@ -917,7 +915,7 @@ static int at86rf23x_getdevmode  (FAR struct ieee802154_dev_s *ieee, FAR uint8_t
  *   set the tx power attenuation or amplification
  *
  ****************************************************************************/
-static int at86rf23x_settxpower(FAR struct ieee802154_dev_s *ieee, int32_t txpwr)
+static int at86rf23x_settxpower(FAR struct ieee802154_radio_s *ieee, int32_t txpwr)
 {
   FAR struct at86rf23x_dev_s *dev = (struct at86rf23x_dev_s *)ieee;
 
@@ -936,7 +934,7 @@ static int at86rf23x_settxpower(FAR struct ieee802154_dev_s *ieee, int32_t txpwr
  *  get the tx power attenuation or amplification.
  *
  ****************************************************************************/
-static int at86rf23x_gettxpower(FAR struct ieee802154_dev_s *ieee, FAR int32_t *txpwr)
+static int at86rf23x_gettxpower(FAR struct ieee802154_radio_s *ieee, FAR int32_t *txpwr)
 {
   /* TODO: this needs alot of work to make sure all chips can share this function */
   FAR struct at86rf23x_dev_s *dev = (struct at86rf23x_dev_s *)ieee;
@@ -1010,7 +1008,7 @@ static int at86rf23x_gettxpower(FAR struct ieee802154_dev_s *ieee, FAR int32_t *
  *
  *
  ****************************************************************************/
-static int at86rf23x_setcca(FAR struct ieee802154_dev_s *ieee, FAR struct ieee802154_cca_s *cca)
+static int at86rf23x_setcca(FAR struct ieee802154_radio_s *ieee, FAR struct ieee802154_cca_s *cca)
 {
   FAR struct at86rf23x_dev_s *dev = (struct at86rf23x_dev_s *)ieee;
 
@@ -1046,7 +1044,7 @@ static int at86rf23x_setcca(FAR struct ieee802154_dev_s *ieee, FAR struct ieee80
  *   Get CCA for ???: TODO: need to implement
  *
  ****************************************************************************/
-static int at86rf23x_getcca(FAR struct ieee802154_dev_s *ieee, FAR struct ieee802154_cca_s *cca)
+static int at86rf23x_getcca(FAR struct ieee802154_radio_s *ieee, FAR struct ieee802154_cca_s *cca)
 {
   FAR struct at86rf23x_dev_s *dev = (struct at86rf23x_dev_s *)ieee;
 
@@ -1065,12 +1063,12 @@ static int at86rf23x_getcca(FAR struct ieee802154_dev_s *ieee, FAR struct ieee80
  *   Control operations for the radio.
  *
  ****************************************************************************/
-static int at86rf23x_ioctl(FAR struct ieee802154_dev_s *ieee, int cmd, unsigned long arg)
+static int at86rf23x_ioctl(FAR struct ieee802154_radio_s *ieee, int cmd, unsigned long arg)
 {
   FAR struct at86rf23x_dev_s *dev = (FAR struct at86rf23x_dev_s *)ieee;
   switch(cmd)
     {
-      case MAC854IORDUMP: return at86rf23x_regdump(dev);
+      case 1000: return at86rf23x_regdump(dev);
       default: return -EINVAL;
     }
 }
@@ -1081,7 +1079,7 @@ static int at86rf23x_ioctl(FAR struct ieee802154_dev_s *ieee, int cmd, unsigned 
  *   Perform energy detection scan. TODO: Need to implement.
  *
  ****************************************************************************/
-static int at86rf23x_energydetect(FAR struct ieee802154_dev_s *ieee, FAR uint8_t *energy)
+static int at86rf23x_energydetect(FAR struct ieee802154_radio_s *ieee, FAR uint8_t *energy)
 {
 
 #warning at86rf23x_energydetect not implemented.
@@ -1161,7 +1159,7 @@ static int at86rf23x_resetrf(FAR struct at86rf23x_dev_s *dev)
  *   RX messages.
  *
  ****************************************************************************/
-static int at86rf23x_rxenable(FAR struct ieee802154_dev_s *ieee, bool state,
+static int at86rf23x_rxenable(FAR struct ieee802154_radio_s *ieee, bool state,
 		FAR struct ieee802154_packet_s *packet)
 {
   FAR struct at86rf23x_dev_s *dev = (FAR struct at86rf23x_dev_s *)ieee;
@@ -1356,7 +1354,7 @@ static void at86rf23x_irqwork_tx(FAR struct at86rf23x_dev_s *dev)
  *   transmission
  *
  ****************************************************************************/
-static int at86rf23x_transmit(FAR struct ieee802154_dev_s *ieee, FAR struct ieee802154_packet_s *packet)
+static int at86rf23x_transmit(FAR struct ieee802154_radio_s *ieee, FAR struct ieee802154_packet_s *packet)
 {
   FAR struct at86rf23x_dev_s *dev = (FAR struct at86rf23x_dev_s *)ieee;
   /*
@@ -1395,7 +1393,7 @@ static int at86rf23x_transmit(FAR struct ieee802154_dev_s *ieee, FAR struct ieee
  *
  ****************************************************************************/
 
-FAR struct ieee802154_dev_s *at86rf23x_init(FAR struct spi_dev_s *spi, FAR const struct at86rf23x_lower_s *lower)
+FAR struct ieee802154_radio_s *at86rf23x_init(FAR struct spi_dev_s *spi, FAR const struct at86rf23x_lower_s *lower)
 {
   FAR struct at86rf23x_dev_s *dev;
   struct ieee802154_cca_s   cca;
