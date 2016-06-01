@@ -108,22 +108,6 @@
 # define RCC_XXX_RTCSEL_LSI  RCC_BDCR_RTCSEL_LSI
 # define RCC_XXX_RTCSEL_HSE  RCC_BDCR_RTCSEL_HSE
 
-/* BCD conversions.
- * FIXME:  rtc_reg_alrmr_bin2bcd() sets only the hour, minute, seconds
- * field.  It does not set the month or year fields.  This breaks the
- * alarm for times > 24 hours.  THIS NEEDS TO BE FIXED!!!
- */
-
-#define rtc_reg_tr_bin2bcd(tp) \
-  ((rtc_bin2bcd((tp)->tm_sec)  << RTC_TR_SU_SHIFT) | \
-   (rtc_bin2bcd((tp)->tm_min)  << RTC_TR_MNU_SHIFT) | \
-   (rtc_bin2bcd((tp)->tm_hour) << RTC_TR_HU_SHIFT))
-
-#define rtc_reg_alrmr_bin2bcd(tm) \
-  ((rtc_bin2bcd((tm)->tm_sec)  << RTC_ALRMR_SU_SHIFT) | \
-   (rtc_bin2bcd((tm)->tm_min)  << RTC_ALRMR_MNU_SHIFT) | \
-   (rtc_bin2bcd((tm)->tm_hour) << RTC_ALRMR_HU_SHIFT))
-
 /* Time conversions */
 
 #define MINUTES_IN_HOUR 60
@@ -615,7 +599,7 @@ static void rtc_resume(void)
 
   /* Clear the RTC Alarm Pending bit */
 
-  putreg32((1 << EXTI_RTC_ALARM ), STM32_EXTI_PR);
+  putreg32(EXTI_RTC_ALARM, STM32_EXTI_PR);
 #endif
 }
 
@@ -1267,7 +1251,9 @@ int stm32_rtc_setdatetime(FAR const struct tm *tp)
    * register.
    */
 
-  tr = (rtc_reg_tr_bin2bcd(tp) & ~RTC_TR_RESERVED_BITS);
+  tr = (rtc_bin2bcd(tp->tm_sec)  << RTC_TR_SU_SHIFT) |
+       (rtc_bin2bcd(tp->tm_min)  << RTC_TR_MNU_SHIFT) |
+       (rtc_bin2bcd(tp->tm_hour) << RTC_TR_HU_SHIFT);
 
   /* Now convert the fields in struct tm format to the RTC date register fields:
    * Days: 1-31 match in both cases.
@@ -1369,14 +1355,16 @@ int stm32_rtc_setalarm(FAR struct alm_setalarm_s *alminfo)
 
   rtc_dumptime(&alminfo->as_time, "New alarm time");
 
-  /* Break out the values to the HW alarm register format.
-   * REVISIT:  rtc_reg_alrmr_bin2bcd() sets only the hour, minute, seconds
-   * field.  It does not set the month or year fields.  This breaks the
-   * alarm for times > 24 hours.  THIS NEEDS TO BE FIXED!!!
+  /* Break out the values to the HW alarm register format.  The values in
+   * all STM32 fields match the fields of struct tm in this case.  Notice
+   * that the alarm is limited to one month.
    */
 
-  alarmreg = rtc_reg_alrmr_bin2bcd(&alminfo->as_time);
-
+  alarmreg = (rtc_bin2bcd(alminfo->as_time.tm_sec)  << RTC_ALRMR_SU_SHIFT) |
+             (rtc_bin2bcd(alminfo->as_time.tm_min)  << RTC_ALRMR_MNU_SHIFT) |
+             (rtc_bin2bcd(alminfo->as_time.tm_hour) << RTC_ALRMR_HU_SHIFT) |
+             (rtc_bin2bcd(alminfo->as_time.tm_mday) << RTC_ALRMR_DU_SHIFT);
+ 
   /* Set the alarm in hardware and enable interrupts */
 
   switch (alminfo->as_id)
@@ -1387,13 +1375,7 @@ int stm32_rtc_setalarm(FAR struct alm_setalarm_s *alminfo)
           cbinfo->ac_cb  = alminfo->as_cb;
           cbinfo->ac_arg = alminfo->as_arg;
 
-          /* REVIST: Note that the alarm time is forced to lie within 24
-           * hours by using the flag RTC_ALRMR_DIS_DATE_MASK.  If this mask
-           * is not set then the date tens:units need to be set up.  See the
-           * rtc_reg_alrmr_bin2bcd() macro.
-           */
-
-          ret = rtchw_set_alrmar(alarmreg | RTC_ALRMR_ENABLE | RTC_ALRMR_DIS_DATE_MASK);
+          ret = rtchw_set_alrmar(alarmreg | RTC_ALRMR_ENABLE);
           if (ret < 0)
             {
               cbinfo->ac_cb  = NULL;
@@ -1410,13 +1392,7 @@ int stm32_rtc_setalarm(FAR struct alm_setalarm_s *alminfo)
           cbinfo->ac_cb  = alminfo->as_cb;
           cbinfo->ac_arg = alminfo->as_arg;
 
-          /* REVIST: Note that the alarm time is forced to lie within 24
-           * hours by using the flag RTC_ALRMR_DIS_DATE_MASK.  If this mask
-           * is not set then the date tens:units need to be set up.  See the
-           * rtc_reg_alrmr_bin2bcd() macro.
-           */
-
-          ret = rtchw_set_alrmbr(alarmreg | RTC_ALRMR_ENABLE | RTC_ALRMR_DIS_DATE_MASK);
+          ret = rtchw_set_alrmbr(alarmreg | RTC_ALRMR_ENABLE);
           if (ret < 0)
             {
               cbinfo->ac_cb  = NULL;
