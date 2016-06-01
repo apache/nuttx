@@ -246,18 +246,45 @@ static int lpc43_irqinfo(int irq, uintptr_t *regaddr, uint32_t *bit,
 
   if (irq >= LPC43_IRQ_EXTINT)
     {
+      /* NOTE: We assume that there are at least 32 interrupts */
+
       if (irq < (LPC43_IRQ_EXTINT + 32))
         {
+           /* Interrupt in range {0-31} */
+
            *regaddr = (NVIC_IRQ0_31_ENABLE + offset);
            *bit     = 1 << (irq - LPC43_IRQ_EXTINT);
         }
-      else if (irq < LPC43M4_IRQ_NIRQS)
+#if LPC43M4_IRQ_NEXTINT > 95
+#  error Extension to interrupt logic needed
+#elif LPC43M4_IRQ_NEXTINT > 63
+      else if (irq < (LPC43_IRQ_EXTINT + 64))
         {
+           /* Interrupt in range {32-63} */
+
            *regaddr = (NVIC_IRQ32_63_ENABLE + offset);
            *bit     = 1 << (irq - LPC43_IRQ_EXTINT - 32);
         }
+      else if (irq < LPC43M4_IRQ_NIRQS)
+        {
+           /* Interrupt in range {64-LPC43M4_IRQ_NIRQS}, LPC43M4_IRQ_NIRQS <= 95 */
+
+           *regaddr = (NVIC_IRQ64_95_ENABLE + offset);
+           *bit     = 1 << (irq - LPC43_IRQ_EXTINT - 64);
+        }
+#else /* if LPC43M4_IRQ_NEXTINT > 31 */
+      else if (irq < LPC43M4_IRQ_NIRQS)
+        {
+           /* Interrupt in range {32-LPC43M4_IRQ_NIRQS}, LPC43M4_IRQ_NIRQS <= 63 */
+
+           *regaddr = (NVIC_IRQ32_63_ENABLE + offset);
+           *bit     = 1 << (irq - LPC43_IRQ_EXTINT - 32);
+        }
+#endif
       else
         {
+           /* Interrupt >= LPC43M4_IRQ_NIRQS */
+
           return ERROR; /* Invalid interrupt */
         }
     }
@@ -317,7 +344,12 @@ void up_irqinitialize(void)
   /* Disable all interrupts */
 
   putreg32(0, NVIC_IRQ0_31_ENABLE);
+#if LPC43M4_IRQ_NEXTINT > 31
   putreg32(0, NVIC_IRQ32_63_ENABLE);
+#if LPC43M4_IRQ_NEXTINT > 63
+  putreg32(0, NVIC_IRQ64_95_ENABLE);
+#endif
+#endif
 
   /* Make sure that we are using the correct vector table.  The default
    * vector address is 0x0000:0000 but if we are executing code that is

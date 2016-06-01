@@ -108,18 +108,6 @@
 # define RCC_XXX_RTCSEL_LSI  RCC_BDCR_RTCSEL_LSI
 # define RCC_XXX_RTCSEL_HSE  RCC_BDCR_RTCSEL_HSE
 
-/* BCD conversions */
-
-#define rtc_reg_tr_bin2bcd(tp) \
-  ((rtc_bin2bcd((tp)->tm_sec)  << RTC_TR_SU_SHIFT) | \
-   (rtc_bin2bcd((tp)->tm_min)  << RTC_TR_MNU_SHIFT) | \
-   (rtc_bin2bcd((tp)->tm_hour) << RTC_TR_HU_SHIFT))
-
-#define rtc_reg_alrmr_bin2bcd(tm) \
-  ((rtc_bin2bcd((tm)->tm_sec)  << RTC_ALRMR_SU_SHIFT) | \
-   (rtc_bin2bcd((tm)->tm_min)  << RTC_ALRMR_MNU_SHIFT) | \
-   (rtc_bin2bcd((tm)->tm_hour) << RTC_ALRMR_HU_SHIFT))
-
 /* Time conversions */
 
 #define MINUTES_IN_HOUR 60
@@ -219,6 +207,8 @@ static int rtchw_set_alrmbr(rtc_alarmreg_t alarmreg);
 #ifdef CONFIG_DEBUG_RTC
 static void rtc_dumpregs(FAR const char *msg)
 {
+  int rtc_state;
+
   rtclldbg("%s:\n", msg);
   rtclldbg("      TR: %08x\n", getreg32(STM32_RTC_TR));
   rtclldbg("      DR: %08x\n", getreg32(STM32_RTC_DR));
@@ -240,6 +230,13 @@ static void rtc_dumpregs(FAR const char *msg)
   rtclldbg("ALRMASSR: %08x\n", getreg32(STM32_RTC_ALRMASSR));
   rtclldbg("ALRMBSSR: %08x\n", getreg32(STM32_RTC_ALRMBSSR));
   rtclldbg("MAGICREG: %08x\n", getreg32(RTC_MAGIC_REG));
+
+  rtc_state =
+    ((getreg32(STM32_EXTI_RTSR) & EXTI_RTC_ALARM) ? 0x1000 : 0) |
+    ((getreg32(STM32_EXTI_FTSR) & EXTI_RTC_ALARM) ? 0x0100 : 0) |
+    ((getreg32(STM32_EXTI_IMR)  & EXTI_RTC_ALARM) ? 0x0010 : 0) |
+    ((getreg32(STM32_EXTI_EMR)  & EXTI_RTC_ALARM) ? 0x0001 : 0);
+  rtclldbg("EXTI (RTSR FTSR ISR EVT): %01x\n",rtc_state);
 }
 #else
 #  define rtc_dumpregs(msg)
@@ -600,9 +597,9 @@ static void rtc_resume(void)
   regval &= ~(RTC_ISR_ALRAF | RTC_ISR_ALRBF);
   putreg32(regval, STM32_RTC_ISR);
 
-  /* Clear the EXTI Line 17 Pending bit (Connected internally to RTC Alarm) */
+  /* Clear the RTC Alarm Pending bit */
 
-  putreg32((1 << 17), STM32_EXTI_PR);
+  putreg32(EXTI_RTC_ALARM, STM32_EXTI_PR);
 #endif
 }
 
@@ -876,8 +873,6 @@ int up_rtc_initialize(void)
    * maximum performance.
    */
 
-  rtc_dumpregs("On reset");
-
   /* Select the clock source */
   /* Save the token before losing it when resetting */
 
@@ -902,16 +897,19 @@ int up_rtc_initialize(void)
 #ifdef CONFIG_RTC_HSECLOCK
       /* Use the HSE clock as the input to the RTC block */
 
+      rtc_dumpregs("On reset HSE");
       modifyreg32(STM32_RCC_XXX, RCC_XXX_RTCSEL_MASK, RCC_XXX_RTCSEL_HSE);
 
 #elif defined(CONFIG_RTC_LSICLOCK)
       /* Use the LSI clock as the input to the RTC block */
 
+      rtc_dumpregs("On reset LSI");
       modifyreg32(STM32_RCC_XXX, RCC_XXX_RTCSEL_MASK, RCC_XXX_RTCSEL_LSI);
 
 #elif defined(CONFIG_RTC_LSECLOCK)
       /* Use the LSE clock as the input to the RTC block */
 
+      rtc_dumpregs("On reset LSE");
       modifyreg32(STM32_RCC_XXX, RCC_XXX_RTCSEL_MASK, RCC_XXX_RTCSEL_LSE);
 
 #endif
@@ -925,6 +923,8 @@ int up_rtc_initialize(void)
     defined(CONFIG_RTC_LSECLOCK)
 
       uint32_t clksrc = getreg32(STM32_RCC_XXX);
+
+      rtc_dumpregs("On reset warm");
 
 #if defined(CONFIG_RTC_HSECLOCK)
       if ((clksrc & RCC_XXX_RTCSEL_MASK) != RCC_XXX_RTCSEL_HSE)
@@ -1060,10 +1060,12 @@ int up_rtc_initialize(void)
    */
 
   stm32_exti_alarm(true, false, true, stm32_rtc_alarm_handler);
+  rtc_dumpregs("After InitExtiAlarm");
+#else
+  rtc_dumpregs("After Initialization");
 #endif
 
   g_rtc_enabled = true;
-  rtc_dumpregs("After Initialization");
   return OK;
 }
 
@@ -1249,7 +1251,9 @@ int stm32_rtc_setdatetime(FAR const struct tm *tp)
    * register.
    */
 
-  tr = (rtc_reg_tr_bin2bcd(tp) & ~RTC_TR_RESERVED_BITS);
+  tr = (rtc_bin2bcd(tp->tm_sec)  << RTC_TR_SU_SHIFT) |
+       (rtc_bin2bcd(tp->tm_min)  << RTC_TR_MNU_SHIFT) |
+       (rtc_bin2bcd(tp->tm_hour) << RTC_TR_HU_SHIFT);
 
   /* Now convert the fields in struct tm format to the RTC date register fields:
    * Days: 1-31 match in both cases.
@@ -1351,10 +1355,16 @@ int stm32_rtc_setalarm(FAR struct alm_setalarm_s *alminfo)
 
   rtc_dumptime(&alminfo->as_time, "New alarm time");
 
-  /* Break out the values to the HW alarm register format */
+  /* Break out the values to the HW alarm register format.  The values in
+   * all STM32 fields match the fields of struct tm in this case.  Notice
+   * that the alarm is limited to one month.
+   */
 
-  alarmreg = rtc_reg_alrmr_bin2bcd(&alminfo->as_time);
-
+  alarmreg = (rtc_bin2bcd(alminfo->as_time.tm_sec)  << RTC_ALRMR_SU_SHIFT) |
+             (rtc_bin2bcd(alminfo->as_time.tm_min)  << RTC_ALRMR_MNU_SHIFT) |
+             (rtc_bin2bcd(alminfo->as_time.tm_hour) << RTC_ALRMR_HU_SHIFT) |
+             (rtc_bin2bcd(alminfo->as_time.tm_mday) << RTC_ALRMR_DU_SHIFT);
+ 
   /* Set the alarm in hardware and enable interrupts */
 
   switch (alminfo->as_id)
@@ -1371,6 +1381,8 @@ int stm32_rtc_setalarm(FAR struct alm_setalarm_s *alminfo)
               cbinfo->ac_cb  = NULL;
               cbinfo->ac_arg = NULL;
             }
+
+          rtc_dumpregs("Set AlarmA");
         }
         break;
 
@@ -1386,6 +1398,8 @@ int stm32_rtc_setalarm(FAR struct alm_setalarm_s *alminfo)
               cbinfo->ac_cb  = NULL;
               cbinfo->ac_arg = NULL;
             }
+
+          rtc_dumpregs("Set AlarmB");
         }
         break;
 
@@ -1486,7 +1500,7 @@ int stm32_rtc_cancelalarm(enum alm_id_e alarmid)
         break;
 
       default:
-        rtcvdbg("ERROR: Invalid ALARM%d\n", alminfo->as_id);
+        rtcvdbg("ERROR: Invalid ALARM%d\n", alarmid);
         break;
     }
 
