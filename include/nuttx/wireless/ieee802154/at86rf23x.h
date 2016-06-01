@@ -1,7 +1,8 @@
 /****************************************************************************
- * include/nuttx/wireless/ieee802154/mrf24j40.h
+ * include/nuttx/ieee802154/at86rf23x.h
  *
- *   Copyright (C) 2014-2016 Sebastien Lorquet. All rights reserved.
+ *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2015 Sebastien Lorquet. All rights reserved.
  *   Author: Sebastien Lorquet <sebastien@lorquet.fr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,24 +34,14 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_WIRELESS_IEEE802154_MRF24J40_H
-#define __INCLUDE_NUTTX_WIRELESS_IEEE802154_MRF24J40_H
+#ifndef __INCLUDE_NUTTX_IEEE802154_AT86RF23X_H
+#define __INCLUDE_NUTTX_IEEE802154_AT86RF23X_H
 
-/****************************************************************************
- * Included files
- ****************************************************************************/
-
-#include <nuttx/arch.h>
-
-/****************************************************************************
- * Public Types
- ****************************************************************************/
-
-/* The MRF24J40 provides interrupts to the MCU via a GPIO pin.  The
- * following structure provides an MCU-independent mechanism for controlling
- * the MRF24J40 GPIO interrupt.
+/* The at86rf23x provides interrupts to the MCU via a GPIO pin.  The
+ * following structure provides an MCU-independent mechanixm for controlling
+ * the at86rf23x GPIO interrupt.
  *
- * The MRF24J40 interrupt is an active low, *level* interrupt. From Datasheet:
+ * The at86rf23x interrupt is an active low, *level* interrupt. From Datasheet:
  * "Note 1: The INTEDGE polarity defaults to:
  * 0 = Falling Edge. Ensure that the inter-
  * rupt polarity matches the interrupt pin
@@ -60,16 +51,16 @@
  * until INTSTAT register is read."
  */
 
-struct mrf24j40_lower_s
+struct at86rf23x_lower_s
 {
-  int  (*attach)(FAR const struct mrf24j40_lower_s *lower, xcpt_t handler);
-  void (*enable)(FAR const struct mrf24j40_lower_s *lower, int state);
+  int  (*irq)(FAR const struct at86rf23x_lower_s *lower, xcpt_t handler, int state);
+  void (*slptr)(FAR const struct at86rf23x_lower_s *lower, int state);
+  void (*reset)(FAR const struct at86rf23x_lower_s *lower, int state);
 };
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C"
-{
+extern "C" {
 #else
 #define EXTERN extern
 #endif
@@ -79,18 +70,18 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Function: mrf24j40_init
+ * Function: at86rf23x_init
  *
  * Description:
- *   Initialize the IEEE802.15.4 driver.  The MRF24J40 device is assumed to be
+ *   Initialize the IEEE802.15.4 driver.  The at86rf23x device is assumed to be
  *   in the post-reset state upon entry to this function.
  *
  * Parameters:
- *   spi   - A reference to the platform's SPI driver for the MRF24J40
+ *   spi   - A reference to the platform's SPI driver for the at86rf23x
  *   lower - The MCU-specific interrupt used to control low-level MCU
- *           functions (i.e., MRF24J40 GPIO interrupts).
- *   devno - If more than one MRF24J40 is supported, then this is the
- *           zero based number that identifies the MRF24J40;
+ *           functions (i.e., at86rf23x GPIO interrupts).
+ *   devno - If more than one at86rf23x is supported, then this is the
+ *           zero based number that identifies the at86rf23x;
  *
  * Returned Value:
  *   OK on success; Negated errno on failure.
@@ -99,13 +90,11 @@ extern "C"
  *
  ****************************************************************************/
 
-struct spi_dev_s; /* Forward reference */
-FAR struct ieee802154_radio_s *mrf24j40_init(FAR struct spi_dev_s *spi,
-                                           FAR const struct mrf24j40_lower_s *lower);
+FAR struct ieee802154_dev_s *at86rf23x_init(FAR struct spi_dev_s *spi, FAR const struct at86rf23x_lower_s *lower);
 
 #undef EXTERN
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __INCLUDE_NUTTX_WIRELESS_IEEE802154_MRF24J40_H */
+#endif /* __INCLUDE_NUTTX_IEEE802154__AT86RF23X_H */

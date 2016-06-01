@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_WIRELESS_IEEE802154_IEEE802154_H
-#define __INCLUDE_NUTTX_WIRELESS_IEEE802154_IEEE802154_H
+#ifndef __INCLUDE_NUTTX_WIRELESS_IEEE802154_IEEE802154_RADIO_H
+#define __INCLUDE_NUTTX_WIRELESS_IEEE802154_IEEE802154_RADIO_H
 
 /****************************************************************************
  * Included Files
@@ -48,70 +48,13 @@
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
-/* None at the moment */
 
-/* IEEE 802.15.4 MAC Interface **********************************************/
+/* IEEE 802.15.4 Radio Interface **********************************************/
 
-/* Frame control field masks, 2 bytes 
- * Seee IEEE 802.15.4/2003 7.2.1.1 page 112
- */
-
-#define IEEE802154_FC1_FTYPE   0x03 /* Frame type, bits 0-2 */
-#define IEEE802154_FC1_SEC     0x08 /* Security Enabled, bit 3 */
-#define IEEE802154_FC1_PEND    0x10 /* Frame pending, bit 4 */
-#define IEEE802154_FC1_ACKREQ  0x20 /* Acknowledge request, bit 5 */
-#define IEEE802154_FC1_INTRA   0x40 /* Intra PAN, bit 6 */
-#define IEEE802154_FC2_DADDR   0x0C /* Dest   addressing mode, bits 10-11 */
-#define IEEE802154_FC2_VERSION 0x30 /* Source addressing mode, bits 12-13 */
-#define IEEE802154_FC2_SADDR   0xC0 /* Source addressing mode, bits 14-15 */
-
-/* Frame Type */
-
-#define IEEE802154_FRAME_BEACON  0x00
-#define IEEE802154_FRAME_DATA    0x01
-#define IEEE802154_FRAME_ACK     0x02
-#define IEEE802154_FRAME_COMMAND 0x03
-
-/* Security Enabled */
-
-#define IEEE802154_SEC_OFF       0x00
-#define IEEE802154_SEC_ON        0x08
-
-/* Flags */
-
-#define IEEE802154_PEND          0x10
-#define IEEE802154_ACK_REQ       0x20
-#define IEEE802154_INTRA         0x40
-
-/* Dest Addressing modes */
-
-#define IEEE802154_DADDR_NONE    0x00
-#define IEEE802154_DADDR_SHORT   0x08
-#define IEEE802154_DADDR_EXT     0x0A
-
-/* Src Addressing modes */
-
-#define IEEE802154_SADDR_NONE    0x00
-#define IEEE802154_SADDR_SHORT   0x80
-#define IEEE802154_SADDR_EXT     0xA0
-
-/* Some addresses */
-
-#define IEEE802154_PAN_DEFAULT  (uint16_t)0xFFFF
-#define IEEE802154_SADDR_UNSPEC (uint16_t)0xFFFF
-#define IEEE802154_SADDR_BCAST  (uint16_t)0xFFFE
-#define IEEE802154_EADDR_UNSPEC (uint8_t*)"\xff\xff\xff\xff\xff\xff\xff\xff"
-
-#define IEEE802154_CMD_ASSOC_REQ      0x01
-#define IEEE802154_CMD_ASSOC_RSP      0x02
-#define IEEE802154_CMD_DIS_NOT        0x03
-#define IEEE802154_CMD_DATA_REQ       0x04
-#define IEEE802154_CMD_PANID_CONF_NOT 0x05
-#define IEEE802154_CMD_ORPHAN_NOT     0x06
-#define IEEE802154_CMD_BEACON_REQ     0x07
-#define IEEE802154_CMD_COORD_REALIGN  0x08
-#define IEEE802154_CMD_GTS_REQ        0x09
+/* This layer only knows radio frames. There are no 802.15.4 specific bits
+ * at this layer. */
 
 /* Device modes */
 
@@ -135,73 +78,75 @@ struct ieee802154_cca_s
 {
   uint8_t use_ed  : 1; /* CCA using ED */
   uint8_t use_cs  : 1; /* CCA using carrier sense */
-  uint8_t edth;     /* Energy detection threshold for CCA */
-  uint8_t csth;     /* Carrier sense threshold for CCA */
+  uint8_t edth;        /* Energy detection threshold for CCA */
+  uint8_t csth;        /* Carrier sense threshold for CCA */
 };
 
-struct ieee802154_dev_s;
+struct ieee802154_radio_s;
 
-struct ieee802154_devops_s
+struct ieee802154_radioops_s
 {
-  CODE int (*setchannel)(FAR struct ieee802154_dev_s *dev, uint8_t channel);
-  CODE int (*getchannel)(FAR struct ieee802154_dev_s *dev,
+  CODE int (*setchannel)(FAR struct ieee802154_radio_s *dev, uint8_t channel);
+  CODE int (*getchannel)(FAR struct ieee802154_radio_s *dev,
              FAR uint8_t *channel);
 
-  CODE int (*setpanid)(FAR struct ieee802154_dev_s *dev, uint16_t panid);
-  CODE int (*getpanid)(FAR struct ieee802154_dev_s *dev,
+  CODE int (*setpanid)(FAR struct ieee802154_radio_s *dev, uint16_t panid);
+  CODE int (*getpanid)(FAR struct ieee802154_radio_s *dev,
              FAR uint16_t *panid);
 
-  CODE int (*setsaddr)(FAR struct ieee802154_dev_s *dev, uint16_t saddr);
-  CODE int (*getsaddr)(FAR struct ieee802154_dev_s *dev,
+  CODE int (*setsaddr)(FAR struct ieee802154_radio_s *dev, uint16_t saddr);
+  CODE int (*getsaddr)(FAR struct ieee802154_radio_s *dev,
              FAR uint16_t *saddr);
 
-  CODE int (*seteaddr)(FAR struct ieee802154_dev_s *dev,
+  CODE int (*seteaddr)(FAR struct ieee802154_radio_s *dev,
              FAR uint8_t *laddr);
-  CODE int (*geteaddr)(FAR struct ieee802154_dev_s *dev,
+  CODE int (*geteaddr)(FAR struct ieee802154_radio_s *dev,
              FAR uint8_t *laddr);
 
-  CODE int (*setpromisc)(FAR struct ieee802154_dev_s *dev, bool promisc);
-  CODE int (*getpromisc)(FAR struct ieee802154_dev_s *dev,
+  CODE int (*setpromisc)(FAR struct ieee802154_radio_s *dev, bool promisc);
+  CODE int (*getpromisc)(FAR struct ieee802154_radio_s *dev,
              FAR bool *promisc);
 
-  CODE int (*setdevmode)(FAR struct ieee802154_dev_s *dev, uint8_t devmode);
-  CODE int (*getdevmode)(FAR struct ieee802154_dev_s *dev,
+  CODE int (*setdevmode)(FAR struct ieee802154_radio_s *dev, uint8_t devmode);
+  CODE int (*getdevmode)(FAR struct ieee802154_radio_s *dev,
              FAR uint8_t *devmode);
 
-  CODE int (*settxpower)(FAR struct ieee802154_dev_s *dev,
+  CODE int (*settxpower)(FAR struct ieee802154_radio_s *dev,
              int32_t txpwr);  /* unit = 1 mBm = 1/100 dBm */
-  CODE int (*gettxpower)(FAR struct ieee802154_dev_s *dev,
+  CODE int (*gettxpower)(FAR struct ieee802154_radio_s *dev,
              FAR int32_t *txpwr);
 
-  CODE int (*setcca)(FAR struct ieee802154_dev_s *dev,
+  CODE int (*setcca)(FAR struct ieee802154_radio_s *dev,
              FAR struct ieee802154_cca_s *cca);
-  CODE int (*getcca)(FAR struct ieee802154_dev_s *dev,
+  CODE int (*getcca)(FAR struct ieee802154_radio_s *dev,
              FAR struct ieee802154_cca_s *cca);
 
-  CODE int (*ioctl)(FAR struct ieee802154_dev_s *ieee, int cmd,
+  CODE int (*ioctl)(FAR struct ieee802154_radio_s *ieee, int cmd,
              unsigned long arg);
-  CODE int (*energydetect)(FAR struct ieee802154_dev_s *dev,
+  CODE int (*energydetect)(FAR struct ieee802154_radio_s *dev,
              FAR uint8_t *energy);
-  CODE int (*rxenable)(FAR struct ieee802154_dev_s *dev, bool state,
+  CODE int (*rxenable)(FAR struct ieee802154_radio_s *dev, bool state,
              FAR struct ieee802154_packet_s *packet);
-  CODE int (*transmit)(FAR struct ieee802154_dev_s *dev,
+  CODE int (*transmit)(FAR struct ieee802154_radio_s *dev,
              FAR struct ieee802154_packet_s *packet);
 
   /*TODO beacon/sf order*/
 };
 
-struct ieee802154_dev_s
+struct ieee802154_radio_s
 {
-  FAR const struct ieee802154_devops_s *ops;
+  FAR const struct ieee802154_radioops_s *ops;
 
   /* Packet reception management */
 
-  struct ieee802154_packet_s *rxbuf;
-  sem_t rxsem;
+  struct ieee802154_packet_s *rxbuf; /* packet reception buffer, filled by rx interrupt, NULL if rx not enabled */
+  sem_t rxsem;                       /* Semaphore posted after reception of a packet */
 
   /* Packet transmission management */
-
-  sem_t txsem;
+  bool txok;                         /* Last transmission status, filled by tx interrupt */
+  bool txbusy;                       /* Last transmission failed because channel busy */
+  uint8_t txretries;                 /* Last transmission required this much retries */
+  sem_t txsem;                       /* Semaphore posted after transmission of a packet */
 };
 
 #ifdef __cplusplus
@@ -221,4 +166,4 @@ extern "C"
 }
 #endif
 
-#endif /* __INCLUDE_NUTTX_WIRELESS_IEEE802154_MRF24J40_H */
+#endif /* __INCLUDE_NUTTX_WIRELESS_IEEE802154_IEEE802154_RADIO_H */

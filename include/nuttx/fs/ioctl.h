@@ -83,6 +83,7 @@
 #define _LOOPBASE       (0x1e00) /* Loop device commands */
 #define _MODEMBASE      (0x1f00) /* Modem ioctl commands */
 #define _I2CBASE        (0x2000) /* I2C driver commands */
+#define _MAC854BASE     (0x2100) /* 802.15.4 device ioctl commands */
 
 /* boardctl commands share the same number space */
 
@@ -380,6 +381,12 @@
 
 #define _I2CIOCVALID(c)    (_IOC_TYPE(c)==_I2CBASE)
 #define _I2CIOC(nr)        _IOC(_I2CBASE,nr)
+
+/* 802.15.4 MAC driver ioctl definitions *******************************************/
+/* (see nuttx/ieee802154/ieee802154_dev.h */
+
+#define _MAC854IOCVALID(c)   (_IOC_TYPE(c)==_MAC854BASE)
+#define _MAC854IOC(nr)       _IOC(_MAC854BASE,nr)
 
 /* boardctl() command definitions *******************************************/
 

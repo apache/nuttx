@@ -97,18 +97,22 @@
 #define MRF24J40_BBREG6    0x3E
 #define MRF24J40_CCAEDTH   0x3F
 
-#define MRF24J40_RFCON0    0x80000200
-#define MRF24J40_RFCON1    0x80000201
-#define MRF24J40_RFCON2    0x80000202
-#define MRF24J40_RFCON3    0x80000203
-#define MRF24J40_RFCON5    0x80000205
-#define MRF24J40_RFCON6    0x80000206
-#define MRF24J40_RFCON7    0x80000207
-#define MRF24J40_RFCON8    0x80000208
-#define MRF24J40_SLPCAL0   0x80000209
-#define MRF24J40_SLPCAL1   0x8000020A
-#define MRF24J40_SLPCAL2   0x8000020B
-#define MRF24J40_RFSTATE   0x8000020F
+#define MRF24J40_TXBUF_BASE     0x80000000
+#define MRF24J40_LONGREG_BASE   0x80000200
+#define MRF24J40_RXBUF_BASE     0x80000300
+
+#define MRF24J40_RFCON0    (MRF24J40_LONGREG_BASE + 0x00)
+#define MRF24J40_RFCON1    (MRF24J40_LONGREG_BASE + 0x01)
+#define MRF24J40_RFCON2    (MRF24J40_LONGREG_BASE + 0x02)
+#define MRF24J40_RFCON3    (MRF24J40_LONGREG_BASE + 0x03)
+#define MRF24J40_RFCON5    (MRF24J40_LONGREG_BASE + 0x05)
+#define MRF24J40_RFCON6    (MRF24J40_LONGREG_BASE + 0x06)
+#define MRF24J40_RFCON7    (MRF24J40_LONGREG_BASE + 0x07)
+#define MRF24J40_RFCON8    (MRF24J40_LONGREG_BASE + 0x08)
+#define MRF24J40_SLPCAL0   (MRF24J40_LONGREG_BASE + 0x09)
+#define MRF24J40_SLPCAL1   (MRF24J40_LONGREG_BASE + 0x0A)
+#define MRF24J40_SLPCAL2   (MRF24J40_LONGREG_BASE + 0x0B)
+#define MRF24J40_RFSTATE   (MRF24J40_LONGREG_BASE + 0x0F)
 #define MRF24J40_RSSI      0x80000210
 #define MRF24J40_SLPCON0   0x80000211
 #define MRF24J40_SLPCON1   0x80000220
@@ -147,18 +151,18 @@
 
 /* INTSTAT bits */
 
-#define MRF24J40_INTSTAT_SLPIF     0x80
-#define MRF24J40_INTSTAT_WAKEIF    0x40
-#define MRF24J40_INTSTAT_HSYMTMRIF 0x20
-#define MRF24J40_INTSTAT_SECIF     0x10
-#define MRF24J40_INTSTAT_RXIF      0x08
-#define MRF24J40_INTSTAT_TXG2IF    0x04
-#define MRF24J40_INTSTAT_TXG1IF    0x02
-#define MRF24J40_INTSTAT_TXNIF     0x01
+#define MRF24J40_INTSTAT_TXNIF     (1 << 0)
+#define MRF24J40_INTSTAT_TXG1IF    (1 << 1)
+#define MRF24J40_INTSTAT_TXG2IF    (1 << 2)
+#define MRF24J40_INTSTAT_RXIF      (1 << 3)
+#define MRF24J40_INTSTAT_SECIF     (1 << 4)
+#define MRF24J40_INTSTAT_HSYMTMRIF (1 << 5)
+#define MRF24J40_INTSTAT_WAKEIF    (1 << 6)
+#define MRF24J40_INTSTAT_SLPIF     (1 << 7)
 
 /* RXMCR bits */
 
-#define MRF24J40_RXMCR_PROMI       0x01 /* Enable promisc mode (rx all valid packets) */ 
+#define MRF24J40_RXMCR_PROMI       (1 << 0) /* Enable promisc mode (rx all valid packets) */ 
 #define MRF24J40_RXMCR_ERRPKT      0x02 /* Do not check CRC */ 
 #define MRF24J40_RXMCR_COORD       0x04 /* Enable coordinator mode     ??? DIFFERENCE ??? - not used in datasheet! */
 #define MRF24J40_RXMCR_PANCOORD    0x08 /* Enable PAN coordinator mode ??? DIFFERENCE ??? */ 
@@ -166,7 +170,7 @@
 
 /* TXMCR bits */
 
-#define MRF24J40_TXMCR_CSMABF0     0x01
+#define MRF24J40_TXMCR_CSMABF0     (1 << 0)
 #define MRF24J40_TXMCR_CSMABF1     0x02
 #define MRF24J40_TXMCR_CSMABF2     0x04
 #define MRF24J40_TXMCR_MACMINBE0   0x08
@@ -184,7 +188,7 @@
 #define MRF24J40_INTCON_RXIE       0x08
 #define MRF24J40_INTCON_TXG2IE     0x04
 #define MRF24J40_INTCON_TXG1IE     0x02
-#define MRF24J40_INTCON_TXNIE      0x01
+#define MRF24J40_INTCON_TXNIE      (1 << 0)
 
 /* BBREG1 bits */
 
@@ -197,10 +201,17 @@
 
 /* TXNCON bits */
 
-#define MRF24J40_TXNCON_TXNTRIG    0x01 /* Trigger packet tx, automatically cleared */
+#define MRF24J40_TXNCON_TXNTRIG    (1 << 0) /* Trigger packet tx, automatically cleared */
 #define MRF24J40_TXNCON_TXNSECEN   0x02 /* Enable security */
 #define MRF24J40_TXNCON_TXNACKREQ  0x04 /* An ACK is requested for this pkt */
 #define MRF24J40_TXNCON_INDIRECT   0x08 /* Activate indirect tx bit (for coordinators) */
 #define MRF24J40_TXNCON_FPSTAT     0x10 /* Status of the frame pending big in txed acks */
+
+/* TXSTAT bits */
+
+#define MRF24J40_TXSTAT_TXNSTAT    (1 << 0)
+#define MRF24J40_TXSTAT_CCAFAIL    (1 << 5)
+#define MRF24J40_TXSTAT_X_SHIFT    6
+#define MRF24J40_TXSTAT_X_MASK     (3 << MRF24J40_TXSTAT_X_SHIFT)
 
 #endif /* __DRIVERS_IEEE802154_MRF24J40_H */
