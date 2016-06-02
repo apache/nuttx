@@ -38,6 +38,8 @@
  * Included Files
  ************************************************************************************/
 
+#include <nuttx/config.h>
+
 #include <stdbool.h>
 #include <sched.h>
 #include <time.h>
@@ -216,9 +218,6 @@ static void rtc_dumpregs(FAR const char *msg)
   rtclldbg("     ISR: %08x\n", getreg32(STM32_RTC_ISR));
   rtclldbg("    PRER: %08x\n", getreg32(STM32_RTC_PRER));
   rtclldbg("    WUTR: %08x\n", getreg32(STM32_RTC_WUTR));
-#ifndef CONFIG_STM32_STM32F30XX
-  rtclldbg("  CALIBR: %08x\n", getreg32(STM32_RTC_CALIBR));
-#endif
   rtclldbg("  ALRMAR: %08x\n", getreg32(STM32_RTC_ALRMAR));
   rtclldbg("  ALRMBR: %08x\n", getreg32(STM32_RTC_ALRMBR));
   rtclldbg("  SHIFTR: %08x\n", getreg32(STM32_RTC_SHIFTR));
