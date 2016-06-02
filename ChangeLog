@@ -11879,3 +11879,11 @@
 	  mcan_txempty().  From Frank Benkert (2016-06-01).
 
 7.17 2016-xx-xx Gregory Nutt <gnutt@nuttx.org>
+
+	* drivers/mtd/flash_eraseall.c:  Removed.  This is no longer used
+	  in the OS and is simply a wrapper around the MDIOC_BULKERASE
+	  IOCTL command.  It used to be called (only) from
+	  apps/system/flash_eraseall, but that has been removed because it
+	  violated the OS/applicatin interface -- by calling flash_eraseall().
+	  The old code can be found in the Obsoleted' repository (2016-06-03).
+
