@@ -183,9 +183,11 @@ volatile bool g_rtc_enabled = false;
 
 #ifdef CONFIG_RTC_ALARM
 static int rtchw_check_alrawf(void);
-static int rtchw_check_alrbwf(void);
 static int rtchw_set_alrmar(rtc_alarmreg_t alarmreg);
+#if CONFIG_RTC_NALARMS > 1
+static int rtchw_check_alrbwf(void);
 static int rtchw_set_alrmbr(rtc_alarmreg_t alarmreg);
+#endif
 #endif
 
 /************************************************************************************
@@ -655,6 +657,7 @@ static int stm32_rtc_alarm_handler(int irq, void *context)
         }
     }
 
+#if CONFIG_RTC_NALARMS > 1
   if ((isr & RTC_ISR_ALRBF) != 0)
     {
       cr  = getreg32(STM32_RTC_CR);
@@ -678,6 +681,7 @@ static int stm32_rtc_alarm_handler(int irq, void *context)
           putreg32(isr, STM32_RTC_CR);
         }
     }
+#endif
 
   return ret;
 }
@@ -723,7 +727,7 @@ static int rtchw_check_alrawf(void)
 }
 #endif
 
-#ifdef CONFIG_RTC_ALARM
+#if defined(CONFIG_RTC_ALARM) && CONFIG_RTC_NALARMS > 1
 static int rtchw_check_alrbwf(void)
 {
   volatile uint32_t timeout;
@@ -801,7 +805,7 @@ errout_with_wprunlock:
 }
 #endif
 
-#ifdef CONFIG_RTC_ALARM
+#if defined(CONFIG_RTC_ALARM) && CONFIG_RTC_NALARMS > 1
 static int rtchw_set_alrmbr(rtc_alarmreg_t alarmreg)
 {
   int ret = -EBUSY;
@@ -1385,6 +1389,7 @@ int stm32_rtc_setalarm(FAR struct alm_setalarm_s *alminfo)
         }
         break;
 
+#if CONFIG_RTC_NALARMS > 1
       case RTC_ALARMB:
         {
           cbinfo         = &g_alarmcb[RTC_ALARMB];
@@ -1401,6 +1406,7 @@ int stm32_rtc_setalarm(FAR struct alm_setalarm_s *alminfo)
           rtc_dumpregs("Set AlarmB");
         }
         break;
+#endif
 
       default:
         rtcvdbg("ERROR: Invalid ALARM%d\n", alminfo->as_id);
@@ -1467,6 +1473,7 @@ int stm32_rtc_cancelalarm(enum alm_id_e alarmid)
         }
         break;
 
+#if CONFIG_RTC_NALARMS > 1
       case RTC_ALARMB:
         {
           /* Cancel the global callback function */
@@ -1497,6 +1504,7 @@ int stm32_rtc_cancelalarm(enum alm_id_e alarmid)
           ret = OK;
         }
         break;
+#endif
 
       default:
         rtcvdbg("ERROR: Invalid ALARM%d\n", alarmid);
