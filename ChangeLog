@@ -11586,7 +11586,7 @@
 	* configs/stm32l476vg-disco: Add support for the STM32L476VG Discovery
 	  board.  From Dave (2016-03-25).
 
-7.16 2016-xx-xx Gregory Nutt <gnutt@nuttx.org>
+7.16 2016-06-01 Gregory Nutt <gnutt@nuttx.org>
 
 	* PM: Add activity domain to all PM interfaces and driver callbacks.  If
 	  CONFIG_PM_NDOMAINS == 1, then the legacy behavior is preserved.  If
@@ -11615,7 +11615,7 @@
 	* STM3220G-EVAL:  Add support for both the IAR and uVision GCC IDEs
 	  From Kha Vo (2016-04-08).
 	* STM32F429I Discovery:  Add support for the uVision GCC IDE.   From
-	* Kha Vo (2016-04-08).
+	  Kha Vo (2016-04-08).
 	* libc/signal and include/signal.h: Rename sigset() to signal().
 	  sigset() is the System V function; signal() is the obsoleted POSIX
 	  name.  These seem to be equivalent.  Neither are relevant in modern
@@ -11640,7 +11640,7 @@
 	  is interpreted as a packed dual frame exchange. Sebastien Lorquet
 	  (2016-04-13).
 	* net/sockets/listen.c and accept.c and include/nuttx/net:  Separate
-	  out psock_listen() and psock_accepti() for internal OS usage
+	  out psock_listen() and psock_accept() for internal OS usage
 	  (2016-04-14).
 	* fs/inode/, fs/vfs/, and sched/task/:  File and socket descriptors are
 	  no longer allocated for kernel threads.  They must use SYSLOG for
@@ -11753,7 +11753,7 @@
 	* arch/srm/src/stm32l4: Add CAN support for STM32L4.  From Sebastien
 	  Lorquet (2016-05-19).
 	* arch/arm/src/samv7: Adds a JTAG config and ERASE config to  Kconfig to
-	  set the CCFG_SYSIO SYSIO Pins.  From Davide Sidrane (2016-05-19).
+	  set the CCFG_SYSIO SYSIO Pins.  From David Sidrane (2016-05-19).
 	* arch/sim/src:  Enhance networking support for the simulation under Linux.
 	  Includes updated support for Linux TUN/TAP, and the addition of support
 	  for Linux bridge devices.  From Steve (2016-05-20).
@@ -11767,7 +11767,7 @@
 	  configurations (2016-05-22).
 	* include/nuttx/crypto/aes.h:  Modifications to the crypto API needed
 	  for LPC43xx.  From Alexander Vasiljev (2016-05-23).
-	* arch/arm/src/lpc32xx:  Add AES support.  From Alexander Vasiljev
+	* arch/arm/src/lpc43xx:  Add AES support.  From Alexander Vasiljev
 	  (2016-05-24).
 	* configs/*/src/tiva_timer.c:  Tiva boards:  Fix a naming collision,
 	  rename board-specific function from tiva_timer_initialize() to
@@ -11830,7 +11830,7 @@
 	* drivers/:  Several SPI-based drivers modified.  All drivers that use
 	  SPI must call SPI_LOCK and SPI_UNLOCK.  This is not optional
 	  (2016-05-26).
-	* drivers/sensosrs:  Fix a bug in crc computation for ms583730.
+	* drivers/sensors:  Fix a bug in crc computation for ms583730.
 	  Implement POSIX read (2016-05-27).
 	* arch/arm/src/samv7: This is a fix to a problem in the handling of the
 	  oneshot timer. Due to a wrong assumption concerning the behavior
@@ -11842,7 +11842,7 @@
 	  counter register to zero, but the reset of the counter register is not
 	  performed instantly. According to the datasheet: "The counter can be
 	  reset by a trigger. In this case, the counter value passes to zero on
-	  the next valid edge of the selected clock.” Thus the counter is set to
+	  the next valid edge of the selected clock." Thus the counter is set to
 	  zero between 0 and USEC_PER_TICK microseconds after the clock was
 	  started.
 	  In my fix I use the freerun count value to determine if at least one
@@ -11869,3 +11869,13 @@
 	  are identical (2016-05-29).
 	* arch/arm/src/stm32: Allow to not use all channel in a lower part of
 	  PWM.  From Pierre-noel Bouteville (2016-05-30).
+	* libc/math: Add a NAN test on 'x' in asin function of lib_asin.c.
+	  Suggested by Pierre-noel Bouteville (2016-05-31).
+	* arch/arm/src/stm32: Fix logic in F4 RTCC driver that prevent ALARM
+	  interrupt.  From Neil Hancock (2016-05-31).
+	* arch/arm/src/stm32: Fix STM32 ValueLine ADC IRQ number selection.
+	  From David Sidrane (2016-05-31).
+	* arch/arm/src/samv7: Fix missing unlock of device in MCAN
+	  mcan_txempty().  From Frank Benkert (2016-06-01).
+
+7.17 2016-xx-xx Gregory Nutt <gnutt@nuttx.org>
