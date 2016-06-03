@@ -395,7 +395,7 @@ static int stm32_tim_setclock(FAR struct stm32_tim_dev_s *dev, uint32_t freq)
   uint32_t freqin;
   int prescaler;
 
-  ASSERT(dev);
+  DEBUGASSERT(dev != NULL);
 
   /* Disable Timer? */
 
@@ -534,7 +534,7 @@ static int stm32_tim_setclock(FAR struct stm32_tim_dev_s *dev, uint32_t freq)
 static void stm32_tim_setperiod(FAR struct stm32_tim_dev_s *dev,
                                 uint32_t period)
 {
-  ASSERT(dev);
+  DEBUGASSERT(dev != NULL);
   stm32_putreg32(dev, STM32_BTIM_ARR_OFFSET, period);
 }
 
@@ -544,8 +544,8 @@ static int stm32_tim_setisr(FAR struct stm32_tim_dev_s *dev,
 {
   int vectorno;
 
-  ASSERT(dev);
-  ASSERT(source == 0);
+  DEBUGASSERT(dev != NULL);
+  DEBUGASSERT(source == 0);
 
   switch (((struct stm32_tim_priv_s *)dev)->base)
     {
@@ -664,13 +664,13 @@ static int stm32_tim_setisr(FAR struct stm32_tim_dev_s *dev,
 
 static void stm32_tim_enableint(FAR struct stm32_tim_dev_s *dev, int source)
 {
-  ASSERT(dev);
+  DEBUGASSERT(dev != NULL);
   stm32_modifyreg16(dev, STM32_BTIM_DIER_OFFSET, 0, ATIM_DIER_UIE);
 }
 
 static void stm32_tim_disableint(FAR struct stm32_tim_dev_s *dev, int source)
 {
-  ASSERT(dev);
+  DEBUGASSERT(dev != NULL);
   stm32_modifyreg16(dev, STM32_BTIM_DIER_OFFSET, ATIM_DIER_UIE, 0);
 }
 
@@ -687,7 +687,7 @@ static int stm32_tim_setmode(FAR struct stm32_tim_dev_s *dev, stm32_tim_mode_t m
 {
   uint16_t val = ATIM_CR1_CEN | ATIM_CR1_ARPE;
 
-  ASSERT(dev);
+  DEBUGASSERT(dev != NULL);
 
   /* This function is not supported on basic timers. To enable or
    * disable it, simply set its clock to valid frequency or zero.
@@ -758,7 +758,7 @@ static int stm32_tim_setchannel(FAR struct stm32_tim_dev_s *dev, uint8_t channel
   uint16_t ccer_val    = stm32_getreg16(dev, STM32_GTIM_CCER_OFFSET);
   uint8_t  ccmr_offset = STM32_GTIM_CCMR1_OFFSET;
 
-  ASSERT(dev);
+  DEBUGASSERT(dev != NULL);
 
   /* Further we use range as 0..3; if channel=0 it will also overflow here */
 
@@ -1271,7 +1271,7 @@ static int stm32_tim_setchannel(FAR struct stm32_tim_dev_s *dev, uint8_t channel
 static int stm32_tim_setcompare(FAR struct stm32_tim_dev_s *dev, uint8_t channel,
                                 uint32_t compare)
 {
-  ASSERT(dev);
+  DEBUGASSERT(dev != NULL);
 
   switch (channel)
     {
@@ -1295,7 +1295,7 @@ static int stm32_tim_setcompare(FAR struct stm32_tim_dev_s *dev, uint8_t channel
 
 static int stm32_tim_getcapture(FAR struct stm32_tim_dev_s *dev, uint8_t channel)
 {
-  ASSERT(dev);
+  DEBUGASSERT(dev != NULL);
 
   switch (channel)
     {
@@ -1622,7 +1622,7 @@ FAR struct stm32_tim_dev_s *stm32_tim_init(int timer)
 
 int stm32_tim_deinit(FAR struct stm32_tim_dev_s * dev)
 {
-  ASSERT(dev);
+  DEBUGASSERT(dev != NULL);
 
   /* Disable power */
 
