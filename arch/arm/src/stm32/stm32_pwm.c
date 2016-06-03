@@ -1903,6 +1903,8 @@ static void pwm_set_apb_clock(FAR struct stm32_pwmtimer_s *priv, bool on)
         en_bit   = RCC_APB2ENR_TIM17EN;
         break;
 #endif
+      default:
+        return;
     }
 
   /* Enable/disable APB 1/2 clock for timer */
@@ -2219,6 +2221,8 @@ static int pwm_stop(FAR struct pwm_lowerhalf_s *dev)
         resetbit = RCC_APB2RSTR_TIM17RST;
         break;
 #endif
+      default:
+        return -EINVAL;
     }
 
   /* Reset the timer - stopping the output and putting the timer back
