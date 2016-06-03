@@ -273,10 +273,12 @@
 #  define CONFIG_STM32F7_I2C_DYNTIMEO_STARTSTOP TICK2USEC(CONFIG_STM32F7_I2CTIMEOTICKS)
 #endif
 
-#define I2C_OUTPUT \
-  (GPIO_OUTPUT | GPIO_OUTPUT_SET | GPIO_CNF_OUTOD | GPIO_MODE_50MHz)
-#define MKI2C_OUTPUT(p) \
-  (((p) & (GPIO_PORT_MASK | GPIO_PIN_MASK)) | I2C_OUTPUT)
+/* Macros to convert a I2C pin to a GPIO output */
+
+#define I2C_OUTPUT (GPIO_OUTPUT | GPIO_FLOAT | GPIO_OPENDRAIN |\
+                      GPIO_SPEED_50MHz | GPIO_OUTPUT_SET)
+
+#define MKI2C_OUTPUT(p) (((p) & (GPIO_PORT_MASK | GPIO_PIN_MASK)) | I2C_OUTPUT)
 
 /* Register setting unique to the STM32F30xx */
 
@@ -483,7 +485,9 @@ static int stm32_i2c_process(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s 
                              int count);
 static int stm32_i2c_transfer(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s *msgs,
                               int count);
-
+#ifdef CONFIG_I2C_RESET
+int stm32_i2c_reset(FAR struct i2c_master_s * dev);
+#endif
 
 /************************************************************************************
  * Private Data
@@ -582,7 +586,7 @@ struct i2c_ops_s stm32_i2c_ops =
 {
   .transfer = stm32_i2c_transfer
 #ifdef CONFIG_I2C_RESET
-  , .reset  = stm32f7_i2c_reset
+  , .reset  = stm32_i2c_reset
 #endif
 };
 
@@ -2576,7 +2580,7 @@ int stm32f7_i2cbus_uninitialize(FAR struct i2c_master_s * dev)
 }
 
 /************************************************************************************
- * Name: up_i2creset
+ * Name: stm32_i2c_reset
  *
  * Description:
  *   Reset an I2C bus
@@ -2584,7 +2588,7 @@ int stm32f7_i2cbus_uninitialize(FAR struct i2c_master_s * dev)
  ************************************************************************************/
 
 #ifdef CONFIG_I2C_RESET
-int up_i2creset(FAR struct i2c_master_s * dev)
+int stm32_i2c_reset(FAR struct i2c_master_s * dev)
 {
   struct stm32_i2c_priv_s * priv;
   unsigned int clock_count;

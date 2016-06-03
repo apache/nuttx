@@ -142,6 +142,10 @@
 #define STM32_USART1_BASE    0x40011000     /* 0x40011000-0x400113ff: USART1 */
 #define STM32_USART6_BASE    0x40011400     /* 0x40011400-0x400117ff: USART6 */
 #define STM32_ADC_BASE       0x40012000     /* 0x40012000-0x400123ff: ADC1 - ADC2 - ADC3 */
+#  define STM32_ADC1_BASE    0x40012000     /*                        ADC1 */
+#  define STM32_ADC2_BASE    0x40012100     /*                        ADC2 */
+#  define STM32_ADC3_BASE    0x40012200     /*                        ADC3 */
+#  define STM32_ADCCMN_BASE  0x40012300     /*                        Common */
 #define STM32_SDMMC1_BASE    0x40012c00     /* 0x40012c00-0x40012fff: SDMMC1 */
 #define STM32_SPI1_BASE      0x40013000     /* 0x40013000-0x400133ff: SPI1 */
 #define STM32_SPI4_BASE      0x40013400     /* 0x40013400-0x400137ff: SPI4 */
