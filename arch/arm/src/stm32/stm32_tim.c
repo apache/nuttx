@@ -324,91 +324,17 @@ static int stm32_tim_setclock(FAR struct stm32_tim_dev_s *dev, uint32_t freq)
       return 0;
     }
 
-  switch (((struct stm32_tim_priv_s *)dev)->base)
-  {
-#ifdef STM32_APB2_TIM1_CLKIN
-      case STM32_TIM1_BASE:
-          prescaler = STM32_APB2_TIM1_CLKIN / freq;
-          break;
+#if STM32_NATIM > 0
+  if (((struct stm32_tim_priv_s *)dev)->base == STM32_TIM1_BASE ||
+      ((struct stm32_tim_priv_s *)dev)->base == STM32_TIM8_BASE)
+    {
+      prescaler = STM32_TIM18_FREQUENCY / freq;
+    }
+  else
 #endif
-#ifdef STM32_APB2_TIM2_CLKIN
-      case STM32_TIM2_BASE:
-          prescaler = STM32_APB2_TIM2_CLKIN / freq;
-          break;
-#endif
-#ifdef STM32_APB2_TIM3_CLKIN
-      case STM32_TIM3_BASE:
-          prescaler = STM32_APB2_TIM3_CLKIN / freq;
-          break;
-#endif
-#ifdef STM32_APB2_TIM4_CLKIN
-      case STM32_TIM4_BASE:
-          prescaler = STM32_APB2_TIM4_CLKIN / freq;
-          break;
-#endif
-#ifdef STM32_APB2_TIM5_CLKIN
-      case STM32_TIM5_BASE:
-          prescaler = STM32_APB2_TIM5_CLKIN / freq;
-          break;
-#endif
-#ifdef STM32_APB2_TIM6_CLKIN
-      case STM32_TIM6_BASE:
-          prescaler = STM32_APB2_TIM6_CLKIN / freq;
-          break;
-#endif
-#ifdef STM32_APB2_TIM7_CLKIN
-      case STM32_TIM7_BASE:
-          prescaler = STM32_APB2_TIM7_CLKIN / freq;
-          break;
-#endif
-#ifdef STM32_APB2_TIM8_CLKIN
-      case STM32_TIM8_BASE:
-          prescaler = STM32_APB2_TIM8_CLKIN / freq;
-          break;
-#endif
-#ifdef STM32_APB2_TIM9_CLKIN
-      case STM32_TIM9_BASE:
-          prescaler = STM32_APB2_TIM9_CLKIN / freq;
-          break;
-#endif
-#ifdef STM32_APB2_TIM10_CLKIN
-      case STM32_TIM10_BASE:
-          prescaler = STM32_APB2_TIM10_CLKIN / freq;
-          break;
-#endif
-#ifdef STM32_APB2_TIM11_CLKIN
-      case STM32_TIM11_BASE:
-          prescaler = STM32_APB2_TIM11_CLKIN / freq;
-          break;
-#endif
-#ifdef STM32_APB2_TIM12_CLKIN
-      case STM32_TIM12_BASE:
-          prescaler = STM32_APB2_TIM12_CLKIN / freq;
-          break;
-#endif
-#ifdef STM32_APB2_TIM13_CLKIN
-      case STM32_TIM13_BASE:
-          prescaler = STM32_APB2_TIM13_CLKIN / freq;
-          break;
-#endif
-#ifdef STM32_APB2_TIM14_CLKIN
-      case STM32_TIM14_BASE:
-          prescaler = STM32_APB2_TIM14_CLKIN / freq;
-          break;
-#endif
-#ifdef STM32_APB2_TIM15_CLKIN
-      case STM32_TIM15_BASE:
-          prescaler = STM32_APB2_TIM15_CLKIN / freq;
-          break;
-#endif
-#ifdef STM32_APB2_TIM16_CLKIN
-      case STM32_TIM16_BASE:
-          prescaler = STM32_APB2_TIM16_CLKIN / freq;
-          break;
-#endif
-      default:
-          return ERROR;
-  }
+    {
+      prescaler = STM32_TIM27_FREQUENCY / freq;
+    }
 
   /* We need to decrement value for '1', but only, if we are allowed to
    * not to cause underflow. Check for overflow.
