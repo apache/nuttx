@@ -425,7 +425,7 @@ static int stm32_tim_setclock(FAR struct stm32_tim_dev_s *dev, uint32_t freq)
 
 #if defined(CONFIG_STM32_TIM16) && defined(BOARD_TIM16_FREQUENCY)
       case STM32_TIM16_BASE:
-        freqin = BOARD_TIM8_FREQUENCY;
+        freqin = BOARD_TIM16_FREQUENCY;
         break;
 #endif
 
