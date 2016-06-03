@@ -2,7 +2,7 @@
  * configs/nucleo-f303re/include/board.h
  * include/arch/board/board.h
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2016 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2015 Omni Hoverboards Inc. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            Paul Alexander Patience <paul-a.patience@polymtl.ca>
@@ -154,8 +154,14 @@
  * Note: TIM1,8 are on APB2, others on APB1
  */
 
-#define STM32_TIM18_FREQUENCY   STM32_HCLK_FREQUENCY
-#define STM32_TIM27_FREQUENCY   (STM32_HCLK_FREQUENCY/2)
+#define BOARD_TIM1_FREQUENCY   STM32_HCLK_FREQUENCY
+#define BOARD_TIM2_FREQUENCY   (STM32_HCLK_FREQUENCY / 2)
+#define BOARD_TIM3_FREQUENCY   (STM32_HCLK_FREQUENCY / 2)
+#define BOARD_TIM4_FREQUENCY   (STM32_HCLK_FREQUENCY / 2)
+#define BOARD_TIM5_FREQUENCY   (STM32_HCLK_FREQUENCY / 2)
+#define BOARD_TIM6_FREQUENCY   (STM32_HCLK_FREQUENCY / 2)
+#define BOARD_TIM7_FREQUENCY   (STM32_HCLK_FREQUENCY / 2)
+#define BOARD_TIM8_FREQUENCY   STM32_HCLK_FREQUENCY
 
 /* LED definitions **********************************************************/
 /* The Nucleo F303RE board has three LEDs.  Two of these are controlled by

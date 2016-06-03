@@ -848,7 +848,7 @@ static int dac_timinit(FAR struct stm32_chan_s *chan)
       case 8:
         regaddr = STM32_RCC_APB2ENR;
         setbits = RCC_APB2ENR_TIM8EN;
-        pclk    = STM32_TIM18_FREQUENCY;
+        pclk    = BOARD_TIM8_FREQUENCY;
         break;
 #endif
       default:

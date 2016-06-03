@@ -312,6 +312,7 @@ static void stm32_tim_gpioconfig(uint32_t cfg, stm32_tim_channel_t mode)
 
 static int stm32_tim_setclock(FAR struct stm32_tim_dev_s *dev, uint32_t freq)
 {
+  uint32_t freqin;
   int prescaler;
 
   ASSERT(dev);
@@ -324,26 +325,130 @@ static int stm32_tim_setclock(FAR struct stm32_tim_dev_s *dev, uint32_t freq)
       return 0;
     }
 
-#if STM32_NATIM > 0
-  if (((struct stm32_tim_priv_s *)dev)->base == STM32_TIM1_BASE ||
-      ((struct stm32_tim_priv_s *)dev)->base == STM32_TIM8_BASE)
+  /* Get the input clock frequency for this timer.  These vary with
+   * different timer clock sources, MCU-specific timer configuration, and
+   * board-specific clock configuration.  The correct input clock frequency
+   * must be defined in the board.h header file.
+   */
+
+  switch (((struct stm32_tim_priv_s *)dev)->base)
     {
-      prescaler = STM32_TIM18_FREQUENCY / freq;
-    }
-  else
+#if defined(CONFIG_STM32_TIM1) && defined(BOARD_TIM1_FREQUENCY)
+      case STM32_TIM1_BASE:
+        freqin = BOARD_TIM1_FREQUENCY;
+        break;
 #endif
-    {
-      prescaler = STM32_TIM27_FREQUENCY / freq;
+
+#if defined(CONFIG_STM32_TIM2) && defined(BOARD_TIM2_FREQUENCY)
+      case STM32_TIM2_BASE:
+        freqin = BOARD_TIM2_FREQUENCY;
+        break;
+#endif
+
+#if defined(CONFIG_STM32_TIM3) && defined(BOARD_TIM3_FREQUENCY)
+      case STM32_TIM3_BASE:
+        freqin = BOARD_TIM3_FREQUENCY;
+        break;
+#endif
+
+#if defined(CONFIG_STM32_TIM4) && defined(BOARD_TIM4_FREQUENCY)
+      case STM32_TIM4_BASE:
+        freqin = BOARD_TIM4_FREQUENCY;
+        break;
+#endif
+
+#if defined(CONFIG_STM32_TIM5) && defined(BOARD_TIM5_FREQUENCY)
+      case STM32_TIM5_BASE:
+        freqin = BOARD_TIM5_FREQUENCY;
+        break;
+#endif
+
+#if defined(CONFIG_STM32_TIM6) && defined(BOARD_TIM6_FREQUENCY)
+      case STM32_TIM6_BASE:
+        freqin = BOARD_TIM6_FREQUENCY;
+        break;
+#endif
+
+#if defined(CONFIG_STM32_TIM7) && defined(BOARD_TIM7_FREQUENCY)
+      case STM32_TIM7_BASE:
+        freqin = BOARD_TIM7_FREQUENCY;
+        break;
+#endif
+
+#if defined(CONFIG_STM32_TIM8) && defined(BOARD_TIM8_FREQUENCY)
+      case STM32_TIM8_BASE:
+        freqin = BOARD_TIM8_FREQUENCY;
+        break;
+#endif
+
+#if defined(CONFIG_STM32_TIM9) && defined(BOARD_TIM9_FREQUENCY)
+      case STM32_TIM9_BASE:
+        freqin = BOARD_TIM9_FREQUENCY;
+        break;
+#endif
+
+#if defined(CONFIG_STM32_TIM10) && defined(BOARD_TIM10_FREQUENCY)
+      case STM32_TIM10_BASE:
+        freqin = BOARD_TIM10_FREQUENCY;
+        break;
+#endif
+
+#if defined(CONFIG_STM32_TIM11) && defined(BOARD_TIM11_FREQUENCY)
+      case STM32_TIM11_BASE:
+        freqin = BOARD_TIM11_FREQUENCY;
+        break;
+#endif
+
+#if defined(CONFIG_STM32_TIM12) && defined(BOARD_TIM12_FREQUENCY)
+      case STM32_TIM12_BASE:
+        freqin = BOARD_TIM12_FREQUENCY;
+        break;
+#endif
+
+#if defined(CONFIG_STM32_TIM13) && defined(BOARD_TIM13_FREQUENCY)
+      case STM32_TIM13_BASE:
+        freqin = BOARD_TIM13_FREQUENCY;
+        break;
+#endif
+
+#if defined(CONFIG_STM32_TIM14) && defined(BOARD_TIM14_FREQUENCY)
+      case STM32_TIM14_BASE:
+        freqin = BOARD_TIM14_FREQUENCY;
+        break;
+#endif
+
+#if defined(CONFIG_STM32_TIM15) && defined(BOARD_TIM15_FREQUENCY)
+      case STM32_TIM15_BASE:
+        freqin = BOARD_TIM15_FREQUENCY;
+        break;
+#endif
+
+#if defined(CONFIG_STM32_TIM16) && defined(BOARD_TIM16_FREQUENCY)
+      case STM32_TIM16_BASE:
+        freqin = BOARD_TIM8_FREQUENCY;
+        break;
+#endif
+
+      default:
+        return -EINVAL;
     }
 
-  /* We need to decrement value for '1', but only, if we are allowed to
-   * not to cause underflow. Check for overflow.
+  /* Select a pre-scaler value for this timer using the input clock
+   * frequency.
+   */
+
+  prescaler = freqin / freq;
+
+  /* We need to decrement value for '1', but only, if that will not to
+   * cause underflow.
    */
 
   if (prescaler > 0)
     {
       prescaler--;
     }
+
+  /* Check for overflow as well. */
 
   if (prescaler > 0xffff)
     {
