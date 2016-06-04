@@ -67,7 +67,11 @@
  * Name: up_getc
  *
  * Description:
- *   Input one byte from the serial console
+ *   Input one byte from the serial console.
+ *
+ *   REVIST:  If used with the serial driver enabled, then this could
+ *   interfere with the serial driver operations.  Serial interrupts should
+ *   be disabled when this function executes in that case.
  *
  ****************************************************************************/
 
