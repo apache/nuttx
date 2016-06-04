@@ -57,6 +57,7 @@
 
 #include <arch/board/board.h>
 #include <nuttx/config.h>
+#include <debug.h>
 
 #include <errno.h>
 
@@ -176,7 +177,7 @@ int lpc43_gpioint_grpinitialize(int group, bool anded, bool level)
 int lpc43_gpioint_pinconfig(uint16_t gpiocfg)
 {
   unsigned int port    = ((gpiocfg & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT);
-  unsigned int pin     = ((gpiocfg & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT);
+  unsigned int pin     = ((gpiocfg & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT);
   unsigned int pinint  = ((gpiocfg & GPIO_PININT_MASK) >> GPIO_PININT_SHIFT);
   uint32_t     bitmask = (1 << pinint);
   uint32_t     regval;
@@ -226,6 +227,8 @@ int lpc43_gpioint_pinconfig(uint16_t gpiocfg)
   putreg32(regval, LPC43_GPIOINT_ISEL);
 
   /* Configure the active high level or rising edge */
+
+  /* TODO: this works for edge sensitive, but not level sensitive, active level is only controlled in IENF */
 
   regval = getreg32(LPC43_GPIOINT_IENR);
   if (GPIO_IS_ACTIVE_HI(gpiocfg))
@@ -318,6 +321,30 @@ int lpc43_gpioint_grpconfig(uint16_t gpiocfg)
   putreg32(regval, regaddr);
 
   leave_critical_section(flags);
+  return OK;
+}
+
+/****************************************************************************
+ * Name: lpc43_gpioint_ack
+ *
+ * Description:
+ *   Acknowledge the interrupt for a given pint interrupt number. Call this
+ *   inside the interrupt handler. For edge sensitive interrupts, the interrupt
+ *   status is cleared. For level sensitive interrupts, the active-high/-low
+ *   sensitivity is inverted.
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int lpc43_gpioint_ack(uint8_t intnumber)
+{
+  uint32_t regval;
+
+  regval = getreg32(LPC43_GPIOINT_IST);
+  regval |= (1 << intnumber);
+  putreg32(regval, LPC43_GPIOINT_IST);
   return OK;
 }
 

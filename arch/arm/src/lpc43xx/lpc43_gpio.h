@@ -143,7 +143,7 @@
  * ..CC C... .... ....
  */
 
-#define GPIO_PININT_SHIFT          (10)        /* Bits 11-13: Pin interrupt number */
+#define GPIO_PININT_SHIFT          (11)        /* Bits 11-13: Pin interrupt number */
 #define GPIO_PININT_MASK           (7 << GPIO_PININT_SHIFT)
 #  define GPIO_PININT0             (0 << GPIO_PININT_SHIFT)
 #  define GPIO_PININT1             (1 << GPIO_PININT_SHIFT)
@@ -162,9 +162,9 @@
  * .... .III .... ....
  */
 
-#define _GPIO_INT_LEVEL            (1 << 10)  /* Bit 10: 1=Level (vs edge) */
-#define _GPIO_INT_HIGH             (1 << 9)   /* Bit 9:  1=High level or rising edge */
-#define _GPIO_INT_LOW              (1 << 8)   /* Bit 8:  1=Low level or falling edge */
+#define _GPIO_INT_EDGE             (1 << 10)  /* Bit 10: 1=Edge (vs level) */
+#define _GPIO_INT_LOW              (1 << 9)   /* Bit 9:  1=Low level or falling edge */
+#define _GPIO_INT_HIGH             (1 << 8)   /* Bit 8:  1=High level or rising edge */
 
 #define GPIO_INT_SHIFT             (8)        /* Bits 8-10: Interrupt mode */
 #define GPIO_INT_MASK              (7 << GPIO_INT_SHIFT)
@@ -176,8 +176,8 @@
 
 #define GPIO_IS_ACTIVE_HI(p)       (((p) & _GPIO_INT_HIGH)  != 0)
 #define GPIO_IS_ACTIVE_LOW(p)      (((p) & _GPIO_INT_LOW)   != 0)
-#define GPIO_IS_EDGE(p)            (((p) & _GPIO_INT_LEVEL) == 0)
-#define GPIO_IS_LEVEL(p)           (((p) & _GPIO_INT_LEVEL) != 0)
+#define GPIO_IS_LEVEL(p)           (((p) & _GPIO_INT_EDGE) == 0)
+#define GPIO_IS_EDGE(p)            (((p) & _GPIO_INT_EDGE) != 0)
 
 /* GPIO Port Number:
  *
