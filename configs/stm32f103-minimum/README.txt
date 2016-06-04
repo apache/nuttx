@@ -421,6 +421,31 @@ instead of configure.sh:
 
 Where <subdir> is one of the following:
 
+  minnsh:
+  ------
+
+    This is a experiment to see just how small we can get a usable NSH
+    configuration.  This configuration has far fewer features than the nsh
+    configuration but is also a fraction of the size.
+
+    STATUS:
+    2016-06-03:  Using that config I got this:
+
+        $ ls -l nuttx.bin
+        -rwxr-xr-x 1 alan alan 12543 Jun 3 17:58 nuttx.bin
+
+        $ arm-none-eabi-size nuttx
+        text data bss dec hex filename
+        12542 1 816 13359 342f nuttx
+
+      And this is free command from NuttX shell:
+
+        NuttShell (NSH)
+        nsh> free
+        total used free largest
+        Mem: 18624 2328 16296 16296
+       nsh>
+
   nsh:
   ---
     Configures the NuttShell (nsh) located at apps/examples/nsh. This
