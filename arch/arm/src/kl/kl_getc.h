@@ -1,7 +1,7 @@
 /************************************************************************************
- * arch/arm/src/kl/kl_lowgetc.h
+ * arch/arm/src/kl/kl_getc.h
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,42 +33,16 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_KL_KINETIS_LOWGETC_H
-#define __ARCH_ARM_SRC_KL_KINETIS_LOWGETC_H
+#ifndef __ARCH_ARM_SRC_KL_KINETIS_GETC_H
+#define __ARCH_ARM_SRC_KL_KINETIS_GETC_H
 
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
 #include <nuttx/config.h>
+
 #include "kl_config.h"
+#include "chip/kl_uart.h"
 
-/************************************************************************************
- * Public Data
- ************************************************************************************/
-
-#ifndef __ASSEMBLY__
-
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
-
-/************************************************************************************
- * Public Function Prototypes
- ************************************************************************************/
-
-#ifdef HAVE_SERIAL_CONSOLE
-int kl_lowgetc(void);
-#endif
-
-#undef EXTERN
-#if defined(__cplusplus)
-}
-#endif
-#endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_KL_KINETIS_LOWGETC_H */
+#endif /* __ARCH_ARM_SRC_KL_KINETIS_GETC_H */

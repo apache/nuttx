@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/lpc11/lpc11_lowgetc.h
+ * arch/arm/src/lpc11/lpc11_getc.h
  *
  *   Copyright (C) 2015, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_LPC11XX_LPC11_LOWGETC_H
-#define __ARCH_ARM_SRC_LPC11XX_LPC11_LOWGETC_H
+#ifndef __ARCH_ARM_SRC_LPC11XX_LPC11_GETC_H
+#define __ARCH_ARM_SRC_LPC11XX_LPC11_GETC_H
 
 /************************************************************************************
  * Included Files
@@ -42,33 +42,6 @@
 
 #include <nuttx/config.h>
 #include "lpc11_serial.h"
+#include "chip/lpc11_uart.h"
 
-/************************************************************************************
- * Public Data
- ************************************************************************************/
-
-#ifndef __ASSEMBLY__
-
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
-
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
-
-#ifdef HAVE_SERIAL_CONSOLE
-int lpc11_lowgetc(void);
-#endif
-
-#undef EXTERN
-#if defined(__cplusplus)
-}
-#endif
-#endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_LPC11XX_LPC11_LOWGETC_H */
+#endif /* __ARCH_ARM_SRC_LPC11XX_LPC11_GETC_H */

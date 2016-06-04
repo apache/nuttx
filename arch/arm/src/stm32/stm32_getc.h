@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/stm32/stm32_lowgetc.h
+ * arch/arm/src/stm32/stm32_getc.h
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32_STM32_LOWGETC_H
-#define __ARCH_ARM_SRC_STM32_STM32_LOWGETC_H
+#ifndef __ARCH_ARM_SRC_STM32_STM32_GETC_H
+#define __ARCH_ARM_SRC_STM32_STM32_GETC_H
 
 /************************************************************************************
  * Included Files
@@ -44,4 +44,4 @@
 
 #include "chip.h"
 
-#endif /* __ARCH_ARM_SRC_STM32_STM32_LOWGETC_H */
+#endif /* __ARCH_ARM_SRC_STM32_STM32_GETC_H */
