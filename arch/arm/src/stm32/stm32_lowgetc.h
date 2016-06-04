@@ -1,10 +1,8 @@
 /************************************************************************************
- * arch/arm/src/stm32/stm32.h
+ * arch/arm/src/stm32/stm32_lowgetc.h
  *
- *   Copyright (C) 2011 Uros Platise. All rights reserved.
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
- *   Authors: Uros Platise <uros.platise@isotel.eu>
- *            Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -35,65 +33,15 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32_STM32_H
-#define __ARCH_ARM_SRC_STM32_STM32_H
+#ifndef __ARCH_ARM_SRC_STM32_STM32_LOWGETC_H
+#define __ARCH_ARM_SRC_STM32_STM32_LOWGETC_H
 
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
-#include <stdint.h>
-#include <stdbool.h>
-
-#include "up_internal.h"
-
-/************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
-
-/* Additional Configuration *********************************************************/
-/* Custom debug settings used in the STM32 port.  These are managed by STM32-specific
- * logic and not the common logic in include/debug.h.  NOTE:  Some of these also
- * depend on CONFIG_DEBUG_VERBOSE
- */
-
-#ifndef CONFIG_DEBUG
-#  undef CONFIG_DEBUG_DMA
-#  undef CONFIG_DEBUG_RTC
-#  undef CONFIG_DEBUG_I2C
-#  undef CONFIG_DEBUG_CAN
-#  undef CONFIG_DEBUG_PWM
-#  undef CONFIG_DEBUG_SENSORS
-#endif
-
-/* Peripherals **********************************************************************/
 
 #include "chip.h"
-#include "stm32_adc.h"
-//#include "stm32_bkp.h"
-#include "stm32_can.h"
-#include "stm32_dbgmcu.h"
-#include "stm32_dma.h"
-#include "stm32_exti.h"
-#include "stm32_flash.h"
-#include "stm32_fsmc.h"
-#include "stm32_gpio.h"
-#include "stm32_i2c.h"
-#include "stm32_ltdc.h"
-#include "stm32_pwr.h"
-#include "stm32_rcc.h"
-#include "stm32_rtc.h"
-#include "stm32_sdio.h"
-#include "stm32_spi.h"
-#include "stm32_tim.h"
-#include "stm32_uart.h"
-#include "stm32_usbdev.h"
-#include "stm32_wdg.h"
-#include "stm32_lowputc.h"
-#include "stm32_lowgetc.h"
-#include "stm32_eth.h"
 
-#endif /* __ARCH_ARM_SRC_STM32_STM32_H */
-
+#endif /* __ARCH_ARM_SRC_STM32_STM32_LOWGETC_H */
