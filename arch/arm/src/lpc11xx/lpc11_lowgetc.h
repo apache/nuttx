@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/lpc11/lpc11_lowgetc.h
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,14 +42,6 @@
 
 #include <nuttx/config.h>
 #include "lpc11_serial.h"
-
-/************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
-
-/************************************************************************************
- * Public Types
- ************************************************************************************/
 
 /************************************************************************************
  * Public Data
