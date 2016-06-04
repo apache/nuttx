@@ -150,6 +150,13 @@ endchoice # LPC43XX Boot Configuration
 
 menu "LPC43xx Peripheral Support"
 
+
+config GPIO_IRQ
+        bool "GPIO interrupt support"
+        default n
+        ---help---
+                Enable support for GPIO interrupts
+
 config LPC43_ADC0
 	bool "ADC0"
 	default n

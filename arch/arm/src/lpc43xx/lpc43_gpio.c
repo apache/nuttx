@@ -49,6 +49,10 @@
 #include "up_arch.h"
 #include "lpc43_gpio.h"
 
+#ifdef CONFIG_GPIO_IRQ
+#include "lpc43_gpioint.h"
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
