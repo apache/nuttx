@@ -151,7 +151,7 @@ endchoice # LPC43XX Boot Configuration
 menu "LPC43xx Peripheral Support"
 
 
-config GPIO_IRQ
+config LPC43_GPIO_IRQ
         bool "GPIO interrupt support"
         default n
         ---help---

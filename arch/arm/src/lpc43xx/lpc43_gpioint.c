@@ -71,7 +71,7 @@
 #include "lpc43_gpio.h"
 #include "lpc43_gpioint.h"
 
-#ifdef CONFIG_GPIO_IRQ
+#ifdef CONFIG_LPC43_GPIO_IRQ
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -226,9 +226,11 @@ int lpc43_gpioint_pinconfig(uint16_t gpiocfg)
 
   putreg32(regval, LPC43_GPIOINT_ISEL);
 
-  /* Configure the active high level or rising edge */
-
-  /* TODO: this works for edge sensitive, but not level sensitive, active level is only controlled in IENF */
+  /* Configure the active high level or rising edge
+   *
+   * TODO: this works for edge sensitive, but not level sensitive, active
+   * level is only controlled in IENF.
+   */
 
   regval = getreg32(LPC43_GPIOINT_IENR);
   if (GPIO_IS_ACTIVE_HI(gpiocfg))
@@ -342,10 +344,11 @@ int lpc43_gpioint_ack(uint8_t intnumber)
 {
   uint32_t regval;
 
-  regval = getreg32(LPC43_GPIOINT_IST);
+  regval  = getreg32(LPC43_GPIOINT_IST);
   regval |= (1 << intnumber);
   putreg32(regval, LPC43_GPIOINT_IST);
+
   return OK;
 }
 
-#endif /* CONFIG_GPIO_IRQ */
+#endif /* CONFIG_LPC43_GPIO_IRQ */
