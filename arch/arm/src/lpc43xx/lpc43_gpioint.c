@@ -180,7 +180,7 @@ int lpc43_gpioint_pinconfig(uint16_t gpiocfg)
   unsigned int pin     = ((gpiocfg & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT);
   unsigned int pinint  = ((gpiocfg & GPIO_PININT_MASK) >> GPIO_PININT_SHIFT);
   uint32_t     bitmask = (1 << pinint);
-  uint32_t     regval;
+  uint32_t     pinsel;
   uint32_t     isel;
   uint32_t     einr;
   uint32_t     einf;
@@ -200,34 +200,20 @@ int lpc43_gpioint_pinconfig(uint16_t gpiocfg)
 
   if (pinint < 4)
     {
-      regval = getreg32(LPC43_SCU_PINTSEL0);
-      regval &= ~SCU_PINTSEL0_MASK(pinint);
-      regval |= ((pin  << SCU_PINTSEL0_INTPIN_SHIFT(pinint)) |
+      pinsel = getreg32(LPC43_SCU_PINTSEL0);
+      pinsel &= ~SCU_PINTSEL0_MASK(pinint);
+      pinsel |= ((pin  << SCU_PINTSEL0_INTPIN_SHIFT(pinint)) |
                  (port << SCU_PINTSEL0_PORTSEL_SHIFT(pinint)));
-      putreg32(regval, LPC43_SCU_PINTSEL0);
+      putreg32(pinsel, LPC43_SCU_PINTSEL0);
     }
   else
     {
-      regval = getreg32(LPC43_SCU_PINTSEL1);
-      regval &= ~SCU_PINTSEL1_MASK(pinint);
-      regval |= ((pin  << SCU_PINTSEL1_INTPIN_SHIFT(pinint)) |
+      pinsel = getreg32(LPC43_SCU_PINTSEL1);
+      pinsel &= ~SCU_PINTSEL1_MASK(pinint);
+      pinsel |= ((pin  << SCU_PINTSEL1_INTPIN_SHIFT(pinint)) |
                  (port << SCU_PINTSEL1_PORTSEL_SHIFT(pinint)));
-      putreg32(regval, LPC43_SCU_PINTSEL1);
+      putreg32(pinsel, LPC43_SCU_PINTSEL1);
     }
-
-  /* Set level or edge sensitive */
-
-  regval = getreg32(LPC43_GPIOINT_ISEL);
-  if (GPIO_IS_LEVEL(gpiocfg))
-    {
-      regval |= bitmask;
-    }
-  else
-    {
-      regval &= ~bitmask;
-    }
-
-  putreg32(regval, LPC43_GPIOINT_ISEL);
 
   /* Configure the active level or rising/falling edge
    *
