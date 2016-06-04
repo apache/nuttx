@@ -2532,6 +2532,8 @@ config STM32_FSMC_SRAM
 	---help---
 		In addition to internal SRAM, SRAM may also be available through the FSMC.
 
+menu "Timer Configuration"
+
 config STM32_TIM1_PWM
 	bool "TIM1 PWM"
 	default n
@@ -5298,6 +5300,8 @@ config STM32_TIM14_CAP
 
 		Timer devices may be used for different purposes.  One special purpose is
 		to capture input.
+
+endmenu # Timer Configuration
 
 menu "ADC Configuration"
 	depends on STM32_ADC
