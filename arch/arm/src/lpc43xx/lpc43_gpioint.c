@@ -181,6 +181,9 @@ int lpc43_gpioint_pinconfig(uint16_t gpiocfg)
   unsigned int pinint  = ((gpiocfg & GPIO_PININT_MASK) >> GPIO_PININT_SHIFT);
   uint32_t     bitmask = (1 << pinint);
   uint32_t     regval;
+  uint32_t     isel;
+  uint32_t     einr;
+  uint32_t     einf;
 
   DEBUGASSERT(port < NUM_GPIO_PORTS && pin < NUM_GPIO_PINS && GPIO_IS_PININT(gpiocfg));
 
@@ -226,37 +229,54 @@ int lpc43_gpioint_pinconfig(uint16_t gpiocfg)
 
   putreg32(regval, LPC43_GPIOINT_ISEL);
 
-  /* Configure the active high level or rising edge
+  /* Configure the active level or rising/falling edge
    *
-   * TODO: this works for edge sensitive, but not level sensitive, active
-   * level is only controlled in IENF.
+   *   ISEL
+   *     0 = Edge sensitive
+   *     1 = Level sensitive
+   *   EINR 0-7:
+   *     0 = Disable rising edge or level interrupt.
+   *     1 = Enable rising edge or level interrupt.
+   *   EINF 0-7:
+   *     0 = Disable falling edge interrupt or set active interrupt level
+   *         LOW.
+   *     1 = Enable falling edge interrupt enabled or set active interrupt
+   *         level HIGH
    */
 
-  regval = getreg32(LPC43_GPIOINT_IENR);
-  if (GPIO_IS_ACTIVE_HI(gpiocfg))
+  isel  = getreg32(LPC43_GPIOINT_ISEL) & ~bitmask;
+  einr  = getreg32(LPC43_GPIOINT_IENR) & ~bitmask;
+  einf  = getreg32(LPC43_GPIOINT_IENF) & ~bitmask;
+
+  switch (gpiocfg & GPIO_INT_MASK)
     {
-      regval |= bitmask;
-    }
-  else
-    {
-      regval &= ~bitmask;
+      case GPIO_INT_LEVEL_HI:
+        einf |= bitmask;  /* Enable active level HI */
+      case GPIO_INT_LEVEL_LOW:
+        isel |= bitmask;  /* Level sensitive */
+        einr |= bitmask;  /* Enable level interrupt */
+        break;
+
+      case GPIO_INT_EDGE_RISING:
+        einr |= bitmask;  /* Enable rising edge interrupt */
+        break;
+
+      case GPIO_INT_EDGE_BOTH:
+        einr |= bitmask;  /* Enable rising edge interrupt */
+      case GPIO_INT_EDGE_FALLING:
+        einf |= bitmask;  /* Enable falling edge interrupt */
+        break;
+
+      /* Default is edge sensitive but with both edges disabled. */
+
+      default:
+        break;
     }
 
-  putreg32(regval, LPC43_GPIOINT_IENR);
+  putreg32(isel, LPC43_GPIOINT_ISEL);
+  putreg32(einr, LPC43_GPIOINT_IENR);
+  putreg32(einf, LPC43_GPIOINT_IENF);
 
-  /* Configure the active high low or falling edge */
-
-  regval = getreg32(LPC43_GPIOINT_IENF);
-  if (GPIO_IS_ACTIVE_LOW(gpiocfg))
-    {
-      regval |= bitmask;
-    }
-  else
-    {
-      regval &= ~bitmask;
-    }
-
-  putreg32(regval, LPC43_GPIOINT_IENF);
   return OK;
 }
 
