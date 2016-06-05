@@ -166,8 +166,8 @@ enum stm32_chanmode_e
 
 struct stm32_pwmchan_s
 {
-  uint8_t               channel; /* Timer output channel: {1,..4} */
-  uint32_t              pincfg;  /* Output pin configuration */
+  uint8_t channel;                     /* Timer output channel: {1,..4} */
+  uint32_t pincfg;                     /* Output pin configuration */
   enum stm32_chanmode_e mode;
 };
 
@@ -176,21 +176,23 @@ struct stm32_pwmchan_s
 struct stm32_pwmtimer_s
 {
   FAR const struct pwm_ops_s *ops;     /* PWM operations */
-  uint8_t                     timid;   /* Timer ID {1,...,17} */
-  struct stm32_pwmchan_s      channels[PWM_NCHANNELS];
-  uint8_t                     timtype; /* See the TIMTYPE_* definitions */
-  enum stm32_timmode_e        mode;
+  uint8_t timid;                       /* Timer ID {1,...,17} */
+  struct stm32_pwmchan_s channels[PWM_NCHANNELS];
+  uint8_t timtype;                     /* See the TIMTYPE_* definitions */
+  enum stm32_timmode_e mode;
 #ifdef CONFIG_PWM_PULSECOUNT
-  uint8_t                     irq;     /* Timer update IRQ */
-  uint8_t                     prev;    /* The previous value of the RCR (pre-loaded) */
-  uint8_t                     curr;    /* The current value of the RCR (pre-loaded) */
-  uint32_t                    count;   /* Remaining pluse count */
+  uint8_t irq;                         /* Timer update IRQ */
+  uint8_t prev;                        /* The previous value of the RCR (pre-loaded) */
+  uint8_t curr;                        /* The current value of the RCR (pre-loaded) */
+  uint32_t count;                      /* Remaining pluse count */
+#else
+  int frequency;                       /* Current frequency setting */
 #endif
-  uint32_t                    base;    /* The base address of the timer */
-  uint32_t                    pclk;    /* The frequency of the peripheral clock
+  uint32_t base;                       /* The base address of the timer */
+  uint32_t pclk;                       /* The frequency of the peripheral clock
                                         * that drives the timer module. */
 #ifdef CONFIG_PWM_PULSECOUNT
-  FAR void                   *handle;  /* Handle used for upper-half callback */
+  FAR void *handle;                    /* Handle used for upper-half callback */
 #endif
 };
 
@@ -1634,6 +1636,89 @@ static int pwm_timer(FAR struct stm32_pwmtimer_s *priv,
   return OK;
 }
 
+#ifndef CONFIG_PWM_PULSECOUNT
+/****************************************************************************
+ * Name: pwm_update_duty
+ *
+ * Description:
+ *   Try to change only channel duty.
+ *
+ * Input parameters:
+ *   priv    - A reference to the lower half PWM driver state structure
+ *   channel - Channel to by updated
+ *   duty    - New duty.
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure
+ *
+ ****************************************************************************/
+
+static  int pwm_update_duty(FAR struct stm32_pwmtimer_s *priv, uint8_t channel,
+                            ub16_t duty)
+{
+  /* Register offset */
+
+  int ccr_offset;
+
+  /* Calculated values */
+
+  uint32_t reload;
+  uint32_t ccr;
+
+  DEBUGASSERT(priv != NULL);
+
+  pwmvdbg("TIM%d channel: %d duty: %08x\n",
+          priv->timid, channel, duty);
+
+#ifndef CONFIG_PWM_MULTICHAN
+  DEBUGASSERT(channel == priv->channels[0].channel);
+  DEBUGASSERT(chan->duty >= 0 && chan->duty < uitoub16(100));
+#endif
+
+  /* Get the reload values */
+
+  reload = pwm_getreg(priv, STM32_GTIM_ARR_OFFSET);
+
+  /* Duty cycle:
+   *
+   * duty cycle = ccr / reload (fractional value)
+   */
+
+  ccr = b16toi(duty * reload + b16HALF);
+
+  pwmvdbg("ccr: %d\n", ccr);
+
+  switch (channel)
+    {
+      case 1:  /* Register offset for Channel 1 */
+        ccr_offset = STM32_GTIM_CCR1_OFFSET;
+        break;
+
+      case 2:  /* Register offset for Channel 2 */
+        ccr_offset = STM32_GTIM_CCR2_OFFSET;
+        break;
+
+      case 3:  /* Register offset for Channel 3 */
+        ccr_offset = STM32_GTIM_CCR3_OFFSET;
+        break;
+
+      case 4:  /* Register offset for Channel 4 */
+        ccr_offset = STM32_GTIM_CCR4_OFFSET;
+        break;
+
+      default:
+        pwmdbg("No such channel: %d\n", channel);
+        return -EINVAL;
+    }
+
+  /* Set the duty cycle by writing to the CCR register for this channel */
+
+  pwm_putreg(priv, ccr_offset, (uint16_t)ccr);
+
+  return OK;
+}
+#endif
+
 /****************************************************************************
  * Name: pwm_interrupt
  *
@@ -2082,8 +2167,43 @@ static int pwm_start(FAR struct pwm_lowerhalf_s *dev,
 static int pwm_start(FAR struct pwm_lowerhalf_s *dev,
                      FAR const struct pwm_info_s *info)
 {
+  int ret = OK;
   FAR struct stm32_pwmtimer_s *priv = (FAR struct stm32_pwmtimer_s *)dev;
-  return pwm_timer(priv, info);
+
+#ifndef CONFIG_PWM_PULSECOUNT
+  /* if frequency has not changed we just update duty */
+
+  if ( info->frequency == priv->frequency )
+    {
+#ifdef CONFIG_PWM_MULTICHAN
+      int i;
+
+      for (i = 0; ret == OK && i < CONFIG_PWM_NCHANNELS; i++)
+        {
+          ret = pwm_update_duty(priv,info->channels[i].channel,
+                                info->channels[i].duty);
+        }
+#else
+      ret = pwm_update_duty(priv,priv->channels[0].channel,info->duty);
+#endif
+    }
+  else
+#endif
+    {
+      ret = pwm_timer(priv, info);
+
+#ifndef CONFIG_PWM_PULSECOUNT
+
+      /* Save current frequency */
+
+      if ( ret == OK )
+        {
+          priv->frequency = info->frequency;
+        }
+#endif
+    }
+
+  return ret;
 }
 #endif
 
@@ -2121,6 +2241,10 @@ static int pwm_stop(FAR struct pwm_lowerhalf_s *dev)
    */
 
   flags = enter_critical_section();
+
+  /* Stopped so frequency is zero */
+
+  priv->frequency = 0;
 
   /* Disable further interrupts and stop the timer */
 
