@@ -136,15 +136,6 @@ function distclean {
     fi
 }
 
-# Check if build is NxWM and clean
-
-function nxcheck {
-    unset nxconfig
-    if [ -d $NXWDIR ]; then
-        nxconfig=`grep CONFIG_NXWM=y $nuttx/.config`
-    fi
-}
-
 # Configure for the next build
 
 function configure {
@@ -226,6 +217,11 @@ function nxbuild {
         $UNLINK $APPSDIR/external
     fi
 
+    unset nxconfig
+    if [ -d $NXWDIR ]; then
+        nxconfig=`grep CONFIG_NXWM=y $nuttx/.config`
+    fi
+
     if [ ! -z "$nxconfig" ]; then
         echo "  Building NxWidgets..."
         echo "------------------------------------------------------------------------------------"
@@ -261,7 +257,6 @@ function build {
 
 function dotest {
     echo "------------------------------------------------------------------------------------"
-    nxcheck
     distclean
     configure
     nxbuild
