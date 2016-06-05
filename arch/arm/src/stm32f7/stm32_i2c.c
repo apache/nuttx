@@ -402,6 +402,7 @@ struct stm32_i2c_priv_s
   uint8_t msgc;                /* Message count */
   struct i2c_msg_s *msgv;      /* Message list */
   uint8_t *ptr;                /* Current message buffer */
+  uint32_t frequency;          /* Current I2C frequency */
   int dcnt;                    /* Current message bytes remaining to transfer */
   uint16_t flags;              /* Current message flags */
   bool astart;                 /* START sent */
@@ -426,10 +427,6 @@ struct stm32_i2c_inst_s
 {
   struct i2c_ops_s        *ops;  /* Standard I2C operations */
   struct stm32_i2c_priv_s *priv; /* Common driver private data structure */
-
-  uint32_t    frequency;   /* Frequency used in this instantiation */
-  int         address;     /* Address used in this instantiation */
-  uint16_t    flags;       /* Flags used in this instantiation */
 };
 
 /************************************************************************************
@@ -516,6 +513,7 @@ struct stm32_i2c_priv_s stm32_i2c1_priv =
   .msgc       = 0,
   .msgv       = NULL,
   .ptr        = NULL,
+  .frequency  = 0,
   .dcnt       = 0,
   .flags      = 0,
   .status     = 0
@@ -545,6 +543,7 @@ struct stm32_i2c_priv_s stm32_i2c2_priv =
   .msgc       = 0,
   .msgv       = NULL,
   .ptr        = NULL,
+  .frequency  = 0,
   .dcnt       = 0,
   .flags      = 0,
   .status     = 0
@@ -574,6 +573,7 @@ struct stm32_i2c_priv_s stm32_i2c3_priv =
   .msgc       = 0,
   .msgv       = NULL,
   .ptr        = NULL,
+  .frequency  = 0,
   .dcnt       = 0,
   .flags      = 0,
   .status     = 0
@@ -1242,55 +1242,59 @@ static void stm32_i2c_setclock(FAR struct stm32_i2c_priv_s *priv, uint32_t frequ
   uint8_t scl_h_period;
   uint8_t scl_l_period;
 
-  /* I2C peripheral must be disabled to update clocking configuration */
-
-  pe = (stm32_i2c_getreg32(priv, STM32F7_I2C_CR1_OFFSET) & I2C_CR1_PE);
-  if (pe)
+  if (frequency != priv->frequency)
     {
-      stm32_i2c_modifyreg32(priv, STM32F7_I2C_CR1_OFFSET, I2C_CR1_PE, 0);
-    }
+	  /* I2C peripheral must be disabled to update clocking configuration */
 
-  /* TODO: speed/timing calcs, at the moment 45Mhz = STM32_PCLK1_FREQUENCY, analog filter is on,
-  	  digital off from STM32F0-F3_AN4235_V1.0.1 */
+	  pe = (stm32_i2c_getreg32(priv, STM32F7_I2C_CR1_OFFSET) & I2C_CR1_PE);
+	  if (pe)
+		{
+		  stm32_i2c_modifyreg32(priv, STM32F7_I2C_CR1_OFFSET, I2C_CR1_PE, 0);
+		}
 
-	if (frequency == 100000)
-	  {
-		presc        = 0x06;
-		scl_delay    = 0x02;
-		sda_delay    = 0x00;
-		scl_h_period = 0x1e;
-		scl_l_period = 0x2b;
+	  /* TODO: speed/timing calcs, at the moment 45Mhz = STM32_PCLK1_FREQUENCY, analog filter is on,
+		  digital off from STM32F0-F3_AN4235_V1.0.1 */
 
-	  }
-   else if (frequency == 400000)
-	  {
-		presc        = 0x00;
-		scl_delay    = 0x0A;
-		sda_delay    = 0x00;
-		scl_h_period = 0x1b;
-		scl_l_period = 0x5b;
-	  }
-	else
-	  {
-		presc        = 0x00;
-		scl_delay    = 0x08;
-		sda_delay    = 0x00;
-		scl_h_period = 0x09;
-		scl_l_period = 0x1c;
-	  }
+		if (frequency == 100000)
+		  {
+			presc        = 0x06;
+			scl_delay    = 0x02;
+			sda_delay    = 0x00;
+			scl_h_period = 0x1e;
+			scl_l_period = 0x2b;
 
-  uint32_t timingr =
-    (presc << I2C_TIMINGR_PRESC_SHIFT) |
-    (scl_delay << I2C_TIMINGR_SCLDEL_SHIFT) |
-    (sda_delay << I2C_TIMINGR_SDADEL_SHIFT) |
-    (scl_h_period << I2C_TIMINGR_SCLH_SHIFT) |
-    (scl_l_period << I2C_TIMINGR_SCLL_SHIFT);
+		  }
+	   else if (frequency == 400000)
+		  {
+			presc        = 0x00;
+			scl_delay    = 0x0A;
+			sda_delay    = 0x00;
+			scl_h_period = 0x1b;
+			scl_l_period = 0x5b;
+		  }
+		else
+		  {
+			presc        = 0x00;
+			scl_delay    = 0x08;
+			sda_delay    = 0x00;
+			scl_h_period = 0x09;
+			scl_l_period = 0x1c;
+		  }
 
-  stm32_i2c_putreg32(priv, STM32F7_I2C_TIMINGR_OFFSET, timingr);
+	  uint32_t timingr =
+		(presc << I2C_TIMINGR_PRESC_SHIFT) |
+		(scl_delay << I2C_TIMINGR_SCLDEL_SHIFT) |
+		(sda_delay << I2C_TIMINGR_SDADEL_SHIFT) |
+		(scl_h_period << I2C_TIMINGR_SCLH_SHIFT) |
+		(scl_l_period << I2C_TIMINGR_SCLL_SHIFT);
 
-  if (pe)
-    {
-      stm32_i2c_modifyreg32(priv, STM32F7_I2C_CR1_OFFSET, 0, I2C_CR1_PE);
+	  stm32_i2c_putreg32(priv, STM32F7_I2C_TIMINGR_OFFSET, timingr);
+
+	  if (pe)
+		{
+		  stm32_i2c_modifyreg32(priv, STM32F7_I2C_CR1_OFFSET, 0, I2C_CR1_PE);
+		}
+	  priv->frequency = frequency;
     }
 }
 
@@ -2352,16 +2356,17 @@ static int stm32_i2c_process(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s 
 
       if (status & I2C_INT_BERR)
         {
-          /* Bus Error */
+          /* Bus Error, ignore it because of errata (revision A,Z) */
 
-	  i2cdbg("I2C: Bus Error\n");
-          errval = EIO;
+    	  i2cdbg("I2C: Bus Error\n");
+
+          /* errval = EIO; */
         }
       else if (status & I2C_INT_ARLO)
         {
           /* Arbitration Lost (master mode) */
 
-	  i2cdbg("I2C: Arbitration Lost\n");
+    	  i2cdbg("I2C: Arbitration Lost\n");
           errval = EAGAIN;
         }
 
@@ -2369,21 +2374,21 @@ static int stm32_i2c_process(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s 
         {
           /* Overrun/Underrun */
 
-	  i2cdbg("I2C: Overrun/Underrun\n");
+    	  i2cdbg("I2C: Overrun/Underrun\n");
           errval = EIO;
         }
       else if (status & I2C_INT_PECERR)
         {
 	  /* PEC Error in reception (SMBus Only) */
 
-	  i2cdbg("I2C: PEC Error\n");
+    	  i2cdbg("I2C: PEC Error\n");
           errval = EPROTO;
         }
       else if (status & I2C_INT_TIMEOUT)
         {
           /* Timeout or Tlow Error (SMBus Only) */
 
-	  i2cdbg("I2C: Timeout / Tlow Error\n");
+    	  i2cdbg("I2C: Timeout / Tlow Error\n");
           errval = ETIME;
         }
       else if (status & I2C_INT_NACK)
@@ -2391,21 +2396,21 @@ static int stm32_i2c_process(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s 
 	  /* NACK Received, flag as "communication error on send" */
 
 	  if (priv->astart == TRUE)
-          {
+        {
 	    i2cdbg("I2C: Address NACK\n");
 	    errval = EADDRNOTAVAIL;
-	  }
-         else
-	  {
-	    i2cdbg("I2C: Data NACK\n");
-	    errval = ECOMM;
-          }
+	    }
+      else
+	    {
+    	  i2cdbg("I2C: Data NACK\n");
+    	  errval = ECOMM;
+        }
 	}
       else
         {
-	  /* Unrecognized error */
+    	  /* Unrecognized error */
 
-	  i2cdbg("I2C: Unrecognized Error");
+    	  i2cdbg("I2C: Unrecognized Error");
           errval = EINTR;
         }
     }
@@ -2427,8 +2432,22 @@ static int stm32_i2c_process(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s 
        * fails above;  Otherwise it is cleared by the hardware when the ISR
        * wraps up the transfer with a STOP condition.
        */
-      i2cdbg("I2C: Bus busy");
-      errval = EBUSY;
+
+      uint32_t start = clock_systimer();
+      uint32_t timeout = USEC2TICK(USEC_PER_SEC/priv->frequency) + 1;
+
+      status = stm32_i2c_getstatus(priv);
+
+      while(status & I2C_ISR_BUSY)
+        {
+    	  if((clock_systimer() - start) > timeout)
+    	    {
+    		  i2cdbg("I2C: Bus busy");
+    		  errval = EBUSY;
+    		  break;
+    	    }
+		  status = stm32_i2c_getstatus(priv);
+        }
     }
 
   /* Dump the trace result */
@@ -2515,9 +2534,6 @@ FAR struct i2c_master_s *stm32f7_i2cbus_initialize(int port)
 
   inst->ops       = &stm32_i2c_ops;
   inst->priv      = priv;
-  inst->frequency = 0;
-  inst->address   = 0;
-  inst->flags     = 0;
 
   /* Init private data for the first time, increment refs count,
    * power-up hardware and configure GPIOs.
