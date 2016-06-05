@@ -200,7 +200,7 @@ int lpc43_gpioint_pinconfig(uint16_t gpiocfg)
 
   if (pinint < 4)
     {
-      pinsel = getreg32(LPC43_SCU_PINTSEL0);
+      pinsel  = getreg32(LPC43_SCU_PINTSEL0);
       pinsel &= ~SCU_PINTSEL0_MASK(pinint);
       pinsel |= ((pin  << SCU_PINTSEL0_INTPIN_SHIFT(pinint)) |
                  (port << SCU_PINTSEL0_PORTSEL_SHIFT(pinint)));
@@ -208,7 +208,7 @@ int lpc43_gpioint_pinconfig(uint16_t gpiocfg)
     }
   else
     {
-      pinsel = getreg32(LPC43_SCU_PINTSEL1);
+      pinsel  = getreg32(LPC43_SCU_PINTSEL1);
       pinsel &= ~SCU_PINTSEL1_MASK(pinint);
       pinsel |= ((pin  << SCU_PINTSEL1_INTPIN_SHIFT(pinint)) |
                  (port << SCU_PINTSEL1_PORTSEL_SHIFT(pinint)));
