@@ -34,7 +34,8 @@
 
 WD=$PWD
 nuttx=$WD/../nuttx
-UNLINK=./unlink.sh
+TOOLSDIR=$nuttx/tools
+UNLINK=$TOOLSDIR/unlink.sh
 
 progname=$0
 host=linux
@@ -53,7 +54,7 @@ function showusage {
     echo "  -w|l selects Windows (w) or Linux (l).  Default: Linux"
     echo "  -c|n selects Windows native (n) or Cygwin (c).  Default Cygwin"
     echo "  -s Use C++ unsigned long size_t in new operator. Default unsigned int"
-    echo "  -a <appdirs> provides the relative path to the apps/ directory.  Default ../apps"
+    echo "  -a <appsdir> provides the relative path to the apps/ directory.  Default ../apps"
     echo "  -n <nxdir> provides the relative path to the NxWidgets/ directory.  Default ../NxWidgets"
     echo "  -h will show this help test and terminate"
     echo "  <testlist-file> selects the list of configurations to test.  No default"
@@ -221,8 +222,8 @@ function configure {
 # Build the NxWidgets libraries
 
 function nxbuild {
-    if [ -e $APPSDIR/internal ]; then
-        $UNLINK $APPSDIR/internal
+    if [ -e $APPSDIR/external ]; then
+        $UNLINK $APPSDIR/external
     fi
 
     if [ ! -z "$nxconfig" ]; then
@@ -231,6 +232,8 @@ function nxbuild {
 
         cd $nuttx/$NXTOOLS || { echo "Failed to CD to $NXTOOLS"; exit 1; }
         ./install.sh $nuttx/$APPSDIR nxwm 1>/dev/null
+
+        make -C $nuttx/$APPSDIR/external TOPDIR=$nuttx APPDIR=$nuttx/$APPSDIR TOPDIR=$nuttx clean 1>/dev/null
 
         cd $nuttx || { echo "Failed to CD to $nuttx"; exit 1; }
         make -i context 1>/dev/null
@@ -249,7 +252,7 @@ function nxbuild {
 
 function build {
     cd $nuttx || { echo "ERROR: failed to CD to $nuttx"; exit 1; }
-    echo "  Building..."
+    echo "  Building NuttX..."
     echo "------------------------------------------------------------------------------------"
     make -i 1>/dev/null
 }
