@@ -186,7 +186,7 @@ struct stm32_pwmtimer_s
   uint8_t curr;                        /* The current value of the RCR (pre-loaded) */
   uint32_t count;                      /* Remaining pluse count */
 #else
-  int frequency;                       /* Current frequency setting */
+  uint32_t frequency;                  /* Current frequency setting */
 #endif
   uint32_t base;                       /* The base address of the timer */
   uint32_t pclk;                       /* The frequency of the peripheral clock
@@ -760,7 +760,7 @@ static struct stm32_pwmtimer_s g_pwm13dev =
   .irq         = STM32_IRQ_TIM13,
 #endif
   .base        = STM32_TIM13_BASE,
-  .pclk       = STM32_APB1_TIM13_CLKIN,
+  .pclk        = STM32_APB1_TIM13_CLKIN,
 };
 #endif
 
@@ -1068,14 +1068,14 @@ static int pwm_timer(FAR struct stm32_pwmtimer_s *priv,
   DEBUGASSERT(priv != NULL && info != NULL);
 
 #if defined(CONFIG_PWM_MULTICHAN)
-  pwmvdbg("TIM%d frequency: %d\n",
+  pwmvdbg("TIM%u frequency: %u\n",
           priv->timid, info->frequency);
 #elif defined(CONFIG_PWM_PULSECOUNT)
-  pwmvdbg("TIM%d channel: %d frequency: %d duty: %08x count: %d\n",
+  pwmvdbg("TIM%u channel: %u frequency: %u duty: %08x count: %u\n",
           priv->timid, priv->channel, info->frequency,
           info->duty, info->count);
 #else
-  pwmvdbg("TIM%d channel: %d frequency: %d duty: %08x\n",
+  pwmvdbg("TIM%u channel: %u frequency: %u duty: %08x\n",
           priv->timid, priv->channel, info->frequency, info->duty);
 #endif
 
@@ -1146,7 +1146,7 @@ static int pwm_timer(FAR struct stm32_pwmtimer_s *priv,
       reload = 65535;
     }
 
-  pwmvdbg("TIM%d PCLK: %d frequency: %d TIMCLK: %d prescaler: %d reload: %d\n",
+  pwmvdbg("TIM%u PCLK: %u frequency: %u TIMCLK: %u prescaler: %u reload: %u\n",
           priv->timid, priv->pclk, info->frequency, timclk, prescaler, reload);
 
   /* Set up the timer CR1 register:
@@ -1209,7 +1209,7 @@ static int pwm_timer(FAR struct stm32_pwmtimer_s *priv,
             break;
 
           default:
-            pwmdbg("No such timer mode: %d\n", (int)priv->mode);
+            pwmdbg("No such timer mode: %u\n", (unsigned int)priv->mode);
             return -EINVAL;
         }
     }
@@ -1336,7 +1336,7 @@ static int pwm_timer(FAR struct stm32_pwmtimer_s *priv,
 
       if (j >= PWM_NCHANNELS)
         {
-          pwmdbg("No such channel: %d\n", channel);
+          pwmdbg("No such channel: %u\n", channel);
           return -EINVAL;
         }
 #else
@@ -1352,7 +1352,7 @@ static int pwm_timer(FAR struct stm32_pwmtimer_s *priv,
 
       ccr = b16toi(duty * reload + b16HALF);
 
-      pwmvdbg("ccr: %d\n", ccr);
+      pwmvdbg("ccr: %u\n", ccr);
 
       switch (mode)
         {
@@ -1387,7 +1387,7 @@ static int pwm_timer(FAR struct stm32_pwmtimer_s *priv,
 #endif
 
           default:
-            pwmdbg("No such mode: %d\n", (int)mode);
+            pwmdbg("No such mode: %u\n", (unsigned int)mode);
             return -EINVAL;
         }
 
@@ -1494,7 +1494,7 @@ static int pwm_timer(FAR struct stm32_pwmtimer_s *priv,
             break;
 
           default:
-            pwmdbg("No such channel: %d\n", channel);
+            pwmdbg("No such channel: %u\n", channel);
             return -EINVAL;
         }
     }
@@ -1667,7 +1667,7 @@ static  int pwm_update_duty(FAR struct stm32_pwmtimer_s *priv, uint8_t channel,
 
   DEBUGASSERT(priv != NULL);
 
-  pwmvdbg("TIM%d channel: %d duty: %08x\n",
+  pwmvdbg("TIM%u channel: %u duty: %08x\n",
           priv->timid, channel, duty);
 
 #ifndef CONFIG_PWM_MULTICHAN
@@ -1686,7 +1686,7 @@ static  int pwm_update_duty(FAR struct stm32_pwmtimer_s *priv, uint8_t channel,
 
   ccr = b16toi(duty * reload + b16HALF);
 
-  pwmvdbg("ccr: %d\n", ccr);
+  pwmvdbg("ccr: %u\n", ccr);
 
   switch (channel)
     {
@@ -1707,7 +1707,7 @@ static  int pwm_update_duty(FAR struct stm32_pwmtimer_s *priv, uint8_t channel,
         break;
 
       default:
-        pwmdbg("No such channel: %d\n", channel);
+        pwmdbg("No such channel: %u\n", channel);
         return -EINVAL;
     }
 
@@ -1795,7 +1795,7 @@ static int pwm_interrupt(struct stm32_pwmtimer_s *priv)
 
   /* Now all of the time critical stuff is done so we can do some debug output */
 
-  pwmllvdbg("Update interrupt SR: %04x prev: %d curr: %d count: %d\n",
+  pwmllvdbg("Update interrupt SR: %04x prev: %u curr: %u count: %u\n",
             regval, priv->prev, priv->curr, priv->count);
 
   return OK;
@@ -2030,7 +2030,7 @@ static int pwm_setup(FAR struct pwm_lowerhalf_s *dev)
   uint32_t pincfg;
   int i;
 
-  pwmvdbg("TIM%d\n", priv->timid);
+  pwmvdbg("TIM%u\n", priv->timid);
   pwm_dumpregs(priv, "Initially");
 
   /* Enable APB1/2 clocking for timer. */
@@ -2078,7 +2078,7 @@ static int pwm_shutdown(FAR struct pwm_lowerhalf_s *dev)
   uint32_t pincfg;
   int i;
 
-  pwmvdbg("TIM%d\n", priv->timid);
+  pwmvdbg("TIM%u\n", priv->timid);
 
   /* Make sure that the output has been stopped */
 
@@ -2149,7 +2149,7 @@ static int pwm_start(FAR struct pwm_lowerhalf_s *dev,
 
       if (priv->timtype != TIMTYPE_ADVANCED)
         {
-          pwmdbg("ERROR: TIM%d cannot support pulse count: %d\n",
+          pwmdbg("ERROR: TIM%u cannot support pulse count: %u\n",
                  priv->timid, info->count);
           return -EPERM;
         }
@@ -2173,7 +2173,7 @@ static int pwm_start(FAR struct pwm_lowerhalf_s *dev,
 #ifndef CONFIG_PWM_PULSECOUNT
   /* if frequency has not changed we just update duty */
 
-  if ( info->frequency == priv->frequency )
+  if (info->frequency == priv->frequency)
     {
 #ifdef CONFIG_PWM_MULTICHAN
       int i;
@@ -2193,10 +2193,9 @@ static int pwm_start(FAR struct pwm_lowerhalf_s *dev,
       ret = pwm_timer(priv, info);
 
 #ifndef CONFIG_PWM_PULSECOUNT
-
       /* Save current frequency */
 
-      if ( ret == OK )
+      if (ret == OK)
         {
           priv->frequency = info->frequency;
         }
@@ -2234,7 +2233,7 @@ static int pwm_stop(FAR struct pwm_lowerhalf_s *dev)
   uint32_t regval;
   irqstate_t flags;
 
-  pwmvdbg("TIM%d\n", priv->timid);
+  pwmvdbg("TIM%u\n", priv->timid);
 
   /* Disable interrupts momentary to stop any ongoing timer processing and
    * to prevent any concurrent access to the reset register.
@@ -2389,7 +2388,7 @@ static int pwm_ioctl(FAR struct pwm_lowerhalf_s *dev, int cmd, unsigned long arg
 
   /* There are no platform-specific ioctl commands */
 
-  pwmvdbg("TIM%d\n", priv->timid);
+  pwmvdbg("TIM%u\n", priv->timid);
 #endif
   return -ENOTTY;
 }
@@ -2419,7 +2418,7 @@ FAR struct pwm_lowerhalf_s *stm32_pwminitialize(int timer)
 {
   FAR struct stm32_pwmtimer_s *lower;
 
-  pwmvdbg("TIM%d\n", timer);
+  pwmvdbg("TIM%u\n", timer);
 
   switch (timer)
     {
