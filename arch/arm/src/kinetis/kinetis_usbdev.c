@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/kinetis/kinetis_usbdev.c
  *
- *   Copyright (C) 2011-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -65,8 +65,6 @@
 #include <nuttx/irq.h>
 
 #include "up_arch.h"
-//#include "pic32mx.h"
-//#include "pic32mx-usbotg.h"
 #include "kinetis.h"
 #include "kinetis_usbotg.h"
 #include "kinetis_sim.h"
@@ -77,9 +75,8 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* Configuration ************************************************************/
 
-//#define CONFIG_USBOTG
+/* Configuration ************************************************************/
 
 #ifndef CONFIG_USBDEV_EP0_MAXSIZE
 #  define CONFIG_USBDEV_EP0_MAXSIZE 64
@@ -94,9 +91,6 @@
 #  undef CONFIG_KHCI_USBDEV_BDTDEBUG
 #endif
 
-//#define CONFIG_KHCI_USBDEV_REGDEBUG
-//#define CONFIG_KHCI_USBDEV_BDTDEBUG
-
 /* Disable this logic because it is buggy.  It works most of the time but
  * has some lurking issues that keep this higher performance solution from
  * being usable.
@@ -110,8 +104,6 @@
 /* Interrupts ***************************************************************/
 /* Initial interrupt sets */
 
-//#define CONFIG_USB_SOFINTS
-
 #ifdef CONFIG_USB_SOFINTS
 #  define USB_SOF_INTERRUPT USB_INT_SOFTOK
 #else
@@ -122,29 +114,31 @@
                            USB_ERRSTAT_CRC16 | USB_ERRSTAT_DFN8 | USB_ERRSTAT_BTOERR | \
                            USB_ERRSTAT_BTSERR)
 
-#define NORMAL_INTERRUPTS  (USB_INT_USBRST | USB_INT_ERROR | USB_SOF_INTERRUPT | \
+#define NORMAL_INTERRUPTS (USB_INT_USBRST | USB_INT_ERROR | USB_SOF_INTERRUPT | \
                            USB_INT_TOKDNE | USB_INT_SLEEP | USB_INT_STALL)
 
 /* Endpoints ****************************************************************/
 
-#define USB_STAT_ENDPT(n)        ((n) << USB_STAT_ENDP_SHIFT) /* Endpoint n, n=0..15 */
+#define USB_STAT_ENDPT(n)     ((n) << USB_STAT_ENDP_SHIFT) /* Endpoint n, n=0..15 */
 
-#define USB_STAT_ODD_ODD          USB_STAT_ODD /* The last transaction was to the ODD BD bank */
-#define USB_STAT_ODD_EVEN         0             /* The last transaction was to the EVEN BD bank */
+#define USB_STAT_ODD_ODD      USB_STAT_ODD /* The last transaction was to the ODD BD bank */
+#define USB_STAT_ODD_EVEN     0            /* The last transaction was to the EVEN BD bank */
 
-#define USB_STAT_TX_IN            USB_STAT_TX  /* Last transaction was a transmit transfer (TX) */
-#define USB_STAT_TX_OUT           0             /* Last transaction was a receive transfer (RX) */
+#define USB_STAT_TX_IN        USB_STAT_TX  /* Last transaction was a transmit transfer (TX) */
+#define USB_STAT_TX_OUT       0            /* Last transaction was a receive transfer (RX) */
 
-#define KHCI_NENDPOINTS    (16)
+#define KHCI_NENDPOINTS       (16)
 #define EP0                   (0)
 
-#define KHCI_ENDP_BIT(ep)  (1 << (ep))
-#define KHCI_ENDP_ALLSET   0xffff
+#define KHCI_ENDP_BIT(ep)     (1 << (ep))
+#define KHCI_ENDP_ALLSET      0xffff
+
+#define SIM_CLKDIV2_USBDIV(n) (uint32_t)(((n) & 0x07) << 1)
 
 /* BDT Table Indexing.  The BDT is addressed in the hardware as follows:
  *
  *   Bits 9-31:  These come the BDT address bits written into the BDTP3,
- *      BDTP2, and BDTP1 registers
+ *               BDTP2, and BDTP1 registers
  *   Bits 5-8:   The endpoint number
  *   Bit 4:      Direction:
  *               1 = Transmit: SETUP/OUT for host, IN for function
@@ -170,32 +164,32 @@
 
 /* Packet sizes.  We use a fixed 64 max packet size for all endpoint types */
 
-#define KHCI_MAXPACKET_SHIFT (6)
-#define KHCI_MAXPACKET_SIZE  (1 << (KHCI_MAXPACKET_SHIFT))
+#define KHCI_MAXPACKET_SHIFT  (6)
+#define KHCI_MAXPACKET_SIZE   (1 << (KHCI_MAXPACKET_SHIFT))
 
-#define KHCI_EP0MAXPACKET  KHCI_MAXPACKET_SIZE
+#define KHCI_EP0MAXPACKET     KHCI_MAXPACKET_SIZE
 
 /* Endpoint register initialization parameters */
 
-#define KHCI_EP_CONTROL    (USB_ENDPT_EPHSHK|USB_ENDPT_EPTXEN|USB_ENDPT_EPRXEN)
-#define KHCI_EP_BULKIN     (USB_ENDPT_EPTXEN|USB_ENDPT_EPCTLDIS|USB_ENDPT_EPHSHK)
-#define KHCI_EP_BULKOUT    (USB_ENDPT_EPRXEN|USB_ENDPT_EPCTLDIS|USB_ENDPT_EPHSHK)
-#define KHCI_EP_INTIN      (USB_ENDPT_EPTXEN|USB_ENDPT_EPCTLDIS|USB_ENDPT_EPHSHK)
-#define KHCI_EP_INTOUT     (USB_ENDPT_EPRXEN|USB_ENDPT_EPCTLDIS|USB_ENDPT_EPHSHK)
-#define KHCI_EP_ISOCIN     (USB_ENDPT_EPTXEN|USB_ENDPT_EPCTLDIS)
-#define KHCI_EP_ISOCOUT    (USB_ENDPT_EPRXEN|USB_ENDPT_EPCTLDIS)
+#define KHCI_EP_CONTROL   (USB_ENDPT_EPHSHK | USB_ENDPT_EPTXEN | USB_ENDPT_EPRXEN)
+#define KHCI_EP_BULKIN    (USB_ENDPT_EPTXEN | USB_ENDPT_EPCTLDIS | USB_ENDPT_EPHSHK)
+#define KHCI_EP_BULKOUT   (USB_ENDPT_EPRXEN | USB_ENDPT_EPCTLDIS | USB_ENDPT_EPHSHK)
+#define KHCI_EP_INTIN     (USB_ENDPT_EPTXEN | USB_ENDPT_EPCTLDIS | USB_ENDPT_EPHSHK)
+#define KHCI_EP_INTOUT    (USB_ENDPT_EPRXEN | USB_ENDPT_EPCTLDIS | USB_ENDPT_EPHSHK)
+#define KHCI_EP_ISOCIN    (USB_ENDPT_EPTXEN | USB_ENDPT_EPCTLDIS)
+#define KHCI_EP_ISOCOUT   (USB_ENDPT_EPRXEN | USB_ENDPT_EPCTLDIS)
 
 /* USB-related masks */
 
-#define REQRECIPIENT_MASK     (USB_REQ_TYPE_MASK | USB_REQ_RECIPIENT_MASK)
+#define REQRECIPIENT_MASK (USB_REQ_TYPE_MASK | USB_REQ_RECIPIENT_MASK)
 
 /* Request queue operations *************************************************/
 
-#define khci_rqempty(q)    ((q)->head == NULL)
-#define khci_rqhead(q)     ((q)->head)
-#define khci_rqtail(q)     ((q)->tail)
+#define khci_rqempty(q)   ((q)->head == NULL)
+#define khci_rqhead(q)    ((q)->head)
+#define khci_rqtail(q)    ((q)->tail)
 
-#define RESTART_DELAY         (150 * CLOCKS_PER_SEC / 1000)
+#define RESTART_DELAY     (150 * CLOCKS_PER_SEC / 1000)
 
 /* USB trace ****************************************************************/
 /* Trace error codes */
@@ -266,47 +260,45 @@
 #define KHCI_TRACEINTID_SUSPENDED          0x0023
 #define KHCI_TRACEINTID_WAITRESET          0x0024
 
-
-
 #ifdef CONFIG_USBDEV_TRACE_STRINGS
 const struct trace_msg_t g_usb_trace_strings_intdecode[] =
 {
-  TRACE_STR(KHCI_TRACEINTID_CLEARFEATURE      	), //0001
-  TRACE_STR(KHCI_TRACEINTID_DEVGETSTATUS      	), //0002
-  TRACE_STR(KHCI_TRACEINTID_DISPATCH          	), //0003
-  TRACE_STR(KHCI_TRACEINTID_EP0IN             	), //0004
-  TRACE_STR(KHCI_TRACEINTID_EP0INDONE         	), //0005
-  TRACE_STR(KHCI_TRACEINTID_EP0OUTDONE        	), //0006
-  TRACE_STR(KHCI_TRACEINTID_EP0SETUPDONE      	), //0007
-  TRACE_STR(KHCI_TRACEINTID_EP0SETUPSETADDRESS	), //0008
-  TRACE_STR(KHCI_TRACEINTID_EP0ADDRESSSET     	), //0009
-  TRACE_STR(KHCI_TRACEINTID_EPGETSTATUS       	), //000a
-  TRACE_STR(KHCI_TRACEINTID_EPINDONE          	), //000b
-  TRACE_STR(KHCI_TRACEINTID_EPINQEMPTY        	), //000c
-  TRACE_STR(KHCI_TRACEINTID_EPOUTDONE         	), //000d
-  TRACE_STR(KHCI_TRACEINTID_EPOUTQEMPTY       	), //000e
-  TRACE_STR(KHCI_TRACEINTID_SOF               	), //000f
-  TRACE_STR(KHCI_TRACEINTID_GETCONFIG         	), //0010
-  TRACE_STR(KHCI_TRACEINTID_GETSETDESC        	), //0011
-  TRACE_STR(KHCI_TRACEINTID_GETSETIF          	), //0012
-  TRACE_STR(KHCI_TRACEINTID_GETSTATUS         	), //0013
-  TRACE_STR(KHCI_TRACEINTID_IFGETSTATUS       	), //0014
-  TRACE_STR(KHCI_TRACEINTID_TRNC              	), //0015
-  TRACE_STR(KHCI_TRACEINTID_TRNCS             	), //0016
-  TRACE_STR(KHCI_TRACEINTID_INTERRUPT         	), //0017
-  TRACE_STR(KHCI_TRACEINTID_NOSTDREQ          	), //0018
-  TRACE_STR(KHCI_TRACEINTID_RESET             	), //0019
-  TRACE_STR(KHCI_TRACEINTID_SETCONFIG         	), //001a
-  TRACE_STR(KHCI_TRACEINTID_SETFEATURE        	), //001b
-  TRACE_STR(KHCI_TRACEINTID_IDLE              	), //001c
-  TRACE_STR(KHCI_TRACEINTID_SYNCHFRAME        	), //001d
-  TRACE_STR(KHCI_TRACEINTID_WKUP              	), //001e
-  TRACE_STR(KHCI_TRACEINTID_T1MSEC            	), //001f
-  TRACE_STR(KHCI_TRACEINTID_OTGID             	), //0020
-  TRACE_STR(KHCI_TRACEINTID_STALL             	), //0021
-  TRACE_STR(KHCI_TRACEINTID_UERR              	), //0022
-  TRACE_STR(KHCI_TRACEINTID_SUSPENDED         	), //0023
-  TRACE_STR(KHCI_TRACEINTID_WAITRESET         	), //0024
+  TRACE_STR(KHCI_TRACEINTID_CLEARFEATURE       ), /* 0x0001 */
+  TRACE_STR(KHCI_TRACEINTID_DEVGETSTATUS       ), /* 0x0002 */
+  TRACE_STR(KHCI_TRACEINTID_DISPATCH           ), /* 0x0003 */
+  TRACE_STR(KHCI_TRACEINTID_EP0IN              ), /* 0x0004 */
+  TRACE_STR(KHCI_TRACEINTID_EP0INDONE          ), /* 0x0005 */
+  TRACE_STR(KHCI_TRACEINTID_EP0OUTDONE         ), /* 0x0006 */
+  TRACE_STR(KHCI_TRACEINTID_EP0SETUPDONE       ), /* 0x0007 */
+  TRACE_STR(KHCI_TRACEINTID_EP0SETUPSETADDRESS ), /* 0x0008 */
+  TRACE_STR(KHCI_TRACEINTID_EP0ADDRESSSET      ), /* 0x0009 */
+  TRACE_STR(KHCI_TRACEINTID_EPGETSTATUS        ), /* 0x000a */
+  TRACE_STR(KHCI_TRACEINTID_EPINDONE           ), /* 0x000b */
+  TRACE_STR(KHCI_TRACEINTID_EPINQEMPTY         ), /* 0x000c */
+  TRACE_STR(KHCI_TRACEINTID_EPOUTDONE          ), /* 0x000d */
+  TRACE_STR(KHCI_TRACEINTID_EPOUTQEMPTY        ), /* 0x000e */
+  TRACE_STR(KHCI_TRACEINTID_SOF                ), /* 0x000f */
+  TRACE_STR(KHCI_TRACEINTID_GETCONFIG          ), /* 0x0010 */
+  TRACE_STR(KHCI_TRACEINTID_GETSETDESC         ), /* 0x0011 */
+  TRACE_STR(KHCI_TRACEINTID_GETSETIF           ), /* 0x0012 */
+  TRACE_STR(KHCI_TRACEINTID_GETSTATUS          ), /* 0x0013 */
+  TRACE_STR(KHCI_TRACEINTID_IFGETSTATUS        ), /* 0x0014 */
+  TRACE_STR(KHCI_TRACEINTID_TRNC               ), /* 0x0015 */
+  TRACE_STR(KHCI_TRACEINTID_TRNCS              ), /* 0x0016 */
+  TRACE_STR(KHCI_TRACEINTID_INTERRUPT          ), /* 0x0017 */
+  TRACE_STR(KHCI_TRACEINTID_NOSTDREQ           ), /* 0x0018 */
+  TRACE_STR(KHCI_TRACEINTID_RESET              ), /* 0x0019 */
+  TRACE_STR(KHCI_TRACEINTID_SETCONFIG          ), /* 0x001a */
+  TRACE_STR(KHCI_TRACEINTID_SETFEATURE         ), /* 0x001b */
+  TRACE_STR(KHCI_TRACEINTID_IDLE               ), /* 0x001c */
+  TRACE_STR(KHCI_TRACEINTID_SYNCHFRAME         ), /* 0x001d */
+  TRACE_STR(KHCI_TRACEINTID_WKUP               ), /* 0x001e */
+  TRACE_STR(KHCI_TRACEINTID_T1MSEC             ), /* 0x001f */
+  TRACE_STR(KHCI_TRACEINTID_OTGID              ), /* 0x0020 */
+  TRACE_STR(KHCI_TRACEINTID_STALL              ), /* 0x0021 */
+  TRACE_STR(KHCI_TRACEINTID_UERR               ), /* 0x0022 */
+  TRACE_STR(KHCI_TRACEINTID_SUSPENDED          ), /* 0x0023 */
+  TRACE_STR(KHCI_TRACEINTID_WAITRESET          ), /* 0x0024 */
   TRACE_STR_END
 };
 #endif
@@ -314,32 +306,32 @@ const struct trace_msg_t g_usb_trace_strings_intdecode[] =
 #ifdef CONFIG_USBDEV_TRACE_STRINGS
 const struct trace_msg_t g_usb_trace_strings_deverror[] =
 {
- TRACE_STR(KHCI_TRACEERR_ALLOCFAIL           	), //0001
-  TRACE_STR(KHCI_TRACEERR_BADCLEARFEATURE     	), //0002
-  TRACE_STR(KHCI_TRACEERR_BADDEVGETSTATUS     	), //0003
-  TRACE_STR(KHCI_TRACEERR_BADEPGETSTATUS      	), //0004
-  TRACE_STR(KHCI_TRACEERR_BADEPNO             	), //0005
-  TRACE_STR(KHCI_TRACEERR_BADEPTYPE           	), //0006
-  TRACE_STR(KHCI_TRACEERR_BADGETCONFIG        	), //0007
-  TRACE_STR(KHCI_TRACEERR_BADGETSETDESC       	), //0008
-  TRACE_STR(KHCI_TRACEERR_BADGETSTATUS        	), //0009
-  TRACE_STR(KHCI_TRACEERR_BADSETADDRESS       	), //000a
-  TRACE_STR(KHCI_TRACEERR_BADSETCONFIG        	), //000b
-  TRACE_STR(KHCI_TRACEERR_BADSETFEATURE       	), //000c
-  TRACE_STR(KHCI_TRACEERR_BINDFAILED          	), //000d
-  TRACE_STR(KHCI_TRACEERR_DISPATCHSTALL       	), //000e
-  TRACE_STR(KHCI_TRACEERR_DRIVER              	), //000f
-  TRACE_STR(KHCI_TRACEERR_DRIVERREGISTERED    	), //0010
-  TRACE_STR(KHCI_TRACEERR_EP0SETUPSTALLED     	), //0011
-  TRACE_STR(KHCI_TRACEERR_EPDISABLED          	), //0012
-  TRACE_STR(KHCI_TRACEERR_EPOUTNULLPACKET     	), //0013
-  TRACE_STR(KHCI_TRACEERR_EPRESERVE           	), //0014
-  TRACE_STR(KHCI_TRACEERR_INVALIDCTRLREQ      	), //0015
-  TRACE_STR(KHCI_TRACEERR_INVALIDPARMS        	), //0016
-  TRACE_STR(KHCI_TRACEERR_IRQREGISTRATION     	), //0017
-  TRACE_STR(KHCI_TRACEERR_NOTCONFIGURED       	), //0018
-  TRACE_STR(KHCI_TRACEERR_REQABORTED          	), //0019
-  TRACE_STR(KHCI_TRACEERR_INVALIDSTATE        	), //001a
+  TRACE_STR(KHCI_TRACEERR_ALLOCFAIL            ), /* 0x0001 */
+  TRACE_STR(KHCI_TRACEERR_BADCLEARFEATURE      ), /* 0x0002 */
+  TRACE_STR(KHCI_TRACEERR_BADDEVGETSTATUS      ), /* 0x0003 */
+  TRACE_STR(KHCI_TRACEERR_BADEPGETSTATUS       ), /* 0x0004 */
+  TRACE_STR(KHCI_TRACEERR_BADEPNO              ), /* 0x0005 */
+  TRACE_STR(KHCI_TRACEERR_BADEPTYPE            ), /* 0x0006 */
+  TRACE_STR(KHCI_TRACEERR_BADGETCONFIG         ), /* 0x0007 */
+  TRACE_STR(KHCI_TRACEERR_BADGETSETDESC        ), /* 0x0008 */
+  TRACE_STR(KHCI_TRACEERR_BADGETSTATUS         ), /* 0x0009 */
+  TRACE_STR(KHCI_TRACEERR_BADSETADDRESS        ), /* 0x000a */
+  TRACE_STR(KHCI_TRACEERR_BADSETCONFIG         ), /* 0x000b */
+  TRACE_STR(KHCI_TRACEERR_BADSETFEATURE        ), /* 0x000c */
+  TRACE_STR(KHCI_TRACEERR_BINDFAILED           ), /* 0x000d */
+  TRACE_STR(KHCI_TRACEERR_DISPATCHSTALL        ), /* 0x000e */
+  TRACE_STR(KHCI_TRACEERR_DRIVER               ), /* 0x000f */
+  TRACE_STR(KHCI_TRACEERR_DRIVERREGISTERED     ), /* 0x0010 */
+  TRACE_STR(KHCI_TRACEERR_EP0SETUPSTALLED      ), /* 0x0011 */
+  TRACE_STR(KHCI_TRACEERR_EPDISABLED           ), /* 0x0012 */
+  TRACE_STR(KHCI_TRACEERR_EPOUTNULLPACKET      ), /* 0x0013 */
+  TRACE_STR(KHCI_TRACEERR_EPRESERVE            ), /* 0x0014 */
+  TRACE_STR(KHCI_TRACEERR_INVALIDCTRLREQ       ), /* 0x0015 */
+  TRACE_STR(KHCI_TRACEERR_INVALIDPARMS         ), /* 0x0016 */
+  TRACE_STR(KHCI_TRACEERR_IRQREGISTRATION      ), /* 0x0017 */
+  TRACE_STR(KHCI_TRACEERR_NOTCONFIGURED        ), /* 0x0018 */
+  TRACE_STR(KHCI_TRACEERR_REQABORTED           ), /* 0x0019 */
+  TRACE_STR(KHCI_TRACEERR_INVALIDSTATE         ), /* 0x001a */
   TRACE_STR_END
 };
 #endif
@@ -451,21 +443,21 @@ union wb_u
 
 struct khci_req_s
 {
-  struct usbdev_req_s   req;                 /* Standard USB request */
+  struct usbdev_req_s req;             /* Standard USB request */
 #ifdef CONFIG_USBDEV_NOWRITEAHEAD
-  uint16_t              inflight[1];         /* The number of bytes "in-flight" */
+  uint16_t inflight[1];                /* The number of bytes "in-flight" */
 #else
-  uint16_t              inflight[2];         /* The number of bytes "in-flight" */
+  uint16_t inflight[2];                /* The number of bytes "in-flight" */
 #endif
-  struct khci_req_s *flink;               /* Supports a singly linked list */
+  struct khci_req_s *flink;            /* Supports a singly linked list */
 };
 
 /* This structure represents the 'head' of a singly linked list of requests */
 
 struct khci_queue_s
 {
-  struct khci_req_s    *head;             /* Head of the request queue */
-  struct khci_req_s    *tail;             /* Tail of the request queue */
+  struct khci_req_s *head;             /* Head of the request queue */
+  struct khci_req_s *tail;             /* Tail of the request queue */
 };
 
 /* This is the internal representation of an endpoint */
@@ -477,18 +469,18 @@ struct khci_ep_s
    * to struct khci_ep_s.
    */
 
-  struct usbdev_ep_s       ep;               /* Standard endpoint structure */
+  struct usbdev_ep_s ep;               /* Standard endpoint structure */
 
   /* KHCI-specific fields */
 
-  struct khci_usbdev_s *dev;              /* Reference to private driver data */
-  struct khci_queue_s   pend;             /* List of pending (inactive) requests for this endpoint */
-  struct khci_queue_s   active;           /* List of active requests for this endpoint */
-  uint8_t                  stalled:1;        /* true: Endpoint is stalled */
-  uint8_t                  halted:1;         /* true: Endpoint feature halted */
-  uint8_t                  txnullpkt:1;      /* Null packet needed at end of TX transfer */
-  uint8_t                  txdata1:1;        /* Data0/1 of next TX transfer */
-  uint8_t                  rxdata1:1;        /* Data0/1 of next RX transfer */
+  struct khci_usbdev_s *dev;           /* Reference to private driver data */
+  struct khci_queue_s pend;            /* List of pending (inactive) requests for this endpoint */
+  struct khci_queue_s active;          /* List of active requests for this endpoint */
+  uint8_t stalled:1;                   /* true: Endpoint is stalled */
+  uint8_t halted:1;                    /* true: Endpoint feature halted */
+  uint8_t txnullpkt:1;                 /* Null packet needed at end of TX transfer */
+  uint8_t txdata1:1;                   /* Data0/1 of next TX transfer */
+  uint8_t rxdata1:1;                   /* Data0/1 of next RX transfer */
   volatile struct usbotg_bdtentry_s *bdtin;  /* BDT entry for the IN transaction */
   volatile struct usbotg_bdtentry_s *bdtout; /* BDT entry for the OUT transaction */
 };
@@ -508,21 +500,21 @@ struct khci_usbdev_s
 
   /* KHCI-specific fields */
 
-  struct usb_ctrlreq_s     ctrl;          /* Last EP0 request */
-  uint8_t                  devstate;      /* Driver state (see enum khci_devstate_e) */
-  uint8_t                  ctrlstate;     /* Control EP state (see enum khci_ctrlstate_e) */
-  uint8_t                  selfpowered:1; /* 1: Device is self powered */
-  uint8_t                  rwakeup:1;     /* 1: Device supports remote wakeup */
-  uint8_t                  attached:1;    /* Device is attached to the host */
-  uint8_t                  ep0done:1;     /* EP0 OUT already prepared */
-  uint8_t                  rxbusy:1;      /* EP0 OUT data transfer in progress */
-  uint16_t                 epavail;       /* Bitset of available endpoints */
-  uint16_t                 epstalled;     /* Bitset of stalled endpoints */
-  WDOG_ID                  wdog;          /* Supports the restart delay */
+  struct usb_ctrlreq_s  ctrl;          /* Last EP0 request */
+  uint8_t devstate;                    /* Driver state (see enum khci_devstate_e) */
+  uint8_t ctrlstate;                   /* Control EP state (see enum khci_ctrlstate_e) */
+  uint8_t selfpowered:1;               /* 1: Device is self powered */
+  uint8_t rwakeup:1;                   /* 1: Device supports remote wakeup */
+  uint8_t attached:1;                  /* Device is attached to the host */
+  uint8_t ep0done:1;                   /* EP0 OUT already prepared */
+  uint8_t rxbusy:1;                    /* EP0 OUT data transfer in progress */
+  uint16_t epavail;                    /* Bitset of available endpoints */
+  uint16_t epstalled;                  /* Bitset of stalled endpoints */
+  WDOG_ID wdog;                        /* Supports the restart delay */
 
   /* The endpoint list */
 
-  struct khci_ep_s      eplist[KHCI_NENDPOINTS];
+  struct khci_ep_s eplist[KHCI_NENDPOINTS];
 };
 
 /****************************************************************************
@@ -548,7 +540,7 @@ static struct khci_req_s *khci_remlast(struct khci_queue_s *queue);
 static void   khci_addlast(struct khci_queue_s *queue,
                 struct khci_req_s *req);
 static void   khci_addfirst(struct khci_queue_s *queue,
-                 struct khci_req_s *req);
+                struct khci_req_s *req);
 
 /* Request Helpers **********************************************************/
 
@@ -601,7 +593,7 @@ static inline struct khci_ep_s *
               khci_epreserve(struct khci_usbdev_s *priv, uint8_t epset);
 static inline void
               khci_epunreserve(struct khci_usbdev_s *priv,
-                struct khci_ep_s *privep);
+              struct khci_ep_s *privep);
 static inline bool
               khci_epreserved(struct khci_usbdev_s *priv, int epno);
 static void  khci_ep0configure(struct khci_usbdev_s *priv);
@@ -690,17 +682,14 @@ static volatile struct usbotg_bdtentry_s g_bdt[4*KHCI_NENDPOINTS]
   __attribute__ ((aligned(512)));
 
 /****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
  * Private Private Functions
  ****************************************************************************/
 
 /****************************************************************************
  * Register Operations
  ****************************************************************************/
-/****************************************************************************
+
+ /****************************************************************************
  * Name: khci_getreg
  ****************************************************************************/
 
@@ -778,6 +767,7 @@ static void khci_putreg(uint32_t val, uint32_t addr)
 /****************************************************************************
  * Request Helpers
  ****************************************************************************/
+
 /****************************************************************************
  * Name: khci_remfirst
  ****************************************************************************/
@@ -867,6 +857,7 @@ static void khci_addfirst(struct khci_queue_s *queue, struct khci_req_s *req)
     {
       queue->tail = req;
     }
+
   queue->head = req;
 }
 
@@ -1781,6 +1772,7 @@ static void khci_cancelrequests(struct khci_ep_s *privep, int16_t result)
 /****************************************************************************
  * Interrupt Level Processing
  ****************************************************************************/
+
 /****************************************************************************
  * Name: khci_dispatchrequest
  ****************************************************************************/
@@ -1967,17 +1959,17 @@ static void khci_ep0rdcomplete(struct khci_usbdev_s *priv)
 static void khci_ep0setup(struct khci_usbdev_s *priv)
 {
   volatile struct usbotg_bdtentry_s *bdt;
-  struct khci_ep_s  *ep0;
-  struct khci_ep_s  *privep;
-  union wb_u            value;
-  union wb_u            index;
-  union wb_u            len;
-  union wb_u            response;
-  uint32_t              regval;
-  bool                  dispatched = false;
-  uint8_t               epno;
-  int                   nbytes = 0; /* Assume zero-length packet */
-  int                   ret;
+  struct khci_ep_s *ep0;
+  struct khci_ep_s *privep;
+  union wb_u value;
+  union wb_u index;
+  union wb_u len;
+  union wb_u response;
+  uint32_t regval;
+  bool dispatched = false;
+  uint8_t epno;
+  int nbytes = 0; /* Assume zero-length packet */
+  int ret;
 
   /* Cancel any pending requests. */
 
@@ -1989,9 +1981,9 @@ static void khci_ep0setup(struct khci_usbdev_s *priv)
    * beginning with DATA1.
    */
 
-  ep0->stalled   = false;
-  ep0->rxdata1   = 0;
-  ep0->txdata1   = 1;
+  ep0->stalled = false;
+  ep0->rxdata1 = 0;
+  ep0->txdata1 = 1;
 
   /* Initialize for the SETUP */
 
@@ -2760,9 +2752,7 @@ static int khci_interrupt(int irq, void *context)
 
   usbir = khci_getreg(KINETIS_USB0_ISTAT) & khci_getreg(KINETIS_USB0_INTEN);
   otgir = khci_getreg(KINETIS_USB0_OTGISTAT) & khci_getreg(KINETIS_USB0_OTGICR);
-// ulldbg("Interrupt: ISTAT %04x\n", khci_getreg(KINETIS_USB0_ISTAT));
-// ulldbg("Interrupt: OTGISTAT %04x\n", khci_getreg(KINETIS_USB0_OTGISTAT));
-// ulldbg("Interrupt: ERRSTAT %04x\n", khci_getreg(KINETIS_USB0_ERRSTAT));
+
   usbtrace(TRACE_INTENTRY(KHCI_TRACEINTID_INTERRUPT), usbir | otgir);
 
 #ifdef CONFIG_USBOTG
@@ -2995,7 +2985,6 @@ x
    */
 
 interrupt_exit:
-  //up_clrpend_irq(KINETIS_IRQ_USBOTG);
   kinetis_clrpend(KINETIS_IRQ_USBOTG);
   usbtrace(TRACE_INTEXIT(KHCI_TRACEINTID_INTERRUPT), usbir | otgir);
   return OK;
@@ -3227,6 +3216,7 @@ static void khci_ep0configure(struct khci_usbdev_s *priv)
 /****************************************************************************
  * Endpoint operations
  ****************************************************************************/
+
 /****************************************************************************
  * Name: khci_epconfigure
  ****************************************************************************/
@@ -3422,6 +3412,7 @@ static struct usbdev_req_s *khci_epallocreq(struct usbdev_ep_s *ep)
       return NULL;
     }
 #endif
+
   usbtrace(TRACE_EPALLOCREQ, USB_EPNO(ep->eplog));
 
   privreq = (struct khci_req_s *)kmm_malloc(sizeof(struct khci_req_s));
@@ -3450,6 +3441,7 @@ static void khci_epfreereq(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
       return;
     }
 #endif
+
   usbtrace(TRACE_EPFREEREQ, USB_EPNO(ep->eplog));
 
   kmm_free(privreq);
@@ -4026,11 +4018,9 @@ static void khci_attach(struct khci_usbdev_s *priv)
 
       /* Initialize registers to known states. */
 
-      //khci_putreg(0, KINETIS_USB0_CTL);
-  
 #if 1
       khci_putreg(0x1,KINETIS_USB0_CTL);
-      khci_putreg(0,KINETIS_USB0_USBCTRL);  
+      khci_putreg(0,KINETIS_USB0_USBCTRL);
 #endif
 
       /* Enable interrupts at the USB controller */
@@ -4221,6 +4211,7 @@ static void khci_hwreset(struct khci_usbdev_s *priv)
 #define USB_FLASH_ACCESS
 #ifdef USB_FLASH_ACCESS
   /* Allow USBOTG-FS Controller to Read from FLASH */
+
   regval = getreg32(KINETIS_FMC_PFAPR);
   regval &= ~(FMC_PFAPR_M4AP_MASK);
   regval |= (FMC_PFAPR_RDONLY << FMC_PFAPR_M4AP_SHIFT);
@@ -4231,13 +4222,15 @@ static void khci_hwreset(struct khci_usbdev_s *priv)
 
   memset((void *)g_bdt, 0, sizeof(g_bdt));
 
-  /* Soft reset the USB Module*/
+  /* Soft reset the USB Module */
+
   regval = khci_getreg(KINETIS_USB0_USBTRC0);
   regval |= USB_USBTRC0_USBRESET;
   khci_putreg(regval,KINETIS_USB0_USBTRC0);
 
-  //is this really necessary?
-  while (khci_getreg(KINETIS_USB0_USBTRC0) & USB_USBTRC0_USBRESET); 
+  /* Is this really necessary? */
+
+  while (khci_getreg(KINETIS_USB0_USBTRC0) & USB_USBTRC0_USBRESET);
 
   /* Set the address of the buffer descriptor table (BDT)
    *
@@ -4245,7 +4238,7 @@ static void khci_hwreset(struct khci_usbdev_s *priv)
    * BDTP2: Bit 0-7: Bits 16-23 of the BDT base address
    * BDTP3: Bit 0-7: Bits 24-31 of the BDT base address
    */
- 
+
   khci_putreg((uint8_t)((uint32_t)g_bdt >> 24), KINETIS_USB0_BDTPAGE3);
   khci_putreg((uint8_t)((uint32_t)g_bdt >> 16), KINETIS_USB0_BDTPAGE2);
   khci_putreg((uint8_t)(((uint32_t)g_bdt >>  8) & USB_BDTPAGE1_MASK), KINETIS_USB0_BDTPAGE1);
@@ -4255,7 +4248,6 @@ static void khci_hwreset(struct khci_usbdev_s *priv)
   ulldbg("BDTPAGE2 %hhx\n",khci_getreg(KINETIS_USB0_BDTPAGE2));
   ulldbg("BDTPAGE1 %hhx\n",khci_getreg(KINETIS_USB0_BDTPAGE1));
 
-
   /* Clear any pending interrupts */
 
   khci_putreg(0xFF, KINETIS_USB0_ERRSTAT);
@@ -4263,7 +4255,6 @@ static void khci_hwreset(struct khci_usbdev_s *priv)
   khci_putreg(0xFF,KINETIS_USB0_OTGISTAT);
 
 #if 1
-
   /* Assert reset request to all of the Ping Pong buffer pointers.  This
    * will reset all Even/Odd buffer pointers to the EVEN BD banks.
    */
@@ -4276,11 +4267,11 @@ static void khci_hwreset(struct khci_usbdev_s *priv)
 
   regval &= ~USB_CTL_ODDRST;
   khci_putreg(regval, KINETIS_USB0_CTL);
-
 #endif
 
 #if 1
-  /*Undocumented bit*/
+  /* Undocumented bit */
+
   regval = khci_getreg(KINETIS_USB0_USBTRC0);
   regval |= 0x40;
   khci_putreg(regval,KINETIS_USB0_USBTRC0);
@@ -4385,6 +4376,7 @@ static void khci_hwshutdown(struct khci_usbdev_s *priv)
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
 /****************************************************************************
  * Name: up_usbinitialize
  *
@@ -4399,39 +4391,41 @@ static void khci_hwshutdown(struct khci_usbdev_s *priv)
  *
  ****************************************************************************/
 
-#define SIM_CLKDIV2_USBDIV(n)		(uint32_t)(((n) & 0x07) << 1)
-
 void up_usbinitialize(void)
 {
+  struct khci_usbdev_s *priv = &g_usbdev;
   uint32_t regval;
+
   /* For now there is only one USB controller, but we will always refer to
    * it using a pointer to make any future ports to multiple USB controllers
    * easier.
    */
 #if 1
-  //1: Select clock source
+  /* 1: Select clock source */
+
   regval = getreg32(KINETIS_SIM_SOPT2);
   regval |= SIM_SOPT2_PLLFLLSEL | SIM_SOPT2_USBSRC;
   putreg32(regval, KINETIS_SIM_SOPT2);
 
   regval = getreg32(KINETIS_SIM_CLKDIV2);
 #if defined(CONFIG_TEENSY_3X_OVERCLOCK)
-  regval = SIM_CLKDIV2_USBDIV(1); //(USBFRAC + 0)/(USBDIV + 1) = (1 + 0)/(1 + 1) = 1/2 for 96Mhz clock
+  /* (USBFRAC + 0)/(USBDIV + 1) = (1 + 0)/(1 + 1) = 1/2 for 96Mhz clock */
+
+  regval = SIM_CLKDIV2_USBDIV(1);
 #else
-  //72Mhz
+  /* 72Mhz */
+
   regval = SIM_CLKDIV2_USBDIV(2) | SIM_CLKDIV2_USBFRAC;
 #endif
   putreg32(regval, KINETIS_SIM_CLKDIV2);
- 
-  //2: Gate USB clock
+
+  /* 2: Gate USB clock */
+
   regval = getreg32(KINETIS_SIM_SCGC4);
   regval |= SIM_SCGC4_USBOTG;
   putreg32(regval, KINETIS_SIM_SCGC4);
- 
+
 #endif
-
-
-  struct khci_usbdev_s *priv = &g_usbdev;
 
   usbtrace(TRACE_DEVINIT, 0);
 
@@ -4459,10 +4453,11 @@ void up_usbinitialize(void)
                (uint16_t)KINETIS_IRQ_USBOTG);
       up_usbuninitialize();
     }
-#ifdef CONFIG_ARCH_IRQPRIO
-      /* Set the interrupt priority */
 
-      up_prioritize_irq(KINETIS_IRQ_USBOTG, 112);
+#ifdef CONFIG_ARCH_IRQPRIO
+  /* Set the interrupt priority */
+
+  up_prioritize_irq(KINETIS_IRQ_USBOTG, 112);
 #endif
 }
 
@@ -4569,6 +4564,7 @@ int usbdev_register(struct usbdevclass_driver_s *driver)
       DEBUGASSERT(priv->devstate == DEVSTATE_DETACHED);
       khci_reset(priv);
    }
+
   return ret;
 }
 

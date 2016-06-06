@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/teensy-3.x/src/k20_usbdev.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,13 +56,10 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+
 #define khci_getreg(addr)      getreg8(addr)
 #define khci_putreg(val,addr)  putreg8(val,addr)
-#define SIM_CLKDIV2_USBDIV(n)		(uint32_t)(((n) & 0x07) << 1)
-
-/************************************************************************************
- * Private Functions
- ************************************************************************************/
+#define SIM_CLKDIV2_USBDIV(n)  (uint32_t)(((n) & 0x07) << 1)
 
 /************************************************************************************
  * Public Functions
@@ -78,9 +75,6 @@
 
 void kinetis_usbinitialize(void)
 {
-  uint32_t regval;
-
-// khci_usbattach();
 }
 
 /************************************************************************************
@@ -99,16 +93,28 @@ int kinetis_usbpullup(FAR struct usbdev_s *dev, bool enable)
 {
   usbtrace(TRACE_DEVPULLUP, (uint16_t)enable);
   uint32_t regval;
-if (enable)
-khci_putreg(USB_CONTROL_DPPULLUPNONOTG, KINETIS_USB0_CONTROL);
-else
-khci_putreg(0,KINETIS_USB0_CONTROL);
+
+  if (enable)
+    {
+      khci_putreg(USB_CONTROL_DPPULLUPNONOTG, KINETIS_USB0_CONTROL);
+    }
+  else
+    {
+      khci_putreg(0,KINETIS_USB0_CONTROL);
+    }
+
 #if 0
   regval = khci_getreg(KINETIS_USB0_OTGCTL);
- if (enable)
-    regval |= (1<<2);
- else
-    regval &= ~(1<<2);
+
+  if (enable)
+    {
+      regval |= (1 << 2);
+    }
+  else
+    {
+      regval &= ~(1 << 2);
+    }
+
   khci_putreg(regval,KINETIS_USB0_OTGCTL);
 #endif
 

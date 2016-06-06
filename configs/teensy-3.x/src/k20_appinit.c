@@ -78,7 +78,9 @@ int board_app_initialize(uintptr_t arg)
   /* Teensy is powered from usb and (bug?) only boots from being programmed, 
    * so if usb is compiled in signal the controller driver that we're attached now.
    */
+
   khci_usbattach();
 #endif
+
   return OK;
 }

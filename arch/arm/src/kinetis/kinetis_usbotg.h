@@ -1,7 +1,7 @@
 /********************************************************************************************
  * arch/arm/src/kinetis/kinetis_usbotg.h
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -362,10 +362,6 @@ struct usbotg_bdtentry_s
   uint8_t *addr;    /* Buffer address */
 };
 #endif
-
-/********************************************************************************************
- * Public Data
- ********************************************************************************************/
 
 /********************************************************************************************
  * Public Functions
