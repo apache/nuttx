@@ -2430,7 +2430,7 @@
 #  if defined(CONFIG_ARCH_CHIP_STM32F469A)
 #    define STM32_NETHERNET              0   /* No Ethernet MAC */
 #  elif defined(CONFIG_ARCH_CHIP_STM32F469I) || \
-#       defined(CONFIG_ARCH_CHIP_STM32F469B) || \
+        defined(CONFIG_ARCH_CHIP_STM32F469B) || \
         defined(CONFIG_ARCH_CHIP_STM32F469N)
 #    define STM32_NETHERNET              1   /* 100/100 Ethernet MAC */
 #  endif
