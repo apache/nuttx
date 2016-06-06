@@ -43,6 +43,9 @@ CSRCS += k20_autoleds.c
 else
 CSRCS += k20_userleds.c
 endif
+ifeq ($(CONFIG_KINETIS_USBOTG),y)
+CSRCS += k20_usbdev.c
+endif
 
 ifeq ($(CONFIG_LIB_BOARDCTL),y)
 CSRCS += k20_appinit.c
