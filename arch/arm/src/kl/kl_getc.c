@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/arm/src/stm32/stm32_lowgetc.c
+ * arch/arm/src/kl/kl_getc.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,42 +41,23 @@
 
 #include <stdint.h>
 
-#include <arch/board/board.h>
-
-#include "up_internal.h"
 #include "up_arch.h"
 
-#include "chip.h"
-
-#include "stm32.h"
-#include "stm32_rcc.h"
-#include "stm32_gpio.h"
-#include "stm32_uart.h"
+#include "kl_config.h"
+#include "kl_getc.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Select U[S]ART console base address */
+/* Select UART parameters for the selected console */
 
-#ifdef HAVE_CONSOLE
-#  if defined(CONFIG_USART1_SERIAL_CONSOLE)
-#    define STM32_CONSOLE_BASE     STM32_USART1_BASE
-#  elif defined(CONFIG_USART2_SERIAL_CONSOLE)
-#    define STM32_CONSOLE_BASE     STM32_USART2_BASE
-#  elif defined(CONFIG_USART3_SERIAL_CONSOLE)
-#    define STM32_CONSOLE_BASE     STM32_USART3_BASE
-#  elif defined(CONFIG_UART4_SERIAL_CONSOLE)
-#    define STM32_CONSOLE_BASE     STM32_UART4_BASE
-#  elif defined(CONFIG_UART5_SERIAL_CONSOLE)
-#    define STM32_CONSOLE_BASE     STM32_UART5_BASE
-#  elif defined(CONFIG_USART6_SERIAL_CONSOLE)
-#    define STM32_CONSOLE_BASE     STM32_USART6_BASE
-#  elif defined(CONFIG_UART7_SERIAL_CONSOLE)
-#    define STM32_CONSOLE_BASE     STM32_UART7_BASE
-#  elif defined(CONFIG_UART8_SERIAL_CONSOLE)
-#    define STM32_CONSOLE_BASE     STM32_UART8_BASE
-#  endif
+#if defined(CONFIG_UART0_SERIAL_CONSOLE)
+#  define CONSOLE_BASE     KL_UART0_BASE
+#elif defined(CONFIG_UART1_SERIAL_CONSOLE)
+#  define CONSOLE_BASE     KL_UART1_BASE
+#elif defined(CONFIG_UART2_SERIAL_CONSOLE)
+#  define CONSOLE_BASE     KL_UART2_BASE
 #endif
 
 /****************************************************************************
@@ -87,31 +68,29 @@
  * Name: up_getc
  *
  * Description:
- *   Read one byte from the serial console
+ *   Input one byte from the serial console
+ *
+ *   REVIST:  If used with the serial driver enabled, then this could
+ *   interfere with the serial driver operations.  Serial interrupts should
+ *   be disabled when this function executes in that case.
  *
  ****************************************************************************/
 
 int up_getc(void)
 {
-  uint32_t ch = 0;
+  uint8_t ch = 0;
 
-#ifdef HAVE_CONSOLE
-  /* While there is any error, read and discard bytes to clear the errors */
+#if defined HAVE_UART_DEVICE && defined HAVE_SERIAL_CONSOLE
+  /* Wait while the receiver data buffer is "empty" (RDRF) to assure that
+   * we have data in the buffer to read.
+   */
 
-  while ((getreg32(STM32_CONSOLE_BASE + STM32_USART_SR_OFFSET) &
-         (USART_SR_ORE | USART_SR_NE | USART_SR_FE | USART_SR_PE)) != 0)
-    {
-      (void)getreg32(STM32_CONSOLE_BASE + STM32_USART_RDR_OFFSET);
-    }
+  while ((getreg8(CONSOLE_BASE + KL_UART_S1_OFFSET) & UART_S1_RDRF) == 0);
 
-  /* Wait until the RX data register has a character to be read */
+  /* Then read a character from the UART data register */
 
-  while ((getreg32(STM32_CONSOLE_BASE + STM32_USART_SR_OFFSET) & USART_SR_RXNE) == 0);
-
-  /* Then read the character */
-
-  ch = getreg32(STM32_CONSOLE_BASE + STM32_USART_RDR_OFFSET);
-#endif /* HAVE_CONSOLE */
+  ch = getreg8(CONSOLE_BASE + KL_UART_D_OFFSET);
+#endif
 
   return (int)ch;
 }

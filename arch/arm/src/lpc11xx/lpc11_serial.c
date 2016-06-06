@@ -64,7 +64,6 @@
 #include "chip.h"
 #include "chip/lpc11_uart.h"
 #include "lpc11_gpio.h"
-#include "lpc11_lowgetc.h"
 #include "lpc11_serial.h"
 
 /****************************************************************************
@@ -1039,21 +1038,6 @@ int up_putc(int ch)
   up_lowputc(ch);
 #endif
   return ch;
-}
-
-/****************************************************************************
- * Name: up_getc
- *
- * Description:
- *   Provide priority, low-level access to support OS debug writes
- *
- ****************************************************************************/
-
-int up_getc(void)
-{
-  /* Check for LF */
-
-  return lpc11_lowgetc();
 }
 
 #endif /* USE_SERIALDRIVER */

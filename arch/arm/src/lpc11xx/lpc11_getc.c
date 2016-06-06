@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/lpc11/lpc11_lowgetc.c
+ * arch/arm/src/lpc11/lpc11_getc.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -41,42 +41,22 @@
 
 #include <stdint.h>
 
-#include <arch/irq.h>
-#include <arch/board/board.h>
-
-#include "up_internal.h"
 #include "up_arch.h"
 
-#include "chip/lpc11_syscon.h"
-#include "chip/lpc11_uart.h"
-
-#include "lpc11_gpio.h"
-#include "lpc11_lowgetc.h"
-#include "lpc11_serial.h"
+#include "lpc11_getc.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Select UART parameters for the selected console */
 
 #if defined(CONFIG_UART0_SERIAL_CONSOLE)
 #  define CONSOLE_BASE     LPC11_UART0_BASE
-#  define CONSOLE_FREQ     BOARD_CORECLK_FREQ
-#  define CONSOLE_BAUD     CONFIG_UART0_BAUD
-#  define CONSOLE_BITS     CONFIG_UART0_BITS
-#  define CONSOLE_PARITY   CONFIG_UART0_PARITY
 #elif defined(CONFIG_UART1_SERIAL_CONSOLE)
 #  define CONSOLE_BASE     LPC11_UART1_BASE
-#  define CONSOLE_FREQ     BOARD_BUSCLK_FREQ
-#  define CONSOLE_BAUD     CONFIG_UART1_BAUD
-#  define CONSOLE_BITS     CONFIG_UART1_BITS
-#  define CONSOLE_PARITY   CONFIG_UART1_PARITY
 #elif defined(CONFIG_UART2_SERIAL_CONSOLE)
 #  define CONSOLE_BASE     LPC11_UART2_BASE
-#  define CONSOLE_FREQ     BOARD_BUSCLK_FREQ
-#  define CONSOLE_BAUD     CONFIG_UART2_BAUD
-#  define CONSOLE_BITS     CONFIG_UART2_BITS
-#  define CONSOLE_PARITY   CONFIG_UART2_PARITY
 #endif
 
 /****************************************************************************
@@ -84,14 +64,18 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lpc11_lowgetc
+ * Name: up_getc
  *
  * Description:
- *   Input one byte from the serial console
+ *   Input one byte from the serial console.
+ *
+ *   REVIST:  If used with the serial driver enabled, then this could
+ *   interfere with the serial driver operations.  Serial interrupts should
+ *   be disabled when this function executes in that case.
  *
  ****************************************************************************/
 
-int lpc11_lowgetc(void)
+int up_getc(void)
 {
   uint8_t ch = 0;
 

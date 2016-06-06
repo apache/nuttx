@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/kl/kl_serial.c
  *
- *   Copyright (C) 2013-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -59,15 +59,14 @@
 
 #include "kl_config.h"
 #include "kl_lowputc.h"
-#include "kl_lowgetc.h"
 #include "chip.h"
 #include "kl_gpio.h"
 #include "chip/kl_uart.h"
 
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Some sanity checks *******************************************************/
 /* Is there at least one UART enabled and configured as a RS-232 device? */
 
@@ -958,18 +957,4 @@ int up_putc(int ch)
   return ch;
 }
 
-/****************************************************************************
- * Name: up_getc
- *
- * Description:
- *   Provide priority, low-level access to support OS debug writes
- *
- ****************************************************************************/
-
-int up_getc(void)
-{
-  /* Check for LF */
-
-  return kl_lowgetc();
-}
 #endif /* USE_SERIALDRIVER */

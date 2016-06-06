@@ -266,6 +266,19 @@ struct boardioc_usbdev_ctrl_s
 #endif /* CONFIG_BOARDCTL_USBDEVCTRL */
 
 /****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
+
+/****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
@@ -298,6 +311,11 @@ struct boardioc_usbdev_ctrl_s
  ****************************************************************************/
 
 int boardctl(unsigned int cmd, uintptr_t arg);
+
+#undef EXTERN
+#if defined(__cplusplus)
+}
+#endif
 
 #endif /* CONFIG_LIB_BOARDCTL */
 #endif /* __INCLUDE_SYS_BOARDCTL_H */
