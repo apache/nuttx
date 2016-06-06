@@ -38,7 +38,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
+#include <sys/types.h>
 #include <nuttx/board.h>
 
 #include "teensy-3x.h"
