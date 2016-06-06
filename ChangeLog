@@ -11887,6 +11887,14 @@
 	  violated the OS/application interface -- by calling flash_eraseall().
 	  The old code can be found in the Obsoleted' repository (and a revised
 	  version can be found at apps/fsutils/flash_eraseall) (2016-06-03).
+	* arch/arm/src/stm32: STM32 Timer Driver: Change calculation of per-
+	  timer pre-scaler value.  Add support for all timers (2016-6-03)
+	* drivers/lcd:  Correct conditional compilation in ST7565 driver.  From
+	  Pierre-noel Bouteville (2016-6-03)
+	* arch/arm/src/stm32: Correct conditional compilation in STM32 timer
+	  capture logic.  From Pierre-noel Bouteville (2016-6-03)
+	* arch/arm/src/efm32: Fix EFM32 FLASH conditional compilation.  From
+	  Pierre-noel Bouteville (2016-6-03)
 	* arch/arm/src/lpc43xx: Fix errors in GPIO interrupt logic.  From v01d
 	  (phreakuencies) (2016-06-04)
 	* arch/arm/src/kl and lpc11xx: rename xyz_lowputc to up_putc.  Remove
@@ -11896,11 +11904,15 @@
 	* arch/arm/src/stm32: Add the up_getc() function to STM32 in order to
 	  support the minnsh configuration.  From Alan Carvalho de Assis
 	  (2016-06-04).
-	* arch/arm/src/stm32: STM32 Timer Driver: Change calculation of per-
-	  timer pre-scaler value.  Add support for all timers (2016-6-03)
-	* drivers/lcd:  Correct conditional compilation in ST7565 driver.  From
-	  Pierre-noel Bouteville (2016-6-03)
-	* arch/arm/src/stm32: Correct conditional compilation in STM32 timer
-	  capture logic.  From Pierre-noel Bouteville (2016-6-03)
-	* arch/arm/src/efm32: Fix EFM32 FLASH conditional compilation.  From
-	  Pierre-noel Bouteville (2016-6-03)
+	* include/sys/boardctl.h:  Needs to be usable with C++ files (2016-06-05).
+	* tools/tesbuild.sh will now build NxWM configurations (2016-06-05).
+	* arch/arm/src/stm32:  In PWM driver, just update duty if frequency is
+	  not changed and PSM started.  This removeis glitch or blinking when
+	  only duty is frequently changed.  From Pierre-noel Bouteville (2016-06-05).
+	* arch/arm/src/kinetis:  Add a USB device controller driver.  Derived from
+	  the pic32mx usb driver, which uses the same usb controller.  From kfazz
+	  (2016-06).
+	* configs/teensy-3.x:  Add USB support and a usbnsh configuration.  From
+	  kfazz (2016-06).
+	* arch/arm/src/stm32:  Add support for the STM32F105R.  From Konstantin
+	  Berezenko  (2016-06-06).
