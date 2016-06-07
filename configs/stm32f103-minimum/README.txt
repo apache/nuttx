@@ -492,7 +492,7 @@ Where <subdir> is one of the following:
     2016-06-07:  As another experiment, I tried enabling just (1) the file
     system, (2) the console device, and (3) the upper half serial driver in
     the minnsh configuration.  With these changes, NSH should behave better 
-    nd we preserve the device driver interface.  I made the following
+    and we preserve the device driver interface.  I made the following
     configuration changes:
 
       Enable the file system:
@@ -525,13 +525,28 @@ Where <subdir> is one of the following:
     The resulting code was bigger as expected:
 
       $ arm-none-eabi-size nuttx
-         text    data     bss     dec     hex filename
-        20093      88     876   21057    5241 nuttx
+       text    data     bss     dec     hex filename
+      19853      88     876   20817    5151 nuttx
 
     I am sure that other things that could be disabled were also drawn into
-    the build, so perhaps this could be reduced.  But as a ballpark
-    estimate, it looks like the cost of basic file system and serial console
-    driver support is around 7+KB.
+    the build, so perhaps this could be reduced.  This amounts to a size
+    increase of around 7KB.
+
+    One major part of this size increase is due to the addition of the NSH
+    'ls' command.  Now, if I disable the 'ls' command, I get:
+
+      $ arm-none-eabi-size nuttx
+       text    data     bss     dec     hex filename
+      17804      80     864   18748    493c nuttx
+
+    Or an increase of only 5.1 KB.  This, of course, not only excludes the
+    'ls' command logic, but also the things that were drawn into the link
+    when 'ls' was enabled:  opendir(), readdir(), closedir(), stat(), and
+    probably other things.
+
+    So I think we can say that the cost of the file system and true serial
+    console device was about 5 KB (primarily OS support) and the cost of
+    the NSH 'ls' command (including OS support) is about 2KB.
 
   nsh:
   ---
