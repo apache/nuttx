@@ -11916,3 +11916,6 @@
 	  kfazz (2016-06).
 	* arch/arm/src/stm32:  Add support for the STM32F105R.  From Konstantin
 	  Berezenko  (2016-06-06).
+	* include/signal.h:  Change type of SIG_ERR, SIG_IGN, ... to
+	  _sa_handler_t.  They type void does not work with the IAR toolchain.
+	  From Aleksandr Vyhovanec (2016-06-07).
