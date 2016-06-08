@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/assert.h
  *
- *   Copyright (C) 2007-2009, 2011-2013, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2013, 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -102,6 +102,11 @@
 #  define DEBUGPANIC()
 
 #  endif /* CONFIG_DEBUG */
+
+/* The C standard states that if NDEBUG is defined, assert will do nothing.
+ * Users can define and undefine NDEBUG as they see fit to choose when assert
+ * does something or does not do anything.
+ */
 
 #ifdef NDEBUG
 #  define assert(f)
