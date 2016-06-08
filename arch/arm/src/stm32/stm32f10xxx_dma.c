@@ -57,7 +57,7 @@
 
 
 #if defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32F30XX) || \
-    defined(CONFIG_STM32_STM32L15XX)
+    defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32L15XX)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -157,7 +157,7 @@ static struct stm32_dma_s g_dma[DMA_NCHANNELS] =
   {
     .chan     = 3,
 #if defined(CONFIG_STM32_CONNECTIVITYLINE) || defined(CONFIG_STM32_STM32F30XX) || \
-    defined(CONFIG_STM32_STM32L15XX)
+    defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32L15XX)
     .irq      = STM32_IRQ_DMA2CH4,
 #else
     .irq      = STM32_IRQ_DMA2CH45,
@@ -167,7 +167,7 @@ static struct stm32_dma_s g_dma[DMA_NCHANNELS] =
   {
     .chan     = 4,
 #if defined(CONFIG_STM32_CONNECTIVITYLINE) || defined(CONFIG_STM32_STM32F30XX) || \
-    defined(CONFIG_STM32_STM32L15XX)
+    defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32L15XX)
     .irq      = STM32_IRQ_DMA2CH5,
 #else
     .irq      = STM32_IRQ_DMA2CH45,
@@ -290,7 +290,7 @@ static int stm32_dmainterrupt(int irq, void *context)
   else
 #if STM32_NDMA > 1
 #if defined(CONFIG_STM32_CONNECTIVITYLINE) || defined(CONFIG_STM32_STM32F30XX) || \
-    defined(CONFIG_STM32_STM32L15XX)
+    defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32L15XX)
   if (irq >= STM32_IRQ_DMA2CH1 && irq <= STM32_IRQ_DMA2CH5)
 #else
   if (irq >= STM32_IRQ_DMA2CH1 && irq <= STM32_IRQ_DMA2CH45)
