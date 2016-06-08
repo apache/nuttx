@@ -1,9 +1,9 @@
 /************************************************************************************
- * arch/arm/src/stm3fr2/chip/stm32f74xxx75xxx_memorymap.h
+ * arch/arm/src/stm3fr2/chip/stm32f76xxx77xxx_memorymap.h
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
- *            David Sidrane <david_s5@nscdg.com>
+ *            David Sidrane <david_s5@uas.net>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -34,8 +34,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32F7_CHIP_STM32F74XXX75XXX_MEMORYMAP_H
-#define __ARCH_ARM_SRC_STM32F7_CHIP_STM32F74XXX75XXX_MEMORYMAP_H
+#ifndef __ARCH_ARM_SRC_STM32F7_CHIP_STM32F76XXX77XXX_MEMORYMAP_H
+#define __ARCH_ARM_SRC_STM32F7_CHIP_STM32F76XXX77XXX_MEMORYMAP_H
 
 /************************************************************************************
  * Included Files
@@ -43,7 +43,7 @@
 
 #include <nuttx/config.h>
 
-#if defined(CONFIG_STM32F7_STM32F74XX) || defined(CONFIG_STM32F7_STM32F75XX)
+#if defined(CONFIG_STM32F7_STM32F76XX) || defined(CONFIG_STM32F7_STM32F77XX)
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -73,9 +73,9 @@
 #define STM32_BOOT_BASE      0x00000000     /* 0x00000000-0x000fffff: Aliased boot memory */
 #define STM32_INSTRAM_BASE   0x00000000     /* 0x00000000-0x00003fff: Instruction RAM (ITCM-RAM) */
 #define STM32_SYSMEM_ICTM    0x00100000     /* 0x00100000-0x0010edbf: System memory (ITCM) */
-#define STM32_FLASH_ITCM     0x00200000     /* 0x00200000-0x002fffff: FLASH memory (ITCM) */
+#define STM32_FLASH_ITCM     0x00200000     /* 0x00200000-0x003fffff: FLASH memory (ITCM) */
 #define STM32_LOADER_BASE    0x01000000     /* 0x01000000-            Bootloader */
-#define STM32_FLASH_AXIM     0x08000000     /* 0x08000000-0x080fffff: FLASH memory (AXIM) */
+#define STM32_FLASH_AXIM     0x08000000     /* 0x08000000-0x081fffff: FLASH memory (AXIM) */
 #define STM32_OPTIONS_BASE   0x1fff0000     /* 0x1ff00000-0x1fff001f: OTP (AXIM) */
 
 /* Information Addresses ************************************************************/
@@ -87,9 +87,9 @@
 
 /* SRAM Base Addresses **************************************************************/
 
-#define STM32_DTCRAM_BASE    0x20000000     /* 0x20000000-0x2000ffff: DTCM-RAM on TCM interface */
-#define STM32_SRAM1_BASE     0x20010000     /* 0x20010000-0x2004bfff: System SRAM1 */
-#define STM32_SRAM2_BASE     0x2004c000     /* 0x2004c000-0x2004ffff: System SRAM2 */
+#define STM32_DTCRAM_BASE    0x20000000     /* 0x20000000-0x2001ffff: DTCM-RAM on TCM interface */
+#define STM32_SRAM1_BASE     0x20020000     /* 0x20020000-0x2007bfff: System SRAM1 */
+#define STM32_SRAM2_BASE     0x2007c000     /* 0x2007c000-0x2007ffff: System SRAM2 */
 
 /* Peripheral Base Addresses ********************************************************/
 
@@ -115,6 +115,7 @@
 #define STM32_BKP_BASE       0x40002800     /* 0x40002800-0x40002bff: RTC & BKP Registers */
 #define STM32_WWDG_BASE      0x40002c00     /* 0x40002c00-0x40002fff: WWDG */
 #define STM32_IWDG_BASE      0x40003000     /* 0x40003000-0x400033ff: IWDG */
+#define STM32_CAN3_BASE      0x40003400     /* 0x40003400-0x400037ff: CAN3 */
 #define STM32_SPI2_BASE      0x40003800     /* 0x40003800-0x40003bff: SPI2 / I2S2 */
 #define STM32_I2S2_BASE      0x40003800     /* 0x40003800-0x40003bff: SPI2 / I2S2 */
 #define STM32_SPI3_BASE      0x40003c00     /* 0x40003c00-0x40003fff: SPI3 / I2S3 */
@@ -142,6 +143,7 @@
 #define STM32_TIM8_BASE      0x40010400     /* 0x40010400-0x400107ff: TIM8 */
 #define STM32_USART1_BASE    0x40011000     /* 0x40011000-0x400113ff: USART1 */
 #define STM32_USART6_BASE    0x40011400     /* 0x40011400-0x400117ff: USART6 */
+#define STM32_SDMMC2_BASE    0x40011c00     /* 0x40011c00-0x40011fff: SDMMC2 */
 #define STM32_ADC_BASE       0x40012000     /* 0x40012000-0x400123ff: ADC1 - ADC2 - ADC3 */
 #define STM32_SDMMC1_BASE    0x40012c00     /* 0x40012c00-0x40012fff: SDMMC1 */
 #define STM32_SPI1_BASE      0x40013000     /* 0x40013000-0x400133ff: SPI1 */
@@ -156,6 +158,9 @@
 #define STM32_SAI1_BASE      0x40015800     /* 0x40015800-0x40015bff: SAI1 */
 #define STM32_SAI2_BASE      0x40015c00     /* 0x40015c00-0x40015fff: SAI2 */
 #define STM32_LCDTFT_BASE    0x40016800     /* 0x40016800-0x40016bff: LCD-TFT */
+#define STM32_DSIHOST_BASE   0x40016c00     /* 0x40016c00-0x400173ff: DSI Host */
+#define STM32_DFSDM1_BASE    0x40017400     /* 0x40017400-0x400174ff: DFSDM1 */
+#define STM32_MDIOS_BASE     0x40017800     /* 0x40017800-0x40017bff: MDIOS */
 
 /* AHB1 Base Addresses **************************************************************/
 
@@ -184,6 +189,7 @@
 
 #define STM32_USBOTGFS_BASE  0x50000000     /* 0x50000000-0x5003ffff: USB OTG FS */
 #define STM32_DCMI_BASE      0x50050000     /* 0x50050000-0x500503ff: DCMI */
+#define STM32_JPEG_BASE      0x50051000     /* 0x50051000-0x500511ff: JPEG */
 #define STM32_CRYP_BASE      0x50060000     /* 0x50060000-0x500603ff: CRYP */
 #define STM32_HASH_BASE      0x50060400     /* 0x50060400-0x500607ff: HASH */
 #define STM32_RNG_BASE       0x50060800     /* 0x50060800-0x50060bff: RNG */
@@ -204,5 +210,5 @@
  * address range
  */
 
-#endif /* CONFIG_STM32F7_STM32F74XX || CONFIG_STM32F7_STM32F75XX */
-#endif /* __ARCH_ARM_SRC_STM32F7_CHIP_STM32F74XXX75XXX_MEMORYMAP_H */
+#endif /* CONFIG_STM32F7_STM32F76XX || CONFIG_STM32F7_STM32F77XX */
+#endif /* __ARCH_ARM_SRC_STM32F7_CHIP_STM32F76XXX77XXX_MEMORYMAP_H */

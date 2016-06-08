@@ -1,7 +1,7 @@
 /************************************************************************************
- * arch/arm/src/stm32f7/chip/stm32f74xx75xx_pwr.h
+ * arch/arm/src/stm32f7/chip/stm32f76xx77xx_pwr.h
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            David Sidrane <david_s5@nscdg.com>
  *
@@ -34,8 +34,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32F7_CHIP_STM32F74XX75XX_PWR_H
-#define __ARCH_ARM_SRC_STM32F7_CHIP_STM32F74XX75XX_PWR_H
+#ifndef __ARCH_ARM_SRC_STM32F7_CHIP_STM32F76XX77XX_PWR_H
+#define __ARCH_ARM_SRC_STM32F7_CHIP_STM32F76XX77XX_PWR_H
 
 /************************************************************************************
  * Included Files
@@ -43,7 +43,7 @@
 
 #include <nuttx/config.h>
 
-#if defined(CONFIG_STM32F7_STM32F74XX) || defined(CONFIG_STM32F7_STM32F75XX)
+#if defined(CONFIG_STM32F7_STM32F76XX) || defined(CONFIG_STM32F7_STM32F76XX)
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -104,7 +104,6 @@
 #define PWR_CSR1_SBF            (1 << 1)  /* Bit 1:  Standby flag */
 #define PWR_CSR1_PVDO           (1 << 2)  /* Bit 2:  PVD Output */
 #define PWR_CSR1_BRR            (1 << 3)  /* Bit 3:  Backup regulator ready */
-#define PWR_CSR1_EIWUP          (1 << 8)  /* Bit 8:  Enable internal wakeup */
 #define PWR_CSR1_BRE            (1 << 9)  /* Bit 9:  Backup regulator enable */
 #define PWR_CSR1_VOSRDY         (1 << 14) /* Bit 14: Regulator voltage scaling output selection ready bite */
 #define PWR_CSR1_ODRDY          (1 << 16) /* Bit 16: Over Drive generator ready */
@@ -156,5 +155,5 @@
 #define PWR_CSR2_EWUP5           (1 << 12) /* Bit 12: Enable wakeup pin for PI8 */
 #define PWR_CSR2_EWUP6           (1 << 13) /* Bit 13: Enable wakeup pin for PI11 */
 
-#endif /* CONFIG_STM32F7_STM32F74XX || CONFIG_STM32F7_STM32F75XX */
-#endif /* __ARCH_ARM_SRC_STM32F7_CHIP_STM32F74XX75XX_PWR_H */
+#endif /* CONFIG_STM32F7_STM32F76XX || CONFIG_STM32F7_STM32F77XX */
+#endif /* __ARCH_ARM_SRC_STM32F7_CHIP_STM32F76XX77XX_PWR_H */

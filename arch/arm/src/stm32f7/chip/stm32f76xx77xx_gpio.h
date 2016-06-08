@@ -1,8 +1,9 @@
 /************************************************************************************
- * arch/arm/src/stm32f7/chip/stm32f74xxx75xx_gpio.h
+ * arch/arm/src/stm32f7/chip/stm32f76xxx77xx_gpio.h
  *
- *   Copyright (C) 2005 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            David Sidrane <david_s5@nscdg.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,8 +34,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32F7_CHIP_STM32F74XX75XX_GPIO_H
-#define __ARCH_ARM_SRC_STM32F7_CHIP_STM32F74XX75XX_GPIO_H
+#ifndef __ARCH_ARM_SRC_STM32F7_CHIP_STM32F76XX77XX_GPIO_H
+#define __ARCH_ARM_SRC_STM32F7_CHIP_STM32F76XX77XX_GPIO_H
 
 /************************************************************************************
  * Included Files
@@ -43,7 +44,7 @@
 #include <nuttx/config.h>
 #include <arch/stm32f7/chip.h>
 
-#if defined(CONFIG_STM32F7_STM32F74XX) || defined(CONFIG_STM32F7_STM32F75XX)
+#if defined(CONFIG_STM32F7_STM32F76XX) || defined(CONFIG_STM32F7_STM32F77XX)
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -399,5 +400,5 @@
 #define GPIO_AFRH15_SHIFT          (28)
 #define GPIO_AFRH15_MASK           (15 << GPIO_AFRH15_SHIFT)
 
-#endif /* CONFIG_STM32F7_STM32F74XX || CONFIG_STM32F7_STM32F75XX */
-#endif /* __ARCH_ARM_SRC_STM32F7_CHIP_STM32F74XX75XX_GPIO_H */
+#endif /* CONFIG_STM32F7_STM32F76XX || CONFIG_STM32F7_STM32F77XX */
+#endif /* __ARCH_ARM_SRC_STM32F7_CHIP_STM32F76XX77XX_GPIO_H */

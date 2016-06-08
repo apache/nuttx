@@ -59,9 +59,11 @@
     !defined(CONFIG_STM32_FLASH_OVERRIDE_E) && \
     !defined(CONFIG_STM32_FLASH_OVERRIDE_F) && \
     !defined(CONFIG_STM32_FLASH_OVERRIDE_G) && \
+    !defined(CONFIG_STM32_FLASH_OVERRIDE_I) && \
     !defined(CONFIG_STM32_FLASH_CONFIG_E) && \
     !defined(CONFIG_STM32_FLASH_CONFIG_F) && \
-    !defined(CONFIG_STM32_FLASH_CONFIG_G)
+    !defined(CONFIG_STM32_FLASH_CONFIG_G) && \
+    !defined(CONFIG_STM32_FLASH_CONFIG_I)
 #  define CONFIG_STM32_FLASH_OVERRIDE_E
 #  warning "Flash size not defined defaulting to 512KiB (E)"
 #endif
@@ -70,6 +72,7 @@
 
 #  undef CONFIG_STM32F7_FLASH_CONFIG_E
 #  undef CONFIG_STM32F7_FLASH_CONFIG_G
+#  undef CONFIG_STM32F7_FLASH_CONFIG_I
 
 #  if defined(CONFIG_STM32F7_FLASH_OVERRIDE_E)
 
@@ -78,6 +81,10 @@
 #  elif defined(CONFIG_STM32F7_FLASH_OVERRIDE_G)
 
 #    define CONFIG_STM32F7_FLASH_CONFIG_G
+
+#  elif defined(CONFIG_STM32F7_FLASH_OVERRIDE_I)
+
+#    define CONFIG_STM32F7_FLASH_CONFIG_I
 
 #  endif
 #endif
@@ -96,6 +103,13 @@
 #  define STM32_FLASH_SIZES       {_K(32), _K(32), _K(32), _K(32),  \
                                   _K(128), _K(256), _K(256), _K(256)}
 
+#elif defined(CONFIG_STM32_FLASH_CONFIG_I)
+
+#  define STM32_FLASH_NPAGES      12
+#  define STM32_FLASH_SIZE        _K((4 * 32) + (1 * 128) + (7 * 256))
+#  define STM32_FLASH_SIZES       {_K(32), _K(32), _K(32), _K(32),  \
+                                  _K(128), _K(256), _K(256), _K(256) \
+                                  _K(256), _K(256), _K(256), _K(256)}
 #endif
 
 /* Register Offsets *****************************************************************/
@@ -150,10 +164,10 @@
 
 #define FLASH_CR_PG                (1 << 0)  /* Bit 0:  Programming */
 #define FLASH_CR_SER               (1 << 1)  /* Bit 1:  Sector Erase */
-#define FLASH_CR_MER               (1 << 2)  /* Bit 2:  Mass Erase sectors 0..11 */
+#define FLASH_CR_MER_MER1          (1 << 2)  /* Bit 2:  Mass Erase sectors 0..11 */
 #define FLASH_CR_SNB_SHIFT         (3)       /* Bits 3-6: Sector number */
-#define FLASH_CR_SNB_MASK          (0xf << FLASH_CR_SNB_SHIFT)
-#  define FLASH_CR_SNB(n)          ((uint32_t)((n) % 8) << FLASH_CR_SNB_SHIFT) | ((n / 8) << 6)) /* Sector n, n=0..23 */
+#define FLASH_CR_SNB_MASK          (0x1f << FLASH_CR_SNB_SHIFT)
+#  define FLASH_CR_SNB(n)          ((uint32_t)((n) % 12) << FLASH_CR_SNB_SHIFT) | ((n / 12) << 7)) /* Sector n, n=0..23 */
 #define FLASH_CR_PSIZE_SHIFT       (8)       /* Bits 8-9: Program size */
 #define FLASH_CR_PSIZE_MASK        (3 << FLASH_CR_PSIZE_SHIFT)
 #  define FLASH_CR_PSIZE_X8        (0 << FLASH_CR_PSIZE_SHIFT) /* Program x8 */
@@ -164,6 +178,7 @@
 #define FLASH_CR_EOPIE             (1 << 24) /* Bit 24: End of operation interrupt enable */
 #define FLASH_CR_ERRIE             (1 << 25) /* Bit 25: Error interrupt enable */
 #define FLASH_CR_LOCK              (1 << 31) /* Bit 31: Lock */
+#define FLASH_CR_MER2              (1 << 15) /* Bit 15: Mass Erase sectors 12..23 */
 
 /* Flash Option Control Register (OPTCR) */
 
@@ -184,9 +199,11 @@
 #define FLASH_OPTCR_RDP_SHIFT      (8)       /* Bits 8-15: Read protect */
 #define FLASH_OPTCR_RDP_MASK       (0xff << FLASH_OPTCR_RDP_SHIFT)
 #  define FLASH_OPTCR_RDP(n)       ((uint32_t)(n) << FLASH_OPTCR_RDP_SHIFT)
-#define FLASH_OPTCR_NWRP_SHIFT     (16)      /* Bits 16-23: Not write protect */
-#define FLASH_OPTCR_NWRP_MASK      (0xff << FLASH_OPTCR_NWRP_SHIFT)
+#define FLASH_OPTCR_NWRP_SHIFT     (16)      /* Bits 16-27: Not write protect */
+#define FLASH_OPTCR_NWRP_MASK      (0xfff << FLASH_OPTCR_NWRP_SHIFT)
 #   define FLASH_OPTCR_NWRP(n)     ((uint32_t)(n) << FLASH_OPTCR_NWRP_SHIFT)
+#define FLASH_OPTCR_NDBANK         (1 << 28) /* Bit 28: Not dual bank mode */
+#define FLASH_OPTCR_NDBOOT         (1 << 29) /* Bit 29: Dual Boot mode */
 #define FLASH_OPTCR_IWDG_STDBY     (1 << 30) /* Bit 30: IWDG freeze in stop mode */
 #define FLASH_OPTCR_IWDG_STOP      (1 << 31) /* Bit 31: IWDG freeze in standby mode */
 
