@@ -11919,3 +11919,6 @@
 	* include/signal.h:  Change type of SIG_ERR, SIG_IGN, ... to
 	  _sa_handler_t.  They type void does not work with the IAR toolchain.
 	  From Aleksandr Vyhovanec (2016-06-07).
+	* Refactoring configs/nucleo-144 sub-directories to support additional
+	  nucleo-144 board.  Add support for the Nucleo-F767ZI board. From David
+	  Sidrane (2016-06-08).

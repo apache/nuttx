@@ -393,9 +393,12 @@ configs/ntosd-dm320
   NuttX 0.2.1 release.
 
 configs/nucleo-144
-  STMicro Nucleo-144 development board featuring the STM32F746ZGT6U MCU. The
-  STM32F746ZGT6U is a 216MHz Cortex-M7 operation with 1024Kb Flash memory
-  and 300Kb SRAM.
+  STMicro Nucleo-144 development board family.  Included support for (1) the
+  Nucleo-F767ZG board featuring the STM32F746ZGT6U MCU. The STM32F746ZGT6U
+  is a 216MHz Cortex-M7 operation with 1024Kb Flash memory and 320Kb SRAM.
+  And (2) the Nucleo-F746ZG board featuring the STM32F767ZIT6 MCU. The
+  STM32F767ZIT6 is a 216MHz Cortex-M7 operation with 2048Kb Flash memory
+  and 512Kb SRAM.
 
 configs/nucleo-f4x1re
   STMicro ST Nucleo F401RE and F411RE boards.  See

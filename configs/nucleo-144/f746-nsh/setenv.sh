@@ -1,9 +1,8 @@
 #!/bin/bash
-# configs/nucleo-144/evalos/setenv.sh
+# configs/nucleo-144/f746-nsh/setenv.sh
 #
 #   Copyright (C) 2016 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
-#   Author: Mark Olsson <post@markolsson.se>
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions

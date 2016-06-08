@@ -1,10 +1,8 @@
 /****************************************************************************
- * configs/nucleo-144/src/stm32_userleds.c
+ * config/nucleo-144/src/stm32_sdio.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
- *   Authors: Gregory Nutt <gnutt@nuttx.org>
- *            Mark Olsson <post@markolsson.se>
- *            David Sidrane <david_s5@nscdg.com>
+ *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -42,115 +40,137 @@
 #include <nuttx/config.h>
 
 #include <stdbool.h>
+#include <stdio.h>
 #include <debug.h>
+#include <errno.h>
 
-#include <nuttx/board.h>
-#include <arch/board/board.h>
+#include <nuttx/sdio.h>
+#include <nuttx/mmcsd.h>
 
-#include "stm32_gpio.h"
+#include "stm32.h"
 #include "nucleo-144.h"
 
-#ifndef CONFIG_ARCH_LEDS
+#ifdef HAVE_SDIO
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* CONFIG_DEBUG_LEDS enables debug output from this file (needs CONFIG_DEBUG
- * with CONFIG_DEBUG_VERBOSE too)
- */
+/* Configuration ************************************************************/
 
-#ifdef CONFIG_DEBUG_LEDS
-#  define leddbg  lldbg
-#  define ledvdbg llvdbg
-#else
-#  define leddbg(x...)
-#  define ledvdbg(x...)
+/* Card detections requires card support and a card detection GPIO */
+
+#define HAVE_NCD   1
+#if !defined(CONFIG_STM32_SDIO) || !defined(GPIO_SDIO_NCD)
+#  undef HAVE_NCD
 #endif
-
-#define ArraySize(x) (sizeof((x)) / sizeof((x)[0]))
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-/* This array maps an LED number to GPIO pin configuration and is indexed by
- * BOARD_LED_<color>
- */
+static FAR struct sdio_dev_s *g_sdio_dev;
+#ifdef HAVE_NCD
+static bool g_sd_inserted = 0xff; /* Impossible value */
+#endif
 
-static const uint32_t g_ledcfg[BOARD_NLEDS] =
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: stm32_ncd_interrupt
+ *
+ * Description:
+ *   Card detect interrupt handler.
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_NCD
+static int stm32_ncd_interrupt(int irq, FAR void *context)
 {
-  GPIO_LED_GREEN,
-  GPIO_LED_BLUE,
-  GPIO_LED_RED,
-};
+  bool present;
+
+  present = !stm32_gpioread(GPIO_SDIO_NCD);
+  if (present != g_sd_inserted)
+    {
+      sdio_mediachange(g_sdio_dev, present);
+      g_sd_inserted = present;
+    }
+
+  return OK;
+}
+#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_userled_initialize
+ * Name: stm32_sdio_initialize
  *
  * Description:
- *   If CONFIG_ARCH_LEDS is defined, then NuttX will control the on-board
- *   LEDs.  If CONFIG_ARCH_LEDS is not defined, then the
- *   board_userled_initialize() is available to initialize the LED from user
- *   application logic.
+ *   Initialize SDIO-based MMC/SD card support
  *
  ****************************************************************************/
 
-void board_userled_initialize(void)
+int stm32_sdio_initialize(void)
 {
-  int i;
+  int ret;
 
-  /* Configure LED1-3 GPIOs for output */
+#ifdef HAVE_NCD
+  /* Card detect */
 
-  for (i = 0; i < ArraySize(g_ledcfg); i++)
+  bool cd_status;
+
+  /* Configure the card detect GPIO */
+
+  stm32_configgpio(GPIO_SDIO_NCD);
+
+  /* Register an interrupt handler for the card detect pin */
+
+  stm32_gpiosetevent(GPIO_SDIO_NCD, true, true, true, stm32_ncd_interrupt);
+#endif
+
+  /* Mount the SDIO-based MMC/SD block driver */
+  /* First, get an instance of the SDIO interface */
+
+  fvdbg("Initializing SDIO slot %d\n", SDIO_SLOTNO);
+
+  g_sdio_dev = sdio_initialize(SDIO_SLOTNO);
+  if (!g_sdio_dev)
     {
-      stm32_configgpio(g_ledcfg[i]);
+      fdbg("Failed to initialize SDIO slot %d\n", SDIO_SLOTNO);
+      return -ENODEV;
     }
+
+  /* Now bind the SDIO interface to the MMC/SD driver */
+
+  fvdbg("Bind SDIO to the MMC/SD driver, minor=%d\n", SDIO_MINOR);
+
+  ret = mmcsd_slotinitialize(SDIO_MINOR, g_sdio_dev);
+  if (ret != OK)
+    {
+      fdbg("Failed to bind SDIO to the MMC/SD driver: %d\n", ret);
+      return ret;
+    }
+
+  fvdbg("Successfully bound SDIO to the MMC/SD driver\n");
+
+#ifdef HAVE_NCD
+  /* Use SD card detect pin to check if a card is g_sd_inserted */
+
+  cd_status = !stm32_gpioread(GPIO_SDIO_NCD);
+  fvdbg("Card detect : %d\n", cd_status);
+
+  sdio_mediachange(g_sdio_dev, cd_status);
+#else
+  /* Assume that the SD card is inserted.  What choice do we have? */
+
+  sdio_mediachange(g_sdio_dev, true);
+#endif
+
+  return OK;
 }
 
-/****************************************************************************
- * Name: board_userled
- *
- * Description:
- *   If CONFIG_ARCH_LEDS is defined, then NuttX will control the on-board
- *  LEDs.  If CONFIG_ARCH_LEDS is not defined, then the board_userled() is
- *  available to control the LED from user application logic.
- *
- ****************************************************************************/
-
-void board_userled(int led, bool ledon)
-{
-  if ((unsigned)led < ArraySize(g_ledcfg))
-    {
-      stm32_gpiowrite(g_ledcfg[led], ledon);
-    }
-}
-
-/****************************************************************************
- * Name: board_userled_all
- *
- * Description:
- *   If CONFIG_ARCH_LEDS is defined, then NuttX will control the on-board
- *  LEDs.  If CONFIG_ARCH_LEDS is not defined, then the board_userled_all() is
- *  available to control the LED from user application logic.  NOTE:  since
- *  there is only a single LED on-board, this is function is not very useful.
- *
- ****************************************************************************/
-
-void board_userled_all(uint8_t ledset)
-{
-  int i;
-
-  /* Configure LED1-3 GPIOs for output */
-
-  for (i = 0; i < ArraySize(g_ledcfg); i++)
-    {
-      stm32_gpiowrite(g_ledcfg[i], (ledset & (1 << i)) != 0);
-    }
-}
-
-#endif /* !CONFIG_ARCH_LEDS */
+#endif /* HAVE_SDIO */

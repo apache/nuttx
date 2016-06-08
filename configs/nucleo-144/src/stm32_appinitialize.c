@@ -2,8 +2,9 @@
  * config/nucleo-144/src/stm32_appinitilaize.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *   Author: Mark Olsson <post@markolsson.se>
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            Mark Olsson <post@markolsson.se>
+ *            David Sidrane <david_s5@nscdg.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -39,6 +40,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
+#include <sys/types.h>
 #include <syslog.h>
 
 #include "nucleo-144.h"
@@ -75,9 +78,20 @@
 
 int board_app_initialize(uintptr_t arg)
 {
-#if !defined(CONFIG_ARCH_LEDS) && defined(CONFIG_USERLED_LOWER)
   int ret;
 
+#ifdef CONFIG_FS_PROCFS
+  /* Mount the procfs file system */
+
+  ret = mount(NULL, STM32_PROCFS_MOUNTPOINT, "procfs", 0, NULL);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to mount procfs at %s: %d\n",
+             STM32_PROCFS_MOUNTPOINT, ret);
+    }
+#endif
+
+#if !defined(CONFIG_ARCH_LEDS) && defined(CONFIG_USERLED_LOWER)
   /* Register the LED driver */
 
   ret = userled_lower_initialize(LED_DRIVER_PATH);
@@ -87,5 +101,36 @@ int board_app_initialize(uintptr_t arg)
     }
 #endif
 
+#if defined(CONFIG_FAT_DMAMEMORY)
+  if (stm32_dma_alloc_init() < 0)
+    {
+      syslog(LOG_ERR, "DMA alloc FAILED");
+    }
+#endif
+
+#if defined(CONFIG_NUCLEO_SPI_TEST)
+  /* Create SPI interfaces */
+
+  ret = stm32_spidev_bus_init();
+  if (ret != OK)
+    {
+      fdbg("ERROR: Failed to initialize SPI interfaces: %d\n", ret);
+      return ret;
+    }
+#endif
+
+#if defined(CONFIG_MMCSD)
+  /* Configure SDIO */
+  /* Initialize the SDIO block driver */
+
+  ret = stm32_sdio_initialize();
+  if (ret != OK)
+    {
+      fdbg("ERROR: Failed to initialize MMC/SD driver: %d\n", ret);
+      return ret;
+    }
+#endif
+
+  UNUSED(ret);
   return OK;
 }
