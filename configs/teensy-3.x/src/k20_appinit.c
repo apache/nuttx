@@ -41,6 +41,7 @@
 #include <sys/types.h>
 #include <nuttx/board.h>
 
+#include "kinetis_usbotg.h"
 #include "teensy-3x.h"
 
 /****************************************************************************

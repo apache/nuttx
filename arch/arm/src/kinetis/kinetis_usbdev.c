@@ -1930,7 +1930,7 @@ static void khci_ep0rdcomplete(struct khci_usbdev_s *priv)
   if (!priv->ep0done)
     {
       bytecount     = (USB_SIZEOF_CTRLREQ << USB_BDT_BYTECOUNT_SHIFT);
-      physaddr      = &priv->ctrl;
+      physaddr      = (uint32_t)&priv->ctrl;
 
       bdt           = &g_bdt[EP0_OUT_EVEN];
       bdt->addr     = (uint8_t *)physaddr;
@@ -2999,7 +2999,9 @@ interrupt_exit:
 
 static void khci_suspend(struct khci_usbdev_s *priv)
 {
+#if 0
   uint32_t regval;
+#endif
 
   /* Notify the class driver of the suspend event */
 
@@ -3008,6 +3010,7 @@ static void khci_suspend(struct khci_usbdev_s *priv)
       CLASS_SUSPEND(priv->driver, &priv->usbdev);
     }
 
+#if 0
   /* Enable the ACTV interrupt.
    *
    * NOTE: Do not clear UIRbits.ACTVIF here! Reason: ACTVIF is only
@@ -3018,7 +3021,7 @@ static void khci_suspend(struct khci_usbdev_s *priv)
    * first because ACTIVIE=0. If this routine clears the only ACTIVIF,
    * then it can never get out of the suspend mode.
    */
-#if 0
+
   regval  = khci_getreg(KINETIS_USB0_OTGICR);
   regval |= USBOTG_INT_ACTV;
   khci_putreg(regval, KINETIS_USB0_OTGICR);
@@ -3651,7 +3654,7 @@ static int khci_epbdtstall(struct usbdev_ep_s *ep, bool resume, bool epin)
       if (epno == 0 && !epin)
         {
           uint32_t bytecount = (USB_SIZEOF_CTRLREQ << USB_BDT_BYTECOUNT_SHIFT);
-          uint32_t physaddr  = &priv->ctrl;
+          uint32_t physaddr  = (uint32_t)&priv->ctrl;
 
           /* Configure the other BDT to receive a SETUP command. */
 
@@ -4094,7 +4097,10 @@ static void khci_attach(struct khci_usbdev_s *priv)
 
 static void khci_detach(struct khci_usbdev_s *priv)
 {
+#ifdef CONFIG_USBOTG
   uint32_t regval;
+#endif
+
   /* Disable USB interrupts at the interrupt controller */
 
   up_disable_irq(KINETIS_IRQ_USBOTG);
@@ -4205,7 +4211,6 @@ static void khci_swreset(struct khci_usbdev_s *priv)
 
 static void khci_hwreset(struct khci_usbdev_s *priv)
 {
-  uint32_t physaddr;
   uint32_t regval;
 
 #define USB_FLASH_ACCESS
@@ -4342,7 +4347,9 @@ static void khci_stateinit(struct khci_usbdev_s *priv)
 
 static void khci_hwshutdown(struct khci_usbdev_s *priv)
 {
+#if 0
   uint32_t regval;
+#endif
 
   /* Put the hardware and driver in its initial, unconnected state */
 
@@ -4366,6 +4373,7 @@ static void khci_hwshutdown(struct khci_usbdev_s *priv)
 
   /* Power down the USB controller */
 #warning FIXME powerdown USB Controller
+
 #if 0
   regval  = khci_getreg(KHCI_USB_PWRC);
   regval &= ~USB_PWRC_USBPWR;

@@ -92,7 +92,9 @@ void kinetis_usbinitialize(void)
 int kinetis_usbpullup(FAR struct usbdev_s *dev, bool enable)
 {
   usbtrace(TRACE_DEVPULLUP, (uint16_t)enable);
+#if 0
   uint32_t regval;
+#endif
 
   if (enable)
     {
