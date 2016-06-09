@@ -2,7 +2,7 @@
  * arch/arm/src/stm32f7/chip/stm32_uart.h
  *
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
- *            David Sidrane <david_s5@uas.net>
+ *            David Sidrane <david_s5@nscdg.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
