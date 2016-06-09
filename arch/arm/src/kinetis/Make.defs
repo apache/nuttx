@@ -127,6 +127,10 @@ ifeq ($(CONFIG_KINETIS_DMA),y)
 CHIP_CSRCS += kinetis_dma.c kinetis_pindma.c
 endif
 
+ifeq ($(CONFIG_PWM),y)
+CHIP_CSRCS += kinetis_pwm.c
+endif
+
 ifeq ($(CONFIG_NET),y)
 ifeq ($(CONFIG_KINETIS_ENET),y)
 CHIP_CSRCS += kinetis_enet.c
