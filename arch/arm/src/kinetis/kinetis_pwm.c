@@ -648,7 +648,7 @@ static int pwm_stop(FAR struct pwm_lowerhalf_s *dev)
 
   /* Disable interrupts momentary to stop any ongoing timer processing and
    * to prevent any concurrent access to the reset register.
-  */
+   */
 
   flags = enter_critical_section();
 

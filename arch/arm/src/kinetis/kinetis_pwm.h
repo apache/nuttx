@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/kinetis/kinetis_pwm.h
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           Alan Carvalho de Assis <acassis@gmail.com>
  *           Ken Fazzone <kfazz01@gmail.com>
