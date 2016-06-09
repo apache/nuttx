@@ -94,23 +94,33 @@
 #endif
 
 #ifndef CONFIG_USBDEV_EP0_TXFIFO_SIZE
-#  define CONFIG_USBDEV_EP0_TXFIFO_SIZE 192
+#  define CONFIG_USBDEV_EP0_TXFIFO_SIZE 128
 #endif
 
 #ifndef CONFIG_USBDEV_EP1_TXFIFO_SIZE
-#  define CONFIG_USBDEV_EP1_TXFIFO_SIZE 192
+#  define CONFIG_USBDEV_EP1_TXFIFO_SIZE 128
 #endif
 
 #ifndef CONFIG_USBDEV_EP2_TXFIFO_SIZE
-#  define CONFIG_USBDEV_EP2_TXFIFO_SIZE 192
+#  define CONFIG_USBDEV_EP2_TXFIFO_SIZE 128
 #endif
 
 #ifndef CONFIG_USBDEV_EP3_TXFIFO_SIZE
-#  define CONFIG_USBDEV_EP3_TXFIFO_SIZE 192
+#  define CONFIG_USBDEV_EP3_TXFIFO_SIZE 128
 #endif
 
-#if (CONFIG_USBDEV_RXFIFO_SIZE + CONFIG_USBDEV_EP0_TXFIFO_SIZE + \
-     CONFIG_USBDEV_EP2_TXFIFO_SIZE + CONFIG_USBDEV_EP3_TXFIFO_SIZE) > 1280
+#ifndef CONFIG_USBDEV_EP4_TXFIFO_SIZE
+#  define CONFIG_USBDEV_EP4_TXFIFO_SIZE 128
+#endif
+
+#ifndef CONFIG_USBDEV_EP5_TXFIFO_SIZE
+#  define CONFIG_USBDEV_EP5_TXFIFO_SIZE 128
+#endif
+
+#if (CONFIG_USBDEV_RXFIFO_SIZE + CONFIG_USBDEV_EP0_TXFIFO_SIZE +\
+     CONFIG_USBDEV_EP1_TXFIFO_SIZE + CONFIG_USBDEV_EP2_TXFIFO_SIZE +\
+     CONFIG_USBDEV_EP3_TXFIFO_SIZE + CONFIG_USBDEV_EP4_TXFIFO_SIZE +\
+     CONFIG_USBDEV_EP5_TXFIFO_SIZE ) > 1280
 #  error "FIFO allocations exceed FIFO memory size"
 #endif
 
@@ -147,6 +157,20 @@
 
 #if STM32_EP3_TXFIFO_WORDS < 16
 #  error "CONFIG_USBDEV_EP3_TXFIFO_SIZE is out of range"
+#endif
+
+#define STM32_EP4_TXFIFO_BYTES ((CONFIG_USBDEV_EP4_TXFIFO_SIZE + 3) & ~3)
+#define STM32_EP4_TXFIFO_WORDS ((CONFIG_USBDEV_EP4_TXFIFO_SIZE + 3) >> 2)
+
+#if STM32_EP4_TXFIFO_WORDS < 16
+#  error "CONFIG_USBDEV_EP4_TXFIFO_SIZE is out of range"
+#endif
+
+#define STM32_EP5_TXFIFO_BYTES ((CONFIG_USBDEV_EP5_TXFIFO_SIZE + 3) & ~3)
+#define STM32_EP5_TXFIFO_WORDS ((CONFIG_USBDEV_EP5_TXFIFO_SIZE + 3) >> 2)
+
+#if STM32_EP5_TXFIFO_WORDS < 16
+#  error "CONFIG_USBDEV_EP5_TXFIFO_SIZE is out of range"
 #endif
 
 /* Debug ***********************************************************************/
@@ -238,8 +262,7 @@
 /* Endpoints ******************************************************************/
 
 /* Number of endpoints */
-//XXX I think this needs to be 6 for the 'L4
-#define STM32_NENDPOINTS             (4)          /* ep0-3 x 2 for IN and OUT */
+#define STM32_NENDPOINTS             (6)          /* ep0-5 x 2 for IN and OUT */
 
 /* Odd physical endpoint numbers are IN; even are OUT */
 
@@ -251,8 +274,7 @@
 #define EP0                          (0)
 
 /* The set of all endpoints available to the class implementation (1-3) */
-//XXX I think this needs to be 0x3e for the 'L4
-#define STM32_EP_AVAILABLE           (0x0e)       /* All available endpoints */
+#define STM32_EP_AVAILABLE           (0x3e)       /* All available endpoints */
 
 /* Maximum packet sizes for full speed endpoints */
 
@@ -5059,7 +5081,7 @@ static void stm32_swinitialize(FAR struct stm32_usbdev_s *priv)
   priv->epin[EP0].ep.priv  = priv;
   priv->epout[EP0].ep.priv = priv;
 
-  /* Initialize the endpoint lists */
+  /* Initialize the IN endpoint list */
 
   for (i = 0; i < STM32_NENDPOINTS; i++)
     {
@@ -5087,7 +5109,7 @@ static void stm32_swinitialize(FAR struct stm32_usbdev_s *priv)
       privep->ep.maxpacket = CONFIG_USBDEV_EP0_MAXSIZE;
     }
 
-  /* Initialize the endpoint lists */
+  /* Initialize the OUT endpoint list */
 
   for (i = 0; i < STM32_NENDPOINTS; i++)
     {
@@ -5254,7 +5276,20 @@ static void stm32_hwinitialize(FAR struct stm32_usbdev_s *priv)
              (STM32_EP3_TXFIFO_WORDS << OTGFS_DIEPTXF_INEPTXFD_SHIFT);
   stm32_putreg(regval, STM32_OTGFS_DIEPTXF3);
 
-  /* XXX EP 4,5 ? */
+  /* EP4 TX */
+
+  address += STM32_EP3_TXFIFO_WORDS;
+  regval   = (address << OTGFS_DIEPTXF_INEPTXSA_SHIFT) |
+             (STM32_EP4_TXFIFO_WORDS << OTGFS_DIEPTXF_INEPTXFD_SHIFT);
+  stm32_putreg(regval, STM32_OTGFS_DIEPTXF4);
+
+  /* EP5 TX */
+
+  address += STM32_EP4_TXFIFO_WORDS;
+  regval   = (address << OTGFS_DIEPTXF_INEPTXSA_SHIFT) |
+             (STM32_EP5_TXFIFO_WORDS << OTGFS_DIEPTXF_INEPTXFD_SHIFT);
+  stm32_putreg(regval, STM32_OTGFS_DIEPTXF5);
+
 
   /* Flush the FIFOs */
 
