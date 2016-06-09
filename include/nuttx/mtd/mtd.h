@@ -413,6 +413,16 @@ void at24c_uninitialize(FAR struct mtd_dev_s *mtd);
 FAR struct mtd_dev_s *at25_initialize(FAR struct spi_dev_s *dev);
 
 /****************************************************************************
+ * Name: is25xp
+ *
+ * Description:
+ *   Initializes the driver for SPI-based IS25xP FLASH
+ *
+ ****************************************************************************/
+
+FAR struct mtd_dev_s *is25xp_initialize(FAR struct spi_dev_s *dev);
+
+/****************************************************************************
  * Name: m25p_initialize
  *
  * Description:
