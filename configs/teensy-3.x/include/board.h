@@ -2,7 +2,7 @@
  * configs/teensy-3.x/include/board.h
  * include/arch/board/board.h
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -63,6 +63,7 @@
  * the C1 divider must be set so that the FLL clock is between 31.25 and 39.0625 khz.
  * For teensy-3.x that works out to a divider of 512.
  */
+
 #define BOARD_FR_DIV (4 << 3)
 #define BOARD_EXTAL_FREQ     16000000       /* 16MHz crystal frequency (REFCLK) */
 #define BOARD_XTAL32_FREQ    32768          /* 32KHz RTC Oscillator (not populated) */
