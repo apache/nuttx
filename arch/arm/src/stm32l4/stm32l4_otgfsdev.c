@@ -62,6 +62,7 @@
 #include "up_internal.h"
 
 #include "stm32l4_otgfs.h"
+#include "stm32l4_pwr.h"
 
 #if defined(CONFIG_USBDEV) && (defined(CONFIG_STM32L4_OTGFS))
 
@@ -250,7 +251,7 @@
 #define EP0                          (0)
 
 /* The set of all endpoints available to the class implementation (1-3) */
-
+//XXX I think this needs to be 0x3e for the 'L4
 #define STM32_EP_AVAILABLE           (0x0e)       /* All available endpoints */
 
 /* Maximum packet sizes for full speed endpoints */
@@ -3482,7 +3483,7 @@ static inline void stm32_otginterrupt(FAR struct stm32_usbdev_s *priv)
 
   /* Clear OTG interrupt */
 
-  stm32_putreg(retval, STM32_OTGFS_GOTGINT);
+  stm32_putreg(regval, STM32_OTGFS_GOTGINT);
 }
 #endif
 
@@ -4916,7 +4917,7 @@ static int stm32_pullup(struct usbdev_s *dev, bool enable)
     }
   else
     {
-      /* Connect the device by setting the soft disconnect bit in the DCTL
+      /* Disconnect the device by setting the soft disconnect bit in the DCTL
        * register
        */
 
@@ -5129,6 +5130,10 @@ static void stm32_hwinitialize(FAR struct stm32_usbdev_s *priv)
   uint32_t address;
   int i;
 
+  /* Enable Vbus monitoring in the Power control */
+
+  stm32l4_pwr_enableusv(true);
+
   /* At start-up the core is in FS mode. */
 
   /* Disable global interrupts by clearing the GINTMASK bit in the GAHBCFG
@@ -5171,44 +5176,24 @@ static void stm32_hwinitialize(FAR struct stm32_usbdev_s *priv)
 
   /* Deactivate the power down */
 
-#if 1 //XXX defined(CONFIG_STM32_STM32F446)
-  /* In the case of the STM32F446 the meaning of the bit has changed to VBUS
-   * Detection Enable when set
-   */
-
   regval  = OTGFS_GCCFG_PWRDWN;
 
 # ifdef CONFIG_USBDEV_VBUSSENSING
+  /* Enable Vbus sensing */
+
   regval |= OTGFS_GCCFG_VBDEN;
 # endif
 
-#else
-  /* In the case of the the all others the meaning of the bit is No VBUS
-   * Sense when Set
-   */
-
-  regval  = (OTGFS_GCCFG_PWRDWN | OTGFS_GCCFG_VBUSASEN | OTGFS_GCCFG_VBUSBSEN);
-# ifndef CONFIG_USBDEV_VBUSSENSING
-  regval |= OTGFS_GCCFG_NOVBUSSENS;
-# endif
-# ifdef CONFIG_STM32_OTGFS_SOFOUTPUT
-  regval |= OTGFS_GCCFG_SOFOUTEN;
-# endif
-#endif
   stm32_putreg(regval, STM32_OTGFS_GCCFG);
   up_mdelay(20);
 
-  /* For the new OTG controller in the F446 when VBUS sensing is not used we
-   * need to force the B session valid
-   */
+  /* When VBUS sensing is not used we need to force the B session valid */
 
-#if 1 //XXX defined(CONFIG_STM32_STM32F446)
 # ifndef CONFIG_USBDEV_VBUSSENSING
   regval  =  stm32_getreg(STM32_OTGFS_GOTGCTL);
   regval |= (OTGFS_GOTGCTL_BVALOEN | OTGFS_GOTGCTL_BVALOVAL);
   stm32_putreg(regval, STM32_OTGFS_GOTGCTL);
 # endif
-#endif
 
   /* Force Device Mode */
 
@@ -5268,6 +5253,8 @@ static void stm32_hwinitialize(FAR struct stm32_usbdev_s *priv)
   regval   = (address << OTGFS_DIEPTXF_INEPTXSA_SHIFT) |
              (STM32_EP3_TXFIFO_WORDS << OTGFS_DIEPTXF_INEPTXFD_SHIFT);
   stm32_putreg(regval, STM32_OTGFS_DIEPTXF3);
+
+  /* XXX EP 4,5 ? */
 
   /* Flush the FIFOs */
 
@@ -5439,7 +5426,7 @@ void up_usbinitialize(void)
 
   up_usbuninitialize();
 
-  /* Initialie the driver data structure */
+  /* Initialize the driver data structure */
 
   stm32_swinitialize(priv);
 
