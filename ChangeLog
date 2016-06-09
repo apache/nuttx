@@ -11924,3 +11924,37 @@
 	* Refactoring configs/nucleo-144 sub-directories to support additional
 	  nucleo-144 board.  Add support for the Nucleo-F767ZI board. From David
 	  Sidrane (2016-06-08).
+	* arch/arm/src/kinetis: Add a USB device controller driver for kinetis.
+	  Derived from pic32mx usb driver, which uses the same usb controller.
+	  From kfazz (2016-06-06).
+	* configs/teensy-3.x:  Add USB device support and usbnsh configuration.
+	  From kfazz (2016-06-06.
+	* arch/arm/src/stm32:  Add STM32F105R support.  From Konstantin Berezenko
+	  (2016-06-06).
+	* include/signal.h:  Change type of SIG_IGN and related defines to
+	  _sa_handler_t.  From Aleksandr Vyhovanec (2016-06-07).
+	* configs/nucleo-144: Refactored configs/nucleo-144 sub-directories to
+	  support additional nucleo-144 board.  Add support for the Nucleo-F767ZI
+	  board.  From David Sidrane (2016-06-07).
+	* arch/arm/src/stm32f7: Add support for STM32FF76xxx and STM32FF7xx
+	  families.  From David Sidrane (2016-06-08).
+	* include/assert.h: Check if NDEBUG is defined.  From Paul Alexander
+	  Patience (2016-06-08).
+	* arch/arm/src/stm32: Fix STM32 DMA code and configuration for STM32F37X
+	  chips.  From Marten Svanfeldt (2016-06-08).
+	* drivers/mtd: Add a driver of IS25xP SPI flash devices.  From Marten
+	  Svanfeldt (2016-06-09).
+	* arch/arm/src/Kconfig and configs/teensy-3.x: Teensy clock fixes.  The
+	  High Gain bit in MCG_C1 was preventing teensy from booting except
+	  after a programming session. The second change doesn't appear to
+	  change any functionality, but complies with restrictions in the k20
+	  family reference manual on FEI -> FBE clock transiions.  From kfazz
+	  (2016-06-09).
+	* configs/*/include/board.h: Fix timer input clock definitions.  From
+	  David Sidrane (2016-06-09).
+	* Networking:  In both IPv6 and IPv4 incoming logic:  (1) Should check
+	  if the packet size is large enough before trying to access the packet
+	  length in the IP header.  (2) In the comparison between the IP length
+	  and the full packet length, need to subtract the size of the link
+	  layer header before making the comparison or we will get false
+	  positives (i.e., the packet is really too small) (2016-06-09)
