@@ -132,8 +132,11 @@ void kinetis_pllconfig(void)
    *   HGO   = 1 (High Gain Oscillator Select)
    *   RANGE = 2 (Oscillator of 8 MHz to 32 MHz)
    */
-
+#ifdef BOARD_EXTAL_LP
+  putreg8(MCG_C2_EREFS | MCG_C2_RANGE_VHIGH, KINETIS_MCG_C2);
+#else
   putreg8(MCG_C2_EREFS | MCG_C2_HGO | MCG_C2_RANGE_VHIGH, KINETIS_MCG_C2);
+#endif /*BOARD_EXTAL_LP*/
 #endif
 
   /* Released latched state of oscillator and GPIO */
@@ -156,7 +159,11 @@ void kinetis_pllconfig(void)
    *   CLKS     = 2 (Clock Source Select, External reference clock)
    */
 
+#ifdef BOARD_FRDIV
+  putreg8(BOARD_FRDIV | MCG_C1_CLKS_EXTREF, KINETIS_MCG_C1);
+#else
   putreg8(MCG_C1_FRDIV_DIV256 | MCG_C1_CLKS_EXTREF, KINETIS_MCG_C1);
+#endif
 
   /* If we aren't using an oscillator input we don't need to wait for the
    * oscillator to initialize
