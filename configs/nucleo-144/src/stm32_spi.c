@@ -3,6 +3,7 @@
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            David Sidrane <david_s5@nscdg.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -49,13 +50,12 @@
 
 #include "up_arch.h"
 #include "chip.h"
+#include "stm32_gpio.h"
 #include "stm32_spi.h"
 
 #include "nucleo-144.h"
 
-#if defined(CONFIG_STM32F7_SPI1) || defined(CONFIG_STM32F7_SPI2) || \
-    defined(CONFIG_STM32F7_SPI3) || defined(CONFIG_STM32F7_SPI4) || \
-    defined(CONFIG_STM32F7_SPI5)
+#if defined(CONFIG_SPI)
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -74,6 +74,108 @@
 #  define spivdbg(x...)
 #endif
 
+#define ArraySize(x) (sizeof((x)) / sizeof((x)[0]))
+
+#if defined(CONFIG_NUCLEO_SPI1_TEST)
+#  if defined(CONFIG_NUCLEO_SPI1_TEST_MODE0)
+#    define CONFIG_NUCLEO_SPI1_TEST_MODE SPIDEV_MODE0
+#  elif defined(CONFIG_NUCLEO_SPI1_TEST_MODE1)
+#    define CONFIG_NUCLEO_SPI1_TEST_MODE SPIDEV_MODE1
+#  elif defined(CONFIG_NUCLEO_SPI1_TEST_MODE2)
+#    define CONFIG_NUCLEO_SPI1_TEST_MODE SPIDEV_MODE2
+#  elif defined(CONFIG_NUCLEO_SPI1_TEST_MODE3)
+#    define CONFIG_NUCLEO_SPI1_TEST_MODE SPIDEV_MODE3
+#  else
+#    error "No CONFIG_NUCLEO_SPI1_TEST_MODEx defined"
+# endif
+#endif
+
+#if defined(CONFIG_NUCLEO_SPI2_TEST)
+#  if defined(CONFIG_NUCLEO_SPI2_TEST_MODE0)
+#    define CONFIG_NUCLEO_SPI2_TEST_MODE SPIDEV_MODE0
+#  elif defined(CONFIG_NUCLEO_SPI2_TEST_MODE1)
+#    define CONFIG_NUCLEO_SPI2_TEST_MODE SPIDEV_MODE1
+#  elif defined(CONFIG_NUCLEO_SPI2_TEST_MODE2)
+#    define CONFIG_NUCLEO_SPI2_TEST_MODE SPIDEV_MODE2
+#  elif defined(CONFIG_NUCLEO_SPI2_TEST_MODE3)
+#    define CONFIG_NUCLEO_SPI2_TEST_MODE SPIDEV_MODE3
+#  else
+#    error "No CONFIG_NUCLEO_SPI2_TEST_MODEx defined"
+# endif
+#endif
+
+#if defined(CONFIG_NUCLEO_SPI3_TEST)
+#  if defined(CONFIG_NUCLEO_SPI3_TEST_MODE0)
+#    define CONFIG_NUCLEO_SPI3_TEST_MODE SPIDEV_MODE0
+#  elif defined(CONFIG_NUCLEO_SPI3_TEST_MODE1)
+#    define CONFIG_NUCLEO_SPI3_TEST_MODE SPIDEV_MODE1
+#  elif defined(CONFIG_NUCLEO_SPI3_TEST_MODE2)
+#    define CONFIG_NUCLEO_SPI3_TEST_MODE SPIDEV_MODE2
+#  elif defined(CONFIG_NUCLEO_SPI3_TEST_MODE3)
+#    define CONFIG_NUCLEO_SPI3_TEST_MODE SPIDEV_MODE3
+#  else
+#    error "No CONFIG_NUCLEO_SPI3_TEST_MODEx defined"
+# endif
+#endif
+
+/************************************************************************************
+ * Private Data
+ ************************************************************************************/
+
+/* Indexed by NUCLEO_SPI_BUSx_CSx */
+
+static const uint32_t g_spigpio[] =
+{
+#if defined(GPIO_SPI1_CS0)
+ GPIO_SPI1_CS0,
+#endif
+#if defined(GPIO_SPI1_CS1)
+ GPIO_SPI1_CS1,
+#endif
+#if defined(GPIO_SPI1_CS2)
+ GPIO_SPI1_CS2,
+#endif
+#if defined(GPIO_SPI1_CS3)
+ GPIO_SPI1_CS3,
+#endif
+#if defined(GPIO_SPI2_CS0)
+ GPIO_SPI2_CS0,
+#endif
+#if defined(GPIO_SPI2_CS1)
+ GPIO_SPI2_CS1,
+#endif
+#if defined(GPIO_SPI2_CS2)
+ GPIO_SPI2_CS2,
+#endif
+#if defined(GPIO_SPI2_CS3)
+ GPIO_SPI2_CS3,
+#endif
+#if defined(GPIO_SPI3_CS0)
+ GPIO_SPI3_CS0,
+#endif
+#if defined(GPIO_SPI3_CS1)
+ GPIO_SPI3_CS1,
+#endif
+#if defined(GPIO_SPI3_CS2)
+ GPIO_SPI3_CS2,
+#endif
+#if defined(GPIO_SPI3_CS3)
+ GPIO_SPI3_CS3,
+#endif
+};
+
+#if defined(CONFIG_NUCLEO_SPI_TEST)
+#  if defined(CONFIG_STM32F7_SPI1)
+struct spi_dev_s *spi1;
+#  endif
+#  if defined(CONFIG_STM32F7_SPI2)
+struct spi_dev_s *spi2;
+#  endif
+#  if defined(CONFIG_STM32F7_SPI3)
+struct spi_dev_s *spi3;
+#  endif
+#endif
+
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
@@ -82,12 +184,20 @@
  * Name: stm32_spidev_initialize
  *
  * Description:
- *   Called to configure SPI chip select GPIO pins for the stm32f746g-disco board.
+ *   Called to configure SPI chip select GPIO pins for the Nucleo-144 board.
  *
  ************************************************************************************/
 
 void weak_function stm32_spidev_initialize(void)
 {
+  int i;
+
+  /* Configure SPI CS GPIO for output */
+
+  for (i = 0; i < ArraySize(g_spigpio); i++)
+    {
+      stm32_configgpio(g_spigpio[i]);
+    }
 }
 
 /****************************************************************************
@@ -119,6 +229,7 @@ void weak_function stm32_spidev_initialize(void)
 void stm32_spi1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
   spidbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  stm32_gpiowrite(g_spigpio[i], !selected);
 }
 
 uint8_t stm32_spi1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
@@ -131,6 +242,7 @@ uint8_t stm32_spi1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 void stm32_spi2select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
   spidbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  stm32_gpiowrite(g_spigpio[i], !selected);
 }
 
 uint8_t stm32_spi2status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
@@ -143,6 +255,7 @@ uint8_t stm32_spi2status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 void stm32_spi3select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
   spidbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  stm32_gpiowrite(g_spigpio[i], !selected);
 }
 
 uint8_t stm32_spi3status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
@@ -152,9 +265,14 @@ uint8_t stm32_spi3status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 #endif
 
 #ifdef CONFIG_STM32F7_SPI4
+#  ifndef NUCLEO_SPI_BUS4_CS0
+#    error "NUCLEO_SPI_BUS4_CSn Are not defined"
+#  endif
+
 void stm32_spi4select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
   spidbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  stm32_gpiowrite(g_spigpio[i], !selected);
 }
 
 uint8_t stm32_spi4status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
@@ -164,9 +282,30 @@ uint8_t stm32_spi4status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 #endif
 
 #ifdef CONFIG_STM32F7_SPI5
+#  ifndef NUCLEO_SPI_BUS5_CS0
+#    error "NUCLEO_SPI_BUS4_CSn Are not defined"
+#  endif
+
 void stm32_spi5select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
   spidbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  stm32_gpiowrite(g_spigpio[i], !selected);
+}
+
+uint8_t stm32_spi5status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+{
+  return 0;
+}
+#endif
+
+#ifdef CONFIG_STM32F7_SPI6
+#  ifndef NUCLEO_SPI_BUS6_CS
+#    error "NUCLEO_SPI_BUS4_CSn Are not defined"
+#  endif
+void stm32_spi5select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
+{
+  spidbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  stm32_gpiowrite(g_spigpio[i], !selected);
 }
 
 uint8_t stm32_spi5status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
@@ -234,5 +373,72 @@ int stm32_spi5cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
 }
 #endif
 
+#ifdef CONFIG_STM32F7_SPI6
+int stm32_spi5cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
+{
+  return -ENODEV;
+}
+#endif
+
 #endif /* CONFIG_SPI_CMDDATA */
-#endif /* CONFIG_STM32F7_SPI1 || ... CONFIG_STM32F7_SPI5 */
+
+#if defined(CONFIG_NUCLEO_SPI_TEST)
+int stm32_spidev_bus_init(void)
+{
+  /* Configure and test SPI-*/
+
+  uint8_t *tx = CONFIG_NUCLEO_SPI_TEST_MESSAGE;
+
+#if defined(CONFIG_NUCLEO_SPI1_TEST)
+  spi1 = stm32_spibus_initialize(1);
+
+  if (!spi1)
+    {
+      syslog(LOG_ERR, "ERROR Failed to initialize SPI port 1\n");
+      return -ENODEV;
+    }
+
+  /* Default SPI1 to NUCLEO_SPI1_FREQ and mode */
+
+  SPI_SETFREQUENCY(spi1, CONFIG_NUCLEO_SPI1_TEST_FREQ);
+  SPI_SETBITS(spi1, CONFIG_NUCLEO_SPI1_TEST_BITS);
+  SPI_SETMODE(spi1, CONFIG_NUCLEO_SPI1_TEST_MODE);
+  SPI_EXCHANGE(spi1, tx, NULL, ArraySize(CONFIG_NUCLEO_SPI_TEST_MESSAGE));
+#endif
+
+#if defined(CONFIG_NUCLEO_SPI2_TEST)
+  spi2 = stm32_spibus_initialize(2);
+
+  if (!spi2)
+    {
+      syslog(LOG_ERR, "ERROR Failed to initialize SPI port 2\n");
+      return -ENODEV;
+    }
+
+  /* Default SPI1 to NUCLEO_SPI2_FREQ and mode */
+
+  SPI_SETFREQUENCY(spi2, CONFIG_NUCLEO_SPI1_TEST_FREQ);
+  SPI_SETBITS(spi2, CONFIG_NUCLEO_SPI2_TEST_BITS);
+  SPI_SETMODE(spi2, CONFIG_NUCLEO_SPI2_TEST_MODE);
+  SPI_EXCHANGE(spi2, tx, NULL, ArraySize(CONFIG_NUCLEO_SPI_TEST_MESSAGE));
+#endif
+
+#if defined(CONFIG_NUCLEO_SPI3_TEST)
+  spi3 = stm32_spibus_initialize(3);
+
+  if (!spi3)
+    {
+      syslog(LOG_ERR, "ERROR Failed to initialize SPI port 2\n");
+      return -ENODEV;
+    }
+
+  /* Default SPI1 to NUCLEO_SPI3_FREQ and mode */
+
+  SPI_SETFREQUENCY(spi3, CONFIG_NUCLEO_SPI3_TEST_FREQ);
+  SPI_SETBITS(spi3, CONFIG_NUCLEO_SPI3_TEST_BITS);
+  SPI_SETMODE(spi3, CONFIG_NUCLEO_SPI3_TEST_MODE);
+  SPI_EXCHANGE(spi3, tx, NULL, ArraySize(CONFIG_NUCLEO_SPI_TEST_MESSAGE));
+#endif
+}
+#endif /* NUCLEO_SPI_TEST */
+#endif /* defined(CONFIG_SPI) */

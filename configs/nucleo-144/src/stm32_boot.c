@@ -2,7 +2,8 @@
  * configs/nucleo-144/src/stm32_boot.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            David Sidrane <david_s5@nscdg.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -63,23 +64,16 @@
 
 void stm32_boardinitialize(void)
 {
-#if defined(CONFIG_STM32F7_SPI1) || defined(CONFIG_STM32F7_SPI2) || \
-    defined(CONFIG_STM32F7_SPI3) || defined(CONFIG_STM32F7_SPI4) || \
-    defined(CONFIG_STM32F7_SPI5)
-  /* Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak function
-   * stm32_spidev_initialize() has been brought into the link.
-   */
-
-  if (stm32_spidev_initialize)
-    {
-      stm32_spidev_initialize();
-    }
-#endif
-
 #ifdef CONFIG_ARCH_LEDS
   /* Configure on-board LEDs if LED support has been selected. */
 
   board_autoled_initialize();
+#endif
+
+#if defined(CONFIG__SPI)
+  /* Configure SPI chip selects */
+
+  stm32_spidev_initialize();
 #endif
 }
 

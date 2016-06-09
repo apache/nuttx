@@ -2,7 +2,8 @@
  * configs/nucleo-144/src/stm32_autoleds.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            David Sidrane <david_s5@nscdg.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -43,10 +44,10 @@
 #include <debug.h>
 
 #include <nuttx/board.h>
+#include <arch/board/board.h>
 
 #include "stm32_gpio.h"
 #include "nucleo-144.h"
-
 #ifdef CONFIG_ARCH_LEDS
 
 /****************************************************************************
@@ -65,6 +66,34 @@
 #  define ledvdbg(x...)
 #endif
 
+#define ArraySize(x) (sizeof((x)) / sizeof((x)[0]))
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+/* Indexed by BOARD_LED_<color> */
+
+static const uint32_t g_ledmap[BOARD_NLEDS] =
+{
+  GPIO_LED_GREEN,
+  GPIO_LED_BLUE,
+  GPIO_LED_RED,
+};
+
+static bool g_initialized;
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+static void phy_set_led(int led, bool state)
+{
+  /* Active High */
+
+  stm32_gpiowrite(g_ledmap[led], state);
+}
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -75,9 +104,14 @@
 
 void board_autoled_initialize(void)
 {
+  int i;
+
   /* Configure the LD1 GPIO for output. Initial state is OFF */
 
-  stm32_configgpio(GPIO_LD1);
+  for (i = 0; i < ArraySize(g_ledmap); i++)
+    {
+      stm32_configgpio(g_ledmap[i]);
+    }
 }
 
 /****************************************************************************
@@ -86,28 +120,47 @@ void board_autoled_initialize(void)
 
 void board_autoled_on(int led)
 {
-  bool ledstate = false;
-
   switch (led)
     {
-    case 0:             /* LED_STARTED:      NuttX has been started  STATUS LED=OFF */
-                        /* LED_HEAPALLOCATE: Heap has been allocated STATUS LED=OFF */
-                        /* LED_IRQSENABLED:  Interrupts enabled      STATUS LED=OFF */
-      break;            /* Leave ledstate == true to turn OFF */
-
     default:
-    case 2:             /* LED_INIRQ:        In an interrupt         STATUS LED=N/C */
-                        /* LED_SIGNAL:       In a signal handler     STATUS LED=N/C */
-                        /* LED_ASSERTION:    An assertion failed     STATUS LED=N/C */
-      return;           /* Return to leave STATUS LED unchanged */
-
-    case 3:             /* LED_PANIC:        The system has crashed  STATUS LED=FLASH */
-    case 1:             /* LED_STACKCREATED: Idle stack created      STATUS LED=ON */
-      ledstate = true;  /* Set ledstate == false to turn ON */
       break;
-    }
 
-   stm32_gpiowrite(GPIO_LD1, ledstate);
+    case LED_HEAPALLOCATE:
+      phy_set_led(BOARD_LED_BLUE, true);
+      break;
+
+    case LED_IRQSENABLED:
+      phy_set_led(BOARD_LED_BLUE, false);
+      phy_set_led(BOARD_LED_GREEN, true);
+      break;
+
+    case LED_STACKCREATED:
+      phy_set_led(BOARD_LED_GREEN, true);
+      phy_set_led(BOARD_LED_BLUE, true);
+      g_initialized = true;
+      break;
+
+    case LED_INIRQ:
+      phy_set_led(BOARD_LED_BLUE, true);
+      break;
+
+    case LED_SIGNAL:
+      phy_set_led(BOARD_LED_GREEN, true);
+      break;
+
+    case LED_ASSERTION:
+      phy_set_led(BOARD_LED_RED, true);
+      phy_set_led(BOARD_LED_BLUE, true);
+      break;
+
+    case LED_PANIC:
+      phy_set_led(BOARD_LED_RED, true);
+      break;
+
+    case LED_IDLE : /* IDLE */
+      phy_set_led(BOARD_LED_RED, true);
+    break;
+    }
 }
 
 /****************************************************************************
@@ -118,26 +171,29 @@ void board_autoled_off(int led)
 {
   switch (led)
     {
-    /* These should not happen and are ignored */
-
     default:
-    case 0:             /* LED_STARTED:      NuttX has been started  STATUS LED=OFF */
-                        /* LED_HEAPALLOCATE: Heap has been allocated STATUS LED=OFF */
-                        /* LED_IRQSENABLED:  Interrupts enabled      STATUS LED=OFF */
-    case 1:             /* LED_STACKCREATED: Idle stack created      STATUS LED=ON */
-
-    /* These result in no-change */
-
-    case 2:             /* LED_INIRQ:        In an interrupt         STATUS LED=N/C */
-                        /* LED_SIGNAL:       In a signal handler     STATUS LED=N/C */
-                        /* LED_ASSERTION:    An assertion failed     STATUS LED=N/C */
-      return;           /* Return to leave STATUS LED unchanged */
-
-    /* Turn STATUS LED off set driving the output high */
-
-    case 3:             /* LED_PANIC:        The system has crashed  STATUS LED=FLASH */
-      stm32_gpiowrite(GPIO_LD1, false);
       break;
+
+    case LED_SIGNAL:
+      phy_set_led(BOARD_LED_GREEN, false);
+      break;
+
+    case LED_INIRQ:
+      phy_set_led(BOARD_LED_BLUE, false);
+      break;
+
+    case LED_ASSERTION:
+      phy_set_led(BOARD_LED_RED, false);
+      phy_set_led(BOARD_LED_BLUE, false);
+      break;
+
+    case LED_PANIC:
+      phy_set_led(BOARD_LED_RED, false);
+      break;
+
+    case LED_IDLE : /* IDLE */
+      phy_set_led(BOARD_LED_RED, false);
+    break;
     }
 }
 

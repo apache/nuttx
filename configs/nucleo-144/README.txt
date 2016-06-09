@@ -11,6 +11,7 @@ Contents
 
   - Nucleo-144 Boards
   - Nucleo F746ZG
+  - Nucleo F767ZI
   - Development Environment
   - IDEs
   - Basic configuaration & build steps
@@ -18,7 +19,11 @@ Contents
     - Button
     - LED
     - U[S]ARTs and Serial Consoles
+    - SPI
+    - SDIO - MMC
   - Configurations
+     f7xx-nsh
+     f7xx-evalos
 
 Nucleo-144 Boards:
 =================
@@ -63,7 +68,7 @@ Common Board Features:
 Nucleo F746ZG
 =============
 
-At present only the ST Nucleo F746ZG board from ST Micro is supported.  See
+ST Nucleo F746ZG board from ST Micro is supported.  See
 
 http://www.st.com/content/st_com/en/products/evaluation-tools/product-evaluation-tools/mcu-eval-tools/stm32-mcu-eval-tools/stm32-mcu-nucleo/nucleo-f746zg.html
 
@@ -80,7 +85,7 @@ NUCLEO-F746ZG Features:
                   + 16KB of instruction TCM RAM + 4KB of backup SRAM
   ADC:            3×12-bit, 2.4 MSPS ADC: up to 24 channels and 7.2 MSPS in
                   triple interleaved mode
-  DMA:            16-stream DMA controllers with FIFOs and burst support
+  DMA:            2 X 16-stream DMA controllers with FIFOs and burst support
   Timers:         Up to 18 timers: up to thirteen 16-bit (1x 16-bit lowpower),
                   two 32-bit timers, 2x watchdogs, SysTick
   GPIO:           114 I/O ports with interrupt capability
@@ -105,8 +110,57 @@ NUCLEO-F746ZG Features:
   TRG:            True random number generator
   RTC
 
-See https://developer.mbed.org/platforms/ST-Nucleo-F746ZG  form additional
+See https://developer.mbed.org/platforms/ST-Nucleo-F746ZG  for additional
 information about this board.
+
+Nucleo F767ZI
+=============
+
+ST Nucleo F7467ZI board from ST Micro is supported.  See
+
+http://www.st.com/content/st_com/en/products/evaluation-tools/product-evaluation-tools/mcu-eval-tools/stm32-mcu-eval-tools/stm32-mcu-nucleo/nucleo-f767zi.html
+
+The Nucleo F767ZI order part number is NUCLEO-F767ZI. It is one member of
+the STM32 Nucleo-144 board family.
+
+NUCLEO-F767ZI Features:
+----------------------
+
+  Microprocessor: STM32F767ZIT6 Core: ARM 32-bit Cortex®-M7 CPU with DPFPU,
+                  L1-cache: 16KB data cache and 16KB instruction cache, up to
+                  216 MHz, MPU, and DSP instructions.
+  Memory:         2048 KB Flash 512KB of SRAM (including 128KB of data TCM RAM)
+                  + 16KB of instruction TCM RAM + 4KB of backup SRAM
+  ADC:            3×12-bit, 2.4 MSPS ADC: up to 24 channels and 7.2 MSPS in
+                  triple interleaved mode
+  DMA:            2 X 16-stream DMA controllers with FIFOs and burst support
+  Timers:         Up to 18 timers: up to thirteen 16-bit (1x 16-bit lowpower),
+                  two 32-bit timers, 2x watchdogs, SysTick
+  GPIO:           114 I/O ports with interrupt capability
+  LCD:            LCD-TFT Controllerwith (DMA2D), Parallel interface
+  I2C:            4 × I2C interfaces (SMBus/PMBus)
+  U[S]ARTs:       4 USARTs, 4 UARTs (27 Mbit/s, ISO7816 interface, LIN, IrDA,
+                  modem control)
+  SPI/12Ss:       6/3 (simplex) (up to 50 Mbit/s), 3 with muxed simplex I2S
+                  for audio class accuracy via internal audio PLL or external
+                  clock
+  QSPI:           Dual mode Quad-SPI
+  SAIs:           2 Serial Audio Interfaces
+  CAN:            3 X CAN interface
+  SDMMC interface
+  SPDIFRX interface
+  USB:            USB 2.0 full/High-speed device/host/OTG controller with on-chip
+                  PHY
+  10/100 Ethernet: MAC with dedicated DMA: supports IEEE 1588v2 hardware,
+                   MII/RMII
+  Camera Interface: 8/14 Bit
+  CRC calculation unit
+  TRG:            True random number generator
+  RTC             subsecond accuracy, hardware calendar
+
+As of this writting the NUCLEO-F767ZI is not available on developer.mbed.org
+However, See https://developer.mbed.org/platforms/ST-Nucleo-F746ZG  for additional
+useful information.
 
 Development Environment
 =======================
@@ -154,8 +208,8 @@ Basic configuration & build steps
 Hardware
 ========
 
-  GPIO - there are 144 I/O lines on the STM32F746ZGT6 with various pins pined out
-  on the Nucleo F746ZG.
+  GPIO - there are 144 I/O lines on the STM32F7xxZxT6 with various pins pined out
+  on the Nucleo 144.
 
   See https://developer.mbed.org/platforms/ST-Nucleo-F746ZG/ for slick graphic
   pinouts.
@@ -168,19 +222,47 @@ Hardware
 
   Our main concern is establishing a console and LED utilization for
   debugging. Because so many pins can be multiplexed with so many functions,
-  the above mentioned graphic is super helpful in indentifying a serial port
-  that will not rob us of another IO feature. Namely Serial Port 8 (UART8)
-  with TX on PE1 and RX on PE0. Of course if your design  has used those
-  pins you can choose another IO configuration to bring out Serial Port 8
-  or choose a completely different U[S]ART to use as the console.
-  In that Case, You will need to edit the include/board.h to select different
-  U[S]ART and / or pin selections.
+  the above mentioned graphic may be helpful in indentifying a serial port.
 
-  Serial
-  ------
+  There are 4 choices that can be made from the menuconfig:
 
-  SERIAL_RX         PE_0
-  SERIAL_TX         PE_1
+  CONFIG_NUCLEO_CONSOLE_ARDUINO or CONFIG_NUCLEO_CONSOLE_MORPHO or
+  CONFIG_NUCLEO_CONSOLE_VIRTUAL or CONFIG_NUCLEO_CONSOLE_NONE
+
+  The CONFIG_NUCLEO_CONSOLE_NONE makes no preset for the console. YOu shuld still visit
+  the U[S]ART selection and Device Drivers to disable any U[S]ART reamaing.
+
+  The CONFIG_NUCLEO_CONSOLE_ARDUINO configurations assume that you are using a
+  standard Arduio RS-232 shield with the serial interface with RX on pin D0 and
+  TX on pin D1 from USART6:
+
+            -------- ---------------
+                        STM32F7
+            ARDUIONO FUNCTION  GPIO
+            -- ----- --------- -----
+            DO RX    USART6_RX PG9
+            D1 TX    USART6_TX PG14
+            -- ----- --------- -----
+
+  The CONFIG_NUCLEO_CONSOLE_MORPHO configurations uses Serial Port 8 (USART8)
+  with TX on PE1 and RX on PE0.
+          Serial
+            ------
+            SERIAL_RX         PE_0
+            SERIAL_TX         PE_1
+
+  The CONFIG_NUCLEO_CONSOLE_VIRTUAL configurations uses Serial Port 3 (USART3)
+  with TX on PD8 and RX on PD9.
+          Serial
+            ------
+            SERIAL_RX         PD9
+            SERIAL_TX         PD8
+
+  These signals are internalaly connected to the on board ST-Link
+
+  Of course if your design  has used those pins you can choose a completely
+  different U[S]ART to use as the console. In that Case, you will need to edit
+  the include/board.h to select different U[S]ART and / or pin selections.
 
   Buttons
   -------
@@ -202,32 +284,36 @@ Hardware
   include/board.h and src/stm32_autoleds.c. The LEDs are used to encode OS
   related events as follows when the LEDs are available:
 
-    SYMBOL                Meaning    RED  GREEN BLUE
-    -------------------  -----------------------  -----------
+  SYMBOL                Meaning                  RED  GREEN BLUE
+  -------------------  -----------------------   ---  ----- ----
 
-    LED_STARTED             0        OFF  OFF   OFF
-    LED_HEAPALLOCATE        0        OFF  OFF   OFF
-    LED_IRQSENABLED         0        OFF  OFF   OFF
-    LED_STACKCREATED        1        OFF  ON    OFF
-    LED_INIRQ               2        NC   NC    ON  (momentary)
-    LED_SIGNAL              2        NC   NC    ON  (momentary)
-    LED_ASSERTION           3        ON   NC    NC  (momentary)
-    LED_PANIC               4        ON   OFF   OFF (flashing 2Hz)
+  LED_STARTED          NuttX has been started    OFF  OFF   OFF
+  LED_HEAPALLOCATE     Heap has been allocated   OFF  OFF   ON
+  LED_IRQSENABLED      Interrupts enabled        OFF  ON    OFF
+  LED_STACKCREATED     Idle stack created        OFF  ON    ON
+  LED_INIRQ            In an interrupt           NC   NC    ON  (momentary)
+  LED_SIGNAL           In a signal handler       NC   ON    OFF (momentary)
+  LED_ASSERTION        An assertion failed       ON   NC    ON  (momentary)
+  LED_PANIC            The system has crashed    ON   OFF   OFF (flashing 2Hz)
+  LED_IDLE             MCU is is sleep mode      ON   OFF   OFF
 
-OFF - means that the OS is still initializing. Initialization is very fast so
-    if you see this at all, it probably means that the system is hanging up
-    somewhere in the initialization phases.
 
-GREEN - This means that the OS completed initialization.
+OFF -    means that the OS is still initializing. Initialization is very fast
+         so if you see this at all, it probably means that the system is
+         hanging up somewhere in the initialization phases.
 
-BLUE - Whenever and interrupt or signal handler is entered, the BLUE LED is
-   illuminated and extinguished when the interrupt or signal handler exits.
+GREEN -  This means that the OS completed initialization.
 
-RED - If a recovered assertion occurs, the RED LED will be illuminated
-   briefly while the assertion is handled.  You will probably never see this.
+BLUE  -  Whenever and interrupt or signal handler is entered, the BLUE LED is
+         illuminated and extinguished when the interrupt or signal handler
+         exits.
+
+VIOLET - If a recovered assertion occurs, the RED and blue LED will be
+         illuminated briefly while the assertion is handled.  You will
+         probably never see this.
 
 Flashing RED - In the event of a fatal crash, all other LEDs will be
-extinguished and RED LED will FLASH at a 2Hz rate.
+          extinguished and RED LED will FLASH at a 2Hz rate.
 
 
   Thus if the GREEN LED is lit, NuttX has successfully booted and is,
@@ -238,30 +324,67 @@ extinguished and RED LED will FLASH at a 2Hz rate.
 Serial Consoles
 ===============
 
-  USART8
+  USART6 (CONFIG_NUCLEO_CONSOLE_ARDUINO)
   ------
-  Pins and Connectors:
-         GPIO  Connector NAME
-    RXD: PE0   CN11 pin 64, PE0
-               CN10 pin 33, D34
-
-    TXD: PE1   CN11 pin 61, PE1
+                STM32F7
+    ARDUIONO FUNCTION  GPIO
+    -- ----- --------- -----
+    DO RX    USART6_RX PG9
+    D1 TX    USART6_TX PG14
+    -- ----- --------- -----
 
   You must use a 3.3 TTL to RS-232 converter or a USB to 3.3V TTL
 
     Nucleo 144           FTDI TTL-232R-3V3
-    -----------         ------------
-    TXD - CN11 pin 64 - RXD - Pin 5 (Yellow)
-    RXD - CN11 pin 61 - TXD - Pin 4 (Orange)
-    GND   CN11 pin 63   GND   Pin 1  (Black)
+    -------------       -------------------
+    TXD - D1-TXD   -    RXD - Pin 5 (Yellow)
+    RXD - D0-RXD   -    TXD - Pin 4 (Orange)
+    GND   GND      -    GND   Pin 1  (Black)
+    -------------       -------------------
+
+    *Note you will be reverse RX/TX
+
+  Use make menuconfig to configure USART6 as the console:
+
+    CONFIG_STM32F7_USART6=y
+    CONFIG_USARTs_SERIALDRIVER=y
+    CONFIG_USARTS_SERIAL_CONSOLE=y
+    CONFIG_USART6_RXBUFSIZE=256
+    CONFIG_USART6_TXBUFSIZE=256
+    CONFIG_USART6_BAUD=115200
+    CONFIG_USART6_BITS=8
+    CONFIG_USART6_PARITY=0
+    CONFIG_USART6_2STOP=0
+
+  USART8 (CONFIG_NUCLEO_CONSOLE_MORPHO)
+  ------
+
+  Pins and Connectors:
+    FUNC GPIO  Connector
+                   Pin NAME
+    ---- ---   ------- ----
+    TXD: PE1   CN11-61, PE1
+    RXD: PE0   CN12-64, PE0
+               CN10-33, D34
+    ---- ---   ------- ----
+
+
+  You must use a 3.3 TTL to RS-232 converter or a USB to 3.3V TTL
+
+    Nucleo 144           FTDI TTL-232R-3V3
+    -------------       -------------------
+    TXD - CN11-61   -   RXD - Pin 5 (Yellow)
+    RXD - CN12-64   -   TXD - Pin 4 (Orange)
+    GND   CN12-63   -   GND   Pin 1  (Black)
+    -------------       -------------------
 
     *Note you will be reverse RX/TX
 
   Use make menuconfig to configure USART8 as the console:
 
     CONFIG_STM32F7_UART8=y
-    CONFIG_USART8_SERIALDRIVER=y
-    CONFIG_USART8_SERIAL_CONSOLE=y
+    CONFIG_UART8_SERIALDRIVER=y
+    CONFIG_UART8_SERIAL_CONSOLE=y
     CONFIG_UART8_RXBUFSIZE=256
     CONFIG_UART8_TXBUFSIZE=256
     CONFIG_UART8_BAUD=115200
@@ -269,7 +392,7 @@ Serial Consoles
     CONFIG_UART8_PARITY=0
     CONFIG_UART8_2STOP=0
 
-  Virtual COM Port
+  Virtual COM Port (CONFIG_NUCLEO_CONSOLE_VIRTUAL)
   ----------------
   Yet another option is to use USART3 and the USB virtual COM port.  This
   option may be more convenient for long term development, but is painful
@@ -290,14 +413,38 @@ Serial Consoles
   As shipped, SB4 and SB7 are open and SB5 and SB6 closed, so the
   virtual COM port is enabled.
 
+
+SPI
+---
+  Since this board is so generic, having a quick way to vet the SPI
+  configuration seams in order. So the board provides a quick test
+  that can be selected vi CONFIG_NUCLEO_SPI_TEST that will initalise
+  the selected buses (SPI1-SPI3) and send some text on the bus at
+  application initalization time board_app_initialize.
+
+SDIO
+----
+  To test the SD performace one can use a SparkFun microSD Sniffer
+  from https://www.sparkfun.com/products/9419 or similar board
+  and connect it as follows:
+
+          VCC    V3.3 CN11  16
+          GND    GND  CN11-8
+          CMD    PD2  CN11-4
+          CLK    PC12 CN11-3
+          DAT0 - PC8  CN12-2
+          DAT1 - PC9  CN12-1
+          DAT2   PC10 CN11-1
+          CD     PC11 CN11-2
+
 Configurations
 ==============
 
-nsh:
+f7xx-nsh:
 ----
   Configures the NuttShell (nsh) located at apps/examples/nsh for the
   Nucleo-144 boards.  The Configuration enables the serial interfaces
-  on UART6.  Support for builtin applications is enabled, but in the base
+  on USART6.  Support for builtin applications is enabled, but in the base
   configuration no builtin applications are selected (see NOTES below).
 
   NOTES:
@@ -333,7 +480,7 @@ nsh:
      device configured for UART8 (see instruction above under "Serial
      Consoles).
 
-evalos:
+f7xx-evalos:
 -------
   This configuration is designed to test the features of the board.
     - Configures the NuttShell (nsh) located at apps/examples/nsh for the

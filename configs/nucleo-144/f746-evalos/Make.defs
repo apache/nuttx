@@ -1,8 +1,10 @@
 ############################################################################
-# configs/nucleo-144/nsh/Make.defs
+# configs/nucleo-144/f746-evalos/Make.defs
 #
 #   Copyright (C) 2016 Gregory Nutt. All rights reserved.
-#   Author: Gregory Nutt <gnutt@nuttx.org>
+#   Authors: Gregory Nutt <gnutt@nuttx.org>
+#            Mark Olsson <post@markolsson.se>
+#            David Sidrane <david_s5@nscdg.com>
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -37,7 +39,7 @@ include ${TOPDIR}/.config
 include ${TOPDIR}/tools/Config.mk
 include ${TOPDIR}/arch/arm/src/armv7-m/Toolchain.defs
 
-LDSCRIPT = flash.ld
+LDSCRIPT = f746-flash.ld
 
 ifeq ($(WINTOOL),y)
   # Windows-native toolchains
@@ -110,4 +112,3 @@ HOSTCC = gcc
 HOSTINCLUDES = -I.
 HOSTCFLAGS = -Wall -Wstrict-prototypes -Wshadow -Wundef -g -pipe
 HOSTLDFLAGS =
-

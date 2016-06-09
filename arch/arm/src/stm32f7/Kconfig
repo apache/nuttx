@@ -12,59 +12,915 @@ choice
 	default ARCH_CHIP_STM32F746
 	depends on ARCH_CHIP_STM32F7
 
-config ARCH_CHIP_STM32F745
-	bool "STM32F745xx"
-	select STM32F7_STM32F74XX
+config ARCH_CHIP_STM32F745VG
+	bool "STM32F745VG"
+	select STM32F7_STM32F745XX
+	select STM32F7_FLASH_CONFIG_G
+	select STM32F7_IO_CONFIG_V
 	---help---
-		STM32 F7 Cortex M7, 512 or 1024Kb FLASH, 335 (240++16+54) Kb SRAM
+		STM32 F7 Cortex M7, 1024 FLASH, 320K (240+16+64) Kb SRAM
 
-config ARCH_CHIP_STM32F746
-	bool "STM32F746xx"
-	select STM32F7_STM32F74XX
-	select STM32F7_HAVE_LTDC
+config ARCH_CHIP_STM32F745VE
+	bool "STM32F745VE"
+	select STM32F7_STM32F745XX
+	select STM32F7_FLASH_CONFIG_E
+	select STM32F7_IO_CONFIG_V
 	---help---
-		STM32 F7 Cortex M7, 512 or 1024Kb FLASH, 335 (240++16+54) Kb SRAM
+		STM32 F7 Cortex M7, 512 320K FLASH, 320K (240+16+64) Kb SRAM
 
-config ARCH_CHIP_STM32F756
-	bool "STM32F756xx"
-	select STM32F7_STM32F75XX
-	select STM32F7_HAVE_LTDC
+config ARCH_CHIP_STM32F745IG
+	bool "STM32F745IG"
+	select STM32F7_STM32F745XX
+	select STM32F7_FLASH_CONFIG_G
+	select STM32F7_IO_CONFIG_I
 	---help---
-		STM32 F7 Cortex M7, 512 or 1024Kb FLASH, 335 (240++16+54) Kb SRAM
+		STM32 F7 Cortex M7, 1024 FLASH, 320K (240+16+64) Kb SRAM
+
+config ARCH_CHIP_STM32F745IE
+	bool "STM32F745IE"
+	select STM32F7_STM32F745XX
+	select STM32F7_FLASH_CONFIG_E
+	select STM32F7_IO_CONFIG_I
+	---help---
+		STM32 F7 Cortex M7, 512 FLASH, 320K (240+16+64) Kb SRAM
+
+config ARCH_CHIP_STM32F745ZE
+	bool "STM32F745ZE"
+	select STM32F7_STM32F745XX
+	select STM32F7_FLASH_CONFIG_E
+	select STM32F7_IO_CONFIG_Z
+	---help---
+		STM32 F7 Cortex M7, 512 FLASH, 320K (240+16+64) Kb SRAM
+
+config ARCH_CHIP_STM32F745ZG
+	bool "STM32F745ZG"
+	select STM32F7_STM32F745XX
+	select STM32F7_FLASH_CONFIG_G
+	select STM32F7_IO_CONFIG_Z
+	---help---
+		STM32 F7 Cortex M7, 1024 FLASH, 320K (240+16+64) Kb SRAM
+
+config ARCH_CHIP_STM32F746BG
+	bool "STM32F746BG"
+	select STM32F7_STM32F746XX
+	select STM32F7_FLASH_CONFIG_G
+	select STM32F7_IO_CONFIG_B
+	---help---
+		STM32 F7 Cortex M7, 1024 FLASH, 320K (240+16+64) Kb SRAM
+
+config ARCH_CHIP_STM32F746VG
+	bool "STM32F746VG"
+	select STM32F7_STM32F746XX
+	select STM32F7_FLASH_CONFIG_G
+	select STM32F7_IO_CONFIG_V
+	---help---
+		STM32 F7 Cortex M7, 1024 FLASH, 320K (240+16+64) Kb SRAM
+
+config ARCH_CHIP_STM32F746VE
+	bool "STM32F746VE"
+	select STM32F7_STM32F746XX
+	select STM32F7_FLASH_CONFIG_E
+	select STM32F7_IO_CONFIG_V
+	---help---
+		STM32 F7 Cortex M7, 512 FLASH, 320K (240+16+64) Kb SRAM
+
+config ARCH_CHIP_STM32F746BE
+	bool "STM32F746BE"
+	select STM32F7_STM32F746XX
+	select STM32F7_FLASH_CONFIG_E
+	select STM32F7_IO_CONFIG_B
+	---help---
+		STM32 F7 Cortex M7, 512 FLASH, 320K (240+16+64) Kb SRAM
+
+config ARCH_CHIP_STM32F746ZG
+	bool "STM32F746ZG"
+	select STM32F7_STM32F746XX
+	select STM32F7_FLASH_CONFIG_G
+	select STM32F7_IO_CONFIG_Z
+	---help---
+		STM32 F7 Cortex M7, 1024 FLASH, 320K (240+16+64) Kb SRAM
+
+config ARCH_CHIP_STM32F746IE
+	bool "STM32F746IE"
+	select STM32F7_STM32F746XX
+	select STM32F7_FLASH_CONFIG_E
+	select STM32F7_IO_CONFIG_I
+	---help---
+		STM32 F7 Cortex M7, 512 FLASH, 320K (240+16+64) Kb SRAM
+
+config ARCH_CHIP_STM32F746NG
+	bool "STM32F746NG"
+	select STM32F7_STM32F746XX
+	select STM32F7_FLASH_CONFIG_G
+	select STM32F7_IO_CONFIG_N
+	---help---
+		STM32 F7 Cortex M7, 1024 FLASH, 320K (240+16+64) Kb SRAM
+
+config ARCH_CHIP_STM32F746NE
+	bool "STM32F746NE"
+	select STM32F7_STM32F746XX
+	select STM32F7_FLASH_CONFIG_E
+	select STM32F7_IO_CONFIG_N
+	---help---
+		STM32 F7 Cortex M7, 512 FLASH, 320K (240+16+64) Kb SRAM
+
+config ARCH_CHIP_STM32F746ZE
+	bool "STM32F746ZE"
+	select STM32F7_STM32F746XX
+	select STM32F7_FLASH_CONFIG_E
+	select STM32F7_IO_CONFIG_Z
+	---help---
+		STM32 F7 Cortex M7, 512 FLASH, 320K (240+16+64) Kb SRAM
+
+config ARCH_CHIP_STM32F746IG
+	bool "STM32F746IG"
+	select STM32F7_STM32F746XX
+	select STM32F7_FLASH_CONFIG_G
+	select STM32F7_IO_CONFIG_I
+	---help---
+		STM32 F7 Cortex M7, 1024 FLASH, 320K (240+16+64) Kb SRAM
+
+config ARCH_CHIP_STM32F756NG
+	bool "STM32F756NG"
+	select STM32F7_STM32F756XX
+	select STM32F7_FLASH_CONFIG_G
+	select STM32F7_IO_CONFIG_N
+	---help---
+		STM32 F7 Cortex M7, 1024 FLASH, 320K (240+16+64) Kb SRAM
+
+config ARCH_CHIP_STM32F756BG
+	bool "STM32F756BG"
+	select STM32F7_STM32F756XX
+	select STM32F7_FLASH_CONFIG_G
+	select STM32F7_IO_CONFIG_B
+	---help---
+		STM32 F7 Cortex M7, 1024 FLASH, 320K (240+16+64) Kb SRAM
+
+config ARCH_CHIP_STM32F756IG
+	bool "STM32F756IG"
+	select STM32F7_STM32F756XX
+	select STM32F7_FLASH_CONFIG_G
+	select STM32F7_IO_CONFIG_I
+	---help---
+		STM32 F7 Cortex M7, 1024 FLASH, 320K (240+16+64) Kb SRAM
+
+config ARCH_CHIP_STM32F756VG
+	bool "STM32F756VG"
+	select STM32F7_STM32F756XX
+	select STM32F7_FLASH_CONFIG_G
+	select STM32F7_IO_CONFIG_V
+	---help---
+		STM32 F7 Cortex M7, 1024 FLASH, 320K (240+16+64) Kb SRAM
+
+config ARCH_CHIP_STM32F756ZG
+	bool "STM32F756ZG"
+	select STM32F7_STM32F756XX
+	select STM32F7_FLASH_CONFIG_G
+	select STM32F7_IO_CONFIG_Z
+	---help---
+		STM32 F7 Cortex M7, 1024 FLASH, 320K (240+16+64) Kb SRAM
+
+config ARCH_CHIP_STM32F765NI
+	bool "STM32F765NI"
+	select STM32F7_STM32F765XX
+	select STM32F7_FLASH_CONFIG_I
+	select STM32F7_IO_CONFIG_N
+	---help---
+		STM32 F7 Cortex M7, 2048 FLASH, 512K (368+16+128) Kb SRAM
+
+config ARCH_CHIP_STM32F765VI
+	bool "STM32F765VI"
+	select STM32F7_STM32F765XX
+	select STM32F7_FLASH_CONFIG_I
+	select STM32F7_IO_CONFIG_V
+	---help---
+		STM32 F7 Cortex M7, 2048 FLASH, 512K (368+16+128) Kb SRAM
+
+config ARCH_CHIP_STM32F765VG
+	bool "STM32F765VG"
+	select STM32F7_STM32F765XX
+	select STM32F7_FLASH_CONFIG_G
+	select STM32F7_IO_CONFIG_V
+	---help---
+		STM32 F7 Cortex M7, 1024 FLASH, 512K (368+16+128) Kb SRAM
+
+config ARCH_CHIP_STM32F765BI
+	bool "STM32F765BI"
+	select STM32F7_STM32F765XX
+	select STM32F7_FLASH_CONFIG_I
+	select STM32F7_IO_CONFIG_B
+	---help---
+		STM32 F7 Cortex M7, 2048 FLASH, 512K (368+16+128) Kb SRAM
+
+config ARCH_CHIP_STM32F765NG
+	bool "STM32F765NG"
+	select STM32F7_STM32F765XX
+	select STM32F7_FLASH_CONFIG_G
+	select STM32F7_IO_CONFIG_N
+	---help---
+		STM32 F7 Cortex M7, 1024 FLASH, 512K (368+16+128) Kb SRAM
+
+config ARCH_CHIP_STM32F765ZG
+	bool "STM32F765ZG"
+	select STM32F7_STM32F765XX
+	select STM32F7_FLASH_CONFIG_G
+	select STM32F7_IO_CONFIG_Z
+	---help---
+		STM32 F7 Cortex M7, 1024 FLASH, 512K (368+16+128) Kb SRAM
+
+config ARCH_CHIP_STM32F765ZI
+	bool "STM32F765ZI"
+	select STM32F7_STM32F765XX
+	select STM32F7_FLASH_CONFIG_I
+	select STM32F7_IO_CONFIG_Z
+	---help---
+		STM32 F7 Cortex M7, 2048 FLASH, 512K (368+16+128) Kb SRAM
+
+config ARCH_CHIP_STM32F765IG
+	bool "STM32F765IG"
+	select STM32F7_STM32F765XX
+	select STM32F7_FLASH_CONFIG_G
+	select STM32F7_IO_CONFIG_I
+	---help---
+		STM32 F7 Cortex M7, 1024 FLASH, 512K (368+16+128) Kb SRAM
+
+config ARCH_CHIP_STM32F765BG
+	bool "STM32F765BG"
+	select STM32F7_STM32F765XX
+	select STM32F7_FLASH_CONFIG_G
+	select STM32F7_IO_CONFIG_B
+	---help---
+		STM32 F7 Cortex M7, 1024 FLASH, 512K (368+16+128) Kb SRAM
+
+config ARCH_CHIP_STM32F765II
+	bool "STM32F765II"
+	select STM32F7_STM32F765XX
+	select STM32F7_FLASH_CONFIG_I
+	select STM32F7_IO_CONFIG_I
+	---help---
+		STM32 F7 Cortex M7, 2048 FLASH, 512K (368+16+128) Kb SRAM
+
+config ARCH_CHIP_STM32F767NG
+	bool "STM32F767NG"
+	select STM32F7_STM32F767XX
+	select STM32F7_FLASH_CONFIG_G
+	select STM32F7_IO_CONFIG_N
+	---help---
+		STM32 F7 Cortex M7, 1024 FLASH, 512K (368+16+128) Kb SRAM
+
+config ARCH_CHIP_STM32F767IG
+	bool "STM32F767IG"
+	select STM32F7_STM32F767XX
+	select STM32F7_FLASH_CONFIG_G
+	select STM32F7_IO_CONFIG_I
+	---help---
+		STM32 F7 Cortex M7, 1024 FLASH, 512K (368+16+128) Kb SRAM
+
+config ARCH_CHIP_STM32F767VG
+	bool "STM32F767VG"
+	select STM32F7_STM32F767XX
+	select STM32F7_FLASH_CONFIG_G
+	select STM32F7_IO_CONFIG_V
+	---help---
+		STM32 F7 Cortex M7, 1024 FLASH, 512K (368+16+128) Kb SRAM
+
+config ARCH_CHIP_STM32F767ZG
+	bool "STM32F767ZG"
+	select STM32F7_STM32F767XX
+	select STM32F7_FLASH_CONFIG_G
+	select STM32F7_IO_CONFIG_Z
+	---help---
+		STM32 F7 Cortex M7, 1024 FLASH, 512K (368+16+128) Kb SRAM
+
+config ARCH_CHIP_STM32F767NI
+	bool "STM32F767NI"
+	select STM32F7_STM32F767XX
+	select STM32F7_FLASH_CONFIG_I
+	select STM32F7_IO_CONFIG_N
+	---help---
+		STM32 F7 Cortex M7, 2048 FLASH, 512K (368+16+128) Kb SRAM
+
+config ARCH_CHIP_STM32F767VI
+	bool "STM32F767VI"
+	select STM32F7_STM32F767XX
+	select STM32F7_FLASH_CONFIG_I
+	select STM32F7_IO_CONFIG_V
+	---help---
+		STM32 F7 Cortex M7, 2048 FLASH, 512K (368+16+128) Kb SRAM
+
+config ARCH_CHIP_STM32F767BG
+	bool "STM32F767BG"
+	select STM32F7_STM32F767XX
+	select STM32F7_FLASH_CONFIG_G
+	select STM32F7_IO_CONFIG_B
+	---help---
+		STM32 F7 Cortex M7, 1024 FLASH, 512K (368+16+128) Kb SRAM
+
+config ARCH_CHIP_STM32F767ZI
+	bool "STM32F767ZI"
+	select STM32F7_STM32F767XX
+	select STM32F7_FLASH_CONFIG_I
+	select STM32F7_IO_CONFIG_Z
+	---help---
+		STM32 F7 Cortex M7, 2048 FLASH, 512K (368+16+128) Kb SRAM
+
+config ARCH_CHIP_STM32F767II
+	bool "STM32F767II"
+	select STM32F7_STM32F767XX
+	select STM32F7_FLASH_CONFIG_I
+	select STM32F7_IO_CONFIG_I
+	---help---
+		STM32 F7 Cortex M7, 2048 FLASH, 512K (368+16+128) Kb SRAM
+
+config ARCH_CHIP_STM32F769BI
+	bool "STM32F769BI"
+	select STM32F7_STM32F769XX
+	select STM32F7_FLASH_CONFIG_I
+	select STM32F7_IO_CONFIG_B
+	---help---
+		STM32 F7 Cortex M7, 2048 FLASH, 512K (368+16+128) Kb SRAM
+
+config ARCH_CHIP_STM32F769II
+	bool "STM32F769II"
+	select STM32F7_STM32F769XX
+	select STM32F7_FLASH_CONFIG_I
+	select STM32F7_IO_CONFIG_I
+	---help---
+		STM32 F7 Cortex M7, 2048 FLASH, 512K (368+16+128) Kb SRAM
+
+config ARCH_CHIP_STM32F769BG
+	bool "STM32F769BG"
+	select STM32F7_STM32F769XX
+	select STM32F7_FLASH_CONFIG_G
+	select STM32F7_IO_CONFIG_B
+	---help---
+		STM32 F7 Cortex M7, 1024 FLASH, 512K (368+16+128) Kb SRAM
+
+config ARCH_CHIP_STM32F769NI
+	bool "STM32F769NI"
+	select STM32F7_STM32F769XX
+	select STM32F7_FLASH_CONFIG_I
+	select STM32F7_IO_CONFIG_N
+	---help---
+		STM32 F7 Cortex M7, 2048 FLASH, 512K (368+16+128) Kb SRAM
+
+config ARCH_CHIP_STM32F769AI
+	bool "STM32F769AI"
+	select STM32F7_STM32F769AX
+	select STM32F7_FLASH_CONFIG_I
+	select STM32F7_IO_CONFIG_A
+	---help---
+		STM32 F7 Cortex M7, 2048 FLASH, 512K (368+16+128) Kb SRAM
+
+config ARCH_CHIP_STM32F769NG
+	bool "STM32F769NG"
+	select STM32F7_STM32F769XX
+	select STM32F7_FLASH_CONFIG_G
+	select STM32F7_IO_CONFIG_N
+	---help---
+		STM32 F7 Cortex M7, 1024 FLASH, 512K (368+16+128) Kb SRAM
+
+config ARCH_CHIP_STM32F769IG
+	bool "STM32F769IG"
+	select STM32F7_STM32F769XX
+	select STM32F7_FLASH_CONFIG_G
+	select STM32F7_IO_CONFIG_I
+	---help---
+		STM32 F7 Cortex M7, 1024 FLASH, 512K (368+16+128) Kb SRAM
+
+config ARCH_CHIP_STM32F777ZI
+	bool "STM32F777ZI"
+	select STM32F7_STM32F777XX
+	select STM32F7_FLASH_CONFIG_I
+	select STM32F7_IO_CONFIG_Z
+	---help---
+		STM32 F7 Cortex M7, 2048 FLASH, 512K (368+16+128) Kb SRAM
+
+config ARCH_CHIP_STM32F777VI
+	bool "STM32F777VI"
+	select STM32F7_STM32F777XX
+	select STM32F7_FLASH_CONFIG_I
+	select STM32F7_IO_CONFIG_V
+	---help---
+		STM32 F7 Cortex M7, 2048 FLASH, 512K (368+16+128) Kb SRAM
+
+config ARCH_CHIP_STM32F777NI
+	bool "STM32F777NI"
+	select STM32F7_STM32F777XX
+	select STM32F7_FLASH_CONFIG_I
+	select STM32F7_IO_CONFIG_N
+	---help---
+		STM32 F7 Cortex M7, 2048 FLASH, 512K (368+16+128) Kb SRAM
+
+config ARCH_CHIP_STM32F777BI
+	bool "STM32F777BI"
+	select STM32F7_STM32F777XX
+	select STM32F7_FLASH_CONFIG_I
+	select STM32F7_IO_CONFIG_B
+	---help---
+		STM32 F7 Cortex M7, 2048 FLASH, 512K (368+16+128) Kb SRAM
+
+config ARCH_CHIP_STM32F777II
+	bool "STM32F777II"
+	select STM32F7_STM32F777XX
+	select STM32F7_FLASH_CONFIG_I
+	select STM32F7_IO_CONFIG_I
+	---help---
+		STM32 F7 Cortex M7, 2048 FLASH, 512K (368+16+128) Kb SRAM
+
+config ARCH_CHIP_STM32F778AI
+	bool "STM32F778AI"
+	select STM32F7_STM32F778AX
+	select STM32F7_FLASH_CONFIG_I
+	select STM32F7_IO_CONFIG_A
+	---help---
+		STM32 F7 Cortex M7, 2048 FLASH, 512K (368+16+128) Kb SRAM
+
+config ARCH_CHIP_STM32F779II
+	bool "STM32F779II"
+	select STM32F7_STM32F779XX
+	select STM32F7_FLASH_CONFIG_I
+	select STM32F7_IO_CONFIG_I
+	---help---
+		STM32 F7 Cortex M7, 2048 FLASH, 512K (368+16+128) Kb SRAM
+
+config ARCH_CHIP_STM32F779NI
+	bool "STM32F779NI"
+	select STM32F7_STM32F779XX
+	select STM32F7_FLASH_CONFIG_I
+	select STM32F7_IO_CONFIG_N
+	---help---
+		STM32 F7 Cortex M7, 2048 FLASH, 512K (368+16+128) Kb SRAM
+
+config ARCH_CHIP_STM32F779BI
+	bool "STM32F779BI"
+	select STM32F7_STM32F779XX
+	select STM32F7_FLASH_CONFIG_I
+	select STM32F7_IO_CONFIG_B
+	---help---
+		STM32 F7 Cortex M7, 2048 FLASH, 512K (368+16+128) Kb SRAM
+
+config ARCH_CHIP_STM32F779AI
+	bool "STM32F779AI"
+	select STM32F7_STM32F779XX
+	select STM32F7_FLASH_CONFIG_I
+	select STM32F7_IO_CONFIG_A
+	---help---
+		STM32 F7 Cortex M7, 2048 FLASH, 512K (368+16+128) Kb SRAM
 
 endchoice # STM32 F7 Chip Selection
 
 config STM32F7_STM32F74XX
 	bool
 	default n
-	select ARCH_HAVE_FPU
-	select ARCH_HAVE_DPFPU # REVISIT
-	select ARMV7M_HAVE_ICACHE
-	select ARMV7M_HAVE_DCACHE
-	select ARMV7M_HAVE_ITCM
-	select ARMV7M_HAVE_DTCM
+
+config STM32F7_STM32F74XX
+	bool
+	default n
 
 config STM32F7_STM32F75XX
 	bool
 	default n
+
+config STM32F7_STM32F76XX
+	bool
+	default n
+
+config STM32F7_STM32F76XX
+	bool
+	default n
+
+config STM32F7_STM32F76XX
+	bool
+	default n
+
+config STM32F7_STM32F76XX
+	bool
+	default n
+
+config STM32F7_STM32F76XX
+	bool
+	default n
+
+config STM32F7_STM32F76XX
+	bool
+	default n
+
+config STM32F7_STM32F77XX
+	bool
+	default n
+
+config STM32F7_STM32F77XX
+	bool
+	default n
+
+config STM32F7_STM32F77XX
+	bool
+	default n
+
+config STM32F7_STM32F77XX
+	bool
+	default n
+
+config STM32F7_STM32F77XX
+	bool
+	default n
+
+config STM32F7_IO_CONFIG_V
+	bool
+	default n
+
+config STM32F7_IO_CONFIG_I
+	bool
+	default n
+
+config STM32F7_IO_CONFIG_Z
+	bool
+	default n
+
+config STM32F7_IO_CONFIG_N
+	bool
+	default n
+
+config STM32F7_IO_CONFIG_B
+	bool
+	default n
+
+config STM32F7_IO_CONFIG_A
+	bool
+	default n
+
+config STM32F7_STM32F745XX
+	bool
+	default n
+	select STM32F7_STM32F74XX
 	select ARCH_HAVE_FPU
-	select ARCH_HAVE_DPFPU # REVISIT
 	select ARMV7M_HAVE_ICACHE
 	select ARMV7M_HAVE_DCACHE
 	select ARMV7M_HAVE_ITCM
 	select ARMV7M_HAVE_DTCM
+	select STM32F7_HAVE_FSMC
+	select STM32F7_HAVE_ETHRNET
+	select STM32F7_HAVE_RNG
+	select STM32F7_HAVE_SPI5 if !STM32F7_IO_CONFIG_V
+	select STM32F7_HAVE_SPI6 if !STM32F7_IO_CONFIG_V
+	select STM32F7_HAVE_DCMI
+	select STM32F7_HAVE_DMA2D
+
+config STM32F7_STM32F746XX
+	bool
+	default n
+	select STM32F7_STM32F74XX
+	select ARCH_HAVE_FPU
+	select ARMV7M_HAVE_ICACHE
+	select ARMV7M_HAVE_DCACHE
+	select ARMV7M_HAVE_ITCM
+	select ARMV7M_HAVE_DTCM
+	select STM32F7_HAVE_FSMC
+	select STM32F7_HAVE_ETHRNET
+	select STM32F7_HAVE_RNG
+	select STM32F7_HAVE_SPI5 if !STM32F7_IO_CONFIG_V
+	select STM32F7_HAVE_SPI6 if !STM32F7_IO_CONFIG_V
+	select STM32F7_HAVE_DCMI
+	select STM32F7_HAVE_LTDC
+	select STM32F7_HAVE_DMA2D
+
+config STM32F7_STM32F756XX
+	bool
+	default n
+	select STM32F7_STM32F75XX
+	select ARCH_HAVE_FPU
+	select ARMV7M_HAVE_ICACHE
+	select ARMV7M_HAVE_DCACHE
+	select ARMV7M_HAVE_ITCM
+	select ARMV7M_HAVE_DTCM
+	select STM32F7_HAVE_FSMC
+	select STM32F7_HAVE_ETHRNET
+	select STM32F7_HAVE_RNG
+	select STM32F7_HAVE_SPI5 if !STM32F7_IO_CONFIG_V
+	select STM32F7_HAVE_SPI6 if !STM32F7_IO_CONFIG_V
+	select STM32F7_HAVE_LTDC
+	select STM32F7_HAVE_DMA2D
+	select STM32F7_HAVE_CRYP
+	select STM32F7_HAVE_HASH
+
+config STM32F7_STM32F765XX
+	bool
+	default n
+	select STM32F7_STM32F76XX
+	select ARCH_HAVE_FPU
+	select ARCH_HAVE_DPFPU
+	select ARMV7M_HAVE_ICACHE
+	select ARMV7M_HAVE_DCACHE
+	select ARMV7M_HAVE_ITCM
+	select ARMV7M_HAVE_DTCM
+	select STM32F7_HAVE_FSMC
+	select STM32F7_HAVE_ETHRNET
+	select STM32F7_HAVE_RNG # data sheet says yes, Product matix says no
+	select STM32F7_HAVE_SPI5 if !STM32F7_IO_CONFIG_V
+	select STM32F7_HAVE_SPI6 if !STM32F7_IO_CONFIG_V
+	select STM32F7_HAVE_SDMMC2 if !STM32F7_IO_CONFIG_V
+	select STM32F7_HAVE_CAN3
+	select STM32F7_HAVE_DCMI
+	select STM32F7_HAVE_DMA2D
+	select STM32F7_HAVE_DFSDM1
+
+config STM32F7_STM32F767XX
+	bool
+	default n
+	select STM32F7_STM32F76XX
+	select ARCH_HAVE_FPU
+	select ARCH_HAVE_DPFPU
+	select ARMV7M_HAVE_ICACHE
+	select ARMV7M_HAVE_DCACHE
+	select ARMV7M_HAVE_ITCM
+	select ARMV7M_HAVE_DTCM
+	select STM32F7_HAVE_FSMC
+	select STM32F7_HAVE_ETHRNET
+	select STM32F7_HAVE_RNG
+	select STM32F7_HAVE_SPI5 if !STM32F7_IO_CONFIG_V
+	select STM32F7_HAVE_SPI6 if !STM32F7_IO_CONFIG_V
+	select STM32F7_HAVE_SDMMC2 if !STM32F7_IO_CONFIG_V
+	select STM32F7_HAVE_CAN3
+	select STM32F7_HAVE_DCMI
+	select STM32F7_HAVE_DSIHOST if !(STM32F7_IO_CONFIG_V || STM32F7_IO_CONFIG_Z)
+	select STM32F7_HAVE_LTDC
+	select STM32F7_HAVE_DMA2D
+	select STM32F7_HAVE_JPEG
+	select STM32F7_HAVE_DFSDM1
+
+config STM32F7_STM32F768XX # Revisit Wehn parts released
+	bool
+	default n
+	select STM32F7_STM32F76XX
+	select ARCH_HAVE_FPU
+	select ARCH_HAVE_DPFPU
+	select ARMV7M_HAVE_ICACHE
+	select ARMV7M_HAVE_DCACHE
+	select ARMV7M_HAVE_ITCM
+	select ARMV7M_HAVE_DTCM
+	select STM32F7_HAVE_FSMC
+	select STM32F7_HAVE_ETHRNET
+	select STM32F7_HAVE_RNG
+	select STM32F7_HAVE_SPI5 if !STM32F7_IO_CONFIG_V
+	select STM32F7_HAVE_SPI6 if !STM32F7_IO_CONFIG_V
+	select STM32F7_HAVE_SDMMC2 if !STM32F7_IO_CONFIG_V
+	select STM32F7_HAVE_CAN3
+	select STM32F7_HAVE_DCMI
+	select STM32F7_HAVE_DSIHOST if !(STM32F7_IO_CONFIG_V || STM32F7_IO_CONFIG_Z)
+	select STM32F7_HAVE_LTDC
+	select STM32F7_HAVE_DMA2D
+	select STM32F7_HAVE_JPEG
+	select STM32F7_HAVE_DFSDM1
+
+config STM32F7_STM32F768AX # Revisit When parts released
+	bool
+	default n
+	select STM32F7_STM32F76XX
+	select ARCH_HAVE_FPU
+	select ARCH_HAVE_DPFPU
+	select ARMV7M_HAVE_ICACHE
+	select ARMV7M_HAVE_DCACHE
+	select ARMV7M_HAVE_ITCM
+	select ARMV7M_HAVE_DTCM
+	select STM32F7_HAVE_FSMC
+	select STM32F7_HAVE_RNG
+	select STM32F7_HAVE_SPI5
+	select STM32F7_HAVE_SPI6
+	select STM32F7_HAVE_SDMMC2
+	select STM32F7_HAVE_CAN3
+	select STM32F7_HAVE_DCMI
+	select STM32F7_HAVE_DSIHOST
+	select STM32F7_HAVE_LTDC
+	select STM32F7_HAVE_DMA2D
+	select STM32F7_HAVE_JPEG
+	select STM32F7_HAVE_DFSDM1
+
+config STM32F7_STM32F769XX
+	bool
+	default n
+	select STM32F7_STM32F76XX
+	select ARCH_HAVE_FPU
+	select ARCH_HAVE_DPFPU
+	select ARMV7M_HAVE_ICACHE
+	select ARMV7M_HAVE_DCACHE
+	select ARMV7M_HAVE_ITCM
+	select ARMV7M_HAVE_DTCM
+	select STM32F7_HAVE_FSMC
+	select STM32F7_HAVE_ETHRNET
+	select STM32F7_HAVE_RNG
+	select STM32F7_HAVE_SPI5 if !STM32F7_IO_CONFIG_V
+	select STM32F7_HAVE_SPI6 if !STM32F7_IO_CONFIG_V
+	select STM32F7_HAVE_SDMMC2 if !STM32F7_IO_CONFIG_V
+	select STM32F7_HAVE_CAN3
+	select STM32F7_HAVE_DCMI
+	select STM32F7_HAVE_DSIHOST if !(STM32F7_IO_CONFIG_V || STM32F7_IO_CONFIG_Z)
+	select STM32F7_HAVE_LTDC
+	select STM32F7_HAVE_DMA2D
+	select STM32F7_HAVE_JPEG
+	select STM32F7_HAVE_DFSDM1
+
+config STM32F7_STM32F769AX # Revisit When parts released
+	bool
+	default n
+	select STM32F7_STM32F76XX
+	select ARCH_HAVE_FPU
+	select ARCH_HAVE_DPFPU
+	select ARMV7M_HAVE_ICACHE
+	select ARMV7M_HAVE_DCACHE
+	select ARMV7M_HAVE_ITCM
+	select ARMV7M_HAVE_DTCM
+	select STM32F7_HAVE_FSMC
+	select STM32F7_HAVE_RNG
+	select STM32F7_HAVE_SPI5
+	select STM32F7_HAVE_SPI6
+	select STM32F7_HAVE_SDMMC2
+	select STM32F7_HAVE_CAN3
+	select STM32F7_HAVE_DCMI
+	select STM32F7_HAVE_DSIHOST
+	select STM32F7_HAVE_LTDC
+	select STM32F7_HAVE_DMA2D
+	select STM32F7_HAVE_JPEG
+	select STM32F7_HAVE_DFSDM1
+
+config STM32F7_STM32F777XX
+	bool
+	default n
+	select STM32F7_STM32F77XX
+	select ARCH_HAVE_FPU
+	select ARCH_HAVE_DPFPU
+	select ARMV7M_HAVE_ICACHE
+	select ARMV7M_HAVE_DCACHE
+	select ARMV7M_HAVE_ITCM
+	select ARMV7M_HAVE_DTCM
+	select STM32F7_HAVE_FSMC
+	select STM32F7_HAVE_ETHRNET
+	select STM32F7_HAVE_RNG
+	select STM32F7_HAVE_SPI5 if !STM32F7_IO_CONFIG_V
+	select STM32F7_HAVE_SPI6 if !STM32F7_IO_CONFIG_V
+	select STM32F7_HAVE_SDMMC2 if !STM32F7_IO_CONFIG_V
+	select STM32F7_HAVE_CAN3
+	select STM32F7_HAVE_DCMI
+	select STM32F7_HAVE_DSIHOST if !(STM32F7_IO_CONFIG_V || STM32F7_IO_CONFIG_Z)
+	select STM32F7_HAVE_LTDC
+	select STM32F7_HAVE_DMA2D
+	select STM32F7_HAVE_JPEG
+	select STM32F7_HAVE_CRYP
+	select STM32F7_HAVE_HASH
+	select STM32F7_HAVE_DFSDM1
+
+config STM32F7_STM32F778XX # Revisit when parts released
+	bool
+	default n
+	select STM32F7_STM32F77XX
+	select ARCH_HAVE_FPU
+	select ARCH_HAVE_DPFPU
+	select ARMV7M_HAVE_ICACHE
+	select ARMV7M_HAVE_DCACHE
+	select ARMV7M_HAVE_ITCM
+	select ARMV7M_HAVE_DTCM
+	select STM32F7_HAVE_FSMC
+	select STM32F7_HAVE_ETHRNET
+	select STM32F7_HAVE_RNG
+	select STM32F7_HAVE_SPI5 if !STM32F7_IO_CONFIG_V
+	select STM32F7_HAVE_SPI6 if !STM32F7_IO_CONFIG_V
+	select STM32F7_HAVE_SDMMC2 if !STM32F7_IO_CONFIG_V
+	select STM32F7_HAVE_CAN3
+	select STM32F7_HAVE_DCMI
+	select STM32F7_HAVE_DSIHOST
+	select STM32F7_HAVE_LTDC
+	select STM32F7_HAVE_DMA2D
+	select STM32F7_HAVE_JPEG
+	select STM32F7_HAVE_CRYP
+	select STM32F7_HAVE_HASH
+	select STM32F7_HAVE_DFSDM1
+
+config STM32F7_STM32F778AX
+	bool
+	default n
+	select STM32F7_STM32F77XX
+	select ARCH_HAVE_FPU
+	select ARCH_HAVE_DPFPU
+	select ARMV7M_HAVE_ICACHE
+	select ARMV7M_HAVE_DCACHE
+	select ARMV7M_HAVE_ITCM
+	select ARMV7M_HAVE_DTCM
+	select STM32F7_HAVE_FSMC
+	select STM32F7_HAVE_RNG
+	select STM32F7_HAVE_SPI5
+	select STM32F7_HAVE_SPI6
+	select STM32F7_HAVE_SDMMC2
+	select STM32F7_HAVE_CAN3
+	select STM32F7_HAVE_DCMI
+	select STM32F7_HAVE_DSIHOST
+	select STM32F7_HAVE_LTDC
+	select STM32F7_HAVE_DMA2D
+	select STM32F7_HAVE_JPEG
+	select STM32F7_HAVE_CRYP
+	select STM32F7_HAVE_HASH
+	select STM32F7_HAVE_DFSDM1
+
+config STM32F7_STM32F779XX
+	bool
+	default n
+	select STM32F7_STM32F77XX
+	select ARCH_HAVE_FPU
+	select ARCH_HAVE_DPFPU
+	select ARMV7M_HAVE_ICACHE
+	select ARMV7M_HAVE_DCACHE
+	select ARMV7M_HAVE_ITCM
+	select ARMV7M_HAVE_DTCM
+	select STM32F7_HAVE_FSMC
+	select STM32F7_HAVE_ETHRNET
+	select STM32F7_HAVE_RNG
+	select STM32F7_HAVE_SPI5 if !STM32F7_IO_CONFIG_V
+	select STM32F7_HAVE_SPI6 if !STM32F7_IO_CONFIG_V
+	select STM32F7_HAVE_SDMMC2 if !STM32F7_IO_CONFIG_V
+	select STM32F7_HAVE_CAN3
+	select STM32F7_HAVE_DCMI
+	select STM32F7_HAVE_DSIHOST if !(STM32F7_IO_CONFIG_V || STM32F7_IO_CONFIG_Z)
+	select STM32F7_HAVE_LTDC
+	select STM32F7_HAVE_DMA2D
+	select STM32F7_HAVE_JPEG
+	select STM32F7_HAVE_CRYP
+	select STM32F7_HAVE_HASH
+	select STM32F7_HAVE_DFSDM1
+
+config STM32F7_STM32F779AX
+	bool
+	default n
+	select STM32F7_STM32F77XX
+	select ARCH_HAVE_FPU
+	select ARCH_HAVE_DPFPU
+	select ARMV7M_HAVE_ICACHE
+	select ARMV7M_HAVE_DCACHE
+	select ARMV7M_HAVE_ITCM
+	select ARMV7M_HAVE_DTCM
+	select STM32F7_HAVE_FSMC
+	select STM32F7_HAVE_RNG
+	select STM32F7_HAVE_SPI5 if !STM32F7_IO_CONFIG_V
+	select STM32F7_HAVE_SPI6 if !STM32F7_IO_CONFIG_V
+	select STM32F7_HAVE_SDMMC2 if !STM32F7_IO_CONFIG_V
+	select STM32F7_HAVE_CAN3
+	select STM32F7_HAVE_DCMI
+	select STM32F7_HAVE_DSIHOST if !(STM32F7_IO_CONFIG_V || STM32F7_IO_CONFIG_Z)
+	select STM32F7_HAVE_LTDC
+	select STM32F7_HAVE_DMA2D
+	select STM32F7_HAVE_JPEG
+	select STM32F7_HAVE_CRYP
+	select STM32F7_HAVE_HASH
+	select STM32F7_HAVE_DFSDM1
+
+config STM32F7_FLASH_CONFIG_E
+	bool
+	default n
+
+config STM32F7_FLASH_CONFIG_I
+	bool
+	default n
+
+config STM32F7_FLASH_CONFIG_I
+	bool
+	default n
 
 choice
-	prompt "Embedded FLASH size"
-	default STM32F7_FLASH_1024KB
+	prompt "Overrdide Flash Size Designator"
+	depends on ARCH_CHIP_STM32F7
+	default STM32F7_FLASH_OVERRIDE_DEFAULT
+	---help---
+		STM32F7 series parts numbering (sans the package type) ends with a letter
+		that designates the FLASH size.
 
-config STM32F7_FLASH_512KB
-	bool "512 KB"
+				Designator  Size in KiB
+				   E	512
+				   G	1024
+				   I	2048
 
-config STM32F7_FLASH_1024KB
-	bool "1024 KB"
+		This configuration option defaults to using the configuration based on that designator
+		or the default smaller size if there is no last character designator is present in the
+		STM32 Chip Selection.
 
-endchoice # Embedded FLASH size
+		Examples:
+		   If the STM32F745VE is chosen, the Flash configuration would be 'E', if a variant of
+		   the part with a  2048 KiB Flash is released in the future one could simply select
+		   the 'I' designator here.
+
+		   If an STM32F7xxx Series parts is chosen the default Flash configuration will be set
+		   herein and can be changed.
+
+config STM32F7_FLASH_OVERRIDE_DEFAULT
+			bool "Default"
+
+config STM32F7_FLASH_OVERRIDE_E
+			bool "E 512KiB"
+
+config STM32F7_FLASH_OVERRIDE_G
+			bool "G 1024KiB"
+
+config STM32F7_FLASH_OVERRIDE_I
+			bool "I 2048KiB"
+
+endchoice # "Overrdide Flash Size Designator"
 
 menu "STM32 Peripheral Support"
 
@@ -72,6 +928,67 @@ menu "STM32 Peripheral Support"
 # selection MCU
 
 config STM32F7_HAVE_LTDC
+	bool
+	default n
+
+config STM32F7_HAVE_FSMC
+	bool
+	default n
+
+
+config STM32F7_HAVE_ETHRNET
+	bool
+	default n
+
+config STM32F7_HAVE_RNG
+	bool
+	default n
+
+config STM32F7_HAVE_SPI5
+	bool
+	default n
+
+config STM32F7_HAVE_SPI6
+	bool
+	default n
+
+config STM32F7_HAVE_SDMMC2
+	bool
+	default n
+
+config STM32F7_HAVE_CAN3
+	bool
+	default n
+
+config STM32F7_HAVE_DCMI
+	bool
+	default n
+
+config STM32F7_HAVE_DSIHOST
+	bool
+	default n
+
+config STM32F7_HAVE_LTDC
+	bool
+	default n
+
+config STM32F7_HAVE_DMA2D
+	bool
+	default n
+
+config STM32F7_HAVE_JPEG
+	bool
+	default n
+
+config STM32F7_HAVE_CRYP
+	bool
+	default n
+
+config STM32F7_HAVE_HASH
+	bool
+	default n
+
+config STM32F7_HAVE_DFSDM1
 	bool
 	default n
 
@@ -143,6 +1060,13 @@ config STM32F7_CAN2
 	select CAN
 	select STM32F7_CAN
 
+config STM32F7_CAN3
+	bool "CAN3"
+	default n
+	select CAN
+	select STM32F7_CAN
+	depends on STM32F7_HAVE_CAN3
+
 config STM32F7_CEC
 	bool "CEC"
 	default n
@@ -154,7 +1078,14 @@ config STM32F7_CRC
 
 config STM32F7_CRYP
 	bool "CRYP"
+	depends on STM32F7_HAVE_CRYP
 	default n
+
+config STM32F7_DFSDM1
+	bool "DFSDM1"
+	default n
+	depends on STM32F7_HAVE_DFSDM1
+	select ARCH_HAVE_DFSDM1
 
 config STM32F7_DMA1
 	bool "DMA1"
@@ -181,16 +1112,53 @@ config STM32F7_DAC2
 config STM32F7_DCMI
 	bool "DCMI"
 	default n
+	depends on STM32F7_HAVE_DCMI
+	---help---
+		The devices embed a camera interface that can connect with camera
+		modules and CMOS sensors through an 8-bit to 14-bit parallel interface,
+		 to receive video data.
+
+config STM32F7_DSIHOST
+	bool "DSIHOST"
+	default n
+	depends on STM32F7_HAVE_DSIHOST
+	---help---
+		The DSI Host is a dedicated peripheral for interfacing with MIPI® DSI
+		 compliant displays.
+
+config STM32F7_DMA2D
+	bool "DMA2D"
+	default n
+	depends on STM32F7_HAVE_DMA2D
+	---help---
+		The STM32 DMA2D is an Chrom-Art Accelerator for image manipulation
+		available on the STM32 F7 devices.
+
+config STM32F7_JPEG
+	bool "JPEG"
+	default n
+	depends on STM32F7_HAVE_JPEG
+	---help---
+		The JPEG codec provides an fast and simple hardware compressor and
+		 decompressor of JPEG images with full management of JPEG headers.
 
 config STM32F7_ETHMAC
 	bool "Ethernet MAC"
 	default n
+	depends on STM32F7_HAVE_ETHRNET
 	select NETDEVICES
 	select ARCH_HAVE_PHY
 
 config STM32F7_FSMC
 	bool "FSMC"
+	depends on STM32F7_HAVE_FSMC
 	default n
+
+config STM32F7_HASH
+	bool "HASH"
+	default n
+	depends on STM32F7_HAVE_HASH
+	select ARCH_HAVE_HASH
 
 config STM32F7_I2C1
 	bool "I2C1"
@@ -225,13 +1193,6 @@ config STM32F7_LTDC
 		video interface (HSYNC, VSYNC, etc.) for controlling TFT
 		LCD displays.
 
-config STM32F7_DMA2D
-	bool "DMA2D"
-	default n
-	---help---
-		The STM32 DMA2D is an Chrom-Art Accelerator for image manipulation
-		available on the STM32 F7 devices.
-
 config STM32F7_OTGFS
 	bool "OTG FS"
 	default n
@@ -246,10 +1207,10 @@ config STM32F7_QUADSPI
 	bool "QuadSPI"
 	default n
 
-config STM32F7_SAI1
 config STM32F7_RNG
 	bool "RNG"
 	default n
+	depends on STM32F7_HAVE_RNG
 	select ARCH_HAVE_RNG
 
 config STM32F7_SAI1
@@ -265,6 +1226,12 @@ config STM32F7_SAI2
 config STM32F7_SDMMC1
 	bool "SDMMC1"
 	default n
+	select ARCH_HAVE_SDIO
+
+config STM32F7_SDMMC2
+	bool "SDMMC2"
+	default n
+	depends on STM32F7_HAVE_SDMMC2
 	select ARCH_HAVE_SDIO
 
 config STM32F7_SPDIFRX
@@ -298,12 +1265,14 @@ config STM32F7_SPI4
 config STM32F7_SPI5
 	bool "SPI5"
 	default n
+	depends on STM32F7_HAVE_SPI5
 	select SPI
 	select STM32F7_SPI
 
 config STM32F7_SPI6
 	bool "SPI6"
 	default n
+	depends on STM32F7_HAVE_SPI6
 	select SPI
 	select STM32F7_SPI
 
@@ -685,7 +1654,7 @@ config STM32F7_SERIALBRK_BSDCOMPAT
 endmenu # U[S]ART Configuration
 
 config STM32F7_CUSTOM_CLOCKCONFIG
-        bool "Custom clock configuration"
+		bool "Custom clock configuration"
 	default n
 	---help---
 		Enables special, board-specific STM32 clock configuration.
