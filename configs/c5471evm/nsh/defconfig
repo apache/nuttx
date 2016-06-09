@@ -881,6 +881,7 @@ CONFIG_NSH_FILEIOSIZE=1024
 #
 # Networking Configuration
 #
+CONFIG_NSH_NETINIT=y
 # CONFIG_NSH_NETINIT_THREAD is not set
 
 #

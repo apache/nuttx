@@ -1360,6 +1360,7 @@ CONFIG_NSH_CONSOLE=y
 #
 # Networking Configuration
 #
+CONFIG_NSH_NETINIT=y
 # CONFIG_NSH_NETINIT_THREAD is not set
 
 #
