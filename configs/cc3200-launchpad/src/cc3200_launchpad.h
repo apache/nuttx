@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/cc3200-launchpad/src/cc3200_launchpad.h
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -70,6 +70,12 @@ void cc3200_uart_init(void);
  ************************************************************************************/
 
 void cc3200_led_init(void);
+
+/****************************************************************************
+ * Name: cc3200_led_initialize
+ ****************************************************************************/
+
+void cc3200_led_initialize(void);
 
 /****************************************************************************
  * Name: cc3200_ledon
