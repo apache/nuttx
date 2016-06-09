@@ -32,7 +32,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
-USAGE="USAGE: $0 [--debug|--help] <board>/<config>"
+USAGE="USAGE: $0 [options] <board>/<config>"
 ADVICE="Try '$0 --help' for more information"
 
 unset CONFIG
@@ -51,7 +51,7 @@ while [ ! -z "$1" ]; do
         echo ""
         echo $USAGE
         echo ""
-        echo "Where:"
+        echo "Where [options] include:"
         echo "  --debug"
         echo "     Enable script debug"
         echo "  --silent"
