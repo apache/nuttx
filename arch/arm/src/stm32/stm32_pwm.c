@@ -123,13 +123,14 @@
 
 #ifdef CONFIG_DEBUG_PWM
 #  define pwmdbg              dbg
-#  define pwmlldbg            lldbg
 #  ifdef CONFIG_DEBUG_VERBOSE
+#    define pwmlldbg          lldbg
 #    define pwmvdbg           vdbg
 #    define pwmllvdbg         llvdbg
 #    define pwm_dumpgpio(p,m) stm32_dumpgpio(p,m)
 #  else
 #    define pwmlldbg(x...)
+#    define pwmvdbg(x...)
 #    define pwmllvdbg(x...)
 #    define pwm_dumpgpio(p,m)
 #  endif
@@ -1072,11 +1073,11 @@ static int pwm_timer(FAR struct stm32_pwmtimer_s *priv,
           priv->timid, info->frequency);
 #elif defined(CONFIG_PWM_PULSECOUNT)
   pwmvdbg("TIM%u channel: %u frequency: %u duty: %08x count: %u\n",
-          priv->timid, priv->channel, info->frequency,
+          priv->timid, priv->channels[0].channel, info->frequency,
           info->duty, info->count);
 #else
   pwmvdbg("TIM%u channel: %u frequency: %u duty: %08x\n",
-          priv->timid, priv->channel, info->frequency, info->duty);
+          priv->timid, priv->channels[0].channel, info->frequency, info->duty);
 #endif
 
   DEBUGASSERT(info->frequency > 0);
@@ -1672,7 +1673,7 @@ static  int pwm_update_duty(FAR struct stm32_pwmtimer_s *priv, uint8_t channel,
 
 #ifndef CONFIG_PWM_MULTICHAN
   DEBUGASSERT(channel == priv->channels[0].channel);
-  DEBUGASSERT(chan->duty >= 0 && chan->duty < uitoub16(100));
+  DEBUGASSERT(duty >= 0 && duty < uitoub16(100));
 #endif
 
   /* Get the reload values */
