@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/stm32f7/chip/stm32f7_spi.h
+ * arch/arm/src/stm32f7/chip/stm32f74xx75xx_spi.h
  *
  *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -2485,7 +2485,7 @@ static int stm32_i2c_transfer(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s
  *
  ************************************************************************************/
 
-FAR struct i2c_master_s *stm32f7_i2cbus_initialize(int port)
+FAR struct i2c_master_s *stm32_i2cbus_initialize(int port)
 {
   struct stm32_i2c_priv_s * priv = NULL;  /* private data of device with multiple instances */
   struct stm32_i2c_inst_s * inst = NULL;  /* device, single instance */
@@ -2559,7 +2559,7 @@ FAR struct i2c_master_s *stm32f7_i2cbus_initialize(int port)
  *
  ************************************************************************************/
 
-int stm32f7_i2cbus_uninitialize(FAR struct i2c_master_s * dev)
+int stm32_i2cbus_uninitialize(FAR struct i2c_master_s * dev)
 {
   int irqs;
 

@@ -72,7 +72,7 @@ enum    spi_dev_e;
  ************************************************************************************/
 
 /************************************************************************************
- * Name: stm32f7_spibus_initialize
+ * Name: stm32_spibus_initialize
  *
  * Description:
  *   Initialize the selected SPI bus
@@ -85,31 +85,31 @@ enum    spi_dev_e;
  *
  ************************************************************************************/
 
-FAR struct spi_dev_s *stm32f7_spibus_initialize(int bus);
+FAR struct spi_dev_s *stm32_spibus_initialize(int bus);
 
 /************************************************************************************
- * Name:  stm32f7_spi1/2/...select and stm32f7_spi1/2/...status
+ * Name:  stm32_spi1/2/...select and stm32_spi1/2/...status
  *
  * Description:
- *   The external functions, stm32f7_spi1/2/...select, stm32f7_spi1/2/...status, and
- *   stm32f7_spi1/2/...cmddata must be provided by board-specific logic.  These are
+ *   The external functions, stm32_spi1/2/...select, stm32_spi1/2/...status, and
+ *   stm32_spi1/2/...cmddata must be provided by board-specific logic.  These are
  *   implementations of the select, status, and cmddata methods of the SPI interface
  *   defined by struct spi_ops_s (see include/nuttx/spi/spi.h). All other methods
- *   (including stm32f7_spibus_initialize()) are provided by common STM32 logic.  To use this
+ *   (including stm32_spibus_initialize()) are provided by common STM32 logic.  To use this
  *   common SPI logic on your board:
  *
- *   1. Provide logic in stm32f7_boardinitialize() to configure SPI chip select
+ *   1. Provide logic in stm32_boardinitialize() to configure SPI chip select
  *      pins.
- *   2. Provide stm32f7_spi1/2/...select() and stm32f7_spi1/2/...status() functions in your
+ *   2. Provide stm32_spi1/2/...select() and stm32_spi1/2/...status() functions in your
  *      board-specific logic.  These functions will perform chip selection and
  *      status operations using GPIOs in the way your board is configured.
  *   3. If CONFIG_SPI_CMDDATA is defined in your NuttX configuration file, then
- *      provide stm32f7_spi1/2/...cmddata() functions in your board-specific logic.
+ *      provide stm32_spi1/2/...cmddata() functions in your board-specific logic.
  *      These functions will perform cmd/data selection operations using GPIOs in the
  *      way your board is configured.
- *   4. Add a calls to stm32f7_spibus_initialize() in your low level application
+ *   4. Add a calls to stm32_spibus_initialize() in your low level application
  *      initialization logic
- *   5. The handle returned by stm32f7_spibus_initialize() may then be used to bind the
+ *   5. The handle returned by stm32_spibus_initialize() may then be used to bind the
  *      SPI driver to higher level logic (e.g., calling
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).
@@ -117,43 +117,43 @@ FAR struct spi_dev_s *stm32f7_spibus_initialize(int bus);
  ************************************************************************************/
 
 #ifdef CONFIG_STM32F7_SPI1
-void stm32f7_spi1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
-uint8_t stm32f7_spi1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
-int stm32f7_spi1cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
+void stm32_spi1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
+uint8_t stm32_spi1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+int stm32_spi1cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
 #endif
 
 #ifdef CONFIG_STM32F7_SPI2
-void stm32f7_spi2select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
-uint8_t stm32f7_spi2status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
-int stm32f7_spi2cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
+void stm32_spi2select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
+uint8_t stm32_spi2status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+int stm32_spi2cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
 #endif
 
 #ifdef CONFIG_STM32F7_SPI3
-void stm32f7_spi3select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
-uint8_t stm32f7_spi3status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
-int stm32f7_spi3cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
+void stm32_spi3select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
+uint8_t stm32_spi3status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+int stm32_spi3cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
 #endif
 
 #ifdef CONFIG_STM32F7_SPI4
-void stm32f7_spi4select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
-uint8_t stm32f7_spi4status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
-int stm32f7_spi4cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
+void stm32_spi4select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
+uint8_t stm32_spi4status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+int stm32_spi4cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
 #endif
 
 #ifdef CONFIG_STM32F7_SPI5
-void stm32f7_spi5select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
-uint8_t stm32f7_spi5status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
-int stm32f7_spi5cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
+void stm32_spi5select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
+uint8_t stm32_spi5status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+int stm32_spi5cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
 #endif
 
 #ifdef CONFIG_STM32F7_SPI6
-void stm32f7_spi6select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
-uint8_t stm32f7_spi6status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
-int stm32f7_spi6cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
+void stm32_spi6select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
+uint8_t stm32_spi6status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+int stm32_spi6cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
 #endif
 
 /************************************************************************************
- * Name: stm32f7_spi1/2/...register
+ * Name: stm32_spi1/2/...register
  *
  * Description:
  *   If the board supports a card detect callback to inform the SPI-based MMC/SD
@@ -174,32 +174,32 @@ int stm32f7_spi6cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cm
 
 #ifdef CONFIG_SPI_CALLBACK
 #ifdef CONFIG_STM32F7_SPI1
-int stm32f7_spi1register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
+int stm32_spi1register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
                        FAR void *arg);
 #endif
 
 #ifdef CONFIG_STM32F7_SPI2
-int stm32f7_spi2register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
+int stm32_spi2register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
                        FAR void *arg);
 #endif
 
 #ifdef CONFIG_STM32F7_SPI3
-int stm32f7_spi3register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
+int stm32_spi3register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
                        FAR void *arg);
 #endif
 
 #ifdef CONFIG_STM32F7_SPI4
-int stm32f7_spi4register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
+int stm32_spi4register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
                        FAR void *arg);
 #endif
 
 #ifdef CONFIG_STM32F7_SPI5
-int stm32f7_spi5register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
+int stm32_spi5register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
                        FAR void *arg);
 #endif
 
 #ifdef CONFIG_STM32F7_SPI6
-int stm32f7_spi6register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
+int stm32_spi6register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
                        FAR void *arg);
 #endif
 #endif
