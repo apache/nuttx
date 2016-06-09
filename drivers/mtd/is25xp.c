@@ -61,6 +61,7 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+
 /* Configuration ********************************************************************/
 /* Per the data sheet, IS25xP parts can be driven with either SPI mode 0 (CPOL=0 and
  * CPHA=0) or mode 3 (CPOL=1 and CPHA=1).  So you may need to specify
@@ -78,7 +79,6 @@
 #  define CONFIG_IS25XP_SPIFREQUENCY 20000000
 #endif
 
-
 /* IS25 Registers *******************************************************************/
 /* Indentification register values */
 
@@ -89,6 +89,7 @@
  *  (2,048 sectors) * (4,096 bytes per sector)
  *  (32,768 pages) * (256 bytes per page)
  */
+
 #define IS25_IS25LP064_CAPACITY       0x17
 #define IS25_IS25LP064_SECTOR_SHIFT   12    /* Sector size 1 << 12 = 4,096 */
 #define IS25_IS25LP064_NSECTORS       2048
@@ -99,6 +100,7 @@
  *  (4,096 sectors) * (4,096 bytes per sector)
  *  (65,536 pages) * (256 bytes per page)
  */
+
 #define IS25_IS25LP128_CAPACITY       0x18
 #define IS25_IS25LP128_SECTOR_SHIFT   12    /* Sector size 1 << 12 = 4,096 */
 #define IS25_IS25LP128_NSECTORS       4096
@@ -107,12 +109,12 @@
 
 
 /* Instructions */
-/*      Command        Value      N Description             Addr Dummy  Data   */
+/*      Command        Value      N Description             Addr Dummy  Data  */
 #define IS25_WREN      0x06    /* 1 Write Enable              0   0     0     */
 #define IS25_WRDI      0x04    /* 1 Write Disable             0   0     0     */
 #define IS25_RDID      0x9f    /* 1 Read Identification       0   0     1-3   */
 #define IS25_RDSR      0x05    /* 1 Read Status Register      0   0     >=1   */
-//#define IS25_EWSR      0x50    /* 1 Write enable status       0   0     0     */
+//#define IS25_EWSR    0x50    /* 1 Write enable status       0   0     0     */
 #define IS25_WRSR      0x01    /* 1 Write Status Register     0   0     1     */
 #define IS25_READ      0x03    /* 1 Read Data Bytes           3   0     >=1   */
 #define IS25_FAST_READ 0x0b    /* 1 Higher speed read         3   1     >=1   */
@@ -200,14 +202,6 @@ static ssize_t is25xp_write(FAR struct mtd_dev_s *dev, off_t offset, size_t nbyt
 static int is25xp_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg);
 
 /************************************************************************************
- * Private Data
- ************************************************************************************/
-
-/************************************************************************************
- * Private Functions
- ************************************************************************************/
-
-/************************************************************************************
  * Name: is25xp_lock
  ************************************************************************************/
 
@@ -231,6 +225,7 @@ static void is25xp_lock(FAR struct spi_dev_s *dev)
 
   SPI_SETMODE(dev, CONFIG_IS25XP_SPIMODE);
   SPI_SETBITS(dev, 8);
+  (void)SPI_HWFEATURES(dev, 0);
   (void)SPI_SETFREQUENCY(dev, CONFIG_IS25XP_SPIFREQUENCY);
 }
 
@@ -318,7 +313,9 @@ static void is25xp_waitwritecomplete(struct is25xp_dev_s *priv)
 
 #if 0
   if (!priv->lastwaswrite)
-    return;
+    {
+      return;
+    }
 #endif
 
   /* Are we the only device on the bus? */
@@ -382,7 +379,6 @@ static void is25xp_waitwritecomplete(struct is25xp_dev_s *priv)
         }
     }
   while ((status & IS25_SR_WIP) != 0);
-
 #endif
 
   priv->lastwaswrite = false;
@@ -1003,3 +999,4 @@ FAR struct mtd_dev_s *is25xp_initialize(FAR struct spi_dev_s *dev)
   fvdbg("Return %p\n", priv);
   return (FAR struct mtd_dev_s *)priv;
 }
+
