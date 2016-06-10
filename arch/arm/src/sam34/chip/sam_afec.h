@@ -205,29 +205,29 @@
 
 /* Extended Mode Register */
 
-#define AFEC_EMR_CMPMODE_SHIFT      (0)      /* Bit 0-1: Comparison Mode */
-#define AFEC_EMR_CMPMODE_MASK       (3 << AFEC_EMR_CMPMODE_SHIFT)
-#  define AFEC_EMR_CMPMODE_LOW      (0 << AFEC_EMR_CMPMODE_SHIFT) /* Event when lower than low window threshold */
-#  define AFEC_EMR_CMPMODE_HIGH     (1 << AFEC_EMR_CMPMODE_SHIFT) /* Event when higher than high window threshold */
-#  define AFEC_EMR_CMPMODE_IN       (2 << AFEC_EMR_CMPMODE_SHIFT) /* Event when in comparison window */
-#  define AFEC_EMR_CMPMODE_OUT      (3 << AFEC_EMR_CMPMODE_SHIFT) /* Event when out of comparison window */
-#define AFEC_EMR_CMPSEL_SHIFT       (3)       /* Bit 3-7: Comparison Selected Channel */
-#define AFEC_EMR_CMPSEL_MASK        (31 << AFEC_EMR_CMPSEL_SHIFT)
-#  define AFEC_EMR_CMPSEL(n)        ((uint32_t)(n) << AFEC_EMR_CMPSEL_SHIFT)
-#define AFEC_EMR_CMPALL             (1 << 9)  /* Bit 9:  Compare All Channels */
-#define AFEC_EMR_CMPFILTER_SHIFT    (12)      /* Bits 12-13: Compare Event Filtering */
-#define AFEC_EMR_CMPFILTER_MASK     (3 << AFEC_EMR_CMPFILTER_SHIFT)
-#  define AFEC_EMR_CMPFILTER(n)     ((uint32_t)(n) << AFEC_EMR_CMPFILTER_SHIFT)
-#define AFEC_EMR_RES_SHIFT          (16)      /* Bits 16-18: Resolution */
-#define AFEC_EMR_RES_MASK           (7 << AFEC_EMR_RES_SHIFT)
-# define AFEC_EMR_RES_NOAVG         (0 << AFEC_EMR_RES_SHIFT) /* 12-bit resolution, AFEC sample rate is maximum (no averaging) */
-# define AFEC_EMR_RES_LOWRES        (1 << AFEC_EMR_RES_SHIFT) /* 10-bit resolution, AFEC sample rate is maximum (no averaging) */
-# define AFEC_EMR_RES_OSR4          (2 << AFEC_EMR_RES_SHIFT) /* 13-bit resolution, AFEC sample rate divided by 4 (averaging) */
-# define AFEC_EMR_RES_OSR16         (3 << AFEC_EMR_RES_SHIFT) /* 14-bit resolution, AFEC sample rate divided by 16 (averaging) */
-# define AFEC_EMR_RES_OSR64         (4 << AFEC_EMR_RES_SHIFT) /* 15-bit resolution, AFEC sample rate divided by 64 (averaging) */
-# define AFEC_EMR_RES_OSR256        (5 << AFEC_EMR_RES_SHIFT) /* 16-bit resolution, AFEC sample rate divided by 256 (averaging) */
-#define AFEC_EMR_TAG                (1 << 24) /* Bit 24: TAG of the AFEC_LDCR register */
-#define AFEC_EMR_STM                (1 << 25) /* Bit 25: Single Trigger Mode */
+#define AFEC_EMR_CMPMODE_SHIFT       (0)      /* Bit 0-1: Comparison Mode */
+#define AFEC_EMR_CMPMODE_MASK        (3 << AFEC_EMR_CMPMODE_SHIFT)
+#  define AFEC_EMR_CMPMODE_LOW       (0 << AFEC_EMR_CMPMODE_SHIFT) /* Event when lower than low window threshold */
+#  define AFEC_EMR_CMPMODE_HIGH      (1 << AFEC_EMR_CMPMODE_SHIFT) /* Event when higher than high window threshold */
+#  define AFEC_EMR_CMPMODE_IN        (2 << AFEC_EMR_CMPMODE_SHIFT) /* Event when in comparison window */
+#  define AFEC_EMR_CMPMODE_OUT       (3 << AFEC_EMR_CMPMODE_SHIFT) /* Event when out of comparison window */
+#define AFEC_EMR_CMPSEL_SHIFT        (3)       /* Bit 3-7: Comparison Selected Channel */
+#define AFEC_EMR_CMPSEL_MASK         (31 << AFEC_EMR_CMPSEL_SHIFT)
+#  define AFEC_EMR_CMPSEL(n)         ((uint32_t)(n) << AFEC_EMR_CMPSEL_SHIFT)
+#define AFEC_EMR_CMPALL              (1 << 9)  /* Bit 9:  Compare All Channels */
+#define AFEC_EMR_CMPFILTER_SHIFT     (12)      /* Bits 12-13: Compare Event Filtering */
+#define AFEC_EMR_CMPFILTER_MASK      (3 << AFEC_EMR_CMPFILTER_SHIFT)
+#  define AFEC_EMR_CMPFILTER(n)      ((uint32_t)(n) << AFEC_EMR_CMPFILTER_SHIFT)
+#define AFEC_EMR_RES_SHIFT           (16)      /* Bits 16-18: Resolution */
+#define AFEC_EMR_RES_MASK            (7 << AFEC_EMR_RES_SHIFT)
+# define AFEC_EMR_RES_NOAVG          (0 << AFEC_EMR_RES_SHIFT) /* 12-bit resolution, AFEC sample rate is maximum (no averaging) */
+# define AFEC_EMR_RES_LOWRES         (1 << AFEC_EMR_RES_SHIFT) /* 10-bit resolution, AFEC sample rate is maximum (no averaging) */
+# define AFEC_EMR_RES_OSR4           (2 << AFEC_EMR_RES_SHIFT) /* 13-bit resolution, AFEC sample rate divided by 4 (averaging) */
+# define AFEC_EMR_RES_OSR16          (3 << AFEC_EMR_RES_SHIFT) /* 14-bit resolution, AFEC sample rate divided by 16 (averaging) */
+# define AFEC_EMR_RES_OSR64          (4 << AFEC_EMR_RES_SHIFT) /* 15-bit resolution, AFEC sample rate divided by 64 (averaging) */
+# define AFEC_EMR_RES_OSR256         (5 << AFEC_EMR_RES_SHIFT) /* 16-bit resolution, AFEC sample rate divided by 256 (averaging) */
+#define AFEC_EMR_TAG                 (1 << 24) /* Bit 24: TAG of the AFEC_LDCR register */
+#define AFEC_EMR_STM                 (1 << 25) /* Bit 25: Single Trigger Mode */
 
 /* Channel Sequence 1 Register */
 
