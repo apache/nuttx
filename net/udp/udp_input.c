@@ -67,9 +67,9 @@
  *   Handle incoming UDP input
  *
  * Parameters:
- *   dev      - The device driver structure containing the received UDP packet
- *   udp      - A pointer to the UDP header in the packet
- *   udpiplen - Length of the IP and UDP headers
+ *   dev   - The device driver structure containing the received UDP packet
+ *   udp   - A pointer to the UDP header in the packet
+ *   iplen - Length of the IP and UDP headers
  *
  * Return:
  *   OK  The packet has been processed  and can be deleted

@@ -71,9 +71,9 @@
  *   Handle incoming TCP input
  *
  * Parameters:
- *   dev      - The device driver structure containing the received TCP packet.
- *   tcp      - A pointer to the TCP header in the packet
- *   tcpiplen - Combined length of the IP and TCP headers
+ *   dev   - The device driver structure containing the received TCP packet.
+ *   tcp   - A pointer to the TCP header in the packet
+ *   iplen - Combined length of the IP and TCP headers
  *
  * Return:
  *   None
