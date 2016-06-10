@@ -205,7 +205,7 @@
 
 /* Extended Mode Register */
 
-#define AFEC_EMR_CMPMODE_SHIFT       (0)      /* Bit 0-1: Comparison Mode */
+#define AFEC_EMR_CMPMODE_SHIFT       (0)       /* Bit 0-1: Comparison Mode */
 #define AFEC_EMR_CMPMODE_MASK        (3 << AFEC_EMR_CMPMODE_SHIFT)
 #  define AFEC_EMR_CMPMODE_LOW       (0 << AFEC_EMR_CMPMODE_SHIFT) /* Event when lower than low window threshold */
 #  define AFEC_EMR_CMPMODE_HIGH      (1 << AFEC_EMR_CMPMODE_SHIFT) /* Event when higher than high window threshold */
@@ -234,28 +234,28 @@
 #define AFEC_SEQ1R_USCH_SHIFT(n)     ((n) << 2) /* n=0..7 */
 #define AFEC_SEQ1R_USCH_MASK(n)      (15 << AFEC_SEQ1R_USCH_SHIFT(n))
 #  define AFEC_SEQ1R_USCH(n,v)       ((uint32_t)(v) << AFEC_SEQ1R_USCH_SHIFT(n))
-#define AFEC_SEQ1R_USCH0_SHIFT       (0) /* Bits 0-3: User sequence number 0 */
+#define AFEC_SEQ1R_USCH0_SHIFT       (0)       /* Bits 0-3: User sequence number 0 */
 #define AFEC_SEQ1R_USCH0_MASK        (15 << AFEC_SEQ1R_USCH0_SHIFT)
 #  define AFEC_SEQ1R_USCH0(v)        ((uint32_t)(v) << AFEC_SEQ1R_USCH0_SHIFT)
-#define AFEC_SEQ1R_USCH1_SHIFT       (4) /* Bits 4-7: User sequence number 1 */
+#define AFEC_SEQ1R_USCH1_SHIFT       (4)       /* Bits 4-7: User sequence number 1 */
 #define AFEC_SEQ1R_USCH1_MASK        (15 << AFEC_SEQ1R_USCH1_SHIFT)
 #  define AFEC_SEQ1R_USCH1(v)        ((uint32_t)(v) << AFEC_SEQ1R_USCH1_SHIFT)
-#define AFEC_SEQ1R_USCH2_SHIFT       (8) /* Bits 8-11: User sequence number 2 */
+#define AFEC_SEQ1R_USCH2_SHIFT       (8)       /* Bits 8-11: User sequence number 2 */
 #define AFEC_SEQ1R_USCH2_MASK        (15 << AFEC_SEQ1R_USCH2_SHIFT)
 #  define AFEC_SEQ1R_USCH2(v)        ((uint32_t)(v) << AFEC_SEQ1R_USCH2_SHIFT)
-#define AFEC_SEQ1R_USCH3_SHIFT       (12) /* Bits 12-15: User sequence number 3 */
+#define AFEC_SEQ1R_USCH3_SHIFT       (12)      /* Bits 12-15: User sequence number 3 */
 #define AFEC_SEQ1R_USCH3_MASK        (15 << AFEC_SEQ1R_USCH3_SHIFT)
 #  define AFEC_SEQ1R_USCH3(v)        ((uint32_t)(v) << AFEC_SEQ1R_USCH3_SHIFT)
-#define AFEC_SEQ1R_USCH4_SHIFT       (16) /* Bits 16-19: User sequence number 4 */
+#define AFEC_SEQ1R_USCH4_SHIFT       (16)      /* Bits 16-19: User sequence number 4 */
 #define AFEC_SEQ1R_USCH4_MASK        (15 << AFEC_SEQ1R_USCH4_SHIFT)
 #  define AFEC_SEQ1R_USCH4(v)        ((uint32_t)(v) << AFEC_SEQ1R_USCH4_SHIFT)
-#define AFEC_SEQ1R_USCH5_SHIFT       (20) /* Bits 20-23: User sequence number 5 */
+#define AFEC_SEQ1R_USCH5_SHIFT       (20)      /* Bits 20-23: User sequence number 5 */
 #define AFEC_SEQ1R_USCH5_MASK        (15 << AFEC_SEQ1R_USCH5_SHIFT)
 #  define AFEC_SEQ1R_USCH5(v)        ((uint32_t)(v) << AFEC_SEQ1R_USCH5_SHIFT)
-#define AFEC_SEQ1R_USCH6_SHIFT       (24) /* Bits 24-27: User sequence number 6 */
+#define AFEC_SEQ1R_USCH6_SHIFT       (24)      /* Bits 24-27: User sequence number 6 */
 #define AFEC_SEQ1R_USCH6_MASK        (15 << AFEC_SEQ1R_USCH6_SHIFT)
 #  define AFEC_SEQ1R_USCH6(v)        ((uint32_t)(v) << AFEC_SEQ1R_USCH6_SHIFT)
-#define AFEC_SEQ1R_USCH7_SHIFT       (28) /* Bits 28-31: User sequence number 7 */
+#define AFEC_SEQ1R_USCH7_SHIFT       (28)      /* Bits 28-31: User sequence number 7 */
 #define AFEC_SEQ1R_USCH7_MASK        (15 << AFEC_SEQ1R_USCH7_SHIFT)
 #  define AFEC_SEQ1R_USCH7(v)        ((uint32_t)(v) << AFEC_SEQ1R_USCH7_SHIFT)
 
@@ -264,28 +264,28 @@
 #define AFEC_SEQ2R_USCH_SHIFT(n)     (((n)-8) << 2) /* n=8..15 */
 #define AFEC_SEQ2R_USCH_MASK(n)      (15 << AFEC_SEQ2R_USCH_SHIFT(n))
 #  define AFEC_SEQ2R_USCH(n,v)       ((uint32_t)(v) << AFEC_SEQ2R_USCH_SHIFT(n))
-#define AFEC_SEQ2R_USCH8_SHIFT       (0) /* Bits 0-3: User sequence number 8 */
+#define AFEC_SEQ2R_USCH8_SHIFT       (0)       /* Bits 0-3: User sequence number 8 */
 #define AFEC_SEQ2R_USCH8_MASK        (15 << AFEC_SEQ2R_USCH8_SHIFT)
 #  define AFEC_SEQ2R_USCH8(v)        ((uint32_t)(v) << AFEC_SEQ2R_USCH8_SHIFT)
-#define AFEC_SEQ2R_USCH9_SHIFT       (4) /* Bits 4-7: User sequence number 9 */
+#define AFEC_SEQ2R_USCH9_SHIFT       (4)       /* Bits 4-7: User sequence number 9 */
 #define AFEC_SEQ2R_USCH9_MASK        (15 << AFEC_SEQ2R_USCH9_SHIFT)
 #  define AFEC_SEQ2R_USCH9(v)        ((uint32_t)(v) << AFEC_SEQ2R_USCH9_SHIFT)
-#define AFEC_SEQ2R_USCH10_SHIFT      (8) /* Bits 8-11: User sequence number 10 */
+#define AFEC_SEQ2R_USCH10_SHIFT      (8)       /* Bits 8-11: User sequence number 10 */
 #define AFEC_SEQ2R_USCH10_MASK       (15 << AFEC_SEQ2R_USCH10_SHIFT)
 #  define AFEC_SEQ2R_USCH10(v)       ((uint32_t)(v) << AFEC_SEQ2R_USCH10_SHIFT)
-#define AFEC_SEQ2R_USCH11_SHIFT      (12) /* Bits 12-15: User sequence number 11 */
+#define AFEC_SEQ2R_USCH11_SHIFT      (12)      /* Bits 12-15: User sequence number 11 */
 #define AFEC_SEQ2R_USCH11_MASK       (15 << AFEC_SEQ2R_USCH11_SHIFT)
 #  define AFEC_SEQ2R_USCH11(v)       ((uint32_t)(v) << AFEC_SEQ2R_USCH11_SHIFT)
-#define AFEC_SEQ2R_USCH12_SHIFT      (16) /* Bits 16-19: User sequence number 12 */
+#define AFEC_SEQ2R_USCH12_SHIFT      (16)      /* Bits 16-19: User sequence number 12 */
 #define AFEC_SEQ2R_USCH12_MASK       (15 << AFEC_SEQ2R_USCH12_SHIFT)
 #  define AFEC_SEQ2R_USCH12(v)       ((uint32_t)(v) << AFEC_SEQ2R_USCH12_SHIFT)
-#define AFEC_SEQ2R_USCH13_SHIFT      (20) /* Bits 20-23: User sequence number 13 */
+#define AFEC_SEQ2R_USCH13_SHIFT      (20)      /* Bits 20-23: User sequence number 13 */
 #define AFEC_SEQ2R_USCH13_MASK       (15 << AFEC_SEQ2R_USCH13_SHIFT)
 #  define AFEC_SEQ2R_USCH13(v)       ((uint32_t)(v) << AFEC_SEQ2R_USCH13_SHIFT)
-#define AFEC_SEQ2R_USCH14_SHIFT      (24) /* Bits 24-27: User sequence number 14 */
+#define AFEC_SEQ2R_USCH14_SHIFT      (24)      /* Bits 24-27: User sequence number 14 */
 #define AFEC_SEQ2R_USCH14_MASK       (15 << AFEC_SEQ2R_USCH14_SHIFT)
 #  define AFEC_SEQ2R_USCH14(v)       ((uint32_t)(v) << AFEC_SEQ2R_USCH14_SHIFT)
-#define AFEC_SEQ2R_USCH15_SHIFT      (28) /* Bits 28-31: User sequence number 15 */
+#define AFEC_SEQ2R_USCH15_SHIFT      (28)      /* Bits 28-31: User sequence number 15 */
 #define AFEC_SEQ2R_USCH15_MASK       (15 << AFEC_SEQ2R_USCH15_SHIFT)
 #  define AFEC_SEQ2R_USCH15(v)       ((uint32_t)(v) << AFEC_SEQ2R_USCH15_SHIFT)
 
@@ -382,52 +382,52 @@
 #define AFEC_CGR_GAIN_SHIFT(n)       ((n) << 1) /* n=0..15 */
 #define AFEC_CGR_GAIN_MASK(n)        (3 << AFEC_CGR_GAIN_SHIFT(n))
 #  define AFEC_CGR_GAIN(n,v)         ((uint32_t)(v) << AFEC_CGR_GAIN_SHIFT(n))
-#define AFEC_CGR_GAIN0_SHIFT         (0)        /* Bits 0-1: Gain for channel 0 */
+#define AFEC_CGR_GAIN0_SHIFT         (0)       /* Bits 0-1: Gain for channel 0 */
 #define AFEC_CGR_GAIN0_MASK          (3 << AFEC_CGR_GAIN0_SHIFT)
 #  define AFEC_CGR_GAIN0(v)          ((uint32_t)(v) << AFEC_CGR_GAIN0_SHIFT)
-#define AFEC_CGR_GAIN1_SHIFT         (2)        /* Bits 2-3: Gain for channel 1 */
+#define AFEC_CGR_GAIN1_SHIFT         (2)       /* Bits 2-3: Gain for channel 1 */
 #define AFEC_CGR_GAIN1_MASK          (3 << AFEC_CGR_GAIN1_SHIFT)
 #  define AFEC_CGR_GAIN1(v)          ((uint32_t)(v) << AFEC_CGR_GAIN1_SHIFT)
-#define AFEC_CGR_GAIN2_SHIFT         (4)        /* Bits 4-5: Gain for channel 2 */
+#define AFEC_CGR_GAIN2_SHIFT         (4)       /* Bits 4-5: Gain for channel 2 */
 #define AFEC_CGR_GAIN2_MASK          (3 << AFEC_CGR_GAIN2_SHIFT)
 #  define AFEC_CGR_GAIN2(v)          ((uint32_t)(v) << AFEC_CGR_GAIN2_SHIFT)
-#define AFEC_CGR_GAIN3_SHIFT         (6)        /* Bits 6-7: Gain for channel 3 */
+#define AFEC_CGR_GAIN3_SHIFT         (6)       /* Bits 6-7: Gain for channel 3 */
 #define AFEC_CGR_GAIN3_MASK          (3 << AFEC_CGR_GAIN3_SHIFT)
 #  define AFEC_CGR_GAIN3(v)          ((uint32_t)(v) << AFEC_CGR_GAIN3_SHIFT)
-#define AFEC_CGR_GAIN4_SHIFT         (8)        /* Bits 8-9: Gain for channel 4 */
+#define AFEC_CGR_GAIN4_SHIFT         (8)       /* Bits 8-9: Gain for channel 4 */
 #define AFEC_CGR_GAIN4_MASK          (3 << AFEC_CGR_GAIN4_SHIFT)
 #  define AFEC_CGR_GAIN4(v)          ((uint32_t)(v) << AFEC_CGR_GAIN4_SHIFT)
-#define AFEC_CGR_GAIN5_SHIFT         (10)       /* Bits 10-11: Gain for channel 5 */
+#define AFEC_CGR_GAIN5_SHIFT         (10)      /* Bits 10-11: Gain for channel 5 */
 #define AFEC_CGR_GAIN5_MASK          (3 << AFEC_CGR_GAIN5_SHIFT)
 #  define AFEC_CGR_GAIN5(v)          ((uint32_t)(v) << AFEC_CGR_GAIN5_SHIFT)
-#define AFEC_CGR_GAIN6_SHIFT         (12)       /* Bits 12-13: Gain for channel 6 */
+#define AFEC_CGR_GAIN6_SHIFT         (12)      /* Bits 12-13: Gain for channel 6 */
 #define AFEC_CGR_GAIN6_MASK          (3 << AFEC_CGR_GAIN6_SHIFT)
 #  define AFEC_CGR_GAIN6(v)          ((uint32_t)(v) << AFEC_CGR_GAIN6_SHIFT)
-#define AFEC_CGR_GAIN7_SHIFT         (14)       /* Bits 14-15: Gain for channel 7 */
+#define AFEC_CGR_GAIN7_SHIFT         (14)      /* Bits 14-15: Gain for channel 7 */
 #define AFEC_CGR_GAIN7_MASK          (3 << AFEC_CGR_GAIN7_SHIFT)
 #  define AFEC_CGR_GAIN7(v)          ((uint32_t)(v) << AFEC_CGR_GAIN7_SHIFT)
-#define AFEC_CGR_GAIN8_SHIFT         (16)       /* Bits 16-17: Gain for channel 8 */
+#define AFEC_CGR_GAIN8_SHIFT         (16)      /* Bits 16-17: Gain for channel 8 */
 #define AFEC_CGR_GAIN8_MASK          (3 << AFEC_CGR_GAIN8_SHIFT)
 #  define AFEC_CGR_GAIN8(v)          ((uint32_t)(v) << AFEC_CGR_GAIN8_SHIFT)
-#define AFEC_CGR_GAIN9_SHIFT         (18)       /* Bits 18-19: Gain for channel 9 */
+#define AFEC_CGR_GAIN9_SHIFT         (18)      /* Bits 18-19: Gain for channel 9 */
 #define AFEC_CGR_GAIN9_MASK          (3 << AFEC_CGR_GAIN9_SHIFT)
 #  define AFEC_CGR_GAIN9(v)          ((uint32_t)(v) << AFEC_CGR_GAIN9_SHIFT)
-#define AFEC_CGR_GAIN10_SHIFT        (20)       /* Bits 20-21: Gain for channel 10 */
+#define AFEC_CGR_GAIN10_SHIFT        (20)      /* Bits 20-21: Gain for channel 10 */
 #define AFEC_CGR_GAIN10_MASK         (3 << AFEC_CGR_GAIN10_SHIFT)
 #  define AFEC_CGR_GAIN10(v)         ((uint32_t)(v) << AFEC_CGR_GAIN10_SHIFT)
-#define AFEC_CGR_GAIN11_SHIFT        (22)       /* Bits 22-23: Gain for channel 11 */
+#define AFEC_CGR_GAIN11_SHIFT        (22)      /* Bits 22-23: Gain for channel 11 */
 #define AFEC_CGR_GAIN11_MASK         (3 << AFEC_CGR_GAIN11_SHIFT)
 #  define AFEC_CGR_GAIN11(v)         ((uint32_t)(v) << AFEC_CGR_GAIN11_SHIFT)
-#define AFEC_CGR_GAIN12_SHIFT        (24)       /* Bits 24-25: Gain for channel 12 */
+#define AFEC_CGR_GAIN12_SHIFT        (24)      /* Bits 24-25: Gain for channel 12 */
 #define AFEC_CGR_GAIN12_MASK         (3 << AFEC_CGR_GAIN12_SHIFT)
 #  define AFEC_CGR_GAIN12(v)         ((uint32_t)(v) << AFEC_CGR_GAIN12_SHIFT)
-#define AFEC_CGR_GAIN13_SHIFT        (26)       /* Bits 26-27: Gain for channel 13 */
+#define AFEC_CGR_GAIN13_SHIFT        (26)      /* Bits 26-27: Gain for channel 13 */
 #define AFEC_CGR_GAIN13_MASK         (3 << AFEC_CGR_GAIN13_SHIFT)
 #  define AFEC_CGR_GAIN13(v)         ((uint32_t)(v) << AFEC_CGR_GAIN13_SHIFT)
-#define AFEC_CGR_GAIN14_SHIFT        (28)       /* Bits 28-29: Gain for channel 14 */
+#define AFEC_CGR_GAIN14_SHIFT        (28)      /* Bits 28-29: Gain for channel 14 */
 #define AFEC_CGR_GAIN14_MASK         (3 << AFEC_CGR_GAIN14_SHIFT)
 #  define AFEC_CGR_GAIN14(v)         ((uint32_t)(v) << AFEC_CGR_GAIN14_SHIFT)
-#define AFEC_CGR_GAIN15_SHIFT        (30)       /* Bits 30-31: Gain for channel 15 */
+#define AFEC_CGR_GAIN15_SHIFT        (30)      /* Bits 30-31: Gain for channel 15 */
 #define AFEC_CGR_GAIN15_MASK         (3 << AFEC_CGR_GAIN15_SHIFT)
 #  define AFEC_CGR_GAIN15(v)         ((uint32_t)(v) << AFEC_CGR_GAIN15_SHIFT)
 
@@ -487,8 +487,8 @@
 
 /* Temperature Sensor Mode Register */
 
-#define AFEC_TEMPMR_RTCT              (1 << 0)  /* Bit 0:  Temperature Sensor RTC Trigger mode */
-#define AFEC_TEMPMR_TEMPCMPMOD_SHIFT  (4)       /* Bits 4-5: Temperature Comparison Mode */
+#define AFEC_TEMPMR_RTCT              (1 << 0) /* Bit 0:  Temperature Sensor RTC Trigger mode */
+#define AFEC_TEMPMR_TEMPCMPMOD_SHIFT  (4)      /* Bits 4-5: Temperature Comparison Mode */
 #define AFEC_TEMPMR_TEMPCMPMOD_MASK   (3 << AFEC_TEMPMR_TEMPCMPMOD_SHIFT)
 #  define AFEC_TEMPMR_TEMPCMPMOD_LOW  (0 << AFEC_TEMPMR_TEMPCMPMOD_SHIFT) /* Event when data is lower than low threshold */
 #  define AFEC_TEMPMR_TEMPCMPMOD_HIGH (1 << AFEC_TEMPMR_TEMPCMPMOD_SHIFT) /* Event when data is higher than high threshold */

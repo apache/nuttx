@@ -89,7 +89,7 @@
 #    define pwmllvdbg         llvdbg
 #    define pwm_dumpgpio(p,m) efm32_dumpgpio(p,m)
 #  else
-#    define pwmlldbg(x...)
+#    define pwmvdbg(x...)
 #    define pwmllvdbg(x...)
 #    define pwm_dumpgpio(p,m)
 #  endif

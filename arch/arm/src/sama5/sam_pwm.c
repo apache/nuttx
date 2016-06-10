@@ -407,7 +407,7 @@
 #    define pwmvdbg           vdbg
 #    define pwmllvdbg         llvdbg
 #  else
-#    define pwmlldbg(x...)
+#    define pwmvdbg(x...)
 #    define pwmllvdbg(x...)
 #  endif
 #else
