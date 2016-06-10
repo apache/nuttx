@@ -54,8 +54,8 @@
  *   #include <stdint.h>
  *   #include <stdio.h>
  *
- *   #define CRC64_POLYNOMIAL ((uint64_t)0x42f0e1eba9ea3693)
- *   #define CRC64_TABLEN     ((size_t)256)
+ *   #define CRC64_POLY   ((uint64_t)0x42f0e1eba9ea3693)
+ *   #define CRC64_TABLEN ((size_t)256)
  *
  *   int main(void)
  *   {
@@ -73,7 +73,7 @@
  *           {
  *             if ((crc64val & ((uint64_t)1 << 63)) != 0)
  *               {
- *                 crc64val = (crc64val << 1) ^ CRC64_POLYNOMIAL;
+ *                 crc64val = (crc64val << 1) ^ CRC64_POLY;
  *               }
  *             else
  *               {
@@ -234,8 +234,6 @@ static const uint64_t crc64_tab[256] =
   0x5dedc41a34bbeeb2, 0x1f1d25f19d51d821,
   0xd80c07cd676f8394, 0x9afce626ce85b507
 };
-#else
-#  define CRC64_POLYNOMIAL ((uint64_t)0x42f0e1eba9ea3693)
 #endif
 
 /****************************************************************************
@@ -257,7 +255,8 @@ uint64_t crc64part(FAR const uint8_t *src, size_t len, uint64_t crc64val)
 
   for (i = 0; i < len; i++)
     {
-      crc64val = crc64_tab[((crc64val >> 56) & 0xff) ^ src[i]] ^ (crc64val << 8);
+      crc64val = crc64_tab[((crc64val >> 56) & 0xff) ^ src[i]] ^
+                 (crc64val << 8);
     }
 
   return crc64val;
@@ -275,7 +274,7 @@ uint64_t crc64part(FAR const uint8_t *src, size_t len, uint64_t crc64val)
         {
           if ((crc64val & ((uint64_t)1 << 63)) != 0)
             {
-              crc64val = (crc64val << 1) ^ CRC64_POLYNOMIAL;
+              crc64val = (crc64val << 1) ^ CRC64_POLY;
             }
           else
             {
@@ -298,5 +297,5 @@ uint64_t crc64part(FAR const uint8_t *src, size_t len, uint64_t crc64val)
 
 uint64_t crc64(FAR const uint8_t *src, size_t len)
 {
-  return crc64part(src, len, ~(uint64_t)0);
+  return crc64part(src, len, CRC64_INIT) ^ CRC64_XOROUT;
 }

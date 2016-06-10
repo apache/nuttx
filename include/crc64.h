@@ -44,6 +44,28 @@
 #include <stdint.h>
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/*
+ * CRC64_CHECK is the CRC64 of the string "123456789" without the null byte.
+ *
+ *   const uint8_t checkbuf[] =
+ *   {
+ *     '1', '2', '3', '4', '5', '6', '7', '8', '9'
+ *   };
+ *
+ *   assert(crc64(checkbuf, sizeof(checkbuf)) == CRC64_CHECK);
+ */
+
+/* CRC-64/WE */
+
+#define CRC64_POLY   ((uint64_t)0x42f0e1eba9ea3693)
+#define CRC64_INIT   ((uint64_t)0xffffffffffffffff)
+#define CRC64_XOROUT ((uint64_t)0xffffffffffffffff)
+#define CRC64_CHECK  ((uint64_t)0x62ec59e3f1a4f00a)
+
+/****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
