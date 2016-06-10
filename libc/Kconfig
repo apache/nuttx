@@ -795,6 +795,12 @@ endif # NETDB_DNSCLIENT
 
 comment "Non-standard Library Support"
 
+config LIB_CRC64_FAST
+	bool "Fast CRC64"
+	default n
+	---help---
+		Enable the CRC64 lookup table to compute the CRC64 faster.
+
 if BUILD_PROTECTED || BUILD_KERNEL
 
 config LIB_USRWORK
