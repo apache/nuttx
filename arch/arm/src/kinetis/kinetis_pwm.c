@@ -88,7 +88,7 @@
 #  ifdef CONFIG_DEBUG_VERBOSE
 #    define pwmvdbg           vdbg
 #    define pwmllvdbg         llvdbg
-#    define pwm_dumpgpio(p,m) kinetis_dumpgpio(p,m)
+#    define pwm_dumpgpio(p,m) /* kinetis_dumpgpio(p,m) */
 #  else
 #    define pwmlldbg(x...)
 #    define pwmllvdbg(x...)
@@ -501,6 +501,19 @@ static int pwm_timer(FAR struct kinetis_pwmtimer_s *priv,
         }
         break;
 
+      case 6:  /* PWM Mode configuration: Channel 6 */
+        {
+          pwm_putreg(priv, KINETIS_FTM_C6SC_OFFSET, FTM_CSC_MSB | FTM_CSC_ELSB);
+          pwm_putreg(priv, KINETIS_FTM_C6V_OFFSET, (uint16_t) cv);
+        }
+        break;
+      case 7:  /* PWM Mode configuration: Channel 7 */
+        {
+          pwm_putreg(priv, KINETIS_FTM_C7SC_OFFSET, FTM_CSC_MSB | FTM_CSC_ELSB);
+          pwm_putreg(priv, KINETIS_FTM_C7V_OFFSET, (uint16_t) cv);
+        }
+        break;
+
       default:
         pwmdbg("No such channel: %d\n", priv->channel);
         return -EINVAL;
@@ -558,7 +571,7 @@ static int pwm_setup(FAR struct pwm_lowerhalf_s *dev)
 
   /* Configure the PWM output pin, but do not start the timer yet */
 
-  kinetis_configgpio(priv->pincfg);
+  kinetis_pinconfig(priv->pincfg);
   pwm_dumpgpio(priv->pincfg, "PWM setup");
   return OK;
 }
@@ -594,7 +607,7 @@ static int pwm_shutdown(FAR struct pwm_lowerhalf_s *dev)
 
   pincfg  = (priv->pincfg & ~(_PIN_MODE_MASK));
   pincfg |= GPIO_INPUT;
-  kinetis_configgpio(pincfg);
+  kinetis_pinconfig(pincfg);
   return OK;
 }
 
@@ -683,6 +696,14 @@ static int pwm_stop(FAR struct pwm_lowerhalf_s *dev)
 
       case 5:
         pwm_putreg(priv, KINETIS_FTM_C5V_OFFSET, 0);
+        break;
+
+      case 6:
+        pwm_putreg(priv, KINETIS_FTM_C6V_OFFSET, 0);
+        break;
+
+      case 7:
+        pwm_putreg(priv, KINETIS_FTM_C7V_OFFSET, 0);
         break;
 
       default:
