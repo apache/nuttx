@@ -141,6 +141,28 @@
 #define BOARD_FLEXBUS_FREQ   (BOARD_MCG_FREQ / BOARD_OUTDIV3)
 #define BOARD_FLASHCLK_FREQ  (BOARD_MCG_FREQ / BOARD_OUTDIV4)
 
+/* PWM Configuration */
+/* FTM0 Channels */
+
+#define GPIO_FTM0_CH0OUT PIN_FTM0_CH0_2  /* Pin 22: PTC1 */
+#define GPIO_FTM0_CH1OUT PIN_FTM0_CH1_2  /* Pin 23: PTC2 */
+#define GPIO_FTM0_CH2OUT PIN_FTM0_CH2_2  /* Pin  9: PTC3 */
+#define GPIO_FTM0_CH3OUT PIN_FTM0_CH3    /* Pin 10: PTC4 */
+#define GPIO_FTM0_CH4OUT PIN_FTM0_CH4    /* Pin  6: PTD4 */
+#define GPIO_FTM0_CH5OUT PIN_FTM0_CH5_2  /* Pin 20: PTD5 */
+#define GPIO_FTM0_CH6OUT PIN_FTM0_CH6_2  /* Pin 21: PTD6 */
+#define GPIO_FTM0_CH7OUT PIN_FTM0_CH7_2  /* Pin  5: PTD7 */
+
+/* FTM1 Channels */
+
+#define GPIO_FTM1_CH0OUT PIN_FTM1_CH0_1  /* Pin  3: PTA12 */
+#define GPIO_FTM1_CH1OUT PIN_FTM1_CH1_1  /* Pin  4: PTA13 */
+
+/* FTM2 Channels */
+
+#define GPIO_FTM2_CH0OUT PIN_FTM2_CH0    /* Pin 25: PTB18 */
+#define GPIO_FTM2_CH1OUT PIN_FTM2_CH1    /* Pin 32: PTB19 */
+
 /* LED definitions ******************************************************************/
 /* A single LED is available driven by PTC5.  The LED is grounded so bringing PTC5
  * high will illuminate the LED.
