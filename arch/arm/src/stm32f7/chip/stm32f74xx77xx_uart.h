@@ -1,8 +1,9 @@
 /************************************************************************************
- * arch/arm/src/stm32f7/chip/stm32f74xxf75xx_uart.h
+ * arch/arm/src/stm32f7/chip/stm32f74xxf77xx_uart.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            David Sidrane <david_s5@nscdg.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,8 +34,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_STC_STM32F7_CHIP_STM32F74XX75XX_UART_H
-#define __ARCH_ARM_STC_STM32F7_CHIP_STM32F74XX75XX_UART_H
+#ifndef __ARCH_ARM_STC_STM32F7_CHIP_STM32F74XX77XX_UART_H
+#define __ARCH_ARM_STC_STM32F7_CHIP_STM32F74XX77XX_UART_H
 
 /************************************************************************************
  * Included Files
@@ -42,7 +43,8 @@
 
 #include <nuttx/config.h>
 
-#if defined(CONFIG_STM32F7_STM32F74XX) || defined(CONFIG_STM32F7_STM32F75XX)
+#if defined(CONFIG_STM32F7_STM32F74XX) || defined(CONFIG_STM32F7_STM32F75XX) || \
+    defined(CONFIG_STM32F7_STM32F76XX) || defined(CONFIG_STM32F7_STM32F77XX)
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -366,4 +368,4 @@
 #define USART_TDR_MASK            (0x1ff << USART_TDR_SHIFT)
 
 #endif /* CONFIG_STM32F7_STM32F74XX || CONFIG_STM32F7_STM32F75XX */
-#endif /* __ARCH_ARM_STC_STM32F7_CHIP_STM32F74XX75XX_UART_H */
+#endif /* __ARCH_ARM_STC_STM32F7_CHIP_STM32F74XX77XX_UART_H */

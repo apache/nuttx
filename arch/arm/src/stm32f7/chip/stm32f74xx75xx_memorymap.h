@@ -2,7 +2,8 @@
  * arch/arm/src/stm3fr2/chip/stm32f74xxx75xxx_memorymap.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            David Sidrane <david_s5@nscdg.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -59,9 +60,8 @@
 #define STM32_FSMC_BASE34    0x80000000     /* 0x80000000-0x8fffffff: 512Mb FSMC bank3&4 block */
 #  define STM32_FSMC_BANK3   0x80000000     /* 0x80000000-0x8fffffff:       256Mb NAND FLASH */
 #  define STM32_FSMC_BANK4   0x90000000     /* 0x90000000-0x9fffffff:       256Mb PC CARD */
-#define STM32_AHB3_BASE      0xa0000000     /* 0xa0000000-0xa0001fff: 256Mb AHB3 peripheral block */
 #define STM32_FSMC_BASE5     0xc0000000     /* 0xc0000000-0xcfffffff: 256Mb FSMC */
-#define STM32_FSMC_BASE6     0xc0000000     /* 0xd0000000-0xdfffffff: 256Mb FSMC */
+#define STM32_FSMC_BASE6     0xd0000000     /* 0xd0000000-0xdfffffff: 256Mb FSMC */
 #define STM32_CORTEX_BASE    0xe0000000     /* 0xe0000000-0xffffffff: 512Mb Cortex-M7 block */
 
 #define STM32_REGION_MASK    0xf0000000
@@ -98,6 +98,7 @@
 #define STM32_APB2_BASE      0x40010000     /* 0x40010000-0x40016bff: APB2 */
 #define STM32_AHB1_BASE      0x40020000     /* 0x40020000-0x4007ffff: APB1 */
 #define STM32_AHB2_BASE      0x50000000     /* 0x50000000-0x5003ffff: AHB2 */
+#define STM32_AHB3_BASE      0x60000000     /* 0x60000000-0xdfffffff: AHB3 */
 
 /* APB1 Base Addresses **************************************************************/
 

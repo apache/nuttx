@@ -48,10 +48,6 @@
 #include "sam4e-ek.h"
 
 /************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
-
-/************************************************************************************
  * Private Functions
  ************************************************************************************/
 
@@ -70,10 +66,10 @@
 #ifdef CONFIG_SAM34_USART1
 static inline void board_config_usart1(void)
 {
-#if defined(CONFIG_USART1_ISUART)
-  (void)sam_configgpio(GPIO_RS232_ENABLE);
-#else /* if defined(CONFIG_USART1_RS485) */
+#if defined(CONFIG_USART1_RS485)
   (void)sam_configgpio(GPIO_RS485_ENABLE);
+#else /* if defined(CONFIG_USART1_SERIALDRIVER) */
+  (void)sam_configgpio(GPIO_RS232_ENABLE);
 #endif
 }
 #else
@@ -152,7 +148,7 @@ void board_initialize(void)
    */
 
 #if defined(CONFIG_NSH_LIBRARY) && !defined(CONFIG_LIB_BOARDCTL)
-  (void)board_app_initialize();
+  (void)board_app_initialize(0);
 #endif
 }
 #endif /* CONFIG_BOARD_INITIALIZE */

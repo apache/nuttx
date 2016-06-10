@@ -117,10 +117,6 @@
 #define TCP_REASS_LASTFRAG   0x01
 
 /****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
  * Private Data
  ****************************************************************************/
 
@@ -323,6 +319,7 @@ nullreturn:
 int ipv4_input(FAR struct net_driver_s *dev)
 {
   FAR struct ipv4_hdr_s *pbuf = BUF;
+  uint16_t hdrlen;
   uint16_t iplen;
 
   /* This is where the input processing starts. */
@@ -345,6 +342,17 @@ int ipv4_input(FAR struct net_driver_s *dev)
       nlldbg("Invalid IP version or header length: %02x\n", pbuf->vhl);
       goto drop;
     }
+
+  /* Get the size of the packet minus the size of link layer header */
+
+  hdrlen = NET_LL_HDRLEN(dev);
+  if ((hdrlen + IPv4_HDRLEN) > dev->d_len)
+    {
+      nlldbg("Packet shorter than IPv4 header\n");
+      goto drop;
+    }
+
+  dev->d_len -= hdrlen;
 
   /* Check the size of the packet. If the size reported to us in d_len is
    * smaller the size reported in the IP header, we assume that the packet

@@ -1,6 +1,6 @@
 /****************************************************************************
  * include/nuttx/net/icmp.h
- * Header file for the uIP ICMP stack.
+ * Header file for the NuttX ICMP stack.
  *
  *   Copyright (C) 2007-2009, 2012, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

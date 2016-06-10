@@ -2,12 +2,14 @@
  * configs/cc3200-launchpad/src/cc3200_boot.c
  *
  *   Copyright (C) 2014 Droidifi LLC. All rights reserved.
+ *   Copyright (C) 2014, 2016 Gregory Nutt.
  *   Author: Jim Ewing <jim@droidifi.com>
+ *           Gregory Nutt <gnutt@nuttx.org>
  *
- *   Adapted for the cc3200 from code:
+ * Adapted for the cc3200 from code:
  *
- *   Copyright (C) Gregory Nutt.
- *   Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2014 Gregory Nutt.
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -48,7 +50,6 @@
 #include <nuttx/board.h>
 #include <arch/board/board.h>
 #include <arch/board/cc3200_utils.h>
-#include <apps/nsh.h>
 
 #include "cc3200_launchpad.h"
 
@@ -56,17 +57,13 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
+#define CC3200_SRAM1_BASE 0x20000000
+#define CC3200_SRAM1_SIZE 0x4000
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
 /****************************************************************************
  * Name: board_app_initialize
  *
@@ -80,9 +77,24 @@
  *   CONFIG_LIB_BOARDCTL=n :
  *     Called from board_initialize().
  *
+ * Input Parameters:
+ *   arg - The boardctl() argument is passed to the board_app_initialize()
+ *         implementation without modification.  The argument has no
+ *         meaning to NuttX; the meaning of the argument is a contract
+ *         between the board-specific initalization logic and the the
+ *         matching application logic.  The value cold be such things as a
+ *         mode enumeration value, a set of DIP switch switch settings, a
+ *         pointer to configuration data read from a file or serial FLASH,
+ *         or whatever you would like to do with it.  Every implementation
+ *         should accept zero/NULL as a default configuration.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure to indicate the nature of the failure.
+ *
  ****************************************************************************/
 
-int board_app_initialize(void)
+int board_app_initialize(uintptr_t arg)
 {
   return OK;
 }
@@ -117,13 +129,8 @@ void tiva_boardinitialize(void)
  ****************************************************************************/
 
 #if CONFIG_MM_REGIONS > 1
-
-#define CC3200_SRAM1_BASE 0x20000000
-#define CC3200_SRAM1_SIZE 0x4000
-
 void up_addregion(void)
 {
   kumm_addregion((FAR void*)CC3200_SRAM1_BASE, CC3200_SRAM1_SIZE);
 }
-
 #endif

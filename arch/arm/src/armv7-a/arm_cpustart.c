@@ -52,6 +52,37 @@
 #ifdef CONFIG_SMP
 
 /****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: arm_registerdump
+ ****************************************************************************/
+
+#if 0 /* Was useful in solving some startup problems */
+static inline void arm_registerdump(FAR struct tcb_s *tcb)
+{
+  int regndx;
+
+  lldbg("CPU%d:\n", up_cpu_index());
+
+  /* Dump the startup registers */
+
+  for (regndx = REG_R0; regndx <= REG_R15; regndx += 8)
+    {
+      uint32_t *ptr = (uint32_t *)&tcb->xcp.regs[regndx];
+      lldbg("R%d: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+             regndx, ptr[0], ptr[1], ptr[2], ptr[3],
+             ptr[4], ptr[5], ptr[6], ptr[7]);
+    }
+
+  lldbg("CPSR: %08x\n", tcb->xcp.regs[REG_CPSR]);
+}
+#else
+# define arm_registerdump(tcb)
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -75,14 +106,16 @@ int arm_start_handler(int irq, FAR void *context)
 {
   FAR struct tcb_s *tcb;
 
-  /* Invalidate CPUn L1 so that is will be reloaded from coherent L2. */
-
-  cp15_invalidate_dcache_all();
+  sllvdbg("CPU%d Started\n", up_cpu_index());
 
   /* Reset scheduler parameters */
 
   tcb = this_task();
   sched_resume_scheduler(tcb);
+
+  /* Dump registers so that we can see what is going to happen on return */
+
+  arm_registerdump(tcb);
 
   /* Then switch contexts. This instantiates the exception context of the
    * tcb at the head of the assigned task list.  In this case, this should
@@ -122,6 +155,8 @@ int arm_start_handler(int irq, FAR void *context)
 
 int up_cpu_start(int cpu)
 {
+  sllvdbg("Starting CPU%d\n", cpu);
+
   DEBUGASSERT(cpu >= 0 && cpu < CONFIG_SMP_NCPUS && cpu != this_cpu());
 
   /* Make the content of CPU0 L1 cache has been written to coherent L2 */

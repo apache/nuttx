@@ -314,20 +314,20 @@ config NUC_PWM7
 config NUC_UART0
 	bool "UART0"
 	default y
-	select ARCH_HAVE_UART0
+	select UART0_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
 
 config NUC_UART1
 	bool "UART1"
 	default n
-	select ARCH_HAVE_UART1
+	select UART1_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
 
 config NUC_UART2
 	bool "UART2"
 	default n
 	depends on NUC_HAVE_UART2
-	select ARCH_HAVE_UART2
+	select UART2_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
 
 config NUC_USBD

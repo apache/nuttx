@@ -8755,9 +8755,8 @@ FAR void *mmap(FAR void *start, size_t length, int prot, int flags, int fd, off_
 </table>
 
 <p>
-  NuttX includes a simple interface layer based on uIP (see <a href="http://www.sics.se/~adam/uip/index.php/Main_Page">http://www.sics.se</a>).
-  NuttX supports subset of a standard socket interface to uIP.
-  These network feature can be enabled by settings in the architecture <a href="NuttXConfigVariables.html">configuration file</a>.
+  NuttX supports a BSD-compatible socket interface layer.
+  These socket interface can be enabled by settings in the architecture <a href="NuttXConfigVariables.html">configuration file</a>.
   Those socket APIs are discussed in the following paragraphs.
 </p>
 <ul>

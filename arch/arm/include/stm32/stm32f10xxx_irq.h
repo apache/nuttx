@@ -120,7 +120,7 @@
 #  define STM32_IRQ_TIM5        (66) /* 50: TIM5 global interrupt */
 #  define STM32_IRQ_SPI3        (67) /* 51: SPI3 global interrupt */
 #  define STM32_IRQ_UART4       (68) /* 52: USART2 global interrupt */
-#  define STM32_IRQ_UART5       (69) /* 53: USART5 global interrupt */
+#  define STM32_IRQ_UART5       (69) /* 53: UART5 global interrupt */
 #  define STM32_IRQ_TIM6        (70) /* 54: TIM6 global interrupt */
 #  define STM32_IRQ_TIM7        (71) /* 55: TIM7 global interrupt */
 #  define STM32_IRQ_DMA2CH1     (72) /* 56: DMA2 Channel 1 global interrupt */

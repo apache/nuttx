@@ -1,10 +1,10 @@
 /****************************************************************************
  * include/nuttx/net/udp.h
- * Header file for the uIP UDP stack.
+ * Header file for the NuttX UDP stack.
  *
- * The uIP UDP stack header file contains definitions for a number
- * of C macros that are used by uIP programs as well as internal uIP
- * structures, UDP header structures and function declarations.
+ * The UDP stack header file contains definitions for a number of C macros
+ * that are used by the internal network structures, UDP header structures
+ * and function declarations.
  *
  *   Copyright (C) 2007, 2009, 2012, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

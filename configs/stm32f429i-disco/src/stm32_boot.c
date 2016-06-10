@@ -149,7 +149,7 @@ void board_initialize(void)
    * but the initialization function must run in kernel space.
    */
 
-  (void)board_app_initialize();
+  (void)board_app_initialize(0);
 #endif
 }
 #endif

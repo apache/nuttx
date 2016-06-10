@@ -2,8 +2,9 @@
  * configs/nucleo-144/include/board.h
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *   Author: Mark Olsson <post@markolsson.se>
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *           Mark Olsson <post@markolsson.se>
+ *           David Sidrane <david_s5@nscdg.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -59,17 +60,17 @@
  ************************************************************************************/
 
 /* Clocking *************************************************************************/
-/* The STM32F7 Discovery board provides the following clock sources:
+/* The Nucleo-144  board provides the following clock sources:
  *
- *   X1:  24 MHz oscillator for USB OTG HS PHY and camera module (daughter board)
- *   X2:  25 MHz oscillator for STM32F746NGH6 microcontroller and Ethernet PHY.
- *   X3:  32.768 KHz crystal for STM32F746NGH6 embedded RTC
+ *   MCO: 8 MHz from MCO output of ST-LINK is used as input clock
+ *   X2:  32.768 KHz crystal for LSE
+ *   X3:  HSE crystal oscillator (not provided)
  *
  * So we have these clock source available within the STM32
  *
  *   HSI: 16 MHz RC factory-trimmed
  *   LSI: 32 KHz RC
- *   HSE: On-board crystal frequency is 25MHz
+ *   HSE: 8 MHz from MCO output of ST-LINK
  *   LSE: 32.768 kHz
  */
 
@@ -106,56 +107,53 @@
  * 2 <= PLLQ <= 15
  */
 
-#if defined(CONFIG_STM32F7_USBOTHFS)
 /* Highest SYSCLK with USB OTG FS clock = 48 MHz
  *
- * PLL_VCO = (8,000,000 / 8) * 384 = 384 MHz
- * SYSCLK  = 384 MHz / 2 = 192 MHz
- * USB OTG FS, SDMMC and RNG Clock = 384 MHz / 8 = 48MHz
- */
-
-#define STM32_PLLCFG_PLLM       RCC_PLLCFG_PLLM(8)
-#define STM32_PLLCFG_PLLN       RCC_PLLCFG_PLLN(384)
-#define STM32_PLLCFG_PLLP       RCC_PLLCFG_PLLP_2
-#define STM32_PLLCFG_PLLQ       RCC_PLLCFG_PLLQ(8)
-
-#define STM32_VCO_FREQUENCY     ((STM32_HSE_FREQUENCY / 8) * 384)
-#define STM32_SYSCLK_FREQUENCY  (STM32_VCO_FREQUENCY / 2)
-#define STM32_OTGFS_FREQUENCY   (STM32_VCO_FREQUENCY / 8)
-
-#elif defined(CONFIG_STM32F7_SDMMC1) || defined(CONFIG_STM32F7_RNG)
-/* Highest SYSCLK with USB OTG FS clock <= 48MHz
- *
- * PLL_VCO = (8,000,000 / 8) * 432 = 432 MHz
+ * PLL_VCO = (8,000,000 / 4) * 216 = 432 MHz
  * SYSCLK  = 432 MHz / 2 = 216 MHz
- * USB OTG FS, SDMMC and RNG Clock = 432 MHz / 10 = 43.2 MHz
+ * USB OTG FS, SDMMC and RNG Clock = 432 MHz / 9 = 48MHz
  */
 
-#define STM32_PLLCFG_PLLM       RCC_PLLCFG_PLLM(8)
-#define STM32_PLLCFG_PLLN       RCC_PLLCFG_PLLN(432)
+#define STM32_PLLCFG_PLLM       RCC_PLLCFG_PLLM(4)
+#define STM32_PLLCFG_PLLN       RCC_PLLCFG_PLLN(216)
 #define STM32_PLLCFG_PLLP       RCC_PLLCFG_PLLP_2
-#define STM32_PLLCFG_PLLQ       RCC_PLLCFG_PLLQ(10)
+#define STM32_PLLCFG_PLLQ       RCC_PLLCFG_PLLQ(9)
 
-#define STM32_VCO_FREQUENCY     ((STM32_HSE_FREQUENCY / 8) * 432)
+#define STM32_VCO_FREQUENCY     ((STM32_HSE_FREQUENCY / 4) * 216)
 #define STM32_SYSCLK_FREQUENCY  (STM32_VCO_FREQUENCY / 2)
-#define STM32_OTGFS_FREQUENCY   (STM32_VCO_FREQUENCY / 10)
+#define STM32_OTGFS_FREQUENCY   (STM32_VCO_FREQUENCY / 9)
 
-#else
-/* Highest SYSCLK
- *
- * PLL_VCO = (8,000,000 / 8) * 432 = 432 MHz
- * SYSCLK  = 432 MHz / 2 = 216 MHz
- */
+/* Configure factors for  PLLSAI clock */
 
-#define STM32_PLLCFG_PLLM       RCC_PLLCFG_PLLM(8)
-#define STM32_PLLCFG_PLLN       RCC_PLLCFG_PLLN(432)
-#define STM32_PLLCFG_PLLP       RCC_PLLCFG_PLLP_2
-#define STM32_PLLCFG_PLLQ       RCC_PLLCFG_PLLQ(10)
+#define STM32_RCC_PLLSAICFGR_PLLSAIN    RCC_PLLSAICFGR_PLLSAIN(192)
+#define STM32_RCC_PLLSAICFGR_PLLSAIP    RCC_PLLSAICFGR_PLLSAIP(2)
+#define STM32_RCC_PLLSAICFGR_PLLSAIQ    RCC_PLLSAICFGR_PLLSAIQ(2)
+#define STM32_RCC_PLLSAICFGR_PLLSAIR    RCC_PLLSAICFGR_PLLSAIR(2)
 
-#define STM32_VCO_FREQUENCY     ((STM32_HSE_FREQUENCY / 8) * 432)
-#define STM32_SYSCLK_FREQUENCY  (STM32_VCO_FREQUENCY / 2)
-#define STM32_OTGFS_FREQUENCY   (STM32_VCO_FREQUENCY / 10)
-#endif
+/* Configure Dedicated Clock Configuration Register */
+
+#define STM32_RCC_DCKCFGR_PLLI2SDIVQ RCC_DCKCFGR_PLLI2SDIVQ(1)
+#define STM32_RCC_DCKCFGR_PLLSAIDIVQ RCC_DCKCFGR_PLLSAIDIVQ(1)
+#define STM32_RCC_DCKCFGR_SAI1SRC       RCC_DCKCFGR_SAI1SRC_PLLSAI
+#define STM32_RCC_DCKCFGR_SAI2SRC       RCC_DCKCFGR_SAI2SRC_PLLSAI
+#define STM32_RCC_DCKCFGR_TIMPRE        0
+#define STM32_RCC_DCKCFGR_I2S1SRC       RCC_DCKCFGR_SAI1SRC_PLL
+#define STM32_RCC_DCKCFGR_I2S2SRC       RCC_DCKCFGR_SAI2SRC_PLL
+
+/* Configure factors for  PLLI2S clock */
+
+#define STM32_RCC_PLLI2SCFGR_PLLI2SN   RCC_PLLI2SCFGR_PLLI2SN(192)
+#define STM32_RCC_PLLI2SCFGR_PLLI2SP   RCC_PLLI2SCFGR_PLLI2SP(2)
+#define STM32_RCC_PLLI2SCFGR_PLLI2SQ   RCC_PLLI2SCFGR_PLLI2SQ(2)
+#define STM32_RCC_PLLI2SCFGR_PLLI2SR   RCC_PLLI2SCFGR_PLLI2SR(2)
+
+/* Configure Dedicated Clock Configuration Register 2 */
+
+#define STM32_RCC_DCKCFGR2_FMPI2C1SEL RCC_DCKCFGR2_FMPI2C1SEL_APB
+#define STM32_RCC_DCKCFGR2_CECSEL     RCC_DCKCFGR2_CECSEL_HSI
+#define STM32_RCC_DCKCFGR2_CK48MSEL   RCC_DCKCFGR2_CK48MSEL_PLLSAI
+#define STM32_RCC_DCKCFGR2_SDIOSEL    RCC_DCKCFGR2_SDIOSEL_48MHZ
+#define STM32_RCC_DCKCFGR2_SPDIFRXSEL RCC_DCKCFGR2_SPDIFRXSEL_PLL
 
 /* Several prescalers allow the configuration of the two AHB buses, the
  * high-speed APB (APB2) and the low-speed APB (APB1) domains. The maximum
@@ -215,12 +213,9 @@
 #define BOARD_FLASH_WAITSTATES 7
 
 /* LED definitions ******************************************************************/
-/* The STM32F746G-DISCO board has numerous LEDs but only one, LD1 located near the
- * reset button, that can be controlled by software (LD2 is a power indicator, LD3-6
- * indicate USB status, LD7 is controlled by the ST-Link).
- *
- * LD1 is controlled by PI1 which is also the SPI2_SCK at the Arduino interface.
- * One end of LD1 is grounded so a high output on PI1 will illuminate the LED.
+/* The Nucleo-144 board has numerous LEDs but only three, LD1 a Green LED, LD2 a Blue
+ * LED and LD3 a Red LED, that can be controlled by software. The following
+ * definitions assume the default Solder Bridges are installed.
  *
  * If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in any way.
  * The following definitions are used to access individual LEDs.
@@ -233,9 +228,9 @@
 #define BOARD_LED3        2
 #define BOARD_NLEDS       3
 
-#define BOARD_LD1         BOARD_LED1
-#define BOARD_LD2         BOARD_LED2
-#define BOARD_LD3         BOARD_LED3
+#define BOARD_LED_GREEN   BOARD_LED1
+#define BOARD_LED_BLUE    BOARD_LED2
+#define BOARD_LED_RED     BOARD_LED3
 
 /* LED bits for use with board_userled_all() */
 
@@ -247,33 +242,29 @@
  * include/board.h and src/stm32_leds.c. The LEDs are used to encode OS-related
  * events as follows:
  *
- *   SYMBOL              Meaning                 LD1
- *   ------------------- ----------------------- ------
- *   LED_STARTED         NuttX has been started  OFF
- *   LED_HEAPALLOCATE    Heap has been allocated OFF
- *   LED_IRQSENABLED     Interrupts enabled      OFF
- *   LED_STACKCREATED    Idle stack created      ON
- *   LED_INIRQ           In an interrupt         N/C
- *   LED_SIGNAL          In a signal handler     N/C
- *   LED_ASSERTION       An assertion failed     N/C
- *   LED_PANIC           The system has crashed  FLASH
  *
- * Thus is LD1 is statically on, NuttX has successfully  booted and is,
- * apparently, running normally.  If LD1 is flashing at approximately
- * 2Hz, then a fatal error has been detected and the system has halted.
+ *   SYMBOL                     Meaning                      LED state
+ *                                                        Red   Green Blue
+ *   ----------------------  --------------------------  ------ ------ ----*/
+
+#define LED_STARTED        0 /* NuttX has been started   OFF    OFF   OFF  */
+#define LED_HEAPALLOCATE   1 /* Heap has been allocated  OFF    OFF   ON   */
+#define LED_IRQSENABLED    2 /* Interrupts enabled       OFF    ON    OFF  */
+#define LED_STACKCREATED   3 /* Idle stack created       OFF    ON    ON   */
+#define LED_INIRQ          4 /* In an interrupt          N/C    N/C   GLOW */
+#define LED_SIGNAL         5 /* In a signal handler      N/C    GLOW  N/C  */
+#define LED_ASSERTION      6 /* An assertion failed      GLOW   N/C   GLOW */
+#define LED_PANIC          7 /* The system has crashed   Blink  OFF   N/C  */
+#define LED_IDLE           8 /* MCU is is sleep mode     ON     OFF   OFF  */
+
+/* Thus if the Green LED is statically on, NuttX has successfully booted and
+ * is, apparently, running normally.  If the Red LED is flashing at
+ * approximately 2Hz, then a fatal error has been detected and the system
+ * has halted.
  */
 
-#define LED_STARTED                  0 /* LD1=OFF */
-#define LED_HEAPALLOCATE             0 /* LD1=OFF */
-#define LED_IRQSENABLED              0 /* LD1=OFF */
-#define LED_STACKCREATED             1 /* LD1=ON */
-#define LED_INIRQ                    2 /* LD1=no change */
-#define LED_SIGNAL                   2 /* LD1=no change */
-#define LED_ASSERTION                2 /* LD1=no change */
-#define LED_PANIC                    3 /* LD1=flashing */
-
 /* Button definitions ***************************************************************/
-/* The STM32F7 Discovery supports one button:  Pushbutton B1, labelled "User", is
+/* The STM32F7 Discovery supports one button:  Pushbutton B1, labeled "User", is
  * connected to GPIO PI11.  A high value will be sensed when the button is depressed.
  */
 
@@ -283,6 +274,7 @@
 
 /* Alternate function pin selections ************************************************/
 
+#if defined(CONFIG_NUCLEO_CONSOLE_ARDUINO)
 /* USART6:
  *
  * These configurations assume that you are using a standard Arduio RS-232 shield
@@ -292,16 +284,32 @@
  *               STM32F7
  *   ARDUIONO FUNCTION  GPIO
  *   -- ----- --------- -----
- *   DO RX    USART6_RX PC7
- *   D1 TX    USART6_TX PC6
+ *   DO RX    USART6_RX PG9
+ *   D1 TX    USART6_TX PG14
  *   -- ----- --------- -----
  */
 
- #define GPIO_USART6_RX GPIO_USART6_RX_1
- #define GPIO_USART6_TX GPIO_USART6_TX_1
+ # define GPIO_USART6_RX GPIO_USART6_RX_2
+ # define GPIO_USART6_TX GPIO_USART6_TX_2
+#endif
 
- #define GPIO_USART3_RX GPIO_USART3_RX_3
- #define GPIO_USART3_TX GPIO_USART3_TX_3
+/* USART3:
+ * Use  USART3 and the USB virtual COM port
+*/
+#if defined(CONFIG_NUCLEO_CONSOLE_VIRTUAL)
+ # define GPIO_USART3_RX GPIO_USART3_RX_3
+ # define GPIO_USART3_TX GPIO_USART3_TX_3
+#endif
+
+/* USART8:
+ *
+ * This configurations assume that you are connecting to the Morpho connector
+ * with the serial interface with the adaptor's RX on pin CN11 pin 64 and
+ * TX on pin CN11 pin 61
+ *
+ * USART8: has noit remap
+ */
+
 
 /* The STM32 F7 connects to a SMSC LAN8742A PHY using these pins:
  *

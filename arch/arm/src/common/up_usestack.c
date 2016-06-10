@@ -174,7 +174,13 @@ int up_use_stack(struct tcb_s *tcb, void *stack, size_t stack_size)
    * value that we can use later to test for high water marks.
    */
 
-#  warning Missing logic
+#ifdef CONFIG_TLS
+  up_stack_color(
+      (FAR void *)((uintptr_t)tcb->stack_alloc_ptr + sizeof(struct tls_info_s)),
+      tcb->adj_stack_size - sizeof(struct tls_info_s));
+#else
+  up_stack_color(tcb->stack_alloc_ptr, tcb->adj_stack_size);
+#endif
 #endif
 
   return OK;

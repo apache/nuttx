@@ -114,10 +114,13 @@ static const struct file_operations g_timerops =
   timer_close, /* close */
   timer_read,  /* read */
   timer_write, /* write */
-  0,           /* seek */
+  NULL,        /* seek */
   timer_ioctl  /* ioctl */
 #ifndef CONFIG_DISABLE_POLL
-  , 0          /* poll */
+  , NULL       /* poll */
+#endif
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  , NULL       /* unlink */
 #endif
 };
 

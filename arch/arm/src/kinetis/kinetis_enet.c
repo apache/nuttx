@@ -165,9 +165,9 @@ struct kinetis_driver_s
   struct enet_desc_s *txdesc;  /* A pointer to the list of TX descriptor */
   struct enet_desc_s *rxdesc;  /* A pointer to the list of RX descriptors */
 
-  /* This holds the information visible to uIP/NuttX */
+  /* This holds the information visible to the NuttX network */
 
-  struct net_driver_s dev;     /* Interface understood by uIP */
+  struct net_driver_s dev;     /* Interface understood by the network */
 
   /* The DMA descriptors.  A unaligned uint8_t is used to allocate the
    * memory; 16 is added to assure that we can meet the descriptor alignment
@@ -435,7 +435,7 @@ static int kinetis_transmit(FAR struct kinetis_driver_s *priv)
  * Function: kinetis_txpoll
  *
  * Description:
- *   The transmitter is available, check if uIP has any outgoing packets ready
+ *   The transmitter is available, check if the network has any outgoing packets ready
  *   to send.  This is a callback from devif_poll().  devif_poll() may be called:
  *
  *   1. When the preceding TX packet send is complete,
@@ -731,7 +731,7 @@ static void kinetis_txdone(FAR struct kinetis_driver_s *priv)
       putreg32(regval, KINETIS_ENET_EIMR);
     }
 
-  /* There should be space for a new TX in any event.  Poll uIP for new XMIT
+  /* There should be space for a new TX in any event.  Poll the network for new XMIT
    * data
    */
 
@@ -848,7 +848,7 @@ static void kinetis_txtimeout(int argc, uint32_t arg, ...)
   (void)kinetis_ifdown(&priv->dev);
   (void)kinetis_ifup(&priv->dev);
 
-  /* Then poll uIP for new XMIT data */
+  /* Then poll the network for new XMIT data */
 
   (void)devif_poll(&priv->dev, kinetis_txpoll);
 }
@@ -881,7 +881,7 @@ static void kinetis_polltimer(int argc, uint32_t arg, ...)
 
   if (!kinetics_txringfull(priv))
     {
-      /* If so, update TCP timing states and poll uIP for new XMIT data. Hmmm..
+      /* If so, update TCP timing states and poll the network for new XMIT data. Hmmm..
        * might be bug here.  Does this mean if there is a transmit in progress,
        * we will missing TCP time state updates?
        */
@@ -1112,7 +1112,7 @@ static int kinetis_txavail(struct net_driver_s *dev)
 
       if (!kinetics_txringfull(priv))
         {
-          /* No, there is space for another transfer.  Poll uIP for new
+          /* No, there is space for another transfer.  Poll the network for new
            * XMIT data.
            */
 

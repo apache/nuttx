@@ -465,31 +465,31 @@ config SAMV7_TWIHS2
 config SAMV7_UART0
 	bool "UART 0"
 	default y
-	select ARCH_HAVE_UART0
+	select UART0_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
 
 config SAMV7_UART1
 	bool "UART 1"
 	default n
-	select ARCH_HAVE_UART1
+	select UART1_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
 
 config SAMV7_UART2
 	bool "UART 2"
 	default y
-	select ARCH_HAVE_UART2
+	select UART2_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
 
 config SAMV7_UART3
 	bool "UART 3"
 	default n
-	select ARCH_HAVE_UART3
+	select UART3_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
 
 config SAMV7_UART4
 	bool "UART 4"
 	default y
-	select ARCH_HAVE_UART4
+	select UART4_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
 
 config SAMV7_USBDEVFS
@@ -520,21 +520,21 @@ config SAMV7_USART0
 	bool "USART 0"
 	default n
 	depends on SAMV7_HAVE_USART0
-	select ARCH_HAVE_USART0
+	select USART0_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
 
 config SAMV7_USART1
 	bool "USART 1"
 	default n
 	depends on SAMV7_HAVE_USART1
-	select ARCH_HAVE_USART1
+	select USART1_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
 
 config SAMV7_USART2
 	bool "USART 2"
 	default n
 	depends on SAMV7_HAVE_USART2
-	select ARCH_HAVE_USART2
+	select USART2_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
 
 config SAMV7_WDT
@@ -617,6 +617,28 @@ config SAMV7_ERASE_ENABLE
 		The ERASE pin is configured to reinitialize the Flash content.
 
 endchoice
+
+menuconfig SAMV7_SYSTEMRESET
+	bool "Enable System Reset"
+	select ARCH_HAVE_RESET
+	---help---
+		Enable up_systemreset
+
+if SAMV7_SYSTEMRESET
+
+config SAMV7_EXTRESET_ERST
+	int "Drive External nRST duration"
+	default 0
+	range 0 16
+	---help---
+		Define if the external reset (nRST) will be generated in up_systemreset
+		and for how long:
+
+		- A value of 0 will not drive the external reset
+		- A value of 1-6 will drive the external reset for 2^SAMV7_EXTRESET_ERST
+		  slow clock cycles.
+
+endif # SAMV7_SYSTEMRESET
 
 menuconfig SAMV7_GPIO_IRQ
 	bool "GPIO pin interrupts"
@@ -1492,6 +1514,7 @@ endif # SAMV7_TC3
 
 config SAMV7_ONESHOT
 	bool "TC one-shot wrapper"
+	depends on SAMV7_FREERUN
 	default n if !SCHED_TICKLESS
 	default y if SCHED_TICKLESS
 	---help---

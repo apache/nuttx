@@ -384,11 +384,6 @@
               <FilePath>../../../../../drivers/mtd/at45db.c</FilePath>
             </File>
             <File>
-              <FileName>flash_eraseall.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../../../../../drivers/mtd/flash_eraseall.c</FilePath>
-            </File>
-            <File>
               <FileName>ftl.c</FileName>
               <FileType>1</FileType>
               <FilePath>../../../../../drivers/mtd/ftl.c</FilePath>

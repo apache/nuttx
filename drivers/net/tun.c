@@ -129,9 +129,9 @@ struct tun_device_s
   sem_t             waitsem;
   sem_t             read_wait_sem;
 
-  /* This holds the information visible to uIP/NuttX */
+  /* This holds the information visible to the NuttX network */
 
-  struct net_driver_s dev;     /* Interface understood by uIP */
+  struct net_driver_s dev;     /* Interface understood by the network */
 };
 
 struct tun_driver_s
@@ -345,7 +345,7 @@ static int tun_transmit(FAR struct tun_device_s *priv)
  * Function: tun_txpoll
  *
  * Description:
- *   The transmitter is available, check if uIP has any outgoing packets
+ *   The transmitter is available, check if the network has any outgoing packets
  *   ready to send.  This is a callback from devif_poll().  devif_poll() may
  *   be called:
  *
@@ -498,7 +498,7 @@ static void tun_txdone(FAR struct tun_device_s *priv)
 
   NETDEV_TXDONE(&priv->dev);
 
-  /* Then poll uIP for new XMIT data */
+  /* Then poll the network for new XMIT data */
 
   priv->dev.d_buf = priv->read_buf;
   (void)devif_poll(&priv->dev, tun_txpoll);
@@ -529,7 +529,7 @@ static void tun_poll_process(FAR struct tun_device_s *priv)
 
   if (priv->read_d_len == 0)
     {
-      /* If so, poll uIP for new XMIT data. */
+      /* If so, poll the network for new XMIT data. */
 
       priv->dev.d_buf = priv->read_buf;
       (void)devif_timer(&priv->dev, tun_txpoll);
@@ -746,7 +746,7 @@ static int tun_txavail(struct net_driver_s *dev)
 
   if (priv->bifup)
     {
-      /* Poll uIP for new XMIT data */
+      /* Poll the network for new XMIT data */
 
       priv->dev.d_buf = priv->read_buf;
       (void)devif_poll(&priv->dev, tun_txpoll);

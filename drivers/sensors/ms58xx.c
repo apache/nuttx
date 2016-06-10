@@ -139,7 +139,7 @@ struct ms58xx_dev_s
  ****************************************************************************/
 /* CRC Calculation */
 
-static uint8_t ms58xx_crc(FAR uint16_t *src, uint8_t crcIndex);
+static uint8_t ms58xx_crc(FAR uint16_t *src, uint8_t crcndx, uint16_t crcmask);
 
 /* I2C Helpers */
 
@@ -200,7 +200,7 @@ static const struct file_operations g_fops =
  *
  ****************************************************************************/
 
-static uint8_t ms58xx_crc(FAR uint16_t *src, uint8_t crcIndex)
+static uint8_t ms58xx_crc(FAR uint16_t *src, uint8_t crcndx, uint16_t crcmask)
 {
   uint16_t cnt;
   uint16_t n_rem;
@@ -208,8 +208,8 @@ static uint8_t ms58xx_crc(FAR uint16_t *src, uint8_t crcIndex)
   uint8_t n_bit;
 
   n_rem = 0x00;
-  crc_read = src[crcIndex];
-  src[crcIndex] = (0xff00 & (src[7]));
+  crc_read = src[crcndx];
+  src[crcndx] &= ~crcmask;
 
   for (cnt = 0; cnt < 16; cnt++)
     {
@@ -236,7 +236,7 @@ static uint8_t ms58xx_crc(FAR uint16_t *src, uint8_t crcIndex)
     }
 
   n_rem = (0x000F & (n_rem >> 12));
-  src[crcIndex] = crc_read;
+  src[crcndx] = crc_read;
   return (n_rem ^ 0x00);
 }
 
@@ -369,24 +369,73 @@ static int ms58xx_readadc(FAR struct ms58xx_dev_s *priv, FAR uint32_t *adc)
   *adc = (uint32_t)buffer[0] << 16 |
          (uint32_t)buffer[1] << 8 |
          (uint32_t)buffer[2];
+
   sndbg("adc: %06x ret: %d\n", *adc, ret);
   return ret;
 }
 
 /****************************************************************************
- * Name: ms58xx_setosr
+ * Name: ms58xx_setosr_1
  *
  * Description:
  *   Set the oversampling ratio.
  *
  ****************************************************************************/
 
-static int ms58xx_setosr(FAR struct ms58xx_dev_s *priv, uint16_t osr)
+static int ms58xx_setosr_1(FAR struct ms58xx_dev_s *priv, uint16_t osr)
 {
   int ret = OK;
+  switch (osr)
+    {
+      case 256:
+          priv->delay = 600;
+          priv->osr   = 0x0;
+          break;
 
-  sndbg("osr: %04x\n", osr);
+      case 512:
+          priv->delay = 1170;
+          priv->osr   = 0x2;
+          break;
 
+      case 1024:
+          priv->delay = 2280;
+          priv->osr   = 0x4;
+          break;
+
+      case 2048:
+          priv->delay = 4540;
+          priv->osr   = 0x6;
+          break;
+
+      case 4096:
+          priv->delay = 9040;
+          priv->osr   = 0x8;
+          break;
+
+      case 8192:
+          priv->delay = 18080;
+          priv->osr   = 0xA;
+          break;
+
+      default:
+          ret = -EINVAL;
+          break;
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: ms58xx_setosr_2
+ *
+ * Description:
+ *   Set the oversampling ratio.
+ *
+ ****************************************************************************/
+
+static int ms58xx_setosr_2(FAR struct ms58xx_dev_s *priv, uint16_t osr)
+{
+  int ret = OK;
   switch (osr)
     {
       case 256:
@@ -409,26 +458,6 @@ static int ms58xx_setosr(FAR struct ms58xx_dev_s *priv, uint16_t osr)
         priv->delay = 9040;
         break;
 
-      case 8192:
-        switch (priv->model)
-          {
-            case MS58XX_MODEL_MS5805_02:
-            case MS58XX_MODEL_MS5837_30:
-              priv->delay = 18080;
-              break;
-
-            case MS58XX_MODEL_MS5803_02:
-            case MS58XX_MODEL_MS5803_05:
-            case MS58XX_MODEL_MS5803_07:
-            case MS58XX_MODEL_MS5803_14:
-            case MS58XX_MODEL_MS5803_30:
-            case MS58XX_MODEL_MS5806_02:
-            default:
-              ret = -EINVAL;
-              break;
-          }
-        break;
-
       default:
         ret = -EINVAL;
         break;
@@ -437,6 +466,44 @@ static int ms58xx_setosr(FAR struct ms58xx_dev_s *priv, uint16_t osr)
   if (ret == OK)
     {
       priv->osr = (osr / 256 - 1) * 2;
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: ms58xx_setosr
+ *
+ * Description:
+ *   Set the oversampling ratio.
+ *
+ ****************************************************************************/
+
+static int ms58xx_setosr(FAR struct ms58xx_dev_s *priv, uint16_t osr)
+{
+  int ret = OK;
+
+  sndbg("osr: %04x\n", osr);
+
+  switch (priv->model)
+    {
+      case MS58XX_MODEL_MS5805_02:
+      case MS58XX_MODEL_MS5837_30:
+          ret = ms58xx_setosr_1(priv,osr);
+          break;
+
+      case MS58XX_MODEL_MS5803_02:
+      case MS58XX_MODEL_MS5803_05:
+      case MS58XX_MODEL_MS5803_07:
+      case MS58XX_MODEL_MS5803_14:
+      case MS58XX_MODEL_MS5803_30:
+      case MS58XX_MODEL_MS5806_02:
+          ret = ms58xx_setosr_2(priv,osr);
+          break;
+
+      default:
+         ret = -EINVAL;
+         break;
     }
 
   return ret;
@@ -499,7 +566,7 @@ static int ms58xx_readprom(FAR struct ms58xx_dev_s *priv)
   crcmask         = (uint16_t)0xf << crcshift;
   crc             = (uint8_t)((prom[crcindex] & crcmask) >> crcshift);
 
-  if (crc != ms58xx_crc(prom, crcindex))
+  if (crc != ms58xx_crc(prom, crcindex, crcmask))
     {
       sndbg("crc mismatch\n");
       return -ENODEV;
@@ -787,7 +854,27 @@ static int ms58xx_close(FAR struct file *filep)
 static ssize_t ms58xx_read(FAR struct file *filep, FAR char *buffer,
                            size_t buflen)
 {
-  return 0;
+  ssize_t size;
+  FAR struct inode *inode        = filep->f_inode;
+  FAR struct ms58xx_dev_s *priv  = inode->i_private;
+  FAR struct ms58xx_measure_s *p = (FAR struct ms58xx_measure_s *)buffer;
+
+  size = buflen;
+  while (size >= sizeof(*p))
+    {
+      if (ms58xx_measure(priv) < 0)
+        {
+          return -1;
+        }
+
+      p->temperature  = priv->temp;
+      p->pressure     = priv->press;
+
+      p++;
+      size -= sizeof(*p);
+    }
+
+  return size;
 }
 
 /****************************************************************************
@@ -907,16 +994,16 @@ int ms58xx_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
   /* Sanity check */
 
   DEBUGASSERT(i2c != NULL);
-  DEBUGASSERT((model == MS58XX_MODEL_MS5803_02 ||
-               model == MS58XX_MODEL_MS5803_05 ||
-               model == MS58XX_MODEL_MS5803_07 ||
-               model == MS58XX_MODEL_MS5803_14 ||
-               model == MS58XX_MODEL_MS5803_30 ||
-               model == MS58XX_MODEL_MS5806_02) &&
-              (addr == MS58XX_ADDR0 || addr == MS58XX_ADDR1) ||
-              (model == MS58XX_MODEL_MS5805_02 ||
-               model == MS58XX_MODEL_MS5837_30) &&
-              addr == MS58XX_ADDR0);
+  DEBUGASSERT(((model == MS58XX_MODEL_MS5803_02 ||
+                model == MS58XX_MODEL_MS5803_05 ||
+                model == MS58XX_MODEL_MS5803_07 ||
+                model == MS58XX_MODEL_MS5803_14 ||
+                model == MS58XX_MODEL_MS5803_30 ||
+                model == MS58XX_MODEL_MS5806_02) &&
+               (addr == MS58XX_ADDR0 || addr == MS58XX_ADDR1)) ||
+              ((model == MS58XX_MODEL_MS5805_02 ||
+                model == MS58XX_MODEL_MS5837_30) &&
+               addr == MS58XX_ADDR0));
 
   /* Initialize the device's structure */
 

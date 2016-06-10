@@ -299,17 +299,6 @@ FAR struct mtd_dev_s *mtd_rwb_initialize(FAR struct mtd_dev_s *mtd);
 int ftl_initialize(int minor, FAR struct mtd_dev_s *mtd);
 
 /****************************************************************************
- * Name: flash_eraseall
- *
- * Description:
- *   Call a block driver with the MTDIOC_BULKERASE ioctl command.  This will
- *   cause the MTD driver to erase all of the flash.
- *
- ****************************************************************************/
-
-int flash_eraseall(FAR const char *driver);
-
-/****************************************************************************
  * Name: smart_initialize
  *
  * Description:
@@ -411,6 +400,16 @@ void at24c_uninitialize(FAR struct mtd_dev_s *mtd);
  ****************************************************************************/
 
 FAR struct mtd_dev_s *at25_initialize(FAR struct spi_dev_s *dev);
+
+/****************************************************************************
+ * Name: is25xp
+ *
+ * Description:
+ *   Initializes the driver for SPI-based IS25xP FLASH
+ *
+ ****************************************************************************/
+
+FAR struct mtd_dev_s *is25xp_initialize(FAR struct spi_dev_s *dev);
 
 /****************************************************************************
  * Name: m25p_initialize

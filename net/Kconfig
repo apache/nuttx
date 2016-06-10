@@ -44,7 +44,7 @@ config NET_MULTIBUFFER
 	bool "Use multiple device-side I/O buffers"
 	default n
 	---help---
-		Traditionally, the uIP stacl has used a single buffer for all
+		Traditionally, the uIP-based stack has used a single buffer for all
 		incoming and outgoing traffic.  If this configuration is selected,
 		then the driver can manage multiple I/O buffers and can, for
 		example, be filling one input buffer while sending another output

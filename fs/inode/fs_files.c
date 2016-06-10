@@ -65,7 +65,7 @@ static void _files_semtake(FAR struct filelist *list)
 
   while (sem_wait(&list->fl_sem) != 0)
     {
-      /* The only case that an error should occr here is if
+      /* The only case that an error should occur here is if
        * the wait was awakened by a signal.
        */
 
@@ -362,9 +362,9 @@ int files_close(int fd)
   /* If the file was properly opened, there should be an inode assigned */
 
   if (fd < 0 || fd >= CONFIG_NFILE_DESCRIPTORS || !list->fl_files[fd].f_inode)
-   {
-     return -EBADF;
-   }
+    {
+      return -EBADF;
+    }
 
   /* Perform the protected close operation */
 

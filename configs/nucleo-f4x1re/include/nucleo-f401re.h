@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/nucleo-f4x1re/include/nucleo-f401re.h
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -168,8 +168,14 @@
  */
 /* REVISIT */
 
-#define STM32_TIM18_FREQUENCY   (2*STM32_PCLK2_FREQUENCY)
-#define STM32_TIM27_FREQUENCY   (2*STM32_PCLK1_FREQUENCY)
+#define BOARD_TIM1_FREQUENCY    (2*STM32_PCLK2_FREQUENCY)
+#define BOARD_TIM2_FREQUENCY    (2*STM32_PCLK1_FREQUENCY)
+#define BOARD_TIM3_FREQUENCY    (2*STM32_PCLK1_FREQUENCY)
+#define BOARD_TIM4_FREQUENCY    (2*STM32_PCLK1_FREQUENCY)
+#define BOARD_TIM5_FREQUENCY    (2*STM32_PCLK1_FREQUENCY)
+#define BOARD_TIM6_FREQUENCY    (2*STM32_PCLK1_FREQUENCY)
+#define BOARD_TIM7_FREQUENCY    (2*STM32_PCLK1_FREQUENCY)
+#define BOARD_TIM8_FREQUENCY    (2*STM32_PCLK2_FREQUENCY)
 
 /* SDIO dividers.  Note that slower clocking is required when DMA is disabled 
  * in order to avoid RX overrun/TX underrun errors due to delayed responses

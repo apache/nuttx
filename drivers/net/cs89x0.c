@@ -314,7 +314,7 @@ static int cs89x0_transmit(struct cs89x0_driver_s *cs89x0)
  * Function: cs89x0_txpoll
  *
  * Description:
- *   The transmitter is available, check if uIP has any outgoing packets ready
+ *   The transmitter is available, check if the network has any outgoing packets ready
  *   to send.  This is a callback from devif_poll().  devif_poll() may be called:
  *
  *   1. When the preceding TX packet send is complete,
@@ -436,7 +436,7 @@ static void cs89x0_receive(FAR struct cs89x0_driver_s *cs89x0, uint16_t isq)
       return;
     }
 
-  /* Check if the packet is a valid size for the uIP buffer configuration */
+  /* Check if the packet is a valid size for the network buffer configuration */
 
   if (rxlength > ???)
     {
@@ -618,7 +618,7 @@ static void cs89x0_txdone(struct cs89x0_driver_s *cs89x0, uint16_t isq)
 
   wd_cancel(cs89x0->cs_txtimeout);
 
-  /* Then poll uIP for new XMIT data */
+  /* Then poll the network for new XMIT data */
 
   (void)devif_poll(&cs89x0->cs_dev, cs89x0_txpoll);
 }
@@ -759,7 +759,7 @@ static void cs89x0_txtimeout(int argc, uint32_t arg, ...)
   /* Then reset the hardware */
 #warning "Missing logic"
 
-  /* Then poll uIP for new XMIT data */
+  /* Then poll the network for new XMIT data */
 
   (void)devif_poll(&cs89x0->cs_dev, cs89x0_txpoll);
 }
@@ -788,7 +788,7 @@ static void cs89x0_polltimer(int argc, uint32_t arg, ...)
   /* Check if there is room in the send another TXr packet.  */
 #warning "Missing logic"
 
-  /* If so, update TCP timing states and poll uIP for new XMIT data */
+  /* If so, update TCP timing states and poll the network for new XMIT data */
 
   (void)devif_timer(&cs89x0->cs_dev, cs89x0_txpoll);
 
@@ -909,7 +909,7 @@ static int cs89x0_txavail(struct net_driver_s *dev)
       /* Check if there is room in the hardware to hold another outgoing packet. */
 #warning "Missing logic"
 
-      /* If so, then poll uIP for new XMIT data */
+      /* If so, then poll the network for new XMIT data */
 
       (void)devif_poll(&cs89x0->cs_dev, cs89x0_txpoll);
     }

@@ -265,9 +265,9 @@ struct enc_driver_s
 
   FAR struct spi_dev_s *spi;
 
-  /* This holds the information visible to uIP/NuttX */
+  /* This holds the information visible to the NuttX network */
 
-  struct net_driver_s   dev;           /* Interface understood by uIP */
+  struct net_driver_s   dev;           /* Interface understood by the network */
 };
 
 /****************************************************************************
@@ -1081,7 +1081,7 @@ static int enc_transmit(FAR struct enc_driver_s *priv)
  *
  * Assumptions:
  *   A packet is available in d_buf.
- *   Interrupts are enabled but the caller holds the uIP lock.
+ *   Interrupts are enabled but the caller holds the network lock.
  *
  ****************************************************************************/
 
@@ -1138,7 +1138,7 @@ static int enc_txenqueue(FAR struct enc_driver_s *priv)
  * Function: enc_txpoll
  *
  * Description:
- *   Enqueues uIP packets if available.
+ *   Enqueues network packets if available.
  *   This is a callback from devif_poll().  devif_poll() may be called:
  *
  *   1. When the preceding TX packet send is complete,
@@ -1152,7 +1152,7 @@ static int enc_txenqueue(FAR struct enc_driver_s *priv)
  *   OK on success; a negated errno on failure
  *
  * Assumptions:
- *   Interrupts are enabled but the caller holds the uIP lock.
+ *   Interrupts are enabled but the caller holds the network lock.
  *
  ****************************************************************************/
 
@@ -1273,7 +1273,7 @@ static void enc_linkstatus(FAR struct enc_driver_s *priv)
  *   None
  *
  * Assumptions:
- *   Interrupts are enabled but the caller holds the uIP lock.
+ *   Interrupts are enabled but the caller holds the network lock.
  *
  ****************************************************************************/
 
@@ -1322,7 +1322,7 @@ static void enc_txif(FAR struct enc_driver_s *priv)
  *   None
  *
  * Assumptions:
- *   Interrupts are enabled but the caller holds the uIP lock.
+ *   Interrupts are enabled but the caller holds the network lock.
  *
  ****************************************************************************/
 
@@ -1362,7 +1362,7 @@ static void enc_rxldpkt(FAR struct enc_driver_s *priv,
  *   A free rx descriptor
  *
  * Assumptions:
- *   Interrupts are enabled but the caller holds the uIP lock.
+ *   Interrupts are enabled but the caller holds the network lock.
  *
  ****************************************************************************/
 
@@ -1395,7 +1395,7 @@ static struct enc_descr_s *enc_rxgetdescr(FAR struct enc_driver_s *priv)
  *   None
  *
  * Assumptions:
- *   Interrupts are enabled but the caller holds the uIP lock.
+ *   Interrupts are enabled but the caller holds the network lock.
  *
  ****************************************************************************/
 
@@ -1443,7 +1443,7 @@ static void enc_rxrmpkt(FAR struct enc_driver_s *priv, FAR struct enc_descr_s *d
  * Function: enc_rxdispatch
  *
  * Description:
- *   Give the newly received packet to uIP.
+ *   Give the newly received packet to the network.
  *
  * Parameters:
  *   priv  - Reference to the driver state structure
@@ -1452,7 +1452,7 @@ static void enc_rxrmpkt(FAR struct enc_driver_s *priv, FAR struct enc_descr_s *d
  *   None
  *
  * Assumptions:
- *   Interrupts are enabled but the caller holds the uIP lock.
+ *   Interrupts are enabled but the caller holds the network lock.
  *
  ****************************************************************************/
 
@@ -1633,7 +1633,7 @@ static void enc_rxdispatch(FAR struct enc_driver_s *priv)
  *   None
  *
  * Assumptions:
- *   Interrupts are enabled but the caller holds the uIP lock.
+ *   Interrupts are enabled but the caller holds the network lock.
  *
  ****************************************************************************/
 
@@ -1763,7 +1763,7 @@ static void enc_pktif(FAR struct enc_driver_s *priv)
  *   None
  *
  * Assumptions:
- *   Interrupts are enabled but the caller holds the uIP lock.
+ *   Interrupts are enabled but the caller holds the network lock.
  *
  ****************************************************************************/
 
@@ -1832,7 +1832,7 @@ static void enc_irqworker(FAR void *arg)
 
   DEBUGASSERT(priv);
 
-  /* Get exclusive access to both uIP and the SPI bus. */
+  /* Get exclusive access to both the network and the SPI bus. */
 
   lock = net_lock();
   enc_lock(priv);
@@ -1975,7 +1975,7 @@ static void enc_irqworker(FAR void *arg)
 
   enc_bfs(priv, ENC_EIE, EIE_INTIE);
 
-  /* Release lock on the SPI bus and uIP */
+  /* Release lock on the SPI bus and the network */
 
   enc_unlock(priv);
   net_unlock(lock);
@@ -2046,7 +2046,7 @@ static void enc_toworker(FAR void *arg)
   nlldbg("Tx timeout\n");
   DEBUGASSERT(priv);
 
-  /* Get exclusive access to uIP. */
+  /* Get exclusive access to the network. */
 
   lock = net_lock();
 
@@ -2064,11 +2064,11 @@ static void enc_toworker(FAR void *arg)
   DEBUGASSERT(ret == OK);
   (void)ret;
 
-  /* Then poll uIP for new XMIT data */
+  /* Then poll the network for new XMIT data */
 
   (void)devif_poll(&priv->dev, enc_txpoll);
 
-  /* Release uIP */
+  /* Release the network */
 
   net_unlock(lock);
 }
@@ -2138,7 +2138,7 @@ static void enc_pollworker(FAR void *arg)
 
   DEBUGASSERT(priv);
 
-  /* Get exclusive access to both uIP and the SPI bus. */
+  /* Get exclusive access to both the network and the SPI bus. */
 
   lock = net_lock();
   enc_lock(priv);
@@ -2151,7 +2151,7 @@ static void enc_pollworker(FAR void *arg)
 
   if ((enc_rdreg(priv, ENC_ECON1) & ECON1_TXRTS) == 0)
     {
-      /* Yes.. update TCP timing states and poll uIP for new XMIT data. Hmmm..
+      /* Yes.. update TCP timing states and poll the network for new XMIT data. Hmmm..
        * looks like a bug here to me.  Does this mean if there is a transmit
        * in progress, we will missing TCP time state updates?
        */
@@ -2159,7 +2159,7 @@ static void enc_pollworker(FAR void *arg)
       (void)devif_timer(&priv->dev, enc_txpoll);
     }
 
-  /* Release lock on the SPI bus and uIP */
+  /* Release lock on the SPI bus and the network */
 
   enc_unlock(priv);
   net_unlock(lock);
@@ -2381,7 +2381,7 @@ static int enc_txavail(struct net_driver_s *dev)
 
       if ((enc_rdreg(priv, ENC_ECON1) & ECON1_TXRTS) == 0)
         {
-          /* The interface is up and TX is idle; poll uIP for new XMIT data */
+          /* The interface is up and TX is idle; poll the network for new XMIT data */
 
           (void)devif_poll(&priv->dev, enc_txpoll);
         }

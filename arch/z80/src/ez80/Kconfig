@@ -9,17 +9,17 @@ menu "ez80 Peripheral Support"
 
 config EZ80_UART0
 	bool "UART0"
-	select ARCH_HAVE_UART0
+	select UART0_SERIALDRIVER
 	default n
 
 config EZ80_UART1
 	bool "UART1"
-	select ARCH_HAVE_UART1
+	select UART1_SERIALDRIVER
 	default n
 
 config EZ80_UART2
 	bool "UART2"
-	select ARCH_HAVE_UART2
+	select UART2_SERIALDRIVER
 	default n
 
 config EZ80_EMAC

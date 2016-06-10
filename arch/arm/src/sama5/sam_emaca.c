@@ -267,9 +267,9 @@ struct sam_emac_s
   WDOG_ID               txpoll;      /* TX poll timer */
   WDOG_ID               txtimeout;   /* TX timeout timer */
 
-  /* This holds the information visible to uIP/NuttX */
+  /* This holds the information visible to the NuttX network */
 
-  struct net_driver_s   dev;         /* Interface understood by uIP */
+  struct net_driver_s   dev;         /* Interface understood by the network */
 
   /* Used to track transmit and receive descriptors */
 
@@ -817,7 +817,7 @@ static int sam_transmit(struct sam_emac_s *priv)
  * Function: sam_txpoll
  *
  * Description:
- *   The transmitter is available, check if uIP has any outgoing packets ready
+ *   The transmitter is available, check if the network has any outgoing packets ready
  *   to send.  This is a callback from devif_poll().  devif_poll() may be called:
  *
  *   1. When the preceding TX packet send is complete,
@@ -926,7 +926,7 @@ static void sam_dopoll(struct sam_emac_s *priv)
 
   if (sam_txfree(priv) > 0)
     {
-      /* If we have the descriptor, then poll uIP for new XMIT data. */
+      /* If we have the descriptor, then poll the network for new XMIT data. */
 
       (void)devif_poll(dev, sam_txpoll);
     }
@@ -1206,7 +1206,7 @@ static void sam_receive(struct sam_emac_s *priv)
     {
       sam_dumppacket("Received packet", dev->d_buf, dev->d_len);
 
-      /* Check if the packet is a valid size for the uIP buffer configuration
+      /* Check if the packet is a valid size for the network buffer configuration
        * (this should not happen)
        */
 
@@ -1410,7 +1410,7 @@ static void sam_txdone(struct sam_emac_s *priv)
       sam_putreg(priv, SAM_EMAC_IER, EMAC_INT_RCOMP);
     }
 
-  /* Then poll uIP for new XMIT data */
+  /* Then poll the network for new XMIT data */
 
   sam_dopoll(priv);
 }
@@ -1633,7 +1633,7 @@ static void sam_txtimeout(int argc, uint32_t arg, ...)
   sam_ifdown(&priv->dev);
   sam_ifup(&priv->dev);
 
-  /* Then poll uIP for new XMIT data */
+  /* Then poll the network for new XMIT data */
 
   sam_dopoll(priv);
 }
@@ -1667,7 +1667,7 @@ static void sam_polltimer(int argc, uint32_t arg, ...)
 
   if (sam_txfree(priv) > 0)
     {
-      /* Update TCP timing states and poll uIP for new XMIT data. */
+      /* Update TCP timing states and poll the network for new XMIT data. */
 
       (void)devif_timer(dev, sam_txpoll);
     }
@@ -1837,7 +1837,7 @@ static int sam_txavail(struct net_driver_s *dev)
 
   if (priv->ifup)
     {
-      /* Poll uIP for new XMIT data */
+      /* Poll the network for new XMIT data */
 
       sam_dopoll(priv);
     }

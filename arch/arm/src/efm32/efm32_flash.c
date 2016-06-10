@@ -845,7 +845,7 @@ ssize_t __ramfunc__ up_progmem_write(size_t addr, const void *buf, size_t size)
 
   bitband_set_peripheral(EFM32_MSC_WRITECTRL, _MSC_WRITECTRL_WREN_SHIFT, 0);
 
-#if (defined(CONFIG_EFM32_EFM32GG) || defined(CONFIG_EFM32_EFM32WG)) && (2==WORDS_PER_DATA_PHASE)
+#if (defined(CONFIG_EFM32_EFM32GG) || defined(CONFIG_EFM32_EFM32WG))
 
   /* Turn off double word write cycle support. */
 

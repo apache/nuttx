@@ -1,8 +1,8 @@
 /************************************************************************************
- * arch/arm/src/lpc11/lpc11_lowgetc.h
+ * arch/arm/src/stm32/stm32_1wire.h
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2016 Aleksandr Vyhovanec. All rights reserved.
+ *   Author: Aleksandr Vyhovanec <www.desh@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,50 +33,55 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_LPC11XX_LPC11_LOWGETC_H
-#define __ARCH_ARM_SRC_LPC11XX_LPC11_LOWGETC_H
+#ifndef __ARCH_ARM_SRC_STM32_STM32_1WIRE_H
+#define __ARCH_ARM_SRC_STM32_STM32_1WIRE_H
 
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include "lpc11_serial.h"
+
+#include "stm32_uart.h"
 
 /************************************************************************************
- * Pre-processor Definitions
+ * Public Function Prototypes
  ************************************************************************************/
 
-/************************************************************************************
- * Public Types
- ************************************************************************************/
+/****************************************************************************
+ * Name: stm32_1wireinitialize
+ *
+ * Description:
+ *   Initialize the selected 1-Wire port. And return a unique instance of struct
+ *   struct onewire_dev_s.  This function may be called to obtain multiple
+ *   instances of the interface, each of which may be set up with a
+ *   different frequency and slave address.
+ *
+ * Input Parameter:
+ *   Port number (for hardware that has multiple 1-Wire interfaces)
+ *
+ * Returned Value:
+ *   Valid 1-Wire device structure reference on succcess; a NULL on failure
+ *
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Data
- ************************************************************************************/
+FAR struct onewire_dev_s *stm32_1wireinitialize(int port);
 
-#ifndef __ASSEMBLY__
+/****************************************************************************
+ * Name: stm32_1wireuninitialize
+ *
+ * Description:
+ *   De-initialize the selected 1-Wire port, and power down the device.
+ *
+ * Input Parameter:
+ *   Device structure as returned by the stm32_1wireinitialize()
+ *
+ * Returned Value:
+ *   OK on success, ERROR when internal reference count mismatch or dev
+ *   points to invalid hardware device.
+ *
+ ****************************************************************************/
 
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
+int stm32_1wireuninitialize(FAR struct onewire_dev_s *dev);
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
-
-#ifdef HAVE_SERIAL_CONSOLE
-int lpc11_lowgetc(void);
-#endif
-
-#undef EXTERN
-#if defined(__cplusplus)
-}
-#endif
-#endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_LPC11XX_LPC11_LOWGETC_H */
+#endif /* __ARCH_ARM_SRC_STM32_STM32_1WIRE_H */

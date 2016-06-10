@@ -157,45 +157,42 @@ config EFM32_BITBAND
 config EFM32_USART0
 	bool "USART0"
 	default n
-	select ARCH_HAVE_USART0
 	select ARCH_HAVE_SERIAL_TERMIOS
 
 config EFM32_USART1
 	bool "USART1"
 	default n
-	select ARCH_HAVE_USART1
 	select ARCH_HAVE_SERIAL_TERMIOS
 
 config EFM32_USART2
 	bool "USART2"
 	default n
 	depends on EFM32_HAVE_USART2
-	select ARCH_HAVE_USART2
 	select ARCH_HAVE_SERIAL_TERMIOS
 
 config EFM32_UART0
 	bool "UART0"
 	default n
-	select ARCH_HAVE_UART0
+	select UART0_SERIALDRIVER
 	select EFM32_UART
 
 config EFM32_UART1
 	bool "UART1"
 	default n
-	select ARCH_HAVE_UART1
+	select UART1_SERIALDRIVER
 	select EFM32_UART
 
 config EFM32_LEUART0
 	bool "Low energy UART0"
 	default n
-	select ARCH_HAVE_OTHER_UART
+	select OTHER_UART_SERIALDRIVER
 	select EFM32_LEUART
 
 config EFM32_LEUART1
 	bool "Low energy UART1"
 	default n
 	depends on EFM32_HAVE_LEUART1
-	select ARCH_HAVE_OTHER_UART
+	select OTHER_UART_SERIALDRIVER
 	select EFM32_LEUART
 
 config EFM32_OTGFS
@@ -261,7 +258,7 @@ choice
 
 config EFM32_USART0_ISUART
 	bool "USART0 is a UART"
-	select USART0_ISUART
+	select USART0_SERIALDRIVER
 	select EFM32_USART_ISUART
 
 config EFM32_USART0_ISSPI
@@ -277,7 +274,7 @@ choice
 
 config EFM32_USART1_ISUART
 	bool "USART1 is a UART"
-	select USART1_ISUART
+	select USART1_SERIALDRIVER
 	select EFM32_USART_ISUART
 
 config EFM32_USART1_ISSPI
@@ -293,7 +290,7 @@ choice
 
 config EFM32_USART2_ISUART
 	bool "USART2 is a UART"
-	select USART2_ISUART
+	select USART2_SERIALDRIVER
 	select EFM32_USART_ISUART
 
 config EFM32_USART2_ISSPI

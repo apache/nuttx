@@ -2,7 +2,8 @@
  * arch/arm/src/stm32f7/chip/stm32f74xx75xx_flash.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            David Sidrane <david_s5@nscdg.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -40,44 +41,62 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-/* Flash size is not known from the chip configuration:
+/* Flash size is known from the chip selection:
+ *
+ *   When CONFIG_STM32F7_FLASH_OVERRIDE_DEFAULT is set the
+ *   CONFIG_STM32F7_FLASH_CONFIG_x selects the default FLASH size based on the chip
+ *   part number. This value can be overridden with CONFIG_STM32F7_FLASH_OVERRIDE_x
  *
  *   Parts STM32F74xxE have 512Kb of FLASH
  *   Parts STM32F74xxG have 1024Kb of FLASH
  *
- * The user has to tell us the FLASH size by setting CONFIG_STM32F7_FLASH_SIZE
+ *   N.B. Only Single bank mode is supported
  */
 
-#if defined(CONFIG_STM32F7_FLASH_512KB)
+#define _K(x) ((x)*1024)
 
-#  define STM32_FLASH_NPAGES  2
-#  define STM32_FLASH_SIZE    (512*1024)
-
-#elif defined(CONFIG_STM32F7_FLASH_1024KB)
-
-#  define STM32_FLASH_NPAGES  4
-#  define STM32_FLASH_SIZE    (1024*1024)
-
-#else
-#  warning Assuming FLASH size 1024KB
-
-#  define STM32_FLASH_NPAGES  4
-#  define STM32_FLASH_SIZE    (1024*1024)
-
+#if !defined(CONFIG_STM32F7_FLASH_OVERRIDE_DEFAULT) && \
+    !defined(CONFIG_STM32_FLASH_OVERRIDE_E) && \
+    !defined(CONFIG_STM32_FLASH_OVERRIDE_F) && \
+    !defined(CONFIG_STM32_FLASH_OVERRIDE_G) && \
+    !defined(CONFIG_STM32_FLASH_CONFIG_E) && \
+    !defined(CONFIG_STM32_FLASH_CONFIG_F) && \
+    !defined(CONFIG_STM32_FLASH_CONFIG_G)
+#  define CONFIG_STM32_FLASH_OVERRIDE_E
+#  warning "Flash size not defined defaulting to 512KiB (E)"
 #endif
 
-/* The STM32F745xx/46xx have mixed page sizes:
- *
- *   Sectors: 0-3:  32 KB
- *   Sector   4    128 KB
- *   Sectors: 5-7: 256 KB
- *
- * We use the largest page size and set the number of pages equal to the
- * FLASH size assuming that fixed, largest pages size.
- */
+#if !defined(CONFIG_STM32F7_FLASH_OVERRIDE_DEFAULT)
 
-#define STM32_FLASH_PAGESIZE  (256*1024)
+#  undef CONFIG_STM32F7_FLASH_CONFIG_E
+#  undef CONFIG_STM32F7_FLASH_CONFIG_G
 
+#  if defined(CONFIG_STM32F7_FLASH_OVERRIDE_E)
+
+#    define CONFIG_STM32F7_FLASH_CONFIG_E
+
+#  elif defined(CONFIG_STM32F7_FLASH_OVERRIDE_G)
+
+#    define CONFIG_STM32F7_FLASH_CONFIG_G
+
+#  endif
+#endif
+
+#if defined(CONFIG_STM32_FLASH_CONFIG_E)
+
+#  define STM32_FLASH_NPAGES      6
+#  define STM32_FLASH_SIZE        _K((4 * 32) + (1 * 128) + (1 * 256))
+#  define STM32_FLASH_SIZES       {_K(32), _K(32), _K(32), _K(32),  \
+                                   _K(128), _K(256)}
+
+#elif defined(CONFIG_STM32_FLASH_CONFIG_G)
+
+#  define STM32_FLASH_NPAGES      8
+#  define STM32_FLASH_SIZE        _K((4 * 32) + (1 * 128) + (3 * 256))
+#  define STM32_FLASH_SIZES       {_K(32), _K(32), _K(32), _K(32),  \
+                                  _K(128), _K(256), _K(256), _K(256)}
+
+#endif
 
 /* Register Offsets *****************************************************************/
 
@@ -133,8 +152,8 @@
 #define FLASH_CR_SER               (1 << 1)  /* Bit 1:  Sector Erase */
 #define FLASH_CR_MER               (1 << 2)  /* Bit 2:  Mass Erase sectors 0..11 */
 #define FLASH_CR_SNB_SHIFT         (3)       /* Bits 3-6: Sector number */
-#define FLASH_CR_SNB_MASK          (15 << FLASH_CR_SNB_SHIFT)
-#  define FLASH_CR_SNB(n)          ((uint32_t)(n) << FLASH_CR_SNB_SHIFT) | ((n / 12) << 7)) /* Sector n, n=0..23 */
+#define FLASH_CR_SNB_MASK          (0xf << FLASH_CR_SNB_SHIFT)
+#  define FLASH_CR_SNB(n)          ((uint32_t)((n) % 8) << FLASH_CR_SNB_SHIFT) | ((n / 8) << 6)) /* Sector n, n=0..23 */
 #define FLASH_CR_PSIZE_SHIFT       (8)       /* Bits 8-9: Program size */
 #define FLASH_CR_PSIZE_MASK        (3 << FLASH_CR_PSIZE_SHIFT)
 #  define FLASH_CR_PSIZE_X8        (0 << FLASH_CR_PSIZE_SHIFT) /* Program x8 */
@@ -145,7 +164,6 @@
 #define FLASH_CR_EOPIE             (1 << 24) /* Bit 24: End of operation interrupt enable */
 #define FLASH_CR_ERRIE             (1 << 25) /* Bit 25: Error interrupt enable */
 #define FLASH_CR_LOCK              (1 << 31) /* Bit 31: Lock */
-#define FLASH_CR_MER1              (1 << 15) /* Bit 15: Mass Erase sectors 12..23 */
 
 /* Flash Option Control Register (OPTCR) */
 
@@ -159,15 +177,15 @@
 #  define FLASH_OPTCR_VBOR0        (3 << FLASH_OPTCR_BORLEV_SHIFT) /* BOR off */
 #define FLASH_OPTCR_USER_SHIFT     (4)       /* Bits 5-7: User option bytes */
 #define FLASH_OPTCR_USER_MASK      (15 << FLASH_OPTCR_USER_SHIFT)
-#  define FLASH_OPTCR_WWDG_SW      (1 << 4)  /* Bit 5: WWDG_SW */
+#  define FLASH_OPTCR_WWDG_SW      (1 << 4)  /* Bit 4: WWDG_SW */
 #  define FLASH_OPTCR_IWDG_SW      (1 << 5)  /* Bit 5: IWDG_SW */
 #  define FLASH_OPTCR_NRST_STOP    (1 << 6)  /* Bit 6: nRST_STOP */
 #  define FLASH_OPTCR_NRST_STDBY   (1 << 7)  /* Bit 7: nRST_STDBY */
 #define FLASH_OPTCR_RDP_SHIFT      (8)       /* Bits 8-15: Read protect */
 #define FLASH_OPTCR_RDP_MASK       (0xff << FLASH_OPTCR_RDP_SHIFT)
 #  define FLASH_OPTCR_RDP(n)       ((uint32_t)(n) << FLASH_OPTCR_RDP_SHIFT)
-#define FLASH_OPTCR_NWRP_SHIFT     (16)      /* Bits 16-27: Not write protect */
-#define FLASH_OPTCR_NWRP_MASK      (0xfff << FLASH_OPTCR_NWRP_SHIFT)
+#define FLASH_OPTCR_NWRP_SHIFT     (16)      /* Bits 16-23: Not write protect */
+#define FLASH_OPTCR_NWRP_MASK      (0xff << FLASH_OPTCR_NWRP_SHIFT)
 #   define FLASH_OPTCR_NWRP(n)     ((uint32_t)(n) << FLASH_OPTCR_NWRP_SHIFT)
 #define FLASH_OPTCR_IWDG_STDBY     (1 << 30) /* Bit 30: IWDG freeze in stop mode */
 #define FLASH_OPTCR_IWDG_STOP      (1 << 31) /* Bit 31: IWDG freeze in standby mode */

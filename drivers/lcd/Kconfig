@@ -3,7 +3,23 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
-comment "Common LCD Settings"
+menu "LCD Driver Support"
+
+menuconfig LCD
+	bool "Graphic LCD Driver Support"
+	default n
+	select NX_LCDDRIVER if NX
+	---help---
+		Drivers for parallel and serial LCD and OLED type devices.  These
+		drivers support interfaces as defined in include/nuttx/lcd/lcd.h
+
+		This selection is necessary to enable support for LCD drivers in
+		drivers/lcd as well as for board-specific LCD drivers in the configs/
+		subdirectories.
+
+if LCD
+
+comment "Common Graphic LCD Settings"
 
 config LCD_CONSOLE
 	bool "LCD console output"
@@ -990,8 +1006,21 @@ config LCD_RA8875_EXTENDED
 		driver anyway.
 
 endif # LCD_RA8875
+endif # LCD
 
-comment "Alphanumeric/Segment LCD Devices"
+menuconfig SLCD
+	bool "Alphanumeric/Segment LCD Devices"
+	default n
+	---help---
+		Drivers for Alphanumeric ans Segment LCDs (SLCDs).  These
+		drivers support interfaces as defined in include/nuttx/lcd/slcd_ioctl.h
+		amd slcd_codec.h
+
+		This selection is necessary to enable support for SLCD drivers in
+		drivers/lcd as well as for board-specific LCD drivers in the configs/
+		subdirectories.
+
+if SLCD
 
 config LCD_LCD1602
 	bool "LCD 1602"
@@ -1003,3 +1032,21 @@ config LCD_LCD1602
 		NOTE:  There is no common implementation of the LCD1602 driver.
 		Rather, there are board-by-board implementations.  See, for example,
 		configs/pcblogic-pic32mx/src/up_lcd1602.c.
+
+config LCD_BACKPACK
+	bool "PCF8574 LCD Backpack"
+	default n
+	depends on I2C
+	select LIB_SLCDCODEC
+	---help---
+		Enable support for PCF8574 LCD Backpack driver. This driver supports
+		an interface board that is based on the PCF8574 io expander and
+		supports the HD44780-based (or compatible) LCD modules.  There are
+		a myriad of different vendors of such, but they are principally the
+		same, save wiring and minor features like jumpers for I2C addresses.
+		This driver supports known and unknown variants.
+
+		See pcf8574_lcd_backpack_readme.txt
+
+endif # SLCD
+endmenu # LCD Driver Support

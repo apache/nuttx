@@ -2905,6 +2905,7 @@ static bool mcan_txempty(FAR struct can_dev_s *dev)
   regval = mcan_getreg(priv, SAM_MCAN_TXFQS_OFFSET);
   if (((regval & MCAN_TXFQS_TFQF) != 0))
     {
+      mcan_dev_unlock(priv);
       return false;
     }
 

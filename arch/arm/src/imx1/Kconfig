@@ -12,17 +12,17 @@ menu "iMX.1 Peripheral Selection"
 config IMX1_UART1
 	bool "UART1"
 	default n
-	select ARCH_HAVE_UART1
+	select UART1_SERIALDRIVER
 
 config IMX1_UART2
 	bool "UART2"
 	default n
-	select ARCH_HAVE_UART2
+	select UART2_SERIALDRIVER
 
 config IMX1_UART3
 	bool "UART3"
 	default n
-	select ARCH_HAVE_UART3
+	select UART3_SERIALDRIVER
 
 config IMX1_SPI1
 	bool "SPI1"

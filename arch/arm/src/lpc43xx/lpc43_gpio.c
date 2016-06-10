@@ -49,6 +49,10 @@
 #include "up_arch.h"
 #include "lpc43_gpio.h"
 
+#ifdef CONFIG_LPC43_GPIO_IRQ
+#include "lpc43_gpioint.h"
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -181,14 +185,14 @@ int lpc43_gpio_config(uint16_t gpiocfg)
 
       case GPIO_MODE_PININTR:    /* GPIO pin interrupt */
         lpc43_configinput(gpiocfg, port, pin);
-#ifdef CONFIG_GPIO_IRQ
+#ifdef CONFIG_LPC43_GPIO_IRQ
         ret = lpc43_gpioint_pinconfig(gpiocfg);
 #endif
         break;
 
       case GPIO_MODE_GRPINTR:    /* GPIO group interrupt */
         lpc43_configinput(gpiocfg, port, pin);
-#ifdef CONFIG_GPIO_IRQ
+#ifdef CONFIG_LPC43_GPIO_IRQ
         ret = lpc43_gpioint_grpconfig(gpiocfg);
 #endif
         break;

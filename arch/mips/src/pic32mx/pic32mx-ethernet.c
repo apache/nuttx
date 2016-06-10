@@ -319,9 +319,9 @@ struct pic32mx_driver_s
 
   sq_queue_t pd_freebuffers;    /* The free buffer list */
 
-  /* This holds the information visible to uIP/NuttX */
+  /* This holds the information visible to the NuttX network */
 
-  struct net_driver_s pd_dev;  /* Interface understood by uIP */
+  struct net_driver_s pd_dev;  /* Interface understood by the network */
 
   /* Descriptors and packet buffers */
 
@@ -1024,7 +1024,7 @@ static int pic32mx_transmit(struct pic32mx_driver_s *priv)
 
   /* Find the next available TX descriptor.  We are guaranteed that is will
    * not fail by upstream logic that assures that a TX packet is available
-   * before polling uIP.
+   * before polling the network.
    */
 
   txdesc = pic32mx_txdesc(priv);
@@ -1080,8 +1080,9 @@ static int pic32mx_transmit(struct pic32mx_driver_s *priv)
  * Function: pic32mx_txpoll
  *
  * Description:
- *   The transmitter is available, check if uIP has any outgoing packets ready
- *   to send.  This is a callback from devif_poll().  devif_poll() may be called:
+ *   The transmitter is available, check if the network has any outgoing
+ *   packets ready to send.  This is a callback from devif_poll().
+ *   devif_poll() may be called:
  *
  *   1. When the preceding TX packet send is complete,
  *   2. When the preceding TX packet send timesout and the interface is reset
@@ -1172,7 +1173,7 @@ static int pic32mx_txpoll(struct net_driver_s *dev)
  * Function: pic32mx_poll
  *
  * Description:
- *   Perform the uIP poll.
+ *   Perform the network poll.
  *
  * Parameters:
  *   priv  - Reference to the driver state structure
@@ -1220,7 +1221,7 @@ static void pic32mx_poll(struct pic32mx_driver_s *priv)
  * Function: pic32mx_timerpoll
  *
  * Description:
- *   Perform the uIP timer poll.
+ *   Perform the network timer poll.
  *
  * Parameters:
  *   priv  - Reference to the driver state structure
@@ -1634,11 +1635,11 @@ static void pic32mx_txdone(struct pic32mx_driver_s *priv)
       pic32mx_putreg(priv->pd_inten, PIC32MX_ETH_IEN);
     }
 
-  /* Otherwise poll uIP for new XMIT data */
+  /* Otherwise poll the network for new XMIT data */
 
   else
     {
-      /* Perform the uIP poll */
+      /* Perform the network poll */
 
       pic32mx_poll(priv);
     }
@@ -1848,7 +1849,7 @@ static void pic32mx_txtimeout(int argc, uint32_t arg, ...)
 
       (void)pic32mx_ifup(&priv->pd_dev);
 
-      /* Then poll uIP for new XMIT data (We are guaranteed to have a free
+      /* Then poll the network for new XMIT data (We are guaranteed to have a free
        * buffer here).
        */
 
@@ -1884,7 +1885,7 @@ static void pic32mx_polltimer(int argc, uint32_t arg, ...)
 
   if (pic32mx_txdesc(priv) != NULL)
     {
-      /* If so, update TCP timing states and poll uIP for new XMIT data. Hmmm..
+      /* If so, update TCP timing states and poll the network for new XMIT data. Hmmm..
        * might be bug here.  Does this mean if there is a transmit in progress,
        * we will missing TCP time state updates?
        */
@@ -2281,7 +2282,7 @@ static int pic32mx_txavail(struct net_driver_s *dev)
 
       if (pic32mx_txdesc(priv) != NULL)
         {
-          /* If so, then poll uIP for new XMIT data.  First allocate a buffer
+          /* If so, then poll the network for new XMIT data.  First allocate a buffer
            * to perform the poll
            */
 

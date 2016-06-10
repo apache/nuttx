@@ -74,7 +74,7 @@
 #define IMX_CSPI1_SPIDMA         (IMX_CSPI1_VBASE + CSPI_DMA_OFFSET)
 #define IMX_CSPI1_SPIRESET       (IMX_CSPI1_VBASE + CSPI_RESET_OFFSET)
 
-/* CSPI1 */
+/* CSPI2 */
 
 #define IMX_CSPI2_RXD            (IMX_CSPI2_VBASE + CSPI_RXD_OFFSET)
 #define IMX_CSPI2_TXD            (IMX_CSPI2_VBASE + CSPI_TXD_OFFSET)
@@ -138,7 +138,7 @@
 /* CSPI Sample Period Control Register */
 
 #define CSPI_SPCR_WAIT_SHIFT       0
-#define CSPI_SPCR_WAIT_MASK        (0x7ff << CSPI_CTRL_DATARATE_SHIFT)
+#define CSPI_SPCR_WAIT_MASK        (0x7ff << CSPI_SPCR_WAIT_SHIFT)
 #define CSPI_SPCR_CSRC             (1 << 15) /* Bit 15: 1:32768 or 32 kHz clock source */
 
 /* CSPI DMA Control Register */

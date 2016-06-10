@@ -2915,10 +2915,10 @@ SAMA5D3-Xplained Configuration Options
     CONFIG_SAMA5_PIOD_IRQ    - Support PIOD interrupts
     CONFIG_SAMA5_PIOE_IRQ    - Support PIOE interrupts
 
-    CONFIG_USART0_ISUART     - USART0 is configured as a UART
-    CONFIG_USART1_ISUART     - USART1 is configured as a UART
-    CONFIG_USART2_ISUART     - USART2 is configured as a UART
-    CONFIG_USART3_ISUART     - USART3 is configured as a UART
+    CONFIG_USART0_SERIALDRIVER - USART0 is configured as a UART
+    CONFIG_USART1_SERIALDRIVER - USART1 is configured as a UART
+    CONFIG_USART2_SERIALDRIVER - USART2 is configured as a UART
+    CONFIG_USART3_SERIALDRIVER - USART3 is configured as a UART
 
   AT91SAMA5 specific device driver settings
 

@@ -125,32 +125,32 @@
 
 struct tiva_adc_step_cfg_s
 {
-    uint8_t  adc;   /* Parent peripheral */
-    uint8_t  sse;   /* Parent sample sequencer (SSE) */
-    uint8_t  step;  /* Which step in the sequencer */
-    uint8_t  shold; /* Sample and hold time */
-    uint8_t  flags; /* Last step? Interrupt enabled?
-                     * Internal temperature sensor? */
-    uint8_t  ain;   /* Which analog input */
+  uint8_t  adc;   /* Parent peripheral */
+  uint8_t  sse;   /* Parent sample sequencer (SSE) */
+  uint8_t  step;  /* Which step in the sequencer */
+  uint8_t  shold; /* Sample and hold time */
+  uint8_t  flags; /* Last step? Interrupt enabled?
+                   * Internal temperature sensor? */
+  uint8_t  ain;   /* Which analog input */
 };
 
 /* Sample Sequencer configuration options */
 
 struct tiva_adc_sse_cfg_s
 {
-    uint8_t priority; /* Conversion priority, 0-3 no duplicates */
-    uint8_t trigger;  /* Trigger source */
+  uint8_t priority; /* Conversion priority, 0-3 no duplicates */
+  uint8_t trigger;  /* Trigger source */
 };
 
 /* ADC peripheral configuration options */
 
 struct tiva_adc_cfg_s
 {
-    uint8_t                    adc;       /* ADC peripheral number */
-    bool                       sse[4];    /* active SSEs in a bitmask */
-    struct tiva_adc_sse_cfg_s  ssecfg[4]; /* SSE configuration */
-    uint8_t                    steps;     /* Size of the stepcfg array */
-    struct tiva_adc_step_cfg_s *stepcfg;  /* Step configuration array */
+  uint8_t                    adc;       /* ADC peripheral number */
+  bool                       sse[4];    /* active SSEs in a bitmask */
+  struct tiva_adc_sse_cfg_s  ssecfg[4]; /* SSE configuration */
+  uint8_t                    steps;     /* Size of the stepcfg array */
+  struct tiva_adc_step_cfg_s *stepcfg;  /* Step configuration array */
 };
 
 /****************************************************************************
@@ -166,15 +166,10 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Inline Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
-/* Only allow access to upper level ADC drivers if they are enabled */
-#ifdef CONFIG_ADC
+#ifdef CONFIG_TIVA_ADC
 
 /****************************************************************************
  * Driver Function Prototypes
@@ -228,7 +223,7 @@ void tiva_adc_lock(FAR struct tiva_adc_s *priv, int sse);
 
 void tiva_adc_unlock(FAR struct tiva_adc_s *priv, int sse);
 
-#endif /* CONFIG_ADC */
+#endif /* CONFIG_TIVA_ADC */
 
 /****************************************************************************
  * Library Function Prototypes

@@ -250,8 +250,8 @@ int psock_tcp_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
       accept_tcpsender(psock, state.acpt_newconn, addr, addrlen);
     }
 
-  /* In general, this uIP-based implementation will not support non-blocking
-   * socket operations... except in a few cases:  Here for TCP accept with
+  /* In general, this implementation will not support non-blocking socket
+   * operations... except in a few cases:  Here for TCP accept with
    * backlog enabled.  If this socket is configured as non-blocking then
    * return EAGAIN if there is no pending connection in the backlog.
    */

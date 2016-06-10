@@ -1,7 +1,7 @@
 /****************************************************************************
- * drivers/mtd/flash_eraseall.c
+ * config/nucleo-144/src/stm32_sdio.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,79 +39,138 @@
 
 #include <nuttx/config.h>
 
-#include <errno.h>
+#include <stdbool.h>
+#include <stdio.h>
 #include <debug.h>
+#include <errno.h>
 
-#include <nuttx/fs/fs.h>
-#include <nuttx/fs/ioctl.h>
-#include <nuttx/mtd/mtd.h>
+#include <nuttx/sdio.h>
+#include <nuttx/mmcsd.h>
+
+#include "stm32.h"
+#include "nucleo-144.h"
+
+#ifdef HAVE_SDIO
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/****************************************************************************
- * Private Types
- ****************************************************************************/
+/* Configuration ************************************************************/
 
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
+/* Card detections requires card support and a card detection GPIO */
+
+#define HAVE_NCD   1
+#if !defined(CONFIG_STM32_SDIO) || !defined(GPIO_SDIO_NCD)
+#  undef HAVE_NCD
+#endif
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
+static FAR struct sdio_dev_s *g_sdio_dev;
+#ifdef HAVE_NCD
+static bool g_sd_inserted = 0xff; /* Impossible value */
+#endif
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: stm32_ncd_interrupt
+ *
+ * Description:
+ *   Card detect interrupt handler.
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_NCD
+static int stm32_ncd_interrupt(int irq, FAR void *context)
+{
+  bool present;
+
+  present = !stm32_gpioread(GPIO_SDIO_NCD);
+  if (present != g_sd_inserted)
+    {
+      sdio_mediachange(g_sdio_dev, present);
+      g_sd_inserted = present;
+    }
+
+  return OK;
+}
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: flash_eraseall
+ * Name: stm32_sdio_initialize
  *
  * Description:
- *   Call a block driver with the MDIOC_BULKERASE ioctl command.  This will
- *   cause the MTD driver to erase all of the flash.
+ *   Initialize SDIO-based MMC/SD card support
  *
  ****************************************************************************/
 
-int flash_eraseall(FAR const char *driver)
+int stm32_sdio_initialize(void)
 {
-  FAR struct inode *inode;
-  FAR const struct block_operations *ops;
   int ret;
 
-  /* Open the block driver */
+#ifdef HAVE_NCD
+  /* Card detect */
 
-  ret = open_blockdriver(driver, 0, &inode);
-  if (ret < 0)
+  bool cd_status;
+
+  /* Configure the card detect GPIO */
+
+  stm32_configgpio(GPIO_SDIO_NCD);
+
+  /* Register an interrupt handler for the card detect pin */
+
+  stm32_gpiosetevent(GPIO_SDIO_NCD, true, true, true, stm32_ncd_interrupt);
+#endif
+
+  /* Mount the SDIO-based MMC/SD block driver */
+  /* First, get an instance of the SDIO interface */
+
+  fvdbg("Initializing SDIO slot %d\n", SDIO_SLOTNO);
+
+  g_sdio_dev = sdio_initialize(SDIO_SLOTNO);
+  if (!g_sdio_dev)
     {
-      fdbg("ERROR: Failed to open '%s': %d\n", driver, ret);
+      fdbg("Failed to initialize SDIO slot %d\n", SDIO_SLOTNO);
+      return -ENODEV;
+    }
+
+  /* Now bind the SDIO interface to the MMC/SD driver */
+
+  fvdbg("Bind SDIO to the MMC/SD driver, minor=%d\n", SDIO_MINOR);
+
+  ret = mmcsd_slotinitialize(SDIO_MINOR, g_sdio_dev);
+  if (ret != OK)
+    {
+      fdbg("Failed to bind SDIO to the MMC/SD driver: %d\n", ret);
       return ret;
     }
 
-  /* Get the block operations */
+  fvdbg("Successfully bound SDIO to the MMC/SD driver\n");
 
-  ops = inode->u.i_bops;
+#ifdef HAVE_NCD
+  /* Use SD card detect pin to check if a card is g_sd_inserted */
 
-  /* Invoke the block driver ioctl method */
+  cd_status = !stm32_gpioread(GPIO_SDIO_NCD);
+  fvdbg("Card detect : %d\n", cd_status);
 
-  ret = -EPERM;
-  if (ops->ioctl)
-    {
-      ret = ops->ioctl(inode, MTDIOC_BULKERASE, 0);
-      if (ret < 0)
-        {
-          fdbg("ERROR: MTD ioctl(%04x) failed: %d\n", MTDIOC_BULKERASE, ret);
-        }
-    }
+  sdio_mediachange(g_sdio_dev, cd_status);
+#else
+  /* Assume that the SD card is inserted.  What choice do we have? */
 
-  /* Close the block driver */
+  sdio_mediachange(g_sdio_dev, true);
+#endif
 
-  close_blockdriver(inode);
-  return ret;
+  return OK;
 }
+
+#endif /* HAVE_SDIO */

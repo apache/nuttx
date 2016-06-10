@@ -296,7 +296,7 @@ static inline int devif_poll_tcp_timer(FAR struct net_driver_s *dev,
  * Function: devif_poll
  *
  * Description:
- *   This function will traverse each active uIP connection structure and
+ *   This function will traverse each active network connection structure and
  *   will perform network polling operations. devif_poll() may be called
  *   asynchronously with the network driver can accept another outgoing
  *   packet.
@@ -307,7 +307,7 @@ static inline int devif_poll_tcp_timer(FAR struct net_driver_s *dev,
  *   should do only if it cannot accept further write data).
  *
  *   When the callback function is called, there may be an outbound packet
- *   waiting for service in the uIP packet buffer, and if so the d_len field
+ *   waiting for service in the device packet buffer, and if so the d_len field
  *   is set to a value larger than zero. The device driver should then send
  *   out the packet.
  *
@@ -400,7 +400,7 @@ int devif_poll(FAR struct net_driver_s *dev, devif_poll_callback_t callback)
  * Function: devif_timer
  *
  * Description:
- *   These function will traverse each active uIP connection structure and
+ *   These function will traverse each active network connection structure and
  *   perform network timer operations. The Ethernet driver MUST implement
  *   logic to periodically call devif_timer().
  *
@@ -410,7 +410,7 @@ int devif_poll(FAR struct net_driver_s *dev, devif_poll_callback_t callback)
  *   should do only if it cannot accept further write data).
  *
  *   When the callback function is called, there may be an outbound packet
- *   waiting for service in the uIP packet buffer, and if so the d_len field
+ *   waiting for service in the device packet buffer, and if so the d_len field
  *   is set to a value larger than zero. The device driver should then send
  *   out the packet.
  *

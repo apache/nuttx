@@ -123,14 +123,17 @@ static int     ramlog_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
 static const struct file_operations g_ramlogfops =
 {
-  0,             /* open */
-  0,             /* close */
-  ramlog_read,   /* read */
-  ramlog_write,  /* write */
-  0,             /* seek */
-  0              /* ioctl */
+  NULL,         /* open */
+  NULL,         /* close */
+  ramlog_read,  /* read */
+  ramlog_write, /* write */
+  NULL,         /* seek */
+  NULL          /* ioctl */
 #ifndef CONFIG_DISABLE_POLL
-  , ramlog_poll  /* poll */
+  , ramlog_poll /* poll */
+#endif
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  , NULL        /* unlink */
 #endif
 };
 
@@ -206,7 +209,7 @@ static void ramlog_pollnotify(FAR struct ramlog_dev_s *priv,
 static int ramlog_addchar(FAR struct ramlog_dev_s *priv, char ch)
 {
   irqstate_t flags;
-  int nexthead;
+  size_t nexthead;
 
   /* Disable interrupts (in case we are NOT called from interrupt handler) */
 
@@ -271,7 +274,7 @@ static ssize_t ramlog_read(FAR struct file *filep, FAR char *buffer, size_t len)
 
   /* Loop until something is read */
 
-  for (nread = 0; nread < len; )
+  for (nread = 0; (size_t)nread < len; )
     {
       /* Get the next byte from the buffer */
 
@@ -437,7 +440,7 @@ static ssize_t ramlog_write(FAR struct file *filep, FAR const char *buffer, size
    * interrupts.
    */
 
-  for (nwritten = 0; nwritten < len; nwritten++)
+  for (nwritten = 0; (size_t)nwritten < len; nwritten++)
     {
       /* Get the next character to output */
 
@@ -529,7 +532,7 @@ int ramlog_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
   FAR struct inode *inode = filep->f_inode;
   FAR struct ramlog_dev_s *priv;
   pollevent_t eventset;
-  int ndx;
+  size_t ndx;
   int ret;
   int i;
 

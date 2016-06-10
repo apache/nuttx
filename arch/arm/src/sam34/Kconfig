@@ -453,7 +453,7 @@ config SAM34_PICOUART
 	bool "PicoUART"
 	default n
 	depends on ARCH_CHIP_SAM4L
-	select ARCH_HAVE_UART
+	select UART_SERIALDRIVER
 
 config SAM34_PWM
 	bool "Pulse Width Modulation (PWM) Controller"
@@ -609,14 +609,14 @@ config SAM34_UART0
 	bool "UART 0"
 	default y
 	depends on ARCH_CHIP_SAM3U || ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A || ARCH_CHIP_SAM4CM || ARCH_CHIP_SAM4S || ARCH_CHIP_SAM4E
-	select ARCH_HAVE_UART0
+	select UART0_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
 
 config SAM34_UART1
 	bool "UART 1"
 	default n
 	depends on ARCH_CHIP_SAM4CM || ARCH_CHIP_SAM4S || ARCH_CHIP_SAM4E
-	select ARCH_HAVE_UART1
+	select UART1_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
 
 if SAM34_UART1 && ARCH_CHIP_SAM4CM
@@ -651,27 +651,27 @@ config SAM34_USBC
 config SAM34_USART0
 	bool "USART 0"
 	default n
-	select ARCH_HAVE_USART0
+	select USART0_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
 
 config SAM34_USART1
 	bool "USART 1"
 	default n
-	select ARCH_HAVE_USART1
+	select USART1_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
 
 config SAM34_USART2
 	bool "USART 2"
 	default n
 	depends on ARCH_CHIP_SAM3U || ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A || ARCH_CHIP_SAM4CM || ARCH_CHIP_SAM4L
-	select ARCH_HAVE_USART2
+	select USART2_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
 
 config SAM34_USART3
 	bool "USART 3"
 	default n
 	depends on ARCH_CHIP_SAM3U || ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A || ARCH_CHIP_SAM4CM || ARCH_CHIP_SAM4L
-	select ARCH_HAVE_USART3
+	select USART3_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
 
 config SAM34_WDT
@@ -1060,6 +1060,7 @@ config SAM34_TC5_TIOB
 
 config SAM34_ONESHOT
 	bool "TC one-shot wrapper"
+	depends on SAM34_FREERUN
 	default n if !SCHED_TICKLESS
 	default y if SCHED_TICKLESS
 	---help---

@@ -57,6 +57,7 @@
 #include <stdbool.h>
 #include <semaphore.h>
 #include <errno.h>
+#include <assert.h>
 #include <debug.h>
 
 #include <arch/board/board.h>
@@ -378,6 +379,7 @@
 
 struct sam_adc_s
 {
+  FAR const struct adc_callback_s *cb;
   sem_t exclsem;         /* Supports exclusive access to the ADC interface */
   bool initialized;      /* The ADC driver is already initialized */
   uint32_t frequency;    /* ADC clock frequency */
@@ -446,6 +448,8 @@ static int  sam_adc_interrupt(int irq, void *context);
 /* ADC methods */
 
 #ifdef SAMA5_ADC_HAVE_CHANNELS
+static int  sam_adc_bind(FAR struct adc_dev_s *dev,
+                         FAR const struct adc_callback_s *callback);
 static void sam_adc_reset(struct adc_dev_s *dev);
 static int  sam_adc_setup(struct adc_dev_s *dev);
 static void sam_adc_shutdown(struct adc_dev_s *dev);
@@ -477,6 +481,7 @@ static void sam_adc_channels(struct sam_adc_s *priv);
 
 static const struct adc_ops_s g_adcops =
 {
+  .ao_bind     = sam_adc_bind,
   .ao_reset    = sam_adc_reset,
   .ao_setup    = sam_adc_setup,
   .ao_shutdown = sam_adc_shutdown,
@@ -664,9 +669,15 @@ static void sam_adc_dmadone(void *arg)
           chan   = (int)((*buffer & ADC_LCDR_CHANB_MASK) >> ADC_LCDR_CHANB_SHIFT);
           sample = ((*buffer & ADC_LCDR_DATA_MASK) >> ADC_LCDR_DATA_SHIFT);
 
-          /* And give the sample data to the ADC upper half */
+          /* Verify that the upper-half driver has bound its callback functions */
 
-          (void)adc_receive(priv->dev, chan, sample);
+          if (priv->cb != NULL)
+            {
+              /* Give the sample data to the ADC upper half */
+
+              DEBUGASSERT(priv->cb->au_receive != NULL);
+              priv->cb->au_receive(priv->dev, chan, sample);
+            }
         }
     }
 
@@ -858,7 +869,17 @@ static void sam_adc_endconversion(void *arg)
           /* Read the ADC sample and pass it to the upper half */
 
           regval = sam_adc_getreg(priv, SAM_ADC_CDR(chan));
-          (void)adc_receive(priv->dev, chan, regval & ADC_CDR_DATA_MASK);
+
+          /* Verify that the upper-half driver has bound its callback functions */
+
+          if (priv->cb != NULL)
+            {
+              /* Perform the data received callback */
+
+              DEBUGASSERT(priv->cb->au_receive != NULL);
+              priv->cb->au_receive(priv->dev, chan, regval & ADC_CDR_DATA_MASK);
+            }
+
           pending &= ~bit;
         }
     }
@@ -954,6 +975,26 @@ static int sam_adc_interrupt(int irq, void *context)
 /****************************************************************************
  * ADC methods
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: sam_adc_bind
+ *
+ * Description:
+ *   Bind the upper-half driver callbacks to the lower-half implementation.  This
+ *   must be called early in order to receive ADC event notifications.
+ *
+ ****************************************************************************/
+
+static int sam_adc_bind(FAR struct adc_dev_s *dev,
+                        FAR const struct adc_callback_s *callback)
+{
+  struct sam_adc_s *priv = (struct sam_adc_s *)dev->ad_priv;
+
+  DEBUGASSERT(priv != NULL);
+  priv->cb = callback;
+  return OK;
+}
+
 /****************************************************************************
  * Name: sam_adc_reset
  *
@@ -1980,6 +2021,7 @@ struct adc_dev_s *sam_adc_initialize(void)
       /* Initialize the private ADC device data structure */
 
       sem_init(&priv->exclsem,  0, 1);
+      priv->cb  = NULL;
       priv->dev = &g_adcdev;
 
 #ifdef CONFIG_SAMA5_ADC_DMA

@@ -175,22 +175,21 @@
 /* Special values of of sa_handler used by sigaction and sigset.  They are all
  * treated like NULL for now.  This is okay for SIG_DFL and SIG_IGN because
  * in NuttX, the default action for all signals is to ignore them.
- *
- * REVISIT:  Need to distinguish the value of SIG_HOLD.  It is needed in the
- * implementation of sigset() but would need to be recognized in all signal
- * functions that deal with signal disposition.
  */
 
-#define SIG_ERR         ((CODE void *)-1)  /* And error occurred */
-#define SIG_DFL         ((CODE void *)0)   /* Default is SIG_IGN for all signals */
-#define SIG_IGN         ((CODE void *)0)   /* Ignore the signal */
-#define SIG_HOLD        ((CODE void *)1)   /* Used only with sigset() */
+#define SIG_ERR         ((_sa_handler_t)-1)  /* And error occurred */
+#define SIG_DFL         ((_sa_handler_t)0)   /* Default is SIG_IGN for all signals */
+#define SIG_IGN         ((_sa_handler_t)0)   /* Ignore the signal */
+#define SIG_HOLD        ((_sa_handler_t)1)   /* Used only with sigset() */
 
 /********************************************************************************
  * Public Type Definitions
  ********************************************************************************/
 
-/* This defines a set of 32 signals (numbered 0 through 31). */
+/* This defines a set of 32 signals (numbered 0 through 31).
+ * REVISIT: Signal 0 is, however, not generally usable since that value has
+ * special meaning in some circumstances (e.g., kill()).
+ */
 
 typedef uint32_t sigset_t;   /* Bit set of 32 signals */
 #define __SIGSET_T_DEFINED 1

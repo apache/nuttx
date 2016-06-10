@@ -118,7 +118,7 @@ ifeq ($(CONFIG_LPC43_GPDMA),y)
 CHIP_CSRCS += lpc43_gpdma.c
 endif
 
-ifeq ($(CONFIG_GPIO_IRQ),y)
+ifeq ($(CONFIG_LPC43_GPIO_IRQ),y)
 CHIP_CSRCS += lpc43_gpioint.c
 endif
 
@@ -180,6 +180,10 @@ endif
 
 ifeq ($(CONFIG_LPC43_USBOTG),y)
 CHIP_CSRCS += lpc43_ehci.c
+endif
+
+ifeq ($(CONFIG_CRYPTO_AES),y)
+CHIP_CSRCS += lpc43_aes.c
 endif
 
 ifeq ($(CONFIG_LPC43_USB0),y)

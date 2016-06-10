@@ -1017,7 +1017,7 @@ FAR struct lcd_dev_s *st7565_initialize(FAR struct st7565_lcd_s *lcd,
 
   /* Follow NHD-C12864KGZ DISPLAY INITIALIZATION...  */
 
-#ifdef CONFIG_NHD_C12864KGZ
+#if defined(CONFIG_NHD_C12864KGZ)
 
   (void)st7565_send_one_data(priv, ST7565_BIAS_1_9);
 
@@ -1027,7 +1027,7 @@ FAR struct lcd_dev_s *st7565_initialize(FAR struct st7565_lcd_s *lcd,
   (void)st7565_send_one_data(priv, ST7565_POWERCTRL_INT);
   (void)st7565_send_one_data(priv, ST7565_SETSTARTLINE);
 
-#elif CONFIG_ERC_12864_3
+#elif defined(CONFIG_ERC_12864_3)
 
   (void)st7565_send_one_data(priv, ST7565_ADCNORMAL);
   (void)st7565_send_one_data(priv, ST7565_SETCOMREVERSE);
