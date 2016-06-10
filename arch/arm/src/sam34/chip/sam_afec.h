@@ -211,8 +211,8 @@
 #  define AFEC_EMR_CMPMODE_HIGH     (1 << AFEC_EMR_CMPMODE_SHIFT) /* Event when higher than high window threshold */
 #  define AFEC_EMR_CMPMODE_IN       (2 << AFEC_EMR_CMPMODE_SHIFT) /* Event when in comparison window */
 #  define AFEC_EMR_CMPMODE_OUT      (3 << AFEC_EMR_CMPMODE_SHIFT) /* Event when out of comparison window */
-#define AFEC_EMR_CMPSEL_SHIFT       (4)       /* Bit 4-7: Comparison Selected Channel */
-#define AFEC_EMR_CMPSEL_MASK        (15 << AFEC_EMR_CMPSEL_SHIFT)
+#define AFEC_EMR_CMPSEL_SHIFT       (3)       /* Bit 3-7: Comparison Selected Channel */
+#define AFEC_EMR_CMPSEL_MASK        (31 << AFEC_EMR_CMPSEL_SHIFT)
 #  define AFEC_EMR_CMPSEL(n)        ((uint32_t)(n) << AFEC_EMR_CMPSEL_SHIFT)
 #define AFEC_EMR_CMPALL             (1 << 9)  /* Bit 9:  Compare All Channels */
 #define AFEC_EMR_CMPFILTER_SHIFT    (12)      /* Bits 12-13: Compare Event Filtering */
@@ -375,7 +375,7 @@
 #  define AFEC_CWR_LOWTHRES(n)       ((uint32_t)(n) << AFEC_CWR_LOWTHRES_SHIFT)
 #define AFEC_CWR_HIGHTHRES_SHIFT     (16)      /* Bits 16-27: High Threshold */
 #define AFEC_CWR_HIGHTHRES_MASK      (0xfff << AFEC_CWR_LOWTHRES_SHIFT)
-#  define AFEC_CWR_HIGHTHRES(n)K     ((uint32_t)(n) << AFEC_CWR_LOWTHRES_SHIFT)
+#  define AFEC_CWR_HIGHTHRES(n)      ((uint32_t)(n) << AFEC_CWR_LOWTHRES_SHIFT)
 
 /* Channel Gain Register */
 
