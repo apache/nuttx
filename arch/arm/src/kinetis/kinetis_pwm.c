@@ -120,6 +120,7 @@ struct kinetis_pwmtimer_s
 /****************************************************************************
  * Static Function Prototypes
  ****************************************************************************/
+
 /* Register access */
 
 static uint32_t pwm_getreg(struct kinetis_pwmtimer_s *priv, int offset);
@@ -151,7 +152,10 @@ static int pwm_ioctl(FAR struct pwm_lowerhalf_s *dev,
 /****************************************************************************
  * Private Data
  ****************************************************************************/
-/* This is the list of lower half PWM driver methods used by the upper half driver */
+
+/* This is the list of lower half PWM driver methods used by the upper half
+ * driver.
+ */
 
 static const struct pwm_ops_s g_pwmops =
 {

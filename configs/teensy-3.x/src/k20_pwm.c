@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/teensy-3.x/src/k20_pwm.c
  *
- *   Copyright (C) 2015,2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           Alan Carvalho de Assis <acassis@gmail.com>
  *
@@ -93,8 +93,9 @@ int board_pwm_setup(void)
 
   if (!initialized)
     {
-      /* Call kinetis_pwminitialize() to get an instance of the PWM interface */
 #ifdef CONFIG_KINETIS_FTM0_PWM
+      /* Call kinetis_pwminitialize() to get an instance of the PWM interface */
+
       pwm = kinetis_pwminitialize(0);
       if (!pwm)
         {
@@ -113,6 +114,7 @@ int board_pwm_setup(void)
 
       /* Now we are initialized */
 #endif
+
 #ifdef CONFIG_KINETIS_FTM1_PWM
       pwm = kinetis_pwminitialize(1);
       if (!pwm)
@@ -132,6 +134,7 @@ int board_pwm_setup(void)
 
       /* Now we are initialized */
 #endif
+
 #ifdef CONFIG_KINETIS_FTM2_PWM
       pwm = kinetis_pwminitialize(2);
       if (!pwm)

@@ -49,6 +49,7 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+
 /* Configuration ********************************************************************/
 /* Timer devices may be used for different purposes.  One special purpose is
  * to generate modulated outputs for such things as motor control.  If CONFIG_KINETIS_FTMn
