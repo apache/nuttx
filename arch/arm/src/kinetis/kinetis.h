@@ -567,7 +567,7 @@ void kinetis_pindmadisable(uint32_t pinset);
  ************************************************************************************/
 
 #ifdef CONFIG_DEBUG_GPIO
-int kinetis_pindump(uint32_t pinset, const char *msg);
+void kinetis_pindump(uint32_t pinset, const char *msg);
 #else
 #  define kinetis_pindump(p,m)
 #endif

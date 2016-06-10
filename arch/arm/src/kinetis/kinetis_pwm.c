@@ -88,7 +88,7 @@
 #  ifdef CONFIG_DEBUG_VERBOSE
 #    define pwmvdbg           vdbg
 #    define pwmllvdbg         llvdbg
-#    define pwm_dumpgpio(p,m) /* kinetis_dumpgpio(p,m) */
+#    define pwm_dumpgpio(p,m) kinetis_pindump(p,m)
 #  else
 #    define pwmlldbg(x...)
 #    define pwmllvdbg(x...)
