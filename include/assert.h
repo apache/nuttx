@@ -52,9 +52,9 @@
 #undef ASSERT       /* Assert if the condition is not true */
 #undef VERIFY       /* Assert if a function returns a negative value */
 #undef PANIC        /* Unconditional abort */
-#undef DEBUGASSERT  /* Like ASSERT, but only if CONFIG_DEBUG is defined */
-#undef DEBUGVERIFY  /* Like VERIFY, but only if CONFIG_DEBUG is defined */
-#undef DEBUGPANIC   /* Like PANIC, but only if CONFIG_DEBUG is defined */
+#undef DEBUGASSERT  /* Like ASSERT, but only if CONFIG_DEBUG_ASSERTIONS is defined */
+#undef DEBUGVERIFY  /* Like VERIFY, but only if CONFIG_DEBUG_ASSERTIONS is defined */
+#undef DEBUGPANIC   /* Like PANIC, but only if CONFIG_DEBUG_ASSERTIONS is defined */
 
 #ifdef CONFIG_HAVE_FILENAME
 
@@ -89,7 +89,7 @@
 
 #endif
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_ASSERTIONS
 
 #  define DEBUGASSERT(f) ASSERT(f)
 #  define DEBUGVERIFY(f) VERIFY(f)
@@ -101,7 +101,7 @@
 #  define DEBUGVERIFY(f) ((void)(f))
 #  define DEBUGPANIC()
 
-#  endif /* CONFIG_DEBUG */
+#  endif /* CONFIG_DEBUG_ASSERTIONS */
 
 /* The C standard states that if NDEBUG is defined, assert will do nothing.
  * Users can define and undefine NDEBUG as they see fit to choose when assert

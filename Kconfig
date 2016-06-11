@@ -413,7 +413,7 @@ if DEBUG
 
 comment "Debug SYSLOG Output Controls"
 
-config DEBUG_WARNINGS
+config DEBUG_WARN
 	bool "Enable Warnings Output"
 	default n
 	---help---
@@ -424,11 +424,22 @@ config DEBUG_WARNINGS
 config DEBUG_INFO
 	bool "Enable Informational Debug Output"
 	default n
-	depends on DEBUG_WARNINGS
+	depends on DEBUG_WARN
 	---help---
 		Enables verbose "informational" debug output.  If you enable
 		CONFIG_DEBUG_INFO, then very chatty (and often annoying) output
 		will be generated.
+
+config DEBUG_ASSERTIONS
+	bool "Enable Debug Assertions"
+	default n
+	---help---
+		Enables the DEBUGASSERT() macro.  When CONFIG_DEBUG_ASSERTIONS is
+		defined, DEBUGASSERT() will cause the system to halt if the
+		assertion fails.  If CONFIG_DEBUG_ASSERTIONS is not defined
+		DEBUGASSERT() compiled out of the system.  In general, you would
+		set CONFIG_DEBUG_ASSERTIONS=y during debug, but disable the
+		assertions on a final, buckled up system.
 
 comment "Subsystem Debug Options"
 
