@@ -331,7 +331,7 @@ config BUTTONS
 if BUTTONS
 
 config BUTTONS_LOWER
-	bool "Generic Lower Half Button Dirver"
+	bool "Generic Lower Half Button Driver"
 	default n
 	depends on ARCH_BUTTONS && ARCH_IRQBUTTONS
 	---help---

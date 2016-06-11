@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/input/button_upper.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -230,8 +230,8 @@ static void btn_enable(FAR struct btn_upperhalf_s *priv)
             {
               /* Yes.. OR in the poll event buttons */
 
-              press   |= opriv->bo_pollevents.ap_press;
-              release |= opriv->bo_pollevents.ap_release;
+              press   |= opriv->bo_pollevents.bp_press;
+              release |= opriv->bo_pollevents.bp_release;
               break;
             }
         }
@@ -322,8 +322,8 @@ static void btn_sample(FAR struct btn_upperhalf_s *priv)
    * newly released.
    */
 
-  change  = sample ^ priv->bu_sample;
-  press   = change & sample;
+  change = sample ^ priv->bu_sample;
+  press  = change & sample;
 
   DEBUGASSERT(lower->bl_supported);
   release = change & (lower->bl_supported(lower) & ~sample);
@@ -335,8 +335,8 @@ static void btn_sample(FAR struct btn_upperhalf_s *priv)
 #ifndef CONFIG_DISABLE_POLL
       /* Have any poll events occurred? */
 
-      if ((press & opriv->bo_pollevents.ap_press)     != 0 ||
-          (release & opriv->bo_pollevents.ap_release) != 0)
+      if ((press & opriv->bo_pollevents.bp_press)     != 0 ||
+          (release & opriv->bo_pollevents.bp_release) != 0)
         {
           /* Yes.. Notify all waiters */
 
@@ -431,8 +431,8 @@ static int btn_open(FAR struct file *filep)
   DEBUGASSERT(lower && lower->bl_supported);
   supported = lower->bl_supported(lower);
 
-  opriv->bo_pollevents.ap_press   = supported;
-  opriv->bo_pollevents.ap_release = supported;
+  opriv->bo_pollevents.bp_press   = supported;
+  opriv->bo_pollevents.bp_release = supported;
 #endif
 
   /* Attach the open structure to the device */
@@ -664,8 +664,8 @@ static int btn_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           {
             /* Save the poll events */
 
-            opriv->bo_pollevents.ap_press   = pollevents->ap_press;
-            opriv->bo_pollevents.ap_release = pollevents->ap_release;
+            opriv->bo_pollevents.bp_press   = pollevents->bp_press;
+            opriv->bo_pollevents.bp_release = pollevents->bp_release;
 
             /* Enable/disable interrupt handling */
 

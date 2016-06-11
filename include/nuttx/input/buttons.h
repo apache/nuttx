@@ -1,7 +1,7 @@
 /************************************************************************************
  * include/nuttx/input/buttons.h
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,6 +46,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 #ifndef CONFIG_BUTTONS_NPOLLWAITERS
@@ -64,6 +65,17 @@
 
 #define BTNIOC_SUPPORTED  _BTNIOC(0x0001)
 
+/* Command:     BTNIOC_POLLEVENTS
+ * Description: Specify the set of button events that can cause a poll()
+ *              to awaken.  The default is all button depressions and all
+ *              button releases (all supported buttons);
+ * Argument:    A read-only pointer to an instance of struct ajoy_pollevents_s
+ * Return:      Zero (OK) on success.  Minus one will be returned on failure
+ *              with the errno value set appropriately.
+ */
+
+#define BTNIOC_POLLEVENTS _BTNIOC(0x0002)
+
 /* Command:     BTNIOC_REGISTER
  * Description: Register to receive a signal whenever there is a change in
  *              the state of button inputs.  This feature, of course, depends
@@ -73,17 +85,29 @@
  *              with the errno value set appropriately.
  */
 
-#define BTNIOC_REGISTER   _BTNIOC(0x0002)
+#define BTNIOC_REGISTER   _BTNIOC(0x0003)
 
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+
 /* This type is a bit set that contains the state of all buttons as defined
  * in arch/board/board.h.  This is the value that is returned when reading
  * from the button driver.
  */
 
 typedef uint8_t btn_buttonset_t;
+
+/* A reference to this structure is provided with the BTNIOC_POLLEVENTS IOCTL
+ * command and describes the conditions under which the client would like
+ * to receive notification.
+ */
+
+struct btn_pollevents_s
+{
+  btn_buttonset_t bp_press;   /* Set of button depressions to wake up the poll */
+  btn_buttonset_t bp_release; /* Set of button releases to wake up the poll */
+};
 
 /* A reference to this structure is provided with the BTNIOC_REGISTER IOCTL
  * command and describes the conditions under which the client would like
