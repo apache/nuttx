@@ -160,7 +160,7 @@ int ipv6_input(FAR struct net_driver_s *dev)
   hdrlen = NET_LL_HDRLEN(dev);
   if ((hdrlen + IPv6_HDRLEN) > dev->d_len)
     {
-      nllerr("Packet shorter than IPv6 header\n");
+      nllerr("ERROR: Packet shorter than IPv6 header\n");
       goto drop;
     }
 

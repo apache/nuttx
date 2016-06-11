@@ -168,7 +168,7 @@ int iob_clone(FAR struct iob_s *iob1, FAR struct iob_s *iob2, bool throttled)
           next = iob_alloc(throttled);
           if (!next)
             {
-              nerr("Failed to allocate an I/O buffer/n");
+              nerr("ERROR: Failed to allocate an I/O buffer/n");
               return -ENOMEM;
             }
 

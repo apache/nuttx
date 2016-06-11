@@ -78,7 +78,7 @@
 
 void pkt_poll(FAR struct net_driver_s *dev, FAR struct pkt_conn_s *conn)
 {
-  nllerr("IN\n");
+  nllinfo("IN\n");
 
   /* Verify that the packet connection is valid */
 

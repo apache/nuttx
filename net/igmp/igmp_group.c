@@ -194,7 +194,7 @@ void igmp_grpinit(void)
   FAR struct igmp_group_s *group;
   int i;
 
-  grpllerr("Initializing\n");
+  grpllinfo("Initializing\n");
 
 #if CONFIG_PREALLOC_IGMPGROUPS > 0
   for (i = 0; i < CONFIG_PREALLOC_IGMPGROUPS; i++)
@@ -226,20 +226,20 @@ FAR struct igmp_group_s *igmp_grpalloc(FAR struct net_driver_s *dev,
   if (up_interrupt_context())
     {
 #if CONFIG_PREALLOC_IGMPGROUPS > 0
-      grpllerr("Use a pre-allocated group entry\n");
+      grpllinfo("Use a pre-allocated group entry\n");
       group = igmp_grpprealloc();
 #else
-      grpllerr("Cannot allocate from interrupt handler\n");
+      grpllerr("ERROR: Cannot allocate from interrupt handler\n");
       group = NULL;
 #endif
     }
   else
     {
-      grpllerr("Allocate from the heap\n");
+      grpllinfo("Allocate from the heap\n");
       group = igmp_grpheapalloc();
     }
 
-  grpllerr("group: %p\n", group);
+  grpllinfo("group: %p\n", group);
 
   /* Check if we successfully allocated a group structure */
 
@@ -285,7 +285,7 @@ FAR struct igmp_group_s *igmp_grpfind(FAR struct net_driver_s *dev,
   FAR struct igmp_group_s *group;
   net_lock_t flags;
 
-  grpllerr("Searching for addr %08x\n", (int)*addr);
+  grpllinfo("Searching for addr %08x\n", (int)*addr);
 
   /* We must disable interrupts because we don't which context we were
    * called from.
@@ -296,10 +296,10 @@ FAR struct igmp_group_s *igmp_grpfind(FAR struct net_driver_s *dev,
        group;
        group = group->next)
     {
-      grpllerr("Compare: %08x vs. %08x\n", group->grpaddr, *addr);
+      grpllinfo("Compare: %08x vs. %08x\n", group->grpaddr, *addr);
       if (net_ipv4addr_cmp(group->grpaddr, *addr))
         {
-          grpllerr("Match!\n");
+          grpllinfo("Match!\n");
           break;
         }
     }
@@ -325,13 +325,13 @@ FAR struct igmp_group_s *igmp_grpallocfind(FAR struct net_driver_s *dev,
 {
   FAR struct igmp_group_s *group = igmp_grpfind(dev, addr);
 
-  grpllerr("group: %p addr: %08x\n", group, (int)*addr);
+  grpllinfo("group: %p addr: %08x\n", group, (int)*addr);
   if (!group)
     {
       group = igmp_grpalloc(dev, addr);
     }
 
-  grpllerr("group: %p\n", group);
+  grpllinfo("group: %p\n", group);
   return group;
 }
 
@@ -350,7 +350,7 @@ void igmp_grpfree(FAR struct net_driver_s *dev, FAR struct igmp_group_s *group)
 {
   net_lock_t flags;
 
-  grpllerr("Free: %p flags: %02x\n", group, group->flags);
+  grpllinfo("Free: %p flags: %02x\n", group, group->flags);
 
   /* Cancel the wdog */
 
@@ -376,7 +376,7 @@ void igmp_grpfree(FAR struct net_driver_s *dev, FAR struct igmp_group_s *group)
 #if CONFIG_PREALLOC_IGMPGROUPS > 0
   if (IS_PREALLOCATED(group->flags))
     {
-      grpllerr("Put back on free list\n");
+      grpllinfo("Put back on free list\n");
       sq_addlast((FAR sq_entry_t *)group, &g_freelist);
       net_unlock(flags);
     }
@@ -388,7 +388,7 @@ void igmp_grpfree(FAR struct net_driver_s *dev, FAR struct igmp_group_s *group)
        */
 
       net_unlock(flags);
-      grpllerr("Call sched_kfree()\n");
+      grpllinfo("Call sched_kfree()\n");
       sched_kfree(group);
     }
 }

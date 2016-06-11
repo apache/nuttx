@@ -124,7 +124,7 @@ void igmp_input(struct net_driver_s *dev)
   if (dev->d_len < NET_LL_HDRLEN(dev) + IPIGMP_HDRLEN)
     {
       IGMP_STATINCR(g_netstats.igmp.length_errors);
-      nllerr("Length error\n");
+      nllerr("ERROR: Length error\n");
       return;
     }
 
@@ -133,7 +133,7 @@ void igmp_input(struct net_driver_s *dev)
   if (net_chksum((FAR uint16_t *)&IGMPBUF->type, IGMP_HDRLEN) != 0)
     {
       IGMP_STATINCR(g_netstats.igmp.chksum_errors);
-      nllerr("Checksum error\n");
+      nllerr("ERROR: Checksum error\n");
       return;
     }
 
@@ -143,7 +143,7 @@ void igmp_input(struct net_driver_s *dev)
   group = igmp_grpallocfind(dev, &destipaddr);
   if (!group)
     {
-      nllerr("Failed to allocate/find group: %08x\n", destipaddr);
+      nllerr("ERROR: Failed to allocate/find group: %08x\n", destipaddr);
       return;
     }
 
@@ -192,7 +192,7 @@ void igmp_input(struct net_driver_s *dev)
                     IGMP_STATINCR(g_netstats.igmp.v1_received);
                     IGMPBUF->maxresp = 10;
 
-                    nllerr("V1 not implemented\n");
+                    nllerr("ERROR: V1 not implemented\n");
                   }
 
                 IGMP_STATINCR(g_netstats.igmp.query_received);
@@ -241,7 +241,7 @@ void igmp_input(struct net_driver_s *dev)
             nllinfo("Unicast query\n");
             IGMP_STATINCR(g_netstats.igmp.ucast_query);
 
-            nllerr("Query to a specific group with the group address as destination\n");
+            nllinfo("Query to a specific group with the group address as destination\n");
 
             ticks = net_dsec2tick((int)IGMPBUF->maxresp);
             if (IS_IDLEMEMBER(group->flags) || igmp_cmptimer(group, ticks))
@@ -270,7 +270,7 @@ void igmp_input(struct net_driver_s *dev)
 
       default:
         {
-          nllerr("Unexpected msg %02x\n", IGMPBUF->type);
+          nllerr("ERROR: Unexpected msg %02x\n", IGMPBUF->type);
         }
       break;
     }

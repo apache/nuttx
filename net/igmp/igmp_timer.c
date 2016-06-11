@@ -170,7 +170,7 @@ void igmp_startticks(FAR struct igmp_group_s *group, unsigned int ticks)
 
   /* Start the timer */
 
-  gtmrllerr("ticks: %d\n", ticks);
+  gtmrllinfo("ticks: %d\n", ticks);
 
   ret = wd_start(group->wdog, ticks, igmp_timeout, 1, (uint32_t)group);
 
@@ -184,7 +184,7 @@ void igmp_starttimer(FAR struct igmp_group_s *group, uint8_t decisecs)
    * Important!! this should be a random timer from 0 to decisecs
    */
 
-  gtmrerr("decisecs: %d\n", decisecs);
+  gtmrinfo("decisecs: %d\n", decisecs);
   igmp_startticks(group, net_dsec2tick(decisecs));
 }
 
@@ -224,7 +224,7 @@ bool igmp_cmptimer(FAR struct igmp_group_s *group, int maxticks)
    * test as well.
    */
 
-  gtmrerr("maxticks: %d remaining: %d\n", maxticks, remaining);
+  gtmrinfo("maxticks: %d remaining: %d\n", maxticks, remaining);
   if (maxticks > remaining)
     {
       /* Cancel the watchdog timer and return true */

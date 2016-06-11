@@ -72,7 +72,7 @@ FAR struct iob_s *iob_trimtail(FAR struct iob_s *iob, unsigned int trimlen)
   FAR struct iob_s *last;
   int len;
 
-  nllerr("iob=%p pktlen=%d trimlen=%d\n", iob, iob->io_pktlen, trimlen);
+  nllinfo("iob=%p pktlen=%d trimlen=%d\n", iob, iob->io_pktlen, trimlen);
 
   if (iob && trimlen > 0)
     {

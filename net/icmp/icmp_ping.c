@@ -262,12 +262,12 @@ static uint16_t ping_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
                * that the destination address is not reachable.
                */
 
-              nllerr("Not reachable\n");
+              nllerr("ERROR:Not reachable\n");
               failcode = -ENETUNREACH;
             }
           else
             {
-              nllerr("Ping timeout\n");
+              nllerr("ERROR:Ping timeout\n");
               failcode = -ETIMEDOUT;
             }
 
@@ -416,7 +416,7 @@ int icmp_ping(in_addr_t addr, uint16_t id, uint16_t seqno, uint16_t datalen,
     }
   else
     {
-      nllerr("Return error=%d\n", -state.png_result);
+      nllerr("ERROR: Return error=%d\n", -state.png_result);
       return state.png_result;
     }
 }
