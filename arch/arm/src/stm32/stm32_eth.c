@@ -1012,7 +1012,7 @@ static int stm32_transmit(FAR struct stm32_ethmac_s *priv)
   txdesc  = priv->txhead;
   txfirst = txdesc;
 
-  nllvdbg("d_len: %d d_buf: %p txhead: %p tdes0: %08x\n",
+  nllinfo("d_len: %d d_buf: %p txhead: %p tdes0: %08x\n",
           priv->dev.d_len, priv->dev.d_buf, txdesc, txdesc->tdes0);
 
   DEBUGASSERT(txdesc && (txdesc->tdes0 & ETH_TDES0_OWN) == 0);
@@ -1029,7 +1029,7 @@ static int stm32_transmit(FAR struct stm32_ethmac_s *priv)
       bufcount = (priv->dev.d_len + (CONFIG_STM32_ETH_BUFSIZE-1)) / CONFIG_STM32_ETH_BUFSIZE;
       lastsize = priv->dev.d_len - (bufcount - 1) * CONFIG_STM32_ETH_BUFSIZE;
 
-      nllvdbg("bufcount: %d lastsize: %d\n", bufcount, lastsize);
+      nllinfo("bufcount: %d lastsize: %d\n", bufcount, lastsize);
 
       /* Set the first segment bit in the first TX descriptor */
 
@@ -1139,7 +1139,7 @@ static int stm32_transmit(FAR struct stm32_ethmac_s *priv)
 
   priv->inflight++;
 
-  nllvdbg("txhead: %p txtail: %p inflight: %d\n",
+  nllinfo("txhead: %p txtail: %p inflight: %d\n",
           priv->txhead, priv->txtail, priv->inflight);
 
   /* If all TX descriptors are in-flight, then we have to disable receive interrupts
@@ -1438,7 +1438,7 @@ static void stm32_freesegment(FAR struct stm32_ethmac_s *priv,
   struct eth_rxdesc_s *rxdesc;
   int i;
 
-  nllvdbg("rxfirst: %p segments: %d\n", rxfirst, segments);
+  nllinfo("rxfirst: %p segments: %d\n", rxfirst, segments);
 
   /* Set OWN bit in RX descriptors.  This gives the buffers back to DMA */
 
@@ -1496,7 +1496,7 @@ static int stm32_recvframe(FAR struct stm32_ethmac_s *priv)
   uint8_t *buffer;
   int i;
 
-  nllvdbg("rxhead: %p rxcurr: %p segments: %d\n",
+  nllinfo("rxhead: %p rxcurr: %p segments: %d\n",
           priv->rxhead, priv->rxcurr, priv->segments);
 
   /* Check if there are free buffers.  We cannot receive new frames in this
@@ -1562,7 +1562,7 @@ static int stm32_recvframe(FAR struct stm32_ethmac_s *priv)
               rxcurr = priv->rxcurr;
             }
 
-          nllvdbg("rxhead: %p rxcurr: %p segments: %d\n",
+          nllinfo("rxhead: %p rxcurr: %p segments: %d\n",
               priv->rxhead, priv->rxcurr, priv->segments);
 
           /* Check if any errors are reported in the frame */
@@ -1601,7 +1601,7 @@ static int stm32_recvframe(FAR struct stm32_ethmac_s *priv)
               priv->rxhead   = (struct eth_rxdesc_s *)rxdesc->rdes3;
               stm32_freesegment(priv, rxcurr, priv->segments);
 
-              nllvdbg("rxhead: %p d_buf: %p d_len: %d\n",
+              nllinfo("rxhead: %p d_buf: %p d_len: %d\n",
                       priv->rxhead, dev->d_buf, dev->d_len);
 
               return OK;
@@ -1628,7 +1628,7 @@ static int stm32_recvframe(FAR struct stm32_ethmac_s *priv)
 
   priv->rxhead = rxdesc;
 
-  nllvdbg("rxhead: %p rxcurr: %p segments: %d\n",
+  nllinfo("rxhead: %p rxcurr: %p segments: %d\n",
           priv->rxhead, priv->rxcurr, priv->segments);
 
   return -EAGAIN;
@@ -1698,7 +1698,7 @@ static void stm32_receive(FAR struct stm32_ethmac_s *priv)
 #ifdef CONFIG_NET_IPv4
       if (BUF->type == HTONS(ETHTYPE_IP))
         {
-          nllvdbg("IPv4 frame\n");
+          nllinfo("IPv4 frame\n");
 
           /* Handle ARP on input then give the IPv4 packet to the network
            * layer
@@ -1738,7 +1738,7 @@ static void stm32_receive(FAR struct stm32_ethmac_s *priv)
 #ifdef CONFIG_NET_IPv6
       if (BUF->type == HTONS(ETHTYPE_IP6))
         {
-          nllvdbg("Iv6 frame\n");
+          nllinfo("Iv6 frame\n");
 
           /* Give the IPv6 packet to the network layer */
 
@@ -1775,7 +1775,7 @@ static void stm32_receive(FAR struct stm32_ethmac_s *priv)
 #ifdef CONFIG_NET_ARP
       if (BUF->type == htons(ETHTYPE_ARP))
         {
-          nllvdbg("ARP frame\n");
+          nllinfo("ARP frame\n");
 
           /* Handle ARP packet */
 
@@ -1834,7 +1834,7 @@ static void stm32_freeframe(FAR struct stm32_ethmac_s *priv)
   struct eth_txdesc_s *txdesc;
   int i;
 
-  nllvdbg("txhead: %p txtail: %p inflight: %d\n",
+  nllinfo("txhead: %p txtail: %p inflight: %d\n",
           priv->txhead, priv->txtail, priv->inflight);
 
   /* Scan for "in-flight" descriptors owned by the CPU */
@@ -1850,7 +1850,7 @@ static void stm32_freeframe(FAR struct stm32_ethmac_s *priv)
            * TX descriptors.
            */
 
-          nllvdbg("txtail: %p tdes0: %08x tdes2: %08x tdes3: %08x\n",
+          nllinfo("txtail: %p tdes0: %08x tdes2: %08x tdes3: %08x\n",
                   txdesc, txdesc->tdes0, txdesc->tdes2, txdesc->tdes3);
 
           DEBUGASSERT(txdesc->tdes2 != 0);
@@ -1903,7 +1903,7 @@ static void stm32_freeframe(FAR struct stm32_ethmac_s *priv)
 
       priv->txtail = txdesc;
 
-      nllvdbg("txhead: %p txtail: %p inflight: %d\n",
+      nllinfo("txhead: %p txtail: %p inflight: %d\n",
               priv->txhead, priv->txtail, priv->inflight);
     }
 }
@@ -2545,7 +2545,7 @@ static int stm32_ifdown(struct net_driver_s *dev)
 
 static inline void stm32_txavail_process(FAR struct stm32_ethmac_s *priv)
 {
-  nvdbg("ifup: %d\n", priv->ifup);
+  ninfo("ifup: %d\n", priv->ifup);
 
   /* Ignore the notification if the interface is not yet up */
 
@@ -2712,7 +2712,7 @@ static int stm32_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
   uint32_t temp;
   uint32_t registeraddress;
 
-  nllvdbg("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
+  nllinfo("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
           mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 
   /* Add the MAC address to the hardware multicast hash table */
@@ -2769,7 +2769,7 @@ static int stm32_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
   uint32_t temp;
   uint32_t registeraddress;
 
-  nllvdbg("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
+  nllinfo("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
           mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 
   /* Remove the MAC address to the hardware multicast hash table */
@@ -3236,7 +3236,7 @@ static inline int stm32_dm9161(FAR struct stm32_ethmac_s *priv)
       up_systemreset();
     }
 
-  nvdbg("PHY ID1: 0x%04X\n", phyval);
+  ninfo("PHY ID1: 0x%04X\n", phyval);
 
   /* Now check the "DAVICOM Specified Configuration Register (DSCR)", Register 16 */
 
@@ -3393,7 +3393,7 @@ static int stm32_phyinit(FAR struct stm32_ethmac_s *priv)
 
   /* Remember the selected speed and duplex modes */
 
-  nvdbg("PHYSR[%d]: %04x\n", CONFIG_STM32_PHYSR, phyval);
+  ninfo("PHYSR[%d]: %04x\n", CONFIG_STM32_PHYSR, phyval);
 
   /* Different PHYs present speed and mode information in different ways.  IF
    * This CONFIG_STM32_PHYSR_ALTCONFIG is selected, this indicates that the PHY
@@ -3853,7 +3853,7 @@ static void stm32_macaddress(FAR struct stm32_ethmac_s *priv)
   FAR struct net_driver_s *dev = &priv->dev;
   uint32_t regval;
 
-  nllvdbg("%s MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
+  nllinfo("%s MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
           dev->d_ifname,
           dev->d_mac.ether_addr_octet[0], dev->d_mac.ether_addr_octet[1],
           dev->d_mac.ether_addr_octet[2], dev->d_mac.ether_addr_octet[3],
@@ -3921,7 +3921,7 @@ static void stm32_ipv6multicast(FAR struct stm32_ethmac_s *priv)
   mac[4] = tmp16 & 0xff;
   mac[5] = tmp16 >> 8;
 
-  nvdbg("IPv6 Multicast: %02x:%02x:%02x:%02x:%02x:%02x\n",
+  ninfo("IPv6 Multicast: %02x:%02x:%02x:%02x:%02x:%02x\n",
         mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 
   (void)stm32_addmac(dev, mac);
@@ -4059,12 +4059,12 @@ static int stm32_ethconfig(FAR struct stm32_ethmac_s *priv)
 
   /* Reset the Ethernet block */
 
-  nllvdbg("Reset the Ethernet block\n");
+  nllinfo("Reset the Ethernet block\n");
   stm32_ethreset(priv);
 
   /* Initialize the PHY */
 
-  nllvdbg("Initialize the PHY\n");
+  nllinfo("Initialize the PHY\n");
   ret = stm32_phyinit(priv);
   if (ret < 0)
     {
@@ -4073,7 +4073,7 @@ static int stm32_ethconfig(FAR struct stm32_ethmac_s *priv)
 
   /* Initialize the MAC and DMA */
 
-  nllvdbg("Initialize the MAC and DMA\n");
+  nllinfo("Initialize the MAC and DMA\n");
   ret = stm32_macconfig(priv);
   if (ret < 0)
     {
@@ -4094,7 +4094,7 @@ static int stm32_ethconfig(FAR struct stm32_ethmac_s *priv)
 
   /* Enable normal MAC operation */
 
-  nllvdbg("Enable normal operation\n");
+  nllinfo("Enable normal operation\n");
   return stm32_macenable(priv);
 }
 
@@ -4130,7 +4130,7 @@ int stm32_ethinitialize(int intf)
 {
   struct stm32_ethmac_s *priv;
 
-  nvdbg("intf: %d\n", intf);
+  ninfo("intf: %d\n", intf);
 
   /* Get the interface structure associated with this interface number. */
 

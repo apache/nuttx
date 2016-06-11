@@ -286,7 +286,7 @@ int elf_symvalue(FAR struct elf_loadinfo_s *loadinfo, FAR Elf32_Sym *sym,
       {
         /* st_value already holds the correct value */
 
-        bvdbg("SHN_ABS: st_value=%08lx\n", (long)sym->st_value);
+        binfo("SHN_ABS: st_value=%08lx\n", (long)sym->st_value);
         return OK;
       }
 
@@ -322,7 +322,7 @@ int elf_symvalue(FAR struct elf_loadinfo_s *loadinfo, FAR Elf32_Sym *sym,
 
         /* Yes... add the exported symbol value to the ELF symbol table entry */
 
-        bvdbg("SHN_ABS: name=%s %08x+%08x=%08x\n",
+        binfo("SHN_ABS: name=%s %08x+%08x=%08x\n",
               loadinfo->iobuffer, sym->st_value, symbol->sym_value,
               sym->st_value + symbol->sym_value);
 
@@ -334,7 +334,7 @@ int elf_symvalue(FAR struct elf_loadinfo_s *loadinfo, FAR Elf32_Sym *sym,
       {
         secbase = loadinfo->shdr[sym->st_shndx].sh_addr;
 
-        bvdbg("Other: %08x+%08x=%08x\n",
+        binfo("Other: %08x+%08x=%08x\n",
               sym->st_value, secbase, sym->st_value + secbase);
 
         sym->st_value += secbase;

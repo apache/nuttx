@@ -82,10 +82,10 @@
 
 #ifdef CONFIG_DEBUG_SPI
 #  define spidbg  lldbg
-#  define spivdbg llvdbg
+#  define spiinfo llinfo
 #else
 #  define spidbg(x...)
-#  define spivdbg(x...)
+#  define spiinfo(x...)
 #endif
 
 /************************************************************************************

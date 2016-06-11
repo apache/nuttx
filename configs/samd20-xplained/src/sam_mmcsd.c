@@ -95,7 +95,7 @@ int sam_sdinitialize(int port, int minor)
 
   /* Get the SPI driver instance for the SD chip select */
 
-  fvdbg("Initializing SERCOM SPI%d\n", port);
+  finfo("Initializing SERCOM SPI%d\n", port);
 
   spi = sam_spibus_initialize(port);
   if (!spi)
@@ -104,11 +104,11 @@ int sam_sdinitialize(int port, int minor)
       return -ENODEV;
     }
 
-  fvdbg("Successfully initialized SPI%d\n", port);
+  finfo("Successfully initialized SPI%d\n", port);
 
   /* Bind the SPI device for the chip select to the slot */
 
-  fvdbg("Binding SPI%d to MMC/SD slot %d\n", port, SAMDL_MMCSDSLOTNO);
+  finfo("Binding SPI%d to MMC/SD slot %d\n", port, SAMDL_MMCSDSLOTNO);
 
   ret = mmcsd_spislotinitialize(minor, SAMDL_MMCSDSLOTNO, spi);
   if (ret < 0)
@@ -118,7 +118,7 @@ int sam_sdinitialize(int port, int minor)
       return ret;
     }
 
-  fvdbg("Successfuly bound SPI%d to MMC/SD slot %d\n",
+  finfo("Successfuly bound SPI%d to MMC/SD slot %d\n",
         port, SAMDL_MMCSDSLOTNO);
 
   return OK;

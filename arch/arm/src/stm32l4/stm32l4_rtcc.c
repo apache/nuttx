@@ -120,14 +120,14 @@
 
 #ifdef CONFIG_DEBUG_RTC
 #  define rtcdbg    dbg
-#  define rtcvdbg   vdbg
+#  define rtcinfo   info
 #  define rtclldbg  lldbg
-#  define rtcllvdbg llvdbg
+#  define rtcllinfo llinfo
 #else
 #  define rtcdbg(x...)
-#  define rtcvdbg(x...)
+#  define rtcinfo(x...)
 #  define rtclldbg(x...)
-#  define rtcllvdbg(x...)
+#  define rtcllinfo(x...)
 #endif
 
 /************************************************************************************
@@ -750,7 +750,7 @@ static int rtchw_set_alrmar(rtc_alarmreg_t alarmreg)
 
   putreg32(alarmreg, STM32L4_RTC_ALRMAR);
   putreg32(0, STM32L4_RTC_ALRMASSR);
-  rtcvdbg("  TR: %08x ALRMAR: %08x\n",
+  rtcinfo("  TR: %08x ALRMAR: %08x\n",
           getreg32(STM32L4_RTC_TR), getreg32(STM32L4_RTC_ALRMAR));
 
   /* Enable RTC alarm A */
@@ -796,7 +796,7 @@ static int rtchw_set_alrmbr(rtc_alarmreg_t alarmreg)
 
   putreg32(alarmreg, STM32L4_RTC_ALRMBR);
   putreg32(0, STM32L4_RTC_ALRMBSSR);
-  rtcvdbg("  TR: %08x ALRMBR: %08x\n",
+  rtcinfo("  TR: %08x ALRMBR: %08x\n",
           getreg32(STM32L4_RTC_TR), getreg32(STM32L4_RTC_ALRMBR));
 
   /* Enable RTC alarm B */
@@ -1309,7 +1309,7 @@ int stm32l4_rtc_setalarm(FAR struct alm_setalarm_s *alminfo)
         break;
 
       default:
-        rtcvdbg("ERROR: Invalid ALARM%d\n", alminfo->as_id);
+        rtcinfo("ERROR: Invalid ALARM%d\n", alminfo->as_id);
         break;
     }
 
@@ -1409,7 +1409,7 @@ int stm32l4_rtc_cancelalarm(enum alm_id_e alarmid)
         break;
 
       default:
-        rtcvdbg("ERROR: Invalid ALARM%d\n", alarmid);
+        rtcinfo("ERROR: Invalid ALARM%d\n", alarmid);
         break;
     }
 

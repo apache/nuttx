@@ -630,7 +630,7 @@ static int up_interrupt(int irq, void *context)
               /* Read the line status register (LSR) to clear */
 
               status = up_serialin(priv, LPC11_UART_LSR_OFFSET);
-              vdbg("LSR: %02x\n", status);
+              info("LSR: %02x\n", status);
               break;
             }
 

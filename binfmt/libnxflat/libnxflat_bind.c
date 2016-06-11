@@ -67,7 +67,7 @@
 #endif
 
 #ifdef CONFIG_NXFLAT_DUMPBUFFER
-# define nxflat_dumpbuffer(m,b,n) bvdbgdumpbuffer(m,b,n)
+# define nxflat_dumpbuffer(m,b,n) binfodumpbuffer(m,b,n)
 #else
 # define nxflat_dumpbuffer(m,b,n)
 #endif
@@ -104,15 +104,15 @@ static inline int nxflat_bindrel32i(FAR struct nxflat_loadinfo_s *loadinfo,
 {
   FAR uint32_t *addr;
 
-  bvdbg("NXFLAT_RELOC_TYPE_REL32I Offset: %08x I-Space: %p\n",
+  binfo("NXFLAT_RELOC_TYPE_REL32I Offset: %08x I-Space: %p\n",
         offset, loadinfo->ispace + sizeof(struct nxflat_hdr_s));
 
   if (offset < loadinfo->dsize)
     {
       addr = (FAR uint32_t *)(offset + loadinfo->dspace->region);
-      bvdbg("  Before: %08x\n", *addr);
+      binfo("  Before: %08x\n", *addr);
      *addr += (uint32_t)(loadinfo->ispace + sizeof(struct nxflat_hdr_s));
-      bvdbg("  After: %08x\n", *addr);
+      binfo("  After: %08x\n", *addr);
       return OK;
     }
   else
@@ -143,15 +143,15 @@ static inline int nxflat_bindrel32d(FAR struct nxflat_loadinfo_s *loadinfo,
 {
   FAR uint32_t *addr;
 
-  bvdbg("NXFLAT_RELOC_TYPE_REL32D Offset: %08x D-Space: %p\n",
+  binfo("NXFLAT_RELOC_TYPE_REL32D Offset: %08x D-Space: %p\n",
         offset, loadinfo->dspace->region);
 
   if (offset < loadinfo->dsize)
     {
       addr = (FAR uint32_t *)(offset + loadinfo->dspace->region);
-      bvdbg("  Before: %08x\n", *addr);
+      binfo("  Before: %08x\n", *addr);
      *addr += (uint32_t)(loadinfo->dspace->region);
-      bvdbg("  After: %08x\n", *addr);
+      binfo("  After: %08x\n", *addr);
       return OK;
     }
   else
@@ -185,15 +185,15 @@ static inline int nxflat_bindrel32id(FAR struct nxflat_loadinfo_s *loadinfo,
 {
   FAR uint32_t *addr;
 
-  bvdbg("NXFLAT_RELOC_TYPE_REL32D Offset: %08x D-Space: %p\n",
+  binfo("NXFLAT_RELOC_TYPE_REL32D Offset: %08x D-Space: %p\n",
         offset, loadinfo->dspace->region);
 
   if (offset < loadinfo->dsize)
     {
       addr = (FAR uint32_t *)(offset + loadinfo->dspace->region);
-      bvdbg("  Before: %08x\n", *addr);
+      binfo("  Before: %08x\n", *addr);
      *addr += ((uint32_t)loadinfo->ispace - (uint32_t)(loadinfo->dspace->region));
-      bvdbg("  After: %08x\n", *addr);
+      binfo("  After: %08x\n", *addr);
       return OK;
     }
   else
@@ -237,7 +237,7 @@ static inline int nxflat_gotrelocs(FAR struct nxflat_loadinfo_s *loadinfo)
 
   offset  = ntohl(hdr->h_relocstart);
   nrelocs = ntohs(hdr->h_reloccount);
-  bvdbg("offset: %08lx nrelocs: %d\n", (long)offset, nrelocs);
+  binfo("offset: %08lx nrelocs: %d\n", (long)offset, nrelocs);
 
   /* The value of the relocation list that we get from the header is a
    * file offset.  We will have to convert this to an offset into the
@@ -251,7 +251,7 @@ static inline int nxflat_gotrelocs(FAR struct nxflat_loadinfo_s *loadinfo)
 
   relocs = (FAR struct nxflat_reloc_s *)
         (offset - loadinfo->isize + loadinfo->dspace->region);
-  bvdbg("isize: %08lx dpsace: %p relocs: %p\n",
+  binfo("isize: %08lx dpsace: %p relocs: %p\n",
         (long)loadinfo->isize, loadinfo->dspace->region, relocs);
 
   /* All relocations are performed within the D-Space allocation.  If
@@ -405,7 +405,7 @@ static inline int nxflat_bindimports(FAR struct nxflat_loadinfo_s *loadinfo,
 
   offset   = ntohl(hdr->h_importsymbols);
   nimports = ntohs(hdr->h_importcount);
-  bvdbg("Imports offset: %08x nimports: %d\n", offset, nimports);
+  binfo("Imports offset: %08x nimports: %d\n", offset, nimports);
 
   /* The import[] table resides within the D-Space allocation.  If
    * CONFIG_ARCH_ADDRENV=y, then that D-Space allocation lies in an address
@@ -450,7 +450,7 @@ static inline int nxflat_bindimports(FAR struct nxflat_loadinfo_s *loadinfo,
 
       for (i = 0; i < nimports; i++)
         {
-          bvdbg("Import[%d] (%08p) offset: %08x func: %08x\n",
+          binfo("Import[%d] (%08p) offset: %08x func: %08x\n",
                 i, &imports[i], imports[i].i_funcname, imports[i].i_funcaddress);
 
           /* Get a pointer to the imported symbol name.  The name itself
@@ -484,7 +484,7 @@ static inline int nxflat_bindimports(FAR struct nxflat_loadinfo_s *loadinfo,
 
           imports[i].i_funcaddress =  (uint32_t)symbol->sym_value;
 
-          bvdbg("Bound import[%d] (%08p) to export '%s' (%08x)\n",
+          binfo("Bound import[%d] (%08p) to export '%s' (%08x)\n",
                 i, &imports[i], symname, imports[i].i_funcaddress);
         }
     }

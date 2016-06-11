@@ -201,10 +201,10 @@
 #  define idbg    udbg
 #  undef  illdbg
 #  define illdbg  ulldbg
-#  undef  ivdbg
-#  define ivdbg   uvdbg
-#  undef  illvdbg
-#  define illvdbg ullvdbg
+#  undef  iinfo
+#  define iinfo   uinfo
+#  undef  illinfo
+#  define illinfo ullinfo
 #endif
 
 /****************************************************************************
@@ -491,7 +491,7 @@ static void usbhost_pollnotify(FAR struct usbhost_state_s *priv)
           fds->revents |= (fds->events & POLLIN);
           if (fds->revents != 0)
             {
-              uvdbg("Report events: %02x\n", fds->revents);
+              uinfo("Report events: %02x\n", fds->revents);
               sem_post(fds->sem);
             }
         }
@@ -524,7 +524,7 @@ static inline FAR struct usbhost_state_s *usbhost_allocclass(void)
 
   DEBUGASSERT(!up_interrupt_context());
   priv = (FAR struct usbhost_state_s *)kmm_malloc(sizeof(struct usbhost_state_s));
-  uvdbg("Allocated: %p\n", priv);
+  uinfo("Allocated: %p\n", priv);
   return priv;
 }
 
@@ -548,7 +548,7 @@ static inline void usbhost_freeclass(FAR struct usbhost_state_s *usbclass)
 
   /* Free the class instance. */
 
-  uvdbg("Freeing: %p\n", usbclass);
+  uinfo("Freeing: %p\n", usbclass);
   sched_kfree(usbclass);
 }
 
@@ -623,13 +623,13 @@ static void usbhost_destroy(FAR void *arg)
   char devname[DEV_NAMELEN];
 
   DEBUGASSERT(priv != NULL && priv->usbclass.hport != NULL);
-  uvdbg("crefs: %d\n", priv->crefs);
+  uinfo("crefs: %d\n", priv->crefs);
 
   hport = priv->usbclass.hport;
 
   /* Unregister the driver */
 
-  uvdbg("Unregister driver\n");
+  uinfo("Unregister driver\n");
   usbhost_mkdevname(priv, devname);
   (void)unregister_driver(devname);
 
@@ -709,7 +709,7 @@ static void usbhost_notify(FAR struct usbhost_state_s *priv)
       if (fds)
         {
           fds->revents |= POLLIN;
-          ivdbg("Report events: %02x\n", fds->revents);
+          iinfo("Report events: %02x\n", fds->revents);
           sem_post(fds->sem);
         }
     }
@@ -1056,7 +1056,7 @@ static int usbhost_mouse_poll(int argc, char *argv[])
   ssize_t nbytes;
   int ret = OK;
 
-  uvdbg("Started\n");
+  uinfo("Started\n");
 
   /* Synchronize with the start-up logic.  Get the private instance, re-start
    * the start-up logic, and wait a bit to make sure that all of the class
@@ -1078,7 +1078,7 @@ static int usbhost_mouse_poll(int argc, char *argv[])
 
   /* Loop here until the device is disconnected */
 
-  uvdbg("Entering poll loop\n");
+  uinfo("Entering poll loop\n");
 
   while (!priv->disconnected)
     {
@@ -1378,7 +1378,7 @@ static int usbhost_waitsample(FAR struct usbhost_state_s *priv,
     {
       /* Wait for a change in the HIDMOUSE state */
 
-      ivdbg("Waiting..\n");
+      iinfo("Waiting..\n");
       priv->nwaiters++;
       ret = sem_wait(&priv->waitsem);
       priv->nwaiters--;
@@ -1404,7 +1404,7 @@ static int usbhost_waitsample(FAR struct usbhost_state_s *priv,
         }
     }
 
-  ivdbg("Sampled\n");
+  iinfo("Sampled\n");
 
   /* Re-acquire the semaphore that manages mutually exclusive access to
    * the device structure.  We may have to wait here.  But we have our sample.
@@ -1509,7 +1509,7 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
 
         case USB_DESC_TYPE_INTERFACE:
           {
-            uvdbg("Interface descriptor\n");
+            uinfo("Interface descriptor\n");
             DEBUGASSERT(remaining >= USB_SIZEOF_IFDESC);
 
             /* Did we already find what we needed from a preceding interface? */
@@ -1534,7 +1534,7 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
         /* HID descriptor */
 
         case USBHID_DESCTYPE_HID:
-            uvdbg("HID descriptor\n");
+            uinfo("HID descriptor\n");
             break;
 
         /* Endpoint descriptor.  We expect one or two interrupt endpoints,
@@ -1545,7 +1545,7 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
           {
             FAR struct usb_epdesc_s *epdesc = (FAR struct usb_epdesc_s *)configdesc;
 
-            uvdbg("Endpoint descriptor\n");
+            uinfo("Endpoint descriptor\n");
             DEBUGASSERT(remaining >= USB_SIZEOF_EPDESC);
 
             /* Check for an interrupt endpoint. */
@@ -1580,7 +1580,7 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
                     epindesc.interval     = epdesc->interval;
                     epindesc.mxpacketsize = usbhost_getle16(epdesc->mxpacketsize);
 
-                    uvdbg("Interrupt IN EP addr:%d mxpacketsize:%d\n",
+                    uinfo("Interrupt IN EP addr:%d mxpacketsize:%d\n",
                           epindesc.addr, epindesc.mxpacketsize);
                   }
               }
@@ -1590,7 +1590,7 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
         /* Other descriptors are just ignored for now */
 
         default:
-          uvdbg("Other descriptor: %d\n", desc->type);
+          uinfo("Other descriptor: %d\n", desc->type);
           break;
         }
 
@@ -1628,7 +1628,7 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
       return ret;
     }
 
-  ullvdbg("Endpoint allocated\n");
+  ullinfo("Endpoint allocated\n");
   return OK;
 }
 
@@ -1679,7 +1679,7 @@ static inline int usbhost_devinit(FAR struct usbhost_state_s *priv)
    * memory resources, primarily for the dedicated stack (CONFIG_HIDMOUSE_STACKSIZE).
    */
 
-  uvdbg("Start poll task\n");
+  uinfo("Start poll task\n");
 
   /* The inputs to a task started by kernel_thread() are very awkward for this
    * purpose.  They are really designed for command line tasks (argc/argv). So
@@ -1712,7 +1712,7 @@ static inline int usbhost_devinit(FAR struct usbhost_state_s *priv)
 
   /* Register the driver */
 
-  uvdbg("Register driver\n");
+  uinfo("Register driver\n");
   usbhost_mkdevname(priv, devname);
   ret = register_driver(devname, &g_hidmouse_fops, 0666, priv);
 
@@ -2062,7 +2062,7 @@ static int usbhost_disconnected(struct usbhost_class_s *usbclass)
    */
 
   priv->disconnected = true;
-  ullvdbg("Disconnected\n");
+  ullinfo("Disconnected\n");
 
   /* Are there a thread(s) waiting for mouse data that will never come? */
 
@@ -2124,7 +2124,7 @@ static int usbhost_open(FAR struct file *filep)
   irqstate_t flags;
   int ret;
 
-  uvdbg("Entry\n");
+  uinfo("Entry\n");
   DEBUGASSERT(filep && filep->f_inode);
   inode = filep->f_inode;
   priv  = inode->i_private;
@@ -2199,7 +2199,7 @@ static int usbhost_close(FAR struct file *filep)
   FAR struct usbhost_state_s *priv;
   irqstate_t flags;
 
-  uvdbg("Entry\n");
+  uinfo("Entry\n");
   DEBUGASSERT(filep && filep->f_inode);
   inode = filep->f_inode;
   priv  = inode->i_private;
@@ -2295,7 +2295,7 @@ static ssize_t usbhost_read(FAR struct file *filep, FAR char *buffer, size_t len
   struct mouse_sample_s       sample;
   int                         ret;
 
-  uvdbg("Entry\n");
+  uinfo("Entry\n");
   DEBUGASSERT(filep && filep->f_inode && buffer);
   inode = filep->f_inode;
   priv  = inode->i_private;
@@ -2392,10 +2392,10 @@ static ssize_t usbhost_read(FAR struct file *filep, FAR char *buffer, size_t len
       report->point[0].flags  = TOUCH_MOVE | TOUCH_ID_VALID | TOUCH_POS_VALID;
     }
 
-  ivdbg("  id:      %d\n", report->point[0].id);
-  ivdbg("  flags:   %02x\n", report->point[0].flags);
-  ivdbg("  x:       %d\n", report->point[0].x);
-  ivdbg("  y:       %d\n", report->point[0].y);
+  iinfo("  id:      %d\n", report->point[0].id);
+  iinfo("  flags:   %02x\n", report->point[0].flags);
+  iinfo("  x:       %d\n", report->point[0].x);
+  iinfo("  y:       %d\n", report->point[0].y);
 
   ret = SIZEOF_TOUCH_SAMPLE_S(1);
 #else
@@ -2414,7 +2414,7 @@ static ssize_t usbhost_read(FAR struct file *filep, FAR char *buffer, size_t len
 
 errout:
   usbhost_givesem(&priv->exclsem);
-  ivdbg("Returning: %d\n", ret);
+  iinfo("Returning: %d\n", ret);
   return (ssize_t)ret;
 }
 
@@ -2451,7 +2451,7 @@ static int usbhost_poll(FAR struct file *filep, FAR struct pollfd *fds,
   int                         ret = OK;
   int                         i;
 
-  uvdbg("Entry\n");
+  uinfo("Entry\n");
   DEBUGASSERT(filep && filep->f_inode && fds);
   inode = filep->f_inode;
   priv  = inode->i_private;

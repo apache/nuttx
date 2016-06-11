@@ -163,7 +163,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 
               up_savestate(tcb->xcp.regs);
 
-              svdbg("PC/STATUS Saved: %08x/%08x New: %08x/%08x\n",
+              sinfo("PC/STATUS Saved: %08x/%08x New: %08x/%08x\n",
                     tcb->xcp.saved_epc, tcb->xcp.saved_status,
                     g_current_regs[REG_EPC], g_current_regs[REG_STATUS]);
             }
@@ -196,7 +196,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
           status                    |= CP0_STATUS_IM_SWINTS;
           tcb->xcp.regs[REG_STATUS]  = status;
 
-          svdbg("PC/STATUS Saved: %08x/%08x New: %08x/%08x\n",
+          sinfo("PC/STATUS Saved: %08x/%08x New: %08x/%08x\n",
                 tcb->xcp.saved_epc, tcb->xcp.saved_status,
                 tcb->xcp.regs[REG_EPC], tcb->xcp.regs[REG_STATUS]);
         }

@@ -66,14 +66,14 @@
 #ifdef SPI_DEBUG
 #  define spidbg  lldbg
 #  ifdef SPI_VERBOSE
-#    define spivdbg lldbg
+#    define spiinfo lldbg
 #  else
-#    define spivdbg(x...)
+#    define spiinfo(x...)
 #  endif
 #else
 #  undef SPI_VERBOSE
 #  define spidbg(x...)
-#  define spivdbg(x...)
+#  define spiinfo(x...)
 #endif
 
 /************************************************************************************
@@ -102,7 +102,7 @@ void stm32_spidev_initialize(void)
 
 #ifdef CONFIG_STM32_SPI1
   /* Configure the SPI-based touch screen CS GPIO */
-  spivdbg("Configure GPIO for SPI1/CS\n");
+  spiinfo("Configure GPIO for SPI1/CS\n");
   stm32_configgpio(GPIO_TS_CS);
 #endif
 }

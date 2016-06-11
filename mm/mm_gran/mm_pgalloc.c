@@ -67,18 +67,18 @@
 #ifdef CONFIG_CPP_HAVE_VARARGS
 #  ifdef CONFIG_DEBUG_PGALLOC
 #    define pgadbg(format, ...)       dbg(format, ##__VA_ARGS__)
-#    define pgavdbg(format, ...)      vdbg(format, ##__VA_ARGS__)
+#    define pgainfo(format, ...)      info(format, ##__VA_ARGS__)
 #  else
 #    define pgadbg(format, ...)       mdbg(format, ##__VA_ARGS__)
-#    define pgavdbg(format, ...)      mvdbg(format, ##__VA_ARGS__)
+#    define pgainfo(format, ...)      minfo(format, ##__VA_ARGS__)
 #  endif
 #else
 #  ifdef CONFIG_DEBUG_PGALLOC
 #    define pgadbg                    dbg
-#    define pgavdbg                   vdbg
+#    define pgainfo                   info
 #  else
 #    define pgadbg                    (void)
-#    define pgavdbg                   (void)
+#    define pgainfo                   (void)
 #  endif
 #endif
 

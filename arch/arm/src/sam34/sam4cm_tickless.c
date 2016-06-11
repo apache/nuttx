@@ -197,7 +197,7 @@ static struct sam_tickless_s g_tickless;
 
 static void sam_oneshot_handler(void *arg)
 {
-  tcllvdbg("Expired...\n");
+  tcllinfo("Expired...\n");
   sched_timer_expiration();
 }
 

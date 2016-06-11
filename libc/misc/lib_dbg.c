@@ -55,7 +55,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: dbg, lldbg, vdbg
+ * Name: dbg, lldbg, info
  *
  * Description:
  *  If the cross-compiler's pre-processor does not support variable
@@ -91,7 +91,7 @@ int lldbg(const char *format, ...)
 #endif
 
 #ifdef CONFIG_DEBUG_INFO
-int vdbg(const char *format, ...)
+int info(const char *format, ...)
 {
   va_list ap;
   int     ret;
@@ -104,7 +104,7 @@ int vdbg(const char *format, ...)
 }
 
 #ifdef CONFIG_ARCH_LOWPUTC
-int llvdbg(const char *format, ...)
+int llinfo(const char *format, ...)
 {
   va_list ap;
   int     ret;

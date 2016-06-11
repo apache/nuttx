@@ -168,7 +168,7 @@ int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
     case R_ARM_CALL:
     case R_ARM_JUMP24:
       {
-        bvdbg("Performing PC24 [%d] link at addr %08lx [%08lx] to sym '%s' st_value=%08lx\n",
+        binfo("Performing PC24 [%d] link at addr %08lx [%08lx] to sym '%s' st_value=%08lx\n",
               ELF32_R_TYPE(rel->r_info), (long)addr, (long)(*(uint32_t *)addr),
               sym, (long)sym->st_value);
 
@@ -197,7 +197,7 @@ int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
     case R_ARM_ABS32:
     case R_ARM_TARGET1:  /* New ABI:  TARGET1 always treated as ABS32 */
       {
-        bvdbg("Performing ABS32 link at addr=%08lx [%08lx] to sym=%p st_value=%08lx\n",
+        binfo("Performing ABS32 link at addr=%08lx [%08lx] to sym=%p st_value=%08lx\n",
               (long)addr, (long)(*(uint32_t *)addr), sym, (long)sym->st_value);
 
         *(uint32_t *)addr += sym->st_value;
@@ -245,7 +245,7 @@ int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
         upper_insn = (uint32_t)(*(uint16_t *)addr);
         lower_insn = (uint32_t)(*(uint16_t *)(addr + 2));
 
-        bvdbg("Performing THM_JUMP24 [%d] link at addr=%08lx [%04x %04x] to sym=%p st_value=%08lx\n",
+        binfo("Performing THM_JUMP24 [%d] link at addr=%08lx [%04x %04x] to sym=%p st_value=%08lx\n",
               ELF32_R_TYPE(rel->r_info), (long)addr, (int)upper_insn, (int)lower_insn,
               sym, (long)sym->st_value);
 
@@ -279,7 +279,7 @@ int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
 
         /* And perform the relocation */
 
-        bvdbg("  S=%d J1=%d J2=%d offset=%08lx branch target=%08lx\n",
+        binfo("  S=%d J1=%d J2=%d offset=%08lx branch target=%08lx\n",
               S, J1, J2, (long)offset, offset + sym->st_value - addr);
 
         offset += sym->st_value - addr;
@@ -320,14 +320,14 @@ int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
         lower_insn = ((lower_insn & 0xd000) | (J1 << 13) | (J2 << 11) | ((offset >> 1) & 0x07ff));
         *(uint16_t *)(addr + 2) = (uint16_t)lower_insn;
 
-        bvdbg("  S=%d J1=%d J2=%d insn [%04x %04x]\n",
+        binfo("  S=%d J1=%d J2=%d insn [%04x %04x]\n",
               S, J1, J2, (int)upper_insn, (int)lower_insn);
       }
       break;
 
     case R_ARM_V4BX:
       {
-        bvdbg("Performing V4BX link at addr=%08lx [%08lx]\n",
+        binfo("Performing V4BX link at addr=%08lx [%08lx]\n",
               (long)addr, (long)(*(uint32_t *)addr));
 
          /* Preserve only Rm and the condition code */
@@ -342,7 +342,7 @@ int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
 
     case R_ARM_PREL31:
       {
-        bvdbg("Performing PREL31 link at addr=%08lx [%08lx] to sym=%p st_value=%08lx\n",
+        binfo("Performing PREL31 link at addr=%08lx [%08lx] to sym=%p st_value=%08lx\n",
               (long)addr, (long)(*(uint32_t *)addr), sym, (long)sym->st_value);
 
         offset            = *(uint32_t *)addr + sym->st_value - addr;
@@ -353,7 +353,7 @@ int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
     case R_ARM_MOVW_ABS_NC:
     case R_ARM_MOVT_ABS:
       {
-        bvdbg("Performing MOVx_ABS [%d] link at addr=%08lx [%08lx] to sym=%p st_value=%08lx\n",
+        binfo("Performing MOVx_ABS [%d] link at addr=%08lx [%08lx] to sym=%p st_value=%08lx\n",
               ELF32_R_TYPE(rel->r_info), (long)addr, (long)(*(uint32_t *)addr),
               sym, (long)sym->st_value);
 
@@ -408,7 +408,7 @@ int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
         upper_insn = (uint32_t)(*(uint16_t *)addr);
         lower_insn = (uint32_t)(*(uint16_t *)(addr + 2));
 
-        bvdbg("Performing THM_MOVx [%d] link at addr=%08lx [%04x %04x] to sym=%p st_value=%08lx\n",
+        binfo("Performing THM_MOVx [%d] link at addr=%08lx [%04x %04x] to sym=%p st_value=%08lx\n",
               ELF32_R_TYPE(rel->r_info), (long)addr, (int)upper_insn, (int)lower_insn,
               sym, (long)sym->st_value);
 
@@ -425,7 +425,7 @@ int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
 
         /* And perform the relocation */
 
-        bvdbg("  offset=%08lx branch target=%08lx\n",
+        binfo("  offset=%08lx branch target=%08lx\n",
               (long)offset, offset + sym->st_value);
 
         offset += sym->st_value;
@@ -445,7 +445,7 @@ int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
         lower_insn = ((lower_insn & 0x8f00) | ((offset & 0x0700) << 4) | (offset & 0x00ff));
         *(uint16_t *)(addr + 2) = (uint16_t)lower_insn;
 
-        bvdbg("  insn [%04x %04x]\n",
+        binfo("  insn [%04x %04x]\n",
              (int)upper_insn, (int)lower_insn);
       }
       break;

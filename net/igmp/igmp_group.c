@@ -90,25 +90,25 @@
 #  ifdef IGMP_GRPDEBUG
 #    define grpdbg(format, ...)    ndbg(format, ##__VA_ARGS__)
 #    define grplldbg(format, ...)  nlldbg(format, ##__VA_ARGS__)
-#    define grpvdbg(format, ...)   nvdbg(format, ##__VA_ARGS__)
-#    define grpllvdbg(format, ...) nllvdbg(format, ##__VA_ARGS__)
+#    define grpinfo(format, ...)   ninfo(format, ##__VA_ARGS__)
+#    define grpllinfo(format, ...) nllinfo(format, ##__VA_ARGS__)
 #  else
 #    define grpdbg(x...)
 #    define grplldbg(x...)
-#    define grpvdbg(x...)
-#    define grpllvdbg(x...)
+#    define grpinfo(x...)
+#    define grpllinfo(x...)
 #  endif
 #else
 #  ifdef IGMP_GRPDEBUG
 #    define grpdbg    ndbg
 #    define grplldbg  nlldbg
-#    define grpvdbg   nvdbg
-#    define grpllvdbg nllvdbg
+#    define grpinfo   ninfo
+#    define grpllinfo nllinfo
 #  else
 #    define grpdbg    (void)
 #    define grplldbg  (void)
-#    define grpvdbg   (void)
-#    define grpllvdbg (void)
+#    define grpinfo   (void)
+#    define grpllinfo (void)
 #  endif
 #endif
 
@@ -222,7 +222,7 @@ FAR struct igmp_group_s *igmp_grpalloc(FAR struct net_driver_s *dev,
   FAR struct igmp_group_s *group;
   net_lock_t flags;
 
-  nllvdbg("addr: %08x dev: %p\n", *addr, dev);
+  nllinfo("addr: %08x dev: %p\n", *addr, dev);
   if (up_interrupt_context())
     {
 #if CONFIG_PREALLOC_IGMPGROUPS > 0

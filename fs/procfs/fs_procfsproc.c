@@ -1013,7 +1013,7 @@ static int proc_open(FAR struct file *filep, FAR const char *relpath,
   unsigned long tmp;
   pid_t pid;
 
-  fvdbg("Open '%s'\n", relpath);
+  finfo("Open '%s'\n", relpath);
 
   /* PROCFS is read-only.  Any attempt to open with any kind of write
    * access is not permitted.
@@ -1137,7 +1137,7 @@ static ssize_t proc_read(FAR struct file *filep, FAR char *buffer,
   irqstate_t flags;
   ssize_t ret;
 
-  fvdbg("buffer=%p buflen=%d\n", buffer, (int)buflen);
+  finfo("buffer=%p buflen=%d\n", buffer, (int)buflen);
 
   /* Recover our private data from the struct file instance */
 
@@ -1215,7 +1215,7 @@ static int proc_dup(FAR const struct file *oldp, FAR struct file *newp)
   FAR struct proc_file_s *oldfile;
   FAR struct proc_file_s *newfile;
 
-  fvdbg("Dup %p->%p\n", oldp, newp);
+  finfo("Dup %p->%p\n", oldp, newp);
 
   /* Recover our private data from the old struct file instance */
 
@@ -1259,7 +1259,7 @@ static int proc_opendir(FAR const char *relpath, FAR struct fs_dirent_s *dir)
   FAR char *ptr;
   pid_t pid;
 
-  fvdbg("relpath: \"%s\"\n", relpath ? relpath : "NULL");
+  finfo("relpath: \"%s\"\n", relpath ? relpath : "NULL");
   DEBUGASSERT(relpath && dir && !dir->u.procfs);
 
   /* The relative must be either:
@@ -1415,7 +1415,7 @@ static int proc_readdir(struct fs_dirent_s *dir)
        * error -ENOENT
        */
 
-      fvdbg("Entry %d: End of directory\n", index);
+      finfo("Entry %d: End of directory\n", index);
       ret = -ENOENT;
     }
 

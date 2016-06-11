@@ -190,7 +190,7 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
     }
   else
     {
-      mvdbg("Allocated %p, size %d\n", ret, size);
+      minfo("Allocated %p, size %d\n", ret, size);
     }
 #endif
 

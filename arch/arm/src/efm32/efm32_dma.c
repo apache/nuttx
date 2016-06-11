@@ -270,7 +270,7 @@ void weak_function up_dmainitialize(void)
   uint32_t regval;
   int i;
 
-  dmallvdbg("Initialize XDMAC0\n");
+  dmallinfo("Initialize XDMAC0\n");
 
   /* Initialize the channel list  */
 
@@ -416,7 +416,7 @@ void efm32_dmafree(DMA_HANDLE handle)
   struct dma_channel_s *dmach = (struct dma_channel_s *)handle;
 
   DEBUGASSERT(dmach != NULL && dmach->inuse);
-  dmavdbg("DMA channel %d\n", dmach->chan);
+  dmainfo("DMA channel %d\n", dmach->chan);
 
   /* Disable the channel */
 

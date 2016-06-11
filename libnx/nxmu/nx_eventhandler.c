@@ -177,7 +177,7 @@ int nx_eventhandler(NXHANDLE handle)
   /* Dispatch the message appropriately */
 
   msg = (struct nxsvrmsg_s *)buffer;
-  gvdbg("Received msgid=%d\n", msg->msgid);
+  ginfo("Received msgid=%d\n", msg->msgid);
   switch (msg->msgid)
     {
     case NX_CLIMSG_CONNECTED:

@@ -164,7 +164,7 @@ static void icmpv6_echo_request(FAR struct net_driver_s *dev,
   uint16_t reqlen;
   int i;
 
-  nllvdbg("Send ECHO request: seqno=%d\n", pstate->png_seqno);
+  nllinfo("Send ECHO request: seqno=%d\n", pstate->png_seqno);
 
   /* Set up the IPv6 header (most is probably already in place) */
 
@@ -217,7 +217,7 @@ static void icmpv6_echo_request(FAR struct net_driver_s *dev,
   dev->d_sndlen = reqlen;
   dev->d_len    = reqlen + IPv6_HDRLEN;
 
-  nllvdbg("Outgoing ICMPv6 Echo Request length: %d (%d)\n",
+  nllinfo("Outgoing ICMPv6 Echo Request length: %d (%d)\n",
           dev->d_len, (icmp->len[0] << 8) | icmp->len[1]);
 
 #ifdef CONFIG_NET_STATISTICS
@@ -253,7 +253,7 @@ static uint16_t ping_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
 {
   FAR struct icmpv6_ping_s *pstate = (struct icmpv6_ping_s *)pvpriv;
 
-  nllvdbg("flags: %04x\n", flags);
+  nllinfo("flags: %04x\n", flags);
 
   if (pstate)
     {
@@ -276,7 +276,7 @@ static uint16_t ping_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
         {
           FAR struct icmpv6_echo_reply_s *reply = ICMPv6ECHOREPLY;
 
-          nllvdbg("ECHO reply: id=%d seqno=%d\n",
+          nllinfo("ECHO reply: id=%d seqno=%d\n",
                   ntohs(reply->id), ntohs(reply->seqno));
 
           if (ntohs(reply->id) == pstate->png_id)
@@ -357,7 +357,7 @@ static uint16_t ping_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
   return flags;
 
 end_wait:
-  nllvdbg("Resuming\n");
+  nllinfo("Resuming\n");
 
   /* Do not allow any further callbacks */
 
@@ -471,7 +471,7 @@ int icmpv6_ping(net_ipv6addr_t addr, uint16_t id, uint16_t seqno,
        * re-enabled when the task restarts.
        */
 
-      nllvdbg("Start time: 0x%08x seqno: %d\n", state.png_time, seqno);
+      nllinfo("Start time: 0x%08x seqno: %d\n", state.png_time, seqno);
       net_lockedwait(&state.png_sem);
 
       icmpv6_callback_free(dev, state.png_cb);
@@ -485,7 +485,7 @@ int icmpv6_ping(net_ipv6addr_t addr, uint16_t id, uint16_t seqno,
 
   if (!state.png_result)
     {
-      nllvdbg("Return seqno=%d\n", state.png_seqno);
+      nllinfo("Return seqno=%d\n", state.png_seqno);
       return (int)state.png_seqno;
     }
   else

@@ -154,7 +154,7 @@ static uint16_t ping_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
   FAR uint8_t *ptr;
   int i;
 
-  nllvdbg("flags: %04x\n", flags);
+  nllinfo("flags: %04x\n", flags);
 
   if (pstate)
     {
@@ -177,7 +177,7 @@ static uint16_t ping_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
         {
           FAR struct icmp_iphdr_s *icmp = (FAR struct icmp_iphdr_s *)conn;
 
-          nllvdbg("ECHO reply: id=%d seqno=%d\n",
+          nllinfo("ECHO reply: id=%d seqno=%d\n",
                   ntohs(icmp->id), ntohs(icmp->seqno));
 
           if (ntohs(icmp->id) == pstate->png_id)
@@ -236,7 +236,7 @@ static uint16_t ping_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
            * of the ICMP header.
            */
 
-          nllvdbg("Send ECHO request: seqno=%d\n", pstate->png_seqno);
+          nllinfo("Send ECHO request: seqno=%d\n", pstate->png_seqno);
 
           dev->d_sndlen = pstate->png_datlen + 4;
           icmp_send(dev, &pstate->png_addr);
@@ -283,7 +283,7 @@ static uint16_t ping_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
   return flags;
 
 end_wait:
-  nllvdbg("Resuming\n");
+  nllinfo("Resuming\n");
 
   /* Do not allow any further callbacks */
 
@@ -397,7 +397,7 @@ int icmp_ping(in_addr_t addr, uint16_t id, uint16_t seqno, uint16_t datalen,
        * re-enabled when the task restarts.
        */
 
-      nllvdbg("Start time: 0x%08x seqno: %d\n", state.png_time, seqno);
+      nllinfo("Start time: 0x%08x seqno: %d\n", state.png_time, seqno);
       net_lockedwait(&state.png_sem);
 
       icmp_callback_free(dev, state.png_cb);
@@ -411,7 +411,7 @@ int icmp_ping(in_addr_t addr, uint16_t id, uint16_t seqno, uint16_t datalen,
 
   if (!state.png_result)
     {
-      nllvdbg("Return seqno=%d\n", state.png_seqno);
+      nllinfo("Return seqno=%d\n", state.png_seqno);
       return (int)state.png_seqno;
     }
   else

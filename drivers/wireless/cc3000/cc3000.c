@@ -422,7 +422,7 @@ static void cc3000_pollnotify(FAR struct cc3000_dev_s *priv, uint32_t type)
       if (fds)
         {
           fds->revents |= type;
-          nllvdbg("Report events: %02x\n", fds->revents);
+          nllinfo("Report events: %02x\n", fds->revents);
           sem_post(fds->sem);
         }
     }
@@ -623,7 +623,7 @@ static void * cc3000_worker(FAR void *arg)
       if ((cc3000_wait_irq(priv) != -EINTR) && (priv->workertid != -1))
         {
           PROBE(0, 0);
-          nllvdbg("State%d\n", priv->state);
+          nllinfo("State%d\n", priv->state);
           switch (priv->state)
             {
             case eSPI_STATE_POWERUP:
@@ -710,9 +710,9 @@ static void * cc3000_worker(FAR void *arg)
 
                     cc3000_devgive(priv);
 
-                    nllvdbg("Wait On Completion\n");
+                    nllinfo("Wait On Completion\n");
                     sem_wait(priv->wrkwaitsem);
-                    nllvdbg("Completed S:%d irq :%d\n",
+                    nllinfo("Completed S:%d irq :%d\n",
                             priv->state, priv->config->irq_read(priv->config));
 
                     sem_getvalue(&priv->irqsem, &count);
@@ -732,7 +732,7 @@ static void * cc3000_worker(FAR void *arg)
               break;
 
             default:
-              nllvdbg("default: State%d\n", priv->state);
+              nllinfo("default: State%d\n", priv->state);
               break;
             }
         }
@@ -802,7 +802,7 @@ static int cc3000_open(FAR struct file *filep)
 
   CHECK_GUARD(priv);
 
-  nllvdbg("crefs: %d\n", priv->crefs);
+  nllinfo("crefs: %d\n", priv->crefs);
 
   /* Get exclusive access to the driver data structure */
 
@@ -982,7 +982,7 @@ static int cc3000_close(FAR struct file *filep)
 
   CHECK_GUARD(priv);
 
-  nllvdbg("crefs: %d\n", priv->crefs);
+  nllinfo("crefs: %d\n", priv->crefs);
 
   /* Get exclusive access to the driver data structure */
 
@@ -1052,7 +1052,7 @@ static ssize_t cc3000_read(FAR struct file *filep, FAR char *buffer, size_t len)
   int ret;
   ssize_t nread;
 
-  nllvdbg("buffer:%p len:%d\n", buffer, len);
+  nllinfo("buffer:%p len:%d\n", buffer, len);
   DEBUGASSERT(filep);
   inode = filep->f_inode;
 
@@ -1091,7 +1091,7 @@ static ssize_t cc3000_read(FAR struct file *filep, FAR char *buffer, size_t len)
        * option, then just return an error.
        */
 
-      nllvdbg("CC3000 data is not available\n");
+      nllinfo("CC3000 data is not available\n");
       if (filep->f_oflags & O_NONBLOCK)
         {
           nread = -EAGAIN;
@@ -1112,7 +1112,7 @@ static ssize_t cc3000_read(FAR struct file *filep, FAR char *buffer, size_t len)
        * but will be re-enabled while we are waiting.
        */
 
-      nllvdbg("Waiting..\n");
+      nllinfo("Waiting..\n");
       ret = sem_wait(&priv->waitsem);
       priv->nwaiters--;
       sched_unlock();
@@ -1166,7 +1166,7 @@ errout_with_sem:
   cc3000_devgive(priv);
 
 errout_without_sem:
-  nllvdbg("Returning: %d\n", nread);
+  nllinfo("Returning: %d\n", nread);
 #ifndef CONFIG_DISABLE_POLL
   if (nread > 0)
     {
@@ -1198,7 +1198,7 @@ static ssize_t cc3000_write(FAR struct file *filep, FAR const char *usrbuffer, s
 
   size_t tx_len = (len & 1) ? len : len +1;
 
-  nllvdbg("buffer:%p len:%d tx_len:%d\n", buffer, len, tx_len);
+  nllinfo("buffer:%p len:%d tx_len:%d\n", buffer, len, tx_len);
 
   DEBUGASSERT(filep);
   inode = filep->f_inode;
@@ -1263,18 +1263,18 @@ static ssize_t cc3000_write(FAR struct file *filep, FAR const char *usrbuffer, s
     }
   else
     {
-      nllvdbg("Assert CS\n");
+      nllinfo("Assert CS\n");
       priv->state  = eSPI_STATE_WRITE_WAIT_IRQ;
       cc3000_lock_and_select(priv->spi); /* Assert CS */
-      nllvdbg("Wait on IRQ Active\n");
+      nllinfo("Wait on IRQ Active\n");
       ret = cc3000_wait_ready(priv);
-      nllvdbg("IRQ Signaled\n");
+      nllinfo("IRQ Signaled\n");
       if (ret < 0)
         {
           /* This should only happen if the wait was canceled by an signal */
 
           cc3000_deselect_and_unlock(priv->spi);
-          nllvdbg("sem_wait: %d\n", errno);
+          nllinfo("sem_wait: %d\n", errno);
           DEBUGASSERT(errno == EINTR);
           nwritten = ret;
           goto errout_without_sem;
@@ -1284,13 +1284,13 @@ static ssize_t cc3000_write(FAR struct file *filep, FAR const char *usrbuffer, s
     }
 
   priv->state  = eSPI_STATE_WRITE_DONE;
-  nllvdbg("Deassert CS S:eSPI_STATE_WRITE_DONE\n");
+  nllinfo("Deassert CS S:eSPI_STATE_WRITE_DONE\n");
   cc3000_deselect_and_unlock(priv->spi);
   nwritten = tx_len;
   cc3000_devgive(priv);
 
 errout_without_sem:
-  nllvdbg("Returning: %d\n", ret);
+  nllinfo("Returning: %d\n", ret);
   return nwritten;
 }
 
@@ -1304,7 +1304,7 @@ static int cc3000_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   FAR struct cc3000_dev_s *priv;
   int ret;
 
-  nllvdbg("cmd: %d arg: %ld\n", cmd, arg);
+  nllinfo("cmd: %d arg: %ld\n", cmd, arg);
   DEBUGASSERT(filep);
   inode = filep->f_inode;
 
@@ -1409,7 +1409,7 @@ static int cc3000_poll(FAR struct file *filep, FAR struct pollfd *fds,
   int ret = OK;
   int i;
 
-  nllvdbg("setup: %d\n", (int)setup);
+  nllinfo("setup: %d\n", (int)setup);
   DEBUGASSERT(filep && fds);
   inode = filep->f_inode;
 
@@ -1517,7 +1517,7 @@ int cc3000_register(FAR struct spi_dev_s *spi,
 #endif
   int ret;
 
-  nllvdbg("spi: %p minor: %d\n", spi, minor);
+  nllinfo("spi: %p minor: %d\n", spi, minor);
 
   /* Debug-only sanity checks */
 
@@ -1572,7 +1572,7 @@ int cc3000_register(FAR struct spi_dev_s *spi,
   /* Register the device as an input device */
 
   (void)snprintf(drvname, DEV_NAMELEN, DEV_FORMAT, minor);
-  nllvdbg("Registering %s\n", drvname);
+  nllinfo("Registering %s\n", drvname);
 
   ret = register_driver(drvname, &cc3000_fops, 0666, priv);
   if (ret < 0)

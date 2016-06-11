@@ -63,7 +63,7 @@
 #endif
 
 #ifdef CONFIG_NXFLAT_DUMPBUFFER
-# define nxflat_dumpbuffer(m,b,n) bvdbgdumpbuffer(m,b,n)
+# define nxflat_dumpbuffer(m,b,n) binfodumpbuffer(m,b,n)
 #else
 # define nxflat_dumpbuffer(m,b,n)
 #endif
@@ -100,7 +100,7 @@ int nxflat_init(const char *filename, struct nxflat_loadinfo_s *loadinfo)
   uint32_t bssend;
   int      ret;
 
-  bvdbg("filename: %s loadinfo: %p\n", filename, loadinfo);
+  binfo("filename: %s loadinfo: %p\n", filename, loadinfo);
 
   /* Clear the load info structure */
 

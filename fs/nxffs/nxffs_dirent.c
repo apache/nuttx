@@ -71,7 +71,7 @@ int nxffs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
   struct nxffs_volume_s *volume;
   int ret;
 
-  fvdbg("relpath: \"%s\"\n", relpath ? relpath : "NULL");
+  finfo("relpath: \"%s\"\n", relpath ? relpath : "NULL");
 
   /* Sanity checks */
 
@@ -146,7 +146,7 @@ int nxffs_readdir(FAR struct inode *mountpt, FAR struct fs_dirent_s *dir)
     {
       /* Return the filename and file type */
 
-      fvdbg("Offset %d: \"%s\"\n", entry.hoffset, entry.name);
+      finfo("Offset %d: \"%s\"\n", entry.hoffset, entry.name);
       dir->fd_dir.d_type = DTYPE_FILE;
       strncpy(dir->fd_dir.d_name, entry.name, NAME_MAX+1);
 
@@ -175,7 +175,7 @@ int nxffs_rewinddir(FAR struct inode *mountpt, FAR struct fs_dirent_s *dir)
   FAR struct nxffs_volume_s *volume;
   int ret;
 
-  fvdbg("Entry\n");
+  finfo("Entry\n");
 
   /* Sanity checks */
 

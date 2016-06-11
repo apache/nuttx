@@ -172,7 +172,7 @@ int igmp_leavegroup(struct net_driver_s *dev, FAR const struct in_addr *grpaddr)
 
   /* Return ENOENT if the address is not a member of the group */
 
-  nvdbg("Return -ENOENT\n");
+  ninfo("Return -ENOENT\n");
   return -ENOENT;
 }
 

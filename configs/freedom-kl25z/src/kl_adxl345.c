@@ -183,7 +183,7 @@ static int adxl345_attach(FAR struct adxl345_config_s *state,
 {
   FAR struct kl_adxl345config_s *priv = (FAR struct kl_adxl345config_s *)state;
 
-  snvdbg("Saving handler %p\n", handler);
+  sninfo("Saving handler %p\n", handler);
   DEBUGASSERT(priv);
 
   /* Just save the handler and its argument.  We will use it when interrupts
@@ -264,7 +264,7 @@ int adxl345_archinitialize(int minor)
 
   if (!g_adxl345config.handle)
     {
-      snvdbg("Initializing\n");
+      sninfo("Initializing\n");
 
       /* Configure the ADXL345 interrupt pin as an input */
 

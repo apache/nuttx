@@ -78,14 +78,14 @@
 #ifdef LCD_DEBUG
 #  define leddbg  lldbg
 #  ifdef LCD_VERBOSE
-#    define ledvdbg lldbg
+#    define ledinfo lldbg
 #  else
-#    define ledvdbg(x...)
+#    define ledinfo(x...)
 #  endif
 #else
 #  undef LCD_VERBOSE
 #  define leddbg(x...)
-#  define ledvdbg(x...)
+#  define ledinfo(x...)
 #endif
 
 /****************************************************************************
@@ -141,7 +141,7 @@ FAR struct lcd_dev_s *board_lcd_getdev(int lcddev)
     }
   else
     {
-      gllvdbg("Bound SSI port 0 to OLCD %d\n", lcddev);
+      gllinfo("Bound SSI port 0 to OLCD %d\n", lcddev);
 
       /* And turn the OLCD on (CONFIG_LCD_MAXPOWER should be 1) */
       (void)g_lcddev->setpower(g_lcddev, CONFIG_LCD_MAXPOWER);

@@ -431,7 +431,7 @@ static int composite_setup(FAR struct usbdevclass_driver_s *driver,
   index     = GETUINT16(ctrl->index);
   len       = GETUINT16(ctrl->len);
 
-  uvdbg("type=%02x req=%02x value=%04x index=%04x len=%04x\n",
+  uinfo("type=%02x req=%02x value=%04x index=%04x len=%04x\n",
         ctrl->type, ctrl->req, value, index, len);
   UNUSED(index);
 

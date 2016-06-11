@@ -63,7 +63,7 @@
 #define DEFAULT_BAUD 9600
 
 #define dbg(format, ...)  if (debug > 0) printconsole(format, ##__VA_ARGS__)
-#define vdbg(format, ...) if (debug > 1) printconsole(format, ##__VA_ARGS__)
+#define info(format, ...) if (debug > 1) printconsole(format, ##__VA_ARGS__)
 
 /****************************************************************************
  * Private Types

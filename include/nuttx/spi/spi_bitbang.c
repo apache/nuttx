@@ -77,13 +77,13 @@
 #ifdef CONFIG_DEBUG_SPI
 #  define spidbg lldbg
 #  ifdef CONFIG_DEBUG_INFO
-#    define spivdbg lldbg
+#    define spiinfo lldbg
 #  else
-#    define spivdbg(x...)
+#    define spiinfo(x...)
 #  endif
 #else
 #  define spidbg(x...)
-#  define spivdbg(x...)
+#  define spiinfo(x...)
 #endif
 
 /****************************************************************************
@@ -273,7 +273,7 @@ static uint32_t spi_setfrequency(FAR struct spi_bitbang_s *priv, uint32_t freque
 static void spi_setmode(FAR struct spi_bitbang_s *priv,
                         enum spi_mode_e mode)
 {
-  spivdbg("mode=%d\n", mode);
+  spiinfo("mode=%d\n", mode);
 
   switch (mode)
     {

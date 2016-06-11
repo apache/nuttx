@@ -1101,7 +1101,7 @@ static void sam_wait_lcdstatus(uint32_t mask, uint32_t value)
 static int sam_base_getvideoinfo(struct fb_vtable_s *vtable,
                                  struct fb_videoinfo_s *vinfo)
 {
-  gvdbg("vtable=%p vinfo=%p\n", vtable, vinfo);
+  ginfo("vtable=%p vinfo=%p\n", vtable, vinfo);
   if (vtable && vinfo)
     {
       memcpy(vinfo, &g_base_videoinfo, sizeof(struct fb_videoinfo_s));
@@ -1119,7 +1119,7 @@ static int sam_base_getvideoinfo(struct fb_vtable_s *vtable,
 static int sam_base_getplaneinfo(struct fb_vtable_s *vtable, int planeno,
                                  struct fb_planeinfo_s *pinfo)
 {
-  gvdbg("vtable=%p planeno=%d pinfo=%p\n", vtable, planeno, pinfo);
+  ginfo("vtable=%p planeno=%d pinfo=%p\n", vtable, planeno, pinfo);
   if (vtable && planeno == 0 && pinfo)
     {
       pinfo->fbmem   = (void *)LAYER_BASE.framebuffer;
@@ -1166,21 +1166,21 @@ static int sam_base_putcmap(struct fb_vtable_s *vtable,
 static int sam_hcr_getcursor(struct fb_vtable_s *vtable,
                              struct fb_cursorattrib_s *attrib)
 {
-  gvdbg("vtable=%p attrib=%p\n", vtable, attrib);
+  ginfo("vtable=%p attrib=%p\n", vtable, attrib);
   if (vtable && attrib)
     {
 #ifdef CONFIG_FB_HWCURSORIMAGE
       attrib->fmt = SAMA5_HCR_COLOR_FMT;
 #endif
 
-      gvdbg("pos: (x=%d, y=%d)\n", g_lcdc.cpos.x, g_lcdc.cpos.y);
+      ginfo("pos: (x=%d, y=%d)\n", g_lcdc.cpos.x, g_lcdc.cpos.y);
       attrib->pos = g_lcdc.cpos;
 
 #ifdef CONFIG_FB_HWCURSORSIZE
       attrib->mxsize.h = CONFIG_SAMA5_LCDC_HCR_HEIGHT;
       attrib->mxsize.w = CONFIG_SAMA5_LCDC_HCR_WIDTH;
 
-      gvdbg("size: (h=%d, w=%d)\n", g_lcdc.csize.h, g_lcdc.csize.w);
+      ginfo("size: (h=%d, w=%d)\n", g_lcdc.csize.h, g_lcdc.csize.w);
       attrib->size = g_lcdc.csize;
 #endif
       return OK;
@@ -1199,26 +1199,26 @@ static int sam_hcr_getcursor(struct fb_vtable_s *vtable,
 static int sam_hcr_setcursor(struct fb_vtable_s *vtable,
                              struct fb_setcursor_s *setttings)
 {
-  gvdbg("vtable=%p setttings=%p\n", vtable, setttings);
+  ginfo("vtable=%p setttings=%p\n", vtable, setttings);
   if (vtable && setttings)
     {
-      gvdbg("flags: %02x\n", settings->flags);
+      ginfo("flags: %02x\n", settings->flags);
       if ((flags & FB_CUR_SETPOSITION) != 0)
         {
           g_lcdc.cpos = settings->pos;
-          gvdbg("pos: (h:%d, w:%d)\n", g_lcdc.cpos.x, g_lcdc.cpos.y);
+          ginfo("pos: (h:%d, w:%d)\n", g_lcdc.cpos.x, g_lcdc.cpos.y);
         }
 #ifdef CONFIG_FB_HWCURSORSIZE
       if ((flags & FB_CUR_SETSIZE) != 0)
         {
           g_lcdc.csize = settings->size;
-          gvdbg("size: (h:%d, w:%d)\n", g_lcdc.csize.h, g_lcdc.csize.w);
+          ginfo("size: (h:%d, w:%d)\n", g_lcdc.csize.h, g_lcdc.csize.w);
         }
 #endif
 #ifdef CONFIG_FB_HWCURSORIMAGE
       if ((flags & FB_CUR_SETIMAGE) != 0)
         {
-          gvdbg("image: (h:%d, w:%d) @ %p\n",
+          ginfo("image: (h:%d, w:%d) @ %p\n",
                 settings->img.height, settings->img.width,
                 settings->img.image);
         }
@@ -1294,9 +1294,9 @@ static void sam_dmasetup(int lid, struct sam_dscr_s *dscr, uint8_t *buffer)
 #if defined(CONFIG_DEBUG_GRAPHICS) && defined(CONFIG_DEBUG_INFO)
   /* Dump the DMA setup */
 
-  gvdbg("DMA descriptor:   addr=%08x ctrl=%08x next=%08x\n",
+  ginfo("DMA descriptor:   addr=%08x ctrl=%08x next=%08x\n",
         dscr->addr, dscr->ctrl, dscr->next);
-  gvdbg("DMA registers[%d]: head=%08x addr=%08x ctrl=%08x next=%08x\n",
+  ginfo("DMA registers[%d]: head=%08x addr=%08x ctrl=%08x next=%08x\n",
         lid, sam_getreg(g_layerhead[lid]), sam_getreg(g_layeraddr[lid]),
         sam_getreg(g_layerctrl[lid]), sam_getreg(g_layernext[lid]));
 #endif
@@ -1379,7 +1379,7 @@ static int sam_setclut(struct sam_layer_s *layer,
   unsigned int end;
   int i;
 
-  gvdbg("layer=%d cmap=%p first=%d len=%d\n",
+  ginfo("layer=%d cmap=%p first=%d len=%d\n",
         layer->lid, cmap, cmap->first, cmap->len);
 
   DEBUGASSERT(layer && cmap);
@@ -1460,7 +1460,7 @@ static int sam_getclut(struct sam_layer_s *layer,
   uintptr_t regval;
   int i;
 
-  gvdbg("layer=%d cmap=%p first=%d len=%d\n",
+  ginfo("layer=%d cmap=%p first=%d len=%d\n",
         layer->lid, cmap, layer->offset, layer->nclut);
 
   DEBUGASSERT(layer && cmap);
@@ -1514,7 +1514,7 @@ static void sam_pio_config(void)
 {
   int i;
 
-  gvdbg("Configuring pins\n");
+  ginfo("Configuring pins\n");
 
   /* Configure each pin */
 
@@ -2915,7 +2915,7 @@ int up_fbinitialize(int display)
   uint32_t regval;
 #endif
 
-  gvdbg("Entry\n");
+  ginfo("Entry\n");
 
   /* Configure layer layer structures, DMA descriptor memory, and
    * framebuffers
@@ -2931,7 +2931,7 @@ int up_fbinitialize(int display)
 
   sam_pio_config();
 
-  gvdbg("Configuring the LCD controller\n");
+  ginfo("Configuring the LCD controller\n");
 
   /* Enable the LCD peripheral clock */
 
@@ -2959,7 +2959,7 @@ int up_fbinitialize(int display)
 
   /* And turn the LCD on */
 
-  gvdbg("Enabling the display\n");
+  ginfo("Enabling the display\n");
   sam_lcd_enable();
 
   /* Display base layer */
@@ -3012,7 +3012,7 @@ int up_fbinitialize(int display)
 
 FAR struct fb_vtable_s *up_fbgetvplane(int display, int vplane)
 {
-  gvdbg("vplane: %d\n", vplane);
+  ginfo("vplane: %d\n", vplane);
   if (vplane == 0)
     {
       return (struct fb_vtable_s *)&g_base_vtable;
@@ -3062,7 +3062,7 @@ void sam_lcdclear(nxgl_mxpixel_t color)
   uint16_t *dest = (uint16_t *)LAYER_BASE.framebuffer;
   int i;
 
-  gvdbg("Clearing display: BPP=16 color=%04x framebuffer=%08x size=%d\n",
+  ginfo("Clearing display: BPP=16 color=%04x framebuffer=%08x size=%d\n",
         color, LAYER_BASE.framebuffer, SAMA5_BASE_FBSIZE);
 
   for (i = 0; i < SAMA5_BASE_FBSIZE; i += sizeof(uint16_t))
@@ -3076,7 +3076,7 @@ void sam_lcdclear(nxgl_mxpixel_t color)
   uint8_t b;
   int i;
 
-  gvdbg("Clearing display: BPP=24 color=%06x framebuffer=%08x size=%d\n",
+  ginfo("Clearing display: BPP=24 color=%06x framebuffer=%08x size=%d\n",
         color, LAYER_BASE.framebuffer, SAMA5_BASE_FBSIZE);
 
   b =  color        & 0xff;
@@ -3093,7 +3093,7 @@ void sam_lcdclear(nxgl_mxpixel_t color)
   uint32_t *dest = (uint32_t *)LAYER_BASE.framebuffer;
   int i;
 
-  gvdbg("Clearing display: BPP=32 color=%08x framebuffer=%08x size=%d\n",
+  ginfo("Clearing display: BPP=32 color=%08x framebuffer=%08x size=%d\n",
         color, LAYER_BASE.framebuffer, SAMA5_BASE_FBSIZE);
 
   for (i = 0; i < SAMA5_BASE_FBSIZE; i += sizeof(uint32_t))

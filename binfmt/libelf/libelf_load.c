@@ -156,7 +156,7 @@ static inline int elf_loadfile(FAR struct elf_loadinfo_s *loadinfo)
 
   /* Read each section into memory that is marked SHF_ALLOC + SHT_NOBITS */
 
-  bvdbg("Loaded sections:\n");
+  binfo("Loaded sections:\n");
   text = (FAR uint8_t *)loadinfo->textalloc;
   data = (FAR uint8_t *)loadinfo->dataalloc;
 
@@ -212,7 +212,7 @@ static inline int elf_loadfile(FAR struct elf_loadinfo_s *loadinfo)
 
       /* Update sh_addr to point to copy in memory */
 
-      bvdbg("%d. %08lx->%08lx\n", i,
+      binfo("%d. %08lx->%08lx\n", i,
             (unsigned long)shdr->sh_addr, (unsigned long)*pptr);
 
       shdr->sh_addr = (uintptr_t)*pptr;
@@ -250,7 +250,7 @@ int elf_load(FAR struct elf_loadinfo_s *loadinfo)
 #endif
   int ret;
 
-  bvdbg("loadinfo: %p\n", loadinfo);
+  binfo("loadinfo: %p\n", loadinfo);
   DEBUGASSERT(loadinfo && loadinfo->filfd >= 0);
 
   /* Load section headers into memory */
@@ -335,7 +335,7 @@ int elf_load(FAR struct elf_loadinfo_s *loadinfo)
   exidx = elf_findsection(loadinfo, CONFIG_ELF_EXIDX_SECTNAME);
   if (exidx < 0)
     {
-      bvdbg("elf_findsection: Exception Index section not found: %d\n", exidx);
+      binfo("elf_findsection: Exception Index section not found: %d\n", exidx);
     }
   else
     {

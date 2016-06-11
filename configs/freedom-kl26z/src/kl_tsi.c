@@ -135,7 +135,7 @@ static void tsi_calibrate(void)
       while (!(getreg32(KL_TSI_GENCS) & TSI_GENCS_EOSF));
 
       g_defcap[i] = getreg32(KL_TSI_DATA) & TSI_DATA_TSICNT_MASK;
-      ivdbg("Sensor %d = %d\n", i+1, g_defcap[i]);
+      iinfo("Sensor %d = %d\n", i+1, g_defcap[i]);
     }
 }
 
@@ -187,7 +187,7 @@ static ssize_t tsi_read(FAR struct file *filep, FAR char *buf, size_t buflen)
 
   g_currdelta = (uint16_t)deltacap;
 
-  ivdbg("Delta for g_channel %d = %d\n", g_channel, g_currdelta);
+  iinfo("Delta for g_channel %d = %d\n", g_channel, g_currdelta);
 
   buf[0] = g_currdelta & 0xff;
   buf[1] = (g_currdelta & 0xff00) >> 8;

@@ -156,13 +156,13 @@
 #ifdef CONFIG_DEBUG_SPI
 #  define qspidbg lldbg
 #  ifdef CONFIG_DEBUG_INFO
-#    define qspivdbg lldbg
+#    define qspiinfo lldbg
 #  else
-#    define qspivdbg(x...)
+#    define qspiinfo(x...)
 #  endif
 #else
 #  define qspidbg(x...)
-#  define qspivdbg(x...)
+#  define qspiinfo(x...)
 #endif
 
 #define DMA_INITIAL      0
@@ -477,18 +477,18 @@ static inline void qspi_putreg(struct sam_qspidev_s *priv, uint32_t value,
 #if defined(CONFIG_DEBUG_SPI) && defined(CONFIG_DEBUG_INFO)
 static void qspi_dumpregs(struct sam_qspidev_s *priv, const char *msg)
 {
-  qspivdbg("%s:\n", msg);
-  qspivdbg("    MR:%08x   SR:%08x  IMR:%08x  SCR:%08x\n",
+  qspiinfo("%s:\n", msg);
+  qspiinfo("    MR:%08x   SR:%08x  IMR:%08x  SCR:%08x\n",
           getreg32(priv->base + SAM_QSPI_MR_OFFSET),
           getreg32(priv->base + SAM_QSPI_SR_OFFSET),
           getreg32(priv->base + SAM_QSPI_IMR_OFFSET),
           getreg32(priv->base + SAM_QSPI_SCR_OFFSET));
-  qspivdbg("   IAR:%08x  ICR:%08x  IFR:%08x  SMR:%08x\n",
+  qspiinfo("   IAR:%08x  ICR:%08x  IFR:%08x  SMR:%08x\n",
           getreg32(priv->base + SAM_QSPI_IAR_OFFSET),
           getreg32(priv->base + SAM_QSPI_ICR_OFFSET),
           getreg32(priv->base + SAM_QSPI_IFR_OFFSET),
           getreg32(priv->base + SAM_QSPI_SMR_OFFSET));
-  qspivdbg("  WPCR:%08x WPSR:%08x\n",
+  qspiinfo("  WPCR:%08x WPSR:%08x\n",
           getreg32(priv->base + SAM_QSPI_WPCR_OFFSET),
           getreg32(priv->base + SAM_QSPI_WPSR_OFFSET));
 }
@@ -1078,7 +1078,7 @@ static int qspi_lock(struct qspi_dev_s *dev, bool lock)
 {
   struct sam_qspidev_s *priv = (struct sam_qspidev_s *)dev;
 
-  qspivdbg("lock=%d\n", lock);
+  qspiinfo("lock=%d\n", lock);
   if (lock)
     {
       /* Take the semaphore (perhaps waiting) */
@@ -1128,7 +1128,7 @@ static uint32_t qspi_setfrequency(struct qspi_dev_s *dev, uint32_t frequency)
 #endif
   uint32_t regval;
 
-  qspivdbg("frequency=%d\n", frequency);
+  qspiinfo("frequency=%d\n", frequency);
   DEBUGASSERT(priv);
 
   /* Check if the requested frequency is the same as the frequency selection */
@@ -1215,14 +1215,14 @@ static uint32_t qspi_setfrequency(struct qspi_dev_s *dev, uint32_t frequency)
   /* Calculate the new actual frequency */
 
   actual = SAM_QSPI_CLOCK / scbr;
-  qspivdbg("SCBR=%d actual=%d\n", scbr, actual);
+  qspiinfo("SCBR=%d actual=%d\n", scbr, actual);
 
   /* Save the frequency setting */
 
   priv->frequency = frequency;
   priv->actual    = actual;
 
-  qspivdbg("Frequency %d->%d\n", frequency, actual);
+  qspiinfo("Frequency %d->%d\n", frequency, actual);
   return actual;
 }
 
@@ -1246,7 +1246,7 @@ static void qspi_setmode(struct qspi_dev_s *dev, enum qspi_mode_e mode)
   struct sam_qspidev_s *priv = (struct sam_qspidev_s *)dev;
   uint32_t regval;
 
-  qspivdbg("mode=%d\n", mode);
+  qspiinfo("mode=%d\n", mode);
 
   /* Has the mode changed? */
 
@@ -1288,7 +1288,7 @@ static void qspi_setmode(struct qspi_dev_s *dev, enum qspi_mode_e mode)
         }
 
       qspi_putreg(priv, regval, SAM_QSPI_SCR_OFFSET);
-      qspivdbg("SCR=%08x\n", regval);
+      qspiinfo("SCR=%08x\n", regval);
 
       /* Save the mode so that subsequent re-configurations will be faster */
 
@@ -1316,7 +1316,7 @@ static void qspi_setbits(struct qspi_dev_s *dev, int nbits)
   struct sam_qspidev_s *priv = (struct sam_qspidev_s *)dev;
   uint32_t regval;
 
-  qspivdbg("nbits=%d\n", nbits);
+  qspiinfo("nbits=%d\n", nbits);
   DEBUGASSERT(priv != NULL);
   DEBUGASSERT(nbits >= SAM_QSPI_MINBITS && nbits <= SAM_QSPI_MAXBITS);
 
@@ -1331,7 +1331,7 @@ static void qspi_setbits(struct qspi_dev_s *dev, int nbits)
       regval |= QSPI_MR_NBBITS(nbits);
       qspi_putreg(priv, regval, SAM_QSPI_MR_OFFSET);
 
-      qspivdbg("MR=%08x\n", regval);
+      qspiinfo("MR=%08x\n", regval);
 
       /* Save the selection so the subsequence re-configurations will be faster */
 
@@ -1364,20 +1364,20 @@ static int qspi_command(struct qspi_dev_s *dev,
   DEBUGASSERT(priv != NULL && cmdinfo != NULL);
 
 #ifdef CONFIG_DEBUG_SPI
-  qspivdbg("Transfer:\n");
-  qspivdbg("  flags: %02x\n", cmdinfo->flags);
-  qspivdbg("  cmd: %04x\n", cmdinfo->cmd);
+  qspiinfo("Transfer:\n");
+  qspiinfo("  flags: %02x\n", cmdinfo->flags);
+  qspiinfo("  cmd: %04x\n", cmdinfo->cmd);
 
   if (QSPICMD_ISADDRESS(cmdinfo->flags))
     {
-      qspivdbg("  address/length: %08lx/%d\n",
+      qspiinfo("  address/length: %08lx/%d\n",
               (unsigned long)cmdinfo->addr, cmdinfo->addrlen);
     }
 
   if (QSPICMD_ISDATA(cmdinfo->flags))
     {
-      qspivdbg("  %s Data:\n", QSPICMD_ISWRITE(cmdinfo->flags) ? "Write" : "Read");
-      qspivdbg("    buffer/length: %p/%d\n", cmdinfo->buffer, cmdinfo->buflen);
+      qspiinfo("  %s Data:\n", QSPICMD_ISWRITE(cmdinfo->flags) ? "Write" : "Read");
+      qspiinfo("    buffer/length: %p/%d\n", cmdinfo->buffer, cmdinfo->buflen);
     }
 #endif
 
@@ -1572,13 +1572,13 @@ static int qspi_memory(struct qspi_dev_s *dev,
 
   DEBUGASSERT(priv != NULL && meminfo != NULL);
 
-  qspivdbg("Transfer:\n");
-  qspivdbg("  flags: %02x\n", meminfo->flags);
-  qspivdbg("  cmd: %04x\n", meminfo->cmd);
-  qspivdbg("  address/length: %08lx/%d\n",
+  qspiinfo("Transfer:\n");
+  qspiinfo("  flags: %02x\n", meminfo->flags);
+  qspiinfo("  cmd: %04x\n", meminfo->cmd);
+  qspiinfo("  address/length: %08lx/%d\n",
           (unsigned long)meminfo->addr, meminfo->addrlen);
-  qspivdbg("  %s Data:\n", QSPIMEM_ISWRITE(meminfo->flags) ? "Write" : "Read");
-  qspivdbg("    buffer/length: %p/%d\n", meminfo->buffer, meminfo->buflen);
+  qspiinfo("  %s Data:\n", QSPIMEM_ISWRITE(meminfo->flags) ? "Write" : "Read");
+  qspiinfo("    buffer/length: %p/%d\n", meminfo->buffer, meminfo->buflen);
 
 #ifdef CONFIG_SAMV7_QSPI_DMA
   /* Can we perform DMA?  Should we perform DMA? */
@@ -1746,7 +1746,7 @@ struct qspi_dev_s *sam_qspi_initialize(int intf)
 
   /* The supported SAM parts have only a single QSPI port */
 
-  qspivdbg("intf: %d\n", intf);
+  qspiinfo("intf: %d\n", intf);
   DEBUGASSERT(intf >= 0 && intf < SAMV7_NQSPI);
 
   /* Select the QSPI interface */

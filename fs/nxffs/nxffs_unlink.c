@@ -148,7 +148,7 @@ int nxffs_unlink(FAR struct inode *mountpt, FAR const char *relpath)
   FAR struct nxffs_volume_s *volume;
   int ret;
 
-  fvdbg("Entry\n");
+  finfo("Entry\n");
 
   /* Sanity checks */
 

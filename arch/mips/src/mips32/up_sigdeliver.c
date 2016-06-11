@@ -127,7 +127,7 @@ void up_sigdeliver(void)
    * errno that is needed by the user logic (it is probably EINTR).
    */
 
-  svdbg("Resuming EPC: %08x STATUS: %08x\n", regs[REG_EPC], regs[REG_STATUS]);
+  sinfo("Resuming EPC: %08x STATUS: %08x\n", regs[REG_EPC], regs[REG_STATUS]);
 
   (void)up_irq_save();
   rtcb->pterrno = saved_errno;

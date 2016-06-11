@@ -175,7 +175,7 @@ static int tsc_attach(FAR struct ads7843e_config_s *state, xcpt_t handler)
 
 static void tsc_enable(FAR struct ads7843e_config_s *state, bool enable)
 {
-  ivdbg("enable:%d\n", enable);
+  iinfo("enable:%d\n", enable);
   if (enable)
     {
       /* Enable PENIRQ interrupts.  NOTE: The pin interrupt is enabled from worker thread
@@ -227,7 +227,7 @@ static bool tsc_busy(FAR struct ads7843e_config_s *state)
 #if defined(CONFIG_DEBUG_INPUT) && defined(CONFIG_DEBUG_INFO)
   if (busy != last)
     {
-      ivdbg("busy:%d\n", busy);
+      iinfo("busy:%d\n", busy);
       last = busy;
     }
 #endif
@@ -245,7 +245,7 @@ static bool tsc_pendown(FAR struct ads7843e_config_s *state)
    */
 
   bool pendown = !lpc17_gpioread(GPIO_TC_PENIRQ);
-  ivdbg("pendown:%d\n", pendown);
+  iinfo("pendown:%d\n", pendown);
   return pendown;
 }
 

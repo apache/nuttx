@@ -869,7 +869,7 @@ bool stm32_dmacapable(uint32_t maddr, uint32_t count, uint32_t ccr)
   uint32_t transfer_size, burst_length;
   uint32_t mend;
 
-  dmavdbg("stm32_dmacapable: 0x%08x/%u 0x%08x\n", maddr, count, ccr);
+  dmainfo("stm32_dmacapable: 0x%08x/%u 0x%08x\n", maddr, count, ccr);
 
   /* Verify that the address conforms to the memory transfer size.
    * Transfers to/from memory performed by the DMA controller are
@@ -899,13 +899,13 @@ bool stm32_dmacapable(uint32_t maddr, uint32_t count, uint32_t ccr)
         break;
 
       default:
-        dmavdbg("stm32_dmacapable: bad transfer size in CCR\n");
+        dmainfo("stm32_dmacapable: bad transfer size in CCR\n");
         return false;
     }
 
   if ((maddr & (transfer_size - 1)) != 0)
     {
-      dmavdbg("stm32_dmacapable: transfer unaligned\n");
+      dmainfo("stm32_dmacapable: transfer unaligned\n");
       return false;
     }
 
@@ -937,13 +937,13 @@ bool stm32_dmacapable(uint32_t maddr, uint32_t count, uint32_t ccr)
             break;
 
           default:
-          dmavdbg("stm32_dmacapable: bad burst size in CCR\n");
+          dmainfo("stm32_dmacapable: bad burst size in CCR\n");
             return false;
         }
 
       if ((maddr & (burst_length - 1)) != 0)
         {
-          dmavdbg("stm32_dmacapable: burst crosses 1KiB\n");
+          dmainfo("stm32_dmacapable: burst crosses 1KiB\n");
           return false;
         }
     }
@@ -952,7 +952,7 @@ bool stm32_dmacapable(uint32_t maddr, uint32_t count, uint32_t ccr)
 
   if ((maddr & STM32_REGION_MASK) != (mend & STM32_REGION_MASK))
     {
-      dmavdbg("stm32_dmacapable: transfer crosses memory region\n");
+      dmainfo("stm32_dmacapable: transfer crosses memory region\n");
       return false;
     }
 
@@ -973,7 +973,7 @@ bool stm32_dmacapable(uint32_t maddr, uint32_t count, uint32_t ccr)
         if (maddr >= STM32_CCMRAM_BASE &&
             (maddr - STM32_CCMRAM_BASE) < 65536)
           {
-            dmavdbg("stm32_dmacapable: transfer targets CCMRAM\n");
+            dmainfo("stm32_dmacapable: transfer targets CCMRAM\n");
             return false;
           }
         break;
@@ -981,11 +981,11 @@ bool stm32_dmacapable(uint32_t maddr, uint32_t count, uint32_t ccr)
       default:
         /* Everything else is unsupported by DMA */
 
-        dmavdbg("stm32_dmacapable: transfer targets unknown/unsupported region\n");
+        dmainfo("stm32_dmacapable: transfer targets unknown/unsupported region\n");
         return false;
     }
 
-    dmavdbg("stm32_dmacapable: transfer OK\n");
+    dmainfo("stm32_dmacapable: transfer OK\n");
   return true;
 }
 #endif

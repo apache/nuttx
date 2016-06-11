@@ -876,7 +876,7 @@ TC_HANDLE sam_tc_allocate(int channel, int mode)
    * access to the requested channel.
    */
 
-  tcvdbg("channel=%d mode=%08x\n", channel, mode);
+  tcinfo("channel=%d mode=%08x\n", channel, mode);
 
   chan = sam_tc_initialize(channel);
   if (chan)
@@ -902,7 +902,7 @@ TC_HANDLE sam_tc_allocate(int channel, int mode)
 
   /* Return an opaque reference to the channel */
 
-  tcvdbg("Returning %p\n", chan);
+  tcinfo("Returning %p\n", chan);
   return (TC_HANDLE)chan;
 }
 
@@ -924,7 +924,7 @@ void sam_tc_free(TC_HANDLE handle)
 {
   struct sam_chan_s *chan = (struct sam_chan_s *)handle;
 
-  tcvdbg("Freeing %p channel=%d inuse=%d\n", chan, chan->chan, chan->inuse);
+  tcinfo("Freeing %p channel=%d inuse=%d\n", chan, chan->chan, chan->inuse);
   DEBUGASSERT(chan && chan->inuse);
 
   /* Make sure that interrupts are detached and disabled and that the channel
@@ -957,7 +957,7 @@ void sam_tc_start(TC_HANDLE handle)
 {
   struct sam_chan_s *chan = (struct sam_chan_s *)handle;
 
-  tcvdbg("Starting channel %d inuse=%d\n", chan->chan, chan->inuse);
+  tcinfo("Starting channel %d inuse=%d\n", chan->chan, chan->inuse);
   DEBUGASSERT(chan && chan->inuse);
 
   /* Read the SR to clear any pending interrupts on this channel */
@@ -989,7 +989,7 @@ void sam_tc_stop(TC_HANDLE handle)
 {
   struct sam_chan_s *chan = (struct sam_chan_s *)handle;
 
-  tcvdbg("Stopping channel %d inuse=%d\n", chan->chan, chan->inuse);
+  tcinfo("Stopping channel %d inuse=%d\n", chan->chan, chan->inuse);
   DEBUGASSERT(chan && chan->inuse);
 
   sam_chan_putreg(chan, SAM_TC_CCR_OFFSET, TC_CCR_CLKDIS);
@@ -1096,7 +1096,7 @@ void sam_tc_setregister(TC_HANDLE handle, int regid, uint32_t regval)
 
   DEBUGASSERT(chan && regid < TC_NREGISTERS);
 
-  tcvdbg("Channel %d: Set register RC%d to %08lx\n",
+  tcinfo("Channel %d: Set register RC%d to %08lx\n",
          chan->chan, regid, (unsigned long)regval);
 
   sam_chan_putreg(chan, g_regoffset[regid], regval);
@@ -1233,7 +1233,7 @@ int sam_tc_divisor(uint32_t frequency, uint32_t *div, uint32_t *tcclks)
   uint32_t ftcin = sam_tc_infreq();
   int ndx = 0;
 
-  tcvdbg("frequency=%d\n", frequency);
+  tcinfo("frequency=%d\n", frequency);
 
   /* Satisfy lower bound.  That is, the value of the divider such that:
    *
@@ -1270,7 +1270,7 @@ int sam_tc_divisor(uint32_t frequency, uint32_t *div, uint32_t *tcclks)
   if (div)
     {
       uint32_t value = sam_tc_freqdiv_lookup(ftcin, ndx);
-      tcvdbg("return div=%lu\n", (unsigned long)value);
+      tcinfo("return div=%lu\n", (unsigned long)value);
       *div = value;
     }
 
@@ -1278,7 +1278,7 @@ int sam_tc_divisor(uint32_t frequency, uint32_t *div, uint32_t *tcclks)
 
   if (tcclks)
     {
-      tcvdbg("return tcclks=%08lx\n", (unsigned long)TC_CMR_TCCLKS(ndx));
+      tcinfo("return tcclks=%08lx\n", (unsigned long)TC_CMR_TCCLKS(ndx));
       *tcclks = TC_CMR_TCCLKS(ndx);
     }
 

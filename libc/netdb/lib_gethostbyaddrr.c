@@ -309,7 +309,7 @@ int lib_hostfile_lookup(FAR const void *addr, socklen_t len, int type,
           FAR char *hostaddr = host->h_addr;
           if (hostaddr != NULL)
             {
-              nvdbg("Comparing addresses...\n");
+              ninfo("Comparing addresses...\n");
               if (memcmp(addr, hostaddr, len) == 0)
                 {
                    /* We have a match */

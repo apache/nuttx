@@ -85,7 +85,7 @@
 #endif
 
 #ifdef CONFIG_DEBUG_LCD
-#  define ugdbg(format, ...)  vdbg(format, ##__VA_ARGS__)
+#  define ugdbg(format, ...)  info(format, ##__VA_ARGS__)
 #  define oleddc_dumpgpio(m)  lpc17_dumpgpio(LPCXPRESSO_OLED_POWER, m)
 #  define oledcs_dumpgpio(m)  lpc17_dumpgpio(LPCXPRESSO_OLED_CS, m)
 #else
@@ -141,7 +141,7 @@ FAR struct lcd_dev_s *board_graphics_setup(unsigned int devno)
         }
      else
         {
-          gllvdbg("Bound SPI port 1 to OLED %d\n", devno);
+          gllinfo("Bound SPI port 1 to OLED %d\n", devno);
 
           /* And turn the OLED on (dim) */
 
@@ -209,7 +209,7 @@ int lpc17_ssp1cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
 #ifdef CONFIG_UG9664HSWAG01_POWER
 void ug_power(unsigned int devno, bool on)
 {
-  gllvdbg("power %s\n", on ? "ON" : "OFF");
+  gllinfo("power %s\n", on ? "ON" : "OFF");
   (void)lpc17_gpiowrite(LPCXPRESSO_OLED_POWER, on);
 }
 #endif

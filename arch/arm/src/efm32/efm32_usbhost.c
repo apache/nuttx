@@ -2016,7 +2016,7 @@ static void efm32_in_next(FAR struct efm32_usbhost_s *priv,
 
   /* The transfer is complete, with or without an error */
 
-  uvdbg("Transfer complete:  %d\n", result);
+  uinfo("Transfer complete:  %d\n", result);
 
   /* Extract the callback information */
 
@@ -2302,7 +2302,7 @@ static void efm32_out_next(FAR struct efm32_usbhost_s *priv,
 
   /* The transfer is complete, with or without an error */
 
-  uvdbg("Transfer complete:  %d\n", result);
+  uinfo("Transfer complete:  %d\n", result);
 
   /* Extract the callback information */
 
@@ -2448,7 +2448,7 @@ static inline void efm32_gint_hcinisr(FAR struct efm32_usbhost_s *priv,
   /* AND the two to get the set of enabled, pending HC interrupts */
 
   pending &= regval;
-  ullvdbg("HCINTMSK%d: %08x pending: %08x\n", chidx, regval, pending);
+  ullinfo("HCINTMSK%d: %08x pending: %08x\n", chidx, regval, pending);
 
   /* Check for a pending ACK response received/transmitted (ACK) interrupt */
 
@@ -2709,7 +2709,7 @@ static inline void efm32_gint_hcoutisr(FAR struct efm32_usbhost_s *priv,
   /* AND the two to get the set of enabled, pending HC interrupts */
 
   pending &= regval;
-  ullvdbg("HCINTMSK%d: %08x pending: %08x\n", chidx, regval, pending);
+  ullinfo("HCINTMSK%d: %08x pending: %08x\n", chidx, regval, pending);
 
   /* Check for a pending ACK response received/transmitted (ACK) interrupt */
 
@@ -3012,7 +3012,7 @@ static inline void efm32_gint_rxflvlisr(FAR struct efm32_usbhost_s *priv)
   /* Read and pop the next status from the Rx FIFO */
 
   grxsts = efm32_getreg(EFM32_USB_GRXSTSP);
-  ullvdbg("GRXSTS: %08x\n", grxsts);
+  ullinfo("GRXSTS: %08x\n", grxsts);
 
   /* Isolate the channel number/index in the status word */
 
@@ -3166,7 +3166,7 @@ static inline void efm32_gint_nptxfeisr(FAR struct efm32_usbhost_s *priv)
 
   /* Write the next group of packets into the Tx FIFO */
 
-  ullvdbg("HNPTXSTS: %08x chidx: %d avail: %d buflen: %d xfrd: %d wrsize: %d\n",
+  ullinfo("HNPTXSTS: %08x chidx: %d avail: %d buflen: %d xfrd: %d wrsize: %d\n",
            regval, chidx, avail, chan->buflen, chan->xfrd, wrsize);
 
   efm32_gint_wrpacket(priv, chan->buffer, chidx, wrsize);
@@ -3254,7 +3254,7 @@ static inline void efm32_gint_ptxfeisr(FAR struct efm32_usbhost_s *priv)
 
   /* Write the next group of packets into the Tx FIFO */
 
-  ullvdbg("HPTXSTS: %08x chidx: %d avail: %d buflen: %d xfrd: %d wrsize: %d\n",
+  ullinfo("HPTXSTS: %08x chidx: %d avail: %d buflen: %d xfrd: %d wrsize: %d\n",
            regval, chidx, avail, chan->buflen, chan->xfrd, wrsize);
 
   efm32_gint_wrpacket(priv, chan->buffer, chidx, wrsize);
@@ -3827,7 +3827,7 @@ static int efm32_wait(FAR struct usbhost_connection_s *conn,
           *hport = connport;
           leave_critical_section(flags);
 
-          uvdbg("RHport Connected: %s\n", connport->connected ? "YES" : "NO");
+          uinfo("RHport Connected: %s\n", connport->connected ? "YES" : "NO");
           return OK;
         }
 
@@ -3844,7 +3844,7 @@ static int efm32_wait(FAR struct usbhost_connection_s *conn,
           *hport = connport;
           leave_critical_section(flags);
 
-          uvdbg("Hub port Connected: %s\n", connport->connected ? "YES" : "NO");
+          uinfo("Hub port Connected: %s\n", connport->connected ? "YES" : "NO");
           return OK;
         }
 #endif
@@ -3964,7 +3964,7 @@ static int efm32_enumerate(FAR struct usbhost_connection_s *conn,
 
   /* Then let the common usbhost_enumerate do the real enumeration. */
 
-  uvdbg("Enumerate the device\n");
+  uinfo("Enumerate the device\n");
   priv->smstate = SMSTATE_ENUM;
   ret = usbhost_enumerate(hport, &hport->devclass);
 
@@ -4380,7 +4380,7 @@ static int efm32_ctrlin(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
 
   DEBUGASSERT(priv != NULL && ep0info != NULL && req != NULL);
   usbhost_vtrace2(USBHOST_VTRACE2_CTRLIN, req->type, req->req);
-  uvdbg("type:%02x req:%02x value:%02x%02x index:%02x%02x len:%02x%02x\n",
+  uinfo("type:%02x req:%02x value:%02x%02x index:%02x%02x len:%02x%02x\n",
         req->type, req->req, req->value[1], req->value[0],
         req->index[1], req->index[0], req->len[1], req->len[0]);
 
@@ -4465,7 +4465,7 @@ static int efm32_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
 
   DEBUGASSERT(priv != NULL && ep0info != NULL && req != NULL);
   usbhost_vtrace2(USBHOST_VTRACE2_CTRLOUT, req->type, req->req);
-  uvdbg("type:%02x req:%02x value:%02x%02x index:%02x%02x len:%02x%02x\n",
+  uinfo("type:%02x req:%02x value:%02x%02x index:%02x%02x len:%02x%02x\n",
         req->type, req->req, req->value[1], req->value[0],
         req->index[1], req->index[0], req->len[1], req->len[0]);
 
@@ -4583,7 +4583,7 @@ static ssize_t efm32_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep
   unsigned int chidx = (unsigned int)ep;
   ssize_t nbytes;
 
-  uvdbg("chidx: %d buflen: %d\n",  (unsigned int)ep, buflen);
+  uinfo("chidx: %d buflen: %d\n",  (unsigned int)ep, buflen);
 
   DEBUGASSERT(priv && buffer && chidx < EFM32_MAX_TX_FIFOS && buflen > 0);
 
@@ -4650,7 +4650,7 @@ static int efm32_asynch(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
   unsigned int chidx = (unsigned int)ep;
   int ret;
 
-  uvdbg("chidx: %d buflen: %d\n",  (unsigned int)ep, buflen);
+  uinfo("chidx: %d buflen: %d\n",  (unsigned int)ep, buflen);
 
   DEBUGASSERT(priv && buffer && chidx < EFM32_MAX_TX_FIFOS && buflen > 0);
 
@@ -4700,7 +4700,7 @@ static int efm32_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
   unsigned int chidx = (unsigned int)ep;
   irqstate_t flags;
 
-  uvdbg("chidx: %u: %d\n",  chidx);
+  uinfo("chidx: %u: %d\n",  chidx);
 
   DEBUGASSERT(priv && chidx < EFM32_MAX_TX_FIFOS);
   chan = &priv->chan[chidx];
@@ -4795,7 +4795,7 @@ static int efm32_connect(FAR struct usbhost_driver_s *drvr,
   /* Set the connected/disconnected flag */
 
   hport->connected = connected;
-  ullvdbg("Hub port %d connected: %s\n", hport->port, connected ? "YES" : "NO");
+  ullinfo("Hub port %d connected: %s\n", hport->port, connected ? "YES" : "NO");
 
   /* Report the connection event */
 

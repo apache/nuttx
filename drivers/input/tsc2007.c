@@ -278,7 +278,7 @@ static void tsc2007_notify(FAR struct tsc2007_dev_s *priv)
       if (fds)
         {
           fds->revents |= POLLIN;
-          ivdbg("Report events: %02x\n", fds->revents);
+          iinfo("Report events: %02x\n", fds->revents);
           sem_post(fds->sem);
         }
     }
@@ -550,7 +550,7 @@ static int tsc2007_transfer(FAR struct tsc2007_dev_s *priv, uint8_t cmd)
    */
 
    ret = (unsigned int)data12[0] << 4 | (unsigned int)data12[1] >> 4;
-   ivdbg("data: 0x%04x\n", ret);
+   iinfo("data: 0x%04x\n", ret);
    return ret;
 }
 
@@ -680,7 +680,7 @@ static void tsc2007_worker(FAR void *arg)
           pressure = (x * config->rxplate * (z2 - z1)) / z1;
           pressure = (pressure + 2048) >> 12;
 
-          ivdbg("Position: (%d,%4d) pressure: %u z1/2: (%d,%d)\n",
+          iinfo("Position: (%d,%4d) pressure: %u z1/2: (%d,%d)\n",
                 x, y, pressure, z1, z2);
 
           /* Ignore out of range caculcations */
@@ -1031,7 +1031,7 @@ static int tsc2007_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   FAR struct tsc2007_dev_s *priv;
   int                       ret;
 
-  ivdbg("cmd: %d arg: %ld\n", cmd, arg);
+  iinfo("cmd: %d arg: %ld\n", cmd, arg);
   DEBUGASSERT(filep);
   inode = filep->f_inode;
 
@@ -1107,7 +1107,7 @@ static int tsc2007_poll(FAR struct file *filep, FAR struct pollfd *fds,
   int                       ret;
   int                       i;
 
-  ivdbg("setup: %d\n", (int)setup);
+  iinfo("setup: %d\n", (int)setup);
   DEBUGASSERT(filep && fds);
   inode = filep->f_inode;
 
@@ -1225,7 +1225,7 @@ int tsc2007_register(FAR struct i2c_master_s *dev,
 #endif
   int ret;
 
-  ivdbg("dev: %p minor: %d\n", dev, minor);
+  iinfo("dev: %p minor: %d\n", dev, minor);
 
   /* Debug-only sanity checks */
 
@@ -1283,7 +1283,7 @@ int tsc2007_register(FAR struct i2c_master_s *dev,
   /* Register the device as an input device */
 
   (void)snprintf(devname, DEV_NAMELEN, DEV_FORMAT, minor);
-  ivdbg("Registering %s\n", devname);
+  iinfo("Registering %s\n", devname);
 
   ret = register_driver(devname, &tsc2007_fops, 0666, priv);
   if (ret < 0)

@@ -161,7 +161,7 @@ static int vnc_connect(FAR struct vnc_session_s *session, int port)
   struct sockaddr_in addr;
   int ret;
 
-  gvdbg("Connecting display %d\n", session->display);
+  ginfo("Connecting display %d\n", session->display);
 
   /* Create a listening socket */
 
@@ -197,7 +197,7 @@ static int vnc_connect(FAR struct vnc_session_s *session, int port)
 
   /* Connect to the client */
 
-  gvdbg("Accepting connection for Display %d\n", session->display);
+  ginfo("Accepting connection for Display %d\n", session->display);
 
   ret = psock_accept(&session->listen, NULL, NULL, &session->connect);
   if (ret < 0)
@@ -206,7 +206,7 @@ static int vnc_connect(FAR struct vnc_session_s *session, int port)
       goto errout_with_listener;
     }
 
-  gvdbg("Display %d connected\n", session->display);
+  ginfo("Display %d connected\n", session->display);
   session->state = VNCSERVER_CONNECTED;
   return OK;
 
@@ -257,7 +257,7 @@ int vnc_server(int argc, FAR char *argv[])
       goto errout_with_post;
     }
 
-  gvdbg("Server started for Display %d\n", display);
+  ginfo("Server started for Display %d\n", display);
 
   /* Allocate the framebuffer memory.  We rely on the fact that
    * the KMM allocator will align memory to 32-bits or better.
@@ -310,7 +310,7 @@ int vnc_server(int argc, FAR char *argv[])
       ret = vnc_connect(session, RFB_DISPLAY_PORT(display));
       if (ret >= 0)
         {
-          gvdbg("New VNC connection\n");
+          ginfo("New VNC connection\n");
 
           /* Perform the VNC initialization sequence after the client has
            * sucessfully connected to the server.  Negotiate security,
@@ -350,7 +350,7 @@ int vnc_server(int argc, FAR char *argv[])
            */
 
           ret = vnc_receiver(session);
-          gvdbg("Session terminated with %d\n", ret);
+          ginfo("Session terminated with %d\n", ret);
           UNUSED(ret);
 
           /* Stop the VNC updater thread. */

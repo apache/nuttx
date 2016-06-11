@@ -87,7 +87,7 @@ void tcp_appsend(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
 
   /* Handle the result based on the application response */
 
-  nllvdbg("result: %04x d_sndlen: %d conn->unacked: %d\n",
+  nllinfo("result: %04x d_sndlen: %d conn->unacked: %d\n",
           result, dev->d_sndlen, conn->unacked);
 
   /* Get the IP header length associated with the IP domain configured for
@@ -124,7 +124,7 @@ void tcp_appsend(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
 
       dev->d_sndlen = 0;
       conn->tcpstateflags = TCP_CLOSED;
-      nllvdbg("TCP state: NETDEV_DOWN\n");
+      nllinfo("TCP state: NETDEV_DOWN\n");
     }
 
   /* Check for connection aborted */
@@ -133,7 +133,7 @@ void tcp_appsend(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
     {
       dev->d_sndlen = 0;
       conn->tcpstateflags = TCP_CLOSED;
-      nllvdbg("TCP state: TCP_CLOSED\n");
+      nllinfo("TCP state: TCP_CLOSED\n");
 
       tcp_send(dev, conn, TCP_RST | TCP_ACK, hdrlen);
     }
@@ -145,7 +145,7 @@ void tcp_appsend(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
       conn->tcpstateflags = TCP_FIN_WAIT_1;
       conn->unacked  = 1;
       conn->nrtx     = 0;
-      nllvdbg("TCP state: TCP_FIN_WAIT_1\n");
+      nllinfo("TCP state: TCP_FIN_WAIT_1\n");
 
       dev->d_sndlen  = 0;
       tcp_send(dev, conn, TCP_FIN | TCP_ACK, hdrlen);
@@ -210,7 +210,7 @@ void tcp_rexmit(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
 {
   uint8_t hdrlen;
 
-  nllvdbg("result: %04x d_sndlen: %d conn->unacked: %d\n",
+  nllinfo("result: %04x d_sndlen: %d conn->unacked: %d\n",
           result, dev->d_sndlen, conn->unacked);
 
   /* Get the IP header length associated with the IP domain configured for

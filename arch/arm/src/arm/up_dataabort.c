@@ -142,7 +142,7 @@ void up_dataabort(uint32_t *regs, uint32_t far, uint32_t fsr)
    * (It has not yet been saved in the register context save area).
    */
 
-  pgllvdbg("VBASE: %08x VEND: %08x\n", PG_PAGED_VBASE, PG_PAGED_VEND);
+  pgllinfo("VBASE: %08x VEND: %08x\n", PG_PAGED_VBASE, PG_PAGED_VEND);
   if (far < PG_PAGED_VBASE || far >= PG_PAGED_VEND)
     {
       goto segfault;

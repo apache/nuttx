@@ -140,7 +140,7 @@ static int stm32_composite_initialize(void)
 
   /* Get the SPI port */
 
-  fvdbg("Initializing SPI port %d\n", CONFIG_SPARK_FLASH_SPI);
+  finfo("Initializing SPI port %d\n", CONFIG_SPARK_FLASH_SPI);
 
   spi = stm32_spibus_initialize(CONFIG_SPARK_FLASH_SPI);
   if (!spi)
@@ -150,11 +150,11 @@ static int stm32_composite_initialize(void)
       return -ENODEV;
     }
 
-  fvdbg("Successfully initialized SPI port %d\n", CONFIG_SPARK_FLASH_SPI);
+  finfo("Successfully initialized SPI port %d\n", CONFIG_SPARK_FLASH_SPI);
 
   /* Now bind the SPI interface to the SST25 SPI FLASH driver */
 
-  fvdbg("Bind SPI to the SPI flash driver\n");
+  finfo("Bind SPI to the SPI flash driver\n");
   mtd = sst25_initialize(spi);
   if (!mtd)
     {
@@ -163,7 +163,7 @@ static int stm32_composite_initialize(void)
     }
   else
     {
-      fvdbg("Successfully bound SPI port %d to the SPI FLASH driver\n",
+      finfo("Successfully bound SPI port %d to the SPI FLASH driver\n",
             CONFIG_SPARK_FLASH_SPI);
     }
 

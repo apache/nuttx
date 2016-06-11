@@ -350,7 +350,7 @@ int task_spawn(FAR pid_t *pid, FAR const char *name, main_t entry,
 #endif
   int ret;
 
-  svdbg("pid=%p name=%s entry=%p file_actions=%p attr=%p argv=%p\n",
+  sinfo("pid=%p name=%s entry=%p file_actions=%p attr=%p argv=%p\n",
         pid, name, entry, file_actions, attr, argv);
 
   /* If there are no file actions to be performed and there is no change to

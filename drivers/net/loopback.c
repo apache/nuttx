@@ -187,7 +187,7 @@ static int lo_txpoll(FAR struct net_driver_s *dev)
 #ifdef CONFIG_NET_IPv4
       if ((IPv4BUF->vhl & IP_VERSION_MASK) == IPv4_VERSION)
         {
-          nllvdbg("IPv4 frame\n");
+          nllinfo("IPv4 frame\n");
           NETDEV_RXIPV4(&priv->lo_dev);
           ipv4_input(&priv->lo_dev);
         }
@@ -196,7 +196,7 @@ static int lo_txpoll(FAR struct net_driver_s *dev)
 #ifdef CONFIG_NET_IPv6
       if ((IPv6BUF->vtc & IP_VERSION_MASK) == IPv6_VERSION)
         {
-          nllvdbg("Iv6 frame\n");
+          nllinfo("Iv6 frame\n");
           NETDEV_RXIPV6(&priv->lo_dev);
           ipv6_input(&priv->lo_dev);
         }

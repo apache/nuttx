@@ -1399,7 +1399,7 @@ static inline void avr_ep0setup(void)
   index = GETUINT16(ctrl.index);
   len   = GETUINT16(ctrl.len);
 
-  ullvdbg("type=%02x req=%02x value=%04x index=%04x len=%04x\n",
+  ullinfo("type=%02x req=%02x value=%04x index=%04x len=%04x\n",
           ctrl.type, ctrl.req, value, index, len);
 
   /* Dispatch any non-standard requests */
@@ -1596,7 +1596,7 @@ static inline void avr_ep0setup(void)
 #ifdef CONFIG_USBDEV_SELFPOWERED
                 if (value == USB_FEATURE_TESTMODE)
                   {
-                    ullvdbg("test mode: %d\n", index);
+                    ullinfo("test mode: %d\n", index);
                   }
                 else if (value == USB_FEATURE_REMOTEWAKEUP)
                   {
@@ -2386,7 +2386,7 @@ static int avr_epsubmit(FAR struct usbdev_ep_s *ep,
   if (!req || !req->callback || !req->buf || !ep)
     {
       usbtrace(TRACE_DEVERROR(AVR_TRACEERR_INVALIDPARMS), 0);
-      ullvdbg("req=%p callback=%p buf=%p ep=%p\n",
+      ullinfo("req=%p callback=%p buf=%p ep=%p\n",
               req, req->callback, req->buf, ep);
       return -EINVAL;
     }

@@ -113,10 +113,10 @@
 
 #ifdef CONFIG_DEBUG_LCD
 #  define lcddbg(format, ...)  dbg(format, ##__VA_ARGS__)
-#  define lcdvdbg(format, ...) vdbg(format, ##__VA_ARGS__)
+#  define lcdinfo(format, ...) info(format, ##__VA_ARGS__)
 #else
 #  define lcddbg(x...)
-#  define lcdvdbg(x...)
+#  define lcdinfo(x...)
 #endif
 
 /****************************************************************************
@@ -408,7 +408,7 @@ static int memlcd_putrun(fb_coord_t row, fb_coord_t col,
   int i;
 
   DEBUGASSERT(buffer);
-  lcdvdbg("row: %d col: %d npixels: %d\n", row, col, npixels);
+  lcdinfo("row: %d col: %d npixels: %d\n", row, col, npixels);
 
 #ifdef CONFIG_NX_PACKEDMSFIRST
   usrmask = MS_BIT;
@@ -499,7 +499,7 @@ static int memlcd_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t * buffer,
   int i;
 
   DEBUGASSERT(buffer);
-  lcdvdbg("row: %d col: %d npixels: %d\n", row, col, npixels);
+  lcdinfo("row: %d col: %d npixels: %d\n", row, col, npixels);
 
 #ifdef CONFIG_NX_PACKEDMSFIRST
   usrmask = MS_BIT;
@@ -557,7 +557,7 @@ static int memlcd_getvideoinfo(FAR struct lcd_dev_s *dev,
                                FAR struct fb_videoinfo_s *vinfo)
 {
   DEBUGASSERT(dev && vinfo);
-  lcdvdbg("fmt: %d xres: %d yres: %d nplanes: %d\n",
+  lcdinfo("fmt: %d xres: %d yres: %d nplanes: %d\n",
           g_videoinfo.fmt, g_videoinfo.xres, g_videoinfo.yres,
           g_videoinfo.nplanes);
   memcpy(vinfo, &g_videoinfo, sizeof(struct fb_videoinfo_s));
@@ -576,7 +576,7 @@ static int memlcd_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
                                FAR struct lcd_planeinfo_s *pinfo)
 {
   DEBUGASSERT(pinfo && planeno == 0);
-  lcdvdbg("planeno: %d bpp: %d\n", planeno, g_planeinfo.bpp);
+  lcdinfo("planeno: %d bpp: %d\n", planeno, g_planeinfo.bpp);
   memcpy(pinfo, &g_planeinfo, sizeof(struct lcd_planeinfo_s));
   return OK;
 }

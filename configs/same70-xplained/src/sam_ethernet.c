@@ -217,7 +217,7 @@ int sam_emac0_setmac(void)
       ndbg("ERROR: Failed to release the I2C interface: %d\n", ret);
     }
 
-  nvdbg("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
+  ninfo("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
         mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 
   /* Now configure the EMAC driver to use this MAC address */
@@ -309,7 +309,7 @@ xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler, phy_enable_t *enable)
 
   DEBUGASSERT(intf);
 
-  nvdbg("%s: handler=%p\n", intf, handler);
+  ninfo("%s: handler=%p\n", intf, handler);
   phydbg("EMAC0: devname=%s\n", SAMV7_EMAC0_DEVNAME);
 
   if (strcmp(intf, SAMV7_EMAC0_DEVNAME) == 0)

@@ -138,7 +138,7 @@ static int cpuload_open(FAR struct file *filep, FAR const char *relpath,
 {
   FAR struct cpuload_file_s *attr;
 
-  fvdbg("Open '%s'\n", relpath);
+  finfo("Open '%s'\n", relpath);
 
   /* PROCFS is read-only.  Any attempt to open with any kind of write
    * access is not permitted.
@@ -207,7 +207,7 @@ static ssize_t cpuload_read(FAR struct file *filep, FAR char *buffer,
   off_t offset;
   ssize_t ret;
 
-  fvdbg("buffer=%p buflen=%d\n", buffer, (int)buflen);
+  finfo("buffer=%p buflen=%d\n", buffer, (int)buflen);
 
   /* Recover our private data from the struct file instance */
 
@@ -288,7 +288,7 @@ static int cpuload_dup(FAR const struct file *oldp, FAR struct file *newp)
   FAR struct cpuload_file_s *oldattr;
   FAR struct cpuload_file_s *newattr;
 
-  fvdbg("Dup %p->%p\n", oldp, newp);
+  finfo("Dup %p->%p\n", oldp, newp);
 
   /* Recover our private data from the old struct file instance */
 

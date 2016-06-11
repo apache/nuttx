@@ -138,7 +138,7 @@ int vnc_receiver(FAR struct vnc_session_s *session)
   int ret;
 
   DEBUGASSERT(session);
-  gvdbg("Receiver running for Display %d\n", session->display);
+  ginfo("Receiver running for Display %d\n", session->display);
 
 #ifdef CONFIG_NET_SOCKOPTS
   /* Disable the receive timeout so that we will wait indefinitely for the
@@ -196,7 +196,7 @@ int vnc_receiver(FAR struct vnc_session_s *session)
         {
           case RFB_SETPIXELFMT_MSG:    /* SetPixelFormat */
             {
-              gvdbg("Received SetPixelFormat\n");
+              ginfo("Received SetPixelFormat\n");
 
               /* Read the rest of the SetPixelFormat message */
 
@@ -230,7 +230,7 @@ int vnc_receiver(FAR struct vnc_session_s *session)
               FAR struct rfb_setencodings_s *encodings;
               unsigned int nencodings;
 
-              gvdbg("Received SetEncodings\n");
+              ginfo("Received SetEncodings\n");
 
               /* Read the SetEncodings message without the following
                * encodings.
@@ -278,7 +278,7 @@ int vnc_receiver(FAR struct vnc_session_s *session)
               FAR struct rfb_fbupdatereq_s *update;
               struct nxgl_rect_s rect;
 
-              gvdbg("Received FramebufferUpdateRequest\n");
+              ginfo("Received FramebufferUpdateRequest\n");
 
               /* Read the rest of the SetPixelFormat message */
 
@@ -314,7 +314,7 @@ int vnc_receiver(FAR struct vnc_session_s *session)
             {
               FAR struct rfb_keyevent_s *keyevent;
 
-              gvdbg("Received KeyEvent\n");
+              ginfo("Received KeyEvent\n");
 
               /* Read the rest of the KeyEvent message */
 
@@ -343,7 +343,7 @@ int vnc_receiver(FAR struct vnc_session_s *session)
               FAR struct rfb_pointerevent_s *event;
               uint8_t buttons;
 #endif
-              gvdbg("Received PointerEvent\n");
+              ginfo("Received PointerEvent\n");
 
               /* Read the rest of the PointerEvent message */
 
@@ -397,7 +397,7 @@ int vnc_receiver(FAR struct vnc_session_s *session)
               FAR struct rfb_clientcuttext_s *cuttext;
               uint32_t length;
 
-              gvdbg("Received ClientCutText\n");
+              ginfo("Received ClientCutText\n");
 
               /* Read the ClientCutText message without the following
                * text.

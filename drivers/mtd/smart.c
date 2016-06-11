@@ -441,7 +441,7 @@ static const struct file_operations g_fops =
 
 static int smart_open(FAR struct inode *inode)
 {
-  fvdbg("Entry\n");
+  finfo("Entry\n");
   return OK;
 }
 
@@ -454,7 +454,7 @@ static int smart_open(FAR struct inode *inode)
 
 static int smart_close(FAR struct inode *inode)
 {
-  fvdbg("Entry\n");
+  finfo("Entry\n");
   return OK;
 }
 
@@ -767,7 +767,7 @@ static ssize_t smart_reload(struct smart_struct_s *dev, FAR uint8_t *buffer,
 
   /* Read the full erase block into the buffer */
 
-  fvdbg("Read %d blocks starting at block %d\n", mtdBlocks, mtdStartBlock);
+  finfo("Read %d blocks starting at block %d\n", mtdBlocks, mtdStartBlock);
   nread = MTD_BREAD(dev->mtd, mtdStartBlock, mtdBlocks, buffer);
   if (nread != mtdBlocks)
     {
@@ -790,7 +790,7 @@ static ssize_t smart_read(FAR struct inode *inode, unsigned char *buffer,
 {
   FAR struct smart_struct_s *dev;
 
-  fvdbg("SMART: sector: %d nsectors: %d\n", start_sector, nsectors);
+  finfo("SMART: sector: %d nsectors: %d\n", start_sector, nsectors);
 
   DEBUGASSERT(inode && inode->i_private);
 #ifdef CONFIG_SMARTFS_MULTI_ROOT_DIRS
@@ -826,7 +826,7 @@ static ssize_t smart_write(FAR struct inode *inode,
   int    ret;
   off_t  mtdstartblock, mtdblockcount;
 
-  fvdbg("sector: %d nsectors: %d\n", start_sector, nsectors);
+  finfo("sector: %d nsectors: %d\n", start_sector, nsectors);
 
   DEBUGASSERT(inode && inode->i_private);
 #ifdef CONFIG_SMARTFS_MULTI_ROOT_DIRS
@@ -851,7 +851,7 @@ static ssize_t smart_write(FAR struct inode *inode,
   mtdblockcount = nsectors * dev->mtdBlksPerSector;
   mtdBlksPerErase = dev->mtdBlksPerSector * dev->sectorsPerBlk;
 
-  fvdbg("mtdsector: %d mtdnsectors: %d\n", mtdstartblock, mtdblockcount);
+  finfo("mtdsector: %d mtdnsectors: %d\n", mtdstartblock, mtdblockcount);
 
   /* Start at first block to be written */
 
@@ -933,7 +933,7 @@ static int smart_geometry(FAR struct inode *inode, struct geometry *geometry)
   FAR struct smart_struct_s *dev;
   uint32_t  erasesize;
 
-  fvdbg("Entry\n");
+  finfo("Entry\n");
 
   DEBUGASSERT(inode);
   if (geometry)
@@ -956,9 +956,9 @@ static int smart_geometry(FAR struct inode *inode, struct geometry *geometry)
                                     dev->sectorsize;
       geometry->geo_sectorsize    = dev->sectorsize;
 
-      fvdbg("available: true mediachanged: false writeenabled: %s\n",
+      finfo("available: true mediachanged: false writeenabled: %s\n",
             geometry->geo_writeenabled ? "true" : "false");
-      fvdbg("nsectors: %d sectorsize: %d\n",
+      finfo("nsectors: %d sectorsize: %d\n",
             geometry->geo_nsectors, geometry->geo_sectorsize);
 
       return OK;
@@ -1767,7 +1767,7 @@ static int smart_set_wear_level(FAR struct smart_struct_s *dev, uint16_t block,
           smart_find_wear_minmax(dev);
 
           if (oldlevel != dev->minwearlevel)
-              fvdbg("##### New min wear level = %d\n", dev->minwearlevel);
+              finfo("##### New min wear level = %d\n", dev->minwearlevel);
         }
     }
 
@@ -1807,7 +1807,7 @@ static int smart_scan(FAR struct smart_struct_s *dev)
   FAR struct smart_multiroot_device_s *rootdirdev;
 #endif
 
-  fvdbg("Entry\n");
+  finfo("Entry\n");
 
   /* Find the sector size on the volume by reading headers from
    * sectors of decreasing size.  On a formatted volume, the sector
@@ -1909,7 +1909,7 @@ static int smart_scan(FAR struct smart_struct_s *dev)
 
   for (sector = 0; sector < totalsectors; sector++)
     {
-      fvdbg("Scan sector %d\n", sector);
+      finfo("Scan sector %d\n", sector);
 
       /* Calculate the read address for this sector */
 
@@ -2373,7 +2373,7 @@ static inline int smart_getformat(FAR struct smart_struct_s *dev,
 {
   int ret;
 
-  fvdbg("Entry\n");
+  finfo("Entry\n");
   DEBUGASSERT(fmt);
 
   /* Test if we know the format status or not.  If we don't know the
@@ -2630,7 +2630,7 @@ static int smart_relocate_static_data(FAR struct smart_struct_s *dev, uint16_t b
       nextsector = dev->freecount[x];
       newsector = dev->releasecount[x];
 #endif
-      fvdbg("Moving block %d, wear %d, free %d, released %d to block %d, wear %d\n",
+      finfo("Moving block %d, wear %d, free %d, released %d to block %d, wear %d\n",
               x, smart_get_wear_level(dev, x),
               nextsector, newsector,
               block, smart_get_wear_level(dev, block));
@@ -2842,7 +2842,7 @@ static inline int smart_llformat(FAR struct smart_struct_s *dev, unsigned long a
   uint8_t     sectsize, prerelease;
   uint16_t    sectorsize;
 
-  fvdbg("Entry\n");
+  finfo("Entry\n");
 
   /* Get the sector size from the provided arg */
 
@@ -3747,11 +3747,11 @@ static int smart_garbagecollect(FAR struct smart_struct_s *dev)
 #endif
 
 #ifdef CONFIG_MTD_SMART_PACK_COUNTS
-          fvdbg("Collecting block %d, free=%d released=%d, totalfree=%d, totalrelease=%d\n",
+          finfo("Collecting block %d, free=%d released=%d, totalfree=%d, totalrelease=%d\n",
               collectblock, smart_get_count(dev, dev->freecount, collectblock),
               smart_get_count(dev, dev->releasecount, collectblock), dev->freesectors, dev->releasesectors);
 #else
-          fvdbg("Collecting block %d, free=%d released=%d\n",
+          finfo("Collecting block %d, free=%d released=%d\n",
               collectblock, dev->freecount[collectblock],
               dev->releasecount[collectblock]);
 #endif
@@ -4088,7 +4088,7 @@ static int smart_write_alloc_sector(FAR struct smart_struct_s *dev,
   /* Write the header to the physical sector location */
 
 #ifndef CONFIG_MTD_SMART_ENABLE_CRC
-  fvdbg("Write MTD block %d\n", physical * dev->mtdBlksPerSector);
+  finfo("Write MTD block %d\n", physical * dev->mtdBlksPerSector);
   ret = MTD_BWRITE(dev->mtd, physical * dev->mtdBlksPerSector, 1,
       (FAR uint8_t *) dev->rwbuffer);
   if (ret != 1)
@@ -4191,7 +4191,7 @@ static int smart_writesector(FAR struct smart_struct_s *dev,
   FAR struct  smart_allocsector_s *allocsector;
 #endif
 
-  fvdbg("Entry\n");
+  finfo("Entry\n");
   req = (FAR struct smart_read_write_s *) arg;
   DEBUGASSERT(req->offset <= dev->sectorsize);
   DEBUGASSERT(req->offset+req->count <= dev->sectorsize);
@@ -4216,7 +4216,7 @@ static int smart_writesector(FAR struct smart_struct_s *dev,
       /* Subtract dev->minwearlevel from all wear levels */
 
       offset = dev->minwearlevel;
-      fvdbg("Reducing wear level bits by %d\n", offset);
+      finfo("Reducing wear level bits by %d\n", offset);
       for (x = 0; x < dev->geo.neraseblocks; x++)
         {
           smart_set_wear_level(dev, x, smart_get_wear_level(dev, x) - offset);
@@ -4462,7 +4462,7 @@ static int smart_writesector(FAR struct smart_struct_s *dev,
       ret = smart_bytewrite(dev, offset, 1, &byte);
       if (ret != 1)
         {
-          fvdbg("Error committing physical sector %d\n", physsector);
+          finfo("Error committing physical sector %d\n", physsector);
           ret = -EIO;
           goto errout;
         }
@@ -4592,7 +4592,7 @@ static int smart_readsector(FAR struct smart_struct_s *dev,
   struct smart_sect_header_s header;
 #endif
 
-  fvdbg("Entry\n");
+  finfo("Entry\n");
   req = (FAR struct smart_read_write_s *) arg;
   DEBUGASSERT(req->offset < dev->sectorsize);
   DEBUGASSERT(req->offset+req->count+ sizeof(struct smart_sect_header_s) <=
@@ -4677,7 +4677,7 @@ static int smart_readsector(FAR struct smart_struct_s *dev,
           sizeof(struct smart_sect_header_s), (FAR uint8_t *) &header);
   if (ret != sizeof(struct smart_sect_header_s))
     {
-      fvdbg("Error reading sector %d header\n", physsector);
+      finfo("Error reading sector %d header\n", physsector);
       ret = -EIO;
       goto errout;
     }
@@ -4891,7 +4891,7 @@ static inline int smart_allocsector(FAR struct smart_struct_s *dev,
   /* Find a free physical sector */
 
   physicalsector = smart_findfreephyssector(dev, FALSE);
-  fvdbg("Alloc: log=%d, phys=%d, erase block=%d, free=%d, released=%d\n",
+  finfo("Alloc: log=%d, phys=%d, erase block=%d, free=%d, released=%d\n",
           logsector, physicalsector, physicalsector /
           dev->sectorsPerBlk, dev->freesectors, dev->releasecount);
 
@@ -5083,7 +5083,7 @@ static int smart_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
   FAR struct mtd_smart_debug_data_s *debug_data;
 #endif
 
-  fvdbg("Entry\n");
+  finfo("Entry\n");
   DEBUGASSERT(inode && inode->i_private);
 
 #ifdef CONFIG_SMARTFS_MULTI_ROOT_DIRS

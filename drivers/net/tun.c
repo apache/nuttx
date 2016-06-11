@@ -425,7 +425,7 @@ static void tun_receive(FAR struct tun_device_s *priv)
   /* We only accept IP packets of the configured type and ARP packets */
 
 #if defined(CONFIG_NET_IPv4)
-  nllvdbg("IPv4 frame\n");
+  nllinfo("IPv4 frame\n");
   NETDEV_RXIPV4(&priv->dev);
 
   /* Give the IPv4 packet to the network layer */
@@ -448,7 +448,7 @@ static void tun_receive(FAR struct tun_device_s *priv)
     }
 
 #elif defined(CONFIG_NET_IPv6)
-  nllvdbg("Iv6 frame\n");
+  nllinfo("Iv6 frame\n");
   NETDEV_RXIPV6(&priv->dev);
 
   /* Give the IPv6 packet to the network layer */

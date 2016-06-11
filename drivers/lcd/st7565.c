@@ -179,7 +179,7 @@
 /* Debug ******************************************************************************/
 
 #ifdef CONFIG_LCD_ST7565DEBUG
-#  define st7565dbg(format, ...)  vdbg(format, ##__VA_ARGS__)
+#  define st7565dbg(format, ...)  info(format, ##__VA_ARGS__)
 #else
 #  define st7565dbg(x...)
 #endif
@@ -475,7 +475,7 @@ static int st7565_putrun(fb_coord_t row, fb_coord_t col,
   uint8_t i;
   int pixlen;
 
-  gvdbg("row: %d col: %d npixels: %d\n", row, col, npixels);
+  ginfo("row: %d col: %d npixels: %d\n", row, col, npixels);
   DEBUGASSERT(buffer);
 
   /* Clip the run to the display */
@@ -627,7 +627,7 @@ static int st7565_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t * buffer,
   uint8_t i;
   int pixlen;
 
-  gvdbg("row: %d col: %d npixels: %d\n", row, col, npixels);
+  ginfo("row: %d col: %d npixels: %d\n", row, col, npixels);
   DEBUGASSERT(buffer);
 
   /* Clip the run to the display */
@@ -736,7 +736,7 @@ static int st7565_getvideoinfo(FAR struct lcd_dev_s *dev,
                                FAR struct fb_videoinfo_s *vinfo)
 {
   DEBUGASSERT(dev && vinfo);
-  gvdbg("fmt: %d xres: %d yres: %d nplanes: %d\n",
+  ginfo("fmt: %d xres: %d yres: %d nplanes: %d\n",
         g_videoinfo.fmt, g_videoinfo.xres, g_videoinfo.yres,
         g_videoinfo.nplanes);
   memcpy(vinfo, &g_videoinfo, sizeof(struct fb_videoinfo_s));
@@ -755,7 +755,7 @@ static int st7565_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
                                FAR struct lcd_planeinfo_s *pinfo)
 {
   DEBUGASSERT(dev && pinfo && planeno == 0);
-  gvdbg("planeno: %d bpp: %d\n", planeno, g_planeinfo.bpp);
+  ginfo("planeno: %d bpp: %d\n", planeno, g_planeinfo.bpp);
   memcpy(pinfo, &g_planeinfo, sizeof(struct lcd_planeinfo_s));
   return OK;
 }
@@ -773,7 +773,7 @@ static int st7565_getpower(struct lcd_dev_s *dev)
 {
   struct st7565_dev_s *priv = (struct st7565_dev_s *)dev;
   DEBUGASSERT(priv);
-  gvdbg("powered: %s\n", priv->power_level);
+  ginfo("powered: %s\n", priv->power_level);
   return priv->power_level;
 }
 
@@ -791,7 +791,7 @@ static int st7565_setpower(struct lcd_dev_s *dev, int power)
   struct st7565_dev_s *priv = (struct st7565_dev_s *)dev;
 
   DEBUGASSERT(priv && (unsigned)power <= CONFIG_LCD_MAXPOWER);
-  gvdbg("power: %s powered: %s\n", power, priv->power_level);
+  ginfo("power: %s powered: %s\n", power, priv->power_level);
 
   /* Select and lock the device */
 
@@ -859,7 +859,7 @@ static int st7565_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
 {
   struct st7565_dev_s *priv = (struct st7565_dev_s *)dev;
 
-  gvdbg("contrast: %d\n", contrast);
+  ginfo("contrast: %d\n", contrast);
   DEBUGASSERT(priv);
 
   if (contrast > 255)
@@ -974,7 +974,7 @@ FAR struct lcd_dev_s *st7565_initialize(FAR struct st7565_lcd_s *lcd,
 
   FAR struct st7565_dev_s *priv = &g_st7565dev;
 
-  gvdbg("Initializing\n");
+  ginfo("Initializing\n");
   DEBUGASSERT(lcd && devno == 0);
 
   /* Save the reference to the SPI device */

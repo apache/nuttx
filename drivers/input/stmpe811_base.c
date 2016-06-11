@@ -226,7 +226,7 @@ static int stmpe811_checkid(FAR struct stmpe811_dev_s *priv)
   devid = stmpe811_getreg8(priv, STMPE811_CHIP_ID);
   devid = (uint32_t)(devid << 8);
   devid |= (uint32_t)stmpe811_getreg8(priv, STMPE811_CHIP_ID+1);
-  ivdbg("devid: %04x\n", devid);
+  iinfo("devid: %04x\n", devid);
 
   if (devid != (uint16_t)CHIP_ID)
     {

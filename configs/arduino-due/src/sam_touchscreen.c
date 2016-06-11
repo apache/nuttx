@@ -266,7 +266,7 @@ static int tsc_attach(FAR struct ads7843e_config_s *state, xcpt_t isr)
 {
   /* Attach the XPT2046 interrupt */
 
-  ivdbg("Attaching %p to IRQ %d\n", isr, SAM_TSC_IRQ);
+  iinfo("Attaching %p to IRQ %d\n", isr, SAM_TSC_IRQ);
   return irq_attach(SAM_TSC_IRQ, isr);
 }
 
@@ -274,7 +274,7 @@ static void tsc_enable(FAR struct ads7843e_config_s *state, bool enable)
 {
   /* Attach and enable, or detach and disable */
 
-  ivdbg("IRQ:%d enable:%d\n", SAM_TSC_IRQ, enable);
+  iinfo("IRQ:%d enable:%d\n", SAM_TSC_IRQ, enable);
   if (enable)
     {
       sam_gpioirqenable(SAM_TSC_IRQ);
@@ -300,7 +300,7 @@ static bool tsc_pendown(FAR struct ads7843e_config_s *state)
   /* The /PENIRQ value is active low */
 
   bool pendown = !sam_gpioread(GPIO_TSC_IRQ);
-  ivdbg("pendown:%d\n", pendown);
+  iinfo("pendown:%d\n", pendown);
   return pendown;
 }
 

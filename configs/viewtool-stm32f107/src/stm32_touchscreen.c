@@ -173,12 +173,12 @@ static int tsc_attach(FAR struct ads7843e_config_s *state, xcpt_t isr)
        * be attached when the interrupt is next enabled.
        */
 
-      ivdbg("Attaching %p\n", isr);
+      iinfo("Attaching %p\n", isr);
       priv->handler = isr;
     }
   else
     {
-      ivdbg("Detaching %p\n", priv->handler);
+      iinfo("Detaching %p\n", priv->handler);
       tsc_enable(state, false);
       priv->handler = NULL;
     }
@@ -228,7 +228,7 @@ static bool tsc_pendown(FAR struct ads7843e_config_s *state)
   /* The /PENIRQ value is active low */
 
   bool pendown = !stm32_gpioread(GPIO_LCDTP_IRQ);
-  ivdbg("pendown=%d\n", pendown);
+  iinfo("pendown=%d\n", pendown);
   return pendown;
 }
 

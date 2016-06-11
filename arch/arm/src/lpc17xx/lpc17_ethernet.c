@@ -906,7 +906,7 @@ static void lpc17_rxdone_process(struct lpc17_driver_s *priv)
 #ifdef CONFIG_NET_IPv4
           if (BUF->type == HTONS(ETHTYPE_IP))
             {
-              nllvdbg("IPv4 frame\n");
+              nllinfo("IPv4 frame\n");
               NETDEV_RXIPV4(&priv->lp_dev);
 
               /* Handle ARP on input then give the IPv4 packet to the
@@ -948,7 +948,7 @@ static void lpc17_rxdone_process(struct lpc17_driver_s *priv)
 #ifdef CONFIG_NET_IPv6
           if (BUF->type == HTONS(ETHTYPE_IP6))
             {
-              nllvdbg("Iv6 frame\n");
+              nllinfo("Iv6 frame\n");
               NETDEV_RXIPV6(&priv->lp_dev);
 
               /* Give the IPv6 packet to the network layer */
@@ -1671,7 +1671,7 @@ static void lpc17_ipv6multicast(FAR struct lpc17_driver_s *priv)
   mac[4] = tmp16 & 0xff;
   mac[5] = tmp16 >> 8;
 
-  nvdbg("IPv6 Multicast: %02x:%02x:%02x:%02x:%02x:%02x\n",
+  ninfo("IPv6 Multicast: %02x:%02x:%02x:%02x:%02x:%02x\n",
         mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 
   (void)lpc17_addmac(dev, mac);
@@ -2145,7 +2145,7 @@ static int lpc17_addmac(struct net_driver_s *dev, const uint8_t *mac)
   uint32_t crc;
   unsigned int ndx;
 
-  nllvdbg("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
+  nllinfo("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
           mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 
   /* Hash function:
@@ -2221,7 +2221,7 @@ static int lpc17_rmmac(struct net_driver_s *dev, const uint8_t *mac)
   uint32_t crc;
   unsigned int ndx;
 
-  nllvdbg("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
+  nllinfo("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
           mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 
   /* Hash function:
@@ -2647,14 +2647,14 @@ static inline int lpc17_phyinit(struct lpc17_driver_s *priv)
        */
 
       phyreg = (unsigned int)lpc17_phyread(phyaddr, MII_PHYID1);
-      nvdbg("Addr: %d PHY ID1: %04x\n", phyaddr, phyreg);
+      ninfo("Addr: %d PHY ID1: %04x\n", phyaddr, phyreg);
 
       /* Compare OUI bits 3-18 */
 
       if (phyreg == LPC17_PHYID1)
         {
           phyreg = lpc17_phyread(phyaddr, MII_PHYID2);
-          nvdbg("Addr: %d PHY ID2: %04x\n", phyaddr, phyreg);
+          ninfo("Addr: %d PHY ID2: %04x\n", phyaddr, phyreg);
 
           /* Compare OUI bits 19-24 and the 6-bit model number (ignoring the
            * 4-bit revision number).
@@ -2676,7 +2676,7 @@ static inline int lpc17_phyinit(struct lpc17_driver_s *priv)
       ndbg("No PHY detected\n");
       return -ENODEV;
     }
-  nvdbg("phyaddr: %d\n", phyaddr);
+  ninfo("phyaddr: %d\n", phyaddr);
 
   /* Save the discovered PHY device address */
 

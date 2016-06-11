@@ -117,7 +117,7 @@ void igmp_input(struct net_driver_s *dev)
   in_addr_t grpaddr;
   unsigned int ticks;
 
-  nllvdbg("IGMP message: %04x%04x\n", IGMPBUF->destipaddr[1], IGMPBUF->destipaddr[0]);
+  nllinfo("IGMP message: %04x%04x\n", IGMPBUF->destipaddr[1], IGMPBUF->destipaddr[0]);
 
   /* Verify the message length */
 
@@ -186,7 +186,7 @@ void igmp_input(struct net_driver_s *dev)
 
                 /* This is the general query */
 
-                nllvdbg("General multicast query\n");
+                nllinfo("General multicast query\n");
                 if (IGMPBUF->maxresp == 0)
                   {
                     IGMP_STATINCR(g_netstats.igmp.v1_received);
@@ -216,7 +216,7 @@ void igmp_input(struct net_driver_s *dev)
               }
             else /* if (IGMPBUF->grpaddr != 0) */
               {
-                nllvdbg("Group-specific multicast queury\n");
+                nllinfo("Group-specific multicast queury\n");
 
                 /* We first need to re-lookup the group since we used dest last time.
                  * Use the incoming IPaddress!
@@ -238,7 +238,7 @@ void igmp_input(struct net_driver_s *dev)
 
         else if (group->grpaddr != 0)
           {
-            nllvdbg("Unicast query\n");
+            nllinfo("Unicast query\n");
             IGMP_STATINCR(g_netstats.igmp.ucast_query);
 
             nlldbg("Query to a specific group with the group address as destination\n");
@@ -254,7 +254,7 @@ void igmp_input(struct net_driver_s *dev)
 
       case IGMPv2_MEMBERSHIP_REPORT:
         {
-          nllvdbg("Membership report\n");
+          nllinfo("Membership report\n");
 
           IGMP_STATINCR(g_netstats.igmp.report_received);
           if (!IS_IDLEMEMBER(group->flags))

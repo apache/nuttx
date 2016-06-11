@@ -133,7 +133,7 @@ static const struct block_operations g_bops =
 
 static int ftl_open(FAR struct inode *inode)
 {
-  fvdbg("Entry\n");
+  finfo("Entry\n");
   return OK;
 }
 
@@ -146,7 +146,7 @@ static int ftl_open(FAR struct inode *inode)
 
 static int ftl_close(FAR struct inode *inode)
 {
-  fvdbg("Entry\n");
+  finfo("Entry\n");
   return OK;
 }
 
@@ -187,7 +187,7 @@ static ssize_t ftl_read(FAR struct inode *inode, unsigned char *buffer,
 {
   FAR struct ftl_struct_s *dev;
 
-  fvdbg("sector: %d nsectors: %d\n", start_sector, nsectors);
+  finfo("sector: %d nsectors: %d\n", start_sector, nsectors);
 
   DEBUGASSERT(inode && inode->i_private);
 
@@ -271,7 +271,7 @@ static ssize_t ftl_flush(FAR void *priv, FAR const uint8_t *buffer,
           nbytes = dev->geo.erasesize - offset;
         }
 
-      fvdbg("Copy %d bytes into erase block=%d at offset=%d\n",
+      finfo("Copy %d bytes into erase block=%d at offset=%d\n",
              nbytes, eraseblock, offset);
 
       memcpy(dev->eblock + offset, buffer, nbytes);
@@ -315,7 +315,7 @@ static ssize_t ftl_flush(FAR void *priv, FAR const uint8_t *buffer,
 
       /* Write a full erase back to flash */
 
-      fvdbg("Write %d bytes into erase block=%d at offset=0\n",
+      finfo("Write %d bytes into erase block=%d at offset=0\n",
              dev->geo.erasesize, alignedblock);
 
       nxfrd = MTD_BWRITE(dev->mtd, alignedblock, dev->blkper, buffer);
@@ -358,7 +358,7 @@ static ssize_t ftl_flush(FAR void *priv, FAR const uint8_t *buffer,
       /* Copy the user data at the beginning the buffered erase block */
 
       nbytes = remaining * dev->geo.blocksize;
-      fvdbg("Copy %d bytes into erase block=%d at offset=0\n",
+      finfo("Copy %d bytes into erase block=%d at offset=0\n",
              nbytes, alignedblock);
       memcpy(dev->eblock, buffer, nbytes);
 
@@ -389,7 +389,7 @@ static ssize_t ftl_write(FAR struct inode *inode, const unsigned char *buffer,
 {
   struct ftl_struct_s *dev;
 
-  fvdbg("sector: %d nsectors: %d\n", start_sector, nsectors);
+  finfo("sector: %d nsectors: %d\n", start_sector, nsectors);
 
   DEBUGASSERT(inode && inode->i_private);
   dev = (struct ftl_struct_s *)inode->i_private;
@@ -412,7 +412,7 @@ static int ftl_geometry(FAR struct inode *inode, struct geometry *geometry)
 {
   struct ftl_struct_s *dev;
 
-  fvdbg("Entry\n");
+  finfo("Entry\n");
 
   DEBUGASSERT(inode);
   if (geometry)
@@ -428,9 +428,9 @@ static int ftl_geometry(FAR struct inode *inode, struct geometry *geometry)
       geometry->geo_nsectors      = dev->geo.neraseblocks * dev->blkper;
       geometry->geo_sectorsize    = dev->geo.blocksize;
 
-      fvdbg("available: true mediachanged: false writeenabled: %s\n",
+      finfo("available: true mediachanged: false writeenabled: %s\n",
             geometry->geo_writeenabled ? "true" : "false");
-      fvdbg("nsectors: %d sectorsize: %d\n",
+      finfo("nsectors: %d sectorsize: %d\n",
             geometry->geo_nsectors, geometry->geo_sectorsize);
 
       return OK;
@@ -451,7 +451,7 @@ static int ftl_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
   struct ftl_struct_s *dev ;
   int ret;
 
-  fvdbg("Entry\n");
+  finfo("Entry\n");
   DEBUGASSERT(inode && inode->i_private);
 
   /* Only one block driver ioctl command is supported by this driver (and

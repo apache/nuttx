@@ -95,7 +95,7 @@ int stm32_sdinitialize(int minor)
 
   /* Get the SPI port */
 
-  fvdbg("Initializing SPI port %d\n", STM32_MMCSDSPIPORTNO);
+  finfo("Initializing SPI port %d\n", STM32_MMCSDSPIPORTNO);
 
   spi = stm32_spibus_initialize(STM32_MMCSDSPIPORTNO);
   if (!spi)
@@ -104,11 +104,11 @@ int stm32_sdinitialize(int minor)
       return -ENODEV;
     }
 
-  fvdbg("Successfully initialized SPI port %d\n", STM32_MMCSDSPIPORTNO);
+  finfo("Successfully initialized SPI port %d\n", STM32_MMCSDSPIPORTNO);
 
   /* Bind the SPI port to the slot */
 
-  fvdbg("Binding SPI port %d to MMC/SD slot %d\n",
+  finfo("Binding SPI port %d to MMC/SD slot %d\n",
           STM32_MMCSDSPIPORTNO, STM32_MMCSDSLOTNO);
 
   ret = mmcsd_spislotinitialize(minor, STM32_MMCSDSLOTNO, spi);
@@ -119,7 +119,7 @@ int stm32_sdinitialize(int minor)
       return ret;
     }
 
-  fvdbg("Successfuly bound SPI port %d to MMC/SD slot %d\n",
+  finfo("Successfuly bound SPI port %d to MMC/SD slot %d\n",
         STM32_MMCSDSPIPORTNO, STM32_MMCSDSLOTNO);
 #endif
   return OK;

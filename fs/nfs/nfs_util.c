@@ -241,7 +241,7 @@ tryagain:
       return error;
     }
 
-  fvdbg("NFS_SUCCESS\n");
+  finfo("NFS_SUCCESS\n");
   return OK;
 }
 

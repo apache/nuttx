@@ -90,7 +90,7 @@ void nxbe_getrectangle(FAR struct nxbe_window_s *wnd,
 #ifdef CONFIG_DEBUG
   if (!wnd || !rect || !dest || plane >= wnd->be->vinfo.nplanes)
     {
-      gvdbg("Invalid parameters\n");
+      ginfo("Invalid parameters\n");
       return;
     }
 #endif

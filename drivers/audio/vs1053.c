@@ -329,7 +329,7 @@ static void vs1053_writereg(FAR struct vs1053_struct_s *dev, uint8_t reg, uint16
 
   /* Select the AUDIO_CTRL device on the SPI bus */
 
-  audvdbg("Write Reg %d = 0x%0X\n", reg, val);
+  audinfo("Write Reg %d = 0x%0X\n", reg, val);
 
   SPI_SELECT(spi, SPIDEV_AUDIO_CTRL, true);
 
@@ -365,7 +365,7 @@ static int vs1053_setfrequency(FAR struct vs1053_struct_s *dev, uint32_t freq)
   uint16_t  reg;
   uint8_t   timeout;
 
-  audvdbg("Entry\n");
+  audinfo("Entry\n");
 
   /* Calculate the clock divisor based on the input frequency */
 
@@ -375,7 +375,7 @@ static int vs1053_setfrequency(FAR struct vs1053_struct_s *dev, uint32_t freq)
 
   if (factor > 50.0)
     {
-      audvdbg("Frequency too high!  Limiting to XTALI * 5\n");
+      audinfo("Frequency too high!  Limiting to XTALI * 5\n");
       factor = 50.0;
       return -EINVAL;
     }
@@ -566,7 +566,7 @@ static void vs1053_setbass(FAR struct vs1053_struct_s *dev)
 static int vs1053_getcaps(FAR struct audio_lowerhalf_s *lower, int type,
             FAR struct audio_caps_s *pCaps)
 {
-  audvdbg("Entry\n");
+  audinfo("Entry\n");
 
   /* Validate the structure */
 
@@ -769,7 +769,7 @@ static int vs1053_configure(FAR struct audio_lowerhalf_s *lower,
   FAR struct vs1053_struct_s *dev = (struct vs1053_struct_s *) lower;
 #endif
 
-  audvdbg("Entry\n");
+  audinfo("Entry\n");
 
   /* Process the configure operation */
 
@@ -924,7 +924,7 @@ static int vs1053_shutdown(FAR struct audio_lowerhalf_s *lower)
   FAR struct vs1053_struct_s *dev = (struct vs1053_struct_s *) lower;
   FAR struct spi_dev_s  *spi = dev->spi;
 
-  audvdbg("Entry\n");
+  audinfo("Entry\n");
   vs1053_spi_lock(spi, dev->spi_freq);            /* Lock the device */
   vs1053_setfrequency(dev, CONFIG_VS1053_XTALI);  /* Reduce speed to minimum */
   vs1053_writereg(dev, VS1053_SCI_VOL, 0xFEFE);   /* Power down the DAC outputs */
@@ -1630,7 +1630,7 @@ static int vs1053_enqueuebuffer(FAR struct audio_lowerhalf_s *lower,
   struct audio_msg_s  term_msg;
   int ret;
 
-  audvdbg("Entry\n");
+  audinfo("Entry\n");
 
   /* Lock access to the apbq */
 

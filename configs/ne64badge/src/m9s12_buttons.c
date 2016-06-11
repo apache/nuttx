@@ -63,14 +63,14 @@
 #ifdef BUTTON_DEBUG
 #  define btndbg  lldbg
 #  ifdef BUTTON_VERBOSE
-#    define btnvdbg lldbg
+#    define btninfo lldbg
 #  else
-#    define btnvdbg(x...)
+#    define btninfo(x...)
 #  endif
 #else
 #  undef BUTTON_VERBOSE
 #  define btndbg(x...)
-#  define btnvdbg(x...)
+#  define btninfo(x...)
 #endif
 
 /* Dump GPIO registers */

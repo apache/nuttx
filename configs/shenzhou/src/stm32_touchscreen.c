@@ -181,7 +181,7 @@ static void tsc_enable(FAR struct ads7843e_config_s *state, bool enable)
 
   /* Attach and enable, or detach and disable */
 
-  ivdbg("enable:%d\n", enable);
+  iinfo("enable:%d\n", enable);
   if (enable)
     {
       (void)stm32_gpiosetevent(GPIO_TP_INT, true, true, false,
@@ -220,7 +220,7 @@ static bool tsc_pendown(FAR struct ads7843e_config_s *state)
    */
 
   bool pendown = !stm32_gpioread(GPIO_TP_INT);
-  ivdbg("pendown:%d\n", pendown);
+  iinfo("pendown:%d\n", pendown);
   return pendown;
 }
 

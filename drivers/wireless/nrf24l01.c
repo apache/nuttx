@@ -495,7 +495,7 @@ static int nrf24l01_irqhandler(int irq, FAR void *context)
 {
   FAR struct nrf24l01_dev_s *dev = g_nrf24l01dev;
 
-  wllvdbg("*IRQ*");
+  wllinfo("*IRQ*");
 
 #ifdef CONFIG_WL_NRF24L01_RXSUPPORT
 
@@ -604,7 +604,7 @@ static void nrf24l01_worker(FAR void *arg)
         {
           dev->pfd->revents |= POLLIN;  /* Data available for input */
 
-          wvdbg("Wake up polled fd");
+          winfo("Wake up polled fd");
           sem_post(dev->pfd->sem);
         }
 #endif
@@ -720,11 +720,11 @@ static int dosend(FAR struct nrf24l01_dev_s *dev, FAR const uint8_t *data, size_
       dev->lastxmitcount = (obsvalue & NRF24L01_ARC_CNT_MASK)
           >> NRF24L01_ARC_CNT_SHIFT;
 
-      wvdbg("Transmission OK (lastxmitcount=%d)\n", dev->lastxmitcount);
+      winfo("Transmission OK (lastxmitcount=%d)\n", dev->lastxmitcount);
     }
   else if (status & NRF24L01_MAX_RT)
     {
-      wvdbg("MAX_RT!\n", dev->lastxmitcount);
+      winfo("MAX_RT!\n", dev->lastxmitcount);
       result = -ECOMM;
       dev->lastxmitcount = NRF24L01_XMIT_MAXRT;
 
@@ -758,7 +758,7 @@ static int nrf24l01_open(FAR struct file *filep)
   FAR struct nrf24l01_dev_s *dev;
   int result;
 
-  wvdbg("Opening nRF24L01 dev\n");
+  winfo("Opening nRF24L01 dev\n");
 
   DEBUGASSERT(filep);
   inode = filep->f_inode;
@@ -800,7 +800,7 @@ static int nrf24l01_close(FAR struct file *filep)
   FAR struct inode *inode;
   FAR struct nrf24l01_dev_s *dev;
 
-  wvdbg("Closing nRF24L01 dev\n");
+  winfo("Closing nRF24L01 dev\n");
   DEBUGASSERT(filep);
   inode = filep->f_inode;
 
@@ -885,7 +885,7 @@ static int nrf24l01_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   FAR struct nrf24l01_dev_s *dev;
   int result = OK;
 
-  wvdbg("cmd: %d arg: %ld\n", cmd, arg);
+  winfo("cmd: %d arg: %ld\n", cmd, arg);
   DEBUGASSERT(filep);
   inode = filep->f_inode;
 
@@ -1117,7 +1117,7 @@ static int nrf24l01_poll(FAR struct file *filep, FAR struct pollfd *fds,
   FAR struct nrf24l01_dev_s *dev;
   int result = OK;
 
-  wvdbg("setup: %d\n", (int)setup);
+  winfo("setup: %d\n", (int)setup);
   DEBUGASSERT(filep && fds);
   inode = filep->f_inode;
 
@@ -1252,7 +1252,7 @@ int nrf24l01_register(FAR struct spi_dev_s *spi, FAR struct nrf24l01_config_s *c
 
   /* Register the device as an input device */
 
-  ivdbg("Registering " DEV_NAME "\n");
+  iinfo("Registering " DEV_NAME "\n");
 
   result = register_driver(DEV_NAME, &nrf24l01_fops, 0666, dev);
   if (result < 0)

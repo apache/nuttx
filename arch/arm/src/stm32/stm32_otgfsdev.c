@@ -1218,7 +1218,7 @@ static void stm32_epin_request(FAR struct stm32_usbdev_s *priv,
       return;
     }
 
-  ullvdbg("EP%d req=%p: len=%d xfrd=%d zlp=%d\n",
+  ullinfo("EP%d req=%p: len=%d xfrd=%d zlp=%d\n",
           privep->epphy, privreq, privreq->req.len,
           privreq->req.xfrd, privep->zlp);
 
@@ -1484,7 +1484,7 @@ static void stm32_epout_complete(FAR struct stm32_usbdev_s *priv,
       return;
     }
 
-  ullvdbg("EP%d: len=%d xfrd=%d\n",
+  ullinfo("EP%d: len=%d xfrd=%d\n",
           privep->epphy, privreq->req.len, privreq->req.xfrd);
 
   /* Return the completed read request to the class driver and mark the state
@@ -1519,7 +1519,7 @@ static inline void stm32_ep0out_receive(FAR struct stm32_ep_s *privep, int bcnt)
   DEBUGASSERT(privep && privep->ep.priv);
   priv = (FAR struct stm32_usbdev_s *)privep->ep.priv;
 
-  ullvdbg("EP0: bcnt=%d\n", bcnt);
+  ullinfo("EP0: bcnt=%d\n", bcnt);
   usbtrace(TRACE_READ(EP0), bcnt);
 
   /* Verify that an OUT SETUP request as received before this data was
@@ -1612,7 +1612,7 @@ static inline void stm32_epout_receive(FAR struct stm32_ep_s *privep, int bcnt)
       return;
     }
 
-  ullvdbg("EP%d: len=%d xfrd=%d\n", privep->epphy, privreq->req.len, privreq->req.xfrd);
+  ullinfo("EP%d: len=%d xfrd=%d\n", privep->epphy, privreq->req.len, privreq->req.xfrd);
   usbtrace(TRACE_READ(privep->epphy), bcnt);
 
   /* Get the number of bytes to transfer from the RxFIFO */
@@ -1696,7 +1696,7 @@ static void stm32_epout_request(FAR struct stm32_usbdev_s *priv,
               return;
             }
 
-          ullvdbg("EP%d: len=%d\n", privep->epphy, privreq->req.len);
+          ullinfo("EP%d: len=%d\n", privep->epphy, privreq->req.len);
 
           /* Ignore any attempt to receive a zero length packet (this really
            * should not happen.
@@ -2490,7 +2490,7 @@ static inline void stm32_ep0out_setup(struct stm32_usbdev_s *priv)
   ctrlreq.index = GETUINT16(priv->ctrlreq.index);
   ctrlreq.len   = GETUINT16(priv->ctrlreq.len);
 
-  ullvdbg("type=%02x req=%02x value=%04x index=%04x len=%04x\n",
+  ullinfo("type=%02x req=%02x value=%04x index=%04x len=%04x\n",
           ctrlreq.type, ctrlreq.req, ctrlreq.value, ctrlreq.index, ctrlreq.len);
 
   /* Check for a standard request */
@@ -4334,7 +4334,7 @@ static int stm32_ep_submit(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *
   if (!req || !req->callback || !req->buf || !ep)
     {
       usbtrace(TRACE_DEVERROR(STM32_TRACEERR_INVALIDPARMS), 0);
-      ullvdbg("req=%p callback=%p buf=%p ep=%p\n", req, req->callback, req->buf, ep);
+      ullinfo("req=%p callback=%p buf=%p ep=%p\n", req, req->callback, req->buf, ep);
       return -EINVAL;
     }
 #endif

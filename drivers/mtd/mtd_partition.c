@@ -479,7 +479,7 @@ static int part_procfs_open(FAR struct file *filep, FAR const char *relpath,
 {
   FAR struct part_procfs_file_s *attr;
 
-  fvdbg("Open '%s'\n", relpath);
+  finfo("Open '%s'\n", relpath);
 
   /* PROCFS is read-only.  Any attempt to open with any kind of write
    * access is not permitted.
@@ -550,7 +550,7 @@ static ssize_t part_procfs_read(FAR struct file *filep, FAR char *buffer,
   uint8_t x;
 #endif
 
-  fvdbg("buffer=%p buflen=%d\n", buffer, (int)buflen);
+  finfo("buffer=%p buflen=%d\n", buffer, (int)buflen);
 
   /* Recover our private data from the struct file instance */
 
@@ -702,7 +702,7 @@ static int part_procfs_dup(FAR const struct file *oldp, FAR struct file *newp)
   FAR struct part_procfs_file_s *oldattr;
   FAR struct part_procfs_file_s *newattr;
 
-  fvdbg("Dup %p->%p\n", oldp, newp);
+  finfo("Dup %p->%p\n", oldp, newp);
 
   /* Recover our private data from the old struct file instance */
 

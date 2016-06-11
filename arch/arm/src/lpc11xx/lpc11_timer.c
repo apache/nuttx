@@ -92,19 +92,19 @@
 #  define pwmdbg              dbg
 #  define pwmlldbg            lldbg
 #  ifdef CONFIG_DEBUG_INFO
-#    define pwmvdbg           vdbg
-#    define pwmllvdbg         llvdbg
+#    define pwminfo           info
+#    define pwmllinfo         llinfo
 #    define pwm_dumpgpio(p,m) stm32_dumpgpio(p,m)
 #  else
-#    define pwmvdbg(x...)
-#    define pwmllvdbg(x...)
+#    define pwminfo(x...)
+#    define pwmllinfo(x...)
 #    define pwm_dumpgpio(p,m)
 #  endif
 #else
 #  define pwmdbg(x...)
 #  define pwmlldbg(x...)
-#  define pwmvdbg(x...)
-#  define pwmllvdbg(x...)
+#  define pwminfo(x...)
+#  define pwmllinfo(x...)
 #  define pwm_dumpgpio(p,m)
 #endif
 

@@ -136,7 +136,7 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
 
   /* Inform the client of the VNC protocol version */
 
-  gvdbg("Send protocol version: %s\n", g_vncproto);
+  ginfo("Send protocol version: %s\n", g_vncproto);
 
   len = strlen(g_vncproto);
   nsent = psock_send(&session->connect, g_vncproto, len, 0);
@@ -152,7 +152,7 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
 
   /* Receive the echo of the protocol string */
 
-  gvdbg("Receive echo from VNC client\n");
+  ginfo("Receive echo from VNC client\n");
 
   nrecvd = psock_recv(&session->connect, session->inbuf, len, 0);
   if (nrecvd < 0)
@@ -176,7 +176,7 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
    * any stinkin' security.
    */
 
-  gvdbg("Send SecurityType\n");
+  ginfo("Send SecurityType\n");
 
   sectype = (FAR struct rfb_sectype_s *)session->outbuf;
   rfb_putbe32(sectype->type, RFB_SECTYPE_NONE);
@@ -198,7 +198,7 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
    * only option offered.
    */
 
-  gvdbg("Send SupportedSecurityTypes\n");
+  ginfo("Send SupportedSecurityTypes\n");
 
   sectypes         = (FAR struct rfb_supported_sectypes_s *)session->outbuf;
   sectypes->ntypes = 1;
@@ -221,7 +221,7 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
    * type is to be used on the connection.
    */
 
-  gvdbg("Receive SecurityType\n");
+  ginfo("Receive SecurityType\n");
 
   sectype = (FAR struct rfb_selected_sectype_s *)session->inbuf;
 
@@ -242,7 +242,7 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
 
   DEBUGASSERT(nrecvd == sizeof(struct rfb_selected_sectype_s));
 
-  gvdbg("Send SecurityResult\n");
+  ginfo("Send SecurityResult\n");
 
   secresult = (FAR struct rfb_sectype_result_s *)session->outbuf;
 
@@ -266,7 +266,7 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
 
       DEBUGASSERT(nsent == sizeof(struct rfb_sectype_result_s));
 
-      gvdbg("Send failure reason\n");
+      ginfo("Send failure reason\n");
 
       secfail = (FAR struct rfb_sectype_fail_s *)session->outbuf;
       len     = strlen(g_nosecurity);
@@ -312,7 +312,7 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
    * In this implementation, the sharing flag is ignored.
    */
 
-  gvdbg("Receive ClientInit\n");
+  ginfo("Receive ClientInit\n");
 
   nrecvd = psock_recv(&session->connect, session->inbuf,
                       sizeof(struct rfb_clientinit_s), 0);
@@ -344,7 +344,7 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
    *   Very Low (8 colors) - RGB3 1:1:1 (TrueColor)
    */
 
-  gvdbg("Send ServerInit\n");
+  ginfo("Send ServerInit\n");
 
   serverinit          = (FAR struct rfb_serverinit_s *)session->outbuf;
 
@@ -385,7 +385,7 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
    * This may override some of our framebuffer settings.
    */
 
-  gvdbg("Receive SetPixelFormat\n");
+  ginfo("Receive SetPixelFormat\n");
 
   setformat = (FAR struct rfb_setpixelformat_s *)session->inbuf;
 
@@ -432,7 +432,7 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
 
   /* Receive supported encoding types from client. */
 
-  gvdbg("Receive encoding types\n");
+  ginfo("Receive encoding types\n");
 
   encodings = (FAR struct rfb_setencodings_s *)session->inbuf;
 
@@ -498,35 +498,35 @@ int vnc_client_pixelformat(FAR struct vnc_session_s *session,
 
   if (pixelfmt->bpp == 8 && pixelfmt->depth == 6)
     {
-      gvdbg("Client pixel format: RGB8 2:2:2\n");
+      ginfo("Client pixel format: RGB8 2:2:2\n");
       session->colorfmt  = FB_FMT_RGB8_222;
       session->bpp       = 8;
       session->bigendian = false;
     }
   else if (pixelfmt->bpp == 8 && pixelfmt->depth == 8)
     {
-      gvdbg("Client pixel format: RGB8 3:3:2\n");
+      ginfo("Client pixel format: RGB8 3:3:2\n");
       session->colorfmt  = FB_FMT_RGB8_332;
       session->bpp       = 8;
       session->bigendian = false;
     }
   else if (pixelfmt->bpp == 16 && pixelfmt->depth == 15)
     {
-      gvdbg("Client pixel format: RGB16 5:5:5\n");
+      ginfo("Client pixel format: RGB16 5:5:5\n");
       session->colorfmt  = FB_FMT_RGB16_555;
       session->bpp       = 16;
       session->bigendian = (pixelfmt->bigendian != 0) ? true : false;
     }
   else if (pixelfmt->bpp == 16 && pixelfmt->depth == 16)
     {
-      gvdbg("Client pixel format: RGB16 5:6:5\n");
+      ginfo("Client pixel format: RGB16 5:6:5\n");
       session->colorfmt  = FB_FMT_RGB16_565;
       session->bpp       = 16;
       session->bigendian = (pixelfmt->bigendian != 0) ? true : false;
     }
   else if (pixelfmt->bpp == 32 && pixelfmt->depth == 24)
     {
-      gvdbg("Client pixel format: RGB32 8:8:8\n");
+      ginfo("Client pixel format: RGB32 8:8:8\n");
       session->colorfmt  = FB_FMT_RGB32;
       session->bpp       = 32;
       session->bigendian = (pixelfmt->bigendian != 0) ? true : false;

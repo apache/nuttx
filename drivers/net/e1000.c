@@ -602,7 +602,7 @@ static void e1000_receive(struct e1000_dev *e1000)
 #ifdef CONFIG_NET_IPv4
       if (BUF->type == HTONS(ETHTYPE_IP))
         {
-          nllvdbg("IPv4 frame\n");
+          nllinfo("IPv4 frame\n");
 
           /* Handle ARP on input then give the IPv4 packet to the network
            * layer
@@ -642,7 +642,7 @@ static void e1000_receive(struct e1000_dev *e1000)
 #ifdef CONFIG_NET_IPv6
       if (BUF->type == HTONS(ETHTYPE_IP6))
         {
-          nllvdbg("Iv6 frame\n");
+          nllinfo("Iv6 frame\n");
 
           /* Give the IPv6 packet to the network layer */
 

@@ -58,13 +58,13 @@
 #ifdef CONFIG_EFM32_RMU_DEBUG
 #  define rmudbg lldbg
 #  ifdef CONFIG_DEBUG_INFO
-#    define rmuvdbg lldbg
+#    define rmuinfo lldbg
 #  else
-#    define rmuvdbg(x...)
+#    define rmuinfo(x...)
 #  endif
 #else
 #  define rmudbg(x...)
-#  define rmuvdbg(x...)
+#  define rmuinfo(x...)
 #endif
 
 /****************************************************************************

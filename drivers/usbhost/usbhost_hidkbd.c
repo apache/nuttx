@@ -180,10 +180,10 @@
 #  define idbg    udbg
 #  undef  illdbg
 #  define illdbg  ulldbg
-#  undef  ivdbg
-#  define ivdbg   uvdbg
-#  undef  illvdbg
-#  define illvdbg ullvdbg
+#  undef  iinfo
+#  define iinfo   uinfo
+#  undef  illinfo
+#  define illinfo ullinfo
 #endif
 
 /****************************************************************************
@@ -631,7 +631,7 @@ static void usbhost_pollnotify(FAR struct usbhost_state_s *priv)
           fds->revents |= (fds->events & POLLIN);
           if (fds->revents != 0)
             {
-              uvdbg("Report events: %02x\n", fds->revents);
+              uinfo("Report events: %02x\n", fds->revents);
               sem_post(fds->sem);
             }
         }
@@ -664,7 +664,7 @@ static inline FAR struct usbhost_state_s *usbhost_allocclass(void)
 
   DEBUGASSERT(!up_interrupt_context());
   priv = (FAR struct usbhost_state_s *)kmm_malloc(sizeof(struct usbhost_state_s));
-  uvdbg("Allocated: %p\n", priv);
+  uinfo("Allocated: %p\n", priv);
   return priv;
 }
 
@@ -688,7 +688,7 @@ static inline void usbhost_freeclass(FAR struct usbhost_state_s *usbclass)
 
   /* Free the class instance. */
 
-  uvdbg("Freeing: %p\n", usbclass);
+  uinfo("Freeing: %p\n", usbclass);
   sched_kfree(usbclass);
 }
 
@@ -764,11 +764,11 @@ static void usbhost_destroy(FAR void *arg)
   DEBUGASSERT(priv != NULL && priv->usbclass.hport != NULL);
   hport = priv->usbclass.hport;
 
-  uvdbg("crefs: %d\n", priv->crefs);
+  uinfo("crefs: %d\n", priv->crefs);
 
   /* Unregister the driver */
 
-  uvdbg("Unregister driver\n");
+  uinfo("Unregister driver\n");
   usbhost_mkdevname(priv, devname);
   (void)unregister_driver(devname);
 
@@ -965,7 +965,7 @@ static inline void usbhost_encodescancode(FAR struct usbhost_state_s *priv,
       /* Yes the value is within range */
 
       encoded = encoding[scancode - FIRST_ENCODING];
-      ivdbg("  scancode: %02x modifier: %02x encoded: %d\n",
+      iinfo("  scancode: %02x modifier: %02x encoded: %d\n",
             scancode, modifier, encoded);
 
       if (encoded)
@@ -1019,7 +1019,7 @@ static int usbhost_kbdpoll(int argc, char *argv[])
   bool newstate;
   int ret;
 
-  uvdbg("Started\n");
+  uinfo("Started\n");
 
   /* Synchronize with the start-up logic.  Get the private instance, re-start
    * the start-up logic, and wait a bit to make sure that all of the class
@@ -1041,7 +1041,7 @@ static int usbhost_kbdpoll(int argc, char *argv[])
 
   /* Loop here until the device is disconnected */
 
-  uvdbg("Entering poll loop\n");
+  uinfo("Entering poll loop\n");
 
   while (!priv->disconnected)
     {
@@ -1143,7 +1143,7 @@ static int usbhost_kbdpoll(int argc, char *argv[])
                    */
 
                   keycode = usbhost_mapscancode(rpt->key[i], rpt->modifier);
-                  ivdbg("Key %d: %02x keycode:%c modifier: %02x\n",
+                  iinfo("Key %d: %02x keycode:%c modifier: %02x\n",
                          i, rpt->key[i], keycode ? keycode : ' ', rpt->modifier);
 
                   /* Zero at this point means that the key does not map to a
@@ -1390,7 +1390,7 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
           {
             FAR struct usb_ifdesc_s *ifdesc = (FAR struct usb_ifdesc_s *)configdesc;
 
-            uvdbg("Interface descriptor\n");
+            uinfo("Interface descriptor\n");
             DEBUGASSERT(remaining >= USB_SIZEOF_IFDESC);
 
             /* Did we already find what we needed from a preceding interface? */
@@ -1418,7 +1418,7 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
         /* HID descriptor */
 
         case USBHID_DESCTYPE_HID:
-            uvdbg("HID descriptor\n");
+            uinfo("HID descriptor\n");
             break;
 
         /* Endpoint descriptor.  We expect one or two interrupt endpoints,
@@ -1429,7 +1429,7 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
           {
             FAR struct usb_epdesc_s *epdesc = (FAR struct usb_epdesc_s *)configdesc;
 
-            uvdbg("Endpoint descriptor\n");
+            uinfo("Endpoint descriptor\n");
             DEBUGASSERT(remaining >= USB_SIZEOF_EPDESC);
 
             /* Check for an interrupt endpoint. */
@@ -1463,7 +1463,7 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
                     epoutdesc.xfrtype      = USB_EP_ATTR_XFER_INT;
                     epoutdesc.interval     = epdesc->interval;
                     epoutdesc.mxpacketsize = usbhost_getle16(epdesc->mxpacketsize);
-                    uvdbg("Interrupt OUT EP addr:%d mxpacketsize:%d\n",
+                    uinfo("Interrupt OUT EP addr:%d mxpacketsize:%d\n",
                           epoutdesc.addr, epoutdesc.mxpacketsize);
                   }
                 else
@@ -1491,7 +1491,7 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
                     epindesc.xfrtype      = USB_EP_ATTR_XFER_INT;
                     epindesc.interval     = epdesc->interval;
                     epindesc.mxpacketsize = usbhost_getle16(epdesc->mxpacketsize);
-                    uvdbg("Interrupt IN EP addr:%d mxpacketsize:%d\n",
+                    uinfo("Interrupt IN EP addr:%d mxpacketsize:%d\n",
                           epindesc.addr, epindesc.mxpacketsize);
                   }
               }
@@ -1501,7 +1501,7 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
         /* Other descriptors are just ignored for now */
 
         default:
-          uvdbg("Other descriptor: %d\n", desc->type);
+          uinfo("Other descriptor: %d\n", desc->type);
           break;
         }
 
@@ -1543,7 +1543,7 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
 
   /* Then the optional interrupt OUT endpoint */
 
-  ullvdbg("Found EPOOUT:%s\n",
+  ullinfo("Found EPOOUT:%s\n",
          (found & USBHOST_EPOUTFOUND) != 0 ? "YES" : "NO");
 
   if ((found & USBHOST_EPOUTFOUND) != 0)
@@ -1557,7 +1557,7 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
         }
     }
 
-  ullvdbg("Endpoints allocated\n");
+  ullinfo("Endpoints allocated\n");
   return OK;
 }
 
@@ -1608,7 +1608,7 @@ static inline int usbhost_devinit(FAR struct usbhost_state_s *priv)
    * memory resources, primarily for the dedicated stack (CONFIG_HIDKBD_STACKSIZE).
    */
 
-  uvdbg("Start poll task\n");
+  uinfo("Start poll task\n");
 
   /* The inputs to a task started by kernel_thread() are very awkard for this
    * purpose.  They are really designed for command line tasks (argc/argv). So
@@ -1641,7 +1641,7 @@ static inline int usbhost_devinit(FAR struct usbhost_state_s *priv)
 
   /* Register the driver */
 
-  uvdbg("Register driver\n");
+  uinfo("Register driver\n");
   usbhost_mkdevname(priv, devname);
   ret = register_driver(devname, &g_hidkbd_fops, 0666, priv);
 
@@ -1991,7 +1991,7 @@ static int usbhost_disconnected(struct usbhost_class_s *usbclass)
    */
 
   priv->disconnected = true;
-  ullvdbg("Disconnected\n");
+  ullinfo("Disconnected\n");
 
   /* Is there a thread waiting for keyboard data that will never come? */
 
@@ -2054,7 +2054,7 @@ static int usbhost_open(FAR struct file *filep)
   irqstate_t flags;
   int ret;
 
-  uvdbg("Entry\n");
+  uinfo("Entry\n");
   DEBUGASSERT(filep && filep->f_inode);
   inode = filep->f_inode;
   priv  = inode->i_private;
@@ -2107,7 +2107,7 @@ static int usbhost_close(FAR struct file *filep)
   FAR struct usbhost_state_s *priv;
   irqstate_t flags;
 
-  uvdbg("Entry\n");
+  uinfo("Entry\n");
   DEBUGASSERT(filep && filep->f_inode);
   inode = filep->f_inode;
   priv  = inode->i_private;
@@ -2201,7 +2201,7 @@ static ssize_t usbhost_read(FAR struct file *filep, FAR char *buffer, size_t len
   unsigned int                tail;
   int                         ret;
 
-  uvdbg("Entry\n");
+  uinfo("Entry\n");
   DEBUGASSERT(filep && filep->f_inode && buffer);
   inode = filep->f_inode;
   priv  = inode->i_private;
@@ -2242,7 +2242,7 @@ static ssize_t usbhost_read(FAR struct file *filep, FAR char *buffer, size_t len
 
           /* Wait for data to be available */
 
-          uvdbg("Waiting...\n");
+          uinfo("Waiting...\n");
 
           priv->waiting = true;
           usbhost_givesem(&priv->exclsem);
@@ -2321,7 +2321,7 @@ static int usbhost_poll(FAR struct file *filep, FAR struct pollfd *fds,
   int                         ret = OK;
   int                         i;
 
-  uvdbg("Entry\n");
+  uinfo("Entry\n");
   DEBUGASSERT(filep && filep->f_inode && fds);
   inode = filep->f_inode;
   priv  = inode->i_private;

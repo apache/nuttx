@@ -152,7 +152,7 @@ static inline int mod_loadfile(FAR struct mod_loadinfo_s *loadinfo)
 
   /* Read each section into memory that is marked SHF_ALLOC + SHT_NOBITS */
 
-  svdbg("Loaded sections:\n");
+  sinfo("Loaded sections:\n");
   text = (FAR uint8_t *)loadinfo->textalloc;
   data = (FAR uint8_t *)loadinfo->datastart;
 
@@ -208,7 +208,7 @@ static inline int mod_loadfile(FAR struct mod_loadinfo_s *loadinfo)
 
       /* Update sh_addr to point to copy in memory */
 
-      svdbg("%d. %08lx->%08lx\n", i,
+      sinfo("%d. %08lx->%08lx\n", i,
             (unsigned long)shdr->sh_addr, (unsigned long)*pptr);
 
       shdr->sh_addr = (uintptr_t)*pptr;
@@ -242,7 +242,7 @@ int mod_load(FAR struct mod_loadinfo_s *loadinfo)
 {
   int ret;
 
-  svdbg("loadinfo: %p\n", loadinfo);
+  sinfo("loadinfo: %p\n", loadinfo);
   DEBUGASSERT(loadinfo && loadinfo->filfd >= 0);
 
   /* Load section headers into memory */

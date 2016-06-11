@@ -417,7 +417,7 @@ static inline void c5471_dumpbuffer(const char *msg, const uint8_t *buffer, unsi
    * defined or the following does nothing.
    */
 
-  nvdbgdumpbuffer(msg, buffer, nbytes);
+  ninfodumpbuffer(msg, buffer, nbytes);
 }
 #else
 # define c5471_dumpbuffer(msg, buffer,nbytes)
@@ -802,7 +802,7 @@ static inline void c5471_inctxcpu(struct c5471_driver_s *c5471)
       c5471->c_txcpudesc += 2*sizeof(uint32_t);
     }
 
-  nvdbg("TX CPU desc: %08x\n", c5471->c_txcpudesc);
+  ninfo("TX CPU desc: %08x\n", c5471->c_txcpudesc);
 }
 
 /****************************************************************************
@@ -825,7 +825,7 @@ static inline void c5471_incrxcpu(struct c5471_driver_s *c5471)
       c5471->c_rxcpudesc += 2*sizeof(uint32_t);
     }
 
-  nvdbg("RX CPU desc: %08x\n", c5471->c_rxcpudesc);
+  ninfo("RX CPU desc: %08x\n", c5471->c_rxcpudesc);
 }
 
 /****************************************************************************
@@ -861,7 +861,7 @@ static int c5471_transmit(struct c5471_driver_s *c5471)
   bfirstframe            = true;
   c5471->c_lastdescstart = c5471->c_rxcpudesc;
 
-  nvdbg("Packet size: %d RX CPU desc: %08x\n", nbytes, c5471->c_rxcpudesc);
+  ninfo("Packet size: %d RX CPU desc: %08x\n", nbytes, c5471->c_rxcpudesc);
   c5471_dumpbuffer("Transmit packet", dev->d_buf, dev->d_len);
 
   while (nbytes)
@@ -918,7 +918,7 @@ static int c5471_transmit(struct c5471_driver_s *c5471)
 
       putreg32(((getreg32(c5471->c_rxcpudesc) & ~EIM_RXDESC_BYTEMASK) | framelen), c5471->c_rxcpudesc);
       nbytes -= framelen;
-      nvdbg("Wrote framelen: %d nbytes: %d nshorts: %d\n", framelen, nbytes, nshorts);
+      ninfo("Wrote framelen: %d nbytes: %d nshorts: %d\n", framelen, nbytes, nshorts);
 
       if (0 == nbytes)
         {
@@ -1092,43 +1092,43 @@ static void c5471_rxstatus(struct c5471_driver_s *c5471)
       if ((rxstatus & EIM_TXDESC_RETRYERROR) != 0)
         {
           c5471->c_rxretries++;
-          nvdbg("c_rxretries: %d\n", c5471->c_rxretries);
+          ninfo("c_rxretries: %d\n", c5471->c_rxretries);
         }
 
       if ((rxstatus & EIM_TXDESC_HEARTBEAT) != 0)
         {
           c5471->c_rxheartbeat++;
-          nvdbg("c_rxheartbeat: %d\n", c5471->c_rxheartbeat);
+          ninfo("c_rxheartbeat: %d\n", c5471->c_rxheartbeat);
         }
 
       if ((rxstatus & EIM_TXDESC_LCOLLISON) != 0)
         {
           c5471->c_rxlcollision++;
-          nvdbg("c_rxlcollision: %d\n", c5471->c_rxlcollision);
+          ninfo("c_rxlcollision: %d\n", c5471->c_rxlcollision);
         }
 
       if ((rxstatus & EIM_TXDESC_COLLISION) != 0)
         {
           c5471->c_rxcollision++;
-          nvdbg("c_rxcollision: %d\n", c5471->c_rxcollision);
+          ninfo("c_rxcollision: %d\n", c5471->c_rxcollision);
         }
 
       if ((rxstatus & EIM_TXDESC_CRCERROR) != 0)
         {
           c5471->c_rxcrc++;
-          nvdbg("c_rxcrc: %d\n", c5471->c_rxcrc);
+          ninfo("c_rxcrc: %d\n", c5471->c_rxcrc);
         }
 
       if ((rxstatus & EIM_TXDESC_UNDERRUN) != 0)
         {
           c5471->c_rxunderrun++;
-          nvdbg("c_rxunderrun: %d\n", c5471->c_rxunderrun);
+          ninfo("c_rxunderrun: %d\n", c5471->c_rxunderrun);
         }
 
       if ((rxstatus & EIM_TXDESC_LOC) != 0)
         {
           c5471->c_rxloc++;
-          nvdbg("c_rxloc: %d\n", c5471->c_rxloc);
+          ninfo("c_rxloc: %d\n", c5471->c_rxloc);
         }
     }
 }
@@ -1166,7 +1166,7 @@ static void c5471_receive(struct c5471_driver_s *c5471)
    * the EIM for additional packets that might be received later from the network.
    */
 
-  nvdbg("Reading TX CPU desc: %08x\n", c5471->c_txcpudesc);
+  ninfo("Reading TX CPU desc: %08x\n", c5471->c_txcpudesc);
   while (bmore)
     {
       /* Words #0 and #1 of descriptor */
@@ -1196,7 +1196,7 @@ static void c5471_receive(struct c5471_driver_s *c5471)
           /* Divide by 2 with round up to get the number of 16-bit words. */
 
           nshorts = (framelen + 1) >> 1;
-          nvdbg("Reading framelen: %d packetlen: %d nshorts: %d packetmen: %p\n",
+          ninfo("Reading framelen: %d packetlen: %d nshorts: %d packetmen: %p\n",
                  framelen, packetlen, nshorts, packetmem);
 
           for (i = 0 ; i < nshorts; i++, j++)
@@ -1210,7 +1210,7 @@ static void c5471_receive(struct c5471_driver_s *c5471)
         }
       else
         {
-          nvdbg("Discarding framelen: %d packetlen\n", framelen, packetlen);
+          ninfo("Discarding framelen: %d packetlen\n", framelen, packetlen);
         }
 
       if (getreg32(c5471->c_txcpudesc) & EIM_TXDESC_LIF)
@@ -1253,7 +1253,7 @@ static void c5471_receive(struct c5471_driver_s *c5471)
       /* Set amount of data in c5471->c_dev.d_len. */
 
       dev->d_len = packetlen;
-      nvdbg("Received packet, packetlen: %d type: %02x\n", packetlen, ntohs(BUF->type));
+      ninfo("Received packet, packetlen: %d type: %02x\n", packetlen, ntohs(BUF->type));
       c5471_dumpbuffer("Received packet", dev->d_buf, dev->d_len);
 
 #ifdef CONFIG_NET_PKT
@@ -1267,7 +1267,7 @@ static void c5471_receive(struct c5471_driver_s *c5471)
 #ifdef CONFIG_NET_IPv4
       if (BUF->type == HTONS(ETHTYPE_IP))
         {
-          nllvdbg("IPv4 frame\n");
+          nllinfo("IPv4 frame\n");
 
           /* Handle ARP on input then give the IPv4 packet to the network
            * layer
@@ -1310,7 +1310,7 @@ static void c5471_receive(struct c5471_driver_s *c5471)
 #ifdef CONFIG_NET_IPv6
       if (BUF->type == HTONS(ETHTYPE_IP6))
         {
-          nllvdbg("Iv6 frame\n");
+          nllinfo("Iv6 frame\n");
 
           /* Give the IPv6 packet to the network layer */
 
@@ -1432,43 +1432,43 @@ static void c5471_txstatus(struct c5471_driver_s *c5471)
       if ((txstatus & EIM_RXDESC_MISS) != 0)
         {
           c5471->c_txmiss++;
-          nvdbg("c_txmiss: %d\n", c5471->c_txmiss);
+          ninfo("c_txmiss: %d\n", c5471->c_txmiss);
         }
 
       if ((txstatus & EIM_RXDESC_VLAN) != 0)
         {
           c5471->c_txvlan++;
-          nvdbg("c_txvlan: %d\n", c5471->c_txvlan);
+          ninfo("c_txvlan: %d\n", c5471->c_txvlan);
         }
 
       if ((txstatus & EIM_RXDESC_LFRAME) != 0)
         {
           c5471->c_txlframe++;
-          nvdbg("c_txlframe: %d\n", c5471->c_txlframe);
+          ninfo("c_txlframe: %d\n", c5471->c_txlframe);
         }
 
       if ((txstatus & EIM_RXDESC_SFRAME) != 0)
         {
           c5471->c_txsframe++;
-          nvdbg("c_txsframe: %d\n", c5471->c_txsframe);
+          ninfo("c_txsframe: %d\n", c5471->c_txsframe);
         }
 
       if ((txstatus & EIM_RXDESC_CRCERROR) != 0)
         {
           c5471->c_txcrc++;
-          nvdbg("c_txcrc: %d\n", c5471->c_txcrc);
+          ninfo("c_txcrc: %d\n", c5471->c_txcrc);
         }
 
       if ((txstatus & EIM_RXDESC_OVERRUN) != 0)
         {
           c5471->c_txoverrun++;
-          nvdbg("c_txoverrun: %d\n", c5471->c_txoverrun);
+          ninfo("c_txoverrun: %d\n", c5471->c_txoverrun);
         }
 
       if ((txstatus & EIM_RXDESC_OVERRUN) != 0)
         {
           c5471->c_txalign++;
-          nvdbg("c_txalign: %d\n", c5471->c_txalign);
+          ninfo("c_txalign: %d\n", c5471->c_txalign);
         }
     }
 }
@@ -1607,7 +1607,7 @@ static void c5471_txtimeout(int argc, uint32_t arg, ...)
 
 #ifdef CONFIG_C5471_NET_STATS
   c5471->c_txtimeouts++;
-  nvdbg("c_txtimeouts: %d\n", c5471->c_txtimeouts);
+  ninfo("c_txtimeouts: %d\n", c5471->c_txtimeouts);
 #endif
 
   /* Then try to restart the hardware */

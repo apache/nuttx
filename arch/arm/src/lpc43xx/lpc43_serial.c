@@ -854,7 +854,7 @@ static int up_interrupt(int irq, void *context)
               /* Read the modem status register (MSR) to clear */
 
               status = up_serialin(priv, LPC43_UART_MSR_OFFSET);
-              vdbg("MSR: %02x\n", status);
+              info("MSR: %02x\n", status);
               break;
             }
 
@@ -865,7 +865,7 @@ static int up_interrupt(int irq, void *context)
               /* Read the line status register (LSR) to clear */
 
               status = up_serialin(priv, LPC43_UART_LSR_OFFSET);
-              vdbg("LSR: %02x\n", status);
+              info("LSR: %02x\n", status);
               break;
             }
 

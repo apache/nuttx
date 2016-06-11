@@ -93,10 +93,10 @@
 
 #ifdef CONFIG_DEBUG_LCD
 #  define lcddbg         dbg
-#  define lcdvdbg        vdbg
+#  define lcdinfo        info
 #else
 #  define lcddbg(x...)
-#  define lcdvdbg(x...)
+#  define lcdinfo(x...)
 #endif
 
 /****************************************************************************

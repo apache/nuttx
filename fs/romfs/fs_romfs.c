@@ -149,7 +149,7 @@ static int romfs_open(FAR struct file *filep, FAR const char *relpath,
   FAR struct romfs_file_s    *rf;
   int                         ret;
 
-  fvdbg("Open '%s'\n", relpath);
+  finfo("Open '%s'\n", relpath);
 
   /* Sanity checks */
 
@@ -285,7 +285,7 @@ static int romfs_close(FAR struct file *filep)
   FAR struct romfs_file_s    *rf;
   int                         ret = OK;
 
-  fvdbg("Closing\n");
+  finfo("Closing\n");
 
   /* Sanity checks */
 
@@ -340,7 +340,7 @@ static ssize_t romfs_read(FAR struct file *filep, FAR char *buffer,
   int                         sectorndx;
   int                         ret;
 
-  fvdbg("Read %d bytes from offset %d\n", buflen, filep->f_pos);
+  finfo("Read %d bytes from offset %d\n", buflen, filep->f_pos);
 
   /* Sanity checks */
 
@@ -404,7 +404,7 @@ static ssize_t romfs_read(FAR struct file *filep, FAR char *buffer,
 
           /* Read all of the sectors directly into user memory */
 
-          fvdbg("Read %d sectors starting with %d\n", nsectors, sector);
+          finfo("Read %d sectors starting with %d\n", nsectors, sector);
           ret = romfs_hwread(rm, userbuffer, sector, nsectors);
           if (ret < 0)
             {
@@ -422,7 +422,7 @@ static ssize_t romfs_read(FAR struct file *filep, FAR char *buffer,
            * it is already there then all is well.
            */
 
-          fvdbg("Read sector %d\n", sector);
+          finfo("Read sector %d\n", sector);
           ret = romfs_filecacheread(rm, rf, sector);
           if (ret < 0)
             {
@@ -446,7 +446,7 @@ static ssize_t romfs_read(FAR struct file *filep, FAR char *buffer,
              sector++;
             }
 
-          fvdbg("Return %d bytes from sector offset %d\n", bytesread, sectorndx);
+          finfo("Return %d bytes from sector offset %d\n", bytesread, sectorndx);
           memcpy(userbuffer, &rf->rf_buffer[sectorndx], bytesread);
         }
 
@@ -477,7 +477,7 @@ static off_t romfs_seek(FAR struct file *filep, off_t offset, int whence)
   off_t                       position;
   int                         ret;
 
-  fvdbg("Seek to offset: %d whence: %d\n", offset, whence);
+  finfo("Seek to offset: %d whence: %d\n", offset, whence);
 
   /* Sanity checks */
 
@@ -537,7 +537,7 @@ static off_t romfs_seek(FAR struct file *filep, off_t offset, int whence)
   /* Set file position and return success */
 
   filep->f_pos = position;
-  fvdbg("New file position: %d\n", filep->f_pos);
+  finfo("New file position: %d\n", filep->f_pos);
 
   romfs_semgive(rm);
   return OK;
@@ -557,7 +557,7 @@ static int romfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   FAR struct romfs_file_s    *rf;
   FAR void                  **ppv = (FAR void**)arg;
 
-  fvdbg("cmd: %d arg: %08lx\n", cmd, arg);
+  finfo("cmd: %d arg: %08lx\n", cmd, arg);
 
   /* Sanity checks */
 
@@ -597,7 +597,7 @@ static int romfs_dup(FAR const struct file *oldp, FAR struct file *newp)
   FAR struct romfs_file_s *newrf;
   int ret;
 
-  fvdbg("Dup %p->%p\n", oldp, newp);
+  finfo("Dup %p->%p\n", oldp, newp);
 
   /* Sanity checks */
 
@@ -691,7 +691,7 @@ static int romfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
   FAR struct romfs_dirinfo_s  dirinfo;
   int                         ret;
 
-  fvdbg("relpath: '%s'\n", relpath);
+  finfo("relpath: '%s'\n", relpath);
 
   /* Sanity checks */
 
@@ -759,7 +759,7 @@ static int romfs_readdir(FAR struct inode *mountpt,
   uint32_t                    size;
   int                         ret;
 
-  fvdbg("Entry\n");
+  finfo("Entry\n");
 
   /* Sanity checks */
 
@@ -851,7 +851,7 @@ static int romfs_rewinddir(FAR struct inode *mountpt,
   FAR struct romfs_mountpt_s *rm;
   int ret;
 
-  fvdbg("Entry\n");
+  finfo("Entry\n");
 
   /* Sanity checks */
 
@@ -891,7 +891,7 @@ static int romfs_bind(FAR struct inode *blkdriver, FAR const void *data,
   struct romfs_mountpt_s *rm;
   int ret;
 
-  fvdbg("Entry\n");
+  finfo("Entry\n");
 
   /* Open the block driver */
 
@@ -977,7 +977,7 @@ static int romfs_unbind(FAR void *handle, FAR struct inode **blkdriver,
   FAR struct romfs_mountpt_s *rm = (FAR struct romfs_mountpt_s *)handle;
   int ret;
 
-  fvdbg("Entry\n");
+  finfo("Entry\n");
 
 #ifdef CONFIG_DEBUG
   if (!rm)
@@ -1056,7 +1056,7 @@ static int romfs_statfs(FAR struct inode *mountpt, FAR struct statfs *buf)
   FAR struct romfs_mountpt_s *rm;
   int ret;
 
-  fvdbg("Entry\n");
+  finfo("Entry\n");
 
   /* Sanity checks */
 
@@ -1114,7 +1114,7 @@ static int romfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
   FAR struct romfs_dirinfo_s dirinfo;
   int ret;
 
-  fvdbg("Entry\n");
+  finfo("Entry\n");
 
   /* Sanity checks */
 
@@ -1142,7 +1142,7 @@ static int romfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
 
   if (ret < 0)
     {
-      fvdbg("Failed to find directory: %d\n", ret);
+      finfo("Failed to find directory: %d\n", ret);
       goto errout_with_semaphore;
     }
 
@@ -1171,7 +1171,7 @@ static int romfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
     {
       /* Otherwise, pretend like the unsupported node does not exist */
 
-      fvdbg("Unsupported inode: %d\n", dirinfo.rd_next);
+      finfo("Unsupported inode: %d\n", dirinfo.rd_next);
       ret = -ENOENT;
       goto errout_with_semaphore;
     }

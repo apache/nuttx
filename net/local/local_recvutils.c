@@ -98,7 +98,7 @@ int local_fifo_read(int fd, FAR uint8_t *buf, size_t *len)
               goto errout;
             }
 
-          nvdbg("Ignoring signal\n");
+          ninfo("Ignoring signal\n");
         }
       else if (nread == 0)
         {

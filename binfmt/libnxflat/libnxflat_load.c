@@ -154,7 +154,7 @@ int nxflat_load(struct nxflat_loadinfo_s *loadinfo)
       return -errno;
     }
 
-  bvdbg("Mapped ISpace (%d bytes) at %08x\n", loadinfo->isize, loadinfo->ispace);
+  binfo("Mapped ISpace (%d bytes) at %08x\n", loadinfo->isize, loadinfo->ispace);
 
   /* The following call allocate D-Space memory and will provide a pointer
    * to the allocated (but still uninitialized) D-Space memory.
@@ -167,7 +167,7 @@ int nxflat_load(struct nxflat_loadinfo_s *loadinfo)
       return ret;
     }
 
-  bvdbg("Allocated DSpace (%d bytes) at %p\n",
+  binfo("Allocated DSpace (%d bytes) at %p\n",
         loadinfo->dsize, loadinfo->dspace->region);
 
   /* If CONFIG_ARCH_ADDRENV=y, then the D-Space allocation lies in an address
@@ -197,7 +197,7 @@ int nxflat_load(struct nxflat_loadinfo_s *loadinfo)
       goto errout;
     }
 
-  bvdbg("TEXT: %08x Entry point offset: %08x Data offset: %08x\n",
+  binfo("TEXT: %08x Entry point offset: %08x Data offset: %08x\n",
       loadinfo->ispace, loadinfo->entryoffs, doffset);
 
   /* Restore the original address environment */

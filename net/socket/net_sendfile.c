@@ -156,7 +156,7 @@ static uint16_t ack_interrupt(FAR struct net_driver_s *dev, FAR void *pvconn,
 {
   FAR struct sendfile_s *pstate = (FAR struct sendfile_s *)pvpriv;
 
-  nllvdbg("flags: %04x\n", flags);
+  nllinfo("flags: %04x\n", flags);
 
   if ((flags & TCP_ACKDATA) != 0)
     {
@@ -197,7 +197,7 @@ static uint16_t ack_interrupt(FAR struct net_driver_s *dev, FAR void *pvconn,
        */
 
       pstate->snd_acked = tcp_getsequence(tcp->ackno) - pstate->snd_isn;
-      nllvdbg("ACK: acked=%d sent=%d flen=%d\n",
+      nllinfo("ACK: acked=%d sent=%d flen=%d\n",
              pstate->snd_acked, pstate->snd_sent, pstate->snd_flen);
 
       dev->d_sndlen = 0;
@@ -336,7 +336,7 @@ static uint16_t sendfile_interrupt(FAR struct net_driver_s *dev, FAR void *pvcon
     }
 #endif
 
-  nllvdbg("flags: %04x acked: %d sent: %d\n",
+  nllinfo("flags: %04x acked: %d sent: %d\n",
           flags, pstate->snd_acked, pstate->snd_sent);
 
   /* Check for a loss of connection */
@@ -410,7 +410,7 @@ static uint16_t sendfile_interrupt(FAR struct net_driver_s *dev, FAR void *pvcon
            */
 
           seqno = pstate->snd_sent + pstate->snd_isn;
-          nllvdbg("SEND: sndseq %08x->%08x len: %d\n", conn->sndseq, seqno, ret);
+          nllinfo("SEND: sndseq %08x->%08x len: %d\n", conn->sndseq, seqno, ret);
 
           tcp_setsequence(conn->sndseq, seqno);
 
@@ -424,7 +424,7 @@ static uint16_t sendfile_interrupt(FAR struct net_driver_s *dev, FAR void *pvcon
               /* Update the amount of data sent (but not necessarily ACKed) */
 
               pstate->snd_sent += sndlen;
-              nllvdbg("pid: %d SEND: acked=%d sent=%d flen=%d\n", getpid(),
+              nllinfo("pid: %d SEND: acked=%d sent=%d flen=%d\n", getpid(),
                      pstate->snd_acked, pstate->snd_sent, pstate->snd_flen);
             }
         }

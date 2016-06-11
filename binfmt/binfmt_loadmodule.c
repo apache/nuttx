@@ -120,7 +120,7 @@ static int load_absmodule(FAR struct binary_s *bin)
   FAR struct binfmt_s *binfmt;
   int ret = -ENOENT;
 
-  bvdbg("Loading %s\n", bin->filename);
+  binfo("Loading %s\n", bin->filename);
 
   /* Disabling pre-emption should be sufficient protection while accessing
    * the list of registered binary format handlers.
@@ -142,7 +142,7 @@ static int load_absmodule(FAR struct binary_s *bin)
         {
           /* Successfully loaded -- break out with ret == 0 */
 
-          bvdbg("Successfully loaded module %s\n", bin->filename);
+          binfo("Successfully loaded module %s\n", bin->filename);
 
           /* Save the unload method for use by unload_module */
 

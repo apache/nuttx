@@ -125,7 +125,7 @@ static ssize_t adxl345_read(FAR struct file *filep, FAR char *buffer, size_t len
   struct adxl345_sample_s   sample;
   int                       ret;
 
-  snvdbg("len=%d\n", len);
+  sninfo("len=%d\n", len);
   DEBUGASSERT(filep);
   inode = filep->f_inode;
 
@@ -196,7 +196,7 @@ int adxl345_register(ADXL345_HANDLE handle, int minor)
   char devname[DEV_NAMELEN];
   int ret;
 
-  snvdbg("handle=%p minor=%d\n", handle, minor);
+  sninfo("handle=%p minor=%d\n", handle, minor);
   DEBUGASSERT(priv);
 
   /* Get exclusive access to the device structure */
@@ -329,7 +329,7 @@ static int adxl345_checkid(FAR struct adxl345_dev_s *priv)
   /* Read device ID  */
 
   devid = adxl345_getreg8(priv, ADXL345_DEVID);
-  snvdbg("devid: %04x\n", devid);
+  sninfo("devid: %04x\n", devid);
 
   if (devid != (uint16_t) DEVID)
     {

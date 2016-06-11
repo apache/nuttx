@@ -345,7 +345,7 @@ int nx_runinstance(FAR const char *mqname, FAR NX_DRIVERTYPE *dev)
        DEBUGASSERT(nbytes >= sizeof(struct nxsvrmsg_s));
        msg = (FAR struct nxsvrmsg_s *)buffer;
 
-       gvdbg("Received opcode=%d nbytes=%d\n", msg->msgid, nbytes);
+       ginfo("Received opcode=%d nbytes=%d\n", msg->msgid, nbytes);
        switch (msg->msgid)
          {
          /* Messages sent from clients to the NX server *********************/
@@ -531,7 +531,7 @@ int nx_runinstance(FAR const char *mqname, FAR NX_DRIVERTYPE *dev)
             {
               FAR struct nxclimsg_redraw_s *redraw = (FAR struct nxclimsg_redraw_s *)buffer;
               DEBUGASSERT(redraw->wnd == &fe.be.bkgd);
-              gvdbg("Re-draw background rect={(%d,%d),(%d,%d)}\n",
+              ginfo("Re-draw background rect={(%d,%d),(%d,%d)}\n",
                     redraw->rect.pt1.x, redraw->rect.pt1.y,
                     redraw->rect.pt2.x, redraw->rect.pt2.y);
               nxbe_fill(&fe.be.bkgd, &redraw->rect, fe.be.bgcolor);

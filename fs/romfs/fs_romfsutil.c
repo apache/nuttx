@@ -437,7 +437,7 @@ int romfs_filecacheread(struct romfs_mountpt_s *rm, struct romfs_file_s *rf,
 {
   int ret;
 
-  fvdbg("sector: %d cached: %d sectorsize: %d XIP base: %p buffer: %p\n",
+  finfo("sector: %d cached: %d sectorsize: %d XIP base: %p buffer: %p\n",
         sector, rf->rf_cachesector, rm->rm_hwsectorsize,
         rm->rm_xipbase, rf->rf_buffer);
 
@@ -457,13 +457,13 @@ int romfs_filecacheread(struct romfs_mountpt_s *rm, struct romfs_file_s *rf,
            */
 
           rf->rf_buffer = rm->rm_xipbase + sector * rm->rm_hwsectorsize;
-          fvdbg("XIP buffer: %p\n", rf->rf_buffer);
+          finfo("XIP buffer: %p\n", rf->rf_buffer);
         }
       else
         {
           /* In non-XIP mode, we will have to read the new sector. */
 
-          fvdbg("Calling romfs_hwread\n");
+          finfo("Calling romfs_hwread\n");
           ret = romfs_hwread(rm, rf->rf_buffer, sector, 1);
           if (ret < 0)
             {

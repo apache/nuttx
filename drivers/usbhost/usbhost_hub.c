@@ -228,7 +228,7 @@ static struct usbhost_registry_s g_hub =
 
 static void usbhost_hport_deactivate(FAR struct usbhost_hubport_s *hport)
 {
-  uvdbg("Deactivating: %s port %d\n",
+  uinfo("Deactivating: %s port %d\n",
         ROOTHUB(hport) ? "Root" : "Hub", hport->port);
 
   /* Don't free the control pipe of root hub ports! */
@@ -274,7 +274,7 @@ static int usbhost_hport_activate(FAR struct usbhost_hubport_s *hport)
   struct usbhost_epdesc_s epdesc;
   int ret;
 
-  uvdbg("Activating port %d\n", hport->port);
+  uinfo("Activating port %d\n", hport->port);
 
   epdesc.hport        = hport;
   epdesc.addr         = 0;
@@ -384,7 +384,7 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_class_s *hubclass,
             FAR struct usb_ifdesc_s *ifdesc =
               (FAR struct usb_ifdesc_s *)configdesc;
 
-            uvdbg("Interface descriptor\n");
+            uinfo("Interface descriptor\n");
             DEBUGASSERT(remaining >= USB_SIZEOF_IFDESC);
 
             /* Save the interface number and mark ONLY the interface found */
@@ -401,7 +401,7 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_class_s *hubclass,
             FAR struct usb_epdesc_s *epdesc =
               (FAR struct usb_epdesc_s *)configdesc;
 
-            uvdbg("Endpoint descriptor\n");
+            uinfo("Endpoint descriptor\n");
             DEBUGASSERT(remaining >= USB_SIZEOF_EPDESC);
 
             /* Check for an interrupt endpoint. */
@@ -415,7 +415,7 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_class_s *hubclass,
                   {
                     /* It is an OUT interrupt endpoint. Ignore */
 
-                    uvdbg("Interrupt OUT EP addr:%d mxpacketsize:%d\n",
+                    uinfo("Interrupt OUT EP addr:%d mxpacketsize:%d\n",
                           (epdesc->addr & USB_EP_ADDR_NUMBER_MASK),
                           usbhost_getle16(epdesc->mxpacketsize));
                   }
@@ -431,7 +431,7 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_class_s *hubclass,
                     intindesc.interval     = epdesc->interval;
                     intindesc.mxpacketsize = usbhost_getle16(epdesc->mxpacketsize);
 
-                    uvdbg("Interrupt IN EP: addr=%d interval=%d mxpacketsize=%d\n",
+                    uinfo("Interrupt IN EP: addr=%d interval=%d mxpacketsize=%d\n",
                           intindesc.addr, intindesc.interval, intindesc.mxpacketsize);
                   }
               }
@@ -479,7 +479,7 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_class_s *hubclass,
       return ret;
     }
 
-  ullvdbg("Endpoint allocated\n");
+  ullinfo("Endpoint allocated\n");
   return OK;
 }
 
@@ -513,7 +513,7 @@ static inline int usbhost_hubdesc(FAR struct usbhost_class_s *hubclass)
   uint16_t hubchar;
   int ret;
 
-  uvdbg("Read hub descriptor\n");
+  uinfo("Read hub descriptor\n");
 
   DEBUGASSERT(hubclass != NULL);
   priv = &((FAR struct usbhost_hubclass_s *)hubclass)->hubpriv;
@@ -550,20 +550,20 @@ static inline int usbhost_hubdesc(FAR struct usbhost_class_s *hubclass)
   priv->pwrondelay  = (2 * hubdesc.pwrondelay);
   priv->ctrlcurrent = hubdesc.ctrlcurrent;
 
-  uvdbg("Hub Descriptor:\n");
-  uvdbg("  bDescLength:         %d\n", hubdesc.len);
-  uvdbg("  bDescriptorType:     0x%02x\n", hubdesc.type);
-  uvdbg("  bNbrPorts:           %d\n", hubdesc.nports);
-  uvdbg("  wHubCharacteristics: 0x%04x\n", usbhost_getle16(hubdesc.characteristics));
-  uvdbg("    lpsm:              %d\n", priv->lpsm);
-  uvdbg("    compounddev:       %s\n", priv->compounddev ? "TRUE" : "FALSE");
-  uvdbg("    ocmode:            %d\n", priv->ocmode);
-  uvdbg("    indicator:         %s\n", priv->indicator ? "TRUE" : "FALSE");
-  uvdbg("  bPwrOn2PwrGood:      %d\n", hubdesc.pwrondelay);
-  uvdbg("    pwrondelay:        %d\n", priv->pwrondelay);
-  uvdbg("  bHubContrCurrent:    %d\n", hubdesc.ctrlcurrent);
-  uvdbg("  DeviceRemovable:     %d\n", hubdesc.devattached);
-  uvdbg("  PortPwrCtrlMask:     %d\n", hubdesc.pwrctrlmask);
+  uinfo("Hub Descriptor:\n");
+  uinfo("  bDescLength:         %d\n", hubdesc.len);
+  uinfo("  bDescriptorType:     0x%02x\n", hubdesc.type);
+  uinfo("  bNbrPorts:           %d\n", hubdesc.nports);
+  uinfo("  wHubCharacteristics: 0x%04x\n", usbhost_getle16(hubdesc.characteristics));
+  uinfo("    lpsm:              %d\n", priv->lpsm);
+  uinfo("    compounddev:       %s\n", priv->compounddev ? "TRUE" : "FALSE");
+  uinfo("    ocmode:            %d\n", priv->ocmode);
+  uinfo("    indicator:         %s\n", priv->indicator ? "TRUE" : "FALSE");
+  uinfo("  bPwrOn2PwrGood:      %d\n", hubdesc.pwrondelay);
+  uinfo("    pwrondelay:        %d\n", priv->pwrondelay);
+  uinfo("  bHubContrCurrent:    %d\n", hubdesc.ctrlcurrent);
+  uinfo("  DeviceRemovable:     %d\n", hubdesc.devattached);
+  uinfo("  PortPwrCtrlMask:     %d\n", hubdesc.pwrctrlmask);
 
   return OK;
 }
@@ -694,7 +694,7 @@ static void usbhost_hub_event(FAR void *arg)
 
   if (priv->disconnected)
     {
-      uvdbg("Disconnected\n");
+      uinfo("Disconnected\n");
       return;
     }
 
@@ -707,7 +707,7 @@ static void usbhost_hub_event(FAR void *arg)
   hport = hubclass->hport;
 
   statuschange = priv->buffer[0];
-  uvdbg("StatusChange: %02x\n", statuschange);
+  uinfo("StatusChange: %02x\n", statuschange);
 
   /* Check for status change on any port */
 
@@ -720,7 +720,7 @@ static void usbhost_hub_event(FAR void *arg)
           continue;
         }
 
-      uvdbg("Port %d status change\n", port);
+      uinfo("Port %d status change\n", port);
 
       /* Port status changed, check what happened */
 
@@ -783,7 +783,7 @@ static void usbhost_hub_event(FAR void *arg)
           uint16_t debouncestable = 0;
           uint16_t connection = 0xffff;
 
-          uvdbg("Port %d status %04x change %04x\n", port, status, change);
+          uinfo("Port %d status %04x change %04x\n", port, status, change);
 
           /* Debounce */
 
@@ -812,7 +812,7 @@ static void usbhost_hub_event(FAR void *arg)
                   debouncestable += 25;
                   if (debouncestable >= 100)
                     {
-                      uvdbg("Port %d debouncestable=%d\n", port, debouncestable);
+                      uinfo("Port %d debouncestable=%d\n", port, debouncestable);
                       break;
                     }
                 }
@@ -847,7 +847,7 @@ static void usbhost_hub_event(FAR void *arg)
             {
               /* Device connected to a port on the hub */
 
-              uvdbg("Connection on port %d\n", port);
+              uinfo("Connection on port %d\n", port);
 
               ctrlreq->type = USBHUB_REQ_TYPE_PORT;
               ctrlreq->req  = USBHUB_REQ_SETFEATURE;
@@ -881,7 +881,7 @@ static void usbhost_hub_event(FAR void *arg)
               status = usbhost_getle16(portstatus.status);
               change = usbhost_getle16(portstatus.change);
 
-              uvdbg("port %d status %04x change %04x after reset\n",
+              uinfo("port %d status %04x change %04x after reset\n",
                     port, status, change);
 
               if ((status & USBHUB_PORT_STAT_RESET)  == 0 &&
@@ -943,7 +943,7 @@ static void usbhost_hub_event(FAR void *arg)
                * resources.
                */
 
-              uvdbg("Disconnection on port %d\n", port);
+              uinfo("Disconnection on port %d\n", port);
 
               /* Free any devices classes connect on this hub port */
 
@@ -1027,13 +1027,13 @@ static void usbhost_disconnect_event(FAR void *arg)
   irqstate_t flags;
   int port;
 
-  uvdbg("Disconnecting\n");
+  uinfo("Disconnecting\n");
 
   DEBUGASSERT(hubclass != NULL && hubclass->hport != NULL);
   priv  = &((FAR struct usbhost_hubclass_s *)hubclass)->hubpriv;
   hport = hubclass->hport;
 
-  uvdbg("Destroying hub on port  %d\n", hport->port);
+  uinfo("Destroying hub on port  %d\n", hport->port);
 
   /* Set an indication to any users of the device that the device is no
    * longer available.
@@ -1453,7 +1453,7 @@ static int usbhost_disconnected(struct usbhost_class_s *hubclass)
   irqstate_t flags;
   int ret;
 
-  uvdbg("Disconnected\n");
+  uinfo("Disconnected\n");
 
   /* Execute the disconnect action from the worker thread. */
 

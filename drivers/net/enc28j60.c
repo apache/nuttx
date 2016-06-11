@@ -1092,7 +1092,7 @@ static int enc_transmit(FAR struct enc_driver_s *priv)
 
   /* Increment statistics */
 
-  nllvdbg("Sending packet, pktlen: %d\n", priv->dev.d_len);
+  nllinfo("Sending packet, pktlen: %d\n", priv->dev.d_len);
   NETDEV_TXPACKETS(&priv->dev);
 
   /* Verify that the hardware is ready to send another packet.  The driver
@@ -1180,7 +1180,7 @@ static int enc_txpoll(struct net_driver_s *dev)
    * the field d_len is set to a value > 0.
    */
 
-  nllvdbg("Poll result: d_len=%d\n", priv->dev.d_len);
+  nllinfo("Poll result: d_len=%d\n", priv->dev.d_len);
   if (priv->dev.d_len > 0)
     {
       /* Look up the destination MAC address and add it to the Ethernet
@@ -1388,7 +1388,7 @@ static void enc_rxdispatch(FAR struct enc_driver_s *priv)
 #ifdef CONFIG_NET_IPv4
   if (BUF->type == HTONS(ETHTYPE_IP))
     {
-      nllvdbg("IPv4 frame\n");
+      nllinfo("IPv4 frame\n");
       NETDEV_RXIPV4(&priv->dev);
 
       /* Handle ARP on input then give the IPv4 packet to the network
@@ -1429,7 +1429,7 @@ static void enc_rxdispatch(FAR struct enc_driver_s *priv)
 #ifdef CONFIG_NET_IPv6
   if (BUF->type == HTONS(ETHTYPE_IP6))
     {
-      nllvdbg("Iv6 frame\n");
+      nllinfo("Iv6 frame\n");
       NETDEV_RXIPV6(&priv->dev);
 
       /* Give the IPv6 packet to the network layer */
@@ -1467,7 +1467,7 @@ static void enc_rxdispatch(FAR struct enc_driver_s *priv)
 #ifdef CONFIG_NET_ARP
   if (BUF->type == htons(ETHTYPE_ARP))
     {
-      nllvdbg("ARP packet received (%02x)\n", BUF->type);
+      nllinfo("ARP packet received (%02x)\n", BUF->type);
       NETDEV_RXARP(&priv->dev);
 
       arp_arpin(&priv->dev);
@@ -1543,7 +1543,7 @@ static void enc_pktif(FAR struct enc_driver_s *priv)
   pktlen        = (uint16_t)rsv[3] << 8 | (uint16_t)rsv[2];
   rxstat        = (uint16_t)rsv[5] << 8 | (uint16_t)rsv[4];
 
-  nllvdbg("Receiving packet, nextpkt: %04x pktlen: %d rxstat: %04x\n",
+  nllinfo("Receiving packet, nextpkt: %04x pktlen: %d rxstat: %04x\n",
           priv->nextpkt, pktlen, rxstat);
 
   /* Check if the packet was received OK */
@@ -1647,7 +1647,7 @@ static void enc_irqworker(FAR void *arg)
        * settings.
        */
 
-      nllvdbg("EIR: %02x\n", eir);
+      nllinfo("EIR: %02x\n", eir);
 
       /* DMAIF: The DMA interrupt indicates that the DMA module has completed
        * its memory copy or checksum calculation. Additionally, this interrupt
@@ -1767,7 +1767,7 @@ static void enc_irqworker(FAR void *arg)
           uint8_t pktcnt = enc_rdbreg(priv, ENC_EPKTCNT);
           if (pktcnt > 0)
             {
-              nllvdbg("EPKTCNT: %02x\n", pktcnt);
+              nllinfo("EPKTCNT: %02x\n", pktcnt);
 
               /* Handle packet receipt */
 
@@ -2336,7 +2336,7 @@ static int enc_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 
 static void enc_pwrsave(FAR struct enc_driver_s *priv)
 {
-  nllvdbg("Set PWRSV\n");
+  nllinfo("Set PWRSV\n");
 
   /* 1. Turn off packet reception by clearing ECON1.RXEN. */
 
@@ -2396,7 +2396,7 @@ static void enc_pwrsave(FAR struct enc_driver_s *priv)
 
 static void enc_pwrfull(FAR struct enc_driver_s *priv)
 {
-  nllvdbg("Clear PWRSV\n");
+  nllinfo("Clear PWRSV\n");
 
   /* 1. Wake-up by clearing ECON2.PWRSV. */
 
@@ -2528,7 +2528,7 @@ static int enc_reset(FAR struct enc_driver_s *priv)
       return -ENODEV;
     }
 
-  nllvdbg("Rev ID: %02x\n", regval);
+  nllinfo("Rev ID: %02x\n", regval);
 
   /* Set filter mode: unicast OR broadcast AND crc valid */
 

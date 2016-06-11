@@ -195,7 +195,7 @@ void up_netinitialize(void)
       return;
     }
 
-  nllvdbg("Bound SPI port %d to ENCX24J600 device %d\n",
+  nllinfo("Bound SPI port %d to ENCX24J600 device %d\n",
           ENCX24J600_SPI_PORTNO, ENCX24J600_DEVNO);
 }
 

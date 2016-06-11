@@ -101,7 +101,7 @@ FAR struct iob_s *iob_trimtail(FAR struct iob_s *iob, unsigned int trimlen)
            * I/O buffer away?
            */
 
-          nllvdbg("iob=%p len=%d vs %d\n", last, last->io_len, len);
+          nllinfo("iob=%p len=%d vs %d\n", last, last->io_len, len);
           if (last->io_len <= len)
             {
               /* Yes.. Consume the entire buffer */

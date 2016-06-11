@@ -999,7 +999,7 @@ static uint32_t nand_nfc_poll(void)
   sr = nand_getreg(SAM_HSMC_SR);
 
 #ifndef CONFIG_SAMA5_NAND_REGDEBUG
-  // fllvdbg("sr=%08x\n", sr);
+  // fllinfo("sr=%08x\n", sr);
 #endif
 
   /* When set to one, this XFRDONE indicates that the NFC has terminated
@@ -1065,7 +1065,7 @@ static int hsmc_interrupt(int irq, void *context)
   uint32_t pending = sr & imr;
 
 #ifndef CONFIG_SAMA5_NAND_REGDEBUG
-  fllvdbg("sr=%08x imr=%08x\n", sr, imr);
+  fllinfo("sr=%08x imr=%08x\n", sr, imr);
 #endif
 
   /* When set to one, this XFRDONE indicates that the NFC has terminated
@@ -1233,7 +1233,7 @@ static int nand_wait_dma(struct sam_nandcs_s *priv)
         }
     }
 
-  fvdbg("Awakened: result=%d\n", priv->result);
+  finfo("Awakened: result=%d\n", priv->result);
   priv->dmadone = false;
   return priv->result;
 }
@@ -1293,7 +1293,7 @@ static int nand_dma_read(struct sam_nandcs_s *priv,
 
   DEBUGASSERT(priv->dma);
 
-  fvdbg("vsrc=%08x vdest=%08x nbytes=%d\n",
+  finfo("vsrc=%08x vdest=%08x nbytes=%d\n",
         (int)vsrc, (int)vdest, (int)nbytes);
 
   /* Initialize sampling */
@@ -1463,7 +1463,7 @@ static int nand_nfcsram_read(struct sam_nandcs_s *priv, uint8_t *buffer,
   int remaining;
   int ret;
 
-  fvdbg("buffer=%p buflen=%d\n", buffer, buflen);
+  finfo("buffer=%p buflen=%d\n", buffer, buflen);
 
   /* Get the offset data source address */
 
@@ -1530,7 +1530,7 @@ static int nand_read(struct sam_nandcs_s *priv, uint8_t *buffer,
   int buswidth;
   int ret;
 
-  fvdbg("buffer=%p buflen=%d\n", buffer, (int)buflen);
+  finfo("buffer=%p buflen=%d\n", buffer, (int)buflen);
 
   /* Get the buswidth */
 
@@ -1622,7 +1622,7 @@ static int nand_read_pmecc(struct sam_nandcs_s *priv, off_t block,
   uint16_t sparesize;
   int ret;
 
-  fvdbg("block=%d page=%d data=%p\n", (int)block, page, data);
+  finfo("block=%d page=%d data=%p\n", (int)block, page, data);
   DEBUGASSERT(priv && data);
 
   /* Get page and spare sizes */
@@ -1765,7 +1765,7 @@ static int nand_nfcsram_write(struct sam_nandcs_s *priv, uint8_t *buffer,
   uintptr_t dest;
   int ret;
 
-  fvdbg("buffer=%p buflen=%d offset=%d\n", buffer, buflen, offset);
+  finfo("buffer=%p buflen=%d offset=%d\n", buffer, buflen, offset);
   nand_dump("NFC SRAM Write", buffer, buflen);
 
   /* Apply the offset to the destination address */
@@ -1829,7 +1829,7 @@ static int nand_write(struct sam_nandcs_s *priv, uint8_t *buffer,
   int buswidth;
   int ret;
 
-  fvdbg("buffer=%p buflen=%d offset=%d\n", buffer, buflen, offset);
+  finfo("buffer=%p buflen=%d offset=%d\n", buffer, buflen, offset);
   nand_dump("NAND Write", buffer, buflen);
 
   /* Apply the offset to the destination address */
@@ -1924,7 +1924,7 @@ static int nand_readpage_noecc(struct sam_nandcs_s *priv, off_t block,
   off_t coladdr;
   int ret;
 
-  fvdbg("block=%d page=%d data=%p spare=%p\n", (int)block, page, data, spare);
+  finfo("block=%d page=%d data=%p spare=%p\n", (int)block, page, data, spare);
   DEBUGASSERT(priv && (data || spare));
 
   /* Get page and spare sizes */
@@ -2038,7 +2038,7 @@ static int nand_readpage_pmecc(struct sam_nandcs_s *priv, off_t block,
   int ret;
   int i;
 
-  fvdbg("block=%d page=%d data=%p\n", (int)block, page, data);
+  finfo("block=%d page=%d data=%p\n", (int)block, page, data);
   DEBUGASSERT(priv && data);
 
   /* Make sure that we have exclusive access to the PMECC and that the PMECC
@@ -2159,7 +2159,7 @@ static int nand_writepage_noecc(struct sam_nandcs_s *priv, off_t block,
   off_t rowaddr;
   int ret = OK;
 
-  fvdbg("block=%d page=%d data=%p spare=%p\n", (int)block, page, data, spare);
+  finfo("block=%d page=%d data=%p spare=%p\n", (int)block, page, data, spare);
 
   /* Get page and spare sizes */
 
@@ -2320,7 +2320,7 @@ static int nand_writepage_pmecc(struct sam_nandcs_s *priv, off_t block,
   unsigned int i;
   int ret = 0;
 
-  fvdbg("block=%d page=%d data=%p\n", (int)block, page, data);
+  finfo("block=%d page=%d data=%p\n", (int)block, page, data);
   DEBUGASSERT(priv && data);
 
   /* Make sure that we have exclusive access to the PMECC and that the PMECC
@@ -2344,7 +2344,7 @@ static int nand_writepage_pmecc(struct sam_nandcs_s *priv, off_t block,
   /* Calculate physical address of the page */
 
   rowaddr = block * nandmodel_pagesperblock(&priv->raw.model) + page;
-  fvdbg("pagesize=%d eccsaddr=%d rowaddr=%d\n", pagesize, eccsaddr, rowaddr);
+  finfo("pagesize=%d eccsaddr=%d rowaddr=%d\n", pagesize, eccsaddr, rowaddr);
 
 #if 1 /* Use NFC SRAM */
   /* Write the data area to NFC SRAM */
@@ -2437,7 +2437,7 @@ static int nand_writepage_pmecc(struct sam_nandcs_s *priv, off_t block,
   eccpersector = (pmecc_get_eccsize()) / sectersperpage;
   eccsize      = sectersperpage * eccpersector;
 
-  fvdbg("sectersperpage=%d eccpersector=%d eccsize=%d\n",
+  finfo("sectersperpage=%d eccpersector=%d eccsize=%d\n",
         sectersperpage, eccpersector, eccsize);
 
 #ifdef CONFIG_SAMA5_PMECC_TRIMPAGE
@@ -2550,7 +2550,7 @@ static int nand_eraseblock(struct nand_raw_s *raw, off_t block)
 
   DEBUGASSERT(priv);
 
-  fvdbg("block=%d\n", (int)block);
+  finfo("block=%d\n", (int)block);
 
   /* Get exclusvie access to the HSMC hardware.
    * REVISIT:  The scope of this exclusivity is just NAND.
@@ -2796,7 +2796,7 @@ static int nand_writepage(struct nand_raw_s *raw, off_t block,
 
 static void nand_reset(struct sam_nandcs_s *priv)
 {
-  fvdbg("Resetting\n");
+  finfo("Resetting\n");
   nand_nfc_cleale(priv, 0, COMMAND_RESET, 0, 0, 0);
   nand_wait_ready(priv);
 }
@@ -2834,7 +2834,7 @@ struct mtd_dev_s *sam_nand_initialize(int cs)
   uint8_t ecctype;
   int ret;
 
-  fvdbg("CS%d\n", cs);
+  finfo("CS%d\n", cs);
 
   /* Select the device structure (In SAMA5D3, NAND is only supported on CS3). */
 

@@ -225,7 +225,7 @@ int nxffs_getc(FAR struct nxffs_volume_s *volume, uint16_t reserve)
           off_t nextblock = volume->ioblock + 1;
           if (nextblock >= volume->nblocks)
             {
-              fvdbg("End of FLASH encountered\n");
+              finfo("End of FLASH encountered\n");
               return -ENOSPC;
             }
 

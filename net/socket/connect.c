@@ -185,7 +185,7 @@ static uint16_t psock_connect_interrupt(FAR struct net_driver_s *dev,
 {
   struct tcp_connect_s *pstate = (struct tcp_connect_s *)pvpriv;
 
-  nllvdbg("flags: %04x\n", flags);
+  nllinfo("flags: %04x\n", flags);
 
   /* 'priv' might be null in some race conditions (?) */
 
@@ -261,7 +261,7 @@ static uint16_t psock_connect_interrupt(FAR struct net_driver_s *dev,
           return flags & ~TCP_NEWDATA;
         }
 
-      nllvdbg("Resuming: %d\n", pstate->tc_result);
+      nllinfo("Resuming: %d\n", pstate->tc_result);
 
       /* Stop further callbacks */
 

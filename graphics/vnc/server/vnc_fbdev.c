@@ -162,7 +162,7 @@ static int up_getvideoinfo(FAR struct fb_vtable_s *vtable,
   FAR struct vnc_fbinfo_s *fbinfo = (FAR struct vnc_fbinfo_s *)vtable;
   FAR struct vnc_session_s *session;
 
-  gvdbg("vtable=%p vinfo=%p\n", vtable, vinfo);
+  ginfo("vtable=%p vinfo=%p\n", vtable, vinfo);
 
   DEBUGASSERT(fbinfo != NULL && vinfo != NULL);
   if (fbinfo != NULL && vinfo != NULL)
@@ -203,7 +203,7 @@ static int up_getplaneinfo(FAR struct fb_vtable_s *vtable, int planeno,
   FAR struct vnc_fbinfo_s *fbinfo = (FAR struct vnc_fbinfo_s *)vtable;
   FAR struct vnc_session_s *session;
 
-  gvdbg("vtable=%p planeno=%d pinfo=%p\n", vtable, planeno, pinfo);
+  ginfo("vtable=%p planeno=%d pinfo=%p\n", vtable, planeno, pinfo);
 
   DEBUGASSERT(fbinfo != NULL && pinfo != NULL && planeno == 0);
   if (fbinfo != NULL && pinfo != NULL && planeno == 0)
@@ -249,7 +249,7 @@ static int up_getcmap(FAR struct fb_vtable_s *vtable,
   FAR struct vnc_session_s *session;
   int i;
 
-  gvdbg("vtable=%p cmap=%p\n", vtable, cmap);
+  ginfo("vtable=%p cmap=%p\n", vtable, cmap);
 
   DEBUGASSERT(fbinfo != NULL && cmap != NULL);
 
@@ -264,7 +264,7 @@ static int up_getcmap(FAR struct fb_vtable_s *vtable,
           return -ENOTCONN;
         }
 
-      gvdbg("first=%d len=%d\n", vcmap->first, cmap->len);
+      ginfo("first=%d len=%d\n", vcmap->first, cmap->len);
 #warning Missing logic
 
       return OK;
@@ -286,7 +286,7 @@ static int up_putcmap(FAR struct fb_vtable_s *vtable, FAR const struct fb_cmap_s
   FAR struct vnc_session_s *session;
   int i;
 
-  gvdbg("vtable=%p cmap=%p\n", vtable, cmap);
+  ginfo("vtable=%p cmap=%p\n", vtable, cmap);
 
   DEBUGASSERT(fbinfo != NULL && cmap != NULL);
 
@@ -301,7 +301,7 @@ static int up_putcmap(FAR struct fb_vtable_s *vtable, FAR const struct fb_cmap_s
           return -ENOTCONN;
         }
 
-      gvdbg("first=%d len=%d\n", vcmap->first, cmap->len);
+      ginfo("first=%d len=%d\n", vcmap->first, cmap->len);
 #warning Missing logic
 
       return OK;
@@ -324,7 +324,7 @@ static int up_getcursor(FAR struct fb_vtable_s *vtable,
   FAR struct vnc_session_s *session;
   int i;
 
-  gvdbg("vtable=%p attrib=%p\n", vtable, attrib);
+  ginfo("vtable=%p attrib=%p\n", vtable, attrib);
 
   DEBUGASSERT(fbinfo != NULL && attrib != NULL);
 
@@ -360,7 +360,7 @@ static int up_setcursor(FAR struct fb_vtable_s *vtable,
   FAR struct vnc_session_s *session;
   int i;
 
-  gvdbg("vtable=%p settings=%p\n", vtable, settings);
+  ginfo("vtable=%p settings=%p\n", vtable, settings);
 
   DEBUGASSERT(fbinfo != NULL && settings != NULL);
 
@@ -375,7 +375,7 @@ static int up_setcursor(FAR struct fb_vtable_s *vtable,
           return -ENOTCONN;
         }
 
-      gvdbg("flags:   %02x\n", settings->flags);
+      ginfo("flags:   %02x\n", settings->flags);
       if ((settings->flags & FB_CUR_SETPOSITION) != 0)
         {
 #warning Missing logic
@@ -435,7 +435,7 @@ static int vnc_start_server(int display)
 
   /* Start the VNC server kernel thread. */
 
-  gvdbg("Starting the VNC server for display %d\n", display);
+  ginfo("Starting the VNC server for display %d\n", display);
 
   g_fbstartup[display].result = -EBUSY;
   sem_reset(&g_fbstartup[display].fbinit, 0);
@@ -630,7 +630,7 @@ int up_fbinitialize(int display)
   ret = vnc_start_server(display);
   if (ret < 0)
     {
-      gvdbg("ERROR: vnc_start_server() failed: %d\n", ret);
+      ginfo("ERROR: vnc_start_server() failed: %d\n", ret);
       return ret;
     }
 
@@ -639,7 +639,7 @@ int up_fbinitialize(int display)
   ret = vnc_wait_connect(display);
   if (ret < 0)
     {
-      gvdbg("ERROR: vnc_wait_connect() failed: %d\n", ret);
+      ginfo("ERROR: vnc_wait_connect() failed: %d\n", ret);
     }
 
   return ret;
@@ -711,7 +711,7 @@ int vnc_fbinitialize(int display, vnc_kbdout_t kbdout,
   ret = vnc_start_server(display);
   if (ret < 0)
     {
-      gvdbg("ERROR: vnc_start_server() failed: %d\n", ret);
+      ginfo("ERROR: vnc_start_server() failed: %d\n", ret);
       return ret;
     }
 
@@ -720,7 +720,7 @@ int vnc_fbinitialize(int display, vnc_kbdout_t kbdout,
   ret = vnc_wait_start(display);
   if (ret < 0)
     {
-      gvdbg("ERROR: vnc_wait_start() failed: %d\n", ret);
+      ginfo("ERROR: vnc_wait_start() failed: %d\n", ret);
       return ret;
     }
 

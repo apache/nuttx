@@ -91,13 +91,13 @@
 #ifdef CONFIG_DEBUG_SPI
 #  define spidbg  lldbg
 #  ifdef CONFIG_DEBUG_INFO
-#    define spivdbg lldbg
+#    define spiinfo lldbg
 #  else
-#    define spivdbg(x...)
+#    define spiinfo(x...)
 #  endif
 #else
 #  define spidbg(x...)
-#  define spivdbg(x...)
+#  define spiinfo(x...)
 #endif
 
 /* Clocking */
@@ -502,7 +502,7 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nw
        * and (3) there are more bytes to be sent.
        */
 
-      spivdbg("TX: rxpending: %d nwords: %d\n", rxpending, nwords);
+      spiinfo("TX: rxpending: %d nwords: %d\n", rxpending, nwords);
       while ((getreg8(LPC214X_SPI1_SR) & LPC214X_SPI1SR_TNF) &&
              (rxpending < LPC214X_SPI1_FIFOSZ) && nwords)
         {
@@ -513,7 +513,7 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nw
 
       /* Now, read the RX data from the RX FIFO while the RX FIFO is not empty */
 
-      spivdbg("RX: rxpending: %d\n", rxpending);
+      spiinfo("RX: rxpending: %d\n", rxpending);
       while (getreg8(LPC214X_SPI1_SR) & LPC214X_SPI1SR_RNE)
         {
           *ptr++ = (uint8_t)getreg16(LPC214X_SPI1_DR);

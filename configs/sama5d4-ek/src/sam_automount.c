@@ -285,7 +285,7 @@ void sam_automount_initialize(void)
 {
   FAR void *handle;
 
-  fvdbg("Initializing automounter(s)\n");
+  finfo("Initializing automounter(s)\n");
 
 #ifdef CONFIG_SAMA5D4EK_HSMCI0_AUTOMOUNT
   /* Initialize the HSMCI0 auto-mounter */

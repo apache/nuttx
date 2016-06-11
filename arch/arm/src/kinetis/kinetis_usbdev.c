@@ -371,9 +371,9 @@ const struct trace_msg_t g_usb_trace_strings_deverror[] =
 
 #  define regdbg lldbg
 #  ifdef CONFIG_DEBUG_INFO
-#    define regvdbg lldbg
+#    define reginfo lldbg
 #  else
-#    define regvdbg(x...)
+#    define reginfo(x...)
 #  endif
 
 #else
@@ -381,7 +381,7 @@ const struct trace_msg_t g_usb_trace_strings_deverror[] =
 #  define khci_getreg(addr)      getreg8(addr)
 #  define khci_putreg(val,addr)  putreg8(val,addr)
 #  define regdbg(x...)
-#  define regvdbg(x...)
+#  define reginfo(x...)
 
 #endif
 
@@ -391,15 +391,15 @@ const struct trace_msg_t g_usb_trace_strings_deverror[] =
 
 #  define bdtdbg lldbg
 #  ifdef CONFIG_DEBUG_INFO
-#    define bdtvdbg lldbg
+#    define bdtinfo lldbg
 #  else
-#    define bdtvdbg(x...)
+#    define bdtinfo(x...)
 #  endif
 
 #else
 
 #  define bdtdbg(x...)
-#  define bdtvdbg(x...)
+#  define bdtinfo(x...)
 
 #endif
 
@@ -987,10 +987,10 @@ static void khci_wrcomplete(struct khci_usbdev_s *priv,
   epno   = USB_EPNO(privep->ep.eplog);
 
 #ifdef CONFIG_USBDEV_NOWRITEAHEAD
-  ullvdbg("EP%d: len=%d xfrd=%d inflight=%d\n",
+  ullinfo("EP%d: len=%d xfrd=%d inflight=%d\n",
           epno, privreq->req.len, privreq->req.xfrd, privreq->inflight[0]);
 #else
-  ullvdbg("EP%d: len=%d xfrd=%d inflight={%d, %d}\n",
+  ullinfo("EP%d: len=%d xfrd=%d inflight={%d, %d}\n",
           epno, privreq->req.len, privreq->req.xfrd,
           privreq->inflight[0], privreq->inflight[1]);
 #endif
@@ -1303,7 +1303,7 @@ static int khci_wrstart(struct khci_usbdev_s *priv,
       bytesleft = privreq->req.len;
     }
 
-  ullvdbg("epno=%d req=%p: len=%d xfrd=%d index=%d nullpkt=%d\n",
+  ullinfo("epno=%d req=%p: len=%d xfrd=%d index=%d nullpkt=%d\n",
           epno, privreq, privreq->req.len, xfrd, index, privep->txnullpkt);
 
   /* Get the number of bytes left to be sent in the packet */
@@ -1417,7 +1417,7 @@ static int khci_rdcomplete(struct khci_usbdev_s *priv,
   bdtout = privep->bdtout;
   epno   = USB_EPNO(privep->ep.eplog);
 
-  ullvdbg("EP%d: len=%d xfrd=%d\n",
+  ullinfo("EP%d: len=%d xfrd=%d\n",
           epno, privreq->req.len, privreq->req.xfrd);
   bdtdbg("EP%d BDT OUT [%p] {%08x, %08x}\n",
          epno, bdtout, bdtout->status, bdtout->addr);
@@ -1705,7 +1705,7 @@ static int khci_rdrequest(struct khci_usbdev_s *priv,
       return OK;
     }
 
-  ullvdbg("EP%d: len=%d\n", USB_EPNO(privep->ep.eplog), privreq->req.len);
+  ullinfo("EP%d: len=%d\n", USB_EPNO(privep->ep.eplog), privreq->req.len);
 
   /* Ignore any attempt to receive a zero length packet */
 
@@ -1995,7 +1995,7 @@ static void khci_ep0setup(struct khci_usbdev_s *priv)
   index.w = GETUINT16(priv->ctrl.index);
   len.w   = GETUINT16(priv->ctrl.len);
 
-  ullvdbg("SETUP: type=%02x req=%02x value=%04x index=%04x len=%04x\n",
+  ullinfo("SETUP: type=%02x req=%02x value=%04x index=%04x len=%04x\n",
           priv->ctrl.type, priv->ctrl.req, value.w, index.w, len.w);
 
   /* Dispatch any non-standard requests */
@@ -2239,7 +2239,7 @@ static void khci_ep0setup(struct khci_usbdev_s *priv)
               {
                 /* Special case recipient=device test mode */
 
-                ullvdbg("test mode: %d\n", index.w);
+                ullinfo("test mode: %d\n", index.w);
               }
             else
               {

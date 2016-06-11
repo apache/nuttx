@@ -191,7 +191,7 @@ static void automount_mount(FAR struct automounter_state_s *priv)
   FAR const struct automount_lower_s *lower = priv->lower;
   int ret;
 
-  fvdbg("Mounting %s\n", lower->mountpoint);
+  finfo("Mounting %s\n", lower->mountpoint);
 
   /* Check if the something is already mounted at the mountpoint. */
 
@@ -268,7 +268,7 @@ static int automount_unmount(FAR struct automounter_state_s *priv)
   FAR const struct automount_lower_s *lower = priv->lower;
   int ret;
 
-  fvdbg("Unmounting %s\n", lower->mountpoint);
+  finfo("Unmounting %s\n", lower->mountpoint);
 
   /* Check if the something is already mounted at the mountpoint. */
 
@@ -295,7 +295,7 @@ static int automount_unmount(FAR struct automounter_state_s *priv)
 
           if (errcode == EBUSY)
             {
-              fvdbg("WARNING: Volume is busy, try again later\n");
+              finfo("WARNING: Volume is busy, try again later\n");
 
               /* Start a timer to retry the umount2 after a delay */
 
@@ -315,7 +315,7 @@ static int automount_unmount(FAR struct automounter_state_s *priv)
 
           else
             {
-              fvdbg("ERROR: umount2 failed: %d\n", errcode);
+              finfo("ERROR: umount2 failed: %d\n", errcode);
               return -errcode;
             }
         }
@@ -363,7 +363,7 @@ static void automount_timeout(int argc, uint32_t arg1, ...)
     (FAR struct automounter_state_s *)((uintptr_t)arg1);
   int ret;
 
-  fllvdbg("Timeout!\n");
+  fllinfo("Timeout!\n");
   DEBUGASSERT(argc == 1 && priv);
 
   /* Check the state of things.  This timeout at the interrupt level and
@@ -372,7 +372,7 @@ static void automount_timeout(int argc, uint32_t arg1, ...)
    * there should be no pending work.
    */
 
-  fllvdbg("inserted=%d\n", priv->inserted);
+  fllinfo("inserted=%d\n", priv->inserted);
   DEBUGASSERT(!priv->inserted && work_available(&priv->work));
 
   /* Queue work to occur immediately. */
@@ -463,7 +463,7 @@ static int automount_interrupt(FAR const struct automount_lower_s *lower,
 
   DEBUGASSERT(lower && priv && priv->lower == lower);
 
-  fllvdbg("inserted=%d\n", inserted);
+  fllinfo("inserted=%d\n", inserted);
 
   /* Cancel any pending work.  We could get called multiple times if, for
    * example there is bounce in the detection mechanism.  Work is performed
@@ -532,7 +532,7 @@ FAR void *automount_initialize(FAR const struct automount_lower_s *lower)
   FAR struct automounter_state_s *priv;
   int ret;
 
-  fvdbg("lower=%p\n", lower);
+  finfo("lower=%p\n", lower);
   DEBUGASSERT(lower);
 
   /* Allocate an auto-mounter state structure */

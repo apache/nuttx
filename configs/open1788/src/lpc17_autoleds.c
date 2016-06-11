@@ -141,13 +141,13 @@
 #ifdef CONFIG_DEBUG_LEDS
 #  define leddbg lldbg
 #  ifdef CONFIG_DEBUG_INFO
-#    define ledvdbg lldbg
+#    define ledinfo lldbg
 #  else
-#    define ledvdbg(x...)
+#    define ledinfo(x...)
 #  endif
 #else
 #  define leddbg(x...)
-#  define ledvdbg(x...)
+#  define ledinfo(x...)
 #endif
 
 /* Dump GPIO registers */

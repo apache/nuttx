@@ -106,7 +106,7 @@ int arm_start_handler(int irq, FAR void *context)
 {
   FAR struct tcb_s *tcb;
 
-  sllvdbg("CPU%d Started\n", up_cpu_index());
+  sllinfo("CPU%d Started\n", up_cpu_index());
 
   /* Reset scheduler parameters */
 
@@ -155,7 +155,7 @@ int arm_start_handler(int irq, FAR void *context)
 
 int up_cpu_start(int cpu)
 {
-  sllvdbg("Starting CPU%d\n", cpu);
+  sllinfo("Starting CPU%d\n", cpu);
 
   DEBUGASSERT(cpu >= 0 && cpu < CONFIG_SMP_NCPUS && cpu != this_cpu());
 

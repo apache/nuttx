@@ -87,7 +87,7 @@ extern "C" {
 #endif
 
 #ifdef CONFIG_MMCSD_DUMPALL
-#  define mmcsd_dumpbuffer(m,b,l) fvdbgdumpbuffer(m,b,l)
+#  define mmcsd_dumpbuffer(m,b,l) finfodumpbuffer(m,b,l)
 #else
 #  define mmcsd_dumpbuffer(m,b,l)
 #endif

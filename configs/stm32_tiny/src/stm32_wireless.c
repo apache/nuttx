@@ -79,7 +79,7 @@ static xcpt_t g_isr;
 
 static int stm32tiny_wl_irq_attach(xcpt_t isr)
 {
-  vdbg("Attach IRQ\n");
+  info("Attach IRQ\n");
   g_isr = isr;
   stm32_gpiosetevent(GPIO_NRF24L01_IRQ, false, true, false, g_isr);
   return OK;
@@ -87,7 +87,7 @@ static int stm32tiny_wl_irq_attach(xcpt_t isr)
 
 static void stm32tiny_wl_chip_enable(bool enable)
 {
-  vdbg("CE:%d\n", enable);
+  info("CE:%d\n", enable);
   stm32_gpiowrite(GPIO_NRF24L01_CE, enable);
 }
 

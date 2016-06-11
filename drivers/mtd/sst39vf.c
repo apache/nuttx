@@ -814,8 +814,8 @@ FAR struct mtd_dev_s *sst39vf_initialize(void)
 
   /* Now see if we can suport the part */
 
-  fvdbg("Manufacturer: %02x\n", manufacturer);
-  fvdbg("Chip ID:      %04x\n", chipid);
+  finfo("Manufacturer: %02x\n", manufacturer);
+  finfo("Chip ID:      %04x\n", chipid);
 
   if (manufacturer != SST_MANUFACTURER_ID)
     {

@@ -69,14 +69,14 @@
 #ifdef CONFIG_DEBUG_SPI
 #  define spidbg  lldbg
 #  ifdef CONFIG_DEBUG_INFO
-#    define spivdbg lldbg
+#    define spiinfo lldbg
 #  else
-#    define spivdbg(x...)
+#    define spiinfo(x...)
 #  endif
 #else
 #  undef CONFIG_DEBUG_INFO
 #  define spidbg(x...)
-#  define spivdbg(x...)
+#  define spiinfo(x...)
 #endif
 
 /* SPI Clocking.

@@ -121,7 +121,7 @@ int elf_loaddtors(FAR struct elf_loadinfo_s *loadinfo)
        * static destructor section.
        */
 
-      bvdbg("elf_findsection .dtors section failed: %d\n", dtoridx);
+      binfo("elf_findsection .dtors section failed: %d\n", dtoridx);
       return ret == -ENOENT ? OK : ret;
     }
 
@@ -138,7 +138,7 @@ int elf_loaddtors(FAR struct elf_loadinfo_s *loadinfo)
   dtorsize         = shdr->sh_size;
   loadinfo->ndtors = dtorsize / sizeof(binfmt_dtor_t);
 
-  bvdbg("dtoridx=%d dtorsize=%d sizeof(binfmt_dtor_t)=%d ndtors=%d\n",
+  binfo("dtoridx=%d dtorsize=%d sizeof(binfmt_dtor_t)=%d ndtors=%d\n",
         dtoridx, dtorsize,  sizeof(binfmt_dtor_t), loadinfo->ndtors);
 
   /* Check if there are any destructors.  It is not an error if there
@@ -191,7 +191,7 @@ int elf_loaddtors(FAR struct elf_loadinfo_s *loadinfo)
             {
               FAR uintptr_t *ptr = (uintptr_t *)((FAR void *)(&loadinfo->dtors)[i]);
 
-              bvdbg("dtor %d: %08lx + %08lx = %08lx\n",
+              binfo("dtor %d: %08lx + %08lx = %08lx\n",
                     i, *ptr, (unsigned long)loadinfo->textalloc,
                     (unsigned long)(*ptr + loadinfo->textalloc));
 

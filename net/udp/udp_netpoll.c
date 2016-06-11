@@ -93,7 +93,7 @@ static uint16_t udp_poll_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
 {
   FAR struct udp_poll_s *info = (FAR struct udp_poll_s *)pvpriv;
 
-  nllvdbg("flags: %04x\n", flags);
+  nllinfo("flags: %04x\n", flags);
 
   DEBUGASSERT(!info || (info->psock && info->fds));
 

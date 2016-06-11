@@ -623,7 +623,7 @@ static void tc_notify(FAR struct tc_dev_s *priv)
       if (fds)
         {
           fds->revents |= POLLIN;
-          ivdbg("Report events: %02x\n", fds->revents);
+          iinfo("Report events: %02x\n", fds->revents);
           sem_post(fds->sem);
         }
     }
@@ -899,7 +899,7 @@ static void tc_worker(FAR void *arg)
             priv->newy  = value / CONFIG_TOUCHSCREEN_AVG_SAMPLES;
             priv->value = 0;
             priv->sampcount = 0;
-            ivdbg("Y=%d\n", priv->newy);
+            iinfo("Y=%d\n", priv->newy);
 
             /* Configure YU and YD with drive voltages and disable XR drive.  Note that
              * this is configuring the DRIVEA and DRIVEB outputs to enable the on-board
@@ -978,7 +978,7 @@ static void tc_worker(FAR void *arg)
               }
 
             newx  = value / CONFIG_TOUCHSCREEN_AVG_SAMPLES;
-            ivdbg("X=%d\n", newx);
+            iinfo("X=%d\n", newx);
 
             /* Samples are available */
 
@@ -1335,14 +1335,14 @@ errout:
 static int tc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
 #if 1
-  ivdbg("cmd: %d arg: %ld\n", cmd, arg);
+  iinfo("cmd: %d arg: %ld\n", cmd, arg);
   return -ENOTTY; /* None yet supported */
 #else
   FAR struct inode *inode;
   FAR struct tc_dev_s *priv;
   int ret;
 
-  ivdbg("cmd: %d arg: %ld\n", cmd, arg);
+  iinfo("cmd: %d arg: %ld\n", cmd, arg);
   DEBUGASSERT(filep);
   inode = filep->f_inode;
 
@@ -1389,7 +1389,7 @@ static int tc_poll(FAR struct file *filep, FAR struct pollfd *fds,
   int                       ret;
   int                       i;
 
-  ivdbg("setup: %d\n", (int)setup);
+  iinfo("setup: %d\n", (int)setup);
   DEBUGASSERT(filep && fds);
   inode = filep->f_inode;
 
@@ -1501,7 +1501,7 @@ int board_tsc_setup(int minor)
 #endif
   int ret;
 
-  ivdbg("minor: %d\n", minor);
+  iinfo("minor: %d\n", minor);
   DEBUGASSERT(minor >= 0 && minor < 100);
 
   /* If we only have one touchscreen, check if we already did init */
@@ -1547,7 +1547,7 @@ int board_tsc_setup(int minor)
   /* Register the device as an input device */
 
   (void)snprintf(devname, DEV_NAMELEN, DEV_FORMAT, minor);
-  ivdbg("Registering %s\n", devname);
+  iinfo("Registering %s\n", devname);
 
   ret = register_driver(devname, &tc_fops, 0666, priv);
   if (ret < 0)

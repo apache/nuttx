@@ -284,7 +284,7 @@ int schedule_unload(pid_t pid, FAR struct binary_s *bin)
       /* The errno value will get trashed by the following debug output */
 
       errorcode = get_errno();
-      bvdbg("ERROR: sigprocmask failed: %d\n", ret);
+      binfo("ERROR: sigprocmask failed: %d\n", ret);
       goto errout;
     }
 
@@ -310,7 +310,7 @@ int schedule_unload(pid_t pid, FAR struct binary_s *bin)
       /* The errno value will get trashed by the following debug output */
 
       errorcode = get_errno();
-      bvdbg("ERROR: sigaction failed: %d\n" , ret);
+      binfo("ERROR: sigaction failed: %d\n" , ret);
 
       /* Emergency removal from the list */
 

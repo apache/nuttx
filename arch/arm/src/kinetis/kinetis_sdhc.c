@@ -791,7 +791,7 @@ static void kinetis_transmit(struct kinetis_dev_s *priv)
    * ready (BWR)
    */
 
-  fllvdbg("Entry: remaining: %d IRQSTAT: %08x\n",
+  fllinfo("Entry: remaining: %d IRQSTAT: %08x\n",
           priv->remaining, getreg32(KINETIS_SDHC_IRQSTAT));
 
   while (priv->remaining > 0 &&
@@ -837,7 +837,7 @@ static void kinetis_transmit(struct kinetis_dev_s *priv)
       putreg32(data.w, KINETIS_SDHC_DATPORT);
     }
 
-  fllvdbg("Exit: remaining: %d IRQSTAT: %08x\n",
+  fllinfo("Exit: remaining: %d IRQSTAT: %08x\n",
           priv->remaining, getreg32(KINETIS_SDHC_IRQSTAT));
 
 }
@@ -877,7 +877,7 @@ static void kinetis_receive(struct kinetis_dev_s *priv)
    * ready (BRR)
    */
 
-  fllvdbg("Entry: remaining: %d IRQSTAT: %08x\n",
+  fllinfo("Entry: remaining: %d IRQSTAT: %08x\n",
           priv->remaining, getreg32(KINETIS_SDHC_IRQSTAT));
 
   while (priv->remaining > 0 &&
@@ -929,7 +929,7 @@ static void kinetis_receive(struct kinetis_dev_s *priv)
 
   putreg32(watermark << SDHC_WML_RD_SHIFT, KINETIS_SDHC_WML);
 
-  fllvdbg("Exit: remaining: %d IRQSTAT: %08x WML: %08x\n",
+  fllinfo("Exit: remaining: %d IRQSTAT: %08x WML: %08x\n",
           priv->remaining, getreg32(KINETIS_SDHC_IRQSTAT),
           getreg32(KINETIS_SDHC_WML));
 
@@ -1105,7 +1105,7 @@ static int kinetis_interrupt(int irq, void *context)
 
   regval  = getreg32(KINETIS_SDHC_IRQSIGEN);
   enabled = getreg32(KINETIS_SDHC_IRQSTAT) & regval;
-  fllvdbg("IRQSTAT: %08x IRQSIGEN %08x enabled: %08x\n",
+  fllinfo("IRQSTAT: %08x IRQSIGEN %08x enabled: %08x\n",
           getreg32(KINETIS_SDHC_IRQSTAT), regval, enabled);
 
   /* Disable card interrupts to clear the card interrupt to the host system. */
@@ -1289,7 +1289,7 @@ static void kinetis_reset(FAR struct sdio_dev_s *dev)
 
   putreg32(SDHC_INT_ALL, KINETIS_SDHC_IRQSTATEN);
 
-  fvdbg("SYSCTL: %08x PRSSTAT: %08x IRQSTATEN: %08x\n",
+  finfo("SYSCTL: %08x PRSSTAT: %08x IRQSTATEN: %08x\n",
         getreg32(KINETIS_SDHC_SYSCTL), getreg32(KINETIS_SDHC_PRSSTAT),
         getreg32(KINETIS_SDHC_IRQSTATEN));
 
@@ -1504,7 +1504,7 @@ static void kinetis_frequency(FAR struct sdio_dev_s *dev, uint32_t frequency)
   regval |= (SDHC_SYSCTL_SDCLKEN | SDHC_SYSCTL_PEREN | SDHC_SYSCTL_HCKEN |
              SDHC_SYSCTL_IPGEN);
   putreg32(regval, KINETIS_SDHC_SYSCTL);
-  fvdbg("SYSCTRL: %08x\n", getreg32(KINETIS_SDHC_SYSCTL));
+  finfo("SYSCTRL: %08x\n", getreg32(KINETIS_SDHC_SYSCTL));
 }
 #endif
 
@@ -1538,7 +1538,7 @@ static void kinetis_clock(FAR struct sdio_dev_s *dev, enum sdio_clock_e rate)
   regval  = getreg32(KINETIS_SDHC_SYSCTL);
   regval &= ~SDHC_SYSCTL_SDCLKEN;
   putreg32(regval, KINETIS_SDHC_SYSCTL);
-  fvdbg("SYSCTRL: %08x\n", getreg32(KINETIS_SDHC_SYSCTL));
+  finfo("SYSCTRL: %08x\n", getreg32(KINETIS_SDHC_SYSCTL));
 
   switch (rate)
     {
@@ -1552,7 +1552,7 @@ static void kinetis_clock(FAR struct sdio_dev_s *dev, enum sdio_clock_e rate)
           regval &= ~(SDHC_SYSCTL_IPGEN | SDHC_SYSCTL_HCKEN | SDHC_SYSCTL_PEREN |
                       SDHC_SYSCTL_SDCLKFS_MASK | SDHC_SYSCTL_DVS_MASK);
           putreg32(regval, KINETIS_SDHC_SYSCTL);
-          fvdbg("SYSCTRL: %08x\n", getreg32(KINETIS_SDHC_SYSCTL));
+          finfo("SYSCTRL: %08x\n", getreg32(KINETIS_SDHC_SYSCTL));
           return;
         }
 
@@ -1593,7 +1593,7 @@ static void kinetis_clock(FAR struct sdio_dev_s *dev, enum sdio_clock_e rate)
   regval  = getreg32(KINETIS_SDHC_SYSCTL);
   regval &= ~SDHC_SYSCTL_SDCLKEN;
   putreg32(regval, KINETIS_SDHC_SYSCTL);
-  fvdbg("SYSCTRL: %08x\n", getreg32(KINETIS_SDHC_SYSCTL));
+  finfo("SYSCTRL: %08x\n", getreg32(KINETIS_SDHC_SYSCTL));
 
   /* Clear the old prescaler and divisor values so that new ones can be ORed
    * in.
@@ -1619,7 +1619,7 @@ static void kinetis_clock(FAR struct sdio_dev_s *dev, enum sdio_clock_e rate)
 
           regval &= ~(SDHC_SYSCTL_IPGEN | SDHC_SYSCTL_HCKEN | SDHC_SYSCTL_PEREN);
           putreg32(regval, KINETIS_SDHC_SYSCTL);
-          fvdbg("SYSCTRL: %08x\n", getreg32(KINETIS_SDHC_SYSCTL));
+          finfo("SYSCTRL: %08x\n", getreg32(KINETIS_SDHC_SYSCTL));
           return;
         }
 
@@ -1653,7 +1653,7 @@ static void kinetis_clock(FAR struct sdio_dev_s *dev, enum sdio_clock_e rate)
     }
 
   putreg32(regval, KINETIS_SDHC_SYSCTL);
-  fvdbg("SYSCTRL: %08x\n", getreg32(KINETIS_SDHC_SYSCTL));
+  finfo("SYSCTRL: %08x\n", getreg32(KINETIS_SDHC_SYSCTL));
 }
 #endif
 
@@ -1824,7 +1824,7 @@ static int kinetis_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t ar
 
   /* Other bits? What about CMDTYP? */
 
-  fvdbg("cmd: %08x arg: %08x regval: %08x\n", cmd, arg, regval);
+  finfo("cmd: %08x arg: %08x regval: %08x\n", cmd, arg, regval);
 
   /* The Command Inhibit (CIHB) bit is set in the PRSSTAT bit immediately
    * after the transfer type register is written.  This bit is cleared when
@@ -2486,7 +2486,7 @@ static void kinetis_callbackenable(FAR struct sdio_dev_s *dev,
 {
   struct kinetis_dev_s *priv = (struct kinetis_dev_s *)dev;
 
-  fvdbg("eventset: %02x\n", eventset);
+  finfo("eventset: %02x\n", eventset);
   DEBUGASSERT(priv != NULL);
 
   priv->cbevents = eventset;
@@ -2522,7 +2522,7 @@ static int kinetis_registercallback(FAR struct sdio_dev_s *dev,
 
   /* Disable callbacks and register this callback and is argument */
 
-  fvdbg("Register %p(%p)\n", callback, arg);
+  finfo("Register %p(%p)\n", callback, arg);
   DEBUGASSERT(priv != NULL);
 
   priv->cbevents = 0;
@@ -2694,7 +2694,7 @@ static void kinetis_callback(void *arg)
   /* Is a callback registered? */
 
   DEBUGASSERT(priv != NULL);
-  fvdbg("Callback %p(%p) cbevents: %02x cdstatus: %02x\n",
+  finfo("Callback %p(%p) cbevents: %02x cdstatus: %02x\n",
         priv->callback, priv->cbarg, priv->cbevents, priv->cdstatus);
 
   if (priv->callback)
@@ -2739,14 +2739,14 @@ static void kinetis_callback(void *arg)
         {
           /* Yes.. queue it */
 
-           fvdbg("Queuing callback to %p(%p)\n", priv->callback, priv->cbarg);
+           finfo("Queuing callback to %p(%p)\n", priv->callback, priv->cbarg);
           (void)work_queue(HPWORK, &priv->cbwork, (worker_t)priv->callback, priv->cbarg, 0);
         }
       else
         {
           /* No.. then just call the callback here */
 
-          fvdbg("Callback to %p(%p)\n", priv->callback, priv->cbarg);
+          finfo("Callback to %p(%p)\n", priv->callback, priv->cbarg);
           priv->callback(priv->cbarg);
         }
     }
@@ -2792,7 +2792,7 @@ FAR struct sdio_dev_s *sdhc_initialize(int slotno)
   regval = getreg32(KINETIS_SIM_SCGC3);
   regval |= SIM_SCGC3_SDHC;
   putreg32(regval, KINETIS_SIM_SCGC3);
-  fvdbg("SIM_SCGC3: %08x\n", regval);
+  finfo("SIM_SCGC3: %08x\n", regval);
 
   /* In addition to the system clock, the SDHC module needs a clock for the
    * base for the external card clock.  There are four possible sources for
@@ -2808,7 +2808,7 @@ FAR struct sdio_dev_s *sdhc_initialize(int slotno)
   regval &= ~SIM_SOPT2_SDHCSRC_MASK;
   regval |= SIM_SOPT2_SDHCSRC_CORE;
   putreg32(regval, KINETIS_SIM_SOPT2);
-  fvdbg("SIM_SOPT2: %08x\n", regval);
+  finfo("SIM_SOPT2: %08x\n", regval);
 
   /* Configure pins for 1 or 4-bit, wide-bus operation (the chip is capable
    * of 8-bit wide bus operation but D4-D7 are not configured).
@@ -2892,7 +2892,7 @@ void sdhc_mediachange(FAR struct sdio_dev_s *dev, bool cardinslot)
       priv->cdstatus &= ~SDIO_STATUS_PRESENT;
     }
 
-  fvdbg("cdstatus OLD: %02x NEW: %02x\n", cdstatus, priv->cdstatus);
+  finfo("cdstatus OLD: %02x NEW: %02x\n", cdstatus, priv->cdstatus);
 
   /* Perform any requested callback if the status has changed */
 
@@ -2937,7 +2937,7 @@ void sdhc_wrprotect(FAR struct sdio_dev_s *dev, bool wrprotect)
       priv->cdstatus &= ~SDIO_STATUS_WRPROTECTED;
     }
 
-  fvdbg("cdstatus: %02x\n", priv->cdstatus);
+  finfo("cdstatus: %02x\n", priv->cdstatus);
   leave_critical_section(flags);
 }
 #endif /* CONFIG_KINETIS_SDHC */

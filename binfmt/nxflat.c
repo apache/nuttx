@@ -65,7 +65,7 @@
 #endif
 
 #ifdef CONFIG_NXFLAT_DUMPBUFFER
-# define nxflat_dumpbuffer(m,b,n) bvdbgdumpbuffer(m,b,n)
+# define nxflat_dumpbuffer(m,b,n) binfodumpbuffer(m,b,n)
 #else
 # define nxflat_dumpbuffer(m,b,n)
 #endif
@@ -151,7 +151,7 @@ static int nxflat_loadbinary(struct binary_s *binp)
   struct nxflat_loadinfo_s loadinfo;  /* Contains globals for libnxflat */
   int                      ret;
 
-  bvdbg("Loading file: %s\n", binp->filename);
+  binfo("Loading file: %s\n", binp->filename);
 
   /* Initialize the xflat library to load the program binary. */
 
@@ -252,7 +252,7 @@ int nxflat_initialize(void)
 
   /* Register ourselves as a binfmt loader */
 
-  bvdbg("Registering NXFLAT\n");
+  binfo("Registering NXFLAT\n");
   ret = register_binfmt(&g_nxflatbinfmt);
   if (ret != 0)
     {

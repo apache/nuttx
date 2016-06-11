@@ -65,10 +65,10 @@
 
 #ifdef CONFIG_DEBUG_LEDS
 #  define leddbg  lldbg
-#  define ledvdbg llvdbg
+#  define ledinfo llinfo
 #else
 #  define leddbg(x...)
-#  define ledvdbg(x...)
+#  define ledinfo(x...)
 #endif
 
 /* The following definitions map the encoded LED setting to bit sets used to

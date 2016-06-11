@@ -95,7 +95,7 @@ int elf_verifyheader(FAR const Elf32_Ehdr *ehdr)
 
   if (memcmp(ehdr->e_ident, g_elfmagic, EI_MAGIC_SIZE) != 0)
     {
-      bvdbg("Not ELF magic {%02x, %02x, %02x, %02x}\n",
+      binfo("Not ELF magic {%02x, %02x, %02x, %02x}\n",
             ehdr->e_ident[0], ehdr->e_ident[1], ehdr->e_ident[2], ehdr->e_ident[3]);
       return -ENOEXEC;
     }

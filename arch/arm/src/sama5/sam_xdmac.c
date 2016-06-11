@@ -1957,7 +1957,7 @@ void sam_dmainitialize(struct sam_xdmac_s *xdmac)
 void weak_function up_dmainitialize(void)
 {
 #ifdef CONFIG_SAMA5_XDMAC0
-  dmallvdbg("Initialize XDMAC0\n");
+  dmallinfo("Initialize XDMAC0\n");
 
   /* Enable peripheral clock */
 
@@ -1977,7 +1977,7 @@ void weak_function up_dmainitialize(void)
 #endif
 
 #ifdef CONFIG_SAMA5_XDMAC1
-  dmallvdbg("Initialize XDMAC1\n");
+  dmallinfo("Initialize XDMAC1\n");
 
   /* Enable peripheral clock */
 
@@ -2083,7 +2083,7 @@ DMA_HANDLE sam_dmachannel(uint8_t dmacno, uint32_t chflags)
 
   if (xdmach)
     {
-      dmavdbg("XDMAC%d CH%d: chflags: %08x returning xdmach: %p\n",
+      dmainfo("XDMAC%d CH%d: chflags: %08x returning xdmach: %p\n",
               (int)dmacno, xdmach->chan, (int)chflags, xdmach);
     }
   else
@@ -2119,13 +2119,13 @@ void sam_dmaconfig(DMA_HANDLE handle, uint32_t chflags)
   xdmach->flags = chflags;
 
 #if defined(CONFIG_SAMA5_XDMAC0) && defined(CONFIG_SAMA5_XDMAC1)
-  dmavdbg("XDMAC%d CH%d: chflags: %08x\n",
+  dmainfo("XDMAC%d CH%d: chflags: %08x\n",
           xdmach->xdmac, xdmach->chan, (int)chflags);
 #elif defined(CONFIG_SAMA5_XDMAC0)
-  dmavdbg("XDMAC0 CH%d: chflags: %08x\n",
+  dmainfo("XDMAC0 CH%d: chflags: %08x\n",
           xdmach->chan, (int)chflags);
 #else
-  dmavdbg("XDMAC1 CH%d: chflags: %08x\n",
+  dmainfo("XDMAC1 CH%d: chflags: %08x\n",
           xdmach->chan, (int)chflags);
 #endif
 }
@@ -2148,7 +2148,7 @@ void sam_dmafree(DMA_HANDLE handle)
   struct sam_xdmach_s *xdmach = (struct sam_xdmach_s *)handle;
   struct sam_xdmac_s *xdmac;
 
-  dmavdbg("xdmach: %p\n", xdmach);
+  dmainfo("xdmach: %p\n", xdmach);
   DEBUGASSERT((xdmach != NULL) && (xdmach->inuse));
 
   xdmac = sam_controller(xdmach);
@@ -2186,10 +2186,10 @@ int sam_dmatxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
   size_t remaining;
   int ret = OK;
 
-  dmavdbg("xdmach: %p paddr: %08x maddr: %08x nbytes: %d\n",
+  dmainfo("xdmach: %p paddr: %08x maddr: %08x nbytes: %d\n",
           xdmach, (int)paddr, (int)maddr, (int)nbytes);
   DEBUGASSERT(xdmach);
-  dmavdbg("llhead: %p lltail: %p\n", xdmach->llhead, xdmach->lltail);
+  dmainfo("llhead: %p lltail: %p\n", xdmach->llhead, xdmach->lltail);
 
   /* The maximum transfer size in bytes depends upon the maximum number of
    * transfers and the number of bytes per transfer.
@@ -2265,10 +2265,10 @@ int sam_dmarxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
   size_t remaining;
   int ret = OK;
 
-  dmavdbg("xdmach: %p paddr: %08x maddr: %08x nbytes: %d\n",
+  dmainfo("xdmach: %p paddr: %08x maddr: %08x nbytes: %d\n",
           xdmach, (int)paddr, (int)maddr, (int)nbytes);
   DEBUGASSERT(xdmach);
-  dmavdbg("llhead: %p lltail: %p\n", xdmach->llhead, xdmach->lltail);
+  dmainfo("llhead: %p lltail: %p\n", xdmach->llhead, xdmach->lltail);
 
   /* The maximum transfer size in bytes depends upon the maximum number of
    * transfers and the number of bytes per transfer.
@@ -2340,7 +2340,7 @@ int sam_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg)
   struct sam_xdmach_s *xdmach = (struct sam_xdmach_s *)handle;
   int ret = -EINVAL;
 
-  dmavdbg("xdmach: %p callback: %p arg: %p\n", xdmach, callback, arg);
+  dmainfo("xdmach: %p callback: %p arg: %p\n", xdmach, callback, arg);
   DEBUGASSERT(xdmach != NULL);
 
   /* Verify that the DMA has been setup (i.e., at least one entry in the
@@ -2384,7 +2384,7 @@ void sam_dmastop(DMA_HANDLE handle)
   struct sam_xdmach_s *xdmach = (struct sam_xdmach_s *)handle;
   irqstate_t flags;
 
-  dmavdbg("xdmach: %p\n", xdmach);
+  dmainfo("xdmach: %p\n", xdmach);
   DEBUGASSERT(xdmach != NULL);
 
   flags = enter_critical_section();

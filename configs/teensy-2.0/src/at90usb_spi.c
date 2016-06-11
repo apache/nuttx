@@ -89,14 +89,14 @@
 #ifdef CONFIG_SPI_DEBUG
 #  define sspdbg  lldbg
 #  ifdef CONFIG_SPI_VERBOSE
-#    define sspvdbg lldbg
+#    define sspinfo lldbg
 #  else
-#    define sspvdbg(x...)
+#    define sspinfo(x...)
 #  endif
 #else
 #  undef CONFIG_SPI_VERBOSE
 #  define sspdbg(x...)
-#  define sspvdbg(x...)
+#  define sspinfo(x...)
 #endif
 
 /************************************************************************************

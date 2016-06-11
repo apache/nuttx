@@ -109,7 +109,7 @@ static void exec_ctors(FAR void *arg)
 
   for (i = 0; i < binp->nctors; i++)
     {
-      bvdbg("Calling ctor %d at %p\n", i, (FAR void *)ctor);
+      binfo("Calling ctor %d at %p\n", i, (FAR void *)ctor);
 
       (*ctor)();
       ctor++;
@@ -155,7 +155,7 @@ int exec_module(FAR const struct binary_s *binp)
     }
 #endif
 
-  bvdbg("Executing %s\n", binp->filename);
+  binfo("Executing %s\n", binp->filename);
 
   /* Allocate a TCB for the new task. */
 

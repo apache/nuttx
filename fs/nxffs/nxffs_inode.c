@@ -286,7 +286,7 @@ int nxffs_nextentry(FAR struct nxffs_volume_s *volume, off_t offset,
 
           if (++nerased >= NXFFS_NERASED)
             {
-              fvdbg("No entry found\n");
+              finfo("No entry found\n");
               return -ENOENT;
             }
         }
@@ -337,7 +337,7 @@ int nxffs_nextentry(FAR struct nxffs_volume_s *volume, off_t offset,
               ret = nxffs_rdentry(volume, offset, entry);
               if (ret == OK)
                 {
-                  fvdbg("Found a valid fileheader, offset: %d\n", offset);
+                  finfo("Found a valid fileheader, offset: %d\n", offset);
                   return OK;
                 }
 
@@ -396,7 +396,7 @@ int nxffs_findinode(FAR struct nxffs_volume_s *volume, FAR const char *name,
       ret = nxffs_nextentry(volume, offset, entry);
       if (ret < 0)
         {
-          fvdbg("No inode found: %d\n", -ret);
+          finfo("No inode found: %d\n", -ret);
           return ret;
         }
 

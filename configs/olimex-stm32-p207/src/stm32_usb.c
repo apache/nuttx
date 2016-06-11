@@ -105,13 +105,13 @@ static int usbhost_waiter(int argc, char *argv[])
 {
   struct usbhost_hubport_s *hport;
 
-  uvdbg("Running\n");
+  uinfo("Running\n");
   for (;;)
     {
       /* Wait for the device to change state */
 
       DEBUGVERIFY(CONN_WAIT(g_usbconn, &hport));
-      uvdbg("%s\n", hport->connected ? "connected" : "disconnected");
+      uinfo("%s\n", hport->connected ? "connected" : "disconnected");
 
       /* Did we just become connected? */
 
@@ -177,7 +177,7 @@ int stm32_usbhost_initialize(void)
    * that we care about:
    */
 
-  uvdbg("Register class drivers\n");
+  uinfo("Register class drivers\n");
 
 #ifdef CONFIG_USBHOST_HUB
   /* Initialize USB hub class support */
@@ -211,13 +211,13 @@ int stm32_usbhost_initialize(void)
 
   /* Then get an instance of the USB host interface */
 
-  uvdbg("Initialize USB host\n");
+  uinfo("Initialize USB host\n");
   g_usbconn = stm32_otgfshost_initialize(0);
   if (g_usbconn)
     {
       /* Start a thread to handle device connection. */
 
-      uvdbg("Start usbhost_waiter\n");
+      uinfo("Start usbhost_waiter\n");
 
       pid = task_create("usbhost", CONFIG_USBHOST_DEFPRIO,
                         CONFIG_USBHOST_STACKSIZE,

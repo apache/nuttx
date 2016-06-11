@@ -135,7 +135,7 @@ static void pipecommon_pollnotify(FAR struct pipe_dev_s *dev,
 
           if (fds->revents != 0)
             {
-              fvdbg("Report events: %02x\n", fds->revents);
+              finfo("Report events: %02x\n", fds->revents);
               sem_post(fds->sem);
             }
         }

@@ -118,10 +118,10 @@
 
 #ifdef CONFIG_DEBUG_LCD
 #  define lcddbg(format, ...)   dbg(format, ##__VA_ARGS__)
-#  define lcdvdbg(format, ...)  vdbg(format, ##__VA_ARGS__)
+#  define lcdinfo(format, ...)  info(format, ##__VA_ARGS__)
 #else
 #  define lcddbg(x...)
-#  define lcdvdbg(x...)
+#  define lcdinfo(x...)
 #endif
 
 /****************************************************************************
@@ -170,7 +170,7 @@ FAR struct lcd_dev_s *board_graphics_setup(unsigned int devno)
         }
      else
         {
-          lcdvdbg("Bound SPI port 1 to OLED %d\n", devno);
+          lcdinfo("Bound SPI port 1 to OLED %d\n", devno);
 
           /* And turn the OLED on */
 

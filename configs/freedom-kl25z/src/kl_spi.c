@@ -60,13 +60,13 @@
 #ifdef CONFIG_DEBUG_SPI
 #  define spidbg  lldbg
 #  ifdef CONFIG_DEBUG_INFO
-#    define spivdbg lldbg
+#    define spiinfo lldbg
 #  else
-#    define spivdbg(x...)
+#    define spiinfo(x...)
 #  endif
 #else
 #  define spidbg(x...)
-#  define spivdbg(x...)
+#  define spiinfo(x...)
 #endif
 
 /****************************************************************************
@@ -164,7 +164,7 @@ void weak_function kl_spidev_initialize(void)
 void kl_spi0select(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
                    bool selected)
 {
-  spivdbg("devid: %d CS: %s\n",
+  spiinfo("devid: %d CS: %s\n",
            (int)devid, selected ? "assert" : "de-assert");
 
 #ifdef CONFIG_ADXL345_SPI
@@ -190,7 +190,7 @@ void kl_spi0select(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
 void kl_spi1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
                    bool selected)
 {
-  spivdbg("devid: %d CS: %s\n",
+  spiinfo("devid: %d CS: %s\n",
            (int)devid, selected ? "assert" : "de-assert");
 }
 #endif

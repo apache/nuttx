@@ -62,14 +62,14 @@
 
 #ifdef CONFIG_DEBUG_PWM
 #  define pwmdbg    dbg
-#  define pwmvdbg   vdbg
+#  define pwminfo   info
 #  define pwmlldbg  lldbg
-#  define pwmllvdbg llvdbg
+#  define pwmllinfo llinfo
 #else
 #  define pwmdbg(x...)
-#  define pwmvdbg(x...)
+#  define pwminfo(x...)
 #  define pwmlldbg(x...)
-#  define pwmllvdbg(x...)
+#  define pwmllinfo(x...)
 #endif
 
 /****************************************************************************

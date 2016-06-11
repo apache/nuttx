@@ -104,7 +104,7 @@ int nx_getrectangle(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
 #ifdef CONFIG_DEBUG
   if (!hwnd || !rect || !dest)
     {
-      gvdbg("Invalid parameters\n");
+      ginfo("Invalid parameters\n");
       set_errno(EINVAL);
       return ERROR;
     }

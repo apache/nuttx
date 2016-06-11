@@ -204,7 +204,7 @@ static void wl_enable_irq(FAR struct cc3000_config_s *state, bool enable)
 
   /* Attach and enable, or detach and disable */
 
-  ivdbg("enable:%d\n", enable);
+  iinfo("enable:%d\n", enable);
   if (enable)
     {
       (void)kl_gpioirqattach(GPIO_WIFI_INT, priv->handler);
@@ -219,7 +219,7 @@ static void wl_enable_irq(FAR struct cc3000_config_s *state, bool enable)
 
 static void wl_enable_power(FAR struct cc3000_config_s *state, bool enable)
 {
-  ivdbg("enable:%d\n", enable);
+  iinfo("enable:%d\n", enable);
 
   /* Active high enable */
 
@@ -228,7 +228,7 @@ static void wl_enable_power(FAR struct cc3000_config_s *state, bool enable)
 
 static void wl_select(FAR struct cc3000_config_s *state, bool enable)
 {
-  ivdbg("enable:%d\n", enable);
+  iinfo("enable:%d\n", enable);
 
   /* Active high enable */
 

@@ -358,7 +358,7 @@ static int cdcacm_sndpacket(FAR struct cdcacm_dev_s *priv)
    * to be sent).
    */
 
-  uvdbg("head=%d tail=%d nwrq=%d empty=%d\n",
+  uinfo("head=%d tail=%d nwrq=%d empty=%d\n",
         priv->serdev.xmit.head, priv->serdev.xmit.tail,
         priv->nwrq, sq_empty(&priv->reqlist));
 
@@ -427,7 +427,7 @@ static inline int cdcacm_recvpacket(FAR struct cdcacm_dev_s *priv,
   uint16_t nexthead;
   uint16_t nbytes = 0;
 
-  uvdbg("head=%d tail=%d nrdq=%d reqlen=%d\n",
+  uinfo("head=%d tail=%d nrdq=%d reqlen=%d\n",
         priv->serdev.recv.head, priv->serdev.recv.tail, priv->nrdq, reqlen);
 
   /* Get the next head index. During the time that RX interrupts are disabled, the
@@ -1276,7 +1276,7 @@ static int cdcacm_setup(FAR struct usbdevclass_driver_s *driver,
   index = GETUINT16(ctrl->index);
   len   = GETUINT16(ctrl->len);
 
-  uvdbg("type=%02x req=%02x value=%04x index=%04x len=%04x\n",
+  uinfo("type=%02x req=%02x value=%04x index=%04x len=%04x\n",
         ctrl->type, ctrl->req, value, index, len);
 
   if ((ctrl->type & USB_REQ_TYPE_MASK) == USB_REQ_TYPE_STANDARD)
@@ -2208,7 +2208,7 @@ static void cdcuart_txint(FAR struct uart_dev_s *dev, bool enable)
    * send the next packet now.
    */
 
-  uvdbg("enable=%d head=%d tail=%d\n",
+  uinfo("enable=%d head=%d tail=%d\n",
         enable, priv->serdev.xmit.head, priv->serdev.xmit.tail);
 
   if (enable && priv->serdev.xmit.head != priv->serdev.xmit.tail)

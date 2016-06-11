@@ -224,7 +224,7 @@
 /* Debug ******************************************************************************/
 
 #ifdef CONFIG_DEBUG_LCD
-# define lcddbg(format, ...)  vdbg(format, ##__VA_ARGS__)
+# define lcddbg(format, ...)  info(format, ##__VA_ARGS__)
 #else
 # define lcddbg(x...)
 #endif
@@ -484,7 +484,7 @@ static int ug_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
   uint8_t i;
   int     pixlen;
 
-  gvdbg("row: %d col: %d npixels: %d\n", row, col, npixels);
+  ginfo("row: %d col: %d npixels: %d\n", row, col, npixels);
   DEBUGASSERT(buffer);
 
   /* Clip the run to the display */
@@ -681,7 +681,7 @@ static int ug_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
   uint8_t i;
   int     pixlen;
 
-  gvdbg("row: %d col: %d npixels: %d\n", row, col, npixels);
+  ginfo("row: %d col: %d npixels: %d\n", row, col, npixels);
   DEBUGASSERT(buffer);
 
   /* Clip the run to the display */
@@ -824,7 +824,7 @@ static int ug_getvideoinfo(FAR struct lcd_dev_s *dev,
                               FAR struct fb_videoinfo_s *vinfo)
 {
   DEBUGASSERT(dev && vinfo);
-  gvdbg("fmt: %d xres: %d yres: %d nplanes: %d\n",
+  ginfo("fmt: %d xres: %d yres: %d nplanes: %d\n",
          g_videoinfo.fmt, g_videoinfo.xres, g_videoinfo.yres, g_videoinfo.nplanes);
   memcpy(vinfo, &g_videoinfo, sizeof(struct fb_videoinfo_s));
   return OK;
@@ -842,7 +842,7 @@ static int ug_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
                               FAR struct lcd_planeinfo_s *pinfo)
 {
   DEBUGASSERT(dev && pinfo && planeno == 0);
-  gvdbg("planeno: %d bpp: %d\n", planeno, g_planeinfo.bpp);
+  ginfo("planeno: %d bpp: %d\n", planeno, g_planeinfo.bpp);
   memcpy(pinfo, &g_planeinfo, sizeof(struct lcd_planeinfo_s));
   return OK;
 }
@@ -860,7 +860,7 @@ static int ug_getpower(struct lcd_dev_s *dev)
 {
   struct ug_dev_s *priv = (struct ug_dev_s *)dev;
   DEBUGASSERT(priv);
-  gvdbg("powered: %s\n", ug_powerstring(priv->powered));
+  ginfo("powered: %s\n", ug_powerstring(priv->powered));
   return priv->powered;
 }
 
@@ -878,7 +878,7 @@ static int ug_setpower(struct lcd_dev_s *dev, int power)
   struct ug_dev_s *priv = (struct ug_dev_s *)dev;
 
   DEBUGASSERT(priv && (unsigned)power <= CONFIG_LCD_MAXPOWER);
-  gvdbg("power: %s powered: %s\n",
+  ginfo("power: %s powered: %s\n",
         ug_powerstring(power), ug_powerstring(priv->powered));
 
   /* Select and lock the device */
@@ -947,7 +947,7 @@ static int ug_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
 {
   struct ug_dev_s *priv = (struct ug_dev_s *)dev;
 
-  gvdbg("contrast: %d\n", contrast);
+  ginfo("contrast: %d\n", contrast);
   DEBUGASSERT(priv);
 
   if (contrast > 255)
@@ -1056,7 +1056,7 @@ FAR struct lcd_dev_s *ug_initialize(FAR struct spi_dev_s *spi, unsigned int devn
 
   FAR struct ug_dev_s  *priv = &g_ugdev;
 
-  gvdbg("Initializing\n");
+  ginfo("Initializing\n");
   DEBUGASSERT(spi && devno == 0);
 
   /* Save the reference to the SPI device */

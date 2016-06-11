@@ -108,7 +108,7 @@ static inline int exec_dtors(FAR struct binary_s *binp)
 
   for (i = 0; i < binp->ndtors; i++)
     {
-      bvdbg("Calling dtor %d at %p\n", i, (FAR void *)dtor);
+      binfo("Calling dtor %d at %p\n", i, (FAR void *)dtor);
 
       (*dtor)();
       dtor++;
@@ -187,7 +187,7 @@ int unload_module(FAR struct binary_s *binp)
 
       if (binp->mapped)
         {
-          bvdbg("Unmapping address space: %p\n", binp->mapped);
+          binfo("Unmapping address space: %p\n", binp->mapped);
 
           munmap(binp->mapped, binp->mapsize);
         }
@@ -198,7 +198,7 @@ int unload_module(FAR struct binary_s *binp)
         {
           if (binp->alloc[i])
             {
-              bvdbg("Freeing alloc[%d]: %p\n", i, binp->alloc[i]);
+              binfo("Freeing alloc[%d]: %p\n", i, binp->alloc[i]);
               kumm_free((FAR void *)binp->alloc[i]);
             }
         }

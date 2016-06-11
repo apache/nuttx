@@ -245,7 +245,7 @@ void up_netinitialize(void)
       return;
     }
 
-  nllvdbg("Bound SPI port %d to ENC28J60 device %d\n",
+  nllinfo("Bound SPI port %d to ENC28J60 device %d\n",
         ENC28J60_SPI_PORTNO, ENC28J60_DEVNO);
 }
 #endif /* CONFIG_ENC28J60 */

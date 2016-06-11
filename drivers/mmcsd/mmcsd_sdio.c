@@ -413,7 +413,7 @@ static int mmcsd_recvR1(FAR struct mmcsd_state_s *priv, uint32_t cmd)
            * indication for later use.
            */
 
-          fvdbg("ERROR: R1=%08x\n", r1);
+          finfo("ERROR: R1=%08x\n", r1);
           priv->locked = ((r1 & MMCSD_R1_CARDISLOCKED) != 0);
           ret = -EIO;
         }
@@ -767,69 +767,69 @@ static void mmcsd_decodeCSD(FAR struct mmcsd_state_s *priv, uint32_t csd[4])
   decoded.mmcecc           = (csd[3] >> 8)  & 3;
   decoded.crc              = (csd[3] >> 1)  & 0x7f;
 
-  fvdbg("CSD:\n");
-  fvdbg("  CSD_STRUCTURE: %d SPEC_VERS: %d (MMC)\n",
+  finfo("CSD:\n");
+  finfo("  CSD_STRUCTURE: %d SPEC_VERS: %d (MMC)\n",
         decoded.csdstructure, decoded.mmcspecvers);
-  fvdbg("  TAAC {TIME_UNIT: %d TIME_VALUE: %d} NSAC: %d\n",
+  finfo("  TAAC {TIME_UNIT: %d TIME_VALUE: %d} NSAC: %d\n",
         decoded.taac.timeunit, decoded.taac.timevalue, decoded.nsac);
-  fvdbg("  TRAN_SPEED {TRANSFER_RATE_UNIT: %d TIME_VALUE: %d}\n",
+  finfo("  TRAN_SPEED {TRANSFER_RATE_UNIT: %d TIME_VALUE: %d}\n",
         decoded.transpeed.transferrateunit, decoded.transpeed.timevalue);
-  fvdbg("  CCC: %d\n", decoded.ccc);
-  fvdbg("  READ_BL_LEN: %d READ_BL_PARTIAL: %d\n",
+  finfo("  CCC: %d\n", decoded.ccc);
+  finfo("  READ_BL_LEN: %d READ_BL_PARTIAL: %d\n",
         decoded.readbllen, decoded.readblpartial);
-  fvdbg("  WRITE_BLK_MISALIGN: %d READ_BLK_MISALIGN: %d\n",
+  finfo("  WRITE_BLK_MISALIGN: %d READ_BLK_MISALIGN: %d\n",
         decoded.writeblkmisalign, decoded.readblkmisalign);
-  fvdbg("  DSR_IMP: %d\n",
+  finfo("  DSR_IMP: %d\n",
         decoded.dsrimp);
 
   if (IS_BLOCK(priv->type))
     {
-      fvdbg("  SD Block Addressing:\n");
-      fvdbg("    C_SIZE: %d SD_ER_BLK_EN: %d\n",
+      finfo("  SD Block Addressing:\n");
+      finfo("    C_SIZE: %d SD_ER_BLK_EN: %d\n",
             decoded.u.sdblock.csize, decoded.u.sdblock.sderblen);
-      fvdbg("    SD_SECTOR_SIZE: %d SD_WP_GRP_SIZE: %d\n",
+      finfo("    SD_SECTOR_SIZE: %d SD_WP_GRP_SIZE: %d\n",
             decoded.u.sdblock.sdsectorsize, decoded.u.sdblock.sdwpgrpsize);
     }
   else if (IS_SD(priv->type))
     {
-      fvdbg("  SD Byte Addressing:\n");
-      fvdbg("    C_SIZE: %d C_SIZE_MULT: %d\n",
+      finfo("  SD Byte Addressing:\n");
+      finfo("    C_SIZE: %d C_SIZE_MULT: %d\n",
             decoded.u.sdbyte.csize, decoded.u.sdbyte.csizemult);
-      fvdbg("    VDD_R_CURR_MIN: %d VDD_R_CURR_MAX: %d\n",
+      finfo("    VDD_R_CURR_MIN: %d VDD_R_CURR_MAX: %d\n",
             decoded.u.sdbyte.vddrcurrmin, decoded.u.sdbyte.vddrcurrmax);
-      fvdbg("    VDD_W_CURR_MIN: %d VDD_W_CURR_MAX: %d\n",
+      finfo("    VDD_W_CURR_MIN: %d VDD_W_CURR_MAX: %d\n",
             decoded.u.sdbyte.vddwcurrmin, decoded.u.sdbyte.vddwcurrmax);
-      fvdbg("    SD_ER_BLK_EN: %d SD_SECTOR_SIZE: %d (SD) SD_WP_GRP_SIZE: %d\n",
+      finfo("    SD_ER_BLK_EN: %d SD_SECTOR_SIZE: %d (SD) SD_WP_GRP_SIZE: %d\n",
             decoded.u.sdbyte.sderblen, decoded.u.sdbyte.sdsectorsize, decoded.u.sdbyte.sdwpgrpsize);
     }
 #ifdef CONFIG_MMCSD_MMCSUPPORT
   else if (IS_MMC(priv->type))
     {
-      fvdbg("  MMC:\n");
-      fvdbg("    C_SIZE: %d C_SIZE_MULT: %d\n",
+      finfo("  MMC:\n");
+      finfo("    C_SIZE: %d C_SIZE_MULT: %d\n",
             decoded.u.mmc.csize, decoded.u.mmc.csizemult);
-      fvdbg("    VDD_R_CURR_MIN: %d VDD_R_CURR_MAX: %d\n",
+      finfo("    VDD_R_CURR_MIN: %d VDD_R_CURR_MAX: %d\n",
             decoded.u.mmc.vddrcurrmin, decoded.u.mmc.vddrcurrmax);
-      fvdbg("    VDD_W_CURR_MIN: %d VDD_W_CURR_MAX: %d\n",
+      finfo("    VDD_W_CURR_MIN: %d VDD_W_CURR_MAX: %d\n",
             decoded.u.mmc.vddwcurrmin, decoded.u.mmc.vddwcurrmax);
-      fvdbg("    MMC_SECTOR_SIZE: %d MMC_ER_GRP_SIZE: %d MMC_WP_GRP_SIZE: %d\n",
+      finfo("    MMC_SECTOR_SIZE: %d MMC_ER_GRP_SIZE: %d MMC_WP_GRP_SIZE: %d\n",
             decoded.u.mmc.er.mmc22.sectorsize, decoded.u.mmc.er.mmc22.ergrpsize,
             decoded.u.mmc.mmcwpgrpsize);
     }
 #endif
 
-  fvdbg("  WP_GRP_EN: %d MMC DFLT_ECC: %d (MMC) R2W_FACTOR: %d\n",
+  finfo("  WP_GRP_EN: %d MMC DFLT_ECC: %d (MMC) R2W_FACTOR: %d\n",
         decoded.wpgrpen, decoded.mmcdfltecc, decoded.r2wfactor);
-  fvdbg("  WRITE_BL_LEN: %d WRITE_BL_PARTIAL: %d\n",
+  finfo("  WRITE_BL_LEN: %d WRITE_BL_PARTIAL: %d\n",
         decoded.writebllen, decoded.writeblpartial);
-  fvdbg("  FILE_FORMAT_GROUP: %d COPY: %d\n",
+  finfo("  FILE_FORMAT_GROUP: %d COPY: %d\n",
         decoded.fileformatgrp, decoded.copy);
-  fvdbg("  PERM_WRITE_PROTECT: %d TMP_WRITE_PROTECT: %d\n",
+  finfo("  PERM_WRITE_PROTECT: %d TMP_WRITE_PROTECT: %d\n",
         decoded.permwriteprotect, decoded.tmpwriteprotect);
-  fvdbg("  FILE_FORMAT: %d ECC: %d (MMC) CRC: %d\n",
+  finfo("  FILE_FORMAT: %d ECC: %d (MMC) CRC: %d\n",
         decoded.fileformat, decoded.mmcecc, decoded.crc);
 
-  fvdbg("Capacity: %luKb, Block size: %db, nblocks: %d wrprotect: %d\n",
+  finfo("Capacity: %luKb, Block size: %db, nblocks: %d wrprotect: %d\n",
          (unsigned long)(priv->capacity / 1024), priv->blocksize,
          priv->nblocks, priv->wrprotect);
 #endif
@@ -893,7 +893,7 @@ static void mmcsd_decodeCID(FAR struct mmcsd_state_s *priv, uint32_t cid[4])
   decoded.mdt    = (cid[3] >> 8) & 0x0fff;
   decoded.crc    = (cid[3] >> 1) & 0x7f;
 
-  fvdbg("mid: %02x oid: %04x pnm: %s prv: %d psn: %d mdt: %02x crc: %02x\n",
+  finfo("mid: %02x oid: %04x pnm: %s prv: %d psn: %d mdt: %02x crc: %02x\n",
       decoded.mid, decoded.oid, decoded.pnm, decoded.prv,
       decoded.psn, decoded.mdt, decoded.crc);
 }
@@ -955,12 +955,12 @@ struct mmcsd_scr_s decoded;
 #if defined(CONFIG_DEBUG) && defined (CONFIG_DEBUG_INFO) && defined(CONFIG_DEBUG_FS)
   decoded.mfgdata   = scr[1];  /* Might be byte reversed! */
 
-  fvdbg("SCR:\n");
-  fvdbg("  SCR_STRUCTURE: %d SD_VERSION: %d\n",
+  finfo("SCR:\n");
+  finfo("  SCR_STRUCTURE: %d SD_VERSION: %d\n",
         decoded.scrversion, decoded.sdversion);
-  fvdbg("  DATA_STATE_AFTER_ERASE: %d SD_SECURITY: %d SD_BUS_WIDTHS: %x\n",
+  finfo("  DATA_STATE_AFTER_ERASE: %d SD_SECURITY: %d SD_BUS_WIDTHS: %x\n",
         decoded.erasestate, decoded.security, decoded.buswidth);
-  fvdbg("  Manufacturing data: %08x\n",
+  finfo("  Manufacturing data: %08x\n",
         decoded.mfgdata);
 #endif
 }
@@ -1288,7 +1288,7 @@ static ssize_t mmcsd_readsingle(FAR struct mmcsd_state_s *priv,
   off_t offset;
   int ret;
 
-  fvdbg("startblock=%d\n", startblock);
+  finfo("startblock=%d\n", startblock);
   DEBUGASSERT(priv != NULL && buffer != NULL);
 
   /* Check if the card is locked */
@@ -1342,7 +1342,7 @@ static ssize_t mmcsd_readsingle(FAR struct mmcsd_state_s *priv,
       offset = startblock << priv->blockshift;
     }
 
-  fvdbg("offset=%d\n", offset);
+  finfo("offset=%d\n", offset);
 
   /* Select the block size for the card */
 
@@ -1365,7 +1365,7 @@ static ssize_t mmcsd_readsingle(FAR struct mmcsd_state_s *priv,
       ret = SDIO_DMARECVSETUP(priv->dev, buffer, priv->blocksize);
       if (ret != OK)
         {
-          fvdbg("SDIO_DMARECVSETUP: error %d\n", ret);
+          finfo("SDIO_DMARECVSETUP: error %d\n", ret);
           return ret;
         }
     }
@@ -1422,7 +1422,7 @@ static ssize_t mmcsd_readmultiple(FAR struct mmcsd_state_s *priv,
   off_t  offset;
   int ret;
 
-  fvdbg("startblock=%d nblocks=%d\n", startblock, nblocks);
+  finfo("startblock=%d nblocks=%d\n", startblock, nblocks);
   DEBUGASSERT(priv != NULL && buffer != NULL && nblocks > 1);
 
   /* Check if the card is locked */
@@ -1476,7 +1476,7 @@ static ssize_t mmcsd_readmultiple(FAR struct mmcsd_state_s *priv,
     {
       offset = startblock << priv->blockshift;
     }
-  fvdbg("nbytes=%d byte offset=%d\n", nbytes, offset);
+  finfo("nbytes=%d byte offset=%d\n", nbytes, offset);
 
   /* Select the block size for the card */
 
@@ -1499,7 +1499,7 @@ static ssize_t mmcsd_readmultiple(FAR struct mmcsd_state_s *priv,
       ret = SDIO_DMARECVSETUP(priv->dev, buffer, nbytes);
       if (ret != OK)
         {
-          fvdbg("SDIO_DMARECVSETUP: error %d\n", ret);
+          finfo("SDIO_DMARECVSETUP: error %d\n", ret);
           return ret;
         }
     }
@@ -1625,7 +1625,7 @@ static ssize_t mmcsd_writesingle(FAR struct mmcsd_state_s *priv,
   off_t offset;
   int ret;
 
-  fvdbg("startblock=%d\n", startblock);
+  finfo("startblock=%d\n", startblock);
   DEBUGASSERT(priv != NULL && buffer != NULL);
 
   /* Check if the card is locked or write protected (either via software or
@@ -1681,7 +1681,7 @@ static ssize_t mmcsd_writesingle(FAR struct mmcsd_state_s *priv,
       offset = startblock << priv->blockshift;
     }
 
-  fvdbg("offset=%d\n", offset);
+  finfo("offset=%d\n", offset);
 
   /* Select the block size for the card */
 
@@ -1713,7 +1713,7 @@ static ssize_t mmcsd_writesingle(FAR struct mmcsd_state_s *priv,
       ret = SDIO_DMASENDSETUP(priv->dev, buffer, priv->blocksize);
       if (ret != OK)
         {
-          fvdbg("SDIO_DMASENDSETUP: error %d\n", ret);
+          finfo("SDIO_DMASENDSETUP: error %d\n", ret);
           return ret;
         }
     }
@@ -1768,7 +1768,7 @@ static ssize_t mmcsd_writemultiple(FAR struct mmcsd_state_s *priv,
   size_t nbytes;
   int ret;
 
-  fvdbg("startblock=%d nblocks=%d\n", startblock, nblocks);
+  finfo("startblock=%d nblocks=%d\n", startblock, nblocks);
   DEBUGASSERT(priv != NULL && buffer != NULL && nblocks > 1);
 
   /* Check if the card is locked or write protected (either via software or
@@ -1825,7 +1825,7 @@ static ssize_t mmcsd_writemultiple(FAR struct mmcsd_state_s *priv,
       offset = startblock << priv->blockshift;
     }
 
-  fvdbg("nbytes=%d byte offset=%d\n", nbytes, offset);
+  finfo("nbytes=%d byte offset=%d\n", nbytes, offset);
 
   /* Select the block size for the card */
 
@@ -1876,7 +1876,7 @@ static ssize_t mmcsd_writemultiple(FAR struct mmcsd_state_s *priv,
       ret = SDIO_DMASENDSETUP(priv->dev, buffer, nbytes);
       if (ret != OK)
         {
-          fvdbg("SDIO_DMASENDSETUP: error %d\n", ret);
+          finfo("SDIO_DMASENDSETUP: error %d\n", ret);
           return ret;
         }
     }
@@ -2003,7 +2003,7 @@ static int mmcsd_open(FAR struct inode *inode)
 {
   FAR struct mmcsd_state_s *priv;
 
-  fvdbg("Entry\n");
+  finfo("Entry\n");
   DEBUGASSERT(inode && inode->i_private);
   priv = (FAR struct mmcsd_state_s *)inode->i_private;
 
@@ -2027,7 +2027,7 @@ static int mmcsd_close(FAR struct inode *inode)
 {
   FAR struct mmcsd_state_s *priv;
 
-  fvdbg("Entry\n");
+  finfo("Entry\n");
   DEBUGASSERT(inode && inode->i_private);
   priv = (FAR struct mmcsd_state_s *)inode->i_private;
 
@@ -2061,7 +2061,7 @@ static ssize_t mmcsd_read(FAR struct inode *inode, unsigned char *buffer,
 
   DEBUGASSERT(inode && inode->i_private);
   priv = (FAR struct mmcsd_state_s *)inode->i_private;
-  fvdbg("startsector: %d nsectors: %d sectorsize: %d\n",
+  finfo("startsector: %d nsectors: %d sectorsize: %d\n",
         startsector, nsectors, priv->blocksize);
 
   if (nsectors > 0)
@@ -2137,7 +2137,7 @@ static ssize_t mmcsd_write(FAR struct inode *inode, FAR const unsigned char *buf
   DEBUGASSERT(inode && inode->i_private);
   priv = (FAR struct mmcsd_state_s *)inode->i_private;
 
-  fvdbg("sector: %lu nsectors: %u sectorsize: %u\n",
+  finfo("sector: %lu nsectors: %u sectorsize: %u\n",
         (unsigned long)startsector, nsectors, priv->blocksize);
 
   mmcsd_takesem(priv);
@@ -2200,7 +2200,7 @@ static int mmcsd_geometry(FAR struct inode *inode, struct geometry *geometry)
   FAR struct mmcsd_state_s *priv;
   int ret = -EINVAL;
 
-  fvdbg("Entry\n");
+  finfo("Entry\n");
   DEBUGASSERT(inode && inode->i_private);
 
   if (geometry)
@@ -2213,7 +2213,7 @@ static int mmcsd_geometry(FAR struct inode *inode, struct geometry *geometry)
         {
           /* No.. return ENODEV */
 
-          fvdbg("IS_EMPTY\n");
+          finfo("IS_EMPTY\n");
           ret = -ENODEV;
         }
       else
@@ -2230,10 +2230,10 @@ static int mmcsd_geometry(FAR struct inode *inode, struct geometry *geometry)
           geometry->geo_nsectors      = priv->nblocks;
           geometry->geo_sectorsize    = priv->blocksize;
 
-          fvdbg("available: true mediachanged: %s writeenabled: %s\n",
+          finfo("available: true mediachanged: %s writeenabled: %s\n",
                  geometry->geo_mediachanged ? "true" : "false",
                  geometry->geo_writeenabled ? "true" : "false");
-          fvdbg("nsectors: %lu sectorsize: %d\n",
+          finfo("nsectors: %lu sectorsize: %d\n",
                  (long)geometry->geo_nsectors, geometry->geo_sectorsize);
 
           priv->mediachanged = false;
@@ -2258,7 +2258,7 @@ static int mmcsd_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
   FAR struct mmcsd_state_s *priv;
   int ret;
 
-  fvdbg("Entry\n");
+  finfo("Entry\n");
   DEBUGASSERT(inode && inode->i_private);
   priv  = (FAR struct mmcsd_state_s *)inode->i_private;
 
@@ -2269,7 +2269,7 @@ static int mmcsd_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
     {
     case BIOC_PROBE: /* Check for media in the slot */
       {
-        fvdbg("BIOC_PROBE\n");
+        finfo("BIOC_PROBE\n");
 
         /* Probe the MMC/SD slot for media */
 
@@ -2283,7 +2283,7 @@ static int mmcsd_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
 
     case BIOC_EJECT: /* Media has been removed from the slot */
       {
-        fvdbg("BIOC_EJECT\n");
+        finfo("BIOC_EJECT\n");
 
         /* Process the removal of the card */
 
@@ -2330,7 +2330,7 @@ static void mmcsd_mediachange(FAR void *arg)
 {
   FAR struct mmcsd_state_s *priv = (FAR struct mmcsd_state_s *)arg;
 
-  fvdbg("arg: %p\n", arg);
+  finfo("arg: %p\n", arg);
   DEBUGASSERT(priv);
 
   /* Is there a card present in the slot? */
@@ -2411,7 +2411,7 @@ static int mmcsd_widebus(FAR struct mmcsd_state_s *priv)
       ret = mmcsd_recvR1(priv, SD_ACMD42);
       if (ret != OK)
         {
-          fvdbg("WARNING: SD card does not support ACMD42: %d\n", ret);
+          finfo("WARNING: SD card does not support ACMD42: %d\n", ret);
           return ret;
         }
 
@@ -2438,7 +2438,7 @@ static int mmcsd_widebus(FAR struct mmcsd_state_s *priv)
 
       /* Configure the SDIO peripheral */
 
-      fvdbg("Wide bus operation selected\n");
+      finfo("Wide bus operation selected\n");
       SDIO_WIDEBUS(priv->dev, true);
       priv->widebus = true;
 
@@ -2454,7 +2454,7 @@ static int mmcsd_widebus(FAR struct mmcsd_state_s *priv)
 
 #else /* CONFIG_SDIO_WIDTH_D1_ONLY */
 
-  fvdbg("Wide-bus operation is disabled\n");
+  finfo("Wide-bus operation is disabled\n");
   return -ENOSYS;
 
 #endif /* CONFIG_SDIO_WIDTH_D1_ONLY */
@@ -2615,7 +2615,7 @@ static int mmcsd_sdinitialize(FAR struct mmcsd_state_s *priv)
       return ret;
     }
 
-  fvdbg("RCA: %04x\n", priv->rca);
+  finfo("RCA: %04x\n", priv->rca);
 
   /* This should have caused a transition to standby state. However, this will
    * not be reflected in the present R1 status.  R1/6 contains the state of
@@ -2729,7 +2729,7 @@ static int mmcsd_cardidentify(FAR struct mmcsd_state_s *priv)
 
   if (!SDIO_PRESENT(priv->dev))
     {
-      fvdbg("No card present\n");
+      finfo("No card present\n");
       return -ENODEV;
     }
 
@@ -2779,7 +2779,7 @@ static int mmcsd_cardidentify(FAR struct mmcsd_state_s *priv)
       if (((response & MMCSD_R7VOLTAGE_MASK) == MMCSD_R7VOLTAGE_27) &&
           ((response & MMCSD_R7ECHO_MASK) ==  MMCSD_R7CHECKPATTERN))
         {
-          fvdbg("SD V2.x card\n");
+          finfo("SD V2.x card\n");
           priv->type = MMCSD_CARDTYPE_SDV2;
           sdcapacity = MMCSD_ACMD41_HIGHCAPACITY;
         }
@@ -2844,10 +2844,10 @@ static int mmcsd_cardidentify(FAR struct mmcsd_state_s *priv)
                    * an SD V2.x (via CMD8), then this must be SD V1.x
                    */
 
-                  fvdbg("R3: %08x\n", response);
+                  finfo("R3: %08x\n", response);
                   if (priv->type == MMCSD_CARDTYPE_UNKNOWN)
                     {
-                      fvdbg("SD V1.x card\n");
+                      finfo("SD V1.x card\n");
                       priv->type = MMCSD_CARDTYPE_SDV1;
                     }
 
@@ -2869,7 +2869,7 @@ static int mmcsd_cardidentify(FAR struct mmcsd_state_s *priv)
 
                       if ((response & MMCSD_R3_HIGHCAPACITY) != 0)
                         {
-                          fvdbg("SD V2.x card with block addressing\n");
+                          finfo("SD V2.x card with block addressing\n");
                           DEBUGASSERT(priv->type == MMCSD_CARDTYPE_SDV2);
                           priv->type |= MMCSD_CARDTYPE_BLOCK;
                         }
@@ -2977,7 +2977,7 @@ static int mmcsd_probe(FAR struct mmcsd_state_s *priv)
 {
   int ret;
 
-  fvdbg("type: %d probed: %d\n", priv->type, priv->probed);
+  finfo("type: %d probed: %d\n", priv->type, priv->probed);
 
   /* If we have reliable card detection events and if we have
    * already probed the card, then we don't need to do anything
@@ -3045,7 +3045,7 @@ static int mmcsd_probe(FAR struct mmcsd_state_s *priv)
             {
               /* Yes...  */
 
-              fvdbg("Capacity: %lu Kbytes\n", (unsigned long)(priv->capacity / 1024));
+              finfo("Capacity: %lu Kbytes\n", (unsigned long)(priv->capacity / 1024));
               priv->mediachanged = true;
 
               /* Set up to receive asynchronous, media removal events */
@@ -3066,7 +3066,7 @@ static int mmcsd_probe(FAR struct mmcsd_state_s *priv)
     {
       /* There is no card in the slot */
 
-      fvdbg("No card\n");
+      finfo("No card\n");
 #ifdef CONFIG_MMCSD_HAVECARDDETECT
       SDIO_CALLBACKENABLE(priv->dev, SDIOMEDIA_INSERTED);
 #endif
@@ -3088,7 +3088,7 @@ static int mmcsd_probe(FAR struct mmcsd_state_s *priv)
 
 static int mmcsd_removed(FAR struct mmcsd_state_s *priv)
 {
-  fvdbg("type: %d present: %d\n", priv->type, SDIO_PRESENT(priv->dev));
+  finfo("type: %d present: %d\n", priv->type, SDIO_PRESENT(priv->dev));
 
   /* Forget the card geometry, pretend the slot is empty (it might not
    * be), and that the card has never been initialized.
@@ -3131,7 +3131,7 @@ static int mmcsd_hwinitialize(FAR struct mmcsd_state_s *priv)
   /* Does this architecture support DMA with the MMC/SD device? */
 
   priv->dma = SDIO_DMASUPPORTED(priv->dev);
-  fvdbg("DMA supported: %d\n", priv->dma);
+  finfo("DMA supported: %d\n", priv->dma);
 #endif
 
   /* Attach and prepare MMC/SD interrupts */
@@ -3143,7 +3143,7 @@ static int mmcsd_hwinitialize(FAR struct mmcsd_state_s *priv)
       return -EBUSY;
     }
 
-  fvdbg("Attached MMC/SD interrupts\n");
+  finfo("Attached MMC/SD interrupts\n");
 
   /* Register a callback so that we get informed if media is inserted or
    * removed from the slot (Initially all callbacks are disabled).
@@ -3174,7 +3174,7 @@ static int mmcsd_hwinitialize(FAR struct mmcsd_state_s *priv)
       ret = mmcsd_probe(priv);
       if (ret != OK)
         {
-          fvdbg("Slot not empty, but initialization failed: %d\n", ret);
+          finfo("Slot not empty, but initialization failed: %d\n", ret);
 
           /* NOTE: The failure to initialize a card does not mean that
            * initialization has failed! A card could be installed in the slot
@@ -3247,7 +3247,7 @@ int mmcsd_slotinitialize(int minor, FAR struct sdio_dev_s *dev)
   char devname[16];
   int ret = -ENOMEM;
 
-  fvdbg("minor: %d\n", minor);
+  finfo("minor: %d\n", minor);
 
   /* Sanity check */
 
@@ -3293,7 +3293,7 @@ int mmcsd_slotinitialize(int minor, FAR struct sdio_dev_s *dev)
 
               SDIO_CALLBACKENABLE(priv->dev, SDIOMEDIA_INSERTED);
 
-              fvdbg("MMC/SD slot is empty\n");
+              finfo("MMC/SD slot is empty\n");
             }
           else
             {

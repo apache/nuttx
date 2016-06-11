@@ -85,7 +85,7 @@ int up_cryptoinitialize(void)
     }
   else
     {
-      cryptllvdbg("crypto test OK\n");
+      cryptllinfo("crypto test OK\n");
     }
 #endif
 

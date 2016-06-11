@@ -100,14 +100,14 @@
 
 #ifdef CONFIG_DEBUG_I2C
 #  define i2cdbg    dbg
-#  define i2cvdbg   vdbg
+#  define i2cinfo   info
 #  define i2clldbg  lldbg
-#  define i2cllvdbg llvdbg
+#  define i2cllinfo llinfo
 #else
 #  define i2cdbg(x...)
-#  define i2cvdbg(x...)
+#  define i2cinfo(x...)
 #  define i2clldbg(x...)
-#  define i2cllvdbg(x...)
+#  define i2cllinfo(x...)
 #endif
 
 /****************************************************************************
@@ -460,7 +460,7 @@ static int twi_interrupt(struct twi_dev_s *priv)
   imr     = twi_getrel(priv, SAM_TWI_IMR_OFFSET);
   pending = sr & imr;
 
-  i2cllvdbg("TWI%d pending: %08x\n", priv->twi, pending);
+  i2cllinfo("TWI%d pending: %08x\n", priv->twi, pending);
 
   msg = priv->msg;
 
@@ -708,7 +708,7 @@ static int twi_transfer(FAR struct i2c_master_s *dev,
   int ret;
 
   DEBUGASSERT(dev != NULL);
-  i2cvdbg("TWI%d count: %d\n", priv->twi, count);
+  i2cinfo("TWI%d count: %d\n", priv->twi, count);
 
   /* Get exclusive access to the device */
 
@@ -842,7 +842,7 @@ static void twi_hw_initialize(struct twi_dev_s *priv, unsigned int pid,
   uint32_t mck;
 #endif
 
-  i2cvdbg("TWI%d Initializing\n", priv->twi);
+  i2cinfo("TWI%d Initializing\n", priv->twi);
 
   /* SVEN: TWI Slave Mode Enabled */
 
@@ -925,7 +925,7 @@ struct i2c_master_s *sam_i2cbus_initialize(int bus)
   uint32_t frequency;
   unsigned int pid;
 
-  i2cvdbg("Initializing TWI%d\n", bus);
+  i2cinfo("Initializing TWI%d\n", bus);
 
   flags = enter_critical_section();
 
@@ -1029,7 +1029,7 @@ int sam_i2cbus_uninitialize(FAR struct i2c_master_s * dev)
 {
   struct twi_dev_s *priv = (struct twi_dev_s *) dev;
 
-  i2cvdbg("TWI%d Un-initializing\n", priv->twi);
+  i2cinfo("TWI%d Un-initializing\n", priv->twi);
 
   /* Disable interrupts */
 

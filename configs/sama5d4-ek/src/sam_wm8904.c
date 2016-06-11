@@ -157,13 +157,13 @@ static int wm8904_attach(FAR const struct wm8904_lower_s *lower,
        * new handler will called via wm8904_interrupt() when the interrupt occurs.
        */
 
-      audvdbg("Attaching %p\n", isr);
+      audinfo("Attaching %p\n", isr);
       g_wm8904info.handler = isr;
       g_wm8904info.arg = arg;
     }
   else
     {
-      audvdbg("Detaching %p\n", g_wm8904info.handler);
+      audinfo("Detaching %p\n", g_wm8904info.handler);
       (void)wm8904_enable(lower, false);
       g_wm8904info.handler = NULL;
       g_wm8904info.arg = NULL;
@@ -187,13 +187,13 @@ static bool wm8904_enable(FAR const struct wm8904_lower_s *lower, bool enable)
 
       if (enable && g_wm8904info.handler)
         {
-          audvdbg("Enabling\n");
+          audinfo("Enabling\n");
           sam_pioirqenable(IRQ_INT_WM8904);
           enabled = true;
         }
       else
         {
-          audvdbg("Disabling\n");
+          audinfo("Disabling\n");
           sam_pioirqdisable(IRQ_INT_WM8904);
           enabled = false;
         }
@@ -208,7 +208,7 @@ static int wm8904_interrupt(int irq, FAR void *context)
 {
   /* Just forward the interrupt to the WM8904 driver */
 
-  audvdbg("handler %p\n", g_wm8904info.handler);
+  audinfo("handler %p\n", g_wm8904info.handler);
   if (g_wm8904info.handler)
     {
       return g_wm8904info.handler(&g_wm8904info.lower, g_wm8904info.arg);

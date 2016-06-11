@@ -95,7 +95,7 @@ static int builtin_loadbinary(struct binary_s *binp)
   int index;
   int ret;
 
-  bvdbg("Loading file: %s\n", binp->filename);
+  binfo("Loading file: %s\n", binp->filename);
 
   /* Open the binary file for reading (only) */
 
@@ -171,7 +171,7 @@ int builtin_initialize(void)
 
   /* Register ourselves as a binfmt loader */
 
-  bvdbg("Registering Builtin Loader\n");
+  binfo("Registering Builtin Loader\n");
 
   ret = register_binfmt(&g_builtin_binfmt);
   if (ret != 0)

@@ -312,7 +312,7 @@
 /* Debug ******************************************************************************/
 
 #ifdef CONFIG_DEBUG_LCD
-# define lcddbg(format, ...)  vdbg(format, ##__VA_ARGS__)
+# define lcddbg(format, ...)  info(format, ##__VA_ARGS__)
 #else
 # define lcddbg(x...)
 #endif
@@ -952,7 +952,7 @@ static int stm3210e_getvideoinfo(FAR struct lcd_dev_s *dev,
                               FAR struct fb_videoinfo_s *vinfo)
 {
   DEBUGASSERT(dev && vinfo);
-  gvdbg("fmt: %d xres: %d yres: %d nplanes: %d\n",
+  ginfo("fmt: %d xres: %d yres: %d nplanes: %d\n",
          g_videoinfo.fmt, g_videoinfo.xres, g_videoinfo.yres, g_videoinfo.nplanes);
   memcpy(vinfo, &g_videoinfo, sizeof(struct fb_videoinfo_s));
   return OK;
@@ -970,7 +970,7 @@ static int stm3210e_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno
                               FAR struct lcd_planeinfo_s *pinfo)
 {
   DEBUGASSERT(dev && pinfo && planeno == 0);
-  gvdbg("planeno: %d bpp: %d\n", planeno, g_planeinfo.bpp);
+  ginfo("planeno: %d bpp: %d\n", planeno, g_planeinfo.bpp);
   memcpy(pinfo, &g_planeinfo, sizeof(struct lcd_planeinfo_s));
   return OK;
 }
@@ -986,7 +986,7 @@ static int stm3210e_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno
 
 static int stm3210e_getpower(struct lcd_dev_s *dev)
 {
-  gvdbg("power: %d\n", 0);
+  ginfo("power: %d\n", 0);
   return g_lcddev.power;
 }
 
@@ -1038,7 +1038,7 @@ static int stm3210e_poweroff(void)
 
 static int stm3210e_setpower(struct lcd_dev_s *dev, int power)
 {
-  gvdbg("power: %d\n", power);
+  ginfo("power: %d\n", power);
   DEBUGASSERT((unsigned)power <= CONFIG_LCD_MAXPOWER);
 
   /* Set new power level */
@@ -1114,7 +1114,7 @@ static int stm3210e_setpower(struct lcd_dev_s *dev, int power)
 
 static int stm3210e_getcontrast(struct lcd_dev_s *dev)
 {
-  gvdbg("Not implemented\n");
+  ginfo("Not implemented\n");
   return -ENOSYS;
 }
 
@@ -1128,7 +1128,7 @@ static int stm3210e_getcontrast(struct lcd_dev_s *dev)
 
 static int stm3210e_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
 {
-  gvdbg("contrast: %d\n", contrast);
+  ginfo("contrast: %d\n", contrast);
   return -ENOSYS;
 }
 
@@ -1786,7 +1786,7 @@ int board_lcd_initialize(void)
   int ret;
 #endif
 
-  gvdbg("Initializing\n");
+  ginfo("Initializing\n");
 
   /* Register to receive power management callbacks */
 

@@ -262,7 +262,7 @@ int mod_findsection(FAR struct mod_loadinfo_s *loadinfo,
 
       /* Check if the name of this section is 'sectname' */
 
-      svdbg("%d. Comparing \"%s\" and .\"%s\"\n",
+      sinfo("%d. Comparing \"%s\" and .\"%s\"\n",
             i, loadinfo->iobuffer, sectname);
 
       if (strcmp((FAR const char *)loadinfo->iobuffer, sectname) == 0)

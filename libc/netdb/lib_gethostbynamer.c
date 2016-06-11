@@ -622,7 +622,7 @@ static int lib_hostfile_lookup(FAR const char *name, FAR struct hostent *host,
         {
           /* We successfully read the entry */
 
-          nvdbg("Comparing %s to %s\n", name, host->h_name);
+          ninfo("Comparing %s to %s\n", name, host->h_name);
 
           /* Check for a host name match */
 

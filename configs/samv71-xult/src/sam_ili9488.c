@@ -302,10 +302,10 @@
 
 #ifdef CONFIG_DEBUG_LCD
 #  define lcddbg              dbg
-#  define lcdvdbg             vdbg
+#  define lcdinfo             info
 #else
 #  define lcddbg(x...)
-#  define lcdvdbg(x...)
+#  define lcdinfo(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_DMA
@@ -674,7 +674,7 @@ static int sam_setwindow(FAR struct sam_dev_s *priv, sam_color_t row,
   uint16_t buffer[4];
   int ret;
 
-  lcdvdbg("row=%d col=%d width=%d height=%d\n", row, col, width, height);
+  lcdinfo("row=%d col=%d width=%d height=%d\n", row, col, width, height);
 
   /* Set Column Address Position */
 
@@ -770,7 +770,7 @@ static void sam_disable_backlight(void)
 
 static int sam_set_backlight(unsigned int power)
 {
-  lcdvdbg("power=%d\n", power);
+  lcdinfo("power=%d\n", power);
 
   /* PWM support is not yet available.  Backlight is currently just
    * configured as a GPIO output.
@@ -803,7 +803,7 @@ static int sam_poweroff(FAR struct sam_dev_s *priv)
 {
   int ret;
 
-  lcdvdbg("OFF\n");
+  lcdinfo("OFF\n");
 
   /* Turn the display off */
 
@@ -1152,7 +1152,7 @@ static int sam_putrun(fb_coord_t row, fb_coord_t col,
 
   /* Buffer must be provided and aligned to a 16-bit address boundary */
 
-  lcdvdbg("row: %d col: %d npixels: %d\n", row, col, npixels);
+  lcdinfo("row: %d col: %d npixels: %d\n", row, col, npixels);
   DEBUGASSERT(buffer && ((uintptr_t)buffer & 1) == 0);
 
   /* Determine the refresh window area */
@@ -1193,7 +1193,7 @@ static int sam_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
 
   /* Buffer must be provided and aligned to a 16-bit address boundary */
 
-  lcdvdbg("row: %d col: %d npixels: %d\n", row, col, npixels);
+  lcdinfo("row: %d col: %d npixels: %d\n", row, col, npixels);
   DEBUGASSERT(buffer && ((uintptr_t)buffer & 1) == 0);
 
   /* Determine the refresh window area */
@@ -1223,7 +1223,7 @@ static int sam_getvideoinfo(FAR struct lcd_dev_s *dev,
                             FAR struct fb_videoinfo_s *vinfo)
 {
   DEBUGASSERT(dev && vinfo);
-  lcdvdbg("fmt: %d xres: %d yres: %d nplanes: %d\n",
+  lcdinfo("fmt: %d xres: %d yres: %d nplanes: %d\n",
           g_videoinfo.fmt, g_videoinfo.xres, g_videoinfo.yres,
           g_videoinfo.nplanes);
 
@@ -1243,7 +1243,7 @@ static int sam_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
                               FAR struct lcd_planeinfo_s *pinfo)
 {
   DEBUGASSERT(dev && pinfo && planeno == 0);
-  lcdvdbg("planeno: %d bpp: %d\n", planeno, g_planeinfo.bpp);
+  lcdinfo("planeno: %d bpp: %d\n", planeno, g_planeinfo.bpp);
   memcpy(pinfo, &g_planeinfo, sizeof(struct lcd_planeinfo_s));
   return OK;
 }
@@ -1262,7 +1262,7 @@ static int sam_getpower(struct lcd_dev_s *dev)
 {
   FAR struct sam_dev_s *priv = (FAR struct sam_dev_s *)dev;
 
-  lcdvdbg("power: %d\n", 0);
+  lcdinfo("power: %d\n", 0);
   return priv->power;
 }
 
@@ -1281,7 +1281,7 @@ static int sam_setpower(struct lcd_dev_s *dev, int power)
   FAR struct sam_dev_s *priv = (FAR struct sam_dev_s *)dev;
   int ret;
 
-  lcdvdbg("power: %d\n", power);
+  lcdinfo("power: %d\n", power);
   DEBUGASSERT((unsigned)power <= CONFIG_LCD_MAXPOWER);
 
   /* Set new power level */
@@ -1340,7 +1340,7 @@ static int sam_setpower(struct lcd_dev_s *dev, int power)
 
 static int sam_getcontrast(struct lcd_dev_s *dev)
 {
-  lcdvdbg("Not implemented\n");
+  lcdinfo("Not implemented\n");
   return -ENOSYS;
 }
 
@@ -1354,7 +1354,7 @@ static int sam_getcontrast(struct lcd_dev_s *dev)
 
 static int sam_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
 {
-  lcdvdbg("contrast: %d\n", contrast);
+  lcdinfo("contrast: %d\n", contrast);
   return -ENOSYS;
 }
 
@@ -1480,7 +1480,7 @@ static inline int sam_lcd_initialize(void)
     }
 
   id = ((uint16_t)buffer[2] << 8) | ((uint16_t)buffer[3] & 0xff);
-  lcdvdbg("ID: %04x\n", id);
+  lcdinfo("ID: %04x\n", id);
 
   if (id != ILI9488_DEVICE_CODE)
     {
@@ -1556,7 +1556,7 @@ int board_lcd_initialize(void)
   FAR struct sam_dev_s *priv = &g_lcddev;
   int ret;
 
-  lcdvdbg("Initializing\n");
+  lcdinfo("Initializing\n");
 
   /* Configure all LCD pins pins (backlight is initially off) */
 

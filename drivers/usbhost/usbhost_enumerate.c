@@ -143,7 +143,7 @@ static inline int usbhost_devdesc(FAR const struct usb_devdesc_s *devdesc,
   id->vid = usbhost_getle16(devdesc->vendor);
   id->pid = usbhost_getle16(devdesc->product);
 
-  uvdbg("class:%d subclass:%04x protocol:%04x vid:%d pid:%d\n",
+  uinfo("class:%d subclass:%04x protocol:%04x vid:%d pid:%d\n",
         id->base, id->subclass, id->proto, id->vid, id->pid);
   return OK;
 }
@@ -169,7 +169,7 @@ static inline int usbhost_configdesc(const uint8_t *configdesc, int cfglen,
   /* Verify that we were passed a configuration descriptor */
 
   cfgdesc = (struct usb_cfgdesc_s *)configdesc;
-  uvdbg("cfg len:%d total len:%d\n", cfgdesc->len, cfglen);
+  uinfo("cfg len:%d total len:%d\n", cfgdesc->len, cfglen);
 
   if (cfgdesc->type != USB_DESC_TYPE_CONFIG)
     {
@@ -200,7 +200,7 @@ static inline int usbhost_configdesc(const uint8_t *configdesc, int cfglen,
           id->base     = ifdesc->classid;
           id->subclass = ifdesc->subclass;
           id->proto    = ifdesc->protocol;
-          uvdbg("class:%d subclass:%d protocol:%d\n",
+          uinfo("class:%d subclass:%d protocol:%d\n",
                 id->base, id->subclass, id->proto);
           return OK;
         }
@@ -235,7 +235,7 @@ static inline int usbhost_classbind(FAR struct usbhost_hubport_s *hport,
   /* Is there is a class implementation registered to support this device. */
 
   reg = usbhost_findclass(id);
-  uvdbg("usbhost_findclass: %p\n", reg);
+  uinfo("usbhost_findclass: %p\n", reg);
   if (reg != NULL)
     {
       /* Yes.. there is a class for this device.  Get an instance of
@@ -244,7 +244,7 @@ static inline int usbhost_classbind(FAR struct usbhost_hubport_s *hport,
 
       ret = -ENOMEM;
       devclass = CLASS_CREATE(reg, hport, id);
-      uvdbg("CLASS_CREATE: %p\n", devclass);
+      uinfo("CLASS_CREATE: %p\n", devclass);
       if (devclass != NULL)
         {
           /* Then bind the newly instantiated class instance */
@@ -266,7 +266,7 @@ static inline int usbhost_classbind(FAR struct usbhost_hubport_s *hport,
         }
     }
 
-  uvdbg("Returning: %d\n", ret);
+  uinfo("Returning: %d\n", ret);
   return ret;
 }
 
@@ -389,7 +389,7 @@ int usbhost_enumerate(FAR struct usbhost_hubport_s *hport,
   /* Extract the correct max packetsize from the device descriptor */
 
   maxpacketsize = ((struct usb_devdesc_s *)buffer)->mxpacketsize;
-  uvdbg("maxpacksetsize: %d\n", maxpacketsize);
+  uinfo("maxpacksetsize: %d\n", maxpacketsize);
 
   /* And reconfigure EP0 with the correct maximum packet size */
 
@@ -481,7 +481,7 @@ int usbhost_enumerate(FAR struct usbhost_hubport_s *hport,
   /* Extract the full size of the configuration data */
 
   cfglen = (unsigned int)usbhost_getle16(((struct usb_cfgdesc_s *)buffer)->totallen);
-  uvdbg("sizeof config data: %d\n", cfglen);
+  uinfo("sizeof config data: %d\n", cfglen);
 
   /* Get all of the configuration descriptor data, index == 0 (Should not be
    * hard-coded!)

@@ -312,7 +312,7 @@ static int mxt_getreg(FAR struct mxt_dev_s *priv, uint16_t regaddr,
 
   for (retries = 1; retries <= 3; retries++)
     {
-      ivdbg("retries=%d regaddr=%04x buflen=%d\n", retries, regaddr, buflen);
+      iinfo("retries=%d regaddr=%04x buflen=%d\n", retries, regaddr, buflen);
 
       /* Set up to write the address */
 
@@ -386,7 +386,7 @@ static int mxt_putreg(FAR struct mxt_dev_s *priv, uint16_t regaddr,
 
   for (retries = 1; retries <= 3; retries++)
     {
-      ivdbg("retries=%d regaddr=%04x buflen=%d\n", retries, regaddr, buflen);
+      iinfo("retries=%d regaddr=%04x buflen=%d\n", retries, regaddr, buflen);
 
       /* Set up to write the address */
 
@@ -611,7 +611,7 @@ static void mxt_notify(FAR struct mxt_dev_s *priv)
       if (fds)
         {
           fds->revents |= POLLIN;
-          ivdbg("Report events: %02x\n", fds->revents);
+          iinfo("Report events: %02x\n", fds->revents);
           sem_post(fds->sem);
         }
     }
@@ -796,7 +796,7 @@ static void mxt_touch_event(FAR struct mxt_dev_s *priv,
   pressure = msg->body[5];
 
   status = msg->body[0];
-  ivdbg("ndx=%u status=%02x pos(%u,%u) area=%u pressure=%u\n",
+  iinfo("ndx=%u status=%02x pos(%u,%u) area=%u pressure=%u\n",
         ndx, status, x, y, area, pressure);
 
   /* The normal sequence that we would see for a touch would be something
@@ -1017,7 +1017,7 @@ static void mxt_worker(FAR void *arg)
                   ((uint32_t)msg.body[2] << 8) |
                   ((uint32_t)msg.body[3] << 16);
 
-          ivdbg("T6: status: %02x checksum: %06lx\n",
+          iinfo("T6: status: %02x checksum: %06lx\n",
                 status, (unsigned long)chksum);
 
           retries = 0;
@@ -1049,7 +1049,7 @@ static void mxt_worker(FAR void *arg)
 
       else if (msg.id != 0xff)
         {
-          ivdbg("Ignored: id=%u message={%02x %02x %02x %02x %02x %02x %02x}\n",
+          iinfo("Ignored: id=%u message={%02x %02x %02x %02x %02x %02x %02x}\n",
                 msg.id, msg.body[0], msg.body[1], msg.body[2], msg.body[3],
                 msg.body[4], msg.body[5], msg.body[6]);
 
@@ -1490,7 +1490,7 @@ static int mxt_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   FAR struct mxt_dev_s *priv;
   int                       ret;
 
-  ivdbg("cmd: %d arg: %ld\n", cmd, arg);
+  iinfo("cmd: %d arg: %ld\n", cmd, arg);
   DEBUGASSERT(filep);
   inode = filep->f_inode;
 
@@ -1551,7 +1551,7 @@ static int mxt_poll(FAR struct file *filep, FAR struct pollfd *fds,
   int                       ret;
   int                       i;
 
-  ivdbg("setup: %d\n", (int)setup);
+  iinfo("setup: %d\n", (int)setup);
   DEBUGASSERT(filep && fds);
   inode = filep->f_inode;
 
@@ -1697,7 +1697,7 @@ static int mxt_getobjtab(FAR struct mxt_dev_s *priv)
           idmax  = 0;
         }
 
-      ivdbg("%2d. type %2d addr %04x size: %d instances: %d IDs: %u-%u\n",
+      iinfo("%2d. type %2d addr %04x size: %d instances: %d IDs: %u-%u\n",
             i, object->type, MXT_GETUINT16(object->addr), object->size + 1,
             object->ninstances + 1, idmin, idmax);
 
@@ -1799,10 +1799,10 @@ static int mxt_hwinitialize(FAR struct mxt_dev_s *priv)
 
   info->ysize = regval;
 
-  ivdbg("Family: %u variant: %u version: %u.%u.%02x\n",
+  iinfo("Family: %u variant: %u version: %u.%u.%02x\n",
         info->family, info->variant, info->version >> 4, info->version & 0x0f,
         info->build);
-  ivdbg("Matrix size: (%u,%u) objects: %u\n",
+  iinfo("Matrix size: (%u,%u) objects: %u\n",
         info->xsize, info->ysize, info->nobjects);
 
   /* How many multi touch "slots" */
@@ -1863,7 +1863,7 @@ int mxt_register(FAR struct i2c_master_s *i2c,
   char devname[DEV_NAMELEN];
   int ret;
 
-  ivdbg("i2c: %p minor: %d\n", i2c, minor);
+  iinfo("i2c: %p minor: %d\n", i2c, minor);
 
   /* Debug-only sanity checks */
 
@@ -1913,7 +1913,7 @@ int mxt_register(FAR struct i2c_master_s *i2c,
   /* Register the device as an input device */
 
   (void)snprintf(devname, DEV_NAMELEN, DEV_FORMAT, minor);
-  ivdbg("Registering %s\n", devname);
+  iinfo("Registering %s\n", devname);
 
   ret = register_driver(devname, &mxt_fops, 0666, priv);
   if (ret < 0)

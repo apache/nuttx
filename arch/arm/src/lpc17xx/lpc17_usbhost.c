@@ -1192,7 +1192,7 @@ static inline int lpc17_addinted(struct lpc17_usbhost_s *priv,
 
   interval     = lpc17_getinterval(epdesc->interval);
   ed->interval = interval;
-  uvdbg("interval: %d->%d\n", epdesc->interval, interval);
+  uinfo("interval: %d->%d\n", epdesc->interval, interval);
 
   /* Get the offset associated with the ED direction. IN EDs get the even
    * entries, OUT EDs get the odd entries.
@@ -1225,7 +1225,7 @@ static inline int lpc17_addinted(struct lpc17_usbhost_s *priv,
           interval = priv->outinterval;
         }
     }
-  uvdbg("min interval: %d offset: %d\n", interval, offset);
+  uinfo("min interval: %d offset: %d\n", interval, offset);
 
   /* Get the head of the first of the duplicated entries.  The first offset
    * entry is always guaranteed to contain the common ED list head.
@@ -1244,7 +1244,7 @@ static inline int lpc17_addinted(struct lpc17_usbhost_s *priv,
 
   ed->hw.nexted = head;
   lpc17_setinttab((uint32_t)ed, interval, offset);
-  uvdbg("head: %08x next: %08x\n", ed, head);
+  uinfo("head: %08x next: %08x\n", ed, head);
 
   /* Re-enabled periodic list processing */
 
@@ -1314,7 +1314,7 @@ static inline int lpc17_reminted(struct lpc17_usbhost_s *priv,
    */
 
   head = (struct lpc17_ed_s *)HCCA->inttbl[offset];
-  uvdbg("ed: %08x head: %08x next: %08x offset: %d\n",
+  uinfo("ed: %08x head: %08x next: %08x offset: %d\n",
         ed, head, head ? head->hw.nexted : 0, offset);
 
   /* Find the ED to be removed in the ED list */
@@ -1349,7 +1349,7 @@ static inline int lpc17_reminted(struct lpc17_usbhost_s *priv,
           prev->hw.nexted = ed->hw.nexted;
         }
 
-        uvdbg("ed: %08x head: %08x next: %08x\n",
+        uinfo("ed: %08x head: %08x next: %08x\n",
               ed, head, head ? head->hw.nexted : 0);
 
       /* Calculate the new minimum interval for this list */
@@ -1363,7 +1363,7 @@ static inline int lpc17_reminted(struct lpc17_usbhost_s *priv,
             }
         }
 
-      uvdbg("min interval: %d offset: %d\n", interval, offset);
+      uinfo("min interval: %d offset: %d\n", interval, offset);
 
       /* Save the new minimum interval */
 
@@ -1642,7 +1642,7 @@ static int lpc17_usbinterrupt(int irq, void *context)
 
   intst  = lpc17_getreg(LPC17_USBHOST_INTST);
   regval = lpc17_getreg(LPC17_USBHOST_INTEN);
-  ullvdbg("INST: %08x INTEN: %08x\n", intst, regval);
+  ullinfo("INST: %08x INTEN: %08x\n", intst, regval);
 
   pending = intst & regval;
   if (pending != 0)
@@ -1652,18 +1652,18 @@ static int lpc17_usbinterrupt(int irq, void *context)
       if ((pending & OHCI_INT_RHSC) != 0)
         {
           uint32_t rhportst1 = lpc17_getreg(LPC17_USBHOST_RHPORTST1);
-          ullvdbg("Root Hub Status Change, RHPORTST1: %08x\n", rhportst1);
+          ullinfo("Root Hub Status Change, RHPORTST1: %08x\n", rhportst1);
 
           if ((rhportst1 & OHCI_RHPORTST_CSC) != 0)
             {
               uint32_t rhstatus = lpc17_getreg(LPC17_USBHOST_RHSTATUS);
-              ullvdbg("Connect Status Change, RHSTATUS: %08x\n", rhstatus);
+              ullinfo("Connect Status Change, RHSTATUS: %08x\n", rhstatus);
 
               /* If DRWE is set, Connect Status Change indicates a remote wake-up event */
 
               if (rhstatus & OHCI_RHSTATUS_DRWE)
                 {
-                  ullvdbg("DRWE: Remote wake-up\n");
+                  ullinfo("DRWE: Remote wake-up\n");
                 }
 
               /* Otherwise... Not a remote wake-up event */
@@ -1680,7 +1680,7 @@ static int lpc17_usbinterrupt(int irq, void *context)
                         {
                           /* Yes.. connected. */
 
-                          ullvdbg("Connected\n");
+                          ullinfo("Connected\n");
                           priv->connected = true;
                           priv->change    = true;
 
@@ -1710,7 +1710,7 @@ static int lpc17_usbinterrupt(int irq, void *context)
                           priv->rhport.hport.speed = USB_SPEED_FULL;
                         }
 
-                      ullvdbg("Speed:%d\n", priv->rhport.hport.speed);
+                      ullinfo("Speed:%d\n", priv->rhport.hport.speed);
                     }
 
                   /* Check if we are now disconnected */
@@ -1719,7 +1719,7 @@ static int lpc17_usbinterrupt(int irq, void *context)
                     {
                       /* Yes.. disconnect the device */
 
-                      ullvdbg("Disconnected\n");
+                      ullinfo("Disconnected\n");
                       priv->connected = false;
                       priv->change    = true;
 
@@ -2089,7 +2089,7 @@ static int lpc17_enumerate(FAR struct usbhost_connection_s *conn,
 
   /* Then let the common usbhost_enumerate do the real enumeration. */
 
-  uvdbg("Enumerate the device\n");
+  uinfo("Enumerate the device\n");
   ret = usbhost_enumerate(hport, &hport->devclass);
   if (ret < 0)
     {
@@ -2155,7 +2155,7 @@ static int lpc17_ep0configure(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
 
   lpc17_givesem(&priv->exclsem);
 
-  uvdbg("EP0 CTRL:%08x\n", ed->hw.ctrl);
+  uinfo("EP0 CTRL:%08x\n", ed->hw.ctrl);
   return OK;
 }
 
@@ -2255,7 +2255,7 @@ static int lpc17_epalloc(struct usbhost_driver_s *drvr,
           ed->hw.ctrl |= ED_CONTROL_F;
         }
 #endif
-      uvdbg("EP%d CTRL:%08x\n", epdesc->addr, ed->hw.ctrl);
+      uinfo("EP%d CTRL:%08x\n", epdesc->addr, ed->hw.ctrl);
 
       /* Initialize the semaphore that is used to wait for the endpoint
        * WDH event.
@@ -2608,7 +2608,7 @@ static int lpc17_ctrlin(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
 
   DEBUGASSERT(priv != NULL && ed != NULL && req != NULL);
 
-  uvdbg("type:%02x req:%02x value:%02x%02x index:%02x%02x len:%02x%02x\n",
+  uinfo("type:%02x req:%02x value:%02x%02x index:%02x%02x len:%02x%02x\n",
         req->type, req->req, req->value[1], req->value[0],
         req->index[1], req->index[0], req->len[1], req->len[0]);
 
@@ -2646,7 +2646,7 @@ static int lpc17_ctrlout(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
 
   DEBUGASSERT(priv != NULL && ed != NULL && req != NULL);
 
-  uvdbg("type:%02x req:%02x value:%02x%02x index:%02x%02x len:%02x%02x\n",
+  uinfo("type:%02x req:%02x value:%02x%02x index:%02x%02x len:%02x%02x\n",
         req->type, req->req, req->value[1], req->value[0],
         req->index[1], req->index[0], req->len[1], req->len[0]);
 
@@ -2712,7 +2712,7 @@ static int lpc17_transfer_common(struct lpc17_usbhost_s *priv,
   xfrinfo = ed->xfrinfo;
   in      = (ed->hw.ctrl & ED_CONTROL_D_MASK) == ED_CONTROL_D_IN;
 
-  uvdbg("EP%u %s toggle:%u maxpacket:%u buflen:%lu\n",
+  uinfo("EP%u %s toggle:%u maxpacket:%u buflen:%lu\n",
         (ed->hw.ctrl  & ED_CONTROL_EN_MASK) >> ED_CONTROL_EN_SHIFT,
         in ? "IN" : "OUT",
         (ed->hw.headp & ED_HEADP_C) != 0 ? 1 : 0,
@@ -2790,7 +2790,7 @@ static int lpc17_dma_alloc(struct lpc17_usbhost_s *priv,
 
       if (buflen > CONFIG_USBHOST_IOBUFSIZE)
         {
-          uvdbg("buflen (%d) > IO buffer size (%d)\n",
+          uinfo("buflen (%d) > IO buffer size (%d)\n",
                  buflen, CONFIG_USBHOST_IOBUFSIZE);
           return -ENOMEM;
         }
@@ -2800,7 +2800,7 @@ static int lpc17_dma_alloc(struct lpc17_usbhost_s *priv,
       newbuffer = lpc17_allocio();
       if (!newbuffer)
         {
-          uvdbg("IO buffer allocation failed\n");
+          uinfo("IO buffer allocation failed\n");
           return -ENOMEM;
         }
 
@@ -3454,7 +3454,7 @@ static int lpc17_connect(FAR struct usbhost_driver_s *drvr,
   /* Set the connected/disconnected flag */
 
   hport->connected = connected;
-  ullvdbg("Hub port %d connected: %s\n", hport->port, connected ? "YES" : "NO");
+  ullinfo("Hub port %d connected: %s\n", hport->port, connected ? "YES" : "NO");
 
   /* Report the connection event */
 
@@ -3700,14 +3700,14 @@ struct usbhost_connection_s *lpc17_usbhost_initialize(int controller)
   /* Show AHB SRAM memory map */
 
 #if 0 /* Useful if you have doubts about the layout */
-  uvdbg("AHB SRAM:\n");
-  uvdbg("  HCCA:   %08x %d\n", LPC17_HCCA_BASE,   LPC17_HCCA_SIZE);
-  uvdbg("  TDTAIL: %08x %d\n", LPC17_TDTAIL_ADDR, LPC17_TD_SIZE);
-  uvdbg("  EDCTRL: %08x %d\n", LPC17_EDCTRL_ADDR, LPC17_ED_SIZE);
-  uvdbg("  EDFREE: %08x %d\n", LPC17_EDFREE_BASE, LPC17_ED_SIZE);
-  uvdbg("  TDFREE: %08x %d\n", LPC17_TDFREE_BASE, LPC17_EDFREE_SIZE);
-  uvdbg("  TBFREE: %08x %d\n", LPC17_TBFREE_BASE, LPC17_TBFREE_SIZE);
-  uvdbg("  IOFREE: %08x %d\n", LPC17_IOFREE_BASE, LPC17_IOBUFFERS * CONFIG_USBHOST_IOBUFSIZE);
+  uinfo("AHB SRAM:\n");
+  uinfo("  HCCA:   %08x %d\n", LPC17_HCCA_BASE,   LPC17_HCCA_SIZE);
+  uinfo("  TDTAIL: %08x %d\n", LPC17_TDTAIL_ADDR, LPC17_TD_SIZE);
+  uinfo("  EDCTRL: %08x %d\n", LPC17_EDCTRL_ADDR, LPC17_ED_SIZE);
+  uinfo("  EDFREE: %08x %d\n", LPC17_EDFREE_BASE, LPC17_ED_SIZE);
+  uinfo("  TDFREE: %08x %d\n", LPC17_TDFREE_BASE, LPC17_EDFREE_SIZE);
+  uinfo("  TBFREE: %08x %d\n", LPC17_TBFREE_BASE, LPC17_TBFREE_SIZE);
+  uinfo("  IOFREE: %08x %d\n", LPC17_IOFREE_BASE, LPC17_IOBUFFERS * CONFIG_USBHOST_IOBUFSIZE);
 #endif
 
   /* Initialize all the TDs, EDs and HCCA to 0 */

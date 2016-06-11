@@ -67,14 +67,14 @@
 #ifdef SSI_DEBUG
 #  define ssidbg  lldbg
 #  ifdef SSI_VERBOSE
-#    define ssivdbg lldbg
+#    define ssiinfo lldbg
 #  else
-#    define ssivdbg(x...)
+#    define ssiinfo(x...)
 #  endif
 #else
 #  undef SSI_VERBOSE
 #  define ssidbg(x...)
-#  define ssivdbg(x...)
+#  define ssiinfo(x...)
 #endif
 
 /* Dump GPIO registers */

@@ -360,7 +360,7 @@ int phy_notify_subscribe(FAR const char *intf, pid_t pid, int signo,
   FAR struct phy_notify_s *client;
   DEBUGASSERT(intf);
 
-  nvdbg("%s: PID=%d signo=%d arg=%p\n", intf, pid, signo, arg);
+  ninfo("%s: PID=%d signo=%d arg=%p\n", intf, pid, signo, arg);
 
   /* The special value pid == 0 means to use the pid of the current task. */
 
@@ -439,7 +439,7 @@ int phy_notify_unsubscribe(FAR const char *intf, pid_t pid)
 {
   FAR struct phy_notify_s *client;
 
-  nvdbg("%s: PID=%d\n", intf, pid);
+  ninfo("%s: PID=%d\n", intf, pid);
 
   /* Find the client entry for this interface */
 

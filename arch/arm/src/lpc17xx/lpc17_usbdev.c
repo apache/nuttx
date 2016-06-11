@@ -1076,7 +1076,7 @@ static int lpc17_wrrequest(struct lpc17_ep_s *privep)
       return OK;
     }
 
-  ullvdbg("epphy=%d req=%p: len=%d xfrd=%d nullpkt=%d\n",
+  ullinfo("epphy=%d req=%p: len=%d xfrd=%d nullpkt=%d\n",
           privep->epphy, privreq, privreq->req.len, privreq->req.xfrd, privep->txnullpkt);
 
   /* Ignore any attempt to send a zero length packet on anything but EP0IN */
@@ -1185,7 +1185,7 @@ static int lpc17_rdrequest(struct lpc17_ep_s *privep)
       return OK;
     }
 
-  ullvdbg("len=%d xfrd=%d nullpkt=%d\n",
+  ullinfo("len=%d xfrd=%d nullpkt=%d\n",
           privreq->req.len, privreq->req.xfrd, privep->txnullpkt);
 
   /* Ignore any attempt to receive a zero length packet */
@@ -1593,7 +1593,7 @@ static inline void lpc17_ep0setup(struct lpc17_usbdev_s *priv)
   index = GETUINT16(ctrl.index);
   len   = GETUINT16(ctrl.len);
 
-  ullvdbg("type=%02x req=%02x value=%04x index=%04x len=%04x\n",
+  ullinfo("type=%02x req=%02x value=%04x index=%04x len=%04x\n",
           ctrl.type, ctrl.req, value, index, len);
 
   /* Dispatch any non-standard requests */
@@ -1739,7 +1739,7 @@ static inline void lpc17_ep0setup(struct lpc17_usbdev_s *priv)
         if (((ctrl.type & USB_REQ_RECIPIENT_MASK) == USB_REQ_RECIPIENT_DEVICE) &&
             value == USB_FEATURE_TESTMODE)
           {
-            ullvdbg("test mode: %d\n", index);
+            ullinfo("test mode: %d\n", index);
           }
         else if ((ctrl.type & USB_REQ_RECIPIENT_MASK) != USB_REQ_RECIPIENT_ENDPOINT)
           {
@@ -2321,7 +2321,7 @@ static int lpc17_usbinterrupt(int irq, FAR void *context)
                                 }
                               else
                                 {
-                                  ullvdbg("Pending data on OUT endpoint\n");
+                                  ullinfo("Pending data on OUT endpoint\n");
                                   priv->rxpending = 1;
                                 }
                             }
@@ -2797,7 +2797,7 @@ static int lpc17_epsubmit(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *r
   if (!req || !req->callback || !req->buf || !ep)
     {
       usbtrace(TRACE_DEVERROR(LPC17_TRACEERR_INVALIDPARMS), 0);
-      ullvdbg("req=%p callback=%p buf=%p ep=%p\n", req, req->callback, req->buf, ep);
+      ullinfo("req=%p callback=%p buf=%p ep=%p\n", req, req->callback, req->buf, ep);
       return -EINVAL;
     }
 #endif

@@ -727,7 +727,7 @@ FAR struct tcp_conn_s *tcp_alloc(uint8_t domain)
 
       while (tmp)
         {
-          nllvdbg("conn: %p state: %02x\n", tmp, tmp->tcpstateflags);
+          nllinfo("conn: %p state: %02x\n", tmp, tmp->tcpstateflags);
 
           /* Is this connection in a state we can sacrifice. */
 

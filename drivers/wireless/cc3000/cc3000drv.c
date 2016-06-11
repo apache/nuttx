@@ -67,14 +67,14 @@
 #ifdef SPI_DEBUG
 #  define spidbg  lldbg
 #  ifdef SPI_VERBOSE
-#    define spivdbg lldbg
+#    define spiinfo lldbg
 #  else
-#    define spivdbg(x...)
+#    define spiinfo(x...)
 #  endif
 #else
 #  undef SPI_VERBOSE
 #  define spidbg(x...)
-#  define spivdbg(x...)
+#  define spiinfo(x...)
 #endif
 
 /****************************************************************************
@@ -118,7 +118,7 @@ void cc3000_resume(void)
 {
   DEBUGASSERT(spiconf.cc3000fd >= 0 && spiconf.done);
   sem_post(spiconf.done);
-  nllvdbg("Done\n");
+  nllinfo("Done\n");
 }
 
 /****************************************************************************

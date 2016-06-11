@@ -333,7 +333,7 @@ static void tiva_ethreset(struct tiva_driver_s *priv)
   regval  = getreg32(TIVA_SYSCON_RCGC2);
   regval |= (SYSCON_RCGC2_EMAC0 | SYSCON_RCGC2_EPHY0);
   putreg32(regval, TIVA_SYSCON_RCGC2);
-  nllvdbg("RCGC2: %08x\n", regval);
+  nllinfo("RCGC2: %08x\n", regval);
 
   /* Put the Ethernet controller into the reset state */
 
@@ -349,7 +349,7 @@ static void tiva_ethreset(struct tiva_driver_s *priv)
 
   regval &= ~(SYSCON_SRCR2_EMAC0 | SYSCON_SRCR2_EPHY0);
   putreg32(regval, TIVA_SYSCON_SRCR2);
-  nllvdbg("SRCR2: %08x\n", regval);
+  nllinfo("SRCR2: %08x\n", regval);
 
   /* Wait just a bit, again.  If we touch the ethernet too soon, we may busfault. */
 
@@ -495,7 +495,7 @@ static int tiva_transmit(struct tiva_driver_s *priv)
        */
 
       pktlen     = priv->ld_dev.d_len;
-      nllvdbg("Sending packet, pktlen: %d\n", pktlen);
+      nllinfo("Sending packet, pktlen: %d\n", pktlen);
       DEBUGASSERT(pktlen > ETH_HDRLEN);
 
       dbuf       = priv->ld_dev.d_buf;
@@ -584,7 +584,7 @@ static int tiva_txpoll(struct net_driver_s *dev)
    * the field d_len is set to a value > 0.
    */
 
-  nllvdbg("Poll result: d_len=%d\n", priv->ld_dev.d_len);
+  nllinfo("Poll result: d_len=%d\n", priv->ld_dev.d_len);
   if (priv->ld_dev.d_len > 0)
     {
       DEBUGASSERT((tiva_ethin(priv, TIVA_MAC_TR_OFFSET) & MAC_TR_NEWTX) == 0);
@@ -672,7 +672,7 @@ static void tiva_receive(struct tiva_driver_s *priv)
 
       regval = tiva_ethin(priv, TIVA_MAC_DATA_OFFSET);
       pktlen = (int)(regval & 0x0000ffff);
-      nllvdbg("Receiving packet, pktlen: %d\n", pktlen);
+      nllinfo("Receiving packet, pktlen: %d\n", pktlen);
 
       /* Check if the pktlen is valid.  It should be large enough to hold
        * an Ethernet header and small enough to fit entirely in the I/O
@@ -770,7 +770,7 @@ static void tiva_receive(struct tiva_driver_s *priv)
 #ifdef CONFIG_NET_IPv4
       if (ETHBUF->type == HTONS(ETHTYPE_IP))
         {
-          nllvdbg("IPv4 frame\n");
+          nllinfo("IPv4 frame\n");
           NETDEV_RXIPV4(&priv->ld_dev);
 
           /* Handle ARP on input then give the IPv4 packet to the network
@@ -811,7 +811,7 @@ static void tiva_receive(struct tiva_driver_s *priv)
 #ifdef CONFIG_NET_IPv6
       if (ETHBUF->type == HTONS(ETHTYPE_IP6))
         {
-          nllvdbg("Iv6 frame\n");
+          nllinfo("Iv6 frame\n");
           NETDEV_RXIPV6(&priv->ld_dev);
 
           /* Give the IPv6 packet to the network layer */
@@ -850,7 +850,7 @@ static void tiva_receive(struct tiva_driver_s *priv)
 #ifdef CONFIG_NET_ARP
       if (ETHBUF->type == htons(ETHTYPE_ARP))
         {
-          nllvdbg("ARP packet received (%02x)\n", ETHBUF->type);
+          nllinfo("ARP packet received (%02x)\n", ETHBUF->type);
           NETDEV_RXARP(&priv->ld_dev);
 
           arp_arpin(&priv->ld_dev);
@@ -1125,7 +1125,7 @@ static int tiva_ifup(struct net_driver_s *dev)
 
   div = SYSCLK_FREQUENCY / 2 / TIVA_MAX_MDCCLK;
   tiva_ethout(priv, TIVA_MAC_MDV_OFFSET, div);
-  nllvdbg("MDV:   %08x\n", div);
+  nllinfo("MDV:   %08x\n", div);
 
   /* Then configure the Ethernet Controller for normal operation
    *
@@ -1137,7 +1137,7 @@ static int tiva_ifup(struct net_driver_s *dev)
   regval &= ~TIVA_TCTCL_CLRBITS;
   regval |= TIVA_TCTCL_SETBITS;
   tiva_ethout(priv, TIVA_MAC_TCTL_OFFSET, regval);
-  nllvdbg("TCTL:  %08x\n", regval);
+  nllinfo("TCTL:  %08x\n", regval);
 
   /* Setup the receive control register (Disable multicast frames, disable
    * promiscuous mode, disable bad CRC rejection).
@@ -1147,7 +1147,7 @@ static int tiva_ifup(struct net_driver_s *dev)
   regval &= ~TIVA_RCTCL_CLRBITS;
   regval |= TIVA_RCTCL_SETBITS;
   tiva_ethout(priv, TIVA_MAC_RCTL_OFFSET, regval);
-  nllvdbg("RCTL:  %08x\n", regval);
+  nllinfo("RCTL:  %08x\n", regval);
 
   /* Setup the time stamp configuration register */
 
@@ -1159,7 +1159,7 @@ static int tiva_ifup(struct net_driver_s *dev)
   regval &= ~(MAC_TS_EN);
 #endif
   tiva_ethout(priv, TIVA_MAC_TS_OFFSET, regval);
-  nllvdbg("TS:    %08x\n", regval);
+  nllinfo("TS:    %08x\n", regval);
 #endif
 
   /* Wait for the link to come up.  This following is not very conservative

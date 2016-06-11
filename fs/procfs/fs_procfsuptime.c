@@ -140,7 +140,7 @@ static int uptime_open(FAR struct file *filep, FAR const char *relpath,
 {
   FAR struct uptime_file_s *attr;
 
-  fvdbg("Open '%s'\n", relpath);
+  finfo("Open '%s'\n", relpath);
 
   /* PROCFS is read-only.  Any attempt to open with any kind of write
    * access is not permitted.
@@ -222,7 +222,7 @@ static ssize_t uptime_read(FAR struct file *filep, FAR char *buffer,
   unsigned int csec;
 #endif
 
-  fvdbg("buffer=%p buflen=%d\n", buffer, (int)buflen);
+  finfo("buffer=%p buflen=%d\n", buffer, (int)buflen);
 
   /* Recover our private data from the struct file instance */
 
@@ -301,7 +301,7 @@ static int uptime_dup(FAR const struct file *oldp, FAR struct file *newp)
   FAR struct uptime_file_s *oldattr;
   FAR struct uptime_file_s *newattr;
 
-  fvdbg("Dup %p->%p\n", oldp, newp);
+  finfo("Dup %p->%p\n", oldp, newp);
 
   /* Recover our private data from the old struct file instance */
 

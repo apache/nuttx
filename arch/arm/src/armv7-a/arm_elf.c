@@ -162,7 +162,7 @@ int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
     case R_ARM_CALL:
     case R_ARM_JUMP24:
       {
-        bvdbg("Performing PC24 [%d] link at addr %08lx [%08lx] to sym '%s' st_value=%08lx\n",
+        binfo("Performing PC24 [%d] link at addr %08lx [%08lx] to sym '%s' st_value=%08lx\n",
               ELF32_R_TYPE(rel->r_info), (long)addr, (long)(*(uint32_t *)addr),
               sym, (long)sym->st_value);
 
@@ -191,7 +191,7 @@ int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
     case R_ARM_ABS32:
     case R_ARM_TARGET1:  /* New ABI:  TARGET1 always treated as ABS32 */
       {
-        bvdbg("Performing ABS32 link at addr=%08lx [%08lx] to sym=%p st_value=%08lx\n",
+        binfo("Performing ABS32 link at addr=%08lx [%08lx] to sym=%p st_value=%08lx\n",
               (long)addr, (long)(*(uint32_t *)addr), sym, (long)sym->st_value);
 
         *(uint32_t *)addr += sym->st_value;
@@ -200,7 +200,7 @@ int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
 
     case R_ARM_V4BX:
       {
-        bvdbg("Performing V4BX link at addr=%08lx [%08lx]\n",
+        binfo("Performing V4BX link at addr=%08lx [%08lx]\n",
               (long)addr, (long)(*(uint32_t *)addr));
 
          /* Preserve only Rm and the condition code */
@@ -215,7 +215,7 @@ int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
 
     case R_ARM_PREL31:
       {
-        bvdbg("Performing PREL31 link at addr=%08lx [%08lx] to sym=%p st_value=%08lx\n",
+        binfo("Performing PREL31 link at addr=%08lx [%08lx] to sym=%p st_value=%08lx\n",
               (long)addr, (long)(*(uint32_t *)addr), sym, (long)sym->st_value);
 
         offset            = *(uint32_t *)addr + sym->st_value - addr;
@@ -226,7 +226,7 @@ int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
     case R_ARM_MOVW_ABS_NC:
     case R_ARM_MOVT_ABS:
       {
-        bvdbg("Performing MOVx_ABS [%d] link at addr=%08lx [%08lx] to sym=%p st_value=%08lx\n",
+        binfo("Performing MOVx_ABS [%d] link at addr=%08lx [%08lx] to sym=%p st_value=%08lx\n",
               ELF32_R_TYPE(rel->r_info), (long)addr, (long)(*(uint32_t *)addr),
               sym, (long)sym->st_value);
 

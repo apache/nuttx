@@ -1445,7 +1445,7 @@ static void pic32mz_rxdone(struct pic32mz_driver_s *priv)
 #ifdef CONFIG_NET_IPv4
           if (BUF->type == HTONS(ETHTYPE_IP))
             {
-              nllvdbg("IPv4 frame\n");
+              nllinfo("IPv4 frame\n");
               NETDEV_RXIPV4(&priv->pd_dev);
 
               /* Handle ARP on input then give the IPv4 packet to the network
@@ -1487,7 +1487,7 @@ static void pic32mz_rxdone(struct pic32mz_driver_s *priv)
 #ifdef CONFIG_NET_IPv6
           if (BUF->type == HTONS(ETHTYPE_IP6))
             {
-              nllvdbg("Iv6 frame\n");
+              nllinfo("Iv6 frame\n");
               NETDEV_RXIPV6(&priv->pd_dev);
 
               /* Give the IPv6 packet to the network layer */
@@ -2774,12 +2774,12 @@ static inline int pic32mz_phyinit(struct pic32mz_driver_s *priv)
        */
 
        phyreg = (unsigned int)pic32mz_phyread(phyaddr, MII_PHYID1);
-       nvdbg("Addr: %d PHY ID1: %04x EXPECT: %04x\n", phyaddr, phyreg, PIC32MZ_PHYID1);
+       ninfo("Addr: %d PHY ID1: %04x EXPECT: %04x\n", phyaddr, phyreg, PIC32MZ_PHYID1);
 
        if (phyreg == PIC32MZ_PHYID1)
         {
           phyreg = pic32mz_phyread(phyaddr, MII_PHYID2);
-          nvdbg("Addr: %d PHY ID2: %04x EXPECT: %04x\n", phyaddr, phyreg, PIC32MZ_PHYID2);
+          ninfo("Addr: %d PHY ID2: %04x EXPECT: %04x\n", phyaddr, phyreg, PIC32MZ_PHYID2);
 
           if (phyreg == PIC32MZ_PHYID2)
             {
@@ -2797,7 +2797,7 @@ static inline int pic32mz_phyinit(struct pic32mz_driver_s *priv)
       ndbg("No PHY detected\n");
       return -ENODEV;
     }
-  nvdbg("phyaddr: %d\n", phyaddr);
+  ninfo("phyaddr: %d\n", phyaddr);
 
   /* Save the discovered PHY device address */
 

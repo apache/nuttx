@@ -171,7 +171,7 @@ static int modprocfs_open(FAR struct file *filep, FAR const char *relpath,
 {
   FAR struct modprocfs_file_s *priv;
 
-  fvdbg("Open '%s'\n", relpath);
+  finfo("Open '%s'\n", relpath);
 
   /* PROCFS is read-only.  Any attempt to open with any kind of write
    * access is not permitted.
@@ -232,7 +232,7 @@ static ssize_t modprocfs_read(FAR struct file *filep, FAR char *buffer,
   FAR struct modprocfs_file_s *priv;
   int ret;
 
-  fvdbg("buffer=%p buflen=%lu\n", buffer, (unsigned long)buflen);
+  finfo("buffer=%p buflen=%lu\n", buffer, (unsigned long)buflen);
 
   /* Recover our private data from the struct file instance */
 
@@ -270,7 +270,7 @@ static int modprocfs_dup(FAR const struct file *oldp, FAR struct file *newp)
   FAR struct modprocfs_file_s *oldpriv;
   FAR struct modprocfs_file_s *newpriv;
 
-  fvdbg("Dup %p->%p\n", oldp, newp);
+  finfo("Dup %p->%p\n", oldp, newp);
 
   /* Recover our private data from the old struct file instance */
 

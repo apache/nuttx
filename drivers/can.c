@@ -101,14 +101,14 @@
 
 #ifdef CONFIG_DEBUG_CAN
 #  define candbg    dbg
-#  define canvdbg   vdbg
+#  define caninfo   info
 #  define canlldbg  lldbg
-#  define canllvdbg llvdbg
+#  define canllinfo llinfo
 #else
 #  define candbg(x...)
-#  define canvdbg(x...)
+#  define caninfo(x...)
 #  define canlldbg(x...)
-#  define canllvdbg(x...)
+#  define canllinfo(x...)
 #endif
 
 /* Timing Definitions *******************************************************/
@@ -296,7 +296,7 @@ static void can_txready_work(FAR void *arg)
   irqstate_t flags;
   int ret;
 
-  canllvdbg("xmit head: %d queue: %d tail: %d\n",
+  canllinfo("xmit head: %d queue: %d tail: %d\n",
             dev->cd_xmit.tx_head, dev->cd_xmit.tx_queue,
             dev->cd_xmit.tx_tail);
 
@@ -348,7 +348,7 @@ static int can_open(FAR struct file *filep)
   uint8_t               tmp;
   int                   ret   = OK;
 
-  canvdbg("ocount: %d\n", dev->cd_ocount);
+  caninfo("ocount: %d\n", dev->cd_ocount);
 
   /* If the port is the middle of closing, wait until the close is finished */
 
@@ -431,7 +431,7 @@ static int can_close(FAR struct file *filep)
   irqstate_t            flags;
   int                   ret = OK;
 
-  canvdbg("ocount: %d\n", dev->cd_ocount);
+  caninfo("ocount: %d\n", dev->cd_ocount);
 
   if (sem_wait(&dev->cd_closesem) != OK)
     {
@@ -510,7 +510,7 @@ static ssize_t can_read(FAR struct file *filep, FAR char *buffer,
   irqstate_t            flags;
   int                   ret   = 0;
 
-  canvdbg("buflen: %d\n", buflen);
+  caninfo("buflen: %d\n", buflen);
 
   /* The caller must provide enough memory to catch the smallest possible
    * message.  This is not a system error condition, but we won't permit
@@ -649,7 +649,7 @@ static int can_xmit(FAR struct can_dev_s *dev)
   int tmpndx;
   int ret = -EBUSY;
 
-  canllvdbg("xmit head: %d queue: %d tail: %d\n",
+  canllinfo("xmit head: %d queue: %d tail: %d\n",
             dev->cd_xmit.tx_head, dev->cd_xmit.tx_queue, dev->cd_xmit.tx_tail);
 
   /* If there is nothing to send, then just disable interrupts and return */
@@ -732,7 +732,7 @@ static ssize_t can_write(FAR struct file *filep, FAR const char *buffer,
   int                      msglen;
   int                      ret   = 0;
 
-  canvdbg("buflen: %d\n", buflen);
+  caninfo("buflen: %d\n", buflen);
 
   /* Interrupts must disabled throughout the following */
 
@@ -915,7 +915,7 @@ static int can_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   FAR struct can_dev_s *dev   = inode->i_private;
   int                   ret   = OK;
 
-  canvdbg("cmd: %d arg: %ld\n", cmd, arg);
+  caninfo("cmd: %d arg: %ld\n", cmd, arg);
 
   /* Handle built-in ioctl commands */
 
@@ -986,7 +986,7 @@ int can_register(FAR const char *path, FAR struct can_dev_s *dev)
 
   /* Register the CAN device */
 
-  canvdbg("Registering %s\n", path);
+  caninfo("Registering %s\n", path);
   return register_driver(path, &g_canops, 0666, dev);
 }
 
@@ -1018,7 +1018,7 @@ int can_receive(FAR struct can_dev_s *dev, FAR struct can_hdr_s *hdr,
   int                      err = -ENOMEM;
   int                      i;
 
-  canllvdbg("ID: %d DLC: %d\n", hdr->ch_id, hdr->ch_dlc);
+  canllinfo("ID: %d DLC: %d\n", hdr->ch_id, hdr->ch_dlc);
 
   /* Check if adding this new message would over-run the drivers ability to
    * enqueue read data.
@@ -1203,7 +1203,7 @@ int can_txdone(FAR struct can_dev_s *dev)
 {
   int ret = -ENOENT;
 
-  canllvdbg("xmit head: %d queue: %d tail: %d\n",
+  canllinfo("xmit head: %d queue: %d tail: %d\n",
             dev->cd_xmit.tx_head, dev->cd_xmit.tx_queue, dev->cd_xmit.tx_tail);
 
   /* Verify that the xmit FIFO is not empty */
@@ -1307,7 +1307,7 @@ int can_txready(FAR struct can_dev_s *dev)
 {
   int ret = -ENOENT;
 
-  canllvdbg("xmit head: %d queue: %d tail: %d waiters: %d\n",
+  canllinfo("xmit head: %d queue: %d tail: %d waiters: %d\n",
             dev->cd_xmit.tx_head, dev->cd_xmit.tx_queue, dev->cd_xmit.tx_tail,
             dev->cd_ntxwaiters);
 

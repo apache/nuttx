@@ -244,7 +244,7 @@ static inline void lpc31_initsrc(void)
       char devname[16];
 #endif
 
-      pgllvdbg("Initializing %s\n", CONFIG_PAGING_BINPATH);
+      pgllinfo("Initializing %s\n", CONFIG_PAGING_BINPATH);
 
       /* No, do we need to mount an SD device? */
 
@@ -300,7 +300,7 @@ static inline void lpc31_initsrc(void)
     {
       /* No... the initialize now */
 
-      pgllvdbg("Initializing\n");
+      pgllinfo("Initializing\n");
 
       /* First get an instance of the SPI device interface */
 
@@ -327,7 +327,7 @@ static inline void lpc31_initsrc(void)
       ret = MTD_IOCTL(g_pgsrc.mtd, MTDIOC_GEOMETRY, (unsigned long)&g_pgsrc.geo);
       DEBUGASSERT(ret >= 0);
       capacity = g_pgsrc.geo.erasesize*g_pgsrc.geo.neraseblocks;
-      pgllvdbg("capacity: %d\n", capacity);
+      pgllinfo("capacity: %d\n", capacity);
       DEBUGASSERT(capacity >= (CONFIG_EA3152_PAGING_BINOFFSET + PG_TEXT_VSIZE));
 #endif
 

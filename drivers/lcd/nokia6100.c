@@ -308,7 +308,7 @@
 /* Debug ******************************************************************************/
 
 #ifdef CONFIG_LCD_REGDEBUG
-# define lcddbg(format, ...) llvdbg(format, ##__VA_ARGS__)
+# define lcddbg(format, ...) llinfo(format, ##__VA_ARGS__)
 #else
 # define lcddbg(x...)
 #endif
@@ -866,7 +866,7 @@ static int nokia_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffe
   FAR struct spi_dev_s *spi = priv->spi;
   uint16_t cmd[3];
 
-  gvdbg("row: %d col: %d npixels: %d\n", row, col, npixels);
+  ginfo("row: %d col: %d npixels: %d\n", row, col, npixels);
 
 #if NOKIA_XBIAS > 0
   col += NOKIA_XBIAS;
@@ -917,7 +917,7 @@ static int nokia_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffe
 static int nokia_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
                         size_t npixels)
 {
-  gvdbg("row: %d col: %d npixels: %d\n", row, col, npixels);
+  ginfo("row: %d col: %d npixels: %d\n", row, col, npixels);
   DEBUGASSERT(buffer && ((uintptr_t)buffer & 1) == 0);
 
   /* At present, this is a write-only LCD driver */
@@ -938,7 +938,7 @@ static int nokia_getvideoinfo(FAR struct lcd_dev_s *dev,
                               FAR struct fb_videoinfo_s *vinfo)
 {
   DEBUGASSERT(dev && vinfo);
-  gvdbg("fmt: %d xres: %d yres: %d nplanes: %d\n",
+  ginfo("fmt: %d xres: %d yres: %d nplanes: %d\n",
          g_videoinfo.fmt, g_videoinfo.xres, g_videoinfo.yres, g_videoinfo.nplanes);
   memcpy(vinfo, &g_videoinfo, sizeof(struct fb_videoinfo_s));
   return OK;
@@ -956,7 +956,7 @@ static int nokia_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
                               FAR struct lcd_planeinfo_s *pinfo)
 {
   DEBUGASSERT(dev && pinfo && planeno == 0);
-  gvdbg("planeno: %d bpp: %d\n", planeno, g_planeinfo.bpp);
+  ginfo("planeno: %d bpp: %d\n", planeno, g_planeinfo.bpp);
   memcpy(pinfo, &g_planeinfo, sizeof(struct lcd_planeinfo_s));
   return OK;
 }
@@ -973,7 +973,7 @@ static int nokia_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
 static int nokia_getpower(struct lcd_dev_s *dev)
 {
   struct nokia_dev_s *priv = (struct nokia_dev_s *)dev;
-  gvdbg("power: %d\n", priv->power);
+  ginfo("power: %d\n", priv->power);
   return priv->power;
 }
 
@@ -991,7 +991,7 @@ static int nokia_setpower(struct lcd_dev_s *dev, int power)
   struct nokia_dev_s *priv = (struct nokia_dev_s *)dev;
   int ret;
 
-  gvdbg("power: %d\n", power);
+  ginfo("power: %d\n", power);
   DEBUGASSERT(power <= CONFIG_LCD_MAXPOWER);
 
   /* Set new power level.  The backlight power is controlled outside of the LCD
@@ -1017,7 +1017,7 @@ static int nokia_setpower(struct lcd_dev_s *dev, int power)
 static int nokia_getcontrast(struct lcd_dev_s *dev)
 {
   struct nokia_dev_s *priv = (struct nokia_dev_s *)dev;
-  gvdbg("contrast: %d\n", priv->contrast);
+  ginfo("contrast: %d\n", priv->contrast);
   return priv->contrast;
 }
 
@@ -1056,7 +1056,7 @@ static int nokia_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
 #endif
     }
 
-  gvdbg("contrast: %d\n", contrast);
+  ginfo("contrast: %d\n", contrast);
   return -ENOSYS;
 }
 
@@ -1169,7 +1169,7 @@ FAR struct lcd_dev_s *nokia_lcdinitialize(FAR struct spi_dev_s *spi, unsigned in
 {
   struct nokia_dev_s *priv = &g_lcddev;
 
-  gvdbg("Initializing\n");
+  ginfo("Initializing\n");
   DEBUGASSERT(devno == 0);
 
   /* Initialize the driver data structure */

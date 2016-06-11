@@ -101,7 +101,7 @@ int tiva_timer_configure(void)
 {
   int ret;
 
-  timvdbg("Registering TIMER%d at %s\n",
+  timinfo("Registering TIMER%d at %s\n",
           GPTM, CONFIG_TM4C1294_LAUNCHPAD_TIMER_DEVNAME);
 
   ret = tiva_timer_register(CONFIG_TM4C1294_LAUNCHPAD_TIMER_DEVNAME,

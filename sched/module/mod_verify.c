@@ -87,7 +87,7 @@ int mod_verifyheader(FAR const Elf32_Ehdr *ehdr)
 
   if (memcmp(ehdr->e_ident, g_modmagic, EI_MAGIC_SIZE) != 0)
     {
-      svdbg("Not ELF magic {%02x, %02x, %02x, %02x}\n",
+      sinfo("Not ELF magic {%02x, %02x, %02x, %02x}\n",
             ehdr->e_ident[0], ehdr->e_ident[1], ehdr->e_ident[2], ehdr->e_ident[3]);
       return -ENOEXEC;
     }

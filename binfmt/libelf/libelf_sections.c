@@ -270,7 +270,7 @@ int elf_findsection(FAR struct elf_loadinfo_s *loadinfo,
 
       /* Check if the name of this section is 'sectname' */
 
-      bvdbg("%d. Comparing \"%s\" and .\"%s\"\n",
+      binfo("%d. Comparing \"%s\" and .\"%s\"\n",
             i, loadinfo->iobuffer, sectname);
 
       if (strcmp((FAR const char *)loadinfo->iobuffer, sectname) == 0)

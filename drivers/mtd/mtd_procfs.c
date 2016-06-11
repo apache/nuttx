@@ -139,7 +139,7 @@ static int mtd_open(FAR struct file *filep, FAR const char *relpath,
 {
   FAR struct mtd_file_s *attr;
 
-  fvdbg("Open '%s'\n", relpath);
+  finfo("Open '%s'\n", relpath);
 
   /* PROCFS is read-only.  Any attempt to open with any kind of write
    * access is not permitted.
@@ -201,7 +201,7 @@ static ssize_t mtd_read(FAR struct file *filep, FAR char *buffer,
   ssize_t total = 0;
   ssize_t ret;
 
-  fvdbg("buffer=%p buflen=%d\n", buffer, (int)buflen);
+  finfo("buffer=%p buflen=%d\n", buffer, (int)buflen);
 
   /* Recover our private data from the struct file instance */
 
@@ -266,7 +266,7 @@ static int mtd_dup(FAR const struct file *oldp, FAR struct file *newp)
   FAR struct mtd_file_s *oldattr;
   FAR struct mtd_file_s *newattr;
 
-  fvdbg("Dup %p->%p\n", oldp, newp);
+  finfo("Dup %p->%p\n", oldp, newp);
 
   /* Recover our private data from the old struct file instance */
 

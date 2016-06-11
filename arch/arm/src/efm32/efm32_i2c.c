@@ -138,10 +138,10 @@
 
 #ifdef CONFIG_DEBUG_I2C
 #  define i2cdbg dbg
-#  define i2cvdbg vdbg
+#  define i2cinfo info
 #else
 #  define i2cdbg(x...)
-#  define i2cvdbg(x...)
+#  define i2cinfo(x...)
 #endif
 
 /* I2C event trace logic.  NOTE:  trace uses the internal, non-standard,
@@ -605,7 +605,7 @@ static inline int efm32_i2c_sem_waitdone(FAR struct efm32_i2c_priv_s *priv)
 
   while (priv->result == I2CRESULT_INPROGRESS);
 
-  i2cvdbg("result: %s elapsed: %d threshold: %d i2c_state %s "
+  i2cinfo("result: %s elapsed: %d threshold: %d i2c_state %s "
           "I2Cx_STATES: %08x I2Cx_IF: %08x\n",
           efm32_i2c_result_str(priv->result), elapsed, timeout,
           efm32_i2c_state_str(priv->i2c_state), priv->i2c_reg_state,
@@ -652,7 +652,7 @@ static inline int efm32_i2c_sem_waitdone(FAR struct efm32_i2c_priv_s *priv)
 
   while ((priv->result == I2CRESULT_INPROGRESS) && elapsed < timeout);
 
-  i2cvdbg("result: %s elapsed: %d threshold: %d i2c_state %s "
+  i2cinfo("result: %s elapsed: %d threshold: %d i2c_state %s "
           "I2Cx_STATES: %08x I2Cx_IF: %08x\n",
           efm32_i2c_result_str(priv->result), elapsed, timeout,
           efm32_i2c_state_str(priv->i2c_state), priv->i2c_reg_state,

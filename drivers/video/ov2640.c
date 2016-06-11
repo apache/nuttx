@@ -864,7 +864,7 @@ static int ovr2640_chipid(FAR struct i2c_master_s *i2c)
       return -ENOSYS;
     }
 
-  gvdbg("PID=%02x$02x MID=%02x%02x\n", pidh, pidl, midh, midl);
+  ginfo("PID=%02x$02x MID=%02x%02x\n", pidh, pidl, midh, midl);
   return OK;
 }
 

@@ -299,7 +299,7 @@ vnc_remove_queue(FAR struct vnc_session_s *session)
   if (session->nwhupd > 0 && rect->whupd)
     {
       session->nwhupd--;
-      updvdbg("Whole screen update: nwhupd=%d\n", session->nwhupd);
+      updinfo("Whole screen update: nwhupd=%d\n", session->nwhupd);
     }
 
   sched_unlock();
@@ -369,7 +369,7 @@ static FAR void *vnc_updater(FAR void *arg)
   int ret;
 
   DEBUGASSERT(session != NULL);
-  gvdbg("Updater running for Display %d\n", session->display);
+  ginfo("Updater running for Display %d\n", session->display);
 
   /* Loop, processing updates until we are asked to stop.
    * REVISIT: Probably need some kind of signal mechanism to wake up
@@ -386,7 +386,7 @@ static FAR void *vnc_updater(FAR void *arg)
       srcrect = vnc_remove_queue(session);
       DEBUGASSERT(srcrect != NULL);
 
-      updvdbg("Dequeued {(%d, %d),(%d, %d)}\n",
+      updinfo("Dequeued {(%d, %d),(%d, %d)}\n",
               srcrect->rect.pt1.x, srcrect->rect.pt1.y,
               srcrect->rect.pt2.x, srcrect->rect.pt2.y);
 
@@ -442,7 +442,7 @@ int vnc_start_updater(FAR struct vnc_session_s *session)
   struct sched_param param;
   int status;
 
-  gvdbg("Starting updater for Display %d\n", session->display);
+  ginfo("Starting updater for Display %d\n", session->display);
 
   /* Create thread that is gonna send rectangles to the client */
 
@@ -577,7 +577,7 @@ int vnc_update_rectangle(FAR struct vnc_session_s *session,
               FAR struct vnc_fbupdate_s *curr;
               FAR struct vnc_fbupdate_s *next;
 
-              updvdbg("New whole screen update...\n");
+              updinfo("New whole screen update...\n");
 
               curr = (FAR struct vnc_fbupdate_s *)session->updqueue.head;
               sq_init(&session->updqueue);
@@ -619,7 +619,7 @@ int vnc_update_rectangle(FAR struct vnc_session_s *session,
 
           vnc_add_queue(session, update);
 
-          updvdbg("Queued {(%d, %d),(%d, %d)}\n",
+          updinfo("Queued {(%d, %d),(%d, %d)}\n",
                   intersection.pt1.x, intersection.pt1.y,
                   intersection.pt2.x, intersection.pt2.y);
         }

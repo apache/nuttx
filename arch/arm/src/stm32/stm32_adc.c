@@ -748,22 +748,22 @@ static void tim_modifyreg(FAR struct stm32_dev_s *priv, int offset,
 #ifdef ADC_HAVE_TIMER
 static void tim_dumpregs(FAR struct stm32_dev_s *priv, FAR const char *msg)
 {
-  avdbg("%s:\n", msg);
-  avdbg("  CR1: %04x CR2:  %04x SMCR:  %04x DIER:  %04x\n",
+  ainfo("%s:\n", msg);
+  ainfo("  CR1: %04x CR2:  %04x SMCR:  %04x DIER:  %04x\n",
         tim_getreg(priv, STM32_GTIM_CR1_OFFSET),
         tim_getreg(priv, STM32_GTIM_CR2_OFFSET),
         tim_getreg(priv, STM32_GTIM_SMCR_OFFSET),
         tim_getreg(priv, STM32_GTIM_DIER_OFFSET));
-  avdbg("   SR: %04x EGR:  0000 CCMR1: %04x CCMR2: %04x\n",
+  ainfo("   SR: %04x EGR:  0000 CCMR1: %04x CCMR2: %04x\n",
         tim_getreg(priv, STM32_GTIM_SR_OFFSET),
         tim_getreg(priv, STM32_GTIM_CCMR1_OFFSET),
         tim_getreg(priv, STM32_GTIM_CCMR2_OFFSET));
-  avdbg(" CCER: %04x CNT:  %04x PSC:   %04x ARR:   %04x\n",
+  ainfo(" CCER: %04x CNT:  %04x PSC:   %04x ARR:   %04x\n",
         tim_getreg(priv, STM32_GTIM_CCER_OFFSET),
         tim_getreg(priv, STM32_GTIM_CNT_OFFSET),
         tim_getreg(priv, STM32_GTIM_PSC_OFFSET),
         tim_getreg(priv, STM32_GTIM_ARR_OFFSET));
-  avdbg(" CCR1: %04x CCR2: %04x CCR3:  %04x CCR4:  %04x\n",
+  ainfo(" CCR1: %04x CCR2: %04x CCR3:  %04x CCR4:  %04x\n",
         tim_getreg(priv, STM32_GTIM_CCR1_OFFSET),
         tim_getreg(priv, STM32_GTIM_CCR2_OFFSET),
         tim_getreg(priv, STM32_GTIM_CCR3_OFFSET),
@@ -771,7 +771,7 @@ static void tim_dumpregs(FAR struct stm32_dev_s *priv, FAR const char *msg)
 #ifndef CONFIG_STM32_STM32L15XX
   if (priv->tbase == STM32_TIM1_BASE || priv->tbase == STM32_TIM8_BASE)
     {
-      avdbg("  RCR: %04x BDTR: %04x DCR:   %04x DMAR:  %04x\n",
+      ainfo("  RCR: %04x BDTR: %04x DCR:   %04x DMAR:  %04x\n",
             tim_getreg(priv, STM32_ATIM_RCR_OFFSET),
             tim_getreg(priv, STM32_ATIM_BDTR_OFFSET),
             tim_getreg(priv, STM32_ATIM_DCR_OFFSET),
@@ -779,7 +779,7 @@ static void tim_dumpregs(FAR struct stm32_dev_s *priv, FAR const char *msg)
     }
   else
     {
-      avdbg("  DCR: %04x DMAR: %04x\n",
+      ainfo("  DCR: %04x DMAR: %04x\n",
             tim_getreg(priv, STM32_GTIM_DCR_OFFSET),
             tim_getreg(priv, STM32_GTIM_DMAR_OFFSET));
     }
@@ -804,7 +804,7 @@ static void tim_dumpregs(FAR struct stm32_dev_s *priv, FAR const char *msg)
 #ifdef ADC_HAVE_TIMER
 static void adc_timstart(FAR struct stm32_dev_s *priv, bool enable)
 {
-  avdbg("enable: %d\n", enable ? 1 : 0);
+  ainfo("enable: %d\n", enable ? 1 : 0);
 
   if (enable)
     {
@@ -873,7 +873,7 @@ static int adc_timinit(FAR struct stm32_dev_s *priv)
    *   position.
    */
 
-  avdbg("Initializing timers extsel = 0x%08x\n", priv->extsel);
+  ainfo("Initializing timers extsel = 0x%08x\n", priv->extsel);
 
   adc_modifyreg(priv, STM32_ADC_EXTREG_OFFSET,
                 ADC_EXTREG_EXTEN_MASK | ADC_EXTREG_EXTSEL_MASK,
@@ -1205,7 +1205,7 @@ static int adc_timinit(FAR struct stm32_dev_s *priv)
 #if defined(CONFIG_STM32_STM32F10XX)
 static void adc_startconv(FAR struct stm32_dev_s *priv, bool enable)
 {
-  avdbg("enable: %d\n", enable ? 1 : 0);
+  ainfo("enable: %d\n", enable ? 1 : 0);
 
   if (!enable)
     {
@@ -1227,7 +1227,7 @@ static void adc_startconv(FAR struct stm32_dev_s *priv, bool enable)
 {
   uint32_t regval;
 
-  avdbg("enable: %d\n", enable ? 1 : 0);
+  ainfo("enable: %d\n", enable ? 1 : 0);
 
   if (enable)
     {
@@ -1256,7 +1256,7 @@ static void adc_startconv(FAR struct stm32_dev_s *priv, bool enable)
 #else
 static void adc_startconv(FAR struct stm32_dev_s *priv, bool enable)
 {
-  avdbg("enable: %d\n", enable ? 1 : 0);
+  ainfo("enable: %d\n", enable ? 1 : 0);
 
   if (enable)
     {
@@ -1364,7 +1364,7 @@ static void adc_power_down_idle(FAR struct stm32_dev_s *priv, bool pdi_high)
 {
   uint32_t regval;
 
-  avdbg("PDI: %d\n", pdi_high ? 1 : 0);
+  ainfo("PDI: %d\n", pdi_high ? 1 : 0);
 
   regval = adc_getreg(priv, STM32_ADC_CR1_OFFSET);
 
@@ -1405,7 +1405,7 @@ static void adc_power_down_delay(FAR struct stm32_dev_s *priv, bool pdd_high)
 {
   uint32_t regval;
 
-  avdbg("PDD: %d\n", pdd_high ? 1 : 0);
+  ainfo("PDD: %d\n", pdd_high ? 1 : 0);
 
   regval = adc_getreg(priv, STM32_ADC_CR1_OFFSET);
 
@@ -1445,7 +1445,7 @@ static void adc_power_down_delay(FAR struct stm32_dev_s *priv, bool pdd_high)
 static void adc_dels_after_conversion(FAR struct stm32_dev_s *priv,
                                       uint32_t delay)
 {
-  avdbg("Delay selected: 0x%08x\n", delay);
+  ainfo("Delay selected: 0x%08x\n", delay);
 
   adc_modifyreg(priv, STM32_ADC_CR2_OFFSET, ADC_CR2_DELS_MASK, delay);
 }
@@ -1471,7 +1471,7 @@ static void adc_dels_after_conversion(FAR struct stm32_dev_s *priv,
 static void adc_select_ch_bank(FAR struct stm32_dev_s *priv,
                                bool chb_selected)
 {
-  avdbg("Bank of channels selected: %c\n", chb_selected ? 'B' : 'A');
+  ainfo("Bank of channels selected: %c\n", chb_selected ? 'B' : 'A');
 
   if (chb_selected)
     {
@@ -1505,7 +1505,7 @@ static void adc_enable(FAR struct stm32_dev_s *priv, bool enable)
 {
   uint32_t regval;
 
-  avdbg("enable: %d\n", enable ? 1 : 0);
+  ainfo("enable: %d\n", enable ? 1 : 0);
 
   regval = adc_getreg(priv, STM32_ADC_CR_OFFSET);
 
@@ -1543,7 +1543,7 @@ static void adc_enable(FAR struct stm32_dev_s *priv, bool enable)
   bool enabled = false;
 #endif
 
-  avdbg("enable: %d\n", enable ? 1 : 0);
+  ainfo("enable: %d\n", enable ? 1 : 0);
 
   if (!enabled && enable)
     {
@@ -1717,7 +1717,7 @@ static void adc_reset(FAR struct adc_dev_s *dev)
   int ret;
 #endif
 
-  allvdbg("intf: %d\n", priv->intf);
+  allinfo("intf: %d\n", priv->intf);
   flags = enter_critical_section();
 
 #if defined(CONFIG_STM32_STM32L15XX) && \
@@ -2018,26 +2018,26 @@ static void adc_reset(FAR struct adc_dev_s *dev)
   leave_critical_section(flags);
 
 #ifdef CONFIG_STM32_STM32F30XX
-  avdbg("ISR:  0x%08x CR:   0x%08x CFGR: 0x%08x\n",
+  ainfo("ISR:  0x%08x CR:   0x%08x CFGR: 0x%08x\n",
         adc_getreg(priv, STM32_ADC_ISR_OFFSET),
         adc_getreg(priv, STM32_ADC_CR_OFFSET),
         adc_getreg(priv, STM32_ADC_CFGR_OFFSET));
 #else
-  avdbg("SR:   0x%08x CR1:  0x%08x CR2:  0x%08x\n",
+  ainfo("SR:   0x%08x CR1:  0x%08x CR2:  0x%08x\n",
         adc_getreg(priv, STM32_ADC_SR_OFFSET),
         adc_getreg(priv, STM32_ADC_CR1_OFFSET),
         adc_getreg(priv, STM32_ADC_CR2_OFFSET));
 #endif
 
-  avdbg("SQR1: 0x%08x SQR2: 0x%08x SQR3: 0x%08x\n",
+  ainfo("SQR1: 0x%08x SQR2: 0x%08x SQR3: 0x%08x\n",
         adc_getreg(priv, STM32_ADC_SQR1_OFFSET),
         adc_getreg(priv, STM32_ADC_SQR2_OFFSET),
         adc_getreg(priv, STM32_ADC_SQR3_OFFSET));
 
 #if defined(CONFIG_STM32_STM32F30XX)
-  avdbg("SQR4: 0x%08x\n", adc_getreg(priv, STM32_ADC_SQR4_OFFSET));
+  ainfo("SQR4: 0x%08x\n", adc_getreg(priv, STM32_ADC_SQR4_OFFSET));
 #elif defined(CONFIG_STM32_STM32L15XX)
-  avdbg("SQR4: 0x%08x SQR5: 0x%08x\n",
+  ainfo("SQR4: 0x%08x SQR5: 0x%08x\n",
         adc_getreg(priv, STM32_ADC_SQR4_OFFSET)
         adc_getreg(priv, STM32_ADC_SQR5_OFFSET));
 #endif
@@ -2045,16 +2045,16 @@ static void adc_reset(FAR struct adc_dev_s *dev)
 #if defined(CONFIG_STM32_STM32F30XX)
   if (priv->base == STM32_ADC1_BASE || priv->base == STM32_ADC2_BASE)
     {
-      avdbg("CCR:  0x%08x\n", getreg32(STM32_ADC12_CCR));
+      ainfo("CCR:  0x%08x\n", getreg32(STM32_ADC12_CCR));
     }
   else
     {
-      avdbg("CCR:  0x%08x\n", getreg32(STM32_ADC34_CCR));
+      ainfo("CCR:  0x%08x\n", getreg32(STM32_ADC34_CCR));
     }
 #elif defined(CONFIG_STM32_STM32F20XX) || \
       defined(CONFIG_STM32_STM32F40XX) || \
       defined(CONFIG_STM32_STM32L15XX)
-  avdbg("CCR:  0x%08x\n", getreg32(STM32_ADC_CCR));
+  ainfo("CCR:  0x%08x\n", getreg32(STM32_ADC_CCR));
 #endif
 }
 
@@ -2107,7 +2107,7 @@ static int adc_setup(FAR struct adc_dev_s *dev)
   ret = irq_attach(priv->irq, priv->isr);
   if (ret < 0)
     {
-      avdbg("irq_attach failed: %d\n", ret);
+      ainfo("irq_attach failed: %d\n", ret);
       return ret;
     }
 
@@ -2117,7 +2117,7 @@ static int adc_setup(FAR struct adc_dev_s *dev)
 
   /* Enable the ADC interrupt */
 
-  avdbg("Enable the ADC interrupt: irq=%d\n", priv->irq);
+  ainfo("Enable the ADC interrupt: irq=%d\n", priv->irq);
   up_enable_irq(priv->irq);
 
   return ret;
@@ -2172,7 +2172,7 @@ static void adc_rxint(FAR struct adc_dev_s *dev, bool enable)
 {
   FAR struct stm32_dev_s *priv = (FAR struct stm32_dev_s *)dev->ad_priv;
 
-  avdbg("intf: %d enable: %d\n", priv->intf, enable ? 1 : 0);
+  ainfo("intf: %d enable: %d\n", priv->intf, enable ? 1 : 0);
 
   if (enable)
     {
@@ -2219,7 +2219,7 @@ static void adc_ioc_enable_tvref_register(FAR struct adc_dev_s *dev,
       stm32_modifyreg32(STM32_ADC_CCR, ADC_CCR_TSVREFE, 0);
     }
 
-  avdbg("STM32_ADC_CCR value: 0x%08x\n", getreg32(STM32_ADC_CCR));
+  ainfo("STM32_ADC_CCR value: 0x%08x\n", getreg32(STM32_ADC_CCR));
 }
 #endif
 
@@ -2263,7 +2263,7 @@ static int adc_ioc_change_sleep_between_opers(FAR struct adc_dev_s *dev,
         break;
 
       default:
-        avdbg("unknown cmd: %d\n", cmd);
+        ainfo("unknown cmd: %d\n", cmd);
         break;
     }
 
@@ -2436,7 +2436,7 @@ static int adc_ioc_change_ints(FAR struct adc_dev_s *dev, int cmd, bool arg)
         break;
 
       default:
-        avdbg("unknown cmd: %d\n", cmd);
+        ainfo("unknown cmd: %d\n", cmd);
         break;
     }
 
@@ -2983,31 +2983,31 @@ struct adc_dev_s *stm32_adcinitialize(int intf, FAR const uint8_t *chanlist,
   FAR struct adc_dev_s   *dev;
   FAR struct stm32_dev_s *priv;
 
-  avdbg("intf: %d cchannels: %d\n", intf, cchannels);
+  ainfo("intf: %d cchannels: %d\n", intf, cchannels);
 
   switch (intf)
     {
 #ifdef CONFIG_STM32_ADC1
       case 1:
-        avdbg("ADC1 selected\n");
+        ainfo("ADC1 selected\n");
         dev = &g_adcdev1;
         break;
 #endif
 #ifdef CONFIG_STM32_ADC2
       case 2:
-        avdbg("ADC2 selected\n");
+        ainfo("ADC2 selected\n");
         dev = &g_adcdev2;
         break;
 #endif
 #ifdef CONFIG_STM32_ADC3
       case 3:
-        avdbg("ADC3 selected\n");
+        ainfo("ADC3 selected\n");
         dev = &g_adcdev3;
         break;
 #endif
 #ifdef CONFIG_STM32_ADC4
       case 4:
-        avdbg("ADC4 selected\n");
+        ainfo("ADC4 selected\n");
         dev = &g_adcdev4;
         break;
 #endif

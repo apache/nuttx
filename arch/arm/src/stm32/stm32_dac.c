@@ -1114,7 +1114,7 @@ FAR struct dac_dev_s *stm32_dacinitialize(int intf)
 #ifdef CONFIG_STM32_DAC1
   if (intf == 1)
     {
-      avdbg("DAC1 Selected\n");
+      ainfo("DAC1 Selected\n");
       dev = &g_dac1dev;
     }
   else
@@ -1122,7 +1122,7 @@ FAR struct dac_dev_s *stm32_dacinitialize(int intf)
 #ifdef CONFIG_STM32_DAC2
   if (intf == 2)
     {
-      avdbg("DAC2 Selected\n");
+      ainfo("DAC2 Selected\n");
       dev = &g_dac2dev;
     }
   else

@@ -119,7 +119,7 @@ int binfmt_copyargv(FAR struct binary_s *bin, FAR char * const *argv)
             }
         }
 
-      bvdbg("args=%d argsize=%lu\n", nargs, (unsigned long)argsize);
+      binfo("args=%d argsize=%lu\n", nargs, (unsigned long)argsize);
 
       /* Allocate the argv array and an argument buffer */
 

@@ -211,7 +211,7 @@ static int stmpe811_attach(FAR struct stmpe811_config_s *state, xcpt_t isr)
 {
   FAR struct stm32_stmpe811config_s *priv = (FAR struct stm32_stmpe811config_s *)state;
 
-  ivdbg("Saving handler %p\n", isr);
+  iinfo("Saving handler %p\n", isr);
   DEBUGASSERT(priv);
 
   /* Just save the handler.  We will use it when EXTI interruptsare enabled */
@@ -286,7 +286,7 @@ int board_tsc_setup(int minor)
 
   if (!g_stmpe811config.handle)
     {
-      ivdbg("Initializing\n");
+      iinfo("Initializing\n");
 
       /* Configure the STMPE811 interrupt pin as an input */
 

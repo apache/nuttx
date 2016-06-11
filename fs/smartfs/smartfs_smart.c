@@ -628,7 +628,7 @@ static int smartfs_sync_internal(struct smartfs_mountpt_s *fs,
 
   if (sf->byteswritten > 0)
     {
-      fvdbg("Syncing sector %d\n", sf->currsector);
+      finfo("Syncing sector %d\n", sf->currsector);
 
       /* Read the existing sector used bytes value */
 
@@ -1218,7 +1218,7 @@ static int smartfs_dup(FAR const struct file *oldp, FAR struct file *newp)
 {
   struct smartfs_ofile_s   *sf;
 
-  fvdbg("Dup %p->%p\n", oldp, newp);
+  finfo("Dup %p->%p\n", oldp, newp);
 
   /* Sanity checks */
 

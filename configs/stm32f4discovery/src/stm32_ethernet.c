@@ -217,7 +217,7 @@ xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler, phy_enable_t *enable)
   xcpt_t oldhandler;
   irqstate_t flags;
 
-  nvdbg("%s: handler=%p\n", intf, handler);
+  ninfo("%s: handler=%p\n", intf, handler);
   phydbg("ETHMAC: devname=%s\n", STM32_ETHMAC_DEVNAME);
 
   DEBUGASSERT(intf);

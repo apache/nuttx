@@ -673,7 +673,7 @@ static int lsm9ds1_readreg8(FAR struct lsm9ds1_dev_s *priv, uint8_t regaddr,
       return ret;
     }
 
-  snvdbg("addr: %02x value: %02x\n", regaddr, *regval);
+  sninfo("addr: %02x value: %02x\n", regaddr, *regval);
   return OK;
 }
 
@@ -716,7 +716,7 @@ static int lsm9ds1_writereg8(FAR struct lsm9ds1_dev_s *priv, uint8_t regaddr,
       return ret;
     }
 
-  snvdbg("addr: %02x value: %02x\n", regaddr, regval);
+  sninfo("addr: %02x value: %02x\n", regaddr, regval);
   return OK;
 }
 

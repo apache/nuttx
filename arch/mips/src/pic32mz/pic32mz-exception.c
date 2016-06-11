@@ -106,83 +106,83 @@ uint32_t *pic32mz_exception(uint32_t *regs)
   switch (cause & CP0_CAUSE_EXCCODE_MASK)
     {
     case CP0_CAUSE_EXCCODE_INT:      /* Interrupt */
-      llvdbg("EXCEPTION: Interrupt"
+      llinfo("EXCEPTION: Interrupt"
              " CAUSE: %08x EPC: %08x\n", cause, epc);
       break;
     case CP0_CAUSE_EXCCODE_TLBL:     /* TLB exception (load or instruction fetch) */
-      llvdbg("EXCEPTION: TLB exception (load or instruction fetch)"
+      llinfo("EXCEPTION: TLB exception (load or instruction fetch)"
              " CAUSE: %08x EPC:%08x\n", cause, epc);
       break;
     case CP0_CAUSE_EXCCODE_TLBS:     /* TLB exception (store) */
-      llvdbg("EXCEPTION: TLB exception (store)"
+      llinfo("EXCEPTION: TLB exception (store)"
              " CAUSE: %08x EPC: %08x\n", cause, epc);
       break;
     case CP0_CAUSE_EXCCODE_ADEL:     /* Address error exception (load or instruction fetch) */
-      llvdbg("EXCEPTION: Address error exception (load or instruction fetch)"
+      llinfo("EXCEPTION: Address error exception (load or instruction fetch)"
              " CAUSE: %08x EPC: %08x\n", cause, epc);
       break;
     case CP0_CAUSE_EXCCODE_ADES:     /* Address error exception (store) */
-      llvdbg("EXCEPTION: Address error exception (store)"
+      llinfo("EXCEPTION: Address error exception (store)"
              " CAUSE: %08x EPC: %08x\n", cause, epc);
       break;
     case CP0_CAUSE_EXCCODE_IBE:      /* Bus error exception (instruction fetch) */
-      llvdbg("EXCEPTION: Bus error exception (instruction fetch)"
+      llinfo("EXCEPTION: Bus error exception (instruction fetch)"
              " CAUSE: %08x EPC: %08x\n", cause, epc);
       break;
     case CP0_CAUSE_EXCCODE_DBE:      /* Bus error exception (data reference: load or store) */
-      llvdbg("EXCEPTION: Bus error exception (data reference: load or store)"
+      llinfo("EXCEPTION: Bus error exception (data reference: load or store)"
              " CAUSE: %08x EPC: %08x\n", cause, epc);
       break;
     case CP0_CAUSE_EXCCODE_SYS:      /* Syscall exception */
-      llvdbg("EXCEPTION: Syscall exception"
+      llinfo("EXCEPTION: Syscall exception"
              " CAUSE: %08x EPC: %08x\n", cause, epc);
       break;
     case CP0_CAUSE_EXCCODE_BP:       /* Breakpoint exception */
-      llvdbg("EXCEPTION: Breakpoint exception"
+      llinfo("EXCEPTION: Breakpoint exception"
              " CAUSE: %08x EPC: %08x\n", cause, epc);
       break;
     case CP0_CAUSE_EXCCODE_RI:       /* Reserved instruction exception */
-      llvdbg("EXCEPTION: Reserved instruction exception"
+      llinfo("EXCEPTION: Reserved instruction exception"
              " CAUSE: %08x EPC: %08x\n", cause, epc);
       break;
     case CP0_CAUSE_EXCCODE_CPU:      /* Coprocessor Unusable exception */
-      llvdbg("EXCEPTION: Coprocessor Unusable exception"
+      llinfo("EXCEPTION: Coprocessor Unusable exception"
              " CAUSE: %08x EPC: %08x\n", cause, epc);
       break;
     case CP0_CAUSE_EXCCODE_OV:       /* Arithmetic Overflow exception */
-      llvdbg("EXCEPTION: Arithmetic Overflow exception"
+      llinfo("EXCEPTION: Arithmetic Overflow exception"
              " CAUSE: %08x EPC: %08x\n", cause, epc);
       break;
     case CP0_CAUSE_EXCCODE_TR:       /* Trap exception */
-      llvdbg("EXCEPTION: Trap exception"
+      llinfo("EXCEPTION: Trap exception"
              " CAUSE: %08x EPC: %08x\n", cause, epc);
       break;
     case CP0_CAUSE_EXCCODE_FPE:      /* Floating point exception */
-      llvdbg("EXCEPTION: Floating point exception"
+      llinfo("EXCEPTION: Floating point exception"
              " CAUSE: %08x EPC: %08x\n", cause, epc);
       break;
     case CP0_CAUSE_EXCCODE_C2E:      /* Precise Coprocessor 2 exceptions */
-      llvdbg("EXCEPTION: Precise Coprocessor 2 exceptions"
+      llinfo("EXCEPTION: Precise Coprocessor 2 exceptions"
              " CAUSE: %08x EPC: %08x\n", cause, epc);
       break;
     case CP0_CAUSE_EXCCODE_MDMX:     /* MDMX Unusable (MIPS64) */
-      llvdbg("EXCEPTION: MDMX Unusable (MIPS64)"
+      llinfo("EXCEPTION: MDMX Unusable (MIPS64)"
              " CAUSE: %08x EPC: %08x\n", cause, epc);
       break;
     case CP0_CAUSE_EXCCODE_WATCH:    /* WatchHi/WatchLo address */
-      llvdbg("EXCEPTION: WatchHi/WatchLo address"
+      llinfo("EXCEPTION: WatchHi/WatchLo address"
              " CAUSE: %08x EPC: %08x\n", cause, epc);
       break;
     case CP0_CAUSE_EXCCODE_MCHECK:   /* Machine check */
-      llvdbg("EXCEPTION: Machine check"
+      llinfo("EXCEPTION: Machine check"
              " CAUSE: %08x EPC: %08x\n", cause, epc);
       break;
     case CP0_CAUSE_EXCCODE_CACHEERR: /* Cache error */
-      llvdbg("EXCEPTION: Cache error"
+      llinfo("EXCEPTION: Cache error"
              " CAUSE: %08x EPC: %08x\n", cause, epc);
       break;
     default:
-      llvdbg("EXCEPTION: Unknown"
+      llinfo("EXCEPTION: Unknown"
              " CAUSE: %08x EPC: %08x\n", cause, epc);
       break;
     }

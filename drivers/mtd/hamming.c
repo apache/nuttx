@@ -301,11 +301,11 @@ static int hamming_verify256(FAR uint8_t *data, FAR const uint8_t *original)
 
   /* There are bit errors */
 
-  fvdbg("Read:       %02x %02x %02x\n",
+  finfo("Read:       %02x %02x %02x\n",
         original[0], original[1], original[2]);
-  fvdbg("Computed:   %02x %02x %02x\n",
+  finfo("Computed:   %02x %02x %02x\n",
         computed[0], computed[1], computed[2]);
-  fvdbg("Correction: %02x %02x %02x\n",
+  finfo("Correction: %02x %02x %02x\n",
         correction[0], correction[1], correction[2]);
 
   /* If there is a single bit error, there are 11 bits set to 1 */

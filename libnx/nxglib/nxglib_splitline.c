@@ -139,7 +139,7 @@ int nxgl_splitline(FAR struct nxgl_vector_s *vector,
   b16_t b16x;
   b16_t b16y;
 
-  gvdbg("vector: (%d,%d)->(%d,%d) linewidth: %d\n",
+  ginfo("vector: (%d,%d)->(%d,%d) linewidth: %d\n",
         vector->pt1.x, vector->pt1.y, vector->pt2.x, vector->pt2.y, linewidth);
 
   /* First, check the linewidth */
@@ -190,7 +190,7 @@ int nxgl_splitline(FAR struct nxgl_vector_s *vector,
       rect->pt1.y = vector->pt1.y - (linewidth >> 1);
       rect->pt2.y = rect->pt1.y + linewidth - 1;
 
-      gvdbg("Horizontal rect: (%d,%d),(%d,%d)\n",
+      ginfo("Horizontal rect: (%d,%d),(%d,%d)\n",
             rect->pt1.x, rect->pt1.y, rect->pt2.x, rect->pt2.y);
 
       return 2;
@@ -208,7 +208,7 @@ int nxgl_splitline(FAR struct nxgl_vector_s *vector,
       rect->pt1.x = line.pt1.x - (linewidth >> 1);
       rect->pt2.x = rect->pt1.x + linewidth - 1;
 
-      gvdbg("Vertical rect: (%d,%d),(%d,%d)\n",
+      ginfo("Vertical rect: (%d,%d),(%d,%d)\n",
             rect->pt1.x, rect->pt1.y, rect->pt2.x, rect->pt2.y);
 
       return 2;
@@ -231,7 +231,7 @@ int nxgl_splitline(FAR struct nxgl_vector_s *vector,
       traps[1].bot.x2 = traps[1].bot.x1;
       traps[1].bot.y  = line.pt2.y;
 
-      gvdbg("Vertical traps[1]: (%08x,%08x,%d),(%08x,%08x, %d)\n",
+      ginfo("Vertical traps[1]: (%08x,%08x,%d),(%08x,%08x, %d)\n",
             traps[1].top.x1, traps[1].top.x2, traps[1].top.y,
             traps[1].bot.x1, traps[1].bot.x2, traps[1].bot.y);
 
@@ -277,7 +277,7 @@ int nxgl_splitline(FAR struct nxgl_vector_s *vector,
   sinangle   =  b16sin(angle);
   b16xoffset = (linewidth * sinangle + 1) >> 1;
 
-  gvdbg("height: %d width: %d angle: %08x b16yoffset: %08x b16xoffset: %08x\n",
+  ginfo("height: %d width: %d angle: %08x b16yoffset: %08x b16xoffset: %08x\n",
         iheight, iwidth, angle, b16yoffset, b16xoffset);
 
   /* Now we know all four points of the rotated rectangle */
@@ -307,7 +307,7 @@ int nxgl_splitline(FAR struct nxgl_vector_s *vector,
           quad[2].x = b16x + b16xoffset;
           quad[3].x = b16x - b16xoffset;
 
-          gvdbg("Southeast: quad (%08x,%08x),(%08x,%08x),(%08x,%08x),(%08x,%08x)\n",
+          ginfo("Southeast: quad (%08x,%08x),(%08x,%08x),(%08x,%08x),(%08x,%08x)\n",
                 quad[0].x, quad[0].y, quad[1].x, quad[1].y,
                 quad[2].x, quad[2].y, quad[3].x, quad[3].y);
 
@@ -408,7 +408,7 @@ int nxgl_splitline(FAR struct nxgl_vector_s *vector,
           quad[2].x = b16x - b16xoffset;
           quad[3].x = b16x + b16xoffset;
 
-          gvdbg("Southwest: quad (%08x,%08x),(%08x,%08x),(%08x,%08x),(%08x,%08x)\n",
+          ginfo("Southwest: quad (%08x,%08x),(%08x,%08x),(%08x,%08x),(%08x,%08x)\n",
                 quad[0].x, quad[0].y, quad[1].x, quad[1].y,
                 quad[2].x, quad[2].y, quad[3].x, quad[3].y);
 
@@ -498,13 +498,13 @@ int nxgl_splitline(FAR struct nxgl_vector_s *vector,
           traps[2].bot.y  = b16toi(quad[3].y + b16HALF);
         }
 
-      gvdbg("traps[0]: (%08x,%08x,%d),(%08x,%08x,%d)\n",
+      ginfo("traps[0]: (%08x,%08x,%d),(%08x,%08x,%d)\n",
             traps[0].top.x1, traps[0].top.x2, traps[0].top.y,
             traps[0].bot.x1, traps[0].bot.x2, traps[0].bot.y);
-      gvdbg("traps[1]: (%08x,%08x,%d),(%08x,%08x,%d)\n",
+      ginfo("traps[1]: (%08x,%08x,%d),(%08x,%08x,%d)\n",
             traps[1].top.x1, traps[1].top.x2, traps[1].top.y,
             traps[1].bot.x1, traps[1].bot.x2, traps[1].bot.y);
-      gvdbg("traps[2]: (%08x,%08x,%d),(%08x,%08x,%d)\n",
+      ginfo("traps[2]: (%08x,%08x,%d),(%08x,%08x,%d)\n",
             traps[2].top.x1, traps[2].top.x2, traps[2].top.y,
             traps[2].bot.x1, traps[2].bot.x2, traps[2].bot.y);
 
@@ -523,7 +523,7 @@ int nxgl_splitline(FAR struct nxgl_vector_s *vector,
   traps[1].bot.x2 = traps[1].bot.x1 + itob16(linewidth - 1);
   traps[1].bot.y  = line.pt2.y;
 
-  gvdbg("Horizontal traps[1]: (%08x,%08x,%d),(%08x,%08x, %d)\n",
+  ginfo("Horizontal traps[1]: (%08x,%08x,%d),(%08x,%08x, %d)\n",
         traps[1].top.x1, traps[1].top.x2, traps[1].top.y,
         traps[1].bot.x1, traps[1].bot.x2, traps[1].bot.y);
 

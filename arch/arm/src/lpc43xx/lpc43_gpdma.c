@@ -69,14 +69,14 @@
 #ifdef DMA_DEBUG
 #  define dmadbg  lldbg
 #  ifdef DMA_VERBOSE
-#    define spivdbg lldbg
+#    define spiinfo lldbg
 #  else
-#    define spivdbg(x...)
+#    define spiinfo(x...)
 #  endif
 #else
 #  undef DMA_VERBOSE
 #  define dmadbg(x...)
-#  define spivdbg(x...)
+#  define spiinfo(x...)
 #endif
 
 /****************************************************************************

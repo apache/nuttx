@@ -104,7 +104,7 @@ static int local_fifo_write(int fd, FAR const uint8_t *buf, size_t len)
               return -errcode;
             }
 
-          nvdbg("Ignoring signal\n");
+          ninfo("Ignoring signal\n");
         }
       else
         {

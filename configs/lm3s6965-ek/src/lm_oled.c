@@ -73,7 +73,7 @@
 #endif
 
 #ifdef CONFIG_LCD_RITDEBUG
-#  define ritdbg(format, ...) vdbg(format, ##__VA_ARGS__)
+#  define ritdbg(format, ...) info(format, ##__VA_ARGS__)
 #  define oleddc_dumpgpio(m)  tiva_dumpgpio(OLEDDC_GPIO, m)
 #  define oledcs_dumpgpio(m)  tiva_dumpgpio(OLEDCS_GPIO, m)
 #else
@@ -127,7 +127,7 @@ FAR struct lcd_dev_s *board_graphics_setup(unsigned int devno)
         }
      else
         {
-          gllvdbg("Bound SSI port 0 to OLED %d\n", devno);
+          gllinfo("Bound SSI port 0 to OLED %d\n", devno);
 
           /* And turn the OLED on (CONFIG_LCD_MAXPOWER should be 1) */
 

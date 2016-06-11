@@ -68,14 +68,14 @@
 #ifdef SPI_DEBUG
 #  define spidbg lldbg
 #  ifdef SPI_VERBOSE
-#    define spivdbg lldbg
+#    define spiinfo lldbg
 #  else
-#    define spivdbg(x...)
+#    define spiinfo(x...)
 #  endif
 #else
 #  undef SPI_VERBOSE
 #  define spidbg(x...)
-#  define spivdbg(x...)
+#  define spiinfo(x...)
 #endif
 
 /****************************************************************************

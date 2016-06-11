@@ -74,14 +74,14 @@
 
 #ifdef CONFIG_DEBUG_RGBLED
 #  define pwmdbg    dbg
-#  define pwmvdbg   vdbg
+#  define pwminfo   info
 #  define pwmlldbg  lldbg
-#  define pwmllvdbg llvdbg
+#  define pwmllinfo llinfo
 #else
 #  define pwmdbg(x...)
-#  define pwmvdbg(x...)
+#  define pwminfo(x...)
 #  define pwmlldbg(x...)
-#  define pwmllvdbg(x...)
+#  define pwmllinfo(x...)
 #endif
 
 /****************************************************************************
@@ -150,7 +150,7 @@ static int rgbled_open(FAR struct file *filep)
   uint8_t                     tmp;
   int                         ret;
 
-  pwmvdbg("crefs: %d\n", upper->crefs);
+  pwminfo("crefs: %d\n", upper->crefs);
 
   /* Get exclusive access to the device structures */
 
@@ -201,7 +201,7 @@ static int rgbled_close(FAR struct file *filep)
   FAR struct rgbled_upperhalf_s *upper = inode->i_private;
   int                         ret;
 
-  pwmvdbg("crefs: %d\n", upper->crefs);
+  pwminfo("crefs: %d\n", upper->crefs);
 
   /* Get exclusive access to the device structures */
 
@@ -410,7 +410,7 @@ int rgbled_register(FAR const char *path, FAR struct pwm_lowerhalf_s *ledr,
 
   /* Register the PWM device */
 
-  pwmvdbg("Registering %s\n", path);
+  pwminfo("Registering %s\n", path);
   return register_driver(path, &g_rgbledops, 0666, upper);
 }
 

@@ -63,7 +63,7 @@
 
 static inline void ssd1306_configspi(FAR struct spi_dev_s *spi)
 {
-  lcdvdbg("Mode: %d Bits: 8 Frequency: %d\n",
+  lcdinfo("Mode: %d Bits: 8 Frequency: %d\n",
           CONFIG_SSD1306_SPIMODE, CONFIG_SSD1306_FREQUENCY);
 
   /* Configure SPI for the SSD1306 */

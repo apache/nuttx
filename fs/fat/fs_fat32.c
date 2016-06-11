@@ -1397,7 +1397,7 @@ static int fat_dup(FAR const struct file *oldp, FAR struct file *newp)
   FAR struct fat_file_s *newff;
   int ret;
 
-  fvdbg("Dup %p->%p\n", oldp, newp);
+  finfo("Dup %p->%p\n", oldp, newp);
 
   /* Sanity checks */
 

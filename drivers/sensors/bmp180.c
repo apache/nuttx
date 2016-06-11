@@ -314,7 +314,7 @@ static int bmp180_checkid(FAR struct bmp180_dev_s *priv)
   /* Read device ID */
 
   devid = bmp180_getreg8(priv, BMP180_DEVID);
-  snvdbg("devid: 0x%02x\n", devid);
+  sninfo("devid: 0x%02x\n", devid);
 
   if (devid != (uint16_t) DEVID)
     {
@@ -421,8 +421,8 @@ static void bmp180_read_press_temp(FAR struct bmp180_dev_s *priv)
   priv->bmp180_upress |= bmp180_getreg8(priv, BMP180_ADC_OUT_XLSB);
   priv->bmp180_upress = priv->bmp180_upress >> (8 - (oss >> 6));
 
-  snvdbg("Uncompensated temperature = %d\n", priv->bmp180_utemp);
-  snvdbg("Uncompensated pressure = %d\n", priv->bmp180_upress);
+  sninfo("Uncompensated temperature = %d\n", priv->bmp180_utemp);
+  sninfo("Uncompensated pressure = %d\n", priv->bmp180_upress);
 }
 
 /****************************************************************************
@@ -470,7 +470,7 @@ static int bmp180_getpressure(FAR struct bmp180_dev_s *priv)
   x2 = (priv->bmp180_cal_mc << 11) / (x1 + priv->bmp180_cal_md);
   b5 = x1 + x2;
   temp = (b5 + 8) >> 4;
-  snvdbg("Compensated temperature = %d\n", temp);
+  sninfo("Compensated temperature = %d\n", temp);
 
   /* Calculate true pressure */
 
@@ -500,7 +500,7 @@ static int bmp180_getpressure(FAR struct bmp180_dev_s *priv)
 
   press = press + ((x1 + x2 + 3791) >> 4);
 
-  snvdbg("Compressed pressure = %d\n", press);
+  sninfo("Compressed pressure = %d\n", press);
   return press;
 }
 
@@ -633,7 +633,7 @@ int bmp180_register(FAR const char *devpath, FAR struct i2c_master_s *i2c)
       kmm_free(priv);
     }
 
-  snvdbg("BMP180 driver loaded successfully!\n");
+  sninfo("BMP180 driver loaded successfully!\n");
   return ret;
 }
 

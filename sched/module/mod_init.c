@@ -65,7 +65,7 @@
 #endif
 
 #ifdef CONFIG_MODULE_DUMPBUFFER
-# define mod_dumpbuffer(m,b,n) svdbgdumpbuffer(m,b,n)
+# define mod_dumpbuffer(m,b,n) sinfodumpbuffer(m,b,n)
 #else
 # define mod_dumpbuffer(m,b,n)
 #endif
@@ -146,7 +146,7 @@ int mod_initialize(FAR const char *filename,
 {
   int ret;
 
-  svdbg("filename: %s loadinfo: %p\n", filename, loadinfo);
+  sinfo("filename: %s loadinfo: %p\n", filename, loadinfo);
 
   /* Clear the load info structure */
 

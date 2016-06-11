@@ -126,7 +126,7 @@ static int netprocfs_open(FAR struct file *filep, FAR const char *relpath,
   FAR struct netprocfs_file_s *priv;
   FAR struct net_driver_s *dev;
 
-  fvdbg("Open '%s'\n", relpath);
+  finfo("Open '%s'\n", relpath);
 
   /* PROCFS is read-only.  Any attempt to open with any kind of write
    * access is not permitted.
@@ -233,7 +233,7 @@ static ssize_t netprocfs_read(FAR struct file *filep, FAR char *buffer,
   FAR struct netprocfs_file_s *priv;
   ssize_t nreturned;
 
-  fvdbg("buffer=%p buflen=%lu\n", buffer, (unsigned long)buflen);
+  finfo("buffer=%p buflen=%lu\n", buffer, (unsigned long)buflen);
 
   /* Recover our private data from the struct file instance */
 
@@ -282,7 +282,7 @@ static int netprocfs_dup(FAR const struct file *oldp, FAR struct file *newp)
   FAR struct netprocfs_file_s *oldpriv;
   FAR struct netprocfs_file_s *newpriv;
 
-  fvdbg("Dup %p->%p\n", oldp, newp);
+  finfo("Dup %p->%p\n", oldp, newp);
 
   /* Recover our private data from the old struct file instance */
 
@@ -322,7 +322,7 @@ static int netprocfs_opendir(FAR const char *relpath,
   FAR struct netprocfs_level1_s *level1;
   int ndevs;
 
-  fvdbg("relpath: \"%s\"\n", relpath ? relpath : "NULL");
+  finfo("relpath: \"%s\"\n", relpath ? relpath : "NULL");
   DEBUGASSERT(relpath && dir && !dir->u.procfs);
 
   /* "net" is the only value of relpath that is a directory */
@@ -420,7 +420,7 @@ static int netprocfs_readdir(FAR struct fs_dirent_s *dir)
        * error -ENOENT.
        */
 
-      fvdbg("Entry %d: End of directory\n", index);
+      finfo("Entry %d: End of directory\n", index);
       return -ENOENT;
     }
 
@@ -575,7 +575,7 @@ ssize_t netprocfs_read_linegen(FAR struct netprocfs_file_s *priv,
   size_t xfrsize;
   ssize_t nreturned;
 
-  fvdbg("buffer=%p buflen=%lu\n", buffer, (unsigned long)buflen);
+  finfo("buffer=%p buflen=%lu\n", buffer, (unsigned long)buflen);
 
   /* Is there line data already buffered? */
 

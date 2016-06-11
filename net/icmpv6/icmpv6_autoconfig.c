@@ -119,7 +119,7 @@ static uint16_t icmpv6_router_interrupt(FAR struct net_driver_s *dev,
 {
   FAR struct icmpv6_router_s *state = (FAR struct icmpv6_router_s *)priv;
 
-  nllvdbg("flags: %04x sent: %d\n", flags, state->snd_sent);
+  nllinfo("flags: %04x sent: %d\n", flags, state->snd_sent);
 
   if (state)
     {
@@ -354,7 +354,7 @@ int icmpv6_autoconfig(FAR struct net_driver_s *dev)
   /* Sanity checks */
 
   DEBUGASSERT(dev);
-  nvdbg("Auto-configuring %s\n", dev->d_ifname);
+  ninfo("Auto-configuring %s\n", dev->d_ifname);
 
 #ifdef CONFIG_NET_MULTILINK
   /* Only Ethernet devices are supported for now */
@@ -402,7 +402,7 @@ int icmpv6_autoconfig(FAR struct net_driver_s *dev)
   memcpy(&lladdr[5], dev->d_mac.ether_addr_octet,
         sizeof(struct ether_addr));                 /* 48-bit Ethernet address */
 
-  nvdbg("lladdr=%04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
+  ninfo("lladdr=%04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
         lladdr[0], lladdr[1], lladdr[2], lladdr[3],
         lladdr[4], lladdr[6], lladdr[6], lladdr[7]);
 
@@ -493,7 +493,7 @@ int icmpv6_autoconfig(FAR struct net_driver_s *dev)
           break;
         }
 
-      nvdbg("Timed out... retrying %d\n", retries + 1);
+      ninfo("Timed out... retrying %d\n", retries + 1);
     }
 
   /* Check for failures.  Note:  On successful return, the network will be 

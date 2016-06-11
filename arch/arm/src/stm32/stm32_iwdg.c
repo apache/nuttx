@@ -113,10 +113,10 @@
 
 #ifdef CONFIG_DEBUG_WATCHDOG
 #  define wddbg    lldbg
-#  define wdvdbg   llvdbg
+#  define wdinfo   llinfo
 #else
 #  define wddbg(x...)
-#  define wdvdbg(x...)
+#  define wdinfo(x...)
 #endif
 
 /****************************************************************************
@@ -339,7 +339,7 @@ static int stm32_start(FAR struct watchdog_lowerhalf_s *lower)
   FAR struct stm32_lowerhalf_s *priv = (FAR struct stm32_lowerhalf_s *)lower;
   irqstate_t flags;
 
-  wdvdbg("Entry: started=%d\n");
+  wdinfo("Entry: started=%d\n");
   DEBUGASSERT(priv);
 
   /* Have we already been started? */
@@ -394,7 +394,7 @@ static int stm32_stop(FAR struct watchdog_lowerhalf_s *lower)
 {
   /* There is no way to disable the IDWG timer once it has been started */
 
-  wdvdbg("Entry\n");
+  wdinfo("Entry\n");
   return -ENOSYS;
 }
 
@@ -420,7 +420,7 @@ static int stm32_keepalive(FAR struct watchdog_lowerhalf_s *lower)
   FAR struct stm32_lowerhalf_s *priv = (FAR struct stm32_lowerhalf_s *)lower;
   irqstate_t flags;
 
-  wdvdbg("Entry\n");
+  wdinfo("Entry\n");
 
   /* Reload the IWDG timer */
 
@@ -455,7 +455,7 @@ static int stm32_getstatus(FAR struct watchdog_lowerhalf_s *lower,
   uint32_t ticks;
   uint32_t elapsed;
 
-  wdvdbg("Entry\n");
+  wdinfo("Entry\n");
   DEBUGASSERT(priv);
 
   /* Return the status bit */
@@ -484,10 +484,10 @@ static int stm32_getstatus(FAR struct watchdog_lowerhalf_s *lower,
 
   status->timeleft = priv->timeout - elapsed;
 
-  wdvdbg("Status     :\n");
-  wdvdbg("  flags    : %08x\n", status->flags);
-  wdvdbg("  timeout  : %d\n", status->timeout);
-  wdvdbg("  timeleft : %d\n", status->timeleft);
+  wdinfo("Status     :\n");
+  wdinfo("  flags    : %08x\n", status->flags);
+  wdinfo("  timeout  : %d\n", status->timeout);
+  wdinfo("  timeleft : %d\n", status->timeleft);
   return OK;
 }
 
@@ -516,7 +516,7 @@ static int stm32_settimeout(FAR struct watchdog_lowerhalf_s *lower,
   int prescaler;
   int shift;
 
-  wdvdbg("Entry: timeout=%d\n", timeout);
+  wdinfo("Entry: timeout=%d\n", timeout);
   DEBUGASSERT(priv);
 
   /* Can this timeout be represented? */
@@ -631,7 +631,7 @@ static int stm32_settimeout(FAR struct watchdog_lowerhalf_s *lower,
     }
 #endif
 
-  wdvdbg("prescaler=%d fiwdg=%d reload=%d\n", prescaler, fiwdg, reload);
+  wdinfo("prescaler=%d fiwdg=%d reload=%d\n", prescaler, fiwdg, reload);
 
   return OK;
 }
@@ -662,7 +662,7 @@ void stm32_iwdginitialize(FAR const char *devpath, uint32_t lsifreq)
 {
   FAR struct stm32_lowerhalf_s *priv = &g_wdgdev;
 
-  wdvdbg("Entry: devpath=%s lsifreq=%d\n", devpath, lsifreq);
+  wdinfo("Entry: devpath=%s lsifreq=%d\n", devpath, lsifreq);
 
   /* NOTE we assume that clocking to the IWDG has already been provided by
    * the RCC initialization logic.
@@ -682,7 +682,7 @@ void stm32_iwdginitialize(FAR const char *devpath, uint32_t lsifreq)
    */
 
   stm32_rcc_enablelsi();
-  wdvdbg("RCC CSR: %08x\n", getreg32(STM32_RCC_CSR));
+  wdinfo("RCC CSR: %08x\n", getreg32(STM32_RCC_CSR));
 
   /* Select an arbitrary initial timeout value.  But don't start the watchdog
    * yet. NOTE: If the "Hardware watchdog" feature is enabled through the

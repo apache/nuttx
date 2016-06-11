@@ -377,7 +377,7 @@ static inline FAR struct usbhost_state_s *usbhost_allocclass(void)
     }
 
   leave_critical_section(flags);
-  ullvdbg("Allocated: %p\n", entry);
+  ullinfo("Allocated: %p\n", entry);
   return (FAR struct usbhost_state_s *)entry;
 }
 #else
@@ -391,7 +391,7 @@ static inline FAR struct usbhost_state_s *usbhost_allocclass(void)
 
   DEBUGASSERT(!up_interrupt_context());
   priv = (FAR struct usbhost_state_s *)kmm_malloc(sizeof(struct usbhost_state_s));
-  uvdbg("Allocated: %p\n", priv);
+  uinfo("Allocated: %p\n", priv);
   return priv;
 }
 #endif
@@ -417,7 +417,7 @@ static inline void usbhost_freeclass(FAR struct usbhost_state_s *usbclass)
   irqstate_t flags;
   DEBUGASSERT(entry != NULL);
 
-  ullvdbg("Freeing: %p\n", entry);
+  ullinfo("Freeing: %p\n", entry);
 
   /* Just put the pre-allocated class structure back on the freelist */
 
@@ -435,7 +435,7 @@ static inline void usbhost_freeclass(FAR struct usbhost_state_s *usbclass)
    * from an interrupt handler.
    */
 
-  uvdbg("Freeing: %p\n", usbclass);
+  uinfo("Freeing: %p\n", usbclass);
   sched_kfree(usbclass);
 }
 #endif
@@ -506,18 +506,18 @@ static void usbhost_dumpcbw(FAR struct usbmsc_cbw_s *cbw)
 {
   int i;
 
-  uvdbg("CBW:\n");
-  uvdbg("  signature: %08x\n", usbhost_getle32(cbw->signature));
-  uvdbg("  tag:       %08x\n", usbhost_getle32(cbw->tag));
-  uvdbg("  datlen:    %08x\n", usbhost_getle32(cbw->datlen));
-  uvdbg("  flags:     %02x\n", cbw->flags);
-  uvdbg("  lun:       %02x\n", cbw->lun);
-  uvdbg("  cdblen:    %02x\n", cbw->cdblen);
+  uinfo("CBW:\n");
+  uinfo("  signature: %08x\n", usbhost_getle32(cbw->signature));
+  uinfo("  tag:       %08x\n", usbhost_getle32(cbw->tag));
+  uinfo("  datlen:    %08x\n", usbhost_getle32(cbw->datlen));
+  uinfo("  flags:     %02x\n", cbw->flags);
+  uinfo("  lun:       %02x\n", cbw->lun);
+  uinfo("  cdblen:    %02x\n", cbw->cdblen);
 
-  uvdbg("CDB:\n");
+  uinfo("CDB:\n");
   for (i = 0; i < cbw->cdblen; i += 8)
     {
-      uvdbg("  %02x %02x %02x %02x %02x %02x %02x %02x\n",
+      uinfo("  %02x %02x %02x %02x %02x %02x %02x %02x\n",
             cbw->cdb[i],   cbw->cdb[i+1], cbw->cdb[i+2], cbw->cdb[i+3],
             cbw->cdb[i+4], cbw->cdb[i+5], cbw->cdb[i+6], cbw->cdb[i+7]);
     }
@@ -525,11 +525,11 @@ static void usbhost_dumpcbw(FAR struct usbmsc_cbw_s *cbw)
 
 static void usbhost_dumpcsw(FAR struct usbmsc_csw_s *csw)
 {
-  uvdbg("CSW:\n");
-  uvdbg("  signature: %08x\n", usbhost_getle32(csw->signature));
-  uvdbg("  tag:       %08x\n", usbhost_getle32(csw->tag));
-  uvdbg("  residue:   %08x\n", usbhost_getle32(csw->residue));
-  uvdbg("  status:    %02x\n", csw->status);
+  uinfo("CSW:\n");
+  uinfo("  signature: %08x\n", usbhost_getle32(csw->signature));
+  uinfo("  tag:       %08x\n", usbhost_getle32(csw->tag));
+  uinfo("  residue:   %08x\n", usbhost_getle32(csw->residue));
+  uinfo("  status:    %02x\n", csw->status);
 }
 #endif
 
@@ -685,7 +685,7 @@ static inline int usbhost_maxlunreq(FAR struct usbhost_state_s *priv)
    * allocated memory.
    */
 
-  uvdbg("Request maximum logical unit number\n");
+  uinfo("Request maximum logical unit number\n");
 
   memset(req, 0, sizeof(struct usb_ctrlreq_s));
   req->type    = USB_DIR_IN | USB_REQ_TYPE_CLASS | USB_REQ_RECIPIENT_INTERFACE;
@@ -920,7 +920,7 @@ static void usbhost_destroy(FAR void *arg)
   DEBUGASSERT(priv != NULL && priv->usbclass.hport != NULL);
   hport = priv->usbclass.hport;
 
-  uvdbg("crefs: %d\n", priv->crefs);
+  uinfo("crefs: %d\n", priv->crefs);
 
   /* Unregister the block driver */
 
@@ -1046,7 +1046,7 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
           {
             FAR struct usb_ifdesc_s *ifdesc = (FAR struct usb_ifdesc_s *)configdesc;
 
-            uvdbg("Interface descriptor\n");
+            uinfo("Interface descriptor\n");
             DEBUGASSERT(remaining >= USB_SIZEOF_IFDESC);
 
             /* Save the interface number and mark ONLY the interface found */
@@ -1064,7 +1064,7 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
           {
             FAR struct usb_epdesc_s *epdesc = (FAR struct usb_epdesc_s *)configdesc;
 
-            uvdbg("Endpoint descriptor\n");
+            uinfo("Endpoint descriptor\n");
             DEBUGASSERT(remaining >= USB_SIZEOF_EPDESC);
 
             /* Check for a bulk endpoint.  We only support the bulk-only
@@ -1100,7 +1100,7 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
                     boutdesc.interval     = epdesc->interval;
                     boutdesc.mxpacketsize = usbhost_getle16(epdesc->mxpacketsize);
 
-                    uvdbg("Bulk OUT EP addr:%d mxpacketsize:%d\n",
+                    uinfo("Bulk OUT EP addr:%d mxpacketsize:%d\n",
                           boutdesc.addr, boutdesc.mxpacketsize);
                   }
                 else
@@ -1127,7 +1127,7 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
                     bindesc.xfrtype      = USB_EP_ATTR_XFER_BULK;
                     bindesc.interval     = epdesc->interval;
                     bindesc.mxpacketsize = usbhost_getle16(epdesc->mxpacketsize);
-                    uvdbg("Bulk IN EP addr:%d mxpacketsize:%d\n",
+                    uinfo("Bulk IN EP addr:%d mxpacketsize:%d\n",
                           bindesc.addr, bindesc.mxpacketsize);
                   }
               }
@@ -1185,7 +1185,7 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
       return ret;
     }
 
-  ullvdbg("Endpoints allocated\n");
+  ullinfo("Endpoints allocated\n");
   return OK;
 }
 
@@ -1234,12 +1234,12 @@ static inline int usbhost_initvolume(FAR struct usbhost_state_s *priv)
 
   /* Request the maximum logical unit number */
 
-  uvdbg("Get max LUN\n");
+  uinfo("Get max LUN\n");
   ret = usbhost_maxlunreq(priv);
 
   for (retries = 0; retries < USBHOST_MAX_RETRIES /* && ret >= 0 */; retries++)
     {
-      uvdbg("Test unit ready, retries=%d\n", retries);
+      uinfo("Test unit ready, retries=%d\n", retries);
 
       /* Wait just a bit */
 
@@ -1268,7 +1268,7 @@ static inline int usbhost_initvolume(FAR struct usbhost_state_s *priv)
            * The returned status is ignored here.
            */
 
-          uvdbg("Request sense\n");
+          uinfo("Request sense\n");
           ret = usbhost_requestsense(priv);
         }
 
@@ -1298,7 +1298,7 @@ static inline int usbhost_initvolume(FAR struct usbhost_state_s *priv)
     {
       /* Get the capacity of the volume */
 
-      uvdbg("Read capacity\n");
+      uinfo("Read capacity\n");
       ret = usbhost_readcapacity(priv);
       if (ret >= 0)
         {
@@ -1319,7 +1319,7 @@ static inline int usbhost_initvolume(FAR struct usbhost_state_s *priv)
     {
       /* Inquiry */
 
-      uvdbg("Inquiry\n");
+      uinfo("Inquiry\n");
       ret = usbhost_inquiry(priv);
       if (ret >= 0)
         {
@@ -1340,7 +1340,7 @@ static inline int usbhost_initvolume(FAR struct usbhost_state_s *priv)
     {
       char devname[DEV_NAMELEN];
 
-      uvdbg("Register block driver\n");
+      uinfo("Register block driver\n");
       usbhost_mkdevname(priv, devname);
       ret = register_blockdriver(devname, &g_bops, 0, priv);
     }
@@ -1830,7 +1830,7 @@ static int usbhost_disconnected(struct usbhost_class_s *usbclass)
    * block driver.
    */
 
-  ullvdbg("crefs: %d\n", priv->crefs);
+  ullinfo("crefs: %d\n", priv->crefs);
   if (priv->crefs == 1)
     {
       /* Destroy the class instance.  If we are executing from an interrupt
@@ -1842,7 +1842,7 @@ static int usbhost_disconnected(struct usbhost_class_s *usbclass)
         {
           /* Destroy the instance on the worker thread. */
 
-          uvdbg("Queuing destruction: worker %p->%p\n", priv->work.worker, usbhost_destroy);
+          uinfo("Queuing destruction: worker %p->%p\n", priv->work.worker, usbhost_destroy);
           DEBUGASSERT(priv->work.worker == NULL);
           (void)work_queue(HPWORK, &priv->work, usbhost_destroy, priv, 0);
        }
@@ -1874,7 +1874,7 @@ static int usbhost_open(FAR struct inode *inode)
   irqstate_t flags;
   int ret;
 
-  uvdbg("Entry\n");
+  uinfo("Entry\n");
   DEBUGASSERT(inode && inode->i_private);
   priv = (FAR struct usbhost_state_s *)inode->i_private;
 
@@ -1923,7 +1923,7 @@ static int usbhost_close(FAR struct inode *inode)
   FAR struct usbhost_state_s *priv;
   irqstate_t flags;
 
-  uvdbg("Entry\n");
+  uinfo("Entry\n");
   DEBUGASSERT(inode && inode->i_private);
   priv = (FAR struct usbhost_state_s *)inode->i_private;
 
@@ -1986,7 +1986,7 @@ static ssize_t usbhost_read(FAR struct inode *inode, unsigned char *buffer,
   DEBUGASSERT(priv->usbclass.hport);
   hport = priv->usbclass.hport;
 
-  uvdbg("startsector: %d nsectors: %d sectorsize: %d\n",
+  uinfo("startsector: %d nsectors: %d sectorsize: %d\n",
         startsector, nsectors, priv->blocksize);
 
   /* Check if the mass storage device is still connected */
@@ -2086,7 +2086,7 @@ static ssize_t usbhost_write(FAR struct inode *inode, const unsigned char *buffe
   FAR struct usbhost_hubport_s *hport;
   ssize_t nbytes;
 
-  uvdbg("sector: %d nsectors: %d sectorsize: %d\n");
+  uinfo("sector: %d nsectors: %d sectorsize: %d\n");
 
   DEBUGASSERT(inode && inode->i_private);
   priv = (FAR struct usbhost_state_s *)inode->i_private;
@@ -2179,7 +2179,7 @@ static int usbhost_geometry(FAR struct inode *inode, struct geometry *geometry)
   FAR struct usbhost_state_s *priv;
   int ret = -EINVAL;
 
-  uvdbg("Entry\n");
+  uinfo("Entry\n");
   DEBUGASSERT(inode && inode->i_private);
 
   /* Check if the mass storage device is still connected */
@@ -2211,7 +2211,7 @@ static int usbhost_geometry(FAR struct inode *inode, struct geometry *geometry)
       geometry->geo_sectorsize    = priv->blocksize;
       usbhost_givesem(&priv->exclsem);
 
-      uvdbg("nsectors: %ld sectorsize: %d\n",
+      uinfo("nsectors: %ld sectorsize: %d\n",
              (long)geometry->geo_nsectors, geometry->geo_sectorsize);
 
       ret = OK;
@@ -2232,7 +2232,7 @@ static int usbhost_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
   FAR struct usbhost_state_s *priv;
   int ret;
 
-  uvdbg("Entry\n");
+  uinfo("Entry\n");
   DEBUGASSERT(inode && inode->i_private);
   priv  = (FAR struct usbhost_state_s *)inode->i_private;
 

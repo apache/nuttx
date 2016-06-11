@@ -726,7 +726,7 @@ static inline int nxffs_rdopen(FAR struct nxffs_volume_s *volume,
       /* Just increment the reference count on the ofile */
 
       ofile->crefs++;
-      fvdbg("crefs: %d\n", ofile->crefs);
+      finfo("crefs: %d\n", ofile->crefs);
     }
 
   /* The file has not yet been opened.
@@ -756,7 +756,7 @@ static inline int nxffs_rdopen(FAR struct nxffs_volume_s *volume,
       ret = nxffs_findinode(volume, name, &ofile->entry);
       if (ret != OK)
         {
-          fvdbg("Inode '%s' not found: %d\n", name, -ret);
+          finfo("Inode '%s' not found: %d\n", name, -ret);
           goto errout_with_ofile;
         }
 
@@ -892,7 +892,7 @@ static inline int nxffs_wrclose(FAR struct nxffs_volume_s *volume,
 
   if (wrfile->truncate && wrfile->ofile.entry.name)
     {
-      fvdbg("Removing old file: %s\n", wrfile->ofile.entry.name);
+      finfo("Removing old file: %s\n", wrfile->ofile.entry.name);
 
       ret = nxffs_rminode(volume, wrfile->ofile.entry.name);
       if (ret < 0)
@@ -1000,7 +1000,7 @@ int nxffs_open(FAR struct file *filep, FAR const char *relpath,
   FAR struct nxffs_ofile_s *ofile = NULL;
   int ret;
 
-  fvdbg("Open '%s'\n", relpath);
+  finfo("Open '%s'\n", relpath);
 
   /* Sanity checks */
 
@@ -1069,7 +1069,7 @@ int nxffs_dup(FAR const struct file *oldp, FAR struct file *newp)
 #endif
   FAR struct nxffs_ofile_s *ofile;
 
-  fvdbg("Dup %p->%p\n", oldp, newp);
+  finfo("Dup %p->%p\n", oldp, newp);
 
   /* Sanity checks */
 
@@ -1126,7 +1126,7 @@ int nxffs_close(FAR struct file *filep)
   FAR struct nxffs_ofile_s *ofile;
   int ret;
 
-  fvdbg("Closing\n");
+  finfo("Closing\n");
 
   /* Sanity checks */
 

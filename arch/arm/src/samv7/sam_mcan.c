@@ -795,9 +795,9 @@
 
 #ifdef CONFIG_DEBUG_CAN
 #  define candbg    dbg
-#  define canvdbg   vdbg
+#  define caninfo   info
 #  define canlldbg  lldbg
-#  define canllvdbg llvdbg
+#  define canllinfo llinfo
 
 #  ifdef CONFIG_SAMV7_MCAN_REGDEBUG
 #    define canregdbg lldbg
@@ -807,9 +807,9 @@
 
 #else
 #  define candbg(x...)
-#  define canvdbg(x...)
+#  define caninfo(x...)
 #  define canlldbg(x...)
-#  define canllvdbg(x...)
+#  define canllinfo(x...)
 #  define canregdbg(x...)
 #endif
 
@@ -2151,7 +2151,7 @@ static void mcan_reset(FAR struct can_dev_s *dev)
   config = priv->config;
   DEBUGASSERT(config);
 
-  canllvdbg("MCAN%d\n", config->port);
+  canllinfo("MCAN%d\n", config->port);
   UNUSED(config);
 
   /* Get exclusive access to the MCAN peripheral */
@@ -2208,7 +2208,7 @@ static int mcan_setup(FAR struct can_dev_s *dev)
   config = priv->config;
   DEBUGASSERT(config);
 
-  canllvdbg("MCAN%d pid: %d\n", config->port, config->pid);
+  canllinfo("MCAN%d pid: %d\n", config->port, config->pid);
 
   /* Get exclusive access to the MCAN peripheral */
 
@@ -2285,7 +2285,7 @@ static void mcan_shutdown(FAR struct can_dev_s *dev)
   config = priv->config;
   DEBUGASSERT(config);
 
-  canllvdbg("MCAN%d\n", config->port);
+  canllinfo("MCAN%d\n", config->port);
 
   /* Get exclusive access to the MCAN peripheral */
 
@@ -2334,7 +2334,7 @@ static void mcan_rxint(FAR struct can_dev_s *dev, bool enable)
 
   DEBUGASSERT(priv && priv->config);
 
-  canllvdbg("MCAN%d enable: %d\n", priv->config->port, enable);
+  canllinfo("MCAN%d enable: %d\n", priv->config->port, enable);
 
   /* Enable/disable the receive interrupts */
 
@@ -2376,7 +2376,7 @@ static void mcan_txint(FAR struct can_dev_s *dev, bool enable)
 
   DEBUGASSERT(priv && priv->config);
 
-  canllvdbg("MCAN%d enable: %d\n", priv->config->port, enable);
+  canllinfo("MCAN%d enable: %d\n", priv->config->port, enable);
 
   /* Enable/disable the receive interrupts */
 
@@ -2415,7 +2415,7 @@ static int mcan_ioctl(FAR struct can_dev_s *dev, int cmd, unsigned long arg)
   FAR struct sam_mcan_s *priv;
   int ret = -ENOTTY;
 
-  canvdbg("cmd=%04x arg=%lu\n", cmd, arg);
+  caninfo("cmd=%04x arg=%lu\n", cmd, arg);
 
   DEBUGASSERT(dev && dev->cd_priv);
   priv = dev->cd_priv;
@@ -2683,8 +2683,8 @@ static int mcan_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
   DEBUGASSERT(priv && priv->config);
   config = priv->config;
 
-  canllvdbg("MCAN%d\n", config->port);
-  canllvdbg("MCAN%d ID: %d DLC: %d\n",
+  canllinfo("MCAN%d\n", config->port);
+  canllinfo("MCAN%d ID: %d DLC: %d\n",
             config->port, msg->cm_hdr.ch_id, msg->cm_hdr.ch_dlc);
 
   /* That that FIFO elements were configured.
@@ -3608,7 +3608,7 @@ static int mcan_hw_initialize(struct sam_mcan_s *priv)
   uint32_t cntr;
   uint32_t cmr;
 
-  canllvdbg("MCAN%d\n", config->port);
+  canllinfo("MCAN%d\n", config->port);
 
   /* Configure MCAN pins */
 
@@ -3883,7 +3883,7 @@ FAR struct can_dev_s *sam_mcan_initialize(int port)
   FAR const struct sam_config_s *config;
   uint32_t regval;
 
-  canvdbg("MCAN%d\n", port);
+  caninfo("MCAN%d\n", port);
 
   /* Select PCK5 clock source and pre-scaler value.  Both MCAN controllers
    * use PCK5 to derive bit rate.

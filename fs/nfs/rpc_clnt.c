@@ -349,7 +349,7 @@ void rpcclnt_init(void)
   rpc_auth_unix = txdr_unsigned(RPCAUTH_UNIX);
   rpc_auth_null = txdr_unsigned(RPCAUTH_NULL);
 
-  fvdbg("RPC initialized\n");
+  finfo("RPC initialized\n");
 }
 
 /****************************************************************************
@@ -385,7 +385,7 @@ int rpcclnt_connect(struct rpcclnt *rpc)
   uint16_t tport;
   int errval;
 
-  fvdbg("Connecting\n");
+  finfo("Connecting\n");
 
   /* Create the socket */
 
@@ -731,7 +731,7 @@ int rpcclnt_request(FAR struct rpcclnt *rpc, int procnum, int prog,
       error = rpcclnt_send(rpc, procnum, prog, request, reqlen);
       if (error != OK)
         {
-          fvdbg("ERROR rpcclnt_send failed: %d\n", error);
+          finfo("ERROR rpcclnt_send failed: %d\n", error);
         }
 
       /* Wait for the reply from our send */
@@ -741,7 +741,7 @@ int rpcclnt_request(FAR struct rpcclnt *rpc, int procnum, int prog,
           error = rpcclnt_reply(rpc, procnum, prog, response, resplen);
           if (error != OK)
             {
-              fvdbg("ERROR rpcclnt_reply failed: %d\n", error);
+              finfo("ERROR rpcclnt_reply failed: %d\n", error);
             }
         }
 
@@ -785,7 +785,7 @@ int rpcclnt_request(FAR struct rpcclnt *rpc, int procnum, int prog,
   tmp = fxdr_unsigned(uint32_t, replymsg->status);
   if (tmp == RPC_SUCCESS)
     {
-      fvdbg("RPC_SUCCESS\n");
+      finfo("RPC_SUCCESS\n");
     }
   else if (tmp == RPC_PROGMISMATCH)
     {

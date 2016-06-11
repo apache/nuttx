@@ -65,14 +65,14 @@
 
 #ifdef CONFIG_DEBUG_TIMER
 #  define tmrdbg    dbg
-#  define tmrvdbg   vdbg
+#  define tmrinfo   info
 #  define tmrlldbg  lldbg
-#  define tmrllvdbg llvdbg
+#  define tmrllinfo llinfo
 #else
 #  define tmrdbg(x...)
-#  define tmrvdbg(x...)
+#  define tmrinfo(x...)
 #  define tmrlldbg(x...)
-#  define tmrllvdbg(x...)
+#  define tmrllinfo(x...)
 #endif
 
 /****************************************************************************
@@ -143,7 +143,7 @@ static int timer_open(FAR struct file *filep)
   uint8_t                          tmp;
   int                              ret;
 
-  tmrvdbg("crefs: %d\n", upper->crefs);
+  tmrinfo("crefs: %d\n", upper->crefs);
 
   /* Increment the count of references to the device.  If this the first
    * time that the driver has been opened for this device, then initialize
@@ -181,7 +181,7 @@ static int timer_close(FAR struct file *filep)
   FAR struct inode *inode = filep->f_inode;
   FAR struct timer_upperhalf_s *upper = inode->i_private;
 
-  tmrvdbg("crefs: %d\n", upper->crefs);
+  tmrinfo("crefs: %d\n", upper->crefs);
 
   /* Decrement the references to the driver.  If the reference count will
    * decrement to 0, then uninitialize the driver.
@@ -240,7 +240,7 @@ static int timer_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   FAR struct timer_lowerhalf_s *lower = upper->lower;
   int                           ret;
 
-  tmrvdbg("cmd: %d arg: %ld\n", cmd, arg);
+  tmrinfo("cmd: %d arg: %ld\n", cmd, arg);
   DEBUGASSERT(upper && lower);
 
   /* Handle built-in ioctl commands */
@@ -384,7 +384,7 @@ static int timer_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
     default:
       {
-        tmrvdbg("Forwarding unrecognized cmd: %d arg: %ld\n", cmd, arg);
+        tmrinfo("Forwarding unrecognized cmd: %d arg: %ld\n", cmd, arg);
 
         /* An ioctl commands that are not recognized by the "upper-half"
          * driver are forwarded to the lower half driver through this
@@ -443,7 +443,7 @@ FAR void *timer_register(FAR const char *path,
   int ret;
 
   DEBUGASSERT(path && lower);
-  tmrvdbg("Entry: path=%s\n", path);
+  tmrinfo("Entry: path=%s\n", path);
 
   /* Allocate the upper-half data structure */
 
@@ -517,7 +517,7 @@ void timer_unregister(FAR void *handle)
   lower = upper->lower;
   DEBUGASSERT(upper && lower);
 
-  tmrvdbg("Unregistering: %s\n", upper->path);
+  tmrinfo("Unregistering: %s\n", upper->path);
 
   /* Disable the timer */
 

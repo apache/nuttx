@@ -244,7 +244,7 @@ static uint16_t max11802_sendcmd(FAR struct max11802_dev_s *priv,
   *tags = result & 0xF;
   result >>= 4; /* Get rid of tags */
 
-  ivdbg("cmd:%02x response:%04x\n", cmd, result);
+  iinfo("cmd:%02x response:%04x\n", cmd, result);
   return result;
 }
 
@@ -284,7 +284,7 @@ static void max11802_notify(FAR struct max11802_dev_s *priv)
       if (fds)
         {
           fds->revents |= POLLIN;
-          ivdbg("Report events: %02x\n", fds->revents);
+          iinfo("Report events: %02x\n", fds->revents);
           sem_post(fds->sem);
         }
     }
@@ -381,7 +381,7 @@ static int max11802_waitsample(FAR struct max11802_dev_s *priv,
     {
       /* Wait for a change in the MAX11802 state */
 
-      ivdbg("Waiting..\n");
+      iinfo("Waiting..\n");
       priv->nwaiters++;
       ret = sem_wait(&priv->waitsem);
       priv->nwaiters--;
@@ -399,7 +399,7 @@ static int max11802_waitsample(FAR struct max11802_dev_s *priv,
         }
     }
 
-  ivdbg("Sampled\n");
+  iinfo("Sampled\n");
 
   /* Re-acquire the semaphore that manages mutually exclusive access to
    * the device structure.  We may have to wait here.  But we have our
@@ -540,11 +540,11 @@ static void max11802_worker(FAR void *arg)
 
   if (pendown)
     {
-      ivdbg("\nPD\n");
+      iinfo("\nPD\n");
     }
   else
     {
-      ivdbg("\nPU\n");
+      iinfo("\nPU\n");
     }
 
   if (!pendown)
@@ -559,7 +559,7 @@ static void max11802_worker(FAR void *arg)
        * reported).
        */
 
-      ivdbg("\nPC%d\n", priv->sample.contact);
+      iinfo("\nPC%d\n", priv->sample.contact);
 
       if (priv->sample.contact == CONTACT_NONE ||
           priv->sample.contact == CONTACT_UP)
@@ -589,7 +589,7 @@ static void max11802_worker(FAR void *arg)
        * again later.
        */
 
-       ivdbg("Previous pen up event still in buffer\n");
+       iinfo("Previous pen up event still in buffer\n");
        max11802_notify(priv);
        wd_start(priv->wdog, MAX11802_WDOG_DELAY, max11802_wdog, 1,
                 (uint32_t)priv);
@@ -636,7 +636,7 @@ static void max11802_worker(FAR void *arg)
 
       if ((tags & 0x03) != 0)
         {
-          ivdbg("Touch ended before measurement\n");
+          iinfo("Touch ended before measurement\n");
           goto ignored;
         }
 
@@ -755,7 +755,7 @@ static int max11802_open(FAR struct file *filep)
   uint8_t                   tmp;
   int                       ret;
 
-  ivdbg("Opening\n");
+  iinfo("Opening\n");
 
   DEBUGASSERT(filep);
   inode = filep->f_inode;
@@ -797,7 +797,7 @@ errout_with_sem:
   sem_post(&priv->devsem);
   return ret;
 #else
-  ivdbg("Opening\n");
+  iinfo("Opening\n");
   return OK;
 #endif
 }
@@ -813,7 +813,7 @@ static int max11802_close(FAR struct file *filep)
   FAR struct max11802_dev_s *priv;
   int                       ret;
 
-  ivdbg("Closing\n");
+  iinfo("Closing\n");
   DEBUGASSERT(filep);
   inode = filep->f_inode;
 
@@ -843,7 +843,7 @@ static int max11802_close(FAR struct file *filep)
 
   sem_post(&priv->devsem);
 #endif
-  ivdbg("Closing\n");
+  iinfo("Closing\n");
   return OK;
 }
 
@@ -860,7 +860,7 @@ static ssize_t max11802_read(FAR struct file *filep, FAR char *buffer,
   struct max11802_sample_s   sample;
   int                        ret;
 
-  ivdbg("buffer:%p len:%d\n", buffer, len);
+  iinfo("buffer:%p len:%d\n", buffer, len);
   DEBUGASSERT(filep);
   inode = filep->f_inode;
 
@@ -903,7 +903,7 @@ static ssize_t max11802_read(FAR struct file *filep, FAR char *buffer,
        * option, then just return an error.
        */
 
-      ivdbg("Sample data is not available\n");
+      iinfo("Sample data is not available\n");
       if (filep->f_oflags & O_NONBLOCK)
         {
           ret = -EAGAIN;
@@ -964,16 +964,16 @@ static ssize_t max11802_read(FAR struct file *filep, FAR char *buffer,
       report->point[0].flags  = TOUCH_MOVE | TOUCH_ID_VALID | TOUCH_POS_VALID;
     }
 
-  ivdbg("  id:      %d\n", report->point[0].id);
-  ivdbg("  flags:   %02x\n", report->point[0].flags);
-  ivdbg("  x:       %d\n", report->point[0].x);
-  ivdbg("  y:       %d\n", report->point[0].y);
+  iinfo("  id:      %d\n", report->point[0].id);
+  iinfo("  flags:   %02x\n", report->point[0].flags);
+  iinfo("  x:       %d\n", report->point[0].x);
+  iinfo("  y:       %d\n", report->point[0].y);
 
   ret = SIZEOF_TOUCH_SAMPLE_S(1);
 
 errout:
   sem_post(&priv->devsem);
-  ivdbg("Returning: %d\n", ret);
+  iinfo("Returning: %d\n", ret);
   return ret;
 }
 
@@ -987,7 +987,7 @@ static int max11802_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   FAR struct max11802_dev_s *priv;
   int                       ret;
 
-  ivdbg("cmd: %d arg: %ld\n", cmd, arg);
+  iinfo("cmd: %d arg: %ld\n", cmd, arg);
   DEBUGASSERT(filep);
   inode = filep->f_inode;
 
@@ -1047,7 +1047,7 @@ static int max11802_poll(FAR struct file *filep, FAR struct pollfd *fds,
   int ret;
   int i;
 
-  ivdbg("setup: %d\n", (int)setup);
+  iinfo("setup: %d\n", (int)setup);
   DEBUGASSERT(filep && fds);
   inode = filep->f_inode;
 
@@ -1159,7 +1159,7 @@ int max11802_register(FAR struct spi_dev_s *spi,
 #endif
   int ret;
 
-  ivdbg("spi: %p minor: %d\n", spi, minor);
+  iinfo("spi: %p minor: %d\n", spi, minor);
 
   /* Debug-only sanity checks */
 
@@ -1253,7 +1253,7 @@ int max11802_register(FAR struct spi_dev_s *spi,
   /* Register the device as an input device */
 
   (void)snprintf(devname, DEV_NAMELEN, DEV_FORMAT, minor);
-  ivdbg("Registering %s\n", devname);
+  iinfo("Registering %s\n", devname);
 
   ret = register_driver(devname, &max11802_fops, 0666, priv);
   if (ret < 0)

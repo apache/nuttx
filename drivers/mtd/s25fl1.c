@@ -443,7 +443,7 @@ static int s25fl1_command(FAR struct qspi_dev_s *qspi, uint8_t cmd)
 {
   struct qspi_cmdinfo_s cmdinfo;
 
-  fvdbg("CMD: %02x\n", cmd);
+  finfo("CMD: %02x\n", cmd);
 
   cmdinfo.flags   = 0;
   cmdinfo.addrlen = 0;
@@ -464,7 +464,7 @@ static int s25fl1_command_address(FAR struct qspi_dev_s *qspi, uint8_t cmd,
 {
   struct qspi_cmdinfo_s cmdinfo;
 
-  fvdbg("CMD: %02x Address: %04lx addrlen=%d\n", cmd, (unsigned long)addr, addrlen);
+  finfo("CMD: %02x Address: %04lx addrlen=%d\n", cmd, (unsigned long)addr, addrlen);
 
   cmdinfo.flags   = QSPICMD_ADDRESS;
   cmdinfo.addrlen = addrlen;
@@ -485,7 +485,7 @@ static int s25fl1_command_read(FAR struct qspi_dev_s *qspi, uint8_t cmd,
 {
   struct qspi_cmdinfo_s cmdinfo;
 
-  fvdbg("CMD: %02x buflen: %lu\n", cmd, (unsigned long)buflen);
+  finfo("CMD: %02x buflen: %lu\n", cmd, (unsigned long)buflen);
 
   cmdinfo.flags   = QSPICMD_READDATA;
   cmdinfo.addrlen = 0;
@@ -506,7 +506,7 @@ static int s25fl1_command_write(FAR struct qspi_dev_s *qspi, uint8_t cmd,
 {
   struct qspi_cmdinfo_s cmdinfo;
 
-  fvdbg("CMD: %02x buflen: %lu\n", cmd, (unsigned long)buflen);
+  finfo("CMD: %02x buflen: %lu\n", cmd, (unsigned long)buflen);
 
   cmdinfo.flags   = QSPICMD_WRITEDATA;
   cmdinfo.addrlen = 0;
@@ -613,7 +613,7 @@ static inline int s25fl1_readid(struct s25fl1_dev_s *priv)
 
   s25fl1_unlock(priv->qspi);
 
-  fvdbg("Manufacturer: %02x Device Type %02x, Capacity: %02x",
+  finfo("Manufacturer: %02x Device Type %02x, Capacity: %02x",
         priv->cmdbuf[0], priv->cmdbuf[1], priv->cmdbuf[2]);
 
   /* Check for a recognized memory device type */
@@ -830,7 +830,7 @@ static int s25fl1_erase_sector(struct s25fl1_dev_s *priv, off_t sector)
   off_t address;
   uint8_t status;
 
-  fvdbg("sector: %08lx\n", (unsigned long)sector);
+  finfo("sector: %08lx\n", (unsigned long)sector);
 
   /* Check that the flash is ready and unprotected */
 
@@ -906,7 +906,7 @@ static int s25fl1_read_byte(FAR struct s25fl1_dev_s *priv, FAR uint8_t *buffer,
 {
   struct qspi_meminfo_s meminfo;
 
-  fvdbg("address: %08lx nbytes: %d\n", (long)address, (int)buflen);
+  finfo("address: %08lx nbytes: %d\n", (long)address, (int)buflen);
 
 #ifdef CONFIG_S25FL1_SCRAMBLE
   meminfo.flags   = QSPIMEM_READ | QSPIMEM_QUADIO | QSPIMEM_SCRAMBLE;
@@ -939,7 +939,7 @@ static int s25fl1_write_page(struct s25fl1_dev_s *priv, FAR const uint8_t *buffe
   int ret;
   int i;
 
-  fvdbg("address: %08lx buflen: %u\n", (unsigned long)address, (unsigned)buflen);
+  finfo("address: %08lx buflen: %u\n", (unsigned long)address, (unsigned)buflen);
 
   npages   = (buflen >> priv->pageshift);
   pagesize = (1 << priv->pageshift);
@@ -1055,7 +1055,7 @@ static FAR uint8_t *s25fl1_read_cache(struct s25fl1_dev_s *priv, off_t sector)
 
   shift    = priv->sectorshift - S25FL1_SECTOR512_SHIFT;
   esectno  = sector >> shift;
-  fvdbg("sector: %ld esectno: %d shift=%d\n", sector, esectno, shift);
+  finfo("sector: %ld esectno: %d shift=%d\n", sector, esectno, shift);
 
   /* Check if the requested erase block is already in the cache */
 
@@ -1123,7 +1123,7 @@ static void s25fl1_erase_cache(struct s25fl1_dev_s *priv, off_t sector)
   if (!IS_ERASED(priv))
     {
       off_t esectno  = sector >> (priv->sectorshift - S25FL1_SECTOR512_SHIFT);
-      fvdbg("sector: %ld esectno: %d\n", sector, esectno);
+      finfo("sector: %ld esectno: %d\n", sector, esectno);
 
       DEBUGVERIFY(s25fl1_erase_sector(priv, esectno));
       SET_ERASED(priv);
@@ -1167,7 +1167,7 @@ static int s25fl1_write_cache(FAR struct s25fl1_dev_s *priv,
       if (!IS_ERASED(priv))
         {
           off_t esectno  = sector >> (priv->sectorshift - S25FL1_SECTOR512_SHIFT);
-          fvdbg("sector: %ld esectno: %d\n", sector, esectno);
+          finfo("sector: %ld esectno: %d\n", sector, esectno);
 
           ret = s25fl1_erase_sector(priv, esectno);
           if (ret < 0)
@@ -1208,7 +1208,7 @@ static int s25fl1_erase(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblo
   int ret;
 #endif
 
-  fvdbg("startblock: %08lx nblocks: %d\n", (long)startblock, (int)nblocks);
+  finfo("startblock: %08lx nblocks: %d\n", (long)startblock, (int)nblocks);
 
   /* Lock access to the SPI bus until we complete the erase */
 
@@ -1252,7 +1252,7 @@ static ssize_t s25fl1_bread(FAR struct mtd_dev_s *dev, off_t startblock,
 #endif
   ssize_t nbytes;
 
-  fvdbg("startblock: %08lx nblocks: %d\n", (long)startblock, (int)nblocks);
+  finfo("startblock: %08lx nblocks: %d\n", (long)startblock, (int)nblocks);
 
   /* On this device, we can handle the block read just like the byte-oriented read */
 
@@ -1285,7 +1285,7 @@ static ssize_t s25fl1_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
   FAR struct s25fl1_dev_s *priv = (FAR struct s25fl1_dev_s *)dev;
   int ret = (int)nblocks;
 
-  fvdbg("startblock: %08lx nblocks: %d\n", (long)startblock, (int)nblocks);
+  finfo("startblock: %08lx nblocks: %d\n", (long)startblock, (int)nblocks);
 
   /* Lock the QuadSPI bus and write all of the pages to FLASH */
 
@@ -1322,7 +1322,7 @@ static ssize_t s25fl1_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbyte
   FAR struct s25fl1_dev_s *priv = (FAR struct s25fl1_dev_s *)dev;
   int ret;
 
-  fvdbg("offset: %08lx nbytes: %d\n", (long)offset, (int)nbytes);
+  finfo("offset: %08lx nbytes: %d\n", (long)offset, (int)nbytes);
 
   /* Lock the QuadSPI bus and select this FLASH part */
 
@@ -1336,7 +1336,7 @@ static ssize_t s25fl1_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbyte
       return (ssize_t)ret;
     }
 
-  fvdbg("return nbytes: %d\n", (int)nbytes);
+  finfo("return nbytes: %d\n", (int)nbytes);
   return (ssize_t)nbytes;
 }
 
@@ -1349,7 +1349,7 @@ static int s25fl1_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
   FAR struct s25fl1_dev_s *priv = (FAR struct s25fl1_dev_s *)dev;
   int ret = -EINVAL; /* Assume good command with bad parameters */
 
-  fvdbg("cmd: %d \n", cmd);
+  finfo("cmd: %d \n", cmd);
 
   switch (cmd)
     {
@@ -1380,7 +1380,7 @@ static int s25fl1_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
 #endif
               ret               = OK;
 
-              fvdbg("blocksize: %d erasesize: %d neraseblocks: %d\n",
+              finfo("blocksize: %d erasesize: %d neraseblocks: %d\n",
                     geo->blocksize, geo->erasesize, geo->neraseblocks);
             }
         }
@@ -1421,7 +1421,7 @@ static int s25fl1_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
         break;
     }
 
-  fvdbg("return %d\n", ret);
+  finfo("return %d\n", ret);
   return ret;
 }
 
@@ -1447,7 +1447,7 @@ FAR struct mtd_dev_s *s25fl1_initialize(FAR struct qspi_dev_s *qspi, bool unprot
   FAR struct s25fl1_dev_s *priv;
   int ret;
 
-  fvdbg("qspi: %p\n", qspi);
+  finfo("qspi: %p\n", qspi);
   DEBUGASSERT(qspi != NULL);
 
   /* Allocate a state structure (we allocate the structure instead of using
@@ -1547,7 +1547,7 @@ FAR struct mtd_dev_s *s25fl1_initialize(FAR struct qspi_dev_s *qspi, bool unprot
 
   /* Return the implementation-specific state structure as the MTD device */
 
-  fvdbg("Return %p\n", priv);
+  finfo("Return %p\n", priv);
   return (FAR struct mtd_dev_s *)priv;
 
 errout_with_readbuf:

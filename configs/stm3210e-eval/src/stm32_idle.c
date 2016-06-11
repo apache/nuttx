@@ -290,7 +290,7 @@ static void stm32_idlepm(void)
 
   if (newstate != oldstate)
     {
-      llvdbg("newstate= %d oldstate=%d\n", newstate, oldstate);
+      llinfo("newstate= %d oldstate=%d\n", newstate, oldstate);
 
       sched_lock();
 

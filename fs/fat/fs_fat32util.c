@@ -573,11 +573,11 @@ int fat_mount(struct fat_mountpt_s *fs, bool writeable)
            */
 
           uint8_t part = PART_GETTYPE(i, fs->fs_buffer);
-          fvdbg("Partition %d, offset %d, type %d\n", i, PART_ENTRY(i), part);
+          finfo("Partition %d, offset %d, type %d\n", i, PART_ENTRY(i), part);
 
           if (part == 0)
             {
-              fvdbg("No partition %d\n", i);
+              finfo("No partition %d\n", i);
               continue;
             }
 
@@ -606,13 +606,13 @@ int fat_mount(struct fat_mountpt_s *fs, bool writeable)
             {
               /* Break out of the loop if a valid boot record is found */
 
-              fvdbg("MBR found in partition %d\n", i);
+              finfo("MBR found in partition %d\n", i);
               break;
             }
 
           /* Re-read sector 0 so that we can check the next partition */
 
-          fvdbg("Partition %d is not an MBR\n", i);
+          finfo("Partition %d is not an MBR\n", i);
           ret = fat_hwread(fs, fs->fs_buffer, 0, 1);
           if (ret < 0)
             {
@@ -1875,7 +1875,7 @@ int fat_currentsector(struct fat_mountpt_s *fs, struct fat_file_s *ff,
 
       ff->ff_sectorsincluster = fs->fs_fatsecperclus - sectoroffset;
 
-      fvdbg("position=%d currentsector=%d sectorsincluster=%d\n",
+      finfo("position=%d currentsector=%d sectorsincluster=%d\n",
             position, ff->ff_currentsector, ff->ff_sectorsincluster);
 
       return OK;

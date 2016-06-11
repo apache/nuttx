@@ -134,7 +134,7 @@ int stm32_sdio_initialize(void)
   /* Mount the SDIO-based MMC/SD block driver */
   /* First, get an instance of the SDIO interface */
 
-  fvdbg("Initializing SDIO slot %d\n", SDIO_SLOTNO);
+  finfo("Initializing SDIO slot %d\n", SDIO_SLOTNO);
 
   g_sdio_dev = sdio_initialize(SDIO_SLOTNO);
   if (!g_sdio_dev)
@@ -145,7 +145,7 @@ int stm32_sdio_initialize(void)
 
   /* Now bind the SDIO interface to the MMC/SD driver */
 
-  fvdbg("Bind SDIO to the MMC/SD driver, minor=%d\n", SDIO_MINOR);
+  finfo("Bind SDIO to the MMC/SD driver, minor=%d\n", SDIO_MINOR);
 
   ret = mmcsd_slotinitialize(SDIO_MINOR, g_sdio_dev);
   if (ret != OK)
@@ -154,13 +154,13 @@ int stm32_sdio_initialize(void)
       return ret;
     }
 
-  fvdbg("Successfully bound SDIO to the MMC/SD driver\n");
+  finfo("Successfully bound SDIO to the MMC/SD driver\n");
 
 #ifdef HAVE_NCD
   /* Use SD card detect pin to check if a card is g_sd_inserted */
 
   cd_status = !stm32_gpioread(GPIO_SDIO_NCD);
-  fvdbg("Card detect : %d\n", cd_status);
+  finfo("Card detect : %d\n", cd_status);
 
   sdio_mediachange(g_sdio_dev, cd_status);
 #else

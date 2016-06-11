@@ -196,7 +196,7 @@ static void stmpe811_notify(FAR struct stmpe811_dev_s *priv)
       if (fds)
         {
           fds->revents |= POLLIN;
-          ivdbg("Report events: %02x\n", fds->revents);
+          iinfo("Report events: %02x\n", fds->revents);
           sem_post(fds->sem);
         }
     }
@@ -464,7 +464,7 @@ static ssize_t stmpe811_read(FAR struct file *filep, FAR char *buffer, size_t le
   struct stmpe811_sample_s   sample;
   int                        ret;
 
-  ivdbg("len=%d\n", len);
+  iinfo("len=%d\n", len);
   DEBUGASSERT(filep);
   inode = filep->f_inode;
 
@@ -589,7 +589,7 @@ static int stmpe811_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   FAR struct stmpe811_dev_s *priv;
   int                        ret;
 
-  ivdbg("cmd: %d arg: %ld\n", cmd, arg);
+  iinfo("cmd: %d arg: %ld\n", cmd, arg);
   DEBUGASSERT(filep);
   inode = filep->f_inode;
 
@@ -653,7 +653,7 @@ static int stmpe811_poll(FAR struct file *filep, FAR struct pollfd *fds,
   int                        ret;
   int                        i;
 
-  ivdbg("setup: %d\n", (int)setup);
+  iinfo("setup: %d\n", (int)setup);
   DEBUGASSERT(filep && fds);
   inode = filep->f_inode;
 
@@ -805,7 +805,7 @@ static inline void stmpe811_tscinitialize(FAR struct stmpe811_dev_s *priv)
 {
   uint8_t regval;
 
-  ivdbg("Initializing touchscreen controller\n");
+  iinfo("Initializing touchscreen controller\n");
 
   /* Enable TSC and ADC functions */
 
@@ -898,7 +898,7 @@ int stmpe811_register(STMPE811_HANDLE handle, int minor)
   char devname[DEV_NAMELEN];
   int ret;
 
-  ivdbg("handle=%p minor=%d\n", handle, minor);
+  iinfo("handle=%p minor=%d\n", handle, minor);
   DEBUGASSERT(priv);
 
   /* Get exclusive access to the device structure */

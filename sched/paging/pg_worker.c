@@ -155,7 +155,7 @@ static void pg_callback(FAR struct tcb_s *tcb, int result)
 {
   /* Verify that g_pftcb is non-NULL */
 
-  pgllvdbg("g_pftcb: %p\n", g_pftcb);
+  pgllinfo("g_pftcb: %p\n", g_pftcb);
   if (g_pftcb)
     {
       FAR struct tcb_s *htcb = (FAR struct tcb_s *)g_waitingforfill.head;
@@ -181,7 +181,7 @@ static void pg_callback(FAR struct tcb_s *tcb, int result)
 
       if (priority > wtcb->sched_priority)
         {
-          pgllvdbg("New worker priority. %d->%d\n",
+          pgllinfo("New worker priority. %d->%d\n",
                    wtcb->sched_priority, priority);
           sched_setpriority(wtcb, priority);
         }
@@ -246,7 +246,7 @@ static inline bool pg_dequeue(void)
       /* Remove the TCB from the head of the list (if any) */
 
       g_pftcb = (FAR struct tcb_s *)dq_remfirst((dq_queue_t *)&g_waitingforfill);
-      pgllvdbg("g_pftcb: %p\n", g_pftcb);
+      pgllinfo("g_pftcb: %p\n", g_pftcb);
       if (g_pftcb != NULL)
         {
           /* Call the architecture-specific function up_checkmapping() to see if
@@ -292,7 +292,7 @@ static inline bool pg_dequeue(void)
 
                   /* Reduce the priority of the page fill worker thread */
 
-                  pgllvdbg("New worker priority. %d->%d\n",
+                  pgllinfo("New worker priority. %d->%d\n",
                            wtcb->sched_priority, priority);
                   sched_setpriority(wtcb, priority);
                 }
@@ -365,7 +365,7 @@ static inline bool pg_startfill(void)
        * a page in-use, un-map it, and make it available.
        */
 
-      pgllvdbg("Call up_allocpage(%p)\n", g_pftcb);
+      pgllinfo("Call up_allocpage(%p)\n", g_pftcb);
       result = up_allocpage(g_pftcb, &vpage);
       DEBUGASSERT(result == OK);
 
@@ -382,7 +382,7 @@ static inline bool pg_startfill(void)
        * status of the fill will be provided by return value from up_fillpage().
        */
 
-      pgllvdbg("Call up_fillpage(%p)\n", g_pftcb);
+      pgllinfo("Call up_fillpage(%p)\n", g_pftcb);
       result = up_fillpage(g_pftcb, vpage);
       DEBUGASSERT(result == OK);
 #else
@@ -395,7 +395,7 @@ static inline bool pg_startfill(void)
        * This callback will probably from interrupt level.
        */
 
-      pgllvdbg("Call up_fillpage(%p)\n", g_pftcb);
+      pgllinfo("Call up_fillpage(%p)\n", g_pftcb);
       result = up_fillpage(g_pftcb, vpage, pg_callback);
       DEBUGASSERT(result == OK);
 
@@ -454,7 +454,7 @@ static inline void pg_alldone(void)
 {
   FAR struct tcb_s *wtcb = this_task();
   g_pftcb = NULL;
-  pgllvdbg("New worker priority. %d->%d\n",
+  pgllinfo("New worker priority. %d->%d\n",
            wtcb->sched_priority, CONFIG_PAGING_DEFPRIO);
   sched_setpriority(wtcb, CONFIG_PAGING_DEFPRIO);
 }
@@ -588,7 +588,7 @@ int pg_worker(int argc, char *argv[])
                * no fill was started).
                */
 
-              pgllvdbg("Calling pg_startfill\n");
+              pgllinfo("Calling pg_startfill\n");
               if (!pg_startfill())
                 {
                   /* No fill was started.  This can mean only that all queued
@@ -596,7 +596,7 @@ int pg_worker(int argc, char *argv[])
                    * nothing more to do.
                    */
 
-                  pgllvdbg("Call pg_alldone()\n");
+                  pgllinfo("Call pg_alldone()\n");
                   pg_alldone();
                 }
             }
@@ -626,7 +626,7 @@ int pg_worker(int argc, char *argv[])
            * g_pftcb).
            */
 
-           pgllvdbg("Calling pg_startfill\n");
+           pgllinfo("Calling pg_startfill\n");
            (void)pg_startfill();
         }
 #else
@@ -641,7 +641,7 @@ int pg_worker(int argc, char *argv[])
            * (false means that no fill was perforemd).
            */
 
-          pgllvdbg("Calling pg_startfill\n");
+          pgllinfo("Calling pg_startfill\n");
           if (!pg_startfill())
             {
               /* Break out of the loop -- there is nothing more to do */
@@ -656,13 +656,13 @@ int pg_worker(int argc, char *argv[])
            * returns true.
            */
 
-          pgllvdbg("Restarting TCB: %p\n", g_pftcb);
+          pgllinfo("Restarting TCB: %p\n", g_pftcb);
           up_unblock_task(g_pftcb);
         }
 
       /* All queued fills have been processed */
 
-      pgllvdbg("Call pg_alldone()\n");
+      pgllinfo("Call pg_alldone()\n");
       pg_alldone();
 #endif
     }

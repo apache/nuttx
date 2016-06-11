@@ -109,19 +109,19 @@
 #  define pwmdbg              dbg
 #  define pwmlldbg            lldbg
 #  ifdef CONFIG_DEBUG_INFO
-#    define pwmvdbg           vdbg
-#    define pwmllvdbg         llvdbg
+#    define pwminfo           info
+#    define pwmllinfo         llinfo
 #    define pwm_dumpgpio(p,m) stm32_dumpgpio(p,m)
 #  else
-#    define pwmvdbg(x...)
-#    define pwmllvdbg(x...)
+#    define pwminfo(x...)
+#    define pwmllinfo(x...)
 #    define pwm_dumpgpio(p,m)
 #  endif
 #else
 #  define pwmdbg(x...)
 #  define pwmlldbg(x...)
-#  define pwmvdbg(x...)
-#  define pwmllvdbg(x...)
+#  define pwminfo(x...)
+#  define pwmllinfo(x...)
 #  define pwm_dumpgpio(p,m)
 #endif
 
@@ -261,8 +261,8 @@ static void pwm_putreg(struct lpc17_pwmtimer_s *priv, int offset, uint32_t value
 #if defined(CONFIG_DEBUG_PWM) && defined(CONFIG_DEBUG_INFO)
 static void pwm_dumpregs(struct lpc17_pwmtimer_s *priv, FAR const char *msg)
 {
-  pwmvdbg("%s:\n", msg);
-  pwmvdbg("  CR1: %04x CR2:  %04x SMCR:  %04x DIER:  %04x\n",
+  pwminfo("%s:\n", msg);
+  pwminfo("  CR1: %04x CR2:  %04x SMCR:  %04x DIER:  %04x\n",
           pwm_getreg(priv, LPC17_PWM_MR0_OFFSET),
           pwm_getreg(priv, LPC17_PWM_MR1_OFFSET),
           pwm_getreg(priv, LPC17_PWM_MR2_OFFSET),
@@ -270,7 +270,7 @@ static void pwm_dumpregs(struct lpc17_pwmtimer_s *priv, FAR const char *msg)
 #if defined(CONFIG_LPC17_PWM1)
   if (priv->timtype == TIMTYPE_ADVANCED)
     {
-      pwmvdbg("  RCR: %04x BDTR: %04x DCR:   %04x DMAR:  %04x\n",
+      pwminfo("  RCR: %04x BDTR: %04x DCR:   %04x DMAR:  %04x\n",
               pwm_getreg(priv, LPC17_PWM_MR0_OFFSET),
               pwm_getreg(priv, LPC17_PWM_MR1_OFFSET),
               pwm_getreg(priv, LPC17_PWM_MR2_OFFSET),
@@ -279,7 +279,7 @@ static void pwm_dumpregs(struct lpc17_pwmtimer_s *priv, FAR const char *msg)
   else
 #endif
     {
-      pwmvdbg("  DCR: %04x DMAR: %04x\n",
+      pwminfo("  DCR: %04x DMAR: %04x\n",
               pwm_getreg(priv, LPC17_PWM_MR2_OFFSET),
               pwm_getreg(priv, LPC17_PWM_MR3_OFFSET));
     }
@@ -491,7 +491,7 @@ static int pwm_shutdown(FAR struct pwm_lowerhalf_s *dev)
   FAR struct lpc17_pwmtimer_s *priv = (FAR struct lpc17_pwmtimer_s *)dev;
   uint32_t pincfg;
 
-  pwmvdbg("TIM%d pincfg: %08x\n", priv->timid, priv->pincfg);
+  pwminfo("TIM%d pincfg: %08x\n", priv->timid, priv->pincfg);
 
   /* Make sure that the output has been stopped */
 
@@ -547,7 +547,7 @@ static int pwm_stop(FAR struct pwm_lowerhalf_s *dev)
   uint32_t regval;
   irqstate_t flags;
 
-  pwmvdbg("TIM%d\n", priv->timid);
+  pwminfo("TIM%d\n", priv->timid);
 
   /* Disable interrupts momentary to stop any ongoing timer processing and
    * to prevent any concurrent access to the reset register.
@@ -573,7 +573,7 @@ static int pwm_stop(FAR struct pwm_lowerhalf_s *dev)
 
   leave_critical_section(flags);
 
-  pwmvdbg("regaddr: %08x resetbit: %08x\n", regaddr, resetbit);
+  pwminfo("regaddr: %08x resetbit: %08x\n", regaddr, resetbit);
   pwm_dumpregs(priv, "After stop");
   return OK;
 }
@@ -601,7 +601,7 @@ static int pwm_ioctl(FAR struct pwm_lowerhalf_s *dev, int cmd, unsigned long arg
 
   /* There are no platform-specific ioctl commands */
 
-  pwmvdbg("TIM%d\n", priv->timid);
+  pwminfo("TIM%d\n", priv->timid);
 #endif
   return -ENOTTY;
 }
@@ -631,7 +631,7 @@ FAR struct pwm_lowerhalf_s *lpc17_pwminitialize(int timer)
 {
   FAR struct lpc17_pwmtimer_s *lower;
 
-  pwmvdbg("TIM%d\n", timer);
+  pwminfo("TIM%d\n", timer);
 
   switch (timer)
     {

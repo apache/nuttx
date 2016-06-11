@@ -93,17 +93,17 @@
 #  define wdgdbg                 dbg
 #  define wdglldbg               lldbg
 #  ifdef CONFIG_DEBUG_INFO
-#    define wdgvdbg              vdbg
-#    define wdgllvdbg            llvdbg
+#    define wdginfo              info
+#    define wdgllinfo            llinfo
 #  else
-#    define wdgvdbg(x...)
-#    define wdgllvdbg(x...)
+#    define wdginfo(x...)
+#    define wdgllinfo(x...)
 #  endif
 #else
 #  define wdgdbg(x...)
 #  define wdglldbg(x...)
-#  define wdgvdbg(x...)
-#  define wdgllvdbg(x...)
+#  define wdginfo(x...)
+#  define wdgllinfo(x...)
 #endif
 
 /************************************************************************************
@@ -124,7 +124,7 @@ static int wdog_daemon(int argc, char *argv[])
 
   /* Open the watchdog device for reading */
 
-  wdgvdbg("Opening.\n");
+  wdginfo("Opening.\n");
   fd = open(CONFIG_WATCHDOG_DEVPATH, O_RDONLY);
   if (fd < 0)
     {
@@ -134,7 +134,7 @@ static int wdog_daemon(int argc, char *argv[])
 
   /* Start the watchdog timer. */
 
-  wdgvdbg("Starting.\n");
+  wdginfo("Starting.\n");
   ret = ioctl(fd, WDIOC_START, 0);
   if (ret < 0)
     {
@@ -147,7 +147,7 @@ static int wdog_daemon(int argc, char *argv[])
     {
       usleep((CONFIG_WDT_THREAD_INTERVAL)*1000);
 
-      wdgvdbg("ping\n");
+      wdginfo("ping\n");
       ret = ioctl(fd, WDIOC_KEEPALIVE, 0);
       if (ret < 0)
         {
@@ -181,12 +181,12 @@ int sam_watchdog_initialize(void)
 
   /* Initialize tha register the watchdog timer device */
 
-  wdgvdbg("Initializing Watchdog driver...\n");
+  wdginfo("Initializing Watchdog driver...\n");
   sam_wdtinitialize(CONFIG_WATCHDOG_DEVPATH);
 
   /* Open the watchdog device */
 
-  wdgvdbg("Opening.\n");
+  wdginfo("Opening.\n");
   fd = open(CONFIG_WATCHDOG_DEVPATH, O_RDONLY);
   if (fd < 0)
     {
@@ -196,7 +196,7 @@ int sam_watchdog_initialize(void)
 
   /* Set the watchdog timeout */
 
-  wdgvdbg("Timeout = %d.\n", CONFIG_WDT_TIMEOUT);
+  wdginfo("Timeout = %d.\n", CONFIG_WDT_TIMEOUT);
   ret = ioctl(fd, WDIOC_SETTIMEOUT, (unsigned long)CONFIG_WDT_TIMEOUT);
   if (ret < 0)
     {
@@ -206,7 +206,7 @@ int sam_watchdog_initialize(void)
 
   /* Set the watchdog minimum time */
 
-  wdgvdbg("MinTime = %d.\n", CONFIG_WDT_MINTIME);
+  wdginfo("MinTime = %d.\n", CONFIG_WDT_MINTIME);
   ret = ioctl(fd, WDIOC_MINTIME, (unsigned long)CONFIG_WDT_MINTIME);
   if (ret < 0)
     {

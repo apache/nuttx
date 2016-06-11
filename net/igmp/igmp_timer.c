@@ -75,25 +75,25 @@
 #  ifdef IGMP_GTMRDEBUG
 #    define gtmrdbg(format, ...)    ndbg(format, ##__VA_ARGS__)
 #    define gtmrlldbg(format, ...)  nlldbg(format, ##__VA_ARGS__)
-#    define gtmrvdbg(format, ...)   nvdbg(format, ##__VA_ARGS__)
-#    define gtmrllvdbg(format, ...) nllvdbg(format, ##__VA_ARGS__)
+#    define gtmrinfo(format, ...)   ninfo(format, ##__VA_ARGS__)
+#    define gtmrllinfo(format, ...) nllinfo(format, ##__VA_ARGS__)
 #  else
 #    define gtmrdbg(x...)
 #    define gtmrlldbg(x...)
-#    define gtmrvdbg(x...)
-#    define gtmrllvdbg(x...)
+#    define gtmrinfo(x...)
+#    define gtmrllinfo(x...)
 #  endif
 #else
 #  ifdef IGMP_GTMRDEBUG
 #    define gtmrdbg    ndbg
 #    define gtmrlldbg  nlldbg
-#    define gtmrvdbg   nvdbg
-#    define gtmrllvdbg nllvdbg
+#    define gtmrinfo   ninfo
+#    define gtmrllinfo nllinfo
 #  else
 #    define gtmrdbg    (void)
 #    define gtmrlldbg  (void)
-#    define gtmrvdbg   (void)
-#    define gtmrllvdbg (void)
+#    define gtmrinfo   (void)
+#    define gtmrllinfo (void)
 #  endif
 #endif
 
@@ -119,7 +119,7 @@ static void igmp_timeout(int argc, uint32_t arg, ...)
 
   /* If the state is DELAYING_MEMBER then we send a report for this group */
 
-  nllvdbg("Timeout!\n");
+  nllinfo("Timeout!\n");
   group = (FAR struct igmp_group_s *)arg;
   DEBUGASSERT(argc == 1 && group);
 

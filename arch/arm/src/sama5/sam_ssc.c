@@ -417,16 +417,16 @@
 #  define i2sdbg         dbg
 #  define i2slldbg       lldbg
 #  ifdef CONFIG_DEBUG_INFO
-#    define i2svdbg      dbg
-#    define i2sllvdbg    lldbg
+#    define i2sinfo      dbg
+#    define i2sllinfo    lldbg
 #  else
-#    define i2svdbg(x...)
+#    define i2sinfo(x...)
 #  endif
 #else
 #  define i2sdbg(x...)
 #  define i2slldbg(x...)
-#  define i2svdbg(x...)
-#  define i2sllvdbg(x...)
+#  define i2sinfo(x...)
+#  define i2sllinfo(x...)
 #endif
 
 #define DMA_INITIAL      0
@@ -820,18 +820,18 @@ static inline uintptr_t ssc_physregaddr(struct sam_ssc_s *priv,
 #if defined(CONFIG_DEBUG_I2S) && defined(CONFIG_DEBUG_INFO)
 static void scc_dump_regs(struct sam_ssc_s *priv, const char *msg)
 {
-  i2svdbg("SSC%d: %s\n", priv->sscno, msg);
-  i2svdbg("   CMR:%08x RCMR:%08x RFMR:%08x TCMR:%08x\n",
+  i2sinfo("SSC%d: %s\n", priv->sscno, msg);
+  i2sinfo("   CMR:%08x RCMR:%08x RFMR:%08x TCMR:%08x\n",
           getreg32(priv->base + SAM_SSC_CMR_OFFSET),
           getreg32(priv->base + SAM_SSC_RCMR_OFFSET),
           getreg32(priv->base + SAM_SSC_RFMR_OFFSET),
           getreg32(priv->base + SAM_SSC_TCMR_OFFSET));
-  i2svdbg("  TFMR:%08x RC0R:%08x RC1R:%08x   SR:%08x\n",
+  i2sinfo("  TFMR:%08x RC0R:%08x RC1R:%08x   SR:%08x\n",
           getreg32(priv->base + SAM_SSC_TFMR_OFFSET),
           getreg32(priv->base + SAM_SSC_RC0R_OFFSET),
           getreg32(priv->base + SAM_SSC_RC1R_OFFSET),
           getreg32(priv->base + SAM_SSC_SR_OFFSET));
-  i2svdbg("   IMR:%08x WPMR:%08x WPSR:%08x\n",
+  i2sinfo("   IMR:%08x WPMR:%08x WPSR:%08x\n",
           getreg32(priv->base + SAM_SSC_IMR_OFFSET),
           getreg32(priv->base + SAM_SSC_WPMR_OFFSET),
           getreg32(priv->base + SAM_SSC_WPSR_OFFSET));
@@ -868,11 +868,11 @@ static void ssc_dump_queue(sq_queue_t *queue)
 
       if (!apb)
         {
-          i2sllvdbg("    %p: No buffer\n", bfcontainer);
+          i2sllinfo("    %p: No buffer\n", bfcontainer);
         }
       else
         {
-          i2sllvdbg("    %p: buffer=%p nmaxbytes=%d nbytes=%d\n",
+          i2sllinfo("    %p: buffer=%p nmaxbytes=%d nbytes=%d\n",
                     bfcontainer, apb, apb->nmaxbytes, apb->nbytes);
         }
     }
@@ -883,12 +883,12 @@ static void ssc_dump_queues(struct sam_transport_s *xpt, const char *msg)
   irqstate_t flags;
 
   flags = enter_critical_section();
-  i2sllvdbg("%s\n", msg);
-  i2sllvdbg("  Pending:\n");
+  i2sllinfo("%s\n", msg);
+  i2sllinfo("  Pending:\n");
   ssc_dump_queue(&xpt->pend);
-  i2sllvdbg("  Active:\n");
+  i2sllinfo("  Active:\n");
   ssc_dump_queue(&xpt->act);
-  i2sllvdbg("  Done:\n");
+  i2sllinfo("  Done:\n");
   ssc_dump_queue(&xpt->done);
   leave_critical_section(flags);
 }
@@ -1447,7 +1447,7 @@ static void ssc_rx_worker(void *arg)
    * So we have to start the next DMA here.
    */
 
-  i2svdbg("rx.act.head=%p rx.done.head=%p\n",
+  i2sinfo("rx.act.head=%p rx.done.head=%p\n",
           priv->rx.act.head, priv->rx.done.head);
   ssc_dump_rxqueues(priv, "RX worker start");
 
@@ -1859,7 +1859,7 @@ static void ssc_tx_worker(void *arg)
    * So we have to start the next DMA here.
    */
 
-  i2svdbg("tx.act.head=%p tx.done.head=%p\n",
+  i2sinfo("tx.act.head=%p tx.done.head=%p\n",
            priv->tx.act.head, priv->tx.done.head);
   ssc_dump_txqueues(priv, "TX worker start");
 
@@ -2234,7 +2234,7 @@ static int ssc_receive(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
 #endif
 
   DEBUGASSERT(priv && apb && ((uintptr_t)apb->samp & priv->align) == 0);
-  i2svdbg("apb=%p nmaxbytes=%d arg=%p timeout=%d\n",
+  i2sinfo("apb=%p nmaxbytes=%d arg=%p timeout=%d\n",
           apb, apb->nmaxbytes, arg, timeout);
 
   ssc_init_buffer(apb->samp, apb->nmaxbytes);
@@ -2449,7 +2449,7 @@ static int ssc_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
    */
 
   DEBUGASSERT(priv && apb);
-  i2svdbg("apb=%p nbytes=%d arg=%p timeout=%d\n",
+  i2sinfo("apb=%p nbytes=%d arg=%p timeout=%d\n",
           apb, apb->nbytes - apb->curbyte, arg, timeout);
 
   ssc_dump_buffer("Sending", &apb->samp[apb->curbyte],
@@ -2929,7 +2929,7 @@ static void ssc_clocking(struct sam_ssc_s *priv)
 
   sam_enableperiph1(priv->pid);
 
-  i2svdbg("PCSR1=%08x PCR=%08x CMR=%08x\n",
+  i2sinfo("PCSR1=%08x PCR=%08x CMR=%08x\n",
           getreg32(SAM_PMC_PCSR1), regval,
           ssc_getreg(priv, SAM_SSC_CMR_OFFSET));
 }
@@ -3431,7 +3431,7 @@ struct i2s_dev_s *sam_ssc_initialize(int port)
 
   /* The support SAM parts have only a single SSC port */
 
-  i2svdbg("port: %d\n", port);
+  i2sinfo("port: %d\n", port);
 
   /* Allocate a new state structure for this chip select.  NOTE that there
    * is no protection if the same chip select is used in two different

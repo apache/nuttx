@@ -390,7 +390,7 @@ static int nfs_filetruncate(FAR struct nfsmount *nmp, struct nfsnode *np)
   int           reqlen;
   int           error;
 
-  fvdbg("Truncating file\n");
+  finfo("Truncating file\n");
 
   /* Create the SETATTR RPC call arguments */
 
@@ -771,7 +771,7 @@ static ssize_t nfs_read(FAR struct file *filep, char *buffer, size_t buflen)
   FAR uint32_t              *ptr;
   int                        error = 0;
 
-  fvdbg("Read %d bytes from offset %d\n", buflen, filep->f_pos);
+  finfo("Read %d bytes from offset %d\n", buflen, filep->f_pos);
 
   /* Sanity checks */
 
@@ -802,7 +802,7 @@ static ssize_t nfs_read(FAR struct file *filep, char *buffer, size_t buflen)
   if (buflen > tmp)
     {
       buflen = tmp;
-      fvdbg("Read size truncated to %d\n", buflen);
+      finfo("Read size truncated to %d\n", buflen);
     }
 
   /* Now loop until we fill the user buffer (or hit the end of the file) */
@@ -852,7 +852,7 @@ static ssize_t nfs_read(FAR struct file *filep, char *buffer, size_t buflen)
 
       /* Perform the read */
 
-      fvdbg("Reading %d bytes\n", readsize);
+      finfo("Reading %d bytes\n", readsize);
       nfs_statistics(NFSPROC_READ);
       error = nfs_request(nmp, NFSPROC_READ,
                           (FAR void *)&nmp->nm_msgbuffer.read, reqlen,
@@ -914,7 +914,7 @@ static ssize_t nfs_read(FAR struct file *filep, char *buffer, size_t buflen)
         }
     }
 
-  fvdbg("Read %d bytes\n", bytesread);
+  finfo("Read %d bytes\n", bytesread);
   nfs_semgive(nmp);
   return bytesread;
 
@@ -947,7 +947,7 @@ static ssize_t nfs_write(FAR struct file *filep, const char *buffer,
   int                    committed = NFSV3WRITE_FILESYNC;
   int                    error;
 
-  fvdbg("Write %d bytes to offset %d\n", buflen, filep->f_pos);
+  finfo("Write %d bytes to offset %d\n", buflen, filep->f_pos);
 
   /* Sanity checks */
 
@@ -1127,7 +1127,7 @@ static int nfs_dup(FAR const struct file *oldp, FAR struct file *newp)
   FAR struct nfsnode *np;
   int error;
 
-  fvdbg("Dup %p->%p\n", oldp, newp);
+  finfo("Dup %p->%p\n", oldp, newp);
 
   /* Sanity checks */
 
@@ -1193,7 +1193,7 @@ static int nfs_opendir(struct inode *mountpt, const char *relpath,
   uint32_t objtype;
   int error;
 
-  fvdbg("relpath: \"%s\"\n", relpath ? relpath : "NULL");
+  finfo("relpath: \"%s\"\n", relpath ? relpath : "NULL");
 
   /* Sanity checks */
 
@@ -1273,7 +1273,7 @@ static int nfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
   int reqlen;
   int error = 0;
 
-  fvdbg("Entry\n");
+  finfo("Entry\n");
 
   /* Sanity checks */
 
@@ -1378,7 +1378,7 @@ static int nfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
       tmp = *ptr++;
       if (tmp != 0)
         {
-          fvdbg("End of directory\n");
+          finfo("End of directory\n");
           error = ENOENT;
         }
 
@@ -1388,7 +1388,7 @@ static int nfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
 
        else
          {
-           fvdbg("No data but not end of directory???\n");
+           finfo("No data but not end of directory???\n");
            error = EAGAIN;
         }
 
@@ -1437,7 +1437,7 @@ static int nfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
 
   memcpy(dir->fd_dir.d_name, name, length);
   dir->fd_dir.d_name[length] = '\0';
-  fvdbg("name: \"%s\"\n", dir->fd_dir.d_name);
+  finfo("name: \"%s\"\n", dir->fd_dir.d_name);
 
   /* Get the file attributes associated with this name and return
    * the file type.
@@ -1481,7 +1481,7 @@ static int nfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
       dir->fd_dir.d_type = DTYPE_CHR;
       break;
     }
-  fvdbg("type: %d->%d\n", (int)tmp, dir->fd_dir.d_type);
+  finfo("type: %d->%d\n", (int)tmp, dir->fd_dir.d_type);
 
 errout_with_semaphore:
   nfs_semgive(nmp);
@@ -1502,7 +1502,7 @@ errout_with_semaphore:
 
 static int nfs_rewinddir(FAR struct inode *mountpt, FAR struct fs_dirent_s *dir)
 {
-  fvdbg("Entry\n");
+  finfo("Entry\n");
 
   /* Sanity checks */
 
@@ -1780,7 +1780,7 @@ static int nfs_bind(FAR struct inode *blkdriver, FAR const void *data,
           return ENOMEM;
         }
 
-      fvdbg("Connecting\n");
+      finfo("Connecting\n");
 
       /* Translate nfsmnt flags -> rpcclnt flags */
 
@@ -1826,7 +1826,7 @@ static int nfs_bind(FAR struct inode *blkdriver, FAR const void *data,
   *handle = (FAR void *)nmp;
   nfs_semgive(nmp);
 
-  fvdbg("Successfully mounted\n");
+  finfo("Successfully mounted\n");
   return OK;
 
 bad:
@@ -1872,7 +1872,7 @@ static int nfs_unbind(FAR void *handle, FAR struct inode **blkdriver,
   FAR struct nfsmount *nmp = (FAR struct nfsmount *)handle;
   int error;
 
-  fvdbg("Entry\n");
+  finfo("Entry\n");
   DEBUGASSERT(nmp);
 
   /* Get exclusive access to the mount structure */

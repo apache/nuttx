@@ -230,10 +230,10 @@
 
 #ifdef CONFIG_DEBUG_LCD
 #  define lcddbg  dbg
-#  define lcdvdbg vdbg
+#  define lcdinfo info
 #else
 #  define lcddbg(x...)
-#  define lcdvdbg(x...)
+#  define lcdinfo(x...)
 #endif
 
 /**************************************************************************************
@@ -846,7 +846,7 @@ static int ssd1289_getvideoinfo(FAR struct lcd_dev_s *dev,
                                  FAR struct fb_videoinfo_s *vinfo)
 {
   DEBUGASSERT(dev && vinfo);
-  lcdvdbg("fmt: %d xres: %d yres: %d nplanes: 1\n",
+  lcdinfo("fmt: %d xres: %d yres: %d nplanes: 1\n",
           SSD1289_COLORFMT, SSD1289_XRES, SSD1289_YRES);
 
   vinfo->fmt     = SSD1289_COLORFMT;    /* Color format: RGB16-565: RRRR RGGG GGGB BBBB */
@@ -870,7 +870,7 @@ static int ssd1289_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
   FAR struct ssd1289_dev_s *priv = (FAR struct ssd1289_dev_s *)dev;
 
   DEBUGASSERT(dev && pinfo && planeno == 0);
-  lcdvdbg("planeno: %d bpp: %d\n", planeno, SSD1289_BPP);
+  lcdinfo("planeno: %d bpp: %d\n", planeno, SSD1289_BPP);
 
   pinfo->putrun = ssd1289_putrun;                 /* Put a run into LCD memory */
   pinfo->getrun = ssd1289_getrun;                 /* Get a run from LCD memory */
@@ -890,7 +890,7 @@ static int ssd1289_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
 
 static int ssd1289_getpower(FAR struct lcd_dev_s *dev)
 {
-  lcdvdbg("power: %d\n", 0);
+  lcdinfo("power: %d\n", 0);
   return g_lcddev.power;
 }
 
@@ -933,7 +933,7 @@ static int ssd1289_setpower(FAR struct lcd_dev_s *dev, int power)
   FAR struct ssd1289_dev_s *priv = (FAR struct ssd1289_dev_s *)dev;
   FAR struct ssd1289_lcd_s *lcd  = priv->lcd;
 
-  lcdvdbg("power: %d\n", power);
+  lcdinfo("power: %d\n", power);
   DEBUGASSERT((unsigned)power <= CONFIG_LCD_MAXPOWER);
 
   /* Set new power level */
@@ -974,7 +974,7 @@ static int ssd1289_setpower(FAR struct lcd_dev_s *dev, int power)
 
 static int ssd1289_getcontrast(FAR struct lcd_dev_s *dev)
 {
-  lcdvdbg("Not implemented\n");
+  lcdinfo("Not implemented\n");
   return -ENOSYS;
 }
 
@@ -988,7 +988,7 @@ static int ssd1289_getcontrast(FAR struct lcd_dev_s *dev)
 
 static int ssd1289_setcontrast(FAR struct lcd_dev_s *dev, unsigned int contrast)
 {
-  lcdvdbg("contrast: %d\n", contrast);
+  lcdinfo("contrast: %d\n", contrast);
   return -ENOSYS;
 }
 
@@ -1302,7 +1302,7 @@ FAR struct lcd_dev_s *ssd1289_lcdinitialize(FAR struct ssd1289_lcd_s *lcd)
 {
   int ret;
 
-  lcdvdbg("Initializing\n");
+  lcdinfo("Initializing\n");
 
   /* If we ccould support multiple SSD1289 devices, this is where we would allocate
    * a new driver data structure... but we can't.  Why not?  Because of a bad should

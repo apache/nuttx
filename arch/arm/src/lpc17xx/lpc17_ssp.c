@@ -83,13 +83,13 @@
 #ifdef CONFIG_DEBUG_SPI
 #  define sspdbg  lldbg
 #  ifdef CONFIG_DEBUG_INFO
-#    define spivdbg lldbg
+#    define spiinfo lldbg
 #  else
-#    define spivdbg(x...)
+#    define spiinfo(x...)
 #  endif
 #else
 #  define sspdbg(x...)
-#  define spivdbg(x...)
+#  define spiinfo(x...)
 #endif
 
 /* SSP Clocking *************************************************************/
@@ -745,7 +745,7 @@ static void ssp_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nw
        * and (3) there are more bytes to be sent.
        */
 
-      spivdbg("TX: rxpending: %d nwords: %d\n", rxpending, nwords);
+      spiinfo("TX: rxpending: %d nwords: %d\n", rxpending, nwords);
       while ((ssp_getreg(priv, LPC17_SSP_SR_OFFSET) & SSP_SR_TNF) &&
              (rxpending < LPC17_SSP_FIFOSZ) && nwords)
         {
@@ -756,7 +756,7 @@ static void ssp_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nw
 
       /* Now, read the RX data from the RX FIFO while the RX FIFO is not empty */
 
-      spivdbg("RX: rxpending: %d\n", rxpending);
+      spiinfo("RX: rxpending: %d\n", rxpending);
       while (ssp_getreg(priv, LPC17_SSP_SR_OFFSET) & SSP_SR_RNE)
         {
           data = (uint8_t)ssp_getreg(priv, LPC17_SSP_DR_OFFSET);

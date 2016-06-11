@@ -393,7 +393,7 @@ void nxterm_kbdin(NXTERM handle, FAR const uint8_t *buffer, uint8_t buflen)
   char ch;
   int ret;
 
-  gvdbg("buflen=%d\n");
+  ginfo("buflen=%d\n");
   DEBUGASSERT(handle);
 
   /* Get the reference to the driver structure from the handle */

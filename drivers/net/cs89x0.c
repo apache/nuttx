@@ -467,7 +467,7 @@ static void cs89x0_receive(FAR struct cs89x0_driver_s *cs89x0, uint16_t isq)
 #ifdef CONFIG_NET_IPv4
   if (BUF->type == HTONS(ETHTYPE_IP))
     {
-      nllvdbg("IPv4 frame\n");
+      nllinfo("IPv4 frame\n");
       NETDEV_RXIPV4(&priv->cs_dev);
 
       /* Handle ARP on input then give the IPv4 packet to the network
@@ -508,7 +508,7 @@ static void cs89x0_receive(FAR struct cs89x0_driver_s *cs89x0, uint16_t isq)
 #ifdef CONFIG_NET_IPv6
   if (BUF->type == HTONS(ETHTYPE_IP6))
     {
-      nllvdbg("Iv6 frame\n");
+      nllinfo("Iv6 frame\n");
       NETDEV_RXIPV6(&priv->cs_dev);
 
       /* Give the IPv6 packet to the network layer */
@@ -561,7 +561,7 @@ static void cs89x0_receive(FAR struct cs89x0_driver_s *cs89x0, uint16_t isq)
   else
 #endif
     {
-      nllvdbg("Unrecognized packet type %02x\n", BUF->type);
+      nllinfo("Unrecognized packet type %02x\n", BUF->type);
       NETDEV_RXDROPPED(&priv->cs_dev);
     }
 }
@@ -690,7 +690,7 @@ static int cs89x0_interrupt(int irq, FAR void *context)
 
   while ((isq = cs89x0_getreg(dev, CS89x0_ISQ_OFFSET)) != 0)
     {
-      nvdbg("ISQ: %04x\n", isq);
+      ninfo("ISQ: %04x\n", isq);
       switch (isq & ISQ_EVENTMASK)
         {
         case ISQ_RXEVENT:

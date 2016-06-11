@@ -60,10 +60,10 @@
 
 #ifdef CONFIG_DEBUG_IRQ
 #  define intdbg    lldbg
-#  define intvdbg   llvdbg
+#  define intinfo   llinfo
 #else
 #  define intdbg(x...)
-#  define intvdbg(x...)
+#  define intinfo(x...)
 #endif
 
 /****************************************************************************
@@ -103,7 +103,7 @@ int up_ramvec_attach(int irq, up_vector_t vector)
 {
   int ret = -EINVAL;
 
-  intvdbg("%s IRQ%d\n", vector ? "Attaching" : "Detaching", irq);
+  intinfo("%s IRQ%d\n", vector ? "Attaching" : "Detaching", irq);
 
   if ((unsigned)irq < NR_VECTORS)
     {

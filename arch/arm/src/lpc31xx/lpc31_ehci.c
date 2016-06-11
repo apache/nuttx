@@ -2113,7 +2113,7 @@ static int lpc31_async_setup(struct lpc31_rhport_s *rhport,
 #ifdef CONFIG_USBHOST_TRACE
   usbhost_vtrace2(EHCI_VTRACE2_ASYNCXFR, epinfo->epno, buflen);
 #else
-  uvdbg("RHport%d EP%d: buffer=%p, buflen=%d, req=%p\n",
+  uinfo("RHport%d EP%d: buffer=%p, buflen=%d, req=%p\n",
         RHPORT(rhport), epinfo->epno, buffer, buflen, req);
 #endif
 
@@ -2391,7 +2391,7 @@ static int lpc31_intr_setup(struct lpc31_rhport_s *rhport,
 #ifdef CONFIG_USBHOST_TRACE
   usbhost_vtrace2(EHCI_VTRACE2_INTRXFR, epinfo->epno, buflen);
 #else
-  uvdbg("RHport%d EP%d: buffer=%p, buflen=%d\n",
+  uinfo("RHport%d EP%d: buffer=%p, buflen=%d\n",
         RHPORT(rhport), epinfo->epno, buffer, buflen);
 #endif
 
@@ -3377,7 +3377,7 @@ static int lpc31_ehci_interrupt(int irq, FAR void *context)
 #ifdef CONFIG_USBHOST_TRACE
   usbhost_vtrace1(EHCI_VTRACE1_TOPHALF, usbsts & regval);
 #else
-  ullvdbg("USBSTS: %08x USBINTR: %08x\n", usbsts, regval);
+  ullinfo("USBSTS: %08x USBINTR: %08x\n", usbsts, regval);
 #endif
 
   /* Handle all unmasked interrupt sources */
@@ -3909,7 +3909,7 @@ static int lpc31_epalloc(FAR struct usbhost_driver_s *drvr,
 #ifdef CONFIG_USBHOST_TRACE
   usbhost_vtrace2(EHCI_VTRACE2_EPALLOC, epdesc->addr, epdesc->xfrtype);
 #else
-  uvdbg("EP%d DIR=%s FA=%08x TYPE=%d Interval=%d MaxPacket=%d\n",
+  uinfo("EP%d DIR=%s FA=%08x TYPE=%d Interval=%d MaxPacket=%d\n",
         epdesc->addr, epdesc->in ? "IN" : "OUT", hport->funcaddr,
         epdesc->xfrtype, epdesc->interval, epdesc->mxpacketsize);
 #endif
@@ -4199,7 +4199,7 @@ static int lpc31_ctrlin(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
 #ifdef CONFIG_USBHOST_TRACE
   usbhost_vtrace2(EHCI_VTRACE2_CTRLINOUT, RHPORT(rhport), req->req);
 #else
-  uvdbg("RHPort%d type: %02x req: %02x value: %02x%02x index: %02x%02x len: %04x\n",
+  uinfo("RHPort%d type: %02x req: %02x value: %02x%02x index: %02x%02x len: %04x\n",
         RHPORT(rhport), req->type, req->req, req->value[1], req->value[0],
         req->index[1], req->index[0], len);
 #endif
@@ -4687,7 +4687,7 @@ static int lpc31_connect(FAR struct usbhost_driver_s *drvr,
   /* Set the connected/disconnected flag */
 
   hport->connected = connected;
-  ullvdbg("Hub port %d connected: %s\n", hport->port, connected ? "YES" : "NO");
+  ullinfo("Hub port %d connected: %s\n", hport->port, connected ? "YES" : "NO");
 
   /* Report the connection event */
 

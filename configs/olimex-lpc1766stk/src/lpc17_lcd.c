@@ -89,7 +89,7 @@
 #endif
 
 #ifdef CONFIG_LCD_NOKIADBG
-#  define lcddbg(format, ...) vdbg(format, ##__VA_ARGS__)
+#  define lcddbg(format, ...) info(format, ##__VA_ARGS__)
 #  define lcd_dumpgpio(m)     lpc17_dumpgpio(LPC1766STK_LCD_RST, m)
 #else
 #  define lcddbg(x...)
@@ -227,7 +227,7 @@ FAR struct lcd_dev_s *board_graphics_setup(unsigned int devno)
         }
      else
         {
-          gllvdbg("Bound SSP port 0 to LCD %d\n", devno);
+          gllinfo("Bound SSP port 0 to LCD %d\n", devno);
 
           /* And turn the LCD on (CONFIG_LCD_MAXPOWER should be 1) */
 

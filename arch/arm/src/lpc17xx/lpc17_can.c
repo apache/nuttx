@@ -167,18 +167,18 @@
 #ifdef CONFIG_DEBUG_CAN
 #  ifdef CONFIG_CAN_REGDEBUG
 #    define candbg  lldbg
-#    define canvdbg llvdbg
+#    define caninfo llinfo
 #  else
 #    define candbg  dbg
-#    define canvdbg vdbg
+#    define caninfo info
 #  endif
 #  define canlldbg  lldbg
-#  define canllvdbg llvdbg
+#  define canllinfo llinfo
 #else
 #  define candbg(x...)
-#  define canvdbg(x...)
+#  define caninfo(x...)
 #  define canlldbg(x...)
-#  define canllvdbg(x...)
+#  define canllinfo(x...)
 #endif
 
 /* Timing *******************************************************************/
@@ -504,7 +504,7 @@ static void can_reset(FAR struct can_dev_s *dev)
   irqstate_t flags;
   int ret;
 
-  canvdbg("CAN%d\n", priv->port);
+  caninfo("CAN%d\n", priv->port);
 
   flags = enter_critical_section();
 
@@ -558,7 +558,7 @@ static int can_setup(FAR struct can_dev_s *dev)
 #endif
   int ret;
 
-  canvdbg("CAN%d\n", priv->port);
+  caninfo("CAN%d\n", priv->port);
 
   ret = irq_attach(LPC17_IRQ_CAN, can12_interrupt);
   if (ret == OK)
@@ -588,7 +588,7 @@ static void can_shutdown(FAR struct can_dev_s *dev)
 #ifdef CONFIG_DEBUG_CAN
   FAR struct up_dev_s *priv = (FAR struct up_dev_s *)dev->cd_priv;
 
-  canvdbg("CAN%d\n", priv->port);
+  caninfo("CAN%d\n", priv->port);
 #endif
 
   up_disable_irq(LPC17_IRQ_CAN);
@@ -615,7 +615,7 @@ static void can_rxint(FAR struct can_dev_s *dev, bool enable)
   uint32_t regval;
   irqstate_t flags;
 
-  canvdbg("CAN%d enable: %d\n", priv->port, enable);
+  caninfo("CAN%d enable: %d\n", priv->port, enable);
 
   /* The EIR register is also modifed from the interrupt handler, so we have
    * to protect this code section.
@@ -656,7 +656,7 @@ static void can_txint(FAR struct can_dev_s *dev, bool enable)
   uint32_t regval;
   irqstate_t flags;
 
-  canvdbg("CAN%d enable: %d\n", priv->port, enable);
+  caninfo("CAN%d enable: %d\n", priv->port, enable);
 
   /* Only disabling of the TX interrupt is supported here.  The TX interrupt
    * is automatically enabled just before a message is sent in order to avoid
@@ -753,7 +753,7 @@ static int can_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
   irqstate_t flags;
   int ret = OK;
 
-  canvdbg("CAN%d ID: %d DLC: %d\n",
+  caninfo("CAN%d ID: %d DLC: %d\n",
           priv->port, msg->cm_hdr.ch_id, msg->cm_hdr.ch_dlc);
 
   if (msg->cm_hdr.ch_rtr)
@@ -958,7 +958,7 @@ static void can_interrupt(FAR struct can_dev_s *dev)
   /* Read the interrupt and capture register (also clearing most status bits) */
 
   regval = can_getreg(priv, LPC17_CAN_ICR_OFFSET);
-  canllvdbg("CAN%d ICR: %08x\n",  priv->port, regval);
+  canllinfo("CAN%d ICR: %08x\n",  priv->port, regval);
 
   /* Check for a receive interrupt */
 
@@ -1065,7 +1065,7 @@ static int can12_interrupt(int irq, void *context)
 {
   /* Handle CAN1/2 interrupts */
 
-  canllvdbg("irq: %d\n",  irq);
+  canllinfo("irq: %d\n",  irq);
 
 #ifdef CONFIG_LPC17_CAN1
   can_interrupt(&g_can1dev);
@@ -1142,7 +1142,7 @@ static int can_bittiming(struct up_dev_s *priv)
   uint32_t ts2;
   uint32_t sjw;
 
-  canllvdbg("CAN%d PCLK: %d baud: %d\n", priv->port,
+  canllinfo("CAN%d PCLK: %d baud: %d\n", priv->port,
             CAN_CLOCK_FREQUENCY(priv->divisor), priv->baud);
 
   /* Try to get CAN_BIT_QUANTA quanta in one bit_time.
@@ -1195,7 +1195,7 @@ static int can_bittiming(struct up_dev_s *priv)
 
   sjw = 1;
 
-  canllvdbg("TS1: %d TS2: %d BRP: %d SJW= %d\n", ts1, ts2, brp, sjw);
+  canllinfo("TS1: %d TS2: %d BRP: %d SJW= %d\n", ts1, ts2, brp, sjw);
 
   /* Configure bit timing */
 
@@ -1212,7 +1212,7 @@ static int can_bittiming(struct up_dev_s *priv)
   btr |= CAN_BTR_SAM;
 #endif
 
-  canllvdbg("Setting CANxBTR= 0x%08x\n", btr);
+  canllinfo("Setting CANxBTR= 0x%08x\n", btr);
   can_putreg(priv, LPC17_CAN_BTR_OFFSET, btr);        /* Set bit timing */
   return OK;
 }
@@ -1240,7 +1240,7 @@ FAR struct can_dev_s *lpc17_caninitialize(int port)
   irqstate_t flags;
   uint32_t regval;
 
-  canllvdbg("CAN%d\n",  port);
+  canllinfo("CAN%d\n",  port);
 
   flags = enter_critical_section();
 

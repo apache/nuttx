@@ -1776,7 +1776,7 @@ TIMER_HANDLE tiva_gptm_configure(const struct tiva_gptmconfig_s *config)
 
       priv->clkin = ALTCLK_FREQUENCY;
 #else
-       timvdbg("tiva_gptm_configure: Error: alternate clock only available on TM4C129 devices\n");
+       timinfo("tiva_gptm_configure: Error: alternate clock only available on TM4C129 devices\n");
        return (TIMER_HANDLE)NULL;
 #endif /* CONFIG_ARCH_CHIP_TM4C129 */
     }
@@ -2564,7 +2564,7 @@ uint32_t tiva_timer32_remaining(TIMER_HANDLE handle)
   uint32_t interval;
   uint32_t remaining;
 
-  timvdbg("Entry\n");
+  timinfo("Entry\n");
 
   DEBUGASSERT(priv && priv->attr && priv->config &&
               priv->config->mode != TIMER16_MODE);

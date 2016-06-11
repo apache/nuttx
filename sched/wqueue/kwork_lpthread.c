@@ -197,7 +197,7 @@ int work_lpstart(void)
 
   /* Start the low-priority, kernel mode worker thread(s) */
 
-  svdbg("Starting low-priority kernel worker thread(s)\n");
+  sinfo("Starting low-priority kernel worker thread(s)\n");
 
   for (wndx = 0; wndx < CONFIG_SCHED_LPNTHREADS; wndx++)
     {

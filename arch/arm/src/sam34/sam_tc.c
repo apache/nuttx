@@ -80,10 +80,10 @@
 
 #ifdef CONFIG_DEBUG_TIMER
 #  define tcdbg    lldbg
-#  define tcvdbg   llvdbg
+#  define tcinfo   llinfo
 #else
 #  define tcdbg(x...)
-#  define tcvdbg(x...)
+#  define tcinfo(x...)
 #endif
 
 /****************************************************************************
@@ -268,7 +268,7 @@ static int sam34_interrupt(int irq, FAR void *context)
 {
   FAR struct sam34_lowerhalf_s *priv = &g_tcdevs[irq-SAM_IRQ_TC0];
 
-  tcvdbg("Entry\n");
+  tcinfo("Entry\n");
   DEBUGASSERT((irq >= SAM_IRQ_TC0) && (irq <= SAM_IRQ_TC5));
 
   /* Check if the interrupt is really pending */
@@ -299,7 +299,7 @@ static int sam34_interrupt(int irq, FAR void *context)
           /* No handler or the handler returned false.. stop the timer */
 
           sam34_stop((FAR struct timer_lowerhalf_s *)priv);
-          tcvdbg("Stopped\n");
+          tcinfo("Stopped\n");
         }
 
       /* TC_INT_CPCS is cleared by reading SAM_TCx_SR */
@@ -328,7 +328,7 @@ static int sam34_start(FAR struct timer_lowerhalf_s *lower)
   FAR struct sam34_lowerhalf_s *priv = (FAR struct sam34_lowerhalf_s *)lower;
   uint32_t mr_val;
 
-  tcvdbg("Entry\n");
+  tcinfo("Entry\n");
   DEBUGASSERT(priv);
 
   if (priv->started)
@@ -382,7 +382,7 @@ static int sam34_start(FAR struct timer_lowerhalf_s *lower)
 static int sam34_stop(FAR struct timer_lowerhalf_s *lower)
 {
   FAR struct sam34_lowerhalf_s *priv = (FAR struct sam34_lowerhalf_s *)lower;
-  tcvdbg("Entry\n");
+  tcinfo("Entry\n");
   DEBUGASSERT(priv);
 
   if (!priv->started)
@@ -421,7 +421,7 @@ static int sam34_getstatus(FAR struct timer_lowerhalf_s *lower,
   FAR struct sam34_lowerhalf_s *priv = (FAR struct sam34_lowerhalf_s *)lower;
   uint32_t elapsed;
 
-  tcvdbg("Entry\n");
+  tcinfo("Entry\n");
   DEBUGASSERT(priv);
 
   /* Return the status bit */
@@ -446,9 +446,9 @@ static int sam34_getstatus(FAR struct timer_lowerhalf_s *lower,
   elapsed = sam34_getreg(priv->base + SAM_TC_CV_OFFSET);
   status->timeleft = ((uint64_t)priv->timeout * elapsed) / (priv->clkticks + 1); /* TODO - check on this +1 */
 
-  tcvdbg("  flags    : %08x\n", status->flags);
-  tcvdbg("  timeout  : %d\n", status->timeout);
-  tcvdbg("  timeleft : %d\n", status->timeleft);
+  tcinfo("  flags    : %08x\n", status->flags);
+  tcinfo("  timeout  : %d\n", status->timeout);
+  tcinfo("  timeleft : %d\n", status->timeleft);
   return OK;
 }
 
@@ -480,7 +480,7 @@ static int sam34_settimeout(FAR struct timer_lowerhalf_s *lower,
       return -EPERM;
     }
 
-  tcvdbg("Entry: timeout=%d\n", timeout);
+  tcinfo("Entry: timeout=%d\n", timeout);
 
   /* Can this timeout be represented? */
 
@@ -496,7 +496,7 @@ static int sam34_settimeout(FAR struct timer_lowerhalf_s *lower,
   timeout = (1000000ULL * priv->clkticks) / TC_FCLK;          /* Truncated timeout */
   priv->adjustment = priv->timeout - timeout;                 /* Truncated time to be added to next interval (dither) */
 
-  tcvdbg("fclk=%d clkticks=%d timout=%d, adjustment=%d\n",
+  tcinfo("fclk=%d clkticks=%d timout=%d, adjustment=%d\n",
          TC_FCLK, priv->clkticks, priv->timeout, priv->adjustment);
 
   return OK;
@@ -531,7 +531,7 @@ static tccb_t sam34_sethandler(FAR struct timer_lowerhalf_s *lower,
   flags = enter_critical_section();
 
   DEBUGASSERT(priv);
-  tcvdbg("Entry: handler=%p\n", handler);
+  tcinfo("Entry: handler=%p\n", handler);
 
   /* Get the old handler return value */
 
@@ -572,7 +572,7 @@ static int sam34_ioctl(FAR struct timer_lowerhalf_s *lower, int cmd,
   int ret = -ENOTTY;
 
   DEBUGASSERT(priv);
-  tcvdbg("Entry: cmd=%d arg=%ld\n", cmd, arg);
+  tcinfo("Entry: cmd=%d arg=%ld\n", cmd, arg);
   UNUSED(priv);
 
   return ret;
@@ -602,7 +602,7 @@ void sam_tcinitialize(FAR const char *devpath, int irq)
 {
   FAR struct sam34_lowerhalf_s *priv = &g_tcdevs[irq-SAM_IRQ_TC0];
 
-  tcvdbg("Entry: devpath=%s\n", devpath);
+  tcinfo("Entry: devpath=%s\n", devpath);
   DEBUGASSERT((irq >= SAM_IRQ_TC0) && (irq <= SAM_IRQ_TC5));
 
   /* Initialize the driver state structure.  Here we assume: (1) the state

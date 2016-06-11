@@ -433,7 +433,7 @@ static void putreg(int reg, uint8_t value)
 
 static void read8(FAR uint8_t *ptr, int len)
 {
-  nvdbg("Read %d bytes (8-bit mode)\n", len);
+  ninfo("Read %d bytes (8-bit mode)\n", len);
   for (; len > 0; len--)
     {
       *ptr++ = DM9X_DATA;
@@ -444,7 +444,7 @@ static void read16(FAR uint8_t *ptr, int len)
 {
   FAR uint16_t *ptr16 = (FAR uint16_t *)ptr;
 
-  nvdbg("Read %d bytes (16-bit mode)\n", len);
+  ninfo("Read %d bytes (16-bit mode)\n", len);
   for (; len > 0; len -= sizeof(uint16_t))
     {
       *ptr16++ = DM9X_DATA;
@@ -455,7 +455,7 @@ static void read32(FAR uint8_t *ptr, int len)
 {
   FAR uint32_t *ptr32 = (FAR uint32_t *)ptr;
 
-  nvdbg("Read %d bytes (32-bit mode)\n", len);
+  ninfo("Read %d bytes (32-bit mode)\n", len);
   for (; len > 0; len -= sizeof(uint32_t))
     {
       *ptr32++ = DM9X_DATA;
@@ -481,7 +481,7 @@ static void read32(FAR uint8_t *ptr, int len)
 
 static void discard8(int len)
 {
-  nvdbg("Discard %d bytes (8-bit mode)\n", len);
+  ninfo("Discard %d bytes (8-bit mode)\n", len);
   for (; len > 0; len--)
     {
       DM9X_DATA;
@@ -490,7 +490,7 @@ static void discard8(int len)
 
 static void discard16(int len)
 {
-  nvdbg("Discard %d bytes (16-bit mode)\n", len);
+  ninfo("Discard %d bytes (16-bit mode)\n", len);
   for (; len > 0; len -= sizeof(uint16_t))
     {
       DM9X_DATA;
@@ -499,7 +499,7 @@ static void discard16(int len)
 
 static void discard32(int len)
 {
-  nvdbg("Discard %d bytes (32-bit mode)\n", len);
+  ninfo("Discard %d bytes (32-bit mode)\n", len);
   for (; len > 0; len -= sizeof(uint32_t))
     {
       DM9X_DATA;
@@ -525,7 +525,7 @@ static void discard32(int len)
 
 static void write8(FAR const uint8_t *ptr, int len)
 {
-  nvdbg("Write %d bytes (8-bit mode)\n", len);
+  ninfo("Write %d bytes (8-bit mode)\n", len);
 
   for (; len > 0; len--)
     {
@@ -537,7 +537,7 @@ static void write16(const uint8_t *ptr, int len)
 {
   FAR uint16_t *ptr16 = (FAR uint16_t *)ptr;
 
-  nvdbg("Write %d bytes (16-bit mode)\n", len);
+  ninfo("Write %d bytes (16-bit mode)\n", len);
 
   for (; len > 0; len -= sizeof(uint16_t))
     {
@@ -549,7 +549,7 @@ static void write32(FAR const uint8_t *ptr, int len)
 {
   FAR uint32_t *ptr32 = (FAR uint32_t *)ptr;
 
-  nvdbg("Write %d bytes (32-bit mode)\n", len);
+  ninfo("Write %d bytes (32-bit mode)\n", len);
 
   for (; len > 0; len -= sizeof(uint32_t))
     {
@@ -831,7 +831,7 @@ static void dm9x_receive(FAR struct dm9x_driver_s *dm9x)
   bool bchecksumready;
   uint8_t rxbyte;
 
-  nvdbg("Packet received\n");
+  ninfo("Packet received\n");
 
   do
     {
@@ -902,7 +902,7 @@ static void dm9x_receive(FAR struct dm9x_driver_s *dm9x)
 #ifdef CONFIG_NET_IPv4
           if (BUF->type == HTONS(ETHTYPE_IP))
             {
-              nllvdbg("IPv4 frame\n");
+              nllinfo("IPv4 frame\n");
               NETDEV_RXIPV4(&priv->dm_dev);
 
               /* Handle ARP on input then give the IPv4 packet to the network
@@ -943,7 +943,7 @@ static void dm9x_receive(FAR struct dm9x_driver_s *dm9x)
 #ifdef CONFIG_NET_IPv6
           if (BUF->type == HTONS(ETHTYPE_IP6))
             {
-              nllvdbg("Iv6 frame\n");
+              nllinfo("Iv6 frame\n");
               NETDEV_RXIPV6(&priv->dm_dev);
 
               /* Give the IPv6 packet to the network layer */
@@ -1004,7 +1004,7 @@ static void dm9x_receive(FAR struct dm9x_driver_s *dm9x)
       dm9x->ncrxpackets++;
     }
   while ((rxbyte & 0x01) == DM9X_PKTRDY && dm9x->ncrxpackets < DM9X_CRXTHRES);
-  nvdbg("All RX packets processed\n");
+  ninfo("All RX packets processed\n");
 }
 
 /****************************************************************************
@@ -1027,7 +1027,7 @@ static void dm9x_txdone(struct dm9x_driver_s *dm9x)
 {
   int  nsr;
 
-  nvdbg("TX done\n");
+  ninfo("TX done\n");
 
   /* Another packet has completed transmission.  Decrement the count of
    * of pending TX transmissions.
@@ -1110,7 +1110,7 @@ static int dm9x_interrupt(int irq, FAR void *context)
 
   isr = getreg(DM9X_ISR);
   putreg(DM9X_ISR, isr);
-  nvdbg("Interrupt status: %02x\n", isr);
+  ninfo("Interrupt status: %02x\n", isr);
 
   /* Check for link status change */
 

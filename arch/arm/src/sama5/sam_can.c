@@ -128,14 +128,14 @@
 
 #ifdef CONFIG_DEBUG_CAN
 #  define candbg    dbg
-#  define canvdbg   vdbg
+#  define caninfo   info
 #  define canlldbg  lldbg
-#  define canllvdbg llvdbg
+#  define canllinfo llinfo
 #else
 #  define candbg(x...)
-#  define canvdbg(x...)
+#  define caninfo(x...)
 #  define canlldbg(x...)
-#  define canllvdbg(x...)
+#  define canllinfo(x...)
 #endif
 
 #if !defined(CONFIG_DEBUG) || !defined(CONFIG_DEBUG_CAN)
@@ -730,7 +730,7 @@ static int can_recvsetup(FAR struct sam_can_s *priv)
 
       priv->rxmbset |= (1 << mbndx);
 
-      canvdbg("CAN%d Mailbox %d: Index=%d rxmbset=%02x\n",
+      caninfo("CAN%d Mailbox %d: Index=%d rxmbset=%02x\n",
               config->port, mbno, mbndx, priv->rxmbset);
 
       /* Set up the message ID and filter mask
@@ -798,7 +798,7 @@ static void can_reset(FAR struct can_dev_s *dev)
   config = priv->config;
   DEBUGASSERT(config);
 
-  canllvdbg("CAN%d\n", config->port);
+  canllinfo("CAN%d\n", config->port);
   UNUSED(config);
 
   /* Get exclusive access to the CAN peripheral */
@@ -855,7 +855,7 @@ static int can_setup(FAR struct can_dev_s *dev)
   config = priv->config;
   DEBUGASSERT(config);
 
-  canllvdbg("CAN%d pid: %d\n", config->port, config->pid);
+  canllinfo("CAN%d pid: %d\n", config->port, config->pid);
 
   /* Get exclusive access to the CAN peripheral */
 
@@ -933,7 +933,7 @@ static void can_shutdown(FAR struct can_dev_s *dev)
   config = priv->config;
   DEBUGASSERT(config);
 
-  canllvdbg("CAN%d\n", config->port);
+  canllinfo("CAN%d\n", config->port);
 
   /* Get exclusive access to the CAN peripheral */
 
@@ -972,7 +972,7 @@ static void can_rxint(FAR struct can_dev_s *dev, bool enable)
   FAR struct sam_can_s *priv = dev->cd_priv;
   DEBUGASSERT(priv && priv->config);
 
-  canllvdbg("CAN%d enable: %d\n", priv->config->port, enable);
+  canllinfo("CAN%d enable: %d\n", priv->config->port, enable);
 
   /* Enable/disable the mailbox interrupts from all receive mailboxes */
 
@@ -1005,7 +1005,7 @@ static void can_txint(FAR struct can_dev_s *dev, bool enable)
   FAR struct sam_can_s *priv = dev->cd_priv;
   DEBUGASSERT(priv && priv->config);
 
-  canllvdbg("CAN%d enable: %d\n", priv->config->port, enable);
+  canllinfo("CAN%d enable: %d\n", priv->config->port, enable);
 
   /* Get exclusive access to the CAN peripheral */
 
@@ -1106,8 +1106,8 @@ static int can_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
   priv = dev->cd_priv;
   DEBUGASSERT(priv && priv->config);
 
-  canllvdbg("CAN%d\n", priv->config->port);
-  canllvdbg("CAN%d ID: %d DLC: %d\n",
+  canllinfo("CAN%d\n", priv->config->port);
+  canllinfo("CAN%d ID: %d DLC: %d\n",
             priv->config->port, msg->cm_hdr.ch_id, msg->cm_hdr.ch_dlc);
 
   /* Get exclusive access to the CAN peripheral */
@@ -1126,7 +1126,7 @@ static int can_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
 
   priv->txmbset |= (1 << mbndx);
 
-  canvdbg("Mailbox Index=%d txmbset=%02x\n", mbndx, priv->txmbset);
+  caninfo("Mailbox Index=%d txmbset=%02x\n", mbndx, priv->txmbset);
 
   /* Set up the ID and mask, standard 11-bit or extended 29-bit.
    * REVISIT: This logic should be capable of sending standard messages
@@ -1788,7 +1788,7 @@ static int can_autobaud(struct sam_can_s *priv)
   uint32_t regval;
   int ret;
 
-  canllvdbg("CAN%d\n", config->port);
+  canllinfo("CAN%d\n", config->port);
 
   /* The CAN controller can start listening to the network in Autobaud Mode.
    * In this case, the error counters are locked and a mailbox may be
@@ -1858,7 +1858,7 @@ static int can_hwinitialize(struct sam_can_s *priv)
   uint32_t mck;
   int ret;
 
-  canllvdbg("CAN%d\n", config->port);
+  canllinfo("CAN%d\n", config->port);
 
   /* Configure CAN pins */
 
@@ -1970,7 +1970,7 @@ FAR struct can_dev_s *sam_caninitialize(int port)
   FAR struct sam_can_s *priv;
   FAR const struct sam_config_s *config;
 
-  canvdbg("CAN%d\n", port);
+  caninfo("CAN%d\n", port);
 
   /* NOTE:  Peripherical clocking for CAN0 and/or CAN1 was already provided
    * by sam_clockconfig() early in the reset sequence.

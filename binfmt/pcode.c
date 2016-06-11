@@ -169,7 +169,7 @@ static int pcode_mount_testfs(void)
 
   /* Create a ROM disk for the ROMFS filesystem */
 
-  bvdbg("Registering romdisk at /dev/ram%d\n", CONFIG_PCODE_TEST_DEVMINOR);
+  binfo("Registering romdisk at /dev/ram%d\n", CONFIG_PCODE_TEST_DEVMINOR);
   ret = romdisk_register(CONFIG_PCODE_TEST_DEVMINOR, (FAR uint8_t *)romfs_img,
                          NSECTORS(ROMFS_IMG_LEN), SECTORSIZE);
   if (ret < 0)
@@ -180,7 +180,7 @@ static int pcode_mount_testfs(void)
 
   /* Mount the test file system */
 
-  bvdbg("Mounting ROMFS filesystem at target=%s with source=%s\n",
+  binfo("Mounting ROMFS filesystem at target=%s with source=%s\n",
          CONFIG_PCODE_TEST_MOUNTPOINT, CONFIG_PCODE_TEST_DEVPATH);
 
   ret = mount(CONFIG_PCODE_TEST_DEVPATH, CONFIG_PCODE_TEST_MOUNTPOINT,
@@ -259,7 +259,7 @@ static int pcode_proxy(int argc, char **argv)
   sem_post(&g_pcode_handoff.exclsem);
   DEBUGASSERT(binp && fullpath);
 
-  bvdbg("Executing %s\n", fullpath);
+  binfo("Executing %s\n", fullpath);
 
   /* Set-up the on-exit handler that will unload the module on exit */
 
@@ -310,7 +310,7 @@ static int pcode_load(struct binary_s *binp)
   int fd;
   int ret;
 
-  bvdbg("Loading file: %s\n", binp->filename);
+  binfo("Loading file: %s\n", binp->filename);
 
   /* Open the binary file for reading (only) */
 
@@ -479,7 +479,7 @@ int pcode_initialize(void)
 
   /* Register ourselves as a binfmt loader */
 
-  bvdbg("Registering P-Code Loader\n");
+  binfo("Registering P-Code Loader\n");
 
   ret = register_binfmt(&g_pcode_binfmt);
   if (ret != 0)

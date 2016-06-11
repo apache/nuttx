@@ -159,7 +159,7 @@ void pg_miss(void)
     {
       /* Reprioritize the page fill worker thread */
 
-      pgllvdbg("New worker priority. %d->%d\n",
+      pgllinfo("New worker priority. %d->%d\n",
                wtcb->sched_priority, ftcb->sched_priority);
       sched_setpriority(wtcb, ftcb->sched_priority);
     }

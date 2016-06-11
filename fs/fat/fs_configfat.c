@@ -464,7 +464,7 @@ mkfatfs_tryfat12(FAR struct fat_format_s *fmt, FAR struct fat_var_s *var,
           maxnclusters = FAT_MAXCLUST12;
         }
 
-      fvdbg("nfatsects=%u nclusters=%u (max=%u)\n",
+      finfo("nfatsects=%u nclusters=%u (max=%u)\n",
             config->fc_nfatsects, config->fc_nclusters, maxnclusters);
 
       /* Check if this number of clusters would overflow the maximum for
@@ -535,7 +535,7 @@ mkfatfs_tryfat16(FAR struct fat_format_s *fmt, FAR struct fat_var_s *var,
           maxnclusters = FAT_MAXCLUST16;
         }
 
-      fvdbg("nfatsects=%u nclusters=%u (min=%u max=%u)\n",
+      finfo("nfatsects=%u nclusters=%u (min=%u max=%u)\n",
             config->fc_nfatsects, config->fc_nclusters, FAT_MINCLUST16,
             maxnclusters);
 
@@ -612,7 +612,7 @@ mkfatfs_tryfat32(FAR struct fat_format_s *fmt, FAR struct fat_var_s *var,
           maxnclusters = FAT_MAXCLUST32;
         }
 
-      fvdbg("nfatsects=%u nclusters=%u (max=%u)\n",
+      finfo("nfatsects=%u nclusters=%u (max=%u)\n",
             config->fc_nfatsects, config->fc_nclusters, maxnclusters);
 
       /* Check if this number of clusters would overflow the maximum for
@@ -654,7 +654,7 @@ mkfatfs_selectfat(int fattype, FAR struct fat_format_s *fmt,
 {
   /* Return the appropriate information about the selected file system. */
 
-  fvdbg("Selected FAT%d\n", fattype);
+  finfo("Selected FAT%d\n", fattype);
 
   var->fv_fattype      = fattype;
   var->fv_nclusters    = config->fc_nclusters;
@@ -745,7 +745,7 @@ mkfatfs_clustersearch(FAR struct fat_format_s *fmt, FAR struct fat_var_s *var)
 
   do
     {
-      fvdbg("Configuring with %d sectors/cluster...\n",
+      finfo("Configuring with %d sectors/cluster...\n",
             1 << fmt->ff_clustshift);
 
       /* Check if FAT12 has not been excluded */

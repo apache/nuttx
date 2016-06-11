@@ -163,13 +163,13 @@ static int mxt_attach(FAR const struct mxt_lower_s *lower, mxt_handler_t isr,
        * new handler will called via mxt_interrupt() when the interrupt occurs.
        */
 
-      ivdbg("Attaching %p\n", isr);
+      iinfo("Attaching %p\n", isr);
       g_mxtinfo.handler = isr;
       g_mxtinfo.arg = arg;
     }
   else
     {
-      ivdbg("Detaching %p\n", g_mxtinfo.handler);
+      iinfo("Detaching %p\n", g_mxtinfo.handler);
       mxt_enable(lower, false);
       g_mxtinfo.handler = NULL;
       g_mxtinfo.arg = NULL;

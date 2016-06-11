@@ -410,7 +410,7 @@ uint16_t devif_conn_event(FAR struct net_driver_s *dev, void *pvconn,
            * beginning of the list (which will be ignored on this pass)
            */
 
-          nllvdbg("Call event=%p with flags=%04x\n", list->event, flags);
+          nllinfo("Call event=%p with flags=%04x\n", list->event, flags);
           flags = list->event(dev, pvconn, list->priv, flags);
         }
 
@@ -475,7 +475,7 @@ uint16_t devif_dev_event(FAR struct net_driver_s *dev, void *pvconn,
            * beginning of the list (which will be ignored on this pass)
            */
 
-          nllvdbg("Call event=%p with flags=%04x\n", cb->event, flags);
+          nllinfo("Call event=%p with flags=%04x\n", cb->event, flags);
           flags = cb->event(dev, pvconn, cb->priv, flags);
         }
 

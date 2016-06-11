@@ -84,14 +84,14 @@
 
 #ifdef CONFIG_SAM34_TC_DEBUG
 #  define tcdbg    dbg
-#  define tcvdbg   vdbg
+#  define tcinfo   info
 #  define tclldbg  lldbg
-#  define tcllvdbg llvdbg
+#  define tcllinfo llinfo
 #else
 #  define tcdbg(x...)
-#  define tcvdbg(x...)
+#  define tcinfo(x...)
 #  define tclldbg(x...)
-#  define tcllvdbg(x...)
+#  define tcllinfo(x...)
 #endif
 
 /****************************************************************************

@@ -161,7 +161,7 @@ static FAR void *g_ajoyarg;
 
 static ajoy_buttonset_t ajoy_supported(FAR const struct ajoy_lowerhalf_s *lower)
 {
-  ivdbg("Supported: %02x\n", AJOY_SUPPORTED);
+  iinfo("Supported: %02x\n", AJOY_SUPPORTED);
   return (ajoy_buttonset_t)AJOY_SUPPORTED;
 }
 
@@ -220,7 +220,7 @@ static int ajoy_sample(FAR const struct ajoy_lowerhalf_s *lower,
           sample->as_x = (int16_t)tmp;
           have |= 1;
 
-          ivdbg("X sample: %ld -> %d\n", (long)tmp, (int)sample->as_x);
+          iinfo("X sample: %ld -> %d\n", (long)tmp, (int)sample->as_x);
         }
 
       if ((have & 2) == 0 && ptr->am_channel == 1)
@@ -229,7 +229,7 @@ static int ajoy_sample(FAR const struct ajoy_lowerhalf_s *lower,
           sample->as_y = (int16_t)tmp;
           have |= 2;
 
-          ivdbg("Y sample: %ld -> %d\n", (long)tmp, (int)sample->as_y);
+          iinfo("Y sample: %ld -> %d\n", (long)tmp, (int)sample->as_y);
         }
     }
 
@@ -243,7 +243,7 @@ static int ajoy_sample(FAR const struct ajoy_lowerhalf_s *lower,
   /* Sample the discrete button inputs */
 
   sample->as_buttons = ajoy_buttons(lower);
-  ivdbg("Returning: %02x\n", AJOY_SUPPORTED);
+  iinfo("Returning: %02x\n", AJOY_SUPPORTED);
   return OK;
 }
 
@@ -274,7 +274,7 @@ static ajoy_buttonset_t ajoy_buttons(FAR const struct ajoy_lowerhalf_s *lower)
         }
     }
 
-  ivdbg("Returning: %02x\n", ret);
+  iinfo("Returning: %02x\n", ret);
   return ret;
 }
 
@@ -301,7 +301,7 @@ static void ajoy_enable(FAR const struct ajoy_lowerhalf_s *lower,
   flags = enter_critical_section();
   ajoy_disable();
 
-  illvdbg("press: %02x release: %02x handler: %p arg: %p\n",
+  illinfo("press: %02x release: %02x handler: %p arg: %p\n",
           press, release, handler, arg);
 
   /* If no events are indicated or if no handler is provided, then this

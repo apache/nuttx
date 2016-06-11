@@ -66,13 +66,13 @@
 #ifdef CONFIG_DEBUG_SPI
 #  define sspdbg  lldbg
 #  ifdef CONFIG_DEBUG_INFO
-#    define sspvdbg lldbg
+#    define sspinfo lldbg
 #  else
-#    define sspvdbg(x...)
+#    define sspinfo(x...)
 #  endif
 #else
 #  define sspdbg(x...)
-#  define sspvdbg(x...)
+#  define sspinfo(x...)
 #endif
 
 /* Dump GPIO registers */

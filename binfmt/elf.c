@@ -73,7 +73,7 @@
 #endif
 
 #ifdef CONFIG_ELF_DUMPBUFFER
-# define elf_dumpbuffer(m,b,n) bvdbgdumpbuffer(m,b,n)
+# define elf_dumpbuffer(m,b,n) binfodumpbuffer(m,b,n)
 #else
 # define elf_dumpbuffer(m,b,n)
 #endif
@@ -229,7 +229,7 @@ static int elf_loadbinary(FAR struct binary_s *binp)
   struct elf_loadinfo_s loadinfo;  /* Contains globals for libelf */
   int                   ret;
 
-  bvdbg("Loading file: %s\n", binp->filename);
+  binfo("Loading file: %s\n", binp->filename);
 
   /* Initialize the ELF library to load the program binary. */
 
@@ -338,7 +338,7 @@ int elf_initialize(void)
 
   /* Register ourselves as a binfmt loader */
 
-  bvdbg("Registering ELF\n");
+  binfo("Registering ELF\n");
 
   ret = register_binfmt(&g_elfbinfmt);
   if (ret != 0)

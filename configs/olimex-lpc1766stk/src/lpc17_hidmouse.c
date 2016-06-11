@@ -64,10 +64,10 @@
 #  define idbg    udbg
 #  undef  illdbg
 #  define illdbg  ulldbg
-#  undef  ivdbg
-#  define ivdbg   uvdbg
-#  undef  illvdbg
-#  define illvdbg ullvdbg
+#  undef  iinfo
+#  define iinfo   uinfo
+#  undef  illinfo
+#  define illinfo ullinfo
 #endif
 
 /****************************************************************************

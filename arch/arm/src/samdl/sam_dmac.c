@@ -769,7 +769,7 @@ static int sam_rxbuffer(struct sam_dmach_s *dmach, uint32_t paddr,
 
 void weak_function up_dmainitialize(void)
 {
-  dmallvdbg("Initialize DMAC\n");
+  dmallinfo("Initialize DMAC\n");
   int i;
 
   /* Initialize global semaphores */
@@ -888,7 +888,7 @@ DMA_HANDLE sam_dmachannel(uint32_t chflags)
 
   sam_givechsem();
 
-  dmavdbg("chflags: %08x returning dmach: %p\n",  (int)chflags, dmach);
+  dmainfo("chflags: %08x returning dmach: %p\n",  (int)chflags, dmach);
   return (DMA_HANDLE)dmach;
 }
 
@@ -914,7 +914,7 @@ void sam_dmaconfig(DMA_HANDLE handle, uint32_t chflags)
 
   /* Set the new DMA channel flags. */
 
-  dmavdbg("chflags: %08x\n",  (int)chflags);
+  dmainfo("chflags: %08x\n",  (int)chflags);
   dmach->dc_flags = chflags;
 }
 
@@ -935,7 +935,7 @@ void sam_dmafree(DMA_HANDLE handle)
 {
   struct sam_dmach_s *dmach = (struct sam_dmach_s *)handle;
 
-  dmavdbg("dmach: %p\n", dmach);
+  dmainfo("dmach: %p\n", dmach);
   DEBUGASSERT((dmach != NULL) && (dmach->dc_inuse));
 
   /* Mark the channel no longer in use.  Clearing the inuse flag is an atomic
@@ -965,12 +965,12 @@ int sam_dmatxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
   size_t maxtransfer;
   int ret = OK;
 
-  dmavdbg("dmach: %p paddr: %08x maddr: %08x nbytes: %d\n",
+  dmainfo("dmach: %p paddr: %08x maddr: %08x nbytes: %d\n",
           dmach, (int)paddr, (int)maddr, (int)nbytes);
   DEBUGASSERT(dmach);
 
 #if CONFIG_SAMDL_DMAC_NDESC > 0
-  dmavdbg("dc_head: %p dc_tail: %p\n", dmach->dc_head, dmach->dc_tail);
+  dmainfo("dc_head: %p dc_tail: %p\n", dmach->dc_head, dmach->dc_tail);
 #endif
 
   /* The maximum transfer size in bytes depends upon the maximum number of
@@ -1039,12 +1039,12 @@ int sam_dmarxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
   size_t maxtransfer;
   int ret = OK;
 
-  dmavdbg("dmach: %p paddr: %08x maddr: %08x nbytes: %d\n",
+  dmainfo("dmach: %p paddr: %08x maddr: %08x nbytes: %d\n",
           dmach, (int)paddr, (int)maddr, (int)nbytes);
   DEBUGASSERT(dmach);
 
 #if CONFIG_SAMDL_DMAC_NDESC > 0
-  dmavdbg("dc_head: %p dc_tail: %p\n", dmach->dc_head, dmach->dc_tail);
+  dmainfo("dc_head: %p dc_tail: %p\n", dmach->dc_head, dmach->dc_tail);
 #endif
 
   /* The maximum transfer size in bytes depends upon the maximum number of
@@ -1115,7 +1115,7 @@ int sam_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg)
   uint8_t memqos;
   int ret = -EINVAL;
 
-  dmavdbg("dmach: %p callback: %p arg: %p\n", dmach, callback, arg);
+  dmainfo("dmach: %p callback: %p arg: %p\n", dmach, callback, arg);
   DEBUGASSERT(dmach != NULL && dmach->dc_chan < SAMDL_NDMACHAN);
   head = &g_base_desc[dmach->dc_chan];
 
@@ -1240,7 +1240,7 @@ void sam_dmastop(DMA_HANDLE handle)
   struct sam_dmach_s *dmach = (struct sam_dmach_s *)handle;
   irqstate_t flags;
 
-  dmavdbg("dmach: %p\n", dmach);
+  dmainfo("dmach: %p\n", dmach);
   DEBUGASSERT(dmach != NULL);
 
   flags = enter_critical_section();

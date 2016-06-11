@@ -82,14 +82,14 @@
 
 #ifdef CONFIG_DEBUG_RTC
 #  define rtcdbg    dbg
-#  define rtcvdbg   vdbg
+#  define rtcinfo   info
 #  define rtclldbg  lldbg
-#  define rtcllvdbg llvdbg
+#  define rtcllinfo llinfo
 #else
 #  define rtcdbg(x...)
-#  define rtcvdbg(x...)
+#  define rtcinfo(x...)
 #  define rtclldbg(x...)
-#  define rtcllvdbg(x...)
+#  define rtcllinfo(x...)
 #endif
 
 /************************************************************************************

@@ -491,7 +491,7 @@ int vnc_raw(FAR struct vnc_session_s *session, FAR struct nxgl_rect_s *rect)
                 }
               while (size > 0);
 
-              updvdbg("Sent {(%d, %d),(%d, %d)}\n",
+              updinfo("Sent {(%d, %d),(%d, %d)}\n",
                       x, y, x + updwidth -1, y + updheight - 1);
             }
         }

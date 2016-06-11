@@ -150,7 +150,7 @@ ssize_t nxffs_read(FAR struct file *filep, FAR char *buffer, size_t buflen)
   size_t readsize;
   int ret;
 
-  fvdbg("Read %d bytes from offset %d\n", buflen, filep->f_pos);
+  finfo("Read %d bytes from offset %d\n", buflen, filep->f_pos);
 
   /* Sanity checks */
 
@@ -304,7 +304,7 @@ int nxffs_nextblock(FAR struct nxffs_volume_s *volume, off_t offset,
 
           if (++nerased >= NXFFS_NERASED)
             {
-              fvdbg("No entry found\n");
+              finfo("No entry found\n");
               return -ENOENT;
             }
         }
@@ -358,7 +358,7 @@ int nxffs_nextblock(FAR struct nxffs_volume_s *volume, off_t offset,
               ret = nxffs_rdblkhdr(volume, blkentry->hoffset, &blkentry->datlen);
               if (ret == OK)
                 {
-                  fvdbg("Found a valid data block, offset: %d datlen: %d\n",
+                  finfo("Found a valid data block, offset: %d datlen: %d\n",
                         blkentry->hoffset, blkentry->datlen);
                   return OK;
                 }

@@ -104,7 +104,7 @@ int stm32_sdinitialize(int minor)
       return -ENODEV;
     }
 
-  fvdbg("Initialized SDIO slot %d\n", STM32_MMCSDSLOTNO);
+  finfo("Initialized SDIO slot %d\n", STM32_MMCSDSLOTNO);
 
   /* Now bind the SDIO interface to the MMC/SD driver */
 
@@ -115,7 +115,7 @@ int stm32_sdinitialize(int minor)
               STM32_MMCSDSLOTNO, minor);
     }
 
-  fvdbg("Bound SDIO slot %d to the MMC/SD driver, minor=%d\n",
+  finfo("Bound SDIO slot %d to the MMC/SD driver, minor=%d\n",
          STM32_MMCSDSLOTNO, minor);
 
   /* Then let's guess and say that there is a card in the slot.  I need to check to

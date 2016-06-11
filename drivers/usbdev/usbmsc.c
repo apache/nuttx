@@ -549,7 +549,7 @@ static int usbmsc_setup(FAR struct usbdevclass_driver_s *driver,
   index = GETUINT16(ctrl->index);
   len   = GETUINT16(ctrl->len);
 
-  uvdbg("type=%02x req=%02x value=%04x index=%04x len=%04x\n",
+  uinfo("type=%02x req=%02x value=%04x index=%04x len=%04x\n",
         ctrl->type, ctrl->req, value, index, len);
 
   if ((ctrl->type & USB_REQ_TYPE_MASK) == USB_REQ_TYPE_STANDARD)
@@ -1652,7 +1652,7 @@ int usbmsc_exportluns(FAR void *handle)
 
   g_usbmsc_handoff = priv;
 
-  uvdbg("Starting SCSI worker thread\n");
+  uinfo("Starting SCSI worker thread\n");
   priv->thpid = kernel_thread("scsid", CONFIG_USBMSC_SCSI_PRIO,
                               CONFIG_USBMSC_SCSI_STACKSIZE,
                               usbmsc_scsi_main, NULL);
@@ -1664,7 +1664,7 @@ int usbmsc_exportluns(FAR void *handle)
 
   /* Wait for the worker thread to run and initialize */
 
-  uvdbg("Waiting for the SCSI worker thread\n");
+  uinfo("Waiting for the SCSI worker thread\n");
   usbmsc_sync_wait(priv);
   DEBUGASSERT(g_usbmsc_handoff == NULL);
 
@@ -1681,7 +1681,7 @@ int usbmsc_exportluns(FAR void *handle)
 
   /* Signal to start the thread */
 
-  uvdbg("Signalling for the SCSI worker thread\n");
+  uinfo("Signalling for the SCSI worker thread\n");
   flags = enter_critical_section();
   priv->theventset |= USBMSC_EVENT_READY;
   usbmsc_scsi_signal(priv);

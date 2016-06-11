@@ -1228,7 +1228,7 @@ static inline void lpc43_ep0setup(struct lpc43_usbdev_s *priv)
 
   priv->ep0buf_len = len;
 
-  ullvdbg("type=%02x req=%02x value=%04x index=%04x len=%04x\n",
+  ullinfo("type=%02x req=%02x value=%04x index=%04x len=%04x\n",
           ctrl->type, ctrl->req, value, index, len);
 
   /* Starting a control request - update state */
@@ -1393,7 +1393,7 @@ static inline void lpc43_ep0setup(struct lpc43_usbdev_s *priv)
           if (((ctrl->type & USB_REQ_RECIPIENT_MASK) == USB_REQ_RECIPIENT_DEVICE) &&
               value == USB_FEATURE_TESTMODE)
             {
-              ullvdbg("test mode: %d\n", index);
+              ullinfo("test mode: %d\n", index);
             }
           else if ((ctrl->type & USB_REQ_RECIPIENT_MASK) != USB_REQ_RECIPIENT_ENDPOINT)
             {
@@ -2206,7 +2206,7 @@ static int lpc43_epsubmit(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *r
   if (!req || !req->callback || !req->buf || !ep)
     {
       usbtrace(TRACE_DEVERROR(LPC43_TRACEERR_INVALIDPARMS), 0);
-      ullvdbg("req=%p callback=%p buf=%p ep=%p\n", req, req->callback, req->buf, ep);
+      ullinfo("req=%p callback=%p buf=%p ep=%p\n", req, req->callback, req->buf, ep);
       return -EINVAL;
     }
 #endif

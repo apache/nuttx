@@ -107,7 +107,7 @@ int board_tsc_setup(int minor)
    * X11 window to support the mouse-driven touchscreen simulation.
    */
 
-  ivdbg("Initializing framebuffer\n");
+  iinfo("Initializing framebuffer\n");
   ret = up_fbinitialize(0);
   if (ret < 0)
     {
@@ -125,7 +125,7 @@ int board_tsc_setup(int minor)
 
   /* Then open NX */
 
-  ivdbg("Open NX\n");
+  iinfo("Open NX\n");
   g_simtc.hnx = nx_open(dev);
   if (!g_simtc.hnx)
     {
@@ -147,7 +147,7 @@ int board_tsc_setup(int minor)
 
   /* Set the background to the configured background color */
 
-  ivdbg("Set background color=%d\n", CONFIG_EXAMPLES_TOUCHSCREEN_BGCOLOR);
+  iinfo("Set background color=%d\n", CONFIG_EXAMPLES_TOUCHSCREEN_BGCOLOR);
 
   color = CONFIG_EXAMPLES_TOUCHSCREEN_BGCOLOR;
   ret = nx_setbgcolor(g_simtc.hnx, &color);

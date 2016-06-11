@@ -142,7 +142,7 @@ static int ccm_open(FAR struct file *filep, FAR const char *relpath,
 {
   FAR struct ccm_file_s *priv;
 
-  fvdbg("Open '%s'\n", relpath);
+  finfo("Open '%s'\n", relpath);
 
   /* PROCFS is read-only.  Any attempt to open with any kind of write
    * access is not permitted.
@@ -214,7 +214,7 @@ static ssize_t ccm_read(FAR struct file *filep, FAR char *buffer,
   struct mallinfo mem;
   off_t offset = filep->f_pos;
 
-  fvdbg("buffer=%p buflen=%d\n", buffer, (int)buflen);
+  finfo("buffer=%p buflen=%d\n", buffer, (int)buflen);
 
   /* Recover our private data from the struct file instance */
 
@@ -273,7 +273,7 @@ static int ccm_dup(FAR const struct file *oldp, FAR struct file *newp)
   FAR struct ccm_file_s *oldpriv;
   FAR struct ccm_file_s *newpriv;
 
-  fvdbg("Dup %p->%p\n", oldp, newp);
+  finfo("Dup %p->%p\n", oldp, newp);
 
   /* Recover our private data from the old struct file instance */
 

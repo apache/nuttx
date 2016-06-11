@@ -254,10 +254,10 @@ static int dns_recv_response(int sd, FAR struct sockaddr *addr,
 
   hdr = (FAR struct dns_header_s *)buffer;
 
-  nvdbg("ID %d\n", htons(hdr->id));
-  nvdbg("Query %d\n", hdr->flags1 & DNS_FLAG1_RESPONSE);
-  nvdbg("Error %d\n", hdr->flags2 & DNS_FLAG2_ERR_MASK);
-  nvdbg("Num questions %d, answers %d, authrr %d, extrarr %d\n",
+  ninfo("ID %d\n", htons(hdr->id));
+  ninfo("Query %d\n", hdr->flags1 & DNS_FLAG1_RESPONSE);
+  ninfo("Error %d\n", hdr->flags2 & DNS_FLAG2_ERR_MASK);
+  ninfo("Num questions %d, answers %d, authrr %d, extrarr %d\n",
         htons(hdr->numquestions), htons(hdr->numanswers),
         htons(hdr->numauthrr), htons(hdr->numextrarr));
 
@@ -317,7 +317,7 @@ static int dns_recv_response(int sd, FAR struct sockaddr *addr,
           /* Compressed name. */
 
           nameptr += 2;
-          nvdbg("Compressed answer\n");
+          ninfo("Compressed answer\n");
         }
       else
         {
@@ -328,7 +328,7 @@ static int dns_recv_response(int sd, FAR struct sockaddr *addr,
 
       ans = (FAR struct dns_answer_s *)nameptr;
 
-      nvdbg("Answer: type=%04x, class=%04x, ttl=%06x, length=%04x \n",
+      ninfo("Answer: type=%04x, class=%04x, ttl=%06x, length=%04x \n",
             htons(ans->type), htons(ans->class),
             (htons(ans->ttl[0]) << 16) | htons(ans->ttl[1]),
             htons(ans->len));
@@ -342,7 +342,7 @@ static int dns_recv_response(int sd, FAR struct sockaddr *addr,
         {
           ans->u.ipv4.s_addr = *(FAR uint32_t *)(nameptr + 10);
 
-          nvdbg("IPv4 address: %d.%d.%d.%d\n",
+          ninfo("IPv4 address: %d.%d.%d.%d\n",
                 (ans->u.ipv4.s_addr      ) & 0xff,
                 (ans->u.ipv4.s_addr >> 8 ) & 0xff,
                 (ans->u.ipv4.s_addr >> 16) & 0xff,
@@ -374,7 +374,7 @@ static int dns_recv_response(int sd, FAR struct sockaddr *addr,
         {
           memcpy(&ans->u.ipv6.s6_addr, nameptr + 10, 16);
 
-          nvdbg("IPv6 address: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
+          ninfo("IPv6 address: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
                 htons(ans->u.ipv6.s6_addr[7]),  htons(ans->u.ipv6.s6_addr[6]),
                 htons(ans->u.ipv6.s6_addr[5]),  htons(ans->u.ipv6.s6_addr[4]),
                 htons(ans->u.ipv6.s6_addr[3]),  htons(ans->u.ipv6.s6_addr[2]),

@@ -436,7 +436,7 @@ ssize_t nxffs_write(FAR struct file *filep, FAR const char *buffer, size_t bufle
   ssize_t total;
   int ret;
 
-  fvdbg("Write %d bytes to offset %d\n", buflen, filep->f_pos);
+  finfo("Write %d bytes to offset %d\n", buflen, filep->f_pos);
 
   /* Sanity checks */
 

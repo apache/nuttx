@@ -101,7 +101,7 @@ static void nxsu_bkgdredraw(NXWINDOW hwnd,
   FAR struct nxbe_window_s *wnd = (FAR struct nxbe_window_s *)hwnd;
   FAR struct nxbe_state_s  *be  = wnd->be;
 
-  gvdbg("BG redraw rect={(%d,%d),(%d,%d)}\n",
+  ginfo("BG redraw rect={(%d,%d),(%d,%d)}\n",
         rect->pt1.x, rect->pt1.y, rect->pt2.x, rect->pt2.y);
   nxbe_fill(wnd, &wnd->bounds, be->bgcolor);
 }

@@ -78,7 +78,7 @@
 /* Debug ******************************************************************************/
 
 #ifdef CONFIG_DEBUG_LCD
-# define lcddbg(format, ...)  vdbg(format, ##__VA_ARGS__)
+# define lcddbg(format, ...)  info(format, ##__VA_ARGS__)
 #else
 # define lcddbg(x...)
 #endif
@@ -307,7 +307,7 @@ int lcd_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
 int lcd_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
     size_t npixels)
 {
-  gvdbg("Not implemented\n");
+  ginfo("Not implemented\n");
   return -ENOSYS;
 }
 
@@ -322,7 +322,7 @@ int lcd_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
 static int lcd_getvideoinfo(FAR struct lcd_dev_s *dev,
     FAR struct fb_videoinfo_s *vinfo)
 {
-  DEBUGASSERT(dev && vinfo);gvdbg("fmt: %d xres: %d yres: %d nplanes: %d\n",
+  DEBUGASSERT(dev && vinfo);ginfo("fmt: %d xres: %d yres: %d nplanes: %d\n",
       g_videoinfo.fmt, g_videoinfo.xres, g_videoinfo.yres, g_videoinfo.nplanes);
   memcpy(vinfo, &g_videoinfo, sizeof(struct fb_videoinfo_s));
   return OK;
@@ -339,7 +339,7 @@ static int lcd_getvideoinfo(FAR struct lcd_dev_s *dev,
 static int lcd_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
     FAR struct lcd_planeinfo_s *pinfo)
 {
-  DEBUGASSERT(dev && pinfo && planeno == 0);gvdbg("planeno: %d bpp: %d\n", planeno, g_planeinfo.bpp);
+  DEBUGASSERT(dev && pinfo && planeno == 0);ginfo("planeno: %d bpp: %d\n", planeno, g_planeinfo.bpp);
   memcpy(pinfo, &g_planeinfo, sizeof(struct lcd_planeinfo_s));
   return OK;
 }
@@ -355,7 +355,7 @@ static int lcd_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
 
 static int lcd_getpower(struct lcd_dev_s *dev)
 {
-  gvdbg("power: %d\n", 0);
+  ginfo("power: %d\n", 0);
   return g_lcddev.power;
 }
 
@@ -376,7 +376,7 @@ static int lcd_setpower(struct lcd_dev_s *dev, int power)
     return OK;
   }
 
-  gvdbg("power: %d\n", power);
+  ginfo("power: %d\n", power);
   DEBUGASSERT(power <= CONFIG_LCD_MAXPOWER);
 
   /* Set new power level */
@@ -405,7 +405,7 @@ static int lcd_setpower(struct lcd_dev_s *dev, int power)
     }
     else
     {
-      gvdbg("powering LCD off...\n");
+      ginfo("powering LCD off...\n");
       /* Switch pin from PWL to LT */
       reg &= ~ASCONF_PWL_ENA;
       putreg8(reg, ASIC_CONF_REG);
@@ -426,7 +426,7 @@ static int lcd_setpower(struct lcd_dev_s *dev, int power)
 
 static int lcd_getcontrast(struct lcd_dev_s *dev)
 {
-  gvdbg("Not implemented\n");
+  ginfo("Not implemented\n");
   return -ENOSYS;
 }
 
@@ -440,7 +440,7 @@ static int lcd_getcontrast(struct lcd_dev_s *dev)
 
 static int lcd_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
 {
-  gvdbg("Not implemented\n");
+  ginfo("Not implemented\n");
   return -ENOSYS;
 }
 
@@ -453,7 +453,7 @@ static int lcd_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
  **************************************************************************************/
 static inline void lcd_initialize(void)
 {
-  gvdbg("%s: initializing LCD.\n",__FUNCTION__);
+  ginfo("%s: initializing LCD.\n",__FUNCTION__);
   calypso_reset_set(RESET_EXT, 0);
   usleep(5000);
   uwire_init();
@@ -478,7 +478,7 @@ static inline void lcd_initialize(void)
 
 int board_lcd_initialize(void)
 {
-  gvdbg("Initializing\n");
+  ginfo("Initializing\n");
 
   lcd_initialize();
 

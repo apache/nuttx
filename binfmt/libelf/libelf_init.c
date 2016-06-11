@@ -65,7 +65,7 @@
 #endif
 
 #ifdef CONFIG_ELF_DUMPBUFFER
-# define elf_dumpbuffer(m,b,n) bvdbgdumpbuffer(m,b,n)
+# define elf_dumpbuffer(m,b,n) binfodumpbuffer(m,b,n)
 #else
 # define elf_dumpbuffer(m,b,n)
 #endif
@@ -145,7 +145,7 @@ int elf_init(FAR const char *filename, FAR struct elf_loadinfo_s *loadinfo)
 {
   int ret;
 
-  bvdbg("filename: %s loadinfo: %p\n", filename, loadinfo);
+  binfo("filename: %s loadinfo: %p\n", filename, loadinfo);
 
   /* Clear the load info structure */
 

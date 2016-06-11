@@ -111,10 +111,10 @@
 
 #ifdef CONFIG_DEBUG_LCD
 #  define lcddbg         dbg
-#  define lcdvdbg        vdbg
+#  define lcdinfo        info
 #else
 #  define lcddbg(x...)
-#  define lcdvdbg(x...)
+#  define lcdinfo(x...)
 #endif
 
 /**************************************************************************************
@@ -355,7 +355,7 @@ int board_lcd_initialize(void)
 
   if (!g_ssd1289drvr)
     {
-      lcdvdbg("Initializing\n");
+      lcdinfo("Initializing\n");
 
       /* Configure GPIO pins and configure the FSMC to support the LCD */
 

@@ -243,7 +243,7 @@ static ssize_t sam_read(struct file *filep, char *buffer, size_t buflen)
   ssize_t retval;
   int ret;
 
-  fvdbg("buffer=%p buflen=%d\n", buffer, (int)buflen);
+  finfo("buffer=%p buflen=%d\n", buffer, (int)buflen);
 
   /* Get exclusive access to the TRNG harware */
 
@@ -283,7 +283,7 @@ static ssize_t sam_read(struct file *filep, char *buffer, size_t buflen)
     {
       ret = sem_wait(&g_trngdev.waitsem);
 
-      fvdbg("Awakened: nsamples=%d maxsamples=%d ret=%d\n",
+      finfo("Awakened: nsamples=%d maxsamples=%d ret=%d\n",
             g_trngdev.nsamples, g_trngdev.maxsamples, ret);
 
       if (ret < 0)
@@ -320,7 +320,7 @@ errout:
 
   sem_post(&g_trngdev.exclsem);
 
-  fvdbg("Return %d\n", (int)retval);
+  finfo("Return %d\n", (int)retval);
   return retval;
 }
 
@@ -346,7 +346,7 @@ void up_rnginitialize(void)
 {
   int ret;
 
-  fvdbg("Initializing TRNG hardware\n");
+  finfo("Initializing TRNG hardware\n");
 
   /* Initialize the device structure */
 

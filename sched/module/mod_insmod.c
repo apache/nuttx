@@ -67,7 +67,7 @@
 #endif
 
 #ifdef CONFIG_MODULE_DUMPBUFFER
-# define mod_dumpbuffer(m,b,n) svdbgdumpbuffer(m,b,n)
+# define mod_dumpbuffer(m,b,n) sinfodumpbuffer(m,b,n)
 #else
 # define mod_dumpbuffer(m,b,n)
 #endif
@@ -191,7 +191,7 @@ int insmod(FAR const char *filename, FAR const char *modulename)
   int ret;
 
   DEBUGASSERT(filename != NULL && modulename != NULL);
-  svdbg("Loading file: %s\n", filename);
+  sinfo("Loading file: %s\n", filename);
 
   /* Get exclusive access to the module registry */
 

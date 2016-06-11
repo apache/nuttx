@@ -63,14 +63,14 @@
 
 #ifdef CONFIG_MODEM_U_BLOX_DEBUG
 #  define m_dbg    dbg
-#  define m_vdbg   vdbg
+#  define m_info   info
 #  define m_vlldbg  lldbg
-#  define m_vllvdbg llvdbg
+#  define m_vllinfo llinfo
 #else
 #  define m_dbg(x...)
-#  define m_vdbg(x...)
+#  define m_info(x...)
 #  define m_lldbg(x...)
-#  define m_llvdbg(x...)
+#  define m_llinfo(x...)
 #endif
 
 #define UBXMDM_REGISTER_COUNT                           \

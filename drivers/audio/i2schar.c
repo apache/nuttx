@@ -89,16 +89,16 @@
 #  define i2sdbg         dbg
 #  define i2slldbg       lldbg
 #  ifdef CONFIG_DEBUG_INFO
-#    define i2svdbg      dbg
-#    define i2sllvdbg    lldbg
+#    define i2sinfo      dbg
+#    define i2sllinfo    lldbg
 #  else
-#    define i2svdbg(x...)
+#    define i2sinfo(x...)
 #  endif
 #else
 #  define i2sdbg(x...)
 #  define i2slldbg(x...)
-#  define i2svdbg(x...)
-#  define i2sllvdbg(x...)
+#  define i2sinfo(x...)
+#  define i2sllinfo(x...)
 #endif
 
 /****************************************************************************
@@ -174,7 +174,7 @@ static void i2schar_rxcallback(FAR struct i2s_dev_s *dev,
   FAR struct i2schar_dev_s *priv = (FAR struct i2schar_dev_s *)arg;
 
   DEBUGASSERT(priv && apb);
-  i2svdbg("apb=%p nbytes=%d result=%d\n", apb, apb->nbytes, result);
+  i2sinfo("apb=%p nbytes=%d result=%d\n", apb, apb->nbytes, result);
 
   /* REVISIT: If you want this to actually do something other than
    * test I2S data transfer, then this is the point where you would
@@ -185,7 +185,7 @@ static void i2schar_rxcallback(FAR struct i2s_dev_s *dev,
    * now.
    */
 
-  i2svdbg("Freeing apb=%p crefs=%d\n", apb, apb->crefs);
+  i2sinfo("Freeing apb=%p crefs=%d\n", apb, apb->crefs);
   apb_free(apb);
 }
 
@@ -209,7 +209,7 @@ static void i2schar_txcallback(FAR struct i2s_dev_s *dev,
   FAR struct i2schar_dev_s *priv = (FAR struct i2schar_dev_s *)arg;
 
   DEBUGASSERT(priv && apb);
-  i2svdbg("apb=%p nbytes=%d result=%d\n", apb, apb->nbytes, result);
+  i2sinfo("apb=%p nbytes=%d result=%d\n", apb, apb->nbytes, result);
 
   /* REVISIT: If you want this to actually do something other than
    * test I2S data transfer, then this is the point where you would
@@ -220,7 +220,7 @@ static void i2schar_txcallback(FAR struct i2s_dev_s *dev,
    * now.
    */
 
-  i2svdbg("Freeing apb=%p crefs=%d\n", apb, apb->crefs);
+  i2sinfo("Freeing apb=%p crefs=%d\n", apb, apb->crefs);
   apb_free(apb);
 }
 
@@ -241,7 +241,7 @@ static ssize_t i2schar_read(FAR struct file *filep, FAR char *buffer,
   size_t nbytes;
   int ret;
 
-  i2svdbg("buffer=%p buflen=%d\n", buffer, (int)buflen);
+  i2sinfo("buffer=%p buflen=%d\n", buffer, (int)buflen);
 
   /* Get our private data structure */
 
@@ -316,7 +316,7 @@ static ssize_t i2schar_write(FAR struct file *filep, FAR const char *buffer,
   size_t nbytes;
   int ret;
 
-  i2svdbg("buffer=%p buflen=%d\n", buffer, (int)buflen);
+  i2sinfo("buffer=%p buflen=%d\n", buffer, (int)buflen);
 
   /* Get our private data structure */
 

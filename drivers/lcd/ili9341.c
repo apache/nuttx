@@ -371,10 +371,10 @@
 
 #ifdef CONFIG_DEBUG_LCD
 #  define lcddbg       dbg
-#  define lcdvdbg      vdbg
+#  define lcdinfo      info
 #else
 #  define lcddbg(x...)
-#  define lcdvdbg(x...)
+#  define lcdinfo(x...)
 #endif
 
 /****************************************************************************
@@ -791,11 +791,11 @@ static int ili9341_hwinitialize(FAR struct ili9341_dev_s *dev)
 
   /* Reset the lcd display to the default state */
 
-  lcdvdbg("ili9341 LCD driver: Software Reset\n");
+  lcdinfo("ili9341 LCD driver: Software Reset\n");
   lcd->sendcmd(lcd, ILI9341_SOFTWARE_RESET);
   up_mdelay(5);
 
-  lcdvdbg("ili9341 LCD driver: set Memory Access Control: %04x\n", dev->orient);
+  lcdinfo("ili9341 LCD driver: set Memory Access Control: %04x\n", dev->orient);
   lcd->sendcmd(lcd, ILI9341_MEMORY_ACCESS_CONTROL);
   lcd->sendparam(lcd, dev->orient);
 
@@ -809,13 +809,13 @@ static int ili9341_hwinitialize(FAR struct ili9341_dev_s *dev)
 
   /* 16 bit RGB565 */
 
-  lcdvdbg("ili9341 LCD driver: Set Pixel Format: %04x\n",
+  lcdinfo("ili9341 LCD driver: Set Pixel Format: %04x\n",
       ILI9341_PIXSET_16BITMCU_PARAM1);
   lcd->sendparam(lcd, ILI9341_PIXSET_16BITMCU_PARAM1);
 
   /* 18 bit RGB666, add settings here */
 
-  lcdvdbg("ili9341 LCD driver: Set Interface control\n");
+  lcdinfo("ili9341 LCD driver: Set Interface control\n");
   lcd->sendcmd(lcd, ILI9341_INTERFACE_CONTROL);
   lcd->sendparam(lcd, ILI9341_IFCTL_PARAM1);
   lcd->sendparam(lcd, ILI9341_IFCTL_PARAM2);
@@ -823,7 +823,7 @@ static int ili9341_hwinitialize(FAR struct ili9341_dev_s *dev)
 
   /* Sleep out */
 
-  lcdvdbg("ili9341 LCD driver: Sleep Out\n");
+  lcdinfo("ili9341 LCD driver: Sleep Out\n");
   lcd->sendcmd(lcd, ILI9341_SLEEP_OUT);
   up_mdelay(120);
 
@@ -948,7 +948,7 @@ static int ili9341_getvideoinfo(FAR struct lcd_dev_s *dev,
       vinfo->yres = ili9341_getyres(priv);
       vinfo->nplanes = 1;
 
-      lcdvdbg("fmt: %d xres: %d yres: %d nplanes: %d\n",
+      lcdinfo("fmt: %d xres: %d yres: %d nplanes: %d\n",
       vinfo->fmt, vinfo->xres, vinfo->yres, vinfo->nplanes);
 
       return OK;
@@ -989,7 +989,7 @@ static int ili9341_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
       pinfo->bpp    = priv->bpp;
       pinfo->buffer = (FAR uint8_t *)priv->runbuffer;  /* Run scratch buffer */
 
-      lcdvdbg("planeno: %d bpp: %d\n", planeno, pinfo->bpp);
+      lcdinfo("planeno: %d bpp: %d\n", planeno, pinfo->bpp);
 
       return OK;
     }
@@ -1103,7 +1103,7 @@ static int ili9341_setpower(FAR struct lcd_dev_s *dev, int power)
 
 static int ili9341_getcontrast(struct lcd_dev_s *dev)
 {
-  lcdvdbg("Not implemented\n");
+  lcdinfo("Not implemented\n");
   return -ENOSYS;
 }
 
@@ -1125,7 +1125,7 @@ static int ili9341_getcontrast(struct lcd_dev_s *dev)
 
 static int ili9341_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
 {
-  lcdvdbg("contrast: %d\n", contrast);
+  lcdinfo("contrast: %d\n", contrast);
   return -ENOSYS;
 }
 

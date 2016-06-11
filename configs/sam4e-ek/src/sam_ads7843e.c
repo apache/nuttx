@@ -153,7 +153,7 @@ static int tsc_attach(FAR struct ads7843e_config_s *state, xcpt_t isr)
 {
   /* Attach the ADS7843E interrupt */
 
-  ivdbg("Attaching %p to IRQ %d\n", isr, SAM_TCS_IRQ);
+  iinfo("Attaching %p to IRQ %d\n", isr, SAM_TCS_IRQ);
   return irq_attach(SAM_TCS_IRQ, isr);
 }
 
@@ -161,7 +161,7 @@ static void tsc_enable(FAR struct ads7843e_config_s *state, bool enable)
 {
   /* Attach and enable, or detach and disable */
 
-  ivdbg("IRQ:%d enable:%d\n", SAM_TCS_IRQ, enable);
+  iinfo("IRQ:%d enable:%d\n", SAM_TCS_IRQ, enable);
   if (enable)
     {
       sam_gpioirqenable(SAM_TCS_IRQ);
@@ -191,7 +191,7 @@ static bool tsc_busy(FAR struct ads7843e_config_s *state)
 #if defined(CONFIG_DEBUG_INPUT) && defined(CONFIG_DEBUG_INFO)
   if (busy != last)
     {
-      ivdbg("busy:%d\n", busy);
+      iinfo("busy:%d\n", busy);
       last = busy;
     }
 #endif
@@ -204,7 +204,7 @@ static bool tsc_pendown(FAR struct ads7843e_config_s *state)
   /* The /PENIRQ value is active low */
 
   bool pendown = !sam_gpioread(GPIO_TCS_IRQ);
-  ivdbg("pendown:%d\n", pendown);
+  iinfo("pendown:%d\n", pendown);
   return pendown;
 }
 

@@ -66,14 +66,14 @@
 #ifdef SSP_DEBUG
 #  define sspdbg  lldbg
 #  ifdef SSP_VERBOSE
-#    define sspvdbg lldbg
+#    define sspinfo lldbg
 #  else
-#    define sspvdbg(x...)
+#    define sspinfo(x...)
 #  endif
 #else
 #  undef SSP_VERBOSE
 #  define sspdbg(x...)
-#  define sspvdbg(x...)
+#  define sspinfo(x...)
 #endif
 
 /* Dump GPIO registers */

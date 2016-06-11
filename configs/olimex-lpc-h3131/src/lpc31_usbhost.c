@@ -104,7 +104,7 @@ static int ehci_waiter(int argc, char *argv[])
 {
   FAR struct usbhost_hubport_s *hport;
 
-  uvdbg("ehci_waiter:  Running\n");
+  uinfo("ehci_waiter:  Running\n");
   for (;;)
     {
       /* Wait for the device to change state */
@@ -261,7 +261,7 @@ int lpc31_usbhost_initialize(void)
 
 void lpc31_usbhost_vbusdrive(int rhport, bool enable)
 {
-  uvdbg("RHPort%d: enable=%d\n", rhport+1, enable);
+  uinfo("RHPort%d: enable=%d\n", rhport+1, enable);
 
   /* The LPC3131 has only a single root hub port */
 

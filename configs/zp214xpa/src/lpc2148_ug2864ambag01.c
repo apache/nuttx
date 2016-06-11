@@ -101,10 +101,10 @@
 
 #ifdef CONFIG_DEBUG_LCD
 #  define lcddbg(format, ...)   dbg(format, ##__VA_ARGS__)
-#  define lcdvdbg(format, ...)  vdbg(format, ##__VA_ARGS__)
+#  define lcdinfo(format, ...)  info(format, ##__VA_ARGS__)
 #else
 #  define lcddbg(x...)
-#  define lcdvdbg(x...)
+#  define lcdinfo(x...)
 #endif
 
 /****************************************************************************
@@ -143,7 +143,7 @@ FAR struct lcd_dev_s *board_graphics_setup(unsigned int devno)
   regval32 = getreg32(RESET_DIR_REGISTER);
   putreg32(regval32 | bits32, RESET_DIR_REGISTER);
 
-  lcdvdbg("RESET Pin Config: PINSEL1: %08x PIN: %08x DIR: %08x\n",
+  lcdinfo("RESET Pin Config: PINSEL1: %08x PIN: %08x DIR: %08x\n",
           getreg32(LPC214X_PINSEL1), getreg32(RESET_PIN_REGISTER),
           getreg32(RESET_DIR_REGISTER));
 
@@ -152,7 +152,7 @@ FAR struct lcd_dev_s *board_graphics_setup(unsigned int devno)
   up_mdelay(20);
   putreg32(bits32, RESET_SET_REGISTER);
 
-  lcdvdbg("RESET release: PIN: %08x DIR: %08x\n",
+  lcdinfo("RESET release: PIN: %08x DIR: %08x\n",
           getreg32(RESET_PIN_REGISTER), getreg32(RESET_DIR_REGISTER));
 
   /* Get the SPI1 port interface */
@@ -173,7 +173,7 @@ FAR struct lcd_dev_s *board_graphics_setup(unsigned int devno)
         }
      else
         {
-          lcdvdbg("Bound SPI port 1 to OLED %d\n", devno);
+          lcdinfo("Bound SPI port 1 to OLED %d\n", devno);
 
           /* And turn the OLED on */
 

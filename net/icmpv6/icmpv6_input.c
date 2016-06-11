@@ -312,7 +312,7 @@ void icmpv6_input(FAR struct net_driver_s *dev)
       }
     }
 
-  nllvdbg("Outgoing ICMPv6 packet length: %d (%d)\n",
+  nllinfo("Outgoing ICMPv6 packet length: %d (%d)\n",
           dev->d_len, (icmp->len[0] << 8) | icmp->len[1]);
 
 #ifdef CONFIG_NET_STATISTICS

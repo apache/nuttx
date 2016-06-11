@@ -78,14 +78,14 @@
 #ifdef CONFIG_SSP_DEBUG
 #  define sspdbg  lldbg
 #  ifdef CONFIG_SSP_VERBOSE
-#    define spivdbg lldbg
+#    define spiinfo lldbg
 #  else
-#    define spivdbg(x...)
+#    define spiinfo(x...)
 #  endif
 #else
 #  undef CONFIG_SSP_VERBOSE
 #  define sspdbg(x...)
-#  define spivdbg(x...)
+#  define spiinfo(x...)
 #endif
 
 
@@ -576,7 +576,7 @@ static void ssp_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
        * and (3) there are more bytes to be sent.
        */
 
-      spivdbg("TX: rxpending: %d nwords: %d\n", rxpending, nwords);
+      spiinfo("TX: rxpending: %d nwords: %d\n", rxpending, nwords);
       while ((ssp_getreg(priv, LPC43_SSP_SR_OFFSET) & SSP_SR_TNF) &&
              (rxpending < LPC43_SSP_FIFOSZ) && nwords)
         {
@@ -599,7 +599,7 @@ static void ssp_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
 
       /* Now, read the RX data from the RX FIFO while the RX FIFO is not empty */
 
-      spivdbg("RX: rxpending: %d\n", rxpending);
+      spiinfo("RX: rxpending: %d\n", rxpending);
       while (ssp_getreg(priv, LPC43_SSP_SR_OFFSET) & SSP_SR_RNE)
         {
           data = ssp_getreg(priv, LPC43_SSP_DR_OFFSET);

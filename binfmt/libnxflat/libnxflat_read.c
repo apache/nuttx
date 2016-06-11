@@ -114,7 +114,7 @@ int nxflat_read(struct nxflat_loadinfo_s *loadinfo, char *buffer, int readsize, 
   int     bytesleft;   /* Number of bytes of .data left to read */
   int     bytesread;   /* Total number of bytes read */
 
-  bvdbg("Read %d bytes from offset %d\n", readsize, offset);
+  binfo("Read %d bytes from offset %d\n", readsize, offset);
 
   /* Seek to the position in the object file where the initialized
    * data is saved.

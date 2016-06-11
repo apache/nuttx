@@ -61,14 +61,14 @@
 
 #ifdef CONFIG_DEBUG_CAN
 #  define candbg    dbg
-#  define canvdbg   vdbg
+#  define caninfo   info
 #  define canlldbg  lldbg
-#  define canllvdbg llvdbg
+#  define canllinfo llinfo
 #else
 #  define candbg(x...)
-#  define canvdbg(x...)
+#  define caninfo(x...)
 #  define canlldbg(x...)
-#  define canllvdbg(x...)
+#  define canllinfo(x...)
 #endif
 
 /****************************************************************************

@@ -1165,7 +1165,7 @@ static int enc_txpoll(struct net_driver_s *dev)
    * the field d_len is set to a value > 0.
    */
 
-  nllvdbg("Poll result: d_len=%d\n", priv->dev.d_len);
+  nllinfo("Poll result: d_len=%d\n", priv->dev.d_len);
 
   if (priv->dev.d_len > 0)
     {
@@ -1331,7 +1331,7 @@ static void enc_rxldpkt(FAR struct enc_driver_s *priv,
 {
   DEBUGASSERT(priv != NULL && descr != NULL);
 
-  nllvdbg("load packet @%04x len: %d\n", descr->addr, descr->len);
+  nllinfo("load packet @%04x len: %d\n", descr->addr, descr->len);
 
   /* Set the rx data pointer to the start of the received packet (ERXRDPT) */
 
@@ -1403,7 +1403,7 @@ static void enc_rxrmpkt(FAR struct enc_driver_s *priv, FAR struct enc_descr_s *d
 {
   uint16_t addr;
 
-  nllvdbg("free descr: %p\n", descr);
+  nllinfo("free descr: %p\n", descr);
 
   /* If it is the last descriptor in the queue, advance ERXTAIL.
    * This way it is possible that gaps occcur. Maybe pending packets
@@ -1420,7 +1420,7 @@ static void enc_rxrmpkt(FAR struct enc_driver_s *priv, FAR struct enc_descr_s *d
 
           DEBUGASSERT(addr >= PKTMEM_RX_START &&  addr < PKTMEM_RX_END);
 
-          nllvdbg("ERXTAIL %04x\n", addr);
+          nllinfo("ERXTAIL %04x\n", addr);
 
           enc_wrreg(priv, ENC_ERXTAIL, addr);
 
@@ -1490,7 +1490,7 @@ static void enc_rxdispatch(FAR struct enc_driver_s *priv)
 #ifdef CONFIG_NET_IPv4
       if (BUF->type == HTONS(ETHTYPE_IP))
         {
-          nllvdbg("IPv4 frame\n");
+          nllinfo("IPv4 frame\n");
           NETDEV_RXIPV4(&priv->dev);
 
           /* Handle ARP on input then give the IPv4 packet to the network
@@ -1540,7 +1540,7 @@ static void enc_rxdispatch(FAR struct enc_driver_s *priv)
 #ifdef CONFIG_NET_IPv6
       if (BUF->type == HTONS(ETHTYPE_IP6))
         {
-          nllvdbg("Iv6 frame\n");
+          nllinfo("Iv6 frame\n");
           NETDEV_RXIPV6(&priv->dev);
 
           /* Give the IPv6 packet to the network layer */
@@ -1587,7 +1587,7 @@ static void enc_rxdispatch(FAR struct enc_driver_s *priv)
 #ifdef CONFIG_NET_ARP
       if (BUF->type == htons(ETHTYPE_ARP))
         {
-          nllvdbg("ARP packet received (%02x)\n", BUF->type);
+          nllinfo("ARP packet received (%02x)\n", BUF->type);
           NETDEV_RXARP(&priv->dev);
 
           arp_arpin(&priv->dev);
@@ -1684,7 +1684,7 @@ static void enc_pktif(FAR struct enc_driver_s *priv)
       rxstat        = (uint32_t)rsv[7] << 24 | (uint32_t)rsv[6] << 16 |
                       (uint32_t)rsv[5] << 8  | (uint32_t)rsv[4];
 
-      nllvdbg("Receiving packet, nextpkt: %04x pktlen: %d rxstat: %08x pktcnt: %d\n",
+      nllinfo("Receiving packet, nextpkt: %04x pktlen: %d rxstat: %08x pktcnt: %d\n",
              priv->nextpkt, pktlen, rxstat, pktcnt);
 
       /* We enqueue the packet first and remove it later if its faulty.
@@ -1859,7 +1859,7 @@ static void enc_irqworker(FAR void *arg)
        * settings.
        */
 
-      nllvdbg("EIR: %04x\n", eir);
+      nllinfo("EIR: %04x\n", eir);
 
       if ((eir & EIR_DMAIF) != 0) /* DMA interrupt */
         {
@@ -2420,7 +2420,7 @@ static int enc_rxavail(struct net_driver_s *dev)
 
   if (!sq_empty(&priv->rxqueue))
     {
-      nllvdbg("RX queue not empty, trying to dispatch\n");
+      nllinfo("RX queue not empty, trying to dispatch\n");
       enc_rxdispatch(priv);
     }
 
@@ -2546,7 +2546,7 @@ static void enc_pwrsave(FAR struct enc_driver_s *priv)
 {
   uint16_t regval;
 
-  nllvdbg("Set PWRSV\n");
+  nllinfo("Set PWRSV\n");
 
   /* 1. Turn off AES */
 
@@ -2597,7 +2597,7 @@ static void enc_ldmacaddr(FAR struct enc_driver_s *priv)
   uint16_t regval;
   uint8_t *mac = priv->dev.d_mac.ether_addr_octet;
 
-  nvdbg("Using ENCX24J600's built in MAC address\n");
+  ninfo("Using ENCX24J600's built in MAC address\n");
 
   regval = enc_rdreg(priv, ENC_MAADR1);
   mac[0] = regval & 0xff;
@@ -2648,7 +2648,7 @@ static void enc_setmacaddr(FAR struct enc_driver_s *priv)
     {
       /* There is a user defined mac address. Write it to the ENCXJ600 */
 
-      nvdbg("Using an user defined MAC address\n");
+      ninfo("Using an user defined MAC address\n");
 
       enc_wrreg(priv, ENC_MAADR1, (uint16_t)mac[1] << 8 | (uint16_t)mac[0]);
       enc_wrreg(priv, ENC_MAADR2, (uint16_t)mac[3] << 8 | (uint16_t)mac[2]);
@@ -2728,7 +2728,7 @@ static int enc_reset(FAR struct enc_driver_s *priv)
   int ret;
   uint16_t regval;
 
-  nllvdbg("Reset\n");
+  nllinfo("Reset\n");
 
   do
     {
@@ -2793,7 +2793,7 @@ static int enc_reset(FAR struct enc_driver_s *priv)
     }
   while ((regval & PHSTAT1_ANDONE) != 0);
 
-  nllvdbg("Auto-negotation completed\n");
+  nllinfo("Auto-negotation completed\n");
 
 #endif
 

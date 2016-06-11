@@ -1379,7 +1379,7 @@ static int sam_transmit(struct sam_emac_s *priv, int qid)
   txhead = xfrq->txhead;
   txdesc = &xfrq->txdesc[txhead];
 
-  nllvdbg("d_len: %d txhead[%d]: %d\n",  dev->d_len, qid, xfrq->txhead);
+  nllinfo("d_len: %d txhead[%d]: %d\n",  dev->d_len, qid, xfrq->txhead);
   sam_dumppacket("Transmit packet", dev->d_buf, dev->d_len);
 
   /* If no free TX descriptor, buffer can't be sent */
@@ -1460,7 +1460,7 @@ static int sam_transmit(struct sam_emac_s *priv, int qid)
 
   if (sam_txfree(priv, qid) < 1)
     {
-      nllvdbg("Disabling RX interrupts\n");
+      nllinfo("Disabling RX interrupts\n");
       sam_putreg(priv, SAM_EMAC_IDR_OFFSET, EMAC_INT_RCOMP);
     }
 
@@ -1646,7 +1646,7 @@ static int sam_recvframe(struct sam_emac_s *priv, int qid)
   arch_invalidate_dcache((uintptr_t)rxdesc,
                          (uintptr_t)rxdesc + sizeof(struct emac_rxdesc_s));
 
-  nllvdbg("Entry rxndx[%d]: %d\n", qid, rxndx);
+  nllinfo("Entry rxndx[%d]: %d\n", qid, rxndx);
 
   while ((rxdesc->addr & EMACRXD_ADDR_OWNER) != 0)
     {
@@ -1709,7 +1709,7 @@ static int sam_recvframe(struct sam_emac_s *priv, int qid)
         {
           if (rxndx == xfrq->rxndx)
             {
-              nllvdbg("ERROR: No EOF (Invalid or buffers too small)\n");
+              nllinfo("ERROR: No EOF (Invalid or buffers too small)\n");
               do
                 {
                   /* Give ownership back to the EMAC */
@@ -1767,7 +1767,7 @@ static int sam_recvframe(struct sam_emac_s *priv, int qid)
               /* Frame size from the EMAC */
 
               dev->d_len = (rxdesc->status & EMACRXD_STA_FRLEN_MASK);
-              nllvdbg("packet %d-%d (%d)\n", xfrq->rxndx, rxndx, dev->d_len);
+              nllinfo("packet %d-%d (%d)\n", xfrq->rxndx, rxndx, dev->d_len);
 
               /* All data have been copied in the application frame buffer,
                * release the RX descriptor(s).  Loop until all descriptors
@@ -1801,7 +1801,7 @@ static int sam_recvframe(struct sam_emac_s *priv, int qid)
                * all of the data.
                */
 
-              nllvdbg("rxndx: %d d_len: %d\n",
+              nllinfo("rxndx: %d d_len: %d\n",
                       xfrq->rxndx, dev->d_len);
               if (pktlen < dev->d_len)
                 {
@@ -1854,7 +1854,7 @@ static int sam_recvframe(struct sam_emac_s *priv, int qid)
   /* No packet was found */
 
   xfrq->rxndx = rxndx;
-  nllvdbg("Exit rxndx[%d]: %d\n", qid, xfrq->rxndx);
+  nllinfo("Exit rxndx[%d]: %d\n", qid, xfrq->rxndx);
   return -EAGAIN;
 }
 
@@ -1912,7 +1912,7 @@ static void sam_receive(struct sam_emac_s *priv, int qid)
 #ifdef CONFIG_NET_IPv4
       if (BUF->type == HTONS(ETHTYPE_IP))
         {
-          nllvdbg("IPv4 frame\n");
+          nllinfo("IPv4 frame\n");
           NETDEV_RXIPV4(&priv->dev);
 
           /* Handle ARP on input then give the IPv4 packet to the network
@@ -1953,7 +1953,7 @@ static void sam_receive(struct sam_emac_s *priv, int qid)
 #ifdef CONFIG_NET_IPv6
       if (BUF->type == HTONS(ETHTYPE_IP6))
         {
-          nllvdbg("Iv6 frame\n");
+          nllinfo("Iv6 frame\n");
           NETDEV_RXIPV6(&priv->dev);
 
           /* Give the IPv6 packet to the network layer */
@@ -1991,7 +1991,7 @@ static void sam_receive(struct sam_emac_s *priv, int qid)
 #ifdef CONFIG_NET_ARP
       if (BUF->type == htons(ETHTYPE_ARP))
         {
-          nllvdbg("ARP frame\n");
+          nllinfo("ARP frame\n");
           NETDEV_RXARP(&priv->dev);
 
           /* Handle ARP packet */
@@ -2286,7 +2286,7 @@ static inline void sam_interrupt_process(FAR struct sam_emac_s *priv, int qid)
   imr = sam_getreg(priv, SAM_EMAC_IMR_OFFSET);
   pending = isr & ~(imr | EMAC_INT_UNUSED);
 
-  nllvdbg("isr: %08x pending: %08x\n", isr, pending);
+  nllinfo("isr: %08x pending: %08x\n", isr, pending);
 
   /* Check for the receipt of an RX packet.
    *
@@ -2837,7 +2837,7 @@ static int sam_ifup(struct net_driver_s *dev)
 
   /* Configure the EMAC interface for normal operation. */
 
-  nllvdbg("Initialize the EMAC\n");
+  nllinfo("Initialize the EMAC\n");
   sam_emac_configure(priv);
   sam_queue_configure(priv, EMAC_QUEUE_1);
   sam_queue_configure(priv, EMAC_QUEUE_2);
@@ -2872,11 +2872,11 @@ static int sam_ifup(struct net_driver_s *dev)
     }
 
   while (sam_linkup(priv) == 0);
-  nllvdbg("Link detected \n");
+  nllinfo("Link detected \n");
 
   /* Enable normal MAC operation */
 
-  nllvdbg("Enable normal operation\n");
+  nllinfo("Enable normal operation\n");
 
   /* Set and activate a timer process */
 
@@ -2955,7 +2955,7 @@ static int sam_ifdown(struct net_driver_s *dev)
 
 static inline void sam_txavail_process(FAR struct sam_emac_s *priv)
 {
-  nllvdbg("ifup: %d\n", priv->ifup);
+  nllinfo("ifup: %d\n", priv->ifup);
 
   /* Ignore the notification if the interface is not yet up */
 
@@ -3208,7 +3208,7 @@ static int sam_addmac(struct net_driver_s *dev, const uint8_t *mac)
   unsigned int ndx;
   unsigned int bit;
 
-  nllvdbg("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
+  nllinfo("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
           mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 
   /* Calculate the 6-bit has table index */
@@ -3281,7 +3281,7 @@ static int sam_rmmac(struct net_driver_s *dev, const uint8_t *mac)
   unsigned int ndx;
   unsigned int bit;
 
-  nllvdbg("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
+  nllinfo("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
           mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 
   /* Calculate the 6-bit has table index */
@@ -3476,19 +3476,19 @@ static void sam_phydump(struct sam_emac_s *priv)
   regval |= EMAC_NCR_MPE;
   sam_putreg(priv, SAM_EMAC_NCR_OFFSET, regval);
 
-  nllvdbg("%s Registers (Address %02x)\n",
+  nllinfo("%s Registers (Address %02x)\n",
           priv->attr->rmii ? "RMII" : "MII", priv->phyaddr);
 
   sam_phyread(priv, priv->phyaddr, MII_MCR, &phyval);
-  nllvdbg("  MCR:       %04x\n", phyval);
+  nllinfo("  MCR:       %04x\n", phyval);
   sam_phyread(priv, priv->phyaddr, MII_MSR, &phyval);
-  nllvdbg("  MSR:       %04x\n", phyval);
+  nllinfo("  MSR:       %04x\n", phyval);
   sam_phyread(priv, priv->phyaddr, MII_ADVERTISE, &phyval);
-  nllvdbg("  ADVERTISE: %04x\n", phyval);
+  nllinfo("  ADVERTISE: %04x\n", phyval);
   sam_phyread(priv, priv->phyaddr, MII_LPA, &phyval);
-  nllvdbg("  LPR:       %04x\n", phyval);
+  nllinfo("  LPR:       %04x\n", phyval);
   sam_phyread(priv, priv->phyaddr, priv->attr->physr, &phyval);
-  nllvdbg("  PHYSR:     %04x\n", phyval);
+  nllinfo("  PHYSR:     %04x\n", phyval);
 
   /* Disable management port */
 
@@ -3716,7 +3716,7 @@ static int sam_phyreset(struct sam_emac_s *priv)
   int timeout;
   int ret;
 
-  nllvdbg(" sam_phyreset\n");
+  nllinfo(" sam_phyreset\n");
 
   /* Enable management port */
 
@@ -3783,7 +3783,7 @@ static int sam_phyfind(struct sam_emac_s *priv, uint8_t *phyaddr)
   unsigned int offset;
   int ret = -ESRCH;
 
-  nllvdbg("Find a valid PHY address\n");
+  nllinfo("Find a valid PHY address\n");
 
   /* Enable management port */
 
@@ -3828,10 +3828,10 @@ static int sam_phyfind(struct sam_emac_s *priv, uint8_t *phyaddr)
 
   if (ret == OK)
     {
-      nllvdbg("  PHYID1: %04x PHY addr: %d\n", phyval, candidate);
+      nllinfo("  PHYID1: %04x PHY addr: %d\n", phyval, candidate);
       *phyaddr = candidate;
       sam_phyread(priv, candidate, priv->attr->physr, &phyval);
-      nllvdbg("  PHYSR:  %04x PHY addr: %d\n", phyval, candidate);
+      nllinfo("  PHYSR:  %04x PHY addr: %d\n", phyval, candidate);
     }
 
   /* Disable management port */
@@ -4011,7 +4011,7 @@ static int sam_autonegotiate(struct sam_emac_s *priv)
       goto errout;
     }
 
-  nllvdbg("PHYID1: %04x PHY address: %02x\n", phyid1, priv->phyaddr);
+  nllinfo("PHYID1: %04x PHY address: %02x\n", phyid1, priv->phyaddr);
 
   ret = sam_phyread(priv, priv->phyaddr, MII_PHYID2, &phyid2);
   if (ret < 0)
@@ -4020,15 +4020,15 @@ static int sam_autonegotiate(struct sam_emac_s *priv)
       goto errout;
     }
 
-  nllvdbg("PHYID2: %04x PHY address: %02x\n", phyid2, priv->phyaddr);
+  nllinfo("PHYID2: %04x PHY address: %02x\n", phyid2, priv->phyaddr);
 
   if (phyid1 == priv->attr->msoui &&
      ((phyid2 & MII_PHYID2_OUI_MASK) >> MII_PHYID2_OUI_SHIFT) ==
       (uint16_t)priv->attr->lsoui)
     {
-      nllvdbg("  Vendor Model Number:   %04x\n",
+      nllinfo("  Vendor Model Number:   %04x\n",
              (phyid2 & MII_PHYID2_MODEL_MASK) >> MII_PHYID2_MODEL_SHIFT);
-      nllvdbg("  Model Revision Number: %04x\n",
+      nllinfo("  Model Revision Number: %04x\n",
              (phyid2 & MII_PHYID2_REV_MASK) >> MII_PHYID2_REV_SHIFT);
     }
   else
@@ -4100,7 +4100,7 @@ static int sam_autonegotiate(struct sam_emac_s *priv)
       goto errout;
     }
 
-  nllvdbg("  MCR: %04x\n", mcr);
+  nllinfo("  MCR: %04x\n", mcr);
 
   /* Check AutoNegotiate complete */
 
@@ -4120,7 +4120,7 @@ static int sam_autonegotiate(struct sam_emac_s *priv)
         {
           /* Yes.. break out of the loop */
 
-          nllvdbg("AutoNegotiate complete\n");
+          nllinfo("AutoNegotiate complete\n");
           break;
         }
 
@@ -4288,7 +4288,7 @@ static bool sam_linkup(struct sam_emac_s *priv)
 
   /* Start the EMAC transfers */
 
-  nllvdbg("Link is up\n");
+  nllinfo("Link is up\n");
   linkup = true;
 
 errout:
@@ -4480,7 +4480,7 @@ static inline void sam_ethgpioconfig(struct sam_emac_s *priv)
   else
 #endif
     {
-      nvdbg("ERROR: emac=%d\n", priv->attr->emac);
+      ninfo("ERROR: emac=%d\n", priv->attr->emac);
     }
 }
 
@@ -4803,7 +4803,7 @@ static void sam_macaddress(struct sam_emac_s *priv)
   struct net_driver_s *dev = &priv->dev;
   uint32_t regval;
 
-  nllvdbg("%s MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
+  nllinfo("%s MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
           dev->d_ifname,
           dev->d_mac.ether_addr_octet[0], dev->d_mac.ether_addr_octet[1],
           dev->d_mac.ether_addr_octet[2], dev->d_mac.ether_addr_octet[3],
@@ -4869,7 +4869,7 @@ static void sam_ipv6multicast(struct sam_emac_s *priv)
   mac[4] = tmp16 & 0xff;
   mac[5] = tmp16 >> 8;
 
-  nvdbg("IPv6 Multicast: %02x:%02x:%02x:%02x:%02x:%02x\n",
+  ninfo("IPv6 Multicast: %02x:%02x:%02x:%02x:%02x:%02x\n",
         mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 
   (void)sam_addmac(dev, mac);
@@ -5006,7 +5006,7 @@ static int sam_emac_configure(struct sam_emac_s *priv)
 {
   uint32_t regval;
 
-  nllvdbg("Entry\n");
+  nllinfo("Entry\n");
 
   /* Enable clocking to the EMAC peripheral */
 
@@ -5270,7 +5270,7 @@ int sam_emac_setmacaddr(int intf, uint8_t mac[6])
   dev = &priv->dev;
   memcpy(dev->d_mac.ether_addr_octet, mac, 6);
 
-  nvdbg("%s MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
+  ninfo("%s MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
         dev->d_ifname,
         dev->d_mac.ether_addr_octet[0], dev->d_mac.ether_addr_octet[1],
         dev->d_mac.ether_addr_octet[2], dev->d_mac.ether_addr_octet[3],

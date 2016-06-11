@@ -617,7 +617,7 @@ static int usbclass_sndpacket(FAR struct pl2303_dev_s *priv)
    * to be sent).
    */
 
-  uvdbg("head=%d tail=%d nwrq=%d empty=%d\n",
+  uinfo("head=%d tail=%d nwrq=%d empty=%d\n",
         priv->serdev.xmit.head, priv->serdev.xmit.tail,
         priv->nwrq, sq_empty(&priv->reqlist));
 
@@ -1644,7 +1644,7 @@ static int usbclass_setup(FAR struct usbdevclass_driver_s *driver,
   index = GETUINT16(ctrl->index);
   len   = GETUINT16(ctrl->len);
 
-  uvdbg("type=%02x req=%02x value=%04x index=%04x len=%04x\n",
+  uinfo("type=%02x req=%02x value=%04x index=%04x len=%04x\n",
         ctrl->type, ctrl->req, value, index, len);
 
   switch (ctrl->type & USB_REQ_TYPE_MASK)
@@ -2227,7 +2227,7 @@ static void usbser_txint(FAR struct uart_dev_s *dev, bool enable)
    * send the next packet now.
    */
 
-  uvdbg("enable=%d head=%d tail=%d\n",
+  uinfo("enable=%d head=%d tail=%d\n",
         enable, priv->serdev.xmit.head, priv->serdev.xmit.tail);
 
   if (enable && priv->serdev.xmit.head != priv->serdev.xmit.tail)

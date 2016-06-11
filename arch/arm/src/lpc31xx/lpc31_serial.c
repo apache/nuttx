@@ -541,7 +541,7 @@ static int up_interrupt(int irq, void *context)
               /* Read the modem status register (MSR) to clear */
 
               status = getreg32(LPC31_UART_MSR);
-              fvdbg("MSR: %02x\n", status);
+              finfo("MSR: %02x\n", status);
               break;
             }
 
@@ -552,7 +552,7 @@ static int up_interrupt(int irq, void *context)
               /* Read the line status register (LSR) to clear */
 
               status = getreg32(LPC31_UART_LSR);
-              fvdbg("LSR: %02x\n", status);
+              finfo("LSR: %02x\n", status);
               break;
             }
 

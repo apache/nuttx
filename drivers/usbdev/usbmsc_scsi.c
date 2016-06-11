@@ -2622,7 +2622,7 @@ int usbmsc_scsi_main(int argc, char *argv[])
   uint16_t eventset;
   int ret;
 
-  uvdbg("Started\n");
+  uinfo("Started\n");
 
   /* Get the SCSI state data handed off from the initialization logic */
 
@@ -2636,7 +2636,7 @@ int usbmsc_scsi_main(int argc, char *argv[])
    * wait here until we are told to begin.  Start in the NOTINITIALIZED state
    */
 
-  uvdbg("Waiting to be signalled\n");
+  uinfo("Waiting to be signalled\n");
   usbmsc_scsi_lock(priv);
   priv->thstate = USBMSC_STATE_STARTED;
   while ((priv->theventset & USBMSC_EVENT_READY) != 0 &&
@@ -2645,7 +2645,7 @@ int usbmsc_scsi_main(int argc, char *argv[])
       usbmsc_scsi_wait(priv);
     }
 
-  uvdbg("Running\n");
+  uinfo("Running\n");
 
   /* Transition to the INITIALIZED/IDLE state */
 

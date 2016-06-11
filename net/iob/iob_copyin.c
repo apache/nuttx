@@ -97,7 +97,7 @@ static int iob_copyin_internal(FAR struct iob_s *iob, FAR const uint8_t *src,
   unsigned int avail;
   unsigned int total = len;
 
-  nllvdbg("iob=%p len=%u offset=%u\n", iob, len, offset);
+  nllinfo("iob=%p len=%u offset=%u\n", iob, len, offset);
   DEBUGASSERT(iob && src);
 
   /* The offset must applied to data that is already in the I/O buffer chain */
@@ -130,7 +130,7 @@ static int iob_copyin_internal(FAR struct iob_s *iob, FAR const uint8_t *src,
       dest  = &iob->io_data[iob->io_offset + offset];
       avail = iob->io_len - offset;
 
-      nllvdbg("iob=%p avail=%u len=%u next=%p\n", iob, avail, len, next);
+      nllinfo("iob=%p avail=%u len=%u next=%p\n", iob, avail, len, next);
 
       /* Will the rest of the copy fit into this buffer, overwriting
        * existing data.
@@ -187,7 +187,7 @@ static int iob_copyin_internal(FAR struct iob_s *iob, FAR const uint8_t *src,
       /* Copy from the user buffer to the I/O buffer.  */
 
       memcpy(dest, src, ncopy);
-      nllvdbg("iob=%p Copy %u bytes new len=%u\n",
+      nllinfo("iob=%p Copy %u bytes new len=%u\n",
               iob, ncopy, iob->io_len);
 
       /* Adjust the total length of the copy and the destination address in
@@ -227,7 +227,7 @@ static int iob_copyin_internal(FAR struct iob_s *iob, FAR const uint8_t *src,
           /* Add the new, empty I/O buffer to the end of the buffer chain. */
 
           iob->io_flink = next;
-          nllvdbg("iob=%p added to the chain\n", iob);
+          nllinfo("iob=%p added to the chain\n", iob);
         }
 
       iob = next;

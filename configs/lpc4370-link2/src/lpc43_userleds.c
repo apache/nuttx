@@ -68,15 +68,15 @@
 #  define leddbg  lldbg
 #  ifdef CONFIG_DEBUG_INFO
 #    define LED_VERBOSE 1
-#    define ledvdbg lldbg
+#    define ledinfo lldbg
 #  else
 #    undef LED_VERBOSE
-#    define ledvdbg(x...)
+#    define ledinfo(x...)
 #  endif
 #else
 #  undef LED_VERBOSE
 #  define leddbg(x...)
-#  define ledvdbg(x...)
+#  define ledinfo(x...)
 #endif
 
 /****************************************************************************

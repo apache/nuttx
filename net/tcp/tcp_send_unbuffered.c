@@ -302,7 +302,7 @@ static uint16_t tcpsend_interrupt(FAR struct net_driver_s *dev,
     }
 #endif
 
-  nllvdbg("flags: %04x acked: %d sent: %d\n",
+  nllinfo("flags: %04x acked: %d sent: %d\n",
           flags, pstate->snd_acked, pstate->snd_sent);
 
   /* If this packet contains an acknowledgement, then update the count of
@@ -348,7 +348,7 @@ static uint16_t tcpsend_interrupt(FAR struct net_driver_s *dev,
        */
 
       pstate->snd_acked = tcp_getsequence(tcp->ackno) - pstate->snd_isn;
-      nllvdbg("ACK: acked=%d sent=%d buflen=%d\n",
+      nllinfo("ACK: acked=%d sent=%d buflen=%d\n",
               pstate->snd_acked, pstate->snd_sent, pstate->snd_buflen);
 
       /* Have all of the bytes in the buffer been sent and acknowledged? */
@@ -392,7 +392,7 @@ static uint16_t tcpsend_interrupt(FAR struct net_driver_s *dev,
     {
       /* Report not connected */
 
-      nllvdbg("Lost connection\n");
+      nllinfo("Lost connection\n");
 
       net_lostconnection(pstate->snd_sock, flags);
       pstate->snd_sent = -ENOTCONN;
@@ -526,7 +526,7 @@ static uint16_t tcpsend_interrupt(FAR struct net_driver_s *dev,
            */
 
           seqno = pstate->snd_sent + pstate->snd_isn;
-          nllvdbg("SEND: sndseq %08x->%08x\n", conn->sndseq, seqno);
+          nllinfo("SEND: sndseq %08x->%08x\n", conn->sndseq, seqno);
           tcp_setsequence(conn->sndseq, seqno);
 
 #ifdef NEED_IPDOMAIN_SUPPORT
@@ -554,7 +554,7 @@ static uint16_t tcpsend_interrupt(FAR struct net_driver_s *dev,
               /* Update the amount of data sent (but not necessarily ACKed) */
 
               pstate->snd_sent += sndlen;
-              nllvdbg("SEND: acked=%d sent=%d buflen=%d\n",
+              nllinfo("SEND: acked=%d sent=%d buflen=%d\n",
                       pstate->snd_acked, pstate->snd_sent, pstate->snd_buflen);
 
             }

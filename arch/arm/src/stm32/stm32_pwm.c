@@ -125,19 +125,19 @@
 #  define pwmdbg              dbg
 #  define pwmlldbg            lldbg
 #  ifdef CONFIG_DEBUG_INFO
-#    define pwmvdbg           vdbg
-#    define pwmllvdbg         llvdbg
+#    define pwminfo           info
+#    define pwmllinfo         llinfo
 #    define pwm_dumpgpio(p,m) stm32_dumpgpio(p,m)
 #  else
-#    define pwmvdbg(x...)
-#    define pwmllvdbg(x...)
+#    define pwminfo(x...)
+#    define pwmllinfo(x...)
 #    define pwm_dumpgpio(p,m)
 #  endif
 #else
 #  define pwmdbg(x...)
 #  define pwmlldbg(x...)
-#  define pwmvdbg(x...)
-#  define pwmllvdbg(x...)
+#  define pwminfo(x...)
+#  define pwmllinfo(x...)
 #  define pwm_dumpgpio(p,m)
 #endif
 
@@ -972,23 +972,23 @@ static void pwm_putreg(struct stm32_pwmtimer_s *priv, int offset, uint16_t value
 #if defined(CONFIG_DEBUG_PWM) && defined(CONFIG_DEBUG_INFO)
 static void pwm_dumpregs(struct stm32_pwmtimer_s *priv, FAR const char *msg)
 {
-  pwmvdbg("%s:\n", msg);
-  pwmvdbg("  CR1: %04x CR2:  %04x SMCR:  %04x DIER:  %04x\n",
+  pwminfo("%s:\n", msg);
+  pwminfo("  CR1: %04x CR2:  %04x SMCR:  %04x DIER:  %04x\n",
           pwm_getreg(priv, STM32_GTIM_CR1_OFFSET),
           pwm_getreg(priv, STM32_GTIM_CR2_OFFSET),
           pwm_getreg(priv, STM32_GTIM_SMCR_OFFSET),
           pwm_getreg(priv, STM32_GTIM_DIER_OFFSET));
-  pwmvdbg("   SR: %04x EGR:  %04x CCMR1: %04x CCMR2: %04x\n",
+  pwminfo("   SR: %04x EGR:  %04x CCMR1: %04x CCMR2: %04x\n",
           pwm_getreg(priv, STM32_GTIM_SR_OFFSET),
           pwm_getreg(priv, STM32_GTIM_EGR_OFFSET),
           pwm_getreg(priv, STM32_GTIM_CCMR1_OFFSET),
           pwm_getreg(priv, STM32_GTIM_CCMR2_OFFSET));
-  pwmvdbg(" CCER: %04x CNT:  %04x PSC:   %04x ARR:   %04x\n",
+  pwminfo(" CCER: %04x CNT:  %04x PSC:   %04x ARR:   %04x\n",
           pwm_getreg(priv, STM32_GTIM_CCER_OFFSET),
           pwm_getreg(priv, STM32_GTIM_CNT_OFFSET),
           pwm_getreg(priv, STM32_GTIM_PSC_OFFSET),
           pwm_getreg(priv, STM32_GTIM_ARR_OFFSET));
-  pwmvdbg(" CCR1: %04x CCR2: %04x CCR3:  %04x CCR4:  %04x\n",
+  pwminfo(" CCR1: %04x CCR2: %04x CCR3:  %04x CCR4:  %04x\n",
           pwm_getreg(priv, STM32_GTIM_CCR1_OFFSET),
           pwm_getreg(priv, STM32_GTIM_CCR2_OFFSET),
           pwm_getreg(priv, STM32_GTIM_CCR3_OFFSET),
@@ -996,7 +996,7 @@ static void pwm_dumpregs(struct stm32_pwmtimer_s *priv, FAR const char *msg)
 #if defined(CONFIG_STM32_TIM1_PWM) || defined(CONFIG_STM32_TIM8_PWM)
   if (priv->timtype == TIMTYPE_ADVANCED)
     {
-      pwmvdbg("  RCR: %04x BDTR: %04x DCR:   %04x DMAR:  %04x\n",
+      pwminfo("  RCR: %04x BDTR: %04x DCR:   %04x DMAR:  %04x\n",
           pwm_getreg(priv, STM32_ATIM_RCR_OFFSET),
           pwm_getreg(priv, STM32_ATIM_BDTR_OFFSET),
           pwm_getreg(priv, STM32_ATIM_DCR_OFFSET),
@@ -1005,7 +1005,7 @@ static void pwm_dumpregs(struct stm32_pwmtimer_s *priv, FAR const char *msg)
   else
 #endif
     {
-      pwmvdbg("  DCR: %04x DMAR: %04x\n",
+      pwminfo("  DCR: %04x DMAR: %04x\n",
           pwm_getreg(priv, STM32_GTIM_DCR_OFFSET),
           pwm_getreg(priv, STM32_GTIM_DMAR_OFFSET));
     }
@@ -1068,14 +1068,14 @@ static int pwm_timer(FAR struct stm32_pwmtimer_s *priv,
   DEBUGASSERT(priv != NULL && info != NULL);
 
 #if defined(CONFIG_PWM_MULTICHAN)
-  pwmvdbg("TIM%u frequency: %u\n",
+  pwminfo("TIM%u frequency: %u\n",
           priv->timid, info->frequency);
 #elif defined(CONFIG_PWM_PULSECOUNT)
-  pwmvdbg("TIM%u channel: %u frequency: %u duty: %08x count: %u\n",
+  pwminfo("TIM%u channel: %u frequency: %u duty: %08x count: %u\n",
           priv->timid, priv->channels[0].channel, info->frequency,
           info->duty, info->count);
 #else
-  pwmvdbg("TIM%u channel: %u frequency: %u duty: %08x\n",
+  pwminfo("TIM%u channel: %u frequency: %u duty: %08x\n",
           priv->timid, priv->channels[0].channel, info->frequency, info->duty);
 #endif
 
@@ -1146,7 +1146,7 @@ static int pwm_timer(FAR struct stm32_pwmtimer_s *priv,
       reload = 65535;
     }
 
-  pwmvdbg("TIM%u PCLK: %u frequency: %u TIMCLK: %u prescaler: %u reload: %u\n",
+  pwminfo("TIM%u PCLK: %u frequency: %u TIMCLK: %u prescaler: %u reload: %u\n",
           priv->timid, priv->pclk, info->frequency, timclk, prescaler, reload);
 
   /* Set up the timer CR1 register:
@@ -1352,7 +1352,7 @@ static int pwm_timer(FAR struct stm32_pwmtimer_s *priv,
 
       ccr = b16toi(duty * reload + b16HALF);
 
-      pwmvdbg("ccr: %u\n", ccr);
+      pwminfo("ccr: %u\n", ccr);
 
       switch (mode)
         {
@@ -1667,7 +1667,7 @@ static  int pwm_update_duty(FAR struct stm32_pwmtimer_s *priv, uint8_t channel,
 
   DEBUGASSERT(priv != NULL);
 
-  pwmvdbg("TIM%u channel: %u duty: %08x\n",
+  pwminfo("TIM%u channel: %u duty: %08x\n",
           priv->timid, channel, duty);
 
 #ifndef CONFIG_PWM_MULTICHAN
@@ -1686,7 +1686,7 @@ static  int pwm_update_duty(FAR struct stm32_pwmtimer_s *priv, uint8_t channel,
 
   ccr = b16toi(duty * reload + b16HALF);
 
-  pwmvdbg("ccr: %u\n", ccr);
+  pwminfo("ccr: %u\n", ccr);
 
   switch (channel)
     {
@@ -1795,7 +1795,7 @@ static int pwm_interrupt(struct stm32_pwmtimer_s *priv)
 
   /* Now all of the time critical stuff is done so we can do some debug output */
 
-  pwmllvdbg("Update interrupt SR: %04x prev: %u curr: %u count: %u\n",
+  pwmllinfo("Update interrupt SR: %04x prev: %u curr: %u count: %u\n",
             regval, priv->prev, priv->curr, priv->count);
 
   return OK;
@@ -2030,7 +2030,7 @@ static int pwm_setup(FAR struct pwm_lowerhalf_s *dev)
   uint32_t pincfg;
   int i;
 
-  pwmvdbg("TIM%u\n", priv->timid);
+  pwminfo("TIM%u\n", priv->timid);
   pwm_dumpregs(priv, "Initially");
 
   /* Enable APB1/2 clocking for timer. */
@@ -2047,7 +2047,7 @@ static int pwm_setup(FAR struct pwm_lowerhalf_s *dev)
           continue;
         }
 
-      pwmvdbg("pincfg: %08x\n", pincfg);
+      pwminfo("pincfg: %08x\n", pincfg);
 
       stm32_configgpio(pincfg);
       pwm_dumpgpio(pincfg, "PWM setup");
@@ -2078,7 +2078,7 @@ static int pwm_shutdown(FAR struct pwm_lowerhalf_s *dev)
   uint32_t pincfg;
   int i;
 
-  pwmvdbg("TIM%u\n", priv->timid);
+  pwminfo("TIM%u\n", priv->timid);
 
   /* Make sure that the output has been stopped */
 
@@ -2098,7 +2098,7 @@ static int pwm_shutdown(FAR struct pwm_lowerhalf_s *dev)
           continue;
         }
 
-      pwmvdbg("pincfg: %08x\n", pincfg);
+      pwminfo("pincfg: %08x\n", pincfg);
 
       pincfg &= (GPIO_PORT_MASK | GPIO_PIN_MASK);
 
@@ -2233,7 +2233,7 @@ static int pwm_stop(FAR struct pwm_lowerhalf_s *dev)
   uint32_t regval;
   irqstate_t flags;
 
-  pwmvdbg("TIM%u\n", priv->timid);
+  pwminfo("TIM%u\n", priv->timid);
 
   /* Disable interrupts momentary to stop any ongoing timer processing and
    * to prevent any concurrent access to the reset register.
@@ -2360,7 +2360,7 @@ static int pwm_stop(FAR struct pwm_lowerhalf_s *dev)
   putreg32(regval, regaddr);
   leave_critical_section(flags);
 
-  pwmvdbg("regaddr: %08x resetbit: %08x\n", regaddr, resetbit);
+  pwminfo("regaddr: %08x resetbit: %08x\n", regaddr, resetbit);
   pwm_dumpregs(priv, "After stop");
   return OK;
 }
@@ -2388,7 +2388,7 @@ static int pwm_ioctl(FAR struct pwm_lowerhalf_s *dev, int cmd, unsigned long arg
 
   /* There are no platform-specific ioctl commands */
 
-  pwmvdbg("TIM%u\n", priv->timid);
+  pwminfo("TIM%u\n", priv->timid);
 #endif
   return -ENOTTY;
 }
@@ -2418,7 +2418,7 @@ FAR struct pwm_lowerhalf_s *stm32_pwminitialize(int timer)
 {
   FAR struct stm32_pwmtimer_s *lower;
 
-  pwmvdbg("TIM%u\n", timer);
+  pwminfo("TIM%u\n", timer);
 
   switch (timer)
     {

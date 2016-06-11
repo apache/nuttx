@@ -71,10 +71,10 @@
 /* Dump GPIO registers */
 
 #if defined(CONFIG_DEBUG_SPI) && defined(CONFIG_DEBUG_INFO)
-#  define ssivdbg lldbg
+#  define ssiinfo lldbg
 #  define ssi_dumpgpio(m) tiva_dumpgpio(SDCCS_GPIO, m)
 #else
-#  define ssivdbg(x...)
+#  define ssiinfo(x...)
 #  define ssi_dumpgpio(m)
 #endif
 

@@ -233,7 +233,7 @@ static ssize_t adc_read(FAR struct file *filep, FAR char *buffer, size_t buflen)
   int                   ret   = 0;
   int                   msglen;
 
-  avdbg("buflen: %d\n", (int)buflen);
+  ainfo("buflen: %d\n", (int)buflen);
 
   if (buflen % 5 == 0)
     msglen = 5;
@@ -351,7 +351,7 @@ return_with_irqdisabled:
       leave_critical_section(flags);
     }
 
-  avdbg("Returning: %d\n", ret);
+  ainfo("Returning: %d\n", ret);
   return ret;
 }
 

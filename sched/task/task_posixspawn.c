@@ -359,7 +359,7 @@ int posix_spawn(FAR pid_t *pid, FAR const char *path,
 
   DEBUGASSERT(path);
 
-  svdbg("pid=%p path=%s file_actions=%p attr=%p argv=%p\n",
+  sinfo("pid=%p path=%s file_actions=%p attr=%p argv=%p\n",
         pid, path, file_actions, attr, argv);
 
   /* If there are no file actions to be performed and there is no change to

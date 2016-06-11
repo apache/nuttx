@@ -86,19 +86,19 @@
 #  define pwmdbg              dbg
 #  define pwmlldbg            lldbg
 #  ifdef CONFIG_DEBUG_INFO
-#    define pwmvdbg           vdbg
-#    define pwmllvdbg         llvdbg
+#    define pwminfo           info
+#    define pwmllinfo         llinfo
 #    define pwm_dumpgpio(p,m) kinetis_pindump(p,m)
 #  else
 #    define pwmlldbg(x...)
-#    define pwmllvdbg(x...)
+#    define pwmllinfo(x...)
 #    define pwm_dumpgpio(p,m)
 #  endif
 #else
 #  define pwmdbg(x...)
 #  define pwmlldbg(x...)
-#  define pwmvdbg(x...)
-#  define pwmllvdbg(x...)
+#  define pwminfo(x...)
+#  define pwmllinfo(x...)
 #  define pwm_dumpgpio(p,m)
 #endif
 
@@ -265,25 +265,25 @@ static void pwm_dumpregs(struct kinetis_pwmtimer_s *priv, FAR const char *msg)
 {
   int nchannels = (priv->tpmid == 0) ? 8 : 2;
 
-  pwmvdbg("%s:\n", msg);
-  pwmvdbg("  FTM%d_SC:     %04x   FTM%d_CNT:  %04x     FTM%d_MOD:  %04x\n",
+  pwminfo("%s:\n", msg);
+  pwminfo("  FTM%d_SC:     %04x   FTM%d_CNT:  %04x     FTM%d_MOD:  %04x\n",
           priv->tpmid,
           pwm_getreg(priv, KINETIS_FTM_SC_OFFSET),
           priv->tpmid,
           pwm_getreg(priv, KINETIS_FTM_CNT_OFFSET),
           priv->tpmid,
           pwm_getreg(priv, KINETIS_FTM_MOD_OFFSET));
-  pwmvdbg("  FTM%d_STATUS: %04x   FTM%d_CONF: %04x\n",
+  pwminfo("  FTM%d_STATUS: %04x   FTM%d_CONF: %04x\n",
           priv->tpmid,
           pwm_getreg(priv, KINETIS_FTM_STATUS_OFFSET),
           priv->tpmid,
           pwm_getreg(priv, KINETIS_FTM_CONF_OFFSET));
-  pwmvdbg("   FTM%d_C0SC:  %04x   FTM%d_C0V:  %04x\n",
+  pwminfo("   FTM%d_C0SC:  %04x   FTM%d_C0V:  %04x\n",
           priv->tpmid,
           pwm_getreg(priv, KINETIS_FTM_C0SC_OFFSET),
           priv->tpmid,
           pwm_getreg(priv, KINETIS_FTM_C0V_OFFSET));
-  pwmvdbg("   FTM%d_C1SC:  %04x   FTM%d_C1V:  %04x\n",
+  pwminfo("   FTM%d_C1SC:  %04x   FTM%d_C1V:  %04x\n",
           priv->tpmid,
           pwm_getreg(priv, KINETIS_FTM_C1SC_OFFSET),
           priv->tpmid,
@@ -291,7 +291,7 @@ static void pwm_dumpregs(struct kinetis_pwmtimer_s *priv, FAR const char *msg)
 
   if (nchannels >= 3)
     {
-      pwmvdbg("   FTM%d_C2SC:  %04x   FTM%d_C2V:  %04x\n",
+      pwminfo("   FTM%d_C2SC:  %04x   FTM%d_C2V:  %04x\n",
               priv->tpmid,
               pwm_getreg(priv, KINETIS_FTM_C2SC_OFFSET),
               priv->tpmid,
@@ -300,7 +300,7 @@ static void pwm_dumpregs(struct kinetis_pwmtimer_s *priv, FAR const char *msg)
 
   if (nchannels >= 4)
     {
-      pwmvdbg("   FTM%d_C3SC:  %04x   FTM%d_C3V:  %04x\n",
+      pwminfo("   FTM%d_C3SC:  %04x   FTM%d_C3V:  %04x\n",
               priv->tpmid,
               pwm_getreg(priv, KINETIS_FTM_C3SC_OFFSET),
               priv->tpmid,
@@ -309,7 +309,7 @@ static void pwm_dumpregs(struct kinetis_pwmtimer_s *priv, FAR const char *msg)
 
   if (nchannels >= 5)
     {
-      pwmvdbg("   FTM%d_C4SC:  %04x   FTM%d_C4V:  %04x\n",
+      pwminfo("   FTM%d_C4SC:  %04x   FTM%d_C4V:  %04x\n",
               priv->tpmid,
               pwm_getreg(priv, KINETIS_FTM_C4SC_OFFSET),
               priv->tpmid,
@@ -318,7 +318,7 @@ static void pwm_dumpregs(struct kinetis_pwmtimer_s *priv, FAR const char *msg)
 
   if (nchannels >= 6)
     {
-      pwmvdbg("   FTM%d_C5SC:  %04x   FTM%d_C5V:  %04x\n",
+      pwminfo("   FTM%d_C5SC:  %04x   FTM%d_C5V:  %04x\n",
               priv->tpmid,
               pwm_getreg(priv, KINETIS_FTM_C5SC_OFFSET),
               priv->tpmid,
@@ -326,7 +326,7 @@ static void pwm_dumpregs(struct kinetis_pwmtimer_s *priv, FAR const char *msg)
     }
   if (nchannels >= 7)
     {
-      pwmvdbg("   FTM%d_C6SC:  %04x   FTM%d_C6V:  %04x\n",
+      pwminfo("   FTM%d_C6SC:  %04x   FTM%d_C6V:  %04x\n",
               priv->tpmid,
               pwm_getreg(priv, KINETIS_FTM_C6SC_OFFSET),
               priv->tpmid,
@@ -334,7 +334,7 @@ static void pwm_dumpregs(struct kinetis_pwmtimer_s *priv, FAR const char *msg)
     }
   if (nchannels >= 8)
     {
-      pwmvdbg("   FTM%d_C7SC:  %04x   FTM%d_C7V:  %04x\n",
+      pwminfo("   FTM%d_C7SC:  %04x   FTM%d_C7V:  %04x\n",
               priv->tpmid,
               pwm_getreg(priv, KINETIS_FTM_C7SC_OFFSET),
               priv->tpmid,
@@ -376,7 +376,7 @@ static int pwm_timer(FAR struct kinetis_pwmtimer_s *priv,
 
   DEBUGASSERT(priv != NULL && info != NULL);
 
-  pwmvdbg("FTM%d channel: %d frequency: %d duty: %08x\n",
+  pwminfo("FTM%d channel: %d frequency: %d duty: %08x\n",
           priv->tpmid, priv->channel, info->frequency, info->duty);
 
   DEBUGASSERT(info->frequency > 0 && info->duty > 0 &&
@@ -446,7 +446,7 @@ static int pwm_timer(FAR struct kinetis_pwmtimer_s *priv,
 
   cv = b16toi(info->duty * modulo + b16HALF);
 
-  pwmvdbg("FTM%d PCLK: %d frequency: %d FTMCLK: %d prescaler: %d modulo: %d c0v: %d\n",
+  pwminfo("FTM%d PCLK: %d frequency: %d FTMCLK: %d prescaler: %d modulo: %d c0v: %d\n",
           priv->tpmid, priv->pclk, info->frequency, tpmclk,
           presc_values[prescaler], modulo, cv);
 
@@ -570,7 +570,7 @@ static int pwm_setup(FAR struct pwm_lowerhalf_s *dev)
   regval |= SIM_SCGC3_FTM2;
   putreg32(regval, KINETIS_SIM_SCGC3);
 
-  pwmvdbg("FTM%d pincfg: %08x\n", priv->tpmid, priv->pincfg);
+  pwminfo("FTM%d pincfg: %08x\n", priv->tpmid, priv->pincfg);
   pwm_dumpregs(priv, "Initially");
 
   /* Configure the PWM output pin, but do not start the timer yet */
@@ -601,7 +601,7 @@ static int pwm_shutdown(FAR struct pwm_lowerhalf_s *dev)
   FAR struct kinetis_pwmtimer_s *priv = (FAR struct kinetis_pwmtimer_s *)dev;
   uint32_t pincfg;
 
-  pwmvdbg("FTM%d pincfg: %08x\n", priv->tpmid, priv->pincfg);
+  pwminfo("FTM%d pincfg: %08x\n", priv->tpmid, priv->pincfg);
 
   /* Make sure that the output has been stopped */
 
@@ -661,7 +661,7 @@ static int pwm_stop(FAR struct pwm_lowerhalf_s *dev)
   FAR struct kinetis_pwmtimer_s *priv = (FAR struct kinetis_pwmtimer_s *)dev;
   irqstate_t flags;
 
-  pwmvdbg("FTM%d\n", priv->tpmid);
+  pwminfo("FTM%d\n", priv->tpmid);
 
   /* Disable interrupts momentary to stop any ongoing timer processing and
    * to prevent any concurrent access to the reset register.
@@ -744,7 +744,7 @@ static int pwm_ioctl(FAR struct pwm_lowerhalf_s *dev, int cmd, unsigned long arg
 
   /* There are no platform-specific ioctl commands */
 
-  pwmvdbg("FTM%d\n", priv->tpmid);
+  pwminfo("FTM%d\n", priv->tpmid);
 #endif
   return -ENOTTY;
 }
@@ -772,7 +772,7 @@ FAR struct pwm_lowerhalf_s *kinetis_pwminitialize(int timer)
 {
   FAR struct kinetis_pwmtimer_s *lower;
 
-  pwmvdbg("FTM%d\n", timer);
+  pwminfo("FTM%d\n", timer);
 
   switch (timer)
     {

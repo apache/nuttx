@@ -125,14 +125,14 @@
 
 #ifdef CONFIG_DEBUG_I2C
 #  define i2cdbg    dbg
-#  define i2cvdbg   vdbg
+#  define i2cinfo   info
 #  define i2clldbg  lldbg
-#  define i2cllvdbg llvdbg
+#  define i2cllinfo llinfo
 #else
 #  define i2cdbg(x...)
-#  define i2cvdbg(x...)
+#  define i2cinfo(x...)
 #  define i2clldbg(x...)
-#  define i2cllvdbg(x...)
+#  define i2cllinfo(x...)
 #endif
 
 /****************************************************************************
@@ -494,9 +494,9 @@ static int twi_wait(struct twi_dev_s *priv, unsigned int size)
 
   do
     {
-      i2cvdbg("TWIHS%d Waiting...\n", priv->attr->twi);
+      i2cinfo("TWIHS%d Waiting...\n", priv->attr->twi);
       twi_takesem(&priv->waitsem);
-      i2cvdbg("TWIHS%d Awakened with result: %d\n",
+      i2cinfo("TWIHS%d Awakened with result: %d\n",
               priv->attr->twi, priv->result);
     }
   while (priv->result == -EBUSY);
@@ -554,7 +554,7 @@ static int twi_interrupt(struct twi_dev_s *priv)
   imr     = twi_getrel(priv, SAM_TWIHS_IMR_OFFSET);
   pending = sr & imr;
 
-  i2cllvdbg("TWIHS%d pending: %08x\n", priv->attr->twi, pending);
+  i2cllinfo("TWIHS%d pending: %08x\n", priv->attr->twi, pending);
 
   /* Byte received */
 
@@ -871,7 +871,7 @@ static int twi_transfer(FAR struct i2c_master_s *dev,
   int ret;
 
   DEBUGASSERT(dev != NULL && msgs != NULL && count > 0);
-  i2cvdbg("TWIHS%d count: %d\n", priv->attr->twi, count);
+  i2cinfo("TWIHS%d count: %d\n", priv->attr->twi, count);
 
   /* Calculate the total transfer size so that we can calculate a reasonable
    * timeout value.
@@ -1157,7 +1157,7 @@ static void twi_hw_initialize(struct twi_dev_s *priv, uint32_t frequency)
   uint32_t regval;
   uint32_t mck;
 
-  i2cvdbg("TWIHS%d Initializing\n", priv->attr->twi);
+  i2cinfo("TWIHS%d Initializing\n", priv->attr->twi);
 
   /* Configure PIO pins */
 
@@ -1258,7 +1258,7 @@ struct i2c_master_s *sam_i2cbus_initialize(int bus)
   irqstate_t flags;
   int ret;
 
-  i2cvdbg("Initializing TWIHS%d\n", bus);
+  i2cinfo("Initializing TWIHS%d\n", bus);
 
 #ifdef CONFIG_SAMV7_TWIHS0
   if (bus == 0)
@@ -1374,7 +1374,7 @@ int sam_i2cbus_uninitialize(FAR struct i2c_master_s *dev)
   struct twi_dev_s *priv = (struct twi_dev_s *) dev;
   irqstate_t flags;
 
-  i2cvdbg("TWIHS%d Un-initializing\n", priv->attr->twi);
+  i2cinfo("TWIHS%d Un-initializing\n", priv->attr->twi);
 
   /* Disable TWIHS interrupts */
 

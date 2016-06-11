@@ -115,13 +115,13 @@ static int usbhost_waiter(struct usbhost_connection_s *dev)
 {
   struct usbhost_hubport_s *hport;
 
-  uvdbg("Running\n");
+  uinfo("Running\n");
   for (;;)
     {
       /* Wait for the device to change state */
 
       DEBUGVERIFY(CONN_WAIT(dev, &hport));
-      uvdbg("%s\n", hport->connected ? "connected" : "disconnected");
+      uinfo("%s\n", hport->connected ? "connected" : "disconnected");
 
       /* Did we just become connected? */
 
@@ -415,7 +415,7 @@ void sam_usbhost_vbusdrive(int rhport, bool enable)
 {
   pio_pinset_t pinset = 0;
 
-  uvdbg("RHPort%d: enable=%d\n", rhport+1, enable);
+  uinfo("RHPort%d: enable=%d\n", rhport+1, enable);
 
   /* Pick the PIO configuration associated with the selected root hub port */
 

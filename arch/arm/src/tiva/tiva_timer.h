@@ -135,10 +135,10 @@
 
 #ifdef CONFIG_DEBUG_TIMER
 #  define timdbg  lldbg
-#  define timvdbg llvdbg
+#  define timinfo llinfo
 #else
 #  define timdbg(x...)
-#  define timvdbg(x...)
+#  define timinfo(x...)
 #endif
 
 /****************************************************************************

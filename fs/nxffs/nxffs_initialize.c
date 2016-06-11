@@ -383,7 +383,7 @@ int nxffs_limits(FAR struct nxffs_volume_s *volume)
        * the location of the free FLASH region.
        */
 
-      fvdbg("No inodes found\n");
+      finfo("No inodes found\n");
       noinodes = true;
     }
   else
@@ -391,7 +391,7 @@ int nxffs_limits(FAR struct nxffs_volume_s *volume)
       /* Save the offset to the first inode */
 
       volume->inoffset = entry.hoffset;
-      fvdbg("First inode at offset %d\n", volume->inoffset);
+      finfo("First inode at offset %d\n", volume->inoffset);
 
       /* Discard this entry and set the next offset. */
 
@@ -411,7 +411,7 @@ int nxffs_limits(FAR struct nxffs_volume_s *volume)
           nxffs_freeentry(&entry);
         }
 
-      fvdbg("Last inode before offset %d\n", offset);
+      finfo("Last inode before offset %d\n", offset);
     }
 
   /* No inodes were found after this offset.  Now search for a block of
@@ -435,11 +435,11 @@ int nxffs_limits(FAR struct nxffs_volume_s *volume)
               /* Yes.. the FLASH is full.  Force the offsets to the end of FLASH */
 
               volume->froffset = volume->nblocks * volume->geo.blocksize;
-              fvdbg("Assume no free FLASH, froffset: %d\n", volume->froffset);
+              finfo("Assume no free FLASH, froffset: %d\n", volume->froffset);
               if (noinodes)
                 {
                   volume->inoffset = volume->froffset;
-                  fvdbg("No inodes, inoffset: %d\n", volume->inoffset);
+                  finfo("No inodes, inoffset: %d\n", volume->inoffset);
                 }
 
               return OK;
@@ -468,11 +468,11 @@ int nxffs_limits(FAR struct nxffs_volume_s *volume)
                */
 
               volume->froffset = offset;
-              fvdbg("Free FLASH region begins at offset: %d\n", volume->froffset);
+              finfo("Free FLASH region begins at offset: %d\n", volume->froffset);
               if (noinodes)
                 {
                   volume->inoffset = offset;
-                  fvdbg("First inode at offset %d\n", volume->inoffset);
+                  finfo("First inode at offset %d\n", volume->inoffset);
                 }
 
               return OK;

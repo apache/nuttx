@@ -1590,7 +1590,7 @@ static int sam_hsmci_interrupt(struct sam_dev_s *priv)
                 {
                   /* Yes.. Was the error some kind of timeout? */
 
-                  fllvdbg("ERROR: events: %08x SR: %08x\n",
+                  fllinfo("ERROR: events: %08x SR: %08x\n",
                           priv->cmdrmask, enabled);
 
                   if ((pending & HSMCI_RESPONSE_TIMEOUT_ERRORS) != 0)
@@ -2056,7 +2056,7 @@ static int sam_sendcmd(FAR struct sdio_dev_s *dev,
 
   /* Write the fully decorated command to CMDR */
 
-  fvdbg("cmd: %08x arg: %08x regval: %08x\n", cmd, arg, regval);
+  finfo("cmd: %08x arg: %08x regval: %08x\n", cmd, arg, regval);
   sam_putreg(priv, regval, SAM_HSMCI_CMDR_OFFSET);
   sam_cmdsample1(priv, SAMPLENDX_AFTER_CMDR);
   return OK;
@@ -2847,7 +2847,7 @@ static void sam_callbackenable(FAR struct sdio_dev_s *dev,
 {
   struct sam_dev_s *priv = (struct sam_dev_s *)dev;
 
-  fvdbg("eventset: %02x\n", eventset);
+  finfo("eventset: %02x\n", eventset);
   DEBUGASSERT(priv != NULL);
 
   priv->cbevents = eventset;
@@ -2883,7 +2883,7 @@ static int sam_registercallback(FAR struct sdio_dev_s *dev,
 
   /* Disable callbacks and register this callback and is argument */
 
-  fvdbg("Register %p(%p)\n", callback, arg);
+  finfo("Register %p(%p)\n", callback, arg);
   DEBUGASSERT(priv != NULL);
 
   priv->cbevents = 0;
@@ -3158,7 +3158,7 @@ static void sam_callback(void *arg)
   /* Is a callback registered? */
 
   DEBUGASSERT(priv != NULL);
-  fvdbg("Callback %p(%p) cbevents: %02x cdstatus: %02x\n",
+  finfo("Callback %p(%p) cbevents: %02x cdstatus: %02x\n",
         priv->callback, priv->cbarg, priv->cbevents, priv->cdstatus);
 
   flags = enter_critical_section();
@@ -3216,7 +3216,7 @@ static void sam_callback(void *arg)
           fdbg("ERROR: Failed to cancel work: %d\n", ret);
         }
 
-      fllvdbg("Queuing callback to %p(%p)\n", priv->callback, priv->cbarg);
+      fllinfo("Queuing callback to %p(%p)\n", priv->callback, priv->cbarg);
       ret = work_queue(LPWORK, &priv->cbwork, (worker_t)priv->callback,
                        priv->cbarg, 0);
       if (ret < 0)
@@ -3261,7 +3261,7 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
    * for now, an* HSMCI peripheral does correspond to a slot.
    */
 
-  fvdbg("slotno: %d\n", slotno);
+  finfo("slotno: %d\n", slotno);
 
 #ifdef CONFIG_SAMV7_HSMCI0
   if (slotno == 0)
@@ -3344,7 +3344,7 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
       return NULL;
     }
 
-  fvdbg("priv: %p base: %08x hsmci: %d pid: %d\n",
+  finfo("priv: %p base: %08x hsmci: %d pid: %d\n",
         priv, priv->base, priv->hsmci, pid);
 
   /* Initialize the HSMCI slot structure */
@@ -3414,7 +3414,7 @@ void sdio_mediachange(FAR struct sdio_dev_s *dev, bool cardinslot)
       priv->cdstatus &= ~SDIO_STATUS_PRESENT;
     }
 
-  fllvdbg("cdstatus OLD: %02x NEW: %02x\n", cdstatus, priv->cdstatus);
+  fllinfo("cdstatus OLD: %02x NEW: %02x\n", cdstatus, priv->cdstatus);
 
   /* Perform any requested callback if the status has changed */
 
@@ -3459,7 +3459,7 @@ void sdio_wrprotect(FAR struct sdio_dev_s *dev, bool wrprotect)
       priv->cdstatus &= ~SDIO_STATUS_WRPROTECTED;
     }
 
-  fvdbg("cdstatus: %02x\n", priv->cdstatus);
+  finfo("cdstatus: %02x\n", priv->cdstatus);
   leave_critical_section(flags);
 }
 

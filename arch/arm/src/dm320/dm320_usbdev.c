@@ -1216,7 +1216,7 @@ static inline void dm320_ep0setup(struct dm320_usbdev_s *priv)
   value = GETUINT16(ctrl.value);
   len   = GETUINT16(ctrl.len);
 
-  ullvdbg("type=%02x req=%02x value=%04x index=%04x len=%04x\n",
+  ullinfo("type=%02x req=%02x value=%04x index=%04x len=%04x\n",
           ctrl.type, ctrl.req, value, index, len);
 
   /* Dispatch any non-standard requests */
@@ -1618,7 +1618,7 @@ static int dm320_ctlrinterrupt(int irq, FAR void *context)
               }
             else
               {
-                ullvdbg("Pending data on OUT endpoint\n");
+                ullinfo("Pending data on OUT endpoint\n");
                 priv->rxpending = 1;
               }
           }

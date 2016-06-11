@@ -285,7 +285,7 @@ static void sam_tsd_notify(struct sam_tsd_s *priv)
       if (fds)
         {
           fds->revents |= POLLIN;
-          ivdbg("Report events: %02x\n", fds->revents);
+          iinfo("Report events: %02x\n", fds->revents);
           sem_post(fds->sem);
         }
     }
@@ -380,7 +380,7 @@ static int sam_tsd_waitsample(struct sam_tsd_s *priv, struct sam_sample_s *sampl
     {
       /* Wait for a sample data */
 
-      ivdbg("Waiting..\n");
+      iinfo("Waiting..\n");
       priv->nwaiters++;
       ret = sem_wait(&priv->waitsem);
       priv->nwaiters--;
@@ -398,7 +398,7 @@ static int sam_tsd_waitsample(struct sam_tsd_s *priv, struct sam_sample_s *sampl
         }
     }
 
-  ivdbg("Sampled\n");
+  iinfo("Sampled\n");
 
   /* Re-acquire the semaphore that manages mutually exclusive access to
    * the device structure.  We may have to wait here.  But we have our sample.
@@ -538,7 +538,7 @@ static void sam_tsd_bottomhalf(void *arg)
 
   /* Handle the change from pen down to pen up */
 
-  ivdbg("pending: %08x pendown: %d contact: %d\n",
+  iinfo("pending: %08x pendown: %d contact: %d\n",
         pending, pendown, priv->sample.contact);
 
   if (!pendown)
@@ -834,7 +834,7 @@ static int sam_tsd_open(struct file *filep)
   uint8_t tmp;
   int ret;
 
-  ivdbg("crefs: %d\n", priv->crefs);
+  iinfo("crefs: %d\n", priv->crefs);
 
   /* Get exclusive access to the device structures */
 
@@ -883,7 +883,7 @@ static int sam_tsd_close(struct file *filep)
   FAR struct inode *inode = filep->f_inode;
   FAR struct sam_tsd_s *priv = inode->i_private;
 
-  ivdbg("crefs: %d\n", priv->crefs);
+  iinfo("crefs: %d\n", priv->crefs);
 
   /* Get exclusive access to the ADC device */
 
@@ -919,7 +919,7 @@ static ssize_t sam_tsd_read(struct file *filep, char *buffer, size_t len)
   struct sam_sample_s sample;
   int ret;
 
-  ivdbg("buffer:%p len:%d\n", buffer, len);
+  iinfo("buffer:%p len:%d\n", buffer, len);
   DEBUGASSERT(filep);
   inode = filep->f_inode;
 
@@ -954,7 +954,7 @@ static ssize_t sam_tsd_read(struct file *filep, char *buffer, size_t len)
        * option, then just return an error.
        */
 
-      ivdbg("Sample data is not available\n");
+      iinfo("Sample data is not available\n");
       if (filep->f_oflags & O_NONBLOCK)
         {
           ret = -EAGAIN;
@@ -1018,16 +1018,16 @@ static ssize_t sam_tsd_read(struct file *filep, char *buffer, size_t len)
       report->point[0].flags  = TSD_PENMOVE;
     }
 
-  ivdbg("  id:      %d\n", report->point[0].id);
-  ivdbg("  flags:   %02x\n", report->point[0].flags);
-  ivdbg("  x:       %d\n", report->point[0].x);
-  ivdbg("  y:       %d\n", report->point[0].y);
+  iinfo("  id:      %d\n", report->point[0].id);
+  iinfo("  flags:   %02x\n", report->point[0].flags);
+  iinfo("  x:       %d\n", report->point[0].x);
+  iinfo("  y:       %d\n", report->point[0].y);
 
   ret = SIZEOF_TOUCH_SAMPLE_S(1);
 
 errout:
   sam_adc_unlock(priv->adc);
-  ivdbg("Returning: %d\n", ret);
+  iinfo("Returning: %d\n", ret);
   return (ssize_t)ret;
 }
 
@@ -1041,7 +1041,7 @@ static int sam_tsd_ioctl(struct file *filep, int cmd, unsigned long arg)
   struct sam_tsd_s *priv;
   int ret;
 
-  ivdbg("cmd: %d arg: %ld\n", cmd, arg);
+  iinfo("cmd: %d arg: %ld\n", cmd, arg);
   DEBUGASSERT(filep);
   inode = filep->f_inode;
 
@@ -1077,7 +1077,7 @@ static int sam_tsd_poll(struct file *filep, struct pollfd *fds, bool setup)
   int ret = OK;
   int i;
 
-  ivdbg("setup: %d\n", (int)setup);
+  iinfo("setup: %d\n", (int)setup);
   DEBUGASSERT(filep && fds);
   inode = filep->f_inode;
 
@@ -1655,7 +1655,7 @@ int sam_tsd_register(struct sam_adc_s *adc, int minor)
   char devname[DEV_NAMELEN];
   int ret;
 
-  ivdbg("minor: %d\n", minor);
+  iinfo("minor: %d\n", minor);
 
   /* Debug-only sanity checks */
 
@@ -1674,7 +1674,7 @@ int sam_tsd_register(struct sam_adc_s *adc, int minor)
   /* Register the device as an input device */
 
   (void)snprintf(devname, DEV_NAMELEN, DEV_FORMAT, minor);
-  ivdbg("Registering %s\n", devname);
+  iinfo("Registering %s\n", devname);
 
   ret = register_driver(devname, &g_tsdops, 0666, priv);
   if (ret < 0)

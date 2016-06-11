@@ -89,10 +89,10 @@
 
 #ifdef CONFIG_DEBUG_WATCHDOG
 #  define wddbg    lldbg
-#  define wdvdbg   llvdbg
+#  define wdinfo   llinfo
 #else
 #  define wddbg(x...)
-#  define wdvdbg(x...)
+#  define wdinfo(x...)
 #endif
 
 /****************************************************************************
@@ -314,7 +314,7 @@ static int sam34_start(FAR struct watchdog_lowerhalf_s *lower)
   FAR struct sam34_lowerhalf_s *priv = (FAR struct sam34_lowerhalf_s *)lower;
   uint32_t mr_val = 0;
 
-  wdvdbg("Entry\n");
+  wdinfo("Entry\n");
   DEBUGASSERT(priv);
 
   /* The watchdog is always disabled after a reset. It is enabled by setting
@@ -360,7 +360,7 @@ static int sam34_stop(FAR struct watchdog_lowerhalf_s *lower)
    * except by a reset.
    */
 
-  wdvdbg("Entry\n");
+  wdinfo("Entry\n");
   return -ENOSYS;
 }
 
@@ -386,7 +386,7 @@ static int sam34_stop(FAR struct watchdog_lowerhalf_s *lower)
 
 static int sam34_keepalive(FAR struct watchdog_lowerhalf_s *lower)
 {
-  wdvdbg("Entry\n");
+  wdinfo("Entry\n");
 
   sam34_putreg((WDT_CR_KEY | WDT_CR_WDRSTT), SAM_WDT_CR);
   return OK;
@@ -414,7 +414,7 @@ static int sam34_getstatus(FAR struct watchdog_lowerhalf_s *lower,
   FAR struct sam34_lowerhalf_s *priv = (FAR struct sam34_lowerhalf_s *)lower;
   uint32_t elapsed;
 
-  wdvdbg("Entry\n");
+  wdinfo("Entry\n");
   DEBUGASSERT(priv);
 
   /* Return the status bit */
@@ -441,10 +441,10 @@ static int sam34_getstatus(FAR struct watchdog_lowerhalf_s *lower,
 
   status->timeleft = (priv->timeout * elapsed) / (priv->reload + 1);
 
-  wdvdbg("Status     : %08x\n", sam34_getreg(SAM_WDT_SR));
-  wdvdbg("  flags    : %08x\n", status->flags);
-  wdvdbg("  timeout  : %d\n", status->timeout);
-  wdvdbg("  timeleft : %d\n", status->timeleft);
+  wdinfo("Status     : %08x\n", sam34_getreg(SAM_WDT_SR));
+  wdinfo("  flags    : %08x\n", status->flags);
+  wdinfo("  timeout  : %d\n", status->timeout);
+  wdinfo("  timeleft : %d\n", status->timeleft);
   return OK;
 }
 
@@ -471,7 +471,7 @@ static int sam34_settimeout(FAR struct watchdog_lowerhalf_s *lower,
   uint32_t reload;
 
   DEBUGASSERT(priv);
-  wdvdbg("Entry: timeout=%d\n", timeout);
+  wdinfo("Entry: timeout=%d\n", timeout);
 
   /* Can this timeout be represented? */
 
@@ -503,7 +503,7 @@ static int sam34_settimeout(FAR struct watchdog_lowerhalf_s *lower,
 
   priv->reload = reload;
 
-  wdvdbg("fwdt=%d reload=%d timout=%d\n",
+  wdinfo("fwdt=%d reload=%d timout=%d\n",
          WDT_FCLK, reload, priv->timeout);
 
   /* Don't commit to MR register until started! */
@@ -543,7 +543,7 @@ static xcpt_t sam34_capture(FAR struct watchdog_lowerhalf_s *lower,
   uint16_t regval;
 
   DEBUGASSERT(priv);
-  wdvdbg("Entry: handler=%p\n", handler);
+  wdinfo("Entry: handler=%p\n", handler);
 
   /* Get the old handler return value */
 
@@ -611,7 +611,7 @@ static int sam34_ioctl(FAR struct watchdog_lowerhalf_s *lower, int cmd,
   int ret = -ENOTTY;
 
   DEBUGASSERT(priv);
-  wdvdbg("Entry: cmd=%d arg=%ld\n", cmd, arg);
+  wdinfo("Entry: cmd=%d arg=%ld\n", cmd, arg);
 
   /* WDIOC_MINTIME: Set the minimum ping time.  If two keepalive ioctls
    * are received within this time, a reset event will be generated.
@@ -676,7 +676,7 @@ void sam_wdtinitialize(FAR const char *devpath)
            WDT_MR_WDRSTEN);
   sam34_putreg(mr_val, SAM_WDT_MR);
 
-  wdvdbg("Entry: devpath=%s\n", devpath);
+  wdinfo("Entry: devpath=%s\n", devpath);
 
   /* NOTE we assume that clocking to the IWDG has already been provided by
    * the RCC initialization logic.

@@ -114,7 +114,7 @@ int mod_read(FAR struct mod_loadinfo_s *loadinfo, FAR uint8_t *buffer,
   ssize_t nbytes;      /* Number of bytes read */
   off_t   rpos;        /* Position returned by lseek */
 
-  svdbg("Read %ld bytes from offset %ld\n", (long)readsize, (long)offset);
+  sinfo("Read %ld bytes from offset %ld\n", (long)readsize, (long)offset);
 
   /* Loop until all of the requested data has been read. */
 

@@ -276,7 +276,7 @@ xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler, phy_enable_t *enable)
 
   DEBUGASSERT(intf);
 
-  nvdbg("%s: handler=%p\n", intf, handler);
+  ninfo("%s: handler=%p\n", intf, handler);
 #ifdef CONFIG_SAMA5_EMACA
   phydbg("EMAC: devname=%s\n", SAMA5_EMAC_DEVNAME);
 #endif

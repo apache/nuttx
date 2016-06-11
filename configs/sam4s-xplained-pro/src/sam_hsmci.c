@@ -207,7 +207,7 @@ bool sam_cardinserted(int slotno)
   /* Get the state of the GPIO pin */
 
   removed = sam_gpioread(GPIO_MCI_CD);
-  fllvdbg("Slot %d inserted: %s\n", slotno, removed ? "NO" : "YES");
+  fllinfo("Slot %d inserted: %s\n", slotno, removed ? "NO" : "YES");
 
   return !removed;
 }

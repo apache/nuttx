@@ -103,13 +103,13 @@
 #ifdef CONFIG_DEBUG_SPI
 #  define qspidbg lldbg
 #  ifdef CONFIG_DEBUG_INFO
-#    define qspivdbg lldbg
+#    define qspiinfo lldbg
 #  else
-#    define qspivdbg(x...)
+#    define qspiinfo(x...)
 #  endif
 #else
 #  define qspidbg(x...)
-#  define qspivdbg(x...)
+#  define qspiinfo(x...)
 #endif
 
 #define DMA_INITIAL      0
@@ -509,7 +509,7 @@ static inline void qspi_putreg(struct stm32l4_qspidev_s *priv, uint32_t value,
 static void qspi_dumpregs(struct stm32l4_qspidev_s *priv, const char *msg)
 {
   uint32_t regval;
-  qspivdbg("%s:\n", msg);
+  qspiinfo("%s:\n", msg);
 
 #if 0
   /* this extra verbose output may be helpful in some cases; you'll need
@@ -517,8 +517,8 @@ static void qspi_dumpregs(struct stm32l4_qspidev_s *priv, const char *msg)
    */
 
   regval = getreg32(priv->base + STM32L4_QUADSPI_CR_OFFSET);    /* Control Register */
-  qspivdbg("CR:%08x\n",regval);
-  qspivdbg("  EN:%1d ABORT:%1d DMAEN:%1d TCEN:%1d SSHIFT:%1d\n"
+  qspiinfo("CR:%08x\n",regval);
+  qspiinfo("  EN:%1d ABORT:%1d DMAEN:%1d TCEN:%1d SSHIFT:%1d\n"
            "  FTHRES: %d\n"
            "  TEIE:%1d TCIE:%1d FTIE:%1d SMIE:%1d TOIE:%1d APMS:%1d PMM:%1d\n"
            "  PRESCALER: %d\n",
@@ -539,16 +539,16 @@ static void qspi_dumpregs(struct stm32l4_qspidev_s *priv, const char *msg)
       );
 
   regval = getreg32(priv->base + STM32L4_QUADSPI_DCR_OFFSET);   /* Device Configuration Register */
-  qspivdbg("DCR:%08x\n",regval);
-  qspivdbg("  CKMODE:%1d CSHT:%d FSIZE:%d\n",
+  qspiinfo("DCR:%08x\n",regval);
+  qspiinfo("  CKMODE:%1d CSHT:%d FSIZE:%d\n",
       (regval&QSPI_DCR_CKMODE)?1:0,
       (regval&QSPI_DCR_CSHT_MASK)>>QSPI_DCR_CSHT_SHIFT,
       (regval&QSPI_DCR_FSIZE_MASK)>>QSPI_DCR_FSIZE_SHIFT
       );
 
   regval = getreg32(priv->base + STM32L4_QUADSPI_CCR_OFFSET);   /* Communication Configuration Register */
-  qspivdbg("CCR:%08x\n",regval);
-  qspivdbg("   INST:%02x IMODE:%d ADMODE:%d ADSIZE:%d ABMODE:%d\n"
+  qspiinfo("CCR:%08x\n",regval);
+  qspiinfo("   INST:%02x IMODE:%d ADMODE:%d ADSIZE:%d ABMODE:%d\n"
            "   ABSIZE:%d DCYC:%d DMODE:%d FMODE:%d\n"
            "   SIOO:%1d DDRM:%1d\n",
       (regval&QSPI_CCR_INSTRUCTION_MASK)>>QSPI_CCR_INSTRUCTION_SHIFT,
@@ -565,8 +565,8 @@ static void qspi_dumpregs(struct stm32l4_qspidev_s *priv, const char *msg)
       );
 
   regval = getreg32(priv->base + STM32L4_QUADSPI_SR_OFFSET);    /* Status Register */
-  qspivdbg("SR:%08x\n",regval);
-  qspivdbg("  TEF:%1d TCF:%1d FTF:%1d SMF:%1d TOF:%1d BUSY:%1d FLEVEL:%d\n",
+  qspiinfo("SR:%08x\n",regval);
+  qspiinfo("  TEF:%1d TCF:%1d FTF:%1d SMF:%1d TOF:%1d BUSY:%1d FLEVEL:%d\n",
       (regval&QSPI_SR_TEF)?1:0,
       (regval&QSPI_SR_TCF)?1:0,
       (regval&QSPI_SR_FTF)?1:0,
@@ -577,17 +577,17 @@ static void qspi_dumpregs(struct stm32l4_qspidev_s *priv, const char *msg)
       );
 
 #else
-  qspivdbg("    CR:%08x   DCR:%08x   CCR:%08x    SR:%08x\n",
+  qspiinfo("    CR:%08x   DCR:%08x   CCR:%08x    SR:%08x\n",
           getreg32(priv->base + STM32L4_QUADSPI_CR_OFFSET),     /* Control Register */
           getreg32(priv->base + STM32L4_QUADSPI_DCR_OFFSET),    /* Device Configuration Register */
           getreg32(priv->base + STM32L4_QUADSPI_CCR_OFFSET),    /* Communication Configuration Register */
           getreg32(priv->base + STM32L4_QUADSPI_SR_OFFSET));    /* Status Register */
-  qspivdbg("   DLR:%08x   ABR:%08x PSMKR:%08x PSMAR:%08x\n",
+  qspiinfo("   DLR:%08x   ABR:%08x PSMKR:%08x PSMAR:%08x\n",
           getreg32(priv->base + STM32L4_QUADSPI_DLR_OFFSET),    /* Data Length Register */
           getreg32(priv->base + STM32L4_QUADSPI_ABR_OFFSET),    /* Alternate Bytes Register */
           getreg32(priv->base + STM32L4_QUADSPI_PSMKR_OFFSET),  /* Polling Status mask Register */
           getreg32(priv->base + STM32L4_QUADSPI_PSMAR_OFFSET)); /* Polling Status match Register */
-  qspivdbg("   PIR:%08x  LPTR:%08x\n",
+  qspiinfo("   PIR:%08x  LPTR:%08x\n",
           getreg32(priv->base + STM32L4_QUADSPI_PIR_OFFSET),    /* Polling Interval Register */
           getreg32(priv->base + STM32L4_QUADSPI_LPTR_OFFSET));  /* Low-Power Timeout Register */
   (void)regval;
@@ -599,25 +599,25 @@ static void qspi_dumpregs(struct stm32l4_qspidev_s *priv, const char *msg)
 static void qspi_dumpgpioconfig(const char *msg)
 {
   uint32_t regval;
-  qspivdbg("%s:\n", msg);
+  qspiinfo("%s:\n", msg);
 
   regval = getreg32(STM32L4_GPIOE_MODER);
-  qspivdbg("E_MODER:%08x\n",regval);
+  qspiinfo("E_MODER:%08x\n",regval);
 
   regval = getreg32(STM32L4_GPIOE_OTYPER);
-  qspivdbg("E_OTYPER:%08x\n",regval);
+  qspiinfo("E_OTYPER:%08x\n",regval);
 
   regval = getreg32(STM32L4_GPIOE_OSPEED);
-  qspivdbg("E_OSPEED:%08x\n",regval);
+  qspiinfo("E_OSPEED:%08x\n",regval);
 
   regval = getreg32(STM32L4_GPIOE_PUPDR);
-  qspivdbg("E_PUPDR:%08x\n",regval);
+  qspiinfo("E_PUPDR:%08x\n",regval);
 
   regval = getreg32(STM32L4_GPIOE_AFRL);
-  qspivdbg("E_AFRL:%08x\n",regval);
+  qspiinfo("E_AFRL:%08x\n",regval);
 
   regval = getreg32(STM32L4_GPIOE_AFRH);
-  qspivdbg("E_AFRH:%08x\n",regval);
+  qspiinfo("E_AFRH:%08x\n",regval);
 }
 #endif
 
@@ -729,20 +729,20 @@ static int qspi_setupxctnfromcmd(struct qspi_xctnspec_s *xctn,
   DEBUGASSERT(xctn != NULL && cmdinfo != NULL);
 
 #ifdef CONFIG_DEBUG_SPI
-  qspivdbg("Transfer:\n");
-  qspivdbg("  flags: %02x\n", cmdinfo->flags);
-  qspivdbg("  cmd: %04x\n", cmdinfo->cmd);
+  qspiinfo("Transfer:\n");
+  qspiinfo("  flags: %02x\n", cmdinfo->flags);
+  qspiinfo("  cmd: %04x\n", cmdinfo->cmd);
 
   if (QSPICMD_ISADDRESS(cmdinfo->flags))
     {
-      qspivdbg("  address/length: %08lx/%d\n",
+      qspiinfo("  address/length: %08lx/%d\n",
               (unsigned long)cmdinfo->addr, cmdinfo->addrlen);
     }
 
   if (QSPICMD_ISDATA(cmdinfo->flags))
     {
-      qspivdbg("  %s Data:\n", QSPICMD_ISWRITE(cmdinfo->flags) ? "Write" : "Read");
-      qspivdbg("    buffer/length: %p/%d\n", cmdinfo->buffer, cmdinfo->buflen);
+      qspiinfo("  %s Data:\n", QSPICMD_ISWRITE(cmdinfo->flags) ? "Write" : "Read");
+      qspiinfo("    buffer/length: %p/%d\n", cmdinfo->buffer, cmdinfo->buflen);
     }
 #endif
 
@@ -853,13 +853,13 @@ static int qspi_setupxctnfrommem(struct qspi_xctnspec_s *xctn,
   DEBUGASSERT(xctn != NULL && meminfo != NULL);
 
 #ifdef CONFIG_DEBUG_SPI
-  qspivdbg("Transfer:\n");
-  qspivdbg("  flags: %02x\n", meminfo->flags);
-  qspivdbg("  cmd: %04x\n", meminfo->cmd);
-  qspivdbg("  address/length: %08lx/%d\n",
+  qspiinfo("Transfer:\n");
+  qspiinfo("  flags: %02x\n", meminfo->flags);
+  qspiinfo("  cmd: %04x\n", meminfo->cmd);
+  qspiinfo("  address/length: %08lx/%d\n",
           (unsigned long)meminfo->addr, meminfo->addrlen);
-  qspivdbg("  %s Data:\n", QSPIMEM_ISWRITE(meminfo->flags) ? "Write" : "Read");
-  qspivdbg("    buffer/length: %p/%d\n", meminfo->buffer, meminfo->buflen);
+  qspiinfo("  %s Data:\n", QSPIMEM_ISWRITE(meminfo->flags) ? "Write" : "Read");
+  qspiinfo("    buffer/length: %p/%d\n", meminfo->buffer, meminfo->buflen);
 #endif
 
   DEBUGASSERT(meminfo->cmd < 256);
@@ -1705,7 +1705,7 @@ static int qspi_lock(struct qspi_dev_s *dev, bool lock)
 {
   struct stm32l4_qspidev_s *priv = (struct stm32l4_qspidev_s *)dev;
 
-  qspivdbg("lock=%d\n", lock);
+  qspiinfo("lock=%d\n", lock);
   if (lock)
     {
       /* Take the semaphore (perhaps waiting) */
@@ -1758,7 +1758,7 @@ static uint32_t qspi_setfrequency(struct qspi_dev_s *dev, uint32_t frequency)
       return 0;
     }
 
-  qspivdbg("frequency=%d\n", frequency);
+  qspiinfo("frequency=%d\n", frequency);
   DEBUGASSERT(priv);
 
   /* Wait till BUSY flag reset */
@@ -1810,14 +1810,14 @@ static uint32_t qspi_setfrequency(struct qspi_dev_s *dev, uint32_t frequency)
   /* Calculate the new actual frequency */
 
   actual = STL32L4_QSPI_CLOCK / prescaler;
-  qspivdbg("prescaler=%d actual=%d\n", prescaler, actual);
+  qspiinfo("prescaler=%d actual=%d\n", prescaler, actual);
 
   /* Save the frequency setting */
 
   priv->frequency = frequency;
   priv->actual    = actual;
 
-  qspivdbg("Frequency %d->%d\n", frequency, actual);
+  qspiinfo("Frequency %d->%d\n", frequency, actual);
   return actual;
 }
 
@@ -1850,7 +1850,7 @@ static void qspi_setmode(struct qspi_dev_s *dev, enum qspi_mode_e mode)
     return;
   }
   
-  qspivdbg("mode=%d\n", mode);
+  qspiinfo("mode=%d\n", mode);
 
   /* Has the mode changed? */
 
@@ -1880,14 +1880,14 @@ static void qspi_setmode(struct qspi_dev_s *dev, enum qspi_mode_e mode)
 
         case QSPIDEV_MODE1: /* CPOL=0; CPHA=1 */
         case QSPIDEV_MODE2: /* CPOL=1; CPHA=0 */
-          qspivdbg("unsupported mode=%d\n", mode);
+          qspiinfo("unsupported mode=%d\n", mode);
         default:
           DEBUGASSERT(FALSE);
           return;
         }
 
       qspi_putreg(priv, regval, STM32L4_QUADSPI_DCR);
-      qspivdbg("DCR=%08x\n", regval);
+      qspiinfo("DCR=%08x\n", regval);
 
       /* Save the mode so that subsequent re-configurations will be faster */
 
@@ -1917,7 +1917,7 @@ static void qspi_setbits(struct qspi_dev_s *dev, int nbits)
 
   if (8 != nbits)
     {
-      qspivdbg("unsupported nbits=%d\n", nbits);
+      qspiinfo("unsupported nbits=%d\n", nbits);
       DEBUGASSERT(FALSE);
     }
 }
@@ -2456,7 +2456,7 @@ struct qspi_dev_s *stm32l4_qspi_initialize(int intf)
 
   /* The STM32L4 has only a single QSPI port */
 
-  qspivdbg("intf: %d\n", intf);
+  qspiinfo("intf: %d\n", intf);
   DEBUGASSERT(intf == 0);
 
   /* Select the QSPI interface */
