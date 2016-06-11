@@ -1,7 +1,7 @@
 /****************************************************************************
  * libc/misc/lib_dbg.c
  *
- *   Copyright (C) 2007-2009, 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,10 +47,6 @@
 #ifndef CONFIG_CPP_HAVE_VARARGS
 
 /****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -83,12 +79,41 @@ int lldbg(const char *format, ...)
   int     ret;
 
   va_start(ap, format);
+  ret = lowvsyslog(LOG_ERR, format, ap);
+  va_end(ap);
+
+  return ret;
+}
+#endif /* CONFIG_ARCH_LOWPUTC */
+#endif /* CONFIG_DEBUG */
+
+#ifdef CONFIG_DEBUG_WARN
+int warn(const char *format, ...)
+{
+  va_list ap;
+  int     ret;
+
+  va_start(ap, format);
+  ret = vsyslog(LOG_WARNING, format, ap);
+  va_end(ap);
+
+  return ret;
+}
+
+#ifdef CONFIG_ARCH_LOWPUTC
+int llwarn(const char *format, ...)
+{
+  va_list ap;
+  int     ret;
+
+  va_start(ap, format);
   ret = lowvsyslog(LOG_DEBUG, format, ap);
   va_end(ap);
 
   return ret;
 }
-#endif
+#endif /* CONFIG_ARCH_LOWPUTC */
+#endif /* CONFIG_DEBUG_INFO */
 
 #ifdef CONFIG_DEBUG_INFO
 int info(const char *format, ...)
@@ -117,5 +142,5 @@ int llinfo(const char *format, ...)
 }
 #endif /* CONFIG_ARCH_LOWPUTC */
 #endif /* CONFIG_DEBUG_INFO */
-#endif /* CONFIG_DEBUG */
+
 #endif /* CONFIG_CPP_HAVE_VARARGS */

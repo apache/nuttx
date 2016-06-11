@@ -413,9 +413,18 @@ if DEBUG
 
 comment "Debug SYSLOG Output Controls"
 
-config CONFIG_DEBUG_INFO
+config DEBUG_WARNINGS
+	bool "Enable Warnings Output"
+	default n
+	---help---
+		Enables output from warning statements.  Warnings are considered to
+		be potential errors or errors that will not have serious
+		consequences.
+
+config DEBUG_INFO
 	bool "Enable Informational Debug Output"
 	default n
+	depends on DEBUG_WARNINGS
 	---help---
 		Enables verbose "informational" debug output.  If you enable
 		CONFIG_DEBUG_INFO, then very chatty (and often annoying) output
