@@ -357,7 +357,7 @@ static int nfs_filecreate(FAR struct nfsmount *nmp, struct nfsnode *np,
       tmp = *ptr;  /* handle_follows */
       if (!tmp)
         {
-          fwarn"WARNING: no file attributes\n");
+          fwarn("WARNING: no file attributes\n");
         }
       else
         {
