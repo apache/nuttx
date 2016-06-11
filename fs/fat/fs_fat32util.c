@@ -623,7 +623,7 @@ int fat_mount(struct fat_mountpt_s *fs, bool writeable)
 
       if (i > 3)
         {
-          ferr("No valid MBR\n");
+          ferr("ERROR: No valid MBR\n");
           ret = -EINVAL;
           goto errout_with_buffer;
         }
@@ -644,22 +644,22 @@ int fat_mount(struct fat_mountpt_s *fs, bool writeable)
 
   /* We did it! */
 
-  ferr("FAT%d:\n", fs->fs_type == 0 ? 12 : fs->fs_type == 1  ? 16 : 32);
-  ferr("\tHW  sector size:     %d\n", fs->fs_hwsectorsize);
-  ferr("\t    sectors:         %d\n", fs->fs_hwnsectors);
-  ferr("\tFAT reserved:        %d\n", fs->fs_fatresvdseccount);
-  ferr("\t    sectors:         %d\n", fs->fs_fattotsec);
-  ferr("\t    start sector:    %d\n", fs->fs_fatbase);
-  ferr("\t    root sector:     %d\n", fs->fs_rootbase);
-  ferr("\t    root entries:    %d\n", fs->fs_rootentcnt);
-  ferr("\t    data sector:     %d\n", fs->fs_database);
-  ferr("\t    FSINFO sector:   %d\n", fs->fs_fsinfo);
-  ferr("\t    Num FATs:        %d\n", fs->fs_fatnumfats);
-  ferr("\t    FAT sectors:     %d\n", fs->fs_nfatsects);
-  ferr("\t    sectors/cluster: %d\n", fs->fs_fatsecperclus);
-  ferr("\t    max clusters:    %d\n", fs->fs_nclusters);
-  ferr("\tFSI free count       %d\n", fs->fs_fsifreecount);
-  ferr("\t    next free        %d\n", fs->fs_fsinextfree);
+  finfo("FAT%d:\n", fs->fs_type == 0 ? 12 : fs->fs_type == 1  ? 16 : 32);
+  finfo("\tHW  sector size:     %d\n", fs->fs_hwsectorsize);
+  finfo("\t    sectors:         %d\n", fs->fs_hwnsectors);
+  finfo("\tFAT reserved:        %d\n", fs->fs_fatresvdseccount);
+  finfo("\t    sectors:         %d\n", fs->fs_fattotsec);
+  finfo("\t    start sector:    %d\n", fs->fs_fatbase);
+  finfo("\t    root sector:     %d\n", fs->fs_rootbase);
+  finfo("\t    root entries:    %d\n", fs->fs_rootentcnt);
+  finfo("\t    data sector:     %d\n", fs->fs_database);
+  finfo("\t    FSINFO sector:   %d\n", fs->fs_fsinfo);
+  finfo("\t    Num FATs:        %d\n", fs->fs_fatnumfats);
+  finfo("\t    FAT sectors:     %d\n", fs->fs_nfatsects);
+  finfo("\t    sectors/cluster: %d\n", fs->fs_fatsecperclus);
+  finfo("\t    max clusters:    %d\n", fs->fs_nclusters);
+  finfo("\tFSI free count       %d\n", fs->fs_fsifreecount);
+  finfo("\t    next free        %d\n", fs->fs_fsinextfree);
 
   return OK;
 

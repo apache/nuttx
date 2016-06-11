@@ -147,11 +147,11 @@ int nxffs_blockstats(FAR struct nxffs_volume_s *volume,
         }
     }
 
-  ferr("Number blocks:        %d\n", stats->nblocks);
-  ferr("  Good blocks:        %d\n", stats->ngood);
-  ferr("  Bad blocks:         %d\n", stats->nbad);
-  ferr("  Unformatted blocks: %d\n", stats->nunformat);
-  ferr("  Corrupt blocks:     %d\n", stats->ncorrupt);
+  finfo("Number blocks:        %d\n", stats->nblocks);
+  finfo("  Good blocks:        %d\n", stats->ngood);
+  finfo("  Bad blocks:         %d\n", stats->nbad);
+  finfo("  Unformatted blocks: %d\n", stats->nunformat);
+  finfo("  Corrupt blocks:     %d\n", stats->ncorrupt);
 
 #else
   for (ioblock = 0; ioblock < volume->nblocks; ioblock++)
@@ -221,12 +221,12 @@ int nxffs_blockstats(FAR struct nxffs_volume_s *volume,
         }
     }
 
-  ferr("Number blocks:        %d\n", stats->nblocks);
-  ferr("  Good blocks:        %d\n", stats->ngood);
-  ferr("  Bad blocks:         %d\n", stats->nbad);
-  ferr("  Unformatted blocks: %d\n", stats->nunformat);
-  ferr("  Corrupt blocks:     %d\n", stats->ncorrupt);
-  ferr("  Unreadable blocks:  %d\n", stats->nbadread);
+  finfo("Number blocks:        %d\n", stats->nblocks);
+  finfo("  Good blocks:        %d\n", stats->ngood);
+  finfo("  Bad blocks:         %d\n", stats->nbad);
+  finfo("  Unformatted blocks: %d\n", stats->nunformat);
+  finfo("  Corrupt blocks:     %d\n", stats->ncorrupt);
+  finfo("  Unreadable blocks:  %d\n", stats->nbadread);
 
 #endif
   return OK;

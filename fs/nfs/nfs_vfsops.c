@@ -357,7 +357,7 @@ static int nfs_filecreate(FAR struct nfsmount *nmp, struct nfsnode *np,
       tmp = *ptr;  /* handle_follows */
       if (!tmp)
         {
-          ferr("WARNING: no file attributes\n");
+          fwarn"WARNING: no file attributes\n");
         }
       else
         {
@@ -790,7 +790,7 @@ static ssize_t nfs_read(FAR struct file *filep, char *buffer, size_t buflen)
   error = nfs_checkmount(nmp);
   if (error != OK)
     {
-      ferr("nfs_checkmount failed: %d\n", error);
+      ferr("ERROR: nfs_checkmount failed: %d\n", error);
       goto errout_with_semaphore;
     }
 
@@ -966,7 +966,7 @@ static ssize_t nfs_write(FAR struct file *filep, const char *buffer,
   error = nfs_checkmount(nmp);
   if (error != OK)
     {
-      ferr("nfs_checkmount failed: %d\n", error);
+      ferr("ERROR: nfs_checkmount failed: %d\n", error);
       goto errout_with_semaphore;
     }
 
@@ -1449,7 +1449,7 @@ static int nfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
   error = nfs_lookup(nmp, dir->fd_dir.d_name, &fhandle, &obj_attributes, NULL);
   if (error != OK)
     {
-      ferr("nfs_lookup failed: %d\n", error);
+      ferr("ERROR: nfs_lookup failed: %d\n", error);
       goto errout_with_semaphore;
     }
 

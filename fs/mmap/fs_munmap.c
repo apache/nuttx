@@ -143,7 +143,7 @@ int munmap(FAR void *start, size_t length)
 
   if (!curr)
     {
-      ferr("Region not found\n");
+      ferr("ERROR: Region not found\n");
       errcode = EINVAL;
       goto errout_with_semaphore;
     }
@@ -158,7 +158,7 @@ int munmap(FAR void *start, size_t length)
   offset = start - curr->addr;
   if (offset + length < curr->length)
     {
-      ferr("Cannot umap without unmapping to the end\n");
+      ferr("ERROR: Cannot umap without unmapping to the end\n");
       errcode = ENOSYS;
       goto errout_with_semaphore;
     }

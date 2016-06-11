@@ -467,7 +467,7 @@ int romfs_filecacheread(struct romfs_mountpt_s *rm, struct romfs_file_s *rf,
           ret = romfs_hwread(rm, rf->rf_buffer, sector, 1);
           if (ret < 0)
             {
-              ferr("romfs_hwread failed: %d\n", ret);
+              ferr("ERROR: romfs_hwread failed: %d\n", ret);
               return ret;
             }
         }

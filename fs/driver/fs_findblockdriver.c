@@ -96,7 +96,7 @@ int find_blockdriver(FAR const char *pathname, int mountflags, FAR struct inode 
   inode = inode_find(pathname, NULL);
   if (!inode)
     {
-      ferr("Failed to find %s\n", pathname);
+      ferr("ERROR: Failed to find %s\n", pathname);
       ret = -ENOENT;
       goto errout;
     }
@@ -105,7 +105,7 @@ int find_blockdriver(FAR const char *pathname, int mountflags, FAR struct inode 
 
   if (!INODE_IS_BLOCK(inode))
     {
-      ferr("%s is not a block driver\n", pathname);
+      ferr("ERROR: %s is not a block driver\n", pathname);
       ret = -ENOTBLK;
       goto errout_with_inode;
     }
@@ -115,7 +115,7 @@ int find_blockdriver(FAR const char *pathname, int mountflags, FAR struct inode 
   if (!inode->u.i_bops || !inode->u.i_bops->read ||
       (!inode->u.i_bops->write && (mountflags & MS_RDONLY) == 0))
     {
-      ferr("%s does not support requested access\n", pathname);
+      ferr("ERROR: %s does not support requested access\n", pathname);
       ret = -EACCES;
       goto errout_with_inode;
     }

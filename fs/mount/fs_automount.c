@@ -204,7 +204,7 @@ static void automount_mount(FAR struct automounter_state_s *priv)
        * try to unmount again because the mount might be stale.
        */
 
-      ferr("WARNING: Mountpoint %s already exists\n", lower->mountpoint);
+      fwarn("WARNING: Mountpoint %s already exists\n", lower->mountpoint);
       ret = automount_unmount(priv);
       if (ret < 0)
         {

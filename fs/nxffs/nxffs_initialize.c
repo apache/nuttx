@@ -274,7 +274,7 @@ int nxffs_initialize(FAR struct mtd_dev_s *mtd)
 
   /* We may need to format the volume.  Try that before giving up. */
 
-  ferr("WARNING: Failed to calculate file system limits: %d\n", -ret);
+  fwarn("WARNING: Failed to calculate file system limits: %d\n", -ret);
   ret = nxffs_reformat(volume);
   if (ret < 0)
     {

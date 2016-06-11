@@ -103,7 +103,7 @@ static inline int nfs_pathsegment(FAR const char **path, FAR char *buffer,
         }
       else if (nbytes >= NAME_MAX)
         {
-          ferr("File name segment is too long: %d\n", *path);
+          ferr("ERROR: File name segment is too long: %d\n", *path);
           return EFBIG;
         }
       else
@@ -277,7 +277,7 @@ int nfs_lookup(struct nfsmount *nmp, FAR const char *filename,
   namelen = strlen(filename);
   if (namelen > NAME_MAX)
     {
-      ferr("Length of the string is too big: %d\n", namelen);
+      ferr("ERROR: Length of the string is too long: %d\n", namelen);
       return E2BIG;
     }
 
@@ -427,7 +427,7 @@ int nfs_findnode(struct nfsmount *nmp, FAR const char *relpath,
         {
           /* The filename segment contains is too long. */
 
-          ferr("nfs_pathsegment of \"%s\" failed after \"%s\": %d\n",
+          ferr("ERROR: nfs_pathsegment of \"%s\" failed after \"%s\": %d\n",
                relpath, buffer, error);
           return error;
         }
@@ -437,7 +437,7 @@ int nfs_findnode(struct nfsmount *nmp, FAR const char *relpath,
       error = nfs_lookup(nmp, buffer, fhandle, obj_attributes, dir_attributes);
       if (error != OK)
         {
-          ferr("nfs_lookup of \"%s\" failed at \"%s\": %d\n",
+          ferr("ERROR: nfs_lookup of \"%s\" failed at \"%s\": %d\n",
                 relpath, buffer, error);
           return error;
         }
@@ -521,7 +521,7 @@ int nfs_finddir(struct nfsmount *nmp, FAR const char *relpath,
         {
           /* The filename segment contains is too long. */
 
-          ferr("nfs_pathsegment of \"%s\" failed after \"%s\": %d\n",
+          ferr("ERROR: nfs_pathsegment of \"%s\" failed after \"%s\": %d\n",
                relpath, filename, error);
           return error;
         }
@@ -545,7 +545,7 @@ int nfs_finddir(struct nfsmount *nmp, FAR const char *relpath,
       error = nfs_lookup(nmp, filename, fhandle, attributes, NULL);
       if (error != OK)
         {
-          ferr("nfs_lookup of \"%s\" failed at \"%s\": %d\n",
+          ferr("ERROR: fs_lookup of \"%s\" failed at \"%s\": %d\n",
                 relpath, filename, error);
           return error;
         }

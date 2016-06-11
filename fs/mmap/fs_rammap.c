@@ -142,7 +142,7 @@ FAR void *rammap(int fd, size_t length, off_t offset)
   alloc = (FAR uint8_t *)kumm_malloc(sizeof(struct fs_rammap_s) + length);
   if (!alloc)
     {
-      ferr("Region allocation failed, length: %d\n", (int)length);
+      ferr("ERROR: Region allocation failed, length: %d\n", (int)length);
       errcode = ENOMEM;
       goto errout;
     }
@@ -164,7 +164,7 @@ FAR void *rammap(int fd, size_t length, off_t offset)
        * the correct response.
        */
 
-      ferr("Seek to position %d failed\n", (int)offset);
+      ferr("ERROR: Seek to position %d failed\n", (int)offset);
       errcode = EINVAL;
       goto errout_with_region;
     }
@@ -190,7 +190,8 @@ FAR void *rammap(int fd, size_t length, off_t offset)
                * destroy the errno value.
                */
 
-              ferr("Read failed: offset=%d errno=%d\n", (int)offset, errcode);
+              ferr("ERROR: Read failed: offset=%d errno=%d\n",
+                   (int)offset, errcode);
 #ifdef CONFIG_DEBUG_FS
               goto errout_with_region;
 #else

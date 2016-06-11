@@ -169,7 +169,7 @@ static int romfs_open(FAR struct file *filep, FAR const char *relpath,
   ret = romfs_checkmount(rm);
   if (ret != OK)
     {
-      ferr("romfs_checkmount failed: %d\n", ret);
+      ferr("ERROR: romfs_checkmount failed: %d\n", ret);
       goto errout_with_semaphore;
     }
 
@@ -179,7 +179,7 @@ static int romfs_open(FAR struct file *filep, FAR const char *relpath,
 
   if ((oflags & O_WRONLY) != 0 || (oflags & O_RDONLY) == 0)
     {
-      ferr("Only O_RDONLY supported\n");
+      ferr("ERROR: Only O_RDONLY supported\n");
       ret = -EACCES;
       goto errout_with_semaphore;
     }
@@ -193,7 +193,7 @@ static int romfs_open(FAR struct file *filep, FAR const char *relpath,
   ret = romfs_finddirentry(rm, &dirinfo, relpath);
   if (ret < 0)
     {
-      ferr("Failed to find directory directory entry for '%s': %d\n",
+      ferr("ERROR: Failed to find directory directory entry for '%s': %d\n",
            relpath, ret);
       goto errout_with_semaphore;
     }
@@ -207,7 +207,7 @@ static int romfs_open(FAR struct file *filep, FAR const char *relpath,
       /* It is a directory */
 
       ret = -EISDIR;
-      ferr("'%s' is a directory\n", relpath);
+      ferr("ERROR: '%s' is a directory\n", relpath);
       goto errout_with_semaphore;
     }
 
@@ -222,7 +222,7 @@ static int romfs_open(FAR struct file *filep, FAR const char *relpath,
   rf = (FAR struct romfs_file_s *)kmm_zalloc(sizeof(struct romfs_file_s));
   if (!rf)
     {
-      ferr("Failed to allocate private data\n", ret);
+      ferr("ERROR: Failed to allocate private data\n", ret);
       ret = -ENOMEM;
       goto errout_with_semaphore;
     }
@@ -239,7 +239,7 @@ static int romfs_open(FAR struct file *filep, FAR const char *relpath,
                         &rf->rf_startoffset);
   if (ret < 0)
     {
-      ferr("Failed to locate start of file data: %d\n", ret);
+      ferr("ERROR: Failed to locate start of file data: %d\n", ret);
       goto errout_with_semaphore;
     }
 
@@ -248,7 +248,7 @@ static int romfs_open(FAR struct file *filep, FAR const char *relpath,
   ret = romfs_fileconfigure(rm, rf);
   if (ret < 0)
     {
-      ferr("Failed configure buffering: %d\n", ret);
+      ferr("ERROR: Failed configure buffering: %d\n", ret);
       goto errout_with_semaphore;
     }
 
@@ -359,7 +359,7 @@ static ssize_t romfs_read(FAR struct file *filep, FAR char *buffer,
   ret = romfs_checkmount(rm);
   if (ret != OK)
     {
-      ferr("romfs_checkmount failed: %d\n", ret);
+      ferr("ERROR: romfs_checkmount failed: %d\n", ret);
       goto errout_with_semaphore;
     }
 
@@ -408,7 +408,7 @@ static ssize_t romfs_read(FAR struct file *filep, FAR char *buffer,
           ret = romfs_hwread(rm, userbuffer, sector, nsectors);
           if (ret < 0)
             {
-              ferr("romfs_hwread failed: %d\n", ret);
+              ferr("ERROR: romfs_hwread failed: %d\n", ret);
               goto errout_with_semaphore;
             }
 
@@ -426,7 +426,7 @@ static ssize_t romfs_read(FAR struct file *filep, FAR char *buffer,
           ret = romfs_filecacheread(rm, rf, sector);
           if (ret < 0)
             {
-              ferr("romfs_filecacheread failed: %d\n", ret);
+              ferr("ERROR: romfs_filecacheread failed: %d\n", ret);
               goto errout_with_semaphore;
             }
 
@@ -511,7 +511,7 @@ static off_t romfs_seek(FAR struct file *filep, off_t offset, int whence)
         break;
 
     default:
-        ferr("Whence is invalid: %d\n", whence);
+        ferr("ERROR: Whence is invalid: %d\n", whence);
         return -EINVAL;
     }
 
@@ -521,7 +521,7 @@ static off_t romfs_seek(FAR struct file *filep, off_t offset, int whence)
   ret = romfs_checkmount(rm);
   if (ret != OK)
     {
-       ferr("romfs_checkmount failed: %d\n", ret);
+       ferr("ERROR: romfs_checkmount failed: %d\n", ret);
        goto errout_with_semaphore;
     }
 
@@ -582,7 +582,7 @@ static int romfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       return OK;
     }
 
-  ferr("Invalid cmd: %d \n", cmd);
+  ferr("ERROR: Invalid cmd: %d \n", cmd);
   return -ENOTTY;
 }
 
@@ -618,7 +618,7 @@ static int romfs_dup(FAR const struct file *oldp, FAR struct file *newp)
   ret = romfs_checkmount(rm);
   if (ret != OK)
     {
-      ferr("romfs_checkmount failed: %d\n", ret);
+      ferr("ERROR: romfs_checkmount failed: %d\n", ret);
       goto errout_with_semaphore;
     }
 
@@ -633,7 +633,7 @@ static int romfs_dup(FAR const struct file *oldp, FAR struct file *newp)
   newrf = (FAR struct romfs_file_s *)kmm_malloc(sizeof(struct romfs_file_s));
   if (!newrf)
     {
-      ferr("Failed to allocate private data\n", ret);
+      ferr("ERROR: Failed to allocate private data\n", ret);
       ret = -ENOMEM;
       goto errout_with_semaphore;
     }
@@ -649,7 +649,7 @@ static int romfs_dup(FAR const struct file *oldp, FAR struct file *newp)
   if (ret < 0)
     {
       kmm_free(newrf);
-      ferr("Failed configure buffering: %d\n", ret);
+      ferr("ERROR: Failed configure buffering: %d\n", ret);
       goto errout_with_semaphore;
     }
 
@@ -707,7 +707,7 @@ static int romfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
   ret = romfs_checkmount(rm);
   if (ret != OK)
     {
-      ferr("romfs_checkmount failed: %d\n", ret);
+      ferr("ERROR: romfs_checkmount failed: %d\n", ret);
       goto errout_with_semaphore;
     }
 
@@ -716,7 +716,7 @@ static int romfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
   ret = romfs_finddirentry(rm, &dirinfo, relpath);
   if (ret < 0)
     {
-      ferr("Failed to find directory '%s': %d\n", relpath, ret);
+      ferr("ERROR: Failed to find directory '%s': %d\n", relpath, ret);
       goto errout_with_semaphore;
     }
 
@@ -726,7 +726,7 @@ static int romfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
     {
       /* The entry is not a directory */
 
-      ferr("'%s' is not a directory: %d\n", relpath);
+      ferr("ERROR: '%s' is not a directory: %d\n", relpath);
       ret = -ENOTDIR;
       goto errout_with_semaphore;
     }
@@ -775,7 +775,7 @@ static int romfs_readdir(FAR struct inode *mountpt,
   ret = romfs_checkmount(rm);
   if (ret != OK)
     {
-      ferr("romfs_checkmount failed: %d\n", ret);
+      ferr("ERROR: omfs_checkmount failed: %d\n", ret);
       goto errout_with_semaphore;
     }
 
@@ -791,7 +791,7 @@ static int romfs_readdir(FAR struct inode *mountpt,
            * special error -ENOENT
            */
 
-          ferr("End of directory\n");
+          finfo("End of directory\n");
           ret = -ENOENT;
           goto errout_with_semaphore;
         }
@@ -802,7 +802,7 @@ static int romfs_readdir(FAR struct inode *mountpt,
                                 &next, &info, &size);
       if (ret < 0)
         {
-          ferr("romfs_parsedirentry failed: %d\n", ret);
+          ferr("ERROR: romfs_parsedirentry failed: %d\n", ret);
           goto errout_with_semaphore;
         }
 
@@ -811,7 +811,7 @@ static int romfs_readdir(FAR struct inode *mountpt,
       ret = romfs_parsefilename(rm, dir->u.romfs.fr_curroffset, dir->fd_dir.d_name);
       if (ret < 0)
         {
-          ferr("romfs_parsefilename failed: %d\n", ret);
+          ferr("ERROR: romfs_parsefilename failed: %d\n", ret);
           goto errout_with_semaphore;
         }
 
@@ -897,14 +897,14 @@ static int romfs_bind(FAR struct inode *blkdriver, FAR const void *data,
 
   if (!blkdriver || !blkdriver->u.i_bops)
     {
-      ferr("No block driver/ops\n");
+      ferr("ERROR: No block driver/ops\n");
       return -ENODEV;
     }
 
   if (blkdriver->u.i_bops->open &&
       blkdriver->u.i_bops->open(blkdriver) != OK)
     {
-      ferr("No open method\n");
+      ferr("ERROR: No open method\n");
       return -ENODEV;
     }
 
@@ -913,7 +913,7 @@ static int romfs_bind(FAR struct inode *blkdriver, FAR const void *data,
   rm = (FAR struct romfs_mountpt_s *)kmm_zalloc(sizeof(struct romfs_mountpt_s));
   if (!rm)
     {
-      ferr("Failed to allocate mountpoint structure\n");
+      ferr("ERROR: Failed to allocate mountpoint structure\n");
       return -ENOMEM;
     }
 
@@ -930,7 +930,7 @@ static int romfs_bind(FAR struct inode *blkdriver, FAR const void *data,
   ret = romfs_hwconfigure(rm);
   if (ret < 0)
     {
-      ferr("romfs_hwconfigure failed: %d\n", ret);
+      ferr("ERROR: romfs_hwconfigure failed: %d\n", ret);
       goto errout_with_sem;
     }
 
@@ -941,7 +941,7 @@ static int romfs_bind(FAR struct inode *blkdriver, FAR const void *data,
   ret = romfs_fsconfigure(rm);
   if (ret < 0)
     {
-      ferr("romfs_fsconfigure failed: %d\n", ret);
+      ferr("ERROR: romfs_fsconfigure failed: %d\n", ret);
       goto errout_with_buffer;
     }
 
@@ -993,7 +993,7 @@ static int romfs_unbind(FAR void *handle, FAR struct inode **blkdriver,
     {
       /* We cannot unmount now.. there are open files */
 
-      ferr("There are open files\n");
+      fwarn("WARNING: There are open files\n");
 
       /* This implementation currently only supports unmounting if there are
        * no open file references.
@@ -1072,7 +1072,7 @@ static int romfs_statfs(FAR struct inode *mountpt, FAR struct statfs *buf)
   ret = romfs_checkmount(rm);
   if (ret < 0)
     {
-      ferr("romfs_checkmount failed: %d\n", ret);
+      ferr("ERROR: romfs_checkmount failed: %d\n", ret);
       goto errout_with_semaphore;
     }
 
@@ -1130,7 +1130,7 @@ static int romfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
   ret = romfs_checkmount(rm);
   if (ret != OK)
     {
-      ferr("romfs_checkmount failed: %d\n", ret);
+      ferr("ERROR: romfs_checkmount failed: %d\n", ret);
       goto errout_with_semaphore;
     }
 

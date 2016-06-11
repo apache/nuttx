@@ -554,7 +554,7 @@ int rpcclnt_connect(struct rpcclnt *rpc)
   error = psock_connect(rpc->rc_so, saddr, sizeof(*saddr));
   if (error)
     {
-      ferr("psock_connect NFS port returns %d\n", error);
+      ferr("ERROR: psock_connect NFS port returns %d\n", error);
       goto bad;
     }
 
@@ -766,11 +766,11 @@ int rpcclnt_request(FAR struct rpcclnt *rpc, int procnum, int prog,
       switch (tmp)
         {
         case RPC_MISMATCH:
-          ferr("RPC_MSGDENIED: RPC_MISMATCH error\n");
+          ferr(ERROR: RPC_MSGDENIED: RPC_MISMATCH error\n");
           return EOPNOTSUPP;
 
         case RPC_AUTHERR:
-          ferr("RPC_MSGDENIED: RPC_AUTHERR error\n");
+          ferr("ERROR: RPC_MSGDENIED: RPC_AUTHERR error\n");
           return EACCES;
 
         default:
@@ -789,12 +789,12 @@ int rpcclnt_request(FAR struct rpcclnt *rpc, int procnum, int prog,
     }
   else if (tmp == RPC_PROGMISMATCH)
     {
-      ferr("RPC_MSGACCEPTED: RPC_PROGMISMATCH error\n");
+      ferr("ERROR: RPC_MSGACCEPTED: RPC_PROGMISMATCH error\n");
       return EOPNOTSUPP;
     }
   else if (tmp > 5)
     {
-      ferr("ERROR:  Other RPC type: %d\n", tmp);
+      ferr("ERROR: Unsupported RPC type: %d\n", tmp);
       return EOPNOTSUPP;
     }
 
