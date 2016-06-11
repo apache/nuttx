@@ -766,7 +766,7 @@ int rpcclnt_request(FAR struct rpcclnt *rpc, int procnum, int prog,
       switch (tmp)
         {
         case RPC_MISMATCH:
-          ferr(ERROR: RPC_MSGDENIED: RPC_MISMATCH error\n");
+          ferr("ERROR: RPC_MSGDENIED: RPC_MISMATCH error\n");
           return EOPNOTSUPP;
 
         case RPC_AUTHERR:
