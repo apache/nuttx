@@ -79,7 +79,7 @@ void up_netinitialize(void)
    * width is 16-bits.
    */
 
-  nlldbg("CS4CTRL1=%04x CS4CTRL2=%04x\n",
+  nllerr("CS4CTRL1=%04x CS4CTRL2=%04x\n",
          getreg16(DM320_EMIF_CS4CTRL1), getreg16(DM320_EMIF_CS4CTRL2));
 
   /* It is assumed that bootloader has already configured CS4.  Here,
@@ -91,7 +91,7 @@ void up_netinitialize(void)
   GIO_INTERRUPT(GIO_DM9000A_INT);
   GIO_RISINGEDGE(GIO_DM9000A_INT);
 
-  nlldbg("GIO DIR0=%04x INV0=%04x IRQPORT=%04x IRQEDGE=%04x\n",
+  nllerr("GIO DIR0=%04x INV0=%04x IRQPORT=%04x IRQEDGE=%04x\n",
          getreg16(DM320_GIO_DIR0), getreg16(DM320_GIO_INV0),
          getreg16(DM320_GIO_IRQPORT), getreg16(DM320_GIO_IRQEDGE));
 

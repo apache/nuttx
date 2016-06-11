@@ -544,7 +544,7 @@ static bool sam_adc_checkreg(struct sam_adc_s *priv, bool wr,
         {
           /* Yes... show how many times we did it */
 
-          lldbg("...[Repeats %d times]...\n", priv->ntimes);
+          llerr("...[Repeats %d times]...\n", priv->ntimes);
         }
 
       /* Save information about the new access */
@@ -751,7 +751,7 @@ static void sam_adc_dmacallback(DMA_HANDLE handle, void *arg, int result)
       ret = work_queue(HPWORK, &priv->work, sam_adc_dmadone, priv, 0);
       if (ret != 0)
         {
-          alldbg("ERROR: Failed to queue work: %d\n", ret);
+          allerr("ERROR: Failed to queue work: %d\n", ret);
         }
     }
 
@@ -957,7 +957,7 @@ static int sam_adc_interrupt(int irq, void *context)
       ret = work_queue(HPWORK, &priv->work, sam_adc_endconversion, priv, 0);
       if (ret != 0)
         {
-          alldbg("ERROR: Failed to queue work: %d\n", ret);
+          allerr("ERROR: Failed to queue work: %d\n", ret);
         }
 
       pending &= ~ADC_INT_EOCALL;
@@ -2187,7 +2187,7 @@ uint32_t sam_adc_getreg(struct sam_adc_s *priv, uintptr_t address)
 
   if (sam_adc_checkreg(priv, false, regval, address))
     {
-      lldbg("%08x->%08x\n", address, regval);
+      llerr("%08x->%08x\n", address, regval);
     }
 
   return regval;
@@ -2207,7 +2207,7 @@ void sam_adc_putreg(struct sam_adc_s *priv, uintptr_t address, uint32_t regval)
 {
   if (sam_adc_checkreg(priv, true, regval, address))
     {
-      lldbg("%08x<-%08x\n", address, regval);
+      llerr("%08x<-%08x\n", address, regval);
     }
 
   putreg32(regval, address);

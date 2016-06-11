@@ -760,7 +760,7 @@ FAR struct tcp_conn_s *tcp_alloc(uint8_t domain)
 
       if (conn != NULL)
         {
-          nlldbg("Closing unestablished connection: %p\n", conn);
+          nllerr("Closing unestablished connection: %p\n", conn);
 
           /* Yes... free it.  This will remove the connection from the list
            * of active connections and release all resources held by the

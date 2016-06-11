@@ -66,12 +66,12 @@
 #ifdef CONFIG_DEBUG_TIMER
 #  define tmrdbg    dbg
 #  define tmrinfo   info
-#  define tmrlldbg  lldbg
+#  define tmrllerr  llerr
 #  define tmrllinfo llinfo
 #else
 #  define tmrdbg(x...)
 #  define tmrinfo(x...)
-#  define tmrlldbg(x...)
+#  define tmrllerr(x...)
 #  define tmrllinfo(x...)
 #endif
 

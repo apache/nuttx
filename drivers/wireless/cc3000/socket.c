@@ -62,7 +62,7 @@
 #  define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
 #endif
 
-#define waitlldbg(x,...) // lldbg
+#define waitllerr(x,...) // llerr
 
 /****************************************************************************
  * Private Types
@@ -194,13 +194,13 @@ int cc3000_closesocket(int sockfd)
   int ret;
 
 #ifdef CONFIG_CC3000_MT
-  waitlldbg("remove\n");
+  waitllerr("remove\n");
   cc3000_remove_socket(sockfd);
 #endif
   cc3000_lib_lock();
-  waitlldbg("Call closesocketl\n");
+  waitllerr("Call closesocketl\n");
   ret = cc3000_closesocket_impl(sockfd);
-  waitlldbg("return closesocket\n");
+  waitllerr("return closesocket\n");
   cc3000_lib_unlock();
   return ret;
 }
@@ -596,9 +596,9 @@ ssize_t cc3000_recv(int sockfd, FAR void *buf, size_t len, int flags)
   ssize_t ret;
 
 #ifdef CONFIG_CC3000_MT
-  waitlldbg("wait\n");
+  waitllerr("wait\n");
   ret = cc3000_wait_data(sockfd);
-  waitlldbg("wait %d\n", ret);
+  waitllerr("wait %d\n", ret);
 
   if (ret == -ECONNABORTED)
     {
@@ -612,9 +612,9 @@ ssize_t cc3000_recv(int sockfd, FAR void *buf, size_t len, int flags)
 #endif
 
   cc3000_lib_lock();
-  waitlldbg("recv\n");
+  waitllerr("recv\n");
   ret = cc3000_recv_impl(sockfd, buf, len, flags);
-  waitlldbg("recv %d\n", ret);
+  waitllerr("recv %d\n", ret);
   cc3000_lib_unlock();
   return ret;
 }

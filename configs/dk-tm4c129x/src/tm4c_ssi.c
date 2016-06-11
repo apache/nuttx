@@ -62,7 +62,7 @@
 /* CONFIG_DEBUG_SPI enables debug output from this file (needs CONFIG_DEBUG_FEATURES too) */
 
 #ifdef CONFIG_DEBUG_SPI
-#  define ssidbg lldbg
+#  define ssidbg llerr
 #else
 #  define ssidbg(x...)
 #endif
@@ -70,7 +70,7 @@
 /* Dump GPIO registers */
 
 #if defined(CONFIG_DEBUG_SPI) && defined(CONFIG_DEBUG_INFO)
-#  define ssiinfo lldbg
+#  define ssiinfo llerr
 #  define ssi_dumpgpio(m) tiva_dumpgpio(SDCCS_GPIO, m)
 #else
 #  define ssiinfo(x...)

@@ -80,7 +80,7 @@
 
 void up_undefinedinsn(uint32_t *regs)
 {
-  lldbg("Undefined instruction at 0x%x\n", regs[REG_PC]);
+  llerr("Undefined instruction at 0x%x\n", regs[REG_PC]);
   CURRENT_REGS = regs;
   PANIC();
 }

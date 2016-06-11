@@ -75,9 +75,9 @@
 /* Debug */
 
 #ifdef CONFIG_DEBUG_SPI
-#  define spidbg  lldbg
+#  define spidbg  llerr
 #  ifdef CONFIG_DEBUG_INFO
-#    define spiinfo lldbg
+#    define spiinfo llerr
 #  else
 #    define spiinfo(x...)
 #  endif
@@ -329,7 +329,7 @@ static uint32_t spi_getreg(FAR struct pic32mx_dev_s *priv, unsigned int offset)
         {
            if (count == 4)
              {
-               lldbg("...\n");
+               llerr("...\n");
              }
           return value;
         }
@@ -345,7 +345,7 @@ static uint32_t spi_getreg(FAR struct pic32mx_dev_s *priv, unsigned int offset)
          {
            /* Yes.. then show how many times the value repeated */
 
-           lldbg("[repeats %d more times]\n", count-3);
+           llerr("[repeats %d more times]\n", count-3);
          }
 
        /* Save the new address, value, and count */
@@ -357,7 +357,7 @@ static uint32_t spi_getreg(FAR struct pic32mx_dev_s *priv, unsigned int offset)
 
   /* Show the register value read */
 
-  lldbg("%08x->%08x\n", addr, value);
+  llerr("%08x->%08x\n", addr, value);
   return value;
 }
 #else
@@ -395,7 +395,7 @@ static void spi_putreg(FAR struct pic32mx_dev_s *priv, unsigned int offset,
 
   /* Show the register value being written */
 
-  lldbg("%08x<-%08x\n", addr, value);
+  llerr("%08x<-%08x\n", addr, value);
 
   /* Then do the write */
 

@@ -150,7 +150,7 @@ static int sporadic_set_lowpriority(FAR struct tcb_s *tcb)
   if (ret < 0)
     {
       int errcode = get_errno();
-      slldbg("ERROR: sched_reprioritize failed: %d\n", errcode);
+      sllerr("ERROR: sched_reprioritize failed: %d\n", errcode);
       return -errcode;
     }
 
@@ -218,7 +218,7 @@ static int sporadic_set_hipriority(FAR struct tcb_s *tcb)
   if (ret < 0)
     {
       int errcode = get_errno();
-      slldbg("ERROR: sched_reprioritize failed: %d\n", errcode);
+      sllerr("ERROR: sched_reprioritize failed: %d\n", errcode);
       return -errcode;
     }
 
@@ -771,7 +771,7 @@ int sched_sporadic_initialize(FAR struct tcb_s *tcb)
   sporadic = (FAR struct sporadic_s *)kmm_zalloc(sizeof(struct sporadic_s));
   if (sporadic == NULL)
     {
-      slldbg("ERROR: Failed to allocate sporadic data structure\n");
+      sllerr("ERROR: Failed to allocate sporadic data structure\n");
       return -ENOMEM;
     }
 
@@ -1078,7 +1078,7 @@ int sched_sporadic_resume(FAR struct tcb_s *tcb)
                * failure from the standpoint of higher level logic.
                */
 
-              slldbg("Failed to allocate timer, nrepls=%d\n",
+              sllerr("Failed to allocate timer, nrepls=%d\n",
                      sporadic->nrepls);
             }
         }

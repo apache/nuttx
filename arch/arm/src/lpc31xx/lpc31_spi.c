@@ -207,7 +207,7 @@ static bool spi_checkreg(bool wr, uint32_t value, uint32_t address)
     {
       if (g_ntimes > 0)
         {
-          lldbg("...[Repeats %d times]...\n", g_ntimes);
+          llerr("...[Repeats %d times]...\n", g_ntimes);
         }
 
       g_wrlast      = wr;
@@ -239,7 +239,7 @@ static void spi_putreg(uint32_t value, uint32_t address)
 {
   if (spi_checkreg(true, value, address))
     {
-      lldbg("%08x<-%08x\n", address, value);
+      llerr("%08x<-%08x\n", address, value);
     }
   putreg32(value, address);
 }
@@ -265,7 +265,7 @@ static uint32_t spi_getreg(uint32_t address)
   uint32_t value = getreg32(address);
   if (spi_checkreg(false, value, address))
     {
-      lldbg("%08x->%08x\n", address, value);
+      llerr("%08x->%08x\n", address, value);
     }
   return value;
 }
@@ -921,7 +921,7 @@ FAR struct spi_dev_s *lpc31_spibus_initialize(int port)
    */
 
 #ifdef CONFIG_LPC31_SPI_REGDEBUG
-  lldbg("PINS: %08x MODE0: %08x MODE1: %08x\n",
+  llerr("PINS: %08x MODE0: %08x MODE1: %08x\n",
         spi_getreg(LPC31_IOCONFIG_SPI_PINS),
         spi_getreg(LPC31_IOCONFIG_SPI_MODE0),
         spi_getreg(LPC31_IOCONFIG_SPI_MODE1));

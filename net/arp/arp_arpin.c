@@ -96,7 +96,7 @@ void arp_arpin(FAR struct net_driver_s *dev)
 
   if (dev->d_len < (sizeof(struct arp_hdr_s) + ETH_HDRLEN))
     {
-      nlldbg("Too small\n");
+      nllerr("Too small\n");
       dev->d_len = 0;
       return;
     }

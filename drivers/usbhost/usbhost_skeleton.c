@@ -576,7 +576,7 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
 
   if (found != USBHOST_ALLFOUND)
     {
-      ulldbg("ERROR: Found IF:%s BIN:%s BOUT:%s\n",
+      ullerr("ERROR: Found IF:%s BIN:%s BOUT:%s\n",
              (found & USBHOST_IFFOUND) != 0  ? "YES" : "NO",
              (found & USBHOST_BINFOUND) != 0 ? "YES" : "NO",
              (found & USBHOST_BOUTFOUND) != 0 ? "YES" : "NO");

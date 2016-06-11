@@ -1860,7 +1860,7 @@ static int sam_xdmac_interrupt(struct sam_xdmac_s *xdmac)
             {
               /* Yes... Terminate the transfer with an error? */
 
-              dmalldbg("ERROR: DMA failed: %08x\n", chpending);
+              dmallerr("ERROR: DMA failed: %08x\n", chpending);
               sam_dmaterminate(xdmach, -EIO);
             }
 
@@ -1877,7 +1877,7 @@ static int sam_xdmac_interrupt(struct sam_xdmac_s *xdmac)
 
           else
             {
-              dmalldbg("ERROR: Unexpected interrupt: %08x\n", chpending);
+              dmallerr("ERROR: Unexpected interrupt: %08x\n", chpending);
               DEBUGPANIC();
             }
 

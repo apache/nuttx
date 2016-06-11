@@ -85,37 +85,37 @@ static void a1x_dumpintc(const char *msg, int irq)
   /* Dump some relevant ARMv7 register contents */
 
   flags = enter_critical_section();
-  lldbg("ARMv7 (%s, irq=%d):\n", msg, irq);
-  lldbg("  CPSR: %08x SCTLR: %08x\n", flags, cp15_rdsctlr());
+  llerr("ARMv7 (%s, irq=%d):\n", msg, irq);
+  llerr("  CPSR: %08x SCTLR: %08x\n", flags, cp15_rdsctlr());
 
   /* Dump all of the (readable) INTC register contents */
 
-  lldbg("INTC (%s, irq=%d):\n", msg, irq);
-  lldbg("  VECTOR: %08x BASE: %08x PROTECT: %08x NMICTRL: %08x\n",
+  llerr("INTC (%s, irq=%d):\n", msg, irq);
+  llerr("  VECTOR: %08x BASE: %08x PROTECT: %08x NMICTRL: %08x\n",
         getreg32(A1X_INTC_VECTOR),    getreg32(A1X_INTC_BASEADDR),
         getreg32(A1X_INTC_PROTECT),   getreg32(A1X_INTC_NMICTRL));
-  lldbg("  IRQ PEND: %08x %08x %08x\n",
+  llerr("  IRQ PEND: %08x %08x %08x\n",
         getreg32(A1X_INTC_IRQ_PEND0), getreg32(A1X_INTC_IRQ_PEND1),
         getreg32(A1X_INTC_IRQ_PEND2));
-  lldbg("  FIQ PEND: %08x %08x %08x\n",
+  llerr("  FIQ PEND: %08x %08x %08x\n",
         getreg32(A1X_INTC_FIQ_PEND0), getreg32(A1X_INTC_FIQ_PEND1),
         getreg32(A1X_INTC_FIQ_PEND2));
-  lldbg("  SEL:      %08x %08x %08x\n",
+  llerr("  SEL:      %08x %08x %08x\n",
         getreg32(A1X_INTC_IRQ_SEL0),  getreg32(A1X_INTC_IRQ_SEL1),
         getreg32(A1X_INTC_IRQ_SEL2));
-  lldbg("  EN:       %08x %08x %08x\n",
+  llerr("  EN:       %08x %08x %08x\n",
         getreg32(A1X_INTC_EN0),       getreg32(A1X_INTC_EN1),
         getreg32(A1X_INTC_EN2));
-  lldbg("  MASK:     %08x %08x %08x\n",
+  llerr("  MASK:     %08x %08x %08x\n",
         getreg32(A1X_INTC_MASK0),     getreg32(A1X_INTC_MASK1),
         getreg32(A1X_INTC_MASK2));
-  lldbg("  RESP:     %08x %08x %08x\n",
+  llerr("  RESP:     %08x %08x %08x\n",
         getreg32(A1X_INTC_RESP0),     getreg32(A1X_INTC_RESP1),
         getreg32(A1X_INTC_RESP2));
-  lldbg("  FF:       %08x %08x %08x\n",
+  llerr("  FF:       %08x %08x %08x\n",
         getreg32(A1X_INTC_FF0),       getreg32(A1X_INTC_FF1),
         getreg32(A1X_INTC_FF2));
-  lldbg("  PRIO:     %08x %08x %08x %08x %08x\n",
+  llerr("  PRIO:     %08x %08x %08x %08x %08x\n",
         getreg32(A1X_INTC_PRIO0),     getreg32(A1X_INTC_PRIO1),
         getreg32(A1X_INTC_PRIO2),     getreg32(A1X_INTC_PRIO3),
         getreg32(A1X_INTC_PRIO4));

@@ -463,7 +463,7 @@ static int max11802_schedule(FAR struct max11802_dev_s *priv)
   ret = work_queue(HPWORK, &priv->work, max11802_worker, priv, 0);
   if (ret != 0)
     {
-      illdbg("Failed to queue work: %d\n", ret);
+      illerr("Failed to queue work: %d\n", ret);
     }
 
   return OK;

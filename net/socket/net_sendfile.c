@@ -206,7 +206,7 @@ static uint16_t ack_interrupt(FAR struct net_driver_s *dev, FAR void *pvconn,
     }
   else if ((flags & TCP_REXMIT) != 0)
     {
-      nlldbg("REXMIT\n");
+      nllerr("REXMIT\n");
 
       /* Yes.. in this case, reset the number of bytes that have been sent
        * to the number of bytes that have been ACKed.
@@ -221,7 +221,7 @@ static uint16_t ack_interrupt(FAR struct net_driver_s *dev, FAR void *pvconn,
     {
       /* Report not connected */
 
-      nlldbg("Lost connection\n");
+      nllerr("Lost connection\n");
 
       net_lostconnection(pstate->snd_sock, flags);
       pstate->snd_sent = -ENOTCONN;
@@ -345,7 +345,7 @@ static uint16_t sendfile_interrupt(FAR struct net_driver_s *dev, FAR void *pvcon
     {
       /* Report not connected */
 
-      nlldbg("Lost connection\n");
+      nllerr("Lost connection\n");
 
       net_lostconnection(pstate->snd_sock, flags);
       pstate->snd_sent = -ENOTCONN;
@@ -386,7 +386,7 @@ static uint16_t sendfile_interrupt(FAR struct net_driver_s *dev, FAR void *pvcon
           if (ret < 0)
             {
               int errcode = get_errno();
-              nlldbg("failed to lseek: %d\n", errcode);
+              nllerr("failed to lseek: %d\n", errcode);
               pstate->snd_sent = -errcode;
               goto end_wait;
             }
@@ -395,7 +395,7 @@ static uint16_t sendfile_interrupt(FAR struct net_driver_s *dev, FAR void *pvcon
           if (ret < 0)
             {
               int errcode = get_errno();
-              nlldbg("failed to read from input file: %d\n", errcode);
+              nllerr("failed to read from input file: %d\n", errcode);
               pstate->snd_sent = -errcode;
               goto end_wait;
             }
@@ -430,7 +430,7 @@ static uint16_t sendfile_interrupt(FAR struct net_driver_s *dev, FAR void *pvcon
         }
       else
         {
-          nlldbg("Window full, wait for ack\n");
+          nllerr("Window full, wait for ack\n");
           goto wait;
         }
     }
@@ -444,7 +444,7 @@ static uint16_t sendfile_interrupt(FAR struct net_driver_s *dev, FAR void *pvcon
     {
       /* Yes.. report the timeout */
 
-      nlldbg("SEND timeout\n");
+      nllerr("SEND timeout\n");
       pstate->snd_sent = -ETIMEDOUT;
       goto end_wait;
     }
@@ -687,7 +687,7 @@ ssize_t net_sendfile(int outfd, struct file *infile, off_t *offset,
 
   if (state.snd_datacb == NULL)
     {
-      nlldbg("Failed to allocate data callback\n");
+      nllerr("Failed to allocate data callback\n");
       errcode = ENOMEM;
       goto errout_locked;
     }
@@ -696,7 +696,7 @@ ssize_t net_sendfile(int outfd, struct file *infile, off_t *offset,
 
   if (state.snd_ackcb == NULL)
     {
-      nlldbg("Failed to allocate ack callback\n");
+      nllerr("Failed to allocate ack callback\n");
       errcode = ENOMEM;
       goto errout_datacb;
     }

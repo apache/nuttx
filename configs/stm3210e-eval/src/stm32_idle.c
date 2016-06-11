@@ -229,7 +229,7 @@ static int stm32_rtc_alarm(time_t tv_sec, time_t tv_nsec, bool exti)
   ret = stm32_rtc_setalarm(&alarmtime, stm32_alarmcb);
   if (ret < 0)
     {
-      lldbg("Warning: The alarm is already set\n");
+      llerr("Warning: The alarm is already set\n");
     }
 
   return ret;
@@ -366,7 +366,7 @@ static void stm32_idlepm(void)
             ret = stm32_rtc_cancelalarm();
             if (ret < 0)
               {
-                lldbg("Warning: Cancel alarm failed\n");
+                llerr("Warning: Cancel alarm failed\n");
               }
 #endif
             /* Note:  See the additional PM_STANDBY related logic at the

@@ -62,8 +62,8 @@
 #ifndef CONFIG_DEBUG_INPUT
 #  undef  idbg
 #  define idbg    udbg
-#  undef  illdbg
-#  define illdbg  ulldbg
+#  undef  illerr
+#  define illerr  ullerr
 #  undef  iinfo
 #  define iinfo   uinfo
 #  undef  illinfo

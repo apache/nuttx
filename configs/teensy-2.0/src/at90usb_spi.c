@@ -87,9 +87,9 @@
  */
 
 #ifdef CONFIG_SPI_DEBUG
-#  define sspdbg  lldbg
+#  define sspdbg  llerr
 #  ifdef CONFIG_SPI_VERBOSE
-#    define sspinfo lldbg
+#    define sspinfo llerr
 #  else
 #    define sspinfo(x...)
 #  endif

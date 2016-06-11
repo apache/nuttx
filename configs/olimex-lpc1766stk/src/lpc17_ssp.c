@@ -81,9 +81,9 @@
  */
 
 #ifdef CONFIG_SSP_DEBUG
-#  define sspdbg  lldbg
+#  define sspdbg  llerr
 #  ifdef CONFIG_SSP_VERBOSE
-#    define sspinfo lldbg
+#    define sspinfo llerr
 #  else
 #    define sspinfo(x...)
 #  endif

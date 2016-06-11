@@ -115,7 +115,7 @@ uint32_t *arm_dataabort(uint32_t *regs, uint32_t dfar, uint32_t dfsr)
    * fatal error.
    */
 
-  pglldbg("DFSR: %08x DFAR: %08x\n", dfsr, dfar);
+  pgllerr("DFSR: %08x DFAR: %08x\n", dfsr, dfar);
   if ((dfsr & FSR_MASK) != FSR_PAGE)
     {
       goto segfault;
@@ -163,7 +163,7 @@ uint32_t *arm_dataabort(uint32_t *regs, uint32_t dfar, uint32_t dfsr)
   return regs;
 
 segfault:
-  lldbg("Data abort. PC: %08x DFAR: %08x DFSR: %08x\n",
+  llerr("Data abort. PC: %08x DFAR: %08x DFSR: %08x\n",
         regs[REG_PC], dfar, dfsr);
   PANIC();
   return regs; /* To keep the compiler happy */
@@ -181,7 +181,7 @@ uint32_t *arm_dataabort(uint32_t *regs, uint32_t dfar, uint32_t dfsr)
 
   /* Crash -- possibly showing diagnostic debug information. */
 
-  lldbg("Data abort. PC: %08x DFAR: %08x DFSR: %08x\n",
+  llerr("Data abort. PC: %08x DFAR: %08x DFSR: %08x\n",
         regs[REG_PC], dfar, dfsr);
   PANIC();
   return regs; /* To keep the compiler happy */

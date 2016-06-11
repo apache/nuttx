@@ -84,5 +84,5 @@
 
 void sam_udp_suspend(FAR struct usbdev_s *dev, bool resume)
 {
-  ulldbg("resume: %d\n", resume);
+  ullerr("resume: %d\n", resume);
 }

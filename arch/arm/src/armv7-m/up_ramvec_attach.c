@@ -54,12 +54,12 @@
  ****************************************************************************/
 /* Debug ********************************************************************/
 /* Non-standard debug that may be enabled just for testing the interrupt
- * config.  NOTE: that only lldbg types are used so that the output is
+ * config.  NOTE: that only llerr types are used so that the output is
  * immediately available.
  */
 
 #ifdef CONFIG_DEBUG_IRQ
-#  define intdbg    lldbg
+#  define intdbg    llerr
 #  define intinfo   llinfo
 #else
 #  define intdbg(x...)

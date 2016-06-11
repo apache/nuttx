@@ -86,12 +86,12 @@
 #ifdef CONFIG_DEBUG_RTC
 #  define rtcdbg    dbg
 #  define rtcinfo   info
-#  define rtclldbg  lldbg
+#  define rtcllerr  llerr
 #  define rtcllinfo llinfo
 #else
 #  define rtcdbg(x...)
 #  define rtcinfo(x...)
-#  define rtclldbg(x...)
+#  define rtcllerr(x...)
 #  define rtcllinfo(x...)
 #endif
 
@@ -143,17 +143,17 @@ static struct ds3231_dev_s g_ds3231;
 #ifdef CONFIG_DEBUG_RTC
 static void rtc_dumptime(FAR struct tm *tp, FAR const char *msg)
 {
-  rtclldbg("%s:\n", msg);
-  rtclldbg("   tm_sec: %08x\n", tp->tm_sec);
-  rtclldbg("   tm_min: %08x\n", tp->tm_min);
-  rtclldbg("  tm_hour: %08x\n", tp->tm_hour);
-  rtclldbg("  tm_mday: %08x\n", tp->tm_mday);
-  rtclldbg("   tm_mon: %08x\n", tp->tm_mon);
-  rtclldbg("  tm_year: %08x\n", tp->tm_year);
+  rtcllerr("%s:\n", msg);
+  rtcllerr("   tm_sec: %08x\n", tp->tm_sec);
+  rtcllerr("   tm_min: %08x\n", tp->tm_min);
+  rtcllerr("  tm_hour: %08x\n", tp->tm_hour);
+  rtcllerr("  tm_mday: %08x\n", tp->tm_mday);
+  rtcllerr("   tm_mon: %08x\n", tp->tm_mon);
+  rtcllerr("  tm_year: %08x\n", tp->tm_year);
 #if defined(CONFIG_LIBC_LOCALTIME) || defined(CONFIG_TIME_EXTENDED)
-  rtclldbg("  tm_wday: %08x\n", tp->tm_wday);
-  rtclldbg("  tm_yday: %08x\n", tp->tm_yday);
-  rtclldbg(" tm_isdst: %08x\n", tp->tm_isdst);
+  rtcllerr("  tm_wday: %08x\n", tp->tm_wday);
+  rtcllerr("  tm_yday: %08x\n", tp->tm_yday);
+  rtcllerr(" tm_isdst: %08x\n", tp->tm_isdst);
 #endif
 }
 #else

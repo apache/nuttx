@@ -630,31 +630,31 @@ int sam_dumppio(uint32_t pinset, const char *msg)
 
   if (secure)
     {
-      lldbg("SPIO%c pinset: %08x base: %08x -- %s\n",
+      llerr("SPIO%c pinset: %08x base: %08x -- %s\n",
              g_portchar[port], pinset, base, msg);
     }
   else
     {
-      lldbg("PIO%c pinset: %08x base: %08x -- %s\n",
+      llerr("PIO%c pinset: %08x base: %08x -- %s\n",
              g_portchar[port], pinset, base, msg);
     }
 
-  lldbg("   MSKR: %08x   CFGR: %08x   PDSR: %08x LOCKSR: %08x\n",
+  llerr("   MSKR: %08x   CFGR: %08x   PDSR: %08x LOCKSR: %08x\n",
         getreg32(base + SAM_PIO_MSKR_OFFSET), getreg32(base + SAM_PIO_CFGR_OFFSET),
         getreg32(base + SAM_PIO_PDSR_OFFSET), getreg32(base + SAM_PIO_LOCKSR_OFFSET));
-  lldbg("   ODSR: %08x    IMR: %08x    ISR: %08x\n",
+  llerr("   ODSR: %08x    IMR: %08x    ISR: %08x\n",
         getreg32(base + SAM_PIO_ODSR_OFFSET), getreg32(base + SAM_PIO_IMR_OFFSET),
         getreg32(base + SAM_PIO_ISR_OFFSET));
 
   if (secure)
     {
-      lldbg("   SCDR: %08x   WPMR: %08x   WPSR: %08x  IOSSR: %08x\n",
+      llerr("   SCDR: %08x   WPMR: %08x   WPSR: %08x  IOSSR: %08x\n",
             getreg32(SAM_SPIO_SCDR), getreg32(SAM_SPIO_WPMR),
             getreg32(SAM_SPIO_WPSR), getreg32(base + SAM_SPIO_IOSSR_OFFSET));
     }
   else
     {
-      lldbg("   WPMR: %08x   WPSR: %08x\n",
+      llerr("   WPMR: %08x   WPSR: %08x\n",
             getreg32(SAM_PIO_WPMR), getreg32(SAM_PIO_WPSR));
     }
 

@@ -124,7 +124,7 @@ CCASSERT(sizeof(cc3000_buffer_desc) <= CONFIG_MQ_MAXMSGSIZE);
 #  define PROBE(pin,state)
 #endif
 
-#define waitlldbg(x,...)
+#define waitllerr(x,...)
 
 /****************************************************************************
  * Private Types
@@ -500,7 +500,7 @@ static void * select_thread_func(FAR void *arg)
               if (priv->sockets[s].sd == CLOSE_SLOT)
                 {
                   priv->sockets[s].sd = FREE_SLOT;
-                  waitlldbg("Close\n");
+                  waitllerr("Close\n");
                   int count;
                   do
                     {
@@ -509,7 +509,7 @@ static void * select_thread_func(FAR void *arg)
                         {
                           /* Release the waiting threads */
 
-                          waitlldbg("Closed Signaled %d\n", count);
+                          waitllerr("Closed Signaled %d\n", count);
                           sem_post(&priv->sockets[s].semwait);
                         }
                     }
@@ -556,17 +556,17 @@ static void * select_thread_func(FAR void *arg)
             {
               if (ret > 0 && CC3000_FD_ISSET(priv->sockets[s].sd, &readsds)) /* and has pending data */
                 {
-                  waitlldbg("Signaled %d\n", priv->sockets[s].sd);
+                  waitllerr("Signaled %d\n", priv->sockets[s].sd);
                   sem_post(&priv->sockets[s].semwait);                       /* release the waiting thread */
                 }
               else if (ret > 0 && CC3000_FD_ISSET(priv->sockets[s].sd, &exceptsds)) /* or has pending exception */
                 {
-                  waitlldbg("Signaled %d (exception)\n", priv->sockets[s].sd);
+                  waitllerr("Signaled %d (exception)\n", priv->sockets[s].sd);
                   sem_post(&priv->sockets[s].semwait);                       /* release the waiting thread */
                 }
               else if (priv->sockets[s].received_closed_event)               /* or remote has closed connection and we have now read all of HW buffer. */
                 {
-                  waitlldbg("Signaled %d (closed & empty)\n", priv->sockets[s].sd);
+                  waitllerr("Signaled %d (closed & empty)\n", priv->sockets[s].sd);
                   priv->sockets[s].emptied_and_remotely_closed = true;
                   sem_post(&priv->sockets[s].semwait);                       /* release the waiting thread */
                 }

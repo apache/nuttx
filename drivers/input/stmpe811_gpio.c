@@ -438,7 +438,7 @@ void stmpe811_gpioworker(FAR struct stmpe811_dev_s *priv)
             }
           else
             {
-              illdbg("No handler for PIN%d, GPIO_INTSTA: %02x\n", pin, regval);
+              illerr("No handler for PIN%d, GPIO_INTSTA: %02x\n", pin, regval);
             }
 
           /* Clear the pending GPIO interrupt by writing a '1' to the

@@ -177,7 +177,7 @@ static int up_getgrp(unsigned int irq)
 static int avr32_xcptn(int irq, FAR void *context)
 {
   (void)up_irq_save();
-  lldbg("PANIC!!! Exception IRQ: %d\n", irq);
+  llerr("PANIC!!! Exception IRQ: %d\n", irq);
   PANIC();
   return 0;
 }
@@ -321,11 +321,11 @@ unsigned int avr32_intirqno(unsigned int level)
           mask <<= 1;
         }
 
-       lldbg("Spurious interrupt: group=%d IRR=%08x\n", group, irr);
+       llerr("Spurious interrupt: group=%d IRR=%08x\n", group, irr);
        return -ENODEV;
     }
 
-  lldbg("Bad group: %d\n", group);
+  llerr("Bad group: %d\n", group);
   return AVR32_IRQ_BADVECTOR;
 }
 

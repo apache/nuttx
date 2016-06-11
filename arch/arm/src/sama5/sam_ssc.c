@@ -415,16 +415,16 @@
 
 #ifdef CONFIG_DEBUG_I2S
 #  define i2sdbg         dbg
-#  define i2slldbg       lldbg
+#  define i2sllerr       llerr
 #  ifdef CONFIG_DEBUG_INFO
 #    define i2sinfo      dbg
-#    define i2sllinfo    lldbg
+#    define i2sllinfo    llerr
 #  else
 #    define i2sinfo(x...)
 #  endif
 #else
 #  define i2sdbg(x...)
-#  define i2slldbg(x...)
+#  define i2sllerr(x...)
 #  define i2sinfo(x...)
 #  define i2sllinfo(x...)
 #endif
@@ -724,7 +724,7 @@ static bool ssc_checkreg(struct sam_ssc_s *priv, bool wr, uint32_t regval,
         {
           /* Yes... show how many times we did it */
 
-          lldbg("...[Repeats %d times]...\n", priv->count);
+          llerr("...[Repeats %d times]...\n", priv->count);
         }
 
       /* Save information about the new access */
@@ -758,7 +758,7 @@ static inline uint32_t ssc_getreg(struct sam_ssc_s *priv,
 #ifdef CONFIG_SAMA5_SSC_REGDEBUG
   if (ssc_checkreg(priv, false, regval, regaddr))
     {
-      lldbg("%08x->%08x\n", regaddr, regval);
+      llerr("%08x->%08x\n", regaddr, regval);
     }
 #endif
 
@@ -781,7 +781,7 @@ static inline void ssc_putreg(struct sam_ssc_s *priv, unsigned int offset,
 #ifdef CONFIG_SAMA5_SSC_REGDEBUG
   if (ssc_checkreg(priv, true, regval, regaddr))
     {
-      lldbg("%08x<-%08x\n", regaddr, regval);
+      llerr("%08x<-%08x\n", regaddr, regval);
     }
 #endif
 
@@ -1111,7 +1111,7 @@ static void ssc_dma_sampleinit(struct sam_ssc_s *priv,
 #if defined(CONFIG_SAMA5_SSC_DMADEBUG) && defined(SSC_HAVE_RX)
 static void ssc_rxdma_sampledone(struct sam_ssc_s *priv, int result)
 {
-  lldbg("result: %d\n", result);
+  llerr("result: %d\n", result);
 
   /* Sample the final registers */
 
@@ -1176,7 +1176,7 @@ static void ssc_rxdma_sampledone(struct sam_ssc_s *priv, int result)
 #if defined(CONFIG_SAMA5_SSC_DMADEBUG) && defined(SSC_HAVE_TX)
 static void ssc_txdma_sampledone(struct sam_ssc_s *priv, int result)
 {
-  lldbg("result: %d\n", result);
+  llerr("result: %d\n", result);
 
   /* Sample the final registers */
 
@@ -1398,7 +1398,7 @@ static int ssc_rxdma_setup(struct sam_ssc_s *priv)
 
       if (ret < 0)
         {
-          i2slldbg("ERROR: wd_start failed: %d\n", errno);
+          i2sllerr("ERROR: wd_start failed: %d\n", errno);
         }
     }
 
@@ -1586,7 +1586,7 @@ static void ssc_rx_schedule(struct sam_ssc_s *priv, int result)
       ret = work_queue(HPWORK, &priv->rx.work, ssc_rx_worker, priv, 0);
       if (ret != 0)
         {
-          i2slldbg("ERROR: Failed to queue RX work: %d\n", ret);
+          i2sllerr("ERROR: Failed to queue RX work: %d\n", ret);
         }
     }
 }
@@ -1811,7 +1811,7 @@ static int ssc_txdma_setup(struct sam_ssc_s *priv)
 
       if (ret < 0)
         {
-          i2slldbg("ERROR: wd_start failed: %d\n", errno);
+          i2sllerr("ERROR: wd_start failed: %d\n", errno);
         }
     }
 
@@ -1986,7 +1986,7 @@ static void ssc_tx_schedule(struct sam_ssc_s *priv, int result)
       ret = work_queue(HPWORK, &priv->tx.work, ssc_tx_worker, priv, 0);
       if (ret != 0)
         {
-          i2slldbg("ERROR: Failed to queue TX work: %d\n", ret);
+          i2sllerr("ERROR: Failed to queue TX work: %d\n", ret);
         }
     }
 }

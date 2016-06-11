@@ -74,24 +74,24 @@
 #ifdef CONFIG_CPP_HAVE_VARARGS
 #  ifdef IGMP_GTMRDEBUG
 #    define gtmrdbg(format, ...)    ndbg(format, ##__VA_ARGS__)
-#    define gtmrlldbg(format, ...)  nlldbg(format, ##__VA_ARGS__)
+#    define gtmrllerr(format, ...)  nllerr(format, ##__VA_ARGS__)
 #    define gtmrinfo(format, ...)   ninfo(format, ##__VA_ARGS__)
 #    define gtmrllinfo(format, ...) nllinfo(format, ##__VA_ARGS__)
 #  else
 #    define gtmrdbg(x...)
-#    define gtmrlldbg(x...)
+#    define gtmrllerr(x...)
 #    define gtmrinfo(x...)
 #    define gtmrllinfo(x...)
 #  endif
 #else
 #  ifdef IGMP_GTMRDEBUG
 #    define gtmrdbg    ndbg
-#    define gtmrlldbg  nlldbg
+#    define gtmrllerr  nllerr
 #    define gtmrinfo   ninfo
 #    define gtmrllinfo nllinfo
 #  else
 #    define gtmrdbg    (void)
-#    define gtmrlldbg  (void)
+#    define gtmrllerr  (void)
 #    define gtmrinfo   (void)
 #    define gtmrllinfo (void)
 #  endif
@@ -170,7 +170,7 @@ void igmp_startticks(FAR struct igmp_group_s *group, unsigned int ticks)
 
   /* Start the timer */
 
-  gtmrlldbg("ticks: %d\n", ticks);
+  gtmrllerr("ticks: %d\n", ticks);
 
   ret = wd_start(group->wdog, ticks, igmp_timeout, 1, (uint32_t)group);
 

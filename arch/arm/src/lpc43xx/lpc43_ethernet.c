@@ -704,7 +704,7 @@ static uint32_t lpc43_getreg(uint32_t addr)
         {
           if (count == 4)
             {
-              lldbg("...\n");
+              llerr("...\n");
             }
 
           return val;
@@ -721,7 +721,7 @@ static uint32_t lpc43_getreg(uint32_t addr)
         {
           /* Yes.. then show how many times the value repeated */
 
-          lldbg("[repeats %d more times]\n", count-3);
+          llerr("[repeats %d more times]\n", count-3);
         }
 
       /* Save the new address, value, and count */
@@ -733,7 +733,7 @@ static uint32_t lpc43_getreg(uint32_t addr)
 
   /* Show the register value read */
 
-  lldbg("%08x->%08x\n", addr, val);
+  llerr("%08x->%08x\n", addr, val);
   return val;
 }
 #endif
@@ -760,7 +760,7 @@ static void lpc43_putreg(uint32_t val, uint32_t addr)
 {
   /* Show the register value being written */
 
-  lldbg("%08x<-%08x\n", addr, val);
+  llerr("%08x<-%08x\n", addr, val);
 
   /* Write the value */
 
@@ -1440,7 +1440,7 @@ static int lpc43_recvframe(FAR struct lpc43_ethmac_s *priv)
 
   if (!lpc43_isfreebuffer(priv))
     {
-      nlldbg("No free buffers\n");
+      nllerr("No free buffers\n");
       return -ENOMEM;
     }
 
@@ -1547,7 +1547,7 @@ static int lpc43_recvframe(FAR struct lpc43_ethmac_s *priv)
                * scanning logic, and continue scanning with the next frame.
                */
 
-              nlldbg("DROPPED: RX descriptor errors: %08x\n", rxdesc->rdes0);
+              nllerr("DROPPED: RX descriptor errors: %08x\n", rxdesc->rdes0);
               lpc43_freesegment(priv, rxcurr, priv->segments);
             }
         }
@@ -1608,7 +1608,7 @@ static void lpc43_receive(FAR struct lpc43_ethmac_s *priv)
 
       if (dev->d_len > CONFIG_NET_ETH_MTU)
         {
-          nlldbg("DROPPED: Too big: %d\n", dev->d_len);
+          nllerr("DROPPED: Too big: %d\n", dev->d_len);
           /* Free dropped packet buffer */
 
           if (dev->d_buf)
@@ -1727,7 +1727,7 @@ static void lpc43_receive(FAR struct lpc43_ethmac_s *priv)
       else
 #endif
         {
-          nlldbg("DROPPED: Unknown type: %04x\n", BUF->type);
+          nllerr("DROPPED: Unknown type: %04x\n", BUF->type);
         }
 
       /* We are finished with the RX buffer.  NOTE:  If the buffer is
@@ -1975,7 +1975,7 @@ static inline void lpc43_interrupt_process(FAR struct lpc43_ethmac_s *priv)
     {
       /* Just let the user know what happened */
 
-      nlldbg("Abnormal event(s): %08x\n", dmasr);
+      nllerr("Abnormal event(s): %08x\n", dmasr);
 
       /* Clear all pending abnormal events */
 
@@ -2179,7 +2179,7 @@ static void lpc43_txtimeout_expiry(int argc, uint32_t arg, ...)
 {
   FAR struct lpc43_ethmac_s *priv = (FAR struct lpc43_ethmac_s *)arg;
 
-  nlldbg("Timeout!\n");
+  nllerr("Timeout!\n");
 
 #ifdef CONFIG_NET_NOINTS
   /* Disable further Ethernet interrupts.  This will prevent some race

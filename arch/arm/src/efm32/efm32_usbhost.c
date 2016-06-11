@@ -582,7 +582,7 @@ static const struct efm32_usbhost_trace_s g_trace2[TRACE2_NSTRINGS] =
 #ifdef CONFIG_EFM32_USBHOST_REGDEBUG
 static void efm32_printreg(uint32_t addr, uint32_t val, bool iswrite)
 {
-  lldbg("%08x%s%08x\n", addr, iswrite ? "<-" : "->", val);
+  llerr("%08x%s%08x\n", addr, iswrite ? "<-" : "->", val);
 }
 #endif
 
@@ -632,7 +632,7 @@ static void efm32_checkreg(uint32_t addr, uint32_t val, bool iswrite)
             {
               /* No.. More than one. */
 
-              lldbg("[repeats %d more times]\n", count);
+              llerr("[repeats %d more times]\n", count);
             }
         }
 

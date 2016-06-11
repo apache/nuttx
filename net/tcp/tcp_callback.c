@@ -245,7 +245,7 @@ uint16_t tcp_datahandler(FAR struct tcp_conn_s *conn, FAR uint8_t *buffer,
   iob = iob_tryalloc(true);
   if (iob == NULL)
     {
-      nlldbg("ERROR: Failed to create new I/O buffer chain\n");
+      nllerr("ERROR: Failed to create new I/O buffer chain\n");
       return 0;
     }
 
@@ -258,7 +258,7 @@ uint16_t tcp_datahandler(FAR struct tcp_conn_s *conn, FAR uint8_t *buffer,
        * not free any I/O buffers.
        */
 
-      nlldbg("ERROR: Failed to add data to the I/O buffer chain: %d\n", ret);
+      nllerr("ERROR: Failed to add data to the I/O buffer chain: %d\n", ret);
       (void)iob_free_chain(iob);
       return 0;
     }
@@ -270,7 +270,7 @@ uint16_t tcp_datahandler(FAR struct tcp_conn_s *conn, FAR uint8_t *buffer,
   ret = iob_tryadd_queue(iob, &conn->readahead);
   if (ret < 0)
     {
-      nlldbg("ERROR: Failed to queue the I/O buffer chain: %d\n", ret);
+      nllerr("ERROR: Failed to queue the I/O buffer chain: %d\n", ret);
       (void)iob_free_chain(iob);
       return 0;
     }

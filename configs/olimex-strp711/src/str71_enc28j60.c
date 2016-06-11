@@ -216,7 +216,7 @@ void up_netinitialize(void)
   spi = str71_spibus_initialize(ENC28J60_SPI_PORTNO);
   if (!spi)
     {
-      nlldbg("Failed to initialize SPI port %d\n", ENC28J60_SPI_PORTNO);
+      nllerr("Failed to initialize SPI port %d\n", ENC28J60_SPI_PORTNO);
       return;
     }
 
@@ -225,7 +225,7 @@ void up_netinitialize(void)
   ret = str71x_xticonfig(ENC28J60_IRQ, false);
   if (ret < 0)
     {
-      nlldbg("Failed configure interrupt for IRQ %d: %d\n", ENC28J60_IRQ, ret);
+      nllerr("Failed configure interrupt for IRQ %d: %d\n", ENC28J60_IRQ, ret);
       return;
     }
 
@@ -240,7 +240,7 @@ void up_netinitialize(void)
   ret = enc_initialize(spi, &g_enclower, ENC28J60_DEVNO);
   if (ret < 0)
     {
-      nlldbg("Failed to bind SPI port %d ENC28J60 device %d: %d\n",
+      nllerr("Failed to bind SPI port %d ENC28J60 device %d: %d\n",
              ENC28J60_SPI_PORTNO, ENC28J60_DEVNO, ret);
       return;
     }

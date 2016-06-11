@@ -653,7 +653,7 @@ static bool sam_checkreg(struct sam_dev_s *priv, bool wr, uint32_t value,
         {
           /* Yes... show how many times we did it */
 
-          lldbg("...[Repeats %d times]...\n", priv->ntimes);
+          llerr("...[Repeats %d times]...\n", priv->ntimes);
         }
 
       /* Save information about the new access */
@@ -686,7 +686,7 @@ static inline uint32_t sam_getreg(struct sam_dev_s *priv, unsigned int offset)
 #ifdef CONFIG_SAMV7_HSMCI_REGDEBUG
   if (sam_checkreg(priv, false, value, address))
     {
-      lldbg("%08x->%08x\n", address, value);
+      llerr("%08x->%08x\n", address, value);
     }
 #endif
 
@@ -709,7 +709,7 @@ static inline void sam_putreg(struct sam_dev_s *priv, uint32_t value,
 #ifdef CONFIG_SAMV7_HSMCI_REGDEBUG
   if (sam_checkreg(priv, true, value, address))
     {
-      lldbg("%08x<-%08x\n", address, value);
+      llerr("%08x<-%08x\n", address, value);
     }
 #endif
 
@@ -1169,7 +1169,7 @@ static void sam_dmacallback(DMA_HANDLE handle, void *arg, int result)
       if (result < 0)
         {
           wkupevent = (result == -ETIMEDOUT ? SDIOWAIT_TIMEOUT : SDIOWAIT_ERROR);
-          flldbg("ERROR: DMA failed: result=%d wkupevent=%04x\n", result, wkupevent);
+          fllerr("ERROR: DMA failed: result=%d wkupevent=%04x\n", result, wkupevent);
 
           /* sam_endtransfer will terminate the transfer and wait up the waiting
            * client in this case.
@@ -1269,7 +1269,7 @@ static void sam_eventtimeout(int argc, uint32_t arg)
       /* Yes.. wake up any waiting threads */
 
       sam_endwait(priv, SDIOWAIT_TIMEOUT);
-      flldbg("ERROR: Timeout\n");
+      fllerr("ERROR: Timeout\n");
     }
 }
 
@@ -1469,7 +1469,7 @@ static int sam_hsmci_interrupt(struct sam_dev_s *priv)
             {
               /* Yes.. Was it some kind of timeout error? */
 
-              flldbg("ERROR: enabled: %08x pending: %08x\n", enabled, pending);
+              fllerr("ERROR: enabled: %08x pending: %08x\n", enabled, pending);
               if ((pending & HSMCI_DATA_TIMEOUT_ERRORS) != 0)
                 {
                   /* Yes.. Terminate with a timeout. */

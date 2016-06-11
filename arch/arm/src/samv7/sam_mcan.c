@@ -796,11 +796,11 @@
 #ifdef CONFIG_DEBUG_CAN
 #  define candbg    dbg
 #  define caninfo   info
-#  define canlldbg  lldbg
+#  define canllerr  llerr
 #  define canllinfo llinfo
 
 #  ifdef CONFIG_SAMV7_MCAN_REGDEBUG
-#    define canregdbg lldbg
+#    define canregdbg llerr
 #  else
 #    define canregdbg(x...)
 #  endif
@@ -808,7 +808,7 @@
 #else
 #  define candbg(x...)
 #  define caninfo(x...)
-#  define canlldbg(x...)
+#  define canllerr(x...)
 #  define canllinfo(x...)
 #  define canregdbg(x...)
 #endif
@@ -1209,7 +1209,7 @@ static uint32_t mcan_getreg(FAR struct sam_mcan_s *priv, int offset)
         {
           if (priv->count == 4)
             {
-              lldbg("...\n");
+              llerr("...\n");
             }
 
           return regval;
@@ -1226,7 +1226,7 @@ static uint32_t mcan_getreg(FAR struct sam_mcan_s *priv, int offset)
         {
           /* Yes.. then show how many times the value repeated */
 
-          lldbg("[repeats %d more times]\n", priv->count - 3);
+          llerr("[repeats %d more times]\n", priv->count - 3);
         }
 
       /* Save the new address, value, and count */
@@ -1238,7 +1238,7 @@ static uint32_t mcan_getreg(FAR struct sam_mcan_s *priv, int offset)
 
   /* Show the register value read */
 
-  lldbg("%08x->%08x\n", regaddr, regval);
+  llerr("%08x->%08x\n", regaddr, regval);
   return regval;
 }
 
@@ -1275,7 +1275,7 @@ static void mcan_putreg(FAR struct sam_mcan_s *priv, int offset, uint32_t regval
 
   /* Show the register value being written */
 
-  lldbg("%08x<-%08x\n", regaddr, regval);
+  llerr("%08x<-%08x\n", regaddr, regval);
 
   /* Write the value */
 
@@ -1310,70 +1310,70 @@ static void mcan_dumpregs(FAR struct sam_mcan_s *priv, FAR const char *msg)
 {
   FAR const struct sam_config_s *config = priv->config;
 
-  lldbg("MCAN%d Registers: %s\n", config->port, msg);
-  lldbg("   Base: %08x\n", config->base);
+  llerr("MCAN%d Registers: %s\n", config->port, msg);
+  llerr("   Base: %08x\n", config->base);
 
-  lldbg("   CUST: %08x  FBTP: %08x TEST: %08x    RWD: %08x\n",
+  llerr("   CUST: %08x  FBTP: %08x TEST: %08x    RWD: %08x\n",
         getreg32(config->base + SAM_MCAN_CUST_OFFSET),
         getreg32(config->base + SAM_MCAN_FBTP_OFFSET),
         getreg32(config->base + SAM_MCAN_TEST_OFFSET),
         getreg32(config->base + SAM_MCAN_RWD_OFFSET));
 
-  lldbg("  CCCR: %08x   BTP: %08x  TSCC: %08x   TSCV: %08x\n",
+  llerr("  CCCR: %08x   BTP: %08x  TSCC: %08x   TSCV: %08x\n",
         getreg32(config->base + SAM_MCAN_CCCR_OFFSET),
         getreg32(config->base + SAM_MCAN_BTP_OFFSET),
         getreg32(config->base + SAM_MCAN_TSCC_OFFSET),
         getreg32(config->base + SAM_MCAN_TSCV_OFFSET));
 
-  lldbg("  TOCC: %08x  TOCV: %08x   ECR: %08x    PSR: %08x\n",
+  llerr("  TOCC: %08x  TOCV: %08x   ECR: %08x    PSR: %08x\n",
         getreg32(config->base + SAM_MCAN_TOCC_OFFSET),
         getreg32(config->base + SAM_MCAN_TOCV_OFFSET),
         getreg32(config->base + SAM_MCAN_ECR_OFFSET),
         getreg32(config->base + SAM_MCAN_PSR_OFFSET));
 
-  lldbg("    IR: %08x    IE: %08x   ILS: %08x    ILE: %08x\n",
+  llerr("    IR: %08x    IE: %08x   ILS: %08x    ILE: %08x\n",
         getreg32(config->base + SAM_MCAN_IR_OFFSET),
         getreg32(config->base + SAM_MCAN_IE_OFFSET),
         getreg32(config->base + SAM_MCAN_ILS_OFFSET),
         getreg32(config->base + SAM_MCAN_ILE_OFFSET));
 
-  lldbg("   GFC: %08x SIDFC: %08x XIDFC: %08x  XIDAM: %08x\n",
+  llerr("   GFC: %08x SIDFC: %08x XIDFC: %08x  XIDAM: %08x\n",
         getreg32(config->base + SAM_MCAN_GFC_OFFSET),
         getreg32(config->base + SAM_MCAN_SIDFC_OFFSET),
         getreg32(config->base + SAM_MCAN_XIDFC_OFFSET),
         getreg32(config->base + SAM_MCAN_XIDAM_OFFSET));
 
-  lldbg("  HPMS: %08x NDAT1: %08x NDAT2: %08x  RXF0C: %08x\n",
+  llerr("  HPMS: %08x NDAT1: %08x NDAT2: %08x  RXF0C: %08x\n",
         getreg32(config->base + SAM_MCAN_HPMS_OFFSET),
         getreg32(config->base + SAM_MCAN_NDAT1_OFFSET),
         getreg32(config->base + SAM_MCAN_NDAT2_OFFSET),
         getreg32(config->base + SAM_MCAN_RXF0C_OFFSET));
 
-  lldbg(" RXF0S: %08x FXF0A: %08x  RXBC: %08x  RXF1C: %08x\n",
+  llerr(" RXF0S: %08x FXF0A: %08x  RXBC: %08x  RXF1C: %08x\n",
         getreg32(config->base + SAM_MCAN_RXF0S_OFFSET),
         getreg32(config->base + SAM_MCAN_RXF0A_OFFSET),
         getreg32(config->base + SAM_MCAN_RXBC_OFFSET),
         getreg32(config->base + SAM_MCAN_RXF1C_OFFSET));
 
-  lldbg(" RXF1S: %08x FXF1A: %08x RXESC: %08x   TXBC: %08x\n",
+  llerr(" RXF1S: %08x FXF1A: %08x RXESC: %08x   TXBC: %08x\n",
         getreg32(config->base + SAM_MCAN_RXF1S_OFFSET),
         getreg32(config->base + SAM_MCAN_RXF1A_OFFSET),
         getreg32(config->base + SAM_MCAN_RXESC_OFFSET),
         getreg32(config->base + SAM_MCAN_TXBC_OFFSET));
 
-  lldbg(" TXFQS: %08x TXESC: %08x TXBRP: %08x  TXBAR: %08x\n",
+  llerr(" TXFQS: %08x TXESC: %08x TXBRP: %08x  TXBAR: %08x\n",
         getreg32(config->base + SAM_MCAN_TXFQS_OFFSET),
         getreg32(config->base + SAM_MCAN_TXESC_OFFSET),
         getreg32(config->base + SAM_MCAN_TXBRP_OFFSET),
         getreg32(config->base + SAM_MCAN_TXBAR_OFFSET));
 
-  lldbg(" TXBCR: %08x TXBTO: %08x TXBCF: %08x TXBTIE: %08x\n",
+  llerr(" TXBCR: %08x TXBTO: %08x TXBCF: %08x TXBTIE: %08x\n",
         getreg32(config->base + SAM_MCAN_TXBCR_OFFSET),
         getreg32(config->base + SAM_MCAN_TXBTO_OFFSET),
         getreg32(config->base + SAM_MCAN_TXBCF_OFFSET),
         getreg32(config->base + SAM_MCAN_TXBTIE_OFFSET));
 
-  lldbg("TXBCIE: %08x TXEFC: %08x TXEFS: %08x  TXEFA: %08x\n",
+  llerr("TXBCIE: %08x TXEFC: %08x TXEFS: %08x  TXEFA: %08x\n",
         getreg32(config->base + SAM_MCAN_TXBCIE_OFFSET),
         getreg32(config->base + SAM_MCAN_TXEFC_OFFSET),
         getreg32(config->base + SAM_MCAN_TXEFS_OFFSET),
@@ -2219,7 +2219,7 @@ static int mcan_setup(FAR struct can_dev_s *dev)
   ret = mcan_hw_initialize(priv);
   if (ret < 0)
     {
-      canlldbg("MCAN%d H/W initialization failed: %d\n", config->port, ret);
+      canllerr("MCAN%d H/W initialization failed: %d\n", config->port, ret);
       return ret;
     }
 
@@ -2230,7 +2230,7 @@ static int mcan_setup(FAR struct can_dev_s *dev)
   ret = irq_attach(config->irq0, config->handler);
   if (ret < 0)
     {
-      canlldbg("Failed to attach MCAN%d line 0 IRQ (%d)",
+      canllerr("Failed to attach MCAN%d line 0 IRQ (%d)",
       config->port, config->irq0);
       return ret;
     }
@@ -2238,7 +2238,7 @@ static int mcan_setup(FAR struct can_dev_s *dev)
   ret = irq_attach(config->irq1, config->handler);
   if (ret < 0)
     {
-      canlldbg("Failed to attach MCAN%d line 1 IRQ (%d)",
+      canllerr("Failed to attach MCAN%d line 1 IRQ (%d)",
       config->port, config->irq1);
       return ret;
     }
@@ -3155,7 +3155,7 @@ static void mcan_error(FAR struct can_dev_s *dev, uint32_t status,
       ret = can_receive(dev, &hdr, data);
       if (ret < 0)
         {
-          canlldbg("ERROR: can_receive failed: %d\n", ret);
+          canllerr("ERROR: can_receive failed: %d\n", ret);
         }
     }
 }
@@ -3249,7 +3249,7 @@ static void mcan_receive(FAR struct can_dev_s *dev, FAR uint32_t *rxbuffer,
   ret = can_receive(dev, &hdr, (FAR uint8_t *)rxbuffer);
   if (ret < 0)
     {
-      canlldbg("ERROR: can_receive failed: %d\n", ret);
+      canllerr("ERROR: can_receive failed: %d\n", ret);
     }
 }
 
@@ -3302,7 +3302,7 @@ static void mcan_interrupt(FAR struct can_dev_s *dev)
 
           if ((pending & MCAN_CMNERR_INTS) != 0)
             {
-              canlldbg("ERROR: Common %08x\n", pending & MCAN_CMNERR_INTS);
+              canllerr("ERROR: Common %08x\n", pending & MCAN_CMNERR_INTS);
 
               /* Clear the error indications */
 
@@ -3313,7 +3313,7 @@ static void mcan_interrupt(FAR struct can_dev_s *dev)
 
           if ((pending & MCAN_TXERR_INTS) != 0)
             {
-              canlldbg("ERROR: TX %08x\n", pending & MCAN_TXERR_INTS);
+              canllerr("ERROR: TX %08x\n", pending & MCAN_TXERR_INTS);
 
               /* Clear the error indications */
 
@@ -3334,7 +3334,7 @@ static void mcan_interrupt(FAR struct can_dev_s *dev)
 
           if ((pending & MCAN_RXERR_INTS) != 0)
             {
-              canlldbg("ERROR: RX %08x\n", pending & MCAN_RXERR_INTS);
+              canllerr("ERROR: RX %08x\n", pending & MCAN_RXERR_INTS);
 
               /* Clear the error indications */
 
@@ -3355,7 +3355,7 @@ static void mcan_interrupt(FAR struct can_dev_s *dev)
         {
           /* All (old) errors cleared  */
 
-          canlldbg("ERROR: CLEARED\n");
+          canllerr("ERROR: CLEARED\n");
 
           mcan_error(dev, 0, priv->olderrors);
 
@@ -3480,7 +3480,7 @@ static void mcan_interrupt(FAR struct can_dev_s *dev)
 
           if ((regval & MCAN_RXF0S_RF0L) != 0)
             {
-              canlldbg("ERROR: Message lost: %08x\n", regval);
+              canllerr("ERROR: Message lost: %08x\n", regval);
             }
           else
             {
@@ -3514,7 +3514,7 @@ static void mcan_interrupt(FAR struct can_dev_s *dev)
 
           if ((regval & MCAN_RXF0S_RF0L) != 0)
             {
-              canlldbg("ERROR: Message lost: %08x\n", regval);
+              canllerr("ERROR: Message lost: %08x\n", regval);
             }
           else
             {

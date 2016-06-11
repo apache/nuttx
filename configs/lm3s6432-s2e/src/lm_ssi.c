@@ -63,9 +63,9 @@
 #undef SSI_VERBOSE /* Define to enable verbose debug */
 
 #ifdef SSI_DEBUG
-#  define ssidbg  lldbg
+#  define ssidbg  llerr
 #  ifdef SSI_VERBOSE
-#    define ssiinfo lldbg
+#    define ssiinfo llerr
 #  else
 #    define ssiinfo(x...)
 #  endif

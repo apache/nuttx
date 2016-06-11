@@ -149,7 +149,7 @@ static int udp_input(FAR struct net_driver_s *dev, unsigned int iplen)
       g_netstats.udp.drop++;
       g_netstats.udp.chkerr++;
 #endif
-      nlldbg("Bad UDP checksum\n");
+      nllerr("Bad UDP checksum\n");
       dev->d_len = 0;
     }
   else
@@ -207,7 +207,7 @@ static int udp_input(FAR struct net_driver_s *dev, unsigned int iplen)
         }
       else
         {
-          nlldbg("No listener on UDP port\n");
+          nllerr("No listener on UDP port\n");
           dev->d_len = 0;
         }
     }

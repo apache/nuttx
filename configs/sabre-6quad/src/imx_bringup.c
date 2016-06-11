@@ -51,7 +51,7 @@
 /* Debug ********************************************************************/
 
 #ifdef CONFIG_BOARD_INITIALIZE
-#  define SYSLOG lldbg
+#  define SYSLOG llerr
 #else
 #  define SYSLOG dbg
 #endif

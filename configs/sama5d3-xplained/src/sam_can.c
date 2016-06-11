@@ -75,12 +75,12 @@
 #ifdef CONFIG_DEBUG_CAN
 #  define candbg    dbg
 #  define caninfo   info
-#  define canlldbg  lldbg
+#  define canllerr  llerr
 #  define canllinfo llinfo
 #else
 #  define candbg(x...)
 #  define caninfo(x...)
-#  define canlldbg(x...)
+#  define canllerr(x...)
 #  define canllinfo(x...)
 #endif
 

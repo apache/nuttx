@@ -107,12 +107,12 @@
 
 /* Debug ********************************************************************/
 /* Non-standard debug that may be enabled just for testing the watchdog
- * driver.  NOTE: that only lldbg types are used so that the output is
+ * driver.  NOTE: that only llerr types are used so that the output is
  * immediately available.
  */
 
 #ifdef CONFIG_DEBUG_WATCHDOG
-#  define wddbg    lldbg
+#  define wddbg    llerr
 #  define wdinfo   llinfo
 #else
 #  define wddbg(x...)
@@ -216,7 +216,7 @@ static uint16_t stm32_getreg(uint32_t addr)
         {
           if (count == 4)
             {
-              lldbg("...\n");
+              llerr("...\n");
             }
 
           return val;
@@ -233,7 +233,7 @@ static uint16_t stm32_getreg(uint32_t addr)
         {
           /* Yes.. then show how many times the value repeated */
 
-          lldbg("[repeats %d more times]\n", count-3);
+          llerr("[repeats %d more times]\n", count-3);
         }
 
       /* Save the new address, value, and count */
@@ -245,7 +245,7 @@ static uint16_t stm32_getreg(uint32_t addr)
 
   /* Show the register value read */
 
-  lldbg("%08x->%04x\n", addr, val);
+  llerr("%08x->%04x\n", addr, val);
   return val;
 }
 #endif
@@ -263,7 +263,7 @@ static void stm32_putreg(uint16_t val, uint32_t addr)
 {
   /* Show the register value being written */
 
-  lldbg("%08x<-%04x\n", addr, val);
+  llerr("%08x<-%04x\n", addr, val);
 
   /* Write the value */
 

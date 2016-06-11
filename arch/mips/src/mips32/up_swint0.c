@@ -65,7 +65,7 @@
  */
 
 #ifdef CONFIG_DEBUG_SYSCALL
-# define swidbg(format, ...) lldbg(format, ##__VA_ARGS__)
+# define swidbg(format, ...) llerr(format, ##__VA_ARGS__)
 #else
 # define swidbg(x...)
 #endif
@@ -289,7 +289,7 @@ int up_swint0(int irq, FAR void *context)
 
           g_current_regs[REG_R0] -= CONFIG_SYS_RESERVED;
 #else
-          slldbg("ERROR: Bad SYS call: %d\n", regs[REG_A0]);
+          sllerr("ERROR: Bad SYS call: %d\n", regs[REG_A0]);
 #endif
         }
         break;

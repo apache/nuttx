@@ -129,12 +129,12 @@
 #ifdef CONFIG_DEBUG_CAN
 #  define candbg    dbg
 #  define caninfo   info
-#  define canlldbg  lldbg
+#  define canllerr  llerr
 #  define canllinfo llinfo
 #else
 #  define candbg(x...)
 #  define caninfo(x...)
-#  define canlldbg(x...)
+#  define canllerr(x...)
 #  define canllinfo(x...)
 #endif
 
@@ -386,7 +386,7 @@ static uint32_t can_getreg(FAR struct sam_can_s *priv, int offset)
         {
           if (priv->count == 4)
             {
-              lldbg("...\n");
+              llerr("...\n");
             }
 
           return regval;
@@ -403,7 +403,7 @@ static uint32_t can_getreg(FAR struct sam_can_s *priv, int offset)
         {
           /* Yes.. then show how many times the value repeated */
 
-          lldbg("[repeats %d more times]\n", priv->count - 3);
+          llerr("[repeats %d more times]\n", priv->count - 3);
         }
 
       /* Save the new address, value, and count */
@@ -415,7 +415,7 @@ static uint32_t can_getreg(FAR struct sam_can_s *priv, int offset)
 
   /* Show the register value read */
 
-  lldbg("%08x->%08x\n", regaddr, regval);
+  llerr("%08x->%08x\n", regaddr, regval);
   return regval;
 }
 
@@ -452,7 +452,7 @@ static void can_putreg(FAR struct sam_can_s *priv, int offset, uint32_t regval)
 
   /* Show the register value being written */
 
-  lldbg("%08x<-%08x\n", regaddr, regval);
+  llerr("%08x<-%08x\n", regaddr, regval);
 
   /* Write the value */
 
@@ -489,26 +489,26 @@ static void can_dumpctrlregs(FAR struct sam_can_s *priv, FAR const char *msg)
 
   if (msg)
     {
-      canlldbg("Control Registers: %s\n", msg);
+      canllerr("Control Registers: %s\n", msg);
     }
   else
     {
-      canlldbg("Control Registers:\n");
+      canllerr("Control Registers:\n");
     }
 
   /* CAN control and status registers */
 
-  lldbg("   MR: %08x      IMR: %08x      SR: %08x\n",
+  llerr("   MR: %08x      IMR: %08x      SR: %08x\n",
         getreg32(config->base + SAM_CAN_MR_OFFSET),
         getreg32(config->base + SAM_CAN_IMR_OFFSET),
         getreg32(config->base + SAM_CAN_SR_OFFSET));
 
-  lldbg("   BR: %08x      TIM: %08x TIMESTP: %08x\n",
+  llerr("   BR: %08x      TIM: %08x TIMESTP: %08x\n",
         getreg32(config->base + SAM_CAN_BR_OFFSET),
         getreg32(config->base + SAM_CAN_TIM_OFFSET),
         getreg32(config->base + SAM_CAN_TIMESTP_OFFSET));
 
-  lldbg("  ECR: %08x     WPMR: %08x    WPSR: %08x\n",
+  llerr("  ECR: %08x     WPMR: %08x    WPSR: %08x\n",
         getreg32(config->base + SAM_CAN_ECR_OFFSET),
         getreg32(config->base + SAM_CAN_TCR_OFFSET),
         getreg32(config->base + SAM_CAN_ACR_OFFSET));
@@ -538,27 +538,27 @@ static void can_dumpmbregs(FAR struct sam_can_s *priv, FAR const char *msg)
 
   if (msg)
     {
-      canlldbg("Mailbox Registers: %s\n", msg);
+      canllerr("Mailbox Registers: %s\n", msg);
     }
   else
     {
-      canlldbg("Mailbox Registers:\n");
+      canllerr("Mailbox Registers:\n");
     }
 
   for (i = 0; i < SAM_CAN_NMAILBOXES; i++)
     {
       mbbase = config->base + SAM_CAN_MBn_OFFSET(i);
-      lldbg("  MB%d:\n", i);
+      llerr("  MB%d:\n", i);
 
       /* CAN mailbox registers */
 
-      lldbg("    MMR: %08x MAM: %08x MID: %08x MFID: %08x\n",
+      llerr("    MMR: %08x MAM: %08x MID: %08x MFID: %08x\n",
             getreg32(mbbase + SAM_CAN_MMR_OFFSET),
             getreg32(mbbase + SAM_CAN_MAM_OFFSET),
             getreg32(mbbase + SAM_CAN_MID_OFFSET),
             getreg32(mbbase + SAM_CAN_MFID_OFFSET));
 
-      lldbg("    MSR: %08x MDL: %08x MDH: %08x\n",
+      llerr("    MSR: %08x MDL: %08x MDH: %08x\n",
             getreg32(mbbase + SAM_CAN_MSR_OFFSET),
             getreg32(mbbase + SAM_CAN_MDL_OFFSET),
             getreg32(mbbase + SAM_CAN_MDH_OFFSET));
@@ -866,7 +866,7 @@ static int can_setup(FAR struct can_dev_s *dev)
   ret = can_hwinitialize(priv);
   if (ret < 0)
     {
-      canlldbg("CAN%d H/W initialization failed: %d\n", config->port, ret);
+      canllerr("CAN%d H/W initialization failed: %d\n", config->port, ret);
       return ret;
     }
 
@@ -878,7 +878,7 @@ static int can_setup(FAR struct can_dev_s *dev)
   ret = irq_attach(config->pid, config->handler);
   if (ret < 0)
     {
-      canlldbg("Failed to attach CAN%d IRQ (%d)", config->port, config->pid);
+      canllerr("Failed to attach CAN%d IRQ (%d)", config->port, config->pid);
       return ret;
     }
 
@@ -887,7 +887,7 @@ static int can_setup(FAR struct can_dev_s *dev)
   ret = can_recvsetup(priv);
   if (ret < 0)
     {
-      canlldbg("CAN%d H/W initialization failed: %d\n", config->port, ret);
+      canllerr("CAN%d H/W initialization failed: %d\n", config->port, ret);
       return ret;
     }
 
@@ -1342,7 +1342,7 @@ static inline void can_rxinterrupt(FAR struct can_dev_s *dev, int mbndx,
   ret = can_receive(dev, &hdr, (FAR uint8_t *)md);
   if (ret < 0)
     {
-      canlldbg("ERROR: can_receive failed: %d\n", ret);
+      canllerr("ERROR: can_receive failed: %d\n", ret);
     }
 
   /* Set the MTCR flag in the CAN_MCRx register.  This clears the
@@ -1437,9 +1437,9 @@ static inline void can_mbinterrupt(FAR struct can_dev_s *dev, int mbndx)
           case CAN_MMR_MOT_CONSUMER: /* Consumer Mailbox */
           case CAN_MMR_MOT_PRODUCER: /* Producer Mailbox */
           case CAN_MMR_MOT_DISABLED: /* Mailbox is disabled */
-            canlldbg("ERROR: CAN%d MB%d: Unsupported or invalid mailbox type\n",
+            canllerr("ERROR: CAN%d MB%d: Unsupported or invalid mailbox type\n",
                      priv->config->port, mbndx);
-            canlldbg("       MSR: %08x MMR: %08x\n", msr, mmr);
+            canllerr("       MSR: %08x MMR: %08x\n", msr, mmr);
             break;
         }
     }
@@ -1530,7 +1530,7 @@ static void can_interrupt(FAR struct can_dev_s *dev)
 
   if ((pending & ~CAN_INT_MBALL) != 0)
     {
-      canlldbg("ERROR: CAN%d system interrupt, SR=%08x IMR=%08x\n",
+      canllerr("ERROR: CAN%d system interrupt, SR=%08x IMR=%08x\n",
                priv->config->port, sr, imr);
     }
 }

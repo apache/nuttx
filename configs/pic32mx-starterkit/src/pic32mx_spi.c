@@ -65,9 +65,9 @@
  */
 
 #ifdef CONFIG_SPI_DEBUG
-#  define spidbg  lldbg
+#  define spidbg  llerr
 #  ifdef CONFIG_SPI_VERBOSE
-#    define spiinfo lldbg
+#    define spiinfo llerr
 #  else
 #    define spiinfo(x...)
 #  endif

@@ -1127,7 +1127,7 @@ static int enc_txenqueue(FAR struct enc_driver_s *priv)
     }
   else
     {
-      nlldbg("no free descriptors\n");
+      nllerr("no free descriptors\n");
       ret = -ENOMEM;
     }
 
@@ -1612,7 +1612,7 @@ static void enc_rxdispatch(FAR struct enc_driver_s *priv)
 
           enc_rxrmpkt(priv, descr);
 
-          nlldbg("Unsupported packet type dropped (%02x)\n", htons(BUF->type));
+          nllerr("Unsupported packet type dropped (%02x)\n", htons(BUF->type));
           NETDEV_RXDROPPED(&priv->dev);
         }
 
@@ -1707,7 +1707,7 @@ static void enc_pktif(FAR struct enc_driver_s *priv)
 
       if ((rxstat & RXSTAT_OK) == 0)
         {
-          nlldbg("ERROR: RXSTAT: %08x\n", rxstat);
+          nllerr("ERROR: RXSTAT: %08x\n", rxstat);
 
           /* Discard packet */
 
@@ -1719,7 +1719,7 @@ static void enc_pktif(FAR struct enc_driver_s *priv)
 
       else if (pktlen > (CONFIG_NET_ETH_MTU + 4) || pktlen <= (ETH_HDRLEN + 4))
         {
-          nlldbg("Bad packet size dropped (%d)\n", pktlen);
+          nllerr("Bad packet size dropped (%d)\n", pktlen);
 
           /* Discard packet */
 
@@ -1774,17 +1774,17 @@ static void enc_rxabtif(FAR struct enc_driver_s *priv)
 #if 0
   /* Free the last received packet from the RX queue */
 
-  nlldbg("rx abort\n");
-  nlldbg("ESTAT:   %04x\n", enc_rdreg(priv, ENC_ESTAT));
-  nlldbg("EIR:     %04x\n", enc_rdreg(priv, ENC_EIR));
-  nlldbg("ERXTAIL: %04x\n", enc_rdreg(priv, ENC_ERXTAIL));
-  nlldbg("ERXHAED: %04x\n", enc_rdreg(priv, ENC_ERXHEAD));
+  nllerr("rx abort\n");
+  nllerr("ESTAT:   %04x\n", enc_rdreg(priv, ENC_ESTAT));
+  nllerr("EIR:     %04x\n", enc_rdreg(priv, ENC_EIR));
+  nllerr("ERXTAIL: %04x\n", enc_rdreg(priv, ENC_ERXTAIL));
+  nllerr("ERXHAED: %04x\n", enc_rdreg(priv, ENC_ERXHEAD));
 
   descr = (FAR struct enc_descr_s *)sq_peek(&priv->rxqueue);
 
   while (descr != NULL)
     {
-      nlldbg("addr: %04x len: %d\n", descr->addr, descr->len);
+      nllerr("addr: %04x len: %d\n", descr->addr, descr->len);
       descr = (FAR struct enc_descr_s *)sq_next(descr);
     }
 
@@ -1797,7 +1797,7 @@ static void enc_rxabtif(FAR struct enc_driver_s *priv)
     {
       enc_rxrmpkt(priv, descr);
 
-      nlldbg("pending packet freed\n");
+      nllerr("pending packet freed\n");
     }
   else
     {
@@ -2043,7 +2043,7 @@ static void enc_toworker(FAR void *arg)
   net_lock_t lock;
   int ret;
 
-  nlldbg("Tx timeout\n");
+  nllerr("Tx timeout\n");
   DEBUGASSERT(priv);
 
   /* Get exclusive access to the network. */
@@ -2231,7 +2231,7 @@ static int enc_ifup(struct net_driver_s *dev)
   FAR struct enc_driver_s *priv = (FAR struct enc_driver_s *)dev->d_private;
   int ret;
 
-  nlldbg("Bringing up: %d.%d.%d.%d\n",
+  nllerr("Bringing up: %d.%d.%d.%d\n",
          dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
         (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
 
@@ -2307,7 +2307,7 @@ static int enc_ifdown(struct net_driver_s *dev)
   irqstate_t flags;
   int ret;
 
-  nlldbg("Taking down: %d.%d.%d.%d\n",
+  nllerr("Taking down: %d.%d.%d.%d\n",
          dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
          (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
 
@@ -2742,7 +2742,7 @@ static int enc_reset(FAR struct enc_driver_s *priv)
 
   if (ret != OK)
     {
-      nlldbg("ERROR: encx24j600 clock failed to become ready\n");
+      nllerr("ERROR: encx24j600 clock failed to become ready\n");
       return -ENODEV;
     }
 
@@ -2756,7 +2756,7 @@ static int enc_reset(FAR struct enc_driver_s *priv)
 
   if (regval != 0x0000)
     {
-      nlldbg("ERROR: encx24j600 seems not to be reset properly\n");
+      nllerr("ERROR: encx24j600 seems not to be reset properly\n");
       return -ENODEV;
     }
 
@@ -2813,7 +2813,7 @@ static int enc_reset(FAR struct enc_driver_s *priv)
 #if 0
   if (ret != OK)
     {
-      nlldbg("ERROR: encx24j600 failed to establish link\n");
+      nllerr("ERROR: encx24j600 failed to establish link\n");
       return -ENODEV;
     }
 #endif

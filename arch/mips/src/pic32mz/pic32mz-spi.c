@@ -70,9 +70,9 @@
 /* Debug */
 
 #ifdef CONFIG_DEBUG_SPI
-#  define spidbg  lldbg
+#  define spidbg  llerr
 #  ifdef CONFIG_DEBUG_INFO
-#    define spiinfo lldbg
+#    define spiinfo llerr
 #  else
 #    define spiinfo(x...)
 #  endif
@@ -496,7 +496,7 @@ static bool spi_checkreg(struct pic32mz_dev_s *priv, uintptr_t regaddr,
         {
           /* Yes... show how many times we did it */
 
-          lldbg("...[Repeats %d times]...\n", priv->ntimes);
+          llerr("...[Repeats %d times]...\n", priv->ntimes);
         }
 
       /* Save information about the new access */
@@ -546,7 +546,7 @@ static uint32_t spi_getreg(FAR struct pic32mz_dev_s *priv,
     {
       /* Yes.. */
 
-      lldbg("%08lx->%08lx\n",
+      llerr("%08lx->%08lx\n",
             (unsigned long)regaddr, (unsigned long)regval);
     }
 
@@ -588,7 +588,7 @@ static void spi_putaddr(FAR struct pic32mz_dev_s *priv, uintptr_t regaddr,
     {
       /* Yes.. */
 
-      lldbg("%08lx<-%08lx\n",
+      llerr("%08lx<-%08lx\n",
       (unsigned long)regaddr, (unsigned long)regval);
     }
 

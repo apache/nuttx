@@ -76,15 +76,15 @@ static void z180_registerdump(void)
 {
   if (g_current_regs)
     {
-      lldbg("AF: %04x  I: %04x\n",
+      llerr("AF: %04x  I: %04x\n",
             g_current_regs[XCPT_AF], g_current_regs[XCPT_I]);
-      lldbg("BC: %04x DE: %04x HL: %04x\n",
+      llerr("BC: %04x DE: %04x HL: %04x\n",
             g_current_regs[XCPT_BC], g_current_regs[XCPT_DE], g_current_regs[XCPT_HL]);
-      lldbg("IX: %04x IY: %04x\n",
+      llerr("IX: %04x IY: %04x\n",
             g_current_regs[XCPT_IX], g_current_regs[XCPT_IY]);
-      lldbg("SP: %04x PC: %04x\n"
+      llerr("SP: %04x PC: %04x\n"
             g_current_regs[XCPT_SP], g_current_regs[XCPT_PC]);
-      lldbg("CBAR: %02x BBR: %02x CBR: %02x\n"
+      llerr("CBAR: %02x BBR: %02x CBR: %02x\n"
             inp(Z180_MMU_CBAR), inp(Z180_MMU_BBR), inp(Z180_MMU_CBR));
     }
 }

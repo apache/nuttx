@@ -128,12 +128,12 @@
 #ifdef CONFIG_DEBUG_RTC
 #  define rtcdbg    dbg
 #  define rtcinfo   info
-#  define rtclldbg  lldbg
+#  define rtcllerr  llerr
 #  define rtcllinfo llinfo
 #else
 #  define rtcdbg(x...)
 #  define rtcinfo(x...)
-#  define rtclldbg(x...)
+#  define rtcllerr(x...)
 #  define rtcllinfo(x...)
 #endif
 
@@ -179,27 +179,27 @@ volatile bool g_rtc_enabled = false;
 #ifdef CONFIG_DEBUG_RTC
 static void rtc_dumpregs(FAR const char *msg)
 {
-  rtclldbg("%s:\n", msg);
-  rtclldbg("      TR: %08x\n", getreg32(STM32_RTC_TR));
-  rtclldbg("      DR: %08x\n", getreg32(STM32_RTC_DR));
-  rtclldbg("      CR: %08x\n", getreg32(STM32_RTC_CR));
-  rtclldbg("     ISR: %08x\n", getreg32(STM32_RTC_ISR));
-  rtclldbg("    PRER: %08x\n", getreg32(STM32_RTC_PRER));
-  rtclldbg("    WUTR: %08x\n", getreg32(STM32_RTC_WUTR));
+  rtcllerr("%s:\n", msg);
+  rtcllerr("      TR: %08x\n", getreg32(STM32_RTC_TR));
+  rtcllerr("      DR: %08x\n", getreg32(STM32_RTC_DR));
+  rtcllerr("      CR: %08x\n", getreg32(STM32_RTC_CR));
+  rtcllerr("     ISR: %08x\n", getreg32(STM32_RTC_ISR));
+  rtcllerr("    PRER: %08x\n", getreg32(STM32_RTC_PRER));
+  rtcllerr("    WUTR: %08x\n", getreg32(STM32_RTC_WUTR));
 #ifndef CONFIG_STM32_STM32F30XX
-  rtclldbg("  CALIBR: %08x\n", getreg32(STM32_RTC_CALIBR));
+  rtcllerr("  CALIBR: %08x\n", getreg32(STM32_RTC_CALIBR));
 #endif
-  rtclldbg("  ALRMAR: %08x\n", getreg32(STM32_RTC_ALRMAR));
-  rtclldbg("  ALRMBR: %08x\n", getreg32(STM32_RTC_ALRMBR));
-  rtclldbg("  SHIFTR: %08x\n", getreg32(STM32_RTC_SHIFTR));
-  rtclldbg("    TSTR: %08x\n", getreg32(STM32_RTC_TSTR));
-  rtclldbg("    TSDR: %08x\n", getreg32(STM32_RTC_TSDR));
-  rtclldbg("   TSSSR: %08x\n", getreg32(STM32_RTC_TSSSR));
-  rtclldbg("    CALR: %08x\n", getreg32(STM32_RTC_CALR));
-  rtclldbg("   TAFCR: %08x\n", getreg32(STM32_RTC_TAFCR));
-  rtclldbg("ALRMASSR: %08x\n", getreg32(STM32_RTC_ALRMASSR));
-  rtclldbg("ALRMBSSR: %08x\n", getreg32(STM32_RTC_ALRMBSSR));
-  rtclldbg("MAGICREG: %08x\n", getreg32(RTC_MAGIC_REG));
+  rtcllerr("  ALRMAR: %08x\n", getreg32(STM32_RTC_ALRMAR));
+  rtcllerr("  ALRMBR: %08x\n", getreg32(STM32_RTC_ALRMBR));
+  rtcllerr("  SHIFTR: %08x\n", getreg32(STM32_RTC_SHIFTR));
+  rtcllerr("    TSTR: %08x\n", getreg32(STM32_RTC_TSTR));
+  rtcllerr("    TSDR: %08x\n", getreg32(STM32_RTC_TSDR));
+  rtcllerr("   TSSSR: %08x\n", getreg32(STM32_RTC_TSSSR));
+  rtcllerr("    CALR: %08x\n", getreg32(STM32_RTC_CALR));
+  rtcllerr("   TAFCR: %08x\n", getreg32(STM32_RTC_TAFCR));
+  rtcllerr("ALRMASSR: %08x\n", getreg32(STM32_RTC_ALRMASSR));
+  rtcllerr("ALRMBSSR: %08x\n", getreg32(STM32_RTC_ALRMBSSR));
+  rtcllerr("MAGICREG: %08x\n", getreg32(RTC_MAGIC_REG));
 }
 #else
 #  define rtc_dumpregs(msg)
@@ -222,13 +222,13 @@ static void rtc_dumpregs(FAR const char *msg)
 #ifdef CONFIG_DEBUG_RTC
 static void rtc_dumptime(FAR struct tm *tp, FAR const char *msg)
 {
-  rtclldbg("%s:\n", msg);
-  rtclldbg("  tm_sec: %08x\n", tp->tm_sec);
-  rtclldbg("  tm_min: %08x\n", tp->tm_min);
-  rtclldbg(" tm_hour: %08x\n", tp->tm_hour);
-  rtclldbg(" tm_mday: %08x\n", tp->tm_mday);
-  rtclldbg("  tm_mon: %08x\n", tp->tm_mon);
-  rtclldbg(" tm_year: %08x\n", tp->tm_year);
+  rtcllerr("%s:\n", msg);
+  rtcllerr("  tm_sec: %08x\n", tp->tm_sec);
+  rtcllerr("  tm_min: %08x\n", tp->tm_min);
+  rtcllerr(" tm_hour: %08x\n", tp->tm_hour);
+  rtcllerr(" tm_mday: %08x\n", tp->tm_mday);
+  rtcllerr("  tm_mon: %08x\n", tp->tm_mon);
+  rtcllerr(" tm_year: %08x\n", tp->tm_year);
 }
 #else
 #  define rtc_dumptime(tp, msg)
@@ -733,13 +733,13 @@ int up_rtc_initialize(void)
         {
           case OK:
             {
-              rtclldbg("rtc_syncwait() okay\n");
+              rtcllerr("rtc_syncwait() okay\n");
               break;
             }
 
           default:
             {
-              rtclldbg("rtc_syncwait() failed (%d)\n", ret);
+              rtcllerr("rtc_syncwait() failed (%d)\n", ret);
               break;
             }
         }
@@ -753,7 +753,7 @@ int up_rtc_initialize(void)
 
   if (regval != RTC_MAGIC)
     {
-      rtclldbg("Do setup\n");
+      rtcllerr("Do setup\n");
 
       /* Perform the one-time setup of the LSE clocking to the RTC */
 
@@ -771,7 +771,7 @@ int up_rtc_initialize(void)
     }
   else
     {
-      rtclldbg("Do resume\n");
+      rtcllerr("Do resume\n");
 
       /* RTC already set-up, just resume normal operation */
 
@@ -787,7 +787,7 @@ int up_rtc_initialize(void)
 
   if (ret != OK && nretry > 0)
     {
-      rtclldbg("setup/resume ran %d times and failed with %d\n",
+      rtcllerr("setup/resume ran %d times and failed with %d\n",
                 nretry, ret);
       return -ETIMEDOUT;
     }

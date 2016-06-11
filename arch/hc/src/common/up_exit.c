@@ -146,10 +146,10 @@ void _exit(int status)
 
   (void)up_irq_save();
 
-  slldbg("TCB=%p exiting\n", this_task());
+  sllerr("TCB=%p exiting\n", this_task());
 
 #if defined(CONFIG_DUMP_ON_EXIT) && defined(CONFIG_DEBUG_FEATURES)
-  slldbg("Other tasks:\n");
+  sllerr("Other tasks:\n");
   sched_foreach(_up_dumponexit, NULL);
 #endif
 

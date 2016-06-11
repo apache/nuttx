@@ -2200,7 +2200,7 @@ int up_netinitialize(void)
   ret = irq_attach(EZ80_EMACSYS_IRQ, ez80emac_sysinterrupt);
   if (ret < 0)
     {
-      nlldbg("Unable to attach IRQ %d\n", EZ80_EMACSYS_IRQ);
+      nllerr("Unable to attach IRQ %d\n", EZ80_EMACSYS_IRQ);
       ret = -EAGAIN;
       goto errout;
     }
@@ -2208,7 +2208,7 @@ int up_netinitialize(void)
   ret = irq_attach(EZ80_EMACRX_IRQ, ez80emac_rxinterrupt);
   if (ret < 0)
     {
-      nlldbg("Unable to attach IRQ %d\n", EZ80_EMACRX_IRQ);
+      nllerr("Unable to attach IRQ %d\n", EZ80_EMACRX_IRQ);
       ret = -EAGAIN;
       goto errout;
     }
@@ -2216,7 +2216,7 @@ int up_netinitialize(void)
   ret = irq_attach(EZ80_EMACTX_IRQ, ez80emac_txinterrupt);
   if (ret < 0)
     {
-      nlldbg("Unable to attach IRQ %d\n", EZ80_EMACTX_IRQ);
+      nllerr("Unable to attach IRQ %d\n", EZ80_EMACTX_IRQ);
       ret = -EAGAIN;
       goto errout;
     }

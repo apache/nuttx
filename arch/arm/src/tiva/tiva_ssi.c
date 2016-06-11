@@ -73,7 +73,7 @@
 #undef SSI_DEBUG  /* Define to enable debug */
 
 #ifdef SSI_DEBUG
-#  define ssidbg  lldbg
+#  define ssidbg  llerr
 #  define ssiinfo llinfo
 #else
 #  define ssidbg(x...)

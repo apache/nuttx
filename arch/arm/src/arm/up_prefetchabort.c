@@ -110,7 +110,7 @@ void up_prefetchabort(uint32_t *regs)
    * virtual addresses.
    */
 
-  pglldbg("VADDR: %08x VBASE: %08x VEND: %08x\n",
+  pgllerr("VADDR: %08x VBASE: %08x VEND: %08x\n",
           regs[REG_PC], PG_PAGED_VBASE, PG_PAGED_VEND);
 
   if (regs[REG_R15] >= PG_PAGED_VBASE && regs[REG_R15] < PG_PAGED_VEND)
@@ -148,7 +148,7 @@ void up_prefetchabort(uint32_t *regs)
   else
 #endif
     {
-      lldbg("Prefetch abort. PC: %08x\n", regs[REG_PC]);
+      llerr("Prefetch abort. PC: %08x\n", regs[REG_PC]);
       PANIC();
     }
 }

@@ -126,7 +126,7 @@ static void tcp_input(FAR struct net_driver_s *dev, unsigned int iplen)
       g_netstats.tcp.drop++;
       g_netstats.tcp.chkerr++;
 #endif
-      nlldbg("Bad TCP checksum\n");
+      nllerr("Bad TCP checksum\n");
       goto drop;
     }
 
@@ -206,7 +206,7 @@ static void tcp_input(FAR struct net_driver_s *dev, unsigned int iplen)
 #ifdef CONFIG_NET_STATISTICS
               g_netstats.tcp.syndrop++;
 #endif
-              nlldbg("No free TCP connections\n");
+              nllerr("No free TCP connections\n");
               goto drop;
             }
 
@@ -308,7 +308,7 @@ found:
   if ((tcp->flags & TCP_RST) != 0)
     {
       conn->tcpstateflags = TCP_CLOSED;
-      nlldbg("RESET - TCP state: TCP_CLOSED\n");
+      nllerr("RESET - TCP state: TCP_CLOSED\n");
 
       (void)tcp_callback(dev, conn, TCP_ABORT);
       goto drop;
@@ -398,7 +398,7 @@ found:
 
           if ((conn->tcpstateflags & TCP_STATE_MASK) == TCP_ESTABLISHED)
             {
-              nlldbg("ERROR: conn->sndseq %d, conn->unacked %d\n",
+              nllerr("ERROR: conn->sndseq %d, conn->unacked %d\n",
                      tcp_getsequence(conn->sndseq), conn->unacked);
               goto reset;
             }

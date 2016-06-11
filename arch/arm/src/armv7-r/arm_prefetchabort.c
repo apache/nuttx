@@ -82,7 +82,7 @@ uint32_t *arm_prefetchabort(uint32_t *regs, uint32_t ifar, uint32_t ifsr)
 
   /* Crash -- possibly showing diagnostic debug information. */
 
-  lldbg("Prefetch abort. PC: %08x IFAR: %08x IFSR: %08x\n",
+  llerr("Prefetch abort. PC: %08x IFAR: %08x IFSR: %08x\n",
         regs[REG_PC], ifar, ifsr);
   PANIC();
   return regs; /* To keep the compiler happy */

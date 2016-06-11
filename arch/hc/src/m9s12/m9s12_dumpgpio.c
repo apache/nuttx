@@ -166,13 +166,13 @@ static inline void hcs12_pimdump(uint8_t portndx)
 
   if (portndx >= HCS12_PIM_NPORTS)
     {
-      lldbg("  Illegal PIM port index: %d\n", portndx);
+      llerr("  Illegal PIM port index: %d\n", portndx);
       return;
     }
 
   ptr = &piminfo[portndx];
-  lldbg(" PIM Port%c:\n", ptr->name);
-  lldbg("   IO:%02x  INP:%02x DDR:%02x RDR:%02x\n",
+  llerr(" PIM Port%c:\n", ptr->name);
+  llerr("   IO:%02x  INP:%02x DDR:%02x RDR:%02x\n",
         getreg8(ptr->base+HCS12_PIM_IO_OFFSET),
         getreg8(ptr->base+HCS12_PIM_INPUT_OFFSET),
         getreg8(ptr->base+HCS12_PIM_DDR_OFFSET),
@@ -181,20 +181,20 @@ static inline void hcs12_pimdump(uint8_t portndx)
   switch (ptr->form)
     {
     case PIMPORT_FORM1:
-      lldbg("  PER:%02x  PS:%02x\n",
+      llerr("  PER:%02x  PS:%02x\n",
             getreg8(ptr->base+HCS12_PIM_PER_OFFSET),
             getreg8(ptr->base+HCS12_PIM_PS_OFFSET));
       break;
 
     case PIMPORT_FORM2:
-      lldbg("  PER:%02x  PS:%02x WOM:%02x\n",
+      llerr("  PER:%02x  PS:%02x WOM:%02x\n",
             getreg8(ptr->base+HCS12_PIM_PER_OFFSET),
             getreg8(ptr->base+HCS12_PIM_PS_OFFSET),
             getreg8(ptr->base+HCS12_PIM_WOM_OFFSET));
       break;
 
     case PIMPORT_FORM3:
-      lldbg("  PER:%02x  PS:%02x  IE:%02x  IF:%02x\n",
+      llerr("  PER:%02x  PS:%02x  IE:%02x  IF:%02x\n",
             getreg8(ptr->base+HCS12_PIM_PER_OFFSET),
             getreg8(ptr->base+HCS12_PIM_PS_OFFSET),
             getreg8(ptr->base+HCS12_PIM_IE_OFFSET),
@@ -220,28 +220,28 @@ static inline void hcs12_mebidump(uint8_t portndx)
 
   if (portndx >= HCS12_MEBI_NPORTS)
     {
-      lldbg("  Illegal MEBI port index: %d\n", portndx);
+      llerr("  Illegal MEBI port index: %d\n", portndx);
       return;
     }
 
   ptr = &mebiinfo[portndx];
-  lldbg(" MEBI Port%c:\n", ptr->name);
+  llerr(" MEBI Port%c:\n", ptr->name);
 
   switch (ptr->form)
     {
     case MEBIPORT_AB:
-      lldbg("   DATA:%02x DDR:%02x\n",
+      llerr("   DATA:%02x DDR:%02x\n",
             getreg8(ptr->data), getreg8(ptr->ddr));
       break;
 
     case MEBIPORT_E:
-      lldbg("   DATA:%02x DDR:%02x MODE:%02x PEAR:%02x\n",
+      llerr("   DATA:%02x DDR:%02x MODE:%02x PEAR:%02x\n",
             getreg8(ptr->data), getreg8(ptr->ddr),
             getreg8(HCS12_MEBI_MODE), getreg8(HCS12_MEBI_PEAR));
       break;
 
     case MEBIPORT_K:
-      lldbg("   DATA:%02x DDR:%02x MODE:%02x\n",
+      llerr("   DATA:%02x DDR:%02x MODE:%02x\n",
             getreg8(ptr->data), getreg8(ptr->ddr),
             getreg8(HCS12_MEBI_MODE));
       break;
@@ -268,7 +268,7 @@ int hcs12_dumpgpio(uint16_t pinset, const char *msg)
   uint8_t portndx = HCS12_PORTNDX(pinset);
   irqstate_t flags = enter_critical_section();
 
-  lldbg("pinset: %08x -- %s\n", pinset, msg);
+  llerr("pinset: %08x -- %s\n", pinset, msg);
 
   if (HCS12_PIMPORT(pinset))
     {

@@ -51,7 +51,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: dbg, lldbg, info
+ * Name: dbg, llerr, info
  *
  * Description:
  *  If the cross-compiler's pre-processor does not support variable
@@ -73,7 +73,7 @@ int dbg(const char *format, ...)
 }
 
 #ifdef CONFIG_ARCH_LOWPUTC
-int lldbg(const char *format, ...)
+int llerr(const char *format, ...)
 {
   va_list ap;
   int     ret;

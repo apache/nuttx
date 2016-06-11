@@ -82,12 +82,12 @@
 
 /* Debug ********************************************************************/
 /* Non-standard debug that may be enabled just for testing the watchdog
- * driver.  NOTE: that only lldbg types are used so that the output is
+ * driver.  NOTE: that only llerr types are used so that the output is
  * immediately available.
  */
 
 #ifdef CONFIG_DEBUG_WATCHDOG
-#  define wddbg    lldbg
+#  define wddbg    llerr
 #  define wdinfo   llinfo
 #else
 #  define wddbg(x...)
@@ -199,7 +199,7 @@ static uint32_t sam_getreg(uintptr_t regaddr)
         {
           if (count == 4)
             {
-              lldbg("...\n");
+              llerr("...\n");
             }
 
           return regval;
@@ -216,7 +216,7 @@ static uint32_t sam_getreg(uintptr_t regaddr)
         {
           /* Yes.. then show how many times the value repeated */
 
-          lldbg("[repeats %d more times]\n", count-3);
+          llerr("[repeats %d more times]\n", count-3);
         }
 
       /* Save the new address, value, and count */
@@ -228,7 +228,7 @@ static uint32_t sam_getreg(uintptr_t regaddr)
 
   /* Show the register value read */
 
-  lldbg("%08x->%048\n", regaddr, regval);
+  llerr("%08x->%048\n", regaddr, regval);
   return regval;
 }
 #endif
@@ -246,7 +246,7 @@ static void sam_putreg(uint32_t regval, uintptr_t regaddr)
 {
   /* Show the register value being written */
 
-  lldbg("%08x<-%08x\n", regaddr, regval);
+  llerr("%08x<-%08x\n", regaddr, regval);
 
   /* Write the value */
 

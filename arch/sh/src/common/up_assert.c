@@ -154,10 +154,10 @@ void up_assert(const uint8_t *filename, int lineno)
   board_autoled_on(LED_ASSERTION);
 
 #if CONFIG_TASK_NAME_SIZE > 0
-  lldbg("Assertion failed at file:%s line: %d task: %s\n",
+  llerr("Assertion failed at file:%s line: %d task: %s\n",
         filename, lineno, rtcb->name);
 #else
-  lldbg("Assertion failed at file:%s line: %d\n",
+  llerr("Assertion failed at file:%s line: %d\n",
         filename, lineno);
 #endif
 

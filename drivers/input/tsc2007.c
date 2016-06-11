@@ -783,7 +783,7 @@ static int tsc2007_interrupt(int irq, FAR void *context)
   ret = work_queue(HPWORK, &priv->work, tsc2007_worker, priv, 0);
   if (ret != 0)
     {
-      illdbg("Failed to queue work: %d\n", ret);
+      illerr("Failed to queue work: %d\n", ret);
     }
 
   /* Clear any pending interrupts and return success */

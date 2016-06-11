@@ -183,14 +183,14 @@ static void stm32_bbsram_rd(void)
 static void stm32_bbsram_dump(FAR struct bbsramfh_s *bbf, char *op)
 {
   BBSRAM_DEBUG_READ();
-  lldbg("%s:\n", op);
-  lldbg(" File Address:0x%8x\n", bbf);
-  lldbg("  crc:0x%8x\n", bbf->crc);
-  lldbg("  fileno:%d\n", (int) bbf->fileno);
-  lldbg("  dirty:%d\n", (int) bbf->dirty);
-  lldbg("  length:%d\n", (int) bbf->len);
-  lldbg("  time:%ld:%ld\n", bbf->lastwrite.tv_sec, bbf->lastwrite.tv_nsec);
-  lldbg("  data: 0x%2x 0x%2x 0x%2x 0x%2x 0x%2x\n",
+  llerr("%s:\n", op);
+  llerr(" File Address:0x%8x\n", bbf);
+  llerr("  crc:0x%8x\n", bbf->crc);
+  llerr("  fileno:%d\n", (int) bbf->fileno);
+  llerr("  dirty:%d\n", (int) bbf->dirty);
+  llerr("  length:%d\n", (int) bbf->len);
+  llerr("  time:%ld:%ld\n", bbf->lastwrite.tv_sec, bbf->lastwrite.tv_nsec);
+  llerr("  data: 0x%2x 0x%2x 0x%2x 0x%2x 0x%2x\n",
         bbf->data[0], bbf->data[1], bbf->data[2], bbf->data[3], bbf->data[4]);
 }
 #endif

@@ -164,7 +164,7 @@ void icmp_input(FAR struct net_driver_s *dev)
 
   else
     {
-      nlldbg("Unknown ICMP cmd: %d\n", picmp->type);
+      nllerr("Unknown ICMP cmd: %d\n", picmp->type);
       goto typeerr;
     }
 

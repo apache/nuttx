@@ -307,7 +307,7 @@ void icmpv6_input(FAR struct net_driver_s *dev)
 
     default:
       {
-        nlldbg("Unknown ICMPv6 type: %d\n", icmp->type);
+        nllerr("Unknown ICMPv6 type: %d\n", icmp->type);
         goto icmpv6_type_error;
       }
     }

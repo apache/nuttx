@@ -108,7 +108,7 @@
 
 #ifdef CONFIG_DEBUG_TIMER
 #  define tcdbg                 dbg
-#  define tclldbg               lldbg
+#  define tcllerr               llerr
 #  ifdef CONFIG_DEBUG_INFO
 #    define tcinfo              info
 #    define tcllinfo            llinfo
@@ -118,7 +118,7 @@
 #  endif
 #else
 #  define tcdbg(x...)
-#  define tclldbg(x...)
+#  define tcllerr(x...)
 #  define tcinfo(x...)
 #  define tcllinfo(x...)
 #endif

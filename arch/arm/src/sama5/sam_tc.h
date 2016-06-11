@@ -88,12 +88,12 @@
 #ifdef CONFIG_SAMA5_TC_DEBUG
 #  define tcdbg    dbg
 #  define tcinfo   info
-#  define tclldbg  lldbg
+#  define tcllerr  llerr
 #  define tcllinfo llinfo
 #else
 #  define tcdbg(x...)
 #  define tcinfo(x...)
-#  define tclldbg(x...)
+#  define tcllerr(x...)
 #  define tcllinfo(x...)
 #endif
 

@@ -372,7 +372,7 @@ void os_start(void)
 #endif
   int i;
 
-  slldbg("Entry\n");
+  sllerr("Entry\n");
 
   /* Boot up is complete */
 

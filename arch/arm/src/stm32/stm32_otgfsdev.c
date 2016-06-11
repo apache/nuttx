@@ -813,7 +813,7 @@ static uint32_t stm32_getreg(uint32_t addr)
         {
           if (count == 4)
             {
-              lldbg("...\n");
+              llerr("...\n");
             }
 
           return val;
@@ -830,7 +830,7 @@ static uint32_t stm32_getreg(uint32_t addr)
         {
           /* Yes.. then show how many times the value repeated */
 
-          lldbg("[repeats %d more times]\n", count-3);
+          llerr("[repeats %d more times]\n", count-3);
         }
 
       /* Save the new address, value, and count */
@@ -842,7 +842,7 @@ static uint32_t stm32_getreg(uint32_t addr)
 
   /* Show the register value read */
 
-  lldbg("%08x->%08x\n", addr, val);
+  llerr("%08x->%08x\n", addr, val);
   return val;
 }
 #endif
@@ -860,7 +860,7 @@ static void stm32_putreg(uint32_t val, uint32_t addr)
 {
   /* Show the register value being written */
 
-  lldbg("%08x<-%08x\n", addr, val);
+  llerr("%08x<-%08x\n", addr, val);
 
   /* Write the value */
 
@@ -2625,7 +2625,7 @@ static inline void stm32_epout_interrupt(FAR struct stm32_usbdev_s *priv)
           if ((daint & 1) != 0)
             {
               regval = stm32_getreg(STM32_OTGFS_DOEPINT(epno));
-              ulldbg("DOEPINT(%d) = %08x\n", epno, regval);
+              ullerr("DOEPINT(%d) = %08x\n", epno, regval);
               stm32_putreg(0xFF, STM32_OTGFS_DOEPINT(epno));
             }
 
@@ -2855,7 +2855,7 @@ static inline void stm32_epin_interrupt(FAR struct stm32_usbdev_s *priv)
         {
           if ((daint & 1) != 0)
             {
-              ulldbg("DIEPINT(%d) = %08x\n",
+              ullerr("DIEPINT(%d) = %08x\n",
                      epno, stm32_getreg(STM32_OTGFS_DIEPINT(epno)));
               stm32_putreg(0xFF, STM32_OTGFS_DIEPINT(epno));
             }

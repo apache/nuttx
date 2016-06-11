@@ -64,9 +64,9 @@
 /* Debug ********************************************************************/
 
 #ifdef CONFIG_DEBUG_SPI
-#  define sspdbg  lldbg
+#  define sspdbg  llerr
 #  ifdef CONFIG_DEBUG_INFO
-#    define sspinfo lldbg
+#    define sspinfo llerr
 #  else
 #    define sspinfo(x...)
 #  endif

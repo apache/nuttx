@@ -64,10 +64,10 @@
  */
 
 #ifdef CONFIG_DEBUG_LEDS
-#  define leddbg  lldbg
+#  define leddbg  llerr
 #  ifdef CONFIG_DEBUG_INFO
 #    define LED_VERBOSE 1
-#    define ledinfo lldbg
+#    define ledinfo llerr
 #  else
 #    undef LED_VERBOSE
 #    define ledinfo(x...)

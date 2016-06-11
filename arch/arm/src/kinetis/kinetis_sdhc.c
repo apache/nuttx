@@ -973,7 +973,7 @@ static void kinetis_eventtimeout(int argc, uint32_t arg)
       /* Wake up any waiting threads */
 
       kinetis_endwait(priv, SDIOWAIT_TIMEOUT);
-      flldbg("Timeout: remaining: %d\n", priv->remaining);
+      fllerr("Timeout: remaining: %d\n", priv->remaining);
     }
 }
 
@@ -1162,7 +1162,7 @@ static int kinetis_interrupt(int irq, void *context)
         {
           /* Terminate the transfer with an error */
 
-          flldbg("ERROR: Data block CRC failure, remaining: %d\n", priv->remaining);
+          fllerr("ERROR: Data block CRC failure, remaining: %d\n", priv->remaining);
           kinetis_endtransfer(priv, SDIOWAIT_TRANSFERDONE | SDIOWAIT_ERROR);
         }
 
@@ -1172,7 +1172,7 @@ static int kinetis_interrupt(int irq, void *context)
         {
           /* Terminate the transfer with an error */
 
-          flldbg("ERROR: Data timeout, remaining: %d\n", priv->remaining);
+          fllerr("ERROR: Data timeout, remaining: %d\n", priv->remaining);
           kinetis_endtransfer(priv, SDIOWAIT_TRANSFERDONE | SDIOWAIT_TIMEOUT);
         }
     }

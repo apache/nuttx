@@ -69,7 +69,7 @@
  */
 
 #if defined(CONFIG_DEBUG_SYSCALL) || defined(CONFIG_DEBUG_SVCALL)
-# define svcdbg(format, ...) lldbg(format, ##__VA_ARGS__)
+# define svcdbg(format, ...) llerr(format, ##__VA_ARGS__)
 #else
 # define svcdbg(x...)
 #endif
@@ -471,7 +471,7 @@ int up_svcall(int irq, FAR void *context)
 
           regs[REG_R0] -= CONFIG_SYS_RESERVED;
 #else
-          slldbg("ERROR: Bad SYS call: %d\n", regs[REG_R0]);
+          sllerr("ERROR: Bad SYS call: %d\n", regs[REG_R0]);
 #endif
         }
         break;

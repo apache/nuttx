@@ -521,7 +521,7 @@ ssize_t pipecommon_write(FAR struct file *filep, FAR const char *buffer,
    * be called from interrupt level.  This actually happens fairly commonly
    * IF dbg() is called from interrupt handlers and stdout is being redirected
    * via a pipe.  In that case, the debug output will try to go out the pipe
-   * (interrupt handlers should use the lldbg() APIs).
+   * (interrupt handlers should use the llerr() APIs).
    *
    * On the other hand, it would be very valuable to be able to feed the pipe
    * from an interrupt handler!  TODO:  Consider disabling interrupts instead

@@ -65,9 +65,9 @@
 #undef SPI_VERBOSE /* Define to enable verbose debug */
 
 #ifdef SPI_DEBUG
-#  define spidbg  lldbg
+#  define spidbg  llerr
 #  ifdef SPI_VERBOSE
-#    define spiinfo lldbg
+#    define spiinfo llerr
 #  else
 #    define spiinfo(x...)
 #  endif
@@ -223,7 +223,7 @@ static void *unsoliced_thread_func(void *parameter)
                           sizeof(spiconf.rx_buffer), 0);
       if (nbytes > 0)
         {
-          nlldbg("%d Processed\n", nbytes);
+          nllerr("%d Processed\n", nbytes);
           spiconf.pfRxHandler(spiconf.rx_buffer.pbuffer);
         }
     }

@@ -1484,7 +1484,7 @@ static void enc_rxdispatch(FAR struct enc_driver_s *priv)
   else
 #endif
     {
-      nlldbg("Unsupported packet type dropped (%02x)\n", htons(BUF->type));
+      nllerr("Unsupported packet type dropped (%02x)\n", htons(BUF->type));
       NETDEV_RXDROPPED(&priv->dev);
     }
 }
@@ -1550,7 +1550,7 @@ static void enc_pktif(FAR struct enc_driver_s *priv)
 
   if ((rxstat & RXSTAT_OK) == 0)
     {
-      nlldbg("ERROR: RXSTAT: %04x\n", rxstat);
+      nllerr("ERROR: RXSTAT: %04x\n", rxstat);
       NETDEV_RXERRORS(&priv->dev);
     }
 
@@ -1558,7 +1558,7 @@ static void enc_pktif(FAR struct enc_driver_s *priv)
 
   else if (pktlen > (CONFIG_NET_ETH_MTU + 4) || pktlen <= (ETH_HDRLEN + 4))
     {
-      nlldbg("Bad packet size dropped (%d)\n", pktlen);
+      nllerr("Bad packet size dropped (%d)\n", pktlen);
       NETDEV_RXERRORS(&priv->dev);
     }
 
@@ -1878,7 +1878,7 @@ static void enc_toworker(FAR void *arg)
   net_lock_t lock;
   int ret;
 
-  nlldbg("Tx timeout\n");
+  nllerr("Tx timeout\n");
   DEBUGASSERT(priv);
 
   /* Get exclusive access to the network */
@@ -2067,7 +2067,7 @@ static int enc_ifup(struct net_driver_s *dev)
   FAR struct enc_driver_s *priv = (FAR struct enc_driver_s *)dev->d_private;
   int ret;
 
-  nlldbg("Bringing up: %d.%d.%d.%d\n",
+  nllerr("Bringing up: %d.%d.%d.%d\n",
          dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
         (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
 
@@ -2139,7 +2139,7 @@ static int enc_ifdown(struct net_driver_s *dev)
   irqstate_t flags;
   int ret;
 
-  nlldbg("Taking down: %d.%d.%d.%d\n",
+  nllerr("Taking down: %d.%d.%d.%d\n",
          dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
          (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
 
@@ -2473,7 +2473,7 @@ static int enc_reset(FAR struct enc_driver_s *priv)
 {
   uint8_t regval;
 
-  nlldbg("Reset\n");
+  nllerr("Reset\n");
 
   /* Configure SPI for the ENC28J60 */
 
@@ -2524,7 +2524,7 @@ static int enc_reset(FAR struct enc_driver_s *priv)
   regval = enc_rdbreg(priv, ENC_EREVID);
   if (regval == 0x00 || regval == 0xff)
     {
-      nlldbg("Bad Rev ID: %02x\n", regval);
+      nllerr("Bad Rev ID: %02x\n", regval);
       return -ENODEV;
     }
 

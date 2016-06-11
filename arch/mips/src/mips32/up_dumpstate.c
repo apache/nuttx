@@ -101,7 +101,7 @@ static void up_stackdump(uint32_t sp, uint32_t stack_base)
   for (stack = sp & ~0x1f; stack < stack_base; stack += 32)
     {
       uint32_t *ptr = (uint32_t *)stack;
-      lldbg("%08x: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+      llerr("%08x: %08x %08x %08x %08x %08x %08x %08x %08x\n",
              stack, ptr[0], ptr[1], ptr[2], ptr[3],
              ptr[4], ptr[5], ptr[6], ptr[7]);
     }
@@ -117,27 +117,27 @@ static inline void up_registerdump(void)
 
   if (g_current_regs)
     {
-      lldbg("MFLO:%08x MFHI:%08x EPC:%08x STATUS:%08x\n",
+      llerr("MFLO:%08x MFHI:%08x EPC:%08x STATUS:%08x\n",
             g_current_regs[REG_MFLO], g_current_regs[REG_MFHI], g_current_regs[REG_EPC],
             g_current_regs[REG_STATUS]);
-      lldbg("AT:%08x V0:%08x V1:%08x A0:%08x A1:%08x A2:%08x A3:%08x\n",
+      llerr("AT:%08x V0:%08x V1:%08x A0:%08x A1:%08x A2:%08x A3:%08x\n",
             g_current_regs[REG_AT], g_current_regs[REG_V0], g_current_regs[REG_V1],
             g_current_regs[REG_A0], g_current_regs[REG_A1], g_current_regs[REG_A2],
             g_current_regs[REG_A3]);
-      lldbg("T0:%08x T1:%08x T2:%08x T3:%08x T4:%08x T5:%08x T6:%08x T7:%08x\n",
+      llerr("T0:%08x T1:%08x T2:%08x T3:%08x T4:%08x T5:%08x T6:%08x T7:%08x\n",
             g_current_regs[REG_T0], g_current_regs[REG_T1], g_current_regs[REG_T2],
             g_current_regs[REG_T3], g_current_regs[REG_T4], g_current_regs[REG_T5],
             g_current_regs[REG_T6], g_current_regs[REG_T7]);
-      lldbg("S0:%08x S1:%08x S2:%08x S3:%08x S4:%08x S5:%08x S6:%08x S7:%08x\n",
+      llerr("S0:%08x S1:%08x S2:%08x S3:%08x S4:%08x S5:%08x S6:%08x S7:%08x\n",
             g_current_regs[REG_S0], g_current_regs[REG_S1], g_current_regs[REG_S2],
             g_current_regs[REG_S3], g_current_regs[REG_S4], g_current_regs[REG_S5],
             g_current_regs[REG_S6], g_current_regs[REG_S7]);
 #ifdef MIPS32_SAVE_GP
-      lldbg("T8:%08x T9:%08x GP:%08x SP:%08x FP:%08x RA:%08x\n",
+      llerr("T8:%08x T9:%08x GP:%08x SP:%08x FP:%08x RA:%08x\n",
             g_current_regs[REG_T8], g_current_regs[REG_T9], g_current_regs[REG_GP],
             g_current_regs[REG_SP], g_current_regs[REG_FP], g_current_regs[REG_RA]);
 #else
-      lldbg("T8:%08x T9:%08x SP:%08x FP:%08x RA:%08x\n",
+      llerr("T8:%08x T9:%08x SP:%08x FP:%08x RA:%08x\n",
             g_current_regs[REG_T8], g_current_regs[REG_T9], g_current_regs[REG_SP],
             g_current_regs[REG_FP], g_current_regs[REG_RA]);
 #endif
@@ -184,10 +184,10 @@ void up_dumpstate(void)
 
   /* Show interrupt stack info */
 
-  lldbg("sp:     %08x\n", sp);
-  lldbg("IRQ stack:\n");
-  lldbg("  base: %08x\n", istackbase);
-  lldbg("  size: %08x\n", istacksize);
+  llerr("sp:     %08x\n", sp);
+  llerr("IRQ stack:\n");
+  llerr("  base: %08x\n", istackbase);
+  llerr("  size: %08x\n", istacksize);
 
   /* Does the current stack pointer lie within the interrupt
    * stack?
@@ -204,18 +204,18 @@ void up_dumpstate(void)
        */
 
       sp = g_intstackbase;
-      lldbg("sp:     %08x\n", sp);
+      llerr("sp:     %08x\n", sp);
     }
 
   /* Show user stack info */
 
-  lldbg("User stack:\n");
-  lldbg("  base: %08x\n", ustackbase);
-  lldbg("  size: %08x\n", ustacksize);
+  llerr("User stack:\n");
+  llerr("  base: %08x\n", ustackbase);
+  llerr("  size: %08x\n", ustacksize);
 #else
-  lldbg("sp:         %08x\n", sp);
-  lldbg("stack base: %08x\n", ustackbase);
-  lldbg("stack size: %08x\n", ustacksize);
+  llerr("sp:         %08x\n", sp);
+  llerr("stack base: %08x\n", ustackbase);
+  llerr("stack size: %08x\n", ustacksize);
 #endif
 
   /* Dump the user stack if the stack pointer lies within the allocated user
@@ -225,7 +225,7 @@ void up_dumpstate(void)
   if (sp > ustackbase || sp <= ustackbase - ustacksize)
     {
 #if !defined(CONFIG_ARCH_INTERRUPTSTACK) || CONFIG_ARCH_INTERRUPTSTACK < 4
-      lldbg("ERROR: Stack pointer is not within allocated stack\n");
+      llerr("ERROR: Stack pointer is not within allocated stack\n");
 #endif
     }
   else

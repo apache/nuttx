@@ -209,7 +209,7 @@ static uint16_t netclose_interrupt(FAR struct net_driver_s *dev,
     {
       /* Yes.. Wake up the waiting thread and report the timeout */
 
-      nlldbg("CLOSE timeout\n");
+      nllerr("CLOSE timeout\n");
       pstate->cl_result = -ETIMEDOUT;
       goto end_wait;
     }

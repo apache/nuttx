@@ -498,7 +498,7 @@ static int ads7843e_schedule(FAR struct ads7843e_dev_s *priv)
   ret = work_queue(HPWORK, &priv->work, ads7843e_worker, priv, 0);
   if (ret != 0)
     {
-      illdbg("Failed to queue work: %d\n", ret);
+      illerr("Failed to queue work: %d\n", ret);
     }
 
   return OK;

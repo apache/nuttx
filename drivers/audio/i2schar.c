@@ -87,16 +87,16 @@
 
 #ifdef CONFIG_DEBUG_I2S
 #  define i2sdbg         dbg
-#  define i2slldbg       lldbg
+#  define i2sllerr       llerr
 #  ifdef CONFIG_DEBUG_INFO
 #    define i2sinfo      dbg
-#    define i2sllinfo    lldbg
+#    define i2sllinfo    llerr
 #  else
 #    define i2sinfo(x...)
 #  endif
 #else
 #  define i2sdbg(x...)
-#  define i2slldbg(x...)
+#  define i2sllerr(x...)
 #  define i2sinfo(x...)
 #  define i2sllinfo(x...)
 #endif

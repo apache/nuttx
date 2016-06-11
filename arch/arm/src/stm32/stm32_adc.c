@@ -2718,12 +2718,12 @@ static int adc_interrupt(FAR struct adc_dev_s *dev)
 
   if ((regval & ADC_ISR_AWD) != 0)
     {
-      alldbg("WARNING: Analog Watchdog, Value converted out of range!\n");
+      allerr("WARNING: Analog Watchdog, Value converted out of range!\n");
     }
 
   if ((regval & ADC_ISR_OVR) != 0)
     {
-      alldbg("WARNING: Overrun has occurred!\n");
+      allerr("WARNING: Overrun has occurred!\n");
     }
 
   /* EOC: End of conversion */

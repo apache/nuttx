@@ -813,7 +813,7 @@ static void lpc17_dmacallback(DMA_HANDLE handle, void *arg, int status)
 
   if (status < 0)
     {
-      flldbg("DMA error %d, remaining: %d\n", status, priv->remaining);
+      fllerr("DMA error %d, remaining: %d\n", status, priv->remaining);
       result = SDIOWAIT_ERROR;
     }
   else
@@ -1080,7 +1080,7 @@ static void lpc17_eventtimeout(int argc, uint32_t arg)
       /* Yes.. wake up any waiting threads */
 
       lpc17_endwait(priv, SDIOWAIT_TIMEOUT);
-      flldbg("Timeout: remaining: %d\n", priv->remaining);
+      fllerr("Timeout: remaining: %d\n", priv->remaining);
     }
 }
 
@@ -1297,7 +1297,7 @@ static int lpc17_interrupt(int irq, void *context)
             {
               /* Terminate the transfer with an error */
 
-              flldbg("ERROR: Data block CRC failure, remaining: %d\n", priv->remaining);
+              fllerr("ERROR: Data block CRC failure, remaining: %d\n", priv->remaining);
               lpc17_endtransfer(priv, SDIOWAIT_TRANSFERDONE | SDIOWAIT_ERROR);
             }
 
@@ -1307,7 +1307,7 @@ static int lpc17_interrupt(int irq, void *context)
             {
               /* Terminate the transfer with an error */
 
-              flldbg("ERROR: Data timeout, remaining: %d\n", priv->remaining);
+              fllerr("ERROR: Data timeout, remaining: %d\n", priv->remaining);
               lpc17_endtransfer(priv, SDIOWAIT_TRANSFERDONE | SDIOWAIT_TIMEOUT);
             }
 
@@ -1317,7 +1317,7 @@ static int lpc17_interrupt(int irq, void *context)
             {
               /* Terminate the transfer with an error */
 
-              flldbg("ERROR: RX FIFO overrun, remaining: %d\n", priv->remaining);
+              fllerr("ERROR: RX FIFO overrun, remaining: %d\n", priv->remaining);
               lpc17_endtransfer(priv, SDIOWAIT_TRANSFERDONE | SDIOWAIT_ERROR);
             }
 
@@ -1327,7 +1327,7 @@ static int lpc17_interrupt(int irq, void *context)
             {
               /* Terminate the transfer with an error */
 
-              flldbg("ERROR: TX FIFO underrun, remaining: %d\n", priv->remaining);
+              fllerr("ERROR: TX FIFO underrun, remaining: %d\n", priv->remaining);
               lpc17_endtransfer(priv, SDIOWAIT_TRANSFERDONE | SDIOWAIT_ERROR);
             }
 
@@ -1337,7 +1337,7 @@ static int lpc17_interrupt(int irq, void *context)
             {
               /* Terminate the transfer with an error */
 
-              flldbg("ERROR: Start bit, remaining: %d\n", priv->remaining);
+              fllerr("ERROR: Start bit, remaining: %d\n", priv->remaining);
               lpc17_endtransfer(priv, SDIOWAIT_TRANSFERDONE | SDIOWAIT_ERROR);
             }
         }

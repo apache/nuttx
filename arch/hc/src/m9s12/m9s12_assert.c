@@ -79,7 +79,7 @@
  * code.  We are going to print the task name if:
  *
  *  CONFIG_TASK_NAME_SIZE > 0 &&    <-- The task has a name
- *  (defined(CONFIG_DEBUG_FEATURES)    ||    <-- And the debug is enabled (lldbg used)
+ *  (defined(CONFIG_DEBUG_FEATURES)    ||    <-- And the debug is enabled (llerr used)
  *   defined(CONFIG_ARCH_STACKDUMP) <-- Or lowsyslog() is used
  */
 
@@ -108,7 +108,7 @@ static void up_stackdump(uint16_t sp, uint16_t stack_base)
   for (stack = sp; stack < stack_base; stack += 16)
     {
       uint8_t *ptr = (uint8_t*)stack;
-      lldbg("%04x: %02x %02x %02x %02x %02x %02x %02x %02x"
+      llerr("%04x: %02x %02x %02x %02x %02x %02x %02x %02x"
             "   %02x %02x %02x %02x %02x %02x %02x %02x\n",
              stack, ptr[0], ptr[1], ptr[2], ptr[3], ptr[4], ptr[5], ptr[6], ptr[7],
              ptr[8], ptr[9], ptr[10], ptr[11], ptr[12], ptr[13], ptr[14], ptr[15]);
@@ -129,11 +129,11 @@ static inline void up_registerdump(void)
 
   if (g_current_regs)
     {
-      lldbg("A:%02x B:%02x X:%02x%02x Y:%02x%02x PC:%02x%02x CCR:%02x\n",
+      llerr("A:%02x B:%02x X:%02x%02x Y:%02x%02x PC:%02x%02x CCR:%02x\n",
              g_current_regs[REG_A], g_current_regs[REG_B], g_current_regs[REG_XH],
              g_current_regs[REG_XL], g_current_regs[REG_YH], g_current_regs[REG_YL],
              g_current_regs[REG_PCH], g_current_regs[REG_PCL], g_current_regs[REG_CCR]);
-      lldbg("SP:%02x%02x FRAME:%02x%02x TMP:%02x%02x Z:%02x%02x XY:%02x\n",
+      llerr("SP:%02x%02x FRAME:%02x%02x TMP:%02x%02x Z:%02x%02x XY:%02x\n",
              g_current_regs[REG_SPH], g_current_regs[REG_SPL],
              g_current_regs[REG_FRAMEH], g_current_regs[REG_FRAMEL],
              g_current_regs[REG_TMPL], g_current_regs[REG_TMPH], g_current_regs[REG_ZL],
@@ -142,16 +142,16 @@ static inline void up_registerdump(void)
 #if CONFIG_HCS12_MSOFTREGS > 2
 #  error "Need to save more registers"
 #elif CONFIG_HCS12_MSOFTREGS == 2
-      lldbg("SOFTREGS: %02x%02x :%02x%02x\n",
+      llerr("SOFTREGS: %02x%02x :%02x%02x\n",
             g_current_regs[REG_SOFTREG1], g_current_regs[REG_SOFTREG1+1],
             g_current_regs[REG_SOFTREG2], g_current_regs[REG_SOFTREG2+1]);
 #elif CONFIG_HCS12_MSOFTREGS == 1
-      lldbg("SOFTREGS: %02x%02x\n", g_current_regs[REG_SOFTREG1],
+      llerr("SOFTREGS: %02x%02x\n", g_current_regs[REG_SOFTREG1],
             g_current_regs[REG_SOFTREG1+1]);
 #endif
 
 #ifndef CONFIG_HCS12_NONBANKED
-      lldbg("PPAGE: %02x\n", g_current_regs[REG_PPAGE],);
+      llerr("PPAGE: %02x\n", g_current_regs[REG_PPAGE],);
 #endif
     }
 }
@@ -221,10 +221,10 @@ static void up_dumpstate(void)
 
   /* Show interrupt stack info */
 
-  lldbg("sp:     %04x\n", sp);
-  lldbg("IRQ stack:\n");
-  lldbg("  base: %04x\n", istackbase);
-  lldbg("  size: %04x\n", istacksize);
+  llerr("sp:     %04x\n", sp);
+  llerr("IRQ stack:\n");
+  llerr("  base: %04x\n", istackbase);
+  llerr("  size: %04x\n", istacksize);
 
   /* Does the current stack pointer lie within the interrupt
    * stack?
@@ -241,18 +241,18 @@ static void up_dumpstate(void)
        */
 
       sp = g_intstackbase;
-      lldbg("sp:     %04x\n", sp);
+      llerr("sp:     %04x\n", sp);
     }
 
   /* Show user stack info */
 
-  lldbg("User stack:\n");
-  lldbg("  base: %04x\n", ustackbase);
-  lldbg("  size: %04x\n", ustacksize);
+  llerr("User stack:\n");
+  llerr("  base: %04x\n", ustackbase);
+  llerr("  size: %04x\n", ustacksize);
 #else
-  lldbg("sp:         %04x\n", sp);
-  lldbg("stack base: %04x\n", ustackbase);
-  lldbg("stack size: %04x\n", ustacksize);
+  llerr("sp:         %04x\n", sp);
+  llerr("stack base: %04x\n", ustackbase);
+  llerr("stack size: %04x\n", ustacksize);
 #endif
 
   /* Dump the user stack if the stack pointer lies within the allocated user
@@ -262,7 +262,7 @@ static void up_dumpstate(void)
   if (sp > ustackbase || sp <= ustackbase - ustacksize)
     {
 #if !defined(CONFIG_ARCH_INTERRUPTSTACK) || CONFIG_ARCH_INTERRUPTSTACK < 4
-      lldbg("ERROR: Stack pointer is not within allocated stack\n");
+      llerr("ERROR: Stack pointer is not within allocated stack\n");
 #endif
     }
   else
@@ -329,10 +329,10 @@ void up_assert(const uint8_t *filename, int lineno)
   board_autoled_on(LED_ASSERTION);
 
 #ifdef CONFIG_PRINT_TASKNAME
-  lldbg("Assertion failed at file:%s line: %d task: %s\n",
+  llerr("Assertion failed at file:%s line: %d task: %s\n",
         filename, lineno, rtcb->name);
 #else
-  lldbg("Assertion failed at file:%s line: %d\n",
+  llerr("Assertion failed at file:%s line: %d\n",
         filename, lineno);
 #endif
 

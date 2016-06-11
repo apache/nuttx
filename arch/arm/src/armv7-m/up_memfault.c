@@ -55,7 +55,7 @@
 #undef DEBUG_MEMFAULTS         /* Define to debug memory management faults */
 
 #ifdef DEBUG_MEMFAULTS
-# define mfdbg(format, ...) lldbg(format, ##__VA_ARGS__)
+# define mfdbg(format, ...) llerr(format, ##__VA_ARGS__)
 #else
 # define mfdbg(x...)
 #endif
@@ -92,9 +92,9 @@ int up_memfault(int irq, FAR void *context)
   /* Dump some memory management fault info */
 
   (void)up_irq_save();
-  lldbg("PANIC!!! Memory Management Fault:\n");
+  llerr("PANIC!!! Memory Management Fault:\n");
   mfdbg("  IRQ: %d context: %p\n", irq, regs);
-  lldbg("  CFAULTS: %08x MMFAR: %08x\n",
+  llerr("  CFAULTS: %08x MMFAR: %08x\n",
         getreg32(NVIC_CFAULTS), getreg32(NVIC_MEMMANAGE_ADDR));
   mfdbg("  BASEPRI: %08x PRIMASK: %08x IPSR: %08x CONTROL: %08x\n",
         getbasepri(), getprimask(), getipsr(), getcontrol());

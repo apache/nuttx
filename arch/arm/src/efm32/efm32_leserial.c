@@ -518,7 +518,7 @@ static int  efm32_interrupt(struct uart_dev_s *dev)
        * FERR - Framing Error Interrupt Enable
        */
 
-      lldbg("RX ERROR: %08x\n", intflags);
+      llerr("RX ERROR: %08x\n", intflags);
     }
 
   /* Check for transmit errors */
@@ -527,7 +527,7 @@ static int  efm32_interrupt(struct uart_dev_s *dev)
     {
       /* TXOF - TX Overflow Interrupt Enable */
 
-      lldbg("RX ERROR: %08x\n", intflags);
+      llerr("RX ERROR: %08x\n", intflags);
     }
 #endif
 

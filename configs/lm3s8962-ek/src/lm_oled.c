@@ -113,7 +113,7 @@ FAR struct lcd_dev_s *board_graphics_setup(unsigned int devno)
   spi = tiva_ssibus_initialize(0);
   if (!spi)
     {
-      glldbg("Failed to initialize SSI port 0\n");
+      gllerr("Failed to initialize SSI port 0\n");
     }
   else
     {
@@ -122,7 +122,7 @@ FAR struct lcd_dev_s *board_graphics_setup(unsigned int devno)
       dev = rit_initialize(spi, devno);
       if (!dev)
         {
-          glldbg("Failed to bind SSI port 0 to OLED %d: %d\n", devno);
+          gllerr("Failed to bind SSI port 0 to OLED %d: %d\n", devno);
         }
      else
         {

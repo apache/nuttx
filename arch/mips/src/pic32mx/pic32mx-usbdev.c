@@ -289,9 +289,9 @@
 #  undef CONFIG_PIC32MX_USBDEV_BDTDEBUG
 #  define CONFIG_PIC32MX_USBDEV_BDTDEBUG 1
 
-#  define regdbg lldbg
+#  define regdbg llerr
 #  ifdef CONFIG_DEBUG_INFO
-#    define reginfo lldbg
+#    define reginfo llerr
 #  else
 #    define reginfo(x...)
 #  endif
@@ -309,9 +309,9 @@
 
 #ifdef CONFIG_PIC32MX_USBDEV_BDTDEBUG
 
-#  define bdtdbg lldbg
+#  define bdtdbg llerr
 #  ifdef CONFIG_DEBUG_INFO
-#    define bdtinfo lldbg
+#    define bdtinfo llerr
 #  else
 #    define bdtinfo(x...)
 #  endif
@@ -637,7 +637,7 @@ static uint16_t pic32mx_getreg(uint32_t addr)
         {
            if (count == 4)
              {
-               lldbg("...\n");
+               llerr("...\n");
              }
           return val;
         }
@@ -653,7 +653,7 @@ static uint16_t pic32mx_getreg(uint32_t addr)
          {
            /* Yes.. then show how many times the value repeated */
 
-           lldbg("[repeats %d more times]\n", count-3);
+           llerr("[repeats %d more times]\n", count-3);
          }
 
        /* Save the new address, value, and count */
@@ -665,7 +665,7 @@ static uint16_t pic32mx_getreg(uint32_t addr)
 
   /* Show the register value read */
 
-  lldbg("%08x->%04x\n", addr, val);
+  llerr("%08x->%04x\n", addr, val);
   return val;
 }
 #endif
@@ -679,7 +679,7 @@ static void pic32mx_putreg(uint16_t val, uint32_t addr)
 {
   /* Show the register value being written */
 
-  lldbg("%08x<-%04x\n", addr, val);
+  llerr("%08x<-%04x\n", addr, val);
 
   /* Write the value */
 
@@ -2832,7 +2832,7 @@ static int pic32mx_interrupt(int irq, void *context)
   if ((usbir & USB_INT_UERR) != 0)
     {
       usbtrace(TRACE_INTDECODE(PIC32MX_TRACEINTID_UERR), usbir);
-      ulldbg("Error: EIR=%04x\n", pic32mx_getreg(PIC32MX_USB_EIR));
+      ullerr("Error: EIR=%04x\n", pic32mx_getreg(PIC32MX_USB_EIR));
 
       /* Clear all pending USB error interrupts */
 
@@ -3152,7 +3152,7 @@ static int pic32mx_epconfigure(struct usbdev_ep_s *ep,
   if (!ep || !desc)
     {
       usbtrace(TRACE_DEVERROR(PIC32MX_TRACEERR_INVALIDPARMS), 0);
-      ulldbg("ERROR: ep=%p desc=%p\n");
+      ullerr("ERROR: ep=%p desc=%p\n");
       return -EINVAL;
     }
 #endif
@@ -3279,7 +3279,7 @@ static int pic32mx_epdisable(struct usbdev_ep_s *ep)
   if (!ep)
     {
       usbtrace(TRACE_DEVERROR(PIC32MX_TRACEERR_INVALIDPARMS), 0);
-      ulldbg("ERROR: ep=%p\n", ep);
+      ullerr("ERROR: ep=%p\n", ep);
       return -EINVAL;
     }
 #endif
@@ -3376,7 +3376,7 @@ static int pic32mx_epsubmit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
   if (!req || !req->callback || !req->buf || !ep)
     {
       usbtrace(TRACE_DEVERROR(PIC32MX_TRACEERR_INVALIDPARMS), 0);
-      ulldbg("ERROR: req=%p callback=%p buf=%p ep=%p\n", req, req->callback, req->buf, ep);
+      ullerr("ERROR: req=%p callback=%p buf=%p ep=%p\n", req, req->callback, req->buf, ep);
       return -EINVAL;
     }
 #endif
@@ -3388,7 +3388,7 @@ static int pic32mx_epsubmit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
   if (!priv->driver)
     {
       usbtrace(TRACE_DEVERROR(PIC32MX_TRACEERR_NOTCONFIGURED), priv->usbdev.speed);
-      ulldbg("ERROR: driver=%p\n", priv->driver);
+      ullerr("ERROR: driver=%p\n", priv->driver);
       return -ESHUTDOWN;
     }
 #endif

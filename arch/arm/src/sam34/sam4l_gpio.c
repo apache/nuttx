@@ -539,21 +539,21 @@ int sam_dumpgpio(uint32_t pinset, const char *msg)
   /* The following requires exclusive access to the GPIO registers */
 
   flags = enter_critical_section();
-  lldbg("GPIO%c pinset: %08x base: %08x -- %s\n",
+  llerr("GPIO%c pinset: %08x base: %08x -- %s\n",
         g_portchar[port], pinset, base, msg);
-  lldbg("    GPER: %08x  PMR0: %08x  PMR1: %08x  PMR2: %08x\n",
+  llerr("    GPER: %08x  PMR0: %08x  PMR1: %08x  PMR2: %08x\n",
         getreg32(base + SAM_GPIO_GPER_OFFSET), getreg32(base + SAM_GPIO_PMR0_OFFSET),
         getreg32(base + SAM_GPIO_PMR1_OFFSET), getreg32(base + SAM_GPIO_PMR2_OFFSET));
-  lldbg("   ODER: %08x   OVR: %08x   PVR:  %08x  PUER: %08x\n",
+  llerr("   ODER: %08x   OVR: %08x   PVR:  %08x  PUER: %08x\n",
         getreg32(base + SAM_GPIO_ODER_OFFSET), getreg32(base + SAM_GPIO_OVR_OFFSET),
         getreg32(base + SAM_GPIO_PVR_OFFSET), getreg32(base + SAM_GPIO_PUER_OFFSET));
-  lldbg("   PDER: %08x    IER: %08x  IMR0: %08x  IMR1: %08x\n",
+  llerr("   PDER: %08x    IER: %08x  IMR0: %08x  IMR1: %08x\n",
         getreg32(base + SAM_GPIO_PDER_OFFSET), getreg32(base + SAM_GPIO_IER_OFFSET),
         getreg32(base + SAM_GPIO_IMR0_OFFSET), getreg32(base + SAM_GPIO_IMR1_OFFSET));
-  lldbg("   GFER: %08x    IFR: %08x ODCR0: %08x ODCR1: %08x\n",
+  llerr("   GFER: %08x    IFR: %08x ODCR0: %08x ODCR1: %08x\n",
         getreg32(base + SAM_GPIO_GFER_OFFSET), getreg32(base + SAM_GPIO_IFR_OFFSET),
         getreg32(base + SAM_GPIO_ODCR0_OFFSET), getreg32(base + SAM_GPIO_ODCR1_OFFSET));
-  lldbg("  OSRR0: %08x   EVER: %08x PARAM: %08x  VERS: %08x\n",
+  llerr("  OSRR0: %08x   EVER: %08x PARAM: %08x  VERS: %08x\n",
         getreg32(base + SAM_GPIO_OSRR0_OFFSET), getreg32(base + SAM_GPIO_EVER_OFFSET),
         getreg32(base + SAM_GPIO_PARAMETER_OFFSET), getreg32(base + SAM_GPIO_VERSION_OFFSET));
   leave_critical_section(flags);

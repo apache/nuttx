@@ -1722,13 +1722,13 @@ int dm9x_initialize(void)
 
   vid = (((uint16_t)getreg(DM9X_VIDH)) << 8) | (uint16_t)getreg(DM9X_VIDL);
   pid = (((uint16_t)getreg(DM9X_PIDH)) << 8) | (uint16_t)getreg(DM9X_PIDL);
-  nlldbg("I/O base: %08x VID: %04x PID: %04x\n", CONFIG_DM9X_BASE, vid, pid);
+  nllerr("I/O base: %08x VID: %04x PID: %04x\n", CONFIG_DM9X_BASE, vid, pid);
 
   /* Check if a DM90x0 chip is recognized at this I/O base */
 
   if (vid != DM9X_DAVICOMVID || (pid != DM9X_DM9000PID && pid != DM9X_DM9010PID))
     {
-      nlldbg("DM90x0 vendor/product ID not found at this base address\n");
+      nllerr("DM90x0 vendor/product ID not found at this base address\n");
       return -ENODEV;
     }
 
@@ -1738,7 +1738,7 @@ int dm9x_initialize(void)
     {
       /* We could not attach the ISR to the ISR */
 
-      nlldbg("irq_attach() failed\n");
+      nllerr("irq_attach() failed\n");
       return -EAGAIN;
     }
 
@@ -1767,7 +1767,7 @@ int dm9x_initialize(void)
       mptr[i] = getreg(j);
     }
 
-  nlldbg("MAC: %0x:%0x:%0x:%0x:%0x:%0x\n",
+  nllerr("MAC: %0x:%0x:%0x:%0x:%0x:%0x\n",
          mptr[0], mptr[1], mptr[2], mptr[3], mptr[4], mptr[5]);
 
   /* Register the device with the OS so that socket IOCTLs can be performed */

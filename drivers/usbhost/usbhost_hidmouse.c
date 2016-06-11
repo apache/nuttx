@@ -199,8 +199,8 @@
 #ifndef CONFIG_DEBUG_INPUT
 #  undef  idbg
 #  define idbg    udbg
-#  undef  illdbg
-#  define illdbg  ulldbg
+#  undef  illerr
+#  define illerr  ullerr
 #  undef  iinfo
 #  define iinfo   uinfo
 #  undef  illinfo
@@ -1613,7 +1613,7 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
 
   if ((found & USBHOST_ALLFOUND) != USBHOST_ALLFOUND)
     {
-      ulldbg("ERROR: Found IF:%s EPIN:%s\n",
+      ullerr("ERROR: Found IF:%s EPIN:%s\n",
              (found & USBHOST_IFFOUND) != 0  ? "YES" : "NO",
              (found & USBHOST_EPINFOUND) != 0 ? "YES" : "NO");
       return -EINVAL;

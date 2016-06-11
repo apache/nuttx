@@ -69,19 +69,19 @@
 
 #ifdef CONFIG_DEBUG_TIMER
 #  define efm32_timerdbg              dbg
-#  define efm32_timerlldbg            lldbg
+#  define efm32_timerllerr            llerr
 #  ifdef CONFIG_DEBUG_INFO
 #    define efm32_timerinfo           info
 #    define efm32_timerllinfo         llinfo
 #    define efm32_timer_dumpgpio(p,m) efm32_dumpgpio(p,m)
 #  else
-#    define efm32_timerlldbg(x...)
+#    define efm32_timerllerr(x...)
 #    define efm32_timerllinfo(x...)
 #    define efm32_timer_dumpgpio(p,m)
 #  endif
 #else
 #  define efm32_timerdbg(x...)
-#  define efm32_timerlldbg(x...)
+#  define efm32_timerllerr(x...)
 #  define efm32_timerinfo(x...)
 #  define efm32_timerllinfo(x...)
 #  define efm32_timer_dumpgpio(p,m)

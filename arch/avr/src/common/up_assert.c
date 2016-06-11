@@ -79,7 +79,7 @@
  * code.  We are going to print the task name if:
  *
  *  CONFIG_TASK_NAME_SIZE > 0 &&     <-- The task has a name
- *  (defined(CONFIG_DEBUG_FEATURES)    ||     <-- And the debug is enabled (lldbg used)
+ *  (defined(CONFIG_DEBUG_FEATURES)    ||     <-- And the debug is enabled (llerr used)
  *   defined(CONFIG_ARCH_STACKDUMP)) <-- Or lowsyslog() is used
  */
 
@@ -166,10 +166,10 @@ void up_assert(const uint8_t *filename, int lineno)
   board_autoled_on(LED_ASSERTION);
 
 #ifdef CONFIG_PRINT_TASKNAME
-  lldbg("Assertion failed at file:%s line: %d task: %s\n",
+  llerr("Assertion failed at file:%s line: %d task: %s\n",
         filename, lineno, rtcb->name);
 #else
-  lldbg("Assertion failed at file:%s line: %d\n",
+  llerr("Assertion failed at file:%s line: %d\n",
         filename, lineno);
 #endif
 

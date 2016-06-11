@@ -65,12 +65,12 @@
 #ifdef CONFIG_DEBUG_WATCHDOG
 #  define wddbg    dbg
 #  define wdinfo   info
-#  define wdlldbg  lldbg
+#  define wdllerr  llerr
 #  define wdllinfo llinfo
 #else
 #  define wddbg(x...)
 #  define wdinfo(x...)
-#  define wdlldbg(x...)
+#  define wdllerr(x...)
 #  define wdllinfo(x...)
 #endif
 

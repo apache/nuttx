@@ -81,7 +81,7 @@
  * code.  We are going to print the task name if:
  *
  *  CONFIG_TASK_NAME_SIZE > 0 &&    <-- The task has a name
- *  (defined(CONFIG_DEBUG_FEATURES)    ||    <-- And the debug is enabled (lldbg used)
+ *  (defined(CONFIG_DEBUG_FEATURES)    ||    <-- And the debug is enabled (llerr used)
  *   defined(CONFIG_ARCH_STACKDUMP) <-- Or lowsyslog() is used
  */
 
@@ -127,7 +127,7 @@ static void up_stackdump(uint32_t sp, uint32_t stack_base)
   for (stack = sp & ~0x1f; stack < stack_base; stack += 32)
     {
       uint32_t *ptr = (uint32_t *)stack;
-      lldbg("%08x: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+      llerr("%08x: %08x %08x %08x %08x %08x %08x %08x %08x\n",
              stack, ptr[0], ptr[1], ptr[2], ptr[3],
              ptr[4], ptr[5], ptr[6], ptr[7]);
     }
@@ -154,12 +154,12 @@ static inline void up_registerdump(void)
       for (regs = REG_R0; regs <= REG_R15; regs += 8)
         {
           uint32_t *ptr = (uint32_t *)&CURRENT_REGS[regs];
-          lldbg("R%d: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+          llerr("R%d: %08x %08x %08x %08x %08x %08x %08x %08x\n",
                  regs, ptr[0], ptr[1], ptr[2], ptr[3],
                  ptr[4], ptr[5], ptr[6], ptr[7]);
         }
 
-      lldbg("CPSR: %08x\n", CURRENT_REGS[REG_CPSR]);
+      llerr("CPSR: %08x\n", CURRENT_REGS[REG_CPSR]);
     }
 }
 #else
@@ -228,12 +228,12 @@ static void up_dumpstate(void)
 
   /* Show interrupt stack info */
 
-  lldbg("sp:     %08x\n", sp);
-  lldbg("IRQ stack:\n");
-  lldbg("  base: %08x\n", istackbase);
-  lldbg("  size: %08x\n", istacksize);
+  llerr("sp:     %08x\n", sp);
+  llerr("IRQ stack:\n");
+  llerr("  base: %08x\n", istackbase);
+  llerr("  size: %08x\n", istacksize);
 #ifdef CONFIG_STACK_COLORATION
-  lldbg("  used: %08x\n", up_check_intstack());
+  llerr("  used: %08x\n", up_check_intstack());
 #endif
 
   /* Does the current stack pointer lie within the interrupt
@@ -251,24 +251,24 @@ static void up_dumpstate(void)
        */
 
       sp = g_intstackbase;
-      lldbg("sp:     %08x\n", sp);
+      llerr("sp:     %08x\n", sp);
     }
 
   /* Show user stack info */
 
-  lldbg("User stack:\n");
-  lldbg("  base: %08x\n", ustackbase);
-  lldbg("  size: %08x\n", ustacksize);
+  llerr("User stack:\n");
+  llerr("  base: %08x\n", ustackbase);
+  llerr("  size: %08x\n", ustacksize);
 #ifdef CONFIG_STACK_COLORATION
-  lldbg("  used: %08x\n", up_check_tcbstack(rtcb));
+  llerr("  used: %08x\n", up_check_tcbstack(rtcb));
 #endif
 
 #else
-  lldbg("sp:         %08x\n", sp);
-  lldbg("stack base: %08x\n", ustackbase);
-  lldbg("stack size: %08x\n", ustacksize);
+  llerr("sp:         %08x\n", sp);
+  llerr("stack base: %08x\n", ustackbase);
+  llerr("stack size: %08x\n", ustacksize);
 #ifdef CONFIG_STACK_COLORATION
-  lldbg("stack used: %08x\n", up_check_tcbstack(rtcb));
+  llerr("stack used: %08x\n", up_check_tcbstack(rtcb));
 #endif
 #endif
 
@@ -279,7 +279,7 @@ static void up_dumpstate(void)
   if (sp > ustackbase || sp <= ustackbase - ustacksize)
     {
 #if !defined(CONFIG_ARCH_INTERRUPTSTACK) || CONFIG_ARCH_INTERRUPTSTACK < 4
-      lldbg("ERROR: Stack pointer is not within allocated stack\n");
+      llerr("ERROR: Stack pointer is not within allocated stack\n");
 #endif
     }
   else
@@ -346,10 +346,10 @@ void up_assert(const uint8_t *filename, int lineno)
   board_autoled_on(LED_ASSERTION);
 
 #ifdef CONFIG_PRINT_TASKNAME
-  lldbg("Assertion failed at file:%s line: %d task: %s\n",
+  llerr("Assertion failed at file:%s line: %d task: %s\n",
         filename, lineno, rtcb->name);
 #else
-  lldbg("Assertion failed at file:%s line: %d\n",
+  llerr("Assertion failed at file:%s line: %d\n",
         filename, lineno);
 #endif
 

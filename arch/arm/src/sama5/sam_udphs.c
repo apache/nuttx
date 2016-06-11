@@ -671,7 +671,7 @@ const struct trace_msg_t g_usb_trace_strings_intdecode[] =
 #ifdef CONFIG_SAMA5_UDPHS_REGDEBUG
 static void sam_printreg(uintptr_t regaddr, uint32_t regval, bool iswrite)
 {
-  lldbg("%p%s%08x\n", regaddr, iswrite ? "<-" : "->", regval);
+  llerr("%p%s%08x\n", regaddr, iswrite ? "<-" : "->", regval);
 }
 #endif
 
@@ -722,7 +722,7 @@ static void sam_checkreg(uintptr_t regaddr, uint32_t regval, bool iswrite)
             {
               /* No.. More than one. */
 
-              lldbg("[repeats %d more times]\n", count);
+              llerr("[repeats %d more times]\n", count);
             }
         }
 
@@ -802,31 +802,31 @@ static void sam_dumpep(struct sam_usbdev_s *priv, int epno)
 {
   /* Global Registers */
 
-  lldbg("Global Register:\n");
-  lldbg("  CTRL:    %04x\n", sam_getreg(SAM_UDPHS_CTRL));
-  lldbg("  FNUM:    %04x\n", sam_getreg(SAM_UDPHS_FNUM));
-  lldbg("  IEN:     %04x\n", sam_getreg(SAM_UDPHS_IEN));
-  lldbg("  INSTA:   %04x\n", sam_getreg(SAM_UDPHS_INTSTA));
-  lldbg("  TST:     %04x\n", sam_getreg(SAM_UDPHS_TST));
+  llerr("Global Register:\n");
+  llerr("  CTRL:    %04x\n", sam_getreg(SAM_UDPHS_CTRL));
+  llerr("  FNUM:    %04x\n", sam_getreg(SAM_UDPHS_FNUM));
+  llerr("  IEN:     %04x\n", sam_getreg(SAM_UDPHS_IEN));
+  llerr("  INSTA:   %04x\n", sam_getreg(SAM_UDPHS_INTSTA));
+  llerr("  TST:     %04x\n", sam_getreg(SAM_UDPHS_TST));
 
   /* Endpoint registers */
 
-  lldbg("Endpoint %d Register:\n", epno);
-  lldbg("  CFG:     %04x\n", sam_getreg(SAM_UDPHS_EPTCFG(epno)));
-  lldbg("  CTL:     %04x\n", sam_getreg(SAM_UDPHS_EPTCTL(epno)));
-  lldbg("  STA:     %04x\n", sam_getreg(SAM_UDPHS_EPTSTA(epno)));
+  llerr("Endpoint %d Register:\n", epno);
+  llerr("  CFG:     %04x\n", sam_getreg(SAM_UDPHS_EPTCFG(epno)));
+  llerr("  CTL:     %04x\n", sam_getreg(SAM_UDPHS_EPTCTL(epno)));
+  llerr("  STA:     %04x\n", sam_getreg(SAM_UDPHS_EPTSTA(epno)));
 
-  lldbg("DMA %d Register:\n", epno);
+  llerr("DMA %d Register:\n", epno);
   if ((SAM_EPSET_DMA & SAM_EP_BIT(epno)) != 0)
     {
-      lldbg("  NXTDSC:  %04x\n", sam_getreg(SAM_UDPHS_DMANXTDSC(epno)));
-      lldbg("  ADDRESS: %04x\n", sam_getreg(SAM_UDPHS_DMAADDRESS(epno)));
-      lldbg("  CONTROL: %04x\n", sam_getreg(SAM_UDPHS_DMACONTROL(epno)));
-      lldbg("  STATUS:  %04x\n", sam_getreg(SAM_UDPHS_DMASTATUS(epno)));
+      llerr("  NXTDSC:  %04x\n", sam_getreg(SAM_UDPHS_DMANXTDSC(epno)));
+      llerr("  ADDRESS: %04x\n", sam_getreg(SAM_UDPHS_DMAADDRESS(epno)));
+      llerr("  CONTROL: %04x\n", sam_getreg(SAM_UDPHS_DMACONTROL(epno)));
+      llerr("  STATUS:  %04x\n", sam_getreg(SAM_UDPHS_DMASTATUS(epno)));
     }
   else
     {
-      lldbg("  None\n");
+      llerr("  None\n");
     }
 }
 #endif
@@ -3440,7 +3440,7 @@ static int sam_ep_disable(struct usbdev_ep_s *ep)
   if (!ep)
     {
       usbtrace(TRACE_DEVERROR(SAM_TRACEERR_INVALIDPARMS), 0);
-      ulldbg("ERROR: ep=%p\n", ep);
+      ullerr("ERROR: ep=%p\n", ep);
       return -EINVAL;
     }
 #endif
@@ -3572,7 +3572,7 @@ static int sam_ep_submit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
   if (!req || !req->callback || !req->buf || !ep)
     {
       usbtrace(TRACE_DEVERROR(SAM_TRACEERR_INVALIDPARMS), 0);
-      ulldbg("ERROR: req=%p callback=%p buf=%p ep=%p\n", req, req->callback, req->buf, ep);
+      ullerr("ERROR: req=%p callback=%p buf=%p ep=%p\n", req, req->callback, req->buf, ep);
       return -EINVAL;
     }
 #endif
@@ -3584,7 +3584,7 @@ static int sam_ep_submit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
   if (!priv->driver)
     {
       usbtrace(TRACE_DEVERROR(SAM_TRACEERR_NOTCONFIGURED), priv->usbdev.speed);
-      ulldbg("ERROR: driver=%p\n", priv->driver);
+      ullerr("ERROR: driver=%p\n", priv->driver);
       return -ESHUTDOWN;
     }
 #endif
@@ -3611,7 +3611,7 @@ static int sam_ep_submit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
       if (privep->stalled)
         {
           sam_req_abort(privep, privreq, -EBUSY);
-          ulldbg("ERROR: stalled\n");
+          ullerr("ERROR: stalled\n");
           ret = -EPERM;
         }
       else

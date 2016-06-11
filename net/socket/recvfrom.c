@@ -1136,7 +1136,7 @@ static uint16_t recvfrom_udp_interrupt(FAR struct net_driver_s *dev,
         {
           /* Terminate the transfer with an error. */
 
-          nlldbg("ERROR: Network is down\n");
+          nllerr("ERROR: Network is down\n");
           recvfrom_udp_terminate(pstate, -ENETUNREACH);
         }
 

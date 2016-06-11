@@ -61,9 +61,9 @@
 #undef BUTTON_VERBOSE /* Define to enable verbose debug */
 
 #ifdef BUTTON_DEBUG
-#  define btndbg  lldbg
+#  define btndbg  llerr
 #  ifdef BUTTON_VERBOSE
-#    define btninfo lldbg
+#    define btninfo llerr
 #  else
 #    define btninfo(x...)
 #  endif

@@ -127,7 +127,7 @@ static uint16_t icmpv6_router_interrupt(FAR struct net_driver_s *dev,
 
       if ((flags & NETDEV_DOWN) != 0)
         {
-          nlldbg("ERROR: Interface is down\n");
+          nllerr("ERROR: Interface is down\n");
           icmpv6_router_terminate(state, -ENETUNREACH);
           return flags;
         }

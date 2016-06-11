@@ -209,12 +209,12 @@
 
 #ifdef CONFIG_SST26_DEBUG
 # define sstdbg(format, ...)    dbg(format, ##__VA_ARGS__)
-# define sstlldbg(format, ...)  lldbg(format, ##__VA_ARGS__)
+# define sstllerr(format, ...)  llerr(format, ##__VA_ARGS__)
 # define sstinfo(format, ...)   info(format, ##__VA_ARGS__)
 # define sstllinfo(format, ...) llinfo(format, ##__VA_ARGS__)
 #else
 # define sstdbg(x...)
-# define sstlldbg(x...)
+# define sstllerr(x...)
 # define sstinfo(x...)
 # define sstllinfo(x...)
 #endif
@@ -340,7 +340,7 @@ static inline int sst26_readid(struct sst26_dev_s *priv)
   SPI_SELECT(priv->dev, SPIDEV_FLASH, false);
   sst26_unlock(priv->dev);
 
-  lldbg("manufacturer: %02x memory: %02x capacity: %02x\n",
+  llerr("manufacturer: %02x memory: %02x capacity: %02x\n",
         manufacturer, memory, capacity);
 
   /* Check for a valid manufacturer and memory type */

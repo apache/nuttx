@@ -109,7 +109,7 @@ int tcp_backlogcreate(FAR struct tcp_conn_s *conn, int nblg)
       bls = (FAR struct tcp_backlog_s *)kmm_zalloc(size);
       if (!bls)
         {
-          nlldbg("Failed to allocate backlog\n");
+          nllerr("Failed to allocate backlog\n");
           return -ENOMEM;
         }
 
@@ -239,7 +239,7 @@ int tcp_backlogadd(FAR struct tcp_conn_s *conn, FAR struct tcp_conn_s *blconn)
       blc = (FAR struct tcp_blcontainer_s *)sq_remfirst(&bls->bl_free);
       if (!blc)
         {
-          nlldbg("Failed to allocate container\n");
+          nllerr("Failed to allocate container\n");
           ret = -ENOMEM;
         }
       else
@@ -390,7 +390,7 @@ int tcp_backlogdelete(FAR struct tcp_conn_s *conn,
             }
         }
 
-      nlldbg("Failed to find pending connection\n");
+      nllerr("Failed to find pending connection\n");
       return -EINVAL;
     }
 

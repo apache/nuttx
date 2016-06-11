@@ -163,13 +163,13 @@ int tiva_dumpgpio(uint32_t pinset, const char *msg)
   enabled  = ((rcgc2 & SYSCON_RCGC2_GPIO(port)) != 0);
 #endif
 
-  lldbg("GPIO%c pinset: %08x base: %08x -- %s\n",
+  llerr("GPIO%c pinset: %08x base: %08x -- %s\n",
         tiva_gpioport(port), pinset, base, msg);
 #ifdef TIVA_SYSCON_RCGCGPIO
-  lldbg("RCGCGPIO: %08x (%s)\n",
+  llerr("RCGCGPIO: %08x (%s)\n",
         rcgcgpio, enabled ? "enabled" : "disabled");
 #else
-  lldbg("   RCGC2: %08x (%s)\n",
+  llerr("   RCGC2: %08x (%s)\n",
         rcgc2, enabled ? "enabled" : "disabled");
 #endif
 
@@ -177,13 +177,13 @@ int tiva_dumpgpio(uint32_t pinset, const char *msg)
 
   if (enabled)
     {
-      lldbg("   AFSEL: %02x DEN: %02x DIR: %02x DATA: %02x\n",
+      llerr("   AFSEL: %02x DEN: %02x DIR: %02x DATA: %02x\n",
             getreg32(base + TIVA_GPIO_AFSEL_OFFSET), getreg32(base + TIVA_GPIO_DEN_OFFSET),
             getreg32(base + TIVA_GPIO_DIR_OFFSET), getreg32(base + TIVA_GPIO_DATA_OFFSET + 0x3fc));
-      lldbg("      IS:  %02x IBE: %02x IEV: %02x IM:  %02x RIS: %08x MIS: %08x\n",
+      llerr("      IS:  %02x IBE: %02x IEV: %02x IM:  %02x RIS: %08x MIS: %08x\n",
             getreg32(base + TIVA_GPIO_IEV_OFFSET), getreg32(base + TIVA_GPIO_IM_OFFSET),
             getreg32(base + TIVA_GPIO_RIS_OFFSET), getreg32(base + TIVA_GPIO_MIS_OFFSET));
-      lldbg("     2MA:  %02x 4MA: %02x 8MA: %02x ODR: %02x PUR %02x PDR: %02x SLR: %02x\n",
+      llerr("     2MA:  %02x 4MA: %02x 8MA: %02x ODR: %02x PUR %02x PDR: %02x SLR: %02x\n",
             getreg32(base + TIVA_GPIO_DR2R_OFFSET), getreg32(base + TIVA_GPIO_DR4R_OFFSET),
             getreg32(base + TIVA_GPIO_DR8R_OFFSET), getreg32(base + TIVA_GPIO_ODR_OFFSET),
             getreg32(base + TIVA_GPIO_PUR_OFFSET), getreg32(base + TIVA_GPIO_PDR_OFFSET),

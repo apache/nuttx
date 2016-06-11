@@ -214,7 +214,7 @@ FAR struct lcd_dev_s *board_graphics_setup(unsigned int devno)
   spi = lpc17_sspbus_initialize(0);
   if (!spi)
     {
-      glldbg("Failed to initialize SSP port 0\n");
+      gllerr("Failed to initialize SSP port 0\n");
     }
   else
     {
@@ -223,7 +223,7 @@ FAR struct lcd_dev_s *board_graphics_setup(unsigned int devno)
       dev = nokia_lcdinitialize(spi, devno);
       if (!dev)
         {
-          glldbg("Failed to bind SSP port 0 to LCD %d: %d\n", devno);
+          gllerr("Failed to bind SSP port 0 to LCD %d: %d\n", devno);
         }
      else
         {

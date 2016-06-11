@@ -447,7 +447,7 @@ static void telnet_sendopt(FAR struct telnet_dev_s *priv, uint8_t option,
   telnet_dumpbuffer("Send optbuf", optbuf, 4);
   if (psock_send(&priv->td_psock, optbuf, 4, 0) < 0)
     {
-      nlldbg("Failed to send TELNET_IAC\n");
+      nllerr("Failed to send TELNET_IAC\n");
     }
 }
 
@@ -548,7 +548,7 @@ static int telnet_close(FAR struct file *filep)
       ret = asprintf(&devpath, TELNETD_DEVFMT, priv->td_minor);
       if (ret < 0)
         {
-          nlldbg("ERROR: Failed to allocate the driver path\n");
+          nllerr("ERROR: Failed to allocate the driver path\n");
         }
       else
         {
@@ -566,7 +566,7 @@ static int telnet_close(FAR struct file *filep)
 
               if (ret != -EBUSY)
                 {
-                  nlldbg("Failed to unregister the driver %s: %d\n",
+                  nllerr("Failed to unregister the driver %s: %d\n",
                          devpath, ret);
                 }
             }
@@ -706,7 +706,7 @@ static ssize_t telnet_write(FAR struct file *filep, FAR const char *buffer, size
           ret = psock_send(&priv->td_psock, priv->td_txbuffer, ncopied, 0);
           if (ret < 0)
             {
-              nlldbg("psock_send failed '%s': %d\n", priv->td_txbuffer, ret);
+              nllerr("psock_send failed '%s': %d\n", priv->td_txbuffer, ret);
               return ret;
             }
 
@@ -723,7 +723,7 @@ static ssize_t telnet_write(FAR struct file *filep, FAR const char *buffer, size
       ret = psock_send(&priv->td_psock, priv->td_txbuffer, ncopied, 0);
       if (ret < 0)
         {
-          nlldbg("psock_send failed '%s': %d\n", priv->td_txbuffer, ret);
+          nllerr("psock_send failed '%s': %d\n", priv->td_txbuffer, ret);
           return ret;
         }
     }
@@ -767,7 +767,7 @@ static int telnet_session(FAR struct telnet_session_s *session)
   priv = (FAR struct telnet_dev_s*)malloc(sizeof(struct telnet_dev_s));
   if (!priv)
     {
-      nlldbg("Failed to allocate the driver data structure\n");
+      nllerr("Failed to allocate the driver data structure\n");
       return -ENOMEM;
     }
 
@@ -788,7 +788,7 @@ static int telnet_session(FAR struct telnet_session_s *session)
   psock = sockfd_socket(session->ts_sd);
   if (!psock)
     {
-      nlldbg("Failed to convert sd=%d to a socket structure\n", session->ts_sd);
+      nllerr("Failed to convert sd=%d to a socket structure\n", session->ts_sd);
       ret = -EINVAL;
       goto errout_with_dev;
     }
@@ -796,7 +796,7 @@ static int telnet_session(FAR struct telnet_session_s *session)
   ret = net_clone(psock, &priv->td_psock);
   if (ret < 0)
     {
-      nlldbg("net_clone failed: %d\n", ret);
+      nllerr("net_clone failed: %d\n", ret);
       goto errout_with_dev;
     }
 
@@ -834,7 +834,7 @@ static int telnet_session(FAR struct telnet_session_s *session)
 
   if (ret >= 0)
     {
-      nlldbg("ERROR: Too many sessions\n");
+      nllerr("ERROR: Too many sessions\n");
       ret = -ENFILE;
       goto errout_with_semaphore;
     }
@@ -844,7 +844,7 @@ static int telnet_session(FAR struct telnet_session_s *session)
   ret = register_driver(session->ts_devpath, &g_telnet_fops, 0666, priv);
   if (ret < 0)
     {
-      nlldbg("ERROR: Failed to register the driver %s: %d\n",
+      nllerr("ERROR: Failed to register the driver %s: %d\n",
              session->ts_devpath, ret);
       goto errout_with_semaphore;
     }

@@ -101,12 +101,12 @@
 #ifdef CONFIG_DEBUG_I2C
 #  define i2cdbg    dbg
 #  define i2cinfo   info
-#  define i2clldbg  lldbg
+#  define i2cllerr  llerr
 #  define i2cllinfo llinfo
 #else
 #  define i2cdbg(x...)
 #  define i2cinfo(x...)
-#  define i2clldbg(x...)
+#  define i2cllerr(x...)
 #  define i2cllinfo(x...)
 #endif
 
@@ -288,7 +288,7 @@ static bool twi_checkreg(struct twi_dev_s *priv, bool wr, uint32_t value,
         {
           /* Yes... show how many times we did it */
 
-          lldbg("...[Repeats %d times]...\n", priv->ntimes);
+          llerr("...[Repeats %d times]...\n", priv->ntimes);
         }
 
       /* Save information about the new access */
@@ -320,7 +320,7 @@ static uint32_t twi_getabs(struct twi_dev_s *priv, uintptr_t address)
 
   if (twi_checkreg(priv, false, value, address))
     {
-      lldbg("%08x->%08x\n", address, value);
+      llerr("%08x->%08x\n", address, value);
     }
 
   return value;
@@ -341,7 +341,7 @@ static void twi_putabs(struct twi_dev_s *priv, uintptr_t address,
 {
   if (twi_checkreg(priv, true, value, address))
     {
-      lldbg("%08x<-%08x\n", address, value);
+      llerr("%08x<-%08x\n", address, value);
     }
 
   putreg32(value, address);
@@ -401,9 +401,9 @@ static int twi_wait(struct twi_dev_s *priv)
 
   do
     {
-      i2clldbg("TWI%d Waiting...\n", priv->twi);
+      i2cllerr("TWI%d Waiting...\n", priv->twi);
       twi_takesem(&priv->waitsem);
-      i2clldbg("TWI%d Awakened with result: %d\n", priv->twi, priv->result);
+      i2cllerr("TWI%d Awakened with result: %d\n", priv->twi, priv->result);
     }
   while (priv->result == -EBUSY);
 
@@ -470,7 +470,7 @@ static int twi_interrupt(struct twi_dev_s *priv)
     {
       /* Wake up the thread with an I/O error indication */
 
-      i2clldbg("ERROR: TWI%d pending: %08x\n", priv->twi, pending);
+      i2cllerr("ERROR: TWI%d pending: %08x\n", priv->twi, pending);
       twi_wakeup(priv, -EIO);
     }
 
@@ -593,7 +593,7 @@ static void twi_timeout(int argc, uint32_t arg, ...)
 {
   struct twi_dev_s *priv = (struct twi_dev_s *)arg;
 
-  i2clldbg("TWI%d Timeout!\n", priv->twi);
+  i2cllerr("TWI%d Timeout!\n", priv->twi);
   twi_wakeup(priv, -ETIMEDOUT);
 }
 

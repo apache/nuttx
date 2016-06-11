@@ -87,12 +87,12 @@
 #ifdef CONFIG_DEBUG_CAN
 #  define candbg    dbg
 #  define caninfo   info
-#  define canlldbg  lldbg
+#  define canllerr  llerr
 #  define canllinfo llinfo
 #else
 #  define candbg(x...)
 #  define caninfo(x...)
-#  define canlldbg(x...)
+#  define canllerr(x...)
 #  define canllinfo(x...)
 #endif
 
@@ -270,7 +270,7 @@ static uint32_t can_vgetreg(uint32_t addr)
         {
           if (count == 4)
             {
-              lldbg("...\n");
+              llerr("...\n");
             }
 
           return val;
@@ -287,7 +287,7 @@ static uint32_t can_vgetreg(uint32_t addr)
         {
           /* Yes.. then show how many times the value repeated */
 
-          lldbg("[repeats %d more times]\n", count-3);
+          llerr("[repeats %d more times]\n", count-3);
         }
 
       /* Save the new address, value, and count */
@@ -299,7 +299,7 @@ static uint32_t can_vgetreg(uint32_t addr)
 
   /* Show the register value read */
 
-  lldbg("%08x->%08x\n", addr, val);
+  llerr("%08x->%08x\n", addr, val);
   return val;
 }
 
@@ -349,7 +349,7 @@ static void can_vputreg(uint32_t addr, uint32_t value)
 
   /* Show the register value being written */
 
-  lldbg("%08x<-%08x\n", addr, value);
+  llerr("%08x<-%08x\n", addr, value);
 
   /* Write the value */
 
@@ -402,25 +402,25 @@ static void can_dumpctrlregs(FAR struct stm32_can_s *priv,
 {
   if (msg)
     {
-      canlldbg("Control Registers: %s\n", msg);
+      canllerr("Control Registers: %s\n", msg);
     }
   else
     {
-      canlldbg("Control Registers:\n");
+      canllerr("Control Registers:\n");
     }
 
   /* CAN control and status registers */
 
-  lldbg("  MCR: %08x   MSR: %08x   TSR: %08x\n",
+  llerr("  MCR: %08x   MSR: %08x   TSR: %08x\n",
         getreg32(priv->base + STM32_CAN_MCR_OFFSET),
         getreg32(priv->base + STM32_CAN_MSR_OFFSET),
         getreg32(priv->base + STM32_CAN_TSR_OFFSET));
 
-  lldbg(" RF0R: %08x  RF1R: %08x\n",
+  llerr(" RF0R: %08x  RF1R: %08x\n",
         getreg32(priv->base + STM32_CAN_RF0R_OFFSET),
         getreg32(priv->base + STM32_CAN_RF1R_OFFSET));
 
-  lldbg("  IER: %08x   ESR: %08x   BTR: %08x\n",
+  llerr("  IER: %08x   ESR: %08x   BTR: %08x\n",
         getreg32(priv->base + STM32_CAN_IER_OFFSET),
         getreg32(priv->base + STM32_CAN_ESR_OFFSET),
         getreg32(priv->base + STM32_CAN_BTR_OFFSET));
@@ -447,40 +447,40 @@ static void can_dumpmbregs(FAR struct stm32_can_s *priv,
 {
   if (msg)
     {
-      canlldbg("Mailbox Registers: %s\n", msg);
+      canllerr("Mailbox Registers: %s\n", msg);
     }
   else
     {
-      canlldbg("Mailbox Registers:\n");
+      canllerr("Mailbox Registers:\n");
     }
 
   /* CAN mailbox registers (3 TX and 2 RX) */
 
-  lldbg(" TI0R: %08x TDT0R: %08x TDL0R: %08x TDH0R: %08x\n",
+  llerr(" TI0R: %08x TDT0R: %08x TDL0R: %08x TDH0R: %08x\n",
         getreg32(priv->base + STM32_CAN_TI0R_OFFSET),
         getreg32(priv->base + STM32_CAN_TDT0R_OFFSET),
         getreg32(priv->base + STM32_CAN_TDL0R_OFFSET),
         getreg32(priv->base + STM32_CAN_TDH0R_OFFSET));
 
-  lldbg(" TI1R: %08x TDT1R: %08x TDL1R: %08x TDH1R: %08x\n",
+  llerr(" TI1R: %08x TDT1R: %08x TDL1R: %08x TDH1R: %08x\n",
         getreg32(priv->base + STM32_CAN_TI1R_OFFSET),
         getreg32(priv->base + STM32_CAN_TDT1R_OFFSET),
         getreg32(priv->base + STM32_CAN_TDL1R_OFFSET),
         getreg32(priv->base + STM32_CAN_TDH1R_OFFSET));
 
-  lldbg(" TI2R: %08x TDT2R: %08x TDL2R: %08x TDH2R: %08x\n",
+  llerr(" TI2R: %08x TDT2R: %08x TDL2R: %08x TDH2R: %08x\n",
         getreg32(priv->base + STM32_CAN_TI2R_OFFSET),
         getreg32(priv->base + STM32_CAN_TDT2R_OFFSET),
         getreg32(priv->base + STM32_CAN_TDL2R_OFFSET),
         getreg32(priv->base + STM32_CAN_TDH2R_OFFSET));
 
-  lldbg(" RI0R: %08x RDT0R: %08x RDL0R: %08x RDH0R: %08x\n",
+  llerr(" RI0R: %08x RDT0R: %08x RDL0R: %08x RDH0R: %08x\n",
         getreg32(priv->base + STM32_CAN_RI0R_OFFSET),
         getreg32(priv->base + STM32_CAN_RDT0R_OFFSET),
         getreg32(priv->base + STM32_CAN_RDL0R_OFFSET),
         getreg32(priv->base + STM32_CAN_RDH0R_OFFSET));
 
-  lldbg(" RI1R: %08x RDT1R: %08x RDL1R: %08x RDH1R: %08x\n",
+  llerr(" RI1R: %08x RDT1R: %08x RDL1R: %08x RDH1R: %08x\n",
         getreg32(priv->base + STM32_CAN_RI1R_OFFSET),
         getreg32(priv->base + STM32_CAN_RDT1R_OFFSET),
         getreg32(priv->base + STM32_CAN_RDL1R_OFFSET),
@@ -510,14 +510,14 @@ static void can_dumpfiltregs(FAR struct stm32_can_s *priv,
 
   if (msg)
     {
-      canlldbg("Filter Registers: %s\n", msg);
+      canllerr("Filter Registers: %s\n", msg);
     }
   else
     {
-      canlldbg("Filter Registers:\n");
+      canllerr("Filter Registers:\n");
     }
 
-  lldbg(" FMR: %08x   FM1R: %08x  FS1R: %08x FFA1R: %08x  FA1R: %08x\n",
+  llerr(" FMR: %08x   FM1R: %08x  FS1R: %08x FFA1R: %08x  FA1R: %08x\n",
         getreg32(priv->base + STM32_CAN_FMR_OFFSET),
         getreg32(priv->base + STM32_CAN_FM1R_OFFSET),
         getreg32(priv->base + STM32_CAN_FS1R_OFFSET),
@@ -526,7 +526,7 @@ static void can_dumpfiltregs(FAR struct stm32_can_s *priv,
 
   for (i = 0; i < CAN_NFILTERS; i++)
     {
-      lldbg(" F%dR1: %08x F%dR2: %08x\n",
+      llerr(" F%dR1: %08x F%dR2: %08x\n",
             i, getreg32(priv->base + STM32_CAN_FIR_OFFSET(i, 1)),
             i, getreg32(priv->base + STM32_CAN_FIR_OFFSET(i, 2)));
     }
@@ -574,7 +574,7 @@ static void can_reset(FAR struct can_dev_s *dev)
   else
 #endif
     {
-      canlldbg("Unsupported port %d\n", priv->port);
+      canllerr("Unsupported port %d\n", priv->port);
       return;
     }
 
@@ -625,7 +625,7 @@ static int can_setup(FAR struct can_dev_s *dev)
   ret = can_cellinit(priv);
   if (ret < 0)
     {
-      canlldbg("CAN%d cell initialization failed: %d\n", priv->port, ret);
+      canllerr("CAN%d cell initialization failed: %d\n", priv->port, ret);
       return ret;
     }
 
@@ -637,7 +637,7 @@ static int can_setup(FAR struct can_dev_s *dev)
   ret = can_filterinit(priv);
   if (ret < 0)
     {
-      canlldbg("CAN%d filter initialization failed: %d\n", priv->port, ret);
+      canllerr("CAN%d filter initialization failed: %d\n", priv->port, ret);
       return ret;
     }
   can_dumpfiltregs(priv, "After filter initialization");
@@ -649,7 +649,7 @@ static int can_setup(FAR struct can_dev_s *dev)
   ret = irq_attach(priv->canrx[0], can_rx0interrupt);
   if (ret < 0)
     {
-      canlldbg("Failed to attach CAN%d RX0 IRQ (%d)",
+      canllerr("Failed to attach CAN%d RX0 IRQ (%d)",
                priv->port, priv->canrx[0]);
       return ret;
     }
@@ -657,7 +657,7 @@ static int can_setup(FAR struct can_dev_s *dev)
   ret = irq_attach(priv->canrx[1], can_rx1interrupt);
   if (ret < 0)
     {
-      canlldbg("Failed to attach CAN%d RX1 IRQ (%d)",
+      canllerr("Failed to attach CAN%d RX1 IRQ (%d)",
                priv->port, priv->canrx[1]);
       return ret;
     }
@@ -665,7 +665,7 @@ static int can_setup(FAR struct can_dev_s *dev)
   ret = irq_attach(priv->cantx, can_txinterrupt);
   if (ret < 0)
     {
-      canlldbg("Failed to attach CAN%d TX IRQ (%d)",
+      canllerr("Failed to attach CAN%d TX IRQ (%d)",
                priv->port, priv->cantx);
       return ret;
     }
@@ -878,7 +878,7 @@ static int can_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
     }
   else
     {
-      canlldbg("ERROR: No available mailbox\n");
+      canllerr("ERROR: No available mailbox\n");
       return -EBUSY;
     }
 
@@ -1099,7 +1099,7 @@ static int can_rxinterrupt(int irq, FAR void *context, int rxmb)
   npending = (regval & CAN_RFR_FMP_MASK) >> CAN_RFR_FMP_SHIFT;
   if (npending < 1)
     {
-      canlldbg("WARNING: No messages pending\n");
+      canllerr("WARNING: No messages pending\n");
       return OK;
     }
 
@@ -1130,7 +1130,7 @@ static int can_rxinterrupt(int irq, FAR void *context, int rxmb)
 #else
   if ((regval & CAN_RIR_IDE) != 0)
     {
-      canlldbg("ERROR: Received message with extended identifier.  Dropped\n");
+      canllerr("ERROR: Received message with extended identifier.  Dropped\n");
       ret = -ENOSYS;
       goto errout;
     }
@@ -1520,7 +1520,7 @@ static int can_cellinit(FAR struct stm32_can_s *priv)
 
   if (timeout < 1)
     {
-      canlldbg("ERROR: Timed out waiting to enter initialization mode\n");
+      canllerr("ERROR: Timed out waiting to enter initialization mode\n");
       return -ETIMEDOUT;
     }
 
@@ -1544,7 +1544,7 @@ static int can_cellinit(FAR struct stm32_can_s *priv)
   ret = can_bittiming(priv);
   if (ret < 0)
     {
-      canlldbg("ERROR: Failed to set bit timing: %d\n", ret);
+      canllerr("ERROR: Failed to set bit timing: %d\n", ret);
       return ret;
     }
 
@@ -1571,7 +1571,7 @@ static int can_cellinit(FAR struct stm32_can_s *priv)
 
   if (timeout < 1)
     {
-      canlldbg("ERROR: Timed out waiting to exit initialization mode: %08x\n",
+      canllerr("ERROR: Timed out waiting to exit initialization mode: %08x\n",
                regval);
       return -ETIMEDOUT;
     }

@@ -869,40 +869,40 @@ int sam_dumppio(uint32_t pinset, const char *msg)
   /* The following requires exclusive access to the PIO registers */
 
   flags = enter_critical_section();
-  lldbg("PIO%c pinset: %08x base: %08x -- %s\n",
+  llerr("PIO%c pinset: %08x base: %08x -- %s\n",
         g_portchar[port], pinset, base, msg);
 
 #ifdef SAM_PIO_ISLR_OFFSET
-  lldbg("    PSR: %08x   ISLR: %08x    OSR: %08x   IFSR: %08x\n",
+  llerr("    PSR: %08x   ISLR: %08x    OSR: %08x   IFSR: %08x\n",
         getreg32(base + SAM_PIO_PSR_OFFSET), getreg32(base + SAM_PIO_ISLR_OFFSET),
         getreg32(base + SAM_PIO_OSR_OFFSET), getreg32(base + SAM_PIO_IFSR_OFFSET));
 #else
-  lldbg("    PSR: %08x    OSR: %08x   IFSR: %08x\n",
+  llerr("    PSR: %08x    OSR: %08x   IFSR: %08x\n",
         getreg32(base + SAM_PIO_PSR_OFFSET), getreg32(base + SAM_PIO_OSR_OFFSET),
         getreg32(base + SAM_PIO_IFSR_OFFSET));
 #endif
-  lldbg("   ODSR: %08x   PDSR: %08x    IMR: %08x    ISR: %08x\n",
+  llerr("   ODSR: %08x   PDSR: %08x    IMR: %08x    ISR: %08x\n",
         getreg32(base + SAM_PIO_ODSR_OFFSET), getreg32(base + SAM_PIO_PDSR_OFFSET),
         getreg32(base + SAM_PIO_IMR_OFFSET), getreg32(base + SAM_PIO_ISR_OFFSET));
-  lldbg("   MDSR: %08x   PUSR: %08x ABDCSR: %08x %08x\n",
+  llerr("   MDSR: %08x   PUSR: %08x ABDCSR: %08x %08x\n",
         getreg32(base + SAM_PIO_MDSR_OFFSET), getreg32(base + SAM_PIO_PUSR_OFFSET),
         getreg32(base + SAM_PIO_ABCDSR1_OFFSET), getreg32(base + SAM_PIO_ABCDSR2_OFFSET));
-  lldbg(" IFSCSR: %08x   SCDR: %08x  PPDSR: %08x   OWSR: %08x\n",
+  llerr(" IFSCSR: %08x   SCDR: %08x  PPDSR: %08x   OWSR: %08x\n",
         getreg32(base + SAM_PIO_IFSCSR_OFFSET), getreg32(base + SAM_PIO_SCDR_OFFSET),
         getreg32(base + SAM_PIO_PPDSR_OFFSET), getreg32(base + SAM_PIO_OWSR_OFFSET));
 #ifdef SAM_PIO_LOCKSR_OFFSET
-  lldbg("  AIMMR: %08x   ELSR: %08x FRLHSR: %08x LOCKSR: %08x\n",
+  llerr("  AIMMR: %08x   ELSR: %08x FRLHSR: %08x LOCKSR: %08x\n",
         getreg32(base + SAM_PIO_AIMMR_OFFSET), getreg32(base + SAM_PIO_ELSR_OFFSET),
         getreg32(base + SAM_PIO_FRLHSR_OFFSET), getreg32(base + SAM_PIO_LOCKSR_OFFSET));
 #else
-  lldbg("  AIMMR: %08x   ELSR: %08x FRLHSR: %08x\n",
+  llerr("  AIMMR: %08x   ELSR: %08x FRLHSR: %08x\n",
         getreg32(base + SAM_PIO_AIMMR_OFFSET), getreg32(base + SAM_PIO_ELSR_OFFSET),
         getreg32(base + SAM_PIO_FRLHSR_OFFSET));
 #endif
-  lldbg("SCHMITT: %08x DRIVER: %08x %08x\n",
+  llerr("SCHMITT: %08x DRIVER: %08x %08x\n",
         getreg32(base + SAM_PIO_SCHMITT_OFFSET), getreg32(base + SAM_PIO_DRIVER1_OFFSET),
         getreg32(base + SAM_PIO_DRIVER2_OFFSET));
-  lldbg("   WPMR: %08x   WPSR: %08x\n",
+  llerr("   WPMR: %08x   WPSR: %08x\n",
         getreg32(base + SAM_PIO_WPMR_OFFSET), getreg32(base + SAM_PIO_WPSR_OFFSET));
 
   leave_critical_section(flags);

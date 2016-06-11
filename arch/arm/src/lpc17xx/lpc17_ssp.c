@@ -81,9 +81,9 @@
  */
 
 #ifdef CONFIG_DEBUG_SPI
-#  define sspdbg  lldbg
+#  define sspdbg  llerr
 #  ifdef CONFIG_DEBUG_INFO
-#    define spiinfo lldbg
+#    define spiinfo llerr
 #  else
 #    define spiinfo(x...)
 #  endif

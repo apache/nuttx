@@ -64,9 +64,9 @@
 #undef SSP_VERBOSE /* Define to enable verbose debug */
 
 #ifdef SSP_DEBUG
-#  define sspdbg  lldbg
+#  define sspdbg  llerr
 #  ifdef SSP_VERBOSE
-#    define sspinfo lldbg
+#    define sspinfo llerr
 #  else
 #    define sspinfo(x...)
 #  endif

@@ -187,7 +187,7 @@ uint32_t *pic32mx_exception(uint32_t *regs)
       break;
     }
 #else
-  lldbg("EXCEPTION: CAUSE: %08x EPC: %08x\n", cause, epc);
+  llerr("EXCEPTION: CAUSE: %08x EPC: %08x\n", cause, epc);
 #endif
 #endif
 

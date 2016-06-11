@@ -145,15 +145,15 @@ void up_irqinitialize(void)
 
 #if 1
 #define REG(x) (*(volatile uint32_t *)(x))
-  lldbg("\n=============================================================\n");
-  lldbg("TM CNTL=%08x INTRS=%08x MASK=%08x LOAD=%08x COUNT=%08x M1=%08x\n",
+  llerr("\n=============================================================\n");
+  llerr("TM CNTL=%08x INTRS=%08x MASK=%08x LOAD=%08x COUNT=%08x M1=%08x\n",
         REG(0x98400030), REG(0x98400034), REG(0x98400038), REG(0x98400004),
         REG(0x98400000), REG(0x98400008));
-  lldbg("IRQ STATUS=%08x MASK=%08x MODE=%08x LEVEL=%08x\n",
+  llerr("IRQ STATUS=%08x MASK=%08x MODE=%08x LEVEL=%08x\n",
         REG(0x98800014), REG(0x98800004), REG(0x9880000C), REG(0x98800010));
-  lldbg("FIQ STATUS=%08x MASK=%08x MODE=%08x LEVEL=%08x\n",
+  llerr("FIQ STATUS=%08x MASK=%08x MODE=%08x LEVEL=%08x\n",
         REG(0x98800034), REG(0x98800024), REG(0x9880002C), REG(0x98800020));
-  lldbg("=============================================================\n");
+  llerr("=============================================================\n");
 #endif
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS

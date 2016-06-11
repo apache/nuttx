@@ -90,9 +90,9 @@
 /* Enables debug output from this file */
 
 #ifdef CONFIG_DEBUG_SPI
-#  define spidbg  lldbg
+#  define spidbg  llerr
 #  ifdef CONFIG_DEBUG_INFO
-#    define spiinfo lldbg
+#    define spiinfo llerr
 #  else
 #    define spiinfo(x...)
 #  endif

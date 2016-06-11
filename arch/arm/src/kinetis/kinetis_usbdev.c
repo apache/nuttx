@@ -369,9 +369,9 @@ const struct trace_msg_t g_usb_trace_strings_deverror[] =
 #  undef CONFIG_KHCI_USBDEV_BDTDEBUG
 #  define CONFIG_KHCI_USBDEV_BDTDEBUG 1
 
-#  define regdbg lldbg
+#  define regdbg llerr
 #  ifdef CONFIG_DEBUG_INFO
-#    define reginfo lldbg
+#    define reginfo llerr
 #  else
 #    define reginfo(x...)
 #  endif
@@ -389,9 +389,9 @@ const struct trace_msg_t g_usb_trace_strings_deverror[] =
 
 #ifdef CONFIG_KHCI_USBDEV_BDTDEBUG
 
-#  define bdtdbg lldbg
+#  define bdtdbg llerr
 #  ifdef CONFIG_DEBUG_INFO
-#    define bdtinfo lldbg
+#    define bdtinfo llerr
 #  else
 #    define bdtinfo(x...)
 #  endif
@@ -714,7 +714,7 @@ static uint16_t khci_getreg(uint32_t addr)
         {
            if (count == 4)
              {
-               lldbg("...\n");
+               llerr("...\n");
              }
           return val;
         }
@@ -730,7 +730,7 @@ static uint16_t khci_getreg(uint32_t addr)
          {
            /* Yes.. then show how many times the value repeated */
 
-           lldbg("[repeats %d more times]\n", count-3);
+           llerr("[repeats %d more times]\n", count-3);
          }
 
        /* Save the new address, value, and count */
@@ -742,7 +742,7 @@ static uint16_t khci_getreg(uint32_t addr)
 
   /* Show the register value read */
 
-  lldbg("%08x->%04x\n", addr, val);
+  llerr("%08x->%04x\n", addr, val);
   return val;
 }
 #endif
@@ -756,7 +756,7 @@ static void khci_putreg(uint32_t val, uint32_t addr)
 {
   /* Show the register value being written */
 
-  lldbg("%08x<-%04x\n", addr, val);
+  llerr("%08x<-%04x\n", addr, val);
 
   /* Write the value */
 
@@ -2913,7 +2913,7 @@ x
   if ((usbir & USB_INT_ERROR) != 0)
     {
       usbtrace(TRACE_INTDECODE(KHCI_TRACEINTID_UERR), usbir);
-      ulldbg("Error: EIR=%04x\n", khci_getreg(KINETIS_USB0_ERRSTAT));
+      ullerr("Error: EIR=%04x\n", khci_getreg(KINETIS_USB0_ERRSTAT));
 
       /* Clear all pending USB error interrupts */
 
@@ -3241,7 +3241,7 @@ static int khci_epconfigure(struct usbdev_ep_s *ep,
   if (!ep || !desc)
     {
       usbtrace(TRACE_DEVERROR(KHCI_TRACEERR_INVALIDPARMS), 0);
-      ulldbg("ERROR: ep=%p desc=%p\n");
+      ullerr("ERROR: ep=%p desc=%p\n");
       return -EINVAL;
     }
 #endif
@@ -3368,7 +3368,7 @@ static int khci_epdisable(struct usbdev_ep_s *ep)
   if (!ep)
     {
       usbtrace(TRACE_DEVERROR(KHCI_TRACEERR_INVALIDPARMS), 0);
-      ulldbg("ERROR: ep=%p\n", ep);
+      ullerr("ERROR: ep=%p\n", ep);
       return -EINVAL;
     }
 #endif
@@ -3467,7 +3467,7 @@ static int khci_epsubmit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
   if (!req || !req->callback || !req->buf || !ep)
     {
       usbtrace(TRACE_DEVERROR(KHCI_TRACEERR_INVALIDPARMS), 0);
-      ulldbg("ERROR: req=%p callback=%p buf=%p ep=%p\n", req, req->callback, req->buf, ep);
+      ullerr("ERROR: req=%p callback=%p buf=%p ep=%p\n", req, req->callback, req->buf, ep);
       return -EINVAL;
     }
 #endif
@@ -3479,7 +3479,7 @@ static int khci_epsubmit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
   if (!priv->driver)
     {
       usbtrace(TRACE_DEVERROR(KHCI_TRACEERR_NOTCONFIGURED), priv->usbdev.speed);
-      ulldbg("ERROR: driver=%p\n", priv->driver);
+      ullerr("ERROR: driver=%p\n", priv->driver);
       return -ESHUTDOWN;
     }
 #endif
@@ -4248,10 +4248,10 @@ static void khci_hwreset(struct khci_usbdev_s *priv)
   khci_putreg((uint8_t)((uint32_t)g_bdt >> 16), KINETIS_USB0_BDTPAGE2);
   khci_putreg((uint8_t)(((uint32_t)g_bdt >>  8) & USB_BDTPAGE1_MASK), KINETIS_USB0_BDTPAGE1);
 
-  ulldbg("BDT Address %hhx \n" ,&g_bdt);
-  ulldbg("BDTPAGE3 %hhx\n",khci_getreg(KINETIS_USB0_BDTPAGE3));
-  ulldbg("BDTPAGE2 %hhx\n",khci_getreg(KINETIS_USB0_BDTPAGE2));
-  ulldbg("BDTPAGE1 %hhx\n",khci_getreg(KINETIS_USB0_BDTPAGE1));
+  ullerr("BDT Address %hhx \n" ,&g_bdt);
+  ullerr("BDTPAGE3 %hhx\n",khci_getreg(KINETIS_USB0_BDTPAGE3));
+  ullerr("BDTPAGE2 %hhx\n",khci_getreg(KINETIS_USB0_BDTPAGE2));
+  ullerr("BDTPAGE1 %hhx\n",khci_getreg(KINETIS_USB0_BDTPAGE1));
 
   /* Clear any pending interrupts */
 

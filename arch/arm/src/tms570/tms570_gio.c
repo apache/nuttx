@@ -296,7 +296,7 @@ int tms570_dumpgio(uint32_t pinset, const char *msg)
   uintptr_t     base;
   unsigned int  port;
 
-  lldbg("GIO%c pinset: %08x base: %08x -- %s\n",
+  llerr("GIO%c pinset: %08x base: %08x -- %s\n",
         g_portchar[port], pinset, base, msg);
 
   /* Get the base address associated with the GIO port */
@@ -310,19 +310,19 @@ int tms570_dumpgio(uint32_t pinset, const char *msg)
 
   /* Show global GIO registers */
 
-  lldbg("   GCR0: %08x INTDET: %08x    POL: %08x   ENA: %08x\n",
+  llerr("   GCR0: %08x INTDET: %08x    POL: %08x   ENA: %08x\n",
         getreg32(TMS570_GIO_GCR0), getreg32(TMS570_GIO_INTDET),
         getreg32(TMS570_GIO_POL), getreg32(TMS570_GIO_ENASET));
-  lldbg("    LVL: %08x    FLG: %08x   EMU1: %08x   EMU2: %08x\n",
+  llerr("    LVL: %08x    FLG: %08x   EMU1: %08x   EMU2: %08x\n",
         getreg32(TMS570_GIO_LVLSET), getreg32(TMS570_GIO_FLG),
         getreg32(TMS570_GIO_EMU1), getreg32(TMS570_GIO_EMU2));
 
   /* Port specific registers */
 
-  lldbg("    DIR: %08x    DIN: %08x   DOUT: %08x    PDR: %08x\n",
+  llerr("    DIR: %08x    DIN: %08x   DOUT: %08x    PDR: %08x\n",
         getreg32(base + TMS570_GIO_DIR_OFFSET), getreg32(base + TMS570_GIO_DIN_OFFSET),
         getreg32(base + TMS570_GIO_DOUT_OFFSET), getreg32(base + TMS570_GIO_PDR_OFFSET));
-  lldbg(" PULDIS: %08x    PSL: %08x\n",
+  llerr(" PULDIS: %08x    PSL: %08x\n",
         getreg32(base + TMS570_GIO_PULDIS_OFFSET), getreg32(base + TMS570_GIO_PSL_OFFSET));
 
   leave_critical_section(flags);

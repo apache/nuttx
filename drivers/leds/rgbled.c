@@ -75,12 +75,12 @@
 #ifdef CONFIG_DEBUG_RGBLED
 #  define pwmdbg    dbg
 #  define pwminfo   info
-#  define pwmlldbg  lldbg
+#  define pwmllerr  llerr
 #  define pwmllinfo llinfo
 #else
 #  define pwmdbg(x...)
 #  define pwminfo(x...)
-#  define pwmlldbg(x...)
+#  define pwmllerr(x...)
 #  define pwmllinfo(x...)
 #endif
 

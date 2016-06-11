@@ -402,7 +402,7 @@
 
 #ifdef CONFIG_DEBUG_PWM
 #  define pwmdbg              dbg
-#  define pwmlldbg            lldbg
+#  define pwmllerr            llerr
 #  ifdef CONFIG_DEBUG_INFO
 #    define pwminfo           info
 #    define pwmllinfo         llinfo
@@ -412,7 +412,7 @@
 #  endif
 #else
 #  define pwmdbg(x...)
-#  define pwmlldbg(x...)
+#  define pwmllerr(x...)
 #  define pwminfo(x...)
 #  define pwmllinfo(x...)
 #endif
@@ -713,7 +713,7 @@ static bool pwm_checkreg(FAR struct sam_pwm_s *pwm, bool wr, uint32_t regval,
         {
           /* Yes... show how many times we did it */
 
-          lldbg("...[Repeats %d times]...\n", pwm->count);
+          llerr("...[Repeats %d times]...\n", pwm->count);
         }
 
       /* Save information about the new access */
@@ -757,7 +757,7 @@ static uint32_t pwm_getreg(struct sam_pwm_chan_s *chan, int offset)
 #ifdef CONFIG_SAMA5_PWM_REGDEBUG
   if (pwm_checkreg(&g_pwm, false, regval, regaddr))
     {
-      lldbg("%08x->%08x\n", regaddr, regval);
+      llerr("%08x->%08x\n", regaddr, regval);
     }
 #endif
 
@@ -774,7 +774,7 @@ static uint32_t pwm_getreg(struct sam_pwm_chan_s *chan, int offset)
 #ifdef CONFIG_SAMA5_PWM_REGDEBUG
   if (pwm_checkreg(pwm, false, regval, regaddr))
     {
-      lldbg("%08x->%08x\n", regaddr, regval);
+      llerr("%08x->%08x\n", regaddr, regval);
     }
 #endif
 
@@ -813,7 +813,7 @@ static uint32_t pwm_chan_getreg(struct sam_pwm_chan_s *chan, int offset)
   if (pwm_checkreg(chan->pwm, false, regval, regaddr))
 #endif
     {
-      lldbg("%08x->%08x\n", regaddr, regval);
+      llerr("%08x->%08x\n", regaddr, regval);
     }
 #endif
 
@@ -844,7 +844,7 @@ static void pwm_putreg(struct sam_pwm_chan_s *chan, int offset,
 #ifdef CONFIG_SAMA5_PWM_REGDEBUG
   if (pwm_checkreg(&g_pwm, true, regval, regaddr))
     {
-      lldbg("%08x<-%08x\n", regaddr, regval);
+      llerr("%08x<-%08x\n", regaddr, regval);
     }
 #endif
 
@@ -857,7 +857,7 @@ static void pwm_putreg(struct sam_pwm_chan_s *chan, int offset,
 #ifdef CONFIG_SAMA5_PWM_REGDEBUG
   if (pwm_checkreg(pwm, true, regval, regaddr))
     {
-      lldbg("%08x<-%08x\n", regaddr, regval);
+      llerr("%08x<-%08x\n", regaddr, regval);
     }
 #endif
 
@@ -893,7 +893,7 @@ static void pwm_chan_putreg(struct sam_pwm_chan_s *chan, int offset,
   if (pwm_checkreg(chan->pwm, true, regval, regaddr))
 #endif
     {
-      lldbg("%08x<-%08x\n", regaddr, regval);
+      llerr("%08x<-%08x\n", regaddr, regval);
     }
 #endif
 

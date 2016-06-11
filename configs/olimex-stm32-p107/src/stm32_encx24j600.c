@@ -180,7 +180,7 @@ void up_netinitialize(void)
   spi = stm32_spibus_initialize(ENCX24J600_SPI_PORTNO);
   if (!spi)
     {
-      nlldbg("Failed to initialize SPI port %d\n", ENCX24J600_SPI_PORTNO);
+      nllerr("Failed to initialize SPI port %d\n", ENCX24J600_SPI_PORTNO);
       return;
     }
 
@@ -190,7 +190,7 @@ void up_netinitialize(void)
 
   if (ret < 0)
     {
-      nlldbg("Failed to bind SPI port %d ENCX24J600 device %d: %d\n",
+      nllerr("Failed to bind SPI port %d ENCX24J600 device %d: %d\n",
              ENCX24J600_SPI_PORTNO, ENCX24J600_DEVNO, ret);
       return;
     }

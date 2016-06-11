@@ -83,7 +83,7 @@
 
 #ifdef CONFIG_DEBUG_PWM
 #  define pwmdbg              dbg
-#  define pwmlldbg            lldbg
+#  define pwmllerr            llerr
 #  ifdef CONFIG_DEBUG_INFO
 #    define pwminfo           info
 #    define pwmllinfo         llinfo
@@ -95,7 +95,7 @@
 #  endif
 #else
 #  define pwmdbg(x...)
-#  define pwmlldbg(x...)
+#  define pwmllerr(x...)
 #  define pwminfo(x...)
 #  define pwmllinfo(x...)
 #  define pwm_dumpgpio(p,m)

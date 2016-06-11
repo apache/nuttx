@@ -60,12 +60,12 @@
 #ifdef CONFIG_MODEM_U_BLOX_DEBUG
 #  define m_dbg    dbg
 #  define m_info   info
-#  define m_vlldbg  lldbg
+#  define m_vllerr  llerr
 #  define m_vllinfo llinfo
 #else
 #  define m_dbg(x...)
 #  define m_info(x...)
-#  define m_lldbg(x...)
+#  define m_llerr(x...)
 #  define m_llinfo(x...)
 #endif
 

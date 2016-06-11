@@ -804,7 +804,7 @@ static int up_interrupte(int irq, void *context)
    */
 
   regval = up_serialin(priv, KINETIS_UART_S1_OFFSET);
-  lldbg("S1: %02x\n", regval);
+  llerr("S1: %02x\n", regval);
   regval = up_serialin(priv, KINETIS_UART_D_OFFSET);
   return OK;
 }

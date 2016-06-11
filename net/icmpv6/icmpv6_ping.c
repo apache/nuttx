@@ -261,7 +261,7 @@ static uint16_t ping_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
 
       if ((flags & NETDEV_DOWN) != 0)
         {
-          nlldbg("ERROR: Interface is down\n");
+          nllerr("ERROR: Interface is down\n");
           pstate->png_result = -ENETUNREACH;
           goto end_wait;
         }
@@ -336,12 +336,12 @@ static uint16_t ping_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
                * reason is that the destination address is not reachable.
                */
 
-              nlldbg("Not reachable\n");
+              nllerr("Not reachable\n");
               failcode = -ENETUNREACH;
             }
           else
             {
-              nlldbg("Ping timeout\n");
+              nllerr("Ping timeout\n");
               failcode = -ETIMEDOUT;
             }
 
@@ -490,7 +490,7 @@ int icmpv6_ping(net_ipv6addr_t addr, uint16_t id, uint16_t seqno,
     }
   else
     {
-      nlldbg("Return error=%d\n", -state.png_result);
+      nllerr("Return error=%d\n", -state.png_result);
       return state.png_result;
     }
 }

@@ -837,7 +837,7 @@ static void lpc17_rxdone_process(struct lpc17_driver_s *priv)
 
       if ((*rxstat & RXSTAT_INFO_ERROR) != 0)
         {
-          nlldbg("Error. considx: %08x prodidx: %08x rxstat: %08x\n",
+          nllerr("Error. considx: %08x prodidx: %08x rxstat: %08x\n",
                  considx, prodidx, *rxstat);
           NETDEV_RXERRORS(&priv->lp_dev);
         }
@@ -850,20 +850,20 @@ static void lpc17_rxdone_process(struct lpc17_driver_s *priv)
 
       /* else */ if (pktlen > CONFIG_NET_ETH_MTU + CONFIG_NET_GUARDSIZE)
         {
-          nlldbg("Too big. considx: %08x prodidx: %08x pktlen: %d rxstat: %08x\n",
+          nllerr("Too big. considx: %08x prodidx: %08x pktlen: %d rxstat: %08x\n",
                  considx, prodidx, pktlen, *rxstat);
           NETDEV_RXERRORS(&priv->lp_dev);
         }
       else if ((*rxstat & RXSTAT_INFO_LASTFLAG) == 0)
         {
-          nlldbg("Fragment. considx: %08x prodidx: %08x pktlen: %d rxstat: %08x\n",
+          nllerr("Fragment. considx: %08x prodidx: %08x pktlen: %d rxstat: %08x\n",
                  considx, prodidx, pktlen, *rxstat);
           NETDEV_RXFRAGMENTS(&priv->lp_dev);
           fragment = true;
         }
       else if (fragment)
         {
-          nlldbg("Last fragment. considx: %08x prodidx: %08x pktlen: %d rxstat: %08x\n",
+          nllerr("Last fragment. considx: %08x prodidx: %08x pktlen: %d rxstat: %08x\n",
                  considx, prodidx, pktlen, *rxstat);
           NETDEV_RXFRAGMENTS(&priv->lp_dev);
           fragment = false;
@@ -1202,13 +1202,13 @@ static int lpc17_interrupt(int irq, void *context)
         {
           if ((status & ETH_INT_RXOVR) != 0)
             {
-              nlldbg("RX Overrun. status: %08x\n", status);
+              nllerr("RX Overrun. status: %08x\n", status);
               NETDEV_RXERRORS(&priv->lp_dev);
             }
 
           if ((status & ETH_INT_TXUNR) != 0)
             {
-              nlldbg("TX Underrun. status: %08x\n", status);
+              nllerr("TX Underrun. status: %08x\n", status);
               NETDEV_TXERRORS(&priv->lp_dev);
             }
 
@@ -1229,7 +1229,7 @@ static int lpc17_interrupt(int irq, void *context)
 
           if ((status & ETH_INT_RXERR) != 0)
             {
-              nlldbg("RX Error. status: %08x\n", status);
+              nllerr("RX Error. status: %08x\n", status);
               NETDEV_RXERRORS(&priv->lp_dev);
             }
 
@@ -1281,7 +1281,7 @@ static int lpc17_interrupt(int irq, void *context)
 
           if ((status & ETH_INT_TXERR) != 0)
             {
-              nlldbg("TX Error. status: %08x\n", status);
+              nllerr("TX Error. status: %08x\n", status);
               NETDEV_TXERRORS(&priv->lp_dev);
             }
 

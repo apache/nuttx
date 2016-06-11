@@ -55,7 +55,7 @@
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_HARDFAULT
-# define hfdbg(format, ...) lldbg(format, ##__VA_ARGS__)
+# define hfdbg(format, ...) llerr(format, ##__VA_ARGS__)
 #else
 # define hfdbg(x...)
 #endif
@@ -149,7 +149,7 @@ int up_hardfault(int irq, FAR void *context)
 #endif
 
   (void)up_irq_save();
-  lldbg("PANIC!!! Hard fault\n");
+  llerr("PANIC!!! Hard fault\n");
   PANIC();
   return OK; /* Won't get here */
 }

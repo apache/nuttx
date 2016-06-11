@@ -463,7 +463,7 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_class_s *hubclass,
 
   if (found != USBHOST_ALLFOUND)
     {
-      ulldbg("ERROR: Found IF=%s EPIN=%s\n",
+      ullerr("ERROR: Found IF=%s EPIN=%s\n",
              (found & USBHOST_IFFOUND) != 0  ? "YES" : "NO",
              (found & USBHOST_EPINFOUND) != 0 ? "YES" : "NO");
       return -EINVAL;
@@ -1190,7 +1190,7 @@ static void usbhost_callback(FAR void *arg, ssize_t nbytes)
       if (nbytes != -EAGAIN)
 #endif
         {
-          ulldbg("ERROR: Transfer failed: %d\n", (int)nbytes);
+          ullerr("ERROR: Transfer failed: %d\n", (int)nbytes);
         }
 
       /* Indicate there there is nothing to do.  So when the work is

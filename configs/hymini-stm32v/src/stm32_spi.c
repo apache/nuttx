@@ -64,9 +64,9 @@
 #define SPI_VERBOSE /* Define to enable verbose debug */
 
 #ifdef SPI_DEBUG
-#  define spidbg  lldbg
+#  define spidbg  llerr
 #  ifdef SPI_VERBOSE
-#    define spiinfo lldbg
+#    define spiinfo llerr
 #  else
 #    define spiinfo(x...)
 #  endif

@@ -73,7 +73,7 @@
 
 void stm32_usbinitialize(void)
 {
-  ulldbg("called\n");
+  ullerr("called\n");
 
   /* USB Soft Connect Pullup */
   stm32_configgpio(GPIO_USB_PULLUP);
@@ -111,6 +111,6 @@ int stm32_usbpullup(FAR struct usbdev_s *dev, bool enable)
 
 void stm32_usbsuspend(FAR struct usbdev_s *dev, bool resume)
 {
-  ulldbg("resume: %d\n", resume);
+  ullerr("resume: %d\n", resume);
 }
 

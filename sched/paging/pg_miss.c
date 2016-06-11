@@ -132,7 +132,7 @@ void pg_miss(void)
    * always present in memory.
    */
 
-  pglldbg("Blocking TCB: %p PID: %d\n", ftcb, ftcb->pid);
+  pgllerr("Blocking TCB: %p PID: %d\n", ftcb, ftcb->pid);
   DEBUGASSERT(g_pgworker != ftcb->pid);
 
   /* Block the currently executing task
@@ -171,7 +171,7 @@ void pg_miss(void)
 
   if (!g_pftcb)
     {
-      pglldbg("Signaling worker. PID: %d\n", g_pgworker);
+      pgllerr("Signaling worker. PID: %d\n", g_pgworker);
       kill(g_pgworker, SIGWORK);
     }
 }

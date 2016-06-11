@@ -609,7 +609,7 @@ static bool tiva_i2c_checkreg(struct tiva_i2c_priv_s *priv, bool wr,
         {
           /* Yes... show how many times we did it */
 
-          lldbg("...[Repeats %d times]...\n", priv->ntimes);
+          llerr("...[Repeats %d times]...\n", priv->ntimes);
         }
 
       /* Save information about the new access */
@@ -642,7 +642,7 @@ static uint32_t tiva_i2c_getreg(struct tiva_i2c_priv_s *priv, unsigned int offse
 
   if (tiva_i2c_checkreg(priv, false, regval, regaddr))
     {
-      lldbg("%08x->%08x\n", regaddr, regval);
+      llerr("%08x->%08x\n", regaddr, regval);
     }
 
   return regval;
@@ -671,7 +671,7 @@ static void tiva_i2c_putreg(struct tiva_i2c_priv_s *priv, unsigned int offset,
 
   if (tiva_i2c_checkreg(priv, true, regval, regaddr))
     {
-      lldbg("%08x<-%08x\n", regaddr, regval);
+      llerr("%08x<-%08x\n", regaddr, regval);
     }
 
   putreg32(regval, regaddr);

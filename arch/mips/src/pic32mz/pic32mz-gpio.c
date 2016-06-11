@@ -325,14 +325,14 @@ void pic32mz_dumpgpio(uint32_t pinset, const char *msg)
       /* The following requires exclusive access to the GPIO registers */
 
       sched_lock();
-      lldbg("IOPORT%c pinset: %04x base: %08x -- %s\n",
+      llerr("IOPORT%c pinset: %04x base: %08x -- %s\n",
             'A'+port, pinset, base, msg);
-      lldbg("   TRIS: %08x   PORT: %08x    LAT: %08x    ODC: %08x\n",
+      llerr("   TRIS: %08x   PORT: %08x    LAT: %08x    ODC: %08x\n",
             getreg32(base + PIC32MZ_IOPORT_TRIS_OFFSET),
             getreg32(base + PIC32MZ_IOPORT_PORT_OFFSET),
             getreg32(base + PIC32MZ_IOPORT_LAT_OFFSET),
             getreg32(base + PIC32MZ_IOPORT_ODC_OFFSET));
-      lldbg("  CNCON: %08x   CNEN: %08x  CNPUE: %08x\n",
+      llerr("  CNCON: %08x   CNEN: %08x  CNPUE: %08x\n",
             getreg32(PIC32MZ_IOPORT_CNCON),
             getreg32(PIC32MZ_IOPORT_CNEN),
             getreg32(PIC32MZ_IOPORT_CNPUE));

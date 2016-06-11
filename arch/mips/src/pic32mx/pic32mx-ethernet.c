@@ -447,7 +447,7 @@ static void pic32mx_ethreset(struct pic32mx_driver_s *priv);
 #ifdef CONFIG_NET_REGDEBUG
 static void pic32mx_printreg(uint32_t addr, uint32_t val, bool iswrite)
 {
-  lldbg("%08x%s%08x\n", addr, iswrite ? "<-" : "->", val);
+  llerr("%08x%s%08x\n", addr, iswrite ? "<-" : "->", val);
 }
 #endif
 
@@ -497,7 +497,7 @@ static void pic32mx_checkreg(uint32_t addr, uint32_t val, bool iswrite)
             {
               /* No.. More than one. */
 
-              lldbg("[repeats %d more times]\n", count);
+              llerr("[repeats %d more times]\n", count);
             }
         }
 
@@ -576,12 +576,12 @@ static void pic32mx_putreg(uint32_t val, uint32_t addr)
 #ifdef CONFIG_NET_DESCDEBUG
 static void pic32mx_dumptxdesc(struct pic32mx_txdesc_s *txdesc, const char *msg)
 {
-  lldbg("TX Descriptor [%p]: %s\n", txdesc, msg);
-  lldbg("   status: %08x\n", txdesc->status);
-  lldbg("  address: %08x [%08x]\n", txdesc->address, VIRT_ADDR(txdesc->address));
-  lldbg("     tsv1: %08x\n", txdesc->tsv1);
-  lldbg("     tsv2: %08x\n", txdesc->tsv2);
-  lldbg("   nexted: %08x [%08x]\n", txdesc->nexted, VIRT_ADDR(txdesc->nexted));
+  llerr("TX Descriptor [%p]: %s\n", txdesc, msg);
+  llerr("   status: %08x\n", txdesc->status);
+  llerr("  address: %08x [%08x]\n", txdesc->address, VIRT_ADDR(txdesc->address));
+  llerr("     tsv1: %08x\n", txdesc->tsv1);
+  llerr("     tsv2: %08x\n", txdesc->tsv2);
+  llerr("   nexted: %08x [%08x]\n", txdesc->nexted, VIRT_ADDR(txdesc->nexted));
 }
 #endif
 
@@ -603,12 +603,12 @@ static void pic32mx_dumptxdesc(struct pic32mx_txdesc_s *txdesc, const char *msg)
 #ifdef CONFIG_NET_DESCDEBUG
 static void pic32mx_dumprxdesc(struct pic32mx_rxdesc_s *rxdesc, const char *msg)
 {
-  lldbg("RX Descriptor [%p]: %s\n", rxdesc, msg);
-  lldbg("   status: %08x\n", rxdesc->status);
-  lldbg("  address: %08x [%08x]\n", rxdesc->address, VIRT_ADDR(rxdesc->address));
-  lldbg("     rsv1: %08x\n", rxdesc->rsv1);
-  lldbg("     rsv2: %08x\n", rxdesc->rsv2);
-  lldbg("   nexted: %08x [%08x]\n", rxdesc->nexted, VIRT_ADDR(rxdesc->nexted));
+  llerr("RX Descriptor [%p]: %s\n", rxdesc, msg);
+  llerr("   status: %08x\n", rxdesc->status);
+  llerr("  address: %08x [%08x]\n", rxdesc->address, VIRT_ADDR(rxdesc->address));
+  llerr("     rsv1: %08x\n", rxdesc->rsv1);
+  llerr("     rsv2: %08x\n", rxdesc->rsv2);
+  llerr("   nexted: %08x [%08x]\n", rxdesc->nexted, VIRT_ADDR(rxdesc->nexted));
 }
 #endif
 
@@ -1366,7 +1366,7 @@ static void pic32mx_rxdone(struct pic32mx_driver_s *priv)
 
       if ((rxdesc->rsv2 & RXDESC_RSV2_OK) == 0)
         {
-          nlldbg("ERROR. rsv1: %08x rsv2: %08x\n", rxdesc->rsv1, rxdesc->rsv2);
+          nllerr("ERROR. rsv1: %08x rsv2: %08x\n", rxdesc->rsv1, rxdesc->rsv2);
           NETDEV_RXERRORS(&priv->pd_dev);
           pic32mx_rxreturn(rxdesc);
         }
@@ -1379,7 +1379,7 @@ static void pic32mx_rxdone(struct pic32mx_driver_s *priv)
 
       else if (priv->pd_dev.d_len > CONFIG_NET_ETH_MTU)
         {
-          nlldbg("Too big. packet length: %d rxdesc: %08x\n",
+          nllerr("Too big. packet length: %d rxdesc: %08x\n",
                  priv->pd_dev.d_len, rxdesc->status);
           NETDEV_RXERRORS(&priv->pd_dev);
           pic32mx_rxreturn(rxdesc);
@@ -1390,7 +1390,7 @@ static void pic32mx_rxdone(struct pic32mx_driver_s *priv)
       else if ((rxdesc->status & (RXDESC_STATUS_EOP | RXDESC_STATUS_SOP)) !=
                (RXDESC_STATUS_EOP | RXDESC_STATUS_SOP))
         {
-          nlldbg("Fragment. packet length: %d rxdesc: %08x\n", priv->pd_dev.d_len, rxdesc->status);
+          nllerr("Fragment. packet length: %d rxdesc: %08x\n", priv->pd_dev.d_len, rxdesc->status);
           NETDEV_RXFRAGMENTS(&priv->pd_dev);
           pic32mx_rxreturn(rxdesc);
         }
@@ -1529,7 +1529,7 @@ static void pic32mx_rxdone(struct pic32mx_driver_s *priv)
             {
               /* Unrecognized... drop it. */
 
-              nlldbg("Unrecognized packet type dropped: %04x\n", ntohs(BUF->type));
+              nllerr("Unrecognized packet type dropped: %04x\n", ntohs(BUF->type));
               NETDEV_RXDROPPED(&priv->pd_dev);
             }
 
@@ -1691,7 +1691,7 @@ static int pic32mx_interrupt(int irq, void *context)
 
       if ((status & ETH_INT_RXOVFLW) != 0)
         {
-          nlldbg("RX Overrun. status: %08x\n", status);
+          nllerr("RX Overrun. status: %08x\n", status);
           NETDEV_RXERRORS(&priv->pd_dev);
         }
 
@@ -1702,7 +1702,7 @@ static int pic32mx_interrupt(int irq, void *context)
 
       if ((status & ETH_INT_RXBUFNA) != 0)
         {
-          nlldbg("RX buffer descriptor overrun. status: %08x\n", status);
+          nllerr("RX buffer descriptor overrun. status: %08x\n", status);
           NETDEV_RXERRORS(&priv->pd_dev);
         }
 
@@ -1713,7 +1713,7 @@ static int pic32mx_interrupt(int irq, void *context)
 
       if ((status & ETH_INT_RXBUSE) != 0)
         {
-          nlldbg("RX BVCI bus error. status: %08x\n", status);
+          nllerr("RX BVCI bus error. status: %08x\n", status);
           NETDEV_RXERRORS(&priv->pd_dev);
         }
 
@@ -1756,7 +1756,7 @@ static int pic32mx_interrupt(int irq, void *context)
 
       if ((status & ETH_INT_TXABORT) != 0)
         {
-          nlldbg("TX abort. status: %08x\n", status);
+          nllerr("TX abort. status: %08x\n", status);
           NETDEV_TXERRORS(&priv->pd_dev);
         }
 
@@ -1767,7 +1767,7 @@ static int pic32mx_interrupt(int irq, void *context)
 
       if ((status & ETH_INT_TXBUSE) != 0)
         {
-          nlldbg("TX BVCI bus error. status: %08x\n", status);
+          nllerr("TX BVCI bus error. status: %08x\n", status);
           NETDEV_TXERRORS(&priv->pd_dev);
         }
 

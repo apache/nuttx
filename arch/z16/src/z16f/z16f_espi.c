@@ -70,9 +70,9 @@
 #endif
 
 #ifdef CONFIG_DEBUG_SPI
-#  define spidbg    lldbg
+#  define spidbg    llerr
 #  ifdef CONFIG_DEBUG_INFO
-#    define spiinfo lldbg
+#    define spiinfo llerr
 #  else
 #    define spiinfo (void)
 #  endif
@@ -231,7 +231,7 @@ static bool spi_checkreg(FAR struct z16f_spi_s *priv, bool wr, uint16_t regval,
         {
           /* Yes... show how many times we did it */
 
-          lldbg("...[Repeats %d times]...\n", priv->ntimes);
+          llerr("...[Repeats %d times]...\n", priv->ntimes);
         }
 
       /* Save information about the new access */
@@ -263,7 +263,7 @@ static uint8_t spi_getreg8(FAR struct z16f_spi_s *priv, uintptr_t regaddr)
 
   if (spi_checkreg(priv, false, (uint16_t)regval, regaddr))
     {
-      lldbg("%06x->%02x\n", regaddr, regval);
+      llerr("%06x->%02x\n", regaddr, regval);
     }
 
   return regval;
@@ -284,7 +284,7 @@ static void spi_putreg8(FAR struct z16f_spi_s *priv, uint8_t regval,
 {
   if (spi_checkreg(priv, true, (uint16_t)regval, regaddr))
     {
-      lldbg("%06x<-%02x\n", regaddr, regval);
+      llerr("%06x<-%02x\n", regaddr, regval);
     }
 
   putreg8(regval, regaddr);
@@ -305,7 +305,7 @@ static void spi_putreg16(FAR struct z16f_spi_s *priv, uint16_t regval,
 {
   if (spi_checkreg(priv, true, regval, regaddr))
     {
-      lldbg("%06x<-%04x\n", regaddr, regval);
+      llerr("%06x<-%04x\n", regaddr, regval);
     }
 
   putreg8(regval, regaddr);

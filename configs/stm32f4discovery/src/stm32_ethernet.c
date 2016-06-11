@@ -80,10 +80,10 @@
 
 #ifdef CONFIG_NETDEV_PHY_DEBUG
 #  define phydbg    dbg
-#  define phylldbg  lldbg
+#  define phyllerr  llerr
 #else
 #  define phydbg(x...)
-#  define phylldbg(x...)
+#  define phyllerr(x...)
 #endif
 
 /************************************************************************************

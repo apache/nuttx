@@ -456,7 +456,7 @@ static struct lpc17_xfrinfo_s g_xfrbuffers[CONFIG_LPC17_USBHOST_NPREALLOC];
 #ifdef CONFIG_LPC17_USBHOST_REGDEBUG
 static void lpc17_printreg(uint32_t addr, uint32_t val, bool iswrite)
 {
-  lldbg("%08x%s%08x\n", addr, iswrite ? "<-" : "->", val);
+  llerr("%08x%s%08x\n", addr, iswrite ? "<-" : "->", val);
 }
 #endif
 
@@ -506,7 +506,7 @@ static void lpc17_checkreg(uint32_t addr, uint32_t val, bool iswrite)
             {
               /* No.. More than one. */
 
-              lldbg("[repeats %d more times]\n", count);
+              llerr("[repeats %d more times]\n", count);
             }
         }
 
@@ -1694,7 +1694,7 @@ static int lpc17_usbinterrupt(int irq, void *context)
                         }
                       else
                         {
-                          ulldbg("Spurious status change (connected)\n");
+                          ullerr("Spurious status change (connected)\n");
                         }
 
                       /* The LSDA (Low speed device attached) bit is valid
@@ -1750,7 +1750,7 @@ static int lpc17_usbinterrupt(int irq, void *context)
                     }
                   else
                     {
-                       ulldbg("Spurious status change (disconnected)\n");
+                       ullerr("Spurious status change (disconnected)\n");
                     }
                 }
 
@@ -1830,7 +1830,7 @@ static int lpc17_usbinterrupt(int irq, void *context)
                     {
                       /* The transfer failed for some reason... dump some diagnostic info. */
 
-                      ulldbg("ERROR: ED xfrtype:%d TD CTRL:%08x/CC:%d RHPORTST1:%08x\n",
+                      ullerr("ERROR: ED xfrtype:%d TD CTRL:%08x/CC:%d RHPORTST1:%08x\n",
                              ed->xfrtype, td->hw.ctrl, xfrinfo->tdstatus,
                              lpc17_getreg(LPC17_USBHOST_RHPORTST1));
                     }
@@ -1894,7 +1894,7 @@ static int lpc17_usbinterrupt(int irq, void *context)
 #ifdef CONFIG_DEBUG_USB
       if ((pending & LPC17_DEBUG_INTS) != 0)
         {
-          ulldbg("ERROR: Unhandled interrupts INTST:%08x\n", intst);
+          ullerr("ERROR: Unhandled interrupts INTST:%08x\n", intst);
         }
 #endif
 

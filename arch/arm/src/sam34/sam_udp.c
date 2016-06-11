@@ -606,7 +606,7 @@ const struct trace_msg_t g_usb_trace_strings_intdecode[] =
 #ifdef CONFIG_SAM34_UDP_REGDEBUG
 static void sam_printreg(uintptr_t regaddr, uint32_t regval, bool iswrite)
 {
-  lldbg("%p%s%08x\n", regaddr, iswrite ? "<-" : "->", regval);
+  llerr("%p%s%08x\n", regaddr, iswrite ? "<-" : "->", regval);
 }
 #endif
 
@@ -657,7 +657,7 @@ static void sam_checkreg(uintptr_t regaddr, uint32_t regval, bool iswrite)
             {
               /* No.. More than one. */
 
-              lldbg("[repeats %d more times]\n", count);
+              llerr("[repeats %d more times]\n", count);
             }
         }
 
@@ -737,15 +737,15 @@ static void sam_dumpep(struct sam_usbdev_s *priv, uint8_t epno)
 {
   /* Global Registers */
 
-  lldbg("Global Registers:\n");
-  lldbg(" FRMNUM:    %08x\n", sam_getreg(SAM_UDP_FRMNUM));
-  lldbg("GLBSTAT:    %08x\n", sam_getreg(SAM_UDP_GLBSTAT));
-  lldbg("  FADDR:    %08x\n", sam_getreg(SAM_UDP_FADDR));
-  lldbg("    IMR:    %08x\n", sam_getreg(SAM_UDP_IMR));
-  lldbg("    ISR:    %08x\n", sam_getreg(SAM_UDP_ISR));
-  lldbg("  RSTEP:    %08x\n", sam_getreg(SAM_UDP_RSTEP));
-  lldbg("   TXVC:    %08x\n", sam_getreg(SAM_UDP_TXVC));
-  lldbg(" CSR[%d]:    %08x\n", epno, sam_getreg(SAM_UDPEP_CSR(epno)));
+  llerr("Global Registers:\n");
+  llerr(" FRMNUM:    %08x\n", sam_getreg(SAM_UDP_FRMNUM));
+  llerr("GLBSTAT:    %08x\n", sam_getreg(SAM_UDP_GLBSTAT));
+  llerr("  FADDR:    %08x\n", sam_getreg(SAM_UDP_FADDR));
+  llerr("    IMR:    %08x\n", sam_getreg(SAM_UDP_IMR));
+  llerr("    ISR:    %08x\n", sam_getreg(SAM_UDP_ISR));
+  llerr("  RSTEP:    %08x\n", sam_getreg(SAM_UDP_RSTEP));
+  llerr("   TXVC:    %08x\n", sam_getreg(SAM_UDP_TXVC));
+  llerr(" CSR[%d]:    %08x\n", epno, sam_getreg(SAM_UDPEP_CSR(epno)));
 }
 #endif
 
@@ -2946,7 +2946,7 @@ static int sam_ep_disable(struct usbdev_ep_s *ep)
   if (!ep)
     {
       usbtrace(TRACE_DEVERROR(SAM_TRACEERR_INVALIDPARMS), 0);
-      ulldbg("ERROR: ep=%p\n", ep);
+      ullerr("ERROR: ep=%p\n", ep);
       return -EINVAL;
     }
 #endif
@@ -3078,7 +3078,7 @@ static int sam_ep_submit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
   if (!req || !req->callback || !req->buf || !ep)
     {
       usbtrace(TRACE_DEVERROR(SAM_TRACEERR_INVALIDPARMS), 0);
-      ulldbg("ERROR: req=%p callback=%p buf=%p ep=%p\n", req, req->callback, req->buf, ep);
+      ullerr("ERROR: req=%p callback=%p buf=%p ep=%p\n", req, req->callback, req->buf, ep);
       return -EINVAL;
     }
 #endif
@@ -3090,7 +3090,7 @@ static int sam_ep_submit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
   if (!priv->driver)
     {
       usbtrace(TRACE_DEVERROR(SAM_TRACEERR_NOTCONFIGURED), priv->usbdev.speed);
-      ulldbg("ERROR: driver=%p\n", priv->driver);
+      ullerr("ERROR: driver=%p\n", priv->driver);
       return -ESHUTDOWN;
     }
 #endif
@@ -3118,7 +3118,7 @@ static int sam_ep_submit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
            * "pending" they will get queue until the stall is cleared.
            */
 
-          ulldbg("Pending stall clear\n");
+          ullerr("Pending stall clear\n");
           sam_req_enqueue(&privep->pendq, privreq);
           usbtrace(TRACE_INREQQUEUED(epno), req->len);
           ret = OK;

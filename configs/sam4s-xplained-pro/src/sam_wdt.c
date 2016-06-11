@@ -91,7 +91,7 @@
 
 #ifdef CONFIG_DEBUG_WATCHDOG
 #  define wdgdbg                 dbg
-#  define wdglldbg               lldbg
+#  define wdgllerr               llerr
 #  ifdef CONFIG_DEBUG_INFO
 #    define wdginfo              info
 #    define wdgllinfo            llinfo
@@ -101,7 +101,7 @@
 #  endif
 #else
 #  define wdgdbg(x...)
-#  define wdglldbg(x...)
+#  define wdgllerr(x...)
 #  define wdginfo(x...)
 #  define wdgllinfo(x...)
 #endif

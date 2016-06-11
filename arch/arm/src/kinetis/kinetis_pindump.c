@@ -115,9 +115,9 @@ void kinetis_pindump(uint32_t pinset, const char *msg)
 
   flags = enter_critical_section();
 
-  lldbg("GPIO%c pinset: %08x base: %08x -- %s\n",
+  llerr("GPIO%c pinset: %08x base: %08x -- %s\n",
         g_portchar[port], pinset, base, msg);
-  lldbg("  PDOR: %08x  PDIR: %08x  PDDR: %08x\n",
+  llerr("  PDOR: %08x  PDIR: %08x  PDDR: %08x\n",
         getreg32(base + KINETIS_GPIO_PDOR_OFFSET),
         getreg32(base + KINETIS_GPIO_PDIR_OFFSET),
         getreg32(base + KINETIS_GPIO_PDDR_OFFSET));

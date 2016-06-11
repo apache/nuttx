@@ -55,7 +55,7 @@
  */
 
 #ifdef CONFIG_DEBUG_LEDS
-#  define leddbg  lldbg
+#  define leddbg  llerr
 #  define ledinfo llinfo
 #else
 #  define leddbg(x...)

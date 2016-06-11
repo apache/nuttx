@@ -166,18 +166,18 @@
 
 #ifdef CONFIG_DEBUG_CAN
 #  ifdef CONFIG_CAN_REGDEBUG
-#    define candbg  lldbg
+#    define candbg  llerr
 #    define caninfo llinfo
 #  else
 #    define candbg  dbg
 #    define caninfo info
 #  endif
-#  define canlldbg  lldbg
+#  define canllerr  llerr
 #  define canllinfo llinfo
 #else
 #  define candbg(x...)
 #  define caninfo(x...)
-#  define canlldbg(x...)
+#  define canllerr(x...)
 #  define canllinfo(x...)
 #endif
 
@@ -325,7 +325,7 @@ static void can_printreg(uint32_t addr, uint32_t value)
         {
           if (count == 4)
             {
-              lldbg("...\n");
+              llerr("...\n");
             }
 
           return;
@@ -342,7 +342,7 @@ static void can_printreg(uint32_t addr, uint32_t value)
         {
           /* Yes.. then show how many times the value repeated */
 
-          lldbg("[repeats %d more times]\n", count-3);
+          llerr("[repeats %d more times]\n", count-3);
         }
 
       /* Save the new address, value, and count */
@@ -354,7 +354,7 @@ static void can_printreg(uint32_t addr, uint32_t value)
 
   /* Show the register value read */
 
-  lldbg("%08x->%08x\n", addr, value);
+  llerr("%08x->%08x\n", addr, value);
 }
 #endif
 
@@ -415,7 +415,7 @@ static void can_putreg(struct up_dev_s *priv, int offset, uint32_t value)
 
   /* Show the register value being written */
 
-  lldbg("%08x<-%08x\n", addr, value);
+  llerr("%08x<-%08x\n", addr, value);
 
   /* Write the value */
 
@@ -475,7 +475,7 @@ static void can_putcommon(uint32_t addr, uint32_t value)
 {
   /* Show the register value being written */
 
-  lldbg("%08x<-%08x\n", addr, value);
+  llerr("%08x<-%08x\n", addr, value);
 
   /* Write the value */
 
@@ -988,7 +988,7 @@ static void can_interrupt(FAR struct can_dev_s *dev)
 
       if ((rfs & CAN_RFS_FF) != 0)
         {
-          canlldbg("ERROR: Received message with extended identifier.  Dropped\n");
+          canllerr("ERROR: Received message with extended identifier.  Dropped\n");
         }
       else
 #endif
