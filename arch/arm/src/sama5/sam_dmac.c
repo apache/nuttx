@@ -1364,7 +1364,7 @@ sam_allocdesc(struct sam_dmach_s *dmach, struct dma_linklist_s *prev,
    * Obviously setting it to zero would break that usage.
    */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (saddr != 0)
 #endif
     {

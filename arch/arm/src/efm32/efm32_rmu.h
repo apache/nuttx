@@ -50,7 +50,7 @@
  ****************************************************************************/
 /* Configuration ************************************************************/
 
-#ifndef CONFIG_DEBUG
+#ifndef CONFIG_DEBUG_FEATURES
 #  undef CONFIG_DEBUG_INFO
 #  undef CONFIG_EFM32_RMU_DEBUG
 #endif

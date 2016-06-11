@@ -259,7 +259,7 @@
 
 /* Debug */
 
-#if !defined(CONFIG_DEBUG) || !defined(CONFIG_DEBUG_FS)
+#if !defined(CONFIG_DEBUG_FEATURES) || !defined(CONFIG_DEBUG_FS)
 #  undef CONFIG_DEBUG_FS
 #  undef CONFIG_SAMA5_NAND_DMADEBUG
 #  undef CONFIG_SAMA5_NAND_REGDEBUG

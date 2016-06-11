@@ -90,7 +90,7 @@
  * enabled.
  */
 
-#ifndef CONFIG_DEBUG
+#ifndef CONFIG_DEBUG_FEATURES
 #  undef CONFIG_SAM34_UDP_REGDEBUG
 #endif
 
@@ -732,7 +732,7 @@ static inline void sam_putreg(uint32_t regval, uint32_t regaddr)
  * Name: sam_dumpep
  ****************************************************************************/
 
-#if defined(CONFIG_SAM34_UDP_REGDEBUG) && defined(CONFIG_DEBUG)
+#if defined(CONFIG_SAM34_UDP_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
 static void sam_dumpep(struct sam_usbdev_s *priv, uint8_t epno)
 {
   /* Global Registers */
@@ -2891,7 +2891,7 @@ static int sam_ep_configure(struct usbdev_ep_s *ep,
 
   /* Verify parameters.  Endpoint 0 is not available at this interface */
 
-#if defined(CONFIG_DEBUG) || defined(CONFIG_USBDEV_TRACE)
+#if defined(CONFIG_DEBUG_FEATURES) || defined(CONFIG_USBDEV_TRACE)
   uint8_t epno = USB_EPNO(desc->addr);
   usbtrace(TRACE_EPCONFIGURE, (uint16_t)epno);
 
@@ -2942,7 +2942,7 @@ static int sam_ep_disable(struct usbdev_ep_s *ep)
   irqstate_t flags;
   uint8_t epno;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!ep)
     {
       usbtrace(TRACE_DEVERROR(SAM_TRACEERR_INVALIDPARMS), 0);
@@ -2979,7 +2979,7 @@ static struct usbdev_req_s *sam_ep_allocreq(struct usbdev_ep_s *ep)
 {
   struct sam_req_s *privreq;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!ep)
     {
       usbtrace(TRACE_DEVERROR(SAM_TRACEERR_INVALIDPARMS), 0);
@@ -3011,7 +3011,7 @@ static void sam_ep_freereq(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
 {
   struct sam_req_s *privreq = (struct sam_req_s *)req;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!ep || !req)
     {
       usbtrace(TRACE_DEVERROR(SAM_TRACEERR_INVALIDPARMS), 0);
@@ -3074,7 +3074,7 @@ static int sam_ep_submit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
   uint8_t epno;
   int ret = OK;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!req || !req->callback || !req->buf || !ep)
     {
       usbtrace(TRACE_DEVERROR(SAM_TRACEERR_INVALIDPARMS), 0);
@@ -3086,7 +3086,7 @@ static int sam_ep_submit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
   usbtrace(TRACE_EPSUBMIT, USB_EPNO(ep->eplog));
   priv = privep->dev;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!priv->driver)
     {
       usbtrace(TRACE_DEVERROR(SAM_TRACEERR_NOTCONFIGURED), priv->usbdev.speed);
@@ -3182,7 +3182,7 @@ static int sam_ep_cancel(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
   struct sam_ep_s *privep = (struct sam_ep_s *)ep;
   irqstate_t flags;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!ep || !req)
     {
       usbtrace(TRACE_DEVERROR(SAM_TRACEERR_INVALIDPARMS), 0);
@@ -3208,7 +3208,7 @@ static int sam_ep_stallresume(struct usbdev_ep_s *ep, bool resume)
   irqstate_t flags;
   int ret;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!ep)
     {
       usbtrace(TRACE_DEVERROR(SAM_TRACEERR_INVALIDPARMS), 0);
@@ -3283,7 +3283,7 @@ static struct usbdev_ep_s *sam_allocep(struct usbdev_s *dev, uint8_t epno,
   uint16_t epset = SAM_EPSET_NOTEP0;
 
   usbtrace(TRACE_DEVALLOCEP, (uint16_t)epno);
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!dev)
     {
       usbtrace(TRACE_DEVERROR(SAM_TRACEERR_INVALIDPARMS), 0);
@@ -3345,7 +3345,7 @@ static void sam_freeep(struct usbdev_s *dev, struct usbdev_ep_s *ep)
   struct sam_usbdev_s *priv;
   struct sam_ep_s *privep;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!dev || !ep)
     {
       usbtrace(TRACE_DEVERROR(SAM_TRACEERR_INVALIDPARMS), 0);
@@ -3377,7 +3377,7 @@ static int sam_getframe(struct usbdev_s *dev)
   uint32_t regval;
   uint16_t frameno;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!dev)
     {
       usbtrace(TRACE_DEVERROR(SAM_TRACEERR_INVALIDPARMS), 0);
@@ -3409,7 +3409,7 @@ static int sam_wakeup(struct usbdev_s *dev)
   uint32_t regval;
 
   usbtrace(TRACE_DEVWAKEUP, 0);
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!dev)
     {
       usbtrace(TRACE_DEVERROR(SAM_TRACEERR_INVALIDPARMS), 0);
@@ -3480,7 +3480,7 @@ static int sam_selfpowered(struct usbdev_s *dev, bool selfpowered)
 
   usbtrace(TRACE_DEVSELFPOWERED, (uint16_t)selfpowered);
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!dev)
     {
       usbtrace(TRACE_DEVERROR(SAM_TRACEERR_INVALIDPARMS), 0);
@@ -3926,7 +3926,7 @@ int usbdev_register(struct usbdevclass_driver_s *driver)
 
   usbtrace(TRACE_DEVREGISTER, 0);
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!driver || !driver->ops->bind || !driver->ops->unbind ||
       !driver->ops->disconnect || !driver->ops->setup)
     {
@@ -4000,7 +4000,7 @@ int usbdev_unregister(struct usbdevclass_driver_s *driver)
 
   usbtrace(TRACE_DEVUNREGISTER, 0);
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (driver != priv->driver)
     {
       usbtrace(TRACE_DEVERROR(SAM_TRACEERR_INVALIDPARMS), 0);

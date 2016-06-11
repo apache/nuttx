@@ -53,7 +53,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Enables debug output from this file (needs CONFIG_DEBUG with
+/* Enables debug output from this file (needs CONFIG_DEBUG_FEATURES with
  * CONFIG_DEBUG_INFO too)
  */
 

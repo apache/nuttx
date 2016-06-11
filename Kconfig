@@ -395,7 +395,7 @@ endmenu # Customize Header Files
 
 menu "Debug Options"
 
-config DEBUG
+config DEBUG_FEATURES
 	bool "Enable Debug Features"
 	default n
 	---help---
@@ -409,7 +409,7 @@ config ARCH_HAVE_HEAPCHECK
 	bool
 	default n
 
-if DEBUG
+if DEBUG_FEATURES
 
 comment "Debug SYSLOG Output Controls"
 
@@ -707,7 +707,7 @@ config DEBUG_WATCHDOG
 		Support for this debug option is architecture-specific and may not
 		be available for some MCUs.
 
-endif # DEBUG
+endif # DEBUG_FEATURES
 
 config ARCH_HAVE_STACKCHECK
 	bool

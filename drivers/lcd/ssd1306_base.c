@@ -742,7 +742,7 @@ static int ssd1306_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
 
   /* Verify the contrast value */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (contrast > CONFIG_LCD_MAXCONTRAST)
     {
       return -EINVAL;

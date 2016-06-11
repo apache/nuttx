@@ -48,7 +48,7 @@
 /* Configuration ************************************************************/
 /* Debug/Trace-related definitions */
 
-#ifndef CONFIG_DEBUG
+#ifndef CONFIG_DEBUG_FEATURES
 #  undef CONFIG_DEBUG_USB
 #  undef CONFIG_DEBUG_INFO
 #endif
@@ -115,7 +115,7 @@ extern "C"
  *
  ****************************************************************************/
 
-#ifndef CONFIG_DEBUG
+#ifndef CONFIG_DEBUG_FEATURES
 #  undef CONFIG_DEBUG_INFO
 #  undef CONFIG_DEBUG_USB
 #endif

@@ -365,7 +365,7 @@ int getsockname(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen)
    * system (?)
    */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!addr || !addrlen)
     {
       err = EINVAL;

@@ -85,7 +85,7 @@
 
 uint32_t *pic32mx_exception(uint32_t *regs)
 {
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   uint32_t cause;
   uint32_t epc;
 #endif
@@ -96,7 +96,7 @@ uint32_t *pic32mx_exception(uint32_t *regs)
 
   board_autoled_on(LED_INIRQ);
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   /* Get the cause of the exception from the CAUSE register */
 
   asm volatile("\tmfc0 %0,$13,0\n" : "=r"(cause));

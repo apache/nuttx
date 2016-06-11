@@ -112,7 +112,7 @@
  * enabled.
  */
 
-#ifndef CONFIG_DEBUG
+#ifndef CONFIG_DEBUG_FEATURES
 #  undef CONFIG_SAMV7_USBHS_REGDEBUG
 #endif
 
@@ -869,7 +869,7 @@ static inline void sam_putreg(uint32_t regval, uint32_t regaddr)
  * Name: sam_dumpep
  ****************************************************************************/
 
-#if defined(CONFIG_SAMV7_USBHS_REGDEBUG) && defined(CONFIG_DEBUG)
+#if defined(CONFIG_SAMV7_USBHS_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
 static void sam_dumpep(struct sam_usbdev_s *priv, int epno)
 {
   /* Global Registers */
@@ -3730,7 +3730,7 @@ static int sam_ep_configure(struct usbdev_ep_s *ep,
 
   /* Verify parameters.  Endpoint 0 is not available at this interface */
 
-#if defined(CONFIG_DEBUG) || defined(CONFIG_USBDEV_TRACE)
+#if defined(CONFIG_DEBUG_FEATURES) || defined(CONFIG_USBDEV_TRACE)
   uint8_t epno = USB_EPNO(desc->addr);
   usbtrace(TRACE_EPCONFIGURE, (uint16_t)epno);
 

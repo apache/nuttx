@@ -80,7 +80,7 @@
  * include/debug.h
  */
 
-#ifndef CONFIG_DEBUG
+#ifndef CONFIG_DEBUG_FEATURES
 #  undef CONFIG_DEBUG_INFO
 #  undef CONFIG_DEBUG_I2S
 #endif

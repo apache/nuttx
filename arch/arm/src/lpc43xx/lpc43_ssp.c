@@ -69,7 +69,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* The following enable debug output from this file (needs CONFIG_DEBUG too).
+/* The following enable debug output from this file (needs CONFIG_DEBUG_FEATURES too).
  *
  * CONFIG_SSP_DEBUG - Define to enable basic SSP debug
  * CONFIG_SSP_VERBOSE - Define to enable verbose SSP debug

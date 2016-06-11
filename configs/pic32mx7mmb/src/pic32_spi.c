@@ -75,7 +75,7 @@
 #define GPIO_SD_WP (GPIO_INPUT|GPIO_PORTG|GPIO_PIN6)
 #define GPIO_SD_CD (GPIO_INPUT|GPIO_INT|GPIO_PORTG|GPIO_PIN7)
 
-/* The following enable debug output from this file (needs CONFIG_DEBUG too).
+/* The following enable debug output from this file (needs CONFIG_DEBUG_FEATURES too).
  *
  * CONFIG_DEBUG_SPI - Define to enable basic SPI debug
  */

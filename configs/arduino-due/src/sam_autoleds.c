@@ -95,7 +95,7 @@
  * at approximately 2Hz, then a fatal error has been detected and the system
  */
 
-/* CONFIG_DEBUG_LEDS enables debug output from this file (needs CONFIG_DEBUG
+/* CONFIG_DEBUG_LEDS enables debug output from this file (needs CONFIG_DEBUG_FEATURES
  * with CONFIG_DEBUG_INFO too)
  */
 

@@ -980,7 +980,7 @@ static void dm320_hwinitialize(void)
 static int dm320_getvid0videoinfo(FAR struct fb_vtable_s *vtable,
                                   FAR struct fb_videoinfo_s *vinfo)
 {
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!vtable || !vinfo)
     {
       return -EINVAL;
@@ -1003,7 +1003,7 @@ static int dm320_getvid0videoinfo(FAR struct fb_vtable_s *vtable,
 static int dm320_getvid0planeinfo(FAR struct fb_vtable_s *vtable, int planeno,
                                   FAR struct fb_planeinfo_s *pinfo)
 {
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!vtable || !pinfo)
     {
       return -EINVAL;
@@ -1027,7 +1027,7 @@ static int dm320_getvid0planeinfo(FAR struct fb_vtable_s *vtable, int planeno,
 static int dm320_getvid1videoinfo(FAR struct fb_vtable_s *vtable,
                                   FAR struct fb_videoinfo_s *vinfo)
 {
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!vtable || !vinfo)
     {
       return -EINVAL;
@@ -1050,7 +1050,7 @@ static int dm320_getvid1videoinfo(FAR struct fb_vtable_s *vtable,
 static int dm320_getvid1planeinfo(FAR struct fb_vtable_s *vtable, int planeno,
                                   FAR struct fb_planeinfo_s *pinfo)
 {
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!vtable || !pinfo)
     {
       return -EINVAL;
@@ -1074,7 +1074,7 @@ static int dm320_getvid1planeinfo(FAR struct fb_vtable_s *vtable, int planeno,
 static int dm320_getosd0videoinfo(FAR struct fb_vtable_s *vtable,
                                   FAR struct fb_videoinfo_s *vinfo)
 {
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!vtable || !vinfo)
     {
       return -EINVAL;
@@ -1101,7 +1101,7 @@ static int dm320_getosd0videoinfo(FAR struct fb_vtable_s *vtable,
 static int dm320_getosd0planeinfo(FAR struct fb_vtable_s *vtable, int planeno,
                                   FAR struct fb_planeinfo_s *pinfo)
 {
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!vtable || !pinfo)
     {
       return -EINVAL;
@@ -1125,7 +1125,7 @@ static int dm320_getosd0planeinfo(FAR struct fb_vtable_s *vtable, int planeno,
 static int dm320_getosd1videoinfo(FAR struct fb_vtable_s *vtable,
                                   FAR struct fb_videoinfo_s *vinfo)
 {
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!vtable || !vinfo)
     {
       return -EINVAL;
@@ -1152,7 +1152,7 @@ static int dm320_getosd1videoinfo(FAR struct fb_vtable_s *vtable,
 static int dm320_getosd1planeinfo(FAR struct fb_vtable_s *vtable, int planeno,
                                   FAR struct fb_planeinfo_s *pinfo)
 {
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!vtable || !pinfo)
     {
       return -EINVAL;
@@ -1196,7 +1196,7 @@ static int dm320_putcmap(FAR struct fb_vtable_s *vtable, FAR struct fb_cmap_s *c
   int len
   int i;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!vtable || !cmap || !cmap->read || !cmap->green || !cmap->blue)
     {
       return -EINVAL;
@@ -1245,7 +1245,7 @@ static int dm320_getcursor(FAR struct fb_vtable_s *vtable, FAR struct fb_cursora
 {
   irqstate_t flags;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!vtable || !attrib)
     {
       return -EINVAL;
@@ -1288,7 +1288,7 @@ static int dm320_setcursor(FAR struct fb_vtable_s *vtable, FAR struct fb_setcurs
   irqstate_t flags;
   uint16_t regval;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!vtable || !settings)
     {
       return -EINVAL;

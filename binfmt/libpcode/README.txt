@@ -96,7 +96,7 @@ Here is a simple test configuration using the NuttX simulator:
 
    Debug options can also be enabled with:
 
-    CONFIG_DEBUG=y
+    CONFIG_DEBUG_FEATURES=y
     CONFIG_DEBUG_BINFMT=y
     CONFIG_DEBUG_INFO=y
 

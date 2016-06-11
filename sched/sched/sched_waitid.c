@@ -175,7 +175,7 @@ int waitid(idtype_t idtype, id_t id, FAR siginfo_t *info, int options)
    * distinguish any other events.
    */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (options != WEXITED)
     {
       set_errno(ENOSYS);

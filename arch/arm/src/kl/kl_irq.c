@@ -137,7 +137,7 @@ static void kl_dumpnvic(const char *msg, int irq)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
 static int kl_nmi(int irq, FAR void *context)
 {
   (void)up_irq_save();
@@ -236,7 +236,7 @@ void up_irqinitialize(void)
 
   /* Attach all other processor exceptions (except reset and sys tick) */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   irq_attach(KL_IRQ_NMI, kl_nmi);
   irq_attach(KL_IRQ_PENDSV, kl_pendsv);
   irq_attach(KL_IRQ_RESERVED, kl_reserved);

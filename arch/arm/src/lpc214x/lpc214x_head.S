@@ -280,7 +280,7 @@
  */
 
 	.macro	showprogress, code
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
 	mov	r0, #\code
 	bl	up_lowputc
 #endif

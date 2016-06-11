@@ -77,7 +77,7 @@
 #  undef CONFIG_SAM34_GPIO_IRQ
 #endif
 
-#ifndef CONFIG_DEBUG
+#ifndef CONFIG_DEBUG_FEATURES
 #  undef CONFIG_DEBUG_GPIO
 #endif
 

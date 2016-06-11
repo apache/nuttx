@@ -169,7 +169,7 @@ static void *ram_write(FAR void *dest, FAR const void *src, size_t len)
        * erased state.
        */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
       if (newvalue != srcvalue)
         {
           dbg("ERROR: Bad write: source=%02x dest=%02x result=%02x\n",

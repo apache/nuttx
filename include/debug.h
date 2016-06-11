@@ -81,7 +81,7 @@
  *    fatal consequences).
  *
  * [a-z]dbg() -- Identical to [a-z]info() except that it also requires that
- *    CONFIG_DEBUG be defined.  This is intended for important error-related
+ *    CONFIG_DEBUG_FEATURES be defined.  This is intended for important error-related
  *    information that you probably not want to suppress during normal debug
  *    general debugging.
  *
@@ -102,7 +102,7 @@
  *    fatal consequences).
  *
  * [a-z]lldbg() -- Identical to [a-z]llinfo() except that it also requires that
- *    CONFIG_DEBUG be defined. This is intended for important error-related
+ *    CONFIG_DEBUG_FEATURES be defined. This is intended for important error-related
  *    information that you probably not want to suppress during normal debug
  *    general debugging.
  */
@@ -132,7 +132,7 @@
 
 /* C-99 style variadic macros are supported */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
 #  define dbg(format, ...) \
    __arch_syslog(LOG_ERR, EXTRA_FMT format EXTRA_ARG, ##__VA_ARGS__)
 
@@ -142,7 +142,7 @@
 # else
 #  define lldbg(x...)
 # endif
-#else /* CONFIG_DEBUG */
+#else /* CONFIG_DEBUG_FEATURES */
 
 #  define dbg(x...)
 #  define lldbg(x...)
@@ -424,7 +424,7 @@
 
 /* Variadic macros NOT supported */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
 #  ifndef CONFIG_ARCH_LOWPUTC
 #    define lldbg     (void)
 #  endif
@@ -697,7 +697,7 @@
 
 /* Buffer dumping macros do not depend on varargs */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
 #  define dbgdumpbuffer(m,b,n) lib_dumpbuffer(m,b,n)
 #  ifdef CONFIG_DEBUG_INFO
 #    define infodumpbuffer(m,b,n) lib_dumpbuffer(m,b,n)
@@ -839,13 +839,13 @@ void lib_dumpbuffer(FAR const char *msg, FAR const uint8_t *buffer,
  */
 
 #ifndef CONFIG_CPP_HAVE_VARARGS
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
 int dbg(const char *format, ...);
 
 # ifdef CONFIG_ARCH_LOWPUTC
 int lldbg(const char *format, ...);
 # endif
-#endif /* CONFIG_DEBUG */
+#endif /* CONFIG_DEBUG_FEATURES */
 
 #ifdef CONFIG_DEBUG_WARN
 int warn(const char *format, ...);

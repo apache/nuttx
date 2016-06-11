@@ -232,7 +232,7 @@ struct up_dev_s
   uintptr_t uartbase;  /* Base address of UART registers */
   uint32_t  baud;      /* Configured baud */
   uint32_t  clock;     /* Clocking frequency of the UART module */
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   uint8_t   irqe;      /* Error IRQ associated with this UART (for enable) */
 #endif
   uint8_t   irqs;      /* Status IRQ associated with this UART (for enable) */
@@ -250,7 +250,7 @@ static int  up_setup(struct uart_dev_s *dev);
 static void up_shutdown(struct uart_dev_s *dev);
 static int  up_attach(struct uart_dev_s *dev);
 static void up_detach(struct uart_dev_s *dev);
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
 static int  up_interrupte(int irq, void *context);
 #endif
 static int  up_interrupts(int irq, void *context);
@@ -327,7 +327,7 @@ static struct up_dev_s g_uart0priv =
   .uartbase       = KINETIS_UART0_BASE,
   .clock          = BOARD_CORECLK_FREQ,
   .baud           = CONFIG_UART0_BAUD,
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   .irqe           = KINETIS_IRQ_UART0E,
 #endif
   .irqs           = KINETIS_IRQ_UART0S,
@@ -361,7 +361,7 @@ static struct up_dev_s g_uart1priv =
   .uartbase       = KINETIS_UART1_BASE,
   .clock          = BOARD_CORECLK_FREQ,
   .baud           = CONFIG_UART1_BAUD,
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   .irqe           = KINETIS_IRQ_UART1E,
 #endif
   .irqs           = KINETIS_IRQ_UART1S,
@@ -395,7 +395,7 @@ static struct up_dev_s g_uart2priv =
   .uartbase       = KINETIS_UART2_BASE,
   .clock          = BOARD_BUS_FREQ,
   .baud           = CONFIG_UART2_BAUD,
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   .irqe           = KINETIS_IRQ_UART2E,
 #endif
   .irqs           = KINETIS_IRQ_UART2S,
@@ -429,7 +429,7 @@ static struct up_dev_s g_uart3priv =
   .uartbase       = KINETIS_UART3_BASE,
   .clock          = BOARD_BUS_FREQ,
   .baud           = CONFIG_UART3_BAUD,
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   .irqe           = KINETIS_IRQ_UART3E,
 #endif
   .irqs           = KINETIS_IRQ_UART3S,
@@ -463,7 +463,7 @@ static struct up_dev_s g_uart4priv =
   .uartbase       = KINETIS_UART4_BASE,
   .clock          = BOARD_BUS_FREQ,
   .baud           = CONFIG_UART4_BAUD,
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   .irqe           = KINETIS_IRQ_UART4E,
 #endif
   .irqs           = KINETIS_IRQ_UART4S,
@@ -497,7 +497,7 @@ static struct up_dev_s g_uart5priv =
   .uartbase       = KINETIS_UART5_BASE,
   .clock          = BOARD_BUS_FREQ,
   .baud           = CONFIG_UART5_BAUD,
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   .irqe           = KINETIS_IRQ_UART5E,
 #endif
   .irqs           = KINETIS_IRQ_UART5S,
@@ -626,7 +626,7 @@ static int up_setup(struct uart_dev_s *dev)
   /* Set up the interrupt priority */
 
   up_prioritize_irq(priv->irqs, priv->irqprio);
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   up_prioritize_irq(priv->irqe, priv->irqprio);
 #endif
 #endif
@@ -681,7 +681,7 @@ static int up_attach(struct uart_dev_s *dev)
    */
 
   ret = irq_attach(priv->irqs, up_interrupts);
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (ret == OK)
     {
       ret = irq_attach(priv->irqe, up_interrupte);
@@ -690,7 +690,7 @@ static int up_attach(struct uart_dev_s *dev)
 
   if (ret == OK)
     {
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
       up_enable_irq(priv->irqe);
 #endif
       up_enable_irq(priv->irqs);
@@ -716,7 +716,7 @@ static void up_detach(struct uart_dev_s *dev)
   /* Disable interrupts */
 
   up_restoreuartint(priv, 0);
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   up_disable_irq(priv->irqe);
 #endif
   up_disable_irq(priv->irqs);
@@ -724,7 +724,7 @@ static void up_detach(struct uart_dev_s *dev)
   /* Detach from the interrupt(s) */
 
   irq_detach(priv->irqs);
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   irq_detach(priv->irqe);
 #endif
 }
@@ -738,7 +738,7 @@ static void up_detach(struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
 static int up_interrupte(int irq, void *context)
 {
   struct uart_dev_s *dev = NULL;
@@ -808,7 +808,7 @@ static int up_interrupte(int irq, void *context)
   regval = up_serialin(priv, KINETIS_UART_D_OFFSET);
   return OK;
 }
-#endif /* CONFIG_DEBUG */
+#endif /* CONFIG_DEBUG_FEATURES */
 
 /****************************************************************************
  * Name: up_interrupts
@@ -1064,7 +1064,7 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
     }
   else
     {
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
 #  warning "Revisit:  How are errors enabled?"
       priv->ie |= UART_C2_RIE;
 #else

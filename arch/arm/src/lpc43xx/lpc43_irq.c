@@ -155,7 +155,7 @@ static void lpc43_dumpnvic(const char *msg, int irq)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
 static int lpc43_nmi(int irq, FAR void *context)
 {
   (void)up_irq_save();
@@ -336,7 +336,7 @@ static int lpc43_irqinfo(int irq, uintptr_t *regaddr, uint32_t *bit,
 void up_irqinitialize(void)
 {
   uint32_t regaddr;
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   uint32_t regval;
 #endif
   int num_priority_registers;
@@ -427,7 +427,7 @@ void up_irqinitialize(void)
 
   /* Attach all other processor exceptions (except reset and sys tick) */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   irq_attach(LPC43_IRQ_NMI, lpc43_nmi);
 #ifndef CONFIG_ARM_MPU
   irq_attach(LPC43_IRQ_MEMFAULT, up_memfault);
@@ -446,7 +446,7 @@ void up_irqinitialize(void)
    * operation.
    */
 
-#if defined(CONFIG_DEBUG) && !defined(CONFIG_ARMV7M_USEBASEPRI)
+#if defined(CONFIG_DEBUG_FEATURES) && !defined(CONFIG_ARMV7M_USEBASEPRI)
   regval  = getreg32(NVIC_DEMCR);
   regval &= ~NVIC_DEMCR_VCHARDERR;
   putreg32(regval, NVIC_DEMCR);

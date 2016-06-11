@@ -136,7 +136,7 @@ static inline uint8_t tiva_gpioport(int port)
 
 int tiva_dumpgpio(uint32_t pinset, const char *msg)
 {
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   irqstate_t   flags;
   unsigned int port = (pinset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
   uintptr_t    base;
@@ -191,7 +191,7 @@ int tiva_dumpgpio(uint32_t pinset, const char *msg)
     }
 
   leave_critical_section(flags);
-#endif /* CONFIG_DEBUG */
+#endif /* CONFIG_DEBUG_FEATURES */
 
   return OK;
 }

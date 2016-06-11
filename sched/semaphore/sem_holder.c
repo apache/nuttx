@@ -372,7 +372,7 @@ static int sem_boostholderprio(FAR struct semholder_s *pholder,
  * Name: sem_verifyholder
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
 static int sem_verifyholder(FAR struct semholder_s *pholder, FAR sem_t *sem,
                             FAR void *arg)
 {
@@ -397,7 +397,7 @@ static int sem_verifyholder(FAR struct semholder_s *pholder, FAR sem_t *sem,
  * Name: sem_dumpholder
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG) && defined(CONFIG_SEM_PHDEBUG)
+#if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_SEM_PHDEBUG)
 static int sem_dumpholder(FAR struct semholder_s *pholder, FAR sem_t *sem,
                           FAR void *arg)
 {
@@ -648,7 +648,7 @@ static inline void sem_restorebaseprio_irq(FAR struct tcb_s *stcb,
    * should be at their base priority.
    */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   else
     {
       (void)sem_foreachholder(sem, sem_verifyholder, NULL);
@@ -723,7 +723,7 @@ static inline void sem_restorebaseprio_task(FAR struct tcb_s *stcb,
    * should be at their base priority.
    */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   else
     {
       (void)sem_foreachholder(sem, sem_verifyholder, NULL);
@@ -1036,7 +1036,7 @@ void sem_canceled(FAR struct tcb_s *stcb, FAR sem_t *sem)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG) && defined(CONFIG_SEM_PHDEBUG)
+#if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_SEM_PHDEBUG)
 void sem_enumholders(FAR sem_t *sem)
 {
   (void)sem_foreachholder(sem, sem_dumpholder, NULL);
@@ -1060,7 +1060,7 @@ void sem_enumholders(FAR sem_t *sem)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG) && defined(CONFIG_SEM_PHDEBUG)
+#if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_SEM_PHDEBUG)
 int sem_nfreeholders(void)
 {
 #if CONFIG_SEM_PREALLOCHOLDERS > 0

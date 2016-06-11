@@ -697,7 +697,7 @@ static ssize_t sst39vf_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
 static ssize_t sst39vf_read(FAR struct mtd_dev_s *dev, off_t offset,
                             size_t nbytes, FAR uint8_t *buffer)
 {
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   FAR struct sst39vf_dev_s *priv = (FAR struct sst39vf_dev_s *)dev;
 #endif
   FAR const uint8_t *source;

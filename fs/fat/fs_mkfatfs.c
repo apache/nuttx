@@ -193,7 +193,7 @@ int mkfatfs(FAR const char *pathname, FAR struct fat_format_s *fmt)
 
   /* Verify format options (only when DEBUG enabled) */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!pathname)
     {
       fdbg("ERROR: No block driver path\n");
@@ -228,7 +228,7 @@ int mkfatfs(FAR const char *pathname, FAR struct fat_format_s *fmt)
    * means that we should autoselect the cluster sizel.
    */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (fmt->ff_clustshift > 7 && fmt->ff_clustshift != 0xff)
     {
       fdbg("ERROR: Invalid cluster shift value: %d\n", fmt->ff_clustshift);

@@ -83,7 +83,7 @@
  * enabled.
  */
 
-#ifndef CONFIG_DEBUG
+#ifndef CONFIG_DEBUG_FEATURES
 #  undef CONFIG_PIC32MX_USBDEV_REGDEBUG
 #  undef CONFIG_PIC32MX_USBDEV_BDTDEBUG
 #endif
@@ -3148,7 +3148,7 @@ static int pic32mx_epconfigure(struct usbdev_ep_s *ep,
   bool     bidi;
   int      index;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!ep || !desc)
     {
       usbtrace(TRACE_DEVERROR(PIC32MX_TRACEERR_INVALIDPARMS), 0);
@@ -3275,7 +3275,7 @@ static int pic32mx_epdisable(struct usbdev_ep_s *ep)
   int i;
   irqstate_t flags;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!ep)
     {
       usbtrace(TRACE_DEVERROR(PIC32MX_TRACEERR_INVALIDPARMS), 0);
@@ -3319,7 +3319,7 @@ static struct usbdev_req_s *pic32mx_epallocreq(struct usbdev_ep_s *ep)
 {
   struct pic32mx_req_s *privreq;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!ep)
     {
       usbtrace(TRACE_DEVERROR(PIC32MX_TRACEERR_INVALIDPARMS), 0);
@@ -3347,7 +3347,7 @@ static void pic32mx_epfreereq(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
 {
   struct pic32mx_req_s *privreq = (struct pic32mx_req_s *)req;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!ep || !req)
     {
       usbtrace(TRACE_DEVERROR(PIC32MX_TRACEERR_INVALIDPARMS), 0);
@@ -3372,7 +3372,7 @@ static int pic32mx_epsubmit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
   uint8_t epno;
   int ret = OK;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!req || !req->callback || !req->buf || !ep)
     {
       usbtrace(TRACE_DEVERROR(PIC32MX_TRACEERR_INVALIDPARMS), 0);
@@ -3384,7 +3384,7 @@ static int pic32mx_epsubmit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
   usbtrace(TRACE_EPSUBMIT, USB_EPNO(ep->eplog));
   priv = privep->dev;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!priv->driver)
     {
       usbtrace(TRACE_DEVERROR(PIC32MX_TRACEERR_NOTCONFIGURED), priv->usbdev.speed);
@@ -3459,7 +3459,7 @@ static int pic32mx_epcancel(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
   struct pic32mx_ep_s *privep = (struct pic32mx_ep_s *)ep;
   irqstate_t flags;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!ep || !req)
     {
       usbtrace(TRACE_DEVERROR(PIC32MX_TRACEERR_INVALIDPARMS), 0);
@@ -3646,7 +3646,7 @@ static int pic32mx_epstall(struct usbdev_ep_s *ep, bool resume)
   irqstate_t flags;
   int ret;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!ep)
     {
       usbtrace(TRACE_DEVERROR(PIC32MX_TRACEERR_INVALIDPARMS), 0);
@@ -3707,7 +3707,7 @@ static struct usbdev_ep_s *pic32mx_allocep(struct usbdev_s *dev, uint8_t epno,
   uint16_t epset = PIC32MX_ENDP_ALLSET;
 
   usbtrace(TRACE_DEVALLOCEP, (uint16_t)epno);
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!dev)
     {
       usbtrace(TRACE_DEVERROR(PIC32MX_TRACEERR_INVALIDPARMS), 0);
@@ -3765,7 +3765,7 @@ static void pic32mx_freeep(struct usbdev_s *dev, struct usbdev_ep_s *ep)
   struct pic32mx_usbdev_s *priv;
   struct pic32mx_ep_s *privep;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!dev || !ep)
     {
       usbtrace(TRACE_DEVERROR(PIC32MX_TRACEERR_INVALIDPARMS), 0);
@@ -3797,7 +3797,7 @@ static int pic32mx_getframe(struct usbdev_s *dev)
   uint16_t frmh;
   uint16_t tmp;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!dev)
     {
       usbtrace(TRACE_DEVERROR(PIC32MX_TRACEERR_INVALIDPARMS), 0);
@@ -3838,7 +3838,7 @@ static int pic32mx_wakeup(struct usbdev_s *dev)
   struct pic32mx_usbdev_s *priv = (struct pic32mx_usbdev_s *)dev;
 
   usbtrace(TRACE_DEVWAKEUP, 0);
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!dev)
     {
       usbtrace(TRACE_DEVERROR(PIC32MX_TRACEERR_INVALIDPARMS), 0);
@@ -3862,7 +3862,7 @@ static int pic32mx_selfpowered(struct usbdev_s *dev, bool selfpowered)
 
   usbtrace(TRACE_DEVSELFPOWERED, (uint16_t)selfpowered);
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!dev)
     {
       usbtrace(TRACE_DEVERROR(PIC32MX_TRACEERR_INVALIDPARMS), 0);
@@ -4373,7 +4373,7 @@ int usbdev_register(struct usbdevclass_driver_s *driver)
 
   usbtrace(TRACE_DEVREGISTER, 0);
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!driver || !driver->ops->bind || !driver->ops->unbind ||
       !driver->ops->disconnect || !driver->ops->setup)
     {
@@ -4439,7 +4439,7 @@ int usbdev_unregister(struct usbdevclass_driver_s *driver)
 
   usbtrace(TRACE_DEVUNREGISTER, 0);
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (driver != priv->driver)
     {
       usbtrace(TRACE_DEVERROR(PIC32MX_TRACEERR_INVALIDPARMS), 0);

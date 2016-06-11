@@ -85,7 +85,7 @@ void up_initial_state(struct tcb_s *tcb)
    * all registers is a good debug helper, but should not be necessary.
    */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   memset(xcp, 0, sizeof(struct xcptcontext));
 #else
   /* No pending signal delivery */

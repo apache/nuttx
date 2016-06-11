@@ -135,7 +135,7 @@
 
 /* Low-level register debug */
 
-#if !defined(CONFIG_DEBUG) || !defined(CONFIG_DEBUG_NET)
+#if !defined(CONFIG_DEBUG_FEATURES) || !defined(CONFIG_DEBUG_NET)
 #  undef CONFIG_ENC28J60_REGDEBUG
 #endif
 

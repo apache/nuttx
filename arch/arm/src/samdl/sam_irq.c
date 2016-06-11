@@ -93,7 +93,7 @@ volatile uint32_t *g_current_regs[1];
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
 static int sam_nmi(int irq, FAR void *context)
 {
   (void)up_irq_save();
@@ -192,7 +192,7 @@ void up_irqinitialize(void)
 
   /* Attach all other processor exceptions (except reset and sys tick) */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   irq_attach(SAM_IRQ_NMI, sam_nmi);
   irq_attach(SAM_IRQ_PENDSV, sam_pendsv);
   irq_attach(SAM_IRQ_RESERVED, sam_reserved);

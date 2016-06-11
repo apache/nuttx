@@ -236,7 +236,7 @@ enum usbhost_trace1codes_e
  *    want to do that?
  *
  *  CONFIG_STM32_USBHOST_REGDEBUG - Enable very low-level register access
- *    debug.  Depends on CONFIG_DEBUG.
+ *    debug.  Depends on CONFIG_DEBUG_FEATURES.
  */
 
 /************************************************************************************

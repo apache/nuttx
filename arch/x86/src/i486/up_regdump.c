@@ -41,9 +41,9 @@
 
 /* Output debug info -- even if debug is not selected. */
 
-#undef  CONFIG_DEBUG
+#undef  CONFIG_DEBUG_FEATURES
 #undef  CONFIG_DEBUG_INFO
-#define CONFIG_DEBUG 1
+#define CONFIG_DEBUG_FEATURES 1
 #define CONFIG_DEBUG_INFO 1
 
 #include <debug.h>

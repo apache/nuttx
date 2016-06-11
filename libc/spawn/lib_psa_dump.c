@@ -42,7 +42,7 @@
 #include <spawn.h>
 #include <debug.h>
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
 
 /****************************************************************************
  * Public Functions
@@ -124,4 +124,4 @@ void posix_spawnattr_dump(posix_spawnattr_t *attr)
 #endif
 }
 
-#endif /* CONFIG_DEBUG */
+#endif /* CONFIG_DEBUG_FEATURES */

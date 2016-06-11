@@ -114,7 +114,7 @@ struct sam34_lowerhalf_s
  ****************************************************************************/
 /* Register operations ******************************************************/
 
-#if defined(CONFIG_SAM34_TC_REGDEBUG) && defined(CONFIG_DEBUG)
+#if defined(CONFIG_SAM34_TC_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
 static uint32_t sam34_getreg(uint32_t addr);
 static void     sam34_putreg(uint32_t val, uint32_t addr);
 #else
@@ -174,7 +174,7 @@ static struct sam34_lowerhalf_s g_tcdevs[6];
  *
  ****************************************************************************/
 
-#if defined(CONFIG_SAM34_TC_REGDEBUG) && defined(CONFIG_DEBUG)
+#if defined(CONFIG_SAM34_TC_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
 static uint32_t sam34_getreg(uint32_t addr)
 {
   static uint32_t prevaddr = 0;
@@ -237,7 +237,7 @@ static uint32_t sam34_getreg(uint32_t addr)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_SAM34_TC_REGDEBUG) && defined(CONFIG_DEBUG)
+#if defined(CONFIG_SAM34_TC_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
 static void sam34_putreg(uint32_t val, uint32_t addr)
 {
   /* Show the register value being written */

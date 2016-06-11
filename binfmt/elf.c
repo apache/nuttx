@@ -60,7 +60,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* CONFIG_DEBUG, CONFIG_DEBUG_INFO, and CONFIG_DEBUG_BINFMT have to be
+/* CONFIG_DEBUG_FEATURES, CONFIG_DEBUG_INFO, and CONFIG_DEBUG_BINFMT have to be
  * defined or CONFIG_ELF_DUMPBUFFER does nothing.
  */
 
@@ -87,7 +87,7 @@
  ****************************************************************************/
 
 static int elf_loadbinary(FAR struct binary_s *binp);
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_BINFMT)
+#if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_DEBUG_BINFMT)
 static void elf_dumploadinfo(FAR struct elf_loadinfo_s *loadinfo);
 #endif
 
@@ -110,7 +110,7 @@ static struct binfmt_s g_elfbinfmt =
  * Name: elf_dumploadinfo
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_BINFMT)
+#if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_DEBUG_BINFMT)
 static void elf_dumploadinfo(FAR struct elf_loadinfo_s *loadinfo)
 {
   int i;

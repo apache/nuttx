@@ -45,7 +45,7 @@
 
 #include <nuttx/spawn.h>
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
 
 /****************************************************************************
  * Public Functions
@@ -126,5 +126,5 @@ void posix_spawn_file_actions_dump(FAR posix_spawn_file_actions_t *file_actions)
     }
 }
 
-#endif /* CONFIG_DEBUG */
+#endif /* CONFIG_DEBUG_FEATURES */
 

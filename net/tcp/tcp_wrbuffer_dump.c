@@ -46,7 +46,7 @@
 
 #include "tcp/tcp.h"
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
 
 /****************************************************************************
  * Public Functions
@@ -68,4 +68,4 @@ void tcp_wrbuffer_dump(FAR const char *msg, FAR struct tcp_wrbuffer_s *wrb,
   iob_dump("I/O Buffer Chain", WRB_IOB(wrb), len, offset);
 }
 
-#endif /* CONFIG_DEBUG */
+#endif /* CONFIG_DEBUG_FEATURES */

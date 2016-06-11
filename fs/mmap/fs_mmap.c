@@ -131,7 +131,7 @@ FAR void *mmap(FAR void *start, size_t length, int prot, int flags,
    * things.
    */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (prot == PROT_NONE ||
       (flags & (MAP_PRIVATE | MAP_FIXED | MAP_ANONYMOUS | MAP_DENYWRITE)) != 0)
     {

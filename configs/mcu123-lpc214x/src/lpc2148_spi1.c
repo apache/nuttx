@@ -548,7 +548,7 @@ FAR struct spi_dev_s *lpc214x_spibus_initialize(int port)
 
   /* Only the SPI1 interface is supported */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (port != 1)
     {
       return NULL;

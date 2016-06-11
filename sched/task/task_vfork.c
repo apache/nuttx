@@ -430,7 +430,7 @@ pid_t task_vforkstart(FAR struct task_tcb_s *child)
 
   rc = 0;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   ret = waitpid(pid, &rc, 0);
   if (ret < 0)
     {

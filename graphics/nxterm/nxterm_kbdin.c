@@ -337,7 +337,7 @@ int nxterm_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
 
       struct pollfd **slot = (struct pollfd **)fds->priv;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
       if (!slot)
         {
           gdbg("ERROR: No slot\n");

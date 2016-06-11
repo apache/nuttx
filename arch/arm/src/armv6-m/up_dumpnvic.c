@@ -48,7 +48,7 @@
 
 #include "nvic.h"
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
 
 /****************************************************************************
  * Private Data
@@ -108,4 +108,4 @@ void up_dumpnvic(FAR const char *msg)
   leave_critical_section(flags);
 }
 
-#endif /* CONFIG_DEBUG */
+#endif /* CONFIG_DEBUG_FEATURES */

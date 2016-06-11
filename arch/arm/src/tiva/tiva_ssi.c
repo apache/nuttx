@@ -66,7 +66,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Enables debug output from this file (needs CONFIG_DEBUG with
+/* Enables debug output from this file (needs CONFIG_DEBUG_FEATURES with
  * CONFIG_DEBUG_INFO too)
  */
 
@@ -719,7 +719,7 @@ static int ssi_performtx(struct tiva_ssidev_s *priv)
            * when the Tx FIFO is 1/2 full or less.
            */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
           regval |= (SSI_IM_TX | SSI_RIS_ROR);
 #else
           regval |= SSI_IM_TX;
@@ -792,7 +792,7 @@ static inline void ssi_performrx(struct tiva_ssidev_s *priv)
        * interrupt, probably an Rx timeout).
        */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
       regval |= (SSI_IM_RX | SSI_IM_RT | SSI_IM_ROR);
 #else
       regval |= (SSI_IM_RX | SSI_IM_RT);

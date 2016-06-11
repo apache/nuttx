@@ -125,7 +125,7 @@ void nxbe_bitmap(FAR struct nxbe_window_s *wnd, FAR const struct nxgl_rect_s *de
   unsigned int deststride;
   int i;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!wnd || !dest || !src || !origin)
     {
       return;

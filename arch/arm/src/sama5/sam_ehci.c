@@ -112,7 +112,7 @@
 
 /* Debug options */
 
-#ifndef CONFIG_DEBUG
+#ifndef CONFIG_DEBUG_FEATURES
 #  undef CONFIG_SAMA5_EHCI_REGDEBUG
 #endif
 
@@ -129,7 +129,7 @@
 
 /* Simplify DEBUG checks */
 
-#ifndef CONFIG_DEBUG
+#ifndef CONFIG_DEBUG_FEATURES
 #  undef CONFIG_DEBUG_INFO
 #  undef CONFIG_DEBUG_USB
 #endif

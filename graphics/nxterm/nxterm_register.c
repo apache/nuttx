@@ -99,7 +99,7 @@ FAR struct nxterm_state_s *
   memcpy(&priv->wndo, wndo, sizeof(struct nxterm_window_s));
 
   sem_init(&priv->exclsem, 0, 1);
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   priv->holder  = NO_HOLDER;
 #endif
 

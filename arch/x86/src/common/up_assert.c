@@ -44,9 +44,9 @@
  */
 
 #ifdef CONFIG_ARCH_STACKDUMP
-# undef  CONFIG_DEBUG
+# undef  CONFIG_DEBUG_FEATURES
 # undef  CONFIG_DEBUG_INFO
-# define CONFIG_DEBUG 1
+# define CONFIG_DEBUG_FEATURES 1
 # define CONFIG_DEBUG_INFO 1
 #endif
 
@@ -80,12 +80,12 @@
  * code.  We are going to print the task name if:
  *
  *  CONFIG_TASK_NAME_SIZE > 0 &&    <-- The task has a name
- *  (defined(CONFIG_DEBUG)    ||    <-- And the debug is enabled (lldbg used)
+ *  (defined(CONFIG_DEBUG_FEATURES)    ||    <-- And the debug is enabled (lldbg used)
  *   defined(CONFIG_ARCH_STACKDUMP) <-- Or lowsyslog() is used
  */
 
 #undef CONFIG_PRINT_TASKNAME
-#if CONFIG_TASK_NAME_SIZE > 0 && (defined(CONFIG_DEBUG) || defined(CONFIG_ARCH_STACKDUMP))
+#if CONFIG_TASK_NAME_SIZE > 0 && (defined(CONFIG_DEBUG_FEATURES) || defined(CONFIG_ARCH_STACKDUMP))
 #  define CONFIG_PRINT_TASKNAME 1
 #endif
 

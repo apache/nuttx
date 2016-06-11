@@ -60,7 +60,7 @@
  * modify r0, r1, r2 and r14
  */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
 	.macro	showprogress, code
 	mov	r0, #\code
 	bl	up_lowputc

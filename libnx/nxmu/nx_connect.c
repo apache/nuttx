@@ -122,7 +122,7 @@ NXHANDLE nx_connectinstance(FAR const char *svrmqname)
 
   /* Sanity checking */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!svrmqname)
     {
       set_errno(EINVAL);

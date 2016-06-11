@@ -404,7 +404,7 @@ static void usbmsc_unbind(FAR struct usbdevclass_driver_s *driver,
 
   usbtrace(TRACE_CLASSUNBIND, 0);
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!driver || !dev || !dev->ep0)
     {
       usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_UNBINDINVALIDARGS), 0);
@@ -416,7 +416,7 @@ static void usbmsc_unbind(FAR struct usbdevclass_driver_s *driver,
 
   priv = ((FAR struct usbmsc_driver_s *)driver)->dev;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!priv)
     {
       usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_EP0NOTBOUND1), 0);
@@ -521,7 +521,7 @@ static int usbmsc_setup(FAR struct usbdevclass_driver_s *driver,
   uint16_t len;
   int ret = -EOPNOTSUPP;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!driver || !dev || !dev->ep0 || !ctrl)
     {
       usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_SETUPINVALIDARGS), 0);
@@ -534,7 +534,7 @@ static int usbmsc_setup(FAR struct usbdevclass_driver_s *driver,
   usbtrace(TRACE_CLASSSETUP, ctrl->req);
   priv = ((FAR struct usbmsc_driver_s *)driver)->dev;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!priv || !priv->ctrlreq)
     {
       usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_EP0NOTBOUND2), 0);
@@ -847,7 +847,7 @@ static void usbmsc_disconnect(FAR struct usbdevclass_driver_s *driver,
 
   usbtrace(TRACE_CLASSDISCONNECT, 0);
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!driver || !dev || !dev->ep0)
     {
       usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_DISCONNECTINVALIDARGS), 0);
@@ -859,7 +859,7 @@ static void usbmsc_disconnect(FAR struct usbdevclass_driver_s *driver,
 
   priv = ((FAR struct usbmsc_driver_s *)driver)->dev;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!priv)
     {
       usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_EP0NOTBOUND3), 0);
@@ -935,7 +935,7 @@ int usbmsc_setconfig(FAR struct usbmsc_dev_s *priv, uint8_t config)
   int i;
   int ret = 0;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (priv == NULL)
     {
       usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_SETCONFIGINVALIDARGS), 0);
@@ -1074,7 +1074,7 @@ void usbmsc_wrcomplete(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *req)
 
   /* Sanity check */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!ep || !ep->priv || !req || !req->priv)
     {
       usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_WRCOMPLETEINVALIDARGS), 0);
@@ -1135,7 +1135,7 @@ void usbmsc_rdcomplete(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *req)
 
   /* Sanity check */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!ep || !ep->priv || !req || !req->priv)
     {
       usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_RDCOMPLETEINVALIDARGS), 0);
@@ -1227,7 +1227,7 @@ void usbmsc_deferredresponse(FAR struct usbmsc_dev_s *priv, bool failed)
   FAR struct usbdev_req_s *ctrlreq;
   int ret;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!priv || !priv->usbdev || !priv->ctrlreq)
     {
       usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_DEFERREDRESPINVALIDARGS), 0);
@@ -1317,7 +1317,7 @@ int usbmsc_configure(unsigned int nluns, void **handle)
   FAR struct usbmsc_driver_s *drvr;
   int ret;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (nluns > 15)
     {
       usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_TOOMANYLUNS), 0);
@@ -1411,7 +1411,7 @@ int usbmsc_bindlun(FAR void *handle, FAR const char *drvrpath,
   struct geometry geo;
   int ret;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!alloc || !drvrpath || startsector < 0)
     {
       usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_BINLUNINVALIDARGS1), 0);
@@ -1421,7 +1421,7 @@ int usbmsc_bindlun(FAR void *handle, FAR const char *drvrpath,
 
   priv = &alloc->dev;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!priv->luntab)
     {
       usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_INTERNALCONFUSION1), 0);
@@ -1437,7 +1437,7 @@ int usbmsc_bindlun(FAR void *handle, FAR const char *drvrpath,
 
   lun = &priv->luntab[lunno];
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (lun->inode != NULL)
     {
       usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_LUNALREADYBOUND), 0);
@@ -1552,7 +1552,7 @@ int usbmsc_unbindlun(FAR void *handle, unsigned int lunno)
   FAR struct usbmsc_lun_s *lun;
   int ret;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!alloc)
     {
       usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_UNBINDLUNINVALIDARGS1), 0);
@@ -1562,7 +1562,7 @@ int usbmsc_unbindlun(FAR void *handle, unsigned int lunno)
 
   priv = &alloc->dev;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!priv->luntab)
     {
       usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_INTERNALCONFUSION2), 0);
@@ -1579,7 +1579,7 @@ int usbmsc_unbindlun(FAR void *handle, unsigned int lunno)
   lun = &priv->luntab[lunno];
   usbmsc_scsi_lock(priv);
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (lun->inode == NULL)
     {
       usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_LUNNOTBOUND), 0);
@@ -1626,7 +1626,7 @@ int usbmsc_exportluns(FAR void *handle)
   irqstate_t flags;
   int ret = OK;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!alloc)
     {
       usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_EXPORTLUNSINVALIDARGS), 0);
@@ -1756,7 +1756,7 @@ void usbmsc_uninitialize(FAR void *handle)
 #endif
   int i;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!handle)
     {
       usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_UNINITIALIZEINVALIDARGS), 0);

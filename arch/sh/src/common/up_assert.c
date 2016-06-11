@@ -44,9 +44,9 @@
  */
 
 #ifdef CONFIG_ARCH_STACKDUMP
-# undef  CONFIG_DEBUG
+# undef  CONFIG_DEBUG_FEATURES
 # undef  CONFIG_DEBUG_INFO
-# define CONFIG_DEBUG 1
+# define CONFIG_DEBUG_FEATURES 1
 # define CONFIG_DEBUG_INFO 1
 #endif
 
@@ -147,7 +147,7 @@ static int assert_tracecallback(FAR struct usbtrace_s *trace, FAR void *arg)
 
 void up_assert(const uint8_t *filename, int lineno)
 {
-#if CONFIG_TASK_NAME_SIZE > 0 && defined(CONFIG_DEBUG)
+#if CONFIG_TASK_NAME_SIZE > 0 && defined(CONFIG_DEBUG_FEATURES)
   struct tcb_s *rtcb = this_task();
 #endif
 

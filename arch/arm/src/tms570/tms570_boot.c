@@ -122,7 +122,7 @@ static inline void tms570_event_export(void)
 
 static inline void tms570_check_reset(void)
 {
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   uint32_t regval;
 
   /* Read from the system exception status register to identify the cause of

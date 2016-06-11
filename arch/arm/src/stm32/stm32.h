@@ -59,7 +59,7 @@
  * depend on CONFIG_DEBUG_INFO
  */
 
-#ifndef CONFIG_DEBUG
+#ifndef CONFIG_DEBUG_FEATURES
 #  undef CONFIG_DEBUG_DMA
 #  undef CONFIG_DEBUG_RTC
 #  undef CONFIG_DEBUG_I2C

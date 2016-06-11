@@ -120,11 +120,11 @@
 
 /* The following enable debug output from this file.
  *
- * CONFIG_DEBUG_SPI && CONFIG_DEBUG - Define to enable basic SPI debug
+ * CONFIG_DEBUG_SPI && CONFIG_DEBUG_FEATURES - Define to enable basic SPI debug
  * CONFIG_DEBUG_INFO - Define to enable verbose SPI debug
  */
 
-#ifndef CONFIG_DEBUG
+#ifndef CONFIG_DEBUG_FEATURES
 #  undef CONFIG_DEBUG_SPI
 #  undef CONFIG_DEBUG_INFO
 #endif

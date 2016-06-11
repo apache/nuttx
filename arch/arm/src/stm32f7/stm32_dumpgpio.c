@@ -51,7 +51,7 @@
 #include "stm32_gpio.h"
 #include "stm32_rcc.h"
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
 
 /* Content of this file requires verification before it is used with other
  * families
@@ -65,7 +65,7 @@
  ****************************************************************************/
 /* Port letters for prettier debug output */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
 static const char g_portchar[STM32F7_NGPIO] =
 {
 #if STM32F7_NGPIO > 11
@@ -156,4 +156,4 @@ int stm32_dumpgpio(uint32_t pinset, const char *msg)
 }
 
 #endif /* CONFIG_STM32F7_STM32F74XX || CONFIG_STM32F7_STM32F75XX */
-#endif /* CONFIG_DEBUG */
+#endif /* CONFIG_DEBUG_FEATURES */

@@ -333,7 +333,7 @@ config STM32L4_QSPI_DMATHRESHOLD
 
 config STM32L4_QSPI_DMADEBUG
 	bool "QSPI DMA transfer debug"
-	depends on STM32L4_QSPI_DMA && DEBUG && DEBUG_DMA
+	depends on STM32L4_QSPI_DMA && DEBUG_FEATURES && DEBUG_DMA
 	default n
 	---help---
 		Enable special debug instrumentation to analyze QSPI DMA data transfers.
@@ -343,11 +343,11 @@ config STM32L4_QSPI_DMADEBUG
 
 config STM32L4_QSPI_REGDEBUG
 	bool "QSPI Register level debug"
-	depends on DEBUG
+	depends on DEBUG_FEATURES
 	default n
 	---help---
 		Output detailed register-level QSPI device debug information.
-		Requires also DEBUG.
+		Requires also CONFIG_DEBUG_FEATURES.
 
 endif
 

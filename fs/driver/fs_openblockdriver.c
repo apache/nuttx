@@ -81,7 +81,7 @@ int open_blockdriver(FAR const char *pathname, int mountflags,
 
   /* Minimal sanity checks */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!ppinode)
     {
       ret = -EINVAL;

@@ -127,9 +127,9 @@
 #endif
 
 /* Debug Configuration *****************************************************/
-/* Register debug -- can only happen of CONFIG_DEBUG is selected */
+/* Register debug -- can only happen of CONFIG_DEBUG_FEATURES is selected */
 
-#ifndef CONFIG_DEBUG
+#ifndef CONFIG_DEBUG_FEATURES
 #  undef  CONFIG_NET_REGDEBUG
 #endif
 
@@ -137,7 +137,7 @@
  * console.
  */
 
-#ifndef CONFIG_DEBUG
+#ifndef CONFIG_DEBUG_FEATURES
 #  undef  CONFIG_NET_DUMPPACKET
 #endif
 

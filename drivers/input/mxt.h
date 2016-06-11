@@ -49,7 +49,7 @@
 /* Support T6 only if debug is enabled */
 
 #undef MXT_SUPPORT_T6
-#if !defined(CONFIG_DEBUG)
+#if !defined(CONFIG_DEBUG_FEATURES)
 #  undef CONFIG_DEBUG_INFO
 #  undef CONFIG_DEBUG_INPUT
 #endif

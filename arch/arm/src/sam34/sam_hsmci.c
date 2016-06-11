@@ -2035,7 +2035,7 @@ static int sam_recvshort(FAR struct sdio_dev_s *dev,
    *     0         1               End bit
    */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!rshort)
     {
       fdbg("ERROR: rshort=NULL\n");
@@ -2095,7 +2095,7 @@ static int sam_recvlong(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t rlong
    *     0         1               End bit
    */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   /* Check that R1 is the correct response to this command */
 
   if ((cmd & MMCSD_RESPONSE_MASK) != MMCSD_R2_RESPONSE)

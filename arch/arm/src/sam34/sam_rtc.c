@@ -80,7 +80,7 @@
 
 #define RTC_MAGIC 0xdeadbeef
 
-#ifndef CONFIG_DEBUG
+#ifndef CONFIG_DEBUG_FEATURES
 #  undef CONFIG_DEBUG_RTC
 #endif
 

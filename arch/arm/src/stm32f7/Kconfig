@@ -1856,9 +1856,9 @@ endchoice
 config STM32F7_ETHMAC_REGDEBUG
 	bool "Register-Level Debug"
 	default n
-	depends on DEBUG
+	depends on DEBUG_FEATURES
 	---help---
-		Enable very low-level register access debug.  Depends on DEBUG.
+		Enable very low-level register access debug.  Depends on CONFIG_DEBUG_FEATURES.
 
 endmenu
 endif # STM32F7_ETHMAC

@@ -456,7 +456,7 @@ int romdisk_register(int minor, FAR const uint8_t *buffer, uint32_t nsectors,
 
   /* Sanity check */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (minor < 0 || minor > 255 || !buffer || !nsectors || !sectsize)
     {
       return -EINVAL;

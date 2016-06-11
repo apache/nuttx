@@ -97,7 +97,7 @@
 #  define canllinfo(x...)
 #endif
 
-#if !defined(CONFIG_DEBUG) || !defined(CONFIG_DEBUG_CAN)
+#if !defined(CONFIG_DEBUG_FEATURES) || !defined(CONFIG_DEBUG_CAN)
 #  undef CONFIG_CAN_REGDEBUG
 #endif
 

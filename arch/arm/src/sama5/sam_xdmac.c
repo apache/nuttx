@@ -1330,7 +1330,7 @@ sam_allocdesc(struct sam_xdmach_s *xdmach, struct chnext_view1_s *prev,
    * Obviously setting it to zero would break that usage.
    */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (csa != 0)
 #endif
     {
@@ -1650,7 +1650,7 @@ static inline int sam_single(struct sam_xdmach_s *xdmach)
 static inline int sam_multiple(struct sam_xdmach_s *xdmach)
 {
   struct sam_xdmac_s *xdmac = sam_controller(xdmach);
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   struct chnext_view1_s *llhead = xdmach->llhead;
 #endif
   uintptr_t paddr;

@@ -141,11 +141,11 @@
 #define PIC32MX_NBUFFERS (CONFIG_NET_NRXDESC + CONFIG_NET_NTXDESC + 1)
 
 /* Debug Configuration *****************************************************/
-/* Register/Descriptor debug -- can only happen of CONFIG_DEBUG is selected.
+/* Register/Descriptor debug -- can only happen of CONFIG_DEBUG_FEATURES is selected.
  * This will probably generate much more output than you care to see.
  */
 
-#ifndef CONFIG_DEBUG
+#ifndef CONFIG_DEBUG_FEATURES
 #  undef CONFIG_NET_REGDEBUG
 #  undef CONFIG_NET_DESCDEBUG
 #endif
@@ -154,7 +154,7 @@
  * console.
  */
 
-#ifndef CONFIG_DEBUG
+#ifndef CONFIG_DEBUG_FEATURES
 #  undef  CONFIG_NET_DUMPPACKET
 #endif
 

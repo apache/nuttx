@@ -146,7 +146,7 @@ static void lpc17_dumpnvic(const char *msg, int irq)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
 static int lpc17_nmi(int irq, FAR void *context)
 {
   (void)up_irq_save();
@@ -392,7 +392,7 @@ void up_irqinitialize(void)
 
   /* Attach all other processor exceptions (except reset and sys tick) */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   irq_attach(LPC17_IRQ_NMI, lpc17_nmi);
 #ifndef CONFIG_ARM_MPU
   irq_attach(LPC17_IRQ_MEMFAULT, up_memfault);

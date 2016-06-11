@@ -79,7 +79,7 @@ Status
   configuration that I used for testing.  I enabled DEBUG output, ran with
   only 2 CPUS, and disabled the RAMLOG:
 
-    +CONFIG_DEBUG=y
+    +CONFIG_DEBUG_FEATURES=y
     +CONFIG_DEBUG_INFO=y
     +CONFIG_DEBUG_SCHED=y
     +CONFIG_DEBUG_SYMBOLS=y

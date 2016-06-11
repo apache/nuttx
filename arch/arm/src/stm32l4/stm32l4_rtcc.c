@@ -83,7 +83,7 @@
 #  error "CONFIG_STM32L4_PWR must selected to use this driver"
 #endif
 
-#ifndef CONFIG_DEBUG
+#ifndef CONFIG_DEBUG_FEATURES
 #  undef CONFIG_DEBUG_RTC
 #endif
 

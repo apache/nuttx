@@ -197,7 +197,7 @@
  * enabled.
  */
 
-#ifndef CONFIG_DEBUG
+#ifndef CONFIG_DEBUG_FEATURES
 #  undef CONFIG_LPC43_ETHMAC_REGDEBUG
 #endif
 
@@ -559,7 +559,7 @@ static struct lpc43_ethmac_s g_lpc43ethmac;
  ****************************************************************************/
 /* Register operations ******************************************************/
 
-#if defined(CONFIG_LPC43_ETHMAC_REGDEBUG) && defined(CONFIG_DEBUG)
+#if defined(CONFIG_LPC43_ETHMAC_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
 static uint32_t lpc43_getreg(uint32_t addr);
 static void lpc43_putreg(uint32_t val, uint32_t addr);
 static void lpc43_checksetup(void);
@@ -683,7 +683,7 @@ static int  lpc43_ethconfig(FAR struct lpc43_ethmac_s *priv);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_LPC43_ETHMAC_REGDEBUG) && defined(CONFIG_DEBUG)
+#if defined(CONFIG_LPC43_ETHMAC_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
 static uint32_t lpc43_getreg(uint32_t addr)
 {
   static uint32_t prevaddr = 0;
@@ -755,7 +755,7 @@ static uint32_t lpc43_getreg(uint32_t addr)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_LPC43_ETHMAC_REGDEBUG) && defined(CONFIG_DEBUG)
+#if defined(CONFIG_LPC43_ETHMAC_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
 static void lpc43_putreg(uint32_t val, uint32_t addr)
 {
   /* Show the register value being written */
@@ -782,7 +782,7 @@ static void lpc43_putreg(uint32_t val, uint32_t addr)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_LPC43_ETHMAC_REGDEBUG) && defined(CONFIG_DEBUG)
+#if defined(CONFIG_LPC43_ETHMAC_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
 static void lpc43_checksetup(void)
 {
 }

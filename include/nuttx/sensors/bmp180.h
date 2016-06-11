@@ -52,7 +52,7 @@
  * CONFIG_BMP180
  *   Enables support for the BMP180 driver
  * CONFIG_BMP180_REGDEBUG
- *   Enable very low register-level debug output.  Requires CONFIG_DEBUG.
+ *   Enable very low register-level debug output.  Requires CONFIG_DEBUG_FEATURES.
  */
 
 /****************************************************************************

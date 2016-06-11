@@ -143,7 +143,7 @@ struct stm32_lowerhalf_s
  ****************************************************************************/
 /* Register operations ******************************************************/
 
-#if defined(CONFIG_STM32_IWDG_REGDEBUG) && defined(CONFIG_DEBUG)
+#if defined(CONFIG_STM32_IWDG_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
 static uint16_t stm32_getreg(uint32_t addr);
 static void     stm32_putreg(uint16_t val, uint32_t addr);
 #else
@@ -195,7 +195,7 @@ static struct stm32_lowerhalf_s g_wdgdev;
  *
  ****************************************************************************/
 
-#if defined(CONFIG_STM32_IWDG_REGDEBUG) && defined(CONFIG_DEBUG)
+#if defined(CONFIG_STM32_IWDG_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
 static uint16_t stm32_getreg(uint32_t addr)
 {
   static uint32_t prevaddr = 0;
@@ -258,7 +258,7 @@ static uint16_t stm32_getreg(uint32_t addr)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_STM32_IWDG_REGDEBUG) && defined(CONFIG_DEBUG)
+#if defined(CONFIG_STM32_IWDG_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
 static void stm32_putreg(uint16_t val, uint32_t addr)
 {
   /* Show the register value being written */

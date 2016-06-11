@@ -97,7 +97,7 @@
  * LED_PANIC         4      ON   OFF   OFF (flashing 2Hz)
  */
 
-/* CONFIG_DEBUG_LEDS enables debug output from this file (needs CONFIG_DEBUG
+/* CONFIG_DEBUG_LEDS enables debug output from this file (needs CONFIG_DEBUG_FEATURES
  * with CONFIG_DEBUG_INFO too)
  */
 

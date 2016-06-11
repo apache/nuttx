@@ -58,7 +58,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* CONFIG_DEBUG, CONFIG_DEBUG_INFO, and CONFIG_DEBUG_BINFMT have to be
+/* CONFIG_DEBUG_FEATURES, CONFIG_DEBUG_INFO, and CONFIG_DEBUG_BINFMT have to be
  * defined or CONFIG_MODULE_DUMPBUFFER does nothing.
  */
 
@@ -84,7 +84,7 @@
  * Name: mod_dumploadinfo
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_BINFMT)
+#if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_DEBUG_BINFMT)
 static void mod_dumploadinfo(FAR struct mod_loadinfo_s *loadinfo)
 {
   int i;

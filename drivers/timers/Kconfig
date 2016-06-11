@@ -237,11 +237,11 @@ if TIMERS_CS2100CP
 
 config CS2100CP_DEBUG
 	bool "Enable CS2100-CP Debug Features"
-	depends on DEBUG
+	depends on DEBUG_FEATURES
 
 config CS2100CP_REGDEBUG
 	bool "Enable CS2100-CP Register Debug"
-	depends on DEBUG
+	depends on DEBUG_FEATURES
 
 endif # TIMERS_CS2100CP
 endmenu  # Timer Driver Support

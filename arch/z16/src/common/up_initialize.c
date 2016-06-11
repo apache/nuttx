@@ -82,7 +82,7 @@ volatile FAR chipreg_t *g_current_regs;
  *
  ****************************************************************************/
 
-#if defined(CONFIG_ARCH_CALIBRATION) && defined(CONFIG_DEBUG)
+#if defined(CONFIG_ARCH_CALIBRATION) && defined(CONFIG_DEBUG_FEATURES)
 static void up_calibratedelay(void)
 {
   int i;

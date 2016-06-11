@@ -130,7 +130,7 @@
 #define __CNT_CARRY_REG         EFM32_BURTC_RET_REG(0)
 #define __CNT_ZERO_REG          EFM32_BURTC_RET_REG(1)
 
-#if defined CONFIG_DEBUG && defined CONFIG_RTC_DEBUG
+#if defined CONFIG_DEBUG_FEATURES && defined CONFIG_RTC_DEBUG
 #   define burtcdbg lldbg
 #else
 #   define burtcdbg(x...)

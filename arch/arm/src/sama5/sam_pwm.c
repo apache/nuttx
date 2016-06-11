@@ -396,7 +396,7 @@
 /* Debug ********************************************************************/
 /* Non-standard debug that may be enabled just for testing PWM */
 
-#ifndef CONFIG_DEBUG
+#ifndef CONFIG_DEBUG_FEATURES
 #  undef CONFIG_DEBUG_PWM
 #endif
 

@@ -687,8 +687,8 @@ config SAMV7_WDT_INTERRUPT
 
 config SAMV7_WDT_DEBUGHALT
 	bool "Halt on DEBUG"
-	default y if DEBUG
-	default n if !DEBUG
+	default y if DEBUG_FEATURES
+	default n if !DEBUG_FEATURES
 	---help---
 		Halt the watchdog timer in the debug state
 
@@ -701,7 +701,7 @@ config SAMV7_WDT_IDLEHALT
 config SAMV7_WDT_REGDEBUG
 	bool "Register level debug"
 	default n
-	depends on DEBUG
+	depends on DEBUG_FEATURES
 	---help---
 		Enable low-level register debug output
 
@@ -721,8 +721,8 @@ config SAMV7_RSWDT_INTERRUPT
 
 config SAMV7_RSWDT_DEBUGHALT
 	bool "Halt on DEBUG"
-	default y if DEBUG
-	default n if !DEBUG
+	default y if DEBUG_FEATURES
+	default n if !DEBUG_FEATURES
 	---help---
 		Halt the watchdog timer in the debug state
 
@@ -735,7 +735,7 @@ config SAMV7_RSWDT_IDLEHALT
 config SAMV7_RSWDT_REGDEBUG
 	bool "Register level debug"
 	default n
-	depends on DEBUG
+	depends on DEBUG_FEATURES
 	---help---
 		Enable low-level register debug output
 
@@ -853,7 +853,7 @@ config SAMV7_SPI_DMATHRESHOLD
 
 config SAMV7_SPI_DMADEBUG
 	bool "SPI DMA transfer debug"
-	depends on SAMV7_SPI_DMA && DEBUG && DEBUG_DMA
+	depends on SAMV7_SPI_DMA && DEBUG_FEATURES && DEBUG_DMA
 	default n
 	---help---
 		Enable special debug instrumentation analyze SPI DMA data transfers.
@@ -877,11 +877,11 @@ endif # SAMV7_SPI_SLAVE
 
 config SAMV7_SPI_REGDEBUG
 	bool "SPI Register level debug"
-	depends on DEBUG
+	depends on DEBUG_FEATURES
 	default n
 	---help---
 		Output detailed register-level SPI device debug information.
-		Requires also DEBUG.
+		Requires also CONFIG_DEBUG_FEATURES.
 
 endmenu # SPI device driver options
 
@@ -914,7 +914,7 @@ config SAMV7_QSPI_DMATHRESHOLD
 
 config SAMV7_QSPI_DMADEBUG
 	bool "QSPI DMA transfer debug"
-	depends on SAMV7_QSPI_DMA && DEBUG && DEBUG_DMA
+	depends on SAMV7_QSPI_DMA && DEBUG_FEATURES && DEBUG_DMA
 	default n
 	---help---
 		Enable special debug instrumentation analyze QSPI DMA data transfers.
@@ -924,11 +924,11 @@ config SAMV7_QSPI_DMADEBUG
 
 config SAMV7_QSPI_REGDEBUG
 	bool "QSPI Register level debug"
-	depends on DEBUG
+	depends on DEBUG_FEATURES
 	default n
 	---help---
 		Output detailed register-level QSPI device debug information.
-		Requires also DEBUG.
+		Requires also CONFIG_DEBUG_FEATURES.
 
 endmenu # QSPI device driver options
 
@@ -952,11 +952,11 @@ config SAMV7_TWIHS2_FREQUENCY
 
 config SAMV7_TWIHS_REGDEBUG
 	bool "TWIHS register level debug"
-	depends on DEBUG
+	depends on DEBUG_FEATURES
 	default n
 	---help---
 		Output detailed register-level TWIHS device debug information.
-		Very invasive! Requires also DEBUG.
+		Very invasive! Requires also CONFIG_DEBUG_FEATURES.
 
 endmenu # TWIHS device driver options
 
@@ -1318,7 +1318,7 @@ endif # SAMV7_SSC1
 
 config SAMV7_SSC_DMADEBUG
 	bool "SSC DMA transfer debug"
-	depends on DEBUG && DEBUG_DMA
+	depends on DEBUG_FEATURES && DEBUG_DMA
 	default n
 	---help---
 		Enable special debug instrumentation analyze SSC DMA data transfers.
@@ -1328,11 +1328,11 @@ config SAMV7_SSC_DMADEBUG
 
 config SAMV7_SSC_REGDEBUG
 	bool "SSC Register level debug"
-	depends on DEBUG
+	depends on DEBUG_FEATURES
 	default n
 	---help---
 		Output detailed register-level SSC device debug information.
-		Very invasive! Requires also DEBUG.
+		Very invasive! Requires also CONFIG_DEBUG_FEATURES.
 
 config SAMV7_SSC_QDEBUG
 	bool "SSC Queue debug"
@@ -1551,11 +1551,11 @@ endif
 
 config SAMV7_TC_DEBUG
 	bool "TC debug"
-	depends on DEBUG
+	depends on DEBUG_FEATURES
 	default n
 	---help---
 		Output high level Timer/Counter device debug information.
-		Requires also DEBUG.  If this option AND CONFIG_DEBUG_INFO are
+		Requires also CONFIG_DEBUG_FEATURES.  If this option AND CONFIG_DEBUG_INFO are
 		enabled, then the system will be overwhelmed the timer debug
 		output.  If CONFIG_DEBUG_INFO is disabled, then debug output will
 		only indicate if/when timer-related errors occur.  This
@@ -1563,11 +1563,11 @@ config SAMV7_TC_DEBUG
 
 config SAMV7_TC_REGDEBUG
 	bool "TC register level debug"
-	depends on DEBUG
+	depends on DEBUG_FEATURES
 	default n
 	---help---
 		Output detailed register-level Timer/Counter device debug
-		information. Very invasive! Requires also DEBUG.
+		information. Very invasive! Requires also CONFIG_DEBUG_FEATURES.
 
 endmenu # Timer/counter Configuration
 endif # SAMV7_HAVE_TC
@@ -1641,11 +1641,11 @@ config SAMV7_HSMCI_CMDDEBUG
 
 config SAMV7_HSMCI_REGDEBUG
 	bool "HSMCI Register level debug"
-	depends on DEBUG
+	depends on DEBUG_FEATURES
 	default n
 	---help---
 		Output detailed register-level HSCMI device debug information.
-		Very invasive! Requires also DEBUG.
+		Very invasive! Requires also CONFIG_DEBUG_FEATURES.
 
 endmenu # HSMCI device driver options
 
@@ -1854,7 +1854,7 @@ config SAMV7_EMAC_NBC
 config SAMV7_EMAC_DEBUG
 	bool "Force EMAC0/1 DEBUG"
 	default n
-	depends on DEBUG && !DEBUG_NET
+	depends on DEBUG_FEATURES && !DEBUG_NET
 	---help---
 		This option will force debug output from EMAC driver even without
 		network debug output enabled.  This is not normally something
@@ -1865,9 +1865,9 @@ config SAMV7_EMAC_DEBUG
 config SAMV7_EMAC_REGDEBUG
 	bool "Register-Level Debug"
 	default n
-	depends on DEBUG
+	depends on DEBUG_FEATURES
 	---help---
-		Enable very low-level register access debug.  Depends on DEBUG.
+		Enable very low-level register access debug.  Depends on CONFIG_DEBUG_FEATURES.
 
 endmenu # EMAC0 device driver options
 
@@ -1923,7 +1923,7 @@ config SAMV7_USBHS_EP7DMA_WAR
 config SAMV7_USBHS_REGDEBUG
 	bool "Enable low-level USBHS register debug"
 	default n
-	depends on DEBUG
+	depends on DEBUG_FEATURES
 
 endmenu # USB High Speed Device Controller driver (DCD) options
 
@@ -2598,11 +2598,11 @@ endmenu # MCAN1 device driver options
 
 config SAMV7_MCAN_REGDEBUG
 	bool "CAN Register level debug"
-	depends on DEBUG
+	depends on DEBUG_FEATURES
 	default n
 	---help---
 		Output detailed register-level CAN device debug information.
-		Requires also DEBUG.
+		Requires also CONFIG_DEBUG_FEATURES.
 
 endmenu # CAN device driver options
 endif # SAMV7_MCAN

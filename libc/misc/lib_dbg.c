@@ -59,7 +59,7 @@
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
 int dbg(const char *format, ...)
 {
   va_list ap;
@@ -85,7 +85,7 @@ int lldbg(const char *format, ...)
   return ret;
 }
 #endif /* CONFIG_ARCH_LOWPUTC */
-#endif /* CONFIG_DEBUG */
+#endif /* CONFIG_DEBUG_FEATURES */
 
 #ifdef CONFIG_DEBUG_WARN
 int warn(const char *format, ...)

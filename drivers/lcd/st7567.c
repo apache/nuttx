@@ -80,7 +80,7 @@
  *   If the hardware supports a controllable OLED a power supply, this
  *   configuration shold be defined.  (See st7567_power() below).
  * CONFIG_LCD_ST7567DEBUG - Enable detailed ST7567 debst7567 output
- *   (CONFIG_DEBUG and CONFIG_VERBOSE must also be enabled).
+ *   (CONFIG_DEBUG_FEATURES and CONFIG_VERBOSE must also be enabled).
  *
  * Required LCD driver settings:
  * CONFIG_LCD_ST7567 - Enable ST7567 support
@@ -123,7 +123,7 @@
 
 /* Verbose debst7567 must also be enabled to use the extra OLED debst7567 */
 
-#ifndef CONFIG_DEBUG
+#ifndef CONFIG_DEBUG_FEATURES
 #  undef CONFIG_DEBUG_INFO
 #  undef CONFIG_DEBUG_GRAPHICS
 #endif

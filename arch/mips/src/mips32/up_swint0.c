@@ -61,7 +61,7 @@
 /* Debug output from this file may interfere with context switching!  To get
  * debug output you must enabled the following in your NuttX configuration:
  *
- * CONFIG_DEBUG and CONFIG_DEBUG_SYSCALL
+ * CONFIG_DEBUG_FEATURES and CONFIG_DEBUG_SYSCALL
  */
 
 #ifdef CONFIG_DEBUG_SYSCALL

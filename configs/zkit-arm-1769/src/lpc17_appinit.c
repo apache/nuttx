@@ -116,13 +116,13 @@
 /* Debug ********************************************************************/
 
 #ifdef CONFIG_CPP_HAVE_VARARGS
-#  ifdef CONFIG_DEBUG
+#  ifdef CONFIG_DEBUG_FEATURES
 #    define message(...) lib_lowprintf(__VA_ARGS__)
 #  else
 #    define message(...) printf(__VA_ARGS__)
 #  endif
 #else
-#  ifdef CONFIG_DEBUG
+#  ifdef CONFIG_DEBUG_FEATURES
 #    define message lib_lowprintf
 #  else
 #    define message printf

@@ -103,7 +103,7 @@
  * enabled.
  */
 
-#ifndef CONFIG_DEBUG
+#ifndef CONFIG_DEBUG_FEATURES
 #  undef CONFIG_STM32_USBDEV_REGDEBUG
 #endif
 
@@ -388,7 +388,7 @@ struct stm32_usbdev_s
 
 /* Register operations ******************************************************/
 
-#if defined(CONFIG_STM32_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG)
+#if defined(CONFIG_STM32_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
 static uint16_t stm32_getreg(uint32_t addr);
 static void stm32_putreg(uint16_t val, uint32_t addr);
 static void stm32_checksetup(void);
@@ -652,7 +652,7 @@ const struct trace_msg_t g_usb_trace_strings_deverror[] =
  * Name: stm32_getreg
  ****************************************************************************/
 
-#if defined(CONFIG_STM32_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG)
+#if defined(CONFIG_STM32_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
 static uint16_t stm32_getreg(uint32_t addr)
 {
   static uint32_t prevaddr = 0;
@@ -710,7 +710,7 @@ static uint16_t stm32_getreg(uint32_t addr)
  * Name: stm32_putreg
  ****************************************************************************/
 
-#if defined(CONFIG_STM32_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG)
+#if defined(CONFIG_STM32_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
 static void stm32_putreg(uint16_t val, uint32_t addr)
 {
   /* Show the register value being written */
@@ -727,7 +727,7 @@ static void stm32_putreg(uint16_t val, uint32_t addr)
  * Name: stm32_dumpep
  ****************************************************************************/
 
-#if defined(CONFIG_STM32_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG)
+#if defined(CONFIG_STM32_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
 static void stm32_dumpep(int epno)
 {
   uint32_t addr;
@@ -770,7 +770,7 @@ static void stm32_dumpep(int epno)
  * Name: stm32_checksetup
  ****************************************************************************/
 
-#if defined(CONFIG_STM32_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG)
+#if defined(CONFIG_STM32_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
 static void stm32_checksetup(void)
 {
   uint32_t cfgr     = getreg32(STM32_RCC_CFGR);
@@ -2840,7 +2840,7 @@ static int stm32_epconfigure(struct usbdev_ep_s *ep,
   uint16_t maxpacket;
   uint8_t  epno;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!ep || !desc)
     {
       usbtrace(TRACE_DEVERROR(STM32_TRACEERR_INVALIDPARMS), 0);
@@ -2936,7 +2936,7 @@ static int stm32_epdisable(struct usbdev_ep_s *ep)
   irqstate_t flags;
   uint8_t epno;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!ep)
     {
       usbtrace(TRACE_DEVERROR(STM32_TRACEERR_INVALIDPARMS), 0);
@@ -2971,7 +2971,7 @@ static struct usbdev_req_s *stm32_epallocreq(struct usbdev_ep_s *ep)
 {
   struct stm32_req_s *privreq;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!ep)
     {
       usbtrace(TRACE_DEVERROR(STM32_TRACEERR_INVALIDPARMS), 0);
@@ -2999,7 +2999,7 @@ static void stm32_epfreereq(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
 {
   struct stm32_req_s *privreq = (struct stm32_req_s *)req;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!ep || !req)
     {
       usbtrace(TRACE_DEVERROR(STM32_TRACEERR_INVALIDPARMS), 0);
@@ -3024,7 +3024,7 @@ static int stm32_epsubmit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
   uint8_t epno;
   int ret = OK;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!req || !req->callback || !req->buf || !ep)
     {
       usbtrace(TRACE_DEVERROR(STM32_TRACEERR_INVALIDPARMS), 0);
@@ -3036,7 +3036,7 @@ static int stm32_epsubmit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
   usbtrace(TRACE_EPSUBMIT, USB_EPNO(ep->eplog));
   priv = privep->dev;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!priv->driver)
     {
       usbtrace(TRACE_DEVERROR(STM32_TRACEERR_NOTCONFIGURED), priv->usbdev.speed);
@@ -3136,7 +3136,7 @@ static int stm32_epcancel(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
   struct stm32_ep_s *privep = (struct stm32_ep_s *)ep;
   irqstate_t flags;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!ep || !req)
     {
       usbtrace(TRACE_DEVERROR(STM32_TRACEERR_INVALIDPARMS), 0);
@@ -3163,7 +3163,7 @@ static int stm32_epstall(struct usbdev_ep_s *ep, bool resume)
   uint16_t status;
   irqstate_t flags;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!ep)
     {
       usbtrace(TRACE_DEVERROR(STM32_TRACEERR_INVALIDPARMS), 0);
@@ -3305,7 +3305,7 @@ static struct usbdev_ep_s *stm32_allocep(struct usbdev_s *dev, uint8_t epno,
   int bufno;
 
   usbtrace(TRACE_DEVALLOCEP, (uint16_t)epno);
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!dev)
     {
       usbtrace(TRACE_DEVERROR(STM32_TRACEERR_INVALIDPARMS), 0);
@@ -3379,7 +3379,7 @@ static void stm32_freeep(struct usbdev_s *dev, struct usbdev_ep_s *ep)
   struct stm32_usbdev_s *priv;
   struct stm32_ep_s *privep;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!dev || !ep)
     {
       usbtrace(TRACE_DEVERROR(STM32_TRACEERR_INVALIDPARMS), 0);
@@ -3410,7 +3410,7 @@ static int stm32_getframe(struct usbdev_s *dev)
 {
   uint16_t fnr;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!dev)
     {
       usbtrace(TRACE_DEVERROR(STM32_TRACEERR_INVALIDPARMS), 0);
@@ -3435,7 +3435,7 @@ static int stm32_wakeup(struct usbdev_s *dev)
   irqstate_t flags;
 
   usbtrace(TRACE_DEVWAKEUP, 0);
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!dev)
     {
       usbtrace(TRACE_DEVERROR(STM32_TRACEERR_INVALIDPARMS), 0);
@@ -3473,7 +3473,7 @@ static int stm32_selfpowered(struct usbdev_s *dev, bool selfpowered)
 
   usbtrace(TRACE_DEVSELFPOWERED, (uint16_t)selfpowered);
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!dev)
     {
       usbtrace(TRACE_DEVERROR(STM32_TRACEERR_INVALIDPARMS), 0);
@@ -3834,7 +3834,7 @@ int usbdev_register(struct usbdevclass_driver_s *driver)
 
   usbtrace(TRACE_DEVREGISTER, 0);
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!driver || !driver->ops->bind || !driver->ops->unbind ||
       !driver->ops->disconnect || !driver->ops->setup)
     {
@@ -3912,7 +3912,7 @@ int usbdev_unregister(struct usbdevclass_driver_s *driver)
 
   usbtrace(TRACE_DEVUNREGISTER, 0);
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (driver != priv->driver)
     {
       usbtrace(TRACE_DEVERROR(STM32_TRACEERR_INVALIDPARMS), 0);

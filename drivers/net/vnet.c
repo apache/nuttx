@@ -186,7 +186,7 @@ static int vnet_transmit(FAR struct vnet_driver_s *vnet)
        * we reset the TX buffer directly.
        */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
       cprintf("VNET: TX buffer is full\n");
 #endif
       return ERROR;
@@ -308,7 +308,7 @@ void rtos_vnet_recv(struct rgmp_vnet *rgmp_vnet, char *data, int len)
 
       if (len > CONFIG_NET_ETH_MTU || len < 14)
         {
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
           cprintf("VNET: receive invalid packet of size %d\n", len);
 #endif
           return;
@@ -506,7 +506,7 @@ static void vnet_polltimer(int argc, uint32_t arg, ...)
 
   if (vnet_is_txbuff_full(vnet->vnet))
     {
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
       cprintf("VNET: TX buffer is full\n");
 #endif
       return;
@@ -640,7 +640,7 @@ static int vnet_txavail(struct net_driver_s *dev)
 
       if (vnet_is_txbuff_full(vnet->vnet))
         {
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
           cprintf("VNET: TX buffer is full\n");
 #endif
           goto out;

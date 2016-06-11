@@ -1848,7 +1848,7 @@ ssize_t psock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
   /* Verify that non-NULL pointers were passed */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!buf)
     {
       err = EINVAL;

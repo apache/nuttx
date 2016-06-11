@@ -961,7 +961,7 @@ static int ug2864ambag01_setcontrast(struct lcd_dev_s *dev, unsigned int contras
 
   /* Verify the contrast value */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (contrast > CONFIG_LCD_MAXCONTRAST)
     {
       return -EINVAL;

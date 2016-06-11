@@ -588,7 +588,7 @@ config ARCH_ROMPGTABLE
 config DEBUG_HARDFAULT
 	bool "Verbose Hard-Fault Debug"
 	default n
-	depends on DEBUG && (ARCH_CORTEXM3 || ARCH_CORTEXM4 || ARCH_CORTEXM7)
+	depends on DEBUG_FEATURES && (ARCH_CORTEXM3 || ARCH_CORTEXM4 || ARCH_CORTEXM7)
 	---help---
 		Enables verbose debug output when a hard fault is occurs.  This verbose
 		output is sometimes helpful when debugging difficult hard fault problems,

@@ -359,7 +359,7 @@ static inline void mpu_set_rgnr(unsigned int rgnr)
 
 static inline void mpu_showtype(void)
 {
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   uint32_t regval = mpu_get_mpuir();
   dbg("%s MPU Regions: data=%d instr=%d\n",
       (regval & MPUIR_SEPARATE) != 0 ? "Separate" : "Unified",

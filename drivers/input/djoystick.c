@@ -790,7 +790,7 @@ static int djoy_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
       FAR struct pollfd **slot = (FAR struct pollfd **)fds->priv;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
       if (!slot)
         {
           iinfo("ERROR: Poll slot not found\n");

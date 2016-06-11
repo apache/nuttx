@@ -474,7 +474,7 @@ struct efm32_usbdev_s
 
 /* Register operations ********************************************************/
 
-#if defined(CONFIG_EFM32_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG)
+#if defined(CONFIG_EFM32_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
 static uint32_t    efm32_getreg(uint32_t addr);
 static void        efm32_putreg(uint32_t val, uint32_t addr);
 #else
@@ -794,7 +794,7 @@ const struct trace_msg_t g_usb_trace_strings_intdecode[] =
  *
  ****************************************************************************/
 
-#if defined(CONFIG_EFM32_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG)
+#if defined(CONFIG_EFM32_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
 static uint32_t efm32_getreg(uint32_t addr)
 {
   static uint32_t prevaddr = 0;
@@ -857,7 +857,7 @@ static uint32_t efm32_getreg(uint32_t addr)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_EFM32_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG)
+#if defined(CONFIG_EFM32_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
 static void efm32_putreg(uint32_t val, uint32_t addr)
 {
   /* Show the register value being written */
@@ -4184,7 +4184,7 @@ static int efm32_ep_disable(FAR struct usbdev_ep_s *ep)
 {
   FAR struct efm32_ep_s *privep = (FAR struct efm32_ep_s *)ep;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!ep)
     {
       usbtrace(TRACE_DEVERROR(EFM32_TRACEERR_INVALIDPARMS), 0);
@@ -4224,7 +4224,7 @@ static FAR struct usbdev_req_s *efm32_ep_allocreq(FAR struct usbdev_ep_s *ep)
 {
   FAR struct efm32_req_s *privreq;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!ep)
     {
       usbtrace(TRACE_DEVERROR(EFM32_TRACEERR_INVALIDPARMS), 0);
@@ -4257,7 +4257,7 @@ static void efm32_ep_freereq(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s
 {
   FAR struct efm32_req_s *privreq = (FAR struct efm32_req_s *)req;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!ep || !req)
     {
       usbtrace(TRACE_DEVERROR(EFM32_TRACEERR_INVALIDPARMS), 0);
@@ -4329,7 +4329,7 @@ static int efm32_ep_submit(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *
 
   /* Some sanity checking */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!req || !req->callback || !req->buf || !ep)
     {
       usbtrace(TRACE_DEVERROR(EFM32_TRACEERR_INVALIDPARMS), 0);
@@ -4341,7 +4341,7 @@ static int efm32_ep_submit(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *
   usbtrace(TRACE_EPSUBMIT, privep->epphy);
   priv = privep->dev;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!priv->driver)
     {
       usbtrace(TRACE_DEVERROR(EFM32_TRACEERR_NOTCONFIGURED), priv->usbdev.speed);
@@ -4418,7 +4418,7 @@ static int efm32_ep_cancel(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *
   FAR struct efm32_ep_s *privep = (FAR struct efm32_ep_s *)ep;
   irqstate_t flags;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!ep || !req)
     {
       usbtrace(TRACE_DEVERROR(EFM32_TRACEERR_INVALIDPARMS), 0);
@@ -4876,7 +4876,7 @@ static int efm32_selfpowered(struct usbdev_s *dev, bool selfpowered)
 
   usbtrace(TRACE_DEVSELFPOWERED, (uint16_t)selfpowered);
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!dev)
     {
       usbtrace(TRACE_DEVERROR(EFM32_TRACEERR_INVALIDPARMS), 0);
@@ -5605,7 +5605,7 @@ int usbdev_register(struct usbdevclass_driver_s *driver)
 
   usbtrace(TRACE_DEVREGISTER, 0);
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!driver || !driver->ops->bind || !driver->ops->unbind ||
       !driver->ops->disconnect || !driver->ops->setup)
     {
@@ -5676,7 +5676,7 @@ int usbdev_unregister(struct usbdevclass_driver_s *driver)
 
   usbtrace(TRACE_DEVUNREGISTER, 0);
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (driver != priv->driver)
     {
       usbtrace(TRACE_DEVERROR(EFM32_TRACEERR_INVALIDPARMS), 0);

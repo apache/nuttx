@@ -129,7 +129,7 @@
  * include/debug.h
  */
 
-#ifndef CONFIG_DEBUG
+#ifndef CONFIG_DEBUG_FEATURES
 #  undef CONFIG_DEBUG_INFO
 #  undef CONFIG_DEBUG_SPI
 #  undef CONFIG_SAMA5_SPI_DMADEBUG

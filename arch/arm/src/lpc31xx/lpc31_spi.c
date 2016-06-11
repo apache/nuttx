@@ -63,10 +63,10 @@
 
 /* Debug ****************************************************************************/
 /* CONFIG_LPC31_SPI_REGDEBUG enabled very low, register-level debug output.
- * CONFIG_DEBUG must also be defined
+ * CONFIG_DEBUG_FEATURES must also be defined
  */
 
-#ifndef CONFIG_DEBUG
+#ifndef CONFIG_DEBUG_FEATURES
 #  undef CONFIG_LPC31_SPI_REGDEBUG
 #endif
 

@@ -973,7 +973,7 @@ int mkfatfs_configfatfs(FAR struct fat_format_s *fmt,
 
   /* Describe the configured filesystem */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   fdbg("Sector size:          %d bytes\n",    var->fv_sectorsize);
   fdbg("Number of sectors:    %d sectors\n",  fmt->ff_nsectors);
   fdbg("FAT size:             %d bits\n",     var->fv_fattype);

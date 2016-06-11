@@ -85,7 +85,7 @@
 #  error CONFIG_SAM34_RC32K be selected in the board configuration
 #endif
 
-#ifndef CONFIG_DEBUG
+#ifndef CONFIG_DEBUG_FEATURES
 #  undef CONFIG_DEBUG_INFO
 #  undef CONFIG_DEBUG_GRAPHICS
 #  undef CONFIG_DEBUG_LCD

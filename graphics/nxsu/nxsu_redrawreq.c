@@ -82,7 +82,7 @@ void nxfe_redrawreq(FAR struct nxbe_window_s *wnd, FAR const struct nxgl_rect_s 
 {
   struct nxgl_rect_s relrect;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!wnd)
     {
       return;

@@ -423,7 +423,7 @@ struct sam_adc_s
  ****************************************************************************/
 /* Register operations ******************************************************/
 
-#if defined(CONFIG_SAMA5_ADC_REGDEBUG) && defined(CONFIG_DEBUG)
+#if defined(CONFIG_SAMA5_ADC_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
 static bool sam_adc_checkreg(struct sam_adc_s *priv, bool wr,
                              uint32_t regval, uintptr_t address);
 #endif

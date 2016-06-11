@@ -386,7 +386,7 @@ extern "C"
  *
  ****************************************************************************************************/
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
 void up_dumpnvic(FAR const char *msg);
 #else
 #  define up_dumpnvic(m)

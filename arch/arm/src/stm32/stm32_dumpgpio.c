@@ -49,14 +49,14 @@
 #include "stm32_gpio.h"
 #include "stm32_rcc.h"
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 /* Port letters for prettier debug output */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
 static const char g_portchar[STM32_NGPIO_PORTS] =
 {
 #if STM32_NGPIO_PORTS > 11
@@ -238,4 +238,4 @@ int stm32_dumpgpio(uint32_t pinset, const char *msg)
   return OK;
 }
 
-#endif /* CONFIG_DEBUG */
+#endif /* CONFIG_DEBUG_FEATURES */

@@ -247,7 +247,7 @@ ifeq ($(CONFIG_STM32_WWDG),y)
 CHIP_CSRCS += stm32_wwdg.c
 endif
 
-ifeq ($(CONFIG_DEBUG),y)
+ifeq ($(CONFIG_DEBUG_FEATURES),y)
 CHIP_CSRCS += stm32_dumpgpio.c
 endif
 

@@ -99,7 +99,7 @@ int nx_drawline(NXWINDOW hwnd, FAR struct nxgl_vector_s *vector,
   struct nxgl_rect_s rect;
   int ret;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!hwnd || !vector || width < 1 || !color)
     {
       set_errno(EINVAL);

@@ -397,7 +397,7 @@
  * include/debug.h
  */
 
-#ifndef CONFIG_DEBUG
+#ifndef CONFIG_DEBUG_FEATURES
 #  undef CONFIG_DEBUG_INFO
 #  undef CONFIG_DEBUG_I2S
 #endif
@@ -476,7 +476,7 @@ struct sam_ssc_s
   uintptr_t base;              /* SSC controller register base address */
   sem_t exclsem;               /* Assures mutually exclusive acess to SSC */
   uint8_t datalen;             /* Data width (8, 16, or 32) */
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   uint8_t align;               /* Log2 of data width (0, 1, or 3) */
 #endif
   uint8_t pid;                 /* Peripheral ID */
@@ -2059,19 +2059,19 @@ static int ssc_checkwidth(struct sam_ssc_s *priv, int bits)
   switch (bits)
     {
     case 8:
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
       priv->align = 0;
 #endif
       break;
 
     case 16:
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
       priv->align = 1;
 #endif
       break;
 
     case 32:
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
       priv->align = 3;
 #endif
       break;
@@ -3257,7 +3257,7 @@ static void ssc0_configure(struct sam_ssc_s *priv)
 
   priv->base    = SAM_SSC0_VBASE;
   priv->datalen = CONFIG_SAMA5_SSC0_DATALEN;
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   priv->align   = SAMA5_SSC0_DATAMASK;
 #endif
   priv->pid     = SAM_PID_SSC0;
@@ -3398,7 +3398,7 @@ static void ssc1_configure(struct sam_ssc_s *priv)
 
   priv->base    = SAM_SSC1_VBASE;
   priv->datalen = CONFIG_SAMA5_SSC1_DATALEN;
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   priv->align   = SAMA5_SSC1_DATAMASK;
 #endif
   priv->pid     = SAM_PID_SSC1;

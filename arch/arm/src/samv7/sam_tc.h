@@ -75,7 +75,7 @@
 
 /* Timer debug is enabled if any timer client is enabled */
 
-#ifndef CONFIG_DEBUG
+#ifndef CONFIG_DEBUG_FEATURES
 #  undef CONFIG_DEBUG_ANALOG
 #  undef CONFIG_SAMV7_TC_REGDEBUG
 #endif

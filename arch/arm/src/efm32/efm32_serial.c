@@ -205,7 +205,7 @@
 #define EFM32_TXERR_INTS      (USART_IEN_TXOF)
 #define EFM32_RXERR_INTS      (USART_IEN_RXOF | USART_IEN_RXUF | \
                                USART_IEN_PERR | USART_IEN_FERR)
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
 #  define EFM32_TX_INTS       (USART_IEN_TXBL | EFM32_TXERR_INTS)
 #  define EFM32_RX_INTS       (USART_IEN_RXDATAV | EFM32_RXERR_INTS)
 #else
@@ -768,7 +768,7 @@ static int  efm32_rxinterrupt(struct uart_dev_s *dev)
       uart_recvchars(dev);
     }
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   /* Check for receive errors */
 
   if ((intflags & EFM32_RXERR_INTS) != 0)
@@ -856,7 +856,7 @@ static int  efm32_txinterrupt(struct uart_dev_s *dev)
       uart_xmitchars(dev);
     }
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   /* Check for transmit errors */
 
   if ((intflags & EFM32_TXERR_INTS) != 0)

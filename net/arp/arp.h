@@ -64,7 +64,7 @@
  ****************************************************************************/
 /* Configuration ************************************************************/
 
-#ifndef CONFIG_DEBUG
+#ifndef CONFIG_DEBUG_FEATURES
 #  undef CONFIG_NET_ARP_DUMP
 #endif
 

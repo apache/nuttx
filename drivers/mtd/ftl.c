@@ -466,7 +466,7 @@ static int ftl_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
        * driver.
        */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
       if (arg == 0)
         {
           fdbg("ERROR: BIOC_XIPBASE argument is NULL\n");
@@ -519,7 +519,7 @@ int ftl_initialize(int minor, FAR struct mtd_dev_s *mtd)
 
   /* Sanity check */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (minor < 0 || minor > 255 || !mtd)
     {
       return -EINVAL;

@@ -133,7 +133,7 @@ static void lpc11_dumpnvic(const char *msg, int irq)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
 static int lpc11_nmi(int irq, FAR void *context)
 {
   (void)up_irq_save();
@@ -232,7 +232,7 @@ void up_irqinitialize(void)
 
   /* Attach all other processor exceptions (except reset and sys tick) */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   irq_attach(LPC11_IRQ_NMI, lpc11_nmi);
   irq_attach(LPC11_IRQ_PENDSV, lpc11_pendsv);
   irq_attach(LPC11_IRQ_RESERVED, lpc11_reserved);

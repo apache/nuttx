@@ -2247,7 +2247,7 @@ static int avr_epdisable(FAR struct usbdev_ep_s *ep)
   FAR struct avr_ep_s *privep = (FAR struct avr_ep_s *)ep;
   irqstate_t flags;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!ep)
     {
       usbtrace(TRACE_DEVERROR(AVR_TRACEERR_INVALIDPARMS), 0);
@@ -2279,7 +2279,7 @@ static FAR struct usbdev_req_s *avr_epallocreq(FAR struct usbdev_ep_s *ep)
 {
   FAR struct avr_req_s *privreq;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!ep)
     {
       usbtrace(TRACE_DEVERROR(AVR_TRACEERR_INVALIDPARMS), 0);
@@ -2312,7 +2312,7 @@ static void avr_epfreereq(FAR struct usbdev_ep_s *ep,
 {
   FAR struct avr_req_s *privreq = (FAR struct avr_req_s *)req;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!ep || !req)
     {
       usbtrace(TRACE_DEVERROR(AVR_TRACEERR_INVALIDPARMS), 0);
@@ -2382,7 +2382,7 @@ static int avr_epsubmit(FAR struct usbdev_ep_s *ep,
   irqstate_t flags;
   int ret = OK;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!req || !req->callback || !req->buf || !ep)
     {
       usbtrace(TRACE_DEVERROR(AVR_TRACEERR_INVALIDPARMS), 0);
@@ -2484,7 +2484,7 @@ static int avr_epcancel(FAR struct usbdev_ep_s *ep,
   FAR struct avr_ep_s *privep = (FAR struct avr_ep_s *)ep;
   irqstate_t flags;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!ep || !req)
     {
       usbtrace(TRACE_DEVERROR(AVR_TRACEERR_INVALIDPARMS), 0);
@@ -2582,7 +2582,7 @@ static FAR struct usbdev_ep_s *avr_allocep(FAR struct usbdev_s *dev,
        * requested 'logical' endpoint.
        */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
       if (epno >= AVR_NENDPOINTS)
         {
           usbtrace(TRACE_DEVERROR(AVR_TRACEERR_BADEPNO), (uint16_t)epno);
@@ -2725,7 +2725,7 @@ static int avr_selfpowered(struct usbdev_s *dev, bool selfpowered)
 {
   usbtrace(TRACE_DEVSELFPOWERED, (uint16_t) selfpowered);
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!dev)
     {
       usbtrace(TRACE_DEVERROR(AVR_TRACEERR_INVALIDPARMS), 0);
@@ -2872,7 +2872,7 @@ int usbdev_register(struct usbdevclass_driver_s *driver)
 
   usbtrace(TRACE_DEVREGISTER, 0);
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!driver || !driver->ops->bind || !driver->ops->unbind ||
       !driver->ops->disconnect || !driver->ops->setup)
     {
@@ -2927,7 +2927,7 @@ int usbdev_unregister(struct usbdevclass_driver_s *driver)
 {
   usbtrace(TRACE_DEVUNREGISTER, 0);
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (driver != g_usbdev.driver)
     {
       usbtrace(TRACE_DEVERROR(AVR_TRACEERR_INVALIDPARMS), 0);

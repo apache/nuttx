@@ -92,7 +92,7 @@ int nxmu_sendserver(FAR struct nxfe_conn_s *conn, FAR const void *msg,
 
   /* Sanity checking */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!conn || !conn->cwrmq)
     {
       set_errno(EINVAL);

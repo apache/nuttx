@@ -112,7 +112,7 @@ void nxbe_setpixel(FAR struct nxbe_window_s *wnd,
   struct nxgl_rect_s rect;
   int i;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!wnd || !pos)
     {
       return;

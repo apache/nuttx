@@ -134,7 +134,7 @@
 #define LED_IDLE_OFF_SETBITS         ((OPEN1788_LED4) << OFF_SETBITS_SHIFT)
 #define LED_IDLE_OFF_CLRBITS         ((0) << OFF_CLRBITS_SHIFT)
 
-/* CONFIG_DEBUG_LEDS enables debug output from this file (needs CONFIG_DEBUG
+/* CONFIG_DEBUG_LEDS enables debug output from this file (needs CONFIG_DEBUG_FEATURES
  * with CONFIG_DEBUG_INFO too)
  */
 

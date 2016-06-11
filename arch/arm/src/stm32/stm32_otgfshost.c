@@ -93,9 +93,9 @@
  *  CONFIG_STM32_OTGFS_SOFINTR - Enable SOF interrupts.  Why would you ever
  *    want to do that?
  *  CONFIG_STM32_USBHOST_REGDEBUG - Enable very low-level register access
- *    debug.  Depends on CONFIG_DEBUG.
+ *    debug.  Depends on CONFIG_DEBUG_FEATURES.
  *  CONFIG_STM32_USBHOST_PKTDUMP - Dump all incoming and outgoing USB
- *    packets. Depends on CONFIG_DEBUG.
+ *    packets. Depends on CONFIG_DEBUG_FEATURES.
  */
 
 /* Pre-requisites (partial) */
@@ -128,9 +128,9 @@
 #  define CONFIG_STM32_OTGFS_DESCSIZE 128
 #endif
 
-/* Register/packet debug depends on CONFIG_DEBUG */
+/* Register/packet debug depends on CONFIG_DEBUG_FEATURES */
 
-#ifndef CONFIG_DEBUG
+#ifndef CONFIG_DEBUG_FEATURES
 #  undef CONFIG_STM32_USBHOST_REGDEBUG
 #  undef CONFIG_STM32_USBHOST_PKTDUMP
 #endif

@@ -65,9 +65,9 @@
 /* Debug ********************************************************************/
 /* The following enable debug output from this file:
  *
- * CONFIG_DEBUG         - Define to enable general debug features
- * CONFIG_DEBUG_SPI     - Define to enable basic SSP debug (needs CONFIG_DEBUG)
- * CONFIG_DEBUG_INFO - Define to enable verbose SSP debug
+ * CONFIG_DEBUG_FEATURES - Define to enable general debug features
+ * CONFIG_DEBUG_SPI      - Define to enable basic SSP debug (needs CONFIG_DEBUG_FEATURES)
+ * CONFIG_DEBUG_INFO     - Define to enable verbose SSP debug
  */
 
 #ifdef CONFIG_DEBUG_SPI

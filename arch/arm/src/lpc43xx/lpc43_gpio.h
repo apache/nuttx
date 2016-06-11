@@ -310,7 +310,7 @@ bool lpc43_gpio_read(uint16_t gpiocfg);
  *
  ********************************************************************************************/
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
 int lpc43_gpio_dump(uint16_t gpiocfg, const char *msg);
 #else
 #  define lpc43_gpio_dump(p,m)

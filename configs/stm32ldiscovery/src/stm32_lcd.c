@@ -84,7 +84,7 @@
 #  error "This SLCD driver requires CONFIG_LIB_SLCDCODEC"
 #endif
 
-#ifndef CONFIG_DEBUG
+#ifndef CONFIG_DEBUG_FEATURES
 #  undef CONFIG_DEBUG_INFO
 #  undef CONFIG_DEBUG_GRAPHICS
 #  undef CONFIG_DEBUG_LCD

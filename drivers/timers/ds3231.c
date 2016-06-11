@@ -77,7 +77,7 @@
 
 #define DS3231_I2C_ADDRESS 0x68
 
-#ifndef CONFIG_DEBUG
+#ifndef CONFIG_DEBUG_FEATURES
 #  undef CONFIG_DEBUG_RTC
 #endif
 

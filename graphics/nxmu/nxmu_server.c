@@ -301,7 +301,7 @@ int nx_runinstance(FAR const char *mqname, FAR NX_DRIVERTYPE *dev)
 
   /* Sanity checking */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!mqname || !dev)
     {
       errno = EINVAL;

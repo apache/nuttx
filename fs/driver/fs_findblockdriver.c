@@ -83,7 +83,7 @@ int find_blockdriver(FAR const char *pathname, int mountflags, FAR struct inode 
 
   /* Sanity checks */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!pathname || !ppinode)
     {
       ret = -EINVAL;

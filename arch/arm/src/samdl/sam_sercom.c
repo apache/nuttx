@@ -162,7 +162,7 @@ void sercom_slowclk_configure(int sercom, int gclkgen)
 #ifdef CONFIG_SAMDL_SERCOM5
   static bool configured5 = false;
 #endif
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
 #ifdef HAVE_SERCOM0_4
   static uint8_t slowgen  = 0xff;
 #endif
@@ -205,12 +205,12 @@ void sercom_slowclk_configure(int sercom, int gclkgen)
            */
 
           configured = true;
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
           slowgen    = (uint8_t)gclkgen;
 #endif
         }
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
       /* Already configured.  This is okay provided that the same GCLK
        * generator is being used.  Otherwise, there is a problem.
        */
@@ -236,12 +236,12 @@ void sercom_slowclk_configure(int sercom, int gclkgen)
            */
 
           configured5 = true;
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
           slowgen5    = (uint8_t)gclkgen;
 #endif
         }
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
       /* Already configured.  This is okay provided that the same GCLK
        * generator is being used.  Otherwise, there is a problem.
        */

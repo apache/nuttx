@@ -413,7 +413,7 @@ static void c5471_macassign(struct c5471_driver_s *c5471);
 #ifdef CONFIG_C5471_NET_DUMPBUFFER
 static inline void c5471_dumpbuffer(const char *msg, const uint8_t *buffer, unsigned int nbytes)
 {
-  /* CONFIG_DEBUG, CONFIG_DEBUG_INFO, and CONFIG_DEBUG_NET have to be
+  /* CONFIG_DEBUG_FEATURES, CONFIG_DEBUG_INFO, and CONFIG_DEBUG_NET have to be
    * defined or the following does nothing.
    */
 

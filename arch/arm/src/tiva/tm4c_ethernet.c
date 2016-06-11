@@ -247,7 +247,7 @@
  * enabled.
  */
 
-#ifndef CONFIG_DEBUG
+#ifndef CONFIG_DEBUG_FEATURES
 #  undef CONFIG_TIVA_ETHERNET_REGDEBUG
 #endif
 
@@ -667,7 +667,7 @@ static struct tiva_ethmac_s g_tiva_ethmac[TIVA_NETHCONTROLLERS];
  ****************************************************************************/
 /* Register operations ******************************************************/
 
-#if defined(CONFIG_TIVA_ETHERNET_REGDEBUG) && defined(CONFIG_DEBUG)
+#if defined(CONFIG_TIVA_ETHERNET_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
 static uint32_t tiva_getreg(uint32_t addr);
 static void tiva_putreg(uint32_t val, uint32_t addr);
 static void tiva_checksetup(void);
@@ -787,7 +787,7 @@ static int  tive_emac_configure(FAR struct tiva_ethmac_s *priv);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_TIVA_ETHERNET_REGDEBUG) && defined(CONFIG_DEBUG)
+#if defined(CONFIG_TIVA_ETHERNET_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
 static uint32_t tiva_getreg(uint32_t addr)
 {
   static uint32_t prevaddr = 0;
@@ -859,7 +859,7 @@ static uint32_t tiva_getreg(uint32_t addr)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_TIVA_ETHERNET_REGDEBUG) && defined(CONFIG_DEBUG)
+#if defined(CONFIG_TIVA_ETHERNET_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
 static void tiva_putreg(uint32_t val, uint32_t addr)
 {
   /* Show the register value being written */
@@ -886,7 +886,7 @@ static void tiva_putreg(uint32_t val, uint32_t addr)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_TIVA_ETHERNET_REGDEBUG) && defined(CONFIG_DEBUG)
+#if defined(CONFIG_TIVA_ETHERNET_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
 static void tiva_checksetup(void)
 {
 }

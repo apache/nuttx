@@ -109,7 +109,7 @@
 #  error "Callback support requires CONFIG_SCHED_WORKQUEUE"
 #endif
 
-#if !defined(CONFIG_DEBUG_FS) || !defined(CONFIG_DEBUG)
+#if !defined(CONFIG_DEBUG_FS) || !defined(CONFIG_DEBUG_FEATURES)
 #  undef CONFIG_DEBUG_SDIO
 #endif
 
@@ -1955,7 +1955,7 @@ static int lpc17_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
 
 static int lpc17_recvshortcrc(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t *rshort)
 {
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   uint32_t respcmd;
 #endif
   uint32_t regval;
@@ -1984,7 +1984,7 @@ static int lpc17_recvshortcrc(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t
    */
 
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!rshort)
     {
       fdbg("ERROR: rshort=NULL\n");
@@ -2016,7 +2016,7 @@ static int lpc17_recvshortcrc(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t
           fdbg("ERROR: CRC failure: %08x\n", regval);
           ret = -EIO;
         }
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
       else
         {
           /* Check response received is of desired command */
@@ -2052,7 +2052,7 @@ static int lpc17_recvlong(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t rlo
    *     0         1               End bit
    */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   /* Check that R1 is the correct response to this command */
 
   if ((cmd & MMCSD_RESPONSE_MASK) != MMCSD_R2_RESPONSE)
@@ -2107,7 +2107,7 @@ static int lpc17_recvshort(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t *r
 
   /* Check that this is the correct response to this command */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if ((cmd & MMCSD_RESPONSE_MASK) != MMCSD_R3_RESPONSE &&
       (cmd & MMCSD_RESPONSE_MASK) != MMCSD_R7_RESPONSE)
     {

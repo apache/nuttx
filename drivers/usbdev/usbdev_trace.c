@@ -81,7 +81,7 @@ static uint16_t g_head = 0;
 static uint16_t g_tail = 0;
 #endif
 
-#if defined(CONFIG_USBDEV_TRACE) || (defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_USB))
+#if defined(CONFIG_USBDEV_TRACE) || (defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_DEBUG_USB))
 static usbtrace_idset_t g_maskedidset = CONFIG_USBDEV_TRACE_INITIALIDSET;
 #endif
 
@@ -94,7 +94,7 @@ static usbtrace_idset_t g_maskedidset = CONFIG_USBDEV_TRACE_INITIALIDSET;
  ****************************************************************************/
 
 #if !defined(CONFIG_USBDEV_TRACE) && \
-    (defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_USB))
+    (defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_DEBUG_USB))
 static int usbtrace_syslog(const char *fmt, ...)
 {
   va_list ap;
@@ -132,7 +132,7 @@ static int usbtrace_syslog(const char *fmt, ...)
  ****************************************************************************/
 
 #if defined(CONFIG_USBDEV_TRACE) || \
-   (defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_USB))
+   (defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_DEBUG_USB))
 usbtrace_idset_t usbtrace_enable(usbtrace_idset_t idset)
 {
   irqstate_t flags;
@@ -146,7 +146,7 @@ usbtrace_idset_t usbtrace_enable(usbtrace_idset_t idset)
   leave_critical_section(flags);
   return ret;
 }
-#endif /* CONFIG_USBDEV_TRACE || CONFIG_DEBUG && CONFIG_DEBUG_USB */
+#endif /* CONFIG_USBDEV_TRACE || CONFIG_DEBUG_FEATURES && CONFIG_DEBUG_USB */
 
 /****************************************************************************
  * Name: usbtrace
@@ -159,7 +159,7 @@ usbtrace_idset_t usbtrace_enable(usbtrace_idset_t idset)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_USBDEV_TRACE) || (defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_USB))
+#if defined(CONFIG_USBDEV_TRACE) || (defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_DEBUG_USB))
 void usbtrace(uint16_t event, uint16_t value)
 {
   irqstate_t flags;
@@ -198,7 +198,7 @@ void usbtrace(uint16_t event, uint16_t value)
 
   leave_critical_section(flags);
 }
-#endif /* CONFIG_USBDEV_TRACE || CONFIG_DEBUG && CONFIG_DEBUG_USB */
+#endif /* CONFIG_USBDEV_TRACE || CONFIG_DEBUG_FEATURES && CONFIG_DEBUG_USB */
 
 /****************************************************************************
  * Name: usbtrace_enumerate

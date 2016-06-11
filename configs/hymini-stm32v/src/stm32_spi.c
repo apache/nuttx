@@ -58,7 +58,7 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-/* Enables debug output from this file (needs CONFIG_DEBUG too) */
+/* Enables debug output from this file (needs CONFIG_DEBUG_FEATURES too) */
 
 #define SPI_DEBUG   /* Define to enable debug */
 #define SPI_VERBOSE /* Define to enable verbose debug */

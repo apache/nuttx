@@ -166,7 +166,7 @@ int udp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
 
   /* Sanity check */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!conn || !fds)
     {
       return -EINVAL;
@@ -295,7 +295,7 @@ int udp_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds)
 
   /* Sanity check */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!conn || !fds->priv)
     {
       return -EINVAL;

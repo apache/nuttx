@@ -72,7 +72,7 @@ int close_blockdriver(FAR struct inode *inode)
 
   /* Sanity checks */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!inode || !inode->u.i_bops)
     {
       ret = -EINVAL;

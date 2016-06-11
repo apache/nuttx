@@ -136,7 +136,7 @@ config ADXL345_ACTIVELOW
 config ADXL345_REGDEBUG
 	bool "Enable Register-Level ADXL345 Debug"
 	default n
-	depends on DEBUG
+	depends on DEBUG_FEATURES
 	---help---
 		Enable very low register-level debug output.
 

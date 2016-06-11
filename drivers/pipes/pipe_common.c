@@ -56,7 +56,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/ioctl.h>
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
 #  include <nuttx/arch.h>
 #endif
 
@@ -722,7 +722,7 @@ int pipecommon_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
       FAR struct pollfd **slot = (FAR struct pollfd **)fds->priv;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
       if (!slot)
         {
           ret              = -EIO;
@@ -752,7 +752,7 @@ int pipecommon_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   FAR struct pipe_dev_s *dev   = inode->i_private;
   int                    ret   = -EINVAL;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   /* Some sanity checking */
 
   if (dev == NULL)

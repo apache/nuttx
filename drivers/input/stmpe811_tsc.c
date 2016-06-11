@@ -306,7 +306,7 @@ static inline int stmpe811_waitsample(FAR struct stmpe811_dev_s *priv,
 
       if (ret < 0)
         {
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
           /* Sample the errno (debug output could change it) */
 
           int errval = errno;

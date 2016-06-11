@@ -49,14 +49,14 @@
 #include "chip.h"
 #include "nuc_gpio.h"
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 /* Port letters for prettier debug output */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
 static const char g_portchar[NUC_GPIO_NPORTS] =
 {
 #if NUC_GPIO_NPORTS > 9
@@ -142,4 +142,4 @@ void nuc_dumpgpio(gpio_cfgset_t pinset, const char *msg)
   leave_critical_section(flags);
 }
 
-#endif /* CONFIG_DEBUG */
+#endif /* CONFIG_DEBUG_FEATURES */

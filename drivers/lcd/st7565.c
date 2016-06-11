@@ -79,7 +79,7 @@
  *   ST7565 devices that will be supported.  NOTE:  At present, this
  *   must be undefined or defined to be 1.
  * CONFIG_LCD_ST7565DEBUG - Enable detailed ST7565 debst7565 output
- *   (CONFIG_DEBUG and CONFIG_VERBOSE must also be enabled).
+ *   (CONFIG_DEBUG_FEATURES and CONFIG_VERBOSE must also be enabled).
  *
  * Required LCD driver settings:
  * CONFIG_LCD_ST7565 - Enable ST7565 support
@@ -105,7 +105,7 @@
 
 /* Verbose debst7565 must also be enabled to use the extra OLED debst7565 */
 
-#ifndef CONFIG_DEBUG
+#ifndef CONFIG_DEBUG_FEATURES
 #  undef CONFIG_DEBUG_INFO
 #  undef CONFIG_DEBUG_GRAPHICS
 #endif

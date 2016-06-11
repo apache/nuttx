@@ -79,7 +79,7 @@ int tcp_backlogcreate(FAR struct tcp_conn_s *conn, int nblg)
 
   nllinfo("conn=%p nblg=%d\n", conn, nblg);
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!conn)
     {
       return -EINVAL;
@@ -163,7 +163,7 @@ int tcp_backlogdestroy(FAR struct tcp_conn_s *conn)
 
   nllinfo("conn=%p\n", conn);
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!conn)
     {
       return -EINVAL;
@@ -224,7 +224,7 @@ int tcp_backlogadd(FAR struct tcp_conn_s *conn, FAR struct tcp_conn_s *blconn)
 
   nllinfo("conn=%p blconn=%p\n", conn, blconn);
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!conn)
     {
       return -EINVAL;
@@ -294,7 +294,7 @@ FAR struct tcp_conn_s *tcp_backlogremove(FAR struct tcp_conn_s *conn)
   FAR struct tcp_blcontainer_s *blc;
   FAR struct tcp_conn_s        *blconn = NULL;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!conn)
     {
       return NULL;
@@ -347,7 +347,7 @@ int tcp_backlogdelete(FAR struct tcp_conn_s *conn,
 
   nllinfo("conn=%p blconn=%p\n", conn, blconn);
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!conn)
     {
       return -EINVAL;

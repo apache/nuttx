@@ -244,7 +244,7 @@
 
 /* EMAC statistics (debug only) */
 
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_NET)
+#if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_DEBUG_NET)
 struct ez80mac_statistics_s
 {
   uint32_t rx_int;         /* Number of Rx interrupts received */
@@ -321,7 +321,7 @@ struct ez80emac_driver_s
   WDOG_ID txpoll;           /* TX poll timer */
   WDOG_ID txtimeout;        /* TX timeout timer */
 
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_NET)
+#if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_DEBUG_NET)
   struct ez80mac_statistics_s stat;
 #endif
 
@@ -574,7 +574,7 @@ static int ez80emac_miiconfigure(FAR struct ez80emac_driver_s *priv)
 
   /* Verify that the detect PHY is an AMD Am87c874 as expected */
 
-#ifdef CONFIG_DEBUG /* Parameter checking only done when DEBUG is enabled */
+#ifdef CONFIG_DEBUG_FEATURES /* Parameter checking only done when DEBUG is enabled */
   phyval = ez80emac_miiread(priv, MII_PHYID1);
   if (phyval != MII_PHYID1_AM79C874)
     {

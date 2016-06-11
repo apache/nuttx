@@ -56,7 +56,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* CONFIG_DEBUG, CONFIG_DEBUG_INFO, and CONFIG_DEBUG_BINFMT have to be
+/* CONFIG_DEBUG_FEATURES, CONFIG_DEBUG_INFO, and CONFIG_DEBUG_BINFMT have to be
  * defined or CONFIG_NXFLAT_DUMPBUFFER does nothing.
  */
 
@@ -79,7 +79,7 @@
  ****************************************************************************/
 
 static int nxflat_loadbinary(struct binary_s *binp);
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_BINFMT)
+#if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_DEBUG_BINFMT)
 static void nxflat_dumploadinfo(struct nxflat_loadinfo_s *loadinfo);
 #endif
 
@@ -102,7 +102,7 @@ static struct binfmt_s g_nxflatbinfmt =
  * Name: nxflat_dumploadinfo
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_BINFMT)
+#if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_DEBUG_BINFMT)
 static void nxflat_dumploadinfo(struct nxflat_loadinfo_s *loadinfo)
 {
   unsigned long dsize = loadinfo->datasize + loadinfo->bsssize;

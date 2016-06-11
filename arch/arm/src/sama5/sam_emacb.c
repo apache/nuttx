@@ -58,7 +58,7 @@
 
 #include <nuttx/config.h>
 
-#if defined(CONFIG_DEBUG) && defined(CONFIG_SAMA5_EMACB_DEBUG)
+#if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_SAMA5_EMACB_DEBUG)
   /* Force debug output (from this file only) */
 
 #  undef  CONFIG_DEBUG_NET
@@ -295,7 +295,7 @@
  * enabled.
  */
 
-#ifndef CONFIG_DEBUG
+#ifndef CONFIG_DEBUG_FEATURES
 #  undef CONFIG_SAMA5_EMACB_REGDEBUG
 #endif
 
@@ -459,7 +459,7 @@ struct sam_emac_s
  ****************************************************************************/
 /* Register operations ******************************************************/
 
-#if defined(CONFIG_SAMA5_EMACB_REGDEBUG) && defined(CONFIG_DEBUG)
+#if defined(CONFIG_SAMA5_EMACB_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
 static bool sam_checkreg(struct sam_emac_s *priv, bool wr,
                          uint32_t regval, uintptr_t address);
 #endif

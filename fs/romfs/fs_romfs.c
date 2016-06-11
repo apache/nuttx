@@ -979,7 +979,7 @@ static int romfs_unbind(FAR void *handle, FAR struct inode **blkdriver,
 
   finfo("Entry\n");
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!rm)
     {
       return -EINVAL;

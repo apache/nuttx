@@ -72,7 +72,7 @@
 #  error "CONFIG_RTC_HIRES must NOT be set with this driver"
 #endif
 
-#ifndef CONFIG_DEBUG
+#ifndef CONFIG_DEBUG_FEATURES
 #  undef CONFIG_DEBUG_RTC
 #endif
 

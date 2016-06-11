@@ -149,6 +149,6 @@ ifeq ($(CONFIG_STM32F7_ETHMAC),y)
 CHIP_CSRCS += stm32_ethernet.c
 endif
 
-ifeq ($(CONFIG_DEBUG),y)
+ifeq ($(CONFIG_DEBUG_FEATURES),y)
 CHIP_CSRCS += stm32_dumpgpio.c
 endif

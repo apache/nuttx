@@ -60,7 +60,7 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-/* CONFIG_DEBUG_SPI enables debug output from this file (needs CONFIG_DEBUG too) */
+/* CONFIG_DEBUG_SPI enables debug output from this file (needs CONFIG_DEBUG_FEATURES too) */
 
 #ifdef CONFIG_DEBUG_SPI
 #  define ssidbg lldbg

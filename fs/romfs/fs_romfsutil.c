@@ -499,7 +499,7 @@ int romfs_hwconfigure(struct romfs_mountpt_s *rm)
 
   /* Get the underlying device geometry */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!inode || !inode->u.i_bops || !inode->u.i_bops->geometry)
     {
       return -ENODEV;

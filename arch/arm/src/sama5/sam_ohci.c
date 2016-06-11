@@ -151,7 +151,7 @@
 
 /* Debug */
 
-#ifndef CONFIG_DEBUG
+#ifndef CONFIG_DEBUG_FEATURES
 #  undef CONFIG_SAMA5_OHCI_REGDEBUG
 #endif
 
@@ -2835,7 +2835,7 @@ errout:
 
 static int sam_epfree(struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 {
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   struct sam_rhport_s *rhport = (struct sam_rhport_s *)drvr;
 #endif
   struct sam_eplist_s *eplist = (struct sam_eplist_s *)ep;

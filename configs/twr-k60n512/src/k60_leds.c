@@ -119,7 +119,7 @@
 #define LED_PANIC_OFF_SETBITS        ((0) << OFF_SETBITS_SHIFT)
 #define LED_PANIC_OFF_CLRBITS        ((K60_LED4) << OFF_CLRBITS_SHIFT)
 
-/* CONFIG_DEBUG_LEDS enables debug output from this file (needs CONFIG_DEBUG
+/* CONFIG_DEBUG_LEDS enables debug output from this file (needs CONFIG_DEBUG_FEATURES
  * with CONFIG_DEBUG_INFO too)
  */
 

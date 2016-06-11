@@ -5104,7 +5104,7 @@ static int smart_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
        * driver.
        */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
       if (arg == 0)
         {
           fdbg("ERROR: BIOC_XIPBASE argument is NULL\n");
@@ -5281,7 +5281,7 @@ int smart_initialize(int minor, FAR struct mtd_dev_s *mtd, FAR const char *partn
 
   /* Sanity check */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (minor < 0 || minor > 255 || !mtd)
     {
       return -EINVAL;
@@ -5550,7 +5550,7 @@ static int smart_loteardown(FAR const char *devname)
 
   /* Sanity check */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!devname)
     {
       return -EINVAL;

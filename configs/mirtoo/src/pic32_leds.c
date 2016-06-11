@@ -93,7 +93,7 @@
 
 /* Debug ********************************************************************/
 
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_LEDS)
+#if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_DEBUG_LEDS)
 #  define leddbg  lldbg
 #  ifdef CONFIG_DEBUG_INFO
 #    define ledinfo lldbg

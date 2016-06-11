@@ -104,7 +104,7 @@
 #  define USB_FRAME_INT 0
 #endif
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
 #  define USB_ERROR_INT USBDEV_DEVINT_EPRINT
 #else
 #  define USB_ERROR_INT 0
@@ -382,7 +382,7 @@ struct lpc214x_usbdev_s
 
 /* Register operations ********************************************************/
 
-#if defined(CONFIG_LPC214X_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG)
+#if defined(CONFIG_LPC214X_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
 static uint32_t lpc214x_getreg(uint32_t addr);
 static void lpc214x_putreg(uint32_t val, uint32_t addr);
 #else
@@ -518,7 +518,7 @@ static const struct usbdev_ops_s g_devops =
  *
  ****************************************************************************/
 
-#if defined(CONFIG_LPC214X_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG)
+#if defined(CONFIG_LPC214X_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
 static uint32_t lpc214x_getreg(uint32_t addr)
 {
   static uint32_t prevaddr = 0;
@@ -581,7 +581,7 @@ static uint32_t lpc214x_getreg(uint32_t addr)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_LPC214X_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG)
+#if defined(CONFIG_LPC214X_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
 static void lpc214x_putreg(uint32_t val, uint32_t addr)
 {
   /* Show the register value being written */
@@ -2055,7 +2055,7 @@ static int lpc214x_usbinterrupt(int irq, FAR void *context)
 
 #endif
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
       /* USB engine error interrupt */
 
       if ((devintstatus & USBDEV_DEVINT_EPRINT))
@@ -2378,7 +2378,7 @@ static int lpc214x_dmasetup(struct lpc214x_usbdev_s *priv, uint8_t epphy,
   struct lpc214x_dmadesc_s *dmadesc = priv;
   uint32_t reg;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!priv || epphy < 2)
     {
       usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_INVALIDPARMS), 0);
@@ -2577,7 +2577,7 @@ static int lpc214x_epdisable(FAR struct usbdev_ep_s *ep)
   uint32_t mask = (1 << privep->epphy);
   uint32_t reg;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!ep)
     {
       usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_INVALIDPARMS), 0);
@@ -2619,7 +2619,7 @@ static FAR struct usbdev_req_s *lpc214x_epallocreq(FAR struct usbdev_ep_s *ep)
 {
   FAR struct lpc214x_req_s *privreq;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!ep)
     {
       usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_INVALIDPARMS), 0);
@@ -2651,7 +2651,7 @@ static void lpc214x_epfreereq(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_
 {
   FAR struct lpc214x_req_s *privreq = (FAR struct lpc214x_req_s *)req;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!ep || !req)
     {
       usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_INVALIDPARMS), 0);
@@ -2759,7 +2759,7 @@ static int lpc214x_epsubmit(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s 
   irqstate_t flags;
   int ret = OK;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!req || !req->callback || !req->buf || !ep)
     {
       usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_INVALIDPARMS), 0);
@@ -2844,7 +2844,7 @@ static int lpc214x_epcancel(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s 
   FAR struct lpc214x_ep_s *privep = (FAR struct lpc214x_ep_s *)ep;
   irqstate_t flags;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!ep || !req)
     {
       usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_INVALIDPARMS), 0);
@@ -3107,7 +3107,7 @@ static int lpc214x_selfpowered(struct usbdev_s *dev, bool selfpowered)
 
   usbtrace(TRACE_DEVSELFPOWERED, (uint16_t)selfpowered);
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!dev)
     {
       usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_INVALIDPARMS), 0);
@@ -3322,7 +3322,7 @@ int usbdev_register(struct usbdevclass_driver_s *driver)
 
   usbtrace(TRACE_DEVREGISTER, 0);
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!driver || !driver->ops->bind || !driver->ops->unbind ||
       !driver->ops->disconnect || !driver->ops->setup)
     {
@@ -3372,7 +3372,7 @@ int usbdev_unregister(struct usbdevclass_driver_s *driver)
 {
   usbtrace(TRACE_DEVUNREGISTER, 0);
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (driver != g_usbdev.driver)
     {
       usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_INVALIDPARMS), 0);

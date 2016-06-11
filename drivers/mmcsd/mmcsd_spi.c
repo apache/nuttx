@@ -1031,7 +1031,7 @@ static int mmcsd_open(FAR struct inode *inode)
 
   finfo("Entry\n");
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!inode || !inode->i_private)
     {
       fdbg("Internal confusion\n");
@@ -1044,7 +1044,7 @@ static int mmcsd_open(FAR struct inode *inode)
   slot = (FAR struct mmcsd_slot_s *)inode->i_private;
   spi  = slot->spi;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!spi)
     {
       fdbg("Internal confusion\n");
@@ -1116,7 +1116,7 @@ static ssize_t mmcsd_read(FAR struct inode *inode, unsigned char *buffer,
 
   finfo("start_sector=%d nsectors=%d\n", start_sector, nsectors);
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!buffer)
     {
       fdbg("Invalid parameters\n");
@@ -1135,7 +1135,7 @@ static ssize_t mmcsd_read(FAR struct inode *inode, unsigned char *buffer,
   slot = (FAR struct mmcsd_slot_s *)inode->i_private;
   spi  = slot->spi;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!spi)
     {
       fdbg("Internal confusion\n");
@@ -1270,7 +1270,7 @@ static ssize_t mmcsd_write(FAR struct inode *inode, const unsigned char *buffer,
 
   finfo("start_sector=%d nsectors=%d\n", start_sector, nsectors);
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!buffer)
     {
       fdbg("Invalid parameters\n");
@@ -1289,7 +1289,7 @@ static ssize_t mmcsd_write(FAR struct inode *inode, const unsigned char *buffer,
   slot = (FAR struct mmcsd_slot_s *)inode->i_private;
   spi  = slot->spi;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!spi)
     {
       fdbg("Internal confusion\n");
@@ -1452,7 +1452,7 @@ static int mmcsd_geometry(FAR struct inode *inode, struct geometry *geometry)
   uint8_t csd[16];
   int ret;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!geometry)
     {
       fdbg("Invalid parameters\n");
@@ -1471,7 +1471,7 @@ static int mmcsd_geometry(FAR struct inode *inode, struct geometry *geometry)
   slot = (FAR struct mmcsd_slot_s *)inode->i_private;
   spi  = slot->spi;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!spi)
     {
       fdbg("Internal confusion\n");
@@ -1833,7 +1833,7 @@ static void mmcsd_mediachanged(void *arg)
   uint8_t oldstate;
   int ret;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!slot || !slot->spi)
     {
       fdbg("Internal confusion\n");
@@ -1915,7 +1915,7 @@ int mmcsd_spislotinitialize(int minor, int slotno, FAR struct spi_dev_s *spi)
   char devname[16];
   int ret;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if ((unsigned)slotno >= CONFIG_MMCSD_NSLOTS || (unsigned)minor > 255 || !spi)
     {
       fdbg("Invalid arguments\n");
@@ -1929,7 +1929,7 @@ int mmcsd_spislotinitialize(int minor, int slotno, FAR struct spi_dev_s *spi)
   memset(slot, 0, sizeof(struct mmcsd_slot_s));
   sem_init(&slot->sem, 0, 1);
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (slot->spi)
     {
       fdbg("Already registered\n");

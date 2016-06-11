@@ -67,7 +67,7 @@
  ****************************************************************************/
 /* Configuration ************************************************************/
 /* CONFIG_AUDIO - Enables Audio driver support
- * CONFIG_DEBUG_AUDIO - If enabled (with CONFIG_DEBUG and, optionally,
+ * CONFIG_DEBUG_AUDIO - If enabled (with CONFIG_DEBUG_FEATURES and, optionally,
  *   CONFIG_DEBUG_INFO), this will generate output that can be used to
  *   debug Audio drivers.
  */

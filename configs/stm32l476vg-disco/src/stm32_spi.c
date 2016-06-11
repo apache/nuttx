@@ -61,7 +61,7 @@
 
 /* Enables debug output from this file */
 
-#ifndef CONFIG_DEBUG
+#ifndef CONFIG_DEBUG_FEATURES
 #  undef CONFIG_DEBUG_SPI
 #  undef CONFIG_DEBUG_INFO
 #endif

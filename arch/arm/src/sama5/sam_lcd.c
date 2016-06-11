@@ -492,7 +492,7 @@
 
 /* Debug */
 
-#ifndef CONFIG_DEBUG
+#ifndef CONFIG_DEBUG_FEATURES
 #  undef CONFIG_SAMA5_LCDC_REGDEBUG
 #endif
 
@@ -666,7 +666,7 @@ struct sam_lcdc_s
  ****************************************************************************/
 /* Register operations ******************************************************/
 
-#if defined(CONFIG_SAMA5_LCDC_REGDEBUG) && defined(CONFIG_DEBUG)
+#if defined(CONFIG_SAMA5_LCDC_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
 static bool sam_checkreg(bool wr, uint32_t regval, uintptr_t address);
 static uint32_t sam_getreg(uintptr_t addr);
 static void sam_putreg(uintptr_t addr, uint32_t val);

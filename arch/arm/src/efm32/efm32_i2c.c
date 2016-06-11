@@ -134,7 +134,7 @@
 
 /* Debug ****************************************************************************/
 
-/* CONFIG_DEBUG_I2C + CONFIG_DEBUG enables general I2C debug output. */
+/* CONFIG_DEBUG_I2C + CONFIG_DEBUG_FEATURES enables general I2C debug output. */
 
 #ifdef CONFIG_DEBUG_I2C
 #  define i2cdbg dbg

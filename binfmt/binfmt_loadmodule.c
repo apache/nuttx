@@ -180,7 +180,7 @@ int load_module(FAR struct binary_s *bin)
 
   /* Verify that we were provided something to work with */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (bin && bin->filename)
 #endif
     {

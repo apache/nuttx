@@ -86,7 +86,7 @@ static void devif_callback_free(FAR struct net_driver_s *dev,
     {
       save = net_lock();
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
       /* Check for double freed callbacks */
 
       curr = g_cbfreelist;
@@ -257,7 +257,7 @@ FAR struct devif_callback_s *
            *list = ret;
         }
     }
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   else
     {
       nlldbg("Failed to allocate callback\n");

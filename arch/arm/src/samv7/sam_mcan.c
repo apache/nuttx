@@ -789,7 +789,7 @@
 /* Debug ********************************************************************/
 /* Debug configurations that may be enabled just for testing MCAN */
 
-#if !defined(CONFIG_DEBUG) || !defined(CONFIG_DEBUG_CAN)
+#if !defined(CONFIG_DEBUG_FEATURES) || !defined(CONFIG_DEBUG_CAN)
 #  undef CONFIG_SAMV7_MCAN_REGDEBUG
 #endif
 
@@ -2829,7 +2829,7 @@ static bool mcan_txready(FAR struct can_dev_s *dev)
   FAR struct sam_mcan_s *priv = dev->cd_priv;
   uint32_t regval;
   bool notfull;
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   int sval;
 #endif
 
@@ -2846,7 +2846,7 @@ static bool mcan_txready(FAR struct can_dev_s *dev)
   regval  = mcan_getreg(priv, SAM_MCAN_TXFQS_OFFSET);
   notfull = ((regval & MCAN_TXFQS_TFQF) == 0);
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   /* As a sanity check, the txfsem should also track the number of elements
    * the TX FIFO/queue.  Make sure that they are consistent.
    */

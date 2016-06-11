@@ -379,7 +379,7 @@ int losetup(FAR const char *devname, FAR const char *filename,
 
   /* Sanity check */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!devname || !filename || !sectsize)
     {
       return -EINVAL;
@@ -485,7 +485,7 @@ int loteardown(FAR const char *devname)
 
   /* Sanity check */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!devname)
     {
       return -EINVAL;

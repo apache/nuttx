@@ -66,7 +66,7 @@
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
 bool kmm_heapmember(FAR void *mem)
 {
 #if CONFIG_MM_REGIONS > 1

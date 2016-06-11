@@ -263,7 +263,7 @@
  * enabled.
  */
 
-#ifndef CONFIG_DEBUG
+#ifndef CONFIG_DEBUG_FEATURES
 #  undef CONFIG_STM32F7_ETHMAC_REGDEBUG
 #endif
 
@@ -664,7 +664,7 @@ static struct stm32_ethmac_s g_stm32ethmac[STM32F7_NETHERNET];
  ****************************************************************************/
 /* Register operations ******************************************************/
 
-#if defined(CONFIG_STM32F7_ETHMAC_REGDEBUG) && defined(CONFIG_DEBUG)
+#if defined(CONFIG_STM32F7_ETHMAC_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
 static uint32_t stm32_getreg(uint32_t addr);
 static void stm32_putreg(uint32_t val, uint32_t addr);
 static void stm32_checksetup(void);
@@ -795,7 +795,7 @@ static int  stm32_ethconfig(struct stm32_ethmac_s *priv);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_STM32F7_ETHMAC_REGDEBUG) && defined(CONFIG_DEBUG)
+#if defined(CONFIG_STM32F7_ETHMAC_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
 static uint32_t stm32_getreg(uint32_t addr)
 {
   static uint32_t prevaddr = 0;
@@ -867,7 +867,7 @@ static uint32_t stm32_getreg(uint32_t addr)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_STM32F7_ETHMAC_REGDEBUG) && defined(CONFIG_DEBUG)
+#if defined(CONFIG_STM32F7_ETHMAC_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
 static void stm32_putreg(uint32_t val, uint32_t addr)
 {
   /* Show the register value being written */
@@ -894,7 +894,7 @@ static void stm32_putreg(uint32_t val, uint32_t addr)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_STM32F7_ETHMAC_REGDEBUG) && defined(CONFIG_DEBUG)
+#if defined(CONFIG_STM32F7_ETHMAC_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
 static void stm32_checksetup(void)
 {
 }

@@ -102,7 +102,7 @@ int nx_bitmap(NXWINDOW hwnd, FAR const struct nxgl_rect_s *dest,
   int ret;
   sem_t sem_done;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!wnd || !dest || !src || !origin)
     {
       set_errno(EINVAL);

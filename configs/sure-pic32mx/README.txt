@@ -735,13 +735,13 @@ Where <subdir> is one of the following:
 
        File Systems:
          CONFIG_FS_FAT=y            : FAT file system
-                                  : Other FAT options
+                                    : Other FAT options
 
     Debug output for testing the SD card can be enabled using:
 
        Build Setup:
-         CONFIG_DEBUG=y             : Enable debug features
-         CONFIG_DEBUG_INFO=y     : Enable verbose debug output
+         CONFIG_DEBUG_FEATURES=y    : Enable debug features
+         CONFIG_DEBUG_INFO=y        : Enable verbose debug output
          CONFIG_DEBUG_FS=y          : Enable file system debug
          CONFIG_DEBUG_SPI=y         : Enable SPI debug
 
@@ -772,7 +772,7 @@ Where <subdir> is one of the following:
        To enable LCD debug output:
 
        Build Setup -> Debug Options:
-         CONFIG_DEBUG=y             : Enable debug features
+         CONFIG_DEBUG_FEATURES=y             : Enable debug features
          CONFIG_DEBUG_INFO=y     : Enable verbose debug output
          CONFIG_DEBUG_LCD=y         : Enable LCD debug output
 

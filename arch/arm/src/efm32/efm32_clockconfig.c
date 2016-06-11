@@ -450,7 +450,7 @@ static inline uint32_t efm32_hfclk_config(uint32_t hfclksel, uint32_t hfclkdiv)
       }
       break;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
       default:
         PANIC();
 #endif

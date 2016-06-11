@@ -149,7 +149,7 @@
  * enabled.
  */
 
-#ifndef CONFIG_DEBUG
+#ifndef CONFIG_DEBUG_FEATURES
 #  undef CONFIG_SAMA5_GMAC_REGDEBUG
 #endif
 
@@ -260,7 +260,7 @@ static uint8_t g_rxbuffer[CONFIG_SAMA5_GMAC_NRXBUFFERS * GMAC_RX_UNITSIZE]
  ****************************************************************************/
 /* Register operations ******************************************************/
 
-#if defined(CONFIG_SAMA5_GMAC_REGDEBUG) && defined(CONFIG_DEBUG)
+#if defined(CONFIG_SAMA5_GMAC_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
 static bool sam_checkreg(struct sam_gmac_s *priv, bool wr,
                          uint32_t regval, uintptr_t address);
 static uint32_t sam_getreg(struct sam_gmac_s *priv, uintptr_t addr);

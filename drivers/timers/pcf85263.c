@@ -77,7 +77,7 @@
 
 #define PCF85263_I2C_ADDRESS 0x51
 
-#ifndef CONFIG_DEBUG
+#ifndef CONFIG_DEBUG_FEATURES
 #  undef CONFIG_DEBUG_RTC
 #endif
 

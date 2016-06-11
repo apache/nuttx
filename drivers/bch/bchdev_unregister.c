@@ -91,7 +91,7 @@ int bchdev_unregister(FAR const char *chardev)
 
   /* Sanity check */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!chardev)
     {
       return -EINVAL;

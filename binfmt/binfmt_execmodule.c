@@ -147,7 +147,7 @@ int exec_module(FAR const struct binary_s *binp)
 
   /* Sanity checking */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!binp || !binp->entrypt || binp->stacksize <= 0)
     {
       err = EINVAL;

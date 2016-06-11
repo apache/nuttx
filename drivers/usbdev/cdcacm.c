@@ -339,7 +339,7 @@ static int cdcacm_sndpacket(FAR struct cdcacm_dev_s *priv)
   int len;
   int ret = OK;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (priv == NULL)
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_INVALIDARG), 0);
@@ -643,7 +643,7 @@ static int cdcacm_setconfig(FAR struct cdcacm_dev_s *priv, uint8_t config)
   int i;
   int ret = 0;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (priv == NULL)
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_INVALIDARG), 0);
@@ -817,7 +817,7 @@ static void cdcacm_rdcomplete(FAR struct usbdev_ep_s *ep,
 
   /* Sanity check */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!ep || !ep->priv || !req)
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_INVALIDARG), 0);
@@ -880,7 +880,7 @@ static void cdcacm_wrcomplete(FAR struct usbdev_ep_s *ep,
 
   /* Sanity check */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!ep || !ep->priv || !req || !req->priv)
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_INVALIDARG), 0);
@@ -1120,7 +1120,7 @@ static void cdcacm_unbind(FAR struct usbdevclass_driver_s *driver,
 
   usbtrace(TRACE_CLASSUNBIND, 0);
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!driver || !dev)
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_INVALIDARG), 0);
@@ -1132,7 +1132,7 @@ static void cdcacm_unbind(FAR struct usbdevclass_driver_s *driver,
 
   priv = ((FAR struct cdcacm_driver_s *)driver)->dev;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!priv)
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_EP0NOTBOUND), 0);
@@ -1248,7 +1248,7 @@ static int cdcacm_setup(FAR struct usbdevclass_driver_s *driver,
   uint16_t len;
   int ret = -EOPNOTSUPP;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!driver || !dev || !ctrl)
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_INVALIDARG), 0);
@@ -1261,7 +1261,7 @@ static int cdcacm_setup(FAR struct usbdevclass_driver_s *driver,
   usbtrace(TRACE_CLASSSETUP, ctrl->req);
   priv = ((FAR struct cdcacm_driver_s *)driver)->dev;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!priv || !priv->ctrlreq)
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_EP0NOTBOUND), 0);
@@ -1621,7 +1621,7 @@ static void cdcacm_disconnect(FAR struct usbdevclass_driver_s *driver,
 
   usbtrace(TRACE_CLASSDISCONNECT, 0);
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!driver || !dev || !dev->ep0)
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_INVALIDARG), 0);
@@ -1633,7 +1633,7 @@ static void cdcacm_disconnect(FAR struct usbdevclass_driver_s *driver,
 
   priv = ((FAR struct cdcacm_driver_s *)driver)->dev;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!priv)
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_EP0NOTBOUND), 0);
@@ -1686,7 +1686,7 @@ static void cdcacm_suspend(FAR struct usbdevclass_driver_s *driver,
 
   usbtrace(TRACE_CLASSSUSPEND, 0);
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!driver || !dev)
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_INVALIDARG), 0);
@@ -1720,7 +1720,7 @@ static void cdcacm_resume(FAR struct usbdevclass_driver_s *driver,
 
   usbtrace(TRACE_CLASSRESUME, 0);
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!driver || !dev)
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_INVALIDARG), 0);
@@ -1763,7 +1763,7 @@ static int cdcuart_setup(FAR struct uart_dev_s *dev)
 
   /* Sanity check */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!dev || !dev->priv)
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_INVALIDARG), 0);
@@ -1804,7 +1804,7 @@ static void cdcuart_shutdown(FAR struct uart_dev_s *dev)
 
   /* Sanity check */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!dev || !dev->priv)
     {
        usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_INVALIDARG), 0);
@@ -2063,7 +2063,7 @@ static void cdcuart_rxint(FAR struct uart_dev_s *dev, bool enable)
 
   /* Sanity check */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!dev || !dev->priv)
     {
        usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_INVALIDARG), 0);
@@ -2192,7 +2192,7 @@ static void cdcuart_txint(FAR struct uart_dev_s *dev, bool enable)
 
   /* Sanity checks */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!dev || !dev->priv)
     {
        usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_INVALIDARG), 0);
@@ -2235,7 +2235,7 @@ static bool cdcuart_txempty(FAR struct uart_dev_s *dev)
 
   usbtrace(CDCACM_CLASSAPI_TXEMPTY, 0);
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!priv)
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_INVALIDARG), 0);

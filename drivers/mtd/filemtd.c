@@ -184,7 +184,7 @@ static ssize_t filemtd_write(FAR struct file_dev_s *priv, size_t offset,
        * erased state.
        */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
       if (newvalue != srcvalue)
         {
           dbg("ERROR: Bad write: source=%02x dest=%02x result=%02x\n",

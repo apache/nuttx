@@ -53,7 +53,7 @@
 //#define MONITOR_MM_SEMAPHORE 1
 
 #ifdef MONITOR_MM_SEMAPHORE
-#  ifdef CONFIG_DEBUG
+#  ifdef CONFIG_DEBUG_FEATURES
 #    include <debug.h>
 #    define msemdbg dbg
 #  else
@@ -186,7 +186,7 @@ void mm_takesemaphore(FAR struct mm_heap_s *heap)
 
 void mm_givesemaphore(FAR struct mm_heap_s *heap)
 {
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   pid_t my_pid = getpid();
 #endif
 
@@ -207,7 +207,7 @@ void mm_givesemaphore(FAR struct mm_heap_s *heap)
     {
       /* Nope, this is the last reference I have */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
       msemdbg("PID=%d giving\n", my_pid);
 #endif
 

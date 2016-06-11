@@ -43,10 +43,14 @@
 #include <errno.h>
 
 #if defined(CONFIG_VNCSERVER_DEBUG) && !defined(CONFIG_DEBUG_GRAPHICS)
-#  undef  CONFIG_DEBUG
+#  undef  CONFIG_DEBUG_FEATURES
+#  undef  CONFIG_DEBUG_ERROR
+#  undef  CONFIG_DEBUG_WARN
 #  undef  CONFIG_DEBUG_INFO
-#  define CONFIG_DEBUG          1
-#  define CONFIG_DEBUG_INFO  1
+#  define CONFIG_DEBUG_FEATURES 1
+#  define CONFIG_DEBUG_ERROR    1
+#  define CONFIG_DEBUG_WARN     1
+#  define CONFIG_DEBUG_INFO     1
 #  define CONFIG_DEBUG_GRAPHICS 1
 #endif
 #include <debug.h>

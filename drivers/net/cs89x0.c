@@ -679,7 +679,7 @@ static int cs89x0_interrupt(int irq, FAR void *context)
   register struct cs89x0_driver_s *cs89x0 = s89x0_mapirq(irq);
   uint16_t isq;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!cs89x0)
     {
       return -ENODEV;
@@ -1010,7 +1010,7 @@ int cs89x0_initialize(FAR const cs89x0_driver_s *cs89x0, int devno)
 {
   /* Sanity checks -- only performed with debug enabled */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!cs89x0 || (unsigned)devno > CONFIG_CS89x0_NINTERFACES || g_cs89x00[devno])
     {
       return -EINVAL;

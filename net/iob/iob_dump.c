@@ -44,7 +44,7 @@
 
 #include <nuttx/net/iob.h>
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
 
 /****************************************************************************
  * Pre-processor definitions
@@ -162,4 +162,4 @@ void iob_dump(FAR const char *msg, FAR struct iob_s *iob, unsigned int len,
     }
 }
 
-#endif /* CONFIG_DEBUG */
+#endif /* CONFIG_DEBUG_FEATURES */

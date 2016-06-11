@@ -399,7 +399,7 @@ static int ez80_i2c_sendaddr(struct ez80_i2cdev_s *priv, uint8_t readbit)
    */
 
   sr = ez80_i2c_waitiflg();
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (sr != I2C_SR_MSTART)
     {
       /* This error should never occur */
@@ -469,7 +469,7 @@ static int ez80_i2c_sendaddr(struct ez80_i2cdev_s *priv, uint8_t readbit)
   /* We don't attempt any fancy status-based error recovery */
 
 failure:
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   switch (sr)
     {
       case I2C_SR_ARBLOST1: /* Arbitration lost in address or data byte */

@@ -42,7 +42,7 @@ CONFIG_BUILD_FLAT=y
 #
 # Debug Options
 #
-# CONFIG_DEBUG is not set
+# CONFIG_DEBUG_FEATURES is not set
 # CONFIG_ARCH_HAVE_HEAPCHECK is not set
 # CONFIG_ARCH_HAVE_STACKCHECK is not set
 # CONFIG_DEBUG_SYMBOLS is not set

@@ -90,7 +90,7 @@ int nx_setposition(NXWINDOW hwnd, FAR const struct nxgl_point_s *pos)
   FAR struct nxbe_window_s     *wnd = (FAR struct nxbe_window_s *)hwnd;
   struct nxsvrmsg_setposition_s outmsg;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!wnd || !pos)
     {
       set_errno(EINVAL);

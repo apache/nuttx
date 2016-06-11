@@ -187,7 +187,7 @@ NXHANDLE nx_open(FAR NX_DRIVERTYPE *dev)
 
   /* Sanity checking */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!dev)
     {
       errno = EINVAL;

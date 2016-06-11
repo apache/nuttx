@@ -97,9 +97,9 @@ static void    ads1242_set_negative_input(FAR struct ads1242_dev_s *dev,
                  ADS1242_NEGATIVE_INPUT_SELECTION const neg_in_sel);
 static bool    ads1242_is_data_ready(FAR struct ads1242_dev_s *dev);
 
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_INFO)
+#if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_DEBUG_INFO)
 static void    ads1242_print_regs(FAR struct ads1242_dev_s *dev, char const *msg);
-#endif /* CONFIG_DEBUG && CONFIG_DEBUG_INFO */
+#endif /* CONFIG_DEBUG_FEATURES && CONFIG_DEBUG_INFO */
 
 /* Character driver methods */
 
@@ -331,7 +331,7 @@ static void ads1242_set_gain(FAR struct ads1242_dev_s *dev,
   setup_reg_value |= (uint8_t)(gain_selection);
   ads1242_write_reg(dev, ADS1242_REG_SETUP, setup_reg_value);
 
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_INFO)
+#if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_DEBUG_INFO)
   ads1242_print_regs(dev, "ads1242_set_gain");
 #endif
 
@@ -355,7 +355,7 @@ static void ads1242_set_positive_input(FAR struct ads1242_dev_s *dev,
   mux_reg_value |= (uint8_t)(pos_in_sel);
   ads1242_write_reg(dev, ADS1242_REG_MUX, mux_reg_value);
 
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_INFO)
+#if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_DEBUG_INFO)
   ads1242_print_regs(dev, "ads1242_set_positive_input");
 #endif
 }
@@ -375,7 +375,7 @@ static void ads1242_set_negative_input(FAR struct ads1242_dev_s *dev,
   mux_reg_value |= (uint8_t)(neg_in_sel);
   ads1242_write_reg(dev, ADS1242_REG_MUX, mux_reg_value);
 
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_INFO)
+#if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_DEBUG_INFO)
   ads1242_print_regs(dev, "ads1242_set_negative_input");
 #endif
 }
@@ -396,7 +396,7 @@ static bool ads1242_is_data_ready(FAR struct ads1242_dev_s *dev)
  * Name: ads1242_print_regs
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_INFO)
+#if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_DEBUG_INFO)
 static void ads1242_print_regs(FAR struct ads1242_dev_s *dev, char const *msg)
 {
  uint8_t setup_reg_value = 0;
@@ -413,7 +413,7 @@ static void ads1242_print_regs(FAR struct ads1242_dev_s *dev, char const *msg)
  dbg("MUX    %02X\n", mux_reg_value);
  dbg("ACR    %02X\n", acr_reg_value);
 }
-#endif /* CONFIG_DEBUG && CONFIG_DEBUG_INFO */
+#endif /* CONFIG_DEBUG_FEATURES && CONFIG_DEBUG_INFO */
 
 /****************************************************************************
  * Name: ads1242_open
@@ -441,7 +441,7 @@ static int ads1242_open(FAR struct file *filep)
   ads1242_performSelfOffsetCalibration(priv);
   up_mdelay(100);
 
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_INFO)
+#if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_DEBUG_INFO)
   ads1242_print_regs(priv, "ads1242_open");
 #endif
 

@@ -138,7 +138,7 @@
 #  define canllinfo(x...)
 #endif
 
-#if !defined(CONFIG_DEBUG) || !defined(CONFIG_DEBUG_CAN)
+#if !defined(CONFIG_DEBUG_FEATURES) || !defined(CONFIG_DEBUG_CAN)
 #  undef CONFIG_SAMA5_CAN_REGDEBUG
 #endif
 
@@ -893,7 +893,7 @@ static int can_setup(FAR struct can_dev_s *dev)
 
   /* Enable all error interrupts */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   can_putreg(priv, SAM_CAN_IER_OFFSET, CAN_DEBUG_INTS);
 #endif
 

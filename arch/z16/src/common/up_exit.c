@@ -67,7 +67,7 @@
  *
  ****************************************************************************/
 
-#if defined(CONFIG_DUMP_ON_EXIT) && defined(CONFIG_DEBUG)
+#if defined(CONFIG_DUMP_ON_EXIT) && defined(CONFIG_DEBUG_FEATURES)
 static void _up_dumponexit(FAR struct tcb_s *tcb, FAR void *arg)
 {
 #if CONFIG_NFILE_DESCRIPTORS > 0
@@ -141,7 +141,7 @@ void _exit(int status)
 
   slldbg("TCB=%p exiting\n", tcb);
 
-#if defined(CONFIG_DUMP_ON_EXIT) && defined(CONFIG_DEBUG)
+#if defined(CONFIG_DUMP_ON_EXIT) && defined(CONFIG_DEBUG_FEATURES)
   lldbg("Other tasks:\n");
   sched_foreach(_up_dumponexit, NULL);
 #endif

@@ -59,9 +59,9 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Enables debug output from this file (needs CONFIG_DEBUG too) */
+/* Enables debug output from this file (needs CONFIG_DEBUG_FEATURES too) */
 
-#ifndef CONFIG_DEBUG
+#ifndef CONFIG_DEBUG_FEATURES
 #  undef CONFIG_DEBUG_INFO
 #  undef CONFIG_DEBUG_SPI
 #endif

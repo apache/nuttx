@@ -47,7 +47,7 @@
 #include "lpc43_pinconfig.h"
 #include "lpc43_gpio.h"
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -93,4 +93,4 @@ int lpc43_gpio_dump(uint16_t gpiocfg, const char *msg)
   return -ENOSYS;
 }
 
-#endif /* CONFIG_DEBUG */
+#endif /* CONFIG_DEBUG_FEATURES */

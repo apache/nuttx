@@ -100,7 +100,7 @@ int nxtk_getwindow(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
   FAR struct nxtk_framedwindow_s *fwnd = (FAR struct nxtk_framedwindow_s *)hfwnd;
   struct nxgl_rect_s getrect;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!hfwnd || !rect || !dest)
     {
       ginfo("Invalid parameters\n");

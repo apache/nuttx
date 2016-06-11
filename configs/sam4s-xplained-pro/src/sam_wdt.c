@@ -85,7 +85,7 @@
 /* Debug ***************************************************************************/
 /* Non-standard debug that may be enabled just for testing the watchdog timer */
 
-#ifndef CONFIG_DEBUG
+#ifndef CONFIG_DEBUG_FEATURES
 #  undef CONFIG_DEBUG_WATCHDOG
 #endif
 

@@ -67,7 +67,7 @@ struct nxffs_blkinfo_s
   off_t nblocks;
   off_t block;
   off_t offset;
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_FS)
+#if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_DEBUG_FS)
   bool verbose;
 #endif
 };
@@ -91,7 +91,7 @@ static const char g_format[]    = "  %5d:%-5d %s %s %5d\n";
  *
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_FS)
+#if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_DEBUG_FS)
 static inline ssize_t nxffs_analyzeinode(FAR struct nxffs_blkinfo_s *blkinfo,
                                          int offset)
 {
@@ -239,7 +239,7 @@ static inline ssize_t nxffs_analyzeinode(FAR struct nxffs_blkinfo_s *blkinfo,
  *
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_FS)
+#if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_DEBUG_FS)
 static inline ssize_t nxffs_analyzedata(FAR struct nxffs_blkinfo_s *blkinfo,
                                         int offset)
 {
@@ -297,7 +297,7 @@ static inline ssize_t nxffs_analyzedata(FAR struct nxffs_blkinfo_s *blkinfo,
  *
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_FS)
+#if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_DEBUG_FS)
 static inline void nxffs_analyze(FAR struct nxffs_blkinfo_s *blkinfo)
 {
   FAR struct nxffs_block_s *blkhdr;
@@ -403,7 +403,7 @@ static inline void nxffs_analyze(FAR struct nxffs_blkinfo_s *blkinfo)
  * Name: nxffs_dump
  *
  * Description:
- *   Dump a summary of the contents of an NXFFS file system.  CONFIG_DEBUG
+ *   Dump a summary of the contents of an NXFFS file system.  CONFIG_DEBUG_FEATURES
  *   and CONFIG_DEBUG_FS must be enabled for this function to do anything.
  *
  * Input Parameters:
@@ -419,7 +419,7 @@ static inline void nxffs_analyze(FAR struct nxffs_blkinfo_s *blkinfo)
 
 int nxffs_dump(FAR struct mtd_dev_s *mtd, bool verbose)
 {
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_FS)
+#if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_DEBUG_FS)
   struct nxffs_blkinfo_s blkinfo;
   int ret;
 

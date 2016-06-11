@@ -80,7 +80,7 @@
 #define TEENSY_CD (1 << 4)
 #define TEENSY_WP (1 << 5)
 
-/* The following enable debug output from this file (needs CONFIG_DEBUG too).
+/* The following enable debug output from this file (needs CONFIG_DEBUG_FEATURES too).
  *
  * CONFIG_SPI_DEBUG - Define to enable basic SSP debug
  * CONFIG_SPI_VERBOSE - Define to enable verbose SSP debug

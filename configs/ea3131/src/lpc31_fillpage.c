@@ -199,7 +199,7 @@ struct pg_source_s
 
   /* This the device geometry */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   FAR struct mtd_geometry_s geo;
 #endif
 };
@@ -289,7 +289,7 @@ static inline void lpc31_initsrc(void)
 static inline void lpc31_initsrc(void)
 {
   FAR struct spi_dev_s *spi;
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   uint32_t capacity;
   int ret;
 #endif
@@ -318,7 +318,7 @@ static inline void lpc31_initsrc(void)
 
       /* Verify that we can use the device */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
       /* Get the device geometry. (casting to uintptr_t first eliminates
        * complaints on some architectures where the sizeof long is different
        * from the size of a pointer).

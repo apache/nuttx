@@ -187,7 +187,7 @@ pid_t waitpid(pid_t pid, int *stat_loc, int options)
 
   /* None of the options are supported */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (options != 0)
     {
       set_errno(ENOSYS);
@@ -309,7 +309,7 @@ pid_t waitpid(pid_t pid, int *stat_loc, int options)
 
   /* None of the options are supported */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (options != 0)
     {
       set_errno(ENOSYS);

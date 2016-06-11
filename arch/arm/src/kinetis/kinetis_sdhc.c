@@ -2152,7 +2152,7 @@ static int kinetis_recvshortcrc(FAR struct sdio_dev_s *dev, uint32_t cmd,
    */
 
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!rshort)
     {
       fdbg("ERROR: rshort=NULL\n");
@@ -2209,7 +2209,7 @@ static int kinetis_recvlong(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t r
    *     0         1               End bit
    */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   /* Check that R1 is the correct response to this command */
 
   if ((cmd & MMCSD_RESPONSE_MASK) != MMCSD_R2_RESPONSE)
@@ -2263,7 +2263,7 @@ static int kinetis_recvshort(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t 
 
   /* Check that this is the correct response to this command */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if ((cmd & MMCSD_RESPONSE_MASK) != MMCSD_R3_RESPONSE &&
       (cmd & MMCSD_RESPONSE_MASK) != MMCSD_R7_RESPONSE)
     {
