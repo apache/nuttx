@@ -137,7 +137,7 @@ void nxterm_redraw(NXTERM handle, FAR const struct nxgl_rect_s *rect, bool more)
   ret = priv->ops->fill(priv, rect, priv->wndo.wcolor);
   if (ret < 0)
     {
-      gdbg("fill failed: %d\n", errno);
+      gerr("fill failed: %d\n", errno);
     }
 
   /* Then redraw each character on the display (Only the characters within

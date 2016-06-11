@@ -272,10 +272,10 @@
 /* Debug ******************************************************************************/
 
 #ifdef CONFIG_DEBUG_LCD
-#  define lcddbg              dbg
+#  define lcderr              err
 #  define lcdinfo             info
 #else
-#  define lcddbg(x...)
+#  define lcderr(x...)
 #  define lcdinfo(x...)
 #endif
 
@@ -1171,7 +1171,7 @@ static inline int sam_lcd_initialize(void)
   id = ((uint16_t)buffer[2] << 8) | (uint16_t)buffer[3];
   if (id != ILI9341_DEVICE_CODE)
     {
-      lcddbg("ERROR: Unsupported LCD: %04x\n", id);
+      lcderr("ERROR: Unsupported LCD: %04x\n", id);
       return -ENODEV;
     }
 

@@ -704,7 +704,7 @@ static int cs89x0_interrupt(int irq, FAR void *context)
         case ISQ_BUFEVENT:
             if ((isq & ISQ_BUFEVENT_TXUNDERRUN) != 0)
               {
-                ndbg("Transmit underrun\n");
+                nerr("Transmit underrun\n");
 #ifdef CONFIG_CS89x0_XMITEARLY
                 cd89x0->cs_txunderrun++;
                 if (cd89x0->cs_txunderrun == 3)
@@ -819,7 +819,7 @@ static int cs89x0_ifup(struct net_driver_s *dev)
 {
   struct cs89x0_driver_s *cs89x0 = (struct cs89x0_driver_s *)dev->d_private;
 
-  ndbg("Bringing up: %d.%d.%d.%d\n",
+  nerr("Bringing up: %d.%d.%d.%d\n",
        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
 

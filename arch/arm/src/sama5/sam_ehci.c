@@ -1275,11 +1275,11 @@ static int sam_qh_flush(struct sam_qh_s *qh)
 #ifdef CONFIG_SAMA5_EHCI_REGDEBUG
 static void sam_qtd_print(struct sam_qtd_s *qtd)
 {
-  udbg("  QTD[%p]:\n", qtd);
-  udbg("    hw:\n");
-  udbg("      nqp: %08x alt: %08x token: %08x\n",
+  uerr("  QTD[%p]:\n", qtd);
+  uerr("    hw:\n");
+  uerr("      nqp: %08x alt: %08x token: %08x\n",
        qtd->hw.nqp, qtd->hw.alt, qtd->hw.token);
-  udbg("      bpl: %08x %08x %08x %08x %08x\n",
+  uerr("      bpl: %08x %08x %08x %08x %08x\n",
        qtd->hw.bpl[0], qtd->hw.bpl[1], qtd->hw.bpl[2],
        qtd->hw.bpl[3], qtd->hw.bpl[4]);
 }
@@ -1299,29 +1299,29 @@ static void sam_qh_print(struct sam_qh_s *qh)
   struct sam_epinfo_s *epinfo;
   struct ehci_overlay_s *overlay;
 
-  udbg("QH[%p]:\n", qh);
-  udbg("  hw:\n");
-  udbg("    hlp: %08x epchar: %08x epcaps: %08x cqp: %08x\n",
+  uerr("QH[%p]:\n", qh);
+  uerr("  hw:\n");
+  uerr("    hlp: %08x epchar: %08x epcaps: %08x cqp: %08x\n",
        qh->hw.hlp, qh->hw.epchar, qh->hw.epcaps, qh->hw.cqp);
 
   overlay = &qh->hw.overlay;
-  udbg("  overlay:\n");
-  udbg("    nqp: %08x alt: %08x token: %08x\n",
+  uerr("  overlay:\n");
+  uerr("    nqp: %08x alt: %08x token: %08x\n",
        overlay->nqp, overlay->alt, overlay->token);
-  udbg("    bpl: %08x %08x %08x %08x %08x\n",
+  uerr("    bpl: %08x %08x %08x %08x %08x\n",
        overlay->bpl[0], overlay->bpl[1], overlay->bpl[2],
        overlay->bpl[3], overlay->bpl[4]);
 
-  udbg("  fqp:\n", qh->fqp);
+  uerr("  fqp:\n", qh->fqp);
 
   epinfo = qh->epinfo;
-  udbg("  epinfo[%p]:\n", epinfo);
+  uerr("  epinfo[%p]:\n", epinfo);
   if (epinfo)
     {
-      udbg("    EP%d DIR=%s FA=%08x TYPE=%d MaxPacket=%d\n",
+      uerr("    EP%d DIR=%s FA=%08x TYPE=%d MaxPacket=%d\n",
            epinfo->epno, epinfo->dirin ? "IN" : "OUT", epinfo->devaddr,
            epinfo->xfrtype, epinfo->maxpacket);
-      udbg("    Toggle=%d iocwait=%d speed=%d result=%d\n",
+      uerr("    Toggle=%d iocwait=%d speed=%d result=%d\n",
            epinfo->toggle, epinfo->iocwait, epinfo->speed, epinfo->result);
     }
 }
@@ -4042,7 +4042,7 @@ static int sam_ctrlin(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
   ret = sam_async_setup(rhport, ep0info, req, buffer, len);
   if (ret < 0)
     {
-      udbg("ERROR: sam_async_setup failed: %d\n", ret);
+      uerr("ERROR: sam_async_setup failed: %d\n", ret);
       goto errout_with_iocwait;
     }
 
@@ -4160,7 +4160,7 @@ static ssize_t sam_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
 
   if (ret < 0)
     {
-      udbg("ERROR: Transfer setup failed: %d\n", ret);
+      uerr("ERROR: Transfer setup failed: %d\n", ret);
       goto errout_with_iocwait;
     }
 

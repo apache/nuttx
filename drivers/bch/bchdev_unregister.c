@@ -103,7 +103,7 @@ int bchdev_unregister(FAR const char *chardev)
   fd = open(chardev, O_RDONLY);
   if (fd < 0)
     {
-      dbg("Failed to open %s: %d\n", chardev, errno);
+      err("Failed to open %s: %d\n", chardev, errno);
       return -errno;
     }
 
@@ -116,7 +116,7 @@ int bchdev_unregister(FAR const char *chardev)
 
   if (ret < 0)
     {
-      dbg("ioctl failed: %d\n", errno);
+      err("ioctl failed: %d\n", errno);
       return -errno;
     }
 

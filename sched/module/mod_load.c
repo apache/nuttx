@@ -192,7 +192,7 @@ static inline int mod_loadfile(FAR struct mod_loadinfo_s *loadinfo)
           ret = mod_read(loadinfo, *pptr, shdr->sh_size, shdr->sh_offset);
           if (ret < 0)
             {
-              sdbg("ERROR: Failed to read section %d: %d\n", i, ret);
+              serr("ERROR: Failed to read section %d: %d\n", i, ret);
               return ret;
             }
         }
@@ -250,7 +250,7 @@ int mod_load(FAR struct mod_loadinfo_s *loadinfo)
   ret = mod_loadshdrs(loadinfo);
   if (ret < 0)
     {
-      sdbg("ERROR: mod_loadshdrs failed: %d\n", ret);
+      serr("ERROR: mod_loadshdrs failed: %d\n", ret);
       goto errout_with_buffers;
     }
 
@@ -265,7 +265,7 @@ int mod_load(FAR struct mod_loadinfo_s *loadinfo)
   loadinfo->textalloc = (uintptr_t)kmm_zalloc(loadinfo->textsize + loadinfo->datasize);
   if (!loadinfo->textalloc)
     {
-      sdbg("ERROR: Failed to allocate memory for the module\n");
+      serr("ERROR: Failed to allocate memory for the module\n");
       ret = -ENOMEM;
       goto errout_with_buffers;
     }
@@ -277,7 +277,7 @@ int mod_load(FAR struct mod_loadinfo_s *loadinfo)
   ret = mod_loadfile(loadinfo);
   if (ret < 0)
     {
-      sdbg("ERROR: mod_loadfile failed: %d\n", ret);
+      serr("ERROR: mod_loadfile failed: %d\n", ret);
       goto errout_with_buffers;
     }
 

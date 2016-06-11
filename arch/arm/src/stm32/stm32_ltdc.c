@@ -283,10 +283,10 @@
 /* Debug option */
 
 #ifdef CONFIG_STM32_LTDC_REGDEBUG
-#  define regdbg       dbg
+#  define regerr       err
 #  define reginfo      info
 #else
-#  define regdbg(x...)
+#  define regerr(x...)
 #  define reginfo(x...)
 #endif
 
@@ -1155,7 +1155,7 @@ static int stm32_ltdcirq(int irq, void *context)
 
           if (ret != OK)
             {
-              dbg("sem_post() failed\n");
+              err("sem_post() failed\n");
               return ret;
             }
         }
@@ -1202,7 +1202,7 @@ static int stm32_ltdc_waitforirq(void)
 
       if (ret != OK)
         {
-          dbg("sem_wait() failed\n");
+          err("sem_wait() failed\n");
         }
     }
 
@@ -1519,7 +1519,7 @@ static int stm32_ltdc_lvalidatearea(FAR struct stm32_layer_s *layer,
       (srcypos > ypos + yres - 1))
 
     {
-      gdbg("layer coordinates out of valid area: xpos = %d > %d, \
+      gerr("layer coordinates out of valid area: xpos = %d > %d, \
            ypos = %d > %d, width = %d > %d, height = %d > %d, \
            srcxpos = %d > %d, srcypos = %d > %d",
            xpos, vinfo->xres - 1,
@@ -1529,7 +1529,7 @@ static int stm32_ltdc_lvalidatearea(FAR struct stm32_layer_s *layer,
            srcxpos, xpos + xres - 1,
            srcypos, ypos + yres - 1);
 
-      gdbg("Returning EINVAL\n");
+      gerr("Returning EINVAL\n");
       return -EINVAL;
     }
 
@@ -2203,7 +2203,7 @@ static int stm32_getvideoinfo(struct fb_vtable_s *vtable,
       return stm32_lgetvideoinfo(ltdc, vinfo);
     }
 
-  gdbg("ERROR: Returning EINVAL\n");
+  gerr("ERROR: Returning EINVAL\n");
   return -EINVAL;
 }
 
@@ -2238,7 +2238,7 @@ static int stm32_getplaneinfo(struct fb_vtable_s *vtable, int planeno,
       return stm32_lgetplaneinfo(ltdc, planeno, pinfo);
     }
 
-  gdbg("Returning EINVAL\n");
+  gerr("Returning EINVAL\n");
   return -EINVAL;
 }
 
@@ -2325,7 +2325,7 @@ static int stm32_lgetvideoinfo(struct ltdc_layer_s *layer,
       return OK;
     }
 
-  gdbg("Returning EINVAL\n");
+  gerr("Returning EINVAL\n");
   return -EINVAL;
 }
 
@@ -2358,7 +2358,7 @@ static int stm32_lgetplaneinfo(struct ltdc_layer_s *layer, int planeno,
       return OK;
     }
 
-  gdbg("Returning EINVAL\n");
+  gerr("Returning EINVAL\n");
   return -EINVAL;
 }
 
@@ -2394,13 +2394,13 @@ static int stm32_setclut(struct ltdc_layer_s *layer,
 
       if (priv->state.vinfo.fmt != FB_FMT_RGB8)
         {
-          gdbg("Error: CLUT is not supported for the pixel format: %d\n",
+          gerr("Error: CLUT is not supported for the pixel format: %d\n",
                     priv->state.vinfo.fmt);
           ret = -EINVAL;
         }
       else if (cmap->first >= STM32_LTDC_NCLUT)
         {
-          gdbg("Error: only %d color table entries supported\n",
+          gerr("Error: only %d color table entries supported\n",
                     STM32_LTDC_NCLUT);
           ret = -EINVAL;
         }
@@ -2418,7 +2418,7 @@ static int stm32_setclut(struct ltdc_layer_s *layer,
       return ret;
     }
 
-  gdbg("Returning EINVAL\n");
+  gerr("Returning EINVAL\n");
   return -EINVAL;
 }
 
@@ -2460,13 +2460,13 @@ static int stm32_getclut(struct ltdc_layer_s *layer,
 #else
       if (priv->state.vinfo.fmt != FB_FMT_RGB8)
         {
-          gdbg("Error: CLUT is not supported for the pixel format: %d\n",
+          gerr("Error: CLUT is not supported for the pixel format: %d\n",
                     priv->state.vinfo.fmt);
           ret = -EINVAL;
         }
       else if (cmap->first >= STM32_LTDC_NCLUT)
         {
-          gdbg("Error: only %d color table entries supported\n",
+          gerr("Error: only %d color table entries supported\n",
                     STM32_LTDC_NCLUT);
           ret = -EINVAL;
         }
@@ -2512,7 +2512,7 @@ static int stm32_getclut(struct ltdc_layer_s *layer,
       return ret;
     }
 
-  gdbg("Returning EINVAL\n");
+  gerr("Returning EINVAL\n");
   return -EINVAL;
 }
 #endif /* STM32_LAYER_CLUT_SIZE */
@@ -2583,7 +2583,7 @@ static int stm32_getlid(FAR struct ltdc_layer_s *layer, int *lid,
 #endif
           default:
             ret = EINVAL;
-            gdbg("Returning EINVAL\n");
+            gerr("Returning EINVAL\n");
             break;
         }
 
@@ -2592,7 +2592,7 @@ static int stm32_getlid(FAR struct ltdc_layer_s *layer, int *lid,
       return ret;
     }
 
-  gdbg("Returning EINVAL\n");
+  gerr("Returning EINVAL\n");
   return -EINVAL;
 }
 
@@ -2629,7 +2629,7 @@ static int stm32_setcolor(FAR struct ltdc_layer_s *layer, uint32_t argb)
       return OK;
     }
 
-  gdbg("Returning EINVAL\n");
+  gerr("Returning EINVAL\n");
   return -EINVAL;
 }
 
@@ -2663,7 +2663,7 @@ static int stm32_getcolor(FAR struct ltdc_layer_s *layer, uint32_t *argb)
       return OK;
     }
 
-  gdbg("Returning EINVAL\n");
+  gerr("Returning EINVAL\n");
   return -EINVAL;
 }
 
@@ -2700,7 +2700,7 @@ static int stm32_setcolorkey(FAR struct ltdc_layer_s *layer, uint32_t rgb)
       return OK;
     }
 
-  gdbg("Returning EINVAL\n");
+  gerr("Returning EINVAL\n");
   return -EINVAL;
 }
 
@@ -2734,7 +2734,7 @@ static int stm32_getcolorkey(FAR struct ltdc_layer_s *layer, uint32_t *rgb)
       return OK;
     }
 
-  gdbg("Returning EINVAL\n");
+  gerr("Returning EINVAL\n");
   return -EINVAL;
 }
 
@@ -2775,7 +2775,7 @@ static int stm32_setalpha(FAR struct ltdc_layer_s *layer, uint8_t alpha)
       return OK;
     }
 
-  gdbg("Returning EINVAL\n");
+  gerr("Returning EINVAL\n");
   return -EINVAL;
 }
 
@@ -2809,7 +2809,7 @@ static int stm32_getalpha(FAR struct ltdc_layer_s *layer, uint8_t *alpha)
       return OK;
     }
 
-  gdbg("Returning EINVAL\n");
+  gerr("Returning EINVAL\n");
   return -EINVAL;
 }
 
@@ -2926,7 +2926,7 @@ static int stm32_setblendmode(FAR struct ltdc_layer_s *layer, uint32_t mode)
         }
       if (blendmode)
         {
-          gdbg("Unknown blendmode %02x\n", blendmode);
+          gerr("Unknown blendmode %02x\n", blendmode);
           ret = -EINVAL;
         }
 
@@ -2942,7 +2942,7 @@ static int stm32_setblendmode(FAR struct ltdc_layer_s *layer, uint32_t mode)
       return ret;
     }
 
-  gdbg("Returning EINVAL\n");
+  gerr("Returning EINVAL\n");
   return -EINVAL;
 }
 
@@ -2975,7 +2975,7 @@ static int stm32_getblendmode(FAR struct ltdc_layer_s *layer, uint32_t *mode)
       return OK;
     }
 
-  gdbg("Returning EINVAL\n");
+  gerr("Returning EINVAL\n");
   return -EINVAL;
 }
 
@@ -3039,7 +3039,7 @@ static int stm32_setarea(FAR struct ltdc_layer_s *layer,
       return ret;
     }
 
-  gdbg("Returning EINVAL\n");
+  gerr("Returning EINVAL\n");
   return -EINVAL;
 }
 
@@ -3080,7 +3080,7 @@ static int stm32_getarea(FAR struct ltdc_layer_s *layer,
       return OK;
     }
 
-  gdbg("Returning EINVAL\n");
+  gerr("Returning EINVAL\n");
   return -EINVAL;
 }
 
@@ -3156,7 +3156,7 @@ static int stm32_update(FAR struct ltdc_layer_s *layer, uint32_t mode)
 
       if (stm32_ltdc_waitforirq() != OK)
         {
-          gdbg("Returning ECANCELED\n");
+          gerr("Returning ECANCELED\n");
           return -ECANCELED;
         }
 
@@ -3238,7 +3238,7 @@ static int stm32_update(FAR struct ltdc_layer_s *layer, uint32_t mode)
       return OK;
     }
 
-  gdbg("Returning EINVAL\n");
+  gerr("Returning EINVAL\n");
   return -EINVAL;
 }
 
@@ -3286,7 +3286,7 @@ static int stm32_blit(FAR struct ltdc_layer_s *dest,
       return ret;
     }
 
-  gdbg("Returning EINVAL\n");
+  gerr("Returning EINVAL\n");
   return -EINVAL;
 }
 
@@ -3342,7 +3342,7 @@ static int stm32_blend(FAR struct ltdc_layer_s *dest,
       return ret;
     }
 
-  gdbg("Returning EINVAL\n");
+  gerr("Returning EINVAL\n");
   return -EINVAL;
 }
 
@@ -3383,7 +3383,7 @@ static int stm32_fillarea(FAR struct ltdc_layer_s *layer,
       return ret;
     }
 
-  gdbg("Returning EINVAL\n");
+  gerr("Returning EINVAL\n");
   return -EINVAL;
 }
 #endif
@@ -3413,7 +3413,7 @@ FAR struct ltdc_layer_s *stm32_ltdcgetlayer(int lid)
       return (FAR struct ltdc_layer_s *) &LAYER(lid);
     }
 
-  gdbg("EINVAL\n");
+  gerr("EINVAL\n");
   errno = EINVAL;
   return NULL;
 }
@@ -3436,7 +3436,7 @@ int stm32_ltdcinitialize(void)
   int   ret;
 #endif
 
-  dbg("Initialize LTDC driver\n");
+  err("Initialize LTDC driver\n");
 
   if (g_initialized == true)
     {
@@ -3600,6 +3600,6 @@ void stm32_backlight(bool blon)
 {
   /* Set default backlight level CONFIG_STM32_LTDC_DEFBACKLIGHT */
 
-  gdbg("Not supported\n");
+  gerr("Not supported\n");
 }
 #endif

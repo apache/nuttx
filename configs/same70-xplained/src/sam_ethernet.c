@@ -80,10 +80,10 @@
  */
 
 #ifdef CONFIG_NETDEV_PHY_DEBUG
-#  define phydbg    dbg
+#  define phyerr    err
 #  define phyllerr  llerr
 #else
-#  define phydbg(x...)
+#  define phyerr(x...)
 #  define phyllerr(x...)
 #endif
 
@@ -106,7 +106,7 @@ static xcpt_t g_emac0_handler;
 #ifdef CONFIG_SAMV7_GPIOA_IRQ
 static void sam_emac0_phy_enable(bool enable)
 {
-  phydbg("IRQ%d: enable=%d\n", IRQ_EMAC0_INT, enable);
+  phyerr("IRQ%d: enable=%d\n", IRQ_EMAC0_INT, enable);
   if (enable)
     {
       sam_gpioirqenable(IRQ_EMAC0_INT);
@@ -134,7 +134,7 @@ void weak_function sam_netinitialize(void)
 {
   /* Configure the PHY interrupt GPIO */
 
-  phydbg("Configuring %08x\n", GPIO_EMAC0_INT);
+  phyerr("Configuring %08x\n", GPIO_EMAC0_INT);
   sam_configgpio(GPIO_EMAC0_INT);
 
   /* Configure PHY /RESET output */
@@ -165,7 +165,7 @@ int sam_emac0_setmac(void)
   i2c = sam_i2cbus_initialize(0);
   if (!i2c)
     {
-      ndbg("ERROR: Failed to initialize TWI0\n");
+      nerr("ERROR: Failed to initialize TWI0\n");
       return -ENODEV;
     }
 
@@ -174,7 +174,7 @@ int sam_emac0_setmac(void)
   at24 = at24c_initialize(i2c);
   if (!at24)
     {
-      ndbg("ERROR: Failed to initialize the AT24 driver\n");
+      nerr("ERROR: Failed to initialize the AT24 driver\n");
       (void)sam_i2cbus_uninitialize(i2c);
       return -ENODEV;
     }
@@ -184,7 +184,7 @@ int sam_emac0_setmac(void)
   ret = at24->ioctl(at24, MTDIOC_EXTENDED, 1);
   if (ret < 0)
     {
-      ndbg("ERROR: AT24 ioctl(MTDIOC_EXTENDED) failed: %d\n", ret);
+      nerr("ERROR: AT24 ioctl(MTDIOC_EXTENDED) failed: %d\n", ret);
       (void)sam_i2cbus_uninitialize(i2c);
       return ret;
     }
@@ -194,7 +194,7 @@ int sam_emac0_setmac(void)
   nread = at24->read(at24, AT24XX_MACADDR_OFFSET, 6, mac);
   if (nread < 6)
     {
-      ndbg("ERROR: AT24 read(AT24XX_MACADDR_OFFSET) failed: ld\n", (long)nread);
+      nerr("ERROR: AT24 read(AT24XX_MACADDR_OFFSET) failed: ld\n", (long)nread);
       (void)sam_i2cbus_uninitialize(i2c);
       return (int)nread;
     }
@@ -204,7 +204,7 @@ int sam_emac0_setmac(void)
   ret = at24->ioctl(at24, MTDIOC_EXTENDED, 0);
   if (ret < 0)
     {
-      ndbg("ERROR: AT24 ioctl(MTDIOC_EXTENDED) failed: %d\n", ret);
+      nerr("ERROR: AT24 ioctl(MTDIOC_EXTENDED) failed: %d\n", ret);
     }
 
   /* Release the I2C instance.
@@ -214,7 +214,7 @@ int sam_emac0_setmac(void)
   ret = sam_i2cbus_uninitialize(i2c);
   if (ret < 0)
     {
-      ndbg("ERROR: Failed to release the I2C interface: %d\n", ret);
+      nerr("ERROR: Failed to release the I2C interface: %d\n", ret);
     }
 
   ninfo("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
@@ -225,7 +225,7 @@ int sam_emac0_setmac(void)
   ret = sam_emac_setmacaddr(EMAC0_INTF, mac);
   if (ret < 0)
     {
-      ndbg("ERROR: Failed to set MAC address: %d\n", ret);
+      nerr("ERROR: Failed to set MAC address: %d\n", ret);
     }
 
   return ret;
@@ -310,11 +310,11 @@ xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler, phy_enable_t *enable)
   DEBUGASSERT(intf);
 
   ninfo("%s: handler=%p\n", intf, handler);
-  phydbg("EMAC0: devname=%s\n", SAMV7_EMAC0_DEVNAME);
+  phyerr("EMAC0: devname=%s\n", SAMV7_EMAC0_DEVNAME);
 
   if (strcmp(intf, SAMV7_EMAC0_DEVNAME) == 0)
     {
-      phydbg("Select EMAC0\n");
+      phyerr("Select EMAC0\n");
       phandler = &g_emac0_handler;
       pinset   = GPIO_EMAC0_INT;
       irq      = IRQ_EMAC0_INT;
@@ -322,7 +322,7 @@ xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler, phy_enable_t *enable)
     }
   else
     {
-      ndbg("Unsupported interface: %s\n", intf);
+      nerr("Unsupported interface: %s\n", intf);
       return NULL;
     }
 
@@ -341,15 +341,15 @@ xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler, phy_enable_t *enable)
 
   if (handler)
     {
-      phydbg("Configure pin: %08x\n", pinset);
+      phyerr("Configure pin: %08x\n", pinset);
       sam_gpioirq(pinset);
 
-      phydbg("Attach IRQ%d\n", irq);
+      phyerr("Attach IRQ%d\n", irq);
       (void)irq_attach(irq, handler);
     }
   else
     {
-      phydbg("Detach IRQ%d\n", irq);
+      phyerr("Detach IRQ%d\n", irq);
       (void)irq_detach(irq);
       enabler = NULL;
     }

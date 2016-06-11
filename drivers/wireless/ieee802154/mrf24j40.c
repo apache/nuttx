@@ -303,7 +303,7 @@ static uint8_t mrf24j40_getreg(FAR struct spi_dev_s *spi, uint32_t addr)
   SPI_SELECT     (spi, SPIDEV_IEEE802154, false);
   mrf24j40_unlock(spi);
 
-  /*dbg("r[%04X]=%02X\n",addr,rx[len-1]);*/
+  /*err("r[%04X]=%02X\n",addr,rx[len-1]);*/
   return rx[len-1];
 }
 
@@ -443,7 +443,7 @@ static int mrf24j40_setrxmode(FAR struct mrf24j40_dev_s *dev, int mode)
   mrf24j40_setreg(dev->spi, MRF24J40_RXMCR, reg);
 
   dev->rxmode = mode;
-  dbg("%u\n",(unsigned)mode);
+  err("%u\n",(unsigned)mode);
   return OK;
 }
 
@@ -470,7 +470,7 @@ static int mrf24j40_setchannel(FAR struct ieee802154_dev_s *ieee,
   
   if (chan<11 || chan>26)
     {
-      dbg("Invalid chan: %d\n",chan);
+      err("Invalid chan: %d\n",chan);
       return -EINVAL;
     }
 
@@ -485,7 +485,7 @@ static int mrf24j40_setchannel(FAR struct ieee802154_dev_s *ieee,
   mrf24j40_resetrfsm(dev);
 
   dev->channel = chan;
-  //dbg("%u\n",(unsigned)chan);
+  //err("%u\n",(unsigned)chan);
 
   return OK;
 }
@@ -525,7 +525,7 @@ static int mrf24j40_setpanid(FAR struct ieee802154_dev_s *ieee,
   mrf24j40_setreg(dev->spi, MRF24J40_PANIDL, (uint8_t)(panid&0xFF));
 
   dev->panid = panid;
-  dbg("%04X\n",(unsigned)panid);
+  err("%04X\n",(unsigned)panid);
 
   return OK;
 }
@@ -567,7 +567,7 @@ static int mrf24j40_setsaddr(FAR struct ieee802154_dev_s *ieee,
   mrf24j40_setreg(dev->spi, MRF24J40_SADRL, (uint8_t)(saddr&0xFF));
 
   dev->saddr = saddr;
-  dbg("%04X\n",(unsigned)saddr);  
+  err("%04X\n",(unsigned)saddr);  
   return OK;
 }
 
@@ -897,7 +897,7 @@ static int mrf24j40_regdump(FAR struct mrf24j40_dev_s *dev)
   char buf[4+16*3+2+1];
   int len=0;
 
-  dbg("Short regs:\n");
+  err("Short regs:\n");
 
   for (i = 0; i < 0x40; i++)
     {
@@ -910,11 +910,11 @@ static int mrf24j40_regdump(FAR struct mrf24j40_dev_s *dev)
       if ((i & 15) == 15)
         {
           sprintf(buf+len, "\n");
-          dbg("%s",buf);
+          err("%s",buf);
         }
     }
 
-  dbg("Long regs:\n");
+  err("Long regs:\n");
   for (i=0x80000200;i<0x80000250;i++)
     {
       if ((i&15)==0)
@@ -926,7 +926,7 @@ static int mrf24j40_regdump(FAR struct mrf24j40_dev_s *dev)
       if ((i & 15) == 15)
         {
           sprintf(buf+len, "\n");
-          dbg("%s",buf);
+          err("%s",buf);
         }
     }
 
@@ -952,7 +952,7 @@ static int mrf24j40_ioctl(FAR struct ieee802154_dev_s *ieee, int cmd,
         return mrf24j40_regdump(dev);
 
       case 1001: dev->paenabled = (uint8_t)arg;
-        dbg("PA %sabled\n",arg?"en":"dis");
+        err("PA %sabled\n",arg?"en":"dis");
         return OK;
 
       default:
@@ -1043,7 +1043,7 @@ static int mrf24j40_transmit(FAR struct ieee802154_dev_s *ieee, FAR struct ieee8
   fc1 = packet->data[0];
   fc2 = packet->data[1];
 
- // dbg("fc1 %02X fc2 %02X\n", fc1,fc2);
+ // err("fc1 %02X fc2 %02X\n", fc1,fc2);
 
   if ((fc2 & IEEE802154_FC2_DADDR) == IEEE802154_DADDR_SHORT)
     {
@@ -1073,7 +1073,7 @@ static int mrf24j40_transmit(FAR struct ieee802154_dev_s *ieee, FAR struct ieee8
       hlen += 8; /* Ext saddr */
     }
 
-//  dbg("hlen %d\n",hlen);
+//  err("hlen %d\n",hlen);
 
   /* Header len, 0, TODO for security modes */
 
@@ -1131,7 +1131,7 @@ static void mrf24j40_irqwork_tx(FAR struct mrf24j40_dev_s *dev)
    * channel_busy = (tmp & (1 << CCAFAIL));
    */
 
-  //dbg("TXSTAT%02X!\n", txstat);
+  //err("TXSTAT%02X!\n", txstat);
 #warning TODO report errors
   UNUSED(txstat);
 
@@ -1193,7 +1193,7 @@ static void mrf24j40_irqwork_rx(FAR struct mrf24j40_dev_s *dev)
   uint32_t index;
   uint8_t  reg;
 
-  /*dbg("!\n");*/
+  /*err("!\n");*/
 
   /* Disable rx int */
 
@@ -1209,7 +1209,7 @@ static void mrf24j40_irqwork_rx(FAR struct mrf24j40_dev_s *dev)
 
   addr = 0x80000300;
   dev->ieee.rxbuf->len = mrf24j40_getreg(dev->spi, addr++);
-  /*dbg("len %3d\n", dev->ieee.rxbuf->len);*/
+  /*err("len %3d\n", dev->ieee.rxbuf->len);*/
 
   for (index = 0; index < dev->ieee.rxbuf->len; index++)
     {
@@ -1264,7 +1264,7 @@ static void mrf24j40_irqworker(FAR void *arg)
   /* Read and store INTSTAT - this clears the register. */
 
   intstat = mrf24j40_getreg(dev->spi, MRF24J40_INTSTAT);
-//  dbg("INT%02X\n", intstat);
+//  err("INT%02X\n", intstat);
 
   /* Do work according to the pending interrupts */
 

@@ -139,10 +139,10 @@
 /* Debug ******************************************************************************/
 
 #ifdef CONFIG_DEBUG_LCD
-#  define lcddbg              dbg
+#  define lcderr              err
 #  define lcdinfo             info
 #else
-#  define lcddbg(x...)
+#  define lcderr(x...)
 #  define lcdinfo(x...)
 #endif
 
@@ -819,7 +819,7 @@ static inline int mio283qt9a_hwinitialize(FAR struct mio283qt9a_dev_s *priv)
 #ifndef CONFIG_LCD_NOGETRUN
   else
     {
-      lcddbg("Unsupported LCD type\n");
+      lcderr("Unsupported LCD type\n");
       ret = -ENODEV;
     }
 #endif

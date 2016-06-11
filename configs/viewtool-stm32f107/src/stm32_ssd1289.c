@@ -104,10 +104,10 @@
 /* Debug ******************************************************************************/
 
 #ifdef CONFIG_DEBUG_LCD
-#  define lcddbg         dbg
+#  define lcderr         err
 #  define lcdinfo        info
 #else
-#  define lcddbg(x...)
+#  define lcderr(x...)
 #  define lcdinfo(x...)
 #endif
 
@@ -425,26 +425,26 @@ static void init_lcd_backlight(void)
 
   /* Dump timer3 registers */
 
-  lcddbg("APB1ENR: %08x\n", getreg32(STM32_RCC_APB1ENR));
-  lcddbg("CR1:     %04x\n", getreg32(STM32_TIM3_CR1));
-  lcddbg("CR2:     %04x\n", getreg32(STM32_TIM3_CR2));
-  lcddbg("SMCR:    %04x\n", getreg32(STM32_TIM3_SMCR));
-  lcddbg("DIER:    %04x\n", getreg32(STM32_TIM3_DIER));
-  lcddbg("SR:      %04x\n", getreg32(STM32_TIM3_SR));
-  lcddbg("EGR:     %04x\n", getreg32(STM32_TIM3_EGR));
-  lcddbg("CCMR1:   %04x\n", getreg32(STM32_TIM3_CCMR1));
-  lcddbg("CCMR2:   %04x\n", getreg32(STM32_TIM3_CCMR2));
-  lcddbg("CCER:    %04x\n", getreg32(STM32_TIM3_CCER));
-  lcddbg("CNT:     %04x\n", getreg32(STM32_TIM3_CNT));
-  lcddbg("PSC:     %04x\n", getreg32(STM32_TIM3_PSC));
-  lcddbg("ARR:     %04x\n", getreg32(STM32_TIM3_ARR));
-  lcddbg("CCR1:    %04x\n", getreg32(STM32_TIM3_CCR1));
-  lcddbg("CCR2:    %04x\n", getreg32(STM32_TIM3_CCR2));
-  lcddbg("CCR3:    %04x\n", getreg32(STM32_TIM3_CCR3));
-  lcddbg("CCR4:    %04x\n", getreg32(STM32_TIM3_CCR4));
-  lcddbg("CCR4:    %04x\n", getreg32(STM32_TIM3_CCR4));
-  lcddbg("CCR4:    %04x\n", getreg32(STM32_TIM3_CCR4));
-  lcddbg("DMAR:    %04x\n", getreg32(STM32_TIM3_DMAR));
+  lcderr("APB1ENR: %08x\n", getreg32(STM32_RCC_APB1ENR));
+  lcderr("CR1:     %04x\n", getreg32(STM32_TIM3_CR1));
+  lcderr("CR2:     %04x\n", getreg32(STM32_TIM3_CR2));
+  lcderr("SMCR:    %04x\n", getreg32(STM32_TIM3_SMCR));
+  lcderr("DIER:    %04x\n", getreg32(STM32_TIM3_DIER));
+  lcderr("SR:      %04x\n", getreg32(STM32_TIM3_SR));
+  lcderr("EGR:     %04x\n", getreg32(STM32_TIM3_EGR));
+  lcderr("CCMR1:   %04x\n", getreg32(STM32_TIM3_CCMR1));
+  lcderr("CCMR2:   %04x\n", getreg32(STM32_TIM3_CCMR2));
+  lcderr("CCER:    %04x\n", getreg32(STM32_TIM3_CCER));
+  lcderr("CNT:     %04x\n", getreg32(STM32_TIM3_CNT));
+  lcderr("PSC:     %04x\n", getreg32(STM32_TIM3_PSC));
+  lcderr("ARR:     %04x\n", getreg32(STM32_TIM3_ARR));
+  lcderr("CCR1:    %04x\n", getreg32(STM32_TIM3_CCR1));
+  lcderr("CCR2:    %04x\n", getreg32(STM32_TIM3_CCR2));
+  lcderr("CCR3:    %04x\n", getreg32(STM32_TIM3_CCR3));
+  lcderr("CCR4:    %04x\n", getreg32(STM32_TIM3_CCR4));
+  lcderr("CCR4:    %04x\n", getreg32(STM32_TIM3_CCR4));
+  lcderr("CCR4:    %04x\n", getreg32(STM32_TIM3_CCR4));
+  lcderr("DMAR:    %04x\n", getreg32(STM32_TIM3_DMAR));
 }
 
 /************************************************************************************
@@ -564,7 +564,7 @@ int board_lcd_initialize(void)
       g_ssd1289drvr = ssd1289_lcdinitialize(&g_ssd1289);
       if (!g_ssd1289drvr)
         {
-          lcddbg("ERROR: ssd1289_lcdinitialize failed\n");
+          lcderr("ERROR: ssd1289_lcdinitialize failed\n");
           return -ENODEV;
         }
     }

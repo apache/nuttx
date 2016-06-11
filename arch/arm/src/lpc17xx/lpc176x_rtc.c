@@ -81,12 +81,12 @@
 /* Debug ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_RTC
-#  define rtcdbg    dbg
+#  define rtcerr    err
 #  define rtcinfo   info
 #  define rtcllerr  llerr
 #  define rtcllinfo llinfo
 #else
-#  define rtcdbg(x...)
+#  define rtcerr(x...)
 #  define rtcinfo(x...)
 #  define rtcllerr(x...)
 #  define rtcllinfo(x...)

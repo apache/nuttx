@@ -84,12 +84,12 @@
 /* Debug ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_RTC
-#  define rtcdbg    dbg
+#  define rtcerr    err
 #  define rtcinfo   info
 #  define rtcllerr  llerr
 #  define rtcllinfo llinfo
 #else
-#  define rtcdbg(x...)
+#  define rtcerr(x...)
 #  define rtcinfo(x...)
 #  define rtcllerr(x...)
 #  define rtcllinfo(x...)
@@ -338,7 +338,7 @@ int up_rtc_getdatetime(FAR struct tm *tp)
       ret = I2C_TRANSFER(g_pcf85263.i2c, msg, 4);
       if (ret < 0)
         {
-          rtcdbg("ERROR: I2C_TRANSFER failed: %d\n", ret)
+          rtcerr("ERROR: I2C_TRANSFER failed: %d\n", ret)
           return ret;
         }
     }
@@ -431,13 +431,13 @@ int up_rtc_settime(FAR const struct timespec *tp)
  #ifdef CONFIG_LIBC_LOCALTIME
    if (localtime_r(&newtime, &newtm) == NULL)
      {
-       rtcdbg("ERROR: localtime_r failed\n")
+       rtcerr("ERROR: localtime_r failed\n")
        return -EINVAL;
      }
 #else
    if (gmtime_r(&newtime, &newtm) == NULL)
      {
-       rtcdbg("ERROR: gmtime_r failed\n")
+       rtcerr("ERROR: gmtime_r failed\n")
        return -EINVAL;
      }
 #endif
@@ -518,7 +518,7 @@ int up_rtc_settime(FAR const struct timespec *tp)
       ret = I2C_TRANSFER(g_pcf85263.i2c, msg, 3);
       if (ret < 0)
         {
-          rtcdbg("ERROR: I2C_TRANSFER failed: %d\n", ret)
+          rtcerr("ERROR: I2C_TRANSFER failed: %d\n", ret)
           return ret;
         }
     }

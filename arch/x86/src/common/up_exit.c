@@ -85,8 +85,8 @@ static void _up_dumponexit(FAR struct tcb_s *tcb, FAR void *arg)
   int i;
 #endif
 
-  sdbg("  TCB=%p name=%s pid=%d\n", tcb, tcb->argv[0], tcb->pid);
-  sdbg("    priority=%d state=%d\n", tcb->sched_priority, tcb->task_state);
+  serr("  TCB=%p name=%s pid=%d\n", tcb, tcb->argv[0], tcb->pid);
+  serr("    priority=%d state=%d\n", tcb->sched_priority, tcb->task_state);
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
   filelist = tcb->group->tg_filelist;
@@ -95,7 +95,7 @@ static void _up_dumponexit(FAR struct tcb_s *tcb, FAR void *arg)
       struct inode *inode = filelist->fl_files[i].f_inode;
       if (inode)
         {
-          sdbg("      fd=%d refcount=%d\n",
+          serr("      fd=%d refcount=%d\n",
                i, inode->i_crefs);
         }
     }
@@ -109,11 +109,11 @@ static void _up_dumponexit(FAR struct tcb_s *tcb, FAR void *arg)
       if (filep->fs_fd >= 0)
         {
 #if CONFIG_STDIO_BUFFER_SIZE > 0
-          sdbg("      fd=%d nbytes=%d\n",
+          serr("      fd=%d nbytes=%d\n",
                filep->fs_fd,
                filep->fs_bufpos - filep->fs_bufstart);
 #else
-          sdbg("      fd=%d\n", filep->fs_fd);
+          serr("      fd=%d\n", filep->fs_fd);
 #endif
         }
     }

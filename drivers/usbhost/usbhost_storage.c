@@ -722,7 +722,7 @@ static inline int usbhost_testunitready(FAR struct usbhost_state_s *priv)
   cbw = usbhost_cbwalloc(priv);
   if (!cbw)
     {
-      udbg("ERROR: Failed to create CBW\n");
+      uerr("ERROR: Failed to create CBW\n");
       return -ENOMEM;
     }
 
@@ -760,7 +760,7 @@ static inline int usbhost_requestsense(FAR struct usbhost_state_s *priv)
   cbw = usbhost_cbwalloc(priv);
   if (!cbw)
     {
-      udbg("ERROR: Failed to create CBW\n");
+      uerr("ERROR: Failed to create CBW\n");
       return -ENOMEM;
     }
 
@@ -806,7 +806,7 @@ static inline int usbhost_readcapacity(FAR struct usbhost_state_s *priv)
   cbw = usbhost_cbwalloc(priv);
   if (!cbw)
     {
-      udbg("ERROR: Failed to create CBW\n");
+      uerr("ERROR: Failed to create CBW\n");
       return -ENOMEM;
     }
 
@@ -857,7 +857,7 @@ static inline int usbhost_inquiry(FAR struct usbhost_state_s *priv)
   cbw = usbhost_cbwalloc(priv);
   if (!cbw)
     {
-      udbg("ERROR: Failed to create CBW\n");
+      uerr("ERROR: Failed to create CBW\n");
       return -ENOMEM;
     }
 
@@ -1173,14 +1173,14 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
   ret = DRVR_EPALLOC(hport->drvr, &boutdesc, &priv->bulkout);
   if (ret < 0)
     {
-      udbg("ERROR: Failed to allocate Bulk OUT endpoint\n");
+      uerr("ERROR: Failed to allocate Bulk OUT endpoint\n");
       return ret;
     }
 
   ret = DRVR_EPALLOC(hport->drvr, &bindesc, &priv->bulkin);
   if (ret < 0)
     {
-      udbg("ERROR: Failed to allocate Bulk IN endpoint\n");
+      uerr("ERROR: Failed to allocate Bulk IN endpoint\n");
       (void)DRVR_EPFREE(hport->drvr, priv->bulkout);
       return ret;
     }
@@ -1221,7 +1221,7 @@ static inline int usbhost_initvolume(FAR struct usbhost_state_s *priv)
   ret = usbhost_talloc(priv);
   if (ret < 0)
     {
-      udbg("ERROR: Failed to allocate transfer buffer\n");
+      uerr("ERROR: Failed to allocate transfer buffer\n");
       return ret;
     }
 
@@ -1281,7 +1281,7 @@ static inline int usbhost_initvolume(FAR struct usbhost_state_s *priv)
 
       if (ret < 0 && ret != -EPERM)
         {
-          udbg("ERROR: DRVR_TRANSFER returned: %d\n", ret);
+          uerr("ERROR: DRVR_TRANSFER returned: %d\n", ret);
           break;
         }
     }
@@ -1290,7 +1290,7 @@ static inline int usbhost_initvolume(FAR struct usbhost_state_s *priv)
 
   if (retries >= USBHOST_MAX_RETRIES)
     {
-      udbg("ERROR: Timeout!\n");
+      uerr("ERROR: Timeout!\n");
       ret = -ETIMEDOUT;
     }
 
@@ -1307,7 +1307,7 @@ static inline int usbhost_initvolume(FAR struct usbhost_state_s *priv)
           csw = (FAR struct usbmsc_csw_s *)priv->tbuffer;
           if (csw->status != 0)
             {
-              udbg("ERROR: CSW status error: %d\n", csw->status);
+              uerr("ERROR: CSW status error: %d\n", csw->status);
               ret = -ENODEV;
             }
         }
@@ -1328,7 +1328,7 @@ static inline int usbhost_initvolume(FAR struct usbhost_state_s *priv)
           csw = (FAR struct usbmsc_csw_s *)priv->tbuffer;
           if (csw->status != 0)
             {
-              udbg("ERROR: CSW status error: %d\n", csw->status);
+              uerr("ERROR: CSW status error: %d\n", csw->status);
               ret = -ENODEV;
             }
         }
@@ -1772,7 +1772,7 @@ static int usbhost_connect(FAR struct usbhost_class_s *usbclass,
   ret = usbhost_cfgdesc(priv, configdesc, desclen);
   if (ret < 0)
     {
-      udbg("usbhost_cfgdesc() failed: %d\n", ret);
+      uerr("usbhost_cfgdesc() failed: %d\n", ret);
     }
   else
     {
@@ -1781,7 +1781,7 @@ static int usbhost_connect(FAR struct usbhost_class_s *usbclass,
       ret = usbhost_initvolume(priv);
       if (ret < 0)
         {
-          udbg("usbhost_initvolume() failed: %d\n", ret);
+          uerr("usbhost_initvolume() failed: %d\n", ret);
         }
     }
 
@@ -2051,7 +2051,7 @@ static ssize_t usbhost_read(FAR struct inode *inode, unsigned char *buffer,
                           csw = (FAR struct usbmsc_csw_s *)priv->tbuffer;
                           if (csw->status != 0)
                             {
-                              udbg("ERROR: CSW status error: %d\n", csw->status);
+                              uerr("ERROR: CSW status error: %d\n", csw->status);
                               nbytes = -ENODEV;
                             }
                         }
@@ -2150,7 +2150,7 @@ static ssize_t usbhost_write(FAR struct inode *inode, const unsigned char *buffe
                       csw = (FAR struct usbmsc_csw_s *)priv->tbuffer;
                       if (csw->status != 0)
                         {
-                          udbg("ERROR: CSW status error: %d\n", csw->status);
+                          uerr("ERROR: CSW status error: %d\n", csw->status);
                           nbytes = -ENODEV;
                         }
                     }

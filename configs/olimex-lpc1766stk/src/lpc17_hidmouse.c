@@ -60,8 +60,8 @@
  */
 
 #ifndef CONFIG_DEBUG_INPUT
-#  undef  idbg
-#  define idbg    udbg
+#  undef  ierr
+#  define ierr    uerr
 #  undef  illerr
 #  define illerr  ullerr
 #  undef  iinfo
@@ -114,7 +114,7 @@ int board_tsc_setup(int minor)
   static bool initialized = false;
   int ret;
 
-  idbg("minor %d\n", minor);
+  ierr("minor %d\n", minor);
   DEBUGASSERT(minor == 0);
 
   /* Have we already initialized?  Since we never uninitialize we must prevent
@@ -131,7 +131,7 @@ int board_tsc_setup(int minor)
       ret = usbhost_hub_initialize();
       if (ret < 0)
         {
-          idbg("ERROR: usbhost_hub_initialize failed: %d\n", ret);
+          ierr("ERROR: usbhost_hub_initialize failed: %d\n", ret);
         }
 #endif
 
@@ -140,7 +140,7 @@ int board_tsc_setup(int minor)
       ret = usbhost_mouse_init();
       if (ret < 0)
         {
-          idbg("Failed to register USB HID mouse device class\n");
+          ierr("Failed to register USB HID mouse device class\n");
           return -ENODEV;
         }
 

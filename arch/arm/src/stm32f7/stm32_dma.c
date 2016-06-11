@@ -606,7 +606,7 @@ void stm32_dmasetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
   uint32_t regoffset;
   uint32_t regval;
 
-  dmadbg("paddr: %08x maddr: %08x ntransfers: %d scr: %08x\n",
+  dmaerr("paddr: %08x maddr: %08x ntransfers: %d scr: %08x\n",
          paddr, maddr, ntransfers, scr);
 
 #ifdef CONFIG_STM32_DMACAPABLE
@@ -1040,15 +1040,15 @@ void stm32_dmadump(DMA_HANDLE handle, const struct stm32_dmaregs_s *regs,
   struct stm32_dma_s *dmast = (struct stm32_dma_s *)handle;
   uint32_t dmabase = DMA_BASE(dmast->base);
 
-  dmadbg("DMA Registers: %s\n", msg);
-  dmadbg("   LISR[%08x]: %08x\n", dmabase + STM32_DMA_LISR_OFFSET, regs->lisr);
-  dmadbg("   HISR[%08x]: %08x\n", dmabase + STM32_DMA_HISR_OFFSET, regs->hisr);
-  dmadbg("    SCR[%08x]: %08x\n", dmast->base + STM32_DMA_SCR_OFFSET, regs->scr);
-  dmadbg("  SNDTR[%08x]: %08x\n", dmast->base + STM32_DMA_SNDTR_OFFSET, regs->sndtr);
-  dmadbg("   SPAR[%08x]: %08x\n", dmast->base + STM32_DMA_SPAR_OFFSET, regs->spar);
-  dmadbg("  SM0AR[%08x]: %08x\n", dmast->base + STM32_DMA_SM0AR_OFFSET, regs->sm0ar);
-  dmadbg("  SM1AR[%08x]: %08x\n", dmast->base + STM32_DMA_SM1AR_OFFSET, regs->sm1ar);
-  dmadbg("   SFCR[%08x]: %08x\n", dmast->base + STM32_DMA_SFCR_OFFSET, regs->sfcr);
+  dmaerr("DMA Registers: %s\n", msg);
+  dmaerr("   LISR[%08x]: %08x\n", dmabase + STM32_DMA_LISR_OFFSET, regs->lisr);
+  dmaerr("   HISR[%08x]: %08x\n", dmabase + STM32_DMA_HISR_OFFSET, regs->hisr);
+  dmaerr("    SCR[%08x]: %08x\n", dmast->base + STM32_DMA_SCR_OFFSET, regs->scr);
+  dmaerr("  SNDTR[%08x]: %08x\n", dmast->base + STM32_DMA_SNDTR_OFFSET, regs->sndtr);
+  dmaerr("   SPAR[%08x]: %08x\n", dmast->base + STM32_DMA_SPAR_OFFSET, regs->spar);
+  dmaerr("  SM0AR[%08x]: %08x\n", dmast->base + STM32_DMA_SM0AR_OFFSET, regs->sm0ar);
+  dmaerr("  SM1AR[%08x]: %08x\n", dmast->base + STM32_DMA_SM1AR_OFFSET, regs->sm1ar);
+  dmaerr("   SFCR[%08x]: %08x\n", dmast->base + STM32_DMA_SFCR_OFFSET, regs->sfcr);
 }
 #endif
 

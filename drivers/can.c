@@ -100,12 +100,12 @@
 /* Non-standard debug that may be enabled just for testing CAN */
 
 #ifdef CONFIG_DEBUG_CAN
-#  define candbg    dbg
+#  define canerr    err
 #  define caninfo   info
 #  define canllerr  llerr
 #  define canllinfo llinfo
 #else
-#  define candbg(x...)
+#  define canerr(x...)
 #  define caninfo(x...)
 #  define canllerr(x...)
 #  define canllinfo(x...)
@@ -702,7 +702,7 @@ static int can_xmit(FAR struct can_dev_s *dev)
       ret = dev_send(dev, &dev->cd_xmit.tx_buffer[tmpndx]);
       if (ret != OK)
         {
-          candbg("dev_send failed: %d\n", ret);
+          canerr("dev_send failed: %d\n", ret);
           break;
         }
     }

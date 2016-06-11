@@ -799,7 +799,7 @@ static int e1000_ifup(struct net_driver_s *dev)
 {
   struct e1000_dev *e1000 = (struct e1000_dev *)dev->d_private;
 
-  ndbg("Bringing up: %d.%d.%d.%d\n",
+  nerr("Bringing up: %d.%d.%d.%d\n",
        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
 

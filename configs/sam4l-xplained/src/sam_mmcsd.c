@@ -99,7 +99,7 @@ int sam_sdinitialize(int minor)
   spi = sam_spibus_initialize(SD_CSNO);
   if (!spi)
     {
-      fdbg("Failed to initialize SPI chip select %d\n", SD_CSNO);
+      ferr("Failed to initialize SPI chip select %d\n", SD_CSNO);
       return -ENODEV;
     }
 
@@ -113,7 +113,7 @@ int sam_sdinitialize(int minor)
   ret = mmcsd_spislotinitialize(minor, SAM34_MMCSDSLOTNO, spi);
   if (ret < 0)
     {
-      fdbg("Failed to bind SPI chip select %d to MMC/SD slot %d: %d\n",
+      ferr("Failed to bind SPI chip select %d to MMC/SD slot %d: %d\n",
             SD_CSNO, SAM34_MMCSDSLOTNO, ret);
       return ret;
     }

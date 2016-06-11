@@ -139,10 +139,10 @@
 /* Debug ******************************************************************************/
 
 #ifdef CONFIG_DEBUG_LCD
-#  define lcddbg       dbg
+#  define lcderr       err
 #  define lcdinfo      info
 #else
-#  define lcddbg(x...)
+#  define lcderr(x...)
 #  define lcdinfo(x...)
 #endif
 
@@ -468,7 +468,7 @@ int board_lcd_initialize(void)
       g_pic32mx7mmb_lcd.drvr = mio283qt2_lcdinitialize(&g_pic32mx7mmb_lcd.dev);
       if (!g_pic32mx7mmb_lcd.drvr)
         {
-          lcddbg("ERROR: mio283qt2_lcdinitialize failed\n");
+          lcderr("ERROR: mio283qt2_lcdinitialize failed\n");
           return -ENODEV;
         }
     }

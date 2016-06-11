@@ -312,9 +312,9 @@
 /* Debug ******************************************************************************/
 
 #ifdef CONFIG_DEBUG_LCD
-# define lcddbg(format, ...)  info(format, ##__VA_ARGS__)
+# define lcderr(format, ...)  info(format, ##__VA_ARGS__)
 #else
-# define lcddbg(x...)
+# define lcderr(x...)
 #endif
 
 /**************************************************************************************
@@ -742,7 +742,7 @@ static int stm3210e_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *bu
 
   /* Buffer must be provided and aligned to a 16-bit address boundary */
 
-  lcddbg("row: %d col: %d npixels: %d\n", row, col, npixels);
+  lcderr("row: %d col: %d npixels: %d\n", row, col, npixels);
   DEBUGASSERT(buffer && ((uintptr_t)buffer & 1) == 0);
 
   /* Write the run to GRAM. */
@@ -835,7 +835,7 @@ static int stm3210e_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
 
   /* Buffer must be provided and aligned to a 16-bit address boundary */
 
-  lcddbg("row: %d col: %d npixels: %d\n", row, col, npixels);
+  lcderr("row: %d col: %d npixels: %d\n", row, col, npixels);
   DEBUGASSERT(buffer && ((uintptr_t)buffer & 1) == 0);
 
   /* Configure according to the LCD type */
@@ -1321,7 +1321,7 @@ static inline void stm3210e_lcdinitialize(void)
    */
 
   id = stm3210e_readreg(LCD_REG_0);
-  lcddbg("LCD ID: %04x\n", id);
+  lcderr("LCD ID: %04x\n", id);
 
   /* Check if the ID is for the SPFD5408B */
 
@@ -1331,7 +1331,7 @@ static inline void stm3210e_lcdinitialize(void)
       /* Set the LCD type for the SPFD5408B */
 
       g_lcddev.type = LCD_TYPE_SPFD5408B;
-      lcddbg("LCD type: %d\n", g_lcddev.type);
+      lcderr("LCD type: %d\n", g_lcddev.type);
 
       /* Start Initial Sequence */
 
@@ -1436,7 +1436,7 @@ static inline void stm3210e_lcdinitialize(void)
       /* Set the LCD type for the R61580 */
 
       g_lcddev.type = LCD_TYPE_R61580;
-      lcddbg("LCD type: %d\n", g_lcddev.type);
+      lcderr("LCD type: %d\n", g_lcddev.type);
 
       /* Start Initial Sequence */
 
@@ -1506,7 +1506,7 @@ static inline void stm3210e_lcdinitialize(void)
       /* Set the LCD type for the AM240320 */
 
       g_lcddev.type = LCD_TYPE_AM240320;
-      lcddbg("LCD type: %d\n", g_lcddev.type);
+      lcderr("LCD type: %d\n", g_lcddev.type);
 
       /* Start Initial Sequence */
 
@@ -1595,7 +1595,7 @@ static inline void stm3210e_lcdinitialize(void)
       stm3210e_writereg(LCD_REG_3, 0x1018);
       stm3210e_writereg(LCD_REG_7, 0);       /* Display off */
 #else
-      lcddbg("Unsupported LCD type\n");
+      lcderr("Unsupported LCD type\n");
 #endif
   }
 }
@@ -1743,25 +1743,25 @@ static void stm3210e_backlight(void)
 
   /* Dump timer1 registers */
 
-  lcddbg("APB2ENR: %08x\n", getreg32(STM32_RCC_APB2ENR));
-  lcddbg("CR1:     %04x\n", getreg32(STM32_TIM1_CR1));
-  lcddbg("CR2:     %04x\n", getreg32(STM32_TIM1_CR2));
-  lcddbg("SMCR:    %04x\n", getreg32(STM32_TIM1_SMCR));
-  lcddbg("DIER:    %04x\n", getreg32(STM32_TIM1_DIER));
-  lcddbg("SR:      %04x\n", getreg32(STM32_TIM1_SR));
-  lcddbg("BDTR:    %04x\n", getreg32(STM32_TIM1_BDTR));
-  lcddbg("CCMR1:   %04x\n", getreg32(STM32_TIM1_CCMR1));
-  lcddbg("CCMR2:   %04x\n", getreg32(STM32_TIM1_CCMR2));
-  lcddbg("CCER:    %04x\n", getreg32(STM32_TIM1_CCER));
-  lcddbg("CNT:     %04x\n", getreg32(STM32_TIM1_CNT));
-  lcddbg("PSC:     %04x\n", getreg32(STM32_TIM1_PSC));
-  lcddbg("ARR:     %04x\n", getreg32(STM32_TIM1_ARR));
-  lcddbg("RCR:     %04x\n", getreg32(STM32_TIM1_RCR));
-  lcddbg("CCR1:    %04x\n", getreg32(STM32_TIM1_CCR1));
-  lcddbg("CCR2:    %04x\n", getreg32(STM32_TIM1_CCR2));
-  lcddbg("CCR3:    %04x\n", getreg32(STM32_TIM1_CCR3));
-  lcddbg("CCR4:    %04x\n", getreg32(STM32_TIM1_CCR4));
-  lcddbg("DMAR:    %04x\n", getreg32(STM32_TIM1_DMAR));
+  lcderr("APB2ENR: %08x\n", getreg32(STM32_RCC_APB2ENR));
+  lcderr("CR1:     %04x\n", getreg32(STM32_TIM1_CR1));
+  lcderr("CR2:     %04x\n", getreg32(STM32_TIM1_CR2));
+  lcderr("SMCR:    %04x\n", getreg32(STM32_TIM1_SMCR));
+  lcderr("DIER:    %04x\n", getreg32(STM32_TIM1_DIER));
+  lcderr("SR:      %04x\n", getreg32(STM32_TIM1_SR));
+  lcderr("BDTR:    %04x\n", getreg32(STM32_TIM1_BDTR));
+  lcderr("CCMR1:   %04x\n", getreg32(STM32_TIM1_CCMR1));
+  lcderr("CCMR2:   %04x\n", getreg32(STM32_TIM1_CCMR2));
+  lcderr("CCER:    %04x\n", getreg32(STM32_TIM1_CCER));
+  lcderr("CNT:     %04x\n", getreg32(STM32_TIM1_CNT));
+  lcderr("PSC:     %04x\n", getreg32(STM32_TIM1_PSC));
+  lcderr("ARR:     %04x\n", getreg32(STM32_TIM1_ARR));
+  lcderr("RCR:     %04x\n", getreg32(STM32_TIM1_RCR));
+  lcderr("CCR1:    %04x\n", getreg32(STM32_TIM1_CCR1));
+  lcderr("CCR2:    %04x\n", getreg32(STM32_TIM1_CCR2));
+  lcderr("CCR3:    %04x\n", getreg32(STM32_TIM1_CCR3));
+  lcderr("CCR4:    %04x\n", getreg32(STM32_TIM1_CCR4));
+  lcderr("DMAR:    %04x\n", getreg32(STM32_TIM1_DMAR));
 #endif
 }
 #endif
@@ -1794,7 +1794,7 @@ int board_lcd_initialize(void)
   ret = pm_register(&g_lcdcb);
   if (ret != OK)
   {
-    lcddbg("ERROR: pm_register failed: %d\n", ret);
+    lcderr("ERROR: pm_register failed: %d\n", ret);
   }
 #endif
 

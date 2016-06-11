@@ -53,17 +53,17 @@
 //#define MONITOR_MM_SEMAPHORE 1
 
 #ifdef MONITOR_MM_SEMAPHORE
-#  ifdef CONFIG_DEBUG_FEATURES
+#  ifdef CONFIG_DEBUG_ERRORS
 #    include <debug.h>
-#    define msemdbg dbg
+#    define msemerr err
 #  else
-#    define msemdbg printf
+#    define msemerr printf
 #  endif
 #else
 #  ifdef CONFIG_CPP_HAVE_VARARGS
-#    define msemdbg(x...)
+#    define msemerr(x...)
 #  else
-#    define msemdbg (void)
+#    define msemerr (void)
 #  endif
 #endif
 
@@ -157,7 +157,7 @@ void mm_takesemaphore(FAR struct mm_heap_s *heap)
     {
       /* Take the semaphore (perhaps waiting) */
 
-      msemdbg("PID=%d taking\n", my_pid);
+      msemerr("PID=%d taking\n", my_pid);
       while (sem_wait(&heap->mm_semaphore) != 0)
         {
           /* The only case that an error should occur here is if
@@ -173,7 +173,7 @@ void mm_takesemaphore(FAR struct mm_heap_s *heap)
       heap->mm_counts_held = 1;
     }
 
-  msemdbg("Holder=%d count=%d\n", heap->mm_holder, heap->mm_counts_held);
+  msemerr("Holder=%d count=%d\n", heap->mm_holder, heap->mm_counts_held);
 }
 
 /****************************************************************************
@@ -186,7 +186,7 @@ void mm_takesemaphore(FAR struct mm_heap_s *heap)
 
 void mm_givesemaphore(FAR struct mm_heap_s *heap)
 {
-#ifdef CONFIG_DEBUG_FEATURES
+#if defined(CONFIG_DEBUG_ASSERTIONS) || defined(CONFIG_DEBUG_ERRORS)
   pid_t my_pid = getpid();
 #endif
 
@@ -201,15 +201,13 @@ void mm_givesemaphore(FAR struct mm_heap_s *heap)
       /* Yes, just release one count and return */
 
       heap->mm_counts_held--;
-      msemdbg("Holder=%d count=%d\n", heap->mm_holder, heap->mm_counts_held);
+      msemerr("Holder=%d count=%d\n", heap->mm_holder, heap->mm_counts_held);
     }
   else
     {
       /* Nope, this is the last reference I have */
 
-#ifdef CONFIG_DEBUG_FEATURES
-      msemdbg("PID=%d giving\n", my_pid);
-#endif
+      msemerr("PID=%d giving\n", my_pid);
 
       heap->mm_holder      = -1;
       heap->mm_counts_held = 0;

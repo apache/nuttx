@@ -832,7 +832,7 @@ static void audio_callback(FAR void *handle, uint16_t reason,
 
       default:
         {
-          auddbg("Unknown callback reason code %d\n", reason);
+          auderr("Unknown callback reason code %d\n", reason);
           break;
         }
     }
@@ -885,7 +885,7 @@ int audio_register(FAR const char *name, FAR struct audio_lowerhalf_s *dev)
   upper = (FAR struct audio_upperhalf_s *)kmm_zalloc(sizeof(struct audio_upperhalf_s));
   if (!upper)
     {
-      auddbg("Allocation failed\n");
+      auderr("Allocation failed\n");
       return -ENOMEM;
     }
 

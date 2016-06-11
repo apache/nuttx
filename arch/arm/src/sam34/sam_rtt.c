@@ -81,10 +81,10 @@
  */
 
 #ifdef CONFIG_DEBUG_RTT
-#  define rttdbg    llerr
+#  define rtterr    llerr
 #  define rttinfo   llinfo
 #else
-#  define rttdbg(x...)
+#  define rtterr(x...)
 #  define rttinfo(x...)
 #endif
 
@@ -537,7 +537,7 @@ static int sam34_settimeout(FAR struct timer_lowerhalf_s *lower,
 
   if (timeout < 1 || timeout > RTT_MAXTIMEOUT)
     {
-      rttdbg("Cannot represent timeout=%lu > %lu\n",
+      rtterr("Cannot represent timeout=%lu > %lu\n",
             timeout, RTT_MAXTIMEOUT);
       return -ERANGE;
     }

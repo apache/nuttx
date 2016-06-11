@@ -203,7 +203,7 @@ static int lo_txpoll(FAR struct net_driver_s *dev)
       else
 #endif
         {
-          ndbg("WARNING: Unrecognized packet type dropped: %02x\n", IPv4BUF->vhl);
+          nerr("WARNING: Unrecognized packet type dropped: %02x\n", IPv4BUF->vhl);
           NETDEV_RXDROPPED(&priv->lo_dev);
           priv->lo_dev.d_len = 0;
         }
@@ -323,12 +323,12 @@ static int lo_ifup(FAR struct net_driver_s *dev)
   FAR struct lo_driver_s *priv = (FAR struct lo_driver_s *)dev->d_private;
 
 #ifdef CONFIG_NET_IPv4
-  ndbg("Bringing up: %d.%d.%d.%d\n",
+  nerr("Bringing up: %d.%d.%d.%d\n",
        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
 #endif
 #ifdef CONFIG_NET_IPv6
-  ndbg("Bringing up: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
+  nerr("Bringing up: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
        dev->d_ipv6addr[0], dev->d_ipv6addr[1], dev->d_ipv6addr[2],
        dev->d_ipv6addr[3], dev->d_ipv6addr[4], dev->d_ipv6addr[5],
        dev->d_ipv6addr[6], dev->d_ipv6addr[7]);

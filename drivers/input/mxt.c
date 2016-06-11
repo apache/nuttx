@@ -343,16 +343,16 @@ static int mxt_getreg(FAR struct mxt_dev_s *priv, uint16_t regaddr,
 #ifdef CONFIG_I2C_RESET
           /* Perhaps the I2C bus is locked up?  Try to shake the bus free */
 
-          idbg("WARNING: I2C_TRANSFER failed: %d ... Resetting\n", ret);
+          ierr("WARNING: I2C_TRANSFER failed: %d ... Resetting\n", ret);
 
           ret = I2C_RESET(priv->i2c);
           if (ret < 0)
             {
-              idbg("ERROR: I2C_RESET failed: %d\n", ret);
+              ierr("ERROR: I2C_RESET failed: %d\n", ret);
               break;
             }
 #else
-          idbg("ERROR: I2C_TRANSFER failed: %d\n", ret);
+          ierr("ERROR: I2C_TRANSFER failed: %d\n", ret);
 #endif
         }
       else
@@ -417,15 +417,15 @@ static int mxt_putreg(FAR struct mxt_dev_s *priv, uint16_t regaddr,
 #ifdef CONFIG_I2C_RESET
           /* Perhaps the I2C bus is locked up?  Try to shake the bus free */
 
-          idbg("WARNING: I2C_TRANSFER failed: %d ... Resetting\n", ret);
+          ierr("WARNING: I2C_TRANSFER failed: %d ... Resetting\n", ret);
 
           ret = I2C_RESET(priv->i2c);
           if (ret < 0)
             {
-              idbg("ERROR: I2C_RESET failed: %d\n", ret);
+              ierr("ERROR: I2C_RESET failed: %d\n", ret);
             }
 #else
-          idbg("ERROR: I2C_TRANSFER failed: %d\n", ret);
+          ierr("ERROR: I2C_TRANSFER failed: %d\n", ret);
 #endif
         }
       else
@@ -466,7 +466,7 @@ static FAR struct mxt_object_s *mxt_object(FAR struct mxt_dev_s *priv,
         }
     }
 
-  idbg("ERROR: Invalid object type: %d\n", type);
+  ierr("ERROR: Invalid object type: %d\n", type);
   return NULL;
 }
 
@@ -483,7 +483,7 @@ static int mxt_getmessage(FAR struct mxt_dev_s *priv,
   object = mxt_object(priv, MXT_GEN_MESSAGE_T5);
   if (object == NULL)
     {
-      idbg("ERROR: mxt_object failed\n");
+      ierr("ERROR: mxt_object failed\n");
       return -EINVAL;
     }
 
@@ -558,7 +558,7 @@ static int mxt_flushmsgs(FAR struct mxt_dev_s *priv)
       ret = mxt_getmessage(priv, &msg);
       if (ret < 0)
         {
-          idbg("ERROR: mxt_getmessage failed: %d\n", ret);
+          ierr("ERROR: mxt_getmessage failed: %d\n", ret);
           return ret;
         }
     }
@@ -568,7 +568,7 @@ static int mxt_flushmsgs(FAR struct mxt_dev_s *priv)
 
   if (retries <= 0)
     {
-      idbg("ERROR: Failed to clear messages: ID=%02x\n", msg.id);
+      ierr("ERROR: Failed to clear messages: ID=%02x\n", msg.id);
       return -EBUSY;
     }
 
@@ -998,7 +998,7 @@ static void mxt_worker(FAR void *arg)
       ret = mxt_getmessage(priv, &msg);
       if (ret < 0)
         {
-          idbg("ERROR: mxt_getmessage failed: %d\n", ret);
+          ierr("ERROR: mxt_getmessage failed: %d\n", ret);
           goto errout_with_semaphore;
         }
 
@@ -1141,7 +1141,7 @@ static int mxt_open(FAR struct file *filep)
     {
       /* More than 255 opens; uint8_t overflows to zero */
 
-      idbg("ERROR: Too many opens: %d\n", priv->crefs);
+      ierr("ERROR: Too many opens: %d\n", priv->crefs);
       ret = -EMFILE;
       goto errout_with_sem;
     }
@@ -1157,7 +1157,7 @@ static int mxt_open(FAR struct file *filep)
       ret = mxt_putobject(priv, MXT_TOUCH_MULTI_T9, MXT_TOUCH_CTRL, 0x83);
       if (ret < 0)
         {
-          idbg("ERROR: Failed to enable touch: %d\n", ret);
+          ierr("ERROR: Failed to enable touch: %d\n", ret);
           goto errout_with_sem;
         }
 
@@ -1169,7 +1169,7 @@ static int mxt_open(FAR struct file *filep)
       ret = mxt_flushmsgs(priv);
       if (ret < 0)
         {
-          idbg("ERROR: mxt_flushmsgs failed: %d\n", ret);
+          ierr("ERROR: mxt_flushmsgs failed: %d\n", ret);
           mxt_putobject(priv, MXT_TOUCH_MULTI_T9, MXT_TOUCH_CTRL, 0);
           goto errout_with_sem;
         }
@@ -1233,7 +1233,7 @@ static int mxt_close(FAR struct file *filep)
           ret = mxt_putobject(priv, MXT_TOUCH_MULTI_T9, MXT_TOUCH_CTRL, 0);
           if (ret < 0)
             {
-              idbg("ERROR: Failed to disable touch: %d\n", ret);
+              ierr("ERROR: Failed to disable touch: %d\n", ret);
             }
         }
     }
@@ -1575,7 +1575,7 @@ static int mxt_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
       if ((fds->events & POLLIN) == 0)
         {
-          idbg("Missing POLLIN: revents: %08x\n", fds->revents);
+          ierr("Missing POLLIN: revents: %08x\n", fds->revents);
           ret = -EDEADLK;
           goto errout;
         }
@@ -1600,7 +1600,7 @@ static int mxt_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
       if (i >= CONFIG_MXT_NPOLLWAITERS)
         {
-          idbg("No availabled slot found: %d\n", i);
+          ierr("No availabled slot found: %d\n", i);
           fds->priv    = NULL;
           ret          = -EBUSY;
           goto errout;
@@ -1646,7 +1646,7 @@ static int mxt_getinfo(struct mxt_dev_s *priv)
                    sizeof(struct mxt_info_s));
   if (ret < 0)
     {
-      idbg("ERROR: mxt_getreg failed: %d\n", ret);
+      ierr("ERROR: mxt_getreg failed: %d\n", ret);
       return ret;
     }
 
@@ -1674,7 +1674,7 @@ static int mxt_getobjtab(FAR struct mxt_dev_s *priv)
                    tabsize);
   if (ret < 0)
     {
-      idbg("ERROR: Failed to object table size: %d\n", ret);
+      ierr("ERROR: Failed to object table size: %d\n", ret);
       return ret;
     }
 
@@ -1747,7 +1747,7 @@ static int mxt_hwinitialize(FAR struct mxt_dev_s *priv)
   ret = mxt_getinfo(priv);
   if (ret < 0)
     {
-      idbg("ERROR: Failed to read info registers: %d\n", ret);
+      ierr("ERROR: Failed to read info registers: %d\n", ret);
       return ret;
     }
 
@@ -1756,7 +1756,7 @@ static int mxt_hwinitialize(FAR struct mxt_dev_s *priv)
   priv->objtab = kmm_zalloc(info->nobjects * sizeof(struct mxt_object_s));
   if (priv->objtab == NULL)
     {
-      idbg("ERROR: Failed to allocate object table\n");
+      ierr("ERROR: Failed to allocate object table\n");
       return -ENOMEM;
     }
 
@@ -1773,7 +1773,7 @@ static int mxt_hwinitialize(FAR struct mxt_dev_s *priv)
   ret = mxt_putobject(priv, MXT_GEN_COMMAND_T6, MXT_COMMAND_RESET, 1);
   if (ret < 0)
     {
-      idbg("ERROR: Soft reset failed: %d\n", ret);
+      ierr("ERROR: Soft reset failed: %d\n", ret);
       goto errout_with_objtab;
     }
 
@@ -1784,7 +1784,7 @@ static int mxt_hwinitialize(FAR struct mxt_dev_s *priv)
   ret = mxt_getreg(priv, MXT_MATRIX_X_SIZE, (FAR uint8_t *)&regval, 1);
   if (ret < 0)
     {
-      idbg("ERROR: Failed to get X size: %d\n", ret);
+      ierr("ERROR: Failed to get X size: %d\n", ret);
       goto errout_with_objtab;
     }
 
@@ -1793,7 +1793,7 @@ static int mxt_hwinitialize(FAR struct mxt_dev_s *priv)
   ret = mxt_getreg(priv, MXT_MATRIX_Y_SIZE, (FAR uint8_t *)&regval, 1);
   if (ret < 0)
     {
-      idbg("ERROR: Failed to get Y size: %d\n", ret);
+      ierr("ERROR: Failed to get Y size: %d\n", ret);
       goto errout_with_objtab;
     }
 
@@ -1818,7 +1818,7 @@ static int mxt_hwinitialize(FAR struct mxt_dev_s *priv)
     kmm_zalloc(nslots * sizeof(struct mxt_sample_s));
   if (priv->sample == NULL)
     {
-      idbg("ERROR: Failed to allocate object table\n");
+      ierr("ERROR: Failed to allocate object table\n");
       goto errout_with_objtab;
     }
 
@@ -1874,7 +1874,7 @@ int mxt_register(FAR struct i2c_master_s *i2c,
   priv = (FAR struct mxt_dev_s *)kmm_zalloc(sizeof(struct mxt_dev_s));
   if (priv == NULL)
     {
-      idbg("ERROR: Failed allocate device structure\n");
+      ierr("ERROR: Failed allocate device structure\n");
       return -ENOMEM;
     }
 
@@ -1897,7 +1897,7 @@ int mxt_register(FAR struct i2c_master_s *i2c,
   ret = MXT_ATTACH(lower, mxt_interrupt, priv);
   if (ret < 0)
     {
-      idbg("Failed to attach interrupt\n");
+      ierr("Failed to attach interrupt\n");
       goto errout_with_priv;
     }
 
@@ -1906,7 +1906,7 @@ int mxt_register(FAR struct i2c_master_s *i2c,
   ret = mxt_hwinitialize(priv);
   if (ret < 0)
     {
-      idbg("ERROR: mxt_hwinitialize failed: %d\n", ret);
+      ierr("ERROR: mxt_hwinitialize failed: %d\n", ret);
       goto errout_with_irq;
     }
 
@@ -1918,7 +1918,7 @@ int mxt_register(FAR struct i2c_master_s *i2c,
   ret = register_driver(devname, &mxt_fops, 0666, priv);
   if (ret < 0)
     {
-      idbg("register_driver() failed: %d\n", ret);
+      ierr("register_driver() failed: %d\n", ret);
       goto errout_with_hwinit;
     }
 

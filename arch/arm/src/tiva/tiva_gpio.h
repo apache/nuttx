@@ -326,12 +326,12 @@
 #endif
 
 #ifdef CONFIG_DEBUG_GPIO
-# define gpiodbg(format, ...)    dbg(format, ##__VA_ARGS__)
+# define gpioerr(format, ...)    err(format, ##__VA_ARGS__)
 # define gpiollerr(format, ...)  llerr(format, ##__VA_ARGS__)
 # define gpioinfo(format, ...)   info(format, ##__VA_ARGS__)
 # define gpiollinfo(format, ...) llinfo(format, ##__VA_ARGS__)
 #else
-# define gpiodbg(x...)
+# define gpioerr(x...)
 # define gpiollerr(x...)
 # define gpioinfo(x...)
 # define gpiollinfo(x...)

@@ -1298,7 +1298,7 @@ struct adc_dev_s *efm32_adcinitialize(int intf, const uint8_t *chanlist, int nch
   else
 #endif
     {
-      adbg("No ADC interface defined\n");
+      aerr("No ADC interface defined\n");
       return NULL;
     }
 

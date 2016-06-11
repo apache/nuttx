@@ -578,7 +578,7 @@ static int ez80emac_miiconfigure(FAR struct ez80emac_driver_s *priv)
   phyval = ez80emac_miiread(priv, MII_PHYID1);
   if (phyval != MII_PHYID1_AM79C874)
     {
-      ndbg("Not an Am79c874 PHY: PHY1=%04x vs %04x\n", phyval, MII_PHYID1_AM79C874);
+      nerr("Not an Am79c874 PHY: PHY1=%04x vs %04x\n", phyval, MII_PHYID1_AM79C874);
       ret = -ENODEV;
       goto dumpregs;
     }
@@ -586,7 +586,7 @@ static int ez80emac_miiconfigure(FAR struct ez80emac_driver_s *priv)
   phyval = ez80emac_miiread(priv, MII_PHYID2);
   if (phyval != MII_PHYID2_AM79C874)
     {
-      ndbg("Not an Am79c874 PHY: PHY2=%04x vs %04x\n", phyval, MII_PHYID2_AM79C874);
+      nerr("Not an Am79c874 PHY: PHY2=%04x vs %04x\n", phyval, MII_PHYID2_AM79C874);
       ret = -ENODEV;
       goto dumpregs;
     }
@@ -618,7 +618,7 @@ static int ez80emac_miiconfigure(FAR struct ez80emac_driver_s *priv)
 
 #if CONFIG_EZ80_PHYCONFIG == EZ80_EMAC_AUTONEG
 
-   ndbg("Configure autonegotiation\n");
+   nerr("Configure autonegotiation\n");
    if (bauto)
     {
       ez80emac_miiwrite(priv, MII_ADVERTISE,
@@ -628,12 +628,12 @@ static int ez80emac_miiconfigure(FAR struct ez80emac_driver_s *priv)
     }
   else
     {
-      ndbg("Am79c784 is not capable of autonegotiation\n");
+      nerr("Am79c784 is not capable of autonegotiation\n");
     }
 
 #elif CONFIG_EZ80_PHYCONFIG == EZ80_EMAC_100BFD
 
-  ndbg("100BASETX full duplex\n");
+  nerr("100BASETX full duplex\n");
   phyval |= MII_MCR_SPEED100 | MII_MCR_FULLDPLX;
   ez80emac_miiwrite(priv, MII_ADVERTISE,
                     MII_ADVERTISE_100BASETXFULL|MII_ADVERTISE_100BASETXHALF|
@@ -642,7 +642,7 @@ static int ez80emac_miiconfigure(FAR struct ez80emac_driver_s *priv)
 
 #elif CONFIG_EZ80_PHYCONFIG == EZ80_EMAC_100BHD
 
-  ndbg("100BASETX half duplex\n");
+  nerr("100BASETX half duplex\n");
   phyval |= MII_MCR_SPEED100;
   ez80emac_miiwrite(priv, MII_ADVERTISE,
                     MII_ADVERTISE_100BASETXHALF|MII_ADVERTISE_10BASETXFULL|
@@ -650,14 +650,14 @@ static int ez80emac_miiconfigure(FAR struct ez80emac_driver_s *priv)
 
 #elif CONFIG_EZ80_PHYCONFIG == EZ80_EMAC_10BFD
 
-  ndbg("10BASETX full duplex\n");
+  nerr("10BASETX full duplex\n");
   phyval |= MII_MCR_FULLDPLX;
   ez80emac_miiwrite(priv, MII_ADVERTISE,
                     MII_ADVERTISE_10BASETXFULL|MII_ADVERTISE_10BASETXHALF|MII_ADVERTISE_CSMA);
 
 #elif CONFIG_EZ80_PHYCONFIG == EZ80_EMAC_10BHD
 
-  ndbg("10BASETX half duplex\n");
+  nerr("10BASETX half duplex\n");
   ez80emac_miiwrite(priv, MII_ADVERTISE,
                     MII_ADVERTISE_10BASETXHALF|MII_ADVERTISE_CSMA);
 
@@ -681,7 +681,7 @@ static int ez80emac_miiconfigure(FAR struct ez80emac_driver_s *priv)
 
   if ((phyval & MII_MSR_LINKSTATUS) == 0)
     {
-      ndbg("Failed to establish link\n");
+      nerr("Failed to establish link\n");
       ret = -ETIMEDOUT;
     }
   else
@@ -731,21 +731,21 @@ static int ez80emac_miiconfigure(FAR struct ez80emac_driver_s *priv)
 
   if (!ez80emac_miipoll(priv, MII_MCR, MII_MCR_ANRESTART, false))
     {
-      ndbg("Autonegotiation didn't start.\n");
+      nerr("Autonegotiation didn't start.\n");
     }
 
   /* Wait for auto-negotiation to complete */
 
   if (!ez80emac_miipoll(priv, MII_MSR, MII_MSR_ANEGCOMPLETE, true))
     {
-      ndbg("Autonegotiation didn't complete.\n");
+      nerr("Autonegotiation didn't complete.\n");
     }
 
   /* Wait link */
 
   if (!ez80emac_miipoll(priv, MII_MSR, MII_MSR_LINKSTATUS, true))
     {
-      ndbg("Link is down!\n");
+      nerr("Link is down!\n");
       priv->blinkok = false;
     }
   else
@@ -763,7 +763,7 @@ static int ez80emac_miiconfigure(FAR struct ez80emac_driver_s *priv)
 
   if ((advertise & MII_ADVERTISE_100BASETXFULL) && (lpa & MII_LPA_100BASETXFULL))
     {
-      ndbg("100BASETX full duplex\n");
+      nerr("100BASETX full duplex\n");
       regval            = inp(EZ80_EMAC_CFG1);
       regval           |= EMAC_CFG1_FULLHD; /* Enable full duplex mode */
       outp(EZ80_EMAC_CFG1, regval);
@@ -775,7 +775,7 @@ static int ez80emac_miiconfigure(FAR struct ez80emac_driver_s *priv)
 
   else if ((advertise & MII_ADVERTISE_100BASETXHALF) && (lpa & MII_LPA_100BASETXHALF))
     {
-      ndbg("100BASETX half duplex\n");
+      nerr("100BASETX half duplex\n");
       regval            = inp(EZ80_EMAC_CFG1);
       regval           &= ~EMAC_CFG1_FULLHD; /* Disable full duplex mode */
       outp(EZ80_EMAC_CFG1, regval);
@@ -787,7 +787,7 @@ static int ez80emac_miiconfigure(FAR struct ez80emac_driver_s *priv)
 
   else if ((advertise & MII_ADVERTISE_10BASETXFULL) && (lpa & MII_LPA_10BASETXFULL))
     {
-      ndbg("10BASETX full duplex\n");
+      nerr("10BASETX full duplex\n");
       regval            = inp(EZ80_EMAC_CFG1);
       regval           |= EMAC_CFG1_FULLHD; /* Enable full duplex mode */
       outp(EZ80_EMAC_CFG1, regval);
@@ -799,7 +799,7 @@ static int ez80emac_miiconfigure(FAR struct ez80emac_driver_s *priv)
 
   else if ((advertise & MII_ADVERTISE_10BASETXHALF) && (lpa & MII_LPA_10BASETXHALF))
     {
-      ndbg("10BASETX half duplex\n");
+      nerr("10BASETX half duplex\n");
       regval            = inp(EZ80_EMAC_CFG1);
       regval           &= ~EMAC_CFG1_FULLHD; /* Disable full duplex mode */
       outp(EZ80_EMAC_CFG1, regval);
@@ -808,7 +808,7 @@ static int ez80emac_miiconfigure(FAR struct ez80emac_driver_s *priv)
     }
   else
     {
-      ndbg("No valid connection; force 10Mbps half-duplex.\n");
+      nerr("No valid connection; force 10Mbps half-duplex.\n");
       regval            = inp(EZ80_EMAC_CFG1);
       regval           &= ~EMAC_CFG1_FULLHD; /* Disable full duplex mode */
       outp(EZ80_EMAC_CFG1, regval);
@@ -1400,7 +1400,7 @@ static int ez80emac_receive(struct ez80emac_driver_s *priv)
       else
 #endif
         {
-          ndbg("Unsupported packet type dropped (%02x)\n", ETHBUF->type);
+          nerr("Unsupported packet type dropped (%02x)\n", ETHBUF->type);
           EMAC_STAT(priv, rx_dropped);
         }
 
@@ -1458,7 +1458,7 @@ static int ez80emac_txinterrupt(int irq, FAR void *context)
     {
       if ((txhead->stat & EMAC_TXDESC_ABORT) != 0)
         {
-          ndbg("Descriptor %p aborted {%06x, %u, %04x} trp=%02x%02x\n",
+          nerr("Descriptor %p aborted {%06x, %u, %04x} trp=%02x%02x\n",
                txhead, txhead->np, txhead->pktsize, txhead->stat,
                inp(EZ80_EMAC_TRP_H), inp(EZ80_EMAC_TRP_L));
 
@@ -1604,7 +1604,7 @@ static int ez80emac_sysinterrupt(int irq, FAR void *context)
 
   if ((istat & EMAC_ISTAT_TXFSMERR) != 0)
     {
-      ndbg("Tx FSMERR txhead=%p {%06x, %u, %04x} trp=%02x%02x istat=%02x\n",
+      nerr("Tx FSMERR txhead=%p {%06x, %u, %04x} trp=%02x%02x istat=%02x\n",
            priv->txhead, priv->txhead->np, priv->txhead->pktsize, priv->txhead->stat,
            inp(EZ80_EMAC_TRP_H), inp(EZ80_EMAC_TRP_L), istat);
 
@@ -1620,7 +1620,7 @@ static int ez80emac_sysinterrupt(int irq, FAR void *context)
 
   if ((istat & EMAC_ISTAT_RXOVR) != 0)
     {
-      ndbg("Rx OVR rxnext=%p {%06x, %u, %04x} rrp=%02x%02x rwp=%02x%02x blkslft=%02x istat=%02x\n",
+      nerr("Rx OVR rxnext=%p {%06x, %u, %04x} rrp=%02x%02x rwp=%02x%02x blkslft=%02x istat=%02x\n",
            priv->rxnext, priv->rxnext->np, priv->rxnext->pktsize, priv->rxnext->stat,
            inp(EZ80_EMAC_RRP_H), inp(EZ80_EMAC_RRP_L),
            inp(EZ80_EMAC_RWP_H), inp(EZ80_EMAC_RWP_L),
@@ -1728,11 +1728,11 @@ static int ez80emac_ifup(FAR struct net_driver_s *dev)
   uint8_t regval;
   int ret;
 
-  ndbg("Bringing up: MAC %02x:%02x:%02x:%02x:%02x:%02x\n",
+  nerr("Bringing up: MAC %02x:%02x:%02x:%02x:%02x:%02x\n",
        dev->d_mac.ether_addr_octet[0], dev->d_mac.ether_addr_octet[1],
        dev->d_mac.ether_addr_octet[2], dev->d_mac.ether_addr_octet[3],
        dev->d_mac.ether_addr_octet[4], dev->d_mac.ether_addr_octet[5]);
-  ndbg("             IP  %d.%d.%d.%d\n",
+  nerr("             IP  %d.%d.%d.%d\n",
        dev->d_ipaddr >> 24,       (dev->d_ipaddr >> 16) & 0xff,
       (dev->d_ipaddr >> 8) & 0xff, dev->d_ipaddr & 0xff);
 
@@ -2094,7 +2094,7 @@ static int ez80_emacinitialize(void)
   ez80emac_miiwrite(priv, MII_MCR, MII_MCR_RESET);
   if (!ez80emac_miipoll(priv, MII_MCR, MII_MCR_RESET, false))
     {
-      ndbg("PHY reset error.\n");
+      nerr("PHY reset error.\n");
     }
 
   /*  Initialize MAC */
@@ -2149,7 +2149,7 @@ static int ez80_emacinitialize(void)
   ez80emac_miiwrite(priv, MII_MCR, MII_MCR_RESET);
   if (!ez80emac_miipoll(priv, MII_MCR, MII_MCR_RESET, false))
     {
-      ndbg("PHY reset error.\n");
+      nerr("PHY reset error.\n");
       ret = -EIO;
       goto errout;
     }

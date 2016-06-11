@@ -369,7 +369,7 @@ const struct trace_msg_t g_usb_trace_strings_deverror[] =
 #  undef CONFIG_KHCI_USBDEV_BDTDEBUG
 #  define CONFIG_KHCI_USBDEV_BDTDEBUG 1
 
-#  define regdbg llerr
+#  define regerr llerr
 #  ifdef CONFIG_DEBUG_INFO
 #    define reginfo llerr
 #  else
@@ -380,7 +380,7 @@ const struct trace_msg_t g_usb_trace_strings_deverror[] =
 
 #  define khci_getreg(addr)      getreg8(addr)
 #  define khci_putreg(val,addr)  putreg8(val,addr)
-#  define regdbg(x...)
+#  define regerr(x...)
 #  define reginfo(x...)
 
 #endif
@@ -389,7 +389,7 @@ const struct trace_msg_t g_usb_trace_strings_deverror[] =
 
 #ifdef CONFIG_KHCI_USBDEV_BDTDEBUG
 
-#  define bdtdbg llerr
+#  define bdterr llerr
 #  ifdef CONFIG_DEBUG_INFO
 #    define bdtinfo llerr
 #  else
@@ -398,7 +398,7 @@ const struct trace_msg_t g_usb_trace_strings_deverror[] =
 
 #else
 
-#  define bdtdbg(x...)
+#  define bdterr(x...)
 #  define bdtinfo(x...)
 
 #endif
@@ -953,7 +953,7 @@ static void khci_epwrite(struct khci_ep_s *privep,
 
   /* And, finally, give the BDT to the USB */
 
-  bdtdbg("EP%d BDT IN [%p] {%08x, %08x}\n",
+  bdterr("EP%d BDT IN [%p] {%08x, %08x}\n",
          USB_EPNO(privep->ep.eplog), bdt, status, bdt->addr);
 
   bdt->status = status;
@@ -994,7 +994,7 @@ static void khci_wrcomplete(struct khci_usbdev_s *priv,
           epno, privreq->req.len, privreq->req.xfrd,
           privreq->inflight[0], privreq->inflight[1]);
 #endif
-  bdtdbg("EP%d BDT IN [%p] {%08x, %08x}\n",
+  bdterr("EP%d BDT IN [%p] {%08x, %08x}\n",
          epno, bdtin, bdtin->status, bdtin->addr);
 
   /* We should own the BDT that just completed. But NULLify the entire BDT IN.
@@ -1419,7 +1419,7 @@ static int khci_rdcomplete(struct khci_usbdev_s *priv,
 
   ullinfo("EP%d: len=%d xfrd=%d\n",
           epno, privreq->req.len, privreq->req.xfrd);
-  bdtdbg("EP%d BDT OUT [%p] {%08x, %08x}\n",
+  bdterr("EP%d BDT OUT [%p] {%08x, %08x}\n",
          epno, bdtout, bdtout->status, bdtout->addr);
 
   /* We should own the BDT that just completed */
@@ -1563,7 +1563,7 @@ static int khci_ep0rdsetup(struct khci_usbdev_s *priv, uint8_t *dest,
 
   /* Then give the BDT to the USB */
 
-  bdtdbg("EP0 BDT OUT [%p] {%08x, %08x}\n", bdtout, status, bdtout->addr);
+  bdterr("EP0 BDT OUT [%p] {%08x, %08x}\n", bdtout, status, bdtout->addr);
   bdtout->status = status;
 
   priv->ctrlstate = CTRLSTATE_RDREQUEST;
@@ -1664,7 +1664,7 @@ static int khci_rdsetup(struct khci_ep_s *privep, uint8_t *dest, int readlen)
 
   /* Then give the BDT to the USB */
 
-  bdtdbg("EP%d BDT OUT [%p] {%08x, %08x}\n",  epno, bdtout, status, bdtout->addr);
+  bdterr("EP%d BDT OUT [%p] {%08x, %08x}\n",  epno, bdtout, status, bdtout->addr);
 
   bdtout->status = status;
   return OK;
@@ -2676,7 +2676,7 @@ static void khci_ep0transfer(struct khci_usbdev_s *priv, uint16_t ustat)
       bdt   = &g_bdt[index];
       priv->eplist[0].bdtout = bdt;
 
-      bdtdbg("EP0 BDT OUT [%p] {%08x, %08x}\n", bdt, bdt->status, bdt->addr);
+      bdterr("EP0 BDT OUT [%p] {%08x, %08x}\n", bdt, bdt->status, bdt->addr);
 
       /* Check the current EP0 OUT buffer contains a SETUP packet */
 
@@ -3299,7 +3299,7 @@ static int khci_epconfigure(struct usbdev_ep_s *ep,
       bdt->status = 0;
       bdt->addr   = 0;
 
-      bdtdbg("EP%d BDT IN [%p] {%08x, %08x}\n", epno, bdt, bdt->status, bdt->addr);
+      bdterr("EP%d BDT IN [%p] {%08x, %08x}\n", epno, bdt, bdt->status, bdt->addr);
 
       /* Now do the same for the other buffer. */
 
@@ -3307,7 +3307,7 @@ static int khci_epconfigure(struct usbdev_ep_s *ep,
       bdt->status = 0;
       bdt->addr   = 0;
 
-      bdtdbg("EP%d BDT IN [%p] {%08x, %08x}\n", epno, bdt, bdt->status, bdt->addr);
+      bdterr("EP%d BDT IN [%p] {%08x, %08x}\n", epno, bdt, bdt->status, bdt->addr);
     }
 
   if (!epin || bidi)
@@ -3321,7 +3321,7 @@ static int khci_epconfigure(struct usbdev_ep_s *ep,
       bdt->status = 0;
       bdt->addr   = 0;
 
-      bdtdbg("EP%d BDT OUT [%p] {%08x, %08x}\n", epno, bdt, bdt->status, bdt->addr);
+      bdterr("EP%d BDT OUT [%p] {%08x, %08x}\n", epno, bdt, bdt->status, bdt->addr);
 
       /* Now do the same for the other buffer. */
 
@@ -3329,7 +3329,7 @@ static int khci_epconfigure(struct usbdev_ep_s *ep,
       bdt->status = 0;
       bdt->addr   = 0;
 
-      bdtdbg("EP%d BDT OUT [%p] {%08x, %08x}\n", epno, bdt, bdt->status, bdt->addr);
+      bdterr("EP%d BDT OUT [%p] {%08x, %08x}\n", epno, bdt, bdt->status, bdt->addr);
     }
 
   /* Get the maxpacket size of the endpoint. */
@@ -3666,9 +3666,9 @@ static int khci_epbdtstall(struct usbdev_ep_s *ep, bool resume, bool epin)
           bdt->addr          = (uint8_t *)physaddr;
           bdt->status        = (USB_BDT_UOWN | bytecount);
 
-          bdtdbg("EP0 BDT IN [%p] {%08x, %08x}\n",
+          bdterr("EP0 BDT IN [%p] {%08x, %08x}\n",
                  bdt, bdt->status, bdt->addr);
-          bdtdbg("EP0 BDT IN [%p] {%08x, %08x}\n",
+          bdterr("EP0 BDT IN [%p] {%08x, %08x}\n",
                  otherbdt, otherbdt->status, otherbdt->addr);
         }
       else
@@ -3683,9 +3683,9 @@ static int khci_epbdtstall(struct usbdev_ep_s *ep, bool resume, bool epin)
           bdt->addr        = 0;
           bdt->status      = 0;
 
-          bdtdbg("EP%d BDT %s [%p] {%08x, %08x}\n",
+          bdterr("EP%d BDT %s [%p] {%08x, %08x}\n",
                  epno, epin ? "IN" : "OUT", bdt, bdt->status, bdt->addr);
-          bdtdbg("EP%d BDT %s [%p] {%08x, %08x}\n",
+          bdterr("EP%d BDT %s [%p] {%08x, %08x}\n",
                  epno, epin ? "IN" : "OUT", otherbdt, otherbdt->status, otherbdt->addr);
 
           /* Restart any queued requests (after a delay so that we can be assured
@@ -3718,9 +3718,9 @@ static int khci_epbdtstall(struct usbdev_ep_s *ep, bool resume, bool epin)
 
       khci_rqstop(privep);
 
-      bdtdbg("EP%d BDT %s [%p] {%08x, %08x}\n",
+      bdterr("EP%d BDT %s [%p] {%08x, %08x}\n",
              epno, epin ? "IN" : "OUT", bdt, bdt->status, bdt->addr);
-      bdtdbg("EP%d BDT %s [%p] {%08x, %08x}\n",
+      bdterr("EP%d BDT %s [%p] {%08x, %08x}\n",
              epno, epin ? "IN" : "OUT", otherbdt, otherbdt->status, otherbdt->addr);
     }
 

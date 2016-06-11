@@ -125,7 +125,7 @@ int iob_add_queue(FAR struct iob_s *iob, FAR struct iob_queue_s *iobq)
   qentry = iob_alloc_qentry();
   if (!qentry)
     {
-      ndbg("ERROR: Failed to allocate a container\n");
+      nerr("ERROR: Failed to allocate a container\n");
       return -ENOMEM;
     }
 

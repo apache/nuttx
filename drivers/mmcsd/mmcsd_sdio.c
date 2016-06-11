@@ -340,7 +340,7 @@ static int mmcsd_sendcmdpoll(FAR struct mmcsd_state_s *priv, uint32_t cmd,
       ret = SDIO_WAITRESPONSE(priv->dev, cmd);
       if (ret != OK)
         {
-          fdbg("ERROR: Wait for response to cmd: %08x failed: %d\n", cmd, ret);
+          ferr("ERROR: Wait for response to cmd: %08x failed: %d\n", cmd, ret);
         }
     }
 
@@ -467,7 +467,7 @@ static int mmcsd_recvR6(FAR struct mmcsd_state_s *priv, uint32_t cmd)
       ret = -EIO;
     }
 
-  fdbg("ERROR: Failed to get RCA. R6=%08x: %d\n", r6, ret);
+  ferr("ERROR: Failed to get RCA. R6=%08x: %d\n", r6, ret);
   return ret;
 }
 
@@ -491,7 +491,7 @@ static int mmcsd_getSCR(FAR struct mmcsd_state_s *priv, uint32_t scr[2])
   ret = mmcsd_setblocklen(priv, 8);
   if (ret != OK)
     {
-      fdbg("ERROR: mmcsd_setblocklen failed: %d\n", ret);
+      ferr("ERROR: mmcsd_setblocklen failed: %d\n", ret);
       return ret;
     }
 
@@ -510,7 +510,7 @@ static int mmcsd_getSCR(FAR struct mmcsd_state_s *priv, uint32_t scr[2])
   ret = mmcsd_recvR1(priv, SD_CMD55);
   if (ret != OK)
     {
-      fdbg("ERROR: RECVR1 for CMD55 failed: %d\n", ret);
+      ferr("ERROR: RECVR1 for CMD55 failed: %d\n", ret);
       return ret;
     }
 
@@ -520,7 +520,7 @@ static int mmcsd_getSCR(FAR struct mmcsd_state_s *priv, uint32_t scr[2])
   ret = mmcsd_recvR1(priv, SD_ACMD51);
   if (ret != OK)
     {
-      fdbg("ERROR: RECVR1 for ACMD51 failed: %d\n", ret);
+      ferr("ERROR: RECVR1 for ACMD51 failed: %d\n", ret);
       SDIO_CANCEL(priv->dev);
       return ret;
     }
@@ -531,7 +531,7 @@ static int mmcsd_getSCR(FAR struct mmcsd_state_s *priv, uint32_t scr[2])
                         MMCSD_SCR_DATADELAY);
   if (ret != OK)
     {
-      fdbg("ERROR: mmcsd_eventwait for READ DATA failed: %d\n", ret);
+      ferr("ERROR: mmcsd_eventwait for READ DATA failed: %d\n", ret);
     }
 
   return ret;
@@ -1028,7 +1028,7 @@ static int mmcsd_verifystate(FAR struct mmcsd_state_s *priv, uint32_t state)
   ret = mmcsd_getR1(priv, &r1);
   if (ret != OK)
     {
-      fdbg("ERROR: mmcsd_getR1 failed: %d\n", ret);
+      ferr("ERROR: mmcsd_getR1 failed: %d\n", ret);
       return ret;
     }
 
@@ -1097,7 +1097,7 @@ static int mmcsd_eventwait(FAR struct mmcsd_state_s *priv,
     {
       /* Yes.. the failure event is probably SDIOWAIT_TIMEOUT */
 
-      fdbg("ERROR: Awakened with %02x\n", wkupevent);
+      ferr("ERROR: Awakened with %02x\n", wkupevent);
       return wkupevent & SDIOWAIT_TIMEOUT ? -ETIMEDOUT : -EIO;
     }
 
@@ -1129,7 +1129,7 @@ static int mmcsd_transferready(FAR struct mmcsd_state_s *priv)
 
   if (!SDIO_PRESENT(priv->dev))
     {
-      fdbg("ERROR: Card has been removed\n");
+      ferr("ERROR: Card has been removed\n");
       return -ENODEV;
     }
 
@@ -1158,7 +1158,7 @@ static int mmcsd_transferready(FAR struct mmcsd_state_s *priv)
                         MMCSD_BLOCK_WDATADELAY);
   if (ret != OK)
     {
-      fdbg("ERROR: mmcsd_eventwait for transfer ready failed: %d\n", ret);
+      ferr("ERROR: mmcsd_eventwait for transfer ready failed: %d\n", ret);
     }
 #endif
 
@@ -1170,7 +1170,7 @@ static int mmcsd_transferready(FAR struct mmcsd_state_s *priv)
       ret = mmcsd_getR1(priv, &r1);
       if (ret != OK)
         {
-          fdbg("ERROR: mmcsd_getR1 failed: %d\n", ret);
+          ferr("ERROR: mmcsd_getR1 failed: %d\n", ret);
           return ret;
         }
 
@@ -1197,7 +1197,7 @@ static int mmcsd_transferready(FAR struct mmcsd_state_s *priv)
            * if this error occurs.
            */
 
-          fdbg("ERROR: Unexpected R1 state: %08x\n", r1);
+          ferr("ERROR: Unexpected R1 state: %08x\n", r1);
           return -EINVAL;
         }
 
@@ -1231,7 +1231,7 @@ static int mmcsd_stoptransmission(FAR struct mmcsd_state_s *priv)
   ret = mmcsd_recvR1(priv, MMCSD_CMD12);
   if (ret != OK)
     {
-      fdbg("ERROR: mmcsd_recvR1 for CMD12 failed: %d\n", ret);
+      ferr("ERROR: mmcsd_recvR1 for CMD12 failed: %d\n", ret);
     }
 
   return ret;
@@ -1267,7 +1267,7 @@ static int mmcsd_setblocklen(FAR struct mmcsd_state_s *priv, uint32_t blocklen)
         }
       else
         {
-          fdbg("ERROR: mmcsd_recvR1 for CMD16 failed: %d\n", ret);
+          ferr("ERROR: mmcsd_recvR1 for CMD16 failed: %d\n", ret);
         }
     }
 
@@ -1295,7 +1295,7 @@ static ssize_t mmcsd_readsingle(FAR struct mmcsd_state_s *priv,
 
   if (priv->locked)
     {
-      fdbg("ERROR: Card is locked\n");
+      ferr("ERROR: Card is locked\n");
       return -EPERM;
     }
 
@@ -1325,7 +1325,7 @@ static ssize_t mmcsd_readsingle(FAR struct mmcsd_state_s *priv,
   ret = mmcsd_transferready(priv);
   if (ret != OK)
     {
-      fdbg("ERROR: Card not ready: %d\n", ret);
+      ferr("ERROR: Card not ready: %d\n", ret);
       return ret;
     }
 
@@ -1349,7 +1349,7 @@ static ssize_t mmcsd_readsingle(FAR struct mmcsd_state_s *priv,
   ret = mmcsd_setblocklen(priv, priv->blocksize);
   if (ret != OK)
     {
-      fdbg("ERROR: mmcsd_setblocklen failed: %d\n", ret);
+      ferr("ERROR: mmcsd_setblocklen failed: %d\n", ret);
       return ret;
     }
 
@@ -1385,7 +1385,7 @@ static ssize_t mmcsd_readsingle(FAR struct mmcsd_state_s *priv,
   ret = mmcsd_recvR1(priv, MMCSD_CMD17);
   if (ret != OK)
     {
-      fdbg("ERROR: mmcsd_recvR1 for CMD17 failed: %d\n", ret);
+      ferr("ERROR: mmcsd_recvR1 for CMD17 failed: %d\n", ret);
       SDIO_CANCEL(priv->dev);
       return ret;
     }
@@ -1396,7 +1396,7 @@ static ssize_t mmcsd_readsingle(FAR struct mmcsd_state_s *priv,
                         MMCSD_BLOCK_RDATADELAY);
   if (ret != OK)
     {
-      fdbg("ERROR: CMD17 transfer failed: %d\n", ret);
+      ferr("ERROR: CMD17 transfer failed: %d\n", ret);
       return ret;
     }
 
@@ -1429,7 +1429,7 @@ static ssize_t mmcsd_readmultiple(FAR struct mmcsd_state_s *priv,
 
   if (priv->locked)
     {
-      fdbg("ERROR: Card is locked\n");
+      ferr("ERROR: Card is locked\n");
       return -EPERM;
     }
 
@@ -1459,7 +1459,7 @@ static ssize_t mmcsd_readmultiple(FAR struct mmcsd_state_s *priv,
   ret = mmcsd_transferready(priv);
   if (ret != OK)
     {
-      fdbg("ERROR: Card not ready: %d\n", ret);
+      ferr("ERROR: Card not ready: %d\n", ret);
       return ret;
     }
 
@@ -1483,7 +1483,7 @@ static ssize_t mmcsd_readmultiple(FAR struct mmcsd_state_s *priv,
   ret = mmcsd_setblocklen(priv, priv->blocksize);
   if (ret != OK)
   {
-    fdbg("ERROR: mmcsd_setblocklen failed: %d\n", ret);
+    ferr("ERROR: mmcsd_setblocklen failed: %d\n", ret);
     return ret;
   }
 
@@ -1517,7 +1517,7 @@ static ssize_t mmcsd_readmultiple(FAR struct mmcsd_state_s *priv,
   ret = mmcsd_recvR1(priv, MMCSD_CMD18);
   if (ret != OK)
     {
-      fdbg("ERROR: mmcsd_recvR1 for CMD18 failed: %d\n", ret);
+      ferr("ERROR: mmcsd_recvR1 for CMD18 failed: %d\n", ret);
       SDIO_CANCEL(priv->dev);
       return ret;
     }
@@ -1528,7 +1528,7 @@ static ssize_t mmcsd_readmultiple(FAR struct mmcsd_state_s *priv,
                         nblocks * MMCSD_BLOCK_RDATADELAY);
   if (ret != OK)
     {
-      fdbg("ERROR: CMD18 transfer failed: %d\n", ret);
+      ferr("ERROR: CMD18 transfer failed: %d\n", ret);
       return ret;
     }
 
@@ -1537,7 +1537,7 @@ static ssize_t mmcsd_readmultiple(FAR struct mmcsd_state_s *priv,
   ret = mmcsd_stoptransmission(priv);
   if (ret != OK)
     {
-      fdbg("ERROR: mmcsd_stoptransmission failed: %d\n", ret);
+      ferr("ERROR: mmcsd_stoptransmission failed: %d\n", ret);
     }
 
   /* On success, return the number of blocks read */
@@ -1634,7 +1634,7 @@ static ssize_t mmcsd_writesingle(FAR struct mmcsd_state_s *priv,
 
   if (mmcsd_wrprotected(priv))
     {
-      fdbg("ERROR: Card is locked or write protected\n");
+      ferr("ERROR: Card is locked or write protected\n");
       return -EPERM;
     }
 
@@ -1664,7 +1664,7 @@ static ssize_t mmcsd_writesingle(FAR struct mmcsd_state_s *priv,
   ret = mmcsd_transferready(priv);
   if (ret != OK)
     {
-      fdbg("ERROR: Card not ready: %d\n", ret);
+      ferr("ERROR: Card not ready: %d\n", ret);
       return ret;
     }
 
@@ -1688,7 +1688,7 @@ static ssize_t mmcsd_writesingle(FAR struct mmcsd_state_s *priv,
   ret = mmcsd_setblocklen(priv, priv->blocksize);
   if (ret != OK)
     {
-      fdbg("ERROR: mmcsd_setblocklen failed: %d\n", ret);
+      ferr("ERROR: mmcsd_setblocklen failed: %d\n", ret);
       return ret;
     }
 
@@ -1698,7 +1698,7 @@ static ssize_t mmcsd_writesingle(FAR struct mmcsd_state_s *priv,
   ret = mmcsd_recvR1(priv, MMCSD_CMD24);
   if (ret != OK)
     {
-      fdbg("ERROR: mmcsd_recvR1 for CMD24 failed: %d\n", ret);
+      ferr("ERROR: mmcsd_recvR1 for CMD24 failed: %d\n", ret);
       return ret;
     }
 
@@ -1735,7 +1735,7 @@ static ssize_t mmcsd_writesingle(FAR struct mmcsd_state_s *priv,
                         SDIOWAIT_TIMEOUT | SDIOWAIT_ERROR, MMCSD_BLOCK_WDATADELAY);
   if (ret != OK)
     {
-      fdbg("ERROR: CMD24 transfer failed: %d\n", ret);
+      ferr("ERROR: CMD24 transfer failed: %d\n", ret);
       return ret;
     }
 
@@ -1777,7 +1777,7 @@ static ssize_t mmcsd_writemultiple(FAR struct mmcsd_state_s *priv,
 
   if (mmcsd_wrprotected(priv))
     {
-      fdbg("ERROR: Card is locked or write protected\n");
+      ferr("ERROR: Card is locked or write protected\n");
       return -EPERM;
     }
 
@@ -1807,7 +1807,7 @@ static ssize_t mmcsd_writemultiple(FAR struct mmcsd_state_s *priv,
   ret = mmcsd_transferready(priv);
   if (ret != OK)
     {
-      fdbg("ERROR: Card not ready: %d\n", ret);
+      ferr("ERROR: Card not ready: %d\n", ret);
       return ret;
     }
 
@@ -1832,7 +1832,7 @@ static ssize_t mmcsd_writemultiple(FAR struct mmcsd_state_s *priv,
   ret = mmcsd_setblocklen(priv, priv->blocksize);
   if (ret != OK)
     {
-      fdbg("ERROR: mmcsd_setblocklen failed: %d\n", ret);
+      ferr("ERROR: mmcsd_setblocklen failed: %d\n", ret);
       return ret;
     }
 
@@ -1850,7 +1850,7 @@ static ssize_t mmcsd_writemultiple(FAR struct mmcsd_state_s *priv,
       ret = mmcsd_recvR1(priv, SD_CMD55);
       if (ret != OK)
         {
-          fdbg("ERROR: mmcsd_recvR1 for CMD55 (ACMD23) failed: %d\n", ret);
+          ferr("ERROR: mmcsd_recvR1 for CMD55 (ACMD23) failed: %d\n", ret);
           return ret;
         }
 
@@ -1860,7 +1860,7 @@ static ssize_t mmcsd_writemultiple(FAR struct mmcsd_state_s *priv,
       ret = mmcsd_recvR1(priv, SD_ACMD23);
       if (ret != OK)
         {
-          fdbg("ERROR: mmcsd_recvR1 for ACMD23 failed: %d\n", ret);
+          ferr("ERROR: mmcsd_recvR1 for ACMD23 failed: %d\n", ret);
           return ret;
         }
     }
@@ -1900,7 +1900,7 @@ static ssize_t mmcsd_writemultiple(FAR struct mmcsd_state_s *priv,
   ret = mmcsd_recvR1(priv, MMCSD_CMD25);
   if (ret != OK)
     {
-      fdbg("ERROR: mmcsd_recvR1 for CMD25 failed: %d\n", ret);
+      ferr("ERROR: mmcsd_recvR1 for CMD25 failed: %d\n", ret);
       return ret;
     }
 
@@ -1909,7 +1909,7 @@ static ssize_t mmcsd_writemultiple(FAR struct mmcsd_state_s *priv,
   ret = mmcsd_eventwait(priv, SDIOWAIT_TIMEOUT | SDIOWAIT_ERROR, nblocks * MMCSD_BLOCK_WDATADELAY);
   if (ret != OK)
     {
-      fdbg("ERROR: CMD18 transfer failed: %d\n", ret);
+      ferr("ERROR: CMD18 transfer failed: %d\n", ret);
       return ret;
     }
 
@@ -1918,7 +1918,7 @@ static ssize_t mmcsd_writemultiple(FAR struct mmcsd_state_s *priv,
   ret = mmcsd_stoptransmission(priv);
   if (ret != OK)
     {
-      fdbg("ERROR: mmcsd_stoptransmission failed: %d\n", ret);
+      ferr("ERROR: mmcsd_stoptransmission failed: %d\n", ret);
       return ret;
     }
 
@@ -2276,7 +2276,7 @@ static int mmcsd_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
         ret = mmcsd_probe(priv);
         if (ret != OK)
           {
-            fdbg("ERROR: mmcsd_probe failed: %d\n", ret);
+            ferr("ERROR: mmcsd_probe failed: %d\n", ret);
           }
       }
       break;
@@ -2290,7 +2290,7 @@ static int mmcsd_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
         ret = mmcsd_removed(priv);
         if (ret != OK)
           {
-            fdbg("ERROR: mmcsd_removed failed: %d\n", ret);
+            ferr("ERROR: mmcsd_removed failed: %d\n", ret);
           }
 
         /* Enable logic to detect if a card is re-inserted */
@@ -2396,7 +2396,7 @@ static int mmcsd_widebus(FAR struct mmcsd_state_s *priv)
       ret = mmcsd_recvR1(priv, SD_CMD55);
       if (ret != OK)
         {
-          fdbg("ERROR: RECVR1 for CMD55 of ACMD42: %d\n", ret);
+          ferr("ERROR: RECVR1 for CMD55 of ACMD42: %d\n", ret);
           return ret;
         }
 
@@ -2423,7 +2423,7 @@ static int mmcsd_widebus(FAR struct mmcsd_state_s *priv)
       ret = mmcsd_recvR1(priv, SD_CMD55);
       if (ret != OK)
         {
-          fdbg("ERROR: RECVR1 for CMD55 of ACMD6: %d\n", ret);
+          ferr("ERROR: RECVR1 for CMD55 of ACMD6: %d\n", ret);
           return ret;
         }
 
@@ -2449,7 +2449,7 @@ static int mmcsd_widebus(FAR struct mmcsd_state_s *priv)
 
   /* Wide bus operation not supported */
 
-  fdbg("WARNING: Card does not support wide-bus operation\n");
+  ferr("WARNING: Card does not support wide-bus operation\n");
   return -ENOSYS;
 
 #else /* CONFIG_SDIO_WIDTH_D1_ONLY */
@@ -2492,7 +2492,7 @@ static int mmcsd_mmcinitialize(FAR struct mmcsd_state_s *priv)
   ret = SDIO_RECVR2(priv->dev, MMCSD_CMD2, cid);
   if (ret != OK)
     {
-      fdbg("ERROR: SDIO_RECVR2 for MMC CID failed: %d\n", ret);
+      ferr("ERROR: SDIO_RECVR2 for MMC CID failed: %d\n", ret);
       return ret;
     }
 
@@ -2508,7 +2508,7 @@ static int mmcsd_mmcinitialize(FAR struct mmcsd_state_s *priv)
   ret = mmcsd_recvR1(priv, MMC_CMD3);
   if (ret != OK)
     {
-      fdbg("ERROR: mmcsd_recvR1(CMD3) failed: %d\n", ret);
+      ferr("ERROR: mmcsd_recvR1(CMD3) failed: %d\n", ret);
       return ret;
     }
 
@@ -2522,7 +2522,7 @@ static int mmcsd_mmcinitialize(FAR struct mmcsd_state_s *priv)
   ret = mmcsd_verifystate(priv, MMCSD_R1_STATE_STBY);
   if (ret != OK)
     {
-      fdbg("ERROR: Failed to enter standby state\n");
+      ferr("ERROR: Failed to enter standby state\n");
       return ret;
     }
 
@@ -2535,7 +2535,7 @@ static int mmcsd_mmcinitialize(FAR struct mmcsd_state_s *priv)
   ret = SDIO_RECVR2(priv->dev, MMCSD_CMD9, csd);
   if (ret != OK)
     {
-      fdbg("ERROR: Could not get SD CSD register: %d\n", ret);
+      ferr("ERROR: Could not get SD CSD register: %d\n", ret);
       return ret;
     }
 
@@ -2593,7 +2593,7 @@ static int mmcsd_sdinitialize(FAR struct mmcsd_state_s *priv)
   ret = SDIO_RECVR2(priv->dev, MMCSD_CMD2, cid);
   if (ret != OK)
     {
-      fdbg("ERROR: SDIO_RECVR2 for SD CID failed: %d\n", ret);
+      ferr("ERROR: SDIO_RECVR2 for SD CID failed: %d\n", ret);
       return ret;
     }
 
@@ -2611,7 +2611,7 @@ static int mmcsd_sdinitialize(FAR struct mmcsd_state_s *priv)
   ret = mmcsd_recvR6(priv, SD_CMD3);
   if (ret != OK)
     {
-      fdbg("ERROR: mmcsd_recvR2 for SD RCA failed: %d\n", ret);
+      ferr("ERROR: mmcsd_recvR2 for SD RCA failed: %d\n", ret);
       return ret;
     }
 
@@ -2627,7 +2627,7 @@ static int mmcsd_sdinitialize(FAR struct mmcsd_state_s *priv)
   ret = mmcsd_verifystate(priv, MMCSD_R1_STATE_STBY);
   if (ret != OK)
     {
-      fdbg("ERROR: Failed to enter standby state\n");
+      ferr("ERROR: Failed to enter standby state\n");
       return ret;
     }
 
@@ -2641,7 +2641,7 @@ static int mmcsd_sdinitialize(FAR struct mmcsd_state_s *priv)
   ret = SDIO_RECVR2(priv->dev, MMCSD_CMD9, csd);
   if (ret != OK)
     {
-      fdbg("ERROR: Could not get SD CSD register(%d)\n", ret);
+      ferr("ERROR: Could not get SD CSD register(%d)\n", ret);
       return ret;
     }
 
@@ -2656,7 +2656,7 @@ static int mmcsd_sdinitialize(FAR struct mmcsd_state_s *priv)
   ret = mmcsd_recvR1(priv, MMCSD_CMD7S);
   if (ret != OK)
     {
-      fdbg("ERROR: mmcsd_recvR1 for CMD7 failed: %d\n", ret);
+      ferr("ERROR: mmcsd_recvR1 for CMD7 failed: %d\n", ret);
       return ret;
     }
 
@@ -2680,7 +2680,7 @@ static int mmcsd_sdinitialize(FAR struct mmcsd_state_s *priv)
   ret = mmcsd_getSCR(priv, scr);
   if (ret != OK)
     {
-      fdbg("ERROR: Could not get SD SCR register(%d)\n", ret);
+      ferr("ERROR: Could not get SD SCR register(%d)\n", ret);
       return ret;
     }
 
@@ -2691,7 +2691,7 @@ static int mmcsd_sdinitialize(FAR struct mmcsd_state_s *priv)
   ret = mmcsd_widebus(priv);
   if (ret != OK)
     {
-      fdbg("WARN: Failed to set wide bus operation: %d\n", ret);
+      ferr("WARN: Failed to set wide bus operation: %d\n", ret);
     }
 
   /* TODO: If wide-bus selected, then send CMD6 to see if the card supports
@@ -2785,7 +2785,7 @@ static int mmcsd_cardidentify(FAR struct mmcsd_state_s *priv)
         }
       else
         {
-          fdbg("ERROR: R7: %08x\n", response);
+          ferr("ERROR: R7: %08x\n", response);
           return -EIO;
         }
     }
@@ -2820,7 +2820,7 @@ static int mmcsd_cardidentify(FAR struct mmcsd_state_s *priv)
                * the MMC vs. SD decision based on CMD1 and ACMD41.
                */
 
-              fdbg("ERROR: mmcsd_recvR1(CMD55) failed: %d\n", ret);
+              ferr("ERROR: mmcsd_recvR1(CMD55) failed: %d\n", ret);
             }
           else
             {
@@ -2835,7 +2835,7 @@ static int mmcsd_cardidentify(FAR struct mmcsd_state_s *priv)
                    * but we will make the decision based on CMD1 below
                    */
 
-                  fdbg("ERROR: ACMD41 RECVR3: %d\n", ret);
+                  ferr("ERROR: ACMD41 RECVR3: %d\n", ret);
                 }
               else
                 {
@@ -2912,13 +2912,13 @@ static int mmcsd_cardidentify(FAR struct mmcsd_state_s *priv)
 
           if (ret != OK)
             {
-              fdbg("ERROR: CMD1 RECVR3: %d\n", ret);
+              ferr("ERROR: CMD1 RECVR3: %d\n", ret);
             }
           else
             {
               /* CMD1 succeeded... this must be an MMC card */
 
-              fdbg("CMD1 succeeded, assuming MMC card\n");
+              ferr("CMD1 succeeded, assuming MMC card\n");
               priv->type = MMCSD_CARDTYPE_MMC;
 
               /* Check if the card is busy.  Very confusing, BUSY is set LOW
@@ -2955,7 +2955,7 @@ static int mmcsd_cardidentify(FAR struct mmcsd_state_s *priv)
 
   if (elapsed >= TICK_PER_SEC || priv->type == MMCSD_CARDTYPE_UNKNOWN)
     {
-      fdbg("ERROR: Failed to identify card\n");
+      ferr("ERROR: Failed to identify card\n");
       return -EIO;
     }
 
@@ -3010,7 +3010,7 @@ static int mmcsd_probe(FAR struct mmcsd_state_s *priv)
       ret = mmcsd_cardidentify(priv);
       if (ret != OK)
         {
-          fdbg("ERROR: Failed to initialize card: %d\n", ret);
+          ferr("ERROR: Failed to initialize card: %d\n", ret);
 #ifdef CONFIG_MMCSD_HAVECARDDETECT
           SDIO_CALLBACKENABLE(priv->dev, SDIOMEDIA_INSERTED);
 #endif
@@ -3034,7 +3034,7 @@ static int mmcsd_probe(FAR struct mmcsd_state_s *priv)
 #endif
             case MMCSD_CARDTYPE_UNKNOWN:                     /* Unknown card type */
             default:
-              fdbg("ERROR: Internal confusion: %d\n", priv->type);
+              ferr("ERROR: Internal confusion: %d\n", priv->type);
               ret = -EPERM;
               break;
             }
@@ -3138,7 +3138,7 @@ static int mmcsd_hwinitialize(FAR struct mmcsd_state_s *priv)
 
   if (SDIO_ATTACH(priv->dev))
     {
-      fdbg("ERROR: Unable to attach MMC/SD interrupts\n");
+      ferr("ERROR: Unable to attach MMC/SD interrupts\n");
       mmcsd_givesem(priv);
       return -EBUSY;
     }
@@ -3299,7 +3299,7 @@ int mmcsd_slotinitialize(int minor, FAR struct sdio_dev_s *dev)
             {
               /* Some other non-recoverable bad thing happened */
 
-              fdbg("ERROR: Failed to initialize MMC/SD slot: %d\n", ret);
+              ferr("ERROR: Failed to initialize MMC/SD slot: %d\n", ret);
               goto errout_with_alloc;
             }
         }
@@ -3311,7 +3311,7 @@ int mmcsd_slotinitialize(int minor, FAR struct sdio_dev_s *dev)
       ret = rwb_initialize(&priv->rwbuffer);
       if (ret < 0)
         {
-          fdbg("ERROR: Buffer setup failed: %d\n", ret);
+          ferr("ERROR: Buffer setup failed: %d\n", ret);
           goto errout_with_hwinit;
         }
 #endif
@@ -3325,7 +3325,7 @@ int mmcsd_slotinitialize(int minor, FAR struct sdio_dev_s *dev)
       ret = register_blockdriver(devname, &g_bops, 0, priv);
       if (ret < 0)
         {
-          fdbg("ERROR: register_blockdriver failed: %d\n", ret);
+          ferr("ERROR: register_blockdriver failed: %d\n", ret);
           goto errout_with_buffers;
         }
     }

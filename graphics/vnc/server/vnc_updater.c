@@ -76,7 +76,7 @@
  ****************************************************************************/
 
 #ifdef VNCSERVER_SEM_DEBUG
-static sem_t g_dbgsem = SEM_INITIALIZER(1);
+static sem_t g_errsem = SEM_INITIALIZER(1);
 #endif
 
 /* A rectangle represent the entire local framebuffer */
@@ -126,7 +126,7 @@ static void vnc_sem_debug(FAR struct vnc_session_s *session,
   int freewaiting;
   int queuewaiting;
 
-  while (sem_wait(&g_dbgsem) < 0)
+  while (sem_wait(&g_errsem) < 0)
     {
       DEBUGASSERT(get_errno() == EINTR);
     }
@@ -168,7 +168,7 @@ static void vnc_sem_debug(FAR struct vnc_session_s *session,
       syslog(LOG_INFO, "  Unqueued:       %u\n", unattached);
     }
 
-  sem_post(&g_dbgsem);
+  sem_post(&g_errsem);
 }
 #else
 #  define vnc_sem_debug(s,m,u)
@@ -412,7 +412,7 @@ static FAR void *vnc_updater(FAR void *arg)
 
       if (ret < 0)
         {
-          gdbg("ERROR: Encoding failed: %d\n", ret);
+          gerr("ERROR: Encoding failed: %d\n", ret);
           break;
         }
     }

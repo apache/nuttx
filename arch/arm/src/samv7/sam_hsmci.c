@@ -933,25 +933,25 @@ static void sam_hsmcisample(struct sam_dev_s *priv,
 static void sam_hsmcidump(struct sam_dev_s *priv,
                           struct sam_hsmciregs_s *regs, const char *msg)
 {
-  fdbg("HSMCI Registers: %s\n", msg);
-  fdbg("      MR[%08x]: %08x\n", priv->base + SAM_HSMCI_MR_OFFSET,    regs->mr);
-  fdbg("    DTOR[%08x]: %08x\n", priv->base + SAM_HSMCI_DTOR_OFFSET,  regs->dtor);
-  fdbg("    SDCR[%08x]: %08x\n", priv->base + SAM_HSMCI_SDCR_OFFSET,  regs->sdcr);
-  fdbg("    ARGR[%08x]: %08x\n", priv->base + SAM_HSMCI_ARGR_OFFSET,  regs->argr);
-  fdbg("    BLKR[%08x]: %08x\n", priv->base + SAM_HSMCI_BLKR_OFFSET,  regs->blkr);
-  fdbg("   CSTOR[%08x]: %08x\n", priv->base + SAM_HSMCI_CSTOR_OFFSET, regs->cstor);
+  ferr("HSMCI Registers: %s\n", msg);
+  ferr("      MR[%08x]: %08x\n", priv->base + SAM_HSMCI_MR_OFFSET,    regs->mr);
+  ferr("    DTOR[%08x]: %08x\n", priv->base + SAM_HSMCI_DTOR_OFFSET,  regs->dtor);
+  ferr("    SDCR[%08x]: %08x\n", priv->base + SAM_HSMCI_SDCR_OFFSET,  regs->sdcr);
+  ferr("    ARGR[%08x]: %08x\n", priv->base + SAM_HSMCI_ARGR_OFFSET,  regs->argr);
+  ferr("    BLKR[%08x]: %08x\n", priv->base + SAM_HSMCI_BLKR_OFFSET,  regs->blkr);
+  ferr("   CSTOR[%08x]: %08x\n", priv->base + SAM_HSMCI_CSTOR_OFFSET, regs->cstor);
 #if 0 /* Reading these can cause loss of response data */
-  fdbg("   RSPR0[%08x]: %08x\n", priv->base + SAM_HSMCI_RSPR0_OFFSET, regs->rsp0);
-  fdbg("   RSPR1[%08x]: %08x\n", priv->base + SAM_HSMCI_RSPR1_OFFSET, regs->rsp1);
-  fdbg("   RSPR2[%08x]: %08x\n", priv->base + SAM_HSMCI_RSPR2_OFFSET, regs->rsp2);
-  fdbg("   RSPR3[%08x]: %08x\n", priv->base + SAM_HSMCI_RSPR3_OFFSET, regs->rsp3);
+  ferr("   RSPR0[%08x]: %08x\n", priv->base + SAM_HSMCI_RSPR0_OFFSET, regs->rsp0);
+  ferr("   RSPR1[%08x]: %08x\n", priv->base + SAM_HSMCI_RSPR1_OFFSET, regs->rsp1);
+  ferr("   RSPR2[%08x]: %08x\n", priv->base + SAM_HSMCI_RSPR2_OFFSET, regs->rsp2);
+  ferr("   RSPR3[%08x]: %08x\n", priv->base + SAM_HSMCI_RSPR3_OFFSET, regs->rsp3);
 #endif
-  fdbg("      SR[%08x]: %08x\n", priv->base + SAM_HSMCI_SR_OFFSET,    regs->sr);
-  fdbg("     IMR[%08x]: %08x\n", priv->base + SAM_HSMCI_IMR_OFFSET,   regs->imr);
-  fdbg("     DMA[%08x]: %08x\n", priv->base + SAM_HSMCI_DMA_OFFSET,   regs->dma);
-  fdbg("     CFG[%08x]: %08x\n", priv->base + SAM_HSMCI_CFG_OFFSET,   regs->cfg);
-  fdbg("    WPMR[%08x]: %08x\n", priv->base + SAM_HSMCI_WPMR_OFFSET,  regs->wpmr);
-  fdbg("    WPSR[%08x]: %08x\n", priv->base + SAM_HSMCI_WPSR_OFFSET,  regs->wpsr);
+  ferr("      SR[%08x]: %08x\n", priv->base + SAM_HSMCI_SR_OFFSET,    regs->sr);
+  ferr("     IMR[%08x]: %08x\n", priv->base + SAM_HSMCI_IMR_OFFSET,   regs->imr);
+  ferr("     DMA[%08x]: %08x\n", priv->base + SAM_HSMCI_DMA_OFFSET,   regs->dma);
+  ferr("     CFG[%08x]: %08x\n", priv->base + SAM_HSMCI_CFG_OFFSET,   regs->cfg);
+  ferr("    WPMR[%08x]: %08x\n", priv->base + SAM_HSMCI_WPMR_OFFSET,  regs->wpmr);
+  ferr("    WPSR[%08x]: %08x\n", priv->base + SAM_HSMCI_WPSR_OFFSET,  regs->wpsr);
 }
 #endif
 
@@ -1025,7 +1025,7 @@ static void sam_xfrdumpone(struct sam_dev_s *priv, int index,
     }
   else
     {
-      fdbg("%s: Not collected\n", msg);
+      ferr("%s: Not collected\n", msg);
     }
 }
 #endif
@@ -2239,7 +2239,7 @@ static int sam_sendsetup(FAR struct sdio_dev_s *dev, FAR const uint8_t *buffer,
         {
           /* Some fatal error has occurred */
 
-          fdbg("ERROR: sr %08x\n", sr);
+          ferr("ERROR: sr %08x\n", sr);
           return -EIO;
         }
       else if ((sr & HSMCI_INT_TXRDY) != 0)
@@ -2419,7 +2419,7 @@ static int sam_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
             {
               /* Yes.. Was the error some kind of timeout? */
 
-              fdbg("ERROR: cmd: %08x events: %08x SR: %08x\n",
+              ferr("ERROR: cmd: %08x events: %08x SR: %08x\n",
                    cmd, priv->cmdrmask, sr);
 
               if ((pending & HSMCI_RESPONSE_TIMEOUT_ERRORS) != 0)
@@ -2449,7 +2449,7 @@ static int sam_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
        }
       else if (--timeout <= 0)
         {
-          fdbg("ERROR: Timeout cmd: %08x events: %08x SR: %08x\n",
+          ferr("ERROR: Timeout cmd: %08x events: %08x SR: %08x\n",
                cmd, priv->cmdrmask, sr);
 
           priv->wkupevent = SDIOWAIT_TIMEOUT;
@@ -2524,7 +2524,7 @@ static int sam_recvshort(FAR struct sdio_dev_s *dev,
 #ifdef CONFIG_DEBUG_FEATURES
   if (!rshort)
     {
-      fdbg("ERROR: rshort=NULL\n");
+      ferr("ERROR: rshort=NULL\n");
       ret = -EINVAL;
     }
 
@@ -2536,7 +2536,7 @@ static int sam_recvshort(FAR struct sdio_dev_s *dev,
            (cmd & MMCSD_RESPONSE_MASK) != MMCSD_R3_RESPONSE &&
            (cmd & MMCSD_RESPONSE_MASK) != MMCSD_R7_RESPONSE)
     {
-      fdbg("ERROR: Wrong response CMD=%08x\n", cmd);
+      ferr("ERROR: Wrong response CMD=%08x\n", cmd);
       ret = -EINVAL;
     }
   else
@@ -2587,7 +2587,7 @@ static int sam_recvlong(FAR struct sdio_dev_s *dev, uint32_t cmd,
 
   if ((cmd & MMCSD_RESPONSE_MASK) != MMCSD_R2_RESPONSE)
     {
-      fdbg("ERROR: Wrong response CMD=%08x\n", cmd);
+      ferr("ERROR: Wrong response CMD=%08x\n", cmd);
       ret = -EINVAL;
     }
   else
@@ -2597,7 +2597,7 @@ static int sam_recvlong(FAR struct sdio_dev_s *dev, uint32_t cmd,
 
   if ((priv->wkupevent & SDIOWAIT_TIMEOUT) != 0)
     {
-      fdbg("ERROR: timeout\n");
+      ferr("ERROR: timeout\n");
       ret = -EINVAL;
     }
 
@@ -2605,7 +2605,7 @@ static int sam_recvlong(FAR struct sdio_dev_s *dev, uint32_t cmd,
 
   else if ((priv->wkupevent & SDIOWAIT_ERROR) != 0)
     {
-      fdbg("ERROR: Other error\n");
+      ferr("ERROR: Other error\n");
       ret = -EIO;
     }
 
@@ -2781,7 +2781,7 @@ static sdio_eventset_t sam_eventwait(FAR struct sdio_dev_s *dev,
                        1, (uint32_t)priv);
       if (ret != OK)
         {
-           fdbg("ERROR: wd_start failed: %d\n", ret);
+           ferr("ERROR: wd_start failed: %d\n", ret);
         }
     }
 
@@ -3213,7 +3213,7 @@ static void sam_callback(void *arg)
         {
           /* NOTE: Currently, work_cancel only returns success */
 
-          fdbg("ERROR: Failed to cancel work: %d\n", ret);
+          ferr("ERROR: Failed to cancel work: %d\n", ret);
         }
 
       fllinfo("Queuing callback to %p(%p)\n", priv->callback, priv->cbarg);
@@ -3223,7 +3223,7 @@ static void sam_callback(void *arg)
         {
           /* NOTE: Currently, work_queue only returns success */
 
-          fdbg("ERROR: Failed to schedule work: %d\n", ret);
+          ferr("ERROR: Failed to schedule work: %d\n", ret);
         }
     }
 

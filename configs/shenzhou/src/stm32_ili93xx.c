@@ -371,10 +371,10 @@
 /* Debug ******************************************************************************/
 
 #ifdef CONFIG_DEBUG_LCD
-#  define lcddbg              dbg
+#  define lcderr              err
 #  define lcdinfo             info
 #else
-#  define lcddbg(x...)
+#  define lcderr(x...)
 #  define lcdinfo(x...)
 #endif
 
@@ -594,18 +594,18 @@ static struct stm32_dev_s g_lcddev =
 #ifdef CONFIG_LCD_REGDEBUG
 static void stm32_lcdshow(FAR struct stm32_lower_s *priv, FAR const char *msg)
 {
-  dbg("%s:\n", msg);
-  dbg("  CRTL   RS: %d CS: %d RD: %d WR: %d LE: %d\n",
+  err("%s:\n", msg);
+  err("  CRTL   RS: %d CS: %d RD: %d WR: %d LE: %d\n",
       getreg32(LCD_RS_READ), getreg32(LCD_CS_READ), getreg32(LCD_RD_READ),
       getreg32(LCD_WR_READ), getreg32(LCD_LE_READ));
-  dbg("  DATA   CR: %08x %08x\n", getreg32(LCD_CRL), getreg32(LCD_CRH));
+  err("  DATA   CR: %08x %08x\n", getreg32(LCD_CRL), getreg32(LCD_CRH));
   if (priv->output)
     {
-      dbg("  OUTPUT: %08x\n", getreg32(LCD_ODR));
+      err("  OUTPUT: %08x\n", getreg32(LCD_ODR));
     }
   else
     {
-      dbg("  INPUT:  %08x\n", getreg32(LCD_IDR));
+      err("  INPUT:  %08x\n", getreg32(LCD_IDR));
     }
 }
 #endif
@@ -1254,7 +1254,7 @@ static int stm32_setpower(struct lcd_dev_s *dev, int power)
       else
 #endif
         {
-          gdbg("Unsupported LCD: %d\n", priv->type);
+          gerr("Unsupported LCD: %d\n", priv->type);
         }
 
       up_mdelay(50);
@@ -1780,7 +1780,7 @@ static inline int stm32_lcdinitialize(FAR struct stm32_dev_s *priv)
   up_mdelay(50);
 
   id = stm32_readreg(priv, LCD_REG_0);     /* Read the ID register */
-  lcddbg("LCD ID: %04x\n", id);
+  lcderr("LCD ID: %04x\n", id);
 
   stm32_lcdoutput(priv);
   up_mdelay(10);
@@ -1852,11 +1852,11 @@ static inline int stm32_lcdinitialize(FAR struct stm32_dev_s *priv)
   else
 #endif
     {
-      lcddbg("Unsupported LCD type\n");
+      lcderr("Unsupported LCD type\n");
       ret = -ENODEV;
     }
 
-  lcddbg("LCD type: %d\n", priv->type);
+  lcderr("LCD type: %d\n", priv->type);
   return ret;
 }
 

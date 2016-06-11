@@ -62,7 +62,7 @@ int trv_mount_world(int minor, FAR const char *mountpoint);
 #ifdef CONFIG_BOARD_INITIALIZE
 #  define SYSLOG llerr
 #else
-#  define SYSLOG dbg
+#  define SYSLOG err
 #endif
 
 /****************************************************************************

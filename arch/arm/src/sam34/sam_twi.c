@@ -99,12 +99,12 @@
 /* CONFIG_DEBUG_I2C + CONFIG_DEBUG_FEATURES enables general I2C debug output. */
 
 #ifdef CONFIG_DEBUG_I2C
-#  define i2cdbg    dbg
+#  define i2cerr    err
 #  define i2cinfo   info
 #  define i2cllerr  llerr
 #  define i2cllinfo llinfo
 #else
-#  define i2cdbg(x...)
+#  define i2cerr(x...)
 #  define i2cinfo(x...)
 #  define i2cllerr(x...)
 #  define i2cllinfo(x...)
@@ -742,7 +742,7 @@ static int twi_transfer(FAR struct i2c_master_s *dev,
   ret = twi_wait(priv);
   if (ret < 0)
     {
-      i2cdbg("ERROR: Transfer failed: %d\n", ret);
+      i2cerr("ERROR: Transfer failed: %d\n", ret);
     }
 
   leave_critical_section(flags);
@@ -985,7 +985,7 @@ struct i2c_master_s *sam_i2cbus_initialize(int bus)
 #endif
     {
       leave_critical_section(flags);
-      i2cdbg("ERROR: Unsupported bus: TWI%d\n", bus);
+      i2cerr("ERROR: Unsupported bus: TWI%d\n", bus);
       return NULL;
     }
 

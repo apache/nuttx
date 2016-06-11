@@ -209,7 +209,7 @@ static int lpc17_getvideoinfo(FAR struct fb_vtable_s *vtable,
       return OK;
     }
 
-  gdbg("Returning EINVAL\n");
+  gerr("Returning EINVAL\n");
   return -EINVAL;
 }
 
@@ -227,7 +227,7 @@ static int lpc17_getplaneinfo(FAR struct fb_vtable_s *vtable, int planeno,
       return OK;
     }
 
-  gdbg("Returning EINVAL\n");
+  gerr("Returning EINVAL\n");
   return -EINVAL;
 }
 
@@ -403,7 +403,7 @@ static int lpc17_getcursor(FAR struct fb_vtable_s *vtable,
       return OK;
     }
 
-  gdbg("Returning EINVAL\n");
+  gerr("Returning EINVAL\n");
   return -EINVAL;
 }
 #endif
@@ -443,7 +443,7 @@ static int lpc17_setcursor(FAR struct fb_vtable_s *vtable,
       return OK;
     }
 
-  gdbg("Returning EINVAL\n");
+  gerr("Returning EINVAL\n");
   return -EINVAL;
 }
 #endif

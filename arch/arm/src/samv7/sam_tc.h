@@ -87,12 +87,12 @@
 /* Timer/counter debug output */
 
 #ifdef CONFIG_SAMV7_TC_DEBUG
-#  define tcdbg    dbg
+#  define tcerr    err
 #  define tcinfo   info
 #  define tcllerr  llerr
 #  define tcllinfo llinfo
 #else
-#  define tcdbg(x...)
+#  define tcerr(x...)
 #  define tcinfo(x...)
 #  define tcllerr(x...)
 #  define tcllinfo(x...)

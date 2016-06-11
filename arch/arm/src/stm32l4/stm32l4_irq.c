@@ -148,7 +148,7 @@ static void stm32l4_dumpnvic(const char *msg, int irq)
 
 /****************************************************************************
  * Name: stm32l4_nmi, stm32l4_busfault, stm32l4_usagefault, stm32l4_pendsv,
- *       stm32l4_dbgmonitor, stm32l4_pendsv, stm32l4_reserved
+ *       stm32l4_errmonitor, stm32l4_pendsv, stm32l4_reserved
  *
  * Description:
  *   Handlers for various execptions.  None are handled and all are fatal
@@ -161,7 +161,7 @@ static void stm32l4_dumpnvic(const char *msg, int irq)
 static int stm32l4_nmi(int irq, FAR void *context)
 {
   (void)up_irq_save();
-  dbg("PANIC!!! NMI received\n");
+  err("PANIC!!! NMI received\n");
   PANIC();
   return 0;
 }
@@ -169,7 +169,7 @@ static int stm32l4_nmi(int irq, FAR void *context)
 static int stm32l4_busfault(int irq, FAR void *context)
 {
   (void)up_irq_save();
-  dbg("PANIC!!! Bus fault received: %08x\n", getreg32(NVIC_CFAULTS));
+  err("PANIC!!! Bus fault received: %08x\n", getreg32(NVIC_CFAULTS));
   PANIC();
   return 0;
 }
@@ -177,7 +177,7 @@ static int stm32l4_busfault(int irq, FAR void *context)
 static int stm32l4_usagefault(int irq, FAR void *context)
 {
   (void)up_irq_save();
-  dbg("PANIC!!! Usage fault received: %08x\n", getreg32(NVIC_CFAULTS));
+  err("PANIC!!! Usage fault received: %08x\n", getreg32(NVIC_CFAULTS));
   PANIC();
   return 0;
 }
@@ -185,15 +185,15 @@ static int stm32l4_usagefault(int irq, FAR void *context)
 static int stm32l4_pendsv(int irq, FAR void *context)
 {
   (void)up_irq_save();
-  dbg("PANIC!!! PendSV received\n");
+  err("PANIC!!! PendSV received\n");
   PANIC();
   return 0;
 }
 
-static int stm32l4_dbgmonitor(int irq, FAR void *context)
+static int stm32l4_errmonitor(int irq, FAR void *context)
 {
   (void)up_irq_save();
-  dbg("PANIC!!! Debug Monitor received\n");
+  err("PANIC!!! Debug Monitor received\n");
   PANIC();
   return 0;
 }
@@ -201,7 +201,7 @@ static int stm32l4_dbgmonitor(int irq, FAR void *context)
 static int stm32l4_reserved(int irq, FAR void *context)
 {
   (void)up_irq_save();
-  dbg("PANIC!!! Reserved interrupt\n");
+  err("PANIC!!! Reserved interrupt\n");
   PANIC();
   return 0;
 }
@@ -411,7 +411,7 @@ void up_irqinitialize(void)
   irq_attach(STM32L4_IRQ_BUSFAULT, stm32l4_busfault);
   irq_attach(STM32L4_IRQ_USAGEFAULT, stm32l4_usagefault);
   irq_attach(STM32L4_IRQ_PENDSV, stm32l4_pendsv);
-  irq_attach(STM32L4_IRQ_DBGMONITOR, stm32l4_dbgmonitor);
+  irq_attach(STM32L4_IRQ_DBGMONITOR, stm32l4_errmonitor);
   irq_attach(STM32L4_IRQ_RESERVED, stm32l4_reserved);
 #endif
 

@@ -66,10 +66,10 @@
 /* CONFIG_DEBUG_I2C + CONFIG_DEBUG_FEATURES enables general I2C debug output. */
 
 #ifdef CONFIG_DEBUG_I2C
-#  define i2cdbg dbg
+#  define i2cerr err
 #  define i2cinfo info
 #else
-#  define i2cdbg(x...)
+#  define i2cerr(x...)
 #  define i2cinfo(x...)
 #endif
 

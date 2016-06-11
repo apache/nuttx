@@ -60,10 +60,10 @@
  */
 
 #ifdef CONFIG_DEBUG_LEDS
-#  define leddbg  llerr
+#  define lederr  llerr
 #  define ledinfo llinfo
 #else
-#  define leddbg(x...)
+#  define lederr(x...)
 #  define ledinfo(x...)
 #endif
 
@@ -96,7 +96,7 @@ static uint8_t g_nest;
 #ifdef CONFIG_ARCH_LEDS
 void board_autoled_initialize(void)
 {
-  leddbg("Initializing\n");
+  lederr("Initializing\n");
 
   /* Configure Port E, Bit 1 as an output, initial value=OFF */
 

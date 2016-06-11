@@ -55,9 +55,9 @@
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_HARDFAULT
-# define hfdbg(format, ...) llerr(format, ##__VA_ARGS__)
+# define hferr(format, ...) llerr(format, ##__VA_ARGS__)
 #else
-# define hfdbg(x...)
+# define hferr(x...)
 #endif
 
 #define INSN_SVC0        0xdf00 /* insn: svc 0 */
@@ -118,7 +118,7 @@ int up_hardfault(int irq, FAR void *context)
       /* Fetch the instruction that caused the Hard fault */
 
       uint16_t insn = *pc;
-      hfdbg("  PC: %p INSN: %04x\n", pc, insn);
+      hferr("  PC: %p INSN: %04x\n", pc, insn);
 
       /* If this was the instruction 'svc 0', then forward processing
        * to the SVCall handler
@@ -126,7 +126,7 @@ int up_hardfault(int irq, FAR void *context)
 
       if (insn == INSN_SVC0)
         {
-          hfdbg("Forward SVCall\n");
+          hferr("Forward SVCall\n");
           return up_svcall(irq, context);
         }
     }
@@ -134,17 +134,17 @@ int up_hardfault(int irq, FAR void *context)
 #if defined(CONFIG_DEBUG_HARDFAULT)
   /* Dump some hard fault info */
 
-  hfdbg("\nHard Fault:\n");
-  hfdbg("  IRQ: %d regs: %p\n", irq, regs);
-  hfdbg("  PRIMASK: %08x IPSR: %08x\n",
+  hferr("\nHard Fault:\n");
+  hferr("  IRQ: %d regs: %p\n", irq, regs);
+  hferr("  PRIMASK: %08x IPSR: %08x\n",
         getprimask(), getipsr());
-  hfdbg("  R0: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+  hferr("  R0: %08x %08x %08x %08x %08x %08x %08x %08x\n",
         regs[REG_R0],  regs[REG_R1],  regs[REG_R2],  regs[REG_R3],
         regs[REG_R4],  regs[REG_R5],  regs[REG_R6],  regs[REG_R7]);
-  hfdbg("  R8: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+  hferr("  R8: %08x %08x %08x %08x %08x %08x %08x %08x\n",
         regs[REG_R8],  regs[REG_R9],  regs[REG_R10], regs[REG_R11],
         regs[REG_R12], regs[REG_R13], regs[REG_R14], regs[REG_R15]);
-  hfdbg("  xPSR: %08x PRIMASK: %08x (saved)\n",
+  hferr("  xPSR: %08x PRIMASK: %08x (saved)\n",
         CURRENT_REGS[REG_XPSR],  CURRENT_REGS[REG_PRIMASK]);
 #endif
 

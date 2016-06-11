@@ -124,7 +124,7 @@ static void lpc11_dumpnvic(const char *msg, int irq)
 
 /****************************************************************************
  * Name: lpc11_nmi, lpc11_busfault, lpc11_usagefault, lpc11_pendsv,
- *       lpc11_dbgmonitor, lpc11_pendsv, lpc11_reserved
+ *       lpc11_errmonitor, lpc11_pendsv, lpc11_reserved
  *
  * Description:
  *   Handlers for various execptions.  None are handled and all are fatal
@@ -137,7 +137,7 @@ static void lpc11_dumpnvic(const char *msg, int irq)
 static int lpc11_nmi(int irq, FAR void *context)
 {
   (void)up_irq_save();
-  dbg("PANIC!!! NMI received\n");
+  err("PANIC!!! NMI received\n");
   PANIC();
   return 0;
 }
@@ -145,7 +145,7 @@ static int lpc11_nmi(int irq, FAR void *context)
 static int lpc11_pendsv(int irq, FAR void *context)
 {
   (void)up_irq_save();
-  dbg("PANIC!!! PendSV received\n");
+  err("PANIC!!! PendSV received\n");
   PANIC();
   return 0;
 }
@@ -153,7 +153,7 @@ static int lpc11_pendsv(int irq, FAR void *context)
 static int lpc11_reserved(int irq, FAR void *context)
 {
   (void)up_irq_save();
-  dbg("PANIC!!! Reserved interrupt\n");
+  err("PANIC!!! Reserved interrupt\n");
   PANIC();
   return 0;
 }

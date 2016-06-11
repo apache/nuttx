@@ -108,7 +108,7 @@ int tiva_timer_configure(void)
                             GPTM, ALTCLK);
   if (ret < 0)
     {
-      timdbg("ERROR: Failed to register timer driver: %d\n", ret);
+      timerr("ERROR: Failed to register timer driver: %d\n", ret);
     }
 
   return ret;

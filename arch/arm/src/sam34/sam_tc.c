@@ -79,10 +79,10 @@
  */
 
 #ifdef CONFIG_DEBUG_TIMER
-#  define tcdbg    llerr
+#  define tcerr    llerr
 #  define tcinfo   llinfo
 #else
-#  define tcdbg(x...)
+#  define tcerr(x...)
 #  define tcinfo(x...)
 #endif
 
@@ -486,7 +486,7 @@ static int sam34_settimeout(FAR struct timer_lowerhalf_s *lower,
 
   if (timeout < 1 || timeout > TC_MAXTIMEOUT)
     {
-      tcdbg("Cannot represent timeout=%lu > %lu\n",
+      tcerr("Cannot represent timeout=%lu > %lu\n",
             timeout, TC_MAXTIMEOUT);
       return -ERANGE;
     }

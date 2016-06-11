@@ -278,7 +278,7 @@ int up_addrenv_create(size_t textsize, size_t datasize, size_t heapsize,
                                   MMU_L2_UTEXTFLAGS);
   if (ret < 0)
     {
-      bdbg("ERROR: Failed to create .text region: %d\n", ret);
+      berr("ERROR: Failed to create .text region: %d\n", ret);
       goto errout;
     }
 
@@ -293,7 +293,7 @@ int up_addrenv_create(size_t textsize, size_t datasize, size_t heapsize,
                                   MMU_L2_UDATAFLAGS);
   if (ret < 0)
     {
-      bdbg("ERROR: Failed to create .bss/.data region: %d\n", ret);
+      berr("ERROR: Failed to create .bss/.data region: %d\n", ret);
       goto errout;
     }
 
@@ -305,7 +305,7 @@ int up_addrenv_create(size_t textsize, size_t datasize, size_t heapsize,
   ret = up_addrenv_initdata((uintptr_t)addrenv->data[0] & PMD_PTE_PADDR_MASK);
   if (ret < 0)
     {
-      bdbg("ERROR: Failed to initialize .bss/.data region: %d\n", ret);
+      berr("ERROR: Failed to initialize .bss/.data region: %d\n", ret);
       goto errout;
     }
 #endif
@@ -318,7 +318,7 @@ int up_addrenv_create(size_t textsize, size_t datasize, size_t heapsize,
                                   MMU_L2_UDATAFLAGS);
   if (ret < 0)
     {
-      bdbg("ERROR: Failed to create heap region: %d\n", ret);
+      berr("ERROR: Failed to create heap region: %d\n", ret);
       goto errout;
     }
 

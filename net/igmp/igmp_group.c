@@ -88,24 +88,24 @@
 
 #ifdef CONFIG_CPP_HAVE_VARARGS
 #  ifdef IGMP_GRPDEBUG
-#    define grpdbg(format, ...)    ndbg(format, ##__VA_ARGS__)
+#    define grperr(format, ...)    nerr(format, ##__VA_ARGS__)
 #    define grpllerr(format, ...)  nllerr(format, ##__VA_ARGS__)
 #    define grpinfo(format, ...)   ninfo(format, ##__VA_ARGS__)
 #    define grpllinfo(format, ...) nllinfo(format, ##__VA_ARGS__)
 #  else
-#    define grpdbg(x...)
+#    define grperr(x...)
 #    define grpllerr(x...)
 #    define grpinfo(x...)
 #    define grpllinfo(x...)
 #  endif
 #else
 #  ifdef IGMP_GRPDEBUG
-#    define grpdbg    ndbg
+#    define grperr    nerr
 #    define grpllerr  nllerr
 #    define grpinfo   ninfo
 #    define grpllinfo nllinfo
 #  else
-#    define grpdbg    (void)
+#    define grperr    (void)
 #    define grpllerr  (void)
 #    define grpinfo   (void)
 #    define grpllinfo (void)

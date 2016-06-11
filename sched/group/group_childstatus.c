@@ -115,10 +115,10 @@ static void group_dumpchildren(FAR struct task_group_s *group,
   FAR struct child_status_s *child;
   int i;
 
-  dbg("Task group=%p: %s\n", group, msg);
+  err("Task group=%p: %s\n", group, msg);
   for (i = 0, child = group->tg_children; child; i++, child = child->flink)
     {
-      dbg("  %d. ch_flags=%02x ch_pid=%d ch_status=%d\n",
+      err("  %d. ch_flags=%02x ch_pid=%d ch_status=%d\n",
           i, child->ch_flags, child->ch_pid, child->ch_status);
     }
 }

@@ -280,7 +280,7 @@ int wireless_archinitialize(size_t max_rx_size)
 
   /* Init SPI bus */
 
-  idbg("minor %d\n", minor);
+  ierr("minor %d\n", minor);
   DEBUGASSERT(CONFIG_CC3000_DEVMINOR == 0);
 
 #ifdef CONFIG_CC3000_PROBES
@@ -295,7 +295,7 @@ int wireless_archinitialize(size_t max_rx_size)
   spi = up_spiinitialize(CONFIG_CC3000_SPIDEV);
   if (!spi)
     {
-      idbg("Failed to initialize SPI bus %d\n", CONFIG_CC3000_SPIDEV);
+      ierr("Failed to initialize SPI bus %d\n", CONFIG_CC3000_SPIDEV);
       return -ENODEV;
     }
 
@@ -305,7 +305,7 @@ int wireless_archinitialize(size_t max_rx_size)
   int ret = cc3000_register(spi, &g_cc3000_info.dev, CONFIG_CC3000_DEVMINOR);
   if (ret < 0)
     {
-      idbg("Failed to initialize SPI bus %d\n", CONFIG_CC3000_SPIDEV);
+      ierr("Failed to initialize SPI bus %d\n", CONFIG_CC3000_SPIDEV);
       return -ENODEV;
     }
 

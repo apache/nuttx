@@ -70,14 +70,14 @@
 /* Debug */
 
 #ifdef CONFIG_DEBUG_SPI
-#  define spidbg  llerr
+#  define spierr  llerr
 #  ifdef CONFIG_DEBUG_INFO
 #    define spiinfo llerr
 #  else
 #    define spiinfo(x...)
 #  endif
 #else
-#  define spidbg(x...)
+#  define spierr(x...)
 #  define spiinfo(x...)
 #endif
 
@@ -887,7 +887,7 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
   priv->frequency = frequency;
   priv->actual    = actual;
 
-  spidbg("New frequency: %d Actual: %d\n", frequency, actual);
+  spierr("New frequency: %d Actual: %d\n", frequency, actual);
   return actual;
 }
 
@@ -1025,7 +1025,7 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
         }
       else
         {
-          spidbg("Unsupported nbits: %d\n", nbits);
+          spierr("Unsupported nbits: %d\n", nbits);
           return;
         }
 
@@ -1275,7 +1275,7 @@ FAR struct spi_dev_s *pic32mz_spibus_initialize(int port)
   else
 #endif
    {
-     spidbg("Unsuppport port: %d\n", port);
+     spierr("Unsuppport port: %d\n", port);
      return NULL;
    }
 
@@ -1311,7 +1311,7 @@ FAR struct spi_dev_s *pic32mz_spibus_initialize(int port)
   ret = irq_attach(priv->config->rxirq, spi_interrupt);
   if (ret < 0)
     {
-      spidbg("Failed to attach RX interrupt: %d port: %d\n",
+      spierr("Failed to attach RX interrupt: %d port: %d\n",
              priv->config->rxirq, port);
       goto errout;
     }
@@ -1319,7 +1319,7 @@ FAR struct spi_dev_s *pic32mz_spibus_initialize(int port)
   ret = irq_attach(priv->config->txirq, spi_interrupt);
   if (ret < 0)
     {
-      spidbg("Failed to attach TX interrupt: %d port: %d\n",
+      spierr("Failed to attach TX interrupt: %d port: %d\n",
              priv->tconfig->xirq, port);
       goto errout_with_rxirq;
     }
@@ -1327,7 +1327,7 @@ FAR struct spi_dev_s *pic32mz_spibus_initialize(int port)
   ret = irq_attach(priv->config->firq, spi_interrupt);
   if (ret < 0)
     {
-      spidbg("Failed to attach fault interrupt: %d port: %d\n",
+      spierr("Failed to attach fault interrupt: %d port: %d\n",
              priv->config->firq, port);
       goto errout_with_txirq;
     }

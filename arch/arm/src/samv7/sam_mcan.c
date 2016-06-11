@@ -794,23 +794,23 @@
 #endif
 
 #ifdef CONFIG_DEBUG_CAN
-#  define candbg    dbg
+#  define canerr    err
 #  define caninfo   info
 #  define canllerr  llerr
 #  define canllinfo llinfo
 
 #  ifdef CONFIG_SAMV7_MCAN_REGDEBUG
-#    define canregdbg llerr
+#    define canregerr llerr
 #  else
-#    define canregdbg(x...)
+#    define canregerr(x...)
 #  endif
 
 #else
-#  define candbg(x...)
+#  define canerr(x...)
 #  define caninfo(x...)
 #  define canllerr(x...)
 #  define canllinfo(x...)
-#  define canregdbg(x...)
+#  define canregerr(x...)
 #endif
 
 /****************************************************************************
@@ -1502,7 +1502,7 @@ static void mcan_buffer_reserve(FAR struct sam_mcan_s *priv)
 
           if (sval > 0)
             {
-              candbg("ERROR: TX FIFOQ full but txfsem is %d\n", sval);
+              canerr("ERROR: TX FIFOQ full but txfsem is %d\n", sval);
               sem_reset(&priv->txfsem, 0);
             }
         }
@@ -1520,7 +1520,7 @@ static void mcan_buffer_reserve(FAR struct sam_mcan_s *priv)
 
       else if (sval <= 0)
         {
-          candbg("ERROR: TX FIFOQ not full but txfsem is %d\n", sval);
+          canerr("ERROR: TX FIFOQ not full but txfsem is %d\n", sval);
 
           /* Less than zero means that another thread is waiting */
 
@@ -1551,7 +1551,7 @@ static void mcan_buffer_reserve(FAR struct sam_mcan_s *priv)
 
       if (tffl > priv->config->ntxfifoq)
         {
-          candbg("ERROR: TX FIFO reports %d but max is %d\n",
+          canerr("ERROR: TX FIFO reports %d but max is %d\n",
                  tffl, priv->config->ntxfifoq);
           tffl = priv->config->ntxfifoq;
         }
@@ -1564,7 +1564,7 @@ static void mcan_buffer_reserve(FAR struct sam_mcan_s *priv)
 
       if (sval != tffl)
         {
-          candbg("ERROR: TX FIFO reports %d but txfsem is %d\n", tffl, sval);
+          canerr("ERROR: TX FIFO reports %d but txfsem is %d\n", tffl, sval);
 
           /* Reset the semaphore count to the Tx FIFO free level. */
 
@@ -1620,7 +1620,7 @@ static void mcan_buffer_release(FAR struct sam_mcan_s *priv)
     }
   else
     {
-      candbg("ERROR: txfsem would increment beyond %d\n",
+      canerr("ERROR: txfsem would increment beyond %d\n",
               priv->config->ntxfifoq);
     }
 }
@@ -2612,7 +2612,7 @@ static int mcan_ioctl(FAR struct can_dev_s *dev, int cmd, unsigned long arg)
       /* Unsupported/unrecognized command */
 
       default:
-        candbg("ERROR: Unrecognized command: %04x\n", cmd);
+        canerr("ERROR: Unrecognized command: %04x\n", cmd);
         break;
     }
 
@@ -2756,7 +2756,7 @@ static int mcan_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
     }
 
   txbuffer[0] = regval;
-  canregdbg("T0: %08x\n", regval);
+  canregerr("T0: %08x\n", regval);
 
   /* Format word T1:
    *   Data Length Code (DLC)            - Value from message structure
@@ -2765,7 +2765,7 @@ static int mcan_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
    */
 
   txbuffer[1] = BUFFER_R1_DLC(msg->cm_hdr.ch_dlc);
-  canregdbg("T1: %08x\n", txbuffer[1]);
+  canregerr("T1: %08x\n", txbuffer[1]);
 
   /* Followed by the amount of data corresponding to the DLC (T2..) */
 
@@ -3194,7 +3194,7 @@ static void mcan_receive(FAR struct can_dev_s *dev, FAR uint32_t *rxbuffer,
   /* Work R0 contains the CAN ID */
 
   regval = *rxbuffer++;
-  canregdbg("R0: %08x\n", regval);
+  canregerr("R0: %08x\n", regval);
 
 #ifdef CONFIG_CAN_ERRORS
   hdr.ch_error  = 0;
@@ -3240,7 +3240,7 @@ static void mcan_receive(FAR struct can_dev_s *dev, FAR uint32_t *rxbuffer,
   /* Word R1 contains the DLC and timestamp */
 
   regval = *rxbuffer++;
-  canregdbg("R1: %08x\n", regval);
+  canregerr("R1: %08x\n", regval);
 
   hdr.ch_dlc = (regval & BUFFER_R1_DLC_MASK) >> BUFFER_R1_DLC_SHIFT;
 
@@ -3935,7 +3935,7 @@ FAR struct can_dev_s *sam_mcan_initialize(int port)
   else
 #endif
     {
-      candbg("ERROR: Unsupported port %d\n", port);
+      canerr("ERROR: Unsupported port %d\n", port);
       return NULL;
     }
 

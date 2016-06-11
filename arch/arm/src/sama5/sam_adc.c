@@ -1285,7 +1285,7 @@ static int sam_adc_settimer(struct sam_adc_s *priv, uint32_t frequency,
   ret = sam_tc_divisor(frequency, &div, &tcclks);
   if (ret < 0)
     {
-      adbg("ERROR: sam_tc_divisor failed: %d\n", ret);
+      aerr("ERROR: sam_tc_divisor failed: %d\n", ret);
       return ret;
     }
 
@@ -1304,7 +1304,7 @@ static int sam_adc_settimer(struct sam_adc_s *priv, uint32_t frequency,
   priv->tc = sam_tc_allocate(channel, mode);
   if (!priv->tc)
     {
-      adbg("ERROR: Failed to allocate channel %d mode %08x\n", channel, mode);
+      aerr("ERROR: Failed to allocate channel %d mode %08x\n", channel, mode);
       return -EINVAL;
     }
 
@@ -1436,7 +1436,7 @@ static int sam_adc_trigger(struct sam_adc_s *priv)
 #endif
   if (ret < 0)
     {
-      adbg("ERROR: sam_adc_settimer failed: %d\n", ret);
+      aerr("ERROR: sam_adc_settimer failed: %d\n", ret);
       return ret;
     }
 
@@ -2056,7 +2056,7 @@ struct adc_dev_s *sam_adc_initialize(void)
         }
       else
         {
-          adbg("ERROR: Cannot realize ADC input frequency\n");
+          aerr("ERROR: Cannot realize ADC input frequency\n");
           return NULL;
         }
 
@@ -2108,7 +2108,7 @@ struct adc_dev_s *sam_adc_initialize(void)
       ret = irq_attach(SAM_IRQ_ADC, sam_adc_interrupt);
       if (ret < 0)
         {
-          adbg("ERROR: Failed to attach IRQ %d: %d\n", SAM_IRQ_ADC, ret);
+          aerr("ERROR: Failed to attach IRQ %d: %d\n", SAM_IRQ_ADC, ret);
           return NULL;
         }
 

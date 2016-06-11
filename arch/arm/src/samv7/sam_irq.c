@@ -161,7 +161,7 @@ static void sam_dumpnvic(const char *msg, int irq)
 #endif
 
 /****************************************************************************
- * Name: sam_nmi, sam_busfault, sam_usagefault, sam_pendsv, sam_dbgmonitor,
+ * Name: sam_nmi, sam_busfault, sam_usagefault, sam_pendsv, sam_errmonitor,
  *       sam_pendsv, sam_reserved
  *
  * Description:
@@ -175,7 +175,7 @@ static void sam_dumpnvic(const char *msg, int irq)
 static int sam_nmi(int irq, FAR void *context)
 {
   (void)up_irq_save();
-  dbg("PANIC!!! NMI received\n");
+  err("PANIC!!! NMI received\n");
   PANIC();
   return 0;
 }
@@ -183,7 +183,7 @@ static int sam_nmi(int irq, FAR void *context)
 static int sam_busfault(int irq, FAR void *context)
 {
   (void)up_irq_save();
-  dbg("PANIC!!! Bus fault received: %08x\n", getreg32(NVIC_CFAULTS));
+  err("PANIC!!! Bus fault received: %08x\n", getreg32(NVIC_CFAULTS));
   PANIC();
   return 0;
 }
@@ -191,7 +191,7 @@ static int sam_busfault(int irq, FAR void *context)
 static int sam_usagefault(int irq, FAR void *context)
 {
   (void)up_irq_save();
-  dbg("PANIC!!! Usage fault received: %08x\n", getreg32(NVIC_CFAULTS));
+  err("PANIC!!! Usage fault received: %08x\n", getreg32(NVIC_CFAULTS));
   PANIC();
   return 0;
 }
@@ -199,15 +199,15 @@ static int sam_usagefault(int irq, FAR void *context)
 static int sam_pendsv(int irq, FAR void *context)
 {
   (void)up_irq_save();
-  dbg("PANIC!!! PendSV received\n");
+  err("PANIC!!! PendSV received\n");
   PANIC();
   return 0;
 }
 
-static int sam_dbgmonitor(int irq, FAR void *context)
+static int sam_errmonitor(int irq, FAR void *context)
 {
   (void)up_irq_save();
-  dbg("PANIC!!! Debug Monitor received\n");
+  err("PANIC!!! Debug Monitor received\n");
   PANIC();
   return 0;
 }
@@ -215,7 +215,7 @@ static int sam_dbgmonitor(int irq, FAR void *context)
 static int sam_reserved(int irq, FAR void *context)
 {
   (void)up_irq_save();
-  dbg("PANIC!!! Reserved interrupt\n");
+  err("PANIC!!! Reserved interrupt\n");
   PANIC();
   return 0;
 }
@@ -464,7 +464,7 @@ void up_irqinitialize(void)
   irq_attach(SAM_IRQ_BUSFAULT, sam_busfault);
   irq_attach(SAM_IRQ_USAGEFAULT, sam_usagefault);
   irq_attach(SAM_IRQ_PENDSV, sam_pendsv);
-  irq_attach(SAM_IRQ_DBGMONITOR, sam_dbgmonitor);
+  irq_attach(SAM_IRQ_DBGMONITOR, sam_errmonitor);
   irq_attach(SAM_IRQ_RESERVED, sam_reserved);
 #endif
 

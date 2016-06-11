@@ -417,7 +417,7 @@ void tiva_adc_irq_attach(uint8_t adc, uint8_t sse, xcpt_t isr)
   ret = irq_attach(irq, isr);
   if (ret < 0)
     {
-      adbg("ERROR: Failed to attach IRQ %d: %d\n", irq, ret);
+      aerr("ERROR: Failed to attach IRQ %d: %d\n", irq, ret);
       return;
     }
 
@@ -446,7 +446,7 @@ void tiva_adc_irq_detach(uint8_t adc, uint8_t sse)
   ret = irq_detach(irq);
   if (ret < 0)
     {
-      adbg("ERROR: Failed to detach IRQ %d: %d\n", irq, ret);
+      aerr("ERROR: Failed to detach IRQ %d: %d\n", irq, ret);
       return;
     }
 }

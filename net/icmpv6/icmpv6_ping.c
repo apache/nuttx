@@ -417,7 +417,7 @@ int icmpv6_ping(net_ipv6addr_t addr, uint16_t id, uint16_t seqno,
   ret = icmpv6_neighbor(addr);
   if (ret < 0)
     {
-      ndbg("ERROR: Not reachable\n");
+      nerr("ERROR: Not reachable\n");
       return -ENETUNREACH;
     }
 #endif /* CONFIG_NET_ICMPv6_NEIGHBOR */
@@ -431,7 +431,7 @@ int icmpv6_ping(net_ipv6addr_t addr, uint16_t id, uint16_t seqno,
 #endif
   if (dev == 0)
     {
-      ndbg("ERROR: Not reachable\n");
+      nerr("ERROR: Not reachable\n");
       return -ENETUNREACH;
     }
 

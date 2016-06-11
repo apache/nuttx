@@ -176,7 +176,7 @@ static void rwb_wrflush(struct rwbuffer_s *rwb)
       ret = rwb->wrflush(rwb->dev, rwb->wrbuffer, rwb->wrblockstart, rwb->wrnblocks);
       if (ret != rwb->wrnblocks)
         {
-          fdbg("ERROR: Error flushing write buffer: %d\n", ret);
+          ferr("ERROR: Error flushing write buffer: %d\n", ret);
         }
 
       rwb_resetwrbuffer(rwb);
@@ -260,7 +260,7 @@ static ssize_t rwb_writebuffer(FAR struct rwbuffer_s *rwb,
       ret = rwb->wrflush(rwb->dev, rwb->wrbuffer, rwb->wrblockstart, rwb->wrnblocks);
       if (ret < 0)
         {
-          fdbg("ERROR: Error writing multiple from cache: %d\n", -ret);
+          ferr("ERROR: Error writing multiple from cache: %d\n", -ret);
           return ret;
         }
 
@@ -461,7 +461,7 @@ int rwb_invalidate_writebuffer(FAR struct rwbuffer_s *rwb,
           ret = rwb->wrflush(rwb->dev, src, block, nblocks);
           if (ret < 0)
             {
-              fdbg("ERROR: wrflush failed: %d\n", ret);
+              ferr("ERROR: wrflush failed: %d\n", ret);
             }
 
           /* Keep the blocks at the beginning of the buffer up the
@@ -670,7 +670,7 @@ int rwb_initialize(FAR struct rwbuffer_s *rwb)
           rwb->wrbuffer = kmm_malloc(allocsize);
           if (!rwb->wrbuffer)
             {
-              fdbg("Write buffer kmm_malloc(%d) failed\n", allocsize);
+              ferr("Write buffer kmm_malloc(%d) failed\n", allocsize);
               return -ENOMEM;
             }
         }
@@ -701,7 +701,7 @@ int rwb_initialize(FAR struct rwbuffer_s *rwb)
           rwb->rhbuffer = kmm_malloc(allocsize);
           if (!rwb->rhbuffer)
             {
-              fdbg("Read-ahead buffer kmm_malloc(%d) failed\n", allocsize);
+              ferr("Read-ahead buffer kmm_malloc(%d) failed\n", allocsize);
               return -ENOMEM;
             }
         }
@@ -821,7 +821,7 @@ ssize_t rwb_read(FAR struct rwbuffer_s *rwb, off_t startblock,
               ret = rwb_rhreload(rwb, startblock);
               if (ret < 0)
                 {
-                  fdbg("ERROR: Failed to fill the read-ahead buffer: %d\n", ret);
+                  ferr("ERROR: Failed to fill the read-ahead buffer: %d\n", ret);
                   return (ssize_t)ret;
                 }
             }
@@ -999,7 +999,7 @@ int rwb_invalidate(FAR struct rwbuffer_s *rwb,
   ret = rwb_invalidate_writebuffer(rwb, startblock, blockcount);
   if (ret < 0)
     {
-      fdbg("ERROR: rwb_invalidate_writebuffer failed: %d\n", ret);
+      ferr("ERROR: rwb_invalidate_writebuffer failed: %d\n", ret);
       return ret;
     }
 #endif
@@ -1008,7 +1008,7 @@ int rwb_invalidate(FAR struct rwbuffer_s *rwb,
   ret = rwb_invalidate_readahead(rwb, startblock, blockcount);
   if (ret < 0)
     {
-      fdbg("ERROR: rwb_invalidate_readahead failed: %d\n", ret);
+      ferr("ERROR: rwb_invalidate_readahead failed: %d\n", ret);
       return ret;
     }
 #endif

@@ -145,7 +145,7 @@ static int stm32_composite_initialize(void)
   spi = stm32_spibus_initialize(CONFIG_SPARK_FLASH_SPI);
   if (!spi)
     {
-      fdbg("ERROR: Failed to initialize SPI port %d\n",
+      ferr("ERROR: Failed to initialize SPI port %d\n",
            CONFIG_SPARK_FLASH_SPI);
       return -ENODEV;
     }
@@ -158,7 +158,7 @@ static int stm32_composite_initialize(void)
   mtd = sst25_initialize(spi);
   if (!mtd)
     {
-      fdbg("ERROR: Failed to bind SPI port %d to the SPI FLASH driver\n",
+      ferr("ERROR: Failed to bind SPI port %d to the SPI FLASH driver\n",
            CONFIG_SPARK_FLASH_SPI);
     }
   else
@@ -174,7 +174,7 @@ static int stm32_composite_initialize(void)
   ret = ftl_initialize(CONFIG_SPARK_FLASH_MINOR, mtd);
   if (ret < 0)
     {
-      fdbg("ERROR: Initialize the FTL layer\n");
+      ferr("ERROR: Initialize the FTL layer\n");
       return ret;
     }
 
@@ -194,7 +194,7 @@ static int stm32_composite_initialize(void)
   ret = mount(partname, mntpoint, "vfat", 0, NULL);
   if (ret < 0)
     {
-      fdbg("ERROR: Failed to mount the FAT volume: %d\n", errno);
+      ferr("ERROR: Failed to mount the FAT volume: %d\n", errno);
       return ret;
     }
 
@@ -228,7 +228,7 @@ static int stm32_composite_initialize(void)
           ret = ftl_initialize(partno, mtd_part);
           if (ret < 0)
             {
-              fdbg("ERROR: Initialize the FTL layer\n");
+              ferr("ERROR: Initialize the FTL layer\n");
               return ret;
             }
 
@@ -241,7 +241,7 @@ static int stm32_composite_initialize(void)
           ret = mount(partname, mntpoint, "vfat", 0, NULL);
           if (ret < 0)
             {
-              fdbg("ERROR: Failed to mount the FAT volume: %d\n", errno);
+              ferr("ERROR: Failed to mount the FAT volume: %d\n", errno);
               return ret;
             }
 
@@ -272,7 +272,7 @@ static int stm32_composite_initialize(void)
   ret = usbmonitor_start(0, NULL);
   if (ret != OK)
     {
-      fdbg("ERROR: Failed to start USB monitor: %d\n", ret);
+      ferr("ERROR: Failed to start USB monitor: %d\n", ret);
     }
 #endif
 

@@ -1274,7 +1274,7 @@ void sam_dmasample(DMA_HANDLE handle, struct sam_dmaregs_s *regs)
   regs->crcdatain  = getreg32(SAM_DMAC_CRCDATAIN);  /* CRC Data Input Register */
   regs->crcchksum  = getreg32(SAM_DMAC_CRCCHKSUM);  /* CRC Checksum Register */
   regs->crcstatus  = getreg8(SAM_DMAC_CRCSTATUS);   /* CRC Status Register */
-  regs->dbgctrl    = getreg8(SAM_DMAC_DBGCTRL);     /* Debug Control Register */
+  regs->errctrl    = getreg8(SAM_DMAC_DBGCTRL);     /* Debug Control Register */
   regs->qosctrl    = getreg8(SAM_DMAC_QOSCTRL);     /* Quality of Service Control Register */
   regs->swtrigctrl = getreg32(SAM_DMAC_SWTRIGCTRL); /* Software Trigger Control Register */
   regs->prictrl0   = getreg32(SAM_DMAC_PRICTRL0);   /* Priority Control 0 Register */
@@ -1310,19 +1310,19 @@ void sam_dmadump(DMA_HANDLE handle, const struct sam_dmaregs_s *regs,
 {
   struct sam_dmach_s *dmach = (struct sam_dmach_s *)handle;
 
-  dmadbg("%s\n", msg);
-  dmadbg("  DMAC Registers:\n");
-  dmadbg("         CTRL: %04x      CRCCTRL: %04x      CRCDATAIN: %08x  CRCCHKSUM: %08x\n",
+  dmaerr("%s\n", msg);
+  dmaerr("  DMAC Registers:\n");
+  dmaerr("         CTRL: %04x      CRCCTRL: %04x      CRCDATAIN: %08x  CRCCHKSUM: %08x\n",
          regs->ctrl, regs->crcctrl, regs->crcdatain, regs->crcchksum);
-  dmadbg("    CRCSTATUS: %02x        DBGCTRL: %02x          QOSCTRL: %02x       SWTRIGCTRL: %08x\n",
-         regs->crcstatus, regs->dbgctrl, regs->qosctrl, regs->swtrigctrl);
-  dmadbg("     PRICTRL0: %08x  INTPEND: %04x     INSTSTATUS: %08x     BUSYCH: %08x\n",
+  dmaerr("    CRCSTATUS: %02x        DBGCTRL: %02x          QOSCTRL: %02x       SWTRIGCTRL: %08x\n",
+         regs->crcstatus, regs->errctrl, regs->qosctrl, regs->swtrigctrl);
+  dmaerr("     PRICTRL0: %08x  INTPEND: %04x     INSTSTATUS: %08x     BUSYCH: %08x\n",
          regs->prictrl0, regs->intpend, regs->intstatus, regs->busych);
-  dmadbg("       PENDCH: %08x   ACTIVE: %08x   BASEADDR: %08x    WRBADDR: %08x\n",
+  dmaerr("       PENDCH: %08x   ACTIVE: %08x   BASEADDR: %08x    WRBADDR: %08x\n",
          regs->pendch, regs->active, regs->baseaddr, regs->wrbaddr);
-  dmadbg("         CHID: %02x       CHCRTRLA: %02x         CHCRTRLB: %08x   CHINFLAG: %02x\n",
+  dmaerr("         CHID: %02x       CHCRTRLA: %02x         CHCRTRLB: %08x   CHINFLAG: %02x\n",
          regs->chid, regs->chctrla, regs->chctrlb, regs->chintflag,
-  dmadbg("     CHSTATUS: %02x\n",
+  dmaerr("     CHSTATUS: %02x\n",
          regs->chstatus);
 }
 #endif /* CONFIG_DEBUG_DMA */

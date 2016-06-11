@@ -150,7 +150,7 @@ int qe_devinit(void)
       ret = stm32_qeinitialize("/dev/qe0", TIMID);
       if (ret < 0)
         {
-          sndbg("stm32_qeinitialize failed: %d\n", ret);
+          snerr("stm32_qeinitialize failed: %d\n", ret);
           return ret;
         }
 

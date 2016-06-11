@@ -72,7 +72,7 @@ int pthread_attr_getinheritsched(FAR const pthread_attr_t *attr,
 {
   int ret;
 
-  sdbg("attr=0x%p inheritsched=0x%p\n", attr, inheritsched);
+  serr("attr=0x%p inheritsched=0x%p\n", attr, inheritsched);
 
   if (!attr || !inheritsched)
     {
@@ -84,7 +84,7 @@ int pthread_attr_getinheritsched(FAR const pthread_attr_t *attr,
       ret = OK;
     }
 
-  sdbg("Returning %d\n", ret);
+  serr("Returning %d\n", ret);
   return ret;
 }
 

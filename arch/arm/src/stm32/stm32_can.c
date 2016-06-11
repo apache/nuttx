@@ -85,12 +85,12 @@
 /* Non-standard debug that may be enabled just for testing CAN */
 
 #ifdef CONFIG_DEBUG_CAN
-#  define candbg    dbg
+#  define canerr    err
 #  define caninfo   info
 #  define canllerr  llerr
 #  define canllinfo llinfo
 #else
-#  define candbg(x...)
+#  define canerr(x...)
 #  define caninfo(x...)
 #  define canllerr(x...)
 #  define canllinfo(x...)
@@ -1745,7 +1745,7 @@ FAR struct can_dev_s *stm32_caninitialize(int port)
   else
 #endif
     {
-      candbg("ERROR: Unsupported port %d\n", port);
+      canerr("ERROR: Unsupported port %d\n", port);
       return NULL;
     }
 

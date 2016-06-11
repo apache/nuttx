@@ -315,7 +315,7 @@ static inline int stmpe811_waitsample(FAR struct stmpe811_dev_s *priv,
            * the failure now.
            */
 
-          idbg("ERROR: sem_wait failed: %d\n", errval);
+          ierr("ERROR: sem_wait failed: %d\n", errval);
           DEBUGASSERT(errval == EINTR);
 #endif
           ret = -EINTR;
@@ -677,7 +677,7 @@ static int stmpe811_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
       if ((fds->events & POLLIN) == 0)
         {
-          idbg("ERROR: Missing POLLIN: revents: %08x\n", fds->revents);
+          ierr("ERROR: Missing POLLIN: revents: %08x\n", fds->revents);
           ret = -EDEADLK;
           goto errout;
         }
@@ -702,7 +702,7 @@ static int stmpe811_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
       if (i >= CONFIG_STMPE811_NPOLLWAITERS)
         {
-          idbg("ERROR: No available slot found: %d\n", i);
+          ierr("ERROR: No available slot found: %d\n", i);
           fds->priv    = NULL;
           ret          = -EBUSY;
           goto errout;
@@ -907,7 +907,7 @@ int stmpe811_register(STMPE811_HANDLE handle, int minor)
   if (ret < 0)
     {
       int errval = errno;
-      idbg("ERROR: sem_wait failed: %d\n", errval);
+      ierr("ERROR: sem_wait failed: %d\n", errval);
       return -errval;
     }
 
@@ -915,7 +915,7 @@ int stmpe811_register(STMPE811_HANDLE handle, int minor)
 
   if ((priv->inuse & TSC_PIN_SET) != 0)
     {
-      idbg("ERROR: TSC pins is already in-use: %02x\n", priv->inuse);
+      ierr("ERROR: TSC pins is already in-use: %02x\n", priv->inuse);
       sem_post(&priv->exclsem);
       return -EBUSY;
     }
@@ -932,7 +932,7 @@ int stmpe811_register(STMPE811_HANDLE handle, int minor)
   priv->wdog      = wd_create();
   if (!priv->wdog)
     {
-      idbg("ERROR: Failed to create a watchdog\n", errno);
+      ierr("ERROR: Failed to create a watchdog\n", errno);
       sem_post(&priv->exclsem);
       return -ENOSPC;
     }
@@ -943,7 +943,7 @@ int stmpe811_register(STMPE811_HANDLE handle, int minor)
   ret = register_driver(devname, &g_stmpe811fops, 0666, priv);
   if (ret < 0)
     {
-      idbg("ERROR: Failed to register driver %s: %d\n", devname, ret);
+      ierr("ERROR: Failed to register driver %s: %d\n", devname, ret);
       sem_post(&priv->exclsem);
       return ret;
     }

@@ -65,7 +65,7 @@
  */
 
 #ifdef CONFIG_DEBUG_LEDS
-#  define leddbg  llerr
+#  define lederr  llerr
 #  ifdef CONFIG_DEBUG_INFO
 #    define LED_VERBOSE 1
 #    define ledinfo llerr
@@ -75,7 +75,7 @@
 #  endif
 #else
 #  undef LED_VERBOSE
-#  define leddbg(x...)
+#  define lederr(x...)
 #  define ledinfo(x...)
 #endif
 

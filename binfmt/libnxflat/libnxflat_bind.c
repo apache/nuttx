@@ -117,7 +117,7 @@ static inline int nxflat_bindrel32i(FAR struct nxflat_loadinfo_s *loadinfo,
     }
   else
     {
-      bdbg("Offset: %08 does not lie in D-Space size: %08x\n",
+      berr("Offset: %08 does not lie in D-Space size: %08x\n",
            offset, loadinfo->dsize);
       return -EINVAL;
     }
@@ -156,7 +156,7 @@ static inline int nxflat_bindrel32d(FAR struct nxflat_loadinfo_s *loadinfo,
     }
   else
     {
-      bdbg("Offset: %08 does not lie in D-Space size: %08x\n",
+      berr("Offset: %08 does not lie in D-Space size: %08x\n",
            offset, loadinfo->dsize);
       return -EINVAL;
     }
@@ -198,7 +198,7 @@ static inline int nxflat_bindrel32id(FAR struct nxflat_loadinfo_s *loadinfo,
     }
   else
     {
-      bdbg("Offset: %08 does not lie in D-Space size: %08x\n",
+      berr("Offset: %08 does not lie in D-Space size: %08x\n",
            offset, loadinfo->dsize);
       return -EINVAL;
     }
@@ -265,7 +265,7 @@ static inline int nxflat_gotrelocs(FAR struct nxflat_loadinfo_s *loadinfo)
   ret = nxflat_addrenv_select(loadinfo);
   if (ret < 0)
     {
-      bdbg("ERROR: nxflat_addrenv_select() failed: %d\n", ret);
+      berr("ERROR: nxflat_addrenv_select() failed: %d\n", ret);
       return ret;
     }
 #endif
@@ -329,7 +329,7 @@ static inline int nxflat_gotrelocs(FAR struct nxflat_loadinfo_s *loadinfo)
 
         default:
           {
-            bdbg("ERROR: Unrecognized relocation type: %d\n", NXFLAT_RELOC_TYPE(reloc.r_info));
+            berr("ERROR: Unrecognized relocation type: %d\n", NXFLAT_RELOC_TYPE(reloc.r_info));
             result = -EINVAL;
           }
           break;
@@ -359,7 +359,7 @@ static inline int nxflat_gotrelocs(FAR struct nxflat_loadinfo_s *loadinfo)
   ret = nxflat_addrenv_restore(loadinfo);
   if (ret < 0)
     {
-      bdbg("ERROR: nxflat_addrenv_restore() failed: %d\n", ret);
+      berr("ERROR: nxflat_addrenv_restore() failed: %d\n", ret);
     }
 #endif
 
@@ -418,7 +418,7 @@ static inline int nxflat_bindimports(FAR struct nxflat_loadinfo_s *loadinfo,
   ret = nxflat_addrenv_select(loadinfo);
   if (ret < 0)
     {
-      bdbg("ERROR: nxflat_addrenv_select() failed: %d\n", ret);
+      berr("ERROR: nxflat_addrenv_select() failed: %d\n", ret);
       return ret;
     }
 #endif
@@ -473,7 +473,7 @@ static inline int nxflat_bindimports(FAR struct nxflat_loadinfo_s *loadinfo,
 #endif
           if (!symbol)
             {
-              bdbg("Exported symbol \"%s\" not found\n", symname);
+              berr("Exported symbol \"%s\" not found\n", symname);
 #ifdef CONFIG_ARCH_ADDRENV
               (void)nxflat_addrenv_restore(loadinfo);
 #endif
@@ -504,7 +504,7 @@ static inline int nxflat_bindimports(FAR struct nxflat_loadinfo_s *loadinfo,
   ret = nxflat_addrenv_restore(loadinfo);
   if (ret < 0)
     {
-      bdbg("ERROR: nxflat_addrenv_restore() failed: %d\n", ret);
+      berr("ERROR: nxflat_addrenv_restore() failed: %d\n", ret);
     }
 
   return ret;
@@ -542,7 +542,7 @@ static inline int nxflat_clearbss(FAR struct nxflat_loadinfo_s *loadinfo)
   ret = nxflat_addrenv_select(loadinfo);
   if (ret < 0)
     {
-      bdbg("ERROR: nxflat_addrenv_select() failed: %d\n", ret);
+      berr("ERROR: nxflat_addrenv_select() failed: %d\n", ret);
       return ret;
     }
 #endif
@@ -558,7 +558,7 @@ static inline int nxflat_clearbss(FAR struct nxflat_loadinfo_s *loadinfo)
   ret = nxflat_addrenv_restore(loadinfo);
   if (ret < 0)
     {
-      bdbg("ERROR: nxflat_addrenv_restore() failed: %d\n", ret);
+      berr("ERROR: nxflat_addrenv_restore() failed: %d\n", ret);
     }
 
   return ret;

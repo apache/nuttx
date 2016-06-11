@@ -229,10 +229,10 @@
 /* Debug ******************************************************************************/
 
 #ifdef CONFIG_DEBUG_LCD
-#  define lcddbg  dbg
+#  define lcderr  err
 #  define lcdinfo info
 #else
-#  define lcddbg(x...)
+#  define lcderr(x...)
 #  define lcdinfo(x...)
 #endif
 
@@ -543,8 +543,8 @@ static void ssd1289_showrun(FAR struct ssd1289_dev_s *priv, fb_coord_t row,
 
       if (priv->firstrow != priv->lastrow)
         {
-          lcddbg("...\n");
-          lcddbg("%s row: %d col: %d npixels: %d\n",
+          lcderr("...\n");
+          lcderr("%s row: %d col: %d npixels: %d\n",
                  priv->put ? "PUT" : "GET",
                  priv->lastrow, priv->col, priv->npixels);
         }
@@ -553,7 +553,7 @@ static void ssd1289_showrun(FAR struct ssd1289_dev_s *priv, fb_coord_t row,
        * new sequence
        */
 
-      lcddbg("%s row: %d col: %d npixels: %d\n",
+      lcderr("%s row: %d col: %d npixels: %d\n",
              put ? "PUT" : "GET", row, col, npixels);
 
       /* And save information about the run so that we can detect continuations
@@ -1020,7 +1020,7 @@ static inline int ssd1289_hwinitialize(FAR struct ssd1289_dev_s *priv)
   id = ssd1289_readreg(lcd, SSD1289_DEVCODE);
   if (id != 0)
     {
-      lcddbg("LCD ID: %04x\n", id);
+      lcderr("LCD ID: %04x\n", id);
     }
 
   /* If we could not get the ID, then let's just assume that this is an SSD1289.
@@ -1030,7 +1030,7 @@ static inline int ssd1289_hwinitialize(FAR struct ssd1289_dev_s *priv)
 
   else
     {
-      lcddbg("No LCD ID, assuming SSD1289\n");
+      lcderr("No LCD ID, assuming SSD1289\n");
       id = SSD1289_DEVCODE_VALUE;
     }
 
@@ -1273,7 +1273,7 @@ static inline int ssd1289_hwinitialize(FAR struct ssd1289_dev_s *priv)
 #ifndef CONFIG_LCD_NOGETRUN
   else
     {
-      lcddbg("Unsupported LCD type\n");
+      lcderr("Unsupported LCD type\n");
       ret = -ENODEV;
     }
 #endif

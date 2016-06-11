@@ -100,7 +100,7 @@ int sam_sdinitialize(int port, int minor)
   spi = sam_spibus_initialize(port);
   if (!spi)
     {
-      fdbg("Failed to initialize SPI%d\n", port);
+      ferr("Failed to initialize SPI%d\n", port);
       return -ENODEV;
     }
 
@@ -113,7 +113,7 @@ int sam_sdinitialize(int port, int minor)
   ret = mmcsd_spislotinitialize(minor, SAMDL_MMCSDSLOTNO, spi);
   if (ret < 0)
     {
-      fdbg("Failed to bind SPI%d to MMC/SD slot %d: %d\n",
+      ferr("Failed to bind SPI%d to MMC/SD slot %d: %d\n",
             port, SAMDL_MMCSDSLOTNO, ret);
       return ret;
     }

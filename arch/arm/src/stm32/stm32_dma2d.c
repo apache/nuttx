@@ -137,10 +137,10 @@
 /* Debug option */
 
 #ifdef CONFIG_STM32_DMA2D_REGDEBUG
-#  define regdbg       dbg
+#  define regerr       err
 #  define reginfo      info
 #else
-#  define regdbg(x...)
+#  define regerr(x...)
 #  define reginfo(x...)
 #endif
 
@@ -469,7 +469,7 @@ static int stm32_dma2dirq(int irq, void *context)
 
       if (ret != OK)
         {
-          dbg("sem_post() failed\n");
+          err("sem_post() failed\n");
           return ret;
         }
     }
@@ -512,7 +512,7 @@ static int stm32_dma2d_waitforirq(void)
 
       if (ret != OK)
         {
-          dbg("sem_wait() failed\n");
+          err("sem_wait() failed\n");
           return ret;
         }
     }
@@ -711,7 +711,7 @@ static int stm32_dma2d_pixelformat(uint8_t fmt, uint8_t *fmtmap)
         break;
 #endif
       default:
-        gdbg("ERROR: Returning EINVAL\n");
+        gerr("ERROR: Returning EINVAL\n");
         return -EINVAL;
     }
 
@@ -756,7 +756,7 @@ static int stm32_dma2d_bpp(uint8_t fmt, uint8_t *bpp)
         break;
 #endif
       default:
-        gdbg("ERROR: Returning EINVAL\n");
+        gerr("ERROR: Returning EINVAL\n");
         return -EINVAL;
     }
 
@@ -1055,7 +1055,7 @@ static int stm32_dma2d_loutpfc(FAR const struct stm32_dma2d_s *layer)
     {
       /* Destination layer doesn't support CLUT output */
 
-      gdbg("ERROR: Returning ENOSYS, "
+      gerr("ERROR: Returning ENOSYS, "
             "output to layer with CLUT format not supported.\n");
       return -ENOSYS;
     }
@@ -1183,7 +1183,7 @@ static int stm32_dma2dgetvideoinfo(FAR struct dma2d_layer_s *layer,
       return OK;
     }
 
-  gdbg("ERROR: Returning EINVAL\n");
+  gerr("ERROR: Returning EINVAL\n");
   return -ENOSYS;
 }
 
@@ -1220,7 +1220,7 @@ static int stm32_dma2dgetplaneinfo(FAR struct dma2d_layer_s *layer, int planeno,
       return OK;
     }
 
-  gdbg("ERROR: Returning EINVAL\n");
+  gerr("ERROR: Returning EINVAL\n");
   return -EINVAL;
 }
 
@@ -1254,7 +1254,7 @@ static int stm32_dma2dgetlid(FAR struct dma2d_layer_s *layer, int *lid)
       return OK;
     }
 
-  gdbg("ERROR: Returning EINVAL\n");
+  gerr("ERROR: Returning EINVAL\n");
   return -EINVAL;
 }
 
@@ -1320,13 +1320,13 @@ static int stm32_dma2dsetclut(FAR struct dma2d_layer_s *layer,
 
       if (priv->fmt != DMA2D_PF_L8)
         {
-          gdbg("Error: CLUT is not supported for the pixel format: %d\n",
+          gerr("Error: CLUT is not supported for the pixel format: %d\n",
                     priv->vinfo.fmt);
           ret = -EINVAL;
         }
       else if (cmap->first >= STM32_DMA2D_NCLUT)
         {
-          gdbg("Error: only %d color table entries supported\n",
+          gerr("Error: only %d color table entries supported\n",
                     STM32_DMA2D_NCLUT);
           ret = -EINVAL;
         }
@@ -1374,7 +1374,7 @@ static int stm32_dma2dsetclut(FAR struct dma2d_layer_s *layer,
       return ret;
     }
 
-  gdbg("ERROR: Returning EINVAL\n");
+  gerr("ERROR: Returning EINVAL\n");
   return -EINVAL;
 }
 
@@ -1409,13 +1409,13 @@ static int stm32_dma2dgetclut(FAR struct dma2d_layer_s *layer,
 
       if (priv->fmt != DMA2D_PF_L8)
         {
-          gdbg("Error: CLUT is not supported for the pixel format: %d\n",
+          gerr("Error: CLUT is not supported for the pixel format: %d\n",
                     priv->vinfo.fmt);
           ret = -EINVAL;
         }
       else if (cmap->first >= STM32_DMA2D_NCLUT)
         {
-          gdbg("Error: only %d color table entries supported\n",
+          gerr("Error: only %d color table entries supported\n",
                     STM32_DMA2D_NCLUT);
           ret = -EINVAL;
         }
@@ -1461,7 +1461,7 @@ static int stm32_dma2dgetclut(FAR struct dma2d_layer_s *layer,
       return ret;
     }
 
-  gdbg("ERROR: Returning EINVAL\n");
+  gerr("ERROR: Returning EINVAL\n");
   return -EINVAL;
 }
 #endif
@@ -1502,7 +1502,7 @@ static int stm32_dma2dsetalpha(FAR struct dma2d_layer_s *layer, uint8_t alpha)
       return OK;
     }
 
-  gdbg("ERROR: Returning EINVAL\n");
+  gerr("ERROR: Returning EINVAL\n");
   return -EINVAL;
 }
 
@@ -1537,7 +1537,7 @@ static int stm32_dma2dgetalpha(FAR struct dma2d_layer_s *layer, uint8_t *alpha)
       return OK;
     }
 
-  gdbg("ERROR: Returning EINVAL\n");
+  gerr("ERROR: Returning EINVAL\n");
   return -EINVAL;
 }
 
@@ -1588,7 +1588,7 @@ static int stm32_dma2dsetblendmode(FAR struct dma2d_layer_s *layer,
       return OK;
     }
 
-  gdbg("ERROR: Returning EINVAL\n");
+  gerr("ERROR: Returning EINVAL\n");
   return -EINVAL;
 }
 
@@ -1624,7 +1624,7 @@ static int stm32_dma2dgetblendmode(FAR struct dma2d_layer_s *layer,
       return OK;
     }
 
-  gdbg("ERROR: Returning EINVAL\n");
+  gerr("ERROR: Returning EINVAL\n");
   return -EINVAL;
 }
 
@@ -1718,7 +1718,7 @@ static int stm32_dma2dblit(FAR struct dma2d_layer_s *dest,
           if (ret != OK)
             {
               ret = -ECANCELED;
-              gdbg("ERROR: Returning ECANCELED\n");
+              gerr("ERROR: Returning ECANCELED\n");
             }
         }
 
@@ -1727,7 +1727,7 @@ static int stm32_dma2dblit(FAR struct dma2d_layer_s *dest,
   else
     {
       ret = -EINVAL;
-      gdbg("ERROR: Returning EINVAL\n");
+      gerr("ERROR: Returning EINVAL\n");
     }
 
   return ret;
@@ -1832,7 +1832,7 @@ static int stm32_dma2dblend(FAR struct dma2d_layer_s *dest,
           if (ret != OK)
             {
               ret = -ECANCELED;
-              gdbg("ERROR: Returning ECANCELED\n");
+              gerr("ERROR: Returning ECANCELED\n");
             }
         }
 
@@ -1841,7 +1841,7 @@ static int stm32_dma2dblend(FAR struct dma2d_layer_s *dest,
   else
     {
       ret = -EINVAL;
-      gdbg("ERROR: Returning EINVAL\n");
+      gerr("ERROR: Returning EINVAL\n");
     }
 
   return ret;
@@ -1912,7 +1912,7 @@ static int stm32_dma2dfillarea(FAR struct dma2d_layer_s *layer,
           if (ret != OK)
             {
               ret = -ECANCELED;
-              gdbg("ERROR: Returning ECANCELED\n");
+              gerr("ERROR: Returning ECANCELED\n");
             }
         }
 
@@ -1921,7 +1921,7 @@ static int stm32_dma2dfillarea(FAR struct dma2d_layer_s *layer,
   else
     {
       ret = -EINVAL;
-      gdbg("ERROR: Returning EINVAL\n");
+      gerr("ERROR: Returning EINVAL\n");
     }
 
   return ret;
@@ -1954,7 +1954,7 @@ FAR struct dma2d_layer_s * up_dma2dgetlayer(int lid)
       return &priv->dma2d;
     }
 
-  gdbg("ERROR: EINVAL, Unknown layer identifier\n");
+  gerr("ERROR: EINVAL, Unknown layer identifier\n");
   errno = EINVAL;
   return NULL;
 }
@@ -2069,19 +2069,19 @@ FAR struct dma2d_layer_s *up_dma2dcreatelayer(fb_coord_t width,
               /* free the layer struture */
 
               kmm_free(layer);
-              gdbg("ERROR: ENOMEM, Unable to allocate layer buffer\n");
+              gerr("ERROR: ENOMEM, Unable to allocate layer buffer\n");
               errno = ENOMEM;
             }
         }
       else
         {
-          gdbg("ERROR: ENOMEM, unable to allocate layer structure\n");
+          gerr("ERROR: ENOMEM, unable to allocate layer structure\n");
           errno = ENOMEM;
         }
     }
   else
     {
-      gdbg("ERROR: EINVAL, no free layer available\n");
+      gerr("ERROR: EINVAL, no free layer available\n");
       errno = EINVAL;
     }
 
@@ -2148,7 +2148,7 @@ int up_dma2dremovelayer(FAR struct dma2d_layer_s *layer)
 
 int up_dma2dinitialize(void)
 {
-  dbg("Initialize DMA2D driver\n");
+  err("Initialize DMA2D driver\n");
 
   if (g_initialized == false)
     {
@@ -2272,7 +2272,7 @@ FAR struct dma2d_layer_s * stm32_dma2dinitltdc(FAR struct stm32_ltdc_s *layer)
 
   if (ret != OK)
     {
-      dbg("Returning -EINVAL, unsupported pixel format: %d\n",
+      err("Returning -EINVAL, unsupported pixel format: %d\n",
             layer->vinfo.fmt);
       errno = -EINVAL;
       return NULL;

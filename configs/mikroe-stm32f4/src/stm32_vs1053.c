@@ -197,7 +197,7 @@ void up_vs1053initialize(FAR struct spi_dev_s* spi)
   ret = audio_register(name, pVs1053);
   if (ret < 0)
     {
-      auddbg("up_vs1053initialize: Failed to register VS1053 Audio device\n");
+      auderr("up_vs1053initialize: Failed to register VS1053 Audio device\n");
     }
 
   audllinfo("Bound SPI port to VS1053 device %s\n", name);

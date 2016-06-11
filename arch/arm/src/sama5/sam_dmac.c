@@ -657,7 +657,7 @@ static uint8_t sam_channel(uint8_t pid, const struct sam_pidmap_s *table,
         }
     }
 
-  dmadbg("No channel found for pid %d\n", pid);
+  dmaerr("No channel found for pid %d\n", pid);
   DEBUGPANIC();
   return 0x3f;
 }
@@ -2002,7 +2002,7 @@ DMA_HANDLE sam_dmachannel(uint8_t dmacno, uint32_t chflags)
 #endif
 
     {
-      dmadbg("ERROR: Bad DMAC number: %d\n", dmacno);
+      dmaerr("ERROR: Bad DMAC number: %d\n", dmacno);
       DEBUGPANIC();
       return (DMA_HANDLE)NULL;
     }
@@ -2051,7 +2051,7 @@ DMA_HANDLE sam_dmachannel(uint8_t dmacno, uint32_t chflags)
     }
   else
     {
-      dmadbg("ERROR: Failed allocate DMAC%d channel\n", (int)dmacno);
+      dmaerr("ERROR: Failed allocate DMAC%d channel\n", (int)dmacno);
     }
 
   return (DMA_HANDLE)dmach;
@@ -2414,27 +2414,27 @@ void sam_dmadump(DMA_HANDLE handle, const struct sam_dmaregs_s *regs,
   struct sam_dmach_s *dmach = (struct sam_dmach_s *)handle;
   struct sam_dmac_s *dmac = sam_controller(dmach);
 
-  dmadbg("%s\n", msg);
-  dmadbg("  DMA Global Registers:\n");
-  dmadbg("      GCFG[%08x]: %08x\n", dmac->base + SAM_DMAC_GCFG_OFFSET, regs->gcfg);
-  dmadbg("        EN[%08x]: %08x\n", dmac->base + SAM_DMAC_EN_OFFSET, regs->en);
-  dmadbg("      SREQ[%08x]: %08x\n", dmac->base + SAM_DMAC_SREQ_OFFSET, regs->sreq);
-  dmadbg("      CREQ[%08x]: %08x\n", dmac->base + SAM_DMAC_CREQ_OFFSET, regs->creq);
-  dmadbg("      LAST[%08x]: %08x\n", dmac->base + SAM_DMAC_LAST_OFFSET, regs->last);
-  dmadbg("    EBCIMR[%08x]: %08x\n", dmac->base + SAM_DMAC_EBCIMR_OFFSET, regs->ebcimr);
-  dmadbg("    EBCISR[%08x]: %08x\n", dmac->base + SAM_DMAC_EBCISR_OFFSET, regs->ebcisr);
-  dmadbg("      CHSR[%08x]: %08x\n", dmac->base + SAM_DMAC_CHSR_OFFSET, regs->chsr);
-  dmadbg("      WPMR[%08x]: %08x\n", dmac->base + SAM_DMAC_WPMR_OFFSET, regs->wpmr);
-  dmadbg("      WPSR[%08x]: %08x\n", dmac->base + SAM_DMAC_WPSR_OFFSET, regs->wpsr);
-  dmadbg("  DMA Channel Registers:\n");
-  dmadbg("     SADDR[%08x]: %08x\n", dmach->base + SAM_DMAC_CH_SADDR_OFFSET, regs->saddr);
-  dmadbg("     DADDR[%08x]: %08x\n", dmach->base + SAM_DMAC_CH_DADDR_OFFSET, regs->daddr);
-  dmadbg("      DSCR[%08x]: %08x\n", dmach->base + SAM_DMAC_CH_DSCR_OFFSET, regs->dscr);
-  dmadbg("     CTRLA[%08x]: %08x\n", dmach->base + SAM_DMAC_CH_CTRLA_OFFSET, regs->ctrla);
-  dmadbg("     CTRLB[%08x]: %08x\n", dmach->base + SAM_DMAC_CH_CTRLB_OFFSET, regs->ctrlb);
-  dmadbg("       CFG[%08x]: %08x\n", dmach->base + SAM_DMAC_CH_CFG_OFFSET, regs->cfg);
-  dmadbg("      SPIP[%08x]: %08x\n", dmach->base + SAM_DMAC_CH_SPIP_OFFSET, regs->spip);
-  dmadbg("      DPIP[%08x]: %08x\n", dmach->base + SAM_DMAC_CH_DPIP_OFFSET, regs->dpip);
+  dmaerr("%s\n", msg);
+  dmaerr("  DMA Global Registers:\n");
+  dmaerr("      GCFG[%08x]: %08x\n", dmac->base + SAM_DMAC_GCFG_OFFSET, regs->gcfg);
+  dmaerr("        EN[%08x]: %08x\n", dmac->base + SAM_DMAC_EN_OFFSET, regs->en);
+  dmaerr("      SREQ[%08x]: %08x\n", dmac->base + SAM_DMAC_SREQ_OFFSET, regs->sreq);
+  dmaerr("      CREQ[%08x]: %08x\n", dmac->base + SAM_DMAC_CREQ_OFFSET, regs->creq);
+  dmaerr("      LAST[%08x]: %08x\n", dmac->base + SAM_DMAC_LAST_OFFSET, regs->last);
+  dmaerr("    EBCIMR[%08x]: %08x\n", dmac->base + SAM_DMAC_EBCIMR_OFFSET, regs->ebcimr);
+  dmaerr("    EBCISR[%08x]: %08x\n", dmac->base + SAM_DMAC_EBCISR_OFFSET, regs->ebcisr);
+  dmaerr("      CHSR[%08x]: %08x\n", dmac->base + SAM_DMAC_CHSR_OFFSET, regs->chsr);
+  dmaerr("      WPMR[%08x]: %08x\n", dmac->base + SAM_DMAC_WPMR_OFFSET, regs->wpmr);
+  dmaerr("      WPSR[%08x]: %08x\n", dmac->base + SAM_DMAC_WPSR_OFFSET, regs->wpsr);
+  dmaerr("  DMA Channel Registers:\n");
+  dmaerr("     SADDR[%08x]: %08x\n", dmach->base + SAM_DMAC_CH_SADDR_OFFSET, regs->saddr);
+  dmaerr("     DADDR[%08x]: %08x\n", dmach->base + SAM_DMAC_CH_DADDR_OFFSET, regs->daddr);
+  dmaerr("      DSCR[%08x]: %08x\n", dmach->base + SAM_DMAC_CH_DSCR_OFFSET, regs->dscr);
+  dmaerr("     CTRLA[%08x]: %08x\n", dmach->base + SAM_DMAC_CH_CTRLA_OFFSET, regs->ctrla);
+  dmaerr("     CTRLB[%08x]: %08x\n", dmach->base + SAM_DMAC_CH_CTRLB_OFFSET, regs->ctrlb);
+  dmaerr("       CFG[%08x]: %08x\n", dmach->base + SAM_DMAC_CH_CFG_OFFSET, regs->cfg);
+  dmaerr("      SPIP[%08x]: %08x\n", dmach->base + SAM_DMAC_CH_SPIP_OFFSET, regs->spip);
+  dmaerr("      DPIP[%08x]: %08x\n", dmach->base + SAM_DMAC_CH_DPIP_OFFSET, regs->dpip);
 }
 #endif /* CONFIG_DEBUG_DMA */
 #endif /* CONFIG_SAMA5_DMAC0 || CONFIG_SAMA5_DMAC1 */

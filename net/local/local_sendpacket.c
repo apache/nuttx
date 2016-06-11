@@ -100,7 +100,7 @@ static int local_fifo_write(int fd, FAR const uint8_t *buf, size_t len)
 
           if (errcode != EINTR)
             {
-              ndbg("ERROR: Write failed: %d\n", errcode);
+              nerr("ERROR: Write failed: %d\n", errcode);
               return -errcode;
             }
 

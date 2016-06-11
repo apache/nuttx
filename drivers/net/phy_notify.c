@@ -82,10 +82,10 @@
  */
 
 #ifdef CONFIG_NETDEV_PHY_DEBUG
-#  define phydbg    dbg
+#  define phyerr    err
 #  define phyllerr  llerr
 #else
-#  define phydbg(x...)
+#  define phyerr(x...)
 #  define phyllerr(x...)
 #endif
 
@@ -208,14 +208,14 @@ static FAR struct phy_notify_s *phy_find_unassigned(void)
           /* Return the client entry assigned to the caller */
 
           phy_semgive();
-          phydbg("Returning client %d\n", i);
+          phyerr("Returning client %d\n", i);
           return client;
         }
     }
 
   /* Ooops... too many */
 
-  ndbg("ERROR: No free client entries\n");
+  nerr("ERROR: No free client entries\n");
   phy_semgive();
   return NULL;
 }
@@ -243,7 +243,7 @@ static FAR struct phy_notify_s *phy_find_assigned(FAR const char *intf,
           /* Return the matching client entry to the caller */
 
           phy_semgive();
-          phydbg("Returning client %d\n", i);
+          phyerr("Returning client %d\n", i);
           return client;
         }
     }
@@ -367,7 +367,7 @@ int phy_notify_subscribe(FAR const char *intf, pid_t pid, int signo,
   if (pid == 0)
     {
       pid = getpid();
-      phydbg("Actual PID=%d\n", pid);
+      phyerr("Actual PID=%d\n", pid);
     }
 
   /* Check if this client already exists */
@@ -387,7 +387,7 @@ int phy_notify_subscribe(FAR const char *intf, pid_t pid, int signo,
       client = phy_find_unassigned();
       if (!client)
         {
-          ndbg("ERROR: Failed to allocate a client entry\n");
+          nerr("ERROR: Failed to allocate a client entry\n");
           return -ENOMEM;
         }
 
@@ -446,7 +446,7 @@ int phy_notify_unsubscribe(FAR const char *intf, pid_t pid)
   client = phy_find_assigned(intf, pid);
   if (!client)
     {
-      ndbg("ERROR: No such client\n");
+      nerr("ERROR: No such client\n");
       return -ENOENT;
     }
 

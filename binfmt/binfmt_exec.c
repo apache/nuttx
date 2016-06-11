@@ -94,7 +94,7 @@ int exec(FAR const char *filename, FAR char * const *argv,
   bin = (FAR struct binary_s *)kmm_zalloc(sizeof(struct binary_s));
   if (!bin)
     {
-      bdbg("ERROR: Failed to allocate binary_s\n");
+      berr("ERROR: Failed to allocate binary_s\n");
       errcode = ENOMEM;
       goto errout;
     }
@@ -111,7 +111,7 @@ int exec(FAR const char *filename, FAR char * const *argv,
   if (ret < 0)
     {
       errcode = -ret;
-      bdbg("ERROR: Failed to copy argv[]: %d\n", errcode);
+      berr("ERROR: Failed to copy argv[]: %d\n", errcode);
       goto errout_with_bin;
     }
 
@@ -121,7 +121,7 @@ int exec(FAR const char *filename, FAR char * const *argv,
   if (ret < 0)
     {
       errcode = get_errno();
-      bdbg("ERROR: Failed to load program '%s': %d\n", filename, errcode);
+      berr("ERROR: Failed to load program '%s': %d\n", filename, errcode);
       goto errout_with_argv;
     }
 
@@ -138,7 +138,7 @@ int exec(FAR const char *filename, FAR char * const *argv,
   if (pid < 0)
     {
       errcode = get_errno();
-      bdbg("ERROR: Failed to execute program '%s': %d\n", filename, errcode);
+      berr("ERROR: Failed to execute program '%s': %d\n", filename, errcode);
       goto errout_with_lock;
     }
 
@@ -150,7 +150,7 @@ int exec(FAR const char *filename, FAR char * const *argv,
   if (ret < 0)
     {
       errcode = get_errno();
-      bdbg("ERROR: Failed to schedule unload '%s': %d\n", filename, errcode);
+      berr("ERROR: Failed to schedule unload '%s': %d\n", filename, errcode);
     }
 
   sched_unlock();
@@ -183,7 +183,7 @@ errout:
   if (ret < 0)
     {
       errcode = get_errno();
-      bdbg("ERROR: Failed to load program '%s': %d\n", filename, errcode);
+      berr("ERROR: Failed to load program '%s': %d\n", filename, errcode);
       goto errout;
     }
 
@@ -193,7 +193,7 @@ errout:
   if (ret < 0)
     {
       errcode = get_errno();
-      bdbg("ERROR: Failed to execute program '%s': %d\n", filename, errcode);
+      berr("ERROR: Failed to execute program '%s': %d\n", filename, errcode);
       goto errout_with_module;
     }
 

@@ -135,10 +135,10 @@
 /* Debug option */
 
 #ifdef CONFIG_DEBUG_LCD
-#  define lcddbg       dbg
+#  define lcderr       err
 #  define lcdinfo      info
 #else
-#  define lcddbg(x...)
+#  define lcderr(x...)
 #  define lcdinfo(x...)
 #endif
 
@@ -587,7 +587,7 @@ static uint16_t stm32_ili93414ws_recvword(void)
         }
     }
 
-  dbg("Timeout during receiving pixel word\n");
+  err("Timeout during receiving pixel word\n");
 
   return 0;
 }
@@ -1174,7 +1174,7 @@ FAR struct ili9341_lcd_s *stm32_ili93414ws_initialize(void)
   FAR struct spi_dev_s *spi;
   FAR struct ili93414ws_lcd_s *priv = &g_lcddev;
 
-  lcddbg("initialize ili9341 4-wire serial subdriver\n");
+  lcderr("initialize ili9341 4-wire serial subdriver\n");
 
   lcdinfo("initialize spi device: %d\n", ILI93414WS_SPI_DEVICE);
   spi = stm32_spi5initialize();
@@ -1206,7 +1206,7 @@ FAR struct ili9341_lcd_s *stm32_ili93414ws_initialize(void)
   uint32_t    regval;
   FAR struct ili93414ws_lcd_s *priv = &g_lcddev;
 
-  lcddbg("initialize ili9341 4-wire serial subdriver\n");
+  lcderr("initialize ili9341 4-wire serial subdriver\n");
 
   /* Enable spi bus */
 

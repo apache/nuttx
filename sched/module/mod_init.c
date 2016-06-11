@@ -102,7 +102,7 @@ static inline int mod_filelen(FAR struct mod_loadinfo_s *loadinfo,
   if (ret < 0)
     {
       int errval = errno;
-      sdbg("Failed to stat file: %d\n", errval);
+      serr("Failed to stat file: %d\n", errval);
       return -errval;
     }
 
@@ -110,7 +110,7 @@ static inline int mod_filelen(FAR struct mod_loadinfo_s *loadinfo,
 
   if (!S_ISREG(buf.st_mode))
     {
-      sdbg("Not a regular file.  mode: %d\n", buf.st_mode);
+      serr("Not a regular file.  mode: %d\n", buf.st_mode);
       return -ENOENT;
     }
 
@@ -157,7 +157,7 @@ int mod_initialize(FAR const char *filename,
   ret = mod_filelen(loadinfo, filename);
   if (ret < 0)
     {
-      sdbg("mod_filelen failed: %d\n", ret);
+      serr("mod_filelen failed: %d\n", ret);
       return ret;
     }
 
@@ -167,7 +167,7 @@ int mod_initialize(FAR const char *filename,
   if (loadinfo->filfd < 0)
     {
       int errval = errno;
-      sdbg("Failed to open ELF binary %s: %d\n", filename, errval);
+      serr("Failed to open ELF binary %s: %d\n", filename, errval);
       return -errval;
     }
 
@@ -177,7 +177,7 @@ int mod_initialize(FAR const char *filename,
                     sizeof(Elf32_Ehdr), 0);
   if (ret < 0)
     {
-      sdbg("Failed to read ELF header: %d\n", ret);
+      serr("Failed to read ELF header: %d\n", ret);
       return ret;
     }
 
@@ -196,7 +196,7 @@ int mod_initialize(FAR const char *filename,
        * is not correctly formed.
        */
 
-      sdbg("Bad ELF header: %d\n", ret);
+      serr("Bad ELF header: %d\n", ret);
       return ret;
     }
 

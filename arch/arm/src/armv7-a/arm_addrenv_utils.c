@@ -98,7 +98,7 @@ int arm_addrenv_create_region(FAR uintptr_t **list, unsigned int listlen,
   npages = MM_NPAGES(regionsize);
   if (npages > (listlen << (20 - MM_PGSHIFT)))
     {
-      bdbg("ERROR: npages=%u listlen=%u\n", npages, listlen);
+      berr("ERROR: npages=%u listlen=%u\n", npages, listlen);
       return -E2BIG;
     }
 

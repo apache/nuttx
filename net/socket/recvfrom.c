@@ -293,11 +293,11 @@ static inline void recvfrom_newtcpdata(FAR struct net_driver_s *dev,
 #ifdef CONFIG_DEBUG_NET
       if (nsaved < buflen)
         {
-          ndbg("ERROR: packet data not saved (%d bytes)\n", buflen - nsaved);
+          nerr("ERROR: packet data not saved (%d bytes)\n", buflen - nsaved);
         }
 #endif
 #else
-      ndbg("ERROR: packet data lost (%d bytes)\n", dev->d_len - recvlen);
+      nerr("ERROR: packet data lost (%d bytes)\n", dev->d_len - recvlen);
 #endif
    }
 
@@ -1988,7 +1988,7 @@ ssize_t psock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
     default:
       {
-        ndbg("ERROR: Unsupported socket type: %d\n", psock->s_type);
+        nerr("ERROR: Unsupported socket type: %d\n", psock->s_type);
         ret = -ENOSYS;
       }
       break;

@@ -153,7 +153,7 @@ static int nand_lock(FAR struct nand_dev_s *nand)
       errcode = errno;
       DEBUGASSERT(errcode != OK);
 
-      fdbg("sem_wait failed: %d\n", errcode);
+      ferr("sem_wait failed: %d\n", errcode);
       return -errcode;
     }
 
@@ -200,7 +200,7 @@ static int nand_checkblock(FAR struct nand_dev_s *nand, off_t block)
   ret = NAND_RAWREAD(raw, block, 0, 0, spare);
   if (ret < 0)
     {
-      fdbg("ERROR: Failed to read page 0 of block %d\n", block);
+      ferr("ERROR: Failed to read page 0 of block %d\n", block);
       return ret;
     }
 
@@ -216,7 +216,7 @@ static int nand_checkblock(FAR struct nand_dev_s *nand, off_t block)
   ret = NAND_RAWREAD(raw, block, 1, 0, spare);
   if (ret < 0)
     {
-      fdbg("ERROR: Failed to read page 1 of block %d\n", block);
+      ferr("ERROR: Failed to read page 1 of block %d\n", block);
       return ret;
     }
 
@@ -303,7 +303,7 @@ static int nand_devscan(FAR struct nand_dev_s *nand)
             }
           else
             {
-              fdbg("ERROR: Cannot retrieve info from block %u: %d\n",
+              ferr("ERROR: Cannot retrieve info from block %u: %d\n",
                    (unsigned int)block, ret);
             }
         }
@@ -417,7 +417,7 @@ static int nand_eraseblock(FAR struct nand_dev_s *nand, off_t block,
     {
       int tmp;
 
-      fdbg("ERROR: Cannot erase block %ld\n", (long)block);
+      ferr("ERROR: Cannot erase block %ld\n", (long)block);
 
       /* Retrieve the model and scheme */
 
@@ -432,7 +432,7 @@ static int nand_eraseblock(FAR struct nand_dev_s *nand, off_t block,
       tmp = NAND_WRITEPAGE(nand->raw, block, 0, 0, spare);
       if (tmp < 0)
         {
-          fdbg("ERROR: Failed bo marke block %ld as BAD\n", (long)block);
+          ferr("ERROR: Failed bo marke block %ld as BAD\n", (long)block);
         }
     }
 
@@ -467,7 +467,7 @@ static int nand_readpage(FAR struct nand_dev_s *nand, off_t block,
 
   if (nand_checkblock(nand, block) != GOODBLOCK)
     {
-      fdbg("ERROR: Block is BAD\n");
+      ferr("ERROR: Block is BAD\n");
       return -EAGAIN;
    }
 #endif
@@ -520,7 +520,7 @@ static int nand_writepage(FAR struct nand_dev_s *nand, off_t block,
 
   if (nand_checkblock(nand, block) != GOODBLOCK)
     {
-      fdbg("ERROR: Block is BAD\n");
+      ferr("ERROR: Block is BAD\n");
       return -EAGAIN;
     }
 #endif
@@ -574,7 +574,7 @@ static int nand_erase(struct mtd_dev_s *dev, off_t startblock,
       ret = nand_eraseblock(nand, startblock, false);
       if (ret < 0)
         {
-          fdbg("nand_eraseblock failed on block %ld: %d\n",
+          ferr("nand_eraseblock failed on block %ld: %d\n",
                (long)startblock, ret);
           nand_unlock(nand);
           return ret;
@@ -642,7 +642,7 @@ static ssize_t nand_bread(struct mtd_dev_s *dev, off_t startpage,
 
       if (block > maxblock)
         {
-          fdbg("ERROR: Read beyond the end of FLASH, block=%ld\n",
+          ferr("ERROR: Read beyond the end of FLASH, block=%ld\n",
                (long)block);
 
           ret = -ESPIPE;
@@ -654,7 +654,7 @@ static ssize_t nand_bread(struct mtd_dev_s *dev, off_t startpage,
       ret = nand_readpage(nand, block, page, buffer);
       if (ret < 0)
         {
-          fdbg("ERROR: nand_readpage failed block=%ld page=%d: %d\n",
+          ferr("ERROR: nand_readpage failed block=%ld page=%d: %d\n",
                (long)block, page, ret);
           goto errout_with_lock;
         }
@@ -738,7 +738,7 @@ static ssize_t nand_bwrite(struct mtd_dev_s *dev, off_t startpage,
 
       if (block > maxblock)
         {
-          fdbg("ERROR: Write beyond the end of FLASH, block=%ld\n",
+          ferr("ERROR: Write beyond the end of FLASH, block=%ld\n",
                (long)block);
 
           ret = -ESPIPE;
@@ -750,7 +750,7 @@ static ssize_t nand_bwrite(struct mtd_dev_s *dev, off_t startpage,
       ret = nand_writepage(nand, block, page, buffer);
       if (ret < 0)
         {
-          fdbg("ERROR: nand_writepage failed block=%ld page=%d: %d\n",
+          ferr("ERROR: nand_writepage failed block=%ld page=%d: %d\n",
                (long)block, page, ret);
           goto errout_with_lock;
         }
@@ -872,7 +872,7 @@ FAR struct mtd_dev_s *nand_initialize(FAR struct nand_raw_s *raw)
 
   if (!onfi_ebidetect(raw->cmdaddr, raw->addraddr, raw->dataaddr))
     {
-      fdbg("ERROR: No NAND device detected at: %p %p %p\n",
+      ferr("ERROR: No NAND device detected at: %p %p %p\n",
            (FAR void *)raw->cmdaddr, (FAR void *)raw->addraddr,
            (FAR void *)raw->dataaddr);
       return NULL;
@@ -895,7 +895,7 @@ FAR struct mtd_dev_s *nand_initialize(FAR struct nand_raw_s *raw)
       if (nandmodel_find(g_nandmodels, NAND_NMODELS, chipid,
                          &raw->model))
        {
-          fdbg("ERROR: Could not determine NAND model\n");
+          ferr("ERROR: Could not determine NAND model\n");
           return NULL;
         }
     }
@@ -955,7 +955,7 @@ FAR struct mtd_dev_s *nand_initialize(FAR struct nand_raw_s *raw)
   nand = (FAR struct nand_dev_s *)kmm_zalloc(sizeof(struct nand_dev_s));
   if (!nand)
     {
-      fdbg("ERROR: Failed to allocate the NAND MTD device structure\n");
+      ferr("ERROR: Failed to allocate the NAND MTD device structure\n");
       return NULL;
     }
 

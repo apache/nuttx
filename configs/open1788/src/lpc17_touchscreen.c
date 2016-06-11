@@ -277,7 +277,7 @@ int board_tsc_setup(int minor)
   FAR struct spi_dev_s *dev;
   int ret;
 
-  idbg("initialized:%d minor:%d\n", initialized, minor);
+  ierr("initialized:%d minor:%d\n", initialized, minor);
   DEBUGASSERT(minor == 0);
 
   /* Since there is no uninitialized logic, this initialization can be
@@ -301,7 +301,7 @@ int board_tsc_setup(int minor)
       dev = lpc17_sspbus_initialize(CONFIG_ADS7843E_SPIDEV);
       if (!dev)
         {
-          idbg("Failed to initialize SPI bus %d\n", CONFIG_ADS7843E_SPIDEV);
+          ierr("Failed to initialize SPI bus %d\n", CONFIG_ADS7843E_SPIDEV);
           return -ENODEV;
         }
 
@@ -310,7 +310,7 @@ int board_tsc_setup(int minor)
       ret = ads7843e_register(dev, &g_tscinfo, CONFIG_ADS7843E_DEVMINOR);
       if (ret < 0)
         {
-          idbg("Failed to register touchscreen device minor=%d\n",
+          ierr("Failed to register touchscreen device minor=%d\n",
                CONFIG_ADS7843E_DEVMINOR);
        /* up_spiuninitialize(dev); */
           return -ENODEV;

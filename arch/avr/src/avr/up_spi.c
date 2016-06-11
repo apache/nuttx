@@ -72,7 +72,7 @@
 #undef SPI_VERBOSE   /* Define to enable verbose debug */
 
 #ifdef SPI_DEBUG
-#  define spidbg  llerr
+#  define spierr  llerr
 #  ifdef SPI_VERBOSE
 #    define spiinfo llerr
 #  else
@@ -80,7 +80,7 @@
 #  endif
 #else
 #  undef SPI_VERBOSE
-#  define spidbg(x...)
+#  define spierr(x...)
 #  define spiinfo(x...)
 #endif
 
@@ -269,7 +269,7 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
       actual          = priv->actual;
     }
 
-  spidbg("Frequency %d->%d\n", frequency, actual);
+  spierr("Frequency %d->%d\n", frequency, actual);
   return actual;
 }
 
@@ -408,7 +408,7 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size
 {
   FAR uint8_t *ptr = (FAR uint8_t *)buffer;
 
-  spidbg("nwords: %d\n", nwords);
+  spierr("nwords: %d\n", nwords);
   while (nwords-- > 0)
     {
       (void)spi_send(dev, (uint16_t)*ptr++);
@@ -439,7 +439,7 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nw
 {
   FAR uint8_t *ptr = (FAR uint8_t *)buffer;
 
-  spidbg("nwords: %d\n", nwords);
+  spierr("nwords: %d\n", nwords);
   while (nwords-- > 0)
     {
       *ptr++ = spi_send(dev, (uint16_t)0xff);

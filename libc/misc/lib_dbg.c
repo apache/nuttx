@@ -1,5 +1,5 @@
 /****************************************************************************
- * libc/misc/lib_dbg.c
+ * libc/misc/lib_err.c
  *
  *   Copyright (C) 2007-2009, 2011-2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -51,7 +51,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: dbg, llerr, info
+ * Name: err, llerr, info
  *
  * Description:
  *  If the cross-compiler's pre-processor does not support variable
@@ -60,7 +60,7 @@
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_FEATURES
-int dbg(const char *format, ...)
+int err(const char *format, ...)
 {
   va_list ap;
   int     ret;

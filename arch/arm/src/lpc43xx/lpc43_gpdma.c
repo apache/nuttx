@@ -67,7 +67,7 @@
 #undef DMA_VERBOSE   /* Define to enable verbose debug */
 
 #ifdef DMA_DEBUG
-#  define dmadbg  llerr
+#  define dmaerr  llerr
 #  ifdef DMA_VERBOSE
 #    define spiinfo llerr
 #  else
@@ -75,7 +75,7 @@
 #  endif
 #else
 #  undef DMA_VERBOSE
-#  define dmadbg(x...)
+#  define dmaerr(x...)
 #  define spiinfo(x...)
 #endif
 

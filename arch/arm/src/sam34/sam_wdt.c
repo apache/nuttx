@@ -88,10 +88,10 @@
  */
 
 #ifdef CONFIG_DEBUG_WATCHDOG
-#  define wddbg    llerr
+#  define wderr    llerr
 #  define wdinfo   llinfo
 #else
-#  define wddbg(x...)
+#  define wderr(x...)
 #  define wdinfo(x...)
 #endif
 
@@ -477,7 +477,7 @@ static int sam34_settimeout(FAR struct watchdog_lowerhalf_s *lower,
 
   if (timeout < 1 || timeout > WDT_MAXTIMEOUT)
     {
-      wddbg("Cannot represent timeout=%d > %d\n",
+      wderr("Cannot represent timeout=%d > %d\n",
             timeout, WDT_MAXTIMEOUT);
       return -ERANGE;
     }

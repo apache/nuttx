@@ -187,7 +187,7 @@ static int mtd_erase(FAR struct mtd_dev_s *dev, off_t block, size_t nblocks)
   ret = rwb_invalidate(&priv->rwb, sector, nsectors);
   if (ret < 0)
     {
-      fdbg("ERROR: rwb_invalidate failed: %d\n", ret);
+      ferr("ERROR: rwb_invalidate failed: %d\n", ret);
       return ret;
     }
 
@@ -289,7 +289,7 @@ static int mtd_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
           ret = priv->dev->ioctl(priv->dev, MTDIOC_BULKERASE, 0);
           if (ret >= 0)
             {
-              fdbg("ERROR: Device ioctl failed: %d\n", ret);
+              ferr("ERROR: Device ioctl failed: %d\n", ret);
               break;
             }
 
@@ -298,7 +298,7 @@ static int mtd_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
          ret = rwb_invalidate(&priv->rwb, 0, priv->rwb.nblocks);
          if (ret < 0)
            {
-              fdbg("ERROR: rwb_invalidate failed: %d\n", ret);
+              ferr("ERROR: rwb_invalidate failed: %d\n", ret);
            }
         }
         break;
@@ -345,7 +345,7 @@ FAR struct mtd_dev_s *mtd_rwb_initialize(FAR struct mtd_dev_s *mtd)
   ret = mtd->ioctl(mtd, MTDIOC_GEOMETRY, (unsigned long)((uintptr_t)&geo));
   if (ret < 0)
     {
-      fdbg("ERROR: MTDIOC_GEOMETRY ioctl failed: %d\n", ret);
+      ferr("ERROR: MTDIOC_GEOMETRY ioctl failed: %d\n", ret);
       return NULL;
     }
 
@@ -404,7 +404,7 @@ FAR struct mtd_dev_s *mtd_rwb_initialize(FAR struct mtd_dev_s *mtd)
       ret = rwb_initialize(&priv->rwb);
       if (ret < 0)
         {
-          fdbg("ERROR: rwb_initialize failed: %d\n", ret);
+          ferr("ERROR: rwb_initialize failed: %d\n", ret);
           kmm_free(priv);
           return NULL;
         }

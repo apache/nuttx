@@ -175,10 +175,10 @@
 /* Debug ******************************************************************************/
 
 #ifdef CONFIG_DEBUG_LCD
-#  define lcddbg  dbg
+#  define lcderr  err
 #  define lcdinfo info
 #else
-#  define lcddbg(x...)
+#  define lcderr(x...)
 #  define lcdinfo(x...)
 #endif
 
@@ -574,8 +574,8 @@ static void ra8875_showrun(FAR struct ra8875_dev_s *priv, fb_coord_t row,
 
       if (priv->firstrow != priv->lastrow)
         {
-          lcddbg("...\n");
-          lcddbg("%s row: %d col: %d npixels: %d\n",
+          lcderr("...\n");
+          lcderr("%s row: %d col: %d npixels: %d\n",
                  priv->put ? "PUT" : "GET",
                  priv->lastrow, priv->col, priv->npixels);
         }
@@ -584,7 +584,7 @@ static void ra8875_showrun(FAR struct ra8875_dev_s *priv, fb_coord_t row,
        * new sequence
        */
 
-      lcddbg("%s row: %d col: %d npixels: %d\n",
+      lcderr("%s row: %d col: %d npixels: %d\n",
              put ? "PUT" : "GET", row, col, npixels);
 
       /* And save information about the run so that we can detect continuations

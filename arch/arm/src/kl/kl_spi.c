@@ -71,14 +71,14 @@
  */
 
 #ifdef CONFIG_DEBUG_SPI
-#  define spidbg  llerr
+#  define spierr  llerr
 #  ifdef CONFIG_DEBUG_INFO
 #    define spiinfo llerr
 #  else
 #    define spiinfo(x...)
 #  endif
 #else
-#  define spidbg(x...)
+#  define spierr(x...)
 #  define spiinfo(x...)
 #endif
 
@@ -364,7 +364,7 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
   priv->frequency = frequency;
   priv->actual    = actual;
 
-  spidbg("Frequency %d->%d\n", frequency, actual);
+  spierr("Frequency %d->%d\n", frequency, actual);
   return actual;
 }
 
@@ -687,7 +687,7 @@ FAR struct spi_dev_s *kl_spibus_initialize(int port)
   else
 #endif
     {
-      spidbg("ERROR: Port %d not configured\n", port);
+      spierr("ERROR: Port %d not configured\n", port);
       return NULL;
     }
 

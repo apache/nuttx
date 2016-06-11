@@ -89,14 +89,14 @@
 /* Enables debug output from this file */
 
 #ifdef CONFIG_DEBUG_SPI
-#  define spidbg  llerr
+#  define spierr  llerr
 #  ifdef CONFIG_DEBUG_INFO
 #    define spiinfo llerr
 #  else
 #    define spiinfo(x...)
 #  endif
 #else
-#  define spidbg(x...)
+#  define spierr(x...)
 #  define spiinfo(x...)
 #endif
 
@@ -232,14 +232,14 @@ static void spi_select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool sel
     {
       /* Enable slave select (low enables) */
 
-      spidbg("CS asserted\n");
+      spierr("CS asserted\n");
       putreg32(bit, CS_CLR_REGISTER);
     }
   else
     {
       /* Disable slave select (low enables) */
 
-      spidbg("CS de-asserted\n");
+      spierr("CS de-asserted\n");
       putreg32(bit, CS_SET_REGISTER);
 
       /* Wait for the TX FIFO not full indication */
@@ -296,7 +296,7 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
   divisor = (divisor + 1) & ~1;
   putreg8(divisor, LPC214X_SPI1_CPSR);
 
-  spidbg("Frequency %d->%d\n", frequency, LPC214X_PCLKFREQ / divisor);
+  spierr("Frequency %d->%d\n", frequency, LPC214X_PCLKFREQ / divisor);
   return LPC214X_PCLKFREQ / divisor;
 }
 
@@ -321,7 +321,7 @@ static uint8_t spi_status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
    * board.
    */
 
-  spidbg("Return SPI_STATUS_PRESENT\n");
+  spierr("Return SPI_STATUS_PRESENT\n");
   return SPI_STATUS_PRESENT;
 }
 
@@ -392,7 +392,7 @@ static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
   /* Get the value from the RX FIFO and return it */
 
   regval = getreg16(LPC214X_SPI1_DR);
-  spidbg("%04x->%04x\n", wd, regval);
+  spierr("%04x->%04x\n", wd, regval);
   return regval;
 }
 
@@ -422,7 +422,7 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size
 
   /* Loop while thre are bytes remaining to be sent */
 
-  spidbg("nwords: %d\n", nwords);
+  spierr("nwords: %d\n", nwords);
   while (nwords > 0)
     {
       /* While the TX FIFO is not full and there are bytes left to send */
@@ -439,7 +439,7 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size
 
   /* Then discard all card responses until the RX & TX FIFOs are emptied. */
 
-  spidbg("discarding\n");
+  spierr("discarding\n");
   do
     {
       /* Is there anything in the RX fifo? */
@@ -493,7 +493,7 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nw
 
   /* While there is remaining to be sent (and no synchronization error has occurred) */
 
-  spidbg("nwords: %d\n", nwords);
+  spierr("nwords: %d\n", nwords);
   while (nwords || rxpending)
     {
       /* Fill the transmit FIFO with 0xff...

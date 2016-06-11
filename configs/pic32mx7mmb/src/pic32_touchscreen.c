@@ -1282,7 +1282,7 @@ static int tc_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
       if ((fds->events & POLLIN) == 0)
         {
-          idbg("Missing POLLIN: revents: %08x\n", fds->revents);
+          ierr("Missing POLLIN: revents: %08x\n", fds->revents);
           ret = -EDEADLK;
           goto errout;
         }
@@ -1307,7 +1307,7 @@ static int tc_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
       if (i >= CONFIG_TOUCHSCREEN_NPOLLWAITERS)
         {
-          idbg("No availabled slot found: %d\n", i);
+          ierr("No availabled slot found: %d\n", i);
           fds->priv    = NULL;
           ret          = -EBUSY;
           goto errout;
@@ -1389,7 +1389,7 @@ int board_tsc_setup(int minor)
   priv = (FAR struct tc_dev_s *)kmm_malloc(sizeof(struct tc_dev_s));
   if (!priv)
     {
-      idbg("kmm_malloc(%d) failed\n", sizeof(struct tc_dev_s));
+      ierr("kmm_malloc(%d) failed\n", sizeof(struct tc_dev_s));
       return -ENOMEM;
     }
 #endif
@@ -1408,7 +1408,7 @@ int board_tsc_setup(int minor)
   ret = register_driver(devname, &tc_fops, 0666, priv);
   if (ret < 0)
     {
-      idbg("register_driver() failed: %d\n", ret);
+      ierr("register_driver() failed: %d\n", ret);
       goto errout_with_priv;
     }
 
@@ -1420,7 +1420,7 @@ int board_tsc_setup(int minor)
   ret = work_queue(HPWORK, &priv->work, tc_worker, priv, 0);
   if (ret != 0)
     {
-      idbg("Failed to queue work: %d\n", ret);
+      ierr("Failed to queue work: %d\n", ret);
       goto errout_with_priv;
     }
 

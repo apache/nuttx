@@ -216,7 +216,7 @@ int net_vfcntl(int sockfd, int cmd, va_list ap)
 #endif
 #endif /* CONFIG_NET_LOCAL || CONFIG_NET_TCP_READAHEAD || CONFIG_NET_UDP_READAHEAD */
             {
-              ndbg("ERROR: Non-blocking not supported for this socket\n");
+              nerr("ERROR: Non-blocking not supported for this socket\n");
             }
         }
         break;

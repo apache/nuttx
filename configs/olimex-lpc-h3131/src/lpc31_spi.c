@@ -65,7 +65,7 @@
 #undef SPI_VERBOSE /* Define to enable verbose debug */
 
 #ifdef SPI_DEBUG
-#  define spidbg  llerr
+#  define spierr  llerr
 #  ifdef SPI_VERBOSE
 #    define spiinfo llerr
 #  else
@@ -73,7 +73,7 @@
 #  endif
 #else
 #  undef SPI_VERBOSE
-#  define spidbg(x...)
+#  define spierr(x...)
 #  define spiinfo(x...)
 #endif
 
@@ -127,7 +127,7 @@ void weak_function lpc31_spidev_intialize(void)
 
 void lpc31_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
-  spidbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  spierr("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 #warning "Missing logic"
 }
 

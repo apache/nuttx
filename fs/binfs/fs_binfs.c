@@ -146,7 +146,7 @@ static int binfs_open(FAR struct file *filep, FAR const char *relpath,
 
   if ((oflags & O_WRONLY) != 0 || (oflags & O_RDONLY) == 0)
     {
-      fdbg("ERROR: Only O_RDONLY supported\n");
+      ferr("ERROR: Only O_RDONLY supported\n");
       return -EACCES;
     }
 
@@ -157,7 +157,7 @@ static int binfs_open(FAR struct file *filep, FAR const char *relpath,
   index = builtin_isavail(relpath);
   if (index < 0)
     {
-      fdbg("ERROR: Builting %s does not exist\n", relpath);
+      ferr("ERROR: Builting %s does not exist\n", relpath);
       return -ENOENT;
     }
 

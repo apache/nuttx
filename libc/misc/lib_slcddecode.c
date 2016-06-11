@@ -92,10 +92,10 @@
 /* Debug ********************************************************************/
 
 #ifdef CONFIG_DEBUG_LCD
-#  define lcddbg         dbg
+#  define lcderr         err
 #  define lcdinfo        info
 #else
-#  define lcddbg(x...)
+#  define lcderr(x...)
 #  define lcdinfo(x...)
 #endif
 
@@ -264,7 +264,7 @@ enum slcdret_e slcd_decode(FAR struct lib_instream_s *stream,
        * return the following characters later.
        */
 
-      lcddbg("Parsing failed: ESC followed by %02x\n", ch);
+      lcderr("Parsing failed: ESC followed by %02x\n", ch);
       return slcd_reget(state, pch, parg);
     }
 
@@ -295,7 +295,7 @@ enum slcdret_e slcd_decode(FAR struct lib_instream_s *stream,
 
       if (code < (int)FIRST_SLCDCODE || code > (int)LAST_SLCDCODE)
         {
-          lcddbg("Parsing failed: ESC-L followed by %02x\n", ch);
+          lcderr("Parsing failed: ESC-L followed by %02x\n", ch);
 
           /* Not a special command code.. put the character in the reget
            * buffer.
@@ -338,7 +338,7 @@ enum slcdret_e slcd_decode(FAR struct lib_instream_s *stream,
            * following characters later.
            */
 
-          lcddbg("Parsing failed: ESC-L-%c followed by %02x\n",
+          lcderr("Parsing failed: ESC-L-%c followed by %02x\n",
                  state->buf[NDX_COUNTH], ch);
 
           return slcd_reget(state, pch, parg);
@@ -384,7 +384,7 @@ enum slcdret_e slcd_decode(FAR struct lib_instream_s *stream,
            * of the characters later.
            */
 
-          lcddbg("Parsing failed: ESC-L-%c-%c followed by %02x\n",
+          lcderr("Parsing failed: ESC-L-%c-%c followed by %02x\n",
                  state->buf[NDX_COUNTH], state->buf[NDX_COUNTL], ch);
 
           return slcd_reget(state, pch, parg);

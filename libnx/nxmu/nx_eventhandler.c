@@ -164,7 +164,7 @@ int nx_eventhandler(NXHANDLE handle)
                 }
               else
                 {
-                  gdbg("mq_receive failed: %d\n", errno);
+                  gerr("mq_receive failed: %d\n", errno);
                   return ERROR;
                 }
             }
@@ -254,7 +254,7 @@ int nx_eventhandler(NXHANDLE handle)
       break;
 
     default:
-      gdbg("Unrecognized message opcode: %d\n", ((FAR struct nxsvrmsg_s *)buffer)->msgid);
+      gerr("Unrecognized message opcode: %d\n", ((FAR struct nxsvrmsg_s *)buffer)->msgid);
       break;
     }
 

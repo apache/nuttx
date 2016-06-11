@@ -89,7 +89,7 @@
 #endif
 
 #ifdef CONFIG_DEBUG_PWM
-#  define pwmdbg              dbg
+#  define pwmerr              err
 #  define pwmllerr            llerr
 #  ifdef CONFIG_DEBUG_INFO
 #    define pwminfo           info
@@ -101,7 +101,7 @@
 #    define pwm_dumpgpio(p,m)
 #  endif
 #else
-#  define pwmdbg(x...)
+#  define pwmerr(x...)
 #  define pwmllerr(x...)
 #  define pwminfo(x...)
 #  define pwmllinfo(x...)
@@ -245,8 +245,8 @@ static void timer_putreg(struct lpc11_timer_s *priv, int offset,
 #if defined(CONFIG_DEBUG_PWM) && defined(CONFIG_DEBUG_INFO)
 static void timer_dumpregs(struct lpc11_timer_s *priv, FAR const char *msg)
 {
-  pwmdbg("%s:\n", msg);
-  pwmdbg("  CR1: %04x CR2:  %04x SMCR:  %04x DIER:  %04x\n",
+  pwmerr("%s:\n", msg);
+  pwmerr("  CR1: %04x CR2:  %04x SMCR:  %04x DIER:  %04x\n",
           timer_getreg(priv, LPC11_PWM_MR0_OFFSET),
           timer_getreg(priv, LPC11_PWM_MR1_OFFSET),
           timer_getreg(priv, LPC11_PWM_MR2_OFFSET),
@@ -254,7 +254,7 @@ static void timer_dumpregs(struct lpc11_timer_s *priv, FAR const char *msg)
 #if defined(CONFIG_LPC11_TMR0)
   if (priv->timtype == TIMTYPE_ADVANCED)
     {
-      pwmdbg("  RCR: %04x BDTR: %04x DCR:   %04x DMAR:  %04x\n",
+      pwmerr("  RCR: %04x BDTR: %04x DCR:   %04x DMAR:  %04x\n",
               timer_getreg(priv, LPC11_PWM_MR0_OFFSET),
               timer_getreg(priv, LPC11_PWM_MR1_OFFSET),
               timer_getreg(priv, LPC11_PWM_MR2_OFFSET),
@@ -263,7 +263,7 @@ static void timer_dumpregs(struct lpc11_timer_s *priv, FAR const char *msg)
   else
 #endif
     {
-      pwmdbg("  DCR: %04x DMAR: %04x\n",
+      pwmerr("  DCR: %04x DMAR: %04x\n",
               timer_getreg(priv, LPC11_PWM_MR2_OFFSET),
               timer_getreg(priv, LPC11_PWM_MR3_OFFSET));
     }
@@ -469,7 +469,7 @@ static int timer_shutdown(FAR struct pwm_lowerhalf_s *dev)
   FAR struct lpc11_timer_s *priv = (FAR struct lpc11_timer_s *)dev;
   uint32_t pincfg;
 
-  pwmdbg("TIM%d pincfg: %08x\n", priv->timid, priv->pincfg);
+  pwmerr("TIM%d pincfg: %08x\n", priv->timid, priv->pincfg);
 
   /* Make sure that the output has been stopped */
 
@@ -525,7 +525,7 @@ static int timer_stop(FAR struct pwm_lowerhalf_s *dev)
   uint32_t regval;
   irqstate_t flags;
 
-  pwmdbg("TIM%d\n", priv->timid);
+  pwmerr("TIM%d\n", priv->timid);
 
   /* Disable interrupts momentary to stop any ongoing timer processing and
    * to prevent any concurrent access to the reset register.
@@ -551,7 +551,7 @@ static int timer_stop(FAR struct pwm_lowerhalf_s *dev)
 
   leave_critical_section(flags);
 
-  pwmdbg("regaddr: %08x resetbit: %08x\n", regaddr, resetbit);
+  pwmerr("regaddr: %08x resetbit: %08x\n", regaddr, resetbit);
   timer_dumpregs(priv, "After stop");
   return OK;
 }
@@ -580,7 +580,7 @@ static int timer_ioctl(FAR struct pwm_lowerhalf_s *dev, int cmd,
 
   /* There are no platform-specific ioctl commands */
 
-  pwmdbg("TIM%d\n", priv->timid);
+  pwmerr("TIM%d\n", priv->timid);
 #endif
   return -ENOTTY;
 }
@@ -610,7 +610,7 @@ FAR struct pwm_lowerhalf_s *lpc11_timerinitialize(int timer)
 {
   FAR struct lpc11_timer_s *lower;
 
-  pwmdbg("TIM%d\n", timer);
+  pwmerr("TIM%d\n", timer);
 
   switch (timer)
     {
@@ -624,7 +624,7 @@ FAR struct pwm_lowerhalf_s *lpc11_timerinitialize(int timer)
 #endif
 
       default:
-        pwmdbg("No such timer configured\n");
+        pwmerr("No such timer configured\n");
         return NULL;
     }
 

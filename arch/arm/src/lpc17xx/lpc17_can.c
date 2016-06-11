@@ -166,16 +166,16 @@
 
 #ifdef CONFIG_DEBUG_CAN
 #  ifdef CONFIG_CAN_REGDEBUG
-#    define candbg  llerr
+#    define canerr  llerr
 #    define caninfo llinfo
 #  else
-#    define candbg  dbg
+#    define canerr  err
 #    define caninfo info
 #  endif
 #  define canllerr  llerr
 #  define canllinfo llinfo
 #else
-#  define candbg(x...)
+#  define canerr(x...)
 #  define caninfo(x...)
 #  define canllerr(x...)
 #  define canllinfo(x...)
@@ -520,7 +520,7 @@ static void can_reset(FAR struct can_dev_s *dev)
   ret = can_bittiming(priv);
   if (ret != OK)
     {
-      candbg("ERROR: Failed to set bit timing: %d\n", ret);
+      canerr("ERROR: Failed to set bit timing: %d\n", ret);
     }
 
   /* Restart the CAN */
@@ -697,7 +697,7 @@ static void can_txint(FAR struct can_dev_s *dev, bool enable)
 
 static int can_ioctl(FAR struct can_dev_s *dev, int cmd, unsigned long arg)
 {
-  dbg("Fix me:Not Implemented\n");
+  err("Fix me:Not Implemented\n");
   return 0;
 }
 
@@ -717,7 +717,7 @@ static int can_ioctl(FAR struct can_dev_s *dev, int cmd, unsigned long arg)
 
 static int can_remoterequest(FAR struct can_dev_s *dev, uint16_t id)
 {
-  dbg("Fix me:Not Implemented\n");
+  err("Fix me:Not Implemented\n");
   return 0;
 }
 
@@ -878,7 +878,7 @@ static int can_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
     }
   else
     {
-      candbg("No available transmission buffer, SR: %08x\n", regval);
+      canerr("No available transmission buffer, SR: %08x\n", regval);
       ret = -EBUSY;
     }
 
@@ -1299,7 +1299,7 @@ FAR struct can_dev_s *lpc17_caninitialize(int port)
   else
 #endif
     {
-      candbg("Unsupported port: %d\n", port);
+      canerr("Unsupported port: %d\n", port);
       leave_critical_section(flags);
       return NULL;
     }

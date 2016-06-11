@@ -212,14 +212,14 @@ static int ajoy_sample(FAR const struct ajoy_lowerhalf_s *lower,
       int errcode = get_errno();
       if (errcode != EINTR)
         {
-          idbg("ERROR: read failed: %d\n", errcode);
+          ierr("ERROR: read failed: %d\n", errcode);
         }
 
       return -errcode;
     }
   else if (nread < NJOYSTICK_CHANNELS * sizeof(struct adc_msg_s))
     {
-      idbg("ERROR: read too small: %ld\n", (long)nread);
+      ierr("ERROR: read too small: %ld\n", (long)nread);
       return -EIO;
     }
 
@@ -266,7 +266,7 @@ static int ajoy_sample(FAR const struct ajoy_lowerhalf_s *lower,
 
   if (have != 3)
     {
-      idbg("ERROR: Could not find joystick channels\n");
+      ierr("ERROR: Could not find joystick channels\n");
       return -EIO;
     }
 
@@ -460,7 +460,7 @@ int board_ajoy_initialize(void)
   ret = board_adc_initialize();
   if (ret < 0)
     {
-      idbg("ERROR: board_adc_initialize() failed: %d\n", ret);
+      ierr("ERROR: board_adc_initialize() failed: %d\n", ret);
       return ret;
     }
 
@@ -470,7 +470,7 @@ int board_ajoy_initialize(void)
   if (fd < 0)
     {
       int errcode = get_errno();
-      idbg("ERROR: Failed to open /dev/adc0: %d\n", errcode);
+      ierr("ERROR: Failed to open /dev/adc0: %d\n", errcode);
       return -errcode;
     }
 
@@ -481,7 +481,7 @@ int board_ajoy_initialize(void)
   ret = file_detach(fd, &g_adcfile);
   if (ret < 0)
     {
-      idbg("ERROR: Failed to detach from file descriptor: %d\n", ret);
+      ierr("ERROR: Failed to detach from file descriptor: %d\n", ret);
       (void)close(fd);
       return ret;
     }
@@ -506,7 +506,7 @@ int board_ajoy_initialize(void)
   ret = ajoy_register("/dev/ajoy0", &g_ajoylower);
   if (ret < 0)
     {
-      idbg("ERROR: ajoy_register failed: %d\n", ret);
+      ierr("ERROR: ajoy_register failed: %d\n", ret);
 #ifndef NO_JOYSTICK_ADC
       file_close_detached(&g_adcfile);
 #endif

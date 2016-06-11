@@ -121,7 +121,7 @@ static int fat_checkbootrecord(struct fat_mountpt_s *fs)
   if (MBR_GETSIGNATURE(fs->fs_buffer) != BOOT_SIGNATURE16 ||
       MBR_GETBYTESPERSEC(fs->fs_buffer) != fs->fs_hwsectorsize)
     {
-      fdbg("ERROR: Signature: %04x FS sectorsize: %d HW sectorsize: %d\n",
+      ferr("ERROR: Signature: %04x FS sectorsize: %d HW sectorsize: %d\n",
             MBR_GETSIGNATURE(fs->fs_buffer), MBR_GETBYTESPERSEC(fs->fs_buffer),
             fs->fs_hwsectorsize);
 
@@ -159,7 +159,7 @@ static int fat_checkbootrecord(struct fat_mountpt_s *fs)
 
   if (!fs->fs_nfatsects || fs->fs_nfatsects >= fs->fs_hwnsectors)
     {
-      fdbg("ERROR: fs_nfatsects %d fs_hwnsectors: %d\n",
+      ferr("ERROR: fs_nfatsects %d fs_hwnsectors: %d\n",
            fs->fs_nfatsects, fs->fs_hwnsectors);
 
       return -EINVAL;
@@ -179,7 +179,7 @@ static int fat_checkbootrecord(struct fat_mountpt_s *fs)
 
   if (!fs->fs_fattotsec || fs->fs_fattotsec > fs->fs_hwnsectors)
     {
-      fdbg("ERROR: fs_fattotsec %d fs_hwnsectors: %d\n",
+      ferr("ERROR: fs_fattotsec %d fs_hwnsectors: %d\n",
            fs->fs_fattotsec, fs->fs_hwnsectors);
 
       return -EINVAL;
@@ -190,7 +190,7 @@ static int fat_checkbootrecord(struct fat_mountpt_s *fs)
   fs->fs_fatresvdseccount = MBR_GETRESVDSECCOUNT(fs->fs_buffer);
   if (fs->fs_fatresvdseccount > fs->fs_hwnsectors)
     {
-      fdbg("ERROR: fs_fatresvdseccount %d fs_hwnsectors: %d\n",
+      ferr("ERROR: fs_fatresvdseccount %d fs_hwnsectors: %d\n",
            fs->fs_fatresvdseccount, fs->fs_hwnsectors);
 
       return -EINVAL;
@@ -206,7 +206,7 @@ static int fat_checkbootrecord(struct fat_mountpt_s *fs)
   ndatasectors = fs->fs_fattotsec - fs->fs_fatresvdseccount - ntotalfatsects - rootdirsectors;
   if (ndatasectors > fs->fs_hwnsectors)
     {
-      fdbg("ERROR: ndatasectors %d fs_hwnsectors: %d\n",
+      ferr("ERROR: ndatasectors %d fs_hwnsectors: %d\n",
            ndatasectors, fs->fs_hwnsectors);
 
       return -EINVAL;
@@ -239,7 +239,7 @@ static int fat_checkbootrecord(struct fat_mountpt_s *fs)
     }
   else
     {
-      fdbg("ERROR: notfat32: %d fs_nclusters: %d\n",
+      ferr("ERROR: notfat32: %d fs_nclusters: %d\n",
            notfat32, fs->fs_nclusters);
 
       return -EINVAL;
@@ -594,7 +594,7 @@ int fat_mount(struct fat_mountpt_s *fs, bool writeable)
             {
               /* Failed to read the sector */
 
-              fdbg("ERROR: Failed to read sector %ld: %d\n",
+              ferr("ERROR: Failed to read sector %ld: %d\n",
                    (long)fs->fs_fatbase, ret);
               continue;
             }
@@ -616,14 +616,14 @@ int fat_mount(struct fat_mountpt_s *fs, bool writeable)
           ret = fat_hwread(fs, fs->fs_buffer, 0, 1);
           if (ret < 0)
             {
-              fdbg("ERROR: Failed to re-read sector 0: %d\n", ret);
+              ferr("ERROR: Failed to re-read sector 0: %d\n", ret);
               goto errout_with_buffer;
             }
         }
 
       if (i > 3)
         {
-          fdbg("No valid MBR\n");
+          ferr("No valid MBR\n");
           ret = -EINVAL;
           goto errout_with_buffer;
         }
@@ -644,22 +644,22 @@ int fat_mount(struct fat_mountpt_s *fs, bool writeable)
 
   /* We did it! */
 
-  fdbg("FAT%d:\n", fs->fs_type == 0 ? 12 : fs->fs_type == 1  ? 16 : 32);
-  fdbg("\tHW  sector size:     %d\n", fs->fs_hwsectorsize);
-  fdbg("\t    sectors:         %d\n", fs->fs_hwnsectors);
-  fdbg("\tFAT reserved:        %d\n", fs->fs_fatresvdseccount);
-  fdbg("\t    sectors:         %d\n", fs->fs_fattotsec);
-  fdbg("\t    start sector:    %d\n", fs->fs_fatbase);
-  fdbg("\t    root sector:     %d\n", fs->fs_rootbase);
-  fdbg("\t    root entries:    %d\n", fs->fs_rootentcnt);
-  fdbg("\t    data sector:     %d\n", fs->fs_database);
-  fdbg("\t    FSINFO sector:   %d\n", fs->fs_fsinfo);
-  fdbg("\t    Num FATs:        %d\n", fs->fs_fatnumfats);
-  fdbg("\t    FAT sectors:     %d\n", fs->fs_nfatsects);
-  fdbg("\t    sectors/cluster: %d\n", fs->fs_fatsecperclus);
-  fdbg("\t    max clusters:    %d\n", fs->fs_nclusters);
-  fdbg("\tFSI free count       %d\n", fs->fs_fsifreecount);
-  fdbg("\t    next free        %d\n", fs->fs_fsinextfree);
+  ferr("FAT%d:\n", fs->fs_type == 0 ? 12 : fs->fs_type == 1  ? 16 : 32);
+  ferr("\tHW  sector size:     %d\n", fs->fs_hwsectorsize);
+  ferr("\t    sectors:         %d\n", fs->fs_hwnsectors);
+  ferr("\tFAT reserved:        %d\n", fs->fs_fatresvdseccount);
+  ferr("\t    sectors:         %d\n", fs->fs_fattotsec);
+  ferr("\t    start sector:    %d\n", fs->fs_fatbase);
+  ferr("\t    root sector:     %d\n", fs->fs_rootbase);
+  ferr("\t    root entries:    %d\n", fs->fs_rootentcnt);
+  ferr("\t    data sector:     %d\n", fs->fs_database);
+  ferr("\t    FSINFO sector:   %d\n", fs->fs_fsinfo);
+  ferr("\t    Num FATs:        %d\n", fs->fs_fatnumfats);
+  ferr("\t    FAT sectors:     %d\n", fs->fs_nfatsects);
+  ferr("\t    sectors/cluster: %d\n", fs->fs_fatsecperclus);
+  ferr("\t    max clusters:    %d\n", fs->fs_nclusters);
+  ferr("\tFSI free count       %d\n", fs->fs_fsifreecount);
+  ferr("\t    next free        %d\n", fs->fs_fsinextfree);
 
   return OK;
 

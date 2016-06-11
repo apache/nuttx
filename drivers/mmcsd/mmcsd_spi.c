@@ -431,7 +431,7 @@ static int mmcsd_waitready(FAR struct mmcsd_slot_s *slot)
     }
   while (elapsed < MMCSD_DELAY_500MS);
 
-  fdbg("Card still busy, last response: %02x\n", response);
+  ferr("Card still busy, last response: %02x\n", response);
   return -EBUSY;
 }
 
@@ -504,7 +504,7 @@ static uint32_t mmcsd_sendcmd(FAR struct mmcsd_slot_s *slot,
 
   if ((response & 0x80) != 0)
     {
-      fdbg("Failed: i=%d response=%02x\n", i, response);
+      ferr("Failed: i=%d response=%02x\n", i, response);
       return (uint32_t)-1;
     }
 
@@ -531,7 +531,7 @@ static uint32_t mmcsd_sendcmd(FAR struct mmcsd_slot_s *slot,
 
         if (busy != 0xff)
           {
-            fdbg("Failed: card still busy (%02x)\n", busy);
+            ferr("Failed: card still busy (%02x)\n", busy);
             return (uint32_t)-1;
           }
 
@@ -613,7 +613,7 @@ static void mmcsd_setblklen(FAR struct mmcsd_slot_s *slot, uint32_t length)
   response = mmcsd_sendcmd(slot, &g_cmd16, length);
   if (response != MMCSD_SPIR1_OK)
     {
-      fdbg("Failed to set block length: %02x\n", response);
+      ferr("Failed to set block length: %02x\n", response);
     }
 }
 
@@ -813,7 +813,7 @@ static void mmcsd_decodecsd(FAR struct mmcsd_slot_s *slot, uint8_t *csd)
     {
       if (readbllen > 9)
         {
-          fdbg("Forcing 512 byte sector size\n");
+          ferr("Forcing 512 byte sector size\n");
           csizemult += (readbllen - 9);
           readbllen  = 9;
         }
@@ -880,7 +880,7 @@ static int mmcsd_getcardinfo(FAR struct mmcsd_slot_s *slot, uint8_t *buffer,
   result = mmcsd_sendcmd(slot, cmd, 0);
   if (result != MMCSD_SPIR1_OK)
     {
-      fdbg("CMD9/10 failed: R1=%02x\n", result);
+      ferr("CMD9/10 failed: R1=%02x\n", result);
       return -EIO;
     }
 
@@ -898,7 +898,7 @@ static int mmcsd_getcardinfo(FAR struct mmcsd_slot_s *slot, uint8_t *buffer,
 
       if (response != 0 && (response & MMCSD_SPIDET_UPPER) == 0)
         {
-          fdbg("%d. Data transfer error: %02x\n", i, response);
+          ferr("%d. Data transfer error: %02x\n", i, response);
           return -EIO;
         }
       else if (response == MMCSD_SPIDT_STARTBLKSNGL)
@@ -916,7 +916,7 @@ static int mmcsd_getcardinfo(FAR struct mmcsd_slot_s *slot, uint8_t *buffer,
         }
     }
 
-  fdbg("%d. Did not find start of block\n");
+  ferr("%d. Did not find start of block\n");
   return -EIO;
 }
 
@@ -960,7 +960,7 @@ static int mmcsd_recvblock(FAR struct mmcsd_slot_s *slot, uint8_t *buffer,
       return OK;
     }
 
-  fdbg("Did not receive data token (%02x)\n", token);
+  ferr("Did not receive data token (%02x)\n", token);
   return ERROR;
 }
 
@@ -1004,7 +1004,7 @@ static int mmcsd_xmitblock(FAR struct mmcsd_slot_s *slot,
   response = SPI_SEND(spi, 0xff);
   if ((response & MMCSD_SPIDR_MASK) != MMCSD_SPIDR_ACCEPTED)
     {
-      fdbg("Bad data response: %02x\n", response);
+      ferr("Bad data response: %02x\n", response);
       return -EIO;
     }
 
@@ -1034,7 +1034,7 @@ static int mmcsd_open(FAR struct inode *inode)
 #ifdef CONFIG_DEBUG_FEATURES
   if (!inode || !inode->i_private)
     {
-      fdbg("Internal confusion\n");
+      ferr("Internal confusion\n");
       return -EIO;
     }
 #endif
@@ -1047,7 +1047,7 @@ static int mmcsd_open(FAR struct inode *inode)
 #ifdef CONFIG_DEBUG_FEATURES
   if (!spi)
     {
-      fdbg("Internal confusion\n");
+      ferr("Internal confusion\n");
       return -EIO;
     }
 #endif
@@ -1119,13 +1119,13 @@ static ssize_t mmcsd_read(FAR struct inode *inode, unsigned char *buffer,
 #ifdef CONFIG_DEBUG_FEATURES
   if (!buffer)
     {
-      fdbg("Invalid parameters\n");
+      ferr("Invalid parameters\n");
       return -EINVAL;
     }
 
   if (!inode || !inode->i_private)
     {
-      fdbg("Internal confusion\n");
+      ferr("Internal confusion\n");
       return -EIO;
     }
 #endif
@@ -1138,7 +1138,7 @@ static ssize_t mmcsd_read(FAR struct inode *inode, unsigned char *buffer,
 #ifdef CONFIG_DEBUG_FEATURES
   if (!spi)
     {
-      fdbg("Internal confusion\n");
+      ferr("Internal confusion\n");
       return -EIO;
     }
 #endif
@@ -1147,7 +1147,7 @@ static ssize_t mmcsd_read(FAR struct inode *inode, unsigned char *buffer,
 
   if (slot->state & MMCSD_SLOTSTATUS_NOTREADY)
     {
-      fdbg("Slot not ready\n");
+      ferr("Slot not ready\n");
       return -ENODEV;
     }
 
@@ -1190,7 +1190,7 @@ static ssize_t mmcsd_read(FAR struct inode *inode, unsigned char *buffer,
       response = mmcsd_sendcmd(slot, &g_cmd17, offset);
       if (response != MMCSD_SPIR1_OK)
         {
-          fdbg("CMD17 failed: R1=%02x\n", response);
+          ferr("CMD17 failed: R1=%02x\n", response);
           goto errout_with_eio;
         }
 
@@ -1198,7 +1198,7 @@ static ssize_t mmcsd_read(FAR struct inode *inode, unsigned char *buffer,
 
       if (mmcsd_recvblock(slot, buffer, SECTORSIZE(slot)) != 0)
         {
-          fdbg("Failed: to receive the block\n");
+          ferr("Failed: to receive the block\n");
           goto errout_with_eio;
         }
     }
@@ -1211,7 +1211,7 @@ static ssize_t mmcsd_read(FAR struct inode *inode, unsigned char *buffer,
       response = mmcsd_sendcmd(slot, &g_cmd18, offset);
       if (response != MMCSD_SPIR1_OK)
         {
-          fdbg("CMD18 failed: R1=%02x\n", response);
+          ferr("CMD18 failed: R1=%02x\n", response);
           goto errout_with_eio;
         }
 
@@ -1221,7 +1221,7 @@ static ssize_t mmcsd_read(FAR struct inode *inode, unsigned char *buffer,
         {
           if (mmcsd_recvblock(slot, buffer, SECTORSIZE(slot)) != 0)
             {
-              fdbg("Failed: to receive the block\n");
+              ferr("Failed: to receive the block\n");
               goto errout_with_eio;
             }
 
@@ -1273,13 +1273,13 @@ static ssize_t mmcsd_write(FAR struct inode *inode, const unsigned char *buffer,
 #ifdef CONFIG_DEBUG_FEATURES
   if (!buffer)
     {
-      fdbg("Invalid parameters\n");
+      ferr("Invalid parameters\n");
       return -EINVAL;
     }
 
   if (!inode || !inode->i_private)
     {
-      fdbg("Internal confusion\n");
+      ferr("Internal confusion\n");
       return -EIO;
     }
 #endif
@@ -1292,7 +1292,7 @@ static ssize_t mmcsd_write(FAR struct inode *inode, const unsigned char *buffer,
 #ifdef CONFIG_DEBUG_FEATURES
   if (!spi)
     {
-      fdbg("Internal confusion\n");
+      ferr("Internal confusion\n");
       return -EIO;
     }
 #endif
@@ -1301,7 +1301,7 @@ static ssize_t mmcsd_write(FAR struct inode *inode, const unsigned char *buffer,
 
   if (slot->state & MMCSD_SLOTSTATUS_NOTREADY)
     {
-      fdbg("Slot not ready\n");
+      ferr("Slot not ready\n");
       return -ENODEV;
     }
 
@@ -1309,7 +1309,7 @@ static ssize_t mmcsd_write(FAR struct inode *inode, const unsigned char *buffer,
 
   if (slot->state & MMCSD_SLOTSTATUS_WRPROTECT)
     {
-      fdbg("Not write enabled\n");
+      ferr("Not write enabled\n");
       return -EACCES;
     }
 
@@ -1352,7 +1352,7 @@ static ssize_t mmcsd_write(FAR struct inode *inode, const unsigned char *buffer,
       response = mmcsd_sendcmd(slot, &g_cmd24, offset);
       if (response != MMCSD_SPIR1_OK)
         {
-          fdbg("CMD24 failed: R1=%02x\n", response);
+          ferr("CMD24 failed: R1=%02x\n", response);
           goto errout_with_sem;
         }
 
@@ -1360,7 +1360,7 @@ static ssize_t mmcsd_write(FAR struct inode *inode, const unsigned char *buffer,
 
       if (mmcsd_xmitblock(slot, buffer, SECTORSIZE(slot), 0xfe) != 0)
         {
-          fdbg("Block transfer failed\n");
+          ferr("Block transfer failed\n");
           goto errout_with_sem;
         }
     }
@@ -1373,14 +1373,14 @@ static ssize_t mmcsd_write(FAR struct inode *inode, const unsigned char *buffer,
           response = mmcsd_sendcmd(slot, &g_cmd55, 0);
           if (response != MMCSD_SPIR1_OK)
             {
-              fdbg("CMD55 failed: R1=%02x\n", response);
+              ferr("CMD55 failed: R1=%02x\n", response);
               goto errout_with_sem;
             }
 
           response = mmcsd_sendcmd(slot, &g_acmd23, nsectors);
           if (response != MMCSD_SPIR1_OK)
             {
-              fdbg("ACMD23 failed: R1=%02x\n", response);
+              ferr("ACMD23 failed: R1=%02x\n", response);
               goto errout_with_sem;
             }
        }
@@ -1392,7 +1392,7 @@ static ssize_t mmcsd_write(FAR struct inode *inode, const unsigned char *buffer,
       response = mmcsd_sendcmd(slot, &g_cmd25, offset);
       if (response != MMCSD_SPIR1_OK)
         {
-          fdbg("CMD25 failed: R1=%02x\n", response);
+          ferr("CMD25 failed: R1=%02x\n", response);
           goto errout_with_sem;
         }
 
@@ -1402,14 +1402,14 @@ static ssize_t mmcsd_write(FAR struct inode *inode, const unsigned char *buffer,
         {
           if (mmcsd_xmitblock(slot, buffer, SECTORSIZE(slot), 0xfc) != 0)
             {
-              fdbg("Failed: to receive the block\n");
+              ferr("Failed: to receive the block\n");
               goto errout_with_sem;
             }
           buffer += SECTORSIZE(slot);
 
           if (mmcsd_waitready(slot) != OK)
             {
-              fdbg("Failed: card is busy\n");
+              ferr("Failed: card is busy\n");
               goto errout_with_sem;
             }
         }
@@ -1455,13 +1455,13 @@ static int mmcsd_geometry(FAR struct inode *inode, struct geometry *geometry)
 #ifdef CONFIG_DEBUG_FEATURES
   if (!geometry)
     {
-      fdbg("Invalid parameters\n");
+      ferr("Invalid parameters\n");
       return -EINVAL;
     }
 
   if (!inode || !inode->i_private)
     {
-      fdbg("Internal confusion\n");
+      ferr("Internal confusion\n");
       return -EIO;
     }
 #endif
@@ -1474,7 +1474,7 @@ static int mmcsd_geometry(FAR struct inode *inode, struct geometry *geometry)
 #ifdef CONFIG_DEBUG_FEATURES
   if (!spi)
     {
-      fdbg("Internal confusion\n");
+      ferr("Internal confusion\n");
       return -EIO;
     }
 #endif
@@ -1489,7 +1489,7 @@ static int mmcsd_geometry(FAR struct inode *inode, struct geometry *geometry)
   if (ret < 0)
     {
       mmcsd_semgive(slot);
-      fdbg("mmcsd_getcsd returned %d\n", ret);
+      ferr("mmcsd_getcsd returned %d\n", ret);
       return ret;
     }
 
@@ -1566,7 +1566,7 @@ static int mmcsd_mediainitialize(FAR struct mmcsd_slot_s *slot)
 
   if ((SPI_STATUS(spi, SPIDEV_MMCSD) & SPI_STATUS_PRESENT) == 0)
     {
-      fdbg("No card present\n");
+      ferr("No card present\n");
       slot->state |= MMCSD_SLOTSTATUS_NODISK;
       return -ENODEV;
     }
@@ -1621,7 +1621,7 @@ static int mmcsd_mediainitialize(FAR struct mmcsd_slot_s *slot)
 
   if (result != MMCSD_SPIR1_IDLESTATE)
     {
-      fdbg("Send CMD0 failed: R1=%02x\n", result);
+      ferr("Send CMD0 failed: R1=%02x\n", result);
       SPI_SELECT(spi, SPIDEV_MMCSD, false);
       mmcsd_semgive(slot);
       return -EIO;
@@ -1678,12 +1678,12 @@ static int mmcsd_mediainitialize(FAR struct mmcsd_slot_s *slot)
                   finfo("OCR: %08x\n", slot->ocr);
                   if ((slot->ocr & MMCSD_OCR_CCS) != 0)
                     {
-                      fdbg("Identified SD ver2 card/with block access\n");
+                      ferr("Identified SD ver2 card/with block access\n");
                       slot->type = MMCSD_CARDTYPE_SDV2 | MMCSD_CARDTYPE_BLOCK;
                     }
                   else
                     {
-                      fdbg("Identified SD ver2 card\n");
+                      ferr("Identified SD ver2 card\n");
                       slot->type = MMCSD_CARDTYPE_SDV2;
                     }
                }
@@ -1706,7 +1706,7 @@ static int mmcsd_mediainitialize(FAR struct mmcsd_slot_s *slot)
           result = mmcsd_sendcmd(slot, &g_acmd41, 0);
           if (result == MMCSD_SPIR1_IDLESTATE || result == MMCSD_SPIR1_OK)
             {
-              fdbg("Identified SD ver1 card\n");
+              ferr("Identified SD ver1 card\n");
               slot->type = MMCSD_CARDTYPE_SDV1;
             }
         }
@@ -1736,7 +1736,7 @@ static int mmcsd_mediainitialize(FAR struct mmcsd_slot_s *slot)
               result = mmcsd_sendcmd(slot, &g_cmd1, 0);
               if (result == MMCSD_SPIR1_OK)
                 {
-                   fdbg("%d. Identified MMC card\n", i);
+                   ferr("%d. Identified MMC card\n", i);
                    slot->type = MMCSD_CARDTYPE_MMC;
                    break;
                 }
@@ -1748,7 +1748,7 @@ static int mmcsd_mediainitialize(FAR struct mmcsd_slot_s *slot)
 
       if (elapsed >= MMCSD_DELAY_1SEC)
         {
-          fdbg("Failed to exit IDLE state\n");
+          ferr("Failed to exit IDLE state\n");
           SPI_SELECT(spi, SPIDEV_MMCSD, false);
           mmcsd_semgive(slot);
           return -EIO;
@@ -1757,7 +1757,7 @@ static int mmcsd_mediainitialize(FAR struct mmcsd_slot_s *slot)
 
   if (slot->type == MMCSD_CARDTYPE_UNKNOWN)
     {
-      fdbg("Failed to identify card\n");
+      ferr("Failed to identify card\n");
       SPI_SELECT(spi, SPIDEV_MMCSD, false);
       mmcsd_semgive(slot);
       return -EIO;
@@ -1769,7 +1769,7 @@ static int mmcsd_mediainitialize(FAR struct mmcsd_slot_s *slot)
   result = mmcsd_getcsd(slot, csd);
   if (result != OK)
     {
-      fdbg("mmcsd_getcsd(CMD9) failed: %d\n", result);
+      ferr("mmcsd_getcsd(CMD9) failed: %d\n", result);
       SPI_SELECT(spi, SPIDEV_MMCSD, false);
       mmcsd_semgive(slot);
       return -EIO;
@@ -1836,7 +1836,7 @@ static void mmcsd_mediachanged(void *arg)
 #ifdef CONFIG_DEBUG_FEATURES
   if (!slot || !slot->spi)
     {
-      fdbg("Internal confusion\n");
+      ferr("Internal confusion\n");
       return;
     }
 #endif
@@ -1857,7 +1857,7 @@ static void mmcsd_mediachanged(void *arg)
     {
       /* Media is not present */
 
-      fdbg("No card present\n");
+      ferr("No card present\n");
       slot->state |= (MMCSD_SLOTSTATUS_NODISK | MMCSD_SLOTSTATUS_NOTREADY);
 
       /* Was media removed? */
@@ -1918,7 +1918,7 @@ int mmcsd_spislotinitialize(int minor, int slotno, FAR struct spi_dev_s *spi)
 #ifdef CONFIG_DEBUG_FEATURES
   if ((unsigned)slotno >= CONFIG_MMCSD_NSLOTS || (unsigned)minor > 255 || !spi)
     {
-      fdbg("Invalid arguments\n");
+      ferr("Invalid arguments\n");
       return -EINVAL;
     }
 #endif
@@ -1932,7 +1932,7 @@ int mmcsd_spislotinitialize(int minor, int slotno, FAR struct spi_dev_s *spi)
 #ifdef CONFIG_DEBUG_FEATURES
   if (slot->spi)
     {
-      fdbg("Already registered\n");
+      ferr("Already registered\n");
       return -EBUSY;
     }
 #endif
@@ -1969,7 +1969,7 @@ int mmcsd_spislotinitialize(int minor, int slotno, FAR struct spi_dev_s *spi)
   ret = register_blockdriver(devname, &g_bops, MMCSD_MODE, slot);
   if (ret < 0)
     {
-      fdbg("register_blockdriver failed: %d\n", -ret);
+      ferr("register_blockdriver failed: %d\n", -ret);
       slot->spi = NULL;
       return ret;
     }

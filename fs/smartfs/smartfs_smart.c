@@ -505,7 +505,7 @@ static ssize_t smartfs_read(FAR struct file *filep, char *buffer, size_t buflen)
       ret = FS_IOCTL(fs, BIOC_READSECT, (unsigned long) &readwrite);
       if (ret < 0)
         {
-          fdbg("Error %d reading sector %d data\n", ret, sf->currsector);
+          ferr("Error %d reading sector %d data\n", ret, sf->currsector);
           goto errout_with_semaphore;
         }
 
@@ -614,7 +614,7 @@ static int smartfs_sync_internal(struct smartfs_mountpt_s *fs,
       ret = FS_IOCTL(fs, BIOC_WRITESECT, (unsigned long) &readwrite);
       if (ret < 0)
         {
-          fdbg("Error %d writing used bytes for sector %d\n", ret, sf->currsector);
+          ferr("Error %d writing used bytes for sector %d\n", ret, sf->currsector);
           goto errout;
         }
 
@@ -639,7 +639,7 @@ static int smartfs_sync_internal(struct smartfs_mountpt_s *fs,
       ret = FS_IOCTL(fs, BIOC_READSECT, (unsigned long) &readwrite);
       if (ret < 0)
         {
-          fdbg("Error %d reading sector %d data\n", ret, sf->currsector);
+          ferr("Error %d reading sector %d data\n", ret, sf->currsector);
           goto errout;
         }
 
@@ -661,7 +661,7 @@ static int smartfs_sync_internal(struct smartfs_mountpt_s *fs,
       ret = FS_IOCTL(fs, BIOC_WRITESECT, (unsigned long) &readwrite);
       if (ret < 0)
         {
-          fdbg("Error %d writing used bytes for sector %d\n", ret, sf->currsector);
+          ferr("Error %d writing used bytes for sector %d\n", ret, sf->currsector);
           goto errout;
         }
 
@@ -766,7 +766,7 @@ static ssize_t smartfs_write(FAR struct file *filep, const char *buffer,
           ret = FS_IOCTL(fs, BIOC_WRITESECT, (unsigned long) &readwrite);
           if (ret < 0)
             {
-              fdbg("Error %d writing sector %d data\n", ret, sf->currsector);
+              ferr("Error %d writing sector %d data\n", ret, sf->currsector);
               goto errout_with_semaphore;
             }
 
@@ -793,7 +793,7 @@ static ssize_t smartfs_write(FAR struct file *filep, const char *buffer,
           ret = FS_IOCTL(fs, BIOC_READSECT, (unsigned long) &readwrite);
           if (ret < 0)
             {
-              fdbg("Error %d reading sector %d header\n", ret, sf->currsector);
+              ferr("Error %d reading sector %d header\n", ret, sf->currsector);
               goto errout_with_semaphore;
             }
 
@@ -841,7 +841,7 @@ static ssize_t smartfs_write(FAR struct file *filep, const char *buffer,
           ret = FS_IOCTL(fs, BIOC_WRITESECT, (unsigned long) &readwrite);
           if (ret < 0)
             {
-              fdbg("Error %d writing sector %d data\n", ret, sf->currsector);
+              ferr("Error %d writing sector %d data\n", ret, sf->currsector);
               goto errout_with_semaphore;
             }
         }
@@ -867,7 +867,7 @@ static ssize_t smartfs_write(FAR struct file *filep, const char *buffer,
           ret = FS_IOCTL(fs, BIOC_ALLOCSECT, 0xFFFF);
           if (ret < 0)
             {
-              fdbg("Error %d allocating new sector\n", ret);
+              ferr("Error %d allocating new sector\n", ret);
               goto errout_with_semaphore;
             }
 
@@ -892,7 +892,7 @@ static ssize_t smartfs_write(FAR struct file *filep, const char *buffer,
             {
               /* Error allocating logical sector! */
 
-              fdbg("Error - duplicate logical sector %d\n", sf->currsector);
+              ferr("Error - duplicate logical sector %d\n", sf->currsector);
             }
 
           sf->bflags = SMARTFS_BFLAG_DIRTY;
@@ -922,7 +922,7 @@ static ssize_t smartfs_write(FAR struct file *filep, const char *buffer,
               ret = FS_IOCTL(fs, BIOC_ALLOCSECT, 0xFFFF);
               if (ret < 0)
                 {
-                  fdbg("Error %d allocating new sector\n", ret);
+                  ferr("Error %d allocating new sector\n", ret);
                   goto errout_with_semaphore;
                 }
 
@@ -937,7 +937,7 @@ static ssize_t smartfs_write(FAR struct file *filep, const char *buffer,
               ret = FS_IOCTL(fs, BIOC_WRITESECT, (unsigned long) &readwrite);
               if (ret < 0)
                 {
-                  fdbg("Error %d writing next sector\n", ret);
+                  ferr("Error %d writing next sector\n", ret);
                   goto errout_with_semaphore;
                 }
 
@@ -949,7 +949,7 @@ static ssize_t smartfs_write(FAR struct file *filep, const char *buffer,
                 {
                   /* Error allocating logical sector! */
 
-                  fdbg("Error - duplicate logical sector %d\n", sf->currsector);
+                  ferr("Error - duplicate logical sector %d\n", sf->currsector);
                 }
 
               sf->currsector = SMARTFS_NEXTSECTOR(header);
@@ -1078,7 +1078,7 @@ static off_t smartfs_seek_internal(struct smartfs_mountpt_s *fs,
       ret = FS_IOCTL(fs, BIOC_READSECT, (unsigned long) &readwrite);
       if (ret < 0)
         {
-          fdbg("Error %d reading sector %d header\n", ret, sf->currsector);
+          ferr("Error %d reading sector %d header\n", ret, sf->currsector);
           goto errout;
         }
 
@@ -1103,7 +1103,7 @@ static off_t smartfs_seek_internal(struct smartfs_mountpt_s *fs,
       ret = FS_IOCTL(fs, BIOC_READSECT, (unsigned long) &readwrite);
       if (ret < 0)
         {
-          fdbg("Error %d reading sector %d header\n", ret, sf->currsector);
+          ferr("Error %d reading sector %d header\n", ret, sf->currsector);
           goto errout;
         }
     }
@@ -1933,7 +1933,7 @@ int smartfs_rename(struct inode *mountpt, const char *oldrelpath,
           ret = FS_IOCTL(fs, BIOC_READSECT, (unsigned long) &readwrite);
           if (ret < 0)
             {
-              fdbg("Error %d reading sector %d data\n", ret, oldentry.dsector);
+              ferr("Error %d reading sector %d data\n", ret, oldentry.dsector);
               goto errout_with_semaphore;
             }
 
@@ -2005,7 +2005,7 @@ int smartfs_rename(struct inode *mountpt, const char *oldrelpath,
       ret = FS_IOCTL(fs, BIOC_READSECT, (unsigned long) &readwrite);
       if (ret < 0)
         {
-          fdbg("Error %d reading sector %d data\n", ret, oldentry.dsector);
+          ferr("Error %d reading sector %d data\n", ret, oldentry.dsector);
           goto errout_with_semaphore;
         }
 
@@ -2024,7 +2024,7 @@ int smartfs_rename(struct inode *mountpt, const char *oldrelpath,
       ret = FS_IOCTL(fs, BIOC_WRITESECT, (unsigned long) &readwrite);
       if (ret < 0)
         {
-          fdbg("Error %d writing flag bytes for sector %d\n", ret, readwrite.logsector);
+          ferr("Error %d writing flag bytes for sector %d\n", ret, readwrite.logsector);
           goto errout_with_semaphore;
         }
     }

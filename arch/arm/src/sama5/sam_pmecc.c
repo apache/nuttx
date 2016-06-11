@@ -632,7 +632,7 @@ static uint32_t pmecc_errorcorrection(uintptr_t sectorbase,
 
           if (bytepos < sectorsz + nand_getreg(SAM_HSMC_PMECCSADDR))
             {
-              fdbg("Correct error bit @[Byte %d, Bit %d]\n",
+              ferr("Correct error bit @[Byte %d, Bit %d]\n",
                       (int)bytepos, (int)bitpos);
 
               if (*(uint8_t *)(sectorbase + bytepos) & (1 << bitpos))
@@ -870,7 +870,7 @@ static int pmecc_pagelayout(uint16_t datasize, uint16_t eccsize)
   bcherr512   = pmecc_bcherr512(nsectors512, eccsize);
   if (bcherr512 < 0)
     {
-      fdbg("WARNING: Cannot realize 512B sectors\n");
+      ferr("WARNING: Cannot realize 512B sectors\n");
     }
   else
     {
@@ -895,7 +895,7 @@ static int pmecc_pagelayout(uint16_t datasize, uint16_t eccsize)
 
   if (bcherr1k < 0)
     {
-      fdbg("WARNING: Cannot realize 1KB sectors\n");
+      ferr("WARNING: Cannot realize 1KB sectors\n");
     }
   else
     {
@@ -1059,7 +1059,7 @@ int pmecc_configure(struct sam_nandcs_s *priv, bool protected)
   ret = pmecc_pagelayout(priv->raw.model.pagesize, eccsize);
   if (ret < 0)
     {
-      fdbg("ERROR: pmecc_pagelayout failed: %d\n", ret);
+      ferr("ERROR: pmecc_pagelayout failed: %d\n", ret);
       return ret;
     }
 
@@ -1114,7 +1114,7 @@ int pmecc_configure(struct sam_nandcs_s *priv, bool protected)
           g_pmecc.desc.pagesize = HSMC_PMECCFG_PAGESIZE_8SEC;
           break;
       default:
-        fdbg("ERROR: Unsupported sectors per page: %d\n", sectorsperpage);
+        ferr("ERROR: Unsupported sectors per page: %d\n", sectorsperpage);
         return -EINVAL;
     }
 
@@ -1148,7 +1148,7 @@ int pmecc_configure(struct sam_nandcs_s *priv, bool protected)
 
   if (g_pmecc.desc.eccend > priv->raw.model.sparesize)
     {
-      fdbg("ERROR: No room for ECC in spare bytes %d > %d\n",
+      ferr("ERROR: No room for ECC in spare bytes %d > %d\n",
            g_pmecc.desc.eccend, priv->raw.model.sparesize);
 
       return -ENOSPC;

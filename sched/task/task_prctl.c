@@ -111,7 +111,7 @@ int prctl(int option, ...)
 
         if (!tcb)
           {
-            sdbg("Pid does not correspond to a task: %d\n", pid);
+            serr("Pid does not correspond to a task: %d\n", pid);
             errcode = ESRCH;
             goto errout;
           }
@@ -120,7 +120,7 @@ int prctl(int option, ...)
 
         if (!name)
           {
-            sdbg("No name provide\n");
+            serr("No name provide\n");
             errcode = EFAULT;
             goto errout;
           }
@@ -144,13 +144,13 @@ int prctl(int option, ...)
       }
       break;
 #else
-      sdbg("Option not enabled: %d\n", option);
+      serr("Option not enabled: %d\n", option);
       errcode = ENOSYS;
       goto errout;
 #endif
 
     default:
-      sdbg("Unrecognized option: %d\n", option);
+      serr("Unrecognized option: %d\n", option);
       errcode = EINVAL;
       goto errout;
     }

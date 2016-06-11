@@ -179,9 +179,9 @@
 /* Debug ******************************************************************************/
 
 #ifdef CONFIG_LCD_ST7565DEBUG
-#  define st7565dbg(format, ...)  info(format, ##__VA_ARGS__)
+#  define st7565err(format, ...)  info(format, ##__VA_ARGS__)
 #else
-#  define st7565dbg(x...)
+#  define st7565err(x...)
 #endif
 
 /**************************************************************************************

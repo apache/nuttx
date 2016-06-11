@@ -401,7 +401,7 @@
 #endif
 
 #ifdef CONFIG_DEBUG_PWM
-#  define pwmdbg              dbg
+#  define pwmerr              err
 #  define pwmllerr            llerr
 #  ifdef CONFIG_DEBUG_INFO
 #    define pwminfo           info
@@ -411,7 +411,7 @@
 #    define pwmllinfo(x...)
 #  endif
 #else
-#  define pwmdbg(x...)
+#  define pwmerr(x...)
 #  define pwmllerr(x...)
 #  define pwminfo(x...)
 #  define pwmllinfo(x...)
@@ -1124,7 +1124,7 @@ static int pwm_start(FAR struct pwm_lowerhalf_s *dev,
 #endif
 
     default:
-      pwmdbg("ERROR: Invalid or unsupported clock source value: %d\n", chan->clksrc);
+      pwmerr("ERROR: Invalid or unsupported clock source value: %d\n", chan->clksrc);
       return -EINVAL;
     }
 
@@ -1336,7 +1336,7 @@ FAR struct pwm_lowerhalf_s *sam_pwminitialize(int channel)
 #endif
 
       default:
-        pwmdbg("ERROR: Channel invalid or not configured: %d\n", channel);
+        pwmerr("ERROR: Channel invalid or not configured: %d\n", channel);
         return NULL;
     }
 
@@ -1366,7 +1366,7 @@ FAR struct pwm_lowerhalf_s *sam_pwminitialize(int channel)
       ret = irq_attach(SAM_IRQ_PWM, pwm_interrupt);
       if (ret < 0)
         {
-          pwmdbg("ERROR: Failed to attach IRQ%d\n", channel);
+          pwmerr("ERROR: Failed to attach IRQ%d\n", channel);
           return NULL;
 
         }

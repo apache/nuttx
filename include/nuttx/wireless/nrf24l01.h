@@ -91,12 +91,12 @@
 /* NRF24L01 debug */
 
 #ifdef NRF24L01_DEBUG
-# define wdbg(format, ...)           dbg(format, ##__VA_ARGS__)
+# define werr(format, ...)           err(format, ##__VA_ARGS__)
 # define wllerr(format, ...)         llerr(format, ##__VA_ARGS__)
 # define winfo(format, ...)          info(format, ##__VA_ARGS__)
 # define wllinfo(format, ...)        llinfo(format, ##__VA_ARGS__)
 #else
-# define wdbg(x...)
+# define werr(x...)
 # define wllerr(x...)
 # define winfo(x...)
 # define wllinfo(x...)

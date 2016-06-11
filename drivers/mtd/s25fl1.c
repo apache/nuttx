@@ -620,7 +620,7 @@ static inline int s25fl1_readid(struct s25fl1_dev_s *priv)
 
   if (priv->cmdbuf[1] != S25FL1_JEDEC_DEVICE_TYPE)
     {
-      fdbg("ERROR: Unrecognized device type: %02x\n", priv->cmdbuf[1]);
+      ferr("ERROR: Unrecognized device type: %02x\n", priv->cmdbuf[1]);
       return -ENODEV;
     }
 
@@ -649,7 +649,7 @@ static inline int s25fl1_readid(struct s25fl1_dev_s *priv)
       /* Support for this part is not implemented yet */
 
       default:
-        fdbg("ERROR: Unsupported memory capacity: %02x\n", priv->cmdbuf[2]);
+        ferr("ERROR: Unsupported memory capacity: %02x\n", priv->cmdbuf[2]);
         return -ENODEV;
     }
 
@@ -837,7 +837,7 @@ static int s25fl1_erase_sector(struct s25fl1_dev_s *priv, off_t sector)
   status = sf25fl1_read_status1(priv);
   if ((status & STATUS1_BUSY_MASK) != STATUS1_READY)
     {
-      fdbg("ERROR: Flash busy: %02x", status);
+      ferr("ERROR: Flash busy: %02x", status);
       return -EBUSY;
     }
 
@@ -848,7 +848,7 @@ static int s25fl1_erase_sector(struct s25fl1_dev_s *priv, off_t sector)
   if ((status & STATUS1_BP_MASK) != 0 &&
       s25fl1_isprotected(priv, status, address))
     {
-      fdbg("ERROR: Flash protected: %02x", status);
+      ferr("ERROR: Flash protected: %02x", status);
       return -EACCES;
     }
 
@@ -876,7 +876,7 @@ static int s25fl1_erase_chip(struct s25fl1_dev_s *priv)
   status = sf25fl1_read_status1(priv);
   if ((status & STATUS1_BP_MASK) != 0)
     {
-      fdbg("ERROR: FLASH is Protected: %02x", status);
+      ferr("ERROR: FLASH is Protected: %02x", status);
       return -EACCES;
     }
 
@@ -976,7 +976,7 @@ static int s25fl1_write_page(struct s25fl1_dev_s *priv, FAR const uint8_t *buffe
 
       if (ret < 0)
         {
-          fdbg("ERROR: QSPI_MEMORY failed writing address=%06x\n",
+          ferr("ERROR: QSPI_MEMORY failed writing address=%06x\n",
                address);
           return ret;
         }
@@ -1023,7 +1023,7 @@ static int s25fl1_flush_cache(struct s25fl1_dev_s *priv)
       ret = s25fl1_write_page(priv, priv->sector, address, 1 << priv->sectorshift);
       if (ret < 0)
         {
-          fdbg("ERROR: s25fl1_write_page failed: %d\n", ret);
+          ferr("ERROR: s25fl1_write_page failed: %d\n", ret);
         }
 
       /* The case is no long dirty and the FLASH is no longer erased */
@@ -1066,7 +1066,7 @@ static FAR uint8_t *s25fl1_read_cache(struct s25fl1_dev_s *priv, off_t sector)
       ret = s25fl1_flush_cache(priv);
       if (ret < 0)
         {
-          fdbg("ERROR: s25fl1_flush_cache failed: %d\n", ret);
+          ferr("ERROR: s25fl1_flush_cache failed: %d\n", ret);
           return NULL;
         }
 
@@ -1077,7 +1077,7 @@ static FAR uint8_t *s25fl1_read_cache(struct s25fl1_dev_s *priv, off_t sector)
                              (1 << priv->sectorshift));
       if (ret < 0)
         {
-          fdbg("ERROR: s25fl1_read_byte failed: %d\n", ret);
+          ferr("ERROR: s25fl1_read_byte failed: %d\n", ret);
           return NULL;
         }
 
@@ -1172,7 +1172,7 @@ static int s25fl1_write_cache(FAR struct s25fl1_dev_s *priv,
           ret = s25fl1_erase_sector(priv, esectno);
           if (ret < 0)
             {
-              fdbg("ERROR: s25fl1_erase_sector failed: %d\n", ret);
+              ferr("ERROR: s25fl1_erase_sector failed: %d\n", ret);
               return ret;
             }
 
@@ -1295,7 +1295,7 @@ static ssize_t s25fl1_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
   ret = s25fl1_write_cache(priv, buffer, startblock, nblocks);
   if (ret < 0)
     {
-      fdbg("ERROR: s25fl1_write_cache failed: %d\n", ret);
+      ferr("ERROR: s25fl1_write_cache failed: %d\n", ret);
     }
 
 #else
@@ -1303,7 +1303,7 @@ static ssize_t s25fl1_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
                           nblocks << priv->sectorshift);
   if (ret < 0)
     {
-      fdbg("ERROR: s25fl1_write_page failed: %d\n", ret);
+      ferr("ERROR: s25fl1_write_page failed: %d\n", ret);
     }
 #endif
 
@@ -1332,7 +1332,7 @@ static ssize_t s25fl1_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbyte
 
   if (ret < 0)
     {
-      fdbg("ERROR: s25fl1_read_byte returned: %d\n", ret);
+      ferr("ERROR: s25fl1_read_byte returned: %d\n", ret);
       return (ssize_t)ret;
     }
 
@@ -1476,7 +1476,7 @@ FAR struct mtd_dev_s *s25fl1_initialize(FAR struct qspi_dev_s *qspi, bool unprot
       priv->cmdbuf = (FAR uint8_t *)QSPI_ALLOC(qspi, 4);
       if (priv->cmdbuf == NULL)
         {
-          fdbg("ERROR Failed to allocate command buffer\n");
+          ferr("ERROR Failed to allocate command buffer\n");
           goto errout_with_priv;
         }
 
@@ -1485,7 +1485,7 @@ FAR struct mtd_dev_s *s25fl1_initialize(FAR struct qspi_dev_s *qspi, bool unprot
       priv->readbuf = (FAR uint8_t *)QSPI_ALLOC(qspi, 1);
       if (priv->readbuf == NULL)
         {
-          fdbg("ERROR Failed to allocate read buffer\n");
+          ferr("ERROR Failed to allocate read buffer\n");
           goto errout_with_cmdbuf;
         }
 
@@ -1496,7 +1496,7 @@ FAR struct mtd_dev_s *s25fl1_initialize(FAR struct qspi_dev_s *qspi, bool unprot
         {
           /* Unrecognized! Discard all of that work we just did and return NULL */
 
-          fdbg("ERROR Unrecognized QSPI device\n");
+          ferr("ERROR Unrecognized QSPI device\n");
           goto errout_with_readbuf;
         }
 
@@ -1521,7 +1521,7 @@ FAR struct mtd_dev_s *s25fl1_initialize(FAR struct qspi_dev_s *qspi, bool unprot
           ret = s25fl1_unprotect(priv, 0, priv->nsectors - 1);
           if (ret < 0)
             {
-              fdbg("ERROR: Sector unprotect failed\n");
+              ferr("ERROR: Sector unprotect failed\n");
             }
         }
 
@@ -1533,7 +1533,7 @@ FAR struct mtd_dev_s *s25fl1_initialize(FAR struct qspi_dev_s *qspi, bool unprot
         {
           /* Allocation failed! Discard all of that work we just did and return NULL */
 
-          fdbg("ERROR: Sector allocation failed\n");
+          ferr("ERROR: Sector allocation failed\n");
           goto errout_with_readbuf;
         }
 #endif

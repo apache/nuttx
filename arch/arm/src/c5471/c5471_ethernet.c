@@ -737,22 +737,22 @@ static int c5471_phyinit (void)
   phyid = (c5471_mdread(0, MD_PHY_MSB_REG) << 16) | c5471_mdread(0, MD_PHY_LSB_REG);
   if (phyid != LU3X31_T64_PHYID)
     {
-      ndbg("Unrecognized PHY ID: %08x\n", phyid);
+      nerr("Unrecognized PHY ID: %08x\n", phyid);
       return ERROR;
     }
 
   /* Next, Set desired network rate, 10BaseT, 100BaseT, or auto. */
 
 #ifdef CONFIG_C5471_AUTONEGOTIATION
-  ndbg("Setting PHY Transceiver for Autonegotiation\n");
+  nerr("Setting PHY Transceiver for Autonegotiation\n");
   c5471_mdwrite(0, MD_PHY_CONTROL_REG, MODE_AUTONEG);
 #endif
 #ifdef CONFIG_C5471_BASET100
-  ndbg("Setting PHY Transceiver for 100BaseT FullDuplex\n");
+  nerr("Setting PHY Transceiver for 100BaseT FullDuplex\n");
   c5471_mdwrite(0, MD_PHY_CONTROL_REG, MODE_100MBIT_FULLDUP);
 #endif
 #ifdef CONFIG_C5471_BASET10
-  ndbg("Setting PHY Transceiver for 10BaseT FullDuplex\n");
+  nerr("Setting PHY Transceiver for 10BaseT FullDuplex\n");
   c5471_mdwrite(0, MD_PHY_CONTROL_REG, MODE_10MBIT_FULLDUP);
 #endif
 
@@ -1371,7 +1371,7 @@ static void c5471_receive(struct c5471_driver_s *c5471)
     {
       /* Increment the count of dropped packets */
 
-      ndbg("Too big! packetlen: %d\n", packetlen);
+      nerr("Too big! packetlen: %d\n", packetlen);
       c5471->c_rxdropped++;
     }
 #endif
@@ -1680,7 +1680,7 @@ static int c5471_ifup(struct net_driver_s *dev)
   struct c5471_driver_s *c5471 = (struct c5471_driver_s *)dev->d_private;
   volatile uint32_t clearbits;
 
-  ndbg("Bringing up: %d.%d.%d.%d\n",
+  nerr("Bringing up: %d.%d.%d.%d\n",
        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
 
@@ -1742,7 +1742,7 @@ static int c5471_ifdown(struct net_driver_s *dev)
   struct c5471_driver_s *c5471 = (struct c5471_driver_s *)dev->d_private;
   irqstate_t flags;
 
-  ndbg("Stopping\n");
+  nerr("Stopping\n");
 
   /* Disable the Ethernet interrupt */
 
@@ -1798,7 +1798,7 @@ static int c5471_txavail(struct net_driver_s *dev)
   struct c5471_driver_s *c5471 = (struct c5471_driver_s *)dev->d_private;
   irqstate_t flags;
 
-  ndbg("Polling\n");
+  nerr("Polling\n");
   flags = enter_critical_section();
 
   /* Ignore the notification if the interface is not yet up */
@@ -1951,7 +1951,7 @@ static void c5471_eimconfig(struct c5471_driver_s *c5471)
 
   /* TX ENET 0 */
 
-  ndbg("TX ENET0 desc: %08x pbuf: %08x\n", desc, pbuf);
+  nerr("TX ENET0 desc: %08x pbuf: %08x\n", desc, pbuf);
   putreg32((desc & 0x0000ffff), ENET0_TDBA); /* 16-bit offset address */
   for (i = NUM_DESC_TX-1; i >= 0; i--)
     {
@@ -1978,7 +1978,7 @@ static void c5471_eimconfig(struct c5471_driver_s *c5471)
 
   /* RX ENET 0 */
 
-  ndbg("RX ENET0 desc: %08x pbuf: %08x\n", desc, pbuf);
+  nerr("RX ENET0 desc: %08x pbuf: %08x\n", desc, pbuf);
   putreg32((desc & 0x0000ffff), ENET0_RDBA); /* 16-bit offset address */
   for (i = NUM_DESC_RX-1; i >= 0; i--)
     {
@@ -2005,7 +2005,7 @@ static void c5471_eimconfig(struct c5471_driver_s *c5471)
 
   /* TX CPU */
 
-  ndbg("TX CPU desc: %08x pbuf: %08x\n", desc, pbuf);
+  nerr("TX CPU desc: %08x pbuf: %08x\n", desc, pbuf);
   c5471->c_txcpudesc = desc;
   putreg32((desc & 0x0000ffff), EIM_CPU_TXBA); /* 16-bit offset address */
   for (i = NUM_DESC_TX-1; i >= 0; i--)
@@ -2035,7 +2035,7 @@ static void c5471_eimconfig(struct c5471_driver_s *c5471)
 
   /* RX CPU */
 
-  ndbg("RX CPU desc: %08x pbuf: %08x\n", desc, pbuf);
+  nerr("RX CPU desc: %08x pbuf: %08x\n", desc, pbuf);
   c5471->c_rxcpudesc = desc;
   putreg32((desc & 0x0000ffff), EIM_CPU_RXBA); /* 16-bit offset address */
   for (i = NUM_DESC_RX-1; i >= 0; i--)
@@ -2063,7 +2063,7 @@ static void c5471_eimconfig(struct c5471_driver_s *c5471)
       pbuf += sizeof(uint32_t); /* Ether Module's "Buffer Usage Word" */
     }
 
-  ndbg("END desc: %08x pbuf: %08x\n", desc, pbuf);
+  nerr("END desc: %08x pbuf: %08x\n", desc, pbuf);
 
   /* Save the descriptor packet size */
 
@@ -2150,13 +2150,13 @@ static void c5471_eimconfig(struct c5471_driver_s *c5471)
 static void c5471_reset(struct c5471_driver_s *c5471)
 {
 #if defined(CONFIG_C5471_PHY_LU3X31T_T64)
-  ndbg("EIM reset\n");
+  nerr("EIM reset\n");
   c5471_eimreset(c5471);
 #endif
-  ndbg("PHY init\n");
+  nerr("PHY init\n");
   c5471_phyinit();
 
-  ndbg("EIM config\n");
+  nerr("EIM config\n");
   c5471_eimconfig(c5471);
 }
 
@@ -2178,7 +2178,7 @@ static void c5471_macassign(struct c5471_driver_s *c5471)
   uint8_t *mptr = dev->d_mac.ether_addr_octet;
   register uint32_t tmp;
 
-  ndbg("MAC: %0x:%0x:%0x:%0x:%0x:%0x\n",
+  nerr("MAC: %0x:%0x:%0x:%0x:%0x:%0x\n",
         mptr[0], mptr[1], mptr[2], mptr[3], mptr[4], mptr[5]);
 
   /* Set CPU port MAC address. S/W will only see incoming packets that match

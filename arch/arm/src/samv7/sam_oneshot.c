@@ -178,7 +178,7 @@ int sam_oneshot_initialize(struct sam_oneshot_s *oneshot, int chan,
   ret = sam_tc_clockselect(frequency, &cmr, &actual);
   if (ret < 0)
     {
-      tcdbg("ERROR: sam_tc_clockselect failed: %d\n", ret);
+      tcerr("ERROR: sam_tc_clockselect failed: %d\n", ret);
       return ret;
     }
 
@@ -218,7 +218,7 @@ int sam_oneshot_initialize(struct sam_oneshot_s *oneshot, int chan,
   oneshot->tch = sam_tc_allocate(chan, cmr);
   if (!oneshot->tch)
     {
-      tcdbg("ERROR: Failed to allocate timer channel %d\n", chan);
+      tcerr("ERROR: Failed to allocate timer channel %d\n", chan);
       return -EBUSY;
     }
 

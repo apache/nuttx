@@ -1455,7 +1455,7 @@ static inline int tiva_ethinitialize(int intf)
 
   /* Check if the Ethernet module is present */
 
-  ndbg("Setting up eth%d\n", intf);
+  nerr("Setting up eth%d\n", intf);
 
 #if TIVA_NETHCONTROLLERS > 1
 # error "This debug check only works with one interface"

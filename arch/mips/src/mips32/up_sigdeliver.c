@@ -96,7 +96,7 @@ void up_sigdeliver(void)
 
   board_autoled_on(LED_SIGNAL);
 
-  sdbg("rtcb=%p sigdeliver=%p sigpendactionq.head=%p\n",
+  serr("rtcb=%p sigdeliver=%p sigpendactionq.head=%p\n",
         rtcb, rtcb->xcp.sigdeliver, rtcb->sigpendactionq.head);
   ASSERT(rtcb->xcp.sigdeliver != NULL);
 

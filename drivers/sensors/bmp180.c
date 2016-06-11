@@ -198,7 +198,7 @@ static uint8_t bmp180_getreg8(FAR struct bmp180_dev_s *priv, uint8_t regaddr)
   ret = i2c_write(priv->i2c, &config, &regaddr, 1);
   if (ret < 0)
     {
-      sndbg("i2c_write failed: %d\n", ret);
+      snerr("i2c_write failed: %d\n", ret);
       return ret;
     }
 
@@ -207,7 +207,7 @@ static uint8_t bmp180_getreg8(FAR struct bmp180_dev_s *priv, uint8_t regaddr)
   ret = i2c_read(priv->i2c, &config, &regval, 1);
   if (ret < 0)
     {
-      sndbg("i2c_read failed: %d\n", ret);
+      snerr("i2c_read failed: %d\n", ret);
       return ret;
     }
 
@@ -240,7 +240,7 @@ static uint16_t bmp180_getreg16(FAR struct bmp180_dev_s *priv, uint8_t regaddr)
   ret = i2c_write(priv->i2c, &config, &regaddr, 1);
   if (ret < 0)
     {
-      sndbg("i2c_write failed: %d\n", ret);
+      snerr("i2c_write failed: %d\n", ret);
       return ret;
     }
 
@@ -249,7 +249,7 @@ static uint16_t bmp180_getreg16(FAR struct bmp180_dev_s *priv, uint8_t regaddr)
   ret = i2c_read(priv->i2c, &config, (uint8_t *)&regval, 2);
   if (ret < 0)
     {
-      sndbg("i2c_read failed: %d\n", ret);
+      snerr("i2c_read failed: %d\n", ret);
       return ret;
     }
 
@@ -292,7 +292,7 @@ static void bmp180_putreg8(FAR struct bmp180_dev_s *priv, uint8_t regaddr,
   ret = i2c_write(priv->i2c, &config, (uint8_t *) &data, 2);
   if (ret < 0)
     {
-      sndbg("i2c_write failed: %d\n", ret);
+      snerr("i2c_write failed: %d\n", ret);
       return;
     }
 
@@ -320,7 +320,7 @@ static int bmp180_checkid(FAR struct bmp180_dev_s *priv)
     {
       /* ID is not Correct */
 
-      sndbg("Wrong Device ID!\n");
+      snerr("Wrong Device ID!\n");
       return -ENODEV;
     }
 
@@ -543,13 +543,13 @@ static ssize_t bmp180_read(FAR struct file *filep, FAR char *buffer,
 
   if (!buffer)
     {
-      sndbg("Buffer is null\n");
+      snerr("Buffer is null\n");
       return -1;
     }
 
   if (buflen != 4)
     {
-      sndbg("You can't read something other than 32 bits (4 bytes)\n");
+      snerr("You can't read something other than 32 bits (4 bytes)\n");
       return -1;
     }
 
@@ -602,7 +602,7 @@ int bmp180_register(FAR const char *devpath, FAR struct i2c_master_s *i2c)
   priv = (FAR struct bmp180_dev_s *)kmm_malloc(sizeof(struct bmp180_dev_s));
   if (!priv)
     {
-      sndbg("Failed to allocate instance\n");
+      snerr("Failed to allocate instance\n");
       return -ENOMEM;
     }
 
@@ -615,7 +615,7 @@ int bmp180_register(FAR const char *devpath, FAR struct i2c_master_s *i2c)
   ret = bmp180_checkid(priv);
   if (ret < 0)
     {
-      sndbg("Failed to register driver: %d\n", ret);
+      snerr("Failed to register driver: %d\n", ret);
       kmm_free(priv);
       return ret;
     }
@@ -629,7 +629,7 @@ int bmp180_register(FAR const char *devpath, FAR struct i2c_master_s *i2c)
   ret = register_driver(devpath, &g_bmp180fops, 0666, priv);
   if (ret < 0)
     {
-      sndbg("Failed to register driver: %d\n", ret);
+      snerr("Failed to register driver: %d\n", ret);
       kmm_free(priv);
     }
 

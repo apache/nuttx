@@ -102,7 +102,7 @@ static inline int elf_filelen(FAR struct elf_loadinfo_s *loadinfo,
   if (ret < 0)
     {
       int errval = errno;
-      bdbg("Failed to stat file: %d\n", errval);
+      berr("Failed to stat file: %d\n", errval);
       return -errval;
     }
 
@@ -110,7 +110,7 @@ static inline int elf_filelen(FAR struct elf_loadinfo_s *loadinfo,
 
   if (!S_ISREG(buf.st_mode))
     {
-      bdbg("Not a regular file.  mode: %d\n", buf.st_mode);
+      berr("Not a regular file.  mode: %d\n", buf.st_mode);
       return -ENOENT;
     }
 
@@ -156,7 +156,7 @@ int elf_init(FAR const char *filename, FAR struct elf_loadinfo_s *loadinfo)
   ret = elf_filelen(loadinfo, filename);
   if (ret < 0)
     {
-      bdbg("elf_filelen failed: %d\n", ret);
+      berr("elf_filelen failed: %d\n", ret);
       return ret;
     }
 
@@ -166,7 +166,7 @@ int elf_init(FAR const char *filename, FAR struct elf_loadinfo_s *loadinfo)
   if (loadinfo->filfd < 0)
     {
       int errval = errno;
-      bdbg("Failed to open ELF binary %s: %d\n", filename, errval);
+      berr("Failed to open ELF binary %s: %d\n", filename, errval);
       return -errval;
     }
 
@@ -175,7 +175,7 @@ int elf_init(FAR const char *filename, FAR struct elf_loadinfo_s *loadinfo)
   ret = elf_read(loadinfo, (FAR uint8_t *)&loadinfo->ehdr, sizeof(Elf32_Ehdr), 0);
   if (ret < 0)
     {
-      bdbg("Failed to read ELF header: %d\n", ret);
+      berr("Failed to read ELF header: %d\n", ret);
       return ret;
     }
 
@@ -193,7 +193,7 @@ int elf_init(FAR const char *filename, FAR struct elf_loadinfo_s *loadinfo)
        * is not correctly formed.
        */
 
-      bdbg("Bad ELF header: %d\n", ret);
+      berr("Bad ELF header: %d\n", ret);
       return ret;
     }
 

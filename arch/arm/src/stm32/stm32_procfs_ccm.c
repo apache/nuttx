@@ -152,7 +152,7 @@ static int ccm_open(FAR struct file *filep, FAR const char *relpath,
 
   if ((oflags & O_WRONLY) != 0 || (oflags & O_RDONLY) == 0)
     {
-      fdbg("ERROR: Only O_RDONLY supported\n");
+      ferr("ERROR: Only O_RDONLY supported\n");
       return -EACCES;
     }
 
@@ -160,7 +160,7 @@ static int ccm_open(FAR struct file *filep, FAR const char *relpath,
 
   if (strcmp(relpath, "ccm") != 0)
     {
-      fdbg("ERROR: relpath is '%s'\n", relpath);
+      ferr("ERROR: relpath is '%s'\n", relpath);
       return -ENOENT;
     }
 
@@ -169,7 +169,7 @@ static int ccm_open(FAR struct file *filep, FAR const char *relpath,
   priv = (FAR struct ccm_file_s *)kmm_zalloc(sizeof(struct ccm_file_s));
   if (!priv)
     {
-      fdbg("ERROR: Failed to allocate file attributes\n");
+      ferr("ERROR: Failed to allocate file attributes\n");
       return -ENOMEM;
     }
 
@@ -285,7 +285,7 @@ static int ccm_dup(FAR const struct file *oldp, FAR struct file *newp)
   newpriv = (FAR struct ccm_file_s *)kmm_zalloc(sizeof(struct ccm_file_s));
   if (!newpriv)
     {
-      fdbg("ERROR: Failed to allocate file attributes\n");
+      ferr("ERROR: Failed to allocate file attributes\n");
       return -ENOMEM;
     }
 
@@ -303,7 +303,7 @@ static int ccm_stat(const char *relpath, struct stat *buf)
 {
   if (strcmp(relpath, "ccm") != 0)
     {
-      fdbg("ERROR: relpath is '%s'\n", relpath);
+      ferr("ERROR: relpath is '%s'\n", relpath);
       return -ENOENT;
     }
 

@@ -88,7 +88,7 @@
 #endif
 
 #ifdef CONFIG_DEBUG_PWM
-#  define pwmdbg              dbg
+#  define pwmerr              err
 #  define pwmllerr            llerr
 #  ifdef CONFIG_DEBUG_INFO
 #    define pwminfo           info
@@ -100,7 +100,7 @@
 #    define pwm_dumpgpio(p,m)
 #  endif
 #else
-#  define pwmdbg(x...)
+#  define pwmerr(x...)
 #  define pwmllerr(x...)
 #  define pwminfo(x...)
 #  define pwmllinfo(x...)
@@ -674,7 +674,7 @@ FAR struct pwm_lowerhalf_s *lpc17_mcpwminitialize(int timer)
 #endif
 
       default:
-        pwmdbg("No such timer configured\n");
+        pwmerr("No such timer configured\n");
         return NULL;
     }
 

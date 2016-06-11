@@ -3342,7 +3342,7 @@ static ssize_t sam_transfer(struct usbhost_driver_s *drvr, usbhost_ep_t ep,
   ret = sam_transfer_common(rhport, eplist, buffer, buflen);
   if (ret < 0)
     {
-      udbg("ERROR: sam_transfer_common failed: %d\n", ret);
+      uerr("ERROR: sam_transfer_common failed: %d\n", ret);
       goto errout;
     }
 
@@ -3593,7 +3593,7 @@ static int sam_asynch(struct usbhost_driver_s *drvr, usbhost_ep_t ep,
   ret = sam_transfer_common(rhport, eplist, buffer, buflen);
   if (ret < 0)
     {
-      udbg("ERROR: sam_transfer_common failed: %d\n", ret);
+      uerr("ERROR: sam_transfer_common failed: %d\n", ret);
       goto errout;
     }
 

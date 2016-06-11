@@ -363,7 +363,7 @@ void up_rnginitialize(void)
 
   if (irq_attach(SAM_IRQ_TRNG, sam_interrupt))
     {
-      fdbg("ERROR: Failed to attach to IRQ%d\n", SAM_IRQ_TRNG);
+      ferr("ERROR: Failed to attach to IRQ%d\n", SAM_IRQ_TRNG);
       return;
     }
 
@@ -380,7 +380,7 @@ void up_rnginitialize(void)
   ret = register_driver("/dev/random", &g_trngops, 0644, NULL);
   if (ret < 0)
     {
-      fdbg("ERROR: Failed to register /dev/random\n");
+      ferr("ERROR: Failed to register /dev/random\n");
       return;
     }
 

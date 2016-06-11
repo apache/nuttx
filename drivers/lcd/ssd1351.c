@@ -499,7 +499,7 @@ static void ssd1351_select(FAR struct ssd1351_dev_s *priv)
    * competing for the SPI bus
    */
 
-  gdbg("SELECTED\n");
+  gerr("SELECTED\n");
   SPI_LOCK(spi, true);
   SPI_SELECT(spi, SPIDEV_DISPLAY, true);
 
@@ -529,7 +529,7 @@ static void ssd1351_deselect(FAR struct ssd1351_dev_s *priv)
 
   /* De-select the chip and relinquish the SPI bus */
 
-  gdbg("DE-SELECTED\n");
+  gerr("DE-SELECTED\n");
   SPI_SELECT(spi, SPIDEV_DISPLAY, false);
   SPI_LOCK(spi, false);
 }

@@ -153,12 +153,12 @@ int board_tsc_setup(int minor)
 {
   FAR struct spi_dev_s *dev;
 
-  idbg("minor %d\n", minor);
+  ierr("minor %d\n", minor);
 
   dev = stm32_spibus_initialize(1);
   if (!dev)
     {
-      idbg("Failed to initialize SPI bus\n");
+      ierr("Failed to initialize SPI bus\n");
       return -ENODEV;
     }
 

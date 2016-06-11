@@ -267,7 +267,7 @@ int cc3000_accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen)
   if (setsockopt(sockfd, CC3000_SOL_SOCKET, CC3000_SOCKOPT_ACCEPT_NONBLOCK,
                  &non_blocking, sizeof(non_blocking)) < 0)
    {
-     ndbg("setsockopt failure %d\n", errno);
+     nerr("setsockopt failure %d\n", errno);
      return -errno;
    }
 
@@ -282,7 +282,7 @@ int cc3000_accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen)
   if (setsockopt(sockfd, CC3000_SOL_SOCKET, CC3000_SOCKOPT_ACCEPT_NONBLOCK,
                  &nonBlocking, sizeof(nonBlocking)) < 0)
    {
-     ndbg("setsockopt failure %d\n", errno);
+     nerr("setsockopt failure %d\n", errno);
      return -errno;
    }
 

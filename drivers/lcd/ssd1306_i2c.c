@@ -94,7 +94,7 @@ void ssd1306_sendbyte(FAR struct ssd1306_dev_s *priv, uint8_t regval)
   ret = I2C_TRANSFER(priv->i2c, &msg, 1);
   if (ret < 0)
     {
-      sndbg("I2C_TRANSFER failed: %d\n", ret);
+      snerr("I2C_TRANSFER failed: %d\n", ret);
     }
 }
 
@@ -130,7 +130,7 @@ void ssd1306_sendblk(FAR struct ssd1306_dev_s *priv, uint8_t *data, uint8_t len)
   ret = I2C_TRANSFER(priv->i2c, &msg, 1);
   if (ret < 0)
     {
-      sndbg("I2C_TRANSFER failed: %d\n", ret);
+      snerr("I2C_TRANSFER failed: %d\n", ret);
     }
 }
 

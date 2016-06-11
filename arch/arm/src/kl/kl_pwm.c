@@ -80,7 +80,7 @@
 #endif
 
 #ifdef CONFIG_DEBUG_PWM
-#  define pwmdbg              dbg
+#  define pwmerr              err
 #  define pwmllerr            llerr
 #  ifdef CONFIG_DEBUG_INFO
 #    define pwminfo           info
@@ -92,7 +92,7 @@
 #    define pwm_dumpgpio(p,m)
 #  endif
 #else
-#  define pwmdbg(x...)
+#  define pwmerr(x...)
 #  define pwmllerr(x...)
 #  define pwminfo(x...)
 #  define pwmllinfo(x...)
@@ -483,7 +483,7 @@ static int pwm_timer(FAR struct kl_pwmtimer_s *priv,
         break;
 
       default:
-        pwmdbg("No such channel: %d\n", priv->channel);
+        pwmerr("No such channel: %d\n", priv->channel);
         return -EINVAL;
     }
 
@@ -663,7 +663,7 @@ static int pwm_stop(FAR struct pwm_lowerhalf_s *dev)
         break;
 
       default:
-        pwmdbg("No such channel: %d\n", priv->channel);
+        pwmerr("No such channel: %d\n", priv->channel);
         return -EINVAL;
     }
 
@@ -750,7 +750,7 @@ FAR struct pwm_lowerhalf_s *kl_pwminitialize(int timer)
 #endif
 
       default:
-        pwmdbg("No such timer configured\n");
+        pwmerr("No such timer configured\n");
         return NULL;
     }
 

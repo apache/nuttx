@@ -1727,7 +1727,7 @@ static int tmpfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       return OK;
     }
 
-  fdbg("Invalid cmd: %d\n", cmd);
+  ferr("Invalid cmd: %d\n", cmd);
   return -ENOTTY;
 }
 

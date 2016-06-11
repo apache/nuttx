@@ -106,7 +106,7 @@ int sam_at24_automount(int minor)
       i2c = sam_i2cbus_initialize(AT24_BUS);
       if (!i2c)
         {
-          fdbg("ERROR: Failed to initialize TWI%d\n", AT24_BUS);
+          ferr("ERROR: Failed to initialize TWI%d\n", AT24_BUS);
           return -ENODEV;
         }
 
@@ -116,7 +116,7 @@ int sam_at24_automount(int minor)
       mtd = at24c_initialize(i2c);
       if (!mtd)
         {
-          fdbg("ERROR: Failed to bind TWI%d to the AT24 EEPROM driver\n",
+          ferr("ERROR: Failed to bind TWI%d to the AT24 EEPROM driver\n",
                AT24_BUS);
           return -ENODEV;
         }
@@ -128,7 +128,7 @@ int sam_at24_automount(int minor)
       ret = ftl_initialize(AT24_MINOR, mtd);
       if (ret < 0)
         {
-          fdbg("ERROR: Failed to initialize the FTL layer: %d\n", ret);
+          ferr("ERROR: Failed to initialize the FTL layer: %d\n", ret);
           return ret;
         }
 
@@ -139,7 +139,7 @@ int sam_at24_automount(int minor)
       ret = nxffs_initialize(mtd);
       if (ret < 0)
         {
-          fdbg("ERROR: NXFFS initialization failed: %d\n", ret);
+          ferr("ERROR: NXFFS initialization failed: %d\n", ret);
           return ret;
         }
 
@@ -149,7 +149,7 @@ int sam_at24_automount(int minor)
       ret = mount(NULL, "/mnt/at24", "nxffs", 0, NULL);
       if (ret < 0)
         {
-          fdbg("ERROR: Failed to mount the NXFFS volume: %d\n", errno);
+          ferr("ERROR: Failed to mount the NXFFS volume: %d\n", errno);
           return ret;
         }
 #endif

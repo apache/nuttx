@@ -144,10 +144,10 @@
 /* Debug ********************************************************************/
 
 #ifdef CONFIG_DEBUG_LCD
-#  define lcddbg         dbg
+#  define lcderr         err
 #  define lcdinfo        info
 #else
-#  define lcddbg(x...)
+#  define lcderr(x...)
 #  define lcdinfo(x...)
 #endif
 

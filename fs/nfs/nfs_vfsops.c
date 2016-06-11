@@ -218,7 +218,7 @@ static int nfs_filecreate(FAR struct nfsmount *nmp, struct nfsnode *np,
   error = nfs_finddir(nmp, relpath, &fhandle, &fattr, filename);
   if (error != OK)
     {
-      fdbg("ERROR: nfs_finddir returned: %d\n", error);
+      ferr("ERROR: nfs_finddir returned: %d\n", error);
       return error;
     }
 
@@ -340,7 +340,7 @@ static int nfs_filecreate(FAR struct nfsmount *nmp, struct nfsnode *np,
       tmp = *ptr++;  /* handle_follows */
       if (!tmp)
         {
-          fdbg("ERROR: no file handle follows\n");
+          ferr("ERROR: no file handle follows\n");
           return EINVAL;
         }
 
@@ -357,7 +357,7 @@ static int nfs_filecreate(FAR struct nfsmount *nmp, struct nfsnode *np,
       tmp = *ptr;  /* handle_follows */
       if (!tmp)
         {
-          fdbg("WARNING: no file attributes\n");
+          ferr("WARNING: no file attributes\n");
         }
       else
         {
@@ -427,7 +427,7 @@ static int nfs_filetruncate(FAR struct nfsmount *nmp, struct nfsnode *np)
                       (FAR void *)nmp->nm_iobuffer, nmp->nm_buflen);
   if (error != OK)
     {
-      fdbg("ERROR: nfs_request failed: %d\n", error);
+      ferr("ERROR: nfs_request failed: %d\n", error);
       return error;
     }
 
@@ -462,7 +462,7 @@ static int nfs_fileopen(FAR struct nfsmount *nmp, struct nfsnode *np,
   error = nfs_findnode(nmp, relpath, &fhandle, &fattr, NULL);
   if (error != OK)
     {
-      fdbg("ERROR: nfs_findnode returned: %d\n", error);
+      ferr("ERROR: nfs_findnode returned: %d\n", error);
       return error;
     }
 
@@ -473,7 +473,7 @@ static int nfs_fileopen(FAR struct nfsmount *nmp, struct nfsnode *np,
     {
       /* Exit with EISDIR if we attempt to open a directory */
 
-      fdbg("ERROR: Path is a directory\n");
+      ferr("ERROR: Path is a directory\n");
       return EISDIR;
     }
 
@@ -489,7 +489,7 @@ static int nfs_fileopen(FAR struct nfsmount *nmp, struct nfsnode *np,
       tmp = fxdr_unsigned(uint32_t, fattr.fa_mode);
       if ((tmp & (NFSMODE_IWOTH | NFSMODE_IWGRP | NFSMODE_IWUSR)) == 0)
         {
-          fdbg("ERROR: File is read-only: %08x\n", tmp);
+          ferr("ERROR: File is read-only: %08x\n", tmp);
           return EACCES;
         }
     }
@@ -500,7 +500,7 @@ static int nfs_fileopen(FAR struct nfsmount *nmp, struct nfsnode *np,
     {
       /* Already exists -- can't create it exclusively */
 
-      fdbg("ERROR: File exists\n");
+      ferr("ERROR: File exists\n");
       return EEXIST;
     }
 
@@ -567,7 +567,7 @@ static int nfs_open(FAR struct file *filep, FAR const char *relpath,
   np = (struct nfsnode *)kmm_zalloc(sizeof(struct nfsnode));
   if (!np)
     {
-      fdbg("ERROR: Failed to allocate private data\n");
+      ferr("ERROR: Failed to allocate private data\n");
       return -ENOMEM;
     }
 
@@ -577,7 +577,7 @@ static int nfs_open(FAR struct file *filep, FAR const char *relpath,
   error = nfs_checkmount(nmp);
   if (error != OK)
     {
-      fdbg("ERROR: nfs_checkmount failed: %d\n", error);
+      ferr("ERROR: nfs_checkmount failed: %d\n", error);
       goto errout_with_semaphore;
     }
 
@@ -594,7 +594,7 @@ static int nfs_open(FAR struct file *filep, FAR const char *relpath,
 
       if (error != ENOENT)
         {
-          fdbg("ERROR: nfs_findnode failed: %d\n", error);
+          ferr("ERROR: nfs_findnode failed: %d\n", error);
           goto errout_with_semaphore;
         }
 
@@ -609,7 +609,7 @@ static int nfs_open(FAR struct file *filep, FAR const char *relpath,
            * to create it.
            */
 
-          fdbg("ERROR: File does not exist\n");
+          ferr("ERROR: File does not exist\n");
            error = ENOENT;
           goto errout_with_semaphore;
         }
@@ -619,7 +619,7 @@ static int nfs_open(FAR struct file *filep, FAR const char *relpath,
       error = nfs_filecreate(nmp, np, relpath, mode);
       if (error != OK)
         {
-          fdbg("ERROR: nfs_filecreate failed: %d\n", error);
+          ferr("ERROR: nfs_filecreate failed: %d\n", error);
           goto errout_with_semaphore;
         }
     }
@@ -790,7 +790,7 @@ static ssize_t nfs_read(FAR struct file *filep, char *buffer, size_t buflen)
   error = nfs_checkmount(nmp);
   if (error != OK)
     {
-      fdbg("nfs_checkmount failed: %d\n", error);
+      ferr("nfs_checkmount failed: %d\n", error);
       goto errout_with_semaphore;
     }
 
@@ -859,7 +859,7 @@ static ssize_t nfs_read(FAR struct file *filep, char *buffer, size_t buflen)
                           (FAR void *)nmp->nm_iobuffer, nmp->nm_buflen);
       if (error)
         {
-          fdbg("ERROR: nfs_request failed: %d\n", error);
+          ferr("ERROR: nfs_request failed: %d\n", error);
           goto errout_with_semaphore;
         }
 
@@ -966,7 +966,7 @@ static ssize_t nfs_write(FAR struct file *filep, const char *buffer,
   error = nfs_checkmount(nmp);
   if (error != OK)
     {
-      fdbg("nfs_checkmount failed: %d\n", error);
+      ferr("nfs_checkmount failed: %d\n", error);
       goto errout_with_semaphore;
     }
 
@@ -1043,7 +1043,7 @@ static ssize_t nfs_write(FAR struct file *filep, const char *buffer,
                           (FAR void *)&nmp->nm_msgbuffer.write, sizeof(struct rpc_reply_write));
       if (error)
         {
-          fdbg("ERROR: nfs_request failed: %d\n", error);
+          ferr("ERROR: nfs_request failed: %d\n", error);
           goto errout_with_semaphore;
         }
 
@@ -1146,7 +1146,7 @@ static int nfs_dup(FAR const struct file *oldp, FAR struct file *newp)
   error = nfs_checkmount(nmp);
   if (error != OK)
     {
-      fdbg("ERROR: nfs_checkmount failed: %d\n", error);
+      ferr("ERROR: nfs_checkmount failed: %d\n", error);
       nfs_semgive(nmp);
       return -error;
     }
@@ -1213,7 +1213,7 @@ static int nfs_opendir(struct inode *mountpt, const char *relpath,
   error = nfs_checkmount(nmp);
   if (error != OK)
     {
-      fdbg("ERROR: nfs_checkmount failed: %d\n", error);
+      ferr("ERROR: nfs_checkmount failed: %d\n", error);
       goto errout_with_semaphore;
     }
 
@@ -1222,7 +1222,7 @@ static int nfs_opendir(struct inode *mountpt, const char *relpath,
   error = nfs_findnode(nmp, relpath, &fhandle, &obj_attributes, NULL);
   if (error != OK)
     {
-      fdbg("ERROR: nfs_findnode failed: %d\n", error);
+      ferr("ERROR: nfs_findnode failed: %d\n", error);
       goto errout_with_semaphore;
     }
 
@@ -1231,7 +1231,7 @@ static int nfs_opendir(struct inode *mountpt, const char *relpath,
   objtype = fxdr_unsigned(uint32_t, obj_attributes.fa_type);
   if (objtype != NFDIR)
     {
-      fdbg("ERROR:  Not a directory, type=%d\n", objtype);
+      ferr("ERROR:  Not a directory, type=%d\n", objtype);
       error = ENOTDIR;
       goto errout_with_semaphore;
     }
@@ -1289,7 +1289,7 @@ static int nfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
   error = nfs_checkmount(nmp);
   if (error != OK)
     {
-      fdbg("ERROR: nfs_checkmount failed: %d\n", error);
+      ferr("ERROR: nfs_checkmount failed: %d\n", error);
       goto errout_with_semaphore;
     }
 
@@ -1333,7 +1333,7 @@ static int nfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
                       (FAR void *)nmp->nm_iobuffer, nmp->nm_buflen);
   if (error != OK)
     {
-      fdbg("ERROR: nfs_request failed: %d\n", error);
+      ferr("ERROR: nfs_request failed: %d\n", error);
       goto errout_with_semaphore;
     }
 
@@ -1449,7 +1449,7 @@ static int nfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
   error = nfs_lookup(nmp, dir->fd_dir.d_name, &fhandle, &obj_attributes, NULL);
   if (error != OK)
     {
-      fdbg("nfs_lookup failed: %d\n", error);
+      ferr("nfs_lookup failed: %d\n", error);
       goto errout_with_semaphore;
     }
 
@@ -1574,7 +1574,7 @@ static void nfs_decode_args(FAR struct nfs_mount_parameters *nprmt,
     }
   else
     {
-      fdbg("ERROR: Only SOCK_DRAM is supported\n");
+      ferr("ERROR: Only SOCK_DRAM is supported\n");
       maxio = NFS_MAXDATA;
     }
 
@@ -1726,7 +1726,7 @@ static int nfs_bind(FAR struct inode *blkdriver, FAR const void *data,
   nmp = (FAR struct nfsmount *)kmm_zalloc(SIZEOF_nfsmount(buflen));
   if (!nmp)
     {
-      fdbg("ERROR: Failed to allocate mountpoint structure\n");
+      ferr("ERROR: Failed to allocate mountpoint structure\n");
       return ENOMEM;
     }
 
@@ -1776,7 +1776,7 @@ static int nfs_bind(FAR struct inode *blkdriver, FAR const void *data,
       rpc = (struct rpcclnt *)kmm_zalloc(sizeof(struct rpcclnt));
       if (!rpc)
         {
-          fdbg("ERROR: Failed to allocate rpc structure\n");
+          ferr("ERROR: Failed to allocate rpc structure\n");
           return ENOMEM;
         }
 
@@ -1794,7 +1794,7 @@ static int nfs_bind(FAR struct inode *blkdriver, FAR const void *data,
       error = rpcclnt_connect(nmp->nm_rpcclnt);
       if (error != OK)
         {
-          fdbg("ERROR: nfs_connect failed: %d\n", error);
+          ferr("ERROR: nfs_connect failed: %d\n", error);
           goto bad;
         }
     }
@@ -1813,7 +1813,7 @@ static int nfs_bind(FAR struct inode *blkdriver, FAR const void *data,
                       (FAR void *)&resok, sizeof(struct rpc_reply_getattr));
   if (error)
     {
-      fdbg("ERROR: nfs_request failed: %d\n", error);
+      ferr("ERROR: nfs_request failed: %d\n", error);
       goto bad;
     }
 
@@ -1887,7 +1887,7 @@ static int nfs_unbind(FAR void *handle, FAR struct inode **blkdriver,
 
   if (nmp->nm_head != NULL)
     {
-      fdbg("ERROR;  There are open files: %p\n", nmp->nm_head);
+      ferr("ERROR;  There are open files: %p\n", nmp->nm_head);
 
       /* This implementation currently only supports unmounting if there are
        * no open file references.
@@ -1902,7 +1902,7 @@ static int nfs_unbind(FAR void *handle, FAR struct inode **blkdriver,
   error = rpcclnt_umount(nmp->nm_rpcclnt);
   if (error)
     {
-      fdbg("ERROR: rpcclnt_umount failed: %d\n", error);
+      ferr("ERROR: rpcclnt_umount failed: %d\n", error);
     }
 
   /* Disconnect from the server */
@@ -2046,7 +2046,7 @@ static int nfs_statfs(FAR struct inode *mountpt, FAR struct statfs *sbp)
   error = nfs_checkmount(nmp);
   if (error != OK)
     {
-      fdbg("ERROR: nfs_checkmount failed: %d\n", error);
+      ferr("ERROR: nfs_checkmount failed: %d\n", error);
       goto errout_with_semaphore;
     }
 
@@ -2124,7 +2124,7 @@ static int nfs_remove(struct inode *mountpt, const char *relpath)
   error = nfs_checkmount(nmp);
   if (error != OK)
     {
-      fdbg("ERROR: nfs_checkmount failed: %d\n", error);
+      ferr("ERROR: nfs_checkmount failed: %d\n", error);
       goto errout_with_semaphore;
     }
 
@@ -2133,7 +2133,7 @@ static int nfs_remove(struct inode *mountpt, const char *relpath)
   error = nfs_finddir(nmp, relpath, &fhandle, &fattr, filename);
   if (error != OK)
     {
-      fdbg("ERROR: nfs_finddir returned: %d\n", error);
+      ferr("ERROR: nfs_finddir returned: %d\n", error);
       goto errout_with_semaphore;
     }
 
@@ -2210,7 +2210,7 @@ static int nfs_mkdir(struct inode *mountpt, const char *relpath, mode_t mode)
   error = nfs_checkmount(nmp);
   if (error != OK)
     {
-      fdbg("ERROR: nfs_checkmount: %d\n", error);
+      ferr("ERROR: nfs_checkmount: %d\n", error);
       goto errout_with_semaphore;
     }
 
@@ -2219,7 +2219,7 @@ static int nfs_mkdir(struct inode *mountpt, const char *relpath, mode_t mode)
   error = nfs_finddir(nmp, relpath, &fhandle, &fattr, dirname);
   if (error != OK)
     {
-      fdbg("ERROR: nfs_finddir returned: %d\n", error);
+      ferr("ERROR: nfs_finddir returned: %d\n", error);
       return error;
     }
 
@@ -2292,7 +2292,7 @@ static int nfs_mkdir(struct inode *mountpt, const char *relpath, mode_t mode)
                       (FAR void *)&nmp->nm_iobuffer, nmp->nm_buflen);
   if (error)
     {
-      fdbg("ERROR: nfs_request failed: %d\n", error);
+      ferr("ERROR: nfs_request failed: %d\n", error);
     }
 
 errout_with_semaphore:
@@ -2336,7 +2336,7 @@ static int nfs_rmdir(struct inode *mountpt, const char *relpath)
   error = nfs_checkmount(nmp);
   if (error != OK)
     {
-      fdbg("ERROR: nfs_checkmount failed: %d\n", error);
+      ferr("ERROR: nfs_checkmount failed: %d\n", error);
       goto errout_with_semaphore;
     }
 
@@ -2345,7 +2345,7 @@ static int nfs_rmdir(struct inode *mountpt, const char *relpath)
   error = nfs_finddir(nmp, relpath, &fhandle, &fattr, dirname);
   if (error != OK)
     {
-      fdbg("ERROR: nfs_finddir returned: %d\n", error);
+      ferr("ERROR: nfs_finddir returned: %d\n", error);
       return error;
     }
 
@@ -2424,7 +2424,7 @@ static int nfs_rename(struct inode *mountpt, const char *oldrelpath,
   error = nfs_checkmount(nmp);
   if (error != OK)
     {
-      fdbg("ERROR: nfs_checkmount returned: %d\n", error);
+      ferr("ERROR: nfs_checkmount returned: %d\n", error);
       goto errout_with_semaphore;
     }
 
@@ -2433,7 +2433,7 @@ static int nfs_rename(struct inode *mountpt, const char *oldrelpath,
   error = nfs_finddir(nmp, oldrelpath, &from_handle, &fattr, from_name);
   if (error != OK)
     {
-      fdbg("ERROR: nfs_finddir returned: %d\n", error);
+      ferr("ERROR: nfs_finddir returned: %d\n", error);
       return error;
     }
 
@@ -2442,7 +2442,7 @@ static int nfs_rename(struct inode *mountpt, const char *oldrelpath,
   error = nfs_finddir(nmp, newrelpath, &to_handle, &fattr, to_name);
   if (error != OK)
     {
-      fdbg("ERROR: nfs_finddir returned: %d\n", error);
+      ferr("ERROR: nfs_finddir returned: %d\n", error);
       return error;
     }
 
@@ -2538,7 +2538,7 @@ static int nfs_stat(struct inode *mountpt, const char *relpath,
   error = nfs_checkmount(nmp);
   if (error != OK)
     {
-      fdbg("ERROR: nfs_checkmount failed: %d\n", error);
+      ferr("ERROR: nfs_checkmount failed: %d\n", error);
       goto errout_with_semaphore;
     }
 
@@ -2547,7 +2547,7 @@ static int nfs_stat(struct inode *mountpt, const char *relpath,
   error = nfs_findnode(nmp, relpath, &fhandle, &obj_attributes, NULL);
   if (error != OK)
     {
-      fdbg("ERROR: nfs_findnode failed: %d\n", error);
+      ferr("ERROR: nfs_findnode failed: %d\n", error);
       goto errout_with_semaphore;
     }
 

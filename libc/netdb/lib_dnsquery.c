@@ -213,7 +213,7 @@ static int dns_send_query(int sd, FAR const char *name,
   if (ret < 0)
     {
       errcode = get_errno();
-      ndbg("ERROR: sendto failed: %d\n", errcode);
+      nerr("ERROR: sendto failed: %d\n", errcode);
       return -errcode;
     }
 
@@ -248,7 +248,7 @@ static int dns_recv_response(int sd, FAR struct sockaddr *addr,
   if (ret < 0)
     {
       errcode = get_errno();
-      ndbg("ERROR: recv failed: %d\n", errcode);
+      nerr("ERROR: recv failed: %d\n", errcode);
       return -errcode;
     }
 
@@ -265,7 +265,7 @@ static int dns_recv_response(int sd, FAR struct sockaddr *addr,
 
   if ((hdr->flags2 & DNS_FLAG2_ERR_MASK) != 0)
     {
-      ndbg("ERROR: DNS reported error: flags2=%02x\n", hdr->flags2);
+      nerr("ERROR: DNS reported error: flags2=%02x\n", hdr->flags2);
       return -EPROTO;
     }
 
@@ -290,7 +290,7 @@ static int dns_recv_response(int sd, FAR struct sockaddr *addr,
 
     for (; ; )
       {
-        ndbg("%02X %02X %02X %02X %02X %02X %02X %02X \n",
+        nerr("%02X %02X %02X %02X %02X %02X %02X %02X \n",
              nameptr[0], nameptr[1], nameptr[2], nameptr[3],
              nameptr[4], nameptr[5], nameptr[6], nameptr[7]);
 
@@ -450,7 +450,7 @@ static int dns_query_callback(FAR void *arg, FAR struct sockaddr *addr,
                * namserver address in resolv.conf.
                */
 
-              ndbg("ERROR: Invalid IPv4 address size: %d\n", addrlen);
+              nerr("ERROR: Invalid IPv4 address size: %d\n", addrlen);
               query->result = -EINVAL;
               return 0;
             }
@@ -466,7 +466,7 @@ static int dns_query_callback(FAR void *arg, FAR struct sockaddr *addr,
                * namserver address in resolv.conf.
                */
 
-              ndbg("ERROR: IPv4 dns_send_query failed: %d\n", ret);
+              nerr("ERROR: IPv4 dns_send_query failed: %d\n", ret);
               query->result = ret;
               return 0;
             }
@@ -492,7 +492,7 @@ static int dns_query_callback(FAR void *arg, FAR struct sockaddr *addr,
 
           /* Handle errors */
 
-          ndbg("ERROR: IPv4 dns_recv_response failed: %d\n", ret);
+          nerr("ERROR: IPv4 dns_recv_response failed: %d\n", ret);
 
           if (ret != -EADDRNOTAVAIL)
             {
@@ -531,7 +531,7 @@ static int dns_query_callback(FAR void *arg, FAR struct sockaddr *addr,
                * namserver address in resolv.conf.
                */
 
-              ndbg("ERROR: Invalid IPv6 address size: %d\n", addrlen);
+              nerr("ERROR: Invalid IPv6 address size: %d\n", addrlen);
               query->result = -EINVAL;
               return 0;
             }
@@ -547,7 +547,7 @@ static int dns_query_callback(FAR void *arg, FAR struct sockaddr *addr,
                * namserver address in resolv.conf.
                */
 
-              ndbg("ERROR: IPv6 dns_send_query failed: %d\n", ret);
+              nerr("ERROR: IPv6 dns_send_query failed: %d\n", ret);
               query->result = ret;
               return 0;
             }
@@ -573,7 +573,7 @@ static int dns_query_callback(FAR void *arg, FAR struct sockaddr *addr,
 
           /* Handle errors */
 
-          ndbg("ERROR: IPv6 dns_recv_response failed: %d\n", ret);
+          nerr("ERROR: IPv6 dns_recv_response failed: %d\n", ret);
 
           if (ret != -EADDRNOTAVAIL)
             {

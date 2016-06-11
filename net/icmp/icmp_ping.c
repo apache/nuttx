@@ -347,7 +347,7 @@ int icmp_ping(in_addr_t addr, uint16_t id, uint16_t seqno, uint16_t datalen,
 #endif
   if (dev == 0)
     {
-      ndbg("ERROR: Not reachable\n");
+      nerr("ERROR: Not reachable\n");
       return -ENETUNREACH;
     }
 
@@ -357,7 +357,7 @@ int icmp_ping(in_addr_t addr, uint16_t id, uint16_t seqno, uint16_t datalen,
   ret = arp_send(addr);
   if (ret < 0)
     {
-      ndbg("ERROR: Not reachable\n");
+      nerr("ERROR: Not reachable\n");
       return -ENETUNREACH;
     }
 #endif

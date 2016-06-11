@@ -359,7 +359,7 @@ static int smartfs_open(FAR struct file *filep, FAR const char *relpath,
   if (((oflags & O_WRONLY) != 0 || (oflags & O_RDONLY) == 0) &&
       (smartfs_procfsoperations.write == NULL))
     {
-      fdbg("ERROR: Only O_RDONLY supported\n");
+      ferr("ERROR: Only O_RDONLY supported\n");
       return -EACCES;
     }
 
@@ -368,7 +368,7 @@ static int smartfs_open(FAR struct file *filep, FAR const char *relpath,
   priv = (FAR struct smartfs_file_s *)kmm_malloc(sizeof(struct smartfs_file_s));
   if (!priv)
     {
-      fdbg("ERROR: Failed to allocate file attributes\n");
+      ferr("ERROR: Failed to allocate file attributes\n");
       return -ENOMEM;
     }
 
@@ -518,7 +518,7 @@ static int smartfs_dup(FAR const struct file *oldp, FAR struct file *newp)
   newpriv = (FAR struct smartfs_file_s *)kmm_malloc(sizeof(struct smartfs_file_s));
   if (!newpriv)
     {
-      fdbg("ERROR: Failed to allocate file attributes\n");
+      ferr("ERROR: Failed to allocate file attributes\n");
       return -ENOMEM;
     }
 
@@ -557,7 +557,7 @@ static int smartfs_opendir(FAR const char *relpath, FAR struct fs_dirent_s *dir)
 
   if (!level1)
     {
-      fdbg("ERROR: Failed to allocate the level1 directory structure\n");
+      ferr("ERROR: Failed to allocate the level1 directory structure\n");
       return -ENOMEM;
     }
 

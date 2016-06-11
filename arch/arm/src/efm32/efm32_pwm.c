@@ -82,7 +82,7 @@
 #endif
 
 #ifdef CONFIG_DEBUG_PWM
-#  define pwmdbg              dbg
+#  define pwmerr              err
 #  define pwmllerr            llerr
 #  ifdef CONFIG_DEBUG_INFO
 #    define pwminfo           info
@@ -94,7 +94,7 @@
 #    define pwm_dumpgpio(p,m)
 #  endif
 #else
-#  define pwmdbg(x...)
+#  define pwmerr(x...)
 #  define pwmllerr(x...)
 #  define pwminfo(x...)
 #  define pwmllinfo(x...)
@@ -414,7 +414,7 @@ static int pwm_timer(FAR struct efm32_pwmtimer_s *priv,
 
   if (efm32_timer_set_freq(priv->base, priv->pclk, info->frequency) < 0)
     {
-      pwmdbg("Cannot set TIMER frequency %dHz from clock %dHz\n",
+      pwmerr("Cannot set TIMER frequency %dHz from clock %dHz\n",
              info->frequency, priv->pclk);
       return -EINVAL;
     }
@@ -933,7 +933,7 @@ FAR struct pwm_lowerhalf_s *efm32_pwminitialize(int timer)
 #endif
 
       default:
-        pwmdbg("No such timer configured\n");
+        pwmerr("No such timer configured\n");
         return NULL;
     }
 

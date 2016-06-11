@@ -137,7 +137,7 @@ static int netprocfs_open(FAR struct file *filep, FAR const char *relpath,
   if (((oflags & O_WRONLY) != 0 || (oflags & O_RDONLY) == 0) &&
       (net_procfsoperations.write == NULL))
     {
-      fdbg("ERROR: Only O_RDONLY supported\n");
+      ferr("ERROR: Only O_RDONLY supported\n");
       return -EACCES;
     }
 
@@ -167,7 +167,7 @@ static int netprocfs_open(FAR struct file *filep, FAR const char *relpath,
       copy = strdup(relpath);
       if (copy == NULL)
         {
-          fdbg("ERROR: strdup failed\n");
+          ferr("ERROR: strdup failed\n");
           return -ENOMEM;
         }
 
@@ -177,7 +177,7 @@ static int netprocfs_open(FAR struct file *filep, FAR const char *relpath,
 
       if (dev == NULL)
         {
-          fdbg("ERROR: relpath is '%s'\n", relpath);
+          ferr("ERROR: relpath is '%s'\n", relpath);
           return -ENOENT;
         }
     }
@@ -187,7 +187,7 @@ static int netprocfs_open(FAR struct file *filep, FAR const char *relpath,
   priv = (FAR struct netprocfs_file_s *)kmm_zalloc(sizeof(struct netprocfs_file_s));
   if (!priv)
     {
-      fdbg("ERROR: Failed to allocate file attributes\n");
+      ferr("ERROR: Failed to allocate file attributes\n");
       return -ENOMEM;
     }
 
@@ -294,7 +294,7 @@ static int netprocfs_dup(FAR const struct file *oldp, FAR struct file *newp)
   newpriv = (FAR struct netprocfs_file_s *)kmm_zalloc(sizeof(struct netprocfs_file_s));
   if (!newpriv)
     {
-      fdbg("ERROR: Failed to allocate file attributes\n");
+      ferr("ERROR: Failed to allocate file attributes\n");
       return -ENOMEM;
     }
 
@@ -334,7 +334,7 @@ static int netprocfs_opendir(FAR const char *relpath,
        * should return -ENOENT.
        */
 
-      fdbg("ERROR: Bad relpath: %s\n", relpath);
+      ferr("ERROR: Bad relpath: %s\n", relpath);
       return -ENOTDIR;
     }
 
@@ -347,7 +347,7 @@ static int netprocfs_opendir(FAR const char *relpath,
 
   if (!level1)
     {
-      fdbg("ERROR: Failed to allocate the level1 directory structure\n");
+      ferr("ERROR: Failed to allocate the level1 directory structure\n");
       return -ENOMEM;
     }
 
@@ -518,7 +518,7 @@ static int netprocfs_stat(FAR const char *relpath, FAR struct stat *buf)
       copy = strdup(relpath);
       if (copy == NULL)
         {
-          fdbg("ERROR: strdup failed\n");
+          ferr("ERROR: strdup failed\n");
           return -ENOMEM;
         }
 
@@ -528,7 +528,7 @@ static int netprocfs_stat(FAR const char *relpath, FAR struct stat *buf)
 
       if (dev == NULL)
         {
-          fdbg("ERROR: relpath is '%s'\n", relpath);
+          ferr("ERROR: relpath is '%s'\n", relpath);
           return -ENOENT;
         }
 

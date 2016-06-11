@@ -148,7 +148,7 @@ static int cpuload_open(FAR struct file *filep, FAR const char *relpath,
 
   if ((oflags & O_WRONLY) != 0 || (oflags & O_RDONLY) == 0)
     {
-      fdbg("ERROR: Only O_RDONLY supported\n");
+      ferr("ERROR: Only O_RDONLY supported\n");
       return -EACCES;
     }
 
@@ -156,7 +156,7 @@ static int cpuload_open(FAR struct file *filep, FAR const char *relpath,
 
   if (strcmp(relpath, "cpuload") != 0)
     {
-      fdbg("ERROR: relpath is '%s'\n", relpath);
+      ferr("ERROR: relpath is '%s'\n", relpath);
       return -ENOENT;
     }
 
@@ -165,7 +165,7 @@ static int cpuload_open(FAR struct file *filep, FAR const char *relpath,
   attr = (FAR struct cpuload_file_s *)kmm_zalloc(sizeof(struct cpuload_file_s));
   if (!attr)
     {
-      fdbg("ERROR: Failed to allocate file attributes\n");
+      ferr("ERROR: Failed to allocate file attributes\n");
       return -ENOMEM;
     }
 
@@ -300,7 +300,7 @@ static int cpuload_dup(FAR const struct file *oldp, FAR struct file *newp)
   newattr = (FAR struct cpuload_file_s *)kmm_malloc(sizeof(struct cpuload_file_s));
   if (!newattr)
     {
-      fdbg("ERROR: Failed to allocate file attributes\n");
+      ferr("ERROR: Failed to allocate file attributes\n");
       return -ENOMEM;
     }
 
@@ -327,7 +327,7 @@ static int cpuload_stat(const char *relpath, struct stat *buf)
 
   if (strcmp(relpath, "cpuload") != 0)
     {
-      fdbg("ERROR: relpath is '%s'\n", relpath);
+      ferr("ERROR: relpath is '%s'\n", relpath);
       return -ENOENT;
     }
 

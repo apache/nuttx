@@ -134,7 +134,7 @@ int igmp_leavegroup(struct net_driver_s *dev, FAR const struct in_addr *grpaddr)
   /* Find the entry corresponding to the address leaving the group */
 
   group = igmp_grpfind(dev, &grpaddr->s_addr);
-  ndbg("Leaving group: %p\n", group);
+  nerr("Leaving group: %p\n", group);
   if (group)
     {
       /* Cancel the timer and discard any queued Membership Reports.  Canceling
@@ -155,7 +155,7 @@ int igmp_leavegroup(struct net_driver_s *dev, FAR const struct in_addr *grpaddr)
 
       if (IS_LASTREPORT(group->flags))
         {
-          ndbg("Schedule Leave Group message\n");
+          nerr("Schedule Leave Group message\n");
           IGMP_STATINCR(g_netstats.igmp.leave_sched);
           igmp_waitmsg(group, IGMP_LEAVE_GROUP);
         }

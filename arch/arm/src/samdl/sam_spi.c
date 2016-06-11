@@ -91,14 +91,14 @@
 #endif
 
 #ifdef CONFIG_DEBUG_SPI
-#  define spidbg llerr
+#  define spierr llerr
 #  ifdef CONFIG_DEBUG_INFO
 #    define spiinfo llerr
 #  else
 #    define spiinfo(x...)
 #  endif
 #else
-#  define spidbg(x...)
+#  define spierr(x...)
 #  define spiinfo(x...)
 #endif
 
@@ -944,7 +944,7 @@ static uint32_t spi_setfrequency(struct spi_dev_s *dev, uint32_t frequency)
     {
       /* Set the frequency to the maximum */
 
-      spidbg("ERROR: Cannot realize frequency: %ld\n", (long)frequency);
+      spierr("ERROR: Cannot realize frequency: %ld\n", (long)frequency);
       frequency = maxfreq;
     }
 
@@ -975,7 +975,7 @@ static uint32_t spi_setfrequency(struct spi_dev_s *dev, uint32_t frequency)
 
   if (baud > 255)
     {
-      spidbg("ERROR: BAUD is out of range: %ld\n", (long)baud);
+      spierr("ERROR: BAUD is out of range: %ld\n", (long)baud);
       baud = 255;
     }
 
@@ -1281,7 +1281,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
       data = spi_getreg16(priv, SAM_SPI_STATUS_OFFSET);
       if ((data & SPI_STATUS_BUFOVF) != 0)
         {
-          spidbg("ERROR: Buffer overflow!\n");
+          spierr("ERROR: Buffer overflow!\n");
 
           /* Clear the buffer overflow flag */
 
@@ -1488,7 +1488,7 @@ struct spi_dev_s *sam_spibus_initialize(int port)
   else
 #endif
     {
-      spidbg("ERROR: Unsupported port: %d\n", port);
+      spierr("ERROR: Unsupported port: %d\n", port);
       return NULL;
     }
 
@@ -1570,7 +1570,7 @@ struct spi_dev_s *sam_spibus_initialize(int port)
   ret = irq_attach(priv->irq, priv->handler);
   if (ret < 0)
     {
-      spidbg("ERROR: Failed to attach interrupt: %d\n", irq);
+      spierr("ERROR: Failed to attach interrupt: %d\n", irq);
       return NULL;
     }
 

@@ -278,7 +278,7 @@ int onfi_read(uintptr_t cmdaddr, uintptr_t addraddr, uintptr_t dataaddr,
 
   if (!onfi_compatible(cmdaddr, addraddr, dataaddr))
     {
-      fdbg("ERROR: No ONFI compatible device detected\n");
+      ferr("ERROR: No ONFI compatible device detected\n");
       return -ENODEV;
     }
 
@@ -316,7 +316,7 @@ int onfi_read(uintptr_t cmdaddr, uintptr_t addraddr, uintptr_t dataaddr,
 
   if (i == ONFI_PARAM_TABLE_SIZE)
     {
-      fdbg("ERROR: Failed to read ONFI parameter table\n");
+      ferr("ERROR: Failed to read ONFI parameter table\n");
       return -EIO;
    }
 

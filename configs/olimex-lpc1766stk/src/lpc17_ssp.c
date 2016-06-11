@@ -81,7 +81,7 @@
  */
 
 #ifdef CONFIG_SSP_DEBUG
-#  define sspdbg  llerr
+#  define ssperr  llerr
 #  ifdef CONFIG_SSP_VERBOSE
 #    define sspinfo llerr
 #  else
@@ -89,7 +89,7 @@
 #  endif
 #else
 #  undef CONFIG_SSP_VERBOSE
-#  define sspdbg(x...)
+#  define ssperr(x...)
 #  define sspinfo(x...)
 #endif
 
@@ -284,7 +284,7 @@ void weak_function lpc1766stk_sspdev_initialize(void)
 #ifdef CONFIG_LPC17_SSP0
 void  lpc17_ssp0select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
-  sspdbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  ssperr("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
   if (devid == SPIDEV_DISPLAY)
     {
       /* Assert/de-assert the CS pin to the card */
@@ -297,7 +297,7 @@ void  lpc17_ssp0select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool sel
 
 uint8_t lpc17_ssp0status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 {
-  sspdbg("Returning nothing\n");
+  ssperr("Returning nothing\n");
   return 0;
 }
 #endif
@@ -305,7 +305,7 @@ uint8_t lpc17_ssp0status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 #ifdef CONFIG_LPC17_SSP1
 void  lpc17_ssp1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
-  sspdbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  ssperr("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
   if (devid == SPIDEV_MMCSD)
     {
       /* Assert/de-assert the CS pin to the card */
@@ -318,7 +318,7 @@ void  lpc17_ssp1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool sel
 
 uint8_t lpc17_ssp1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 {
-  sspdbg("Returning SPI_STATUS_PRESENT\n");
+  ssperr("Returning SPI_STATUS_PRESENT\n");
   return SPI_STATUS_PRESENT;
 }
 #endif

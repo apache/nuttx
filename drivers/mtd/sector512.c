@@ -173,7 +173,7 @@ static FAR uint8_t *s512_cacheread(struct s512_dev_s *priv, off_t sector512)
                                 priv->eblock);
       if (result < 0)
         {
-          fdbg("ERROR: bread(%lu, %lu) returned %ld\n",
+          ferr("ERROR: bread(%lu, %lu) returned %ld\n",
                (unsigned long)sector, (unsigned long)priv->eblocksize,
                (long)result);
 
@@ -221,7 +221,7 @@ static void s512_cacheflush(struct s512_dev_s *priv)
       result = priv->dev->bwrite(priv->dev, sector, priv->sectperblock, priv->eblock);
       if (result < 0)
         {
-          fdbg("ERROR: bwrite(%lu, %lu) returned %ld\n",
+          ferr("ERROR: bwrite(%lu, %lu) returned %ld\n",
                (unsigned long)sector, (unsigned long)priv->eblocksize,
                (long)result);
 
@@ -263,7 +263,7 @@ static int s512_erase(FAR struct mtd_dev_s *dev, off_t sector512, size_t nsector
       dest = s512_cacheread(priv, sector512);
       if (!dest)
         {
-          fdbg("ERROR: s512_cacheread(%ul) failed\n", (unsigned long)sector512);
+          ferr("ERROR: s512_cacheread(%ul) failed\n", (unsigned long)sector512);
           DEBUGPANIC();
           return -EIO;
         }
@@ -282,7 +282,7 @@ static int s512_erase(FAR struct mtd_dev_s *dev, off_t sector512, size_t nsector
           ret = priv->dev->erase(priv->dev, eblockno, 1);
           if (ret < 0)
             {
-              fdbg("ERROR: Failed to erase block %lu: %d\n",
+              ferr("ERROR: Failed to erase block %lu: %d\n",
                    (unsigned long)eblockno, ret);
               return ret;
             }
@@ -331,7 +331,7 @@ static ssize_t s512_bread(FAR struct mtd_dev_s *dev, off_t sector512,
       src = s512_cacheread(priv, sector512);
       if (!src)
         {
-          fdbg("ERROR: s512_cacheread(%ul) failed\n", (unsigned long)sector512);
+          ferr("ERROR: s512_cacheread(%ul) failed\n", (unsigned long)sector512);
           DEBUGPANIC();
 
           result = (ssize_t)nsectors - remaining;
@@ -405,7 +405,7 @@ static ssize_t s512_bwrite(FAR struct mtd_dev_s *dev, off_t sector512, size_t ns
           result = priv->dev->erase(priv->dev, eblockno, 1);
           if (result < 0)
             {
-              fdbg("ERROR: Failed to erase block %lu: %ld\n",
+              ferr("ERROR: Failed to erase block %lu: %ld\n",
                    (unsigned long)eblockno, (long)result);
               return result;
             }
@@ -464,7 +464,7 @@ static ssize_t s512_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
         {
           int result;
 
-          fdbg("ERROR: s512_cacheread(%ul) failed\n", (unsigned long)sector);
+          ferr("ERROR: s512_cacheread(%ul) failed\n", (unsigned long)sector);
           DEBUGPANIC();
 
           result = (ssize_t)nbytes - remaining;
@@ -590,7 +590,7 @@ FAR struct mtd_dev_s *s512_initialize(FAR struct mtd_dev_s *mtd)
   if (ret < 0 || geo.erasesize <= SECTOR_512 ||
      (geo.erasesize & ~MASK_512) != geo.erasesize)
     {
-      fdbg("ERROR: MTDIOC_GEOMETRY ioctl returned %d, eraseize=%d\n",
+      ferr("ERROR: MTDIOC_GEOMETRY ioctl returned %d, eraseize=%d\n",
            ret, geo.erasesize);
       DEBUGPANIC();
       return NULL;
@@ -629,7 +629,7 @@ FAR struct mtd_dev_s *s512_initialize(FAR struct mtd_dev_s *mtd)
         {
           /* Allocation failed! Discard all of that work we just did and return NULL */
 
-          fdbg("Allocation failed\n");
+          ferr("Allocation failed\n");
           kmm_free(priv);
           priv = NULL;
         }

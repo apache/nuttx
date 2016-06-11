@@ -432,7 +432,7 @@ int nxffs_dump(FAR struct mtd_dev_s *mtd, bool verbose)
   ret = MTD_IOCTL(mtd, MTDIOC_GEOMETRY, (unsigned long)((uintptr_t)&blkinfo.geo));
   if (ret < 0)
     {
-      fdbg("ERROR: MTD ioctl(MTDIOC_GEOMETRY) failed: %d\n", -ret);
+      ferr("ERROR: MTD ioctl(MTDIOC_GEOMETRY) failed: %d\n", -ret);
       return ret;
     }
 
@@ -445,7 +445,7 @@ int nxffs_dump(FAR struct mtd_dev_s *mtd, bool verbose)
   blkinfo.buffer = (FAR uint8_t *)kmm_malloc(blkinfo.geo.blocksize);
   if (!blkinfo.buffer)
     {
-      fdbg("ERROR: Failed to allocate block cache\n");
+      ferr("ERROR: Failed to allocate block cache\n");
       return -ENOMEM;
     }
 
@@ -467,7 +467,7 @@ int nxffs_dump(FAR struct mtd_dev_s *mtd, bool verbose)
 #ifndef CONFIG_NXFFS_NAND
           /* Read errors are fatal */
 
-          fdbg("ERROR: Failed to read block %d\n", blkinfo.block);
+          ferr("ERROR: Failed to read block %d\n", blkinfo.block);
           kmm_free(blkinfo.buffer);
           return ret;
 #else

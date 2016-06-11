@@ -196,7 +196,7 @@ static inline int elf_loadfile(FAR struct elf_loadinfo_s *loadinfo)
           ret = elf_read(loadinfo, *pptr, shdr->sh_size, shdr->sh_offset);
           if (ret < 0)
             {
-              bdbg("ERROR: Failed to read section %d: %d\n", i, ret);
+              berr("ERROR: Failed to read section %d: %d\n", i, ret);
               return ret;
             }
         }
@@ -258,7 +258,7 @@ int elf_load(FAR struct elf_loadinfo_s *loadinfo)
   ret = elf_loadshdrs(loadinfo);
   if (ret < 0)
     {
-      bdbg("ERROR: elf_loadshdrs failed: %d\n", ret);
+      berr("ERROR: elf_loadshdrs failed: %d\n", ret);
       goto errout_with_buffers;
     }
 
@@ -286,7 +286,7 @@ int elf_load(FAR struct elf_loadinfo_s *loadinfo)
   ret = elf_addrenv_alloc(loadinfo, loadinfo->textsize, loadinfo->datasize, heapsize);
   if (ret < 0)
     {
-      bdbg("ERROR: elf_addrenv_alloc() failed: %d\n", ret);
+      berr("ERROR: elf_addrenv_alloc() failed: %d\n", ret);
       goto errout_with_buffers;
     }
 
@@ -299,7 +299,7 @@ int elf_load(FAR struct elf_loadinfo_s *loadinfo)
   ret = elf_addrenv_select(loadinfo);
   if (ret < 0)
     {
-      bdbg("ERROR: elf_addrenv_select() failed: %d\n", ret);
+      berr("ERROR: elf_addrenv_select() failed: %d\n", ret);
       goto errout_with_buffers;
     }
 #endif
@@ -309,7 +309,7 @@ int elf_load(FAR struct elf_loadinfo_s *loadinfo)
   ret = elf_loadfile(loadinfo);
   if (ret < 0)
     {
-      bdbg("ERROR: elf_loadfile failed: %d\n", ret);
+      berr("ERROR: elf_loadfile failed: %d\n", ret);
       goto errout_with_addrenv;
     }
 
@@ -319,14 +319,14 @@ int elf_load(FAR struct elf_loadinfo_s *loadinfo)
   ret = elf_loadctors(loadinfo);
   if (ret < 0)
     {
-      bdbg("ERROR: elf_loadctors failed: %d\n", ret);
+      berr("ERROR: elf_loadctors failed: %d\n", ret);
       goto errout_with_addrenv;
     }
 
   ret = elf_loaddtors(loadinfo);
   if (ret < 0)
     {
-      bdbg("ERROR: elf_loaddtors failed: %d\n", ret);
+      berr("ERROR: elf_loaddtors failed: %d\n", ret);
       goto errout_with_addrenv;
     }
 #endif
@@ -349,7 +349,7 @@ int elf_load(FAR struct elf_loadinfo_s *loadinfo)
   ret = elf_addrenv_restore(loadinfo);
   if (ret < 0)
     {
-      bdbg("ERROR: elf_addrenv_restore() failed: %d\n", ret);
+      berr("ERROR: elf_addrenv_restore() failed: %d\n", ret);
       goto errout_with_buffers;
     }
 #endif

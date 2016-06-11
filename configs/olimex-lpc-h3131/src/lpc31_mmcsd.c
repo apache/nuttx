@@ -80,7 +80,7 @@ int lpc31_mmcsd_initialize(int slot, int minor)
   sdio = sdio_initialize(slot);
   if (!sdio)
     {
-      fdbg("ERROR: Failed to initialize SDIO slot %d\n", slot);
+      ferr("ERROR: Failed to initialize SDIO slot %d\n", slot);
       return -ENODEV;
     }
 
@@ -90,7 +90,7 @@ int lpc31_mmcsd_initialize(int slot, int minor)
   ret = mmcsd_slotinitialize(minor, sdio);
   if (ret != OK)
     {
-      fdbg("ERROR: Failed to bind SDIO to the MMC/SD driver: %d\n", ret);
+      ferr("ERROR: Failed to bind SDIO to the MMC/SD driver: %d\n", ret);
       return ret;
     }
 

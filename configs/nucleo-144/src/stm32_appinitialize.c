@@ -114,7 +114,7 @@ int board_app_initialize(uintptr_t arg)
   ret = stm32_spidev_bus_init();
   if (ret != OK)
     {
-      fdbg("ERROR: Failed to initialize SPI interfaces: %d\n", ret);
+      ferr("ERROR: Failed to initialize SPI interfaces: %d\n", ret);
       return ret;
     }
 #endif
@@ -126,7 +126,7 @@ int board_app_initialize(uintptr_t arg)
   ret = stm32_sdio_initialize();
   if (ret != OK)
     {
-      fdbg("ERROR: Failed to initialize MMC/SD driver: %d\n", ret);
+      ferr("ERROR: Failed to initialize MMC/SD driver: %d\n", ret);
       return ret;
     }
 #endif

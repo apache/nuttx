@@ -64,12 +64,12 @@
 /* Non-standard debug that may be enabled just for testing the timer driver */
 
 #ifdef CONFIG_DEBUG_TIMER
-#  define tmrdbg    dbg
+#  define tmrerr    err
 #  define tmrinfo   info
 #  define tmrllerr  llerr
 #  define tmrllinfo llinfo
 #else
-#  define tmrdbg(x...)
+#  define tmrerr(x...)
 #  define tmrinfo(x...)
 #  define tmrllerr(x...)
 #  define tmrllinfo(x...)
@@ -451,7 +451,7 @@ FAR void *timer_register(FAR const char *path,
     kmm_zalloc(sizeof(struct timer_upperhalf_s));
   if (!upper)
     {
-      tmrdbg("Upper half allocation failed\n");
+      tmrerr("Upper half allocation failed\n");
       goto errout;
     }
 
@@ -466,7 +466,7 @@ FAR void *timer_register(FAR const char *path,
   upper->path = strdup(path);
   if (!upper->path)
     {
-      tmrdbg("Path allocation failed\n");
+      tmrerr("Path allocation failed\n");
       goto errout_with_upper;
     }
 
@@ -475,7 +475,7 @@ FAR void *timer_register(FAR const char *path,
   ret = register_driver(path, &g_timerops, 0666, upper);
   if (ret < 0)
     {
-      tmrdbg("register_driver failed: %d\n", ret);
+      tmrerr("register_driver failed: %d\n", ret);
       goto errout_with_path;
     }
 

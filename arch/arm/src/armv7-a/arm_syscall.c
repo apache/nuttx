@@ -71,9 +71,9 @@
 /* Debug ********************************************************************/
 
 #if defined(CONFIG_DEBUG_SYSCALL)
-# define svcdbg(format, ...) llerr(format, ##__VA_ARGS__)
+# define svcerr(format, ...) llerr(format, ##__VA_ARGS__)
 #else
-# define svcdbg(x...)
+# define svcerr(x...)
 #endif
 
 /****************************************************************************
@@ -179,14 +179,14 @@ uint32_t *arm_syscall(uint32_t *regs)
    */
 
 #if defined(CONFIG_DEBUG_SYSCALL)
-  svcdbg("SYSCALL Entry: regs: %p cmd: %d\n", regs, cmd);
-  svcdbg("  R0: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+  svcerr("SYSCALL Entry: regs: %p cmd: %d\n", regs, cmd);
+  svcerr("  R0: %08x %08x %08x %08x %08x %08x %08x %08x\n",
          regs[REG_R0],  regs[REG_R1],  regs[REG_R2],  regs[REG_R3],
          regs[REG_R4],  regs[REG_R5],  regs[REG_R6],  regs[REG_R7]);
-  svcdbg("  R8: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+  svcerr("  R8: %08x %08x %08x %08x %08x %08x %08x %08x\n",
          regs[REG_R8],  regs[REG_R9],  regs[REG_R10], regs[REG_R11],
          regs[REG_R12], regs[REG_R13], regs[REG_R14], regs[REG_R15]);
-  svcdbg("CPSR: %08x\n", regs[REG_CPSR]);
+  svcerr("CPSR: %08x\n", regs[REG_CPSR]);
 #endif
 
   /* Handle the SVCall according to the command in R0 */
@@ -480,7 +480,7 @@ uint32_t *arm_syscall(uint32_t *regs)
 
           regs[REG_R0] -= CONFIG_SYS_RESERVED;
 #else
-          svcdbg("ERROR: Bad SYS call: %d\n", regs[REG_R0]);
+          svcerr("ERROR: Bad SYS call: %d\n", regs[REG_R0]);
 #endif
 
 #ifdef CONFIG_ARCH_KERNEL_STACK
@@ -504,14 +504,14 @@ uint32_t *arm_syscall(uint32_t *regs)
 #if defined(CONFIG_DEBUG_SYSCALL)
   /* Report what happened */
 
-  svcdbg("SYSCALL Exit: regs: %p\n", regs);
-  svcdbg("  R0: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+  svcerr("SYSCALL Exit: regs: %p\n", regs);
+  svcerr("  R0: %08x %08x %08x %08x %08x %08x %08x %08x\n",
          regs[REG_R0],  regs[REG_R1],  regs[REG_R2],  regs[REG_R3],
          regs[REG_R4],  regs[REG_R5],  regs[REG_R6],  regs[REG_R7]);
-  svcdbg("  R8: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+  svcerr("  R8: %08x %08x %08x %08x %08x %08x %08x %08x\n",
          regs[REG_R8],  regs[REG_R9],  regs[REG_R10], regs[REG_R11],
          regs[REG_R12], regs[REG_R13], regs[REG_R14], regs[REG_R15]);
-  svcdbg("CPSR: %08x\n", regs[REG_CPSR]);
+  svcerr("CPSR: %08x\n", regs[REG_CPSR]);
 #endif
 
   /* Return the last value of curent_regs.  This supports context switches

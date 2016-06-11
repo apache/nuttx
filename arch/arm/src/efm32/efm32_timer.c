@@ -68,7 +68,7 @@
 #endif
 
 #ifdef CONFIG_DEBUG_TIMER
-#  define efm32_timerdbg              dbg
+#  define efm32_timererr              err
 #  define efm32_timerllerr            llerr
 #  ifdef CONFIG_DEBUG_INFO
 #    define efm32_timerinfo           info
@@ -80,7 +80,7 @@
 #    define efm32_timer_dumpgpio(p,m)
 #  endif
 #else
-#  define efm32_timerdbg(x...)
+#  define efm32_timererr(x...)
 #  define efm32_timerllerr(x...)
 #  define efm32_timerinfo(x...)
 #  define efm32_timerllinfo(x...)
@@ -262,7 +262,7 @@ int efm32_timer_set_freq(uintptr_t base, uint32_t clk_freq, uint32_t freq)
 
   reload = (clk_freq / prescaler / freq);
 
-  efm32_timerdbg("Source: %4xHz Div: %4x Reload: %4x \n",
+  efm32_timererr("Source: %4xHz Div: %4x Reload: %4x \n",
                  clk_freq, prescaler, reload);
 
   putreg32(reload, base + EFM32_TIMER_TOP_OFFSET);

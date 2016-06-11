@@ -183,7 +183,7 @@ int stm32_usbhost_initialize(void)
   ret = usbhost_hub_initialize();
   if (ret < 0)
     {
-      udbg("ERROR: usbhost_hub_initialize failed: %d\n", ret);
+      uerr("ERROR: usbhost_hub_initialize failed: %d\n", ret);
     }
 #endif
 
@@ -193,7 +193,7 @@ int stm32_usbhost_initialize(void)
   ret = usbhost_msc_initialize();
   if (ret != OK)
     {
-      udbg("ERROR: Failed to register the mass storage class: %d\n", ret);
+      uerr("ERROR: Failed to register the mass storage class: %d\n", ret);
     }
 #endif
 
@@ -203,7 +203,7 @@ int stm32_usbhost_initialize(void)
   ret = usbhost_cdcacm_initialize();
   if (ret != OK)
     {
-      udbg("ERROR: Failed to register the CDC/ACM serial class: %d\n", ret);
+      uerr("ERROR: Failed to register the CDC/ACM serial class: %d\n", ret);
     }
 #endif
 
@@ -213,7 +213,7 @@ int stm32_usbhost_initialize(void)
   ret = usbhost_kbdinit();
   if (ret != OK)
     {
-      udbg("Failed to register the HID keyboard class\n");
+      uerr("Failed to register the HID keyboard class\n");
     }
 #endif
 
@@ -223,7 +223,7 @@ int stm32_usbhost_initialize(void)
   ret = usbhost_mouse_init();
   if (ret != OK)
     {
-      udbg("Failed to register the HID mouse class\n");
+      uerr("Failed to register the HID mouse class\n");
     }
 #endif
 

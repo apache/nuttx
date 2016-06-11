@@ -941,14 +941,14 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
 
   if (!psock || psock->s_crefs <= 0)
     {
-      ndbg("ERROR: Invalid socket\n");
+      nerr("ERROR: Invalid socket\n");
       errcode = EBADF;
       goto errout;
     }
 
   if (psock->s_type != SOCK_STREAM || !_SS_ISCONNECTED(psock->s_flags))
     {
-      ndbg("ERROR: Not connected\n");
+      nerr("ERROR: Not connected\n");
       errcode = ENOTCONN;
       goto errout;
     }
@@ -985,7 +985,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
 
   if (ret < 0)
     {
-      ndbg("ERROR: Not reachable\n");
+      nerr("ERROR: Not reachable\n");
       errcode = ENETUNREACH;
       goto errout;
     }
@@ -1011,7 +1011,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
         {
           /* A buffer allocation error occurred */
 
-          ndbg("ERROR: Failed to allocate write buffer\n");
+          nerr("ERROR: Failed to allocate write buffer\n");
           errcode = ENOMEM;
           goto errout_with_lock;
         }
@@ -1029,7 +1029,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
         {
           /* A buffer allocation error occurred */
 
-          ndbg("ERROR: Failed to allocate callback\n");
+          nerr("ERROR: Failed to allocate callback\n");
           errcode = ENOMEM;
           goto errout_with_wrb;
         }
@@ -1136,13 +1136,13 @@ int psock_tcp_cansend(FAR struct socket *psock)
 {
   if (!psock || psock->s_crefs <= 0)
     {
-      ndbg("ERROR: Invalid socket\n");
+      nerr("ERROR: Invalid socket\n");
       return -EBADF;
     }
 
   if (psock->s_type != SOCK_STREAM || !_SS_ISCONNECTED(psock->s_flags))
     {
-      ndbg("ERROR: Not connected\n");
+      nerr("ERROR: Not connected\n");
       return -ENOTCONN;
     }
 

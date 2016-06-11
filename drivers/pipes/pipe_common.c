@@ -205,7 +205,7 @@ int pipecommon_open(FAR struct file *filep)
   ret = sem_wait(&dev->d_bfsem);
   if (ret != OK)
     {
-      fdbg("sem_wait failed: %d\n", get_errno());
+      ferr("sem_wait failed: %d\n", get_errno());
       DEBUGASSERT(get_errno() > 0);
       return -get_errno();
     }
@@ -283,7 +283,7 @@ int pipecommon_open(FAR struct file *filep)
            * a signal.
            */
 
-          fdbg("sem_wait failed: %d\n", get_errno());
+          ferr("sem_wait failed: %d\n", get_errno());
           DEBUGASSERT(get_errno() > 0);
           ret = -get_errno();
 
@@ -519,7 +519,7 @@ ssize_t pipecommon_write(FAR struct file *filep, FAR const char *buffer,
   /* At present, this method cannot be called from interrupt handlers.  That is
    * because it calls sem_wait (via pipecommon_semtake below) and sem_wait cannot
    * be called from interrupt level.  This actually happens fairly commonly
-   * IF dbg() is called from interrupt handlers and stdout is being redirected
+   * IF err() is called from interrupt handlers and stdout is being redirected
    * via a pipe.  In that case, the debug output will try to go out the pipe
    * (interrupt handlers should use the llerr() APIs).
    *

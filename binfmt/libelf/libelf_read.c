@@ -127,7 +127,7 @@ int elf_read(FAR struct elf_loadinfo_s *loadinfo, FAR uint8_t *buffer,
       if (rpos != offset)
         {
           int errval = errno;
-          bdbg("Failed to seek to position %lu: %d\n",
+          berr("Failed to seek to position %lu: %d\n",
                (unsigned long)offset, errval);
           return -errval;
         }
@@ -143,14 +143,14 @@ int elf_read(FAR struct elf_loadinfo_s *loadinfo, FAR uint8_t *buffer,
 
            if (errval != EINTR)
              {
-               bdbg("Read from offset %lu failed: %d\n",
+               berr("Read from offset %lu failed: %d\n",
                     (unsigned long)offset, errval);
                return -errval;
              }
          }
        else if (nbytes == 0)
          {
-           bdbg("Unexpected end of file\n");
+           berr("Unexpected end of file\n");
            return -ENODATA;
          }
        else

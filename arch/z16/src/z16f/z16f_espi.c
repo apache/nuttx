@@ -70,14 +70,14 @@
 #endif
 
 #ifdef CONFIG_DEBUG_SPI
-#  define spidbg    llerr
+#  define spierr    llerr
 #  ifdef CONFIG_DEBUG_INFO
 #    define spiinfo llerr
 #  else
 #    define spiinfo (void)
 #  endif
 #else
-#  define spidbg    (void)
+#  define spierr    (void)
 #  define spiinfo   (void)
 #endif
 
@@ -476,7 +476,7 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
   priv->frequency = frequency;
   priv->actual    = actual;
 
-  spidbg("Frequency %d->%d\n", frequency, actual);
+  spierr("Frequency %d->%d\n", frequency, actual);
   return actual;
 }
 

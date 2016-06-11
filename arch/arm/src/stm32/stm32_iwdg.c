@@ -51,7 +51,7 @@
 
 #include "up_arch.h"
 #include "stm32_rcc.h"
-#include "chip/stm32_dbgmcu.h"
+#include "chip/stm32_errmcu.h"
 #include "stm32_wdg.h"
 
 #if defined(CONFIG_WATCHDOG) && defined(CONFIG_STM32_IWDG)
@@ -112,10 +112,10 @@
  */
 
 #ifdef CONFIG_DEBUG_WATCHDOG
-#  define wddbg    llerr
+#  define wderr    llerr
 #  define wdinfo   llinfo
 #else
-#  define wddbg(x...)
+#  define wderr(x...)
 #  define wdinfo(x...)
 #endif
 
@@ -523,7 +523,7 @@ static int stm32_settimeout(FAR struct watchdog_lowerhalf_s *lower,
 
   if (timeout < 1 || timeout > IWDG_MAXTIMEOUT)
     {
-      wddbg("Cannot represent timeout=%d > %d\n",
+      wderr("Cannot represent timeout=%d > %d\n",
             timeout, IWDG_MAXTIMEOUT);
       return -ERANGE;
     }
@@ -536,7 +536,7 @@ static int stm32_settimeout(FAR struct watchdog_lowerhalf_s *lower,
 #ifdef CONFIG_STM32_IWDG_ONETIMESETUP
   if (priv->started)
     {
-      wddbg("Timer is already started\n");
+      wderr("Timer is already started\n");
       return -EBUSY;
     }
 #endif

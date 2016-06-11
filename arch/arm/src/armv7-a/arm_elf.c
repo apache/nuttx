@@ -74,7 +74,7 @@ bool up_checkarch(FAR const Elf32_Ehdr *ehdr)
 
   if (ehdr->e_machine != EM_ARM)
     {
-      bdbg("Not for ARM: e_machine=%04x\n", ehdr->e_machine);
+      berr("Not for ARM: e_machine=%04x\n", ehdr->e_machine);
       return -ENOEXEC;
     }
 
@@ -82,7 +82,7 @@ bool up_checkarch(FAR const Elf32_Ehdr *ehdr)
 
   if (ehdr->e_ident[EI_CLASS] != ELFCLASS32)
     {
-      bdbg("Need 32-bit objects: e_ident[EI_CLASS]=%02x\n", ehdr->e_ident[EI_CLASS]);
+      berr("Need 32-bit objects: e_ident[EI_CLASS]=%02x\n", ehdr->e_ident[EI_CLASS]);
       return -ENOEXEC;
     }
 
@@ -94,7 +94,7 @@ bool up_checkarch(FAR const Elf32_Ehdr *ehdr)
   if (ehdr->e_ident[EI_DATA] != ELFDATA2LSB)
 #endif
     {
-      bdbg("Wrong endian-ness: e_ident[EI_DATA]=%02x\n", ehdr->e_ident[EI_DATA]);
+      berr("Wrong endian-ness: e_ident[EI_DATA]=%02x\n", ehdr->e_ident[EI_DATA]);
       return -ENOEXEC;
     }
 
@@ -102,7 +102,7 @@ bool up_checkarch(FAR const Elf32_Ehdr *ehdr)
 
   if ((ehdr->e_entry & 3) != 0)
     {
-      bdbg("Entry point is not properly aligned: %08x\n", ehdr->e_entry);
+      berr("Entry point is not properly aligned: %08x\n", ehdr->e_entry);
       return -ENOEXEC;
     }
 
@@ -175,7 +175,7 @@ int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
         offset += sym->st_value - addr;
         if (offset & 3 || offset <= (int32_t) 0xfe000000 || offset >= (int32_t) 0x02000000)
           {
-            bdbg("  ERROR: PC24 [%d] relocation out of range, offset=%08lx\n",
+            berr("  ERROR: PC24 [%d] relocation out of range, offset=%08lx\n",
                  ELF32_R_TYPE(rel->r_info), offset);
 
             return -EINVAL;
@@ -246,7 +246,7 @@ int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
       break;
 
     default:
-      bdbg("Unsupported relocation: %d\n", ELF32_R_TYPE(rel->r_info));
+      berr("Unsupported relocation: %d\n", ELF32_R_TYPE(rel->r_info));
       return -EINVAL;
     }
 
@@ -256,6 +256,6 @@ int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
 int up_relocateadd(FAR const Elf32_Rela *rel, FAR const Elf32_Sym *sym,
                    uintptr_t addr)
 {
-  bdbg("RELA relocation not supported\n");
+  berr("RELA relocation not supported\n");
   return -ENOSYS;
 }

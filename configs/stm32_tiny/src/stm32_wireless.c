@@ -114,14 +114,14 @@ void stm32_wlinitialize(void)
   spidev = stm32_spibus_initialize(2);
   if (!spidev)
     {
-      dbg("Failed to initialize SPI bus\n");
+      err("Failed to initialize SPI bus\n");
       return;
     }
 
   result = nrf24l01_register(spidev, &nrf_cfg);
   if (result != OK)
     {
-      dbg("Failed to register initialize SPI bus\n");
+      err("Failed to register initialize SPI bus\n");
       return;
     }
 }

@@ -63,12 +63,12 @@
 /* Non-standard debug that may be enabled just for testing the watchdog driver */
 
 #ifdef CONFIG_DEBUG_WATCHDOG
-#  define wddbg    dbg
+#  define wderr    err
 #  define wdinfo   info
 #  define wdllerr  llerr
 #  define wdllinfo llinfo
 #else
-#  define wddbg(x...)
+#  define wderr(x...)
 #  define wdinfo(x...)
 #  define wdllerr(x...)
 #  define wdllinfo(x...)
@@ -486,7 +486,7 @@ FAR void *watchdog_register(FAR const char *path,
     kmm_zalloc(sizeof(struct watchdog_upperhalf_s));
   if (!upper)
     {
-      wddbg("Upper half allocation failed\n");
+      wderr("Upper half allocation failed\n");
       goto errout;
     }
 
@@ -502,7 +502,7 @@ FAR void *watchdog_register(FAR const char *path,
   upper->path = strdup(path);
   if (!upper->path)
     {
-      wddbg("Path allocation failed\n");
+      wderr("Path allocation failed\n");
       goto errout_with_upper;
     }
 
@@ -511,7 +511,7 @@ FAR void *watchdog_register(FAR const char *path,
   ret = register_driver(path, &g_wdogops, 0666, upper);
   if (ret < 0)
     {
-      wddbg("register_driver failed: %d\n", ret);
+      wderr("register_driver failed: %d\n", ret);
       goto errout_with_path;
     }
 

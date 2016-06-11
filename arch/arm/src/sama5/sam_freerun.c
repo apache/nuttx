@@ -150,7 +150,7 @@ int sam_freerun_initialize(struct sam_freerun_s *freerun, int chan,
   ret = sam_tc_divisor(frequency, &divisor, &cmr);
   if (ret < 0)
     {
-      tcdbg("ERROR: sam_tc_divisor failed: %d\n", ret);
+      tcerr("ERROR: sam_tc_divisor failed: %d\n", ret);
       return ret;
     }
 
@@ -189,7 +189,7 @@ int sam_freerun_initialize(struct sam_freerun_s *freerun, int chan,
   freerun->tch = sam_tc_allocate(chan, cmr);
   if (!freerun->tch)
     {
-      tcdbg("ERROR: Failed to allocate timer channel %d\n", chan);
+      tcerr("ERROR: Failed to allocate timer channel %d\n", chan);
       return -EBUSY;
     }
 

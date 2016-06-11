@@ -251,7 +251,7 @@ static inline void cc3000_devgive(FAR struct cc3000_dev_s *priv)
 
 static inline void cc3000_configspi(FAR struct spi_dev_s *spi)
 {
-  ndbg("Mode: %d Bits: 8 Frequency: %d\n",
+  nerr("Mode: %d Bits: 8 Frequency: %d\n",
        CONFIG_CC3000_SPI_MODE, CONFIG_CC3000_SPI_FREQUENCY);
 
   SPI_SETMODE(spi, CONFIG_CC3000_SPI_MODE);
@@ -1071,7 +1071,7 @@ static ssize_t cc3000_read(FAR struct file *filep, FAR char *buffer, size_t len)
 
   if (len < priv->rx_buffer_max_len)
     {
-      ndbg("Unsupported read size: %d\n", len);
+      nerr("Unsupported read size: %d\n", len);
       nread = -ENOSYS;
       goto errout_with_sem;
     }
@@ -1531,7 +1531,7 @@ int cc3000_register(FAR struct spi_dev_s *spi,
   priv = (FAR struct cc3000_dev_s *)kmm_malloc(sizeof(struct cc3000_dev_s));
   if (!priv)
     {
-      ndbg("kmm_malloc(%d) failed\n", sizeof(struct cc3000_dev_s));
+      nerr("kmm_malloc(%d) failed\n", sizeof(struct cc3000_dev_s));
       return -ENOMEM;
     }
 #endif
@@ -1565,7 +1565,7 @@ int cc3000_register(FAR struct spi_dev_s *spi,
   ret = config->irq_attach(config, cc3000_interrupt);
   if (ret < 0)
     {
-      ndbg("Failed to attach interrupt\n");
+      nerr("Failed to attach interrupt\n");
       goto errout_with_priv;
     }
 
@@ -1577,7 +1577,7 @@ int cc3000_register(FAR struct spi_dev_s *spi,
   ret = register_driver(drvname, &cc3000_fops, 0666, priv);
   if (ret < 0)
     {
-      ndbg("register_driver() failed: %d\n", ret);
+      nerr("register_driver() failed: %d\n", ret);
       goto errout_with_priv;
     }
 

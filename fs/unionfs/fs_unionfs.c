@@ -2512,7 +2512,7 @@ int unionfs_mount(FAR const char *fspath1, FAR const char *prefix1,
   ui = (FAR struct unionfs_inode_s *)kmm_zalloc(sizeof(struct unionfs_inode_s));
   if (!ui)
     {
-      fdbg("ERROR: Failed to allocated union FS state structure\n");
+      ferr("ERROR: Failed to allocated union FS state structure\n");
       return -ENOMEM;
     }
 
@@ -2523,14 +2523,14 @@ int unionfs_mount(FAR const char *fspath1, FAR const char *prefix1,
   ret = unionfs_getmount(fspath1, &ui->ui_fs[0].um_node);
   if (ret < 0)
     {
-      fdbg("ERROR: unionfs_getmount(fspath1) failed: %d\n", ret);
+      ferr("ERROR: unionfs_getmount(fspath1) failed: %d\n", ret);
       goto errout_with_uinode;
     }
 
   ret = unionfs_getmount(fspath2, &ui->ui_fs[1].um_node);
   if (ret < 0)
     {
-      fdbg("ERROR: unionfs_getmount(fspath2) failed: %d\n", ret);
+      ferr("ERROR: unionfs_getmount(fspath2) failed: %d\n", ret);
       goto errout_with_fs1;
     }
 
@@ -2541,7 +2541,7 @@ int unionfs_mount(FAR const char *fspath1, FAR const char *prefix1,
       ui->ui_fs[0].um_prefix = strdup(prefix1);
       if (ui->ui_fs[0].um_prefix == NULL)
         {
-          fdbg("ERROR: strdup(prefix1) failed\n");
+          ferr("ERROR: strdup(prefix1) failed\n");
           ret = -ENOMEM;
           goto errout_with_fs2;
         }
@@ -2552,7 +2552,7 @@ int unionfs_mount(FAR const char *fspath1, FAR const char *prefix1,
       ui->ui_fs[1].um_prefix = strdup(prefix2);
       if (ui->ui_fs[1].um_prefix == NULL)
         {
-          fdbg("ERROR: strdup(prefix2) failed\n");
+          ferr("ERROR: strdup(prefix2) failed\n");
           ret = -ENOMEM;
           goto errout_with_prefix1;
         }
@@ -2580,7 +2580,7 @@ int unionfs_mount(FAR const char *fspath1, FAR const char *prefix1,
        *  -ENOMEM - Failed to allocate in-memory resources for the operation
        */
 
-      fdbg("ERROR: Failed to reserve inode\n");
+      ferr("ERROR: Failed to reserve inode\n");
       goto errout_with_semaphore;
     }
 

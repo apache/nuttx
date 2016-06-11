@@ -185,7 +185,7 @@ int stm32_usbhost_initialize(void)
   ret = usbhost_msc_initialize();
   if (ret != OK)
     {
-      udbg("ERROR: Failed to register the mass storage class\n");
+      uerr("ERROR: Failed to register the mass storage class\n");
     }
 #endif
 
@@ -195,7 +195,7 @@ int stm32_usbhost_initialize(void)
   ret = usbhost_cdcacm_initialize();
   if (ret != OK)
     {
-      udbg("ERROR: Failed to register the CDC/ACM serial class\n");
+      uerr("ERROR: Failed to register the CDC/ACM serial class\n");
     }
 #endif
 

@@ -804,29 +804,29 @@ void efm32_dmadump(DMA_HANDLE handle, const struct efm32_dmaregs_s *regs,
 {
   struct dma_channel_s *dmach = (struct dma_channel_s *)handle;
 
-  dmadbg("%s\n", msg);
-  dmadbg("  DMA Registers:\n");
-  dmadbg("        STATUS: %08x\n", regs->status);
-  dmadbg("      CTRLBASE: %08x\n", regs->ctrlbase);
-  dmadbg("   ALTCTRLBASE: %08x\n", regs->altctrlbase);
-  dmadbg("  CHWAITSTATUS: %08x\n", regs->chwaitstatus);
-  dmadbg("   CHUSEBURSTS: %08x\n", regs->chusebursts);
-  dmadbg("    CHREQMASKS: %08x\n", regs->chreqmasks);
-  dmadbg("         CHENS: %08x\n", regs->chens);
-  dmadbg("        CHALTS: %08x\n", regs->chalts);
-  dmadbg("        CHPRIS: %08x\n", regs->chpris);
-  dmadbg("        ERRORC: %08x\n", regs->errorc);
-  dmadbg("   CHREQSTATUS: %08x\n", regs->chreqstatus);
-  dmadbg("  CHSREQSTATUS: %08x\n", regs->chsreqstatus);
-  dmadbg("           IEN: %08x\n", regs->ien);
+  dmaerr("%s\n", msg);
+  dmaerr("  DMA Registers:\n");
+  dmaerr("        STATUS: %08x\n", regs->status);
+  dmaerr("      CTRLBASE: %08x\n", regs->ctrlbase);
+  dmaerr("   ALTCTRLBASE: %08x\n", regs->altctrlbase);
+  dmaerr("  CHWAITSTATUS: %08x\n", regs->chwaitstatus);
+  dmaerr("   CHUSEBURSTS: %08x\n", regs->chusebursts);
+  dmaerr("    CHREQMASKS: %08x\n", regs->chreqmasks);
+  dmaerr("         CHENS: %08x\n", regs->chens);
+  dmaerr("        CHALTS: %08x\n", regs->chalts);
+  dmaerr("        CHPRIS: %08x\n", regs->chpris);
+  dmaerr("        ERRORC: %08x\n", regs->errorc);
+  dmaerr("   CHREQSTATUS: %08x\n", regs->chreqstatus);
+  dmaerr("  CHSREQSTATUS: %08x\n", regs->chsreqstatus);
+  dmaerr("           IEN: %08x\n", regs->ien);
 #if defined(CONFIG_EFM32_EFM32GG)
-  dmadbg("          CTRL: %08x\n", regs->ctrl);
-  dmadbg("           RDS: %08x\n", regs->rds);
-  dmadbg("         LOOP0: %08x\n", regs->loop0);
-  dmadbg("         LOOP1: %08x\n", regs->loop1);
-  dmadbg("         RECT0: %08x\n", regs->rect0);
+  dmaerr("          CTRL: %08x\n", regs->ctrl);
+  dmaerr("           RDS: %08x\n", regs->rds);
+  dmaerr("         LOOP0: %08x\n", regs->loop0);
+  dmaerr("         LOOP1: %08x\n", regs->loop1);
+  dmaerr("         RECT0: %08x\n", regs->rect0);
 #endif
-  dmadbg("  DMA Channel %d Registers:\n", dmach->chan);
-  dmadbg("        CHCTRL: %08x\n", regs->chnctrl);
+  dmaerr("  DMA Channel %d Registers:\n", dmach->chan);
+  dmaerr("        CHCTRL: %08x\n", regs->chnctrl);
 }
 #endif

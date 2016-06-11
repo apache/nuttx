@@ -574,29 +574,29 @@ static void kinetis_sample(struct kinetis_dev_s *priv, int index)
 static void kinetis_dumpsample(struct kinetis_dev_s *priv,
                                struct kinetis_sdhcregs_s *regs, const char *msg)
 {
-  fdbg("SDHC Registers: %s\n", msg);
-  fdbg("   DSADDR[%08x]: %08x\n", KINETIS_SDHC_DSADDR,    regs->dsaddr);
-  fdbg("  BLKATTR[%08x]: %08x\n", KINETIS_SDHC_BLKATTR,   regs->blkattr);
-  fdbg("   CMDARG[%08x]: %08x\n", KINETIS_SDHC_CMDARG,    regs->cmdarg);
-  fdbg("   XFERTY[%08x]: %08x\n", KINETIS_SDHC_XFERTYP,   regs->xferty);
-  fdbg("  CMDRSP0[%08x]: %08x\n", KINETIS_SDHC_CMDRSP0,   regs->cmdrsp0);
-  fdbg("  CMDRSP1[%08x]: %08x\n", KINETIS_SDHC_CMDRSP1,   regs->cmdrsp1);
-  fdbg("  CMDRSP2[%08x]: %08x\n", KINETIS_SDHC_CMDRSP2,   regs->cmdrsp2);
-  fdbg("  CMDRSP3[%08x]: %08x\n", KINETIS_SDHC_CMDRSP3,   regs->cmdrsp3);
-  fdbg("  PRSSTAT[%08x]: %08x\n", KINETIS_SDHC_PRSSTAT,   regs->prsstat);
-  fdbg("   PROCTL[%08x]: %08x\n", KINETIS_SDHC_PROCTL,    regs->proctl);
-  fdbg("   SYSCTL[%08x]: %08x\n", KINETIS_SDHC_SYSCTL,    regs->sysctl);
-  fdbg("  IRQSTAT[%08x]: %08x\n", KINETIS_SDHC_IRQSTAT,   regs->irqstat);
-  fdbg("IRQSTATEN[%08x]: %08x\n", KINETIS_SDHC_IRQSTATEN, regs->irqstaten);
-  fdbg(" IRQSIGEN[%08x]: %08x\n", KINETIS_SDHC_IRQSIGEN,  regs->irqsigen);
-  fdbg("  AC12ERR[%08x]: %08x\n", KINETIS_SDHC_AC12ERR,   regs->ac12err);
-  fdbg(" HTCAPBLT[%08x]: %08x\n", KINETIS_SDHC_HTCAPBLT,  regs->htcapblt);
-  fdbg("      WML[%08x]: %08x\n", KINETIS_SDHC_WML,       regs->wml);
-  fdbg("   ADMAES[%08x]: %08x\n", KINETIS_SDHC_ADMAES,    regs->admaes);
-  fdbg("  ADSADDR[%08x]: %08x\n", KINETIS_SDHC_ADSADDR,   regs->adsaddr);
-  fdbg("   VENDOR[%08x]: %08x\n", KINETIS_SDHC_VENDOR,    regs->vendor);
-  fdbg("  MMCBOOT[%08x]: %08x\n", KINETIS_SDHC_MMCBOOT,   regs->mmcboot);
-  fdbg("  HOSTVER[%08x]: %08x\n", KINETIS_SDHC_HOSTVER,   regs->hostver);
+  ferr("SDHC Registers: %s\n", msg);
+  ferr("   DSADDR[%08x]: %08x\n", KINETIS_SDHC_DSADDR,    regs->dsaddr);
+  ferr("  BLKATTR[%08x]: %08x\n", KINETIS_SDHC_BLKATTR,   regs->blkattr);
+  ferr("   CMDARG[%08x]: %08x\n", KINETIS_SDHC_CMDARG,    regs->cmdarg);
+  ferr("   XFERTY[%08x]: %08x\n", KINETIS_SDHC_XFERTYP,   regs->xferty);
+  ferr("  CMDRSP0[%08x]: %08x\n", KINETIS_SDHC_CMDRSP0,   regs->cmdrsp0);
+  ferr("  CMDRSP1[%08x]: %08x\n", KINETIS_SDHC_CMDRSP1,   regs->cmdrsp1);
+  ferr("  CMDRSP2[%08x]: %08x\n", KINETIS_SDHC_CMDRSP2,   regs->cmdrsp2);
+  ferr("  CMDRSP3[%08x]: %08x\n", KINETIS_SDHC_CMDRSP3,   regs->cmdrsp3);
+  ferr("  PRSSTAT[%08x]: %08x\n", KINETIS_SDHC_PRSSTAT,   regs->prsstat);
+  ferr("   PROCTL[%08x]: %08x\n", KINETIS_SDHC_PROCTL,    regs->proctl);
+  ferr("   SYSCTL[%08x]: %08x\n", KINETIS_SDHC_SYSCTL,    regs->sysctl);
+  ferr("  IRQSTAT[%08x]: %08x\n", KINETIS_SDHC_IRQSTAT,   regs->irqstat);
+  ferr("IRQSTATEN[%08x]: %08x\n", KINETIS_SDHC_IRQSTATEN, regs->irqstaten);
+  ferr(" IRQSIGEN[%08x]: %08x\n", KINETIS_SDHC_IRQSIGEN,  regs->irqsigen);
+  ferr("  AC12ERR[%08x]: %08x\n", KINETIS_SDHC_AC12ERR,   regs->ac12err);
+  ferr(" HTCAPBLT[%08x]: %08x\n", KINETIS_SDHC_HTCAPBLT,  regs->htcapblt);
+  ferr("      WML[%08x]: %08x\n", KINETIS_SDHC_WML,       regs->wml);
+  ferr("   ADMAES[%08x]: %08x\n", KINETIS_SDHC_ADMAES,    regs->admaes);
+  ferr("  ADSADDR[%08x]: %08x\n", KINETIS_SDHC_ADSADDR,   regs->adsaddr);
+  ferr("   VENDOR[%08x]: %08x\n", KINETIS_SDHC_VENDOR,    regs->vendor);
+  ferr("  MMCBOOT[%08x]: %08x\n", KINETIS_SDHC_MMCBOOT,   regs->mmcboot);
+  ferr("  HOSTVER[%08x]: %08x\n", KINETIS_SDHC_HOSTVER,   regs->hostver);
 }
 #endif
 
@@ -1840,7 +1840,7 @@ static int kinetis_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t ar
     {
       if (--timeout <= 0)
         {
-          fdbg("ERROR: Timeout cmd: %08x PRSSTAT: %08x\n",
+          ferr("ERROR: Timeout cmd: %08x PRSSTAT: %08x\n",
                cmd, getreg32(KINETIS_SDHC_PRSSTAT));
 
           return -EBUSY;
@@ -2079,7 +2079,7 @@ static int kinetis_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
     {
       if (--timeout <= 0)
         {
-          fdbg("ERROR: Timeout cmd: %08x IRQSTAT: %08x\n",
+          ferr("ERROR: Timeout cmd: %08x IRQSTAT: %08x\n",
                cmd, getreg32(KINETIS_SDHC_IRQSTAT));
 
           return -ETIMEDOUT;
@@ -2090,7 +2090,7 @@ static int kinetis_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
 
   if ((getreg32(KINETIS_SDHC_IRQSTAT) & errors) != 0)
     {
-      fdbg("ERROR: cmd: %08x errors: %08x IRQSTAT: %08x\n",
+      ferr("ERROR: cmd: %08x errors: %08x IRQSTAT: %08x\n",
            cmd, errors, getreg32(KINETIS_SDHC_IRQSTAT));
       ret = -EIO;
     }
@@ -2155,7 +2155,7 @@ static int kinetis_recvshortcrc(FAR struct sdio_dev_s *dev, uint32_t cmd,
 #ifdef CONFIG_DEBUG_FEATURES
   if (!rshort)
     {
-      fdbg("ERROR: rshort=NULL\n");
+      ferr("ERROR: rshort=NULL\n");
       ret = -EINVAL;
     }
 
@@ -2165,7 +2165,7 @@ static int kinetis_recvshortcrc(FAR struct sdio_dev_s *dev, uint32_t cmd,
            (cmd & MMCSD_RESPONSE_MASK) != MMCSD_R1B_RESPONSE &&
            (cmd & MMCSD_RESPONSE_MASK) != MMCSD_R6_RESPONSE)
     {
-      fdbg("ERROR: Wrong response CMD=%08x\n", cmd);
+      ferr("ERROR: Wrong response CMD=%08x\n", cmd);
       ret = -EINVAL;
     }
   else
@@ -2176,12 +2176,12 @@ static int kinetis_recvshortcrc(FAR struct sdio_dev_s *dev, uint32_t cmd,
       regval = getreg32(KINETIS_SDHC_IRQSTAT);
       if ((regval & SDHC_INT_CTOE) != 0)
         {
-          fdbg("ERROR: Command timeout: %08x\n", regval);
+          ferr("ERROR: Command timeout: %08x\n", regval);
           ret = -ETIMEDOUT;
         }
       else if ((regval & SDHC_INT_CCE) != 0)
         {
-          fdbg("ERROR: CRC failure: %08x\n", regval);
+          ferr("ERROR: CRC failure: %08x\n", regval);
           ret = -EIO;
         }
     }
@@ -2214,7 +2214,7 @@ static int kinetis_recvlong(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t r
 
   if ((cmd & MMCSD_RESPONSE_MASK) != MMCSD_R2_RESPONSE)
     {
-      fdbg("ERROR: Wrong response CMD=%08x\n", cmd);
+      ferr("ERROR: Wrong response CMD=%08x\n", cmd);
       ret = -EINVAL;
     }
   else
@@ -2225,12 +2225,12 @@ static int kinetis_recvlong(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t r
       regval = getreg32(KINETIS_SDHC_IRQSTAT);
       if (regval & SDHC_INT_CTOE)
         {
-          fdbg("ERROR: Timeout IRQSTAT: %08x\n", regval);
+          ferr("ERROR: Timeout IRQSTAT: %08x\n", regval);
           ret = -ETIMEDOUT;
         }
       else if (regval & SDHC_INT_CCE)
         {
-          fdbg("ERROR: CRC fail IRQSTAT: %08x\n", regval);
+          ferr("ERROR: CRC fail IRQSTAT: %08x\n", regval);
           ret = -EIO;
         }
     }
@@ -2267,7 +2267,7 @@ static int kinetis_recvshort(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t 
   if ((cmd & MMCSD_RESPONSE_MASK) != MMCSD_R3_RESPONSE &&
       (cmd & MMCSD_RESPONSE_MASK) != MMCSD_R7_RESPONSE)
     {
-      fdbg("ERROR: Wrong response CMD=%08x\n", cmd);
+      ferr("ERROR: Wrong response CMD=%08x\n", cmd);
       ret = -EINVAL;
     }
   else
@@ -2280,7 +2280,7 @@ static int kinetis_recvshort(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t 
       regval = getreg32(KINETIS_SDHC_IRQSTAT);
       if (regval & SDHC_INT_CTOE)
         {
-          fdbg("ERROR: Timeout IRQSTAT: %08x\n", regval);
+          ferr("ERROR: Timeout IRQSTAT: %08x\n", regval);
           ret = -ETIMEDOUT;
         }
     }
@@ -2416,7 +2416,7 @@ static sdio_eventset_t kinetis_eventwait(FAR struct sdio_dev_s *dev,
                        1, (uint32_t)priv);
       if (ret != OK)
         {
-          fdbg("ERROR: wd_start failed: %d\n", ret);
+          ferr("ERROR: wd_start failed: %d\n", ret);
         }
     }
 

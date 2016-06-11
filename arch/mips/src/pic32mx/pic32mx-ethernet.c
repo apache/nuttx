@@ -1921,7 +1921,7 @@ static int pic32mx_ifup(struct net_driver_s *dev)
   uint32_t regval;
   int ret;
 
-  ndbg("Bringing up: %d.%d.%d.%d\n",
+  nerr("Bringing up: %d.%d.%d.%d\n",
        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
 
@@ -2011,7 +2011,7 @@ static int pic32mx_ifup(struct net_driver_s *dev)
   ret = pic32mx_phyinit(priv);
   if (ret != 0)
     {
-      ndbg("pic32mx_phyinit failed: %d\n", ret);
+      nerr("pic32mx_phyinit failed: %d\n", ret);
       return ret;
     }
 
@@ -2373,14 +2373,14 @@ static int pic32mx_rmmac(struct net_driver_s *dev, const uint8_t *mac)
 #if defined(CONFIG_NET_REGDEBUG) && defined(PIC32MX_HAVE_PHY)
 static void pic32mx_showmii(uint8_t phyaddr, const char *msg)
 {
-  dbg("PHY " PIC32MX_PHYNAME ": %s\n", msg);
-  dbg("  MCR:       %04x\n", pic32mx_phyread(phyaddr, MII_MCR));
-  dbg("  MSR:       %04x\n", pic32mx_phyread(phyaddr, MII_MSR));
-  dbg("  ADVERTISE: %04x\n", pic32mx_phyread(phyaddr, MII_ADVERTISE));
-  dbg("  LPA:       %04x\n", pic32mx_phyread(phyaddr, MII_LPA));
-  dbg("  EXPANSION: %04x\n", pic32mx_phyread(phyaddr, MII_EXPANSION));
+  err("PHY " PIC32MX_PHYNAME ": %s\n", msg);
+  err("  MCR:       %04x\n", pic32mx_phyread(phyaddr, MII_MCR));
+  err("  MSR:       %04x\n", pic32mx_phyread(phyaddr, MII_MSR));
+  err("  ADVERTISE: %04x\n", pic32mx_phyread(phyaddr, MII_ADVERTISE));
+  err("  LPA:       %04x\n", pic32mx_phyread(phyaddr, MII_LPA));
+  err("  EXPANSION: %04x\n", pic32mx_phyread(phyaddr, MII_EXPANSION));
 #ifdef CONFIG_ETH0_PHY_KS8721
-  dbg("  10BTCR:    %04x\n", pic32mx_phyread(phyaddr, MII_KS8721_10BTCR));
+  err("  10BTCR:    %04x\n", pic32mx_phyread(phyaddr, MII_KS8721_10BTCR));
 #endif
 }
 #endif
@@ -2543,7 +2543,7 @@ static inline int pic32mx_phyreset(uint8_t phyaddr)
         }
     }
 
-  ndbg("Reset failed. MCR: %04x\n", phyreg);
+  nerr("Reset failed. MCR: %04x\n", phyreg);
   return -ETIMEDOUT;
 }
 #endif
@@ -2590,7 +2590,7 @@ static inline int pic32mx_phyautoneg(uint8_t phyaddr)
         }
     }
 
-  ndbg("Auto-negotiation failed. MSR: %04x\n", phyreg);
+  nerr("Auto-negotiation failed. MSR: %04x\n", phyreg);
   return -ETIMEDOUT;
 }
 #endif
@@ -2669,7 +2669,7 @@ static int pic32mx_phymode(uint8_t phyaddr, uint8_t mode)
 #endif
     }
 
-  ndbg("Link failed. MSR: %04x\n", phyreg);
+  nerr("Link failed. MSR: %04x\n", phyreg);
   return -ETIMEDOUT;
 }
 #endif
@@ -2738,7 +2738,7 @@ static inline int pic32mx_phyinit(struct pic32mx_driver_s *priv)
       ret = pic32mx_phyreset(phyaddr);
       if (ret < 0)
         {
-          ndbg("Failed to reset PHY at address %d\n", phyaddr);
+          nerr("Failed to reset PHY at address %d\n", phyaddr);
           continue;
         }
 
@@ -2771,7 +2771,7 @@ static inline int pic32mx_phyinit(struct pic32mx_driver_s *priv)
     {
       /* Failed to find PHY at any location */
 
-      ndbg("No PHY detected\n");
+      nerr("No PHY detected\n");
       return -ENODEV;
     }
   ninfo("phyaddr: %d\n", phyaddr);
@@ -2875,7 +2875,7 @@ static inline int pic32mx_phyinit(struct pic32mx_driver_s *priv)
         priv->pd_mode = PIC32MX_100BASET_FD;
         break;
       default:
-        ndbg("Unrecognized mode: %04x\n", phyreg);
+        nerr("Unrecognized mode: %04x\n", phyreg);
         return -ENODEV;
     }
 #elif defined(CONFIG_ETH0_PHY_DP83848C)
@@ -2898,7 +2898,7 @@ static inline int pic32mx_phyinit(struct pic32mx_driver_s *priv)
         priv->pd_mode = PIC32MX_10BASET_FD;
         break;
       default:
-        ndbg("Unrecognized mode: %04x\n", phyreg);
+        nerr("Unrecognized mode: %04x\n", phyreg);
         return -ENODEV;
     }
 #elif defined(CONFIG_ETH0_PHY_LAN8720)
@@ -2943,7 +2943,7 @@ static inline int pic32mx_phyinit(struct pic32mx_driver_s *priv)
       }
     else
       {
-        ndbg("Unrecognized mode: %04x\n", phyreg);
+        nerr("Unrecognized mode: %04x\n", phyreg);
         return -ENODEV;
       }
   }
@@ -2951,7 +2951,7 @@ static inline int pic32mx_phyinit(struct pic32mx_driver_s *priv)
 #  warning "PHY Unknown: speed and duplex are bogus"
 #endif
 
-  ndbg("%dBase-T %s duplex\n",
+  nerr("%dBase-T %s duplex\n",
        (priv->pd_mode & PIC32MX_SPEED_MASK) ==  PIC32MX_SPEED_100 ? 100 : 10,
        (priv->pd_mode & PIC32MX_DUPLEX_MASK) == PIC32MX_DUPLEX_FULL ?"full" : "half");
 

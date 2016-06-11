@@ -56,14 +56,14 @@
 #endif
 
 #ifdef CONFIG_EFM32_RMU_DEBUG
-#  define rmudbg llerr
+#  define rmuerr llerr
 #  ifdef CONFIG_DEBUG_INFO
 #    define rmuinfo llerr
 #  else
 #    define rmuinfo(x...)
 #  endif
 #else
-#  define rmudbg(x...)
+#  define rmuerr(x...)
 #  define rmuinfo(x...)
 #endif
 

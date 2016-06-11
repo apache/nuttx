@@ -262,7 +262,7 @@ void efm32_rmu_initialize(void)
     }
 
 #ifdef CONFIG_EFM32_RMU_DEBUG
-  rmudbg("RMU => reg = 0x%08X\n", g_efm32_rstcause);
+  rmuerr("RMU => reg = 0x%08X\n", g_efm32_rstcause);
   for (; ; )
     {
       const char *str;
@@ -273,7 +273,7 @@ void efm32_rmu_initialize(void)
           break;
         }
 
-      rmudbg("RMU => %s\n", str);
+      rmuerr("RMU => %s\n", str);
     }
 #endif
 }

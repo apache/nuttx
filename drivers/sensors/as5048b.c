@@ -139,7 +139,7 @@ static int as5048b_readu8(FAR struct as5048b_dev_s *priv, uint8_t regaddr,
   ret = i2c_write(priv->i2c, &config, &regaddr, sizeof(regaddr));
   if (ret < 0)
     {
-      sndbg("i2c_write failed: %d\n", ret);
+      snerr("i2c_write failed: %d\n", ret);
       return ret;
     }
 
@@ -148,11 +148,11 @@ static int as5048b_readu8(FAR struct as5048b_dev_s *priv, uint8_t regaddr,
   ret = i2c_read(priv->i2c, &config, regval, sizeof(*regval));
   if (ret < 0)
     {
-      sndbg("i2c_read failed: %d\n", ret);
+      snerr("i2c_read failed: %d\n", ret);
       return ret;
     }
 
-  sndbg("addr: %02x value: %02x ret: %d\n", regaddr, *regval, ret);
+  snerr("addr: %02x value: %02x ret: %d\n", regaddr, *regval, ret);
   return ret;
 }
 
@@ -175,7 +175,7 @@ static int as5048b_readu16(FAR struct as5048b_dev_s *priv, uint8_t regaddrhi,
   ret = as5048b_readu8(priv, regaddrhi, &hi);
   if (ret < 0)
     {
-      sndbg("as5048b_readu8 failed: %d\n", ret);
+      snerr("as5048b_readu8 failed: %d\n", ret);
       return ret;
     }
 
@@ -184,12 +184,12 @@ static int as5048b_readu16(FAR struct as5048b_dev_s *priv, uint8_t regaddrhi,
   ret = as5048b_readu8(priv, regaddrlo, &lo);
   if (ret < 0)
     {
-      sndbg("as5048b_readu8 failed: %d\n", ret);
+      snerr("as5048b_readu8 failed: %d\n", ret);
       return ret;
     }
 
   *regval = (uint16_t)hi << 6 | (uint16_t)lo;
-  sndbg("addrhi: %02x addrlo: %02x value: %04x ret: %d\n",
+  snerr("addrhi: %02x addrlo: %02x value: %04x ret: %d\n",
         regaddrhi, regaddrlo, *regval, ret);
   return ret;
 }
@@ -209,7 +209,7 @@ static int as5048b_writeu8(FAR struct as5048b_dev_s *priv, uint8_t regaddr,
   uint8_t buffer[2];
   int ret;
 
-  sndbg("addr: %02x value: %02x\n", regaddr, regval);
+  snerr("addr: %02x value: %02x\n", regaddr, regval);
 
   /* Set up the I2C configuration */
 
@@ -227,7 +227,7 @@ static int as5048b_writeu8(FAR struct as5048b_dev_s *priv, uint8_t regaddr,
   ret = i2c_write(priv->i2c, &config, buffer, sizeof(buffer));
   if (ret < 0)
     {
-      sndbg("i2c_write failed: %d\n", ret);
+      snerr("i2c_write failed: %d\n", ret);
     }
 
   return ret;
@@ -246,7 +246,7 @@ static int as5048b_writeu16(FAR struct as5048b_dev_s *priv, uint8_t regaddrhi,
 {
   int ret;
 
-  sndbg("addrhi: %02x addrlo: %02x value: %04x\n",
+  snerr("addrhi: %02x addrlo: %02x value: %04x\n",
         regaddrhi, regaddrlo, regval);
 
   /* Write the high 8 bits of the 13-bit value */
@@ -254,7 +254,7 @@ static int as5048b_writeu16(FAR struct as5048b_dev_s *priv, uint8_t regaddrhi,
   ret = as5048b_writeu8(priv, regaddrhi, (uint8_t)(regval >> 6));
   if (ret < 0)
     {
-      sndbg("as5048b_writeu8 failed: %d\n", ret);
+      snerr("as5048b_writeu8 failed: %d\n", ret);
       return ret;
     }
 
@@ -263,7 +263,7 @@ static int as5048b_writeu16(FAR struct as5048b_dev_s *priv, uint8_t regaddrhi,
   ret = as5048b_writeu8(priv, regaddrhi, (uint8_t)regval);
   if (ret < 0)
     {
-      sndbg("as5048b_writeu8 failed: %d\n", ret);
+      snerr("as5048b_writeu8 failed: %d\n", ret);
     }
 
   return ret;
@@ -285,11 +285,11 @@ static int as5048b_readzero(FAR struct as5048b_dev_s *priv,
   ret = as5048b_readu16(priv, AS5048B_ZEROHI_REG, AS5048B_ZEROLO_REG, zero);
   if (ret < 0)
     {
-      sndbg("as5048b_readu16 failed: %d\n", ret);
+      snerr("as5048b_readu16 failed: %d\n", ret);
       return ret;
     }
 
-  sndbg("zero: %04x ret: %d\n", *zero, ret);
+  snerr("zero: %04x ret: %d\n", *zero, ret);
   return ret;
 }
 
@@ -305,12 +305,12 @@ static int as5048b_writezero(FAR struct as5048b_dev_s *priv, uint16_t zero)
 {
   int ret;
 
-  sndbg("zero: %04x\n", zero);
+  snerr("zero: %04x\n", zero);
 
   ret = as5048b_writeu16(priv, AS5048B_ZEROHI_REG, AS5048B_ZEROLO_REG, zero);
   if (ret < 0)
     {
-      sndbg("as5048b_writeu16 failed: %d\n", ret);
+      snerr("as5048b_writeu16 failed: %d\n", ret);
     }
 
   return ret;
@@ -331,11 +331,11 @@ static int as5048b_readagc(FAR struct as5048b_dev_s *priv, FAR uint8_t *agc)
   ret = as5048b_readu8(priv, AS5048B_AGC_REG, agc);
   if (ret < 0)
     {
-      sndbg("as5048b_readu8 failed: %d\n", ret);
+      snerr("as5048b_readu8 failed: %d\n", ret);
       return ret;
     }
 
-  sndbg("agc: %02x ret: %d\n", *agc, ret);
+  snerr("agc: %02x ret: %d\n", *agc, ret);
   return ret;
 }
 
@@ -354,11 +354,11 @@ static int as5048b_readdiag(FAR struct as5048b_dev_s *priv, FAR uint8_t *diag)
   ret = as5048b_readu8(priv, AS5048B_DIAG_REG, diag);
   if (ret < 0)
     {
-      sndbg("as5048b_readu8 failed: %d\n", ret);
+      snerr("as5048b_readu8 failed: %d\n", ret);
       return ret;
     }
 
-  sndbg("diag: %02x ret: %d\n", *diag, ret);
+  snerr("diag: %02x ret: %d\n", *diag, ret);
   return ret;
 }
 
@@ -377,11 +377,11 @@ static int as5048b_readmag(FAR struct as5048b_dev_s *priv, FAR uint16_t *mag)
   ret = as5048b_readu16(priv, AS5048B_MAGHI_REG, AS5048B_MAGLO_REG, mag);
   if (ret < 0)
     {
-      sndbg("as5048b_readu16 failed: %d\n", ret);
+      snerr("as5048b_readu16 failed: %d\n", ret);
       return ret;
     }
 
-  sndbg("mag: %04x ret: %d\n", *mag, ret);
+  snerr("mag: %04x ret: %d\n", *mag, ret);
   return ret;
 }
 
@@ -400,11 +400,11 @@ static int as5048b_readang(FAR struct as5048b_dev_s *priv, FAR uint16_t *ang)
   ret = as5048b_readu16(priv, AS5048B_ANGHI_REG, AS5048B_ANGLO_REG, ang);
   if (ret < 0)
     {
-      sndbg("as5048b_readu16 failed: %d\n", ret);
+      snerr("as5048b_readu16 failed: %d\n", ret);
       return ret;
     }
 
-  sndbg("ang: %04x ret: %d\n", *ang, ret);
+  snerr("ang: %04x ret: %d\n", *ang, ret);
   return ret;
 }
 
@@ -452,7 +452,7 @@ static int as5048b_position(FAR struct qe_lowerhalf_s *lower,
   ret = as5048b_readang(priv, &ang);
   if (ret < 0)
     {
-      sndbg("as5048b_readang failed: %d\n", ret);
+      snerr("as5048b_readang failed: %d\n", ret);
       return ret;
     }
 
@@ -477,21 +477,21 @@ static int as5048b_reset(FAR struct qe_lowerhalf_s *lower)
   ret = as5048b_writezero(priv, 0);
   if (ret < 0)
     {
-      sndbg("as5048b_writezero failed: %d\n", ret);
+      snerr("as5048b_writezero failed: %d\n", ret);
       return ret;
     }
 
   ret = as5048b_readang(priv, &ang);
   if (ret < 0)
     {
-      sndbg("as5048b_readang failed: %d\n", ret);
+      snerr("as5048b_readang failed: %d\n", ret);
       return ret;
     }
 
   ret = as5048b_writezero(priv, ang);
   if (ret < 0)
     {
-      sndbg("as5048b_writezero failed: %d\n", ret);
+      snerr("as5048b_writezero failed: %d\n", ret);
     }
 
   return ret;
@@ -521,7 +521,7 @@ static int as5048b_ioctl(FAR struct qe_lowerhalf_s *lower, int cmd,
             {
               *ptr = (int32_t)zero;
             }
-          sndbg("zero: %04x ret: %d\n", *ptr, ret);
+          snerr("zero: %04x ret: %d\n", *ptr, ret);
         }
         break;
 
@@ -532,7 +532,7 @@ static int as5048b_ioctl(FAR struct qe_lowerhalf_s *lower, int cmd,
           FAR uint8_t *ptr = (FAR uint8_t *)((uintptr_t)arg);
           DEBUGASSERT(ptr != NULL);
           ret = as5048b_readagc(priv, ptr);
-          sndbg("agc: %02x ret: %d\n", *ptr, ret);
+          snerr("agc: %02x ret: %d\n", *ptr, ret);
         }
         break;
 
@@ -543,7 +543,7 @@ static int as5048b_ioctl(FAR struct qe_lowerhalf_s *lower, int cmd,
           FAR uint8_t *ptr = (FAR uint8_t *)((uintptr_t)arg);
           DEBUGASSERT(ptr != NULL);
           ret = as5048b_readdiag(priv, ptr);
-          sndbg("diag: %02x ret: %d\n", *ptr, ret);
+          snerr("diag: %02x ret: %d\n", *ptr, ret);
         }
         break;
 
@@ -559,12 +559,12 @@ static int as5048b_ioctl(FAR struct qe_lowerhalf_s *lower, int cmd,
             {
               *ptr = (int32_t)mag;
             }
-          sndbg("mag: %04x ret: %d\n", *ptr, ret);
+          snerr("mag: %04x ret: %d\n", *ptr, ret);
         }
         break;
 
       default:
-        sndbg("Unrecognized cmd: %d arg: %ld\n", cmd, arg);
+        snerr("Unrecognized cmd: %d arg: %ld\n", cmd, arg);
         ret = -ENOTTY;
         break;
     }
@@ -604,7 +604,7 @@ FAR struct qe_lowerhalf_s *as5048b_initialize(FAR struct i2c_master_s *i2c,
   priv = (FAR struct as5048b_dev_s *)kmm_malloc(sizeof(*priv));
   if (priv == NULL)
     {
-      sndbg("Failed to allocate instance\n");
+      snerr("Failed to allocate instance\n");
       return NULL;
     }
 

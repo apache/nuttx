@@ -127,12 +127,12 @@
 /* CONFIG_DEBUG_I2C + CONFIG_DEBUG_FEATURES enables general I2C debug output. */
 
 #ifdef CONFIG_DEBUG_I2C
-#  define i2cdbg    dbg
+#  define i2cerr    err
 #  define i2cinfo   info
 #  define i2cllerr  llerr
 #  define i2cllinfo llinfo
 #else
-#  define i2cdbg(x...)
+#  define i2cerr(x...)
 #  define i2cinfo(x...)
 #  define i2cllerr(x...)
 #  define i2cllinfo(x...)
@@ -887,7 +887,7 @@ static int twi_transfer(FAR struct i2c_master_s *dev,
   ret = twi_wait(priv, size);
   if (ret < 0)
     {
-      i2cdbg("ERROR: Transfer failed: %d\n", ret);
+      i2cerr("ERROR: Transfer failed: %d\n", ret);
     }
 
   leave_critical_section(flags);
@@ -1287,7 +1287,7 @@ struct i2c_master_s *sam_i2cbus_initialize(int bus)
   else
 #endif
     {
-      i2cdbg("ERROR: Unsupported bus: TWI%d\n", bus);
+      i2cerr("ERROR: Unsupported bus: TWI%d\n", bus);
       return NULL;
     }
 
@@ -1300,7 +1300,7 @@ struct i2c_master_s *sam_i2cbus_initialize(int bus)
   priv->timeout = wd_create();
   if (priv->timeout == NULL)
     {
-      idbg("ERROR: Failed to allocate a timer\n");
+      ierr("ERROR: Failed to allocate a timer\n");
       goto errout_with_irq;
     }
 
@@ -1309,7 +1309,7 @@ struct i2c_master_s *sam_i2cbus_initialize(int bus)
   ret = irq_attach(priv->attr->irq, priv->attr->handler);
   if (ret < 0)
     {
-      idbg("ERROR: Failed to attach irq %d\n", priv->attr->irq);
+      ierr("ERROR: Failed to attach irq %d\n", priv->attr->irq);
       goto errout_with_wdog;
     }
 

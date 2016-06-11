@@ -159,7 +159,7 @@ static void kinetis_dumpnvic(const char *msg, int irq)
 
 /****************************************************************************
  * Name: kinetis_nmi, kinetis_busfault, kinetis_usagefault, kinetis_pendsv,
- *       kinetis_dbgmonitor, kinetis_pendsv, kinetis_reserved
+ *       kinetis_errmonitor, kinetis_pendsv, kinetis_reserved
  *
  * Description:
  *   Handlers for various execptions.  None are handled and all are fatal
@@ -172,7 +172,7 @@ static void kinetis_dumpnvic(const char *msg, int irq)
 static int kinetis_nmi(int irq, FAR void *context)
 {
   (void)up_irq_save();
-  dbg("PANIC!!! NMI received\n");
+  err("PANIC!!! NMI received\n");
   PANIC();
   return 0;
 }
@@ -180,7 +180,7 @@ static int kinetis_nmi(int irq, FAR void *context)
 static int kinetis_busfault(int irq, FAR void *context)
 {
   (void)up_irq_save();
-  dbg("PANIC!!! Bus fault recived\n");
+  err("PANIC!!! Bus fault recived\n");
   PANIC();
   return 0;
 }
@@ -188,7 +188,7 @@ static int kinetis_busfault(int irq, FAR void *context)
 static int kinetis_usagefault(int irq, FAR void *context)
 {
   (void)up_irq_save();
-  dbg("PANIC!!! Usage fault received\n");
+  err("PANIC!!! Usage fault received\n");
   PANIC();
   return 0;
 }
@@ -196,15 +196,15 @@ static int kinetis_usagefault(int irq, FAR void *context)
 static int kinetis_pendsv(int irq, FAR void *context)
 {
   (void)up_irq_save();
-  dbg("PANIC!!! PendSV received\n");
+  err("PANIC!!! PendSV received\n");
   PANIC();
   return 0;
 }
 
-static int kinetis_dbgmonitor(int irq, FAR void *context)
+static int kinetis_errmonitor(int irq, FAR void *context)
 {
   (void)up_irq_save();
-  dbg("PANIC!!! Debug Monitor received\n");
+  err("PANIC!!! Debug Monitor received\n");
   PANIC();
   return 0;
 }
@@ -212,7 +212,7 @@ static int kinetis_dbgmonitor(int irq, FAR void *context)
 static int kinetis_reserved(int irq, FAR void *context)
 {
   (void)up_irq_save();
-  dbg("PANIC!!! Reserved interrupt\n");
+  err("PANIC!!! Reserved interrupt\n");
   PANIC();
   return 0;
 }
@@ -428,7 +428,7 @@ void up_irqinitialize(void)
   irq_attach(KINETIS_IRQ_BUSFAULT, kinetis_busfault);
   irq_attach(KINETIS_IRQ_USAGEFAULT, kinetis_usagefault);
   irq_attach(KINETIS_IRQ_PENDSV, kinetis_pendsv);
-  irq_attach(KINETIS_IRQ_DBGMONITOR, kinetis_dbgmonitor);
+  irq_attach(KINETIS_IRQ_DBGMONITOR, kinetis_errmonitor);
   irq_attach(KINETIS_IRQ_RESERVED, kinetis_reserved);
 #endif
 

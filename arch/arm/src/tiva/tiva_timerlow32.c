@@ -565,7 +565,7 @@ int tiva_timer_initialize(FAR const char *devpath,
   priv = (struct tiva_lowerhalf_s *)kmm_zalloc(sizeof(struct tiva_lowerhalf_s));
   if (!priv)
     {
-      timdbg("ERROR: Failed to allocate driver structure\n");
+      timerr("ERROR: Failed to allocate driver structure\n");
       return -ENOMEM;
     }
 
@@ -577,7 +577,7 @@ int tiva_timer_initialize(FAR const char *devpath,
 #else
   if (config->cmn.alternate)
     {
-      timdbg("ERROR: Alternate clock unsupported on TM4C123 architecture\n");
+      timerr("ERROR: Alternate clock unsupported on TM4C123 architecture\n");
       return -ENOMEM;
     }
   else
@@ -599,7 +599,7 @@ int tiva_timer_initialize(FAR const char *devpath,
   priv->handle = tiva_gptm_configure((const struct tiva_gptmconfig_s *)&priv->config);
   if (!priv->handle)
     {
-      timdbg("ERROR: Failed to create timer handle\n");
+      timerr("ERROR: Failed to create timer handle\n");
       ret = -EINVAL;
       goto errout_with_alloc;
     }

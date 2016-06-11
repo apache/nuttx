@@ -3799,7 +3799,7 @@ static int efm32_epout_configure(FAR struct efm32_ep_s *privep, uint8_t eptype,
             break;
 
           default:
-            udbg("Unsupported maxpacket: %d\n", maxpacket);
+            uerr("Unsupported maxpacket: %d\n", maxpacket);
             return -EINVAL;
         }
     }
@@ -3894,7 +3894,7 @@ static int efm32_epin_configure(FAR struct efm32_ep_s *privep, uint8_t eptype,
             break;
 
           default:
-            udbg("Unsupported maxpacket: %d\n", maxpacket);
+            uerr("Unsupported maxpacket: %d\n", maxpacket);
             return -EINVAL;
         }
     }
@@ -5482,7 +5482,7 @@ void up_usbinitialize(void)
   ret = irq_attach(EFM32_IRQ_USB, efm32_usbinterrupt);
   if (ret < 0)
     {
-      udbg("irq_attach failed\n", ret);
+      uerr("irq_attach failed\n", ret);
       goto errout;
     }
 

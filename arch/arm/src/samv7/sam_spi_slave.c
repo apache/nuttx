@@ -85,14 +85,14 @@
 #endif
 
 #ifdef CONFIG_DEBUG_SPI
-#  define spidbg llerr
+#  define spierr llerr
 #  ifdef CONFIG_DEBUG_INFO
 #    define spiinfo llerr
 #  else
 #    define spiinfo(x...)
 #  endif
 #else
-#  define spidbg(x...)
+#  define spierr(x...)
 #  define spiinfo(x...)
 #endif
 
@@ -464,7 +464,7 @@ static int spi_interrupt(struct sam_spidev_s *priv)
         {
           /* If debug is enabled, report any overrun errors */
 
-          spidbg("Error: Overrun (OVRES): %08x\n", pending);
+          spierr("Error: Overrun (OVRES): %08x\n", pending);
 
           /* OVRES was cleared by the status read. */
         }
@@ -531,7 +531,7 @@ static int spi_interrupt(struct sam_spidev_s *priv)
         {
           /* If debug is enabled, report any overrun errors */
 
-          spidbg("Error: Underrun (UNDEX): %08x\n", pending);
+          spierr("Error: Underrun (UNDEX): %08x\n", pending);
 
           /* UNDES was cleared by the status read. */
         }

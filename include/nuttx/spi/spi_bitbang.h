@@ -62,14 +62,14 @@
 #endif
 
 #ifdef CONFIG_DEBUG_SPI
-#  define spidbg llerr
+#  define spierr llerr
 #  ifdef CONFIG_DEBUG_INFO
 #    define spiinfo llerr
 #  else
 #    define spiinfo(x...)
 #  endif
 #else
-#  define spidbg(x...)
+#  define spierr(x...)
 #  define spiinfo(x...)
 #endif
 

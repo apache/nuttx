@@ -906,7 +906,7 @@ static int adc_timinit(FAR struct stm32_dev_s *priv)
 
   if (prescaler < 1)
     {
-      adbg("WARNING: Prescaler underflowed.\n");
+      aerr("WARNING: Prescaler underflowed.\n");
       prescaler = 1;
     }
 
@@ -914,7 +914,7 @@ static int adc_timinit(FAR struct stm32_dev_s *priv)
 
   else if (prescaler > 65536)
     {
-      adbg("WARNING: Prescaler overflowed.\n");
+      aerr("WARNING: Prescaler overflowed.\n");
       prescaler = 65536;
     }
 
@@ -923,12 +923,12 @@ static int adc_timinit(FAR struct stm32_dev_s *priv)
   reload = timclk / priv->freq;
   if (reload < 1)
     {
-      adbg("WARNING: Reload value underflowed.\n");
+      aerr("WARNING: Reload value underflowed.\n");
       reload = 1;
     }
   else if (reload > 65535)
     {
-      adbg("WARNING: Reload value overflowed.\n");
+      aerr("WARNING: Reload value overflowed.\n");
       reload = 65535;
     }
 
@@ -1070,7 +1070,7 @@ static int adc_timinit(FAR struct stm32_dev_s *priv)
         break;
 
       default:
-        adbg("No such trigger: %d\n", priv->trigger);
+        aerr("No such trigger: %d\n", priv->trigger);
         return -EINVAL;
     }
 
@@ -2002,7 +2002,7 @@ static void adc_reset(FAR struct adc_dev_s *dev)
       ret = adc_timinit(priv);
       if (ret < 0)
         {
-          adbg("adc_timinit failed: %d\n", ret);
+          aerr("adc_timinit failed: %d\n", ret);
         }
     }
 #ifndef CONFIG_ADC_NO_STARTUP_CONV
@@ -2680,7 +2680,7 @@ static int adc_ioctl(FAR struct adc_dev_s *dev, int cmd, unsigned long arg)
 #endif /* CONFIG_STM32_STM32L15XX */
 
       default:
-        adbg("ERROR: Unknown cmd: %d\n", cmd);
+        aerr("ERROR: Unknown cmd: %d\n", cmd);
         ret = -ENOTTY;
         break;
     }
@@ -3012,7 +3012,7 @@ struct adc_dev_s *stm32_adcinitialize(int intf, FAR const uint8_t *chanlist,
         break;
 #endif
       default:
-        adbg("No ADC interface defined\n");
+        aerr("No ADC interface defined\n");
         return NULL;
     }
 

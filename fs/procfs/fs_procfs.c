@@ -496,7 +496,7 @@ static int procfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
 
       if (!level0)
         {
-          fdbg("ERROR: Failed to allocate the level0 directory structure\n");
+          ferr("ERROR: Failed to allocate the level0 directory structure\n");
           return -ENOMEM;
         }
 
@@ -575,7 +575,7 @@ static int procfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
 
               if (!level1)
                 {
-                  fdbg("ERROR: Failed to allocate the level0 directory structure\n");
+                  ferr("ERROR: Failed to allocate the level0 directory structure\n");
                   return -ENOMEM;
                 }
 
@@ -757,7 +757,7 @@ static int procfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
 
           if (!tcb)
             {
-              fdbg("ERROR: PID %d is no longer valid\n", (int)pid);
+              ferr("ERROR: PID %d is no longer valid\n", (int)pid);
               return -ENOENT;
             }
 

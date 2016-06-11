@@ -391,7 +391,7 @@ static int sam_tsd_waitsample(struct sam_tsd_s *priv, struct sam_sample_s *sampl
            * the failure now.
            */
 
-          idbg("ERROR: sem_wait: %d\n", errno);
+          ierr("ERROR: sem_wait: %d\n", errno);
           DEBUGASSERT(errno == EINTR);
           ret = -EINTR;
           goto errout;
@@ -644,7 +644,7 @@ static void sam_tsd_bottomhalf(void *arg)
 
       if (xraw == 0 || xraw >= xscale || yraw == 0 || yraw > yscale)
         {
-          idbg("Discarding: x %d:%d y %d:%d\n", xraw, xscale);
+          ierr("Discarding: x %d:%d y %d:%d\n", xraw, xscale);
           goto ignored;
         }
 
@@ -936,7 +936,7 @@ static ssize_t sam_tsd_read(struct file *filep, char *buffer, size_t len)
        * handle smaller reads... but why?
        */
 
-      idbg("ERROR: Unsupported read size: %d\n", len);
+      ierr("ERROR: Unsupported read size: %d\n", len);
       return -ENOSYS;
     }
 
@@ -968,7 +968,7 @@ static ssize_t sam_tsd_read(struct file *filep, char *buffer, size_t len)
         {
           /* We might have been awakened by a signal */
 
-          idbg("ERROR: sam_tsd_waitsample: %d\n", ret);
+          ierr("ERROR: sam_tsd_waitsample: %d\n", ret);
           goto errout;
         }
     }
@@ -1679,7 +1679,7 @@ int sam_tsd_register(struct sam_adc_s *adc, int minor)
   ret = register_driver(devname, &g_tsdops, 0666, priv);
   if (ret < 0)
     {
-      idbg("ERROR: register_driver() failed: %d\n", ret);
+      ierr("ERROR: register_driver() failed: %d\n", ret);
       goto errout_with_priv;
     }
 
@@ -1724,7 +1724,7 @@ void sam_tsd_interrupt(uint32_t pending)
       ret = sam_tsd_schedule(priv);
       if (ret < 0)
         {
-          idbg("ERROR: sam_tsd_schedule failed: %d\n", ret);
+          ierr("ERROR: sam_tsd_schedule failed: %d\n", ret);
         }
     }
 }

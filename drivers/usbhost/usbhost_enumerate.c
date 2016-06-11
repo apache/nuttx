@@ -256,7 +256,7 @@ static inline int usbhost_classbind(FAR struct usbhost_hubport_s *hport,
                * should then free the allocated devclass instance.
                */
 
-              udbg("CLASS_CONNECT failed: %d\n", ret);
+              uerr("CLASS_CONNECT failed: %d\n", ret);
               CLASS_DISCONNECTED(devclass);
             }
           else
@@ -326,14 +326,14 @@ int usbhost_enumerate(FAR struct usbhost_hubport_s *hport,
   ret = DRVR_ALLOC(hport->drvr, (FAR uint8_t **)&ctrlreq, &maxlen);
   if (ret < 0)
     {
-      udbg("DRVR_ALLOC failed: %d\n", ret);
+      uerr("DRVR_ALLOC failed: %d\n", ret);
       return ret;
     }
 
   ret = DRVR_ALLOC(hport->drvr, &buffer, &maxlen);
   if (ret < 0)
     {
-      udbg("DRVR_ALLOC failed: %d\n", ret);
+      uerr("DRVR_ALLOC failed: %d\n", ret);
       goto errout;
     }
 
@@ -381,7 +381,7 @@ int usbhost_enumerate(FAR struct usbhost_hubport_s *hport,
   ret = DRVR_CTRLIN(hport->drvr, hport->ep0, ctrlreq, buffer);
   if (ret < 0)
     {
-      udbg("ERROR: Failed to get device descriptor, length=%d: %d\n",
+      uerr("ERROR: Failed to get device descriptor, length=%d: %d\n",
            descsize, ret);
       goto errout;
     }
@@ -409,7 +409,7 @@ int usbhost_enumerate(FAR struct usbhost_hubport_s *hport,
       ret = DRVR_CTRLIN(hport->drvr, hport->ep0, ctrlreq, buffer);
       if (ret < 0)
         {
-          udbg("ERROR: Failed to get device descriptor, length=%d: %d\n",
+          uerr("ERROR: Failed to get device descriptor, length=%d: %d\n",
                USB_SIZEOF_DEVDESC, ret);
           goto errout;
         }
@@ -428,7 +428,7 @@ int usbhost_enumerate(FAR struct usbhost_hubport_s *hport,
   funcaddr = usbhost_devaddr_create(hport);
   if (funcaddr < 0)
     {
-      udbg("ERROR: usbhost_devaddr_create failed: %d\n", ret);
+      uerr("ERROR: usbhost_devaddr_create failed: %d\n", ret);
       goto errout;
     }
 
@@ -443,7 +443,7 @@ int usbhost_enumerate(FAR struct usbhost_hubport_s *hport,
   ret = DRVR_CTRLOUT(hport->drvr, hport->ep0, ctrlreq, NULL);
   if (ret < 0)
     {
-      udbg("ERROR: Failed to set address: %d\n");
+      uerr("ERROR: Failed to set address: %d\n");
       goto errout;
     }
 
@@ -473,7 +473,7 @@ int usbhost_enumerate(FAR struct usbhost_hubport_s *hport,
   ret = DRVR_CTRLIN(hport->drvr, hport->ep0, ctrlreq, buffer);
   if (ret < 0)
    {
-      udbg("ERROR: Failed to get configuration descriptor, length=%d: %d\n",
+      uerr("ERROR: Failed to get configuration descriptor, length=%d: %d\n",
            USB_SIZEOF_CFGDESC, ret);
       goto errout;
     }
@@ -496,7 +496,7 @@ int usbhost_enumerate(FAR struct usbhost_hubport_s *hport,
   ret = DRVR_CTRLIN(hport->drvr, hport->ep0, ctrlreq, buffer);
   if (ret < 0)
     {
-      udbg("ERROR: Failed to get configuration descriptor, length=%d: %d\n",
+      uerr("ERROR: Failed to get configuration descriptor, length=%d: %d\n",
            cfglen, ret);
       goto errout;
     }
@@ -512,7 +512,7 @@ int usbhost_enumerate(FAR struct usbhost_hubport_s *hport,
   ret = DRVR_CTRLOUT(hport->drvr, hport->ep0, ctrlreq, NULL);
   if (ret < 0)
     {
-      udbg("ERROR: Failed to set configuration: %d\n", ret);
+      uerr("ERROR: Failed to set configuration: %d\n", ret);
       goto errout;
     }
 
@@ -530,7 +530,7 @@ int usbhost_enumerate(FAR struct usbhost_hubport_s *hport,
       ret = usbhost_configdesc(buffer, cfglen, &id);
       if (ret < 0)
         {
-          udbg("ERROR: usbhost_configdesc failed: %d\n", ret);
+          uerr("ERROR: usbhost_configdesc failed: %d\n", ret);
           goto errout;
         }
     }
@@ -547,7 +547,7 @@ int usbhost_enumerate(FAR struct usbhost_hubport_s *hport,
   ret = usbhost_classbind(hport, buffer, cfglen, &id, devclass);
   if (ret < 0)
     {
-      udbg("ERROR: usbhost_classbind failed %d\n", ret);
+      uerr("ERROR: usbhost_classbind failed %d\n", ret);
     }
 
 errout:

@@ -205,7 +205,7 @@ int adxl345_register(ADXL345_HANDLE handle, int minor)
   if (ret < 0)
     {
       int errval = errno;
-      sndbg("ERROR: sem_wait failed: %d\n", errval);
+      snerr("ERROR: sem_wait failed: %d\n", errval);
       return -errval;
     }
 
@@ -221,7 +221,7 @@ int adxl345_register(ADXL345_HANDLE handle, int minor)
   ret = register_driver(devname, &g_adxl345fops, 0666, priv);
   if (ret < 0)
     {
-      sndbg("ERROR: Failed to register driver %s: %d\n", devname, ret);
+      snerr("ERROR: Failed to register driver %s: %d\n", devname, ret);
       sem_post(&priv->exclsem);
       return ret;
     }
@@ -397,7 +397,7 @@ ADXL345_HANDLE adxl345_instantiate(FAR struct i2c_master_s *dev,
   priv = (FAR struct adxl345_dev_s *)kmm_zalloc(sizeof(struct adxl345_dev_s));
   if (!priv)
     {
-      sndbg("Failed to allocate the device structure!\n");
+      snerr("Failed to allocate the device structure!\n");
       return NULL;
     }
 
@@ -418,7 +418,7 @@ ADXL345_HANDLE adxl345_instantiate(FAR struct i2c_master_s *dev,
   ret = adxl345_checkid(priv);
   if (ret < 0)
     {
-      sndbg("Wrong Device ID!\n");
+      snerr("Wrong Device ID!\n");
       kmm_free(priv);
       return NULL;
     }

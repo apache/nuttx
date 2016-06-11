@@ -137,10 +137,10 @@
 /* CONFIG_DEBUG_I2C + CONFIG_DEBUG_FEATURES enables general I2C debug output. */
 
 #ifdef CONFIG_DEBUG_I2C
-#  define i2cdbg dbg
+#  define i2cerr err
 #  define i2cinfo info
 #else
-#  define i2cdbg(x...)
+#  define i2cerr(x...)
 #  define i2cinfo(x...)
 #endif
 
@@ -761,7 +761,7 @@ static void efm32_i2c_tracenew(FAR struct efm32_i2c_priv_s *priv)
 
           if (priv->tndx >= (CONFIG_I2C_NTRACE - 1))
             {
-              i2cdbg("Trace table overflow\n");
+              i2cerr("Trace table overflow\n");
               return;
             }
 
@@ -1536,7 +1536,7 @@ static int efm32_i2c_transfer(FAR struct i2c_master_s *dev,
     {
       ret = -ETIMEDOUT;
 
-      i2cdbg("Timed out: I2Cx_STATE: 0x%04x I2Cx_STATUS: 0x%08x\n",
+      i2cerr("Timed out: I2Cx_STATE: 0x%04x I2Cx_STATUS: 0x%08x\n",
              efm32_i2c_getreg(priv, EFM32_I2C_STATE_OFFSET),
              efm32_i2c_getreg(priv, EFM32_I2C_STATUS_OFFSET));
 

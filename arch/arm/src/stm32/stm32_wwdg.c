@@ -49,7 +49,7 @@
 #include <arch/board/board.h>
 
 #include "up_arch.h"
-#include "chip/stm32_dbgmcu.h"
+#include "chip/stm32_errmcu.h"
 #include "stm32_wdg.h"
 
 #if defined(CONFIG_WATCHDOG) && defined(CONFIG_STM32_WWDG)
@@ -88,10 +88,10 @@
  */
 
 #ifdef CONFIG_DEBUG_WATCHDOG
-#  define wddbg    llerr
+#  define wderr    llerr
 #  define wdinfo   llinfo
 #else
-#  define wddbg(x...)
+#  define wderr(x...)
 #  define wdinfo(x...)
 #endif
 
@@ -513,7 +513,7 @@ static int stm32_settimeout(FAR struct watchdog_lowerhalf_s *lower,
 
   if (timeout < 1 || timeout > WWDG_MAXTIMEOUT)
     {
-      wddbg("Cannot represent timeout=%d > %d\n",
+      wderr("Cannot represent timeout=%d > %d\n",
             timeout, WWDG_MAXTIMEOUT);
       return -ERANGE;
     }

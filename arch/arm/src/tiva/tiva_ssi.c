@@ -73,10 +73,10 @@
 #undef SSI_DEBUG  /* Define to enable debug */
 
 #ifdef SSI_DEBUG
-#  define ssidbg  llerr
+#  define ssierr  llerr
 #  define ssiinfo llinfo
 #else
-#  define ssidbg(x...)
+#  define ssierr(x...)
 #  define ssiinfo(x...)
 #endif
 
@@ -841,7 +841,7 @@ static int ssi_transfer(struct tiva_ssidev_s *priv, const void *txbuffer,
 #endif
   int ntxd;
 
-  ssidbg("txbuffer: %p rxbuffer: %p nwords: %d\n", txbuffer, rxbuffer, nwords);
+  ssierr("txbuffer: %p rxbuffer: %p nwords: %d\n", txbuffer, rxbuffer, nwords);
 
   /* Set up to perform the transfer */
 
@@ -913,7 +913,7 @@ static int ssi_transfer(struct tiva_ssidev_s *priv, const void *txbuffer,
       ssi_semtake(&priv->xfrsem);
     }
   while (priv->nrxwords < priv->nwords);
-  ssidbg("Transfer complete\n");
+  ssierr("Transfer complete\n");
 
 #else
   /* Perform the transfer using polling logic.  This will totally
@@ -1025,7 +1025,7 @@ static int ssi_interrupt(int irq, void *context)
 #ifdef SSI_DEBUG
   if ((regval & SSI_RIS_ROR) != 0)
     {
-      ssidbg("Rx FIFO Overrun!\n");
+      ssierr("Rx FIFO Overrun!\n");
     }
 #endif
 
@@ -1056,7 +1056,7 @@ static int ssi_interrupt(int irq, void *context)
 
       /* Wake up the waiting thread */
 
-      ssidbg("Transfer complete\n");
+      ssierr("Transfer complete\n");
       ssi_semgive(&priv->xfrsem);
     }
 
@@ -1137,7 +1137,7 @@ static uint32_t ssi_setfrequencyinternal(struct tiva_ssidev_s *priv,
   uint32_t scr;
   uint32_t actual;
 
-  ssidbg("frequency: %d\n", frequency);
+  ssierr("frequency: %d\n", frequency);
   DEBUGASSERT(frequency);
 
   /* Has the frequency changed? */
@@ -1261,7 +1261,7 @@ static void ssi_setmodeinternal(struct tiva_ssidev_s *priv, enum spi_mode_e mode
   uint32_t modebits;
   uint32_t regval;
 
-  ssidbg("mode: %d\n", mode);
+  ssierr("mode: %d\n", mode);
   DEBUGASSERT(priv);
 
   /* Has the number of bits per word changed? */
@@ -1340,7 +1340,7 @@ static void ssi_setbitsinternal(struct tiva_ssidev_s *priv, int nbits)
 {
   uint32_t regval;
 
-  ssidbg("nbits: %d\n", nbits);
+  ssierr("nbits: %d\n", nbits);
   DEBUGASSERT(priv);
   if (nbits != priv->nbits && nbits >= 4 && nbits <= 16)
     {
@@ -1507,7 +1507,7 @@ FAR struct spi_dev_s *tiva_ssibus_initialize(int port)
   struct tiva_ssidev_s *priv;
   irqstate_t flags;
 
-  ssidbg("port: %d\n", port);
+  ssierr("port: %d\n", port);
 
   /* Set up for the selected port */
 

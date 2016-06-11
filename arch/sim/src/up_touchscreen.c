@@ -670,7 +670,7 @@ int board_tsc_setup(int minor)
   ret = register_driver(devname, &up_fops, 0666, priv);
   if (ret < 0)
     {
-      idbg("register_driver() failed: %d\n", ret);
+      ierr("register_driver() failed: %d\n", ret);
       goto errout_with_priv;
     }
 
@@ -737,7 +737,7 @@ void board_tsc_teardown(void)
   ret = unregister_driver(devname);
   if (ret < 0)
     {
-      idbg("uregister_driver() failed: %d\n", ret);
+      ierr("uregister_driver() failed: %d\n", ret);
     }
 
   /* Clean up any resources.  Ouch!  While we are holding the semaphore? */

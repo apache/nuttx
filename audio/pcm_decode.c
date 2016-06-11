@@ -259,23 +259,23 @@ static void pcm_callback(FAR void *arg, uint16_t reason,
 #ifdef CONFIG_PCM_DEBUG
 static void pcm_dump(FAR const struct wav_header_s *wav)
 {
-  dbg("Wave file header\n");
-  dbg("  Header Chunk:\n");
-  dbg("    Chunk ID:        0x%08x\n", wav->hdr.chunkid);
-  dbg("    Chunk Size:      %u\n",     wav->hdr.chunklen);
-  dbg("    Format:          0x%08x\n", wav->hdr.format);
-  dbg("  Format Chunk:\n");
-  dbg("    Chunk ID:        0x%08x\n", wav->fmt.chunkid);
-  dbg("    Chunk Size:      %u\n",     wav->fmt.chunklen);
-  dbg("    Audio Format:    0x%04x\n", wav->fmt.format);
-  dbg("    Num. Channels:   %d\n",     wav->fmt.nchannels);
-  dbg("    Sample Rate:     %u\n",     wav->fmt.samprate);
-  dbg("    Byte Rate:       %u\n",     wav->fmt.byterate);
-  dbg("    Block Align:     %d\n",     wav->fmt.align);
-  dbg("    Bits Per Sample: %d\n",     wav->fmt.bpsamp);
-  dbg("  Data Chunk:\n");
-  dbg("    Chunk ID:        0x%08x\n", wav->data.chunkid);
-  dbg("    Chunk Size:      %u\n",     wav->data.chunklen);
+  err("Wave file header\n");
+  err("  Header Chunk:\n");
+  err("    Chunk ID:        0x%08x\n", wav->hdr.chunkid);
+  err("    Chunk Size:      %u\n",     wav->hdr.chunklen);
+  err("    Format:          0x%08x\n", wav->hdr.format);
+  err("  Format Chunk:\n");
+  err("    Chunk ID:        0x%08x\n", wav->fmt.chunkid);
+  err("    Chunk Size:      %u\n",     wav->fmt.chunklen);
+  err("    Audio Format:    0x%04x\n", wav->fmt.format);
+  err("    Num. Channels:   %d\n",     wav->fmt.nchannels);
+  err("    Sample Rate:     %u\n",     wav->fmt.samprate);
+  err("    Byte Rate:       %u\n",     wav->fmt.byterate);
+  err("    Block Align:     %d\n",     wav->fmt.align);
+  err("    Bits Per Sample: %d\n",     wav->fmt.bpsamp);
+  err("  Data Chunk:\n");
+  err("    Chunk ID:        0x%08x\n", wav->data.chunkid);
+  err("    Chunk Size:      %u\n",     wav->data.chunklen);
 }
 #endif
 
@@ -398,14 +398,14 @@ static bool pcm_parsewav(FAR struct pcm_decode_s *priv, uint8_t *data)
 
       if (priv->bpsamp != 8 && priv->bpsamp != 16)
         {
-          auddbg("ERROR: Cannot support bits per sample of %d in this mode\n",
+          auderr("ERROR: Cannot support bits per sample of %d in this mode\n",
                  priv->bpsamp);
           return -EINVAL;
         }
 
       if (priv->nchannels != 1 && priv->nchannels != 2)
         {
-          auddbg("ERROR: Cannot support number of channles of %d in this mode\n",
+          auderr("ERROR: Cannot support number of channles of %d in this mode\n",
                  priv->nchannels);
           return -EINVAL;
         }
@@ -691,7 +691,7 @@ static int pcm_getcaps(FAR struct audio_lowerhalf_s *dev, int type,
   ret = lower->ops->getcaps(lower, type, caps);
   if (ret < 0)
     {
-      auddbg("Lower getcaps() failed: %d\n", ret);
+      auderr("Lower getcaps() failed: %d\n", ret);
       return ret;
     }
 
@@ -1100,7 +1100,7 @@ static int pcm_enqueuebuffer(FAR struct audio_lowerhalf_s *dev,
 #endif
           if (ret < 0)
             {
-              auddbg("ERROR: Failed to set PCM configuration: %d\n", ret);
+              auderr("ERROR: Failed to set PCM configuration: %d\n", ret);
               return ret;
             }
 
@@ -1135,7 +1135,7 @@ static int pcm_enqueuebuffer(FAR struct audio_lowerhalf_s *dev,
             }
         }
 
-      auddbg("ERROR: Invalid PCM WAV file\n");
+      auderr("ERROR: Invalid PCM WAV file\n");
 
       /* The normal protocol for streaming errors is as follows:
        *
@@ -1161,7 +1161,7 @@ static int pcm_enqueuebuffer(FAR struct audio_lowerhalf_s *dev,
 
   /* This is not a WAV file! */
 
-  auddbg("ERROR: Invalid PCM WAV file\n");
+  auderr("ERROR: Invalid PCM WAV file\n");
   return -EINVAL;
 }
 
@@ -1378,7 +1378,7 @@ FAR struct audio_lowerhalf_s *
   priv = (FAR struct pcm_decode_s *)kmm_zalloc(sizeof(struct pcm_decode_s));
   if (!priv)
     {
-      auddbg("ERROR: Failed to allocate driver structure\n");
+      auderr("ERROR: Failed to allocate driver structure\n");
       return NULL;
     }
 

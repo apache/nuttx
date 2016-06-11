@@ -150,7 +150,7 @@ static int uptime_open(FAR struct file *filep, FAR const char *relpath,
 
   if ((oflags & O_WRONLY) != 0 || (oflags & O_RDONLY) == 0)
     {
-      fdbg("ERROR: Only O_RDONLY supported\n");
+      ferr("ERROR: Only O_RDONLY supported\n");
       return -EACCES;
     }
 
@@ -158,7 +158,7 @@ static int uptime_open(FAR struct file *filep, FAR const char *relpath,
 
   if (strcmp(relpath, "uptime") != 0)
     {
-      fdbg("ERROR: relpath is '%s'\n", relpath);
+      ferr("ERROR: relpath is '%s'\n", relpath);
       return -ENOENT;
     }
 
@@ -167,7 +167,7 @@ static int uptime_open(FAR struct file *filep, FAR const char *relpath,
   attr = (FAR struct uptime_file_s *)kmm_zalloc(sizeof(struct uptime_file_s));
   if (!attr)
     {
-      fdbg("ERROR: Failed to allocate file attributes\n");
+      ferr("ERROR: Failed to allocate file attributes\n");
       return -ENOMEM;
     }
 
@@ -313,7 +313,7 @@ static int uptime_dup(FAR const struct file *oldp, FAR struct file *newp)
   newattr = (FAR struct uptime_file_s *)kmm_malloc(sizeof(struct uptime_file_s));
   if (!newattr)
     {
-      fdbg("ERROR: Failed to allocate file attributes\n");
+      ferr("ERROR: Failed to allocate file attributes\n");
       return -ENOMEM;
     }
 
@@ -340,7 +340,7 @@ static int uptime_stat(FAR const char *relpath, FAR struct stat *buf)
 
   if (strcmp(relpath, "uptime") != 0)
     {
-      fdbg("ERROR: relpath is '%s'\n", relpath);
+      ferr("ERROR: relpath is '%s'\n", relpath);
       return -ENOENT;
     }
 

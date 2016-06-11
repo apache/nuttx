@@ -371,7 +371,7 @@ int qe_register(FAR const char *devpath, FAR struct qe_lowerhalf_s *lower)
   upper = (FAR struct qe_upperhalf_s *)kmm_zalloc(sizeof(struct qe_upperhalf_s));
   if (!upper)
     {
-      sndbg("Allocation failed\n");
+      snerr("Allocation failed\n");
       return -ENOMEM;
     }
 

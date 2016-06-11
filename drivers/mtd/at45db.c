@@ -869,7 +869,7 @@ FAR struct mtd_dev_s *at45db_initialize(FAR struct spi_dev_s *spi)
         {
           /* Unrecognized! Discard all of that work we just did and return NULL */
 
-          fdbg("Unrecognized\n");
+          ferr("Unrecognized\n");
           goto errout;
         }
 
@@ -887,7 +887,7 @@ FAR struct mtd_dev_s *at45db_initialize(FAR struct spi_dev_s *spi)
            * is required after the device has be re-programmed.
            */
 
-          fdbg("Reprogramming page size\n");
+          ferr("Reprogramming page size\n");
           SPI_SELECT(priv->spi, SPIDEV_FLASH, true);
           SPI_SNDBLOCK(priv->spi, g_binpgsize, BINPGSIZE_SIZE);
           SPI_SELECT(priv->spi, SPIDEV_FLASH, false);

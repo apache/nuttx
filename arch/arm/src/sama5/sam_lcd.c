@@ -1108,7 +1108,7 @@ static int sam_base_getvideoinfo(struct fb_vtable_s *vtable,
       return OK;
     }
 
-  gdbg("ERROR: Returning EINVAL\n");
+  gerr("ERROR: Returning EINVAL\n");
   return -EINVAL;
 }
 
@@ -1130,7 +1130,7 @@ static int sam_base_getplaneinfo(struct fb_vtable_s *vtable, int planeno,
       return OK;
     }
 
-  gdbg("Returning EINVAL\n");
+  gerr("Returning EINVAL\n");
   return -EINVAL;
 }
 
@@ -1186,7 +1186,7 @@ static int sam_hcr_getcursor(struct fb_vtable_s *vtable,
       return OK;
     }
 
-  gdbg("Returning EINVAL\n");
+  gerr("Returning EINVAL\n");
   return -EINVAL;
 }
 #endif
@@ -1226,7 +1226,7 @@ static int sam_hcr_setcursor(struct fb_vtable_s *vtable,
       return OK;
     }
 
-  gdbg("Returning EINVAL\n");
+  gerr("Returning EINVAL\n");
   return -EINVAL;
 }
 #endif
@@ -1391,7 +1391,7 @@ static int sam_setclut(struct sam_layer_s *layer,
 
   if (offset >= SAM_LCDC_NCLUT)
     {
-      gdbg("ERROR: CLUT offset is out of range: %d\n", offset);
+      gerr("ERROR: CLUT offset is out of range: %d\n", offset);
       return -EINVAL;
     }
 

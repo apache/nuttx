@@ -153,7 +153,7 @@ int up_addrenv_kstackalloc(FAR struct tcb_s *tcb)
   tcb->xcp.kstack = (FAR uint32_t *)kmm_memalign(8, ARCH_KERNEL_STACKSIZE);
   if (!tcb->xcp.kstack)
     {
-      bdbg("ERROR: Failed to allocate the kernel stack\n");
+      berr("ERROR: Failed to allocate the kernel stack\n");
       return -ENOMEM;
     }
 

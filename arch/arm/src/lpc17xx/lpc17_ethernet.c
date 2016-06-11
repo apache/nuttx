@@ -415,7 +415,7 @@ static void lpc17_ethreset(struct lpc17_driver_s *priv);
 #ifdef CONFIG_NET_REGDEBUG
 static void lpc17_printreg(uint32_t addr, uint32_t val, bool iswrite)
 {
-  dbg("%08x%s%08x\n", addr, iswrite ? "<-" : "->", val);
+  err("%08x%s%08x\n", addr, iswrite ? "<-" : "->", val);
 }
 #endif
 
@@ -465,7 +465,7 @@ static void lpc17_checkreg(uint32_t addr, uint32_t val, bool iswrite)
             {
               /* No.. More than one. */
 
-              dbg("[repeats %d more times]\n", count);
+              err("[repeats %d more times]\n", count);
             }
         }
 
@@ -1720,7 +1720,7 @@ static int lpc17_ifup(struct net_driver_s *dev)
   uint32_t regval;
   int ret;
 
-  ndbg("Bringing up: %d.%d.%d.%d\n",
+  nerr("Bringing up: %d.%d.%d.%d\n",
        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
 
@@ -1733,7 +1733,7 @@ static int lpc17_ifup(struct net_driver_s *dev)
   ret = lpc17_phyinit(priv);
   if (ret != 0)
     {
-      ndbg("lpc17_phyinit failed: %d\n", ret);
+      nerr("lpc17_phyinit failed: %d\n", ret);
       return ret;
     }
 
@@ -2319,14 +2319,14 @@ static void lpc17_showpins(void)
 #if defined(CONFIG_NET_REGDEBUG) && defined(LPC17_HAVE_PHY)
 static void lpc17_showmii(uint8_t phyaddr, const char *msg)
 {
-  dbg("PHY " LPC17_PHYNAME ": %s\n", msg);
-  dbg("  MCR:       %04x\n", lpc17_phyread(phyaddr, MII_MCR));
-  dbg("  MSR:       %04x\n", lpc17_phyread(phyaddr, MII_MSR));
-  dbg("  ADVERTISE: %04x\n", lpc17_phyread(phyaddr, MII_ADVERTISE));
-  dbg("  LPA:       %04x\n", lpc17_phyread(phyaddr, MII_LPA));
-  dbg("  EXPANSION: %04x\n", lpc17_phyread(phyaddr, MII_EXPANSION));
+  err("PHY " LPC17_PHYNAME ": %s\n", msg);
+  err("  MCR:       %04x\n", lpc17_phyread(phyaddr, MII_MCR));
+  err("  MSR:       %04x\n", lpc17_phyread(phyaddr, MII_MSR));
+  err("  ADVERTISE: %04x\n", lpc17_phyread(phyaddr, MII_ADVERTISE));
+  err("  LPA:       %04x\n", lpc17_phyread(phyaddr, MII_LPA));
+  err("  EXPANSION: %04x\n", lpc17_phyread(phyaddr, MII_EXPANSION));
 #ifdef CONFIG_ETH0_PHY_KS8721
-  dbg("  10BTCR:    %04x\n", lpc17_phyread(phyaddr, MII_KS8721_10BTCR));
+  err("  10BTCR:    %04x\n", lpc17_phyread(phyaddr, MII_KS8721_10BTCR));
 #endif
 }
 #endif
@@ -2462,7 +2462,7 @@ static inline int lpc17_phyreset(uint8_t phyaddr)
         }
     }
 
-  ndbg("Reset failed. MCR: %04x\n", phyreg);
+  nerr("Reset failed. MCR: %04x\n", phyreg);
   return -ETIMEDOUT;
 }
 #endif
@@ -2509,7 +2509,7 @@ static inline int lpc17_phyautoneg(uint8_t phyaddr)
         }
     }
 
-  ndbg("Auto-negotiation failed. MSR: %04x\n", phyreg);
+  nerr("Auto-negotiation failed. MSR: %04x\n", phyreg);
   return -ETIMEDOUT;
 }
 #endif
@@ -2593,7 +2593,7 @@ static int lpc17_phymode(uint8_t phyaddr, uint8_t mode)
 #endif
     }
 
-  ndbg("Link failed. MSR: %04x\n", phyreg);
+  nerr("Link failed. MSR: %04x\n", phyreg);
   return -ETIMEDOUT;
 }
 #endif
@@ -2673,7 +2673,7 @@ static inline int lpc17_phyinit(struct lpc17_driver_s *priv)
     {
       /* Failed to find PHY at any location */
 
-      ndbg("No PHY detected\n");
+      nerr("No PHY detected\n");
       return -ENODEV;
     }
   ninfo("phyaddr: %d\n", phyaddr);
@@ -2760,7 +2760,7 @@ static inline int lpc17_phyinit(struct lpc17_driver_s *priv)
         break;
 
       default:
-        ndbg("Unrecognized mode: %04x\n", phyreg);
+        nerr("Unrecognized mode: %04x\n", phyreg);
         return -ENODEV;
     }
 
@@ -2788,7 +2788,7 @@ static inline int lpc17_phyinit(struct lpc17_driver_s *priv)
         break;
 
       default:
-        ndbg("Unrecognized mode: %04x\n", phyreg);
+        nerr("Unrecognized mode: %04x\n", phyreg);
         return -ENODEV;
     }
 
@@ -2816,7 +2816,7 @@ static inline int lpc17_phyinit(struct lpc17_driver_s *priv)
         break;
 
       default:
-        ndbg("Unrecognized mode: %04x\n", phyreg);
+        nerr("Unrecognized mode: %04x\n", phyreg);
         return -ENODEV;
     }
 
@@ -2862,7 +2862,7 @@ static inline int lpc17_phyinit(struct lpc17_driver_s *priv)
       }
     else
       {
-        ndbg("Unrecognized mode: %04x\n", phyreg);
+        nerr("Unrecognized mode: %04x\n", phyreg);
         return -ENODEV;
       }
   }
@@ -2871,7 +2871,7 @@ static inline int lpc17_phyinit(struct lpc17_driver_s *priv)
 #  warning "PHY Unknown: speed and duplex are bogus"
 #endif
 
-  ndbg("%dBase-T %s duplex\n",
+  nerr("%dBase-T %s duplex\n",
        (priv->lp_mode & LPC17_SPEED_MASK) ==  LPC17_SPEED_100 ? 100 : 10,
        (priv->lp_mode & LPC17_DUPLEX_MASK) == LPC17_DUPLEX_FULL ?"full" : "half");
 

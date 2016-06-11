@@ -127,7 +127,7 @@ int nx_getrectangle(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
 
   if (ret != OK)
     {
-      gdbg("sem_init failed: %d\n", errno);
+      gerr("sem_init failed: %d\n", errno);
       return ret;
     }
 

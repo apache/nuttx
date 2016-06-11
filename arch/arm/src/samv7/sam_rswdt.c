@@ -87,10 +87,10 @@
  */
 
 #ifdef CONFIG_DEBUG_WATCHDOG
-#  define wddbg    llerr
+#  define wderr    llerr
 #  define wdinfo   llinfo
 #else
-#  define wddbg(x...)
+#  define wderr(x...)
 #  define wdinfo(x...)
 #endif
 
@@ -463,7 +463,7 @@ static int sam_settimeout(FAR struct watchdog_lowerhalf_s *lower,
 
   if (timeout < RSWDT_MINTIMEOUT || timeout >= RSWDT_MAXTIMEOUT)
     {
-      wddbg("Cannot represent timeout: %d < %d > %d\n",
+      wderr("Cannot represent timeout: %d < %d > %d\n",
             RSWDT_MINTIMEOUT, timeout, RSWDT_MAXTIMEOUT);
       return -ERANGE;
     }
@@ -574,7 +574,7 @@ static xcpt_t sam_capture(FAR struct watchdog_lowerhalf_s *lower,
                             xcpt_t handler)
 {
 #ifndef CONFIG_SAMV7_RSWDT_INTERRUPT
-  wddbg("ERROR: Not configured for this mode\n");
+  wderr("ERROR: Not configured for this mode\n");
   return NULL;
 #else
   FAR struct sam_lowerhalf_s *priv = (FAR struct sam_lowerhalf_s *)lower;

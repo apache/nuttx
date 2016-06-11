@@ -101,14 +101,14 @@
 #endif
 
 #ifdef CONFIG_DEBUG_SPI
-#  define qspidbg llerr
+#  define qspierr llerr
 #  ifdef CONFIG_DEBUG_INFO
 #    define qspiinfo llerr
 #  else
 #    define qspiinfo(x...)
 #  endif
 #else
-#  define qspidbg(x...)
+#  define qspierr(x...)
 #  define qspiinfo(x...)
 #endif
 
@@ -1472,7 +1472,7 @@ static int qspi_memory_dma(struct stm32l4_qspidev_s *priv,
                      (wdentry_t)qspi_dma_timeout, 1, (uint32_t)priv);
       if (ret != OK)
         {
-           qspidbg("ERROR: wd_start failed: %d\n", ret);
+           qspierr("ERROR: wd_start failed: %d\n", ret);
         }
 
       /* Wait for the DMA complete */
@@ -1535,7 +1535,7 @@ static int qspi_memory_dma(struct stm32l4_qspidev_s *priv,
 
   if (priv->result)
     {
-      qspidbg("ERROR: DMA failed with result: %d\n", priv->result);
+      qspierr("ERROR: DMA failed with result: %d\n", priv->result);
     }
 
   return priv->result;
@@ -2497,7 +2497,7 @@ struct qspi_dev_s *stm32l4_qspi_initialize(int intf)
     }
   else
     {
-      qspidbg("ERROR: QSPI%d not supported\n", intf);
+      qspierr("ERROR: QSPI%d not supported\n", intf);
       return NULL;
     }
 
@@ -2520,7 +2520,7 @@ struct qspi_dev_s *stm32l4_qspi_initialize(int intf)
           priv->dmach = stm32l4_dmachannel(DMACHAN_QUADSPI);
           if (!priv->dmach)
             {
-              qspidbg("ERROR: Failed to allocate the DMA channel\n");
+              qspierr("ERROR: Failed to allocate the DMA channel\n");
               priv->candma = false;
             }
         }
@@ -2536,7 +2536,7 @@ struct qspi_dev_s *stm32l4_qspi_initialize(int intf)
       priv->dmadog = wd_create();
       if (priv->dmadog == NULL)
         {
-          qspidbg("ERROR: Failed to create wdog\n");
+          qspierr("ERROR: Failed to create wdog\n");
           goto errout_with_dmahandles;
         }
 #endif
@@ -2547,7 +2547,7 @@ struct qspi_dev_s *stm32l4_qspi_initialize(int intf)
       ret = irq_attach(priv->irq, priv->handler);
       if (ret < 0)
         {
-          qspidbg("ERROR: Failed to attach irq %d\n", priv->irq);
+          qspierr("ERROR: Failed to attach irq %d\n", priv->irq);
           goto errout_with_dmadog;
         }
 
@@ -2564,7 +2564,7 @@ struct qspi_dev_s *stm32l4_qspi_initialize(int intf)
       ret = qspi_hw_initialize(priv);
       if (ret < 0)
         {
-          qspidbg("ERROR: Failed to initialize QSPI hardware\n");
+          qspierr("ERROR: Failed to initialize QSPI hardware\n");
           goto errout_with_irq;
         }
 

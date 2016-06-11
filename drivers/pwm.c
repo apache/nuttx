@@ -71,12 +71,12 @@
 /* Non-standard debug that may be enabled just for testing PWM */
 
 #ifdef CONFIG_DEBUG_PWM
-#  define pwmdbg    dbg
+#  define pwmerr    err
 #  define pwminfo   info
 #  define pwmllerr  llerr
 #  define pwmllinfo llinfo
 #else
-#  define pwmdbg(x...)
+#  define pwmerr(x...)
 #  define pwminfo(x...)
 #  define pwmllerr(x...)
 #  define pwmllinfo(x...)
@@ -610,7 +610,7 @@ int pwm_register(FAR const char *path, FAR struct pwm_lowerhalf_s *dev)
   upper = (FAR struct pwm_upperhalf_s *)kmm_zalloc(sizeof(struct pwm_upperhalf_s));
   if (!upper)
     {
-      pwmdbg("Allocation failed\n");
+      pwmerr("Allocation failed\n");
       return -ENOMEM;
     }
 

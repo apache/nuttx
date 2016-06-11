@@ -268,7 +268,7 @@ FAR struct task_tcb_s *task_vforksetup(start_t retaddr)
   child = (FAR struct task_tcb_s *)kmm_zalloc(sizeof(struct task_tcb_s));
   if (!child)
     {
-      sdbg("ERROR: Failed to allocate TCB\n");
+      serr("ERROR: Failed to allocate TCB\n");
       set_errno(ENOMEM);
       return NULL;
     }
@@ -434,7 +434,7 @@ pid_t task_vforkstart(FAR struct task_tcb_s *child)
   ret = waitpid(pid, &rc, 0);
   if (ret < 0)
     {
-      sdbg("ERROR: waitpid failed: %d\n", errno);
+      serr("ERROR: waitpid failed: %d\n", errno);
     }
 #else
   (void)waitpid(pid, &rc, 0);

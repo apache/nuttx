@@ -265,10 +265,10 @@
 /* Debug ******************************************************************************/
 
 #ifdef CONFIG_DEBUG_LCD
-#  define lcddbg              dbg
+#  define lcderr              err
 #  define lcdinfo             info
 #else
-#  define lcddbg(x...)
+#  define lcderr(x...)
 #  define lcdinfo(x...)
 #endif
 
@@ -966,7 +966,7 @@ static inline void stm3240g_lcdinitialize(void)
   /* Check LCD ID */
 
   id = stm3240g_readreg(LCD_REG_0);
-  lcddbg("LCD ID: %04x\n", id);
+  lcderr("LCD ID: %04x\n", id);
 
   /* Check if the ID is for the STM32_ILI9320 (or ILI9321) or STM32_ILI9325 */
 
@@ -995,7 +995,7 @@ static inline void stm3240g_lcdinitialize(void)
 #else /* if !defined(CONFIG_STM3240G_ILI9325_DISABLE) */
       g_lcddev.type = LCD_TYPE_ILI9325;
 #endif
-      lcddbg("LCD type: %d\n", g_lcddev.type);
+      lcderr("LCD type: %d\n", g_lcddev.type);
 
       /* Start Initial Sequence */
 
@@ -1113,7 +1113,7 @@ static inline void stm3240g_lcdinitialize(void)
     }
   else
     {
-      lcddbg("Unsupported LCD type\n");
+      lcderr("Unsupported LCD type\n");
     }
 }
 

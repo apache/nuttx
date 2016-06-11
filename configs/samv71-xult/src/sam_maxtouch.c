@@ -241,7 +241,7 @@ int board_tsc_setup(int minor)
   static bool initialized = false;
   int ret;
 
-  idbg("minor %d\n", minor);
+  ierr("minor %d\n", minor);
   DEBUGASSERT(minor == 0);
 
   /* Have we already initialized?  Since we never uninitialize we must prevent
@@ -261,7 +261,7 @@ int board_tsc_setup(int minor)
       i2c = sam_i2cbus_initialize(MXT_TWI_BUS);
       if (!i2c)
         {
-          idbg("Failed to initialize I2C%d\n", MXT_TWI_BUS);
+          ierr("Failed to initialize I2C%d\n", MXT_TWI_BUS);
           return -ENODEV;
         }
 
@@ -275,7 +275,7 @@ int board_tsc_setup(int minor)
       ret = mxt_register(i2c, &g_mxtinfo.lower, CONFIG_SAMV71XULT_MXT_DEVMINOR);
       if (ret < 0)
         {
-          idbg("ERROR: Failed to register touchscreen device\n");
+          ierr("ERROR: Failed to register touchscreen device\n");
           irq_detach(IRQ_MXT_CHG);
           /* sam_i2cbus_uninitialize(i2c); */
           return -ENODEV;

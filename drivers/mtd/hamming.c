@@ -333,7 +333,7 @@ static int hamming_verify256(FAR uint8_t *data, FAR const uint8_t *original)
 
       /* Correct bit */
 
-      fdbg("Correcting byte %d at bit %d\n", byte, bit);
+      ferr("Correcting byte %d at bit %d\n", byte, bit);
       data[byte] ^= (1 << bit);
 
       return HAMMING_ERROR_SINGLEBIT;
@@ -343,7 +343,7 @@ static int hamming_verify256(FAR uint8_t *data, FAR const uint8_t *original)
 
   if (hamming_bitsincode256(correction) == 1)
     {
-      fdbg("ERROR: ECC has been correupted\n");
+      ferr("ERROR: ECC has been correupted\n");
       return HAMMING_ERROR_ECC;
     }
 
@@ -351,7 +351,7 @@ static int hamming_verify256(FAR uint8_t *data, FAR const uint8_t *original)
 
   else
     {
-      fdbg("ERROR: Multiple bit errors\n");
+      ferr("ERROR: Multiple bit errors\n");
       return HAMMING_ERROR_MULTIPLEBITS;
     }
 }

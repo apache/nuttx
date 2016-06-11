@@ -1270,7 +1270,7 @@ int stm32_qeinitialize(FAR const char *devpath, int tim)
   priv = stm32_tim2lower(tim);
   if (!priv)
     {
-      sndbg("TIM%d support not configured\n", tim);
+      snerr("TIM%d support not configured\n", tim);
       return -ENXIO;
     }
 
@@ -1278,7 +1278,7 @@ int stm32_qeinitialize(FAR const char *devpath, int tim)
 
   if (priv->inuse)
     {
-      sndbg("TIM%d is in-used\n", tim);
+      snerr("TIM%d is in-used\n", tim);
       return -EBUSY;
     }
 
@@ -1287,7 +1287,7 @@ int stm32_qeinitialize(FAR const char *devpath, int tim)
   ret = qe_register(devpath, (FAR struct qe_lowerhalf_s *)priv);
   if (ret < 0)
     {
-      sndbg("qe_register failed: %d\n", ret);
+      snerr("qe_register failed: %d\n", ret);
       return ret;
     }
 

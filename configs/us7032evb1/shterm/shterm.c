@@ -62,7 +62,7 @@
 
 #define DEFAULT_BAUD 9600
 
-#define dbg(format, ...)  if (debug > 0) printconsole(format, ##__VA_ARGS__)
+#define err(format, ...)  if (debug > 0) printconsole(format, ##__VA_ARGS__)
 #define info(format, ...) if (debug > 1) printconsole(format, ##__VA_ARGS__)
 
 /****************************************************************************

@@ -67,14 +67,14 @@
 #endif
 
 #ifdef CONFIG_DEBUG_LEDS
-#  define ddbg llerr
+#  define derr llerr
 #  ifdef CONFIG_DEBUG_INFO
 #    define dinfo llerr
 #  else
 #    define dinfo(x...)
 #  endif
 #else
-#  define ddbg(x...)
+#  define derr(x...)
 #  define dinfo(x...)
 #endif
 

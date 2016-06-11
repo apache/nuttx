@@ -139,7 +139,7 @@ int stm32_sdio_initialize(void)
   g_sdio_dev = sdio_initialize(SDIO_SLOTNO);
   if (!g_sdio_dev)
     {
-      fdbg("Failed to initialize SDIO slot %d\n", SDIO_SLOTNO);
+      ferr("Failed to initialize SDIO slot %d\n", SDIO_SLOTNO);
       return -ENODEV;
     }
 
@@ -150,7 +150,7 @@ int stm32_sdio_initialize(void)
   ret = mmcsd_slotinitialize(SDIO_MINOR, g_sdio_dev);
   if (ret != OK)
     {
-      fdbg("Failed to bind SDIO to the MMC/SD driver: %d\n", ret);
+      ferr("Failed to bind SDIO to the MMC/SD driver: %d\n", ret);
       return ret;
     }
 

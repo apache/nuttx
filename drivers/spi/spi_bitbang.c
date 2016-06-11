@@ -89,14 +89,14 @@
 #endif
 
 #ifdef CONFIG_DEBUG_SPI
-#  define spidbg llerr
+#  define spierr llerr
 #  ifdef CONFIG_DEBUG_INFO
 #    define spiinfo llerr
 #  else
 #    define spiinfo(x...)
 #  endif
 #else
-#  define spidbg(x...)
+#  define spierr(x...)
 #  define spiinfo(x...)
 #endif
 
@@ -564,7 +564,7 @@ FAR struct spi_dev_s *spi_create_bitbang(FAR const struct spi_bitbang_ops_s *low
   priv = (FAR struct spi_bitbang_s *)zalloc(sizeof(struct spi_bitbang_s));
   if (!priv)
     {
-      spidbg("Failed to allocate the device structure\n");
+      spierr("Failed to allocate the device structure\n");
       return NULL;
     }
 

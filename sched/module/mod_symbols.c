@@ -93,7 +93,7 @@ static int mod_symname(FAR struct mod_loadinfo_s *loadinfo,
 
   if (sym->st_name == 0)
     {
-      sdbg("Symbol has no name\n");
+      serr("Symbol has no name\n");
       return -ESRCH;
     }
 
@@ -112,7 +112,7 @@ static int mod_symname(FAR struct mod_loadinfo_s *loadinfo,
         {
           if (loadinfo->filelen <= offset)
             {
-              sdbg("At end of file\n");
+              serr("At end of file\n");
               return -EINVAL;
             }
 
@@ -125,7 +125,7 @@ static int mod_symname(FAR struct mod_loadinfo_s *loadinfo,
       ret = mod_read(loadinfo, buffer, readlen, offset);
       if (ret < 0)
         {
-          sdbg("mod_read failed: %d\n", ret);
+          serr("mod_read failed: %d\n", ret);
           return ret;
         }
 
@@ -145,7 +145,7 @@ static int mod_symname(FAR struct mod_loadinfo_s *loadinfo,
       ret = mod_reallocbuffer(loadinfo, CONFIG_MODULE_BUFFERINCR);
       if (ret < 0)
         {
-          sdbg("mod_reallocbuffer failed: %d\n", ret);
+          serr("mod_reallocbuffer failed: %d\n", ret);
           return ret;
         }
     }
@@ -191,7 +191,7 @@ int mod_findsymtab(FAR struct mod_loadinfo_s *loadinfo)
 
   if (loadinfo->symtabidx == 0)
     {
-      sdbg("No symbols in ELF file\n");
+      serr("No symbols in ELF file\n");
       return -EINVAL;
     }
 
@@ -225,7 +225,7 @@ int mod_readsym(FAR struct mod_loadinfo_s *loadinfo, int index,
 
   if (index < 0 || index > (symtab->sh_size / sizeof(Elf32_Sym)))
     {
-      sdbg("Bad relocation symbol index: %d\n", index);
+      serr("Bad relocation symbol index: %d\n", index);
       return -EINVAL;
     }
 
@@ -273,7 +273,7 @@ int mod_symvalue(FAR struct mod_loadinfo_s *loadinfo, FAR Elf32_Sym *sym)
       {
         /* NuttX ELF modules should be compiled with -fno-common. */
 
-        sdbg("SHN_COMMON: Re-compile with -fno-common\n");
+        serr("SHN_COMMON: Re-compile with -fno-common\n");
         return -ENOSYS;
       }
 
@@ -298,7 +298,7 @@ int mod_symvalue(FAR struct mod_loadinfo_s *loadinfo, FAR Elf32_Sym *sym)
              * indicate the nameless symbol.
              */
 
-            sdbg("SHN_UNDEF: Failed to get symbol name: %d\n", ret);
+            serr("SHN_UNDEF: Failed to get symbol name: %d\n", ret);
             return ret;
           }
 
@@ -315,7 +315,7 @@ int mod_symvalue(FAR struct mod_loadinfo_s *loadinfo, FAR Elf32_Sym *sym)
 #endif
         if (!symbol)
           {
-            sdbg("SHN_UNDEF: Exported symbol \"%s\" not found\n", loadinfo->iobuffer);
+            serr("SHN_UNDEF: Exported symbol \"%s\" not found\n", loadinfo->iobuffer);
             return -ENOENT;
           }
 

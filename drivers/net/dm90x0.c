@@ -865,7 +865,7 @@ static void dm9x_receive(FAR struct dm9x_driver_s *dm9x)
         {
           /* Bad RX packet... update statistics */
 
-          ndbg("Received packet with errors: %02x\n", rx.desc.rx_status);
+          nerr("Received packet with errors: %02x\n", rx.desc.rx_status);
           NETDEV_RXERRORS(&dm9x->dm_dev);
 
           /* Drop this packet and continue to check the next packet */
@@ -877,7 +877,7 @@ static void dm9x_receive(FAR struct dm9x_driver_s *dm9x)
 
       else if (rx.desc.rx_len < ETH_HDRLEN || rx.desc.rx_len > (CONFIG_NET_ETH_MTU + 2))
         {
-          ndbg("RX length error\n");
+          nerr("RX length error\n");
           NETDEV_RXERRORS(&dm9x->dm_dev);
 
           /* Drop this packet and continue to check the next packet */
@@ -1042,7 +1042,7 @@ static void dm9x_txdone(struct dm9x_driver_s *dm9x)
         }
       else
         {
-          ndbg("Bad TX count (TX1END)\n");
+          nerr("Bad TX count (TX1END)\n");
         }
     }
 
@@ -1054,7 +1054,7 @@ static void dm9x_txdone(struct dm9x_driver_s *dm9x)
         }
       else
         {
-          ndbg("Bad TX count (TX2END)\n");
+          nerr("Bad TX count (TX2END)\n");
         }
     }
 
@@ -1144,7 +1144,7 @@ static int dm9x_interrupt(int irq, FAR void *context)
             }
           up_mdelay(1);
         }
-      ndbg("delay: %dmS speed: %s\n", i, dm9x->dm_b100M ? "100M" : "10M");
+      nerr("delay: %dmS speed: %s\n", i, dm9x->dm_b100M ? "100M" : "10M");
     }
 
   /* Check if we received an incoming packet */
@@ -1206,16 +1206,16 @@ static void dm9x_txtimeout(int argc, uint32_t arg, ...)
 {
   struct dm9x_driver_s *dm9x = (struct dm9x_driver_s *)arg;
 
-  ndbg("TX timeout\n");
+  nerr("TX timeout\n");
 
   /* Increment statistics and dump debug info */
 
   NETDEV_TXTIMEOUTS(dm9x->dm_dev);
 
-  ndbg("  TX packet count:           %d\n", dm9x->dm_ntxpending);
-  ndbg("  TX read pointer address:   0x%02x:%02x\n",
+  nerr("  TX packet count:           %d\n", dm9x->dm_ntxpending);
+  nerr("  TX read pointer address:   0x%02x:%02x\n",
        getreg(DM9X_TRPAH), getreg(DM9X_TRPAL));
-  ndbg("  Memory data write address: 0x%02x:%02x (DM9010)\n",
+  nerr("  Memory data write address: 0x%02x:%02x (DM9010)\n",
        getreg(DM9X_MDWAH), getreg(DM9X_MDWAL));
 
   /* Then reset the DM90x0 */
@@ -1342,7 +1342,7 @@ static int dm9x_ifup(struct net_driver_s *dev)
   uint8_t netstatus;
   int i;
 
-  ndbg("Bringing up: %d.%d.%d.%d\n",
+  nerr("Bringing up: %d.%d.%d.%d\n",
        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
 
@@ -1372,7 +1372,7 @@ static int dm9x_ifup(struct net_driver_s *dev)
       up_mdelay(1);
     }
 
-  ndbg("delay: %dmS speed: %s\n", i, dm9x->dm_b100M ? "100M" : "10M");
+  nerr("delay: %dmS speed: %s\n", i, dm9x->dm_b100M ? "100M" : "10M");
 
   /* Set and activate a timer process */
 
@@ -1407,7 +1407,7 @@ static int dm9x_ifdown(struct net_driver_s *dev)
   struct dm9x_driver_s *dm9x = (struct dm9x_driver_s *)dev->d_private;
   irqstate_t flags;
 
-  ndbg("Stopping\n");
+  nerr("Stopping\n");
 
   /* Disable the DM9X interrupt */
 
@@ -1456,7 +1456,7 @@ static int dm9x_txavail(struct net_driver_s *dev)
   struct dm9x_driver_s *dm9x = (struct dm9x_driver_s *)dev->d_private;
   irqstate_t flags;
 
-  ndbg("Polling\n");
+  nerr("Polling\n");
   flags = enter_critical_section();
 
   /* Ignore the notification if the interface is not yet up */
@@ -1557,7 +1557,7 @@ static int dm9x_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 
 static void dm9x_bringup(struct dm9x_driver_s *dm9x)
 {
-  ndbg("Initializing\n");
+  nerr("Initializing\n");
 
   /* Set the internal PHY power-on, GPIOs normal, and wait 2ms */
 

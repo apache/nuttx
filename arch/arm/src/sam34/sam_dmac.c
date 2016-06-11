@@ -1780,22 +1780,22 @@ void sam_dmadump(DMA_HANDLE handle, const struct sam_dmaregs_s *regs,
 {
   struct sam_dma_s *dmach = (struct sam_dma_s *)handle;
 
-  dmadbg("%s\n", msg);
-  dmadbg("  DMA Global Registers:\n");
-  dmadbg("      GCFG[%08x]: %08x\n", SAM_DMAC_GCFG, regs->gcfg);
-  dmadbg("        EN[%08x]: %08x\n", SAM_DMAC_EN, regs->en);
-  dmadbg("      SREQ[%08x]: %08x\n", SAM_DMAC_SREQ, regs->sreq);
-  dmadbg("      CREQ[%08x]: %08x\n", SAM_DMAC_CREQ, regs->creq);
-  dmadbg("      LAST[%08x]: %08x\n", SAM_DMAC_LAST, regs->last);
-  dmadbg("    EBCIMR[%08x]: %08x\n", SAM_DMAC_EBCIMR, regs->ebcimr);
-  dmadbg("      CHSR[%08x]: %08x\n", SAM_DMAC_CHSR, regs->chsr);
-  dmadbg("  DMA Channel Registers:\n");
-  dmadbg("     SADDR[%08x]: %08x\n", dmach->base + SAM_DMACHAN_SADDR_OFFSET, regs->saddr);
-  dmadbg("     DADDR[%08x]: %08x\n", dmach->base + SAM_DMACHAN_DADDR_OFFSET, regs->daddr);
-  dmadbg("      DSCR[%08x]: %08x\n", dmach->base + SAM_DMACHAN_DSCR_OFFSET, regs->dscr);
-  dmadbg("     CTRLA[%08x]: %08x\n", dmach->base + SAM_DMACHAN_CTRLA_OFFSET, regs->ctrla);
-  dmadbg("     CTRLB[%08x]: %08x\n", dmach->base + SAM_DMACHAN_CTRLB_OFFSET, regs->ctrlb);
-  dmadbg("       CFG[%08x]: %08x\n", dmach->base + SAM_DMACHAN_CFG_OFFSET, regs->cfg);
+  dmaerr("%s\n", msg);
+  dmaerr("  DMA Global Registers:\n");
+  dmaerr("      GCFG[%08x]: %08x\n", SAM_DMAC_GCFG, regs->gcfg);
+  dmaerr("        EN[%08x]: %08x\n", SAM_DMAC_EN, regs->en);
+  dmaerr("      SREQ[%08x]: %08x\n", SAM_DMAC_SREQ, regs->sreq);
+  dmaerr("      CREQ[%08x]: %08x\n", SAM_DMAC_CREQ, regs->creq);
+  dmaerr("      LAST[%08x]: %08x\n", SAM_DMAC_LAST, regs->last);
+  dmaerr("    EBCIMR[%08x]: %08x\n", SAM_DMAC_EBCIMR, regs->ebcimr);
+  dmaerr("      CHSR[%08x]: %08x\n", SAM_DMAC_CHSR, regs->chsr);
+  dmaerr("  DMA Channel Registers:\n");
+  dmaerr("     SADDR[%08x]: %08x\n", dmach->base + SAM_DMACHAN_SADDR_OFFSET, regs->saddr);
+  dmaerr("     DADDR[%08x]: %08x\n", dmach->base + SAM_DMACHAN_DADDR_OFFSET, regs->daddr);
+  dmaerr("      DSCR[%08x]: %08x\n", dmach->base + SAM_DMACHAN_DSCR_OFFSET, regs->dscr);
+  dmaerr("     CTRLA[%08x]: %08x\n", dmach->base + SAM_DMACHAN_CTRLA_OFFSET, regs->ctrla);
+  dmaerr("     CTRLB[%08x]: %08x\n", dmach->base + SAM_DMACHAN_CTRLB_OFFSET, regs->ctrlb);
+  dmaerr("       CFG[%08x]: %08x\n", dmach->base + SAM_DMACHAN_CFG_OFFSET, regs->cfg);
 }
 #endif /* CONFIG_DEBUG_DMA */
 #endif /* CONFIG_SAM34_DMAC0 */

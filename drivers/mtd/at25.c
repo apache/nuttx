@@ -292,7 +292,7 @@ static void at25_waitwritecomplete(struct at25_dev_s *priv)
 
   if (status & AT25_SR_EPE)
     {
-      fdbg("ERROR: Write error, status: 0x%02x\n", status);
+      ferr("ERROR: Write error, status: 0x%02x\n", status);
     }
 
   finfo("Complete, status: 0x%02x\n", status);
@@ -671,7 +671,7 @@ FAR struct mtd_dev_s *at25_initialize(FAR struct spi_dev_s *dev)
         {
           /* Unrecognized! Discard all of that work we just did and return NULL */
 
-          fdbg("ERROR: Unrecognized\n");
+          ferr("ERROR: Unrecognized\n");
           kmm_free(priv);
           priv = NULL;
         }

@@ -212,10 +212,10 @@
 /* Debug ******************************************************************************/
 
 #ifdef CONFIG_DEBUG_LCD
-#  define lcddbg(format, ...)     dbg(format, ##__VA_ARGS__)
+#  define lcderr(format, ...)     err(format, ##__VA_ARGS__)
 #  define lcdinfo(format, ...)    info(format, ##__VA_ARGS__)
 #else
-#  define lcddbg(x...)
+#  define lcderr(x...)
 #  define lcdinfo(x...)
 #endif
 

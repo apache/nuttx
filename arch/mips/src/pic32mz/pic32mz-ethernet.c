@@ -1938,7 +1938,7 @@ static int pic32mz_ifup(struct net_driver_s *dev)
   uint32_t regval;
   int ret;
 
-  ndbg("Bringing up: %d.%d.%d.%d\n",
+  nerr("Bringing up: %d.%d.%d.%d\n",
        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
 
@@ -2028,7 +2028,7 @@ static int pic32mz_ifup(struct net_driver_s *dev)
   ret = pic32mz_phyinit(priv);
   if (ret != 0)
     {
-      ndbg("pic32mz_phyinit failed: %d\n", ret);
+      nerr("pic32mz_phyinit failed: %d\n", ret);
       return ret;
     }
 
@@ -2105,7 +2105,7 @@ static int pic32mz_ifup(struct net_driver_s *dev)
   priv->pd_dev.d_mac.ether_addr_octet[0] = (uint32_t)(regval & 0xff);
   priv->pd_dev.d_mac.ether_addr_octet[1] = (uint32_t)((regval >> 8) & 0xff);
 
-  ndbg("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
+  nerr("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
          dev->d_mac.ether_addr_octet[0], dev->d_mac.ether_addr_octet[1],
          dev->d_mac.ether_addr_octet[2], dev->d_mac.ether_addr_octet[3],
          dev->d_mac.ether_addr_octet[4], dev->d_mac.ether_addr_octet[5]);
@@ -2396,14 +2396,14 @@ static int pic32mz_rmmac(struct net_driver_s *dev, const uint8_t *mac)
 #if defined(CONFIG_NET_REGDEBUG) && defined(PIC32MZ_HAVE_PHY)
 static void pic32mz_showmii(uint8_t phyaddr, const char *msg)
 {
-  dbg("PHY " PIC32MZ_PHYNAME ": %s\n", msg);
-  dbg("  MCR:       %04x\n", pic32mz_phyread(phyaddr, MII_MCR));
-  dbg("  MSR:       %04x\n", pic32mz_phyread(phyaddr, MII_MSR));
-  dbg("  ADVERTISE: %04x\n", pic32mz_phyread(phyaddr, MII_ADVERTISE));
-  dbg("  LPA:       %04x\n", pic32mz_phyread(phyaddr, MII_LPA));
-  dbg("  EXPANSION: %04x\n", pic32mz_phyread(phyaddr, MII_EXPANSION));
+  err("PHY " PIC32MZ_PHYNAME ": %s\n", msg);
+  err("  MCR:       %04x\n", pic32mz_phyread(phyaddr, MII_MCR));
+  err("  MSR:       %04x\n", pic32mz_phyread(phyaddr, MII_MSR));
+  err("  ADVERTISE: %04x\n", pic32mz_phyread(phyaddr, MII_ADVERTISE));
+  err("  LPA:       %04x\n", pic32mz_phyread(phyaddr, MII_LPA));
+  err("  EXPANSION: %04x\n", pic32mz_phyread(phyaddr, MII_EXPANSION));
 #ifdef CONFIG_ETH0_PHY_KS8721
-  dbg("  10BTCR:    %04x\n", pic32mz_phyread(phyaddr, MII_KS8721_10BTCR));
+  err("  10BTCR:    %04x\n", pic32mz_phyread(phyaddr, MII_KS8721_10BTCR));
 #endif
 }
 #endif
@@ -2566,7 +2566,7 @@ static inline int pic32mz_phyreset(uint8_t phyaddr)
         }
     }
 
-  ndbg("Reset failed. MCR: %04x\n", phyreg);
+  nerr("Reset failed. MCR: %04x\n", phyreg);
   return -ETIMEDOUT;
 }
 #endif
@@ -2613,7 +2613,7 @@ static inline int pic32mz_phyautoneg(uint8_t phyaddr)
         }
     }
 
-  ndbg("Auto-negotiation failed. MSR: %04x\n", phyreg);
+  nerr("Auto-negotiation failed. MSR: %04x\n", phyreg);
   return -ETIMEDOUT;
 }
 #endif
@@ -2692,7 +2692,7 @@ static int pic32mz_phymode(uint8_t phyaddr, uint8_t mode)
 #endif
     }
 
-  ndbg("Link failed. MSR: %04x\n", phyreg);
+  nerr("Link failed. MSR: %04x\n", phyreg);
   return -ETIMEDOUT;
 }
 #endif
@@ -2761,7 +2761,7 @@ static inline int pic32mz_phyinit(struct pic32mz_driver_s *priv)
       ret = pic32mz_phyreset(phyaddr);
       if (ret < 0)
         {
-          ndbg("Failed to reset PHY at address %d\n", phyaddr);
+          nerr("Failed to reset PHY at address %d\n", phyaddr);
           continue;
         }
 
@@ -2794,7 +2794,7 @@ static inline int pic32mz_phyinit(struct pic32mz_driver_s *priv)
     {
       /* Failed to find PHY at any location */
 
-      ndbg("No PHY detected\n");
+      nerr("No PHY detected\n");
       return -ENODEV;
     }
   ninfo("phyaddr: %d\n", phyaddr);
@@ -2898,7 +2898,7 @@ static inline int pic32mz_phyinit(struct pic32mz_driver_s *priv)
         priv->pd_mode = PIC32MZ_100BASET_FD;
         break;
       default:
-        ndbg("Unrecognized mode: %04x\n", phyreg);
+        nerr("Unrecognized mode: %04x\n", phyreg);
         return -ENODEV;
     }
 #elif defined(CONFIG_ETH0_PHY_DP83848C)
@@ -2921,7 +2921,7 @@ static inline int pic32mz_phyinit(struct pic32mz_driver_s *priv)
         priv->pd_mode = PIC32MZ_10BASET_FD;
         break;
       default:
-        ndbg("Unrecognized mode: %04x\n", phyreg);
+        nerr("Unrecognized mode: %04x\n", phyreg);
         return -ENODEV;
     }
 #elif defined(CONFIG_ETH0_PHY_LAN8720) || defined(CONFIG_ETH0_PHY_LAN8740) || defined(CONFIG_ETH0_PHY_LAN8740A)
@@ -2966,7 +2966,7 @@ static inline int pic32mz_phyinit(struct pic32mz_driver_s *priv)
       }
     else
       {
-        ndbg("Unrecognized mode: %04x\n", phyreg);
+        nerr("Unrecognized mode: %04x\n", phyreg);
         return -ENODEV;
       }
   }
@@ -2974,7 +2974,7 @@ static inline int pic32mz_phyinit(struct pic32mz_driver_s *priv)
 #  warning "PHY Unknown: speed and duplex are bogus"
 #endif
 
-  ndbg("%dBase-T %s duplex\n",
+  nerr("%dBase-T %s duplex\n",
        (priv->pd_mode & PIC32MZ_SPEED_MASK) ==  PIC32MZ_SPEED_100 ? 100 : 10,
        (priv->pd_mode & PIC32MZ_DUPLEX_MASK) == PIC32MZ_DUPLEX_FULL ?"full" : "half");
 

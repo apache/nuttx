@@ -197,8 +197,8 @@
  */
 
 #ifndef CONFIG_DEBUG_INPUT
-#  undef  idbg
-#  define idbg    udbg
+#  undef  ierr
+#  define ierr    uerr
 #  undef  illerr
 #  define illerr  ullerr
 #  undef  iinfo
@@ -1101,14 +1101,14 @@ static int usbhost_mouse_poll(int argc, char *argv[])
            * long time).
            */
 
-          udbg("ERROR: DRVR_TRANSFER returned: %d/%u\n",
+          uerr("ERROR: DRVR_TRANSFER returned: %d/%u\n",
                (int)nbytes, nerrors);
 
           if (nbytes != -EAGAIN)
             {
               if (++nerrors > 200)
                 {
-                  udbg("Too many errors... aborting: %d\n", nerrors);
+                  uerr("Too many errors... aborting: %d\n", nerrors);
                   ret = (int)nbytes;
                   break;
                 }
@@ -1212,7 +1212,7 @@ static int usbhost_mouse_poll(int argc, char *argv[])
       npolls++;
       if ((npolls & 31) == 0)
         {
-          udbg("Still polling: %d\n", npolls);
+          uerr("Still polling: %d\n", npolls);
         }
 #endif
     }
@@ -1233,7 +1233,7 @@ static int usbhost_mouse_poll(int argc, char *argv[])
    * of the file descriptors are closed.
    */
 
-  udbg("Mouse removed, polling halted\n");
+  uerr("Mouse removed, polling halted\n");
 
   flags = enter_critical_section();
   priv->polling = false;
@@ -1389,7 +1389,7 @@ static int usbhost_waitsample(FAR struct usbhost_state_s *priv,
            * the failure now.
            */
 
-          idbg("sem_wait: %d\n", errno);
+          ierr("sem_wait: %d\n", errno);
           DEBUGASSERT(errno == EINTR);
           ret = -EINTR;
           goto errout;
@@ -1624,7 +1624,7 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
   ret = DRVR_EPALLOC(hport->drvr, &epindesc, &priv->epin);
   if (ret < 0)
     {
-      udbg("ERROR: Failed to allocate interrupt IN endpoint\n");
+      uerr("ERROR: Failed to allocate interrupt IN endpoint\n");
       return ret;
     }
 
@@ -1661,7 +1661,7 @@ static inline int usbhost_devinit(FAR struct usbhost_state_s *priv)
   ret = usbhost_tdalloc(priv);
   if (ret < 0)
     {
-      udbg("ERROR: Failed to allocate transfer buffer\n");
+      uerr("ERROR: Failed to allocate transfer buffer\n");
       return ret;
     }
 
@@ -2002,7 +2002,7 @@ static int usbhost_connect(FAR struct usbhost_class_s *usbclass,
   ret = usbhost_cfgdesc(priv, configdesc, desclen);
   if (ret < 0)
     {
-      udbg("usbhost_cfgdesc() failed: %d\n", ret);
+      uerr("usbhost_cfgdesc() failed: %d\n", ret);
     }
   else
     {
@@ -2011,7 +2011,7 @@ static int usbhost_connect(FAR struct usbhost_class_s *usbclass,
       ret = usbhost_devinit(priv);
       if (ret < 0)
         {
-          udbg("usbhost_devinit() failed: %d\n", ret);
+          uerr("usbhost_devinit() failed: %d\n", ret);
         }
     }
 
@@ -2345,7 +2345,7 @@ static ssize_t usbhost_read(FAR struct file *filep, FAR char *buffer, size_t len
         {
           /* We might have been awakened by a signal */
 
-          idbg("usbhost_waitsample: %d\n", ret);
+          ierr("usbhost_waitsample: %d\n", ret);
           goto errout;
         }
     }

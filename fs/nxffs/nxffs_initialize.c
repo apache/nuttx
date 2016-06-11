@@ -190,7 +190,7 @@ int nxffs_initialize(FAR struct mtd_dev_s *mtd)
   ret = MTD_IOCTL(mtd, MTDIOC_GEOMETRY, (unsigned long)((uintptr_t)&volume->geo));
   if (ret < 0)
     {
-      fdbg("ERROR: MTD ioctl(MTDIOC_GEOMETRY) failed: %d\n", -ret);
+      ferr("ERROR: MTD ioctl(MTDIOC_GEOMETRY) failed: %d\n", -ret);
       goto errout_with_volume;
     }
 
@@ -199,7 +199,7 @@ int nxffs_initialize(FAR struct mtd_dev_s *mtd)
   volume->cache = (FAR uint8_t *)kmm_malloc(volume->geo.blocksize);
   if (!volume->cache)
     {
-      fdbg("ERROR: Failed to allocate an erase block buffer\n");
+      ferr("ERROR: Failed to allocate an erase block buffer\n");
       ret = -ENOMEM;
       goto errout_with_volume;
     }
@@ -212,7 +212,7 @@ int nxffs_initialize(FAR struct mtd_dev_s *mtd)
   volume->pack = (FAR uint8_t *)kmm_malloc(volume->geo.erasesize);
   if (!volume->pack)
     {
-      fdbg("ERROR: Failed to allocate an I/O block buffer\n");
+      ferr("ERROR: Failed to allocate an I/O block buffer\n");
       ret = -ENOMEM;
       goto errout_with_cache;
     }
@@ -231,7 +231,7 @@ int nxffs_initialize(FAR struct mtd_dev_s *mtd)
   ret = nxffs_blockstats(volume, &stats);
   if (ret < 0)
     {
-      fdbg("ERROR: Failed to collect block statistics: %d\n", -ret);
+      ferr("ERROR: Failed to collect block statistics: %d\n", -ret);
       goto errout_with_buffer;
     }
 
@@ -247,7 +247,7 @@ int nxffs_initialize(FAR struct mtd_dev_s *mtd)
       ret = nxffs_reformat(volume);
       if (ret < 0)
         {
-          fdbg("ERROR: Failed to reformat the volume: %d\n", -ret);
+          ferr("ERROR: Failed to reformat the volume: %d\n", -ret);
           goto errout_with_buffer;
         }
 
@@ -257,7 +257,7 @@ int nxffs_initialize(FAR struct mtd_dev_s *mtd)
       ret = nxffs_blockstats(volume, &stats);
       if (ret < 0)
         {
-          fdbg("ERROR: Failed to collect block statistics: %d\n", -ret);
+          ferr("ERROR: Failed to collect block statistics: %d\n", -ret);
           goto errout_with_buffer;
         }
 #endif
@@ -274,11 +274,11 @@ int nxffs_initialize(FAR struct mtd_dev_s *mtd)
 
   /* We may need to format the volume.  Try that before giving up. */
 
-  fdbg("WARNING: Failed to calculate file system limits: %d\n", -ret);
+  ferr("WARNING: Failed to calculate file system limits: %d\n", -ret);
   ret = nxffs_reformat(volume);
   if (ret < 0)
     {
-      fdbg("ERROR: Failed to reformat the volume: %d\n", -ret);
+      ferr("ERROR: Failed to reformat the volume: %d\n", -ret);
       goto errout_with_buffer;
     }
 
@@ -288,7 +288,7 @@ int nxffs_initialize(FAR struct mtd_dev_s *mtd)
   ret = nxffs_blockstats(volume, &stats);
   if (ret < 0)
     {
-      fdbg("ERROR: Failed to collect block statistics: %d\n", -ret);
+      ferr("ERROR: Failed to collect block statistics: %d\n", -ret);
       goto errout_with_buffer;
     }
 #endif
@@ -303,7 +303,7 @@ int nxffs_initialize(FAR struct mtd_dev_s *mtd)
 
   /* Now give up */
 
-  fdbg("ERROR: Failed to calculate file system limits: %d\n", -ret);
+  ferr("ERROR: Failed to calculate file system limits: %d\n", -ret);
 
 errout_with_buffer:
   kmm_free(volume->pack);
@@ -356,7 +356,7 @@ int nxffs_limits(FAR struct nxffs_volume_s *volume)
   ret = nxffs_validblock(volume, &block);
   if (ret < 0)
     {
-      fdbg("ERROR: Failed to find a valid block: %d\n", -ret);
+      ferr("ERROR: Failed to find a valid block: %d\n", -ret);
       return ret;
     }
 
@@ -374,7 +374,7 @@ int nxffs_limits(FAR struct nxffs_volume_s *volume)
 
       if (ret != -ENOENT)
         {
-          fdbg("ERROR: nxffs_nextentry failed: %d\n", -ret);
+          ferr("ERROR: nxffs_nextentry failed: %d\n", -ret);
           return ret;
         }
 
@@ -447,7 +447,7 @@ int nxffs_limits(FAR struct nxffs_volume_s *volume)
 
           /* No?  Then it is some other failure that we do not know how to handle */
 
-          fdbg("ERROR: nxffs_getc failed: %d\n", -ch);
+          ferr("ERROR: nxffs_getc failed: %d\n", -ch);
           return ch;
         }
 

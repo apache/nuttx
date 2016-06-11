@@ -208,12 +208,12 @@
 /* Debug ****************************************************************************/
 
 #ifdef CONFIG_SST26_DEBUG
-# define sstdbg(format, ...)    dbg(format, ##__VA_ARGS__)
+# define ssterr(format, ...)    err(format, ##__VA_ARGS__)
 # define sstllerr(format, ...)  llerr(format, ##__VA_ARGS__)
 # define sstinfo(format, ...)   info(format, ##__VA_ARGS__)
 # define sstllinfo(format, ...) llinfo(format, ##__VA_ARGS__)
 #else
-# define sstdbg(x...)
+# define ssterr(x...)
 # define sstllerr(x...)
 # define sstinfo(x...)
 # define sstllinfo(x...)
@@ -936,7 +936,7 @@ FAR struct mtd_dev_s *sst26_initialize_spi(FAR struct spi_dev_s *dev)
         {
           /* Unrecognized! Discard all of that work we just did and return NULL */
 
-          sstdbg("Unrecognized\n");
+          ssterr("Unrecognized\n");
           kmm_free(priv);
           priv = NULL;
         }

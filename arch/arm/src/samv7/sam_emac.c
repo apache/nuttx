@@ -2824,12 +2824,12 @@ static int sam_ifup(struct net_driver_s *dev)
   int ret;
 
 #ifdef CONFIG_NET_IPv4
-  ndbg("Bringing up: %d.%d.%d.%d\n",
+  nerr("Bringing up: %d.%d.%d.%d\n",
        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
 #endif
 #ifdef CONFIG_NET_IPv6
-  ndbg("Bringing up: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
+  nerr("Bringing up: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
        dev->d_ipv6addr[0], dev->d_ipv6addr[1], dev->d_ipv6addr[2],
        dev->d_ipv6addr[3], dev->d_ipv6addr[4], dev->d_ipv6addr[5],
        dev->d_ipv6addr[6], dev->d_ipv6addr[7]);
@@ -3652,7 +3652,7 @@ static int sam_phyintenable(struct sam_emac_s *priv)
   else
 #endif
     {
-      ndbg("ERROR: Unsupported PHY type: %d\n", priv->phytype);
+      nerr("ERROR: Unsupported PHY type: %d\n", priv->phytype);
       ret = -ENOSYS;
     }
 
@@ -4329,7 +4329,7 @@ static int sam_phyinit(struct sam_emac_s *priv)
   mck = BOARD_MCK_FREQUENCY;
   if (mck > (240*1000*1000))
     {
-      ndbg("ERROR: Cannot realize PHY clock\n");
+      nerr("ERROR: Cannot realize PHY clock\n");
       return -EINVAL;
     }
   else if (mck > (160*1000*1000))
@@ -5111,7 +5111,7 @@ int sam_emac_initialize(int intf)
   else
 #endif
     {
-      ndbg("ERROR:  Interface %d not supported\n", intf);
+      nerr("ERROR:  Interface %d not supported\n", intf);
       return -EINVAL;
     }
 
@@ -5140,7 +5140,7 @@ int sam_emac_initialize(int intf)
   priv->txpoll = wd_create();
   if (!priv->txpoll)
     {
-      ndbg("ERROR: Failed to create periodic poll timer\n");
+      nerr("ERROR: Failed to create periodic poll timer\n");
       ret = -EAGAIN;
       goto errout;
     }
@@ -5148,7 +5148,7 @@ int sam_emac_initialize(int intf)
   priv->txtimeout = wd_create();     /* Create TX timeout timer */
   if (!priv->txtimeout)
     {
-      ndbg("ERROR: Failed to create periodic poll timer\n");
+      nerr("ERROR: Failed to create periodic poll timer\n");
       ret = -EAGAIN;
       goto errout_with_txpoll;
     }
@@ -5162,7 +5162,7 @@ int sam_emac_initialize(int intf)
   ret = sam_buffer_allocate(priv);
   if (ret < 0)
     {
-      ndbg("ERROR: sam_buffer_allocate failed: %d\n", ret);
+      nerr("ERROR: sam_buffer_allocate failed: %d\n", ret);
       goto errout_with_txtimeout;
     }
 
@@ -5173,7 +5173,7 @@ int sam_emac_initialize(int intf)
   ret = irq_attach(priv->attr->irq, priv->attr->handler);
   if (ret < 0)
     {
-      ndbg("ERROR: Failed to attach the handler to the IRQ%d\n", priv->attr->irq);
+      nerr("ERROR: Failed to attach the handler to the IRQ%d\n", priv->attr->irq);
       goto errout_with_buffers;
     }
 
@@ -5186,7 +5186,7 @@ int sam_emac_initialize(int intf)
   ret = sam_ifdown(&priv->dev);
   if (ret < 0)
     {
-      ndbg("ERROR: Failed to put the interface in the down state: %d\n", ret);
+      nerr("ERROR: Failed to put the interface in the down state: %d\n", ret);
       goto errout_with_buffers;
     }
 
@@ -5198,7 +5198,7 @@ int sam_emac_initialize(int intf)
       return ret;
     }
 
-  ndbg("ERROR: netdev_register() failed: %d\n", ret);
+  nerr("ERROR: netdev_register() failed: %d\n", ret);
 
 errout_with_buffers:
   sam_buffer_free(priv);
@@ -5261,7 +5261,7 @@ int sam_emac_setmacaddr(int intf, uint8_t mac[6])
   else
 #endif
     {
-      ndbg("ERROR:  Interface %d not supported\n", intf);
+      nerr("ERROR:  Interface %d not supported\n", intf);
       return -EINVAL;
     }
 

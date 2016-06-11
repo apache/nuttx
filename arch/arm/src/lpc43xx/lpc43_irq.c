@@ -146,7 +146,7 @@ static void lpc43_dumpnvic(const char *msg, int irq)
 
 /****************************************************************************
  * Name: lpc43_nmi, lpc43_busfault, lpc43_usagefault, lpc43_pendsv,
- *       lpc43_dbgmonitor, lpc43_pendsv, lpc43_reserved
+ *       lpc43_errmonitor, lpc43_pendsv, lpc43_reserved
  *
  * Description:
  *   Handlers for various exceptions.  None are handled and all are fatal
@@ -159,7 +159,7 @@ static void lpc43_dumpnvic(const char *msg, int irq)
 static int lpc43_nmi(int irq, FAR void *context)
 {
   (void)up_irq_save();
-  dbg("PANIC!!! NMI received\n");
+  err("PANIC!!! NMI received\n");
   PANIC();
   return 0;
 }
@@ -167,7 +167,7 @@ static int lpc43_nmi(int irq, FAR void *context)
 static int lpc43_busfault(int irq, FAR void *context)
 {
   (void)up_irq_save();
-  dbg("PANIC!!! Bus fault recived\n");
+  err("PANIC!!! Bus fault recived\n");
   PANIC();
   return 0;
 }
@@ -175,7 +175,7 @@ static int lpc43_busfault(int irq, FAR void *context)
 static int lpc43_usagefault(int irq, FAR void *context)
 {
   (void)up_irq_save();
-  dbg("PANIC!!! Usage fault received\n");
+  err("PANIC!!! Usage fault received\n");
   PANIC();
   return 0;
 }
@@ -183,15 +183,15 @@ static int lpc43_usagefault(int irq, FAR void *context)
 static int lpc43_pendsv(int irq, FAR void *context)
 {
   (void)up_irq_save();
-  dbg("PANIC!!! PendSV received\n");
+  err("PANIC!!! PendSV received\n");
   PANIC();
   return 0;
 }
 
-static int lpc43_dbgmonitor(int irq, FAR void *context)
+static int lpc43_errmonitor(int irq, FAR void *context)
 {
   (void)up_irq_save();
-  dbg("PANIC!!! Debug Monitor received\n");
+  err("PANIC!!! Debug Monitor received\n");
   PANIC();
   return 0;
 }
@@ -199,7 +199,7 @@ static int lpc43_dbgmonitor(int irq, FAR void *context)
 static int lpc43_reserved(int irq, FAR void *context)
 {
   (void)up_irq_save();
-  dbg("PANIC!!! Reserved interrupt\n");
+  err("PANIC!!! Reserved interrupt\n");
   PANIC();
   return 0;
 }
@@ -435,7 +435,7 @@ void up_irqinitialize(void)
   irq_attach(LPC43_IRQ_BUSFAULT, lpc43_busfault);
   irq_attach(LPC43_IRQ_USAGEFAULT, lpc43_usagefault);
   irq_attach(LPC43_IRQ_PENDSV, lpc43_pendsv);
-  irq_attach(LPC43_IRQ_DBGMONITOR, lpc43_dbgmonitor);
+  irq_attach(LPC43_IRQ_DBGMONITOR, lpc43_errmonitor);
   irq_attach(LPC43_IRQ_RESERVED, lpc43_reserved);
 #endif
 

@@ -248,7 +248,7 @@ int vnc_server(int argc, FAR char *argv[])
 
   if (argc != 2)
     {
-      gdbg("ERROR: Unexpected number of arguments: %d\n", argc);
+      gerr("ERROR: Unexpected number of arguments: %d\n", argc);
       ret = -EINVAL;
       goto errout_with_post;
     }
@@ -256,7 +256,7 @@ int vnc_server(int argc, FAR char *argv[])
   display = atoi(argv[1]);
   if (display < 0 || display >= RFB_MAX_DISPLAYS)
     {
-      gdbg("ERROR: Invalid display number: %d\n", display);
+      gerr("ERROR: Invalid display number: %d\n", display);
       ret = -EINVAL;
       goto errout_with_post;
     }
@@ -270,7 +270,7 @@ int vnc_server(int argc, FAR char *argv[])
   fb = (FAR uint8_t *)kmm_zalloc(RFB_SIZE);
   if (fb == NULL)
     {
-      gdbg("ERROR: Failed to allocate framebuffer memory: %lu KB\n",
+      gerr("ERROR: Failed to allocate framebuffer memory: %lu KB\n",
            (unsigned long)(RFB_SIZE / 1024));
       ret = -ENOMEM;
       goto errout_with_post;
@@ -281,7 +281,7 @@ int vnc_server(int argc, FAR char *argv[])
   session = kmm_zalloc(sizeof(struct vnc_session_s));
   if (session == NULL)
     {
-      gdbg("ERROR: Failed to allocate session\n");
+      gerr("ERROR: Failed to allocate session\n");
       ret = -ENOMEM;
       goto errout_with_fb;
     }
@@ -324,7 +324,7 @@ int vnc_server(int argc, FAR char *argv[])
           ret = vnc_negotiate(session);
           if (ret < 0)
             {
-              gdbg("ERROR: Failed to negotiate security/framebuffer: %d\n",
+              gerr("ERROR: Failed to negotiate security/framebuffer: %d\n",
                    ret);
               continue;
             }
@@ -336,7 +336,7 @@ int vnc_server(int argc, FAR char *argv[])
           ret = vnc_start_updater(session);
           if (ret < 0)
             {
-              gdbg("ERROR: Failed to start updater thread: %d\n", ret);
+              gerr("ERROR: Failed to start updater thread: %d\n", ret);
               continue;
             }
 
@@ -362,7 +362,7 @@ int vnc_server(int argc, FAR char *argv[])
           ret = vnc_stop_updater(session);
           if (ret < 0)
             {
-              gdbg("ERROR: Failed to stop updater thread: %d\n", ret);
+              gerr("ERROR: Failed to stop updater thread: %d\n", ret);
             }
         }
     }

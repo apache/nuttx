@@ -918,7 +918,7 @@ static int kinetis_ifup(struct net_driver_s *dev)
   uint8_t *mac = dev->d_mac.ether_addr_octet;
   uint32_t regval;
 
-  ndbg("Bringing up: %d.%d.%d.%d\n",
+  nerr("Bringing up: %d.%d.%d.%d\n",
        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
 
@@ -1695,7 +1695,7 @@ int kinetis_netinitialize(int intf)
     {
       /* We could not attach the ISR to the interrupt */
 
-      ndbg("Failed to attach EMACTMR IRQ\n");
+      nerr("Failed to attach EMACTMR IRQ\n");
       return -EAGAIN;
     }
 #endif
@@ -1706,7 +1706,7 @@ int kinetis_netinitialize(int intf)
     {
       /* We could not attach the ISR to the interrupt */
 
-      ndbg("Failed to attach EMACTX IRQ\n");
+      nerr("Failed to attach EMACTX IRQ\n");
       return -EAGAIN;
     }
 
@@ -1716,7 +1716,7 @@ int kinetis_netinitialize(int intf)
     {
       /* We could not attach the ISR to the interrupt */
 
-      ndbg("Failed to attach EMACRX IRQ\n");
+      nerr("Failed to attach EMACRX IRQ\n");
       return -EAGAIN;
     }
 
@@ -1726,7 +1726,7 @@ int kinetis_netinitialize(int intf)
     {
       /* We could not attach the ISR to the interrupt */
 
-      ndbg("Failed to attach EMACMISC IRQ\n");
+      nerr("Failed to attach EMACMISC IRQ\n");
       return -EAGAIN;
     }
 

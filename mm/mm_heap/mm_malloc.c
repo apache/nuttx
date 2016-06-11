@@ -186,7 +186,7 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
 #ifdef CONFIG_DEBUG_MM
   if (!ret)
     {
-      mdbg("Allocation failed, size %d\n", size);
+      merr("Allocation failed, size %d\n", size);
     }
   else
     {

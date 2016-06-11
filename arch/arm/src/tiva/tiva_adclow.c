@@ -753,7 +753,7 @@ static void tiva_adc_interrupt(struct tiva_adc_sse_s *sse)
   ret = work_queue(HPWORK, &sse->work, tiva_adc_read, sse, 0);
   if (ret != 0)
     {
-      adbg("ERROR: Failed to queue work: %d ADC.SSE: %d.%d\n",
+      aerr("ERROR: Failed to queue work: %d ADC.SSE: %d.%d\n",
            ret, sse->adc, sse->num);
     }
 }
@@ -879,7 +879,7 @@ int tiva_adc_initialize(const char *devpath, struct tiva_adc_cfg_s *cfg,
   adc = tiva_adc_struct_init(cfg);
   if (adc == NULL)
     {
-      adbg("Invalid ADC device number: expected=%d actual=%d\n",
+      aerr("Invalid ADC device number: expected=%d actual=%d\n",
             0, cfg->adc);
       return -ENODEV;
     }
@@ -888,7 +888,7 @@ int tiva_adc_initialize(const char *devpath, struct tiva_adc_cfg_s *cfg,
 
   if (tiva_adc_enable(adc->devno, true) < 0)
     {
-      adbg("ERROR: failure to power ADC peripheral (devno=%d)\n",
+      aerr("ERROR: failure to power ADC peripheral (devno=%d)\n",
             cfg->adc);
       return ret;
     }
@@ -912,7 +912,7 @@ int tiva_adc_initialize(const char *devpath, struct tiva_adc_cfg_s *cfg,
 
   if (adc->dev == NULL)
     {
-      adbg("ERROR: Failed to get interface %s\n", devpath);
+      aerr("ERROR: Failed to get interface %s\n", devpath);
       return -ENODEV;
     }
 
@@ -925,7 +925,7 @@ int tiva_adc_initialize(const char *devpath, struct tiva_adc_cfg_s *cfg,
   ret = adc_register(devpath, adc->dev);
   if (ret < 0)
     {
-      adbg("ERROR: Failed to register %s to character driver: %d\n",
+      aerr("ERROR: Failed to register %s to character driver: %d\n",
             devpath, ret);
       return ret;
     }

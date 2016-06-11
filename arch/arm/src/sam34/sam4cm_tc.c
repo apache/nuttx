@@ -757,7 +757,7 @@ static inline struct sam_chan_s *sam_tc_initialize(int channel)
     {
       /* Timer/counter is not invalid or not enabled */
 
-      tcdbg("ERROR: Bad channel number: %d\n", channel);
+      tcerr("ERROR: Bad channel number: %d\n", channel);
       return NULL;
     }
 
@@ -770,7 +770,7 @@ static inline struct sam_chan_s *sam_tc_initialize(int channel)
     {
       /* Initialize the channel. */
 
-      tcdbg("Initializing TC%d\n", chconfig->chan);
+      tcerr("Initializing TC%d\n", chconfig->chan);
 
       memset(chan, 0, sizeof(struct sam_chan_s));
       sem_init(&chan->exclsem, 0, 1);
@@ -831,7 +831,7 @@ static inline struct sam_chan_s *sam_tc_initialize(int channel)
     {
       /* No.. return a failure */
 
-      tcdbg("Channel %d is in-used\n", channel);
+      tcerr("Channel %d is in-used\n", channel);
       sam_givesem(chan);
       return NULL;
     }
@@ -1246,7 +1246,7 @@ int sam_tc_divisor(uint32_t frequency, uint32_t *div, uint32_t *tcclks)
         {
           /* If no divisor can be found, return -ERANGE */
 
-          tcdbg("Lower bound search failed\n");
+          tcerr("Lower bound search failed\n");
           return -ERANGE;
         }
     }

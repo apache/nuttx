@@ -75,10 +75,10 @@ void posix_spawn_file_actions_dump(FAR posix_spawn_file_actions_t *file_actions)
 
   DEBUGASSERT(file_actions);
 
-  dbg("File Actions[%p->%p]:\n", file_actions, *file_actions);
+  err("File Actions[%p->%p]:\n", file_actions, *file_actions);
   if (!*file_actions)
     {
-      dbg("  NONE\n");
+      err("  NONE\n");
       return;
     }
 
@@ -95,7 +95,7 @@ void posix_spawn_file_actions_dump(FAR posix_spawn_file_actions_t *file_actions)
             FAR struct spawn_close_file_action_s *action =
               (FAR struct spawn_close_file_action_s *)entry;
 
-            dbg("  CLOSE: fd=%d\n", action->fd);
+            err("  CLOSE: fd=%d\n", action->fd);
           }
           break;
 
@@ -104,7 +104,7 @@ void posix_spawn_file_actions_dump(FAR posix_spawn_file_actions_t *file_actions)
             FAR struct spawn_dup2_file_action_s *action =
               (FAR struct spawn_dup2_file_action_s *)entry;
 
-            dbg("  DUP2: %d->%d\n", action->fd1, action->fd2);
+            err("  DUP2: %d->%d\n", action->fd1, action->fd2);
           }
           break;
 
@@ -113,14 +113,14 @@ void posix_spawn_file_actions_dump(FAR posix_spawn_file_actions_t *file_actions)
             FAR struct spawn_open_file_action_s *action =
               (FAR struct spawn_open_file_action_s *)entry;
 
-            dbg("  OPEN: path=%s oflags=%04x mode=%04x fd=%d\n",
+            err("  OPEN: path=%s oflags=%04x mode=%04x fd=%d\n",
                 action->path, action->oflags, action->mode, action->fd);
           }
           break;
 
         case SPAWN_FILE_ACTION_NONE:
         default:
-          dbg("  ERROR: Unknown action: %d\n", entry->action);
+          err("  ERROR: Unknown action: %d\n", entry->action);
           break;
         }
     }

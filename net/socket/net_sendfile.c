@@ -610,7 +610,7 @@ ssize_t net_sendfile(int outfd, struct file *infile, off_t *offset,
 
   if (!psock || psock->s_crefs <= 0)
     {
-      ndbg("ERROR: Invalid socket\n");
+      nerr("ERROR: Invalid socket\n");
       errcode = EBADF;
       goto errout;
     }
@@ -619,7 +619,7 @@ ssize_t net_sendfile(int outfd, struct file *infile, off_t *offset,
 
   if (psock->s_type != SOCK_STREAM || !_SS_ISCONNECTED(psock->s_flags))
     {
-      ndbg("ERROR: Not connected\n");
+      nerr("ERROR: Not connected\n");
       errcode = ENOTCONN;
       goto errout;
     }
@@ -657,7 +657,7 @@ ssize_t net_sendfile(int outfd, struct file *infile, off_t *offset,
 
   if (ret < 0)
     {
-      ndbg("ERROR: Not reachable\n");
+      nerr("ERROR: Not reachable\n");
       errcode = ENETUNREACH;
       goto errout;
     }

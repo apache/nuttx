@@ -152,7 +152,7 @@ pid_t up_vfork(const struct vfork_s *context)
   child = task_vforksetup((start_t)context->ra);
   if (!child)
     {
-      sdbg("task_vforksetup failed\n");
+      serr("task_vforksetup failed\n");
       return (pid_t)ERROR;
     }
 
@@ -171,7 +171,7 @@ pid_t up_vfork(const struct vfork_s *context)
                         parent->flags & TCB_FLAG_TTYPE_MASK);
   if (ret != OK)
     {
-      sdbg("up_create_stack failed: %d\n", ret);
+      serr("up_create_stack failed: %d\n", ret);
       task_vforkabort(child, -ret);
       return (pid_t)ERROR;
     }

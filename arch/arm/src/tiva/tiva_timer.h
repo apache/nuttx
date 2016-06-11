@@ -134,10 +134,10 @@
  */
 
 #ifdef CONFIG_DEBUG_TIMER
-#  define timdbg  llerr
+#  define timerr  llerr
 #  define timinfo llinfo
 #else
-#  define timdbg(x...)
+#  define timerr(x...)
 #  define timinfo(x...)
 #endif
 

@@ -90,9 +90,9 @@
 /* Debug ******************************************************************************/
 
 #ifdef CONFIG_LCD_SKELDEBUG
-# define skeldbg(format, ...)  info(format, ##__VA_ARGS__)
+# define skelerr(format, ...)  info(format, ##__VA_ARGS__)
 #else
-# define skeldbg(x...)
+# define skelerr(x...)
 #endif
 
 /**************************************************************************************

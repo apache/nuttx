@@ -122,7 +122,7 @@
 #endif
 
 #ifdef CONFIG_DEBUG_PWM
-#  define pwmdbg              dbg
+#  define pwmerr              err
 #  define pwmllerr            llerr
 #  ifdef CONFIG_DEBUG_INFO
 #    define pwminfo           info
@@ -134,7 +134,7 @@
 #    define pwm_dumpgpio(p,m)
 #  endif
 #else
-#  define pwmdbg(x...)
+#  define pwmerr(x...)
 #  define pwmllerr(x...)
 #  define pwminfo(x...)
 #  define pwmllinfo(x...)
@@ -1209,7 +1209,7 @@ static int pwm_timer(FAR struct stm32_pwmtimer_s *priv,
             break;
 
           default:
-            pwmdbg("No such timer mode: %u\n", (unsigned int)priv->mode);
+            pwmerr("No such timer mode: %u\n", (unsigned int)priv->mode);
             return -EINVAL;
         }
     }
@@ -1336,7 +1336,7 @@ static int pwm_timer(FAR struct stm32_pwmtimer_s *priv,
 
       if (j >= PWM_NCHANNELS)
         {
-          pwmdbg("No such channel: %u\n", channel);
+          pwmerr("No such channel: %u\n", channel);
           return -EINVAL;
         }
 #else
@@ -1387,7 +1387,7 @@ static int pwm_timer(FAR struct stm32_pwmtimer_s *priv,
 #endif
 
           default:
-            pwmdbg("No such mode: %u\n", (unsigned int)mode);
+            pwmerr("No such mode: %u\n", (unsigned int)mode);
             return -EINVAL;
         }
 
@@ -1494,7 +1494,7 @@ static int pwm_timer(FAR struct stm32_pwmtimer_s *priv,
             break;
 
           default:
-            pwmdbg("No such channel: %u\n", channel);
+            pwmerr("No such channel: %u\n", channel);
             return -EINVAL;
         }
     }
@@ -1707,7 +1707,7 @@ static  int pwm_update_duty(FAR struct stm32_pwmtimer_s *priv, uint8_t channel,
         break;
 
       default:
-        pwmdbg("No such channel: %u\n", channel);
+        pwmerr("No such channel: %u\n", channel);
         return -EINVAL;
     }
 
@@ -2149,7 +2149,7 @@ static int pwm_start(FAR struct pwm_lowerhalf_s *dev,
 
       if (priv->timtype != TIMTYPE_ADVANCED)
         {
-          pwmdbg("ERROR: TIM%u cannot support pulse count: %u\n",
+          pwmerr("ERROR: TIM%u cannot support pulse count: %u\n",
                  priv->timid, info->count);
           return -EPERM;
         }
@@ -2527,7 +2527,7 @@ FAR struct pwm_lowerhalf_s *stm32_pwminitialize(int timer)
 #endif
 
       default:
-        pwmdbg("No such timer configured\n");
+        pwmerr("No such timer configured\n");
         return NULL;
     }
 

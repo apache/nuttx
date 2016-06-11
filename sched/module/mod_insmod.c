@@ -89,50 +89,50 @@ static void mod_dumploadinfo(FAR struct mod_loadinfo_s *loadinfo)
 {
   int i;
 
-  sdbg("LOAD_INFO:\n");
-  sdbg("  textalloc:    %08lx\n", (long)loadinfo->textalloc);
-  sdbg("  datastart:    %08lx\n", (long)loadinfo->datastart);
-  sdbg("  textsize:     %ld\n",   (long)loadinfo->textsize);
-  sdbg("  datasize:     %ld\n",   (long)loadinfo->datasize);
-  sdbg("  filelen:      %ld\n",   (long)loadinfo->filelen);
-  sdbg("  filfd:        %d\n",    loadinfo->filfd);
-  sdbg("  symtabidx:    %d\n",    loadinfo->symtabidx);
-  sdbg("  strtabidx:    %d\n",    loadinfo->strtabidx);
+  serr("LOAD_INFO:\n");
+  serr("  textalloc:    %08lx\n", (long)loadinfo->textalloc);
+  serr("  datastart:    %08lx\n", (long)loadinfo->datastart);
+  serr("  textsize:     %ld\n",   (long)loadinfo->textsize);
+  serr("  datasize:     %ld\n",   (long)loadinfo->datasize);
+  serr("  filelen:      %ld\n",   (long)loadinfo->filelen);
+  serr("  filfd:        %d\n",    loadinfo->filfd);
+  serr("  symtabidx:    %d\n",    loadinfo->symtabidx);
+  serr("  strtabidx:    %d\n",    loadinfo->strtabidx);
 
-  sdbg("ELF Header:\n");
-  sdbg("  e_ident:      %02x %02x %02x %02x\n",
+  serr("ELF Header:\n");
+  serr("  e_ident:      %02x %02x %02x %02x\n",
     loadinfo->ehdr.e_ident[0], loadinfo->ehdr.e_ident[1],
     loadinfo->ehdr.e_ident[2], loadinfo->ehdr.e_ident[3]);
-  sdbg("  e_type:       %04x\n",  loadinfo->ehdr.e_type);
-  sdbg("  e_machine:    %04x\n",  loadinfo->ehdr.e_machine);
-  sdbg("  e_version:    %08x\n",  loadinfo->ehdr.e_version);
-  sdbg("  e_entry:      %08lx\n", (long)loadinfo->ehdr.e_entry);
-  sdbg("  e_phoff:      %d\n",    loadinfo->ehdr.e_phoff);
-  sdbg("  e_shoff:      %d\n",    loadinfo->ehdr.e_shoff);
-  sdbg("  e_flags:      %08x\n" , loadinfo->ehdr.e_flags);
-  sdbg("  e_ehsize:     %d\n",    loadinfo->ehdr.e_ehsize);
-  sdbg("  e_phentsize:  %d\n",    loadinfo->ehdr.e_phentsize);
-  sdbg("  e_phnum:      %d\n",    loadinfo->ehdr.e_phnum);
-  sdbg("  e_shentsize:  %d\n",    loadinfo->ehdr.e_shentsize);
-  sdbg("  e_shnum:      %d\n",    loadinfo->ehdr.e_shnum);
-  sdbg("  e_shstrndx:   %d\n",    loadinfo->ehdr.e_shstrndx);
+  serr("  e_type:       %04x\n",  loadinfo->ehdr.e_type);
+  serr("  e_machine:    %04x\n",  loadinfo->ehdr.e_machine);
+  serr("  e_version:    %08x\n",  loadinfo->ehdr.e_version);
+  serr("  e_entry:      %08lx\n", (long)loadinfo->ehdr.e_entry);
+  serr("  e_phoff:      %d\n",    loadinfo->ehdr.e_phoff);
+  serr("  e_shoff:      %d\n",    loadinfo->ehdr.e_shoff);
+  serr("  e_flags:      %08x\n" , loadinfo->ehdr.e_flags);
+  serr("  e_ehsize:     %d\n",    loadinfo->ehdr.e_ehsize);
+  serr("  e_phentsize:  %d\n",    loadinfo->ehdr.e_phentsize);
+  serr("  e_phnum:      %d\n",    loadinfo->ehdr.e_phnum);
+  serr("  e_shentsize:  %d\n",    loadinfo->ehdr.e_shentsize);
+  serr("  e_shnum:      %d\n",    loadinfo->ehdr.e_shnum);
+  serr("  e_shstrndx:   %d\n",    loadinfo->ehdr.e_shstrndx);
 
   if (loadinfo->shdr && loadinfo->ehdr.e_shnum > 0)
     {
       for (i = 0; i < loadinfo->ehdr.e_shnum; i++)
         {
           FAR Elf32_Shdr *shdr = &loadinfo->shdr[i];
-          sdbg("Sections %d:\n", i);
-          sdbg("  sh_name:      %08x\n", shdr->sh_name);
-          sdbg("  sh_type:      %08x\n", shdr->sh_type);
-          sdbg("  sh_flags:     %08x\n", shdr->sh_flags);
-          sdbg("  sh_addr:      %08x\n", shdr->sh_addr);
-          sdbg("  sh_offset:    %d\n",   shdr->sh_offset);
-          sdbg("  sh_size:      %d\n",   shdr->sh_size);
-          sdbg("  sh_link:      %d\n",   shdr->sh_link);
-          sdbg("  sh_info:      %d\n",   shdr->sh_info);
-          sdbg("  sh_addralign: %d\n",   shdr->sh_addralign);
-          sdbg("  sh_entsize:   %d\n",   shdr->sh_entsize);
+          serr("Sections %d:\n", i);
+          serr("  sh_name:      %08x\n", shdr->sh_name);
+          serr("  sh_type:      %08x\n", shdr->sh_type);
+          serr("  sh_flags:     %08x\n", shdr->sh_flags);
+          serr("  sh_addr:      %08x\n", shdr->sh_addr);
+          serr("  sh_offset:    %d\n",   shdr->sh_offset);
+          serr("  sh_size:      %d\n",   shdr->sh_size);
+          serr("  sh_link:      %d\n",   shdr->sh_link);
+          serr("  sh_info:      %d\n",   shdr->sh_info);
+          serr("  sh_addralign: %d\n",   shdr->sh_addralign);
+          serr("  sh_entsize:   %d\n",   shdr->sh_entsize);
         }
     }
 }
@@ -212,7 +212,7 @@ int insmod(FAR const char *filename, FAR const char *modulename)
   mod_dumploadinfo(&loadinfo);
   if (ret != 0)
     {
-      sdbg("ERROR: Failed to initialize to load module: %d\n", ret);
+      serr("ERROR: Failed to initialize to load module: %d\n", ret);
       goto errout_with_lock;
     }
 
@@ -221,7 +221,7 @@ int insmod(FAR const char *filename, FAR const char *modulename)
   modp = (FAR struct module_s *)kmm_zalloc(sizeof(struct module_s));
   if (ret != 0)
     {
-      sdbg("Failed to initialize for load of ELF program: %d\n", ret);
+      serr("Failed to initialize for load of ELF program: %d\n", ret);
       goto errout_with_loadinfo;
     }
 
@@ -235,7 +235,7 @@ int insmod(FAR const char *filename, FAR const char *modulename)
   mod_dumploadinfo(&loadinfo);
   if (ret != 0)
     {
-      sdbg("Failed to load ELF program binary: %d\n", ret);
+      serr("Failed to load ELF program binary: %d\n", ret);
       goto errout_with_registry_entry;
     }
 
@@ -244,7 +244,7 @@ int insmod(FAR const char *filename, FAR const char *modulename)
   ret = mod_bind(&loadinfo);
   if (ret != 0)
     {
-      sdbg("Failed to bind symbols program binary: %d\n", ret);
+      serr("Failed to bind symbols program binary: %d\n", ret);
       goto errout_with_load;
     }
 
@@ -269,7 +269,7 @@ int insmod(FAR const char *filename, FAR const char *modulename)
   ret = initializer(&modp->uninitializer, &modp->arg);
   if (ret < 0)
     {
-      sdbg("Failed to initialize the module: %d\n", ret);
+      serr("Failed to initialize the module: %d\n", ret);
       goto errout_with_load;
     }
 

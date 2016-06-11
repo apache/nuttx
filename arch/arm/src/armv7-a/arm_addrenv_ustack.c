@@ -163,7 +163,7 @@ int up_addrenv_ustackalloc(FAR struct tcb_s *tcb, size_t stacksize)
                                   MMU_L2_UDATAFLAGS);
   if (ret < 0)
     {
-      bdbg("ERROR: Failed to create stack region: %d\n", ret);
+      berr("ERROR: Failed to create stack region: %d\n", ret);
       up_addrenv_ustackfree(tcb);
       return ret;
     }

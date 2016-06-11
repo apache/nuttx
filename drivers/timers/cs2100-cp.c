@@ -66,33 +66,33 @@
 
 /* Debug ********************************************************************/
 
-#undef csdbg
+#undef cserr
 #ifdef CONFIG_CS2100CP_DEBUG
 #  ifdef CONFIG_CPP_HAVE_VARARGS
-#    define csdbg(format, ...)  dbg(format, ##__VA_ARGS__)
+#    define cserr(format, ...)  err(format, ##__VA_ARGS__)
 #  else
-#    define csdbg               dbg
+#    define cserr               err
 #  endif
 #else
 #  ifdef CONFIG_CPP_HAVE_VARARGS
-#    define csdbg(x...)
+#    define cserr(x...)
 #  else
-#    define csdbg               (void)
+#    define cserr               (void)
 #  endif
 #endif
 
-#undef regdbg
+#undef regerr
 #ifdef CONFIG_CS2100CP_REGDEBUG
 #  ifdef CONFIG_CPP_HAVE_VARARGS
-#    define regdbg(format, ...) dbg(format, ##__VA_ARGS__)
+#    define regerr(format, ...) err(format, ##__VA_ARGS__)
 #  else
-#    define regdbg              dbg
+#    define regerr              err
 #  endif
 #else
 #  ifdef CONFIG_CPP_HAVE_VARARGS
-#    define regdbg(x...)
+#    define regerr(x...)
 #  else
-#    define regdbg              (void)
+#    define regerr              (void)
 #  endif
 #endif
 
@@ -129,7 +129,7 @@ static int cs2100_write_reg(FAR const struct cs2100_config_s *config,
 {
   struct i2c_msg_s msgs[2];
 
-  regdbg("%02x<-%02x\n", regaddr, regval);
+  regerr("%02x<-%02x\n", regaddr, regval);
   DEBUGASSERT(config->i2c->ops && config->i2c->ops->transfer);
 
   /* Construct the I2C message (write N+1 bytes with no restart) */
@@ -200,7 +200,7 @@ static int cs2100_read_reg(FAR const struct cs2100_config_s *config,
       ret = I2C_TRANSFER(config->i2c, &msg, 1);
       if (ret == OK)
         {
-          regdbg("%02x->%02x\n", regaddr, *regval);
+          regerr("%02x->%02x\n", regaddr, *regval);
         }
     }
 
@@ -229,7 +229,7 @@ static int cs2100_write_ratio(FAR const struct cs2100_config_s *config,
   struct i2c_msg_s msg;
   uint8_t buffer[5];
 
-  regdbg("%02x<-%04l\n", CS2100_RATIO0, (unsigned long)ratio);
+  regerr("%02x<-%04l\n", CS2100_RATIO0, (unsigned long)ratio);
   DEBUGASSERT(config->i2c->ops && config->i2c->ops->transfer);
 
   /* Construct the I2C message (write N+1 bytes with no restart) */
@@ -310,7 +310,7 @@ static int cs2100_read_ratio(FAR const struct cs2100_config_s *config,
                     ((uint32_t)buffer[2] << 8) |
                      (uint32_t)buffer[0];
 
-           regdbg("%02x->%04l\n", CS2100_RATIO0, (unsigned long)*ratio);
+           regerr("%02x->%04l\n", CS2100_RATIO0, (unsigned long)*ratio);
         }
     }
 
@@ -356,7 +356,7 @@ static int cs2100_refclk(FAR const struct cs2100_config_s *config)
     }
   else
     {
-      csdbg("ERROR: reflck too large: %ul\n", (unsigned long)config->refclk);
+      cserr("ERROR: reflck too large: %ul\n", (unsigned long)config->refclk);
       return -EINVAL;
     }
 
@@ -370,7 +370,7 @@ static int cs2100_refclk(FAR const struct cs2100_config_s *config)
   ret = cs2100_write_reg(config, CS2100_FNCCFG1, regval);
   if (ret < 0)
     {
-      csdbg("ERROR: Failed to set CS2100_FNCCFG1: %d\n", ret);
+      cserr("ERROR: Failed to set CS2100_FNCCFG1: %d\n", ret);
       return ret;
     }
 
@@ -414,7 +414,7 @@ static int cs2100_refclk(FAR const struct cs2100_config_s *config)
   ret = cs2100_write_reg(config, CS2100_FNCCFG3, regval);
   if (ret < 0)
     {
-      csdbg("ERROR: Failed to set CS2100_FNCCFG3: %d\n", ret);
+      cserr("ERROR: Failed to set CS2100_FNCCFG3: %d\n", ret);
       return ret;
     }
 
@@ -426,7 +426,7 @@ static int cs2100_refclk(FAR const struct cs2100_config_s *config)
   ret = cs2100_write_reg(config, CS2100_FNCCFG2, CS2100_FNCCFG2_CLKOUTUNL);
   if (ret < 0)
     {
-      csdbg("ERROR: Failed to set CS2100_FNCCFG2: %d\n", ret);
+      cserr("ERROR: Failed to set CS2100_FNCCFG2: %d\n", ret);
     }
 
   return ret;
@@ -554,7 +554,7 @@ static int cs2100_ratio(FAR const struct cs2100_config_s *config)
     }
   else
     {
-      csdbg("ERROR: Ratio too large: %08llx\n", rudb24);
+      cserr("ERROR: Ratio too large: %08llx\n", rudb24);
       return -E2BIG;
     }
 
@@ -563,7 +563,7 @@ static int cs2100_ratio(FAR const struct cs2100_config_s *config)
   ret = cs2100_write_ratio(config, rud);
   if (ret < 0)
     {
-      csdbg("ERROR: Failed to set ratio: %d\n", ret);
+      cserr("ERROR: Failed to set ratio: %d\n", ret);
       return ret;
     }
 
@@ -576,7 +576,7 @@ static int cs2100_ratio(FAR const struct cs2100_config_s *config)
   ret    = cs2100_write_reg(config, CS2100_DEVCFG1, regval);
   if (ret < 0)
     {
-      csdbg("ERROR: Failed to set CS2100_DEVCFG1: %d\n", ret);
+      cserr("ERROR: Failed to set CS2100_DEVCFG1: %d\n", ret);
       return ret;
     }
 
@@ -628,7 +628,7 @@ int cs2100_enable(FAR const struct cs2100_config_s *config)
   ret = cs2100_write_reg(config, CS2100_DEVCTL, regval);
   if (ret < 0)
     {
-      csdbg("ERROR: Failed to set CS2100_DEVCTL: %d\n", ret);
+      cserr("ERROR: Failed to set CS2100_DEVCTL: %d\n", ret);
       return ret;
     }
 
@@ -637,7 +637,7 @@ int cs2100_enable(FAR const struct cs2100_config_s *config)
   ret = cs2100_refclk(config);
   if (ret < 0)
     {
-      csdbg("ERROR: cs2100_refclk failed: %d\n", ret);
+      cserr("ERROR: cs2100_refclk failed: %d\n", ret);
       return ret;
     }
 
@@ -649,7 +649,7 @@ int cs2100_enable(FAR const struct cs2100_config_s *config)
   ret = cs2100_write_reg(config, CS2100_GBLCFG, CS2100_GBLCFG_FREEZE);
   if (ret < 0)
     {
-      csdbg("ERROR: Failed to set CS2100_GBLCFG: %d\n", ret);
+      cserr("ERROR: Failed to set CS2100_GBLCFG: %d\n", ret);
       return ret;
     }
 
@@ -658,7 +658,7 @@ int cs2100_enable(FAR const struct cs2100_config_s *config)
   ret = cs2100_ratio(config);
   if (ret < 0)
     {
-      csdbg("ERROR: cs2100_ratio failed: %d\n", ret);
+      cserr("ERROR: cs2100_ratio failed: %d\n", ret);
       return ret;
     }
 
@@ -667,7 +667,7 @@ int cs2100_enable(FAR const struct cs2100_config_s *config)
   ret = cs2100_write_reg(config, CS2100_GBLCFG, CS2100_GBLCFG_ENDEVCFG2);
   if (ret < 0)
     {
-      csdbg("ERROR: Failed to set CS2100_GBLCFG: %d\n", ret);
+      cserr("ERROR: Failed to set CS2100_GBLCFG: %d\n", ret);
       return ret;
     }
 
@@ -677,7 +677,7 @@ int cs2100_enable(FAR const struct cs2100_config_s *config)
   ret = cs2100_write_reg(config, CS2100_DEVCTL, regval);
   if (ret < 0)
     {
-      csdbg("ERROR: Failed to set CS2100_DEVCTL: %d\n", ret);
+      cserr("ERROR: Failed to set CS2100_DEVCTL: %d\n", ret);
     }
 
   return ret;
@@ -709,7 +709,7 @@ int cs2100_disable(FAR const struct cs2100_config_s *config)
   ret = cs2100_write_reg(config, CS2100_DEVCTL, regval);
   if (ret < 0)
     {
-      csdbg("ERROR: Failed to set CS2100_DEVCTL: %d\n", ret);
+      cserr("ERROR: Failed to set CS2100_DEVCTL: %d\n", ret);
       return ret;
     }
 
@@ -718,7 +718,7 @@ int cs2100_disable(FAR const struct cs2100_config_s *config)
   ret = cs2100_write_reg(config, CS2100_GBLCFG, 0);
   if (ret < 0)
     {
-      csdbg("ERROR: Failed to set CS2100_GBLCFG: %d\n", ret);
+      cserr("ERROR: Failed to set CS2100_GBLCFG: %d\n", ret);
       return ret;
     }
 
@@ -727,7 +727,7 @@ int cs2100_disable(FAR const struct cs2100_config_s *config)
   ret = cs2100_write_reg(config, CS2100_DEVCFG1, 0);
   if (ret < 0)
     {
-      csdbg("ERROR: Failed to set CS2100_DEVCFG1: %d\n", ret);
+      cserr("ERROR: Failed to set CS2100_DEVCFG1: %d\n", ret);
       return ret;
     }
 
@@ -737,7 +737,7 @@ int cs2100_disable(FAR const struct cs2100_config_s *config)
   ret = cs2100_write_reg(config, CS2100_DEVCTL, regval);
   if (ret < 0)
     {
-      csdbg("ERROR: Failed to set CS2100_DEVCTL: %d\n", ret);
+      cserr("ERROR: Failed to set CS2100_DEVCTL: %d\n", ret);
     }
 
   return ret;
@@ -764,79 +764,79 @@ int cs2100_dump(FAR const struct cs2100_config_s *config)
   uint8_t regval;
   int ret;
 
-  dbg("CS200-CP Registers:\n");
+  err("CS200-CP Registers:\n");
 
   ret = cs2100_read_reg(config, CS2100_DEVID, &regval);
   if (ret < 0)
     {
-      csdbg("ERROR: Failed to read CS2100_DEVID: %d\n", ret);
+      cserr("ERROR: Failed to read CS2100_DEVID: %d\n", ret);
       return ret;
     }
 
-  dbg("     Devid: %02x\n", regval);
+  err("     Devid: %02x\n", regval);
 
   ret = cs2100_read_reg(config, CS2100_DEVCTL, &regval);
   if (ret < 0)
     {
-      csdbg("ERROR: Failed to read CS2100_DEVCTL: %d\n", ret);
+      cserr("ERROR: Failed to read CS2100_DEVCTL: %d\n", ret);
       return ret;
     }
 
-  dbg("    DevCtl: %02x\n", regval);
+  err("    DevCtl: %02x\n", regval);
 
   ret = cs2100_read_reg(config, CS2100_DEVCFG1, &regval);
   if (ret < 0)
     {
-      csdbg("ERROR: Failed to read CS2100_DEVCFG1: %d\n", ret);
+      cserr("ERROR: Failed to read CS2100_DEVCFG1: %d\n", ret);
       return ret;
     }
 
-  dbg("   DevCfg1: %02x\n", regval);
+  err("   DevCfg1: %02x\n", regval);
 
   ret = cs2100_read_reg(config, CS2100_GBLCFG, &regval);
   if (ret < 0)
     {
-      csdbg("ERROR: Failed to read CS2100_GBLCFG: %d\n", ret);
+      cserr("ERROR: Failed to read CS2100_GBLCFG: %d\n", ret);
       return ret;
     }
 
-  dbg("    GblCfg: %02x\n", regval);
+  err("    GblCfg: %02x\n", regval);
 
   ret = cs2100_read_ratio(config, &ratio);
   if (ret < 0)
     {
-      csdbg("ERROR: cs2100_read_ratio failed: %d\n", ret);
+      cserr("ERROR: cs2100_read_ratio failed: %d\n", ret);
       return ret;
     }
 
-  dbg("     Ratio: %04lx\n", (unsigned long)ratio);
+  err("     Ratio: %04lx\n", (unsigned long)ratio);
 
   ret = cs2100_read_reg(config, CS2100_FNCCFG1, &regval);
   if (ret < 0)
     {
-      csdbg("ERROR: Failed to read CS2100_FNCCFG1: %d\n", ret);
+      cserr("ERROR: Failed to read CS2100_FNCCFG1: %d\n", ret);
       return ret;
     }
 
-  dbg("  FuncCfg1: %02x\n", regval);
+  err("  FuncCfg1: %02x\n", regval);
 
   ret = cs2100_read_reg(config, CS2100_FNCCFG2, &regval);
   if (ret < 0)
     {
-      csdbg("ERROR: Failed to read CS2100_FNCCFG2: %d\n", ret);
+      cserr("ERROR: Failed to read CS2100_FNCCFG2: %d\n", ret);
       return ret;
     }
 
-  dbg("  FuncCfg2: %02x\n", regval);
+  err("  FuncCfg2: %02x\n", regval);
 
   ret = cs2100_read_reg(config, CS2100_FNCCFG3, &regval);
   if (ret < 0)
     {
-      csdbg("ERROR: Failed to read CS2100_FNCCFG3: %d\n", ret);
+      cserr("ERROR: Failed to read CS2100_FNCCFG3: %d\n", ret);
       return ret;
     }
 
-  dbg("  FuncCfg3: %02x\n", regval);
+  err("  FuncCfg3: %02x\n", regval);
   return OK;
 }
 

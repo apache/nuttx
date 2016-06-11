@@ -71,12 +71,12 @@
 /* Non-standard debug that may be enabled just for testing CAN */
 
 #ifdef CONFIG_DEBUG_CAN
-#  define candbg    dbg
+#  define canerr    err
 #  define caninfo   info
 #  define canllerr  llerr
 #  define canllinfo llinfo
 #else
-#  define candbg(x...)
+#  define canerr(x...)
 #  define caninfo(x...)
 #  define canllerr(x...)
 #  define canllinfo(x...)
@@ -110,7 +110,7 @@ int board_can_initialize(void)
       can = sam_mcan_initialize(CAN_PORT);
       if (can == NULL)
         {
-          candbg("ERROR:  Failed to get CAN interface\n");
+          canerr("ERROR:  Failed to get CAN interface\n");
           return -ENODEV;
         }
 
@@ -119,7 +119,7 @@ int board_can_initialize(void)
       ret = can_register("/dev/can0", can);
       if (ret < 0)
         {
-          candbg("ERROR: can_register failed: %d\n", ret);
+          canerr("ERROR: can_register failed: %d\n", ret);
           return ret;
         }
 

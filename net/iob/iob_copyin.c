@@ -104,7 +104,7 @@ static int iob_copyin_internal(FAR struct iob_s *iob, FAR const uint8_t *src,
 
   if (offset > iob->io_pktlen)
     {
-      ndbg("ERROR: offset is past the end of data: %u > %u\n",
+      nerr("ERROR: offset is past the end of data: %u > %u\n",
            offset, iob->io_pktlen);
       return -ESPIPE;
     }
@@ -220,7 +220,7 @@ static int iob_copyin_internal(FAR struct iob_s *iob, FAR const uint8_t *src,
 
           if (next == NULL)
             {
-              ndbg("ERROR: Failed to allocate I/O buffer\n");
+              nerr("ERROR: Failed to allocate I/O buffer\n");
               return len;
             }
 

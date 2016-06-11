@@ -388,7 +388,7 @@ static void lpc43_blockerase(struct lpc43_dev_s *priv, off_t sector)
   result = SPIFI_ERASE(priv, &priv->rom, &priv->operands);
   if (result != 0)
     {
-      fdbg("ERROR: SPIFI_ERASE failed: %05x\n", result);
+      ferr("ERROR: SPIFI_ERASE failed: %05x\n", result);
     }
 }
 
@@ -417,7 +417,7 @@ static inline int lpc43_chiperase(struct lpc43_dev_s *priv)
   result = SPIFI_ERASE(priv, &priv->rom, &priv->operands);
   if (result != 0)
     {
-      fdbg("ERROR: SPIFI_ERASE failed: %05x\n", result);
+      ferr("ERROR: SPIFI_ERASE failed: %05x\n", result);
       return -EIO;
     }
 
@@ -463,7 +463,7 @@ static int lpc43_pagewrite(FAR struct lpc43_dev_s *priv, FAR uint8_t *dest,
   result = SPIFI_PROGRAM(priv, &priv->rom, src, &priv->operands);
   if (result != 0)
     {
-      fdbg("ERROR: SPIFI_PROGRAM failed: %05x\n", result);
+      ferr("ERROR: SPIFI_PROGRAM failed: %05x\n", result);
       return -EIO;
     }
 
@@ -475,7 +475,7 @@ static int lpc43_pagewrite(FAR struct lpc43_dev_s *priv, FAR uint8_t *dest,
   result = lpc43_verify(priv, dest, src, nbytes);
   if (result != 0)
     {
-      fdbg("ERROR: lpc43_verify failed: %05x\n", result);
+      ferr("ERROR: lpc43_verify failed: %05x\n", result);
       return -EIO;
     }
 #endif
@@ -523,7 +523,7 @@ static void lpc43_cacheflush(struct lpc43_dev_s *priv)
       ret = lpc43_pagewrite(priv, dest, priv->cache, SPIFI_BLKSIZE);
       if (ret < 0)
         {
-          fdbg("ERROR: lpc43_pagewrite failed: %d\n", ret);
+          ferr("ERROR: lpc43_pagewrite failed: %d\n", ret);
         }
 
       /* The case is no long dirty and the FLASH is no longer erased */
@@ -798,7 +798,7 @@ static ssize_t lpc43_bwrite(FAR struct mtd_dev_s *dev, off_t startblock, size_t 
   ret = lpc43_pagewrite(priv, dest, buffer, nblocks << SPIFI_512SHIFT);
   if (ret < 0)
     {
-      fdbg("ERROR: lpc43_pagewrite failed: %d\n", ret);
+      ferr("ERROR: lpc43_pagewrite failed: %d\n", ret);
       return ret;
     }
 #endif
@@ -1025,7 +1025,7 @@ static inline int lpc43_rominit(FAR struct lpc43_dev_s *priv)
                       S_RCVCLK | S_FULLCLK, SCLK_MHZ);
   if (result != 0)
     {
-      fdbg("ERROR: SPIFI_INIT failed: %05x\n", result);
+      ferr("ERROR: SPIFI_INIT failed: %05x\n", result);
 
       /* Try again */
 
@@ -1033,7 +1033,7 @@ static inline int lpc43_rominit(FAR struct lpc43_dev_s *priv)
                           S_RCVCLK | S_FULLCLK, SCLK_MHZ);
       if (result != 0)
         {
-          fdbg("ERROR: SPIFI_INIT failed: %05x\n", result);
+          ferr("ERROR: SPIFI_INIT failed: %05x\n", result);
           return -ENODEV;
         }
     }
@@ -1201,7 +1201,7 @@ FAR struct mtd_dev_s *lpc43_spifi_initialize(void)
     {
       /* Allocation failed! Discard all of that work we just did and return NULL */
 
-      fdbg("ERROR: Allocation failed\n");
+      ferr("ERROR: Allocation failed\n");
       return NULL;
     }
 #endif

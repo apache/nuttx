@@ -63,18 +63,18 @@
 
 #ifdef CONFIG_CPP_HAVE_VARARGS
 #  ifdef CONFIG_DEBUG_GRAM
-#    define grandbg(format, ...)       dbg(format, ##__VA_ARGS__)
+#    define granerr(format, ...)       err(format, ##__VA_ARGS__)
 #    define graninfo(format, ...)      info(format, ##__VA_ARGS__)
 #  else
-#    define grandbg(format, ...)       mdbg(format, ##__VA_ARGS__)
+#    define granerr(format, ...)       merr(format, ##__VA_ARGS__)
 #    define graninfo(format, ...)      minfo(format, ##__VA_ARGS__)
 #  endif
 #else
 #  ifdef CONFIG_DEBUG_GRAM
-#    define grandbg                    dbg
+#    define granerr                    err
 #    define graninfo                   info
 #  else
-#    define grandbg                    (void)
+#    define granerr                    (void)
 #    define graninfo                   (void)
 #  endif
 #endif

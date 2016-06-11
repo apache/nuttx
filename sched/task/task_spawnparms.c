@@ -102,7 +102,7 @@ static inline int spawn_dup2(FAR struct spawn_dup2_file_action_s *action)
     {
       int errcode = get_errno();
 
-      sdbg("ERROR: dup2 failed: %d\n", errcode);
+      serr("ERROR: dup2 failed: %d\n", errcode);
       return -errcode;
     }
 
@@ -123,7 +123,7 @@ static inline int spawn_open(FAR struct spawn_open_file_action_s *action)
   if (fd < 0)
     {
       ret = get_errno();
-      sdbg("ERROR: open failed: %d\n", ret);
+      serr("ERROR: open failed: %d\n", ret);
     }
 
   /* Does the return file descriptor happen to match the required file
@@ -140,7 +140,7 @@ static inline int spawn_open(FAR struct spawn_open_file_action_s *action)
       if (ret < 0)
         {
           ret = get_errno();
-          sdbg("ERROR: dup2 failed: %d\n", ret);
+          serr("ERROR: dup2 failed: %d\n", ret);
         }
 
       sinfo("Closing fd=%d\n", fd);
@@ -347,7 +347,7 @@ int spawn_proxyattrs(FAR const posix_spawnattr_t *attr,
 
             case SPAWN_FILE_ACTION_NONE:
             default:
-              sdbg("ERROR: Unknown action: %d\n", entry->action);
+              serr("ERROR: Unknown action: %d\n", entry->action);
               ret = EINVAL;
               break;
             }

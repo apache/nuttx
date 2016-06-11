@@ -160,7 +160,7 @@ FAR struct tcp_wrbuffer_s *tcp_wrbuffer_alloc(void)
   wrb->wb_iob = iob_alloc(false);
   if (!wrb->wb_iob)
     {
-      ndbg("ERROR: Failed to allocate I/O buffer\n");
+      nerr("ERROR: Failed to allocate I/O buffer\n");
       tcp_wrbuffer_release(wrb);
       return NULL;
     }

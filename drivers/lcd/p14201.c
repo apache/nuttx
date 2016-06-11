@@ -180,9 +180,9 @@
 /* Debug ******************************************************************************/
 
 #ifdef CONFIG_LCD_RITDEBUG
-#  define ritdbg(format, ...)  info(format, ##__VA_ARGS__)
+#  define riterr(format, ...)  info(format, ##__VA_ARGS__)
 #else
-#  define ritdbg(x...)
+#  define riterr(x...)
 #endif
 
 /**************************************************************************************
@@ -508,7 +508,7 @@ static void rit_sndbytes(FAR struct rit_dev_s *priv, FAR const uint8_t *buffer,
   FAR struct spi_dev_s *spi = priv->spi;
   uint8_t tmp;
 
-  ritdbg("buflen: %d cmd: %s [%02x %02x %02x]\n",
+  riterr("buflen: %d cmd: %s [%02x %02x %02x]\n",
          buflen, cmd ? "YES" : "NO", buffer[0], buffer[1], buffer[2]);
   DEBUGASSERT(spi);
 
@@ -552,7 +552,7 @@ static void rit_sndcmds(FAR struct rit_dev_s *priv, FAR const uint8_t *table)
 
   while ((cmdlen = *table++) != 0)
     {
-      ritdbg("command: %02x cmdlen: %d\n", *table, cmdlen);
+      riterr("command: %02x cmdlen: %d\n", *table, cmdlen);
       rit_sndcmd(priv, table, cmdlen);
       table += cmdlen;
     }
@@ -578,7 +578,7 @@ static inline void rit_clear(FAR struct rit_dev_s *priv)
   FAR uint8_t *ptr = g_framebuffer;
   unsigned int row;
 
-  ritdbg("Clear display\n");
+  riterr("Clear display\n");
 
   /* Initialize the framebuffer */
 
@@ -605,7 +605,7 @@ static inline void rit_clear(FAR struct rit_dev_s *priv)
 {
   unsigned int row;
 
-  ritdbg("Clear display\n");
+  riterr("Clear display\n");
 
   /* Create a black row */
 
@@ -655,7 +655,7 @@ static int rit_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
   int aend;
   int i;
 
-  ritdbg("row: %d col: %d npixels: %d\n", row, col, npixels);
+  riterr("row: %d col: %d npixels: %d\n", row, col, npixels);
   DEBUGASSERT(buffer);
 
   /* Toss out the special case of the empty run now */
@@ -678,7 +678,7 @@ static int rit_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
   start = col >> 1;
   aend  = (col + npixels) >> 1;
   end   = (col + npixels + 1) >> 1;
-  ritdbg("start: %d aend: %d end: %d\n", start, aend, end);
+  riterr("start: %d aend: %d end: %d\n", start, aend, end);
 
   /* Copy the run into the framebuffer, handling nibble alignment.
    *
@@ -814,7 +814,7 @@ static int rit_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
   FAR struct rit_dev_s *priv = (FAR struct rit_dev_s *)&g_oleddev;
   uint8_t cmd[3];
 
-  ritdbg("row: %d col: %d npixels: %d\n", row, col, npixels);
+  riterr("row: %d col: %d npixels: %d\n", row, col, npixels);
   DEBUGASSERT(buffer);
 
   if (npixels > 0)
@@ -885,7 +885,7 @@ static int rit_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
   int aend;
   int i;
 
-  ritdbg("row: %d col: %d npixels: %d\n", row, col, npixels);
+  riterr("row: %d col: %d npixels: %d\n", row, col, npixels);
   DEBUGASSERT(buffer);
 
   /* Can't read from OLED GDDRAM in SPI mode, but we can read from the framebuffer */

@@ -156,7 +156,7 @@ void __start(void)
 
   /* Show reset status */
 
-  dbg("Reset status: %02x:%02x\n",
+  err("Reset status: %02x:%02x\n",
       getreg8(KINETIS_SMC_SRSH), getreg8(KINETIS_SMC_SRSL));
 
   /* Then start NuttX */

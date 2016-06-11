@@ -301,10 +301,10 @@
 /* Debug *********************************************************************/
 
 #ifdef CONFIG_DEBUG_LCD
-#  define lcddbg              dbg
+#  define lcderr              err
 #  define lcdinfo             info
 #else
-#  define lcddbg(x...)
+#  define lcderr(x...)
 #  define lcdinfo(x...)
 #endif
 
@@ -548,7 +548,7 @@ static int sam_sendcmd(FAR struct sam_dev_s *priv, uint16_t cmd)
   ret = sam_lcd_txtransfer(priv, &cmd, sizeof(uint16_t));
   if (ret < 0)
     {
-      lcddbg("ERROR: Failed to send command %02x: %d\n", cmd, ret);
+      lcderr("ERROR: Failed to send command %02x: %d\n", cmd, ret);
     }
 
   /* Make sure that the CMD/DATA GPIO is reset for commands.  I don't understand
@@ -592,7 +592,7 @@ static int sam_lcd_put(FAR struct sam_dev_s *priv, uint16_t cmd,
       ret = sam_lcd_txtransfer(priv, buffer, buflen);
       if (ret < 0)
         {
-          lcddbg("ERROR: Failed to send command %02x data: %d\n", cmd, ret);
+          lcderr("ERROR: Failed to send command %02x data: %d\n", cmd, ret);
        }
     }
 
@@ -874,7 +874,7 @@ static void sam_lcd_dumpone(struct sam_dev_s *priv, int index,
     }
   else
     {
-      fdbg("%s: Not collected\n", msg);
+      ferr("%s: Not collected\n", msg);
     }
 }
 #endif
@@ -994,7 +994,7 @@ static int sam_lcd_dmawait(FAR struct sam_dev_s *priv, uint32_t timeout)
                  1, (uint32_t)priv);
   if (ret < 0)
     {
-      lcddbg("ERROR: wd_start failed: %d\n", errno);
+      lcderr("ERROR: wd_start failed: %d\n", errno);
     }
 
   /* Loop until the event (or the timeout occurs). */
@@ -1160,7 +1160,7 @@ static int sam_putrun(fb_coord_t row, fb_coord_t col,
   ret = sam_setwindow(priv, row, col, npixels, 1);
   if (ret < 0)
     {
-      lcddbg("ERROR: sam_setwindow failed: %d\n",  ret);
+      lcderr("ERROR: sam_setwindow failed: %d\n",  ret);
       return ret;
     }
 
@@ -1201,7 +1201,7 @@ static int sam_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
   ret = sam_setwindow(priv, row, col, npixels, 1);
   if (ret < 0)
     {
-      lcddbg("ERROR: sam_setwindow failed: %d\n",  ret);
+      lcderr("ERROR: sam_setwindow failed: %d\n",  ret);
       return ret;
     }
 
@@ -1484,7 +1484,7 @@ static inline int sam_lcd_initialize(void)
 
   if (id != ILI9488_DEVICE_CODE)
     {
-      lcddbg("ERROR: Unsupported LCD ID: %04x (vs. %04x)\n",
+      lcderr("ERROR: Unsupported LCD ID: %04x (vs. %04x)\n",
              id, ILI9488_DEVICE_CODE);
       return -ENODEV;
     }
@@ -1575,7 +1575,7 @@ int board_lcd_initialize(void)
   priv->dmach = sam_dmachannel(0, DMA_FLAGS);
   if (!priv->dmach)
     {
-      lcddbg("ERROR: Failed to allocate a DMA channel\n");
+      lcderr("ERROR: Failed to allocate a DMA channel\n");
       ret =  -EAGAIN;
       goto errout_with_waitsem;
     }
@@ -1585,7 +1585,7 @@ int board_lcd_initialize(void)
   priv->dmadog = wd_create();
   if (!priv->dmadog)
     {
-      lcddbg("ERROR: Failed to allocate a timer\n");
+      lcderr("ERROR: Failed to allocate a timer\n");
       ret = -EAGAIN;
       goto errout_with_dmach;
     }
@@ -1596,7 +1596,7 @@ int board_lcd_initialize(void)
   ret = sam_lcd_initialize();
   if (ret < 0)
     {
-      lcddbg("ERROR: sam_lcd_initialize failed: %d\n", ret);
+      lcderr("ERROR: sam_lcd_initialize failed: %d\n", ret);
       goto errout_with_dmadog;
     }
 
@@ -1609,7 +1609,7 @@ int board_lcd_initialize(void)
   ret = sam_poweroff(priv);
   if (ret < 0)
     {
-      lcddbg("ERROR: sam_poweroff failed: %d\n", ret);
+      lcderr("ERROR: sam_poweroff failed: %d\n", ret);
       goto errout_with_dmadog;
     }
 
@@ -1705,7 +1705,7 @@ void sam_lcdclear(uint16_t color)
   ret = sam_setwindow(priv, 0, 0, SAM_XRES, SAM_YRES);
   if (ret < 0)
     {
-      lcddbg("ERROR: sam_setwindow failed: %d\n",  ret);
+      lcderr("ERROR: sam_setwindow failed: %d\n",  ret);
       return;
     }
 
@@ -1714,7 +1714,7 @@ void sam_lcdclear(uint16_t color)
       ret = sam_putrun(row, 0, (FAR const uint8_t *)g_runbuffer, SAM_XRES);
       if (ret < 0)
         {
-          lcddbg("ERROR: sam_putrun failed on row %d: %d\n", row, ret);
+          lcderr("ERROR: sam_putrun failed on row %d: %d\n", row, ret);
           return;
         }
     }

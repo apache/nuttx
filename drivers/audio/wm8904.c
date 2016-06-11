@@ -283,16 +283,16 @@ uint16_t wm8904_readreg(FAR struct wm8904_dev_s *priv, uint8_t regaddr)
 #ifdef CONFIG_I2C_RESET
           /* Perhaps the I2C bus is locked up?  Try to shake the bus free */
 
-          auddbg("WARNING: I2C_TRANSFER failed: %d ... Resetting\n", ret);
+          auderr("WARNING: I2C_TRANSFER failed: %d ... Resetting\n", ret);
 
           ret = I2C_RESET(priv->i2c);
           if (ret < 0)
             {
-              auddbg("ERROR: I2C_RESET failed: %d\n", ret);
+              auderr("ERROR: I2C_RESET failed: %d\n", ret);
               break;
             }
 #else
-          auddbg("ERROR: I2C_TRANSFER failed: %d\n", ret);
+          auderr("ERROR: I2C_TRANSFER failed: %d\n", ret);
 #endif
         }
       else
@@ -359,16 +359,16 @@ static void wm8904_writereg(FAR struct wm8904_dev_s *priv, uint8_t regaddr,
 #ifdef CONFIG_I2C_RESET
           /* Perhaps the I2C bus is locked up?  Try to shake the bus free */
 
-          auddbg("WARNING: i2c_write failed: %d ... Resetting\n", ret);
+          auderr("WARNING: i2c_write failed: %d ... Resetting\n", ret);
 
           ret = I2C_RESET(priv->i2c);
           if (ret < 0)
             {
-              auddbg("ERROR: I2C_RESET failed: %d\n", ret);
+              auderr("ERROR: I2C_RESET failed: %d\n", ret);
               break;
             }
 #else
-          auddbg("ERROR: I2C_TRANSFER failed: %d\n", ret);
+          auderr("ERROR: I2C_TRANSFER failed: %d\n", ret);
 #endif
         }
       else
@@ -1207,7 +1207,7 @@ static int wm8904_configure(FAR struct audio_lowerhalf_s *dev,
 #endif  /* CONFIG_AUDIO_EXCLUDE_TONE */
 
         default:
-          auddbg("    Unrecognized feature unit\n");
+          auderr("    Unrecognized feature unit\n");
           ret = -ENOTTY;
           break;
         }
@@ -1225,14 +1225,14 @@ static int wm8904_configure(FAR struct audio_lowerhalf_s *dev,
         ret = -ERANGE;
         if (caps->ac_channels != 1 && caps->ac_channels != 2)
           {
-            auddbg("ERROR: Unsupported number of channels: %d\n",
+            auderr("ERROR: Unsupported number of channels: %d\n",
                    caps->ac_channels);
             break;
           }
 
         if (caps->ac_controls.b[2] != 8 && caps->ac_controls.b[2] != 16)
           {
-            auddbg("ERROR: Unsupported bits per sample: %d\n",
+            auderr("ERROR: Unsupported bits per sample: %d\n",
                    caps->ac_controls.b[2]);
             break;
           }
@@ -1496,7 +1496,7 @@ static int wm8904_sendbuffer(FAR struct wm8904_dev_s *priv)
       ret = I2S_SEND(priv->i2s, apb, wm8904_senddone, priv, timeout);
       if (ret < 0)
         {
-          auddbg("ERROR: I2S_SEND failed: %d\n", ret);
+          auderr("ERROR: I2S_SEND failed: %d\n", ret);
           break;
         }
     }
@@ -1545,7 +1545,7 @@ static int wm8904_start(FAR struct audio_lowerhalf_s *dev)
     {
       /* Error creating message queue! */
 
-      auddbg("ERROR: Couldn't allocate message queue\n");
+      auderr("ERROR: Couldn't allocate message queue\n");
       return -ENOMEM;
     }
 
@@ -1569,7 +1569,7 @@ static int wm8904_start(FAR struct audio_lowerhalf_s *dev)
                        (pthread_addr_t)priv);
   if (ret != OK)
     {
-      auddbg("ERROR: pthread_create failed: %d\n", ret);
+      auderr("ERROR: pthread_create failed: %d\n", ret);
     }
   else
     {
@@ -1726,7 +1726,7 @@ static int wm8904_enqueuebuffer(FAR struct audio_lowerhalf_s *dev,
           int errcode = errno;
           DEBUGASSERT(errcode > 0);
 
-          auddbg("ERROR: mq_send failed: %d\n", errcode);
+          auderr("ERROR: mq_send failed: %d\n", errcode);
           UNUSED(errcode);
         }
     }
@@ -2042,7 +2042,7 @@ static void *wm8904_workerthread(pthread_addr_t pvarg)
 
       if (msglen < sizeof(struct audio_msg_s))
         {
-          auddbg("ERROR: Message too small: %d\n", msglen);
+          auderr("ERROR: Message too small: %d\n", msglen);
           continue;
         }
 
@@ -2085,7 +2085,7 @@ static void *wm8904_workerthread(pthread_addr_t pvarg)
             break;
 
           default:
-            auddbg("ERROR: Ignoring message ID %d\n", msg.msgId);
+            auderr("ERROR: Ignoring message ID %d\n", msg.msgId);
             break;
         }
     }
@@ -2506,7 +2506,7 @@ FAR struct audio_lowerhalf_s *
       regval = wm8904_readreg(priv, WM8904_ID);
       if (regval != WM8904_SW_RST_DEV_ID1)
         {
-          auddbg("ERROR: WM8904 not found: ID=%04x\n", regval);
+          auderr("ERROR: WM8904 not found: ID=%04x\n", regval);
           goto errout_with_dev;
         }
 

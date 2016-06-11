@@ -103,7 +103,7 @@ int elf_loaddtors(FAR struct elf_loadinfo_s *loadinfo)
   ret = elf_allocbuffer(loadinfo);
   if (ret < 0)
     {
-      bdbg("elf_allocbuffer failed: %d\n", ret);
+      berr("elf_allocbuffer failed: %d\n", ret);
       return -ENOMEM;
     }
 
@@ -166,7 +166,7 @@ int elf_loaddtors(FAR struct elf_loadinfo_s *loadinfo)
           loadinfo->ctoralloc = (binfmt_dtor_t *)kumm_malloc(dtorsize);
           if (!loadinfo->ctoralloc)
             {
-              bdbg("Failed to allocate memory for .dtors\n");
+              berr("Failed to allocate memory for .dtors\n");
               return -ENOMEM;
             }
 
@@ -178,7 +178,7 @@ int elf_loaddtors(FAR struct elf_loadinfo_s *loadinfo)
                          shdr->sh_offset);
           if (ret < 0)
             {
-              bdbg("Failed to allocate .dtors: %d\n", ret);
+              berr("Failed to allocate .dtors: %d\n", ret);
               return ret;
             }
 

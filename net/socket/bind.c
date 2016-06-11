@@ -196,14 +196,14 @@ int psock_bind(FAR struct socket *psock, const struct sockaddr *addr,
 #endif
 
     default:
-      ndbg("ERROR: Unrecognized address family: %d\n", addr->sa_family);
+      nerr("ERROR: Unrecognized address family: %d\n", addr->sa_family);
       errcode = EAFNOSUPPORT;
       goto errout;
     }
 
   if (addrlen < minlen)
     {
-      ndbg("ERROR: Invalid address length: %d < %d\n", addrlen, minlen);
+      nerr("ERROR: Invalid address length: %d < %d\n", addrlen, minlen);
       errcode = EBADF;
       goto errout;
     }

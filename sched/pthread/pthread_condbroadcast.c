@@ -71,7 +71,7 @@ int pthread_cond_broadcast(FAR pthread_cond_t *cond)
   int ret = OK;
   int sval;
 
-  sdbg("cond=0x%p\n", cond);
+  serr("cond=0x%p\n", cond);
 
   if (!cond)
     {
@@ -118,7 +118,7 @@ int pthread_cond_broadcast(FAR pthread_cond_t *cond)
       sched_unlock();
     }
 
-  sdbg("Returning %d\n", ret);
+  serr("Returning %d\n", ret);
   return ret;
 }
 

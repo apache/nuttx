@@ -79,7 +79,7 @@ int mod_verifyheader(FAR const Elf32_Ehdr *ehdr)
 {
   if (!ehdr)
     {
-      sdbg("NULL ELF header!");
+      serr("NULL ELF header!");
       return -ENOEXEC;
     }
 
@@ -96,7 +96,7 @@ int mod_verifyheader(FAR const Elf32_Ehdr *ehdr)
 
   if (ehdr->e_type != ET_REL)
     {
-      sdbg("Not a relocatable file: e_type=%d\n", ehdr->e_type);
+      serr("Not a relocatable file: e_type=%d\n", ehdr->e_type);
       return -EINVAL;
     }
 
@@ -104,7 +104,7 @@ int mod_verifyheader(FAR const Elf32_Ehdr *ehdr)
 
   if (up_checkarch(ehdr))
     {
-      sdbg("Not a supported architecture\n");
+      serr("Not a supported architecture\n");
       return -ENOEXEC;
     }
 

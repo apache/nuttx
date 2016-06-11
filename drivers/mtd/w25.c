@@ -1256,7 +1256,7 @@ FAR struct mtd_dev_s *w25_initialize(FAR struct spi_dev_s *spi)
         {
           /* Unrecognized! Discard all of that work we just did and return NULL */
 
-          fdbg("Unrecognized\n");
+          ferr("Unrecognized\n");
           kmm_free(priv);
           priv = NULL;
         }
@@ -1276,7 +1276,7 @@ FAR struct mtd_dev_s *w25_initialize(FAR struct spi_dev_s *spi)
             {
               /* Allocation failed! Discard all of that work we just did and return NULL */
 
-              fdbg("Allocation failed\n");
+              ferr("Allocation failed\n");
               kmm_free(priv);
               priv = NULL;
             }

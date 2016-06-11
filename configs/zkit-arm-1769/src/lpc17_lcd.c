@@ -76,7 +76,7 @@
 #undef LCD_VERBOSE /* Define to enable verbose debug */
 
 #ifdef LCD_DEBUG
-#  define leddbg  llerr
+#  define lederr  llerr
 #  ifdef LCD_VERBOSE
 #    define ledinfo llerr
 #  else
@@ -84,7 +84,7 @@
 #  endif
 #else
 #  undef LCD_VERBOSE
-#  define leddbg(x...)
+#  define lederr(x...)
 #  define ledinfo(x...)
 #endif
 

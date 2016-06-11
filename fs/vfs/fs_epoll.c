@@ -190,12 +190,12 @@ int epoll_wait(int epfd, FAR struct epoll_event *evs, int maxevents,
     {
       if (rc < 0)
         {
-          fdbg("%08x poll fail: %d for %d, %d msecs\n",
+          ferr("%08x poll fail: %d for %d, %d msecs\n",
                epfd, rc, eph->occupied, timeout);
 
           for (i = 0; i < eph->occupied; i++)
             {
-              fdbg("%02d: fd=%d\n", i, eph->evs[i].data.fd);
+              ferr("%02d: fd=%d\n", i, eph->evs[i].data.fd);
             }
         }
 

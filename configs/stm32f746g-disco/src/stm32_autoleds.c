@@ -58,10 +58,10 @@
  */
 
 #ifdef CONFIG_DEBUG_LEDS
-#  define leddbg  llerr
+#  define lederr  llerr
 #  define ledinfo llinfo
 #else
-#  define leddbg(x...)
+#  define lederr(x...)
 #  define ledinfo(x...)
 #endif
 

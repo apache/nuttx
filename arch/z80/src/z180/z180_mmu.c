@@ -258,7 +258,7 @@ int up_addrenv_create(size_t textsize, size_t datasize, size_t heapsize,
     {
       /* No address environment... but I suppose that is not an error */
 
-      sdbg("ERROR: npages is zero\n");
+      serr("ERROR: npages is zero\n");
       return OK;
     }
 
@@ -273,7 +273,7 @@ int up_addrenv_create(size_t textsize, size_t datasize, size_t heapsize,
   cbr = z180_mmu_alloccbr();
   if (!cbr)
     {
-      sdbg("ERROR: No free CBR structures\n");
+      serr("ERROR: No free CBR structures\n");
       ret = -ENOMEM;
       goto errout_with_irq;
     }
@@ -287,7 +287,7 @@ int up_addrenv_create(size_t textsize, size_t datasize, size_t heapsize,
 #endif
   if (!alloc)
     {
-      sdbg("ERROR: Failed to allocate %d pages\n", npages);
+      serr("ERROR: Failed to allocate %d pages\n", npages);
       ret = -ENOMEM;
       goto errout_with_cbr;
     }

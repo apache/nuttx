@@ -622,7 +622,7 @@ FAR struct mtd_dev_s *at24c_initialize(FAR struct i2c_master_s *dev)
   priv = (FAR struct at24c_dev_s *)kmm_zalloc(sizeof(struct at24c_dev_s));
   if (priv == NULL)
     {
-      fdbg("ERROR: Failed to allocate device structure\n");
+      ferr("ERROR: Failed to allocate device structure\n");
       return NULL;
     }
 

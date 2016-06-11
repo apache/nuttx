@@ -99,7 +99,7 @@ int board_pwm_setup(void)
       pwm = kinetis_pwminitialize(0);
       if (!pwm)
         {
-          adbg("Failed to get the KL20 PWM lower half\n");
+          aerr("Failed to get the KL20 PWM lower half\n");
           return -ENODEV;
         }
 
@@ -108,7 +108,7 @@ int board_pwm_setup(void)
       ret = pwm_register("/dev/pwm0", pwm);
       if (ret < 0)
         {
-          adbg("pwm_register failed: %d\n", ret);
+          aerr("pwm_register failed: %d\n", ret);
           return ret;
         }
 
@@ -119,7 +119,7 @@ int board_pwm_setup(void)
       pwm = kinetis_pwminitialize(1);
       if (!pwm)
         {
-          adbg("Failed to get the KL20 PWM lower half\n");
+          aerr("Failed to get the KL20 PWM lower half\n");
           return -ENODEV;
         }
 
@@ -128,7 +128,7 @@ int board_pwm_setup(void)
       ret = pwm_register("/dev/pwm1", pwm);
       if (ret < 0)
         {
-          adbg("pwm_register failed: %d\n", ret);
+          aerr("pwm_register failed: %d\n", ret);
           return ret;
         }
 
@@ -139,7 +139,7 @@ int board_pwm_setup(void)
       pwm = kinetis_pwminitialize(2);
       if (!pwm)
         {
-          adbg("Failed to get the KL20 PWM lower half\n");
+          aerr("Failed to get the KL20 PWM lower half\n");
           return -ENODEV;
         }
 
@@ -148,7 +148,7 @@ int board_pwm_setup(void)
       ret = pwm_register("/dev/pwm2", pwm);
       if (ret < 0)
         {
-          adbg("pwm_register failed: %d\n", ret);
+          aerr("pwm_register failed: %d\n", ret);
           return ret;
         }
 

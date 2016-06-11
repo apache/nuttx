@@ -110,10 +110,10 @@
 /* Debug ******************************************************************************/
 
 #ifdef CONFIG_DEBUG_LCD
-#  define lcddbg         dbg
+#  define lcderr         err
 #  define lcdinfo        info
 #else
-#  define lcddbg(x...)
+#  define lcderr(x...)
 #  define lcdinfo(x...)
 #endif
 
@@ -373,7 +373,7 @@ int board_lcd_initialize(void)
       g_ssd1289drvr = ssd1289_lcdinitialize(&g_ssd1289);
       if (!g_ssd1289drvr)
         {
-          lcddbg("ERROR: ssd1289_lcdinitialize failed\n");
+          lcderr("ERROR: ssd1289_lcdinitialize failed\n");
           return -ENODEV;
         }
     }

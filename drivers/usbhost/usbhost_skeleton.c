@@ -588,14 +588,14 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
   ret = DRVR_EPALLOC(hport->drvr, &boutdesc, &priv->epout);
   if (ret < 0)
     {
-      udbg("ERROR: Failed to allocate Bulk OUT endpoint\n");
+      uerr("ERROR: Failed to allocate Bulk OUT endpoint\n");
       return ret;
     }
 
   ret = DRVR_EPALLOC(hport->drvr, &bindesc, &priv->epin);
   if (ret < 0)
     {
-      udbg("ERROR: Failed to allocate Bulk IN endpoint\n");
+      uerr("ERROR: Failed to allocate Bulk IN endpoint\n");
       (void)DRVR_EPFREE(hport->drvr, priv->epout);
       return ret;
     }
@@ -955,7 +955,7 @@ static int usbhost_connect(FAR struct usbhost_class_s *usbclass,
   ret = usbhost_cfgdesc(priv, configdesc, desclen);
   if (ret < 0)
     {
-      udbg("usbhost_cfgdesc() failed: %d\n", ret);
+      uerr("usbhost_cfgdesc() failed: %d\n", ret);
     }
   else
     {
@@ -964,7 +964,7 @@ static int usbhost_connect(FAR struct usbhost_class_s *usbclass,
       ret = usbhost_devinit(priv);
       if (ret < 0)
         {
-          udbg("usbhost_devinit() failed: %d\n", ret);
+          uerr("usbhost_devinit() failed: %d\n", ret);
         }
     }
 

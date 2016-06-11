@@ -225,7 +225,7 @@ static int icmpv6_send_message(FAR struct net_driver_s *dev, bool advertise)
   state.snd_cb = icmpv6_callback_alloc(dev);
   if (!state.snd_cb)
     {
-      ndbg("ERROR: Failed to allocate a cllback\n");
+      nerr("ERROR: Failed to allocate a cllback\n");
       ret = -ENOMEM;
       goto errout_with_semaphore;
     }
@@ -341,7 +341,7 @@ int icmpv6_autoconfig(FAR struct net_driver_s *dev)
 #ifndef CONFIG_NET_ETHERNET
   /* Only Ethernet supported for now */
 
-  ndbg("ERROR: Only Ethernet is supported\n");
+  nerr("ERROR: Only Ethernet is supported\n");
   return -ENOSYS;
 
 #else /* CONFIG_NET_ETHERNET */
@@ -361,7 +361,7 @@ int icmpv6_autoconfig(FAR struct net_driver_s *dev)
 
   if (dev->d_lltype != NET_LL_ETHERNET)
     {
-      ndbg("ERROR: Only Ethernet is supported\n");
+      nerr("ERROR: Only Ethernet is supported\n");
       return -ENOSYS;
     }
 #endif
@@ -439,7 +439,7 @@ int icmpv6_autoconfig(FAR struct net_driver_s *dev)
        * have not back-up plan in place.  Just bail.
        */
 
-      ndbg("ERROR: IP conflict\n");
+      nerr("ERROR: IP conflict\n");
       return -EEXIST;
     }
 #endif
@@ -477,7 +477,7 @@ int icmpv6_autoconfig(FAR struct net_driver_s *dev)
       ret = icmpv6_send_message(dev, false);
       if (ret < 0)
         {
-          ndbg("ERROR: Failed send router solicitation: %d\n", ret);
+          nerr("ERROR: Failed send router solicitation: %d\n", ret);
           break;
         }
 
@@ -502,7 +502,7 @@ int icmpv6_autoconfig(FAR struct net_driver_s *dev)
 
   if (ret < 0)
     {
-      ndbg("ERROR: Failed to get the router advertisement: %d (retries=%d)\n",
+      nerr("ERROR: Failed to get the router advertisement: %d (retries=%d)\n",
            ret, retries);
 
       /* Claim the link local address as ours by sending the ICMPv6 Neighbor
@@ -512,7 +512,7 @@ int icmpv6_autoconfig(FAR struct net_driver_s *dev)
       ret = icmpv6_send_message(dev, true);
       if (ret < 0)
         {
-          ndbg("ERROR: Failed send neighbor advertisement: %d\n", ret);
+          nerr("ERROR: Failed send neighbor advertisement: %d\n", ret);
           netdev_ifdown(dev);
         }
 

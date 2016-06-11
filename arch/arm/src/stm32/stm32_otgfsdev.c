@@ -3801,7 +3801,7 @@ static int stm32_epout_configure(FAR struct stm32_ep_s *privep, uint8_t eptype,
             break;
 
           default:
-            udbg("Unsupported maxpacket: %d\n", maxpacket);
+            uerr("Unsupported maxpacket: %d\n", maxpacket);
             return -EINVAL;
         }
     }
@@ -3896,7 +3896,7 @@ static int stm32_epin_configure(FAR struct stm32_ep_s *privep, uint8_t eptype,
             break;
 
           default:
-            udbg("Unsupported maxpacket: %d\n", maxpacket);
+            uerr("Unsupported maxpacket: %d\n", maxpacket);
             return -EINVAL;
         }
     }
@@ -5447,7 +5447,7 @@ void up_usbinitialize(void)
   ret = irq_attach(STM32_IRQ_OTGFS, stm32_usbinterrupt);
   if (ret < 0)
     {
-      udbg("irq_attach failed\n", ret);
+      uerr("irq_attach failed\n", ret);
       goto errout;
     }
 

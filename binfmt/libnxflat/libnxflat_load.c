@@ -150,7 +150,7 @@ int nxflat_load(struct nxflat_loadinfo_s *loadinfo)
                                     MAP_SHARED | MAP_FILE, loadinfo->filfd, 0);
   if (loadinfo->ispace == (uint32_t)MAP_FAILED)
     {
-      bdbg("Failed to map NXFLAT ISpace: %d\n", errno);
+      berr("Failed to map NXFLAT ISpace: %d\n", errno);
       return -errno;
     }
 
@@ -163,7 +163,7 @@ int nxflat_load(struct nxflat_loadinfo_s *loadinfo)
   ret = nxflat_addrenv_alloc(loadinfo, loadinfo->dsize);
   if (ret < 0)
     {
-      bdbg("ERROR: nxflat_addrenv_alloc() failed: %d\n", ret);
+      berr("ERROR: nxflat_addrenv_alloc() failed: %d\n", ret);
       return ret;
     }
 
@@ -180,7 +180,7 @@ int nxflat_load(struct nxflat_loadinfo_s *loadinfo)
   ret = nxflat_addrenv_select(loadinfo);
   if (ret < 0)
     {
-      bdbg("ERROR: nxflat_addrenv_select() failed: %d\n", ret);
+      berr("ERROR: nxflat_addrenv_select() failed: %d\n", ret);
       return ret;
     }
 #endif
@@ -193,7 +193,7 @@ int nxflat_load(struct nxflat_loadinfo_s *loadinfo)
                     dreadsize, doffset);
   if (ret < 0)
     {
-      bdbg("Failed to read .data section: %d\n", ret);
+      berr("Failed to read .data section: %d\n", ret);
       goto errout;
     }
 
@@ -206,7 +206,7 @@ int nxflat_load(struct nxflat_loadinfo_s *loadinfo)
   ret = nxflat_addrenv_restore(loadinfo);
   if (ret < 0)
     {
-      bdbg("ERROR: nxflat_addrenv_restore() failed: %d\n", ret);
+      berr("ERROR: nxflat_addrenv_restore() failed: %d\n", ret);
       return ret;
     }
 #endif

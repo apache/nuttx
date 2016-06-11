@@ -88,7 +88,7 @@ int rmmod(FAR const char *modulename)
   modp = mod_registry_find(modulename);
   if (modp == NULL)
     {
-      sdbg("ERROR: Failed to find module %s: %d\n", modulename, ret);
+      serr("ERROR: Failed to find module %s: %d\n", modulename, ret);
       ret = -ENOENT;
       goto errout_with_lock;
     }
@@ -105,7 +105,7 @@ int rmmod(FAR const char *modulename)
 
       if (ret < 0)
         {
-          sdbg("ERROR: Failed to uninitialize the module: %d\n", ret);
+          serr("ERROR: Failed to uninitialize the module: %d\n", ret);
           goto errout_with_lock;
         }
 
@@ -140,7 +140,7 @@ int rmmod(FAR const char *modulename)
   ret = mod_registry_del(modp);
   if (ret < 0)
     {
-      sdbg("ERROR: Failed to remove the module from the registry: %d\n", ret);
+      serr("ERROR: Failed to remove the module from the registry: %d\n", ret);
       goto errout_with_lock;
     }
 

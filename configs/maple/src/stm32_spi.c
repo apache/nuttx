@@ -67,14 +67,14 @@
 #endif
 
 #ifdef CONFIG_DEBUG_SPI
-#  define spidbg llerr
+#  define spierr llerr
 #  ifdef CONFIG_DEBUG_INFO
 #    define spiinfo llerr
 #  else
 #    define spiinfo(x...)
 #  endif
 #else
-#  define spidbg(x...)
+#  define spierr(x...)
 #  define spiinfo(x...)
 #endif
 
@@ -134,7 +134,7 @@ void weak_function stm32_spidev_initialize(void)
 void stm32_spi1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
                       bool selected)
 {
-  spidbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  spierr("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 
 #  if defined(CONFIG_LCD_SHARP_MEMLCD)
   if (devid == SPIDEV_DISPLAY)

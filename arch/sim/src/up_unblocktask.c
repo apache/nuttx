@@ -77,7 +77,7 @@ void up_unblock_task(FAR struct tcb_s *tcb)
   ASSERT((tcb->task_state >= FIRST_BLOCKED_STATE) &&
          (tcb->task_state <= LAST_BLOCKED_STATE));
 
-  sdbg("Unblocking TCB=%p\n", tcb);
+  serr("Unblocking TCB=%p\n", tcb);
 
   /* Remove the task from the blocked task list */
 
@@ -107,7 +107,7 @@ void up_unblock_task(FAR struct tcb_s *tcb)
            */
 
           rtcb = this_task();
-          sdbg("New Active Task TCB=%p\n", rtcb);
+          serr("New Active Task TCB=%p\n", rtcb);
 
           /* The way that we handle signals in the simulation is kind of
            * a kludge.  This would be unsafe in a truly multi-threaded, interrupt
@@ -116,7 +116,7 @@ void up_unblock_task(FAR struct tcb_s *tcb)
 
           if (rtcb->xcp.sigdeliver)
             {
-              sdbg("Delivering signals TCB=%p\n", rtcb);
+              serr("Delivering signals TCB=%p\n", rtcb);
               ((sig_deliver_t)rtcb->xcp.sigdeliver)(rtcb);
               rtcb->xcp.sigdeliver = NULL;
             }

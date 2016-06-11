@@ -74,10 +74,10 @@
 /* Debug ********************************************************************/
 
 #ifdef CONFIG_DEBUG_LCD
-#  define lcddbg(format, ...)  dbg(format, ##__VA_ARGS__)
+#  define lcderr(format, ...)  err(format, ##__VA_ARGS__)
 #  define lcdinfo(format, ...) info(format, ##__VA_ARGS__)
 #else
-#  define lcddbg(x...)
+#  define lcderr(x...)
 #  define lcdinfo(x...)
 #endif
 
@@ -114,7 +114,7 @@ FAR struct lcd_dev_s *board_graphics_setup(unsigned int devno)
   spi = stm32_spibus_initialize(1);
   if (spi == NULL)
     {
-      lcddbg("Failed to initialize SPI port 1\n");
+      lcderr("Failed to initialize SPI port 1\n");
     }
   else
     {
@@ -123,7 +123,7 @@ FAR struct lcd_dev_s *board_graphics_setup(unsigned int devno)
       dev = ssd1351_initialize(spi, devno);
       if (dev == NULL)
         {
-          lcddbg("Failed to bind SPI port 1 to OLED %d: %d\n", devno);
+          lcderr("Failed to bind SPI port 1 to OLED %d: %d\n", devno);
         }
      else
         {

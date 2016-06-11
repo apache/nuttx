@@ -240,10 +240,10 @@
 /* Debug ******************************************************************************/
 
 #ifdef CONFIG_DEBUG_LCD
-#  define lcddbg              dbg
+#  define lcderr              err
 #  define lcdinfo             info
 #else
-#  define lcddbg(x...)
+#  define lcderr(x...)
 #  define lcdinfo(x...)
 #endif
 
@@ -820,7 +820,7 @@ static inline int mio283qt2_hwinitialize(FAR struct mio283qt2_dev_s *priv)
 
 #ifndef CONFIG_LCD_NOGETRUN
   id = mio283qt2_readreg(lcd, 0x00);
-  lcddbg("LCD ID: %04x\n", id);
+  lcderr("LCD ID: %04x\n", id);
 
   /* Check if the ID is for the MIO283QT2 */
 
@@ -926,7 +926,7 @@ static inline int mio283qt2_hwinitialize(FAR struct mio283qt2_dev_s *priv)
 #ifndef CONFIG_LCD_NOGETRUN
   else
     {
-      lcddbg("Unsupported LCD type\n");
+      lcderr("Unsupported LCD type\n");
       ret = -ENODEV;
     }
 #endif

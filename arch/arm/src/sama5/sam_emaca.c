@@ -2996,7 +2996,7 @@ static int sam_phyinit(struct sam_emac_s *priv)
   mck = BOARD_MCK_FREQUENCY;
   if (mck > (160*1000*1000))
     {
-      ndbg("ERROR: Cannot realize PHY clock\n");
+      nerr("ERROR: Cannot realize PHY clock\n");
       return -EINVAL;
     }
   else if (mck > (80*1000*1000))
@@ -3501,7 +3501,7 @@ int sam_emac_initialize(void)
   priv->txpoll = wd_create();
   if (!priv->txpoll)
     {
-      ndbg("ERROR: Failed to create periodic poll timer\n");
+      nerr("ERROR: Failed to create periodic poll timer\n");
       ret = -EAGAIN;
       goto errout;
     }
@@ -3509,7 +3509,7 @@ int sam_emac_initialize(void)
   priv->txtimeout = wd_create();         /* Create TX timeout timer */
   if (!priv->txtimeout)
     {
-      ndbg("ERROR: Failed to create periodic poll timer\n");
+      nerr("ERROR: Failed to create periodic poll timer\n");
       ret = -EAGAIN;
       goto errout_with_txpoll;
     }
@@ -3523,7 +3523,7 @@ int sam_emac_initialize(void)
   ret = sam_buffer_initialize(priv);
   if (ret < 0)
     {
-      ndbg("ERROR: sam_buffer_initialize failed: %d\n", ret);
+      nerr("ERROR: sam_buffer_initialize failed: %d\n", ret);
       goto errout_with_txtimeout;
     }
 
@@ -3534,7 +3534,7 @@ int sam_emac_initialize(void)
   ret = irq_attach(SAM_IRQ_EMAC, sam_emac_interrupt);
   if (ret < 0)
     {
-      ndbg("ERROR: Failed to attach the handler to the IRQ%d\n", SAM_IRQ_EMAC);
+      nerr("ERROR: Failed to attach the handler to the IRQ%d\n", SAM_IRQ_EMAC);
       goto errout_with_buffers;
     }
 
@@ -3547,7 +3547,7 @@ int sam_emac_initialize(void)
   ret = sam_ifdown(&priv->dev);
   if (ret < 0)
     {
-      ndbg("ERROR: Failed to put the interface in the down state: %d\n", ret);
+      nerr("ERROR: Failed to put the interface in the down state: %d\n", ret);
       goto errout_with_buffers;
     }
 
@@ -3559,7 +3559,7 @@ int sam_emac_initialize(void)
       return ret;
     }
 
-  ndbg("ERROR: netdev_register() failed: %d\n", ret);
+  nerr("ERROR: netdev_register() failed: %d\n", ret);
 
 errout_with_buffers:
   sam_buffer_free(priv);

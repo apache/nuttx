@@ -414,16 +414,16 @@
 #endif
 
 #ifdef CONFIG_DEBUG_I2S
-#  define i2sdbg         dbg
+#  define i2serr         err
 #  define i2sllerr       llerr
 #  ifdef CONFIG_DEBUG_INFO
-#    define i2sinfo      dbg
+#    define i2sinfo      err
 #    define i2sllinfo    llerr
 #  else
 #    define i2sinfo(x...)
 #  endif
 #else
-#  define i2sdbg(x...)
+#  define i2serr(x...)
 #  define i2sllerr(x...)
 #  define i2sinfo(x...)
 #  define i2sllinfo(x...)
@@ -2077,7 +2077,7 @@ static int ssc_checkwidth(struct sam_ssc_s *priv, int bits)
       break;
 
     default:
-      i2sdbg("ERROR: Unsupported or invalid data width: %d\n", bits);
+      i2serr("ERROR: Unsupported or invalid data width: %d\n", bits);
       return (bits < 2 || bits > 32) ? -EINVAL : -ENOSYS;
     }
 
@@ -2155,7 +2155,7 @@ static uint32_t ssc_rxdatawidth(struct i2s_dev_s *dev, int bits)
   ret = ssc_checkwidth(priv, bits);
   if (ret < 0)
     {
-      i2sdbg("ERROR: ssc_checkwidth failed: %d\n", ret);
+      i2serr("ERROR: ssc_checkwidth failed: %d\n", ret);
       return 0;
     }
 
@@ -2164,7 +2164,7 @@ static uint32_t ssc_rxdatawidth(struct i2s_dev_s *dev, int bits)
   ret = ssc_dma_flags(priv, &dmaflags);
   if (ret < 0)
     {
-      i2sdbg("ERROR: ssc_dma_flags failed: %d\n", ret);
+      i2serr("ERROR: ssc_dma_flags failed: %d\n", ret);
       return 0;
     }
 
@@ -2253,7 +2253,7 @@ static int ssc_receive(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
 
   if (!priv->rxenab)
     {
-      i2sdbg("ERROR: SSC%d has no receiver\n", priv->sscno);
+      i2serr("ERROR: SSC%d has no receiver\n", priv->sscno);
       ret = -EAGAIN;
       goto errout_with_exclsem;
     }
@@ -2292,7 +2292,7 @@ errout_with_exclsem:
   return ret;
 
 #else
-  i2sdbg("ERROR: SSC%d has no receiver\n", priv->sscno);
+  i2serr("ERROR: SSC%d has no receiver\n", priv->sscno);
   UNUSED(priv);
   return -ENOSYS;
 #endif
@@ -2366,7 +2366,7 @@ static uint32_t ssc_txdatawidth(struct i2s_dev_s *dev, int bits)
   ret = ssc_checkwidth(priv, bits);
   if (ret < 0)
     {
-      i2sdbg("ERROR: ssc_checkwidth failed: %d\n", ret);
+      i2serr("ERROR: ssc_checkwidth failed: %d\n", ret);
       return 0;
     }
 
@@ -2375,7 +2375,7 @@ static uint32_t ssc_txdatawidth(struct i2s_dev_s *dev, int bits)
   ret = ssc_dma_flags(priv, &dmaflags);
   if (ret < 0)
     {
-      i2sdbg("ERROR: ssc_dma_flags failed: %d\n", ret);
+      i2serr("ERROR: ssc_dma_flags failed: %d\n", ret);
       return 0;
     }
 
@@ -2470,7 +2470,7 @@ static int ssc_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
 
   if (!priv->txenab)
     {
-      i2sdbg("ERROR: SSC%d has no transmitter\n", priv->sscno);
+      i2serr("ERROR: SSC%d has no transmitter\n", priv->sscno);
       ret = -EAGAIN;
       goto errout_with_exclsem;
     }
@@ -2509,7 +2509,7 @@ errout_with_exclsem:
   return ret;
 
 #else
-  i2sdbg("ERROR: SSC%d has no transmitter\n", priv->sscno);
+  i2serr("ERROR: SSC%d has no transmitter\n", priv->sscno);
   UNUSED(priv);
   return -ENOSYS;
 #endif
@@ -2563,7 +2563,7 @@ static int ssc_rx_configure(struct sam_ssc_s *priv)
 
     case SSC_CLKSRC_NONE: /* No clock */
     default:
-      i2sdbg("ERROR:  No receiver clock\n");
+      i2serr("ERROR:  No receiver clock\n");
       return -EINVAL;
     }
 
@@ -2584,7 +2584,7 @@ static int ssc_rx_configure(struct sam_ssc_s *priv)
       break;
 
     default:
-      i2sdbg("ERROR: Invalid clock output selection\n");
+      i2serr("ERROR: Invalid clock output selection\n");
       return -EINVAL;
     }
 
@@ -2688,7 +2688,7 @@ static int ssc_tx_configure(struct sam_ssc_s *priv)
 
     case SSC_CLKSRC_NONE: /* No clock */
     default:
-      i2sdbg("ERROR:  No transmitter clock\n");
+      i2serr("ERROR:  No transmitter clock\n");
       return -EINVAL;
     }
 
@@ -2709,7 +2709,7 @@ static int ssc_tx_configure(struct sam_ssc_s *priv)
       break;
 
     default:
-      i2sdbg("ERROR: Invalid clock output selection\n");
+      i2serr("ERROR: Invalid clock output selection\n");
       return -EINVAL;
     }
 
@@ -2968,7 +2968,7 @@ static int ssc_dma_flags(struct sam_ssc_s *priv, uint32_t *dmaflags)
       break;
 
     default:
-      i2sdbg("ERROR: Unsupported data width: %d\n", priv->datalen);
+      i2serr("ERROR: Unsupported data width: %d\n", priv->datalen);
       return -ENOSYS;
     }
 
@@ -3001,7 +3001,7 @@ static int ssc_dma_allocate(struct sam_ssc_s *priv)
   ret = ssc_dma_flags(priv, &dmaflags);
   if (ret < 0)
     {
-      i2sdbg("ERROR: ssc_dma_flags failed: %d\n", ret);
+      i2serr("ERROR: ssc_dma_flags failed: %d\n", ret);
       return ret;
     }
 
@@ -3018,7 +3018,7 @@ static int ssc_dma_allocate(struct sam_ssc_s *priv)
       priv->rx.dma = sam_dmachannel(priv->sscno, dmaflags);
       if (!priv->rx.dma)
         {
-          i2sdbg("ERROR: Failed to allocate the RX DMA channel\n");
+          i2serr("ERROR: Failed to allocate the RX DMA channel\n");
           goto errout;
         }
 
@@ -3027,7 +3027,7 @@ static int ssc_dma_allocate(struct sam_ssc_s *priv)
       priv->rx.dog = wd_create();
       if (!priv->rx.dog)
         {
-          i2sdbg("ERROR: Failed to create the RX DMA watchdog\n");
+          i2serr("ERROR: Failed to create the RX DMA watchdog\n");
           goto errout;
         }
     }
@@ -3041,7 +3041,7 @@ static int ssc_dma_allocate(struct sam_ssc_s *priv)
       priv->tx.dma = sam_dmachannel(priv->sscno, dmaflags);
       if (!priv->tx.dma)
         {
-          i2sdbg("ERROR: Failed to allocate the TX DMA channel\n");
+          i2serr("ERROR: Failed to allocate the TX DMA channel\n");
           goto errout;
         }
 
@@ -3050,7 +3050,7 @@ static int ssc_dma_allocate(struct sam_ssc_s *priv)
       priv->tx.dog = wd_create();
       if (!priv->tx.dog)
         {
-          i2sdbg("ERROR: Failed to create the TX DMA watchdog\n");
+          i2serr("ERROR: Failed to create the TX DMA watchdog\n");
           goto errout;
         }
     }
@@ -3441,7 +3441,7 @@ struct i2s_dev_s *sam_ssc_initialize(int port)
   priv = (struct sam_ssc_s *)zalloc(sizeof(struct sam_ssc_s));
   if (!priv)
     {
-      i2sdbg("ERROR: Failed to allocate a chip select structure\n");
+      i2serr("ERROR: Failed to allocate a chip select structure\n");
       return NULL;
     }
 
@@ -3475,7 +3475,7 @@ struct i2s_dev_s *sam_ssc_initialize(int port)
   else
 #endif /* CONFIG_SAMA5_SSC1 */
     {
-      i2sdbg("ERROR:  Unsupported I2S port: %d\n", port);
+      i2serr("ERROR:  Unsupported I2S port: %d\n", port);
       goto errout_with_alloc;
     }
 
@@ -3496,7 +3496,7 @@ struct i2s_dev_s *sam_ssc_initialize(int port)
   ret = ssc_rx_configure(priv);
   if (ret < 0)
     {
-      i2sdbg("ERROR: Failed to configure the receiver: %d\n", ret);
+      i2serr("ERROR: Failed to configure the receiver: %d\n", ret);
       goto errout_with_clocking;
     }
 
@@ -3505,7 +3505,7 @@ struct i2s_dev_s *sam_ssc_initialize(int port)
   ret = ssc_tx_configure(priv);
   if (ret < 0)
     {
-      i2sdbg("ERROR: Failed to configure the transmitter: %d\n", ret);
+      i2serr("ERROR: Failed to configure the transmitter: %d\n", ret);
       goto errout_with_clocking;
     }
 

@@ -260,7 +260,7 @@ int board_tsc_setup(int minor)
   static bool initialized = false;
   int ret;
 
-  idbg("minor %d\n", minor);
+  ierr("minor %d\n", minor);
   DEBUGASSERT(minor == 0);
 
   /* Have we already initialized?  Since we never uninitialize we must prevent
@@ -280,7 +280,7 @@ int board_tsc_setup(int minor)
       dev = stm32_spibus_initialize(TSC_DEVNUM);
       if (!dev)
         {
-          idbg("Failed to initialize SPI%d\n", TSC_DEVNUM);
+          ierr("Failed to initialize SPI%d\n", TSC_DEVNUM);
           return -ENODEV;
         }
 
@@ -289,7 +289,7 @@ int board_tsc_setup(int minor)
       ret = ads7843e_register(dev, &g_tscinfo.config, CONFIG_ADS7843E_DEVMINOR);
       if (ret < 0)
         {
-          idbg("Failed to register touchscreen device\n");
+          ierr("Failed to register touchscreen device\n");
           /* up_spiuninitialize(dev); */
           return -ENODEV;
         }

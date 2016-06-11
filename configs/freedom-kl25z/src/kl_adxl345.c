@@ -257,7 +257,7 @@ int adxl345_archinitialize(int minor)
   FAR struct spi_dev_s *dev;
   int ret;
 
-  sndbg("minor %d\n", minor);
+  snerr("minor %d\n", minor);
   DEBUGASSERT(minor == 0);
 
   /* Check if we are already initialized */
@@ -275,7 +275,7 @@ int adxl345_archinitialize(int minor)
       dev = kl_spibus_initialize(CONFIG_ADXL345_SPIDEV);
       if (!dev)
         {
-          sndbg("Failed to initialize SPI bus %d\n", CONFIG_ADXL345_SPIDEV);
+          snerr("Failed to initialize SPI bus %d\n", CONFIG_ADXL345_SPIDEV);
           return -ENODEV;
         }
 
@@ -285,7 +285,7 @@ int adxl345_archinitialize(int minor)
         adxl345_instantiate(dev, (FAR struct adxl345_config_s *)&g_adxl345config);
       if (!g_adxl345config.handle)
         {
-          sndbg("Failed to instantiate the ADXL345 driver\n");
+          snerr("Failed to instantiate the ADXL345 driver\n");
           return -ENODEV;
         }
 
@@ -294,7 +294,7 @@ int adxl345_archinitialize(int minor)
       ret = adxl345_register(g_adxl345config.handle, CONFIG_ADXL345_DEVMINOR);
       if (ret < 0)
         {
-          sndbg("Failed to register ADXL345 driver: %d\n", ret);
+          snerr("Failed to register ADXL345 driver: %d\n", ret);
           return ret;
         }
     }

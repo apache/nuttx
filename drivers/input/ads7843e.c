@@ -427,7 +427,7 @@ static int ads7843e_waitsample(FAR struct ads7843e_dev_s *priv,
            * the failure now.
            */
 
-          idbg("sem_wait: %d\n", errno);
+          ierr("sem_wait: %d\n", errno);
           DEBUGASSERT(errno == EINTR);
           ret = -EINTR;
           goto errout;
@@ -870,7 +870,7 @@ static ssize_t ads7843e_read(FAR struct file *filep, FAR char *buffer, size_t le
        * handle smaller reads... but why?
        */
 
-      idbg("Unsupported read size: %d\n", len);
+      ierr("Unsupported read size: %d\n", len);
       return -ENOSYS;
     }
 
@@ -881,7 +881,7 @@ static ssize_t ads7843e_read(FAR struct file *filep, FAR char *buffer, size_t le
     {
       /* This should only happen if the wait was cancelled by an signal */
 
-      idbg("sem_wait: %d\n", errno);
+      ierr("sem_wait: %d\n", errno);
       DEBUGASSERT(errno == EINTR);
       return -EINTR;
     }
@@ -910,7 +910,7 @@ static ssize_t ads7843e_read(FAR struct file *filep, FAR char *buffer, size_t le
         {
           /* We might have been awakened by a signal */
 
-          idbg("ads7843e_waitsample: %d\n", ret);
+          ierr("ads7843e_waitsample: %d\n", ret);
           goto errout;
         }
     }
@@ -1170,7 +1170,7 @@ int ads7843e_register(FAR struct spi_dev_s *spi,
   priv = (FAR struct ads7843e_dev_s *)kmm_malloc(sizeof(struct ads7843e_dev_s));
   if (!priv)
     {
-      idbg("kmm_malloc(%d) failed\n", sizeof(struct ads7843e_dev_s));
+      ierr("kmm_malloc(%d) failed\n", sizeof(struct ads7843e_dev_s));
       return -ENOMEM;
     }
 #endif
@@ -1197,11 +1197,11 @@ int ads7843e_register(FAR struct spi_dev_s *spi,
   ret = config->attach(config, ads7843e_interrupt);
   if (ret < 0)
     {
-      idbg("Failed to attach interrupt\n");
+      ierr("Failed to attach interrupt\n");
       goto errout_with_priv;
     }
 
-  idbg("Mode: %d Bits: 8 Frequency: %d\n",
+  ierr("Mode: %d Bits: 8 Frequency: %d\n",
        CONFIG_ADS7843E_SPIMODE, CONFIG_ADS7843E_FREQUENCY);
 
   /* Lock the SPI bus so that we have exclusive access */
@@ -1224,7 +1224,7 @@ int ads7843e_register(FAR struct spi_dev_s *spi,
   ret = register_driver(devname, &ads7843e_fops, 0666, priv);
   if (ret < 0)
     {
-      idbg("register_driver() failed: %d\n", ret);
+      ierr("register_driver() failed: %d\n", ret);
       goto errout_with_priv;
     }
 
@@ -1246,7 +1246,7 @@ int ads7843e_register(FAR struct spi_dev_s *spi,
   ret = work_queue(HPWORK, &priv->work, ads7843e_worker, priv, 0);
   if (ret != 0)
     {
-      idbg("Failed to queue work: %d\n", ret);
+      ierr("Failed to queue work: %d\n", ret);
       goto errout_with_priv;
     }
 

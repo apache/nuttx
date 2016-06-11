@@ -75,14 +75,14 @@
 /* Debug */
 
 #ifdef CONFIG_DEBUG_SPI
-#  define spidbg  llerr
+#  define spierr  llerr
 #  ifdef CONFIG_DEBUG_INFO
 #    define spiinfo llerr
 #  else
 #    define spiinfo(x...)
 #  endif
 #else
-#  define spidbg(x...)
+#  define spierr(x...)
 #  define spiinfo(x...)
 #endif
 
@@ -526,7 +526,7 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
   priv->frequency = frequency;
   priv->actual    = actual;
 
-  spidbg("New frequency: %d Actual: %d\n", frequency, actual);
+  spierr("New frequency: %d Actual: %d\n", frequency, actual);
   return actual;
 }
 
@@ -665,7 +665,7 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
         }
       else
         {
-          spidbg("Unsupported nbits: %d\n", nbits);
+          spierr("Unsupported nbits: %d\n", nbits);
           return;
         }
 
@@ -897,7 +897,7 @@ FAR struct spi_dev_s *pic32mx_spibus_initialize(int port)
   else
 #endif
    {
-     spidbg("Unsuppport port: %d\n", port);
+     spierr("Unsuppport port: %d\n", port);
      return NULL;
    }
 
@@ -926,7 +926,7 @@ FAR struct spi_dev_s *pic32mx_spibus_initialize(int port)
   ret = irq_attach(priv->vector, spi_interrupt);
   if (ret < 0)
     {
-      spidbg("Failed to attach vector: %d port: %d\n", priv->vector, port);
+      spierr("Failed to attach vector: %d port: %d\n", priv->vector, port);
       goto errout;
     }
 #endif
@@ -976,7 +976,7 @@ FAR struct spi_dev_s *pic32mx_spibus_initialize(int port)
   ret = up_prioritize_irq(priv->vector, CONFIG_PIC32MX_SPI_PRIORITY)
   if (ret < 0)
     {
-      spidbg("up_prioritize_irq failed: %d\n", ret);
+      spierr("up_prioritize_irq failed: %d\n", ret);
       goto errout;
     }
 #endif

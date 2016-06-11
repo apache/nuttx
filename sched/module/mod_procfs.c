@@ -181,7 +181,7 @@ static int modprocfs_open(FAR struct file *filep, FAR const char *relpath,
 
   if (((oflags & O_WRONLY) != 0 || (oflags & O_RDONLY) == 0))
     {
-      fdbg("ERROR: Only O_RDONLY supported\n");
+      ferr("ERROR: Only O_RDONLY supported\n");
       return -EACCES;
     }
 
@@ -190,7 +190,7 @@ static int modprocfs_open(FAR struct file *filep, FAR const char *relpath,
   priv = (FAR struct modprocfs_file_s *)kmm_zalloc(sizeof(struct modprocfs_file_s));
   if (!priv)
     {
-      fdbg("ERROR: Failed to allocate file attributes\n");
+      ferr("ERROR: Failed to allocate file attributes\n");
       return -ENOMEM;
     }
 
@@ -282,7 +282,7 @@ static int modprocfs_dup(FAR const struct file *oldp, FAR struct file *newp)
   newpriv = (FAR struct modprocfs_file_s *)kmm_zalloc(sizeof(struct modprocfs_file_s));
   if (!newpriv)
     {
-      fdbg("ERROR: Failed to allocate file attributes\n");
+      ferr("ERROR: Failed to allocate file attributes\n");
       return -ENOMEM;
     }
 

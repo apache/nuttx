@@ -62,9 +62,9 @@
 /* CONFIG_DEBUG_SPI enables debug output from this file (needs CONFIG_DEBUG_FEATURES too) */
 
 #ifdef CONFIG_DEBUG_SPI
-#  define ssidbg llerr
+#  define ssierr llerr
 #else
-#  define ssidbg(x...)
+#  define ssierr(x...)
 #endif
 
 /* Dump GPIO registers */
@@ -118,14 +118,14 @@ void weak_function tm4c_ssidev_initialize(void)
 
 void tiva_ssiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
-  ssidbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  ssierr("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
   ssi_dumpgpio("tiva_ssiselect() Entry");
   ssi_dumpgpio("tiva_ssiselect() Exit");
 }
 
 uint8_t tiva_ssistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 {
-  ssidbg("Returning SPI_STATUS_PRESENT\n");
+  ssierr("Returning SPI_STATUS_PRESENT\n");
   return SPI_STATUS_PRESENT;
 }
 

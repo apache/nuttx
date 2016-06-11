@@ -59,10 +59,10 @@
  */
 
 #ifdef CONFIG_DEBUG_IRQ
-#  define intdbg    llerr
+#  define interr    llerr
 #  define intinfo   llinfo
 #else
-#  define intdbg(x...)
+#  define interr(x...)
 #  define intinfo(x...)
 #endif
 

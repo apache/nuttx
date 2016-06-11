@@ -83,7 +83,7 @@ void iob_dump(FAR const char *msg, FAR struct iob_s *iob, unsigned int len,
 
   if (offset > head->io_pktlen)
     {
-      ndbg("ERROR: offset is past the end of data: %u > %u\n",
+      nerr("ERROR: offset is past the end of data: %u > %u\n",
            offset, head->io_pktlen);
       return;
     }

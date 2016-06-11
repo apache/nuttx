@@ -831,38 +831,38 @@ static void sam_hsmcisample(struct sam_hsmciregs_s *regs)
 #if defined(CONFIG_SAM34_HSMCI_XFRDEBUG) || defined(CONFIG_SAM34_HSMCI_CMDDEBUG)
 static void sam_hsmcidump(struct sam_hsmciregs_s *regs, const char *msg)
 {
-  fdbg("HSMCI Registers: %s\n", msg);
-  fdbg("     MR[%08x]: %08x\n", SAM_HSMCI_MR,       regs->mr);
-  fdbg("   DTOR[%08x]: %08x\n", SAM_HSMCI_DTOR,     regs->dtor);
-  fdbg("   SDCR[%08x]: %08x\n", SAM_HSMCI_SDCR,     regs->sdcr);
-  fdbg("   ARGR[%08x]: %08x\n", SAM_HSMCI_ARGR,     regs->argr);
-  fdbg("   BLKR[%08x]: %08x\n", SAM_HSMCI_BLKR,     regs->blkr);
-  fdbg("  CSTOR[%08x]: %08x\n", SAM_HSMCI_CSTOR,    regs->cstor);
-  fdbg("  RSPR0[%08x]: %08x\n", SAM_HSMCI_RSPR0,    regs->rsp0);
-  fdbg("  RSPR1[%08x]: %08x\n", SAM_HSMCI_RSPR1,    regs->rsp1);
-  fdbg("  RSPR2[%08x]: %08x\n", SAM_HSMCI_RSPR2,    regs->rsp2);
-  fdbg("  RSPR3[%08x]: %08x\n", SAM_HSMCI_RSPR3,    regs->rsp3);
-  fdbg("     SR[%08x]: %08x\n", SAM_HSMCI_SR,       regs->sr);
-  fdbg("    IMR[%08x]: %08x\n", SAM_HSMCI_IMR,      regs->imr);
+  ferr("HSMCI Registers: %s\n", msg);
+  ferr("     MR[%08x]: %08x\n", SAM_HSMCI_MR,       regs->mr);
+  ferr("   DTOR[%08x]: %08x\n", SAM_HSMCI_DTOR,     regs->dtor);
+  ferr("   SDCR[%08x]: %08x\n", SAM_HSMCI_SDCR,     regs->sdcr);
+  ferr("   ARGR[%08x]: %08x\n", SAM_HSMCI_ARGR,     regs->argr);
+  ferr("   BLKR[%08x]: %08x\n", SAM_HSMCI_BLKR,     regs->blkr);
+  ferr("  CSTOR[%08x]: %08x\n", SAM_HSMCI_CSTOR,    regs->cstor);
+  ferr("  RSPR0[%08x]: %08x\n", SAM_HSMCI_RSPR0,    regs->rsp0);
+  ferr("  RSPR1[%08x]: %08x\n", SAM_HSMCI_RSPR1,    regs->rsp1);
+  ferr("  RSPR2[%08x]: %08x\n", SAM_HSMCI_RSPR2,    regs->rsp2);
+  ferr("  RSPR3[%08x]: %08x\n", SAM_HSMCI_RSPR3,    regs->rsp3);
+  ferr("     SR[%08x]: %08x\n", SAM_HSMCI_SR,       regs->sr);
+  ferr("    IMR[%08x]: %08x\n", SAM_HSMCI_IMR,      regs->imr);
 #if defined(CONFIG_ARCH_CHIP_SAM3U)
-  fdbg("    DMA[%08x]: %08x\n", SAM_HSMCI_DMA,      regs->dma);
+  ferr("    DMA[%08x]: %08x\n", SAM_HSMCI_DMA,      regs->dma);
 #endif
-  fdbg("    CFG[%08x]: %08x\n", SAM_HSMCI_CFG,      regs->cfg);
-  fdbg("   WPMR[%08x]: %08x\n", SAM_HSMCI_WPMR,     regs->wpmr);
-  fdbg("   WPSR[%08x]: %08x\n", SAM_HSMCI_WPSR,     regs->wpsr);
+  ferr("    CFG[%08x]: %08x\n", SAM_HSMCI_CFG,      regs->cfg);
+  ferr("   WPMR[%08x]: %08x\n", SAM_HSMCI_WPMR,     regs->wpmr);
+  ferr("   WPSR[%08x]: %08x\n", SAM_HSMCI_WPSR,     regs->wpsr);
 
 #ifdef CONFIG_SAM34_PDCA
-  fdbg("HSMCI PDC Registers:\n");
-  fdbg("    RPR[%08x]: %08x\n", SAM_HSMCI_PDC_RPR,  regs->pdc_rpr);
-  fdbg("    RCR[%08x]: %08x\n", SAM_HSMCI_PDC_RCR,  regs->pdc_rcr);
-  fdbg("    TPR[%08x]: %08x\n", SAM_HSMCI_PDC_TPR,  regs->pdc_tpr);
-  fdbg("    TCR[%08x]: %08x\n", SAM_HSMCI_PDC_TCR,  regs->pdc_tcr);
-  fdbg("   RNPR[%08x]: %08x\n", SAM_HSMCI_PDC_RNPR, regs->pdc_rnpr);
-  fdbg("   RNCR[%08x]: %08x\n", SAM_HSMCI_PDC_RNCR, regs->pdc_rncr);
-  fdbg("   TNPR[%08x]: %08x\n", SAM_HSMCI_PDC_TNPR, regs->pdc_tnpr);
-  fdbg("   TNCR[%08x]: %08x\n", SAM_HSMCI_PDC_TNCR, regs->pdc_tncr);
-//fdbg("    TCR[%08x]: %08x\n", SAM_HSMCI_PDC_PTCR, regs->pdc_ptcr);
-  fdbg("   PTSR[%08x]: %08x\n", SAM_HSMCI_PDC_PTSR, regs->pdc_ptsr);
+  ferr("HSMCI PDC Registers:\n");
+  ferr("    RPR[%08x]: %08x\n", SAM_HSMCI_PDC_RPR,  regs->pdc_rpr);
+  ferr("    RCR[%08x]: %08x\n", SAM_HSMCI_PDC_RCR,  regs->pdc_rcr);
+  ferr("    TPR[%08x]: %08x\n", SAM_HSMCI_PDC_TPR,  regs->pdc_tpr);
+  ferr("    TCR[%08x]: %08x\n", SAM_HSMCI_PDC_TCR,  regs->pdc_tcr);
+  ferr("   RNPR[%08x]: %08x\n", SAM_HSMCI_PDC_RNPR, regs->pdc_rnpr);
+  ferr("   RNCR[%08x]: %08x\n", SAM_HSMCI_PDC_RNCR, regs->pdc_rncr);
+  ferr("   TNPR[%08x]: %08x\n", SAM_HSMCI_PDC_TNPR, regs->pdc_tnpr);
+  ferr("   TNCR[%08x]: %08x\n", SAM_HSMCI_PDC_TNCR, regs->pdc_tncr);
+//ferr("    TCR[%08x]: %08x\n", SAM_HSMCI_PDC_PTCR, regs->pdc_ptcr);
+  ferr("   PTSR[%08x]: %08x\n", SAM_HSMCI_PDC_PTSR, regs->pdc_ptsr);
 #endif
 }
 #endif
@@ -1933,7 +1933,7 @@ static int sam_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
             {
               /* Yes.. Was the error some kind of timeout? */
 
-              fdbg("ERROR: cmd: %08x events: %08x SR: %08x\n",
+              ferr("ERROR: cmd: %08x events: %08x SR: %08x\n",
                    cmd, priv->cmdrmask, sr);
 
               if ((pending & HSMCI_RESPONSE_TIMEOUT_ERRORS) != 0)
@@ -1963,7 +1963,7 @@ static int sam_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
        }
       else if (--timeout <= 0)
         {
-          fdbg("ERROR: Timeout cmd: %08x events: %08x SR: %08x\n",
+          ferr("ERROR: Timeout cmd: %08x events: %08x SR: %08x\n",
                cmd, priv->cmdrmask, sr);
 
           priv->wkupevent = SDIOWAIT_TIMEOUT;
@@ -2038,7 +2038,7 @@ static int sam_recvshort(FAR struct sdio_dev_s *dev,
 #ifdef CONFIG_DEBUG_FEATURES
   if (!rshort)
     {
-      fdbg("ERROR: rshort=NULL\n");
+      ferr("ERROR: rshort=NULL\n");
       ret = -EINVAL;
     }
 
@@ -2050,7 +2050,7 @@ static int sam_recvshort(FAR struct sdio_dev_s *dev,
            (cmd & MMCSD_RESPONSE_MASK) != MMCSD_R3_RESPONSE &&
            (cmd & MMCSD_RESPONSE_MASK) != MMCSD_R7_RESPONSE)
     {
-      fdbg("ERROR: Wrong response CMD=%08x\n", cmd);
+      ferr("ERROR: Wrong response CMD=%08x\n", cmd);
       ret = -EINVAL;
     }
   else
@@ -2100,7 +2100,7 @@ static int sam_recvlong(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t rlong
 
   if ((cmd & MMCSD_RESPONSE_MASK) != MMCSD_R2_RESPONSE)
     {
-      fdbg("ERROR: Wrong response CMD=%08x\n", cmd);
+      ferr("ERROR: Wrong response CMD=%08x\n", cmd);
       ret = -EINVAL;
     }
   else
@@ -2282,7 +2282,7 @@ static sdio_eventset_t sam_eventwait(FAR struct sdio_dev_s *dev,
                        1, (uint32_t)priv);
       if (ret != OK)
         {
-          fdbg("ERROR: wd_start failed: %d\n", ret);
+          ferr("ERROR: wd_start failed: %d\n", ret);
         }
     }
 
@@ -2472,7 +2472,7 @@ static int sam_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
 
 #ifdef CONFIG_SAM34_PDCA
   modifyreg32(SAM_HSMCI_MR, 0, HSMCI_MR_PDCMODE);
-  fdbg("SAM_HSMCI_MR = 0x%08X\n", getreg32(SAM_HSMCI_MR));
+  ferr("SAM_HSMCI_MR = 0x%08X\n", getreg32(SAM_HSMCI_MR));
   putreg32((uint32_t)buffer, SAM_HSMCI_PDC_RPR);
   putreg32(buflen/4, SAM_HSMCI_PDC_RCR);
   putreg32(PDC_PTCR_RXTEN, SAM_HSMCI_PDC_PTCR);
@@ -2541,7 +2541,7 @@ static int sam_dmasendsetup(FAR struct sdio_dev_s *dev,
 
 #ifdef CONFIG_SAM34_PDCA
   modifyreg32(SAM_HSMCI_MR, 0, HSMCI_MR_PDCMODE);
-  fdbg("SAM_HSMCI_MR = 0x%08X\n", getreg32(SAM_HSMCI_MR));
+  ferr("SAM_HSMCI_MR = 0x%08X\n", getreg32(SAM_HSMCI_MR));
   putreg32((uint32_t)buffer, SAM_HSMCI_PDC_TPR);
   putreg32(buflen/4, SAM_HSMCI_PDC_TCR);
   putreg32(PDC_PTCR_TXTEN, SAM_HSMCI_PDC_PTCR);
@@ -2663,7 +2663,7 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
 
   struct sam_dev_s *priv = &g_sdiodev;
 
-  fdbg("slotno: %d\n", slotno);
+  ferr("slotno: %d\n", slotno);
 
   /* Initialize the HSMCI slot structure */
 

@@ -172,10 +172,10 @@
 /* CONFIG_DEBUG_I2C + CONFIG_DEBUG_FEATURES enables general I2C debug output. */
 
 #ifdef CONFIG_DEBUG_I2C
-#  define i2cdbg dbg
+#  define i2cerr err
 #  define i2cinfo info
 #else
-#  define i2cdbg(x...)
+#  define i2cerr(x...)
 #  define i2cinfo(x...)
 #endif
 
@@ -867,7 +867,7 @@ static void stm32_i2c_tracenew(FAR struct stm32_i2c_priv_s *priv, uint16_t statu
 
           if (priv->tndx >= (CONFIG_I2C_NTRACE-1))
             {
-              i2cdbg("Trace table overflow\n");
+              i2cerr("Trace table overflow\n");
               return;
             }
 
@@ -908,7 +908,7 @@ static void stm32_i2c_traceevent(FAR struct stm32_i2c_priv_s *priv,
 
       if (priv->tndx >= (CONFIG_I2C_NTRACE-1))
         {
-          i2cdbg("Trace table overflow\n");
+          i2cerr("Trace table overflow\n");
           return;
         }
 
@@ -1382,7 +1382,7 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
         {
           /* TODO: untested!! */
 
-          i2cdbg(" An empty message has been detected, ignoring and passing to next message.\n");
+          i2cerr(" An empty message has been detected, ignoring and passing to next message.\n");
 
           /* Trace event */
 
@@ -1609,14 +1609,14 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
             }
           else
             {
-              i2cdbg("Write mode: next message has an unrecognized flag.\n");
+              i2cerr("Write mode: next message has an unrecognized flag.\n");
               stm32_i2c_traceevent(priv, I2CEVENT_WRITE_FLAG_ERROR, priv->msgv->flags);
             }
 
         }
       else
         {
-          i2cdbg("Write mode error.\n");
+          i2cerr("Write mode error.\n");
           stm32_i2c_traceevent(priv, I2CEVENT_WRITE_ERROR, 0);
         }
     }
@@ -1783,8 +1783,8 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
 
       else
         {
-          i2cdbg("I2C read mode no correct state detected\n");
-          i2cdbg(" state %i, dcnt=%i\n", status, priv->dcnt);
+          i2cerr("I2C read mode no correct state detected\n");
+          i2cerr(" state %i, dcnt=%i\n", status, priv->dcnt);
 
           /* set condition to terminate ISR and wake waiting thread */
 
@@ -1809,7 +1809,7 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
       /* Read rest of the state */
 
       status |= (stm32_i2c_getreg(priv, STM32_I2C_SR2_OFFSET) << 16);
-      i2cdbg("Empty call to ISR: Stopping ISR\n");
+      i2cerr("Empty call to ISR: Stopping ISR\n");
       stm32_i2c_traceevent(priv, I2CEVENT_ISR_EMPTY_CALL, 0);
     }
 
@@ -1833,8 +1833,8 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
 
       status |= (stm32_i2c_getreg(priv, STM32_I2C_SR2_OFFSET) << 16);
 
-      i2cdbg(" No correct state detected(start bit, read or write) \n");
-      i2cdbg(" state %i\n", status);
+      i2cerr(" No correct state detected(start bit, read or write) \n");
+      i2cerr(" state %i\n", status);
 
       /* set condition to terminate ISR and wake waiting thread */
 
@@ -2126,7 +2126,7 @@ static int stm32_i2c_transfer(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s
       status = stm32_i2c_getstatus(priv);
       ret = -ETIMEDOUT;
 
-      i2cdbg("Timed out: CR1: 0x%04x status: 0x%08x\n",
+      i2cerr("Timed out: CR1: 0x%04x status: 0x%08x\n",
              stm32_i2c_getreg(priv, STM32_I2C_CR1_OFFSET), status);
 
       /* "Note: When the STOP, START or PEC bit is set, the software must
@@ -2156,7 +2156,7 @@ static int stm32_i2c_transfer(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s
        * Note: this commentary is found in both places.
        *
        */
-      i2cdbg("Check if the address was valid\n");
+      i2cerr("Check if the address was valid\n");
       stm32_i2c_sendstop(priv);
 #endif
       /* Clear busy flag in case of timeout */

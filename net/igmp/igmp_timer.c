@@ -73,24 +73,24 @@
 
 #ifdef CONFIG_CPP_HAVE_VARARGS
 #  ifdef IGMP_GTMRDEBUG
-#    define gtmrdbg(format, ...)    ndbg(format, ##__VA_ARGS__)
+#    define gtmrerr(format, ...)    nerr(format, ##__VA_ARGS__)
 #    define gtmrllerr(format, ...)  nllerr(format, ##__VA_ARGS__)
 #    define gtmrinfo(format, ...)   ninfo(format, ##__VA_ARGS__)
 #    define gtmrllinfo(format, ...) nllinfo(format, ##__VA_ARGS__)
 #  else
-#    define gtmrdbg(x...)
+#    define gtmrerr(x...)
 #    define gtmrllerr(x...)
 #    define gtmrinfo(x...)
 #    define gtmrllinfo(x...)
 #  endif
 #else
 #  ifdef IGMP_GTMRDEBUG
-#    define gtmrdbg    ndbg
+#    define gtmrerr    nerr
 #    define gtmrllerr  nllerr
 #    define gtmrinfo   ninfo
 #    define gtmrllinfo nllinfo
 #  else
-#    define gtmrdbg    (void)
+#    define gtmrerr    (void)
 #    define gtmrllerr  (void)
 #    define gtmrinfo   (void)
 #    define gtmrllinfo (void)
@@ -184,7 +184,7 @@ void igmp_starttimer(FAR struct igmp_group_s *group, uint8_t decisecs)
    * Important!! this should be a random timer from 0 to decisecs
    */
 
-  gtmrdbg("decisecs: %d\n", decisecs);
+  gtmrerr("decisecs: %d\n", decisecs);
   igmp_startticks(group, net_dsec2tick(decisecs));
 }
 
@@ -224,7 +224,7 @@ bool igmp_cmptimer(FAR struct igmp_group_s *group, int maxticks)
    * test as well.
    */
 
-  gtmrdbg("maxticks: %d remaining: %d\n", maxticks, remaining);
+  gtmrerr("maxticks: %d remaining: %d\n", maxticks, remaining);
   if (maxticks > remaining)
     {
       /* Cancel the watchdog timer and return true */

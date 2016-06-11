@@ -413,13 +413,21 @@ if DEBUG_FEATURES
 
 comment "Debug SYSLOG Output Controls"
 
+config DEBUG_ERROR
+	bool "Enable Error Output"
+	default n
+	---help---
+		Enables output from err() statements.  Errors are significant system
+		exceptions that require immediate attention.
+
 config DEBUG_WARN
 	bool "Enable Warnings Output"
 	default n
+	depends on DEBUG_ERROR
 	---help---
-		Enables output from warning statements.  Warnings are considered to
-		be potential errors or errors that will not have serious
-		consequences.
+		Enables output from warn() statements.  Warnings are considered to
+		be various unexpected conditions, potential errors or errors that will
+		not have serious consequences.
 
 config DEBUG_INFO
 	bool "Enable Informational Debug Output"

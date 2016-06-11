@@ -88,7 +88,7 @@ int nxffs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   if (ret != OK)
     {
       ret = -get_errno();
-      fdbg("ERROR: sem_wait failed: %d\n", ret);
+      ferr("ERROR: sem_wait failed: %d\n", ret);
       goto errout;
     }
 
@@ -102,7 +102,7 @@ int nxffs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       if (volume->ofiles)
         {
-          fdbg("ERROR: Open files\n");
+          ferr("ERROR: Open files\n");
           ret = -EBUSY;
           goto errout_with_semaphore;
         }

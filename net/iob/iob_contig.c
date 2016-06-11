@@ -161,7 +161,7 @@ int iob_contig(FAR struct iob_s *iob, unsigned int len)
 
   else
     {
-      ndbg("ERROR: pktlen=%u < requested len=%u\n", iob->io_pktlen, len);
+      nerr("ERROR: pktlen=%u < requested len=%u\n", iob->io_pktlen, len);
       return -ENOSPC;
     }
 }

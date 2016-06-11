@@ -73,12 +73,12 @@
 /* Non-standard debug that may be enabled just for testing PWM */
 
 #ifdef CONFIG_DEBUG_RGBLED
-#  define pwmdbg    dbg
+#  define pwmerr    err
 #  define pwminfo   info
 #  define pwmllerr  llerr
 #  define pwmllinfo llinfo
 #else
-#  define pwmdbg(x...)
+#  define pwmerr(x...)
 #  define pwminfo(x...)
 #  define pwmllerr(x...)
 #  define pwmllinfo(x...)
@@ -395,7 +395,7 @@ int rgbled_register(FAR const char *path, FAR struct pwm_lowerhalf_s *ledr,
 
   if (!upper)
     {
-      pwmdbg("Allocation failed\n");
+      pwmerr("Allocation failed\n");
       return -ENOMEM;
     }
 

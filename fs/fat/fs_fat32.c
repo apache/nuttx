@@ -624,7 +624,7 @@ fat_read_restart:
 
               if (ret == -EFAULT && !force_indirect)
                 {
-                  fdbg("DMA: read alignment error, restarting indirect\n");
+                  ferr("DMA: read alignment error, restarting indirect\n");
                   force_indirect = true;
                   goto fat_read_restart;
                 }
@@ -884,7 +884,7 @@ fat_write_restart:
 
               if (ret == -EFAULT && !force_indirect)
                 {
-                  fdbg("DMA: write alignment error, restarting indirect\n");
+                  ferr("DMA: write alignment error, restarting indirect\n");
                   force_indirect = true;
                   goto fat_write_restart;
                 }

@@ -146,14 +146,14 @@
 #endif
 
 #ifdef CONFIG_DEBUG_SPI
-#  define spidbg llerr
+#  define spierr llerr
 #  ifdef CONFIG_DEBUG_INFO
 #    define spiinfo llerr
 #  else
 #    define spiinfo(x...)
 #  endif
 #else
-#  define spidbg(x...)
+#  define spierr(x...)
 #  define spiinfo(x...)
 #endif
 
@@ -1627,7 +1627,7 @@ FAR struct spi_dev_s *stm32l4_spibus_initialize(int bus)
   else
 #endif
     {
-      spidbg("ERROR: Unsupbused SPI bus: %d\n", bus);
+      spierr("ERROR: Unsupbused SPI bus: %d\n", bus);
       return NULL;
     }
 

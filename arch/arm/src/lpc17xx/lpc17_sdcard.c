@@ -722,16 +722,16 @@ static void lpc17_sample(struct lpc17_dev_s *priv, int index)
 #ifdef CONFIG_DEBUG_SDIO
 static void lpc17_sdcard_dump(struct lpc17_sdcard_regs_s *regs, const char *msg)
 {
-  fdbg("SD Card Registers: %s\n", msg);
-  fdbg("  POWER[%08x]: %08x\n", LPC17_SDCARD_PWR,     regs->pwr);
-  fdbg("  CLKCR[%08x]: %08x\n", LPC17_SDCARD_CLOCK,   regs->clkcr);
-  fdbg("  DCTRL[%08x]: %08x\n", LPC17_SDCARD_DCTRL,   regs->dctrl);
-  fdbg(" DTIMER[%08x]: %08x\n", LPC17_SDCARD_DTIMER,  regs->dtimer);
-  fdbg("   DLEN[%08x]: %08x\n", LPC17_SDCARD_DLEN,    regs->dlen);
-  fdbg(" DCOUNT[%08x]: %08x\n", LPC17_SDCARD_DCOUNT,  regs->dcount);
-  fdbg("    STA[%08x]: %08x\n", LPC17_SDCARD_STATUS,  regs->sta);
-  fdbg("   MASK[%08x]: %08x\n", LPC17_SDCARD_MASK0,   regs->mask);
-  fdbg("FIFOCNT[%08x]: %08x\n", LPC17_SDCARD_FIFOCNT, regs->fifocnt);
+  ferr("SD Card Registers: %s\n", msg);
+  ferr("  POWER[%08x]: %08x\n", LPC17_SDCARD_PWR,     regs->pwr);
+  ferr("  CLKCR[%08x]: %08x\n", LPC17_SDCARD_CLOCK,   regs->clkcr);
+  ferr("  DCTRL[%08x]: %08x\n", LPC17_SDCARD_DCTRL,   regs->dctrl);
+  ferr(" DTIMER[%08x]: %08x\n", LPC17_SDCARD_DTIMER,  regs->dtimer);
+  ferr("   DLEN[%08x]: %08x\n", LPC17_SDCARD_DLEN,    regs->dlen);
+  ferr(" DCOUNT[%08x]: %08x\n", LPC17_SDCARD_DCOUNT,  regs->dcount);
+  ferr("    STA[%08x]: %08x\n", LPC17_SDCARD_STATUS,  regs->sta);
+  ferr("   MASK[%08x]: %08x\n", LPC17_SDCARD_MASK0,   regs->mask);
+  ferr("FIFOCNT[%08x]: %08x\n", LPC17_SDCARD_FIFOCNT, regs->fifocnt);
 }
 #endif
 
@@ -1920,7 +1920,7 @@ static int lpc17_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
     {
       if (--timeout <= 0)
         {
-          fdbg("ERROR: Timeout cmd: %08x events: %08x STA: %08x\n",
+          ferr("ERROR: Timeout cmd: %08x events: %08x STA: %08x\n",
                cmd, events, getreg32(LPC17_SDCARD_STATUS));
 
           return -ETIMEDOUT;
@@ -1987,7 +1987,7 @@ static int lpc17_recvshortcrc(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t
 #ifdef CONFIG_DEBUG_FEATURES
   if (!rshort)
     {
-      fdbg("ERROR: rshort=NULL\n");
+      ferr("ERROR: rshort=NULL\n");
       ret = -EINVAL;
     }
 
@@ -1997,7 +1997,7 @@ static int lpc17_recvshortcrc(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t
            (cmd & MMCSD_RESPONSE_MASK) != MMCSD_R1B_RESPONSE &&
            (cmd & MMCSD_RESPONSE_MASK) != MMCSD_R6_RESPONSE)
     {
-      fdbg("ERROR: Wrong response CMD=%08x\n", cmd);
+      ferr("ERROR: Wrong response CMD=%08x\n", cmd);
       ret = -EINVAL;
     }
   else
@@ -2008,12 +2008,12 @@ static int lpc17_recvshortcrc(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t
       regval = getreg32(LPC17_SDCARD_STATUS);
       if ((regval & SDCARD_STATUS_CTIMEOUT) != 0)
         {
-          fdbg("ERROR: Command timeout: %08x\n", regval);
+          ferr("ERROR: Command timeout: %08x\n", regval);
           ret = -ETIMEDOUT;
         }
       else if ((regval & SDCARD_STATUS_CCRCFAIL) != 0)
         {
-          fdbg("ERROR: CRC failure: %08x\n", regval);
+          ferr("ERROR: CRC failure: %08x\n", regval);
           ret = -EIO;
         }
 #ifdef CONFIG_DEBUG_FEATURES
@@ -2024,7 +2024,7 @@ static int lpc17_recvshortcrc(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t
           respcmd = getreg32(LPC17_SDCARD_RESPCMD);
           if ((uint8_t)(respcmd & SDCARD_RESPCMD_MASK) != (cmd & MMCSD_CMDIDX_MASK))
             {
-              fdbg("ERROR: RESCMD=%02x CMD=%08x\n", respcmd, cmd);
+              ferr("ERROR: RESCMD=%02x CMD=%08x\n", respcmd, cmd);
               ret = -EINVAL;
             }
         }
@@ -2057,7 +2057,7 @@ static int lpc17_recvlong(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t rlo
 
   if ((cmd & MMCSD_RESPONSE_MASK) != MMCSD_R2_RESPONSE)
     {
-      fdbg("ERROR: Wrong response CMD=%08x\n", cmd);
+      ferr("ERROR: Wrong response CMD=%08x\n", cmd);
       ret = -EINVAL;
     }
   else
@@ -2068,12 +2068,12 @@ static int lpc17_recvlong(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t rlo
       regval = getreg32(LPC17_SDCARD_STATUS);
       if (regval & SDCARD_STATUS_CTIMEOUT)
         {
-          fdbg("ERROR: Timeout STA: %08x\n", regval);
+          ferr("ERROR: Timeout STA: %08x\n", regval);
           ret = -ETIMEDOUT;
         }
       else if (regval & SDCARD_STATUS_CCRCFAIL)
         {
-          fdbg("ERROR: CRC fail STA: %08x\n", regval);
+          ferr("ERROR: CRC fail STA: %08x\n", regval);
           ret = -EIO;
         }
     }
@@ -2111,7 +2111,7 @@ static int lpc17_recvshort(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t *r
   if ((cmd & MMCSD_RESPONSE_MASK) != MMCSD_R3_RESPONSE &&
       (cmd & MMCSD_RESPONSE_MASK) != MMCSD_R7_RESPONSE)
     {
-      fdbg("ERROR: Wrong response CMD=%08x\n", cmd);
+      ferr("ERROR: Wrong response CMD=%08x\n", cmd);
       ret = -EINVAL;
     }
   else
@@ -2124,7 +2124,7 @@ static int lpc17_recvshort(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t *r
       regval = getreg32(LPC17_SDCARD_STATUS);
       if (regval & SDCARD_STATUS_CTIMEOUT)
         {
-          fdbg("ERROR: Timeout STA: %08x\n", regval);
+          ferr("ERROR: Timeout STA: %08x\n", regval);
           ret = -ETIMEDOUT;
         }
     }
@@ -2269,7 +2269,7 @@ static sdio_eventset_t lpc17_eventwait(FAR struct sdio_dev_s *dev,
                        1, (uint32_t)priv);
       if (ret != OK)
         {
-          fdbg("ERROR: wd_start failed: %d\n", ret);
+          ferr("ERROR: wd_start failed: %d\n", ret);
         }
     }
 

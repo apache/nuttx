@@ -84,7 +84,7 @@ volatile uint32_t *g_current_regs[1];
 
 /****************************************************************************
  * Name: sam_nmi, sam_busfault, sam_usagefault, sam_pendsv,
- *       sam_dbgmonitor, sam_pendsv, sam_reserved
+ *       sam_errmonitor, sam_pendsv, sam_reserved
  *
  * Description:
  *   Handlers for various execptions.  None are handled and all are fatal
@@ -97,7 +97,7 @@ volatile uint32_t *g_current_regs[1];
 static int sam_nmi(int irq, FAR void *context)
 {
   (void)up_irq_save();
-  dbg("PANIC!!! NMI received\n");
+  err("PANIC!!! NMI received\n");
   PANIC();
   return 0;
 }
@@ -105,7 +105,7 @@ static int sam_nmi(int irq, FAR void *context)
 static int sam_pendsv(int irq, FAR void *context)
 {
   (void)up_irq_save();
-  dbg("PANIC!!! PendSV received\n");
+  err("PANIC!!! PendSV received\n");
   PANIC();
   return 0;
 }
@@ -113,7 +113,7 @@ static int sam_pendsv(int irq, FAR void *context)
 static int sam_reserved(int irq, FAR void *context)
 {
   (void)up_irq_save();
-  dbg("PANIC!!! Reserved interrupt\n");
+  err("PANIC!!! Reserved interrupt\n");
   PANIC();
   return 0;
 }

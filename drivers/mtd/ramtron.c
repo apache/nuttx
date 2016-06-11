@@ -476,7 +476,7 @@ static int ramtron_waitwritecomplete(struct ramtron_dev_s *priv)
     }
   else
     {
-      fdbg("timeout waiting for write completion\n");
+      ferr("timeout waiting for write completion\n");
       retries = -EAGAIN;
     }
 
@@ -694,7 +694,7 @@ static ssize_t ramtron_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbyt
   status = SPI_SEND(priv->dev, RAMTRON_DUMMY);
   if ((status & ~RAMTRON_SR_SRWD) == 0)
     {
-      fdbg("read status failed - got 0x%02x\n", (unsigned)status);
+      ferr("read status failed - got 0x%02x\n", (unsigned)status);
       nbytes = -EIO;
     }
 #endif

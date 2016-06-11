@@ -172,7 +172,7 @@ int exec_module(FAR const struct binary_s *binp)
   ret = up_addrenv_select(&binp->addrenv, &oldenv);
   if (ret < 0)
     {
-      bdbg("ERROR: up_addrenv_select() failed: %d\n", ret);
+      berr("ERROR: up_addrenv_select() failed: %d\n", ret);
       errcode = -ret;
       goto errout_with_tcb;
     }
@@ -203,7 +203,7 @@ int exec_module(FAR const struct binary_s *binp)
   if (ret < 0)
     {
       errcode = get_errno();
-      bdbg("task_init() failed: %d\n", errcode);
+      berr("task_init() failed: %d\n", errcode);
       goto errout_with_addrenv;
     }
 
@@ -224,7 +224,7 @@ int exec_module(FAR const struct binary_s *binp)
   ret = up_addrenv_kstackalloc(&tcb->cmn);
   if (ret < 0)
     {
-      bdbg("ERROR: up_addrenv_select() failed: %d\n", ret);
+      berr("ERROR: up_addrenv_select() failed: %d\n", ret);
       errcode = -ret;
       goto errout_with_tcbinit;
     }
@@ -236,7 +236,7 @@ int exec_module(FAR const struct binary_s *binp)
   ret = shm_group_initialize(tcb->cmn.group);
   if (ret < 0)
     {
-      bdbg("ERROR: shm_group_initialize() failed: %d\n", ret);
+      berr("ERROR: shm_group_initialize() failed: %d\n", ret);
       errcode = -ret;
       goto errout_with_tcbinit;
     }
@@ -261,7 +261,7 @@ int exec_module(FAR const struct binary_s *binp)
   if (ret < 0)
     {
       errcode = -ret;
-      bdbg("ERROR: up_addrenv_clone() failed: %d\n", ret);
+      berr("ERROR: up_addrenv_clone() failed: %d\n", ret);
       goto errout_with_tcbinit;
     }
 
@@ -289,7 +289,7 @@ int exec_module(FAR const struct binary_s *binp)
   if (ret < 0)
     {
       errcode = get_errno();
-      bdbg("task_activate() failed: %d\n", errcode);
+      berr("task_activate() failed: %d\n", errcode);
       goto errout_with_tcbinit;
     }
 
@@ -299,7 +299,7 @@ int exec_module(FAR const struct binary_s *binp)
   ret = up_addrenv_restore(&oldenv);
   if (ret < 0)
     {
-      bdbg("ERROR: up_addrenv_select() failed: %d\n", ret);
+      berr("ERROR: up_addrenv_select() failed: %d\n", ret);
       errcode = -ret;
       goto errout_with_tcbinit;
     }
@@ -323,7 +323,7 @@ errout_with_tcb:
 
 errout:
   set_errno(errcode);
-  bdbg("returning errno: %d\n", errcode);
+  berr("returning errno: %d\n", errcode);
   return ERROR;
 }
 

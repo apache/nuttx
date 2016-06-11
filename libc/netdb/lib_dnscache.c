@@ -207,7 +207,7 @@ int dns_find_answer(FAR const char *hostname, FAR struct sockaddr *addr,
 
   if (!dns_initialize())
     {
-      ndbg("ERROR: DNS failed to initialize\n");
+      nerr("ERROR: DNS failed to initialize\n");
       return -EAGAIN;
     }
 

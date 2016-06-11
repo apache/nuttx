@@ -308,9 +308,9 @@
 /* Debug ******************************************************************************/
 
 #ifdef CONFIG_LCD_REGDEBUG
-# define lcddbg(format, ...) llinfo(format, ##__VA_ARGS__)
+# define lcderr(format, ...) llinfo(format, ##__VA_ARGS__)
 #else
-# define lcddbg(x...)
+# define lcderr(x...)
 #endif
 
 /**************************************************************************************
@@ -666,7 +666,7 @@ static void nokia_select(FAR struct spi_dev_s *spi)
    * devices competing for the SPI bus
    */
 
-  lcddbg("SELECTED\n");
+  lcderr("SELECTED\n");
   SPI_LOCK(spi, true);
   SPI_SELECT(spi, SPIDEV_DISPLAY, true);
 
@@ -700,7 +700,7 @@ static void nokia_deselect(FAR struct spi_dev_s *spi)
 {
   /* De-select Nokia 6100 chip and relinquish the SPI bus. */
 
-  lcddbg("DE-SELECTED\n");
+  lcderr("DE-SELECTED\n");
   SPI_SELECT(spi, SPIDEV_DISPLAY, false);
   SPI_LOCK(spi, false);
 }
@@ -717,7 +717,7 @@ static void nokia_sndcmd(FAR struct spi_dev_s *spi, const uint8_t cmd)
 {
   /* Select the LCD */
 
-  lcddbg("cmd: %02x\n", cmd);
+  lcderr("cmd: %02x\n", cmd);
   nokia_select(spi);
 
   /* Send the command. Bit 8 == 0 denotes a command */
@@ -743,7 +743,7 @@ static void nokia_cmddata(FAR struct spi_dev_s *spi, uint8_t cmd, int datlen,
   uint16_t *rowbuf = g_rowbuf;
   int i;
 
-  lcddbg("cmd: %02x datlen: %d\n", cmd, datlen);
+  lcderr("cmd: %02x datlen: %d\n", cmd, datlen);
   DEBUGASSERT(datlen <= NOKIA_STRIDE);
 
   /* Copy the command into the line buffer. Bit 8 == 0 denotes a command. */
@@ -800,7 +800,7 @@ static void nokia_cmdarray(FAR struct spi_dev_s *spi, int len, const uint8_t *cm
 
   for (i = 0; i < len; i++)
     {
-      lcddbg("cmddata[%d]: %02x\n", i, cmddata[i]);
+      lcderr("cmddata[%d]: %02x\n", i, cmddata[i]);
     }
 #endif
   nokia_cmddata(spi, cmddata[0], len-1, &cmddata[1]);

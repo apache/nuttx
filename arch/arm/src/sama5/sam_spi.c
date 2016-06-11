@@ -141,14 +141,14 @@
 #endif
 
 #ifdef CONFIG_DEBUG_SPI
-#  define spidbg llerr
+#  define spierr llerr
 #  ifdef CONFIG_DEBUG_INFO
 #    define spiinfo llerr
 #  else
 #    define spiinfo(x...)
 #  endif
 #else
-#  define spidbg(x...)
+#  define spierr(x...)
 #  define spiinfo(x...)
 #endif
 
@@ -1065,7 +1065,7 @@ static uint32_t spi_setfrequency(struct spi_dev_s *dev, uint32_t frequency)
   spics->frequency = frequency;
   spics->actual    = actual;
 
-  spidbg("Frequency %d->%d\n", frequency, actual);
+  spierr("Frequency %d->%d\n", frequency, actual);
   return actual;
 }
 
@@ -1476,7 +1476,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
   ret = sam_dmarxsetup(spics->rxdma, paddr, maddr, nwords);
   if (ret < 0)
     {
-      dmadbg("ERROR: sam_dmarxsetup failed: %d\n", ret);
+      dmaerr("ERROR: sam_dmarxsetup failed: %d\n", ret);
       return;
     }
 
@@ -1488,7 +1488,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
   ret = sam_dmatxsetup(spics->txdma, paddr, maddr, nwords);
   if (ret < 0)
     {
-      dmadbg("ERROR: sam_dmatxsetup failed: %d\n", ret);
+      dmaerr("ERROR: sam_dmatxsetup failed: %d\n", ret);
       return;
     }
 
@@ -1500,7 +1500,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
   ret = sam_dmastart(spics->rxdma, spi_rxcallback, (void *)spics);
   if (ret < 0)
     {
-      dmadbg("ERROR: RX sam_dmastart failed: %d\n", ret);
+      dmaerr("ERROR: RX sam_dmastart failed: %d\n", ret);
       return;
     }
 
@@ -1509,7 +1509,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
   ret = sam_dmastart(spics->txdma, spi_txcallback, (void *)spics);
   if (ret < 0)
     {
-      dmadbg("ERROR: RX sam_dmastart failed: %d\n", ret);
+      dmaerr("ERROR: RX sam_dmastart failed: %d\n", ret);
       sam_dmastop(spics->rxdma);
       return;
     }
@@ -1531,7 +1531,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
                      (wdentry_t)spi_dmatimeout, 1, (uint32_t)spics);
       if (ret != OK)
         {
-           spidbg("ERROR: wd_start failed: %d\n", ret);
+           spierr("ERROR: wd_start failed: %d\n", ret);
         }
 
       /* Wait for the DMA complete */
@@ -1582,7 +1582,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
 
   if (spics->result)
     {
-      spidbg("ERROR: DMA failed with result: %d\n", spics->result);
+      spierr("ERROR: DMA failed with result: %d\n", spics->result);
     }
 }
 #endif /* CONFIG_SAMA5_SPI_DMA */
@@ -1692,7 +1692,7 @@ struct spi_dev_s *sam_spibus_initialize(int port)
   spics = (struct sam_spics_s *)zalloc(sizeof(struct sam_spics_s));
   if (!spics)
     {
-      spidbg("ERROR: Failed to allocate a chip select structure\n");
+      spierr("ERROR: Failed to allocate a chip select structure\n");
       return NULL;
     }
 
@@ -1715,7 +1715,7 @@ struct spi_dev_s *sam_spibus_initialize(int port)
       spics->rxdma = sam_dmachannel(spino, 0);
       if (!spics->rxdma)
         {
-          spidbg("ERROR: Failed to allocate the RX DMA channel\n");
+          spierr("ERROR: Failed to allocate the RX DMA channel\n");
           spics->candma = false;
         }
     }
@@ -1725,7 +1725,7 @@ struct spi_dev_s *sam_spibus_initialize(int port)
       spics->txdma = sam_dmachannel(spino, 0);
       if (!spics->txdma)
         {
-          spidbg("ERROR: Failed to allocate the TX DMA channel\n");
+          spierr("ERROR: Failed to allocate the TX DMA channel\n");
           sam_dmafree(spics->rxdma);
           spics->rxdma  = NULL;
           spics->candma = false;

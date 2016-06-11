@@ -64,63 +64,63 @@
 
 void posix_spawnattr_dump(posix_spawnattr_t *attr)
 {
-  dbg("attr[%p]:\n", attr);
-  dbg("  flags:    %04x\n", attr->flags);
+  err("attr[%p]:\n", attr);
+  err("  flags:    %04x\n", attr->flags);
   if (attr->flags == 0)
     {
-      dbg("            None\n");
+      err("            None\n");
     }
   else
     {
       if ((attr->flags & POSIX_SPAWN_RESETIDS) != 0)
         {
-          dbg("            POSIX_SPAWN_RESETIDS\n");
+          err("            POSIX_SPAWN_RESETIDS\n");
         }
 
       if ((attr->flags & POSIX_SPAWN_SETPGROUP) != 0)
         {
-          dbg("            POSIX_SPAWN_SETPGROUP\n");
+          err("            POSIX_SPAWN_SETPGROUP\n");
         }
 
       if ((attr->flags & POSIX_SPAWN_SETSCHEDPARAM) != 0)
         {
-          dbg("            POSIX_SPAWN_SETSCHEDPARAM\n");
+          err("            POSIX_SPAWN_SETSCHEDPARAM\n");
         }
 
       if ((attr->flags & POSIX_SPAWN_SETSCHEDULER) != 0)
         {
-          dbg("            POSIX_SPAWN_SETSCHEDULER\n");
+          err("            POSIX_SPAWN_SETSCHEDULER\n");
         }
 
       if ((attr->flags & POSIX_SPAWN_SETSIGDEF) != 0)
         {
-          dbg("            POSIX_SPAWN_SETSIGDEF\n");
+          err("            POSIX_SPAWN_SETSIGDEF\n");
         }
 
       if ((attr->flags & POSIX_SPAWN_SETSIGMASK) != 0)
         {
-          dbg("            POSIX_SPAWN_SETSIGMASK\n");
+          err("            POSIX_SPAWN_SETSIGMASK\n");
         }
     }
 
-  dbg("  priority: %d\n", attr->priority);
+  err("  priority: %d\n", attr->priority);
 
-  dbg("  policy:   %d\n", attr->policy);
+  err("  policy:   %d\n", attr->policy);
   if (attr->policy == SCHED_FIFO)
     {
-      dbg("            SCHED_FIFO\n");
+      err("            SCHED_FIFO\n");
     }
   else if (attr->policy == SCHED_RR)
     {
-      dbg("            SCHED_RR\n");
+      err("            SCHED_RR\n");
     }
   else
     {
-      dbg("            Unrecognized\n");
+      err("            Unrecognized\n");
     }
 
 #ifndef CONFIG_DISABLE_SIGNALS
-  dbg("  sigmask:  %08x\n", attr->sigmask);
+  err("  sigmask:  %08x\n", attr->sigmask);
 #endif
 }
 

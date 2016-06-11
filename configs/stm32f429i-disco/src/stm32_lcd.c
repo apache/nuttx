@@ -317,7 +317,7 @@ static int stm32_ili9341_initialize(void)
 
   /* Select spi device */
 
-  dbg("Initialize ili9341 lcd driver\n");
+  err("Initialize ili9341 lcd driver\n");
   lcd->select(lcd);
 
 #ifdef CONFIG_DEBUG_LCD
@@ -325,13 +325,13 @@ static int stm32_ili9341_initialize(void)
 
   lcd->sendcmd(lcd, ILI9341_READ_ID1);
   lcd->recvparam(lcd, &param);
-  dbg("ili9341 LCD driver: LCD modules manufacturer ID: %d\n", param);
+  err("ili9341 LCD driver: LCD modules manufacturer ID: %d\n", param);
   lcd->sendcmd(lcd, ILI9341_READ_ID2);
   lcd->recvparam(lcd, &param);
-  dbg("ili9341 LCD driver: LCD modules driver version ID: %d\n", param);
+  err("ili9341 LCD driver: LCD modules driver version ID: %d\n", param);
   lcd->sendcmd(lcd, ILI9341_READ_ID3);
   lcd->recvparam(lcd, &param);
-  dbg("ili9341 LCD driver: LCD modules driver ID: %d\n", param);
+  err("ili9341 LCD driver: LCD modules driver ID: %d\n", param);
 #endif
 
   /* Reset the lcd display to the default state */

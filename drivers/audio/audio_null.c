@@ -375,7 +375,7 @@ static int null_configure(FAR struct audio_lowerhalf_s *dev,
 #endif  /* CONFIG_AUDIO_EXCLUDE_TONE */
 
         default:
-          auddbg("    Unrecognized feature unit\n");
+          auderr("    Unrecognized feature unit\n");
           break;
         }
       break;
@@ -443,7 +443,7 @@ static void *null_workerthread(pthread_addr_t pvarg)
 
       if (msglen < sizeof(struct audio_msg_s))
         {
-          auddbg("ERROR: Message too small: %d\n", msglen);
+          auderr("ERROR: Message too small: %d\n", msglen);
           continue;
         }
 
@@ -467,7 +467,7 @@ static void *null_workerthread(pthread_addr_t pvarg)
             break;
 
           default:
-            auddbg("ERROR: Ignoring message ID %d\n", msg.msgId);
+            auderr("ERROR: Ignoring message ID %d\n", msg.msgId);
             break;
         }
     }
@@ -527,7 +527,7 @@ static int null_start(FAR struct audio_lowerhalf_s *dev)
     {
       /* Error creating message queue! */
 
-      auddbg("ERROR: Couldn't allocate message queue\n");
+      auderr("ERROR: Couldn't allocate message queue\n");
       return -ENOMEM;
     }
 
@@ -551,7 +551,7 @@ static int null_start(FAR struct audio_lowerhalf_s *dev)
                        (pthread_addr_t)priv);
   if (ret != OK)
     {
-      auddbg("ERROR: pthread_create failed: %d\n", ret);
+      auderr("ERROR: pthread_create failed: %d\n", ret);
     }
   else
     {
@@ -843,6 +843,6 @@ FAR struct audio_lowerhalf_s *audio_null_initialize(void)
       return &priv->dev;
     }
 
-  auddbg("ERROR: Failed to allocate null audio device\n");
+  auderr("ERROR: Failed to allocate null audio device\n");
   return NULL;
 }

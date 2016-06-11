@@ -345,7 +345,7 @@ int vnc_raw(FAR struct vnc_session_s *session, FAR struct nxgl_rect_s *rect)
         break;
 
       default:
-        gdbg("ERROR: Unrecognized color format: %d\n", session->colorfmt);
+        gerr("ERROR: Unrecognized color format: %d\n", session->colorfmt);
         return -EINVAL;
     }
 
@@ -483,7 +483,7 @@ int vnc_raw(FAR struct vnc_session_s *session, FAR struct nxgl_rect_s *rect)
                   if (nsent < 0)
                     {
                       int errcode = get_errno();
-                      gdbg("ERROR: Send FrameBufferUpdate failed: %d\n",
+                      gerr("ERROR: Send FrameBufferUpdate failed: %d\n",
                            errcode);
                       DEBUGASSERT(errcode > 0);
                       return -errcode;

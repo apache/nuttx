@@ -176,7 +176,7 @@ static int up_getvideoinfo(FAR struct fb_vtable_s *vtable,
 
       if (session == NULL || session->state != VNCSERVER_RUNNING)
         {
-          gdbg("ERROR: session is not connected\n");
+          gerr("ERROR: session is not connected\n");
           return -ENOTCONN;
         }
 
@@ -193,7 +193,7 @@ static int up_getvideoinfo(FAR struct fb_vtable_s *vtable,
       return OK;
     }
 
-  gdbg("ERROR: Invalid arguments\n");
+  gerr("ERROR: Invalid arguments\n");
   return -EINVAL;
 }
 
@@ -217,7 +217,7 @@ static int up_getplaneinfo(FAR struct fb_vtable_s *vtable, int planeno,
 
       if (session == NULL || session->state != VNCSERVER_RUNNING)
         {
-          gdbg("ERROR: session is not connected\n");
+          gerr("ERROR: session is not connected\n");
           return -ENOTCONN;
         }
 
@@ -237,7 +237,7 @@ static int up_getplaneinfo(FAR struct fb_vtable_s *vtable, int planeno,
       return OK;
     }
 
-  gdbg("Returning EINVAL\n");
+  gerr("Returning EINVAL\n");
   return -EINVAL;
 }
 
@@ -264,7 +264,7 @@ static int up_getcmap(FAR struct fb_vtable_s *vtable,
 
       if (session == NULL || session->state != VNCSERVER_RUNNING)
         {
-          gdbg("ERROR: session is not connected\n");
+          gerr("ERROR: session is not connected\n");
           return -ENOTCONN;
         }
 
@@ -274,7 +274,7 @@ static int up_getcmap(FAR struct fb_vtable_s *vtable,
       return OK;
     }
 
-  gdbg("Returning EINVAL\n");
+  gerr("Returning EINVAL\n");
   return -EINVAL;
 }
 #endif
@@ -301,7 +301,7 @@ static int up_putcmap(FAR struct fb_vtable_s *vtable, FAR const struct fb_cmap_s
 
       if (session == NULL || session->state != VNCSERVER_RUNNING)
         {
-          gdbg("ERROR: session is not connected\n");
+          gerr("ERROR: session is not connected\n");
           return -ENOTCONN;
         }
 
@@ -311,7 +311,7 @@ static int up_putcmap(FAR struct fb_vtable_s *vtable, FAR const struct fb_cmap_s
       return OK;
     }
 
-  gdbg("Returning EINVAL\n");
+  gerr("Returning EINVAL\n");
   return -EINVAL;
 }
 #endif
@@ -339,7 +339,7 @@ static int up_getcursor(FAR struct fb_vtable_s *vtable,
 
       if (session == NULL || session->state != VNCSERVER_RUNNING)
         {
-          gdbg("ERROR: session is not connected\n");
+          gerr("ERROR: session is not connected\n");
           return -ENOTCONN;
         }
 
@@ -347,7 +347,7 @@ static int up_getcursor(FAR struct fb_vtable_s *vtable,
 
       return OK;
     }
-  gdbg("Returning EINVAL\n");
+  gerr("Returning EINVAL\n");
   return -EINVAL;
 }
 #endif
@@ -375,7 +375,7 @@ static int up_setcursor(FAR struct fb_vtable_s *vtable,
 
       if (session == NULL || session->state != VNCSERVER_RUNNING)
         {
-          gdbg("ERROR: session is not connected\n");
+          gerr("ERROR: session is not connected\n");
           return -ENOTCONN;
         }
 
@@ -400,7 +400,7 @@ static int up_setcursor(FAR struct fb_vtable_s *vtable,
       return OK;
     }
 
-  gdbg("Returning EINVAL\n");
+  gerr("Returning EINVAL\n");
   return -EINVAL;
 }
 #endif
@@ -456,7 +456,7 @@ static int vnc_start_server(int display)
                        (main_t)vnc_server, argv);
   if (pid < 0)
     {
-      gdbg("ERROR: Failed to start the VNC server: %d\n", (int)pid);
+      gerr("ERROR: Failed to start the VNC server: %d\n", (int)pid);
       return (int)pid;
     }
 
@@ -588,7 +588,7 @@ static inline int vnc_wait_connect(int display)
           if (result < 0)
             {
               DEBUGASSERT(g_vnc_sessions[display] == NULL);
-              gdbg("ERROR: VNC server startup failed: %d\n", result);
+              gerr("ERROR: VNC server startup failed: %d\n", result);
             }
           else
             {
@@ -884,7 +884,7 @@ void nx_notify_rectangle(FAR NX_PLANEINFOTYPE *pinfo,
       ret = vnc_update_rectangle(session, rect, true);
       if (ret < 0)
         {
-          gdbg("ERROR: vnc_update_rectangle failed: %d\n", ret);
+          gerr("ERROR: vnc_update_rectangle failed: %d\n", ret);
         }
     }
 }

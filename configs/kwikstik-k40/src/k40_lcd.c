@@ -61,9 +61,9 @@
 /* Debug ******************************************************************************/
 
 #ifdef CONFIG_DEBUG_LCD
-# define lcddbg(format, ...)  info(format, ##__VA_ARGS__)
+# define lcderr(format, ...)  info(format, ##__VA_ARGS__)
 #else
-# define lcddbg(x...)
+# define lcderr(x...)
 #endif
 
 /**************************************************************************************

@@ -74,7 +74,7 @@
 /* Debug ********************************************************************/
 
 #if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_DEBUG_LEDS)
-#  define leddbg  llerr
+#  define lederr  llerr
 #  ifdef CONFIG_DEBUG_INFO
 #    define ledinfo llerr
 #  else
@@ -83,7 +83,7 @@
 #else
 #  undef CONFIG_DEBUG_LEDS
 #  undef CONFIG_DEBUG_INFO
-#  define leddbg(x...)
+#  define lederr(x...)
 #  define ledinfo(x...)
 #endif
 

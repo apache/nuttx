@@ -89,10 +89,10 @@
 #endif
 
 #ifdef CONFIG_LCD_NOKIADBG
-#  define lcddbg(format, ...) info(format, ##__VA_ARGS__)
+#  define lcderr(format, ...) info(format, ##__VA_ARGS__)
 #  define lcd_dumpgpio(m)     lpc17_dumpgpio(LPC1766STK_LCD_RST, m)
 #else
-#  define lcddbg(x...)
+#  define lcderr(x...)
 #  define lcd_dumpgpio(m)
 #endif
 

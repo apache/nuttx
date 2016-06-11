@@ -4692,7 +4692,7 @@ static void sam_sw_setup(struct sam_usbdev_s *priv)
     kmm_memalign(16, CONFIG_SAMV7_USBDEVHS_NDTDS * sizeof(struct sam_dtd_s));
   if (!priv->dtdpool)
      {
-      udbg("ERROR: Failed to allocate the DMA transfer descriptor pool\n");
+      uerr("ERROR: Failed to allocate the DMA transfer descriptor pool\n");
       return NULL;
     }
 

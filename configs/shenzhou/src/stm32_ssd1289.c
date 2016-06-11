@@ -89,10 +89,10 @@
 /* Debug ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_LCD
-#  define lcddbg         dbg
+#  define lcderr         err
 #  define lcdinfo        info
 #else
-#  define lcddbg(x...)
+#  define lcderr(x...)
 #  define lcdinfo(x...)
 #endif
 
@@ -277,18 +277,18 @@ static struct stm32_lower_s g_lcdlower =
 #ifdef CONFIG_LCD_REGDEBUG
 static void stm32_lcdshow(FAR struct stm32_lower_s *priv, FAR const char *msg)
 {
-  dbg("%s:\n", msg);
-  dbg("  CRTL   RS: %d CS: %d RD: %d WR: %d LE: %d\n",
+  err("%s:\n", msg);
+  err("  CRTL   RS: %d CS: %d RD: %d WR: %d LE: %d\n",
       getreg32(LCD_RS_READ), getreg32(LCD_CS_READ), getreg32(LCD_RD_READ),
       getreg32(LCD_WR_READ), getreg32(LCD_LE_READ));
-  dbg("  DATA   CR: %08x %08x\n", getreg32(LCD_CRL), getreg32(LCD_CRH));
+  err("  DATA   CR: %08x %08x\n", getreg32(LCD_CRL), getreg32(LCD_CRH));
   if (priv->output)
     {
-      dbg("  OUTPUT: %08x\n", getreg32(LCD_ODR));
+      err("  OUTPUT: %08x\n", getreg32(LCD_ODR));
     }
   else
     {
-      dbg("  INPUT:  %08x\n", getreg32(LCD_IDR));
+      err("  INPUT:  %08x\n", getreg32(LCD_IDR));
     }
 }
 #endif
@@ -563,7 +563,7 @@ int board_lcd_initialize(void)
       priv->drvr = ssd1289_lcdinitialize(&priv->dev);
       if (!priv->drvr)
         {
-          lcddbg("ERROR: ssd1289_lcdinitialize failed\n");
+          lcderr("ERROR: ssd1289_lcdinitialize failed\n");
           return -ENODEV;
         }
     }

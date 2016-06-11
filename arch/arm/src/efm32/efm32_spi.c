@@ -100,14 +100,14 @@
 #endif
 
 #ifdef CONFIG_DEBUG_SPI
-#  define spidbg llerr
+#  define spierr llerr
 #  ifdef CONFIG_DEBUG_INFO
 #    define spiinfo llerr
 #  else
 #    define spiinfo(x...)
 #  endif
 #else
-#  define spidbg(x...)
+#  define spierr(x...)
 #  define spiinfo(x...)
 #endif
 
@@ -1456,7 +1456,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
       ret = wd_start(priv->wdog, (int)ticks, spi_dma_timeout, 1, (uint32_t)priv);
       if (ret < 0)
         {
-          spidbg("ERROR: Failed to start timeout\n");
+          spierr("ERROR: Failed to start timeout\n");
         }
 
       /* Then wait for each to complete.  TX should complete first */
@@ -1594,7 +1594,7 @@ static int spi_portinitialize(struct efm32_spidev_s *priv)
   priv->rxdmach = efm32_dmachannel();
   if (!priv->rxdmach)
     {
-      spidbg("ERROR: Failed to allocate the RX DMA channel for SPI port: %d\n",
+      spierr("ERROR: Failed to allocate the RX DMA channel for SPI port: %d\n",
              port);
       goto errout;
     }
@@ -1602,7 +1602,7 @@ static int spi_portinitialize(struct efm32_spidev_s *priv)
   priv->txdmach = efm32_dmachannel();
   if (!priv->txdmach)
     {
-      spidbg("ERROR: Failed to allocate the TX DMA channel for SPI port: %d\n",
+      spierr("ERROR: Failed to allocate the TX DMA channel for SPI port: %d\n",
              port);
       goto errout_with_rxdmach;
     }
@@ -1612,7 +1612,7 @@ static int spi_portinitialize(struct efm32_spidev_s *priv)
   priv->wdog = wd_create();
   if (!priv->wdog)
     {
-      spidbg("ERROR: Failed to create a timer for SPI port: %d\n", port);
+      spierr("ERROR: Failed to create a timer for SPI port: %d\n", port);
       goto errout_with_txdmach;
     }
 
@@ -1709,7 +1709,7 @@ struct spi_dev_s *efm32_spibus_initialize(int port)
   else
 #endif
     {
-      spidbg("ERROR: Unsupported SPI port: %d\n", port);
+      spierr("ERROR: Unsupported SPI port: %d\n", port);
       return NULL;
     }
 
@@ -1731,7 +1731,7 @@ struct spi_dev_s *efm32_spibus_initialize(int port)
       ret = spi_portinitialize(priv);
       if (ret < 0)
         {
-          spidbg("ERROR: Failed to initialize SPI port %d\n", port);
+          spierr("ERROR: Failed to initialize SPI port %d\n", port);
           leave_critical_section(flags);
           return NULL;
         }

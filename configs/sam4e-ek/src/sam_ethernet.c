@@ -74,10 +74,10 @@
  */
 
 #ifdef CONFIG_NETDEV_PHY_DEBUG
-#  define phydbg    dbg
+#  define phyerr    err
 #  define phyllerr  llerr
 #else
-#  define phydbg(x...)
+#  define phyerr(x...)
 #  define phyllerr(x...)
 #endif
 
@@ -100,7 +100,7 @@ static xcpt_t g_emac_handler;
 #ifdef CONFIG_SAM34_GPIOD_IRQ
 static void sam_emac_phy_enable(bool enable)
 {
-  phydbg("IRQ%d: enable=%d\n", SAM_PHY_IRQ, enable);
+  phyerr("IRQ%d: enable=%d\n", SAM_PHY_IRQ, enable);
   if (enable)
     {
       sam_gpioirqenable(SAM_PHY_IRQ);
@@ -126,7 +126,7 @@ static void sam_emac_phy_enable(bool enable)
 
 void weak_function sam_netinitialize(void)
 {
-  phydbg("Configuring %08x\n", GPIO_PHY_IRQ);
+  phyerr("Configuring %08x\n", GPIO_PHY_IRQ);
   sam_configgpio(GPIO_PHY_IRQ);
 }
 
@@ -206,11 +206,11 @@ xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler, phy_enable_t *enable)
   DEBUGASSERT(intf);
 
   ninfo("%s: handler=%p\n", intf, handler);
-  phydbg("EMAC: devname=%s\n", SAM34_EMAC_DEVNAME);
+  phyerr("EMAC: devname=%s\n", SAM34_EMAC_DEVNAME);
 
   if (strcmp(intf, SAM34_EMAC_DEVNAME) == 0)
     {
-      phydbg("Select EMAC\n");
+      phyerr("Select EMAC\n");
       phandler = &g_emac_handler;
       pinset   = GPIO_PHY_IRQ;
       irq      = SAM_PHY_IRQ;
@@ -218,7 +218,7 @@ xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler, phy_enable_t *enable)
     }
   else
     {
-      ndbg("Unsupported interface: %s\n", intf);
+      nerr("Unsupported interface: %s\n", intf);
       return NULL;
     }
 
@@ -237,15 +237,15 @@ xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler, phy_enable_t *enable)
 
   if (handler)
     {
-      phydbg("Configure pin: %08x\n", pinset);
+      phyerr("Configure pin: %08x\n", pinset);
       sam_gpioirq(pinset);
 
-      phydbg("Attach IRQ%d\n", irq);
+      phyerr("Attach IRQ%d\n", irq);
       (void)irq_attach(irq, handler);
     }
   else
     {
-      phydbg("Detach IRQ%d\n", irq);
+      phyerr("Detach IRQ%d\n", irq);
       (void)irq_detach(irq);
       enabler = NULL;
     }

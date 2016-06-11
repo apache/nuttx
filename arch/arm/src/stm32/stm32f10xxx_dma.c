@@ -741,12 +741,12 @@ void stm32_dmadump(DMA_HANDLE handle, const struct stm32_dmaregs_s *regs,
   struct stm32_dma_s *dmach = (struct stm32_dma_s *)handle;
   uint32_t dmabase = DMA_BASE(dmach->base);
 
-  dmadbg("DMA Registers: %s\n", msg);
-  dmadbg("   ISRC[%08x]: %08x\n", dmabase + STM32_DMA_ISR_OFFSET, regs->isr);
-  dmadbg("    CCR[%08x]: %08x\n", dmach->base + STM32_DMACHAN_CCR_OFFSET, regs->ccr);
-  dmadbg("  CNDTR[%08x]: %08x\n", dmach->base + STM32_DMACHAN_CNDTR_OFFSET, regs->cndtr);
-  dmadbg("   CPAR[%08x]: %08x\n", dmach->base + STM32_DMACHAN_CPAR_OFFSET, regs->cpar);
-  dmadbg("   CMAR[%08x]: %08x\n", dmach->base + STM32_DMACHAN_CMAR_OFFSET, regs->cmar);
+  dmaerr("DMA Registers: %s\n", msg);
+  dmaerr("   ISRC[%08x]: %08x\n", dmabase + STM32_DMA_ISR_OFFSET, regs->isr);
+  dmaerr("    CCR[%08x]: %08x\n", dmach->base + STM32_DMACHAN_CCR_OFFSET, regs->ccr);
+  dmaerr("  CNDTR[%08x]: %08x\n", dmach->base + STM32_DMACHAN_CNDTR_OFFSET, regs->cndtr);
+  dmaerr("   CPAR[%08x]: %08x\n", dmach->base + STM32_DMACHAN_CPAR_OFFSET, regs->cpar);
+  dmaerr("   CMAR[%08x]: %08x\n", dmach->base + STM32_DMACHAN_CMAR_OFFSET, regs->cmar);
 }
 #endif
 

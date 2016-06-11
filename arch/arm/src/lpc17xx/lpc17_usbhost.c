@@ -1547,7 +1547,7 @@ static int lpc17_ctrltd(struct lpc17_usbhost_s *priv, struct lpc17_ed_s *ed,
   xfrinfo = lpc17_alloc_xfrinfo();
   if (xfrinfo == NULL)
     {
-      udbg("ERROR: lpc17_alloc_xfrinfo failed\n");
+      uerr("ERROR: lpc17_alloc_xfrinfo failed\n");
       return -ENOMEM;
     }
 
@@ -1566,7 +1566,7 @@ static int lpc17_ctrltd(struct lpc17_usbhost_s *priv, struct lpc17_ed_s *ed,
   ret = lpc17_wdhwait(priv, ed);
   if (ret < 0)
     {
-      udbg("ERROR: Device disconnected\n");
+      uerr("ERROR: Device disconnected\n");
       goto errout_with_xfrinfo;
     }
 
@@ -1607,7 +1607,7 @@ static int lpc17_ctrltd(struct lpc17_usbhost_s *priv, struct lpc17_ed_s *ed,
         }
       else
         {
-          udbg("ERROR: Bad TD completion status: %d\n", xfrinfo->tdstatus);
+          uerr("ERROR: Bad TD completion status: %d\n", xfrinfo->tdstatus);
           ret = xfrinfo->tdstatus == TD_CC_STALL ? -EPERM : -EIO;
         }
     }
@@ -1967,7 +1967,7 @@ static int lpc17_wait(struct usbhost_connection_s *conn,
               *hport = connport;
               leave_critical_section(flags);
 
-              udbg("RHport Connected: %s\n",
+              uerr("RHport Connected: %s\n",
                    connport->connected ? "YES" : "NO");
 
               return OK;
@@ -1987,7 +1987,7 @@ static int lpc17_wait(struct usbhost_connection_s *conn,
           *hport = connport;
           leave_critical_section(flags);
 
-          udbg("Hub port Connected: %s\n", connport->connected ? "YES" : "NO");
+          uerr("Hub port Connected: %s\n", connport->connected ? "YES" : "NO");
           return OK;
         }
 #endif
@@ -2041,7 +2041,7 @@ static int lpc17_rh_enumerate(struct usbhost_connection_s *conn,
     {
       /* No, return an error */
 
-      udbg("Not connected\n");
+      uerr("Not connected\n");
       return -ENODEV;
     }
 
@@ -2093,7 +2093,7 @@ static int lpc17_enumerate(FAR struct usbhost_connection_s *conn,
   ret = usbhost_enumerate(hport, &hport->devclass);
   if (ret < 0)
     {
-      udbg("ERROR: Enumeration failed: %d\n", ret);
+      uerr("ERROR: Enumeration failed: %d\n", ret);
     }
 
   return ret;
@@ -2299,7 +2299,7 @@ static int lpc17_epalloc(struct usbhost_driver_s *drvr,
         {
           /* No.. destroy it and report the error */
 
-          udbg("ERROR: Failed to queue ED for transfer type: %d\n", ed->xfrtype);
+          uerr("ERROR: Failed to queue ED for transfer type: %d\n", ed->xfrtype);
           sem_destroy(&ed->wdhsem);
           lpc17_edfree(ed);
         }
@@ -2947,7 +2947,7 @@ static ssize_t lpc17_transfer(struct usbhost_driver_s *drvr, usbhost_ep_t ep,
   xfrinfo = lpc17_alloc_xfrinfo();
   if (xfrinfo == NULL)
     {
-      udbg("ERROR: lpc17_alloc_xfrinfo failed\n");
+      uerr("ERROR: lpc17_alloc_xfrinfo failed\n");
       nbytes = -ENOMEM;
       goto errout_with_sem;
     }
@@ -2966,7 +2966,7 @@ static ssize_t lpc17_transfer(struct usbhost_driver_s *drvr, usbhost_ep_t ep,
   ret = lpc17_dma_alloc(priv, ed, buffer, buflen, &alloc);
   if (ret < 0)
     {
-      udbg("ERROR: lpc17_dma_alloc failed: %d\n", ret);
+      uerr("ERROR: lpc17_dma_alloc failed: %d\n", ret);
       nbytes = (ssize_t)ret;
       goto errout_with_xfrinfo;
     }
@@ -2987,7 +2987,7 @@ static ssize_t lpc17_transfer(struct usbhost_driver_s *drvr, usbhost_ep_t ep,
   ret = lpc17_wdhwait(priv, ed);
   if (ret < 0)
     {
-      udbg("ERROR: Device disconnected\n");
+      uerr("ERROR: Device disconnected\n");
       nbytes = (ssize_t)ret;
       goto errout_with_buffers;
     }
@@ -2997,7 +2997,7 @@ static ssize_t lpc17_transfer(struct usbhost_driver_s *drvr, usbhost_ep_t ep,
   ret = lpc17_transfer_common(priv, ed, buffer, buflen);
   if (ret < 0)
     {
-      udbg("ERROR: lpc17_transfer_common failed: %d\n", ret);
+      uerr("ERROR: lpc17_transfer_common failed: %d\n", ret);
       nbytes = (ssize_t)ret;
       goto errout_with_wdhwait;
     }
@@ -3021,7 +3021,7 @@ static ssize_t lpc17_transfer(struct usbhost_driver_s *drvr, usbhost_ep_t ep,
        * might understand.
        */
 
-      udbg("ERROR: Bad TD completion status: %d\n", xfrinfo->tdstatus);
+      uerr("ERROR: Bad TD completion status: %d\n", xfrinfo->tdstatus);
 
       switch (xfrinfo->tdstatus)
         {
@@ -3111,7 +3111,7 @@ static void lpc17_asynch_completion(struct lpc17_usbhost_s *priv,
        * might understand.
        */
 
-      udbg("ERROR: Bad TD completion status: %d\n", xfrinfo->tdstatus);
+      uerr("ERROR: Bad TD completion status: %d\n", xfrinfo->tdstatus);
 
       switch (xfrinfo->tdstatus)
         {
@@ -3213,7 +3213,7 @@ static int lpc17_asynch(struct usbhost_driver_s *drvr, usbhost_ep_t ep,
   xfrinfo = lpc17_alloc_xfrinfo();
   if (xfrinfo == NULL)
     {
-      udbg("ERROR: lpc17_alloc_xfrinfo failed\n");
+      uerr("ERROR: lpc17_alloc_xfrinfo failed\n");
       ret = -ENOMEM;
       goto errout_with_sem;
     }
@@ -3234,7 +3234,7 @@ static int lpc17_asynch(struct usbhost_driver_s *drvr, usbhost_ep_t ep,
   ret = lpc17_dma_alloc(priv, ed, buffer, buflen, &xfrinfo->alloc);
   if (ret < 0)
     {
-      udbg("ERROR: lpc17_dma_alloc failed: %d\n", ret);
+      uerr("ERROR: lpc17_dma_alloc failed: %d\n", ret);
       goto errout_with_sem;
     }
 
@@ -3251,7 +3251,7 @@ static int lpc17_asynch(struct usbhost_driver_s *drvr, usbhost_ep_t ep,
   ret = lpc17_transfer_common(priv, ed, buffer, buflen);
   if (ret < 0)
     {
-      udbg("ERROR: lpc17_transfer_common failed: %d\n", ret);
+      uerr("ERROR: lpc17_transfer_common failed: %d\n", ret);
       goto errout_with_asynch;
     }
 
@@ -3695,7 +3695,7 @@ struct usbhost_connection_s *lpc17_usbhost_initialize(int controller)
   lpc17_configgpio(GPIO_USB_OVRCR);   /* USB port Over-Current status */
   usbhost_dumpgpio();
 
-  udbg("Initializing Host Stack\n");
+  uerr("Initializing Host Stack\n");
 
   /* Show AHB SRAM memory map */
 
@@ -3825,7 +3825,7 @@ struct usbhost_connection_s *lpc17_usbhost_initialize(int controller)
 
   if (irq_attach(LPC17_IRQ_USB, lpc17_usbinterrupt) != 0)
     {
-      udbg("Failed to attach IRQ\n");
+      uerr("Failed to attach IRQ\n");
       return NULL;
     }
 
@@ -3850,7 +3850,7 @@ struct usbhost_connection_s *lpc17_usbhost_initialize(int controller)
   /* Enable interrupts at the interrupt controller */
 
   up_enable_irq(LPC17_IRQ_USB); /* enable USB interrupt */
-  udbg("USB host Initialized, Device connected:%s\n",
+  uerr("USB host Initialized, Device connected:%s\n",
        priv->connected ? "YES" : "NO");
 
   return &g_usbconn;

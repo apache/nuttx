@@ -116,7 +116,7 @@ static inline FAR struct semholder_s *sem_allocholder(sem_t *sem)
 #endif
   else
     {
-      sdbg("Insufficient pre-allocated holders\n");
+      serr("Insufficient pre-allocated holders\n");
       pholder = NULL;
     }
 
@@ -283,7 +283,7 @@ static int sem_boostholderprio(FAR struct semholder_s *pholder,
 
   if (!sched_verifytcb(htcb))
     {
-      sdbg("TCB 0x%08x is a stale handle, counts lost\n", htcb);
+      serr("TCB 0x%08x is a stale handle, counts lost\n", htcb);
       sem_freeholder(sem, pholder);
     }
 
@@ -321,7 +321,7 @@ static int sem_boostholderprio(FAR struct semholder_s *pholder,
                 }
               else
                 {
-                  sdbg("CONFIG_SEM_NNESTPRIO exceeded\n");
+                  serr("CONFIG_SEM_NNESTPRIO exceeded\n");
                 }
             }
 
@@ -402,10 +402,10 @@ static int sem_dumpholder(FAR struct semholder_s *pholder, FAR sem_t *sem,
                           FAR void *arg)
 {
 #if CONFIG_SEM_PREALLOCHOLDERS > 0
-  dbg("  %08x: %08x %08x %04x\n",
+  err("  %08x: %08x %08x %04x\n",
       pholder, pholder->flink, pholder->htcb, pholder->counts);
 #else
-  dbg("  %08x: %08x %04x\n", pholder, pholder->htcb, pholder->counts);
+  err("  %08x: %08x %04x\n", pholder, pholder->htcb, pholder->counts);
 #endif
   return 0;
 }
@@ -434,7 +434,7 @@ static int sem_restoreholderprio(FAR struct semholder_s *pholder,
 
   if (!sched_verifytcb(htcb))
     {
-      sdbg("TCB 0x%08x is a stale handle, counts lost\n", htcb);
+      serr("TCB 0x%08x is a stale handle, counts lost\n", htcb);
       sem_freeholder(sem, pholder);
     }
 
@@ -819,13 +819,13 @@ void sem_destroyholder(FAR sem_t *sem)
 #if CONFIG_SEM_PREALLOCHOLDERS > 0
   if (sem->hhead)
     {
-      sdbg("Semaphore destroyed with holders\n");
+      serr("Semaphore destroyed with holders\n");
       (void)sem_foreachholder(sem, sem_recoverholders, NULL);
     }
 #else
   if (sem->holder.htcb)
     {
-      sdbg("Semaphore destroyed with holder\n");
+      serr("Semaphore destroyed with holder\n");
     }
 
   sem->holder.htcb = NULL;

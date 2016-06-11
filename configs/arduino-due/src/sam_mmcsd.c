@@ -259,7 +259,7 @@ int sam_sdinitialize(int minor)
   spi = sam_mmcsd_spiinitialize();
   if (!spi)
     {
-      fdbg("Failed to bit bang SPI for the MMC/SD slot\n");
+      ferr("Failed to bit bang SPI for the MMC/SD slot\n");
       return -ENODEV;
     }
 
@@ -273,7 +273,7 @@ int sam_sdinitialize(int minor)
   ret = mmcsd_spislotinitialize(minor, SAM34_MMCSDSLOTNO, spi);
   if (ret < 0)
     {
-      fdbg("Failed to bind  bit bang SPI device to MMC/SD slot %d: %d\n",
+      ferr("Failed to bind  bit bang SPI device to MMC/SD slot %d: %d\n",
             SAM34_MMCSDSLOTNO, ret);
       return ret;
     }

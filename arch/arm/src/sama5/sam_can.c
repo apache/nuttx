@@ -127,12 +127,12 @@
 /* Non-standard debug that may be enabled just for testing CAN */
 
 #ifdef CONFIG_DEBUG_CAN
-#  define candbg    dbg
+#  define canerr    err
 #  define caninfo   info
 #  define canllerr  llerr
 #  define canllinfo llinfo
 #else
-#  define candbg(x...)
+#  define canerr(x...)
 #  define caninfo(x...)
 #  define canllerr(x...)
 #  define canllinfo(x...)
@@ -722,7 +722,7 @@ static int can_recvsetup(FAR struct sam_can_s *priv)
       mbndx = can_mballoc(priv);
       if (mbndx < 0)
         {
-          candbg("ERROR: Failed to allocate mailbox %d: %d\n", mbno, mbndx);
+          canerr("ERROR: Failed to allocate mailbox %d: %d\n", mbno, mbndx);
           return mbndx;
         }
 
@@ -1119,7 +1119,7 @@ static int can_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
   mbndx = can_mballoc(priv);
   if (mbndx < 0)
     {
-      candbg("ERROR: CAN%d failed to allocate a mailbox: %d\n",
+      canerr("ERROR: CAN%d failed to allocate a mailbox: %d\n",
              priv->config->port, mbndx);
       return mbndx;
     }
@@ -1708,7 +1708,7 @@ static int can_bittiming(struct sam_can_s *priv)
     {
       /* The BRP field must be within the range 1 - 0x7f */
 
-      candbg("CAN%d: baud %d too high\n", config->port, config->baud);
+      canerr("CAN%d: baud %d too high\n", config->port, config->baud);
       return -EINVAL;
     }
 
@@ -1756,7 +1756,7 @@ static int can_bittiming(struct sam_can_s *priv)
 
   if ((propag + phase1 + phase2) != (uint32_t)(tq - 4))
     {
-      candbg("CAN%d: Could not realize baud %d\n", config->port, config->baud);
+      canerr("CAN%d: Could not realize baud %d\n", config->port, config->baud);
       return -EINVAL;
     }
 
@@ -1890,7 +1890,7 @@ static int can_hwinitialize(struct sam_can_s *priv)
     }
   else
     {
-      candbg("ERROR: Cannot realize CAN input frequency\n");
+      canerr("ERROR: Cannot realize CAN input frequency\n");
       return -EINVAL;
     }
 
@@ -1912,7 +1912,7 @@ static int can_hwinitialize(struct sam_can_s *priv)
   ret = can_bittiming(priv);
   if (ret < 0)
     {
-      candbg("ERROR: Failed to set bit timing: %d\n", ret);
+      canerr("ERROR: Failed to set bit timing: %d\n", ret);
       return ret;
     }
 
@@ -1922,7 +1922,7 @@ static int can_hwinitialize(struct sam_can_s *priv)
   ret = can_autobaud(priv);
   if (ret < 0)
     {
-      candbg("ERROR: can_autobaud failed: %d\n", ret);
+      canerr("ERROR: can_autobaud failed: %d\n", ret);
       return ret;
     }
 #endif
@@ -1999,7 +1999,7 @@ FAR struct can_dev_s *sam_caninitialize(int port)
   else
 #endif
     {
-      candbg("ERROR: Unsupported port %d\n", port);
+      canerr("ERROR: Unsupported port %d\n", port);
       return NULL;
     }
 
