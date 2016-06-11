@@ -1049,7 +1049,7 @@ static int usbhost_mouse_poll(int argc, char *argv[])
 #ifndef CONFIG_HIDMOUSE_TSCIF
   uint8_t buttons;
 #endif
-#if defined(CONFIG_DEBUG_USB) && defined(CONFIG_DEBUG_VERBOSE)
+#if defined(CONFIG_DEBUG_USB) && defined(CONFIG_DEBUG_INFO)
   unsigned int npolls = 0;
 #endif
   unsigned int nerrors = 0;
@@ -1208,7 +1208,7 @@ static int usbhost_mouse_poll(int argc, char *argv[])
        * polling is still happening.
        */
 
-#if defined(CONFIG_DEBUG_USB) && defined(CONFIG_DEBUG_VERBOSE)
+#if defined(CONFIG_DEBUG_USB) && defined(CONFIG_DEBUG_INFO)
       npolls++;
       if ((npolls & 31) == 0)
         {

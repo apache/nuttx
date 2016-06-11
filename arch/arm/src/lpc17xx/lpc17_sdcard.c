@@ -94,7 +94,7 @@
  *     operate with only a single data line (the default is to use all
  *     4 SD data lines).
  *   CONFIG_DEBUG_SDIO - Enables some very low-level debug output
- *     This also requires CONFIG_DEBUG_FS and CONFIG_DEBUG_VERBOSE
+ *     This also requires CONFIG_DEBUG_FS and CONFIG_DEBUG_INFO
  */
 
 #if defined(CONFIG_SDIO_DMA) && !defined(CONFIG_LPC17_GPDMA)

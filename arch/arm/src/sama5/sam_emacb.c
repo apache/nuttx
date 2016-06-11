@@ -536,7 +536,7 @@ static int  sam_ioctl(struct net_driver_s *dev, int cmd, long arg);
 
 /* PHY Initialization */
 
-#if defined(CONFIG_DEBUG_NET) && defined(CONFIG_DEBUG_VERBOSE)
+#if defined(CONFIG_DEBUG_NET) && defined(CONFIG_DEBUG_INFO)
 static void sam_phydump(struct sam_emac_s *priv);
 #else
 #  define sam_phydump(priv)
@@ -3014,7 +3014,7 @@ static int sam_ioctl(struct net_driver_s *dev, int cmd, long arg)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG_NET) && defined(CONFIG_DEBUG_VERBOSE)
+#if defined(CONFIG_DEBUG_NET) && defined(CONFIG_DEBUG_INFO)
 static void sam_phydump(struct sam_emac_s *priv)
 {
   uint32_t regval;

@@ -102,7 +102,7 @@ uint32_t *pic32mz_exception(uint32_t *regs)
   asm volatile("\tmfc0 %0,$13,0\n" : "=r"(cause));
   asm volatile("\tmfc0 %0,$14,0\n" : "=r"(epc));
 
-#ifdef CONFIG_DEBUG_VERBOSE
+#ifdef CONFIG_DEBUG_INFO
   switch (cause & CP0_CAUSE_EXCCODE_MASK)
     {
     case CP0_CAUSE_EXCCODE_INT:      /* Interrupt */

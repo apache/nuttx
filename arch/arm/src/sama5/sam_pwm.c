@@ -403,7 +403,7 @@
 #ifdef CONFIG_DEBUG_PWM
 #  define pwmdbg              dbg
 #  define pwmlldbg            lldbg
-#  ifdef CONFIG_DEBUG_VERBOSE
+#  ifdef CONFIG_DEBUG_INFO
 #    define pwmvdbg           vdbg
 #    define pwmllvdbg         llvdbg
 #  else
@@ -480,7 +480,7 @@ static bool pwm_checkreg(FAR struct sam_pwm_s *chan, bool wr, uint32_t regval,
 static uint32_t pwm_getreg(FAR struct sam_pwm_chan_s *chan, int offset);
 static void pwm_putreg(FAR struct sam_pwm_chan_s *chan, int offset, uint32_t regval);
 
-#if defined(CONFIG_DEBUG_PWM) && defined(CONFIG_DEBUG_VERBOSE)
+#if defined(CONFIG_DEBUG_PWM) && defined(CONFIG_DEBUG_INFO)
 static void pwm_dumpregs(FAR struct sam_pwm_chan_s *chan, FAR const char *msg);
 #else
 #  define pwm_dumpregs(chan,msg)
@@ -914,7 +914,7 @@ static void pwm_chan_putreg(struct sam_pwm_chan_s *chan, int offset,
  *
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG_PWM) && defined(CONFIG_DEBUG_VERBOSE)
+#if defined(CONFIG_DEBUG_PWM) && defined(CONFIG_DEBUG_INFO)
 static void pwm_dumpregs(struct sam_pwm_chan_s *chan, FAR const char *msg)
 {
   pwmvdbg("PWM: %s\n", msg);

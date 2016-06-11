@@ -124,7 +124,7 @@
 #ifdef CONFIG_DEBUG_PWM
 #  define pwmdbg              dbg
 #  define pwmlldbg            lldbg
-#  ifdef CONFIG_DEBUG_VERBOSE
+#  ifdef CONFIG_DEBUG_INFO
 #    define pwmvdbg           vdbg
 #    define pwmllvdbg         llvdbg
 #    define pwm_dumpgpio(p,m) stm32_dumpgpio(p,m)
@@ -204,7 +204,7 @@ struct stm32_pwmtimer_s
 static uint16_t pwm_getreg(struct stm32_pwmtimer_s *priv, int offset);
 static void pwm_putreg(struct stm32_pwmtimer_s *priv, int offset, uint16_t value);
 
-#if defined(CONFIG_DEBUG_PWM) && defined(CONFIG_DEBUG_VERBOSE)
+#if defined(CONFIG_DEBUG_PWM) && defined(CONFIG_DEBUG_INFO)
 static void pwm_dumpregs(struct stm32_pwmtimer_s *priv, FAR const char *msg);
 #else
 #  define pwm_dumpregs(priv,msg)
@@ -969,7 +969,7 @@ static void pwm_putreg(struct stm32_pwmtimer_s *priv, int offset, uint16_t value
  *
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG_PWM) && defined(CONFIG_DEBUG_VERBOSE)
+#if defined(CONFIG_DEBUG_PWM) && defined(CONFIG_DEBUG_INFO)
 static void pwm_dumpregs(struct stm32_pwmtimer_s *priv, FAR const char *msg)
 {
   pwmvdbg("%s:\n", msg);

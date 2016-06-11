@@ -208,13 +208,13 @@
  */
 
 #ifndef CONFIG_DEBUG
-#  undef CONFIG_DEBUG_VERBOSE
+#  undef CONFIG_DEBUG_INFO
 #  undef CONFIG_DEBUG_GRAPHICS
 #  undef CONFIG_DEBUG_LCD
 #  undef CONFIG_LCD_REGDEBUG
 #endif
 
-#ifndef CONFIG_DEBUG_VERBOSE
+#ifndef CONFIG_DEBUG_INFO
 #  undef CONFIG_DEBUG_LCD
 #endif
 

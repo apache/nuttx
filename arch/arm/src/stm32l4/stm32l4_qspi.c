@@ -90,7 +90,7 @@
  */
 
 #ifndef CONFIG_DEBUG
-#  undef CONFIG_DEBUG_VERBOSE
+#  undef CONFIG_DEBUG_INFO
 #  undef CONFIG_DEBUG_SPI
 #  undef CONFIG_STM32L4_QSPI_DMADEBUG
 #  undef CONFIG_STM32L4_QSPI_REGDEBUG
@@ -102,7 +102,7 @@
 
 #ifdef CONFIG_DEBUG_SPI
 #  define qspidbg lldbg
-#  ifdef CONFIG_DEBUG_VERBOSE
+#  ifdef CONFIG_DEBUG_INFO
 #    define qspivdbg lldbg
 #  else
 #    define qspivdbg(x...)
@@ -286,7 +286,7 @@ static inline uint32_t qspi_getreg(struct stm32l4_qspidev_s *priv,
 static inline void qspi_putreg(struct stm32l4_qspidev_s *priv, uint32_t value,
                   unsigned int offset);
 
-#if defined(CONFIG_DEBUG_SPI) && defined(CONFIG_DEBUG_VERBOSE)
+#if defined(CONFIG_DEBUG_SPI) && defined(CONFIG_DEBUG_INFO)
 static void     qspi_dumpregs(struct stm32l4_qspidev_s *priv, const char *msg);
 #else
 # define        qspi_dumpregs(priv,msg)
@@ -505,7 +505,7 @@ static inline void qspi_putreg(struct stm32l4_qspidev_s *priv, uint32_t value,
  *
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG_SPI) && defined(CONFIG_DEBUG_VERBOSE)
+#if defined(CONFIG_DEBUG_SPI) && defined(CONFIG_DEBUG_INFO)
 static void qspi_dumpregs(struct stm32l4_qspidev_s *priv, const char *msg)
 {
   uint32_t regval;

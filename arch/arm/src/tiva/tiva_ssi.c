@@ -67,7 +67,7 @@
  ****************************************************************************/
 
 /* Enables debug output from this file (needs CONFIG_DEBUG with
- * CONFIG_DEBUG_VERBOSE too)
+ * CONFIG_DEBUG_INFO too)
  */
 
 #undef SSI_DEBUG  /* Define to enable debug */
@@ -577,7 +577,7 @@ static void ssi_txuint8(struct tiva_ssidev_s *priv)
 
 static void ssi_rxnull(struct tiva_ssidev_s *priv)
 {
-#if defined(SSI_DEBUG) && defined(CONFIG_DEBUG_VERBOSE)
+#if defined(SSI_DEBUG) && defined(CONFIG_DEBUG_INFO)
   uint32_t regval  = ssi_getreg(priv, TIVA_SSI_DR_OFFSET);
   ssivdbg("RX: discard %04x\n", regval);
 #else

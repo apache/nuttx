@@ -126,10 +126,10 @@
 /* Verbose debug must also be enabled to use the extra OLED debug */
 
 #ifndef CONFIG_DEBUG
-#  undef CONFIG_DEBUG_VERBOSE
+#  undef CONFIG_DEBUG_INFO
 #endif
 
-#ifndef CONFIG_DEBUG_VERBOSE
+#ifndef CONFIG_DEBUG_INFO
 #  undef CONFIG_DEBUG_LCD
 #endif
 

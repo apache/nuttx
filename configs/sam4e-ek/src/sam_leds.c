@@ -99,7 +99,7 @@
 #define D4_NOCHANGE    (LED_NOCHANGE << D4_SHIFT)
 
 /* CONFIG_DEBUG_LEDS enables debug output from this file (needs CONFIG_DEBUG
- * with CONFIG_DEBUG_VERBOSE too)
+ * with CONFIG_DEBUG_INFO too)
  */
 
 #ifdef CONFIG_DEBUG_LEDS

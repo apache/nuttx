@@ -944,7 +944,7 @@ Touchscreen
 
     Build Setup:
       CONFIG_DEBUG=y                    : Enable debug features
-      CONFIG_DEBUG_VERBOSE=y            : Enable verbose debug output
+      CONFIG_DEBUG_INFO=y            : Enable verbose debug output
       CONFIG_DEBUG_INPUT=y              : Enable debug output from input devices
 
     STATUS: Verified 2014-05-14
@@ -1440,7 +1440,7 @@ Configurations
 
        Build Setup:
          CONFIG_DEBUG=y                    : Enable debug features
-         CONFIG_DEBUG_VERBOSE=y            : Enable verbose debug output
+         CONFIG_DEBUG_INFO=y            : Enable verbose debug output
          CONFIG_DEBUG_INPUT=y              : Enable debug output from input devices
 
    10. This configuration can be re-configured to test the on-board LCD

@@ -90,7 +90,7 @@ int lldbg(const char *format, ...)
 }
 #endif
 
-#ifdef CONFIG_DEBUG_VERBOSE
+#ifdef CONFIG_DEBUG_INFO
 int vdbg(const char *format, ...)
 {
   va_list ap;
@@ -116,6 +116,6 @@ int llvdbg(const char *format, ...)
   return ret;
 }
 #endif /* CONFIG_ARCH_LOWPUTC */
-#endif /* CONFIG_DEBUG_VERBOSE */
+#endif /* CONFIG_DEBUG_INFO */
 #endif /* CONFIG_DEBUG */
 #endif /* CONFIG_CPP_HAVE_VARARGS */

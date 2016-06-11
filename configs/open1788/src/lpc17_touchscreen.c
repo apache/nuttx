@@ -217,14 +217,14 @@ static bool tsc_busy(FAR struct ads7843e_config_s *state)
 
 #else /* XPT2046_NO_BUSY */
 
-#if defined(CONFIG_DEBUG_INPUT) && defined(CONFIG_DEBUG_VERBOSE)
+#if defined(CONFIG_DEBUG_INPUT) && defined(CONFIG_DEBUG_INFO)
   static bool last = (bool)-1;
 #endif
 
   /* REVISIT:  This might need to be inverted */
 
   bool busy = lpc17_gpioread(GPIO_TC_BUSY);
-#if defined(CONFIG_DEBUG_INPUT) && defined(CONFIG_DEBUG_VERBOSE)
+#if defined(CONFIG_DEBUG_INPUT) && defined(CONFIG_DEBUG_INFO)
   if (busy != last)
     {
       ivdbg("busy:%d\n", busy);

@@ -182,7 +182,7 @@ static void tsc_clear(FAR struct ads7843e_config_s *state)
 
 static bool tsc_busy(FAR struct ads7843e_config_s *state)
 {
-#if defined(CONFIG_DEBUG_INPUT) && defined(CONFIG_DEBUG_VERBOSE)
+#if defined(CONFIG_DEBUG_INPUT) && defined(CONFIG_DEBUG_INFO)
   static bool last = (bool)-1;
 #endif
 
@@ -191,7 +191,7 @@ static bool tsc_busy(FAR struct ads7843e_config_s *state)
    */
 
   bool busy = sam_gpioread(GPIO_TCS_BUSY);
-#if defined(CONFIG_DEBUG_INPUT) && defined(CONFIG_DEBUG_VERBOSE)
+#if defined(CONFIG_DEBUG_INPUT) && defined(CONFIG_DEBUG_INFO)
   if (busy != last)
     {
       ivdbg("busy:%d\n", busy);

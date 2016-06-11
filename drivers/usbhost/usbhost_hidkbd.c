@@ -1010,7 +1010,7 @@ static int usbhost_kbdpoll(int argc, char *argv[])
 #ifndef CONFIG_HIDKBD_NODEBOUNCE
   uint8_t lastkey[6] = {0, 0, 0, 0, 0, 0};
 #endif
-#if defined(CONFIG_DEBUG_USB) && defined(CONFIG_DEBUG_VERBOSE)
+#if defined(CONFIG_DEBUG_USB) && defined(CONFIG_DEBUG_INFO)
   unsigned int npolls = 0;
 #endif
   unsigned int nerrors = 0;
@@ -1223,7 +1223,7 @@ static int usbhost_kbdpoll(int argc, char *argv[])
        * polling is still happening.
        */
 
-#if defined(CONFIG_DEBUG_USB) && defined(CONFIG_DEBUG_VERBOSE)
+#if defined(CONFIG_DEBUG_USB) && defined(CONFIG_DEBUG_INFO)
       npolls++;
       if ((npolls & 31) == 0)
         {

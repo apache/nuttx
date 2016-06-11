@@ -107,12 +107,12 @@
  */
 
 #ifndef CONFIG_DEBUG
-#  undef CONFIG_DEBUG_VERBOSE
+#  undef CONFIG_DEBUG_INFO
 #  undef CONFIG_DEBUG_GRAPHICS
 #  undef CONFIG_DEBUG_LCD
 #endif
 
-#ifndef CONFIG_DEBUG_VERBOSE
+#ifndef CONFIG_DEBUG_INFO
 #  undef CONFIG_DEBUG_LCD
 #endif
 
@@ -174,7 +174,7 @@ struct lcd1602_2
  ****************************************************************************/
 /* Debug */
 
-#if defined(CONFIG_DEBUG_LCD) && defined(CONFIG_DEBUG_VERBOSE)
+#if defined(CONFIG_DEBUG_LCD) && defined(CONFIG_DEBUG_INFO)
 static void lcd_dumpstate(FAR const char *msg);
 static void lcd_dumpstream(FAR const char *msg,
                            FAR const struct lcd_instream_s *stream);
@@ -234,7 +234,7 @@ static struct lcd1602_2 g_lcd1602;
  * Name: lcd_dumpstate
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG_LCD) && defined(CONFIG_DEBUG_VERBOSE)
+#if defined(CONFIG_DEBUG_LCD) && defined(CONFIG_DEBUG_INFO)
 static void lcd_dumpstate(FAR const char *msg)
 {
   uint8_t buffer[LCD_NCOLUMNS];
@@ -269,7 +269,7 @@ static void lcd_dumpstate(FAR const char *msg)
  * Name: lcd_dumpstate
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG_LCD) && defined(CONFIG_DEBUG_VERBOSE)
+#if defined(CONFIG_DEBUG_LCD) && defined(CONFIG_DEBUG_INFO)
 static void lcd_dumpstream(FAR const char *msg,
                            FAR const struct lcd_instream_s *stream)
 {

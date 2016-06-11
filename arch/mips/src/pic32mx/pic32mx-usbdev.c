@@ -290,7 +290,7 @@
 #  define CONFIG_PIC32MX_USBDEV_BDTDEBUG 1
 
 #  define regdbg lldbg
-#  ifdef CONFIG_DEBUG_VERBOSE
+#  ifdef CONFIG_DEBUG_INFO
 #    define regvdbg lldbg
 #  else
 #    define regvdbg(x...)
@@ -310,7 +310,7 @@
 #ifdef CONFIG_PIC32MX_USBDEV_BDTDEBUG
 
 #  define bdtdbg lldbg
-#  ifdef CONFIG_DEBUG_VERBOSE
+#  ifdef CONFIG_DEBUG_INFO
 #    define bdtvdbg lldbg
 #  else
 #    define bdtvdbg(x...)

@@ -92,7 +92,7 @@
 #ifdef CONFIG_DEBUG_WATCHDOG
 #  define wdgdbg                 dbg
 #  define wdglldbg               lldbg
-#  ifdef CONFIG_DEBUG_VERBOSE
+#  ifdef CONFIG_DEBUG_INFO
 #    define wdgvdbg              vdbg
 #    define wdgllvdbg            llvdbg
 #  else

@@ -92,7 +92,7 @@
  *   from the SPI address space after each write.
  * CONFIG_DEBUG_SPIFI_DUMP - Debug option to dump read/write buffers.  You
  *   probably do not want to enable this unless you want to dig through a
- *   *lot* of debug output!  Also required CONFIG_DEBUG, CONFIG_DEBUG_VERBOSE,
+ *   *lot* of debug output!  Also required CONFIG_DEBUG, CONFIG_DEBUG_INFO,
  *   and CONFIG_DEBUG_FS,
  */
 
@@ -263,7 +263,7 @@
  * enable this unless you want to dig through a *lot* of debug output!
  */
 
-#if !defined(CONFIG_DEBUG) || !defined(CONFIG_DEBUG_VERBOSE) || !defined(CONFIG_DEBUG_FS)
+#if !defined(CONFIG_DEBUG) || !defined(CONFIG_DEBUG_INFO) || !defined(CONFIG_DEBUG_FS)
 #  undef CONFIG_DEBUG_SPIFI_DUMP
 #endif
 

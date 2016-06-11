@@ -130,7 +130,7 @@
  */
 
 #ifndef CONFIG_DEBUG
-#  undef CONFIG_DEBUG_VERBOSE
+#  undef CONFIG_DEBUG_INFO
 #  undef CONFIG_DEBUG_SPI
 #  undef CONFIG_SAMA5_SPI_DMADEBUG
 #  undef CONFIG_SAMA5_SPI_REGDEBUG
@@ -142,7 +142,7 @@
 
 #ifdef CONFIG_DEBUG_SPI
 #  define spidbg lldbg
-#  ifdef CONFIG_DEBUG_VERBOSE
+#  ifdef CONFIG_DEBUG_INFO
 #    define spivdbg lldbg
 #  else
 #    define spivdbg(x...)
@@ -243,7 +243,7 @@ static inline void spi_putreg(struct sam_spidev_s *spi, uint32_t value,
                   unsigned int offset);
 static inline struct sam_spidev_s *spi_device(struct sam_spics_s *spics);
 
-#if defined(CONFIG_DEBUG_SPI) && defined(CONFIG_DEBUG_VERBOSE)
+#if defined(CONFIG_DEBUG_SPI) && defined(CONFIG_DEBUG_INFO)
 static void     spi_dumpregs(struct sam_spidev_s *spi, const char *msg);
 #else
 # define        spi_dumpregs(spi,msg)
@@ -509,7 +509,7 @@ static inline void spi_putreg(struct sam_spidev_s *spi, uint32_t value,
  *
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG_SPI) && defined(CONFIG_DEBUG_VERBOSE)
+#if defined(CONFIG_DEBUG_SPI) && defined(CONFIG_DEBUG_INFO)
 static void spi_dumpregs(struct sam_spidev_s *spi, const char *msg)
 {
   spivdbg("%s:\n", msg);

@@ -271,7 +271,7 @@ int main(int argc, char **argv, char **envp)
 
   printf("/* Verbose debug and sub-system debug only make sense if debug is enabled */\n\n");
   printf("#ifndef CONFIG_DEBUG\n");
-  printf("#  undef CONFIG_DEBUG_VERBOSE\n");
+  printf("#  undef CONFIG_DEBUG_INFO\n");
   printf("#  undef CONFIG_DEBUG_ANALOG\n");
   printf("#  undef CONFIG_DEBUG_AUDIO\n");
   printf("#  undef CONFIG_DEBUG_BINFMT\n");

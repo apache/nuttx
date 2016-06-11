@@ -176,10 +176,10 @@ config MXT_NPOLLWAITERS
 	---help---
 		Maximum number of threads that can be waiting on poll()
 
-config MXT_DISABLE_DEBUG_VERBOSE
+config MXT_DISABLE_CONFIG_DEBUG_INFO
 	bool "Disable verbose debug output"
 	default y
-	depends on DEBUG_VERBOSE && DEBUG_INPUT
+	depends on CONFIG_DEBUG_INFO && DEBUG_INPUT
 	---help---
 		The maXTouch tends to generate interrupts at a high rate during the
 		contact.  If verbose debug is enabled in this driver, you may not

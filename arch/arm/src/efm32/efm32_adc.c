@@ -716,7 +716,7 @@ endif /* defined(ADC_COUNT) && (ADC_COUNT > 0) */
 #ifdef ADC_HAVE_TIMER
 static void adc_tim_dumpregs(struct efm32_dev_s *priv, FAR const char *msg)
 {
-#if defined(CONFIG_DEBUG_ANALOG) && defined(CONFIG_DEBUG_VERBOSE)
+#if defined(CONFIG_DEBUG_ANALOG) && defined(CONFIG_DEBUG_INFO)
   avdbg("%s:\n", msg);
   avdbg("  CR1: %04x CR2:  %04x SMCR:  %04x DIER:  %04x\n",
         tim_getreg(priv, EFM32_GTIM_CR1_OFFSET),

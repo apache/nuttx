@@ -1291,7 +1291,7 @@ static void sam_dmasetup(int lid, struct sam_dscr_s *dscr, uint8_t *buffer)
       sam_putreg(g_layernext[lid], physdscr);
     }
 
-#if defined(CONFIG_DEBUG_GRAPHICS) && defined(CONFIG_DEBUG_VERBOSE)
+#if defined(CONFIG_DEBUG_GRAPHICS) && defined(CONFIG_DEBUG_INFO)
   /* Dump the DMA setup */
 
   gvdbg("DMA descriptor:   addr=%08x ctrl=%08x next=%08x\n",

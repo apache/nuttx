@@ -930,7 +930,7 @@ Configuration Sub-Directories
        Otherwise, you will have not feedback about what is going on:
 
        CONFIG_DEBUG=y
-       CONFIG_DEBUG_VERBOSE=y
+       CONFIG_DEBUG_INFO=y
        CONFIG_DEBUG_FTPC=y
 
   hidkbd:

@@ -70,7 +70,7 @@
 #ifdef CONFIG_DEBUG_TIMER
 #  define efm32_timerdbg              dbg
 #  define efm32_timerlldbg            lldbg
-#  ifdef CONFIG_DEBUG_VERBOSE
+#  ifdef CONFIG_DEBUG_INFO
 #    define efm32_timervdbg           vdbg
 #    define efm32_timerllvdbg         llvdbg
 #    define efm32_timer_dumpgpio(p,m) efm32_dumpgpio(p,m)
@@ -137,7 +137,7 @@ void efm32_timer_dumpregs(uintptr_t base, FAR const char *msg)
 
   for (i = 0; i < EFM32_TIMER_NCC; i++)
     {
-#if defined(CONFIG_DEBUG_TIMER) && defined(CONFIG_DEBUG_VERBOSE)
+#if defined(CONFIG_DEBUG_TIMER) && defined(CONFIG_DEBUG_INFO)
       uintptr_t base_cc = base + EFM32_TIMER_CC_OFFSET(i);
 #endif
       efm32_timervdbg("CC%d => CTRL: %04x    CCV:  %04x  CCVP: %04x CCVB: %04x\n",

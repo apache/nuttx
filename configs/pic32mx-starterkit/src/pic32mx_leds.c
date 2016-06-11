@@ -99,14 +99,14 @@
 
 #if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_LEDS)
 #  define leddbg  lldbg
-#  ifdef CONFIG_DEBUG_VERBOSE
+#  ifdef CONFIG_DEBUG_INFO
 #    define ledvdbg lldbg
 #  else
 #    define ledvdbg(x...)
 #  endif
 #else
 #  undef CONFIG_DEBUG_LEDS
-#  undef CONFIG_DEBUG_VERBOSE
+#  undef CONFIG_DEBUG_INFO
 #  define leddbg(x...)
 #  define ledvdbg(x...)
 #endif

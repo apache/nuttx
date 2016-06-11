@@ -89,7 +89,7 @@
 #  define CONFIG_KINETIS_SDHC_DMAPRIO DMA_CCR_PRIMED
 #endif
 
-#if !defined(CONFIG_DEBUG_FS) || !defined(CONFIG_DEBUG_VERBOSE)
+#if !defined(CONFIG_DEBUG_FS) || !defined(CONFIG_DEBUG_INFO)
 #  undef CONFIG_SDIO_XFRDEBUG
 #endif
 

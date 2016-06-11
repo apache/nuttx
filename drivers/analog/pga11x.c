@@ -105,13 +105,13 @@
 /* Check if (non-standard) SPI debug is enabled */
 
 #ifndef CONFIG_DEBUG
-#  undef CONFIG_DEBUG_VERBOSE
+#  undef CONFIG_DEBUG_INFO
 #  undef CONFIG_DEBUG_SPI
 #endif
 
 #ifdef CONFIG_DEBUG_SPI
 #  define spidbg dbg
-#  ifdef CONFIG_DEBUG_VERBOSE
+#  ifdef CONFIG_DEBUG_INFO
 #    define spivdbg dbg
 #  else
 #    define spivdbg(x...)

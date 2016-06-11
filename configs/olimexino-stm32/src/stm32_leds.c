@@ -55,12 +55,12 @@
  ****************************************************************************/
 
 /* CONFIG_DEBUG_LEDS enables debug output from this file (needs CONFIG_DEBUG
- * with CONFIG_DEBUG_VERBOSE too)
+ * with CONFIG_DEBUG_INFO too)
  */
 
 #ifdef CONFIG_DEBUG_LEDS
 #  define leddbg lldbg
-#  ifdef CONFIG_DEBUG_VERBOSE
+#  ifdef CONFIG_DEBUG_INFO
 #    define ledvdbg lldbg
 #  else
 #    define ledvdbg(x...)
@@ -72,7 +72,7 @@
 
 /* Dump GPIO registers */
 
-#if defined(CONFIG_DEBUG_VERBOSE) && defined(CONFIG_DEBUG_LEDS)
+#if defined(CONFIG_DEBUG_INFO) && defined(CONFIG_DEBUG_LEDS)
 #  define led_dumpgpio(m) stm32_dumpgpio(GPIO_LED_GREEN, m)
 #else
 #  define led_dumpgpio(m)

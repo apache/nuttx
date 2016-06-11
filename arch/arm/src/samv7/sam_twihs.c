@@ -99,7 +99,7 @@
  * to transfer on byte.  So these define a "long" timeout.
  */
 
-#if defined(CONFIG_DEBUG_I2C) && defined(CONFIG_DEBUG_VERBOSE)
+#if defined(CONFIG_DEBUG_I2C) && defined(CONFIG_DEBUG_INFO)
 #  define TWIHS_TIMEOUT_MSPB (50)  /* 50 msec/byte */
 #else
 #  define TWIHS_TIMEOUT_MSPB (5)   /* 5 msec/byte */

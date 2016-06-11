@@ -90,7 +90,7 @@
 #ifdef CONFIG_DEBUG_PWM
 #  define pwmdbg              dbg
 #  define pwmlldbg            lldbg
-#  ifdef CONFIG_DEBUG_VERBOSE
+#  ifdef CONFIG_DEBUG_INFO
 #    define pwmvdbg           vdbg
 #    define pwmllvdbg         llvdbg
 #    define pwm_dumpgpio(p,m) stm32_dumpgpio(p,m)
@@ -132,7 +132,7 @@ struct lpc17_mcpwmtimer_s
 static uint32_t mcpwm_getreg(struct lpc17_mcpwmtimer_s *priv, int offset);
 static void mcpwm_putreg(struct lpc17_mcpwmtimer_s *priv, int offset, uint32_t value);
 
-#if defined(CONFIG_DEBUG_PWM) && defined(CONFIG_DEBUG_VERBOSE)
+#if defined(CONFIG_DEBUG_PWM) && defined(CONFIG_DEBUG_INFO)
 static void mcpwm_dumpregs(struct lpc17_mcpwmtimer_s *priv, FAR const char *msg);
 #else
 #  define mcpwm_dumpregs(priv,msg)
@@ -242,7 +242,7 @@ static void mcpwm_putreg(struct lpc17_mcpwmtimer_s *priv, int offset, uint32_t v
  *
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG_PWM) && defined(CONFIG_DEBUG_VERBOSE)
+#if defined(CONFIG_DEBUG_PWM) && defined(CONFIG_DEBUG_INFO)
 static void mcpwm_dumpregs(FAR struct lpc17_mcpwmtimer_s *priv,
                            FAR const char *msg)
 {

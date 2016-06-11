@@ -833,7 +833,7 @@ static void usbhost_notification_callback(FAR void *arg, ssize_t nbytes)
            * FIX:  Don't output the message is the result is -EAGAIN.
            */
 
-#if defined(CONFIG_DEBUG_USB) && !defined(CONFIG_DEBUG_VERBOSE)
+#if defined(CONFIG_DEBUG_USB) && !defined(CONFIG_DEBUG_INFO)
           if (nbytes != -EAGAIN)
 #endif
             {

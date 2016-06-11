@@ -64,14 +64,14 @@
  */
 
 #ifndef CONFIG_DEBUG
-#  undef CONFIG_DEBUG_VERBOSE
+#  undef CONFIG_DEBUG_INFO
 #  undef CONFIG_DEBUG_SPI
 #  undef CONFIG_Z16F_ESPI_REGDEBUG
 #endif
 
 #ifdef CONFIG_DEBUG_SPI
 #  define spidbg    lldbg
-#  ifdef CONFIG_DEBUG_VERBOSE
+#  ifdef CONFIG_DEBUG_INFO
 #    define spivdbg lldbg
 #  else
 #    define spivdbg (void)
@@ -127,7 +127,7 @@ static void     spi_putreg16(FAR struct z16f_spi_s *priv, uint16_t regval,
 # define        spi_putreg16(priv,regval,regaddr) putreg16(regval, regaddr)
 #endif
 
-#if defined(CONFIG_DEBUG_SPI) && defined(CONFIG_DEBUG_VERBOSE)
+#if defined(CONFIG_DEBUG_SPI) && defined(CONFIG_DEBUG_INFO)
 static void     spi_dumpregs(FAR struct z16f_spi_s *priv, const char *msg);
 #else
 # define        spi_dumpregs(priv,msg)
@@ -327,7 +327,7 @@ static void spi_putreg16(FAR struct z16f_spi_s *priv, uint16_t regval,
  *
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG_SPI) && defined(CONFIG_DEBUG_VERBOSE)
+#if defined(CONFIG_DEBUG_SPI) && defined(CONFIG_DEBUG_INFO)
 static void spi_dumpregs(FAR struct z16f_spi_s *priv, FAR const char *msg)
 {
   spivdbg("%s:\n", msg);

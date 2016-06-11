@@ -62,13 +62,13 @@
  ****************************************************************************/
 
 #ifndef CONFIG_DEBUG
-#  undef CONFIG_DEBUG_VERBOSE
+#  undef CONFIG_DEBUG_INFO
 #  undef CONFIG_DEBUG_LEDS
 #endif
 
 #ifdef CONFIG_DEBUG_LEDS
 #  define ddbg lldbg
-#  ifdef CONFIG_DEBUG_VERBOSE
+#  ifdef CONFIG_DEBUG_INFO
 #    define dvdbg lldbg
 #  else
 #    define dvdbg(x...)

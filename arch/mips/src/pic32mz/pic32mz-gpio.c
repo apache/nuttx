@@ -307,7 +307,7 @@ bool pic32mz_gpioread(pinset_t pinset)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_VERBOSE) && defined(CONFIG_DEBUG_GPIO)
+#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_INFO) && defined(CONFIG_DEBUG_GPIO)
 void pic32mz_dumpgpio(uint32_t pinset, const char *msg)
 {
   unsigned int port = pic32mz_portno(pinset);

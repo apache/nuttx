@@ -63,12 +63,12 @@
  ****************************************************************************/
 
 /* CONFIG_DEBUG_LEDS enables debug output from this file (needs CONFIG_DEBUG
- * and pherhaps CONFIG_DEBUG_VERBOSE too)
+ * and pherhaps CONFIG_DEBUG_INFO too)
  */
 
 #ifdef CONFIG_DEBUG_LEDS
 #  define leddbg  lldbg
-#  ifdef CONFIG_DEBUG_VERBOSE
+#  ifdef CONFIG_DEBUG_INFO
 #    define ledvdbg lldbg
 #  else
 #    define ledvdbg(x...)

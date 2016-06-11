@@ -44,7 +44,7 @@ CONFIG_RAW_BINARY=y
 #
 CONFIG_DEBUG=y
 CONFIG_ARCH_HAVE_HEAPCHECK=y
-# CONFIG_DEBUG_VERBOSE is not set
+# CONFIG_DEBUG_INFO is not set
 
 #
 # Subsystem Debug Options

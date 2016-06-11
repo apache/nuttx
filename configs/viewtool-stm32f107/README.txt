@@ -767,7 +767,7 @@ Configurations
 
           Build Setup:
             CONFIG_DEBUG=y                     : Enable debug features
-            CONFIG_DEBUG_VERBOSE=y             : Enable verbose debug output
+            CONFIG_DEBUG_INFO=y             : Enable verbose debug output
             CONFIG_DEBUG_INPUT=y               : Enable debug output from input devices
 
        STATUS: Working

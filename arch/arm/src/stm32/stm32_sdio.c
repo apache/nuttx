@@ -95,7 +95,7 @@
  *   CONFIG_SDM_DMAPRIO - SDIO DMA priority.  This can be selecte if
  *     CONFIG_SDIO_DMA is enabled.
  *   CONFIG_SDIO_XFRDEBUG - Enables some very low-level debug output
- *     This also requires CONFIG_DEBUG_FS and CONFIG_DEBUG_VERBOSE
+ *     This also requires CONFIG_DEBUG_FS and CONFIG_DEBUG_INFO
  */
 
 #if defined(CONFIG_SDIO_DMA) && !defined(CONFIG_STM32_DMA2)

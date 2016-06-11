@@ -928,7 +928,7 @@ Where <subdir> is one of the following:
            from the SPI address space after each write.
          CONFIG_DEBUG_SPIFI_DUMP - Debug option to dump read/write buffers.  You
            probably do not want to enable this unless you want to dig through a
-           *lot* of debug output!  Also required CONFIG_DEBUG, CONFIG_DEBUG_VERBOSE,
+           *lot* of debug output!  Also required CONFIG_DEBUG, CONFIG_DEBUG_INFO,
            and CONFIG_DEBUG_FS,
 
     5. In my experience, there were some missing function pointers in the LPC43xx

@@ -1013,7 +1013,7 @@ config MODULE_BUFFERINCR
 config MODULE_DUMPBUFFER
 	bool "Dump module buffers"
 	default n
-	depends on DEBUG && DEBUG_VERBOSE
+	depends on DEBUG && CONFIG_DEBUG_INFO
 	---help---
 		Dump various module buffers for debug purposes
 

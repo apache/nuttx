@@ -91,7 +91,7 @@
 #ifdef CONFIG_DEBUG_PWM
 #  define pwmdbg              dbg
 #  define pwmlldbg            lldbg
-#  ifdef CONFIG_DEBUG_VERBOSE
+#  ifdef CONFIG_DEBUG_INFO
 #    define pwmvdbg           vdbg
 #    define pwmllvdbg         llvdbg
 #    define pwm_dumpgpio(p,m) stm32_dumpgpio(p,m)
@@ -133,7 +133,7 @@ struct lpc17_timer_s
 static uint32_t timer_getreg(struct lpc17_timer_s *priv, int offset);
 static void timer_putreg(struct lpc17_timer_s *priv, int offset, uint32_t value);
 
-#if defined(CONFIG_DEBUG_PWM) && defined(CONFIG_DEBUG_VERBOSE)
+#if defined(CONFIG_DEBUG_PWM) && defined(CONFIG_DEBUG_INFO)
 static void timer_dumpregs(struct lpc17_timer_s *priv, FAR const char *msg);
 #else
 #  define timer_dumpregs(priv,msg)
@@ -242,7 +242,7 @@ static void timer_putreg(struct lpc17_timer_s *priv, int offset,
  *
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG_PWM) && defined(CONFIG_DEBUG_VERBOSE)
+#if defined(CONFIG_DEBUG_PWM) && defined(CONFIG_DEBUG_INFO)
 static void timer_dumpregs(struct lpc17_timer_s *priv, FAR const char *msg)
 {
   pwmdbg("%s:\n", msg);

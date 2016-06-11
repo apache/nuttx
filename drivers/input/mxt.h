@@ -50,11 +50,11 @@
 
 #undef MXT_SUPPORT_T6
 #if !defined(CONFIG_DEBUG)
-#  undef CONFIG_DEBUG_VERBOSE
+#  undef CONFIG_DEBUG_INFO
 #  undef CONFIG_DEBUG_INPUT
 #endif
 
-#if defined(CONFIG_DEBUG_VERBOSE) && defined(CONFIG_DEBUG_INPUT)
+#if defined(CONFIG_DEBUG_INFO) && defined(CONFIG_DEBUG_INPUT)
 #  define MXT_SUPPORT_T6 1
 #endif
 

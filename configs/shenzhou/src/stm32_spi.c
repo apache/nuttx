@@ -65,7 +65,7 @@
 
 #ifdef CONFIG_DEBUG_SPI
 #  define spidbg  lldbg
-#  ifdef CONFIG_DEBUG_VERBOSE
+#  ifdef CONFIG_DEBUG_INFO
 #    define spivdbg lldbg
 #  else
 #    define spivdbg(x...)

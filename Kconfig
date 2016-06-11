@@ -411,16 +411,15 @@ config ARCH_HAVE_HEAPCHECK
 
 if DEBUG
 
-config DEBUG_VERBOSE
-	bool "Enable Debug Verbose Output"
+comment "Debug SYSLOG Output Controls"
+
+config CONFIG_DEBUG_INFO
+	bool "Enable Informational Debug Output"
 	default n
 	---help---
-		Enables verbose debug output (assuming debug features are enabled).
-		As a general rule, when DEBUG is enabled only errors will be
-		reported in the debug SYSLOG output.  But if you also enable
-		DEBUG_VERBOSE, then very chatty (and often annoying) output will be
-		generated.  This means there are two levels of debug output:
-		errors-only and everything.
+		Enables verbose "informational" debug output.  If you enable
+		CONFIG_DEBUG_INFO, then very chatty (and often annoying) output
+		will be generated.
 
 comment "Subsystem Debug Options"
 

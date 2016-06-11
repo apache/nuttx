@@ -398,7 +398,7 @@
  */
 
 #ifndef CONFIG_DEBUG
-#  undef CONFIG_DEBUG_VERBOSE
+#  undef CONFIG_DEBUG_INFO
 #  undef CONFIG_DEBUG_I2S
 #endif
 
@@ -416,7 +416,7 @@
 #ifdef CONFIG_DEBUG_I2S
 #  define i2sdbg         dbg
 #  define i2slldbg       lldbg
-#  ifdef CONFIG_DEBUG_VERBOSE
+#  ifdef CONFIG_DEBUG_INFO
 #    define i2svdbg      dbg
 #    define i2sllvdbg    lldbg
 #  else
@@ -539,7 +539,7 @@ static inline void ssc_putreg(struct sam_ssc_s *priv, unsigned int offset,
 static inline uintptr_t ssc_physregaddr(struct sam_ssc_s *priv,
                   unsigned int offset);
 
-#if defined(CONFIG_DEBUG_I2S) && defined(CONFIG_DEBUG_VERBOSE)
+#if defined(CONFIG_DEBUG_I2S) && defined(CONFIG_DEBUG_INFO)
 static void     scc_dump_regs(struct sam_ssc_s *priv, const char *msg);
 #else
 #  define       scc_dump_regs(s,m)
@@ -817,7 +817,7 @@ static inline uintptr_t ssc_physregaddr(struct sam_ssc_s *priv,
  *
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG_I2S) && defined(CONFIG_DEBUG_VERBOSE)
+#if defined(CONFIG_DEBUG_I2S) && defined(CONFIG_DEBUG_INFO)
 static void scc_dump_regs(struct sam_ssc_s *priv, const char *msg)
 {
   i2svdbg("SSC%d: %s\n", priv->sscno, msg);

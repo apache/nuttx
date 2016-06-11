@@ -168,7 +168,7 @@ static inline void usbhost_mkdevname(FAR struct usbhost_state_s *priv,
 
 /* CBW/CSW debug helpers */
 
-#if defined(CONFIG_DEBUG_USB) && defined(CONFIG_DEBUG_VERBOSE)
+#if defined(CONFIG_DEBUG_USB) && defined(CONFIG_DEBUG_INFO)
 static void usbhost_dumpcbw(FAR struct usbmsc_cbw_s *cbw);
 static void usbhost_dumpcsw(FAR struct usbmsc_csw_s *csw);
 #else
@@ -501,7 +501,7 @@ static inline void usbhost_mkdevname(FAR struct usbhost_state_s *priv, char *dev
  *
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG_USB) && defined(CONFIG_DEBUG_VERBOSE)
+#if defined(CONFIG_DEBUG_USB) && defined(CONFIG_DEBUG_INFO)
 static void usbhost_dumpcbw(FAR struct usbmsc_cbw_s *cbw)
 {
   int i;

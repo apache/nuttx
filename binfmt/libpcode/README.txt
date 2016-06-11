@@ -98,7 +98,7 @@ Here is a simple test configuration using the NuttX simulator:
 
     CONFIG_DEBUG=y
     CONFIG_DEBUG_BINFMT=y
-    CONFIG_DEBUG_VERBOSE=y
+    CONFIG_DEBUG_INFO=y
 
 4. In lieu of a a real test application, this Quick'n'Dirty patch can be used
    to initialize the P-Code binary format:

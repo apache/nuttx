@@ -86,12 +86,12 @@
 #endif
 
 #ifndef CONFIG_DEBUG
-#  undef CONFIG_DEBUG_VERBOSE
+#  undef CONFIG_DEBUG_INFO
 #  undef CONFIG_DEBUG_GRAPHICS
 #  undef CONFIG_DEBUG_LCD
 #endif
 
-#ifndef CONFIG_DEBUG_VERBOSE
+#ifndef CONFIG_DEBUG_INFO
 #  undef CONFIG_DEBUG_LCD
 #endif
 
@@ -294,7 +294,7 @@ struct slcd_pixel_s
  ****************************************************************************/
 /* Debug */
 
-#if defined(CONFIG_DEBUG_LCD) && defined(CONFIG_DEBUG_VERBOSE)
+#if defined(CONFIG_DEBUG_LCD) && defined(CONFIG_DEBUG_INFO)
 static void slcd_dumpstate(FAR const char *msg);
 static void slcd_dumpslcd(FAR const char *msg);
 #else
@@ -405,7 +405,7 @@ static const struct slcd_pixel_s g_einfo[SLCD_NE] =
  * Name: slcd_dumpstate
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG_LCD) && defined(CONFIG_DEBUG_VERBOSE)
+#if defined(CONFIG_DEBUG_LCD) && defined(CONFIG_DEBUG_INFO)
 static void slcd_dumpstate(FAR const char *msg)
 {
   lcdvdbg("%s:\n", msg);
@@ -424,7 +424,7 @@ static void slcd_dumpstate(FAR const char *msg)
  * Name: slcd_dumpslcd
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG_LCD) && defined(CONFIG_DEBUG_VERBOSE)
+#if defined(CONFIG_DEBUG_LCD) && defined(CONFIG_DEBUG_INFO)
 static void slcd_dumpslcd(FAR const char *msg)
 {
   lcdvdbg("%s:\n", msg);

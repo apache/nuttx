@@ -252,7 +252,7 @@
 #endif
 
 #ifdef CONFIG_DEBUG_SENSORS
-#  ifdef CONFIG_DEBUG_VERBOSE
+#  ifdef CONFIG_DEBUG_INFO
 #    define qe_dumpgpio(p,m)    stm32_dumpgpio(p,m)
 #  else
 #    define qe_dumpgpio(p,m)
@@ -317,7 +317,7 @@ static void stm32_putreg16(FAR struct stm32_lowerhalf_s *priv, int offset, uint1
 static uint32_t stm32_getreg32(FAR struct stm32_lowerhalf_s *priv, int offset);
 static void stm32_putreg32(FAR struct stm32_lowerhalf_s *priv, int offset, uint32_t value);
 
-#if defined(CONFIG_DEBUG_SENSORS) && defined(CONFIG_DEBUG_VERBOSE)
+#if defined(CONFIG_DEBUG_SENSORS) && defined(CONFIG_DEBUG_INFO)
 static void stm32_dumpregs(FAR struct stm32_lowerhalf_s *priv, FAR const char *msg);
 #else
 #  define stm32_dumpregs(priv,msg)
@@ -631,7 +631,7 @@ static void stm32_putreg32(FAR struct stm32_lowerhalf_s *priv, int offset, uint3
  *
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG_SENSORS) && defined(CONFIG_DEBUG_VERBOSE)
+#if defined(CONFIG_DEBUG_SENSORS) && defined(CONFIG_DEBUG_INFO)
 static void stm32_dumpregs(FAR struct stm32_lowerhalf_s *priv, FAR const char *msg)
 {
   snvdbg("%s:\n", msg);

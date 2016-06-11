@@ -48,7 +48,7 @@ CONFIG_BUILD_FLAT=y
 #
 CONFIG_DEBUG=y
 # CONFIG_ARCH_HAVE_HEAPCHECK is not set
-# CONFIG_DEBUG_VERBOSE is not set
+# CONFIG_DEBUG_INFO is not set
 
 #
 # Subsystem Debug Options

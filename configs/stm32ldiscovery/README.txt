@@ -814,7 +814,7 @@ Configuration sub-directories
 
        Build Setup -> Debug Options:
          CONFIG_DEBUG=y                          : Enable debug features
-         CONFIG_DEBUG_VERBOSE=y                  : Enable LCD debug
+         CONFIG_DEBUG_INFO=y                  : Enable LCD debug
 
        NOTE:  At this point in time, testing of the SLCD is very limited because
        there is not much in apps/examples/slcd.  Certainly there are more bugs

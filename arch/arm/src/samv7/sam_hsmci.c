@@ -98,7 +98,7 @@
 #  error "This driver requires CONFIG_SDIO_BLOCKSETUP"
 #endif
 
-#if !defined(CONFIG_DEBUG_FS) || !defined(CONFIG_DEBUG_VERBOSE)
+#if !defined(CONFIG_DEBUG_FS) || !defined(CONFIG_DEBUG_INFO)
 #  undef CONFIG_SAMV7_HSMCI_CMDDEBUG
 #  undef CONFIG_SAMV7_HSMCI_XFRDEBUG
 #endif

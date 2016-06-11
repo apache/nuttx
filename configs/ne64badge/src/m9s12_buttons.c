@@ -54,7 +54,7 @@
  ****************************************************************************/
 
 /* Enables debug output from this file (needs CONFIG_DEBUG with
- * CONFIG_DEBUG_VERBOSE too)
+ * CONFIG_DEBUG_INFO too)
  */
 
 #undef BUTTON_DEBUG   /* Define to enable debug */

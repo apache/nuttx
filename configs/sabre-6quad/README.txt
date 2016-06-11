@@ -80,7 +80,7 @@ Status
   only 2 CPUS, and disabled the RAMLOG:
 
     +CONFIG_DEBUG=y
-    +CONFIG_DEBUG_VERBOSE=y
+    +CONFIG_DEBUG_INFO=y
     +CONFIG_DEBUG_SCHED=y
     +CONFIG_DEBUG_SYMBOLS=y
 

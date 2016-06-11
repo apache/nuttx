@@ -124,11 +124,11 @@
 /* Verbose debst7567 must also be enabled to use the extra OLED debst7567 */
 
 #ifndef CONFIG_DEBUG
-#  undef CONFIG_DEBUG_VERBOSE
+#  undef CONFIG_DEBUG_INFO
 #  undef CONFIG_DEBUG_GRAPHICS
 #endif
 
-#ifndef CONFIG_DEBUG_VERBOSE
+#ifndef CONFIG_DEBUG_INFO
 #  undef CONFIG_LCD_ST7567DEBUG
 #endif
 

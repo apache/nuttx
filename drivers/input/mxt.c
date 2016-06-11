@@ -41,8 +41,8 @@
 
 /* Suppress verbose debug output so that we don't swamp the system */
 
-#ifdef CONFIG_MXT_DISABLE_DEBUG_VERBOSE
-#  undef CONFIG_DEBUG_VERBOSE
+#ifdef CONFIG_MXT_DISABLE_CONFIG_DEBUG_INFO
+#  undef CONFIG_DEBUG_INFO
 #endif
 
 #include <sys/types.h>

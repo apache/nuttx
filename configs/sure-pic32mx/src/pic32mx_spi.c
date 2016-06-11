@@ -121,17 +121,17 @@
 /* The following enable debug output from this file.
  *
  * CONFIG_DEBUG_SPI && CONFIG_DEBUG - Define to enable basic SPI debug
- * CONFIG_DEBUG_VERBOSE - Define to enable verbose SPI debug
+ * CONFIG_DEBUG_INFO - Define to enable verbose SPI debug
  */
 
 #ifndef CONFIG_DEBUG
 #  undef CONFIG_DEBUG_SPI
-#  undef CONFIG_DEBUG_VERBOSE
+#  undef CONFIG_DEBUG_INFO
 #endif
 
 #ifdef CONFIG_DEBUG_SPI
 #  define spidbg  lldbg
-#  ifdef CONFIG_DEBUG_VERBOSE
+#  ifdef CONFIG_DEBUG_INFO
 #    define spivdbg lldbg
 #  else
 #    define spivdbg(x...)

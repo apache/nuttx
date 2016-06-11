@@ -1369,7 +1369,7 @@ config SAM34_HSMCI_WRPROOF
 
 config SAM34_HSMCI_XFRDEBUG
 	bool "HSMCI transfer debug"
-	depends on DEBUG_FS && DEBUG_VERBOSE
+	depends on DEBUG_FS && CONFIG_DEBUG_INFO
 	default n
 	---help---
 		Enable special debug instrumentation analyze HSMCI data transfers.
@@ -1377,11 +1377,11 @@ config SAM34_HSMCI_XFRDEBUG
 		registers at key points in the data transfer and then dumps all of
 		the registers at the end of the transfer.  If DEBUG_DMA is also
 		enabled, then DMA register will be collected as well.  Requires also
-		DEBUG_FS and DEBUG_VERBOSE.
+		DEBUG_FS and CONFIG_DEBUG_INFO.
 
 config SAM34_HSMCI_CMDDEBUG
 	bool "HSMCI command debug"
-	depends on DEBUG_FS && DEBUG_VERBOSE
+	depends on DEBUG_FS && CONFIG_DEBUG_INFO
 	default n
 	---help---
 		Enable special debug instrumentation analyze HSMCI commands. This
@@ -1389,7 +1389,7 @@ config SAM34_HSMCI_CMDDEBUG
 		key points in the data transfer and then dumps all of the registers
 		at the end of the transfer.  If DEBUG_DMA is also enabled, then DMA
 		register will be collected as well.  Requires also DEBUG_FS and
-		DEBUG_VERBOSE.
+		CONFIG_DEBUG_INFO.
 
 endmenu # HSMCI device driver options
 endif # SAM34_HSMCI

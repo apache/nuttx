@@ -125,7 +125,7 @@
 /* Simplify DEBUG checks */
 
 #ifndef CONFIG_DEBUG
-#  undef CONFIG_DEBUG_VERBOSE
+#  undef CONFIG_DEBUG_INFO
 #  undef CONFIG_DEBUG_USB
 #endif
 
@@ -4887,7 +4887,7 @@ FAR struct usbhost_connection_s *lpc31_ehci_initialize(int controller)
 {
   FAR struct usbhost_hubport_s *hport;
   uint32_t regval;
-#if defined(CONFIG_DEBUG_USB) && defined(CONFIG_DEBUG_VERBOSE)
+#if defined(CONFIG_DEBUG_USB) && defined(CONFIG_DEBUG_INFO)
   uint16_t regval16;
   unsigned int nports;
 #endif
@@ -5140,7 +5140,7 @@ FAR struct usbhost_connection_s *lpc31_ehci_initialize(int controller)
 
   lpc31_putreg(EHCI_INT_ALLINTS, &HCOR->usbsts);
 
-#if defined(CONFIG_DEBUG_USB) && defined(CONFIG_DEBUG_VERBOSE)
+#if defined(CONFIG_DEBUG_USB) && defined(CONFIG_DEBUG_INFO)
   /* Show the EHCI version */
 
   regval16 = lpc31_swap16(HCCR->hciversion);

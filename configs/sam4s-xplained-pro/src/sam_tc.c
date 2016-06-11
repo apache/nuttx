@@ -109,7 +109,7 @@
 #ifdef CONFIG_DEBUG_TIMER
 #  define tcdbg                 dbg
 #  define tclldbg               lldbg
-#  ifdef CONFIG_DEBUG_VERBOSE
+#  ifdef CONFIG_DEBUG_INFO
 #    define tcvdbg              vdbg
 #    define tcllvdbg            llvdbg
 #  else

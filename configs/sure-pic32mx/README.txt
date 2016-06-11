@@ -741,7 +741,7 @@ Where <subdir> is one of the following:
 
        Build Setup:
          CONFIG_DEBUG=y             : Enable debug features
-         CONFIG_DEBUG_VERBOSE=y     : Enable verbose debug output
+         CONFIG_DEBUG_INFO=y     : Enable verbose debug output
          CONFIG_DEBUG_FS=y          : Enable file system debug
          CONFIG_DEBUG_SPI=y         : Enable SPI debug
 
@@ -773,7 +773,7 @@ Where <subdir> is one of the following:
 
        Build Setup -> Debug Options:
          CONFIG_DEBUG=y             : Enable debug features
-         CONFIG_DEBUG_VERBOSE=y     : Enable verbose debug output
+         CONFIG_DEBUG_INFO=y     : Enable verbose debug output
          CONFIG_DEBUG_LCD=y         : Enable LCD debug output
 
        NOTES:

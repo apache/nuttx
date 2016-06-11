@@ -81,14 +81,14 @@
  */
 
 #ifndef CONFIG_DEBUG
-#  undef CONFIG_DEBUG_VERBOSE
+#  undef CONFIG_DEBUG_INFO
 #  undef CONFIG_DEBUG_I2S
 #endif
 
 #ifdef CONFIG_DEBUG_I2S
 #  define i2sdbg         dbg
 #  define i2slldbg       lldbg
-#  ifdef CONFIG_DEBUG_VERBOSE
+#  ifdef CONFIG_DEBUG_INFO
 #    define i2svdbg      dbg
 #    define i2sllvdbg    lldbg
 #  else

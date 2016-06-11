@@ -250,7 +250,7 @@ static int nand_checkblock(FAR struct nand_dev_s *nand, off_t block)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_MTD_NAND_BLOCKCHECK) && defined(CONFIG_DEBUG_VERBOSE) && \
+#if defined(CONFIG_MTD_NAND_BLOCKCHECK) && defined(CONFIG_DEBUG_INFO) && \
     defined(CONFIG_DEBUG_FS)
 static int nand_devscan(FAR struct nand_dev_s *nand)
 {
@@ -258,7 +258,7 @@ static int nand_devscan(FAR struct nand_dev_s *nand)
   FAR struct nand_model_s *model;
   off_t nblocks;
   off_t block;
-#if defined(CONFIG_DEBUG_VERBOSE) && defined(CONFIG_DEBUG_FS)
+#if defined(CONFIG_DEBUG_INFO) && defined(CONFIG_DEBUG_FS)
   off_t good;
   unsigned int ngood;
 #endif
@@ -279,7 +279,7 @@ static int nand_devscan(FAR struct nand_dev_s *nand)
 
   /* Retrieve block status from their first page spare area */
 
-#if defined(CONFIG_DEBUG_VERBOSE) && defined(CONFIG_DEBUG_FS)
+#if defined(CONFIG_DEBUG_INFO) && defined(CONFIG_DEBUG_FS)
   ngood = 0;
 #endif
 
@@ -290,7 +290,7 @@ static int nand_devscan(FAR struct nand_dev_s *nand)
       ret = nand_checkblock(nand, block);
       if (ret != GOODBLOCK)
         {
-#if defined(CONFIG_DEBUG_VERBOSE) && defined(CONFIG_DEBUG_FS)
+#if defined(CONFIG_DEBUG_INFO) && defined(CONFIG_DEBUG_FS)
           if (ngood > 0)
             {
               fvdbg("Good blocks: %u - %u\n", good, good + ngood);
@@ -307,7 +307,7 @@ static int nand_devscan(FAR struct nand_dev_s *nand)
                    (unsigned int)block, ret);
             }
         }
-#if defined(CONFIG_DEBUG_VERBOSE) && defined(CONFIG_DEBUG_FS)
+#if defined(CONFIG_DEBUG_INFO) && defined(CONFIG_DEBUG_FS)
       else
         {
            if (ngood == 0)
@@ -320,7 +320,7 @@ static int nand_devscan(FAR struct nand_dev_s *nand)
 #endif
     }
 
-#if defined(CONFIG_DEBUG_VERBOSE) && defined(CONFIG_DEBUG_FS)
+#if defined(CONFIG_DEBUG_INFO) && defined(CONFIG_DEBUG_FS)
   if (ngood > 0)
     {
       fvdbg("Good blocks: %u - %u\n", good, good + ngood);
@@ -329,7 +329,7 @@ static int nand_devscan(FAR struct nand_dev_s *nand)
 
   return OK;
 }
-#endif /* CONFIG_MTD_NAND_BLOCKCHECK &&  CONFIG_DEBUG_VERBOSE && CONFIG_DEBUG_FS */
+#endif /* CONFIG_MTD_NAND_BLOCKCHECK &&  CONFIG_DEBUG_INFO && CONFIG_DEBUG_FS */
 
 /****************************************************************************
  * Name: nand_chipid

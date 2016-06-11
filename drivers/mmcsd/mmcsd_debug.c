@@ -81,7 +81,7 @@
  *
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG_VERBOSE) && defined(CONFIG_DEBUG_FS)
+#if defined(CONFIG_DEBUG_INFO) && defined(CONFIG_DEBUG_FS)
 void mmcsd_dmpcsd(FAR const uint8_t *csd, uint8_t cardtype)
 {
   bool mmc = (cardtype == MMCSD_CARDTYPE_MMC);

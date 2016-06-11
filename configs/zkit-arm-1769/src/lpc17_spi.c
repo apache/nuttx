@@ -67,7 +67,7 @@
 
 #ifdef CONFIG_DEBUG_SPI
 #  define spidbg  lldbg
-#  ifdef CONFIG_DEBUG_VERBOSE
+#  ifdef CONFIG_DEBUG_INFO
 #    define spivdbg lldbg
 #  else
 #    define spivdbg(x...)
@@ -79,7 +79,7 @@
 
 /* Dump GPIO registers */
 
-#if defined(CONFIG_DEBUG_SPI) && defined(CONFIG_DEBUG_VERBOSE)
+#if defined(CONFIG_DEBUG_SPI) && defined(CONFIG_DEBUG_INFO)
 #  define spi_dumpgpio(m) lpc17_dumpgpio(SDCCS_GPIO, m)
 #else
 #  define spi_dumpgpio(m)

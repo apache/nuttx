@@ -76,12 +76,12 @@
  *
  * CONFIG_DEBUG         - Define to enable general debug features
  * CONFIG_DEBUG_SPI     - Define to enable basic SSP debug (needs CONFIG_DEBUG)
- * CONFIG_DEBUG_VERBOSE - Define to enable verbose SSP debug
+ * CONFIG_DEBUG_INFO - Define to enable verbose SSP debug
  */
 
 #ifdef CONFIG_DEBUG_SPI
 #  define spidbg  lldbg
-#  ifdef CONFIG_DEBUG_VERBOSE
+#  ifdef CONFIG_DEBUG_INFO
 #    define spivdbg lldbg
 #  else
 #    define spivdbg(x...)

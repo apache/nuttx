@@ -1065,10 +1065,10 @@ Where <subdir> is one of the following:
     settings in the configuration file:
 
       -CONFIG_DEBUG=n
-      -CONFIG_DEBUG_VERBOSE=n
+      -CONFIG_DEBUG_INFO=n
       -CONFIG_DEBUG_USB=n
       +CONFIG_DEBUG=y
-      +CONFIG_DEBUG_VERBOSE=y
+      +CONFIG_DEBUG_INFO=y
       +CONFIG_DEBUG_USB=y
 
       -CONFIG_EXAMPLES_USBSERIAL_TRACEINIT=n

@@ -42,8 +42,8 @@
 /* Force verbose debug on in this file only to support unit-level testing. */
 
 #ifdef CONFIG_NETDEV_PHY_DEBUG
-#  undef  CONFIG_DEBUG_VERBOSE
-#  define CONFIG_DEBUG_VERBOSE 1
+#  undef  CONFIG_DEBUG_INFO
+#  define CONFIG_DEBUG_INFO 1
 #  undef  CONFIG_DEBUG_NET
 #  define CONFIG_DEBUG_NET 1
 #endif
