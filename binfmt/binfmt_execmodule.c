@@ -142,7 +142,7 @@ int exec_module(FAR const struct binary_s *binp)
 #endif
   FAR uint32_t *stack;
   pid_t pid;
-  int err;
+  int errcode;
   int ret;
 
   /* Sanity checking */
@@ -150,7 +150,7 @@ int exec_module(FAR const struct binary_s *binp)
 #ifdef CONFIG_DEBUG_FEATURES
   if (!binp || !binp->entrypt || binp->stacksize <= 0)
     {
-      err = EINVAL;
+      errcode = EINVAL;
       goto errout;
     }
 #endif
@@ -162,7 +162,7 @@ int exec_module(FAR const struct binary_s *binp)
   tcb = (FAR struct task_tcb_s *)kmm_zalloc(sizeof(struct task_tcb_s));
   if (!tcb)
     {
-      err = ENOMEM;
+      errcode = ENOMEM;
       goto errout;
     }
 
@@ -173,7 +173,7 @@ int exec_module(FAR const struct binary_s *binp)
   if (ret < 0)
     {
       bdbg("ERROR: up_addrenv_select() failed: %d\n", ret);
-      err = -ret;
+      errcode = -ret;
       goto errout_with_tcb;
     }
 
@@ -192,7 +192,7 @@ int exec_module(FAR const struct binary_s *binp)
   stack = (FAR uint32_t *)kumm_malloc(binp->stacksize);
   if (!stack)
     {
-      err = ENOMEM;
+      errcode = ENOMEM;
       goto errout_with_addrenv;
     }
 
@@ -202,8 +202,8 @@ int exec_module(FAR const struct binary_s *binp)
                   stack, binp->stacksize, binp->entrypt, binp->argv);
   if (ret < 0)
     {
-      err = get_errno();
-      bdbg("task_init() failed: %d\n", err);
+      errcode = get_errno();
+      bdbg("task_init() failed: %d\n", errcode);
       goto errout_with_addrenv;
     }
 
@@ -225,7 +225,7 @@ int exec_module(FAR const struct binary_s *binp)
   if (ret < 0)
     {
       bdbg("ERROR: up_addrenv_select() failed: %d\n", ret);
-      err = -ret;
+      errcode = -ret;
       goto errout_with_tcbinit;
     }
 #endif
@@ -237,7 +237,7 @@ int exec_module(FAR const struct binary_s *binp)
   if (ret < 0)
     {
       bdbg("ERROR: shm_group_initialize() failed: %d\n", ret);
-      err = -ret;
+      errcode = -ret;
       goto errout_with_tcbinit;
     }
 #endif
@@ -260,7 +260,7 @@ int exec_module(FAR const struct binary_s *binp)
   ret = up_addrenv_clone(&binp->addrenv, &tcb->cmn.group->tg_addrenv);
   if (ret < 0)
     {
-      err = -ret;
+      errcode = -ret;
       bdbg("ERROR: up_addrenv_clone() failed: %d\n", ret);
       goto errout_with_tcbinit;
     }
@@ -288,8 +288,8 @@ int exec_module(FAR const struct binary_s *binp)
   ret = task_activate((FAR struct tcb_s *)tcb);
   if (ret < 0)
     {
-      err = get_errno();
-      bdbg("task_activate() failed: %d\n", err);
+      errcode = get_errno();
+      bdbg("task_activate() failed: %d\n", errcode);
       goto errout_with_tcbinit;
     }
 
@@ -300,7 +300,7 @@ int exec_module(FAR const struct binary_s *binp)
   if (ret < 0)
     {
       bdbg("ERROR: up_addrenv_select() failed: %d\n", ret);
-      err = -ret;
+      errcode = -ret;
       goto errout_with_tcbinit;
     }
 #endif
@@ -322,8 +322,8 @@ errout_with_tcb:
   kmm_free(tcb);
 
 errout:
-  set_errno(err);
-  bdbg("returning errno: %d\n", err);
+  set_errno(errcode);
+  bdbg("returning errno: %d\n", errcode);
   return ERROR;
 }
 

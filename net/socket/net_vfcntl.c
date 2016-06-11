@@ -77,7 +77,7 @@ int net_vfcntl(int sockfd, int cmd, va_list ap)
 {
   FAR struct socket *psock = sockfd_socket(sockfd);
   net_lock_t flags;
-  int err = 0;
+  int errcode = 0;
   int ret = 0;
 
   ninfo("sockfd=%d cmd=%d\n", sockfd, cmd);
@@ -86,7 +86,7 @@ int net_vfcntl(int sockfd, int cmd, va_list ap)
 
   if (!psock || psock->s_crefs <= 0)
     {
-      err = EBADF;
+      errcode = EBADF;
       goto errout;
     }
 
@@ -126,7 +126,7 @@ int net_vfcntl(int sockfd, int cmd, va_list ap)
          * successful execution of one  of  the  exec  functions.
          */
 
-         err = ENOSYS; /* F_GETFD and F_SETFD not implemented */
+         errcode = ENOSYS; /* F_GETFD and F_SETFD not implemented */
          break;
 
       case F_GETFL:
@@ -263,20 +263,20 @@ int net_vfcntl(int sockfd, int cmd, va_list ap)
          * not be done.
          */
 
-         err = ENOSYS; /* F_GETOWN, F_SETOWN, F_GETLK, F_SETLK, F_SETLKW */
+         errcode = ENOSYS; /* F_GETOWN, F_SETOWN, F_GETLK, F_SETLK, F_SETLKW */
          break;
 
       default:
-         err = EINVAL;
+         errcode = EINVAL;
          break;
   }
 
   net_unlock(flags);
 
 errout:
-  if (err != 0)
+  if (errcode != 0)
     {
-      set_errno(err);
+      set_errno(errcode);
       return ERROR;
     }
 

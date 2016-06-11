@@ -936,20 +936,20 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
   FAR struct tcp_wrbuffer_s *wrb;
   net_lock_t save;
   ssize_t    result = 0;
-  int        err;
+  int        errcode;
   int        ret = OK;
 
   if (!psock || psock->s_crefs <= 0)
     {
       ndbg("ERROR: Invalid socket\n");
-      err = EBADF;
+      errcode = EBADF;
       goto errout;
     }
 
   if (psock->s_type != SOCK_STREAM || !_SS_ISCONNECTED(psock->s_flags))
     {
       ndbg("ERROR: Not connected\n");
-      err = ENOTCONN;
+      errcode = ENOTCONN;
       goto errout;
     }
 
@@ -986,7 +986,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
   if (ret < 0)
     {
       ndbg("ERROR: Not reachable\n");
-      err = ENETUNREACH;
+      errcode = ENETUNREACH;
       goto errout;
     }
 #endif /* CONFIG_NET_ARP_SEND || CONFIG_NET_ICMPv6_NEIGHBOR */
@@ -1012,7 +1012,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
           /* A buffer allocation error occurred */
 
           ndbg("ERROR: Failed to allocate write buffer\n");
-          err = ENOMEM;
+          errcode = ENOMEM;
           goto errout_with_lock;
         }
 
@@ -1030,7 +1030,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
           /* A buffer allocation error occurred */
 
           ndbg("ERROR: Failed to allocate callback\n");
-          err = ENOMEM;
+          errcode = ENOMEM;
           goto errout_with_wrb;
         }
 
@@ -1076,7 +1076,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
 
   if (result < 0)
     {
-      err = result;
+      errcode = result;
       goto errout;
     }
 
@@ -1086,7 +1086,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
 
   if (ret < 0)
     {
-      err = -ret;
+      errcode = -ret;
       goto errout;
     }
 
@@ -1101,7 +1101,7 @@ errout_with_lock:
   net_unlock(save);
 
 errout:
-  set_errno(err);
+  set_errno(errcode);
   return ERROR;
 }
 

@@ -1844,21 +1844,21 @@ ssize_t psock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
                        FAR socklen_t *fromlen)
 {
   ssize_t ret;
-  int err;
+  int errcode;
 
   /* Verify that non-NULL pointers were passed */
 
 #ifdef CONFIG_DEBUG_FEATURES
   if (!buf)
     {
-      err = EINVAL;
+      errcode = EINVAL;
       goto errout;
     }
 #endif
 
   if (from && !fromlen)
     {
-      err = EINVAL;
+      errcode = EINVAL;
       goto errout;
     }
 
@@ -1866,7 +1866,7 @@ ssize_t psock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
   if (!psock || psock->s_crefs <= 0)
     {
-      err = EBADF;
+      errcode = EBADF;
       goto errout;
     }
 
@@ -1908,13 +1908,13 @@ ssize_t psock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
         default:
           DEBUGPANIC();
-          err = EINVAL;
+          errcode = EINVAL;
           goto errout;
         }
 
       if (*fromlen < minlen)
         {
-          err = EINVAL;
+          errcode = EINVAL;
           goto errout;
         }
     }
@@ -2002,7 +2002,7 @@ ssize_t psock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
   if (ret < 0)
     {
-      err = -ret;
+      errcode = -ret;
       goto errout;
     }
 
@@ -2011,7 +2011,7 @@ ssize_t psock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
   return ret;
 
 errout:
-  set_errno(err);
+  set_errno(errcode);
   return ERROR;
 }
 

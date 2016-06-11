@@ -239,7 +239,7 @@ int main(int argc, char **argv, char **envp)
   char *destfile;
   FILE *src;
   FILE *dest;
-  int err;
+  int errcode;
 
   if (argc != 2)
     {
@@ -258,7 +258,7 @@ int main(int argc, char **argv, char **envp)
   if (!destfile)
     {
       fprintf(stderr, "getfilepath failed\n");
-      err = 2;
+      errcode = 2;
       goto errout_with_srcfile;
     }
 
@@ -266,7 +266,7 @@ int main(int argc, char **argv, char **envp)
   if (!src)
     {
       fprintf(stderr, "open %s failed: %s\n", srcfile, strerror(errno));
-      err = 3;
+      errcode = 3;
       goto errout_with_destfile;
     }
 
@@ -274,7 +274,7 @@ int main(int argc, char **argv, char **envp)
   if (!dest)
     {
       fprintf(stderr, "open %s failed: %s\n", destfile, strerror(errno));
-      err = 3;
+      errcode = 3;
       goto errout_with_destfile;
     }
 
@@ -285,7 +285,7 @@ int main(int argc, char **argv, char **envp)
       if (parse_line(&hexline))
         {
           fprintf(stderr, "Failed to parse line\n");
-          err = 1;
+          errcode = 1;
           goto errout_with_destfile;
         }
 
@@ -325,5 +325,5 @@ errout_with_destfile:
   free(destfile);
 errout_with_srcfile:
   free(srcfile);
-  return err;
+  return errcode;
 }

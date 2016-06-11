@@ -128,7 +128,7 @@ ssize_t psock_sendto(FAR struct socket *psock, FAR const void *buf,
 #if defined(CONFIG_NET_UDP) || defined(CONFIG_NET_LOCAL_DGRAM)
   ssize_t nsent;
 #endif
-  int err;
+  int errcode;
 
   /* If to is NULL or tolen is zero, then this function is same as send (for
    * connected socket types)
@@ -140,7 +140,7 @@ ssize_t psock_sendto(FAR struct socket *psock, FAR const void *buf,
       return psock_send(psock, buf, len, flags);
 #else
       ndbg("ERROR: No 'to' address\n");
-      err = EINVAL;
+      errcode = EINVAL;
       goto errout;
 #endif
     }
@@ -169,14 +169,14 @@ ssize_t psock_sendto(FAR struct socket *psock, FAR const void *buf,
 
     default:
       ndbg("ERROR: Unrecognized address family: %d\n", to->sa_family);
-      err = EAFNOSUPPORT;
+      errcode = EAFNOSUPPORT;
       goto errout;
     }
 
   if (tolen < minlen)
     {
       ndbg("ERROR: Invalid address length: %d < %d\n", tolen, minlen);
-      err = EBADF;
+      errcode = EBADF;
       goto errout;
     }
 
@@ -185,7 +185,7 @@ ssize_t psock_sendto(FAR struct socket *psock, FAR const void *buf,
   if (!psock || psock->s_crefs <= 0)
     {
       ndbg("ERROR: Invalid socket\n");
-      err = EBADF;
+      errcode = EBADF;
       goto errout;
     }
 
@@ -194,7 +194,7 @@ ssize_t psock_sendto(FAR struct socket *psock, FAR const void *buf,
   if (psock->s_type != SOCK_DGRAM)
     {
       ndbg("ERROR: Connected socket\n");
-      err = EISCONN;
+      errcode = EISCONN;
       goto errout;
     }
 
@@ -226,17 +226,17 @@ ssize_t psock_sendto(FAR struct socket *psock, FAR const void *buf,
   if (nsent < 0)
     {
       ndbg("ERROR: UDP or Unix domain sendto() failed: %ld\n", (long)nsent);
-      err = -nsent;
+      errcode = -nsent;
       goto errout;
     }
 
   return nsent;
 #else
-  err = ENOSYS;
+  errcode = ENOSYS;
 #endif /* CONFIG_NET_UDP || CONFIG_NET_LOCAL_DGRAM */
 
 errout:
-  set_errno(err);
+  set_errno(errcode);
   return ERROR;
 }
 

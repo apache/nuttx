@@ -604,14 +604,14 @@ ssize_t net_sendfile(int outfd, struct file *infile, off_t *offset,
   FAR struct tcp_conn_s *conn;
   struct sendfile_s state;
   net_lock_t save;
-  int err;
+  int errcode;
 
   /* Verify that the sockfd corresponds to valid, allocated socket */
 
   if (!psock || psock->s_crefs <= 0)
     {
       ndbg("ERROR: Invalid socket\n");
-      err = EBADF;
+      errcode = EBADF;
       goto errout;
     }
 
@@ -620,7 +620,7 @@ ssize_t net_sendfile(int outfd, struct file *infile, off_t *offset,
   if (psock->s_type != SOCK_STREAM || !_SS_ISCONNECTED(psock->s_flags))
     {
       ndbg("ERROR: Not connected\n");
-      err = ENOTCONN;
+      errcode = ENOTCONN;
       goto errout;
     }
 
@@ -658,7 +658,7 @@ ssize_t net_sendfile(int outfd, struct file *infile, off_t *offset,
   if (ret < 0)
     {
       ndbg("ERROR: Not reachable\n");
-      err = ENETUNREACH;
+      errcode = ENETUNREACH;
       goto errout;
     }
 #endif /* CONFIG_NET_ARP_SEND || CONFIG_NET_ICMPv6_NEIGHBOR */
@@ -688,7 +688,7 @@ ssize_t net_sendfile(int outfd, struct file *infile, off_t *offset,
   if (state.snd_datacb == NULL)
     {
       nlldbg("Failed to allocate data callback\n");
-      err = ENOMEM;
+      errcode = ENOMEM;
       goto errout_locked;
     }
 
@@ -697,7 +697,7 @@ ssize_t net_sendfile(int outfd, struct file *infile, off_t *offset,
   if (state.snd_ackcb == NULL)
     {
       nlldbg("Failed to allocate ack callback\n");
-      err = ENOMEM;
+      errcode = ENOMEM;
       goto errout_datacb;
     }
 
@@ -754,9 +754,9 @@ errout_locked:
 
 errout:
 
-  if (err)
+  if (errcode)
     {
-      set_errno(err);
+      set_errno(errcode);
       return ERROR;
     }
   else if (state.snd_sent < 0)

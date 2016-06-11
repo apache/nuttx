@@ -115,7 +115,7 @@ int munmap(FAR void *start, size_t length)
   FAR void *newaddr;
   unsigned int offset;
   int ret;
-  int err;
+  int errcode;
 
   /* Find a region containing this start and length in the list of regions */
 
@@ -144,7 +144,7 @@ int munmap(FAR void *start, size_t length)
   if (!curr)
     {
       fdbg("Region not found\n");
-      err = EINVAL;
+      errcode = EINVAL;
       goto errout_with_semaphore;
     }
 
@@ -159,7 +159,7 @@ int munmap(FAR void *start, size_t length)
   if (offset + length < curr->length)
     {
       fdbg("Cannot umap without unmapping to the end\n");
-      err = ENOSYS;
+      errcode = ENOSYS;
       goto errout_with_semaphore;
     }
 
@@ -205,7 +205,7 @@ int munmap(FAR void *start, size_t length)
 
 errout_with_semaphore:
   sem_post(&g_rammaps.exclsem);
-  set_errno(err);
+  set_errno(errcode);
   return ERROR;
 }
 

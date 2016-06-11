@@ -507,13 +507,13 @@ static void local_close(FAR struct socket *psock)
 
 int psock_close(FAR struct socket *psock)
 {
-  int err;
+  int errcode;
 
   /* Verify that the sockfd corresponds to valid, allocated socket */
 
   if (!psock || psock->s_crefs <= 0)
     {
-      err = EBADF;
+      errcode = EBADF;
       goto errout;
     }
 
@@ -565,8 +565,8 @@ int psock_close(FAR struct socket *psock)
 
                       /* Break any current connections */
 
-                      err = netclose_disconnect(psock);
-                      if (err < 0)
+                      errcode = netclose_disconnect(psock);
+                      if (errcode < 0)
                         {
                           /* This would normally occur only if there is a
                            * timeout from a lingering close.
@@ -662,7 +662,7 @@ int psock_close(FAR struct socket *psock)
 #endif
 
           default:
-            err = EBADF;
+            errcode = EBADF;
             goto errout;
         }
     }
@@ -678,7 +678,7 @@ errout_with_psock:
 #endif
 
 errout:
-  set_errno(err);
+  set_errno(errcode);
   return ERROR;
 }
 

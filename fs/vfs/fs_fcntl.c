@@ -75,14 +75,14 @@
 #if CONFIG_NFILE_DESCRIPTORS > 0
 int file_vfcntl(FAR struct file *filep, int cmd, va_list ap)
 {
-  int err = 0;
+  int errcode = 0;
   int ret = OK;
 
   /* Was this file opened ? */
 
   if (!filep->f_inode)
     {
-      err = EBADF;
+      errcode = EBADF;
       goto errout;
     }
 
@@ -119,7 +119,7 @@ int file_vfcntl(FAR struct file *filep, int cmd, va_list ap)
          * successful execution of one  of  the  exec  functions.
          */
 
-        err = ENOSYS;
+        errcode = ENOSYS;
         break;
 
       case F_GETFL:
@@ -169,7 +169,7 @@ int file_vfcntl(FAR struct file *filep, int cmd, va_list ap)
          * fd does not refer to a socket, the results are unspecified.
          */
 
-        err = EBADF; /* Only valid on socket descriptors */
+        errcode = EBADF; /* Only valid on socket descriptors */
         break;
 
       case F_GETLK:
@@ -199,18 +199,18 @@ int file_vfcntl(FAR struct file *filep, int cmd, va_list ap)
          * not be done.
          */
 
-        err = ENOSYS; /* Not implemented */
+        errcode = ENOSYS; /* Not implemented */
         break;
 
       default:
-        err = EINVAL;
+        errcode = EINVAL;
         break;
     }
 
 errout:
-  if (err != 0)
+  if (errcode != 0)
     {
-      set_errno(err);
+      set_errno(errcode);
       return ERROR;
     }
 

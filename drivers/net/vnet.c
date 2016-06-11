@@ -169,7 +169,7 @@ static int vnet_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac);
 
 static int vnet_transmit(FAR struct vnet_driver_s *vnet)
 {
-  int err;
+  int errcode;
 
   /* Verify that the hardware is ready to send another packet.  If we get
    * here, then we are committed to sending a packet; Higher level logic
@@ -178,8 +178,8 @@ static int vnet_transmit(FAR struct vnet_driver_s *vnet)
 
   /* Send the packet: address=vnet->sk_dev.d_buf, length=vnet->sk_dev.d_len */
 
-  err = vnet_xmit(vnet->vnet, (char *)vnet->sk_dev.d_buf, vnet->sk_dev.d_len);
-  if (err)
+  errcode = vnet_xmit(vnet->vnet, (char *)vnet->sk_dev.d_buf, vnet->sk_dev.d_len);
+  if (errcode)
     {
       /* When vnet_xmit fail, it means TX buffer is full. Watchdog
        * is of no use here because no TX done INT will happen. So

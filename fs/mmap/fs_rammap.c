@@ -121,7 +121,7 @@ FAR void *rammap(int fd, size_t length, off_t offset)
   FAR uint8_t *rdbuffer;
   ssize_t nread;
   off_t fpos;
-  int err;
+  int errcode;
   int ret;
 
   /* There is a major design flaw that I have not yet thought of fix for:
@@ -143,7 +143,7 @@ FAR void *rammap(int fd, size_t length, off_t offset)
   if (!alloc)
     {
       fdbg("Region allocation failed, length: %d\n", (int)length);
-      err = ENOMEM;
+      errcode = ENOMEM;
       goto errout;
     }
 
@@ -165,7 +165,7 @@ FAR void *rammap(int fd, size_t length, off_t offset)
        */
 
       fdbg("Seek to position %d failed\n", (int)offset);
-      err = EINVAL;
+      errcode = EINVAL;
       goto errout_with_region;
     }
 
@@ -181,8 +181,8 @@ FAR void *rammap(int fd, size_t length, off_t offset)
            * signal.
            */
 
-          err = get_errno();
-          if (err != EINTR)
+          errcode = get_errno();
+          if (errcode != EINTR)
             {
               /* All other read errors are bad.  errno is already set.
                * (but maybe should be forced to EINVAL?).  NOTE that if
@@ -190,7 +190,7 @@ FAR void *rammap(int fd, size_t length, off_t offset)
                * destroy the errno value.
                */
 
-              fdbg("Read failed: offset=%d errno=%d\n", (int)offset, err);
+              fdbg("Read failed: offset=%d errno=%d\n", (int)offset, errcode);
 #ifdef CONFIG_DEBUG_FS
               goto errout_with_region;
 #else
@@ -234,7 +234,7 @@ FAR void *rammap(int fd, size_t length, off_t offset)
 errout_with_region:
   kumm_free(alloc);
 errout:
-  set_errno(err);
+  set_errno(errcode);
   return MAP_FAILED;
 
 errout_with_errno:

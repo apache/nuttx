@@ -1015,7 +1015,7 @@ int can_receive(FAR struct can_dev_s *dev, FAR struct can_hdr_s *hdr,
   FAR struct can_rxfifo_s *fifo = &dev->cd_recv;
   FAR uint8_t             *dest;
   int                      nexttail;
-  int                      err = -ENOMEM;
+  int                      errcode = -ENOMEM;
   int                      i;
 
   canllinfo("ID: %d DLC: %d\n", hdr->ch_id, hdr->ch_dlc);
@@ -1113,7 +1113,7 @@ int can_receive(FAR struct can_dev_s *dev, FAR struct can_hdr_s *hdr,
           sem_post(&fifo->rx_sem);
         }
 
-      err = OK;
+      errcode = OK;
     }
 #ifdef CONFIG_CAN_ERRORS
   else
@@ -1124,7 +1124,7 @@ int can_receive(FAR struct can_dev_s *dev, FAR struct can_hdr_s *hdr,
     }
 #endif
 
-  return err;
+  return errcode;
 }
 
 /****************************************************************************

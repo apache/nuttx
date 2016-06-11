@@ -84,7 +84,7 @@
 
 int psock_listen(FAR struct socket *psock, int backlog)
 {
-  int err;
+  int errcode;
 
   DEBUGASSERT(psock != NULL);
 
@@ -92,7 +92,7 @@ int psock_listen(FAR struct socket *psock, int backlog)
 
   if (psock->s_type != SOCK_STREAM || !psock->s_conn)
     {
-      err = EOPNOTSUPP;
+      errcode = EOPNOTSUPP;
       goto errout;
     }
 
@@ -104,10 +104,10 @@ int psock_listen(FAR struct socket *psock, int backlog)
       FAR struct local_conn_s *conn =
         (FAR struct local_conn_s *)psock->s_conn;
 
-      err = local_listen(conn, backlog);
-      if (err < 0)
+      errcode = local_listen(conn, backlog);
+      if (errcode < 0)
         {
-          err = -err;
+          errcode = -errcode;
           goto errout;
         }
     }
@@ -123,17 +123,17 @@ int psock_listen(FAR struct socket *psock, int backlog)
 
       if (conn->lport <= 0)
         {
-          err = EOPNOTSUPP;
+          errcode = EOPNOTSUPP;
           goto errout;
         }
 
       /* Set up the backlog for this connection */
 
 #ifdef CONFIG_NET_TCPBACKLOG
-      err = tcp_backlogcreate(conn, backlog);
-      if (err < 0)
+      errcode = tcp_backlogcreate(conn, backlog);
+      if (errcode < 0)
         {
-          err = -err;
+          errcode = -errcode;
           goto errout;
         }
 #endif
@@ -150,7 +150,7 @@ int psock_listen(FAR struct socket *psock, int backlog)
   return OK;
 
 errout:
-  set_errno(err);
+  set_errno(errcode);
   return ERROR;
 }
 
@@ -190,7 +190,7 @@ errout:
 int listen(int sockfd, int backlog)
 {
   FAR struct socket *psock = sockfd_socket(sockfd);
-  int err;
+  int errcode;
 
   /* Verify that the sockfd corresponds to valid, allocated socket */
 
@@ -204,15 +204,15 @@ int listen(int sockfd, int backlog)
 #if CONFIG_NFILE_DESCRIPTORS > 0
       if ((unsigned int)sockfd < CONFIG_NFILE_DESCRIPTORS)
         {
-          err = ENOTSOCK;
+          errcode = ENOTSOCK;
         }
       else
 #endif
         {
-          err = EBADF;
+          errcode = EBADF;
         }
 
-      set_errno(err);
+      set_errno(errcode);
       return ERROR;
     }
 

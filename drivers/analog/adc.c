@@ -377,7 +377,7 @@ static int adc_receive(FAR struct adc_dev_s *dev, uint8_t ch, int32_t data)
 {
   FAR struct adc_fifo_s *fifo = &dev->ad_recv;
   int                    nexttail;
-  int                    err = -ENOMEM;
+  int                    errcode = -ENOMEM;
 
   /* Check if adding this new message would over-run the drivers ability to enqueue
    * read data.
@@ -407,9 +407,10 @@ static int adc_receive(FAR struct adc_dev_s *dev, uint8_t ch, int32_t data)
           sem_post(&fifo->af_sem);
         }
 
-      err = OK;
+      errcode = OK;
     }
-    return err;
+
+  return errcode;
 }
 
 /****************************************************************************

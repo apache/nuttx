@@ -719,7 +719,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
   FAR struct tcp_conn_s *conn = (FAR struct tcp_conn_s *)psock->s_conn;
   struct send_s state;
   net_lock_t save;
-  int err;
+  int errcode;
   int ret = OK;
 
   /* Verify that the sockfd corresponds to valid, allocated socket */
@@ -727,7 +727,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
   if (!psock || psock->s_crefs <= 0)
     {
       ndbg("ERROR: Invalid socket\n");
-      err = EBADF;
+      errcode = EBADF;
       goto errout;
     }
 
@@ -736,7 +736,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
   if (psock->s_type != SOCK_STREAM || !_SS_ISCONNECTED(psock->s_flags))
     {
       ndbg("ERROR: Not connected\n");
-      err = ENOTCONN;
+      errcode = ENOTCONN;
       goto errout;
     }
 
@@ -774,7 +774,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
   if (ret < 0)
     {
       ndbg("ERROR: Not reachable\n");
-      err = ENETUNREACH;
+      errcode = ENETUNREACH;
       goto errout;
     }
 #endif /* CONFIG_NET_ARP_SEND || CONFIG_NET_ICMPv6_NEIGHBOR */
@@ -857,7 +857,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
 
   if (state.snd_sent < 0)
     {
-      err = state.snd_sent;
+      errcode = state.snd_sent;
       goto errout;
     }
 
@@ -867,7 +867,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
 
   if (ret < 0)
     {
-      err = -ret;
+      errcode = -ret;
       goto errout;
     }
 
@@ -876,7 +876,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
   return state.snd_sent;
 
 errout:
-  set_errno(err);
+  set_errno(errcode);
   return ERROR;
 }
 

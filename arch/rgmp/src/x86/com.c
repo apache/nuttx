@@ -315,11 +315,11 @@ static void up_shutdown(struct uart_dev_s *dev)
 static int up_attach(struct uart_dev_s *dev)
 {
     struct up_dev_s *priv = dev->priv;
-    int err;
+    int errcode;
 
-    err = rgmp_request_irq(priv->irq, &priv->action, 0);
+    errcode = rgmp_request_irq(priv->irq, &priv->action, 0);
 
-    return err;
+    return errcode;
 }
 
 /****************************************************************************
@@ -578,15 +578,15 @@ void up_earlyserialinit(void)
 void up_serialinit(void)
 {
     uart_dev_t *dev;
-    int err;
+    int errcode;
 
 #ifdef CONFIG_COM1
     dev = up_alloc_com(COM1, 4);
     if (dev == NULL)
         dbg("alloc com1 fail\n");
     else {
-        err = uart_register("/dev/ttyS0", dev);
-        if (err)
+        errcode = uart_register("/dev/ttyS0", dev);
+        if (errcode)
             dbg("register com1 fail\n");
     }
 #endif
@@ -595,8 +595,8 @@ void up_serialinit(void)
     if (dev == NULL)
         dbg("alloc com2 fail\n");
     else {
-        err = uart_register("/dev/ttyS1", dev);
-        if (err)
+        errcode = uart_register("/dev/ttyS1", dev);
+        if (errcode)
             dbg("register com2 fail\n");
     }
 #endif
@@ -605,8 +605,8 @@ void up_serialinit(void)
     if (dev == NULL)
         dbg("alloc com3 fail\n");
     else {
-        err = uart_register("/dev/ttyS2", dev);
-        if (err)
+        errcode = uart_register("/dev/ttyS2", dev);
+        if (errcode)
             dbg("register com3 fail\n");
     }
 #endif
@@ -615,8 +615,8 @@ void up_serialinit(void)
     if (dev == NULL)
         dbg("alloc com4 fail\n");
     else {
-        err = uart_register("/dev/ttyS3", dev);
-        if (err)
+        errcode = uart_register("/dev/ttyS3", dev);
+        if (errcode)
             dbg("register com4 fail\n");
     }
 #endif
