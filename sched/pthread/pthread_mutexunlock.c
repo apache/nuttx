@@ -82,7 +82,7 @@ int pthread_mutex_unlock(FAR pthread_mutex_t *mutex)
 {
   int ret = OK;
 
-  serr("mutex=0x%p\n", mutex);
+  sinfo("mutex=0x%p\n", mutex);
 
   if (!mutex)
     {
@@ -102,7 +102,7 @@ int pthread_mutex_unlock(FAR pthread_mutex_t *mutex)
         {
           /* No... return an error (default behavior is like PTHREAD_MUTEX_ERRORCHECK) */
 
-          serr("Holder=%d returning EPERM\n", mutex->pid);
+          serr(ERROR: "Holder=%d returning EPERM\n", mutex->pid);
           ret = EPERM;
         }
 
@@ -137,7 +137,7 @@ int pthread_mutex_unlock(FAR pthread_mutex_t *mutex)
       sched_unlock();
     }
 
-  serr("Returning %d\n", ret);
+  sinfo("Returning %d\n", ret);
   return ret;
 }
 

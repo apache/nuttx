@@ -67,7 +67,7 @@ int clock_settime(clockid_t clock_id, FAR const struct timespec *tp)
   irqstate_t flags;
   int ret = OK;
 
-  serr("clock_id=%d\n", clock_id);
+  sinfo("clock_id=%d\n", clock_id);
   DEBUGASSERT(tp != NULL);
 
   /* CLOCK_REALTIME - POSIX demands this to be present. This is the wall
@@ -120,9 +120,9 @@ int clock_settime(clockid_t clock_id, FAR const struct timespec *tp)
 #endif
       leave_critical_section(flags);
 
-      serr("basetime=(%ld,%lu) bias=(%ld,%lu)\n",
-          (long)g_basetime.tv_sec, (unsigned long)g_basetime.tv_nsec,
-          (long)bias.tv_sec, (unsigned long)bias.tv_nsec);
+      sinfo("basetime=(%ld,%lu) bias=(%ld,%lu)\n",
+            (long)g_basetime.tv_sec, (unsigned long)g_basetime.tv_nsec,
+            (long)bias.tv_sec, (unsigned long)bias.tv_nsec);
     }
   else
     {

@@ -68,7 +68,7 @@ int clock_gettime(clockid_t clock_id, struct timespec *tp)
   uint32_t carry;
   int ret = OK;
 
-  serr("clock_id=%d\n", clock_id);
+  sinfo("clock_id=%d\n", clock_id);
   DEBUGASSERT(tp != NULL);
 
 #ifdef CONFIG_CLOCK_MONOTONIC
@@ -155,7 +155,7 @@ int clock_gettime(clockid_t clock_id, struct timespec *tp)
     }
   else
     {
-      serr("Returning tp=(%d,%d)\n", (int)tp->tv_sec, (int)tp->tv_nsec);
+      sinfo("Returning tp=(%d,%d)\n", (int)tp->tv_sec, (int)tp->tv_nsec);
     }
 
   return ret;

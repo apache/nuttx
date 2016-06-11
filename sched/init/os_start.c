@@ -372,7 +372,7 @@ void os_start(void)
 #endif
   int i;
 
-  sllerr("Entry\n");
+  sllinfo("Entry\n");
 
   /* Boot up is complete */
 
@@ -797,7 +797,7 @@ void os_start(void)
   /* The IDLE Loop **********************************************************/
   /* When control is return to this point, the system is idle. */
 
-  serr("CPU0: Beginning Idle Loop\n");
+  sinfo("CPU0: Beginning Idle Loop\n");
   for (; ; )
     {
       /* Perform garbage collection (if it is not being done by the worker

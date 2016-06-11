@@ -214,7 +214,7 @@ int pthread_completejoin(pid_t pid, FAR void *exit_value)
   pjoin = pthread_findjoininfo(group, pid);
   if (!pjoin)
     {
-      serr("Could not find join info, pid=%d\n", pid);
+      serr("ERROR: Could not find join info, pid=%d\n", pid);
       (void)pthread_givesemaphore(&group->tg_joinsem);
       return ERROR;
     }
@@ -271,7 +271,7 @@ int pthread_completejoin(pid_t pid, FAR void *exit_value)
 void pthread_destroyjoin(FAR struct task_group_s *group,
                          FAR struct join_s *pjoin)
 {
-  serr("pjoin=0x%p\n", pjoin);
+  sinfo("pjoin=0x%p\n", pjoin);
 
   /* Remove the join info from the set of joins */
 

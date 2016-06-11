@@ -1078,7 +1078,7 @@ int sched_sporadic_resume(FAR struct tcb_s *tcb)
                * failure from the standpoint of higher level logic.
                */
 
-              sllerr("Failed to allocate timer, nrepls=%d\n",
+              sllerr("ERROR: Failed to allocate timer, nrepls=%d\n",
                      sporadic->nrepls);
             }
         }

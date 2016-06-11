@@ -76,9 +76,9 @@ int sig_mqnotempty(int pid, int signo, void *sival_ptr)
   int ret;
 
 #ifdef CONFIG_CAN_PASS_STRUCTS
-  serr("pid=%p signo=%d value=%d\n", pid, signo, value.sival_int);
+  sinfo("pid=%p signo=%d value=%d\n", pid, signo, value.sival_int);
 #else
-  serr("pid=%p signo=%d sival_ptr=%p\n", pid, signo, sival_ptr);
+  sinfo("pid=%p signo=%d sival_ptr=%p\n", pid, signo, sival_ptr);
 #endif
 
   /* Verify that we can perform the signalling operation */

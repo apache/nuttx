@@ -212,7 +212,7 @@ int work_lpstart(void)
           int errcode = errno;
           DEBUGASSERT(errcode > 0);
 
-          sllerr("kernel_thread %d failed: %d\n", wndx, errcode);
+          sllerr("ERROR: kernel_thread %d failed: %d\n", wndx, errcode);
           sched_unlock();
           return -errcode;
         }

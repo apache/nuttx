@@ -58,8 +58,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* CONFIG_DEBUG_FEATURES, CONFIG_DEBUG_INFO, and CONFIG_DEBUG_BINFMT have to be
- * defined or CONFIG_MODULE_DUMPBUFFER does nothing.
+/* CONFIG_DEBUG_INFO, and CONFIG_DEBUG_BINFMT have to be defined or
+ * CONFIG_MODULE_DUMPBUFFER does nothing.
  */
 
 #if !defined(CONFIG_DEBUG_INFO) || !defined (CONFIG_DEBUG_BINFMT)
@@ -84,55 +84,55 @@
  * Name: mod_dumploadinfo
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_DEBUG_BINFMT)
+#if defined(CONFIG_DEBUG_INFO) && defined(CONFIG_DEBUG_BINFMT)
 static void mod_dumploadinfo(FAR struct mod_loadinfo_s *loadinfo)
 {
   int i;
 
-  serr("LOAD_INFO:\n");
-  serr("  textalloc:    %08lx\n", (long)loadinfo->textalloc);
-  serr("  datastart:    %08lx\n", (long)loadinfo->datastart);
-  serr("  textsize:     %ld\n",   (long)loadinfo->textsize);
-  serr("  datasize:     %ld\n",   (long)loadinfo->datasize);
-  serr("  filelen:      %ld\n",   (long)loadinfo->filelen);
-  serr("  filfd:        %d\n",    loadinfo->filfd);
-  serr("  symtabidx:    %d\n",    loadinfo->symtabidx);
-  serr("  strtabidx:    %d\n",    loadinfo->strtabidx);
+  sinfo("LOAD_INFO:\n");
+  sinfo("  textalloc:    %08lx\n", (long)loadinfo->textalloc);
+  sinfo("  datastart:    %08lx\n", (long)loadinfo->datastart);
+  sinfo("  textsize:     %ld\n",   (long)loadinfo->textsize);
+  sinfo("  datasize:     %ld\n",   (long)loadinfo->datasize);
+  sinfo("  filelen:      %ld\n",   (long)loadinfo->filelen);
+  sinfo("  filfd:        %d\n",    loadinfo->filfd);
+  sinfo("  symtabidx:    %d\n",    loadinfo->symtabidx);
+  sinfo("  strtabidx:    %d\n",    loadinfo->strtabidx);
 
-  serr("ELF Header:\n");
-  serr("  e_ident:      %02x %02x %02x %02x\n",
+  sinfo("ELF Header:\n");
+  sinfo("  e_ident:      %02x %02x %02x %02x\n",
     loadinfo->ehdr.e_ident[0], loadinfo->ehdr.e_ident[1],
     loadinfo->ehdr.e_ident[2], loadinfo->ehdr.e_ident[3]);
-  serr("  e_type:       %04x\n",  loadinfo->ehdr.e_type);
-  serr("  e_machine:    %04x\n",  loadinfo->ehdr.e_machine);
-  serr("  e_version:    %08x\n",  loadinfo->ehdr.e_version);
-  serr("  e_entry:      %08lx\n", (long)loadinfo->ehdr.e_entry);
-  serr("  e_phoff:      %d\n",    loadinfo->ehdr.e_phoff);
-  serr("  e_shoff:      %d\n",    loadinfo->ehdr.e_shoff);
-  serr("  e_flags:      %08x\n" , loadinfo->ehdr.e_flags);
-  serr("  e_ehsize:     %d\n",    loadinfo->ehdr.e_ehsize);
-  serr("  e_phentsize:  %d\n",    loadinfo->ehdr.e_phentsize);
-  serr("  e_phnum:      %d\n",    loadinfo->ehdr.e_phnum);
-  serr("  e_shentsize:  %d\n",    loadinfo->ehdr.e_shentsize);
-  serr("  e_shnum:      %d\n",    loadinfo->ehdr.e_shnum);
-  serr("  e_shstrndx:   %d\n",    loadinfo->ehdr.e_shstrndx);
+  sinfo("  e_type:       %04x\n",  loadinfo->ehdr.e_type);
+  sinfo("  e_machine:    %04x\n",  loadinfo->ehdr.e_machine);
+  sinfo("  e_version:    %08x\n",  loadinfo->ehdr.e_version);
+  sinfo("  e_entry:      %08lx\n", (long)loadinfo->ehdr.e_entry);
+  sinfo("  e_phoff:      %d\n",    loadinfo->ehdr.e_phoff);
+  sinfo("  e_shoff:      %d\n",    loadinfo->ehdr.e_shoff);
+  sinfo("  e_flags:      %08x\n" , loadinfo->ehdr.e_flags);
+  sinfo("  e_ehsize:     %d\n",    loadinfo->ehdr.e_ehsize);
+  sinfo("  e_phentsize:  %d\n",    loadinfo->ehdr.e_phentsize);
+  sinfo("  e_phnum:      %d\n",    loadinfo->ehdr.e_phnum);
+  sinfo("  e_shentsize:  %d\n",    loadinfo->ehdr.e_shentsize);
+  sinfo("  e_shnum:      %d\n",    loadinfo->ehdr.e_shnum);
+  sinfo("  e_shstrndx:   %d\n",    loadinfo->ehdr.e_shstrndx);
 
   if (loadinfo->shdr && loadinfo->ehdr.e_shnum > 0)
     {
       for (i = 0; i < loadinfo->ehdr.e_shnum; i++)
         {
           FAR Elf32_Shdr *shdr = &loadinfo->shdr[i];
-          serr("Sections %d:\n", i);
-          serr("  sh_name:      %08x\n", shdr->sh_name);
-          serr("  sh_type:      %08x\n", shdr->sh_type);
-          serr("  sh_flags:     %08x\n", shdr->sh_flags);
-          serr("  sh_addr:      %08x\n", shdr->sh_addr);
-          serr("  sh_offset:    %d\n",   shdr->sh_offset);
-          serr("  sh_size:      %d\n",   shdr->sh_size);
-          serr("  sh_link:      %d\n",   shdr->sh_link);
-          serr("  sh_info:      %d\n",   shdr->sh_info);
-          serr("  sh_addralign: %d\n",   shdr->sh_addralign);
-          serr("  sh_entsize:   %d\n",   shdr->sh_entsize);
+          sinfo("Sections %d:\n", i);
+          sinfo("  sh_name:      %08x\n", shdr->sh_name);
+          sinfo("  sh_type:      %08x\n", shdr->sh_type);
+          sinfo("  sh_flags:     %08x\n", shdr->sh_flags);
+          sinfo("  sh_addr:      %08x\n", shdr->sh_addr);
+          sinfo("  sh_offset:    %d\n",   shdr->sh_offset);
+          sinfo("  sh_size:      %d\n",   shdr->sh_size);
+          sinfo("  sh_link:      %d\n",   shdr->sh_link);
+          sinfo("  sh_info:      %d\n",   shdr->sh_info);
+          sinfo("  sh_addralign: %d\n",   shdr->sh_addralign);
+          sinfo("  sh_entsize:   %d\n",   shdr->sh_entsize);
         }
     }
 }
@@ -212,7 +212,7 @@ int insmod(FAR const char *filename, FAR const char *modulename)
   mod_dumploadinfo(&loadinfo);
   if (ret != 0)
     {
-      serr("ERROR: Failed to initialize to load module: %d\n", ret);
+      sinfo("ERROR: Failed to initialize to load module: %d\n", ret);
       goto errout_with_lock;
     }
 
@@ -221,7 +221,7 @@ int insmod(FAR const char *filename, FAR const char *modulename)
   modp = (FAR struct module_s *)kmm_zalloc(sizeof(struct module_s));
   if (ret != 0)
     {
-      serr("Failed to initialize for load of ELF program: %d\n", ret);
+      sinfo("Failed to initialize for load of ELF program: %d\n", ret);
       goto errout_with_loadinfo;
     }
 
@@ -235,7 +235,7 @@ int insmod(FAR const char *filename, FAR const char *modulename)
   mod_dumploadinfo(&loadinfo);
   if (ret != 0)
     {
-      serr("Failed to load ELF program binary: %d\n", ret);
+      sinfo("Failed to load ELF program binary: %d\n", ret);
       goto errout_with_registry_entry;
     }
 
@@ -244,7 +244,7 @@ int insmod(FAR const char *filename, FAR const char *modulename)
   ret = mod_bind(&loadinfo);
   if (ret != 0)
     {
-      serr("Failed to bind symbols program binary: %d\n", ret);
+      sinfo("Failed to bind symbols program binary: %d\n", ret);
       goto errout_with_load;
     }
 
@@ -269,7 +269,7 @@ int insmod(FAR const char *filename, FAR const char *modulename)
   ret = initializer(&modp->uninitializer, &modp->arg);
   if (ret < 0)
     {
-      serr("Failed to initialize the module: %d\n", ret);
+      sinfo("Failed to initialize the module: %d\n", ret);
       goto errout_with_load;
     }
 

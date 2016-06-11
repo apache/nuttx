@@ -133,7 +133,7 @@ int os_idle_task(int argc, FAR char *argv[])
 {
   /* Enter the IDLE loop */
 
-  serr("CPU%d: Beginning Idle Loop\n", this_cpu());
+  sinfo("CPU%d: Beginning Idle Loop\n", this_cpu());
 
   for (; ; )
     {

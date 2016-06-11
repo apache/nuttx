@@ -198,7 +198,7 @@ static void pg_callback(FAR struct tcb_s *tcb, int result)
 
   /* Signal the page fill worker thread (in any event) */
 
-  pgllerr("Signaling worker. PID: %d\n", g_pgworker);
+  pgllinfo("Signaling worker. PID: %d\n", g_pgworker);
   kill(g_pgworker, SIGWORK);
 }
 #endif
@@ -308,7 +308,7 @@ static inline bool pg_dequeue(void)
            * virtual address space -- just restart it.
            */
 
-          pgllerr("Restarting TCB: %p\n", g_pftcb);
+          pgllinfo("Restarting TCB: %p\n", g_pftcb);
           up_unblock_task(g_pftcb);
         }
     }
@@ -422,7 +422,7 @@ static inline bool pg_startfill(void)
       return true;
     }
 
-  pgllerr("Queue empty\n");
+  pgllinfo("Queue empty\n");
   return false;
 }
 
@@ -490,7 +490,7 @@ static inline void pg_fillcomplete(void)
    * received the fill ready-to-run.
    */
 
-  pgllerr("Restarting TCB: %p\n", g_pftcb);
+  pgllinfo("Restarting TCB: %p\n", g_pftcb);
   up_unblock_task(g_pftcb);
 }
 
@@ -532,7 +532,7 @@ int pg_worker(int argc, char *argv[])
    * fill completions should occur while this thread sleeps.
    */
 
-  pgllerr("Started\n");
+  pgllinfo("Started\n");
   (void)up_irq_save();
   for (; ; )
     {
@@ -580,7 +580,7 @@ int pg_worker(int argc, char *argv[])
                * task that was blocked waiting for this page fill.
                */
 
-              pgllerr("Restarting TCB: %p\n", g_pftcb);
+              pgllinfo("Restarting TCB: %p\n", g_pftcb);
               up_unblock_task(g_pftcb);
 
               /* Yes .. Start the next asynchronous fill.  Check the return
@@ -608,7 +608,7 @@ int pg_worker(int argc, char *argv[])
 #ifdef CONFIG_PAGING_TIMEOUT_TICKS
           else
             {
-              llerr("Timeout!\n");
+              pgllerr("ERROR: Timeout!\n");
               ASSERT(clock_systimer() - g_starttime < CONFIG_PAGING_TIMEOUT_TICKS);
             }
 #endif
