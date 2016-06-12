@@ -39,6 +39,15 @@
 
 #include <nuttx/config.h>
 
+/* Output debug info even if debug output is not selected. */
+
+#undef  CONFIG_DEBUG_ERROR
+#undef  CONFIG_DEBUG_WARN
+#undef  CONFIG_DEBUG_INFO
+#define CONFIG_DEBUG_ERROR 1
+#define CONFIG_DEBUG_WARN 1
+#define CONFIG_DEBUG_INFO 1
+
 #include <sys/types.h>
 #include <debug.h>
 
@@ -56,7 +65,6 @@
  ****************************************************************************/
 /* Port letters for prettier debug output */
 
-#ifdef CONFIG_DEBUG_FEATURES
 static const char g_portchar[STM32_NGPIO_PORTS] =
 {
 #if STM32_NGPIO_PORTS > 11
@@ -87,15 +95,6 @@ static const char g_portchar[STM32_NGPIO_PORTS] =
 #  error "Bad number of GPIOs"
 #endif
 };
-#endif
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -125,111 +124,107 @@ int stm32_dumpgpio(uint32_t pinset, const char *msg)
   flags = enter_critical_section();
 
 #if defined(CONFIG_STM32_STM32F10XX)
-
-  llerr("GPIO%c pinset: %08x base: %08x -- %s\n",
-        g_portchar[port], pinset, base, msg);
+  llinfo("GPIO%c pinset: %08x base: %08x -- %s\n",
+         g_portchar[port], pinset, base, msg);
 
   if ((getreg32(STM32_RCC_APB2ENR) & RCC_APB2ENR_IOPEN(port)) != 0)
     {
-      llerr("  CR: %08x %08x IDR: %04x ODR: %04x LCKR: %04x\n",
-            getreg32(base + STM32_GPIO_CRH_OFFSET),
-            getreg32(base + STM32_GPIO_CRL_OFFSET),
-            getreg32(base + STM32_GPIO_IDR_OFFSET),
-            getreg32(base + STM32_GPIO_ODR_OFFSET),
-            getreg32(base + STM32_GPIO_LCKR_OFFSET));
-      llerr("  EVCR: %02x MAPR: %08x CR: %04x %04x %04x %04x\n",
-            getreg32(STM32_AFIO_EVCR), getreg32(STM32_AFIO_MAPR),
-            getreg32(STM32_AFIO_EXTICR1),
-            getreg32(STM32_AFIO_EXTICR2),
-            getreg32(STM32_AFIO_EXTICR3),
-            getreg32(STM32_AFIO_EXTICR4));
+      llinfo("  CR: %08x %08x IDR: %04x ODR: %04x LCKR: %04x\n",
+             getreg32(base + STM32_GPIO_CRH_OFFSET),
+             getreg32(base + STM32_GPIO_CRL_OFFSET),
+             getreg32(base + STM32_GPIO_IDR_OFFSET),
+             getreg32(base + STM32_GPIO_ODR_OFFSET),
+             getreg32(base + STM32_GPIO_LCKR_OFFSET));
+      llinfo("  EVCR: %02x MAPR: %08x CR: %04x %04x %04x %04x\n",
+             getreg32(STM32_AFIO_EVCR), getreg32(STM32_AFIO_MAPR),
+             getreg32(STM32_AFIO_EXTICR1),
+             getreg32(STM32_AFIO_EXTICR2),
+             getreg32(STM32_AFIO_EXTICR3),
+             getreg32(STM32_AFIO_EXTICR4));
     }
   else
     {
-      llerr("  GPIO%c not enabled: APB2ENR: %08x\n",
+      llinfo("  GPIO%c not enabled: APB2ENR: %08x\n",
             g_portchar[port], getreg32(STM32_RCC_APB2ENR));
     }
 
 #elif defined(CONFIG_STM32_STM32L15XX)
-
   DEBUGASSERT(port < STM32_NGPIO_PORTS);
 
-  llerr("GPIO%c pinset: %08x base: %08x -- %s\n",
-        g_portchar[port], pinset, base, msg);
+  llinfo("GPIO%c pinset: %08x base: %08x -- %s\n",
+         g_portchar[port], pinset, base, msg);
 
   if ((getreg32(STM32_RCC_AHBENR) & RCC_AHBENR_GPIOEN(port)) != 0)
     {
-      llerr(" MODE: %08x OTYPE: %04x     OSPEED: %08x PUPDR: %08x\n",
-            getreg32(base + STM32_GPIO_MODER_OFFSET),
-            getreg32(base + STM32_GPIO_OTYPER_OFFSET),
-            getreg32(base + STM32_GPIO_OSPEED_OFFSET),
-            getreg32(base + STM32_GPIO_PUPDR_OFFSET));
-      llerr("  IDR: %04x       ODR: %04x       BSRR: %08x  LCKR: %04x\n",
-            getreg32(base + STM32_GPIO_IDR_OFFSET),
-            getreg32(base + STM32_GPIO_ODR_OFFSET),
-            getreg32(base + STM32_GPIO_BSRR_OFFSET),
-            getreg32(base + STM32_GPIO_LCKR_OFFSET));
-      llerr(" AFRH: %08x  AFRL: %08x\n",
-            getreg32(base + STM32_GPIO_AFRH_OFFSET),
-            getreg32(base + STM32_GPIO_AFRL_OFFSET));
+      llinfo(" MODE: %08x OTYPE: %04x     OSPEED: %08x PUPDR: %08x\n",
+             getreg32(base + STM32_GPIO_MODER_OFFSET),
+             getreg32(base + STM32_GPIO_OTYPER_OFFSET),
+             getreg32(base + STM32_GPIO_OSPEED_OFFSET),
+             getreg32(base + STM32_GPIO_PUPDR_OFFSET));
+      llinfo("  IDR: %04x       ODR: %04x       BSRR: %08x  LCKR: %04x\n",
+             getreg32(base + STM32_GPIO_IDR_OFFSET),
+             getreg32(base + STM32_GPIO_ODR_OFFSET),
+             getreg32(base + STM32_GPIO_BSRR_OFFSET),
+             getreg32(base + STM32_GPIO_LCKR_OFFSET));
+      llinfo(" AFRH: %08x  AFRL: %08x\n",
+             getreg32(base + STM32_GPIO_AFRH_OFFSET),
+             getreg32(base + STM32_GPIO_AFRL_OFFSET));
     }
   else
     {
-      llerr("  GPIO%c not enabled: AHBENR: %08x\n",
-            g_portchar[port], getreg32(STM32_RCC_AHBENR));
+      llinfo("  GPIO%c not enabled: AHBENR: %08x\n",
+             g_portchar[port], getreg32(STM32_RCC_AHBENR));
     }
 
 #elif defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX)
-
   DEBUGASSERT(port < STM32_NGPIO_PORTS);
 
-  llerr("GPIO%c pinset: %08x base: %08x -- %s\n",
-        g_portchar[port], pinset, base, msg);
+  llinfo("GPIO%c pinset: %08x base: %08x -- %s\n",
+         g_portchar[port], pinset, base, msg);
 
   /* GPIOs are always enabled */
 
-  llerr(" MODE: %08x OTYPE: %04x     OSPEED: %08x PUPDR: %08x\n",
-        getreg32(base + STM32_GPIO_MODER_OFFSET),
-        getreg32(base + STM32_GPIO_OTYPER_OFFSET),
-        getreg32(base + STM32_GPIO_OSPEED_OFFSET),
-        getreg32(base + STM32_GPIO_PUPDR_OFFSET));
-  llerr("  IDR: %04x       ODR: %04x       BSRR: %08x  LCKR: %04x\n",
-        getreg32(base + STM32_GPIO_IDR_OFFSET),
-        getreg32(base + STM32_GPIO_ODR_OFFSET),
-        getreg32(base + STM32_GPIO_BSRR_OFFSET),
-        getreg32(base + STM32_GPIO_LCKR_OFFSET));
-  llerr(" AFRH: %08x  AFRL: %08x   BRR: %04x\n",
-        getreg32(base + STM32_GPIO_AFRH_OFFSET),
-        getreg32(base + STM32_GPIO_AFRL_OFFSET),
-        getreg32(base + STM32_GPIO_BRR_OFFSET));
+  llinfo(" MODE: %08x OTYPE: %04x     OSPEED: %08x PUPDR: %08x\n",
+         getreg32(base + STM32_GPIO_MODER_OFFSET),
+         getreg32(base + STM32_GPIO_OTYPER_OFFSET),
+         getreg32(base + STM32_GPIO_OSPEED_OFFSET),
+         getreg32(base + STM32_GPIO_PUPDR_OFFSET));
+  llinfo("  IDR: %04x       ODR: %04x       BSRR: %08x  LCKR: %04x\n",
+         getreg32(base + STM32_GPIO_IDR_OFFSET),
+         getreg32(base + STM32_GPIO_ODR_OFFSET),
+         getreg32(base + STM32_GPIO_BSRR_OFFSET),
+         getreg32(base + STM32_GPIO_LCKR_OFFSET));
+  llinfo(" AFRH: %08x  AFRL: %08x   BRR: %04x\n",
+         getreg32(base + STM32_GPIO_AFRH_OFFSET),
+         getreg32(base + STM32_GPIO_AFRL_OFFSET),
+         getreg32(base + STM32_GPIO_BRR_OFFSET));
 
 #elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
-
   DEBUGASSERT(port < STM32_NGPIO_PORTS);
 
-  llerr("GPIO%c pinset: %08x base: %08x -- %s\n",
-        g_portchar[port], pinset, base, msg);
+  llinfo("GPIO%c pinset: %08x base: %08x -- %s\n",
+         g_portchar[port], pinset, base, msg);
 
   if ((getreg32(STM32_RCC_AHB1ENR) & RCC_AHB1ENR_GPIOEN(port)) != 0)
     {
-      llerr(" MODE: %08x OTYPE: %04x     OSPEED: %08x PUPDR: %08x\n",
-            getreg32(base + STM32_GPIO_MODER_OFFSET),
-            getreg32(base + STM32_GPIO_OTYPER_OFFSET),
-            getreg32(base + STM32_GPIO_OSPEED_OFFSET),
-            getreg32(base + STM32_GPIO_PUPDR_OFFSET));
-      llerr("  IDR: %04x       ODR: %04x       BSRR: %08x  LCKR: %04x\n",
-            getreg32(base + STM32_GPIO_IDR_OFFSET),
-            getreg32(base + STM32_GPIO_ODR_OFFSET),
-            getreg32(base + STM32_GPIO_BSRR_OFFSET),
-            getreg32(base + STM32_GPIO_LCKR_OFFSET));
-      llerr(" AFRH: %08x  AFRL: %08x\n",
-            getreg32(base + STM32_GPIO_AFRH_OFFSET),
-            getreg32(base + STM32_GPIO_AFRL_OFFSET));
+      llinfo(" MODE: %08x OTYPE: %04x     OSPEED: %08x PUPDR: %08x\n",
+             getreg32(base + STM32_GPIO_MODER_OFFSET),
+             getreg32(base + STM32_GPIO_OTYPER_OFFSET),
+             getreg32(base + STM32_GPIO_OSPEED_OFFSET),
+             getreg32(base + STM32_GPIO_PUPDR_OFFSET));
+      llinfo("  IDR: %04x       ODR: %04x       BSRR: %08x  LCKR: %04x\n",
+             getreg32(base + STM32_GPIO_IDR_OFFSET),
+             getreg32(base + STM32_GPIO_ODR_OFFSET),
+             getreg32(base + STM32_GPIO_BSRR_OFFSET),
+             getreg32(base + STM32_GPIO_LCKR_OFFSET));
+      llinfo(" AFRH: %08x  AFRL: %08x\n",
+             getreg32(base + STM32_GPIO_AFRH_OFFSET),
+             getreg32(base + STM32_GPIO_AFRL_OFFSET));
     }
   else
     {
-      llerr("  GPIO%c not enabled: AHB1ENR: %08x\n",
-            g_portchar[port], getreg32(STM32_RCC_AHB1ENR));
+      llinfo("  GPIO%c not enabled: AHB1ENR: %08x\n",
+             g_portchar[port], getreg32(STM32_RCC_AHB1ENR));
     }
 #else
 # error "Unsupported STM32 chip"
