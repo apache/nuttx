@@ -126,7 +126,7 @@ static void tcp_input(FAR struct net_driver_s *dev, unsigned int iplen)
       g_netstats.tcp.drop++;
       g_netstats.tcp.chkerr++;
 #endif
-      nllerr("ERROR: Bad TCP checksum\n");
+      nllwarn("WARNING: Bad TCP checksum\n");
       goto drop;
     }
 
@@ -398,7 +398,7 @@ found:
 
           if ((conn->tcpstateflags & TCP_STATE_MASK) == TCP_ESTABLISHED)
             {
-              nllerr("ERROR: conn->sndseq %d, conn->unacked %d\n",
+              nllwarn("WARNING: conn->sndseq %d, conn->unacked %d\n",
                      tcp_getsequence(conn->sndseq), conn->unacked);
               goto reset;
             }

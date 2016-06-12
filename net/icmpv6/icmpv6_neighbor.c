@@ -298,7 +298,7 @@ int icmpv6_neighbor(const net_ipv6addr_t ipaddr)
   state.snd_cb = icmpv6_callback_alloc(dev);
   if (!state.snd_cb)
     {
-      nerr("ERROR: Failed to allocate a cllback\n");
+      nerr("ERROR: Failed to allocate a callback\n");
       ret = -ENOMEM;
       goto errout_with_lock;
     }

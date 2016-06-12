@@ -339,8 +339,8 @@ int ipv4_input(FAR struct net_driver_s *dev)
       g_netstats.ipv4.drop++;
       g_netstats.ipv4.vhlerr++;
 #endif
-      nllerr("ERROR: Invalid IP version or header length: %02x\n",
-             pbuf->vhl);
+      nllwarn("WARNING: Invalid IP version or header length: %02x\n",
+              pbuf->vhl);
       goto drop;
     }
 
@@ -349,7 +349,7 @@ int ipv4_input(FAR struct net_driver_s *dev)
   hdrlen = NET_LL_HDRLEN(dev);
   if ((hdrlen + IPv4_HDRLEN) > dev->d_len)
     {
-      nllerr("ERROR: Packet shorter than IPv4 header\n");
+      nllwarn("WARNING: Packet shorter than IPv4 header\n");
       goto drop;
     }
 
@@ -369,7 +369,7 @@ int ipv4_input(FAR struct net_driver_s *dev)
     }
   else
     {
-      nllerr("ERROR: IP packet shorter than length in IP header\n");
+      nllwarn("WARNING: IP packet shorter than length in IP header\n");
       goto drop;
     }
 
@@ -388,7 +388,7 @@ int ipv4_input(FAR struct net_driver_s *dev)
       g_netstats.ipv4.drop++;
       g_netstats.ipv4.fragerr++;
 #endif
-      nllerr("ERROR: IP fragment dropped\n");
+      nllwarn("WARNING: IP fragment dropped\n");
       goto drop;
 #endif /* CONFIG_NET_TCP_REASSEMBLY */
     }
@@ -414,7 +414,7 @@ int ipv4_input(FAR struct net_driver_s *dev)
 #ifdef CONFIG_NET_ICMP
   if (net_ipv4addr_cmp(dev->d_ipaddr, INADDR_ANY))
     {
-      nllerr("ERROR: No IP address assigned\n");
+      nllwarn("WARNING: No IP address assigned\n");
       goto drop;
     }
 
@@ -447,7 +447,7 @@ int ipv4_input(FAR struct net_driver_s *dev)
       g_netstats.ipv4.drop++;
       g_netstats.ipv4.chkerr++;
 #endif
-      nllerr("ERROR: Bad IP checksum\n");
+      nllwarn("WARNING: Bad IP checksum\n");
       goto drop;
     }
 
@@ -495,7 +495,7 @@ int ipv4_input(FAR struct net_driver_s *dev)
         g_netstats.ipv4.protoerr++;
 #endif
 
-        nllerr("ERROR: Unrecognized IP protocol\n");
+        nllwarn("WARNING: Unrecognized IP protocol\n");
         goto drop;
     }
 

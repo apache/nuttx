@@ -566,7 +566,7 @@ static uint16_t psock_send_interrupt(FAR struct net_driver_s *dev,
 
           if (++WRB_NRTX(wrb) >= TCP_MAXRTX)
             {
-              nllerr("ERROR: Expiring wrb=%p nrtx=%u\n",
+              nllwarn("WARNING: Expiring wrb=%p nrtx=%u\n",
                      wrb, WRB_NRTX(wrb));
 
               /* The maximum retry count as been exhausted. Remove the write
@@ -632,7 +632,7 @@ static uint16_t psock_send_interrupt(FAR struct net_driver_s *dev,
 
           if (++WRB_NRTX(wrb) >= TCP_MAXRTX)
             {
-              nllerr("ERROR: Expiring wrb=%p nrtx=%u\n",
+              nllwarn("WARNING: Expiring wrb=%p nrtx=%u\n",
                      wrb, WRB_NRTX(wrb));
 
               /* Return the write buffer to the free list */

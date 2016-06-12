@@ -235,7 +235,7 @@ static uint16_t sendto_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
         {
           /* Terminate the transfer with an error. */
 
-          nllerr("ERROR: Network is down\n");
+          nllwarn("WARNING: Network is down\n");
           pstate->st_sndlen = -ENETUNREACH;
         }
 
@@ -257,7 +257,7 @@ static uint16_t sendto_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
             {
               /* Yes.. report the timeout */
 
-              nllerr("ERROR: SEND timeout\n");
+              nllwarn("WARNING: SEND timeout\n");
               pstate->st_sndlen = -ETIMEDOUT;
             }
           else
