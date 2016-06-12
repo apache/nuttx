@@ -629,7 +629,7 @@ FAR struct mtd_dev_s *s512_initialize(FAR struct mtd_dev_s *mtd)
         {
           /* Allocation failed! Discard all of that work we just did and return NULL */
 
-          ferr("Allocation failed\n");
+          ferr("ERROR: Allocation failed\n");
           kmm_free(priv);
           priv = NULL;
         }

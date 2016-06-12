@@ -819,7 +819,7 @@ FAR struct mtd_dev_s *sst39vf_initialize(void)
 
   if (manufacturer != SST_MANUFACTURER_ID)
     {
-      ferr("Unrecognized manufacturer: %02x\n", manufacturer);
+      ferr("ERROR: Unrecognized manufacturer: %02x\n", manufacturer);
       return NULL;
     }
   else if (chipid == g_sst39vf1601.chipid)
@@ -840,7 +840,7 @@ FAR struct mtd_dev_s *sst39vf_initialize(void)
     }
   else
     {
-      ferr("Unrecognized chip ID: %04x\n", chipid);
+      ferr("ERROR: Unrecognized chip ID: %04x\n", chipid);
       return NULL;
     }
 

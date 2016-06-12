@@ -1772,7 +1772,7 @@ static int usbhost_connect(FAR struct usbhost_class_s *usbclass,
   ret = usbhost_cfgdesc(priv, configdesc, desclen);
   if (ret < 0)
     {
-      uerr("usbhost_cfgdesc() failed: %d\n", ret);
+      uerr("ERROR: usbhost_cfgdesc() failed: %d\n", ret);
     }
   else
     {
@@ -1781,7 +1781,7 @@ static int usbhost_connect(FAR struct usbhost_class_s *usbclass,
       ret = usbhost_initvolume(priv);
       if (ret < 0)
         {
-          uerr("usbhost_initvolume() failed: %d\n", ret);
+          uerr("ERROR: usbhost_initvolume() failed: %d\n", ret);
         }
     }
 

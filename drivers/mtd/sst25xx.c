@@ -954,7 +954,7 @@ FAR struct mtd_dev_s *sst25xx_initialize(FAR struct spi_dev_s *dev)
         {
           /* Unrecognized! Discard all of that work we just did and return NULL */
 
-          ferr("Unrecognized\n");
+          ferr("ERROR: Unrecognized\n");
           kmm_free(priv);
           priv = NULL;
         }

@@ -1108,7 +1108,7 @@ static int usbhost_mouse_poll(int argc, char *argv[])
             {
               if (++nerrors > 200)
                 {
-                  uerr("Too many errors... aborting: %d\n", nerrors);
+                  uerr("  Too many errors... aborting: %d\n", nerrors);
                   ret = (int)nbytes;
                   break;
                 }
@@ -1212,7 +1212,7 @@ static int usbhost_mouse_poll(int argc, char *argv[])
       npolls++;
       if ((npolls & 31) == 0)
         {
-          uerr("Still polling: %d\n", npolls);
+          uinfo("Still polling: %d\n", npolls);
         }
 #endif
     }
@@ -1233,7 +1233,7 @@ static int usbhost_mouse_poll(int argc, char *argv[])
    * of the file descriptors are closed.
    */
 
-  uerr("Mouse removed, polling halted\n");
+  uinfo("Mouse removed, polling halted\n");
 
   flags = enter_critical_section();
   priv->polling = false;
@@ -1389,7 +1389,7 @@ static int usbhost_waitsample(FAR struct usbhost_state_s *priv,
            * the failure now.
            */
 
-          ierr("sem_wait: %d\n", errno);
+          ierr("ERROR: sem_wait: %d\n", errno);
           DEBUGASSERT(errno == EINTR);
           ret = -EINTR;
           goto errout;
@@ -2002,7 +2002,7 @@ static int usbhost_connect(FAR struct usbhost_class_s *usbclass,
   ret = usbhost_cfgdesc(priv, configdesc, desclen);
   if (ret < 0)
     {
-      uerr("usbhost_cfgdesc() failed: %d\n", ret);
+      uerr("ERROR: usbhost_cfgdesc() failed: %d\n", ret);
     }
   else
     {
@@ -2011,7 +2011,7 @@ static int usbhost_connect(FAR struct usbhost_class_s *usbclass,
       ret = usbhost_devinit(priv);
       if (ret < 0)
         {
-          uerr("usbhost_devinit() failed: %d\n", ret);
+          uerr("ERROR: usbhost_devinit() failed: %d\n", ret);
         }
     }
 
@@ -2345,7 +2345,7 @@ static ssize_t usbhost_read(FAR struct file *filep, FAR char *buffer, size_t len
         {
           /* We might have been awakened by a signal */
 
-          ierr("usbhost_waitsample: %d\n", ret);
+          ierr("ERROR: usbhost_waitsample: %d\n", ret);
           goto errout;
         }
     }

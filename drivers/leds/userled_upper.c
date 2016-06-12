@@ -69,7 +69,7 @@
 #ifdef CONFIG_DEBUG_LEDS
 #  define derr llerr
 #  ifdef CONFIG_DEBUG_INFO
-#    define dinfo llerr
+#    define dinfo llinfo
 #  else
 #    define dinfo(x...)
 #  endif

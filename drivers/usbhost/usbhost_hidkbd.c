@@ -1087,7 +1087,7 @@ static int usbhost_kbdpoll(int argc, char *argv[])
 
           if (nerrors > 200)
             {
-              uerr("Too many errors... aborting: %d\n", nerrors);
+              uerr("  Too many errors... aborting: %d\n", nerrors);
               break;
             }
         }
@@ -1227,7 +1227,7 @@ static int usbhost_kbdpoll(int argc, char *argv[])
       npolls++;
       if ((npolls & 31) == 0)
         {
-          uerr("Still polling: %d\n", npolls);
+          uinfo("Still polling: %d\n", npolls);
         }
 #endif
       /* Wait for the required amount (or until a signal is received).  We
@@ -1267,7 +1267,7 @@ static int usbhost_kbdpoll(int argc, char *argv[])
    * of the file descriptors are closed.
    */
 
-  uerr("Keyboard removed, polling halted\n");
+  uinfo("Keyboard removed, polling halted\n");
 
   flags = enter_critical_section();
   priv->polling = false;
@@ -1932,7 +1932,7 @@ static int usbhost_connect(FAR struct usbhost_class_s *usbclass,
   ret = usbhost_cfgdesc(priv, configdesc, desclen);
   if (ret < 0)
     {
-      uerr("usbhost_cfgdesc() failed: %d\n", ret);
+      uerr("ERROR: usbhost_cfgdesc() failed: %d\n", ret);
     }
   else
     {
@@ -1941,7 +1941,7 @@ static int usbhost_connect(FAR struct usbhost_class_s *usbclass,
       ret = usbhost_devinit(priv);
       if (ret < 0)
         {
-          uerr("usbhost_devinit() failed: %d\n", ret);
+          uerr("ERROR: usbhost_devinit() failed: %d\n", ret);
         }
     }
 

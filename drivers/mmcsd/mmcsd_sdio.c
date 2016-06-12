@@ -2411,7 +2411,7 @@ static int mmcsd_widebus(FAR struct mmcsd_state_s *priv)
       ret = mmcsd_recvR1(priv, SD_ACMD42);
       if (ret != OK)
         {
-          finfo("WARNING: SD card does not support ACMD42: %d\n", ret);
+          fwarn("WARNING: SD card does not support ACMD42: %d\n", ret);
           return ret;
         }
 
@@ -2449,7 +2449,7 @@ static int mmcsd_widebus(FAR struct mmcsd_state_s *priv)
 
   /* Wide bus operation not supported */
 
-  ferr("WARNING: Card does not support wide-bus operation\n");
+  fwarn("WARNING: Card does not support wide-bus operation\n");
   return -ENOSYS;
 
 #else /* CONFIG_SDIO_WIDTH_D1_ONLY */
@@ -2691,7 +2691,7 @@ static int mmcsd_sdinitialize(FAR struct mmcsd_state_s *priv)
   ret = mmcsd_widebus(priv);
   if (ret != OK)
     {
-      ferr("WARN: Failed to set wide bus operation: %d\n", ret);
+      ferr("ERROR: Failed to set wide bus operation: %d\n", ret);
     }
 
   /* TODO: If wide-bus selected, then send CMD6 to see if the card supports
@@ -2918,7 +2918,7 @@ static int mmcsd_cardidentify(FAR struct mmcsd_state_s *priv)
             {
               /* CMD1 succeeded... this must be an MMC card */
 
-              ferr("CMD1 succeeded, assuming MMC card\n");
+              finfo("CMD1 succeeded, assuming MMC card\n");
               priv->type = MMCSD_CARDTYPE_MMC;
 
               /* Check if the card is busy.  Very confusing, BUSY is set LOW

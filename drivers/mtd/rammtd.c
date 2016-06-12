@@ -446,7 +446,7 @@ FAR struct mtd_dev_s *rammtd_initialize(FAR uint8_t *start, size_t size)
   priv = (FAR struct ram_dev_s *)kmm_zalloc(sizeof(struct ram_dev_s));
   if (!priv)
     {
-      ferr("Failed to allocate the RAM MTD state structure\n");
+      ferr("ERROR: Failed to allocate the RAM MTD state structure\n");
       return NULL;
     }
 
@@ -455,7 +455,7 @@ FAR struct mtd_dev_s *rammtd_initialize(FAR uint8_t *start, size_t size)
   nblocks = size / CONFIG_RAMMTD_ERASESIZE;
   if (nblocks < 1)
     {
-      ferr("Need to provide at least one full erase block\n");
+      ferr("ERROR: Need to provide at least one full erase block\n");
       return NULL;
     }
 

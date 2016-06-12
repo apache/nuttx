@@ -82,9 +82,13 @@
  */
 
 #ifdef CONFIG_NETDEV_PHY_DEBUG
+#  define phyinfo   info
+#  define phyllinfo llinfo
 #  define phyerr    err
 #  define phyllerr  llerr
 #else
+#  define phyinfo(x...)
+#  define phyllinfo(x...)
 #  define phyerr(x...)
 #  define phyllerr(x...)
 #endif
@@ -208,7 +212,7 @@ static FAR struct phy_notify_s *phy_find_unassigned(void)
           /* Return the client entry assigned to the caller */
 
           phy_semgive();
-          phyerr("Returning client %d\n", i);
+          phyinfo("Returning client %d\n", i);
           return client;
         }
     }
@@ -243,7 +247,7 @@ static FAR struct phy_notify_s *phy_find_assigned(FAR const char *intf,
           /* Return the matching client entry to the caller */
 
           phy_semgive();
-          phyerr("Returning client %d\n", i);
+          phyinfo("Returning client %d\n", i);
           return client;
         }
     }
@@ -266,8 +270,8 @@ static int phy_handler(FAR struct phy_notify_s *client)
   int ret;
 
   DEBUGASSERT(client && client->assigned && client->enable);
-  phyllerr("Entry client %d, signalling PID=%d with signal %d\n",
-           client->index, client->pid, client->signo);
+  phyllinfo("Entry client %d, signalling PID=%d with signal %d\n",
+            client->index, client->pid, client->signo);
 
   /* Disable further interrupts */
 
@@ -287,7 +291,7 @@ static int phy_handler(FAR struct phy_notify_s *client)
       int errcode = errno;
       DEBUGASSERT(errcode > 0);
 
-      nllerr("ERROR: sigqueue failed: %d\n", errcode);
+      nllinfo("ERROR: sigqueue failed: %d\n", errcode);
       UNUSED(errcode);
     }
 
@@ -367,7 +371,7 @@ int phy_notify_subscribe(FAR const char *intf, pid_t pid, int signo,
   if (pid == 0)
     {
       pid = getpid();
-      phyerr("Actual PID=%d\n", pid);
+      phyinfo("Actual PID=%d\n", pid);
     }
 
   /* Check if this client already exists */

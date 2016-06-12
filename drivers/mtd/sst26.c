@@ -340,8 +340,8 @@ static inline int sst26_readid(struct sst26_dev_s *priv)
   SPI_SELECT(priv->dev, SPIDEV_FLASH, false);
   sst26_unlock(priv->dev);
 
-  llerr("manufacturer: %02x memory: %02x capacity: %02x\n",
-        manufacturer, memory, capacity);
+  llinfo("manufacturer: %02x memory: %02x capacity: %02x\n",
+         manufacturer, memory, capacity);
 
   /* Check for a valid manufacturer and memory type */
 
@@ -936,7 +936,7 @@ FAR struct mtd_dev_s *sst26_initialize_spi(FAR struct spi_dev_s *dev)
         {
           /* Unrecognized! Discard all of that work we just did and return NULL */
 
-          ssterr("Unrecognized\n");
+          ssterr("ERROR: Unrecognized\n");
           kmm_free(priv);
           priv = NULL;
         }

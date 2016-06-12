@@ -1206,7 +1206,7 @@ FAR struct mtd_dev_s *sst25_initialize(FAR struct spi_dev_s *dev)
         {
           /* Unrecognized! Discard all of that work we just did and return NULL */
 
-          ferr("Unrecognized\n");
+          ferr("ERROR: Unrecognized\n");
           kmm_free(priv);
           priv = NULL;
         }
@@ -1226,7 +1226,7 @@ FAR struct mtd_dev_s *sst25_initialize(FAR struct spi_dev_s *dev)
             {
               /* Allocation failed! Discard all of that work we just did and return NULL */
 
-              ferr("Allocation failed\n");
+              ferr("ERROR: Allocation failed\n");
               kmm_free(priv);
               priv = NULL;
             }

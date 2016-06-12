@@ -333,7 +333,7 @@ static int hamming_verify256(FAR uint8_t *data, FAR const uint8_t *original)
 
       /* Correct bit */
 
-      ferr("Correcting byte %d at bit %d\n", byte, bit);
+      finfo("Correcting byte %d at bit %d\n", byte, bit);
       data[byte] ^= (1 << bit);
 
       return HAMMING_ERROR_SINGLEBIT;

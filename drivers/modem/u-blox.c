@@ -58,8 +58,8 @@
 /* Non-standard debug that may be enabled just for testing the modem driver */
 
 #ifdef CONFIG_MODEM_U_BLOX_DEBUG
-#  define m_err    err
-#  define m_info   info
+#  define m_err     err
+#  define m_info    info
 #  define m_vllerr  llerr
 #  define m_vllinfo llinfo
 #else
@@ -286,7 +286,7 @@ FAR void* ubxmdm_register(FAR const char *path,
     kmm_zalloc(sizeof(struct ubxmdm_upper));
   if (!upper)
     {
-      m_err("Upper half allocation failed\n");
+      m_err("ERROR: Upper half allocation failed\n");
       goto errout;
     }
 
@@ -294,14 +294,14 @@ FAR void* ubxmdm_register(FAR const char *path,
   upper->path = strdup(path);
   if (!upper->path)
     {
-      m_err("Path allocation failed\n");
+      m_err("ERROR: Path allocation failed\n");
       goto errout_with_upper;
     }
 
   ret = register_driver(path, &ubxmdm_fops, 0666, upper);
   if (ret < 0)
     {
-      m_err("register_driver failed: %d\n", ret);
+      m_err("ERROR: register_driver failed: %d\n", ret);
       goto errout_with_path;
     }
 

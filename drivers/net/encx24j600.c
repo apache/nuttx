@@ -1127,7 +1127,7 @@ static int enc_txenqueue(FAR struct enc_driver_s *priv)
     }
   else
     {
-      nllerr("no free descriptors\n");
+      nllerr("ERROR: no free descriptors\n");
       ret = -ENOMEM;
     }
 
@@ -1612,7 +1612,7 @@ static void enc_rxdispatch(FAR struct enc_driver_s *priv)
 
           enc_rxrmpkt(priv, descr);
 
-          nllerr("Unsupported packet type dropped (%02x)\n", htons(BUF->type));
+          nllerr("ERROR: Unsupported packet type dropped (%02x)\n", htons(BUF->type));
           NETDEV_RXDROPPED(&priv->dev);
         }
 
@@ -1719,7 +1719,7 @@ static void enc_pktif(FAR struct enc_driver_s *priv)
 
       else if (pktlen > (CONFIG_NET_ETH_MTU + 4) || pktlen <= (ETH_HDRLEN + 4))
         {
-          nllerr("Bad packet size dropped (%d)\n", pktlen);
+          nllerr("ERROR: Bad packet size dropped (%d)\n", pktlen);
 
           /* Discard packet */
 
@@ -1774,17 +1774,17 @@ static void enc_rxabtif(FAR struct enc_driver_s *priv)
 #if 0
   /* Free the last received packet from the RX queue */
 
-  nllerr("rx abort\n");
-  nllerr("ESTAT:   %04x\n", enc_rdreg(priv, ENC_ESTAT));
-  nllerr("EIR:     %04x\n", enc_rdreg(priv, ENC_EIR));
-  nllerr("ERXTAIL: %04x\n", enc_rdreg(priv, ENC_ERXTAIL));
-  nllerr("ERXHAED: %04x\n", enc_rdreg(priv, ENC_ERXHEAD));
+  nllinfo("rx abort\n");
+  nllinfo("ESTAT:   %04x\n", enc_rdreg(priv, ENC_ESTAT));
+  nllinfo("EIR:     %04x\n", enc_rdreg(priv, ENC_EIR));
+  nllinfo("ERXTAIL: %04x\n", enc_rdreg(priv, ENC_ERXTAIL));
+  nllinfo("ERXHAED: %04x\n", enc_rdreg(priv, ENC_ERXHEAD));
 
   descr = (FAR struct enc_descr_s *)sq_peek(&priv->rxqueue);
 
   while (descr != NULL)
     {
-      nllerr("addr: %04x len: %d\n", descr->addr, descr->len);
+      nllinfo("addr: %04x len: %d\n", descr->addr, descr->len);
       descr = (FAR struct enc_descr_s *)sq_next(descr);
     }
 
@@ -1797,7 +1797,7 @@ static void enc_rxabtif(FAR struct enc_driver_s *priv)
     {
       enc_rxrmpkt(priv, descr);
 
-      nllerr("pending packet freed\n");
+      nllinfo("pending packet freed\n");
     }
   else
     {
@@ -2043,7 +2043,7 @@ static void enc_toworker(FAR void *arg)
   net_lock_t lock;
   int ret;
 
-  nllerr("Tx timeout\n");
+  nllerr("ERROR: Tx timeout\n");
   DEBUGASSERT(priv);
 
   /* Get exclusive access to the network. */
@@ -2231,9 +2231,9 @@ static int enc_ifup(struct net_driver_s *dev)
   FAR struct enc_driver_s *priv = (FAR struct enc_driver_s *)dev->d_private;
   int ret;
 
-  nllerr("Bringing up: %d.%d.%d.%d\n",
-         dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
-        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
+  nllinfo("Bringing up: %d.%d.%d.%d\n",
+          dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
+          (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
 
   /* Lock the SPI bus so that we have exclusive access */
 
@@ -2307,9 +2307,9 @@ static int enc_ifdown(struct net_driver_s *dev)
   irqstate_t flags;
   int ret;
 
-  nllerr("Taking down: %d.%d.%d.%d\n",
-         dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
-         (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
+  nllinfo("Taking down: %d.%d.%d.%d\n",
+          dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
+          (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
 
   /* Lock the SPI bus so that we have exclusive access */
 

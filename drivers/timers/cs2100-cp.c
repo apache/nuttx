@@ -81,18 +81,18 @@
 #  endif
 #endif
 
-#undef regerr
+#undef reginfo
 #ifdef CONFIG_CS2100CP_REGDEBUG
 #  ifdef CONFIG_CPP_HAVE_VARARGS
-#    define regerr(format, ...) err(format, ##__VA_ARGS__)
+#    define reginfo(format, ...) err(format, ##__VA_ARGS__)
 #  else
-#    define regerr              err
+#    define reginfo              err
 #  endif
 #else
 #  ifdef CONFIG_CPP_HAVE_VARARGS
-#    define regerr(x...)
+#    define reginfo(x...)
 #  else
-#    define regerr              (void)
+#    define reginfo              (void)
 #  endif
 #endif
 
@@ -129,7 +129,7 @@ static int cs2100_write_reg(FAR const struct cs2100_config_s *config,
 {
   struct i2c_msg_s msgs[2];
 
-  regerr("%02x<-%02x\n", regaddr, regval);
+  reginfo("%02x<-%02x\n", regaddr, regval);
   DEBUGASSERT(config->i2c->ops && config->i2c->ops->transfer);
 
   /* Construct the I2C message (write N+1 bytes with no restart) */
@@ -200,7 +200,7 @@ static int cs2100_read_reg(FAR const struct cs2100_config_s *config,
       ret = I2C_TRANSFER(config->i2c, &msg, 1);
       if (ret == OK)
         {
-          regerr("%02x->%02x\n", regaddr, *regval);
+          reginfo("%02x->%02x\n", regaddr, *regval);
         }
     }
 
@@ -229,7 +229,7 @@ static int cs2100_write_ratio(FAR const struct cs2100_config_s *config,
   struct i2c_msg_s msg;
   uint8_t buffer[5];
 
-  regerr("%02x<-%04l\n", CS2100_RATIO0, (unsigned long)ratio);
+  reginfo("%02x<-%04l\n", CS2100_RATIO0, (unsigned long)ratio);
   DEBUGASSERT(config->i2c->ops && config->i2c->ops->transfer);
 
   /* Construct the I2C message (write N+1 bytes with no restart) */
@@ -310,7 +310,7 @@ static int cs2100_read_ratio(FAR const struct cs2100_config_s *config,
                     ((uint32_t)buffer[2] << 8) |
                      (uint32_t)buffer[0];
 
-           regerr("%02x->%04l\n", CS2100_RATIO0, (unsigned long)*ratio);
+           reginfo("%02x->%04l\n", CS2100_RATIO0, (unsigned long)*ratio);
         }
     }
 
@@ -764,7 +764,7 @@ int cs2100_dump(FAR const struct cs2100_config_s *config)
   uint8_t regval;
   int ret;
 
-  err("CS200-CP Registers:\n");
+  csinfo("CS200-CP Registers:\n");
 
   ret = cs2100_read_reg(config, CS2100_DEVID, &regval);
   if (ret < 0)
@@ -773,7 +773,7 @@ int cs2100_dump(FAR const struct cs2100_config_s *config)
       return ret;
     }
 
-  err("     Devid: %02x\n", regval);
+  csinfo("     Devid: %02x\n", regval);
 
   ret = cs2100_read_reg(config, CS2100_DEVCTL, &regval);
   if (ret < 0)
@@ -782,7 +782,7 @@ int cs2100_dump(FAR const struct cs2100_config_s *config)
       return ret;
     }
 
-  err("    DevCtl: %02x\n", regval);
+  csinfo("    DevCtl: %02x\n", regval);
 
   ret = cs2100_read_reg(config, CS2100_DEVCFG1, &regval);
   if (ret < 0)
@@ -791,7 +791,7 @@ int cs2100_dump(FAR const struct cs2100_config_s *config)
       return ret;
     }
 
-  err("   DevCfg1: %02x\n", regval);
+  csinfo("   DevCfg1: %02x\n", regval);
 
   ret = cs2100_read_reg(config, CS2100_GBLCFG, &regval);
   if (ret < 0)
@@ -800,7 +800,7 @@ int cs2100_dump(FAR const struct cs2100_config_s *config)
       return ret;
     }
 
-  err("    GblCfg: %02x\n", regval);
+  csinfo("    GblCfg: %02x\n", regval);
 
   ret = cs2100_read_ratio(config, &ratio);
   if (ret < 0)
@@ -809,7 +809,7 @@ int cs2100_dump(FAR const struct cs2100_config_s *config)
       return ret;
     }
 
-  err("     Ratio: %04lx\n", (unsigned long)ratio);
+  csinfo("     Ratio: %04lx\n", (unsigned long)ratio);
 
   ret = cs2100_read_reg(config, CS2100_FNCCFG1, &regval);
   if (ret < 0)
@@ -818,7 +818,7 @@ int cs2100_dump(FAR const struct cs2100_config_s *config)
       return ret;
     }
 
-  err("  FuncCfg1: %02x\n", regval);
+  csinfo("  FuncCfg1: %02x\n", regval);
 
   ret = cs2100_read_reg(config, CS2100_FNCCFG2, &regval);
   if (ret < 0)
@@ -827,7 +827,7 @@ int cs2100_dump(FAR const struct cs2100_config_s *config)
       return ret;
     }
 
-  err("  FuncCfg2: %02x\n", regval);
+  csinfo("  FuncCfg2: %02x\n", regval);
 
   ret = cs2100_read_reg(config, CS2100_FNCCFG3, &regval);
   if (ret < 0)
@@ -836,7 +836,7 @@ int cs2100_dump(FAR const struct cs2100_config_s *config)
       return ret;
     }
 
-  err("  FuncCfg3: %02x\n", regval);
+  csinfo("  FuncCfg3: %02x\n", regval);
   return OK;
 }
 

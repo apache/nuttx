@@ -2002,7 +2002,7 @@ static int usbhost_connect(FAR struct usbhost_class_s *usbclass,
   ret = usbhost_cfgdesc(priv, configdesc, desclen);
   if (ret < 0)
     {
-      uerr("usbhost_cfgdesc() failed: %d\n", ret);
+      uerr("ERROR: usbhost_cfgdesc() failed: %d\n", ret);
       goto errout;
     }
 
@@ -2021,7 +2021,7 @@ static int usbhost_connect(FAR struct usbhost_class_s *usbclass,
   ret = usbhost_linecoding_send(priv);
   if (ret < 0)
     {
-      uerr("usbhost_linecoding_send() failed: %d\n", ret);
+      uerr("ERROR: usbhost_linecoding_send() failed: %d\n", ret);
     }
 #endif
 
@@ -2034,7 +2034,7 @@ static int usbhost_connect(FAR struct usbhost_class_s *usbclass,
   ret = uart_register(devname, &priv->uartdev);
   if (ret < 0)
     {
-      uerr("uart_register() failed: %d\n", ret);
+      uerr("ERROR: uart_register() failed: %d\n", ret);
       goto errout;
     }
 

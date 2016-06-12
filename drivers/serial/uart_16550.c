@@ -848,7 +848,7 @@ static int u16550_interrupt(int irq, void *context)
 
           default:
             {
-              err("Unexpected IIR: %02x\n", status);
+              err("ERROR: Unexpected IIR: %02x\n", status);
               break;
             }
         }

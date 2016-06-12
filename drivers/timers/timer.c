@@ -451,7 +451,7 @@ FAR void *timer_register(FAR const char *path,
     kmm_zalloc(sizeof(struct timer_upperhalf_s));
   if (!upper)
     {
-      tmrerr("Upper half allocation failed\n");
+      tmrerr("ERROR: Upper half allocation failed\n");
       goto errout;
     }
 
@@ -466,7 +466,7 @@ FAR void *timer_register(FAR const char *path,
   upper->path = strdup(path);
   if (!upper->path)
     {
-      tmrerr("Path allocation failed\n");
+      tmrerr("ERROR: Path allocation failed\n");
       goto errout_with_upper;
     }
 
@@ -475,7 +475,7 @@ FAR void *timer_register(FAR const char *path,
   ret = register_driver(path, &g_timerops, 0666, upper);
   if (ret < 0)
     {
-      tmrerr("register_driver failed: %d\n", ret);
+      tmrerr("ERROR: register_driver failed: %d\n", ret);
       goto errout_with_path;
     }
 

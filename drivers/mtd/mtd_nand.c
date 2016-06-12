@@ -153,7 +153,7 @@ static int nand_lock(FAR struct nand_dev_s *nand)
       errcode = errno;
       DEBUGASSERT(errcode != OK);
 
-      ferr("sem_wait failed: %d\n", errcode);
+      ferr("ERROR: sem_wait failed: %d\n", errcode);
       return -errcode;
     }
 
@@ -574,7 +574,7 @@ static int nand_erase(struct mtd_dev_s *dev, off_t startblock,
       ret = nand_eraseblock(nand, startblock, false);
       if (ret < 0)
         {
-          ferr("nand_eraseblock failed on block %ld: %d\n",
+          ferr("ERROR: nand_eraseblock failed on block %ld: %d\n",
                (long)startblock, ret);
           nand_unlock(nand);
           return ret;

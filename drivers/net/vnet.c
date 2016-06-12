@@ -546,9 +546,9 @@ static int vnet_ifup(struct net_driver_s *dev)
 {
   FAR struct vnet_driver_s *vnet = (FAR struct vnet_driver_s *)dev->d_private;
 
-  nerr("Bringing up: %d.%d.%d.%d\n",
-     dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
-     (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
+  ninfo("Bringing up: %d.%d.%d.%d\n",
+        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
+        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
 
   /* Initialize PHYs, the Ethernet interface, and setup up Ethernet interrupts */
 

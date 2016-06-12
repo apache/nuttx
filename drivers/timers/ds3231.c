@@ -140,20 +140,20 @@ static struct ds3231_dev_s g_ds3231;
  *
  ************************************************************************************/
 
-#ifdef CONFIG_DEBUG_RTC
+#if defined(CONFIG_DEBUG_RTC) && defined(CONFIG_DEBUG_INFO)
 static void rtc_dumptime(FAR struct tm *tp, FAR const char *msg)
 {
-  rtcllerr("%s:\n", msg);
-  rtcllerr("   tm_sec: %08x\n", tp->tm_sec);
-  rtcllerr("   tm_min: %08x\n", tp->tm_min);
-  rtcllerr("  tm_hour: %08x\n", tp->tm_hour);
-  rtcllerr("  tm_mday: %08x\n", tp->tm_mday);
-  rtcllerr("   tm_mon: %08x\n", tp->tm_mon);
-  rtcllerr("  tm_year: %08x\n", tp->tm_year);
+  rtcllinfo("%s:\n", msg);
+  rtcllinfo("   tm_sec: %08x\n", tp->tm_sec);
+  rtcllinfo("   tm_min: %08x\n", tp->tm_min);
+  rtcllinfo("  tm_hour: %08x\n", tp->tm_hour);
+  rtcllinfo("  tm_mday: %08x\n", tp->tm_mday);
+  rtcllinfo("   tm_mon: %08x\n", tp->tm_mon);
+  rtcllinfo("  tm_year: %08x\n", tp->tm_year);
 #if defined(CONFIG_LIBC_LOCALTIME) || defined(CONFIG_TIME_EXTENDED)
-  rtcllerr("  tm_wday: %08x\n", tp->tm_wday);
-  rtcllerr("  tm_yday: %08x\n", tp->tm_yday);
-  rtcllerr(" tm_isdst: %08x\n", tp->tm_isdst);
+  rtcllinfo("  tm_wday: %08x\n", tp->tm_wday);
+  rtcllinfo("  tm_yday: %08x\n", tp->tm_yday);
+  rtcllinfo(" tm_isdst: %08x\n", tp->tm_isdst);
 #endif
 }
 #else

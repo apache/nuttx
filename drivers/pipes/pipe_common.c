@@ -205,7 +205,7 @@ int pipecommon_open(FAR struct file *filep)
   ret = sem_wait(&dev->d_bfsem);
   if (ret != OK)
     {
-      ferr("sem_wait failed: %d\n", get_errno());
+      ferr("ERROR: sem_wait failed: %d\n", get_errno());
       DEBUGASSERT(get_errno() > 0);
       return -get_errno();
     }
@@ -283,7 +283,7 @@ int pipecommon_open(FAR struct file *filep)
            * a signal.
            */
 
-          ferr("sem_wait failed: %d\n", get_errno());
+          ferr("ERROR: sem_wait failed: %d\n", get_errno());
           DEBUGASSERT(get_errno() > 0);
           ret = -get_errno();
 

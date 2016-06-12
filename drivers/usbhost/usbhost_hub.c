@@ -961,7 +961,7 @@ static void usbhost_hub_event(FAR void *arg)
         }
       else if (change)
         {
-          uerr("WARNING: status %04x change %04x not handled\n", status, change);
+          uwarn("WARNING: status %04x change %04x not handled\n", status, change);
         }
     }
 
@@ -971,7 +971,7 @@ static void usbhost_hub_event(FAR void *arg)
     {
       /* Hub status changed */
 
-      uerr("WARNING: Hub status changed, not handled\n");
+      uwarn("WARNING: Hub status changed, not handled\n");
     }
 
   /* The preceding sequence of events may take a significant amount of

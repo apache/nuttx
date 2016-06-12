@@ -72,16 +72,16 @@
 /* Debug ********************************************************************/
 /* Non-standard debug that may be enabled just for testing PWM */
 
-#ifdef CONFIG_DEBUG_RGBLED
-#  define pwmerr    err
-#  define pwminfo   info
-#  define pwmllerr  llerr
-#  define pwmllinfo llinfo
+#ifdef CONFIG_DEBUG_LEDS
+#  define derr    err
+#  define dinfo   info
+#  define dllerr  llerr
+#  define dllinfo llinfo
 #else
-#  define pwmerr(x...)
-#  define pwminfo(x...)
-#  define pwmllerr(x...)
-#  define pwmllinfo(x...)
+#  define derr(x...)
+#  define dinfo(x...)
+#  define dllerr(x...)
+#  define dllinfo(x...)
 #endif
 
 /****************************************************************************
@@ -150,7 +150,7 @@ static int rgbled_open(FAR struct file *filep)
   uint8_t                     tmp;
   int                         ret;
 
-  pwminfo("crefs: %d\n", upper->crefs);
+  dinfo("crefs: %d\n", upper->crefs);
 
   /* Get exclusive access to the device structures */
 
@@ -201,7 +201,7 @@ static int rgbled_close(FAR struct file *filep)
   FAR struct rgbled_upperhalf_s *upper = inode->i_private;
   int                         ret;
 
-  pwminfo("crefs: %d\n", upper->crefs);
+  dinfo("crefs: %d\n", upper->crefs);
 
   /* Get exclusive access to the device structures */
 
@@ -395,7 +395,7 @@ int rgbled_register(FAR const char *path, FAR struct pwm_lowerhalf_s *ledr,
 
   if (!upper)
     {
-      pwmerr("Allocation failed\n");
+      derr("ERROR: Allocation failed\n");
       return -ENOMEM;
     }
 
@@ -410,7 +410,7 @@ int rgbled_register(FAR const char *path, FAR struct pwm_lowerhalf_s *ledr,
 
   /* Register the PWM device */
 
-  pwminfo("Registering %s\n", path);
+  dinfo("Registering %s\n", path);
   return register_driver(path, &g_rgbledops, 0666, upper);
 }
 

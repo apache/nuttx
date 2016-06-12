@@ -168,7 +168,7 @@ static ssize_t ftl_reload(FAR void *priv, FAR uint8_t *buffer,
   nread   = MTD_BREAD(dev->mtd, startblock, nblocks, buffer);
   if (nread != nblocks)
     {
-      ferr("Read %d blocks starting at block %d failed: %d\n",
+      ferr("ERROR: Read %d blocks starting at block %d failed: %d\n",
             nblocks, startblock, nread);
     }
 
@@ -244,7 +244,7 @@ static ssize_t ftl_flush(FAR void *priv, FAR const uint8_t *buffer,
       nxfrd   = MTD_BREAD(dev->mtd, rwblock, dev->blkper, dev->eblock);
       if (nxfrd != dev->blkper)
         {
-          ferr("Read erase block %d failed: %d\n", rwblock, nxfrd);
+          ferr("ERROR: Read erase block %d failed: %d\n", rwblock, nxfrd);
           return -EIO;
         }
 
@@ -254,7 +254,7 @@ static ssize_t ftl_flush(FAR void *priv, FAR const uint8_t *buffer,
       ret        = MTD_ERASE(dev->mtd, eraseblock, 1);
       if (ret < 0)
         {
-          ferr("Erase block=%d failed: %d\n", eraseblock, ret);
+          ferr("ERROR: Erase block=%d failed: %d\n", eraseblock, ret);
           return ret;
         }
 
@@ -281,7 +281,7 @@ static ssize_t ftl_flush(FAR void *priv, FAR const uint8_t *buffer,
       nxfrd = MTD_BWRITE(dev->mtd, rwblock, dev->blkper, dev->eblock);
       if (nxfrd != dev->blkper)
         {
-          ferr("Write erase block %d failed: %d\n", rwblock, nxfrd);
+          ferr("ERROR: Write erase block %d failed: %d\n", rwblock, nxfrd);
           return -EIO;
         }
 
@@ -309,7 +309,7 @@ static ssize_t ftl_flush(FAR void *priv, FAR const uint8_t *buffer,
       ret        = MTD_ERASE(dev->mtd, eraseblock, 1);
       if (ret < 0)
         {
-          ferr("Erase block=%d failed: %d\n", eraseblock, ret);
+          ferr("ERROR: Erase block=%d failed: %d\n", eraseblock, ret);
           return ret;
         }
 
@@ -321,7 +321,7 @@ static ssize_t ftl_flush(FAR void *priv, FAR const uint8_t *buffer,
       nxfrd = MTD_BWRITE(dev->mtd, alignedblock, dev->blkper, buffer);
       if (nxfrd != dev->blkper)
         {
-          ferr("Write erase block %d failed: %d\n", alignedblock, nxfrd);
+          ferr("ERROR: Write erase block %d failed: %d\n", alignedblock, nxfrd);
           return -EIO;
         }
 
@@ -341,7 +341,7 @@ static ssize_t ftl_flush(FAR void *priv, FAR const uint8_t *buffer,
      nxfrd = MTD_BREAD(dev->mtd, alignedblock, dev->blkper, dev->eblock);
       if (nxfrd != dev->blkper)
         {
-          ferr("Read erase block %d failed: %d\n", alignedblock, nxfrd);
+          ferr("ERROR: Read erase block %d failed: %d\n", alignedblock, nxfrd);
           return -EIO;
         }
 
@@ -351,7 +351,7 @@ static ssize_t ftl_flush(FAR void *priv, FAR const uint8_t *buffer,
       ret        = MTD_ERASE(dev->mtd, eraseblock, 1);
       if (ret < 0)
         {
-          ferr("Erase block=%d failed: %d\n", eraseblock, ret);
+          ferr("ERROR: Erase block=%d failed: %d\n", eraseblock, ret);
           return ret;
         }
 
@@ -367,7 +367,7 @@ static ssize_t ftl_flush(FAR void *priv, FAR const uint8_t *buffer,
       nxfrd = MTD_BWRITE(dev->mtd, alignedblock, dev->blkper, dev->eblock);
       if (nxfrd != dev->blkper)
         {
-          ferr("Write erase block %d failed: %d\n", alignedblock, nxfrd);
+          ferr("ERROR: Write erase block %d failed: %d\n", alignedblock, nxfrd);
           return -EIO;
         }
     }
@@ -543,7 +543,7 @@ int ftl_initialize(int minor, FAR struct mtd_dev_s *mtd)
       ret = MTD_IOCTL(mtd, MTDIOC_GEOMETRY, (unsigned long)((uintptr_t)&dev->geo));
       if (ret < 0)
         {
-          ferr("MTD ioctl(MTDIOC_GEOMETRY) failed: %d\n", ret);
+          ferr("ERROR: MTD ioctl(MTDIOC_GEOMETRY) failed: %d\n", ret);
           kmm_free(dev);
           return ret;
         }
@@ -554,7 +554,7 @@ int ftl_initialize(int minor, FAR struct mtd_dev_s *mtd)
       dev->eblock  = (FAR uint8_t *)kmm_malloc(dev->geo.erasesize);
       if (!dev->eblock)
         {
-          ferr("Failed to allocate an erase block buffer\n");
+          ferr("ERROR: Failed to allocate an erase block buffer\n");
           kmm_free(dev);
           return -ENOMEM;
         }
@@ -585,7 +585,7 @@ int ftl_initialize(int minor, FAR struct mtd_dev_s *mtd)
       ret = rwb_initialize(&dev->rwb);
       if (ret < 0)
         {
-          ferr("rwb_initialize failed: %d\n", ret);
+          ferr("ERROR: rwb_initialize failed: %d\n", ret);
           kmm_free(dev);
           return ret;
         }
@@ -600,7 +600,7 @@ int ftl_initialize(int minor, FAR struct mtd_dev_s *mtd)
       ret = register_blockdriver(devname, &g_bops, 0, dev);
       if (ret < 0)
         {
-          ferr("register_blockdriver failed: %d\n", -ret);
+          ferr("ERROR: register_blockdriver failed: %d\n", -ret);
           kmm_free(dev);
         }
     }

@@ -256,7 +256,7 @@ static inline int usbhost_classbind(FAR struct usbhost_hubport_s *hport,
                * should then free the allocated devclass instance.
                */
 
-              uerr("CLASS_CONNECT failed: %d\n", ret);
+              uerr("ERROR: CLASS_CONNECT failed: %d\n", ret);
               CLASS_DISCONNECTED(devclass);
             }
           else
@@ -326,14 +326,14 @@ int usbhost_enumerate(FAR struct usbhost_hubport_s *hport,
   ret = DRVR_ALLOC(hport->drvr, (FAR uint8_t **)&ctrlreq, &maxlen);
   if (ret < 0)
     {
-      uerr("DRVR_ALLOC failed: %d\n", ret);
+      uerr("ERROR: DRVR_ALLOC failed: %d\n", ret);
       return ret;
     }
 
   ret = DRVR_ALLOC(hport->drvr, &buffer, &maxlen);
   if (ret < 0)
     {
-      uerr("DRVR_ALLOC failed: %d\n", ret);
+      uerr("ERROR: DRVR_ALLOC failed: %d\n", ret);
       goto errout;
     }
 
