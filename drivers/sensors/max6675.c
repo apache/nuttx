@@ -185,13 +185,13 @@ static ssize_t max6675_read(FAR struct file *filep, FAR char *buffer, size_t buf
 
   if (!buffer)
     {
-      snerr("Buffer is null\n");
+      snerr("ERROR: Buffer is null\n");
       return -EINVAL;
     }
 
   if (buflen != 2)
     {
-      snerr("You can't read something other than 16 bits (2 bytes)\n");
+      snerr("ERROR: You can't read something other than 16 bits (2 bytes)\n");
       return -EINVAL;
     }
 
@@ -212,7 +212,7 @@ static ssize_t max6675_read(FAR struct file *filep, FAR char *buffer, size_t buf
   regval  = (regmsb & 0xFF00) >> 8;
   regval |= (regmsb & 0xFF) << 8;
 
-  snerr("Read from MAX6675 = 0x%04X\n", regval);
+  sninfo("Read from MAX6675 = 0x%04X\n", regval);
 
   /* Verify if the device ID bit is really zero */
 
@@ -226,7 +226,7 @@ static ssize_t max6675_read(FAR struct file *filep, FAR char *buffer, size_t buf
 
   if (regval & MAX6675_OPEN_CIRCUIT)
     {
-      snerr("The thermocouple input is not connected!\n");
+      snerr("ERROR: The thermocouple input is not connected!\n");
       ret = -EINVAL;
     }
 
@@ -285,7 +285,7 @@ int max6675_register(FAR const char *devpath, FAR struct spi_dev_s *spi)
   priv = (FAR struct max6675_dev_s *)kmm_malloc(sizeof(struct max6675_dev_s));
   if (priv == NULL)
     {
-      snerr("Failed to allocate instance\n");
+      snerr("ERROR: Failed to allocate instance\n");
       return -ENOMEM;
     }
 
@@ -297,7 +297,7 @@ int max6675_register(FAR const char *devpath, FAR struct spi_dev_s *spi)
   ret = register_driver(devpath, &g_max6675fops, 0666, priv);
   if (ret < 0)
     {
-      snerr("Failed to register driver: %d\n", ret);
+      snerr("ERROR: Failed to register driver: %d\n", ret);
       kmm_free(priv);
     }
 

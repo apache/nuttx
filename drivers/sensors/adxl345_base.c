@@ -305,7 +305,7 @@ static void adxl345_interrupt(FAR struct adxl345_config_s *config, FAR void *arg
       ret = work_queue(HPWORK, &priv->work, adxl345_worker, priv, 0);
       if (ret != 0)
         {
-          snllerr("Failed to queue work: %d\n", ret);
+          snllerr("ERROR: Failed to queue work: %d\n", ret);
         }
     }
 
@@ -397,7 +397,7 @@ ADXL345_HANDLE adxl345_instantiate(FAR struct i2c_master_s *dev,
   priv = (FAR struct adxl345_dev_s *)kmm_zalloc(sizeof(struct adxl345_dev_s));
   if (!priv)
     {
-      snerr("Failed to allocate the device structure!\n");
+      snerr("ERROR: Failed to allocate the device structure!\n");
       return NULL;
     }
 
@@ -418,7 +418,7 @@ ADXL345_HANDLE adxl345_instantiate(FAR struct i2c_master_s *dev,
   ret = adxl345_checkid(priv);
   if (ret < 0)
     {
-      snerr("Wrong Device ID!\n");
+      snerr("ERROR: Wrong Device ID!\n");
       kmm_free(priv);
       return NULL;
     }
