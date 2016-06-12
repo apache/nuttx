@@ -124,7 +124,8 @@ CCASSERT(sizeof(cc3000_buffer_desc) <= CONFIG_MQ_MAXMSGSIZE);
 #  define PROBE(pin,state)
 #endif
 
-#define waitllerr(x,...)
+#define waitllerr(x,...) // llerr
+#define waitllinfo(x,...) // llinfo
 
 /****************************************************************************
  * Private Types
