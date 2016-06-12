@@ -213,7 +213,7 @@ int stm32_usbhost_initialize(void)
   ret = usbhost_kbdinit();
   if (ret != OK)
     {
-      uerr("Failed to register the HID keyboard class\n");
+      uerr("ERROR: Failed to register the HID keyboard class\n");
     }
 #endif
 
@@ -223,7 +223,7 @@ int stm32_usbhost_initialize(void)
   ret = usbhost_mouse_init();
   if (ret != OK)
     {
-      uerr("Failed to register the HID mouse class\n");
+      uerr("ERROR: Failed to register the HID mouse class\n");
     }
 #endif
 
@@ -329,7 +329,7 @@ xcpt_t stm32_setup_overcurrent(xcpt_t handler)
 #ifdef CONFIG_USBDEV
 void stm32_usbsuspend(FAR struct usbdev_s *dev, bool resume)
 {
-  ullerr("resume: %d\n", resume);
+  ullinfo("resume: %d\n", resume);
 }
 #endif
 

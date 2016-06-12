@@ -88,20 +88,13 @@
 
 #ifdef CONFIG_SPI_DEBUG
 #  define ssperr  llerr
-#  ifdef CONFIG_SPI_VERBOSE
-#    define sspinfo llerr
-#  else
-#    define sspinfo(x...)
-#  endif
+#  define sspwarn llwarn
+#  define sspinfo llinfo
 #else
-#  undef CONFIG_SPI_VERBOSE
 #  define ssperr(x...)
+#  define sspwarn(x...)
 #  define sspinfo(x...)
 #endif
-
-/************************************************************************************
- * Private Functions
- ************************************************************************************/
 
 /************************************************************************************
  * Public Functions
@@ -161,7 +154,7 @@ void weak_function at90usb_spidev_initialize(void)
 
 void  avr_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
-  ssperr("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  sspinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 
   /* Assert/de-assert the CS pin to the card */
 
@@ -194,7 +187,7 @@ uint8_t avr_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
       ret |= SPI_STATUS_WRPROTECTED;
     }
 
-  ssperr("Returning %02x\n", ret);
+  sspinfo("Returning %02x\n", ret);
   return ret;
 }
 

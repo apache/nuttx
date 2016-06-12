@@ -101,9 +101,11 @@
 
 #ifdef CONFIG_DEBUG_LCD
 #  define lcderr(format, ...)   err(format, ##__VA_ARGS__)
+#  define lcdwarn(format, ...)  warn(format, ##__VA_ARGS__)
 #  define lcdinfo(format, ...)  info(format, ##__VA_ARGS__)
 #else
 #  define lcderr(x...)
+#  define lcdwarm(x...)
 #  define lcdinfo(x...)
 #endif
 
@@ -160,7 +162,7 @@ FAR struct lcd_dev_s *board_graphics_setup(unsigned int devno)
   spi = lpc214x_spibus_initialize(1);
   if (!spi)
     {
-      lcderr("Failed to initialize SPI port 1\n");
+      lcderr("ERROR: Failed to initialize SPI port 1\n");
     }
   else
     {
@@ -169,7 +171,7 @@ FAR struct lcd_dev_s *board_graphics_setup(unsigned int devno)
       dev = ug2864ambag01_initialize(spi, devno);
       if (!dev)
         {
-          lcderr("Failed to bind SPI port 1 to OLED %d: %d\n", devno);
+          lcderr("ERROR: Failed to bind SPI port 1 to OLED %d: %d\n", devno);
         }
      else
         {

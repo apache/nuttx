@@ -96,10 +96,6 @@ FAR struct spi_dev_s *g_spidev;
 FAR struct lcd_dev_s *g_lcddev;
 
 /****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -118,7 +114,7 @@ int board_lcd_initialize(void)
   g_spidev = lpc17_sspbus_initialize(0);
   if (!g_spidev)
     {
-      gllerr("Failed to initialize SSP port 0\n");
+      gllerr("ERROR: Failed to initialize SSP port 0\n");
       return 0;
     }
 
@@ -137,7 +133,7 @@ FAR struct lcd_dev_s *board_lcd_getdev(int lcddev)
   g_lcddev = st7567_initialize(g_spidev, lcddev);
   if (!g_lcddev)
     {
-      gllerr("Failed to bind SSI port 0 to OLCD %d: %d\n", lcddev);
+      gllerr("ERROR: Failed to bind SSI port 0 to OLCD %d: %d\n", lcddev);
     }
   else
     {

@@ -284,7 +284,7 @@ int board_app_initialize(uintptr_t arg)
 
             if (mtd_part == NULL)
               {
-                err("Error: failed to create partition %s\n", partname);
+                ferr("ERROR: failed to create partition %s\n", partname);
                 return -1;
               }
 

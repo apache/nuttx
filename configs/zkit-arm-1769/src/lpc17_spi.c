@@ -67,13 +67,11 @@
 
 #ifdef CONFIG_DEBUG_SPI
 #  define spierr  llerr
-#  ifdef CONFIG_DEBUG_INFO
-#    define spiinfo llerr
-#  else
-#    define spiinfo(x...)
-#  endif
+#  define spiwarn llwarn
+#  define spiinfo llinfo
 #else
 #  define spierr(x...)
+#  define spiwarn(x...)
 #  define spiinfo(x...)
 #endif
 
@@ -143,7 +141,7 @@ void weak_function zkit_spidev_initialize(void)
 
 void  lpc17_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
-  spierr("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
   spi_dumpgpio("lpc17_spiselect() Entry");
 
   if (devid == SPIDEV_MMCSD)
@@ -164,12 +162,12 @@ uint8_t lpc17_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 
       if (lpc17_gpioread(ZKITARM_SD_CD) == 0)
         {
-          spierr("Returning SPI_STATUS_PRESENT\n");
+          spiinfo("Returning SPI_STATUS_PRESENT\n");
           return SPI_STATUS_PRESENT;
         }
     }
 
-  spierr("Returning zero\n");
+  spiinfo("Returning zero\n");
   return 0;
 }
 

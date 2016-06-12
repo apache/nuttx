@@ -103,9 +103,11 @@
 
 #ifdef CONFIG_DEBUG_LEDS
 #  define lederr  llerr
+#  define ledwarn llwarn
 #  define ledinfo llinfo
 #else
 #  define lederr(x...)
+#  define ledwarn(x...)
 #  define ledinfo(x...)
 #endif
 
@@ -116,14 +118,6 @@
 #else
 #  define led_dumpgpio(m)
 #endif
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -140,7 +134,7 @@
 #ifdef CONFIG_ARCH_LEDS
 void tm4c_led_initialize(void)
 {
-  lederr("Initializing\n");
+  ledinfo("Initializing\n");
 
   /* Configure Port E, Bit 1 as an output, initial value=OFF */
 

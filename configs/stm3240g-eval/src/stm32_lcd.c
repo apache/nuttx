@@ -33,6 +33,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  **************************************************************************************/
+
 /* This driver supports the following LCDs on the STM324xG_EVAL board:
  *
  *   AM-240320L8TNQW00H (LCD_ILI9320 or LCD_ILI9321) OR
@@ -266,9 +267,11 @@
 
 #ifdef CONFIG_DEBUG_LCD
 #  define lcderr              err
+#  define lcdwarn             warn
 #  define lcdinfo             info
 #else
 #  define lcderr(x...)
+#  define lcdwarn(x...)
 #  define lcdinfo(x...)
 #endif
 
@@ -966,7 +969,7 @@ static inline void stm3240g_lcdinitialize(void)
   /* Check LCD ID */
 
   id = stm3240g_readreg(LCD_REG_0);
-  lcderr("LCD ID: %04x\n", id);
+  lcdinfo("LCD ID: %04x\n", id);
 
   /* Check if the ID is for the STM32_ILI9320 (or ILI9321) or STM32_ILI9325 */
 
@@ -995,7 +998,7 @@ static inline void stm3240g_lcdinitialize(void)
 #else /* if !defined(CONFIG_STM3240G_ILI9325_DISABLE) */
       g_lcddev.type = LCD_TYPE_ILI9325;
 #endif
-      lcderr("LCD type: %d\n", g_lcddev.type);
+      lcdinfo("LCD type: %d\n", g_lcddev.type);
 
       /* Start Initial Sequence */
 
@@ -1113,7 +1116,7 @@ static inline void stm3240g_lcdinitialize(void)
     }
   else
     {
-      lcderr("Unsupported LCD type\n");
+      lcderr("ERROR: Unsupported LCD type\n");
     }
 }
 

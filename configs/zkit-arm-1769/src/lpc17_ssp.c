@@ -67,13 +67,11 @@
 
 #ifdef CONFIG_DEBUG_SPI
 #  define ssperr  llerr
-#  ifdef CONFIG_DEBUG_INFO
-#    define sspinfo llerr
-#  else
-#    define sspinfo(x...)
-#  endif
+#  define sspwarn llwarn
+#  define sspinfo llinfo
 #else
 #  define ssperr(x...)
+#  define sspwarn(x...)
 #  define sspinfo(x...)
 #endif
 
@@ -146,7 +144,7 @@ void weak_function zkit_sspdev_initialize(void)
 #ifdef CONFIG_LPC17_SSP1
 void  lpc17_ssp1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
-  ssperr("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  sspinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
   ssp_dumpgpio("lpc17_ssp1select() Entry");
 
 #warning "Assert CS here (false)"
@@ -156,7 +154,7 @@ void  lpc17_ssp1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool sel
 
 uint8_t lpc17_ssp1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 {
-  ssperr("Returning SPI_STATUS_PRESENT\n");
+  sspinfo("Returning SPI_STATUS_PRESENT\n");
   return SPI_STATUS_PRESENT;
 }
 
@@ -180,7 +178,7 @@ int weak_function lpc17_ssp1cmddata(FAR struct spi_dev_s *dev,
 #ifdef CONFIG_LPC17_SSP0
 void  lpc17_ssp0select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
-  ssperr("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  sspinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
   ssp_dumpgpio("lpc17_ssp0select() Entry");
 
 #ifdef CONFIG_NX_LCDDRIVER
@@ -199,11 +197,11 @@ uint8_t lpc17_ssp0status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 {
   if (devid == SPIDEV_DISPLAY)
     {
-      ssperr("Returning SPI_STATUS_PRESENT\n");
+      sspinfo("Returning SPI_STATUS_PRESENT\n");
       return SPI_STATUS_PRESENT;
     }
 
-  ssperr("Returning zero\n");
+  sspinfo("Returning zero\n");
   return 0;
 }
 

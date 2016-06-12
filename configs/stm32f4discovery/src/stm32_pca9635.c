@@ -93,7 +93,7 @@ int stm32_pca9635_initialize(void)
   ret = pca9635pw_register("/dev/leddrv0", i2c, PCA9635_I2CADDR);
   if (ret < 0)
     {
-      snerr("Failed to register PCA9635 driver: %d\n", ret);
+      snerr("ERROR: Failed to register PCA9635 driver: %d\n", ret);
      return ret;
     }
 
