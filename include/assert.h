@@ -4,6 +4,9 @@
  *   Copyright (C) 2007-2009, 2011-2013, 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
+ *   Copyright (C) 2016 Omni Hoverboards Inc. All rights reserved.
+ *   Author: Paul Alexander Patience <paul-a.patience@polymtl.ca>
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -47,61 +50,33 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Macro Name: ASSERT, VERIFY, et al. */
+/* Macro Name: PANIC, ASSERT, VERIFY, et al. */
 
+#undef PANIC        /* Unconditional abort */
 #undef ASSERT       /* Assert if the condition is not true */
 #undef VERIFY       /* Assert if a function returns a negative value */
-#undef PANIC        /* Unconditional abort */
+#undef DEBUGPANIC   /* Like PANIC, but only if CONFIG_DEBUG_ASSERTIONS is defined */
 #undef DEBUGASSERT  /* Like ASSERT, but only if CONFIG_DEBUG_ASSERTIONS is defined */
 #undef DEBUGVERIFY  /* Like VERIFY, but only if CONFIG_DEBUG_ASSERTIONS is defined */
-#undef DEBUGPANIC   /* Like PANIC, but only if CONFIG_DEBUG_ASSERTIONS is defined */
 
 #ifdef CONFIG_HAVE_FILENAME
-
-#  define ASSERT(f) \
-     do \
-       { \
-         if (!(f)) \
-           { \
-             up_assert((const uint8_t *)__FILE__, (int)__LINE__); \
-           } \
-       } \
-     while (0)
-
-#  define VERIFY(f) \
-     do \
-       { \
-         if ((f) < 0) \
-           { \
-             up_assert((const uint8_t *)__FILE__, (int)__LINE__); \
-           } \
-       } \
-     while (0)
-
-#  define PANIC() \
-     up_assert((const uint8_t *)__FILE__, (int)__LINE__)
-
+#  define PANIC()        up_assert((const uint8_t *)__FILE__, (int)__LINE__)
 #else
-
-#  define ASSERT(f)        do { if (!(f)) up_assert(); } while (0)
-#  define VERIFY(f)        do { if ((f) < 0) up_assert(); } while (0)
-#  define PANIC()          up_assert()
-
+#  define PANIC()        up_assert()
 #endif
 
-#ifdef CONFIG_DEBUG_ASSERTIONS
+#define ASSERT(f)        do { if (!(f)) PANIC(); } while (0)
+#define VERIFY(f)        do { if ((f) < 0) PANIC(); } while (0)
 
+#ifdef CONFIG_DEBUG_ASSERTIONS
+#  define DEBUGPANIC()   PANIC()
 #  define DEBUGASSERT(f) ASSERT(f)
 #  define DEBUGVERIFY(f) VERIFY(f)
-#  define DEBUGPANIC()   PANIC()
-
 #else
-
+#  define DEBUGPANIC()
 #  define DEBUGASSERT(f)
 #  define DEBUGVERIFY(f) ((void)(f))
-#  define DEBUGPANIC()
-
-#  endif /* CONFIG_DEBUG_ASSERTIONS */
+#endif
 
 /* The C standard states that if NDEBUG is defined, assert will do nothing.
  * Users can define and undefine NDEBUG as they see fit to choose when assert
