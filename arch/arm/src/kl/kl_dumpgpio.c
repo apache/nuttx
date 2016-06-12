@@ -55,7 +55,7 @@
  ****************************************************************************/
 /* Port letters for prettier debug output */
 
-#ifdef CONFIG_DEBUG_FEATURES
+#ifdef CONFIG_DEBUG_ERROR
 static const char g_portchar[KL_GPIO_NPORTS] =
 {
 #if KL_GPIO_NPORTS > 9
@@ -82,15 +82,7 @@ static const char g_portchar[KL_GPIO_NPORTS] =
 #  error "Bad number of GPIOs"
 #endif
 };
-#endif
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
+#endif /* CONFIG_DEBUG_ERROR */
 
 /****************************************************************************
  * Public Functions
@@ -107,6 +99,7 @@ static const char g_portchar[KL_GPIO_NPORTS] =
 
 void kl_dumpgpio(gpio_cfgset_t pinset, const char *msg)
 {
+#ifdef CONFIG_DEBUG_ERROR
   irqstate_t flags;
   uintptr_t base;
   int port;
@@ -131,6 +124,7 @@ void kl_dumpgpio(gpio_cfgset_t pinset, const char *msg)
         getreg32(base + KL_GPIO_PDDR_OFFSET));
 
   leave_critical_section(flags);
+#endif /* CONFIG_DEBUG_ERROR */
 }
 
 #endif /* CONFIG_DEBUG_FEATURES */

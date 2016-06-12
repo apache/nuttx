@@ -64,6 +64,7 @@
 
 void posix_spawnattr_dump(posix_spawnattr_t *attr)
 {
+#ifdef CONFIG_DEBUG_ERROR
   err("attr[%p]:\n", attr);
   err("  flags:    %04x\n", attr->flags);
   if (attr->flags == 0)
@@ -122,6 +123,7 @@ void posix_spawnattr_dump(posix_spawnattr_t *attr)
 #ifndef CONFIG_DISABLE_SIGNALS
   err("  sigmask:  %08x\n", attr->sigmask);
 #endif
+#endif /* CONFIG_DEBUG_ERROR */
 }
 
 #endif /* CONFIG_DEBUG_FEATURES */
