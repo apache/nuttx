@@ -57,12 +57,15 @@
  ****************************************************************************/
 
 #ifdef CONFIG_WL_PN532_DEBUG
-#  define pn532err err
+#  define pn532err    err
+#  define pn532info   info
 #else
 #  ifdef CONFIG_CPP_HAVE_VARARGS
 #    define pn532err(x...)
+#    define pn532info(x...)
 #  else
-#    define pn532err (void)
+#    define pn532err  (void)
+#    define pn532info (void)
 #    endif
 #endif
 
@@ -226,7 +229,8 @@ bool pn532_rx_frame_is_valid(struct pn532_frame *f, bool check_data)
 
   if (f->start_code != PN532_SOF)
     {
-      pn532err("Frame startcode 0x%X != 0x%X\n", PN532_SOF, f->start_code);
+      pn532err("ERROR: Frame startcode 0x%X != 0x%X\n",
+               PN532_SOF, f->start_code);
       return false;
     }
 
@@ -238,7 +242,7 @@ bool pn532_rx_frame_is_valid(struct pn532_frame *f, bool check_data)
   chk = pn532_checksum(f->len);
   if (chk != f->lcs)
     {
-      pn532err("Frame data len checksum failed");
+      pn532err("ERROR: Frame data len checksum failed");
       return false;
     }
 
@@ -247,7 +251,8 @@ bool pn532_rx_frame_is_valid(struct pn532_frame *f, bool check_data)
       chk = pn532_data_checksum(&f->tfi, f->len);
       if (chk != f->data[f->len-1])
         {
-          pn532err("Frame data checksum failed: calc=0x%X != 0x%X", chk, f->data[f->len-1]);
+          pn532err("ERROR: Frame data checksum failed: calc=0x%X != 0x%X",
+                   chk, f->data[f->len-1]);
           return false;
         }
     }
@@ -303,7 +308,7 @@ static int pn532_wait_rx_ready(struct pn532_dev_s *dev, int timeout)
     {
       if (--timeout == 0x00)
         {
-          pn532err("wait RX timeout!\n");
+          pn532err("ERROR: wait RX timeout!\n");
           return -ETIMEDOUT;
         }
 
@@ -414,7 +419,7 @@ int pn532_read_ack(struct pn532_dev_s *dev)
     }
   else
     {
-      pn532err("ACK NOK");
+      pn532info("ACK NOK");
       res = 0;
     }
 
@@ -460,7 +465,7 @@ int pn532_write_frame(struct pn532_dev_s *dev, struct pn532_frame *f)
     {
       if (!pn532_read_ack(dev))
         {
-          pn532err("command FAILED\n");
+          pn532err("ERROR: command FAILED\n");
           res = -EIO;
         }
     }
@@ -580,8 +585,8 @@ int pn532_get_fw_version(struct pn532_dev_s *dev,
           if (f->data[0] == PN532_COMMAND_GETFIRMWAREVERSION + 1)
             {
               fw = (struct pn_firmware_version*) &f->data[1];
-              pn532err("FW: %d.%d on IC:0x%X (Features: 0x%X)\n",
-                       fw->ver, fw->rev, fw->ic, fw->support);
+              pn532info("FW: %d.%d on IC:0x%X (Features: 0x%X)\n",
+                        fw->ver, fw->rev, fw->ic, fw->support);
               if (fv)
                 {
                   memcpy(fv, fw, sizeof(struct pn_firmware_version));
@@ -611,7 +616,7 @@ int pn532_write_gpio(struct pn532_dev_s *dev, uint8_t p3, uint8_t p7)
     {
       pn532_read(dev, cmd_buffer, 10);
       tracetx("Resp:", cmd_buffer, 10);
-      pn532err("TFI=%x, data0=%X", f->tfi, f->data[0]);
+      pn532info("TFI=%x, data0=%X", f->tfi, f->data[0]);
       if ((f->tfi == PN532_PN532TOHOST) && (f->data[0] == PN532_COMMAND_WRITEGPIO+1))
         {
           res = OK;
@@ -723,15 +728,15 @@ uint32_t pn532_read_passive_target_id(struct pn532_dev_s *dev, uint8_t baudrate)
 
               if (r->nbtg == 1)
                 {
-                  pn532err("Found %d card(s)\n", r->nbtg);
+                  pn532info("Found %d card(s)\n", r->nbtg);
 
                   /* now supports only type_a cards
                    * if (poll_mode == PN532_POLL_MOD_106KBPS_A)
                    */
 
                   struct pn_target_type_a *t = (struct pn_target_type_a *) &r->target_data;
-                  pn532err("sens:0x%x  sel:0x%x", t->sens_res, t->sel_res);
-                  pn532err("idlen:0x%x ", t->nfcid_len);
+                  pn532info("sens:0x%x  sel:0x%x", t->sens_res, t->sel_res);
+                  pn532info("idlen:0x%x ", t->nfcid_len);
 
                   /* generate 32bit cid from id (could be longer)
                    * HACK: Using only top 4 bytes.
@@ -817,7 +822,7 @@ static int irq_handler(int irq, FAR void *context)
   (void) irq;
   (void) context;
 
-  /* pn532err("*IRQ*\n"); */
+  /* pn532info("*IRQ*\n"); */
   /* work_queue(HPWORK, &g_dev->irq_work, pn532_worker, dev, 0); */
 
   return OK;
@@ -1064,7 +1069,7 @@ static int _ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       break;
 
     default:
-      pn532err("Unrecognized cmd: %d\n", cmd);
+      pn532err("ERROR: Unrecognized cmd: %d\n", cmd);
       ret = -EINVAL;
       break;
     }
@@ -1105,7 +1110,7 @@ int pn532_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
   dev = (FAR struct pn532_dev_s *)kmm_malloc(sizeof(struct pn532_dev_s));
   if (!dev)
     {
-      pn532err("Failed to allocate instance\n");
+      pn532err("ERROR: Failed to allocate instance\n");
       return -ENOMEM;
     }
 
@@ -1123,7 +1128,7 @@ int pn532_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
   ret = register_driver(devpath, &g_pn532fops, 0666, dev);
   if (ret < 0)
     {
-      pn532err("Failed to register driver: %d\n", ret);
+      pn532err("ERROR: Failed to register driver: %d\n", ret);
       kmm_free(dev);
     }
 

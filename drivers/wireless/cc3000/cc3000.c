@@ -251,7 +251,7 @@ static inline void cc3000_devgive(FAR struct cc3000_dev_s *priv)
 
 static inline void cc3000_configspi(FAR struct spi_dev_s *spi)
 {
-  nerr("Mode: %d Bits: 8 Frequency: %d\n",
+  ninfo("Mode: %d Bits: 8 Frequency: %d\n",
        CONFIG_CC3000_SPI_MODE, CONFIG_CC3000_SPI_FREQUENCY);
 
   SPI_SETMODE(spi, CONFIG_CC3000_SPI_MODE);
@@ -500,7 +500,7 @@ static void * select_thread_func(FAR void *arg)
               if (priv->sockets[s].sd == CLOSE_SLOT)
                 {
                   priv->sockets[s].sd = FREE_SLOT;
-                  waitllerr("Close\n");
+                  waitllinfo("Close\n");
                   int count;
                   do
                     {
@@ -509,7 +509,7 @@ static void * select_thread_func(FAR void *arg)
                         {
                           /* Release the waiting threads */
 
-                          waitllerr("Closed Signaled %d\n", count);
+                          waitllinfo("Closed Signaled %d\n", count);
                           sem_post(&priv->sockets[s].semwait);
                         }
                     }
@@ -556,17 +556,17 @@ static void * select_thread_func(FAR void *arg)
             {
               if (ret > 0 && CC3000_FD_ISSET(priv->sockets[s].sd, &readsds)) /* and has pending data */
                 {
-                  waitllerr("Signaled %d\n", priv->sockets[s].sd);
+                  waitllinfo("Signaled %d\n", priv->sockets[s].sd);
                   sem_post(&priv->sockets[s].semwait);                       /* release the waiting thread */
                 }
               else if (ret > 0 && CC3000_FD_ISSET(priv->sockets[s].sd, &exceptsds)) /* or has pending exception */
                 {
-                  waitllerr("Signaled %d (exception)\n", priv->sockets[s].sd);
+                  waitllinfo("Signaled %d (exception)\n", priv->sockets[s].sd);
                   sem_post(&priv->sockets[s].semwait);                       /* release the waiting thread */
                 }
               else if (priv->sockets[s].received_closed_event)               /* or remote has closed connection and we have now read all of HW buffer. */
                 {
-                  waitllerr("Signaled %d (closed & empty)\n", priv->sockets[s].sd);
+                  waitllinfo("Signaled %d (closed & empty)\n", priv->sockets[s].sd);
                   priv->sockets[s].emptied_and_remotely_closed = true;
                   sem_post(&priv->sockets[s].semwait);                       /* release the waiting thread */
                 }
@@ -1071,7 +1071,7 @@ static ssize_t cc3000_read(FAR struct file *filep, FAR char *buffer, size_t len)
 
   if (len < priv->rx_buffer_max_len)
     {
-      nerr("Unsupported read size: %d\n", len);
+      nerr("ERROR: Unsupported read size: %d\n", len);
       nread = -ENOSYS;
       goto errout_with_sem;
     }
@@ -1531,7 +1531,7 @@ int cc3000_register(FAR struct spi_dev_s *spi,
   priv = (FAR struct cc3000_dev_s *)kmm_malloc(sizeof(struct cc3000_dev_s));
   if (!priv)
     {
-      nerr("kmm_malloc(%d) failed\n", sizeof(struct cc3000_dev_s));
+      nerr("ERROR: kmm_malloc(%d) failed\n", sizeof(struct cc3000_dev_s));
       return -ENOMEM;
     }
 #endif
@@ -1565,7 +1565,7 @@ int cc3000_register(FAR struct spi_dev_s *spi,
   ret = config->irq_attach(config, cc3000_interrupt);
   if (ret < 0)
     {
-      nerr("Failed to attach interrupt\n");
+      nerr("ERROR: Failed to attach interrupt\n");
       goto errout_with_priv;
     }
 
@@ -1577,7 +1577,7 @@ int cc3000_register(FAR struct spi_dev_s *spi,
   ret = register_driver(drvname, &cc3000_fops, 0666, priv);
   if (ret < 0)
     {
-      nerr("register_driver() failed: %d\n", ret);
+      nerr("ERROR: register_driver() failed: %d\n", ret);
       goto errout_with_priv;
     }
 

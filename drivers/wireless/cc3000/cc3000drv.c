@@ -58,26 +58,6 @@
 #include <nuttx/wireless/cc3000/cc3000_common.h>
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#undef SPI_DEBUG   /* Define to enable debug */
-#undef SPI_VERBOSE /* Define to enable verbose debug */
-
-#ifdef SPI_DEBUG
-#  define spierr  llerr
-#  ifdef SPI_VERBOSE
-#    define spiinfo llerr
-#  else
-#    define spiinfo(x...)
-#  endif
-#else
-#  undef SPI_VERBOSE
-#  define spierr(x...)
-#  define spiinfo(x...)
-#endif
-
-/****************************************************************************
  * Private Types
  ****************************************************************************/
 
@@ -223,7 +203,7 @@ static void *unsoliced_thread_func(void *parameter)
                           sizeof(spiconf.rx_buffer), 0);
       if (nbytes > 0)
         {
-          nllerr("%d Processed\n", nbytes);
+          nllinfo("%d Processed\n", nbytes);
           spiconf.pfRxHandler(spiconf.rx_buffer.pbuffer);
         }
     }

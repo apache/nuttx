@@ -63,6 +63,7 @@
 #endif
 
 #define waitllerr(x,...) // llerr
+#define waitllinfo(x,...) // llinfo
 
 /****************************************************************************
  * Private Types
@@ -194,13 +195,13 @@ int cc3000_closesocket(int sockfd)
   int ret;
 
 #ifdef CONFIG_CC3000_MT
-  waitllerr("remove\n");
+  waitllinfo("remove\n");
   cc3000_remove_socket(sockfd);
 #endif
   cc3000_lib_lock();
-  waitllerr("Call closesocketl\n");
+  waitllinfo("Call closesocketl\n");
   ret = cc3000_closesocket_impl(sockfd);
-  waitllerr("return closesocket\n");
+  waitllinfo("return closesocket\n");
   cc3000_lib_unlock();
   return ret;
 }
@@ -267,7 +268,7 @@ int cc3000_accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen)
   if (setsockopt(sockfd, CC3000_SOL_SOCKET, CC3000_SOCKOPT_ACCEPT_NONBLOCK,
                  &non_blocking, sizeof(non_blocking)) < 0)
    {
-     nerr("setsockopt failure %d\n", errno);
+     nerr("ERROR: setsockopt failure %d\n", errno);
      return -errno;
    }
 
@@ -282,7 +283,7 @@ int cc3000_accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen)
   if (setsockopt(sockfd, CC3000_SOL_SOCKET, CC3000_SOCKOPT_ACCEPT_NONBLOCK,
                  &nonBlocking, sizeof(nonBlocking)) < 0)
    {
-     nerr("setsockopt failure %d\n", errno);
+     nerr("ERROR: setsockopt failure %d\n", errno);
      return -errno;
    }
 
@@ -596,9 +597,9 @@ ssize_t cc3000_recv(int sockfd, FAR void *buf, size_t len, int flags)
   ssize_t ret;
 
 #ifdef CONFIG_CC3000_MT
-  waitllerr("wait\n");
+  waitllinfo("wait\n");
   ret = cc3000_wait_data(sockfd);
-  waitllerr("wait %d\n", ret);
+  waitllinfo("wait %d\n", ret);
 
   if (ret == -ECONNABORTED)
     {
@@ -612,9 +613,9 @@ ssize_t cc3000_recv(int sockfd, FAR void *buf, size_t len, int flags)
 #endif
 
   cc3000_lib_lock();
-  waitllerr("recv\n");
+  waitllinfo("recv\n");
   ret = cc3000_recv_impl(sockfd, buf, len, flags);
-  waitllerr("recv %d\n", ret);
+  waitllinfo("recv %d\n", ret);
   cc3000_lib_unlock();
   return ret;
 }

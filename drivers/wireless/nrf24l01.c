@@ -551,7 +551,7 @@ static void nrf24l01_worker(FAR void *arg)
 
       bool ce = nrf24l01_chipenable(dev, false);
 
-      werr("RX_DR is set!\n");
+      winfo("RX_DR is set!\n");
 
       /* Read and store all received payloads */
 
@@ -586,8 +586,8 @@ static void nrf24l01_worker(FAR void *arg)
 
           status = nrf24l01_readreg(dev, NRF24L01_FIFO_STATUS, &fifo_status, 1);
 
-          werr("FIFO_STATUS=%02x\n", fifo_status);
-          werr("STATUS=%02x\n", status);
+          winfo("FIFO_STATUS=%02x\n", fifo_status);
+          winfo("STATUS=%02x\n", status);
         }
       while (!(fifo_status | NRF24L01_RX_EMPTY));
 
@@ -736,7 +736,7 @@ static int dosend(FAR struct nrf24l01_dev_s *dev, FAR const uint8_t *data, size_
     {
       /* Unexpected... */
 
-      werr("No TX_DS nor MAX_RT bit set in STATUS reg!\n");
+      werr("ERROR: No TX_DS nor MAX_RT bit set in STATUS reg!\n");
       result = -EIO;
     }
 
@@ -1257,7 +1257,7 @@ int nrf24l01_register(FAR struct spi_dev_s *spi, FAR struct nrf24l01_config_s *c
   result = register_driver(DEV_NAME, &nrf24l01_fops, 0666, dev);
   if (result < 0)
     {
-      werr("register_driver() failed: %d\n", result);
+      werr("ERROR: register_driver() failed: %d\n", result);
       nrf24l01_unregister(dev);
     }
 
@@ -1658,7 +1658,7 @@ int nrf24l01_sendto(FAR struct nrf24l01_dev_s *dev, FAR const uint8_t *data,
 
   if ((dev->en_aa & 1) && (memcmp(destaddr, dev->pipe0addr, dev->addrlen)))
     {
-      werr("Change pipe #0 addr to dest addr\n");
+      winfo("Change pipe #0 addr to dest addr\n");
       nrf24l01_writereg(dev, NRF24L01_RX_ADDR_P0, destaddr, NRF24L01_MAX_ADDR_LEN);
       pipeaddrchg = true;
     }
@@ -1670,7 +1670,7 @@ int nrf24l01_sendto(FAR struct nrf24l01_dev_s *dev, FAR const uint8_t *data,
       /* Restore pipe #0 addr */
 
       nrf24l01_writereg(dev, NRF24L01_RX_ADDR_P0, dev->pipe0addr, NRF24L01_MAX_ADDR_LEN);
-      werr("Pipe #0 default addr restored\n");
+      winfo("Pipe #0 default addr restored\n");
     }
 
   nrf24l01_unlock(dev->spi);
