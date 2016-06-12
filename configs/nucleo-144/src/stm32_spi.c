@@ -61,16 +61,15 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
+/* Enables debug output from this file */
+
 #ifdef CONFIG_DEBUG_SPI
 #  define spierr  llerr
-#  ifdef SPI_VERBOSE
-#    define spiinfo llerr
-#  else
-#    define spiinfo(x...)
-#  endif
+#  define spiwarn llwarn
+#  define spiinfo llinfo
 #else
-#  undef SPI_VERBOSE
 #  define spierr(x...)
+#  define spiwarn(x...)
 #  define spiinfo(x...)
 #endif
 

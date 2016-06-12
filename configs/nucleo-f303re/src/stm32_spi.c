@@ -60,27 +60,17 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Enables debug output from this file (needs CONFIG_DEBUG_FEATURES too) */
+/* Enables debug output from this file */
 
-#undef SPI_DEBUG   /* Define to enable debug */
-#undef SPI_VERBOSE /* Define to enable verbose debug */
-
-#ifdef SPI_DEBUG
-#  define spierr llerr
-#  ifdef SPI_VERBOSE
-#    define spiinfo llerr
-#  else
-#    define spiinfo(x...)
-#  endif
+#ifdef CONFIG_DEBUG_SPI
+#  define spierr  llerr
+#  define spiwarn llwarn
+#  define spiinfo llinfo
 #else
-#  undef SPI_VERBOSE
 #  define spierr(x...)
+#  define spiwarn(x...)
 #  define spiinfo(x...)
 #endif
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions

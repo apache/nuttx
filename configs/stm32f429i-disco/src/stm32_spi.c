@@ -60,7 +60,7 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-/* Enables debug output from this file (needs CONFIG_DEBUG_FEATURES too) */
+/* Enables debug output from this file */
 
 #ifdef CONFIG_DEBUG_SPI
 #  define spierr  llerr
