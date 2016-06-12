@@ -96,7 +96,7 @@ int bchlib_setup(const char *blkdev, bool readonly, FAR void **handle)
   bch = (FAR struct bchlib_s *)kmm_zalloc(sizeof(struct bchlib_s));
   if (!bch)
     {
-      ferr("Failed to allocate BCH structure\n");
+      ferr("ERROR: Failed to allocate BCH structure\n");
       return -ENOMEM;
     }
 
@@ -105,7 +105,7 @@ int bchlib_setup(const char *blkdev, bool readonly, FAR void **handle)
   ret = open_blockdriver(blkdev, readonly ? MS_RDONLY : 0, &bch->inode);
   if (ret < 0)
     {
-      ferr("Failed to open driver %s: %d\n", blkdev, -ret);
+      ferr("ERROR: Failed to open driver %s: %d\n", blkdev, -ret);
       goto errout_with_bch;
     }
 
@@ -114,20 +114,20 @@ int bchlib_setup(const char *blkdev, bool readonly, FAR void **handle)
   ret = bch->inode->u.i_bops->geometry(bch->inode, &geo);
   if (ret < 0)
     {
-      ferr("geometry failed: %d\n", -ret);
+      ferr("ERROR: geometry failed: %d\n", -ret);
       goto errout_with_bch;
     }
 
   if (!geo.geo_available)
     {
-      ferr("geometry failed: %d\n", -ret);
+      ferr("ERROR: geometry failed: %d\n", -ret);
       ret = -ENODEV;
       goto errout_with_bch;
     }
 
   if (!readonly && (!bch->inode->u.i_bops->write || !geo.geo_writeenabled))
     {
-      ferr("write access not supported\n");
+      ferr("ERROR: write access not supported\n");
       ret = -EACCES;
       goto errout_with_bch;
     }
@@ -145,7 +145,7 @@ int bchlib_setup(const char *blkdev, bool readonly, FAR void **handle)
   bch->buffer = (FAR uint8_t *)kmm_malloc(bch->sectsize);
   if (!bch->buffer)
     {
-      ferr("Failed to allocate sector buffer\n");
+      ferr("ERROR: Failed to allocate sector buffer\n");
       ret = -ENOMEM;
       goto errout_with_bch;
     }

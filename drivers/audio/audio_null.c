@@ -375,7 +375,7 @@ static int null_configure(FAR struct audio_lowerhalf_s *dev,
 #endif  /* CONFIG_AUDIO_EXCLUDE_TONE */
 
         default:
-          auderr("    Unrecognized feature unit\n");
+          auderr("    ERROR: Unrecognized feature unit\n");
           break;
         }
       break;

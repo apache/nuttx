@@ -392,7 +392,7 @@ static int max11802_waitsample(FAR struct max11802_dev_s *priv,
            * the failure now.
            */
 
-          ierr("sem_wait: %d\n", errno);
+          ierr("ERROR: sem_wait: %d\n", errno);
           DEBUGASSERT(errno == EINTR);
           ret = -EINTR;
           goto errout;
@@ -463,7 +463,7 @@ static int max11802_schedule(FAR struct max11802_dev_s *priv)
   ret = work_queue(HPWORK, &priv->work, max11802_worker, priv, 0);
   if (ret != 0)
     {
-      illerr("Failed to queue work: %d\n", ret);
+      illerr("ERROR: Failed to queue work: %d\n", ret);
     }
 
   return OK;
@@ -877,7 +877,7 @@ static ssize_t max11802_read(FAR struct file *filep, FAR char *buffer,
        * handle smaller reads... but why?
        */
 
-      ierr("Unsupported read size: %d\n", len);
+      ierr("ERROR: Unsupported read size: %d\n", len);
       return -ENOSYS;
     }
 
@@ -888,7 +888,7 @@ static ssize_t max11802_read(FAR struct file *filep, FAR char *buffer,
     {
       /* This should only happen if the wait was cancelled by an signal */
 
-      ierr("sem_wait: %d\n", errno);
+      ierr("ERROR: sem_wait: %d\n", errno);
       DEBUGASSERT(errno == EINTR);
       return -EINTR;
     }
@@ -917,7 +917,7 @@ static ssize_t max11802_read(FAR struct file *filep, FAR char *buffer,
         {
           /* We might have been awakened by a signal */
 
-          ierr("max11802_waitsample: %d\n", ret);
+          ierr("ERROR: max11802_waitsample: %d\n", ret);
           goto errout;
         }
     }
@@ -1173,7 +1173,7 @@ int max11802_register(FAR struct spi_dev_s *spi,
   priv = (FAR struct max11802_dev_s *)kmm_malloc(sizeof(struct max11802_dev_s));
   if (!priv)
     {
-      ierr("kmm_malloc(%d) failed\n", sizeof(struct max11802_dev_s));
+      ierr("ERROR: kmm_malloc(%d) failed\n", sizeof(struct max11802_dev_s));
       return -ENOMEM;
     }
 #endif
@@ -1200,12 +1200,12 @@ int max11802_register(FAR struct spi_dev_s *spi,
   ret = config->attach(config, max11802_interrupt);
   if (ret < 0)
     {
-      ierr("Failed to attach interrupt\n");
+      ierr("ERROR: Failed to attach interrupt\n");
       goto errout_with_priv;
     }
 
-  ierr("Mode: %d Bits: 8 Frequency: %d\n",
-       CONFIG_MAX11802_SPIMODE, CONFIG_MAX11802_FREQUENCY);
+  iinfo("Mode: %d Bits: 8 Frequency: %d\n",
+        CONFIG_MAX11802_SPIMODE, CONFIG_MAX11802_FREQUENCY);
 
   /* Lock the SPI bus so that we have exclusive access */
 
@@ -1246,7 +1246,7 @@ int max11802_register(FAR struct spi_dev_s *spi,
 
   if (ret != MAX11802_MODE)
   {
-    ierr("max11802 mode readback failed: %02x\n", ret);
+    ierr("ERROR: max11802 mode readback failed: %02x\n", ret);
     goto errout_with_priv;
   }
 
@@ -1258,7 +1258,7 @@ int max11802_register(FAR struct spi_dev_s *spi,
   ret = register_driver(devname, &max11802_fops, 0666, priv);
   if (ret < 0)
     {
-      ierr("register_driver() failed: %d\n", ret);
+      ierr("ERROR: register_driver() failed: %d\n", ret);
       goto errout_with_priv;
     }
 
@@ -1281,7 +1281,7 @@ int max11802_register(FAR struct spi_dev_s *spi,
   ret = work_queue(HPWORK, &priv->work, max11802_worker, priv, 0);
   if (ret != 0)
     {
-      ierr("Failed to queue work: %d\n", ret);
+      ierr("ERROR: Failed to queue work: %d\n", ret);
       goto errout_with_priv;
     }
 

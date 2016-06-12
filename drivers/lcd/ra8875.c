@@ -574,18 +574,18 @@ static void ra8875_showrun(FAR struct ra8875_dev_s *priv, fb_coord_t row,
 
       if (priv->firstrow != priv->lastrow)
         {
-          lcderr("...\n");
-          lcderr("%s row: %d col: %d npixels: %d\n",
-                 priv->put ? "PUT" : "GET",
-                 priv->lastrow, priv->col, priv->npixels);
+          lcdinfo("...\n");
+          lcdinfo("%s row: %d col: %d npixels: %d\n",
+                  priv->put ? "PUT" : "GET",
+                  priv->lastrow, priv->col, priv->npixels);
         }
 
       /* And we are starting a new sequence.  Output the first run of the
        * new sequence
        */
 
-      lcderr("%s row: %d col: %d npixels: %d\n",
-             put ? "PUT" : "GET", row, col, npixels);
+      lcdinfo("%s row: %d col: %d npixels: %d\n",
+              put ? "PUT" : "GET", row, col, npixels);
 
       /* And save information about the run so that we can detect continuations
        * of the sequence.

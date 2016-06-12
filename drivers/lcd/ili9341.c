@@ -371,9 +371,11 @@
 
 #ifdef CONFIG_DEBUG_LCD
 #  define lcderr       err
+#  define lcdinfo      warn
 #  define lcdinfo      info
 #else
 #  define lcderr(x...)
+#  define lcdwarn(x...)
 #  define lcdinfo(x...)
 #endif
 
@@ -772,7 +774,7 @@ static int ili9341_hwinitialize(FAR struct ili9341_dev_s *dev)
 
   /* Select spi device */
 
-  lcderr("Initialize lcd driver\n");
+  lcdinfo("Initialize lcd driver\n");
   lcd->select(lcd);
 
 #ifdef CONFIG_DEBUG_LCD
@@ -780,13 +782,13 @@ static int ili9341_hwinitialize(FAR struct ili9341_dev_s *dev)
 
   lcd->sendcmd(lcd, ILI9341_READ_ID1);
   lcd->recvparam(lcd, &param);
-  lcderr("ili9341 LCD driver: LCD modules manufacturer ID: %d\n", param);
+  lcdinfo("ili9341 LCD driver: LCD modules manufacturer ID: %d\n", param);
   lcd->sendcmd(lcd, ILI9341_READ_ID2);
   lcd->recvparam(lcd, &param);
-  lcderr("ili9341 LCD driver: LCD modules driver version ID: %d\n", param);
+  lcdinfo("ili9341 LCD driver: LCD modules driver version ID: %d\n", param);
   lcd->sendcmd(lcd, ILI9341_READ_ID3);
   lcd->recvparam(lcd, &param);
-  lcderr("ili9341 LCD driver: LCD modules driver ID: %d\n", param);
+  lcdinfo("ili9341 LCD driver: LCD modules driver ID: %d\n", param);
 #endif
 
   /* Reset the lcd display to the default state */
@@ -1020,7 +1022,7 @@ static int ili9341_getpower(FAR struct lcd_dev_s *dev)
 
   if (priv)
     {
-      lcderr("%d\n", priv->power);
+      lcdinfo("%d\n", priv->power);
 
       return priv->power;
     }
@@ -1053,7 +1055,7 @@ static int ili9341_setpower(FAR struct lcd_dev_s *dev, int power)
 
   if (dev)
     {
-      lcderr("%d\n", power);
+      lcdinfo("%d\n", power);
 
       lcd->select(lcd);
 

@@ -113,9 +113,11 @@
 
 #ifdef CONFIG_DEBUG_LCD
 #  define lcderr(format, ...)  err(format, ##__VA_ARGS__)
+#  define lcdwarn(format, ...) warn(format, ##__VA_ARGS__)
 #  define lcdinfo(format, ...) info(format, ##__VA_ARGS__)
 #else
 #  define lcderr(x...)
+#  define lcdwarn(x...)
 #  define lcdinfo(x...)
 #endif
 
@@ -339,7 +341,8 @@ static void memlcd_deselect(FAR struct spi_dev_s *spi)
 static inline void memlcd_clear(FAR struct memlcd_dev_s *mlcd)
 {
   uint16_t cmd = MEMLCD_CMD_ALL_CLEAR;
-  lcderr("Clear display\n");
+
+  lcdinfo("Clear display\n");
   memlcd_select(mlcd->spi);
   /* XXX Ensure 2us here */
   SPI_SNDBLOCK(mlcd->spi, &cmd, 2);
@@ -593,8 +596,9 @@ static int memlcd_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
 static int memlcd_getpower(FAR struct lcd_dev_s *dev)
 {
   FAR struct memlcd_dev_s *mlcd = (FAR struct memlcd_dev_s *)dev;
+
   DEBUGASSERT(mlcd);
-  lcderr("%d\n", mlcd->power);
+  lcdinfo("%d\n", mlcd->power);
   return mlcd->power;
 }
 
@@ -610,8 +614,9 @@ static int memlcd_getpower(FAR struct lcd_dev_s *dev)
 static int memlcd_setpower(FAR struct lcd_dev_s *dev, int power)
 {
   struct memlcd_dev_s *mlcd = (struct memlcd_dev_s *)dev;
+
   DEBUGASSERT(mlcd && (unsigned)power <= CONFIG_LCD_MAXPOWER && mlcd->spi);
-  lcderr("%d\n", power);
+  lcdinfo("%d\n", power);
   mlcd->power = power;
 
   if (power > 0)
@@ -638,8 +643,9 @@ static int memlcd_setpower(FAR struct lcd_dev_s *dev, int power)
 static int memlcd_getcontrast(struct lcd_dev_s *dev)
 {
   struct memlcd_dev_s *mlcd = (struct memlcd_dev_s *)dev;
+
   DEBUGASSERT(mlcd);
-  lcderr("contrast: %d\n", mlcd->contrast);
+  lcdinfo("contrast: %d\n", mlcd->contrast);
   return mlcd->contrast;
 }
 
@@ -654,8 +660,9 @@ static int memlcd_getcontrast(struct lcd_dev_s *dev)
 static int memlcd_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
 {
   struct memlcd_dev_s *mlcd = (struct memlcd_dev_s *)dev;
+
   DEBUGASSERT(mlcd);
-  lcderr("contrast: %d\n", contrast);
+  lcdinfo("contrast: %d\n", contrast);
   if (contrast > MEMLCD_MAXCONTRAST)
     {
       contrast = MEMLCD_MAXCONTRAST;
@@ -710,6 +717,6 @@ FAR struct lcd_dev_s *memlcd_initialize(FAR struct spi_dev_s *spi,
 
   mlcd->priv->attachirq(memlcd_extcominisr);
 
-  lcderr("done\n");
+  lcdinfo("done\n");
   return &mlcd->dev;
 }

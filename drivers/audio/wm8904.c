@@ -283,7 +283,7 @@ uint16_t wm8904_readreg(FAR struct wm8904_dev_s *priv, uint8_t regaddr)
 #ifdef CONFIG_I2C_RESET
           /* Perhaps the I2C bus is locked up?  Try to shake the bus free */
 
-          auderr("WARNING: I2C_TRANSFER failed: %d ... Resetting\n", ret);
+          audwarn("WARNING: I2C_TRANSFER failed: %d ... Resetting\n", ret);
 
           ret = I2C_RESET(priv->i2c);
           if (ret < 0)
@@ -359,7 +359,7 @@ static void wm8904_writereg(FAR struct wm8904_dev_s *priv, uint8_t regaddr,
 #ifdef CONFIG_I2C_RESET
           /* Perhaps the I2C bus is locked up?  Try to shake the bus free */
 
-          auderr("WARNING: i2c_write failed: %d ... Resetting\n", ret);
+          audwarn("WARNING: i2c_write failed: %d ... Resetting\n", ret);
 
           ret = I2C_RESET(priv->i2c);
           if (ret < 0)
@@ -1207,7 +1207,7 @@ static int wm8904_configure(FAR struct audio_lowerhalf_s *dev,
 #endif  /* CONFIG_AUDIO_EXCLUDE_TONE */
 
         default:
-          auderr("    Unrecognized feature unit\n");
+          auderr("    ERROR: Unrecognized feature unit\n");
           ret = -ENOTTY;
           break;
         }

@@ -967,7 +967,7 @@ static void vs1053_feeddata(FAR struct vs1053_struct_s *dev)
   /* Local stack copy of our active buffer */
 
   apb = dev->apb;
-  //auderr("Entry apb=%p, Bytes left=%d\n", apb, apb->nbytes - apb->curbyte);
+  //audinfo("Entry apb=%p, Bytes left=%d\n", apb, apb->nbytes - apb->curbyte);
 
   /* Setup pointer to the next sample in the buffer */
 
@@ -1039,12 +1039,16 @@ static void vs1053_feeddata(FAR struct vs1053_struct_s *dev)
                 {
                   (void)SPI_SETFREQUENCY(dev->spi, dev->spi_freq);
                   dev->hw_lower->disable(dev->hw_lower);   /* Disable the DREQ interrupt */
-                  auderr("HDAT1: 0x%0X   HDAT0: 0x%0X\n",
-                      vs1053_readreg(dev, VS1053_SCI_HDAT1),
-                      vs1053_readreg(dev, VS1053_SCI_HDAT0));
+
+                  audinfo("HDAT1: 0x%0X   HDAT0: 0x%0X\n",
+                          vs1053_readreg(dev, VS1053_SCI_HDAT1),
+                          vs1053_readreg(dev, VS1053_SCI_HDAT0));
+
                   vs1053_writereg(dev, VS1053_SCI_WRAMADDR, VS1053_END_FILL_BYTE);
                   dev->endfillchar = vs1053_readreg(dev, VS1053_SCI_WRAM) >> 8;
-                  auderr("EndFillChar: 0x%0X\n", dev->endfillchar);
+
+                  audinfo("EndFillChar: 0x%0X\n", dev->endfillchar);
+
                   reg = vs1053_readreg(dev, VS1053_SCI_MODE);
                   vs1053_writereg(dev, VS1053_SCI_MODE, reg | VS1053_SM_RESET);
 
@@ -1171,7 +1175,7 @@ static void vs1053_feeddata(FAR struct vs1053_struct_s *dev)
                   dev->lower.upper(dev->lower.priv,
                       AUDIO_CALLBACK_IOERR, NULL, ret);
 #endif
-                  auderr("I/O error!\n");
+                  auderr("ERROR: I/O error!\n");
 
                   goto err_out;
                 }
@@ -1181,7 +1185,7 @@ static void vs1053_feeddata(FAR struct vs1053_struct_s *dev)
               apb = (struct ap_buffer_s *) dq_remfirst(&dev->apbq);
               dev->apb = apb;
 
-              //auderr("Next Buffer = %p, bytes = %d\n", apb, apb ? apb->nbytes : 0);
+              //audinfo("Next Buffer = %p, bytes = %d\n", apb, apb ? apb->nbytes : 0);
               if (apb == NULL)
                 {
                   sem_post(&dev->apbq_sem);
@@ -1274,7 +1278,7 @@ static void *vs1053_workerthread(pthread_addr_t pvarg)
 #endif
   uint8_t                 timeout;
 
-  auderr("Entry\n");
+  audinfo("Entry\n");
 
 #ifndef CONFIG_AUDIO_EXCLUDE_STOP
   dev->cancelmode   = false;
@@ -1404,8 +1408,7 @@ static void *vs1053_workerthread(pthread_addr_t pvarg)
   dev->lower.upper(dev->lower.priv, AUDIO_CALLBACK_COMPLETE, NULL, OK);
 #endif
 
-  auderr("Exit\n");
-
+  audinfo("Exit\n");
   return NULL;
 }
 
@@ -1430,12 +1433,12 @@ static int vs1053_start(FAR struct audio_lowerhalf_s *lower)
   int                 ret;
   void                *value;
 
-  auderr("Entry\n");
+  audinfo("Entry\n");
 
   vs1053_spi_lock(dev->spi, dev->spi_freq);     /* Lock the device */
-  auderr("Entry HDAT1=0x%0X  HDAT0=0x%0X\n",
-      vs1053_readreg(dev, VS1053_SCI_HDAT1),
-      vs1053_readreg(dev, VS1053_SCI_HDAT0));
+  audinfo("Entry HDAT1=0x%0X  HDAT0=0x%0X\n",
+          vs1053_readreg(dev, VS1053_SCI_HDAT1),
+          vs1053_readreg(dev, VS1053_SCI_HDAT0));
   vs1053_spi_unlock(dev->spi);
 
   /* Do a soft reset, just in case */
@@ -1446,9 +1449,9 @@ static int vs1053_start(FAR struct audio_lowerhalf_s *lower)
 
   vs1053_spi_lock(dev->spi, dev->spi_freq);     /* Lock the device */
   vs1053_setfrequency(dev, CONFIG_VS1053_MP3_DECODE_FREQ);
-  auderr("Reset HDAT1=0x%0X  HDAT0=0x%0X\n",
-      vs1053_readreg(dev, VS1053_SCI_HDAT1),
-      vs1053_readreg(dev, VS1053_SCI_HDAT0));
+  audinfo("Reset HDAT1=0x%0X  HDAT0=0x%0X\n",
+          vs1053_readreg(dev, VS1053_SCI_HDAT1),
+          vs1053_readreg(dev, VS1053_SCI_HDAT0));
   vs1053_spi_unlock(dev->spi);
 
   /* Create a message queue for the worker thread */
@@ -1463,7 +1466,7 @@ static int vs1053_start(FAR struct audio_lowerhalf_s *lower)
     {
       /* Error creating message queue! */
 
-      auderr("Couldn't allocate message queue\n");
+      auderr("ERROR: Couldn't allocate message queue\n");
       return -ENOMEM;
     }
 
@@ -1477,7 +1480,7 @@ static int vs1053_start(FAR struct audio_lowerhalf_s *lower)
     }
   else
     {
-      auderr("Error getting APB Queue sem\n");
+      auderr("ERROR: Error getting APB Queue sem\n");
       return ret;
     }
 
@@ -1485,7 +1488,7 @@ static int vs1053_start(FAR struct audio_lowerhalf_s *lower)
 
   if (dev->threadid != 0)
     {
-      auderr("Joining old thread\n");
+      audinfo("Joining old thread\n");
       pthread_join(dev->threadid, &value);
     }
 
@@ -1496,17 +1499,17 @@ static int vs1053_start(FAR struct audio_lowerhalf_s *lower)
   (void)pthread_attr_setschedparam(&tattr, &sparam);
   (void)pthread_attr_setstacksize(&tattr, CONFIG_VS1053_WORKER_STACKSIZE);
 
-  auderr("Starting workerthread\n");
+  audinfo("Starting workerthread\n");
   ret = pthread_create(&dev->threadid, &tattr, vs1053_workerthread,
       (pthread_addr_t) dev);
   if (ret != OK)
     {
-      auderr("Can't create worker thread, errno=%d\n", errno);
+      auderr("ERROR: Can't create worker thread, errno=%d\n", errno);
     }
   else
     {
       pthread_setname_np(dev->threadid, "vs1053");
-      auderr("Created worker thread\n");
+      audinfo("Created worker thread\n");
     }
 
   return ret;
@@ -1896,13 +1899,13 @@ struct audio_lowerhalf_s *vs1053_initialize(FAR struct spi_dev_s *spi,
       id = (status & VS1053_SS_VER) >> VS1053_VER_SHIFT;
       if (id != VS1053_VER_VS1053)
         {
-          auderr("Unexpected VER bits: 0x%0X\n", id);
+          auderr("ERROR: Unexpected VER bits: 0x%0X\n", id);
           kmm_free(dev);
           return NULL;
         }
       else
         {
-          auderr("VS1053 Detected!\n");
+          audinfo("VS1053 Detected!\n");
         }
 
       /* Attach our ISR to this device */

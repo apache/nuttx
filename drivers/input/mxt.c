@@ -343,7 +343,7 @@ static int mxt_getreg(FAR struct mxt_dev_s *priv, uint16_t regaddr,
 #ifdef CONFIG_I2C_RESET
           /* Perhaps the I2C bus is locked up?  Try to shake the bus free */
 
-          ierr("WARNING: I2C_TRANSFER failed: %d ... Resetting\n", ret);
+          iwarn("WARNING: I2C_TRANSFER failed: %d ... Resetting\n", ret);
 
           ret = I2C_RESET(priv->i2c);
           if (ret < 0)
@@ -417,7 +417,7 @@ static int mxt_putreg(FAR struct mxt_dev_s *priv, uint16_t regaddr,
 #ifdef CONFIG_I2C_RESET
           /* Perhaps the I2C bus is locked up?  Try to shake the bus free */
 
-          ierr("WARNING: I2C_TRANSFER failed: %d ... Resetting\n", ret);
+          iwarn("WARNING: I2C_TRANSFER failed: %d ... Resetting\n", ret);
 
           ret = I2C_RESET(priv->i2c);
           if (ret < 0)
@@ -1097,7 +1097,7 @@ static int mxt_interrupt(FAR const struct mxt_lower_s *lower, FAR void *arg)
   ret = work_queue(HPWORK, &priv->work, mxt_worker, priv, 0);
   if (ret != 0)
     {
-      illerr("Failed to queue work: %d\n", ret);
+      illerr("ERROR: Failed to queue work: %d\n", ret);
     }
 
   /* Clear any pending interrupts and return success */
@@ -1575,7 +1575,7 @@ static int mxt_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
       if ((fds->events & POLLIN) == 0)
         {
-          ierr("Missing POLLIN: revents: %08x\n", fds->revents);
+          ierr("ERROR: Missing POLLIN: revents: %08x\n", fds->revents);
           ret = -EDEADLK;
           goto errout;
         }
@@ -1600,7 +1600,7 @@ static int mxt_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
       if (i >= CONFIG_MXT_NPOLLWAITERS)
         {
-          ierr("No availabled slot found: %d\n", i);
+          ierr("ERROR: No availabled slot found: %d\n", i);
           fds->priv    = NULL;
           ret          = -EBUSY;
           goto errout;
@@ -1897,7 +1897,7 @@ int mxt_register(FAR struct i2c_master_s *i2c,
   ret = MXT_ATTACH(lower, mxt_interrupt, priv);
   if (ret < 0)
     {
-      ierr("Failed to attach interrupt\n");
+      ierr("ERROR: Failed to attach interrupt\n");
       goto errout_with_priv;
     }
 
@@ -1918,7 +1918,7 @@ int mxt_register(FAR struct i2c_master_s *i2c,
   ret = register_driver(devname, &mxt_fops, 0666, priv);
   if (ret < 0)
     {
-      ierr("register_driver() failed: %d\n", ret);
+      ierr("ERROR: register_driver() failed: %d\n", ret);
       goto errout_with_hwinit;
     }
 

@@ -403,15 +403,15 @@ static void ads1242_print_regs(FAR struct ads1242_dev_s *dev, char const *msg)
  uint8_t mux_reg_value   = 0;
  uint8_t acr_reg_value   = 0;
 
- err("%s\n", msg);
+ info("%s\n", msg);
 
  ads1242_read_reg(dev, ADS1242_REG_SETUP, &setup_reg_value);
  ads1242_read_reg(dev, ADS1242_REG_MUX, &mux_reg_value);
  ads1242_read_reg(dev, ADS1242_REG_ACR, &acr_reg_value);
 
- err("SETUP  %02X\n", setup_reg_value);
- err("MUX    %02X\n", mux_reg_value);
- err("ACR    %02X\n", acr_reg_value);
+ info("SETUP  %02X\n", setup_reg_value);
+ info("MUX    %02X\n", mux_reg_value);
+ info("ACR    %02X\n", acr_reg_value);
 }
 #endif /* CONFIG_DEBUG_FEATURES && CONFIG_DEBUG_INFO */
 

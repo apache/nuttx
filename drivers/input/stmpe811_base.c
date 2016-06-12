@@ -199,7 +199,7 @@ static int stmpe811_interrupt(int irq, FAR void *context)
       ret = work_queue(HPWORK, &priv->work, stmpe811_worker, priv, 0);
       if (ret != 0)
         {
-          illerr("Failed to queue work: %d\n", ret);
+          illerr("ERROR: Failed to queue work: %d\n", ret);
         }
     }
 
@@ -422,7 +422,7 @@ uint8_t stmpe811_getreg8(FAR struct stmpe811_dev_s *priv, uint8_t regaddr)
   ret = I2C_TRANSFER(priv->i2c, msg, 2);
   if (ret < 0)
     {
-      ierr("I2C_TRANSFER failed: %d\n", ret);
+      ierr("ERROR: I2C_TRANSFER failed: %d\n", ret);
       return 0;
     }
 
@@ -479,7 +479,7 @@ void stmpe811_putreg8(FAR struct stmpe811_dev_s *priv,
   ret = I2C_TRANSFER(priv->i2c, &msg, 1);
   if (ret < 0)
     {
-      ierr("I2C_TRANSFER failed: %d\n", ret);
+      ierr("ERROR: I2C_TRANSFER failed: %d\n", ret);
     }
 }
 #endif
@@ -530,7 +530,7 @@ uint16_t stmpe811_getreg16(FAR struct stmpe811_dev_s *priv, uint8_t regaddr)
   ret = I2C_TRANSFER(priv->i2c, msg, 2);
   if (ret < 0)
     {
-      ierr("I2C_TRANSFER failed: %d\n", ret);
+      ierr("ERROR: I2C_TRANSFER failed: %d\n", ret);
       return 0;
     }
 
