@@ -237,7 +237,7 @@ static int up_getplaneinfo(FAR struct fb_vtable_s *vtable, int planeno,
       return OK;
     }
 
-  gerr("Returning EINVAL\n");
+  gerr("ERROR: Returning EINVAL\n");
   return -EINVAL;
 }
 
@@ -274,7 +274,7 @@ static int up_getcmap(FAR struct fb_vtable_s *vtable,
       return OK;
     }
 
-  gerr("Returning EINVAL\n");
+  gerr("ERROR: Returning EINVAL\n");
   return -EINVAL;
 }
 #endif
@@ -311,7 +311,7 @@ static int up_putcmap(FAR struct fb_vtable_s *vtable, FAR const struct fb_cmap_s
       return OK;
     }
 
-  gerr("Returning EINVAL\n");
+  gerr("ERROR: Returning EINVAL\n");
   return -EINVAL;
 }
 #endif
@@ -347,7 +347,8 @@ static int up_getcursor(FAR struct fb_vtable_s *vtable,
 
       return OK;
     }
-  gerr("Returning EINVAL\n");
+
+  gerr("ERROR: Returning EINVAL\n");
   return -EINVAL;
 }
 #endif
@@ -400,7 +401,7 @@ static int up_setcursor(FAR struct fb_vtable_s *vtable,
       return OK;
     }
 
-  gerr("Returning EINVAL\n");
+  gerr("ERROR: Returning EINVAL\n");
   return -EINVAL;
 }
 #endif

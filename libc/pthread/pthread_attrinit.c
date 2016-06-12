@@ -87,7 +87,7 @@ int pthread_attr_init(FAR pthread_attr_t *attr)
 {
   int ret = OK;
 
-  serr("attr=0x%p\n", attr);
+  linfo("attr=0x%p\n", attr);
   if (!attr)
     {
       ret = ENOMEM;
@@ -102,7 +102,7 @@ int pthread_attr_init(FAR pthread_attr_t *attr)
       memcpy(attr, &g_default_pthread_attr, sizeof(pthread_attr_t));
     }
 
-  serr("Returning %d\n", ret);
+  linfo("Returning %d\n", ret);
   return ret;
 }
 

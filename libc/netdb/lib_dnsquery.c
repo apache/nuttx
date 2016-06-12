@@ -283,16 +283,16 @@ static int dns_recv_response(int sd, FAR struct sockaddr *addr,
    * match.
    */
 
-#ifdef CONFIG_DEBUG_NET
+#if defined(CONFIG_DEBUG_NET) && defined(CONFIG_DEBUG_INFO)
   {
     int d = 64;
     nameptr = dns_parse_name((uint8_t *)buffer + 12) + 4;
 
     for (; ; )
       {
-        nerr("%02X %02X %02X %02X %02X %02X %02X %02X \n",
-             nameptr[0], nameptr[1], nameptr[2], nameptr[3],
-             nameptr[4], nameptr[5], nameptr[6], nameptr[7]);
+        ninfo("%02X %02X %02X %02X %02X %02X %02X %02X \n",
+              nameptr[0], nameptr[1], nameptr[2], nameptr[3],
+              nameptr[4], nameptr[5], nameptr[6], nameptr[7]);
 
         nameptr += 8;
         d -= 8;

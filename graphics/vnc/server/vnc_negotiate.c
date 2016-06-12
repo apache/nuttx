@@ -168,7 +168,7 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
     }
   else if (nrecvd == 0)
     {
-      gerr("Connection closed\n");
+      gwarn("WARNING: Connection closed\n");
       return -ECONNABORTED;
     }
 
@@ -240,7 +240,7 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
     }
   else if (nrecvd == 0)
     {
-      gerr("Connection closed\n");
+      gwarn("WARNING: Connection closed\n");
       return -ECONNABORTED;
     }
 
@@ -329,7 +329,7 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
     }
   else if (nrecvd == 0)
     {
-      gerr("Connection closed\n");
+      gwarn("WARNING: Connection closed\n");
       return -ECONNABORTED;
     }
 
@@ -404,7 +404,7 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
     }
   else if (nrecvd == 0)
     {
-      gerr("Connection closed\n");
+      gwarn("WARNING: Connection closed\n");
       return -ECONNABORTED;
     }
   else if (nrecvd != sizeof(struct rfb_setpixelformat_s))
@@ -451,7 +451,7 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
     }
   else if (nrecvd == 0)
     {
-      gerr("Connection closed\n");
+      gwarn("WARNING: Connection closed\n");
       return -ECONNABORTED;
     }
 

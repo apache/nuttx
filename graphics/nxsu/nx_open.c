@@ -120,7 +120,7 @@ static inline int nxsu_setup(FAR NX_DRIVERTYPE *dev,
   ret = nxbe_configure(dev, &fe->be);
   if (ret < 0)
     {
-      gerr("nxbe_configure failed: %d\n", -ret);
+      gerr("ERROR: nxbe_configure failed: %d\n", -ret);
       errno = -ret;
       return ERROR;
     }
@@ -129,7 +129,7 @@ static inline int nxsu_setup(FAR NX_DRIVERTYPE *dev,
   ret = nxbe_colormap(dev);
   if (ret < 0)
     {
-      gerr("nxbe_colormap failed: %d\n", -ret);
+      gerr("ERROR: nxbe_colormap failed: %d\n", -ret);
       errno = -ret;
       return ERROR;
     }

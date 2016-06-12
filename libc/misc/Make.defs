@@ -79,7 +79,7 @@ CSRCS += lib_crc64.c lib_crc32.c lib_crc16.c lib_crc8.c
 CSRCS += lib_dumpbuffer.c lib_match.c
 
 ifeq ($(CONFIG_DEBUG_FEATURES),y)
-CSRCS += lib_dbg.c
+CSRCS += lib_debug.c
 endif
 
 # Keyboard driver encoder/decoder

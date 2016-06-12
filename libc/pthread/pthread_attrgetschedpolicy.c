@@ -68,7 +68,7 @@ int pthread_attr_getschedpolicy(FAR const pthread_attr_t *attr, int *policy)
 {
   int ret;
 
-  serr("attr=0x%p policy=0x%p\n", attr, policy);
+  linfo("attr=0x%p policy=0x%p\n", attr, policy);
 
   if (!attr || !policy)
     {
@@ -80,6 +80,6 @@ int pthread_attr_getschedpolicy(FAR const pthread_attr_t *attr, int *policy)
       ret = OK;
     }
 
-  serr("Returning %d\n", ret);
+  linfo("Returning %d\n", ret);
   return ret;
 }

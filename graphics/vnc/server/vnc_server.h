@@ -190,9 +190,13 @@
 #    define updllerr(format, ...)  llerr(format, ##__VA_ARGS__)
 #    define updinfo(format, ...)   info(format, ##__VA_ARGS__)
 #    define updllinfo(format, ...) llinfo(format, ##__VA_ARGS__)
+#    define updinfo(format, ...)   info(format, ##__VA_ARGS__)
+#    define updllinfo(format, ...) llinfo(format, ##__VA_ARGS__)
 #  else
 #   define upderr                  err
 #   define updllerr                llerr
+#   define updwarn                 warn
+#   define updllwarn               llwarn
 #   define updinfo                 info
 #   define updllinfo               llinfo
 #  endif
@@ -200,11 +204,15 @@
 #  ifdef CONFIG_CPP_HAVE_VARARGS
 #    define upderr(x...)
 #    define updllerr(x...)
+#    define updwarn(x...)
+#    define updllwarn(x...)
 #    define updinfo(x...)
 #    define updllinfo(x...)
 #  else
 #    define upderr                 (void)
 #    define updllerr               (void)
+#    define updwarn                (void)
+#    define updllwarn              (void)
 #    define updinfo                (void)
 #    define updllinfo              (void)
 #  endif

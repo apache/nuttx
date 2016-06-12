@@ -186,7 +186,7 @@ int vnc_receiver(FAR struct vnc_session_s *session)
 
       else if (nrecvd == 0)
         {
-          gerr("Connection closed\n", errcode);
+          gwarn("WARNING: Connection closed\n", errcode);
           return OK;
         }
 
