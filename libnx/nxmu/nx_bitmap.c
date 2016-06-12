@@ -133,7 +133,7 @@ int nx_bitmap(NXWINDOW hwnd, FAR const struct nxgl_rect_s *dest,
 
   if (ret != OK)
     {
-      gerr("sem_init failed: %d\n", errno);
+      gerr("ERROR: sem_init failed: %d\n", errno);
       return ret;
     }
 

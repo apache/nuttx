@@ -475,7 +475,7 @@ static inline FAR const struct nx_fontset_s *
 
       fontset = &package->font8;
 #else
-      gerr("8-bit font support disabled: %d\n", ch);
+      gwarn("WARNING: 8-bit font support disabled: %d\n", ch);
       return NULL;
 #endif
     }
@@ -483,7 +483,7 @@ static inline FAR const struct nx_fontset_s *
     {
       /* Someday, perhaps 16-bit fonts will go here */
 
-      gerr("16-bit font not currently supported\n");
+      gerr("ERROR: 16-bit font not currently supported\n");
       return NULL;
     }
 
@@ -494,7 +494,7 @@ static inline FAR const struct nx_fontset_s *
       return fontset;
     }
 
-  gerr("No bitmap for code %02x\n", ch);
+  gerr("ERROR: No bitmap for code %02x\n", ch);
   return NULL;
 }
 

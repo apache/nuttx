@@ -67,18 +67,22 @@
 #ifdef CONFIG_CPP_HAVE_VARARGS
 #  ifdef CONFIG_DEBUG_PGALLOC
 #    define pgaerr(format, ...)       err(format, ##__VA_ARGS__)
+#    define pgawarn(format, ...)      warn(format, ##__VA_ARGS__)
 #    define pgainfo(format, ...)      info(format, ##__VA_ARGS__)
 #  else
 #    define pgaerr(format, ...)       merr(format, ##__VA_ARGS__)
+#    define pgawarn(format, ...)      mwarn(format, ##__VA_ARGS__)
 #    define pgainfo(format, ...)      minfo(format, ##__VA_ARGS__)
 #  endif
 #else
 #  ifdef CONFIG_DEBUG_PGALLOC
 #    define pgaerr                    err
+#    define pgawarn                   warn
 #    define pgainfo                   info
 #  else
-#    define pgaerr                    (void)
-#    define pgainfo                   (void)
+#    define pgaerr                    merr
+#    define pgawarn                   mwarn
+#    define pgainfo                   minfo
 #  endif
 #endif
 

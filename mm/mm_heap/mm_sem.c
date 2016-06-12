@@ -157,7 +157,7 @@ void mm_takesemaphore(FAR struct mm_heap_s *heap)
     {
       /* Take the semaphore (perhaps waiting) */
 
-      msemerr("PID=%d taking\n", my_pid);
+      mseminfo("PID=%d taking\n", my_pid);
       while (sem_wait(&heap->mm_semaphore) != 0)
         {
           /* The only case that an error should occur here is if
@@ -173,7 +173,7 @@ void mm_takesemaphore(FAR struct mm_heap_s *heap)
       heap->mm_counts_held = 1;
     }
 
-  msemerr("Holder=%d count=%d\n", heap->mm_holder, heap->mm_counts_held);
+  mseminfo("Holder=%d count=%d\n", heap->mm_holder, heap->mm_counts_held);
 }
 
 /****************************************************************************
@@ -201,13 +201,13 @@ void mm_givesemaphore(FAR struct mm_heap_s *heap)
       /* Yes, just release one count and return */
 
       heap->mm_counts_held--;
-      msemerr("Holder=%d count=%d\n", heap->mm_holder, heap->mm_counts_held);
+      mseminfo("Holder=%d count=%d\n", heap->mm_holder, heap->mm_counts_held);
     }
   else
     {
       /* Nope, this is the last reference I have */
 
-      msemerr("PID=%d giving\n", my_pid);
+      mseminfo("PID=%d giving\n", my_pid);
 
       heap->mm_holder      = -1;
       heap->mm_counts_held = 0;

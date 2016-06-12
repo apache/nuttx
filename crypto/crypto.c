@@ -81,7 +81,7 @@ int up_cryptoinitialize(void)
   res = crypto_test();
   if (res)
     {
-      cryptllerr("crypto test failed\n");
+      cryptllerr("ERROR: crypto test failed\n");
     }
   else
     {

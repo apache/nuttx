@@ -259,23 +259,23 @@ static void pcm_callback(FAR void *arg, uint16_t reason,
 #ifdef CONFIG_PCM_DEBUG
 static void pcm_dump(FAR const struct wav_header_s *wav)
 {
-  err("Wave file header\n");
-  err("  Header Chunk:\n");
-  err("    Chunk ID:        0x%08x\n", wav->hdr.chunkid);
-  err("    Chunk Size:      %u\n",     wav->hdr.chunklen);
-  err("    Format:          0x%08x\n", wav->hdr.format);
-  err("  Format Chunk:\n");
-  err("    Chunk ID:        0x%08x\n", wav->fmt.chunkid);
-  err("    Chunk Size:      %u\n",     wav->fmt.chunklen);
-  err("    Audio Format:    0x%04x\n", wav->fmt.format);
-  err("    Num. Channels:   %d\n",     wav->fmt.nchannels);
-  err("    Sample Rate:     %u\n",     wav->fmt.samprate);
-  err("    Byte Rate:       %u\n",     wav->fmt.byterate);
-  err("    Block Align:     %d\n",     wav->fmt.align);
-  err("    Bits Per Sample: %d\n",     wav->fmt.bpsamp);
-  err("  Data Chunk:\n");
-  err("    Chunk ID:        0x%08x\n", wav->data.chunkid);
-  err("    Chunk Size:      %u\n",     wav->data.chunklen);
+  info("Wave file header\n");
+  info("  Header Chunk:\n");
+  info("    Chunk ID:        0x%08x\n", wav->hdr.chunkid);
+  info("    Chunk Size:      %u\n",     wav->hdr.chunklen);
+  info("    Format:          0x%08x\n", wav->hdr.format);
+  info("  Format Chunk:\n");
+  info("    Chunk ID:        0x%08x\n", wav->fmt.chunkid);
+  info("    Chunk Size:      %u\n",     wav->fmt.chunklen);
+  info("    Audio Format:    0x%04x\n", wav->fmt.format);
+  info("    Num. Channels:   %d\n",     wav->fmt.nchannels);
+  info("    Sample Rate:     %u\n",     wav->fmt.samprate);
+  info("    Byte Rate:       %u\n",     wav->fmt.byterate);
+  info("    Block Align:     %d\n",     wav->fmt.align);
+  info("    Bits Per Sample: %d\n",     wav->fmt.bpsamp);
+  info("  Data Chunk:\n");
+  info("    Chunk ID:        0x%08x\n", wav->data.chunkid);
+  info("    Chunk Size:      %u\n",     wav->data.chunklen);
 }
 #endif
 
@@ -691,7 +691,7 @@ static int pcm_getcaps(FAR struct audio_lowerhalf_s *dev, int type,
   ret = lower->ops->getcaps(lower, type, caps);
   if (ret < 0)
     {
-      auderr("Lower getcaps() failed: %d\n", ret);
+      auderr("ERROR: Lower getcaps() failed: %d\n", ret);
       return ret;
     }
 
