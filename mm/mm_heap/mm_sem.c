@@ -60,8 +60,12 @@
 #else
 #  ifdef CONFIG_CPP_HAVE_VARARGS
 #    define msemerr(x...)
+#    define msemwarn(x...)
+#    define mseminfo(x...)
 #  else
 #    define msemerr (void)
+#    define msemwarn (void)
+#    define mseminfo (void)
 #  endif
 #endif
 
