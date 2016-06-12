@@ -219,8 +219,9 @@ uint32_t mpu_subregion(uintptr_t base, size_t size, uint8_t l2size);
 
 static inline void mpu_showtype(void)
 {
-#ifdef CONFIG_DEBUG_FEATURES
+#ifdef CONFIG_DEBUG_ERROR
   uint32_t regval = getreg32(MPU_TYPE);
+
   err("%s MPU Regions: data=%d instr=%d\n",
       (regval & MPU_TYPE_SEPARATE) != 0 ? "Separate" : "Unified",
       (regval & MPU_TYPE_DREGION_MASK) >> MPU_TYPE_DREGION_SHIFT,
