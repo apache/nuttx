@@ -53,12 +53,10 @@
 //#define MONITOR_MM_SEMAPHORE 1
 
 #ifdef MONITOR_MM_SEMAPHORE
-#  ifdef CONFIG_DEBUG_ERRORS
-#    include <debug.h>
-#    define msemerr err
-#  else
-#    define msemerr printf
-#  endif
+#  include <debug.h>
+#  define msemerr  err
+#  define msemwarn warn
+#  define mseminfo info
 #else
 #  ifdef CONFIG_CPP_HAVE_VARARGS
 #    define msemerr(x...)
@@ -186,7 +184,8 @@ void mm_takesemaphore(FAR struct mm_heap_s *heap)
 
 void mm_givesemaphore(FAR struct mm_heap_s *heap)
 {
-#if defined(CONFIG_DEBUG_ASSERTIONS) || defined(CONFIG_DEBUG_ERRORS)
+#if defined(CONFIG_DEBUG_ASSERTIONS) || \
+   (defined(MONITOR_MM_SEMAPHORE) && defined(CONFIG_DEBUG_INFO))
   pid_t my_pid = getpid();
 #endif
 
@@ -201,7 +200,8 @@ void mm_givesemaphore(FAR struct mm_heap_s *heap)
       /* Yes, just release one count and return */
 
       heap->mm_counts_held--;
-      mseminfo("Holder=%d count=%d\n", heap->mm_holder, heap->mm_counts_held);
+      mseminfo("Holder=%d count=%d\n", heap->mm_holder,
+               heap->mm_counts_held);
     }
   else
     {
