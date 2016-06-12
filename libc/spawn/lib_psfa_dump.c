@@ -39,6 +39,15 @@
 
 #include <nuttx/config.h>
 
+/* Output debug info even if debug output is not selected. */
+
+#undef  CONFIG_DEBUG_ERROR
+#undef  CONFIG_DEBUG_WARN
+#undef  CONFIG_DEBUG_INFO
+#define CONFIG_DEBUG_ERROR 1
+#define CONFIG_DEBUG_WARN 1
+#define CONFIG_DEBUG_INFO 1
+
 #include <spawn.h>
 #include <assert.h>
 #include <debug.h>
@@ -46,10 +55,6 @@
 #include <nuttx/spawn.h>
 
 #ifdef CONFIG_DEBUG_FEATURES
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions

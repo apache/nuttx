@@ -39,6 +39,15 @@
 
 #include <nuttx/config.h>
 
+/* Output debug info even if debug output is not selected. */
+
+#undef  CONFIG_DEBUG_ERROR
+#undef  CONFIG_DEBUG_WARN
+#undef  CONFIG_DEBUG_INFO
+#define CONFIG_DEBUG_ERROR 1
+#define CONFIG_DEBUG_WARN 1
+#define CONFIG_DEBUG_INFO 1
+
 #include <sys/types.h>
 #include <debug.h>
 
@@ -55,7 +64,6 @@
  ****************************************************************************/
 /* Port letters for prettier debug output */
 
-#ifdef CONFIG_DEBUG_ERROR
 static const char g_portchar[KL_GPIO_NPORTS] =
 {
 #if KL_GPIO_NPORTS > 9
@@ -82,7 +90,6 @@ static const char g_portchar[KL_GPIO_NPORTS] =
 #  error "Bad number of GPIOs"
 #endif
 };
-#endif /* CONFIG_DEBUG_ERROR */
 
 /****************************************************************************
  * Public Functions
@@ -99,7 +106,6 @@ static const char g_portchar[KL_GPIO_NPORTS] =
 
 void kl_dumpgpio(gpio_cfgset_t pinset, const char *msg)
 {
-#ifdef CONFIG_DEBUG_ERROR
   irqstate_t flags;
   uintptr_t base;
   int port;
@@ -124,7 +130,6 @@ void kl_dumpgpio(gpio_cfgset_t pinset, const char *msg)
         getreg32(base + KL_GPIO_PDDR_OFFSET));
 
   leave_critical_section(flags);
-#endif /* CONFIG_DEBUG_ERROR */
 }
 
 #endif /* CONFIG_DEBUG_FEATURES */
