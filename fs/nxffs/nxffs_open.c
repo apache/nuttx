@@ -1064,7 +1064,7 @@ int nxffs_open(FAR struct file *filep, FAR const char *relpath,
 
 int nxffs_dup(FAR const struct file *oldp, FAR struct file *newp)
 {
-#ifdef CONFIG_DEBUG_FEATURES
+#ifdef CONFIG_DEBUG_ASSERTIONS
   FAR struct nxffs_volume_s *volume;
 #endif
   FAR struct nxffs_ofile_s *ofile;
@@ -1073,7 +1073,7 @@ int nxffs_dup(FAR const struct file *oldp, FAR struct file *newp)
 
   /* Sanity checks */
 
-#ifdef CONFIG_DEBUG_FEATURES
+#ifdef CONFIG_DEBUG_ASSERTIONS
   DEBUGASSERT(oldp->f_priv == NULL && oldp->f_inode != NULL);
 
   /* Get the mountpoint private data from the NuttX inode reference in the

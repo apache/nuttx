@@ -42,8 +42,12 @@
 /* Output debug info -- even if debug is not selected. */
 
 #undef  CONFIG_DEBUG_FEATURES
+#undef  CONFIG_DEBUG_ERROR
+#undef  CONFIG_DEBUG_WARN
 #undef  CONFIG_DEBUG_INFO
 #define CONFIG_DEBUG_FEATURES 1
+#define CONFIG_DEBUG_ERROR 1
+#define CONFIG_DEBUG_WARN 1
 #define CONFIG_DEBUG_INFO 1
 
 #include <stdint.h>
@@ -60,14 +64,6 @@
 #include "up_internal.h"
 
 #ifdef CONFIG_ARCH_STACKDUMP
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
