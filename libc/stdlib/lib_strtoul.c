@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <stdlib.h>
+#include <errno.h>
 
 #include "libc.h"
 

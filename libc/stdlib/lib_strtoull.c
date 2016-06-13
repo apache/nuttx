@@ -41,6 +41,7 @@
 #include <nuttx/compiler.h>
 
 #include <stdlib.h>
+#include <errno.h>
 
 #include "libc.h"
 
