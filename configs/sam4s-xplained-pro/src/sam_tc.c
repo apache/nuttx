@@ -211,7 +211,7 @@ int sam_timerinitialize(void)
   fd = open(CONFIG_SAM4S_XPLAINED_PRO_SCHED_TIMER_DEVPATH, O_RDONLY);
   if (fd < 0)
     {
-      tcerr("open %s failed: %d\n",
+      tcerr("ERROR: open %s failed: %d\n",
             CONFIG_SAM4S_XPLAINED_PRO_SCHED_TIMER_DEVPATH, errno);
       goto errout;
     }
@@ -222,7 +222,7 @@ int sam_timerinitialize(void)
   ret = ioctl(fd, TCIOC_SETTIMEOUT, (unsigned long)USEC_PER_TICK);
   if (ret < 0)
     {
-      tcerr("ioctl(TCIOC_SETTIMEOUT) failed: %d\n", errno);
+      tcerr("ERROR: ioctl(TCIOC_SETTIMEOUT) failed: %d\n", errno);
       goto errout_with_dev;
     }
 
@@ -235,7 +235,7 @@ int sam_timerinitialize(void)
     ret = ioctl(fd, TCIOC_SETHANDLER, (unsigned long)&tccb);
     if (ret < 0)
       {
-        tcerr("ioctl(TCIOC_SETHANDLER) failed: %d\n", errno);
+        tcerr("ERROR: ioctl(TCIOC_SETHANDLER) failed: %d\n", errno);
         goto errout_with_dev;
       }
   }
@@ -246,7 +246,7 @@ int sam_timerinitialize(void)
   ret = ioctl(fd, TCIOC_START, 0);
   if (ret < 0)
     {
-      tcerr("ioctl(TCIOC_START) failed: %d\n", errno);
+      tcerr("ERROR: ioctl(TCIOC_START) failed: %d\n", errno);
       goto errout_with_dev;
     }
 #endif
@@ -259,7 +259,7 @@ int sam_timerinitialize(void)
   fd = open(CONFIG_SAM4S_XPLAINED_PRO_CPULOAD_TIMER_DEVPATH, O_RDONLY);
   if (fd < 0)
     {
-      tcerr("open %s failed: %d\n",
+      tcerr("ERROR: open %s failed: %d\n",
             CONFIG_SAM4S_XPLAINED_PRO_CPULOAD_TIMER_DEVPATH, errno);
       goto errout;
     }
@@ -272,7 +272,7 @@ int sam_timerinitialize(void)
              (unsigned long)1000000 / CONFIG_SCHED_CPULOAD_TICKSPERSEC);
   if (ret < 0)
     {
-      tcerr("ioctl(TCIOC_SETTIMEOUT) failed: %d\n", errno);
+      tcerr("ERROR: ioctl(TCIOC_SETTIMEOUT) failed: %d\n", errno);
       goto errout_with_dev;
     }
 
@@ -286,7 +286,7 @@ int sam_timerinitialize(void)
     ret = ioctl(fd, TCIOC_SETHANDLER, (unsigned long)&tccb);
     if (ret < 0)
       {
-        tcerr("ioctl(TCIOC_SETHANDLER) failed: %d\n", errno);
+        tcerr("ERROR: ioctl(TCIOC_SETHANDLER) failed: %d\n", errno);
         goto errout_with_dev;
       }
   }
@@ -297,7 +297,7 @@ int sam_timerinitialize(void)
   ret = ioctl(fd, TCIOC_START, 0);
   if (ret < 0)
     {
-      tcerr("ioctl(TCIOC_START) failed: %d\n", errno);
+      tcerr("ERROR: ioctl(TCIOC_START) failed: %d\n", errno);
       goto errout_with_dev;
     }
 #endif

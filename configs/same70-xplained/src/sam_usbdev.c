@@ -94,5 +94,5 @@ void sam_usbinitialize(void)
 
 void sam_usbsuspend(FAR struct usbdev_s *dev, bool resume)
 {
-  ullerr("resume: %d\n", resume);
+  ullinfo("resume: %d\n", resume);
 }

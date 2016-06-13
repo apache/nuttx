@@ -242,7 +242,7 @@ int board_tsc_setup(int minor)
   static bool initialized = false;
   int ret;
 
-  ierr("minor %d\n", minor);
+  iinfo("minor %d\n", minor);
   DEBUGASSERT(minor == 0);
 
   /* Have we already initialized?  Since we never uninitialize we must prevent
@@ -262,7 +262,7 @@ int board_tsc_setup(int minor)
       i2c = sam_i2cbus_initialize(MXT_TWI_BUS);
       if (!i2c)
         {
-          ierr("Failed to initialize I2C%d\n", MXT_TWI_BUS);
+          ierr("ERROR: Failed to initialize I2C%d\n", MXT_TWI_BUS);
           return -ENODEV;
         }
 

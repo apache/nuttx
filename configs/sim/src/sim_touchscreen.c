@@ -111,14 +111,14 @@ int board_tsc_setup(int minor)
   ret = up_fbinitialize(0);
   if (ret < 0)
     {
-      ierr("up_fbinitialize failed: %d\n", -ret);
+      ierr("ERROR: up_fbinitialize failed: %d\n", -ret);
       goto errout;
     }
 
   dev = up_fbgetvplane(0, 0);
   if (!dev)
     {
-      ierr("up_fbgetvplane 0 failed\n");
+      ierr("ERROR: up_fbgetvplane 0 failed\n");
       ret = -ENODEV;
       goto errout_with_fb;
     }
@@ -130,7 +130,7 @@ int board_tsc_setup(int minor)
   if (!g_simtc.hnx)
     {
       ret = -errno;
-      ierr("nx_open failed: %d\n", ret);
+      ierr("ERROR: nx_open failed: %d\n", ret);
       goto errout_with_fb;
     }
 
@@ -140,7 +140,7 @@ int board_tsc_setup(int minor)
   ret = vnc_default_fbinitialize(0, g_simtc.hnx);
   if (ret < 0)
     {
-      ierr("vnc_default_fbinitialize failed: %d\n", ret);
+      ierr("ERROR: vnc_default_fbinitialize failed: %d\n", ret);
       goto errout_with_fb;
     }
 #endif
@@ -153,7 +153,7 @@ int board_tsc_setup(int minor)
   ret = nx_setbgcolor(g_simtc.hnx, &color);
   if (ret < 0)
     {
-      ierr("nx_setbgcolor failed: %d\n", ret);
+      ierr("ERROR: nx_setbgcolor failed: %d\n", ret);
       goto errout_with_nx;
     }
 
@@ -162,7 +162,7 @@ int board_tsc_setup(int minor)
   ret = board_tsc_setup(minor);
   if (ret < 0)
     {
-      ierr("board_tsc_setup failed: %d\n", ret);
+      ierr("ERROR: board_tsc_setup failed: %d\n", ret);
       goto errout_with_nx;
     }
   return OK;

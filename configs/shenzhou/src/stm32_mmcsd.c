@@ -100,7 +100,7 @@ int stm32_sdinitialize(int minor)
   spi = stm32_spibus_initialize(STM32_MMCSDSPIPORTNO);
   if (!spi)
     {
-      ferr("Failed to initialize SPI port %d\n", STM32_MMCSDSPIPORTNO);
+      ferr("ERROR: Failed to initialize SPI port %d\n", STM32_MMCSDSPIPORTNO);
       return -ENODEV;
     }
 
@@ -114,7 +114,7 @@ int stm32_sdinitialize(int minor)
   ret = mmcsd_spislotinitialize(minor, STM32_MMCSDSLOTNO, spi);
   if (ret < 0)
     {
-      ferr("Failed to bind SPI port %d to MMC/SD slot %d: %d\n",
+      ferr("ERROR: Failed to bind SPI port %d to MMC/SD slot %d: %d\n",
             STM32_MMCSDSPIPORTNO, STM32_MMCSDSLOTNO, ret);
       return ret;
     }

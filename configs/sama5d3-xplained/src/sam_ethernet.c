@@ -85,10 +85,18 @@
 
 #ifdef CONFIG_NETDEV_PHY_DEBUG
 #  define phyerr    err
+#  define phywarn   warn
+#  define phyinfo   info
 #  define phyllerr  llerr
+#  define phyllwarn llwarn
+#  define phyllinfo llinfo
 #else
 #  define phyerr(x...)
+#  define phywarn(x...)
+#  define phyinfo(x...)
 #  define phyllerr(x...)
+#  define phyllwarn(x...)
+#  define phyllinfo(x...)
 #endif
 
 /************************************************************************************
@@ -116,7 +124,7 @@ static xcpt_t g_gmac_handler;
 #ifdef CONFIG_SAMA5_EMACA
 static void sam_emac_phy_enable(bool enable)
 {
-  phyerr("IRQ%d: enable=%d\n", IRQ_INT_ETH1, enable);
+  phyinfo("IRQ%d: enable=%d\n", IRQ_INT_ETH1, enable);
   if (enable)
     {
       sam_pioirqenable(IRQ_INT_ETH1);
@@ -132,7 +140,7 @@ static void sam_emac_phy_enable(bool enable)
 #ifdef CONFIG_SAMA5_GMAC
 static void sam_gmac_phy_enable(bool enable)
 {
-  phyerr("IRQ%d: enable=%d\n", IRQ_INT_ETH0, enable);
+  phyinfo("IRQ%d: enable=%d\n", IRQ_INT_ETH0, enable);
   if (enable)
     {
       sam_pioirqenable(IRQ_INT_ETH0);
@@ -179,7 +187,7 @@ void weak_function sam_netinitialize(void)
    * The KSZ8051 PHY interrupt is available on PE30 INT_ETH1
   */
 
-  phyerr("Configuring %08x\n", PIO_INT_ETH1);
+  phyinfo("Configuring %08x\n", PIO_INT_ETH1);
   sam_configpio(PIO_INT_ETH1);
 #endif
 
@@ -196,7 +204,7 @@ void weak_function sam_netinitialize(void)
    * The KSZ9021/31 interrupt is available on PB35 INT_GETH0
    */
 
-  phyerr("Configuring %08x\n", PIO_INT_ETH0);
+  phyinfo("Configuring %08x\n", PIO_INT_ETH0);
   sam_configpio(PIO_INT_ETH0);
 #endif
 }
@@ -278,16 +286,16 @@ xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler, phy_enable_t *enable)
 
   ninfo("%s: handler=%p\n", intf, handler);
 #ifdef CONFIG_SAMA5_EMACA
-  phyerr("EMAC: devname=%s\n", SAMA5_EMAC_DEVNAME);
+  phyinfo("EMAC: devname=%s\n", SAMA5_EMAC_DEVNAME);
 #endif
 #ifdef CONFIG_SAMA5_GMAC
-  phyerr("GMAC: devname=%s\n", SAMA5_GMAC_DEVNAME);
+  phyinfo("GMAC: devname=%s\n", SAMA5_GMAC_DEVNAME);
 #endif
 
 #ifdef CONFIG_SAMA5_EMACA
   if (strcmp(intf, SAMA5_EMAC_DEVNAME) == 0)
     {
-      phyerr("Select EMAC\n");
+      phyinfo("Select EMAC\n");
       phandler = &g_emac_handler;
       pinset   = PIO_INT_ETH1;
       irq      = IRQ_INT_ETH1;
@@ -298,7 +306,7 @@ xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler, phy_enable_t *enable)
 #ifdef CONFIG_SAMA5_GMAC
   if (strcmp(intf, SAMA5_GMAC_DEVNAME) == 0)
     {
-      phyerr("Select GMAC\n");
+      phyinfo("Select GMAC\n");
       phandler = &g_gmac_handler;
       pinset   = PIO_INT_ETH0;
       irq      = IRQ_INT_ETH0;
@@ -307,7 +315,7 @@ xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler, phy_enable_t *enable)
   else
 #endif
     {
-      nerr("Unsupported interface: %s\n", intf);
+      nerr("ERROR: Unsupported interface: %s\n", intf);
       return NULL;
     }
 
@@ -326,15 +334,15 @@ xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler, phy_enable_t *enable)
 
   if (handler)
     {
-      phyerr("Configure pin: %08x\n", pinset);
+      phyinfo("Configure pin: %08x\n", pinset);
       sam_pioirq(pinset);
 
-      phyerr("Attach IRQ%d\n", irq);
+      phyinfo("Attach IRQ%d\n", irq);
       (void)irq_attach(irq, handler);
     }
   else
     {
-      phyerr("Detach IRQ%d\n", irq);
+      phyinfo("Detach IRQ%d\n", irq);
       (void)irq_detach(irq);
       enabler = NULL;
     }

@@ -160,16 +160,22 @@
 /* Debug ******************************************************************************/
 
 #ifdef CONFIG_LCD_REGDEBUG
-#  define regerr(format, ...)  info(format, ##__VA_ARGS__)
+#  define regerr(format, ...)  err(format, ##__VA_ARGS__)
+#  define regwarn(format, ...) warn(format, ##__VA_ARGS__)
+#  define reginfo(format, ...) info(format, ##__VA_ARGS__)
 #else
 #  define regerr(x...)
+#  define regwarn(x...)
+#  define reginfo(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_LCD
 #  define lcderr(format, ...)  err(format, ##__VA_ARGS__)
+#  define lcdwarn(format, ...) warn(format, ##__VA_ARGS__)
 #  define lcdinfo(format, ...) info(format, ##__VA_ARGS__)
 #else
 #  define lcderr(x...)
+#  define lcdwarn(x...)
 #  define lcdinfo(x...)
 #endif
 
@@ -438,7 +444,7 @@ static struct sam_dev_s g_lcddev_s =
 
 static void sam_putreg(uint16_t reg,  uint16_t data)
 {
-  regerr("base: %08x RS: %04x data: %04x\n", LCD_BASE, LCD_BASE + HX843X_LCD_RS, data);
+  reginfo("base: %08x RS: %04x data: %04x\n", LCD_BASE, LCD_BASE + HX843X_LCD_RS, data);
   putreg16(reg, LCD_BASE);
   putreg16(data, LCD_BASE + HX843X_LCD_RS);
 }
@@ -457,7 +463,7 @@ static uint16_t sam_getreg(uint16_t reg)
   uint16_t data;
   putreg16(reg, LCD_BASE);
   data = getreg16(LCD_BASE + HX843X_LCD_RS);
-  regerr("base: %08x RS: %04x data: %04x\n", LCD_BASE, LCD_BASE + HX843X_LCD_RS, data);
+  reginfo("base: %08x RS: %04x data: %04x\n", LCD_BASE, LCD_BASE + HX843X_LCD_RS, data);
   return data;
 }
 #endif
@@ -586,7 +592,7 @@ static void sam_dumpreg(uint8_t startreg, uint8_t endreg)
   for (addr = startreg; addr <= endreg; addr++)
     {
       value = sam_getreg(addr);
-      lcderr(" %02x: %04x\n", addr, value);
+      lcdinfo(" %02x: %04x\n", addr, value);
     }
 }
 #endif
@@ -912,7 +918,7 @@ int board_lcd_initialize(void)
   /* Enable SMC peripheral clock */
 
   putreg32((1 << SAM_PID_SMC), SAM_PMC_PCER);
-  regerr("PMC PCSR: %08x SMC: %08x\n", getreg32(SAM_PMC_PCSR), (1 << SAM_PID_SMC));
+  reginfo("PMC PCSR: %08x SMC: %08x\n", getreg32(SAM_PMC_PCSR), (1 << SAM_PID_SMC));
 
   /* Configure SMC CS2 */
 
@@ -932,12 +938,12 @@ int board_lcd_initialize(void)
   regval |= (SMCCS_MODE_READMODE)  | (SMCCS_MODE_WRITEMODE) | (SMCCS_MODE_DBW_16BITS);
   putreg32(regval, SAM_SMCCS_MODE(2));
 
-  regerr("SMC SETUP[%08x]: %08x PULSE[%08x]: %08x\n",
-         SAM_SMCCS_SETUP(2), getreg32(SAM_SMCCS_SETUP(2)),
-         SAM_SMCCS_PULSE(2), getreg32(SAM_SMCCS_PULSE(2)));
-  regerr("    CYCLE[%08x]: %08x MODE[%08x]:  %08x\n",
-         SAM_SMCCS_CYCLE(2), getreg32(SAM_SMCCS_CYCLE(2)),
-         SAM_SMCCS_MODE(2),  getreg32(SAM_SMCCS_MODE(2)));
+  reginfo("SMC SETUP[%08x]: %08x PULSE[%08x]: %08x\n",
+          SAM_SMCCS_SETUP(2), getreg32(SAM_SMCCS_SETUP(2)),
+          SAM_SMCCS_PULSE(2), getreg32(SAM_SMCCS_PULSE(2)));
+  reginfo("    CYCLE[%08x]: %08x MODE[%08x]:  %08x\n",
+          SAM_SMCCS_CYCLE(2), getreg32(SAM_SMCCS_CYCLE(2)),
+          SAM_SMCCS_MODE(2),  getreg32(SAM_SMCCS_MODE(2)));
 
   /* Check HX8347 Chip ID */
 
@@ -946,7 +952,7 @@ int board_lcd_initialize(void)
   lcdinfo("Chip ID: %04x\n", hxregval);
   if (hxregval != HX8347_CHIPID)
     {
-      lcderr("Bad chip ID: %04x Expected: %04x\n", hxregval, HX8347_CHIPID);
+      lcderr("ERROR: Bad chip ID: %04x Expected: %04x\n", hxregval, HX8347_CHIPID);
       return -ENODEV;
     }
 #endif

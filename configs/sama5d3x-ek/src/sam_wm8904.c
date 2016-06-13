@@ -253,7 +253,7 @@ int sam_wm8904_initialize(int minor)
   char devname[12];
   int ret;
 
-  auderr("minor %d\n", minor);
+  audinfo("minor %d\n", minor);
   DEBUGASSERT(minor >= 0 && minor <= 25);
 
   /* Have we already initialized?  Since we never uninitialize we must prevent
@@ -273,7 +273,7 @@ int sam_wm8904_initialize(int minor)
       i2c = sam_i2cbus_initialize(WM8904_TWI_BUS);
       if (!i2c)
         {
-          auderr("Failed to initialize TWI%d\n", WM8904_TWI_BUS);
+          auderr("ERROR: Failed to initialize TWI%d\n", WM8904_TWI_BUS);
           ret = -ENODEV;
           goto errout;
         }
@@ -283,7 +283,7 @@ int sam_wm8904_initialize(int minor)
       i2s = sam_ssc_initialize(WM8904_SSC_BUS);
       if (!i2s)
         {
-          auderr("Failed to initialize SSC%d\n", WM8904_SSC_BUS);
+          auderr("ERROR: Failed to initialize SSC%d\n", WM8904_SSC_BUS);
           ret = -ENODEV;
           goto errout_with_i2c;
         }
@@ -325,7 +325,7 @@ int sam_wm8904_initialize(int minor)
       wm8904 = wm8904_initialize(i2c, i2s, &g_wm8904info.lower);
       if (!wm8904)
         {
-          auderr("Failed to initialize the WM8904\n");
+          auderr("ERROR: Failed to initialize the WM8904\n");
           ret = -ENODEV;
           goto errout_with_irq;
         }

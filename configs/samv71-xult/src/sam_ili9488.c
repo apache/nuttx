@@ -874,7 +874,7 @@ static void sam_lcd_dumpone(struct sam_dev_s *priv, int index,
     }
   else
     {
-      ferr("%s: Not collected\n", msg);
+      finfo("%s: Not collected\n", msg);
     }
 }
 #endif

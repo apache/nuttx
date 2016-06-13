@@ -108,7 +108,7 @@ int board_tsc_setup(int minor)
   static bool initialized = false;
   int ret;
 
-  ierr("initialized:%d minor:%d\n", initialized, minor);
+  iinfo("initialized:%d minor:%d\n", initialized, minor);
   DEBUGASSERT(minor == 0);
 
   /* Since there is no uninitialized logic, this initialization can be

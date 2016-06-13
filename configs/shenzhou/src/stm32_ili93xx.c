@@ -594,18 +594,18 @@ static struct stm32_dev_s g_lcddev =
 #ifdef CONFIG_LCD_REGDEBUG
 static void stm32_lcdshow(FAR struct stm32_lower_s *priv, FAR const char *msg)
 {
-  err("%s:\n", msg);
-  err("  CRTL   RS: %d CS: %d RD: %d WR: %d LE: %d\n",
-      getreg32(LCD_RS_READ), getreg32(LCD_CS_READ), getreg32(LCD_RD_READ),
-      getreg32(LCD_WR_READ), getreg32(LCD_LE_READ));
-  err("  DATA   CR: %08x %08x\n", getreg32(LCD_CRL), getreg32(LCD_CRH));
+  info("%s:\n", msg);
+  info("  CRTL   RS: %d CS: %d RD: %d WR: %d LE: %d\n",
+       getreg32(LCD_RS_READ), getreg32(LCD_CS_READ), getreg32(LCD_RD_READ),
+       getreg32(LCD_WR_READ), getreg32(LCD_LE_READ));
+  info("  DATA   CR: %08x %08x\n", getreg32(LCD_CRL), getreg32(LCD_CRH));
   if (priv->output)
     {
-      err("  OUTPUT: %08x\n", getreg32(LCD_ODR));
+      info("  OUTPUT: %08x\n", getreg32(LCD_ODR));
     }
   else
     {
-      err("  INPUT:  %08x\n", getreg32(LCD_IDR));
+      info("  INPUT:  %08x\n", getreg32(LCD_IDR));
     }
 }
 #endif
@@ -1254,7 +1254,7 @@ static int stm32_setpower(struct lcd_dev_s *dev, int power)
       else
 #endif
         {
-          gerr("Unsupported LCD: %d\n", priv->type);
+          lcderr("ERROR: Unsupported LCD: %d\n", priv->type);
         }
 
       up_mdelay(50);
@@ -1780,7 +1780,7 @@ static inline int stm32_lcdinitialize(FAR struct stm32_dev_s *priv)
   up_mdelay(50);
 
   id = stm32_readreg(priv, LCD_REG_0);     /* Read the ID register */
-  lcderr("LCD ID: %04x\n", id);
+  lcdinfo("LCD ID: %04x\n", id);
 
   stm32_lcdoutput(priv);
   up_mdelay(10);
@@ -1852,11 +1852,11 @@ static inline int stm32_lcdinitialize(FAR struct stm32_dev_s *priv)
   else
 #endif
     {
-      lcderr("Unsupported LCD type\n");
+      lcderr("ERROR: Unsupported LCD type\n");
       ret = -ENODEV;
     }
 
-  lcderr("LCD type: %d\n", priv->type);
+  lcdinfo("LCD type: %d\n", priv->type);
   return ret;
 }
 

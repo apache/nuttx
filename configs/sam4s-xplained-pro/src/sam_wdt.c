@@ -128,7 +128,7 @@ static int wdog_daemon(int argc, char *argv[])
   fd = open(CONFIG_WATCHDOG_DEVPATH, O_RDONLY);
   if (fd < 0)
     {
-      wdgerr("open %s failed: %d\n", CONFIG_WATCHDOG_DEVPATH, errno);
+      wdgerr("ERROR: open %s failed: %d\n", CONFIG_WATCHDOG_DEVPATH, errno);
       goto errout;
     }
 
@@ -138,7 +138,7 @@ static int wdog_daemon(int argc, char *argv[])
   ret = ioctl(fd, WDIOC_START, 0);
   if (ret < 0)
     {
-      wdgerr("ioctl(WDIOC_START) failed: %d\n", errno);
+      wdgerr("ERROR: ioctl(WDIOC_START) failed: %d\n", errno);
       goto errout_with_dev;
     }
 
@@ -151,7 +151,7 @@ static int wdog_daemon(int argc, char *argv[])
       ret = ioctl(fd, WDIOC_KEEPALIVE, 0);
       if (ret < 0)
         {
-          wdgerr("ioctl(WDIOC_KEEPALIVE) failed: %d\n", errno);
+          wdgerr("ERROR: ioctl(WDIOC_KEEPALIVE) failed: %d\n", errno);
           goto errout_with_dev;
         }
     }
@@ -190,7 +190,7 @@ int sam_watchdog_initialize(void)
   fd = open(CONFIG_WATCHDOG_DEVPATH, O_RDONLY);
   if (fd < 0)
     {
-      wdgerr("open %s failed: %d\n", CONFIG_WATCHDOG_DEVPATH, errno);
+      wdgerr("ERROR: open %s failed: %d\n", CONFIG_WATCHDOG_DEVPATH, errno);
       goto errout;
     }
 
@@ -200,7 +200,7 @@ int sam_watchdog_initialize(void)
   ret = ioctl(fd, WDIOC_SETTIMEOUT, (unsigned long)CONFIG_WDT_TIMEOUT);
   if (ret < 0)
     {
-      wdgerr("ioctl(WDIOC_SETTIMEOUT) failed: %d\n", errno);
+      wdgerr("ERROR: ioctl(WDIOC_SETTIMEOUT) failed: %d\n", errno);
       goto errout_with_dev;
     }
 
@@ -210,7 +210,7 @@ int sam_watchdog_initialize(void)
   ret = ioctl(fd, WDIOC_MINTIME, (unsigned long)CONFIG_WDT_MINTIME);
   if (ret < 0)
     {
-      wdgerr("ioctl(WDIOC_MINTIME) failed: %d\n", errno);
+      wdgerr("ERROR: ioctl(WDIOC_MINTIME) failed: %d\n", errno);
       goto errout_with_dev;
     }
 

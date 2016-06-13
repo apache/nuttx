@@ -100,7 +100,7 @@ int sam_audio_null_initialize(int minor)
   char devname[12];
   int ret;
 
-  auderr("minor %d\n", minor);
+  audinfo("minor %d\n", minor);
   DEBUGASSERT(minor >= 0 && minor <= 25);
 
   /* Have we already initialized?  Since we never uninitialize we must prevent
@@ -117,7 +117,7 @@ int sam_audio_null_initialize(int minor)
       nullaudio = audio_null_initialize();
       if (!nullaudio)
         {
-          auderr("Failed to get the NULL audio interface\n");
+          auderr("ERROR: Failed to get the NULL audio interface\n");
           ret = -ENODEV;
           goto errout;
         }

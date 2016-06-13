@@ -238,7 +238,7 @@ int board_tsc_setup(int minor)
   FAR struct spi_dev_s *dev;
   int ret;
 
-  ierr("minor %d\n", minor);
+  iinfo("minor %d\n", minor);
   DEBUGASSERT(minor == 0);
 
   /* Configure and enable the ADS7843E interrupt pin as an input */
@@ -255,7 +255,7 @@ int board_tsc_setup(int minor)
   dev = sam_spibus_initialize(TSC_CSNUM);
   if (!dev)
     {
-      ierr("Failed to initialize SPI chip select %d\n", TSC_CSNUM);
+      ierr("ERROR: Failed to initialize SPI chip select %d\n", TSC_CSNUM);
       return -ENODEV;
     }
 
@@ -264,7 +264,7 @@ int board_tsc_setup(int minor)
   ret = ads7843e_register(dev, &g_tscinfo, CONFIG_ADS7843E_DEVMINOR);
   if (ret < 0)
     {
-      ierr("Failed to initialize SPI chip select %d\n", TSC_CSNUM);
+      ierr("ERROR: Failed to initialize SPI chip select %d\n", TSC_CSNUM);
       /* sam_spibus_uninitialize(dev); */
       return -ENODEV;
     }

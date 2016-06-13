@@ -157,7 +157,7 @@ FAR struct lcd_dev_s *board_graphics_setup(unsigned int devno)
   spi = sam_spibus_initialize(OLED_CSNO);
   if (!spi)
     {
-      lcderr("Failed to initialize SPI port 1\n");
+      lcderr("ERROR: Failed to initialize SPI port 1\n");
     }
   else
     {
@@ -166,7 +166,7 @@ FAR struct lcd_dev_s *board_graphics_setup(unsigned int devno)
       dev = ssd1306_initialize(spi, devno);
       if (!dev)
         {
-          lcderr("Failed to bind SPI port 1 to OLED %d: %d\n", devno);
+          lcderr("ERROR: Failed to bind SPI port 1 to OLED %d: %d\n", devno);
         }
      else
         {
