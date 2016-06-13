@@ -1,7 +1,7 @@
 /****************************************************************************
  * /libc/stdlib/lib_strtoull.c
  *
- *   Copyright (C) 2009, 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2010, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,10 +47,6 @@
 #ifdef CONFIG_HAVE_LONG_LONG
 
 /****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -72,7 +68,8 @@
 
 unsigned long long strtoull(FAR const char *nptr, FAR char **endptr, int base)
 {
-  unsigned long long prev, accum = 0;
+  unsigned long long accum = 0;
+  unsigned long long prev;
   int value;
 
   if (nptr)
@@ -103,9 +100,9 @@ unsigned long long strtoull(FAR const char *nptr, FAR char **endptr, int base)
 
           if (accum < prev)
             {
-            set_errno(ERANGE);
-            accum = 0;
-            break;
+              set_errno(ERANGE);
+              accum = 0;
+              break;
             }
         }
 
@@ -116,7 +113,8 @@ unsigned long long strtoull(FAR const char *nptr, FAR char **endptr, int base)
           *endptr = (char *)nptr;
         }
     }
-   return accum;
+
+  return accum;
 }
 
 #endif

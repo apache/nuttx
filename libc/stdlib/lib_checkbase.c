@@ -1,7 +1,7 @@
 /****************************************************************************
  * libc/stdlib/lib_checkbase.c
  *
- *   Copyright (C) 2007, 2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,10 +45,6 @@
 #include "libc.h"
 
 /****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -72,7 +68,7 @@
 
 int lib_checkbase(int base, FAR const char **pptr)
 {
-   const char *ptr = *pptr;
+  FAR const char *ptr = *pptr;
 
   /* Check for unspecified base */
 
@@ -113,9 +109,10 @@ int lib_checkbase(int base, FAR const char **pptr)
     }
 
   /* Check for incorrect bases. */
+
   else if (base < 2 || base > 26)
     {
-    return -1; /* Means incorrect base */
+      return -1; /* Means incorrect base */
     }
 
   /* Return the updated pointer and base */
@@ -123,4 +120,3 @@ int lib_checkbase(int base, FAR const char **pptr)
   *pptr = ptr;
   return base;
 }
-

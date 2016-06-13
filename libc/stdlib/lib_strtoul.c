@@ -1,7 +1,7 @@
 /****************************************************************************
  * /libc/stdlib/lib_strtoul.c
  *
- *   Copyright (C) 2007, 2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,10 +44,6 @@
 #include "libc.h"
 
 /****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -69,7 +65,8 @@
 
 unsigned long strtoul(FAR const char *nptr, FAR char **endptr, int base)
 {
-  unsigned long prev, accum = 0;
+  unsigned long accum = 0;
+  unsigned long prev;
   int value;
 
   if (nptr)
@@ -100,9 +97,9 @@ unsigned long strtoul(FAR const char *nptr, FAR char **endptr, int base)
 
           if (accum < prev)
             {
-            set_errno(ERANGE);
-            accum = 0;
-            break;
+              set_errno(ERANGE);
+              accum = 0;
+              break;
             }
         }
 
