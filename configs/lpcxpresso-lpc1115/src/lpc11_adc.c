@@ -107,7 +107,7 @@ int adc_devinit(void)
       ret = adc_register("/dev/adc0", adc);
       if (ret < 0)
         {
-          aerr("adc_register failed: %d\n", ret);
+          aerr("ERROR: adc_register failed: %d\n", ret);
           return ret;
         }
 

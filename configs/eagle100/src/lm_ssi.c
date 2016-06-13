@@ -59,29 +59,17 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-/* Enables debug output from this file (needs CONFIG_DEBUG_FEATURES too) */
+/* CONFIG_DEBUG_SPI enables debug output from this file */
 
-#undef SSI_DEBUG   /* Define to enable debug */
-#undef SSI_VERBOSE /* Define to enable verbose debug */
-
-#ifdef SSI_DEBUG
+#ifdef CONFIG_DEBUG_SPI
 #  define ssierr  llerr
-#  ifdef SSI_VERBOSE
-#    define ssiinfo llerr
-#  else
-#    define ssiinfo(x...)
-#  endif
-#else
-#  undef SSI_VERBOSE
-#  define ssierr(x...)
-#  define ssiinfo(x...)
-#endif
-
-/* Dump GPIO registers */
-
-#ifdef SSI_VERBOSE
+#  define ssiwarn llwarn
+#  define ssiinfo llinfo
 #  define ssi_dumpgpio(m) tiva_dumpgpio(SDCCS_GPIO, m)
 #else
+#  define ssierr(x...)
+#  define ssiwarn(x...)
+#  define ssiinfo(x...)
 #  define ssi_dumpgpio(m)
 #endif
 

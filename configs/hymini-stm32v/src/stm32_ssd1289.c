@@ -103,21 +103,21 @@
 #define LCD_DATA         0x60020000  /* RS = 1 */
 
 /* Debug ******************************************************************************/
+
 #ifdef CONFIG_DEBUG_LCD
 #  define lcderr         err
+#  define lcdwarn        warn
 #  define lcdinfo        info
 #else
 #  define lcderr(x...)
+#  define lcdwarn(x...)
 #  define lcdinfo(x...)
 #endif
 
 /**************************************************************************************
- * Private Type Definition
- **************************************************************************************/
-
-/**************************************************************************************
  * Private Function Prototypes
  **************************************************************************************/
+
 /* Low Level LCD access */
 
 static void stm32_select(FAR struct ssd1289_lcd_s *dev);
@@ -359,26 +359,26 @@ static void init_lcd_backlight(void)
 
   /* Dump timer3 registers */
 
-  lcderr("APB1ENR: %08x\n", getreg32(STM32_RCC_APB1ENR));
-  lcderr("CR1:     %04x\n", getreg32(STM32_TIM3_CR1));
-  lcderr("CR2:     %04x\n", getreg32(STM32_TIM3_CR2));
-  lcderr("SMCR:    %04x\n", getreg32(STM32_TIM3_SMCR));
-  lcderr("DIER:    %04x\n", getreg32(STM32_TIM3_DIER));
-  lcderr("SR:      %04x\n", getreg32(STM32_TIM3_SR));
-  lcderr("EGR:     %04x\n", getreg32(STM32_TIM3_EGR));
-  lcderr("CCMR1:   %04x\n", getreg32(STM32_TIM3_CCMR1));
-  lcderr("CCMR2:   %04x\n", getreg32(STM32_TIM3_CCMR2));
-  lcderr("CCER:    %04x\n", getreg32(STM32_TIM3_CCER));
-  lcderr("CNT:     %04x\n", getreg32(STM32_TIM3_CNT));
-  lcderr("PSC:     %04x\n", getreg32(STM32_TIM3_PSC));
-  lcderr("ARR:     %04x\n", getreg32(STM32_TIM3_ARR));
-  lcderr("CCR1:    %04x\n", getreg32(STM32_TIM3_CCR1));
-  lcderr("CCR2:    %04x\n", getreg32(STM32_TIM3_CCR2));
-  lcderr("CCR3:    %04x\n", getreg32(STM32_TIM3_CCR3));
-  lcderr("CCR4:    %04x\n", getreg32(STM32_TIM3_CCR4));
-  lcderr("CCR4:    %04x\n", getreg32(STM32_TIM3_CCR4));
-  lcderr("CCR4:    %04x\n", getreg32(STM32_TIM3_CCR4));
-  lcderr("DMAR:    %04x\n", getreg32(STM32_TIM3_DMAR));
+  lcdinfo("APB1ENR: %08x\n", getreg32(STM32_RCC_APB1ENR));
+  lcdinfo("CR1:     %04x\n", getreg32(STM32_TIM3_CR1));
+  lcdinfo("CR2:     %04x\n", getreg32(STM32_TIM3_CR2));
+  lcdinfo("SMCR:    %04x\n", getreg32(STM32_TIM3_SMCR));
+  lcdinfo("DIER:    %04x\n", getreg32(STM32_TIM3_DIER));
+  lcdinfo("SR:      %04x\n", getreg32(STM32_TIM3_SR));
+  lcdinfo("EGR:     %04x\n", getreg32(STM32_TIM3_EGR));
+  lcdinfo("CCMR1:   %04x\n", getreg32(STM32_TIM3_CCMR1));
+  lcdinfo("CCMR2:   %04x\n", getreg32(STM32_TIM3_CCMR2));
+  lcdinfo("CCER:    %04x\n", getreg32(STM32_TIM3_CCER));
+  lcdinfo("CNT:     %04x\n", getreg32(STM32_TIM3_CNT));
+  lcdinfo("PSC:     %04x\n", getreg32(STM32_TIM3_PSC));
+  lcdinfo("ARR:     %04x\n", getreg32(STM32_TIM3_ARR));
+  lcdinfo("CCR1:    %04x\n", getreg32(STM32_TIM3_CCR1));
+  lcdinfo("CCR2:    %04x\n", getreg32(STM32_TIM3_CCR2));
+  lcdinfo("CCR3:    %04x\n", getreg32(STM32_TIM3_CCR3));
+  lcdinfo("CCR4:    %04x\n", getreg32(STM32_TIM3_CCR4));
+  lcdinfo("CCR4:    %04x\n", getreg32(STM32_TIM3_CCR4));
+  lcdinfo("CCR4:    %04x\n", getreg32(STM32_TIM3_CCR4));
+  lcdinfo("DMAR:    %04x\n", getreg32(STM32_TIM3_DMAR));
 }
 
 /************************************************************************************

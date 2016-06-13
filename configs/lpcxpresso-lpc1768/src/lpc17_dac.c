@@ -86,7 +86,7 @@ int dac_devinit(void)
     ret = dac_register("/dev/dac0", dac);
     if (ret < 0)
       {
-        aerr("dac_register failed: %d\n", ret);
+        aerr("ERROR: dac_register failed: %d\n", ret);
         return ret;
       }
 

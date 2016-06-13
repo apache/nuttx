@@ -201,7 +201,7 @@ uint8_t stm32_spi3status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 #ifdef CONFIG_STM32_SPI2
 void stm32_spi2select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
-  spierr("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 }
 
 uint8_t stm32_spi2status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
@@ -213,7 +213,7 @@ uint8_t stm32_spi2status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 #ifdef CONFIG_STM32_SPI1
 void stm32_spi1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
-  spierr("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 }
 
 uint8_t stm32_spi1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)

@@ -99,15 +99,13 @@
 
 #ifdef CONFIG_DEBUG_SPI
 #  define spierr  llerr
+#  define spiwarn llwarn
 #  define spiinfo llinfo
 #else
 #  define spierr(x...)
+#  define spiwarn(x...)
 #  define spiinfo(x...)
 #endif
-
-/************************************************************************************
- * Private Functions
- ************************************************************************************/
 
 /************************************************************************************
  * Public Functions
@@ -175,7 +173,7 @@ enum spi_dev_e;
 
 void  pic32mx_spi2select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
-  spierr("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 
   if (devid == SPIDEV_FLASH)
     {

@@ -66,18 +66,18 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Enables debug output from this file (needs CONFIG_DEBUG_FEATURES with
- * CONFIG_DEBUG_INFO too)
- */
+/* CONFIG_DEBUG_SPI enables debug output from this file */
 
-#undef SSI_DEBUG  /* Define to enable debug */
-
-#ifdef SSI_DEBUG
+#ifdef CONFIG_DEBUG_SPI
 #  define ssierr  llerr
+#  define ssiwarn llwarn
 #  define ssiinfo llinfo
+#  define ssi_dumpgpio(m) tiva_dumpgpio(SDCCS_GPIO, m)
 #else
 #  define ssierr(x...)
+#  define ssiwarn(x...)
 #  define ssiinfo(x...)
+#  define ssi_dumpgpio(m)
 #endif
 
 /* How many SSI modules does this chip support? The LM3S6918 supports 2 SSI
@@ -577,7 +577,7 @@ static void ssi_txuint8(struct tiva_ssidev_s *priv)
 
 static void ssi_rxnull(struct tiva_ssidev_s *priv)
 {
-#if defined(SSI_DEBUG) && defined(CONFIG_DEBUG_INFO)
+#if defined(CONFIG_DEBUG_SPI) && defined(CONFIG_DEBUG_INFO)
   uint32_t regval  = ssi_getreg(priv, TIVA_SSI_DR_OFFSET);
   ssiinfo("RX: discard %04x\n", regval);
 #else
@@ -1022,7 +1022,7 @@ static int ssi_interrupt(int irq, void *context)
 
   /* Check for Rx FIFO overruns */
 
-#ifdef SSI_DEBUG
+#ifdef CONFIG_DEBUG_SPI
   if ((regval & SSI_RIS_ROR) != 0)
     {
       ssierr("Rx FIFO Overrun!\n");

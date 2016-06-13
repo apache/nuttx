@@ -59,28 +59,17 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Enables debug output from this file (needs CONFIG_DEBUG_FEATURES too) */
-
-#ifndef CONFIG_DEBUG_FEATURES
-#  undef CONFIG_DEBUG_INFO
-#  undef CONFIG_DEBUG_SPI
-#endif
+/* Enables debug output from this file */
 
 #ifdef CONFIG_DEBUG_SPI
-#  define spierr llerr
-#  ifdef CONFIG_DEBUG_INFO
-#    define spiinfo llerr
-#  else
-#    define spiinfo(x...)
-#  endif
+#  define spierr  llerr
+#  define spiwarn llwarn
+#  define spiinfo llinfo
 #else
 #  define spierr(x...)
+#  define spiwarn(x...)
 #  define spiinfo(x...)
 #endif
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -134,7 +123,7 @@ void weak_function stm32_spidev_initialize(void)
 void stm32_spi1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
                       bool selected)
 {
-  spierr("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 
 #  if defined(CONFIG_LCD_SHARP_MEMLCD)
   if (devid == SPIDEV_DISPLAY)

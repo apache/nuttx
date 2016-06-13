@@ -96,7 +96,7 @@ int pwm_devinit(void)
       pwm = lpc11_pwminitialize(0);
       if (!pwm)
         {
-          aerr("Failed to get the LPC17XX PWM lower half\n");
+          aerr("ERROR: Failed to get the LPC17XX PWM lower half\n");
           return -ENODEV;
         }
 
@@ -105,14 +105,14 @@ int pwm_devinit(void)
       ret = pwm_register("/dev/pwm0", pwm);
       if (ret < 0)
         {
-          aerr("pwm_register failed: %d\n", ret);
+          aerr("ERROR: pwm_register failed: %d\n", ret);
           return ret;
         }
 
       mcpwm = lpc11_mcpwminitialize(0);
       if (!mcpwm)
         {
-          aerr("Failed to get the LPC17XX MOTOR PWM lower half\n");
+          aerr("ERROR: Failed to get the LPC17XX MOTOR PWM lower half\n");
           return -ENODEV;
         }
 
@@ -121,14 +121,14 @@ int pwm_devinit(void)
       ret = pwm_register("/dev/mcpwm0", mcpwm);
       if (ret < 0)
         {
-          aerr("mcpwm_register failed: %d\n", ret);
+          aerr("ERROR: mcpwm_register failed: %d\n", ret);
           return ret;
         }
 
       timer = lpc11_timerinitialize(0);
       if (!timer)
         {
-          aerr("Failed to get the LPC17XX TIMER lower half\n");
+          aerr("ERROR: Failed to get the LPC17XX TIMER lower half\n");
           return -ENODEV;
         }
 
@@ -137,7 +137,7 @@ int pwm_devinit(void)
       ret = pwm_register("/dev/timer0", timer);
       if (ret < 0)
         {
-          aerr("timer_register failed: %d\n", ret);
+          aerr("ERROR: timer_register failed: %d\n", ret);
           return ret;
         }
 
