@@ -69,26 +69,17 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* The following enable debug output from this file (needs CONFIG_DEBUG_FEATURES too).
- *
- * CONFIG_SSP_DEBUG - Define to enable basic SSP debug
- * CONFIG_SSP_VERBOSE - Define to enable verbose SSP debug
- */
+/* The following enable debug output from this file */
 
-#ifdef CONFIG_SSP_DEBUG
+#ifdef CONFIG_DEBUG_SPI
 #  define ssperr  llerr
-#  ifdef CONFIG_SSP_VERBOSE
-#    define spiinfo llerr
-#  else
-#    define spiinfo(x...)
-#  endif
+#  define sspwarn llwarn
+#  define sspinfo llinfo
 #else
-#  undef CONFIG_SSP_VERBOSE
 #  define ssperr(x...)
-#  define spiinfo(x...)
+#  define sspwarn(x...)
+#  define sspinfo(x...)
 #endif
-
-
 
 /****************************************************************************
  * Private Types
@@ -576,7 +567,7 @@ static void ssp_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
        * and (3) there are more bytes to be sent.
        */
 
-      spiinfo("TX: rxpending: %d nwords: %d\n", rxpending, nwords);
+      sspinfo("TX: rxpending: %d nwords: %d\n", rxpending, nwords);
       while ((ssp_getreg(priv, LPC43_SSP_SR_OFFSET) & SSP_SR_TNF) &&
              (rxpending < LPC43_SSP_FIFOSZ) && nwords)
         {
@@ -599,7 +590,7 @@ static void ssp_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
 
       /* Now, read the RX data from the RX FIFO while the RX FIFO is not empty */
 
-      spiinfo("RX: rxpending: %d\n", rxpending);
+      sspinfo("RX: rxpending: %d\n", rxpending);
       while (ssp_getreg(priv, LPC43_SSP_SR_OFFSET) & SSP_SR_RNE)
         {
           data = ssp_getreg(priv, LPC43_SSP_DR_OFFSET);

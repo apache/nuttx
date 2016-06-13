@@ -58,27 +58,21 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-/* Enables debug output from this file (needs CONFIG_DEBUG_FEATURES too) */
+/* Enables debug output from this file */
 
-#undef SSP_DEBUG   /* Define to enable debug */
-#undef SSP_VERBOSE /* Define to enable verbose debug */
-
-#ifdef SSP_DEBUG
+#ifdef CONFIG_DEBUG_SPI
 #  define ssperr  llerr
-#  ifdef SSP_VERBOSE
-#    define sspinfo llerr
-#  else
-#    define sspinfo(x...)
-#  endif
+#  define sspwarn llwarn
+#  define sspinfo llinfo
 #else
-#  undef SSP_VERBOSE
 #  define ssperr(x...)
+#  define sspwarn(x...)
 #  define sspinfo(x...)
 #endif
 
 /* Dump GPIO registers */
 
-#ifdef SSP_VERBOSE
+#ifdef CONFIG_DEBUG_GPIO
 #  define ssp_dumpgpio(m) lpc17_dumpgpio(SDCCS_GPIO, m)
 #else
 #  define ssp_dumpgpio(m)

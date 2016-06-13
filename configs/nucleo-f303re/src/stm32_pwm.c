@@ -112,7 +112,7 @@ int board_pwm_setup(void)
       pwm = stm32_pwminitialize(NUCLEO_F303RE_PWMTIMER);
       if (pwm == NULL)
         {
-          pwmerr("Failed to get the STM32 PWM lower half\n");
+          pwmerr("ERROR: Failed to get the STM32 PWM lower half\n");
           return -ENODEV;
         }
 
@@ -121,7 +121,7 @@ int board_pwm_setup(void)
       ret = pwm_register("/dev/pwm0", pwm);
       if (ret < 0)
         {
-          pwmerr("pwm_register failed: %d\n", ret);
+          pwmerr("ERROR: pwm_register failed: %d\n", ret);
           return ret;
         }
 

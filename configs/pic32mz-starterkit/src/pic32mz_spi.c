@@ -121,13 +121,13 @@ enum spi_dev_e;
 #ifdef CONFIG_PIC32MZ_SPI1
 void  pic32mz_spi1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
-  spierr("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 #warning "Missing logic"
 }
 
 uint8_t pic32mz_spi1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 {
-  spierr("Returning nothing\n");
+  spiinfo("Returning nothing\n");
 #warning "Missing logic"
   return 0;
 }
@@ -143,13 +143,13 @@ int pic32mz_spi1cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cm
 #ifdef CONFIG_PIC32MZ_SPI2
 void  pic32mz_spi2select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
-  spierr("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 #warning "Missing logic"
 }
 
 uint8_t pic32mz_spi2status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 {
-  spierr("Returning nothing\n");
+  spiinfo("Returning nothing\n");
 #warning "Missing logic"
   return 0;
 }
@@ -165,13 +165,13 @@ int pic32mz_spi2cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cm
 #ifdef CONFIG_PIC32MZ_SPI3
 void  pic32mz_spi3select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
-  spierr("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 #warning "Missing logic"
 }
 
 uint8_t pic32mz_spi3status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 {
-  spierr("Returning nothing\n");
+  spiinfo("Returning nothing\n");
 #warning "Missing logic"
   return 0;
 }
@@ -187,13 +187,13 @@ int pic32mz_spi3cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cm
 #ifdef CONFIG_PIC32MZ_SPI4
 void  pic32mz_spi4select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
-  spierr("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 #warning "Missing logic"
 }
 
 uint8_t pic32mz_spi4status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 {
-  spierr("Returning nothing\n");
+  spiinfo("Returning nothing\n");
 #warning "Missing logic"
   return 0;
 }
@@ -209,13 +209,13 @@ int pic32mz_spi4cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cm
 #ifdef CONFIG_PIC32MZ_SPI5
 void  pic32mz_spi5select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
-  spierr("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 #warning "Missing logic"
 }
 
 uint8_t pic32mz_spi5status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 {
-  spierr("Returning nothing\n");
+  spiinfo("Returning nothing\n");
 #warning "Missing logic"
   return 0;
 }
@@ -231,13 +231,13 @@ int pic32mz_spi5cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cm
 #ifdef CONFIG_PIC32MZ_SPI6
 void  pic32mz_spi6select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
-  spierr("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 #warning "Missing logic"
 }
 
 uint8_t pic32mz_spi6status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 {
-  spierr("Returning nothing\n");
+  spiinfo("Returning nothing\n");
 #warning "Missing logic"
   return 0;
 }

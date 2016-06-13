@@ -61,20 +61,13 @@
 
 /* Enables debug output from this file */
 
-#ifndef CONFIG_DEBUG_FEATURES
-#  undef CONFIG_DEBUG_SPI
-#  undef CONFIG_DEBUG_INFO
-#endif
-
 #ifdef CONFIG_DEBUG_SPI
 #  define spierr  llerr
-#  ifdef CONFIG_DEBUG_INFO
-#    define spiinfo llerr
-#  else
-#    define spiinfo(x...)
-#  endif
+#  define spiwarn llwarn
+#  define spiinfo llinfo
 #else
 #  define spierr(x...)
+#  define spiwarn(x...)
 #  define spiinfo(x...)
 #endif
 
@@ -111,7 +104,7 @@ void weak_function stm32_spiinitialize(void)
   g_spi1 = up_spiinitialize(1);
   if (!g_spi1)
     {
-      spierr("[boot] FAILED to initialize SPI port 1\n");
+      spierr("ERROR: FAILED to initialize SPI port 1\n");
     }
 
 #ifdef CONFIG_WL_CC3000
@@ -166,7 +159,7 @@ void weak_function stm32_spiinitialize(void)
 #ifdef CONFIG_STM32_SPI1
 void stm32_spi1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
-  spierr("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 
 #ifdef CONFIG_WL_CC3000
   if (devid == SPIDEV_WIRELESS)
@@ -192,7 +185,7 @@ uint8_t stm32_spi1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 #ifdef CONFIG_STM32_SPI2
 void stm32_spi2select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
-  spierr("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 
 #ifdef CONFIG_WL_CC3000
   if (devid == SPIDEV_WIRELESS)
@@ -211,7 +204,7 @@ uint8_t stm32_spi2status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 #ifdef CONFIG_STM32_SPI3
 void stm32_spi3select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 
-  spierr("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 }
 
 uint8_t stm32_spi3status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)

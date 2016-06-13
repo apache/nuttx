@@ -114,7 +114,7 @@ int board_tsc_setup(int minor)
   static bool initialized = false;
   int ret;
 
-  ierr("minor %d\n", minor);
+  iinfo("minor %d\n", minor);
   DEBUGASSERT(minor == 0);
 
   /* Have we already initialized?  Since we never uninitialize we must prevent
@@ -140,7 +140,7 @@ int board_tsc_setup(int minor)
       ret = usbhost_mouse_init();
       if (ret < 0)
         {
-          ierr("Failed to register USB HID mouse device class\n");
+          ierr("ERROR: Failed to register USB HID mouse device class\n");
           return -ENODEV;
         }
 

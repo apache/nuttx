@@ -72,7 +72,7 @@
 
 /* Dump GPIO registers */
 
-#ifdef SSP_VERBOSE
+#ifdef CONFIG_DEBUG_GPIO
 #  define ssp_dumpgpio(m) lpc17_dumpgpio(SDCCS_GPIO, m)
 #else
 #  define ssp_dumpgpio(m)

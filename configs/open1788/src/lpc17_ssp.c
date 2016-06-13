@@ -65,13 +65,11 @@
 
 #ifdef CONFIG_DEBUG_SPI
 #  define ssperr  llerr
-#  ifdef CONFIG_DEBUG_INFO
-#    define sspinfo llerr
-#  else
-#    define sspinfo(x...)
-#  endif
+#  define sspwarn llwarn
+#  define sspinfo llinfo
 #else
 #  define ssperr(x...)
+#  define sspwarn(x...)
 #  define sspinfo(x...)
 #endif
 
@@ -82,18 +80,6 @@
 #else
 #  define ssp_dumpgpio(p,m)
 #endif
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -158,12 +144,12 @@ void weak_function open1788_sspdev_initialize(void)
 #ifdef CONFIG_LPC17_SSP0
 void  lpc17_ssp0select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
-  ssperr("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  sspinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 }
 
 uint8_t lpc17_ssp0status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 {
-  ssperr("Returning nothing\n");
+  sspinfo("Returning nothing\n");
   return 0;
 }
 #endif
@@ -171,7 +157,7 @@ uint8_t lpc17_ssp0status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 #ifdef CONFIG_LPC17_SSP1
 void  lpc17_ssp1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
-  ssperr("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  sspinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
   if (devid == SPIDEV_TOUCHSCREEN)
     {
       /* Assert/de-assert the CS pin to the touchscreen */
@@ -184,7 +170,7 @@ void  lpc17_ssp1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool sel
 
 uint8_t lpc17_ssp1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 {
-  ssperr("Returning nothing\n");
+  sspinfo("Returning nothing\n");
   return 0;
 }
 #endif
@@ -192,12 +178,12 @@ uint8_t lpc17_ssp1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 #ifdef CONFIG_LPC17_SSP2
 void  lpc17_ssp2select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
-  ssperr("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  sspinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 }
 
 uint8_t lpc17_ssp2status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 {
-  ssperr("Returning nothing\n");
+  sspinfo("Returning nothing\n");
   return 0;
 }
 #endif
