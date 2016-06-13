@@ -99,7 +99,7 @@
 #  define USB_FRAME_INT 0
 #endif
 
-#ifdef CONFIG_DEBUG_FEATURES
+#ifdef CONFIG_DEBUG_USB
 #  define USB_ERROR_INT USBDEV_INT_ERRINT
 #else
 #  undef  CONFIG_LPC17_USBDEV_REGDEBUG
@@ -2090,7 +2090,7 @@ static int lpc17_usbinterrupt(int irq, FAR void *context)
 
 #endif
 
-#ifdef CONFIG_DEBUG_FEATURES
+#ifdef CONFIG_DEBUG_USB
       /* USB engine error interrupt */
 
       if ((devintstatus & USBDEV_INT_ERRINT) != 0)
@@ -2412,7 +2412,7 @@ static int lpc17_dmasetup(struct lpc17_usbdev_s *priv, uint8_t epphy,
   struct lpc17_dmadesc_s *dmadesc = priv;
   uint32_t regval;
 
-#ifdef CONFIG_DEBUG_FEATURES
+#ifdef CONFIG_DEBUG_USB
   if (!priv || epphy < 2)
     {
       usbtrace(TRACE_DEVERROR(LPC17_TRACEERR_INVALIDPARMS), 0);
@@ -2611,13 +2611,14 @@ static int lpc17_epdisable(FAR struct usbdev_ep_s *ep)
   uint32_t mask = (1 << privep->epphy);
   uint32_t regval;
 
-#ifdef CONFIG_DEBUG_FEATURES
+#ifdef CONFIG_DEBUG_USB
   if (!ep)
     {
       usbtrace(TRACE_DEVERROR(LPC17_TRACEERR_INVALIDPARMS), 0);
       return -EINVAL;
     }
 #endif
+
   usbtrace(TRACE_EPDISABLE, privep->epphy);
 
   /* Cancel any ongoing activity */
@@ -2653,13 +2654,14 @@ static FAR struct usbdev_req_s *lpc17_epallocreq(FAR struct usbdev_ep_s *ep)
 {
   FAR struct lpc17_req_s *privreq;
 
-#ifdef CONFIG_DEBUG_FEATURES
+#ifdef CONFIG_DEBUG_USB
   if (!ep)
     {
       usbtrace(TRACE_DEVERROR(LPC17_TRACEERR_INVALIDPARMS), 0);
       return NULL;
     }
 #endif
+
   usbtrace(TRACE_EPALLOCREQ, ((FAR struct lpc17_ep_s *)ep)->epphy);
 
   privreq = (FAR struct lpc17_req_s *)kmm_malloc(sizeof(struct lpc17_req_s));
@@ -2685,13 +2687,14 @@ static void lpc17_epfreereq(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s 
 {
   FAR struct lpc17_req_s *privreq = (FAR struct lpc17_req_s *)req;
 
-#ifdef CONFIG_DEBUG_FEATURES
+#ifdef CONFIG_DEBUG_USB
   if (!ep || !req)
     {
       usbtrace(TRACE_DEVERROR(LPC17_TRACEERR_INVALIDPARMS), 0);
       return;
     }
 #endif
+
   usbtrace(TRACE_EPFREEREQ, ((FAR struct lpc17_ep_s *)ep)->epphy);
 
   kmm_free(privreq);
@@ -2793,7 +2796,7 @@ static int lpc17_epsubmit(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *r
   irqstate_t flags;
   int ret = OK;
 
-#ifdef CONFIG_DEBUG_FEATURES
+#ifdef CONFIG_DEBUG_USB
   if (!req || !req->callback || !req->buf || !ep)
     {
       usbtrace(TRACE_DEVERROR(LPC17_TRACEERR_INVALIDPARMS), 0);
@@ -2878,7 +2881,7 @@ static int lpc17_epcancel(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *r
   FAR struct lpc17_ep_s *privep = (FAR struct lpc17_ep_s *)ep;
   irqstate_t flags;
 
-#ifdef CONFIG_DEBUG_FEATURES
+#ifdef CONFIG_DEBUG_USB
   if (!ep || !req)
     {
       usbtrace(TRACE_DEVERROR(LPC17_TRACEERR_INVALIDPARMS), 0);
@@ -3142,7 +3145,7 @@ static int lpc17_selfpowered(struct usbdev_s *dev, bool selfpowered)
 
   usbtrace(TRACE_DEVSELFPOWERED, (uint16_t)selfpowered);
 
-#ifdef CONFIG_DEBUG_FEATURES
+#ifdef CONFIG_DEBUG_USB
   if (!dev)
     {
       usbtrace(TRACE_DEVERROR(LPC17_TRACEERR_INVALIDPARMS), 0);
@@ -3406,7 +3409,7 @@ int usbdev_register(struct usbdevclass_driver_s *driver)
 
   usbtrace(TRACE_DEVREGISTER, 0);
 
-#ifdef CONFIG_DEBUG_FEATURES
+#ifdef CONFIG_DEBUG_USB
   if (!driver || !driver->ops->bind || !driver->ops->unbind ||
       !driver->ops->disconnect || !driver->ops->setup)
     {
@@ -3456,7 +3459,7 @@ int usbdev_unregister(struct usbdevclass_driver_s *driver)
 {
   usbtrace(TRACE_DEVUNREGISTER, 0);
 
-#ifdef CONFIG_DEBUG_FEATURES
+#ifdef CONFIG_DEBUG_USB
   if (driver != g_usbdev.driver)
     {
       usbtrace(TRACE_DEVERROR(LPC17_TRACEERR_INVALIDPARMS), 0);

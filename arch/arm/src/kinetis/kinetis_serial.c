@@ -251,7 +251,7 @@ static void up_shutdown(struct uart_dev_s *dev);
 static int  up_attach(struct uart_dev_s *dev);
 static void up_detach(struct uart_dev_s *dev);
 #ifdef CONFIG_DEBUG_FEATURES
-static int  up_interrupte(int irq, void *context);
+static int  up_interrupt(int irq, void *context);
 #endif
 static int  up_interrupts(int irq, void *context);
 static int  up_ioctl(struct file *filep, int cmd, unsigned long arg);
@@ -684,7 +684,7 @@ static int up_attach(struct uart_dev_s *dev)
 #ifdef CONFIG_DEBUG_FEATURES
   if (ret == OK)
     {
-      ret = irq_attach(priv->irqe, up_interrupte);
+      ret = irq_attach(priv->irqe, up_interrupt);
     }
 #endif
 
@@ -730,7 +730,7 @@ static void up_detach(struct uart_dev_s *dev)
 }
 
 /****************************************************************************
- * Name: up_interrupte
+ * Name: up_interrupt
  *
  * Description:
  *   This is the UART error interrupt handler.  It will be invoked when an
@@ -739,7 +739,7 @@ static void up_detach(struct uart_dev_s *dev)
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_FEATURES
-static int up_interrupte(int irq, void *context)
+static int up_interrupt(int irq, void *context)
 {
   struct uart_dev_s *dev = NULL;
   struct up_dev_s   *priv;
@@ -790,6 +790,7 @@ static int up_interrupte(int irq, void *context)
     {
       PANIC();
     }
+
   priv = (struct up_dev_s *)dev->priv;
   DEBUGASSERT(priv);
 
@@ -805,7 +806,11 @@ static int up_interrupte(int irq, void *context)
 
   regval = up_serialin(priv, KINETIS_UART_S1_OFFSET);
   llerr("S1: %02x\n", regval);
+  UNUSED(regval);
+
   regval = up_serialin(priv, KINETIS_UART_D_OFFSET);
+  UNUSED(regval);
+
   return OK;
 }
 #endif /* CONFIG_DEBUG_FEATURES */

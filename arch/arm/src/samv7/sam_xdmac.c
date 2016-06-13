@@ -1340,7 +1340,7 @@ static inline int sam_single(struct sam_xdmach_s *xdmach)
 static inline int sam_multiple(struct sam_xdmach_s *xdmach)
 {
   struct sam_xdmac_s *xdmac = sam_controller(xdmach);
-#ifdef CONFIG_DEBUG_FEATURES
+#ifdef CONFIG_DEBUG_ASSERTIONS
   struct chnext_view1_s *llhead = xdmach->llhead;
 #endif
   uintptr_t paddr;

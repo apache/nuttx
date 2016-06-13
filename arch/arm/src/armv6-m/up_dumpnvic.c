@@ -39,6 +39,15 @@
 
 #include <nuttx/config.h>
 
+/* Output debug info even if debug output is not selected. */
+
+#undef  CONFIG_DEBUG_ERROR
+#undef  CONFIG_DEBUG_WARN
+#undef  CONFIG_DEBUG_INFO
+#define CONFIG_DEBUG_ERROR 1
+#define CONFIG_DEBUG_WARN 1
+#define CONFIG_DEBUG_INFO 1
+
 #include <sys/types.h>
 #include <debug.h>
 
@@ -49,18 +58,6 @@
 #include "nvic.h"
 
 #ifdef CONFIG_DEBUG_FEATURES
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -83,27 +80,27 @@ void up_dumpnvic(FAR const char *msg)
 
   flags = enter_critical_section();
 
-  llerr("NVIC: %s\n", msg);
-  llerr("   ISER: %08x  ICER: %08x  ISPR: %08x  ICPR: %08x\n",
-        getreg32(ARMV6M_NVIC_ISER), getreg32(ARMV6M_NVIC_ICER),
-        getreg32(ARMV6M_NVIC_ISPR), getreg32(ARMV6M_NVIC_ICPR));
+  llinfo("NVIC: %s\n", msg);
+  llinfo("   ISER: %08x  ICER: %08x  ISPR: %08x  ICPR: %08x\n",
+         getreg32(ARMV6M_NVIC_ISER), getreg32(ARMV6M_NVIC_ICER),
+         getreg32(ARMV6M_NVIC_ISPR), getreg32(ARMV6M_NVIC_ICPR));
 
   for (i = 0 ; i < 8; i += 4)
     {
-      llerr("   IPR%d: %08x  IPR%d: %08x  IPR%d: %08x  IPR%d: %08x\n",
-            i,   getreg32(ARMV6M_NVIC_IPR(i)),
-            i+1, getreg32(ARMV6M_NVIC_IPR(i+1)),
-            i+2, getreg32(ARMV6M_NVIC_IPR(i+2)),
-            i+3, getreg32(ARMV6M_NVIC_IPR(i+3)));
+      llinfo("   IPR%d: %08x  IPR%d: %08x  IPR%d: %08x  IPR%d: %08x\n",
+             i,   getreg32(ARMV6M_NVIC_IPR(i)),
+             i+1, getreg32(ARMV6M_NVIC_IPR(i+1)),
+             i+2, getreg32(ARMV6M_NVIC_IPR(i+2)),
+             i+3, getreg32(ARMV6M_NVIC_IPR(i+3)));
     }
 
-  llerr("SYSCON:\n");
-  llerr("  CPUID: %08x  ICSR: %08x AIRCR: %08x   SCR: %08x\n",
-        getreg32(ARMV6M_SYSCON_CPUID), getreg32(ARMV6M_SYSCON_ICSR),
-        getreg32(ARMV6M_SYSCON_AIRCR), getreg32(ARMV6M_SYSCON_SCR));
-  llerr("    CCR: %08x SHPR2: %08x SHPR3: %08x\n",
-        getreg32(ARMV6M_SYSCON_CCR),   getreg32(ARMV6M_SYSCON_SHPR2),
-        getreg32(ARMV6M_SYSCON_SHPR3));
+  llinfo("SYSCON:\n");
+  llinfo("  CPUID: %08x  ICSR: %08x AIRCR: %08x   SCR: %08x\n",
+         getreg32(ARMV6M_SYSCON_CPUID), getreg32(ARMV6M_SYSCON_ICSR),
+         getreg32(ARMV6M_SYSCON_AIRCR), getreg32(ARMV6M_SYSCON_SCR));
+  llinfo("    CCR: %08x SHPR2: %08x SHPR3: %08x\n",
+         getreg32(ARMV6M_SYSCON_CCR),   getreg32(ARMV6M_SYSCON_SHPR2),
+         getreg32(ARMV6M_SYSCON_SHPR3));
 
   leave_critical_section(flags);
 }
