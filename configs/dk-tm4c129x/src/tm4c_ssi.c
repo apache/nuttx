@@ -59,27 +59,19 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-/* CONFIG_DEBUG_SPI enables debug output from this file (needs CONFIG_DEBUG_FEATURES too) */
+/* Enables debug output from this file */
 
 #ifdef CONFIG_DEBUG_SPI
-#  define ssierr llerr
-#else
-#  define ssierr(x...)
-#endif
-
-/* Dump GPIO registers */
-
-#if defined(CONFIG_DEBUG_SPI) && defined(CONFIG_DEBUG_INFO)
-#  define ssiinfo llerr
+#  define ssierr  llerr
+#  define ssiwarn llwarn
+#  define ssiinfo llinfo
 #  define ssi_dumpgpio(m) tiva_dumpgpio(SDCCS_GPIO, m)
 #else
+#  define ssierr(x...)
+#  define ssiwarn(x...)
 #  define ssiinfo(x...)
 #  define ssi_dumpgpio(m)
 #endif
-
-/************************************************************************************
- * Private Functions
- ************************************************************************************/
 
 /************************************************************************************
  * Public Functions
@@ -118,14 +110,14 @@ void weak_function tm4c_ssidev_initialize(void)
 
 void tiva_ssiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
-  ssierr("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  ssiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
   ssi_dumpgpio("tiva_ssiselect() Entry");
   ssi_dumpgpio("tiva_ssiselect() Exit");
 }
 
 uint8_t tiva_ssistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 {
-  ssierr("Returning SPI_STATUS_PRESENT\n");
+  ssiinfo("Returning SPI_STATUS_PRESENT\n");
   return SPI_STATUS_PRESENT;
 }
 

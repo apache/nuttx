@@ -100,7 +100,7 @@ static uint8_t g_nest;
 #ifdef CONFIG_ARCH_LEDS
 void board_autoled_initialize(void)
 {
-  lederr("Initializing\n");
+  ledinfo("Initializing\n");
 
   /* Configure Port E, Bit 1 as an output, initial value=OFF */
 

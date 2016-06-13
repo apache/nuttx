@@ -250,7 +250,8 @@ static void lcd_write_prepare(unsigned int x1, unsigned int x2, unsigned int y1,
     { CMD,  0x5c },                  /* enter write display ram mode */
     { END,  0x00 }
   };
-  err("x1:%d, x2:%d, y1:%d, y2:%d\n",x1, x2,y1, y2);
+
+  info("x1:%d, x2:%d, y1:%d, y2:%d\n",x1, x2,y1, y2);
   fb_ssd1783_send_cmdlist(prepare_disp_write_cmds);
 }
 

@@ -115,7 +115,7 @@ void weak_function lm_ssidev_initialize(void)
 
 void tiva_ssiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
-  ssierr("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  ssiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
   if (devid == SPIDEV_MMCSD)
     {
       /* Assert the CS pin to the card */
@@ -128,7 +128,7 @@ void tiva_ssiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool select
 
 uint8_t tiva_ssistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 {
-  ssierr("Returning SPI_STATUS_PRESENT\n");
+  ssiinfo("Returning SPI_STATUS_PRESENT\n");
   return SPI_STATUS_PRESENT;
 }
 

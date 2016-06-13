@@ -412,7 +412,7 @@ int up_fillpage(FAR struct tcb_s *tcb, FAR void *vpage)
   off_t   offset;
 #endif
 
-  pgllerr("TCB: %p vpage: %p far: %08x\n", tcb, vpage, tcb->xcp.far);
+  pgllinfo("TCB: %p vpage: %p far: %08x\n", tcb, vpage, tcb->xcp.far);
   DEBUGASSERT(tcb->xcp.far >= PG_PAGED_VBASE && tcb->xcp.far < PG_PAGED_VEND);
 
   /* If BINPATH is defined, then it is the full path to a file on a mounted file
@@ -475,7 +475,7 @@ int up_fillpage(FAR struct tcb_s *tcb, FAR void *vpage)
 
 int up_fillpage(FAR struct tcb_s *tcb, FAR void *vpage, up_pgcallback_t pg_callback)
 {
-  pgllerr("TCB: %p vpage: %d far: %08x\n", tcb, vpage, tcb->xcp.far);
+  pgllinfo("TCB: %p vpage: %d far: %08x\n", tcb, vpage, tcb->xcp.far);
   DEBUGASSERT(tcb->xcp.far >= PG_PAGED_VBASE && tcb->xcp.far < PG_PAGED_VEND);
 
 #if defined(CONFIG_PAGING_BINPATH)

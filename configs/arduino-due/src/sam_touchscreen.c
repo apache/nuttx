@@ -359,7 +359,7 @@ int board_tsc_setup(int minor)
   static bool initialized = false;
   int ret;
 
-  ierr("minor %d\n", minor);
+  iinfo("minor %d\n", minor);
   DEBUGASSERT(minor == 0);
 
   /* Have we already initialized?  Since we never uninitialize we must prevent
@@ -383,7 +383,7 @@ int board_tsc_setup(int minor)
       dev = sam_tsc_spiinitialize();
       if (!dev)
         {
-          ierr("Failed to initialize bit bang SPI\n");
+          ierr("ERROR: Failed to initialize bit bang SPI\n");
           return -ENODEV;
         }
 
@@ -392,7 +392,7 @@ int board_tsc_setup(int minor)
       ret = ads7843e_register(dev, &g_tscinfo, CONFIG_ADS7843E_DEVMINOR);
       if (ret < 0)
         {
-          ierr("Failed to register touchscreen device\n");
+          ierr("ERROR: Failed to register touchscreen device\n");
           /* up_spiuninitialize(dev); */
           return -ENODEV;
         }
