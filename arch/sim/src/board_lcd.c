@@ -101,24 +101,15 @@
 #endif
 
 /* Debug ********************************************************************/
-/* Define CONFIG_DEBUG_LCD to enable detailed LCD debug output. Verbose debug must
- * also be enabled.
- */
-
-#ifndef CONFIG_DEBUG_FEATURES
-#  undef CONFIG_DEBUG_INFO
-#  undef CONFIG_DEBUG_GRAPHICS
-#  undef CONFIG_DEBUG_LCD
-#endif
-
-#ifndef CONFIG_DEBUG_INFO
-#  undef CONFIG_DEBUG_LCD
-#endif
 
 #ifdef CONFIG_DEBUG_LCD
-# define lcderr(format, ...)  info(format, ##__VA_ARGS__)
+# define lcderr(format, ...)  err(format, ##__VA_ARGS__)
+# define lcdwarn(format, ...) warn(format, ##__VA_ARGS__)
+# define lcdinfo(format, ...) info(format, ##__VA_ARGS__)
 #else
 # define lcderr(x...)
+# define lcdwarn(x...)
+# define lcdinfo(x...)
 #endif
 
 /****************************************************************************

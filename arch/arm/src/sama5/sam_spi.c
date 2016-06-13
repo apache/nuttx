@@ -125,30 +125,19 @@
 #define DMA_TIMEOUT_TICKS MSEC2TICK(DMA_TIMEOUT_MS)
 
 /* Debug *******************************************************************/
-/* Check if SPI debut is enabled (non-standard.. no support in
- * include/debug.h
- */
-
-#ifndef CONFIG_DEBUG_FEATURES
-#  undef CONFIG_DEBUG_INFO
-#  undef CONFIG_DEBUG_SPI
-#  undef CONFIG_SAMA5_SPI_DMADEBUG
-#  undef CONFIG_SAMA5_SPI_REGDEBUG
-#endif
+/* Check if SPI debug is enabled */
 
 #ifndef CONFIG_DEBUG_DMA
 #  undef CONFIG_SAMA5_SPI_DMADEBUG
 #endif
 
 #ifdef CONFIG_DEBUG_SPI
-#  define spierr llerr
-#  ifdef CONFIG_DEBUG_INFO
-#    define spiinfo llerr
-#  else
-#    define spiinfo(x...)
-#  endif
+#  define spierr  llerr
+#  define spiwarn llwarn
+#  define spiinfo llinfo
 #else
 #  define spierr(x...)
+#  define spiwarn(x...)
 #  define spiinfo(x...)
 #endif
 

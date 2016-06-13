@@ -85,30 +85,19 @@
 #define IS_ALIGNED(n)     (((uint32_t)(n) & ALIGN_MASK) == 0)
 
 /* Debug *******************************************************************/
-/* Check if QSPI debug is enabled (non-standard.. no support in
- * include/debug.h
- */
-
-#ifndef CONFIG_DEBUG_FEATURES
-#  undef CONFIG_DEBUG_INFO
-#  undef CONFIG_DEBUG_SPI
-#  undef CONFIG_STM32L4_QSPI_DMADEBUG
-#  undef CONFIG_STM32L4_QSPI_REGDEBUG
-#endif
+/* Check if QSPI debug is enabled */
 
 #ifndef CONFIG_DEBUG_DMA
 #  undef CONFIG_STM32L4_QSPI_DMADEBUG
 #endif
 
 #ifdef CONFIG_DEBUG_SPI
-#  define qspierr llerr
-#  ifdef CONFIG_DEBUG_INFO
-#    define qspiinfo llerr
-#  else
-#    define qspiinfo(x...)
-#  endif
+#  define qspierr  llerr
+#  define qspiwarn llwarn
+#  define qspiinfo llinfo
 #else
 #  define qspierr(x...)
+#  define qspiwarn(x...)
 #  define qspiinfo(x...)
 #endif
 

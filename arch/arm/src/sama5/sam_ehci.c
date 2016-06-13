@@ -127,13 +127,6 @@
 #  undef CONFIG_SAMA5_UHPHS_RHPORT1
 #endif
 
-/* Simplify DEBUG checks */
-
-#ifndef CONFIG_DEBUG_FEATURES
-#  undef CONFIG_DEBUG_INFO
-#  undef CONFIG_DEBUG_USB
-#endif
-
 /* For now, suppress use of PORTA in any event.  I use that for SAM-BA and
  * would prefer that the board not try to drive VBUS on that port!
  */
@@ -4701,7 +4694,7 @@ FAR struct usbhost_connection_s *sam_ehci_initialize(int controller)
   FAR struct usbhost_hubport_s *hport;
   irqstate_t flags;
   uint32_t regval;
-#if defined(CONFIG_DEBUG_USB) && defined(CONFIG_DEBUG_INFO)
+#if defined(CONFIG_DEBUG_USB) && defined(CONFIG_DEBUG_ASSERTIONS)
   uint16_t regval16;
   unsigned int nports;
 #endif
@@ -4952,7 +4945,7 @@ FAR struct usbhost_connection_s *sam_ehci_initialize(int controller)
 
   sam_putreg(EHCI_INT_ALLINTS, &HCOR->usbsts);
 
-#if defined(CONFIG_DEBUG_USB) && defined(CONFIG_DEBUG_INFO)
+#if defined(CONFIG_DEBUG_USB) && defined(CONFIG_DEBUG_ASSERTIONS)
   /* Show the EHCI version */
 
   regval16 = sam_swap16(HCCR->hciversion);

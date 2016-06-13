@@ -795,7 +795,7 @@ int pipecommon_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
               count = dev->d_wrndx - dev->d_rdndx;
             }
 
-          *(FAR int *)arg = count;
+          *(FAR int *)((uintptr_t)arg) = count;
           ret = 0;
         }
         break;
@@ -815,7 +815,7 @@ int pipecommon_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
               count = ((CONFIG_DEV_PIPE_SIZE - dev->d_wrndx) + dev->d_rdndx) - 1;
             }
 
-          *(FAR int *)arg = count;
+          *(FAR int *)((uintptr_t)arg) = count;
           ret = 0;
         }
         break;

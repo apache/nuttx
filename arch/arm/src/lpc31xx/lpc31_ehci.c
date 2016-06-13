@@ -122,13 +122,6 @@
 #undef CONFIG_USBHOST_ISOC_DISABLE
 #define CONFIG_USBHOST_ISOC_DISABLE 1
 
-/* Simplify DEBUG checks */
-
-#ifndef CONFIG_DEBUG_FEATURES
-#  undef CONFIG_DEBUG_INFO
-#  undef CONFIG_DEBUG_USB
-#endif
-
 /* Registers *******************************************************************/
 /* Traditionally, NuttX specifies register locations using individual
  * register offsets from a base address.  That tradition is broken here and,
@@ -4887,7 +4880,7 @@ FAR struct usbhost_connection_s *lpc31_ehci_initialize(int controller)
 {
   FAR struct usbhost_hubport_s *hport;
   uint32_t regval;
-#if defined(CONFIG_DEBUG_USB) && defined(CONFIG_DEBUG_INFO)
+#if defined(CONFIG_DEBUG_USB) && defined(CONFIG_DEBUG_ASSERTIONS)
   uint16_t regval16;
   unsigned int nports;
 #endif
@@ -5140,7 +5133,7 @@ FAR struct usbhost_connection_s *lpc31_ehci_initialize(int controller)
 
   lpc31_putreg(EHCI_INT_ALLINTS, &HCOR->usbsts);
 
-#if defined(CONFIG_DEBUG_USB) && defined(CONFIG_DEBUG_INFO)
+#if defined(CONFIG_DEBUG_USB) && defined(CONFIG_DEBUG_ASSERTIONS)
   /* Show the EHCI version */
 
   regval16 = lpc31_swap16(HCCR->hciversion);

@@ -68,14 +68,11 @@
 
 #ifdef CONFIG_DEBUG_SPI
 #  define spierr  llerr
-#  ifdef CONFIG_DEBUG_INFO
-#    define spiinfo llerr
-#  else
-#    define spiinfo(x...)
-#  endif
+#  define spiwarn llwarn
+#  define spiinfo llinfo
 #else
-#  undef CONFIG_DEBUG_INFO
 #  define spierr(x...)
+#  define spiwarn(x...)
 #  define spiinfo(x...)
 #endif
 

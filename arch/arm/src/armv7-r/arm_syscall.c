@@ -44,10 +44,14 @@
  */
 
 #ifdef CONFIG_ARCH_STACKDUMP
-# undef  CONFIG_DEBUG_FEATURES
-# undef  CONFIG_DEBUG_INFO
-# define CONFIG_DEBUG_FEATURES 1
-# define CONFIG_DEBUG_INFO 1
+#  undef  CONFIG_DEBUG_FEATURES
+#  undef  CONFIG_DEBUG_ERROR
+#  undef  CONFIG_DEBUG_WARN
+#  undef  CONFIG_DEBUG_INFO
+#  define CONFIG_DEBUG_FEATURES 1
+#  define CONFIG_DEBUG_ERROR 1
+#  define CONFIG_DEBUG_WARN 1
+#  define CONFIG_DEBUG_INFO 1
 #endif
 
 #include <stdint.h>
@@ -66,6 +70,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Debug ********************************************************************/
 
 #if defined(CONFIG_DEBUG_SYSCALL)
@@ -75,7 +80,7 @@
 #endif
 
 /****************************************************************************
- * Private Data
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************

@@ -366,14 +366,7 @@
 #define DMA_TIMEOUT_TICKS MSEC2TICK(DMA_TIMEOUT_MS)
 
 /* Debug *******************************************************************/
-/* Check if SSC debug is enabled (non-standard.. no support in
- * include/debug.h
- */
-
-#ifndef CONFIG_DEBUG_FEATURES
-#  undef CONFIG_DEBUG_INFO
-#  undef CONFIG_DEBUG_I2S
-#endif
+/* Check if SSC debug is enabled */
 
 #ifndef CONFIG_DEBUG_I2S
 #  undef CONFIG_SAMV7_SSC_DMADEBUG
@@ -389,15 +382,15 @@
 #ifdef CONFIG_DEBUG_I2S
 #  define i2serr         err
 #  define i2sllerr       llerr
-#  ifdef CONFIG_DEBUG_INFO
-#    define i2sinfo      err
-#    define i2sllinfo    llerr
-#  else
-#    define i2sinfo(x...)
-#  endif
+#  define i2swarn        warn
+#  define i2sllwarn      llwarn
+#  define i2sinfo        info
+#  define i2sllinfo      llinfo
 #else
 #  define i2serr(x...)
 #  define i2sllerr(x...)
+#  define i2swarn(x...)
+#  define i2sllwarn(x...)
 #  define i2sinfo(x...)
 #  define i2sllinfo(x...)
 #endif

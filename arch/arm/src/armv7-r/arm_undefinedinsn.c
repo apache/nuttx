@@ -44,10 +44,14 @@
  */
 
 #ifdef CONFIG_ARCH_STACKDUMP
-# undef  CONFIG_DEBUG_FEATURES
-# undef  CONFIG_DEBUG_INFO
-# define CONFIG_DEBUG_FEATURES 1
-# define CONFIG_DEBUG_INFO 1
+#  undef  CONFIG_DEBUG_FEATURES
+#  undef  CONFIG_DEBUG_ERROR
+#  undef  CONFIG_DEBUG_WARN
+#  undef  CONFIG_DEBUG_INFO
+#  define CONFIG_DEBUG_FEATURES 1
+#  define CONFIG_DEBUG_ERROR 1
+#  define CONFIG_DEBUG_WARN 1
+#  define CONFIG_DEBUG_INFO 1
 #endif
 
 #include <stdint.h>
@@ -57,18 +61,6 @@
 #include <arch/irq.h>
 
 #include "up_internal.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
