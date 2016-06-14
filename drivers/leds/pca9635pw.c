@@ -53,14 +53,12 @@
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_LEDS
-#  define derr llerr
-#  ifdef CONFIG_DEBUG_INFO
-#    define dinfo llinfo
-#  else
-#    define dinfo(x...)
-#  endif
+#  define derr  llerr
+#  define dwarn llwarn
+#  define dinfo llinfo
 #else
 #  define derr(x...)
+#  define dwarn(x...)
 #  define dinfo(x...)
 #endif
 
@@ -121,8 +119,6 @@ static int pca9635pw_i2c_write_byte(FAR struct pca9635pw_dev_s *priv,
 {
   struct i2c_config_s config;
 
-  dinfo("pca9635pw_i2c_write_byte\n");
-
   /* assemble the 2 byte message comprised of reg_addr and reg_val */
 
   uint8_t const BUFFER_SIZE = 2;
@@ -141,7 +137,6 @@ static int pca9635pw_i2c_write_byte(FAR struct pca9635pw_dev_s *priv,
 
   dinfo("i2c addr: 0x%02X reg addr: 0x%02X value: 0x%02X\n", priv->i2c_addr,
         buffer[0], buffer[1]);
-
 
   ret = i2c_write(priv->i2c, &config, buffer, BUFFER_SIZE);
   if (ret != OK)
@@ -189,11 +184,8 @@ static int pca9635pw_set_led_mode(FAR struct pca9635pw_dev_s *priv,
 
 static int pca9635pw_open(FAR struct file *filep)
 {
-  dinfo("pca9635pw_open\n");
-
   FAR struct inode *inode = filep->f_inode;
   FAR struct pca9635pw_dev_s *priv = inode->i_private;
-
   int ret = -1;
 
   /* Wake up the PCA9635PW (sleep bit PCA9635PW_MODE_1_SLEEP is set to zero
@@ -261,11 +253,8 @@ static int pca9635pw_open(FAR struct file *filep)
 
 static int pca9635pw_close(FAR struct file *filep)
 {
-  dinfo("pca9635pw_close\n");
-
   FAR struct inode *inode = filep->f_inode;
   FAR struct pca9635pw_dev_s *priv = inode->i_private;
-
   int ret = -1;
 
   /* Turn all led drivers off */
@@ -301,11 +290,8 @@ static int pca9635pw_close(FAR struct file *filep)
 
 static int pca9635pw_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
-  dinfo("pca9635pw_ioctl\n");
-
   FAR struct inode *inode = filep->f_inode;
   FAR struct pca9635pw_dev_s *priv = inode->i_private;
-
   int ret = OK;
 
   dinfo("cmd: %d arg: %ld\n", cmd, arg);
