@@ -221,7 +221,7 @@ static bool spi_checkreg(FAR struct z16f_spi_s *priv, bool wr, uint16_t regval,
         {
           /* Yes... show how many times we did it */
 
-          llerr("...[Repeats %d times]...\n", priv->ntimes);
+          syslog(LOG_INFO, "...[Repeats %d times]...\n", priv->ntimes);
         }
 
       /* Save information about the new access */
@@ -253,7 +253,7 @@ static uint8_t spi_getreg8(FAR struct z16f_spi_s *priv, uintptr_t regaddr)
 
   if (spi_checkreg(priv, false, (uint16_t)regval, regaddr))
     {
-      llerr("%06x->%02x\n", regaddr, regval);
+      syslog(LOG_INFO, "%06x->%02x\n", regaddr, regval);
     }
 
   return regval;
@@ -274,7 +274,7 @@ static void spi_putreg8(FAR struct z16f_spi_s *priv, uint8_t regval,
 {
   if (spi_checkreg(priv, true, (uint16_t)regval, regaddr))
     {
-      llerr("%06x<-%02x\n", regaddr, regval);
+      syslog(LOG_INFO, "%06x<-%02x\n", regaddr, regval);
     }
 
   putreg8(regval, regaddr);
@@ -295,7 +295,7 @@ static void spi_putreg16(FAR struct z16f_spi_s *priv, uint16_t regval,
 {
   if (spi_checkreg(priv, true, regval, regaddr))
     {
-      llerr("%06x<-%04x\n", regaddr, regval);
+      syslog(LOG_INFO, "%06x<-%04x\n", regaddr, regval);
     }
 
   putreg8(regval, regaddr);
@@ -466,7 +466,7 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
   priv->frequency = frequency;
   priv->actual    = actual;
 
-  spierr("Frequency %d->%d\n", frequency, actual);
+  spiinfo("Frequency %d->%d\n", frequency, actual);
   return actual;
 }
 

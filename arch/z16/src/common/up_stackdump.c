@@ -78,9 +78,9 @@ static void up_stackdump(void)
   chipreg_t stack_base = (chipreg_t)rtcb->adj_stack_ptr;
   chipreg_t stack_size = (chipreg_t)rtcb->adj_stack_size;
 
-  llerr("stack_base: %08x\n", stack_base);
-  llerr("stack_size: %08x\n", stack_size);
-  llerr("sp:         %08x\n", sp);
+  llinfo("stack_base: %08x\n", stack_base);
+  llinfo("stack_size: %08x\n", stack_size);
+  llinfo("sp:         %08x\n", sp);
 
   if (sp >= stack_base || sp < stack_base - stack_size)
     {
@@ -94,7 +94,7 @@ static void up_stackdump(void)
       for (stack = sp & ~0x0f; stack < stack_base; stack += 8*sizeof(chipreg_t))
         {
           chipreg_t *ptr = (chipreg_t*)stack;
-          llerr("%08x: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+          llinfo("%08x: %08x %08x %08x %08x %08x %08x %08x %08x\n",
                  stack, ptr[0], ptr[1], ptr[2], ptr[3],
                  ptr[4], ptr[5], ptr[6], ptr[7]);
         }

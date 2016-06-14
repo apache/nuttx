@@ -78,8 +78,8 @@ static void _up_dumponexit(FAR struct tcb_s *tcb, FAR void *arg)
   int i;
 #endif
 
-  llerr("  TCB=%p name=%s\n", tcb, tcb->argv[0]);
-  llerr("    priority=%d state=%d\n", tcb->sched_priority, tcb->task_state);
+  sllinfo("  TCB=%p name=%s\n", tcb, tcb->argv[0]);
+  sllinfo("    priority=%d state=%d\n", tcb->sched_priority, tcb->task_state);
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
   filelist = tcb->group->tg_filelist;
@@ -88,8 +88,8 @@ static void _up_dumponexit(FAR struct tcb_s *tcb, FAR void *arg)
       struct inode *inode = filelist->fl_files[i].f_inode;
       if (inode)
         {
-          llerr("      fd=%d refcount=%d\n",
-                i, inode->i_crefs);
+          sllinfo("      fd=%d refcount=%d\n",
+                  i, inode->i_crefs);
         }
     }
 #endif
@@ -102,11 +102,11 @@ static void _up_dumponexit(FAR struct tcb_s *tcb, FAR void *arg)
       if (filep->fs_fd >= 0)
         {
 #if CONFIG_STDIO_BUFFER_SIZE > 0
-          llerr("      fd=%d nbytes=%d\n",
-                filep->fs_fd,
-                filep->fs_bufpos - filep->fs_bufstart);
+          sllinfo("      fd=%d nbytes=%d\n",
+                  filep->fs_fd,
+                  filep->fs_bufpos - filep->fs_bufstart);
 #else
-          llerr("      fd=%d\n", filep->fs_fd);
+          sllinfo("      fd=%d\n", filep->fs_fd);
 #endif
         }
     }
@@ -139,10 +139,10 @@ void _exit(int status)
 
   (void)up_irq_save();
 
-  sllerr("TCB=%p exiting\n", tcb);
+  sllinfo("TCB=%p exiting\n", tcb);
 
 #if defined(CONFIG_DUMP_ON_EXIT) && defined(CONFIG_DEBUG_FEATURES)
-  llerr("Other tasks:\n");
+  sllinfo("Other tasks:\n");
   sched_foreach(_up_dumponexit, NULL);
 #endif
 
@@ -155,7 +155,7 @@ void _exit(int status)
    */
 
   tcb = this_task();
-  sllerr("New Active Task TCB=%p\n", tcb);
+  sllinfo("New Active Task TCB=%p\n", tcb);
 
   /* Then switch contexts */
 
