@@ -81,9 +81,9 @@ static void up_stackdump(uint32_t sp, uint32_t stack_base)
   for (stack = sp & ~0x1f; stack < stack_base; stack += 32)
     {
       uint32_t *ptr = (uint32_t*)stack;
-      llerr("%08x: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-             stack, ptr[0], ptr[1], ptr[2], ptr[3],
-             ptr[4], ptr[5], ptr[6], ptr[7]);
+      alert("%08x: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+            stack, ptr[0], ptr[1], ptr[2], ptr[3],
+            ptr[4], ptr[5], ptr[6], ptr[7]);
     }
 }
 #else
@@ -152,10 +152,10 @@ static void up_dumpstate(void)
 
   /* Show interrupt stack info */
 
-  llerr("sp:     %08x\n", sp);
-  llerr("IRQ stack:\n");
-  llerr("  base: %08x\n", istackbase);
-  llerr("  size: %08x\n", istacksize);
+  alert("sp:     %08x\n", sp);
+  alert("IRQ stack:\n");
+  alert("  base: %08x\n", istackbase);
+  alert("  size: %08x\n", istacksize);
 
   /* Does the current stack pointer lie within the interrupt
    * stack?
@@ -172,18 +172,18 @@ static void up_dumpstate(void)
        */
 
       sp = g_intstackbase;
-      llerr("sp:     %08x\n", sp);
+      alert("sp:     %08x\n", sp);
     }
 
   /* Show user stack info */
 
-  llerr("User stack:\n");
-  llerr("  base: %08x\n", ustackbase);
-  llerr("  size: %08x\n", ustacksize);
+  alert("User stack:\n");
+  alert("  base: %08x\n", ustackbase);
+  alert("  size: %08x\n", ustacksize);
 #else
-  llerr("sp:         %08x\n", sp);
-  llerr("stack base: %08x\n", ustackbase);
-  llerr("stack size: %08x\n", ustacksize);
+  alert("sp:         %08x\n", sp);
+  alert("stack base: %08x\n", ustackbase);
+  alert("stack size: %08x\n", ustacksize);
 #endif
 
   /* Dump the user stack if the stack pointer lies within the allocated user
@@ -193,7 +193,7 @@ static void up_dumpstate(void)
   if (sp > ustackbase || sp <= ustackbase - ustacksize)
     {
 #if !defined(CONFIG_ARCH_INTERRUPTSTACK) || CONFIG_ARCH_INTERRUPTSTACK < 4
-      llerr("ERROR: Stack pointer is not within allocated stack\n");
+      alert("ERROR: Stack pointer is not within allocated stack\n");
 #endif
     }
   else
@@ -263,10 +263,10 @@ void up_assert(const uint8_t *filename, int lineno)
   board_autoled_on(LED_ASSERTION);
 
 #if CONFIG_TASK_NAME_SIZE > 0
-  llerr("Assertion failed at file:%s line: %d task: %s\n",
+  alert("Assertion failed at file:%s line: %d task: %s\n",
         filename, lineno, rtcb->name);
 #else
-  llerr("Assertion failed at file:%s line: %d\n",
+  alert("Assertion failed at file:%s line: %d\n",
         filename, lineno);
 #endif
 
