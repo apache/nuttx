@@ -56,4 +56,12 @@ config PCA9635PW
 		Enable support for the NXP PCA9635PW LED driver which can be
 		utilized to drive up to 16 LED's.
 
+config NCP5623C
+	bool "NCP5623C I2C LED Driver"
+	default n
+	select I2C
+	---help---
+		Enable support for the onsemi NCP5623C LED driver which can be
+		utilized to drive up to 3 LED's.
+
 endmenu # LED Support
