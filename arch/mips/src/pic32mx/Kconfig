@@ -1034,7 +1034,7 @@ config PIC32MX_SPI_ENHBUF
 
 config PIC32MX_SPI_REGDEBUG
 	bool "SPI Register level debug"
-	depends on DEBUG_FEATURES
+	depends on DEBUG_INFO
 	default n
 	---help---
 		Output detailed register-level SPI device debug information.

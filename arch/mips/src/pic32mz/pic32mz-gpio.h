@@ -253,7 +253,7 @@ void pic32mz_gpioirqdisable(pinset_t pinset);
  *
  ************************************************************************************/
 
-#ifdef CONFIG_DEBUG_GPIO
+#if defined(CONFIG_DEBUG_INFO) && defined(CONFIG_DEBUG_GPIO)
 void pic32mz_dumpgpio(uint32_t pinset, const char *msg);
 #else
 #  define pic32mz_dumpgpio(p,m)

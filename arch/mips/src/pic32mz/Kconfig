@@ -332,7 +332,7 @@ config PIC32MZ_SPI_ENHBUF
 
 config PIC32MZ_SPI_REGDEBUG
 	bool "SPI Register level debug"
-	depends on DEBUG_FEATURES
+	depends on DEBUG_INFO
 	default n
 	---help---
 		Output detailed register-level SPI device debug information.
@@ -400,7 +400,7 @@ config NET_WOL
 config NET_REGDEBUG
 	bool "Register level debug"
 	default n
-	depends on PIC32MZ_ETHERNET && DEBUG_FEATURES
+	depends on PIC32MZ_ETHERNET && DEBUG_NET_INFO
 	---help---
 		Enabled low level register debug.  Also needs CONFIG_DEBUG_FEATURES.
 

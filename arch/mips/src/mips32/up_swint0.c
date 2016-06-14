@@ -66,17 +66,13 @@
 
 #ifdef CONFIG_DEBUG_SYSCALL
 # define swierr(format, ...) llerr(format, ##__VA_ARGS__)
+# define swiwarn(format, ...) llwarn(format, ##__VA_ARGS__)
+# define swiinfo(format, ...) llinfo(format, ##__VA_ARGS__)
 #else
 # define swierr(x...)
+# define swiwarn(x...)
+# define swiinfo(x...)
 #endif
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
@@ -89,25 +85,25 @@
 #ifdef CONFIG_DEBUG_SYSCALL
 static void up_registerdump(const uint32_t *regs)
 {
-  swierr("MFLO:%08x MFHI:%08x EPC:%08x STATUS:%08x\n",
-         regs[REG_MFLO], regs[REG_MFHI], regs[REG_EPC], regs[REG_STATUS]);
-  swierr("AT:%08x V0:%08x V1:%08x A0:%08x A1:%08x A2:%08x A3:%08x\n",
-         regs[REG_AT], regs[REG_V0], regs[REG_V1], regs[REG_A0],
-         regs[REG_A1], regs[REG_A2], regs[REG_A3]);
-  swierr("T0:%08x T1:%08x T2:%08x T3:%08x T4:%08x T5:%08x T6:%08x T7:%08x\n",
-         regs[REG_T0], regs[REG_T1], regs[REG_T2], regs[REG_T3],
-         regs[REG_T4], regs[REG_T5], regs[REG_T6], regs[REG_T7]);
-  swierr("S0:%08x S1:%08x S2:%08x S3:%08x S4:%08x S5:%08x S6:%08x S7:%08x\n",
-         regs[REG_S0], regs[REG_S1], regs[REG_S2], regs[REG_S3],
-         regs[REG_S4], regs[REG_S5], regs[REG_S6], regs[REG_S7]);
+  swiinfo("MFLO:%08x MFHI:%08x EPC:%08x STATUS:%08x\n",
+          regs[REG_MFLO], regs[REG_MFHI], regs[REG_EPC], regs[REG_STATUS]);
+  swiinfo("AT:%08x V0:%08x V1:%08x A0:%08x A1:%08x A2:%08x A3:%08x\n",
+          regs[REG_AT], regs[REG_V0], regs[REG_V1], regs[REG_A0],
+          regs[REG_A1], regs[REG_A2], regs[REG_A3]);
+  swiinfo("T0:%08x T1:%08x T2:%08x T3:%08x T4:%08x T5:%08x T6:%08x T7:%08x\n",
+          regs[REG_T0], regs[REG_T1], regs[REG_T2], regs[REG_T3],
+          regs[REG_T4], regs[REG_T5], regs[REG_T6], regs[REG_T7]);
+  swiinfo("S0:%08x S1:%08x S2:%08x S3:%08x S4:%08x S5:%08x S6:%08x S7:%08x\n",
+          regs[REG_S0], regs[REG_S1], regs[REG_S2], regs[REG_S3],
+          regs[REG_S4], regs[REG_S5], regs[REG_S6], regs[REG_S7]);
 #ifdef MIPS32_SAVE_GP
-  swierr("T8:%08x T9:%08x GP:%08x SP:%08x FP:%08x RA:%08x\n",
-         regs[REG_T8], regs[REG_T9], regs[REG_GP], regs[REG_SP],
-         regs[REG_FP], regs[REG_RA]);
+  swiinfo("T8:%08x T9:%08x GP:%08x SP:%08x FP:%08x RA:%08x\n",
+          regs[REG_T8], regs[REG_T9], regs[REG_GP], regs[REG_SP],
+          regs[REG_FP], regs[REG_RA]);
 #else
-  swierr("T8:%08x T9:%08x SP:%08x FP:%08x RA:%08x\n",
-         regs[REG_T8], regs[REG_T9], regs[REG_SP], regs[REG_FP],
-         regs[REG_RA]);
+  swiinfo("T8:%08x T9:%08x SP:%08x FP:%08x RA:%08x\n",
+          regs[REG_T8], regs[REG_T9], regs[REG_SP], regs[REG_FP],
+          regs[REG_RA]);
 #endif
 }
 #else
@@ -168,7 +164,7 @@ int up_swint0(int irq, FAR void *context)
    */
 
 #ifdef CONFIG_DEBUG_SYSCALL
-  swierr("Entry: regs: %p cmd: %d\n", regs, regs[REG_R4]);
+  swiinfo("Entry: regs: %p cmd: %d\n", regs, regs[REG_R4]);
   up_registerdump(regs);
 #endif
 
@@ -300,12 +296,12 @@ int up_swint0(int irq, FAR void *context)
 #ifdef CONFIG_DEBUG_SYSCALL
   if (regs != g_current_regs)
     {
-      swierr("SWInt Return: Context switch!\n");
+      swiinfo("SWInt Return: Context switch!\n");
       up_registerdump((const uint32_t *)g_current_regs);
     }
   else
     {
-      swierr("SWInt Return: %d\n", regs[REG_V0]);
+      swiinfo("SWInt Return: %d\n", regs[REG_V0]);
     }
 #endif
 

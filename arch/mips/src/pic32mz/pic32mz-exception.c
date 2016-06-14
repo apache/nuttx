@@ -56,22 +56,6 @@
 #include "chip/pic32mz-int.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -106,88 +90,88 @@ uint32_t *pic32mz_exception(uint32_t *regs)
   switch (cause & CP0_CAUSE_EXCCODE_MASK)
     {
     case CP0_CAUSE_EXCCODE_INT:      /* Interrupt */
-      llinfo("EXCEPTION: Interrupt"
-             " CAUSE: %08x EPC: %08x\n", cause, epc);
+      alert("EXCEPTION: Interrupt"
+            " CAUSE: %08x EPC: %08x\n", cause, epc);
       break;
     case CP0_CAUSE_EXCCODE_TLBL:     /* TLB exception (load or instruction fetch) */
-      llinfo("EXCEPTION: TLB exception (load or instruction fetch)"
-             " CAUSE: %08x EPC:%08x\n", cause, epc);
+      alert("EXCEPTION: TLB exception (load or instruction fetch)"
+            " CAUSE: %08x EPC:%08x\n", cause, epc);
       break;
     case CP0_CAUSE_EXCCODE_TLBS:     /* TLB exception (store) */
-      llinfo("EXCEPTION: TLB exception (store)"
-             " CAUSE: %08x EPC: %08x\n", cause, epc);
+      alert("EXCEPTION: TLB exception (store)"
+            " CAUSE: %08x EPC: %08x\n", cause, epc);
       break;
     case CP0_CAUSE_EXCCODE_ADEL:     /* Address error exception (load or instruction fetch) */
-      llinfo("EXCEPTION: Address error exception (load or instruction fetch)"
-             " CAUSE: %08x EPC: %08x\n", cause, epc);
+      alert("EXCEPTION: Address error exception (load or instruction fetch)"
+            " CAUSE: %08x EPC: %08x\n", cause, epc);
       break;
     case CP0_CAUSE_EXCCODE_ADES:     /* Address error exception (store) */
-      llinfo("EXCEPTION: Address error exception (store)"
-             " CAUSE: %08x EPC: %08x\n", cause, epc);
+      alert("EXCEPTION: Address error exception (store)"
+            " CAUSE: %08x EPC: %08x\n", cause, epc);
       break;
     case CP0_CAUSE_EXCCODE_IBE:      /* Bus error exception (instruction fetch) */
-      llinfo("EXCEPTION: Bus error exception (instruction fetch)"
-             " CAUSE: %08x EPC: %08x\n", cause, epc);
+      alert("EXCEPTION: Bus error exception (instruction fetch)"
+            " CAUSE: %08x EPC: %08x\n", cause, epc);
       break;
     case CP0_CAUSE_EXCCODE_DBE:      /* Bus error exception (data reference: load or store) */
-      llinfo("EXCEPTION: Bus error exception (data reference: load or store)"
-             " CAUSE: %08x EPC: %08x\n", cause, epc);
+      alert("EXCEPTION: Bus error exception (data reference: load or store)"
+            " CAUSE: %08x EPC: %08x\n", cause, epc);
       break;
     case CP0_CAUSE_EXCCODE_SYS:      /* Syscall exception */
-      llinfo("EXCEPTION: Syscall exception"
-             " CAUSE: %08x EPC: %08x\n", cause, epc);
+      alert("EXCEPTION: Syscall exception"
+            " CAUSE: %08x EPC: %08x\n", cause, epc);
       break;
     case CP0_CAUSE_EXCCODE_BP:       /* Breakpoint exception */
-      llinfo("EXCEPTION: Breakpoint exception"
-             " CAUSE: %08x EPC: %08x\n", cause, epc);
+      alert("EXCEPTION: Breakpoint exception"
+            " CAUSE: %08x EPC: %08x\n", cause, epc);
       break;
     case CP0_CAUSE_EXCCODE_RI:       /* Reserved instruction exception */
-      llinfo("EXCEPTION: Reserved instruction exception"
-             " CAUSE: %08x EPC: %08x\n", cause, epc);
+      alert("EXCEPTION: Reserved instruction exception"
+            " CAUSE: %08x EPC: %08x\n", cause, epc);
       break;
     case CP0_CAUSE_EXCCODE_CPU:      /* Coprocessor Unusable exception */
-      llinfo("EXCEPTION: Coprocessor Unusable exception"
-             " CAUSE: %08x EPC: %08x\n", cause, epc);
+      alert("EXCEPTION: Coprocessor Unusable exception"
+            " CAUSE: %08x EPC: %08x\n", cause, epc);
       break;
     case CP0_CAUSE_EXCCODE_OV:       /* Arithmetic Overflow exception */
-      llinfo("EXCEPTION: Arithmetic Overflow exception"
-             " CAUSE: %08x EPC: %08x\n", cause, epc);
+      alert("EXCEPTION: Arithmetic Overflow exception"
+            " CAUSE: %08x EPC: %08x\n", cause, epc);
       break;
     case CP0_CAUSE_EXCCODE_TR:       /* Trap exception */
-      llinfo("EXCEPTION: Trap exception"
-             " CAUSE: %08x EPC: %08x\n", cause, epc);
+      alert("EXCEPTION: Trap exception"
+            " CAUSE: %08x EPC: %08x\n", cause, epc);
       break;
     case CP0_CAUSE_EXCCODE_FPE:      /* Floating point exception */
-      llinfo("EXCEPTION: Floating point exception"
-             " CAUSE: %08x EPC: %08x\n", cause, epc);
+      alert("EXCEPTION: Floating point exception"
+            " CAUSE: %08x EPC: %08x\n", cause, epc);
       break;
     case CP0_CAUSE_EXCCODE_C2E:      /* Precise Coprocessor 2 exceptions */
-      llinfo("EXCEPTION: Precise Coprocessor 2 exceptions"
-             " CAUSE: %08x EPC: %08x\n", cause, epc);
+      alert("EXCEPTION: Precise Coprocessor 2 exceptions"
+            " CAUSE: %08x EPC: %08x\n", cause, epc);
       break;
     case CP0_CAUSE_EXCCODE_MDMX:     /* MDMX Unusable (MIPS64) */
-      llinfo("EXCEPTION: MDMX Unusable (MIPS64)"
-             " CAUSE: %08x EPC: %08x\n", cause, epc);
+      alert("EXCEPTION: MDMX Unusable (MIPS64)"
+            " CAUSE: %08x EPC: %08x\n", cause, epc);
       break;
     case CP0_CAUSE_EXCCODE_WATCH:    /* WatchHi/WatchLo address */
-      llinfo("EXCEPTION: WatchHi/WatchLo address"
-             " CAUSE: %08x EPC: %08x\n", cause, epc);
+      alert("EXCEPTION: WatchHi/WatchLo address"
+            " CAUSE: %08x EPC: %08x\n", cause, epc);
       break;
     case CP0_CAUSE_EXCCODE_MCHECK:   /* Machine check */
-      llinfo("EXCEPTION: Machine check"
-             " CAUSE: %08x EPC: %08x\n", cause, epc);
+      alert("EXCEPTION: Machine check"
+            " CAUSE: %08x EPC: %08x\n", cause, epc);
       break;
     case CP0_CAUSE_EXCCODE_CACHEERR: /* Cache error */
-      llinfo("EXCEPTION: Cache error"
-             " CAUSE: %08x EPC: %08x\n", cause, epc);
+      alert("EXCEPTION: Cache error"
+            " CAUSE: %08x EPC: %08x\n", cause, epc);
       break;
     default:
-      llinfo("EXCEPTION: Unknown"
-             " CAUSE: %08x EPC: %08x\n", cause, epc);
+      alert("EXCEPTION: Unknown"
+            " CAUSE: %08x EPC: %08x\n", cause, epc);
       break;
     }
 #else
-  llerr("EXCEPTION: CAUSE: %08x EPC: %08x\n", cause, epc);
+  alert("EXCEPTION: CAUSE: %08x EPC: %08x\n", cause, epc);
 #endif
 #endif
 

@@ -76,13 +76,11 @@
 
 #ifdef CONFIG_DEBUG_SPI
 #  define spierr  llerr
-#  ifdef CONFIG_DEBUG_INFO
-#    define spiinfo llerr
-#  else
-#    define spiinfo(x...)
-#  endif
+#  define spiwarn llwarn
+#  define spiinfo llinfo
 #else
 #  define spierr(x...)
+#  define spiwarn(x...)
 #  define spiinfo(x...)
 #endif
 
@@ -329,7 +327,7 @@ static uint32_t spi_getreg(FAR struct pic32mx_dev_s *priv, unsigned int offset)
         {
            if (count == 4)
              {
-               llerr("...\n");
+               llinfo("...\n");
              }
           return value;
         }
@@ -345,7 +343,7 @@ static uint32_t spi_getreg(FAR struct pic32mx_dev_s *priv, unsigned int offset)
          {
            /* Yes.. then show how many times the value repeated */
 
-           llerr("[repeats %d more times]\n", count-3);
+           llinfo("[repeats %d more times]\n", count-3);
          }
 
        /* Save the new address, value, and count */
@@ -357,7 +355,7 @@ static uint32_t spi_getreg(FAR struct pic32mx_dev_s *priv, unsigned int offset)
 
   /* Show the register value read */
 
-  llerr("%08x->%08x\n", addr, value);
+  llinfo("%08x->%08x\n", addr, value);
   return value;
 }
 #else
@@ -395,7 +393,7 @@ static void spi_putreg(FAR struct pic32mx_dev_s *priv, unsigned int offset,
 
   /* Show the register value being written */
 
-  llerr("%08x<-%08x\n", addr, value);
+  llinfo("%08x<-%08x\n", addr, value);
 
   /* Then do the write */
 
@@ -526,7 +524,7 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
   priv->frequency = frequency;
   priv->actual    = actual;
 
-  spierr("New frequency: %d Actual: %d\n", frequency, actual);
+  spiinfo("New frequency: %d Actual: %d\n", frequency, actual);
   return actual;
 }
 
@@ -665,7 +663,7 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
         }
       else
         {
-          spierr("Unsupported nbits: %d\n", nbits);
+          spierr("ERROR: Unsupported nbits: %d\n", nbits);
           return;
         }
 
@@ -897,7 +895,7 @@ FAR struct spi_dev_s *pic32mx_spibus_initialize(int port)
   else
 #endif
    {
-     spierr("Unsuppport port: %d\n", port);
+     spierr("ERROR: Unsuppport port: %d\n", port);
      return NULL;
    }
 
@@ -926,7 +924,8 @@ FAR struct spi_dev_s *pic32mx_spibus_initialize(int port)
   ret = irq_attach(priv->vector, spi_interrupt);
   if (ret < 0)
     {
-      spierr("Failed to attach vector: %d port: %d\n", priv->vector, port);
+      spierr("ERROR: Failed to attach vector: %d port: %d\n",
+             priv->vector, port);
       goto errout;
     }
 #endif
@@ -976,7 +975,7 @@ FAR struct spi_dev_s *pic32mx_spibus_initialize(int port)
   ret = up_prioritize_irq(priv->vector, CONFIG_PIC32MX_SPI_PRIORITY)
   if (ret < 0)
     {
-      spierr("up_prioritize_irq failed: %d\n", ret);
+      spierr("ERROR: up_prioritize_irq failed: %d\n", ret);
       goto errout;
     }
 #endif

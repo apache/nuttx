@@ -79,15 +79,6 @@
 #  define CONFIG_USBDEV_EP0_MAXSIZE 64
 #endif
 
-/* Extremely detailed register/BDT debug that you would normally never want
- * enabled.
- */
-
-#ifndef CONFIG_DEBUG_FEATURES
-#  undef CONFIG_PIC32MX_USBDEV_REGDEBUG
-#  undef CONFIG_PIC32MX_USBDEV_BDTDEBUG
-#endif
-
 /* Disable this logic because it is buggy.  It works most of the time but
  * has some lurking issues that keep this higher performance solution from
  * being usable.
@@ -289,18 +280,16 @@
 #  undef CONFIG_PIC32MX_USBDEV_BDTDEBUG
 #  define CONFIG_PIC32MX_USBDEV_BDTDEBUG 1
 
-#  define regerr llerr
-#  ifdef CONFIG_DEBUG_INFO
-#    define reginfo llerr
-#  else
-#    define reginfo(x...)
-#  endif
+#  define regerr  llerr
+#  define regwarn llwarn
+#  define reginfo llinfo
 
 #else
 
 #  define pic32mx_getreg(addr)      getreg16(addr)
 #  define pic32mx_putreg(val,addr)  putreg16(val,addr)
 #  define regerr(x...)
+#  define regwarn(x...)
 #  define reginfo(x...)
 
 #endif
@@ -309,16 +298,14 @@
 
 #ifdef CONFIG_PIC32MX_USBDEV_BDTDEBUG
 
-#  define bdterr llerr
-#  ifdef CONFIG_DEBUG_INFO
-#    define bdtinfo llerr
-#  else
-#    define bdtinfo(x...)
-#  endif
+#  define bdterr  llerr
+#  define bdtwarn llwarn
+#  define bdtinfo llinfo
 
 #else
 
 #  define bdterr(x...)
+#  define bdtwarn(x...)
 #  define bdtinfo(x...)
 
 #endif
@@ -602,16 +589,13 @@ static volatile struct usbotg_bdtentry_s g_bdt[4*PIC32MX_NENDPOINTS]
   __attribute__ ((aligned(512)));
 
 /****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Private Functions
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
  * Register Operations
  ****************************************************************************/
+
 /****************************************************************************
  * Name: pic32mx_getreg
  ****************************************************************************/
@@ -637,8 +621,9 @@ static uint16_t pic32mx_getreg(uint32_t addr)
         {
            if (count == 4)
              {
-               llerr("...\n");
+               reginfo("...\n");
              }
+
           return val;
         }
     }
@@ -653,7 +638,7 @@ static uint16_t pic32mx_getreg(uint32_t addr)
          {
            /* Yes.. then show how many times the value repeated */
 
-           llerr("[repeats %d more times]\n", count-3);
+           reginfo("[repeats %d more times]\n", count-3);
          }
 
        /* Save the new address, value, and count */
@@ -665,7 +650,7 @@ static uint16_t pic32mx_getreg(uint32_t addr)
 
   /* Show the register value read */
 
-  llerr("%08x->%04x\n", addr, val);
+  reginfo("%08x->%04x\n", addr, val);
   return val;
 }
 #endif
@@ -679,7 +664,7 @@ static void pic32mx_putreg(uint16_t val, uint32_t addr)
 {
   /* Show the register value being written */
 
-  llerr("%08x<-%04x\n", addr, val);
+  reginfo("%08x<-%04x\n", addr, val);
 
   /* Write the value */
 
@@ -874,8 +859,8 @@ static void pic32mx_epwrite(struct pic32mx_ep_s *privep,
 
   /* And, finally, give the BDT to the USB */
 
-  bdterr("EP%d BDT IN [%p] {%08x, %08x}\n",
-         USB_EPNO(privep->ep.eplog), bdt, status, bdt->addr);
+  bdtinfo("EP%d BDT IN [%p] {%08x, %08x}\n",
+          USB_EPNO(privep->ep.eplog), bdt, status, bdt->addr);
 
   bdt->status = status;
 }
@@ -915,8 +900,8 @@ static void pic32mx_wrcomplete(struct pic32mx_usbdev_s *priv,
           epno, privreq->req.len, privreq->req.xfrd,
           privreq->inflight[0], privreq->inflight[1]);
 #endif
-  bdterr("EP%d BDT IN [%p] {%08x, %08x}\n",
-         epno, bdtin, bdtin->status, bdtin->addr);
+  bdtinfo("EP%d BDT IN [%p] {%08x, %08x}\n",
+          epno, bdtin, bdtin->status, bdtin->addr);
 
   /* We should own the BDT that just completed. But NULLify the entire BDT IN.
    * Why?  So that we can tell later that the BDT available.  No, it is not
@@ -1340,8 +1325,8 @@ static int pic32mx_rdcomplete(struct pic32mx_usbdev_s *priv,
 
   ullinfo("EP%d: len=%d xfrd=%d\n",
           epno, privreq->req.len, privreq->req.xfrd);
-  bdterr("EP%d BDT OUT [%p] {%08x, %08x}\n",
-         epno, bdtout, bdtout->status, bdtout->addr);
+  bdtinfo("EP%d BDT OUT [%p] {%08x, %08x}\n",
+          epno, bdtout, bdtout->status, bdtout->addr);
 
   /* We should own the BDT that just completed */
 
@@ -1484,7 +1469,8 @@ static int pic32mx_ep0rdsetup(struct pic32mx_usbdev_s *priv, uint8_t *dest,
 
   /* Then give the BDT to the USB */
 
-  bdterr("EP0 BDT OUT [%p] {%08x, %08x}\n", bdtout, status, bdtout->addr);
+  bdtinfo("EP0 BDT OUT [%p] {%08x, %08x}\n",
+          bdtout, status, bdtout->addr);
   bdtout->status = status;
 
   priv->ctrlstate = CTRLSTATE_RDREQUEST;
@@ -1585,7 +1571,8 @@ static int pic32mx_rdsetup(struct pic32mx_ep_s *privep, uint8_t *dest, int readl
 
   /* Then give the BDT to the USB */
 
-  bdterr("EP%d BDT OUT [%p] {%08x, %08x}\n",  epno, bdtout, status, bdtout->addr);
+  bdtinfo("EP%d BDT OUT [%p] {%08x, %08x}\n",
+          epno, bdtout, status, bdtout->addr);
 
   bdtout->status = status;
   return OK;
@@ -2596,7 +2583,8 @@ static void pic32mx_ep0transfer(struct pic32mx_usbdev_s *priv, uint16_t ustat)
       bdt   = &g_bdt[index];
       priv->eplist[0].bdtout = bdt;
 
-      bdterr("EP0 BDT OUT [%p] {%08x, %08x}\n", bdt, bdt->status, bdt->addr);
+      bdtinfo("EP0 BDT OUT [%p] {%08x, %08x}\n",
+              bdt, bdt->status, bdt->addr);
 
       /* Check the current EP0 OUT buffer contains a SETUP packet */
 
@@ -2832,7 +2820,7 @@ static int pic32mx_interrupt(int irq, void *context)
   if ((usbir & USB_INT_UERR) != 0)
     {
       usbtrace(TRACE_INTDECODE(PIC32MX_TRACEINTID_UERR), usbir);
-      ullerr("Error: EIR=%04x\n", pic32mx_getreg(PIC32MX_USB_EIR));
+      ullerr("ERROR: EIR=%04x\n", pic32mx_getreg(PIC32MX_USB_EIR));
 
       /* Clear all pending USB error interrupts */
 
@@ -3210,7 +3198,8 @@ static int pic32mx_epconfigure(struct usbdev_ep_s *ep,
       bdt->status = 0;
       bdt->addr   = 0;
 
-      bdterr("EP%d BDT IN [%p] {%08x, %08x}\n", epno, bdt, bdt->status, bdt->addr);
+      bdtinfo("EP%d BDT IN [%p] {%08x, %08x}\n",
+              epno, bdt, bdt->status, bdt->addr);
 
       /* Now do the same for the other buffer. */
 
@@ -3218,7 +3207,8 @@ static int pic32mx_epconfigure(struct usbdev_ep_s *ep,
       bdt->status = 0;
       bdt->addr   = 0;
 
-      bdterr("EP%d BDT IN [%p] {%08x, %08x}\n", epno, bdt, bdt->status, bdt->addr);
+      bdtinfo("EP%d BDT IN [%p] {%08x, %08x}\n",
+              epno, bdt, bdt->status, bdt->addr);
     }
 
   if (!epin || bidi)
@@ -3232,7 +3222,8 @@ static int pic32mx_epconfigure(struct usbdev_ep_s *ep,
       bdt->status = 0;
       bdt->addr   = 0;
 
-      bdterr("EP%d BDT OUT [%p] {%08x, %08x}\n", epno, bdt, bdt->status, bdt->addr);
+      bdtinfo("EP%d BDT OUT [%p] {%08x, %08x}\n",
+              epno, bdt, bdt->status, bdt->addr);
 
       /* Now do the same for the other buffer. */
 
@@ -3240,7 +3231,8 @@ static int pic32mx_epconfigure(struct usbdev_ep_s *ep,
       bdt->status = 0;
       bdt->addr   = 0;
 
-      bdterr("EP%d BDT OUT [%p] {%08x, %08x}\n", epno, bdt, bdt->status, bdt->addr);
+      bdtinfo("EP%d BDT OUT [%p] {%08x, %08x}\n",
+              epno, bdt, bdt->status, bdt->addr);
     }
 
   /* Get the maxpacket size of the endpoint. */
@@ -3376,7 +3368,8 @@ static int pic32mx_epsubmit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
   if (!req || !req->callback || !req->buf || !ep)
     {
       usbtrace(TRACE_DEVERROR(PIC32MX_TRACEERR_INVALIDPARMS), 0);
-      ullerr("ERROR: req=%p callback=%p buf=%p ep=%p\n", req, req->callback, req->buf, ep);
+      ullerr("ERROR: req=%p callback=%p buf=%p ep=%p\n",
+             req, req->callback, req->buf, ep);
       return -EINVAL;
     }
 #endif
@@ -3575,10 +3568,10 @@ static int pic32mx_epbdtstall(struct usbdev_ep_s *ep, bool resume, bool epin)
           bdt->addr          = (uint8_t *)physaddr;
           bdt->status        = (USB_BDT_UOWN | bytecount);
 
-          bdterr("EP0 BDT IN [%p] {%08x, %08x}\n",
-                 bdt, bdt->status, bdt->addr);
-          bdterr("EP0 BDT IN [%p] {%08x, %08x}\n",
-                 otherbdt, otherbdt->status, otherbdt->addr);
+          bdtinfo("EP0 BDT IN [%p] {%08x, %08x}\n",
+                  bdt, bdt->status, bdt->addr);
+          bdtinfo("EP0 BDT IN [%p] {%08x, %08x}\n",
+                  otherbdt, otherbdt->status, otherbdt->addr);
         }
       else
         {
@@ -3592,10 +3585,11 @@ static int pic32mx_epbdtstall(struct usbdev_ep_s *ep, bool resume, bool epin)
           bdt->addr        = 0;
           bdt->status      = 0;
 
-          bdterr("EP%d BDT %s [%p] {%08x, %08x}\n",
-                 epno, epin ? "IN" : "OUT", bdt, bdt->status, bdt->addr);
-          bdterr("EP%d BDT %s [%p] {%08x, %08x}\n",
-                 epno, epin ? "IN" : "OUT", otherbdt, otherbdt->status, otherbdt->addr);
+          bdtinfo("EP%d BDT %s [%p] {%08x, %08x}\n",
+                  epno, epin ? "IN" : "OUT", bdt, bdt->status, bdt->addr);
+          bdtinfo("EP%d BDT %s [%p] {%08x, %08x}\n",
+                  epno, epin ? "IN" : "OUT", otherbdt, otherbdt->status,
+                  otherbdt->addr);
 
           /* Restart any queued requests (after a delay so that we can be assured
            * that the hardware has recovered from the stall -- I don't know of any
@@ -3627,10 +3621,11 @@ static int pic32mx_epbdtstall(struct usbdev_ep_s *ep, bool resume, bool epin)
 
       pic32mx_rqstop(privep);
 
-      bdterr("EP%d BDT %s [%p] {%08x, %08x}\n",
-             epno, epin ? "IN" : "OUT", bdt, bdt->status, bdt->addr);
-      bdterr("EP%d BDT %s [%p] {%08x, %08x}\n",
-             epno, epin ? "IN" : "OUT", otherbdt, otherbdt->status, otherbdt->addr);
+      bdtinfo("EP%d BDT %s [%p] {%08x, %08x}\n",
+              epno, epin ? "IN" : "OUT", bdt, bdt->status, bdt->addr);
+      bdtinfo("EP%d BDT %s [%p] {%08x, %08x}\n",
+              epno, epin ? "IN" : "OUT", otherbdt, otherbdt->status,
+              otherbdt->addr);
     }
 
   return OK;

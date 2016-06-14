@@ -71,13 +71,11 @@
 
 #ifdef CONFIG_DEBUG_SPI
 #  define spierr  llerr
-#  ifdef CONFIG_DEBUG_INFO
-#    define spiinfo llerr
-#  else
-#    define spiinfo(x...)
-#  endif
+#  define spiwarn llwarn
+#  define spiinfo llinfo
 #else
 #  define spierr(x...)
+#  define spiwarn(x...)
 #  define spiinfo(x...)
 #endif
 
@@ -496,7 +494,7 @@ static bool spi_checkreg(struct pic32mz_dev_s *priv, uintptr_t regaddr,
         {
           /* Yes... show how many times we did it */
 
-          llerr("...[Repeats %d times]...\n", priv->ntimes);
+          llinfo("...[Repeats %d times]...\n", priv->ntimes);
         }
 
       /* Save information about the new access */
@@ -546,8 +544,8 @@ static uint32_t spi_getreg(FAR struct pic32mz_dev_s *priv,
     {
       /* Yes.. */
 
-      llerr("%08lx->%08lx\n",
-            (unsigned long)regaddr, (unsigned long)regval);
+      llinfo("%08lx->%08lx\n",
+             (unsigned long)regaddr, (unsigned long)regval);
     }
 
   /* Return the value read */
@@ -588,8 +586,8 @@ static void spi_putaddr(FAR struct pic32mz_dev_s *priv, uintptr_t regaddr,
     {
       /* Yes.. */
 
-      llerr("%08lx<-%08lx\n",
-      (unsigned long)regaddr, (unsigned long)regval);
+      llinfo("%08lx<-%08lx\n",
+             (unsigned long)regaddr, (unsigned long)regval);
     }
 
   /* Write the value to the register */
@@ -887,7 +885,7 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
   priv->frequency = frequency;
   priv->actual    = actual;
 
-  spierr("New frequency: %d Actual: %d\n", frequency, actual);
+  spiinfo("New frequency: %d Actual: %d\n", frequency, actual);
   return actual;
 }
 
@@ -1025,7 +1023,7 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
         }
       else
         {
-          spierr("Unsupported nbits: %d\n", nbits);
+          spierr("ERROR: Unsupported nbits: %d\n", nbits);
           return;
         }
 
@@ -1275,7 +1273,7 @@ FAR struct spi_dev_s *pic32mz_spibus_initialize(int port)
   else
 #endif
    {
-     spierr("Unsuppport port: %d\n", port);
+     spierr("ERROR: Unsuppport port: %d\n", port);
      return NULL;
    }
 
@@ -1311,7 +1309,7 @@ FAR struct spi_dev_s *pic32mz_spibus_initialize(int port)
   ret = irq_attach(priv->config->rxirq, spi_interrupt);
   if (ret < 0)
     {
-      spierr("Failed to attach RX interrupt: %d port: %d\n",
+      spierr("ERROR: Failed to attach RX interrupt: %d port: %d\n",
              priv->config->rxirq, port);
       goto errout;
     }
@@ -1319,7 +1317,7 @@ FAR struct spi_dev_s *pic32mz_spibus_initialize(int port)
   ret = irq_attach(priv->config->txirq, spi_interrupt);
   if (ret < 0)
     {
-      spierr("Failed to attach TX interrupt: %d port: %d\n",
+      spierr("ERROR: Failed to attach TX interrupt: %d port: %d\n",
              priv->tconfig->xirq, port);
       goto errout_with_rxirq;
     }
@@ -1327,7 +1325,7 @@ FAR struct spi_dev_s *pic32mz_spibus_initialize(int port)
   ret = irq_attach(priv->config->firq, spi_interrupt);
   if (ret < 0)
     {
-      spierr("Failed to attach fault interrupt: %d port: %d\n",
+      spierr("ERROR: Failed to attach fault interrupt: %d port: %d\n",
              priv->config->firq, port);
       goto errout_with_txirq;
     }

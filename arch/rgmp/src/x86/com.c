@@ -263,23 +263,27 @@ static int up_setup(struct uart_dev_s *dev)
       }
 
     // Set speed; requires DLAB latch
+
     outb(base+COM_LCR, COM_LCR_DLAB);
     data.val = 115200 / priv->baud;
     outb(base+COM_DLL, data.sep.low);
     outb(base+COM_DLM, data.sep.high);
 
     // set data bits, stop bit, parity; turn off DLAB latch
+
     outb(base+COM_LCR, priv->lcr.val);
 
     // OUT2 must be set to enable interrupt
+
     outb(base+COM_MCR, COM_MCR_OUT2);
 
     // setup FIFO
+
     outb(base+COM_FCR, 1);
 
     // disable COM interrupts
-    outb(base+COM_IER, 0);
 
+    outb(base+COM_IER, 0);
     return OK;
 }
 
