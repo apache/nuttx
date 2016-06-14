@@ -81,23 +81,23 @@ static void ez80_registerdump(void)
   if (g_current_regs)
     {
 #ifdef CONFIG_EZ80_Z80MODE
-      llerr("AF: %04x  I: %04x\n",
-            g_current_regs[XCPT_AF], g_current_regs[XCPT_I]);
-      llerr("BC: %04x DE: %04x HL: %04x\n",
-            g_current_regs[XCPT_BC], g_current_regs[XCPT_DE], g_current_regs[XCPT_HL]);
-      llerr("IX: %04x IY: %04x\n",
-            g_current_regs[XCPT_IX], g_current_regs[XCPT_IY]);
-      llerr("SP: %04x PC: %04x\n"
-            g_current_regs[XCPT_SP], g_current_regs[XCPT_PC]);
+      llinfo("AF: %04x  I: %04x\n",
+             g_current_regs[XCPT_AF], g_current_regs[XCPT_I]);
+      llinfo("BC: %04x DE: %04x HL: %04x\n",
+             g_current_regs[XCPT_BC], g_current_regs[XCPT_DE], g_current_regs[XCPT_HL]);
+      llinfo("IX: %04x IY: %04x\n",
+             g_current_regs[XCPT_IX], g_current_regs[XCPT_IY]);
+      llinfo("SP: %04x PC: %04x\n"
+             g_current_regs[XCPT_SP], g_current_regs[XCPT_PC]);
 #else
-      llerr("AF: %06x  I: %06x\n",
-            g_current_regs[XCPT_AF], g_current_regs[XCPT_I]);
-      llerr("BC: %06x DE: %06x HL: %06x\n",
-            g_current_regs[XCPT_BC], g_current_regs[XCPT_DE], g_current_regs[XCPT_HL]);
-      llerr("IX: %06x IY: %06x\n",
-            g_current_regs[XCPT_IX], g_current_regs[XCPT_IY]);
-      llerr("SP: %06x PC: %06x\n"
-            g_current_regs[XCPT_SP], g_current_regs[XCPT_PC]);
+      llinfo("AF: %06x  I: %06x\n",
+             g_current_regs[XCPT_AF], g_current_regs[XCPT_I]);
+      llinfo("BC: %06x DE: %06x HL: %06x\n",
+             g_current_regs[XCPT_BC], g_current_regs[XCPT_DE], g_current_regs[XCPT_HL]);
+      llinfo("IX: %06x IY: %06x\n",
+             g_current_regs[XCPT_IX], g_current_regs[XCPT_IY]);
+      llinfo("SP: %06x PC: %06x\n"
+             g_current_regs[XCPT_SP], g_current_regs[XCPT_PC]);
 #endif
     }
 }

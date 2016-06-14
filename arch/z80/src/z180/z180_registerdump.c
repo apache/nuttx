@@ -61,14 +61,6 @@
 #ifdef CONFIG_ARCH_STACKDUMP
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -80,16 +72,16 @@ static void z180_registerdump(void)
 {
   if (g_current_regs)
     {
-      llerr("AF: %04x  I: %04x\n",
-            g_current_regs[XCPT_AF], g_current_regs[XCPT_I]);
-      llerr("BC: %04x DE: %04x HL: %04x\n",
-            g_current_regs[XCPT_BC], g_current_regs[XCPT_DE], g_current_regs[XCPT_HL]);
-      llerr("IX: %04x IY: %04x\n",
-            g_current_regs[XCPT_IX], g_current_regs[XCPT_IY]);
-      llerr("SP: %04x PC: %04x\n"
-            g_current_regs[XCPT_SP], g_current_regs[XCPT_PC]);
-      llerr("CBAR: %02x BBR: %02x CBR: %02x\n"
-            inp(Z180_MMU_CBAR), inp(Z180_MMU_BBR), inp(Z180_MMU_CBR));
+      llinfo("AF: %04x  I: %04x\n",
+             g_current_regs[XCPT_AF], g_current_regs[XCPT_I]);
+      llinfo("BC: %04x DE: %04x HL: %04x\n",
+             g_current_regs[XCPT_BC], g_current_regs[XCPT_DE], g_current_regs[XCPT_HL]);
+      llinfo("IX: %04x IY: %04x\n",
+             g_current_regs[XCPT_IX], g_current_regs[XCPT_IY]);
+      llinfo("SP: %04x PC: %04x\n"
+             g_current_regs[XCPT_SP], g_current_regs[XCPT_PC]);
+      llinfo("CBAR: %02x BBR: %02x CBR: %02x\n"
+             inp(Z180_MMU_CBAR), inp(Z180_MMU_BBR), inp(Z180_MMU_CBR));
     }
 }
 

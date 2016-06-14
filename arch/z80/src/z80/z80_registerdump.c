@@ -80,14 +80,14 @@ static void z80_registerdump(void)
 {
   if (g_current_regs)
     {
-      llerr("AF: %04x  I: %04x\n",
-            g_current_regs[XCPT_AF], g_current_regs[XCPT_I]);
-      llerr("BC: %04x DE: %04x HL: %04x\n",
-            g_current_regs[XCPT_BC], g_current_regs[XCPT_DE], g_current_regs[XCPT_HL]);
-      llerr("IX: %04x IY: %04x\n",
-            g_current_regs[XCPT_IX], g_current_regs[XCPT_IY]);
-      llerr("SP: %04x PC: %04x\n"
-            g_current_regs[XCPT_SP], g_current_regs[XCPT_PC]);
+      llinfo("AF: %04x  I: %04x\n",
+             g_current_regs[XCPT_AF], g_current_regs[XCPT_I]);
+      llinfo("BC: %04x DE: %04x HL: %04x\n",
+             g_current_regs[XCPT_BC], g_current_regs[XCPT_DE], g_current_regs[XCPT_HL]);
+      llinfo("IX: %04x IY: %04x\n",
+             g_current_regs[XCPT_IX], g_current_regs[XCPT_IY]);
+      llinfo("SP: %04x PC: %04x\n"
+             g_current_regs[XCPT_SP], g_current_regs[XCPT_PC]);
     }
 }
 

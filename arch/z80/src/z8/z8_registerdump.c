@@ -64,29 +64,21 @@
 #ifdef CONFIG_ARCH_STACKDUMP
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 static inline void z8_dumpregs(FAR chipret_t *regs)
 {
-  llerr("REGS: %04x %04x %04x %04x %04x %04x %04x %04x\n",
+  llinfo("REGS: %04x %04x %04x %04x %04x %04x %04x %04x\n",
          regs[XCPT_RR0], regs[XCPT_RR2], regs[XCPT_RR4], regs[XCPT_RR6],
-         regs[XCPT_RR8], regs[XCPT_RR10], regs[XCPT_RR12], regs[XCPT_RR14]);
+          regs[XCPT_RR8], regs[XCPT_RR10], regs[XCPT_RR12], regs[XCPT_RR14]);
 }
 
 static inline void z8_dumpstate(chipreg_t sp, chipreg_t pc, uint8_t irqctl,
                                 chipreg_t rpflags)
 {
-  llerr("SP: %04x PC: %04x IRQCTL: %02x RP: %02x FLAGS: %02x\n",
-        sp, pc, irqctl & 0xff, rpflags >> 8, rpflags & 0xff);
+  llinfo("SP: %04x PC: %04x IRQCTL: %02x RP: %02x FLAGS: %02x\n",
+         sp, pc, irqctl & 0xff, rpflags >> 8, rpflags & 0xff);
 }
 
 /****************************************************************************
