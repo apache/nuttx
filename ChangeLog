@@ -12023,7 +12023,7 @@
 	  - Increase the allowed SPI-Frequency from 20 to 40 MHz.
 	  - Correct and rename the "VARSELECT" option
 	    This option was included in the code as "CONFIG_SPI_VARSELECT" but
-	    nowhere  defined in a Kconfig file. The patch renames it to
+	    nowhere  defined in a Kconfig file. The change renames it to
 	    "CONFIG_SAMV7_SPI_VARSELECT" and corrects the implementation
 	    according the datasheet of Atmel. In short, this option switches
 	    the processor from "fixed peripheral selection" (single device) to
