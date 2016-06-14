@@ -421,7 +421,7 @@ static ssize_t ncp5623c_write(FAR struct file *filep, FAR const char *buffer,
                                  red);
   if (ret != OK)
     {
-      derr("ERROR: Could set red led\n");
+      derr("ERROR: Could not set red led\n");
       return ret;
     }
 
@@ -431,7 +431,7 @@ static ssize_t ncp5623c_write(FAR struct file *filep, FAR const char *buffer,
                                  green);
   if (ret != OK)
     {
-      derr("ERROR: Could set green led\n");
+      derr("ERROR: Could not set green led\n");
       return ret;
     }
 
@@ -441,7 +441,7 @@ static ssize_t ncp5623c_write(FAR struct file *filep, FAR const char *buffer,
                                  blue);
   if (ret != OK)
     {
-      derr("ERROR: Could set blue led\n");
+      derr("ERROR: Could not set blue led\n");
       return ret;
     }
 
