@@ -1097,7 +1097,7 @@ config NET_WOL
 config NET_REGDEBUG
 	bool "Register level debug"
 	default n
-	depends on PIC32MX_ETHERNET && DEBUG_FEATURES
+	depends on PIC32MX_ETHERNET && DEBUG_NET_INFO
 	---help---
 		Enabled low level register debug.  Also needs CONFIG_DEBUG_FEATURES.
 
