@@ -53,14 +53,12 @@
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_LEDS
-#  define derr llerr
-#  ifdef CONFIG_DEBUG_INFO
-#    define dinfo llinfo
-#  else
-#    define dinfo(x...)
-#  endif
+#  define derr  llerr
+#  define dwarn llwarn
+#  define dinfo llinfo
 #else
 #  define derr(x...)
+#  define dwarn(x...)
 #  define dinfo(x...)
 #endif
 
@@ -79,8 +77,7 @@ struct ncp5623c_dev_s
  ****************************************************************************/
 
 static int ncp5623c_i2c_write_byte(FAR struct ncp5623c_dev_s *priv,
-                                    uint8_t const reg_addr,
-                                    uint8_t const reg_val);
+                 uint8_t const reg_addr, uint8_t const reg_val);
 
 static int ncp5623c_open(FAR struct file *filep);
 static int ncp5623c_close(FAR struct file *filep);
@@ -118,13 +115,13 @@ static const struct file_operations g_ncp5623c_fileops =
  ****************************************************************************/
 
 static int ncp5623c_i2c_write_byte(FAR struct ncp5623c_dev_s *priv,
-                                    uint8_t const reg_addr,
-                                    uint8_t const reg_val)
+                                   uint8_t const reg_addr,
+                                   uint8_t const reg_val)
 {
   struct i2c_config_s config;
   int ret = OK;
 
-  /* assemble the 1 byte message comprised of reg_val */
+  /* Assemble the 1 byte message comprised of reg_val */
 
   uint8_t const BUFFER_SIZE = 1;
   uint8_t buffer[BUFFER_SIZE];
@@ -140,13 +137,13 @@ static int ncp5623c_i2c_write_byte(FAR struct ncp5623c_dev_s *priv,
   /* Write the data (no RESTART) */
 
   dinfo("i2c addr: 0x%02X value: 0x%02X\n", priv->i2c_addr,
-      buffer[0]);
+        buffer[0]);
 
 
   ret = i2c_write(priv->i2c, &config, buffer, BUFFER_SIZE);
   if (ret != OK)
     {
-      derr("i2c_write returned error code %d\n", ret);
+      derr("ERROR: i2c_write returned error code %d\n", ret);
       return ret;
     }
 
@@ -163,36 +160,32 @@ static int ncp5623c_i2c_write_byte(FAR struct ncp5623c_dev_s *priv,
 
 static int ncp5623c_open(FAR struct file *filep)
 {
-  dinfo("ncp5623c_open\n");
-
   FAR struct inode *inode = filep->f_inode;
   FAR struct ncp5623c_dev_s *priv = inode->i_private;
 
   int ret = -1;
 
-  /*  shutdown the NCP5623C */
+  /* Shutdown the NCP5623C */
 
-  ret = ncp5623c_i2c_write_byte(priv, NCP5623C_SHUTDOWN,
-                                 0x00);
+  ret = ncp5623c_i2c_write_byte(priv, NCP5623C_SHUTDOWN, 0x00);
   if (ret != OK)
     {
-      derr("Could not shut down the NCP5623C\n");
+      derr("ERROR: Could not shut down the NCP5623C\n");
       return ret;
     }
 
-  /*  Set up Max current */
+  /* Set up Max current */
 
-  ret = ncp5623c_i2c_write_byte(priv, NCP5623C_ILED,
-											0x1F);
+  ret = ncp5623c_i2c_write_byte(priv, NCP5623C_ILED, 0x1F);
   if (ret != OK)
     {
-      derr("Could not set up max current\n");
+      derr("ERROR: Could not set up max current\n");
       return ret;
     }
 
- // let the chip settle a bit
- usleep(1);
+  /* Let the chip settle a bit */
 
+  usleep(1);
   return OK;
 }
 
@@ -206,17 +199,13 @@ static int ncp5623c_open(FAR struct file *filep)
 
 static int ncp5623c_close(FAR struct file *filep)
 {
-  dinfo("ncp5623c_close\n");
-
   FAR struct inode *inode = filep->f_inode;
   FAR struct ncp5623c_dev_s *priv = inode->i_private;
-
   int ret = -1;
 
-  /* shut down NCP5623C */
+  /* Shut down NCP5623C */
 
-  ret =ncp5623c_i2c_write_byte(priv, NCP5623C_SHUTDOWN,
-                                0x00);
+  ret = ncp5623c_i2c_write_byte(priv, NCP5623C_SHUTDOWN, 0x00);
   if (ret != OK)
     {
       return ret;
@@ -237,7 +226,6 @@ static int ncp5623c_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct ncp5623c_dev_s *priv = inode->i_private;
-
   int ret = OK;
 
   dinfo("cmd: %d arg: %ld\n", cmd, arg);
@@ -252,11 +240,12 @@ static int ncp5623c_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           (FAR const struct ncp5623c_set_reg_s *)((uintptr_t)arg);
 
         DEBUGASSERT(ptr != NULL);
-        if (ptr->reg > NCP5623C_MAX_REG) {
-          derr("Unrecognized register: %d\n", ptr->reg);
-          ret = -EFAULT;
-          break;
-        }
+        if (ptr->reg > NCP5623C_MAX_REG)
+          {
+            derr("ERROR: Unrecognized register: %d\n", ptr->reg);
+            ret = -EFAULT;
+            break;
+          }
 
         ret = ncp5623c_i2c_write_byte(priv, ptr->reg, ptr->val);
       }
@@ -266,7 +255,7 @@ static int ncp5623c_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
     default:
       {
-        derr("Unrecognized cmd: %d\n", cmd);
+        derr("ERROR: Unrecognized cmd: %d\n", cmd);
         ret = -ENOTTY;
       }
       break;
@@ -298,7 +287,7 @@ static int ncp5623c_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  ****************************************************************************/
 
 int ncp5623c_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
-                       uint8_t const ncp5623c_i2c_addr)
+                      uint8_t const ncp5623c_i2c_addr)
 {
   /* Sanity check */
 
@@ -311,7 +300,7 @@ int ncp5623c_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
 
   if (priv == NULL)
     {
-      derr("Failed to allocate instance of ncp5623c_dev_s\n");
+      derr("ERROR: Failed to allocate instance of ncp5623c_dev_s\n");
       return -ENOMEM;
     }
 
@@ -323,7 +312,7 @@ int ncp5623c_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
   int const ret = register_driver(devpath, &g_ncp5623c_fileops, 666, priv);
   if (ret != OK)
     {
-      derr("Failed to register driver: %d\n", ret);
+      derr("ERROR: Failed to register driver: %d\n", ret);
       kmm_free(priv);
       return ret;
     }
@@ -356,10 +345,8 @@ static ssize_t ncp5623c_read(FAR struct file *filep, FAR char *buffer,
  ****************************************************************************/
 
 static ssize_t ncp5623c_write(FAR struct file *filep, FAR const char *buffer,
-                            size_t buflen)
+                              size_t buflen)
 {
-  dinfo("%s\n", buffer);
-
   FAR struct inode *inode = filep->f_inode;
   FAR struct ncp5623c_dev_s *priv = inode->i_private;
   int ret = OK;
@@ -368,6 +355,8 @@ static ssize_t ncp5623c_write(FAR struct file *filep, FAR const char *buffer,
   unsigned int green;
   unsigned int blue;
   char color[3];
+
+  dinfo("%s\n", buffer);
 
   /* We need to receive a string #RRGGBB = 7 bytes */
 
@@ -432,7 +421,7 @@ static ssize_t ncp5623c_write(FAR struct file *filep, FAR const char *buffer,
                                  red);
   if (ret != OK)
     {
-      derr("Could set red led\n");
+      derr("ERROR: Could set red led\n");
       return ret;
     }
 
@@ -442,7 +431,7 @@ static ssize_t ncp5623c_write(FAR struct file *filep, FAR const char *buffer,
                                  green);
   if (ret != OK)
     {
-      derr("Could set green led\n");
+      derr("ERROR: Could set green led\n");
       return ret;
     }
 
@@ -452,7 +441,7 @@ static ssize_t ncp5623c_write(FAR struct file *filep, FAR const char *buffer,
                                  blue);
   if (ret != OK)
     {
-      derr("Could set blue led\n");
+      derr("ERROR: Could set blue led\n");
       return ret;
     }
 
