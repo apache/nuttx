@@ -263,7 +263,7 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
       actual          = priv->actual;
     }
 
-  spierr("Frequency %d->%d\n", frequency, actual);
+  spiinfo("Frequency %d->%d\n", frequency, actual);
   return actual;
 }
 
@@ -402,7 +402,7 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size
 {
   FAR uint8_t *ptr = (FAR uint8_t *)buffer;
 
-  spierr("nwords: %d\n", nwords);
+  spiinfo("nwords: %d\n", nwords);
   while (nwords-- > 0)
     {
       (void)spi_send(dev, (uint16_t)*ptr++);
@@ -433,7 +433,7 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nw
 {
   FAR uint8_t *ptr = (FAR uint8_t *)buffer;
 
-  spierr("nwords: %d\n", nwords);
+  spiinfo("nwords: %d\n", nwords);
   while (nwords-- > 0)
     {
       *ptr++ = spi_send(dev, (uint16_t)0xff);
