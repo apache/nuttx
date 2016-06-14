@@ -145,6 +145,10 @@ CHIP_CSRCS += stm32_exti_alarm.c
 endif
 endif
 
+ifeq ($(CONFIG_STM32F7_SPI),y)
+CHIP_CSRCS += stm32_spi.c
+endif
+
 ifeq ($(CONFIG_STM32F7_ETHMAC),y)
 CHIP_CSRCS += stm32_ethernet.c
 endif

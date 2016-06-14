@@ -1613,6 +1613,25 @@ config STM32F7_SERIALBRK_BSDCOMPAT
 
 endmenu # U[S]ART Configuration
 
+menu "SPI Configuration"
+	depends on STM32F7_SPI
+
+config STM32F7_SPI_INTERRUPTS
+	bool "Interrupt driver SPI"
+	default n
+	---help---
+		Select to enable interrupt driven SPI support. Non-interrupt-driven,
+		poll-waiting is recommended if the interrupt rate would be to high in
+		the interrupt driven case.
+
+config STM32F7_SPI_DMA
+	bool "SPI DMA"
+	default n
+	---help---
+		Use DMA to improve SPI transfer performance.  Cannot be used with STM32F7_SPI_INTERRUPT.
+
+endmenu # "SPI Configuration"
+
 config STM32F7_CUSTOM_CLOCKCONFIG
 		bool "Custom clock configuration"
 	default n
@@ -1627,6 +1646,18 @@ config STM32F7_DTCM_PROCFS
 		Select to build in support for /proc/dtcm.  Reading from /proc/dtcm
 		will provide statistics about DTCM memory use similar to what you
 		would get from mallinfo() for the user heap.
+
+config STM32F7_DMACAPABLE
+	bool "Workaround non-DMA capable memory"
+	depends on ARCH_DMA
+	default y if !STM32_CCMEXCLUDE
+	default n if STM32_CCMEXCLUDE
+	---help---
+		This option enables the DMA interface stm32_dmacapable that can be
+		used to check if it is possible to do DMA from the selected address.
+		Drivers then may use this information to determine if they should
+		attempt the DMA or fall back to a different transfer method.
+
 
 if STM32F7_ETHMAC
 menu "Ethernet MAC configuration"
