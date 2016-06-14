@@ -248,7 +248,7 @@ static struct sim_dev_s g_lcddev =
 static int sim_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
                        size_t npixels)
 {
-  lcderr("row: %d col: %d npixels: %d\n", row, col, npixels);
+  lcdinfo("row: %d col: %d npixels: %d\n", row, col, npixels);
   return OK;
 }
 
@@ -269,7 +269,7 @@ static int sim_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
 static int sim_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
                        size_t npixels)
 {
-  lcderr("row: %d col: %d npixels: %d\n", row, col, npixels);
+  lcdinfo("row: %d col: %d npixels: %d\n", row, col, npixels);
   return -ENOSYS;
 }
 

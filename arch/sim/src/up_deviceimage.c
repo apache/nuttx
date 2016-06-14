@@ -223,7 +223,7 @@ char *up_deviceimage(void)
   ret           = inflateInit(&strm);
   if (ret != Z_OK)
     {
-      serr("inflateInit FAILED: ret=%d msg=\"%s\"\n",
+      serr("ERROR: inflateInit FAILED: ret=%d msg=\"%s\"\n",
            ret, strm.msg ? strm.msg : "No message");
       return NULL;
     }
@@ -260,7 +260,7 @@ char *up_deviceimage(void)
           case Z_DATA_ERROR:
           case Z_MEM_ERROR:
           case Z_STREAM_ERROR:
-              serr("inflate FAILED: ret=%d msg=\"%s\"\n",
+              serr("ERROR: inflate FAILED: ret=%d msg=\"%s\"\n",
                     ret, strm.msg ? strm.msg : "No message");
               (void)inflateEnd(&strm);
               kmm_free(pbuffer);
