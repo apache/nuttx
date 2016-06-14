@@ -49,7 +49,7 @@
 #include <arch/board/board.h>
 
 #include "up_arch.h"
-#include "chip/stm32_errmcu.h"
+#include "chip/stm32_dbgmcu.h"
 #include "stm32_wdg.h"
 
 #if defined(CONFIG_WATCHDOG) && defined(CONFIG_STM32_WWDG)

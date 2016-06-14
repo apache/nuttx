@@ -51,7 +51,7 @@
 
 #include "up_arch.h"
 #include "stm32_rcc.h"
-#include "chip/stm32_errmcu.h"
+#include "chip/stm32_dbgmcu.h"
 #include "stm32_wdg.h"
 
 #if defined(CONFIG_WATCHDOG) && defined(CONFIG_STM32_IWDG)
