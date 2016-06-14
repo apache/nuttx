@@ -56,31 +56,32 @@
 
 /* I2C definitions */
 
-#define I2C_BUS_FREQ_HZ            (400000)
+#define I2C_BUS_FREQ_HZ        (400000)
 
 /* NCP5623C register addresses */
 
-#define NCP5623C_SHUTDOWN           (0x00)             /* System Shut Down */
-#define NCP5623C_ILED               (0x1)              /* ILED current */
-#define NCP5623C_PWM1               (0x2)              /* LED 1 brightness control */
-#define NCP5623C_PWM2               (0x3)              /* LED 2 brightness control */
-#define NCP5623C_PWM3               (0x4)              /* LED 3 brightness control */
-#define NCP5623C_UPWARD             (0x5)              /* Set Up the IEND Upward */
-#define NCP5623C_DWNWRD             (0x6)              /* Set Up the IEND Downward */
-#define NCP5623C_GRAD               (0x7)              /* Set Up the Gradual Dimming */
-#define NCP5623C_MAX_REG            (0x7)              /* Highest register */
+#define NCP5623C_SHUTDOWN      (0x00)     /* System Shut Down */
+#define NCP5623C_ILED          (0x1)      /* ILED current */
+#define NCP5623C_PWM1          (0x2)      /* LED 1 brightness control */
+#define NCP5623C_PWM2          (0x3)      /* LED 2 brightness control */
+#define NCP5623C_PWM3          (0x4)      /* LED 3 brightness control */
+#define NCP5623C_UPWARD        (0x5)      /* Set Up the IEND Upward */
+#define NCP5623C_DWNWRD        (0x6)      /* Set Up the IEND Downward */
+#define NCP5623C_GRAD          (0x7)      /* Set Up the Gradual Dimming */
+#define NCP5623C_MAX_REG       (0x7)      /* Highest register */
 
-#define NCP5623C_ADDRESS_MASK       (0xE0)             /* Address part of reg */
-#define NCP5623C_VALUE_MASK         (0x1F)             /* Value part of reg */
-#define NCP5623C_SHIFT_ADDRESS      (5)
-#define NCP5623C_MAX_VALUE          (0x1F)             /* Max value of all registers */
+#define NCP5623C_ADDRESS_MASK  (0xe0)     /* Address part of reg */
+#define NCP5623C_VALUE_MASK    (0x1f)     /* Value part of reg */
+#define NCP5623C_SHIFT_ADDRESS (5)
+#define NCP5623C_MAX_VALUE     (0x1f)     /* Max value of all registers */
 
-#define NCP5623C_SET_REG(addr, val) (((addr << NCP5623C_SHIFT_ADDRESS) & NCP5623C_ADDRESS_MASK) \
-												 | (val & NCP5623C_VALUE_MASK)) // combine addr and val
+#define NCP5623C_SET_REG(addr, val) \
+  (((addr << NCP5623C_SHIFT_ADDRESS) & NCP5623C_ADDRESS_MASK) | \
+   (val & NCP5623C_VALUE_MASK))           /* combine addr and val */
 
 /* IOCTL commands */
 
-#define LEDIOC_SET_REG  _ULEDIOC(1)    /* Arg: ncp5623c_set_reg_s * pointer */
+#define LEDIOC_SET_REG _ULEDIOC(1)        /* Arg: ncp5623c_set_reg_s * pointer */
 
 /****************************************************************************
  * Public Types
@@ -143,7 +144,7 @@ extern "C"
  ****************************************************************************/
 
 int ncp5623c_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
-                       uint8_t const ncp5623c_i2c_addr);
+                      uint8_t const ncp5623c_i2c_addr);
 
 #undef EXTERN
 #ifdef __cplusplus
