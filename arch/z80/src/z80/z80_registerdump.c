@@ -39,17 +39,6 @@
 
 #include <nuttx/config.h>
 
-/* Output debug info -- even if debug is not selected. */
-
-#undef  CONFIG_DEBUG_FEATURES
-#undef  CONFIG_DEBUG_ERROR
-#undef  CONFIG_DEBUG_WARN
-#undef  CONFIG_DEBUG_INFO
-#define CONFIG_DEBUG_FEATURES 1
-#define CONFIG_DEBUG_ERROR 1
-#define CONFIG_DEBUG_WARN 1
-#define CONFIG_DEBUG_INFO 1
-
 #include <debug.h>
 
 #include <nuttx/irq.h>
@@ -59,14 +48,6 @@
 #include "up_internal.h"
 
 #ifdef CONFIG_ARCH_STACKDUMP
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
@@ -80,14 +61,14 @@ static void z80_registerdump(void)
 {
   if (g_current_regs)
     {
-      llinfo("AF: %04x  I: %04x\n",
-             g_current_regs[XCPT_AF], g_current_regs[XCPT_I]);
-      llinfo("BC: %04x DE: %04x HL: %04x\n",
-             g_current_regs[XCPT_BC], g_current_regs[XCPT_DE], g_current_regs[XCPT_HL]);
-      llinfo("IX: %04x IY: %04x\n",
-             g_current_regs[XCPT_IX], g_current_regs[XCPT_IY]);
-      llinfo("SP: %04x PC: %04x\n"
-             g_current_regs[XCPT_SP], g_current_regs[XCPT_PC]);
+      alert("AF: %04x  I: %04x\n",
+            g_current_regs[XCPT_AF], g_current_regs[XCPT_I]);
+      alert("BC: %04x DE: %04x HL: %04x\n",
+            g_current_regs[XCPT_BC], g_current_regs[XCPT_DE], g_current_regs[XCPT_HL]);
+      alert("IX: %04x IY: %04x\n",
+            g_current_regs[XCPT_IX], g_current_regs[XCPT_IY]);
+      alert("SP: %04x PC: %04x\n"
+            g_current_regs[XCPT_SP], g_current_regs[XCPT_PC]);
     }
 }
 

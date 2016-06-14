@@ -51,13 +51,27 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: err, llerr, info
+ * Name: alert, err, llerr, warn, llwarn, info, llinfo
  *
  * Description:
  *  If the cross-compiler's pre-processor does not support variable
- * length arguments, then these additional APIs will be built.
+ *  length arguments, then these additional APIs will be built.
  *
  ****************************************************************************/
+
+#ifdef CONFIG_ARCH_LOWPUTC
+int alert(const char *format, ...)
+{
+  va_list ap;
+  int     ret;
+
+  va_start(ap, format);
+  ret = lowvsyslog(LOG_EMERG, format, ap);
+  va_end(ap);
+
+  return ret;
+}
+#endif /* CONFIG_ARCH_LOWPUTC */
 
 #ifdef CONFIG_DEBUG_FEATURES
 int err(const char *format, ...)
@@ -66,7 +80,7 @@ int err(const char *format, ...)
   int     ret;
 
   va_start(ap, format);
-  ret = vsyslog(LOG_DEBUG, format, ap);
+  ret = vsyslog(LOG_ERR, format, ap);
   va_end(ap);
 
   return ret;
@@ -107,7 +121,7 @@ int llwarn(const char *format, ...)
   int     ret;
 
   va_start(ap, format);
-  ret = lowvsyslog(LOG_DEBUG, format, ap);
+  ret = lowvsyslog(LOG_WARNING, format, ap);
   va_end(ap);
 
   return ret;
@@ -122,7 +136,7 @@ int info(const char *format, ...)
   int     ret;
 
   va_start(ap, format);
-  ret = vsyslog(LOG_DEBUG, format, ap);
+  ret = vsyslog(LOG_INFO, format, ap);
   va_end(ap);
 
   return ret;
@@ -135,7 +149,7 @@ int llinfo(const char *format, ...)
   int     ret;
 
   va_start(ap, format);
-  ret = lowvsyslog(LOG_DEBUG, format, ap);
+  ret = lowvsyslog(LOG_INFO, format, ap);
   va_end(ap);
 
   return ret;

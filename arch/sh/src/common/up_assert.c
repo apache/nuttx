@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/sh/src/common/up_assert.c
  *
- *   Copyright (C) 2008-2009, 2012-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2012-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,21 +39,6 @@
 
 #include <nuttx/config.h>
 
-/* Output debug info if stack dump is selected -- even if debug is not
- * selected.
- */
-
-#ifdef CONFIG_ARCH_STACKDUMP
-#  undef  CONFIG_DEBUG_FEATURES
-#  undef  CONFIG_DEBUG_ERROR
-#  undef  CONFIG_DEBUG_WARN
-#  undef  CONFIG_DEBUG_INFO
-#  define CONFIG_DEBUG_FEATURES 1
-#  define CONFIG_DEBUG_ERROR 1
-#  define CONFIG_DEBUG_WARN 1
-# define CONFIG_DEBUG_INFO 1
-#endif
-
 #include <stdint.h>
 #include <stdlib.h>
 #include <assert.h>
@@ -79,10 +64,6 @@
 #ifndef CONFIG_USBDEV_TRACE
 #  undef CONFIG_ARCH_USBDUMP
 #endif
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
@@ -151,17 +132,17 @@ static int assert_tracecallback(FAR struct usbtrace_s *trace, FAR void *arg)
 
 void up_assert(const uint8_t *filename, int lineno)
 {
-#if CONFIG_TASK_NAME_SIZE > 0 && defined(CONFIG_DEBUG_FEATURES)
+#if CONFIG_TASK_NAME_SIZE > 0
   struct tcb_s *rtcb = this_task();
 #endif
 
   board_autoled_on(LED_ASSERTION);
 
 #if CONFIG_TASK_NAME_SIZE > 0
-  llerr("Assertion failed at file:%s line: %d task: %s\n",
+  alert("Assertion failed at file:%s line: %d task: %s\n",
         filename, lineno, rtcb->name);
 #else
-  llerr("Assertion failed at file:%s line: %d\n",
+  alert("Assertion failed at file:%s line: %d\n",
         filename, lineno);
 #endif
 

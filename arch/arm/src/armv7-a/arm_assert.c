@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/armv7-a/arm_assert.c
  *
- *   Copyright (C) 2013-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,21 +39,6 @@
 
 #include <nuttx/config.h>
 
-/* Output debug info if stack dump is selected -- even if debug is not
- * selected.
- */
-
-#ifdef CONFIG_ARCH_STACKDUMP
-#  undef  CONFIG_DEBUG_FEATURES
-#  undef  CONFIG_DEBUG_ERROR
-#  undef  CONFIG_DEBUG_WARN
-#  undef  CONFIG_DEBUG_INFO
-#  define CONFIG_DEBUG_FEATURES 1
-#  define CONFIG_DEBUG_ERROR 1
-#  define CONFIG_DEBUG_WARN 1
-#  define CONFIG_DEBUG_INFO 1
-#endif
-
 #include <stdint.h>
 #include <stdlib.h>
 #include <assert.h>
@@ -77,19 +62,6 @@
 
 #ifndef CONFIG_USBDEV_TRACE
 #  undef CONFIG_ARCH_USBDUMP
-#endif
-
-/* The following is just intended to keep some ugliness out of the mainline
- * code.  We are going to print the task name if:
- *
- *  CONFIG_TASK_NAME_SIZE > 0 &&    <-- The task has a name
- *  (defined(CONFIG_DEBUG_FEATURES)    ||    <-- And the debug is enabled (llerr used)
- *   defined(CONFIG_ARCH_STACKDUMP) <-- Or lowsyslog() is used
- */
-
-#undef CONFIG_PRINT_TASKNAME
-#if CONFIG_TASK_NAME_SIZE > 0 && (defined(CONFIG_DEBUG_FEATURES) || defined(CONFIG_ARCH_STACKDUMP))
-#  define CONFIG_PRINT_TASKNAME 1
 #endif
 
 /****************************************************************************
@@ -125,7 +97,7 @@ static void up_stackdump(uint32_t sp, uint32_t stack_base)
   for (stack = sp & ~0x1f; stack < stack_base; stack += 32)
     {
       uint32_t *ptr = (uint32_t *)stack;
-      llerr("%08x: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+      alert("%08x: %08x %08x %08x %08x %08x %08x %08x %08x\n",
              stack, ptr[0], ptr[1], ptr[2], ptr[3],
              ptr[4], ptr[5], ptr[6], ptr[7]);
     }
@@ -143,12 +115,12 @@ static void up_taskdump(FAR struct tcb_s *tcb, FAR void *arg)
 {
   /* Dump interesting properties of this task */
 
-#ifdef CONFIG_PRINT_TASKNAME
-  llerr("%s: PID=%d Stack Used=%lu of %lu\n",
+#if CONFIG_TASK_NAME_SIZE > 0
+  alert("%s: PID=%d Stack Used=%lu of %lu\n",
         tcb->name, tcb->pid, (unsigned long)up_check_tcbstack(tcb),
         (unsigned long)tcb->adj_stack_size);
 #else
-  llerr("PID: %d Stack Used=%lu of %lu\n",
+  alert("PID: %d Stack Used=%lu of %lu\n",
         tcb->pid, (unsigned long)up_check_tcbstack(tcb),
         (unsigned long)tcb->adj_stack_size);
 #endif
@@ -188,12 +160,12 @@ static inline void up_registerdump(void)
       for (regs = REG_R0; regs <= REG_R15; regs += 8)
         {
           uint32_t *ptr = (uint32_t *)&CURRENT_REGS[regs];
-          llerr("R%d: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+          alert("R%d: %08x %08x %08x %08x %08x %08x %08x %08x\n",
                  regs, ptr[0], ptr[1], ptr[2], ptr[3],
                  ptr[4], ptr[5], ptr[6], ptr[7]);
         }
 
-      llerr("CPSR: %08x\n", CURRENT_REGS[REG_CPSR]);
+      alert("CPSR: %08x\n", CURRENT_REGS[REG_CPSR]);
     }
 }
 #else
@@ -257,7 +229,7 @@ static void up_dumpstate(void)
       ustacksize = (uint32_t)rtcb->adj_stack_size;
     }
 
-  llerr("Current sp: %08x\n", sp);
+  alert("Current sp: %08x\n", sp);
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
   /* Get the limits on the interrupt stack memory */
@@ -267,21 +239,21 @@ static void up_dumpstate(void)
 
   /* Show interrupt stack info */
 
-  llerr("Interrupt stack:\n");
-  llerr("  base: %08x\n", istackbase);
-  llerr("  size: %08x\n", istacksize);
+  alert("Interrupt stack:\n");
+  alert("  base: %08x\n", istackbase);
+  alert("  size: %08x\n", istacksize);
 #ifdef CONFIG_STACK_COLORATION
-  llerr("  used: %08x\n", up_check_intstack());
+  alert("  used: %08x\n", up_check_intstack());
 #endif
 #endif
 
   /* Show user stack info */
 
-  llerr("User stack:\n");
-  llerr("  base: %08x\n", ustackbase);
-  llerr("  size: %08x\n", ustacksize);
+  alert("User stack:\n");
+  alert("  base: %08x\n", ustackbase);
+  alert("  size: %08x\n", ustacksize);
 #ifdef CONFIG_STACK_COLORATION
-  llerr("  used: %08x\n", up_check_tcbstack(rtcb));
+  alert("  used: %08x\n", up_check_tcbstack(rtcb));
 #endif
 
 #ifdef CONFIG_ARCH_KERNEL_STACK
@@ -291,9 +263,9 @@ static void up_dumpstate(void)
     {
       kstackbase = (uint32_t)rtcb->xcp.kstack + CONFIG_ARCH_KERNEL_STACKSIZE - 4;
 
-      llerr("Kernel stack:\n");
-      llerr("  base: %08x\n", kstackbase);
-      llerr("  size: %08x\n", CONFIG_ARCH_KERNEL_STACKSIZE);
+      alert("Kernel stack:\n");
+      alert("  base: %08x\n", kstackbase);
+      alert("  size: %08x\n", CONFIG_ARCH_KERNEL_STACKSIZE);
     }
 #endif
 
@@ -304,7 +276,7 @@ static void up_dumpstate(void)
     {
       /* Yes.. dump the interrupt stack */
 
-      llerr("Interrupt Stack\n", sp);
+      alert("Interrupt Stack\n", sp);
       up_stackdump(sp, istackbase);
 
       /* Extract the user stack pointer which should lie
@@ -312,7 +284,7 @@ static void up_dumpstate(void)
        */
 
       sp = g_intstackbase;
-      llerr("User sp: %08x\n", sp);
+      alert("User sp: %08x\n", sp);
     }
 #endif
 
@@ -322,7 +294,7 @@ static void up_dumpstate(void)
 
   if (sp > ustackbase - ustacksize && sp < ustackbase)
     {
-      llerr("User Stack\n", sp);
+      alert("User Stack\n", sp);
       up_stackdump(sp, ustackbase);
     }
 
@@ -333,7 +305,7 @@ static void up_dumpstate(void)
 
   if (sp >= (uint32_t)rtcb->xcp.kstack && sp < kstackbase)
     {
-      llerr("Kernel Stack\n", sp);
+      alert("Kernel Stack\n", sp);
       up_stackdump(sp, kstackbase);
     }
 #endif
@@ -341,7 +313,7 @@ static void up_dumpstate(void)
 #ifdef CONFIG_SMP
   /* Show the CPU number */
 
-  llerr("CPU%d:\n", up_cpu_index());
+  alert("CPU%d:\n", up_cpu_index());
 #endif
 
   /* Then dump the CPU registers (if available) */
@@ -400,16 +372,16 @@ static void _up_assert(int errorcode)
 
 void up_assert(const uint8_t *filename, int lineno)
 {
-#ifdef CONFIG_PRINT_TASKNAME
+#if CONFIG_TASK_NAME_SIZE > 0
   struct tcb_s *rtcb = this_task();
 #endif
   board_autoled_on(LED_ASSERTION);
 
-#ifdef CONFIG_PRINT_TASKNAME
-  llerr("Assertion failed at file:%s line: %d task: %s\n",
+#if CONFIG_TASK_NAME_SIZE > 0
+  alert("Assertion failed at file:%s line: %d task: %s\n",
         filename, lineno, rtcb->name);
 #else
-  llerr("Assertion failed at file:%s line: %d\n",
+  alert("Assertion failed at file:%s line: %d\n",
         filename, lineno);
 #endif
   up_dumpstate();

@@ -41,11 +41,7 @@
 
 /* Output debug info even if debug output is not selected. */
 
-#undef  CONFIG_DEBUG_ERROR
-#undef  CONFIG_DEBUG_WARN
 #undef  CONFIG_DEBUG_INFO
-#define CONFIG_DEBUG_ERROR 1
-#define CONFIG_DEBUG_WARN 1
 #define CONFIG_DEBUG_INFO 1
 
 #include <sys/types.h>
@@ -122,12 +118,12 @@ void kl_dumpgpio(gpio_cfgset_t pinset, const char *msg)
 
   flags = enter_critical_section();
 
-  llerr("GPIO%c pinset: %08x base: %08x -- %s\n",
-        g_portchar[port], pinset, base, msg);
-  llerr("  PDOR: %08x  PDIR: %08x  PDDR: %08x\n",
-        getreg32(base + KL_GPIO_PDOR_OFFSET),
-        getreg32(base + KL_GPIO_PDIR_OFFSET),
-        getreg32(base + KL_GPIO_PDDR_OFFSET));
+  llinfo("GPIO%c pinset: %08x base: %08x -- %s\n",
+         g_portchar[port], pinset, base, msg);
+  llinfo("  PDOR: %08x  PDIR: %08x  PDDR: %08x\n",
+         getreg32(base + KL_GPIO_PDOR_OFFSET),
+         getreg32(base + KL_GPIO_PDIR_OFFSET),
+         getreg32(base + KL_GPIO_PDDR_OFFSET));
 
   leave_critical_section(flags);
 }

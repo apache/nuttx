@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/armv7-r/arm_assert.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,21 +39,6 @@
 
 #include <nuttx/config.h>
 
-/* Output debug info if stack dump is selected -- even if debug is not
- * selected.
- */
-
-#ifdef CONFIG_ARCH_STACKDUMP
-#  undef  CONFIG_DEBUG_FEATURES
-#  undef  CONFIG_DEBUG_ERROR
-#  undef  CONFIG_DEBUG_WARN
-#  undef  CONFIG_DEBUG_INFO
-#  define CONFIG_DEBUG_FEATURES 1
-#  define CONFIG_DEBUG_ERROR 1
-#  define CONFIG_DEBUG_WARN 1
-#  define CONFIG_DEBUG_INFO 1
-#endif
-
 #include <stdint.h>
 #include <stdlib.h>
 #include <assert.h>
@@ -78,19 +63,6 @@
 
 #ifndef CONFIG_USBDEV_TRACE
 #  undef CONFIG_ARCH_USBDUMP
-#endif
-
-/* The following is just intended to keep some ugliness out of the mainline
- * code.  We are going to print the task name if:
- *
- *  CONFIG_TASK_NAME_SIZE > 0 &&       <-- The task has a name
- *  (defined(CONFIG_DEBUG_FEATURES) || <-- And the debug is enabled (llerr used)
- *   defined(CONFIG_ARCH_STACKDUMP)    <-- Or lowsyslog() is used
- */
-
-#undef CONFIG_PRINT_TASKNAME
-#if CONFIG_TASK_NAME_SIZE > 0 && (defined(CONFIG_DEBUG_FEATURES) || defined(CONFIG_ARCH_STACKDUMP))
-#  define CONFIG_PRINT_TASKNAME 1
 #endif
 
 /****************************************************************************
@@ -144,7 +116,7 @@ static void up_taskdump(FAR struct tcb_s *tcb, FAR void *arg)
 {
   /* Dump interesting properties of this task */
 
-#ifdef CONFIG_PRINT_TASKNAME
+#if CONFIG_TASK_NAME_SIZE > 0
   llerr("%s: PID=%d Stack Used=%lu of %lu\n",
         tcb->name, tcb->pid, (unsigned long)up_check_tcbstack(tcb),
         (unsigned long)tcb->adj_stack_size);
@@ -395,12 +367,12 @@ static void _up_assert(int errorcode)
 
 void up_assert(const uint8_t *filename, int lineno)
 {
-#ifdef CONFIG_PRINT_TASKNAME
+#if CONFIG_TASK_NAME_SIZE > 0
   struct tcb_s *rtcb = this_task();
 #endif
   board_autoled_on(LED_ASSERTION);
 
-#ifdef CONFIG_PRINT_TASKNAME
+#if CONFIG_TASK_NAME_SIZE > 0
   llerr("Assertion failed at file:%s line: %d task: %s\n",
         filename, lineno, rtcb->name);
 #else

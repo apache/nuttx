@@ -1,7 +1,7 @@
 /****************************************************************************
  * common/up_stackdump.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,17 +39,6 @@
 
 #include <nuttx/config.h>
 
-/* Output debug info -- even if debug is not selected. */
-
-#undef  CONFIG_DEBUG_FEATURES
-#undef  CONFIG_DEBUG_ERROR
-#undef  CONFIG_DEBUG_WARN
-#undef  CONFIG_DEBUG_INFO
-#define CONFIG_DEBUG_FEATURES 1
-#define CONFIG_DEBUG_ERROR 1
-#define CONFIG_DEBUG_WARN 1
-#define CONFIG_DEBUG_INFO 1
-
 #include <stdint.h>
 #include <debug.h>
 
@@ -58,14 +47,6 @@
 #include "up_internal.h"
 
 #ifdef CONFIG_ARCH_STACKDUMP
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
@@ -87,13 +68,13 @@ static void up_stackdump(void)
   uint16_t stack_base = (uint16_t)rtcb->adj_stack_ptr;
   uint16_t stack_size = (uint16_t)rtcb->adj_stack_size;
 
-  llinfo("stack_base: %04x\n", stack_base);
-  llinfo("stack_size: %04x\n", stack_size);
-  llinfo("sp:         %04x\n", sp);
+  alert("stack_base: %04x\n", stack_base);
+  alert("stack_size: %04x\n", stack_size);
+  alert("sp:         %04x\n", sp);
 
   if (sp >= stack_base || sp < stack_base - stack_size)
     {
-      llinfo("ERROR: Stack pointer is not within allocated stack\n");
+      alert("ERROR: Stack pointer is not within allocated stack\n");
       return;
     }
   else
@@ -103,9 +84,9 @@ static void up_stackdump(void)
       for (stack = sp & ~0x0f; stack < stack_base; stack += 8*sizeof(uint16_t))
         {
           uint16_t *ptr = (uint16_t*)stack;
-          llinfo("%04x: %04x %04x %04x %04x %04x %04x %04x %04x\n",
-                 stack, ptr[0], ptr[1], ptr[2], ptr[3],
-                 ptr[4], ptr[5], ptr[6], ptr[7]);
+          alert("%04x: %04x %04x %04x %04x %04x %04x %04x %04x\n",
+                stack, ptr[0], ptr[1], ptr[2], ptr[3],
+                ptr[4], ptr[5], ptr[6], ptr[7]);
         }
     }
 }

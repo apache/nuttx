@@ -105,6 +105,9 @@
  *    CONFIG_DEBUG_ERROR be defined. This is intended for important error-related
  *    information that you probably not want to suppress during normal debug
  *    general debugging.
+ *
+ * alert() - is a special, high-priority, unconditional version that is really
+ *    intended only for crash error reporting.
  */
 
 #ifdef CONFIG_HAVE_FUNCTIONNAME
@@ -132,6 +135,13 @@
 
 /* C-99 style variadic macros are supported */
 
+#ifdef CONFIG_ARCH_LOWPUTC
+#  define alert(format, ...) \
+   __arch_lowsyslog(LOG_EMERG, EXTRA_FMT format EXTRA_ARG, ##__VA_ARGS__)
+# else
+#  define alert(x...)
+# endif
+
 #ifdef CONFIG_DEBUG_ERROR
 #  define err(format, ...) \
    __arch_syslog(LOG_ERR, EXTRA_FMT format EXTRA_ARG, ##__VA_ARGS__)
@@ -149,11 +159,11 @@
 
 #ifdef CONFIG_DEBUG_WARN
 #  define warn(format, ...) \
-   __arch_syslog(LOG_DEBUG, EXTRA_FMT format EXTRA_ARG, ##__VA_ARGS__)
+   __arch_syslog(LOG_WARNING, EXTRA_FMT format EXTRA_ARG, ##__VA_ARGS__)
 
 #  ifdef CONFIG_ARCH_LOWPUTC
 #    define llwarn(format, ...) \
-     __arch_lowsyslog(LOG_DEBUG, EXTRA_FMT format EXTRA_ARG, ##__VA_ARGS__)
+     __arch_lowsyslog(LOG_WARNING, EXTRA_FMT format EXTRA_ARG, ##__VA_ARGS__)
 #  else
 #    define llwarn(x...)
 #  endif
@@ -164,11 +174,11 @@
 
 #ifdef CONFIG_DEBUG_INFO
 #  define info(format, ...) \
-   __arch_syslog(LOG_DEBUG, EXTRA_FMT format EXTRA_ARG, ##__VA_ARGS__)
+   __arch_syslog(LOG_INFO, EXTRA_FMT format EXTRA_ARG, ##__VA_ARGS__)
 
 #  ifdef CONFIG_ARCH_LOWPUTC
 #    define llinfo(format, ...) \
-     __arch_lowsyslog(LOG_DEBUG, EXTRA_FMT format EXTRA_ARG, ##__VA_ARGS__)
+     __arch_lowsyslog(LOG_INFO, EXTRA_FMT format EXTRA_ARG, ##__VA_ARGS__)
 #  else
 #    define llinfo(x...)
 #  endif
@@ -542,6 +552,10 @@
 #else /* CONFIG_CPP_HAVE_VARARGS */
 
 /* Variadic macros NOT supported */
+
+#ifndef CONFIG_ARCH_LOWPUTC
+#  define alert       (void)
+# endif
 
 #ifdef CONFIG_DEBUG_ERROR
 #  ifndef CONFIG_ARCH_LOWPUTC
@@ -1078,6 +1092,10 @@ void lib_dumpbuffer(FAR const char *msg, FAR const uint8_t *buffer,
  */
 
 #ifndef CONFIG_CPP_HAVE_VARARGS
+#ifndef CONFIG_ARCH_LOWPUTC
+int alert(const char *format, ...);
+#endif
+
 #ifdef CONFIG_DEBUG_ERROR
 int err(const char *format, ...);
 

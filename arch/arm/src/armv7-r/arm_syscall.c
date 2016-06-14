@@ -39,21 +39,6 @@
 
 #include <nuttx/config.h>
 
-/* Output debug info if stack dump is selected -- even if debug is not
- * selected.
- */
-
-#ifdef CONFIG_ARCH_STACKDUMP
-#  undef  CONFIG_DEBUG_FEATURES
-#  undef  CONFIG_DEBUG_ERROR
-#  undef  CONFIG_DEBUG_WARN
-#  undef  CONFIG_DEBUG_INFO
-#  define CONFIG_DEBUG_FEATURES 1
-#  define CONFIG_DEBUG_ERROR 1
-#  define CONFIG_DEBUG_WARN 1
-#  define CONFIG_DEBUG_INFO 1
-#endif
-
 #include <stdint.h>
 #include <string.h>
 #include <syscall.h>
@@ -74,9 +59,13 @@
 /* Debug ********************************************************************/
 
 #if defined(CONFIG_DEBUG_SYSCALL)
-# define svcerr(format, ...) llerr(format, ##__VA_ARGS__)
+# define svcerr(format, ...)  llerr(format, ##__VA_ARGS__)
+# define svcwarn(format, ...) llwarn(format, ##__VA_ARGS__)
+# define svcinfo(format, ...) llinfo(format, ##__VA_ARGS__)
 #else
 # define svcerr(x...)
+# define svcwarn(x...)
+# define svcinfo(x...)
 #endif
 
 /****************************************************************************
@@ -182,14 +171,14 @@ uint32_t *arm_syscall(uint32_t *regs)
    */
 
 #if defined(CONFIG_DEBUG_SYSCALL)
-  svcerr("SYSCALL Entry: regs: %p cmd: %d\n", regs, cmd);
-  svcerr("  R0: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-         regs[REG_R0],  regs[REG_R1],  regs[REG_R2],  regs[REG_R3],
-         regs[REG_R4],  regs[REG_R5],  regs[REG_R6],  regs[REG_R7]);
-  svcerr("  R8: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-         regs[REG_R8],  regs[REG_R9],  regs[REG_R10], regs[REG_R11],
-         regs[REG_R12], regs[REG_R13], regs[REG_R14], regs[REG_R15]);
-  svcerr("CPSR: %08x\n", regs[REG_CPSR]);
+  svcinfo("SYSCALL Entry: regs: %p cmd: %d\n", regs, cmd);
+  svcinfo("  R0: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+          regs[REG_R0],  regs[REG_R1],  regs[REG_R2],  regs[REG_R3],
+          regs[REG_R4],  regs[REG_R5],  regs[REG_R6],  regs[REG_R7]);
+  svcinfo("  R8: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+          regs[REG_R8],  regs[REG_R9],  regs[REG_R10], regs[REG_R11],
+          regs[REG_R12], regs[REG_R13], regs[REG_R14], regs[REG_R15]);
+  svcinfo("CPSR: %08x\n", regs[REG_CPSR]);
 #endif
 
   /* Handle the SVCall according to the command in R0 */
@@ -507,14 +496,14 @@ uint32_t *arm_syscall(uint32_t *regs)
 #if defined(CONFIG_DEBUG_SYSCALL)
   /* Report what happened */
 
-  svcerr("SYSCALL Exit: regs: %p\n", regs);
-  svcerr("  R0: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-         regs[REG_R0],  regs[REG_R1],  regs[REG_R2],  regs[REG_R3],
-         regs[REG_R4],  regs[REG_R5],  regs[REG_R6],  regs[REG_R7]);
-  svcerr("  R8: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-         regs[REG_R8],  regs[REG_R9],  regs[REG_R10], regs[REG_R11],
-         regs[REG_R12], regs[REG_R13], regs[REG_R14], regs[REG_R15]);
-  svcerr("CPSR: %08x\n", regs[REG_CPSR]);
+  svcinfo("SYSCALL Exit: regs: %p\n", regs);
+  svcinfo("  R0: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+          regs[REG_R0],  regs[REG_R1],  regs[REG_R2],  regs[REG_R3],
+          regs[REG_R4],  regs[REG_R5],  regs[REG_R6],  regs[REG_R7]);
+  svcinfo("  R8: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+          regs[REG_R8],  regs[REG_R9],  regs[REG_R10], regs[REG_R11],
+          regs[REG_R12], regs[REG_R13], regs[REG_R14], regs[REG_R15]);
+  svcinfo("CPSR: %08x\n", regs[REG_CPSR]);
 #endif
 
   /* Return the last value of curent_regs.  This supports context switches
@@ -529,7 +518,7 @@ uint32_t *arm_syscall(uint32_t *regs)
 
 uint32_t *arm_syscall(uint32_t *regs)
 {
-  llerr("SYSCALL from 0x%x\n", regs[REG_PC]);
+  alert("SYSCALL from 0x%x\n", regs[REG_PC]);
   CURRENT_REGS = regs;
   PANIC();
 }

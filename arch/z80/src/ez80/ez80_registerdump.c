@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/z80/src/ez80/ez80_registerdump.c
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,17 +39,6 @@
 
 #include <nuttx/config.h>
 
-/* Output debug info -- even if debug is not selected. */
-
-#undef  CONFIG_DEBUG_FEATURES
-#undef  CONFIG_DEBUG_ERROR
-#undef  CONFIG_DEBUG_WARN
-#undef  CONFIG_DEBUG_INFO
-#define CONFIG_DEBUG_FEATURES 1
-#define CONFIG_DEBUG_ERROR 1
-#define CONFIG_DEBUG_WARN 1
-#define CONFIG_DEBUG_INFO 1
-
 #include <debug.h>
 
 #include <nuttx/irq.h>
@@ -81,23 +70,23 @@ static void ez80_registerdump(void)
   if (g_current_regs)
     {
 #ifdef CONFIG_EZ80_Z80MODE
-      llinfo("AF: %04x  I: %04x\n",
-             g_current_regs[XCPT_AF], g_current_regs[XCPT_I]);
-      llinfo("BC: %04x DE: %04x HL: %04x\n",
-             g_current_regs[XCPT_BC], g_current_regs[XCPT_DE], g_current_regs[XCPT_HL]);
-      llinfo("IX: %04x IY: %04x\n",
-             g_current_regs[XCPT_IX], g_current_regs[XCPT_IY]);
-      llinfo("SP: %04x PC: %04x\n"
-             g_current_regs[XCPT_SP], g_current_regs[XCPT_PC]);
+      alert("AF: %04x  I: %04x\n",
+            g_current_regs[XCPT_AF], g_current_regs[XCPT_I]);
+      alert("BC: %04x DE: %04x HL: %04x\n",
+            g_current_regs[XCPT_BC], g_current_regs[XCPT_DE], g_current_regs[XCPT_HL]);
+      alert("IX: %04x IY: %04x\n",
+            g_current_regs[XCPT_IX], g_current_regs[XCPT_IY]);
+      alert("SP: %04x PC: %04x\n"
+            g_current_regs[XCPT_SP], g_current_regs[XCPT_PC]);
 #else
-      llinfo("AF: %06x  I: %06x\n",
-             g_current_regs[XCPT_AF], g_current_regs[XCPT_I]);
-      llinfo("BC: %06x DE: %06x HL: %06x\n",
-             g_current_regs[XCPT_BC], g_current_regs[XCPT_DE], g_current_regs[XCPT_HL]);
-      llinfo("IX: %06x IY: %06x\n",
-             g_current_regs[XCPT_IX], g_current_regs[XCPT_IY]);
-      llinfo("SP: %06x PC: %06x\n"
-             g_current_regs[XCPT_SP], g_current_regs[XCPT_PC]);
+      alert("AF: %06x  I: %06x\n",
+            g_current_regs[XCPT_AF], g_current_regs[XCPT_I]);
+      alert("BC: %06x DE: %06x HL: %06x\n",
+            g_current_regs[XCPT_BC], g_current_regs[XCPT_DE], g_current_regs[XCPT_HL]);
+      alert("IX: %06x IY: %06x\n",
+            g_current_regs[XCPT_IX], g_current_regs[XCPT_IY]);
+      alert("SP: %06x PC: %06x\n"
+            g_current_regs[XCPT_SP], g_current_regs[XCPT_PC]);
 #endif
     }
 }

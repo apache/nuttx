@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/avr/src/avr32/up_dumpstate.c
  *
- *   Copyright (C) 2010-2011, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2011, 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,17 +38,6 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
-/* Output debug info -- even if debug is not selected. */
-
-#undef  CONFIG_DEBUG_FEATURES
-#undef  CONFIG_DEBUG_ERROR
-#undef  CONFIG_DEBUG_WARN
-#undef  CONFIG_DEBUG_INFO
-#define CONFIG_DEBUG_FEATURES 1
-#define CONFIG_DEBUG_ERROR 1
-#define CONFIG_DEBUG_WARN 1
-#define CONFIG_DEBUG_INFO 1
 
 #include <stdint.h>
 #include <stdlib.h>
@@ -97,7 +86,7 @@ static void up_stackdump(uint32_t sp, uint32_t stack_base)
   for (stack = sp & ~0x1f; stack < stack_base; stack += 32)
     {
       uint32_t *ptr = (uint32_t *)stack;
-      llerr("%08x: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+      alert("%08x: %08x %08x %08x %08x %08x %08x %08x %08x\n",
              stack, ptr[0], ptr[1], ptr[2], ptr[3],
              ptr[4], ptr[5], ptr[6], ptr[7]);
     }
@@ -113,21 +102,21 @@ static inline void up_registerdump(void)
 
   if (g_current_regs)
     {
-      llerr("R%d: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+      alert("R%d: %08x %08x %08x %08x %08x %08x %08x %08x\n",
             0,
             g_current_regs[REG_R0], g_current_regs[REG_R1],
             g_current_regs[REG_R2], g_current_regs[REG_R3],
             g_current_regs[REG_R4], g_current_regs[REG_R5],
             g_current_regs[REG_R6], g_current_regs[REG_R7]);
 
-      llerr("R%d: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+      alert("R%d: %08x %08x %08x %08x %08x %08x %08x %08x\n",
             8,
             g_current_regs[REG_R8],  g_current_regs[REG_R9],
             g_current_regs[REG_R10], g_current_regs[REG_R11],
             g_current_regs[REG_R12], g_current_regs[REG_R13],
             g_current_regs[REG_R14], g_current_regs[REG_R15]);
 
-      llerr("SR: %08x\n", g_current_regs[REG_SR]);
+      alert("SR: %08x\n", g_current_regs[REG_SR]);
     }
 }
 
@@ -167,12 +156,12 @@ void up_dumpstate(void)
 
   /* Show interrupt stack info */
 
-  llerr("sp:     %08x\n", sp);
-  llerr("IRQ stack:\n");
-  llerr("  base: %08x\n", istackbase);
-  llerr("  size: %08x\n", istacksize);
+  alert("sp:     %08x\n", sp);
+  alert("IRQ stack:\n");
+  alert("  base: %08x\n", istackbase);
+  alert("  size: %08x\n", istacksize);
 #ifdef CONFIG_STACK_COLORATION
-  llerr("  used: %08x\n", up_check_intstack());
+  alert("  used: %08x\n", up_check_intstack());
 #endif
 
   /* Does the current stack pointer lie within the interrupt
@@ -194,14 +183,14 @@ void up_dumpstate(void)
   if (g_current_regs)
     {
       sp = g_current_regs[REG_R13];
-      llerr("sp:     %08x\n", sp);
+      alert("sp:     %08x\n", sp);
     }
 
-  llerr("User stack:\n");
-  llerr("  base: %08x\n", ustackbase);
-  llerr("  size: %08x\n", ustacksize);
+  alert("User stack:\n");
+  alert("  base: %08x\n", ustackbase);
+  alert("  size: %08x\n", ustacksize);
 #ifdef CONFIG_STACK_COLORATION
-  llerr("  used: %08x\n", up_check_tcbstack(rtcb));
+  alert("  used: %08x\n", up_check_tcbstack(rtcb));
 #endif
 
   /* Dump the user stack if the stack pointer lies within the allocated user
@@ -213,11 +202,11 @@ void up_dumpstate(void)
       up_stackdump(sp, ustackbase);
     }
 #else
-  llerr("sp:         %08x\n", sp);
-  llerr("stack base: %08x\n", ustackbase);
-  llerr("stack size: %08x\n", ustacksize);
+  alert("sp:         %08x\n", sp);
+  alert("stack base: %08x\n", ustackbase);
+  alert("stack size: %08x\n", ustacksize);
 #ifdef CONFIG_STACK_COLORATION
-  llerr("stack used: %08x\n", up_check_tcbstack(rtcb));
+  alert("stack used: %08x\n", up_check_tcbstack(rtcb));
 #endif
 
   /* Dump the user stack if the stack pointer lies within the allocated user
@@ -226,7 +215,7 @@ void up_dumpstate(void)
 
   if (sp > ustackbase || sp <= ustackbase - ustacksize)
     {
-      llerr("ERROR: Stack pointer is not within allocated stack\n");
+      alert("ERROR: Stack pointer is not within allocated stack\n");
     }
   else
     {

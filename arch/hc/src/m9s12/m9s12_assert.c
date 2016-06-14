@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/hc/src/m9s12/m9s12_assert.c
  *
- *   Copyright (C) 2011-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,21 +39,6 @@
 
 #include <nuttx/config.h>
 
-/* Output debug info if stack dump is selected -- even if debug is not
- * selected.
- */
-
-#ifdef CONFIG_ARCH_STACKDUMP
-#  undef  CONFIG_DEBUG_FEATURES
-#  undef  CONFIG_DEBUG_ERROR
-#  undef  CONFIG_DEBUG_WARN
-#  undef  CONFIG_DEBUG_INFO
-#  define CONFIG_DEBUG_FEATURES 1
-#  define CONFIG_DEBUG_ERROR 1
-#  define CONFIG_DEBUG_WARN 1
-#  define CONFIG_DEBUG_INFO 1
-#endif
-
 #include <stdint.h>
 #include <stdlib.h>
 #include <assert.h>
@@ -79,23 +64,6 @@
 #  undef CONFIG_ARCH_USBDUMP
 #endif
 
-/* The following is just intended to keep some ugliness out of the mainline
- * code.  We are going to print the task name if:
- *
- *  CONFIG_TASK_NAME_SIZE > 0 &&    <-- The task has a name
- *  (defined(CONFIG_DEBUG_FEATURES)    ||    <-- And the debug is enabled (llerr used)
- *   defined(CONFIG_ARCH_STACKDUMP) <-- Or lowsyslog() is used
- */
-
-#undef CONFIG_PRINT_TASKNAME
-#if CONFIG_TASK_NAME_SIZE > 0 && (defined(CONFIG_DEBUG_FEATURES) || defined(CONFIG_ARCH_STACKDUMP))
-#  define CONFIG_PRINT_TASKNAME 1
-#endif
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -112,7 +80,7 @@ static void up_stackdump(uint16_t sp, uint16_t stack_base)
   for (stack = sp; stack < stack_base; stack += 16)
     {
       uint8_t *ptr = (uint8_t*)stack;
-      llerr("%04x: %02x %02x %02x %02x %02x %02x %02x %02x"
+      alert("%04x: %02x %02x %02x %02x %02x %02x %02x %02x"
             "   %02x %02x %02x %02x %02x %02x %02x %02x\n",
              stack, ptr[0], ptr[1], ptr[2], ptr[3], ptr[4], ptr[5], ptr[6], ptr[7],
              ptr[8], ptr[9], ptr[10], ptr[11], ptr[12], ptr[13], ptr[14], ptr[15]);
@@ -133,11 +101,11 @@ static inline void up_registerdump(void)
 
   if (g_current_regs)
     {
-      llerr("A:%02x B:%02x X:%02x%02x Y:%02x%02x PC:%02x%02x CCR:%02x\n",
+      alert("A:%02x B:%02x X:%02x%02x Y:%02x%02x PC:%02x%02x CCR:%02x\n",
              g_current_regs[REG_A], g_current_regs[REG_B], g_current_regs[REG_XH],
              g_current_regs[REG_XL], g_current_regs[REG_YH], g_current_regs[REG_YL],
              g_current_regs[REG_PCH], g_current_regs[REG_PCL], g_current_regs[REG_CCR]);
-      llerr("SP:%02x%02x FRAME:%02x%02x TMP:%02x%02x Z:%02x%02x XY:%02x\n",
+      alert("SP:%02x%02x FRAME:%02x%02x TMP:%02x%02x Z:%02x%02x XY:%02x\n",
              g_current_regs[REG_SPH], g_current_regs[REG_SPL],
              g_current_regs[REG_FRAMEH], g_current_regs[REG_FRAMEL],
              g_current_regs[REG_TMPL], g_current_regs[REG_TMPH], g_current_regs[REG_ZL],
@@ -146,16 +114,16 @@ static inline void up_registerdump(void)
 #if CONFIG_HCS12_MSOFTREGS > 2
 #  error "Need to save more registers"
 #elif CONFIG_HCS12_MSOFTREGS == 2
-      llerr("SOFTREGS: %02x%02x :%02x%02x\n",
+      alert("SOFTREGS: %02x%02x :%02x%02x\n",
             g_current_regs[REG_SOFTREG1], g_current_regs[REG_SOFTREG1+1],
             g_current_regs[REG_SOFTREG2], g_current_regs[REG_SOFTREG2+1]);
 #elif CONFIG_HCS12_MSOFTREGS == 1
-      llerr("SOFTREGS: %02x%02x\n", g_current_regs[REG_SOFTREG1],
+      alert("SOFTREGS: %02x%02x\n", g_current_regs[REG_SOFTREG1],
             g_current_regs[REG_SOFTREG1+1]);
 #endif
 
 #ifndef CONFIG_HCS12_NONBANKED
-      llerr("PPAGE: %02x\n", g_current_regs[REG_PPAGE],);
+      alert("PPAGE: %02x\n", g_current_regs[REG_PPAGE],);
 #endif
     }
 }
@@ -225,10 +193,10 @@ static void up_dumpstate(void)
 
   /* Show interrupt stack info */
 
-  llerr("sp:     %04x\n", sp);
-  llerr("IRQ stack:\n");
-  llerr("  base: %04x\n", istackbase);
-  llerr("  size: %04x\n", istacksize);
+  alert("sp:     %04x\n", sp);
+  alert("IRQ stack:\n");
+  alert("  base: %04x\n", istackbase);
+  alert("  size: %04x\n", istacksize);
 
   /* Does the current stack pointer lie within the interrupt
    * stack?
@@ -245,18 +213,18 @@ static void up_dumpstate(void)
        */
 
       sp = g_intstackbase;
-      llerr("sp:     %04x\n", sp);
+      alert("sp:     %04x\n", sp);
     }
 
   /* Show user stack info */
 
-  llerr("User stack:\n");
-  llerr("  base: %04x\n", ustackbase);
-  llerr("  size: %04x\n", ustacksize);
+  alert("User stack:\n");
+  alert("  base: %04x\n", ustackbase);
+  alert("  size: %04x\n", ustacksize);
 #else
-  llerr("sp:         %04x\n", sp);
-  llerr("stack base: %04x\n", ustackbase);
-  llerr("stack size: %04x\n", ustacksize);
+  alert("sp:         %04x\n", sp);
+  alert("stack base: %04x\n", ustackbase);
+  alert("stack size: %04x\n", ustacksize);
 #endif
 
   /* Dump the user stack if the stack pointer lies within the allocated user
@@ -266,7 +234,7 @@ static void up_dumpstate(void)
   if (sp > ustackbase || sp <= ustackbase - ustacksize)
     {
 #if !defined(CONFIG_ARCH_INTERRUPTSTACK) || CONFIG_ARCH_INTERRUPTSTACK < 4
-      llerr("ERROR: Stack pointer is not within allocated stack\n");
+      alert("ERROR: Stack pointer is not within allocated stack\n");
 #endif
     }
   else
@@ -326,17 +294,17 @@ static void _up_assert(int errorcode)
 
 void up_assert(const uint8_t *filename, int lineno)
 {
-#ifdef CONFIG_PRINT_TASKNAME
+#if CONFIG_TASK_NAME_SIZE > 0
   struct tcb_s *rtcb = this_task();
 #endif
 
   board_autoled_on(LED_ASSERTION);
 
-#ifdef CONFIG_PRINT_TASKNAME
-  llerr("Assertion failed at file:%s line: %d task: %s\n",
+#if CONFIG_TASK_NAME_SIZE > 0
+  alert("Assertion failed at file:%s line: %d task: %s\n",
         filename, lineno, rtcb->name);
 #else
-  llerr("Assertion failed at file:%s line: %d\n",
+  alert("Assertion failed at file:%s line: %d\n",
         filename, lineno);
 #endif
 

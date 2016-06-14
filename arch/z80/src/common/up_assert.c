@@ -1,7 +1,7 @@
 /****************************************************************************
  * common/up_assert.c
  *
- *   Copyright (C) 2007-2009, 2012-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2012-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,21 +39,6 @@
 
 #include <nuttx/config.h>
 
-/* Output debug info if stack dump is selected -- even if debug is not
- * selected.
- */
-
-#ifdef CONFIG_ARCH_STACKDUMP
-#  undef  CONFIG_DEBUG_FEATURES
-#  undef  CONFIG_DEBUG_ERROR
-#  undef  CONFIG_DEBUG_WARN
-#  undef  CONFIG_DEBUG_INFO
-#  define CONFIG_DEBUG_FEATURES 1
-#  define CONFIG_DEBUG_ERROR 1
-#  define CONFIG_DEBUG_WARN 1
-#  define CONFIG_DEBUG_INFO 1
-#endif
-
 #include <stdint.h>
 #include <stdlib.h>
 #include <assert.h>
@@ -78,10 +63,6 @@
 #ifndef CONFIG_USBDEV_TRACE
 #  undef CONFIG_ARCH_USBDUMP
 #endif
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
@@ -161,17 +142,17 @@ void up_assert(void)
 
 #ifdef CONFIG_HAVE_FILENAME
 #if CONFIG_TASK_NAME_SIZE > 0
-  llinfo("Assertion failed at file:%s line: %d task: %s\n",
-         filename, lineno, rtcb->name);
+  alert("Assertion failed at file:%s line: %d task: %s\n",
+        filename, lineno, rtcb->name);
 #else
-  llinfo("Assertion failed at file:%s line: %d\n",
-         filename, lineno);
+  alert("Assertion failed at file:%s line: %d\n",
+        filename, lineno);
 #endif
 #else
 #if CONFIG_TASK_NAME_SIZE > 0
-  llinfo("Assertion failed: task: %s\n", rtcb->name);
+  alert("Assertion failed: task: %s\n", rtcb->name);
 #else
-  llinfo("Assertion failed\n");
+  alert("Assertion failed\n");
 #endif
 #endif
 

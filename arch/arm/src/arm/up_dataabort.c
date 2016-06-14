@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/arm/up_dataabort.c
  *
- *   Copyright (C) 2007-2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2011, 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,21 +39,6 @@
 
 #include <nuttx/config.h>
 
-/* Output debug info if stack dump is selected -- even if debug is not
- * selected.
- */
-
-#ifdef CONFIG_ARCH_STACKDUMP
-#  undef  CONFIG_DEBUG_FEATURES
-#  undef  CONFIG_DEBUG_ERROR
-#  undef  CONFIG_DEBUG_WARN
-#  undef  CONFIG_DEBUG_INFO
-#  define CONFIG_DEBUG_FEATURES 1
-#  define CONFIG_DEBUG_ERROR 1
-#  define CONFIG_DEBUG_WARN 1
-#  define CONFIG_DEBUG_INFO 1
-#endif
-
 #include <stdint.h>
 #include <debug.h>
 
@@ -66,18 +51,6 @@
 #  include <nuttx/page.h>
 #  include "arm.h"
 #endif
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -115,7 +88,6 @@ void up_dataabort(uint32_t *regs, uint32_t far, uint32_t fsr)
   /* Save the saved processor context in CURRENT_REGS where it can be accessed
    * for register dumps and possibly context switching.
    */
-
 
   savestate    = (uint32_t *)CURRENT_REGS;
 #endif
@@ -184,7 +156,7 @@ void up_dataabort(uint32_t *regs, uint32_t far, uint32_t fsr)
 
 segfault:
 #endif
-  llerr("Data abort. PC: %08x FAR: %08x FSR: %08x\n", regs[REG_PC], far, fsr);
+  alert("Data abort. PC: %08x FAR: %08x FSR: %08x\n", regs[REG_PC], far, fsr);
   PANIC();
 }
 
@@ -200,7 +172,7 @@ void up_dataabort(uint32_t *regs)
 
   /* Crash -- possibly showing diagnost debug information. */
 
-  llerr("Data abort. PC: %08x\n", regs[REG_PC]);
+  alert("Data abort. PC: %08x\n", regs[REG_PC]);
   PANIC();
 }
 

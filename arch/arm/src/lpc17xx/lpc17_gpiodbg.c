@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/lpc17xx/lpc17_gpiodbg.c
  *
- *   Copyright (C) 2010-2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2011, 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,11 +41,7 @@
 
 /* Output debug info even if debug output is not selected. */
 
-#undef  CONFIG_DEBUG_ERROR
-#undef  CONFIG_DEBUG_WARN
 #undef  CONFIG_DEBUG_INFO
-#define CONFIG_DEBUG_ERROR 1
-#define CONFIG_DEBUG_WARN 1
 #define CONFIG_DEBUG_INFO 1
 
 #include <sys/types.h>
@@ -158,32 +154,33 @@ int lpc17_dumpgpio(lpc17_pinset_t pinset, const char *msg)
   /* The following requires exclusive access to the GPIO registers */
 
   flags = enter_critical_section();
-  llerr("GPIO%c pin%d (pinset: %08x) -- %s\n",
-        port + '0', pin, pinset, msg);
+  llinfo("GPIO%c pin%d (pinset: %08x) -- %s\n",
+         port + '0', pin, pinset, msg);
 
 #if defined(LPC176x)
-  llerr("  PINSEL[%08x]: %08x PINMODE[%08x]: %08x ODMODE[%08x]: %08x\n",
-        pinsel,  pinsel  ? getreg32(pinsel) : 0,
-        pinmode, pinmode ? getreg32(pinmode) : 0,
-        g_odmode[port],    getreg32(g_odmode[port]));
+  llinfo("  PINSEL[%08x]: %08x PINMODE[%08x]: %08x ODMODE[%08x]: %08x\n",
+         pinsel,  pinsel  ? getreg32(pinsel) : 0,
+         pinmode, pinmode ? getreg32(pinmode) : 0,
+         g_odmode[port],    getreg32(g_odmode[port]));
 #elif defined(LPC178x)
-  llerr("  IOCON[%08x]: %08x\n", iocon, getreg32(iocon));
+  llinfo("  IOCON[%08x]: %08x\n", iocon, getreg32(iocon));
 #endif
 
   base = g_fiobase[port];
-  llerr("  FIODIR[%08x]: %08x FIOMASK[%08x]: %08x FIOPIN[%08x]: %08x\n",
-        base+LPC17_FIO_DIR_OFFSET,  getreg32(base+LPC17_FIO_DIR_OFFSET),
-        base+LPC17_FIO_MASK_OFFSET, getreg32(base+LPC17_FIO_MASK_OFFSET),
-        base+LPC17_FIO_PIN_OFFSET,  getreg32(base+LPC17_FIO_PIN_OFFSET));
+  llinfo("  FIODIR[%08x]: %08x FIOMASK[%08x]: %08x FIOPIN[%08x]: %08x\n",
+         base+LPC17_FIO_DIR_OFFSET,  getreg32(base+LPC17_FIO_DIR_OFFSET),
+         base+LPC17_FIO_MASK_OFFSET, getreg32(base+LPC17_FIO_MASK_OFFSET),
+         base+LPC17_FIO_PIN_OFFSET,  getreg32(base+LPC17_FIO_PIN_OFFSET));
 
   base = g_intbase[port];
-  llerr("  IOINTSTATUS[%08x]: %08x INTSTATR[%08x]: %08x INSTATF[%08x]: %08x\n",
-        LPC17_GPIOINT_IOINTSTATUS,          getreg32(LPC17_GPIOINT_IOINTSTATUS),
-        base+LPC17_GPIOINT_INTSTATR_OFFSET, getreg32(base+LPC17_GPIOINT_INTSTATR_OFFSET),
-        base+LPC17_GPIOINT_INTSTATF_OFFSET, getreg32(base+LPC17_GPIOINT_INTSTATF_OFFSET));
-  llerr("  INTENR[%08x]: %08x INTENF[%08x]: %08x\n",
-        base+LPC17_GPIOINT_INTENR_OFFSET,   getreg32(base+LPC17_GPIOINT_INTENR_OFFSET),
-        base+LPC17_GPIOINT_INTENF_OFFSET,   getreg32(base+LPC17_GPIOINT_INTENF_OFFSET));
+  llinfo("  IOINTSTATUS[%08x]: %08x INTSTATR[%08x]: %08x INSTATF[%08x]: %08x\n",
+         LPC17_GPIOINT_IOINTSTATUS,          getreg32(LPC17_GPIOINT_IOINTSTATUS),
+         base+LPC17_GPIOINT_INTSTATR_OFFSET, getreg32(base+LPC17_GPIOINT_INTSTATR_OFFSET),
+         base+LPC17_GPIOINT_INTSTATF_OFFSET, getreg32(base+LPC17_GPIOINT_INTSTATF_OFFSET));
+  llinfo("  INTENR[%08x]: %08x INTENF[%08x]: %08x\n",
+         base+LPC17_GPIOINT_INTENR_OFFSET,   getreg32(base+LPC17_GPIOINT_INTENR_OFFSET),
+         base+LPC17_GPIOINT_INTENF_OFFSET,   getreg32(base+LPC17_GPIOINT_INTENF_OFFSET));
+
   leave_critical_section(flags);
   return OK;
 }

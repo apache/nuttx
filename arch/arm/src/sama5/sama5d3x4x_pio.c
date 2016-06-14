@@ -43,11 +43,7 @@
 #ifdef CONFIG_DEBUG_GPIO
 /* Output informational debug info even if debug output is not enabled. */
 
-#  undef  CONFIG_DEBUG_ERROR
-#  undef  CONFIG_DEBUG_WARN
 #  undef  CONFIG_DEBUG_INFO
-#  define CONFIG_DEBUG_ERROR 1
-#  define CONFIG_DEBUG_WARN 1
 #  define CONFIG_DEBUG_INFO 1
 #endif
 

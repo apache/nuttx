@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/armv6-m/up_dumpnvic.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,15 +39,6 @@
 
 #include <nuttx/config.h>
 
-/* Output debug info even if debug output is not selected. */
-
-#undef  CONFIG_DEBUG_ERROR
-#undef  CONFIG_DEBUG_WARN
-#undef  CONFIG_DEBUG_INFO
-#define CONFIG_DEBUG_ERROR 1
-#define CONFIG_DEBUG_WARN 1
-#define CONFIG_DEBUG_INFO 1
-
 #include <sys/types.h>
 #include <debug.h>
 
@@ -73,6 +64,7 @@
 
 void up_dumpnvic(FAR const char *msg)
 {
+#ifdef CONFIG_DEBUG_INFO
   irqstate_t flags;
   int i;
 
@@ -103,6 +95,7 @@ void up_dumpnvic(FAR const char *msg)
          getreg32(ARMV6M_SYSCON_SHPR3));
 
   leave_critical_section(flags);
+#endif
 }
 
 #endif /* CONFIG_DEBUG_FEATURES */

@@ -1,7 +1,7 @@
 /****************************************************************************
  *  arch/arm/src/armv7-a/arm_prefetchabort.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,21 +38,6 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
-/* Output debug info if stack dump is selected -- even if debug is not
- * selected.
- */
-
-#ifdef CONFIG_ARCH_STACKDUMP
-#  undef  CONFIG_DEBUG_FEATURES
-#  undef  CONFIG_DEBUG_ERROR
-#  undef  CONFIG_DEBUG_WARN
-#  undef  CONFIG_DEBUG_INFO
-#  define CONFIG_DEBUG_FEATURES 1
-#  define CONFIG_DEBUG_ERROR 1
-#  define CONFIG_DEBUG_WARN 1
-#  define CONFIG_DEBUG_INFO 1
-#endif
 
 #include <stdint.h>
 #include <debug.h>
@@ -138,7 +123,7 @@ uint32_t *arm_prefetchabort(uint32_t *regs, uint32_t ifar, uint32_t ifsr)
     }
   else
     {
-      llerr("Prefetch abort. PC: %08x IFAR: %08x IFSR: %08x\n",
+      alert("Prefetch abort. PC: %08x IFAR: %08x IFSR: %08x\n",
             regs[REG_PC], ifar, ifsr);
       PANIC();
     }
@@ -158,7 +143,7 @@ uint32_t *arm_prefetchabort(uint32_t *regs, uint32_t ifar, uint32_t ifsr)
 
   /* Crash -- possibly showing diagnostic debug information. */
 
-  llerr("Prefetch abort. PC: %08x IFAR: %08x IFSR: %08x\n",
+  alert("Prefetch abort. PC: %08x IFAR: %08x IFSR: %08x\n",
         regs[REG_PC], ifar, ifsr);
   PANIC();
   return regs; /* To keep the compiler happy */

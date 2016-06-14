@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/z80/src/z8/z8_registerdump.c
  *
- *   Copyright (C) 2008-2009,2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,19 +39,6 @@
 
 #include <nuttx/config.h>
 
-/* Output debug info -- even if debug is not selected. */
-
-/* Output debug info -- even if debug is not selected. */
-
-#undef  CONFIG_DEBUG_FEATURES
-#undef  CONFIG_DEBUG_ERROR
-#undef  CONFIG_DEBUG_WARN
-#undef  CONFIG_DEBUG_INFO
-#define CONFIG_DEBUG_FEATURES 1
-#define CONFIG_DEBUG_ERROR 1
-#define CONFIG_DEBUG_WARN 1
-#define CONFIG_DEBUG_INFO 1
-
 #include <stdint.h>
 #include <debug.h>
 
@@ -69,16 +56,16 @@
 
 static inline void z8_dumpregs(FAR chipret_t *regs)
 {
-  llinfo("REGS: %04x %04x %04x %04x %04x %04x %04x %04x\n",
-         regs[XCPT_RR0], regs[XCPT_RR2], regs[XCPT_RR4], regs[XCPT_RR6],
-          regs[XCPT_RR8], regs[XCPT_RR10], regs[XCPT_RR12], regs[XCPT_RR14]);
+  alert("REGS: %04x %04x %04x %04x %04x %04x %04x %04x\n",
+        regs[XCPT_RR0], regs[XCPT_RR2], regs[XCPT_RR4], regs[XCPT_RR6],
+        regs[XCPT_RR8], regs[XCPT_RR10], regs[XCPT_RR12], regs[XCPT_RR14]);
 }
 
 static inline void z8_dumpstate(chipreg_t sp, chipreg_t pc, uint8_t irqctl,
                                 chipreg_t rpflags)
 {
-  llinfo("SP: %04x PC: %04x IRQCTL: %02x RP: %02x FLAGS: %02x\n",
-         sp, pc, irqctl & 0xff, rpflags >> 8, rpflags & 0xff);
+  alert("SP: %04x PC: %04x IRQCTL: %02x RP: %02x FLAGS: %02x\n",
+        sp, pc, irqctl & 0xff, rpflags >> 8, rpflags & 0xff);
 }
 
 /****************************************************************************
