@@ -128,6 +128,27 @@
 #define SPI_SETFREQUENCY(d,f) ((d)->ops->setfrequency(d,f))
 
 /****************************************************************************
+ * Name: SPI_SETDELAY
+ *
+ * Description:
+ *   Set the SPI Delays in nanoseconds. Optional.
+ *
+ * Input Parameters:
+ *   dev        - Device-specific state data
+ *   startdelay - The delay between CS active and first CLK
+ *   stopdelay  - The delay between last CLK and CS inactive
+ *   csdelay    - The delay between CS inactive and CS active again
+ *
+ * Returned Value:
+ *   Returns the actual frequency selected
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SPI_CS_DELAY_CONTROL
+#  define SPI_SETDELAY(d,a,b,c) ((d)->ops->setdelay(d,a,b,c))
+#endif
+
+/****************************************************************************
  * Name: SPI_SETMODE
  *
  * Description:
@@ -189,15 +210,35 @@
 #  define SPI_HWFEATURES(d,f) \
   (((d)->ops->hwfeatures) ? (d)->ops->hwfeatures(d,f) : ((f) == 0 ? OK : -ENOSYS))
 
-  /* These are currently defined feature flags */
+  /* These are currently defined feature flags:
+   *
+   *   Bit 0: HWFEAT_CRCGENERATION
+   *          Hardware CRC generation
+   *   Bit 1: HWFEAT_FORCE_CS_INACTIVE_AFTER_TRANSFER
+   *          CS rises after every Transmission, also if we provide new data
+   *          immediately
+   *   Bit 2: HWFEAT_FORCE_CS_ACTIVE_AFTER_TRANSFER
+   *          CS does not rise automatically after a transmission, also if
+   *          the spi runs out of data (for a long time)
+   *   Bit 3: HWFEAT_ESCAPE_LASTXFER
+   *          Do not set the LASTXFER-Bit at the last word of the next
+   *          exchange, Flag is auto-resetting after the next LASTXFER
+   *          condition. (see spi_exchange)
+   */
 
 #  ifdef CONFIG_SPI_CRCGENERATION
-#    HWFEAT_CRCGENERATION (1 << 0) /* Bit 0: Hardward CRC generation */
+#    define HWFEAT_CRCGENERATION                     (1 << 0)
+#  endif
+
+#  ifdef CONFIG_SPI_CS_CONTROL
+#    define HWFEAT_FORCE_CS_INACTIVE_AFTER_TRANSFER  (1 << 1)
+#    define HWFEAT_FORCE_CS_ACTIVE_AFTER_TRANSFER    (1 << 2)
+#    define HWFEAT_ESCAPE_LASTXFER                   (1 << 3)
 #  endif
 
 #else
   /* Any attempt to select hardware features with CONFIG_SPI_HWFEATURES
-   * deselected will cause an assertion.
+   * deselected will return an -ENOSYS error.
    */
 
 #  define SPI_HWFEATURES(d,f) (((f) == 0) ? OK : -ENOSYS)
@@ -431,6 +472,10 @@ struct spi_ops_s
   CODE void     (*select)(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
                   bool selected);
   CODE uint32_t (*setfrequency)(FAR struct spi_dev_s *dev, uint32_t frequency);
+#ifdef CONFIG_SPI_CS_DELAY_CONTROL
+  CODE int      (*setdelay)(FAR struct spi_dev_s *dev, uint32_t a, uint32_t b,
+                  uint32_t c);
+#endif
   CODE void     (*setmode)(FAR struct spi_dev_s *dev, enum spi_mode_e mode);
   CODE void     (*setbits)(FAR struct spi_dev_s *dev, int nbits);
 #ifdef CONFIG_SPI_HWFEATURES

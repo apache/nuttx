@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/samv7/sam_spi.c
  *
- *   Copyright (C) 2015=2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            Diego Sanchez <dsanchez@nx-engineering.com>
  *
@@ -194,6 +194,7 @@ struct sam_spidev_s
   sem_t spisem;                /* Assures mutually exclusive access to SPI */
   select_t select;             /* SPI select call-out */
   bool initialized;            /* TRUE: Controller has been initialized */
+  bool escape_lastxfer;        /* Dont set LASTXFER-Bit in the next transfer */
 #ifdef CONFIG_SAMV7_SPI_DMA
   uint8_t pid;                 /* SPI peripheral ID */
 #endif
@@ -266,6 +267,12 @@ static int      spi_lock(struct spi_dev_s *dev, bool lock);
 static void     spi_select(struct spi_dev_s *dev, enum spi_dev_e devid,
                   bool selected);
 static uint32_t spi_setfrequency(struct spi_dev_s *dev, uint32_t frequency);
+#ifdef CONFIG_SPI_CS_DELAY_CONTROL
+static int      spi_setdelay(struct spi_dev_s *dev, uint32_t a, uint32_t b, uint32_t c);
+#endif
+#ifdef CONFIG_SPI_HWFEATURES
+static int      spi_hwfeatures(struct spi_dev_s *dev, uint8_t features);
+#endif
 static void     spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode);
 static void     spi_setbits(struct spi_dev_s *dev, int nbits);
 static uint16_t spi_send(struct spi_dev_s *dev, uint16_t ch);
@@ -313,10 +320,13 @@ static const struct spi_ops_s g_spi0ops =
   .lock              = spi_lock,
   .select            = spi_select,
   .setfrequency      = spi_setfrequency,
+#ifdef CONFIG_SPI_CS_DELAY_CONTROL
+  .setdelay          = spi_setdelay,
+#endif
   .setmode           = spi_setmode,
   .setbits           = spi_setbits,
 #ifdef CONFIG_SPI_HWFEATURES
-  .hwfeatures        = 0,                 /* Not supported */
+  .hwfeatures        = spi_hwfeatures,
 #endif
   .status            = sam_spi0status,
 #ifdef CONFIG_SPI_CMDDATA
@@ -352,6 +362,9 @@ static const struct spi_ops_s g_spi1ops =
   .lock              = spi_lock,
   .select            = spi_select,
   .setfrequency      = spi_setfrequency,
+#ifdef CONFIG_SPI_CS_DELAY_CONTROL
+  .setdelay          = spi_setdelay,
+#endif
   .setmode           = spi_setmode,
   .setbits           = spi_setbits,
   .status            = sam_spi1status,
@@ -951,7 +964,18 @@ static void spi_select(struct spi_dev_s *dev, enum spi_dev_e devid,
 
       regval  = spi_getreg(spi, SAM_SPI_MR_OFFSET);
       regval &= ~SPI_MR_PCS_MASK;
+
+      /* SPI_VARSELECT means, that the ChipSelect for each device is set within
+       * the transferred data (SAM_SPI_TDR) instead inside the mode register
+       * (SAM_SPI_MR).
+       * In addition, the LASTXFER flag is also set within the transferred data
+       * (SAM_SPI_TDR) instead inside the control register (SAM_SPI_CR).
+       * (see spi_exchange)
+       */
+
+#ifndef CONFIG_SAMV7_SPI_VARSELECT
       regval |= (spi_cs2pcs(spics) << SPI_MR_PCS_SHIFT);
+#endif
       spi_putreg(spi, regval, SAM_SPI_MR_OFFSET);
     }
 
@@ -1016,9 +1040,9 @@ static uint32_t spi_setfrequency(struct spi_dev_s *dev, uint32_t frequency)
 
   scbr = SAM_SPI_CLOCK / frequency;
 
-  if (scbr < 8)
+  if (scbr < 2)
     {
-      scbr = 8;
+      scbr = 2;
     }
   else if (scbr > 254)
     {
@@ -1078,6 +1102,189 @@ static uint32_t spi_setfrequency(struct spi_dev_s *dev, uint32_t frequency)
   spierr("Frequency %d->%d\n", frequency, actual);
   return actual;
 }
+
+/****************************************************************************
+ * Name: spi_setdelay
+ *
+ * Description:
+ *   Set the SPI Delays in nanoseconds. Optional.
+ *
+ * Input Parameters:
+ *   dev        - Device-specific state data
+ *   startdelay - The delay between CS active and first CLK
+ *   stopdelay  - The delay between last CLK and CS inactive
+ *   csdelay    - The delay between CS inactive and CS active again
+ *
+ * Returned Value:
+ *   Returns 0 if ok
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SPI_CS_DELAY_CONTROL
+static int spi_setdelay(struct spi_dev_s *dev, uint32_t startdelay,
+                        uint32_t stopdelay, uint32_t csdelay)
+{
+  struct sam_spics_s *spics = (struct sam_spics_s *)dev;
+  struct sam_spidev_s *spi = spi_device(spics);
+  uint64_t dlybs;
+  uint64_t dlybct;
+  uint64_t dlybcs;
+  uint32_t regval;
+  unsigned int offset;
+
+  spivdbg("cs=%d startdelay=%d\n", spics->cs, startdelay);
+  spivdbg("cs=%d stopdelay=%d\n", spics->cs, stopdelay);
+  spivdbg("cs=%d csdelay=%d\n", spics->cs, csdelay);
+
+  offset = (unsigned int)g_csroffset[spics->cs];
+
+  /* startdelay = DLYBS: Delay Before SPCK.
+   * This field defines the delay from NPCS valid to the first valid SPCK
+   * transition. When DLYBS equals zero, the NPCS valid to SPCK transition is
+   * 1/2 the SPCK clock period.
+   * Otherwise, the following equations determine the delay:
+   *
+   *   Delay Before SPCK = DLYBS / SPI_CLK
+   *
+   * For a 2uS delay
+   *
+   *   DLYBS = SPI_CLK * 0.000002 = SPI_CLK / 500000
+   *
+   * TODO: Check for boundaries!
+   */
+
+  dlybs   = SAM_SPI_CLOCK;
+  dlybs  *= startdelay;
+  dlybs  /= 1000000000;
+  regval  = spi_getreg(spi, offset);
+  regval &= ~SPI_CSR_DLYBS_MASK;
+  regval |= (uint32_t) dlybs << SPI_CSR_DLYBS_SHIFT;
+
+  /* stopdelay = DLYBCT: Delay Between Consecutive Transfers.
+   * This field defines the delay between two consecutive transfers with the
+   * same peripheral without removing the chip select. The delay is always
+   * inserted after each transfer and before removing the chip select if
+   * needed.
+   *
+   *   Delay Between Consecutive Transfers = (32 x DLYBCT) / SPI_CLK
+   *
+   * For a 5uS delay:
+   *
+   *   DLYBCT = SPI_CLK * 0.000005 / 32 = SPI_CLK / 200000 / 32
+   */
+
+  dlybct  = SAM_SPI_CLOCK;
+  dlybct *= stopdelay;
+  dlybct /= 1000000000;
+  dlybct /= 32;
+  regval  = spi_getreg(spi, offset);
+  regval &= ~SPI_CSR_DLYBCT_MASK;
+  regval |= (uint32_t) dlybct << SPI_CSR_DLYBCT_SHIFT;
+  spi_putreg(spi, regval, offset);
+
+  /* csdelay = DLYBCS: Delay Between Chip Selects.
+   * This field defines the delay between the inactivation and the activation
+   * of NPCS. The DLYBCS time guarantees non-overlapping chip selects and
+   * solves bus contentions in case of peripherals having long data float
+   * times. If DLYBCS is lower than 6, six peripheral clock periods are
+   * inserted by default.
+   *
+   *   Delay Between Chip Selects = DLYBCS / SPI_CLK
+   *
+   *   DLYBCS = SPI_CLK * Delay
+   */
+  dlybcs  = SAM_SPI_CLOCK;
+  dlybcs *= csdelay;
+  dlybcs /= 1000000000;
+  regval  = spi_getreg(spi, SAM_SPI_MR_OFFSET);
+  regval &= ~SPI_MR_DLYBCS_MASK;
+  regval |= dlybcs << SPI_MR_DLYBCS_SHIFT;
+  spi_putreg(spi, regval, SAM_SPI_MR_OFFSET);
+
+  return 0;
+}
+#endif
+
+/****************************************************************************
+ * Name: spi_hwfeatures
+ *
+ * Description:
+ *   Use some super-special hardware Features. Optional.
+ *
+ * Input Parameters:
+ *   dev      -  Device-specific state data
+ *   features -  Bitmask of the activated features
+ *
+ * Returned Value:
+ *   Returns 0 if ok
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SPI_HWFEATURES
+static int spi_hwfeatures(struct spi_dev_s *dev, uint8_t features)
+{
+  struct sam_spics_s *spics = (struct sam_spics_s *)dev;
+  struct sam_spidev_s *spi = spi_device(spics);
+  uint32_t regval;
+  unsigned int offset;
+
+  /* CS rises after every Transmission, also if we provide new data
+   * immediately.
+   */
+
+  if (features & HWFEAT_FORCE_CS_INACTIVE_AFTER_TRANSFER)
+    {
+      offset  = (unsigned int)g_csroffset[spics->cs];
+      regval  = spi_getreg(spi, offset);
+      regval |= SPI_CSR_CSNAAT; /* Chip Select Not Active After Transfer */
+      regval &= ~SPI_CSR_CSAAT; /* Chip Select Active After Transfer */
+      spi_putreg(spi, regval, offset);
+    }
+  else
+    {
+      offset  = (unsigned int)g_csroffset[spics->cs];
+      regval  = spi_getreg(spi, offset);
+      regval &= ~SPI_CSR_CSNAAT; /* Chip Select Not Active After Transfer */
+      spi_putreg(spi, regval, offset);
+    }
+
+  /* CS does not rise automatically after a transmission, also if the spi runs
+   * out of data (for a long time)
+   */
+
+  if ((features & HWFEAT_FORCE_CS_ACTIVE_AFTER_TRANSFER) != 0)
+    {
+      offset  = (unsigned int)g_csroffset[spics->cs];
+      regval  = spi_getreg(spi, offset);
+      regval &= ~SPI_CSR_CSNAAT; /* Chip Select Not Active After Transfer */
+      regval |= SPI_CSR_CSAAT; /* Chip Select Active After Transfer */
+      spi_putreg(spi, regval, offset);
+    }
+  else
+    {
+      offset  = (unsigned int)g_csroffset[spics->cs];
+      regval  = spi_getreg(spi, offset);
+      regval &= ~SPI_CSR_CSAAT; /* Chip Select Not Active After Transfer */
+      spi_putreg(spi, regval, offset);
+    }
+
+  /* Do not set the LASTXFER-Bit at the last word of the next exchange,
+   * Flag is auto-resetting after the next LASTXFER condition.
+   * (see spi_exchange)
+   */
+
+  if ((features & HWFEAT_ESCAPE_LASTXFER) != 0)
+    {
+      spi->escape_lastxfer = true;
+    }
+  else
+    {
+      spi->escape_lastxfer = false;
+    }
+
+  return 0;
+}
+#endif
 
 /****************************************************************************
  * Name: spi_setmode
@@ -1191,7 +1398,9 @@ static void spi_setbits(struct spi_dev_s *dev, int nbits)
 
       spiinfo("csr[offset=%02x]=%08x\n", offset, regval);
 
-      /* Save the selection so the subsequence re-configurations will be faster */
+      /* Save the selection so the subsequence re-configurations will be
+       * faster.
+       */
 
       spics->nbits = nbits;
     }
@@ -1347,16 +1556,37 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
           data = 0xffff;
         }
 
+      /* SPI_VARSELECT means, that the ChipSelect for each device is set within
+       * the transferred data (SAM_SPI_TDR) instead inside the mode register
+       * (SAM_SPI_MR).
+       * In addition, the LASTXFER flag is also set within the transferred data
+       * (SAM_SPI_TDR) instead inside the control register (SAM_SPI_CR).
+       */
+
+#ifdef CONFIG_SAMV7_SPI_VARSELECT
       /* Set the PCS field in the value written to the TDR */
 
       data |= pcs;
 
       /* Do we need to set the LASTXFER bit in the TDR value too? */
 
-#ifdef CONFIG_SPI_VARSELECT
       if (nwords == 1)
         {
-          data |= SPI_TDR_LASTXFER;
+          if (spi->escape_lastxfer == false)
+            {
+              /* According the data sheet (SAME70 Rev. 2016-01) this LASTXFER
+               * bit has no effect without also setting CSAAT.
+               * (see HWFEAT_FORCE_CS_ACTIVE_AFTER_TRANSFER)
+               */
+
+               data |= SPI_TDR_LASTXFER;
+            }
+          else
+            {
+              /* the escaping should only prevent ONE last-xfer */
+
+              spi->escape_lastxfer = false;
+            }
         }
 #endif
 
@@ -1369,6 +1599,32 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
       /* Write the data to transmitted to the Transmit Data Register (TDR) */
 
       spi_putreg(spi, data, SAM_SPI_TDR_OFFSET);
+
+#ifndef CONFIG_SAMV7_SPI_VARSELECT
+      /* To de-assert the chip select line at the end of the transfer, the
+       * Last Transfer (LASTXFER) bit in SPI_CR must be set after writing the
+       * last data to transmit into SPI_TDR.
+       */
+
+      if (nwords == 1)
+        {
+          if (spi->escape_lastxfer == false)
+            {
+              /* According the datasheet (SAME70 Rev. 2016-01) this LASTXFER
+               * bit has no effect without also setting CSAAT.
+               * (see HWFEAT_FORCE_CS_ACTIVE_AFTER_TRANSFER)
+               */
+
+              spi_putreg(spi, SPI_CR_LASTXFER, SAM_SPI_CR_OFFSET);
+            }
+          else
+            {
+              /* the escaping should only prevent ONE last-xfer */
+
+              spi->escape_lastxfer = false;
+            }
+        }
+#endif
 
       /* Wait for the read data to be available in the RDR.
        * TODO:  Data transfer rates would be improved using the RX FIFO
@@ -1870,14 +2126,21 @@ FAR struct spi_dev_s *sam_spibus_initialize(int port)
 
       /* Configure the SPI mode register */
 
+      regval = SPI_MR_MSTR | SPI_MR_MODFDIS;
+
 #if defined(CONFIG_SAMV7_SPI_CS_DECODING)
       /* Enable Peripheral Chip Select Decoding? */
 
-      spi_putreg(spi, SPI_MR_MSTR | SPI_MR_MODFDIS | SPI_MR_PCSDEC,
-                 SAM_SPI_MR_OFFSET);
-#else
-      spi_putreg(spi, SPI_MR_MSTR | SPI_MR_MODFDIS, SAM_SPI_MR_OFFSET);
+      regval |= SPI_MR_PCSDEC;
 #endif
+
+# ifdef CONFIG_SAMV7_SPI_VARSELECT
+      /* Enable Variable Peripheral Selection? */
+
+      regval |= SPI_MR_PS;
+#endif
+
+      spi_putreg(spi, regval, SAM_SPI_MR_OFFSET);
 
       /* And enable the SPI */
 
@@ -1894,6 +2157,7 @@ FAR struct spi_dev_s *sam_spibus_initialize(int port)
        */
 
       sem_init(&spi->spisem, 0, 1);
+      spi->escape_lastxfer = false;
       spi->initialized = true;
 
 #ifdef CONFIG_SAMV7_SPI_DMA

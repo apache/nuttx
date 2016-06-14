@@ -835,6 +835,23 @@ config SAMV7_SPI_CS_DECODING
 	---help---
 		Use Peripheral Chip Select Decoding on SPI Master
 
+config SAMV7_SPI_VARSELECT
+	bool "SPI Variable Peripheral Select Mode"
+	default n
+	---help---
+		When enabled, the spi device is working in the "Variable Peripheral
+		Select Mode" (VARMODE) instead of the "Fixed Peripheral Select Mode"
+		(FIXEDMODE).
+
+		In FIXEDMODE the ChipSelect is set (once) with a call to spi_select and
+		stays the same value all the time. In addition an eventually signaled
+		LASTXFER has to be written to the global control register (SPI_CR).
+		Within the VARMODE, the ChipSelect can be changed with each datablock
+		transferred via spi_exchange because it is encoded by the driver
+		within the data.
+
+		The same behavior applies for the LASTXFER bit.
+
 config SAMV7_SPI_DMA
 	bool "SPI DMA"
 	default n
