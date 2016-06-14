@@ -21,6 +21,7 @@ Contents
     - U[S]ARTs and Serial Consoles
     - SPI
     - SDIO - MMC
+  - SPI Test
   - Configurations
      f7xx-nsh
      f7xx-evalos
@@ -436,6 +437,40 @@ SDIO
           DAT1 - PC9  CN12-1
           DAT2   PC10 CN11-1
           CD     PC11 CN11-2
+
+SPI Test
+========
+
+  The builtin SPI test facility can be enabled with the following settings:
+
+    +CONFIG_STM32F7_SPI=y
+    +CONFIG_STM32F7_SPI1=y
+    +CONFIG_STM32F7_SPI2=y
+    +CONFIG_STM32F7_SPI3=y
+
+    +# CONFIG_STM32F7_SPI_INTERRUPTS is not set
+    +# CONFIG_STM32F7_SPI_DMA is not set
+     # CONFIG_STM32F7_CUSTOM_CLOCKCONFIG is not set
+
+    +CONFIG_NUCLEO_SPI_TEST=y
+    +CONFIG_NUCLEO_SPI_TEST_MESSAGE="Hello World"
+    +CONFIG_NUCLEO_SPI1_TEST=y
+    +CONFIG_NUCLEO_SPI1_TEST_FREQ=1000000
+    +CONFIG_NUCLEO_SPI1_TEST_BITS=8
+    +CONFIG_NUCLEO_SPI1_TEST_MODE3=y
+
+    +CONFIG_NUCLEO_SPI2_TEST=y
+    +CONFIG_NUCLEO_SPI2_TEST_FREQ=12000000
+    +CONFIG_NUCLEO_SPI2_TEST_BITS=8
+    +CONFIG_NUCLEO_SPI2_TEST_MODE3=y
+
+    +CONFIG_NUCLEO_SPI3_TEST=y
+    +CONFIG_NUCLEO_SPI3_TEST_FREQ=40000000
+    +CONFIG_NUCLEO_SPI3_TEST_BITS=8
+    +CONFIG_NUCLEO_SPI3_TEST_MODE3=y
+
+    +CONFIG_LIB_BOARDCTL=y
+    +CONFIG_NSH_ARCHINIT=y
 
 Configurations
 ==============

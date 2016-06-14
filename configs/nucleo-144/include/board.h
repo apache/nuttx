@@ -296,6 +296,7 @@
 /* USART3:
  * Use  USART3 and the USB virtual COM port
 */
+
 #if defined(CONFIG_NUCLEO_CONSOLE_VIRTUAL)
  # define GPIO_USART3_RX GPIO_USART3_RX_3
  # define GPIO_USART3_TX GPIO_USART3_TX_3
@@ -307,9 +308,36 @@
  * with the serial interface with the adaptor's RX on pin CN11 pin 64 and
  * TX on pin CN11 pin 61
  *
- * USART8: has noit remap
+ * USART8: has no remap
  */
 
+/* SPI
+ *
+ *
+ *  PA6   MISO CN12-13
+ *  PA7   MOSI CN12-15
+ *  PA5   SCK  CN12-11
+ *
+ *  PB14  MISO CN12-28
+ *  PB15  MOSI CN12-26
+ *  PB10  SCK  CN12-25
+ *
+ *  PB4   MISO CN12-27
+ *  PB5   MOSI CN12-29
+ *  PB3   SCK  CN12-31
+ */
+
+#define GPIO_SPI1_MISO   GPIO_SPI1_MISO_1
+#define GPIO_SPI1_MOSI   GPIO_SPI1_MOSI_1
+#define GPIO_SPI1_SCK    GPIO_SPI1_SCK_1
+
+#define GPIO_SPI2_MISO   GPIO_SPI2_MISO_1
+#define GPIO_SPI2_MOSI   GPIO_SPI2_MOSI_1
+#define GPIO_SPI2_SCK    GPIO_SPI2_SCK_2
+
+#define GPIO_SPI3_MISO  GPIO_SPI3_MISO_1
+#define GPIO_SPI3_MOSI  GPIO_SPI3_MOSI_2
+#define GPIO_SPI3_SCK   GPIO_SPI3_SCK_1
 
 /* The STM32 F7 connects to a SMSC LAN8742A PHY using these pins:
  *

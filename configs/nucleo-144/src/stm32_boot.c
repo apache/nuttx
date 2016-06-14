@@ -70,7 +70,7 @@ void stm32_boardinitialize(void)
   board_autoled_initialize();
 #endif
 
-#if defined(CONFIG__SPI)
+#if defined(CONFIG_SPI)
   /* Configure SPI chip selects */
 
   stm32_spidev_initialize();

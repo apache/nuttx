@@ -111,10 +111,10 @@ int board_app_initialize(uintptr_t arg)
 #if defined(CONFIG_NUCLEO_SPI_TEST)
   /* Create SPI interfaces */
 
-  ret = stm32_spidev_bus_init();
+  ret = stm32_spidev_bus_test();
   if (ret != OK)
     {
-      ferr("ERROR: Failed to initialize SPI interfaces: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: Failed to initialize SPI interfaces: %d\n", ret);
       return ret;
     }
 #endif
