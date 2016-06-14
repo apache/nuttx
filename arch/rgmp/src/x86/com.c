@@ -245,19 +245,22 @@ static int up_setup(struct uart_dev_s *dev)
     } data;
 
     // clear and disable FIFO
+
     outb(base+COM_FCR, 1);
     outb(base+COM_FCR, 3);
     outb(base+COM_FCR, 0);
 
     // Clear any preexisting overrun indications and interrupts
     // Serial port doesn't exist if COM_LSR returns 0xFF
+
     inb(base+COM_LSR);
     inb(base+COM_IIR);
     inb(base+COM_RX);
-    if (inb(base+COM_LSR) == 0xff) {
-        err("COM %d does not exist\n", base);
+    if (inb(base+COM_LSR) == 0xff)
+      {
+        err("ERROR: COM %d does not exist\n", base);
         return -1;
-    }
+      }
 
     // Set speed; requires DLAB latch
     outb(base+COM_LCR, COM_LCR_DLAB);
@@ -583,42 +586,62 @@ void up_serialinit(void)
 #ifdef CONFIG_COM1
     dev = up_alloc_com(COM1, 4);
     if (dev == NULL)
-        err("alloc com1 fail\n");
-    else {
+      {
+        err("ERROR: alloc com1 fail\n");
+      }
+    else
+      {
         errcode = uart_register("/dev/ttyS0", dev);
         if (errcode)
-            err("register com1 fail\n");
-    }
+          {
+            err("ERROR: register com1 fail\n");
+          }
+      }
 #endif
 #ifdef CONFIG_COM2
     dev = up_alloc_com(COM2, 3);
     if (dev == NULL)
-        err("alloc com2 fail\n");
-    else {
+      {
+        err("ERROR: alloc com2 fail\n");
+      }
+    else
+      {
         errcode = uart_register("/dev/ttyS1", dev);
         if (errcode)
-            err("register com2 fail\n");
-    }
+          {
+            err("ERROR: register com2 fail\n");
+          }
+      }
 #endif
 #ifdef CONFIG_COM3
     dev = up_alloc_com(COM3, 4);
     if (dev == NULL)
-        err("alloc com3 fail\n");
-    else {
+      {
+        err("ERROR: alloc com3 fail\n");
+      }
+    else
+      {
         errcode = uart_register("/dev/ttyS2", dev);
         if (errcode)
-            err("register com3 fail\n");
-    }
+          {
+            err("ERROR: register com3 fail\n");
+          }
+      }
 #endif
 #ifdef CONFIG_COM4
     dev = up_alloc_com(COM4, 3);
     if (dev == NULL)
-        err("alloc com4 fail\n");
-    else {
+      {
+        err("ERROR: alloc com4 fail\n");
+      }
+    else
+      {
         errcode = uart_register("/dev/ttyS3", dev);
         if (errcode)
-            err("register com4 fail\n");
-    }
+          {
+            err("ERROR: register com4 fail\n");
+          }
+      }
 #endif
 }
 
