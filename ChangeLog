@@ -12005,3 +12005,43 @@
 	  system debug output. It enables general file system debug logic and
 	  enables selection of CONFIG_DEBUG_FS_ERROR, CONFIG_DEBUG_FS_WARN,
 	  and CONFIG_DEBUG_FS_INFO (2016-06-12).
+	* strtoul() and strtoull():  Fix errno settings required by function
+	  definition.  Resolved Bitbucket Issue #1. From Sebastien Lorquet
+	  (2016-06-13)
+	* arch/arm/src/stm32f7:  Add SPI driver.  DMA not yet supported.  From
+	  David Sidrane (2016-06-14).
+	* configs/nucleo-144:  Add test for STM32 F7 SPI.  From David Sidrane
+	  (2016-06-14).
+	* alert(): New debug macro: alert().  This is high priority,
+	  unconditional output and is used to simplify and stanardize crash
+	  error reporting(2016-06-14).
+	* arch/arm/src/tiva: Bug Fix in tiva_serial.c - UART5, UART6 and UART7
+	  were not being configured as TTYS0 for printing over serial console.
+	  From Shirshak Sengupta (2016-06-14).
+	* SAMV7: SPI: SPI-Freq. 40MHz; VARSELECT; hw-features
+	  This change adds the following improvements:
+	  - Increase the allowed SPI-Frequency from 20 to 40 MHz.
+	  - Correct and rename the "VARSELECT" option
+	    This option was included in the code as "CONFIG_SPI_VARSELECT" but
+	    nowhere  defined in a Kconfig file. The patch renames it to
+	    "CONFIG_SAMV7_SPI_VARSELECT" and corrects the implementation
+	    according the datasheet of Atmel. In short, this option switches
+	    the processor from "fixed peripheral selection" (single device) to
+	    "variable peripheral selection" (multiple devices on the bus).
+	  - Add a new Function to the interface to control the timing and delays
+	    of the chip according the ChipSelect lines. This function can
+	    control the delay between the assertion of the ChipSelect and the
+	    first bit, between the last bit and the de-assertion of the
+	    ChipSelect and between two ChipSelects. This is needed to tune the
+	    transfer according the specification of the connected devices.  
+	  - Add three "hw-features" for the SAMV7, which controls the behavior
+	    of the ChipSelect:
+	    - force CS inactive after transfer: this forces a (short)
+	      de-assertion of the CS after a transfer, even if more data is
+	      available in time
+	    - force CS active after transfer: this forces the CS to stay active
+	      after a transfer, even if the chip runs out of data.
+	      Btw.: this is a prerequisit to make the LASTXFER bit working at all.
+	    - escape LASTXFER: this suppresses the LASTXFER bit at the end of the
+	      next transfer. The "escape"-Flag is reset automatically.
+	  From Frank Benkert (2016-06-14)
