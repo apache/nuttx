@@ -74,19 +74,6 @@
 #  define CONFIG_SAMV7_SPI_SLAVE_QSIZE 8
 #endif
 
-/* Debug *******************************************************************/
-/* Check if SPI debug is enabled */
-
-#ifdef CONFIG_DEBUG_SPI
-#  define spierr  llerr
-#  define spiwarn llwarn
-#  define spiinfo llinfo
-#else
-#  define spierr(x...)
-#  define spiwarn(x...)
-#  define spiinfo(x...)
-#endif
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -144,7 +131,7 @@ static uint32_t spi_getreg(struct sam_spidev_s *priv,
 static void     spi_putreg(struct sam_spidev_s *priv, uint32_t value,
                   unsigned int offset);
 
-#if defined(CONFIG_DEBUG_SPI) && defined(CONFIG_DEBUG_INFO)
+#ifdef CONFIG_DEBUG_SPI_INFO
 static void     spi_dumpregs(struct sam_spidev_s *priv, const char *msg);
 #else
 # define        spi_dumpregs(priv,msg)
@@ -339,7 +326,7 @@ static void spi_putreg(struct sam_spidev_s *priv, uint32_t value,
  *
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG_SPI) && defined(CONFIG_DEBUG_INFO)
+#ifdef CONFIG_DEBUG_SPI_INFO
 static void spi_dumpregs(struct sam_spidev_s *priv, const char *msg)
 {
   spiinfo("%s:\n", msg);
@@ -448,7 +435,7 @@ static int spi_interrupt(struct sam_spidev_s *priv)
        * bit.
        */
 
-#ifdef CONFIG_DEBUG_SPI
+#ifdef CONFIG_DEBUG_SPI_ERROR
       /* Check the RX data overflow condition */
 
       if ((pending & SPI_INT_OVRES) != 0)
@@ -515,7 +502,7 @@ static int spi_interrupt(struct sam_spidev_s *priv)
        * Underrun Error Status Flag (UNDES) is set in the SPI_SR.
        */
 
-#ifdef CONFIG_DEBUG_SPI
+#ifdef CONFIG_DEBUG_SPI_ERROR
       /* Check the TX data underflow condition */
 
       if ((pending & SPI_INT_UNDES) != 0)
@@ -882,7 +869,7 @@ static void spi_bind(struct spi_sctrlr_s *sctrlr,
    */
 
   regval  = (SPI_INT_RDRF | SPI_INT_NSSR);
-#ifdef CONFIG_DEBUG_SPI
+#ifdef CONFIG_DEBUG_SPI_ERROR
   regval |= SPI_INT_OVRES;
 #endif
 

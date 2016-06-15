@@ -56,22 +56,6 @@
 #if defined(CONFIG_SAMA5_SPI0) || defined(CONFIG_SAMA5_SPI1)
 
 /************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
-
-/* Enables debug output from this file */
-
-#ifdef CONFIG_DEBUG_SPI
-#  define spierr  llerr
-#  define spiwarn llwarn
-#  define spiinfo llinfo
-#else
-#  define spierr(x...)
-#  define spiwarn(x...)
-#  define spiinfo(x...)
-#endif
-
-/************************************************************************************
  * Public Functions
  ************************************************************************************/
 

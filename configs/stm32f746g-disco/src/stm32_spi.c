@@ -58,20 +58,6 @@
     defined(CONFIG_STM32F7_SPI5)
 
 /************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
-
-#ifdef CONFIG_DEBUG_SPI
-#  define spierr  llerr
-#  define spiwarn llwarn
-#  define spiinfo llinfo
-#else
-#  define spierr(x...)
-#  define spiwarn(x...)
-#  define spiinfo(x...)
-#endif
-
-/************************************************************************************
  * Public Functions
  ************************************************************************************/
 

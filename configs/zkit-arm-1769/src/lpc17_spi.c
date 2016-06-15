@@ -63,29 +63,13 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-/* CONFIG_DEBUG_SPI enables debug output from this file (needs CONFIG_DEBUG_FEATURES too) */
-
-#ifdef CONFIG_DEBUG_SPI
-#  define spierr  llerr
-#  define spiwarn llwarn
-#  define spiinfo llinfo
-#else
-#  define spierr(x...)
-#  define spiwarn(x...)
-#  define spiinfo(x...)
-#endif
-
 /* Dump GPIO registers */
 
-#if defined(CONFIG_DEBUG_SPI) && defined(CONFIG_DEBUG_INFO)
+#if CONFIG_DEBUG_SPI_INFO
 #  define spi_dumpgpio(m) lpc17_dumpgpio(SDCCS_GPIO, m)
 #else
 #  define spi_dumpgpio(m)
 #endif
-
-/************************************************************************************
- * Private Functions
- ************************************************************************************/
 
 /************************************************************************************
  * Public Functions

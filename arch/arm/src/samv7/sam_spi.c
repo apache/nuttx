@@ -126,16 +126,6 @@
 #  undef CONFIG_SAMV7_SPI_DMADEBUG
 #endif
 
-#ifdef CONFIG_DEBUG_SPI
-#  define spierr  llerr
-#  define spiwarn llwarn
-#  define spiinfo llinfo
-#else
-#  define spierr(x...)
-#  define spiwarn(x...)
-#  define spiinfo(x...)
-#endif
-
 #define DMA_INITIAL      0
 #define DMA_AFTER_SETUP  1
 #define DMA_AFTER_START  2
@@ -228,7 +218,7 @@ static inline void spi_putreg(struct sam_spidev_s *spi, uint32_t value,
                   unsigned int offset);
 static inline struct sam_spidev_s *spi_device(struct sam_spics_s *spics);
 
-#if defined(CONFIG_DEBUG_SPI) && defined(CONFIG_DEBUG_INFO)
+#ifdef CONFIG_DEBUG_SPI_INFO
 static void     spi_dumpregs(struct sam_spidev_s *spi, const char *msg);
 #else
 # define        spi_dumpregs(spi,msg)
@@ -517,7 +507,7 @@ static inline void spi_putreg(struct sam_spidev_s *spi, uint32_t value,
  *
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG_SPI) && defined(CONFIG_DEBUG_INFO)
+#ifdef CONFIG_DEBUG_SPI_INFO
 static void spi_dumpregs(struct sam_spidev_s *spi, const char *msg)
 {
   spiinfo("%s:\n", msg);

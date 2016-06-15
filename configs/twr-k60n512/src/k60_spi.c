@@ -54,22 +54,6 @@
 #if defined(CONFIG_KINETIS_SPI1) || defined(CONFIG_KINETIS_SPI2)
 
 /************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
-
-/* Enables debug output from this file (needs CONFIG_DEBUG_FEATURES too) */
-
-#ifdef CONFIG_DEBUG_SPI
-#  define spierr  llerr
-#  define spiwarn llwarn
-#  define spiinfo llinfo
-#else
-#  define spierr(x...)
-#  define spiwarn(x...)
-#  define spiinfo(x...)
-#endif
-
-/************************************************************************************
  * Public Functions
  ************************************************************************************/
 

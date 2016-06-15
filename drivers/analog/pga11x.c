@@ -101,26 +101,6 @@
 
 #define SPI_DUMMY 0xff
 
-/* Debug ********************************************************************/
-/* Check if (non-standard) SPI debug is enabled */
-
-#ifndef CONFIG_DEBUG_FEATURES
-#  undef CONFIG_DEBUG_INFO
-#  undef CONFIG_DEBUG_SPI
-#endif
-
-#ifdef CONFIG_DEBUG_SPI
-#  define spierr err
-#  ifdef CONFIG_DEBUG_INFO
-#    define spiinfo err
-#  else
-#    define spiinfo(x...)
-#  endif
-#else
-#  define spierr(x...)
-#  define spiinfo(x...)
-#endif
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/

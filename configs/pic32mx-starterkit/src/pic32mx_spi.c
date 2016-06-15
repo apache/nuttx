@@ -55,22 +55,6 @@
     defined(CONFIG_PIC32MX_SPI3) || defined(CONFIG_PIC32MX_SPI4)
 
 /************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
-
-/* Enables debug output from this file */
-
-#ifdef CONFIG_DEBUG_SPI
-#  define spierr  llerr
-#  define spiwarn llwarn
-#  define spiinfo llinfo
-#else
-#  define spierr(x...)
-#  define spiwarn(x...)
-#  define spiinfo(x...)
-#endif
-
-/************************************************************************************
  * Public Functions
  ************************************************************************************/
 

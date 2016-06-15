@@ -136,19 +136,6 @@
 #  define SPI_TXDMA8NULL_CONFIG     (SPI_DMA_PRIO|DMA_SCR_MSIZE_8BITS |DMA_SCR_PSIZE_8BITS              |DMA_SCR_DIR_M2P)
 #endif
 
-/* Debug ****************************************************************************/
-/* Check if SPI debug is enabled */
-
-#ifdef CONFIG_DEBUG_SPI
-#  define spierr   llerr
-#  define spiwarn  llwarn
-#  define spiinfo  llinfo
-#else
-#  define spierr(x...)
-#  define spiwarn(x...)
-#  define spiinfo(x...)
-#endif
-
 /************************************************************************************
  * Private Types
  ************************************************************************************/

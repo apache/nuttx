@@ -87,18 +87,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Enables debug output from this file */
-
-#ifdef CONFIG_DEBUG_SPI
-#  define spierr  llerr
-#  define spiwarn llwarn
-#  define spiinfo llinfo
-#else
-#  define spierr(x...)
-#  define spiwarn(x...)
-#  define spiinfo(x...)
-#endif
-
 /* Clocking */
 
 #define LPC214X_CCLKFREQ  (LPC214X_FOSC*LPC214X_PLL_M)
@@ -227,7 +215,7 @@ static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
 
 static void spi_select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
-#ifdef CONFIG_DEBUG_SPI
+#ifdef CONFIG_DEBUG_SPI_INFO
   uint32_t regval;
 #endif
   uint32_t bit = 1 << 20;
@@ -236,7 +224,7 @@ static void spi_select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool sel
    * only thing on the bus.
    */
 
-#ifdef CONFIG_DEBUG_SPI
+#ifdef CONFIG_DEBUG_SPI_INFO
   regval = getreg32(CS_PIN_REGISTER);
 #endif
 
@@ -360,7 +348,7 @@ static uint8_t spi_status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 #ifdef CONFIG_SPI_CMDDATA
 static int spi_cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
 {
-#ifdef CONFIG_DEBUG_SPI
+#ifdef CONFIG_DEBUG_SPI_INFO
   uint32_t regval;
 #endif
   uint32_t bit = 1 << 23;
@@ -376,7 +364,7 @@ static int spi_cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd
    *  A0 = L: the inputs at D0 to D7 are transferred to the command registers."
    */
 
-#ifdef CONFIG_DEBUG_SPI
+#ifdef CONFIG_DEBUG_SPI_INFO
   regval = getreg32(CS_PIN_REGISTER);
 #endif
 

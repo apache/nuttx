@@ -118,33 +118,6 @@
 #  define GPIO_SOIC_CS (GPIO_OUTPUT|GPIO_VALUE_ONE|GPIO_PORTB|GPIO_PIN11)
 #endif
 
-/* The following enable debug output from this file.
- *
- * CONFIG_DEBUG_SPI && CONFIG_DEBUG_FEATURES - Define to enable basic SPI debug
- * CONFIG_DEBUG_INFO - Define to enable verbose SPI debug
- */
-
-#ifndef CONFIG_DEBUG_FEATURES
-#  undef CONFIG_DEBUG_SPI
-#  undef CONFIG_DEBUG_INFO
-#endif
-
-#ifdef CONFIG_DEBUG_SPI
-#  define spierr  llerr
-#  ifdef CONFIG_DEBUG_INFO
-#    define spiinfo llerr
-#  else
-#    define spiinfo(x...)
-#  endif
-#else
-#  define spierr(x...)
-#  define spiinfo(x...)
-#endif
-
-/************************************************************************************
- * Private Functions
- ************************************************************************************/
-
 /************************************************************************************
  * Public Functions
  ************************************************************************************/

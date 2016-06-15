@@ -381,30 +381,6 @@
 #  define illinfo(x...)
 #endif
 
-#ifdef CONFIG_DEBUG_SENSORS_ERROR
-#  define snerr(format, ...)    err(format, ##__VA_ARGS__)
-#  define snllerr(format, ...)  llerr(format, ##__VA_ARGS__)
-#else
-#  define snerr(x...)
-#  define snllerr(x...)
-#endif
-
-#ifdef CONFIG_DEBUG_SENSORS_WARN
-#  define snwarn(format, ...)   warn(format, ##__VA_ARGS__)
-#  define snllwarn(format, ...) llwarn(format, ##__VA_ARGS__)
-#else
-#  define snwarn(x...)
-#  define snllwarn(x...)
-#endif
-
-#ifdef CONFIG_DEBUG_SENSORS_INFO
-#  define sninfo(format, ...)   info(format, ##__VA_ARGS__)
-#  define snllinfo(format, ...) llinfo(format, ##__VA_ARGS__)
-#else
-#  define sninfo(x...)
-#  define snllinfo(x...)
-#endif
-
 #ifdef CONFIG_DEBUG_ANALOG_ERROR
 #  define aerr(format, ...)    err(format, ##__VA_ARGS__)
 #  define allerr(format, ...)  llerr(format, ##__VA_ARGS__)
@@ -595,6 +571,54 @@
 #else
 #  define gpioinfo(x...)
 #  define gpiollinfo(x...)
+#endif
+
+#ifdef CONFIG_DEBUG_SENSORS_ERROR
+#  define snerr(format, ...)    err(format, ##__VA_ARGS__)
+#  define snllerr(format, ...)  llerr(format, ##__VA_ARGS__)
+#else
+#  define snerr(x...)
+#  define snllerr(x...)
+#endif
+
+#ifdef CONFIG_DEBUG_SENSORS_WARN
+#  define snwarn(format, ...)   warn(format, ##__VA_ARGS__)
+#  define snllwarn(format, ...) llwarn(format, ##__VA_ARGS__)
+#else
+#  define snwarn(x...)
+#  define snllwarn(x...)
+#endif
+
+#ifdef CONFIG_DEBUG_SENSORS_INFO
+#  define sninfo(format, ...)   info(format, ##__VA_ARGS__)
+#  define snllinfo(format, ...) llinfo(format, ##__VA_ARGS__)
+#else
+#  define sninfo(x...)
+#  define snllinfo(x...)
+#endif
+
+#ifdef CONFIG_DEBUG_SPI_ERROR
+#  define spierr(format, ...)    err(format, ##__VA_ARGS__)
+#  define spillerr(format, ...)  llerr(format, ##__VA_ARGS__)
+#else
+#  define spierr(x...)
+#  define spillerr(x...)
+#endif
+
+#ifdef CONFIG_DEBUG_SPI_WARN
+#  define spiwarn(format, ...)   warn(format, ##__VA_ARGS__)
+#  define spillwarn(format, ...) llwarn(format, ##__VA_ARGS__)
+#else
+#  define spiwarn(x...)
+#  define spillwarn(x...)
+#endif
+
+#ifdef CONFIG_DEBUG_SPI_INFO
+#  define spiinfo(format, ...)   info(format, ##__VA_ARGS__)
+#  define spillinfo(format, ...) llinfo(format, ##__VA_ARGS__)
+#else
+#  define spiinfo(x...)
+#  define spillinfo(x...)
 #endif
 
 #else /* CONFIG_CPP_HAVE_VARARGS */
@@ -826,30 +850,6 @@
 #  define illinfo     (void)
 #endif
 
-#ifdef CONFIG_DEBUG_SENSORS_ERROR
-#  define snerr       err
-#  define snllerr     llerr
-#else
-#  define snerr       (void)
-#  define snllerr     (void)
-#endif
-
-#ifdef CONFIG_DEBUG_SENSORS_WARN
-#  define snwarn      warn
-#  define snllwarn    llwarn
-#else
-#  define snwarn      (void)
-#  define snllwarn    (void)
-#endif
-
-#ifdef CONFIG_DEBUG_SENSORS_INFO
-#  define sninfo      info
-#  define snllinfo    llinfo
-#else
-#  define sninfo      (void)
-#  define snllinfo    (void)
-#endif
-
 #ifdef CONFIG_DEBUG_ANALOG_ERROR
 #  define aerr        err
 #  define allerr      llerr
@@ -1042,6 +1042,54 @@
 #  define gpiollinfo  (void)
 #endif
 
+#ifdef CONFIG_DEBUG_SENSORS_ERROR
+#  define snerr       err
+#  define snllerr     llerr
+#else
+#  define snerr       (void)
+#  define snllerr     (void)
+#endif
+
+#ifdef CONFIG_DEBUG_SENSORS_WARN
+#  define snwarn      warn
+#  define snllwarn    llwarn
+#else
+#  define snwarn      (void)
+#  define snllwarn    (void)
+#endif
+
+#ifdef CONFIG_DEBUG_SENSORS_INFO
+#  define sninfo      info
+#  define snllinfo    llinfo
+#else
+#  define sninfo      (void)
+#  define snllinfo    (void)
+#endif
+
+#ifdef CONFIG_DEBUG_SPI_ERROR
+#  define spierr      err
+#  define spillerr    llerr
+#else
+#  define spierr      (void)
+#  define spillerr    (void)
+#endif
+
+#ifdef CONFIG_DEBUG_SPI_WARN
+#  define spiwarn     warn
+#  define spillwarn   llwarn
+#else
+#  define spiwarn     (void)
+#  define spillwarn   (void)
+#endif
+
+#ifdef CONFIG_DEBUG_SPI_INFO
+#  define spiinfo     info
+#  define spillinfo   llinfo
+#else
+#  define spiinfo     (void)
+#  define spillinfo   (void)
+#endif
+
 #endif /* CONFIG_CPP_HAVE_VARARGS */
 
 /* Buffer dumping macros do not depend on varargs */
@@ -1170,6 +1218,14 @@
 #else
 #  define gpioerrdumpbuffer(m,b,n)
 #  define gpioinfodumpbuffer(m,b,n)
+#endif
+
+#ifdef CONFIG_DEBUG_SENSORS
+#  define snerrdumpbuffer(m,b,n)  errdumpbuffer(m,b,n)
+#  define sninfodumpbuffer(m,b,n) infodumpbuffer(m,b,n)
+#else
+#  define snerrdumpbuffer(m,b,n)
+#  define sninfodumpbuffer(m,b,n)
 #endif
 
 /****************************************************************************

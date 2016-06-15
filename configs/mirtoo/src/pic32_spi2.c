@@ -92,21 +92,6 @@
 #define GPIO_PGA117_CS      (GPIO_OUTPUT|GPIO_VALUE_ONE|GPIO_PORTB|GPIO_PIN7)
 #define GPIO_SST25VF032B_CS (GPIO_OUTPUT|GPIO_VALUE_ONE|GPIO_PORTB|GPIO_PIN13)
 
-/* The following enable debug output from this file (needs CONFIG_DEBUG_FEATURES too).
- *
- * CONFIG_DEBUG_SPI - Define to enable basic SPI debug
- */
-
-#ifdef CONFIG_DEBUG_SPI
-#  define spierr  llerr
-#  define spiwarn llwarn
-#  define spiinfo llinfo
-#else
-#  define spierr(x...)
-#  define spiwarn(x...)
-#  define spiinfo(x...)
-#endif
-
 /************************************************************************************
  * Public Functions
  ************************************************************************************/

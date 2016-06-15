@@ -74,23 +74,6 @@
 #ifdef SAMDL_HAVE_SPI
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* Debug *******************************************************************/
-/* Check if SPI debug is enabled */
-
-#ifdef CONFIG_DEBUG_SPI
-#  define spierr  llerr
-#  define spiwarn llwarn
-#  define spiinfo llinfo
-#else
-#  define spierr(x...)
-#  define spiwarn(x...)
-#  define spiinfo(x...)
-#endif
-
-/****************************************************************************
  * Private Types
  ****************************************************************************/
 
@@ -163,7 +146,7 @@ static uint32_t spi_getreg32(struct sam_spidev_s *priv,
 static void     spi_putreg32(struct sam_spidev_s *priv, uint32_t regval,
                   unsigned int offset);
 
-#if defined(CONFIG_DEBUG_SPI) && defined(CONFIG_DEBUG_INFO)
+#ifdef CONFIG_DEBUG_SPI_INFO
 static void     spi_dumpregs(struct sam_spidev_s *priv, const char *msg);
 #else
 # define        spi_dumpregs(priv,msg)
@@ -727,7 +710,7 @@ static void spi_putreg32(struct sam_spidev_s *priv, uint32_t regval,
  *
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG_SPI) && defined(CONFIG_DEBUG_INFO)
+#ifdef CONFIG_DEBUG_SPI_INFO
 static void spi_dumpregs(struct sam_spidev_s *priv, const char *msg)
 {
   spiinfo("%s:\n", msg);

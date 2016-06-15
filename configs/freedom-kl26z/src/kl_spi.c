@@ -52,28 +52,6 @@
 #if defined(CONFIG_KL_SPI0) || defined(CONFIG_KL_SPI1)
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* Enables debug output from this file (needs CONFIG_DEBUG_FEATURES too) */
-
-#ifdef CONFIG_DEBUG_SPI
-#  define spierr  llerr
-#  ifdef CONFIG_DEBUG_INFO
-#    define spiinfo llerr
-#  else
-#    define spiinfo(x...)
-#  endif
-#else
-#  define spierr(x...)
-#  define spiinfo(x...)
-#endif
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 

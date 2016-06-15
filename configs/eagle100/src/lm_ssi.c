@@ -62,14 +62,8 @@
 /* CONFIG_DEBUG_SPI enables debug output from this file */
 
 #ifdef CONFIG_DEBUG_SPI
-#  define ssierr  llerr
-#  define ssiwarn llwarn
-#  define ssiinfo llinfo
 #  define ssi_dumpgpio(m) tiva_dumpgpio(SDCCS_GPIO, m)
 #else
-#  define ssierr(x...)
-#  define ssiwarn(x...)
-#  define ssiinfo(x...)
 #  define ssi_dumpgpio(m)
 #endif
 
@@ -115,7 +109,7 @@ void weak_function lm_ssidev_initialize(void)
 
 void tiva_ssiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
-  ssiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
   if (devid == SPIDEV_MMCSD)
     {
       /* Assert the CS pin to the card */
@@ -128,7 +122,7 @@ void tiva_ssiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool select
 
 uint8_t tiva_ssistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 {
-  ssiinfo("Returning SPI_STATUS_PRESENT\n");
+  spiinfo("Returning SPI_STATUS_PRESENT\n");
   return SPI_STATUS_PRESENT;
 }
 

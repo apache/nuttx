@@ -60,19 +60,6 @@
  ************************************************************************************/
 /* Configuration ********************************************************************/
 
-/* Debug ****************************************************************************/
-/* Check if SPI debug is enabled */
-
-#ifdef CONFIG_DEBUG_SPI
-#  define spierr  llerr
-#  define spiwarn llwarn
-#  define spiinfo llinfo
-#else
-#  define spierr(x...)
-#  define spiwarn(x...)
-#  define spiinfo(x...)
-#endif
-
 /* Define the FLASH SIZE in bytes */
 
 #ifdef CONFIG_SIM_SPIFLASH_1M

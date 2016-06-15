@@ -80,18 +80,6 @@
 #define TEENSY_CD (1 << 4)
 #define TEENSY_WP (1 << 5)
 
-/* The following enable debug output from this file */
-
-#ifdef CONFIG_CONFIG_DEBUG_SPI
-#  define ssperr  llerr
-#  define sspwarn llwarn
-#  define sspinfo llinfo
-#else
-#  define ssperr(x...)
-#  define sspwarn(x...)
-#  define sspinfo(x...)
-#endif
-
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
@@ -150,7 +138,7 @@ void weak_function at90usb_spidev_initialize(void)
 
 void  avr_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
-  sspinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 
   /* Assert/de-assert the CS pin to the card */
 
@@ -183,7 +171,7 @@ uint8_t avr_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
       ret |= SPI_STATUS_WRPROTECTED;
     }
 
-  sspinfo("Returning %02x\n", ret);
+  spiinfo("Returning %02x\n", ret);
   return ret;
 }
 

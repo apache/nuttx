@@ -60,29 +60,6 @@
 #if defined(CONFIG_KL_SPI0) || defined(CONFIG_KL_SPI1)
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-/* Debug ********************************************************************/
-/* The following enable debug output from this file:
- *
- * CONFIG_DEBUG_FEATURES - Define to enable general debug features
- * CONFIG_DEBUG_SPI      - Define to enable basic SSP debug (needs CONFIG_DEBUG_FEATURES)
- * CONFIG_DEBUG_INFO     - Define to enable verbose SSP debug
- */
-
-#ifdef CONFIG_DEBUG_SPI
-#  define spierr  llerr
-#  ifdef CONFIG_DEBUG_INFO
-#    define spiinfo llerr
-#  else
-#    define spiinfo(x...)
-#  endif
-#else
-#  define spierr(x...)
-#  define spiinfo(x...)
-#endif
-
-/****************************************************************************
  * Private Types
  ****************************************************************************/
 

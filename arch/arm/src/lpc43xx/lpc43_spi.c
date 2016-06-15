@@ -64,18 +64,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Enables debug output from this file (needs CONFIG_DEBUG_FEATURES too) */
-
-#ifdef CONFIG_DEBUG_SPI
-#  define spierr  llerr
-#  define spiwarn llwarn
-#  define spiinfo llinfo
-#else
-#  define spierr(x...)
-#  define spiwarn(x...)
-#  define spiinfo(x...)
-#endif
-
 /* SPI Clocking.
  *
  * The CPU clock by 1, 2, 4, or 8 to get the SPI peripheral clock (SPI_CLOCK).

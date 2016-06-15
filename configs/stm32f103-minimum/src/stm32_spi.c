@@ -55,29 +55,6 @@
 #if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2)
 
 /************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
-
-/* Enables debug output from this file (needs CONFIG_DEBUG_FEATURES too) */
-
-#ifndef CONFIG_DEBUG_FEATURES
-#  undef CONFIG_DEBUG_INFO
-#  undef CONFIG_DEBUG_SPI
-#endif
-
-#ifdef CONFIG_DEBUG_SPI
-#  define spierr llerr
-#  ifdef CONFIG_DEBUG_INFO
-#    define spiinfo llerr
-#  else
-#    define spiinfo(x...)
-#  endif
-#else
-#  define spierr(x...)
-#  define spiinfo(x...)
-#endif
-
-/************************************************************************************
  * Public Functions
  ************************************************************************************/
 

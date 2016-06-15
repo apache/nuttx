@@ -75,21 +75,6 @@
 #  error CONFIG_SPI_EXCHANGE is not supported by this driver
 #endif
 
-/* Debug ********************************************************************/
-/* CONFIG_DEBUG_SPI enables debug output from this file */
-
-#ifdef CONFIG_DEBUG_SPI
-#  define spierr  llerr
-#  ifdef CONFIG_DEBUG_INFO
-#    define spiinfo llerr
-#  else
-#    define spiinfo(x...)
-#  endif
-#else
-#  define spierr(x...)
-#  define spiinfo(x...)
-#endif
-
 /* SPI Clocking.
  *
  * The CPU clock is divided by by 1, 2, 4, or 8 to get the SPI peripheral

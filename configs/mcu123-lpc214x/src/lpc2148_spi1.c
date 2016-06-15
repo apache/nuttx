@@ -86,20 +86,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Enables debug output from this file */
-
-#ifdef CONFIG_DEBUG_SPI
-#  define spierr  llerr
-#  ifdef CONFIG_DEBUG_INFO
-#    define spiinfo llerr
-#  else
-#    define spiinfo(x...)
-#  endif
-#else
-#  define spierr(x...)
-#  define spiinfo(x...)
-#endif
-
 /* Clocking */
 
 #define LPC214X_CCLKFREQ  (LPC214X_FOSC*LPC214X_PLL_M)

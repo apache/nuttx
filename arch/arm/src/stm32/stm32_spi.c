@@ -155,20 +155,6 @@
 #  error "Unknown STM32 DMA"
 #endif
 
-
-/* Debug ****************************************************************************/
-/* Check if SPI debug is enabled */
-
-#ifdef CONFIG_DEBUG_SPI
-#  define spierr  llerr
-#  define spiwarn llwarn
-#  define spiinfo llinfo
-#else
-#  define spierr(x...)
-#  define spiwarn(x...)
-#  define spiinfo(x...)
-#endif
-
 /************************************************************************************
  * Private Types
  ************************************************************************************/

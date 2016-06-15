@@ -56,22 +56,6 @@
 #ifdef CONFIG_Z16F_ESPI
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-/* Debug *******************************************************************/
-/* Check if SPI debug is enabled */
-
-#ifdef CONFIG_DEBUG_SPI
-#  define spierr  llerr
-#  define spiwarn llwarn
-#  define spiinfo llinfo
-#else
-#  define spierr(x...)
-#  define spiwarn(x...)
-#  define spiinfo(x...)
-#endif
-
-/****************************************************************************
  * Private Types
  ****************************************************************************/
 
@@ -117,7 +101,7 @@ static void     spi_putreg16(FAR struct z16f_spi_s *priv, uint16_t regval,
 # define        spi_putreg16(priv,regval,regaddr) putreg16(regval, regaddr)
 #endif
 
-#if defined(CONFIG_DEBUG_SPI) && defined(CONFIG_DEBUG_INFO)
+#ifdef CONFIG_DEBUG_SPI_INFO
 static void     spi_dumpregs(FAR struct z16f_spi_s *priv, const char *msg);
 #else
 # define        spi_dumpregs(priv,msg)
@@ -317,7 +301,7 @@ static void spi_putreg16(FAR struct z16f_spi_s *priv, uint16_t regval,
  *
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG_SPI) && defined(CONFIG_DEBUG_INFO)
+#ifdef CONFIG_DEBUG_SPI_INFO
 static void spi_dumpregs(FAR struct z16f_spi_s *priv, FAR const char *msg)
 {
   spiinfo("%s:\n", msg);

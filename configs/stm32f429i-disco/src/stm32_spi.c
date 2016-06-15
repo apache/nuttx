@@ -57,32 +57,12 @@
     defined(CONFIG_STM32_SPI4) || defined(CONFIG_STM32_SPI5)
 
 /************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
-
-/* Enables debug output from this file */
-
-#ifdef CONFIG_DEBUG_SPI
-#  define spierr  llerr
-#  define spiwarn llwarn
-#  define spiinfo llinfo
-#else
-#  define spierr(x...)
-#  define spiwarn(x...)
-#  define spiinfo(x...)
-#endif
-
-/************************************************************************************
  * Private Data
  ************************************************************************************/
 
 #ifdef CONFIG_STM32_SPI5
 FAR struct spi_dev_s *g_spidev5 = NULL;
 #endif
-
-/************************************************************************************
- * Private Functions
- ************************************************************************************/
 
 /************************************************************************************
  * Public Functions

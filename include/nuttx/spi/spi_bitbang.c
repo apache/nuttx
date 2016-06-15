@@ -64,32 +64,6 @@
  *   in the bit bang interface and calls spi_create_bitbang().
  */
 
-/* Debug ********************************************************************/
-/* Check if SPI debut is enabled (non-standard.. no support in
- * include/debug.h
- */
-
-#ifndef CONFIG_DEBUG_FEATURES
-#  undef CONFIG_DEBUG_INFO
-#  undef CONFIG_DEBUG_SPI
-#endif
-
-#ifdef CONFIG_DEBUG_SPI
-#  define spierr llerr
-#  ifdef CONFIG_DEBUG_INFO
-#    define spiinfo llerr
-#  else
-#    define spiinfo(x...)
-#  endif
-#else
-#  define spierr(x...)
-#  define spiinfo(x...)
-#endif
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
-
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/

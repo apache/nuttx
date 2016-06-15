@@ -134,7 +134,7 @@
 
 /* Debug option */
 
-#ifdef CONFIG_DEBUG_SPI
+#ifdef CONFIG_DEBUG_LCD
 #  define lcderr  err
 #  define lcdwarn warn
 #  define lcdinfo info

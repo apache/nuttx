@@ -74,19 +74,6 @@
 #endif
 
 /* Debug ********************************************************************/
-
-/* The following enable debug output from this file */
-
-#ifdef CONFIG_DEBUG_SPI
-#  define ssperr  llerr
-#  define sspwarn llwarn
-#  define sspinfo llinfo
-#else
-#  define ssperr(x...)
-#  define sspwarn(x...)
-#  define sspinfo(x...)
-#endif
-
 /* Dump GPIO registers */
 
 #ifdef CONFIG_DEBUG_GPIO_INFO
@@ -278,7 +265,7 @@ void weak_function lpc1766stk_sspdev_initialize(void)
 #ifdef CONFIG_LPC17_SSP0
 void  lpc17_ssp0select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
-  sspinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
   if (devid == SPIDEV_DISPLAY)
     {
       /* Assert/de-assert the CS pin to the card */
@@ -291,7 +278,7 @@ void  lpc17_ssp0select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool sel
 
 uint8_t lpc17_ssp0status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 {
-  sspinfo("Returning nothing\n");
+  spiinfo("Returning nothing\n");
   return 0;
 }
 #endif
@@ -299,7 +286,7 @@ uint8_t lpc17_ssp0status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 #ifdef CONFIG_LPC17_SSP1
 void  lpc17_ssp1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
-  sspinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
   if (devid == SPIDEV_MMCSD)
     {
       /* Assert/de-assert the CS pin to the card */
@@ -312,7 +299,7 @@ void  lpc17_ssp1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool sel
 
 uint8_t lpc17_ssp1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 {
-  sspinfo("Returning SPI_STATUS_PRESENT\n");
+  spiinfo("Returning SPI_STATUS_PRESENT\n");
   return SPI_STATUS_PRESENT;
 }
 #endif

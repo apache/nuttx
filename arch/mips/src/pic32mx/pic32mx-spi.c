@@ -72,18 +72,6 @@
 #  error CONFIG_SPI_EXCHANGE not supported by this driver
 #endif
 
-/* Debug */
-
-#ifdef CONFIG_DEBUG_SPI
-#  define spierr  llerr
-#  define spiwarn llwarn
-#  define spiinfo llinfo
-#else
-#  define spierr(x...)
-#  define spiwarn(x...)
-#  define spiinfo(x...)
-#endif
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/

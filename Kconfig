@@ -1091,13 +1091,39 @@ config DEBUG_SENSORS_INFO
 endif # DEBUG_SENSORS
 
 config DEBUG_SPI
-	bool "SPI Debug Output"
+	bool "SPI Debug Features"
 	default n
 	depends on SPI
 	---help---
-		Enable I2C driver debug SYSLOG output (disabled by default).
+		Enable SPI debug features.
+
 		Support for this debug option is architecture-specific and may not
 		be available for some MCUs.
+
+if DEBUG_SPI
+
+config DEBUG_SPI_ERROR
+	bool "SPI Error Output"
+	default n
+	depends on DEBUG_ERROR
+	---help---
+		Enable SPI error output to SYSLOG.
+
+config DEBUG_SPI_WARN
+	bool "SPI Warnings Output"
+	default n
+	depends on DEBUG_WARN
+	---help---
+		Enable SPI warning output to SYSLOG.
+
+config DEBUG_SPI_INFO
+	bool "SPI Informational Output"
+	default n
+	depends on DEBUG_INFO
+	---help---
+		Enable SPI informational output to SYSLOG.
+
+endif # DEBUG_SPI
 
 config DEBUG_TIMER
 	bool "Timer Debug Output"

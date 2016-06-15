@@ -144,16 +144,6 @@
 #  undef CONFIG_SAMV7_QSPI_DMADEBUG
 #endif
 
-#ifdef CONFIG_DEBUG_SPI
-#  define spierr  llerr
-#  define spiwarn llwarn
-#  define spiinfo llinfo
-#else
-#  define spierr(x...)
-#  define spiwarn(x...)
-#  define spiinfo(x...)
-#endif
-
 #define DMA_INITIAL      0
 #define DMA_AFTER_SETUP  1
 #define DMA_AFTER_START  2
@@ -232,7 +222,7 @@ static inline uint32_t qspi_getreg(struct sam_qspidev_s *priv,
 static inline void qspi_putreg(struct sam_qspidev_s *priv, uint32_t value,
                   unsigned int offset);
 
-#if defined(CONFIG_DEBUG_SPI) && defined(CONFIG_DEBUG_INFO)
+#ifdef CONFIG_DEBUG_SPI_INFO
 static void     qspi_dumpregs(struct sam_qspidev_s *priv, const char *msg);
 #else
 # define        qspi_dumpregs(priv,msg)
@@ -463,7 +453,7 @@ static inline void qspi_putreg(struct sam_qspidev_s *priv, uint32_t value,
  *
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG_SPI) && defined(CONFIG_DEBUG_INFO)
+#ifdef CONFIG_DEBUG_SPI_INFO
 static void qspi_dumpregs(struct sam_qspidev_s *priv, const char *msg)
 {
   qspiinfo("%s:\n", msg);
@@ -1352,7 +1342,7 @@ static int qspi_command(struct qspi_dev_s *dev,
 
   DEBUGASSERT(priv != NULL && cmdinfo != NULL);
 
-#ifdef CONFIG_DEBUG_SPI
+#ifdef CONFIG_DEBUG_SPI_INFO
   qspiinfo("Transfer:\n");
   qspiinfo("  flags: %02x\n", cmdinfo->flags);
   qspiinfo("  cmd: %04x\n", cmdinfo->cmd);
