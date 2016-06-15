@@ -123,22 +123,7 @@
 #define CAN_DEBUG_INTS (CAN_INT_ERRA | CAN_INT_WARN | CAN_INT_CERR | \
                         CAN_INT_SERR | CAN_INT_FERR | CAN_INT_BERR)
 
-/* Debug ********************************************************************/
-/* Non-standard debug that may be enabled just for testing CAN */
-
-#ifdef CONFIG_DEBUG_CAN
-#  define canerr    err
-#  define caninfo   info
-#  define canllerr  llerr
-#  define canllinfo llinfo
-#else
-#  define canerr(x...)
-#  define caninfo(x...)
-#  define canllerr(x...)
-#  define canllinfo(x...)
-#endif
-
-#if !defined(CONFIG_DEBUG_FEATURES) || !defined(CONFIG_DEBUG_CAN)
+#ifndef CONFIG_DEBUG_CAN_INFO
 #  undef CONFIG_SAMA5_CAN_REGDEBUG
 #endif
 

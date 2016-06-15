@@ -2323,11 +2323,11 @@ config SAMA5_CAN_AUTOBAUD
 
 config SAMA5_CAN_REGDEBUG
 	bool "CAN Register level debug"
-	depends on DEBUG_FEATURES
+	depends on DEBUG_CAN_INFO
 	default n
 	---help---
 		Output detailed register-level CAN device debug information.
-		Requires also CONFIG_DEBUG_FEATURES.
+		Requires also CONFIG_DEBUG_CAN_INFO.
 
 endmenu # CAN device driver options
 endif # SAMA5_CAN0 || SAMA5_CAN1

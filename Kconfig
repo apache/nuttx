@@ -980,7 +980,7 @@ config DEBUG_ANALOG
 	default n
 	depends on ANALOG
 	---help---
-		Enable analog devic debug features.
+		Enable analog device debug features.
 		Enable low level debug features the analog device drivers such as
 		A/D and D/A converters (disabled by default).  Support for this
 		debug option is architecture-specific and may not be available for
@@ -1007,18 +1007,44 @@ config DEBUG_ANALOG_INFO
 	default n
 	depends on DEBUG_INFO
 	---help---
-		Enable analog device informational output to SYSLOG.
+		Enable CAN driver informational output to SYSLOG.
 
 endif # DEBUG_ANALOG
 
 config DEBUG_CAN
-	bool "CAN Debug Output"
+	bool "CAN Debug Features"
 	default n
 	depends on CAN
 	---help---
-		Enable CAN driver debug SYSLOG output (disabled by default).
+		Enable CAN driver debug features.
+
 		Support for this debug option is architecture-specific and may not
 		be available for some MCUs.
+
+if DEBUG_CAN
+
+config DEBUG_CAN_ERROR
+	bool "CAN Error Output"
+	default n
+	depends on DEBUG_ERROR
+	---help---
+		Enable CAN driver error output to SYSLOG.
+
+config DEBUG_CAN_WARN
+	bool "CAN Warnings Output"
+	default n
+	depends on DEBUG_WARN
+	---help---
+		Enable CAN driver warning output to SYSLOG.
+
+config DEBUG_CAN_INFO
+	bool "CAN Informational Output"
+	default n
+	depends on DEBUG_INFO
+	---help---
+		Enable CAN driver informational output to SYSLOG.
+
+endif # DEBUG_CAN
 
 config DEBUG_GPIO
 	bool "GPIO Debug Features"

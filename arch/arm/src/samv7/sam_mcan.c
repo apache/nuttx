@@ -789,28 +789,14 @@
 /* Debug ********************************************************************/
 /* Debug configurations that may be enabled just for testing MCAN */
 
-#if !defined(CONFIG_DEBUG_FEATURES) || !defined(CONFIG_DEBUG_CAN)
+#ifndef CONFIG_DEBUG_CAN_INFO
 #  undef CONFIG_SAMV7_MCAN_REGDEBUG
 #endif
 
-#ifdef CONFIG_DEBUG_CAN
-#  define canerr    err
-#  define caninfo   info
-#  define canllerr  llerr
-#  define canllinfo llinfo
-
-#  ifdef CONFIG_SAMV7_MCAN_REGDEBUG
-#    define canregerr llerr
-#  else
-#    define canregerr(x...)
-#  endif
-
+#ifdef CONFIG_SAMV7_MCAN_REGDEBUG
+#  define reginfo caninfo
 #else
-#  define canerr(x...)
-#  define caninfo(x...)
-#  define canllerr(x...)
-#  define canllinfo(x...)
-#  define canregerr(x...)
+#  define reginfo(x...)
 #endif
 
 /****************************************************************************
@@ -2756,7 +2742,7 @@ static int mcan_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
     }
 
   txbuffer[0] = regval;
-  canregerr("T0: %08x\n", regval);
+  reginfo("T0: %08x\n", regval);
 
   /* Format word T1:
    *   Data Length Code (DLC)            - Value from message structure
@@ -2765,7 +2751,7 @@ static int mcan_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
    */
 
   txbuffer[1] = BUFFER_R1_DLC(msg->cm_hdr.ch_dlc);
-  canregerr("T1: %08x\n", txbuffer[1]);
+  reginfo("T1: %08x\n", txbuffer[1]);
 
   /* Followed by the amount of data corresponding to the DLC (T2..) */
 
@@ -3194,7 +3180,7 @@ static void mcan_receive(FAR struct can_dev_s *dev, FAR uint32_t *rxbuffer,
   /* Work R0 contains the CAN ID */
 
   regval = *rxbuffer++;
-  canregerr("R0: %08x\n", regval);
+  reginfo("R0: %08x\n", regval);
 
 #ifdef CONFIG_CAN_ERRORS
   hdr.ch_error  = 0;
@@ -3240,7 +3226,7 @@ static void mcan_receive(FAR struct can_dev_s *dev, FAR uint32_t *rxbuffer,
   /* Word R1 contains the DLC and timestamp */
 
   regval = *rxbuffer++;
-  canregerr("R1: %08x\n", regval);
+  reginfo("R1: %08x\n", regval);
 
   hdr.ch_dlc = (regval & BUFFER_R1_DLC_MASK) >> BUFFER_R1_DLC_SHIFT;
 

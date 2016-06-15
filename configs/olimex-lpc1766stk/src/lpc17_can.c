@@ -73,25 +73,6 @@
 #  define CAN_PORT 2
 #endif
 
-/* Debug ***************************************************************************/
-/* Non-standard debug that may be enabled just for testing CAN */
-
-#ifdef CONFIG_DEBUG_CAN
-#  define canerr    err
-#  define caninfo   info
-#  define canllerr  llerr
-#  define canllinfo llinfo
-#else
-#  define canerr(x...)
-#  define caninfo(x...)
-#  define canllerr(x...)
-#  define canllinfo(x...)
-#endif
-
-/************************************************************************************
- * Private Functions
- ************************************************************************************/
-
 /************************************************************************************
  * Public Functions
  ************************************************************************************/

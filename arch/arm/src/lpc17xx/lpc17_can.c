@@ -160,25 +160,8 @@
 /* Debug ********************************************************************/
 /* Non-standard debug that may be enabled just for testing CAN */
 
-#if !defined(CONFIG_DEBUG_FEATURES) || !defined(CONFIG_DEBUG_CAN)
-#  undef CONFIG_CAN_REGDEBUG
-#endif
-
-#ifdef CONFIG_DEBUG_CAN
-#  ifdef CONFIG_CAN_REGDEBUG
-#    define canerr  llerr
-#    define caninfo llinfo
-#  else
-#    define canerr  err
-#    define caninfo info
-#  endif
-#  define canllerr  llerr
-#  define canllinfo llinfo
-#else
-#  define canerr(x...)
-#  define caninfo(x...)
-#  define canllerr(x...)
-#  define canllinfo(x...)
+#ifndef CONFIG_DEBUG_CAN_INFO
+#  undef CONFIG_LPC17_CAN_REGDEBUG
 #endif
 
 /* Timing *******************************************************************/
@@ -203,14 +186,14 @@ struct up_dev_s
  ****************************************************************************/
 /* CAN Register access */
 
-#ifdef CONFIG_CAN_REGDEBUG
+#ifdef CONFIG_LPC17_CAN_REGDEBUG
 static void can_printreg(uint32_t addr, uint32_t value);
 #endif
 
 static uint32_t can_getreg(struct up_dev_s *priv, int offset);
 static void can_putreg(struct up_dev_s *priv, int offset, uint32_t value);
 
-#ifdef CONFIG_CAN_REGDEBUG
+#ifdef CONFIG_LPC17_CAN_REGDEBUG
 static uint32_t can_getcommon(uint32_t addr);
 static void can_putcommon(uint32_t addr, uint32_t value);
 #else
@@ -308,7 +291,7 @@ static struct can_dev_s g_can2dev =
  *
  ****************************************************************************/
 
-#ifdef CONFIG_CAN_REGDEBUG
+#ifdef CONFIG_LPC17_CAN_REGDEBUG
 static void can_printreg(uint32_t addr, uint32_t value)
 {
   static uint32_t prevaddr = 0;
@@ -372,7 +355,7 @@ static void can_printreg(uint32_t addr, uint32_t value)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_CAN_REGDEBUG
+#ifdef CONFIG_LPC17_CAN_REGDEBUG
 static uint32_t can_getreg(struct up_dev_s *priv, int offset)
 {
   uint32_t addr;
@@ -408,7 +391,7 @@ static uint32_t can_getreg(struct up_dev_s *priv, int offset)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_CAN_REGDEBUG
+#ifdef CONFIG_LPC17_CAN_REGDEBUG
 static void can_putreg(struct up_dev_s *priv, int offset, uint32_t value)
 {
   uint32_t addr = priv->base + offset;
@@ -442,7 +425,7 @@ static void can_putreg(struct up_dev_s *priv, int offset, uint32_t value)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_CAN_REGDEBUG
+#ifdef CONFIG_LPC17_CAN_REGDEBUG
 static uint32_t can_getcommon(uint32_t addr)
 {
   uint32_t value;
@@ -470,7 +453,7 @@ static uint32_t can_getcommon(uint32_t addr)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_CAN_REGDEBUG
+#ifdef CONFIG_LPC17_CAN_REGDEBUG
 static void can_putcommon(uint32_t addr, uint32_t value)
 {
   /* Show the register value being written */
@@ -553,7 +536,7 @@ static void can_reset(FAR struct can_dev_s *dev)
 
 static int can_setup(FAR struct can_dev_s *dev)
 {
-#ifdef CONFIG_DEBUG_CAN
+#ifdef CONFIG_DEBUG_CAN_INFO
   FAR struct up_dev_s *priv = (FAR struct up_dev_s *)dev->cd_priv;
 #endif
   int ret;
@@ -565,6 +548,7 @@ static int can_setup(FAR struct can_dev_s *dev)
     {
       up_enable_irq(LPC17_IRQ_CAN);
     }
+
   return ret;
 }
 
@@ -585,7 +569,7 @@ static int can_setup(FAR struct can_dev_s *dev)
 
 static void can_shutdown(FAR struct can_dev_s *dev)
 {
-#ifdef CONFIG_DEBUG_CAN
+#ifdef CONFIG_DEBUG_CAN_INFO
   FAR struct up_dev_s *priv = (FAR struct up_dev_s *)dev->cd_priv;
 
   caninfo("CAN%d\n", priv->port);

@@ -405,6 +405,30 @@
 #  define allinfo(x...)
 #endif
 
+#ifdef CONFIG_DEBUG_CAN_ERROR
+#  define canerr(format, ...)    err(format, ##__VA_ARGS__)
+#  define canllerr(format, ...)  llerr(format, ##__VA_ARGS__)
+#else
+#  define canerr(x...)
+#  define canllerr(x...)
+#endif
+
+#ifdef CONFIG_DEBUG_CAN_WARN
+#  define canwarn(format, ...)   warn(format, ##__VA_ARGS__)
+#  define canllwarn(format, ...) llwarn(format, ##__VA_ARGS__)
+#else
+#  define canwarn(x...)
+#  define canllwarn(x...)
+#endif
+
+#ifdef CONFIG_DEBUG_CAN_INFO
+#  define caninfo(format, ...)   info(format, ##__VA_ARGS__)
+#  define canllinfo(format, ...) llinfo(format, ##__VA_ARGS__)
+#else
+#  define caninfo(x...)
+#  define canllinfo(x...)
+#endif
+
 #ifdef CONFIG_DEBUG_GRAPHICS_ERROR
 #  define gerr(format, ...)    err(format, ##__VA_ARGS__)
 #  define gllerr(format, ...)  llerr(format, ##__VA_ARGS__)
@@ -922,6 +946,30 @@
 #  define allinfo     (void)
 #endif
 
+#ifdef CONFIG_DEBUG_CAN_ERROR
+#  define canerr        err
+#  define canllerr      llerr
+#else
+#  define canerr        (void)
+#  define canllerr      (void)
+#endif
+
+#ifdef CONFIG_DEBUG_CAN_WARN
+#  define canwarn       warn
+#  define canllwarn     llwarn
+#else
+#  define canwarn       (void)
+#  define canllwarn     (void)
+#endif
+
+#ifdef CONFIG_DEBUG_CAN_INFO
+#  define caninfo       info
+#  define canllinfo     llinfo
+#else
+#  define caninfo       (void)
+#  define canllinfo     (void)
+#endif
+
 #ifdef CONFIG_DEBUG_GRAPHICS_ERROR
 #  define gerr        err
 #  define gllerr      llerr
@@ -1258,6 +1306,22 @@
 #else
 #  define ierrdumpbuffer(m,b,n)
 #  define iinfodumpbuffer(m,b,n)
+#endif
+
+#ifdef CONFIG_DEBUG_ANALOG
+#  define aerrdumpbuffer(m,b,n)  errdumpbuffer(m,b,n)
+#  define ainfodumpbuffer(m,b,n) infodumpbuffer(m,b,n)
+#else
+#  define aerrdumpbuffer(m,b,n)
+#  define ainfodumpbuffer(m,b,n)
+#endif
+
+#ifdef CONFIG_DEBUG_CAN
+#  define canerrdumpbuffer(m,b,n)  errdumpbuffer(m,b,n)
+#  define caninfodumpbuffer(m,b,n) infodumpbuffer(m,b,n)
+#else
+#  define canerrdumpbuffer(m,b,n)
+#  define caninfodumpbuffer(m,b,n)
 #endif
 
 #ifdef CONFIG_DEBUG_GRAPHICS

@@ -594,13 +594,13 @@ config CAN_LOOPBACK
 	---help---
 		Enable CAN loopback mode
 
-config CAN_REGDEBUG
+config LPC17_CAN_REGDEBUG
 	bool "Register level debug"
-	depends on DEBUG_FEATURES
+	depends on DEBUG_CAN_INFO
 	default n
 	---help---
 		Output detailed register-level CAN debug information.  Requires also
-		CONFIG_DEBUG_FEATURES and CONFIG_DEBUG_CAN.
+		CONFIG_DEBUG_CAN_INFO.
 
 endmenu
 

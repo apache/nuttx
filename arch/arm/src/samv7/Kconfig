@@ -2615,11 +2615,11 @@ endmenu # MCAN1 device driver options
 
 config SAMV7_MCAN_REGDEBUG
 	bool "CAN Register level debug"
-	depends on DEBUG_FEATURES
+	depends on DEBUG_CAN_INFO
 	default n
 	---help---
 		Output detailed register-level CAN device debug information.
-		Requires also CONFIG_DEBUG_FEATURES.
+		Requires also CONFIG_DEBUG_CAN_INFO.
 
 endmenu # CAN device driver options
 endif # SAMV7_MCAN
