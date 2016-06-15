@@ -450,7 +450,7 @@ static uint32_t ssp_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
   priv->frequency = frequency;
   priv->actual    = actual;
 
-  ssperr("Frequency %d->%d\n", frequency, actual);
+  spiinfo("Frequency %d->%d\n", frequency, actual);
   return actual;
 }
 
@@ -501,7 +501,7 @@ static void ssp_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
           break;
 
         default:
-          ssperr("Bad mode: %d\n", mode);
+          spierr("ERROR: Bad mode: %d\n", mode);
           DEBUGASSERT(FALSE);
           return;
         }
@@ -589,7 +589,7 @@ static uint16_t ssp_send(FAR struct spi_dev_s *dev, uint16_t wd)
   /* Get the value from the RX FIFO and return it */
 
   regval = ssp_getreg(priv, LPC17_SSP_DR_OFFSET);
-  ssperr("%04x->%04x\n", wd, regval);
+  spiinfo("%04x->%04x\n", wd, regval);
   return (uint16_t)regval;
 }
 
@@ -626,7 +626,7 @@ static void ssp_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size
 
   /* Loop while thre are bytes remaining to be sent */
 
-  ssperr("nwords: %d\n", nwords);
+  spiinfo("nwords: %d\n", nwords);
   u.pv = buffer;
   while (nwords > 0)
     {
@@ -654,7 +654,7 @@ static void ssp_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size
 
   /* Then discard all card responses until the RX & TX FIFOs are emptied. */
 
-  ssperr("discarding\n");
+  spiinfo("discarding\n");
   do
     {
       /* Is there anything in the RX fifo? */
@@ -715,7 +715,7 @@ static void ssp_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nw
 
   /* While there is remaining to be sent (and no synchronization error has occurred) */
 
-  ssperr("nwords: %d\n", nwords);
+  spiinfo("nwords: %d\n", nwords);
   u.pv = buffer;
   while (nwords || rxpending)
     {
