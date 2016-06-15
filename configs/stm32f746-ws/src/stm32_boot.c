@@ -1,7 +1,7 @@
 /************************************************************************************
- * arch/arm/src/stm32f7/chip.h
+ * configs/stm32f746-ws/src/stm32_boot.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,52 +33,74 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32F7_CHIP_H
-#define __ARCH_ARM_SRC_STM32F7_CHIP_H
-
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
 #include <nuttx/config.h>
 
-/* Include the memory map and the chip definitions file.  Other chip hardware files
- * should then include this file for the proper setup.
- */
+#include <debug.h>
 
-#include <arch/irq.h>
-#include <arch/stm32f7/chip.h>
-#include "chip/stm32_pinmap.h"
-#include "chip/stm32_memorymap.h"
-#include "chip/stm32_pinmap.h"
+#include <nuttx/board.h>
+#include <arch/board/board.h>
 
-/* If the common ARMv7-M vector handling logic is used, then it expects the
- * following definition in this file that provides the number of supported external
- * interrupts which, for this architecture, is provided in the arch/stm32f7/chip.h
- * header file.
- */
-
-#define ARMV7M_PERIPHERAL_INTERRUPTS NR_INTERRUPTS
-
-/* Cache line sizes (in bytes)for the STM32F7 */
-
-#define ARMV7M_DCACHE_LINESIZE 32  /* 32 bytes (8 words) */
-#define ARMV7M_ICACHE_LINESIZE 32  /* 32 bytes (8 words) */
-
-/************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
-
-/************************************************************************************
- * Public Types
- ************************************************************************************/
-
-/************************************************************************************
- * Public Data
- ************************************************************************************/
+#include "up_arch.h"
+#include "stm32f746-ws.h"
 
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_STM32F7_CHIP_H */
+/************************************************************************************
+ * Name: stm32_boardinitialize
+ *
+ * Description:
+ *   All STM32 architectures must provide the following entry point.  This entry point
+ *   is called early in the initialization -- after all memory has been configured
+ *   and mapped but before any devices have been initialized.
+ *
+ ************************************************************************************/
+
+void stm32_boardinitialize(void)
+{
+#if defined(CONFIG_STM32F7_SPI1) || defined(CONFIG_STM32F7_SPI2) || \
+    defined(CONFIG_STM32F7_SPI3) || defined(CONFIG_STM32F7_SPI4) || \
+    defined(CONFIG_STM32F7_SPI5) || defined(CONFIG_STM32F7_SPI6)
+  /* Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak function
+   * stm32_spidev_initialize() has been brought into the link.
+   */
+
+  if (stm32_spidev_initialize)
+    {
+      stm32_spidev_initialize();
+    }
+#endif
+
+}
+
+/************************************************************************************
+ * Name: board_initialize
+ *
+ * Description:
+ *   If CONFIG_BOARD_INITIALIZE is selected, then an additional initialization call
+ *   will be performed in the boot-up sequence to a function called
+ *   board_initialize().  board_initialize() will be called immediately after
+ *   up_initialize() is called and just before the initial application is started.
+ *   This additional initialization phase may be used, for example, to initialize
+ *   board-specific device drivers.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_BOARD_INITIALIZE
+void board_initialize(void)
+{
+#if defined(CONFIG_NSH_LIBRARY) && !defined(CONFIG_LIB_BOARDCTL)
+  /* Perform NSH initialization here instead of from the NSH.  This
+   * alternative NSH initialization is necessary when NSH is ran in user-space
+   * but the initialization function must run in kernel space.
+   */
+
+  (void)board_app_initialize();
+#endif
+}
+#endif
