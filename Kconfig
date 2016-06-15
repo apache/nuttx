@@ -1104,25 +1104,54 @@ config DEBUG_I2C_WARN
 	default n
 	depends on DEBUG_WARN
 	---help---
-		Enable I2C drive warning output to SYSLOG.
+		Enable I2c driver warning output to SYSLOG.
 
 config DEBUG_I2C_INFO
 	bool "I2C Informational Output"
 	default n
 	depends on DEBUG_INFO
 	---help---
-		Enable I2C drive informational output to SYSLOG.
+		Enable I2c driver informational output to SYSLOG.
 
 endif # DEBUG_I2C
 
 config DEBUG_I2S
-	bool "I2S Debug Output"
+	bool "I2S Debug Features"
 	default n
 	depends on I2S
 	---help---
-		Enable I2S driver debug SYSLOG output (disabled by default).
+		Enable I2S debug features.
+
 		Support for this debug option is architecture-specific and may not
 		be available for some MCUs.
+
+if DEBUG_I2S
+
+config DEBUG_I2S_ERROR
+	bool "I2S Error Output"
+	default n
+	depends on DEBUG_ERROR
+	---help---
+		Enable I2S driver error output to SYSLOG.
+
+		Support for this debug option is architecture-specific and may not
+		be available for some MCUs.
+
+config DEBUG_I2S_WARN
+	bool "I2S Warnings Output"
+	default n
+	depends on DEBUG_WARN
+	---help---
+		Enable I2S driver warning output to SYSLOG.
+
+config DEBUG_I2S_INFO
+	bool "I2S Informational Output"
+	default n
+	depends on DEBUG_INFO
+	---help---
+		Enable I2S driver informational output to SYSLOG.
+
+endif # DEBUG_I2S
 
 config DEBUG_PWM
 	bool "PWM Debug Output"

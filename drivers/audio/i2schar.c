@@ -75,32 +75,6 @@
 #define DEVNAME_FMT    "/dev/i2schar%d"
 #define DEVNAME_FMTLEN (12 + 3 + 1)
 
-/* Debug *******************************************************************/
-/* Check if SSC debut is enabled (non-standard.. no support in
- * include/debug.h
- */
-
-#ifndef CONFIG_DEBUG_FEATURES
-#  undef CONFIG_DEBUG_INFO
-#  undef CONFIG_DEBUG_I2S
-#endif
-
-#ifdef CONFIG_DEBUG_I2S
-#  define i2serr         err
-#  define i2sllerr       llerr
-#  ifdef CONFIG_DEBUG_INFO
-#    define i2sinfo      err
-#    define i2sllinfo    llerr
-#  else
-#    define i2sinfo(x...)
-#  endif
-#else
-#  define i2serr(x...)
-#  define i2sllerr(x...)
-#  define i2sinfo(x...)
-#  define i2sllinfo(x...)
-#endif
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/

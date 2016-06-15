@@ -368,7 +368,7 @@
 /* Debug *******************************************************************/
 /* Check if SSC debug is enabled */
 
-#ifndef CONFIG_DEBUG_I2S
+#ifndef CONFIG_DEBUG_I2S_INFO
 #  undef CONFIG_SAMV7_SSC_DMADEBUG
 #  undef CONFIG_SAMV7_SSC_REGDEBUG
 #  undef CONFIG_SAMV7_SSC_QDEBUG
@@ -377,22 +377,6 @@
 
 #ifndef CONFIG_DEBUG_DMA
 #  undef CONFIG_SAMV7_SSC_DMADEBUG
-#endif
-
-#ifdef CONFIG_DEBUG_I2S
-#  define i2serr         err
-#  define i2sllerr       llerr
-#  define i2swarn        warn
-#  define i2sllwarn      llwarn
-#  define i2sinfo        info
-#  define i2sllinfo      llinfo
-#else
-#  define i2serr(x...)
-#  define i2sllerr(x...)
-#  define i2swarn(x...)
-#  define i2sllwarn(x...)
-#  define i2sinfo(x...)
-#  define i2sllinfo(x...)
 #endif
 
 #define DMA_INITIAL      0
@@ -505,7 +489,7 @@ static inline void ssc_putreg(struct sam_ssc_s *priv, unsigned int offset,
 static inline uintptr_t ssc_regaddr(struct sam_ssc_s *priv,
                   unsigned int offset);
 
-#if defined(CONFIG_DEBUG_I2S) && defined(CONFIG_DEBUG_INFO)
+#ifdef CONFIG_DEBUG_I2S_INFO
 static void     scc_dump_regs(struct sam_ssc_s *priv, const char *msg);
 #else
 #  define       scc_dump_regs(s,m)
@@ -782,7 +766,7 @@ static inline uintptr_t ssc_regaddr(struct sam_ssc_s *priv, unsigned int offset)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG_I2S) && defined(CONFIG_DEBUG_INFO)
+#ifdef CONFIG_DEBUG_I2S_INFO
 static void scc_dump_regs(struct sam_ssc_s *priv, const char *msg)
 {
   i2sinfo("SSC%d: %s\n", priv->sscno, msg);

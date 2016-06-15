@@ -669,6 +669,30 @@
 #  define i2cllinfo(x...)
 #endif
 
+#ifdef CONFIG_DEBUG_I2S_ERROR
+#  define i2serr(format, ...)   err(format, ##__VA_ARGS__)
+#  define i2sllerr(format, ...) llerr(format, ##__VA_ARGS__)
+#else
+#  define i2serr(x...)
+#  define i2sllerr(x...)
+#endif
+
+#ifdef CONFIG_DEBUG_I2S_WARN
+#  define i2swarn(format, ...)   warn(format, ##__VA_ARGS__)
+#  define i2sllwarn(format, ...) llwarn(format, ##__VA_ARGS__)
+#else
+#  define i2swarn(x...)
+#  define i2sllwarn(x...)
+#endif
+
+#ifdef CONFIG_DEBUG_I2S_INFO
+#  define i2sinfo(format, ...)   info(format, ##__VA_ARGS__)
+#  define i2sllinfo(format, ...) llinfo(format, ##__VA_ARGS__)
+#else
+#  define i2sinfo(x...)
+#  define i2sllinfo(x...)
+#endif
+
 #ifdef CONFIG_DEBUG_SENSORS_ERROR
 #  define snerr(format, ...)    err(format, ##__VA_ARGS__)
 #  define snllerr(format, ...)  llerr(format, ##__VA_ARGS__)
@@ -1234,6 +1258,30 @@
 #  define i2cllinfo   (void)
 #endif
 
+#ifdef CONFIG_DEBUG_I2S_ERROR
+#  define i2serr      err
+#  define i2sllerr    llerr
+#else
+#  define i2serr      (void)
+#  define i2sllerr    (void)
+#endif
+
+#ifdef CONFIG_DEBUG_I2S_WARN
+#  define i2swarn     warn
+#  define i2sllwarn   llwarn
+#else
+#  define i2swarn     (void)
+#  define i2sllwarn   (void)
+#endif
+
+#ifdef CONFIG_DEBUG_I2S_INFO
+#  define i2sinfo     info
+#  define i2sllinfo   llinfo
+#else
+#  define i2sinfo     (void)
+#  define i2sllinfo   (void)
+#endif
+
 #ifdef CONFIG_DEBUG_SENSORS_ERROR
 #  define snerr       err
 #  define snllerr     llerr
@@ -1450,6 +1498,14 @@
 #else
 #  define i2cerrdumpbuffer(m,b,n)
 #  define i2cinfodumpbuffer(m,b,n)
+#endif
+
+#ifdef CONFIG_DEBUG_I2S
+#  define i2serrdumpbuffer(m,b,n)  errdumpbuffer(m,b,n)
+#  define i2sinfodumpbuffer(m,b,n) infodumpbuffer(m,b,n)
+#else
+#  define i2serrdumpbuffer(m,b,n)
+#  define i2sinfodumpbuffer(m,b,n)
 #endif
 
 #ifdef CONFIG_DEBUG_SENSORS
