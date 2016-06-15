@@ -119,17 +119,8 @@
 #define MKI2C_OUTPUT(p) (((p) & (GPIO_PORT_MASK | GPIO_PIN_MASK)) | I2C_OUTPUT)
 
 /* Debug ****************************************************************************/
-/* CONFIG_DEBUG_I2C + CONFIG_DEBUG_FEATURES enables general I2C debug output. */
 
-#ifdef CONFIG_DEBUG_I2C
-#  define i2cerr err
-#  define i2cinfo info
-#else
-#  define i2cerr(x...)
-#  define i2cinfo(x...)
-#endif
-
-#ifndef CONFIG_DEBUG_FEATURES
+#ifndef CONFIG_DEBUG_I2C_INFO
 #  undef CONFIG_TIVA_I2C_REGDEBUG
 #endif
 
@@ -609,7 +600,7 @@ static bool tiva_i2c_checkreg(struct tiva_i2c_priv_s *priv, bool wr,
         {
           /* Yes... show how many times we did it */
 
-          llerr("...[Repeats %d times]...\n", priv->ntimes);
+          i2cinfo("...[Repeats %d times]...\n", priv->ntimes);
         }
 
       /* Save information about the new access */
@@ -642,7 +633,7 @@ static uint32_t tiva_i2c_getreg(struct tiva_i2c_priv_s *priv, unsigned int offse
 
   if (tiva_i2c_checkreg(priv, false, regval, regaddr))
     {
-      llerr("%08x->%08x\n", regaddr, regval);
+      i2cinfo("%08x->%08x\n", regaddr, regval);
     }
 
   return regval;
@@ -671,7 +662,7 @@ static void tiva_i2c_putreg(struct tiva_i2c_priv_s *priv, unsigned int offset,
 
   if (tiva_i2c_checkreg(priv, true, regval, regaddr))
     {
-      llerr("%08x<-%08x\n", regaddr, regval);
+      i2cinfo("%08x<-%08x\n", regaddr, regval);
     }
 
   putreg32(regval, regaddr);

@@ -645,6 +645,30 @@
 #  define gpiollinfo(x...)
 #endif
 
+#ifdef CONFIG_DEBUG_I2C_ERROR
+#  define i2cerr(format, ...)   err(format, ##__VA_ARGS__)
+#  define i2cllerr(format, ...) llerr(format, ##__VA_ARGS__)
+#else
+#  define i2cerr(x...)
+#  define i2cllerr(x...)
+#endif
+
+#ifdef CONFIG_DEBUG_I2C_WARN
+#  define i2cwarn(format, ...)   warn(format, ##__VA_ARGS__)
+#  define i2cllwarn(format, ...) llwarn(format, ##__VA_ARGS__)
+#else
+#  define i2cwarn(x...)
+#  define i2cllwarn(x...)
+#endif
+
+#ifdef CONFIG_DEBUG_I2C_INFO
+#  define i2cinfo(format, ...)   info(format, ##__VA_ARGS__)
+#  define i2cllinfo(format, ...) llinfo(format, ##__VA_ARGS__)
+#else
+#  define i2cinfo(x...)
+#  define i2cllinfo(x...)
+#endif
+
 #ifdef CONFIG_DEBUG_SENSORS_ERROR
 #  define snerr(format, ...)    err(format, ##__VA_ARGS__)
 #  define snllerr(format, ...)  llerr(format, ##__VA_ARGS__)
@@ -1186,6 +1210,30 @@
 #  define gpiollinfo  (void)
 #endif
 
+#ifdef CONFIG_DEBUG_I2C_ERROR
+#  define i2cerr      err
+#  define i2cllerr    llerr
+#else
+#  define i2cerr      (void)
+#  define i2cllerr    (void)
+#endif
+
+#ifdef CONFIG_DEBUG_I2C_WARN
+#  define i2cwarn     warn
+#  define i2cllwarn   llwarn
+#else
+#  define i2cwarn     (void)
+#  define i2cllwarn   (void)
+#endif
+
+#ifdef CONFIG_DEBUG_I2C_INFO
+#  define i2cinfo     info
+#  define i2cllinfo   llinfo
+#else
+#  define i2cinfo     (void)
+#  define i2cllinfo   (void)
+#endif
+
 #ifdef CONFIG_DEBUG_SENSORS_ERROR
 #  define snerr       err
 #  define snllerr     llerr
@@ -1394,6 +1442,14 @@
 #else
 #  define gpioerrdumpbuffer(m,b,n)
 #  define gpioinfodumpbuffer(m,b,n)
+#endif
+
+#ifdef CONFIG_DEBUG_I2C
+#  define i2cerrdumpbuffer(m,b,n)  errdumpbuffer(m,b,n)
+#  define i2cinfodumpbuffer(m,b,n) infodumpbuffer(m,b,n)
+#else
+#  define i2cerrdumpbuffer(m,b,n)
+#  define i2cinfodumpbuffer(m,b,n)
 #endif
 
 #ifdef CONFIG_DEBUG_SENSORS

@@ -99,7 +99,7 @@
  * to transfer on byte.  So these define a "long" timeout.
  */
 
-#if defined(CONFIG_DEBUG_I2C) && defined(CONFIG_DEBUG_INFO)
+#ifdef CONFIG_DEBUG_I2C_INFO
 #  define TWIHS_TIMEOUT_MSPB (50)  /* 50 msec/byte */
 #else
 #  define TWIHS_TIMEOUT_MSPB (5)   /* 5 msec/byte */
@@ -119,21 +119,6 @@
 
 #define MKI2C_INPUT(p)  (((p) & (PIO_PORT_MASK | PIO_PIN_MASK)) | I2C_INPUT)
 #define MKI2C_OUTPUT(p) (((p) & (PIO_PORT_MASK | PIO_PIN_MASK)) | I2C_OUTPUT)
-
-/* Debug ***********************************************************************/
-/* CONFIG_DEBUG_I2C + CONFIG_DEBUG_FEATURES enables general I2C debug output. */
-
-#ifdef CONFIG_DEBUG_I2C
-#  define i2cerr    err
-#  define i2cinfo   info
-#  define i2cllerr  llerr
-#  define i2cllinfo llinfo
-#else
-#  define i2cerr(x...)
-#  define i2cinfo(x...)
-#  define i2cllerr(x...)
-#  define i2cllinfo(x...)
-#endif
 
 /****************************************************************************
  * Private Types

@@ -783,7 +783,7 @@ config TIVA_I2C_HIGHSPEED
 config TIVA_I2C_REGDEBUG
 	bool "Register level debug"
 	default n
-	depends on DEBUG_INFO
+	depends on DEBUG_I2C_INFO
 	---help---
 		Enables extremely detailed register access debug output.
 

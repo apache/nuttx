@@ -62,17 +62,6 @@
 #define DEVNAME_FMT    "/dev/i2c%d"
 #define DEVNAME_FMTLEN (8 + 3 + 1)
 
-/* Debug ********************************************************************/
-/* CONFIG_DEBUG_I2C + CONFIG_DEBUG_FEATURES enables general I2C debug output. */
-
-#ifdef CONFIG_DEBUG_I2C
-#  define i2cerr err
-#  define i2cinfo info
-#else
-#  define i2cerr(x...)
-#  define i2cinfo(x...)
-#endif
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/

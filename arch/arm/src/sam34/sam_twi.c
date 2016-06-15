@@ -95,21 +95,6 @@
 
 #define TWI_MAX_FREQUENCY 66000000   /* Maximum TWI frequency */
 
-/* Debug ***********************************************************************/
-/* CONFIG_DEBUG_I2C + CONFIG_DEBUG_FEATURES enables general I2C debug output. */
-
-#ifdef CONFIG_DEBUG_I2C
-#  define i2cerr    err
-#  define i2cinfo   info
-#  define i2cllerr  llerr
-#  define i2cllinfo llinfo
-#else
-#  define i2cerr(x...)
-#  define i2cinfo(x...)
-#  define i2cllerr(x...)
-#  define i2cllinfo(x...)
-#endif
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/

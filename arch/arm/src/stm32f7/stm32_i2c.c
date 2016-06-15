@@ -178,7 +178,7 @@
  *
  *  Debugging output enabled with:
  *
- *    CONFIG_DEBUG and CONFIG_DEBUG_I2C
+ *    CONFIG_DEBUG_I2C_INFO
  *
  *  ISR Debugging output may be enabled with:
  *
@@ -286,16 +286,6 @@
   (I2C_CR1_RXIE | I2C_CR1_TXIE)
 #define I2C_CR1_ALLINTS \
   (I2C_CR1_TXRX | I2C_CR1_TCIE | I2C_CR1_ERRIE)
-
-/* I2C Debugging */
-
-#ifdef CONFIG_DEBUG_I2C
-#  define i2cerr err
-#  define i2cinfo info
-#else
-#  define i2cerr(x...)
-#  define i2cinfo(x...)
-#endif
 
 /* I2C event tracing
  *

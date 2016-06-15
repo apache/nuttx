@@ -134,16 +134,6 @@
 
 /* Debug ****************************************************************************/
 
-/* CONFIG_DEBUG_I2C + CONFIG_DEBUG_FEATURES enables general I2C debug output. */
-
-#ifdef CONFIG_DEBUG_I2C
-#  define i2cerr err
-#  define i2cinfo info
-#else
-#  define i2cerr(x...)
-#  define i2cinfo(x...)
-#endif
-
 /* I2C event trace logic.  NOTE:  trace uses the internal, non-standard,
  * low-level debug interface syslog() but does not require that any other debug
  * is enabled.

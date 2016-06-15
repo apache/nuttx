@@ -1081,13 +1081,39 @@ config DEBUG_GPIO_INFO
 endif # DEBUG_GPIO
 
 config DEBUG_I2C
-	bool "I2C Debug Output"
+	bool "I2C Debug Features"
 	default n
 	depends on I2C
 	---help---
-		Enable I2C driver debug SYSLOG output (disabled by default).
+		Enable I2C debug features.
+
 		Support for this debug option is architecture-specific and may not
 		be available for some MCUs.
+
+if DEBUG_I2C
+
+config DEBUG_I2C_ERROR
+	bool "I2C Error Output"
+	default n
+	depends on DEBUG_ERROR
+	---help---
+		Enable I2C driver error output to SYSLOG.
+
+config DEBUG_I2C_WARN
+	bool "I2C Warnings Output"
+	default n
+	depends on DEBUG_WARN
+	---help---
+		Enable I2C drive warning output to SYSLOG.
+
+config DEBUG_I2C_INFO
+	bool "I2C Informational Output"
+	default n
+	depends on DEBUG_INFO
+	---help---
+		Enable I2C drive informational output to SYSLOG.
+
+endif # DEBUG_I2C
 
 config DEBUG_I2S
 	bool "I2S Debug Output"
