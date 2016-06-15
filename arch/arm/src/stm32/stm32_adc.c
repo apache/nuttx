@@ -1666,7 +1666,6 @@ static void adc_dmaconvcallback(DMA_HANDLE handle, uint8_t isr, FAR void *arg)
               priv->current = 0;
             }
         }
-    }
 
   /* Restart DMA for the next conversion series */
 

@@ -6,6 +6,7 @@
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            Diego Sanchez <dsanchez@nx-engineering.com>
  *            Paul Alexander Patience <paul-a.patience@polymtl.ca>
+ *            David Sidrane <david_s5@nscdg.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -60,11 +61,14 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/analog/adc.h>
+#include <nuttx/fs/ioctl.h>
 
 #include "up_internal.h"
 #include "up_arch.h"
 
 #include "chip.h"
+#include "stm32_rcc.h"
+#include "stm32_tim.h"
 #include "stm32_dma.h"
 #include "stm32_adc.h"
 
@@ -77,9 +81,10 @@
 #if defined(CONFIG_STM32F7_ADC1) || defined(CONFIG_STM32F7_ADC2) || \
     defined(CONFIG_STM32F7_ADC3)
 
-/* This implementation is for the STM32 F7 only */
+/* This implementation is for the STM32 F7[4-7] only */
 
-#if defined(CONFIG_STM32F7_STM32F74XX)
+#if defined(CONFIG_STM32F7_STM32F74XX) || defined(CONFIG_STM32F7_STM32F75XX) || \
+    defined(CONFIG_STM32F7_STM32F76XX) || defined(CONFIG_STM32F7_STM32F77XX)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -1121,7 +1126,6 @@ static void adc_dmaconvcallback(DMA_HANDLE handle, uint8_t isr, FAR void *arg)
             }
         }
     }
-
   /* Restart DMA for the next conversion series */
 
   adc_modifyreg(priv, STM32_ADC_DMAREG_OFFSET, ADC_DMAREG_DMA, 0);
@@ -1723,9 +1727,13 @@ struct adc_dev_s *stm32_adc_initialize(int intf, FAR const uint8_t *chanlist,
 
   priv = (FAR struct stm32_dev_s *)dev->ad_priv;
 
-  DEBUGASSERT(cchannels <= ADC_MAX_SAMPLES);
-
   priv->cb        = NULL;
+
+  DEBUGASSERT(cchannels <= ADC_MAX_SAMPLES);
+ if (cchannels > ADC_MAX_SAMPLES)
+   {
+     cchannels = ADC_MAX_SAMPLES;
+   }
   priv->cchannels = cchannels;
 
   memcpy(priv->chanlist, chanlist, cchannels);
