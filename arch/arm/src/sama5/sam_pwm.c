@@ -393,30 +393,6 @@
 #define PWM_PINMASK      (PIO_PORT_MASK | PIO_PIN_MASK)
 #define PWM_MKINPUT(cfg) (((cfg) & PWM_PINMASK) | PWM_INPUTCFG)
 
-/* Debug ********************************************************************/
-/* Non-standard debug that may be enabled just for testing PWM */
-
-#ifndef CONFIG_DEBUG_FEATURES
-#  undef CONFIG_DEBUG_PWM
-#endif
-
-#ifdef CONFIG_DEBUG_PWM
-#  define pwmerr              err
-#  define pwmllerr            llerr
-#  ifdef CONFIG_DEBUG_INFO
-#    define pwminfo           info
-#    define pwmllinfo         llinfo
-#  else
-#    define pwminfo(x...)
-#    define pwmllinfo(x...)
-#  endif
-#else
-#  define pwmerr(x...)
-#  define pwmllerr(x...)
-#  define pwminfo(x...)
-#  define pwmllinfo(x...)
-#endif
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -480,7 +456,7 @@ static bool pwm_checkreg(FAR struct sam_pwm_s *chan, bool wr, uint32_t regval,
 static uint32_t pwm_getreg(FAR struct sam_pwm_chan_s *chan, int offset);
 static void pwm_putreg(FAR struct sam_pwm_chan_s *chan, int offset, uint32_t regval);
 
-#if defined(CONFIG_DEBUG_PWM) && defined(CONFIG_DEBUG_INFO)
+#ifdef CONFIG_DEBUG_PWM_INFO
 static void pwm_dumpregs(FAR struct sam_pwm_chan_s *chan, FAR const char *msg);
 #else
 #  define pwm_dumpregs(chan,msg)
@@ -914,7 +890,7 @@ static void pwm_chan_putreg(struct sam_pwm_chan_s *chan, int offset,
  *
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG_PWM) && defined(CONFIG_DEBUG_INFO)
+#ifdef CONFIG_DEBUG_PWM_INFO
 static void pwm_dumpregs(struct sam_pwm_chan_s *chan, FAR const char *msg)
 {
   pwminfo("PWM: %s\n", msg);
@@ -1231,7 +1207,7 @@ static int pwm_stop(FAR struct pwm_lowerhalf_s *dev)
 
 static int pwm_ioctl(FAR struct pwm_lowerhalf_s *dev, int cmd, unsigned long arg)
 {
-#ifdef CONFIG_DEBUG_PWM
+#ifdef CONFIG_DEBUG_PWM_INFO
   FAR struct sam_pwm_chan_s *chan = (FAR struct sam_pwm_chan_s *)dev;
 
   /* There are no platform-specific ioctl commands */

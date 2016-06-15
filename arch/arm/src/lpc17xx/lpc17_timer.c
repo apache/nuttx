@@ -82,29 +82,10 @@
 
 
 /* Debug ********************************************************************/
-/* Non-standard debug that may be enabled just for testing PWM */
 
-#ifndef CONFIG_DEBUG_FEATURES
-#  undef CONFIG_DEBUG_PWM
-#endif
-
-#ifdef CONFIG_DEBUG_PWM
-#  define pwmerr              err
-#  define pwmllerr            llerr
-#  ifdef CONFIG_DEBUG_INFO
-#    define pwminfo           info
-#    define pwmllinfo         llinfo
-#    define pwm_dumpgpio(p,m) stm32_dumpgpio(p,m)
-#  else
-#    define pwminfo(x...)
-#    define pwmllinfo(x...)
-#    define pwm_dumpgpio(p,m)
-#  endif
+#ifdef CONFIG_DEBUG_PWM_INFO
+#  define pwm_dumpgpio(p,m) stm32_dumpgpio(p,m)
 #else
-#  define pwmerr(x...)
-#  define pwmllerr(x...)
-#  define pwminfo(x...)
-#  define pwmllinfo(x...)
 #  define pwm_dumpgpio(p,m)
 #endif
 
@@ -133,7 +114,7 @@ struct lpc17_timer_s
 static uint32_t timer_getreg(struct lpc17_timer_s *priv, int offset);
 static void timer_putreg(struct lpc17_timer_s *priv, int offset, uint32_t value);
 
-#if defined(CONFIG_DEBUG_PWM) && defined(CONFIG_DEBUG_INFO)
+#ifdef CONFIG_DEBUG_PWM_INFO
 static void timer_dumpregs(struct lpc17_timer_s *priv, FAR const char *msg);
 #else
 #  define timer_dumpregs(priv,msg)
@@ -242,11 +223,11 @@ static void timer_putreg(struct lpc17_timer_s *priv, int offset,
  *
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG_PWM) && defined(CONFIG_DEBUG_INFO)
+#ifdef CONFIG_DEBUG_PWM_INFO
 static void timer_dumpregs(struct lpc17_timer_s *priv, FAR const char *msg)
 {
-  pwmerr("%s:\n", msg);
-  pwmerr("  CR1: %04x CR2:  %04x SMCR:  %04x DIER:  %04x\n",
+  pwminfo("%s:\n", msg);
+  pwminfo("  CR1: %04x CR2:  %04x SMCR:  %04x DIER:  %04x\n",
           timer_getreg(priv, LPC17_PWM_MR0_OFFSET),
           timer_getreg(priv, LPC17_PWM_MR1_OFFSET),
           timer_getreg(priv, LPC17_PWM_MR2_OFFSET),
@@ -254,7 +235,7 @@ static void timer_dumpregs(struct lpc17_timer_s *priv, FAR const char *msg)
 #if defined(CONFIG_LPC17_TMR0)
   if (priv->timtype == TIMTYPE_ADVANCED)
     {
-      pwmerr("  RCR: %04x BDTR: %04x DCR:   %04x DMAR:  %04x\n",
+      pwminfo("  RCR: %04x BDTR: %04x DCR:   %04x DMAR:  %04x\n",
               timer_getreg(priv, LPC17_PWM_MR0_OFFSET),
               timer_getreg(priv, LPC17_PWM_MR1_OFFSET),
               timer_getreg(priv, LPC17_PWM_MR2_OFFSET),
@@ -263,7 +244,7 @@ static void timer_dumpregs(struct lpc17_timer_s *priv, FAR const char *msg)
   else
 #endif
     {
-      pwmerr("  DCR: %04x DMAR: %04x\n",
+      pwminfo("  DCR: %04x DMAR: %04x\n",
               timer_getreg(priv, LPC17_PWM_MR2_OFFSET),
               timer_getreg(priv, LPC17_PWM_MR3_OFFSET));
     }

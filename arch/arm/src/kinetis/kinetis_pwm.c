@@ -76,29 +76,10 @@
 /* PWM/Timer Definitions ****************************************************/
 
 /* Debug ********************************************************************/
-/* Non-standard debug that may be enabled just for testing PWM */
 
-#ifndef CONFIG_DEBUG_FEATURES
-#  undef CONFIG_DEBUG_PWM
-#endif
-
-#ifdef CONFIG_DEBUG_PWM
-#  define pwmerr              err
-#  define pwmllerr            llerr
-#  ifdef CONFIG_DEBUG_INFO
-#    define pwminfo           info
-#    define pwmllinfo         llinfo
-#    define pwm_dumpgpio(p,m) kinetis_pindump(p,m)
-#  else
-#    define pwmllerr(x...)
-#    define pwmllinfo(x...)
-#    define pwm_dumpgpio(p,m)
-#  endif
+#ifdef CONFIG_DEBUG_PWM_INFO
+#  define pwm_dumpgpio(p,m) kinetis_pindump(p,m)
 #else
-#  define pwmerr(x...)
-#  define pwmllerr(x...)
-#  define pwminfo(x...)
-#  define pwmllinfo(x...)
 #  define pwm_dumpgpio(p,m)
 #endif
 
@@ -126,7 +107,7 @@ struct kinetis_pwmtimer_s
 static uint32_t pwm_getreg(struct kinetis_pwmtimer_s *priv, int offset);
 static void pwm_putreg(struct kinetis_pwmtimer_s *priv, int offset, uint32_t value);
 
-#if defined(CONFIG_DEBUG_PWM) && defined(CONFIG_DEBUG_INFO)
+#ifdef CONFIG_DEBUG_PWM_INFO
 static void pwm_dumpregs(struct kinetis_pwmtimer_s *priv, FAR const char *msg);
 #else
 #  define pwm_dumpregs(priv,msg)
@@ -260,7 +241,7 @@ static void pwm_putreg(struct kinetis_pwmtimer_s *priv, int offset, uint32_t val
  *
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG_PWM) && defined(CONFIG_DEBUG_INFO)
+#ifdef CONFIG_DEBUG_PWM_INFO
 static void pwm_dumpregs(struct kinetis_pwmtimer_s *priv, FAR const char *msg)
 {
   int nchannels = (priv->tpmid == 0) ? 8 : 2;
@@ -739,7 +720,7 @@ static int pwm_stop(FAR struct pwm_lowerhalf_s *dev)
 
 static int pwm_ioctl(FAR struct pwm_lowerhalf_s *dev, int cmd, unsigned long arg)
 {
-#ifdef CONFIG_DEBUG_PWM
+#ifdef CONFIG_DEBUG_PWM_INFO
   FAR struct kinetis_pwmtimer_s *priv = (FAR struct kinetis_pwmtimer_s *)dev;
 
   /* There are no platform-specific ioctl commands */

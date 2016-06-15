@@ -1165,7 +1165,7 @@ Where <subdir> is one of the following:
 
        Special PWM-only debug options:
 
-       CONFIG_DEBUG_PWM
+       CONFIG_DEBUG_PWM_INFO
 
     5. This example supports the CAN loopback test (apps/examples/can) but this
        must be manually enabled by selecting:

@@ -99,29 +99,10 @@
 #define TCR_PWM_EN         (0x00000008)
 
 /* Debug ********************************************************************/
-/* Non-standard debug that may be enabled just for testing PWM */
 
-#ifndef CONFIG_DEBUG_FEATURES
-#  undef CONFIG_DEBUG_PWM
-#endif
-
-#ifdef CONFIG_DEBUG_PWM
-#  define pwmerr              err
-#  define pwmllerr            llerr
-#  ifdef CONFIG_DEBUG_INFO
-#    define pwminfo           info
-#    define pwmllinfo         llinfo
-#    define pwm_dumpgpio(p,m) stm32_dumpgpio(p,m)
-#  else
-#    define pwminfo(x...)
-#    define pwmllinfo(x...)
-#    define pwm_dumpgpio(p,m)
-#  endif
+#ifdef CONFIG_DEBUG_PWM_INFO
+#  define pwm_dumpgpio(p,m) stm32_dumpgpio(p,m)
 #else
-#  define pwmerr(x...)
-#  define pwmllerr(x...)
-#  define pwminfo(x...)
-#  define pwmllinfo(x...)
 #  define pwm_dumpgpio(p,m)
 #endif
 
@@ -150,7 +131,7 @@ struct lpc17_pwmtimer_s
 static uint32_t pwm_getreg(struct lpc17_pwmtimer_s *priv, int offset);
 static void pwm_putreg(struct lpc17_pwmtimer_s *priv, int offset, uint32_t value);
 
-#if defined(CONFIG_DEBUG_PWM) && defined(CONFIG_DEBUG_INFO)
+#ifdef CONFIG_DEBUG_PWM_INFO
 static void pwm_dumpregs(struct lpc17_pwmtimer_s *priv, FAR const char *msg);
 #else
 #  define pwm_dumpregs(priv,msg)
@@ -258,7 +239,7 @@ static void pwm_putreg(struct lpc17_pwmtimer_s *priv, int offset, uint32_t value
  *
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG_PWM) && defined(CONFIG_DEBUG_INFO)
+#ifdef CONFIG_DEBUG_PWM_INFO
 static void pwm_dumpregs(struct lpc17_pwmtimer_s *priv, FAR const char *msg)
 {
   pwminfo("%s:\n", msg);
@@ -596,7 +577,7 @@ static int pwm_stop(FAR struct pwm_lowerhalf_s *dev)
 
 static int pwm_ioctl(FAR struct pwm_lowerhalf_s *dev, int cmd, unsigned long arg)
 {
-#ifdef CONFIG_DEBUG_PWM
+#ifdef CONFIG_DEBUG_PWM_INFO
   FAR struct lpc17_pwmtimer_s *priv = (FAR struct lpc17_pwmtimer_s *)dev;
 
   /* There are no platform-specific ioctl commands */

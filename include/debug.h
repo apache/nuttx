@@ -693,6 +693,30 @@
 #  define i2sllinfo(x...)
 #endif
 
+#ifdef CONFIG_DEBUG_PWM_ERROR
+#  define pwmerr(format, ...)   err(format, ##__VA_ARGS__)
+#  define pwmllerr(format, ...) llerr(format, ##__VA_ARGS__)
+#else
+#  define pwmerr(x...)
+#  define pwmllerr(x...)
+#endif
+
+#ifdef CONFIG_DEBUG_PWM_WARN
+#  define pwmwarn(format, ...)   warn(format, ##__VA_ARGS__)
+#  define pwmllwarn(format, ...) llwarn(format, ##__VA_ARGS__)
+#else
+#  define pwmwarn(x...)
+#  define pwmllwarn(x...)
+#endif
+
+#ifdef CONFIG_DEBUG_PWM_INFO
+#  define pwminfo(format, ...)   info(format, ##__VA_ARGS__)
+#  define pwmllinfo(format, ...) llinfo(format, ##__VA_ARGS__)
+#else
+#  define pwminfo(x...)
+#  define pwmllinfo(x...)
+#endif
+
 #ifdef CONFIG_DEBUG_SENSORS_ERROR
 #  define snerr(format, ...)    err(format, ##__VA_ARGS__)
 #  define snllerr(format, ...)  llerr(format, ##__VA_ARGS__)
@@ -1282,6 +1306,30 @@
 #  define i2sllinfo   (void)
 #endif
 
+#ifdef CONFIG_DEBUG_PWM_ERROR
+#  define pwmerr      err
+#  define pwmllerr    llerr
+#else
+#  define pwmerr      (void)
+#  define pwmllerr    (void)
+#endif
+
+#ifdef CONFIG_DEBUG_PWM_WARN
+#  define pwmwarn     warn
+#  define pwmllwarn   llwarn
+#else
+#  define pwmwarn     (void)
+#  define pwmllwarn   (void)
+#endif
+
+#ifdef CONFIG_DEBUG_PWM_INFO
+#  define pwminfo     info
+#  define pwmllinfo   llinfo
+#else
+#  define pwminfo     (void)
+#  define pwmllinfo   (void)
+#endif
+
 #ifdef CONFIG_DEBUG_SENSORS_ERROR
 #  define snerr       err
 #  define snllerr     llerr
@@ -1506,6 +1554,14 @@
 #else
 #  define i2serrdumpbuffer(m,b,n)
 #  define i2sinfodumpbuffer(m,b,n)
+#endif
+
+#ifdef CONFIG_DEBUG_PWM
+#  define pwmerrdumpbuffer(m,b,n)  errdumpbuffer(m,b,n)
+#  define pwminfodumpbuffer(m,b,n) infodumpbuffer(m,b,n)
+#else
+#  define pwmerrdumpbuffer(m,b,n)
+#  define pwminfodumpbuffer(m,b,n)
 #endif
 
 #ifdef CONFIG_DEBUG_SENSORS
