@@ -1,18 +1,16 @@
 /************************************************************************************
- * arch/arm/src/stm32/stm32f3xx_i2c.c
- * STM32 F3 I2C Hardware Layer - Device Driver
+ * arch/arm/src/stm32/stm32f7_i2c.c
+ * STM32 I2C Hardware Layer - Device Driver
  *
  *   Copyright (C) 2011 Uros Platise. All rights reserved.
  *   Author: Uros Platise <uros.platise@isotel.eu>
  *
  * With extensions and modifications for the F1, F2, and F4 by:
  *
- *   Copyright (C) 2011-2013 Gregory Nutt. All rights reserved.
- *   Author: Gregroy Nutt <gnutt@nuttx.org>
- *
- * And this version for the STM32 F3 by
- *
- *   Author: John Wharington
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Authors: Gregroy Nutt <gnutt@nuttx.org>
+ *            John Wharington
+ *            David Sidrane <david_s5@nscdg.com>
  *
  * Major rewrite of ISR and supporting methods, including support
  * for NACK and RELOAD by:
@@ -51,11 +49,9 @@
 
 /* ------------------------------------------------------------------------------
  *
- * STM32 F3 I2C Driver
+ * STM32 F7 I2C Driver
  *
  * Supports:
- *  - STM32 F30xxx
- *  - Internal Oscillator (HSI) running at 8 Mhz
  *  - Master operation at up to 400Khz (Fast Mode)
  *  - Multiple instances (shared bus)
  *  - Interrupt based operation
@@ -712,7 +708,7 @@ static useconds_t stm32_i2c_tousecs(int msgc, FAR struct i2c_msg_s *msgs)
 #ifndef CONFIG_I2C_POLLED
 static inline void stm32_i2c_enableinterrupts(struct stm32_i2c_priv_s *priv)
 {
-    stm32_i2c_modifyreg32(priv, STM32F7_I2C_CR1_OFFSET, 0, (I2C_CR1_TXRX | I2C_CR1_NACKIE));
+    stm32_i2c_modifyreg32(priv, STM32_I2C_CR1_OFFSET, 0, (I2C_CR1_TXRX | I2C_CR1_NACKIE));
 }
 #endif
 
@@ -742,7 +738,7 @@ static inline int stm32_i2c_sem_waitdone(FAR struct stm32_i2c_priv_s *priv)
    * The remainder of the interrupts, including error-related, are enabled here.
    */
 
-  stm32_i2c_modifyreg32(priv, STM32F7_I2C_CR1_OFFSET, 0,
+  stm32_i2c_modifyreg32(priv, STM32_I2C_CR1_OFFSET, 0,
                         (I2C_CR1_ALLINTS & ~I2C_CR1_TXRX));
 
   /* Signal the interrupt handler that we are waiting */
@@ -802,7 +798,7 @@ static inline int stm32_i2c_sem_waitdone(FAR struct stm32_i2c_priv_s *priv)
 
   /* Disable I2C interrupts */
 
-  stm32_i2c_modifyreg32(priv, STM32F7_I2C_CR1_OFFSET, I2C_CR1_ALLINTS, 0);
+  stm32_i2c_modifyreg32(priv, STM32_I2C_CR1_OFFSET, I2C_CR1_ALLINTS, 0);
 
   leave_critical_section(flags);
   return ret;
@@ -869,7 +865,7 @@ static inline int stm32_i2c_sem_waitdone(FAR struct stm32_i2c_priv_s *priv)
 static inline void
 stm32_i2c_set_7bit_address(FAR struct stm32_i2c_priv_s *priv)
 {
-  stm32_i2c_modifyreg32(priv, STM32F7_I2C_CR2_OFFSET, I2C_CR2_SADD7_MASK,
+  stm32_i2c_modifyreg32(priv, STM32_I2C_CR2_OFFSET, I2C_CR2_SADD7_MASK,
                         ((priv->msgv->addr & 0x7F) << I2C_CR2_SADD7_SHIFT));
 }
 
@@ -884,7 +880,7 @@ static inline void
 stm32_i2c_set_bytes_to_transfer(FAR struct stm32_i2c_priv_s *priv,
                                uint8_t n_bytes)
 {
-  stm32_i2c_modifyreg32(priv, STM32F7_I2C_CR2_OFFSET, I2C_CR2_NBYTES_MASK,
+  stm32_i2c_modifyreg32(priv, STM32_I2C_CR2_OFFSET, I2C_CR2_NBYTES_MASK,
                         (n_bytes << I2C_CR2_NBYTES_SHIFT));
 }
 
@@ -898,7 +894,7 @@ stm32_i2c_set_bytes_to_transfer(FAR struct stm32_i2c_priv_s *priv,
 static inline void
 stm32_i2c_set_write_transfer_dir(FAR struct stm32_i2c_priv_s *priv)
 {
-  stm32_i2c_modifyreg32(priv, STM32F7_I2C_CR2_OFFSET, I2C_CR2_RD_WRN, 0);
+  stm32_i2c_modifyreg32(priv, STM32_I2C_CR2_OFFSET, I2C_CR2_RD_WRN, 0);
 }
 
 /************************************************************************************
@@ -911,7 +907,7 @@ stm32_i2c_set_write_transfer_dir(FAR struct stm32_i2c_priv_s *priv)
 static inline void
 stm32_i2c_set_read_transfer_dir(FAR struct stm32_i2c_priv_s *priv)
 {
-  stm32_i2c_modifyreg32(priv, STM32F7_I2C_CR2_OFFSET, 0, I2C_CR2_RD_WRN);
+  stm32_i2c_modifyreg32(priv, STM32_I2C_CR2_OFFSET, 0, I2C_CR2_RD_WRN);
 }
 
 /************************************************************************************
@@ -924,7 +920,7 @@ stm32_i2c_set_read_transfer_dir(FAR struct stm32_i2c_priv_s *priv)
 static inline void
 stm32_i2c_enable_reload(FAR struct stm32_i2c_priv_s *priv)
 {
-  stm32_i2c_modifyreg32(priv, STM32F7_I2C_CR2_OFFSET, 0, I2C_CR2_RELOAD);
+  stm32_i2c_modifyreg32(priv, STM32_I2C_CR2_OFFSET, 0, I2C_CR2_RELOAD);
 }
 
 /************************************************************************************
@@ -937,7 +933,7 @@ stm32_i2c_enable_reload(FAR struct stm32_i2c_priv_s *priv)
 static inline void
 stm32_i2c_disable_reload(FAR struct stm32_i2c_priv_s *priv)
 {
-  stm32_i2c_modifyreg32(priv, STM32F7_I2C_CR2_OFFSET, I2C_CR2_RELOAD, 0);
+  stm32_i2c_modifyreg32(priv, STM32_I2C_CR2_OFFSET, I2C_CR2_RELOAD, 0);
 }
 
 
@@ -972,7 +968,7 @@ static inline void stm32_i2c_sem_waitstop(FAR struct stm32_i2c_priv_s *priv)
     {
       /* Check for STOP condition */
 
-      cr = stm32_i2c_getreg32(priv, STM32F7_I2C_CR2_OFFSET);
+      cr = stm32_i2c_getreg32(priv, STM32_I2C_CR2_OFFSET);
       if ((cr & I2C_CR2_STOP) == 0)
         {
           return;
@@ -980,7 +976,7 @@ static inline void stm32_i2c_sem_waitstop(FAR struct stm32_i2c_priv_s *priv)
 
       /* Check for timeout error */
 
-      sr = stm32_i2c_getreg(priv, STM32F7_I2C_ISR_OFFSET);
+      sr = stm32_i2c_getreg(priv, STM32_I2C_ISR_OFFSET);
       if ((sr & I2C_INT_TIMEOUT) != 0)
         {
           return;
@@ -1235,10 +1231,10 @@ static void stm32_i2c_setclock(FAR struct stm32_i2c_priv_s *priv, uint32_t frequ
     {
       /* I2C peripheral must be disabled to update clocking configuration */
 
-      pe = (stm32_i2c_getreg32(priv, STM32F7_I2C_CR1_OFFSET) & I2C_CR1_PE);
+      pe = (stm32_i2c_getreg32(priv, STM32_I2C_CR1_OFFSET) & I2C_CR1_PE);
       if (pe)
         {
-          stm32_i2c_modifyreg32(priv, STM32F7_I2C_CR1_OFFSET, I2C_CR1_PE, 0);
+          stm32_i2c_modifyreg32(priv, STM32_I2C_CR1_OFFSET, I2C_CR1_PE, 0);
         }
 
       /* TODO: speed/timing calcs, at the moment 45Mhz = STM32_PCLK1_FREQUENCY, analog filter is on,
@@ -1277,11 +1273,11 @@ static void stm32_i2c_setclock(FAR struct stm32_i2c_priv_s *priv, uint32_t frequ
         (scl_h_period << I2C_TIMINGR_SCLH_SHIFT) |
         (scl_l_period << I2C_TIMINGR_SCLL_SHIFT);
 
-      stm32_i2c_putreg32(priv, STM32F7_I2C_TIMINGR_OFFSET, timingr);
+      stm32_i2c_putreg32(priv, STM32_I2C_TIMINGR_OFFSET, timingr);
 
       if (pe)
         {
-          stm32_i2c_modifyreg32(priv, STM32F7_I2C_CR1_OFFSET, 0, I2C_CR1_PE);
+          stm32_i2c_modifyreg32(priv, STM32_I2C_CR1_OFFSET, 0, I2C_CR1_PE);
         }
 
       priv->frequency = frequency;
@@ -1410,7 +1406,7 @@ static inline void stm32_i2c_sendstart(FAR struct stm32_i2c_priv_s *priv)
   i2cinfo("Sending START: dcnt=%i msgc=%i flags=0x%04x\n",
      priv->dcnt, priv->msgc, priv->flags);
 
-  stm32_i2c_modifyreg32(priv, STM32F7_I2C_CR2_OFFSET, 0, I2C_CR2_START);
+  stm32_i2c_modifyreg32(priv, STM32_I2C_CR2_OFFSET, 0, I2C_CR2_START);
 }
 
 /************************************************************************************
@@ -1430,7 +1426,7 @@ static inline void stm32_i2c_sendstop(FAR struct stm32_i2c_priv_s *priv)
   i2cinfo("Sending STOP\n");
   stm32_i2c_traceevent(priv, I2CEVENT_WRITE_STOP, 0);
 
-  stm32_i2c_modifyreg32(priv, STM32F7_I2C_CR2_OFFSET, 0, I2C_CR2_STOP);
+  stm32_i2c_modifyreg32(priv, STM32_I2C_CR2_OFFSET, 0, I2C_CR2_STOP);
 }
 
 /************************************************************************************
@@ -1443,7 +1439,7 @@ static inline void stm32_i2c_sendstop(FAR struct stm32_i2c_priv_s *priv)
 
 static inline uint32_t stm32_i2c_getstatus(FAR struct stm32_i2c_priv_s *priv)
 {
-  return getreg32(priv->config->base + STM32F7_I2C_ISR_OFFSET);
+  return getreg32(priv->config->base + STM32_I2C_ISR_OFFSET);
 }
 
 /************************************************************************************
@@ -1456,7 +1452,7 @@ static inline uint32_t stm32_i2c_getstatus(FAR struct stm32_i2c_priv_s *priv)
 
 static inline void stm32_i2c_clearinterrupts(struct stm32_i2c_priv_s *priv)
 {
-  stm32_i2c_modifyreg32(priv, STM32F7_I2C_ICR_OFFSET, 0, I2C_ICR_CLEARMASK);
+  stm32_i2c_modifyreg32(priv, STM32_I2C_ICR_OFFSET, 0, I2C_ICR_CLEARMASK);
 }
 
 /************************************************************************************
@@ -1483,7 +1479,7 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
 
   /* Get state of the I2C controller */
 
-  status = stm32_i2c_getreg32(priv, STM32F7_I2C_ISR_OFFSET);
+  status = stm32_i2c_getreg32(priv, STM32_I2C_ISR_OFFSET);
 
   i2cinfo("ENTER: status = 0x%08x\n", status);
 
@@ -1645,7 +1641,7 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
 
           /* Transmit current byte */
 
-          stm32_i2c_putreg(priv, STM32F7_I2C_TXDR_OFFSET, *priv->ptr);
+          stm32_i2c_putreg(priv, STM32_I2C_TXDR_OFFSET, *priv->ptr);
 
           /* Advance to next byte */
 
@@ -1719,7 +1715,7 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
 #endif
           /* Receive a byte */
 
-          *priv->ptr = stm32_i2c_getreg(priv, STM32F7_I2C_RXDR_OFFSET);
+          *priv->ptr = stm32_i2c_getreg(priv, STM32_I2C_RXDR_OFFSET);
 
           i2cinfo("RXNE: Read Data 0x%02x\n", *priv->ptr);
 
@@ -1742,7 +1738,7 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
           stm32_i2c_traceevent(priv, I2CEVENT_READ_ERROR, 0);
           status = stm32_i2c_getreg(priv, STM32F7_I2C_ISR_OFFSET);
           i2cerr("ERROR: RXNE Unsupported state detected, dcnt=%i, status 0x%08x\n",
-          priv->dcnt, status);
+                 priv->dcnt, status);
 
           /* Set signals that will terminate ISR and wake waiting thread */
 
@@ -1997,7 +1993,7 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
 #else
       /* Read rest of the state */
 
-      status = stm32_i2c_getreg(priv, STM32F7_I2C_ISR_OFFSET);
+      status = stm32_i2c_getreg(priv, STM32_I2C_ISR_OFFSET);
 
       i2cerr("ERROR: Invalid state detected, status 0x%08x\n", status);
 
@@ -2033,7 +2029,7 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
       priv->intstate = INTSTATE_DONE;
 #else
 
-      status = stm32_i2c_getreg32(priv, STM32F7_I2C_ISR_OFFSET);
+      status = stm32_i2c_getreg32(priv, STM32_I2C_ISR_OFFSET);
 
       /* Update private state to capture NACK which is used in combination
        * with the astart flag to report the type of NACK received (address
@@ -2046,7 +2042,7 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
 
       /* Clear all interrupts */
 
-      stm32_i2c_modifyreg32(priv, STM32F7_I2C_ICR_OFFSET, 0, I2C_ICR_CLEARMASK);
+      stm32_i2c_modifyreg32(priv, STM32_I2C_ICR_OFFSET, 0, I2C_ICR_CLEARMASK);
 
       /* If a thread is waiting then inform it transfer is complete */
 
@@ -2058,7 +2054,7 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
 #endif
     }
 
-  status = stm32_i2c_getreg32(priv, STM32F7_I2C_ISR_OFFSET);
+  status = stm32_i2c_getreg32(priv, STM32_I2C_ISR_OFFSET);
   i2cinfo("EXIT: status = 0x%08x\n", status);
 
   return OK;
@@ -2164,7 +2160,7 @@ static int stm32_i2c_init(FAR struct stm32_i2c_priv_s *priv)
 
   /* Enable I2C peripheral */
 
-  stm32_i2c_modifyreg32(priv, STM32F7_I2C_CR1_OFFSET, 0, I2C_CR1_PE);
+  stm32_i2c_modifyreg32(priv, STM32_I2C_CR1_OFFSET, 0, I2C_CR1_PE);
 
   return OK;
 }
@@ -2181,7 +2177,7 @@ static int stm32_i2c_deinit(FAR struct stm32_i2c_priv_s *priv)
 {
   /* Disable I2C */
 
-  stm32_i2c_putreg32(priv, STM32F7_I2C_CR1_OFFSET, 0);
+  stm32_i2c_putreg32(priv, STM32_I2C_CR1_OFFSET, 0);
 
   /* Unconfigure GPIO pins */
 
@@ -2279,9 +2275,12 @@ static int stm32_i2c_process(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s 
 
   waitrc = stm32_i2c_sem_waitdone(priv);
 
-  cr1 = stm32_i2c_getreg32(priv, STM32F7_I2C_CR1_OFFSET);
-  cr2 = stm32_i2c_getreg32(priv, STM32F7_I2C_CR2_OFFSET);
-
+  cr1 = stm32_i2c_getreg32(priv, STM32_I2C_CR1_OFFSET);
+  cr2 = stm32_i2c_getreg32(priv, STM32_I2C_CR2_OFFSET);
+#if !defined(CONFIG_DEBUG_I2C)
+  UNUSED(cr1);
+  UNUSED(cr2);
+#endif
   /* Status after a normal / good exit is usually 0x00000001, meaning the TXE
    * bit is set.  That occurs as a result of the I2C_TXDR register being
    * empty, and it naturally will be after the last byte is transmitted.
