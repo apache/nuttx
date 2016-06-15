@@ -55,16 +55,16 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* CONFIG_DEBUG_LEDS enables debug output from this file (needs CONFIG_DEBUG
- * with CONFIG_DEBUG_VERBOSE too)
+/* CONFIG_DEBUG_LEDS enables debug output from this file (needs CONFIG_DEBUG_FEATURES
+ * with CONFIG_DEBUG_INFO too)
  */
 
 #ifdef CONFIG_DEBUG_LEDS
-#  define leddbg  lldbg
-#  define ledvdbg llvdbg
+#  define lederr  llerr
+#  define ledinfo llinfo
 #else
-#  define leddbg(x...)
-#  define ledvdbg(x...)
+#  define lederr(x...)
+#  define ledinfo(x...)
 #endif
 
 /* The following definitions map the encoded LED setting to GPIO settings */

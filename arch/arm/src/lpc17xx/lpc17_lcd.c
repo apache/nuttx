@@ -202,14 +202,14 @@ struct fb_vtable_s g_fbobject =
 static int lpc17_getvideoinfo(FAR struct fb_vtable_s *vtable,
                               FAR struct fb_videoinfo_s *vinfo)
 {
-  gvdbg("vtable=%p vinfo=%p\n", vtable, vinfo);
+  ginfo("vtable=%p vinfo=%p\n", vtable, vinfo);
   if (vtable && vinfo)
     {
       memcpy(vinfo, &g_videoinfo, sizeof(struct fb_videoinfo_s));
       return OK;
     }
 
-  gdbg("Returning EINVAL\n");
+  gerr("Returning EINVAL\n");
   return -EINVAL;
 }
 
@@ -220,14 +220,14 @@ static int lpc17_getvideoinfo(FAR struct fb_vtable_s *vtable,
 static int lpc17_getplaneinfo(FAR struct fb_vtable_s *vtable, int planeno,
                               FAR struct fb_planeinfo_s *pinfo)
 {
-  gvdbg("vtable=%p planeno=%d pinfo=%p\n", vtable, planeno, pinfo);
+  ginfo("vtable=%p planeno=%d pinfo=%p\n", vtable, planeno, pinfo);
   if (vtable && planeno == 0 && pinfo)
     {
       memcpy(pinfo, &g_planeinfo, sizeof(struct fb_planeinfo_s));
       return OK;
     }
 
-  gdbg("Returning EINVAL\n");
+  gerr("Returning EINVAL\n");
   return -EINVAL;
 }
 
@@ -244,7 +244,7 @@ static int lpc17_getcmap(FAR struct fb_vtable_s *vtable,
   int last;
   int i;
 
-  gvdbg("vtable=%p cmap=%p first=%d len=%d\n",
+  ginfo("vtable=%p cmap=%p first=%d len=%d\n",
         vtable, cmap, cmap->first, cmap->len);
 
   DEBUGASSERT(vtable && cmap &&
@@ -319,7 +319,7 @@ static int lpc17_putcmap(FAR struct fb_vtable_s *vtable,
   int last;
   int i;
 
-  gvdbg("vtable=%p cmap=%p first=%d len=%d\n",
+  ginfo("vtable=%p cmap=%p first=%d len=%d\n",
         vtable, cmap, cmap->first, cmap->len);
 
   DEBUGASSERT(vtable && cmap);
@@ -383,27 +383,27 @@ static int lpc17_putcmap(FAR struct fb_vtable_s *vtable,
 static int lpc17_getcursor(FAR struct fb_vtable_s *vtable,
                         FAR struct fb_cursorattrib_s *attrib)
 {
-  gvdbg("vtable=%p attrib=%p\n", vtable, attrib);
+  ginfo("vtable=%p attrib=%p\n", vtable, attrib);
   if (vtable && attrib)
     {
 #ifdef CONFIG_FB_HWCURSORIMAGE
       attrib->fmt = LPC17_COLOR_FMT;
 #endif
 
-      gvdbg("pos: (x=%d, y=%d)\n", g_cpos.x, g_cpos.y);
+      ginfo("pos: (x=%d, y=%d)\n", g_cpos.x, g_cpos.y);
       attrib->pos = g_cpos;
 
 #ifdef CONFIG_FB_HWCURSORSIZE
       attrib->mxsize.h = CONFIG_LPC17_LCD_VHEIGHT;
       attrib->mxsize.w = CONFIG_LPC17_LCD_HWIDTH;
 
-      gvdbg("size: (h=%d, w=%d)\n", g_csize.h, g_csize.w);
+      ginfo("size: (h=%d, w=%d)\n", g_csize.h, g_csize.w);
       attrib->size = g_csize;
 #endif
       return OK;
     }
 
-  gdbg("Returning EINVAL\n");
+  gerr("Returning EINVAL\n");
   return -EINVAL;
 }
 #endif
@@ -416,26 +416,26 @@ static int lpc17_getcursor(FAR struct fb_vtable_s *vtable,
 static int lpc17_setcursor(FAR struct fb_vtable_s *vtable,
                        FAR struct fb_setcursor_s *setttings)
 {
-  gvdbg("vtable=%p setttings=%p\n", vtable, setttings);
+  ginfo("vtable=%p setttings=%p\n", vtable, setttings);
   if (vtable && setttings)
     {
-      gvdbg("flags: %02x\n", settings->flags);
+      ginfo("flags: %02x\n", settings->flags);
       if ((flags & FB_CUR_SETPOSITION) != 0)
         {
           g_cpos = settings->pos;
-          gvdbg("pos: (h:%d, w:%d)\n", g_cpos.x, g_cpos.y);
+          ginfo("pos: (h:%d, w:%d)\n", g_cpos.x, g_cpos.y);
         }
 #ifdef CONFIG_FB_HWCURSORSIZE
       if ((flags & FB_CUR_SETSIZE) != 0)
         {
           g_csize = settings->size;
-          gvdbg("size: (h:%d, w:%d)\n", g_csize.h, g_csize.w);
+          ginfo("size: (h:%d, w:%d)\n", g_csize.h, g_csize.w);
         }
 #endif
 #ifdef CONFIG_FB_HWCURSORIMAGE
       if ((flags & FB_CUR_SETIMAGE) != 0)
         {
-          gvdbg("image: (h:%d, w:%d) @ %p\n",
+          ginfo("image: (h:%d, w:%d) @ %p\n",
                 settings->img.height, settings->img.width,
                 settings->img.image);
         }
@@ -443,7 +443,7 @@ static int lpc17_setcursor(FAR struct fb_vtable_s *vtable,
       return OK;
     }
 
-  gdbg("Returning EINVAL\n");
+  gerr("Returning EINVAL\n");
   return -EINVAL;
 }
 #endif
@@ -473,7 +473,7 @@ int up_fbinitialize(int display)
   uint32_t regval;
   int i;
 
-  gvdbg("Entry\n");
+  ginfo("Entry\n");
 
   /* Give LCD bus priority */
 
@@ -485,7 +485,7 @@ int up_fbinitialize(int display)
   /* Configure pins */
   /* Video data */
 
-  gvdbg("Configuring pins\n");
+  ginfo("Configuring pins\n");
 
   lpc17_configgpio(GPIO_LCD_VD0);
   lpc17_configgpio(GPIO_LCD_VD1);
@@ -528,7 +528,7 @@ int up_fbinitialize(int display)
 
   modifyreg32(LPC17_SYSCON_PCONP, 0, SYSCON_PCONP_PCLCD);
 
-  gvdbg("Configuring the LCD controller\n");
+  ginfo("Configuring the LCD controller\n");
 
   /* Disable the cursor */
 
@@ -686,7 +686,7 @@ int up_fbinitialize(int display)
 #endif
 
   putreg32(0, LPC17_LCD_INTMSK);
-  gvdbg("Enabling the display\n");
+  ginfo("Enabling the display\n");
 
   for (i = LPC17_LCD_PWREN_DELAY; i; i--);
 
@@ -727,7 +727,7 @@ int up_fbinitialize(int display)
 
 FAR struct fb_vtable_s *up_fbgetvplane(int display, int vplane)
 {
-  gvdbg("vplane: %d\n", vplane);
+  ginfo("vplane: %d\n", vplane);
   if (vplane == 0)
     {
       return &g_fbobject;
@@ -801,14 +801,14 @@ void lpc17_lcdclear(nxgl_mxpixel_t color)
 #if LPC17_BPP > 16
   uint32_t *dest = (uint32_t *)CONFIG_LPC17_LCD_VRAMBASE;
 
-  gvdbg("Clearing display: color=%08x VRAM=%08x size=%d\n",
+  ginfo("Clearing display: color=%08x VRAM=%08x size=%d\n",
         color, CONFIG_LPC17_LCD_VRAMBASE,
         CONFIG_LPC17_LCD_HWIDTH * CONFIG_LPC17_LCD_VHEIGHT * sizeof(uint32_t));
 
 #else
   uint16_t *dest = (uint16_t *)CONFIG_LPC17_LCD_VRAMBASE;
 
-  gvdbg("Clearing display: color=%08x VRAM=%08x size=%d\n",
+  ginfo("Clearing display: color=%08x VRAM=%08x size=%d\n",
         color, CONFIG_LPC17_LCD_VRAMBASE,
         CONFIG_LPC17_LCD_HWIDTH * CONFIG_LPC17_LCD_VHEIGHT * sizeof(uint16_t));
 #endif

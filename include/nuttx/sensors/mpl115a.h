@@ -49,7 +49,7 @@
  * CONFIG_SENSORS_MPL115A
  *   Enables support for the MPL115A driver
  * CONFIG_MPL115A_REGDEBUG
- *   Enable very low register-level debug output.  Requires CONFIG_DEBUG.
+ *   Enable very low register-level debug output.  Requires CONFIG_DEBUG_FEATURES.
  */
 
 /* There are two types of MPL115A chips. The MPL115A1 communicates with the target CPU

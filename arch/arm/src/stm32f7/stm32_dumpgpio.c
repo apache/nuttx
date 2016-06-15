@@ -51,7 +51,7 @@
 #include "stm32_gpio.h"
 #include "stm32_rcc.h"
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
 
 /* Content of this file requires verification before it is used with other
  * families
@@ -65,7 +65,7 @@
  ****************************************************************************/
 /* Port letters for prettier debug output */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
 static const char g_portchar[STM32F7_NGPIO] =
 {
 #if STM32F7_NGPIO > 11
@@ -127,27 +127,27 @@ int stm32_dumpgpio(uint32_t pinset, const char *msg)
 
   DEBUGASSERT(port < STM32F7_NGPIO);
 
-  lldbg("GPIO%c pinset: %08x base: %08x -- %s\n",
+  llerr("GPIO%c pinset: %08x base: %08x -- %s\n",
         g_portchar[port], pinset, base, msg);
 
   if ((getreg32(STM32_RCC_AHB1ENR) & RCC_AHB1ENR_GPIOEN(port)) != 0)
     {
-      lldbg(" MODE: %08x OTYPE: %04x     OSPEED: %08x PUPDR: %08x\n",
+      llerr(" MODE: %08x OTYPE: %04x     OSPEED: %08x PUPDR: %08x\n",
             getreg32(base + STM32_GPIO_MODER_OFFSET),
             getreg32(base + STM32_GPIO_OTYPER_OFFSET),
             getreg32(base + STM32_GPIO_OSPEED_OFFSET),
             getreg32(base + STM32_GPIO_PUPDR_OFFSET));
-      lldbg("  IDR: %04x       ODR: %04x       LCKR: %05x\n",
+      llerr("  IDR: %04x       ODR: %04x       LCKR: %05x\n",
             getreg32(base + STM32_GPIO_IDR_OFFSET),
             getreg32(base + STM32_GPIO_ODR_OFFSET),
             getreg32(base + STM32_GPIO_LCKR_OFFSET));
-      lldbg(" AFRH: %08x  AFRL: %08x\n",
+      llerr(" AFRH: %08x  AFRL: %08x\n",
             getreg32(base + STM32_GPIO_AFRH_OFFSET),
             getreg32(base + STM32_GPIO_AFRL_OFFSET));
     }
   else
     {
-      lldbg("  GPIO%c not enabled: AHB1ENR: %08x\n",
+      llerr("  GPIO%c not enabled: AHB1ENR: %08x\n",
             g_portchar[port], getreg32(STM32_RCC_AHB1ENR));
     }
 
@@ -156,4 +156,4 @@ int stm32_dumpgpio(uint32_t pinset, const char *msg)
 }
 
 #endif /* CONFIG_STM32F7_STM32F74XX || CONFIG_STM32F7_STM32F75XX */
-#endif /* CONFIG_DEBUG */
+#endif /* CONFIG_DEBUG_FEATURES */

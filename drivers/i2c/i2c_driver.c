@@ -63,14 +63,14 @@
 #define DEVNAME_FMTLEN (8 + 3 + 1)
 
 /* Debug ********************************************************************/
-/* CONFIG_DEBUG_I2C + CONFIG_DEBUG enables general I2C debug output. */
+/* CONFIG_DEBUG_I2C + CONFIG_DEBUG_FEATURES enables general I2C debug output. */
 
 #ifdef CONFIG_DEBUG_I2C
-#  define i2cdbg dbg
-#  define i2cvdbg vdbg
+#  define i2cerr err
+#  define i2cinfo info
 #else
-#  define i2cdbg(x...)
-#  define i2cvdbg(x...)
+#  define i2cerr(x...)
+#  define i2cinfo(x...)
 #endif
 
 /****************************************************************************
@@ -254,7 +254,7 @@ static int i2cdrvr_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   FAR struct i2c_transfer_s *transfer;
   int ret;
 
-  i2cvdbg("cmd=%d arg=%lu\n", cmd, arg);
+  i2cinfo("cmd=%d arg=%lu\n", cmd, arg);
 
   /* Get our private data structure */
 

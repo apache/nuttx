@@ -60,11 +60,11 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* CONFIG_DEBUG, CONFIG_DEBUG_VERBOSE, and CONFIG_DEBUG_BINFMT have to be
+/* CONFIG_DEBUG_FEATURES, CONFIG_DEBUG_INFO, and CONFIG_DEBUG_BINFMT have to be
  * defined or CONFIG_ELF_DUMPBUFFER does nothing.
  */
 
-#if !defined(CONFIG_DEBUG_VERBOSE) || !defined (CONFIG_DEBUG_BINFMT)
+#if !defined(CONFIG_DEBUG_INFO) || !defined (CONFIG_DEBUG_BINFMT)
 #  undef CONFIG_ELF_DUMPBUFFER
 #endif
 
@@ -73,7 +73,7 @@
 #endif
 
 #ifdef CONFIG_ELF_DUMPBUFFER
-# define elf_dumpbuffer(m,b,n) bvdbgdumpbuffer(m,b,n)
+# define elf_dumpbuffer(m,b,n) binfodumpbuffer(m,b,n)
 #else
 # define elf_dumpbuffer(m,b,n)
 #endif
@@ -87,7 +87,7 @@
  ****************************************************************************/
 
 static int elf_loadbinary(FAR struct binary_s *binp);
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_BINFMT)
+#if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_DEBUG_BINFMT)
 static void elf_dumploadinfo(FAR struct elf_loadinfo_s *loadinfo);
 #endif
 
@@ -110,63 +110,63 @@ static struct binfmt_s g_elfbinfmt =
  * Name: elf_dumploadinfo
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_BINFMT)
+#if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_DEBUG_BINFMT)
 static void elf_dumploadinfo(FAR struct elf_loadinfo_s *loadinfo)
 {
   int i;
 
-  bdbg("LOAD_INFO:\n");
-  bdbg("  textalloc:    %08lx\n", (long)loadinfo->textalloc);
-  bdbg("  dataalloc:    %08lx\n", (long)loadinfo->dataalloc);
-  bdbg("  textsize:     %ld\n",   (long)loadinfo->textsize);
-  bdbg("  datasize:     %ld\n",   (long)loadinfo->datasize);
-  bdbg("  filelen:      %ld\n",   (long)loadinfo->filelen);
+  berr("LOAD_INFO:\n");
+  berr("  textalloc:    %08lx\n", (long)loadinfo->textalloc);
+  berr("  dataalloc:    %08lx\n", (long)loadinfo->dataalloc);
+  berr("  textsize:     %ld\n",   (long)loadinfo->textsize);
+  berr("  datasize:     %ld\n",   (long)loadinfo->datasize);
+  berr("  filelen:      %ld\n",   (long)loadinfo->filelen);
 #ifdef CONFIG_BINFMT_CONSTRUCTORS
-  bdbg("  ctoralloc:    %08lx\n", (long)loadinfo->ctoralloc);
-  bdbg("  ctors:        %08lx\n", (long)loadinfo->ctors);
-  bdbg("  nctors:       %d\n",    loadinfo->nctors);
-  bdbg("  dtoralloc:    %08lx\n", (long)loadinfo->dtoralloc);
-  bdbg("  dtors:        %08lx\n", (long)loadinfo->dtors);
-  bdbg("  ndtors:       %d\n",    loadinfo->ndtors);
+  berr("  ctoralloc:    %08lx\n", (long)loadinfo->ctoralloc);
+  berr("  ctors:        %08lx\n", (long)loadinfo->ctors);
+  berr("  nctors:       %d\n",    loadinfo->nctors);
+  berr("  dtoralloc:    %08lx\n", (long)loadinfo->dtoralloc);
+  berr("  dtors:        %08lx\n", (long)loadinfo->dtors);
+  berr("  ndtors:       %d\n",    loadinfo->ndtors);
 #endif
-  bdbg("  filfd:        %d\n",    loadinfo->filfd);
-  bdbg("  symtabidx:    %d\n",    loadinfo->symtabidx);
-  bdbg("  strtabidx:    %d\n",    loadinfo->strtabidx);
+  berr("  filfd:        %d\n",    loadinfo->filfd);
+  berr("  symtabidx:    %d\n",    loadinfo->symtabidx);
+  berr("  strtabidx:    %d\n",    loadinfo->strtabidx);
 
-  bdbg("ELF Header:\n");
-  bdbg("  e_ident:      %02x %02x %02x %02x\n",
+  berr("ELF Header:\n");
+  berr("  e_ident:      %02x %02x %02x %02x\n",
     loadinfo->ehdr.e_ident[0], loadinfo->ehdr.e_ident[1],
     loadinfo->ehdr.e_ident[2], loadinfo->ehdr.e_ident[3]);
-  bdbg("  e_type:       %04x\n",  loadinfo->ehdr.e_type);
-  bdbg("  e_machine:    %04x\n",  loadinfo->ehdr.e_machine);
-  bdbg("  e_version:    %08x\n",  loadinfo->ehdr.e_version);
-  bdbg("  e_entry:      %08lx\n", (long)loadinfo->ehdr.e_entry);
-  bdbg("  e_phoff:      %d\n",    loadinfo->ehdr.e_phoff);
-  bdbg("  e_shoff:      %d\n",    loadinfo->ehdr.e_shoff);
-  bdbg("  e_flags:      %08x\n" , loadinfo->ehdr.e_flags);
-  bdbg("  e_ehsize:     %d\n",    loadinfo->ehdr.e_ehsize);
-  bdbg("  e_phentsize:  %d\n",    loadinfo->ehdr.e_phentsize);
-  bdbg("  e_phnum:      %d\n",    loadinfo->ehdr.e_phnum);
-  bdbg("  e_shentsize:  %d\n",    loadinfo->ehdr.e_shentsize);
-  bdbg("  e_shnum:      %d\n",    loadinfo->ehdr.e_shnum);
-  bdbg("  e_shstrndx:   %d\n",    loadinfo->ehdr.e_shstrndx);
+  berr("  e_type:       %04x\n",  loadinfo->ehdr.e_type);
+  berr("  e_machine:    %04x\n",  loadinfo->ehdr.e_machine);
+  berr("  e_version:    %08x\n",  loadinfo->ehdr.e_version);
+  berr("  e_entry:      %08lx\n", (long)loadinfo->ehdr.e_entry);
+  berr("  e_phoff:      %d\n",    loadinfo->ehdr.e_phoff);
+  berr("  e_shoff:      %d\n",    loadinfo->ehdr.e_shoff);
+  berr("  e_flags:      %08x\n" , loadinfo->ehdr.e_flags);
+  berr("  e_ehsize:     %d\n",    loadinfo->ehdr.e_ehsize);
+  berr("  e_phentsize:  %d\n",    loadinfo->ehdr.e_phentsize);
+  berr("  e_phnum:      %d\n",    loadinfo->ehdr.e_phnum);
+  berr("  e_shentsize:  %d\n",    loadinfo->ehdr.e_shentsize);
+  berr("  e_shnum:      %d\n",    loadinfo->ehdr.e_shnum);
+  berr("  e_shstrndx:   %d\n",    loadinfo->ehdr.e_shstrndx);
 
   if (loadinfo->shdr && loadinfo->ehdr.e_shnum > 0)
     {
       for (i = 0; i < loadinfo->ehdr.e_shnum; i++)
         {
           FAR Elf32_Shdr *shdr = &loadinfo->shdr[i];
-          bdbg("Sections %d:\n", i);
-          bdbg("  sh_name:      %08x\n", shdr->sh_name);
-          bdbg("  sh_type:      %08x\n", shdr->sh_type);
-          bdbg("  sh_flags:     %08x\n", shdr->sh_flags);
-          bdbg("  sh_addr:      %08x\n", shdr->sh_addr);
-          bdbg("  sh_offset:    %d\n",   shdr->sh_offset);
-          bdbg("  sh_size:      %d\n",   shdr->sh_size);
-          bdbg("  sh_link:      %d\n",   shdr->sh_link);
-          bdbg("  sh_info:      %d\n",   shdr->sh_info);
-          bdbg("  sh_addralign: %d\n",   shdr->sh_addralign);
-          bdbg("  sh_entsize:   %d\n",   shdr->sh_entsize);
+          berr("Sections %d:\n", i);
+          berr("  sh_name:      %08x\n", shdr->sh_name);
+          berr("  sh_type:      %08x\n", shdr->sh_type);
+          berr("  sh_flags:     %08x\n", shdr->sh_flags);
+          berr("  sh_addr:      %08x\n", shdr->sh_addr);
+          berr("  sh_offset:    %d\n",   shdr->sh_offset);
+          berr("  sh_size:      %d\n",   shdr->sh_size);
+          berr("  sh_link:      %d\n",   shdr->sh_link);
+          berr("  sh_info:      %d\n",   shdr->sh_info);
+          berr("  sh_addralign: %d\n",   shdr->sh_addralign);
+          berr("  sh_entsize:   %d\n",   shdr->sh_entsize);
         }
     }
 }
@@ -193,7 +193,7 @@ static void elf_dumpentrypt(FAR struct binary_s *binp,
   ret = elf_addrenv_select(loadinfo);
   if (ret < 0)
     {
-      bdbg("ERROR: elf_addrenv_select() failed: %d\n", ret);
+      berr("ERROR: elf_addrenv_select() failed: %d\n", ret);
       return;
     }
 #endif
@@ -207,7 +207,7 @@ static void elf_dumpentrypt(FAR struct binary_s *binp,
   ret = elf_addrenv_restore(loadinfo);
   if (ret < 0)
     {
-      bdbg("ERROR: elf_addrenv_restore() failed: %d\n", ret);
+      berr("ERROR: elf_addrenv_restore() failed: %d\n", ret);
     }
 #endif
 }
@@ -229,7 +229,7 @@ static int elf_loadbinary(FAR struct binary_s *binp)
   struct elf_loadinfo_s loadinfo;  /* Contains globals for libelf */
   int                   ret;
 
-  bvdbg("Loading file: %s\n", binp->filename);
+  binfo("Loading file: %s\n", binp->filename);
 
   /* Initialize the ELF library to load the program binary. */
 
@@ -237,7 +237,7 @@ static int elf_loadbinary(FAR struct binary_s *binp)
   elf_dumploadinfo(&loadinfo);
   if (ret != 0)
     {
-      bdbg("Failed to initialize for load of ELF program: %d\n", ret);
+      berr("Failed to initialize for load of ELF program: %d\n", ret);
       goto errout;
     }
 
@@ -247,7 +247,7 @@ static int elf_loadbinary(FAR struct binary_s *binp)
   elf_dumploadinfo(&loadinfo);
   if (ret != 0)
     {
-      bdbg("Failed to load ELF program binary: %d\n", ret);
+      berr("Failed to load ELF program binary: %d\n", ret);
       goto errout_with_init;
     }
 
@@ -256,7 +256,7 @@ static int elf_loadbinary(FAR struct binary_s *binp)
   ret = elf_bind(&loadinfo, binp->exports, binp->nexports);
   if (ret != 0)
     {
-      bdbg("Failed to bind symbols program binary: %d\n", ret);
+      berr("Failed to bind symbols program binary: %d\n", ret);
       goto errout_with_load;
     }
 
@@ -338,12 +338,12 @@ int elf_initialize(void)
 
   /* Register ourselves as a binfmt loader */
 
-  bvdbg("Registering ELF\n");
+  binfo("Registering ELF\n");
 
   ret = register_binfmt(&g_elfbinfmt);
   if (ret != 0)
     {
-      bdbg("Failed to register binfmt: %d\n", ret);
+      berr("Failed to register binfmt: %d\n", ret);
     }
 
   return ret;

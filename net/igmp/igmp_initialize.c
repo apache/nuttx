@@ -84,7 +84,7 @@ in_addr_t g_ipv4_allrouters;
 
 void igmp_initialize(void)
 {
-  nvdbg("IGMP initializing\n");
+  ninfo("IGMP initializing\n");
 
   net_ipaddr(g_ipv4_allrouters, 224, 0, 0, 2);
   net_ipaddr(g_ipv4_allsystems, 224, 0, 0, 1);
@@ -105,7 +105,7 @@ void igmp_initialize(void)
 
 void igmp_devinit(struct net_driver_s *dev)
 {
-  nvdbg("IGMP initializing dev %p\n", dev);
+  ninfo("IGMP initializing dev %p\n", dev);
   DEBUGASSERT(dev->grplist.head == NULL);
 
   /* Add the all systems address to the group */

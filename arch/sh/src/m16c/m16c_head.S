@@ -58,7 +58,7 @@
  *****************************************************************************/
 
 	.macro	showprogress, code
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
 	.globl	_up_lowputc
 	mov.b	r#\code1l					/* Character to print */
 	jsr.a	_up_lowputc					/* Print it */

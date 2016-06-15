@@ -67,23 +67,23 @@
  */
 
 /* Debug definitions ********************************************************/
-/* CONFIG_DEBUG_LEDS enables debug output from this file (needs CONFIG_DEBUG
- * with CONFIG_DEBUG_VERBOSE too)
+/* CONFIG_DEBUG_LEDS enables debug output from this file (needs CONFIG_DEBUG_FEATURES
+ * with CONFIG_DEBUG_INFO too)
  */
 
 #ifdef CONFIG_DEBUG_LEDS
-#  define leddbg  lldbg
-#  ifdef CONFIG_DEBUG_VERBOSE
+#  define lederr  llerr
+#  ifdef CONFIG_DEBUG_INFO
 #    define LED_VERBOSE 1
-#    define ledvdbg lldbg
+#    define ledinfo llerr
 #  else
 #    undef LED_VERBOSE
-#    define ledvdbg(x...)
+#    define ledinfo(x...)
 #  endif
 #else
 #  undef LED_VERBOSE
-#  define leddbg(x...)
-#  define ledvdbg(x...)
+#  define lederr(x...)
+#  define ledinfo(x...)
 #endif
 
 /****************************************************************************

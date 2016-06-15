@@ -155,7 +155,7 @@ int tms570_esm_interrupt(int irq, void *context)
 
   /* Crash -- possibly showing diagnostic debug information. */
 
-  lldbg("ESM Interrupt. PC: %08x\n", CURRENT_REGS[REG_PC]);
+  llerr("ESM Interrupt. PC: %08x\n", CURRENT_REGS[REG_PC]);
   PANIC();
   return OK; /* To keep the compiler happy */
 }

@@ -1,8 +1,9 @@
 /************************************************************************************
  * arm/arm/src/stm32f7/stm32_spi.c
  *
- *   Copyright (C) 2009-2013, 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            David Sidrane <david_s5@nscdg.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -34,8 +35,8 @@
  ************************************************************************************/
 
 /************************************************************************************
- * The external functions, stm32_spi1/2/3select and stm32_spi1/2/3status must be
- * provided by board-specific logic.  They are implementations of the select
+ * The external functions, stm32_spi1/2/3/4/5/6select and stm32_spi1/2/3/4/5/6status
+ * must be * provided by board-specific logic.  They are implementations of the select
  * and status methods of the SPI interface defined by struct spi_ops_s (see
  * include/nuttx/spi/spi.h). All other methods (including stm32_spibus_initialize())
  * are provided by common STM32 logic.  To use this common SPI logic on your
@@ -43,9 +44,10 @@
  *
  *   1. Provide logic in stm32_boardinitialize() to configure SPI chip select
  *      pins.
- *   2. Provide stm32_spi1/2/3select() and stm32_spi1/2/3status() functions in your
- *      board-specific logic.  These functions will perform chip selection and
- *      status operations using GPIOs in the way your board is configured.
+ *   2. Provide stm32_spi1/2/3/4/5/6select() and stm32_spi1/2/3/4/5/6status()
+ *      functions in your board-specific logic.  These functions will perform chip
+ *      selection and status operations using GPIOs in the way your board is
+ *      configured.
  *   3. Add a calls to stm32_spibus_initialize() in your low level application
  *      initialization logic
  *   4. The handle returned by stm32_spibus_initialize() may then be used to bind the
@@ -53,13 +55,7 @@
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).
  *
- ****************************************************c********************************/
-
-/* This driver is ported from the stm32 one, which only supports 8 and 16 bits
- * transfers. The STM32F7 family supports frame size from 4 to 16 bits, but we do not
- * support that yet. For the moment, we replace uses of the CR1_DFF bit with a check
- * of the CR2_DS[0..3] bits. If the value is SPI_CR2_DS_16BIT it means 16 bits, else 8 bits.
- */
+ ****************************************************c*******************************/
 
 /************************************************************************************
  * Included Files
@@ -87,11 +83,10 @@
 #include "stm32_gpio.h"
 #include "stm32_dma.h"
 #include "stm32_spi.h"
-#include "chip/stm32_pinmap.h"
 
 #if defined(CONFIG_STM32F7_SPI1) || defined(CONFIG_STM32F7_SPI2) || \
     defined(CONFIG_STM32F7_SPI3) || defined(CONFIG_STM32F7_SPI4) || \
-	defined(CONFIG_STM32F7_SPI5) || defined(CONFIG_STM32F7_SPI6)
+    defined(CONFIG_STM32F7_SPI5) || defined(CONFIG_STM32F7_SPI6)
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -114,48 +109,44 @@
 
 #ifdef CONFIG_STM32F7_SPI_DMA
 
+#  error "SPI DMA not yet supported"
+
 #  if defined(CONFIG_SPI_DMAPRIO)
 #    define SPI_DMA_PRIO  CONFIG_SPI_DMAPRIO
+#  elif defined(DMA_SCR_PRIMED)
+#    define SPI_DMA_PRIO  DMA_SCR_PRIMED
 #  else
-#    define SPI_DMA_PRIO  DMA_CCR_PRIMED
+#    error "Unknown STM32 DMA"
 #  endif
 
-#  if (SPI_DMA_PRIO & ~DMA_CCR_PL_MASK) != 0
+#if (SPI_DMA_PRIO & ~DMA_SCR_PL_MASK) != 0
 #    error "Illegal value for CONFIG_SPI_DMAPRIO"
-#  endif
-
 #endif
+
 
 /* DMA channel configuration */
 
-#define SPI_RXDMA16_CONFIG        (SPI_DMA_PRIO|DMA_CCR_MSIZE_16BITS|DMA_CCR_PSIZE_16BITS|DMA_CCR_MINC            )
-#define SPI_RXDMA8_CONFIG         (SPI_DMA_PRIO|DMA_CCR_MSIZE_8BITS |DMA_CCR_PSIZE_8BITS |DMA_CCR_MINC            )
-#define SPI_RXDMA16NULL_CONFIG    (SPI_DMA_PRIO|DMA_CCR_MSIZE_8BITS |DMA_CCR_PSIZE_16BITS                         )
-#define SPI_RXDMA8NULL_CONFIG     (SPI_DMA_PRIO|DMA_CCR_MSIZE_8BITS |DMA_CCR_PSIZE_8BITS                          )
-#define SPI_TXDMA16_CONFIG        (SPI_DMA_PRIO|DMA_CCR_MSIZE_16BITS|DMA_CCR_PSIZE_16BITS|DMA_CCR_MINC|DMA_CCR_DIR)
-#define SPI_TXDMA8_CONFIG         (SPI_DMA_PRIO|DMA_CCR_MSIZE_8BITS |DMA_CCR_PSIZE_8BITS |DMA_CCR_MINC|DMA_CCR_DIR)
-#define SPI_TXDMA16NULL_CONFIG    (SPI_DMA_PRIO|DMA_CCR_MSIZE_8BITS |DMA_CCR_PSIZE_16BITS             |DMA_CCR_DIR)
-#define SPI_TXDMA8NULL_CONFIG     (SPI_DMA_PRIO|DMA_CCR_MSIZE_8BITS |DMA_CCR_PSIZE_8BITS              |DMA_CCR_DIR)
-
-
-/* Debug ****************************************************************************/
-/* Check if (non-standard) SPI debug is enabled */
-
-#ifndef CONFIG_DEBUG
-#  undef CONFIG_DEBUG_VERBOSE
-#  undef CONFIG_DEBUG_SPI
+#  define SPI_RXDMA16_CONFIG        (SPI_DMA_PRIO|DMA_SCR_MSIZE_16BITS|DMA_SCR_PSIZE_16BITS|DMA_SCR_MINC|DMA_SCR_DIR_P2M)
+#  define SPI_RXDMA8_CONFIG         (SPI_DMA_PRIO|DMA_SCR_MSIZE_8BITS |DMA_SCR_PSIZE_8BITS |DMA_SCR_MINC|DMA_SCR_DIR_P2M)
+#  define SPI_RXDMA16NULL_CONFIG    (SPI_DMA_PRIO|DMA_SCR_MSIZE_8BITS |DMA_SCR_PSIZE_16BITS             |DMA_SCR_DIR_P2M)
+#  define SPI_RXDMA8NULL_CONFIG     (SPI_DMA_PRIO|DMA_SCR_MSIZE_8BITS |DMA_SCR_PSIZE_8BITS              |DMA_SCR_DIR_P2M)
+#  define SPI_TXDMA16_CONFIG        (SPI_DMA_PRIO|DMA_SCR_MSIZE_16BITS|DMA_SCR_PSIZE_16BITS|DMA_SCR_MINC|DMA_SCR_DIR_M2P)
+#  define SPI_TXDMA8_CONFIG         (SPI_DMA_PRIO|DMA_SCR_MSIZE_8BITS |DMA_SCR_PSIZE_8BITS |DMA_SCR_MINC|DMA_SCR_DIR_M2P)
+#  define SPI_TXDMA16NULL_CONFIG    (SPI_DMA_PRIO|DMA_SCR_MSIZE_8BITS |DMA_SCR_PSIZE_16BITS             |DMA_SCR_DIR_M2P)
+#  define SPI_TXDMA8NULL_CONFIG     (SPI_DMA_PRIO|DMA_SCR_MSIZE_8BITS |DMA_SCR_PSIZE_8BITS              |DMA_SCR_DIR_M2P)
 #endif
 
+/* Debug ****************************************************************************/
+/* Check if SPI debug is enabled */
+
 #ifdef CONFIG_DEBUG_SPI
-#  define spidbg lldbg
-#  ifdef CONFIG_DEBUG_VERBOSE
-#    define spivdbg lldbg
-#  else
-#    define spivdbg(x...)
-#  endif
+#  define spierr   llerr
+#  define spiwarn  llwarn
+#  define spiinfo  llinfo
 #else
-#  define spidbg(x...)
-#  define spivdbg(x...)
+#  define spierr(x...)
+#  define spiwarn(x...)
+#  define spiinfo(x...)
 #endif
 
 /************************************************************************************
@@ -173,8 +164,8 @@ struct stm32_spidev_s
 #ifdef CONFIG_STM32F7_SPI_DMA
   volatile uint8_t rxresult;   /* Result of the RX DMA */
   volatile uint8_t txresult;   /* Result of the RX DMA */
-  uint16_t         rxch;       /* The RX DMA channel number */
-  uint16_t         txch;       /* The TX DMA channel number */
+  uint8_t          rxch;       /* The RX DMA channel number */
+  uint8_t          txch;       /* The TX DMA channel number */
   DMA_HANDLE       rxdma;      /* DMA channel handle for RX transfers */
   DMA_HANDLE       txdma;      /* DMA channel handle for TX transfers */
   sem_t            rxsem;      /* Wait for RX DMA to complete */
@@ -185,7 +176,7 @@ struct stm32_spidev_s
   sem_t            exclsem;    /* Held while chip is selected for mutual exclusion */
   uint32_t         frequency;  /* Requested clock frequency */
   uint32_t         actual;     /* Actual clock frequency */
-  int8_t           nbits;      /* Width of word in bits (8 or 16) */
+  int8_t           nbits;      /* Width of word in bits */
   uint8_t          mode;       /* Mode 0,1,2,3 */
 };
 
@@ -200,7 +191,7 @@ static inline void spi_putreg(FAR struct stm32_spidev_s *priv, uint8_t offset,
                                  uint16_t value);
 static inline uint16_t spi_readword(FAR struct stm32_spidev_s *priv);
 static inline void spi_writeword(FAR struct stm32_spidev_s *priv, uint16_t byte);
-static inline bool spi_16bitmode(FAR struct stm32_spidev_s *priv);
+static inline bool spi_9to16bitmode(FAR struct stm32_spidev_s *priv);
 
 /* DMA support */
 
@@ -244,7 +235,7 @@ static void        spi_bus_initialize(FAR struct stm32_spidev_s *priv);
  ************************************************************************************/
 
 #ifdef CONFIG_STM32F7_SPI1
-static const struct spi_ops_s g_spi1ops =
+static const struct spi_ops_s g_sp1iops =
 {
   .lock              = spi_lock,
   .select            = stm32_spi1select,
@@ -274,14 +265,13 @@ static const struct spi_ops_s g_spi1ops =
 
 static struct stm32_spidev_s g_spi1dev =
 {
-  .spidev   = { &g_spi1ops },
+  .spidev   = { &g_sp1iops },
   .spibase  = STM32_SPI1_BASE,
   .spiclock = STM32_PCLK2_FREQUENCY,
 #ifdef CONFIG_STM32F7_SPI_INTERRUPTS
   .spiirq   = STM32_IRQ_SPI1,
 #endif
 #ifdef CONFIG_STM32F7_SPI_DMA
-  /* lines must be configured in board.h */
   .rxch     = DMACHAN_SPI1_RX,
   .txch     = DMACHAN_SPI1_TX,
 #endif
@@ -289,7 +279,7 @@ static struct stm32_spidev_s g_spi1dev =
 #endif
 
 #ifdef CONFIG_STM32F7_SPI2
-static const struct spi_ops_s g_spi2ops =
+static const struct spi_ops_s g_sp2iops =
 {
   .lock              = spi_lock,
   .select            = stm32_spi2select,
@@ -316,7 +306,7 @@ static const struct spi_ops_s g_spi2ops =
 
 static struct stm32_spidev_s g_spi2dev =
 {
-  .spidev   = { &g_spi2ops },
+  .spidev   = { &g_sp2iops },
   .spibase  = STM32_SPI2_BASE,
   .spiclock = STM32_PCLK1_FREQUENCY,
 #ifdef CONFIG_STM32F7_SPI_INTERRUPTS
@@ -330,7 +320,7 @@ static struct stm32_spidev_s g_spi2dev =
 #endif
 
 #ifdef CONFIG_STM32F7_SPI3
-static const struct spi_ops_s g_spi3ops =
+static const struct spi_ops_s g_sp3iops =
 {
   .lock              = spi_lock,
   .select            = stm32_spi3select,
@@ -357,7 +347,7 @@ static const struct spi_ops_s g_spi3ops =
 
 static struct stm32_spidev_s g_spi3dev =
 {
-  .spidev   = { &g_spi3ops },
+  .spidev   = { &g_sp3iops },
   .spibase  = STM32_SPI3_BASE,
   .spiclock = STM32_PCLK1_FREQUENCY,
 #ifdef CONFIG_STM32F7_SPI_INTERRUPTS
@@ -371,16 +361,13 @@ static struct stm32_spidev_s g_spi3dev =
 #endif
 
 #ifdef CONFIG_STM32F7_SPI4
-static const struct spi_ops_s g_spi4ops =
+static const struct spi_ops_s g_sp4iops =
 {
   .lock              = spi_lock,
   .select            = stm32_spi4select,
   .setfrequency      = spi_setfrequency,
   .setmode           = spi_setmode,
   .setbits           = spi_setbits,
-#ifdef CONFIG_SPI_HWFEATURES
-  .hwfeatures        = 0,                   /* Not supported */
-#endif
   .status            = stm32_spi4status,
 #ifdef CONFIG_SPI_CMDDATA
   .cmddata           = stm32_spi4cmddata,
@@ -393,22 +380,21 @@ static const struct spi_ops_s g_spi4ops =
   .recvblock         = spi_recvblock,
 #endif
 #ifdef CONFIG_SPI_CALLBACK
-  .registercallback  = stm32_spi4register,  /* Provided externally */
+  .registercallback  = stm32_spi4register,  /* provided externally */
 #else
-  .registercallback  = 0,                   /* Not implemented */
+  .registercallback  = 0,  /* not implemented */
 #endif
 };
 
 static struct stm32_spidev_s g_spi4dev =
 {
-  .spidev   = { &g_spi4ops },
+  .spidev   = { &g_sp4iops },
   .spibase  = STM32_SPI4_BASE,
   .spiclock = STM32_PCLK2_FREQUENCY,
 #ifdef CONFIG_STM32F7_SPI_INTERRUPTS
   .spiirq   = STM32_IRQ_SPI4,
 #endif
 #ifdef CONFIG_STM32F7_SPI_DMA
-  /* lines must be configured in board.h */
   .rxch     = DMACHAN_SPI4_RX,
   .txch     = DMACHAN_SPI4_TX,
 #endif
@@ -416,16 +402,13 @@ static struct stm32_spidev_s g_spi4dev =
 #endif
 
 #ifdef CONFIG_STM32F7_SPI5
-static const struct spi_ops_s g_spi5ops =
+static const struct spi_ops_s g_sp5iops =
 {
   .lock              = spi_lock,
   .select            = stm32_spi5select,
   .setfrequency      = spi_setfrequency,
   .setmode           = spi_setmode,
   .setbits           = spi_setbits,
-#ifdef CONFIG_SPI_HWFEATURES
-  .hwfeatures        = 0,                   /* Not supported */
-#endif
   .status            = stm32_spi5status,
 #ifdef CONFIG_SPI_CMDDATA
   .cmddata           = stm32_spi5cmddata,
@@ -438,22 +421,21 @@ static const struct spi_ops_s g_spi5ops =
   .recvblock         = spi_recvblock,
 #endif
 #ifdef CONFIG_SPI_CALLBACK
-  .registercallback  = stm32_spi5register,  /* Provided externally */
+  .registercallback  = stm32_spi5register,  /* provided externally */
 #else
-  .registercallback  = 0,                   /* Not implemented */
+  .registercallback  = 0,  /* not implemented */
 #endif
 };
 
 static struct stm32_spidev_s g_spi5dev =
 {
-  .spidev   = { &g_spi5ops },
+  .spidev   = { &g_sp5iops },
   .spibase  = STM32_SPI5_BASE,
   .spiclock = STM32_PCLK2_FREQUENCY,
 #ifdef CONFIG_STM32F7_SPI_INTERRUPTS
   .spiirq   = STM32_IRQ_SPI5,
 #endif
 #ifdef CONFIG_STM32F7_SPI_DMA
-  /* lines must be configured in board.h */
   .rxch     = DMACHAN_SPI5_RX,
   .txch     = DMACHAN_SPI5_TX,
 #endif
@@ -461,19 +443,16 @@ static struct stm32_spidev_s g_spi5dev =
 #endif
 
 #ifdef CONFIG_STM32F7_SPI6
-static const struct spi_ops_s g_spi6ops =
+static const struct spi_ops_s g_sp6iops =
 {
   .lock              = spi_lock,
   .select            = stm32_spi6select,
   .setfrequency      = spi_setfrequency,
   .setmode           = spi_setmode,
   .setbits           = spi_setbits,
-#ifdef CONFIG_SPI_HWFEATURES
-  .hwfeatures        = 0,                   /* Not supported */
-#endif
   .status            = stm32_spi6status,
 #ifdef CONFIG_SPI_CMDDATA
-  .cmddata           = stm32_spi6cmddata,
+  .cmddata           = stm32_spi3cmddata,
 #endif
   .send              = spi_send,
 #ifdef CONFIG_SPI_EXCHANGE
@@ -483,36 +462,69 @@ static const struct spi_ops_s g_spi6ops =
   .recvblock         = spi_recvblock,
 #endif
 #ifdef CONFIG_SPI_CALLBACK
-  .registercallback  = stm32_spi6register,  /* Provided externally */
+  .registercallback  = stm32_spi6register,  /* provided externally */
 #else
-  .registercallback  = 0,                   /* Not implemented */
+  .registercallback  = 0,  /* not implemented */
 #endif
 };
 
 static struct stm32_spidev_s g_spi6dev =
 {
-  .spidev   = { &g_spi6ops },
+  .spidev   = { &g_sp6iops },
   .spibase  = STM32_SPI6_BASE,
   .spiclock = STM32_PCLK2_FREQUENCY,
 #ifdef CONFIG_STM32F7_SPI_INTERRUPTS
   .spiirq   = STM32_IRQ_SPI6,
 #endif
 #ifdef CONFIG_STM32F7_SPI_DMA
-  /* lines must be configured in board.h */
   .rxch     = DMACHAN_SPI6_RX,
   .txch     = DMACHAN_SPI6_TX,
 #endif
 };
 #endif
 
-
-/************************************************************************************
- * Public Data
- ************************************************************************************/
-
 /************************************************************************************
  * Private Functions
  ************************************************************************************/
+
+/************************************************************************************
+ * Name: spi_getreg8
+ *
+ * Description:
+ *   Get the contents of the SPI register at offset
+ *
+ * Input Parameters:
+ *   priv   - private SPI device structure
+ *   offset - offset to the register of interest
+ *
+ * Returned Value:
+ *   The contents of the 8-bit register
+ *
+ ************************************************************************************/
+
+static inline uint8_t spi_getreg8(FAR struct stm32_spidev_s *priv, uint8_t offset)
+{
+  return getreg8(priv->spibase + offset);
+}
+
+/************************************************************************************
+ * Name: spi_putreg8
+ *
+ * Description:
+ *   Write a 8-bit value to the SPI register at offset
+ *
+ * Input Parameters:
+ *   priv   - private SPI device structure
+ *   offset - offset to the register of interest
+ *   value  - the 8-bit value to be written
+ *
+ ************************************************************************************/
+
+static inline void spi_putreg8(FAR struct stm32_spidev_s *priv, uint8_t offset,
+                               uint8_t value)
+{
+  putreg8(value, priv->spibase + offset);
+}
 
 /************************************************************************************
  * Name: spi_getreg
@@ -557,55 +569,16 @@ static inline void spi_putreg(FAR struct stm32_spidev_s *priv, uint8_t offset,
 }
 
 /************************************************************************************
- * Name: spi_getreg8
- *
- * Description:
- *   Get the contents of the SPI register at offset
- *
- * Input Parameters:
- *   priv   - private SPI device structure
- *   offset - offset to the register of interest
- *
- * Returned Value:
- *   The contents of the 8-bit register
- *
- ************************************************************************************/
-
-static inline uint8_t spi_getreg8(FAR struct stm32_spidev_s *priv, uint8_t offset)
-{
-  return getreg8(priv->spibase + offset);
-}
-
-/************************************************************************************
- * Name: spi_putreg8
- *
- * Description:
- *   Write a 8-bit value to the SPI register at offset
- *
- * Input Parameters:
- *   priv   - private SPI device structure
- *   offset - offset to the register of interest
- *   value  - the 8-bit value to be written
- *
- ************************************************************************************/
-
-static inline void spi_putreg8(FAR struct stm32_spidev_s *priv, uint8_t offset,
-                               uint8_t value)
-{
-  putreg8(value, priv->spibase + offset);
-}
-
-/************************************************************************************
  * Name: spi_readword
  *
  * Description:
- *   Read one word (TWO bytes!) from SPI
+ *   Read one byte from SPI
  *
  * Input Parameters:
  *   priv - Device-specific state data
  *
  * Returned Value:
- *   Word as read
+ *   Byte as read
  *
  ************************************************************************************/
 
@@ -613,11 +586,37 @@ static inline uint16_t spi_readword(FAR struct stm32_spidev_s *priv)
 {
   /* Wait until the receive buffer is not empty */
 
-  while ((spi_getreg(priv, STM32F7_SPI_SR_OFFSET) & SPI_SR_RXNE) == 0);
+  while ((spi_getreg(priv, STM32_SPI_SR_OFFSET) & SPI_SR_RXNE) == 0);
 
   /* Then return the received byte */
 
-  return spi_getreg(priv, STM32F7_SPI_DR_OFFSET);
+  return spi_getreg(priv, STM32_SPI_DR_OFFSET);
+}
+
+/************************************************************************************
+ * Name: spi_writeword
+ *
+ * Description:
+ *   Write one byte to SPI
+ *
+ * Input Parameters:
+ *   priv - Device-specific state data
+ *   byte - Byte to send
+ *
+ * Returned Value:
+ *   None
+ *
+ ************************************************************************************/
+
+static inline void spi_writeword(FAR struct stm32_spidev_s *priv, uint16_t word)
+{
+  /* Wait until the transmit buffer is empty */
+
+  while ((spi_getreg(priv, STM32_SPI_SR_OFFSET) & SPI_SR_TXE) == 0);
+
+  /* Then send the byte */
+
+  spi_putreg(priv, STM32_SPI_DR_OFFSET, word);
 }
 
 /************************************************************************************
@@ -638,37 +637,11 @@ static inline uint8_t spi_readbyte(FAR struct stm32_spidev_s *priv)
 {
   /* Wait until the receive buffer is not empty */
 
-  while ((spi_getreg(priv, STM32F7_SPI_SR_OFFSET) & SPI_SR_RXNE) == 0);
+  while ((spi_getreg(priv, STM32_SPI_SR_OFFSET) & SPI_SR_RXNE) == 0);
 
   /* Then return the received byte */
 
-  return spi_getreg8(priv, STM32F7_SPI_DR_OFFSET);
-}
-
-/************************************************************************************
- * Name: spi_writeword
- *
- * Description:
- *   Write one 16-bit frame to the SPI FIFO
- *
- * Input Parameters:
- *   priv - Device-specific state data
- *   byte - Word to send
- *
- * Returned Value:
- *   None
- *
- ************************************************************************************/
-
-static inline void spi_writeword(FAR struct stm32_spidev_s *priv, uint16_t word)
-{
-  /* Wait until the transmit buffer is empty */
-
-  while ((spi_getreg(priv, STM32F7_SPI_SR_OFFSET) & SPI_SR_TXE) == 0);
-
-  /* Then send the byte */
-
-  spi_putreg(priv, STM32F7_SPI_DR_OFFSET, word);
+  return spi_getreg8(priv, STM32_SPI_DR_OFFSET);
 }
 
 /************************************************************************************
@@ -690,49 +663,34 @@ static inline void spi_writebyte(FAR struct stm32_spidev_s *priv, uint8_t byte)
 {
   /* Wait until the transmit buffer is empty */
 
-  while ((spi_getreg(priv, STM32F7_SPI_SR_OFFSET) & SPI_SR_TXE) == 0);
+  while ((spi_getreg(priv, STM32_SPI_SR_OFFSET) & SPI_SR_TXE) == 0);
 
   /* Then send the byte */
 
-  spi_putreg8(priv, STM32F7_SPI_DR_OFFSET, byte);
+  spi_putreg8(priv, STM32_SPI_DR_OFFSET, byte);
 }
 
 /************************************************************************************
- * Name: spi_16bitmode
+ * Name: spi_9to16bitmode
  *
  * Description:
- *   Check if the SPI is operating in 16-bit mode
+ *   Check if the SPI is operating in more then 8 bit mode
  *
  * Input Parameters:
  *   priv     - Device-specific state data
  *
  * Returned Value:
- *   true: 16-bit mode, false: 8-bit mode
+ *   true: >8 bit mode-bit mode, false: <= 8-bit mode
  *
  ************************************************************************************/
 
-static inline bool spi_16bitmode(FAR struct stm32_spidev_s *priv)
+static inline bool spi_9to16bitmode(FAR struct stm32_spidev_s *priv)
 {
-  uint8_t bits = priv->nbits;
-
-  /* Get the real number of bits */
-
-  if (bits < 0)
-    {
-      bits = -bits;
-    }
-
-  return (bits > 8);
-
-  /* Should we read the hardware regs? seems to be equivalent ~~ sebastien lorquet
-   * (20160413)
-   */
-
-//  return ((spi_getreg(priv, STM32F7_SPI_CR2_OFFSET) & SPI_CR2_DS_MASK) == SPI_CR2_DS_16BIT);
+  return ((spi_getreg(priv, STM32_SPI_CR2_OFFSET) & SPI_CR2_DS_9BIT) == SPI_CR2_DS_9BIT);
 }
 
 /************************************************************************************
- * Name: spi_dmarxwaitw
+ * Name: spi_dmarxwait
  *
  * Description:
  *   Wait for DMA to complete.
@@ -867,7 +825,7 @@ static void spi_dmarxsetup(FAR struct stm32_spidev_s *priv, FAR void *rxbuffer,
 {
   /* 8- or 16-bit mode? */
 
-  if (spi_16bitmode(priv))
+  if (spi_9to16bitmode(priv))
     {
       /* 16-bit mode -- is there a buffer to receive data in? */
 
@@ -898,7 +856,7 @@ static void spi_dmarxsetup(FAR struct stm32_spidev_s *priv, FAR void *rxbuffer,
 
   /* Configure the RX DMA */
 
-  stm32_dmasetup(priv->rxdma, priv->spibase + STM32F7_SPI_DR_OFFSET,
+  stm32_dmasetup(priv->rxdma, priv->spibase + STM32_SPI_DR_OFFSET,
                  (uint32_t)rxbuffer, nwords, priv->rxccr);
 }
 #endif
@@ -917,7 +875,7 @@ static void spi_dmatxsetup(FAR struct stm32_spidev_s *priv, FAR const void *txbu
 {
   /* 8- or 16-bit mode? */
 
-  if (spi_16bitmode(priv))
+  if (spi_9to16bitmode(priv))
     {
       /* 16-bit mode -- is there a buffer to transfer data from? */
 
@@ -948,7 +906,7 @@ static void spi_dmatxsetup(FAR struct stm32_spidev_s *priv, FAR const void *txbu
 
   /* Setup the TX DMA */
 
-  stm32_dmasetup(priv->txdma, priv->spibase + STM32F7_SPI_DR_OFFSET,
+  stm32_dmasetup(priv->txdma, priv->spibase + STM32_SPI_DR_OFFSET,
                  (uint32_t)txbuffer, nwords, priv->txccr);
 }
 #endif
@@ -986,10 +944,10 @@ static inline void spi_dmatxstart(FAR struct stm32_spidev_s *priv)
 #endif
 
 /************************************************************************************
- * Name: spi_modifycr
+ * Name: spi_modifycr1
  *
  * Description:
- *   Clear and set bits in the CR1 or CR2 register
+ *   Clear and set bits in the CR1 register
  *
  * Input Parameters:
  *   priv    - Device-specific state data
@@ -1001,14 +959,40 @@ static inline void spi_dmatxstart(FAR struct stm32_spidev_s *priv)
  *
  ************************************************************************************/
 
-static void spi_modifycr(uint32_t addr, FAR struct stm32_spidev_s *priv, uint16_t setbits, uint16_t clrbits)
+static void spi_modifycr1(FAR struct stm32_spidev_s *priv, uint16_t setbits,
+                          uint16_t clrbits)
 {
-  uint16_t cr;
+  uint16_t cr1;
+  cr1 = spi_getreg(priv, STM32_SPI_CR1_OFFSET);
+  cr1 &= ~clrbits;
+  cr1 |= setbits;
+  spi_putreg(priv, STM32_SPI_CR1_OFFSET, cr1);
+}
 
-  cr  = spi_getreg(priv, addr);
-  cr &= ~clrbits;
-  cr |= setbits;
-  spi_putreg(priv, addr, cr);
+/************************************************************************************
+ * Name: spi_modifycr2
+ *
+ * Description:
+ *   Clear and set bits in the CR2 register
+ *
+ * Input Parameters:
+ *   priv    - Device-specific state data
+ *   clrbits - The bits to clear
+ *   setbits - The bits to set
+ *
+ * Returned Value:
+ *   None
+ *
+ ************************************************************************************/
+
+static void spi_modifycr2(FAR struct stm32_spidev_s *priv, uint16_t setbits,
+                          uint16_t clrbits)
+{
+  uint16_t cr2;
+  cr2 = spi_getreg(priv, STM32_SPI_CR2_OFFSET);
+  cr2 &= ~clrbits;
+  cr2 |= setbits;
+  spi_putreg(priv, STM32_SPI_CR2_OFFSET, cr2);
 }
 
 /************************************************************************************
@@ -1053,6 +1037,7 @@ static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
     {
       (void)sem_post(&priv->exclsem);
     }
+
   return OK;
 }
 
@@ -1077,11 +1062,11 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
   uint16_t setbits;
   uint32_t actual;
 
-  /* Limit to max possible (if STM32F7_SPI_CLK_MAX is defined in board.h) */
+  /* Limit to max possible (if STM32_SPI_CLK_MAX is defined in board.h) */
 
-  if (frequency > STM32F7_SPI_CLK_MAX)
+  if (frequency > STM32_SPI_CLK_MAX)
     {
-      frequency = STM32F7_SPI_CLK_MAX;
+      frequency = STM32_SPI_CLK_MAX;
     }
 
   /* Has the frequency changed? */
@@ -1147,15 +1132,15 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
           actual = priv->spiclock >> 8;
         }
 
-      spi_modifycr(STM32F7_SPI_CR1_OFFSET, priv, 0, SPI_CR1_SPE);
-      spi_modifycr(STM32F7_SPI_CR1_OFFSET, priv, setbits, SPI_CR1_BR_MASK);
-      spi_modifycr(STM32F7_SPI_CR1_OFFSET, priv, SPI_CR1_SPE, 0);
+      spi_modifycr1(priv, 0, SPI_CR1_SPE);
+      spi_modifycr1(priv, setbits, SPI_CR1_BR_MASK);
+      spi_modifycr1(priv, SPI_CR1_SPE, 0);
 
       /* Save the frequency selection so that subsequent reconfigurations will be
        * faster.
        */
 
-      spivdbg("Frequency %d->%d\n", frequency, actual);
+      spiinfo("Frequency %d->%d\n", frequency, actual);
 
       priv->frequency = frequency;
       priv->actual    = actual;
@@ -1185,7 +1170,7 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
   uint16_t setbits;
   uint16_t clrbits;
 
-  spivdbg("mode=%d\n", mode);
+  spiinfo("mode=%d\n", mode);
 
   /* Has the mode changed? */
 
@@ -1219,13 +1204,13 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
           return;
         }
 
-        spi_modifycr(STM32F7_SPI_CR1_OFFSET, priv, 0, SPI_CR1_SPE);
-        spi_modifycr(STM32F7_SPI_CR1_OFFSET, priv, setbits, clrbits);
-        spi_modifycr(STM32F7_SPI_CR1_OFFSET, priv, SPI_CR1_SPE, 0);
+      spi_modifycr1(priv, 0, SPI_CR1_SPE);
+      spi_modifycr1(priv, setbits, clrbits);
+      spi_modifycr1(priv, SPI_CR1_SPE, 0);
 
-        /* Save the mode so that subsequent re-configurations will be faster */
+      /* Save the mode so that subsequent re-configurations will be faster */
 
-        priv->mode = mode;
+      priv->mode = mode;
     }
 }
 
@@ -1233,12 +1218,11 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
  * Name: spi_setbits
  *
  * Description:
- *   Set the number of bits per word. With STM32F7, this is not restricted to 8 or 16,
- *   but can be any value between 4 and 16.
+ *   Set the number of bits per word.
  *
  * Input Parameters:
  *   dev   - Device-specific state data
- *   nbits - The number of bits requested, negative value means LSB first.
+ *   nbits - The number of bits requested
  *
  * Returned Value:
  *   None
@@ -1248,11 +1232,13 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
 static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
 {
   FAR struct stm32_spidev_s *priv = (FAR struct stm32_spidev_s *)dev;
-  uint16_t setbits1, setbits2;
-  uint16_t clrbits1, clrbits2;
+  uint16_t setbitscr1;
+  uint16_t clrbitscr1;
+  uint16_t setbitscr2;
+  uint16_t clrbitscr2;
   int savbits = nbits;
 
-  spivdbg("nbits=%d\n", nbits);
+  spiinfo("nbits=%d\n", nbits);
 
   /* Has the number of bits changed? */
 
@@ -1263,14 +1249,14 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
 
       if (nbits < 0)
         {
-          setbits1 = SPI_CR1_LSBFIRST;
-          clrbits1 = 0;
+          setbitscr1 = SPI_CR1_LSBFIRST;
+          clrbitscr1 = 0;
           nbits    = -nbits;
         }
       else
         {
-          setbits1 = 0;
-          clrbits1 = SPI_CR1_LSBFIRST;
+          setbitscr1 = 0;
+          clrbitscr1 = SPI_CR1_LSBFIRST;
         }
 
       /* Set the number of bits (valid range 4-16) */
@@ -1280,8 +1266,8 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
           return;
         }
 
-      clrbits2 = SPI_CR2_DS_MASK;
-      setbits2 = SPI_CR2_DS_VAL(nbits);
+      clrbitscr2 = SPI_CR2_DS_MASK;
+      setbitscr2 = SPI_CR2_DS_VAL(nbits);
 
       /* If nbits is <=8, then we are in byte mode and FRXTH shall be set
        * (else, transaction will not complete).
@@ -1289,17 +1275,17 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
 
       if (nbits < 9)
         {
-          setbits2 |= SPI_CR2_FRXTH; /* RX FIFO Threshold = 1 byte */
+          setbitscr2 |= SPI_CR2_FRXTH; /* RX FIFO Threshold = 1 byte */
         }
       else
         {
-          clrbits2 |= SPI_CR2_FRXTH; /* RX FIFO Threshold = 2 bytes */
+          clrbitscr2 |= SPI_CR2_FRXTH; /* RX FIFO Threshold = 2 bytes */
         }
 
-      spi_modifycr(STM32F7_SPI_CR1_OFFSET, priv, 0, SPI_CR1_SPE);
-      spi_modifycr(STM32F7_SPI_CR1_OFFSET, priv, setbits1, clrbits1);
-      spi_modifycr(STM32F7_SPI_CR2_OFFSET, priv, setbits2, clrbits2);
-      spi_modifycr(STM32F7_SPI_CR1_OFFSET, priv, SPI_CR1_SPE, 0);
+      spi_modifycr1(priv, 0, SPI_CR1_SPE);
+      spi_modifycr1(priv, setbitscr1, clrbitscr1);
+      spi_modifycr2(priv, setbitscr2, clrbitscr2);
+      spi_modifycr1(priv, SPI_CR1_SPE, 0);
 
       /* Save the selection so the subsequence re-configurations will be faster */
 
@@ -1332,11 +1318,11 @@ static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
   DEBUGASSERT(priv && priv->spibase);
 
   /* According to the number of bits, access data register as word or byte
-   * This is absolutely required because of packing. With <=8 bit frames,
+   * This is absolutely required because of packing. With nbits <=8 bit frames,
    * two bytes are received by a 16-bit read of the data register!
    */
 
-  if (spi_16bitmode(priv))
+  if (spi_9to16bitmode(priv))
     {
       spi_writeword(priv, wd);
       ret = spi_readword(priv);
@@ -1351,15 +1337,15 @@ static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
    * flags).
    */
 
-  regval = spi_getreg(priv, STM32F7_SPI_SR_OFFSET);
+  regval = spi_getreg(priv, STM32_SPI_SR_OFFSET);
 
-  if (spi_16bitmode(priv))
+  if (spi_9to16bitmode(priv))
     {
-      spivdbg("Sent: %04x Return: %04x Status: %02x\n", wd, ret, regval);
+      spiinfo("Sent: %04x Return: %04x Status: %02x\n", wd, ret, regval);
     }
   else
     {
-      spivdbg("Sent: %02x Return: %02x Status: %02x\n", wd, ret, regval);
+      spiinfo("Sent: %02x Return: %02x Status: %02x\n", wd, ret, regval);
     }
 
   UNUSED(regval);
@@ -1398,11 +1384,11 @@ static void spi_exchange_nodma(FAR struct spi_dev_s *dev, FAR const void *txbuff
   FAR struct stm32_spidev_s *priv = (FAR struct stm32_spidev_s *)dev;
   DEBUGASSERT(priv && priv->spibase);
 
-  spivdbg("txbuffer=%p rxbuffer=%p nwords=%d\n", txbuffer, rxbuffer, nwords);
+  spiinfo("txbuffer=%p rxbuffer=%p nwords=%d\n", txbuffer, rxbuffer, nwords);
 
   /* 8- or 16-bit mode? */
 
-  if (spi_16bitmode(priv))
+  if (spi_9to16bitmode(priv))
     {
       /* 16-bit mode */
 
@@ -1511,7 +1497,7 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
       static uint16_t rxdummy = 0xffff;
       static const uint16_t txdummy = 0xffff;
 
-      spivdbg("txbuffer=%p rxbuffer=%p nwords=%d\n", txbuffer, rxbuffer, nwords);
+      spiinfo("txbuffer=%p rxbuffer=%p nwords=%d\n", txbuffer, rxbuffer, nwords);
       DEBUGASSERT(priv && priv->spibase);
 
       /* Setup DMAs */
@@ -1554,7 +1540,7 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
 #ifndef CONFIG_SPI_EXCHANGE
 static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *txbuffer, size_t nwords)
 {
-  spivdbg("txbuffer=%p nwords=%d\n", txbuffer, nwords);
+  spiinfo("txbuffer=%p nwords=%d\n", txbuffer, nwords);
   return spi_exchange(dev, txbuffer, NULL, nwords);
 }
 #endif
@@ -1581,7 +1567,7 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *txbuffer, si
 #ifndef CONFIG_SPI_EXCHANGE
 static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *rxbuffer, size_t nwords)
 {
-  spivdbg("rxbuffer=%p nwords=%d\n", rxbuffer, nwords);
+  spiinfo("rxbuffer=%p nwords=%d\n", rxbuffer, nwords);
   return spi_exchange(dev, NULL, rxbuffer, nwords);
 }
 #endif
@@ -1617,11 +1603,11 @@ static void spi_bus_initialize(FAR struct stm32_spidev_s *priv)
   clrbits = SPI_CR1_CPHA | SPI_CR1_CPOL | SPI_CR1_BR_MASK | SPI_CR1_LSBFIRST |
             SPI_CR1_RXONLY | SPI_CR1_BIDIOE | SPI_CR1_BIDIMODE;
   setbits = SPI_CR1_MSTR | SPI_CR1_SSI | SPI_CR1_SSM;
-  spi_modifycr(STM32F7_SPI_CR1_OFFSET, priv, setbits, clrbits);
+  spi_modifycr1(priv, setbits, clrbits);
 
   clrbits = SPI_CR2_DS_MASK;
   setbits = SPI_CR2_DS_8BIT | SPI_CR2_FRXTH; /* FRXTH must be high in 8-bit mode */
-  spi_modifycr(STM32F7_SPI_CR2_OFFSET, priv, setbits, clrbits);
+  spi_modifycr2(priv, setbits, clrbits);
 
   priv->frequency = 0;
   priv->nbits     = 8;
@@ -1633,15 +1619,15 @@ static void spi_bus_initialize(FAR struct stm32_spidev_s *priv)
 
   /* CRCPOLY configuration */
 
-  spi_putreg(priv, STM32F7_SPI_CRCPR_OFFSET, 7);
+  spi_putreg(priv, STM32_SPI_CRCPR_OFFSET, 7);
 
   /* Initialize the SPI semaphore that enforces mutually exclusive access */
 
   sem_init(&priv->exclsem, 0, 1);
 
-#ifdef CONFIG_STM32F7_SPI_DMA
   /* Initialize the SPI semaphores that is used to wait for DMA completion */
 
+#ifdef CONFIG_STM32F7_SPI_DMA
   sem_init(&priv->rxsem, 0, 0);
   sem_init(&priv->txsem, 0, 0);
 
@@ -1657,12 +1643,12 @@ static void spi_bus_initialize(FAR struct stm32_spidev_s *priv)
   priv->txdma = stm32_dmachannel(priv->txch);
   DEBUGASSERT(priv->rxdma && priv->txdma);
 
-  spi_putreg(priv, STM32F7_SPI_CR2_OFFSET, SPI_CR2_RXDMAEN | SPI_CR2_TXDMAEN);
+  spi_putreg(priv, STM32_SPI_CR2_OFFSET, SPI_CR2_RXDMAEN | SPI_CR2_TXDMAEN);
 #endif
 
   /* Enable spi */
 
-  spi_modifycr(STM32F7_SPI_CR1_OFFSET, priv, SPI_CR1_SPE, 0);
+  spi_modifycr1(priv, SPI_CR1_SPE, 0);
 }
 
 /************************************************************************************
@@ -1698,7 +1684,7 @@ FAR struct spi_dev_s *stm32_spibus_initialize(int bus)
 
       /* Only configure if the bus is not already configured */
 
-      if ((spi_getreg(priv, STM32F7_SPI_CR1_OFFSET) & SPI_CR1_SPE) == 0)
+      if ((spi_getreg(priv, STM32_SPI_CR1_OFFSET) & SPI_CR1_SPE) == 0)
         {
           /* Configure SPI1 pins: SCK, MISO, and MOSI */
 
@@ -1722,7 +1708,7 @@ FAR struct spi_dev_s *stm32_spibus_initialize(int bus)
 
       /* Only configure if the bus is not already configured */
 
-      if ((spi_getreg(priv, STM32F7_SPI_CR1_OFFSET) & SPI_CR1_SPE) == 0)
+      if ((spi_getreg(priv, STM32_SPI_CR1_OFFSET) & SPI_CR1_SPE) == 0)
         {
           /* Configure SPI2 pins: SCK, MISO, and MOSI */
 
@@ -1746,7 +1732,7 @@ FAR struct spi_dev_s *stm32_spibus_initialize(int bus)
 
       /* Only configure if the bus is not already configured */
 
-      if ((spi_getreg(priv, STM32F7_SPI_CR1_OFFSET) & SPI_CR1_SPE) == 0)
+      if ((spi_getreg(priv, STM32_SPI_CR1_OFFSET) & SPI_CR1_SPE) == 0)
         {
           /* Configure SPI3 pins: SCK, MISO, and MOSI */
 
@@ -1770,7 +1756,7 @@ FAR struct spi_dev_s *stm32_spibus_initialize(int bus)
 
       /* Only configure if the bus is not already configured */
 
-      if ((spi_getreg(priv, STM32F7_SPI_CR1_OFFSET) & SPI_CR1_SPE) == 0)
+      if ((spi_getreg(priv, STM32_SPI_CR1_OFFSET) & SPI_CR1_SPE) == 0)
         {
           /* Configure SPI4 pins: SCK, MISO, and MOSI */
 
@@ -1794,7 +1780,7 @@ FAR struct spi_dev_s *stm32_spibus_initialize(int bus)
 
       /* Only configure if the bus is not already configured */
 
-      if ((spi_getreg(priv, STM32F7_SPI_CR1_OFFSET) & SPI_CR1_SPE) == 0)
+      if ((spi_getreg(priv, STM32_SPI_CR1_OFFSET) & SPI_CR1_SPE) == 0)
         {
           /* Configure SPI5 pins: SCK, MISO, and MOSI */
 
@@ -1818,7 +1804,7 @@ FAR struct spi_dev_s *stm32_spibus_initialize(int bus)
 
       /* Only configure if the bus is not already configured */
 
-      if ((spi_getreg(priv, STM32F7_SPI_CR1_OFFSET) & SPI_CR1_SPE) == 0)
+      if ((spi_getreg(priv, STM32_SPI_CR1_OFFSET) & SPI_CR1_SPE) == 0)
         {
           /* Configure SPI6 pins: SCK, MISO, and MOSI */
 
@@ -1834,7 +1820,7 @@ FAR struct spi_dev_s *stm32_spibus_initialize(int bus)
   else
 #endif
     {
-      spidbg("ERROR: Unsupbused SPI bus: %d\n", bus);
+      spierr("ERROR: Unsupported SPI bus: %d\n", bus);
       return NULL;
     }
 
@@ -1842,5 +1828,5 @@ FAR struct spi_dev_s *stm32_spibus_initialize(int bus)
   return (FAR struct spi_dev_s *)priv;
 }
 
-#endif /* CONFIG_STM32F7_SPI1 || CONFIG_STM32F7_SPI2 || CONFIG_STM32F7_SPI3 || CONFIG_STM32F7_SPI4 || CONFIG_STM32F7_SPI5 || CONFIG_STM32F7_SPI6 */
-
+#endif /* CONFIG_STM32F7_SPI1 || CONFIG_STM32F7_SPI2 || CONFIG_STM32F7_SPI3 || \
+        * CONFIG_STM32F7_SPI4 || CONFIG_STM32F7_SPI5 || CONFIG_STM32F7_SPI6 */

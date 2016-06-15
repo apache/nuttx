@@ -101,7 +101,7 @@ static void nxsu_bkgdredraw(NXWINDOW hwnd,
   FAR struct nxbe_window_s *wnd = (FAR struct nxbe_window_s *)hwnd;
   FAR struct nxbe_state_s  *be  = wnd->be;
 
-  gvdbg("BG redraw rect={(%d,%d),(%d,%d)}\n",
+  ginfo("BG redraw rect={(%d,%d),(%d,%d)}\n",
         rect->pt1.x, rect->pt1.y, rect->pt2.x, rect->pt2.y);
   nxbe_fill(wnd, &wnd->bounds, be->bgcolor);
 }
@@ -120,7 +120,7 @@ static inline int nxsu_setup(FAR NX_DRIVERTYPE *dev,
   ret = nxbe_configure(dev, &fe->be);
   if (ret < 0)
     {
-      gdbg("nxbe_configure failed: %d\n", -ret);
+      gerr("ERROR: nxbe_configure failed: %d\n", -ret);
       errno = -ret;
       return ERROR;
     }
@@ -129,7 +129,7 @@ static inline int nxsu_setup(FAR NX_DRIVERTYPE *dev,
   ret = nxbe_colormap(dev);
   if (ret < 0)
     {
-      gdbg("nxbe_colormap failed: %d\n", -ret);
+      gerr("ERROR: nxbe_colormap failed: %d\n", -ret);
       errno = -ret;
       return ERROR;
     }
@@ -187,7 +187,7 @@ NXHANDLE nx_open(FAR NX_DRIVERTYPE *dev)
 
   /* Sanity checking */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!dev)
     {
       errno = EINVAL;

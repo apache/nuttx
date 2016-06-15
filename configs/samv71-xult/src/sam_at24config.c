@@ -75,7 +75,7 @@ int sam_at24config(void)
   i2c = sam_i2cbus_initialize(0);
   if (!i2c)
     {
-      fdbg("ERROR: Failed to initialize TWI0\n");
+      ferr("ERROR: Failed to initialize TWI0\n");
       return -ENODEV;
     }
 
@@ -84,7 +84,7 @@ int sam_at24config(void)
   at24 = at24c_initialize(i2c);
   if (!at24)
     {
-      fdbg("ERROR: Failed to initialize the AT24 driver\n");
+      ferr("ERROR: Failed to initialize the AT24 driver\n");
       (void)sam_i2cbus_uninitialize(i2c);
       return -ENODEV;
     }
@@ -94,7 +94,7 @@ int sam_at24config(void)
   ret = at24->ioctl(at24, MTDIOC_EXTENDED, 0);
   if (ret < 0)
     {
-      fdbg("ERROR: AT24 ioctl(MTDIOC_EXTENDED) failed: %d\n", ret);
+      ferr("ERROR: AT24 ioctl(MTDIOC_EXTENDED) failed: %d\n", ret);
     }
 
   /* Bind the instance of an MTD device to the /dev/config device. */
@@ -102,7 +102,7 @@ int sam_at24config(void)
   ret = mtdconfig_register(at24);
   if (ret < 0)
     {
-      fdbg("ERROR: Failed to bind AT24 driver to the MTD config device\n");
+      ferr("ERROR: Failed to bind AT24 driver to the MTD config device\n");
       (void)sam_i2cbus_uninitialize(i2c);
     }
 

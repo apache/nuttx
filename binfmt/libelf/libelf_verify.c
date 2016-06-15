@@ -87,7 +87,7 @@ int elf_verifyheader(FAR const Elf32_Ehdr *ehdr)
 {
   if (!ehdr)
     {
-      bdbg("NULL ELF header!");
+      berr("NULL ELF header!");
       return -ENOEXEC;
     }
 
@@ -95,7 +95,7 @@ int elf_verifyheader(FAR const Elf32_Ehdr *ehdr)
 
   if (memcmp(ehdr->e_ident, g_elfmagic, EI_MAGIC_SIZE) != 0)
     {
-      bvdbg("Not ELF magic {%02x, %02x, %02x, %02x}\n",
+      binfo("Not ELF magic {%02x, %02x, %02x, %02x}\n",
             ehdr->e_ident[0], ehdr->e_ident[1], ehdr->e_ident[2], ehdr->e_ident[3]);
       return -ENOEXEC;
     }
@@ -104,7 +104,7 @@ int elf_verifyheader(FAR const Elf32_Ehdr *ehdr)
 
   if (ehdr->e_type != ET_REL)
     {
-      bdbg("Not a relocatable file: e_type=%d\n", ehdr->e_type);
+      berr("Not a relocatable file: e_type=%d\n", ehdr->e_type);
       return -EINVAL;
     }
 
@@ -112,7 +112,7 @@ int elf_verifyheader(FAR const Elf32_Ehdr *ehdr)
 
   if (up_checkarch(ehdr))
     {
-      bdbg("Not a supported architecture\n");
+      berr("Not a supported architecture\n");
       return -ENOEXEC;
     }
 

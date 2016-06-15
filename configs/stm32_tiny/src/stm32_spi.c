@@ -58,23 +58,23 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-/* Enables debug output from this file (needs CONFIG_DEBUG too) */
+/* Enables debug output from this file (needs CONFIG_DEBUG_FEATURES too) */
 
-#ifndef CONFIG_DEBUG
-#  undef CONFIG_DEBUG_VERBOSE
+#ifndef CONFIG_DEBUG_FEATURES
+#  undef CONFIG_DEBUG_INFO
 #  undef CONFIG_DEBUG_SPI
 #endif
 
 #ifdef CONFIG_DEBUG_SPI
-#  define spidbg lldbg
-#  ifdef CONFIG_DEBUG_VERBOSE
-#    define spivdbg lldbg
+#  define spierr llerr
+#  ifdef CONFIG_DEBUG_INFO
+#    define spiinfo llerr
 #  else
-#    define spivdbg(x...)
+#    define spiinfo(x...)
 #  endif
 #else
-#  define spidbg(x...)
-#  define spivdbg(x...)
+#  define spierr(x...)
+#  define spiinfo(x...)
 #endif
 
 /************************************************************************************
@@ -104,7 +104,7 @@ void stm32_spidev_initialize(void)
 #ifdef CONFIG_STM32_SPI2
 #  ifdef CONFIG_WL_NRF24L01
   /* Configure the SPI-based NRF24L01 chip select GPIO */
-  spivdbg("Configure GPIO for SPI2/CS\n");
+  spiinfo("Configure GPIO for SPI2/CS\n");
   stm32_configgpio(GPIO_NRF24L01_CS);
 #  endif
 #endif
@@ -153,7 +153,7 @@ void stm32_spi2select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool sele
   {
 #ifdef CONFIG_WL_NRF24L01
     case SPIDEV_WIRELESS:
-      spivdbg("nRF24L01 device %s\n", selected ? "asserted" : "de-asserted");
+      spiinfo("nRF24L01 device %s\n", selected ? "asserted" : "de-asserted");
 
       /* Set the GPIO low to select and high to de-select */
 

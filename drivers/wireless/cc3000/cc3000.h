@@ -168,7 +168,7 @@ struct cc3000_dev_s
   struct pollfd *fds[CONFIG_CC3000_NPOLLWAITERS];
 #endif
 
-#if defined(CONFIG_DEBUG) && defined(CONFIG_CC3000_PROBES)
+#if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_CC3000_PROBES)
  long guard;
 #endif
 

@@ -50,14 +50,6 @@
 #include "teensy-20.h"
 
 /************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
-
-/************************************************************************************
- * Private Functions
- ************************************************************************************/
-
-/************************************************************************************
  * Public Functions
  ************************************************************************************/
 
@@ -73,20 +65,20 @@
 
 void at90usb_boardinitialize(void)
 {
+#ifdef CONFIG_AVR_SPI
   /* Configure SSP chip selects if 1) at least one SSP is enabled, and 2) the weak
    * function at90usb_spidev_initialize() has been brought into the link.
    */
 
-#ifdef CONFIG_AVR_SPI
   if (at90usb_spidev_initialize)
     {
       at90usb_spidev_initialize();
     }
 #endif
 
+#ifdef CONFIG_ARCH_LEDS
   /* Configure on-board LEDs if LED support has been selected. */
 
-#ifdef CONFIG_ARCH_LEDS
   at90usb_led_initialize();
 #endif
 }

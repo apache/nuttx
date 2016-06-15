@@ -254,7 +254,7 @@
 #define TIVA_SYSCON_UNIQUEID2_OFFSET   0x0f28 /* Unique ID 2 */
 #define TIVA_SYSCON_UNIQUEID3_OFFSET   0x0f2c /* Unique ID 3 */
 
-/*( CCM System Control Registers (CCM Control Offset) */
+/* CCM System Control Registers (CCM Control Offset) */
 
 #define TIVA_SYSCON_CCMCGREQ_OFFSET    0x0204 /* Cryptographic Modules Clock Gating Request */
 

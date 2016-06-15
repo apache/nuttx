@@ -114,12 +114,12 @@ int binfmt_copyargv(FAR struct binary_s *bin, FAR char * const *argv)
 
           if (nargs > MAX_EXEC_ARGS)
             {
-              bdbg("ERROR: Too many arguments: %lu\n", (unsigned long)argvsize);
+              berr("ERROR: Too many arguments: %lu\n", (unsigned long)argvsize);
               return -E2BIG;
             }
         }
 
-      bvdbg("args=%d argsize=%lu\n", nargs, (unsigned long)argsize);
+      binfo("args=%d argsize=%lu\n", nargs, (unsigned long)argsize);
 
       /* Allocate the argv array and an argument buffer */
 
@@ -129,7 +129,7 @@ int binfmt_copyargv(FAR struct binary_s *bin, FAR char * const *argv)
           bin->argbuffer = (FAR char *)kmm_malloc(argvsize + argsize);
           if (!bin->argbuffer)
             {
-              bdbg("ERROR: Failed to allocate the argument buffer\n");
+              berr("ERROR: Failed to allocate the argument buffer\n");
               return -ENOMEM;
             }
 

@@ -114,7 +114,7 @@ int epoll_ctl(int epfd, int op, int fd, struct epoll_event *ev)
   switch (op)
     {
       case EPOLL_CTL_ADD:
-        fvdbg("%08x CTL ADD(%d): fd=%d ev=%08x\n",
+        finfo("%08x CTL ADD(%d): fd=%d ev=%08x\n",
               epfd, eph->occupied, fd, ev->events);
 
         eph->evs[eph->occupied].events = ev->events | POLLERR | POLLHUP;
@@ -147,7 +147,7 @@ int epoll_ctl(int epfd, int op, int fd, struct epoll_event *ev)
         {
           int i;
 
-          fvdbg("%08x CTL MOD(%d): fd=%d ev=%08x\n",
+          finfo("%08x CTL MOD(%d): fd=%d ev=%08x\n",
                 epfd, eph->occupied, fd, ev->events);
 
           for (i = 0; i < eph->occupied; i++)
@@ -190,12 +190,12 @@ int epoll_wait(int epfd, FAR struct epoll_event *evs, int maxevents,
     {
       if (rc < 0)
         {
-          fdbg("%08x poll fail: %d for %d, %d msecs\n",
+          ferr("ERROR: %08x poll fail: %d for %d, %d msecs\n",
                epfd, rc, eph->occupied, timeout);
 
           for (i = 0; i < eph->occupied; i++)
             {
-              fdbg("%02d: fd=%d\n", i, eph->evs[i].data.fd);
+              ferr("  %02d: fd=%d\n", i, eph->evs[i].data.fd);
             }
         }
 

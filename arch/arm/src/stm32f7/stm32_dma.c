@@ -606,7 +606,7 @@ void stm32_dmasetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
   uint32_t regoffset;
   uint32_t regval;
 
-  dmadbg("paddr: %08x maddr: %08x ntransfers: %d scr: %08x\n",
+  dmaerr("paddr: %08x maddr: %08x ntransfers: %d scr: %08x\n",
          paddr, maddr, ntransfers, scr);
 
 #ifdef CONFIG_STM32_DMACAPABLE
@@ -871,7 +871,7 @@ bool stm32_dmacapable(uint32_t maddr, uint32_t count, uint32_t ccr)
   uint32_t transfer_size, burst_length;
   uint32_t mend;
 
-  dmavdbg("stm32_dmacapable: 0x%08x/%u 0x%08x\n", maddr, count, ccr);
+  dmainfo("stm32_dmacapable: 0x%08x/%u 0x%08x\n", maddr, count, ccr);
 
   /* Verify that the address conforms to the memory transfer size.
    * Transfers to/from memory performed by the DMA controller are
@@ -901,13 +901,13 @@ bool stm32_dmacapable(uint32_t maddr, uint32_t count, uint32_t ccr)
         break;
 
       default:
-        dmavdbg("stm32_dmacapable: bad transfer size in CCR\n");
+        dmainfo("stm32_dmacapable: bad transfer size in CCR\n");
         return false;
     }
 
   if ((maddr & (transfer_size - 1)) != 0)
     {
-      dmavdbg("stm32_dmacapable: transfer unaligned\n");
+      dmainfo("stm32_dmacapable: transfer unaligned\n");
       return false;
     }
 
@@ -939,13 +939,13 @@ bool stm32_dmacapable(uint32_t maddr, uint32_t count, uint32_t ccr)
             break;
 
           default:
-          dmavdbg("stm32_dmacapable: bad burst size in CCR\n");
+          dmainfo("stm32_dmacapable: bad burst size in CCR\n");
             return false;
         }
 
       if ((maddr & (burst_length - 1)) != 0)
         {
-          dmavdbg("stm32_dmacapable: burst crosses 1KiB\n");
+          dmainfo("stm32_dmacapable: burst crosses 1KiB\n");
           return false;
         }
     }
@@ -954,7 +954,7 @@ bool stm32_dmacapable(uint32_t maddr, uint32_t count, uint32_t ccr)
 
   if ((maddr & STM32_REGION_MASK) != (mend & STM32_REGION_MASK))
     {
-      dmavdbg("stm32_dmacapable: transfer crosses memory region\n");
+      dmainfo("stm32_dmacapable: transfer crosses memory region\n");
       return false;
     }
 
@@ -975,7 +975,7 @@ bool stm32_dmacapable(uint32_t maddr, uint32_t count, uint32_t ccr)
         if (maddr >= STM32_CCMRAM_BASE &&
             (maddr - STM32_CCMRAM_BASE) < 65536)
           {
-            dmavdbg("stm32_dmacapable: transfer targets CCMRAM\n");
+            dmainfo("stm32_dmacapable: transfer targets CCMRAM\n");
             return false;
           }
         break;
@@ -983,11 +983,11 @@ bool stm32_dmacapable(uint32_t maddr, uint32_t count, uint32_t ccr)
       default:
         /* Everything else is unsupported by DMA */
 
-        dmavdbg("stm32_dmacapable: transfer targets unknown/unsupported region\n");
+        dmainfo("stm32_dmacapable: transfer targets unknown/unsupported region\n");
         return false;
     }
 
-    dmavdbg("stm32_dmacapable: transfer OK\n");
+    dmainfo("stm32_dmacapable: transfer OK\n");
   return true;
 }
 #endif
@@ -1040,15 +1040,15 @@ void stm32_dmadump(DMA_HANDLE handle, const struct stm32_dmaregs_s *regs,
   struct stm32_dma_s *dmast = (struct stm32_dma_s *)handle;
   uint32_t dmabase = DMA_BASE(dmast->base);
 
-  dmadbg("DMA Registers: %s\n", msg);
-  dmadbg("   LISR[%08x]: %08x\n", dmabase + STM32_DMA_LISR_OFFSET, regs->lisr);
-  dmadbg("   HISR[%08x]: %08x\n", dmabase + STM32_DMA_HISR_OFFSET, regs->hisr);
-  dmadbg("    SCR[%08x]: %08x\n", dmast->base + STM32_DMA_SCR_OFFSET, regs->scr);
-  dmadbg("  SNDTR[%08x]: %08x\n", dmast->base + STM32_DMA_SNDTR_OFFSET, regs->sndtr);
-  dmadbg("   SPAR[%08x]: %08x\n", dmast->base + STM32_DMA_SPAR_OFFSET, regs->spar);
-  dmadbg("  SM0AR[%08x]: %08x\n", dmast->base + STM32_DMA_SM0AR_OFFSET, regs->sm0ar);
-  dmadbg("  SM1AR[%08x]: %08x\n", dmast->base + STM32_DMA_SM1AR_OFFSET, regs->sm1ar);
-  dmadbg("   SFCR[%08x]: %08x\n", dmast->base + STM32_DMA_SFCR_OFFSET, regs->sfcr);
+  dmaerr("DMA Registers: %s\n", msg);
+  dmaerr("   LISR[%08x]: %08x\n", dmabase + STM32_DMA_LISR_OFFSET, regs->lisr);
+  dmaerr("   HISR[%08x]: %08x\n", dmabase + STM32_DMA_HISR_OFFSET, regs->hisr);
+  dmaerr("    SCR[%08x]: %08x\n", dmast->base + STM32_DMA_SCR_OFFSET, regs->scr);
+  dmaerr("  SNDTR[%08x]: %08x\n", dmast->base + STM32_DMA_SNDTR_OFFSET, regs->sndtr);
+  dmaerr("   SPAR[%08x]: %08x\n", dmast->base + STM32_DMA_SPAR_OFFSET, regs->spar);
+  dmaerr("  SM0AR[%08x]: %08x\n", dmast->base + STM32_DMA_SM0AR_OFFSET, regs->sm0ar);
+  dmaerr("  SM1AR[%08x]: %08x\n", dmast->base + STM32_DMA_SM1AR_OFFSET, regs->sm1ar);
+  dmaerr("   SFCR[%08x]: %08x\n", dmast->base + STM32_DMA_SFCR_OFFSET, regs->sfcr);
 }
 #endif
 

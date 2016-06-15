@@ -82,7 +82,7 @@ void nxfe_reportposition(FAR struct nxbe_window_s *wnd)
   FAR struct nxbe_state_s  *be;
   struct nxgl_size_s        size;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!wnd)
     {
       return;

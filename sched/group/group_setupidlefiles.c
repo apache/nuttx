@@ -120,13 +120,14 @@ int group_setupidlefiles(FAR struct task_tcb_s *tcb)
 
       if (fd > 0)
         {
-          slldbg("Open /dev/console fd: %d\n", fd);
+          sllinfo("Open /dev/console fd: %d\n", fd);
           (void)close(fd);
         }
       else
         {
-          slldbg("Failed to open /dev/console: %d\n", errno);
+          sllerr("ERROR: Failed to open /dev/console: %d\n", errno);
         }
+
       return -ENFILE;
     }
 #endif

@@ -82,7 +82,7 @@ void up_sigdeliver(void)
 
   board_autoled_on(LED_SIGNAL);
 
-  sdbg("rtcb=%p sigdeliver=%p sigpendactionq.head=%p\n",
+  sinfo("rtcb=%p sigdeliver=%p sigpendactionq.head=%p\n",
         rtcb, rtcb->xcp.sigdeliver, rtcb->sigpendactionq.head);
   ASSERT(rtcb->xcp.sigdeliver != NULL);
 
@@ -117,7 +117,7 @@ void up_sigdeliver(void)
    * errno that is needed by the user logic (it is probably EINTR).
    */
 
-  sdbg("Resuming\n");
+  sinfo("Resuming\n");
   (void)up_irq_save();
   rtcb->pterrno = saved_errno;
 

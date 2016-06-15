@@ -57,20 +57,16 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* CONFIG_DEBUG_LEDS enables debug output from this file (needs CONFIG_DEBUG
- * with CONFIG_DEBUG_VERBOSE too)
- */
+/* CONFIG_DEBUG_LEDS enables debug output from this file */
 
 #ifdef CONFIG_DEBUG_LEDS
-#  define leddbg  lldbg
-#  ifdef CONFIG_DEBUG_VERBOSE
-#    define ledvdbg lldbg
-#  else
-#    define ledvdbg(x...)
-#  endif
+#  define lederr  llerr
+#  define ledwarn llwarn
+#  define ledinfo llinfo
 #else
-#  define leddbg(x...)
-#  define ledvdbg(x...)
+#  define lederr(x...)
+#  define ledwarn(x...)
+#  define ledinfo(x...)
 #endif
 
 /****************************************************************************
@@ -78,10 +74,6 @@
  ****************************************************************************/
 
 static bool g_ncoff;
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions

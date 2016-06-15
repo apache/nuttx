@@ -73,20 +73,20 @@
  * also be enabled.
  */
 
-#ifndef CONFIG_DEBUG
-#  undef CONFIG_DEBUG_VERBOSE
+#ifndef CONFIG_DEBUG_FEATURES
+#  undef CONFIG_DEBUG_INFO
 #  undef CONFIG_DEBUG_GRAPHICS
 #  undef CONFIG_DEBUG_LCD
 #endif
 
-#ifndef CONFIG_DEBUG_VERBOSE
+#ifndef CONFIG_DEBUG_INFO
 #  undef CONFIG_DEBUG_LCD
 #endif
 
 #ifdef CONFIG_DEBUG_LCD
-#  define lcddbg(format, ...)  vdbg(format, ##__VA_ARGS__)
+#  define lcderr(format, ...)  info(format, ##__VA_ARGS__)
 #else
-#  define lcddbg(x...)
+#  define lcderr(x...)
 #endif
 
 /****************************************************************************
@@ -107,7 +107,7 @@ static int up_lcdextcominisr(int irq, void *context)
   STM32_TIM_ACKINT(tim, 0);
   if (g_isr == NULL)
     {
-      lcddbg("error, irq not attached, disabled\n");
+      lcderr("ERROR: error, irq not attached, disabled\n");
       STM32_TIM_DISABLEINT(tim, 0);
       return OK;
     }
@@ -117,7 +117,7 @@ static int up_lcdextcominisr(int irq, void *context)
 
 static int up_lcdirqattach(xcpt_t isr)
 {
-  lcddbg("%s IRQ\n", isr == NULL ? "Detach" : "Attach");
+  lcdinfo("%s IRQ\n", isr == NULL ? "Detach" : "Attach");
 
   if (isr != NULL)
     {
@@ -135,7 +135,7 @@ static int up_lcdirqattach(xcpt_t isr)
 
 static void up_lcddispcontrol(bool on)
 {
-  lcddbg("set: %s\n", on ? "on" : "off");
+  lcdinfo("set: %s\n", on ? "on" : "off");
 
   if (on)
     {
@@ -159,7 +159,7 @@ static void up_lcdsetpolarity(bool pol)
 
 static void up_lcdsetvcomfreq(unsigned int freq)
 {
-  lcddbg("freq: %d\n", freq);
+  lcdinfo("freq: %d\n", freq);
   DEBUGASSERT(freq >= 1 && freq <= 60);
   STM32_TIM_SETPERIOD(tim, TIMER_FREQ / freq);
 }
@@ -190,17 +190,17 @@ static FAR struct memlcd_priv_s memlcd_priv =
 
 FAR int board_lcd_initialize(void)
 {
-  lcddbg("Initializing lcd\n");
+  lcdinfo("Initializing lcd\n");
 
-  lcddbg("init spi1\n");
+  lcdinfo("init spi1\n");
   spi = stm32_spibus_initialize(1);
   DEBUGASSERT(spi);
 
-  lcddbg("configure related io\n");
+  lcdinfo("configure related io\n");
   stm32_configgpio(GPIO_MEMLCD_EXTCOMIN);
   stm32_configgpio(GPIO_MEMLCD_DISP);
 
-  lcddbg("configure EXTCOMIN timer\n");
+  lcdinfo("configure EXTCOMIN timer\n");
   if (tim == NULL)
     {
       tim = stm32_tim_init(2);
@@ -210,7 +210,7 @@ FAR int board_lcd_initialize(void)
       STM32_TIM_SETMODE(tim, STM32_TIM_MODE_UP);
     }
 
-  lcddbg("init lcd\n");
+  lcdinfo("init lcd\n");
   l_lcddev = memlcd_initialize(spi, &memlcd_priv, 0);
   DEBUGASSERT(l_lcddev);
 

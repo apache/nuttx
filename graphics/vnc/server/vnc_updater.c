@@ -48,10 +48,14 @@
 #include <errno.h>
 
 #if defined(CONFIG_VNCSERVER_DEBUG) && !defined(CONFIG_DEBUG_GRAPHICS)
-#  undef  CONFIG_DEBUG
-#  undef  CONFIG_DEBUG_VERBOSE
-#  define CONFIG_DEBUG          1
-#  define CONFIG_DEBUG_VERBOSE  1
+#  undef  CONFIG_DEBUG_FEATURES
+#  undef  CONFIG_DEBUG_ERROR
+#  undef  CONFIG_DEBUG_WARN
+#  undef  CONFIG_DEBUG_INFO
+#  define CONFIG_DEBUG_FEATURES 1
+#  define CONFIG_DEBUG_ERROR    1
+#  define CONFIG_DEBUG_WARN     1
+#  define CONFIG_DEBUG_INFO     1
 #  define CONFIG_DEBUG_GRAPHICS 1
 #endif
 #include <debug.h>
@@ -72,7 +76,7 @@
  ****************************************************************************/
 
 #ifdef VNCSERVER_SEM_DEBUG
-static sem_t g_dbgsem = SEM_INITIALIZER(1);
+static sem_t g_errsem = SEM_INITIALIZER(1);
 #endif
 
 /* A rectangle represent the entire local framebuffer */
@@ -122,7 +126,7 @@ static void vnc_sem_debug(FAR struct vnc_session_s *session,
   int freewaiting;
   int queuewaiting;
 
-  while (sem_wait(&g_dbgsem) < 0)
+  while (sem_wait(&g_errsem) < 0)
     {
       DEBUGASSERT(get_errno() == EINTR);
     }
@@ -164,7 +168,7 @@ static void vnc_sem_debug(FAR struct vnc_session_s *session,
       syslog(LOG_INFO, "  Unqueued:       %u\n", unattached);
     }
 
-  sem_post(&g_dbgsem);
+  sem_post(&g_errsem);
 }
 #else
 #  define vnc_sem_debug(s,m,u)
@@ -299,7 +303,7 @@ vnc_remove_queue(FAR struct vnc_session_s *session)
   if (session->nwhupd > 0 && rect->whupd)
     {
       session->nwhupd--;
-      updvdbg("Whole screen update: nwhupd=%d\n", session->nwhupd);
+      updinfo("Whole screen update: nwhupd=%d\n", session->nwhupd);
     }
 
   sched_unlock();
@@ -369,7 +373,7 @@ static FAR void *vnc_updater(FAR void *arg)
   int ret;
 
   DEBUGASSERT(session != NULL);
-  gvdbg("Updater running for Display %d\n", session->display);
+  ginfo("Updater running for Display %d\n", session->display);
 
   /* Loop, processing updates until we are asked to stop.
    * REVISIT: Probably need some kind of signal mechanism to wake up
@@ -386,7 +390,7 @@ static FAR void *vnc_updater(FAR void *arg)
       srcrect = vnc_remove_queue(session);
       DEBUGASSERT(srcrect != NULL);
 
-      updvdbg("Dequeued {(%d, %d),(%d, %d)}\n",
+      updinfo("Dequeued {(%d, %d),(%d, %d)}\n",
               srcrect->rect.pt1.x, srcrect->rect.pt1.y,
               srcrect->rect.pt2.x, srcrect->rect.pt2.y);
 
@@ -408,7 +412,7 @@ static FAR void *vnc_updater(FAR void *arg)
 
       if (ret < 0)
         {
-          gdbg("ERROR: Encoding failed: %d\n", ret);
+          gerr("ERROR: Encoding failed: %d\n", ret);
           break;
         }
     }
@@ -442,7 +446,7 @@ int vnc_start_updater(FAR struct vnc_session_s *session)
   struct sched_param param;
   int status;
 
-  gvdbg("Starting updater for Display %d\n", session->display);
+  ginfo("Starting updater for Display %d\n", session->display);
 
   /* Create thread that is gonna send rectangles to the client */
 
@@ -577,7 +581,7 @@ int vnc_update_rectangle(FAR struct vnc_session_s *session,
               FAR struct vnc_fbupdate_s *curr;
               FAR struct vnc_fbupdate_s *next;
 
-              updvdbg("New whole screen update...\n");
+              updinfo("New whole screen update...\n");
 
               curr = (FAR struct vnc_fbupdate_s *)session->updqueue.head;
               sq_init(&session->updqueue);
@@ -619,7 +623,7 @@ int vnc_update_rectangle(FAR struct vnc_session_s *session,
 
           vnc_add_queue(session, update);
 
-          updvdbg("Queued {(%d, %d),(%d, %d)}\n",
+          updinfo("Queued {(%d, %d),(%d, %d)}\n",
                   intersection.pt1.x, intersection.pt1.y,
                   intersection.pt2.x, intersection.pt2.y);
         }

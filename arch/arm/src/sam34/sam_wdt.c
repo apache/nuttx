@@ -83,16 +83,16 @@
 
 /* Debug ********************************************************************/
 /* Non-standard debug that may be enabled just for testing the watchdog
- * driver.  NOTE: that only lldbg types are used so that the output is
+ * driver.  NOTE: that only llerr types are used so that the output is
  * immediately available.
  */
 
 #ifdef CONFIG_DEBUG_WATCHDOG
-#  define wddbg    lldbg
-#  define wdvdbg   llvdbg
+#  define wderr    llerr
+#  define wdinfo   llinfo
 #else
-#  define wddbg(x...)
-#  define wdvdbg(x...)
+#  define wderr(x...)
+#  define wdinfo(x...)
 #endif
 
 /****************************************************************************
@@ -118,7 +118,7 @@ struct sam34_lowerhalf_s
  ****************************************************************************/
 /* Register operations ******************************************************/
 
-#if defined(CONFIG_SAM34_WDT_REGDEBUG) && defined(CONFIG_DEBUG)
+#if defined(CONFIG_SAM34_WDT_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
 static uint32_t sam34_getreg(uint32_t addr);
 static void     sam34_putreg(uint32_t val, uint32_t addr);
 #else
@@ -176,7 +176,7 @@ static struct sam34_lowerhalf_s g_wdgdev;
  *
  ****************************************************************************/
 
-#if defined(CONFIG_SAM34_WDT_REGDEBUG) && defined(CONFIG_DEBUG)
+#if defined(CONFIG_SAM34_WDT_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
 static uint32_t sam34_getreg(uint32_t addr)
 {
   static uint32_t prevaddr = 0;
@@ -197,7 +197,7 @@ static uint32_t sam34_getreg(uint32_t addr)
         {
           if (count == 4)
             {
-              lldbg("...\n");
+              llerr("...\n");
             }
 
           return val;
@@ -214,7 +214,7 @@ static uint32_t sam34_getreg(uint32_t addr)
         {
           /* Yes.. then show how many times the value repeated */
 
-          lldbg("[repeats %d more times]\n", count-3);
+          llerr("[repeats %d more times]\n", count-3);
         }
 
       /* Save the new address, value, and count */
@@ -226,7 +226,7 @@ static uint32_t sam34_getreg(uint32_t addr)
 
   /* Show the register value read */
 
-  lldbg("%08x->%08x\n", addr, val);
+  llerr("%08x->%08x\n", addr, val);
   return val;
 }
 #endif
@@ -239,12 +239,12 @@ static uint32_t sam34_getreg(uint32_t addr)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_SAM34_WDT_REGDEBUG) && defined(CONFIG_DEBUG)
+#if defined(CONFIG_SAM34_WDT_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
 static void sam34_putreg(uint32_t val, uint32_t addr)
 {
   /* Show the register value being written */
 
-  lldbg("%08x<-%08x\n", addr, val);
+  llerr("%08x<-%08x\n", addr, val);
 
   /* Write the value */
 
@@ -314,7 +314,7 @@ static int sam34_start(FAR struct watchdog_lowerhalf_s *lower)
   FAR struct sam34_lowerhalf_s *priv = (FAR struct sam34_lowerhalf_s *)lower;
   uint32_t mr_val = 0;
 
-  wdvdbg("Entry\n");
+  wdinfo("Entry\n");
   DEBUGASSERT(priv);
 
   /* The watchdog is always disabled after a reset. It is enabled by setting
@@ -360,7 +360,7 @@ static int sam34_stop(FAR struct watchdog_lowerhalf_s *lower)
    * except by a reset.
    */
 
-  wdvdbg("Entry\n");
+  wdinfo("Entry\n");
   return -ENOSYS;
 }
 
@@ -386,7 +386,7 @@ static int sam34_stop(FAR struct watchdog_lowerhalf_s *lower)
 
 static int sam34_keepalive(FAR struct watchdog_lowerhalf_s *lower)
 {
-  wdvdbg("Entry\n");
+  wdinfo("Entry\n");
 
   sam34_putreg((WDT_CR_KEY | WDT_CR_WDRSTT), SAM_WDT_CR);
   return OK;
@@ -414,7 +414,7 @@ static int sam34_getstatus(FAR struct watchdog_lowerhalf_s *lower,
   FAR struct sam34_lowerhalf_s *priv = (FAR struct sam34_lowerhalf_s *)lower;
   uint32_t elapsed;
 
-  wdvdbg("Entry\n");
+  wdinfo("Entry\n");
   DEBUGASSERT(priv);
 
   /* Return the status bit */
@@ -441,10 +441,10 @@ static int sam34_getstatus(FAR struct watchdog_lowerhalf_s *lower,
 
   status->timeleft = (priv->timeout * elapsed) / (priv->reload + 1);
 
-  wdvdbg("Status     : %08x\n", sam34_getreg(SAM_WDT_SR));
-  wdvdbg("  flags    : %08x\n", status->flags);
-  wdvdbg("  timeout  : %d\n", status->timeout);
-  wdvdbg("  timeleft : %d\n", status->timeleft);
+  wdinfo("Status     : %08x\n", sam34_getreg(SAM_WDT_SR));
+  wdinfo("  flags    : %08x\n", status->flags);
+  wdinfo("  timeout  : %d\n", status->timeout);
+  wdinfo("  timeleft : %d\n", status->timeleft);
   return OK;
 }
 
@@ -471,13 +471,13 @@ static int sam34_settimeout(FAR struct watchdog_lowerhalf_s *lower,
   uint32_t reload;
 
   DEBUGASSERT(priv);
-  wdvdbg("Entry: timeout=%d\n", timeout);
+  wdinfo("Entry: timeout=%d\n", timeout);
 
   /* Can this timeout be represented? */
 
   if (timeout < 1 || timeout > WDT_MAXTIMEOUT)
     {
-      wddbg("Cannot represent timeout=%d > %d\n",
+      wderr("Cannot represent timeout=%d > %d\n",
             timeout, WDT_MAXTIMEOUT);
       return -ERANGE;
     }
@@ -503,7 +503,7 @@ static int sam34_settimeout(FAR struct watchdog_lowerhalf_s *lower,
 
   priv->reload = reload;
 
-  wdvdbg("fwdt=%d reload=%d timout=%d\n",
+  wdinfo("fwdt=%d reload=%d timout=%d\n",
          WDT_FCLK, reload, priv->timeout);
 
   /* Don't commit to MR register until started! */
@@ -543,7 +543,7 @@ static xcpt_t sam34_capture(FAR struct watchdog_lowerhalf_s *lower,
   uint16_t regval;
 
   DEBUGASSERT(priv);
-  wdvdbg("Entry: handler=%p\n", handler);
+  wdinfo("Entry: handler=%p\n", handler);
 
   /* Get the old handler return value */
 
@@ -611,7 +611,7 @@ static int sam34_ioctl(FAR struct watchdog_lowerhalf_s *lower, int cmd,
   int ret = -ENOTTY;
 
   DEBUGASSERT(priv);
-  wdvdbg("Entry: cmd=%d arg=%ld\n", cmd, arg);
+  wdinfo("Entry: cmd=%d arg=%ld\n", cmd, arg);
 
   /* WDIOC_MINTIME: Set the minimum ping time.  If two keepalive ioctls
    * are received within this time, a reset event will be generated.
@@ -676,7 +676,7 @@ void sam_wdtinitialize(FAR const char *devpath)
            WDT_MR_WDRSTEN);
   sam34_putreg(mr_val, SAM_WDT_MR);
 
-  wdvdbg("Entry: devpath=%s\n", devpath);
+  wdinfo("Entry: devpath=%s\n", devpath);
 
   /* NOTE we assume that clocking to the IWDG has already been provided by
    * the RCC initialization logic.

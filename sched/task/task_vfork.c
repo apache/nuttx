@@ -268,7 +268,7 @@ FAR struct task_tcb_s *task_vforksetup(start_t retaddr)
   child = (FAR struct task_tcb_s *)kmm_zalloc(sizeof(struct task_tcb_s));
   if (!child)
     {
-      sdbg("ERROR: Failed to allocate TCB\n");
+      serr("ERROR: Failed to allocate TCB\n");
       set_errno(ENOMEM);
       return NULL;
     }
@@ -303,14 +303,14 @@ FAR struct task_tcb_s *task_vforksetup(start_t retaddr)
 
   /* Initialize the task control block.  This calls up_initial_state() */
 
-  svdbg("Child priority=%d start=%p\n", priority, retaddr);
+  sinfo("Child priority=%d start=%p\n", priority, retaddr);
   ret = task_schedsetup(child, priority, retaddr, parent->entry.main, ttype);
   if (ret < OK)
     {
       goto errout_with_tcb;
     }
 
-  svdbg("parent=%p, returning child=%p\n", parent, child);
+  sinfo("parent=%p, returning child=%p\n", parent, child);
   return child;
 
 errout_with_tcb:
@@ -369,7 +369,7 @@ pid_t task_vforkstart(FAR struct task_tcb_s *child)
   int rc;
   int ret;
 
-  svdbg("Starting Child TCB=%p, parent=%p\n", child, this_task());
+  sinfo("Starting Child TCB=%p, parent=%p\n", child, this_task());
   DEBUGASSERT(child);
 
   /* Duplicate the original argument list in the forked child TCB */
@@ -430,11 +430,11 @@ pid_t task_vforkstart(FAR struct task_tcb_s *child)
 
   rc = 0;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   ret = waitpid(pid, &rc, 0);
   if (ret < 0)
     {
-      sdbg("ERROR: waitpid failed: %d\n", errno);
+      serr("ERROR: waitpid failed: %d\n", errno);
     }
 #else
   (void)waitpid(pid, &rc, 0);

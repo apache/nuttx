@@ -1,7 +1,7 @@
 ############################################################################
 # configs/teensy-3.x/src/Makefile
 #
-#   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2015, 2016 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -49,6 +49,10 @@ endif
 
 ifeq ($(CONFIG_LIB_BOARDCTL),y)
 CSRCS += k20_appinit.c
+endif
+
+ifeq ($(CONFIG_PWM),y)
+CSRCS += k20_pwm.c
 endif
 
 include $(TOPDIR)/configs/Board.mk

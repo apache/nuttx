@@ -92,7 +92,7 @@ int nxmu_sendclient(FAR struct nxfe_conn_s *conn, FAR const void *msg,
 
   /* Sanity checking */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!conn || !conn->swrmq)
     {
       set_errno(EINVAL);
@@ -105,7 +105,7 @@ int nxmu_sendclient(FAR struct nxfe_conn_s *conn, FAR const void *msg,
   ret = mq_send(conn->swrmq, msg, msglen, NX_CLIMSG_PRIO);
   if (ret < 0)
     {
-      gdbg("mq_send failed: %d\n", errno);
+      gerr("ERROR: mq_send failed: %d\n", errno);
     }
 
   return ret;

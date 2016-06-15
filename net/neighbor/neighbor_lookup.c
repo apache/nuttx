@@ -76,7 +76,7 @@ FAR const struct neighbor_addr_s *neighbor_lookup(const net_ipv6addr_t ipaddr)
   neighbor = neighbor_findentry(ipaddr);
   if (neighbor != NULL)
     {
-      nllvdbg("Lookup neighbor: %02x:%02x:%02x:%02x:%02x:%02x\n",
+      nllinfo("Lookup neighbor: %02x:%02x:%02x:%02x:%02x:%02x\n",
               neighbor->ne_addr.na_addr.ether_addr_octet[0],
               neighbor->ne_addr.na_addr.ether_addr_octet[1],
               neighbor->ne_addr.na_addr.ether_addr_octet[2],

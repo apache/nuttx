@@ -98,7 +98,7 @@ int nxtk_movewindow(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
   struct nxgl_rect_s srcrect;
   struct nxgl_point_s clipoffset;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!hfwnd || !rect || !offset)
     {
       set_errno(EINVAL);

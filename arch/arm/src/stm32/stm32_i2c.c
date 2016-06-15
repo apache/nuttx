@@ -162,14 +162,14 @@
 #define MKI2C_OUTPUT(p) (((p) & (GPIO_PORT_MASK | GPIO_PIN_MASK)) | I2C_OUTPUT)
 
 /* Debug ****************************************************************************/
-/* CONFIG_DEBUG_I2C + CONFIG_DEBUG enables general I2C debug output. */
+/* CONFIG_DEBUG_I2C + CONFIG_DEBUG_FEATURES enables general I2C debug output. */
 
 #ifdef CONFIG_DEBUG_I2C
-#  define i2cdbg dbg
-#  define i2cvdbg vdbg
+#  define i2cerr err
+#  define i2cinfo info
 #else
-#  define i2cdbg(x...)
-#  define i2cvdbg(x...)
+#  define i2cerr(x...)
+#  define i2cinfo(x...)
 #endif
 
 /* I2C event trace logic.  NOTE:  trace uses the internal, non-standard, low-level
@@ -693,7 +693,7 @@ static inline int stm32_i2c_sem_waitdone(FAR struct stm32_i2c_priv_s *priv)
 
   while (priv->intstate != INTSTATE_DONE && elapsed < timeout);
 
-  i2cvdbg("intstate: %d elapsed: %ld threshold: %ld status: %08x\n",
+  i2cinfo("intstate: %d elapsed: %ld threshold: %ld status: %08x\n",
           priv->intstate, (long)elapsed, (long)timeout, priv->status);
 
   /* Set the interrupt state back to IDLE */
@@ -766,7 +766,7 @@ static inline void stm32_i2c_sem_waitstop(FAR struct stm32_i2c_priv_s *priv)
    * still pending.
    */
 
-  i2cvdbg("Timeout with CR1: %04x SR1: %04x\n", cr1, sr1);
+  i2cinfo("Timeout with CR1: %04x SR1: %04x\n", cr1, sr1);
 }
 
 /************************************************************************************
@@ -859,7 +859,7 @@ static void stm32_i2c_tracenew(FAR struct stm32_i2c_priv_s *priv, uint32_t statu
 
           if (priv->tndx >= (CONFIG_I2C_NTRACE-1))
             {
-              i2cdbg("Trace table overflow\n");
+              i2cerr("Trace table overflow\n");
               return;
             }
 
@@ -900,7 +900,7 @@ static void stm32_i2c_traceevent(FAR struct stm32_i2c_priv_s *priv,
 
       if (priv->tndx >= (CONFIG_I2C_NTRACE-1))
         {
-          i2cdbg("Trace table overflow\n");
+          i2cerr("Trace table overflow\n");
           return;
         }
 
@@ -1695,7 +1695,7 @@ static int stm32_i2c_transfer(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s
       status = stm32_i2c_getstatus(priv);
       ret = -ETIMEDOUT;
 
-      i2cdbg("Timed out: CR1: 0x%04x status: 0x%08x\n",
+      i2cerr("Timed out: CR1: 0x%04x status: 0x%08x\n",
              stm32_i2c_getreg(priv, STM32_I2C_CR1_OFFSET), status);
 
       /* "Note: When the STOP, START or PEC bit is set, the software must

@@ -57,16 +57,16 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* CONFIG_DEBUG_LEDS enables debug output from this file (needs CONFIG_DEBUG
- * with CONFIG_DEBUG_VERBOSE too)
+/* CONFIG_DEBUG_LEDS enables debug output from this file (needs CONFIG_DEBUG_FEATURES
+ * with CONFIG_DEBUG_INFO too)
  */
 
 #ifdef CONFIG_DEBUG_LEDS
-#  define leddbg  lldbg
-#  define ledvdbg llvdbg
+#  define lederr  llerr
+#  define ledinfo llinfo
 #else
-#  define leddbg(x...)
-#  define ledvdbg(x...)
+#  define lederr(x...)
+#  define ledinfo(x...)
 #endif
 
 /****************************************************************************
@@ -79,7 +79,7 @@
 
 static inline void set_led(bool v)
 {
-  ledvdbg("Turn LED %s\n", v? "on":"off");
+  ledinfo("Turn LED %s\n", v? "on":"off");
   stm32_gpiowrite(GPIO_LED, v);
 }
 
@@ -105,7 +105,7 @@ void board_autoled_initialize(void)
 
 void board_autoled_on(int led)
 {
-  ledvdbg("board_autoled_on(%d)\n", led);
+  ledinfo("board_autoled_on(%d)\n", led);
   switch (led)
     {
     case LED_STARTED:
@@ -134,7 +134,7 @@ void board_autoled_on(int led)
 
 void board_autoled_off(int led)
 {
-  ledvdbg("board_autoled_off(%d)\n", led);
+  ledinfo("board_autoled_off(%d)\n", led);
 
   switch (led)
     {

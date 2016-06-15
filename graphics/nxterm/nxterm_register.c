@@ -87,7 +87,7 @@ FAR struct nxterm_state_s *
   priv = (FAR struct nxterm_state_s *)kmm_zalloc(sizeof(struct nxterm_state_s));
   if (!priv)
     {
-      gdbg("Failed to allocate the NX driver structure\n");
+      gerr("ERROR: Failed to allocate the NX driver structure\n");
       return NULL;
     }
 
@@ -99,7 +99,7 @@ FAR struct nxterm_state_s *
   memcpy(&priv->wndo, wndo, sizeof(struct nxterm_window_s));
 
   sem_init(&priv->exclsem, 0, 1);
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   priv->holder  = NO_HOLDER;
 #endif
 
@@ -112,7 +112,7 @@ FAR struct nxterm_state_s *
   priv->font = nxf_getfonthandle(wndo->fontid);
   if (!priv->font)
     {
-      gdbg("Failed to get font ID %d: %d\n", wndo->fontid, errno);
+      gerr("ERROR: Failed to get font ID %d: %d\n", wndo->fontid, errno);
       goto errout;
     }
 
@@ -150,7 +150,7 @@ FAR struct nxterm_state_s *
   ret = register_driver(devname, &g_nxterm_drvrops, 0666, priv);
   if (ret < 0)
     {
-      gdbg("Failed to register %s\n", devname);
+      gerr("ERROR: Failed to register %s\n", devname);
     }
   return (NXTERM)priv;
 

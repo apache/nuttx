@@ -63,7 +63,7 @@ void mm_free(FAR struct mm_heap_s *heap, FAR void *mem)
   FAR struct mm_freenode_s *prev;
   FAR struct mm_freenode_s *next;
 
-  mvdbg("Freeing %p\n", mem);
+  minfo("Freeing %p\n", mem);
 
   /* Protect against attempts to free a NULL reference */
 

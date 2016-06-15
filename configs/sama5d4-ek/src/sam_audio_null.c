@@ -100,7 +100,7 @@ int sam_audio_null_initialize(int minor)
   char devname[12];
   int ret;
 
-  auddbg("minor %d\n", minor);
+  audinfo("minor %d\n", minor);
   DEBUGASSERT(minor >= 0 && minor <= 25);
 
   /* Have we already initialized?  Since we never uninitialize we must prevent
@@ -117,7 +117,7 @@ int sam_audio_null_initialize(int minor)
       nullaudio = audio_null_initialize();
       if (!nullaudio)
         {
-          auddbg("Failed to get the NULL audio interface\n");
+          auderr("ERROR: Failed to get the NULL audio interface\n");
           ret = -ENODEV;
           goto errout;
         }
@@ -130,7 +130,7 @@ int sam_audio_null_initialize(int minor)
       pcm = pcm_decode_initialize(nullaudio);
       if (!pcm)
         {
-          auddbg("ERROR: Failed create the PCM decoder\n");
+          auderr("ERROR: Failed create the PCM decoder\n");
           ret = -ENODEV;
           goto errout_with_nullaudio;
         }
@@ -144,7 +144,7 @@ int sam_audio_null_initialize(int minor)
       ret = audio_register(devname, pcm);
       if (ret < 0)
         {
-          auddbg("ERROR: Failed to register /dev/%s device: %d\n", devname, ret);
+          auderr("ERROR: Failed to register /dev/%s device: %d\n", devname, ret);
           goto errout_with_pcm;
         }
 

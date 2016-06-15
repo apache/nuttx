@@ -96,11 +96,13 @@
 /* Debug ********************************************************************/
 
 #ifdef CONFIG_DEBUG_LCD
-#  define lcddbg(format, ...)   dbg(format, ##__VA_ARGS__)
-#  define lcdvdbg(format, ...)  vdbg(format, ##__VA_ARGS__)
+#  define lcderr(format, ...)   err(format, ##__VA_ARGS__)
+#  define lcdwarn(format, ...)  warn(format, ##__VA_ARGS__)
+#  define lcdinfo(format, ...)  info(format, ##__VA_ARGS__)
 #else
-#  define lcddbg(x...)
-#  define lcdvdbg(x...)
+#  define lcderr(x...)
+#  define lcdwarn(x...)
+#  define lcdinfo(x...)
 #endif
 
 /****************************************************************************
@@ -136,7 +138,7 @@ FAR struct lcd_dev_s *board_graphics_setup(unsigned int devno)
   spi = stm32_spibus_initialize(1);
   if (!spi)
     {
-      lcddbg("Failed to initialize SPI port 1\n");
+      lcderr("ERROR: Failed to initialize SPI port 1\n");
     }
   else
     {
@@ -145,11 +147,11 @@ FAR struct lcd_dev_s *board_graphics_setup(unsigned int devno)
       dev = ssd1306_initialize(spi, devno);
       if (!dev)
         {
-          lcddbg("Failed to bind SPI port 1 to OLED %d: %d\n", devno);
+          lcderr("ERROR: Failed to bind SPI port 1 to OLED %d: %d\n", devno);
         }
      else
         {
-          lcdvdbg("Bound SPI port 1 to OLED %d\n", devno);
+          lcdinfo("Bound SPI port 1 to OLED %d\n", devno);
 
           /* And turn the OLED on */
 

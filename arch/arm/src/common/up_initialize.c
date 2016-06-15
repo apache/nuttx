@@ -72,18 +72,18 @@
  *
  ****************************************************************************/
 
-#if defined(CONFIG_ARCH_CALIBRATION) && defined(CONFIG_DEBUG)
+#if defined(CONFIG_ARCH_CALIBRATION) && defined(CONFIG_DEBUG_FEATURES)
 static void up_calibratedelay(void)
 {
   int i;
 
-  lldbg("Beginning 100s delay\n");
+  llerr("Beginning 100s delay\n");
   for (i = 0; i < 100; i++)
     {
       up_mdelay(1000);
     }
 
-  lldbg("End 100s delay\n");
+  llerr("End 100s delay\n");
 }
 #else
 # define up_calibratedelay()

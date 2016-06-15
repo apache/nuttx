@@ -96,7 +96,7 @@ static int nxffs_format(FAR struct nxffs_volume_s *volume)
       ret = MTD_ERASE(volume->mtd, eblock, 1);
       if (ret < 0)
         {
-          fdbg("ERROR: Erase block %d failed: %d\n", eblock, ret);
+          ferr("ERROR: Erase block %d failed: %d\n", eblock, ret);
           return ret;
         }
 
@@ -106,7 +106,7 @@ static int nxffs_format(FAR struct nxffs_volume_s *volume)
       nxfrd = MTD_BWRITE(volume->mtd, lblock, volume->blkper, volume->pack);
       if (nxfrd != volume->blkper)
         {
-          fdbg("ERROR: Write erase block %d failed: %d\n", lblock, nxfrd);
+          ferr("ERROR: Write erase block %d failed: %d\n", lblock, nxfrd);
           return -EIO;
         }
     }
@@ -157,7 +157,7 @@ static int nxffs_badblocks(FAR struct nxffs_volume_s *volume)
       nxfrd  = MTD_BREAD(volume->mtd, lblock, volume->blkper, volume->pack);
       if (nxfrd != volume->blkper)
         {
-          fdbg("ERROR: Read erase block %d failed: %d\n", lblock, nxfrd);
+          ferr("ERROR: Read erase block %d failed: %d\n", lblock, nxfrd);
           return -EIO;
         }
 #endif
@@ -195,7 +195,7 @@ static int nxffs_badblocks(FAR struct nxffs_volume_s *volume)
                * read a block with uncorrectable bit errors.
                */
 
-              fdbg("ERROR: Failed to read block %d: %d\n",
+              ferr("ERROR: Failed to read block %d: %d\n",
                    block, (int)nxfrd);
 
               good = false;
@@ -244,7 +244,7 @@ static int nxffs_badblocks(FAR struct nxffs_volume_s *volume)
           nxfrd = MTD_BWRITE(volume->mtd, lblock, volume->blkper, volume->pack);
           if (nxfrd != volume->blkper)
             {
-              fdbg("ERROR: Write erase block %d failed: %d\n", lblock, nxfrd);
+              ferr("ERROR: Write erase block %d failed: %d\n", lblock, nxfrd);
               return -EIO;
             }
         }
@@ -283,7 +283,7 @@ int nxffs_reformat(FAR struct nxffs_volume_s *volume)
   ret = nxffs_format(volume);
   if (ret < 0)
     {
-      fdbg("ERROR: Failed to reformat the volume: %d\n", -ret);
+      ferr("ERROR: Failed to reformat the volume: %d\n", -ret);
       return ret;
     }
 
@@ -292,7 +292,7 @@ int nxffs_reformat(FAR struct nxffs_volume_s *volume)
   ret = nxffs_badblocks(volume);
   if (ret < 0)
     {
-      fdbg("ERROR: Bad block check failed: %d\n", -ret);
+      ferr("ERROR: Bad block check failed: %d\n", -ret);
     }
 
   return ret;

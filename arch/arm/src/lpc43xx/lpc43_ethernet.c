@@ -197,7 +197,7 @@
  * enabled.
  */
 
-#ifndef CONFIG_DEBUG
+#ifndef CONFIG_DEBUG_FEATURES
 #  undef CONFIG_LPC43_ETHMAC_REGDEBUG
 #endif
 
@@ -559,7 +559,7 @@ static struct lpc43_ethmac_s g_lpc43ethmac;
  ****************************************************************************/
 /* Register operations ******************************************************/
 
-#if defined(CONFIG_LPC43_ETHMAC_REGDEBUG) && defined(CONFIG_DEBUG)
+#if defined(CONFIG_LPC43_ETHMAC_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
 static uint32_t lpc43_getreg(uint32_t addr);
 static void lpc43_putreg(uint32_t val, uint32_t addr);
 static void lpc43_checksetup(void);
@@ -683,7 +683,7 @@ static int  lpc43_ethconfig(FAR struct lpc43_ethmac_s *priv);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_LPC43_ETHMAC_REGDEBUG) && defined(CONFIG_DEBUG)
+#if defined(CONFIG_LPC43_ETHMAC_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
 static uint32_t lpc43_getreg(uint32_t addr)
 {
   static uint32_t prevaddr = 0;
@@ -704,7 +704,7 @@ static uint32_t lpc43_getreg(uint32_t addr)
         {
           if (count == 4)
             {
-              lldbg("...\n");
+              llerr("...\n");
             }
 
           return val;
@@ -721,7 +721,7 @@ static uint32_t lpc43_getreg(uint32_t addr)
         {
           /* Yes.. then show how many times the value repeated */
 
-          lldbg("[repeats %d more times]\n", count-3);
+          llerr("[repeats %d more times]\n", count-3);
         }
 
       /* Save the new address, value, and count */
@@ -733,7 +733,7 @@ static uint32_t lpc43_getreg(uint32_t addr)
 
   /* Show the register value read */
 
-  lldbg("%08x->%08x\n", addr, val);
+  llerr("%08x->%08x\n", addr, val);
   return val;
 }
 #endif
@@ -755,12 +755,12 @@ static uint32_t lpc43_getreg(uint32_t addr)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_LPC43_ETHMAC_REGDEBUG) && defined(CONFIG_DEBUG)
+#if defined(CONFIG_LPC43_ETHMAC_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
 static void lpc43_putreg(uint32_t val, uint32_t addr)
 {
   /* Show the register value being written */
 
-  lldbg("%08x<-%08x\n", addr, val);
+  llerr("%08x<-%08x\n", addr, val);
 
   /* Write the value */
 
@@ -782,7 +782,7 @@ static void lpc43_putreg(uint32_t val, uint32_t addr)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_LPC43_ETHMAC_REGDEBUG) && defined(CONFIG_DEBUG)
+#if defined(CONFIG_LPC43_ETHMAC_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
 static void lpc43_checksetup(void)
 {
 }
@@ -947,7 +947,7 @@ static int lpc43_transmit(FAR struct lpc43_ethmac_s *priv)
   txdesc  = priv->txhead;
   txfirst = txdesc;
 
-  nllvdbg("d_len: %d d_buf: %p txhead: %p tdes0: %08x\n",
+  nllinfo("d_len: %d d_buf: %p txhead: %p tdes0: %08x\n",
           priv->dev.d_len, priv->dev.d_buf, txdesc, txdesc->tdes0);
 
   DEBUGASSERT(txdesc && (txdesc->tdes0 & ETH_TDES0_OWN) == 0);
@@ -964,7 +964,7 @@ static int lpc43_transmit(FAR struct lpc43_ethmac_s *priv)
       bufcount = (priv->dev.d_len + (CONFIG_LPC43_ETH_BUFSIZE-1)) / CONFIG_LPC43_ETH_BUFSIZE;
       lastsize = priv->dev.d_len - (bufcount - 1) * CONFIG_LPC43_ETH_BUFSIZE;
 
-      nllvdbg("bufcount: %d lastsize: %d\n", bufcount, lastsize);
+      nllinfo("bufcount: %d lastsize: %d\n", bufcount, lastsize);
 
       /* Set the first segment bit in the first TX descriptor */
 
@@ -1074,7 +1074,7 @@ static int lpc43_transmit(FAR struct lpc43_ethmac_s *priv)
 
   priv->inflight++;
 
-  nllvdbg("txhead: %p txtail: %p inflight: %d\n",
+  nllinfo("txhead: %p txtail: %p inflight: %d\n",
           priv->txhead, priv->txtail, priv->inflight);
 
   /* If all TX descriptors are in-flight, then we have to disable receive interrupts
@@ -1373,7 +1373,7 @@ static void lpc43_freesegment(FAR struct lpc43_ethmac_s *priv,
   struct eth_rxdesc_s *rxdesc;
   int i;
 
-  nllvdbg("rxfirst: %p segments: %d\n", rxfirst, segments);
+  nllinfo("rxfirst: %p segments: %d\n", rxfirst, segments);
 
   /* Set OWN bit in RX descriptors.  This gives the buffers back to DMA */
 
@@ -1431,7 +1431,7 @@ static int lpc43_recvframe(FAR struct lpc43_ethmac_s *priv)
   uint8_t *buffer;
   int i;
 
-  nllvdbg("rxhead: %p rxcurr: %p segments: %d\n",
+  nllinfo("rxhead: %p rxcurr: %p segments: %d\n",
           priv->rxhead, priv->rxcurr, priv->segments);
 
   /* Check if there are free buffers.  We cannot receive new frames in this
@@ -1440,7 +1440,7 @@ static int lpc43_recvframe(FAR struct lpc43_ethmac_s *priv)
 
   if (!lpc43_isfreebuffer(priv))
     {
-      nlldbg("No free buffers\n");
+      nllerr("No free buffers\n");
       return -ENOMEM;
     }
 
@@ -1497,7 +1497,7 @@ static int lpc43_recvframe(FAR struct lpc43_ethmac_s *priv)
               rxcurr = priv->rxcurr;
             }
 
-          nllvdbg("rxhead: %p rxcurr: %p segments: %d\n",
+          nllinfo("rxhead: %p rxcurr: %p segments: %d\n",
               priv->rxhead, priv->rxcurr, priv->segments);
 
           /* Check if any errors are reported in the frame */
@@ -1536,7 +1536,7 @@ static int lpc43_recvframe(FAR struct lpc43_ethmac_s *priv)
               priv->rxhead   = (struct eth_rxdesc_s *)rxdesc->rdes3;
               lpc43_freesegment(priv, rxcurr, priv->segments);
 
-              nllvdbg("rxhead: %p d_buf: %p d_len: %d\n",
+              nllinfo("rxhead: %p d_buf: %p d_len: %d\n",
                       priv->rxhead, dev->d_buf, dev->d_len);
 
               return OK;
@@ -1547,7 +1547,7 @@ static int lpc43_recvframe(FAR struct lpc43_ethmac_s *priv)
                * scanning logic, and continue scanning with the next frame.
                */
 
-              nlldbg("DROPPED: RX descriptor errors: %08x\n", rxdesc->rdes0);
+              nllerr("DROPPED: RX descriptor errors: %08x\n", rxdesc->rdes0);
               lpc43_freesegment(priv, rxcurr, priv->segments);
             }
         }
@@ -1563,7 +1563,7 @@ static int lpc43_recvframe(FAR struct lpc43_ethmac_s *priv)
 
   priv->rxhead = rxdesc;
 
-  nllvdbg("rxhead: %p rxcurr: %p segments: %d\n",
+  nllinfo("rxhead: %p rxcurr: %p segments: %d\n",
           priv->rxhead, priv->rxcurr, priv->segments);
 
   return -EAGAIN;
@@ -1608,7 +1608,7 @@ static void lpc43_receive(FAR struct lpc43_ethmac_s *priv)
 
       if (dev->d_len > CONFIG_NET_ETH_MTU)
         {
-          nlldbg("DROPPED: Too big: %d\n", dev->d_len);
+          nllerr("DROPPED: Too big: %d\n", dev->d_len);
           /* Free dropped packet buffer */
 
           if (dev->d_buf)
@@ -1632,7 +1632,7 @@ static void lpc43_receive(FAR struct lpc43_ethmac_s *priv)
 #ifdef CONFIG_NET_IPv4
       if (BUF->type == HTONS(ETHTYPE_IP))
         {
-          nllvdbg("IPv4 frame\n");
+          nllinfo("IPv4 frame\n");
 
           /* Handle ARP on input then give the IPv4 packet to the network
            * layer
@@ -1672,7 +1672,7 @@ static void lpc43_receive(FAR struct lpc43_ethmac_s *priv)
 #ifdef CONFIG_NET_IPv6
       if (BUF->type == HTONS(ETHTYPE_IP6))
         {
-          nllvdbg("Iv6 frame\n");
+          nllinfo("Iv6 frame\n");
 
           /* Give the IPv6 packet to the network layer */
 
@@ -1709,7 +1709,7 @@ static void lpc43_receive(FAR struct lpc43_ethmac_s *priv)
 #ifdef CONFIG_NET_ARP
       if (BUF->type == htons(ETHTYPE_ARP))
         {
-          nllvdbg("ARP frame\n");
+          nllinfo("ARP frame\n");
 
           /* Handle ARP packet */
 
@@ -1727,7 +1727,7 @@ static void lpc43_receive(FAR struct lpc43_ethmac_s *priv)
       else
 #endif
         {
-          nlldbg("DROPPED: Unknown type: %04x\n", BUF->type);
+          nllerr("DROPPED: Unknown type: %04x\n", BUF->type);
         }
 
       /* We are finished with the RX buffer.  NOTE:  If the buffer is
@@ -1768,7 +1768,7 @@ static void lpc43_freeframe(FAR struct lpc43_ethmac_s *priv)
   struct eth_txdesc_s *txdesc;
   int i;
 
-  nllvdbg("txhead: %p txtail: %p inflight: %d\n",
+  nllinfo("txhead: %p txtail: %p inflight: %d\n",
           priv->txhead, priv->txtail, priv->inflight);
 
   /* Scan for "in-flight" descriptors owned by the CPU */
@@ -1784,7 +1784,7 @@ static void lpc43_freeframe(FAR struct lpc43_ethmac_s *priv)
            * TX descriptors.
            */
 
-          nllvdbg("txtail: %p tdes0: %08x tdes2: %08x tdes3: %08x\n",
+          nllinfo("txtail: %p tdes0: %08x tdes2: %08x tdes3: %08x\n",
                   txdesc, txdesc->tdes0, txdesc->tdes2, txdesc->tdes3);
 
           DEBUGASSERT(txdesc->tdes2 != 0);
@@ -1837,7 +1837,7 @@ static void lpc43_freeframe(FAR struct lpc43_ethmac_s *priv)
 
       priv->txtail = txdesc;
 
-      nllvdbg("txhead: %p txtail: %p inflight: %d\n",
+      nllinfo("txhead: %p txtail: %p inflight: %d\n",
               priv->txhead, priv->txtail, priv->inflight);
     }
 }
@@ -1975,7 +1975,7 @@ static inline void lpc43_interrupt_process(FAR struct lpc43_ethmac_s *priv)
     {
       /* Just let the user know what happened */
 
-      nlldbg("Abnormal event(s): %08x\n", dmasr);
+      nllerr("Abnormal event(s): %08x\n", dmasr);
 
       /* Clear all pending abnormal events */
 
@@ -2179,7 +2179,7 @@ static void lpc43_txtimeout_expiry(int argc, uint32_t arg, ...)
 {
   FAR struct lpc43_ethmac_s *priv = (FAR struct lpc43_ethmac_s *)arg;
 
-  nlldbg("Timeout!\n");
+  nllerr("Timeout!\n");
 
 #ifdef CONFIG_NET_NOINTS
   /* Disable further Ethernet interrupts.  This will prevent some race
@@ -2381,12 +2381,12 @@ static int lpc43_ifup(struct net_driver_s *dev)
   int ret;
 
 #ifdef CONFIG_NET_IPv4
-  ndbg("Bringing up: %d.%d.%d.%d\n",
+  nerr("Bringing up: %d.%d.%d.%d\n",
        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
 #endif
 #ifdef CONFIG_NET_IPv6
-  ndbg("Bringing up: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
+  nerr("Bringing up: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
        dev->d_ipv6addr[0], dev->d_ipv6addr[1], dev->d_ipv6addr[2],
        dev->d_ipv6addr[3], dev->d_ipv6addr[4], dev->d_ipv6addr[5],
        dev->d_ipv6addr[6], dev->d_ipv6addr[7]);
@@ -2435,7 +2435,7 @@ static int lpc43_ifdown(struct net_driver_s *dev)
   FAR struct lpc43_ethmac_s *priv = (FAR struct lpc43_ethmac_s *)dev->d_private;
   irqstate_t flags;
 
-  ndbg("Taking the network down\n");
+  nerr("Taking the network down\n");
 
   /* Disable the Ethernet interrupt */
 
@@ -2480,7 +2480,7 @@ static int lpc43_ifdown(struct net_driver_s *dev)
 
 static inline void lpc43_txavail_process(FAR struct lpc43_ethmac_s *priv)
 {
-  nvdbg("ifup: %d\n", priv->ifup);
+  ninfo("ifup: %d\n", priv->ifup);
 
   /* Ignore the notification if the interface is not yet up */
 
@@ -2647,7 +2647,7 @@ static int lpc43_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
   uint32_t temp;
   uint32_t registeraddress;
 
-  nllvdbg("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
+  nllinfo("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
           mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 
   /* Add the MAC address to the hardware multicast hash table */
@@ -2704,7 +2704,7 @@ static int lpc43_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
   uint32_t temp;
   uint32_t registeraddress;
 
-  nllvdbg("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
+  nllinfo("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
           mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 
   /* Remove the MAC address to the hardware multicast hash table */
@@ -3065,7 +3065,7 @@ static int lpc43_phyread(uint16_t phydevaddr, uint16_t phyregaddr, uint16_t *val
         }
     }
 
-  ndbg("MII transfer timed out: phydevaddr: %04x phyregaddr: %04x\n",
+  nerr("MII transfer timed out: phydevaddr: %04x phyregaddr: %04x\n",
        phydevaddr, phyregaddr);
 
   return -ETIMEDOUT;
@@ -3124,7 +3124,7 @@ static int lpc43_phywrite(uint16_t phydevaddr, uint16_t phyregaddr, uint16_t val
         }
     }
 
-  ndbg("MII transfer timed out: phydevaddr: %04x phyregaddr: %04x value: %04x\n",
+  nerr("MII transfer timed out: phydevaddr: %04x phyregaddr: %04x value: %04x\n",
        phydevaddr, phyregaddr, value);
 
   return -ETIMEDOUT;
@@ -3161,7 +3161,7 @@ static inline int lpc43_dm9161(FAR struct lpc43_ethmac_s *priv)
   ret = lpc43_phyread(CONFIG_LPC43_PHYADDR, MII_PHYID1, &phyval);
   if (ret < 0)
     {
-      ndbg("Failed to read the PHY ID1: %d\n", ret);
+      nerr("Failed to read the PHY ID1: %d\n", ret);
       return ret;
     }
 
@@ -3172,14 +3172,14 @@ static inline int lpc43_dm9161(FAR struct lpc43_ethmac_s *priv)
       up_systemreset();
     }
 
-  nvdbg("PHY ID1: 0x%04X\n", phyval);
+  ninfo("PHY ID1: 0x%04X\n", phyval);
 
   /* Now check the "DAVICOM Specified Configuration Register (DSCR)", Register 16 */
 
   ret = lpc43_phyread(CONFIG_LPC43_PHYADDR, 16, &phyval);
   if (ret < 0)
     {
-      ndbg("Failed to read the PHY Register 0x10: %d\n", ret);
+      nerr("Failed to read the PHY Register 0x10: %d\n", ret);
       return ret;
     }
 
@@ -3236,7 +3236,7 @@ static int lpc43_phyinit(FAR struct lpc43_ethmac_s *priv)
   ret = lpc43_phywrite(CONFIG_LPC43_PHYADDR, MII_MCR, MII_MCR_RESET);
   if (ret < 0)
     {
-      ndbg("Failed to reset the PHY: %d\n", ret);
+      nerr("Failed to reset the PHY: %d\n", ret);
       return ret;
     }
 
@@ -3248,7 +3248,7 @@ static int lpc43_phyinit(FAR struct lpc43_ethmac_s *priv)
   ret = lpc43_phy_boardinitialize(0);
   if (ret < 0)
     {
-      ndbg("Failed to initialize the PHY: %d\n", ret);
+      nerr("Failed to initialize the PHY: %d\n", ret);
       return ret;
     }
 #endif
@@ -3273,7 +3273,7 @@ static int lpc43_phyinit(FAR struct lpc43_ethmac_s *priv)
       ret = lpc43_phyread(CONFIG_LPC43_PHYADDR, MII_MSR, &phyval);
       if (ret < 0)
         {
-          ndbg("Failed to read the PHY MSR: %d\n", ret);
+          nerr("Failed to read the PHY MSR: %d\n", ret);
           return ret;
         }
       else if ((phyval & MII_MSR_LINKSTATUS) != 0)
@@ -3284,7 +3284,7 @@ static int lpc43_phyinit(FAR struct lpc43_ethmac_s *priv)
 
   if (timeout >= PHY_RETRY_TIMEOUT)
     {
-      ndbg("Timed out waiting for link status: %04x\n", phyval);
+      nerr("Timed out waiting for link status: %04x\n", phyval);
       return -ETIMEDOUT;
     }
 
@@ -3293,7 +3293,7 @@ static int lpc43_phyinit(FAR struct lpc43_ethmac_s *priv)
   ret = lpc43_phywrite(CONFIG_LPC43_PHYADDR, MII_MCR, MII_MCR_ANENABLE);
   if (ret < 0)
     {
-      ndbg("Failed to enable auto-negotiation: %d\n", ret);
+      nerr("Failed to enable auto-negotiation: %d\n", ret);
       return ret;
     }
 
@@ -3304,7 +3304,7 @@ static int lpc43_phyinit(FAR struct lpc43_ethmac_s *priv)
       ret = lpc43_phyread(CONFIG_LPC43_PHYADDR, MII_MSR, &phyval);
       if (ret < 0)
         {
-          ndbg("Failed to read the PHY MSR: %d\n", ret);
+          nerr("Failed to read the PHY MSR: %d\n", ret);
           return ret;
         }
       else if ((phyval & MII_MSR_ANEGCOMPLETE) != 0)
@@ -3315,7 +3315,7 @@ static int lpc43_phyinit(FAR struct lpc43_ethmac_s *priv)
 
   if (timeout >= PHY_RETRY_TIMEOUT)
     {
-      ndbg("Timed out waiting for auto-negotiation\n");
+      nerr("Timed out waiting for auto-negotiation\n");
       return -ETIMEDOUT;
     }
 
@@ -3324,13 +3324,13 @@ static int lpc43_phyinit(FAR struct lpc43_ethmac_s *priv)
   ret = lpc43_phyread(CONFIG_LPC43_PHYADDR, CONFIG_LPC43_PHYSR, &phyval);
   if (ret < 0)
     {
-      ndbg("Failed to read PHY status register\n");
+      nerr("Failed to read PHY status register\n");
       return ret;
     }
 
   /* Remember the selected speed and duplex modes */
 
-  nvdbg("PHYSR[%d]: %04x\n", CONFIG_LPC43_PHYSR, phyval);
+  ninfo("PHYSR[%d]: %04x\n", CONFIG_LPC43_PHYSR, phyval);
 
 #ifdef CONFIG_ETH0_PHY_LAN8720
   if ((phyval & (MII_MSR_100BASETXHALF | MII_MSR_100BASETXFULL)) != 0)
@@ -3418,7 +3418,7 @@ static int lpc43_phyinit(FAR struct lpc43_ethmac_s *priv)
   ret = lpc43_phywrite(CONFIG_LPC43_PHYADDR, MII_MCR, phyval);
   if (ret < 0)
     {
-     ndbg("Failed to write the PHY MCR: %d\n", ret);
+     nerr("Failed to write the PHY MCR: %d\n", ret);
       return ret;
     }
 
@@ -3434,7 +3434,7 @@ static int lpc43_phyinit(FAR struct lpc43_ethmac_s *priv)
 #endif
 #endif
 
-  ndbg("Duplex: %s Speed: %d MBps\n",
+  nerr("Duplex: %s Speed: %d MBps\n",
        priv->fduplex ? "FULL" : "HALF",
        priv->mbps100 ? 100 : 10);
 
@@ -3718,7 +3718,7 @@ static void lpc43_macaddress(FAR struct lpc43_ethmac_s *priv)
   FAR struct net_driver_s *dev = &priv->dev;
   uint32_t regval;
 
-  nllvdbg("%s MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
+  nllinfo("%s MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
           dev->d_ifname,
           dev->d_mac.ether_addr_octet[0], dev->d_mac.ether_addr_octet[1],
           dev->d_mac.ether_addr_octet[2], dev->d_mac.ether_addr_octet[3],
@@ -3786,7 +3786,7 @@ static void lpc43_ipv6multicast(FAR struct lpc43_ethmac_s *priv)
   mac[4] = tmp16 & 0xff;
   mac[5] = tmp16 >> 8;
 
-  nvdbg("IPv6 Multicast: %02x:%02x:%02x:%02x:%02x:%02x\n",
+  ninfo("IPv6 Multicast: %02x:%02x:%02x:%02x:%02x:%02x\n",
         mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 
   (void)lpc43_addmac(dev, mac);
@@ -3925,12 +3925,12 @@ static int lpc43_ethconfig(FAR struct lpc43_ethmac_s *priv)
 
   /* Reset the Ethernet block */
 
-  nllvdbg("Reset the Ethernet block\n");
+  nllinfo("Reset the Ethernet block\n");
   lpc43_ethreset(priv);
 
   /* Initialize the PHY */
 
-  nllvdbg("Initialize the PHY\n");
+  nllinfo("Initialize the PHY\n");
   ret = lpc43_phyinit(priv);
   if (ret < 0)
     {
@@ -3945,7 +3945,7 @@ static int lpc43_ethconfig(FAR struct lpc43_ethmac_s *priv)
 
   /* Initialize the MAC and DMA */
 
-  nllvdbg("Initialize the MAC and DMA\n");
+  nllinfo("Initialize the MAC and DMA\n");
   ret = lpc43_macconfig(priv);
   if (ret < 0)
     {
@@ -3966,7 +3966,7 @@ static int lpc43_ethconfig(FAR struct lpc43_ethmac_s *priv)
 
   /* Enable normal MAC operation */
 
-  nllvdbg("Enable normal operation\n");
+  nllinfo("Enable normal operation\n");
   return lpc43_macenable(priv);
 }
 

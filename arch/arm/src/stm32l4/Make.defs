@@ -150,7 +150,7 @@ CHIP_CSRCS += stm32l4_rtcc.c
 endif
 endif
 
-ifeq ($(CONFIG_DEBUG),y)
+ifeq ($(CONFIG_DEBUG_FEATURES),y)
 CHIP_CSRCS += stm32l4_dumpgpio.c
 endif
 

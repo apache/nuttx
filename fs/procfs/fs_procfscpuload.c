@@ -138,7 +138,7 @@ static int cpuload_open(FAR struct file *filep, FAR const char *relpath,
 {
   FAR struct cpuload_file_s *attr;
 
-  fvdbg("Open '%s'\n", relpath);
+  finfo("Open '%s'\n", relpath);
 
   /* PROCFS is read-only.  Any attempt to open with any kind of write
    * access is not permitted.
@@ -148,7 +148,7 @@ static int cpuload_open(FAR struct file *filep, FAR const char *relpath,
 
   if ((oflags & O_WRONLY) != 0 || (oflags & O_RDONLY) == 0)
     {
-      fdbg("ERROR: Only O_RDONLY supported\n");
+      ferr("ERROR: Only O_RDONLY supported\n");
       return -EACCES;
     }
 
@@ -156,7 +156,7 @@ static int cpuload_open(FAR struct file *filep, FAR const char *relpath,
 
   if (strcmp(relpath, "cpuload") != 0)
     {
-      fdbg("ERROR: relpath is '%s'\n", relpath);
+      ferr("ERROR: relpath is '%s'\n", relpath);
       return -ENOENT;
     }
 
@@ -165,7 +165,7 @@ static int cpuload_open(FAR struct file *filep, FAR const char *relpath,
   attr = (FAR struct cpuload_file_s *)kmm_zalloc(sizeof(struct cpuload_file_s));
   if (!attr)
     {
-      fdbg("ERROR: Failed to allocate file attributes\n");
+      ferr("ERROR: Failed to allocate file attributes\n");
       return -ENOMEM;
     }
 
@@ -207,7 +207,7 @@ static ssize_t cpuload_read(FAR struct file *filep, FAR char *buffer,
   off_t offset;
   ssize_t ret;
 
-  fvdbg("buffer=%p buflen=%d\n", buffer, (int)buflen);
+  finfo("buffer=%p buflen=%d\n", buffer, (int)buflen);
 
   /* Recover our private data from the struct file instance */
 
@@ -288,7 +288,7 @@ static int cpuload_dup(FAR const struct file *oldp, FAR struct file *newp)
   FAR struct cpuload_file_s *oldattr;
   FAR struct cpuload_file_s *newattr;
 
-  fvdbg("Dup %p->%p\n", oldp, newp);
+  finfo("Dup %p->%p\n", oldp, newp);
 
   /* Recover our private data from the old struct file instance */
 
@@ -300,7 +300,7 @@ static int cpuload_dup(FAR const struct file *oldp, FAR struct file *newp)
   newattr = (FAR struct cpuload_file_s *)kmm_malloc(sizeof(struct cpuload_file_s));
   if (!newattr)
     {
-      fdbg("ERROR: Failed to allocate file attributes\n");
+      ferr("ERROR: Failed to allocate file attributes\n");
       return -ENOMEM;
     }
 
@@ -327,7 +327,7 @@ static int cpuload_stat(const char *relpath, struct stat *buf)
 
   if (strcmp(relpath, "cpuload") != 0)
     {
-      fdbg("ERROR: relpath is '%s'\n", relpath);
+      ferr("ERROR: relpath is '%s'\n", relpath);
       return -ENOENT;
     }
 

@@ -322,7 +322,7 @@ static int procfs_open(FAR struct file *filep, FAR const char *relpath,
 {
   int x, ret = -ENOENT;
 
-  fvdbg("Open '%s'\n", relpath);
+  finfo("Open '%s'\n", relpath);
 
   /* Perform the stat based on the procfs_entry operations */
 
@@ -382,7 +382,7 @@ static ssize_t procfs_read(FAR struct file *filep, FAR char *buffer,
   FAR struct procfs_file_s *handler;
   ssize_t ret = 0;
 
-  fvdbg("buffer=%p buflen=%d\n", buffer, (int)buflen);
+  finfo("buffer=%p buflen=%d\n", buffer, (int)buflen);
 
   /* Recover our private data from the struct file instance */
 
@@ -406,7 +406,7 @@ static ssize_t procfs_write(FAR struct file *filep, FAR const char *buffer,
   FAR struct procfs_file_s *handler;
   ssize_t ret = 0;
 
-  fvdbg("buffer=%p buflen=%d\n", buffer, (int)buflen);
+  finfo("buffer=%p buflen=%d\n", buffer, (int)buflen);
 
   /* Recover our private data from the struct file instance */
 
@@ -429,7 +429,7 @@ static ssize_t procfs_write(FAR struct file *filep, FAR const char *buffer,
 
 static int procfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
-  fvdbg("cmd: %d arg: %08lx\n", cmd, arg);
+  finfo("cmd: %d arg: %08lx\n", cmd, arg);
 
   /* No IOCTL commands supported */
 
@@ -448,7 +448,7 @@ static int procfs_dup(FAR const struct file *oldp, FAR struct file *newp)
 {
   FAR struct procfs_file_s *oldattr;
 
-  fvdbg("Dup %p->%p\n", oldp, newp);
+  finfo("Dup %p->%p\n", oldp, newp);
 
   /* Recover our private data from the old struct file instance */
 
@@ -476,7 +476,7 @@ static int procfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
   FAR void *priv = NULL;
   irqstate_t flags;
 
-  fvdbg("relpath: \"%s\"\n", relpath ? relpath : "NULL");
+  finfo("relpath: \"%s\"\n", relpath ? relpath : "NULL");
   DEBUGASSERT(mountpt && relpath && dir && !dir->u.procfs);
 
   /* The relative must be either:
@@ -496,7 +496,7 @@ static int procfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
 
       if (!level0)
         {
-          fdbg("ERROR: Failed to allocate the level0 directory structure\n");
+          ferr("ERROR: Failed to allocate the level0 directory structure\n");
           return -ENOMEM;
         }
 
@@ -575,7 +575,7 @@ static int procfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
 
               if (!level1)
                 {
-                  fdbg("ERROR: Failed to allocate the level0 directory structure\n");
+                  ferr("ERROR: Failed to allocate the level0 directory structure\n");
                   return -ENOMEM;
                 }
 
@@ -717,7 +717,7 @@ static int procfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
                * error -ENOENT
                */
 
-              fvdbg("Entry %d: End of directory\n", index);
+              finfo("Entry %d: End of directory\n", index);
               ret = -ENOENT;
             }
           else
@@ -757,7 +757,7 @@ static int procfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
 
           if (!tcb)
             {
-              fdbg("ERROR: PID %d is no longer valid\n", (int)pid);
+              ferr("ERROR: PID %d is no longer valid\n", (int)pid);
               return -ENOENT;
             }
 

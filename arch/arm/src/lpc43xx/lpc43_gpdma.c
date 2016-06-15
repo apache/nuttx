@@ -61,22 +61,22 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Enables debug output from this file (needs CONFIG_DEBUG too) */
+/* Enables debug output from this file (needs CONFIG_DEBUG_FEATURES too) */
 
 #undef DMA_DEBUG     /* Define to enable debug */
 #undef DMA_VERBOSE   /* Define to enable verbose debug */
 
 #ifdef DMA_DEBUG
-#  define dmadbg  lldbg
+#  define dmaerr  llerr
 #  ifdef DMA_VERBOSE
-#    define spivdbg lldbg
+#    define spiinfo llerr
 #  else
-#    define spivdbg(x...)
+#    define spiinfo(x...)
 #  endif
 #else
 #  undef DMA_VERBOSE
-#  define dmadbg(x...)
-#  define spivdbg(x...)
+#  define dmaerr(x...)
+#  define spiinfo(x...)
 #endif
 
 /****************************************************************************

@@ -388,7 +388,7 @@ static void ee25xx_waitwritecomplete(struct ee25xx_dev_s *priv)
     }
   while ((status & EE25XX_SR_WIP) != 0);
 
-  fvdbg("Complete\n");
+  finfo("Complete\n");
 }
 
 /****************************************************************************

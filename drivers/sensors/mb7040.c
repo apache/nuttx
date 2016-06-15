@@ -131,7 +131,7 @@ static int mb7040_measurerange(FAR struct mb7040_dev_s *priv)
   uint8_t regaddr;
   int ret;
 
-  sndbg("addr: %02x\n", regaddr);
+  sninfo("addr: %02x\n", regaddr);
 
   /* Set up the I2C configuration */
 
@@ -146,7 +146,7 @@ static int mb7040_measurerange(FAR struct mb7040_dev_s *priv)
   ret = i2c_write(priv->i2c, &config, &regaddr, sizeof(regaddr));
   if (ret < 0)
     {
-      sndbg("i2c_write failed: %d\n", ret);
+      snerr("ERROR: i2c_write failed: %d\n", ret);
     }
 
   return ret;
@@ -178,12 +178,12 @@ static int mb7040_readrange(FAR struct mb7040_dev_s *priv,
   ret = i2c_read(priv->i2c, &config, buffer, sizeof(buffer));
   if (ret < 0)
     {
-      sndbg("i2c_read failed: %d\n", ret);
+      snerr("ERROR: i2c_read failed: %d\n", ret);
       return ret;
     }
 
   *range = (uint16_t)buffer[0] << 8 | (uint16_t)buffer[1];
-  sndbg("range: %04x ret: %d\n", *range, ret);
+  sninfo("range: %04x ret: %d\n", *range, ret);
   return ret;
 }
 
@@ -201,7 +201,7 @@ static int mb7040_changeaddr(FAR struct mb7040_dev_s *priv, uint8_t addr)
   uint8_t buffer[3];
   int ret;
 
-  sndbg("new addr: %02x\n", addr);
+  sninfo("new addr: %02x\n", addr);
 
   /* Sanity check */
 
@@ -225,7 +225,7 @@ static int mb7040_changeaddr(FAR struct mb7040_dev_s *priv, uint8_t addr)
   ret = i2c_write(priv->i2c, &config, buffer, sizeof(buffer));
   if (ret < 0)
     {
-      sndbg("i2c_write failed: %d\n", ret);
+      snerr("ERROR: i2c_write failed: %d\n", ret);
       return ret;
     }
 
@@ -324,7 +324,8 @@ static int mb7040_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             {
               *ptr = (int32_t)range;
             }
-          sndbg("range: %04x ret: %d\n", *ptr, ret);
+
+          sninfo("range: %04x ret: %d\n", *ptr, ret);
         }
         break;
 
@@ -332,13 +333,13 @@ static int mb7040_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case SNIOC_CHANGEADDR:
         ret = mb7040_changeaddr(priv, (uint8_t)arg);
-        sndbg("new addr: %02x ret: %d\n", *(uint8_t *)arg, ret);
+        sninfo("new addr: %02x ret: %d\n", *(uint8_t *)arg, ret);
         break;
 
       /* Unrecognized commands */
 
       default:
-        sndbg("Unrecognized cmd: %d arg: %ld\n", cmd, arg);
+        snerr("ERROR: Unrecognized cmd: %d arg: %ld\n", cmd, arg);
         ret = -ENOTTY;
         break;
     }
@@ -381,7 +382,7 @@ int mb7040_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
   priv = (FAR struct mb7040_dev_s *)kmm_malloc(sizeof(*priv));
   if (priv == NULL)
     {
-      sndbg("Failed to allocate instance\n");
+      snerr("ERROR: Failed to allocate instance\n");
       return -ENOMEM;
     }
 
@@ -393,7 +394,7 @@ int mb7040_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
   ret = register_driver(devpath, &g_fops, 0666, priv);
   if (ret < 0)
     {
-      sndbg("Failed to register driver: %d\n", ret);
+      snerr("ERROR: Failed to register driver: %d\n", ret);
       kmm_free(priv);
     }
 

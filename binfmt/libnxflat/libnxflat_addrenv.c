@@ -103,7 +103,7 @@ int nxflat_addrenv_alloc(FAR struct nxflat_loadinfo_s *loadinfo, size_t envsize)
   dspace = (FAR struct dspace_s *)kmm_malloc(sizeof(struct dspace_s));
   if (dspace == 0)
     {
-      bdbg("ERROR: Failed to allocate DSpace\n");
+      berr("ERROR: Failed to allocate DSpace\n");
       return -ENOMEM;
     }
 
@@ -124,7 +124,7 @@ int nxflat_addrenv_alloc(FAR struct nxflat_loadinfo_s *loadinfo, size_t envsize)
   ret = up_addrenv_create(0, envsize, heapsize, &loadinfo->addrenv);
   if (ret < 0)
     {
-      bdbg("ERROR: up_addrenv_create failed: %d\n", ret);
+      berr("ERROR: up_addrenv_create failed: %d\n", ret);
       goto errout_with_dspace;
     }
 
@@ -137,7 +137,7 @@ int nxflat_addrenv_alloc(FAR struct nxflat_loadinfo_s *loadinfo, size_t envsize)
   ret = up_addrenv_vdata(&loadinfo->addrenv, 0, &vdata);
   if (ret < 0)
     {
-      bdbg("ERROR: up_addrenv_vdata failed: %d\n", ret);
+      berr("ERROR: up_addrenv_vdata failed: %d\n", ret);
       goto errout_with_addrenv;
     }
 
@@ -148,7 +148,7 @@ int nxflat_addrenv_alloc(FAR struct nxflat_loadinfo_s *loadinfo, size_t envsize)
   ret = up_addrenv_select(loadinfo->addrenv, &oldenv);
   if (ret < 0)
     {
-      bdbg("ERROR: up_addrenv_select failed: %d\n", ret);
+      berr("ERROR: up_addrenv_select failed: %d\n", ret);
       goto errout_with_addrenv;
     }
 
@@ -157,7 +157,7 @@ int nxflat_addrenv_alloc(FAR struct nxflat_loadinfo_s *loadinfo, size_t envsize)
   ret = up_addrenv_restore(oldenv);
   if (ret < 0)
     {
-      bdbg("ERROR: up_addrenv_restore failed: %d\n", ret);
+      berr("ERROR: up_addrenv_restore failed: %d\n", ret);
       goto errout_with_addrenv;
     }
 
@@ -227,7 +227,7 @@ void nxflat_addrenv_free(FAR struct nxflat_loadinfo_s *loadinfo)
       ret = up_addrenv_destroy(loadinfo->addrenv);
       if (ret < 0)
         {
-          bdbg("ERROR: up_addrenv_destroy failed: %d\n", ret);
+          berr("ERROR: up_addrenv_destroy failed: %d\n", ret);
         }
 
       loadinfo->addrenv = 0;

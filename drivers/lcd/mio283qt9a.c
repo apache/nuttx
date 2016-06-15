@@ -100,13 +100,13 @@
  * also be enabled.
  */
 
-#ifndef CONFIG_DEBUG
-#  undef CONFIG_DEBUG_VERBOSE
+#ifndef CONFIG_DEBUG_FEATURES
+#  undef CONFIG_DEBUG_INFO
 #  undef CONFIG_DEBUG_GRAPHICS
 #  undef CONFIG_DEBUG_LCD
 #endif
 
-#ifndef CONFIG_DEBUG_VERBOSE
+#ifndef CONFIG_DEBUG_INFO
 #  undef CONFIG_DEBUG_LCD
 #endif
 
@@ -139,11 +139,13 @@
 /* Debug ******************************************************************************/
 
 #ifdef CONFIG_DEBUG_LCD
-#  define lcddbg              dbg
-#  define lcdvdbg             vdbg
+#  define lcderr              err
+#  define lcdwarn             warn
+#  define lcdinfo             info
 #else
-#  define lcddbg(x...)
-#  define lcdvdbg(x...)
+#  define lcderr(x...)
+#  define lcdwarn(x...)
+#  define lcdinfo(x...)
 #endif
 
 /**************************************************************************************
@@ -498,7 +500,7 @@ static int mio283qt9a_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer
 
   /* Buffer must be provided and aligned to a 16-bit address boundary */
 
-  lcdvdbg("mio283qt9a_getrun row: %d col: %d npixels: %d\n", row, col, npixels);
+  lcdinfo("mio283qt9a_getrun row: %d col: %d npixels: %d\n", row, col, npixels);
   DEBUGASSERT(buffer && ((uintptr_t)buffer & 1) == 0);
 
   /* Read the run from GRAM. */
@@ -543,7 +545,7 @@ static int mio283qt9a_getvideoinfo(FAR struct lcd_dev_s *dev,
                                    FAR struct fb_videoinfo_s *vinfo)
 {
   DEBUGASSERT(dev && vinfo);
-  lcdvdbg("fmt: %d xres: %d yres: %d nplanes: 1\n",
+  lcdinfo("fmt: %d xres: %d yres: %d nplanes: 1\n",
           MIO283QT9A_COLORFMT, MIO283QT9A_XRES, MIO283QT9A_YRES);
 
   vinfo->fmt     = MIO283QT9A_COLORFMT;  /* Color format: RGB16-565: RRRR RGGG GGGB BBBB */
@@ -567,7 +569,7 @@ static int mio283qt9a_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int plane
   FAR struct mio283qt9a_dev_s *priv = (FAR struct mio283qt9a_dev_s *)dev;
 
   DEBUGASSERT(dev && pinfo && planeno == 0);
-  lcdvdbg("planeno: %d bpp: %d\n", planeno, MIO283QT9A_BPP);
+  lcdinfo("planeno: %d bpp: %d\n", planeno, MIO283QT9A_BPP);
 
   pinfo->putrun = mio283qt9a_putrun;               /* Put a run into LCD memory */
   pinfo->getrun = mio283qt9a_getrun;               /* Get a run from LCD memory */
@@ -588,7 +590,7 @@ static int mio283qt9a_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int plane
 
 static int mio283qt9a_getpower(FAR struct lcd_dev_s *dev)
 {
-  lcdvdbg("getpower: %d\n", 0);
+  lcdinfo("getpower: %d\n", 0);
   return g_lcddev.power;
 }
 
@@ -604,7 +606,7 @@ static int mio283qt9a_getpower(FAR struct lcd_dev_s *dev)
 static int mio283qt9a_poweroff(FAR struct mio283qt9a_lcd_s *lcd)
 {
   /* Select the LCD */
-  lcdvdbg("mio283qt9a_poweroff\n");
+  lcdinfo("mio283qt9a_poweroff\n");
 
   lcd->select(lcd);
 
@@ -640,7 +642,7 @@ static int mio283qt9a_setpower(FAR struct lcd_dev_s *dev, int power)
   FAR struct mio283qt9a_dev_s *priv = (FAR struct mio283qt9a_dev_s *)dev;
   FAR struct mio283qt9a_lcd_s *lcd  = priv->lcd;
 
-  lcdvdbg("setpower: %d\n", power);
+  lcdinfo("setpower: %d\n", power);
   DEBUGASSERT((unsigned)power <= CONFIG_LCD_MAXPOWER);
 
   /* Set new power level */
@@ -687,7 +689,7 @@ static int mio283qt9a_setpower(FAR struct lcd_dev_s *dev, int power)
 
 static int mio283qt9a_getcontrast(FAR struct lcd_dev_s *dev)
 {
-  lcdvdbg("Not implemented\n");
+  lcdinfo("Not implemented\n");
   return -ENOSYS;
 }
 
@@ -701,7 +703,7 @@ static int mio283qt9a_getcontrast(FAR struct lcd_dev_s *dev)
 
 static int mio283qt9a_setcontrast(FAR struct lcd_dev_s *dev, unsigned int contrast)
 {
-  lcdvdbg("contrast: %d\n", contrast);
+  lcdinfo("contrast: %d\n", contrast);
   return -ENOSYS;
 }
 
@@ -739,7 +741,7 @@ static inline int mio283qt9a_hwinitialize(FAR struct mio283qt9a_dev_s *priv)
   id_c = lcd->read(lcd);
   id_d = lcd->read(lcd);
 
-  lcdvdbg("LCD ID: %04x %04x %04x %04x\n", id_a, id_b, id_c, id_d);
+  lcdinfo("LCD ID: %04x %04x %04x %04x\n", id_a, id_b, id_c, id_d);
   UNUSED(id_a);
   UNUSED(id_b);
 
@@ -781,45 +783,45 @@ static inline int mio283qt9a_hwinitialize(FAR struct mio283qt9a_dev_s *priv)
       id_b = lcd->read(lcd);
       id_c = lcd->read(lcd);
       id_d = lcd->read(lcd);
-      lcdvdbg("LCD man ID: %02x, version: %02x, driver ID: %02x\n", id_b, id_c, id_d);
+      lcdinfo("LCD man ID: %02x, version: %02x, driver ID: %02x\n", id_b, id_c, id_d);
 
       id_a = mio283qt9a_readreg(lcd, 0x09); /* Read display status */
       id_b = lcd->read(lcd);
       id_c = lcd->read(lcd);
       id_d = lcd->read(lcd);
       id_e = lcd->read(lcd);
-      lcdvdbg("Display status %02x, %02x, %02x, %02x, %02x\n", id_a, id_b, id_c, id_d, id_e);
+      lcdinfo("Display status %02x, %02x, %02x, %02x, %02x\n", id_a, id_b, id_c, id_d, id_e);
 
       id_a = mio283qt9a_readreg(lcd, 0x0a); /* Read power status */
       id_b = lcd->read(lcd);
-      lcdvdbg("Power status %02x, %02x\n", id_a, id_b);
+      lcdinfo("Power status %02x, %02x\n", id_a, id_b);
 
       id_a = mio283qt9a_readreg(lcd, 0x0b); /* Read MADCTL */
       id_b = lcd->read(lcd);
-      lcdvdbg("MADCTL %02x, %02x\n", id_a, id_b);
+      lcdinfo("MADCTL %02x, %02x\n", id_a, id_b);
 
       id_a = mio283qt9a_readreg(lcd, 0x0c); /* Read pixel format */
       id_b = lcd->read(lcd);
-      lcdvdbg("Pixel format %02x, %02x\n", id_a, id_b);
+      lcdinfo("Pixel format %02x, %02x\n", id_a, id_b);
 
       id_a = mio283qt9a_readreg(lcd, 0x0d); /* Read image format */
       id_b = lcd->read(lcd);
-      lcdvdbg("Image format %02x, %02x\n", id_a, id_b);
+      lcdinfo("Image format %02x, %02x\n", id_a, id_b);
 
       id_a = mio283qt9a_readreg(lcd, 0x0e);  /* read signal mode */
       id_b = lcd->read(lcd);
-      lcdvdbg("Signal mode %02x, %02x\n", id_a, id_b);
+      lcdinfo("Signal mode %02x, %02x\n", id_a, id_b);
 
       id_a = mio283qt9a_readreg(lcd, 0x0f);  /* read self diag */
       id_b = lcd->read(lcd);
-      lcdvdbg("Self diag %02x, %02x\n", id_a, id_b);
+      lcdinfo("Self diag %02x, %02x\n", id_a, id_b);
 #endif
       ret = OK;
     }
 #ifndef CONFIG_LCD_NOGETRUN
   else
     {
-      lcddbg("Unsupported LCD type\n");
+      lcderr("ERROR: Unsupported LCD type\n");
       ret = -ENODEV;
     }
 #endif
@@ -849,7 +851,7 @@ FAR struct lcd_dev_s *mio283qt9a_lcdinitialize(FAR struct mio283qt9a_lcd_s *lcd)
   FAR struct mio283qt9a_dev_s *priv;
   int ret;
 
-  lcdvdbg("Initializing\n");
+  lcdinfo("Initializing\n");
 
   /* If we could support multiple MIO283QT9A devices, this is where we would allocate
    * a new driver data structure... but we can't.  Why not?  Because of a bad should

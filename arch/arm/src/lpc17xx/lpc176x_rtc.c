@@ -72,7 +72,7 @@
 #  error "CONFIG_RTC_HIRES must NOT be set with this driver"
 #endif
 
-#ifndef CONFIG_DEBUG
+#ifndef CONFIG_DEBUG_FEATURES
 #  undef CONFIG_DEBUG_RTC
 #endif
 
@@ -81,15 +81,15 @@
 /* Debug ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_RTC
-#  define rtcdbg    dbg
-#  define rtcvdbg   vdbg
-#  define rtclldbg  lldbg
-#  define rtcllvdbg llvdbg
+#  define rtcerr    err
+#  define rtcinfo   info
+#  define rtcllerr  llerr
+#  define rtcllinfo llinfo
 #else
-#  define rtcdbg(x...)
-#  define rtcvdbg(x...)
-#  define rtclldbg(x...)
-#  define rtcllvdbg(x...)
+#  define rtcerr(x...)
+#  define rtcinfo(x...)
+#  define rtcllerr(x...)
+#  define rtcllinfo(x...)
 #endif
 
 /************************************************************************************
@@ -134,9 +134,9 @@ volatile bool g_rtc_enabled = false;
 #ifdef CONFIG_DEBUG_RTC
 static void rtc_dumpregs(FAR const char *msg)
 {
-  rtclldbg("%s:\n", msg);
-  rtclldbg("  DOM : %08x\n", (getreg32(LPC17_RTC_DOM) & RTC_DOM_MASK));
-  rtclldbg("  DOW : %08x\n", (getreg32(LPC17_RTC_DOW) & RTC_DOW_MASK));
+  rtcllerr("%s:\n", msg);
+  rtcllerr("  DOM : %08x\n", (getreg32(LPC17_RTC_DOM) & RTC_DOM_MASK));
+  rtcllerr("  DOW : %08x\n", (getreg32(LPC17_RTC_DOW) & RTC_DOW_MASK));
 }
 #else
 #  define rtc_dumpregs(msg)
@@ -159,13 +159,13 @@ static void rtc_dumpregs(FAR const char *msg)
 #ifdef CONFIG_DEBUG_RTC
 static void rtc_dumptime(FAR struct tm *tp, FAR const char *msg)
 {
-  rtclldbg("%s:\n", msg);
-  rtclldbg("  tm_sec: %08x\n", tp->tm_sec);
-  rtclldbg("  tm_min: %08x\n", tp->tm_min);
-  rtclldbg(" tm_hour: %08x\n", tp->tm_hour);
-  rtclldbg(" tm_mday: %08x\n", tp->tm_mday);
-  rtclldbg("  tm_mon: %08x\n", tp->tm_mon);
-  rtclldbg(" tm_year: %08x\n", tp->tm_year);
+  rtcllerr("%s:\n", msg);
+  rtcllerr("  tm_sec: %08x\n", tp->tm_sec);
+  rtcllerr("  tm_min: %08x\n", tp->tm_min);
+  rtcllerr(" tm_hour: %08x\n", tp->tm_hour);
+  rtcllerr(" tm_mday: %08x\n", tp->tm_mday);
+  rtcllerr("  tm_mon: %08x\n", tp->tm_mon);
+  rtcllerr(" tm_year: %08x\n", tp->tm_year);
 }
 #else
 #  define rtc_dumptime(tp, msg)

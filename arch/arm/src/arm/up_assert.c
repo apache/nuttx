@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/arm/up_assert.c
  *
- *   Copyright (C) 2007-2010, 2012-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2010, 2012-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,17 +39,6 @@
 
 #include <nuttx/config.h>
 
-/* Output debug info if stack dump is selected -- even if debug is not
- * selected.
- */
-
-#ifdef CONFIG_ARCH_STACKDUMP
-#  undef  CONFIG_DEBUG
-#  undef  CONFIG_DEBUG_VERBOSE
-#  define CONFIG_DEBUG 1
-#  define CONFIG_DEBUG_VERBOSE 1
-#endif
-
 #include <stdarg.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -76,23 +65,6 @@
 #ifndef CONFIG_USBDEV_TRACE
 #  undef CONFIG_ARCH_USBDUMP
 #endif
-
-/* The following is just intended to keep some ugliness out of the mainline
- * code.  We are going to print the task name if:
- *
- *  CONFIG_TASK_NAME_SIZE > 0 &&    <-- The task has a name
- *  (defined(CONFIG_DEBUG)    ||    <-- And the debug is enabled (lldbg used)
- *   defined(CONFIG_ARCH_STACKDUMP) <-- Or lowsyslog() is used
- */
-
-#undef CONFIG_PRINT_TASKNAME
-#if CONFIG_TASK_NAME_SIZE > 0 && (defined(CONFIG_DEBUG) || defined(CONFIG_ARCH_STACKDUMP))
-#  define CONFIG_PRINT_TASKNAME 1
-#endif
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
@@ -127,7 +99,7 @@ static void up_stackdump(uint32_t sp, uint32_t stack_base)
   for (stack = sp & ~0x1f; stack < stack_base; stack += 32)
     {
       uint32_t *ptr = (uint32_t *)stack;
-      lldbg("%08x: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+      alert("%08x: %08x %08x %08x %08x %08x %08x %08x %08x\n",
              stack, ptr[0], ptr[1], ptr[2], ptr[3],
              ptr[4], ptr[5], ptr[6], ptr[7]);
     }
@@ -154,12 +126,12 @@ static inline void up_registerdump(void)
       for (regs = REG_R0; regs <= REG_R15; regs += 8)
         {
           uint32_t *ptr = (uint32_t *)&CURRENT_REGS[regs];
-          lldbg("R%d: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+          alert("R%d: %08x %08x %08x %08x %08x %08x %08x %08x\n",
                  regs, ptr[0], ptr[1], ptr[2], ptr[3],
                  ptr[4], ptr[5], ptr[6], ptr[7]);
         }
 
-      lldbg("CPSR: %08x\n", CURRENT_REGS[REG_CPSR]);
+      alert("CPSR: %08x\n", CURRENT_REGS[REG_CPSR]);
     }
 }
 #else
@@ -228,12 +200,12 @@ static void up_dumpstate(void)
 
   /* Show interrupt stack info */
 
-  lldbg("sp:     %08x\n", sp);
-  lldbg("IRQ stack:\n");
-  lldbg("  base: %08x\n", istackbase);
-  lldbg("  size: %08x\n", istacksize);
+  alert("sp:     %08x\n", sp);
+  alert("IRQ stack:\n");
+  alert("  base: %08x\n", istackbase);
+  alert("  size: %08x\n", istacksize);
 #ifdef CONFIG_STACK_COLORATION
-  lldbg("  used: %08x\n", up_check_intstack());
+  alert("  used: %08x\n", up_check_intstack());
 #endif
 
   /* Does the current stack pointer lie within the interrupt
@@ -251,24 +223,24 @@ static void up_dumpstate(void)
        */
 
       sp = g_intstackbase;
-      lldbg("sp:     %08x\n", sp);
+      alert("sp:     %08x\n", sp);
     }
 
   /* Show user stack info */
 
-  lldbg("User stack:\n");
-  lldbg("  base: %08x\n", ustackbase);
-  lldbg("  size: %08x\n", ustacksize);
+  alert("User stack:\n");
+  alert("  base: %08x\n", ustackbase);
+  alert("  size: %08x\n", ustacksize);
 #ifdef CONFIG_STACK_COLORATION
-  lldbg("  used: %08x\n", up_check_tcbstack(rtcb));
+  alert("  used: %08x\n", up_check_tcbstack(rtcb));
 #endif
 
 #else
-  lldbg("sp:         %08x\n", sp);
-  lldbg("stack base: %08x\n", ustackbase);
-  lldbg("stack size: %08x\n", ustacksize);
+  alert("sp:         %08x\n", sp);
+  alert("stack base: %08x\n", ustackbase);
+  alert("stack size: %08x\n", ustacksize);
 #ifdef CONFIG_STACK_COLORATION
-  lldbg("stack used: %08x\n", up_check_tcbstack(rtcb));
+  alert("stack used: %08x\n", up_check_tcbstack(rtcb));
 #endif
 #endif
 
@@ -279,7 +251,7 @@ static void up_dumpstate(void)
   if (sp > ustackbase || sp <= ustackbase - ustacksize)
     {
 #if !defined(CONFIG_ARCH_INTERRUPTSTACK) || CONFIG_ARCH_INTERRUPTSTACK < 4
-      lldbg("ERROR: Stack pointer is not within allocated stack\n");
+      alert("ERROR: Stack pointer is not within allocated stack\n");
 #endif
     }
   else
@@ -339,17 +311,17 @@ static void _up_assert(int errorcode)
 
 void up_assert(const uint8_t *filename, int lineno)
 {
-#ifdef CONFIG_PRINT_TASKNAME
+#if CONFIG_TASK_NAME_SIZE > 0
   struct tcb_s *rtcb = this_task();
 #endif
 
   board_autoled_on(LED_ASSERTION);
 
-#ifdef CONFIG_PRINT_TASKNAME
-  lldbg("Assertion failed at file:%s line: %d task: %s\n",
+#if CONFIG_TASK_NAME_SIZE > 0
+  alert("Assertion failed at file:%s line: %d task: %s\n",
         filename, lineno, rtcb->name);
 #else
-  lldbg("Assertion failed at file:%s line: %d\n",
+  alert("Assertion failed at file:%s line: %d\n",
         filename, lineno);
 #endif
 

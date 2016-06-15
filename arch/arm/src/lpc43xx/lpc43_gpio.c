@@ -198,7 +198,7 @@ int lpc43_gpio_config(uint16_t gpiocfg)
         break;
 
       default :
-        sdbg("ERROR: Unrecognized pin mode: %04x\n", gpiocfg);
+        serr("ERROR: Unrecognized pin mode: %04x\n", gpiocfg);
         ret = -EINVAL;
         break;
     }

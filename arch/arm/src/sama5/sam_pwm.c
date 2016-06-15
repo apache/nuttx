@@ -396,25 +396,25 @@
 /* Debug ********************************************************************/
 /* Non-standard debug that may be enabled just for testing PWM */
 
-#ifndef CONFIG_DEBUG
+#ifndef CONFIG_DEBUG_FEATURES
 #  undef CONFIG_DEBUG_PWM
 #endif
 
 #ifdef CONFIG_DEBUG_PWM
-#  define pwmdbg              dbg
-#  define pwmlldbg            lldbg
-#  ifdef CONFIG_DEBUG_VERBOSE
-#    define pwmvdbg           vdbg
-#    define pwmllvdbg         llvdbg
+#  define pwmerr              err
+#  define pwmllerr            llerr
+#  ifdef CONFIG_DEBUG_INFO
+#    define pwminfo           info
+#    define pwmllinfo         llinfo
 #  else
-#    define pwmlldbg(x...)
-#    define pwmllvdbg(x...)
+#    define pwminfo(x...)
+#    define pwmllinfo(x...)
 #  endif
 #else
-#  define pwmdbg(x...)
-#  define pwmlldbg(x...)
-#  define pwmvdbg(x...)
-#  define pwmllvdbg(x...)
+#  define pwmerr(x...)
+#  define pwmllerr(x...)
+#  define pwminfo(x...)
+#  define pwmllinfo(x...)
 #endif
 
 /****************************************************************************
@@ -480,7 +480,7 @@ static bool pwm_checkreg(FAR struct sam_pwm_s *chan, bool wr, uint32_t regval,
 static uint32_t pwm_getreg(FAR struct sam_pwm_chan_s *chan, int offset);
 static void pwm_putreg(FAR struct sam_pwm_chan_s *chan, int offset, uint32_t regval);
 
-#if defined(CONFIG_DEBUG_PWM) && defined(CONFIG_DEBUG_VERBOSE)
+#if defined(CONFIG_DEBUG_PWM) && defined(CONFIG_DEBUG_INFO)
 static void pwm_dumpregs(FAR struct sam_pwm_chan_s *chan, FAR const char *msg);
 #else
 #  define pwm_dumpregs(chan,msg)
@@ -713,7 +713,7 @@ static bool pwm_checkreg(FAR struct sam_pwm_s *pwm, bool wr, uint32_t regval,
         {
           /* Yes... show how many times we did it */
 
-          lldbg("...[Repeats %d times]...\n", pwm->count);
+          llerr("...[Repeats %d times]...\n", pwm->count);
         }
 
       /* Save information about the new access */
@@ -757,7 +757,7 @@ static uint32_t pwm_getreg(struct sam_pwm_chan_s *chan, int offset)
 #ifdef CONFIG_SAMA5_PWM_REGDEBUG
   if (pwm_checkreg(&g_pwm, false, regval, regaddr))
     {
-      lldbg("%08x->%08x\n", regaddr, regval);
+      llerr("%08x->%08x\n", regaddr, regval);
     }
 #endif
 
@@ -774,7 +774,7 @@ static uint32_t pwm_getreg(struct sam_pwm_chan_s *chan, int offset)
 #ifdef CONFIG_SAMA5_PWM_REGDEBUG
   if (pwm_checkreg(pwm, false, regval, regaddr))
     {
-      lldbg("%08x->%08x\n", regaddr, regval);
+      llerr("%08x->%08x\n", regaddr, regval);
     }
 #endif
 
@@ -813,7 +813,7 @@ static uint32_t pwm_chan_getreg(struct sam_pwm_chan_s *chan, int offset)
   if (pwm_checkreg(chan->pwm, false, regval, regaddr))
 #endif
     {
-      lldbg("%08x->%08x\n", regaddr, regval);
+      llerr("%08x->%08x\n", regaddr, regval);
     }
 #endif
 
@@ -844,7 +844,7 @@ static void pwm_putreg(struct sam_pwm_chan_s *chan, int offset,
 #ifdef CONFIG_SAMA5_PWM_REGDEBUG
   if (pwm_checkreg(&g_pwm, true, regval, regaddr))
     {
-      lldbg("%08x<-%08x\n", regaddr, regval);
+      llerr("%08x<-%08x\n", regaddr, regval);
     }
 #endif
 
@@ -857,7 +857,7 @@ static void pwm_putreg(struct sam_pwm_chan_s *chan, int offset,
 #ifdef CONFIG_SAMA5_PWM_REGDEBUG
   if (pwm_checkreg(pwm, true, regval, regaddr))
     {
-      lldbg("%08x<-%08x\n", regaddr, regval);
+      llerr("%08x<-%08x\n", regaddr, regval);
     }
 #endif
 
@@ -893,7 +893,7 @@ static void pwm_chan_putreg(struct sam_pwm_chan_s *chan, int offset,
   if (pwm_checkreg(chan->pwm, true, regval, regaddr))
 #endif
     {
-      lldbg("%08x<-%08x\n", regaddr, regval);
+      llerr("%08x<-%08x\n", regaddr, regval);
     }
 #endif
 
@@ -914,61 +914,61 @@ static void pwm_chan_putreg(struct sam_pwm_chan_s *chan, int offset,
  *
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG_PWM) && defined(CONFIG_DEBUG_VERBOSE)
+#if defined(CONFIG_DEBUG_PWM) && defined(CONFIG_DEBUG_INFO)
 static void pwm_dumpregs(struct sam_pwm_chan_s *chan, FAR const char *msg)
 {
-  pwmvdbg("PWM: %s\n", msg);
-  pwmvdbg("   CLK: %08x    SR: %08x  IMR1: %08x  ISR1: %08x\n",
+  pwminfo("PWM: %s\n", msg);
+  pwminfo("   CLK: %08x    SR: %08x  IMR1: %08x  ISR1: %08x\n",
           pwm_getreg(chan, SAM_PWM_CLK_OFFSET),
           pwm_getreg(chan, SAM_PWM_SR_OFFSET),
           pwm_getreg(chan, SAM_PWM_IMR1_OFFSET),
           pwm_getreg(chan, SAM_PWM_ISR1_OFFSET));
-  pwmvdbg("   SCM: %08x  SCUC: %08x  SCUP: %08x  IMR2: %08x\n",
+  pwminfo("   SCM: %08x  SCUC: %08x  SCUP: %08x  IMR2: %08x\n",
           pwm_getreg(chan, SAM_PWM_SCM_OFFSET),
           pwm_getreg(chan, SAM_PWM_SCUC_OFFSET),
           pwm_getreg(chan, SAM_PWM_SCUP_OFFSET),
           pwm_getreg(chan, SAM_PWM_IMR2_OFFSET));
-  pwmvdbg("  ISR2: %08x   OOV: %08x    OS: %08x   FMR: %08x\n",
+  pwminfo("  ISR2: %08x   OOV: %08x    OS: %08x   FMR: %08x\n",
           pwm_getreg(chan, SAM_PWM_ISR2_OFFSET),
           pwm_getreg(chan, SAM_PWM_OOV_OFFSET),
           pwm_getreg(chan, SAM_PWM_OS_OFFSET),
           pwm_getreg(chan, SAM_PWM_FMR_OFFSET));
-  pwmvdbg("   FSR: %08x   FPV: %08x   FPE: %08x ELMR0: %08x\n",
+  pwminfo("   FSR: %08x   FPV: %08x   FPE: %08x ELMR0: %08x\n",
           pwm_getreg(chan, SAM_PWM_FSR_OFFSET),
           pwm_getreg(chan, SAM_PWM_FPV_OFFSET),
           pwm_getreg(chan, SAM_PWM_FPE_OFFSET),
           pwm_getreg(chan, SAM_PWM_ELMR0_OFFSET));
-  pwmvdbg(" ELMR1: %08x  SMMR: %08x  WPSR: %08x\n",
+  pwminfo(" ELMR1: %08x  SMMR: %08x  WPSR: %08x\n",
           pwm_getreg(chan, SAM_PWM_ELMR1_OFFSET),
           pwm_getreg(chan, SAM_PWM_SMMR_OFFSET),
           pwm_getreg(chan, SAM_PWM_WPSR_OFFSET));
-  pwmvdbg(" CMPV0: %08x CMPM0: %08x CMPV1: %08x CMPM1: %08x\n",
+  pwminfo(" CMPV0: %08x CMPM0: %08x CMPV1: %08x CMPM1: %08x\n",
           pwm_getreg(chan, SAM_PWM_CMPV0_OFFSET),
           pwm_getreg(chan, SAM_PWM_CMPM0_OFFSET),
           pwm_getreg(chan, SAM_PWM_CMPV1_OFFSET),
           pwm_getreg(chan, SAM_PWM_CMPM1_OFFSET));
-  pwmvdbg(" CMPV2: %08x CMPM2: %08x CMPV3: %08x CMPM3: %08x\n",
+  pwminfo(" CMPV2: %08x CMPM2: %08x CMPV3: %08x CMPM3: %08x\n",
           pwm_getreg(chan, SAM_PWM_CMPV2_OFFSET),
           pwm_getreg(chan, SAM_PWM_CMPM2_OFFSET),
           pwm_getreg(chan, SAM_PWM_CMPV3_OFFSET),
           pwm_getreg(chan, SAM_PWM_CMPM3_OFFSET));
-  pwmvdbg(" CMPV4: %08x CMPM4: %08x CMPV5: %08x CMPM5: %08x\n",
+  pwminfo(" CMPV4: %08x CMPM4: %08x CMPV5: %08x CMPM5: %08x\n",
           pwm_getreg(chan, SAM_PWM_CMPV4_OFFSET),
           pwm_getreg(chan, SAM_PWM_CMPM4_OFFSET),
           pwm_getreg(chan, SAM_PWM_CMPV5_OFFSET),
           pwm_getreg(chan, SAM_PWM_CMPM5_OFFSET));
-  pwmvdbg(" CMPV6: %08x CMPM6: %08x CMPV7: %08x CMPM7: %08x\n",
+  pwminfo(" CMPV6: %08x CMPM6: %08x CMPV7: %08x CMPM7: %08x\n",
           pwm_getreg(chan, SAM_PWM_CMPV6_OFFSET),
           pwm_getreg(chan, SAM_PWM_CMPM6_OFFSET),
           pwm_getreg(chan, SAM_PWM_CMPV7_OFFSET),
           pwm_getreg(chan, SAM_PWM_CMPM7_OFFSET));
-  pwmvdbg("Channel %d: %s\n", chan->channel, msg);
-  pwmvdbg("   CMR: %08x  CDTY: %08x  CPRD: %08x  CCNT: %08x\n",
+  pwminfo("Channel %d: %s\n", chan->channel, msg);
+  pwminfo("   CMR: %08x  CDTY: %08x  CPRD: %08x  CCNT: %08x\n",
           pwm_chan_getreg(chan, SAM_PWM_CMR_OFFSET),
           pwm_chan_getreg(chan, SAM_PWM_CDTY_OFFSET),
           pwm_chan_getreg(chan, SAM_PWM_CPRD_OFFSET),
           pwm_chan_getreg(chan, SAM_PWM_CCNT_OFFSET));
-  pwmvdbg("    CT: %08x\n",
+  pwminfo("    CT: %08x\n",
           pwm_chan_getreg(chan, SAM_PWM_DT_OFFSET));
 }
 #endif
@@ -1018,7 +1018,7 @@ static int pwm_setup(FAR struct pwm_lowerhalf_s *dev)
 {
   FAR struct sam_pwm_chan_s *chan = (FAR struct sam_pwm_chan_s *)dev;
 
-  pwmvdbg("Channel %d: H=%08x L=%08x FI=%08x\n",
+  pwminfo("Channel %d: H=%08x L=%08x FI=%08x\n",
           chan->channel, chan->ohpincfg, chan->olpincfg, chan->fipincfg);
 
   /* Configure selected PWM pins */
@@ -1061,7 +1061,7 @@ static int pwm_shutdown(FAR struct pwm_lowerhalf_s *dev)
 {
   FAR struct sam_pwm_chan_s *chan = (FAR struct sam_pwm_chan_s *)dev;
 
-  pwmvdbg("Channel %d\n", chan->channel);
+  pwminfo("Channel %d\n", chan->channel);
 
   /* Make sure that the output has been stopped */
 
@@ -1124,7 +1124,7 @@ static int pwm_start(FAR struct pwm_lowerhalf_s *dev,
 #endif
 
     default:
-      pwmdbg("ERROR: Invalid or unsupported clock source value: %d\n", chan->clksrc);
+      pwmerr("ERROR: Invalid or unsupported clock source value: %d\n", chan->clksrc);
       return -EINVAL;
     }
 
@@ -1167,7 +1167,7 @@ static int pwm_start(FAR struct pwm_lowerhalf_s *dev,
     }
 
   pwm_chan_putreg(chan, SAM_PWM_CDTY_OFFSET, regval);
-  pwmvdbg("Fsrc=%d cprd=%d cdty=%d\n", fsrc, cprd, regval);
+  pwminfo("Fsrc=%d cprd=%d cdty=%d\n", fsrc, cprd, regval);
 
   /* Enable the channel */
 
@@ -1199,7 +1199,7 @@ static int pwm_stop(FAR struct pwm_lowerhalf_s *dev)
 {
   FAR struct sam_pwm_chan_s *chan = (FAR struct sam_pwm_chan_s *)dev;
 
-  pwmvdbg("Channel %d\n", chan->channel);
+  pwminfo("Channel %d\n", chan->channel);
 
   /* Disable further PWM interrupts from this channel */
 
@@ -1236,7 +1236,7 @@ static int pwm_ioctl(FAR struct pwm_lowerhalf_s *dev, int cmd, unsigned long arg
 
   /* There are no platform-specific ioctl commands */
 
-  pwmvdbg("Channel %d\n", chan->channel);
+  pwminfo("Channel %d\n", chan->channel);
 #endif
   return -ENOTTY;
 }
@@ -1299,7 +1299,7 @@ FAR struct pwm_lowerhalf_s *sam_pwminitialize(int channel)
   FAR struct sam_pwm_chan_s *chan;
   uint32_t regval;
 
-  pwmvdbg("Channel %d\n", channel);
+  pwminfo("Channel %d\n", channel);
 
   switch (channel)
     {
@@ -1336,7 +1336,7 @@ FAR struct pwm_lowerhalf_s *sam_pwminitialize(int channel)
 #endif
 
       default:
-        pwmdbg("ERROR: Channel invalid or not configured: %d\n", channel);
+        pwmerr("ERROR: Channel invalid or not configured: %d\n", channel);
         return NULL;
     }
 
@@ -1366,7 +1366,7 @@ FAR struct pwm_lowerhalf_s *sam_pwminitialize(int channel)
       ret = irq_attach(SAM_IRQ_PWM, pwm_interrupt);
       if (ret < 0)
         {
-          pwmdbg("ERROR: Failed to attach IRQ%d\n", channel);
+          pwmerr("ERROR: Failed to attach IRQ%d\n", channel);
           return NULL;
 
         }

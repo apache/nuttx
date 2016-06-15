@@ -101,10 +101,10 @@ int nx_getrectangle(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
   int ret;
   sem_t sem_done;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!hwnd || !rect || !dest)
     {
-      gvdbg("Invalid parameters\n");
+      ginfo("Invalid parameters\n");
       set_errno(EINVAL);
       return ERROR;
     }
@@ -127,7 +127,7 @@ int nx_getrectangle(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
 
   if (ret != OK)
     {
-      gdbg("sem_init failed: %d\n", errno);
+      gerr("ERROR: sem_init failed: %d\n", errno);
       return ret;
     }
 

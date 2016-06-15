@@ -115,7 +115,7 @@
 #  define WRB_TRIM(wrb,n) \
   do { (wrb)->wb_iob = iob_trimhead((wrb)->wb_iob,(n)); } while (0)
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
 #  define WRB_DUMP(msg,wrb,len,offset) \
      tcp_wrbuffer_dump(msg,wrb,len,offset)
 #else
@@ -1251,7 +1251,7 @@ int tcp_wrbuffer_test(void);
  ****************************************************************************/
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
 void tcp_wrbuffer_dump(FAR const char *msg, FAR struct tcp_wrbuffer_s *wrb,
                        unsigned int len, unsigned int offset);
 #else

@@ -189,7 +189,7 @@ int pipe(int fd[2])
   FAR struct pipe_dev_s *dev = NULL;
   char devname[16];
   int pipeno;
-  int err;
+  int errcode;
   int ret;
 
   /* Get exclusive access to the pipe allocation data */
@@ -208,7 +208,7 @@ int pipe(int fd[2])
   if (pipeno < 0)
     {
       (void)sem_post(&g_pipesem);
-      err = -pipeno;
+      errcode = -pipeno;
       goto errout;
     }
 
@@ -226,7 +226,7 @@ int pipe(int fd[2])
       if (!dev)
         {
           (void)sem_post(&g_pipesem);
-          err = ENOMEM;
+          errcode = ENOMEM;
           goto errout_with_pipe;
         }
 
@@ -238,7 +238,7 @@ int pipe(int fd[2])
       if (ret != 0)
         {
           (void)sem_post(&g_pipesem);
-          err = -ret;
+          errcode = -ret;
           goto errout_with_dev;
         }
 
@@ -254,7 +254,7 @@ int pipe(int fd[2])
   fd[1] = open(devname, O_WRONLY);
   if (fd[1] < 0)
     {
-      err = -fd[1];
+      errcode = -fd[1];
       goto errout_with_driver;
     }
 
@@ -263,7 +263,7 @@ int pipe(int fd[2])
   fd[0] = open(devname, O_RDONLY);
   if (fd[0] < 0)
     {
-      err = -fd[0];
+      errcode = -fd[0];
       goto errout_with_wrfd;
     }
 
@@ -285,7 +285,7 @@ errout_with_pipe:
   pipe_free(pipeno);
 
 errout:
-  set_errno(err);
+  set_errno(errcode);
   return ERROR;
 }
 

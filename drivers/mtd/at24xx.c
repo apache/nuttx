@@ -302,7 +302,7 @@ static ssize_t at24c_read_internal(FAR struct at24c_dev_s *priv, off_t offset,
   uint8_t buf[AT24XX_ADDRSIZE];
   uint16_t at24addr;
 
-  fvdbg("offset: %lu nbytes: %lu address: %02x\n",
+  finfo("offset: %lu nbytes: %lu address: %02x\n",
         (unsigned long)offset, (unsigned long)nbytes, address);
 
   /* "Random Read: A Random Read requires a dummy byte write sequence to load in the
@@ -329,7 +329,7 @@ static ssize_t at24c_read_internal(FAR struct at24c_dev_s *priv, off_t offset,
 
   while (at24c_i2c_write(priv, at24addr, buf, AT24XX_ADDRSIZE) < 0)
     {
-      fvdbg("wait\n");
+      finfo("wait\n");
       usleep(1000);
     }
 
@@ -356,7 +356,7 @@ static ssize_t at24c_bread(FAR struct mtd_dev_s *dev, off_t startblock,
   nblocks    *= (CONFIG_AT24XX_MTD_BLOCKSIZE / AT24XX_PAGESIZE);
 #endif
 
-  fvdbg("startblock: %08lx nblocks: %lu\n",
+  finfo("startblock: %08lx nblocks: %lu\n",
         (unsigned long)startblock, (unsigned long)nblocks);
 
   if (startblock >= priv->npages)
@@ -427,7 +427,7 @@ static ssize_t at24c_bwrite(FAR struct mtd_dev_s *dev, off_t startblock, size_t 
       nblocks = priv->npages - startblock;
     }
 
-  fvdbg("startblock: %08lx nblocks: %d\n", (long)startblock, (int)nblocks);
+  finfo("startblock: %08lx nblocks: %d\n", (long)startblock, (int)nblocks);
 
   while (blocksleft-- > 0)
     {
@@ -445,7 +445,7 @@ static ssize_t at24c_bwrite(FAR struct mtd_dev_s *dev, off_t startblock, size_t 
 
       while (at24c_i2c_write(priv, at24addr, buf, AT24XX_ADDRSIZE) < 0)
         {
-          fvdbg("wait\n");
+          finfo("wait\n");
           usleep(1000);
         }
 
@@ -474,7 +474,7 @@ static ssize_t at24c_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes
   size_t  memsize;
   uint8_t addr;
 
-  fvdbg("offset: %lu nbytes: %lu\n", (unsigned long)offset, (unsigned long)nbytes);
+  finfo("offset: %lu nbytes: %lu\n", (unsigned long)offset, (unsigned long)nbytes);
 
   /* Don't permit reads beyond the end of the memory region */
 
@@ -520,7 +520,7 @@ static int at24c_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
   FAR struct at24c_dev_s *priv = (FAR struct at24c_dev_s *)dev;
   int ret = -EINVAL; /* Assume good command with bad parameters */
 
-  fvdbg("cmd: %d \n", cmd);
+  finfo("cmd: %d \n", cmd);
 
   switch (cmd)
     {
@@ -561,7 +561,7 @@ static int at24c_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
 #endif
               ret               = OK;
 
-              fvdbg("blocksize: %d erasesize: %d neraseblocks: %d\n",
+              finfo("blocksize: %d erasesize: %d neraseblocks: %d\n",
                     geo->blocksize, geo->erasesize, geo->neraseblocks);
             }
         }
@@ -610,7 +610,7 @@ FAR struct mtd_dev_s *at24c_initialize(FAR struct i2c_master_s *dev)
   FAR struct at24c_dev_s *priv;
 
 #ifdef CONFIG_AT24XX_MULTI
-  fvdbg("dev: %p address: %02x\n", dev, address);
+  finfo("dev: %p address: %02x\n", dev, address);
 
   /* Allocate a state structure (we allocate the structure instead of using
    * a fixed, static allocation so that we can handle multiple FLASH devices.
@@ -622,12 +622,12 @@ FAR struct mtd_dev_s *at24c_initialize(FAR struct i2c_master_s *dev)
   priv = (FAR struct at24c_dev_s *)kmm_zalloc(sizeof(struct at24c_dev_s));
   if (priv == NULL)
     {
-      fdbg("ERROR: Failed to allocate device structure\n");
+      ferr("ERROR: Failed to allocate device structure\n");
       return NULL;
     }
 
 #else
-  fvdbg("dev: %p\n", dev);
+  finfo("dev: %p\n", dev);
 
   /* If only a signal AT24 part is supported then a statically allocated state
    * structure is used.
@@ -669,7 +669,7 @@ FAR struct mtd_dev_s *at24c_initialize(FAR struct i2c_master_s *dev)
 
   /* Return the implementation-specific state structure as the MTD device */
 
-  fvdbg("Return %p\n", priv);
+  finfo("Return %p\n", priv);
   return (FAR struct mtd_dev_s *)priv;
 }
 

@@ -129,16 +129,16 @@
 
 /* Debug ********************************************************************/
 /* Non-standard debug that may be enabled just for testing the timer
- * driver.  NOTE: that only lldbg types are used so that the output is
+ * driver.  NOTE: that only llerr types are used so that the output is
  * immediately available.
  */
 
 #ifdef CONFIG_DEBUG_TIMER
-#  define timdbg  lldbg
-#  define timvdbg llvdbg
+#  define timerr  llerr
+#  define timinfo llinfo
 #else
-#  define timdbg(x...)
-#  define timvdbg(x...)
+#  define timerr(x...)
+#  define timinfo(x...)
 #endif
 
 /****************************************************************************

@@ -77,14 +77,14 @@ static int poll_semtake(FAR sem_t *sem)
 
   if (sem_wait(sem) < 0)
     {
-      int err = get_errno();
+      int errcode = get_errno();
 
       /* The only case that an error should occur here is if the wait were
        * awakened by a signal.
        */
 
-      DEBUGASSERT(err == EINTR);
-      return -err;
+      DEBUGASSERT(errcode == EINTR);
+      return -errcode;
     }
 
   return OK;
@@ -329,7 +329,7 @@ int poll(FAR struct pollfd *fds, nfds_t nfds, int timeout)
 {
   sem_t sem;
   int count = 0;
-  int err;
+  int errcode;
   int ret;
 
   sem_init(&sem, 0, 0);
@@ -378,10 +378,10 @@ int poll(FAR struct pollfd *fds, nfds_t nfds, int timeout)
        * Preserve ret, if negative, since it holds the result of the wait.
        */
 
-      err = poll_teardown(fds, nfds, &count, ret);
-      if (err < 0 && ret >= 0)
+      errcode = poll_teardown(fds, nfds, &count, ret);
+      if (errcode < 0 && ret >= 0)
         {
-          ret = err;
+          ret = errcode;
         }
     }
 

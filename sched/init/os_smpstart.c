@@ -133,7 +133,7 @@ int os_idle_task(int argc, FAR char *argv[])
 {
   /* Enter the IDLE loop */
 
-  sdbg("CPU%d: Beginning Idle Loop\n", this_cpu());
+  sinfo("CPU%d: Beginning Idle Loop\n", this_cpu());
 
   for (; ; )
     {
@@ -207,7 +207,7 @@ int os_smp_start(void)
       ret = up_cpu_idlestack(cpu, tcb, CONFIG_SMP_IDLETHREAD_STACKSIZE);
       if (ret < 0)
         {
-          sdbg("ERROR: Failed to allocate stack for CPU%d\n", cpu);
+          serr("ERROR: Failed to allocate stack for CPU%d\n", cpu);
           return ret;
         }
 
@@ -231,7 +231,7 @@ int os_smp_start(void)
       ret = up_cpu_start(cpu);
       if (ret < 0)
         {
-          sdbg("ERROR: Failed to start CPU%d: %d\n", cpu, ret);
+          serr("ERROR: Failed to start CPU%d: %d\n", cpu, ret);
           return ret;
         }
     }

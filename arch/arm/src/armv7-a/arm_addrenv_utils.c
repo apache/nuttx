@@ -84,7 +84,7 @@ int arm_addrenv_create_region(FAR uintptr_t **list, unsigned int listlen,
   unsigned int i;
   unsigned int j;
 
-  bvdbg("listlen=%d vaddr=%08lx regionsize=%ld, mmuflags=%08x\n",
+  binfo("listlen=%d vaddr=%08lx regionsize=%ld, mmuflags=%08x\n",
         listlen, (unsigned long)vaddr, (unsigned long)regionsize,
         (unsigned int)mmuflags);
 
@@ -98,7 +98,7 @@ int arm_addrenv_create_region(FAR uintptr_t **list, unsigned int listlen,
   npages = MM_NPAGES(regionsize);
   if (npages > (listlen << (20 - MM_PGSHIFT)))
     {
-      bdbg("ERROR: npages=%u listlen=%u\n", npages, listlen);
+      berr("ERROR: npages=%u listlen=%u\n", npages, listlen);
       return -E2BIG;
     }
 
@@ -201,7 +201,7 @@ void arm_addrenv_destroy_region(FAR uintptr_t **list, unsigned int listlen,
   int i;
   int j;
 
-  bvdbg("listlen=%d vaddr=%08lx\n", listlen, (unsigned long)vaddr);
+  binfo("listlen=%d vaddr=%08lx\n", listlen, (unsigned long)vaddr);
 
   for (i = 0; i < listlen; vaddr += SECTION_SIZE, list++, i++)
     {

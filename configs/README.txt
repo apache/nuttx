@@ -123,7 +123,7 @@ Make.defs -- This makefile fragment provides architecture and
 
   Definitions in the Make.defs file probably depend on some of the
   settings in the .config file.  For example, the CFLAGS will most likely be
-  different if CONFIG_DEBUG=y.
+  different if CONFIG_DEBUG_FEATURES=y.
 
   The included tools/Config.mk file contains additional definitions that may
   be overriden in the architecture-specific Make.defs file as necessary:

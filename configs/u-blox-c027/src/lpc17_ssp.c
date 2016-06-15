@@ -58,27 +58,21 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-/* Enables debug output from this file (needs CONFIG_DEBUG too) */
+/* Enables debug output from this file (needs CONFIG_DEBUG_FEATURES too) */
 
-#undef SSP_DEBUG   /* Define to enable debug */
-#undef SSP_VERBOSE /* Define to enable verbose debug */
-
-#ifdef SSP_DEBUG
-#  define sspdbg  lldbg
-#  ifdef SSP_VERBOSE
-#    define sspvdbg lldbg
-#  else
-#    define sspvdbg(x...)
-#  endif
+#ifdef CONFIG_DEBUG_SPI
+#  define ssperr  llerr
+#  define sspwarn llwarn
+#  define sspinfo llinfo
 #else
-#  undef SSP_VERBOSE
-#  define sspdbg(x...)
-#  define sspvdbg(x...)
+#  define ssperr(x...)
+#  define sspwarn(x...)
+#  define sspinfo(x...)
 #endif
 
 /* Dump GPIO registers */
 
-#ifdef SSP_VERBOSE
+#ifdef CONFIG_DEBUG_GPIO
 #  define ssp_dumpgpio(m) lpc17_dumpgpio(SDCCS_GPIO, m)
 #else
 #  define ssp_dumpgpio(m)
@@ -140,7 +134,7 @@ void weak_function c027_sspdev_initialize(void)
 #ifdef CONFIG_LPC17_SSP0
 void  lpc17_ssp0select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
-  sspdbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  sspinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
   ssp_dumpgpio("lpc17_ssp0select() Entry");
 
 #warning "Assert CS here (false)"
@@ -150,7 +144,7 @@ void  lpc17_ssp0select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool sel
 
 uint8_t lpc17_ssp0status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 {
-  sspdbg("Returning SPI_STATUS_PRESENT\n");
+  sspinfo("Returning SPI_STATUS_PRESENT\n");
   return SPI_STATUS_PRESENT;
 }
 #endif
@@ -158,7 +152,7 @@ uint8_t lpc17_ssp0status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 #ifdef CONFIG_LPC17_SSP1
 void  lpc17_ssp1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
-  sspdbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  sspinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
   ssp_dumpgpio("lpc17_ssp1select() Entry");
 
   if (devid == SPIDEV_MMCSD)
@@ -186,12 +180,12 @@ uint8_t lpc17_ssp1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 
       if (lpc17_gpioread(C027_SD_CD) == 0)
         {
-          sspdbg("Returning SPI_STATUS_PRESENT\n");
+          sspinfo("Returning SPI_STATUS_PRESENT\n");
           return SPI_STATUS_PRESENT;
         }
     }
 
-  sspdbg("Returning zero\n");
+  sspinfo("Returning zero\n");
   return 0;
 }
 #endif

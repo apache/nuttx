@@ -129,7 +129,7 @@ FAR struct file_struct *fs_fdopen(int fd, int oflags, FAR struct tcb_s *tcb)
 {
   FAR struct streamlist *slist;
   FAR FILE              *stream;
-  int                    err = OK;
+  int                    errcode = OK;
   int                    ret;
   int                    i;
 
@@ -137,7 +137,7 @@ FAR struct file_struct *fs_fdopen(int fd, int oflags, FAR struct tcb_s *tcb)
 
   if (fd < 0)
     {
-      err = EBADF;
+      errcode = EBADF;
       goto errout;
     }
 
@@ -173,7 +173,7 @@ FAR struct file_struct *fs_fdopen(int fd, int oflags, FAR struct tcb_s *tcb)
 #else
       /* No networking... it is just a bad descriptor */
 
-      err = EBADF;
+      errcode = EBADF;
       goto errout;
 #endif
     }
@@ -193,7 +193,7 @@ FAR struct file_struct *fs_fdopen(int fd, int oflags, FAR struct tcb_s *tcb)
     {
       /* No... return the reported error */
 
-      err = -ret;
+      errcode = -ret;
       goto errout;
     }
 
@@ -241,7 +241,7 @@ FAR struct file_struct *fs_fdopen(int fd, int oflags, FAR struct tcb_s *tcb)
 
           if (!stream->fs_bufstart)
             {
-              err = ENOMEM;
+              errcode = ENOMEM;
               goto errout_with_sem;
             }
 
@@ -266,7 +266,7 @@ FAR struct file_struct *fs_fdopen(int fd, int oflags, FAR struct tcb_s *tcb)
 
   /* No free stream available.. report ENFILE */
 
-  err = ENFILE;
+  errcode = ENFILE;
 
 #if CONFIG_STDIO_BUFFER_SIZE > 0
 errout_with_sem:
@@ -274,7 +274,7 @@ errout_with_sem:
   sem_post(&slist->sl_sem);
 
 errout:
-  set_errno(err);
+  set_errno(errcode);
 errout_with_errno:
   return NULL;
 }

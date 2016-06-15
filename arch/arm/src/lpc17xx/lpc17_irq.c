@@ -108,25 +108,25 @@ static void lpc17_dumpnvic(const char *msg, int irq)
   irqstate_t flags;
 
   flags = enter_critical_section();
-  lldbg("NVIC (%s, irq=%d):\n", msg, irq);
-  lldbg("  INTCTRL:    %08x VECTAB: %08x\n",
+  llerr("NVIC (%s, irq=%d):\n", msg, irq);
+  llerr("  INTCTRL:    %08x VECTAB: %08x\n",
         getreg32(NVIC_INTCTRL), getreg32(NVIC_VECTAB));
 #if 0
-  lldbg("  SYSH ENABLE MEMFAULT: %08x BUSFAULT: %08x USGFAULT: %08x SYSTICK: %08x\n",
+  llerr("  SYSH ENABLE MEMFAULT: %08x BUSFAULT: %08x USGFAULT: %08x SYSTICK: %08x\n",
         getreg32(NVIC_SYSHCON_MEMFAULTENA), getreg32(NVIC_SYSHCON_BUSFAULTENA),
         getreg32(NVIC_SYSHCON_USGFAULTENA), getreg32(NVIC_SYSTICK_CTRL_ENABLE));
 #endif
-  lldbg("  IRQ ENABLE: %08x\n", getreg32(NVIC_IRQ0_31_ENABLE));
-  lldbg("  SYSH_PRIO:  %08x %08x %08x\n",
+  llerr("  IRQ ENABLE: %08x\n", getreg32(NVIC_IRQ0_31_ENABLE));
+  llerr("  SYSH_PRIO:  %08x %08x %08x\n",
         getreg32(NVIC_SYSH4_7_PRIORITY), getreg32(NVIC_SYSH8_11_PRIORITY),
         getreg32(NVIC_SYSH12_15_PRIORITY));
-  lldbg("  IRQ PRIO:   %08x %08x %08x %08x\n",
+  llerr("  IRQ PRIO:   %08x %08x %08x %08x\n",
         getreg32(NVIC_IRQ0_3_PRIORITY), getreg32(NVIC_IRQ4_7_PRIORITY),
         getreg32(NVIC_IRQ8_11_PRIORITY), getreg32(NVIC_IRQ12_15_PRIORITY));
-  lldbg("              %08x %08x %08x %08x\n",
+  llerr("              %08x %08x %08x %08x\n",
         getreg32(NVIC_IRQ16_19_PRIORITY), getreg32(NVIC_IRQ20_23_PRIORITY),
         getreg32(NVIC_IRQ24_27_PRIORITY), getreg32(NVIC_IRQ28_31_PRIORITY));
-  lldbg("              %08x %08x %08x %08x\n",
+  llerr("              %08x %08x %08x %08x\n",
         getreg32(NVIC_IRQ32_35_PRIORITY), getreg32(NVIC_IRQ36_39_PRIORITY),
         getreg32(NVIC_IRQ40_43_PRIORITY), getreg32(NVIC_IRQ44_47_PRIORITY));
   leave_critical_section(flags);
@@ -137,7 +137,7 @@ static void lpc17_dumpnvic(const char *msg, int irq)
 
 /****************************************************************************
  * Name: lpc17_nmi, lpc17_busfault, lpc17_usagefault, lpc17_pendsv,
- *       lpc17_dbgmonitor, lpc17_pendsv, lpc17_reserved
+ *       lpc17_errmonitor, lpc17_pendsv, lpc17_reserved
  *
  * Description:
  *   Handlers for various execptions.  None are handled and all are fatal
@@ -146,11 +146,11 @@ static void lpc17_dumpnvic(const char *msg, int irq)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
 static int lpc17_nmi(int irq, FAR void *context)
 {
   (void)up_irq_save();
-  dbg("PANIC!!! NMI received\n");
+  err("PANIC!!! NMI received\n");
   PANIC();
   return 0;
 }
@@ -158,7 +158,7 @@ static int lpc17_nmi(int irq, FAR void *context)
 static int lpc17_busfault(int irq, FAR void *context)
 {
   (void)up_irq_save();
-  dbg("PANIC!!! Bus fault recived\n");
+  err("PANIC!!! Bus fault recived\n");
   PANIC();
   return 0;
 }
@@ -166,7 +166,7 @@ static int lpc17_busfault(int irq, FAR void *context)
 static int lpc17_usagefault(int irq, FAR void *context)
 {
   (void)up_irq_save();
-  dbg("PANIC!!! Usage fault received\n");
+  err("PANIC!!! Usage fault received\n");
   PANIC();
   return 0;
 }
@@ -174,15 +174,15 @@ static int lpc17_usagefault(int irq, FAR void *context)
 static int lpc17_pendsv(int irq, FAR void *context)
 {
   (void)up_irq_save();
-  dbg("PANIC!!! PendSV received\n");
+  err("PANIC!!! PendSV received\n");
   PANIC();
   return 0;
 }
 
-static int lpc17_dbgmonitor(int irq, FAR void *context)
+static int lpc17_errmonitor(int irq, FAR void *context)
 {
   (void)up_irq_save();
-  dbg("PANIC!!! Debug Monitor received\n");
+  err("PANIC!!! Debug Monitor received\n");
   PANIC();
   return 0;
 }
@@ -190,7 +190,7 @@ static int lpc17_dbgmonitor(int irq, FAR void *context)
 static int lpc17_reserved(int irq, FAR void *context)
 {
   (void)up_irq_save();
-  dbg("PANIC!!! Reserved interrupt\n");
+  err("PANIC!!! Reserved interrupt\n");
   PANIC();
   return 0;
 }
@@ -392,7 +392,7 @@ void up_irqinitialize(void)
 
   /* Attach all other processor exceptions (except reset and sys tick) */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   irq_attach(LPC17_IRQ_NMI, lpc17_nmi);
 #ifndef CONFIG_ARM_MPU
   irq_attach(LPC17_IRQ_MEMFAULT, up_memfault);
@@ -400,7 +400,7 @@ void up_irqinitialize(void)
   irq_attach(LPC17_IRQ_BUSFAULT, lpc17_busfault);
   irq_attach(LPC17_IRQ_USAGEFAULT, lpc17_usagefault);
   irq_attach(LPC17_IRQ_PENDSV, lpc17_pendsv);
-  irq_attach(LPC17_IRQ_DBGMONITOR, lpc17_dbgmonitor);
+  irq_attach(LPC17_IRQ_DBGMONITOR, lpc17_errmonitor);
   irq_attach(LPC17_IRQ_RESERVED, lpc17_reserved);
 #endif
 

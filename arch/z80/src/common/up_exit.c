@@ -77,7 +77,7 @@
  *
  ****************************************************************************/
 
-#if defined(CONFIG_DUMP_ON_EXIT) && defined(CONFIG_DEBUG)
+#if defined(CONFIG_DUMP_ON_EXIT) && defined(CONFIG_DEBUG_FEATURES)
 static void _up_dumponexit(FAR struct tcb_s *tcb, FAR void *arg)
 {
 #if CONFIG_NFILE_DESCRIPTORS > 0
@@ -88,8 +88,8 @@ static void _up_dumponexit(FAR struct tcb_s *tcb, FAR void *arg)
   int i;
 #endif
 
-  lldbg("  TCB=%p name=%s\n", tcb, tcb->argv[0]);
-  lldbg("    priority=%d state=%d\n", tcb->sched_priority, tcb->task_state);
+  llinfo("  TCB=%p name=%s\n", tcb, tcb->argv[0]);
+  llinfo("    priority=%d state=%d\n", tcb->sched_priority, tcb->task_state);
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
   filelist = tcb->group->tg_filelist;
@@ -98,8 +98,8 @@ static void _up_dumponexit(FAR struct tcb_s *tcb, FAR void *arg)
       struct inode *inode = filelist->fl_files[i].f_inode;
       if (inode)
         {
-          lldbg("      fd=%d refcount=%d\n",
-                i, inode->i_crefs);
+          llinfo("      fd=%d refcount=%d\n",
+                 i, inode->i_crefs);
         }
     }
 #endif
@@ -112,11 +112,11 @@ static void _up_dumponexit(FAR struct tcb_s *tcb, FAR void *arg)
       if (filep->fs_fd >= 0)
         {
 #if CONFIG_STDIO_BUFFER_SIZE > 0
-          lldbg("      fd=%d nbytes=%d\n",
-                filep->fs_fd,
-                filep->fs_bufpos - filep->fs_bufstart);
+          llinfo("      fd=%d nbytes=%d\n",
+                 filep->fs_fd,
+                 filep->fs_bufpos - filep->fs_bufstart);
 #else
-          lldbg("      fd=%d\n", filep->fs_fd);
+          llinfo("      fd=%d\n", filep->fs_fd);
 #endif
         }
     }
@@ -149,10 +149,10 @@ void _exit(int status)
 
   (void)up_irq_save();
 
-  slldbg("TCB=%p exiting\n", tcb);
+  sllinfo("TCB=%p exiting\n", tcb);
 
-#if defined(CONFIG_DUMP_ON_EXIT) && defined(CONFIG_DEBUG)
-  lldbg("Other tasks:\n");
+#if defined(CONFIG_DUMP_ON_EXIT) && defined(CONFIG_DEBUG_FEATURES)
+  llinfo("Other tasks:\n");
   sched_foreach(_up_dumponexit, NULL);
 #endif
 
@@ -165,7 +165,7 @@ void _exit(int status)
    */
 
   tcb = this_task();
-  slldbg("New Active Task TCB=%p\n", tcb);
+  sllinfo("New Active Task TCB=%p\n", tcb);
 
 #ifdef CONFIG_ARCH_ADDRENV
   /* Make sure that the address environment for the previously running

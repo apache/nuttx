@@ -78,7 +78,7 @@ void pthread_exit(FAR void *exit_value)
   FAR struct tcb_s *tcb = this_task();
   int status;
 
-  sdbg("exit_value=%p\n", exit_value);
+  sinfo("exit_value=%p\n", exit_value);
 
   /* Block any signal actions that would awaken us while were
    * are performing the JOIN handshake.

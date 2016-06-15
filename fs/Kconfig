@@ -21,7 +21,7 @@ config FS_AUTOMOUNTER
 config FS_AUTOMOUNTER_DEBUG
 	bool "Auto-mounter debug"
 	default n
-	depends on FS_AUTOMOUNTER && DEBUG
+	depends on FS_AUTOMOUNTER && DEBUG_FEATURES
 	---help---
 		Normally, the auto-mounter will generate debug output when sub-system
 		level file system debug is enabled.  This option will select debug

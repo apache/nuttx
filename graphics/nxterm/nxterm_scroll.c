@@ -118,7 +118,7 @@ static inline void nxterm_movedisplay(FAR struct nxterm_state_s *priv,
       ret = priv->ops->fill(priv, &rect, priv->wndo.wcolor);
       if (ret < 0)
         {
-          gdbg("Fill failed: %d\n", errno);
+          gerr("ERROR: Fill failed: %d\n", errno);
         }
 
       /* Fill each character that might lie within in the bounding box */
@@ -141,7 +141,7 @@ static inline void nxterm_movedisplay(FAR struct nxterm_state_s *priv,
   ret = priv->ops->fill(priv, &rect, priv->wndo.wcolor);
   if (ret < 0)
     {
-      gdbg("Fill failed: %d\n", errno);
+      gerr("ERROR: Fill failed: %d\n", errno);
     }
 }
 #else
@@ -177,7 +177,7 @@ static inline void nxterm_movedisplay(FAR struct nxterm_state_s *priv,
   ret = priv->ops->move(priv, &rect, &offset);
   if (ret < 0)
     {
-      gdbg("Move failed: %d\n", errno);
+      gerr("ERROR: Move failed: %d\n", errno);
     }
 
   /* Finally, clear the vacated bottom part of the display */
@@ -187,7 +187,7 @@ static inline void nxterm_movedisplay(FAR struct nxterm_state_s *priv,
   ret = priv->ops->fill(priv, &rect, priv->wndo.wcolor);
   if (ret < 0)
     {
-      gdbg("Fill failed: %d\n", errno);
+      gerr("ERROR: Fill failed: %d\n", errno);
     }
 }
 #endif

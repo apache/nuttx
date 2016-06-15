@@ -69,14 +69,6 @@
 #endif
 
 /****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -162,9 +154,9 @@ void sercom_slowclk_configure(int sercom, int gclkgen)
 #ifdef CONFIG_SAMDL_SERCOM5
   static bool configured5 = false;
 #endif
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_ASSERTIONS
 #ifdef HAVE_SERCOM0_4
-  static uint8_t slowgen  = 0xff;
+  static uint8_t slowgen04  = 0xff;
 #endif
 #ifdef CONFIG_SAMDL_SERCOM5
   static uint8_t slowgen5 = 0xff;
@@ -205,19 +197,19 @@ void sercom_slowclk_configure(int sercom, int gclkgen)
            */
 
           configured = true;
-#ifdef CONFIG_DEBUG
-          slowgen    = (uint8_t)gclkgen;
+#ifdef CONFIG_DEBUG_ASSERTIONS
+          slowgen04  = (uint8_t)gclkgen;
 #endif
         }
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_ASSERTIONS
       /* Already configured.  This is okay provided that the same GCLK
        * generator is being used.  Otherwise, there is a problem.
        */
 
       else
         {
-          DEBUGASSERT((int)slowgen == gclkgen);
+          DEBUGASSERT((int)slowgen04 == gclkgen);
         }
 #endif
       break;
@@ -236,12 +228,12 @@ void sercom_slowclk_configure(int sercom, int gclkgen)
            */
 
           configured5 = true;
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_ASSERTIONS
           slowgen5    = (uint8_t)gclkgen;
 #endif
         }
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_ASSERTIONS
       /* Already configured.  This is okay provided that the same GCLK
        * generator is being used.  Otherwise, there is a problem.
        */

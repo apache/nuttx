@@ -66,18 +66,18 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Enables debug output from this file (needs CONFIG_DEBUG with
- * CONFIG_DEBUG_VERBOSE too)
- */
+/* CONFIG_DEBUG_SPI enables debug output from this file */
 
-#undef SSI_DEBUG  /* Define to enable debug */
-
-#ifdef SSI_DEBUG
-#  define ssidbg  lldbg
-#  define ssivdbg llvdbg
+#ifdef CONFIG_DEBUG_SPI
+#  define ssierr  llerr
+#  define ssiwarn llwarn
+#  define ssiinfo llinfo
+#  define ssi_dumpgpio(m) tiva_dumpgpio(SDCCS_GPIO, m)
 #else
-#  define ssidbg(x...)
-#  define ssivdbg(x...)
+#  define ssierr(x...)
+#  define ssiwarn(x...)
+#  define ssiinfo(x...)
+#  define ssi_dumpgpio(m)
 #endif
 
 /* How many SSI modules does this chip support? The LM3S6918 supports 2 SSI
@@ -462,7 +462,7 @@ static uint32_t ssi_disable(struct tiva_ssidev_s *priv)
   retval = ssi_getreg(priv, TIVA_SSI_CR1_OFFSET);
   regval = (retval & ~SSI_CR1_SSE);
   ssi_putreg(priv, TIVA_SSI_CR1_OFFSET, regval);
-  ssivdbg("CR1: %08x\n", regval);
+  ssiinfo("CR1: %08x\n", regval);
   return retval;
 }
 
@@ -489,7 +489,7 @@ static void ssi_enable(struct tiva_ssidev_s *priv, uint32_t enable)
   regval &= ~SSI_CR1_SSE;
   regval  |= (enable & SSI_CR1_SSE);
   ssi_putreg(priv, TIVA_SSI_CR1_OFFSET, regval);
-  ssivdbg("CR1: %08x\n", regval);
+  ssiinfo("CR1: %08x\n", regval);
 }
 
 /****************************************************************************
@@ -538,14 +538,14 @@ static void ssi_semtake(sem_t *sem)
 
 static void ssi_txnull(struct tiva_ssidev_s *priv)
 {
-  ssivdbg("TX: ->0xffff\n");
+  ssiinfo("TX: ->0xffff\n");
   ssi_putreg(priv, TIVA_SSI_DR_OFFSET, 0xffff);
 }
 
 static void ssi_txuint16(struct tiva_ssidev_s *priv)
 {
   uint16_t *ptr    = (uint16_t *)priv->txbuffer;
-  ssivdbg("TX: %p->%04x\n", ptr, *ptr);
+  ssiinfo("TX: %p->%04x\n", ptr, *ptr);
   ssi_putreg(priv, TIVA_SSI_DR_OFFSET, (uint32_t)(*ptr++));
   priv->txbuffer = (void *)ptr;
 }
@@ -553,7 +553,7 @@ static void ssi_txuint16(struct tiva_ssidev_s *priv)
 static void ssi_txuint8(struct tiva_ssidev_s *priv)
 {
   uint8_t *ptr   = (uint8_t *)priv->txbuffer;
-  ssivdbg("TX: %p->%02x\n", ptr, *ptr);
+  ssiinfo("TX: %p->%02x\n", ptr, *ptr);
   ssi_putreg(priv, TIVA_SSI_DR_OFFSET, (uint32_t)(*ptr++));
   priv->txbuffer = (void *)ptr;
 }
@@ -577,9 +577,9 @@ static void ssi_txuint8(struct tiva_ssidev_s *priv)
 
 static void ssi_rxnull(struct tiva_ssidev_s *priv)
 {
-#if defined(SSI_DEBUG) && defined(CONFIG_DEBUG_VERBOSE)
+#if defined(CONFIG_DEBUG_SPI) && defined(CONFIG_DEBUG_INFO)
   uint32_t regval  = ssi_getreg(priv, TIVA_SSI_DR_OFFSET);
-  ssivdbg("RX: discard %04x\n", regval);
+  ssiinfo("RX: discard %04x\n", regval);
 #else
   (void)ssi_getreg(priv, TIVA_SSI_DR_OFFSET);
 #endif
@@ -589,7 +589,7 @@ static void ssi_rxuint16(struct tiva_ssidev_s *priv)
 {
   uint16_t *ptr    = (uint16_t *)priv->rxbuffer;
   *ptr           = (uint16_t)ssi_getreg(priv, TIVA_SSI_DR_OFFSET);
-  ssivdbg("RX: %p<-%04x\n", ptr, *ptr);
+  ssiinfo("RX: %p<-%04x\n", ptr, *ptr);
   priv->rxbuffer = (void *)(++ptr);
 }
 
@@ -597,7 +597,7 @@ static void ssi_rxuint8(struct tiva_ssidev_s *priv)
 {
   uint8_t *ptr   = (uint8_t *)priv->rxbuffer;
   *ptr           = (uint8_t)ssi_getreg(priv, TIVA_SSI_DR_OFFSET);
-  ssivdbg("RX: %p<-%02x\n", ptr, *ptr);
+  ssiinfo("RX: %p<-%02x\n", ptr, *ptr);
   priv->rxbuffer = (void *)(++ptr);
 }
 
@@ -719,7 +719,7 @@ static int ssi_performtx(struct tiva_ssidev_s *priv)
            * when the Tx FIFO is 1/2 full or less.
            */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
           regval |= (SSI_IM_TX | SSI_RIS_ROR);
 #else
           regval |= SSI_IM_TX;
@@ -792,7 +792,7 @@ static inline void ssi_performrx(struct tiva_ssidev_s *priv)
        * interrupt, probably an Rx timeout).
        */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
       regval |= (SSI_IM_RX | SSI_IM_RT | SSI_IM_ROR);
 #else
       regval |= (SSI_IM_RX | SSI_IM_RT);
@@ -841,7 +841,7 @@ static int ssi_transfer(struct tiva_ssidev_s *priv, const void *txbuffer,
 #endif
   int ntxd;
 
-  ssidbg("txbuffer: %p rxbuffer: %p nwords: %d\n", txbuffer, rxbuffer, nwords);
+  ssierr("txbuffer: %p rxbuffer: %p nwords: %d\n", txbuffer, rxbuffer, nwords);
 
   /* Set up to perform the transfer */
 
@@ -882,7 +882,7 @@ static int ssi_transfer(struct tiva_ssidev_s *priv, const void *txbuffer,
 
 #ifndef CONFIG_SSI_POLLWAIT
   flags = enter_critical_section();
-  ssivdbg("ntxwords: %d nrxwords: %d nwords: %d SR: %08x\n",
+  ssiinfo("ntxwords: %d nrxwords: %d nwords: %d SR: %08x\n",
           priv->ntxwords, priv->nrxwords, priv->nwords,
           ssi_getreg(priv, TIVA_SSI_SR_OFFSET));
 
@@ -896,7 +896,7 @@ static int ssi_transfer(struct tiva_ssidev_s *priv, const void *txbuffer,
 
   ssi_performrx(priv);
 
-  ssivdbg("ntxwords: %d nrxwords: %d nwords: %d SR: %08x IM: %08x\n",
+  ssiinfo("ntxwords: %d nrxwords: %d nwords: %d SR: %08x IM: %08x\n",
           priv->ntxwords, priv->nrxwords, priv->nwords,
           ssi_getreg(priv, TIVA_SSI_SR_OFFSET),
           ssi_getreg(priv, TIVA_SSI_IM_OFFSET));
@@ -906,14 +906,14 @@ static int ssi_transfer(struct tiva_ssidev_s *priv, const void *txbuffer,
    * with the transfer, so it should be safe with no timeout.
    */
 
-  ssivdbg("Waiting for transfer complete\n");
+  ssiinfo("Waiting for transfer complete\n");
   leave_critical_section(flags);
   do
     {
       ssi_semtake(&priv->xfrsem);
     }
   while (priv->nrxwords < priv->nwords);
-  ssidbg("Transfer complete\n");
+  ssierr("Transfer complete\n");
 
 #else
   /* Perform the transfer using polling logic.  This will totally
@@ -1022,14 +1022,14 @@ static int ssi_interrupt(int irq, void *context)
 
   /* Check for Rx FIFO overruns */
 
-#ifdef SSI_DEBUG
+#ifdef CONFIG_DEBUG_SPI
   if ((regval & SSI_RIS_ROR) != 0)
     {
-      ssidbg("Rx FIFO Overrun!\n");
+      ssierr("Rx FIFO Overrun!\n");
     }
 #endif
 
-  ssivdbg("ntxwords: %d nrxwords: %d nwords: %d SR: %08x\n",
+  ssiinfo("ntxwords: %d nrxwords: %d nwords: %d SR: %08x\n",
           priv->ntxwords, priv->nrxwords, priv->nwords,
           ssi_getreg(priv, TIVA_SSI_SR_OFFSET));
 
@@ -1041,7 +1041,7 @@ static int ssi_interrupt(int irq, void *context)
 
   ssi_performrx(priv);
 
-  ssivdbg("ntxwords: %d nrxwords: %d nwords: %d SR: %08x IM: %08x\n",
+  ssiinfo("ntxwords: %d nrxwords: %d nwords: %d SR: %08x IM: %08x\n",
           priv->ntxwords, priv->nrxwords, priv->nwords,
           ssi_getreg(priv, TIVA_SSI_SR_OFFSET),
           ssi_getreg(priv, TIVA_SSI_IM_OFFSET));
@@ -1056,7 +1056,7 @@ static int ssi_interrupt(int irq, void *context)
 
       /* Wake up the waiting thread */
 
-      ssidbg("Transfer complete\n");
+      ssierr("Transfer complete\n");
       ssi_semgive(&priv->xfrsem);
     }
 
@@ -1137,7 +1137,7 @@ static uint32_t ssi_setfrequencyinternal(struct tiva_ssidev_s *priv,
   uint32_t scr;
   uint32_t actual;
 
-  ssidbg("frequency: %d\n", frequency);
+  ssierr("frequency: %d\n", frequency);
   DEBUGASSERT(frequency);
 
   /* Has the frequency changed? */
@@ -1207,7 +1207,7 @@ static uint32_t ssi_setfrequencyinternal(struct tiva_ssidev_s *priv,
       regval &= ~SSI_CR0_SCR_MASK;
       regval |= (scr << SSI_CR0_SCR_SHIFT);
       ssi_putreg(priv, TIVA_SSI_CR0_OFFSET, regval);
-      ssivdbg("CR0: %08x CPSR: %08x\n", regval, cpsdvsr);
+      ssiinfo("CR0: %08x CPSR: %08x\n", regval, cpsdvsr);
 
       /* Calcluate the actual frequency */
 
@@ -1261,7 +1261,7 @@ static void ssi_setmodeinternal(struct tiva_ssidev_s *priv, enum spi_mode_e mode
   uint32_t modebits;
   uint32_t regval;
 
-  ssidbg("mode: %d\n", mode);
+  ssierr("mode: %d\n", mode);
   DEBUGASSERT(priv);
 
   /* Has the number of bits per word changed? */
@@ -1298,7 +1298,7 @@ static void ssi_setmodeinternal(struct tiva_ssidev_s *priv, enum spi_mode_e mode
       regval &= ~(SSI_CR0_FRF_MASK | SSI_CR0_SPH | SSI_CR0_SPO);
       regval |= modebits;
       ssi_putreg(priv, TIVA_SSI_CR0_OFFSET, regval);
-      ssivdbg("CR0: %08x\n", regval);
+      ssiinfo("CR0: %08x\n", regval);
 
       /* Save the mode so that subsequent re-configuratins will be faster */
 
@@ -1340,7 +1340,7 @@ static void ssi_setbitsinternal(struct tiva_ssidev_s *priv, int nbits)
 {
   uint32_t regval;
 
-  ssidbg("nbits: %d\n", nbits);
+  ssierr("nbits: %d\n", nbits);
   DEBUGASSERT(priv);
   if (nbits != priv->nbits && nbits >= 4 && nbits <= 16)
     {
@@ -1348,7 +1348,7 @@ static void ssi_setbitsinternal(struct tiva_ssidev_s *priv, int nbits)
       regval &= ~SSI_CR0_DSS_MASK;
       regval |= ((nbits - 1) << SSI_CR0_DSS_SHIFT);
       ssi_putreg(priv, TIVA_SSI_CR0_OFFSET, regval);
-      ssivdbg("CR0: %08x\n", regval);
+      ssiinfo("CR0: %08x\n", regval);
 
       priv->nbits = nbits;
     }
@@ -1507,7 +1507,7 @@ FAR struct spi_dev_s *tiva_ssibus_initialize(int port)
   struct tiva_ssidev_s *priv;
   irqstate_t flags;
 
-  ssidbg("port: %d\n", port);
+  ssierr("port: %d\n", port);
 
   /* Set up for the selected port */
 

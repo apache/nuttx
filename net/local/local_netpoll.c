@@ -152,7 +152,7 @@ void local_accept_pollnotify(FAR struct local_conn_s *conn,
           fds->revents |= (fds->events & eventset);
           if (fds->revents != 0)
             {
-              ndbg("Report events: %02x\n", fds->revents);
+              ninfo("Report events: %02x\n", fds->revents);
               sem_post(fds->sem);
             }
         }

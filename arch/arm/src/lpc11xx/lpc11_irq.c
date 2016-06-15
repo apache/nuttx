@@ -93,26 +93,26 @@ static void lpc11_dumpnvic(const char *msg, int irq)
 
   flags = enter_critical_section();
 
-  lldbg("NVIC (%s, irq=%d):\n", msg, irq);
-  lldbg("  ISER:       %08x ICER:   %08x\n",
+  llerr("NVIC (%s, irq=%d):\n", msg, irq);
+  llerr("  ISER:       %08x ICER:   %08x\n",
         getreg32(ARMV6M_NVIC_ISER), getreg32(ARMV6M_NVIC_ICER));
-  lldbg("  ISPR:       %08x ICPR:   %08x\n",
+  llerr("  ISPR:       %08x ICPR:   %08x\n",
         getreg32(ARMV6M_NVIC_ISPR), getreg32(ARMV6M_NVIC_ICPR));
-  lldbg("  IRQ PRIO:   %08x %08x %08x %08x\n",
+  llerr("  IRQ PRIO:   %08x %08x %08x %08x\n",
         getreg32(ARMV6M_NVIC_IPR0), getreg32(ARMV6M_NVIC_IPR1),
         getreg32(ARMV6M_NVIC_IPR2), getreg32(ARMV6M_NVIC_IPR3));
-  lldbg("              %08x %08x %08x %08x\n",
+  llerr("              %08x %08x %08x %08x\n",
         getreg32(ARMV6M_NVIC_IPR4), getreg32(ARMV6M_NVIC_IPR5),
         getreg32(ARMV6M_NVIC_IPR6), getreg32(ARMV6M_NVIC_IPR7));
 
-  lldbg("SYSCON:\n");
-  lldbg("  CPUID:      %08x\n",
+  llerr("SYSCON:\n");
+  llerr("  CPUID:      %08x\n",
         getreg32(ARMV6M_SYSCON_CPUID));
-  lldbg("  ICSR:       %08x AIRCR:  %08x\n",
+  llerr("  ICSR:       %08x AIRCR:  %08x\n",
         getreg32(ARMV6M_SYSCON_ICSR), getreg32(ARMV6M_SYSCON_AIRCR));
-  lldbg("  SCR:        %08x CCR:    %08x\n",
+  llerr("  SCR:        %08x CCR:    %08x\n",
         getreg32(ARMV6M_SYSCON_SCR), getreg32(ARMV6M_SYSCON_CCR));
-  lldbg("  SHPR2:      %08x SHPR3:  %08x\n",
+  llerr("  SHPR2:      %08x SHPR3:  %08x\n",
         getreg32(ARMV6M_SYSCON_SHPR2), getreg32(ARMV6M_SYSCON_SHPR3));
 
   leave_critical_section(flags);
@@ -124,7 +124,7 @@ static void lpc11_dumpnvic(const char *msg, int irq)
 
 /****************************************************************************
  * Name: lpc11_nmi, lpc11_busfault, lpc11_usagefault, lpc11_pendsv,
- *       lpc11_dbgmonitor, lpc11_pendsv, lpc11_reserved
+ *       lpc11_errmonitor, lpc11_pendsv, lpc11_reserved
  *
  * Description:
  *   Handlers for various execptions.  None are handled and all are fatal
@@ -133,11 +133,11 @@ static void lpc11_dumpnvic(const char *msg, int irq)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
 static int lpc11_nmi(int irq, FAR void *context)
 {
   (void)up_irq_save();
-  dbg("PANIC!!! NMI received\n");
+  err("PANIC!!! NMI received\n");
   PANIC();
   return 0;
 }
@@ -145,7 +145,7 @@ static int lpc11_nmi(int irq, FAR void *context)
 static int lpc11_pendsv(int irq, FAR void *context)
 {
   (void)up_irq_save();
-  dbg("PANIC!!! PendSV received\n");
+  err("PANIC!!! PendSV received\n");
   PANIC();
   return 0;
 }
@@ -153,7 +153,7 @@ static int lpc11_pendsv(int irq, FAR void *context)
 static int lpc11_reserved(int irq, FAR void *context)
 {
   (void)up_irq_save();
-  dbg("PANIC!!! Reserved interrupt\n");
+  err("PANIC!!! Reserved interrupt\n");
   PANIC();
   return 0;
 }
@@ -232,7 +232,7 @@ void up_irqinitialize(void)
 
   /* Attach all other processor exceptions (except reset and sys tick) */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   irq_attach(LPC11_IRQ_NMI, lpc11_nmi);
   irq_attach(LPC11_IRQ_PENDSV, lpc11_pendsv);
   irq_attach(LPC11_IRQ_RESERVED, lpc11_reserved);

@@ -52,7 +52,7 @@
 #  undef CONFIG_SAMA5_PIO_IRQ
 #endif
 
-#ifndef CONFIG_DEBUG
+#ifndef CONFIG_DEBUG_FEATURES
 #  undef CONFIG_DEBUG_GPIO
 #endif
 

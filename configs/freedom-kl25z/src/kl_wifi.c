@@ -204,7 +204,7 @@ static void wl_enable_irq(FAR struct cc3000_config_s *state, bool enable)
 
   /* Attach and enable, or detach and disable */
 
-  ivdbg("enable:%d\n", enable);
+  iinfo("enable:%d\n", enable);
   if (enable)
     {
       (void)kl_gpioirqattach(GPIO_WIFI_INT, priv->handler);
@@ -219,7 +219,7 @@ static void wl_enable_irq(FAR struct cc3000_config_s *state, bool enable)
 
 static void wl_enable_power(FAR struct cc3000_config_s *state, bool enable)
 {
-  ivdbg("enable:%d\n", enable);
+  iinfo("enable:%d\n", enable);
 
   /* Active high enable */
 
@@ -228,7 +228,7 @@ static void wl_enable_power(FAR struct cc3000_config_s *state, bool enable)
 
 static void wl_select(FAR struct cc3000_config_s *state, bool enable)
 {
-  ivdbg("enable:%d\n", enable);
+  iinfo("enable:%d\n", enable);
 
   /* Active high enable */
 
@@ -289,7 +289,7 @@ int wireless_archinitialize(size_t max_rx_size)
 
   /* Init SPI bus */
 
-  idbg("minor %d\n", minor);
+  iinfo("minor %d\n", minor);
   DEBUGASSERT(CONFIG_CC3000_DEVMINOR == 0);
 
 #ifdef CONFIG_CC3000_PROBES
@@ -304,7 +304,7 @@ int wireless_archinitialize(size_t max_rx_size)
   spi = kl_spibus_initialize(CONFIG_CC3000_SPIDEV);
   if (!spi)
     {
-      idbg("Failed to initialize SPI bus %d\n", CONFIG_CC3000_SPIDEV);
+      ierr("ERROR: Failed to initialize SPI bus %d\n", CONFIG_CC3000_SPIDEV);
       return -ENODEV;
     }
 
@@ -314,7 +314,7 @@ int wireless_archinitialize(size_t max_rx_size)
   int ret = cc3000_register(spi, &g_cc3000_info.dev, CONFIG_CC3000_DEVMINOR);
   if (ret < 0)
     {
-      idbg("Failed to initialize SPI bus %d\n", CONFIG_CC3000_SPIDEV);
+      ierr("ERROR: Failed to initialize SPI bus %d\n", CONFIG_CC3000_SPIDEV);
       return -ENODEV;
     }
 

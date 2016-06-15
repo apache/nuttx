@@ -76,13 +76,13 @@
  * also be enabled.
  */
 
-#ifndef CONFIG_DEBUG
-#  undef CONFIG_DEBUG_VERBOSE
+#ifndef CONFIG_DEBUG_FEATURES
+#  undef CONFIG_DEBUG_INFO
 #  undef CONFIG_DEBUG_GRAPHICS
 #  undef CONFIG_DEBUG_LCD
 #endif
 
-#ifndef CONFIG_DEBUG_VERBOSE
+#ifndef CONFIG_DEBUG_INFO
 #  undef CONFIG_DEBUG_LCD
 #endif
 
@@ -110,11 +110,11 @@
 /* Debug ******************************************************************************/
 
 #ifdef CONFIG_DEBUG_LCD
-#  define lcddbg         dbg
-#  define lcdvdbg        vdbg
+#  define lcderr         err
+#  define lcdinfo        info
 #else
-#  define lcddbg(x...)
-#  define lcdvdbg(x...)
+#  define lcderr(x...)
+#  define lcdinfo(x...)
 #endif
 
 /**************************************************************************************
@@ -355,7 +355,7 @@ int board_lcd_initialize(void)
 
   if (!g_ssd1289drvr)
     {
-      lcdvdbg("Initializing\n");
+      lcdinfo("Initializing\n");
 
       /* Configure GPIO pins and configure the FSMC to support the LCD */
 
@@ -373,7 +373,7 @@ int board_lcd_initialize(void)
       g_ssd1289drvr = ssd1289_lcdinitialize(&g_ssd1289);
       if (!g_ssd1289drvr)
         {
-          lcddbg("ERROR: ssd1289_lcdinitialize failed\n");
+          lcderr("ERROR: ssd1289_lcdinitialize failed\n");
           return -ENODEV;
         }
     }

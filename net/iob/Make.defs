@@ -43,7 +43,7 @@ NET_CSRCS += iob_free_chain.c iob_free_qentry.c iob_free_queue.c
 NET_CSRCS += iob_initialize.c iob_pack.c iob_peek_queue.c iob_remove_queue.c
 NET_CSRCS += iob_trimhead.c iob_trimhead_queue.c iob_trimtail.c
 
-ifeq ($(CONFIG_DEBUG),y)
+ifeq ($(CONFIG_DEBUG_FEATURES),y)
 NET_CSRCS += iob_dump.c
 endif
 

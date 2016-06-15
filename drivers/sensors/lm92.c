@@ -198,7 +198,7 @@ static int lm92_readb16(FAR struct lm92_dev_s *priv, uint8_t regaddr,
   ret = lm92_i2c_write(priv, &regaddr, 1);
   if (ret < 0)
     {
-      sndbg("i2c_write failed: %d\n", ret);
+      snerr("ERROR: i2c_write failed: %d\n", ret);
       return ret;
     }
 
@@ -207,7 +207,7 @@ static int lm92_readb16(FAR struct lm92_dev_s *priv, uint8_t regaddr,
   ret = lm92_i2c_read(priv, buffer, 2);
   if (ret < 0)
     {
-      sndbg("i2c_read failed: %d\n", ret);
+      snerr("ERROR: i2c_read failed: %d\n", ret);
       return ret;
     }
 
@@ -218,7 +218,7 @@ static int lm92_readb16(FAR struct lm92_dev_s *priv, uint8_t regaddr,
   *regvalue = (b16_t)((uint32_t)(buffer[0] & (1 << 7)) << 24 |
                       (uint32_t)(buffer[0] & ~(1 << 7)) << 17 |
                       (uint32_t)(buffer[1] & ~7) << 9);
-  sndbg("addr: %02x value: %08x ret: %d\n", regaddr, *regvalue, ret);
+  sninfo("addr: %02x value: %08x ret: %d\n", regaddr, *regvalue, ret);
   return OK;
 }
 
@@ -236,7 +236,7 @@ static int lm92_writeb16(FAR struct lm92_dev_s *priv, uint8_t regaddr,
 {
   uint8_t buffer[3];
 
-  sndbg("addr: %02x value: %08x\n", regaddr, regval);
+  sninfo("addr: %02x value: %08x\n", regaddr, regval);
 
   /* Set up a 3-byte message to send */
 
@@ -268,11 +268,11 @@ static int lm92_readtemp(FAR struct lm92_dev_s *priv, FAR b16_t *temp)
   ret = lm92_readb16(priv, LM92_TEMP_REG, &temp16);
   if (ret < 0)
     {
-      sndbg("lm92_readb16 failed: %d\n", ret);
+      snerr("ERROR: lm92_readb16 failed: %d\n", ret);
       return ret;
     }
 
-  sndbg("Centigrade: %08x\n", temp16);
+  sninfo("Centigrade: %08x\n", temp16);
 
   /* Was Fahrenheit requested? */
 
@@ -281,7 +281,7 @@ static int lm92_readtemp(FAR struct lm92_dev_s *priv, FAR b16_t *temp)
       /* Centigrade to Fahrenheit conversion:  F = 9*C/5 + 32 */
 
       temp16 = b16mulb16(temp16, B16_9DIV5) + B16_32;
-      sndbg("Fahrenheit: %08x\n", temp16);
+      sninfo("Fahrenheit: %08x\n", temp16);
     }
 
   *temp = temp16;
@@ -308,14 +308,14 @@ static int lm92_readconf(FAR struct lm92_dev_s *priv, FAR uint8_t *conf)
   ret = lm92_i2c_write(priv, &buffer, 1);
   if (ret < 0)
     {
-      sndbg("i2c_write failed: %d\n", ret);
+      snerr("ERROR: i2c_write failed: %d\n", ret);
       return ret;
     }
 
   /* Restart and read 8 bits from the register */
 
   ret = lm92_i2c_read(priv, conf, 1);
-  sndbg("conf: %02x ret: %d\n", *conf, ret);
+  sninfo("conf: %02x ret: %d\n", *conf, ret);
   return ret;
 }
 
@@ -331,7 +331,7 @@ static int lm92_writeconf(FAR struct lm92_dev_s *priv, uint8_t conf)
 {
   uint8_t buffer[2];
 
-  sndbg("conf: %02x\n", conf);
+  sninfo("conf: %02x\n", conf);
 
   /* Set up a 2-byte message to send */
 
@@ -364,7 +364,7 @@ static int lm92_readid(FAR struct lm92_dev_s *priv, FAR uint16_t *id)
   ret = lm92_i2c_write(priv, &regaddr, 1);
   if (ret < 0)
     {
-      sndbg("i2c_write failed: %d\n", ret);
+      snerr("ERROR: i2c_write failed: %d\n", ret);
       return ret;
     }
 
@@ -373,12 +373,12 @@ static int lm92_readid(FAR struct lm92_dev_s *priv, FAR uint16_t *id)
   ret = lm92_i2c_read(priv, buffer, 2);
   if (ret < 0)
     {
-      sndbg("i2c_read failed: %d\n", ret);
+      snerr("ERROR: i2c_read failed: %d\n", ret);
       return ret;
     }
 
   *id = (uint16_t)buffer[0] << 8 | (uint16_t)buffer[1];
-  sndbg("id: %04x ret: %d\n", *id, ret);
+  sninfo("id: %04x ret: %d\n", *id, ret);
   return OK;
 }
 
@@ -427,7 +427,7 @@ static ssize_t lm92_read(FAR struct file *filep, FAR char *buffer,
   nsamples = buflen / sizeof(b16_t);
   ptr      = (FAR b16_t *)buffer;
 
-  sndbg("buflen: %d nsamples: %d\n", buflen, nsamples);
+  sninfo("buflen: %d nsamples: %d\n", buflen, nsamples);
 
   /* Get the requested number of samples */
 
@@ -440,7 +440,7 @@ static ssize_t lm92_read(FAR struct file *filep, FAR char *buffer,
       ret = lm92_readtemp(priv, &temp);
       if (ret < 0)
         {
-          sndbg("lm92_readtemp failed: %d\n", ret);
+          snerr("ERROR: lm92_readtemp failed: %d\n", ret);
           return (ssize_t)ret;
         }
 
@@ -481,7 +481,7 @@ static int lm92_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           FAR uint8_t *ptr = (FAR uint8_t *)((uintptr_t)arg);
           DEBUGASSERT(ptr != NULL);
           ret = lm92_readconf(priv, ptr);
-          sndbg("conf: %02x ret: %d\n", *ptr, ret);
+          sninfo("conf: %02x ret: %d\n", *ptr, ret);
         }
         break;
 
@@ -489,7 +489,7 @@ static int lm92_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case SNIOC_WRITECONF:
         ret = lm92_writeconf(priv, (uint8_t)arg);
-        sndbg("conf: %02x ret: %d\n", *(uint8_t *)arg, ret);
+        sninfo("conf: %02x ret: %d\n", *(uint8_t *)arg, ret);
         break;
 
       /* Shutdown the LM92.  Arg:  None */
@@ -503,7 +503,7 @@ static int lm92_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
               ret = lm92_writeconf(priv, conf | LM92_CONF_SHUTDOWN);
             }
 
-          sndbg("conf: %02x ret: %d\n", conf | LM92_CONF_SHUTDOWN, ret);
+          sninfo("conf: %02x ret: %d\n", conf | LM92_CONF_SHUTDOWN, ret);
         }
         break;
 
@@ -518,7 +518,7 @@ static int lm92_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
               ret = lm92_writeconf(priv, conf & ~LM92_CONF_SHUTDOWN);
             }
 
-          sndbg("conf: %02x ret: %d\n", conf & ~LM92_CONF_SHUTDOWN, ret);
+          sninfo("conf: %02x ret: %d\n", conf & ~LM92_CONF_SHUTDOWN, ret);
         }
         break;
 
@@ -526,14 +526,14 @@ static int lm92_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case SNIOC_FAHRENHEIT:
         priv->fahrenheit = true;
-        sndbg("Fahrenheit\n");
+        sninfo("Fahrenheit\n");
         break;
 
       /* Report samples in Centigrade.  Arg: None */
 
       case SNIOC_CENTIGRADE:
         priv->fahrenheit = false;
-        sndbg("Centigrade\n");
+        sninfo("Centigrade\n");
         break;
 
       /* Read THYS temperature register.  Arg: b16_t* pointer */
@@ -543,7 +543,7 @@ static int lm92_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           FAR b16_t *ptr = (FAR b16_t *)((uintptr_t)arg);
           DEBUGASSERT(ptr != NULL);
           ret = lm92_readb16(priv, LM92_THYS_REG, ptr);
-          sndbg("THYS: %08x ret: %d\n", *ptr, ret);
+          sninfo("THYS: %08x ret: %d\n", *ptr, ret);
         }
         break;
 
@@ -551,7 +551,7 @@ static int lm92_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case SNIOC_WRITETHYS:
         ret = lm92_writeb16(priv, LM92_THYS_REG, (b16_t)arg);
-        sndbg("THYS: %08x ret: %d\n", (b16_t)arg, ret);
+        sninfo("THYS: %08x ret: %d\n", (b16_t)arg, ret);
         break;
 
       /* Read TCRIT temperature register.  Arg: b16_t* pointer */
@@ -561,7 +561,7 @@ static int lm92_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           FAR b16_t *ptr = (FAR b16_t *)((uintptr_t)arg);
           DEBUGASSERT(ptr != NULL);
           ret = lm92_readb16(priv, LM92_TCRIT_REG, ptr);
-          sndbg("TCRIT: %08x ret: %d\n", *ptr, ret);
+          sninfo("TCRIT: %08x ret: %d\n", *ptr, ret);
         }
         break;
 
@@ -569,7 +569,7 @@ static int lm92_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case SNIOC_WRITETCRIT:
         ret = lm92_writeb16(priv, LM92_TCRIT_REG, (b16_t)arg);
-        sndbg("TCRIT: %08x ret: %d\n", (b16_t)arg, ret);
+        sninfo("TCRIT: %08x ret: %d\n", (b16_t)arg, ret);
         break;
 
       /* Read TLOW temperature register.  Arg: b16_t* pointer */
@@ -579,7 +579,7 @@ static int lm92_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           FAR b16_t *ptr = (FAR b16_t *)((uintptr_t)arg);
           DEBUGASSERT(ptr != NULL);
           ret = lm92_readb16(priv, LM92_TLOW_REG, ptr);
-          sndbg("TLOW: %08x ret: %d\n", *ptr, ret);
+          sninfo("TLOW: %08x ret: %d\n", *ptr, ret);
         }
         break;
 
@@ -587,7 +587,7 @@ static int lm92_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case SNIOC_WRITETLOW:
         ret = lm92_writeb16(priv, LM92_TLOW_REG, (b16_t)arg);
-        sndbg("TLOW: %08x ret: %d\n", (b16_t)arg, ret);
+        sninfo("TLOW: %08x ret: %d\n", (b16_t)arg, ret);
         break;
 
       /* Read THIGH temperature register.  Arg: b16_t* pointer */
@@ -597,7 +597,7 @@ static int lm92_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           FAR b16_t *ptr = (FAR b16_t *)((uintptr_t)arg);
           DEBUGASSERT(ptr != NULL);
           ret = lm92_readb16(priv, LM92_THIGH_REG, ptr);
-          sndbg("THIGH: %08x ret: %d\n", *ptr, ret);
+          sninfo("THIGH: %08x ret: %d\n", *ptr, ret);
         }
         break;
 
@@ -605,7 +605,7 @@ static int lm92_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case SNIOC_WRITETHIGH:
         ret = lm92_writeb16(priv, LM92_THIGH_REG, (b16_t)arg);
-        sndbg("THIGH: %08x ret: %d\n", (b16_t)arg, ret);
+        sninfo("THIGH: %08x ret: %d\n", (b16_t)arg, ret);
         break;
 
       /* Read from the identification register.  Arg: uint16_t* pointer */
@@ -615,12 +615,12 @@ static int lm92_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           FAR uint16_t *ptr = (FAR uint16_t *)((uintptr_t)arg);
           DEBUGASSERT(ptr != NULL);
           ret = lm92_readid(priv, ptr);
-          sndbg("id: %04x ret: %d\n", *ptr, ret);
+          sninfo("id: %04x ret: %d\n", *ptr, ret);
         }
         break;
 
       default:
-        sndbg("Unrecognized cmd: %d\n", cmd);
+        snerr("ERROR: Unrecognized cmd: %d\n", cmd);
         ret = -ENOTTY;
         break;
     }
@@ -668,7 +668,7 @@ int lm92_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
   priv = (FAR struct lm92_dev_s *)kmm_malloc(sizeof(struct lm92_dev_s));
   if (priv == NULL)
     {
-      sndbg("Failed to allocate instance\n");
+      snerr("ERROR: Failed to allocate instance\n");
       return -ENOMEM;
     }
 
@@ -681,7 +681,7 @@ int lm92_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
   ret = register_driver(devpath, &g_lm92fops, 0666, priv);
   if (ret < 0)
     {
-      sndbg("Failed to register driver: %d\n", ret);
+      snerr("ERROR: Failed to register driver: %d\n", ret);
       kmm_free(priv);
     }
 

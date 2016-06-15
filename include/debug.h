@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/debug.h
  *
- *   Copyright (C) 2007-2011, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2011, 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,55 +56,75 @@
 /* Debug macros to runtime filter the debug messages sent to the console.  In
  * general, there are four forms of the debug macros:
  *
- * [a-z]dbg() -- Outputs messages to the console similar to printf() except
- *    that the output is not buffered.  The first character indicates the
- *    system system (e.g., n=network, f=filesystm, etc.).  If the first
- *    character is missing (i.e., dbg()), then it is common.  The common
- *    dbg() macro is enabled by CONFIG_DEBUG.  Subsystem debug requires an
+ * [a-z]info() -- Outputs messages to the console similar to printf() except
+ *    that the output is not buffered.  Output is only generated if
+ *    CONFIG_DEBUG_INFO is defined.  The info macros are intended for
+ *    verbose "informational" debug output.  If you enable CONFIG_DEBUG_INFO,
+ *    then very chatty (and often annoying) output will be generated.
+ *
+ *    The first character of the macro name indicates the system system
+ *    (e.g., n=network, f=filesystm, etc.).  If the first character is
+ *    missing (i.e., info()), then it is common.  The common info() macro
+ *    is enabled simply with CONFIG_DEBUG_INFO.  Subsystem debug requires an
  *    additional configuration setting to enable it (e.g., CONFIG_DEBUG_NET
  *    for the network, CONFIG_DEBUG_FS for the file system, etc).
  *
- *    In general, error messages and output of importance use [a-z]dbg().
- *    [a-z]dbg() is implementation dependent but usually uses file descriptors.
+ *    In general, error messages and output of importance use [a-z]err().
+ *    [a-z]err() is implementation dependent but usually uses file descriptors.
  *    (that is a problem only because the interrupt task may have re-
- *    directed stdout).  Therefore [a-z]dbg() should not be used in interrupt
+ *    directed stdout).  Therefore [a-z]err() should not be used in interrupt
  *    handlers.
  *
- * [a-z]vdbg() -- Identical to [a-z]dbg() except that it also requires that
- *    CONFIG_DEBUG_VERBOSE be defined.  This is intended for general debug
- *    output that you would normally want to suppress.
+ * [a-z]warn() -- Identical to [a-z]info() except that it also requires that
+ *    CONFIG_DEBUG_WARN be defined.  This is intended for important exception
+ *    conditions that are potential errors (or perhaps real errors with non-
+ *    fatal consequences).
  *
- * [a-z]lldbg() -- Identical to [a-z]dbg() except this is uses special
+ * [a-z]err() -- Identical to [a-z]info() except that it also requires that
+ *    CONFIG_DEBUG_ERROR be defined.  This is intended for important error-related
+ *    information that you probably not want to suppress during normal debug
+ *    general debugging.
+ *
+ * [a-z]llinfo() -- Identical to [a-z]err() except this is uses special
  *    interfaces provided by architecture-specific logic to talk directly
  *    to the underlying console hardware.  If the architecture provides such
  *    logic, it should define CONFIG_ARCH_LOWPUTC.
  *
- *    [a-z]lldbg() should not be used in normal code because the implementation
+ *    [a-z]llinfo() should not be used in normal code because the implementation
  *    probably disables interrupts and does things that are not consistent with
- *    good real-time performance.  However, [a-z]lldbg() is particularly useful
+ *    good real-time performance.  However, [a-z]llinfo() is particularly useful
  *    in low-level code where it is inappropriate to use file descriptors.  For
- *    example, only [a-z]lldbg() should be used in interrupt handlers.
+ *    example, only [a-z]llinfo() should be used in interrupt handlers.
  *
- * [a-z]llvdbg() -- Identical to [a-z]lldbg() except that it also requires that
- *    CONFIG_DEBUG_VERBOSE be defined.  This is intended for general debug
- *    output that you would normally want to suppress.
+ * [a-z]llwarn() -- Identical to [a-z]llinfo() except that it also requires that
+ *    CONFIG_DEBUG_WARN be defined.  This is intended for important exception
+ *    conditions that are potential errors (or perhaps real errors with non-
+ *    fatal consequences).
+ *
+ * [a-z]llerr() -- Identical to [a-z]llinfo() except that it also requires that
+ *    CONFIG_DEBUG_ERROR be defined. This is intended for important error-related
+ *    information that you probably not want to suppress during normal debug
+ *    general debugging.
+ *
+ * alert() - is a special, high-priority, unconditional version that is really
+ *    intended only for crash error reporting.
  */
 
 #ifdef CONFIG_HAVE_FUNCTIONNAME
-# define EXTRA_FMT "%s: "
-# define EXTRA_ARG ,__FUNCTION__
+#  define EXTRA_FMT "%s: "
+#  define EXTRA_ARG ,__FUNCTION__
 #else
-# define EXTRA_FMT
-# define EXTRA_ARG
+#  define EXTRA_FMT
+#  define EXTRA_ARG
 #endif
 
 /* The actual logger function may be overridden in arch/debug.h if needed. */
 
 #ifndef __arch_syslog
-# define __arch_syslog syslog
+#  define __arch_syslog syslog
 #endif
 #ifndef __arch_lowsyslog
-# define __arch_lowsyslog lowsyslog
+#  define __arch_lowsyslog lowsyslog
 #endif
 
 /* Debug macros will differ depending upon if the toolchain supports
@@ -115,541 +135,929 @@
 
 /* C-99 style variadic macros are supported */
 
-#ifdef CONFIG_DEBUG
-# define dbg(format, ...) \
-  __arch_syslog(LOG_ERR, EXTRA_FMT format EXTRA_ARG, ##__VA_ARGS__)
-
-# ifdef CONFIG_ARCH_LOWPUTC
-#  define lldbg(format, ...) \
-   __arch_lowsyslog(LOG_ERR, EXTRA_FMT format EXTRA_ARG, ##__VA_ARGS__)
+#ifdef CONFIG_ARCH_LOWPUTC
+#  define alert(format, ...) \
+   __arch_lowsyslog(LOG_EMERG, EXTRA_FMT format EXTRA_ARG, ##__VA_ARGS__)
 # else
-#  define lldbg(x...)
+#  define alert(x...)
 # endif
 
-# ifdef CONFIG_DEBUG_VERBOSE
-#  define vdbg(format, ...) \
-   __arch_syslog(LOG_DEBUG, EXTRA_FMT format EXTRA_ARG, ##__VA_ARGS__)
+#ifdef CONFIG_DEBUG_ERROR
+#  define err(format, ...) \
+   __arch_syslog(LOG_ERR, EXTRA_FMT format EXTRA_ARG, ##__VA_ARGS__)
+
+# ifdef CONFIG_ARCH_LOWPUTC
+#  define llerr(format, ...) \
+   __arch_lowsyslog(LOG_ERR, EXTRA_FMT format EXTRA_ARG, ##__VA_ARGS__)
+# else
+#  define llerr(x...)
+# endif
+#else /* CONFIG_DEBUG_ERROR */
+#  define err(x...)
+#  define llerr(x...)
+#endif
+
+#ifdef CONFIG_DEBUG_WARN
+#  define warn(format, ...) \
+   __arch_syslog(LOG_WARNING, EXTRA_FMT format EXTRA_ARG, ##__VA_ARGS__)
 
 #  ifdef CONFIG_ARCH_LOWPUTC
-#    define llvdbg(format, ...) \
-     __arch_lowsyslog(LOG_DEBUG, EXTRA_FMT format EXTRA_ARG, ##__VA_ARGS__)
+#    define llwarn(format, ...) \
+     __arch_lowsyslog(LOG_WARNING, EXTRA_FMT format EXTRA_ARG, ##__VA_ARGS__)
 #  else
-#    define llvdbg(x...)
+#    define llwarn(x...)
 #  endif
+#else /* CONFIG_DEBUG_INFO */
+#  define warn(x...)
+#  define llwarn(x...)
+#endif /* CONFIG_DEBUG_INFO */
 
-# else /* CONFIG_DEBUG_VERBOSE */
-#  define vdbg(x...)
-#  define llvdbg(x...)
-# endif /* CONFIG_DEBUG_VERBOSE */
+#ifdef CONFIG_DEBUG_INFO
+#  define info(format, ...) \
+   __arch_syslog(LOG_INFO, EXTRA_FMT format EXTRA_ARG, ##__VA_ARGS__)
 
-#else /* CONFIG_DEBUG */
-
-# define dbg(x...)
-# define lldbg(x...)
-# define vdbg(x...)
-# define llvdbg(x...)
-
-#endif /* CONFIG_DEBUG */
+#  ifdef CONFIG_ARCH_LOWPUTC
+#    define llinfo(format, ...) \
+     __arch_lowsyslog(LOG_INFO, EXTRA_FMT format EXTRA_ARG, ##__VA_ARGS__)
+#  else
+#    define llinfo(x...)
+#  endif
+#else /* CONFIG_DEBUG_INFO */
+#  define info(x...)
+#  define llinfo(x...)
+#endif /* CONFIG_DEBUG_INFO */
 
 /* Subsystem specific debug */
 
-#ifdef CONFIG_DEBUG_MM
-# define mdbg(format, ...)    dbg(format, ##__VA_ARGS__)
-# define mlldbg(format, ...)  lldbg(format, ##__VA_ARGS__)
-# define mvdbg(format, ...)   vdbg(format, ##__VA_ARGS__)
-# define mllvdbg(format, ...) llvdbg(format, ##__VA_ARGS__)
+#ifdef CONFIG_DEBUG_MM_ERROR
+#  define merr(format, ...)    err(format, ##__VA_ARGS__)
+#  define mllerr(format, ...)  llerr(format, ##__VA_ARGS__)
 #else
-# define mdbg(x...)
-# define mlldbg(x...)
-# define mvdbg(x...)
-# define mllvdbg(x...)
+#  define merr(x...)
+#  define mllerr(x...)
 #endif
 
-#ifdef CONFIG_DEBUG_SCHED
-# define sdbg(format, ...)    dbg(format, ##__VA_ARGS__)
-# define slldbg(format, ...)  lldbg(format, ##__VA_ARGS__)
-# define svdbg(format, ...)   vdbg(format, ##__VA_ARGS__)
-# define sllvdbg(format, ...) llvdbg(format, ##__VA_ARGS__)
+#ifdef CONFIG_DEBUG_MM_WARN
+#  define mwarn(format, ...)   warn(format, ##__VA_ARGS__)
+#  define mllwarn(format, ...) llwarn(format, ##__VA_ARGS__)
 #else
-# define sdbg(x...)
-# define slldbg(x...)
-# define svdbg(x...)
-# define sllvdbg(x...)
+#  define mwarn(x...)
+#  define mllwarn(x...)
 #endif
 
-#ifdef CONFIG_DEBUG_PAGING
-# define pgdbg(format, ...)    dbg(format, ##__VA_ARGS__)
-# define pglldbg(format, ...)  lldbg(format, ##__VA_ARGS__)
-# define pgvdbg(format, ...)   vdbg(format, ##__VA_ARGS__)
-# define pgllvdbg(format, ...) llvdbg(format, ##__VA_ARGS__)
+#ifdef CONFIG_DEBUG_MM_INFO
+#  define minfo(format, ...)   info(format, ##__VA_ARGS__)
+#  define mllinfo(format, ...) llinfo(format, ##__VA_ARGS__)
 #else
-# define pgdbg(x...)
-# define pglldbg(x...)
-# define pgvdbg(x...)
-# define pgllvdbg(x...)
+#  define minfo(x...)
+#  define mllinfo(x...)
 #endif
 
-#ifdef CONFIG_DEBUG_DMA
-# define dmadbg(format, ...)    dbg(format, ##__VA_ARGS__)
-# define dmalldbg(format, ...)  lldbg(format, ##__VA_ARGS__)
-# define dmavdbg(format, ...)   vdbg(format, ##__VA_ARGS__)
-# define dmallvdbg(format, ...) llvdbg(format, ##__VA_ARGS__)
+#ifdef CONFIG_DEBUG_SCHED_ERROR
+#  define serr(format, ...)    err(format, ##__VA_ARGS__)
+#  define sllerr(format, ...)  llerr(format, ##__VA_ARGS__)
 #else
-# define dmadbg(x...)
-# define dmalldbg(x...)
-# define dmavdbg(x...)
-# define dmallvdbg(x...)
+#  define serr(x...)
+#  define sllerr(x...)
 #endif
 
-#ifdef CONFIG_DEBUG_NET
-# define ndbg(format, ...)    dbg(format, ##__VA_ARGS__)
-# define nlldbg(format, ...)  lldbg(format, ##__VA_ARGS__)
-# define nvdbg(format, ...)   vdbg(format, ##__VA_ARGS__)
-# define nllvdbg(format, ...) llvdbg(format, ##__VA_ARGS__)
+#ifdef CONFIG_DEBUG_SCHED_WARN
+#  define swarn(format, ...)   warn(format, ##__VA_ARGS__)
+#  define sllwarn(format, ...) llwarn(format, ##__VA_ARGS__)
 #else
-# define ndbg(x...)
-# define nlldbg(x...)
-# define nvdbg(x...)
-# define nllvdbg(x...)
+#  define swarn(x...)
+#  define sllwarn(x...)
 #endif
 
-#ifdef CONFIG_DEBUG_USB
-# define udbg(format, ...)    dbg(format, ##__VA_ARGS__)
-# define ulldbg(format, ...)  lldbg(format, ##__VA_ARGS__)
-# define uvdbg(format, ...)   vdbg(format, ##__VA_ARGS__)
-# define ullvdbg(format, ...) llvdbg(format, ##__VA_ARGS__)
+#ifdef CONFIG_DEBUG_SCHED_INFO
+#  define sinfo(format, ...)   info(format, ##__VA_ARGS__)
+#  define sllinfo(format, ...) llinfo(format, ##__VA_ARGS__)
 #else
-# define udbg(x...)
-# define ulldbg(x...)
-# define uvdbg(x...)
-# define ullvdbg(x...)
+#  define sinfo(x...)
+#  define sllinfo(x...)
 #endif
 
-#ifdef CONFIG_DEBUG_FS
-# define fdbg(format, ...)    dbg(format, ##__VA_ARGS__)
-# define flldbg(format, ...)  lldbg(format, ##__VA_ARGS__)
-# define fvdbg(format, ...)   vdbg(format, ##__VA_ARGS__)
-# define fllvdbg(format, ...) llvdbg(format, ##__VA_ARGS__)
+#ifdef CONFIG_DEBUG_PAGING_ERROR
+#  define pgerr(format, ...)    err(format, ##__VA_ARGS__)
+#  define pgllerr(format, ...)  llerr(format, ##__VA_ARGS__)
 #else
-# define fdbg(x...)
-# define flldbg(x...)
-# define fvdbg(x...)
-# define fllvdbg(x...)
+#  define pgerr(x...)
+#  define pgllerr(x...)
 #endif
 
-#ifdef CONFIG_DEBUG_CRYPTO
-# define cryptdbg(format, ...)    dbg(format, ##__VA_ARGS__)
-# define cryptlldbg(format, ...)  lldbg(format, ##__VA_ARGS__)
-# define cryptvdbg(format, ...)   vdbg(format, ##__VA_ARGS__)
-# define cryptllvdbg(format, ...) llvdbg(format, ##__VA_ARGS__)
+#ifdef CONFIG_DEBUG_PAGING_WARN
+#  define pgwarn(format, ...)   warn(format, ##__VA_ARGS__)
+#  define pgllwarn(format, ...) llwarn(format, ##__VA_ARGS__)
 #else
-# define cryptdbg(x...)
-# define cryptlldbg(x...)
-# define cryptvdbg(x...)
-# define cryptllvdbg(x...)
+#  define pgwarn(x...)
+#  define pgllwarn(x...)
 #endif
 
-#ifdef CONFIG_DEBUG_INPUT
-# define idbg(format, ...)    dbg(format, ##__VA_ARGS__)
-# define illdbg(format, ...)  lldbg(format, ##__VA_ARGS__)
-# define ivdbg(format, ...)   vdbg(format, ##__VA_ARGS__)
-# define illvdbg(format, ...) llvdbg(format, ##__VA_ARGS__)
+#ifdef CONFIG_DEBUG_PAGING_INFO
+#  define pginfo(format, ...)   info(format, ##__VA_ARGS__)
+#  define pgllinfo(format, ...) llinfo(format, ##__VA_ARGS__)
 #else
-# define idbg(x...)
-# define illdbg(x...)
-# define ivdbg(x...)
-# define illvdbg(x...)
+#  define pgerr(x...)
+#  define pgllerr(x...)
 #endif
 
-#ifdef CONFIG_DEBUG_SENSORS
-# define sndbg(format, ...)    dbg(format, ##__VA_ARGS__)
-# define snlldbg(format, ...)  lldbg(format, ##__VA_ARGS__)
-# define snvdbg(format, ...)   vdbg(format, ##__VA_ARGS__)
-# define snllvdbg(format, ...) llvdbg(format, ##__VA_ARGS__)
+#ifdef CONFIG_DEBUG_DMA_ERROR
+#  define dmaerr(format, ...)    err(format, ##__VA_ARGS__)
+#  define dmallerr(format, ...)  llerr(format, ##__VA_ARGS__)
 #else
-# define sndbg(x...)
-# define snlldbg(x...)
-# define snvdbg(x...)
-# define snllvdbg(x...)
+#  define dmaerr(x...)
+#  define dmallerr(x...)
 #endif
 
-#ifdef CONFIG_DEBUG_ANALOG
-# define adbg(format, ...)    dbg(format, ##__VA_ARGS__)
-# define alldbg(format, ...)  lldbg(format, ##__VA_ARGS__)
-# define avdbg(format, ...)   vdbg(format, ##__VA_ARGS__)
-# define allvdbg(format, ...) llvdbg(format, ##__VA_ARGS__)
+#ifdef CONFIG_DEBUG_DMA_WARN
+#  define dmawarn(format, ...)   warn(format, ##__VA_ARGS__)
+#  define dmallwarn(format, ...) llwarn(format, ##__VA_ARGS__)
 #else
-# define adbg(x...)
-# define alldbg(x...)
-# define avdbg(x...)
-# define allvdbg(x...)
+#  define dmawarn(x...)
+#  define dmallwarn(x...)
 #endif
 
-#ifdef CONFIG_DEBUG_GRAPHICS
-# define gdbg(format, ...)    dbg(format, ##__VA_ARGS__)
-# define glldbg(format, ...)  lldbg(format, ##__VA_ARGS__)
-# define gvdbg(format, ...)   vdbg(format, ##__VA_ARGS__)
-# define gllvdbg(format, ...) llvdbg(format, ##__VA_ARGS__)
+#ifdef CONFIG_DEBUG_DMA_INFO
+#  define dmainfo(format, ...)   info(format, ##__VA_ARGS__)
+#  define dmallinfo(format, ...) llinfo(format, ##__VA_ARGS__)
 #else
-# define gdbg(x...)
-# define glldbg(x...)
-# define gvdbg(x...)
-# define gllvdbg(x...)
+#  define dmainfo(x...)
+#  define dmallinfo(x...)
 #endif
 
-#ifdef CONFIG_DEBUG_BINFMT
-# define bdbg(format, ...)    dbg(format, ##__VA_ARGS__)
-# define blldbg(format, ...)  lldbg(format, ##__VA_ARGS__)
-# define bvdbg(format, ...)   vdbg(format, ##__VA_ARGS__)
-# define bllvdbg(format, ...) llvdbg(format, ##__VA_ARGS__)
+#ifdef CONFIG_DEBUG_NET_ERROR
+#  define nerr(format, ...)    err(format, ##__VA_ARGS__)
+#  define nllerr(format, ...)  llerr(format, ##__VA_ARGS__)
 #else
-# define bdbg(x...)
-# define blldbg(x...)
-# define bvdbg(x...)
-# define bllvdbg(x...)
+#  define nerr(x...)
+#  define nllerr(x...)
 #endif
 
-#ifdef CONFIG_DEBUG_LIB
-# define ldbg(format, ...)    dbg(format, ##__VA_ARGS__)
-# define llldbg(format, ...)  lldbg(format, ##__VA_ARGS__)
-# define lvdbg(format, ...)   vdbg(format, ##__VA_ARGS__)
-# define lllvdbg(format, ...) llvdbg(format, ##__VA_ARGS__)
+#ifdef CONFIG_DEBUG_NET_WARN
+#  define nwarn(format, ...)   warn(format, ##__VA_ARGS__)
+#  define nllwarn(format, ...) llwarn(format, ##__VA_ARGS__)
 #else
-# define ldbg(x...)
-# define llldbg(x...)
-# define lvdbg(x...)
-# define lllvdbg(x...)
+#  define nwarn(x...)
+#  define nllwarn(x...)
 #endif
 
-#ifdef CONFIG_DEBUG_AUDIO
-# define auddbg(format, ...)    dbg(format, ##__VA_ARGS__)
-# define audlldbg(format, ...)  lldbg(format, ##__VA_ARGS__)
-# define audvdbg(format, ...)   vdbg(format, ##__VA_ARGS__)
-# define audllvdbg(format, ...) llvdbg(format, ##__VA_ARGS__)
+#ifdef CONFIG_DEBUG_NET_INFO
+#  define ninfo(format, ...)   info(format, ##__VA_ARGS__)
+#  define nllinfo(format, ...) llinfo(format, ##__VA_ARGS__)
 #else
-# define auddbg(x...)
-# define audlldbg(x...)
-# define audvdbg(x...)
-# define audllvdbg(x...)
+#  define ninfo(x...)
+#  define nllinfo(x...)
+#endif
+
+#ifdef CONFIG_DEBUG_USB_ERROR
+#  define uerr(format, ...)    err(format, ##__VA_ARGS__)
+#  define ullerr(format, ...)  llerr(format, ##__VA_ARGS__)
+#else
+#  define uerr(x...)
+#  define ullerr(x...)
+#endif
+
+#ifdef CONFIG_DEBUG_USB_WARN
+#  define uwarn(format, ...)   warn(format, ##__VA_ARGS__)
+#  define ullwarn(format, ...) llwarn(format, ##__VA_ARGS__)
+#else
+#  define uwarn(x...)
+#  define ullwarn(x...)
+#endif
+
+#ifdef CONFIG_DEBUG_USB_INFO
+#  define uinfo(format, ...)   info(format, ##__VA_ARGS__)
+#  define ullinfo(format, ...) llinfo(format, ##__VA_ARGS__)
+#else
+#  define uinfo(x...)
+#  define ullinfo(x...)
+#endif
+
+#ifdef CONFIG_DEBUG_FS_ERROR
+#  define ferr(format, ...)    err(format, ##__VA_ARGS__)
+#  define fllerr(format, ...)  llerr(format, ##__VA_ARGS__)
+#else
+#  define ferr(x...)
+#  define fllerr(x...)
+#endif
+
+#ifdef CONFIG_DEBUG_FS_WARN
+#  define fwarn(format, ...)   warn(format, ##__VA_ARGS__)
+#  define fllwarn(format, ...) llwarn(format, ##__VA_ARGS__)
+#else
+#  define fwarn(x...)
+#  define fllwarn(x...)
+#endif
+
+#ifdef CONFIG_DEBUG_FS_INFO
+#  define finfo(format, ...)   info(format, ##__VA_ARGS__)
+#  define fllinfo(format, ...) llinfo(format, ##__VA_ARGS__)
+#else
+#  define finfo(x...)
+#  define fllinfo(x...)
+#endif
+
+#ifdef CONFIG_DEBUG_CRYPTO_ERROR
+#  define crypterr(format, ...)    err(format, ##__VA_ARGS__)
+#  define cryptllerr(format, ...)  llerr(format, ##__VA_ARGS__)
+#else
+#  define crypterr(x...)
+#  define cryptllerr(x...)
+#endif
+
+#ifdef CONFIG_DEBUG_CRYPTO_WARN
+#  define cryptwarn(format, ...)   warn(format, ##__VA_ARGS__)
+#  define cryptllwarn(format, ...) llwarn(format, ##__VA_ARGS__)
+#else
+#  define cryptwarn(x...)
+#  define cryptllwarn(x...)
+#endif
+
+#ifdef CONFIG_DEBUG_CRYPTO_INFO
+#  define cryptinfo(format, ...)   info(format, ##__VA_ARGS__)
+#  define cryptllinfo(format, ...) llinfo(format, ##__VA_ARGS__)
+#else
+#  define cryptinfo(x...)
+#  define cryptllinfo(x...)
+#endif
+
+#ifdef CONFIG_DEBUG_INPUT_ERROR
+#  define ierr(format, ...)    err(format, ##__VA_ARGS__)
+#  define illerr(format, ...)  llerr(format, ##__VA_ARGS__)
+#else
+#  define ierr(x...)
+#  define illerr(x...)
+#endif
+
+#ifdef CONFIG_DEBUG_INPUT_WARN
+#  define iwarn(format, ...)   warn(format, ##__VA_ARGS__)
+#  define illwarn(format, ...) llwarn(format, ##__VA_ARGS__)
+#else
+#  define iwarn(x...)
+#  define illwarn(x...)
+#endif
+
+#ifdef CONFIG_DEBUG_INPUT_INFO
+#  define iinfo(format, ...)   info(format, ##__VA_ARGS__)
+#  define illinfo(format, ...) llinfo(format, ##__VA_ARGS__)
+#else
+#  define iinfo(x...)
+#  define illinfo(x...)
+#endif
+
+#ifdef CONFIG_DEBUG_SENSORS_ERROR
+#  define snerr(format, ...)    err(format, ##__VA_ARGS__)
+#  define snllerr(format, ...)  llerr(format, ##__VA_ARGS__)
+#else
+#  define snerr(x...)
+#  define snllerr(x...)
+#endif
+
+#ifdef CONFIG_DEBUG_SENSORS_WARN
+#  define snwarn(format, ...)   warn(format, ##__VA_ARGS__)
+#  define snllwarn(format, ...) llwarn(format, ##__VA_ARGS__)
+#else
+#  define snwarn(x...)
+#  define snllwarn(x...)
+#endif
+
+#ifdef CONFIG_DEBUG_SENSORS_INFO
+#  define sninfo(format, ...)   info(format, ##__VA_ARGS__)
+#  define snllinfo(format, ...) llinfo(format, ##__VA_ARGS__)
+#else
+#  define sninfo(x...)
+#  define snllinfo(x...)
+#endif
+
+#ifdef CONFIG_DEBUG_ANALOG_ERROR
+#  define aerr(format, ...)    err(format, ##__VA_ARGS__)
+#  define allerr(format, ...)  llerr(format, ##__VA_ARGS__)
+#else
+#  define aerr(x...)
+#  define allerr(x...)
+#endif
+
+#ifdef CONFIG_DEBUG_ANALOG_WARN
+#  define awarn(format, ...)   warn(format, ##__VA_ARGS__)
+#  define allwarn(format, ...) llwarn(format, ##__VA_ARGS__)
+#else
+#  define awarn(x...)
+#  define allwarn(x...)
+#endif
+
+#ifdef CONFIG_DEBUG_ANALOG_INFO
+#  define ainfo(format, ...)   info(format, ##__VA_ARGS__)
+#  define allinfo(format, ...) llinfo(format, ##__VA_ARGS__)
+#else
+#  define ainfo(x...)
+#  define allinfo(x...)
+#endif
+
+#ifdef CONFIG_DEBUG_GRAPHICS_ERROR
+#  define gerr(format, ...)    err(format, ##__VA_ARGS__)
+#  define gllerr(format, ...)  llerr(format, ##__VA_ARGS__)
+#else
+#  define gerr(x...)
+#  define gllerr(x...)
+#endif
+
+#ifdef CONFIG_DEBUG_GRAPHICS_WARN
+#  define gwarn(format, ...)   warn(format, ##__VA_ARGS__)
+#  define gllwarn(format, ...) llwarn(format, ##__VA_ARGS__)
+#else
+#  define gwarn(x...)
+#  define gllwarn(x...)
+#endif
+
+#ifdef CONFIG_DEBUG_GRAPHICS_INFO
+#  define ginfo(format, ...)   info(format, ##__VA_ARGS__)
+#  define gllinfo(format, ...) llinfo(format, ##__VA_ARGS__)
+#else
+#  define ginfo(x...)
+#  define gllinfo(x...)
+#endif
+
+#ifdef CONFIG_DEBUG_BINFMT_ERROR
+#  define berr(format, ...)    err(format, ##__VA_ARGS__)
+#  define bllerr(format, ...)  llerr(format, ##__VA_ARGS__)
+#else
+#  define berr(x...)
+#  define bllerr(x...)
+#endif
+
+#ifdef CONFIG_DEBUG_BINFMT_WARN
+#  define bwarn(format, ...)   warn(format, ##__VA_ARGS__)
+#  define bllwarn(format, ...) llwarn(format, ##__VA_ARGS__)
+#else
+#  define bwarn(x...)
+#  define bllwarn(x...)
+#endif
+
+#ifdef CONFIG_DEBUG_BINFMT_INFO
+#  define binfo(format, ...)   info(format, ##__VA_ARGS__)
+#  define bllinfo(format, ...) llinfo(format, ##__VA_ARGS__)
+#else
+#  define binfo(x...)
+#  define bllinfo(x...)
+#endif
+
+#ifdef CONFIG_DEBUG_LIB_ERROR
+#  define lerr(format, ...)    err(format, ##__VA_ARGS__)
+#  define lllerr(format, ...)  llerr(format, ##__VA_ARGS__)
+#else
+#  define lerr(x...)
+#  define lllerr(x...)
+#endif
+
+#ifdef CONFIG_DEBUG_LIB_WARN
+#  define lwarn(format, ...)   warn(format, ##__VA_ARGS__)
+#  define lllwarn(format, ...) llwarn(format, ##__VA_ARGS__)
+#else
+#  define lwarn(x...)
+#  define lllwarn(x...)
+#endif
+
+#ifdef CONFIG_DEBUG_LIB_INFO
+#  define linfo(format, ...)   info(format, ##__VA_ARGS__)
+#  define lllinfo(format, ...) llinfo(format, ##__VA_ARGS__)
+#else
+#  define linfo(x...)
+#  define lllinfo(x...)
+#endif
+
+#ifdef CONFIG_DEBUG_AUDIO_ERROR
+#  define auderr(format, ...)    err(format, ##__VA_ARGS__)
+#  define audllerr(format, ...)  llerr(format, ##__VA_ARGS__)
+#else
+#  define auderr(x...)
+#  define audllerr(x...)
+#endif
+
+#ifdef CONFIG_DEBUG_AUDIO_WARN
+#  define audwarn(format, ...)   warn(format, ##__VA_ARGS__)
+#  define audllwarn(format, ...) llwarn(format, ##__VA_ARGS__)
+#else
+#  define audwarn(x...)
+#  define audllwarn(x...)
+#endif
+
+#ifdef CONFIG_DEBUG_AUDIO_INFO
+#  define audinfo(format, ...)   info(format, ##__VA_ARGS__)
+#  define audllinfo(format, ...) llinfo(format, ##__VA_ARGS__)
+#else
+#  define audinfo(x...)
+#  define audllinfo(x...)
 #endif
 
 #else /* CONFIG_CPP_HAVE_VARARGS */
 
 /* Variadic macros NOT supported */
 
-#ifdef CONFIG_DEBUG
-# ifndef CONFIG_ARCH_LOWPUTC
-#  define lldbg      (void)
+#ifndef CONFIG_ARCH_LOWPUTC
+#  define alert       (void)
 # endif
-# ifndef CONFIG_DEBUG_VERBOSE
-#  define vdbg       (void)
-#  define llvdbg     (void)
-# else
+
+#ifdef CONFIG_DEBUG_ERROR
 #  ifndef CONFIG_ARCH_LOWPUTC
-#    define llvdbg   (void)
+#    define llerr     (void)
 #  endif
-# endif
 #else
-# define dbg         (void)
-# define lldbg       (void)
-# define vdbg        (void)
-# define llvdbg      (void)
+#  define err         (void)
+#  define llerr       (void)
+#endif
+
+#ifdef CONFIG_DEBUG_WARN
+#  ifndef CONFIG_ARCH_LOWPUTC
+#    define llwarn    (void)
+#  endif
+#else
+#  define warn        (void)
+#  define llwarn      (void)
+#endif
+
+#ifdef CONFIG_DEBUG_INFO
+#  ifndef CONFIG_ARCH_LOWPUTC
+#    define llinfo    (void)
+#  endif
+#else
+#  define info        (void)
+#  define llinfo      (void)
 #endif
 
 /* Subsystem specific debug */
 
-#ifdef CONFIG_DEBUG_MM
-# define mdbg        dbg
-# define mlldbg      lldbg
-# define mvdbg       vdbg
-# define mllvdbg     llvdbg
+#ifdef CONFIG_DEBUG_MM_ERROR
+#  define merr        err
+#  define mllerr      llerr
 #else
-# define mdbg        (void)
-# define mlldbg      (void)
-# define mvdbg       (void)
-# define mllvdbg     (void)
+#  define merr        (void)
+#  define mllerr      (void)
 #endif
 
-#ifdef CONFIG_DEBUG_SCHED
-# define sdbg        dbg
-# define slldbg      lldbg
-# define svdbg       vdbg
-# define sllvdbg     llvdbg
+#ifdef CONFIG_DEBUG_MM_WARN
+#  define mwarn       warn
+#  define mllwarn     llwarn
 #else
-# define sdbg        (void)
-# define slldbg      (void)
-# define svdbg       (void)
-# define sllvdbg     (void)
+#  define mwarn       (void)
+#  define mllwarn     (void)
 #endif
 
-#ifdef CONFIG_DEBUG_PAGING
-# define pgdbg       dbg
-# define pglldbg     lldbg
-# define pgvdbg      vdbg
-# define pgllvdbg    llvdbg
+#ifdef CONFIG_DEBUG_MM_INFO
+#  define minfo       info
+#  define mllinfo     llinfo
 #else
-# define pgdbg       (void)
-# define pglldbg     (void)
-# define pgvdbg      (void)
-# define pgllvdbg    (void)
+#  define minfo       (void)
+#  define mllinfo     (void)
 #endif
 
-#ifdef CONFIG_DEBUG_DMA
-# define dmadbg      dbg
-# define dmalldbg    lldbg
-# define dmavdbg     vdbg
-# define dmallvdbg   llvdbg
+#ifdef CONFIG_DEBUG_SCHED_ERROR
+#  define serr        err
+#  define sllerr      llerr
 #else
-# define dmadbg      (void)
-# define dmalldbg    (void)
-# define dmavdbg     (void)
-# define dmallvdbg   (void)
+#  define serr        (void)
+#  define sllerr      (void)
 #endif
 
-#ifdef CONFIG_DEBUG_NET
-# define ndbg        dbg
-# define nlldbg      lldbg
-# define nvdbg       vdbg
-# define nllvdbg     llvdbg
+#ifdef CONFIG_DEBUG_SCHED_WARN
+#  define swarn       warn
+#  define sllwarn     llwarn
 #else
-# define ndbg        (void)
-# define nlldbg      (void)
-# define nvdbg       (void)
-# define nllvdbg     (void)
+#  define swarn       (void)
+#  define sllwarn     (void)
 #endif
 
-#ifdef CONFIG_DEBUG_USB
-# define udbg        dbg
-# define ulldbg      lldbg
-# define uvdbg       vdbg
-# define ullvdbg     llvdbg
+#ifdef CONFIG_DEBUG_SCHED_INFO
+#  define sinfo       info
+#  define sllinfo     llinfo
 #else
-# define udbg        (void)
-# define ulldbg      (void)
-# define uvdbg       (void)
-# define ullvdbg     (void)
+#  define sinfo       (void)
+#  define sllinfo     (void)
 #endif
 
-#ifdef CONFIG_DEBUG_FS
-# define fdbg        dbg
-# define flldbg      lldbg
-# define fvdbg       vdbg
-# define fllvdbg     llvdbg
+#ifdef CONFIG_DEBUG_PAGING_ERROR
+#  define pgerr       err
+#  define pgllerr     llerr
 #else
-# define fdbg        (void)
-# define flldbg      (void)
-# define fvdbg       (void)
-# define fllvdbg     (void)
+#  define pgerr       (void)
+#  define pgllerr     (void)
 #endif
 
-#ifdef CONFIG_DEBUG_CRYPTO
-# define cryptdbg    dbg
-# define cryptlldbg  lldbg
-# define cryptvdbg   vdbg
-# define cryptllvdbg llvdbg
+#ifdef CONFIG_DEBUG_PAGING_WARN
+#  define pgwarn      warn
+#  define pgllwarn    llwarn
 #else
-# define cryptdbg    (void)
-# define cryptlldbg  (void)
-# define cryptvdbg   (void)
-# define cryptllvdbg (void)
+#  define pgwarn      (void)
+#  define pgllwarn    (void)
 #endif
 
-#ifdef CONFIG_DEBUG_INPUT
-# define idbg        dbg
-# define illdbg      lldbg
-# define ivdbg       vdbg
-# define illvdbg     llvdbg
+#ifdef CONFIG_DEBUG_PAGING_INFO
+#  define pginfo      info
+#  define pgllinfo    llinfo
 #else
-# define idbg        (void)
-# define illdbg      (void)
-# define ivdbg       (void)
-# define illvdbg     (void)
+#  define pginfo      (void)
+#  define pgllinfo    (void)
 #endif
 
-#ifdef CONFIG_DEBUG_SENSORS
-# define sndbg        dbg
-# define snlldbg      lldbg
-# define snvdbg       vdbg
-# define snllvdbg     llvdbg
+#ifdef CONFIG_DEBUG_DMA_ERROR
+#  define dmaerr      err
+#  define dmallerr    llerr
 #else
-# define sndbg        (void)
-# define snlldbg      (void)
-# define snvdbg       (void)
-# define snllvdbg     (void)
+#  define dmaerr      (void)
+#  define dmallerr    (void)
 #endif
 
-#ifdef CONFIG_DEBUG_ANALOG
-# define adbg        dbg
-# define alldbg      lldbg
-# define avdbg       vdbg
-# define allvdbg     llvdbg
+#ifdef CONFIG_DEBUG_DMA_WARN
+#  define dmawarn     warn
+#  define dmallwarn   llwarn
 #else
-# define adbg        (void)
-# define alldbg      (void)
-# define avdbg       (void)
-# define allvdbg     (void)
+#  define dmawarn     (void)
+#  define dmallwarn   (void)
 #endif
 
-#ifdef CONFIG_DEBUG_GRAPHICS
-# define gdbg        dbg
-# define glldbg      lldbg
-# define gvdbg       vdbg
-# define gllvdbg     llvdbg
+#ifdef CONFIG_DEBUG_DMA_INFO
+#  define dmainfo     info
+#  define dmallinfo   llinfo
 #else
-# define gdbg        (void)
-# define glldbg      (void)
-# define gvdbg       (void)
-# define gllvdbg     (void)
+#  define dmainfo     (void)
+#  define dmallinfo   (void)
 #endif
 
-#ifdef CONFIG_DEBUG_BINFMT
-# define bdbg        dbg
-# define blldbg      lldbg
-# define bvdbg       vdbg
-# define bllvdbg     llvdbg
+#ifdef CONFIG_DEBUG_NET_ERROR
+#  define nerr        err
+#  define nllerr      llerr
 #else
-# define bdbg        (void)
-# define blldbg      (void)
-# define bvdbg       (void)
-# define bllvdbg     (void)
+#  define nerr        (void)
+#  define nllerr      (void)
 #endif
 
-#ifdef CONFIG_DEBUG_LIB
-# define ldbg        dbg
-# define llldbg      lldbg
-# define lvdbg       vdbg
-# define lllvdbg     llvdbg
+#ifdef CONFIG_DEBUG_NET_WARN
+#  define nwarn       warn
+#  define nllwarn     llwarn
 #else
-# define ldbg        (void)
-# define llldbg      (void)
-# define lvdbg       (void)
-# define lllvdbg     (void)
+#  define nwarn       (void)
+#  define nllwarn     (void)
 #endif
 
-#ifdef CONFIG_DEBUG_AUDIO
-# define auddbg      dbg
-# define audlldbg    lldbg
-# define audvdbg     vdbg
-# define audllvdbg   llvdbg
+#ifdef CONFIG_DEBUG_NET_INFO
+#  define ninfo       info
+#  define nllinfo     llinfo
 #else
-# define auddbg      (void)
-# define audlldbg    (void)
-# define audvdbg     (void)
-# define audllvdbg   (void)
+#  define ninfo       (void)
+#  define nllinfo     (void)
+#endif
+
+#ifdef CONFIG_DEBUG_USB_ERROR
+#  define uerr        err
+#  define ullerr      llerr
+#else
+#  define uerr        (void)
+#  define ullerr      (void)
+#endif
+
+#ifdef CONFIG_DEBUG_USB_WARN
+#  define uwarn       warn
+#  define ullwarn     llwarn
+#else
+#  define uwarn       (void)
+#  define ullwarn     (void)
+#endif
+
+#ifdef CONFIG_DEBUG_USB_INFO
+#  define uinfo       info
+#  define ullinfo     llinfo
+#else
+#  define uinfo       (void)
+#  define ullinfo     (void)
+#endif
+
+#ifdef CONFIG_DEBUG_FS_ERROR
+#  define ferr        err
+#  define fllerr      llerr
+#else
+#  define ferr        (void)
+#  define fllerr      (void)
+#endif
+
+#ifdef CONFIG_DEBUG_FS_WARN
+#  define fwarn       warn
+#  define fllwarn     llwarn
+#else
+#  define fwarn       (void)
+#  define fllwarn     (void)
+#endif
+
+#ifdef CONFIG_DEBUG_FS_INFO
+#  define finfo       info
+#  define fllinfo     llinfo
+#else
+#  define finfo       (void)
+#  define fllinfo     (void)
+#endif
+
+#ifdef CONFIG_DEBUG_CRYPTO_ERROR
+#  define crypterr    err
+#  define cryptllerr  llerr
+#else
+#  define crypterr    (void)
+#  define cryptllerr  (void)
+#endif
+
+#ifdef CONFIG_DEBUG_CRYPTO_WARN
+#  define cryptwarn   warn
+#  define cryptllwarn llwarn
+#else
+#  define cryptwarn   (void)
+#  define cryptllwarn (void)
+#endif
+
+#ifdef CONFIG_DEBUG_CRYPTO_INFO
+#  define cryptinfo   info
+#  define cryptllinfo llinfo
+#else
+#  define cryptinfo(x...)
+#  define cryptllinfo(x...)
+#endif
+
+#ifdef CONFIG_DEBUG_INPUT_ERROR
+#  define ierr        err
+#  define illerr      llerr
+#else
+#  define ierr        (void)
+#  define illerr      (void)
+#endif
+
+#ifdef CONFIG_DEBUG_INPUT_WARN
+#  define iwarn       warn
+#  define illwarn     llwarn
+#else
+#  define iwarn       (void)
+#  define illwarn     (void)
+#endif
+
+#ifdef CONFIG_DEBUG_INPUT_INFO
+#  define iinfo       info
+#  define illinfo     llinfo
+#else
+#  define iinfo       (void)
+#  define illinfo     (void)
+#endif
+
+#ifdef CONFIG_DEBUG_SENSORS_ERROR
+#  define snerr       err
+#  define snllerr     llerr
+#else
+#  define snerr       (void)
+#  define snllerr     (void)
+#endif
+
+#ifdef CONFIG_DEBUG_SENSORS_WARN
+#  define snwarn      warn
+#  define snllwarn    llwarn
+#else
+#  define snwarn      (void)
+#  define snllwarn    (void)
+#endif
+
+#ifdef CONFIG_DEBUG_SENSORS_INFO
+#  define sninfo      info
+#  define snllinfo    llinfo
+#else
+#  define sninfo      (void)
+#  define snllinfo    (void)
+#endif
+
+#ifdef CONFIG_DEBUG_ANALOG_ERROR
+#  define aerr        err
+#  define allerr      llerr
+#else
+#  define aerr        (void)
+#  define allerr      (void)
+#endif
+
+#ifdef CONFIG_DEBUG_ANALOG_WARN
+#  define awarn       warn
+#  define allwarn     llwarn
+#else
+#  define awarn       (void)
+#  define allwarn     (void)
+#endif
+
+#ifdef CONFIG_DEBUG_ANALOG_INFO
+#  define ainfo       info
+#  define allinfo     llinfo
+#else
+#  define ainfo       (void)
+#  define allinfo     (void)
+#endif
+
+#ifdef CONFIG_DEBUG_GRAPHICS_ERROR
+#  define gerr        err
+#  define gllerr      llerr
+#else
+#  define gerr        (void)
+#  define gllerr      (void)
+#endif
+
+#ifdef CONFIG_DEBUG_GRAPHICS_WARN
+#  define gwarn       warn
+#  define gllwarn     llwarn
+#else
+#  define gwarn       (void)
+#  define gllwarn     (void)
+#endif
+
+#ifdef CONFIG_DEBUG_GRAPHICS_INFO
+#  define ginfo       info
+#  define gllinfo     llinfo
+#else
+#  define ginfo       (void)
+#  define gllinfo     (void)
+#endif
+
+#ifdef CONFIG_DEBUG_BINFMT_ERROR
+#  define berr        err
+#  define bllerr      llerr
+#else
+#  define berr        (void)
+#  define bllerr      (void)
+#endif
+
+#ifdef CONFIG_DEBUG_BINFMT_WARN
+#  define bwarn       warn
+#  define bllwarn     llwarn
+#else
+#  define bwarn       (void)
+#  define bllwarn     (void)
+#endif
+
+#ifdef CONFIG_DEBUG_BINFMT_INFO
+#  define binfo       info
+#  define bllinfo     llinfo
+#else
+#  define binfo       (void)
+#  define bllinfo     (void)
+#endif
+
+#ifdef CONFIG_DEBUG_LIB_ERROR
+#  define lerr        err
+#  define lllerr      llerr
+#else
+#  define lerr        (void)
+#  define lllerr      (void)
+#endif
+
+#ifdef CONFIG_DEBUG_LIB_WARN
+#  define lwarn       warn
+#  define lllwarn     llwarn
+#else
+#  define lwarn       (void)
+#  define lllwarn     (void)
+#endif
+
+#ifdef CONFIG_DEBUG_LIB_INFO
+#  define linfo       info
+#  define lllinfo     llinfo
+#else
+#  define linfo       (void)
+#  define lllinfo     (void)
+#endif
+
+#ifdef CONFIG_DEBUG_AUDIO_ERROR
+#  define auderr      err
+#  define audllerr    llerr
+#else
+#  define auderr      (void)
+#  define audllerr    (void)
+#endif
+
+#ifdef CONFIG_DEBUG_AUDIO_WARN
+#  define audwarn     warn
+#  define audllwarn   llwarn
+#else
+#  define audwarn     (void)
+#  define audllwarn   (void)
+#endif
+
+#ifdef CONFIG_DEBUG_AUDIO_INFO
+#  define audinfo     info
+#  define audllinfo   llinfo
+#else
+#  define audinfo     (void)
+#  define audllinfo   (void)
 #endif
 
 #endif /* CONFIG_CPP_HAVE_VARARGS */
 
 /* Buffer dumping macros do not depend on varargs */
 
-#ifdef CONFIG_DEBUG
-#  define dbgdumpbuffer(m,b,n) lib_dumpbuffer(m,b,n)
-#  ifdef CONFIG_DEBUG_VERBOSE
-#    define vdbgdumpbuffer(m,b,n) lib_dumpbuffer(m,b,n)
+#ifdef CONFIG_DEBUG_ERROR
+#  define errdumpbuffer(m,b,n) lib_dumpbuffer(m,b,n)
+#  ifdef CONFIG_DEBUG_INFO
+#    define infodumpbuffer(m,b,n) lib_dumpbuffer(m,b,n)
 #  else
-#   define vdbgdumpbuffer(m,b,n)
+#   define infodumpbuffer(m,b,n)
 #  endif
 #else
-#  define dbgdumpbuffer(m,b,n)
-#  define vdbgdumpbuffer(m,b,n)
+#  define errdumpbuffer(m,b,n)
+#  define infodumpbuffer(m,b,n)
 # endif
 
 /* Subsystem specific debug */
 
 #ifdef CONFIG_DEBUG_MM
-#  define mdbgdumpbuffer(m,b,n)  dbgdumpbuffer(m,b,n)
-#  define mvdbgdumpbuffer(m,b,n) vdbgdumpbuffer(m,b,n)
+#  define merrdumpbuffer(m,b,n)  errdumpbuffer(m,b,n)
+#  define minfodumpbuffer(m,b,n) infodumpbuffer(m,b,n)
 #else
-#  define mdbgdumpbuffer(m,b,n)
-#  define mvdbgdumpbuffer(m,b,n)
+#  define merrdumpbuffer(m,b,n)
+#  define minfodumpbuffer(m,b,n)
 #endif
 
 #ifdef CONFIG_DEBUG_SCHED
-#  define sdbgdumpbuffer(m,b,n)  dbgdumpbuffer(m,b,n)
-#  define svdbgdumpbuffer(m,b,n) vdbgdumpbuffer(m,b,n)
+#  define serrdumpbuffer(m,b,n)  errdumpbuffer(m,b,n)
+#  define sinfodumpbuffer(m,b,n) infodumpbuffer(m,b,n)
 #else
-#  define sdbgdumpbuffer(m,b,n)
-#  define svdbgdumpbuffer(m,b,n)
+#  define serrdumpbuffer(m,b,n)
+#  define sinfodumpbuffer(m,b,n)
 #endif
 
 #ifdef CONFIG_DEBUG_PAGING
-#  define pgdbgdumpbuffer(m,b,n)  dbgdumpbuffer(m,b,n)
-#  define pgvdbgdumpbuffer(m,b,n) vdbgdumpbuffer(m,b,n)
+#  define pgerrdumpbuffer(m,b,n)  errdumpbuffer(m,b,n)
+#  define pginfodumpbuffer(m,b,n) infodumpbuffer(m,b,n)
 #else
-#  define pgdbgdumpbuffer(m,b,n)
-#  define pgvdbgdumpbuffer(m,b,n)
+#  define pgerrdumpbuffer(m,b,n)
+#  define pginfodumpbuffer(m,b,n)
 #endif
 
 #ifdef CONFIG_DEBUG_DMA
-#  define dmadbgdumpbuffer(m,b,n)  dbgdumpbuffer(m,b,n)
-#  define dmavdbgdumpbuffer(m,b,n) vdbgdumpbuffer(m,b,n)
+#  define dmaerrdumpbuffer(m,b,n)  errdumpbuffer(m,b,n)
+#  define dmainfodumpbuffer(m,b,n) infodumpbuffer(m,b,n)
 #else
-#  define dmadbgdumpbuffer(m,b,n)
-#  define dmavdbgdumpbuffer(m,b,n)
+#  define dmaerrdumpbuffer(m,b,n)
+#  define dmainfodumpbuffer(m,b,n)
 #endif
 
 #ifdef CONFIG_DEBUG_NET
-#  define ndbgdumpbuffer(m,b,n)  dbgdumpbuffer(m,b,n)
-#  define nvdbgdumpbuffer(m,b,n) vdbgdumpbuffer(m,b,n)
+#  define nerrdumpbuffer(m,b,n)  errdumpbuffer(m,b,n)
+#  define ninfodumpbuffer(m,b,n) infodumpbuffer(m,b,n)
 #else
-#  define ndbgdumpbuffer(m,b,n)
-#  define nvdbgdumpbuffer(m,b,n)
+#  define nerrdumpbuffer(m,b,n)
+#  define ninfodumpbuffer(m,b,n)
 #endif
 
 #ifdef CONFIG_DEBUG_USB
-#  define udbgdumpbuffer(m,b,n)  dbgdumpbuffer(m,b,n)
-#  define uvdbgdumpbuffer(m,b,n) vdbgdumpbuffer(m,b,n)
+#  define uerrdumpbuffer(m,b,n)  errdumpbuffer(m,b,n)
+#  define uinfodumpbuffer(m,b,n) infodumpbuffer(m,b,n)
 #else
-#  define udbgdumpbuffer(m,b,n)
-#  define uvdbgdumpbuffer(m,b,n)
+#  define uerrdumpbuffer(m,b,n)
+#  define uinfodumpbuffer(m,b,n)
 #endif
 
 #ifdef CONFIG_DEBUG_FS
-#  define fdbgdumpbuffer(m,b,n)  dbgdumpbuffer(m,b,n)
-#  define fvdbgdumpbuffer(m,b,n) vdbgdumpbuffer(m,b,n)
+#  define ferrdumpbuffer(m,b,n)  errdumpbuffer(m,b,n)
+#  define finfodumpbuffer(m,b,n) infodumpbuffer(m,b,n)
 #else
-#  define fdbgdumpbuffer(m,b,n)
-#  define fvdbgdumpbuffer(m,b,n)
+#  define ferrdumpbuffer(m,b,n)
+#  define finfodumpbuffer(m,b,n)
 #endif
 
 #ifdef CONFIG_DEBUG_INPUT
-#  define idbgdumpbuffer(m,b,n)  dbgdumpbuffer(m,b,n)
-#  define ivdbgdumpbuffer(m,b,n) vdbgdumpbuffer(m,b,n)
+#  define ierrdumpbuffer(m,b,n)  errdumpbuffer(m,b,n)
+#  define iinfodumpbuffer(m,b,n) infodumpbuffer(m,b,n)
 #else
-#  define idbgdumpbuffer(m,b,n)
-#  define ivdbgdumpbuffer(m,b,n)
+#  define ierrdumpbuffer(m,b,n)
+#  define iinfodumpbuffer(m,b,n)
 #endif
 
 #ifdef CONFIG_DEBUG_GRAPHICS
-#  define gdbgdumpbuffer(m,b,n)  dbgdumpbuffer(m,b,n)
-#  define gvdbgdumpbuffer(m,b,n) vdbgdumpbuffer(m,b,n)
+#  define gerrdumpbuffer(m,b,n)  errdumpbuffer(m,b,n)
+#  define ginfodumpbuffer(m,b,n) infodumpbuffer(m,b,n)
 #else
-#  define gdbgdumpbuffer(m,b,n)
-#  define gvdbgdumpbuffer(m,b,n)
+#  define gerrdumpbuffer(m,b,n)
+#  define ginfodumpbuffer(m,b,n)
 #endif
 
 #ifdef CONFIG_DEBUG_BINFMT
-#  define bdbgdumpbuffer(m,b,n)  dbgdumpbuffer(m,b,n)
-#  define bvdbgdumpbuffer(m,b,n) vdbgdumpbuffer(m,b,n)
+#  define berrdumpbuffer(m,b,n)  errdumpbuffer(m,b,n)
+#  define binfodumpbuffer(m,b,n) infodumpbuffer(m,b,n)
 #else
-#  define bdbgdumpbuffer(m,b,n)
-#  define bvdbgdumpbuffer(m,b,n)
+#  define berrdumpbuffer(m,b,n)
+#  define binfodumpbuffer(m,b,n)
 #endif
 
 #ifdef CONFIG_DEBUG_LIB
-#  define ldbgdumpbuffer(m,b,n)  dbgdumpbuffer(m,b,n)
-#  define lvdbgdumpbuffer(m,b,n) vdbgdumpbuffer(m,b,n)
+#  define lerrdumpbuffer(m,b,n)  errdumpbuffer(m,b,n)
+#  define linfodumpbuffer(m,b,n) infodumpbuffer(m,b,n)
 #else
-#  define ldbgdumpbuffer(m,b,n)
-#  define lvdbgdumpbuffer(m,b,n)
+#  define lerrdumpbuffer(m,b,n)
+#  define linfodumpbuffer(m,b,n)
 #endif
 
 #ifdef CONFIG_DEBUG_AUDIO
-#  define auddbgdumpbuffer(m,b,n)  dbgdumpbuffer(m,b,n)
-#  define audvdbgdumpbuffer(m,b,n) vdbgdumpbuffer(m,b,n)
+#  define auderrdumpbuffer(m,b,n)  errdumpbuffer(m,b,n)
+#  define audinfodumpbuffer(m,b,n) infodumpbuffer(m,b,n)
 #else
-#  define auddbgdumpbuffer(m,b,n)
-#  define audvdbgdumpbuffer(m,b,n)
+#  define auderrdumpbuffer(m,b,n)
+#  define audinfodumpbuffer(m,b,n)
 #endif
 
 /****************************************************************************
@@ -684,21 +1092,33 @@ void lib_dumpbuffer(FAR const char *msg, FAR const uint8_t *buffer,
  */
 
 #ifndef CONFIG_CPP_HAVE_VARARGS
-#ifdef CONFIG_DEBUG
-int dbg(const char *format, ...);
-
-# ifdef CONFIG_ARCH_LOWPUTC
-int lldbg(const char *format, ...);
-# endif
-
-# ifdef CONFIG_DEBUG_VERBOSE
-int vdbg(const char *format, ...);
-
-# ifdef CONFIG_ARCH_LOWPUTC
-int llvdbg(const char *format, ...);
-# endif
+#ifndef CONFIG_ARCH_LOWPUTC
+int alert(const char *format, ...);
 #endif
-#endif /* CONFIG_DEBUG */
+
+#ifdef CONFIG_DEBUG_ERROR
+int err(const char *format, ...);
+
+# ifdef CONFIG_ARCH_LOWPUTC
+int llerr(const char *format, ...);
+# endif
+#endif /* CONFIG_DEBUG_ERROR */
+
+#ifdef CONFIG_DEBUG_WARN
+int warn(const char *format, ...);
+
+# ifdef CONFIG_ARCH_LOWPUTC
+int llwarn(const char *format, ...);
+# endif
+#endif /* CONFIG_DEBUG_WARN */
+
+#ifdef CONFIG_DEBUG_INFO
+int info(const char *format, ...);
+
+# ifdef CONFIG_ARCH_LOWPUTC
+int llinfo(const char *format, ...);
+# endif
+#endif /* CONFIG_DEBUG_INFO */
 #endif /* CONFIG_CPP_HAVE_VARARGS */
 
 #if defined(__cplusplus)

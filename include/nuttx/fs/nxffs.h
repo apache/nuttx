@@ -140,7 +140,7 @@ int nxffs_initialize(FAR struct mtd_dev_s *mtd);
  * Name: nxffs_dump
  *
  * Description:
- *   Dump a summary of the contents of an NXFFS file system.  CONFIG_DEBUG
+ *   Dump a summary of the contents of an NXFFS file system.  CONFIG_DEBUG_FEATURES
  *   and CONFIG_DEBUG_FS must be enabled for this function to do anything.
  *
  * Input Parameters:

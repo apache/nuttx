@@ -68,24 +68,24 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Enables debug output from this file (needs CONFIG_DEBUG with
- * CONFIG_DEBUG_VERBOSE too)
+/* Enables debug output from this file (needs CONFIG_DEBUG_FEATURES with
+ * CONFIG_DEBUG_INFO too)
  */
 
 #undef LCD_DEBUG   /* Define to enable debug */
 #undef LCD_VERBOSE /* Define to enable verbose debug */
 
 #ifdef LCD_DEBUG
-#  define leddbg  lldbg
+#  define lederr  llerr
 #  ifdef LCD_VERBOSE
-#    define ledvdbg lldbg
+#    define ledinfo llerr
 #  else
-#    define ledvdbg(x...)
+#    define ledinfo(x...)
 #  endif
 #else
 #  undef LCD_VERBOSE
-#  define leddbg(x...)
-#  define ledvdbg(x...)
+#  define lederr(x...)
+#  define ledinfo(x...)
 #endif
 
 /****************************************************************************
@@ -94,10 +94,6 @@
 
 FAR struct spi_dev_s *g_spidev;
 FAR struct lcd_dev_s *g_lcddev;
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -118,7 +114,7 @@ int board_lcd_initialize(void)
   g_spidev = lpc17_sspbus_initialize(0);
   if (!g_spidev)
     {
-      glldbg("Failed to initialize SSP port 0\n");
+      gllerr("ERROR: Failed to initialize SSP port 0\n");
       return 0;
     }
 
@@ -137,11 +133,11 @@ FAR struct lcd_dev_s *board_lcd_getdev(int lcddev)
   g_lcddev = st7567_initialize(g_spidev, lcddev);
   if (!g_lcddev)
     {
-      glldbg("Failed to bind SSI port 0 to OLCD %d: %d\n", lcddev);
+      gllerr("ERROR: Failed to bind SSI port 0 to OLCD %d: %d\n", lcddev);
     }
   else
     {
-      gllvdbg("Bound SSI port 0 to OLCD %d\n", lcddev);
+      gllinfo("Bound SSI port 0 to OLCD %d\n", lcddev);
 
       /* And turn the OLCD on (CONFIG_LCD_MAXPOWER should be 1) */
       (void)g_lcddev->setpower(g_lcddev, CONFIG_LCD_MAXPOWER);

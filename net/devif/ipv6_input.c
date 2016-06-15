@@ -151,7 +151,7 @@ int ipv6_input(FAR struct net_driver_s *dev)
       g_netstats.ipv6.vhlerr++;
 #endif
 
-      nlldbg("ERROR: Invalid IPv6 version: %d\n", ipv6->vtc >> 4);
+      nllwarn("WARNING: Invalid IPv6 version: %d\n", ipv6->vtc >> 4);
       goto drop;
     }
 
@@ -160,7 +160,7 @@ int ipv6_input(FAR struct net_driver_s *dev)
   hdrlen = NET_LL_HDRLEN(dev);
   if ((hdrlen + IPv6_HDRLEN) > dev->d_len)
     {
-      nlldbg("Packet shorter than IPv6 header\n");
+      nllwarn("WARNING: Packet shorter than IPv6 header\n");
       goto drop;
     }
 
@@ -187,7 +187,7 @@ int ipv6_input(FAR struct net_driver_s *dev)
     }
   else
     {
-      nlldbg("ERROR: IP packet shorter than length in IP header\n");
+      nllwarn("WARNING: IP packet shorter than length in IP header\n");
       goto drop;
     }
 
@@ -216,7 +216,7 @@ int ipv6_input(FAR struct net_driver_s *dev)
        * packets.
        */
 
-      nlldbg("ERROR: No IP address assigned\n");
+      nllwarn("WARNING: No IP address assigned\n");
       goto drop;
     }
 
@@ -279,7 +279,7 @@ int ipv6_input(FAR struct net_driver_s *dev)
         g_netstats.ipv6.protoerr++;
 #endif
 
-        nlldbg("ERROR: Unrecognized IP protocol: %04x\n", ipv6->proto);
+        nllwarn("WARNING: Unrecognized IP protocol: %04x\n", ipv6->proto);
         goto drop;
     }
 

@@ -108,7 +108,7 @@ CHIP_CSRCS += kinetis_pinirq.c
 endif
 
 ifeq ($(CONFIG_DEBUG_GPIO),y)
-CHIP_CSRCS += kinetis_pindbg.c
+CHIP_CSRCS += kinetis_pindump.c
 endif
 
 ifeq ($(CONFIG_KINETIS_SDHC),y)
@@ -125,6 +125,10 @@ endif
 
 ifeq ($(CONFIG_KINETIS_DMA),y)
 CHIP_CSRCS += kinetis_dma.c kinetis_pindma.c
+endif
+
+ifeq ($(CONFIG_PWM),y)
+CHIP_CSRCS += kinetis_pwm.c
 endif
 
 ifeq ($(CONFIG_NET),y)

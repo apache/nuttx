@@ -1353,7 +1353,7 @@ int mtdconfig_register(FAR struct mtd_dev_s *mtd)
       ret = MTD_IOCTL(mtd, MTDIOC_GEOMETRY, (unsigned long)((uintptr_t)&geo));
       if (ret < 0)
         {
-          fdbg("MTD ioctl(MTDIOC_GEOMETRY) failed: %d\n", ret);
+          ferr("ERROR: MTD ioctl(MTDIOC_GEOMETRY) failed: %d\n", ret);
           kmm_free(dev);
           goto errout;
         }

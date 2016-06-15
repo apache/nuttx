@@ -785,50 +785,50 @@ uint32_t spifiGetSubBlockFromBlock(const SPIFI_HANDLE_T *pHandle, uint32_t block
 SPIFI_ERR_T spifiProgram(const SPIFI_HANDLE_T *pHandle, uint32_t addr, const uint32_t *writeBuff, uint32_t bytes)
 {
 	uint32_t sendBytes;
-	SPIFI_ERR_T err = SPIFI_ERR_NONE;
+	SPIFI_ERR_T errcode = SPIFI_ERR_NONE;
 
 	/* Program using up to page size */
-	while ((bytes > 0) && (err == SPIFI_ERR_NONE)) {
+	while ((bytes > 0) && (errcode == SPIFI_ERR_NONE)) {
 		sendBytes = bytes;
 		if (sendBytes > pHandle->pInfoData->pageSize) {
 			sendBytes = pHandle->pInfoData->pageSize;
 		}
 
-		err = pHandle->pFamFx->pageProgram(pHandle, addr, writeBuff, sendBytes);
+		errcode = pHandle->pFamFx->pageProgram(pHandle, addr, writeBuff, sendBytes);
 		addr += sendBytes;
 		writeBuff += (sendBytes >> 2);
 		bytes -= sendBytes;
 	}
 
-	return err;
+	return errcode;
 }
 
 /* Read the device into the passed buffer */
 SPIFI_ERR_T spifiRead(const SPIFI_HANDLE_T *pHandle, uint32_t addr, uint32_t *readBuff, uint32_t bytes)
 {
 	uint32_t readBytes;
-	SPIFI_ERR_T err = SPIFI_ERR_NONE;
+	SPIFI_ERR_T errcode = SPIFI_ERR_NONE;
 
 	/* Read using up to the maximum read size */
-	while ((bytes > 0) && (err == SPIFI_ERR_NONE)) {
+	while ((bytes > 0) && (errcode == SPIFI_ERR_NONE)) {
 		readBytes = bytes;
 		if (readBytes > pHandle->pInfoData->maxReadSize) {
 			readBytes = pHandle->pInfoData->maxReadSize;
 		}
 
-		err = pHandle->pFamFx->read(pHandle, addr, readBuff, readBytes);
+		errcode = pHandle->pFamFx->read(pHandle, addr, readBuff, readBytes);
 		addr += readBytes;
 		readBuff += (readBytes / sizeof(uint32_t));
 		bytes -= readBytes;
 	}
 
-	return err;
+	return errcode;
 }
 
 /* Erase multiple blocks */
 SPIFI_ERR_T spifiErase(const SPIFI_HANDLE_T *pHandle, uint32_t firstBlock, uint32_t numBlocks)
 {
-	SPIFI_ERR_T err = SPIFI_ERR_NONE;
+	SPIFI_ERR_T errcode = SPIFI_ERR_NONE;
 
 	if ((firstBlock + numBlocks) > pHandle->pInfoData->numBlocks) {
 		return SPIFI_ERR_RANGE;
@@ -836,20 +836,20 @@ SPIFI_ERR_T spifiErase(const SPIFI_HANDLE_T *pHandle, uint32_t firstBlock, uint3
 
 	/* Only perform erase if numBlocks is != 0 */
 	for (; (numBlocks); ++firstBlock, --numBlocks) {
-		err = pHandle->pFamFx->eraseBlock(pHandle, firstBlock);
-		if (err != SPIFI_ERR_NONE) {
+		errcode = pHandle->pFamFx->eraseBlock(pHandle, firstBlock);
+		if (errcode != SPIFI_ERR_NONE) {
 			break;
 		}
 	}
 
-	return err;
+	return errcode;
 }
 
 /* Erase multiple blocks by address range */
 SPIFI_ERR_T spifiEraseByAddr(const SPIFI_HANDLE_T *pHandle, uint32_t firstAddr, uint32_t lastAddr)
 {
 	uint32_t firstBlock, lastBlock;
-	SPIFI_ERR_T err = SPIFI_ERR_RANGE;
+	SPIFI_ERR_T errcode = SPIFI_ERR_RANGE;
 
 	/* Get block numbers for addresses */
 	firstBlock = spifiGetBlockFromAddr(pHandle, firstAddr);
@@ -857,8 +857,8 @@ SPIFI_ERR_T spifiEraseByAddr(const SPIFI_HANDLE_T *pHandle, uint32_t firstAddr, 
 
 	/* Limit to legal address range */
 	if ((firstBlock != ~0UL) && (lastBlock != ~0UL)) {
-		err = spifiErase(pHandle, firstBlock, ((lastBlock - firstBlock) + 1));
+		errcode = spifiErase(pHandle, firstBlock, ((lastBlock - firstBlock) + 1));
 	}
 
-	return err;
+	return errcode;
 }

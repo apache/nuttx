@@ -304,7 +304,7 @@ static inline void pim_configgpio(uint16_t cfgset, uint8_t portndx, uint8_t pin)
 
   DEBUGASSERT(portndx < HCS12_PIM_NPORTS);
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if ((cfgset & GPIO_INT_ENABLE) != 0)
     {
       /* Yes.. then it must not be tagged as an output */

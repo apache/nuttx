@@ -1345,7 +1345,7 @@ static int tmpfs_open(FAR struct file *filep, FAR const char *relpath,
   off_t offset;
   int ret;
 
-  fvdbg("filep: %p\n", filep);
+  finfo("filep: %p\n", filep);
   DEBUGASSERT(filep->f_priv == NULL && filep->f_inode != NULL);
 
   /* Get the mountpoint inode reference from the file structure and the
@@ -1489,7 +1489,7 @@ static int tmpfs_close(FAR struct file *filep)
 {
   FAR struct tmpfs_file_s *tfo;
 
-  fvdbg("filep: %p\n", filep);
+  finfo("filep: %p\n", filep);
   DEBUGASSERT(filep->f_priv != NULL && filep->f_inode != NULL);
 
   /* Recover our private data from the struct file instance */
@@ -1543,7 +1543,7 @@ static ssize_t tmpfs_read(FAR struct file *filep, FAR char *buffer,
   off_t startpos;
   off_t endpos;
 
-  fvdbg("filep: %p buffer: %p buflen: %lu\n",
+  finfo("filep: %p buffer: %p buflen: %lu\n",
         filep, buffer, (unsigned long)buflen);
   DEBUGASSERT(filep->f_priv != NULL && filep->f_inode != NULL);
 
@@ -1591,7 +1591,7 @@ static ssize_t tmpfs_write(FAR struct file *filep, FAR const char *buffer,
   off_t endpos;
   int ret;
 
-  fvdbg("filep: %p buffer: %p buflen: %lu\n",
+  finfo("filep: %p buffer: %p buflen: %lu\n",
         filep, buffer, (unsigned long)buflen);
   DEBUGASSERT(filep->f_priv != NULL && filep->f_inode != NULL);
 
@@ -1646,7 +1646,7 @@ static off_t tmpfs_seek(FAR struct file *filep, off_t offset, int whence)
   FAR struct tmpfs_file_s *tfo;
   off_t position;
 
-  fvdbg("filep: %p\n", filep);
+  finfo("filep: %p\n", filep);
   DEBUGASSERT(filep->f_priv != NULL && filep->f_inode != NULL);
 
   /* Recover our private data from the struct file instance */
@@ -1706,7 +1706,7 @@ static int tmpfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   FAR struct tmpfs_file_s *tfo;
   FAR void **ppv = (FAR void**)arg;
 
-  fvdbg("filep: %p cmd: %d arg: %08lx\n", filep, cmd, arg);
+  finfo("filep: %p cmd: %d arg: %08lx\n", filep, cmd, arg);
   DEBUGASSERT(filep->f_priv != NULL && filep->f_inode != NULL);
 
   /* Recover our private data from the struct file instance */
@@ -1727,7 +1727,7 @@ static int tmpfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       return OK;
     }
 
-  fdbg("Invalid cmd: %d\n", cmd);
+  ferr("ERROR: Invalid cmd: %d\n", cmd);
   return -ENOTTY;
 }
 
@@ -1739,7 +1739,7 @@ static int tmpfs_dup(FAR const struct file *oldp, FAR struct file *newp)
 {
   FAR struct tmpfs_file_s *tfo;
 
-  fvdbg("Dup %p->%p\n", oldp, newp);
+  finfo("Dup %p->%p\n", oldp, newp);
   DEBUGASSERT(oldp->f_priv != NULL && oldp->f_inode != NULL &&
               newp->f_priv == NULL && newp->f_inode != NULL);
 
@@ -1774,7 +1774,7 @@ static int tmpfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
   FAR struct tmpfs_directory_s *tdo;
   int ret;
 
-  fvdbg("mountpt: %p relpath: %s dir: %p\n",
+  finfo("mountpt: %p relpath: %s dir: %p\n",
         mountpt, relpath, dir);
   DEBUGASSERT(mountpt != NULL && relpath != NULL && dir != NULL);
 
@@ -1820,7 +1820,7 @@ static int tmpfs_closedir(FAR struct inode *mountpt,
 {
   FAR struct tmpfs_directory_s *tdo;
 
-  fvdbg("mountpt: %p dir: %p\n",  mountpt, dir);
+  finfo("mountpt: %p dir: %p\n",  mountpt, dir);
   DEBUGASSERT(mountpt != NULL && dir != NULL);
 
   /* Get the directory structure from the dir argument */
@@ -1847,7 +1847,7 @@ static int tmpfs_readdir(FAR struct inode *mountpt,
   unsigned int index;
   int ret;
 
-  fvdbg("mountpt: %p dir: %p\n",  mountpt, dir);
+  finfo("mountpt: %p dir: %p\n",  mountpt, dir);
   DEBUGASSERT(mountpt != NULL && dir != NULL);
 
   /* Get the directory structure from the dir argument and lock it */
@@ -1866,7 +1866,7 @@ static int tmpfs_readdir(FAR struct inode *mountpt,
        * -ENOENT
        */
 
-      fvdbg("End of directory\n");
+      finfo("End of directory\n");
       ret = -ENOENT;
     }
   else
@@ -1914,7 +1914,7 @@ static int tmpfs_readdir(FAR struct inode *mountpt,
 static int tmpfs_rewinddir(FAR struct inode *mountpt,
                            FAR struct fs_dirent_s *dir)
 {
-  fvdbg("mountpt: %p dir: %p\n",  mountpt, dir);
+  finfo("mountpt: %p dir: %p\n",  mountpt, dir);
   DEBUGASSERT(mountpt != NULL && dir != NULL);
 
   /* Set the readdir index to zero */
@@ -1933,7 +1933,7 @@ static int tmpfs_bind(FAR struct inode *blkdriver, FAR const void *data,
   FAR struct tmpfs_directory_s *tdo;
   FAR struct tmpfs_s *fs;
 
-  fvdbg("blkdriver: %p data: %p handle: %p\n", blkdriver, data, handle);
+  finfo("blkdriver: %p data: %p handle: %p\n", blkdriver, data, handle);
   DEBUGASSERT(blkdriver == NULL && handle != NULL);
 
   /* Create an instance of the tmpfs file system */
@@ -1985,7 +1985,7 @@ static int tmpfs_unbind(FAR void *handle, FAR struct inode **blkdriver,
   FAR struct tmpfs_directory_s *tdo;
   int ret;
 
-  fvdbg("handle: %p blkdriver: %p flags: %02x\n",
+  finfo("handle: %p blkdriver: %p flags: %02x\n",
         handle, blkdriver, flags);
   DEBUGASSERT(fs != NULL && fs->tfs_root.tde_object != NULL);
 
@@ -2023,7 +2023,7 @@ static int tmpfs_statfs(FAR struct inode *mountpt, FAR struct statfs *buf)
   off_t blkused;
   int ret;
 
-  fvdbg("mountpt: %p buf: %p\n", mountpt, buf);
+  finfo("mountpt: %p buf: %p\n", mountpt, buf);
   DEBUGASSERT(mountpt != NULL && buf != NULL);
 
   /* Get the file system structure from the inode reference. */
@@ -2090,7 +2090,7 @@ static int tmpfs_unlink(FAR struct inode *mountpt, FAR const char *relpath)
   FAR const char *name;
   int ret;
 
-  fvdbg("mountpt: %p relpath: %s\n", mountpt, relpath);
+  finfo("mountpt: %p relpath: %s\n", mountpt, relpath);
   DEBUGASSERT(mountpt != NULL && relpath != NULL);
 
   /* Get the file system structure from the inode reference. */
@@ -2190,7 +2190,7 @@ static int tmpfs_mkdir(FAR struct inode *mountpt, FAR const char *relpath,
   FAR struct tmpfs_s *fs;
   int ret;
 
-  fvdbg("mountpt: %p relpath: %s mode: %04x\n", mountpt, relpath, mode);
+  finfo("mountpt: %p relpath: %s mode: %04x\n", mountpt, relpath, mode);
   DEBUGASSERT(mountpt != NULL && relpath != NULL);
 
   /* Get the file system structure from the inode reference. */
@@ -2221,7 +2221,7 @@ static int tmpfs_rmdir(FAR struct inode *mountpt, FAR const char *relpath)
   FAR const char *name;
   int ret;
 
-  fvdbg("mountpt: %p relpath: %s\n", mountpt, relpath);
+  finfo("mountpt: %p relpath: %s\n", mountpt, relpath);
   DEBUGASSERT(mountpt != NULL && relpath != NULL);
 
   /* Get the file system structure from the inode reference. */
@@ -2322,7 +2322,7 @@ static int tmpfs_rename(FAR struct inode *mountpt, FAR const char *oldrelpath,
   FAR char *copy;
   int ret;
 
-  fvdbg("mountpt: %p oldrelpath: %s newrelpath: %s\n",
+  finfo("mountpt: %p oldrelpath: %s newrelpath: %s\n",
         mountpt, oldrelpath, newrelpath);
   DEBUGASSERT(mountpt != NULL && oldrelpath != NULL && newrelpath != NULL);
 
@@ -2462,7 +2462,7 @@ static int tmpfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
   size_t objsize;
   int ret;
 
-  fvdbg("mountpt=%p relpath=%s buf=%p\n", mountpt, relpath, buf);
+  finfo("mountpt=%p relpath=%s buf=%p\n", mountpt, relpath, buf);
   DEBUGASSERT(mountpt != NULL && relpath != NULL && buf != NULL);
 
   /* Get the file system structure from the inode reference. */

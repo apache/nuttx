@@ -144,7 +144,7 @@ static int bh1750fvi_read16(FAR struct bh1750fvi_dev_s *priv,
   ret = i2c_read(priv->i2c, &config, buffer, 2);
   if (ret < 0)
     {
-      sndbg ("i2c_read failed: %d\n", ret);
+      snerr ("i2c_read failed: %d\n", ret);
       return ret;
     }
 
@@ -152,7 +152,7 @@ static int bh1750fvi_read16(FAR struct bh1750fvi_dev_s *priv,
 
   *regval = (uint16_t)((buffer[0]<<8) | (buffer[1]));
 
-  sndbg("value: %08x ret: %d\n", *regval, ret);
+  sninfo("value: %08x ret: %d\n", *regval, ret);
   return OK;
 }
 
@@ -169,7 +169,7 @@ static int bh1750fvi_write8(FAR struct bh1750fvi_dev_s *priv, uint8_t regval)
   struct i2c_config_s config;
   int ret;
 
-  sndbg("value: %02x\n", regval);
+  sninfo("value: %02x\n", regval);
 
   /* Set up the I2C configuration */
 
@@ -182,7 +182,7 @@ static int bh1750fvi_write8(FAR struct bh1750fvi_dev_s *priv, uint8_t regval)
   ret = i2c_write(priv->i2c, &config, &regval, 1);
   if (ret < 0)
     {
-      sndbg("i2c_write failed: %d\n", ret);
+      snerr("ERROR: i2c_write failed: %d\n", ret);
     }
 
   return ret;
@@ -236,14 +236,14 @@ static ssize_t bh1750fvi_read(FAR struct file *filep, FAR char *buffer,
 
   if (buflen != 2)
     {
-      sndbg("You need to read 2 bytes from this sensor!\n");
+      snerr("ERROR: You need to read 2 bytes from this sensor!\n");
       return -EINVAL;
     }
 
   ret = bh1750fvi_read16(priv, &lux);
   if (ret < 0)
     {
-      sndbg("Error reading light sensor!\n");
+      snerr("ERROR: Error reading light sensor!\n");
       return ret;
     }
 
@@ -283,7 +283,7 @@ static int bh1750fvi_ioctl(FAR struct file *filep, int cmd,
           ret = bh1750fvi_write8(priv, BH1750FVI_CONTINUOUS_HRM);
           if (ret < 0)
             {
-              sndbg("Cannot change to Continuously H-Resolution Mode!\n");
+              snerr("ERROR: Cannot change to Continuously H-Resolution Mode!\n");
             }
         }
         break;
@@ -295,7 +295,7 @@ static int bh1750fvi_ioctl(FAR struct file *filep, int cmd,
           ret = bh1750fvi_write8(priv, BH1750FVI_CONTINUOUS_HRM2);
           if (ret < 0)
             {
-              sndbg("Cannot change to Continuously H-Resolution Mode2!\n");
+              snerr("ERROR: Cannot change to Continuously H-Resolution Mode2!\n");
             }
         }
         break;
@@ -307,7 +307,7 @@ static int bh1750fvi_ioctl(FAR struct file *filep, int cmd,
           ret = bh1750fvi_write8(priv, BH1750FVI_CONTINUOUS_LRM);
           if (ret < 0)
             {
-              sndbg("Cannot change to Continuously L-Resolution Mode!\n");
+              snerr("ERROR: Cannot change to Continuously L-Resolution Mode!\n");
             }
         }
         break;
@@ -319,7 +319,7 @@ static int bh1750fvi_ioctl(FAR struct file *filep, int cmd,
           ret = bh1750fvi_write8(priv, BH1750FVI_ONETIME_HRM);
           if (ret < 0)
             {
-              sndbg("Cannot change to One Time H-Resolution Mode!\n");
+              snerr("ERROR: Cannot change to One Time H-Resolution Mode!\n");
             }
         }
         break;
@@ -331,7 +331,7 @@ static int bh1750fvi_ioctl(FAR struct file *filep, int cmd,
           ret = bh1750fvi_write8(priv, BH1750FVI_ONETIME_HRM2);
           if (ret < 0)
             {
-              sndbg("Cannot change to One Time H-Resolution Mode2!\n");
+              snerr("ERROR: Cannot change to One Time H-Resolution Mode2!\n");
             }
         }
         break;
@@ -343,7 +343,7 @@ static int bh1750fvi_ioctl(FAR struct file *filep, int cmd,
           ret = bh1750fvi_write8(priv, BH1750FVI_ONETIME_LRM);
           if (ret < 0)
             {
-              sndbg("Cannot change to One Time L-Resolution Mode!\n");
+              snerr("ERROR: Cannot change to One Time L-Resolution Mode!\n");
             }
         }
         break;
@@ -361,7 +361,7 @@ static int bh1750fvi_ioctl(FAR struct file *filep, int cmd,
           ret = bh1750fvi_write8(priv, reg);
           if (ret < 0)
             {
-              sndbg("Cannot Change Measure Time at MEASURE_TIMEH!\n");
+              snerr("ERROR: Cannot Change Measure Time at MEASURE_TIMEH!\n");
             }
 
           reg = BH1750FVI_MEASURE_TIMEL | (*ptr & 0x1F);
@@ -369,13 +369,13 @@ static int bh1750fvi_ioctl(FAR struct file *filep, int cmd,
           ret = bh1750fvi_write8(priv, reg);
           if (ret < 0)
             {
-              sndbg("Cannot Change Measure Time at MEASURE_TIMEL!\n");
+              snerr("ERROR: Cannot Change Measure Time at MEASURE_TIMEL!\n");
             }
         }
         break;
 
       default:
-        sndbg("Unrecognized cmd: %d\n", cmd);
+        snerr("ERROR: Unrecognized cmd: %d\n", cmd);
         ret = -ENOTTY;
         break;
     }
@@ -419,7 +419,7 @@ int bh1750fvi_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
 
   if (priv == NULL)
     {
-      sndbg("Failed to allocate instance\n");
+      snerr("ERROR: Failed to allocate instance\n");
       return -ENOMEM;
     }
 
@@ -431,7 +431,7 @@ int bh1750fvi_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
   ret = bh1750fvi_write8(priv, BH1750FVI_POWERON);
   if (ret < 0)
     {
-      sndbg("Failed to power-on the BH1750FVI!\n");
+      snerr("ERROR: Failed to power-on the BH1750FVI!\n");
       return ret;
     }
 
@@ -440,7 +440,7 @@ int bh1750fvi_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
   ret = bh1750fvi_write8(priv, BH1750FVI_CONTINUOUS_HRM);
   if (ret < 0)
     {
-      sndbg("Failed to enable the Continuosly H-Resolution Mode!\n");
+      snerr("ERROR: Failed to enable the Continuosly H-Resolution Mode!\n");
       return ret;
     }
 
@@ -449,7 +449,7 @@ int bh1750fvi_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
   ret = register_driver(devpath, &g_bh1750fvi_fops, 0666, priv);
   if (ret < 0)
     {
-      sndbg("Failed to register driver: %d\n", ret);
+      snerr("ERROR: Failed to register driver: %d\n", ret);
       kmm_free(priv);
     }
 

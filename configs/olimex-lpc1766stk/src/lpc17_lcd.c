@@ -79,20 +79,20 @@
  * Verbose debug must also be enabled
  */
 
-#ifndef CONFIG_DEBUG
-#  undef CONFIG_DEBUG_VERBOSE
+#ifndef CONFIG_DEBUG_FEATURES
+#  undef CONFIG_DEBUG_INFO
 #  undef CONFIG_DEBUG_GRAPHICS
 #endif
 
-#ifndef CONFIG_DEBUG_VERBOSE
+#ifndef CONFIG_DEBUG_INFO
 #  undef CONFIG_LCD_NOKIADBG
 #endif
 
 #ifdef CONFIG_LCD_NOKIADBG
-#  define lcddbg(format, ...) vdbg(format, ##__VA_ARGS__)
+#  define lcderr(format, ...) info(format, ##__VA_ARGS__)
 #  define lcd_dumpgpio(m)     lpc17_dumpgpio(LPC1766STK_LCD_RST, m)
 #else
-#  define lcddbg(x...)
+#  define lcderr(x...)
 #  define lcd_dumpgpio(m)
 #endif
 
@@ -214,7 +214,7 @@ FAR struct lcd_dev_s *board_graphics_setup(unsigned int devno)
   spi = lpc17_sspbus_initialize(0);
   if (!spi)
     {
-      glldbg("Failed to initialize SSP port 0\n");
+      gllerr("ERROR: Failed to initialize SSP port 0\n");
     }
   else
     {
@@ -223,11 +223,11 @@ FAR struct lcd_dev_s *board_graphics_setup(unsigned int devno)
       dev = nokia_lcdinitialize(spi, devno);
       if (!dev)
         {
-          glldbg("Failed to bind SSP port 0 to LCD %d: %d\n", devno);
+          gllerr("ERROR: Failed to bind SSP port 0 to LCD %d: %d\n", devno);
         }
      else
         {
-          gllvdbg("Bound SSP port 0 to LCD %d\n", devno);
+          gllinfo("Bound SSP port 0 to LCD %d\n", devno);
 
           /* And turn the LCD on (CONFIG_LCD_MAXPOWER should be 1) */
 

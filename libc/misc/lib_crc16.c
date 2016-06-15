@@ -114,9 +114,9 @@ uint16_t crc16part(FAR const uint8_t *src, size_t len, uint16_t crc16val)
 {
   size_t i;
 
-  for (i = 0;  i < len;  i++)
+  for (i = 0; i < len; i++)
     {
-      crc16val = crc16_tab[((crc16val >> 8) & 255)] ^ (crc16val << 8) ^ src[i];
+      crc16val = crc16_tab[((crc16val >> 8) & 0xff) ^ src[i]] ^ (crc16val << 8);
     }
 
   return crc16val;

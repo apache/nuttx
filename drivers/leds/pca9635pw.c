@@ -49,6 +49,20 @@
 #if defined(CONFIG_I2C) && defined(CONFIG_PCA9635PW)
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#ifdef CONFIG_DEBUG_LEDS
+#  define derr  llerr
+#  define dwarn llwarn
+#  define dinfo llinfo
+#else
+#  define derr(x...)
+#  define dwarn(x...)
+#  define dinfo(x...)
+#endif
+
+/****************************************************************************
  * Private Type Definitions
  ****************************************************************************/
 
@@ -105,8 +119,6 @@ static int pca9635pw_i2c_write_byte(FAR struct pca9635pw_dev_s *priv,
 {
   struct i2c_config_s config;
 
-  dbg("pca9635pw_i2c_write_byte\n");
-
   /* assemble the 2 byte message comprised of reg_addr and reg_val */
 
   uint8_t const BUFFER_SIZE = 2;
@@ -123,14 +135,13 @@ static int pca9635pw_i2c_write_byte(FAR struct pca9635pw_dev_s *priv,
 
   /* Write the register address followed by the data (no RESTART) */
 
-  dbg("i2c addr: 0x%02X reg addr: 0x%02X value: 0x%02X\n", priv->i2c_addr,
-      buffer[0], buffer[1]);
-
+  dinfo("i2c addr: 0x%02X reg addr: 0x%02X value: 0x%02X\n", priv->i2c_addr,
+        buffer[0], buffer[1]);
 
   ret = i2c_write(priv->i2c, &config, buffer, BUFFER_SIZE);
   if (ret != OK)
     {
-      dbg("i2c_write returned error code %d\n", ret);
+      derr("ERROR: i2c_write returned error code %d\n", ret);
       return ret;
     }
 
@@ -173,11 +184,8 @@ static int pca9635pw_set_led_mode(FAR struct pca9635pw_dev_s *priv,
 
 static int pca9635pw_open(FAR struct file *filep)
 {
-  dbg("pca9635pw_open\n");
-
   FAR struct inode *inode = filep->f_inode;
   FAR struct pca9635pw_dev_s *priv = inode->i_private;
-
   int ret = -1;
 
   /* Wake up the PCA9635PW (sleep bit PCA9635PW_MODE_1_SLEEP is set to zero
@@ -192,7 +200,7 @@ static int pca9635pw_open(FAR struct file *filep)
                                  PCA9635PW_MODE_1_INITIAL_VALUE);
   if (ret != OK)
     {
-      dbg("Could not set initial config for PCA9635PW_MODE_1\n");
+      derr("ERROR: Could not set initial config for PCA9635PW_MODE_1\n");
       return ret;
     }
 
@@ -209,7 +217,7 @@ static int pca9635pw_open(FAR struct file *filep)
                                  PCA9635PW_MODE_2_INITIAL_VALUE);
   if (ret != OK)
     {
-      dbg("Could not set initial config for PCA9635PW_MODE_2\n");
+      derr("ERROR: Could not set initial config for PCA9635PW_MODE_2\n");
       return ret;
     }
 
@@ -227,7 +235,7 @@ static int pca9635pw_open(FAR struct file *filep)
   ret = pca9635pw_set_led_mode(priv, PCA9635PW_LED_OUT_x_MODE_2);
   if (ret != OK)
     {
-      dbg("Could not set led driver outputs to MODE2 (LED's brightness are "
+      derr("ERROR: Could not set led driver outputs to MODE2 (LED's brightness are "
           "controlled by pwm registers)\n");
       return ret;
     }
@@ -245,11 +253,8 @@ static int pca9635pw_open(FAR struct file *filep)
 
 static int pca9635pw_close(FAR struct file *filep)
 {
-  dbg("pca9635pw_close\n");
-
   FAR struct inode *inode = filep->f_inode;
   FAR struct pca9635pw_dev_s *priv = inode->i_private;
-
   int ret = -1;
 
   /* Turn all led drivers off */
@@ -257,7 +262,7 @@ static int pca9635pw_close(FAR struct file *filep)
   ret = pca9635pw_set_led_mode(priv, PCA9635PW_LED_OUT_x_MODE_0);
   if (ret != OK)
     {
-      dbg("Could not set led driver outputs to MODE0 (LED's are off)\n");
+      derr("ERROR: Could not set led driver outputs to MODE0 (LED's are off)\n");
       return ret;
     }
 
@@ -285,14 +290,11 @@ static int pca9635pw_close(FAR struct file *filep)
 
 static int pca9635pw_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
-  dbg("pca9635pw_ioctl\n");
-
   FAR struct inode *inode = filep->f_inode;
   FAR struct pca9635pw_dev_s *priv = inode->i_private;
-
   int ret = OK;
 
-  dbg("cmd: %d arg: %ld\n", cmd, arg);
+  dinfo("cmd: %d arg: %ld\n", cmd, arg);
 
   switch (cmd)
     {
@@ -319,7 +321,7 @@ static int pca9635pw_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
     default:
       {
-        dbg("Unrecognized cmd: %d\n", cmd);
+        derr("ERROR: Unrecognized cmd: %d\n", cmd);
         ret = -ENOTTY;
       }
       break;
@@ -364,7 +366,7 @@ int pca9635pw_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
 
   if (priv == NULL)
     {
-      dbg("Failed to allocate instance of pca9635pw_dev_s\n");
+      derr("ERROR: Failed to allocate instance of pca9635pw_dev_s\n");
       return -ENOMEM;
     }
 
@@ -376,7 +378,7 @@ int pca9635pw_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
   int const ret = register_driver(devpath, &g_pca9635pw_fileops, 666, priv);
   if (ret != OK)
     {
-      dbg("Failed to register driver: %d\n", ret);
+      derr("ERROR: Failed to register driver: %d\n", ret);
       kmm_free(priv);
       return ret;
     }

@@ -158,7 +158,7 @@ static const struct block_operations g_bops =
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static void rd_destroy(FAR struct rd_struct_s *dev)
 {
-  fvdbg("Destroying RAM disk\n");
+  finfo("Destroying RAM disk\n");
 
   /* We we configured to free the RAM disk memory when unlinked? */
 
@@ -197,7 +197,7 @@ static int rd_open(FAR struct inode *inode)
   dev->rd_crefs++;
   DEBUGASSERT(dev->rd_crefs > 0);
 
-  fvdbg("rd_crefs: %d\n", dev->rd_crefs);
+  finfo("rd_crefs: %d\n", dev->rd_crefs);
   return OK;
 }
 #endif
@@ -221,7 +221,7 @@ static int rd_close(FAR struct inode *inode)
 
   DEBUGASSERT(dev->rd_crefs > 0);
   dev->rd_crefs--;
-  fvdbg("rd_crefs: %d\n", dev->rd_crefs);
+  finfo("rd_crefs: %d\n", dev->rd_crefs);
 
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   /* Was that the last open reference to the RAM disk? */
@@ -258,13 +258,13 @@ static ssize_t rd_read(FAR struct inode *inode, unsigned char *buffer,
   DEBUGASSERT(inode && inode->i_private);
   dev = (FAR struct rd_struct_s *)inode->i_private;
 
-  fvdbg("sector: %d nsectors: %d sectorsize: %d\n",
+  finfo("sector: %d nsectors: %d sectorsize: %d\n",
         start_sector, dev->rd_sectsize, nsectors);
 
   if (start_sector < dev->rd_nsectors &&
       start_sector + nsectors <= dev->rd_nsectors)
     {
-       fvdbg("Transfer %d bytes from %p\n",
+       finfo("Transfer %d bytes from %p\n",
              nsectors * dev->rd_sectsize,
              &dev->rd_buffer[start_sector * dev->rd_sectsize]);
 
@@ -293,7 +293,7 @@ static ssize_t rd_write(FAR struct inode *inode, const unsigned char *buffer,
   DEBUGASSERT(inode && inode->i_private);
   dev = (struct rd_struct_s *)inode->i_private;
 
-  fvdbg("sector: %d nsectors: %d sectorsize: %d\n",
+  finfo("sector: %d nsectors: %d sectorsize: %d\n",
         start_sector, dev->rd_sectsize, nsectors);
 
   if (!RDFLAG_IS_WRENABLED(dev->rd_flags))
@@ -303,7 +303,7 @@ static ssize_t rd_write(FAR struct inode *inode, const unsigned char *buffer,
   else if (start_sector < dev->rd_nsectors &&
            start_sector + nsectors <= dev->rd_nsectors)
     {
-      fvdbg("Transfer %d bytes from %p\n",
+      finfo("Transfer %d bytes from %p\n",
              nsectors * dev->rd_sectsize,
              &dev->rd_buffer[start_sector * dev->rd_sectsize]);
 
@@ -328,7 +328,7 @@ static int rd_geometry(FAR struct inode *inode, struct geometry *geometry)
 {
   struct rd_struct_s *dev;
 
-  fvdbg("Entry\n");
+  finfo("Entry\n");
 
   DEBUGASSERT(inode);
   if (geometry)
@@ -344,9 +344,9 @@ static int rd_geometry(FAR struct inode *inode, struct geometry *geometry)
       geometry->geo_nsectors      = dev->rd_nsectors;
       geometry->geo_sectorsize    = dev->rd_sectsize;
 
-      fvdbg("available: true mediachanged: false writeenabled: %s\n",
+      finfo("available: true mediachanged: false writeenabled: %s\n",
             geometry->geo_writeenabled ? "true" : "false");
-      fvdbg("nsectors: %d sectorsize: %d\n",
+      finfo("nsectors: %d sectorsize: %d\n",
             geometry->geo_nsectors, geometry->geo_sectorsize);
 
       return OK;
@@ -368,7 +368,7 @@ static int rd_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
   FAR struct rd_struct_s *dev;
   FAR void **ppv = (void**)((uintptr_t)arg);
 
-  fvdbg("Entry\n");
+  finfo("Entry\n");
 
   /* Only one ioctl command is supported */
 
@@ -378,7 +378,7 @@ static int rd_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
       dev  = (FAR struct rd_struct_s *)inode->i_private;
       *ppv = (FAR void *)dev->rd_buffer;
 
-      fvdbg("ppv: %p\n", *ppv);
+      finfo("ppv: %p\n", *ppv);
       return OK;
     }
 
@@ -452,11 +452,11 @@ int romdisk_register(int minor, FAR const uint8_t *buffer, uint32_t nsectors,
   char devname[16];
   int ret = -ENOMEM;
 
-  fvdbg("buffer: %p nsectors: %d sectsize: %d\n", buffer, nsectors, sectsize);
+  finfo("buffer: %p nsectors: %d sectsize: %d\n", buffer, nsectors, sectsize);
 
   /* Sanity check */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (minor < 0 || minor > 255 || !buffer || !nsectors || !sectsize)
     {
       return -EINVAL;
@@ -487,7 +487,7 @@ int romdisk_register(int minor, FAR const uint8_t *buffer, uint32_t nsectors,
       ret = register_blockdriver(devname, &g_bops, 0, dev);
       if (ret < 0)
         {
-          fdbg("register_blockdriver failed: %d\n", -ret);
+          ferr("register_blockdriver failed: %d\n", -ret);
           kmm_free(dev);
         }
     }

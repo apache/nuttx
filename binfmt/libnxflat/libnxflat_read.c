@@ -114,7 +114,7 @@ int nxflat_read(struct nxflat_loadinfo_s *loadinfo, char *buffer, int readsize, 
   int     bytesleft;   /* Number of bytes of .data left to read */
   int     bytesread;   /* Total number of bytes read */
 
-  bvdbg("Read %d bytes from offset %d\n", readsize, offset);
+  binfo("Read %d bytes from offset %d\n", readsize, offset);
 
   /* Seek to the position in the object file where the initialized
    * data is saved.
@@ -129,7 +129,7 @@ int nxflat_read(struct nxflat_loadinfo_s *loadinfo, char *buffer, int readsize, 
       if (rpos != offset)
         {
           int errval = errno;
-          bdbg("Failed to seek to position %d: %d\n", offset, errval);
+          berr("Failed to seek to position %d: %d\n", offset, errval);
           return -errval;
         }
 
@@ -141,13 +141,13 @@ int nxflat_read(struct nxflat_loadinfo_s *loadinfo, char *buffer, int readsize, 
            int errval = errno;
            if (errval != EINTR)
              {
-               bdbg("Read from offset %d failed: %d\n", offset, errval);
+               berr("Read from offset %d failed: %d\n", offset, errval);
                return -errval;
              }
          }
        else if (nbytes == 0)
          {
-           bdbg("Unexpected end of file\n");
+           berr("Unexpected end of file\n");
            return -ENODATA;
          }
        else

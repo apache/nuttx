@@ -106,13 +106,13 @@
  * also be enabled.
  */
 
-#ifndef CONFIG_DEBUG
-#  undef CONFIG_DEBUG_VERBOSE
+#ifndef CONFIG_DEBUG_FEATURES
+#  undef CONFIG_DEBUG_INFO
 #  undef CONFIG_DEBUG_GRAPHICS
 #  undef CONFIG_DEBUG_LCD
 #endif
 
-#ifndef CONFIG_DEBUG_VERBOSE
+#ifndef CONFIG_DEBUG_INFO
 #  undef CONFIG_DEBUG_LCD
 #endif
 
@@ -140,11 +140,11 @@
 /* Debug ********************************************************************/
 
 #ifdef CONFIG_DEBUG_LCD
-#  define lcddbg         dbg
-#  define lcdvdbg        vdbg
+#  define lcderr         err
+#  define lcdinfo        info
 #else
-#  define lcddbg(x...)
-#  define lcdvdbg(x...)
+#  define lcderr(x...)
+#  define lcdinfo(x...)
 #endif
 
 /****************************************************************************
@@ -174,7 +174,7 @@ struct lcd1602_2
  ****************************************************************************/
 /* Debug */
 
-#if defined(CONFIG_DEBUG_LCD) && defined(CONFIG_DEBUG_VERBOSE)
+#if defined(CONFIG_DEBUG_LCD) && defined(CONFIG_DEBUG_INFO)
 static void lcd_dumpstate(FAR const char *msg);
 static void lcd_dumpstream(FAR const char *msg,
                            FAR const struct lcd_instream_s *stream);
@@ -234,7 +234,7 @@ static struct lcd1602_2 g_lcd1602;
  * Name: lcd_dumpstate
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG_LCD) && defined(CONFIG_DEBUG_VERBOSE)
+#if defined(CONFIG_DEBUG_LCD) && defined(CONFIG_DEBUG_INFO)
 static void lcd_dumpstate(FAR const char *msg)
 {
   uint8_t buffer[LCD_NCOLUMNS];
@@ -242,8 +242,8 @@ static void lcd_dumpstate(FAR const char *msg)
   int row;
   int column;
 
-  lcdvdbg("%s:\n", msg);
-  lcdvdbg("  currow: %d curcol: %d\n",
+  lcdinfo("%s:\n", msg);
+  lcdinfo("  currow: %d curcol: %d\n",
           g_lcd1602.currow, g_lcd1602.curcol);
 
   for (row = 0, column = 0; row < LCD_NROWS; )
@@ -252,7 +252,7 @@ static void lcd_dumpstate(FAR const char *msg)
       buffer[column] = isprint(ch) ? ch : '.';
       if (++column >= LCD_NCOLUMNS)
         {
-          lcdvdbg("  [%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c]\n",
+          lcdinfo("  [%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c]\n",
                   buffer[0],  buffer[1],  buffer[2],  buffer[3],
                   buffer[4],  buffer[5],  buffer[6],  buffer[7],
                   buffer[8],  buffer[9],  buffer[10], buffer[11],
@@ -269,12 +269,12 @@ static void lcd_dumpstate(FAR const char *msg)
  * Name: lcd_dumpstate
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG_LCD) && defined(CONFIG_DEBUG_VERBOSE)
+#if defined(CONFIG_DEBUG_LCD) && defined(CONFIG_DEBUG_INFO)
 static void lcd_dumpstream(FAR const char *msg,
                            FAR const struct lcd_instream_s *stream)
 {
-  lcdvdbg("%s:\n", msg);
-  lcdvdbg("  nget: %d nbytes: %d\n",
+  lcdinfo("%s:\n", msg);
+  lcdinfo("  nget: %d nbytes: %d\n",
           stream->stream.nget, stream->nbytes);
   lib_dumpbuffer("STREAM", stream->buffer, stream->nbytes);
 }
@@ -437,7 +437,7 @@ static void lcd_appendch(uint8_t ch)
 
 static void lcd_action(enum slcdcode_e code, uint8_t count)
 {
-  lcdvdbg("Action: %d count: %d\n", code, count);
+  lcdinfo("Action: %d count: %d\n", code, count);
   lcd_dumpstate("BEFORE ACTION");
 
   switch (code)
@@ -719,7 +719,7 @@ static ssize_t lcd_write(FAR struct file *filep,  FAR const char *buffer,
   memset(&state, 0, sizeof(struct slcdstate_s));
   while ((result = slcd_decode(&instream.stream, &state, &ch, &count)) != SLCDRET_EOF)
     {
-      lcdvdbg("slcd_decode returned result=%d char=%d count=%d\n",
+      lcdinfo("slcd_decode returned result=%d char=%d count=%d\n",
               result, ch, count);
 
       if (result == SLCDRET_CHAR)          /* A normal character was returned */
@@ -796,7 +796,7 @@ static int lcd_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         {
           FAR struct slcd_attributes_s *attr = (FAR struct slcd_attributes_s *)((uintptr_t)arg);
 
-          lcdvdbg("SLCDIOC_GETATTRIBUTES:\n");
+          lcdinfo("SLCDIOC_GETATTRIBUTES:\n");
 
           if (!attr)
             {
@@ -822,7 +822,7 @@ static int lcd_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         {
           FAR struct slcd_curpos_s *curpos = (FAR struct slcd_curpos_s *)((uintptr_t)arg);
 
-          lcdvdbg("SLCDIOC_CURPOS: row=%d column=%d\n", g_lcd1602.currow, g_lcd1602.curcol);
+          lcdinfo("SLCDIOC_CURPOS: row=%d column=%d\n", g_lcd1602.currow, g_lcd1602.curcol);
 
           if (!curpos)
             {
@@ -890,7 +890,7 @@ int up_lcd1602_initialize(void)
 
   if (!g_lcd1602.initialized)
     {
-      lcdvdbg("Initializing\n");
+      lcdinfo("Initializing\n");
 
       /* PMP Master mode configuration */
       /* Make sure that interrupts are disabled */

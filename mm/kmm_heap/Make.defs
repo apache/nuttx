@@ -44,7 +44,7 @@ ifeq ($(CONFIG_BUILD_KERNEL),y)
 CSRCS += kmm_sbrk.c
 endif
 
-ifeq ($(CONFIG_DEBUG),y)
+ifeq ($(CONFIG_DEBUG_FEATURES),y)
 CSRCS += kmm_heapmember.c
 endif
 

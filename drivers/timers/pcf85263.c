@@ -77,22 +77,22 @@
 
 #define PCF85263_I2C_ADDRESS 0x51
 
-#ifndef CONFIG_DEBUG
+#ifndef CONFIG_DEBUG_FEATURES
 #  undef CONFIG_DEBUG_RTC
 #endif
 
 /* Debug ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_RTC
-#  define rtcdbg    dbg
-#  define rtcvdbg   vdbg
-#  define rtclldbg  lldbg
-#  define rtcllvdbg llvdbg
+#  define rtcerr    err
+#  define rtcinfo   info
+#  define rtcllerr  llerr
+#  define rtcllinfo llinfo
 #else
-#  define rtcdbg(x...)
-#  define rtcvdbg(x...)
-#  define rtclldbg(x...)
-#  define rtcllvdbg(x...)
+#  define rtcerr(x...)
+#  define rtcinfo(x...)
+#  define rtcllerr(x...)
+#  define rtcllinfo(x...)
 #endif
 
 /************************************************************************************
@@ -140,20 +140,20 @@ static struct pcf85263_dev_s g_pcf85263;
  *
  ************************************************************************************/
 
-#ifdef CONFIG_DEBUG_RTC
+#if defined(CONFIG_DEBUG_RTC) && defined(CONFIG_DEBUG_INFO)
 static void rtc_dumptime(FAR struct tm *tp, FAR const char *msg)
 {
-  rtclldbg("%s:\n", msg);
-  rtclldbg("   tm_sec: %08x\n", tp->tm_sec);
-  rtclldbg("   tm_min: %08x\n", tp->tm_min);
-  rtclldbg("  tm_hour: %08x\n", tp->tm_hour);
-  rtclldbg("  tm_mday: %08x\n", tp->tm_mday);
-  rtclldbg("   tm_mon: %08x\n", tp->tm_mon);
-  rtclldbg("  tm_year: %08x\n", tp->tm_year);
+  rtcllinfo("%s:\n", msg);
+  rtcllinfo("   tm_sec: %08x\n", tp->tm_sec);
+  rtcllinfo("   tm_min: %08x\n", tp->tm_min);
+  rtcllinfo("  tm_hour: %08x\n", tp->tm_hour);
+  rtcllinfo("  tm_mday: %08x\n", tp->tm_mday);
+  rtcllinfo("   tm_mon: %08x\n", tp->tm_mon);
+  rtcllinfo("  tm_year: %08x\n", tp->tm_year);
 #if defined(CONFIG_LIBC_LOCALTIME) || defined(CONFIG_TIME_EXTENDED)
-  rtclldbg("  tm_wday: %08x\n", tp->tm_wday);
-  rtclldbg("  tm_yday: %08x\n", tp->tm_yday);
-  rtclldbg(" tm_isdst: %08x\n", tp->tm_isdst);
+  rtcllinfo("  tm_wday: %08x\n", tp->tm_wday);
+  rtcllinfo("  tm_yday: %08x\n", tp->tm_yday);
+  rtcllinfo(" tm_isdst: %08x\n", tp->tm_isdst);
 #endif
 }
 #else
@@ -338,7 +338,7 @@ int up_rtc_getdatetime(FAR struct tm *tp)
       ret = I2C_TRANSFER(g_pcf85263.i2c, msg, 4);
       if (ret < 0)
         {
-          rtcdbg("ERROR: I2C_TRANSFER failed: %d\n", ret)
+          rtcerr("ERROR: I2C_TRANSFER failed: %d\n", ret)
           return ret;
         }
     }
@@ -431,13 +431,13 @@ int up_rtc_settime(FAR const struct timespec *tp)
  #ifdef CONFIG_LIBC_LOCALTIME
    if (localtime_r(&newtime, &newtm) == NULL)
      {
-       rtcdbg("ERROR: localtime_r failed\n")
+       rtcerr("ERROR: localtime_r failed\n")
        return -EINVAL;
      }
 #else
    if (gmtime_r(&newtime, &newtm) == NULL)
      {
-       rtcdbg("ERROR: gmtime_r failed\n")
+       rtcerr("ERROR: gmtime_r failed\n")
        return -EINVAL;
      }
 #endif
@@ -518,7 +518,7 @@ int up_rtc_settime(FAR const struct timespec *tp)
       ret = I2C_TRANSFER(g_pcf85263.i2c, msg, 3);
       if (ret < 0)
         {
-          rtcdbg("ERROR: I2C_TRANSFER failed: %d\n", ret)
+          rtcerr("ERROR: I2C_TRANSFER failed: %d\n", ret)
           return ret;
         }
     }

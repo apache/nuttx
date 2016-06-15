@@ -75,7 +75,7 @@ off_t file_seek(FAR struct file *filep, off_t offset, int whence)
 {
   FAR struct inode *inode;
   int ret;
-  int err = OK;
+  int errcode = OK;
 
   DEBUGASSERT(filep);
   inode =  filep->f_inode;
@@ -87,7 +87,7 @@ off_t file_seek(FAR struct file *filep, off_t offset, int whence)
       ret = (int)inode->u.i_ops->seek(filep, offset, whence);
       if (ret < 0)
         {
-          err = -ret;
+          errcode = -ret;
           goto errout;
         }
     }
@@ -108,17 +108,17 @@ off_t file_seek(FAR struct file *filep, off_t offset, int whence)
               }
             else
               {
-                err = EINVAL;
+                errcode = EINVAL;
                 goto errout;
               }
             break;
 
           case SEEK_END:
-            err = ENOSYS;
+            errcode = ENOSYS;
             goto errout;
 
           default:
-            err = EINVAL;
+            errcode = EINVAL;
             goto errout;
         }
     }
@@ -126,7 +126,7 @@ off_t file_seek(FAR struct file *filep, off_t offset, int whence)
   return filep->f_pos;
 
 errout:
-  set_errno(err);
+  set_errno(errcode);
   return (off_t)ERROR;
 }
 

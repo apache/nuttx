@@ -88,7 +88,7 @@ int sam_at25_automount(int minor)
       spi = sam_spibus_initialize(FLASH_CSNUM);
       if (!spi)
         {
-          fdbg("ERROR: Failed to initialize SPI port %d\n", FLASH_CSNUM);
+          ferr("ERROR: Failed to initialize SPI port %d\n", FLASH_CSNUM);
           return -ENODEV;
         }
 
@@ -97,7 +97,7 @@ int sam_at25_automount(int minor)
       mtd = at25_initialize(spi);
       if (!mtd)
         {
-          fdbg("ERROR: Failed to bind SPI port %d to the AT25 FLASH driver\n");
+          ferr("ERROR: Failed to bind SPI port %d to the AT25 FLASH driver\n");
           return -ENODEV;
         }
 
@@ -109,7 +109,7 @@ int sam_at25_automount(int minor)
       ret = ftl_initialize(minor, mtd);
       if (ret < 0)
         {
-          fdbg("ERROR: Failed to initialize the FTL layer: %d\n", ret);
+          ferr("ERROR: Failed to initialize the FTL layer: %d\n", ret);
           return ret;
         }
 
@@ -119,7 +119,7 @@ int sam_at25_automount(int minor)
       ret = nxffs_initialize(mtd);
       if (ret < 0)
         {
-          fdbg("ERROR: NXFFS initialization failed: %d\n", ret);
+          ferr("ERROR: NXFFS initialization failed: %d\n", ret);
           return ret;
         }
 
@@ -128,7 +128,7 @@ int sam_at25_automount(int minor)
       ret = mount(NULL, "/mnt/at25", "nxffs", 0, NULL);
       if (ret < 0)
         {
-          fdbg("ERROR: Failed to mount the NXFFS volume: %d\n", errno);
+          ferr("ERROR: Failed to mount the NXFFS volume: %d\n", errno);
           return ret;
         }
 #endif

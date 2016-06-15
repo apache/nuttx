@@ -71,7 +71,7 @@
 
 /* Timer debug is enabled if any timer client is enabled */
 
-#ifndef CONFIG_DEBUG
+#ifndef CONFIG_DEBUG_FEATURES
 #  undef CONFIG_DEBUG_ANALOG
 #  undef CONFIG_SAMA5_TC_REGDEBUG
 #endif
@@ -83,15 +83,15 @@
 /* Timer/counter debug output */
 
 #ifdef CONFIG_SAM34_TC_DEBUG
-#  define tcdbg    dbg
-#  define tcvdbg   vdbg
-#  define tclldbg  lldbg
-#  define tcllvdbg llvdbg
+#  define tcerr    err
+#  define tcinfo   info
+#  define tcllerr  llerr
+#  define tcllinfo llinfo
 #else
-#  define tcdbg(x...)
-#  define tcvdbg(x...)
-#  define tclldbg(x...)
-#  define tcllvdbg(x...)
+#  define tcerr(x...)
+#  define tcinfo(x...)
+#  define tcllerr(x...)
+#  define tcllinfo(x...)
 #endif
 
 /****************************************************************************

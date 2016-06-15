@@ -80,7 +80,7 @@
 
 #define RTC_MAGIC 0xdeadbeef
 
-#ifndef CONFIG_DEBUG
+#ifndef CONFIG_DEBUG_FEATURES
 #  undef CONFIG_DEBUG_RTC
 #endif
 
@@ -89,15 +89,15 @@
 /* Debug ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_RTC
-#  define rtcdbg    dbg
-#  define rtcvdbg   vdbg
-#  define rtclldbg  lldbg
-#  define rtcllvdbg llvdbg
+#  define rtcerr    err
+#  define rtcinfo   info
+#  define rtcllerr  llerr
+#  define rtcllinfo llinfo
 #else
-#  define rtcdbg(x...)
-#  define rtcvdbg(x...)
-#  define rtclldbg(x...)
-#  define rtcllvdbg(x...)
+#  define rtcerr(x...)
+#  define rtcinfo(x...)
+#  define rtcllerr(x...)
+#  define rtcllinfo(x...)
 #endif
 
 /************************************************************************************
@@ -149,16 +149,16 @@ uint32_t g_rtt_offset = 0;
 #ifdef CONFIG_DEBUG_RTC
 static void rtc_dumpregs(FAR const char *msg)
 {
-  rtclldbg("%s:\n", msg);
-  rtclldbg("      CR: %08x\n", getreg32(SAM_RTC_CR));
-  rtclldbg("      MR: %08x\n", getreg32(SAM_RTC_MR));
-  rtclldbg("    TIMR: %08x\n", getreg32(SAM_RTC_TIMR));
-  rtclldbg("    CALR: %08x\n", getreg32(SAM_RTC_CALR));
-  rtclldbg("  TIMALR: %08x\n", getreg32(SAM_RTC_TIMALR));
-  rtclldbg("  CALALR: %08x\n", getreg32(SAM_RTC_CALALR));
-  rtclldbg("      SR: %08x\n", getreg32(SAM_RTC_SR));
-  rtclldbg("     IMR: %08x\n", getreg32(SAM_RTC_IMR));
-  rtclldbg("     VER: %08x\n", getreg32(SAM_RTC_VER));
+  rtcllerr("%s:\n", msg);
+  rtcllerr("      CR: %08x\n", getreg32(SAM_RTC_CR));
+  rtcllerr("      MR: %08x\n", getreg32(SAM_RTC_MR));
+  rtcllerr("    TIMR: %08x\n", getreg32(SAM_RTC_TIMR));
+  rtcllerr("    CALR: %08x\n", getreg32(SAM_RTC_CALR));
+  rtcllerr("  TIMALR: %08x\n", getreg32(SAM_RTC_TIMALR));
+  rtcllerr("  CALALR: %08x\n", getreg32(SAM_RTC_CALALR));
+  rtcllerr("      SR: %08x\n", getreg32(SAM_RTC_SR));
+  rtcllerr("     IMR: %08x\n", getreg32(SAM_RTC_IMR));
+  rtcllerr("     VER: %08x\n", getreg32(SAM_RTC_VER));
 }
 #else
 #  define rtc_dumpregs(msg)
@@ -181,13 +181,13 @@ static void rtc_dumpregs(FAR const char *msg)
 #ifdef CONFIG_DEBUG_RTC
 static void rtc_dumptime(FAR struct tm *tp, FAR const char *msg)
 {
-  rtclldbg("%s:\n", msg);
-  rtclldbg("  tm_sec: %08x\n", tp->tm_sec);
-  rtclldbg("  tm_min: %08x\n", tp->tm_min);
-  rtclldbg(" tm_hour: %08x\n", tp->tm_hour);
-  rtclldbg(" tm_mday: %08x\n", tp->tm_mday);
-  rtclldbg("  tm_mon: %08x\n", tp->tm_mon);
-  rtclldbg(" tm_year: %08x\n", tp->tm_year);
+  rtcllerr("%s:\n", msg);
+  rtcllerr("  tm_sec: %08x\n", tp->tm_sec);
+  rtcllerr("  tm_min: %08x\n", tp->tm_min);
+  rtcllerr(" tm_hour: %08x\n", tp->tm_hour);
+  rtcllerr(" tm_mday: %08x\n", tp->tm_mday);
+  rtcllerr("  tm_mon: %08x\n", tp->tm_mon);
+  rtcllerr(" tm_year: %08x\n", tp->tm_year);
 }
 #else
 #  define rtc_dumptime(tp, msg)
@@ -298,7 +298,7 @@ static int rtc_interrupt(int irq, void *context)
   ret = work_queue(LPWORK, &g_alarmwork, rtc_worker, NULL, 0);
   if (ret < 0)
     {
-      rtclldbg("ERRPR: work_queue failed: %d\n", ret);
+      rtcllerr("ERRPR: work_queue failed: %d\n", ret);
     }
 
   /* Disable any further alarm interrupts */

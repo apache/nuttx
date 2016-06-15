@@ -74,21 +74,21 @@
 /* Debug ********************************************************************/
 /* The following enable debug output from this file:
  *
- * CONFIG_DEBUG         - Define to enable general debug features
- * CONFIG_DEBUG_SPI     - Define to enable basic SSP debug (needs CONFIG_DEBUG)
- * CONFIG_DEBUG_VERBOSE - Define to enable verbose SSP debug
+ * CONFIG_DEBUG_FEATURES - Define to enable general debug features
+ * CONFIG_DEBUG_SPI      - Define to enable basic SSP debug (needs CONFIG_DEBUG_FEATURES)
+ * CONFIG_DEBUG_INFO     - Define to enable verbose SSP debug
  */
 
 #ifdef CONFIG_DEBUG_SPI
-#  define spidbg  lldbg
-#  ifdef CONFIG_DEBUG_VERBOSE
-#    define spivdbg lldbg
+#  define spierr  llerr
+#  ifdef CONFIG_DEBUG_INFO
+#    define spiinfo llerr
 #  else
-#    define spivdbg(x...)
+#    define spiinfo(x...)
 #  endif
 #else
-#  define spidbg(x...)
-#  define spivdbg(x...)
+#  define spierr(x...)
+#  define spiinfo(x...)
 #endif
 
 /* SSP Clocking *************************************************************/
@@ -287,7 +287,7 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
   priv->frequency = frequency;
   priv->actual    = actual;
 
-  spidbg("Frequency %d->%d\n", frequency, actual);
+  spierr("Frequency %d->%d\n", frequency, actual);
   return actual;
 }
 
@@ -449,7 +449,7 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size
   FAR uint8_t *ptr = (FAR uint8_t *)buffer;
   uint8_t data;
 
-  spidbg("nwords: %d\n", nwords);
+  spierr("nwords: %d\n", nwords);
   while (nwords)
     {
       /* Write the data to transmitted to the SPI Data Register */
@@ -494,7 +494,7 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nw
 {
   FAR uint8_t *ptr = (FAR uint8_t *)buffer;
 
-  spidbg("nwords: %d\n", nwords);
+  spierr("nwords: %d\n", nwords);
   while (nwords)
     {
       /* Write some dummy data to the SPI Data Register in order to clock the

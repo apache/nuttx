@@ -86,7 +86,7 @@ int bchdev_register(FAR const char *blkdev, FAR const char *chardev,
   ret = bchlib_setup(blkdev, readonly, &handle);
   if (ret < 0)
     {
-      fdbg("bchlib_setup failed: %d\n", -ret);
+      ferr("ERROR: bchlib_setup failed: %d\n", -ret);
       return ret;
     }
 
@@ -95,7 +95,7 @@ int bchdev_register(FAR const char *blkdev, FAR const char *chardev,
   ret = register_driver(chardev, &bch_fops, 0666, handle);
   if (ret < 0)
     {
-      fdbg("register_driver failed: %d\n", -ret);
+      ferr("ERROR: register_driver failed: %d\n", -ret);
       bchlib_teardown(handle);
       handle = NULL;
     }

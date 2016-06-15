@@ -64,14 +64,14 @@
 /* Debug output from this file may interfere with context switching!  To get
  * debug output you must enabled the following in your NuttX configuration:
  *
- * - CONFIG_DEBUG and CONFIG_DEBUG_SYSCALL (shows only syscalls)
- * - CONFIG_DEBUG and CONFIG_DEBUG_SVCALL  (shows everything)
+ * - CONFIG_DEBUG_FEATURES and CONFIG_DEBUG_SYSCALL (shows only syscalls)
+ * - CONFIG_DEBUG_FEATURES and CONFIG_DEBUG_SVCALL  (shows everything)
  */
 
 #if defined(CONFIG_DEBUG_SYSCALL) || defined(CONFIG_DEBUG_SVCALL)
-# define svcdbg(format, ...) lldbg(format, ##__VA_ARGS__)
+# define svcerr(format, ...) llerr(format, ##__VA_ARGS__)
 #else
-# define svcdbg(x...)
+# define svcerr(x...)
 #endif
 
 /****************************************************************************
@@ -174,18 +174,18 @@ int up_svcall(int irq, FAR void *context)
   if (cmd > SYS_switch_context)
 # endif
     {
-      svcdbg("SVCALL Entry: regs: %p cmd: %d\n", regs, cmd);
-      svcdbg("  R0: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+      svcerr("SVCALL Entry: regs: %p cmd: %d\n", regs, cmd);
+      svcerr("  R0: %08x %08x %08x %08x %08x %08x %08x %08x\n",
              regs[REG_R0],  regs[REG_R1],  regs[REG_R2],  regs[REG_R3],
              regs[REG_R4],  regs[REG_R5],  regs[REG_R6],  regs[REG_R7]);
-      svcdbg("  R8: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+      svcerr("  R8: %08x %08x %08x %08x %08x %08x %08x %08x\n",
              regs[REG_R8],  regs[REG_R9],  regs[REG_R10], regs[REG_R11],
              regs[REG_R12], regs[REG_R13], regs[REG_R14], regs[REG_R15]);
 # ifdef CONFIG_BUILD_PROTECTED
-      svcdbg(" PSR: %08x PRIMASK: %08x EXC_RETURN: %08x\n",
+      svcerr(" PSR: %08x PRIMASK: %08x EXC_RETURN: %08x\n",
              regs[REG_XPSR], regs[REG_PRIMASK], regs[REG_EXC_RETURN]);
 # else
-      svcdbg(" PSR: %08x PRIMASK: %08x\n",
+      svcerr(" PSR: %08x PRIMASK: %08x\n",
              regs[REG_XPSR], regs[REG_PRIMASK]);
 # endif
     }
@@ -471,7 +471,7 @@ int up_svcall(int irq, FAR void *context)
 
           regs[REG_R0] -= CONFIG_SYS_RESERVED;
 #else
-          slldbg("ERROR: Bad SYS call: %d\n", regs[REG_R0]);
+          sllerr("ERROR: Bad SYS call: %d\n", regs[REG_R0]);
 #endif
         }
         break;
@@ -486,30 +486,30 @@ int up_svcall(int irq, FAR void *context)
   if (regs != CURRENT_REGS)
 # endif
     {
-      svcdbg("SVCall Return:\n");
-      svcdbg("  R0: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+      svcerr("SVCall Return:\n");
+      svcerr("  R0: %08x %08x %08x %08x %08x %08x %08x %08x\n",
              CURRENT_REGS[REG_R0],  CURRENT_REGS[REG_R1],
              CURRENT_REGS[REG_R2],  CURRENT_REGS[REG_R3],
              CURRENT_REGS[REG_R4],  CURRENT_REGS[REG_R5],
              CURRENT_REGS[REG_R6],  CURRENT_REGS[REG_R7]);
-      svcdbg("  R8: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+      svcerr("  R8: %08x %08x %08x %08x %08x %08x %08x %08x\n",
              CURRENT_REGS[REG_R8],  CURRENT_REGS[REG_R9],
              CURRENT_REGS[REG_R10], CURRENT_REGS[REG_R11],
              CURRENT_REGS[REG_R12], CURRENT_REGS[REG_R13],
              CURRENT_REGS[REG_R14], CURRENT_REGS[REG_R15]);
 #ifdef CONFIG_BUILD_PROTECTED
-      svcdbg(" PSR: %08x PRIMASK: %08x EXC_RETURN: %08x\n",
+      svcerr(" PSR: %08x PRIMASK: %08x EXC_RETURN: %08x\n",
              CURRENT_REGS[REG_XPSR], CURRENT_REGS[REG_PRIMASK],
              CURRENT_REGS[REG_EXC_RETURN]);
 #else
-      svcdbg(" PSR: %08x PRIMASK: %08x\n",
+      svcerr(" PSR: %08x PRIMASK: %08x\n",
              CURRENT_REGS[REG_XPSR], CURRENT_REGS[REG_PRIMASK]);
 #endif
     }
 # ifdef CONFIG_DEBUG_SVCALL
   else
     {
-      svcdbg("SVCall Return: %d\n", regs[REG_R0]);
+      svcerr("SVCall Return: %d\n", regs[REG_R0]);
     }
 # endif
 #endif

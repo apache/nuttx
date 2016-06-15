@@ -56,21 +56,21 @@
  * include/debug.h
  */
 
-#ifndef CONFIG_DEBUG
-#  undef CONFIG_DEBUG_VERBOSE
+#ifndef CONFIG_DEBUG_FEATURES
+#  undef CONFIG_DEBUG_INFO
 #  undef CONFIG_DEBUG_SPI
 #endif
 
 #ifdef CONFIG_DEBUG_SPI
-#  define spidbg lldbg
-#  ifdef CONFIG_DEBUG_VERBOSE
-#    define spivdbg lldbg
+#  define spierr llerr
+#  ifdef CONFIG_DEBUG_INFO
+#    define spiinfo llerr
 #  else
-#    define spivdbg(x...)
+#    define spiinfo(x...)
 #  endif
 #else
-#  define spidbg(x...)
-#  define spivdbg(x...)
+#  define spierr(x...)
+#  define spiinfo(x...)
 #endif
 
 /****************************************************************************

@@ -70,15 +70,13 @@
 /* Debug */
 
 #ifdef CONFIG_DEBUG_SPI
-#  define spidbg  lldbg
-#  ifdef CONFIG_DEBUG_VERBOSE
-#    define spivdbg lldbg
-#  else
-#    define spivdbg(x...)
-#  endif
+#  define spierr  llerr
+#  define spiwarn llwarn
+#  define spiinfo llinfo
 #else
-#  define spidbg(x...)
-#  define spivdbg(x...)
+#  define spierr(x...)
+#  define spiwarn(x...)
+#  define spiinfo(x...)
 #endif
 
 /****************************************************************************
@@ -496,7 +494,7 @@ static bool spi_checkreg(struct pic32mz_dev_s *priv, uintptr_t regaddr,
         {
           /* Yes... show how many times we did it */
 
-          lldbg("...[Repeats %d times]...\n", priv->ntimes);
+          llinfo("...[Repeats %d times]...\n", priv->ntimes);
         }
 
       /* Save information about the new access */
@@ -546,8 +544,8 @@ static uint32_t spi_getreg(FAR struct pic32mz_dev_s *priv,
     {
       /* Yes.. */
 
-      lldbg("%08lx->%08lx\n",
-            (unsigned long)regaddr, (unsigned long)regval);
+      llinfo("%08lx->%08lx\n",
+             (unsigned long)regaddr, (unsigned long)regval);
     }
 
   /* Return the value read */
@@ -588,8 +586,8 @@ static void spi_putaddr(FAR struct pic32mz_dev_s *priv, uintptr_t regaddr,
     {
       /* Yes.. */
 
-      lldbg("%08lx<-%08lx\n",
-      (unsigned long)regaddr, (unsigned long)regval);
+      llinfo("%08lx<-%08lx\n",
+             (unsigned long)regaddr, (unsigned long)regval);
     }
 
   /* Write the value to the register */
@@ -652,7 +650,7 @@ static void spi_exchange8(FAR struct pic32mz_dev_s *priv,
   uint32_t regval;
   uint8_t data;
 
-  spivdbg("nbytes: %d\n", nbytes);
+  spiinfo("nbytes: %d\n", nbytes);
   while (nbytes)
     {
       /* Write the data to transmitted to the SPI Data Register */
@@ -723,7 +721,7 @@ static void spi_exchange16(FAR struct pic32mz_dev_s *priv,
   uint32_t regval;
   uint16_t data;
 
-  spivdbg("nwords: %d\n", nwords);
+  spiinfo("nwords: %d\n", nwords);
   while (nwords)
     {
       /* Write the data to transmitted to the SPI Data Register */
@@ -837,7 +835,7 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
   uint32_t actual;
   uint32_t regval;
 
-  spivdbg("Old frequency: %d actual: %d New frequency: %d\n",
+  spiinfo("Old frequency: %d actual: %d New frequency: %d\n",
           priv->frequency, priv->actual, frequency);
 
   /* Check if the requested frequency is the same as the frequency selection */
@@ -872,7 +870,7 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
   /* Save the new BRG value */
 
   spi_putreg(priv, PIC32MZ_SPI_BRG_OFFSET, regval);
-  spivdbg("PBCLOCK: %d frequency: %d divisor: %d BRG: %d\n",
+  spiinfo("PBCLOCK: %d frequency: %d divisor: %d BRG: %d\n",
           BOARD_PBCLOCK, frequency, divisor, regval);
 
   /* Calculate the new actual frequency.
@@ -887,7 +885,7 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
   priv->frequency = frequency;
   priv->actual    = actual;
 
-  spidbg("New frequency: %d Actual: %d\n", frequency, actual);
+  spiinfo("New frequency: %d Actual: %d\n", frequency, actual);
   return actual;
 }
 
@@ -911,7 +909,7 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
   FAR struct pic32mz_dev_s *priv = (FAR struct pic32mz_dev_s *)dev;
   uint32_t regval;
 
-  spivdbg("Old mode: %d New mode: %d\n", priv->mode, mode);
+  spiinfo("Old mode: %d New mode: %d\n", priv->mode, mode);
 
   /* Has the mode changed? */
 
@@ -973,7 +971,7 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
         }
 
       spi_putreg(priv, PIC32MZ_SPI_CON_OFFSET, regval);
-      spivdbg("CON: %08x\n", regval);
+      spiinfo("CON: %08x\n", regval);
 
       /* Save the mode so that subsequent re-configuratins will be faster */
 
@@ -1002,7 +1000,7 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
   uint32_t setting;
   uint32_t regval;
 
-  spivdbg("Old nbits: %d New nbits: %d\n", priv->nbits, nbits);
+  spiinfo("Old nbits: %d New nbits: %d\n", priv->nbits, nbits);
 
   /* Has the number of bits changed? */
 
@@ -1025,7 +1023,7 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
         }
       else
         {
-          spidbg("Unsupported nbits: %d\n", nbits);
+          spierr("ERROR: Unsupported nbits: %d\n", nbits);
           return;
         }
 
@@ -1033,7 +1031,7 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
       regval &= ~SPI_CON_MODE_MASK;
       regval |= setting;
       regval = spi_getreg(priv, PIC32MZ_SPI_CON_OFFSET);
-      spivdbg("CON: %08x\n", regval);
+      spiinfo("CON: %08x\n", regval);
 
       /* Save the selection so the subsequence re-configurations will be
        * faster
@@ -1075,7 +1073,7 @@ static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
       rxword = 0;
       spi_exchange16(priv, &txword, &rxword, 1);
 
-      spivdbg("Sent %04x received %04x\n", txword, rxword);
+      spiinfo("Sent %04x received %04x\n", txword, rxword);
       return rxword;
     }
   else
@@ -1089,7 +1087,7 @@ static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
       rxbyte = (uint8_t)0;
       spi_exchange8(priv, &txbyte, &rxbyte, 1);
 
-      spivdbg("Sent %02x received %02x\n", txbyte, rxbyte);
+      spiinfo("Sent %02x received %02x\n", txbyte, rxbyte);
       return (uint16_t)rxbyte;
     }
 }
@@ -1222,7 +1220,7 @@ FAR struct spi_dev_s *pic32mz_spibus_initialize(int port)
   irqstate_t flags;
   uint32_t regval;
 
-  spivdbg("port: %d\n", port);
+  spiinfo("port: %d\n", port);
 
   /* Select the SPI state structure and SDI PPS register for this port */
 
@@ -1275,7 +1273,7 @@ FAR struct spi_dev_s *pic32mz_spibus_initialize(int port)
   else
 #endif
    {
-     spidbg("Unsuppport port: %d\n", port);
+     spierr("ERROR: Unsuppport port: %d\n", port);
      return NULL;
    }
 
@@ -1311,7 +1309,7 @@ FAR struct spi_dev_s *pic32mz_spibus_initialize(int port)
   ret = irq_attach(priv->config->rxirq, spi_interrupt);
   if (ret < 0)
     {
-      spidbg("Failed to attach RX interrupt: %d port: %d\n",
+      spierr("ERROR: Failed to attach RX interrupt: %d port: %d\n",
              priv->config->rxirq, port);
       goto errout;
     }
@@ -1319,7 +1317,7 @@ FAR struct spi_dev_s *pic32mz_spibus_initialize(int port)
   ret = irq_attach(priv->config->txirq, spi_interrupt);
   if (ret < 0)
     {
-      spidbg("Failed to attach TX interrupt: %d port: %d\n",
+      spierr("ERROR: Failed to attach TX interrupt: %d port: %d\n",
              priv->tconfig->xirq, port);
       goto errout_with_rxirq;
     }
@@ -1327,7 +1325,7 @@ FAR struct spi_dev_s *pic32mz_spibus_initialize(int port)
   ret = irq_attach(priv->config->firq, spi_interrupt);
   if (ret < 0)
     {
-      spidbg("Failed to attach fault interrupt: %d port: %d\n",
+      spierr("ERROR: Failed to attach fault interrupt: %d port: %d\n",
              priv->config->firq, port);
       goto errout_with_txirq;
     }
@@ -1354,7 +1352,7 @@ FAR struct spi_dev_s *pic32mz_spibus_initialize(int port)
   regval |= (SPI_CON_ENHBUF | SPI_CON_SRXISEL_HALF | SPI_CON_STXISEL_HALF);
 #endif
   spi_putreg(priv, PIC32MZ_SPI_CON_OFFSET, regval);
-  spivdbg("CON: %08x\n", regval);
+  spiinfo("CON: %08x\n", regval);
 
   /* Set the initial SPI configuration */
 

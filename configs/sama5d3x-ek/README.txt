@@ -1534,7 +1534,7 @@ USB High-Speed Device
   --------------------
 
   There is normal console debug output available that can be enabled with
-  CONFIG_DEBUG + CONFIG_DEBUG_USB.  However, USB device operation is very
+  CONFIG_DEBUG_FEATURES + CONFIG_DEBUG_USB.  However, USB device operation is very
   time critical and enabling this debug output WILL interfere with the
   operation of the UDPHS.  USB device tracing is a less invasive way to get
   debug information:  If tracing is enabled, the USB device will save
@@ -1718,7 +1718,7 @@ USB High-Speed Host
   ------------------
 
   There is normal console debug output available that can be enabled with
-  CONFIG_DEBUG + CONFIG_DEBUG_USB.  However, USB host operation is very time
+  CONFIG_DEBUG_FEATURES + CONFIG_DEBUG_USB.  However, USB host operation is very time
   critical and enabling this debug output might interfere with the operation
   of the UDPHS.  USB host tracing is a less invasive way to get debug
   information:  If tracing is enabled, the USB host will save encoded trace

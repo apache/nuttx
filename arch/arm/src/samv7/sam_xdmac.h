@@ -52,7 +52,7 @@
 
 /* Configuration ********************************************************************/
 
-#ifndef CONFIG_DEBUG
+#ifndef CONFIG_DEBUG_FEATURES
 #  undef CONFIG_DEBUG_DMA
 #endif
 

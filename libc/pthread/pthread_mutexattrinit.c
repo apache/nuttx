@@ -67,7 +67,7 @@ int pthread_mutexattr_init(FAR pthread_mutexattr_t *attr)
 {
   int ret = OK;
 
-  sdbg("attr=0x%p\n", attr);
+  linfo("attr=0x%p\n", attr);
 
   if (!attr)
     {
@@ -81,6 +81,6 @@ int pthread_mutexattr_init(FAR pthread_mutexattr_t *attr)
 #endif
     }
 
-  sdbg("Returning %d\n", ret);
+  linfo("Returning %d\n", ret);
   return ret;
 }

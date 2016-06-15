@@ -594,15 +594,15 @@
 /* Debug */
 
 #ifdef CONFIG_DEBUG_IRQ
-#  define gicdbg(format, ...)    dbg(format, ##__VA_ARGS__)
-#  define giclldbg(format, ...)  lldbg(format, ##__VA_ARGS__)
-#  define gicvdbg(format, ...)   vdbg(format, ##__VA_ARGS__)
-#  define gicllvdbg(format, ...) llvdbg(format, ##__VA_ARGS__)
+#  define gicerr(format, ...)    err(format, ##__VA_ARGS__)
+#  define gicllerr(format, ...)  llerr(format, ##__VA_ARGS__)
+#  define gicinfo(format, ...)   info(format, ##__VA_ARGS__)
+#  define gicllinfo(format, ...) llinfo(format, ##__VA_ARGS__)
 #else
-#  define gicdbg(x...)
-#  define giclldbg(x...)
-#  define gicvdbg(x...)
-#  define gicllvdbg(x...)
+#  define gicerr(x...)
+#  define gicllerr(x...)
+#  define gicinfo(x...)
+#  define gicllinfo(x...)
 #endif
 
 /****************************************************************************

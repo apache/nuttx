@@ -74,13 +74,13 @@
  * also be enabled.
  */
 
-#ifndef CONFIG_DEBUG
-#  undef CONFIG_DEBUG_VERBOSE
+#ifndef CONFIG_DEBUG_FEATURES
+#  undef CONFIG_DEBUG_INFO
 #  undef CONFIG_DEBUG_GRAPHICS
 #  undef CONFIG_DEBUG_LCD
 #endif
 
-#ifndef CONFIG_DEBUG_VERBOSE
+#ifndef CONFIG_DEBUG_INFO
 #  undef CONFIG_DEBUG_LCD
 #endif
 
@@ -121,11 +121,11 @@
 /* Debug ******************************************************************************/
 
 #ifdef CONFIG_DEBUG_LCD
-#  define lcddbg       dbg
-#  define lcdvdbg      vdbg
+#  define lcderr       err
+#  define lcdinfo      info
 #else
-#  define lcddbg(x...)
-#  define lcdvdbg(x...)
+#  define lcderr(x...)
+#  define lcdinfo(x...)
 #endif
 
 /**************************************************************************************
@@ -503,7 +503,7 @@ int board_lcd_initialize(void)
 
   if (!g_stm32f4_lcd.drvr)
     {
-      lcdvdbg("Initializing\n");
+      lcdinfo("Initializing\n");
 
       /* Hold the LCD in reset (active low)  */
 
@@ -520,7 +520,7 @@ int board_lcd_initialize(void)
       g_stm32f4_lcd.drvr = mio283qt9a_lcdinitialize(&g_stm32f4_lcd.dev);
       if (!g_stm32f4_lcd.drvr)
         {
-          lcddbg("ERROR: mio283qt9a_lcdinitialize failed\n");
+          lcderr("ERROR: mio283qt9a_lcdinitialize failed\n");
           return -ENODEV;
         }
     }

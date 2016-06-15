@@ -130,10 +130,10 @@
 #define __CNT_CARRY_REG         EFM32_BURTC_RET_REG(0)
 #define __CNT_ZERO_REG          EFM32_BURTC_RET_REG(1)
 
-#if defined CONFIG_DEBUG && defined CONFIG_RTC_DEBUG
-#   define burtcdbg lldbg
+#if defined CONFIG_DEBUG_FEATURES && defined CONFIG_RTC_DEBUG
+#   define burtcerr llerr
 #else
-#   define burtcdbg(x...)
+#   define burtcerr(x...)
 #endif
 
 /************************************************************************************
@@ -191,7 +191,7 @@ static int efm32_rtc_burtc_interrupt(int irq, void *context)
 
   if (source & BURTC_IF_LFXOFAIL)
     {
-      burtcdbg("BURTC_IF_LFXOFAIL");
+      burtcerr("BURTC_IF_LFXOFAIL");
     }
 
 #ifdef CONFIG_RTC_HIRES
@@ -245,7 +245,7 @@ static void efm32_rtc_burtc_init(void)
   regval = g_efm32_rstcause;
   regval2 = getreg32(EFM32_BURTC_CTRL);
 
-  burtcdbg("BURTC RESETCAUSE=0x%08X BURTC_CTRL=0x%08X\n", regval, regval2);
+  burtcerr("BURTC RESETCAUSE=0x%08X BURTC_CTRL=0x%08X\n", regval, regval2);
 
   if (!(regval2 & BURTC_CTRL_RSTEN) &&
       !(regval  & RMU_RSTCAUSE_BUBODREG) &&
@@ -262,11 +262,11 @@ static void efm32_rtc_burtc_init(void)
 
       /* restore saved base time */
 
-      burtcdbg("BURTC OK\n");
+      burtcerr("BURTC OK\n");
       return;
     }
 
-  burtcdbg("BURTC RESETED\n");
+  burtcerr("BURTC RESETED\n");
 
   /* Disable reset of BackupDomain */
 
@@ -358,7 +358,7 @@ static uint64_t efm32_get_burtc_tick(void)
 
   val = (uint64_t)cnt_carry*__CNT_TOP + cnt + cnt_zero;
 
-  burtcdbg("Get Tick carry %u zero %u reg %u\n", cnt_carry, cnt_carry,cnt);
+  burtcerr("Get Tick carry %u zero %u reg %u\n", cnt_carry, cnt_carry,cnt);
 
   return val;
 }
@@ -449,7 +449,7 @@ int up_rtc_gettime(FAR struct timespec *tp)
   tp->tv_sec  = val  / CONFIG_RTC_FREQUENCY;
   tp->tv_nsec = (val % CONFIG_RTC_FREQUENCY)*(NSEC_PER_SEC/CONFIG_RTC_FREQUENCY);
 
-  burtcdbg("Get RTC %u.%09u\n", tp->tv_sec, tp->tv_nsec);
+  burtcerr("Get RTC %u.%09u\n", tp->tv_sec, tp->tv_nsec);
 
   return OK;
 }
@@ -499,7 +499,7 @@ int up_rtc_settime(FAR const struct timespec *tp)
   cnt_carry = val / __CNT_TOP;
   cnt       = val % __CNT_TOP;
 
-  burtcdbg("Set RTC %u.%09u carry %u zero %u reg %u\n",
+  burtcerr("Set RTC %u.%09u carry %u zero %u reg %u\n",
            tp->tv_sec, tp->tv_nsec, cnt_carry, cnt, cnt_reg);
 
   putreg32(cnt_carry, __CNT_CARRY_REG);

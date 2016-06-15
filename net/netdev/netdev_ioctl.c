@@ -363,7 +363,7 @@ static int netdev_ifrioctl(FAR struct socket *psock, int cmd,
   FAR struct net_driver_s *dev;
   int ret = -EINVAL;
 
-  nvdbg("cmd: %d\n", cmd);
+  ninfo("cmd: %d\n", cmd);
 
   /* Execute the command */
 
@@ -769,7 +769,7 @@ static int netdev_imsfioctl(FAR struct socket *psock, int cmd,
   FAR struct net_driver_s *dev;
   int ret = -EINVAL;
 
-  nvdbg("cmd: %d\n", cmd);
+  ninfo("cmd: %d\n", cmd);
 
   /* Execute the command */
 

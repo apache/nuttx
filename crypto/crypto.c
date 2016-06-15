@@ -81,11 +81,11 @@ int up_cryptoinitialize(void)
   res = crypto_test();
   if (res)
     {
-      cryptlldbg("crypto test failed\n");
+      cryptllerr("ERROR: crypto test failed\n");
     }
   else
     {
-      cryptllvdbg("crypto test OK\n");
+      cryptllinfo("crypto test OK\n");
     }
 #endif
 

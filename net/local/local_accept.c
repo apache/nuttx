@@ -156,7 +156,7 @@ int psock_local_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
           conn = local_alloc();
           if (!conn)
             {
-              ndbg("ERROR:  Failed to allocate new connection structure\n");
+              nerr("ERROR:  Failed to allocate new connection structure\n");
               ret = -ENOMEM;
             }
           else
@@ -180,7 +180,7 @@ int psock_local_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
                                          _SS_ISNONBLOCK(psock->s_flags));
               if (ret < 0)
                 {
-                   ndbg("ERROR: Failed to open write-only FIFOs for %s: %d\n",
+                   nerr("ERROR: Failed to open write-only FIFOs for %s: %d\n",
                         conn->lc_path, ret);
                 }
             }
@@ -200,7 +200,7 @@ int psock_local_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
                                          _SS_ISNONBLOCK(psock->s_flags));
               if (ret < 0)
                 {
-                   ndbg("ERROR: Failed to open read-only FIFOs for %s: %d\n",
+                   nerr("ERROR: Failed to open read-only FIFOs for %s: %d\n",
                         conn->lc_path, ret);
                 }
             }

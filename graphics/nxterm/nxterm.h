@@ -141,7 +141,7 @@ struct nxterm_state_s
   FAR struct nxterm_window_s wndo;           /* Describes the window and font */
   NXHANDLE font;                            /* The current font handle */
   sem_t exclsem;                            /* Forces mutually exclusive access */
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   pid_t holder;                             /* Deadlock avoidance */
 #endif
   uint8_t minor;                            /* Device minor number */
@@ -206,7 +206,7 @@ extern const struct file_operations g_nxterm_drvrops;
  ****************************************************************************/
 /* Semaphore helpers */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
 int nxterm_semwait(FAR struct nxterm_state_s *priv);
 int nxterm_sempost(FAR struct nxterm_state_s *priv);
 #else

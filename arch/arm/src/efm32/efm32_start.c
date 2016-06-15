@@ -85,7 +85,7 @@ static void go_os_start(void *pv, unsigned int nbytes)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
 #  if defined(CONFIG_ARMV7M_ITMSYSLOG)
 #    define showprogress(c) (void)syslog_putc(c)
 #  elif defined(HAVE_UART_CONSOLE) || defined(HAVE_LEUART_CONSOLE)

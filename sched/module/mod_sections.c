@@ -85,7 +85,7 @@ static inline int mod_sectname(FAR struct mod_loadinfo_s *loadinfo,
   shstrndx = loadinfo->ehdr.e_shstrndx;
   if (shstrndx == SHN_UNDEF)
     {
-      sdbg("No section header string table\n");
+      serr("ERROR: No section header string table\n");
       return -EINVAL;
     }
 
@@ -118,7 +118,7 @@ static inline int mod_sectname(FAR struct mod_loadinfo_s *loadinfo,
         {
           if (loadinfo->filelen <= offset)
             {
-              sdbg("At end of file\n");
+              serr("ERROR: At end of file\n");
               return -EINVAL;
             }
 
@@ -131,7 +131,7 @@ static inline int mod_sectname(FAR struct mod_loadinfo_s *loadinfo,
       ret = mod_read(loadinfo, buffer, readlen, offset);
       if (ret < 0)
         {
-          sdbg("Failed to read section name\n");
+          serr("ERROR: Failed to read section name: %d\n", ret);
           return ret;
         }
 
@@ -151,7 +151,7 @@ static inline int mod_sectname(FAR struct mod_loadinfo_s *loadinfo,
       ret = mod_reallocbuffer(loadinfo, CONFIG_MODULE_BUFFERINCR);
       if (ret < 0)
         {
-          sdbg("mod_reallocbuffer failed: %d\n", ret);
+          serr("ERROR: mod_reallocbuffer failed: %d\n", ret);
           return ret;
         }
     }
@@ -188,7 +188,7 @@ int mod_loadshdrs(FAR struct mod_loadinfo_s *loadinfo)
 
   if (loadinfo->ehdr.e_shnum < 1)
     {
-      sdbg("No sections(?)\n");
+      serr("ERROR: No sections(?)\n");
       return -EINVAL;
     }
 
@@ -197,7 +197,7 @@ int mod_loadshdrs(FAR struct mod_loadinfo_s *loadinfo)
   shdrsize = (size_t)loadinfo->ehdr.e_shentsize * (size_t)loadinfo->ehdr.e_shnum;
   if (loadinfo->ehdr.e_shoff + shdrsize > loadinfo->filelen)
     {
-      sdbg("Insufficent space in file for section header table\n");
+      serr("ERROR: Insufficent space in file for section header table\n");
       return -ESPIPE;
     }
 
@@ -206,7 +206,7 @@ int mod_loadshdrs(FAR struct mod_loadinfo_s *loadinfo)
   loadinfo->shdr = (FAR FAR Elf32_Shdr *)kmm_malloc(shdrsize);
   if (!loadinfo->shdr)
     {
-      sdbg("Failed to allocate the section header table. Size: %ld\n",
+      serr("ERROR: Failed to allocate the section header table. Size: %ld\n",
            (long)shdrsize);
       return -ENOMEM;
     }
@@ -217,7 +217,7 @@ int mod_loadshdrs(FAR struct mod_loadinfo_s *loadinfo)
                     loadinfo->ehdr.e_shoff);
   if (ret < 0)
     {
-      sdbg("Failed to read section header table: %d\n", ret);
+      serr("ERROR: Failed to read section header table: %d\n", ret);
     }
 
   return ret;
@@ -256,13 +256,13 @@ int mod_findsection(FAR struct mod_loadinfo_s *loadinfo,
       ret  = mod_sectname(loadinfo, shdr);
       if (ret < 0)
         {
-          sdbg("mod_sectname failed: %d\n", ret);
+          serr("ERROR: mod_sectname failed: %d\n", ret);
           return ret;
         }
 
       /* Check if the name of this section is 'sectname' */
 
-      svdbg("%d. Comparing \"%s\" and .\"%s\"\n",
+      sinfo("%d. Comparing \"%s\" and .\"%s\"\n",
             i, loadinfo->iobuffer, sectname);
 
       if (strcmp((FAR const char *)loadinfo->iobuffer, sectname) == 0)

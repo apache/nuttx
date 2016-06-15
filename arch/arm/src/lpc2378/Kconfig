@@ -185,7 +185,7 @@ config LPC2378_USBDEV_FRAME_INTERRUPT
 config LPC2378_USBDEV_REGDEBUG
 	bool "USB Device Register-Level Debug Output"
 	default n
-	depends on DEBUG
+	depends on DEBUG_FEATURES
 
 endmenu
 endif

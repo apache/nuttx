@@ -86,7 +86,7 @@ int nxffs_rminode(FAR struct nxffs_volume_s *volume, FAR const char *name)
     {
       /* We can't remove the inode if it is open */
 
-      fdbg("ERROR: Inode '%s' is open\n", name);
+      ferr("ERROR: Inode '%s' is open\n", name);
       ret = -EBUSY;
       goto errout;
     }
@@ -96,7 +96,7 @@ int nxffs_rminode(FAR struct nxffs_volume_s *volume, FAR const char *name)
   ret = nxffs_findinode(volume, name, &entry);
   if (ret < 0)
     {
-      fdbg("ERROR: Inode '%s' not found\n", name);
+      ferr("ERROR: Inode '%s' not found\n", name);
       goto errout;
     }
 
@@ -111,7 +111,7 @@ int nxffs_rminode(FAR struct nxffs_volume_s *volume, FAR const char *name)
   ret = nxffs_rdcache(volume, volume->ioblock);
   if (ret < 0)
     {
-      fdbg("ERROR: Failed to read block %d into cache: %d\n",
+      ferr("ERROR: Failed to read block %d into cache: %d\n",
            volume->ioblock, ret);
       goto errout_with_entry;
     }
@@ -126,7 +126,7 @@ int nxffs_rminode(FAR struct nxffs_volume_s *volume, FAR const char *name)
   ret = nxffs_wrcache(volume);
   if (ret < 0)
     {
-      fdbg("ERROR: Failed to write block %d: %d\n",
+      ferr("ERROR: Failed to write block %d: %d\n",
            volume->ioblock, ret);
     }
 
@@ -148,7 +148,7 @@ int nxffs_unlink(FAR struct inode *mountpt, FAR const char *relpath)
   FAR struct nxffs_volume_s *volume;
   int ret;
 
-  fvdbg("Entry\n");
+  finfo("Entry\n");
 
   /* Sanity checks */
 

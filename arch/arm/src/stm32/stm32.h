@@ -56,10 +56,10 @@
 /* Additional Configuration *********************************************************/
 /* Custom debug settings used in the STM32 port.  These are managed by STM32-specific
  * logic and not the common logic in include/debug.h.  NOTE:  Some of these also
- * depend on CONFIG_DEBUG_VERBOSE
+ * depend on CONFIG_DEBUG_INFO
  */
 
-#ifndef CONFIG_DEBUG
+#ifndef CONFIG_DEBUG_FEATURES
 #  undef CONFIG_DEBUG_DMA
 #  undef CONFIG_DEBUG_RTC
 #  undef CONFIG_DEBUG_I2C

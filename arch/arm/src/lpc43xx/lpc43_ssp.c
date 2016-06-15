@@ -69,26 +69,17 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* The following enable debug output from this file (needs CONFIG_DEBUG too).
- *
- * CONFIG_SSP_DEBUG - Define to enable basic SSP debug
- * CONFIG_SSP_VERBOSE - Define to enable verbose SSP debug
- */
+/* The following enable debug output from this file */
 
-#ifdef CONFIG_SSP_DEBUG
-#  define sspdbg  lldbg
-#  ifdef CONFIG_SSP_VERBOSE
-#    define spivdbg lldbg
-#  else
-#    define spivdbg(x...)
-#  endif
+#ifdef CONFIG_DEBUG_SPI
+#  define ssperr  llerr
+#  define sspwarn llwarn
+#  define sspinfo llinfo
 #else
-#  undef CONFIG_SSP_VERBOSE
-#  define sspdbg(x...)
-#  define spivdbg(x...)
+#  define ssperr(x...)
+#  define sspwarn(x...)
+#  define sspinfo(x...)
 #endif
-
-
 
 /****************************************************************************
  * Private Types
@@ -378,7 +369,7 @@ static uint32_t ssp_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
   priv->frequency = frequency;
   priv->actual    = actual;
 
-  sspdbg("Frequency %d->%d\n", frequency, actual);
+  ssperr("Frequency %d->%d\n", frequency, actual);
   return actual;
 }
 
@@ -429,7 +420,7 @@ static void ssp_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
           break;
 
         default:
-          sspdbg("Bad mode: %d\n", mode);
+          ssperr("Bad mode: %d\n", mode);
           DEBUGASSERT(FALSE);
           return;
         }
@@ -517,7 +508,7 @@ static uint16_t ssp_send(FAR struct spi_dev_s *dev, uint16_t wd)
   /* Get the value from the RX FIFO and return it */
 
   regval = ssp_getreg(priv, LPC43_SSP_DR_OFFSET);
-  sspdbg("%04x->%04x\n", wd, regval);
+  ssperr("%04x->%04x\n", wd, regval);
   return (uint16_t)regval;
 }
 
@@ -564,7 +555,7 @@ static void ssp_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
 
   /* While there is remaining to be sent (and no synchronization error has occurred) */
 
-  sspdbg("nwords: %d\n", nwords);
+  ssperr("nwords: %d\n", nwords);
 
   tx.pv = txbuffer;
   rx.pv = rxbuffer;
@@ -576,7 +567,7 @@ static void ssp_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
        * and (3) there are more bytes to be sent.
        */
 
-      spivdbg("TX: rxpending: %d nwords: %d\n", rxpending, nwords);
+      sspinfo("TX: rxpending: %d nwords: %d\n", rxpending, nwords);
       while ((ssp_getreg(priv, LPC43_SSP_SR_OFFSET) & SSP_SR_TNF) &&
              (rxpending < LPC43_SSP_FIFOSZ) && nwords)
         {
@@ -599,7 +590,7 @@ static void ssp_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
 
       /* Now, read the RX data from the RX FIFO while the RX FIFO is not empty */
 
-      spivdbg("RX: rxpending: %d\n", rxpending);
+      sspinfo("RX: rxpending: %d\n", rxpending);
       while (ssp_getreg(priv, LPC43_SSP_SR_OFFSET) & SSP_SR_RNE)
         {
           data = ssp_getreg(priv, LPC43_SSP_DR_OFFSET);

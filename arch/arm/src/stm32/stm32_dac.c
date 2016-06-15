@@ -852,7 +852,7 @@ static int dac_timinit(FAR struct stm32_chan_s *chan)
         break;
 #endif
       default:
-        adbg("Could not enable timer\n");
+        aerr("Could not enable timer\n");
         break;
     }
 
@@ -1016,7 +1016,7 @@ static int dac_chaninit(FAR struct stm32_chan_s *chan)
       chan->dma = stm32_dmachannel(chan->dmachan);
       if (!chan->dma)
         {
-          adbg("Failed to allocate a DMA channel\n");
+          aerr("Failed to allocate a DMA channel\n");
           return -EBUSY;
         }
 
@@ -1025,7 +1025,7 @@ static int dac_chaninit(FAR struct stm32_chan_s *chan)
       ret = dac_timinit(chan);
       if (ret < 0)
         {
-          adbg("Failed to initialize the DMA timer: %d\n", ret);
+          aerr("Failed to initialize the DMA timer: %d\n", ret);
           return ret;
         }
     }
@@ -1114,7 +1114,7 @@ FAR struct dac_dev_s *stm32_dacinitialize(int intf)
 #ifdef CONFIG_STM32_DAC1
   if (intf == 1)
     {
-      avdbg("DAC1 Selected\n");
+      ainfo("DAC1 Selected\n");
       dev = &g_dac1dev;
     }
   else
@@ -1122,13 +1122,13 @@ FAR struct dac_dev_s *stm32_dacinitialize(int intf)
 #ifdef CONFIG_STM32_DAC2
   if (intf == 2)
     {
-      avdbg("DAC2 Selected\n");
+      ainfo("DAC2 Selected\n");
       dev = &g_dac2dev;
     }
   else
 #endif
     {
-      adbg("No such DAC interface: %d\n", intf);
+      aerr("No such DAC interface: %d\n", intf);
       errno = ENODEV;
       return NULL;
     }
@@ -1138,7 +1138,7 @@ FAR struct dac_dev_s *stm32_dacinitialize(int intf)
   ret = dac_blockinit();
   if (ret < 0)
     {
-      adbg("Failed to initialize the DAC block: %d\n", ret);
+      aerr("Failed to initialize the DAC block: %d\n", ret);
       errno = -ret;
       return NULL;
     }
@@ -1149,7 +1149,7 @@ FAR struct dac_dev_s *stm32_dacinitialize(int intf)
   ret  = dac_chaninit(chan);
   if (ret < 0)
     {
-      adbg("Failed to initialize DAC channel %d: %d\n", intf, ret);
+      aerr("Failed to initialize DAC channel %d: %d\n", intf, ret);
       errno = -ret;
       return NULL;
     }

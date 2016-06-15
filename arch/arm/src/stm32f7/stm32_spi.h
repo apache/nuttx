@@ -1,8 +1,9 @@
 /************************************************************************************
  * arch/arm/src/stm32f7/stm32_spi.h
  *
- *   Copyright (C) 2009, 2015 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            David Sidrane <david_s5@nscdg.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -42,11 +43,13 @@
 
 #include <nuttx/config.h>
 
+#include <stdbool.h>
+
 #include "chip.h"
 #include "chip/stm32_spi.h"
 
 /************************************************************************************
- * Pre-processor Definitions
+ * Public Functions
  ************************************************************************************/
 
 #ifndef __ASSEMBLY__
@@ -60,16 +63,8 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
- * Public Data
- ************************************************************************************/
-
-struct  spi_dev_s;
-enum    spi_dev_e;
-
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+struct  spi_dev_s; /* Forward reference */
+enum    spi_dev_e; /* Forward reference */
 
 /************************************************************************************
  * Name: stm32_spibus_initialize

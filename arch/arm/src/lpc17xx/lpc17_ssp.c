@@ -75,21 +75,21 @@
 /* Debug ********************************************************************/
 /* The following enable debug output from this file:
  *
- * CONFIG_DEBUG         - Define to enable general debug features
- * CONFIG_DEBUG_SPI     - Define to enable basic SSP debug (needs CONFIG_DEBUG)
- * CONFIG_DEBUG_VERBOSE - Define to enable verbose SSP debug
+ * CONFIG_DEBUG_FEATURES - Define to enable general debug features
+ * CONFIG_DEBUG_SPI      - Define to enable basic SSP debug (needs CONFIG_DEBUG_FEATURES)
+ * CONFIG_DEBUG_INFO     - Define to enable verbose SSP debug
  */
 
 #ifdef CONFIG_DEBUG_SPI
-#  define sspdbg  lldbg
-#  ifdef CONFIG_DEBUG_VERBOSE
-#    define spivdbg lldbg
+#  define ssperr  llerr
+#  ifdef CONFIG_DEBUG_INFO
+#    define spiinfo llerr
 #  else
-#    define spivdbg(x...)
+#    define spiinfo(x...)
 #  endif
 #else
-#  define sspdbg(x...)
-#  define spivdbg(x...)
+#  define ssperr(x...)
+#  define spiinfo(x...)
 #endif
 
 /* SSP Clocking *************************************************************/
@@ -470,7 +470,7 @@ static uint32_t ssp_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
   priv->frequency = frequency;
   priv->actual    = actual;
 
-  sspdbg("Frequency %d->%d\n", frequency, actual);
+  ssperr("Frequency %d->%d\n", frequency, actual);
   return actual;
 }
 
@@ -521,7 +521,7 @@ static void ssp_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
           break;
 
         default:
-          sspdbg("Bad mode: %d\n", mode);
+          ssperr("Bad mode: %d\n", mode);
           DEBUGASSERT(FALSE);
           return;
         }
@@ -609,7 +609,7 @@ static uint16_t ssp_send(FAR struct spi_dev_s *dev, uint16_t wd)
   /* Get the value from the RX FIFO and return it */
 
   regval = ssp_getreg(priv, LPC17_SSP_DR_OFFSET);
-  sspdbg("%04x->%04x\n", wd, regval);
+  ssperr("%04x->%04x\n", wd, regval);
   return (uint16_t)regval;
 }
 
@@ -646,7 +646,7 @@ static void ssp_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size
 
   /* Loop while thre are bytes remaining to be sent */
 
-  sspdbg("nwords: %d\n", nwords);
+  ssperr("nwords: %d\n", nwords);
   u.pv = buffer;
   while (nwords > 0)
     {
@@ -674,7 +674,7 @@ static void ssp_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size
 
   /* Then discard all card responses until the RX & TX FIFOs are emptied. */
 
-  sspdbg("discarding\n");
+  ssperr("discarding\n");
   do
     {
       /* Is there anything in the RX fifo? */
@@ -735,7 +735,7 @@ static void ssp_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nw
 
   /* While there is remaining to be sent (and no synchronization error has occurred) */
 
-  sspdbg("nwords: %d\n", nwords);
+  ssperr("nwords: %d\n", nwords);
   u.pv = buffer;
   while (nwords || rxpending)
     {
@@ -745,7 +745,7 @@ static void ssp_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nw
        * and (3) there are more bytes to be sent.
        */
 
-      spivdbg("TX: rxpending: %d nwords: %d\n", rxpending, nwords);
+      spiinfo("TX: rxpending: %d nwords: %d\n", rxpending, nwords);
       while ((ssp_getreg(priv, LPC17_SSP_SR_OFFSET) & SSP_SR_TNF) &&
              (rxpending < LPC17_SSP_FIFOSZ) && nwords)
         {
@@ -756,7 +756,7 @@ static void ssp_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nw
 
       /* Now, read the RX data from the RX FIFO while the RX FIFO is not empty */
 
-      spivdbg("RX: rxpending: %d\n", rxpending);
+      spiinfo("RX: rxpending: %d\n", rxpending);
       while (ssp_getreg(priv, LPC17_SSP_SR_OFFSET) & SSP_SR_RNE)
         {
           data = (uint8_t)ssp_getreg(priv, LPC17_SSP_DR_OFFSET);

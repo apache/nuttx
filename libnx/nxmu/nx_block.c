@@ -107,7 +107,7 @@ int nx_block(NXWINDOW hwnd, FAR void *arg)
   struct nxsvrmsg_blocked_s outmsg;
   int ret = OK;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!hwnd)
     {
       set_errno(EINVAL);

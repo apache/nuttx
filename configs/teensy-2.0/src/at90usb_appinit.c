@@ -1,7 +1,7 @@
 /****************************************************************************
- * libc/misc/lib_dbg.c
+ * configs/teensy-2.0/src/at90usb_appinit.c
  *
- *   Copyright (C) 2007-2009, 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,83 +39,43 @@
 
 #include <nuttx/config.h>
 
-#include <stdarg.h>
-#include <debug.h>
+#include <sys/types.h>
+#include <nuttx/board.h>
 
-#include "libc.h"
-
-#ifndef CONFIG_CPP_HAVE_VARARGS
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
+#ifdef CONFIG_LIB_BOARDCTL
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: dbg, lldbg, vdbg
+ * Name: board_app_initialize
  *
  * Description:
- *  If the cross-compiler's pre-processor does not support variable
- * length arguments, then these additional APIs will be built.
+ *   Perform application specific initialization.  This function is never
+ *   called directly from application code, but only indirectly via the
+ *   (non-standard) boardctl() interface using the command BOARDIOC_INIT.
+ *
+ * Input Parameters:
+ *   arg - The boardctl() argument is passed to the board_app_initialize()
+ *         implementation without modification.  The argument has no
+ *         meaning to NuttX; the meaning of the argument is a contract
+ *         between the board-specific initalization logic and the the
+ *         matching application logic.  The value cold be such things as a
+ *         mode enumeration value, a set of DIP switch switch settings, a
+ *         pointer to configuration data read from a file or serial FLASH,
+ *         or whatever you would like to do with it.  Every implementation
+ *         should accept zero/NULL as a default configuration.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure to indicate the nature of the failure.
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG
-int dbg(const char *format, ...)
+int board_app_initialize(uintptr_t arg)
 {
-  va_list ap;
-  int     ret;
-
-  va_start(ap, format);
-  ret = vsyslog(LOG_DEBUG, format, ap);
-  va_end(ap);
-
-  return ret;
+  return OK;
 }
 
-#ifdef CONFIG_ARCH_LOWPUTC
-int lldbg(const char *format, ...)
-{
-  va_list ap;
-  int     ret;
-
-  va_start(ap, format);
-  ret = lowvsyslog(LOG_DEBUG, format, ap);
-  va_end(ap);
-
-  return ret;
-}
-#endif
-
-#ifdef CONFIG_DEBUG_VERBOSE
-int vdbg(const char *format, ...)
-{
-  va_list ap;
-  int     ret;
-
-  va_start(ap, format);
-  ret = vsyslog(LOG_DEBUG, format, ap);
-  va_end(ap);
-
-  return ret;
-}
-
-#ifdef CONFIG_ARCH_LOWPUTC
-int llvdbg(const char *format, ...)
-{
-  va_list ap;
-  int     ret;
-
-  va_start(ap, format);
-  ret = lowvsyslog(LOG_DEBUG, format, ap);
-  va_end(ap);
-
-  return ret;
-}
-#endif /* CONFIG_ARCH_LOWPUTC */
-#endif /* CONFIG_DEBUG_VERBOSE */
-#endif /* CONFIG_DEBUG */
-#endif /* CONFIG_CPP_HAVE_VARARGS */
+#endif /* CONFIG_LIB_BOARDCTL */

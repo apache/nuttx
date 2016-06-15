@@ -120,25 +120,25 @@
 
 /* The following enable debug output from this file.
  *
- * CONFIG_DEBUG_SPI && CONFIG_DEBUG - Define to enable basic SPI debug
- * CONFIG_DEBUG_VERBOSE - Define to enable verbose SPI debug
+ * CONFIG_DEBUG_SPI && CONFIG_DEBUG_FEATURES - Define to enable basic SPI debug
+ * CONFIG_DEBUG_INFO - Define to enable verbose SPI debug
  */
 
-#ifndef CONFIG_DEBUG
+#ifndef CONFIG_DEBUG_FEATURES
 #  undef CONFIG_DEBUG_SPI
-#  undef CONFIG_DEBUG_VERBOSE
+#  undef CONFIG_DEBUG_INFO
 #endif
 
 #ifdef CONFIG_DEBUG_SPI
-#  define spidbg  lldbg
-#  ifdef CONFIG_DEBUG_VERBOSE
-#    define spivdbg lldbg
+#  define spierr  llerr
+#  ifdef CONFIG_DEBUG_INFO
+#    define spiinfo llerr
 #  else
-#    define spivdbg(x...)
+#    define spiinfo(x...)
 #  endif
 #else
-#  define spidbg(x...)
-#  define spivdbg(x...)
+#  define spierr(x...)
+#  define spiinfo(x...)
 #endif
 
 /************************************************************************************
@@ -203,7 +203,7 @@ void weak_function pic32mx_spidev_initialize(void)
 #ifdef CONFIG_PIC32MX_SPI2
 void pic32mx_spi2select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
-  spivdbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 
   /* The SD card chip select is pulled high and active low */
 
@@ -263,7 +263,7 @@ uint8_t pic32mx_spi2status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
     }
 #endif
 
-  spivdbg("Returning %d\n", ret);
+  spiinfo("Returning %d\n", ret);
   return ret;
 }
 #endif

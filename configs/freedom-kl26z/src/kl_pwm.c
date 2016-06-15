@@ -98,7 +98,7 @@ int board_pwm_setup(void)
       pwm = kl_pwminitialize(0);
       if (!pwm)
         {
-          adbg("Failed to get the KL26 PWM lower half\n");
+          aerr("ERROR: Failed to get the KL26 PWM lower half\n");
           return -ENODEV;
         }
 
@@ -107,7 +107,7 @@ int board_pwm_setup(void)
       ret = pwm_register("/dev/pwm0", pwm);
       if (ret < 0)
         {
-          adbg("pwm_register failed: %d\n", ret);
+          aerr("ERROR: pwm_register failed: %d\n", ret);
           return ret;
         }
 

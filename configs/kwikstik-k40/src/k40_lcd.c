@@ -61,9 +61,9 @@
 /* Debug ******************************************************************************/
 
 #ifdef CONFIG_DEBUG_LCD
-# define lcddbg(format, ...)  vdbg(format, ##__VA_ARGS__)
+# define lcderr(format, ...)  info(format, ##__VA_ARGS__)
 #else
-# define lcddbg(x...)
+# define lcderr(x...)
 #endif
 
 /**************************************************************************************
@@ -98,7 +98,7 @@
 
 int board_lcd_initialize(void)
 {
-  gvdbg("Initializing\n");
+  ginfo("Initializing\n");
 #warning "Missing logic"
   return OK;
 }

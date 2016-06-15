@@ -136,6 +136,6 @@ int kinetis_usbpullup(FAR struct usbdev_s *dev, bool enable)
 
 void kinetis_usbsuspend(FAR struct usbdev_s *dev, bool resume)
 {
-  ulldbg("resume: %d\n", resume);
+  ullinfo("resume: %d\n", resume);
 #warning "Missing logic"
 }

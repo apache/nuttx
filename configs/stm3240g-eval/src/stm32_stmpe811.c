@@ -211,7 +211,7 @@ static int stmpe811_attach(FAR struct stmpe811_config_s *state, xcpt_t isr)
 {
   FAR struct stm32_stmpe811config_s *priv = (FAR struct stm32_stmpe811config_s *)state;
 
-  ivdbg("Saving handler %p\n", isr);
+  iinfo("Saving handler %p\n", isr);
   DEBUGASSERT(priv);
 
   /* Just save the handler.  We will use it when EXTI interruptsare enabled */
@@ -279,14 +279,14 @@ int board_tsc_setup(int minor)
   FAR struct i2c_master_s *dev;
   int ret;
 
-  idbg("minor %d\n", minor);
+  iinfo("minor %d\n", minor);
   DEBUGASSERT(minor == 0);
 
   /* Check if we are already initialized */
 
   if (!g_stmpe811config.handle)
     {
-      ivdbg("Initializing\n");
+      iinfo("Initializing\n");
 
       /* Configure the STMPE811 interrupt pin as an input */
 
@@ -297,7 +297,7 @@ int board_tsc_setup(int minor)
       dev = stm32_i2cbus_initialize(CONFIG_STMPE811_I2CDEV);
       if (!dev)
         {
-          idbg("Failed to initialize I2C bus %d\n", CONFIG_STMPE811_I2CDEV);
+          ierr("ERROR: Failed to initialize I2C bus %d\n", CONFIG_STMPE811_I2CDEV);
           return -ENODEV;
         }
 
@@ -307,7 +307,7 @@ int board_tsc_setup(int minor)
         stmpe811_instantiate(dev, (FAR struct stmpe811_config_s *)&g_stmpe811config);
       if (!g_stmpe811config.handle)
         {
-          idbg("Failed to instantiate the STMPE811 driver\n");
+          ierr("ERROR: Failed to instantiate the STMPE811 driver\n");
           return -ENODEV;
         }
 
@@ -316,7 +316,7 @@ int board_tsc_setup(int minor)
       ret = stmpe811_register(g_stmpe811config.handle, CONFIG_STMPE811_DEVMINOR);
       if (ret < 0)
         {
-          idbg("Failed to register STMPE driver: %d\n", ret);
+          ierr("ERROR: Failed to register STMPE driver: %d\n", ret);
           /* stm32_i2cbus_uninitialize(dev); */
           return -ENODEV;
         }

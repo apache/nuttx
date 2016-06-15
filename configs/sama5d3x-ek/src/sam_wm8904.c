@@ -157,13 +157,13 @@ static int wm8904_attach(FAR const struct wm8904_lower_s *lower,
        * new handler will called via wm8904_interrupt() when the interrupt occurs.
        */
 
-      audvdbg("Attaching %p\n", isr);
+      audinfo("Attaching %p\n", isr);
       g_wm8904info.handler = isr;
       g_wm8904info.arg = arg;
     }
   else
     {
-      audvdbg("Detaching %p\n", g_wm8904info.handler);
+      audinfo("Detaching %p\n", g_wm8904info.handler);
       (void)wm8904_enable(lower, false);
       g_wm8904info.handler = NULL;
       g_wm8904info.arg = NULL;
@@ -187,13 +187,13 @@ static bool wm8904_enable(FAR const struct wm8904_lower_s *lower, bool enable)
 
       if (enable && g_wm8904info.handler)
         {
-          audvdbg("Enabling\n");
+          audinfo("Enabling\n");
           sam_pioirqenable(IRQ_INT_WM8904);
           enabled = true;
         }
       else
         {
-          audvdbg("Disabling\n");
+          audinfo("Disabling\n");
           sam_pioirqdisable(IRQ_INT_WM8904);
           enabled = false;
         }
@@ -208,7 +208,7 @@ static int wm8904_interrupt(int irq, FAR void *context)
 {
   /* Just forward the interrupt to the WM8904 driver */
 
-  audvdbg("handler %p\n", g_wm8904info.handler);
+  audinfo("handler %p\n", g_wm8904info.handler);
   if (g_wm8904info.handler)
     {
       return g_wm8904info.handler(&g_wm8904info.lower, g_wm8904info.arg);
@@ -253,7 +253,7 @@ int sam_wm8904_initialize(int minor)
   char devname[12];
   int ret;
 
-  auddbg("minor %d\n", minor);
+  audinfo("minor %d\n", minor);
   DEBUGASSERT(minor >= 0 && minor <= 25);
 
   /* Have we already initialized?  Since we never uninitialize we must prevent
@@ -273,7 +273,7 @@ int sam_wm8904_initialize(int minor)
       i2c = sam_i2cbus_initialize(WM8904_TWI_BUS);
       if (!i2c)
         {
-          auddbg("Failed to initialize TWI%d\n", WM8904_TWI_BUS);
+          auderr("ERROR: Failed to initialize TWI%d\n", WM8904_TWI_BUS);
           ret = -ENODEV;
           goto errout;
         }
@@ -283,7 +283,7 @@ int sam_wm8904_initialize(int minor)
       i2s = sam_ssc_initialize(WM8904_SSC_BUS);
       if (!i2s)
         {
-          auddbg("Failed to initialize SSC%d\n", WM8904_SSC_BUS);
+          auderr("ERROR: Failed to initialize SSC%d\n", WM8904_SSC_BUS);
           ret = -ENODEV;
           goto errout_with_i2c;
         }
@@ -314,7 +314,7 @@ int sam_wm8904_initialize(int minor)
       ret = irq_attach(IRQ_INT_WM8904, wm8904_interrupt);
       if (ret < 0)
         {
-          auddbg("ERROR: Failed to attach WM8904 interrupt: %d\n", ret);
+          auderr("ERROR: Failed to attach WM8904 interrupt: %d\n", ret);
           goto errout_with_i2s;
         }
 
@@ -325,7 +325,7 @@ int sam_wm8904_initialize(int minor)
       wm8904 = wm8904_initialize(i2c, i2s, &g_wm8904info.lower);
       if (!wm8904)
         {
-          auddbg("Failed to initialize the WM8904\n");
+          auderr("ERROR: Failed to initialize the WM8904\n");
           ret = -ENODEV;
           goto errout_with_irq;
         }
@@ -338,7 +338,7 @@ int sam_wm8904_initialize(int minor)
       pcm = pcm_decode_initialize(wm8904);
       if (!pcm)
         {
-          auddbg("ERROR: Failed create the PCM decoder\n");
+          auderr("ERROR: Failed create the PCM decoder\n");
           ret = -ENODEV;
           goto errout_with_wm8904;
         }
@@ -355,7 +355,7 @@ int sam_wm8904_initialize(int minor)
       ret = audio_register(devname, pcm);
       if (ret < 0)
         {
-          auddbg("ERROR: Failed to register /dev/%s device: %d\n", devname, ret);
+          auderr("ERROR: Failed to register /dev/%s device: %d\n", devname, ret);
           goto errout_with_pcm;
         }
 

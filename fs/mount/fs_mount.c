@@ -256,7 +256,7 @@ int mount(FAR const char *source, FAR const char *target,
       ret = find_blockdriver(source, mountflags, &blkdrvr_inode);
       if (ret < 0)
         {
-          fdbg("ERROR: Failed to find block driver %s\n", source);
+          ferr("ERROR: Failed to find block driver %s\n", source);
           errcode = -ret;
           goto errout;
         }
@@ -270,7 +270,7 @@ int mount(FAR const char *source, FAR const char *target,
   else
 #endif /* NONBDFS_SUPPORT */
     {
-      fdbg("ERROR: Failed to find file system %s\n", filesystemtype);
+      ferr("ERROR: Failed to find file system %s\n", filesystemtype);
       errcode = ENODEV;
       goto errout;
     }
@@ -289,7 +289,7 @@ int mount(FAR const char *source, FAR const char *target,
 
       if (INODE_IS_SPECIAL(mountpt_inode))
         {
-          fdbg("ERROR: target %s exists and is a special nodes\n", target);
+          ferr("ERROR: target %s exists and is a special nodes\n", target);
           errcode = -ENOTDIR;
           goto errout_with_semaphore;
         }
@@ -321,7 +321,7 @@ int mount(FAR const char *source, FAR const char *target,
            *  -ENOMEM - Failed to allocate in-memory resources for the operation
            */
 
-          fdbg("ERROR: Failed to reserve inode for target %s\n", target);
+          ferr("ERROR: Failed to reserve inode for target %s\n", target);
           errcode = -ret;
           goto errout_with_semaphore;
         }
@@ -336,7 +336,7 @@ int mount(FAR const char *source, FAR const char *target,
     {
       /* The filesystem does not support the bind operation ??? */
 
-      fdbg("ERROR: Filesystem does not support bind\n");
+      ferr("ERROR: Filesystem does not support bind\n");
       errcode = EINVAL;
       goto errout_with_mountpt;
     }
@@ -366,7 +366,7 @@ int mount(FAR const char *source, FAR const char *target,
        * error.
        */
 
-      fdbg("ERROR: Bind method failed: %d\n", ret);
+      ferr("ERROR: Bind method failed: %d\n", ret);
 #ifdef BDFS_SUPPORT
 #ifdef NONBDFS_SUPPORT
       if (blkdrvr_inode)
@@ -441,7 +441,7 @@ errout:
   return ERROR;
 
 #else
-  fdbg("ERROR: No filesystems enabled\n");
+  ferr("ERROR: No filesystems enabled\n");
   set_errno(ENOSYS);
   return ERROR;
 #endif /* BDFS_SUPPORT || NONBDFS_SUPPORT */

@@ -42,8 +42,8 @@
 /* Force verbose debug on in this file only to support unit-level testing. */
 
 #ifdef CONFIG_NETDEV_PHY_DEBUG
-#  undef  CONFIG_DEBUG_VERBOSE
-#  define CONFIG_DEBUG_VERBOSE 1
+#  undef  CONFIG_DEBUG_INFO
+#  define CONFIG_DEBUG_INFO 1
 #  undef  CONFIG_DEBUG_NET
 #  define CONFIG_DEBUG_NET 1
 #endif
@@ -74,11 +74,19 @@
  */
 
 #ifdef CONFIG_NETDEV_PHY_DEBUG
-#  define phydbg    dbg
-#  define phylldbg  lldbg
+#  define phyerr    err
+#  define phywarn   warn
+#  define phyinfo   info
+#  define phyllerr  llerr
+#  define phyllwarn llwarn
+#  define phyllinfo llinfo
 #else
-#  define phydbg(x...)
-#  define phylldbg(x...)
+#  define phyerr(x...)
+#  define phywarn(x...)
+#  define phyinfo(x...)
+#  define phyllerr(x...)
+#  define phyllwarn(x...)
+#  define phyllinfo(x...)
 #endif
 
 /************************************************************************************
@@ -100,7 +108,7 @@ static xcpt_t g_emac_handler;
 #ifdef CONFIG_SAM34_GPIOD_IRQ
 static void sam_emac_phy_enable(bool enable)
 {
-  phydbg("IRQ%d: enable=%d\n", SAM_PHY_IRQ, enable);
+  phyinfo("IRQ%d: enable=%d\n", SAM_PHY_IRQ, enable);
   if (enable)
     {
       sam_gpioirqenable(SAM_PHY_IRQ);
@@ -126,7 +134,7 @@ static void sam_emac_phy_enable(bool enable)
 
 void weak_function sam_netinitialize(void)
 {
-  phydbg("Configuring %08x\n", GPIO_PHY_IRQ);
+  phyinfo("Configuring %08x\n", GPIO_PHY_IRQ);
   sam_configgpio(GPIO_PHY_IRQ);
 }
 
@@ -205,12 +213,12 @@ xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler, phy_enable_t *enable)
 
   DEBUGASSERT(intf);
 
-  nvdbg("%s: handler=%p\n", intf, handler);
-  phydbg("EMAC: devname=%s\n", SAM34_EMAC_DEVNAME);
+  ninfo("%s: handler=%p\n", intf, handler);
+  phyinfo("EMAC: devname=%s\n", SAM34_EMAC_DEVNAME);
 
   if (strcmp(intf, SAM34_EMAC_DEVNAME) == 0)
     {
-      phydbg("Select EMAC\n");
+      phyinfo("Select EMAC\n");
       phandler = &g_emac_handler;
       pinset   = GPIO_PHY_IRQ;
       irq      = SAM_PHY_IRQ;
@@ -218,7 +226,7 @@ xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler, phy_enable_t *enable)
     }
   else
     {
-      ndbg("Unsupported interface: %s\n", intf);
+      nerr("ERROR: Unsupported interface: %s\n", intf);
       return NULL;
     }
 
@@ -237,15 +245,15 @@ xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler, phy_enable_t *enable)
 
   if (handler)
     {
-      phydbg("Configure pin: %08x\n", pinset);
+      phyinfo("Configure pin: %08x\n", pinset);
       sam_gpioirq(pinset);
 
-      phydbg("Attach IRQ%d\n", irq);
+      phyinfo("Attach IRQ%d\n", irq);
       (void)irq_attach(irq, handler);
     }
   else
     {
-      phydbg("Detach IRQ%d\n", irq);
+      phyinfo("Detach IRQ%d\n", irq);
       (void)irq_detach(irq);
       enabler = NULL;
     }

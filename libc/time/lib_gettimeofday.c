@@ -75,7 +75,7 @@ int gettimeofday(FAR struct timeval *tv, FAR struct timezone *tz)
   struct timespec ts;
   int ret;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!tv)
     {
       set_errno(EINVAL);

@@ -130,12 +130,12 @@ pid_t up_vfork(const struct vfork_s *context)
   uint32_t stackutil;
   int ret;
 
-  svdbg("vfork context [%p]:\n", context);
-  svdbg("  r4:%08x r5:%08x r6:%08x r7:%08x\n",
+  sinfo("vfork context [%p]:\n", context);
+  sinfo("  r4:%08x r5:%08x r6:%08x r7:%08x\n",
         context->r4, context->r5, context->r6, context->r7);
-  svdbg("  r8:%08x r9:%08x r10:%08x\n",
+  sinfo("  r8:%08x r9:%08x r10:%08x\n",
         context->r8, context->r9, context->r10);
-  svdbg("  fp:%08x sp:%08x lr:%08x\n",
+  sinfo("  fp:%08x sp:%08x lr:%08x\n",
         context->fp, context->sp, context->lr);
 
   /* Allocate and initialize a TCB for the child task. */
@@ -143,11 +143,11 @@ pid_t up_vfork(const struct vfork_s *context)
   child = task_vforksetup((start_t)(context->lr & ~1));
   if (!child)
     {
-      sdbg("ERROR: task_vforksetup failed\n");
+      serr("ERROR: task_vforksetup failed\n");
       return (pid_t)ERROR;
     }
 
-  svdbg("TCBs: Parent=%p Child=%p\n", parent, child);
+  sinfo("TCBs: Parent=%p Child=%p\n", parent, child);
 
   /* Get the size of the parent task's stack.  Due to alignment operations,
    * the adjusted stack size may be smaller than the stack size originally
@@ -162,7 +162,7 @@ pid_t up_vfork(const struct vfork_s *context)
                         parent->flags & TCB_FLAG_TTYPE_MASK);
   if (ret != OK)
     {
-      sdbg("ERROR: up_create_stack failed: %d\n", ret);
+      serr("ERROR: up_create_stack failed: %d\n", ret);
       task_vforkabort(child, -ret);
       return (pid_t)ERROR;
     }
@@ -176,7 +176,7 @@ pid_t up_vfork(const struct vfork_s *context)
   DEBUGASSERT((uint32_t)parent->adj_stack_ptr > context->sp);
   stackutil = (uint32_t)parent->adj_stack_ptr - context->sp;
 
-  svdbg("Parent: stacksize:%d stackutil:%d\n", stacksize, stackutil);
+  sinfo("Parent: stacksize:%d stackutil:%d\n", stacksize, stackutil);
 
   /* Make some feeble effort to preserve the stack contents.  This is
    * feeble because the stack surely contains invalid pointers and other
@@ -201,9 +201,9 @@ pid_t up_vfork(const struct vfork_s *context)
       newfp = context->fp;
     }
 
-  svdbg("Parent: stack base:%08x SP:%08x FP:%08x\n",
+  sinfo("Parent: stack base:%08x SP:%08x FP:%08x\n",
         parent->adj_stack_ptr, context->sp, context->fp);
-  svdbg("Child:  stack base:%08x SP:%08x FP:%08x\n",
+  sinfo("Child:  stack base:%08x SP:%08x FP:%08x\n",
         child->cmn.adj_stack_ptr, newsp, newfp);
 
   /* Update the stack pointer, frame pointer, and volatile registers.  When

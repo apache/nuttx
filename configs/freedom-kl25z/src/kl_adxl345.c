@@ -183,7 +183,7 @@ static int adxl345_attach(FAR struct adxl345_config_s *state,
 {
   FAR struct kl_adxl345config_s *priv = (FAR struct kl_adxl345config_s *)state;
 
-  snvdbg("Saving handler %p\n", handler);
+  sninfo("Saving handler %p\n", handler);
   DEBUGASSERT(priv);
 
   /* Just save the handler and its argument.  We will use it when interrupts
@@ -257,14 +257,14 @@ int adxl345_archinitialize(int minor)
   FAR struct spi_dev_s *dev;
   int ret;
 
-  sndbg("minor %d\n", minor);
+  sninfo("minor %d\n", minor);
   DEBUGASSERT(minor == 0);
 
   /* Check if we are already initialized */
 
   if (!g_adxl345config.handle)
     {
-      snvdbg("Initializing\n");
+      sninfo("Initializing\n");
 
       /* Configure the ADXL345 interrupt pin as an input */
 
@@ -275,7 +275,7 @@ int adxl345_archinitialize(int minor)
       dev = kl_spibus_initialize(CONFIG_ADXL345_SPIDEV);
       if (!dev)
         {
-          sndbg("Failed to initialize SPI bus %d\n", CONFIG_ADXL345_SPIDEV);
+          snerr("ERROR: Failed to initialize SPI bus %d\n", CONFIG_ADXL345_SPIDEV);
           return -ENODEV;
         }
 
@@ -285,7 +285,7 @@ int adxl345_archinitialize(int minor)
         adxl345_instantiate(dev, (FAR struct adxl345_config_s *)&g_adxl345config);
       if (!g_adxl345config.handle)
         {
-          sndbg("Failed to instantiate the ADXL345 driver\n");
+          snerr("ERROR: Failed to instantiate the ADXL345 driver\n");
           return -ENODEV;
         }
 
@@ -294,7 +294,7 @@ int adxl345_archinitialize(int minor)
       ret = adxl345_register(g_adxl345config.handle, CONFIG_ADXL345_DEVMINOR);
       if (ret < 0)
         {
-          sndbg("Failed to register ADXL345 driver: %d\n", ret);
+          snerr("ERROR: Failed to register ADXL345 driver: %d\n", ret);
           return ret;
         }
     }

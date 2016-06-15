@@ -246,7 +246,7 @@ int psock_tcp_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
     {
       /* Yes... get the address of the connected client */
 
-      nvdbg("Pending conn=%p\n", state.acpt_newconn);
+      ninfo("Pending conn=%p\n", state.acpt_newconn);
       accept_tcpsender(psock, state.acpt_newconn, addr, addrlen);
     }
 

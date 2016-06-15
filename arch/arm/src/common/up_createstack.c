@@ -205,12 +205,12 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
         }
 #endif /* CONFIG_TLS */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
       /* Was the allocation successful? */
 
       if (!tcb->stack_alloc_ptr)
         {
-          sdbg("ERROR: Failed to allocate stack, size %d\n", stack_size);
+          serr("ERROR: Failed to allocate stack, size %d\n", stack_size);
         }
 #endif
     }

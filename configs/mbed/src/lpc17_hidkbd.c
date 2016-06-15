@@ -76,7 +76,7 @@ struct usbhost_connection_s *arch_usbhost_initialize(void)
   ret = usbhost_hub_initialize();
   if (ret < 0)
     {
-      udbg("ERROR: usbhost_hub_initialize failed: %d\n", ret);
+      uerr("ERROR: usbhost_hub_initialize failed: %d\n", ret);
     }
 #endif
 

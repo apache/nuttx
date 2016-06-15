@@ -143,7 +143,7 @@ int board_app_initialize(uintptr_t arg)
   rtclower = stm32l4_rtc_lowerhalf();
   if (!rtclower)
     {
-      sdbg("ERROR: Failed to instantiate the RTC lower-half driver\n");
+      serr("ERROR: Failed to instantiate the RTC lower-half driver\n");
       return -ENOMEM;
     }
   else
@@ -155,7 +155,7 @@ int board_app_initialize(uintptr_t arg)
       ret = rtc_initialize(0, rtclower);
       if (ret < 0)
         {
-          sdbg("ERROR: Failed to bind/register the RTC driver: %d\n", ret);
+          serr("ERROR: Failed to bind/register the RTC driver: %d\n", ret);
           return ret;
         }
     }

@@ -146,7 +146,7 @@ static int tiva_erase(FAR struct mtd_dev_s *dev, off_t startblock,
     {
       pageaddr = TIVA_VIRTUAL_BASE + curpage * TIVA_FLASH_PAGESIZE;
 
-      fvdbg("Erase page at %08x\n", pageaddr);
+      finfo("Erase page at %08x\n", pageaddr);
 
       /* set page address */
 

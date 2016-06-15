@@ -72,7 +72,7 @@ int close_blockdriver(FAR struct inode *inode)
 
   /* Sanity checks */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!inode || !inode->u.i_bops)
     {
       ret = -EINVAL;
@@ -84,7 +84,7 @@ int close_blockdriver(FAR struct inode *inode)
 
   if (!INODE_IS_BLOCK(inode))
     {
-      fdbg("inode is not a block driver\n");
+      ferr("ERROR: inode is not a block driver\n");
       ret = -ENOTBLK;
       goto errout;
    }

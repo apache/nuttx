@@ -61,17 +61,16 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
+/* Enables debug output from this file */
+
 #ifdef CONFIG_DEBUG_SPI
-#  define spidbg  lldbg
-#  ifdef SPI_VERBOSE
-#    define spivdbg lldbg
-#  else
-#    define spivdbg(x...)
-#  endif
+#  define spierr  llerr
+#  define spiwarn llwarn
+#  define spiinfo llinfo
 #else
-#  undef SPI_VERBOSE
-#  define spidbg(x...)
-#  define spivdbg(x...)
+#  define spierr(x...)
+#  define spiwarn(x...)
+#  define spiinfo(x...)
 #endif
 
 #define ArraySize(x) (sizeof((x)) / sizeof((x)[0]))
@@ -228,8 +227,8 @@ void weak_function stm32_spidev_initialize(void)
 #ifdef CONFIG_STM32F7_SPI1
 void stm32_spi1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
-  spidbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
-  stm32_gpiowrite(g_spigpio[i], !selected);
+  spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  stm32_gpiowrite(g_spigpio[devid], !selected);
 }
 
 uint8_t stm32_spi1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
@@ -241,8 +240,8 @@ uint8_t stm32_spi1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 #ifdef CONFIG_STM32F7_SPI2
 void stm32_spi2select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
-  spidbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
-  stm32_gpiowrite(g_spigpio[i], !selected);
+  spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  stm32_gpiowrite(g_spigpio[devid], !selected);
 }
 
 uint8_t stm32_spi2status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
@@ -254,8 +253,8 @@ uint8_t stm32_spi2status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 #ifdef CONFIG_STM32F7_SPI3
 void stm32_spi3select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
-  spidbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
-  stm32_gpiowrite(g_spigpio[i], !selected);
+  spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  stm32_gpiowrite(g_spigpio[devid], !selected);
 }
 
 uint8_t stm32_spi3status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
@@ -271,8 +270,8 @@ uint8_t stm32_spi3status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 
 void stm32_spi4select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
-  spidbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
-  stm32_gpiowrite(g_spigpio[i], !selected);
+  spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  stm32_gpiowrite(g_spigpio[devid], !selected);
 }
 
 uint8_t stm32_spi4status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
@@ -288,8 +287,8 @@ uint8_t stm32_spi4status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 
 void stm32_spi5select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
-  spidbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
-  stm32_gpiowrite(g_spigpio[i], !selected);
+  spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  stm32_gpiowrite(g_spigpio[devid], !selected);
 }
 
 uint8_t stm32_spi5status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
@@ -304,8 +303,8 @@ uint8_t stm32_spi5status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 #  endif
 void stm32_spi5select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
-  spidbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
-  stm32_gpiowrite(g_spigpio[i], !selected);
+  spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  stm32_gpiowrite(g_spigpio[devid], !selected);
 }
 
 uint8_t stm32_spi5status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
@@ -383,11 +382,11 @@ int stm32_spi5cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
 #endif /* CONFIG_SPI_CMDDATA */
 
 #if defined(CONFIG_NUCLEO_SPI_TEST)
-int stm32_spidev_bus_init(void)
+int stm32_spidev_bus_test(void)
 {
   /* Configure and test SPI-*/
 
-  uint8_t *tx = CONFIG_NUCLEO_SPI_TEST_MESSAGE;
+  uint8_t *tx = (uint8_t *)CONFIG_NUCLEO_SPI_TEST_MESSAGE;
 
 #if defined(CONFIG_NUCLEO_SPI1_TEST)
   spi1 = stm32_spibus_initialize(1);
@@ -415,9 +414,9 @@ int stm32_spidev_bus_init(void)
       return -ENODEV;
     }
 
-  /* Default SPI1 to NUCLEO_SPI2_FREQ and mode */
+  /* Default SPI2 to NUCLEO_SPI2_FREQ and mode */
 
-  SPI_SETFREQUENCY(spi2, CONFIG_NUCLEO_SPI1_TEST_FREQ);
+  SPI_SETFREQUENCY(spi2, CONFIG_NUCLEO_SPI2_TEST_FREQ);
   SPI_SETBITS(spi2, CONFIG_NUCLEO_SPI2_TEST_BITS);
   SPI_SETMODE(spi2, CONFIG_NUCLEO_SPI2_TEST_MODE);
   SPI_EXCHANGE(spi2, tx, NULL, ArraySize(CONFIG_NUCLEO_SPI_TEST_MESSAGE));
@@ -432,13 +431,15 @@ int stm32_spidev_bus_init(void)
       return -ENODEV;
     }
 
-  /* Default SPI1 to NUCLEO_SPI3_FREQ and mode */
+  /* Default SPI3 to NUCLEO_SPI3_FREQ and mode */
 
   SPI_SETFREQUENCY(spi3, CONFIG_NUCLEO_SPI3_TEST_FREQ);
   SPI_SETBITS(spi3, CONFIG_NUCLEO_SPI3_TEST_BITS);
   SPI_SETMODE(spi3, CONFIG_NUCLEO_SPI3_TEST_MODE);
   SPI_EXCHANGE(spi3, tx, NULL, ArraySize(CONFIG_NUCLEO_SPI_TEST_MESSAGE));
 #endif
+
+  return OK;
 }
 #endif /* NUCLEO_SPI_TEST */
 #endif /* defined(CONFIG_SPI) */
