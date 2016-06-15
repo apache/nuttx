@@ -58,23 +58,6 @@
     defined(CONFIG_STM32F7_SPI5) || defined(CONFIG_STM32F7_SPI6)
 
 /************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
-
-#ifdef CONFIG_DEBUG_SPI
-#  define spidbg  lldbg
-#  ifdef SPI_VERBOSE
-#    define spivdbg lldbg
-#  else
-#    define spivdbg(x...)
-#  endif
-#else
-#  undef SPI_VERBOSE
-#  define spidbg(x...)
-#  define spivdbg(x...)
-#endif
-
-/************************************************************************************
  * Public Functions
  ************************************************************************************/
 

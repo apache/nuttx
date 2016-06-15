@@ -1,7 +1,7 @@
 /****************************************************************************************************
  * arch/arm/src/stm32f7/chip/stm32_tim.h
  *
- *   Copyright (C) 2009, 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -712,10 +712,10 @@
 
 /* Repetition counter register */
 
-#define ATIM_RCR_REP_SHIFT      (0)       /* Bits 0-7: Repetition Counter Value */
-#define ATIM_RCR_REP_MASK       (0xff << ATIM_RCR_REP_SHIFT)
+#define ATIM_RCR_REP_SHIFT        (0)       /* Bits 0-7: Repetition Counter Value */
+#define ATIM_RCR_REP_MASK         (0xff << ATIM_RCR_REP_SHIFT)
 
-#define ATIM_RCR_REP_MAX        128
+#define ATIM_RCR_REP_MAX          128
 
 /* Capture/compare registers (CCR) */
 

@@ -75,7 +75,6 @@ void stm32_boardinitialize(void)
       stm32_spidev_initialize();
     }
 #endif
-
 }
 
 /************************************************************************************

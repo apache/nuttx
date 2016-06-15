@@ -103,11 +103,11 @@
 #define ADC_IER_AWD                ADC_CR1_AWDIE
 #define ADC_ISR_JEOC               ADC_SR_JEOC
 #define ADC_IER_JEOC               ADC_CR1_JEOCIE
-#define ADC_EXTREG_EXTEN_MASK    ADC_CR2_EXTEN_MASK
-#define ADC_EXTREG_EXTEN_NONE    ADC_CR2_EXTEN_NONE
-#define ADC_EXTREG_EXTEN_DEFAULT ADC_CR2_EXTEN_RISING
-#define ADC_ISR_OVR              ADC_SR_OVR
-#define ADC_IER_OVR              ADC_CR1_OVRIE
+#define ADC_EXTREG_EXTEN_MASK      ADC_CR2_EXTEN_MASK
+#define ADC_EXTREG_EXTEN_NONE      ADC_CR2_EXTEN_NONE
+#define ADC_EXTREG_EXTEN_DEFAULT   ADC_CR2_EXTEN_RISING
+#define ADC_ISR_OVR                ADC_SR_OVR
+#define ADC_IER_OVR                ADC_CR1_OVRIE
 
 #define ADC_ISR_ALLINTS (ADC_ISR_EOC | ADC_ISR_AWD | ADC_ISR_JEOC | \
                          ADC_ISR_OVR)
@@ -1622,7 +1622,7 @@ static int adc123_interrupt(int irq, FAR void *context)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32_adcinitialize
+ * Name: stm32_adc_initialize
  *
  * Description:
  *   Initialize the ADC.
@@ -1647,8 +1647,8 @@ static int adc123_interrupt(int irq, FAR void *context)
  *
  ****************************************************************************/
 
-struct adc_dev_s *stm32_adcinitialize(int intf, FAR const uint8_t *chanlist,
-                                      int cchannels)
+struct adc_dev_s *stm32_adc_initialize(int intf, FAR const uint8_t *chanlist,
+                                       int cchannels)
 {
   FAR struct adc_dev_s   *dev;
   FAR struct stm32_dev_s *priv;

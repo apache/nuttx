@@ -983,6 +983,10 @@ config STM32F7_SPI
 	bool
 	default n
 
+config STM32F7_TIM
+	bool
+	default n
+
 config STM32F7_USART
 	bool
 	default n
@@ -1239,62 +1243,77 @@ config STM32F7_SPI6
 config STM32F7_TIM1
 	bool "TIM1"
 	default n
+	select STM32F7_TIM
 
 config STM32F7_TIM2
 	bool "TIM2"
 	default n
+	select STM32F7_TIM
 
 config STM32F7_TIM3
 	bool "TIM3"
 	default n
+	select STM32F7_TIM
 
 config STM32F7_TIM4
 	bool "TIM4"
 	default n
+	select STM32F7_TIM
 
 config STM32F7_TIM5
 	bool "TIM5"
 	default n
+	select STM32F7_TIM
 
 config STM32F7_TIM6
 	bool "TIM6"
 	default n
+	select STM32F7_TIM
 
 config STM32F7_TIM7
 	bool "TIM7"
 	default n
+	select STM32F7_TIM
 
 config STM32F7_TIM8
 	bool "TIM8"
 	default n
+	select STM32F7_TIM
 
 config STM32F7_TIM9
 	bool "TIM9"
 	default n
+	select STM32F7_TIM
 
 config STM32F7_TIM10
 	bool "TIM10"
 	default n
+	select STM32F7_TIM
 
 config STM32F7_TIM11
 	bool "TIM11"
 	default n
+	select STM32F7_TIM
 
 config STM32F7_TIM12
 	bool "TIM12"
 	default n
+	select STM32F7_TIM
 
 config STM32F7_TIM13
 	bool "TIM13"
 	default n
+	select STM32F7_TIM
 
 config STM32F7_TIM14
 	bool "TIM14"
 	default n
+	select STM32F7_TIM
 
 config STM32F7_TIM15
 	bool "TIM15"
 	default n
+	select STM32F7_TIM
 
 config STM32F7_USART1
 	bool "USART1"

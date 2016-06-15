@@ -50,7 +50,6 @@
 #include <arch/stm32f7/chip.h>
 #include "chip/stm32_pinmap.h"
 #include "chip/stm32_memorymap.h"
-#include "chip/stm32_pinmap.h"
 
 /* If the common ARMv7-M vector handling logic is used, then it expects the
  * following definition in this file that provides the number of supported external
