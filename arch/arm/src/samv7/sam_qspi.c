@@ -456,20 +456,20 @@ static inline void qspi_putreg(struct sam_qspidev_s *priv, uint32_t value,
 #ifdef CONFIG_DEBUG_SPI_INFO
 static void qspi_dumpregs(struct sam_qspidev_s *priv, const char *msg)
 {
-  qspiinfo("%s:\n", msg);
-  qspiinfo("    MR:%08x   SR:%08x  IMR:%08x  SCR:%08x\n",
-          getreg32(priv->base + SAM_QSPI_MR_OFFSET),
-          getreg32(priv->base + SAM_QSPI_SR_OFFSET),
-          getreg32(priv->base + SAM_QSPI_IMR_OFFSET),
-          getreg32(priv->base + SAM_QSPI_SCR_OFFSET));
-  qspiinfo("   IAR:%08x  ICR:%08x  IFR:%08x  SMR:%08x\n",
-          getreg32(priv->base + SAM_QSPI_IAR_OFFSET),
-          getreg32(priv->base + SAM_QSPI_ICR_OFFSET),
-          getreg32(priv->base + SAM_QSPI_IFR_OFFSET),
-          getreg32(priv->base + SAM_QSPI_SMR_OFFSET));
-  qspiinfo("  WPCR:%08x WPSR:%08x\n",
-          getreg32(priv->base + SAM_QSPI_WPCR_OFFSET),
-          getreg32(priv->base + SAM_QSPI_WPSR_OFFSET));
+  spiinfo("%s:\n", msg);
+  spiinfo("    MR:%08x   SR:%08x  IMR:%08x  SCR:%08x\n",
+         getreg32(priv->base + SAM_QSPI_MR_OFFSET),
+         getreg32(priv->base + SAM_QSPI_SR_OFFSET),
+         getreg32(priv->base + SAM_QSPI_IMR_OFFSET),
+         getreg32(priv->base + SAM_QSPI_SCR_OFFSET));
+  spiinfo("   IAR:%08x  ICR:%08x  IFR:%08x  SMR:%08x\n",
+         getreg32(priv->base + SAM_QSPI_IAR_OFFSET),
+         getreg32(priv->base + SAM_QSPI_ICR_OFFSET),
+         getreg32(priv->base + SAM_QSPI_IFR_OFFSET),
+         getreg32(priv->base + SAM_QSPI_SMR_OFFSET));
+  spiinfo("  WPCR:%08x WPSR:%08x\n",
+         getreg32(priv->base + SAM_QSPI_WPCR_OFFSET),
+         getreg32(priv->base + SAM_QSPI_WPSR_OFFSET));
 }
 #endif
 
@@ -845,7 +845,7 @@ static int qspi_memory_dma(struct sam_qspidev_s *priv,
 
   if (ret < 0)
     {
-      qspierr("ERROR: DMA setup failed: %d\n", ret);
+      spierr("ERROR: DMA setup failed: %d\n", ret);
       return ret;
     }
 
@@ -861,7 +861,7 @@ static int qspi_memory_dma(struct sam_qspidev_s *priv,
   ret = sam_dmastart(priv->dmach, qspi_dma_callback, (void *)priv);
   if (ret < 0)
     {
-      qspierr("ERROR: sam_dmastart failed: %d\n", ret);
+      spierr("ERROR: sam_dmastart failed: %d\n", ret);
       return ret;
     }
 
@@ -882,7 +882,7 @@ static int qspi_memory_dma(struct sam_qspidev_s *priv,
                      (wdentry_t)qspi_dma_timeout, 1, (uint32_t)priv);
       if (ret != OK)
         {
-           qspierr("ERROR: wd_start failed: %d\n", ret);
+           spierr("ERROR: wd_start failed: %d\n", ret);
         }
 
       /* Wait for the DMA complete */
@@ -940,7 +940,7 @@ static int qspi_memory_dma(struct sam_qspidev_s *priv,
 
   if (priv->result)
     {
-      qspierr("ERROR: DMA failed with result: %d\n", priv->result);
+      spierr("ERROR: DMA failed with result: %d\n", priv->result);
     }
 
   return priv->result;
@@ -1057,7 +1057,7 @@ static int qspi_lock(struct qspi_dev_s *dev, bool lock)
 {
   struct sam_qspidev_s *priv = (struct sam_qspidev_s *)dev;
 
-  qspiinfo("lock=%d\n", lock);
+  spiinfo("lock=%d\n", lock);
   if (lock)
     {
       /* Take the semaphore (perhaps waiting) */
@@ -1107,7 +1107,7 @@ static uint32_t qspi_setfrequency(struct qspi_dev_s *dev, uint32_t frequency)
 #endif
   uint32_t regval;
 
-  qspiinfo("frequency=%d\n", frequency);
+  spiinfo("frequency=%d\n", frequency);
   DEBUGASSERT(priv);
 
   /* Check if the requested frequency is the same as the frequency selection */
@@ -1194,14 +1194,14 @@ static uint32_t qspi_setfrequency(struct qspi_dev_s *dev, uint32_t frequency)
   /* Calculate the new actual frequency */
 
   actual = SAM_QSPI_CLOCK / scbr;
-  qspiinfo("SCBR=%d actual=%d\n", scbr, actual);
+  spiinfo("SCBR=%d actual=%d\n", scbr, actual);
 
   /* Save the frequency setting */
 
   priv->frequency = frequency;
   priv->actual    = actual;
 
-  qspiinfo("Frequency %d->%d\n", frequency, actual);
+  spiinfo("Frequency %d->%d\n", frequency, actual);
   return actual;
 }
 
@@ -1225,7 +1225,7 @@ static void qspi_setmode(struct qspi_dev_s *dev, enum qspi_mode_e mode)
   struct sam_qspidev_s *priv = (struct sam_qspidev_s *)dev;
   uint32_t regval;
 
-  qspiinfo("mode=%d\n", mode);
+  spiinfo("mode=%d\n", mode);
 
   /* Has the mode changed? */
 
@@ -1267,7 +1267,7 @@ static void qspi_setmode(struct qspi_dev_s *dev, enum qspi_mode_e mode)
         }
 
       qspi_putreg(priv, regval, SAM_QSPI_SCR_OFFSET);
-      qspiinfo("SCR=%08x\n", regval);
+      spiinfo("SCR=%08x\n", regval);
 
       /* Save the mode so that subsequent re-configurations will be faster */
 
@@ -1295,7 +1295,7 @@ static void qspi_setbits(struct qspi_dev_s *dev, int nbits)
   struct sam_qspidev_s *priv = (struct sam_qspidev_s *)dev;
   uint32_t regval;
 
-  qspiinfo("nbits=%d\n", nbits);
+  spiinfo("nbits=%d\n", nbits);
   DEBUGASSERT(priv != NULL);
   DEBUGASSERT(nbits >= SAM_QSPI_MINBITS && nbits <= SAM_QSPI_MAXBITS);
 
@@ -1310,7 +1310,7 @@ static void qspi_setbits(struct qspi_dev_s *dev, int nbits)
       regval |= QSPI_MR_NBBITS(nbits);
       qspi_putreg(priv, regval, SAM_QSPI_MR_OFFSET);
 
-      qspiinfo("MR=%08x\n", regval);
+      spiinfo("MR=%08x\n", regval);
 
       /* Save the selection so the subsequence re-configurations will be faster */
 
@@ -1343,20 +1343,20 @@ static int qspi_command(struct qspi_dev_s *dev,
   DEBUGASSERT(priv != NULL && cmdinfo != NULL);
 
 #ifdef CONFIG_DEBUG_SPI_INFO
-  qspiinfo("Transfer:\n");
-  qspiinfo("  flags: %02x\n", cmdinfo->flags);
-  qspiinfo("  cmd: %04x\n", cmdinfo->cmd);
+  spiinfo("Transfer:\n");
+  spiinfo("  flags: %02x\n", cmdinfo->flags);
+  spiinfo("  cmd: %04x\n", cmdinfo->cmd);
 
   if (QSPICMD_ISADDRESS(cmdinfo->flags))
     {
-      qspiinfo("  address/length: %08lx/%d\n",
+      spiinfo("  address/length: %08lx/%d\n",
               (unsigned long)cmdinfo->addr, cmdinfo->addrlen);
     }
 
   if (QSPICMD_ISDATA(cmdinfo->flags))
     {
-      qspiinfo("  %s Data:\n", QSPICMD_ISWRITE(cmdinfo->flags) ? "Write" : "Read");
-      qspiinfo("    buffer/length: %p/%d\n", cmdinfo->buffer, cmdinfo->buflen);
+      spiinfo("  %s Data:\n", QSPICMD_ISWRITE(cmdinfo->flags) ? "Write" : "Read");
+      spiinfo("    buffer/length: %p/%d\n", cmdinfo->buffer, cmdinfo->buflen);
     }
 #endif
 
@@ -1551,13 +1551,13 @@ static int qspi_memory(struct qspi_dev_s *dev,
 
   DEBUGASSERT(priv != NULL && meminfo != NULL);
 
-  qspiinfo("Transfer:\n");
-  qspiinfo("  flags: %02x\n", meminfo->flags);
-  qspiinfo("  cmd: %04x\n", meminfo->cmd);
-  qspiinfo("  address/length: %08lx/%d\n",
-          (unsigned long)meminfo->addr, meminfo->addrlen);
-  qspiinfo("  %s Data:\n", QSPIMEM_ISWRITE(meminfo->flags) ? "Write" : "Read");
-  qspiinfo("    buffer/length: %p/%d\n", meminfo->buffer, meminfo->buflen);
+  spiinfo("Transfer:\n");
+  spiinfo("  flags: %02x\n", meminfo->flags);
+  spiinfo("  cmd: %04x\n", meminfo->cmd);
+  spiinfo("  address/length: %08lx/%d\n",
+         (unsigned long)meminfo->addr, meminfo->addrlen);
+  spiinfo("  %s Data:\n", QSPIMEM_ISWRITE(meminfo->flags) ? "Write" : "Read");
+  spiinfo("    buffer/length: %p/%d\n", meminfo->buffer, meminfo->buflen);
 
 #ifdef CONFIG_SAMV7_QSPI_DMA
   /* Can we perform DMA?  Should we perform DMA? */
@@ -1725,7 +1725,7 @@ struct qspi_dev_s *sam_qspi_initialize(int intf)
 
   /* The supported SAM parts have only a single QSPI port */
 
-  qspiinfo("intf: %d\n", intf);
+  spiinfo("intf: %d\n", intf);
   DEBUGASSERT(intf >= 0 && intf < SAMV7_NQSPI);
 
   /* Select the QSPI interface */
@@ -1757,7 +1757,7 @@ struct qspi_dev_s *sam_qspi_initialize(int intf)
   else
 #endif
     {
-      qspierr("ERROR: QSPI%d not supported\n", intf);
+      spierr("ERROR: QSPI%d not supported\n", intf);
       return NULL;
     }
 
@@ -1780,7 +1780,7 @@ struct qspi_dev_s *sam_qspi_initialize(int intf)
           priv->dmach = sam_dmachannel(0, 0);
           if (!priv->dmach)
             {
-              qspierr("ERROR: Failed to allocate the DMA channel\n");
+              spierr("ERROR: Failed to allocate the DMA channel\n");
               priv->candma = false;
             }
         }
@@ -1796,7 +1796,7 @@ struct qspi_dev_s *sam_qspi_initialize(int intf)
       priv->dmadog = wd_create();
       if (priv->dmadog == NULL)
         {
-          qspierr("ERROR: Failed to create wdog\n");
+          spierr("ERROR: Failed to create wdog\n");
           goto errout_with_dmahandles;
         }
 #endif
@@ -1807,7 +1807,7 @@ struct qspi_dev_s *sam_qspi_initialize(int intf)
       ret = irq_attach(priv->irq, priv->handler);
       if (ret < 0)
         {
-          qspierr("ERROR: Failed to attach irq %d\n", priv->irq);
+          spierr("ERROR: Failed to attach irq %d\n", priv->irq);
           goto errout_with_dmadog;
         }
 #endif
@@ -1819,7 +1819,7 @@ struct qspi_dev_s *sam_qspi_initialize(int intf)
       ret = qspi_hw_initialize(priv);
       if (ret < 0)
         {
-          qspierr("ERROR: Failed to initialize QSPI hardware\n");
+          spierr("ERROR: Failed to initialize QSPI hardware\n");
           goto errout_with_irq;
         }
 
