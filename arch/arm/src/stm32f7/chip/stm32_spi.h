@@ -34,8 +34,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_STC_STM32F7_CHIP_STM32_SPI_H
-#define __ARCH_ARM_STC_STM32F7_CHIP_STM32_SPI_H
+#ifndef __ARCH_ARM_SRC_STM32F7_CHIP_STM32_SPI_H
+#define __ARCH_ARM_SRC_STM32F7_CHIP_STM32_SPI_H
 
 /************************************************************************************
  * Included Files
@@ -255,4 +255,4 @@
 #define SPI_I2SPR_ODD              (1 << 8)  /* Bit 8: Odd factor for the prescaler */
 #define SPI_I2SPR_MCKOE            (1 << 9)  /* Bit 9: Master clock output enable */
 
-#endif /* __ARCH_ARM_STC_STM32F7_CHIP_STM32_SPI_H */
+#endif /* __ARCH_ARM_SRC_STM32F7_CHIP_STM32_SPI_H */
