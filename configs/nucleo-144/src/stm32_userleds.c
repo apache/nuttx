@@ -56,18 +56,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* CONFIG_DEBUG_LEDS enables debug output from this file (needs CONFIG_DEBUG_FEATURES
- * with CONFIG_DEBUG_INFO too)
- */
-
-#ifdef CONFIG_DEBUG_LEDS
-#  define lederr  llerr
-#  define ledinfo llinfo
-#else
-#  define lederr(x...)
-#  define ledinfo(x...)
-#endif
-
 #define ArraySize(x) (sizeof((x)) / sizeof((x)[0]))
 
 /****************************************************************************

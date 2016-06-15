@@ -54,9 +54,6 @@
 
 #ifdef CONFIG_ARCH_LEDS
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
 /* LED definitions **********************************************************/
 /* The LPC4330-Xplorer has 2 user-controllable LEDs labeled D2 an D3 in the
  * schematic and on but referred to has LED1 and LED2 here, respectively.
@@ -88,30 +85,6 @@
  *  void board_userled(int led, bool ledon);
  *  void board_userled_all(uint8_t ledset);
  */
-
-/* Debug definitions ********************************************************/
-/* CONFIG_DEBUG_LEDS enables debug output from this file (needs CONFIG_DEBUG_FEATURES
- * with CONFIG_DEBUG_INFO too)
- */
-
-#ifdef CONFIG_DEBUG_LEDS
-#  define lederr  llerr
-#  ifdef CONFIG_DEBUG_INFO
-#    define LED_VERBOSE 1
-#    define ledinfo llerr
-#  else
-#    undef LED_VERBOSE
-#    define ledinfo(x...)
-#  endif
-#else
-#  undef LED_VERBOSE
-#  define lederr(x...)
-#  define ledinfo(x...)
-#endif
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
 
 /****************************************************************************
  * Private Functions

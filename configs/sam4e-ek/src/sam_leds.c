@@ -98,18 +98,6 @@
 #define D4_ON          (LED_ON << D4_SHIFT)
 #define D4_NOCHANGE    (LED_NOCHANGE << D4_SHIFT)
 
-/* CONFIG_DEBUG_LEDS enables debug output from this file (needs CONFIG_DEBUG_FEATURES
- * with CONFIG_DEBUG_INFO too)
- */
-
-#ifdef CONFIG_DEBUG_LEDS
-#  define lederr  llerr
-#  define ledinfo llinfo
-#else
-#  define lederr(x...)
-#  define ledinfo(x...)
-#endif
-
 /****************************************************************************
  * Private Data
  ****************************************************************************/

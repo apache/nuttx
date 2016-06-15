@@ -54,9 +54,6 @@
 
 #ifndef CONFIG_ARCH_LEDS
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
 /* LED Configuration ********************************************************/
 /* The PIC32MZ Ethernet Starter kit has 3 user LEDs labelled LED1-3 on the
  * board:
@@ -70,22 +67,6 @@
  * If CONFIG_ARCH_LEDS is not defined, then the user is free to control the
  * LEDs through the functions provided in this file
  */
-
-/* Debug ********************************************************************/
-
-#if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_DEBUG_LEDS)
-#  define lederr  llerr
-#  ifdef CONFIG_DEBUG_INFO
-#    define ledinfo llerr
-#  else
-#    define ledinfo(x...)
-#  endif
-#else
-#  undef CONFIG_DEBUG_LEDS
-#  undef CONFIG_DEBUG_INFO
-#  define lederr(x...)
-#  define ledinfo(x...)
-#endif
 
 /****************************************************************************
  * Private Data

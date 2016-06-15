@@ -49,20 +49,6 @@
 #if defined(CONFIG_I2C) && defined(CONFIG_PCA9635PW)
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#ifdef CONFIG_DEBUG_LEDS
-#  define derr  llerr
-#  define dwarn llwarn
-#  define dinfo llinfo
-#else
-#  define derr(x...)
-#  define dwarn(x...)
-#  define dinfo(x...)
-#endif
-
-/****************************************************************************
  * Private Type Definitions
  ****************************************************************************/
 
@@ -135,13 +121,13 @@ static int pca9635pw_i2c_write_byte(FAR struct pca9635pw_dev_s *priv,
 
   /* Write the register address followed by the data (no RESTART) */
 
-  dinfo("i2c addr: 0x%02X reg addr: 0x%02X value: 0x%02X\n", priv->i2c_addr,
+  lcdllinfo("i2c addr: 0x%02X reg addr: 0x%02X value: 0x%02X\n", priv->i2c_addr,
         buffer[0], buffer[1]);
 
   ret = i2c_write(priv->i2c, &config, buffer, BUFFER_SIZE);
   if (ret != OK)
     {
-      derr("ERROR: i2c_write returned error code %d\n", ret);
+      lcderr("ERROR: i2c_write returned error code %d\n", ret);
       return ret;
     }
 
@@ -200,7 +186,7 @@ static int pca9635pw_open(FAR struct file *filep)
                                  PCA9635PW_MODE_1_INITIAL_VALUE);
   if (ret != OK)
     {
-      derr("ERROR: Could not set initial config for PCA9635PW_MODE_1\n");
+      lcderr("ERROR: Could not set initial config for PCA9635PW_MODE_1\n");
       return ret;
     }
 
@@ -217,7 +203,7 @@ static int pca9635pw_open(FAR struct file *filep)
                                  PCA9635PW_MODE_2_INITIAL_VALUE);
   if (ret != OK)
     {
-      derr("ERROR: Could not set initial config for PCA9635PW_MODE_2\n");
+      lcderr("ERROR: Could not set initial config for PCA9635PW_MODE_2\n");
       return ret;
     }
 
@@ -235,8 +221,8 @@ static int pca9635pw_open(FAR struct file *filep)
   ret = pca9635pw_set_led_mode(priv, PCA9635PW_LED_OUT_x_MODE_2);
   if (ret != OK)
     {
-      derr("ERROR: Could not set led driver outputs to MODE2 (LED's brightness are "
-          "controlled by pwm registers)\n");
+      lcderr("ERROR: Could not set led driver outputs to MODE2 (LED's brightness are "
+             "controlled by pwm registers)\n");
       return ret;
     }
 
@@ -262,7 +248,7 @@ static int pca9635pw_close(FAR struct file *filep)
   ret = pca9635pw_set_led_mode(priv, PCA9635PW_LED_OUT_x_MODE_0);
   if (ret != OK)
     {
-      derr("ERROR: Could not set led driver outputs to MODE0 (LED's are off)\n");
+      lcderr("ERROR: Could not set led driver outputs to MODE0 (LED's are off)\n");
       return ret;
     }
 
@@ -294,7 +280,7 @@ static int pca9635pw_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   FAR struct pca9635pw_dev_s *priv = inode->i_private;
   int ret = OK;
 
-  dinfo("cmd: %d arg: %ld\n", cmd, arg);
+  lcdllinfo("cmd: %d arg: %ld\n", cmd, arg);
 
   switch (cmd)
     {
@@ -321,7 +307,7 @@ static int pca9635pw_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
     default:
       {
-        derr("ERROR: Unrecognized cmd: %d\n", cmd);
+        lcderr("ERROR: Unrecognized cmd: %d\n", cmd);
         ret = -ENOTTY;
       }
       break;
@@ -366,7 +352,7 @@ int pca9635pw_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
 
   if (priv == NULL)
     {
-      derr("ERROR: Failed to allocate instance of pca9635pw_dev_s\n");
+      lcderr("ERROR: Failed to allocate instance of pca9635pw_dev_s\n");
       return -ENOMEM;
     }
 
@@ -378,7 +364,7 @@ int pca9635pw_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
   int const ret = register_driver(devpath, &g_pca9635pw_fileops, 666, priv);
   if (ret != OK)
     {
-      derr("ERROR: Failed to register driver: %d\n", ret);
+      lcderr("ERROR: Failed to register driver: %d\n", ret);
       kmm_free(priv);
       return ret;
     }

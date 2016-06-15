@@ -878,7 +878,7 @@ endif # DEBUG_PAGING
 comment "Driver Debug Options"
 
 config DEBUG_LCD
-	bool "Low-level LCD Debug Output"
+	bool "Low-level LCD Debug Features"
 	default n
 	depends on LCD
 	---help---
@@ -912,13 +912,39 @@ config DEBUG_LCD_INFO
 endif # DEBUG_LCD
 
 config DEBUG_LEDS
-	bool "Low-level LED Debug Output"
+	bool "Low-level LED Debug Features"
 	default n
 	depends on ARCH_HAVE_LEDS
 	---help---
-		Enable low level debug from board-specific LED logic.  Support for
-		this debug option is board-specific and may not be available for
-		some boards.
+		Enable LED driver debug features.
+
+		Support for this debug option is board-specific and may not
+		be available for some boards.
+
+if DEBUG_LEDS
+
+config DEBUG_LEDS_ERROR
+	bool "LED Driver Error Output"
+	default n
+	depends on DEBUG_ERROR
+	---help---
+		Enable LED driver error output to SYSLOG.
+
+config DEBUG_LEDS_WARN
+	bool "LED Driver Warnings Output"
+	default n
+	depends on DEBUG_WARN
+	---help---
+		Enable LED driver warning output to SYSLOG.
+
+config DEBUG_LEDS_INFO
+	bool "LED Driver Informational Output"
+	default n
+	depends on DEBUG_INFO
+	---help---
+		Enable LED driver informational output to SYSLOG.
+
+endif # DEBUG_LEDS
 
 config DEBUG_INPUT
 	bool "Input Device Debug Features"

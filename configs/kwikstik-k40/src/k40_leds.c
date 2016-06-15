@@ -44,24 +44,6 @@
 #include <nuttx/board.h>
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* CONFIG_DEBUG_LEDS enables debug output from this file (needs CONFIG_DEBUG_FEATURES
- * with CONFIG_DEBUG_INFO too)
- */
-
-#ifdef CONFIG_DEBUG_LEDS
-#  define lederr  llerr
-#  define ledwarn llwarn
-#  define ledinfo llinfo
-#else
-#  define lederr(x...)
-#  define ledwarn(x...)
-#  define ledinfo(x...)
-#endif
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 

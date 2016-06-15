@@ -65,30 +65,6 @@
 #ifdef CONFIG_NX_LCDDRIVER
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* Enables debug output from this file (needs CONFIG_DEBUG_FEATURES with
- * CONFIG_DEBUG_INFO too)
- */
-
-#undef LCD_DEBUG   /* Define to enable debug */
-#undef LCD_VERBOSE /* Define to enable verbose debug */
-
-#ifdef LCD_DEBUG
-#  define lederr  llerr
-#  ifdef LCD_VERBOSE
-#    define ledinfo llerr
-#  else
-#    define ledinfo(x...)
-#  endif
-#else
-#  undef LCD_VERBOSE
-#  define lederr(x...)
-#  define ledinfo(x...)
-#endif
-
-/****************************************************************************
  * Private Data
  ****************************************************************************/
 
@@ -114,7 +90,7 @@ int board_lcd_initialize(void)
   g_spidev = lpc17_sspbus_initialize(0);
   if (!g_spidev)
     {
-      gllerr("ERROR: Failed to initialize SSP port 0\n");
+      lcdllerr("ERROR: Failed to initialize SSP port 0\n");
       return 0;
     }
 
@@ -133,13 +109,14 @@ FAR struct lcd_dev_s *board_lcd_getdev(int lcddev)
   g_lcddev = st7567_initialize(g_spidev, lcddev);
   if (!g_lcddev)
     {
-      gllerr("ERROR: Failed to bind SSI port 0 to OLCD %d: %d\n", lcddev);
+      lcdllerr("ERROR: Failed to bind SSI port 0 to OLCD %d: %d\n", lcddev);
     }
   else
     {
-      gllinfo("Bound SSI port 0 to OLCD %d\n", lcddev);
+      lcdllinfo("Bound SSI port 0 to OLCD %d\n", lcddev);
 
       /* And turn the OLCD on (CONFIG_LCD_MAXPOWER should be 1) */
+
       (void)g_lcddev->setpower(g_lcddev, CONFIG_LCD_MAXPOWER);
       return g_lcddev;
     }

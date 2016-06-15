@@ -55,17 +55,9 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* CONFIG_DEBUG_LEDS enables debug output from this file */
-
-#ifdef CONFIG_DEBUG_LEDS
-#  define lederr  llerr
-#  define ledinfo llinfo
-#  define ledinfo llinfo
+#ifdef CONFIG_DEBUG_LEDS_INFO
 #  define led_dumpgpio(m) tiva_dumpgpio(LED_GPIO, m)
 #else
-#  define lederr(x...)
-#  define ledinfo(x...)
-#  define ledinfo(x...)
 #  define led_dumpgpio(m)
 #endif
 

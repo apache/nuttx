@@ -573,6 +573,30 @@
 #  define lcdllinfo(x...)
 #endif
 
+#ifdef CONFIG_DEBUG_LEDS_ERROR
+#  define lederr(format, ...)    err(format, ##__VA_ARGS__)
+#  define ledllerr(format, ...)  llerr(format, ##__VA_ARGS__)
+#else
+#  define lederr(x...)
+#  define ledllerr(x...)
+#endif
+
+#ifdef CONFIG_DEBUG_LEDS_WARN
+#  define ledwarn(format, ...)   warn(format, ##__VA_ARGS__)
+#  define ledllwarn(format, ...) llwarn(format, ##__VA_ARGS__)
+#else
+#  define ledwarn(x...)
+#  define ledllwarn(x...)
+#endif
+
+#ifdef CONFIG_DEBUG_LEDS_INFO
+#  define ledinfo(format, ...)   info(format, ##__VA_ARGS__)
+#  define ledllinfo(format, ...) llinfo(format, ##__VA_ARGS__)
+#else
+#  define ledinfo(x...)
+#  define ledllinfo(x...)
+#endif
+
 #ifdef CONFIG_DEBUG_GPIO_ERROR
 #  define gpioerr(format, ...)   err(format, ##__VA_ARGS__)
 #  define gpiollerr(format, ...) llerr(format, ##__VA_ARGS__)
@@ -1066,6 +1090,30 @@
 #  define lcdllinfo   (void)
 #endif
 
+#ifdef CONFIG_DEBUG_LEDS_ERROR
+#  define lederr      err
+#  define ledllerr    llerr
+#else
+#  define lederr      (void)
+#  define ledllerr    (void)
+#endif
+
+#ifdef CONFIG_DEBUG_LEDS_WARN
+#  define ledwarn     warn
+#  define ledllwarn   llwarn
+#else
+#  define ledwarn     (void)
+#  define ledllwarn   (void)
+#endif
+
+#ifdef CONFIG_DEBUG_LEDS_INFO
+#  define ledinfo     info
+#  define ledllinfo   llinfo
+#else
+#  define ledinfo     (void)
+#  define ledllinfo   (void)
+#endif
+
 #ifdef CONFIG_DEBUG_GPIO_ERROR
 #  define gpioerr     err
 #  define gpiollerr   llerr
@@ -1266,6 +1314,14 @@
 #else
 #  define lcderrdumpbuffer(m,b,n)
 #  define lcdinfodumpbuffer(m,b,n)
+#endif
+
+#ifdef CONFIG_DEBUG_LEDS
+#  define lederrdumpbuffer(m,b,n)  errdumpbuffer(m,b,n)
+#  define ledinfodumpbuffer(m,b,n) infodumpbuffer(m,b,n)
+#else
+#  define lederrdumpbuffer(m,b,n)
+#  define ledinfodumpbuffer(m,b,n)
 #endif
 
 #ifdef CONFIG_DEBUG_GPIO

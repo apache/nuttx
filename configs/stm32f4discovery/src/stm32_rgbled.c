@@ -86,16 +86,6 @@
 #  undef HAVE_RGBLED
 #endif
 
-#ifdef CONFIG_DEBUG_LEDS
-#  define lederr  llerr
-#  define ledwarn llwarn
-#  define ledinfo llinfo
-#else
-#  define lederr(x...)
-#  define ledwarn(x...)
-#  define ledinfo(x...)
-#endif
-
 #ifdef HAVE_RGBLED
 
 /************************************************************************************

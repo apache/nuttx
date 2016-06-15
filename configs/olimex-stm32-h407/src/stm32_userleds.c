@@ -54,22 +54,6 @@
 #ifndef CONFIG_ARCH_LEDS
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* CONFIG_DEBUG_LEDS enables debug output from this file (needs CONFIG_DEBUG_FEATURES
- * with CONFIG_DEBUG_INFO too)
- */
-
-#ifdef CONFIG_DEBUG_LEDS
-#  define lederr  llerr
-#  define ledinfo llinfo
-#else
-#  define lederr(x...)
-#  define ledinfo(x...)
-#endif
-
-/****************************************************************************
  * Private Data
  ****************************************************************************/
 /* This array maps an LED number to GPIO pin configuration */

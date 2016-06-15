@@ -49,20 +49,6 @@
 #if defined(CONFIG_I2C) && defined(CONFIG_NCP5623C)
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#ifdef CONFIG_DEBUG_LEDS
-#  define derr  llerr
-#  define dwarn llwarn
-#  define dinfo llinfo
-#else
-#  define derr(x...)
-#  define dwarn(x...)
-#  define dinfo(x...)
-#endif
-
-/****************************************************************************
  * Private Type Definitions
  ****************************************************************************/
 
@@ -136,14 +122,14 @@ static int ncp5623c_i2c_write_byte(FAR struct ncp5623c_dev_s *priv,
 
   /* Write the data (no RESTART) */
 
-  dinfo("i2c addr: 0x%02X value: 0x%02X\n", priv->i2c_addr,
+  lcdinfo("i2c addr: 0x%02X value: 0x%02X\n", priv->i2c_addr,
         buffer[0]);
 
 
   ret = i2c_write(priv->i2c, &config, buffer, BUFFER_SIZE);
   if (ret != OK)
     {
-      derr("ERROR: i2c_write returned error code %d\n", ret);
+      lcderr("ERROR: i2c_write returned error code %d\n", ret);
       return ret;
     }
 
@@ -170,7 +156,7 @@ static int ncp5623c_open(FAR struct file *filep)
   ret = ncp5623c_i2c_write_byte(priv, NCP5623C_SHUTDOWN, 0x00);
   if (ret != OK)
     {
-      derr("ERROR: Could not shut down the NCP5623C\n");
+      lcderr("ERROR: Could not shut down the NCP5623C\n");
       return ret;
     }
 
@@ -179,7 +165,7 @@ static int ncp5623c_open(FAR struct file *filep)
   ret = ncp5623c_i2c_write_byte(priv, NCP5623C_ILED, 0x1F);
   if (ret != OK)
     {
-      derr("ERROR: Could not set up max current\n");
+      lcderr("ERROR: Could not set up max current\n");
       return ret;
     }
 
@@ -228,7 +214,7 @@ static int ncp5623c_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   FAR struct ncp5623c_dev_s *priv = inode->i_private;
   int ret = OK;
 
-  dinfo("cmd: %d arg: %ld\n", cmd, arg);
+  lcdinfo("cmd: %d arg: %ld\n", cmd, arg);
 
   switch (cmd)
     {
@@ -242,7 +228,7 @@ static int ncp5623c_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         DEBUGASSERT(ptr != NULL);
         if (ptr->reg > NCP5623C_MAX_REG)
           {
-            derr("ERROR: Unrecognized register: %d\n", ptr->reg);
+            lcderr("ERROR: Unrecognized register: %d\n", ptr->reg);
             ret = -EFAULT;
             break;
           }
@@ -255,7 +241,7 @@ static int ncp5623c_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
     default:
       {
-        derr("ERROR: Unrecognized cmd: %d\n", cmd);
+        lcderr("ERROR: Unrecognized cmd: %d\n", cmd);
         ret = -ENOTTY;
       }
       break;
@@ -300,7 +286,7 @@ int ncp5623c_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
 
   if (priv == NULL)
     {
-      derr("ERROR: Failed to allocate instance of ncp5623c_dev_s\n");
+      lcderr("ERROR: Failed to allocate instance of ncp5623c_dev_s\n");
       return -ENOMEM;
     }
 
@@ -312,7 +298,7 @@ int ncp5623c_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
   int const ret = register_driver(devpath, &g_ncp5623c_fileops, 666, priv);
   if (ret != OK)
     {
-      derr("ERROR: Failed to register driver: %d\n", ret);
+      lcderr("ERROR: Failed to register driver: %d\n", ret);
       kmm_free(priv);
       return ret;
     }
@@ -356,7 +342,7 @@ static ssize_t ncp5623c_write(FAR struct file *filep, FAR const char *buffer,
   unsigned int blue;
   char color[3];
 
-  dinfo("%s\n", buffer);
+  lcdinfo("%s\n", buffer);
 
   /* We need to receive a string #RRGGBB = 7 bytes */
 
@@ -421,7 +407,7 @@ static ssize_t ncp5623c_write(FAR struct file *filep, FAR const char *buffer,
                                  red);
   if (ret != OK)
     {
-      derr("ERROR: Could not set red led\n");
+      lcderr("ERROR: Could not set red led\n");
       return ret;
     }
 
@@ -431,7 +417,7 @@ static ssize_t ncp5623c_write(FAR struct file *filep, FAR const char *buffer,
                                  green);
   if (ret != OK)
     {
-      derr("ERROR: Could not set green led\n");
+      lcderr("ERROR: Could not set green led\n");
       return ret;
     }
 
@@ -441,7 +427,7 @@ static ssize_t ncp5623c_write(FAR struct file *filep, FAR const char *buffer,
                                  blue);
   if (ret != OK)
     {
-      derr("ERROR: Could not set blue led\n");
+      lcderr("ERROR: Could not set blue led\n");
       return ret;
     }
 

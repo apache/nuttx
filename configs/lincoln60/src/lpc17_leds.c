@@ -60,25 +60,9 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* CONFIG_DEBUG_LEDS enables debug output from this file (needs CONFIG_DEBUG_FEATURES
- * with CONFIG_DEBUG_INFO too)
- */
-
-#ifdef CONFIG_DEBUG_LEDS
-#  define lederr  llerr
-#  ifdef CONFIG_DEBUG_INFO
-#    define ledinfo llerr
-#  else
-#    define ledinfo(x...)
-#  endif
-#else
-#  define lederr(x...)
-#  define ledinfo(x...)
-#endif
-
 /* Dump GPIO registers */
 
-#if defined(CONFIG_DEBUG_INFO) && defined(CONFIG_DEBUG_LEDS)
+#ifdef CONFIG_DEBUG_LEDS_INFO
 #  define led_dumpgpio(m) lpc17_dumpgpio(LINCOLN60_LED2, m)
 #else
 #  define led_dumpgpio(m)

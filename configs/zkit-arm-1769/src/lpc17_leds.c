@@ -59,26 +59,6 @@
 #ifdef CONFIG_ARCH_LEDS
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* CONFIG_DEBUG_LEDS enables debug output from this file (needs CONFIG_DEBUG_FEATURES
- * and pherhaps CONFIG_DEBUG_INFO too)
- */
-
-#ifdef CONFIG_DEBUG_LEDS
-#  define lederr  llerr
-#  ifdef CONFIG_DEBUG_INFO
-#    define ledinfo llerr
-#  else
-#    define ledinfo(x...)
-#  endif
-#else
-#  define lederr(x...)
-#  define ledinfo(x...)
-#endif
-
-/****************************************************************************
  * Private Data
  ****************************************************************************/
 

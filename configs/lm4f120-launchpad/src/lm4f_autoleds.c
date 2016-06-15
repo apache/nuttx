@@ -97,33 +97,13 @@
  * LED_PANIC         4      ON   OFF   OFF (flashing 2Hz)
  */
 
-/* CONFIG_DEBUG_LEDS enables debug output from this file (needs CONFIG_DEBUG_FEATURES
- * with CONFIG_DEBUG_INFO too)
- */
-
-#ifdef CONFIG_DEBUG_LEDS
-#  define lederr  llerr
-#  define ledinfo llinfo
-#else
-#  define lederr(x...)
-#  define ledinfo(x...)
-#endif
-
 /* Dump GPIO registers */
 
-#ifdef CONFIG_DEBUG_LEDS
+#ifdef CONFIG_DEBUG_LEDS_INFO
 #  define led_dumpgpio(m) tiva_dumpgpio(LED_GPIO, m)
 #else
 #  define led_dumpgpio(m)
 #endif
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
