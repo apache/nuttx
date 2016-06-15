@@ -72,15 +72,11 @@
 
 /* Dump GPIO registers */
 
-#ifdef CONFIG_DEBUG_GPIO
+#ifdef CONFIG_DEBUG_GPIO_INFO
 #  define ssp_dumpgpio(m) lpc17_dumpgpio(SDCCS_GPIO, m)
 #else
 #  define ssp_dumpgpio(m)
 #endif
-
-/************************************************************************************
- * Private Functions
- ************************************************************************************/
 
 /************************************************************************************
  * Public Functions
