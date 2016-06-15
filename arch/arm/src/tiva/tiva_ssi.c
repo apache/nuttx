@@ -841,7 +841,8 @@ static int ssi_transfer(struct tiva_ssidev_s *priv, const void *txbuffer,
 #endif
   int ntxd;
 
-  ssierr("txbuffer: %p rxbuffer: %p nwords: %d\n", txbuffer, rxbuffer, nwords);
+  ssiinfo("txbuffer: %p rxbuffer: %p nwords: %d\n",
+         txbuffer, rxbuffer, nwords);
 
   /* Set up to perform the transfer */
 
@@ -913,7 +914,7 @@ static int ssi_transfer(struct tiva_ssidev_s *priv, const void *txbuffer,
       ssi_semtake(&priv->xfrsem);
     }
   while (priv->nrxwords < priv->nwords);
-  ssierr("Transfer complete\n");
+  ssiinfo("Transfer complete\n");
 
 #else
   /* Perform the transfer using polling logic.  This will totally
@@ -1025,7 +1026,7 @@ static int ssi_interrupt(int irq, void *context)
 #ifdef CONFIG_DEBUG_SPI
   if ((regval & SSI_RIS_ROR) != 0)
     {
-      ssierr("Rx FIFO Overrun!\n");
+      ssierr("ERROR: Rx FIFO Overrun!\n");
     }
 #endif
 
@@ -1056,7 +1057,7 @@ static int ssi_interrupt(int irq, void *context)
 
       /* Wake up the waiting thread */
 
-      ssierr("Transfer complete\n");
+      ssiinfo("Transfer complete\n");
       ssi_semgive(&priv->xfrsem);
     }
 
@@ -1137,7 +1138,7 @@ static uint32_t ssi_setfrequencyinternal(struct tiva_ssidev_s *priv,
   uint32_t scr;
   uint32_t actual;
 
-  ssierr("frequency: %d\n", frequency);
+  ssiinfo("frequency: %d\n", frequency);
   DEBUGASSERT(frequency);
 
   /* Has the frequency changed? */
@@ -1261,7 +1262,7 @@ static void ssi_setmodeinternal(struct tiva_ssidev_s *priv, enum spi_mode_e mode
   uint32_t modebits;
   uint32_t regval;
 
-  ssierr("mode: %d\n", mode);
+  ssiinfo("mode: %d\n", mode);
   DEBUGASSERT(priv);
 
   /* Has the number of bits per word changed? */
@@ -1340,7 +1341,7 @@ static void ssi_setbitsinternal(struct tiva_ssidev_s *priv, int nbits)
 {
   uint32_t regval;
 
-  ssierr("nbits: %d\n", nbits);
+  ssiinfo("nbits: %d\n", nbits);
   DEBUGASSERT(priv);
   if (nbits != priv->nbits && nbits >= 4 && nbits <= 16)
     {
@@ -1507,7 +1508,7 @@ FAR struct spi_dev_s *tiva_ssibus_initialize(int port)
   struct tiva_ssidev_s *priv;
   irqstate_t flags;
 
-  ssierr("port: %d\n", port);
+  ssiinfo("port: %d\n", port);
 
   /* Set up for the selected port */
 

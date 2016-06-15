@@ -63,6 +63,10 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#ifndef CONFIG_DEBUG_INFO
+#  undef CONFIG_TIVA_TIMER_REGDEBUG
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -393,7 +397,7 @@ static bool tiva_timer_checkreg(struct tiva_gptmstate_s *priv, bool wr,
         {
           /* Yes... show how many times we did it */
 
-          llerr("...[Repeats %d times]...\n", priv->ntimes);
+          llinfo("...[Repeats %d times]...\n", priv->ntimes);
         }
 
       /* Save information about the new access */
@@ -426,7 +430,7 @@ static uint32_t tiva_getreg(struct tiva_gptmstate_s *priv, unsigned int offset)
 #ifdef CONFIG_TIVA_TIMER_REGDEBUG
   if (tiva_timer_checkreg(priv, false, regval, regaddr))
     {
-      llerr("%08x->%08x\n", regaddr, regval);
+      llinfo("%08x->%08x\n", regaddr, regval);
     }
 #endif
 
@@ -449,7 +453,7 @@ static void tiva_putreg(struct tiva_gptmstate_s *priv, unsigned int offset,
 #ifdef CONFIG_TIVA_TIMER_REGDEBUG
   if (tiva_timer_checkreg(priv, true, regval, regaddr))
     {
-       llerr("%08x<-%08x\n", regaddr, regval);
+       llinfo("%08x<-%08x\n", regaddr, regval);
     }
 #endif
 
@@ -2378,14 +2382,14 @@ void tiva_timer32_setinterval(TIMER_HANDLE handle, uint32_t interval)
 #ifdef CONFIG_TIVA_TIMER_REGDEBUG
   /* Generate low-level debug output outside of the critical section */
 
-  llerr("%08x<-%08x\n", loadr, interval);
+  llinfo("%08x<-%08x\n", loadr, interval);
   if (toints)
     {
 #  ifdef CONFIG_ARCH_CHIP_TM4C129
-      llerr("%08x->%08x\n", moder, modev1);
-      llerr("%08x<-%08x\n", moder, modev2);
+      llinfo("%08x->%08x\n", moder, modev1);
+      llinfo("%08x<-%08x\n", moder, modev2);
 #  endif /* CONFIG_ARCH_CHIP_TM4C129 */
-      llerr("%08x<-%08x\n", imrr, priv->imr);
+      llinfo("%08x<-%08x\n", imrr, priv->imr);
     }
 #endif
 }
@@ -2525,14 +2529,14 @@ void tiva_timer16_setinterval(TIMER_HANDLE handle, uint16_t interval, int tmndx)
 #ifdef CONFIG_TIVA_TIMER_REGDEBUG
   /* Generate low-level debug output outside of the critical section */
 
-  llerr("%08x<-%08x\n", loadr, interval);
+  llinfo("%08x<-%08x\n", loadr, interval);
   if (toints)
     {
 #ifdef CONFIG_ARCH_CHIP_TM4C129
-      llerr("%08x->%08x\n", moder, modev1);
-      llerr("%08x<-%08x\n", moder, modev2);
+      llinfo("%08x->%08x\n", moder, modev1);
+      llinfo("%08x<-%08x\n", moder, modev2);
 #endif
-      llerr("%08x<-%08x\n", imrr, priv->imr);
+      llinfo("%08x<-%08x\n", imrr, priv->imr);
     }
 #endif
 }
@@ -2730,13 +2734,13 @@ void tiva_rtc_setalarm(TIMER_HANDLE handle, uint32_t delay)
 #ifdef CONFIG_TIVA_TIMER_REGDEBUG
   /* Generate low-level debug output outside of the critical section */
 
-  llerr("%08x->%08x\n", base + TIVA_TIMER_TAR_OFFSET, counter);
-  llerr("%08x<-%08x\n", base + TIVA_TIMER_TAMATCHR_OFFSET, match);
+  llinfo("%08x->%08x\n", base + TIVA_TIMER_TAR_OFFSET, counter);
+  llinfo("%08x<-%08x\n", base + TIVA_TIMER_TAMATCHR_OFFSET, match);
 #ifdef CONFIG_ARCH_CHIP_TM4C129
-  llerr("%08x->%08x\n", base + TIVA_TIMER_ADCEV_OFFSET, adcev);
-  llerr("%08x<-%08x\n", base + TIVA_TIMER_ADCEV_OFFSET, adcev | adcbits);
+  llinfo("%08x->%08x\n", base + TIVA_TIMER_ADCEV_OFFSET, adcev);
+  llinfo("%08x<-%08x\n", base + TIVA_TIMER_ADCEV_OFFSET, adcev | adcbits);
 #endif /* CONFIG_ARCH_CHIP_TM4C129 */
-  llerr("%08x<-%08x\n", base + TIVA_TIMER_IMR_OFFSET, priv->imr);
+  llinfo("%08x<-%08x\n", base + TIVA_TIMER_IMR_OFFSET, priv->imr);
 #endif
 }
 #endif
@@ -2834,13 +2838,13 @@ void tiva_timer32_relmatch(TIMER_HANDLE handle, uint32_t relmatch)
 #ifdef CONFIG_TIVA_TIMER_REGDEBUG
   /* Generate low-level debug output outside of the critical section */
 
-  llerr("%08x->%08x\n", base + TIVA_TIMER_TAR_OFFSET, counter);
-  llerr("%08x<-%08x\n", base + TIVA_TIMER_TAMATCHR_OFFSET, match);
+  llinfo("%08x->%08x\n", base + TIVA_TIMER_TAR_OFFSET, counter);
+  llinfo("%08x<-%08x\n", base + TIVA_TIMER_TAMATCHR_OFFSET, match);
 #ifdef CONFIG_ARCH_CHIP_TM4C129
-  llerr("%08x->%08x\n", base + TIVA_TIMER_ADCEV_OFFSET, adcev);
-  llerr("%08x<-%08x\n", base + TIVA_TIMER_ADCEV_OFFSET, adcev | adcbits);
+  llinfo("%08x->%08x\n", base + TIVA_TIMER_ADCEV_OFFSET, adcev);
+  llinfo("%08x<-%08x\n", base + TIVA_TIMER_ADCEV_OFFSET, adcev | adcbits);
 #endif /* CONFIG_ARCH_CHIP_TM4C129 */
-  llerr("%08x<-%08x\n", base + TIVA_TIMER_IMR_OFFSET, priv->imr);
+  llinfo("%08x<-%08x\n", base + TIVA_TIMER_IMR_OFFSET, priv->imr);
 #endif /* CONFIG_TIVA_TIMER_REGDEBUG */
 
 }
@@ -3036,15 +3040,15 @@ void tiva_timer16_relmatch(TIMER_HANDLE handle, uint32_t relmatch, int tmndx)
 #ifdef CONFIG_TIVA_TIMER_REGDEBUG
   /* Generate low-level debug output outside of the critical section */
 
-  llerr("%08x->%08x\n", timerr, timerv);
-  llerr("%08x->%08x\n", prescr, prescv);
-  llerr("%08x<-%08x\n", matchr, matchv);
-  llerr("%08x<-%08x\n", prematchr, prematchv);
+  llinfo("%08x->%08x\n", timerr, timerv);
+  llinfo("%08x->%08x\n", prescr, prescv);
+  llinfo("%08x<-%08x\n", matchr, matchv);
+  llinfo("%08x<-%08x\n", prematchr, prematchv);
 #ifdef CONFIG_ARCH_CHIP_TM4C129
-  llerr("%08x->%08x\n", adcevr, adcevv);
-  llerr("%08x<-%08x\n", adcevr, adcevv | adcbits);
+  llinfo("%08x->%08x\n", adcevr, adcevv);
+  llinfo("%08x<-%08x\n", adcevr, adcevv | adcbits);
 #endif
-  llerr("%08x<-%08x\n", imr, priv->imr);
+  llinfo("%08x<-%08x\n", imr, priv->imr);
 #endif
 }
 #endif

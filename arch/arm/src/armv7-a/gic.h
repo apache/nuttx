@@ -590,21 +590,6 @@
 
 #define GIC_IRQ_SPI              32  /* First SPI interrupt ID */
 
-/* General Macro Definitions ************************************************/
-/* Debug */
-
-#ifdef CONFIG_DEBUG_IRQ
-#  define gicerr(format, ...)    err(format, ##__VA_ARGS__)
-#  define gicllerr(format, ...)  llerr(format, ##__VA_ARGS__)
-#  define gicinfo(format, ...)   info(format, ##__VA_ARGS__)
-#  define gicllinfo(format, ...) llinfo(format, ##__VA_ARGS__)
-#else
-#  define gicerr(x...)
-#  define gicllerr(x...)
-#  define gicinfo(x...)
-#  define gicllinfo(x...)
-#endif
-
 /****************************************************************************
  * Inline Functions
  ****************************************************************************/
@@ -817,7 +802,7 @@ int arm_pause_handler(int irq, FAR void *context);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG_IRQ
+#ifdef CONFIG_DEBUG_IRQ_INFO
 void arm_gic_dump(const char *msg, bool all, int irq);
 #else
 #  define arm_gic_dump(m,a,i)

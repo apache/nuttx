@@ -247,7 +247,7 @@
  * enabled.
  */
 
-#ifndef CONFIG_DEBUG_FEATURES
+#ifndef CONFIG_DEBUG_INFO
 #  undef CONFIG_TIVA_ETHERNET_REGDEBUG
 #endif
 
@@ -667,7 +667,7 @@ static struct tiva_ethmac_s g_tiva_ethmac[TIVA_NETHCONTROLLERS];
  ****************************************************************************/
 /* Register operations ******************************************************/
 
-#if defined(CONFIG_TIVA_ETHERNET_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
+#if defined(CONFIG_TIVA_ETHERNET_REGDEBUG) && defined(CONFIG_DEBUG_INFO)
 static uint32_t tiva_getreg(uint32_t addr);
 static void tiva_putreg(uint32_t val, uint32_t addr);
 static void tiva_checksetup(void);
@@ -787,7 +787,7 @@ static int  tive_emac_configure(FAR struct tiva_ethmac_s *priv);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_TIVA_ETHERNET_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
+#if defined(CONFIG_TIVA_ETHERNET_REGDEBUG) && defined(CONFIG_DEBUG_INFO)
 static uint32_t tiva_getreg(uint32_t addr)
 {
   static uint32_t prevaddr = 0;
@@ -808,7 +808,7 @@ static uint32_t tiva_getreg(uint32_t addr)
         {
           if (count == 4)
             {
-              llerr("...\n");
+              llinfo("...\n");
             }
 
           return val;
@@ -825,7 +825,7 @@ static uint32_t tiva_getreg(uint32_t addr)
         {
           /* Yes.. then show how many times the value repeated */
 
-          llerr("[repeats %d more times]\n", count-3);
+          llinfo("[repeats %d more times]\n", count-3);
         }
 
       /* Save the new address, value, and count */
@@ -837,7 +837,7 @@ static uint32_t tiva_getreg(uint32_t addr)
 
   /* Show the register value read */
 
-  llerr("%08x->%08x\n", addr, val);
+  llinfo("%08x->%08x\n", addr, val);
   return val;
 }
 #endif
@@ -859,12 +859,12 @@ static uint32_t tiva_getreg(uint32_t addr)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_TIVA_ETHERNET_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
+#if defined(CONFIG_TIVA_ETHERNET_REGDEBUG) && defined(CONFIG_DEBUG_INFO)
 static void tiva_putreg(uint32_t val, uint32_t addr)
 {
   /* Show the register value being written */
 
-  llerr("%08x<-%08x\n", addr, val);
+  llinfo("%08x<-%08x\n", addr, val);
 
   /* Write the value */
 
@@ -886,7 +886,7 @@ static void tiva_putreg(uint32_t val, uint32_t addr)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_TIVA_ETHERNET_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
+#if defined(CONFIG_TIVA_ETHERNET_REGDEBUG) && defined(CONFIG_DEBUG_INFO)
 static void tiva_checksetup(void)
 {
 }
@@ -1544,7 +1544,7 @@ static int tiva_recvframe(FAR struct tiva_ethmac_s *priv)
 
   if (!tiva_isfreebuffer(priv))
     {
-      nllerr("No free buffers\n");
+      nllerr("ERROR: No free buffers\n");
       return -ENOMEM;
     }
 
@@ -1651,7 +1651,7 @@ static int tiva_recvframe(FAR struct tiva_ethmac_s *priv)
                * scanning logic, and continue scanning with the next frame.
                */
 
-              nllerr("DROPPED: RX descriptor errors: %08x\n", rxdesc->rdes0);
+              nllwarn("DROPPED: RX descriptor errors: %08x\n", rxdesc->rdes0);
               tiva_freesegment(priv, rxcurr, priv->segments);
             }
         }
@@ -1712,7 +1712,7 @@ static void tiva_receive(FAR struct tiva_ethmac_s *priv)
 
       if (dev->d_len > CONFIG_NET_ETH_MTU)
         {
-          nllerr("DROPPED: Too big: %d\n", dev->d_len);
+          nllwarn("DROPPED: Too big: %d\n", dev->d_len);
         }
       else
 
@@ -1815,7 +1815,7 @@ static void tiva_receive(FAR struct tiva_ethmac_s *priv)
       else
 #endif
         {
-          nllerr("DROPPED: Unknown type: %04x\n", BUF->type);
+          nllwarn("DROPPED: Unknown type: %04x\n", BUF->type);
         }
 
       /* We are finished with the RX buffer.  NOTE:  If the buffer is
@@ -2067,7 +2067,7 @@ static inline void tiva_interrupt_process(FAR struct tiva_ethmac_s *priv)
     {
       /* Just let the user know what happened */
 
-      nllerr("Abnormal event(s): %08x\n", dmaris);
+      nllerr("ERROR: Abnormal event(s): %08x\n", dmaris);
 
       /* Clear all pending abnormal events */
 
@@ -2287,7 +2287,7 @@ static void tiva_txtimeout_expiry(int argc, uint32_t arg, ...)
 {
   FAR struct tiva_ethmac_s *priv = (FAR struct tiva_ethmac_s *)arg;
 
-  nllerr("Timeout!\n");
+  nllerr("ERROR: Timeout!\n");
 
 #ifdef CONFIG_NET_NOINTS
   /* Disable further Ethernet interrupts.  This will prevent some race
@@ -2488,15 +2488,15 @@ static int tiva_ifup(struct net_driver_s *dev)
   int ret;
 
 #ifdef CONFIG_NET_IPv4
-  nerr("Bringing up: %d.%d.%d.%d\n",
-       dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
-       (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
+  ninfo("Bringing up: %d.%d.%d.%d\n",
+        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
+        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
 #endif
 #ifdef CONFIG_NET_IPv6
-  nerr("Bringing up: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
-       dev->d_ipv6addr[0], dev->d_ipv6addr[1], dev->d_ipv6addr[2],
-       dev->d_ipv6addr[3], dev->d_ipv6addr[4], dev->d_ipv6addr[5],
-       dev->d_ipv6addr[6], dev->d_ipv6addr[7]);
+  ninfo("Bringing up: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
+        dev->d_ipv6addr[0], dev->d_ipv6addr[1], dev->d_ipv6addr[2],
+        dev->d_ipv6addr[3], dev->d_ipv6addr[4], dev->d_ipv6addr[5],
+        dev->d_ipv6addr[6], dev->d_ipv6addr[7]);
 #endif
 
   /* Configure the Ethernet interface for DMA operation. */
@@ -3236,7 +3236,7 @@ static int tiva_phyread(uint16_t phydevaddr, uint16_t phyregaddr, uint16_t *valu
         }
     }
 
-  nerr("MII transfer timed out: phydevaddr: %04x phyregaddr: %04x\n",
+  nerr("ERROR: MII transfer timed out: phydevaddr: %04x phyregaddr: %04x\n",
        phydevaddr, phyregaddr);
 
   return -ETIMEDOUT;
@@ -3295,7 +3295,7 @@ static int tiva_phywrite(uint16_t phydevaddr, uint16_t phyregaddr, uint16_t valu
         }
     }
 
-  nerr("MII transfer timed out: phydevaddr: %04x phyregaddr: %04x value: %04x\n",
+  nerr("ERROR: MII transfer timed out: phydevaddr: %04x phyregaddr: %04x value: %04x\n",
        phydevaddr, phyregaddr, value);
 
   return -ETIMEDOUT;
@@ -3343,7 +3343,7 @@ static int tiva_phyinit(FAR struct tiva_ethmac_s *priv)
   ret = tiva_phywrite(CONFIG_TIVA_PHYADDR, MII_MCR, MII_MCR_RESET);
   if (ret < 0)
     {
-      nerr("Failed to reset the PHY: %d\n", ret);
+      nerr("ERROR: Failed to reset the PHY: %d\n", ret);
       return ret;
     }
 
@@ -3359,7 +3359,7 @@ static int tiva_phyinit(FAR struct tiva_ethmac_s *priv)
       ret = tiva_phyread(CONFIG_TIVA_PHYADDR, MII_MSR, &phyval);
       if (ret < 0)
         {
-          nerr("Failed to read the PHY MSR: %d\n", ret);
+          nerr("ERROR: Failed to read the PHY MSR: %d\n", ret);
           return ret;
         }
       else if ((phyval & MII_MSR_LINKSTATUS) != 0)
@@ -3370,7 +3370,7 @@ static int tiva_phyinit(FAR struct tiva_ethmac_s *priv)
 
   if (timeout >= PHY_RETRY_TIMEOUT)
     {
-      nerr("Timed out waiting for link status: %04x\n", phyval);
+      nerr("ERROR: Timed out waiting for link status: %04x\n", phyval);
       return -ETIMEDOUT;
     }
 
@@ -3379,7 +3379,7 @@ static int tiva_phyinit(FAR struct tiva_ethmac_s *priv)
   ret = tiva_phywrite(CONFIG_TIVA_PHYADDR, MII_MCR, MII_MCR_ANENABLE);
   if (ret < 0)
     {
-      nerr("Failed to enable auto-negotiation: %d\n", ret);
+      nerr("ERROR: Failed to enable auto-negotiation: %d\n", ret);
       return ret;
     }
 
@@ -3390,7 +3390,7 @@ static int tiva_phyinit(FAR struct tiva_ethmac_s *priv)
       ret = tiva_phyread(CONFIG_TIVA_PHYADDR, MII_MSR, &phyval);
       if (ret < 0)
         {
-          nerr("Failed to read the PHY MSR: %d\n", ret);
+          nerr("ERROR: Failed to read the PHY MSR: %d\n", ret);
           return ret;
         }
       else if ((phyval & MII_MSR_ANEGCOMPLETE) != 0)
@@ -3401,7 +3401,7 @@ static int tiva_phyinit(FAR struct tiva_ethmac_s *priv)
 
   if (timeout >= PHY_RETRY_TIMEOUT)
     {
-      nerr("Timed out waiting for auto-negotiation\n");
+      nerr("ERROR: Timed out waiting for auto-negotiation\n");
       return -ETIMEDOUT;
     }
 
@@ -3410,7 +3410,7 @@ static int tiva_phyinit(FAR struct tiva_ethmac_s *priv)
   ret = tiva_phyread(CONFIG_TIVA_PHYADDR, CONFIG_TIVA_PHYSR, &phyval);
   if (ret < 0)
     {
-      nerr("Failed to read PHY status register\n");
+      nerr("ERROR: Failed to read PHY status register\n");
       return ret;
     }
 
@@ -3480,7 +3480,7 @@ static int tiva_phyinit(FAR struct tiva_ethmac_s *priv)
   ret = tiva_phywrite(CONFIG_TIVA_PHYADDR, MII_MCR, phyval);
   if (ret < 0)
     {
-     nerr("Failed to write the PHY MCR: %d\n", ret);
+     nerr("ERROR: Failed to write the PHY MCR: %d\n", ret);
       return ret;
     }
   up_mdelay(PHY_CONFIG_DELAY);
@@ -3495,9 +3495,9 @@ static int tiva_phyinit(FAR struct tiva_ethmac_s *priv)
 #endif
 #endif
 
-  nerr("Duplex: %s Speed: %d MBps\n",
-       priv->fduplex ? "FULL" : "HALF",
-       priv->mbps100 ? 100 : 10);
+  ninfo("Duplex: %s Speed: %d MBps\n",
+        priv->fduplex ? "FULL" : "HALF",
+        priv->mbps100 ? 100 : 10);
 
   return OK;
 }

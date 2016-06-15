@@ -328,7 +328,7 @@ void tms570_gioirqdisable(int irq);
  *
  ************************************************************************************/
 
-#ifdef CONFIG_DEBUG_GPIO
+#ifdef CONFIG_DEBUG_GPIO_INFO
 int tms570_dumpgio(uint32_t pinset, const char *msg);
 #else
 #  define tms570_dumpgio(p,m)

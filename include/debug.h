@@ -261,30 +261,6 @@
 #  define pgllerr(x...)
 #endif
 
-#ifdef CONFIG_DEBUG_DMA_ERROR
-#  define dmaerr(format, ...)    err(format, ##__VA_ARGS__)
-#  define dmallerr(format, ...)  llerr(format, ##__VA_ARGS__)
-#else
-#  define dmaerr(x...)
-#  define dmallerr(x...)
-#endif
-
-#ifdef CONFIG_DEBUG_DMA_WARN
-#  define dmawarn(format, ...)   warn(format, ##__VA_ARGS__)
-#  define dmallwarn(format, ...) llwarn(format, ##__VA_ARGS__)
-#else
-#  define dmawarn(x...)
-#  define dmallwarn(x...)
-#endif
-
-#ifdef CONFIG_DEBUG_DMA_INFO
-#  define dmainfo(format, ...)   info(format, ##__VA_ARGS__)
-#  define dmallinfo(format, ...) llinfo(format, ##__VA_ARGS__)
-#else
-#  define dmainfo(x...)
-#  define dmallinfo(x...)
-#endif
-
 #ifdef CONFIG_DEBUG_NET_ERROR
 #  define nerr(format, ...)    err(format, ##__VA_ARGS__)
 #  define nllerr(format, ...)  llerr(format, ##__VA_ARGS__)
@@ -549,6 +525,54 @@
 #  define audllinfo(x...)
 #endif
 
+#ifdef CONFIG_DEBUG_DMA_ERROR
+#  define dmaerr(format, ...)    err(format, ##__VA_ARGS__)
+#  define dmallerr(format, ...)  llerr(format, ##__VA_ARGS__)
+#else
+#  define dmaerr(x...)
+#  define dmallerr(x...)
+#endif
+
+#ifdef CONFIG_DEBUG_DMA_WARN
+#  define dmawarn(format, ...)   warn(format, ##__VA_ARGS__)
+#  define dmallwarn(format, ...) llwarn(format, ##__VA_ARGS__)
+#else
+#  define dmawarn(x...)
+#  define dmallwarn(x...)
+#endif
+
+#ifdef CONFIG_DEBUG_DMA_INFO
+#  define dmainfo(format, ...)   info(format, ##__VA_ARGS__)
+#  define dmallinfo(format, ...) llinfo(format, ##__VA_ARGS__)
+#else
+#  define dmainfo(x...)
+#  define dmallinfo(x...)
+#endif
+
+#ifdef CONFIG_DEBUG_IRQ_ERROR
+#  define dmaerr(format, ...)    err(format, ##__VA_ARGS__)
+#  define dmallerr(format, ...)  llerr(format, ##__VA_ARGS__)
+#else
+#  define dmaerr(x...)
+#  define dmallerr(x...)
+#endif
+
+#ifdef CONFIG_DEBUG_IRQ_WARN
+#  define irqwarn(format, ...)   warn(format, ##__VA_ARGS__)
+#  define irqllwarn(format, ...) llwarn(format, ##__VA_ARGS__)
+#else
+#  define irqwarn(x...)
+#  define irqllwarn(x...)
+#endif
+
+#ifdef CONFIG_DEBUG_IRQ_INFO
+#  define irqinfo(format, ...)   info(format, ##__VA_ARGS__)
+#  define irqllinfo(format, ...) llinfo(format, ##__VA_ARGS__)
+#else
+#  define irqinfo(x...)
+#  define irqllinfo(x...)
+#endif
+
 #else /* CONFIG_CPP_HAVE_VARARGS */
 
 /* Variadic macros NOT supported */
@@ -656,30 +680,6 @@
 #else
 #  define pginfo      (void)
 #  define pgllinfo    (void)
-#endif
-
-#ifdef CONFIG_DEBUG_DMA_ERROR
-#  define dmaerr      err
-#  define dmallerr    llerr
-#else
-#  define dmaerr      (void)
-#  define dmallerr    (void)
-#endif
-
-#ifdef CONFIG_DEBUG_DMA_WARN
-#  define dmawarn     warn
-#  define dmallwarn   llwarn
-#else
-#  define dmawarn     (void)
-#  define dmallwarn   (void)
-#endif
-
-#ifdef CONFIG_DEBUG_DMA_INFO
-#  define dmainfo     info
-#  define dmallinfo   llinfo
-#else
-#  define dmainfo     (void)
-#  define dmallinfo   (void)
 #endif
 
 #ifdef CONFIG_DEBUG_NET_ERROR
@@ -944,6 +944,54 @@
 #else
 #  define audinfo     (void)
 #  define audllinfo   (void)
+#endif
+
+#ifdef CONFIG_DEBUG_DMA_ERROR
+#  define dmaerr      err
+#  define dmallerr    llerr
+#else
+#  define dmaerr      (void)
+#  define dmallerr    (void)
+#endif
+
+#ifdef CONFIG_DEBUG_DMA_WARN
+#  define dmawarn     warn
+#  define dmallwarn   llwarn
+#else
+#  define dmawarn     (void)
+#  define dmallwarn   (void)
+#endif
+
+#ifdef CONFIG_DEBUG_DMA_INFO
+#  define dmainfo     info
+#  define dmallinfo   llinfo
+#else
+#  define dmainfo     (void)
+#  define dmallinfo   (void)
+#endif
+
+#ifdef CONFIG_DEBUG_IRQ_ERROR
+#  define irqerr      err
+#  define irqllerr    llerr
+#else
+#  define irqerr      (void)
+#  define irqllerr    (void)
+#endif
+
+#ifdef CONFIG_DEBUG_IRQ_WARN
+#  define irqwarn     warn
+#  define irqllwarn   llwarn
+#else
+#  define irqwarn     (void)
+#  define irqllwarn   (void)
+#endif
+
+#ifdef CONFIG_DEBUG_IRQ_INFO
+#  define irqinfo     info
+#  define irqllinfo   llinfo
+#else
+#  define irqinfo     (void)
+#  define irqllinfo   (void)
 #endif
 
 #endif /* CONFIG_CPP_HAVE_VARARGS */

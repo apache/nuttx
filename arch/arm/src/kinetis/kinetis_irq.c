@@ -105,50 +105,51 @@ extern uint32_t _vectors[];
  *
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG_IRQ)
+#if defined(CONFIG_DEBUG_IRQ_INFO)
 static void kinetis_dumpnvic(const char *msg, int irq)
 {
   irqstate_t flags;
 
   flags = enter_critical_section();
-  llerr("NVIC (%s, irq=%d):\n", msg, irq);
-  llerr("  INTCTRL:    %08x VECTAB: %08x\n",
-        getreg32(NVIC_INTCTRL), getreg32(NVIC_VECTAB));
+
+  irqinfo("NVIC (%s, irq=%d):\n", msg, irq);
+  irqinfo("  INTCTRL:    %08x VECTAB: %08x\n",
+          getreg32(NVIC_INTCTRL), getreg32(NVIC_VECTAB));
 #if 0
-  llerr("  SYSH ENABLE MEMFAULT: %08x BUSFAULT: %08x USGFAULT: %08x SYSTICK: %08x\n",
-        getreg32(NVIC_SYSHCON_MEMFAULTENA), getreg32(NVIC_SYSHCON_BUSFAULTENA),
-        getreg32(NVIC_SYSHCON_USGFAULTENA), getreg32(NVIC_SYSTICK_CTRL_ENABLE));
+  irqinfo("  SYSH ENABLE MEMFAULT: %08x BUSFAULT: %08x USGFAULT: %08x SYSTICK: %08x\n",
+          getreg32(NVIC_SYSHCON_MEMFAULTENA), getreg32(NVIC_SYSHCON_BUSFAULTENA),
+          getreg32(NVIC_SYSHCON_USGFAULTENA), getreg32(NVIC_SYSTICK_CTRL_ENABLE));
 #endif
-  llerr("  IRQ ENABLE: %08x %08x %08x %08x\n",
-        getreg32(NVIC_IRQ0_31_ENABLE), getreg32(NVIC_IRQ32_63_ENABLE),
-        getreg32(NVIC_IRQ64_95_ENABLE), getreg32(NVIC_IRQ96_127_ENABLE));
-  llerr("  SYSH_PRIO:  %08x %08x %08x\n",
-        getreg32(NVIC_SYSH4_7_PRIORITY), getreg32(NVIC_SYSH8_11_PRIORITY),
-        getreg32(NVIC_SYSH12_15_PRIORITY));
-  llerr("  IRQ PRIO:   %08x %08x %08x %08x\n",
-        getreg32(NVIC_IRQ0_3_PRIORITY), getreg32(NVIC_IRQ4_7_PRIORITY),
-        getreg32(NVIC_IRQ8_11_PRIORITY), getreg32(NVIC_IRQ12_15_PRIORITY));
-  llerr("              %08x %08x %08x %08x\n",
-        getreg32(NVIC_IRQ16_19_PRIORITY), getreg32(NVIC_IRQ20_23_PRIORITY),
-        getreg32(NVIC_IRQ24_27_PRIORITY), getreg32(NVIC_IRQ28_31_PRIORITY));
-  llerr("              %08x %08x %08x %08x\n",
-        getreg32(NVIC_IRQ32_35_PRIORITY), getreg32(NVIC_IRQ36_39_PRIORITY),
-        getreg32(NVIC_IRQ40_43_PRIORITY), getreg32(NVIC_IRQ44_47_PRIORITY));
-  llerr("              %08x %08x %08x %08x\n",
-        getreg32(NVIC_IRQ48_51_PRIORITY), getreg32(NVIC_IRQ52_55_PRIORITY),
-        getreg32(NVIC_IRQ56_59_PRIORITY), getreg32(NVIC_IRQ60_63_PRIORITY));
-  llerr("              %08x %08x %08x %08x\n",
-        getreg32(NVIC_IRQ64_67_PRIORITY), getreg32(NVIC_IRQ68_71_PRIORITY),
-        getreg32(NVIC_IRQ72_75_PRIORITY), getreg32(NVIC_IRQ76_79_PRIORITY));
-  llerr("              %08x %08x %08x %08x\n",
-        getreg32(NVIC_IRQ80_83_PRIORITY), getreg32(NVIC_IRQ84_87_PRIORITY),
-        getreg32(NVIC_IRQ88_91_PRIORITY), getreg32(NVIC_IRQ92_95_PRIORITY));
-  llerr("              %08x %08x %08x %08x\n",
-        getreg32(NVIC_IRQ96_99_PRIORITY), getreg32(NVIC_IRQ100_103_PRIORITY),
-        getreg32(NVIC_IRQ104_107_PRIORITY), getreg32(NVIC_IRQ108_111_PRIORITY));
+  irqinfo("  IRQ ENABLE: %08x %08x %08x %08x\n",
+          getreg32(NVIC_IRQ0_31_ENABLE), getreg32(NVIC_IRQ32_63_ENABLE),
+          getreg32(NVIC_IRQ64_95_ENABLE), getreg32(NVIC_IRQ96_127_ENABLE));
+  irqinfo("  SYSH_PRIO:  %08x %08x %08x\n",
+          getreg32(NVIC_SYSH4_7_PRIORITY), getreg32(NVIC_SYSH8_11_PRIORITY),
+          getreg32(NVIC_SYSH12_15_PRIORITY));
+  irqinfo("  IRQ PRIO:   %08x %08x %08x %08x\n",
+          getreg32(NVIC_IRQ0_3_PRIORITY), getreg32(NVIC_IRQ4_7_PRIORITY),
+          getreg32(NVIC_IRQ8_11_PRIORITY), getreg32(NVIC_IRQ12_15_PRIORITY));
+  irqinfo("              %08x %08x %08x %08x\n",
+          getreg32(NVIC_IRQ16_19_PRIORITY), getreg32(NVIC_IRQ20_23_PRIORITY),
+          getreg32(NVIC_IRQ24_27_PRIORITY), getreg32(NVIC_IRQ28_31_PRIORITY));
+  irqinfo("              %08x %08x %08x %08x\n",
+          getreg32(NVIC_IRQ32_35_PRIORITY), getreg32(NVIC_IRQ36_39_PRIORITY),
+          getreg32(NVIC_IRQ40_43_PRIORITY), getreg32(NVIC_IRQ44_47_PRIORITY));
+  irqinfo("              %08x %08x %08x %08x\n",
+          getreg32(NVIC_IRQ48_51_PRIORITY), getreg32(NVIC_IRQ52_55_PRIORITY),
+          getreg32(NVIC_IRQ56_59_PRIORITY), getreg32(NVIC_IRQ60_63_PRIORITY));
+  irqinfo("              %08x %08x %08x %08x\n",
+          getreg32(NVIC_IRQ64_67_PRIORITY), getreg32(NVIC_IRQ68_71_PRIORITY),
+          getreg32(NVIC_IRQ72_75_PRIORITY), getreg32(NVIC_IRQ76_79_PRIORITY));
+  irqinfo("              %08x %08x %08x %08x\n",
+          getreg32(NVIC_IRQ80_83_PRIORITY), getreg32(NVIC_IRQ84_87_PRIORITY),
+          getreg32(NVIC_IRQ88_91_PRIORITY), getreg32(NVIC_IRQ92_95_PRIORITY));
+  irqinfo("              %08x %08x %08x %08x\n",
+          getreg32(NVIC_IRQ96_99_PRIORITY), getreg32(NVIC_IRQ100_103_PRIORITY),
+          getreg32(NVIC_IRQ104_107_PRIORITY), getreg32(NVIC_IRQ108_111_PRIORITY));
 #if NR_VECTORS > 111
-  llerr("              %08x %08x\n",
-        getreg32(NVIC_IRQ112_115_PRIORITY), getreg32(NVIC_IRQ116_119_PRIORITY));
+  irqinfo("              %08x %08x\n",
+          getreg32(NVIC_IRQ112_115_PRIORITY), getreg32(NVIC_IRQ116_119_PRIORITY));
 #endif
 
   leave_critical_section(flags);
