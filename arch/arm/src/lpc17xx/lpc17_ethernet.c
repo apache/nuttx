@@ -365,7 +365,7 @@ static int lpc17_rmmac(struct net_driver_s *dev, const uint8_t *mac);
 
 /* Initialization functions */
 
-#if defined(CONFIG_NET_REGDEBUG) && defined(CONFIG_DEBUG_GPIO)
+#if defined(CONFIG_NET_REGDEBUG) && defined(CONFIG_DEBUG_GPIO_INFO)
 static void lpc17_showpins(void);
 #else
 #  define lpc17_showpins()
@@ -2292,7 +2292,7 @@ static int lpc17_rmmac(struct net_driver_s *dev, const uint8_t *mac)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NET_REGDEBUG) && defined(CONFIG_DEBUG_GPIO)
+#if defined(CONFIG_NET_REGDEBUG) && defined(CONFIG_DEBUG_GPIO_INFO)
 static void lpc17_showpins(void)
 {
   lpc17_dumpgpio(GPIO_PORT1 | GPIO_PIN0, "P1[1-15]");

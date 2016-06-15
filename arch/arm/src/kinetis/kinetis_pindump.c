@@ -49,7 +49,7 @@
 #include "kinetis_gpio.h"
 #include "kinetis_port.h"
 
-#ifdef CONFIG_DEBUG_GPIO
+#ifdef CONFIG_DEBUG_GPIO_INFO
 
 /****************************************************************************
  * Private Data
@@ -115,14 +115,14 @@ void kinetis_pindump(uint32_t pinset, const char *msg)
 
   flags = enter_critical_section();
 
-  llerr("GPIO%c pinset: %08x base: %08x -- %s\n",
-        g_portchar[port], pinset, base, msg);
-  llerr("  PDOR: %08x  PDIR: %08x  PDDR: %08x\n",
-        getreg32(base + KINETIS_GPIO_PDOR_OFFSET),
-        getreg32(base + KINETIS_GPIO_PDIR_OFFSET),
-        getreg32(base + KINETIS_GPIO_PDDR_OFFSET));
+  gpioinfo("GPIO%c pinset: %08x base: %08x -- %s\n",
+           g_portchar[port], pinset, base, msg);
+  gpioinfo("  PDOR: %08x  PDIR: %08x  PDDR: %08x\n",
+           getreg32(base + KINETIS_GPIO_PDOR_OFFSET),
+           getreg32(base + KINETIS_GPIO_PDIR_OFFSET),
+           getreg32(base + KINETIS_GPIO_PDDR_OFFSET));
 
   leave_critical_section(flags);
 }
 
-#endif /* CONFIG_DEBUG_GPIO */
+#endif /* CONFIG_DEBUG_GPIO_INFO */

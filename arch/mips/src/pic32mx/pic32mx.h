@@ -378,7 +378,7 @@ void pic32mx_gpioirqdisable(unsigned int cn);
  *
  ************************************************************************************/
 
-#ifdef CONFIG_DEBUG_GPIO
+#ifdef CONFIG_DEBUG_GPIO_INFO
 void pic32mx_dumpgpio(uint32_t pinset, const char *msg);
 #else
 #  define pic32mx_dumpgpio(p,m)

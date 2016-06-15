@@ -936,7 +936,7 @@ config DEBUG_ANALOG
 	default n
 	depends on ANALOG
 	---help---
-		Enable  debug features.
+		Enable analog devic debug features.
 		Enable low level debug features the analog device drivers such as
 		A/D and D/A converters (disabled by default).  Support for this
 		debug option is architecture-specific and may not be available for
@@ -977,12 +977,38 @@ config DEBUG_CAN
 		be available for some MCUs.
 
 config DEBUG_GPIO
-	bool "GPIO Debug Output"
+	bool "GPIO Debug Features"
 	default n
 	---help---
-		Enable GPIO-releated debug SYSLOG output (disabled by default).
+		Enable GPIO debug features.
+
 		Support for this debug option is architecture-specific and may not
 		be available for some MCUs.
+
+if DEBUG_GPIO
+
+config DEBUG_GPIO_ERROR
+	bool "GPIO Error Output"
+	default n
+	depends on DEBUG_ERROR
+	---help---
+		Enable GPIO error output to SYSLOG.
+
+config DEBUG_GPIO_WARN
+	bool "GPIO Warnings Output"
+	default n
+	depends on DEBUG_WARN
+	---help---
+		Enable GPIO warning output to SYSLOG.
+
+config DEBUG_GPIO_INFO
+	bool "GPIO Informational Output"
+	default n
+	depends on DEBUG_INFO
+	---help---
+		Enable GPIO informational output to SYSLOG.
+
+endif # DEBUG_GPIO
 
 config DEBUG_I2C
 	bool "I2C Debug Output"

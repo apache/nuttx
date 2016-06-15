@@ -181,7 +181,7 @@ void lpc17_gpioirqdisable(int irq);
  *
  ************************************************************************************/
 
-#ifdef CONFIG_DEBUG_GPIO
+#ifdef CONFIG_DEBUG_GPIO_INFO
 int lpc17_dumpgpio(lpc17_pinset_t pinset, const char *msg);
 #else
 #  define lpc17_dumpgpio(p,m)

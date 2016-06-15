@@ -550,11 +550,11 @@
 #endif
 
 #ifdef CONFIG_DEBUG_IRQ_ERROR
-#  define dmaerr(format, ...)    err(format, ##__VA_ARGS__)
-#  define dmallerr(format, ...)  llerr(format, ##__VA_ARGS__)
+#  define irqerr(format, ...)    err(format, ##__VA_ARGS__)
+#  define irqllerr(format, ...)  llerr(format, ##__VA_ARGS__)
 #else
-#  define dmaerr(x...)
-#  define dmallerr(x...)
+#  define irqerr(x...)
+#  define irqllerr(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_IRQ_WARN
@@ -571,6 +571,30 @@
 #else
 #  define irqinfo(x...)
 #  define irqllinfo(x...)
+#endif
+
+#ifdef CONFIG_DEBUG_GPIO_ERROR
+#  define gpioerr(format, ...)   err(format, ##__VA_ARGS__)
+#  define gpiollerr(format, ...) llerr(format, ##__VA_ARGS__)
+#else
+#  define gpioerr(x...)
+#  define gpiollerr(x...)
+#endif
+
+#ifdef CONFIG_DEBUG_GPIO_WARN
+#  define gpiowarn(format, ...)   warn(format, ##__VA_ARGS__)
+#  define gpiollwarn(format, ...) llwarn(format, ##__VA_ARGS__)
+#else
+#  define gpiowarn(x...)
+#  define gpiollwarn(x...)
+#endif
+
+#ifdef CONFIG_DEBUG_GPIO_INFO
+#  define gpioinfo(format, ...)   info(format, ##__VA_ARGS__)
+#  define gpiollinfo(format, ...) llinfo(format, ##__VA_ARGS__)
+#else
+#  define gpioinfo(x...)
+#  define gpiollinfo(x...)
 #endif
 
 #else /* CONFIG_CPP_HAVE_VARARGS */
@@ -994,6 +1018,30 @@
 #  define irqllinfo   (void)
 #endif
 
+#ifdef CONFIG_DEBUG_GPIO_ERROR
+#  define gpioerr     err
+#  define gpiollerr   llerr
+#else
+#  define gpioerr     (void)
+#  define gpiollerr   (void)
+#endif
+
+#ifdef CONFIG_DEBUG_GPIO_WARN
+#  define gpiowarn    warn
+#  define gpiollwarn  llwarn
+#else
+#  define gpiowarn    (void)
+#  define gpiollwarn  (void)
+#endif
+
+#ifdef CONFIG_DEBUG_GPIO_INFO
+#  define gpioinfo    info
+#  define gpiollinfo  llinfo
+#else
+#  define gpioinfo    (void)
+#  define gpiollinfo  (void)
+#endif
+
 #endif /* CONFIG_CPP_HAVE_VARARGS */
 
 /* Buffer dumping macros do not depend on varargs */
@@ -1034,14 +1082,6 @@
 #else
 #  define pgerrdumpbuffer(m,b,n)
 #  define pginfodumpbuffer(m,b,n)
-#endif
-
-#ifdef CONFIG_DEBUG_DMA
-#  define dmaerrdumpbuffer(m,b,n)  errdumpbuffer(m,b,n)
-#  define dmainfodumpbuffer(m,b,n) infodumpbuffer(m,b,n)
-#else
-#  define dmaerrdumpbuffer(m,b,n)
-#  define dmainfodumpbuffer(m,b,n)
 #endif
 
 #ifdef CONFIG_DEBUG_NET
@@ -1106,6 +1146,30 @@
 #else
 #  define auderrdumpbuffer(m,b,n)
 #  define audinfodumpbuffer(m,b,n)
+#endif
+
+#ifdef CONFIG_DEBUG_DMA
+#  define dmaerrdumpbuffer(m,b,n)  errdumpbuffer(m,b,n)
+#  define dmainfodumpbuffer(m,b,n) infodumpbuffer(m,b,n)
+#else
+#  define dmaerrdumpbuffer(m,b,n)
+#  define dmainfodumpbuffer(m,b,n)
+#endif
+
+#ifdef CONFIG_DEBUG_IRQ
+#  define irqerrdumpbuffer(m,b,n)  errdumpbuffer(m,b,n)
+#  define irqinfodumpbuffer(m,b,n) infodumpbuffer(m,b,n)
+#else
+#  define irqerrdumpbuffer(m,b,n)
+#  define irqinfodumpbuffer(m,b,n)
+#endif
+
+#ifdef CONFIG_DEBUG_GPIO
+#  define gpioerrdumpbuffer(m,b,n)  errdumpbuffer(m,b,n)
+#  define gpioinfodumpbuffer(m,b,n) infodumpbuffer(m,b,n)
+#else
+#  define gpioerrdumpbuffer(m,b,n)
+#  define gpioinfodumpbuffer(m,b,n)
 #endif
 
 /****************************************************************************

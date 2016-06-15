@@ -139,9 +139,9 @@ static inline uint8_t tiva_gpioport(int port)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_DEBUG_GPIO_INFO
 int tiva_dumpgpio(uint32_t pinset, const char *msg)
 {
-#ifdef CONFIG_DEBUG_FEATURES
   irqstate_t   flags;
   unsigned int port = (pinset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
   uintptr_t    base;
@@ -168,35 +168,34 @@ int tiva_dumpgpio(uint32_t pinset, const char *msg)
   enabled  = ((rcgc2 & SYSCON_RCGC2_GPIO(port)) != 0);
 #endif
 
-  llinfo("GPIO%c pinset: %08x base: %08x -- %s\n",
-        tiva_gpioport(port), pinset, base, msg);
+  gpioinfo("GPIO%c pinset: %08x base: %08x -- %s\n",
+           tiva_gpioport(port), pinset, base, msg);
 #ifdef TIVA_SYSCON_RCGCGPIO
-  llinfo("RCGCGPIO: %08x (%s)\n",
-        rcgcgpio, enabled ? "enabled" : "disabled");
+  gpioinfo("RCGCGPIO: %08x (%s)\n",
+           rcgcgpio, enabled ? "enabled" : "disabled");
 #else
-  llinfo("   RCGC2: %08x (%s)\n",
-        rcgc2, enabled ? "enabled" : "disabled");
+  gpioinfo("   RCGC2: %08x (%s)\n",
+           rcgc2, enabled ? "enabled" : "disabled");
 #endif
 
   /* Don't bother with the rest unless the port is enabled */
 
   if (enabled)
     {
-      llinfo("   AFSEL: %02x DEN: %02x DIR: %02x DATA: %02x\n",
-             getreg32(base + TIVA_GPIO_AFSEL_OFFSET), getreg32(base + TIVA_GPIO_DEN_OFFSET),
-             getreg32(base + TIVA_GPIO_DIR_OFFSET), getreg32(base + TIVA_GPIO_DATA_OFFSET + 0x3fc));
-      llinfo("      IS:  %02x IBE: %02x IEV: %02x IM:  %02x RIS: %08x MIS: %08x\n",
-             getreg32(base + TIVA_GPIO_IEV_OFFSET), getreg32(base + TIVA_GPIO_IM_OFFSET),
-             getreg32(base + TIVA_GPIO_RIS_OFFSET), getreg32(base + TIVA_GPIO_MIS_OFFSET));
-      llinfo("     2MA:  %02x 4MA: %02x 8MA: %02x ODR: %02x PUR %02x PDR: %02x SLR: %02x\n",
-             getreg32(base + TIVA_GPIO_DR2R_OFFSET), getreg32(base + TIVA_GPIO_DR4R_OFFSET),
-             getreg32(base + TIVA_GPIO_DR8R_OFFSET), getreg32(base + TIVA_GPIO_ODR_OFFSET),
-             getreg32(base + TIVA_GPIO_PUR_OFFSET), getreg32(base + TIVA_GPIO_PDR_OFFSET),
-             getreg32(base + TIVA_GPIO_SLR_OFFSET));
+      gpioinfo("   AFSEL: %02x DEN: %02x DIR: %02x DATA: %02x\n",
+               getreg32(base + TIVA_GPIO_AFSEL_OFFSET), getreg32(base + TIVA_GPIO_DEN_OFFSET),
+               getreg32(base + TIVA_GPIO_DIR_OFFSET), getreg32(base + TIVA_GPIO_DATA_OFFSET + 0x3fc));
+      gpioinfo("      IS:  %02x IBE: %02x IEV: %02x IM:  %02x RIS: %08x MIS: %08x\n",
+               getreg32(base + TIVA_GPIO_IEV_OFFSET), getreg32(base + TIVA_GPIO_IM_OFFSET),
+               getreg32(base + TIVA_GPIO_RIS_OFFSET), getreg32(base + TIVA_GPIO_MIS_OFFSET));
+      gpioinfo("     2MA:  %02x 4MA: %02x 8MA: %02x ODR: %02x PUR %02x PDR: %02x SLR: %02x\n",
+               getreg32(base + TIVA_GPIO_DR2R_OFFSET), getreg32(base + TIVA_GPIO_DR4R_OFFSET),
+               getreg32(base + TIVA_GPIO_DR8R_OFFSET), getreg32(base + TIVA_GPIO_ODR_OFFSET),
+               getreg32(base + TIVA_GPIO_PUR_OFFSET), getreg32(base + TIVA_GPIO_PDR_OFFSET),
+               getreg32(base + TIVA_GPIO_SLR_OFFSET));
     }
 
   leave_critical_section(flags);
-#endif /* CONFIG_DEBUG_FEATURES */
-
   return OK;
 }
+#endif /* CONFIG_DEBUG_GPIO_INFO */

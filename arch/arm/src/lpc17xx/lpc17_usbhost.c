@@ -114,7 +114,7 @@
 
 /* Dump GPIO registers */
 
-#if defined(CONFIG_LPC17_USBHOST_REGDEBUG) && defined(CONFIG_DEBUG_GPIO)
+#if defined(CONFIG_LPC17_USBHOST_REGDEBUG) && defined(CONFIG_DEBUG_GPIO_INFO)
 #  define usbhost_dumpgpio() \
    do { \
      lpc17_dumpgpio(GPIO_USB_DP, "D+ P0.29; D- P0.30"); \

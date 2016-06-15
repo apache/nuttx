@@ -54,15 +54,7 @@
 #include "chip.h"
 #include "lpc17_gpio.h"
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#ifndef CONFIG_DEBUG_FEATURES
-#  undef CONFIG_DEBUG_GPIO
-#endif
-
-#ifdef CONFIG_DEBUG_GPIO
+#ifdef CONFIG_DEBUG_GPIO_INFO
 
 /****************************************************************************
  * Private Functions
@@ -154,35 +146,36 @@ int lpc17_dumpgpio(lpc17_pinset_t pinset, const char *msg)
   /* The following requires exclusive access to the GPIO registers */
 
   flags = enter_critical_section();
-  llinfo("GPIO%c pin%d (pinset: %08x) -- %s\n",
-         port + '0', pin, pinset, msg);
+
+  gpioinfo("GPIO%c pin%d (pinset: %08x) -- %s\n",
+           port + '0', pin, pinset, msg);
 
 #if defined(LPC176x)
-  llinfo("  PINSEL[%08x]: %08x PINMODE[%08x]: %08x ODMODE[%08x]: %08x\n",
-         pinsel,  pinsel  ? getreg32(pinsel) : 0,
-         pinmode, pinmode ? getreg32(pinmode) : 0,
-         g_odmode[port],    getreg32(g_odmode[port]));
+  gpioinfo("  PINSEL[%08x]: %08x PINMODE[%08x]: %08x ODMODE[%08x]: %08x\n",
+           pinsel,  pinsel  ? getreg32(pinsel) : 0,
+           pinmode, pinmode ? getreg32(pinmode) : 0,
+           g_odmode[port],    getreg32(g_odmode[port]));
 #elif defined(LPC178x)
-  llinfo("  IOCON[%08x]: %08x\n", iocon, getreg32(iocon));
+  gpioinfo("  IOCON[%08x]: %08x\n", iocon, getreg32(iocon));
 #endif
 
   base = g_fiobase[port];
-  llinfo("  FIODIR[%08x]: %08x FIOMASK[%08x]: %08x FIOPIN[%08x]: %08x\n",
-         base+LPC17_FIO_DIR_OFFSET,  getreg32(base+LPC17_FIO_DIR_OFFSET),
-         base+LPC17_FIO_MASK_OFFSET, getreg32(base+LPC17_FIO_MASK_OFFSET),
-         base+LPC17_FIO_PIN_OFFSET,  getreg32(base+LPC17_FIO_PIN_OFFSET));
+  gpioinfo("  FIODIR[%08x]: %08x FIOMASK[%08x]: %08x FIOPIN[%08x]: %08x\n",
+           base+LPC17_FIO_DIR_OFFSET,  getreg32(base+LPC17_FIO_DIR_OFFSET),
+           base+LPC17_FIO_MASK_OFFSET, getreg32(base+LPC17_FIO_MASK_OFFSET),
+           base+LPC17_FIO_PIN_OFFSET,  getreg32(base+LPC17_FIO_PIN_OFFSET));
 
   base = g_intbase[port];
-  llinfo("  IOINTSTATUS[%08x]: %08x INTSTATR[%08x]: %08x INSTATF[%08x]: %08x\n",
-         LPC17_GPIOINT_IOINTSTATUS,          getreg32(LPC17_GPIOINT_IOINTSTATUS),
-         base+LPC17_GPIOINT_INTSTATR_OFFSET, getreg32(base+LPC17_GPIOINT_INTSTATR_OFFSET),
-         base+LPC17_GPIOINT_INTSTATF_OFFSET, getreg32(base+LPC17_GPIOINT_INTSTATF_OFFSET));
-  llinfo("  INTENR[%08x]: %08x INTENF[%08x]: %08x\n",
-         base+LPC17_GPIOINT_INTENR_OFFSET,   getreg32(base+LPC17_GPIOINT_INTENR_OFFSET),
-         base+LPC17_GPIOINT_INTENF_OFFSET,   getreg32(base+LPC17_GPIOINT_INTENF_OFFSET));
+  gpioinfo("  IOINTSTATUS[%08x]: %08x INTSTATR[%08x]: %08x INSTATF[%08x]: %08x\n",
+           LPC17_GPIOINT_IOINTSTATUS,          getreg32(LPC17_GPIOINT_IOINTSTATUS),
+           base+LPC17_GPIOINT_INTSTATR_OFFSET, getreg32(base+LPC17_GPIOINT_INTSTATR_OFFSET),
+           base+LPC17_GPIOINT_INTSTATF_OFFSET, getreg32(base+LPC17_GPIOINT_INTSTATF_OFFSET));
+  gpioinfo("  INTENR[%08x]: %08x INTENF[%08x]: %08x\n",
+           base+LPC17_GPIOINT_INTENR_OFFSET,   getreg32(base+LPC17_GPIOINT_INTENR_OFFSET),
+           base+LPC17_GPIOINT_INTENF_OFFSET,   getreg32(base+LPC17_GPIOINT_INTENF_OFFSET));
 
   leave_critical_section(flags);
   return OK;
 }
-#endif /* CONFIG_DEBUG_GPIO */
+#endif /* CONFIG_DEBUG_GPIO_INFO */
 
