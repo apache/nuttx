@@ -123,8 +123,7 @@ static int ncp5623c_i2c_write_byte(FAR struct ncp5623c_dev_s *priv,
   /* Write the data (no RESTART) */
 
   lcdinfo("i2c addr: 0x%02X value: 0x%02X\n", priv->i2c_addr,
-        buffer[0]);
-
+          buffer[0]);
 
   ret = i2c_write(priv->i2c, &config, buffer, BUFFER_SIZE);
   if (ret != OK)
