@@ -798,13 +798,6 @@ config DEBUG_DMA_INFO
 
 endif # DEBUG_DMA
 
-config DEBUG_HEAP
-	bool "Heap usage debug hooks"
-	default n
-	depends on ARCH_HAVE_HEAPCHECK
-	---help---
-		Enable hooks to check heap usage.  Only supported by a few architectures.
-
 config DEBUG_IRQ
 	bool "Interrupt Controller Debug Features"
 	default n
@@ -1242,6 +1235,14 @@ config STACK_COLORATION
 		to monitor the level of stack usage.
 
 		Only supported by a few architectures.
+
+config HEAP_COLORATION
+	bool "Heap coloration"
+	default n
+	depends on ARCH_HAVE_HEAPCHECK
+	---help---
+		Enable heap coloration to check heap usage.  Only supported by a few
+		architectures.
 
 config DEBUG_SYMBOLS
 	bool "Generate Debug Symbols"

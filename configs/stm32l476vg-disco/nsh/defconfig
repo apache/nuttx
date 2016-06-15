@@ -60,7 +60,7 @@ CONFIG_ARCH_HAVE_HEAPCHECK=y
 # OS Function Debug Options
 #
 # CONFIG_DEBUG_DMA is not set
-# CONFIG_DEBUG_HEAP is not set
+# CONFIG_HEAP_COLORATION is not set
 # CONFIG_DEBUG_IRQ is not set
 
 #
