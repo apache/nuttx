@@ -52,19 +52,6 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* Configuration ************************************************************/
-/* Define CONFIG_DEBUG_LCD to enable detailed LCD debug output. Verbose
- * debug must also be enabled.
- */
-
-#ifndef CONFIG_DEBUG_FEATURES
-#  undef CONFIG_DEBUG_INFO
-#  undef CONFIG_DEBUG_LCD
-#endif
-
-#ifndef CONFIG_DEBUG_INFO
-#  undef CONFIG_DEBUG_LCD
-#endif
 
 /* Indices, counts, helper macros ******************************************/
 
@@ -88,18 +75,6 @@
 #define CODE_MAX       ('A' + LAST_SLCDCODE)
 #define IS_CODE(a)     (((a) >= CODE_MIN) && ((a) <= CODE_MAX))
 #define CODE_RETURN(a) (enum slcdcode_e)((a) - 'A')
-
-/* Debug ********************************************************************/
-
-#ifdef CONFIG_DEBUG_LCD
-#  define lcderr         err
-#  define lcdwarn        warn
-#  define lcdinfo        info
-#else
-#  define lcderr(x...)
-#  define lcdwarn(x...)
-#  define lcdinfo(x...)
-#endif
 
 /****************************************************************************
  * Private Functions

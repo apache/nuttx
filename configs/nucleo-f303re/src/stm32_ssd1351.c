@@ -71,16 +71,6 @@
 #  error "The configuration requires the SPI 4-wire interface"
 #endif
 
-/* Debug ********************************************************************/
-
-#ifdef CONFIG_DEBUG_LCD
-#  define lcderr(format, ...)  err(format, ##__VA_ARGS__)
-#  define lcdinfo(format, ...) info(format, ##__VA_ARGS__)
-#else
-#  define lcderr(x...)
-#  define lcdinfo(x...)
-#endif
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/

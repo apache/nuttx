@@ -67,21 +67,6 @@
 /**************************************************************************************
  * Pre-processor Definitions
  **************************************************************************************/
-/* Configuration **********************************************************************/
-
-/* Define CONFIG_DEBUG_LCD to enable detailed LCD debug output. Verbose debug must
- * also be enabled.
- */
-
-#ifndef CONFIG_DEBUG_FEATURES
-#  undef CONFIG_DEBUG_INFO
-#  undef CONFIG_DEBUG_GRAPHICS
-#  undef CONFIG_DEBUG_LCD
-#endif
-
-#ifndef CONFIG_DEBUG_INFO
-#  undef CONFIG_DEBUG_LCD
-#endif
 
 /* Mikroe-STM32F4 Hardware Definitions ************************************************/
 /* --- ---------------------------------- -------------------- ------------------------
@@ -116,16 +101,6 @@
  *  95 PB8                                DRIVEA               TFT display
  *  96 PB9                                DRIVEB               TFT display
  */
-
-/* Debug ******************************************************************************/
-
-#ifdef CONFIG_DEBUG_LCD
-#  define lcderr       err
-#  define lcdinfo      info
-#else
-#  define lcderr(x...)
-#  define lcdinfo(x...)
-#endif
 
 /**************************************************************************************
  * Private Type Definition

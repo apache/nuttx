@@ -549,6 +549,30 @@
 #  define irqllinfo(x...)
 #endif
 
+#ifdef CONFIG_DEBUG_LCD_ERROR
+#  define lcderr(format, ...)    err(format, ##__VA_ARGS__)
+#  define lcdllerr(format, ...)  llerr(format, ##__VA_ARGS__)
+#else
+#  define lcderr(x...)
+#  define lcdllerr(x...)
+#endif
+
+#ifdef CONFIG_DEBUG_LCD_WARN
+#  define lcdwarn(format, ...)   warn(format, ##__VA_ARGS__)
+#  define lcdllwarn(format, ...) llwarn(format, ##__VA_ARGS__)
+#else
+#  define lcdwarn(x...)
+#  define lcdllwarn(x...)
+#endif
+
+#ifdef CONFIG_DEBUG_LCD_INFO
+#  define lcdinfo(format, ...)   info(format, ##__VA_ARGS__)
+#  define lcdllinfo(format, ...) llinfo(format, ##__VA_ARGS__)
+#else
+#  define lcdinfo(x...)
+#  define lcdllinfo(x...)
+#endif
+
 #ifdef CONFIG_DEBUG_GPIO_ERROR
 #  define gpioerr(format, ...)   err(format, ##__VA_ARGS__)
 #  define gpiollerr(format, ...) llerr(format, ##__VA_ARGS__)
@@ -1018,6 +1042,30 @@
 #  define irqllinfo   (void)
 #endif
 
+#ifdef CONFIG_DEBUG_LCD_ERROR
+#  define lcderr      err
+#  define lcdllerr    llerr
+#else
+#  define lcderr      (void)
+#  define lcdllerr    (void)
+#endif
+
+#ifdef CONFIG_DEBUG_LCD_WARN
+#  define lcdwarn     warn
+#  define lcdllwarn   llwarn
+#else
+#  define lcdwarn     (void)
+#  define lcdllwarn   (void)
+#endif
+
+#ifdef CONFIG_DEBUG_LCD_INFO
+#  define lcdinfo     info
+#  define lcdllinfo   llinfo
+#else
+#  define lcdinfo     (void)
+#  define lcdllinfo   (void)
+#endif
+
 #ifdef CONFIG_DEBUG_GPIO_ERROR
 #  define gpioerr     err
 #  define gpiollerr   llerr
@@ -1210,6 +1258,14 @@
 #else
 #  define irqerrdumpbuffer(m,b,n)
 #  define irqinfodumpbuffer(m,b,n)
+#endif
+
+#ifdef CONFIG_DEBUG_LCD
+#  define lcderrdumpbuffer(m,b,n)  errdumpbuffer(m,b,n)
+#  define lcdinfodumpbuffer(m,b,n) infodumpbuffer(m,b,n)
+#else
+#  define lcderrdumpbuffer(m,b,n)
+#  define lcdinfodumpbuffer(m,b,n)
 #endif
 
 #ifdef CONFIG_DEBUG_GPIO

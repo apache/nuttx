@@ -97,18 +97,6 @@
 #  define RESET_DIR_REGISTER (LPC214X_GPIO0_BASE+LPC214X_GPIO_DIR_OFFSET)
 #endif
 
-/* Debug ********************************************************************/
-
-#ifdef CONFIG_DEBUG_LCD
-#  define lcderr(format, ...)   err(format, ##__VA_ARGS__)
-#  define lcdwarn(format, ...)  warn(format, ##__VA_ARGS__)
-#  define lcdinfo(format, ...)  info(format, ##__VA_ARGS__)
-#else
-#  define lcderr(x...)
-#  define lcdwarm(x...)
-#  define lcdinfo(x...)
-#endif
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/

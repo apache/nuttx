@@ -280,18 +280,6 @@
 #define ILI9341_YRES BOARD_LTDC_HEIGHT
 #endif /* CONFIG_STM32F429I_DISCO_ILI9341_FBIFACE */
 
-/* Debug */
-
-#ifdef CONFIG_DEBUG_LCD
-#  define lcderr  err
-#  define lcdwarn warn
-#  define lcdinfo info
-#else
-#  define lcderr(x...)
-#  define lcdwarn(x...)
-#  define lcdinfo(x...)
-#endif
-
 /************************************************************************************
  * Private Data
  ************************************************************************************/
@@ -333,7 +321,7 @@ static int stm32_ili9341_initialize(void)
   lcdinfo("Initialize ili9341 lcd driver\n");
   lcd->select(lcd);
 
-#ifdef CONFIG_DEBUG_LCD
+#ifdef CONFIG_DEBUG_LCD_INFO
   /* Read display identification */
 
   lcd->sendcmd(lcd, ILI9341_READ_ID1);

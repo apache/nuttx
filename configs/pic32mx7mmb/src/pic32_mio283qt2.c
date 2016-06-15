@@ -69,20 +69,6 @@
 #  error "CONFIG_PIC32MX_PMP is required to use the LCD"
 #endif
 
-/* Define CONFIG_DEBUG_LCD to enable detailed LCD debug output. Verbose debug must
- * also be enabled.
- */
-
-#ifndef CONFIG_DEBUG_FEATURES
-#  undef CONFIG_DEBUG_INFO
-#  undef CONFIG_DEBUG_GRAPHICS
-#  undef CONFIG_DEBUG_LCD
-#endif
-
-#ifndef CONFIG_DEBUG_INFO
-#  undef CONFIG_DEBUG_LCD
-#endif
-
 /* PIC32MX7MMB LCD Hardware Definitions ***********************************************/
 /* --- ---------------------------------- -------------------- ------------------------
  * PIN CONFIGURATIONS                     SIGNAL NAME          ON-BOARD CONNECTIONS
@@ -135,16 +121,6 @@
 /* RB15, RS -- High values selects data */
 
 #define GPIO_LCD_RS   (GPIO_OUTPUT|GPIO_VALUE_ZERO|GPIO_PORTB|GPIO_PIN15)
-
-/* Debug ******************************************************************************/
-
-#ifdef CONFIG_DEBUG_LCD
-#  define lcderr       err
-#  define lcdinfo      info
-#else
-#  define lcderr(x...)
-#  define lcdinfo(x...)
-#endif
 
 #ifdef CONFIG_LCD_MIO283QT2
 

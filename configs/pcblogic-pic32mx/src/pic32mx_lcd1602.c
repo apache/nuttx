@@ -102,20 +102,6 @@
 #  error "CONFIG_PIC32MX_PMP is required to use the LCD"
 #endif
 
-/* Define CONFIG_DEBUG_LCD to enable detailed LCD debug output. Verbose debug must
- * also be enabled.
- */
-
-#ifndef CONFIG_DEBUG_FEATURES
-#  undef CONFIG_DEBUG_INFO
-#  undef CONFIG_DEBUG_GRAPHICS
-#  undef CONFIG_DEBUG_LCD
-#endif
-
-#ifndef CONFIG_DEBUG_INFO
-#  undef CONFIG_DEBUG_LCD
-#endif
-
 /* The ever-present MIN/MAX macros ******************************************/
 
 #ifndef MIN
@@ -136,16 +122,6 @@
 #define LCD_NROWS        2
 #define LCD_NCOLUMNS     16
 #define LCD_NCHARS       (LCD_NROWS * LCD_NCOLUMNS)
-
-/* Debug ********************************************************************/
-
-#ifdef CONFIG_DEBUG_LCD
-#  define lcderr         err
-#  define lcdinfo        info
-#else
-#  define lcderr(x...)
-#  define lcdinfo(x...)
-#endif
 
 /****************************************************************************
  * Private Type Definition
@@ -174,7 +150,7 @@ struct lcd1602_2
  ****************************************************************************/
 /* Debug */
 
-#if defined(CONFIG_DEBUG_LCD) && defined(CONFIG_DEBUG_INFO)
+#ifdef CONFIG_DEBUG_LCD_INFO
 static void lcd_dumpstate(FAR const char *msg);
 static void lcd_dumpstream(FAR const char *msg,
                            FAR const struct lcd_instream_s *stream);
@@ -234,7 +210,7 @@ static struct lcd1602_2 g_lcd1602;
  * Name: lcd_dumpstate
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG_LCD) && defined(CONFIG_DEBUG_INFO)
+#ifdef CONFIG_DEBUG_LCD_INFO
 static void lcd_dumpstate(FAR const char *msg)
 {
   uint8_t buffer[LCD_NCOLUMNS];
@@ -269,7 +245,7 @@ static void lcd_dumpstate(FAR const char *msg)
  * Name: lcd_dumpstate
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG_LCD) && defined(CONFIG_DEBUG_INFO)
+#ifdef CONFIG_DEBUG_LCD_INFO
 static void lcd_dumpstream(FAR const char *msg,
                            FAR const struct lcd_instream_s *stream)
 {

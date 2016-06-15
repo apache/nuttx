@@ -123,16 +123,6 @@
 #  undef CONFIG_LCD_RPORTRAIT
 #endif
 
-/* Verbose debug must also be enabled to use the extra OLED debug */
-
-#ifndef CONFIG_DEBUG_FEATURES
-#  undef CONFIG_DEBUG_INFO
-#endif
-
-#ifndef CONFIG_DEBUG_INFO
-#  undef CONFIG_DEBUG_LCD
-#endif
-
 /* Check contrast selection */
 
 #ifndef CONFIG_LCD_MAXCONTRAST

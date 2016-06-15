@@ -67,28 +67,6 @@
 #define EXTCOMIN_FREQ    24
 #define TIMER_FREQ       1200    /* 72000000/60000 */
 
-/* Debug ********************************************************************/
-
-/* Define CONFIG_DEBUG_LCD to enable detailed LCD debug output. Verbose debug must
- * also be enabled.
- */
-
-#ifndef CONFIG_DEBUG_FEATURES
-#  undef CONFIG_DEBUG_INFO
-#  undef CONFIG_DEBUG_GRAPHICS
-#  undef CONFIG_DEBUG_LCD
-#endif
-
-#ifndef CONFIG_DEBUG_INFO
-#  undef CONFIG_DEBUG_LCD
-#endif
-
-#ifdef CONFIG_DEBUG_LCD
-#  define lcderr(format, ...)  info(format, ##__VA_ARGS__)
-#else
-#  define lcderr(x...)
-#endif
-
 /****************************************************************************
  * Private Data
  ****************************************************************************/

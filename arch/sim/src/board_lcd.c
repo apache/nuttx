@@ -100,18 +100,6 @@
 #  error "Unsupported BPP"
 #endif
 
-/* Debug ********************************************************************/
-
-#ifdef CONFIG_DEBUG_LCD
-# define lcderr(format, ...)  err(format, ##__VA_ARGS__)
-# define lcdwarn(format, ...) warn(format, ##__VA_ARGS__)
-# define lcdinfo(format, ...) info(format, ##__VA_ARGS__)
-#else
-# define lcderr(x...)
-# define lcdwarn(x...)
-# define lcdinfo(x...)
-#endif
-
 /****************************************************************************
  * Private Type Definition
  ****************************************************************************/

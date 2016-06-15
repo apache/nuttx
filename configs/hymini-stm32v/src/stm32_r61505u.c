@@ -91,18 +91,6 @@
 
 #define LCD_ID           0x1505
 
-/* Debug ******************************************************************************/
-
-#ifdef CONFIG_DEBUG_LCD
-#  define lcderr         err
-#  define lcdwarn        warn
-#  define lcdinfo        info
-#else
-#  define lcderr(x...)
-#  define lcdwarn(x...)
-#  define lcdinfo(x...)
-#endif
-
 /* This should be put elsewhere (possibly include/nuttx/compiler.h) */
 
 #ifdef __CC_ARM               /* ARM Compiler        */

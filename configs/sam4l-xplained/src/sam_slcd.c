@@ -72,10 +72,6 @@
  ****************************************************************************/
 /* Configuration ************************************************************/
 
-/* Define CONFIG_DEBUG_LCD to enable detailed LCD debug output. Verbose debug
- * must also be enabled.
- */
-
 #ifndef CONFIG_LIB_SLCDCODEC
 #  error This SLCD driver requires CONFIG_LIB_SLCDCODEC
 #endif
@@ -83,16 +79,6 @@
 #if !defined(CONFIG_SAM34_OSC32K) && !defined(CONFIG_SAM34_RC32K)
 #  error This SLCD driver requires that either CONFIG_SAM34_OSC32K or
 #  error CONFIG_SAM34_RC32K be selected in the board configuration
-#endif
-
-#ifndef CONFIG_DEBUG_FEATURES
-#  undef CONFIG_DEBUG_INFO
-#  undef CONFIG_DEBUG_GRAPHICS
-#  undef CONFIG_DEBUG_LCD
-#endif
-
-#ifndef CONFIG_DEBUG_INFO
-#  undef CONFIG_DEBUG_LCD
 #endif
 
 /* The ever-present MIN/MAX macros ******************************************/
@@ -248,16 +234,6 @@
 #define SLCD_PM          (&g_einfo[6])
 #define SLCD_AM          (&g_einfo[7])
 
-/* Debug ********************************************************************/
-
-#ifdef CONFIG_DEBUG_LCD
-#  define lcderr              err
-#  define lcdinfo             info
-#else
-#  define lcderr(x...)
-#  define lcdinfo(x...)
-#endif
-
 /****************************************************************************
  * Private Type Definition
  ****************************************************************************/
@@ -294,7 +270,7 @@ struct slcd_pixel_s
  ****************************************************************************/
 /* Debug */
 
-#if defined(CONFIG_DEBUG_LCD) && defined(CONFIG_DEBUG_INFO)
+#ifdef CONFIG_DEBUG_LCD_INFO
 static void slcd_dumpstate(FAR const char *msg);
 static void slcd_dumpslcd(FAR const char *msg);
 #else
@@ -405,7 +381,7 @@ static const struct slcd_pixel_s g_einfo[SLCD_NE] =
  * Name: slcd_dumpstate
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG_LCD) && defined(CONFIG_DEBUG_INFO)
+#ifdef CONFIG_DEBUG_LCD_INFO
 static void slcd_dumpstate(FAR const char *msg)
 {
   lcdinfo("%s:\n", msg);
@@ -424,7 +400,7 @@ static void slcd_dumpstate(FAR const char *msg)
  * Name: slcd_dumpslcd
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG_LCD) && defined(CONFIG_DEBUG_INFO)
+#ifdef CONFIG_DEBUG_LCD_INFO
 static void slcd_dumpslcd(FAR const char *msg)
 {
   lcdinfo("%s:\n", msg);

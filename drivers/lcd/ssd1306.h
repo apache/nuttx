@@ -209,16 +209,6 @@
 #define LS_BIT                    (1 << 0)
 #define MS_BIT                    (1 << 7)
 
-/* Debug ******************************************************************************/
-
-#ifdef CONFIG_DEBUG_LCD
-#  define lcderr(format, ...)     err(format, ##__VA_ARGS__)
-#  define lcdinfo(format, ...)    info(format, ##__VA_ARGS__)
-#else
-#  define lcderr(x...)
-#  define lcdinfo(x...)
-#endif
-
 /**************************************************************************************
  * Public Type Definition
  **************************************************************************************/

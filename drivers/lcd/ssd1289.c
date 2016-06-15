@@ -100,20 +100,6 @@
 #  define CONFIG_LCD_LANDSCAPE 1
 #endif
 
-/* Define CONFIG_DEBUG_LCD to enable detailed LCD debug output. Verbose debug must
- * also be enabled.
- */
-
-#ifndef CONFIG_DEBUG_FEATURES
-#  undef CONFIG_DEBUG_INFO
-#  undef CONFIG_DEBUG_GRAPHICS
-#  undef CONFIG_DEBUG_LCD
-#endif
-
-#ifndef CONFIG_DEBUG_INFO
-#  undef CONFIG_DEBUG_LCD
-#endif
-
 /* Display/Color Properties ***********************************************************/
 /* Display Resolution */
 
@@ -224,18 +210,6 @@
 
 #  define PWRCTRL5_SETTING (SSD1289_PWRCTRL5_VCM(60) | SSD1289_PWRCTRL5_NOTP)
 
-#endif
-
-/* Debug ******************************************************************************/
-
-#ifdef CONFIG_DEBUG_LCD
-#  define lcderr  err
-#  define lcdwarn  warn
-#  define lcdinfo info
-#else
-#  define lcderr(x...)
-#  define lcdwarn(x...)
-#  define lcdinfo(x...)
 #endif
 
 /**************************************************************************************

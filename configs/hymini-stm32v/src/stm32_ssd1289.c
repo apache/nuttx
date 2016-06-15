@@ -65,20 +65,6 @@
 #  error "CONFIG_STM32_FSMC is required to use the LCD"
 #endif
 
-/* Define CONFIG_DEBUG_LCD to enable detailed LCD debug output. Verbose debug must
- * also be enabled.
- */
-
-#ifndef CONFIG_DEBUG_FEATURES
-#  undef CONFIG_DEBUG_INFO
-#  undef CONFIG_DEBUG_GRAPHICS
-#  undef CONFIG_DEBUG_LCD
-#endif
-
-#ifndef CONFIG_DEBUG_INFO
-#  undef CONFIG_DEBUG_LCD
-#endif
-
 /* Color depth and format */
 
 #define LCD_BPP          16
@@ -101,18 +87,6 @@
 
 #define LCD_INDEX        0x60000000  /* RS = 0 */
 #define LCD_DATA         0x60020000  /* RS = 1 */
-
-/* Debug ******************************************************************************/
-
-#ifdef CONFIG_DEBUG_LCD
-#  define lcderr         err
-#  define lcdwarn        warn
-#  define lcdinfo        info
-#else
-#  define lcderr(x...)
-#  define lcdwarn(x...)
-#  define lcdinfo(x...)
-#endif
 
 /**************************************************************************************
  * Private Function Prototypes

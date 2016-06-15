@@ -305,18 +305,6 @@
 #define NOKIA_ENDPAGE        131
 #define NOKIA_ENDCOL         131
 
-/* Debug ******************************************************************************/
-
-#ifdef CONFIG_LCD_REGDEBUG
-# define lcderr(format, ...)  llerr(format, ##__VA_ARGS__)
-# define lcdwarn(format, ...) llwarn(format, ##__VA_ARGS__)
-# define lcdinfo(format, ...) llinfo(format, ##__VA_ARGS__)
-#else
-# define lcderr(x...)
-# define lcdwarn(x...)
-# define lcdinfo(x...)
-#endif
-
 /**************************************************************************************
  * Private Type Definition
  **************************************************************************************/

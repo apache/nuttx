@@ -78,16 +78,6 @@
 #define CMD_SET_CGADDR      0x40
 #define CMD_SET_DDADDR      0x80
 
-#ifdef CONFIG_DEBUG_LCD
-#  define lcderr            err
-#  define lcdwarn           warn
-#  define lcdinfo           info
-#else
-#  define lcderr(x...)
-#  define lcdwarn(x...)
-#  define lcdinfo(x...)
-#endif
-
 #define MAX_OPENCNT     (255)                  /* Limit of uint8_t */
 
 /****************************************************************************

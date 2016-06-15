@@ -157,28 +157,6 @@
 #  error "CONFIG_LCD_MAXCONTRAST must be defined in the range 1 to 31"
 #endif
 
-/* Debug ******************************************************************************/
-
-#ifdef CONFIG_LCD_REGDEBUG
-#  define regerr(format, ...)  err(format, ##__VA_ARGS__)
-#  define regwarn(format, ...) warn(format, ##__VA_ARGS__)
-#  define reginfo(format, ...) info(format, ##__VA_ARGS__)
-#else
-#  define regerr(x...)
-#  define regwarn(x...)
-#  define reginfo(x...)
-#endif
-
-#ifdef CONFIG_DEBUG_LCD
-#  define lcderr(format, ...)  err(format, ##__VA_ARGS__)
-#  define lcdwarn(format, ...) warn(format, ##__VA_ARGS__)
-#  define lcdinfo(format, ...) info(format, ##__VA_ARGS__)
-#else
-#  define lcderr(x...)
-#  define lcdwarn(x...)
-#  define lcdinfo(x...)
-#endif
-
 /* Graphics Capbilities ***************************************************************/
 
 /* LCD resolution: 320 (columns) by 240 (rows).  The physical dimensions of the device
@@ -320,7 +298,7 @@ struct sam_dev_s
 /* Low-level HX834x Register access */
 
 static void sam_putreg(uint16_t reg,  uint16_t data);
-#ifdef CONFIG_DEBUG_LCD
+#ifdef CONFIG_DEBUG_LCD_INFO
 static uint16_t sam_getreg(uint16_t reg);
 #endif
 
@@ -333,7 +311,7 @@ static inline uint16_t sam_rdram(void);
 static void sam_lcdon(void);
 static void sam_lcdoff(void);
 
-#if 0 /* CONFIG_DEBUG_LCD */
+#if 0 /* CONFIG_DEBUG_LCD_INFO */
 static void sam_dumpreg(uint8_t startreg, uint8_t endreg);
 #endif
 
@@ -444,7 +422,8 @@ static struct sam_dev_s g_lcddev_s =
 
 static void sam_putreg(uint16_t reg,  uint16_t data)
 {
-  reginfo("base: %08x RS: %04x data: %04x\n", LCD_BASE, LCD_BASE + HX843X_LCD_RS, data);
+  lcdinfo("base: %08x RS: %04x data: %04x\n",
+          LCD_BASE, LCD_BASE + HX843X_LCD_RS, data);
   putreg16(reg, LCD_BASE);
   putreg16(data, LCD_BASE + HX843X_LCD_RS);
 }
@@ -457,13 +436,15 @@ static void sam_putreg(uint16_t reg,  uint16_t data)
  *
  **************************************************************************************/
 
-#ifdef CONFIG_DEBUG_LCD
+#ifdef CONFIG_DEBUG_LCD_INFO
 static uint16_t sam_getreg(uint16_t reg)
 {
   uint16_t data;
+
   putreg16(reg, LCD_BASE);
   data = getreg16(LCD_BASE + HX843X_LCD_RS);
-  reginfo("base: %08x RS: %04x data: %04x\n", LCD_BASE, LCD_BASE + HX843X_LCD_RS, data);
+  lcdinfo("base: %08x RS: %04x data: %04x\n",
+          LCD_BASE, LCD_BASE + HX843X_LCD_RS, data);
   return data;
 }
 #endif
@@ -583,7 +564,7 @@ static void sam_lcdoff(void)
  *
  **************************************************************************************/
 
-#if 0 /* CONFIG_DEBUG_LCD */
+#if 0 /* CONFIG_DEBUG_LCD_INFO */
 static void sam_dumpreg(uint8_t startreg, uint8_t endreg)
 {
   uint16_t value;
@@ -874,7 +855,7 @@ static int sam_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
 
 int board_lcd_initialize(void)
 {
-#ifdef CONFIG_DEBUG_LCD
+#ifdef CONFIG_DEBUG_LCD_INFO
   uint16_t hxregval;
 #endif
   uint32_t regval;
@@ -918,7 +899,8 @@ int board_lcd_initialize(void)
   /* Enable SMC peripheral clock */
 
   putreg32((1 << SAM_PID_SMC), SAM_PMC_PCER);
-  reginfo("PMC PCSR: %08x SMC: %08x\n", getreg32(SAM_PMC_PCSR), (1 << SAM_PID_SMC));
+  lcdinfo("PMC PCSR: %08x SMC: %08x\n",
+          getreg32(SAM_PMC_PCSR), (1 << SAM_PID_SMC));
 
   /* Configure SMC CS2 */
 
@@ -938,16 +920,16 @@ int board_lcd_initialize(void)
   regval |= (SMCCS_MODE_READMODE)  | (SMCCS_MODE_WRITEMODE) | (SMCCS_MODE_DBW_16BITS);
   putreg32(regval, SAM_SMCCS_MODE(2));
 
-  reginfo("SMC SETUP[%08x]: %08x PULSE[%08x]: %08x\n",
+  lcdinfo("SMC SETUP[%08x]: %08x PULSE[%08x]: %08x\n",
           SAM_SMCCS_SETUP(2), getreg32(SAM_SMCCS_SETUP(2)),
           SAM_SMCCS_PULSE(2), getreg32(SAM_SMCCS_PULSE(2)));
-  reginfo("    CYCLE[%08x]: %08x MODE[%08x]:  %08x\n",
+  lcdinfo("    CYCLE[%08x]: %08x MODE[%08x]:  %08x\n",
           SAM_SMCCS_CYCLE(2), getreg32(SAM_SMCCS_CYCLE(2)),
           SAM_SMCCS_MODE(2),  getreg32(SAM_SMCCS_MODE(2)));
 
+#ifdef CONFIG_DEBUG_LCD_INFO
   /* Check HX8347 Chip ID */
 
-#ifdef CONFIG_DEBUG_LCD
   hxregval = sam_getreg(HX8347_R67H);
   lcdinfo("Chip ID: %04x\n", hxregval);
   if (hxregval != HX8347_CHIPID)

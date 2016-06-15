@@ -202,21 +202,6 @@
 #undef CONFIG_LCD_FASTCONFIG
 #define CONFIG_LCD_FASTCONFIG 1
 
-/* Define CONFIG_DEBUG_LCD to enable detailed LCD debug output. Verbose debug must
- * also be enabled.
- */
-
-#ifndef CONFIG_DEBUG_FEATURES
-#  undef CONFIG_DEBUG_INFO
-#  undef CONFIG_DEBUG_GRAPHICS
-#  undef CONFIG_DEBUG_LCD
-#  undef CONFIG_LCD_REGDEBUG
-#endif
-
-#ifndef CONFIG_DEBUG_INFO
-#  undef CONFIG_DEBUG_LCD
-#endif
-
 /* Display/Color Properties ***********************************************************/
 /* Display Resolution */
 
@@ -367,16 +352,6 @@
 #define ILI9328_ID            0x9328
 #define ILI9331_ID            0x9331
 #define ILI9919_ID            0x9919
-
-/* Debug ******************************************************************************/
-
-#ifdef CONFIG_DEBUG_LCD
-#  define lcderr              err
-#  define lcdinfo             info
-#else
-#  define lcderr(x...)
-#  define lcdinfo(x...)
-#endif
 
 /************************************************************************************
  * Private Type Definition

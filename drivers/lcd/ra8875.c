@@ -99,20 +99,6 @@
 #  define CONFIG_LCD_LANDSCAPE 1
 #endif
 
-/* Define CONFIG_DEBUG_LCD to enable detailed LCD debug output. Verbose debug must
- * also be enabled.
- */
-
-#ifndef CONFIG_DEBUG_FEATURES
-#  undef CONFIG_DEBUG_INFO
-#  undef CONFIG_DEBUG_GRAPHICS
-#  undef CONFIG_DEBUG_LCD
-#endif
-
-#ifndef CONFIG_DEBUG_INFO
-#  undef CONFIG_DEBUG_LCD
-#endif
-
 /* Display/Color Properties ***********************************************************/
 /* Display Resolution */
 
@@ -170,16 +156,6 @@
 #  undef RA8875_2LAYER_POSSIBLE
 #else
 #  define RA8875_2LAYER_POSSIBLE 1
-#endif
-
-/* Debug ******************************************************************************/
-
-#ifdef CONFIG_DEBUG_LCD
-#  define lcderr  err
-#  define lcdinfo info
-#else
-#  define lcderr(x...)
-#  define lcdinfo(x...)
 #endif
 
 /**************************************************************************************

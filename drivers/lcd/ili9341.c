@@ -365,20 +365,6 @@
 #  endif
 #endif
 
-/* Add next LCD display */
-
-/* Debug option */
-
-#ifdef CONFIG_DEBUG_LCD
-#  define lcderr       err
-#  define lcdinfo      warn
-#  define lcdinfo      info
-#else
-#  define lcderr(x...)
-#  define lcdwarn(x...)
-#  define lcdinfo(x...)
-#endif
-
 /****************************************************************************
  * Private Type Definition
  ****************************************************************************/
@@ -767,7 +753,7 @@ static int ili9341_getrun(int devno, fb_coord_t row, fb_coord_t col,
 
 static int ili9341_hwinitialize(FAR struct ili9341_dev_s *dev)
 {
-#ifdef CONFIG_DEBUG_LCD
+#ifdef CONFIG_DEBUG_LCD_INFO
   uint8_t param;
 #endif
   FAR struct ili9341_lcd_s *lcd = dev->lcd;
@@ -777,15 +763,17 @@ static int ili9341_hwinitialize(FAR struct ili9341_dev_s *dev)
   lcdinfo("Initialize lcd driver\n");
   lcd->select(lcd);
 
-#ifdef CONFIG_DEBUG_LCD
+#ifdef CONFIG_DEBUG_LCD_INFO
   /* Read display identification */
 
   lcd->sendcmd(lcd, ILI9341_READ_ID1);
   lcd->recvparam(lcd, &param);
   lcdinfo("ili9341 LCD driver: LCD modules manufacturer ID: %d\n", param);
+
   lcd->sendcmd(lcd, ILI9341_READ_ID2);
   lcd->recvparam(lcd, &param);
   lcdinfo("ili9341 LCD driver: LCD modules driver version ID: %d\n", param);
+
   lcd->sendcmd(lcd, ILI9341_READ_ID3);
   lcd->recvparam(lcd, &param);
   lcdinfo("ili9341 LCD driver: LCD modules driver ID: %d\n", param);

@@ -882,9 +882,34 @@ config DEBUG_LCD
 	default n
 	depends on LCD
 	---help---
-		Enable low level debug SYSLOG output from the LCD driver (disabled
-		by default).  Support for this debug option is board-specific and
-		may not be available for some boards.
+		Enable LCD driver debug features.
+
+		Support for this debug option is board-specific and may not
+		be available for some boards.
+if DEBUG_LCD
+
+config DEBUG_LCD_ERROR
+	bool "LCD Driver Error Output"
+	default n
+	depends on DEBUG_ERROR
+	---help---
+		Enable LCD driver error output to SYSLOG.
+
+config DEBUG_LCD_WARN
+	bool "LCD Driver Warnings Output"
+	default n
+	depends on DEBUG_WARN
+	---help---
+		Enable LCD driver warning output to SYSLOG.
+
+config DEBUG_LCD_INFO
+	bool "LCD Driver Informational Output"
+	default n
+	depends on DEBUG_INFO
+	---help---
+		Enable LCD driver informational output to SYSLOG.
+
+endif # DEBUG_LCD
 
 config DEBUG_LEDS
 	bool "Low-level LED Debug Output"

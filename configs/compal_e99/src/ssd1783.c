@@ -75,15 +75,8 @@
 #define LCD_XRES         98
 #define LCD_YRES         67
 
-/* Debug ******************************************************************************/
+/* This should be put elsewhere */
 
-#ifdef CONFIG_DEBUG_LCD
-# define lcderr(format, ...)  info(format, ##__VA_ARGS__)
-#else
-# define lcderr(x...)
-#endif
-
-/** This should be put elsewhere */
 #ifdef __CC_ARM               /* ARM Compiler        */
 #define lcd_inline            static __inline
 #elif defined (__ICCARM__)    /* for IAR Compiler */

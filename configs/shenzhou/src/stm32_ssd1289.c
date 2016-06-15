@@ -67,34 +67,9 @@
  * Pre-processor Definitions
  ************************************************************************************/
 /* Configuration ********************************************************************/
-/* Define CONFIG_DEBUG_LCD to enable detailed LCD debug output. Verbose debug must
- * also be enabled.
- */
-
-#ifndef CONFIG_DEBUG_FEATURES
-#  undef CONFIG_DEBUG_INFO
-#  undef CONFIG_DEBUG_GRAPHICS
-#  undef CONFIG_DEBUG_LCD
-#  undef CONFIG_LCD_REGDEBUG
-#endif
-
-#ifndef CONFIG_DEBUG_INFO
-#  undef CONFIG_DEBUG_LCD
-#endif
 
 #undef CONFIG_LCD_FASTCONFIG
 #define CONFIG_LCD_FASTCONFIG 1
-
-/* Shenzhou LCD Hardware Definitions ************************************************/
-/* Debug ****************************************************************************/
-
-#ifdef CONFIG_DEBUG_LCD
-#  define lcderr         err
-#  define lcdinfo        info
-#else
-#  define lcderr(x...)
-#  define lcdinfo(x...)
-#endif
 
 /************************************************************************************
  * Private Type Definition

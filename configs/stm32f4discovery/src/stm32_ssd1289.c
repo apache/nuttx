@@ -72,20 +72,6 @@
 #  error "CONFIG_STM32_FSMC is required to use the LCD"
 #endif
 
-/* Define CONFIG_DEBUG_LCD to enable detailed LCD debug output. Verbose debug must
- * also be enabled.
- */
-
-#ifndef CONFIG_DEBUG_FEATURES
-#  undef CONFIG_DEBUG_INFO
-#  undef CONFIG_DEBUG_GRAPHICS
-#  undef CONFIG_DEBUG_LCD
-#endif
-
-#ifndef CONFIG_DEBUG_INFO
-#  undef CONFIG_DEBUG_LCD
-#endif
-
 /* STM32F4Discovery LCD Hardware Definitions ******************************************/
 /* LCD /CS is CE1 ==  NOR/SRAM Bank 1
  *
@@ -107,23 +93,10 @@
 #define LCD_NADDRLINES   1   /* A16 */
 #define LCD_NDATALINES   16  /* D0-15 */
 
-/* Debug ******************************************************************************/
-
-#ifdef CONFIG_DEBUG_LCD
-#  define lcderr         err
-#  define lcdinfo        info
-#else
-#  define lcderr(x...)
-#  define lcdinfo(x...)
-#endif
-
-/**************************************************************************************
- * Private Type Definition
- **************************************************************************************/
-
 /**************************************************************************************
  * Private Function Protototypes
  **************************************************************************************/
+
 /* Low Level LCD access */
 
 static void stm32_select(FAR struct ssd1289_lcd_s *dev);

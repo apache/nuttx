@@ -86,14 +86,14 @@
 #  undef HAVE_RGBLED
 #endif
 
-#ifdef CONFIG_DEBUG_LCD
-#  define lcderr  llerr
-#  define lcdwarn llwarn
-#  define lcdinfo llinfo
+#ifdef CONFIG_DEBUG_LEDS
+#  define lederr  llerr
+#  define ledwarn llwarn
+#  define ledinfo llinfo
 #else
-#  define lcderr(x...)
-#  define lcdwarn(x...)
-#  define lcdinfo(x...)
+#  define lederr(x...)
+#  define ledwarn(x...)
+#  define ledinfo(x...)
 #endif
 
 #ifdef HAVE_RGBLED
@@ -129,7 +129,7 @@ int stm32_rgbled_setup(void)
       ledr = stm32_pwminitialize(1);
       if (!ledr)
         {
-          lcderr("ERROR: Failed to get the STM32 PWM lower half to LEDR\n");
+          lederr("ERROR: Failed to get the STM32 PWM lower half to LEDR\n");
           return -ENODEV;
         }
 
@@ -148,7 +148,7 @@ int stm32_rgbled_setup(void)
       ledg = stm32_pwminitialize(2);
       if (!ledg)
         {
-          lcderr("ERROR: Failed to get the STM32 PWM lower half to LEDG\n");
+          lederr("ERROR: Failed to get the STM32 PWM lower half to LEDG\n");
           return -ENODEV;
         }
 
@@ -162,7 +162,7 @@ int stm32_rgbled_setup(void)
       ledb = stm32_pwminitialize(3);
       if (!ledb)
         {
-          lcderr("ERROR: Failed to get the STM32 PWM lower half to LEDB\n");
+          lederr("ERROR: Failed to get the STM32 PWM lower half to LEDB\n");
           return -ENODEV;
         }
 
@@ -176,7 +176,7 @@ int stm32_rgbled_setup(void)
       ret = rgbled_register("/dev/rgbled0", ledr, ledg, ledb);
       if (ret < 0)
         {
-          lcderr("ERROR: rgbled_register failed: %d\n", ret);
+          lederr("ERROR: rgbled_register failed: %d\n", ret);
           return ret;
         }
 

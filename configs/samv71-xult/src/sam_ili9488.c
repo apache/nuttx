@@ -203,21 +203,6 @@
 #  define CONFIG_SAMV71XULT_LCD_BGCOLOR 0
 #endif
 
-/* Define CONFIG_DEBUG_LCD to enable detailed LCD debug output. Verbose debug must
- * also be enabled.
- */
-
-#ifndef CONFIG_DEBUG_FEATURES
-#  undef CONFIG_DEBUG_INFO
-#  undef CONFIG_DEBUG_GRAPHICS
-#  undef CONFIG_DEBUG_LCD
-#  undef CONFIG_LCD_REGDEBUG
-#endif
-
-#ifndef CONFIG_DEBUG_INFO
-#  undef CONFIG_DEBUG_LCD
-#endif
-
 /* Display/Color Properties **************************************************/
 /* Display Resolution */
 
@@ -299,14 +284,6 @@
 #endif
 
 /* Debug *********************************************************************/
-
-#ifdef CONFIG_DEBUG_LCD
-#  define lcderr              err
-#  define lcdinfo             info
-#else
-#  define lcderr(x...)
-#  define lcdinfo(x...)
-#endif
 
 #ifdef CONFIG_DEBUG_DMA
 #  define SAMPLENDX_BEFORE_SETUP  0

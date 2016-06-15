@@ -75,24 +75,15 @@
 
 /* Define the CONFIG_LCD_NOKIADBG to enable detailed debug output (stuff you
  * would never want to see unless you are debugging this file).
- *
- * Verbose debug must also be enabled
  */
-
-#ifndef CONFIG_DEBUG_FEATURES
-#  undef CONFIG_DEBUG_INFO
-#  undef CONFIG_DEBUG_GRAPHICS
-#endif
 
 #ifndef CONFIG_DEBUG_INFO
 #  undef CONFIG_LCD_NOKIADBG
 #endif
 
 #ifdef CONFIG_LCD_NOKIADBG
-#  define lcderr(format, ...) info(format, ##__VA_ARGS__)
 #  define lcd_dumpgpio(m)     lpc17_dumpgpio(LPC1766STK_LCD_RST, m)
 #else
-#  define lcderr(x...)
 #  define lcd_dumpgpio(m)
 #endif
 

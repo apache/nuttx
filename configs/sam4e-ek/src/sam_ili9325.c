@@ -197,21 +197,6 @@
 #  define CONFIG_SAM4EEK_LCD_BGCOLOR 0
 #endif
 
-/* Define CONFIG_DEBUG_LCD to enable detailed LCD debug output. Verbose debug must
- * also be enabled.
- */
-
-#ifndef CONFIG_DEBUG_FEATURES
-#  undef CONFIG_DEBUG_INFO
-#  undef CONFIG_DEBUG_GRAPHICS
-#  undef CONFIG_DEBUG_LCD
-#  undef CONFIG_LCD_REGDEBUG
-#endif
-
-#ifndef CONFIG_DEBUG_INFO
-#  undef CONFIG_DEBUG_LCD
-#endif
-
 /* Display/Color Properties ***********************************************************/
 /* Display Resolution */
 
@@ -265,16 +250,6 @@
 #define BKL_PULSE_DURATION    24
 #define BKL_ENABLE_DURATION   (128*1024)
 #define BKL_DISABLE_DURATION  (128*1024)
-
-/* Debug ******************************************************************************/
-
-#ifdef CONFIG_DEBUG_LCD
-#  define lcderr              err
-#  define lcdinfo             info
-#else
-#  define lcderr(x...)
-#  define lcdinfo(x...)
-#endif
 
 /************************************************************************************
  * Private Type Definition
