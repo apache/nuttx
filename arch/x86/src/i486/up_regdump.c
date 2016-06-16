@@ -54,13 +54,13 @@
 
 void up_registerdump(uint32_t *regs)
 {
-  alert(" ds:%08x irq:%08x err:%08x\n",
+  _alert(" ds:%08x irq:%08x err:%08x\n",
         regs[REG_DS], regs[REG_IRQNO], regs[REG_ERRCODE]);
-  alert("edi:%08x esi:%08x ebp:%08x esp:%08x\n",
+  _alert("edi:%08x esi:%08x ebp:%08x esp:%08x\n",
         regs[REG_EDI], regs[REG_ESI], regs[REG_EBP], regs[REG_ESP]);
-  alert("ebx:%08x edx:%08x ecx:%08x eax:%08x\n",
+  _alert("ebx:%08x edx:%08x ecx:%08x eax:%08x\n",
         regs[REG_EBX], regs[REG_EDX], regs[REG_ECX], regs[REG_EAX]);
-  alert("eip:%08x  cs:%08x flg:%08x  sp:%08x ss:%08x\n",
+  _alert("eip:%08x  cs:%08x flg:%08x  sp:%08x ss:%08x\n",
         regs[REG_EIP], regs[REG_CS], regs[REG_EFLAGS], regs[REG_SP],
         regs[REG_SS]);
 }

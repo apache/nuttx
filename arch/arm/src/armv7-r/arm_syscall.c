@@ -498,7 +498,7 @@ uint32_t *arm_syscall(uint32_t *regs)
 
 uint32_t *arm_syscall(uint32_t *regs)
 {
-  alert("SYSCALL from 0x%x\n", regs[REG_PC]);
+  _alert("SYSCALL from 0x%x\n", regs[REG_PC]);
   CURRENT_REGS = regs;
   PANIC();
 }

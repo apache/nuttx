@@ -106,7 +106,7 @@
  *    information that you probably not want to suppress during normal debug
  *    general debugging.
  *
- * alert() - is a special, high-priority, unconditional version that is really
+ * _alert() - is a special, high-priority, unconditional version that is really
  *    intended only for crash error reporting.
  */
 
@@ -138,10 +138,10 @@
 #endif
 
 #ifdef CONFIG_ARCH_LOWPUTC
-#  define alert(format, ...) \
+#  define _alert(format, ...) \
    __arch_lowsyslog(LOG_EMERG, EXTRA_FMT format EXTRA_ARG, ##__VA_ARGS__)
 # else
-#  define alert(x...)
+#  define _alert(x...)
 # endif
 
 #ifdef CONFIG_DEBUG_ERROR
@@ -892,7 +892,7 @@
 /* Variadic macros NOT supported */
 
 #ifndef CONFIG_ARCH_LOWPUTC
-#  define alert       (void)
+#  define _alert      (void)
 # endif
 
 #ifdef CONFIG_DEBUG_ERROR
@@ -1895,7 +1895,7 @@ void lib_dumpbuffer(FAR const char *msg, FAR const uint8_t *buffer,
 
 #ifndef CONFIG_CPP_HAVE_VARARGS
 #ifndef CONFIG_ARCH_LOWPUTC
-int alert(const char *format, ...);
+int _alert(const char *format, ...);
 #endif
 
 #ifdef CONFIG_DEBUG_ERROR

@@ -90,88 +90,88 @@ uint32_t *pic32mx_exception(uint32_t *regs)
   switch (cause & CP0_CAUSE_EXCCODE_MASK)
     {
     case CP0_CAUSE_EXCCODE_INT:      /* Interrupt */
-      alert("EXCEPTION: Interrupt"
+      _alert("EXCEPTION: Interrupt"
             " CAUSE: %08x EPC: %08x\n", cause, epc);
       break;
     case CP0_CAUSE_EXCCODE_TLBL:     /* TLB exception (load or instruction fetch) */
-      alert("EXCEPTION: TLB exception (load or instruction fetch)"
+      _alert("EXCEPTION: TLB exception (load or instruction fetch)"
             " CAUSE: %08x EPC:%08x\n", cause, epc);
       break;
     case CP0_CAUSE_EXCCODE_TLBS:     /* TLB exception (store) */
-      alert("EXCEPTION: TLB exception (store)"
+      _alert("EXCEPTION: TLB exception (store)"
             " CAUSE: %08x EPC: %08x\n", cause, epc);
       break;
     case CP0_CAUSE_EXCCODE_ADEL:     /* Address error exception (load or instruction fetch) */
-      alert("EXCEPTION: Address error exception (load or instruction fetch)"
+      _alert("EXCEPTION: Address error exception (load or instruction fetch)"
             " CAUSE: %08x EPC: %08x\n", cause, epc);
       break;
     case CP0_CAUSE_EXCCODE_ADES:     /* Address error exception (store) */
-      alert("EXCEPTION: Address error exception (store)"
+      _alert("EXCEPTION: Address error exception (store)"
             " CAUSE: %08x EPC: %08x\n", cause, epc);
       break;
     case CP0_CAUSE_EXCCODE_IBE:      /* Bus error exception (instruction fetch) */
-      alert("EXCEPTION: Bus error exception (instruction fetch)"
+      _alert("EXCEPTION: Bus error exception (instruction fetch)"
             " CAUSE: %08x EPC: %08x\n", cause, epc);
       break;
     case CP0_CAUSE_EXCCODE_DBE:      /* Bus error exception (data reference: load or store) */
-      alert("EXCEPTION: Bus error exception (data reference: load or store)"
+      _alert("EXCEPTION: Bus error exception (data reference: load or store)"
             " CAUSE: %08x EPC: %08x\n", cause, epc);
       break;
     case CP0_CAUSE_EXCCODE_SYS:      /* Syscall exception */
-      alert("EXCEPTION: Syscall exception"
+      _alert("EXCEPTION: Syscall exception"
             " CAUSE: %08x EPC: %08x\n", cause, epc);
       break;
     case CP0_CAUSE_EXCCODE_BP:       /* Breakpoint exception */
-      alert("EXCEPTION: Breakpoint exception"
+      _alert("EXCEPTION: Breakpoint exception"
             " CAUSE: %08x EPC: %08x\n", cause, epc);
       break;
     case CP0_CAUSE_EXCCODE_RI:       /* Reserved instruction exception */
-      alert("EXCEPTION: Reserved instruction exception"
+      _alert("EXCEPTION: Reserved instruction exception"
             " CAUSE: %08x EPC: %08x\n", cause, epc);
       break;
     case CP0_CAUSE_EXCCODE_CPU:      /* Coprocessor Unusable exception */
-      alert("EXCEPTION: Coprocessor Unusable exception"
+      _alert("EXCEPTION: Coprocessor Unusable exception"
             " CAUSE: %08x EPC: %08x\n", cause, epc);
       break;
     case CP0_CAUSE_EXCCODE_OV:       /* Arithmetic Overflow exception */
-      alert("EXCEPTION: Arithmetic Overflow exception"
+      _alert("EXCEPTION: Arithmetic Overflow exception"
             " CAUSE: %08x EPC: %08x\n", cause, epc);
       break;
     case CP0_CAUSE_EXCCODE_TR:       /* Trap exception */
-      alert("EXCEPTION: Trap exception"
+      _alert("EXCEPTION: Trap exception"
             " CAUSE: %08x EPC: %08x\n", cause, epc);
       break;
     case CP0_CAUSE_EXCCODE_FPE:      /* Floating point exception */
-      alert("EXCEPTION: Floating point exception"
+      _alert("EXCEPTION: Floating point exception"
             " CAUSE: %08x EPC: %08x\n", cause, epc);
       break;
     case CP0_CAUSE_EXCCODE_C2E:      /* Precise Coprocessor 2 exceptions */
-      alert("EXCEPTION: Precise Coprocessor 2 exceptions"
+      _alert("EXCEPTION: Precise Coprocessor 2 exceptions"
             " CAUSE: %08x EPC: %08x\n", cause, epc);
       break;
     case CP0_CAUSE_EXCCODE_MDMX:     /* MDMX Unusable (MIPS64) */
-      alert("EXCEPTION: MDMX Unusable (MIPS64)"
+      _alert("EXCEPTION: MDMX Unusable (MIPS64)"
             " CAUSE: %08x EPC: %08x\n", cause, epc);
       break;
     case CP0_CAUSE_EXCCODE_WATCH:    /* WatchHi/WatchLo address */
-      alert("EXCEPTION: WatchHi/WatchLo address"
+      _alert("EXCEPTION: WatchHi/WatchLo address"
             " CAUSE: %08x EPC: %08x\n", cause, epc);
       break;
     case CP0_CAUSE_EXCCODE_MCHECK:   /* Machine check */
-      alert("EXCEPTION: Machine check"
+      _alert("EXCEPTION: Machine check"
             " CAUSE: %08x EPC: %08x\n", cause, epc);
       break;
     case CP0_CAUSE_EXCCODE_CACHEERR: /* Cache error */
-      alert("EXCEPTION: Cache error"
+      _alert("EXCEPTION: Cache error"
             " CAUSE: %08x EPC: %08x\n", cause, epc);
       break;
     default:
-      alert("EXCEPTION: Unknown"
+      _alert("EXCEPTION: Unknown"
             " CAUSE: %08x EPC: %08x\n", cause, epc);
       break;
     }
 #else
-  alert("EXCEPTION: CAUSE: %08x EPC: %08x\n", cause, epc);
+  _alert("EXCEPTION: CAUSE: %08x EPC: %08x\n", cause, epc);
 #endif
 #endif
 

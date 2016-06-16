@@ -137,7 +137,7 @@ void up_prefetchabort(uint32_t *regs)
   else
 #endif
     {
-      alert("Prefetch abort. PC: %08x\n", regs[REG_PC]);
+      _alert("Prefetch abort. PC: %08x\n", regs[REG_PC]);
       PANIC();
     }
 }

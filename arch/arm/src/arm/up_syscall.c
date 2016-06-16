@@ -66,7 +66,7 @@
 
 void up_syscall(uint32_t *regs)
 {
-  alert("Syscall from 0x%x\n", regs[REG_PC]);
+  _alert("Syscall from 0x%x\n", regs[REG_PC]);
   CURRENT_REGS = regs;
   PANIC();
 }
