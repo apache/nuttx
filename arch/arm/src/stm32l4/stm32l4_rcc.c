@@ -88,14 +88,14 @@
  * Public Functions
  ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: rcc_resetbkp
  *
  * Description:
- *   The RTC needs to reset the Backup Domain to change RTCSEL and resetting the
- *   Backup Domain renders to disabling the LSE as consequence.   In order to avoid
- *   resetting the Backup Domain when we already configured LSE we will reset the
- *   Backup Domain early (here).
+ *   The RTC needs to reset the Backup Domain to change RTCSEL and resetting
+ *   the Backup Domain renders to disabling the LSE as consequence.   In order
+ *   to avoid resetting the Backup Domain when we already configured LSE we
+ *   will reset the Backup Domain early (here).
  *
  * Input Parameters:
  *   None
@@ -103,7 +103,7 @@
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_STM32_PWR) && defined(CONFIG_RTC)
 static inline rcc_resetbkp(void)
@@ -139,17 +139,17 @@ static inline rcc_resetbkp(void)
  * Public Functions
  ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_clockconfig
  *
  * Description:
- *   Called to establish the clock settings based on the values in board.h.  This
- *   function (by default) will reset most everything, enable the PLL, and enable
- *   peripheral clocking for all periperipherals enabled in the NuttX configuration
- *   file.
+ *   Called to establish the clock settings based on the values in board.h.
+ *   This function (by default) will reset most everything, enable the PLL,
+ *   and enable peripheral clocking for all peripherals enabled in the NuttX
+ *   configuration file.
  *
- *   If CONFIG_ARCH_BOARD_STM32L4_CUSTOM_CLOCKCONFIG is defined, then clocking will
- *   be enabled by an externally provided, board-specific function called
+ *   If CONFIG_ARCH_BOARD_STM32L4_CUSTOM_CLOCKCONFIG is defined, then clocking
+ *   will be enabled by an externally provided, board-specific function called
  *   stm32l4_board_clockconfig().
  *
  * Input Parameters:
@@ -158,7 +158,7 @@ static inline rcc_resetbkp(void)
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void stm32l4_clockconfig(void)
 {
