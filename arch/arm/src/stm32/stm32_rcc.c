@@ -106,6 +106,53 @@
  ****************************************************************************/
 
 /************************************************************************************
+ * Name: rcc_enablebkp
+ *
+ * Description:
+ *   The RTC needs to reset the Backup Domain to change RTCSEL and resetting the
+ *   Backup Domain renders to disabling the LSE as consequence.   In order to avoid
+ *   resetting the Backup Domain when we already configured LSE we will reset the
+ *   Backup Domain early (here).
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_STM32_PWR
+static inline rcc_enablebkp(void)
+{
+  uint32_t regval;
+
+  /* Check if the RTC is already configured */
+
+  regval = getreg32(RTC_MAGIC_REG);
+  if (regval != RTC_MAGIC)
+    {
+      (void)stm32_pwr_enablebkp(true);
+
+      /* We might be changing RTCSEL - to ensure such changes work, we must
+       * reset the backup domain (having backed up the RTC_MAGIC token)
+       */
+
+      modifyreg32(STM32_RCC_XXX, 0, RCC_XXX_YYYRST);
+      modifyreg32(STM32_RCC_XXX, RCC_XXX_YYYRST, 0);
+
+      (void)stm32_pwr_enablebkp(false);
+    }
+}
+#else
+#  define rcc_enablebkp()
+#endif
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/************************************************************************************
  * Name: stm32_clockconfig
  *
  * Description:
@@ -134,28 +181,9 @@ void stm32_clockconfig(void)
 
   rcc_reset();
 
-  /* The RTC needs to reset the Backup Domain to change RTCSEL and resetting the
-   * Backup Domain renders to disabling the LSE as consequence.   In order to avoid
-   * resetting the Backup Domain when we already configured LSE we will reset the
-   * Backup Domain early (here).
-   */
+  /* Reset backup domain */
 
-  /* Check if the RTC is already configured */
-
-  regval = getreg32(RTC_MAGIC_REG);
-  if (regval != RTC_MAGIC)
-    {
-      (void)stm32_pwr_enablebkp(true);
-
-      /* We might be changing RTCSEL - to ensure such changes work, we must
-       * reset the backup domain (having backed up the RTC_MAGIC token)
-       */
-
-      modifyreg32(STM32_RCC_XXX, 0, RCC_XXX_YYYRST);
-      modifyreg32(STM32_RCC_XXX, RCC_XXX_YYYRST, 0);
-
-      (void)stm32_pwr_enablebkp(false);
-    }
+  rcc_enablebkp();
 
 #if defined(CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG)
 
