@@ -1310,11 +1310,6 @@ config STM32F7_TIM14
 	default n
 	select STM32F7_TIM
 
-config STM32F7_TIM15
-	bool "TIM15"
-	default n
-	select STM32F7_TIM
-
 config STM32F7_USART1
 	bool "USART1"
 	default n
