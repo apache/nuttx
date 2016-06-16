@@ -959,7 +959,7 @@ static void tiva_i2c_tracenew(struct tiva_i2c_priv_s *priv, uint32_t status)
 
           if (priv->tndx >= (CONFIG_I2C_NTRACE-1))
             {
-              i2cerr("I2C%d: ERROR: Trace table overflow\n", priv->config->devno);
+              i2cerr("ERROR: I2C%d trace table overflow\n", priv->config->devno);
               return;
             }
 
@@ -1008,7 +1008,7 @@ static void tiva_i2c_traceevent(struct tiva_i2c_priv_s *priv,
 
           if (priv->tndx >= (CONFIG_I2C_NTRACE-1))
             {
-              i2cerr("I2C%d: ERROR: Trace table overflow\n", priv->config->devno);
+              i2cerr("ERROR: I2C%d trace table overflow\n", priv->config->devno);
               return;
             }
 
@@ -1907,7 +1907,7 @@ static int tiva_i2c_transfer(struct i2c_master_s *dev, struct i2c_msg_s *msgv,
 
   if (tiva_i2c_sem_waitdone(priv) < 0)
     {
-      i2cerr("I2C%d: ERROR: Timed out\n", priv->config->devno);
+      i2cerr("ERROR: I2C%d timed out\n", priv->config->devno);
       ret = -ETIMEDOUT;
     }
 #if 0 /* I2CM_CS_CLKTO */
@@ -1916,7 +1916,7 @@ static int tiva_i2c_transfer(struct i2c_master_s *dev, struct i2c_msg_s *msgv,
   else if ((priv->mstatus & (I2CM_CS_ERROR | I2CM_CS_ARBLST)) != 0)
 #endif
     {
-      i2cerr("I2C%d: ERROR:  I2C error status: %08x\n",
+      i2cerr("ERROR: I2C%d I2C error status: %08x\n",
              priv->config->devno, priv->mstatus);
 
       if ((priv->mstatus & I2CM_CS_ARBLST) != 0)
@@ -1963,7 +1963,7 @@ static int tiva_i2c_transfer(struct i2c_master_s *dev, struct i2c_msg_s *msgv,
        * other bits are valid.
        */
 
-      i2cerr("I2C%d: ERROR:  I2C still busy: %08x\n",
+      i2cerr("ERROR: I2C%d I2C still busy: %08x\n",
              priv->config->devno, regval);
 
       /* Reset and reinitialize the I2C hardware */
@@ -2212,7 +2212,7 @@ struct i2c_master_s *tiva_i2cbus_initialize(int port)
 #endif
 
     default:
-      i2cerr("I2C%d: ERROR: Not supported\n", port);
+      i2cerr("ERROR: I2C%d not supported\n", port);
       return NULL;
     }
 

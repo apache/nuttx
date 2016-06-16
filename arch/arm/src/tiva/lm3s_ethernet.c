@@ -686,7 +686,7 @@ static void tiva_receive(struct tiva_driver_s *priv)
 
           /* We will have to drop this packet */
 
-          nllerr("Bad packet size dropped (%d)\n", pktlen);
+          nllwarn("WARNING: "Bad packet size dropped (%d)\n", pktlen);
           NETDEV_RXERRORS(&priv->ld_dev);
 
           /* The number of bytes and words left to read is pktlen - 4 (including,
@@ -867,7 +867,8 @@ static void tiva_receive(struct tiva_driver_s *priv)
       else
 #endif
         {
-          nllerr("Unsupported packet type dropped (%02x)\n", htons(ETHBUF->type));
+          nllwarn("WARNING: Unsupported packet type dropped (%02x)\n",
+                  htons(ETHBUF->type));
           NETDEV_RXDROPPED(&priv->ld_dev);
         }
     }
@@ -1024,7 +1025,7 @@ static void tiva_txtimeout(int argc, uint32_t arg, ...)
 
   /* Increment statistics */
 
-  nllerr("Tx timeout\n");
+  nllerr("ERROR: Tx timeout\n");
   NETDEV_TXTIMEOUTS(&priv->ld_dev);
 
   /* Then reset the hardware */
@@ -1104,9 +1105,9 @@ static int tiva_ifup(struct net_driver_s *dev)
   uint32_t div;
   uint16_t phyreg;
 
-  nllerr("Bringing up: %d.%d.%d.%d\n",
-       dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
-       (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
+  nllinfo("Bringing up: %d.%d.%d.%d\n",
+          dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
+          (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
 
   /* Enable and reset the Ethernet controller */
 
@@ -1168,13 +1169,13 @@ static int tiva_ifup(struct net_driver_s *dev)
    * set
    */
 
-  nllerr("Waiting for link\n");
+  nllinfo("Waiting for link\n");
   do
     {
       phyreg = tiva_phyread(priv, MII_MSR);
     }
   while ((phyreg & MII_MSR_LINKSTATUS) == 0);
-  nllerr("Link established\n");
+  nllinfo("Link established\n");
 
   /* Reset the receive FIFO */
 
@@ -1258,9 +1259,9 @@ static int tiva_ifdown(struct net_driver_s *dev)
   irqstate_t flags;
   uint32_t regval;
 
-  nllerr("Taking down: %d.%d.%d.%d\n",
-       dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
-       (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
+  nllinfo("Taking down: %d.%d.%d.%d\n",
+          dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
+          (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
 
   /* Cancel the TX poll timer and TX timeout timers */
 
@@ -1455,7 +1456,7 @@ static inline int tiva_ethinitialize(int intf)
 
   /* Check if the Ethernet module is present */
 
-  nerr("Setting up eth%d\n", intf);
+  ninfo("Setting up eth%d\n", intf);
 
 #if TIVA_NETHCONTROLLERS > 1
 # error "This debug check only works with one interface"

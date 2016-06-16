@@ -1093,7 +1093,7 @@ static void stm32_i2c_tracenew(FAR struct stm32_i2c_priv_s *priv,
 
           if (priv->tndx >= (CONFIG_I2C_NTRACE-1))
             {
-              i2cerr("Trace table overflow\n");
+              i2cerr("ERROR: Trace table overflow\n");
               return;
             }
 
@@ -1134,7 +1134,7 @@ static void stm32_i2c_traceevent(FAR struct stm32_i2c_priv_s *priv,
 
       if (priv->tndx >= (CONFIG_I2C_NTRACE-1))
         {
-          i2cerr("Trace table overflow\n");
+          i2cerr("ERROR: Trace table overflow\n");
           return;
         }
 
@@ -1362,13 +1362,13 @@ static inline void stm32_i2c_sendstart(FAR struct stm32_i2c_priv_s *priv)
 
   if ((priv->flags & I2C_M_NORESTART) || priv->dcnt > 255)
     {
-      i2cerr("RELOAD enabled: dcnt = %i msgc = %i\n",
+      i2cinfo("RELOAD enabled: dcnt = %i msgc = %i\n",
           priv->dcnt, priv->msgc);
       stm32_i2c_enable_reload(priv);
     }
   else
     {
-      i2cerr("RELOAD disable: dcnt = %i msgc = %i\n",
+      i2cinfo("RELOAD disable: dcnt = %i msgc = %i\n",
           priv->dcnt, priv->msgc);
       stm32_i2c_disable_reload(priv);
     }
@@ -1407,7 +1407,7 @@ static inline void stm32_i2c_sendstart(FAR struct stm32_i2c_priv_s *priv)
    * START condition using the address and transfer direction data entered.
    */
 
-  i2cerr("Sending START: dcnt=%i msgc=%i flags=0x%04x\n",
+  i2cinfo("Sending START: dcnt=%i msgc=%i flags=0x%04x\n",
      priv->dcnt, priv->msgc, priv->flags);
 
   stm32_i2c_modifyreg32(priv, STM32F7_I2C_CR2_OFFSET, 0, I2C_CR2_START);
@@ -1427,7 +1427,7 @@ static inline void stm32_i2c_sendstart(FAR struct stm32_i2c_priv_s *priv)
 
 static inline void stm32_i2c_sendstop(FAR struct stm32_i2c_priv_s *priv)
 {
-  i2cerr("Sending STOP\n");
+  i2cinfo("Sending STOP\n");
   stm32_i2c_traceevent(priv, I2CEVENT_WRITE_STOP, 0);
 
   stm32_i2c_modifyreg32(priv, STM32F7_I2C_CR2_OFFSET, 0, I2C_CR2_STOP);
@@ -1655,7 +1655,7 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
         {
           /* Unsupported state */
 
-          i2cerr("TXIS: UNSUPPORTED STATE DETECTED, dcnt=%i, status 0x%08x\n",
+          i2cerr("ERROR: TXIS Unsupported state detected, dcnt=%i, status 0x%08x\n",
           priv->dcnt, status);
           stm32_i2c_traceevent(priv, I2CEVENT_WRITE_ERROR, 0);
         }
@@ -1741,7 +1741,7 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
 
           stm32_i2c_traceevent(priv, I2CEVENT_READ_ERROR, 0);
           status = stm32_i2c_getreg(priv, STM32F7_I2C_ISR_OFFSET);
-          i2cerr("RXNE: UNSUPPORTED STATE DETECTED, dcnt=%i, status 0x%08x\n",
+          i2cerr("ERROR: RXNE Unsupported state detected, dcnt=%i, status 0x%08x\n",
           priv->dcnt, status);
 
           /* Set signals that will terminate ISR and wake waiting thread */
@@ -1976,7 +1976,7 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
   else if (priv->dcnt == -1 && priv->msgc == 0)
     {
       status = stm32_i2c_getreg(priv, STM32F7_I2C_ISR_OFFSET);
-      i2cerr("EMPTY CALL: Stopping ISR: status 0x%08x\n", status);
+      i2cwarn("WARNING: EMPTY CALL: Stopping ISR: status 0x%08x\n", status);
       stm32_i2c_traceevent(priv, I2CEVENT_ISR_EMPTY_CALL, 0);
     }
 
@@ -1999,7 +1999,7 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
 
       status = stm32_i2c_getreg(priv, STM32F7_I2C_ISR_OFFSET);
 
-      i2cerr("INVALID STATE DETECTED, status 0x%08x\n", status);
+      i2cerr("ERROR: Invalid state detected, status 0x%08x\n", status);
 
       /* set condition to terminate ISR and wake waiting thread */
 
@@ -2303,16 +2303,16 @@ static int stm32_i2c_process(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s 
       /* Connection timed out */
 
       errval = ETIMEDOUT;
-      i2cerr("Waitdone timed out: CR1: 0x%08x CR2: 0x%08x status: 0x%08x\n",
+      i2cerr("ERROR: Waitdone timed out CR1: 0x%08x CR2: 0x%08x status: 0x%08x\n",
              cr1, cr2,status);
     }
   else
     {
-      i2cerr("Waitdone success: CR1: 0x%08x CR2: 0x%08x status: 0x%08x\n",
+      i2cinfo("Waitdone success: CR1: 0x%08x CR2: 0x%08x status: 0x%08x\n",
              cr1, cr2,status );
     }
 
-  i2cerr("priv->status: 0x%08x\n", priv->status);
+  i2cinfo("priv->status: 0x%08x\n", priv->status);
 
   /* Check for error status conditions */
 
@@ -2330,7 +2330,7 @@ static int stm32_i2c_process(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s 
         {
           /* Bus Error, ignore it because of errata (revision A,Z) */
 
-          i2cerr("I2C: Bus Error\n");
+          i2cerr("ERROR: I2C Bus Error\n");
 
           /* errval = EIO; */
         }
@@ -2338,7 +2338,7 @@ static int stm32_i2c_process(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s 
         {
           /* Arbitration Lost (master mode) */
 
-          i2cerr("I2C: Arbitration Lost\n");
+          i2cerr("ERROR: I2C Arbitration Lost\n");
           errval = EAGAIN;
         }
 
@@ -2346,21 +2346,21 @@ static int stm32_i2c_process(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s 
         {
           /* Overrun/Underrun */
 
-          i2cerr("I2C: Overrun/Underrun\n");
+          i2cerr("ERROR: I2C Overrun/Underrun\n");
           errval = EIO;
         }
       else if (status & I2C_INT_PECERR)
         {
       /* PEC Error in reception (SMBus Only) */
 
-          i2cerr("I2C: PEC Error\n");
+          i2cerr("ERROR: I2C PEC Error\n");
           errval = EPROTO;
         }
       else if (status & I2C_INT_TIMEOUT)
         {
           /* Timeout or Tlow Error (SMBus Only) */
 
-          i2cerr("I2C: Timeout / Tlow Error\n");
+          i2cerr("ERROR: I2C Timeout / Tlow Error\n");
           errval = ETIME;
         }
       else if (status & I2C_INT_NACK)
@@ -2369,12 +2369,12 @@ static int stm32_i2c_process(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s 
 
           if (priv->astart == TRUE)
             {
-              i2cerr("I2C: Address NACK\n");
+              i2cwarn("WARNING: I2C Address NACK\n");
               errval = EADDRNOTAVAIL;
             }
           else
             {
-              i2cerr("I2C: Data NACK\n");
+              i2cwarn("WARNING: I2C Data NACK\n");
               errval = ECOMM;
             }
         }
@@ -2382,7 +2382,7 @@ static int stm32_i2c_process(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s 
         {
           /* Unrecognized error */
 
-          i2cerr("I2C: Unrecognized Error");
+          i2cerr("ERROR: I2C Unrecognized Error");
           errval = EINTR;
         }
     }
@@ -2413,7 +2413,7 @@ static int stm32_i2c_process(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s 
         {
           if((clock_systimer() - start) > timeout)
             {
-              i2cerr("I2C: Bus busy");
+              i2cerr("ERROR: I2C Bus busy");
               errval = EBUSY;
               break;
             }
