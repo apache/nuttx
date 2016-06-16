@@ -1188,13 +1188,42 @@ config DEBUG_PWM_INFO
 endif # DEBUG_PWM
 
 config DEBUG_RTC
-	bool "RTC Debug Output"
+	bool "RTC Debug Features"
 	default n
 	depends on RTC
 	---help---
-		Enable RTC driver debug SYSLOG output (disabled by default).
+		Enable RTC debug features.
+
 		Support for this debug option is architecture-specific and may not
 		be available for some MCUs.
+
+if DEBUG_RTC
+
+config DEBUG_RTC_ERROR
+	bool "RTC Error Output"
+	default n
+	depends on DEBUG_ERROR
+	---help---
+		Enable RTC driver error output to SYSLOG.
+
+		Support for this debug option is architecture-specific and may not
+		be available for some MCUs.
+
+config DEBUG_RTC_WARN
+	bool "RTC Warnings Output"
+	default n
+	depends on DEBUG_WARN
+	---help---
+		Enable RTC driver warning output to SYSLOG.
+
+config DEBUG_RTC_INFO
+	bool "RTC Informational Output"
+	default n
+	depends on DEBUG_INFO
+	---help---
+		Enable RTC driver informational output to SYSLOG.
+
+endif # DEBUG_RTC
 
 config DEBUG_SDIO
 	bool "SDIO Debug Output"

@@ -81,10 +81,6 @@
 #  error "CONFIG_STM32_PWR must selected to use this driver"
 #endif
 
-#ifndef CONFIG_DEBUG_FEATURES
-#  undef CONFIG_DEBUG_RTC
-#endif
-
 #if !defined(CONFIG_RTC_MAGIC)
 # define CONFIG_RTC_MAGIC (0xfacefeee)
 #endif
@@ -130,20 +126,6 @@
                                        RTC_ALRMR_MSK2 | RTC_ALRMR_MSK1)
 #define RTC_ALRMR_DIS_DATE_MASK       (RTC_ALRMR_MSK4)
 #define RTC_ALRMR_ENABLE              (0)
-
-/* Debug ****************************************************************************/
-
-#ifdef CONFIG_DEBUG_RTC
-#  define rtcerr             err
-#  define rtcinfo            info
-#  define rtcllerr           llerr
-#  define rtcllinfo          llinfo
-#else
-#  define rtcerr(x...)
-#  define rtcinfo(x...)
-#  define rtcllerr(x...)
-#  define rtcllinfo(x...)
-#endif
 
 /************************************************************************************
  * Private Types
@@ -208,36 +190,36 @@ static int rtchw_set_alrmbr(rtc_alarmreg_t alarmreg);
  *
  ************************************************************************************/
 
-#ifdef CONFIG_DEBUG_RTC
+#ifdef CONFIG_DEBUG_RTC_INFO
 static void rtc_dumpregs(FAR const char *msg)
 {
   int rtc_state;
 
-  rtcllerr("%s:\n", msg);
-  rtcllerr("      TR: %08x\n", getreg32(STM32_RTC_TR));
-  rtcllerr("      DR: %08x\n", getreg32(STM32_RTC_DR));
-  rtcllerr("      CR: %08x\n", getreg32(STM32_RTC_CR));
-  rtcllerr("     ISR: %08x\n", getreg32(STM32_RTC_ISR));
-  rtcllerr("    PRER: %08x\n", getreg32(STM32_RTC_PRER));
-  rtcllerr("    WUTR: %08x\n", getreg32(STM32_RTC_WUTR));
-  rtcllerr("  ALRMAR: %08x\n", getreg32(STM32_RTC_ALRMAR));
-  rtcllerr("  ALRMBR: %08x\n", getreg32(STM32_RTC_ALRMBR));
-  rtcllerr("  SHIFTR: %08x\n", getreg32(STM32_RTC_SHIFTR));
-  rtcllerr("    TSTR: %08x\n", getreg32(STM32_RTC_TSTR));
-  rtcllerr("    TSDR: %08x\n", getreg32(STM32_RTC_TSDR));
-  rtcllerr("   TSSSR: %08x\n", getreg32(STM32_RTC_TSSSR));
-  rtcllerr("    CALR: %08x\n", getreg32(STM32_RTC_CALR));
-  rtcllerr("   TAFCR: %08x\n", getreg32(STM32_RTC_TAFCR));
-  rtcllerr("ALRMASSR: %08x\n", getreg32(STM32_RTC_ALRMASSR));
-  rtcllerr("ALRMBSSR: %08x\n", getreg32(STM32_RTC_ALRMBSSR));
-  rtcllerr("MAGICREG: %08x\n", getreg32(RTC_MAGIC_REG));
+  rtcinfo("%s:\n", msg);
+  rtcinfo("      TR: %08x\n", getreg32(STM32_RTC_TR));
+  rtcinfo("      DR: %08x\n", getreg32(STM32_RTC_DR));
+  rtcinfo("      CR: %08x\n", getreg32(STM32_RTC_CR));
+  rtcinfo("     ISR: %08x\n", getreg32(STM32_RTC_ISR));
+  rtcinfo("    PRER: %08x\n", getreg32(STM32_RTC_PRER));
+  rtcinfo("    WUTR: %08x\n", getreg32(STM32_RTC_WUTR));
+  rtcinfo("  ALRMAR: %08x\n", getreg32(STM32_RTC_ALRMAR));
+  rtcinfo("  ALRMBR: %08x\n", getreg32(STM32_RTC_ALRMBR));
+  rtcinfo("  SHIFTR: %08x\n", getreg32(STM32_RTC_SHIFTR));
+  rtcinfo("    TSTR: %08x\n", getreg32(STM32_RTC_TSTR));
+  rtcinfo("    TSDR: %08x\n", getreg32(STM32_RTC_TSDR));
+  rtcinfo("   TSSSR: %08x\n", getreg32(STM32_RTC_TSSSR));
+  rtcinfo("    CALR: %08x\n", getreg32(STM32_RTC_CALR));
+  rtcinfo("   TAFCR: %08x\n", getreg32(STM32_RTC_TAFCR));
+  rtcinfo("ALRMASSR: %08x\n", getreg32(STM32_RTC_ALRMASSR));
+  rtcinfo("ALRMBSSR: %08x\n", getreg32(STM32_RTC_ALRMBSSR));
+  rtcinfo("MAGICREG: %08x\n", getreg32(RTC_MAGIC_REG));
 
   rtc_state =
     ((getreg32(STM32_EXTI_RTSR) & EXTI_RTC_ALARM) ? 0x1000 : 0) |
     ((getreg32(STM32_EXTI_FTSR) & EXTI_RTC_ALARM) ? 0x0100 : 0) |
     ((getreg32(STM32_EXTI_IMR)  & EXTI_RTC_ALARM) ? 0x0010 : 0) |
     ((getreg32(STM32_EXTI_EMR)  & EXTI_RTC_ALARM) ? 0x0001 : 0);
-  rtcllerr("EXTI (RTSR FTSR ISR EVT): %01x\n",rtc_state);
+  rtcinfo("EXTI (RTSR FTSR ISR EVT): %01x\n",rtc_state);
 }
 #else
 #  define rtc_dumpregs(msg)
@@ -257,16 +239,16 @@ static void rtc_dumpregs(FAR const char *msg)
  *
  ************************************************************************************/
 
-#ifdef CONFIG_DEBUG_RTC
+#ifdef CONFIG_DEBUG_RTC_INFO
 static void rtc_dumptime(FAR const struct tm *tp, FAR const char *msg)
 {
-  rtcllerr("%s:\n", msg);
-  rtcllerr("  tm_sec: %08x\n", tp->tm_sec);
-  rtcllerr("  tm_min: %08x\n", tp->tm_min);
-  rtcllerr(" tm_hour: %08x\n", tp->tm_hour);
-  rtcllerr(" tm_mday: %08x\n", tp->tm_mday);
-  rtcllerr("  tm_mon: %08x\n", tp->tm_mon);
-  rtcllerr(" tm_year: %08x\n", tp->tm_year);
+  rtcinfo("%s:\n", msg);
+  rtcinfo("  tm_sec: %08x\n", tp->tm_sec);
+  rtcinfo("  tm_min: %08x\n", tp->tm_min);
+  rtcinfo(" tm_hour: %08x\n", tp->tm_hour);
+  rtcinfo(" tm_mday: %08x\n", tp->tm_mday);
+  rtcinfo("  tm_mon: %08x\n", tp->tm_mon);
+  rtcinfo(" tm_year: %08x\n", tp->tm_year);
 }
 #else
 #  define rtc_dumptime(tp, msg)

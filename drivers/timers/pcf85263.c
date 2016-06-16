@@ -77,24 +77,6 @@
 
 #define PCF85263_I2C_ADDRESS 0x51
 
-#ifndef CONFIG_DEBUG_FEATURES
-#  undef CONFIG_DEBUG_RTC
-#endif
-
-/* Debug ****************************************************************************/
-
-#ifdef CONFIG_DEBUG_RTC
-#  define rtcerr    err
-#  define rtcinfo   info
-#  define rtcllerr  llerr
-#  define rtcllinfo llinfo
-#else
-#  define rtcerr(x...)
-#  define rtcinfo(x...)
-#  define rtcllerr(x...)
-#  define rtcllinfo(x...)
-#endif
-
 /************************************************************************************
  * Priviate Types
  ************************************************************************************/
@@ -140,20 +122,20 @@ static struct pcf85263_dev_s g_pcf85263;
  *
  ************************************************************************************/
 
-#if defined(CONFIG_DEBUG_RTC) && defined(CONFIG_DEBUG_INFO)
+#ifdef CONFIG_DEBUG_RTC_INFO
 static void rtc_dumptime(FAR struct tm *tp, FAR const char *msg)
 {
-  rtcllinfo("%s:\n", msg);
-  rtcllinfo("   tm_sec: %08x\n", tp->tm_sec);
-  rtcllinfo("   tm_min: %08x\n", tp->tm_min);
-  rtcllinfo("  tm_hour: %08x\n", tp->tm_hour);
-  rtcllinfo("  tm_mday: %08x\n", tp->tm_mday);
-  rtcllinfo("   tm_mon: %08x\n", tp->tm_mon);
-  rtcllinfo("  tm_year: %08x\n", tp->tm_year);
+  rtcinfo("%s:\n", msg);
+  rtcinfo("   tm_sec: %08x\n", tp->tm_sec);
+  rtcinfo("   tm_min: %08x\n", tp->tm_min);
+  rtcinfo("  tm_hour: %08x\n", tp->tm_hour);
+  rtcinfo("  tm_mday: %08x\n", tp->tm_mday);
+  rtcinfo("   tm_mon: %08x\n", tp->tm_mon);
+  rtcinfo("  tm_year: %08x\n", tp->tm_year);
 #if defined(CONFIG_LIBC_LOCALTIME) || defined(CONFIG_TIME_EXTENDED)
-  rtcllinfo("  tm_wday: %08x\n", tp->tm_wday);
-  rtcllinfo("  tm_yday: %08x\n", tp->tm_yday);
-  rtcllinfo(" tm_isdst: %08x\n", tp->tm_isdst);
+  rtcinfo("  tm_wday: %08x\n", tp->tm_wday);
+  rtcinfo("  tm_yday: %08x\n", tp->tm_yday);
+  rtcinfo(" tm_isdst: %08x\n", tp->tm_isdst);
 #endif
 }
 #else

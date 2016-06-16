@@ -693,6 +693,30 @@
 #  define pwmllinfo(x...)
 #endif
 
+#ifdef CONFIG_DEBUG_RTC_ERROR
+#  define rtcerr(format, ...)   err(format, ##__VA_ARGS__)
+#  define rtcllerr(format, ...) llerr(format, ##__VA_ARGS__)
+#else
+#  define rtcerr(x...)
+#  define rtcllerr(x...)
+#endif
+
+#ifdef CONFIG_DEBUG_RTC_WARN
+#  define rtcwarn(format, ...)   warn(format, ##__VA_ARGS__)
+#  define rtcllwarn(format, ...) llwarn(format, ##__VA_ARGS__)
+#else
+#  define rtcwarn(x...)
+#  define rtcllwarn(x...)
+#endif
+
+#ifdef CONFIG_DEBUG_RTC_INFO
+#  define rtcinfo(format, ...)   info(format, ##__VA_ARGS__)
+#  define rtcllinfo(format, ...) llinfo(format, ##__VA_ARGS__)
+#else
+#  define rtcinfo(x...)
+#  define rtcllinfo(x...)
+#endif
+
 #ifdef CONFIG_DEBUG_SENSORS_ERROR
 #  define snerr(format, ...)    err(format, ##__VA_ARGS__)
 #  define snllerr(format, ...)  llerr(format, ##__VA_ARGS__)
@@ -1354,6 +1378,30 @@
 #  define pwmllinfo   (void)
 #endif
 
+#ifdef CONFIG_DEBUG_RTC_ERROR
+#  define rtcerr      err
+#  define rtcllerr    llerr
+#else
+#  define rtcerr      (void)
+#  define rtcllerr    (void)
+#endif
+
+#ifdef CONFIG_DEBUG_RTC_WARN
+#  define rtcwarn     warn
+#  define rtcllwarn   llwarn
+#else
+#  define rtcwarn     (void)
+#  define rtcllwarn   (void)
+#endif
+
+#ifdef CONFIG_DEBUG_RTC_INFO
+#  define rtcinfo     info
+#  define rtcllinfo   llinfo
+#else
+#  define rtcinfo     (void)
+#  define rtcllinfo   (void)
+#endif
+
 #ifdef CONFIG_DEBUG_SENSORS_ERROR
 #  define snerr       err
 #  define snllerr     llerr
@@ -1650,6 +1698,14 @@
 #else
 #  define pwmerrdumpbuffer(m,b,n)
 #  define pwminfodumpbuffer(m,b,n)
+#endif
+
+#ifdef CONFIG_DEBUG_RTC
+#  define rtcerrdumpbuffer(m,b,n)  errdumpbuffer(m,b,n)
+#  define rtcinfodumpbuffer(m,b,n) infodumpbuffer(m,b,n)
+#else
+#  define rtcerrdumpbuffer(m,b,n)
+#  define rtcinfodumpbuffer(m,b,n)
 #endif
 
 #ifdef CONFIG_DEBUG_SENSORS
