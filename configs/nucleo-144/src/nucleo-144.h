@@ -185,5 +185,19 @@ void stm32_dma_alloc_init(void);
 int stm32_dma_alloc_init(void);
 #endif
 
+/****************************************************************************
+ * Name: stm32_adc_initialize
+ *
+ * Description:
+ *   Called at application startup time to initialize the ADC functionality.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ADC
+int board_adc_initialize(void);
+#endif
+
+
+
 #endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_NUCLEO_144_SRC_NUCLEO_144_H */

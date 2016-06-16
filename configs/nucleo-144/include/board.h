@@ -311,6 +311,13 @@
  * USART8: has no remap
  */
 
+/* DMA channels *************************************************************/
+/* ADC */
+
+#define ADC1_DMA_CHAN DMAMAP_ADC1_1
+#define ADC2_DMA_CHAN DMAMAP_ADC2_1
+#define ADC3_DMA_CHAN DMAMAP_ADC3_1
+
 /* SPI
  *
  *
