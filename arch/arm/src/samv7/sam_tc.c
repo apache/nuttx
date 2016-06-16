@@ -77,6 +77,10 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#ifndef CONFIG_DEBUG_TIMER_INFO
+#  undef CONFIG_SAMV7_TC_REGDEBUG
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -643,19 +647,19 @@ static void sam_regdump(struct sam_chan_s *chan, const char *msg)
   uintptr_t base;
 
   base = tc->base;
-  _llerr("TC%d [%08x]: %s\n", tc->tc, (int)base, msg);
-  _llerr("  BMR: %08x QIMR: %08x QISR: %08x WPMR: %08x\n",
-        getreg32(base+SAM_TC_BMR_OFFSET), getreg32(base+SAM_TC_QIMR_OFFSET),
-        getreg32(base+SAM_TC_QISR_OFFSET), getreg32(base+SAM_TC_WPMR_OFFSET));
+  tmrinfo("TC%d [%08x]: %s\n", tc->tc, (int)base, msg);
+  tmrinfo("  BMR: %08x QIMR: %08x QISR: %08x WPMR: %08x\n",
+          getreg32(base+SAM_TC_BMR_OFFSET), getreg32(base+SAM_TC_QIMR_OFFSET),
+          getreg32(base+SAM_TC_QISR_OFFSET), getreg32(base+SAM_TC_WPMR_OFFSET));
 
   base = chan->base;
-  _llerr("TC%d Channel %d [%08x]: %s\n", tc->tc, chan->chan, (int)base, msg);
-  _llerr("  CMR: %08x SSMR: %08x  RAB: %08x   CV: %08x\n",
-        getreg32(base+SAM_TC_CMR_OFFSET), getreg32(base+SAM_TC_SMMR_OFFSET),
-        getreg32(base+SAM_TC_RAB_OFFSET), getreg32(base+SAM_TC_CV_OFFSET));
-  _llerr("   RA: %08x   RB: %08x   RC: %08x  IMR: %08x\n",
-        getreg32(base+SAM_TC_RA_OFFSET), getreg32(base+SAM_TC_RB_OFFSET),
-        getreg32(base+SAM_TC_RC_OFFSET), getreg32(base+SAM_TC_IMR_OFFSET));
+  tmrinfo("TC%d Channel %d [%08x]: %s\n", tc->tc, chan->chan, (int)base, msg);
+  tmrinfo("  CMR: %08x SSMR: %08x  RAB: %08x   CV: %08x\n",
+          getreg32(base+SAM_TC_CMR_OFFSET), getreg32(base+SAM_TC_SMMR_OFFSET),
+          getreg32(base+SAM_TC_RAB_OFFSET), getreg32(base+SAM_TC_CV_OFFSET));
+  tmrinfo("   RA: %08x   RB: %08x   RC: %08x  IMR: %08x\n",
+          getreg32(base+SAM_TC_RA_OFFSET), getreg32(base+SAM_TC_RB_OFFSET),
+          getreg32(base+SAM_TC_RC_OFFSET), getreg32(base+SAM_TC_IMR_OFFSET));
 }
 #endif
 
@@ -698,7 +702,7 @@ static bool sam_checkreg(struct sam_tc_s *tc, bool wr, uint32_t regaddr,
         {
           /* Yes... show how many times we did it */
 
-          _llerr("...[Repeats %d times]...\n", tc->ntimes);
+          tmrinfo("...[Repeats %d times]...\n", tc->ntimes);
         }
 
       /* Save information about the new access */
@@ -733,7 +737,7 @@ static inline uint32_t sam_tc_getreg(struct sam_chan_s *chan,
 #ifdef CONFIG_SAMV7_TC_REGDEBUG
   if (sam_checkreg(tc, false, regaddr, regval))
     {
-      _llerr("%08x->%08x\n", regaddr, regval);
+      tmrinfo("%08x->%08x\n", regaddr, regval);
     }
 #endif
 
@@ -757,7 +761,7 @@ static inline void sam_tc_putreg(struct sam_chan_s *chan, uint32_t regval,
 #ifdef CONFIG_SAMV7_TC_REGDEBUG
   if (sam_checkreg(tc, true, regaddr, regval))
     {
-      _llerr("%08x<-%08x\n", regaddr, regval);
+      tmrinfo("%08x<-%08x\n", regaddr, regval);
     }
 #endif
 
@@ -781,7 +785,7 @@ static inline uint32_t sam_chan_getreg(struct sam_chan_s *chan,
 #ifdef CONFIG_SAMV7_TC_REGDEBUG
   if (sam_checkreg(chan->tc, false, regaddr, regval))
     {
-      _llerr("%08x->%08x\n", regaddr, regval);
+      tmrinfo("%08x->%08x\n", regaddr, regval);
     }
 #endif
 
@@ -804,7 +808,7 @@ static inline void sam_chan_putreg(struct sam_chan_s *chan, unsigned int offset,
 #ifdef CONFIG_SAMV7_TC_REGDEBUG
   if (sam_checkreg(chan->tc, true, regaddr, regval))
     {
-      _llerr("%08x<-%08x\n", regaddr, regval);
+      tmrinfo("%08x<-%08x\n", regaddr, regval);
     }
 #endif
 
@@ -1066,7 +1070,7 @@ static int sam_tc_mcksrc(uint32_t frequency, uint32_t *tcclks,
     {
       /* If no divisor can be found, return -ERANGE */
 
-      tmrerr("Lower bound search failed\n");
+      tmrerr("ERROR: Lower bound search failed\n");
       return -ERANGE;
     }
 
@@ -1225,7 +1229,7 @@ static inline struct sam_chan_s *sam_tc_initialize(int channel)
     {
       /* Yes.. return a failure */
 
-      tmrerr("Channel %d is in-use\n", channel);
+      tmrerr("ERROR: Channel %d is in-use\n", channel);
       sam_givesem(tc);
       return NULL;
     }

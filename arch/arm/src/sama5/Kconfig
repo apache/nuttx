@@ -1393,9 +1393,9 @@ endif # SAMA5_LCDC_HCR
 config SAMA5_LCDC_REGDEBUG
 	bool "Register-Level Debug"
 	default n
-	depends on DEBUG_FEATURES
+	depends on DEBUG_LCD_INFO
 	---help---
-		Enable very low-level register access debug.  Depends on CONFIG_DEBUG_FEATURES.
+		Enable very low-level register access debug.  Depends on CONFIG_DEBUG_LCD_INFO.
 
 endmenu # LCDC configuration
 endif # SAMA5_LCDC
@@ -1499,9 +1499,9 @@ endif # !SAMA5_GMAC_AUTONEG
 config SAMA5_GMAC_REGDEBUG
 	bool "Register-Level Debug"
 	default n
-	depends on DEBUG_FEATURES
+	depends on DEBUG_NET_INFO
 	---help---
-		Enable very low-level register access debug.  Depends on CONFIG_DEBUG_FEATURES.
+		Enable very low-level register access debug.  Depends on CONFIG_DEBUG_NET_INFO.
 
 endmenu # GMAC device driver options
 endif # SAMA5_GMAC
@@ -1678,9 +1678,9 @@ config SAMA5_EMACA_NBC
 config SAMA5_EMACA_REGDEBUG
 	bool "Register-Level Debug"
 	default n
-	depends on DEBUG_FEATURES
+	depends on DEBUG_NET_FEATURES
 	---help---
-		Enable very low-level register access debug.  Depends on CONFIG_DEBUG_FEATURES.
+		Enable very low-level register access debug.  Depends on CONFIG_DEBUG_NET_FEATURES.
 
 endmenu # EMAC device driver options
 endif # SAMA5_EMACA
@@ -2087,9 +2087,9 @@ config SAMA5_EMACB_DEBUG
 config SAMA5_EMACB_REGDEBUG
 	bool "Register-Level Debug"
 	default n
-	depends on DEBUG_FEATURES
+	depends on DEBUG_NET_INFO
 	---help---
-		Enable very low-level register access debug.  Depends on CONFIG_DEBUG_FEATURES.
+		Enable very low-level register access debug.  Depends on CONFIG_DEBUG_NET_INFO.
 
 endmenu # EMAC device driver options
 endif # SAMA5_EMACB
@@ -2364,11 +2364,11 @@ config SAMA5_SPI_DMADEBUG
 
 config SAMA5_SPI_REGDEBUG
 	bool "SPI Register level debug"
-	depends on DEBUG_FEATURES
+	depends on DEBUG_SPI_INFO
 	default n
 	---help---
 		Output detailed register-level SPI device debug information.
-		Requires also CONFIG_DEBUG_FEATURES.
+		Requires also CONFIG_DEBUG_SPI_INFO.
 
 endmenu # SPI device driver options
 endif # SAMA5_SPI0 || SAMA5_SPI1
@@ -2399,11 +2399,11 @@ config SAMA5_TWI3_FREQUENCY
 
 config SAMA5_TWI_REGDEBUG
 	bool "TWI register level debug"
-	depends on DEBUG_FEATURES
+	depends on DEBUG_I2C_INFO
 	default n
 	---help---
 		Output detailed register-level TWI device debug information.
-		Very invasive! Requires also CONFIG_DEBUG_FEATURES.
+		Very invasive! Requires also CONFIG_DEBUG_I2C_INFO.
 
 endmenu # TWI device driver options
 endif # SAMA5_TWI0 || SAMA5_TWI1 || SAMA5_TWI2 || SAMA5_TWI3
@@ -2776,11 +2776,11 @@ config SAMA5_SSC_DMADEBUG
 
 config SAMA5_SSC_REGDEBUG
 	bool "SSC Register level debug"
-	depends on DEBUG_FEATURES
+	depends on DEBUG_I2S_INFO
 	default n
 	---help---
 		Output detailed register-level SSC device debug information.
-		Very invasive! Requires also CONFIG_DEBUG_FEATURES.
+		Very invasive! Requires also CONFIG_DEBUG_I2S_INFO.
 
 config SAMA5_SSC_QDEBUG
 	bool "SSC Queue debug"
@@ -2881,11 +2881,11 @@ config SAMA5_HSMCI_CMDDEBUG
 
 config SAMA5_HSMCI_REGDEBUG
 	bool "HSMCI Register level debug"
-	depends on DEBUG_FEATURES
+	depends on DEBUG_MEMCARD_INFO
 	default n
 	---help---
 		Output detailed register-level HSCMI device debug information.
-		Very invasive! Requires also CONFIG_DEBUG_FEATURES.
+		Very invasive! Requires also CONFIG_DEBUG_MEMCARD_INFO.
 
 endmenu # HSMCI device driver options
 endif # SAMA5_HSMCI0 || SAMA5_HSMCI1 || SAMA5_HSMCI2
@@ -2920,7 +2920,7 @@ config SAMA5_UDPHS_PREALLOCATE
 config SAMA5_UDPHS_REGDEBUG
 	bool "Enable low-level UDPHS register debug"
 	default n
-	depends on DEBUG_FEATURES
+	depends on DEBUG_USB_INFO
 
 endmenu # USB High Speed Device Controller driver (DCD) options
 endif # SAMA5_UDPHS
@@ -2960,7 +2960,7 @@ config SAMA5_OHCI_TDBUFSIZE
 config SAMA5_OHCI_REGDEBUG
 	bool "Enable low-level OHCI register debug"
 	default n
-	depends on DEBUG_FEATURES
+	depends on DEBUG_USB_INFO
 
 endif # SAMA5_OHCI
 
@@ -3009,7 +3009,7 @@ config SAMA5_EHCI_PREALLOCATE
 config SAMA5_EHCI_REGDEBUG
 	bool "Enable low-level EHCI register debug"
 	default n
-	depends on DEBUG_FEATURES
+	depends on DEBUG_USB_INFO
 
 endif # SAMA5_EHCI
 
@@ -3661,7 +3661,7 @@ endif # SAMA5_ADC_HAVE_CHAN
 config SAMA5_ADC_REGDEBUG
 	bool "Enable register-level ADC/touchscreen debug"
 	default n
-	depends on DEBUG_FEATURES
+	depends on DEBUG_ANALOG_INFO
 	---help---
 		Enable very low register-level debug output.
 
@@ -3915,11 +3915,11 @@ config SAMA5_TC_DEBUG
 
 config SAMA5_TC_REGDEBUG
 	bool "TC register level debug"
-	depends on DEBUG_FEATURES
+	depends on DEBUG_TIMER_INFO
 	default n
 	---help---
 		Output detailed register-level Timer/Counter device debug
-		information. Very invasive! Requires also CONFIG_DEBUG_FEATURES.
+		information. Very invasive! Requires also CONFIG_DEBUG_TIMER_INFO.
 
 endmenu # Timer/counter Configuration
 endif # SAMA5_HAVE_TC
@@ -4150,7 +4150,7 @@ endif # SAMA5_PWM_CHAN3
 config SAMA5_PWM_REGDEBUG
 	bool "Enable register-level PWM debug"
 	default n
-	depends on DEBUG_FEATURES
+	depends on DEBUG_PWM_INFO
 	---help---
 		Enable very low register-level debug output.
 
@@ -4185,7 +4185,7 @@ config SAMA5_WDT_IDLEHALT
 config SAMA5_WDT_REGDEBUG
 	bool "Register level debug"
 	default n
-	depends on DEBUG_FEATURES
+	depends on DEBUG_WATCHDOG_INFO
 	---help---
 		Enable low-level register debug output
 
@@ -4699,10 +4699,9 @@ config SAMA5_NAND_DMADEBUG
 config SAMA5_NAND_REGDEBUG
 	bool "Register-Level NAND Debug"
 	default n
-	depends on DEBUG_FEATURES && DEBUG_FS
+	depends on DEBUG_FS_INFO
 	---help---
-		Enable very low-level register access debug.  Depends on CONFIG_DEBUG_FEATURES and
-		DEBUG_FS.
+		Enable very low-level register access debug.  Depends on CONFIG_DEBUG_FS_INFO.
 
 config SAMA5_NAND_DUMP
 	bool "NAND data dump"

@@ -79,6 +79,10 @@
 
 /* Configuration ************************************************************/
 
+#ifndef CONFIG_DEBUG_MEMCARD_INFO
+#  undef CONFIG_SAMA5_HSMCI_REGDEBUG
+#endif
+
 #if defined(ATSAMA5D3)
   /* The SAMA5D3 has three HSMCI blocks: HSMCI0-2.  HSMCI0 requires DMAC0
    * support, HSMCI1-2 require DMAC1 support.
@@ -725,7 +729,7 @@ static bool sam_checkreg(struct sam_dev_s *priv, bool wr, uint32_t value,
         {
           /* Yes... show how many times we did it */
 
-          _llerr("...[Repeats %d times]...\n", priv->ntimes);
+          mcinfo("...[Repeats %d times]...\n", priv->ntimes);
         }
 
       /* Save information about the new access */
@@ -758,7 +762,7 @@ static inline uint32_t sam_getreg(struct sam_dev_s *priv, unsigned int offset)
 #ifdef CONFIG_SAMA5_HSMCI_REGDEBUG
   if (sam_checkreg(priv, false, value, address))
     {
-      _llerr("%08x->%08x\n", address, value);
+      mcinfo("%08x->%08x\n", address, value);
     }
 #endif
 
@@ -781,7 +785,7 @@ static inline void sam_putreg(struct sam_dev_s *priv, uint32_t value,
 #ifdef CONFIG_SAMA5_HSMCI_REGDEBUG
   if (sam_checkreg(priv, true, value, address))
     {
-      _llerr("%08x<-%08x\n", address, value);
+      mcinfo("%08x<-%08x\n", address, value);
     }
 #endif
 
@@ -1003,23 +1007,23 @@ static void sam_hsmcisample(struct sam_dev_s *priv,
 static void sam_hsmcidump(struct sam_dev_s *priv,
                           struct sam_hsmciregs_s *regs, const char *msg)
 {
-  ferr("HSMCI Registers: %s\n", msg);
-  ferr("      MR[%08x]: %08x\n", priv->base + SAM_HSMCI_MR_OFFSET,    regs->mr);
-  ferr("    DTOR[%08x]: %08x\n", priv->base + SAM_HSMCI_DTOR_OFFSET,  regs->dtor);
-  ferr("    SDCR[%08x]: %08x\n", priv->base + SAM_HSMCI_SDCR_OFFSET,  regs->sdcr);
-  ferr("    ARGR[%08x]: %08x\n", priv->base + SAM_HSMCI_ARGR_OFFSET,  regs->argr);
-  ferr("    BLKR[%08x]: %08x\n", priv->base + SAM_HSMCI_BLKR_OFFSET,  regs->blkr);
-  ferr("   CSTOR[%08x]: %08x\n", priv->base + SAM_HSMCI_CSTOR_OFFSET, regs->cstor);
-  ferr("   RSPR0[%08x]: %08x\n", priv->base + SAM_HSMCI_RSPR0_OFFSET, regs->rsp0);
-  ferr("   RSPR1[%08x]: %08x\n", priv->base + SAM_HSMCI_RSPR1_OFFSET, regs->rsp1);
-  ferr("   RSPR2[%08x]: %08x\n", priv->base + SAM_HSMCI_RSPR2_OFFSET, regs->rsp2);
-  ferr("   RSPR3[%08x]: %08x\n", priv->base + SAM_HSMCI_RSPR3_OFFSET, regs->rsp3);
-  ferr("      SR[%08x]: %08x\n", priv->base + SAM_HSMCI_SR_OFFSET,    regs->sr);
-  ferr("     IMR[%08x]: %08x\n", priv->base + SAM_HSMCI_IMR_OFFSET,   regs->imr);
-  ferr("     DMA[%08x]: %08x\n", priv->base + SAM_HSMCI_DMA_OFFSET,   regs->dma);
-  ferr("     CFG[%08x]: %08x\n", priv->base + SAM_HSMCI_CFG_OFFSET,   regs->cfg);
-  ferr("    WPMR[%08x]: %08x\n", priv->base + SAM_HSMCI_WPMR_OFFSET,  regs->wpmr);
-  ferr("    WPSR[%08x]: %08x\n", priv->base + SAM_HSMCI_WPSR_OFFSET,  regs->wpsr);
+  lcdinfo("HSMCI Registers: %s\n", msg);
+  lcdinfo("      MR[%08x]: %08x\n", priv->base + SAM_HSMCI_MR_OFFSET,    regs->mr);
+  lcdinfo("    DTOR[%08x]: %08x\n", priv->base + SAM_HSMCI_DTOR_OFFSET,  regs->dtor);
+  lcdinfo("    SDCR[%08x]: %08x\n", priv->base + SAM_HSMCI_SDCR_OFFSET,  regs->sdcr);
+  lcdinfo("    ARGR[%08x]: %08x\n", priv->base + SAM_HSMCI_ARGR_OFFSET,  regs->argr);
+  lcdinfo("    BLKR[%08x]: %08x\n", priv->base + SAM_HSMCI_BLKR_OFFSET,  regs->blkr);
+  lcdinfo("   CSTOR[%08x]: %08x\n", priv->base + SAM_HSMCI_CSTOR_OFFSET, regs->cstor);
+  lcdinfo("   RSPR0[%08x]: %08x\n", priv->base + SAM_HSMCI_RSPR0_OFFSET, regs->rsp0);
+  lcdinfo("   RSPR1[%08x]: %08x\n", priv->base + SAM_HSMCI_RSPR1_OFFSET, regs->rsp1);
+  lcdinfo("   RSPR2[%08x]: %08x\n", priv->base + SAM_HSMCI_RSPR2_OFFSET, regs->rsp2);
+  lcdinfo("   RSPR3[%08x]: %08x\n", priv->base + SAM_HSMCI_RSPR3_OFFSET, regs->rsp3);
+  lcdinfo("      SR[%08x]: %08x\n", priv->base + SAM_HSMCI_SR_OFFSET,    regs->sr);
+  lcdinfo("     IMR[%08x]: %08x\n", priv->base + SAM_HSMCI_IMR_OFFSET,   regs->imr);
+  lcdinfo("     DMA[%08x]: %08x\n", priv->base + SAM_HSMCI_DMA_OFFSET,   regs->dma);
+  lcdinfo("     CFG[%08x]: %08x\n", priv->base + SAM_HSMCI_CFG_OFFSET,   regs->cfg);
+  lcdinfo("    WPMR[%08x]: %08x\n", priv->base + SAM_HSMCI_WPMR_OFFSET,  regs->wpmr);
+  lcdinfo("    WPSR[%08x]: %08x\n", priv->base + SAM_HSMCI_WPSR_OFFSET,  regs->wpsr);
 }
 #endif
 
@@ -1093,7 +1097,7 @@ static void sam_xfrdumpone(struct sam_dev_s *priv, int index,
     }
   else
     {
-      ferr("%s: Not collected\n", msg);
+      lcdinfo("%s: Not collected\n", msg);
     }
 }
 #endif
@@ -2253,7 +2257,7 @@ static int sam_sendsetup(FAR struct sdio_dev_s *dev, FAR const uint8_t *buffer,
         {
           /* Some fatal error has occurred */
 
-          ferr("ERROR: sr %08x\n", sr);
+          lcderr("ERROR: sr %08x\n", sr);
           return -EIO;
         }
       else if ((sr & HSMCI_INT_TXRDY) != 0)
@@ -2388,7 +2392,7 @@ static int sam_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
             {
               /* Yes.. Was the error some kind of timeout? */
 
-              ferr("ERROR: cmd: %08x events: %08x SR: %08x\n",
+              lcderr("ERROR: cmd: %08x events: %08x SR: %08x\n",
                    cmd, priv->cmdrmask, sr);
 
               if ((pending & HSMCI_RESPONSE_TIMEOUT_ERRORS) != 0)
@@ -2418,8 +2422,8 @@ static int sam_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
        }
       else if (--timeout <= 0)
         {
-          ferr("ERROR: Timeout cmd: %08x events: %08x SR: %08x\n",
-               cmd, priv->cmdrmask, sr);
+          lcderr("ERROR: Timeout cmd: %08x events: %08x SR: %08x\n",
+                 cmd, priv->cmdrmask, sr);
 
           priv->wkupevent = SDIOWAIT_TIMEOUT;
           return -ETIMEDOUT;
@@ -2493,7 +2497,7 @@ static int sam_recvshort(FAR struct sdio_dev_s *dev,
 #ifdef CONFIG_DEBUG_FEATURES
   if (!rshort)
     {
-      ferr("ERROR: rshort=NULL\n");
+      lcderr("ERROR: rshort=NULL\n");
       ret = -EINVAL;
     }
 
@@ -2505,7 +2509,7 @@ static int sam_recvshort(FAR struct sdio_dev_s *dev,
            (cmd & MMCSD_RESPONSE_MASK) != MMCSD_R3_RESPONSE &&
            (cmd & MMCSD_RESPONSE_MASK) != MMCSD_R7_RESPONSE)
     {
-      ferr("ERROR: Wrong response CMD=%08x\n", cmd);
+      lcderr("ERROR: Wrong response CMD=%08x\n", cmd);
       ret = -EINVAL;
     }
   else
@@ -2555,7 +2559,7 @@ static int sam_recvlong(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t rlong
 
   if ((cmd & MMCSD_RESPONSE_MASK) != MMCSD_R2_RESPONSE)
     {
-      ferr("ERROR: Wrong response CMD=%08x\n", cmd);
+      lcderr("ERROR: Wrong response CMD=%08x\n", cmd);
       ret = -EINVAL;
     }
   else
@@ -2746,7 +2750,7 @@ static sdio_eventset_t sam_eventwait(FAR struct sdio_dev_s *dev,
                        1, (uint32_t)priv);
       if (ret != OK)
         {
-           ferr("ERROR: wd_start failed: %d\n", ret);
+           lcderr("ERROR: wd_start failed: %d\n", ret);
         }
     }
 
@@ -3150,7 +3154,7 @@ static void sam_callback(void *arg)
         {
           /* NOTE: Currently, work_cancel only returns success */
 
-          ferr("ERROR: Failed to cancel work: %d\n", ret);
+          lcderr("ERROR: Failed to cancel work: %d\n", ret);
         }
 
       fllinfo("Queuing callback to %p(%p)\n", priv->callback, priv->cbarg);
@@ -3160,7 +3164,7 @@ static void sam_callback(void *arg)
         {
           /* NOTE: Currently, work_queue only returns success */
 
-          ferr("ERROR: Failed to schedule work: %d\n", ret);
+          lcderr("ERROR: Failed to schedule work: %d\n", ret);
         }
     }
 
@@ -3199,7 +3203,7 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
    * for now, an* HSMCI peripheral does correspond to a slot.
    */
 
-  ferr("slotno: %d\n", slotno);
+  lcdinfo("slotno: %d\n", slotno);
 
 #ifdef CONFIG_SAMA5_HSMCI0
   if (slotno == 0)

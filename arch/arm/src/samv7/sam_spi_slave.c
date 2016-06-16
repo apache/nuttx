@@ -74,6 +74,10 @@
 #  define CONFIG_SAMV7_SPI_SLAVE_QSIZE 8
 #endif
 
+#ifndef CONFIG_DEBUG_SPI_INFO
+#  undef CONFIG_SAMV7_SPI_REGDEBUG
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -248,7 +252,7 @@ static bool spi_checkreg(struct sam_spidev_s *priv, bool wr, uint32_t value,
         {
           /* Yes... show how many times we did it */
 
-          _llerr("...[Repeats %d times]...\n", priv->ntimes);
+          spiinfo("...[Repeats %d times]...\n", priv->ntimes);
         }
 
       /* Save information about the new access */
@@ -281,7 +285,7 @@ static uint32_t spi_getreg(struct sam_spidev_s *priv, unsigned int offset)
 #ifdef CONFIG_SAMV7_SPI_REGDEBUG
   if (spi_checkreg(priv, false, value, address))
     {
-      _llerr("%08x->%08x\n", address, value);
+      spiinfo("%08x->%08x\n", address, value);
     }
 #endif
 
@@ -304,7 +308,7 @@ static void spi_putreg(struct sam_spidev_s *priv, uint32_t value,
 #ifdef CONFIG_SAMV7_SPI_REGDEBUG
   if (spi_checkreg(priv, true, value, address))
     {
-      _llerr("%08x<-%08x\n", address, value);
+      spiinfo("%08x<-%08x\n", address, value);
     }
 #endif
 
@@ -442,7 +446,7 @@ static int spi_interrupt(struct sam_spidev_s *priv)
         {
           /* If debug is enabled, report any overrun errors */
 
-          spierr("Error: Overrun (OVRES): %08x\n", pending);
+          spierr("ERROR: Overrun (OVRES): %08x\n", pending);
 
           /* OVRES was cleared by the status read. */
         }
@@ -509,7 +513,7 @@ static int spi_interrupt(struct sam_spidev_s *priv)
         {
           /* If debug is enabled, report any overrun errors */
 
-          spierr("Error: Underrun (UNDEX): %08x\n", pending);
+          spierr("ERROR: Underrun (UNDEX): %08x\n", pending);
 
           /* UNDES was cleared by the status read. */
         }

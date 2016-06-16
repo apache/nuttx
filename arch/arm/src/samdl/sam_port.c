@@ -62,7 +62,7 @@
  * Private Data
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG_PORT
+#ifdef CONFIG_DEBUG_GPIO_INFO
 static const char g_portchar[2]   = { 'A', 'B' };
 #endif
 
@@ -521,7 +521,7 @@ bool sam_portread(port_pinset_t pinset)
  *
  ************************************************************************************/
 
-#ifdef CONFIG_DEBUG_PORT
+#ifdef CONFIG_DEBUG_GPIO_INFO
 int sam_dumpport(uint32_t pinset, const char *msg)
 {
   irqstate_t    flags;
@@ -538,20 +538,20 @@ int sam_dumpport(uint32_t pinset, const char *msg)
   /* The following requires exclusive access to the PORT registers */
 
   flags = enter_critical_section();
-  _llerr("PORT%c pin: %d pinset: %08x base: %08x -- %s\n",
-        g_portchar[port], pin, pinset, base, msg);
-  _llerr("  DIR: %08x OUT: %08x IN: %08x\n",
-        getreg32(base + SAM_PORT_DIR_OFFSET),
-        getreg32(base + SAM_PORT_OUT_OFFSET),
-        getreg32(base + SAM_PORT_IN_OFFSET));
-  _llerr("  CTRL: %08x WRCONFIG: %08x\n",
-        getreg32(base + SAM_PORT_CTRL_OFFSET),
-        getreg32(base + SAM_PORT_WRCONFIG_OFFSET));
-  _llerr("  PMUX[%08x]: %02x PINCFG[%08x]: %02x\n",
-        base + SAM_PORT_PMUX_OFFSET(pin),
-        getreg8(base + SAM_PORT_PMUX_OFFSET(pin)),
-        base + SAM_PORT_PINCFG_OFFSET(pin),
-        getreg8(base + SAM_PORT_PINCFG_OFFSET(pin)));
+  gpioinfo("PORT%c pin: %d pinset: %08x base: %08x -- %s\n",
+           g_portchar[port], pin, pinset, base, msg);
+  gpioinfo("  DIR: %08x OUT: %08x IN: %08x\n",
+           getreg32(base + SAM_PORT_DIR_OFFSET),
+           getreg32(base + SAM_PORT_OUT_OFFSET),
+           getreg32(base + SAM_PORT_IN_OFFSET));
+  gpioinfo("  CTRL: %08x WRCONFIG: %08x\n",
+           getreg32(base + SAM_PORT_CTRL_OFFSET),
+           getreg32(base + SAM_PORT_WRCONFIG_OFFSET));
+  gpioinfo("  PMUX[%08x]: %02x PINCFG[%08x]: %02x\n",
+           base + SAM_PORT_PMUX_OFFSET(pin),
+           getreg8(base + SAM_PORT_PMUX_OFFSET(pin)),
+           base + SAM_PORT_PINCFG_OFFSET(pin),
+           getreg8(base + SAM_PORT_PINCFG_OFFSET(pin)));
 
   leave_critical_section(flags);
   return OK;

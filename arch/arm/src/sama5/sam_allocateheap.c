@@ -312,9 +312,9 @@ void up_addregion(void)
     }
   else
     {
-      _llerr("ERROR: SDRAM memory not added to heap.  CONFIG_MM_NREGIONS=%d\n",
-            CONFIG_MM_REGIONS);
-      _llerr("       Increase the size of CONFIG_MM_NREGIONS\n");
+      serr("ERROR: SDRAM memory not added to heap.  CONFIG_MM_NREGIONS=%d\n",
+           CONFIG_MM_REGIONS);
+      serr("       Increase the size of CONFIG_MM_NREGIONS\n");
     }
 #endif
 
@@ -331,9 +331,9 @@ void up_addregion(void)
     }
   else
     {
-      _llerr("ERROR: CS0 memory not added to heap.  CONFIG_MM_NREGIONS=%d\n",
-            CONFIG_MM_REGIONS);
-      _llerr("       Increase the size of CONFIG_MM_NREGIONS\n");
+      serr("ERROR: CS0 memory not added to heap.  CONFIG_MM_NREGIONS=%d\n",
+           CONFIG_MM_REGIONS);
+      serr("       Increase the size of CONFIG_MM_NREGIONS\n");
     }
 #endif
 
@@ -350,9 +350,9 @@ void up_addregion(void)
     }
   else
     {
-      _llerr("ERROR: CS1 memory not added to heap.  CONFIG_MM_NREGIONS=%d\n",
-            CONFIG_MM_REGIONS);
-      _llerr("       Increase the size of CONFIG_MM_NREGIONS\n");
+      serr("ERROR: CS1 memory not added to heap.  CONFIG_MM_NREGIONS=%d\n",
+           CONFIG_MM_REGIONS);
+      serr("       Increase the size of CONFIG_MM_NREGIONS\n");
     }
 #endif
 
@@ -369,9 +369,9 @@ void up_addregion(void)
     }
   else
     {
-      _llerr("ERROR: CS2 memory not added to heap.  CONFIG_MM_NREGIONS=%d\n",
-            CONFIG_MM_REGIONS);
-      _llerr("       Increase the size of CONFIG_MM_NREGIONS\n");
+      serr("ERROR: CS2 memory not added to heap.  CONFIG_MM_NREGIONS=%d\n",
+           CONFIG_MM_REGIONS);
+      serr("       Increase the size of CONFIG_MM_NREGIONS\n");
     }
 #endif
 
@@ -388,9 +388,9 @@ void up_addregion(void)
     }
   else
     {
-      _llerr("ERROR: CS3 memory not added to heap.  CONFIG_MM_NREGIONS=%d\n",
-            CONFIG_MM_REGIONS);
-      _llerr("       Increase the size of CONFIG_MM_NREGIONS\n");
+      serr("ERROR: CS3 memory not added to heap.  CONFIG_MM_NREGIONS=%d\n",
+           CONFIG_MM_REGIONS);
+      serr("       Increase the size of CONFIG_MM_NREGIONS\n");
     }
 #endif
 
@@ -398,9 +398,9 @@ void up_addregion(void)
 
   if (nregions > 0)
     {
-      _llerr("ERROR: Not all regions added to heap: %d added, but CONFIG_MM_NREGIONS=%d\n",
-            CONFIG_MM_REGIONS - nregions, CONFIG_MM_REGIONS);
-      _llerr("       Decrease the size of CONFIG_MM_NREGIONS\n");
+      serr("ERROR: Not all regions added to heap: %d added, but CONFIG_MM_NREGIONS=%d\n",
+           CONFIG_MM_REGIONS - nregions, CONFIG_MM_REGIONS);
+      serr("       Decrease the size of CONFIG_MM_NREGIONS\n");
     }
 }
 #endif

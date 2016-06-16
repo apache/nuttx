@@ -274,7 +274,7 @@ static int rtc_interrupt(int irq, void *context)
   ret = work_queue(LPWORK, &g_alarmwork, rtc_worker, NULL, 0);
   if (ret < 0)
     {
-      rtcllerr("ERRPR: work_queue failed: %d\n", ret);
+      rtcllerr("ERR0R: work_queue failed: %d\n", ret);
     }
 
   /* Disable any further alarm interrupts */
