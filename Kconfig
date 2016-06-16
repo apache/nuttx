@@ -1225,14 +1225,43 @@ config DEBUG_RTC_INFO
 
 endif # DEBUG_RTC
 
-config DEBUG_SDIO
-	bool "SDIO Debug Output"
+config DEBUG_MEMCARD
+	bool "Memory Card Driver Debug Features"
 	default n
 	depends on MMCSD_SDIO
 	---help---
-		Enable SDIO driver debug SYSLOG output (disabled by default).
+		Enable MMC/SD memory card Driver debug features.
+
 		Support for this debug option is architecture-specific and may not
 		be available for some MCUs.
+
+if DEBUG_MEMCARD
+
+config DEBUG_MEMCARD_ERROR
+	bool "Memory Card Driver Error Output"
+	default n
+	depends on DEBUG_ERROR
+	---help---
+		Enable MMC/SD memory card driver error output to SYSLOG.
+
+		Support for this debug option is architecture-specific and may not
+		be available for some MCUs.
+
+config DEBUG_MEMCARD_WARN
+	bool "Memory Card Driver Warnings Output"
+	default n
+	depends on DEBUG_WARN
+	---help---
+		Enable MMC/SD memory card driver warning output to SYSLOG.
+
+config DEBUG_MEMCARD_INFO
+	bool "Memory Card Driver Informational Output"
+	default n
+	depends on DEBUG_INFO
+	---help---
+		Enable MMC/SD memory card driver informational output to SYSLOG.
+
+endif # DEBUG_MEMCARD
 
 config DEBUG_SENSORS
 	bool "Sensor Debug Features"

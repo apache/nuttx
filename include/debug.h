@@ -717,6 +717,30 @@
 #  define rtcllinfo(x...)
 #endif
 
+#ifdef CONFIG_DEBUG_MEMCARD_ERROR
+#  define mcerr(format, ...)   err(format, ##__VA_ARGS__)
+#  define mcllerr(format, ...) llerr(format, ##__VA_ARGS__)
+#else
+#  define mcerr(x...)
+#  define mcllerr(x...)
+#endif
+
+#ifdef CONFIG_DEBUG_MEMCARD_WARN
+#  define mcwarn(format, ...)   warn(format, ##__VA_ARGS__)
+#  define mcllwarn(format, ...) llwarn(format, ##__VA_ARGS__)
+#else
+#  define mcwarn(x...)
+#  define mcllwarn(x...)
+#endif
+
+#ifdef CONFIG_DEBUG_MEMCARD_INFO
+#  define mcinfo(format, ...)   info(format, ##__VA_ARGS__)
+#  define mcllinfo(format, ...) llinfo(format, ##__VA_ARGS__)
+#else
+#  define mcinfo(x...)
+#  define mcllinfo(x...)
+#endif
+
 #ifdef CONFIG_DEBUG_SENSORS_ERROR
 #  define snerr(format, ...)    err(format, ##__VA_ARGS__)
 #  define snllerr(format, ...)  llerr(format, ##__VA_ARGS__)
@@ -1402,6 +1426,30 @@
 #  define rtcllinfo   (void)
 #endif
 
+#ifdef CONFIG_DEBUG_MEMCARD_ERROR
+#  define mcerr       err
+#  define mcllerr     llerr
+#else
+#  define mcerr       (void)
+#  define mcllerr     (void)
+#endif
+
+#ifdef CONFIG_DEBUG_MEMCARD_WARN
+#  define mcwarn      warn
+#  define mcllwarn    llwarn
+#else
+#  define mcwarn      (void)
+#  define mcllwarn    (void)
+#endif
+
+#ifdef CONFIG_DEBUG_MEMCARD_INFO
+#  define mcinfo      info
+#  define mcllinfo    llinfo
+#else
+#  define mcinfo      (void)
+#  define mcllinfo    (void)
+#endif
+
 #ifdef CONFIG_DEBUG_SENSORS_ERROR
 #  define snerr       err
 #  define snllerr     llerr
@@ -1706,6 +1754,14 @@
 #else
 #  define rtcerrdumpbuffer(m,b,n)
 #  define rtcinfodumpbuffer(m,b,n)
+#endif
+
+#ifdef CONFIG_DEBUG_MEMCARD
+#  define mcerrdumpbuffer(m,b,n)  errdumpbuffer(m,b,n)
+#  define mcinfodumpbuffer(m,b,n) infodumpbuffer(m,b,n)
+#else
+#  define mcerrdumpbuffer(m,b,n)
+#  define mcinfodumpbuffer(m,b,n)
 #endif
 
 #ifdef CONFIG_DEBUG_SENSORS
