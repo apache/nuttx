@@ -166,6 +166,10 @@ void stm32l4_clockconfig(void)
 
   rcc_reset();
 
+  /* Reset backup domain if appropriate */
+
+  rcc_resetbkp();
+
 #if defined(CONFIG_ARCH_BOARD_STM32L4_CUSTOM_CLOCKCONFIG)
 
   /* Invoke Board Custom Clock Configuration */
