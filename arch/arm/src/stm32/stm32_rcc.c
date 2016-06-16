@@ -171,8 +171,6 @@ static inline rcc_resetbkp(void)
 
 void stm32_clockconfig(void)
 {
-  uint32_t regval;
-
   /* Make sure that we are starting in the reset state */
 
   rcc_reset();
