@@ -106,7 +106,7 @@
  ****************************************************************************/
 
 #if defined(CONFIG_STM32_PWR) && defined(CONFIG_RTC)
-static inline rcc_resetbkp(void)
+static inline void rcc_resetbkp(void)
 {
   bool init_stat;
 
