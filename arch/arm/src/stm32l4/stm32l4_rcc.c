@@ -89,7 +89,58 @@
  ****************************************************************************/
 
 /************************************************************************************
- * Name: stm32l4_clockconfig
+ * Name: rcc_resetbkp
+ *
+ * Description:
+ *   The RTC needs to reset the Backup Domain to change RTCSEL and resetting the
+ *   Backup Domain renders to disabling the LSE as consequence.   In order to avoid
+ *   resetting the Backup Domain when we already configured LSE we will reset the
+ *   Backup Domain early (here).
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ************************************************************************************/
+
+#if defined(CONFIG_STM32_PWR) && defined(CONFIG_RTC)
+static inline rcc_resetbkp(void)
+{
+  bool init_stat;
+
+  /* Check if the RTC is already configured */
+
+  init_stat = rtc_is_inits();
+  if(!init_stat)
+    {
+       /* Enable write access to the backup domain (RTC registers, RTC
+        * backup data registers and backup SRAM).
+        */
+
+      (void)stm32l4_pwr_enablebkp(true);
+
+      /* We might be changing RTCSEL - to ensure such changes work, we must
+       * reset the backup domain (having backed up the RTC_MAGIC token)
+       */
+
+       modifyreg32(STM32L4_RCC_BDCR, 0, RCC_BDCR_BDRST);
+       modifyreg32(STM32L4_RCC_BDCR, RCC_BDCR_BDRST, 0);
+
+       (void)stm32l4_pwr_enablebkp(false);
+    }
+}
+#else
+#  define rcc_resetbkp()
+#endif
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/************************************************************************************
+ * Name: stm32_clockconfig
  *
  * Description:
  *   Called to establish the clock settings based on the values in board.h.  This

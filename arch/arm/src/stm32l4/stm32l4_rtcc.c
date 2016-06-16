@@ -250,7 +250,7 @@ static void rtc_dumptime(FAR const struct tm *tp, FAR const char *msg)
  *
  ************************************************************************************/
 
-static bool rtc_is_inits(void)
+bool rtc_is_inits(void)
 {
   uint32_t regval;
 
@@ -831,13 +831,6 @@ int up_rtc_initialize(void)
        */
 
       (void)stm32l4_pwr_enablebkp(true);
-
-#if 0
-      /* Do not reset the backup domain; you will lose your clock setup done in *rcc.c */
-
-      modifyreg32(STM32L4_RCC_BDCR, 0, RCC_BDCR_BDRST);
-      modifyreg32(STM32L4_RCC_BDCR, RCC_BDCR_BDRST, 0);
-#endif
 
 #if defined(CONFIG_STM32L4_RTC_HSECLOCK)
       modifyreg32(STM32L4_RCC_BDCR, RCC_BDCR_RTCSEL_MASK, RCC_BDCR_RTCSEL_HSE);
