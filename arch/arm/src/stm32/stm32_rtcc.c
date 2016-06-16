@@ -711,13 +711,13 @@ int up_rtc_initialize(void)
         {
           case OK:
             {
-              rtcllerr("rtc_syncwait() okay\n");
+              rtcllinfo("rtc_syncwait() okay\n");
               break;
             }
 
           default:
             {
-              rtcllerr("rtc_syncwait() failed (%d)\n", ret);
+              rtcllerr("ERROR: rtc_syncwait() failed (%d)\n", ret);
               break;
             }
         }
@@ -731,7 +731,7 @@ int up_rtc_initialize(void)
 
   if (regval != RTC_MAGIC)
     {
-      rtcllerr("Do setup\n");
+      rtcllinfo("Do setup\n");
 
       /* Perform the one-time setup of the LSE clocking to the RTC */
 
@@ -749,7 +749,7 @@ int up_rtc_initialize(void)
     }
   else
     {
-      rtcllerr("Do resume\n");
+      rtcllinfo("Do resume\n");
 
       /* RTC already set-up, just resume normal operation */
 
@@ -765,7 +765,7 @@ int up_rtc_initialize(void)
 
   if (ret != OK && nretry > 0)
     {
-      rtcllerr("setup/resume ran %d times and failed with %d\n",
+      rtcllinfo("setup/resume ran %d times and failed with %d\n",
                 nretry, ret);
       return -ETIMEDOUT;
     }

@@ -906,7 +906,7 @@ static int adc_timinit(FAR struct stm32_dev_s *priv)
 
   if (prescaler < 1)
     {
-      aerr("WARNING: Prescaler underflowed.\n");
+      awarn("WARNING: Prescaler underflowed.\n");
       prescaler = 1;
     }
 
@@ -914,7 +914,7 @@ static int adc_timinit(FAR struct stm32_dev_s *priv)
 
   else if (prescaler > 65536)
     {
-      aerr("WARNING: Prescaler overflowed.\n");
+      awarn("WARNING: Prescaler overflowed.\n");
       prescaler = 65536;
     }
 
@@ -923,12 +923,12 @@ static int adc_timinit(FAR struct stm32_dev_s *priv)
   reload = timclk / priv->freq;
   if (reload < 1)
     {
-      aerr("WARNING: Reload value underflowed.\n");
+      awarn("WARNING: Reload value underflowed.\n");
       reload = 1;
     }
   else if (reload > 65535)
     {
-      aerr("WARNING: Reload value overflowed.\n");
+      awarn("WARNING: Reload value overflowed.\n");
       reload = 65535;
     }
 
@@ -1070,7 +1070,7 @@ static int adc_timinit(FAR struct stm32_dev_s *priv)
         break;
 
       default:
-        aerr("No such trigger: %d\n", priv->trigger);
+        aerr("ERROR: No such trigger: %d\n", priv->trigger);
         return -EINVAL;
     }
 
@@ -2002,7 +2002,7 @@ static void adc_reset(FAR struct adc_dev_s *dev)
       ret = adc_timinit(priv);
       if (ret < 0)
         {
-          aerr("adc_timinit failed: %d\n", ret);
+          aerr("ERROR: adc_timinit failed: %d\n", ret);
         }
     }
 #ifndef CONFIG_ADC_NO_STARTUP_CONV
@@ -2718,12 +2718,12 @@ static int adc_interrupt(FAR struct adc_dev_s *dev)
 
   if ((regval & ADC_ISR_AWD) != 0)
     {
-      allerr("WARNING: Analog Watchdog, Value converted out of range!\n");
+      allwarn("WARNING: Analog Watchdog, Value converted out of range!\n");
     }
 
   if ((regval & ADC_ISR_OVR) != 0)
     {
-      allerr("WARNING: Overrun has occurred!\n");
+      allwarn("WARNING: Overrun has occurred!\n");
     }
 
   /* EOC: End of conversion */
@@ -3012,7 +3012,7 @@ struct adc_dev_s *stm32_adcinitialize(int intf, FAR const uint8_t *chanlist,
         break;
 #endif
       default:
-        aerr("No ADC interface defined\n");
+        aerr("ERROR: No ADC interface defined\n");
         return NULL;
     }
 
