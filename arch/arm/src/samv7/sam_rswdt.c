@@ -80,20 +80,6 @@
 #define RSWDT_MINTIMEOUT ((1000 + RSWDT_FREQUENCY - 1) / RSWDT_FREQUENCY)
 #define RSWDT_MAXTIMEOUT ((4096 * 1000) / RSWDT_FREQUENCY)
 
-/* Debug ********************************************************************/
-/* Non-standard debug that may be enabled just for testing the watchdog
- * driver.  NOTE: that only llerr types are used so that the output is
- * immediately available.
- */
-
-#ifdef CONFIG_DEBUG_WATCHDOG
-#  define wderr    llerr
-#  define wdinfo   llinfo
-#else
-#  define wderr(x...)
-#  define wdinfo(x...)
-#endif
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/

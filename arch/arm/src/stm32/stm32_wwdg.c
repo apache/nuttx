@@ -81,20 +81,6 @@
 #  define CONFIG_STM32_WWDG_DEFTIMOUT WWDG_MAXTIMEOUT
 #endif
 
-/* Debug ********************************************************************/
-/* Non-standard debug that may be enabled just for testing the watchdog
- * driver.  NOTE: that only llerr types are used so that the output is
- * immediately available.
- */
-
-#ifdef CONFIG_DEBUG_WATCHDOG
-#  define wderr    llerr
-#  define wdinfo   llinfo
-#else
-#  define wderr(x...)
-#  define wdinfo(x...)
-#endif
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/

@@ -285,30 +285,6 @@
 #  define nllinfo(x...)
 #endif
 
-#ifdef CONFIG_DEBUG_USB_ERROR
-#  define uerr(format, ...)    err(format, ##__VA_ARGS__)
-#  define ullerr(format, ...)  llerr(format, ##__VA_ARGS__)
-#else
-#  define uerr(x...)
-#  define ullerr(x...)
-#endif
-
-#ifdef CONFIG_DEBUG_USB_WARN
-#  define uwarn(format, ...)   warn(format, ##__VA_ARGS__)
-#  define ullwarn(format, ...) llwarn(format, ##__VA_ARGS__)
-#else
-#  define uwarn(x...)
-#  define ullwarn(x...)
-#endif
-
-#ifdef CONFIG_DEBUG_USB_INFO
-#  define uinfo(format, ...)   info(format, ##__VA_ARGS__)
-#  define ullinfo(format, ...) llinfo(format, ##__VA_ARGS__)
-#else
-#  define uinfo(x...)
-#  define ullinfo(x...)
-#endif
-
 #ifdef CONFIG_DEBUG_FS_ERROR
 #  define ferr(format, ...)    err(format, ##__VA_ARGS__)
 #  define fllerr(format, ...)  llerr(format, ##__VA_ARGS__)
@@ -765,6 +741,54 @@
 #  define spillinfo(x...)
 #endif
 
+#ifdef CONFIG_DEBUG_USB_ERROR
+#  define uerr(format, ...)    err(format, ##__VA_ARGS__)
+#  define ullerr(format, ...)  llerr(format, ##__VA_ARGS__)
+#else
+#  define uerr(x...)
+#  define ullerr(x...)
+#endif
+
+#ifdef CONFIG_DEBUG_USB_WARN
+#  define uwarn(format, ...)   warn(format, ##__VA_ARGS__)
+#  define ullwarn(format, ...) llwarn(format, ##__VA_ARGS__)
+#else
+#  define uwarn(x...)
+#  define ullwarn(x...)
+#endif
+
+#ifdef CONFIG_DEBUG_USB_INFO
+#  define uinfo(format, ...)   info(format, ##__VA_ARGS__)
+#  define ullinfo(format, ...) llinfo(format, ##__VA_ARGS__)
+#else
+#  define uinfo(x...)
+#  define ullinfo(x...)
+#endif
+
+#ifdef CONFIG_DEBUG_WATCHDOG_ERROR
+#  define wderr(format, ...)    err(format, ##__VA_ARGS__)
+#  define wdllerr(format, ...)  llerr(format, ##__VA_ARGS__)
+#else
+#  define wderr(x...)
+#  define wdllerr(x...)
+#endif
+
+#ifdef CONFIG_DEBUG_WATCHDOG_WARN
+#  define wdwarn(format, ...)   warn(format, ##__VA_ARGS__)
+#  define wdllwarn(format, ...) llwarn(format, ##__VA_ARGS__)
+#else
+#  define wdwarn(x...)
+#  define wdllwarn(x...)
+#endif
+
+#ifdef CONFIG_DEBUG_WATCHDOG_INFO
+#  define wdinfo(format, ...)   info(format, ##__VA_ARGS__)
+#  define wdllinfo(format, ...) llinfo(format, ##__VA_ARGS__)
+#else
+#  define wdinfo(x...)
+#  define wdllinfo(x...)
+#endif
+
 #else /* CONFIG_CPP_HAVE_VARARGS */
 
 /* Variadic macros NOT supported */
@@ -896,30 +920,6 @@
 #else
 #  define ninfo       (void)
 #  define nllinfo     (void)
-#endif
-
-#ifdef CONFIG_DEBUG_USB_ERROR
-#  define uerr        err
-#  define ullerr      llerr
-#else
-#  define uerr        (void)
-#  define ullerr      (void)
-#endif
-
-#ifdef CONFIG_DEBUG_USB_WARN
-#  define uwarn       warn
-#  define ullwarn     llwarn
-#else
-#  define uwarn       (void)
-#  define ullwarn     (void)
-#endif
-
-#ifdef CONFIG_DEBUG_USB_INFO
-#  define uinfo       info
-#  define ullinfo     llinfo
-#else
-#  define uinfo       (void)
-#  define ullinfo     (void)
 #endif
 
 #ifdef CONFIG_DEBUG_FS_ERROR
@@ -1378,6 +1378,54 @@
 #  define spillinfo   (void)
 #endif
 
+#ifdef CONFIG_DEBUG_USB_ERROR
+#  define uerr        err
+#  define ullerr      llerr
+#else
+#  define uerr        (void)
+#  define ullerr      (void)
+#endif
+
+#ifdef CONFIG_DEBUG_USB_WARN
+#  define uwarn       warn
+#  define ullwarn     llwarn
+#else
+#  define uwarn       (void)
+#  define ullwarn     (void)
+#endif
+
+#ifdef CONFIG_DEBUG_USB_INFO
+#  define uinfo       info
+#  define ullinfo     llinfo
+#else
+#  define uinfo       (void)
+#  define ullinfo     (void)
+#endif
+
+#ifdef CONFIG_DEBUG_WATCHDOG_ERROR
+#  define wderr       err
+#  define wdllerr     llerr
+#else
+#  define wderr       (void)
+#  define wdllerr     (void)
+#endif
+
+#ifdef CONFIG_DEBUG_WATCHDOG_WARN
+#  define wdwarn      warn
+#  define wdllwarn    llwarn
+#else
+#  define wdwarn      (void)
+#  define wdllwarn    (void)
+#endif
+
+#ifdef CONFIG_DEBUG_WATCHDOG_INFO
+#  define wdinfo      info
+#  define wdllinfo    llinfo
+#else
+#  define wdinfo      (void)
+#  define wdllinfo    (void)
+#endif
+
 #endif /* CONFIG_CPP_HAVE_VARARGS */
 
 /* Buffer dumping macros do not depend on varargs */
@@ -1426,14 +1474,6 @@
 #else
 #  define nerrdumpbuffer(m,b,n)
 #  define ninfodumpbuffer(m,b,n)
-#endif
-
-#ifdef CONFIG_DEBUG_USB
-#  define uerrdumpbuffer(m,b,n)  errdumpbuffer(m,b,n)
-#  define uinfodumpbuffer(m,b,n) infodumpbuffer(m,b,n)
-#else
-#  define uerrdumpbuffer(m,b,n)
-#  define uinfodumpbuffer(m,b,n)
 #endif
 
 #ifdef CONFIG_DEBUG_FS
@@ -1570,6 +1610,22 @@
 #else
 #  define snerrdumpbuffer(m,b,n)
 #  define sninfodumpbuffer(m,b,n)
+#endif
+
+#ifdef CONFIG_DEBUG_USB
+#  define uerrdumpbuffer(m,b,n)  errdumpbuffer(m,b,n)
+#  define uinfodumpbuffer(m,b,n) infodumpbuffer(m,b,n)
+#else
+#  define uerrdumpbuffer(m,b,n)
+#  define uinfodumpbuffer(m,b,n)
+#endif
+
+#ifdef CONFIG_DEBUG_WATCHDOG
+#  define wderrdumpbuffer(m,b,n)  errdumpbuffer(m,b,n)
+#  define wdinfodumpbuffer(m,b,n) infodumpbuffer(m,b,n)
+#else
+#  define wderrdumpbuffer(m,b,n)
+#  define wdinfodumpbuffer(m,b,n)
 #endif
 
 /****************************************************************************

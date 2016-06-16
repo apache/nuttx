@@ -405,10 +405,6 @@ config DEBUG_FEATURES
 		Note that enabling this option by itself does not produce debug output.
 		Debug output must also be selected on a subsystem-by-subsystem basis.
 
-config ARCH_HAVE_HEAPCHECK
-	bool
-	default n
-
 if DEBUG_FEATURES
 
 comment "Debug SYSLOG Output Controls"
@@ -1321,14 +1317,39 @@ config DEBUG_USB_INFO
 endif # DEBUG_USB
 
 config DEBUG_WATCHDOG
-	bool "Watchdog Timer Debug Output"
+	bool "Watchdog Timer Debug Features"
 	default n
 	depends on WATCHDOG
 	---help---
-		Enable watchdog timer debug SYSLOG output (disabled by default).
+		Enable watchdog timer debug features.
+
 		Support for this debug option is architecture-specific and may not
 		be available for some MCUs.
 
+if DEBUG_WATCHDOG
+
+config DEBUG_WATCHDOG_ERROR
+	bool "Watchdog Timer Error Output"
+	default n
+	depends on DEBUG_ERROR
+	---help---
+		Enable watchdog time error output to SYSLOG.
+
+config DEBUG_WATCHDOG_WARN
+	bool "Watchdog Timer Warnings Output"
+	default n
+	depends on DEBUG_WARN
+	---help---
+		Enable watchdog time warning output to SYSLOG.
+
+config DEBUG_WATCHDOG_INFO
+	bool "Watchdog Timer Informational Output"
+	default n
+	depends on DEBUG_INFO
+	---help---
+		Enable watchdog time informational output to SYSLOG.
+
+endif # DEBUG_WATCHDOG
 endif # DEBUG_FEATURES
 
 config ARCH_HAVE_STACKCHECK
@@ -1345,6 +1366,10 @@ config STACK_COLORATION
 		to monitor the level of stack usage.
 
 		Only supported by a few architectures.
+
+config ARCH_HAVE_HEAPCHECK
+	bool
+	default n
 
 config HEAP_COLORATION
 	bool "Heap coloration"

@@ -80,20 +80,6 @@
 #define WDT_MINTIMEOUT ((1000 + WDT_FREQUENCY - 1) / WDT_FREQUENCY)
 #define WDT_MAXTIMEOUT ((4096 * 1000) / WDT_FREQUENCY)
 
-/* Debug ********************************************************************/
-/* Non-standard debug that may be enabled just for testing the watchdog
- * driver.  NOTE: that only llerr types are used so that the output is
- * immediately available.
- */
-
-#ifdef CONFIG_DEBUG_WATCHDOG
-#  define wderr    llerr
-#  define wdinfo   llinfo
-#else
-#  define wderr(x...)
-#  define wdinfo(x...)
-#endif
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/

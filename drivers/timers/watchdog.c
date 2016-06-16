@@ -57,24 +57,6 @@
 #ifdef CONFIG_WATCHDOG
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-/* Debug ********************************************************************/
-/* Non-standard debug that may be enabled just for testing the watchdog driver */
-
-#ifdef CONFIG_DEBUG_WATCHDOG
-#  define wderr    err
-#  define wdinfo   info
-#  define wdllerr  llerr
-#  define wdllinfo llinfo
-#else
-#  define wderr(x...)
-#  define wdinfo(x...)
-#  define wdllerr(x...)
-#  define wdllinfo(x...)
-#endif
-
-/****************************************************************************
  * Private Type Definitions
  ****************************************************************************/
 
