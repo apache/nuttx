@@ -953,7 +953,7 @@ static inline struct sam_chan_s *sam_tc_initialize(int channel)
     {
       /* Timer/counter is not invalid or not enabled */
 
-      tcerr("ERROR: Bad channel number: %d\n", channel);
+      tmrerr("ERROR: Bad channel number: %d\n", channel);
       return NULL;
     }
 
@@ -976,7 +976,7 @@ static inline struct sam_chan_s *sam_tc_initialize(int channel)
 
       for (i = 0, ch = tcconfig->chfirst; i < SAM_TC_NCHANNELS; i++)
         {
-          tcerr("Initializing TC%d channel %d\n", tcconfig->tc, ch);
+          tmrerr("ERROR: Initializing TC%d channel %d\n", tcconfig->tc, ch);
 
           /* Initialize the channel data structure */
 
@@ -1057,7 +1057,7 @@ static inline struct sam_chan_s *sam_tc_initialize(int channel)
     {
       /* No.. return a failure */
 
-      tcerr("Channel %d is in-used\n", channel);
+      tmrerr("ERROR: Channel %d is in-use\n", channel);
       sam_givesem(tc);
       return NULL;
     }
@@ -1102,7 +1102,7 @@ TC_HANDLE sam_tc_allocate(int channel, int mode)
    * access to the requested channel.
    */
 
-  tcinfo("channel=%d mode=%08x\n", channel, mode);
+  tmrinfo("channel=%d mode=%08x\n", channel, mode);
 
   chan = sam_tc_initialize(channel);
   if (chan)
@@ -1128,7 +1128,7 @@ TC_HANDLE sam_tc_allocate(int channel, int mode)
 
   /* Return an opaque reference to the channel */
 
-  tcinfo("Returning %p\n", chan);
+  tmrinfo("Returning %p\n", chan);
   return (TC_HANDLE)chan;
 }
 
@@ -1150,7 +1150,7 @@ void sam_tc_free(TC_HANDLE handle)
 {
   struct sam_chan_s *chan = (struct sam_chan_s *)handle;
 
-  tcinfo("Freeing %p channel=%d inuse=%d\n", chan, chan->chan, chan->inuse);
+  tmrinfo("Freeing %p channel=%d inuse=%d\n", chan, chan->chan, chan->inuse);
   DEBUGASSERT(chan && chan->inuse);
 
   /* Make sure that interrupts are detached and disabled and that the channel
@@ -1183,7 +1183,7 @@ void sam_tc_start(TC_HANDLE handle)
 {
   struct sam_chan_s *chan = (struct sam_chan_s *)handle;
 
-  tcinfo("Starting channel %d inuse=%d\n", chan->chan, chan->inuse);
+  tmrinfo("Starting channel %d inuse=%d\n", chan->chan, chan->inuse);
   DEBUGASSERT(chan && chan->inuse);
 
   /* Read the SR to clear any pending interrupts on this channel */
@@ -1215,7 +1215,7 @@ void sam_tc_stop(TC_HANDLE handle)
 {
   struct sam_chan_s *chan = (struct sam_chan_s *)handle;
 
-  tcinfo("Stopping channel %d inuse=%d\n", chan->chan, chan->inuse);
+  tmrinfo("Stopping channel %d inuse=%d\n", chan->chan, chan->inuse);
   DEBUGASSERT(chan && chan->inuse);
 
   sam_chan_putreg(chan, SAM_TC_CCR_OFFSET, TC_CCR_CLKDIS);
@@ -1322,8 +1322,8 @@ void sam_tc_setregister(TC_HANDLE handle, int regid, uint32_t regval)
 
   DEBUGASSERT(chan && regid < TC_NREGISTERS);
 
-  tcinfo("Channel %d: Set register RC%d to %08lx\n",
-         chan->chan, regid, (unsigned long)regval);
+  tmrinfo("Channel %d: Set register RC%d to %08lx\n",
+          chan->chan, regid, (unsigned long)regval);
 
   sam_chan_putreg(chan, g_regoffset[regid], regval);
   sam_regdump(chan, "Set register");
@@ -1465,7 +1465,7 @@ int sam_tc_divisor(uint32_t frequency, uint32_t *div, uint32_t *tcclks)
   uint32_t ftcin = sam_tc_infreq();
   int ndx = 0;
 
-  tcinfo("frequency=%d\n", frequency);
+  tmrinfo("frequency=%d\n", frequency);
 
   /* Satisfy lower bound.  That is, the value of the divider such that:
    *
@@ -1478,7 +1478,7 @@ int sam_tc_divisor(uint32_t frequency, uint32_t *div, uint32_t *tcclks)
         {
           /* If no divisor can be found, return -ERANGE */
 
-          tcerr("Lower bound search failed\n");
+          tmrerr("ERROR: Lower bound search failed\n");
           return -ERANGE;
         }
     }
@@ -1502,7 +1502,7 @@ int sam_tc_divisor(uint32_t frequency, uint32_t *div, uint32_t *tcclks)
   if (div)
     {
       uint32_t value = sam_tc_freqdiv_lookup(ftcin, ndx);
-      tcinfo("return div=%lu\n", (unsigned long)value);
+      tmrinfo("return div=%lu\n", (unsigned long)value);
       *div = value;
     }
 
@@ -1510,7 +1510,7 @@ int sam_tc_divisor(uint32_t frequency, uint32_t *div, uint32_t *tcclks)
 
   if (tcclks)
     {
-      tcinfo("return tcclks=%08lx\n", (unsigned long)TC_CMR_TCCLKS(ndx));
+      tmrinfo("return tcclks=%08lx\n", (unsigned long)TC_CMR_TCCLKS(ndx));
       *tcclks = TC_CMR_TCCLKS(ndx);
     }
 

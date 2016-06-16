@@ -75,27 +75,12 @@
 
 /* Timer debug is enabled if any timer client is enabled */
 
-#ifndef CONFIG_DEBUG_FEATURES
-#  undef CONFIG_DEBUG_ANALOG
+#ifndef CONFIG_DEBUG_TIMER_INFO
 #  undef CONFIG_SAMV7_TC_REGDEBUG
 #endif
 
 #if !defined(CONFIG_SAMV7_TC_DEBUG) && defined(CONFIG_SAMV7_ADC) && defined(CONFIG_DEBUG_ANALOG)
 #  define CONFIG_SAMV7_TC_DEBUG 1
-#endif
-
-/* Timer/counter debug output */
-
-#ifdef CONFIG_SAMV7_TC_DEBUG
-#  define tcerr    err
-#  define tcinfo   info
-#  define tcllerr  llerr
-#  define tcllinfo llinfo
-#else
-#  define tcerr(x...)
-#  define tcinfo(x...)
-#  define tcllerr(x...)
-#  define tcllinfo(x...)
 #endif
 
 /****************************************************************************

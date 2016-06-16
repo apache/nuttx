@@ -741,6 +741,30 @@
 #  define spillinfo(x...)
 #endif
 
+#ifdef CONFIG_DEBUG_TIMER_ERROR
+#  define tmrerr(format, ...)    err(format, ##__VA_ARGS__)
+#  define tmrllerr(format, ...)  llerr(format, ##__VA_ARGS__)
+#else
+#  define tmrerr(x...)
+#  define tmrllerr(x...)
+#endif
+
+#ifdef CONFIG_DEBUG_TIMER_WARN
+#  define tmrwarn(format, ...)   warn(format, ##__VA_ARGS__)
+#  define tmrllwarn(format, ...) llwarn(format, ##__VA_ARGS__)
+#else
+#  define tmrwarn(x...)
+#  define tmrllwarn(x...)
+#endif
+
+#ifdef CONFIG_DEBUG_TIMER_INFO
+#  define tmrinfo(format, ...)   info(format, ##__VA_ARGS__)
+#  define tmrllinfo(format, ...) llinfo(format, ##__VA_ARGS__)
+#else
+#  define tmrinfo(x...)
+#  define tmrllinfo(x...)
+#endif
+
 #ifdef CONFIG_DEBUG_USB_ERROR
 #  define uerr(format, ...)    err(format, ##__VA_ARGS__)
 #  define ullerr(format, ...)  llerr(format, ##__VA_ARGS__)
@@ -1378,6 +1402,30 @@
 #  define spillinfo   (void)
 #endif
 
+#ifdef CONFIG_DEBUG_TIMER_ERROR
+#  define tmrerr      err
+#  define tmrllerr    llerr
+#else
+#  define tmrerr      (void)
+#  define tmrllerr    (void)
+#endif
+
+#ifdef CONFIG_DEBUG_TIMER_WARN
+#  define tmrwarn     warn
+#  define tmrllwarn   llwarn
+#else
+#  define tmrwarn     (void)
+#  define tmrllwarn   (void)
+#endif
+
+#ifdef CONFIG_DEBUG_TIMER_INFO
+#  define tmrinfo     info
+#  define tmrllinfo   llinfo
+#else
+#  define tmrinfo     (void)
+#  define tmrllinfo   (void)
+#endif
+
 #ifdef CONFIG_DEBUG_USB_ERROR
 #  define uerr        err
 #  define ullerr      llerr
@@ -1610,6 +1658,22 @@
 #else
 #  define snerrdumpbuffer(m,b,n)
 #  define sninfodumpbuffer(m,b,n)
+#endif
+
+#ifdef CONFIG_DEBUG_SPI
+#  define spierrdumpbuffer(m,b,n)  errdumpbuffer(m,b,n)
+#  define spiinfodumpbuffer(m,b,n) infodumpbuffer(m,b,n)
+#else
+#  define spierrdumpbuffer(m,b,n)
+#  define spiinfodumpbuffer(m,b,n)
+#endif
+
+#ifdef CONFIG_DEBUG_TIMER
+#  define tmrerrdumpbuffer(m,b,n)  errdumpbuffer(m,b,n)
+#  define tmrinfodumpbuffer(m,b,n) infodumpbuffer(m,b,n)
+#else
+#  define tmrerrdumpbuffer(m,b,n)
+#  define tmrinfodumpbuffer(m,b,n)
 #endif
 
 #ifdef CONFIG_DEBUG_USB

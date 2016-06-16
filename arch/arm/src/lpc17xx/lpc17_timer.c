@@ -450,7 +450,7 @@ static int timer_shutdown(FAR struct pwm_lowerhalf_s *dev)
   FAR struct lpc17_timer_s *priv = (FAR struct lpc17_timer_s *)dev;
   uint32_t pincfg;
 
-  pwmerr("TIM%d pincfg: %08x\n", priv->timid, priv->pincfg);
+  pwminfo("TIM%d pincfg: %08x\n", priv->timid, priv->pincfg);
 
   /* Make sure that the output has been stopped */
 
@@ -506,7 +506,7 @@ static int timer_stop(FAR struct pwm_lowerhalf_s *dev)
   uint32_t regval;
   irqstate_t flags;
 
-  pwmerr("TIM%d\n", priv->timid);
+  pwminfo("TIM%d\n", priv->timid);
 
   /* Disable interrupts momentary to stop any ongoing timer processing and
    * to prevent any concurrent access to the reset register.
@@ -532,7 +532,7 @@ static int timer_stop(FAR struct pwm_lowerhalf_s *dev)
 
   leave_critical_section(flags);
 
-  pwmerr("regaddr: %08x resetbit: %08x\n", regaddr, resetbit);
+  pwminfo("regaddr: %08x resetbit: %08x\n", regaddr, resetbit);
   timer_dumpregs(priv, "After stop");
   return OK;
 }
@@ -555,12 +555,12 @@ static int timer_stop(FAR struct pwm_lowerhalf_s *dev)
 
 static int timer_ioctl(FAR struct pwm_lowerhalf_s *dev, int cmd, unsigned long arg)
 {
-#ifdef CONFIG_DEBUG_TIMER
+#ifdef CONFIG_DEBUG_PWM_INFO
   FAR struct lpc17_timer_s *priv = (FAR struct lpc17_timer_s *)dev;
 
   /* There are no platform-specific ioctl commands */
 
-  pwmerr("TIM%d\n", priv->timid);
+  pwminfo("TIM%d\n", priv->timid);
 #endif
   return -ENOTTY;
 }
@@ -590,7 +590,7 @@ FAR struct pwm_lowerhalf_s *lpc17_timerinitialize(int timer)
 {
   FAR struct lpc17_timer_s *lower;
 
-  pwmerr("TIM%d\n", timer);
+  pwminfo("TIM%d\n", timer);
 
   switch (timer)
     {
@@ -604,7 +604,7 @@ FAR struct pwm_lowerhalf_s *lpc17_timerinitialize(int timer)
 #endif
 
       default:
-        pwmerr("No such timer configured\n");
+        pwmerr("ERROR: No such timer configured\n");
         return NULL;
     }
 
