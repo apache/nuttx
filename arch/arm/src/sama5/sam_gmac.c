@@ -392,7 +392,7 @@ static bool sam_checkreg(struct sam_gmac_s *priv, bool wr, uint32_t regval,
         {
           /* Yes... show how many times we did it */
 
-          llerr("...[Repeats %d times]...\n", priv->ntimes);
+          _llerr("...[Repeats %d times]...\n", priv->ntimes);
         }
 
       /* Save information about the new access */
@@ -424,7 +424,7 @@ static uint32_t sam_getreg(struct sam_gmac_s *priv, uintptr_t address)
 
   if (sam_checkreg(priv, false, regval, address))
     {
-      llerr("%08x->%08x\n", address, regval);
+      _llerr("%08x->%08x\n", address, regval);
     }
 
   return regval;
@@ -445,7 +445,7 @@ static void sam_putreg(struct sam_gmac_s *priv, uintptr_t address,
 {
   if (sam_checkreg(priv, true, regval, address))
     {
-      llerr("%08x<-%08x\n", address, regval);
+      _llerr("%08x<-%08x\n", address, regval);
     }
 
   putreg32(regval, address);

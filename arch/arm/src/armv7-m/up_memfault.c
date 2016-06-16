@@ -55,7 +55,7 @@
 #undef DEBUG_MEMFAULTS         /* Define to debug memory management faults */
 
 #ifdef DEBUG_MEMFAULTS
-# define mferr(format, ...) llerr(format, ##__VA_ARGS__)
+# define mferr(format, ...)  _llerr(format, ##__VA_ARGS__)
 #else
 # define mferr(x...)
 #endif
@@ -92,9 +92,9 @@ int up_memfault(int irq, FAR void *context)
   /* Dump some memory management fault info */
 
   (void)up_irq_save();
-  llerr("PANIC!!! Memory Management Fault:\n");
+  _llerr("PANIC!!! Memory Management Fault:\n");
   mferr("  IRQ: %d context: %p\n", irq, regs);
-  llerr("  CFAULTS: %08x MMFAR: %08x\n",
+  _llerr("  CFAULTS: %08x MMFAR: %08x\n",
         getreg32(NVIC_CFAULTS), getreg32(NVIC_MEMMANAGE_ADDR));
   mferr("  BASEPRI: %08x PRIMASK: %08x IPSR: %08x CONTROL: %08x\n",
         getbasepri(), getprimask(), getipsr(), getcontrol());

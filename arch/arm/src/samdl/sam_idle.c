@@ -99,7 +99,7 @@ static void up_idlepm(void)
 
       /* Perform board-specific, state-dependent logic here */
 
-      llinfo("newstate= %d oldstate=%d\n", newstate, oldstate);
+      _llinfo("newstate= %d oldstate=%d\n", newstate, oldstate);
 
       /* Then force the global state change */
 

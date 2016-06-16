@@ -139,7 +139,7 @@ int board_pwm_setup(void)
       pwm = sam_pwminitialize(CONFIG_SAMA5D3XPLAINED_CHANNEL);
       if (!pwm)
         {
-          err("ERROR: Failed to get the SAMA5 PWM lower half\n");
+          _err("ERROR: Failed to get the SAMA5 PWM lower half\n");
           return -ENODEV;
         }
 

@@ -246,7 +246,7 @@ static ssize_t loop_read(FAR struct inode *inode, FAR unsigned char *buffer,
 
   if (start_sector + nsectors > dev->nsectors)
     {
-      err("ERROR: Read past end of file\n");
+      _err("ERROR: Read past end of file\n");
       return -EIO;
     }
 
@@ -256,7 +256,7 @@ static ssize_t loop_read(FAR struct inode *inode, FAR unsigned char *buffer,
   ret = lseek(dev->fd, offset, SEEK_SET);
   if (ret == (off_t)-1)
     {
-      err("ERROR: Seek failed for offset=%d: %d\n", (int)offset, get_errno());
+      _err("ERROR: Seek failed for offset=%d: %d\n", (int)offset, get_errno());
       return -EIO;
     }
 
@@ -267,7 +267,7 @@ static ssize_t loop_read(FAR struct inode *inode, FAR unsigned char *buffer,
       nbytesread = read(dev->fd, buffer, nsectors * dev->sectsize);
       if (nbytesread < 0 && get_errno() != EINTR)
         {
-          err("ERROR: Read failed: %d\n", get_errno());
+          _err("ERROR: Read failed: %d\n", get_errno());
           return -get_errno();
         }
     }
@@ -304,7 +304,7 @@ static ssize_t loop_write(FAR struct inode *inode,
   ret = lseek(dev->fd, offset, SEEK_SET);
   if (ret == (off_t)-1)
     {
-      err("ERROR: Seek failed for offset=%d: %d\n", (int)offset, get_errno());
+      _err("ERROR: Seek failed for offset=%d: %d\n", (int)offset, get_errno());
     }
 
   /* Then write the requested number of sectors to that position */
@@ -314,7 +314,7 @@ static ssize_t loop_write(FAR struct inode *inode,
       nbyteswritten = write(dev->fd, buffer, nsectors * dev->sectsize);
       if (nbyteswritten < 0 && get_errno() != EINTR)
         {
-          err("ERROR: Write failed: %d\n", get_errno());
+          _err("ERROR: Write failed: %d\n", get_errno());
           return -get_errno();
         }
     }
@@ -391,7 +391,7 @@ int losetup(FAR const char *devname, FAR const char *filename,
   ret = stat(filename, &sb);
   if (ret < 0)
     {
-      err("ERROR: Failed to stat %s: %d\n", filename, get_errno());
+      _err("ERROR: Failed to stat %s: %d\n", filename, get_errno());
       return -get_errno();
     }
 
@@ -399,7 +399,7 @@ int losetup(FAR const char *devname, FAR const char *filename,
 
   if (sb.st_size - offset < sectsize)
     {
-      err("ERROR: File is too small for blocksize\n");
+      _err("ERROR: File is too small for blocksize\n");
       return -ERANGE;
     }
 
@@ -445,7 +445,7 @@ int losetup(FAR const char *devname, FAR const char *filename,
       dev->fd = open(filename, O_RDWR);
       if (dev->fd < 0)
         {
-          err("ERROR: Failed to open %s: %d\n", filename, get_errno());
+          _err("ERROR: Failed to open %s: %d\n", filename, get_errno());
           ret = -get_errno();
           goto errout_with_dev;
         }
@@ -499,7 +499,7 @@ int loteardown(FAR const char *devname)
   ret = open_blockdriver(devname, MS_RDONLY, &inode);
   if (ret < 0)
     {
-      err("ERROR: Failed to open %s: %d\n", devname, -ret);
+      _err("ERROR: Failed to open %s: %d\n", devname, -ret);
       return ret;
     }
 

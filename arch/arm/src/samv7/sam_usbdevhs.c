@@ -743,7 +743,7 @@ const struct trace_msg_t g_usb_trace_strings_intdecode[] =
 #ifdef CONFIG_SAMV7_USBHS_REGDEBUG
 static void sam_printreg(uintptr_t regaddr, uint32_t regval, bool iswrite)
 {
-  llerr("%p%s%08x\n", regaddr, iswrite ? "<-" : "->", regval);
+  _llerr("%p%s%08x\n", regaddr, iswrite ? "<-" : "->", regval);
 }
 #endif
 
@@ -794,7 +794,7 @@ static void sam_checkreg(uintptr_t regaddr, uint32_t regval, bool iswrite)
             {
               /* No.. More than one. */
 
-              llerr("[repeats %d more times]\n", count);
+              _llerr("[repeats %d more times]\n", count);
             }
         }
 
@@ -874,31 +874,31 @@ static void sam_dumpep(struct sam_usbdev_s *priv, int epno)
 {
   /* Global Registers */
 
-  llerr("Global Register:\n");
-  llerr("  CTRL:    %08x\n", sam_getreg(SAM_USBHS_DEVCTRL));
-  llerr("  ISR:     %08x\n", sam_getreg(SAM_USBHS_DEVISR));
-  llerr("  IMR:     %08x\n", sam_getreg(SAM_USBHS_DEVIMR));
-  llerr("  EPT:     %08x\n", sam_getreg(SAM_USBHS_DEVEPT));
-  llerr("  FNUM:    %08x\n", sam_getreg(SAM_USBHS_DEVFNUM));
+  _llerr("Global Register:\n");
+  _llerr("  CTRL:    %08x\n", sam_getreg(SAM_USBHS_DEVCTRL));
+  _llerr("  ISR:     %08x\n", sam_getreg(SAM_USBHS_DEVISR));
+  _llerr("  IMR:     %08x\n", sam_getreg(SAM_USBHS_DEVIMR));
+  _llerr("  EPT:     %08x\n", sam_getreg(SAM_USBHS_DEVEPT));
+  _llerr("  FNUM:    %08x\n", sam_getreg(SAM_USBHS_DEVFNUM));
 
   /* Endpoint registers */
 
-  llerr("Endpoint %d Register:\n", epno);
-  llerr("  CFG:     %08x\n", sam_getreg(SAM_USBHS_DEVEPTCFG(epno)));
-  llerr("  ISR:     %08x\n", sam_getreg(SAM_USBHS_DEVEPTISR(epno)));
-  llerr("  IMR:     %08x\n", sam_getreg(SAM_USBHS_DEVEPTIMR(epno)));
+  _llerr("Endpoint %d Register:\n", epno);
+  _llerr("  CFG:     %08x\n", sam_getreg(SAM_USBHS_DEVEPTCFG(epno)));
+  _llerr("  ISR:     %08x\n", sam_getreg(SAM_USBHS_DEVEPTISR(epno)));
+  _llerr("  IMR:     %08x\n", sam_getreg(SAM_USBHS_DEVEPTIMR(epno)));
 
-  llerr("DMA %d Register:\n", epno);
+  _llerr("DMA %d Register:\n", epno);
   if ((SAM_EPSET_DMA & SAM_EP_BIT(epno)) != 0)
     {
-      llerr("  NXTDSC:  %08x\n", sam_getreg(SAM_USBHS_DEVDMANXTDSC(epno)));
-      llerr("  ADDRESS: %08x\n", sam_getreg(SAM_USBHS_DEVDMAADDR(epno)));
-      llerr("  CONTROL: %08x\n", sam_getreg(SAM_USBHS_DEVDMACTRL(epno)));
-      llerr("  STATUS:  %08x\n", sam_getreg(SAM_USBHS_DEVDMASTA(epno)));
+      _llerr("  NXTDSC:  %08x\n", sam_getreg(SAM_USBHS_DEVDMANXTDSC(epno)));
+      _llerr("  ADDRESS: %08x\n", sam_getreg(SAM_USBHS_DEVDMAADDR(epno)));
+      _llerr("  CONTROL: %08x\n", sam_getreg(SAM_USBHS_DEVDMACTRL(epno)));
+      _llerr("  STATUS:  %08x\n", sam_getreg(SAM_USBHS_DEVDMASTA(epno)));
     }
   else
     {
-      llerr("  None\n");
+      _llerr("  None\n");
     }
 }
 #endif

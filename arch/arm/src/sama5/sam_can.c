@@ -371,7 +371,7 @@ static uint32_t can_getreg(FAR struct sam_can_s *priv, int offset)
         {
           if (priv->count == 4)
             {
-              llerr("...\n");
+              _llerr("...\n");
             }
 
           return regval;
@@ -388,7 +388,7 @@ static uint32_t can_getreg(FAR struct sam_can_s *priv, int offset)
         {
           /* Yes.. then show how many times the value repeated */
 
-          llerr("[repeats %d more times]\n", priv->count - 3);
+          _llerr("[repeats %d more times]\n", priv->count - 3);
         }
 
       /* Save the new address, value, and count */
@@ -400,7 +400,7 @@ static uint32_t can_getreg(FAR struct sam_can_s *priv, int offset)
 
   /* Show the register value read */
 
-  llerr("%08x->%08x\n", regaddr, regval);
+  _llerr("%08x->%08x\n", regaddr, regval);
   return regval;
 }
 
@@ -437,7 +437,7 @@ static void can_putreg(FAR struct sam_can_s *priv, int offset, uint32_t regval)
 
   /* Show the register value being written */
 
-  llerr("%08x<-%08x\n", regaddr, regval);
+  _llerr("%08x<-%08x\n", regaddr, regval);
 
   /* Write the value */
 
@@ -483,17 +483,17 @@ static void can_dumpctrlregs(FAR struct sam_can_s *priv, FAR const char *msg)
 
   /* CAN control and status registers */
 
-  llerr("   MR: %08x      IMR: %08x      SR: %08x\n",
+  _llerr("   MR: %08x      IMR: %08x      SR: %08x\n",
         getreg32(config->base + SAM_CAN_MR_OFFSET),
         getreg32(config->base + SAM_CAN_IMR_OFFSET),
         getreg32(config->base + SAM_CAN_SR_OFFSET));
 
-  llerr("   BR: %08x      TIM: %08x TIMESTP: %08x\n",
+  _llerr("   BR: %08x      TIM: %08x TIMESTP: %08x\n",
         getreg32(config->base + SAM_CAN_BR_OFFSET),
         getreg32(config->base + SAM_CAN_TIM_OFFSET),
         getreg32(config->base + SAM_CAN_TIMESTP_OFFSET));
 
-  llerr("  ECR: %08x     WPMR: %08x    WPSR: %08x\n",
+  _llerr("  ECR: %08x     WPMR: %08x    WPSR: %08x\n",
         getreg32(config->base + SAM_CAN_ECR_OFFSET),
         getreg32(config->base + SAM_CAN_TCR_OFFSET),
         getreg32(config->base + SAM_CAN_ACR_OFFSET));
@@ -533,17 +533,17 @@ static void can_dumpmbregs(FAR struct sam_can_s *priv, FAR const char *msg)
   for (i = 0; i < SAM_CAN_NMAILBOXES; i++)
     {
       mbbase = config->base + SAM_CAN_MBn_OFFSET(i);
-      llerr("  MB%d:\n", i);
+      _llerr("  MB%d:\n", i);
 
       /* CAN mailbox registers */
 
-      llerr("    MMR: %08x MAM: %08x MID: %08x MFID: %08x\n",
+      _llerr("    MMR: %08x MAM: %08x MID: %08x MFID: %08x\n",
             getreg32(mbbase + SAM_CAN_MMR_OFFSET),
             getreg32(mbbase + SAM_CAN_MAM_OFFSET),
             getreg32(mbbase + SAM_CAN_MID_OFFSET),
             getreg32(mbbase + SAM_CAN_MFID_OFFSET));
 
-      llerr("    MSR: %08x MDL: %08x MDH: %08x\n",
+      _llerr("    MSR: %08x MDL: %08x MDH: %08x\n",
             getreg32(mbbase + SAM_CAN_MSR_OFFSET),
             getreg32(mbbase + SAM_CAN_MDL_OFFSET),
             getreg32(mbbase + SAM_CAN_MDH_OFFSET));

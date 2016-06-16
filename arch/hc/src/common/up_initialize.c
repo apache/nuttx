@@ -74,13 +74,13 @@ static void up_calibratedelay(void)
 {
   int i;
 
-  llwarn("Beginning 100s delay\n");
+  _llwarn("Beginning 100s delay\n");
   for (i = 0; i < 100; i++)
     {
       up_mdelay(1000);
     }
 
-  llwarn("End 100s delay\n");
+  _llwarn("End 100s delay\n");
 }
 #else
 # define up_calibratedelay()

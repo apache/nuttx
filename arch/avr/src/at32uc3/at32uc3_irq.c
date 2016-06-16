@@ -321,11 +321,11 @@ unsigned int avr32_intirqno(unsigned int level)
           mask <<= 1;
         }
 
-       llerr("ERROR: Spurious interrupt: group=%d IRR=%08x\n", group, irr);
+       _llerr("ERROR: Spurious interrupt: group=%d IRR=%08x\n", group, irr);
        return -ENODEV;
     }
 
-  llerr("ERROR: Bad group: %d\n", group);
+  _llerr("ERROR: Bad group: %d\n", group);
   return AVR32_IRQ_BADVECTOR;
 }
 

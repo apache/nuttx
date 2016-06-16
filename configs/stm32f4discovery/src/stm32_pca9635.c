@@ -86,7 +86,7 @@ int stm32_pca9635_initialize(void)
   i2c = stm32_i2cbus_initialize(PCA9635_I2CBUS);
   if (!i2c)
     {
-      err("ERROR: Failed to initialize I2C%d\n", PCA9635_I2CBUS);
+      _err("ERROR: Failed to initialize I2C%d\n", PCA9635_I2CBUS);
       return -1;
     }
 

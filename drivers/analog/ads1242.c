@@ -403,15 +403,15 @@ static void ads1242_print_regs(FAR struct ads1242_dev_s *dev, char const *msg)
  uint8_t mux_reg_value   = 0;
  uint8_t acr_reg_value   = 0;
 
- info("%s\n", msg);
+ _info("%s\n", msg);
 
  ads1242_read_reg(dev, ADS1242_REG_SETUP, &setup_reg_value);
  ads1242_read_reg(dev, ADS1242_REG_MUX, &mux_reg_value);
  ads1242_read_reg(dev, ADS1242_REG_ACR, &acr_reg_value);
 
- info("SETUP  %02X\n", setup_reg_value);
- info("MUX    %02X\n", mux_reg_value);
- info("ACR    %02X\n", acr_reg_value);
+ _info("SETUP  %02X\n", setup_reg_value);
+ _info("MUX    %02X\n", mux_reg_value);
+ _info("ACR    %02X\n", acr_reg_value);
 }
 #endif /* CONFIG_DEBUG_FEATURES && CONFIG_DEBUG_INFO */
 
@@ -552,7 +552,7 @@ static int ads1242_ioctl (FAR struct file *filep, int cmd, unsigned long arg)
       /* Command was not recognized */
 
     default:
-      err ("Unrecognized cmd: %d\n", cmd);
+       _err("ERROR: Unrecognized cmd: %d\n", cmd);
       ret = -ENOTTY;
       break;
     }
@@ -596,7 +596,7 @@ int ads1242_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
   priv = (FAR struct ads1242_dev_s *)kmm_malloc(sizeof(struct ads1242_dev_s));
   if (priv == NULL)
     {
-      err ("Failed to allocate instance\n");
+       _err("ERROR: Failed to allocate instance\n");
       return -ENOMEM;
     }
 
@@ -610,7 +610,7 @@ int ads1242_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
   ret = register_driver(devpath, &g_ads1242_fops, 0666, priv);
   if (ret < 0)
     {
-      err ("Failed to register driver: %d\n", ret);
+       _err("ERROR: Failed to register driver: %d\n", ret);
       kmm_free(priv);
     }
 

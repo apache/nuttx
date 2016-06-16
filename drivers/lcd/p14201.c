@@ -180,9 +180,9 @@
 /* Debug ******************************************************************************/
 
 #ifdef CONFIG_LCD_RITDEBUG
-#  define riterr(format, ...)  err(format, ##__VA_ARGS__)
-#  define ritwarn(format, ...) warn(format, ##__VA_ARGS__)
-#  define ritinfo(format, ...) info(format, ##__VA_ARGS__)
+#  define riterr(format, ...)  _err(format, ##__VA_ARGS__)
+#  define ritwarn(format, ...) _warn(format, ##__VA_ARGS__)
+#  define ritinfo(format, ...) _info(format, ##__VA_ARGS__)
 #else
 #  define riterr(x...)
 #  define ritwarn(x...)

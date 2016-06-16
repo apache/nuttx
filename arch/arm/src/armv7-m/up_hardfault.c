@@ -60,7 +60,7 @@
  */
 
 #ifdef CONFIG_DEBUG_HARDFAULT
-# define hferr(format, ...) llerr(format, ##__VA_ARGS__)
+# define hferr(format, ...)  _llerr(format, ##__VA_ARGS__)
 #else
 # define hferr(x...)
 #endif
@@ -179,7 +179,7 @@ int up_hardfault(int irq, FAR void *context)
 #endif
 
   (void)up_irq_save();
-  llerr("PANIC!!! Hard fault: %08x\n", getreg32(NVIC_HFAULTS));
+  _llerr("PANIC!!! Hard fault: %08x\n", getreg32(NVIC_HFAULTS));
   PANIC();
   return OK;
 }

@@ -427,7 +427,7 @@ uint8_t stmpe811_getreg8(FAR struct stmpe811_dev_s *priv, uint8_t regaddr)
     }
 
 #ifdef CONFIG_STMPE811_REGDEBUG
-  err("%02x->%02x\n", regaddr, regval);
+  _err("%02x->%02x\n", regaddr, regval);
 #endif
   return regval;
 }
@@ -455,7 +455,7 @@ void stmpe811_putreg8(FAR struct stmpe811_dev_s *priv,
   int ret;
 
 #ifdef CONFIG_STMPE811_REGDEBUG
-  err("%02x<-%02x\n", regaddr, regval);
+  _err("%02x<-%02x\n", regaddr, regval);
 #endif
 
   /* Setup to the data to be transferred.  Two bytes:  The STMPE811 register
@@ -535,7 +535,7 @@ uint16_t stmpe811_getreg16(FAR struct stmpe811_dev_s *priv, uint8_t regaddr)
     }
 
 #ifdef CONFIG_STMPE811_REGDEBUG
-  err("%02x->%02x%02x\n", regaddr, rxbuffer[0], rxbuffer[1]);
+  _err("%02x->%02x%02x\n", regaddr, rxbuffer[0], rxbuffer[1]);
 #endif
   return (uint16_t)rxbuffer[0] << 8 | (uint16_t)rxbuffer[1];
 }

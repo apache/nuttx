@@ -606,7 +606,7 @@ const struct trace_msg_t g_usb_trace_strings_intdecode[] =
 #ifdef CONFIG_SAM34_UDP_REGDEBUG
 static void sam_printreg(uintptr_t regaddr, uint32_t regval, bool iswrite)
 {
-  llinfo("%p%s%08x\n", regaddr, iswrite ? "<-" : "->", regval);
+  _llinfo("%p%s%08x\n", regaddr, iswrite ? "<-" : "->", regval);
 }
 #endif
 
@@ -657,7 +657,7 @@ static void sam_checkreg(uintptr_t regaddr, uint32_t regval, bool iswrite)
             {
               /* No.. More than one. */
 
-              llinfo("[repeats %d more times]\n", count);
+              _llinfo("[repeats %d more times]\n", count);
             }
         }
 
@@ -737,15 +737,15 @@ static void sam_dumpep(struct sam_usbdev_s *priv, uint8_t epno)
 {
   /* Global Registers */
 
-  llinfo("Global Registers:\n");
-  llinfo(" FRMNUM:    %08x\n", sam_getreg(SAM_UDP_FRMNUM));
-  llinfo("GLBSTAT:    %08x\n", sam_getreg(SAM_UDP_GLBSTAT));
-  llinfo("  FADDR:    %08x\n", sam_getreg(SAM_UDP_FADDR));
-  llinfo("    IMR:    %08x\n", sam_getreg(SAM_UDP_IMR));
-  llinfo("    ISR:    %08x\n", sam_getreg(SAM_UDP_ISR));
-  llinfo("  RSTEP:    %08x\n", sam_getreg(SAM_UDP_RSTEP));
-  llinfo("   TXVC:    %08x\n", sam_getreg(SAM_UDP_TXVC));
-  llinfo(" CSR[%d]:    %08x\n", epno, sam_getreg(SAM_UDPEP_CSR(epno)));
+  _llinfo("Global Registers:\n");
+  _llinfo(" FRMNUM:    %08x\n", sam_getreg(SAM_UDP_FRMNUM));
+  _llinfo("GLBSTAT:    %08x\n", sam_getreg(SAM_UDP_GLBSTAT));
+  _llinfo("  FADDR:    %08x\n", sam_getreg(SAM_UDP_FADDR));
+  _llinfo("    IMR:    %08x\n", sam_getreg(SAM_UDP_IMR));
+  _llinfo("    ISR:    %08x\n", sam_getreg(SAM_UDP_ISR));
+  _llinfo("  RSTEP:    %08x\n", sam_getreg(SAM_UDP_RSTEP));
+  _llinfo("   TXVC:    %08x\n", sam_getreg(SAM_UDP_TXVC));
+  _llinfo(" CSR[%d]:    %08x\n", epno, sam_getreg(SAM_UDPEP_CSR(epno)));
 }
 #endif
 

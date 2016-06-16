@@ -361,7 +361,7 @@ static inline void mpu_showtype(void)
 {
 #ifdef CONFIG_DEBUG_FEATURES
   uint32_t regval = mpu_get_mpuir();
-  err("%s MPU Regions: data=%d instr=%d\n",
+  _err("%s MPU Regions: data=%d instr=%d\n",
       (regval & MPUIR_SEPARATE) != 0 ? "Separate" : "Unified",
       (regval & MPUIR_DREGION_MASK) >> MPUIR_DREGION_SHIFT,
       (regval & MPUIR_IREGION_MASK) >> MPUIR_IREGION_SHIFT);

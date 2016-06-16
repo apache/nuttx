@@ -689,7 +689,7 @@ static bool pwm_checkreg(FAR struct sam_pwm_s *pwm, bool wr, uint32_t regval,
         {
           /* Yes... show how many times we did it */
 
-          llerr("...[Repeats %d times]...\n", pwm->count);
+          _llerr("...[Repeats %d times]...\n", pwm->count);
         }
 
       /* Save information about the new access */
@@ -733,7 +733,7 @@ static uint32_t pwm_getreg(struct sam_pwm_chan_s *chan, int offset)
 #ifdef CONFIG_SAMA5_PWM_REGDEBUG
   if (pwm_checkreg(&g_pwm, false, regval, regaddr))
     {
-      llerr("%08x->%08x\n", regaddr, regval);
+      _llerr("%08x->%08x\n", regaddr, regval);
     }
 #endif
 
@@ -750,7 +750,7 @@ static uint32_t pwm_getreg(struct sam_pwm_chan_s *chan, int offset)
 #ifdef CONFIG_SAMA5_PWM_REGDEBUG
   if (pwm_checkreg(pwm, false, regval, regaddr))
     {
-      llerr("%08x->%08x\n", regaddr, regval);
+      _llerr("%08x->%08x\n", regaddr, regval);
     }
 #endif
 
@@ -789,7 +789,7 @@ static uint32_t pwm_chan_getreg(struct sam_pwm_chan_s *chan, int offset)
   if (pwm_checkreg(chan->pwm, false, regval, regaddr))
 #endif
     {
-      llerr("%08x->%08x\n", regaddr, regval);
+      _llerr("%08x->%08x\n", regaddr, regval);
     }
 #endif
 
@@ -820,7 +820,7 @@ static void pwm_putreg(struct sam_pwm_chan_s *chan, int offset,
 #ifdef CONFIG_SAMA5_PWM_REGDEBUG
   if (pwm_checkreg(&g_pwm, true, regval, regaddr))
     {
-      llerr("%08x<-%08x\n", regaddr, regval);
+      _llerr("%08x<-%08x\n", regaddr, regval);
     }
 #endif
 
@@ -833,7 +833,7 @@ static void pwm_putreg(struct sam_pwm_chan_s *chan, int offset,
 #ifdef CONFIG_SAMA5_PWM_REGDEBUG
   if (pwm_checkreg(pwm, true, regval, regaddr))
     {
-      llerr("%08x<-%08x\n", regaddr, regval);
+      _llerr("%08x<-%08x\n", regaddr, regval);
     }
 #endif
 
@@ -869,7 +869,7 @@ static void pwm_chan_putreg(struct sam_pwm_chan_s *chan, int offset,
   if (pwm_checkreg(chan->pwm, true, regval, regaddr))
 #endif
     {
-      llerr("%08x<-%08x\n", regaddr, regval);
+      _llerr("%08x<-%08x\n", regaddr, regval);
     }
 #endif
 

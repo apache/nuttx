@@ -456,7 +456,7 @@ static struct lpc17_xfrinfo_s g_xfrbuffers[CONFIG_LPC17_USBHOST_NPREALLOC];
 #ifdef CONFIG_LPC17_USBHOST_REGDEBUG
 static void lpc17_printreg(uint32_t addr, uint32_t val, bool iswrite)
 {
-  llerr("%08x%s%08x\n", addr, iswrite ? "<-" : "->", val);
+  _llerr("%08x%s%08x\n", addr, iswrite ? "<-" : "->", val);
 }
 #endif
 
@@ -506,7 +506,7 @@ static void lpc17_checkreg(uint32_t addr, uint32_t val, bool iswrite)
             {
               /* No.. More than one. */
 
-              llerr("[repeats %d more times]\n", count);
+              _llerr("[repeats %d more times]\n", count);
             }
         }
 

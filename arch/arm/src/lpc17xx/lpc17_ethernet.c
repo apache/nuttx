@@ -415,7 +415,7 @@ static void lpc17_ethreset(struct lpc17_driver_s *priv);
 #ifdef CONFIG_NET_REGDEBUG
 static void lpc17_printreg(uint32_t addr, uint32_t val, bool iswrite)
 {
-  err("%08x%s%08x\n", addr, iswrite ? "<-" : "->", val);
+  _err("%08x%s%08x\n", addr, iswrite ? "<-" : "->", val);
 }
 #endif
 
@@ -465,7 +465,7 @@ static void lpc17_checkreg(uint32_t addr, uint32_t val, bool iswrite)
             {
               /* No.. More than one. */
 
-              err("[repeats %d more times]\n", count);
+              _err("[repeats %d more times]\n", count);
             }
         }
 
@@ -2319,14 +2319,14 @@ static void lpc17_showpins(void)
 #if defined(CONFIG_NET_REGDEBUG) && defined(LPC17_HAVE_PHY)
 static void lpc17_showmii(uint8_t phyaddr, const char *msg)
 {
-  err("PHY " LPC17_PHYNAME ": %s\n", msg);
-  err("  MCR:       %04x\n", lpc17_phyread(phyaddr, MII_MCR));
-  err("  MSR:       %04x\n", lpc17_phyread(phyaddr, MII_MSR));
-  err("  ADVERTISE: %04x\n", lpc17_phyread(phyaddr, MII_ADVERTISE));
-  err("  LPA:       %04x\n", lpc17_phyread(phyaddr, MII_LPA));
-  err("  EXPANSION: %04x\n", lpc17_phyread(phyaddr, MII_EXPANSION));
+  _err("PHY " LPC17_PHYNAME ": %s\n", msg);
+  _err("  MCR:       %04x\n", lpc17_phyread(phyaddr, MII_MCR));
+  _err("  MSR:       %04x\n", lpc17_phyread(phyaddr, MII_MSR));
+  _err("  ADVERTISE: %04x\n", lpc17_phyread(phyaddr, MII_ADVERTISE));
+  _err("  LPA:       %04x\n", lpc17_phyread(phyaddr, MII_LPA));
+  _err("  EXPANSION: %04x\n", lpc17_phyread(phyaddr, MII_EXPANSION));
 #ifdef CONFIG_ETH0_PHY_KS8721
-  err("  10BTCR:    %04x\n", lpc17_phyread(phyaddr, MII_KS8721_10BTCR));
+  _err("  10BTCR:    %04x\n", lpc17_phyread(phyaddr, MII_KS8721_10BTCR));
 #endif
 }
 #endif

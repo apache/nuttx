@@ -817,7 +817,7 @@ static uint32_t lpc43_swap32(uint32_t value)
 static void lpc43_printreg(volatile uint32_t *regaddr, uint32_t regval,
                           bool iswrite)
 {
-  llerr("%08x%s%08x\n", (uintptr_t)regaddr, iswrite ? "<-" : "->", regval);
+  _llerr("%08x%s%08x\n", (uintptr_t)regaddr, iswrite ? "<-" : "->", regval);
 }
 #endif
 
@@ -868,7 +868,7 @@ static void lpc43_checkreg(volatile uint32_t *regaddr, uint32_t regval, bool isw
             {
               /* No.. More than one. */
 
-              llerr("[repeats %d more times]\n", count);
+              _llerr("[repeats %d more times]\n", count);
             }
         }
 

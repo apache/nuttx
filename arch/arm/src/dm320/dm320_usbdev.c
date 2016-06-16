@@ -443,7 +443,7 @@ static uint8_t dm320_getreg8(uint32_t addr)
         {
           if (count == 4)
             {
-              llerr("...\n");
+              _llerr("...\n");
             }
 
           return val;
@@ -460,7 +460,7 @@ static uint8_t dm320_getreg8(uint32_t addr)
         {
           /* Yes.. then show how many times the value repeated */
 
-          llerr("[repeats %d more times]\n", count-3);
+          _llerr("[repeats %d more times]\n", count-3);
         }
 
       /* Save the new address, value, and count */
@@ -472,7 +472,7 @@ static uint8_t dm320_getreg8(uint32_t addr)
 
   /* Show the register value read */
 
-  llerr("%08x->%02x\n", addr, val);
+  _llerr("%08x->%02x\n", addr, val);
   return val;
 }
 #endif
@@ -506,7 +506,7 @@ static uint32_t dm320_getreg16(uint32_t addr)
         {
           if (count == 4)
             {
-              llerr("...\n");
+              _llerr("...\n");
             }
 
           return val;
@@ -523,7 +523,7 @@ static uint32_t dm320_getreg16(uint32_t addr)
         {
           /* Yes.. then show how many times the value repeated */
 
-          llerr("[repeats %d more times]\n", count-3);
+          _llerr("[repeats %d more times]\n", count-3);
         }
 
       /* Save the new address, value, and count */
@@ -535,7 +535,7 @@ static uint32_t dm320_getreg16(uint32_t addr)
 
   /* Show the register value read */
 
-  llerr("%08x->%04x\n", addr, val);
+  _llerr("%08x->%04x\n", addr, val);
   return val;
 }
 #endif
@@ -569,7 +569,7 @@ static uint32_t dm320_getreg32(uint32_t addr)
         {
           if (count == 4)
             {
-              llerr("...\n");
+              _llerr("...\n");
             }
 
           return val;
@@ -586,7 +586,7 @@ static uint32_t dm320_getreg32(uint32_t addr)
         {
           /* Yes.. then show how many times the value repeated */
 
-          llerr("[repeats %d more times]\n", count-3);
+          _llerr("[repeats %d more times]\n", count-3);
         }
 
       /* Save the new address, value, and count */
@@ -598,7 +598,7 @@ static uint32_t dm320_getreg32(uint32_t addr)
 
   /* Show the register value read */
 
-  llerr("%08x->%08x\n", addr, val);
+  _llerr("%08x->%08x\n", addr, val);
   return val;
 }
 #endif
@@ -616,7 +616,7 @@ static void dm320_putreg8(uint8_t val, uint32_t addr)
 {
   /* Show the register value being written */
 
-  llerr("%08x<-%02x\n", addr, val);
+  _llerr("%08x<-%02x\n", addr, val);
 
   /* Write the value */
 
@@ -637,7 +637,7 @@ static void dm320_putreg16(uint16_t val, uint32_t addr)
 {
   /* Show the register value being written */
 
-  llerr("%08x<-%04x\n", addr, val);
+  _llerr("%08x<-%04x\n", addr, val);
 
   /* Write the value */
 
@@ -658,7 +658,7 @@ static void dm320_putreg32(uint32_t val, uint32_t addr)
 {
   /* Show the register value being written */
 
-  llerr("%08x<-%08x\n", addr, val);
+  _llerr("%08x<-%08x\n", addr, val);
 
   /* Write the value */
 

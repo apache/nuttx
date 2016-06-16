@@ -258,7 +258,7 @@ static int up_setup(struct uart_dev_s *dev)
     inb(base+COM_RX);
     if (inb(base+COM_LSR) == 0xff)
       {
-        err("ERROR: COM %d does not exist\n", base);
+        _err("ERROR: COM %d does not exist\n", base);
         return -1;
       }
 
@@ -591,14 +591,14 @@ void up_serialinit(void)
     dev = up_alloc_com(COM1, 4);
     if (dev == NULL)
       {
-        err("ERROR: alloc com1 fail\n");
+        _err("ERROR: alloc com1 fail\n");
       }
     else
       {
         errcode = uart_register("/dev/ttyS0", dev);
         if (errcode)
           {
-            err("ERROR: register com1 fail\n");
+            _err("ERROR: register com1 fail\n");
           }
       }
 #endif
@@ -606,14 +606,14 @@ void up_serialinit(void)
     dev = up_alloc_com(COM2, 3);
     if (dev == NULL)
       {
-        err("ERROR: alloc com2 fail\n");
+        _err("ERROR: alloc com2 fail\n");
       }
     else
       {
         errcode = uart_register("/dev/ttyS1", dev);
         if (errcode)
           {
-            err("ERROR: register com2 fail\n");
+            _err("ERROR: register com2 fail\n");
           }
       }
 #endif
@@ -621,14 +621,14 @@ void up_serialinit(void)
     dev = up_alloc_com(COM3, 4);
     if (dev == NULL)
       {
-        err("ERROR: alloc com3 fail\n");
+        _err("ERROR: alloc com3 fail\n");
       }
     else
       {
         errcode = uart_register("/dev/ttyS2", dev);
         if (errcode)
           {
-            err("ERROR: register com3 fail\n");
+            _err("ERROR: register com3 fail\n");
           }
       }
 #endif
@@ -636,14 +636,14 @@ void up_serialinit(void)
     dev = up_alloc_com(COM4, 3);
     if (dev == NULL)
       {
-        err("ERROR: alloc com4 fail\n");
+        _err("ERROR: alloc com4 fail\n");
       }
     else
       {
         errcode = uart_register("/dev/ttyS3", dev);
         if (errcode)
           {
-            err("ERROR: register com4 fail\n");
+            _err("ERROR: register com4 fail\n");
           }
       }
 #endif

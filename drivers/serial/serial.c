@@ -1369,7 +1369,7 @@ int uart_register(FAR const char *path, FAR uart_dev_t *dev)
   sem_init(&dev->pollsem,  0, 1);
 #endif
 
-  info("Registering %s\n", path);
+  _info("Registering %s\n", path);
   return register_driver(path, &g_serialops, 0666, dev);
 }
 

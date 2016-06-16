@@ -349,7 +349,7 @@ static bool twi_checkreg(struct twi_dev_s *priv, bool wr, uint32_t value,
         {
           /* Yes... show how many times we did it */
 
-          llerr("...[Repeats %d times]...\n", priv->ntimes);
+          _llerr("...[Repeats %d times]...\n", priv->ntimes);
         }
 
       /* Save information about the new access */
@@ -381,7 +381,7 @@ static uint32_t twi_getabs(struct twi_dev_s *priv, uintptr_t address)
 
   if (twi_checkreg(priv, false, value, address))
     {
-      llerr("%08x->%08x\n", address, value);
+      _llerr("%08x->%08x\n", address, value);
     }
 
   return value;
@@ -402,7 +402,7 @@ static void twi_putabs(struct twi_dev_s *priv, uintptr_t address,
 {
   if (twi_checkreg(priv, true, value, address))
     {
-      llerr("%08x<-%08x\n", address, value);
+      _llerr("%08x<-%08x\n", address, value);
     }
 
   putreg32(value, address);

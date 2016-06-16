@@ -966,7 +966,7 @@ static bool sam_checkreg(struct sam_emac_s *priv, bool wr, uint32_t regval,
         {
           /* Yes... show how many times we did it */
 
-          llerr("...[Repeats %d times]...\n", priv->ntimes);
+          _llerr("...[Repeats %d times]...\n", priv->ntimes);
         }
 
       /* Save information about the new access */
@@ -999,7 +999,7 @@ static uint32_t sam_getreg(struct sam_emac_s *priv, uint16_t offset)
 #ifdef CONFIG_SAMV7_EMAC_REGDEBUG
   if (sam_checkreg(priv, false, regval, regaddr))
     {
-      llerr("%08x->%08x\n", regaddr, regval);
+      _llerr("%08x->%08x\n", regaddr, regval);
     }
 #endif
 
@@ -1023,7 +1023,7 @@ static void sam_putreg(struct sam_emac_s *priv, uint16_t offset,
 #ifdef CONFIG_SAMV7_EMAC_REGDEBUG
   if (sam_checkreg(priv, true, regval, regaddr))
     {
-      llerr("%08x<-%08x\n", regaddr, regval);
+      _llerr("%08x<-%08x\n", regaddr, regval);
     }
 #endif
 

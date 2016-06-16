@@ -173,7 +173,7 @@ static void kinetis_dumpnvic(const char *msg, int irq)
 static int kinetis_nmi(int irq, FAR void *context)
 {
   (void)up_irq_save();
-  err("PANIC!!! NMI received\n");
+  _err("PANIC!!! NMI received\n");
   PANIC();
   return 0;
 }
@@ -181,7 +181,7 @@ static int kinetis_nmi(int irq, FAR void *context)
 static int kinetis_busfault(int irq, FAR void *context)
 {
   (void)up_irq_save();
-  err("PANIC!!! Bus fault recived\n");
+  _err("PANIC!!! Bus fault recived\n");
   PANIC();
   return 0;
 }
@@ -189,7 +189,7 @@ static int kinetis_busfault(int irq, FAR void *context)
 static int kinetis_usagefault(int irq, FAR void *context)
 {
   (void)up_irq_save();
-  err("PANIC!!! Usage fault received\n");
+  _err("PANIC!!! Usage fault received\n");
   PANIC();
   return 0;
 }
@@ -197,7 +197,7 @@ static int kinetis_usagefault(int irq, FAR void *context)
 static int kinetis_pendsv(int irq, FAR void *context)
 {
   (void)up_irq_save();
-  err("PANIC!!! PendSV received\n");
+  _err("PANIC!!! PendSV received\n");
   PANIC();
   return 0;
 }
@@ -205,7 +205,7 @@ static int kinetis_pendsv(int irq, FAR void *context)
 static int kinetis_errmonitor(int irq, FAR void *context)
 {
   (void)up_irq_save();
-  err("PANIC!!! Debug Monitor received\n");
+  _err("PANIC!!! Debug Monitor received\n");
   PANIC();
   return 0;
 }
@@ -213,7 +213,7 @@ static int kinetis_errmonitor(int irq, FAR void *context)
 static int kinetis_reserved(int irq, FAR void *context)
 {
   (void)up_irq_save();
-  err("PANIC!!! Reserved interrupt\n");
+  _err("PANIC!!! Reserved interrupt\n");
   PANIC();
   return 0;
 }

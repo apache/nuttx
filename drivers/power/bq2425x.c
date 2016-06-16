@@ -78,8 +78,8 @@
 /* Debug ********************************************************************/
 
 #ifdef CONFIG_DEBUG_BQ2425X
-#  define baterr err
-#  define batreg err
+#  define baterr  _err
+#  define batreg  _err
 #else
 #  ifdef CONFIG_CPP_HAVE_VARARGS
 #    define baterr(x...)

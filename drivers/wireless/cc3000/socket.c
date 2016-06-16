@@ -62,8 +62,8 @@
 #  define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
 #endif
 
-#define waitllerr(x,...) // llerr
-#define waitllinfo(x,...) // llinfo
+#define waitllerr(x,...) //  _llerr
+#define waitllinfo(x,...) // _llinfo
 
 /****************************************************************************
  * Private Types

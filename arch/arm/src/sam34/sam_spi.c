@@ -420,7 +420,7 @@ static bool spi_checkreg(struct sam_spidev_s *spi, bool wr, uint32_t value,
         {
           /* Yes... show how many times we did it */
 
-          llerr("...[Repeats %d times]...\n", spi->ntimes);
+          _llerr("...[Repeats %d times]...\n", spi->ntimes);
         }
 
       /* Save information about the new access */
@@ -454,7 +454,7 @@ static inline uint32_t spi_getreg(struct sam_spidev_s *spi,
 #ifdef CONFIG_SAM34_SPI_REGDEBUG
   if (spi_checkreg(spi, false, value, address))
     {
-      llerr("%08x->%08x\n", address, value);
+      _llerr("%08x->%08x\n", address, value);
     }
 #endif
 
@@ -477,7 +477,7 @@ static inline void spi_putreg(struct sam_spidev_s *spi, uint32_t value,
 #ifdef CONFIG_SAM34_SPI_REGDEBUG
   if (spi_checkreg(spi, true, value, address))
     {
-      llerr("%08x<-%08x\n", address, value);
+      _llerr("%08x<-%08x\n", address, value);
     }
 #endif
 

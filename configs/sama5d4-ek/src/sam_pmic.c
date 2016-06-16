@@ -80,7 +80,7 @@ void sam_pmic_initialize(void)
   i2c = sam_i2cbus_initialize(PMIC_TWI_BUS);
   if (!i2c)
     {
-      err("ERROR: Failed to initialize TWI%d\n", PMIC_TWI_BUS);
+      _err("ERROR: Failed to initialize TWI%d\n", PMIC_TWI_BUS);
     }
   else
     {

@@ -538,16 +538,16 @@ int sam_dumpport(uint32_t pinset, const char *msg)
   /* The following requires exclusive access to the PORT registers */
 
   flags = enter_critical_section();
-  llerr("PORT%c pin: %d pinset: %08x base: %08x -- %s\n",
+  _llerr("PORT%c pin: %d pinset: %08x base: %08x -- %s\n",
         g_portchar[port], pin, pinset, base, msg);
-  llerr("  DIR: %08x OUT: %08x IN: %08x\n",
+  _llerr("  DIR: %08x OUT: %08x IN: %08x\n",
         getreg32(base + SAM_PORT_DIR_OFFSET),
         getreg32(base + SAM_PORT_OUT_OFFSET),
         getreg32(base + SAM_PORT_IN_OFFSET));
-  llerr("  CTRL: %08x WRCONFIG: %08x\n",
+  _llerr("  CTRL: %08x WRCONFIG: %08x\n",
         getreg32(base + SAM_PORT_CTRL_OFFSET),
         getreg32(base + SAM_PORT_WRCONFIG_OFFSET));
-  llerr("  PMUX[%08x]: %02x PINCFG[%08x]: %02x\n",
+  _llerr("  PMUX[%08x]: %02x PINCFG[%08x]: %02x\n",
         base + SAM_PORT_PMUX_OFFSET(pin),
         getreg8(base + SAM_PORT_PMUX_OFFSET(pin)),
         base + SAM_PORT_PINCFG_OFFSET(pin),

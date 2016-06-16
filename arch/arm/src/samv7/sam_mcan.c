@@ -1195,7 +1195,7 @@ static uint32_t mcan_getreg(FAR struct sam_mcan_s *priv, int offset)
         {
           if (priv->count == 4)
             {
-              llerr("...\n");
+              _llerr("...\n");
             }
 
           return regval;
@@ -1212,7 +1212,7 @@ static uint32_t mcan_getreg(FAR struct sam_mcan_s *priv, int offset)
         {
           /* Yes.. then show how many times the value repeated */
 
-          llerr("[repeats %d more times]\n", priv->count - 3);
+          _llerr("[repeats %d more times]\n", priv->count - 3);
         }
 
       /* Save the new address, value, and count */
@@ -1224,7 +1224,7 @@ static uint32_t mcan_getreg(FAR struct sam_mcan_s *priv, int offset)
 
   /* Show the register value read */
 
-  llerr("%08x->%08x\n", regaddr, regval);
+  _llerr("%08x->%08x\n", regaddr, regval);
   return regval;
 }
 
@@ -1261,7 +1261,7 @@ static void mcan_putreg(FAR struct sam_mcan_s *priv, int offset, uint32_t regval
 
   /* Show the register value being written */
 
-  llerr("%08x<-%08x\n", regaddr, regval);
+  _llerr("%08x<-%08x\n", regaddr, regval);
 
   /* Write the value */
 
@@ -1296,70 +1296,70 @@ static void mcan_dumpregs(FAR struct sam_mcan_s *priv, FAR const char *msg)
 {
   FAR const struct sam_config_s *config = priv->config;
 
-  llerr("MCAN%d Registers: %s\n", config->port, msg);
-  llerr("   Base: %08x\n", config->base);
+  _llerr("MCAN%d Registers: %s\n", config->port, msg);
+  _llerr("   Base: %08x\n", config->base);
 
-  llerr("   CUST: %08x  FBTP: %08x TEST: %08x    RWD: %08x\n",
+  _llerr("   CUST: %08x  FBTP: %08x TEST: %08x    RWD: %08x\n",
         getreg32(config->base + SAM_MCAN_CUST_OFFSET),
         getreg32(config->base + SAM_MCAN_FBTP_OFFSET),
         getreg32(config->base + SAM_MCAN_TEST_OFFSET),
         getreg32(config->base + SAM_MCAN_RWD_OFFSET));
 
-  llerr("  CCCR: %08x   BTP: %08x  TSCC: %08x   TSCV: %08x\n",
+  _llerr("  CCCR: %08x   BTP: %08x  TSCC: %08x   TSCV: %08x\n",
         getreg32(config->base + SAM_MCAN_CCCR_OFFSET),
         getreg32(config->base + SAM_MCAN_BTP_OFFSET),
         getreg32(config->base + SAM_MCAN_TSCC_OFFSET),
         getreg32(config->base + SAM_MCAN_TSCV_OFFSET));
 
-  llerr("  TOCC: %08x  TOCV: %08x   ECR: %08x    PSR: %08x\n",
+  _llerr("  TOCC: %08x  TOCV: %08x   ECR: %08x    PSR: %08x\n",
         getreg32(config->base + SAM_MCAN_TOCC_OFFSET),
         getreg32(config->base + SAM_MCAN_TOCV_OFFSET),
         getreg32(config->base + SAM_MCAN_ECR_OFFSET),
         getreg32(config->base + SAM_MCAN_PSR_OFFSET));
 
-  llerr("    IR: %08x    IE: %08x   ILS: %08x    ILE: %08x\n",
+  _llerr("    IR: %08x    IE: %08x   ILS: %08x    ILE: %08x\n",
         getreg32(config->base + SAM_MCAN_IR_OFFSET),
         getreg32(config->base + SAM_MCAN_IE_OFFSET),
         getreg32(config->base + SAM_MCAN_ILS_OFFSET),
         getreg32(config->base + SAM_MCAN_ILE_OFFSET));
 
-  llerr("   GFC: %08x SIDFC: %08x XIDFC: %08x  XIDAM: %08x\n",
+  _llerr("   GFC: %08x SIDFC: %08x XIDFC: %08x  XIDAM: %08x\n",
         getreg32(config->base + SAM_MCAN_GFC_OFFSET),
         getreg32(config->base + SAM_MCAN_SIDFC_OFFSET),
         getreg32(config->base + SAM_MCAN_XIDFC_OFFSET),
         getreg32(config->base + SAM_MCAN_XIDAM_OFFSET));
 
-  llerr("  HPMS: %08x NDAT1: %08x NDAT2: %08x  RXF0C: %08x\n",
+  _llerr("  HPMS: %08x NDAT1: %08x NDAT2: %08x  RXF0C: %08x\n",
         getreg32(config->base + SAM_MCAN_HPMS_OFFSET),
         getreg32(config->base + SAM_MCAN_NDAT1_OFFSET),
         getreg32(config->base + SAM_MCAN_NDAT2_OFFSET),
         getreg32(config->base + SAM_MCAN_RXF0C_OFFSET));
 
-  llerr(" RXF0S: %08x FXF0A: %08x  RXBC: %08x  RXF1C: %08x\n",
+  _llerr(" RXF0S: %08x FXF0A: %08x  RXBC: %08x  RXF1C: %08x\n",
         getreg32(config->base + SAM_MCAN_RXF0S_OFFSET),
         getreg32(config->base + SAM_MCAN_RXF0A_OFFSET),
         getreg32(config->base + SAM_MCAN_RXBC_OFFSET),
         getreg32(config->base + SAM_MCAN_RXF1C_OFFSET));
 
-  llerr(" RXF1S: %08x FXF1A: %08x RXESC: %08x   TXBC: %08x\n",
+  _llerr(" RXF1S: %08x FXF1A: %08x RXESC: %08x   TXBC: %08x\n",
         getreg32(config->base + SAM_MCAN_RXF1S_OFFSET),
         getreg32(config->base + SAM_MCAN_RXF1A_OFFSET),
         getreg32(config->base + SAM_MCAN_RXESC_OFFSET),
         getreg32(config->base + SAM_MCAN_TXBC_OFFSET));
 
-  llerr(" TXFQS: %08x TXESC: %08x TXBRP: %08x  TXBAR: %08x\n",
+  _llerr(" TXFQS: %08x TXESC: %08x TXBRP: %08x  TXBAR: %08x\n",
         getreg32(config->base + SAM_MCAN_TXFQS_OFFSET),
         getreg32(config->base + SAM_MCAN_TXESC_OFFSET),
         getreg32(config->base + SAM_MCAN_TXBRP_OFFSET),
         getreg32(config->base + SAM_MCAN_TXBAR_OFFSET));
 
-  llerr(" TXBCR: %08x TXBTO: %08x TXBCF: %08x TXBTIE: %08x\n",
+  _llerr(" TXBCR: %08x TXBTO: %08x TXBCF: %08x TXBTIE: %08x\n",
         getreg32(config->base + SAM_MCAN_TXBCR_OFFSET),
         getreg32(config->base + SAM_MCAN_TXBTO_OFFSET),
         getreg32(config->base + SAM_MCAN_TXBCF_OFFSET),
         getreg32(config->base + SAM_MCAN_TXBTIE_OFFSET));
 
-  llerr("TXBCIE: %08x TXEFC: %08x TXEFS: %08x  TXEFA: %08x\n",
+  _llerr("TXBCIE: %08x TXEFC: %08x TXEFS: %08x  TXEFA: %08x\n",
         getreg32(config->base + SAM_MCAN_TXBCIE_OFFSET),
         getreg32(config->base + SAM_MCAN_TXEFC_OFFSET),
         getreg32(config->base + SAM_MCAN_TXEFS_OFFSET),

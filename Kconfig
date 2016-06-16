@@ -413,7 +413,7 @@ config DEBUG_ERROR
 	bool "Enable Error Output"
 	default n
 	---help---
-		Enables output from err() statements.  Errors are significant system
+		Enables output from [a-z]err() statements.  Errors are significant system
 		exceptions that require immediate attention.
 
 config DEBUG_WARN
@@ -421,7 +421,7 @@ config DEBUG_WARN
 	default n
 	depends on DEBUG_ERROR
 	---help---
-		Enables output from warn() statements.  Warnings are considered to
+		Enables output from [a-z]warn() statements.  Warnings are considered to
 		be various unexpected conditions, potential errors or errors that will
 		not have serious consequences.
 

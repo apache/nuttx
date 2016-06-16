@@ -81,8 +81,8 @@
  */
 
 #ifdef CONFIG_DEBUG_RTT
-#  define rtterr    llerr
-#  define rttinfo   llinfo
+#  define rtterr    _llerr
+#  define rttinfo   _llinfo
 #else
 #  define rtterr(x...)
 #  define rttinfo(x...)
@@ -214,7 +214,7 @@ static uint32_t sam34_getreg(uint32_t addr)
         {
           if (count == 4)
             {
-              llerr("...\n");
+              _llerr("...\n");
             }
 
           return val;
@@ -231,7 +231,7 @@ static uint32_t sam34_getreg(uint32_t addr)
         {
           /* Yes.. then show how many times the value repeated */
 
-          llerr("[repeats %d more times]\n", count-3);
+          _llerr("[repeats %d more times]\n", count-3);
         }
 
       /* Save the new address, value, and count */
@@ -243,7 +243,7 @@ static uint32_t sam34_getreg(uint32_t addr)
 
   /* Show the register value read */
 
-  llerr("%08lx->%08lx\n", addr, val);
+  _llerr("%08lx->%08lx\n", addr, val);
   return val;
 }
 #endif
@@ -261,7 +261,7 @@ static void sam34_putreg(uint32_t val, uint32_t addr)
 {
   /* Show the register value being written */
 
-  llerr("%08lx<-%08lx\n", addr, val);
+  _llerr("%08lx<-%08lx\n", addr, val);
 
   /* Write the value */
 

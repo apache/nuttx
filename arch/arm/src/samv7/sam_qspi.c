@@ -374,7 +374,7 @@ static bool qspi_checkreg(struct sam_qspidev_s *priv, bool wr, uint32_t value,
         {
           /* Yes... show how many times we did it */
 
-          llerr("...[Repeats %d times]...\n", priv->ntimes);
+          _llerr("...[Repeats %d times]...\n", priv->ntimes);
         }
 
       /* Save information about the new access */
@@ -408,7 +408,7 @@ static inline uint32_t qspi_getreg(struct sam_qspidev_s *priv,
 #ifdef CONFIG_SAMV7_QSPI_REGDEBUG
   if (qspi_checkreg(priv, false, value, address))
     {
-      llerr("%08x->%08x\n", address, value);
+      _llerr("%08x->%08x\n", address, value);
     }
 #endif
 
@@ -431,7 +431,7 @@ static inline void qspi_putreg(struct sam_qspidev_s *priv, uint32_t value,
 #ifdef CONFIG_SAMV7_QSPI_REGDEBUG
   if (qspi_checkreg(priv, true, value, address))
     {
-      llerr("%08x<-%08x\n", address, value);
+      _llerr("%08x<-%08x\n", address, value);
     }
 #endif
 

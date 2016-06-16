@@ -531,7 +531,7 @@ static struct lpc17_dmadesc_s  g_usbddesc[CONFIG_LPC17_USBDEV_NDMADESCRIPTORS];
 #ifdef CONFIG_LPC17_USBDEV_REGDEBUG
 static void lpc17_printreg(uint32_t addr, uint32_t val, bool iswrite)
 {
-  llerr("%08x%s%08x\n", addr, iswrite ? "<-" : "->", val);
+  _llerr("%08x%s%08x\n", addr, iswrite ? "<-" : "->", val);
 }
 #endif
 
@@ -581,7 +581,7 @@ static void lpc17_checkreg(uint32_t addr, uint32_t val, bool iswrite)
             {
               /* No.. More than one. */
 
-              llerr("[repeats %d more times]\n", count);
+              _llerr("[repeats %d more times]\n", count);
             }
         }
 

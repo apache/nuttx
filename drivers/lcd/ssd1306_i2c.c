@@ -71,7 +71,7 @@ void ssd1306_sendbyte(FAR struct ssd1306_dev_s *priv, uint8_t regval)
   int ret;
 
 #ifdef CONFIG_LCD_SSD1306_REGDEBUG
-  llerr("-> 0x%02x\n", regval);
+  _llerr("-> 0x%02x\n", regval);
 #endif
 
   /* Setup to the data to be transferred.  Two bytes:  The SSD1306 register

@@ -69,24 +69,24 @@
 #undef cserr
 #ifdef CONFIG_CS2100CP_DEBUG
 #  ifdef CONFIG_CPP_HAVE_VARARGS
-#    define cserr(format, ...)  err(format, ##__VA_ARGS__)
+#    define cserr(format, ...)    _err(format, ##__VA_ARGS__)
 #  else
-#    define cserr               err
+#    define cserr                 _err
 #  endif
 #else
 #  ifdef CONFIG_CPP_HAVE_VARARGS
 #    define cserr(x...)
 #  else
-#    define cserr               (void)
+#    define cserr                (void)
 #  endif
 #endif
 
 #undef reginfo
 #ifdef CONFIG_CS2100CP_REGDEBUG
 #  ifdef CONFIG_CPP_HAVE_VARARGS
-#    define reginfo(format, ...) err(format, ##__VA_ARGS__)
+#    define reginfo(format, ...)  _err(format, ##__VA_ARGS__)
 #  else
-#    define reginfo              err
+#    define reginfo               _err
 #  endif
 #else
 #  ifdef CONFIG_CPP_HAVE_VARARGS
@@ -95,14 +95,6 @@
 #    define reginfo              (void)
 #  endif
 #endif
-
-/****************************************************************************
- * Public Types
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
 
 /****************************************************************************
  * Private Functions

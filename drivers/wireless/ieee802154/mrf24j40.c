@@ -779,7 +779,7 @@ static int mrf24j40_settxpower(FAR struct ieee802154_dev_s *ieee,
       return -EINVAL;
     }
 
-  llinfo("remaining attenuation: %d mBm\n",txpwr);
+  _llinfo("remaining attenuation: %d mBm\n",txpwr);
 
   switch(txpwr/100)
     {

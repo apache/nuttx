@@ -653,7 +653,7 @@ static bool sam_checkreg(struct sam_dev_s *priv, bool wr, uint32_t value,
         {
           /* Yes... show how many times we did it */
 
-          llerr("...[Repeats %d times]...\n", priv->ntimes);
+          _llerr("...[Repeats %d times]...\n", priv->ntimes);
         }
 
       /* Save information about the new access */
@@ -686,7 +686,7 @@ static inline uint32_t sam_getreg(struct sam_dev_s *priv, unsigned int offset)
 #ifdef CONFIG_SAMV7_HSMCI_REGDEBUG
   if (sam_checkreg(priv, false, value, address))
     {
-      llerr("%08x->%08x\n", address, value);
+      _llerr("%08x->%08x\n", address, value);
     }
 #endif
 
@@ -709,7 +709,7 @@ static inline void sam_putreg(struct sam_dev_s *priv, uint32_t value,
 #ifdef CONFIG_SAMV7_HSMCI_REGDEBUG
   if (sam_checkreg(priv, true, value, address))
     {
-      llerr("%08x<-%08x\n", address, value);
+      _llerr("%08x<-%08x\n", address, value);
     }
 #endif
 

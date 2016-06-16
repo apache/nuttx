@@ -157,7 +157,7 @@ static uint8_t mpl115a_getreg8(FAR struct mpl115a_dev_s *priv, uint8_t regaddr)
   (void)SPI_LOCK(priv->spi, false);
 
 #ifdef CONFIG_MPL115A_REGDEBUG
-  err("%02x->%02x\n", regaddr, regval);
+  _err("%02x->%02x\n", regaddr, regval);
 #endif
   return regval;
 }

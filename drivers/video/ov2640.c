@@ -696,7 +696,7 @@ static int ov2640_putreg(FAR struct i2c_master_s *i2c, uint8_t regaddr,
   int ret;
 
 #ifdef CONFIG_OV2640_REGDEBUG
-   err("%02x <- %02x\n", regaddr, regval);
+   _err("%02x <- %02x\n", regaddr, regval);
 #endif
 
   /* Set up for the transfer */
@@ -771,7 +771,7 @@ static uint8_t ov2640_getreg(FAR struct i2c_master_s *i2c, uint8_t regaddr)
 #ifdef CONFIG_OV2640_REGDEBUG
   else
     {
-      err("%02x -> %02x\n", regaddr, regval);
+      _err("%02x -> %02x\n", regaddr, regval);
     }
 #endif
 

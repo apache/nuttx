@@ -124,19 +124,19 @@ void nuc_dumpgpio(gpio_cfgset_t pinset, const char *msg)
 
   flags = enter_critical_section();
 
-  llerr("GPIO%c pinset: %08x base: %08x -- %s\n",
+  _llerr("GPIO%c pinset: %08x base: %08x -- %s\n",
         g_portchar[port], pinset, base, msg);
-  llerr("  PMD: %08x  OFFD: %08x  DOUT: %08x DMASK: %08x\n",
+  _llerr("  PMD: %08x  OFFD: %08x  DOUT: %08x DMASK: %08x\n",
         getreg32(base + NUC_GPIO_PMD_OFFSET),
         getreg32(base + NUC_GPIO_OFFD_OFFSET),
         getreg32(base + NUC_GPIO_DOUT_OFFSET),
         getreg32(base + NUC_GPIO_DMASK_OFFSET));
-  llerr("  PIN: %08x  DBEN: %08x   IMD: %08x   IEN: %08x\n",
+  _llerr("  PIN: %08x  DBEN: %08x   IMD: %08x   IEN: %08x\n",
         getreg32(base + NUC_GPIO_PIN_OFFSET),
         getreg32(base + NUC_GPIO_DBEN_OFFSET),
         getreg32(base + NUC_GPIO_IMD_OFFSET),
         getreg32(base + NUC_GPIO_IEN_OFFSET));
-  llerr(" ISRC: %08x\n",
+  _llerr(" ISRC: %08x\n",
         getreg32(base + NUC_GPIO_ISRC_OFFSET));
 
   leave_critical_section(flags);

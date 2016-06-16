@@ -674,7 +674,7 @@ static bool ssc_checkreg(struct sam_ssc_s *priv, bool wr, uint32_t regval,
         {
           /* Yes... show how many times we did it */
 
-          llerr("...[Repeats %d times]...\n", priv->count);
+          _llerr("...[Repeats %d times]...\n", priv->count);
         }
 
       /* Save information about the new access */
@@ -708,7 +708,7 @@ static inline uint32_t ssc_getreg(struct sam_ssc_s *priv,
 #ifdef CONFIG_SAMV7_SSC_REGDEBUG
   if (ssc_checkreg(priv, false, regval, regaddr))
     {
-      llerr("%08x->%08x\n", regaddr, regval);
+      _llerr("%08x->%08x\n", regaddr, regval);
     }
 #endif
 
@@ -731,7 +731,7 @@ static inline void ssc_putreg(struct sam_ssc_s *priv, unsigned int offset,
 #ifdef CONFIG_SAMV7_SSC_REGDEBUG
   if (ssc_checkreg(priv, true, regval, regaddr))
     {
-      llerr("%08x<-%08x\n", regaddr, regval);
+      _llerr("%08x<-%08x\n", regaddr, regval);
     }
 #endif
 
@@ -1060,7 +1060,7 @@ static void ssc_dma_sampleinit(struct sam_ssc_s *priv,
 #if defined(CONFIG_SAMV7_SSC_DMADEBUG) && defined(SSC_HAVE_RX)
 static void ssc_rxdma_sampledone(struct sam_ssc_s *priv, int result)
 {
-  llerr("result: %d\n", result);
+  _llerr("result: %d\n", result);
 
   /* Sample the final registers */
 
@@ -1125,7 +1125,7 @@ static void ssc_rxdma_sampledone(struct sam_ssc_s *priv, int result)
 #if defined(CONFIG_SAMV7_SSC_DMADEBUG) && defined(SSC_HAVE_TX)
 static void ssc_txdma_sampledone(struct sam_ssc_s *priv, int result)
 {
-  llerr("result: %d\n", result);
+  _llerr("result: %d\n", result);
 
   /* Sample the final registers */
 

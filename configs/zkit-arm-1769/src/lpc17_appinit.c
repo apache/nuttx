@@ -117,13 +117,13 @@
 
 #ifdef CONFIG_CPP_HAVE_VARARGS
 #  ifdef CONFIG_DEBUG_INFO
-#    define message(...) llinfo(__VA_ARGS__)
+#    define message(...) _llinfo(__VA_ARGS__)
 #  else
 #    define message(...) printf(__VA_ARGS__)
 #  endif
 #else
 #  ifdef CONFIG_DEBUG_FEATURES
-#    define message llinfo
+#    define message _llinfo
 #  else
 #    define message printf
 #  endif

@@ -390,20 +390,20 @@ static void sam_regdump(struct sam_chan_s *chan, const char *msg)
   uintptr_t base;
 
   base = chan->base;
-  llerr("TC%d [%08x]: %s\n", chan->chan, (int)base, msg);
-  llerr("  BMR: %08x QIMR: %08x QISR: %08x WPMR: %08x\n",
+  _llerr("TC%d [%08x]: %s\n", chan->chan, (int)base, msg);
+  _llerr("  BMR: %08x QIMR: %08x QISR: %08x WPMR: %08x\n",
         getreg32(base+SAM_TC_BMR_OFFSET), getreg32(base+SAM_TC_QIMR_OFFSET),
         getreg32(base+SAM_TC_QISR_OFFSET), getreg32(base+SAM_TC_WPMR_OFFSET));
 
   base = chan->base;
-  llerr("TC%d Channel %d [%08x]: %s\n", chan->chan, chan->chan, (int)base, msg);
-  llerr("  CMR: %08x SSMR: %08x  RAB: %08x   CV: %08x\n",
+  _llerr("TC%d Channel %d [%08x]: %s\n", chan->chan, chan->chan, (int)base, msg);
+  _llerr("  CMR: %08x SSMR: %08x  RAB: %08x   CV: %08x\n",
         getreg32(base+SAM_TC_CMR_OFFSET), getreg32(base+SAM_TC_SMMR_OFFSET),
         getreg32(base+SAM_TC_RAB_OFFSET), getreg32(base+SAM_TC_CV_OFFSET));
-  llerr("   RA: %08x   RB: %08x   RC: %08x   SR: %08x\n",
+  _llerr("   RA: %08x   RB: %08x   RC: %08x   SR: %08x\n",
         getreg32(base+SAM_TC_RA_OFFSET), getreg32(base+SAM_TC_RB_OFFSET),
         getreg32(base+SAM_TC_RC_OFFSET), getreg32(base+SAM_TC_SR_OFFSET));
-  llerr("  IMR: %08x\n",
+  _llerr("  IMR: %08x\n",
         getreg32(base+SAM_TC_IMR_OFFSET));
 }
 #endif
@@ -447,7 +447,7 @@ static bool sam_checkreg(struct sam_chan_s *chan, bool wr, uint32_t regaddr,
         {
           /* Yes... show how many times we did it */
 
-          llerr("...[Repeats %d times]...\n", chan->ntimes);
+          _llerr("...[Repeats %d times]...\n", chan->ntimes);
         }
 
       /* Save information about the new access */
@@ -481,7 +481,7 @@ static inline uint32_t sam_chan_getreg(struct sam_chan_s *chan,
 #ifdef CONFIG_SAM34_TC_REGDEBUG
   if (sam_checkreg(chan, false, regaddr, regval))
     {
-      llerr("%08x->%08x\n", regaddr, regval);
+      _llerr("%08x->%08x\n", regaddr, regval);
     }
 #endif
 
@@ -504,7 +504,7 @@ static inline void sam_chan_putreg(struct sam_chan_s *chan, unsigned int offset,
 #ifdef CONFIG_SAM34_TC_REGDEBUG
   if (sam_checkreg(chan, true, regaddr, regval))
     {
-      llerr("%08x<-%08x\n", regaddr, regval);
+      _llerr("%08x<-%08x\n", regaddr, regval);
     }
 #endif
 

@@ -77,16 +77,16 @@
 
 #ifdef CONFIG_CPP_HAVE_VARARGS
 #  ifdef CONFIG_DEBUG_SHM
-#    define shmerr(format, ...)       err(format, ##__VA_ARGS__)
-#    define shminfo(format, ...)      info(format, ##__VA_ARGS__)
+#    define shmerr(format, ...)       _err(format, ##__VA_ARGS__)
+#    define shminfo(format, ...)      _info(format, ##__VA_ARGS__)
 #  else
 #    define shmerr(format, ...)       merr(format, ##__VA_ARGS__)
 #    define shminfo(format, ...)      minfo(format, ##__VA_ARGS__)
 #  endif
 #else
 #  ifdef CONFIG_DEBUG_SHM
-#    define shmerr                    err
-#    define shminfo                   info
+#    define shmerr                    _err
+#    define shminfo                   _info
 #  else
 #    define shmerr                    (void)
 #    define shminfo                   (void)
