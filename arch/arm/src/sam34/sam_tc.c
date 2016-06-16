@@ -63,6 +63,12 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+/* Configuration ************************************************************/
+
+#ifndef CONFIG_DEBUG_TIMER_INFO
+#  undef CONFIG_SAM34_TC_REGDEBUG
+#endif
+
 /* Clocking *****************************************************************/
 
 /* TODO: Allow selection of any of the input clocks */
@@ -98,7 +104,7 @@ struct sam34_lowerhalf_s
  ****************************************************************************/
 /* Register operations ******************************************************/
 
-#if defined(CONFIG_SAM34_TC_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
+#ifdef CONFIG_SAM34_TC_REGDEBUG
 static uint32_t sam34_getreg(uint32_t addr);
 static void     sam34_putreg(uint32_t val, uint32_t addr);
 #else
@@ -158,7 +164,7 @@ static struct sam34_lowerhalf_s g_tcdevs[6];
  *
  ****************************************************************************/
 
-#if defined(CONFIG_SAM34_TC_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
+#ifdef CONFIG_SAM34_TC_REGDEBUG
 static uint32_t sam34_getreg(uint32_t addr)
 {
   static uint32_t prevaddr = 0;
@@ -179,7 +185,7 @@ static uint32_t sam34_getreg(uint32_t addr)
         {
           if (count == 4)
             {
-              _llerr("...\n");
+              tmrinfo("...\n");
             }
 
           return val;
@@ -196,7 +202,7 @@ static uint32_t sam34_getreg(uint32_t addr)
         {
           /* Yes.. then show how many times the value repeated */
 
-          _llerr("[repeats %d more times]\n", count-3);
+          tmrinfo("[repeats %d more times]\n", count-3);
         }
 
       /* Save the new address, value, and count */
@@ -208,7 +214,7 @@ static uint32_t sam34_getreg(uint32_t addr)
 
   /* Show the register value read */
 
-  _llerr("%08lx->%08lx\n", addr, val);
+  tmrinfo("%08lx->%08lx\n", addr, val);
   return val;
 }
 #endif
@@ -221,12 +227,12 @@ static uint32_t sam34_getreg(uint32_t addr)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_SAM34_TC_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
+#ifdef CONFIG_SAM34_TC_REGDEBUG
 static void sam34_putreg(uint32_t val, uint32_t addr)
 {
   /* Show the register value being written */
 
-  _llerr("%08lx<-%08lx\n", addr, val);
+  tmrinfo("%08lx<-%08lx\n", addr, val);
 
   /* Write the value */
 

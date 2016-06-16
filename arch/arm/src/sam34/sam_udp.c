@@ -3115,11 +3115,11 @@ static int sam_ep_submit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
 
       if (privep->stalled || privep->pending)
         {
-          /* Yes.. in this case, save the new they will get in a special
-           * "pending" they will get queue until the stall is cleared.
+          /* Yes.. in this case, save the request in a special "pending"
+           * queue. They will stay queuee until the stall is cleared.
            */
 
-          ullerr("Pending stall clear\n");
+          ullinfo("Pending stall clear\n");
           sam_req_enqueue(&privep->pendq, privreq);
           usbtrace(TRACE_INREQQUEUED(epno), req->len);
           ret = OK;

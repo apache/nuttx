@@ -1128,11 +1128,11 @@ config SAM34_SPI_DMADEBUG
 
 config SAM34_SPI_REGDEBUG
 	bool "SPI Register level debug"
-	depends on DEBUG_FEATURES
+	depends on DEBUG_SPI_INFO
 	default n
 	---help---
 		Output detailed register-level SPI device debug information.
-		Requires also CONFIG_DEBUG_FEATURES.
+		Requires also CONFIG_SPI_INFO.
 
 endmenu # AT91SAM3/4 SPI device driver options
 endif # SAM34_SPI0 || SAM34_SPI1
@@ -1336,9 +1336,9 @@ config SAM34_EMAC_PHYSR_100FD
 config SAM34_EMAC_REGDEBUG
 	bool "Register-Level Debug"
 	default n
-	depends on DEBUG_FEATURES
+	depends on DEBUG_NET_INFO
 	---help---
-		Enable very low-level register access debug.  Depends on CONFIG_DEBUG_FEATURES.
+		Enable very low-level register access debug.  Depends on CONFIG_DEBUG_NET_INFO.
 
 config SAM34_EMAC_ISETH0
 	bool
@@ -1400,7 +1400,7 @@ menu "AT91SAM3/4 USB Full Speed Device Controller driver (DCD) options"
 config SAM34_UDP_REGDEBUG
 	bool "Enable low-level UDP register debug"
 	default n
-	depends on DEBUG_FEATURES
+	depends on DEBUG_USB_INFO
 
 endmenu # USB Full Speed Device Controller driver (DCD) options
 
@@ -1415,7 +1415,7 @@ menu "AT91SAM3/4 Timer/Counter options"
 config SAM34_TC_REGDEBUG
 	bool "Enable low-level timer/counter register debug"
 	default n
-	depends on DEBUG_FEATURES
+	depends on DEBUG_TIMER_INFO
 
 endmenu # USB Full Speed Device Controller driver (DCD) options
 

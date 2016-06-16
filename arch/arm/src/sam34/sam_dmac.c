@@ -1730,7 +1730,7 @@ void sam_dmastop(DMA_HANDLE handle)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG_DMA
+#ifdef CONFIG_DEBUG_DMA_INFO
 void sam_dmasample(DMA_HANDLE handle, struct sam_dmaregs_s *regs)
 {
   struct sam_dma_s *dmach = (struct sam_dma_s *)handle;
@@ -1761,7 +1761,7 @@ void sam_dmasample(DMA_HANDLE handle, struct sam_dmaregs_s *regs)
   regs->cfg    = getreg32(dmach->base + SAM_DMACHAN_CFG_OFFSET);
   leave_critical_section(flags);
 }
-#endif /* CONFIG_DEBUG_DMA */
+#endif /* CONFIG_DEBUG_DMA_INFO */
 
 /****************************************************************************
  * Name: sam_dmadump
@@ -1774,28 +1774,28 @@ void sam_dmasample(DMA_HANDLE handle, struct sam_dmaregs_s *regs)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG_DMA
+#ifdef CONFIG_DEBUG_DMA_INFO
 void sam_dmadump(DMA_HANDLE handle, const struct sam_dmaregs_s *regs,
                  const char *msg)
 {
   struct sam_dma_s *dmach = (struct sam_dma_s *)handle;
 
-  dmaerr("%s\n", msg);
-  dmaerr("  DMA Global Registers:\n");
-  dmaerr("      GCFG[%08x]: %08x\n", SAM_DMAC_GCFG, regs->gcfg);
-  dmaerr("        EN[%08x]: %08x\n", SAM_DMAC_EN, regs->en);
-  dmaerr("      SREQ[%08x]: %08x\n", SAM_DMAC_SREQ, regs->sreq);
-  dmaerr("      CREQ[%08x]: %08x\n", SAM_DMAC_CREQ, regs->creq);
-  dmaerr("      LAST[%08x]: %08x\n", SAM_DMAC_LAST, regs->last);
-  dmaerr("    EBCIMR[%08x]: %08x\n", SAM_DMAC_EBCIMR, regs->ebcimr);
-  dmaerr("      CHSR[%08x]: %08x\n", SAM_DMAC_CHSR, regs->chsr);
-  dmaerr("  DMA Channel Registers:\n");
-  dmaerr("     SADDR[%08x]: %08x\n", dmach->base + SAM_DMACHAN_SADDR_OFFSET, regs->saddr);
-  dmaerr("     DADDR[%08x]: %08x\n", dmach->base + SAM_DMACHAN_DADDR_OFFSET, regs->daddr);
-  dmaerr("      DSCR[%08x]: %08x\n", dmach->base + SAM_DMACHAN_DSCR_OFFSET, regs->dscr);
-  dmaerr("     CTRLA[%08x]: %08x\n", dmach->base + SAM_DMACHAN_CTRLA_OFFSET, regs->ctrla);
-  dmaerr("     CTRLB[%08x]: %08x\n", dmach->base + SAM_DMACHAN_CTRLB_OFFSET, regs->ctrlb);
-  dmaerr("       CFG[%08x]: %08x\n", dmach->base + SAM_DMACHAN_CFG_OFFSET, regs->cfg);
+  dmainfo("%s\n", msg);
+  dmainfo("  DMA Global Registers:\n");
+  dmainfo("      GCFG[%08x]: %08x\n", SAM_DMAC_GCFG, regs->gcfg);
+  dmainfo("        EN[%08x]: %08x\n", SAM_DMAC_EN, regs->en);
+  dmainfo("      SREQ[%08x]: %08x\n", SAM_DMAC_SREQ, regs->sreq);
+  dmainfo("      CREQ[%08x]: %08x\n", SAM_DMAC_CREQ, regs->creq);
+  dmainfo("      LAST[%08x]: %08x\n", SAM_DMAC_LAST, regs->last);
+  dmainfo("    EBCIMR[%08x]: %08x\n", SAM_DMAC_EBCIMR, regs->ebcimr);
+  dmainfo("      CHSR[%08x]: %08x\n", SAM_DMAC_CHSR, regs->chsr);
+  dmainfo("  DMA Channel Registers:\n");
+  dmainfo("     SADDR[%08x]: %08x\n", dmach->base + SAM_DMACHAN_SADDR_OFFSET, regs->saddr);
+  dmainfo("     DADDR[%08x]: %08x\n", dmach->base + SAM_DMACHAN_DADDR_OFFSET, regs->daddr);
+  dmainfo("      DSCR[%08x]: %08x\n", dmach->base + SAM_DMACHAN_DSCR_OFFSET, regs->dscr);
+  dmainfo("     CTRLA[%08x]: %08x\n", dmach->base + SAM_DMACHAN_CTRLA_OFFSET, regs->ctrla);
+  dmainfo("     CTRLB[%08x]: %08x\n", dmach->base + SAM_DMACHAN_CTRLB_OFFSET, regs->ctrlb);
+  dmainfo("       CFG[%08x]: %08x\n", dmach->base + SAM_DMACHAN_CFG_OFFSET, regs->cfg);
 }
-#endif /* CONFIG_DEBUG_DMA */
+#endif /* CONFIG_DEBUG_DMA_INFO */
 #endif /* CONFIG_SAM34_DMAC0 */
