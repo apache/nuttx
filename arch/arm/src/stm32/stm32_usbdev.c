@@ -2845,7 +2845,7 @@ static int stm32_epconfigure(struct usbdev_ep_s *ep,
   if (!ep || !desc)
     {
       usbtrace(TRACE_DEVERROR(STM32_TRACEERR_INVALIDPARMS), 0);
-      uusbinfo("ERROR: ep=%p desc=%p\n");
+      usberr("ERROR: ep=%p desc=%p\n");
       return -EINVAL;
     }
 #endif
@@ -2941,7 +2941,7 @@ static int stm32_epdisable(struct usbdev_ep_s *ep)
   if (!ep)
     {
       usbtrace(TRACE_DEVERROR(STM32_TRACEERR_INVALIDPARMS), 0);
-      uusbinfo("ERROR: ep=%p\n", ep);
+      usberr("ERROR: ep=%p\n", ep);
       return -EINVAL;
     }
 #endif
@@ -3029,7 +3029,7 @@ static int stm32_epsubmit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
   if (!req || !req->callback || !req->buf || !ep)
     {
       usbtrace(TRACE_DEVERROR(STM32_TRACEERR_INVALIDPARMS), 0);
-      uusbinfo("ERROR: req=%p callback=%p buf=%p ep=%p\n", req, req->callback, req->buf, ep);
+      usberr("ERROR: req=%p callback=%p buf=%p ep=%p\n", req, req->callback, req->buf, ep);
       return -EINVAL;
     }
 #endif
@@ -3041,7 +3041,7 @@ static int stm32_epsubmit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
   if (!priv->driver)
     {
       usbtrace(TRACE_DEVERROR(STM32_TRACEERR_NOTCONFIGURED), priv->usbdev.speed);
-      uusbinfo("ERROR: driver=%p\n", priv->driver);
+      usberr("ERROR: driver=%p\n", priv->driver);
       return -ESHUTDOWN;
     }
 #endif
@@ -3058,7 +3058,7 @@ static int stm32_epsubmit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
   if (privep->stalled)
     {
       stm32_abortrequest(privep, privreq, -EBUSY);
-      uusbinfo("ERROR: stalled\n");
+      usberr("ERROR: stalled\n");
       ret = -EBUSY;
     }
 
