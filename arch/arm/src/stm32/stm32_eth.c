@@ -2042,7 +2042,7 @@ static inline void stm32_interrupt_process(FAR struct stm32_ethmac_s *priv)
     {
       /* Just let the user know what happened */
 
-      nllnerr("ERROR: Abormal event(s): %08x\n", dmasr);
+      nllerr("ERROR: Abormal event(s): %08x\n", dmasr);
 
       /* Clear all pending abnormal events */
 
@@ -2246,7 +2246,7 @@ static void stm32_txtimeout_expiry(int argc, uint32_t arg, ...)
 {
   FAR struct stm32_ethmac_s *priv = (FAR struct stm32_ethmac_s *)arg;
 
-  nllnerr("ERROR: Timeout!\n");
+  nllerr("ERROR: Timeout!\n");
 
 #ifdef CONFIG_NET_NOINTS
   /* Disable further Ethernet interrupts.  This will prevent some race
