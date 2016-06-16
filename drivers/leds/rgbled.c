@@ -34,10 +34,6 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Compilation Switches
- ****************************************************************************/
-
-/****************************************************************************
  * Included Files
  ****************************************************************************/
 
@@ -65,24 +61,6 @@
 #include <arch/irq.h>
 
 #ifdef CONFIG_RGBLED
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-/* Debug ********************************************************************/
-/* Non-standard debug that may be enabled just for testing PWM */
-
-#ifdef CONFIG_DEBUG_RGBLED
-#  define pwmdbg    dbg
-#  define pwmvdbg   vdbg
-#  define pwmlldbg  lldbg
-#  define pwmllvdbg llvdbg
-#else
-#  define pwmdbg(x...)
-#  define pwmvdbg(x...)
-#  define pwmlldbg(x...)
-#  define pwmllvdbg(x...)
-#endif
 
 /****************************************************************************
  * Private Type Definitions
@@ -150,7 +128,7 @@ static int rgbled_open(FAR struct file *filep)
   uint8_t                     tmp;
   int                         ret;
 
-  pwmvdbg("crefs: %d\n", upper->crefs);
+  lcdinfo("crefs: %d\n", upper->crefs);
 
   /* Get exclusive access to the device structures */
 
@@ -201,7 +179,7 @@ static int rgbled_close(FAR struct file *filep)
   FAR struct rgbled_upperhalf_s *upper = inode->i_private;
   int                         ret;
 
-  pwmvdbg("crefs: %d\n", upper->crefs);
+  lcdinfo("crefs: %d\n", upper->crefs);
 
   /* Get exclusive access to the device structures */
 
@@ -395,7 +373,7 @@ int rgbled_register(FAR const char *path, FAR struct pwm_lowerhalf_s *ledr,
 
   if (!upper)
     {
-      pwmdbg("Allocation failed\n");
+      lcderr("ERROR: Allocation failed\n");
       return -ENOMEM;
     }
 
@@ -410,7 +388,7 @@ int rgbled_register(FAR const char *path, FAR struct pwm_lowerhalf_s *ledr,
 
   /* Register the PWM device */
 
-  pwmvdbg("Registering %s\n", path);
+  lcdinfo("Registering %s\n", path);
   return register_driver(path, &g_rgbledops, 0666, upper);
 }
 

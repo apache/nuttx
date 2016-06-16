@@ -86,7 +86,7 @@ void sig_deliver(FAR struct tcb_s *stcb)
   for (sigq = (FAR sigq_t *)stcb->sigpendactionq.head; (sigq); sigq = next)
     {
       next = sigq->flink;
-      sdbg("Sending signal sigq=0x%x\n", sigq);
+      sinfo("Sending signal sigq=0x%x\n", sigq);
 
       /* Remove the signal structure from the sigpendactionq and place it
        * in the sigpostedq.  NOTE:  Since signals are processed one at a

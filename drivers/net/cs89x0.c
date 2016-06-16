@@ -467,7 +467,7 @@ static void cs89x0_receive(FAR struct cs89x0_driver_s *cs89x0, uint16_t isq)
 #ifdef CONFIG_NET_IPv4
   if (BUF->type == HTONS(ETHTYPE_IP))
     {
-      nllvdbg("IPv4 frame\n");
+      nllinfo("IPv4 frame\n");
       NETDEV_RXIPV4(&priv->cs_dev);
 
       /* Handle ARP on input then give the IPv4 packet to the network
@@ -508,7 +508,7 @@ static void cs89x0_receive(FAR struct cs89x0_driver_s *cs89x0, uint16_t isq)
 #ifdef CONFIG_NET_IPv6
   if (BUF->type == HTONS(ETHTYPE_IP6))
     {
-      nllvdbg("Iv6 frame\n");
+      nllinfo("Iv6 frame\n");
       NETDEV_RXIPV6(&priv->cs_dev);
 
       /* Give the IPv6 packet to the network layer */
@@ -561,7 +561,7 @@ static void cs89x0_receive(FAR struct cs89x0_driver_s *cs89x0, uint16_t isq)
   else
 #endif
     {
-      nllvdbg("Unrecognized packet type %02x\n", BUF->type);
+      nllinfo("Unrecognized packet type %02x\n", BUF->type);
       NETDEV_RXDROPPED(&priv->cs_dev);
     }
 }
@@ -679,7 +679,7 @@ static int cs89x0_interrupt(int irq, FAR void *context)
   register struct cs89x0_driver_s *cs89x0 = s89x0_mapirq(irq);
   uint16_t isq;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!cs89x0)
     {
       return -ENODEV;
@@ -690,7 +690,7 @@ static int cs89x0_interrupt(int irq, FAR void *context)
 
   while ((isq = cs89x0_getreg(dev, CS89x0_ISQ_OFFSET)) != 0)
     {
-      nvdbg("ISQ: %04x\n", isq);
+      ninfo("ISQ: %04x\n", isq);
       switch (isq & ISQ_EVENTMASK)
         {
         case ISQ_RXEVENT:
@@ -704,7 +704,7 @@ static int cs89x0_interrupt(int irq, FAR void *context)
         case ISQ_BUFEVENT:
             if ((isq & ISQ_BUFEVENT_TXUNDERRUN) != 0)
               {
-                ndbg("Transmit underrun\n");
+                nerr("ERROR: Transmit underrun\n");
 #ifdef CONFIG_CS89x0_XMITEARLY
                 cd89x0->cs_txunderrun++;
                 if (cd89x0->cs_txunderrun == 3)
@@ -819,9 +819,9 @@ static int cs89x0_ifup(struct net_driver_s *dev)
 {
   struct cs89x0_driver_s *cs89x0 = (struct cs89x0_driver_s *)dev->d_private;
 
-  ndbg("Bringing up: %d.%d.%d.%d\n",
-       dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
-       (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
+  ninfo("Bringing up: %d.%d.%d.%d\n",
+        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
+        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
 
   /* Initialize the Ethernet interface */
 #warning "Missing logic"
@@ -1010,7 +1010,7 @@ int cs89x0_initialize(FAR const cs89x0_driver_s *cs89x0, int devno)
 {
   /* Sanity checks -- only performed with debug enabled */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!cs89x0 || (unsigned)devno > CONFIG_CS89x0_NINTERFACES || g_cs89x00[devno])
     {
       return -EINVAL;

@@ -97,7 +97,7 @@ static int elf_symname(FAR struct elf_loadinfo_s *loadinfo,
 
   if (sym->st_name == 0)
     {
-      bdbg("Symbol has no name\n");
+      berr("Symbol has no name\n");
       return -ESRCH;
     }
 
@@ -116,7 +116,7 @@ static int elf_symname(FAR struct elf_loadinfo_s *loadinfo,
         {
           if (loadinfo->filelen <= offset)
             {
-              bdbg("At end of file\n");
+              berr("At end of file\n");
               return -EINVAL;
             }
 
@@ -129,7 +129,7 @@ static int elf_symname(FAR struct elf_loadinfo_s *loadinfo,
       ret = elf_read(loadinfo, buffer, readlen, offset);
       if (ret < 0)
         {
-          bdbg("elf_read failed: %d\n", ret);
+          berr("elf_read failed: %d\n", ret);
           return ret;
         }
 
@@ -149,7 +149,7 @@ static int elf_symname(FAR struct elf_loadinfo_s *loadinfo,
       ret = elf_reallocbuffer(loadinfo, CONFIG_ELF_BUFFERINCR);
       if (ret < 0)
         {
-          bdbg("elf_reallocbuffer failed: %d\n", ret);
+          berr("elf_reallocbuffer failed: %d\n", ret);
           return ret;
         }
     }
@@ -195,7 +195,7 @@ int elf_findsymtab(FAR struct elf_loadinfo_s *loadinfo)
 
   if (loadinfo->symtabidx == 0)
     {
-      bdbg("No symbols in ELF file\n");
+      berr("No symbols in ELF file\n");
       return -EINVAL;
     }
 
@@ -229,7 +229,7 @@ int elf_readsym(FAR struct elf_loadinfo_s *loadinfo, int index,
 
   if (index < 0 || index > (symtab->sh_size / sizeof(Elf32_Sym)))
     {
-      bdbg("Bad relocation symbol index: %d\n", index);
+      berr("Bad relocation symbol index: %d\n", index);
       return -EINVAL;
     }
 
@@ -278,7 +278,7 @@ int elf_symvalue(FAR struct elf_loadinfo_s *loadinfo, FAR Elf32_Sym *sym,
       {
         /* NuttX ELF modules should be compiled with -fno-common. */
 
-        bdbg("SHN_COMMON: Re-compile with -fno-common\n");
+        berr("SHN_COMMON: Re-compile with -fno-common\n");
         return -ENOSYS;
       }
 
@@ -286,7 +286,7 @@ int elf_symvalue(FAR struct elf_loadinfo_s *loadinfo, FAR Elf32_Sym *sym,
       {
         /* st_value already holds the correct value */
 
-        bvdbg("SHN_ABS: st_value=%08lx\n", (long)sym->st_value);
+        binfo("SHN_ABS: st_value=%08lx\n", (long)sym->st_value);
         return OK;
       }
 
@@ -303,7 +303,7 @@ int elf_symvalue(FAR struct elf_loadinfo_s *loadinfo, FAR Elf32_Sym *sym,
              * indicate the nameless symbol.
              */
 
-            bdbg("SHN_UNDEF: Failed to get symbol name: %d\n", ret);
+            berr("SHN_UNDEF: Failed to get symbol name: %d\n", ret);
             return ret;
           }
 
@@ -316,13 +316,13 @@ int elf_symvalue(FAR struct elf_loadinfo_s *loadinfo, FAR Elf32_Sym *sym,
 #endif
         if (!symbol)
           {
-            bdbg("SHN_UNDEF: Exported symbol \"%s\" not found\n", loadinfo->iobuffer);
+            berr("SHN_UNDEF: Exported symbol \"%s\" not found\n", loadinfo->iobuffer);
             return -ENOENT;
           }
 
         /* Yes... add the exported symbol value to the ELF symbol table entry */
 
-        bvdbg("SHN_ABS: name=%s %08x+%08x=%08x\n",
+        binfo("SHN_ABS: name=%s %08x+%08x=%08x\n",
               loadinfo->iobuffer, sym->st_value, symbol->sym_value,
               sym->st_value + symbol->sym_value);
 
@@ -334,7 +334,7 @@ int elf_symvalue(FAR struct elf_loadinfo_s *loadinfo, FAR Elf32_Sym *sym,
       {
         secbase = loadinfo->shdr[sym->st_shndx].sh_addr;
 
-        bvdbg("Other: %08x+%08x=%08x\n",
+        binfo("Other: %08x+%08x=%08x\n",
               sym->st_value, secbase, sym->st_value + secbase);
 
         sym->st_value += secbase;

@@ -112,7 +112,7 @@ void sim_cpu_pause(int cpu, volatile spinlock_t *wait,
 
       if (rtcb->xcp.sigdeliver)
         {
-          sdbg("CPU%d: Delivering signals TCB=%p\n", cpu, rtcb);
+          sinfo("CPU%d: Delivering signals TCB=%p\n", cpu, rtcb);
           ((sig_deliver_t)rtcb->xcp.sigdeliver)(rtcb);
           rtcb->xcp.sigdeliver = NULL;
         }

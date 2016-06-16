@@ -126,7 +126,7 @@ static int netprocfs_open(FAR struct file *filep, FAR const char *relpath,
   FAR struct netprocfs_file_s *priv;
   FAR struct net_driver_s *dev;
 
-  fvdbg("Open '%s'\n", relpath);
+  finfo("Open '%s'\n", relpath);
 
   /* PROCFS is read-only.  Any attempt to open with any kind of write
    * access is not permitted.
@@ -137,7 +137,7 @@ static int netprocfs_open(FAR struct file *filep, FAR const char *relpath,
   if (((oflags & O_WRONLY) != 0 || (oflags & O_RDONLY) == 0) &&
       (net_procfsoperations.write == NULL))
     {
-      fdbg("ERROR: Only O_RDONLY supported\n");
+      ferr("ERROR: Only O_RDONLY supported\n");
       return -EACCES;
     }
 
@@ -167,7 +167,7 @@ static int netprocfs_open(FAR struct file *filep, FAR const char *relpath,
       copy = strdup(relpath);
       if (copy == NULL)
         {
-          fdbg("ERROR: strdup failed\n");
+          ferr("ERROR: strdup failed\n");
           return -ENOMEM;
         }
 
@@ -177,7 +177,7 @@ static int netprocfs_open(FAR struct file *filep, FAR const char *relpath,
 
       if (dev == NULL)
         {
-          fdbg("ERROR: relpath is '%s'\n", relpath);
+          ferr("ERROR: relpath is '%s'\n", relpath);
           return -ENOENT;
         }
     }
@@ -187,7 +187,7 @@ static int netprocfs_open(FAR struct file *filep, FAR const char *relpath,
   priv = (FAR struct netprocfs_file_s *)kmm_zalloc(sizeof(struct netprocfs_file_s));
   if (!priv)
     {
-      fdbg("ERROR: Failed to allocate file attributes\n");
+      ferr("ERROR: Failed to allocate file attributes\n");
       return -ENOMEM;
     }
 
@@ -233,7 +233,7 @@ static ssize_t netprocfs_read(FAR struct file *filep, FAR char *buffer,
   FAR struct netprocfs_file_s *priv;
   ssize_t nreturned;
 
-  fvdbg("buffer=%p buflen=%lu\n", buffer, (unsigned long)buflen);
+  finfo("buffer=%p buflen=%lu\n", buffer, (unsigned long)buflen);
 
   /* Recover our private data from the struct file instance */
 
@@ -282,7 +282,7 @@ static int netprocfs_dup(FAR const struct file *oldp, FAR struct file *newp)
   FAR struct netprocfs_file_s *oldpriv;
   FAR struct netprocfs_file_s *newpriv;
 
-  fvdbg("Dup %p->%p\n", oldp, newp);
+  finfo("Dup %p->%p\n", oldp, newp);
 
   /* Recover our private data from the old struct file instance */
 
@@ -294,7 +294,7 @@ static int netprocfs_dup(FAR const struct file *oldp, FAR struct file *newp)
   newpriv = (FAR struct netprocfs_file_s *)kmm_zalloc(sizeof(struct netprocfs_file_s));
   if (!newpriv)
     {
-      fdbg("ERROR: Failed to allocate file attributes\n");
+      ferr("ERROR: Failed to allocate file attributes\n");
       return -ENOMEM;
     }
 
@@ -322,7 +322,7 @@ static int netprocfs_opendir(FAR const char *relpath,
   FAR struct netprocfs_level1_s *level1;
   int ndevs;
 
-  fvdbg("relpath: \"%s\"\n", relpath ? relpath : "NULL");
+  finfo("relpath: \"%s\"\n", relpath ? relpath : "NULL");
   DEBUGASSERT(relpath && dir && !dir->u.procfs);
 
   /* "net" is the only value of relpath that is a directory */
@@ -334,7 +334,7 @@ static int netprocfs_opendir(FAR const char *relpath,
        * should return -ENOENT.
        */
 
-      fdbg("ERROR: Bad relpath: %s\n", relpath);
+      ferr("ERROR: Bad relpath: %s\n", relpath);
       return -ENOTDIR;
     }
 
@@ -347,7 +347,7 @@ static int netprocfs_opendir(FAR const char *relpath,
 
   if (!level1)
     {
-      fdbg("ERROR: Failed to allocate the level1 directory structure\n");
+      ferr("ERROR: Failed to allocate the level1 directory structure\n");
       return -ENOMEM;
     }
 
@@ -420,7 +420,7 @@ static int netprocfs_readdir(FAR struct fs_dirent_s *dir)
        * error -ENOENT.
        */
 
-      fvdbg("Entry %d: End of directory\n", index);
+      finfo("Entry %d: End of directory\n", index);
       return -ENOENT;
     }
 
@@ -518,7 +518,7 @@ static int netprocfs_stat(FAR const char *relpath, FAR struct stat *buf)
       copy = strdup(relpath);
       if (copy == NULL)
         {
-          fdbg("ERROR: strdup failed\n");
+          ferr("ERROR: strdup failed\n");
           return -ENOMEM;
         }
 
@@ -528,7 +528,7 @@ static int netprocfs_stat(FAR const char *relpath, FAR struct stat *buf)
 
       if (dev == NULL)
         {
-          fdbg("ERROR: relpath is '%s'\n", relpath);
+          ferr("ERROR: relpath is '%s'\n", relpath);
           return -ENOENT;
         }
 
@@ -575,7 +575,7 @@ ssize_t netprocfs_read_linegen(FAR struct netprocfs_file_s *priv,
   size_t xfrsize;
   ssize_t nreturned;
 
-  fvdbg("buffer=%p buflen=%lu\n", buffer, (unsigned long)buflen);
+  finfo("buffer=%p buflen=%lu\n", buffer, (unsigned long)buflen);
 
   /* Is there line data already buffered? */
 

@@ -127,7 +127,7 @@ int shm_group_initialize(FAR struct task_group_s *group)
 
   if (!group->tg_shm.gs_handle)
     {
-      shmdbg("gran_initialize() failed\n");
+      shmerr("ERROR: gran_initialize() failed\n");
       return -ENOMEM;
     }
 

@@ -91,7 +91,7 @@ static int load_default_priority(FAR struct binary_s *bin)
   ret = sched_getparam(0, &param);
   if (ret < 0)
     {
-      bdbg("ERROR: sched_getparam failed: %d\n", get_errno());
+      berr("ERROR: sched_getparam failed: %d\n", get_errno());
       return ERROR;
     }
 
@@ -120,7 +120,7 @@ static int load_absmodule(FAR struct binary_s *bin)
   FAR struct binfmt_s *binfmt;
   int ret = -ENOENT;
 
-  bvdbg("Loading %s\n", bin->filename);
+  binfo("Loading %s\n", bin->filename);
 
   /* Disabling pre-emption should be sufficient protection while accessing
    * the list of registered binary format handlers.
@@ -142,7 +142,7 @@ static int load_absmodule(FAR struct binary_s *bin)
         {
           /* Successfully loaded -- break out with ret == 0 */
 
-          bvdbg("Successfully loaded module %s\n", bin->filename);
+          binfo("Successfully loaded module %s\n", bin->filename);
 
           /* Save the unload method for use by unload_module */
 
@@ -180,7 +180,7 @@ int load_module(FAR struct binary_s *bin)
 
   /* Verify that we were provided something to work with */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (bin && bin->filename)
 #endif
     {
@@ -262,7 +262,7 @@ int load_module(FAR struct binary_s *bin)
 
   if (ret < 0)
     {
-      bdbg("ERROR: Returning errno %d\n", -ret);
+      berr("ERROR: Returning errno %d\n", -ret);
       set_errno(-ret);
       return ERROR;
     }

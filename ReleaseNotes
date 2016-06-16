@@ -5303,7 +5303,8 @@ Additional new features and extended functionality:
         can be re-enabled if needed via configuration option.
       - NXFFS: Make the start up scan of the media a configuration option.
         It just takes to long and is not really necessary!  Those rare cases
-        where the scan was helpful can be fixed using flash_eraseall().
+        where the scan was helpful can be fixed using MDIOC_BULKERASE IOCTL
+        command.
 
     * General Drivers:
 

@@ -287,7 +287,7 @@ static int slip_transmit(FAR struct slip_driver_s *priv)
 
   /* Increment statistics */
 
-  nvdbg("Sending packet size %d\n", priv->dev.d_len);
+  ninfo("Sending packet size %d\n", priv->dev.d_len);
   NETDEV_TXPACKETS(&priv->dev);
 
   /* Send an initial END character to flush out any data that may have
@@ -438,7 +438,7 @@ static void slip_txtask(int argc, FAR char *argv[])
   systime_t msec_now;
   unsigned int hsec;
 
-  ndbg("index: %d\n", index);
+  nerr("index: %d\n", index);
   DEBUGASSERT(index < CONFIG_NET_SLIP_NINTERFACES);
 
   /* Get our private data structure instance and wake up the waiting
@@ -555,7 +555,7 @@ static inline void slip_receive(FAR struct slip_driver_s *priv)
    * packet if we run out of room.
    */
 
-  nvdbg("Receiving packet\n");
+  ninfo("Receiving packet\n");
   for (; ; )
     {
       /* Get the next character in the stream. */
@@ -572,7 +572,7 @@ static inline void slip_receive(FAR struct slip_driver_s *priv)
 
         case SLIP_END:
           {
-            nvdbg("END\n");
+            ninfo("END\n");
 
             /* A minor optimization: if there is no data in the packet,
              * ignore it. This is meant to avoid bothering IP with all the
@@ -582,7 +582,7 @@ static inline void slip_receive(FAR struct slip_driver_s *priv)
 
             if (priv->rxlen > 0)
               {
-                nvdbg("Received packet size %d\n", priv->rxlen);
+                ninfo("Received packet size %d\n", priv->rxlen);
                 return;
               }
           }
@@ -595,7 +595,7 @@ static inline void slip_receive(FAR struct slip_driver_s *priv)
 
         case SLIP_ESC:
           {
-            nvdbg("ESC\n");
+            ninfo("ESC\n");
             ch = slip_getc(priv);
 
             /* if "ch" is not one of these two, then we have a protocol
@@ -606,17 +606,17 @@ static inline void slip_receive(FAR struct slip_driver_s *priv)
             switch (ch)
               {
               case SLIP_ESC_END:
-                nvdbg("ESC-END\n");
+                ninfo("ESC-END\n");
                 ch = SLIP_END;
                 break;
 
                case SLIP_ESC_ESC:
-                nvdbg("ESC-ESC\n");
+                ninfo("ESC-ESC\n");
                 ch = SLIP_ESC;
                 break;
 
               default:
-                ndbg("ERROR: Protocol violation: %02x\n", ch);
+                nerr("ERROR: Protocol violation: %02x\n", ch);
                 break;
               }
 
@@ -661,7 +661,7 @@ static int slip_rxtask(int argc, FAR char *argv[])
   net_lock_t flags;
   int ch;
 
-  ndbg("index: %d\n", index);
+  nerr("index: %d\n", index);
   DEBUGASSERT(index < CONFIG_NET_SLIP_NINTERFACES);
 
   /* Get our private data structure instance and wake up the waiting
@@ -677,7 +677,7 @@ static int slip_rxtask(int argc, FAR char *argv[])
     {
       /* Wait for the next character to be available on the input stream. */
 
-      nvdbg("Waiting...\n");
+      ninfo("Waiting...\n");
       ch = slip_getc(priv);
 
       /* Ignore any input that we receive before the interface is up. */
@@ -779,7 +779,7 @@ static int slip_ifup(FAR struct net_driver_s *dev)
 {
   FAR struct slip_driver_s *priv = (FAR struct slip_driver_s *)dev->d_private;
 
-  ndbg("Bringing up: %d.%d.%d.%d\n",
+  nerr("Bringing up: %d.%d.%d.%d\n",
        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
 
@@ -958,7 +958,7 @@ int slip_initialize(int intf, FAR const char *devname)
   priv->fd            = open(devname, O_RDWR, 0666);
   if (priv->fd < 0)
     {
-      ndbg("ERROR: Failed to open %s: %d\n", devname, errno);
+      nerr("ERROR: Failed to open %s: %d\n", devname, errno);
       return -errno;
     }
 
@@ -983,7 +983,7 @@ int slip_initialize(int intf, FAR const char *devname)
                             (FAR char * const *)argv);
   if (priv->rxpid < 0)
     {
-      ndbg("ERROR: Failed to start receiver task\n");
+      nerr("ERROR: Failed to start receiver task\n");
       return -errno;
     }
 
@@ -998,7 +998,7 @@ int slip_initialize(int intf, FAR const char *devname)
                             (FAR char * const *)argv);
   if (priv->txpid < 0)
     {
-      ndbg("ERROR: Failed to start receiver task\n");
+      nerr("ERROR: Failed to start receiver task\n");
       return -errno;
     }
 

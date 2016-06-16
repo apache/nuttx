@@ -58,7 +58,7 @@
 #undef  CONFIG_SUPPRESS_UART_CONFIG   /* Do not reconfig UART */
 #undef  CONFIG_DUMP_ON_EXIT           /* Dump task state on exit */
 #undef  CONFIG_Z16_LOWPUTC            /* Support up_lowputc for debug */
-#undef  CONFIG_Z16_LOWGETC            /* support up_lowgetc for debug */
+#undef  CONFIG_Z16_LOWGETC            /* support z16_lowgetc for debug */
 
 /* Determine which (if any) console driver to use.  If a console is enabled
  * and no other console device is specified, then a serial console is

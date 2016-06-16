@@ -348,7 +348,7 @@ static int smartfs_open(FAR struct file *filep, FAR const char *relpath,
   FAR struct smartfs_file_s *priv;
   int   ret;
 
-  fvdbg("Open '%s'\n", relpath);
+  finfo("Open '%s'\n", relpath);
 
   /* PROCFS is read-only.  Any attempt to open with any kind of write
    * access is not permitted.
@@ -359,7 +359,7 @@ static int smartfs_open(FAR struct file *filep, FAR const char *relpath,
   if (((oflags & O_WRONLY) != 0 || (oflags & O_RDONLY) == 0) &&
       (smartfs_procfsoperations.write == NULL))
     {
-      fdbg("ERROR: Only O_RDONLY supported\n");
+      ferr("ERROR: Only O_RDONLY supported\n");
       return -EACCES;
     }
 
@@ -368,7 +368,7 @@ static int smartfs_open(FAR struct file *filep, FAR const char *relpath,
   priv = (FAR struct smartfs_file_s *)kmm_malloc(sizeof(struct smartfs_file_s));
   if (!priv)
     {
-      fdbg("ERROR: Failed to allocate file attributes\n");
+      ferr("ERROR: Failed to allocate file attributes\n");
       return -ENOMEM;
     }
 
@@ -421,7 +421,7 @@ static ssize_t smartfs_read(FAR struct file *filep, FAR char *buffer,
   FAR struct smartfs_file_s *priv;
   ssize_t ret;
 
-  fvdbg("buffer=%p buflen=%d\n", buffer, (int)buflen);
+  finfo("buffer=%p buflen=%d\n", buffer, (int)buflen);
 
   /* Recover our private data from the struct file instance */
 
@@ -506,7 +506,7 @@ static int smartfs_dup(FAR const struct file *oldp, FAR struct file *newp)
   FAR struct smartfs_file_s *oldpriv;
   FAR struct smartfs_file_s *newpriv;
 
-  fvdbg("Dup %p->%p\n", oldp, newp);
+  finfo("Dup %p->%p\n", oldp, newp);
 
   /* Recover our private data from the old struct file instance */
 
@@ -518,7 +518,7 @@ static int smartfs_dup(FAR const struct file *oldp, FAR struct file *newp)
   newpriv = (FAR struct smartfs_file_s *)kmm_malloc(sizeof(struct smartfs_file_s));
   if (!newpriv)
     {
-      fdbg("ERROR: Failed to allocate file attributes\n");
+      ferr("ERROR: Failed to allocate file attributes\n");
       return -ENOMEM;
     }
 
@@ -545,7 +545,7 @@ static int smartfs_opendir(FAR const char *relpath, FAR struct fs_dirent_s *dir)
   FAR struct smartfs_level1_s *level1;
   int        ret;
 
-  fvdbg("relpath: \"%s\"\n", relpath ? relpath : "NULL");
+  finfo("relpath: \"%s\"\n", relpath ? relpath : "NULL");
   DEBUGASSERT(relpath && dir && !dir->u.procfs);
 
   /* The path refers to the 1st level subdirectory.  Allocate the level1
@@ -557,7 +557,7 @@ static int smartfs_opendir(FAR const char *relpath, FAR struct fs_dirent_s *dir)
 
   if (!level1)
     {
-      fdbg("ERROR: Failed to allocate the level1 directory structure\n");
+      ferr("ERROR: Failed to allocate the level1 directory structure\n");
       return -ENOMEM;
     }
 
@@ -624,7 +624,7 @@ static int smartfs_readdir(struct fs_dirent_s *dir)
        * error -ENOENT
        */
 
-      fvdbg("Entry %d: End of directory\n", index);
+      finfo("Entry %d: End of directory\n", index);
       ret = -ENOENT;
     }
 

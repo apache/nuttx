@@ -136,9 +136,9 @@ int inline local_stream_connect(FAR struct local_conn_s *client,
       server->u.server.lc_pending >= server->u.server.lc_backlog)
     {
       net_unlock(state);
-      ndbg("ERROR: Server is not listening: lc_state=%d\n",
+      nerr("ERROR: Server is not listening: lc_state=%d\n",
            server->lc_state);
-      ndbg("   OR: The backlog limit was reached: %d or %d\n",
+      nerr("   OR: The backlog limit was reached: %d or %d\n",
            server->u.server.lc_pending, server->u.server.lc_backlog);
       return -ECONNREFUSED;
     }
@@ -153,7 +153,7 @@ int inline local_stream_connect(FAR struct local_conn_s *client,
   ret = local_create_fifos(client);
   if (ret < 0)
     {
-      ndbg("ERROR: Failed to create FIFOs for %s: %d\n",
+      nerr("ERROR: Failed to create FIFOs for %s: %d\n",
            client->lc_path, ret);
 
       net_unlock(state);
@@ -167,7 +167,7 @@ int inline local_stream_connect(FAR struct local_conn_s *client,
   ret = local_open_client_tx(client, nonblock);
   if (ret < 0)
     {
-      ndbg("ERROR: Failed to open write-only FIFOs for %s: %d\n",
+      nerr("ERROR: Failed to open write-only FIFOs for %s: %d\n",
            client->lc_path, ret);
 
       net_unlock(state);
@@ -198,7 +198,7 @@ int inline local_stream_connect(FAR struct local_conn_s *client,
 
   if (ret < 0)
     {
-      ndbg("ERROR: Failed to connect: %d\n", ret);
+      nerr("ERROR: Failed to connect: %d\n", ret);
       goto errout_with_outfd;
     }
 
@@ -207,7 +207,7 @@ int inline local_stream_connect(FAR struct local_conn_s *client,
   ret = local_open_client_rx(client, nonblock);
   if (ret < 0)
     {
-      ndbg("ERROR: Failed to open write-only FIFOs for %s: %d\n",
+      nerr("ERROR: Failed to open write-only FIFOs for %s: %d\n",
            client->lc_path, ret);
       goto errout_with_outfd;
     }

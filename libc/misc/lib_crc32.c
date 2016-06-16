@@ -102,9 +102,9 @@ uint32_t crc32part(FAR const uint8_t *src, size_t len, uint32_t crc32val)
 {
   size_t i;
 
-  for (i = 0;  i < len;  i++)
+  for (i = 0; i < len; i++)
     {
-      crc32val = crc32_tab[(crc32val ^ src[i]) & 0xff] ^ (crc32val >> 8);
+      crc32val = crc32_tab[(crc32val & 0xff) ^ src[i]] ^ (crc32val >> 8);
     }
   return crc32val;
 }

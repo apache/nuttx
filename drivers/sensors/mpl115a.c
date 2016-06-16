@@ -157,7 +157,7 @@ static uint8_t mpl115a_getreg8(FAR struct mpl115a_dev_s *priv, uint8_t regaddr)
   (void)SPI_LOCK(priv->spi, false);
 
 #ifdef CONFIG_MPL115A_REGDEBUG
-  dbg("%02x->%02x\n", regaddr, regval);
+  _err("%02x->%02x\n", regaddr, regval);
 #endif
   return regval;
 }
@@ -176,25 +176,25 @@ static void mpl115a_updatecaldata(FAR struct mpl115a_dev_s *priv)
 
   priv->mpl115a_cal_a0 = mpl115a_getreg8(priv, MPL115A_BASE_CMD | (MPL115A_A0_MSB << 1)) << 8;
   priv->mpl115a_cal_a0 |= mpl115a_getreg8(priv, MPL115A_BASE_CMD | (MPL115A_A0_LSB << 1));
-  sndbg("a0 = %d\n", priv->mpl115a_cal_a0);
+  sninfo("a0 = %d\n", priv->mpl115a_cal_a0);
 
   /* Get b1 coefficient */
 
   priv->mpl115a_cal_b1 = mpl115a_getreg8(priv, MPL115A_BASE_CMD | (MPL115A_B1_MSB << 1)) << 8;
   priv->mpl115a_cal_b1 |= mpl115a_getreg8(priv, MPL115A_BASE_CMD | (MPL115A_B1_LSB << 1));
-  sndbg("b1 = %d\n", priv->mpl115a_cal_b1);
+  sninfo("b1 = %d\n", priv->mpl115a_cal_b1);
 
   /* Get b2 coefficient */
 
   priv->mpl115a_cal_b2 = mpl115a_getreg8(priv, MPL115A_BASE_CMD | (MPL115A_B2_MSB << 1)) << 8;
   priv->mpl115a_cal_b2 |= mpl115a_getreg8(priv, MPL115A_BASE_CMD | (MPL115A_B2_LSB << 1));
-  sndbg("b2 = %d\n", priv->mpl115a_cal_b2);
+  sninfo("b2 = %d\n", priv->mpl115a_cal_b2);
 
   /* Get c12 coefficient */
 
   priv->mpl115a_cal_c12 = mpl115a_getreg8(priv, MPL115A_BASE_CMD | (MPL115A_C12_MSB << 1)) << 8;
   priv->mpl115a_cal_c12 |= mpl115a_getreg8(priv, MPL115A_BASE_CMD | (MPL115A_C12_LSB << 1));
-  sndbg("c12 = %d\n", priv->mpl115a_cal_c12);
+  sninfo("c12 = %d\n", priv->mpl115a_cal_c12);
 }
 
 /****************************************************************************
@@ -220,13 +220,13 @@ static void mpl115a_read_press_temp(FAR struct mpl115a_dev_s *priv)
   priv->mpl115a_pressure |= mpl115a_getreg8(priv, MPL115A_BASE_CMD | (MPL115A_PADC_LSB << 1));
   priv->mpl115a_pressure >>= 6; /* Padc is 10bit unsigned */
 
-  sndbg("Pressure = %d\n", priv->mpl115a_pressure);
+  sninfo("Pressure = %d\n", priv->mpl115a_pressure);
 
   priv->mpl115a_temperature = mpl115a_getreg8(priv, MPL115A_BASE_CMD | (MPL115A_TADC_MSB << 1)) << 8;
   priv->mpl115a_temperature |= mpl115a_getreg8(priv, MPL115A_BASE_CMD | (MPL115A_TADC_LSB << 1));
   priv->mpl115a_temperature >>= 6; /* Tadc is 10bit unsigned */
 
-  sndbg("Temperature = %d\n", priv->mpl115a_temperature);
+  sninfo("Temperature = %d\n", priv->mpl115a_temperature);
 }
 
 /****************************************************************************
@@ -274,7 +274,7 @@ static int mpl115a_getpressure(FAR struct mpl115a_dev_s *priv)
    * This may be eliminated by right shifting the result 4 bits.
    */
 
-  sndbg("Final Pressure = %d\n", pressure >> 4);
+  sninfo("Final Pressure = %d\n", pressure >> 4);
   return pressure;
 }
 
@@ -316,13 +316,13 @@ static ssize_t mpl115a_read(FAR struct file *filep, FAR char *buffer, size_t buf
 
   if (!buffer)
     {
-      sndbg("Buffer is null\n");
+      snerr("ERROR: Buffer is null\n");
       return -1;
     }
 
   if (buflen != 2)
     {
-      sndbg("You can't read something other than 16 bits (2 bytes)\n");
+      snerr("ERROR: You can't read something other than 16 bits (2 bytes)\n");
       return -1;
     }
 
@@ -378,7 +378,7 @@ int mpl115a_register(FAR const char *devpath, FAR struct spi_dev_s *spi)
   priv = (FAR struct mpl115a_dev_s *)kmm_malloc(sizeof(struct mpl115a_dev_s));
   if (!priv)
     {
-      sndbg("Failed to allocate instance\n");
+      snerr("ERROR: Failed to allocate instance\n");
       return -ENOMEM;
     }
 
@@ -397,7 +397,7 @@ int mpl115a_register(FAR const char *devpath, FAR struct spi_dev_s *spi)
   ret = register_driver(devpath, &g_mpl115afops, 0666, priv);
   if (ret < 0)
     {
-      sndbg("Failed to register driver: %d\n", ret);
+      snerr("ERROR: Failed to register driver: %d\n", ret);
       kmm_free(priv);
     }
 

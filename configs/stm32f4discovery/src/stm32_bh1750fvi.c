@@ -80,7 +80,7 @@ int stm32_bh1750initialize(FAR const char *devpath)
   FAR struct i2c_master_s *i2c;
   int ret;
 
-  sndbg("Initializing BH1750FVI!\n");
+  sninfo("Initializing BH1750FVI!\n");
 
   /* Initialize I2C */
 
@@ -96,7 +96,7 @@ int stm32_bh1750initialize(FAR const char *devpath)
   ret = bh1750fvi_register(devpath, i2c, BH1750FVI_I2C_ADDR);
   if (ret < 0)
     {
-      sndbg("Error registering BM180\n");
+      snerr("ERROR: Error registering BM180\n");
     }
 
   return ret;

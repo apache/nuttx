@@ -588,7 +588,7 @@ static int up_setup(struct uart_dev_s *dev)
   else
 #endif
     {
-      dbg("Invalid UART #\n");
+      _err("ERROR: Invalid UART #\n");
     }
 
   /* Set UART transmit/receive control register 1 to enable transmit and receive */
@@ -613,7 +613,7 @@ static int up_setup(struct uart_dev_s *dev)
     }
   else
     {
-      dbg("Invalid bits=%d\n", priv->bits);
+      _err("ERROR: Invalid bits=%d\n", priv->bits);
     }
 
   if (priv->parity != 0)
@@ -665,7 +665,7 @@ static int up_setup(struct uart_dev_s *dev)
   else
 #endif
     {
-      dbg("Invalid UART #\n");
+      _err("ERROR: Invalid UART #\n");
     }
 
   /* Read any data left in the RX fifo */
@@ -872,7 +872,7 @@ static void m16c_rxint(struct up_dev_s *dev, bool enable)
   else
 #endif
     {
-      dbg("Invalid UART #\n");
+      _err("ERROR: Invalid UART #\n");
       return;
     }
 
@@ -1027,7 +1027,7 @@ static void m16c_txint(struct up_dev_s *dev, bool enable)
   else
 #endif
     {
-      dbg("Invalid UART #\n");
+      _err("ERROR: Invalid UART #\n");
       return;
     }
 

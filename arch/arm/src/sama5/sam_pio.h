@@ -214,7 +214,7 @@ void sam_pio_forceclk(pio_pinset_t pinset, bool enable);
  *
  ************************************************************************************/
 
-#ifdef CONFIG_DEBUG_GPIO
+#ifdef CONFIG_DEBUG_GPIO_INFO
 int sam_dumppio(uint32_t pinset, const char *msg);
 #else
 #  define sam_dumppio(p,m)

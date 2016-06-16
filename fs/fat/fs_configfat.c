@@ -464,7 +464,7 @@ mkfatfs_tryfat12(FAR struct fat_format_s *fmt, FAR struct fat_var_s *var,
           maxnclusters = FAT_MAXCLUST12;
         }
 
-      fvdbg("nfatsects=%u nclusters=%u (max=%u)\n",
+      finfo("nfatsects=%u nclusters=%u (max=%u)\n",
             config->fc_nfatsects, config->fc_nclusters, maxnclusters);
 
       /* Check if this number of clusters would overflow the maximum for
@@ -473,7 +473,7 @@ mkfatfs_tryfat12(FAR struct fat_format_s *fmt, FAR struct fat_var_s *var,
 
       if (config->fc_nclusters + 2 > maxnclusters)
         {
-          fdbg("Too many clusters for FAT12: %d > %d\n",
+          ferr("ERROR: Too many clusters for FAT12: %d > %d\n",
                config->fc_nclusters, maxnclusters - 2);
 
           return -ENFILE;
@@ -535,7 +535,7 @@ mkfatfs_tryfat16(FAR struct fat_format_s *fmt, FAR struct fat_var_s *var,
           maxnclusters = FAT_MAXCLUST16;
         }
 
-      fvdbg("nfatsects=%u nclusters=%u (min=%u max=%u)\n",
+      finfo("nfatsects=%u nclusters=%u (min=%u max=%u)\n",
             config->fc_nfatsects, config->fc_nclusters, FAT_MINCLUST16,
             maxnclusters);
 
@@ -550,7 +550,7 @@ mkfatfs_tryfat16(FAR struct fat_format_s *fmt, FAR struct fat_var_s *var,
       if ((config->fc_nclusters + 2 > maxnclusters) ||
           (config->fc_nclusters < FAT_MINCLUST16))
         {
-          fdbg("Too few or too many clusters for FAT16: %d < %d < %d\n",
+          ferr("ERROR: Too few or too many clusters for FAT16: %d < %d < %d\n",
                FAT_MINCLUST16, config->fc_nclusters, maxnclusters - 2);
 
           return -ENFILE;
@@ -612,7 +612,7 @@ mkfatfs_tryfat32(FAR struct fat_format_s *fmt, FAR struct fat_var_s *var,
           maxnclusters = FAT_MAXCLUST32;
         }
 
-      fvdbg("nfatsects=%u nclusters=%u (max=%u)\n",
+      finfo("nfatsects=%u nclusters=%u (max=%u)\n",
             config->fc_nfatsects, config->fc_nclusters, maxnclusters);
 
       /* Check if this number of clusters would overflow the maximum for
@@ -622,7 +622,7 @@ mkfatfs_tryfat32(FAR struct fat_format_s *fmt, FAR struct fat_var_s *var,
       if ((config->fc_nclusters + 3 > maxnclusters) ||
           (config->fc_nclusters < FAT_MINCLUST32))
         {
-          fdbg("Too few or too many clusters for FAT32: %d < %d < %d\n",
+          ferr("ERROR: Too few or too many clusters for FAT32: %d < %d < %d\n",
                FAT_MINCLUST32, config->fc_nclusters, maxnclusters - 3);
 
           return -ENFILE;
@@ -654,7 +654,7 @@ mkfatfs_selectfat(int fattype, FAR struct fat_format_s *fmt,
 {
   /* Return the appropriate information about the selected file system. */
 
-  fvdbg("Selected FAT%d\n", fattype);
+  finfo("Selected FAT%d\n", fattype);
 
   var->fv_fattype      = fattype;
   var->fv_nclusters    = config->fc_nclusters;
@@ -696,7 +696,7 @@ mkfatfs_clustersearch(FAR struct fat_format_s *fmt, FAR struct fat_var_s *var)
 
       if (fmt->ff_rsvdseccount < 2)
         {
-          fdbg("At least 2 reserved sectors needed by FAT32\n");
+          ferr("ERROR: At least 2 reserved sectors needed by FAT32\n");
           fatconfig32.fc_rsvdseccount = 2;
         }
       else
@@ -745,7 +745,7 @@ mkfatfs_clustersearch(FAR struct fat_format_s *fmt, FAR struct fat_var_s *var)
 
   do
     {
-      fvdbg("Configuring with %d sectors/cluster...\n",
+      finfo("Configuring with %d sectors/cluster...\n",
             1 << fmt->ff_clustshift);
 
       /* Check if FAT12 has not been excluded */
@@ -756,7 +756,7 @@ mkfatfs_clustersearch(FAR struct fat_format_s *fmt, FAR struct fat_var_s *var)
 
           if (mkfatfs_tryfat12(fmt, var, &fatconfig12) != 0)
             {
-              fdbg("Cannot format FAT12 at %u sectors/cluster\n",
+              ferr("ERROR: Cannot format FAT12 at %u sectors/cluster\n",
                    1 << fmt->ff_clustshift);
 
               fatconfig12.fc_nfatsects = 0;
@@ -772,7 +772,7 @@ mkfatfs_clustersearch(FAR struct fat_format_s *fmt, FAR struct fat_var_s *var)
 
           if (mkfatfs_tryfat16(fmt, var, &fatconfig16) != 0)
             {
-              fdbg("Cannot format FAT16 at %u sectors/cluster\n",
+              ferr("ERROR: Cannot format FAT16 at %u sectors/cluster\n",
                    1 << fmt->ff_clustshift);
 
               fatconfig16.fc_nfatsects = 0;
@@ -828,7 +828,7 @@ mkfatfs_clustersearch(FAR struct fat_format_s *fmt, FAR struct fat_var_s *var)
 
           if (mkfatfs_tryfat32(fmt, var, &fatconfig32) != 0)
             {
-              fdbg("Cannot format FAT32 at %u sectors/cluster\n",
+              ferr("ERROR: Cannot format FAT32 at %u sectors/cluster\n",
                    1 << fmt->ff_clustshift);
 
               fatconfig32.fc_nfatsects = 0;
@@ -897,7 +897,7 @@ int mkfatfs_configfatfs(FAR struct fat_format_s *fmt,
   ret = mkfatfs_clustersearch(fmt, var);
   if (ret < 0)
     {
-       fdbg("ERROR: Failed to set cluster size\n");
+       ferr("ERROR: Failed to set cluster size\n");
        return ret;
     }
 
@@ -940,7 +940,7 @@ int mkfatfs_configfatfs(FAR struct fat_format_s *fmt,
 
       if (fmt->ff_backupboot <= 1 || fmt->ff_backupboot >= fmt->ff_rsvdseccount)
         {
-          fdbg("Invalid backup boot sector: %d\n", fmt->ff_backupboot);
+          ferr("ERROR: Invalid backup boot sector: %d\n", fmt->ff_backupboot);
           fmt->ff_backupboot = 0;
         }
 
@@ -973,22 +973,22 @@ int mkfatfs_configfatfs(FAR struct fat_format_s *fmt,
 
   /* Describe the configured filesystem */
 
-#ifdef CONFIG_DEBUG
-  fdbg("Sector size:          %d bytes\n",    var->fv_sectorsize);
-  fdbg("Number of sectors:    %d sectors\n",  fmt->ff_nsectors);
-  fdbg("FAT size:             %d bits\n",     var->fv_fattype);
-  fdbg("Number FATs:          %d\n",          fmt->ff_nfats);
-  fdbg("Sectors per cluster:  %d sectors\n",  1 << fmt->ff_clustshift);
-  fdbg("FS size:              %d sectors\n",  var->fv_nfatsects);
-  fdbg("                      %d clusters\n", var->fv_nclusters);
+#ifdef CONFIG_DEBUG_FEATURES
+  finfo("Sector size:          %d bytes\n",    var->fv_sectorsize);
+  finfo("Number of sectors:    %d sectors\n",  fmt->ff_nsectors);
+  finfo("FAT size:             %d bits\n",     var->fv_fattype);
+  finfo("Number FATs:          %d\n",          fmt->ff_nfats);
+  finfo("Sectors per cluster:  %d sectors\n",  1 << fmt->ff_clustshift);
+  finfo("FS size:              %d sectors\n",  var->fv_nfatsects);
+  finfo("                      %d clusters\n", var->fv_nclusters);
 
   if (var->fv_fattype != 32)
     {
-       fdbg("Root directory slots: %d\n", fmt->ff_rootdirentries);
+       finfo("Root directory slots: %d\n", fmt->ff_rootdirentries);
     }
 
-  fdbg("Volume ID:            %08x\n", fmt->ff_volumeid);
-  fdbg("Volume Label:         \"%c%c%c%c%c%c%c%c%c%c%c\"\n",
+  finfo("Volume ID:            %08x\n", fmt->ff_volumeid);
+  finfo("Volume Label:         \"%c%c%c%c%c%c%c%c%c%c%c\"\n",
     fmt->ff_volumelabel[0], fmt->ff_volumelabel[1], fmt->ff_volumelabel[2],
     fmt->ff_volumelabel[3], fmt->ff_volumelabel[4], fmt->ff_volumelabel[5],
     fmt->ff_volumelabel[6], fmt->ff_volumelabel[7], fmt->ff_volumelabel[8],

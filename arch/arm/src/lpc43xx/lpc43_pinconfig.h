@@ -264,7 +264,7 @@ int lpc43_pin_config(uint32_t pinconf);
  *
  ********************************************************************************************/
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
 int lpc43_pin_dump(uint32_t pinconf, const char *msg);
 #else
 #  define lpc43_pin_dump(p,m)

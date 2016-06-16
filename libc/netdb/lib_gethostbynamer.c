@@ -583,7 +583,7 @@ static int lib_hostfile_lookup(FAR const char *name, FAR struct hostent *host,
     {
       int errcode = errno;
 
-      ndbg("ERROR:  Failed to open the hosts file %s: %d\n",
+      nerr("ERROR:  Failed to open the hosts file %s: %d\n",
            CONFIG_NETDB_HOSTCONF_PATH, errcode);
       UNUSED(errcode);
 
@@ -622,7 +622,7 @@ static int lib_hostfile_lookup(FAR const char *name, FAR struct hostent *host,
         {
           /* We successfully read the entry */
 
-          nvdbg("Comparing %s to %s\n", name, host->h_name);
+          ninfo("Comparing %s to %s\n", name, host->h_name);
 
           /* Check for a host name match */
 

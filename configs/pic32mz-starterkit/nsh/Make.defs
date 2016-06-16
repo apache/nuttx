@@ -103,7 +103,7 @@ ARCHWARNINGSXX = -Wall -Wshadow -Wundef
 ARCHDEFINES =
 
 ifeq ($(CONFIG_MIPS32_TOOLCHAIN_MICROCHIPL_XC32),y)
-ifeq ($(CONFIG_DEBUG),y)
+ifeq ($(CONFIG_DEBUG_FEATURES),y)
   ARCHCFLAGS += -D__DEBUG -D__MPLAB_DEBUGGER_PK3=1 -fframe-base-loclist
 endif
 endif

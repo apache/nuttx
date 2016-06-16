@@ -38,6 +38,8 @@
  * Included Files
  ************************************************************************************/
 
+#include <nuttx/config.h>
+
 #include <stdbool.h>
 #include <sched.h>
 #include <time.h>
@@ -79,24 +81,10 @@
 #  error "CONFIG_STM32_PWR must selected to use this driver"
 #endif
 
-#ifndef CONFIG_DEBUG
-#  undef CONFIG_DEBUG_RTC
-#endif
-
-#if !defined(CONFIG_RTC_MAGIC)
-# define CONFIG_RTC_MAGIC (0xfacefeee)
-#endif
-
-#if !defined(CONFIG_RTC_MAGIC_REG)
-# define CONFIG_RTC_MAGIC_REG (0)
-#endif
-
 /* Constants ************************************************************************/
 
 #define SYNCHRO_TIMEOUT      (0x00020000)
 #define INITMODE_TIMEOUT     (0x00010000)
-#define RTC_MAGIC            CONFIG_RTC_MAGIC
-#define RTC_MAGIC_REG        STM32_RTC_BKR(CONFIG_RTC_MAGIC_REG)
 
 /* Proxy definitions to make the same code work for all the STM32 series ************/
 
@@ -128,20 +116,6 @@
                                        RTC_ALRMR_MSK2 | RTC_ALRMR_MSK1)
 #define RTC_ALRMR_DIS_DATE_MASK       (RTC_ALRMR_MSK4)
 #define RTC_ALRMR_ENABLE              (0)
-
-/* Debug ****************************************************************************/
-
-#ifdef CONFIG_DEBUG_RTC
-#  define rtcdbg             dbg
-#  define rtcvdbg            vdbg
-#  define rtclldbg           lldbg
-#  define rtcllvdbg          llvdbg
-#else
-#  define rtcdbg(x...)
-#  define rtcvdbg(x...)
-#  define rtclldbg(x...)
-#  define rtcllvdbg(x...)
-#endif
 
 /************************************************************************************
  * Private Types
@@ -181,9 +155,11 @@ volatile bool g_rtc_enabled = false;
 
 #ifdef CONFIG_RTC_ALARM
 static int rtchw_check_alrawf(void);
-static int rtchw_check_alrbwf(void);
 static int rtchw_set_alrmar(rtc_alarmreg_t alarmreg);
+#if CONFIG_RTC_NALARMS > 1
+static int rtchw_check_alrbwf(void);
 static int rtchw_set_alrmbr(rtc_alarmreg_t alarmreg);
+#endif
 #endif
 
 /************************************************************************************
@@ -204,39 +180,36 @@ static int rtchw_set_alrmbr(rtc_alarmreg_t alarmreg);
  *
  ************************************************************************************/
 
-#ifdef CONFIG_DEBUG_RTC
+#ifdef CONFIG_DEBUG_RTC_INFO
 static void rtc_dumpregs(FAR const char *msg)
 {
   int rtc_state;
 
-  rtclldbg("%s:\n", msg);
-  rtclldbg("      TR: %08x\n", getreg32(STM32_RTC_TR));
-  rtclldbg("      DR: %08x\n", getreg32(STM32_RTC_DR));
-  rtclldbg("      CR: %08x\n", getreg32(STM32_RTC_CR));
-  rtclldbg("     ISR: %08x\n", getreg32(STM32_RTC_ISR));
-  rtclldbg("    PRER: %08x\n", getreg32(STM32_RTC_PRER));
-  rtclldbg("    WUTR: %08x\n", getreg32(STM32_RTC_WUTR));
-#ifndef CONFIG_STM32_STM32F30XX
-  rtclldbg("  CALIBR: %08x\n", getreg32(STM32_RTC_CALIBR));
-#endif
-  rtclldbg("  ALRMAR: %08x\n", getreg32(STM32_RTC_ALRMAR));
-  rtclldbg("  ALRMBR: %08x\n", getreg32(STM32_RTC_ALRMBR));
-  rtclldbg("  SHIFTR: %08x\n", getreg32(STM32_RTC_SHIFTR));
-  rtclldbg("    TSTR: %08x\n", getreg32(STM32_RTC_TSTR));
-  rtclldbg("    TSDR: %08x\n", getreg32(STM32_RTC_TSDR));
-  rtclldbg("   TSSSR: %08x\n", getreg32(STM32_RTC_TSSSR));
-  rtclldbg("    CALR: %08x\n", getreg32(STM32_RTC_CALR));
-  rtclldbg("   TAFCR: %08x\n", getreg32(STM32_RTC_TAFCR));
-  rtclldbg("ALRMASSR: %08x\n", getreg32(STM32_RTC_ALRMASSR));
-  rtclldbg("ALRMBSSR: %08x\n", getreg32(STM32_RTC_ALRMBSSR));
-  rtclldbg("MAGICREG: %08x\n", getreg32(RTC_MAGIC_REG));
+  rtcinfo("%s:\n", msg);
+  rtcinfo("      TR: %08x\n", getreg32(STM32_RTC_TR));
+  rtcinfo("      DR: %08x\n", getreg32(STM32_RTC_DR));
+  rtcinfo("      CR: %08x\n", getreg32(STM32_RTC_CR));
+  rtcinfo("     ISR: %08x\n", getreg32(STM32_RTC_ISR));
+  rtcinfo("    PRER: %08x\n", getreg32(STM32_RTC_PRER));
+  rtcinfo("    WUTR: %08x\n", getreg32(STM32_RTC_WUTR));
+  rtcinfo("  ALRMAR: %08x\n", getreg32(STM32_RTC_ALRMAR));
+  rtcinfo("  ALRMBR: %08x\n", getreg32(STM32_RTC_ALRMBR));
+  rtcinfo("  SHIFTR: %08x\n", getreg32(STM32_RTC_SHIFTR));
+  rtcinfo("    TSTR: %08x\n", getreg32(STM32_RTC_TSTR));
+  rtcinfo("    TSDR: %08x\n", getreg32(STM32_RTC_TSDR));
+  rtcinfo("   TSSSR: %08x\n", getreg32(STM32_RTC_TSSSR));
+  rtcinfo("    CALR: %08x\n", getreg32(STM32_RTC_CALR));
+  rtcinfo("   TAFCR: %08x\n", getreg32(STM32_RTC_TAFCR));
+  rtcinfo("ALRMASSR: %08x\n", getreg32(STM32_RTC_ALRMASSR));
+  rtcinfo("ALRMBSSR: %08x\n", getreg32(STM32_RTC_ALRMBSSR));
+  rtcinfo("MAGICREG: %08x\n", getreg32(RTC_MAGIC_REG));
 
   rtc_state =
     ((getreg32(STM32_EXTI_RTSR) & EXTI_RTC_ALARM) ? 0x1000 : 0) |
     ((getreg32(STM32_EXTI_FTSR) & EXTI_RTC_ALARM) ? 0x0100 : 0) |
     ((getreg32(STM32_EXTI_IMR)  & EXTI_RTC_ALARM) ? 0x0010 : 0) |
     ((getreg32(STM32_EXTI_EMR)  & EXTI_RTC_ALARM) ? 0x0001 : 0);
-  rtclldbg("EXTI (RTSR FTSR ISR EVT): %01x\n",rtc_state);
+  rtcinfo("EXTI (RTSR FTSR ISR EVT): %01x\n",rtc_state);
 }
 #else
 #  define rtc_dumpregs(msg)
@@ -256,16 +229,16 @@ static void rtc_dumpregs(FAR const char *msg)
  *
  ************************************************************************************/
 
-#ifdef CONFIG_DEBUG_RTC
+#ifdef CONFIG_DEBUG_RTC_INFO
 static void rtc_dumptime(FAR const struct tm *tp, FAR const char *msg)
 {
-  rtclldbg("%s:\n", msg);
-  rtclldbg("  tm_sec: %08x\n", tp->tm_sec);
-  rtclldbg("  tm_min: %08x\n", tp->tm_min);
-  rtclldbg(" tm_hour: %08x\n", tp->tm_hour);
-  rtclldbg(" tm_mday: %08x\n", tp->tm_mday);
-  rtclldbg("  tm_mon: %08x\n", tp->tm_mon);
-  rtclldbg(" tm_year: %08x\n", tp->tm_year);
+  rtcinfo("%s:\n", msg);
+  rtcinfo("  tm_sec: %08x\n", tp->tm_sec);
+  rtcinfo("  tm_min: %08x\n", tp->tm_min);
+  rtcinfo(" tm_hour: %08x\n", tp->tm_hour);
+  rtcinfo(" tm_mday: %08x\n", tp->tm_mday);
+  rtcinfo("  tm_mon: %08x\n", tp->tm_mon);
+  rtcinfo(" tm_year: %08x\n", tp->tm_year);
 }
 #else
 #  define rtc_dumptime(tp, msg)
@@ -656,6 +629,7 @@ static int stm32_rtc_alarm_handler(int irq, void *context)
         }
     }
 
+#if CONFIG_RTC_NALARMS > 1
   if ((isr & RTC_ISR_ALRBF) != 0)
     {
       cr  = getreg32(STM32_RTC_CR);
@@ -679,6 +653,7 @@ static int stm32_rtc_alarm_handler(int irq, void *context)
           putreg32(isr, STM32_RTC_CR);
         }
     }
+#endif
 
   return ret;
 }
@@ -724,7 +699,7 @@ static int rtchw_check_alrawf(void)
 }
 #endif
 
-#ifdef CONFIG_RTC_ALARM
+#if defined(CONFIG_RTC_ALARM) && CONFIG_RTC_NALARMS > 1
 static int rtchw_check_alrbwf(void)
 {
   volatile uint32_t timeout;
@@ -789,7 +764,7 @@ static int rtchw_set_alrmar(rtc_alarmreg_t alarmreg)
   /* Set the RTC Alarm register */
 
   putreg32(alarmreg, STM32_RTC_ALRMAR);
-  rtcvdbg("  TR: %08x ALRMAR: %08x\n",
+  rtcinfo("  TR: %08x ALRMAR: %08x\n",
           getreg32(STM32_RTC_TR), getreg32(STM32_RTC_ALRMAR));
 
   /* Enable RTC alarm */
@@ -802,7 +777,7 @@ errout_with_wprunlock:
 }
 #endif
 
-#ifdef CONFIG_RTC_ALARM
+#if defined(CONFIG_RTC_ALARM) && CONFIG_RTC_NALARMS > 1
 static int rtchw_set_alrmbr(rtc_alarmreg_t alarmreg)
 {
   int ret = -EBUSY;
@@ -826,7 +801,7 @@ static int rtchw_set_alrmbr(rtc_alarmreg_t alarmreg)
   /* Set the RTC Alarm register */
 
   putreg32(alarmreg, STM32_RTC_ALRMBR);
-  rtcvdbg("  TR: %08x ALRMBR: %08x\n",
+  rtcinfo("  TR: %08x ALRMBR: %08x\n",
           getreg32(STM32_RTC_TR), getreg32(STM32_RTC_ALRMBR));
 
   /* Enable RTC alarm B */
@@ -882,13 +857,6 @@ int up_rtc_initialize(void)
 
   if (regval != RTC_MAGIC)
     {
-      /* We might be changing RTCSEL - to ensure such changes work, we must reset the
-       * backup domain (having backed up the RTC_MAGIC token)
-       */
-
-      modifyreg32(STM32_RCC_XXX, 0, RCC_XXX_YYYRST);
-      modifyreg32(STM32_RCC_XXX, RCC_XXX_YYYRST, 0);
-
       /* Some boards do not have the external 32khz oscillator installed, for those
        * boards we must fallback to the crummy internal RC clock or the external high
        * rate clock
@@ -986,13 +954,13 @@ int up_rtc_initialize(void)
         {
           case OK:
             {
-              rtclldbg("rtc_syncwait() okay\n");
+              rtcllinfo("rtc_syncwait() okay\n");
               break;
             }
 
           default:
             {
-              rtclldbg("rtc_syncwait() failed (%d)\n", ret);
+              rtcllerr("ERROR: rtc_syncwait() failed (%d)\n", ret);
               break;
             }
         }
@@ -1006,7 +974,7 @@ int up_rtc_initialize(void)
 
   if (regval != RTC_MAGIC)
     {
-      rtclldbg("Do setup\n");
+      rtcllinfo("Do setup\n");
 
       /* Perform the one-time setup of the LSE clocking to the RTC */
 
@@ -1024,7 +992,7 @@ int up_rtc_initialize(void)
     }
   else
     {
-      rtclldbg("Do resume\n");
+      rtcllinfo("Do resume\n");
 
       /* RTC already set-up, just resume normal operation */
 
@@ -1040,7 +1008,7 @@ int up_rtc_initialize(void)
 
   if (ret != OK && nretry > 0)
     {
-      rtclldbg("setup/resume ran %d times and failed with %d\n",
+      rtcllinfo("setup/resume ran %d times and failed with %d\n",
                 nretry, ret);
       return -ETIMEDOUT;
     }
@@ -1386,6 +1354,7 @@ int stm32_rtc_setalarm(FAR struct alm_setalarm_s *alminfo)
         }
         break;
 
+#if CONFIG_RTC_NALARMS > 1
       case RTC_ALARMB:
         {
           cbinfo         = &g_alarmcb[RTC_ALARMB];
@@ -1402,9 +1371,10 @@ int stm32_rtc_setalarm(FAR struct alm_setalarm_s *alminfo)
           rtc_dumpregs("Set AlarmB");
         }
         break;
+#endif
 
       default:
-        rtcvdbg("ERROR: Invalid ALARM%d\n", alminfo->as_id);
+        rtcinfo("ERROR: Invalid ALARM%d\n", alminfo->as_id);
         break;
     }
 
@@ -1468,6 +1438,7 @@ int stm32_rtc_cancelalarm(enum alm_id_e alarmid)
         }
         break;
 
+#if CONFIG_RTC_NALARMS > 1
       case RTC_ALARMB:
         {
           /* Cancel the global callback function */
@@ -1498,9 +1469,10 @@ int stm32_rtc_cancelalarm(enum alm_id_e alarmid)
           ret = OK;
         }
         break;
+#endif
 
       default:
-        rtcvdbg("ERROR: Invalid ALARM%d\n", alarmid);
+        rtcinfo("ERROR: Invalid ALARM%d\n", alarmid);
         break;
     }
 

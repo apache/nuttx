@@ -71,27 +71,12 @@
 
 /* Timer debug is enabled if any timer client is enabled */
 
-#ifndef CONFIG_DEBUG
-#  undef CONFIG_DEBUG_ANALOG
+#ifndef CONFIG_DEBUG_TIMER_INFO
 #  undef CONFIG_SAMA5_TC_REGDEBUG
 #endif
 
 #if !defined(CONFIG_SAM34_TC_DEBUG) && defined(CONFIG_SAM34_ADC) && defined(CONFIG_DEBUG_ANALOG)
 #  define CONFIG_SAM34_TC_DEBUG 1
-#endif
-
-/* Timer/counter debug output */
-
-#ifdef CONFIG_SAM34_TC_DEBUG
-#  define tcdbg    dbg
-#  define tcvdbg   vdbg
-#  define tclldbg  lldbg
-#  define tcllvdbg llvdbg
-#else
-#  define tcdbg(x...)
-#  define tcvdbg(x...)
-#  define tclldbg(x...)
-#  define tcllvdbg(x...)
 #endif
 
 /****************************************************************************

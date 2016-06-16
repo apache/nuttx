@@ -129,7 +129,7 @@ int igmp_joingroup(struct net_driver_s *dev, FAR const struct in_addr *grpaddr)
     {
        /* No... allocate a new entry */
 
-       nvdbg("Join to new group: %08x\n", grpaddr->s_addr);
+       ninfo("Join to new group: %08x\n", grpaddr->s_addr);
        group = igmp_grpalloc(dev, &grpaddr->s_addr);
        IGMP_STATINCR(g_netstats.igmp.joins);
 

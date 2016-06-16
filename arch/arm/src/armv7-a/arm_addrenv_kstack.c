@@ -144,7 +144,7 @@
 
 int up_addrenv_kstackalloc(FAR struct tcb_s *tcb)
 {
-  bvdbg("tcb=%p stacksize=%u\n", tcb, ARCH_KERNEL_STACKSIZE);
+  binfo("tcb=%p stacksize=%u\n", tcb, ARCH_KERNEL_STACKSIZE);
 
   DEBUGASSERT(tcb && tcb->xcp.kstack == 0);
 
@@ -153,7 +153,7 @@ int up_addrenv_kstackalloc(FAR struct tcb_s *tcb)
   tcb->xcp.kstack = (FAR uint32_t *)kmm_memalign(8, ARCH_KERNEL_STACKSIZE);
   if (!tcb->xcp.kstack)
     {
-      bdbg("ERROR: Failed to allocate the kernel stack\n");
+      berr("ERROR: Failed to allocate the kernel stack\n");
       return -ENOMEM;
     }
 
@@ -177,7 +177,7 @@ int up_addrenv_kstackalloc(FAR struct tcb_s *tcb)
 
 int up_addrenv_kstackfree(FAR struct tcb_s *tcb)
 {
-  bvdbg("tcb=%p\n", tcb);
+  binfo("tcb=%p\n", tcb);
   DEBUGASSERT(tcb);
 
   /* Does the exiting thread have a kernel stack? */

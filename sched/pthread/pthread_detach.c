@@ -82,7 +82,7 @@ int pthread_detach(pthread_t thread)
   FAR struct join_s *pjoin;
   int ret;
 
-  sdbg("Thread=%d group=%p\n", thread, group);
+  sinfo("Thread=%d group=%p\n", thread, group);
   DEBUGASSERT(group);
 
   /* Find the entry associated with this pthread. */
@@ -91,7 +91,7 @@ int pthread_detach(pthread_t thread)
   pjoin = pthread_findjoininfo(group, (pid_t)thread);
   if (!pjoin)
     {
-      sdbg("Could not find thread entry\n");
+      serr("ERROR: Could not find thread entry\n");
       ret = EINVAL;
     }
   else
@@ -121,6 +121,6 @@ int pthread_detach(pthread_t thread)
 
   (void)pthread_givesemaphore(&group->tg_joinsem);
 
-  sdbg("Returning %d\n", ret);
+  sinfo("Returning %d\n", ret);
   return ret;
 }

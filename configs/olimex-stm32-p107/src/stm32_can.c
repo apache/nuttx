@@ -61,25 +61,6 @@
 
 #define CAN_PORT 1
 
-/* Debug ***************************************************************************/
-/* Non-standard debug that may be enabled just for testing CAN */
-
-#ifdef CONFIG_DEBUG_CAN
-#  define candbg    dbg
-#  define canvdbg   vdbg
-#  define canlldbg  lldbg
-#  define canllvdbg llvdbg
-#else
-#  define candbg(x...)
-#  define canvdbg(x...)
-#  define canlldbg(x...)
-#  define canllvdbg(x...)
-#endif
-
-/************************************************************************************
- * Private Functions
- ************************************************************************************/
-
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
@@ -108,7 +89,7 @@ int board_can_initialize(void)
       can = stm32_caninitialize(CAN_PORT);
       if (can == NULL)
         {
-          candbg("ERROR:  Failed to get CAN interface\n");
+          canerr("ERROR:  Failed to get CAN interface\n");
           return -ENODEV;
         }
 
@@ -117,7 +98,7 @@ int board_can_initialize(void)
       ret = can_register("/dev/can0", can);
       if (ret < 0)
         {
-          candbg("ERROR: can_register failed: %d\n", ret);
+          canerr("ERROR: can_register failed: %d\n", ret);
           return ret;
         }
 

@@ -96,7 +96,7 @@ int usbhost_registerclass(struct usbhost_registry_s *usbclass)
 {
   irqstate_t flags;
 
-  uvdbg("Registering class:%p nids:%d\n", usbclass, usbclass->nids);
+  uinfo("Registering class:%p nids:%d\n", usbclass, usbclass->nids);
 
   /* g_classregistry is a singly-linkedlist of class ID information added by
    * calls to usbhost_registerclass().  Since this list is accessed from USB

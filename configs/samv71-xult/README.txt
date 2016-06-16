@@ -1335,9 +1335,9 @@ MCAN1 Loopback Test
     Enabling CAN Debug Output
     -------------------------
     Build Setup -> Debug Options
-      CONFIG_DEBUG=y                           # Enables general debug features
-      CONFIG_DEBUG_VERBOSE=y                   # Enables verbose output
-      CONFIG_DEBUG_CAN=y                       # Enables debug output from CAN
+      CONFIG_DEBUG_FEATURES=y                  # Enables general debug features
+      CONFIG_DEBUG_INFO=y                      # Enables verbose output
+      CONFIG_DEBUG_CAN_INFO=y                  # Enables debug output from CAN
 
       CONFIG_STACK_COLORATION=y                # Monitor stack usage
       CONFIG_DEBUG_SYMBOLS=y                   # Needed only for use with a debugger

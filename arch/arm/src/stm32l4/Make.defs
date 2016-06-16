@@ -105,10 +105,6 @@ else ifeq ($(CONFIG_MODULE),y)
 CMN_CSRCS += up_elf.c up_coherent_dcache.c
 endif
 
-ifeq ($(CONFIG_STACK_COLORATION),y)
-CMN_CSRCS += up_checkstack.c
-endif
-
 # Required STM32L4 files
 
 CHIP_ASRCS  =
@@ -150,7 +146,7 @@ CHIP_CSRCS += stm32l4_rtcc.c
 endif
 endif
 
-ifeq ($(CONFIG_DEBUG),y)
+ifeq ($(CONFIG_DEBUG_FEATURES),y)
 CHIP_CSRCS += stm32l4_dumpgpio.c
 endif
 

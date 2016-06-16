@@ -72,7 +72,7 @@
 static bool usbhost_idmatch(const struct usbhost_id_s *classid,
                             const struct usbhost_id_s *devid)
 {
-  uvdbg("Compare to class:%d subclass:%d protocol:%d vid:%04x pid:%04x\n",
+  uinfo("Compare to class:%d subclass:%d protocol:%d vid:%04x pid:%04x\n",
          classid->base, classid->subclass, classid->proto,
          classid->vid, classid->pid);
 
@@ -142,7 +142,7 @@ const struct usbhost_registry_s *usbhost_findclass(const struct usbhost_id_s *id
   int ndx;
 
   DEBUGASSERT(id);
-  uvdbg("Looking for class:%d subclass:%d protocol:%d vid:%04x pid:%04x\n",
+  uinfo("Looking for class:%d subclass:%d protocol:%d vid:%04x pid:%04x\n",
         id->base, id->subclass, id->proto, id->vid, id->pid);
 
   /* g_classregistry is a singly-linked list of class ID information added by
@@ -161,7 +161,7 @@ const struct usbhost_registry_s *usbhost_findclass(const struct usbhost_id_s *id
        * protocol, then try each.
        */
 
-     uvdbg("Checking class:%p nids:%d\n", usbclass, usbclass->nids);
+     uinfo("Checking class:%p nids:%d\n", usbclass, usbclass->nids);
      for (ndx = 0; ndx < usbclass->nids; ndx++)
         {
           /* Did we find a matching ID? */

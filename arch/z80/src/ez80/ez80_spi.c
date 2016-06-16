@@ -446,7 +446,7 @@ FAR struct spi_dev_s *ez80_spibus_initialize(int port)
 
   /* Only the SPI1 interface is supported */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (port != 1)
     {
       return NULL;

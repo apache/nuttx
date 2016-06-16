@@ -2,7 +2,7 @@
  * configs/nucleo-f303re/include/board.h
  * include/arch/board/board.h
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2016 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2015 Omni Hoverboards Inc. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            Paul Alexander Patience <paul-a.patience@polymtl.ca>
@@ -96,13 +96,14 @@
 
 #define STM32_RCC_CFGR_PPRE2    RCC_CFGR_PPRE2_HCLK
 #define STM32_PCLK2_FREQUENCY   STM32_HCLK_FREQUENCY
-#define STM32_APB2_CLKIN        (STM32_PCLK2_FREQUENCY)   /* Timers 2-7, 12-14 */
+#define STM32_APB2_CLKIN        (STM32_PCLK2_FREQUENCY)   /* Timers 1 and 8, 15-17 */
 
-/* APB2 timers 1 and 8 will receive PCLK2. */
+/* APB2 timers 1 and 8, 15-17 will receive PCLK2. */
+
+/* Timers driven from APB2 will be PCLK2 */
 
 #define STM32_APB2_TIM1_CLKIN   (STM32_PCLK2_FREQUENCY)
 #define STM32_APB2_TIM8_CLKIN   (STM32_PCLK2_FREQUENCY)
-
 #define STM32_APB1_TIM15_CLKIN  (STM32_PCLK2_FREQUENCY)
 #define STM32_APB1_TIM16_CLKIN  (STM32_PCLK2_FREQUENCY)
 #define STM32_APB1_TIM17_CLKIN  (STM32_PCLK2_FREQUENCY)
@@ -112,50 +113,38 @@
 #define STM32_RCC_CFGR_PPRE1    RCC_CFGR_PPRE1_HCLKd2
 #define STM32_PCLK1_FREQUENCY   (STM32_HCLK_FREQUENCY/2)
 
-/* APB1 timers 2-4 will be twice PCLK1 (REVISIT) */
+/* APB1 timers 2-7 will be twice PCLK1 */
 
 #define STM32_APB1_TIM2_CLKIN   (2*STM32_PCLK1_FREQUENCY)
 #define STM32_APB1_TIM3_CLKIN   (2*STM32_PCLK1_FREQUENCY)
 #define STM32_APB1_TIM4_CLKIN   (2*STM32_PCLK1_FREQUENCY)
-#define STM32_APB1_TIM6_CLKIN   (STM32_PCLK1_FREQUENCY)
-#define STM32_APB1_TIM7_CLKIN   (STM32_PCLK1_FREQUENCY)
+#define STM32_APB1_TIM6_CLKIN   (2*STM32_PCLK1_FREQUENCY)
+#define STM32_APB1_TIM7_CLKIN   (2*STM32_PCLK1_FREQUENCY)
 
 /* USB divider -- Divide PLL clock by 1.5 */
 
 #define STM32_CFGR_USBPRE       0
 
-/* Timers driven from APB1 will be twice PCLK1 */
-
-#define STM32_APB1_TIM2_CLKIN   (2*STM32_PCLK1_FREQUENCY)
-#define STM32_APB1_TIM3_CLKIN   (2*STM32_PCLK1_FREQUENCY)
-#define STM32_APB1_TIM4_CLKIN   (2*STM32_PCLK1_FREQUENCY)
-#define STM32_APB1_TIM5_CLKIN   (2*STM32_PCLK1_FREQUENCY)
-#define STM32_APB1_TIM6_CLKIN   (2*STM32_PCLK1_FREQUENCY)
-#define STM32_APB1_TIM7_CLKIN   (2*STM32_PCLK1_FREQUENCY)
-#define STM32_APB1_TIM12_CLKIN  (2*STM32_PCLK1_FREQUENCY)
-#define STM32_APB1_TIM13_CLKIN  (2*STM32_PCLK1_FREQUENCY)
-#define STM32_APB1_TIM14_CLKIN  (2*STM32_PCLK1_FREQUENCY)
 
 /* APB2 clock (PCLK2) is HCLK/2 (84MHz) */
 
 #define STM32_RCC_CFGR_PPRE2    RCC_CFGR_PPRE2_HCLKd2     /* PCLK2 = HCLK / 2 */
 #define STM32_PCLK2_FREQUENCY   (STM32_HCLK_FREQUENCY/2)
 
-/* Timers driven from APB2 will be twice PCLK2 */
-
-#define STM32_APB2_TIM1_CLKIN   (2*STM32_PCLK2_FREQUENCY)
-#define STM32_APB2_TIM8_CLKIN   (2*STM32_PCLK2_FREQUENCY)
-#define STM32_APB2_TIM9_CLKIN   (2*STM32_PCLK2_FREQUENCY)
-#define STM32_APB2_TIM10_CLKIN  (2*STM32_PCLK2_FREQUENCY)
-#define STM32_APB2_TIM11_CLKIN  (2*STM32_PCLK2_FREQUENCY)
 
 /* Timer Frequencies, if APBx is set to 1, frequency is same to APBx
  * otherwise frequency is 2xAPBx.
  * Note: TIM1,8 are on APB2, others on APB1
  */
 
-#define STM32_TIM18_FREQUENCY   STM32_HCLK_FREQUENCY
-#define STM32_TIM27_FREQUENCY   (STM32_HCLK_FREQUENCY/2)
+#define BOARD_TIM1_FREQUENCY   STM32_HCLK_FREQUENCY
+#define BOARD_TIM2_FREQUENCY   (STM32_HCLK_FREQUENCY / 2)
+#define BOARD_TIM3_FREQUENCY   (STM32_HCLK_FREQUENCY / 2)
+#define BOARD_TIM4_FREQUENCY   (STM32_HCLK_FREQUENCY / 2)
+#define BOARD_TIM5_FREQUENCY   (STM32_HCLK_FREQUENCY / 2)
+#define BOARD_TIM6_FREQUENCY   (STM32_HCLK_FREQUENCY / 2)
+#define BOARD_TIM7_FREQUENCY   (STM32_HCLK_FREQUENCY / 2)
+#define BOARD_TIM8_FREQUENCY   STM32_HCLK_FREQUENCY
 
 /* LED definitions **********************************************************/
 /* The Nucleo F303RE board has three LEDs.  Two of these are controlled by

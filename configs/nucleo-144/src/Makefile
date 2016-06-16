@@ -3,6 +3,7 @@
 #
 #   Copyright (C) 2015 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
+#            David Sidrane <david_s5@nscdg.com>
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -36,7 +37,7 @@
 -include $(TOPDIR)/Make.defs
 
 ASRCS =
-CSRCS = stm32_boot.c stm32_spi.c
+CSRCS = stm32_boot.c
 
 ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += stm32_autoleds.c
@@ -50,6 +51,14 @@ endif
 
 ifeq ($(CONFIG_LIB_BOARDCTL),y)
 CSRCS += stm32_appinitialize.c
+endif
+
+ifeq ($(CONFIG_SPI),y)
+CSRCS += stm32_spi.c
+endif
+
+ifeq ($(HAVE_SDIO),y)
+CSRCS += stm32_sdio.c
 endif
 
 include $(TOPDIR)/configs/Board.mk

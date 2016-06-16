@@ -186,7 +186,7 @@ int sam_nand_automount(int minor)
       mtd = sam_nand_initialize(HSMC_CS3);
       if (!mtd)
         {
-          fdbg("ERROR: Failed to create the NAND driver on CS%d\n", HSMC_CS3);
+          ferr("ERROR: Failed to create the NAND driver on CS%d\n", HSMC_CS3);
           return -ENODEV;
         }
 
@@ -196,7 +196,7 @@ int sam_nand_automount(int minor)
       ret = ftl_initialize(NAND_MINOR, mtd);
       if (ret < 0)
         {
-          fdbg("ERROR: Failed to initialize the FTL layer: %d\n", ret);
+          ferr("ERROR: Failed to initialize the FTL layer: %d\n", ret);
           return ret;
         }
 
@@ -206,7 +206,7 @@ int sam_nand_automount(int minor)
       ret = nxffs_initialize(mtd);
       if (ret < 0)
         {
-          fdbg("ERROR: NXFFS initialization failed: %d\n", ret);
+          ferr("ERROR: NXFFS initialization failed: %d\n", ret);
           return ret;
         }
 
@@ -215,7 +215,7 @@ int sam_nand_automount(int minor)
       ret = mount(NULL, "/mnt/nand", "nxffs", 0, NULL);
       if (ret < 0)
         {
-          fdbg("ERROR: Failed to mount the NXFFS volume: %d\n", errno);
+          ferr("ERROR: Failed to mount the NXFFS volume: %d\n", errno);
           return ret;
         }
 #endif

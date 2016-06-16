@@ -624,7 +624,7 @@ fat_read_restart:
 
               if (ret == -EFAULT && !force_indirect)
                 {
-                  fdbg("DMA: read alignment error, restarting indirect\n");
+                  ferr("ERROR: DMA read alignment error, restarting indirect\n");
                   force_indirect = true;
                   goto fat_read_restart;
                 }
@@ -884,7 +884,7 @@ fat_write_restart:
 
               if (ret == -EFAULT && !force_indirect)
                 {
-                  fdbg("DMA: write alignment error, restarting indirect\n");
+                  ferr("ERROR: DMA write alignment error, restarting indirect\n");
                   force_indirect = true;
                   goto fat_write_restart;
                 }
@@ -1397,7 +1397,7 @@ static int fat_dup(FAR const struct file *oldp, FAR struct file *newp)
   FAR struct fat_file_s *newff;
   int ret;
 
-  fvdbg("Dup %p->%p\n", oldp, newp);
+  finfo("Dup %p->%p\n", oldp, newp);
 
   /* Sanity checks */
 

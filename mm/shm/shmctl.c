@@ -134,7 +134,7 @@ int shmctl(int shmid, int cmd, struct shmid_ds *buf)
   ret = sem_wait(&region->sr_sem);
   if (ret < 0)
     {
-      shmdbg("sem_wait failed: %d\n", ret);
+      shmerr("ERROR: sem_wait failed: %d\n", ret);
       return ret;
     }
 
@@ -190,7 +190,7 @@ int shmctl(int shmid, int cmd, struct shmid_ds *buf)
         break;
 
       default:
-        shmdbg("Unrecognized command: %d\n", cmd);
+        shmerr("ERROR: Unrecognized command: %d\n", cmd);
         ret = -EINVAL;
         goto errout_with_semaphore;
     }

@@ -161,7 +161,7 @@ static uint16_t netclose_interrupt(FAR struct net_driver_s *dev,
 
   DEBUGASSERT(conn != NULL);
 
-  nllvdbg("conn: %p flags: %04x\n", conn, flags);
+  nllinfo("conn: %p flags: %04x\n", conn, flags);
 
   /* TCP_DISCONN_EVENTS:
    *   TCP_CLOSE:    The remote host has closed the connection
@@ -209,7 +209,7 @@ static uint16_t netclose_interrupt(FAR struct net_driver_s *dev,
     {
       /* Yes.. Wake up the waiting thread and report the timeout */
 
-      nlldbg("CLOSE timeout\n");
+      nllerr("ERROR: CLOSE timeout\n");
       pstate->cl_result = -ETIMEDOUT;
       goto end_wait;
     }
@@ -250,7 +250,7 @@ end_wait:
   pstate->cl_cb->event = NULL;
   sem_post(&pstate->cl_sem);
 
-  nllvdbg("Resuming\n");
+  nllinfo("Resuming\n");
   return 0;
 #endif
 }
@@ -507,13 +507,13 @@ static void local_close(FAR struct socket *psock)
 
 int psock_close(FAR struct socket *psock)
 {
-  int err;
+  int errcode;
 
   /* Verify that the sockfd corresponds to valid, allocated socket */
 
   if (!psock || psock->s_crefs <= 0)
     {
-      err = EBADF;
+      errcode = EBADF;
       goto errout;
     }
 
@@ -565,8 +565,8 @@ int psock_close(FAR struct socket *psock)
 
                       /* Break any current connections */
 
-                      err = netclose_disconnect(psock);
-                      if (err < 0)
+                      errcode = netclose_disconnect(psock);
+                      if (errcode < 0)
                         {
                           /* This would normally occur only if there is a
                            * timeout from a lingering close.
@@ -662,7 +662,7 @@ int psock_close(FAR struct socket *psock)
 #endif
 
           default:
-            err = EBADF;
+            errcode = EBADF;
             goto errout;
         }
     }
@@ -678,7 +678,7 @@ errout_with_psock:
 #endif
 
 errout:
-  set_errno(err);
+  set_errno(errcode);
   return ERROR;
 }
 

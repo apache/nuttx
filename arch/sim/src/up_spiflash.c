@@ -60,26 +60,6 @@
  ************************************************************************************/
 /* Configuration ********************************************************************/
 
-/* Debug ****************************************************************************/
-/* Check if (non-standard) SPI debug is enabled */
-
-#ifndef CONFIG_DEBUG
-#  undef CONFIG_DEBUG_VERBOSE
-#  undef CONFIG_DEBUG_SPI
-#endif
-
-#ifdef CONFIG_DEBUG_SPI
-#  define spidbg lldbg
-#  ifdef CONFIG_DEBUG_VERBOSE
-#    define spivdbg lldbg
-#  else
-#    define spivdbg(x...)
-#  endif
-#else
-#  define spidbg(x...)
-#  define spivdbg(x...)
-#endif
-
 /* Define the FLASH SIZE in bytes */
 
 #ifdef CONFIG_SIM_SPIFLASH_1M
@@ -479,7 +459,7 @@ static uint16_t spiflash_send(FAR struct spi_dev_s *dev, uint16_t wd)
 static void spiflash_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
                               FAR void *rxbuffer, size_t nwords)
 {
-  spivdbg("txbuffer=%p rxbuffer=%p nwords=%d\n", txbuffer, rxbuffer, nwords);
+  spiinfo("txbuffer=%p rxbuffer=%p nwords=%d\n", txbuffer, rxbuffer, nwords);
 
   /* 8-bit mode */
 
@@ -536,7 +516,7 @@ static void spiflash_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffe
 #ifndef CONFIG_SPI_EXCHANGE
 static void spiflash_sndblock(FAR struct spi_dev_s *dev, FAR const void *txbuffer, size_t nwords)
 {
-  spivdbg("txbuffer=%p nwords=%d\n", txbuffer, nwords);
+  spiinfo("txbuffer=%p nwords=%d\n", txbuffer, nwords);
   return spiflash_exchange(dev, txbuffer, NULL, nwords);
 }
 #endif
@@ -565,7 +545,7 @@ static void spiflash_sndblock(FAR struct spi_dev_s *dev, FAR const void *txbuffe
 static void spiflash_recvblock(FAR struct spi_dev_s *dev, FAR void *rxbuffer,
                                size_t nwords)
 {
-  spivdbg("rxbuffer=%p nwords=%d\n", rxbuffer, nwords);
+  spiinfo("rxbuffer=%p nwords=%d\n", rxbuffer, nwords);
   return spiflash_exchange(dev, NULL, rxbuffer, nwords);
 }
 #endif

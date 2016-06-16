@@ -147,12 +147,12 @@
  * Verbose debug must also be enabled
  */
 
-#ifndef CONFIG_DEBUG
-#  undef CONFIG_DEBUG_VERBOSE
+#ifndef CONFIG_DEBUG_FEATURES
+#  undef CONFIG_DEBUG_INFO
 #  undef CONFIG_DEBUG_GRAPHICS
 #endif
 
-#ifndef CONFIG_DEBUG_VERBOSE
+#ifndef CONFIG_DEBUG_INFO
 #  undef CONFIG_LCD_RITDEBUG
 #endif
 
@@ -180,9 +180,13 @@
 /* Debug ******************************************************************************/
 
 #ifdef CONFIG_LCD_RITDEBUG
-#  define ritdbg(format, ...)  vdbg(format, ##__VA_ARGS__)
+#  define riterr(format, ...)  _err(format, ##__VA_ARGS__)
+#  define ritwarn(format, ...) _warn(format, ##__VA_ARGS__)
+#  define ritinfo(format, ...) _info(format, ##__VA_ARGS__)
 #else
-#  define ritdbg(x...)
+#  define riterr(x...)
+#  define ritwarn(x...)
+#  define ritinfo(x...)
 #endif
 
 /**************************************************************************************
@@ -508,8 +512,8 @@ static void rit_sndbytes(FAR struct rit_dev_s *priv, FAR const uint8_t *buffer,
   FAR struct spi_dev_s *spi = priv->spi;
   uint8_t tmp;
 
-  ritdbg("buflen: %d cmd: %s [%02x %02x %02x]\n",
-         buflen, cmd ? "YES" : "NO", buffer[0], buffer[1], buffer[2]);
+  ritinfo("buflen: %d cmd: %s [%02x %02x %02x]\n",
+          buflen, cmd ? "YES" : "NO", buffer[0], buffer[1], buffer[2]);
   DEBUGASSERT(spi);
 
   /* Clear/set the D/Cn bit to enable command or data mode */
@@ -552,7 +556,8 @@ static void rit_sndcmds(FAR struct rit_dev_s *priv, FAR const uint8_t *table)
 
   while ((cmdlen = *table++) != 0)
     {
-      ritdbg("command: %02x cmdlen: %d\n", *table, cmdlen);
+      ritinfo("command: %02x cmdlen: %d\n", *table, cmdlen);
+
       rit_sndcmd(priv, table, cmdlen);
       table += cmdlen;
     }
@@ -578,7 +583,7 @@ static inline void rit_clear(FAR struct rit_dev_s *priv)
   FAR uint8_t *ptr = g_framebuffer;
   unsigned int row;
 
-  ritdbg("Clear display\n");
+  ritinfo("Clear display\n");
 
   /* Initialize the framebuffer */
 
@@ -605,7 +610,7 @@ static inline void rit_clear(FAR struct rit_dev_s *priv)
 {
   unsigned int row;
 
-  ritdbg("Clear display\n");
+  ritinfo("Clear display\n");
 
   /* Create a black row */
 
@@ -655,7 +660,7 @@ static int rit_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
   int aend;
   int i;
 
-  ritdbg("row: %d col: %d npixels: %d\n", row, col, npixels);
+  ritinfo("row: %d col: %d npixels: %d\n", row, col, npixels);
   DEBUGASSERT(buffer);
 
   /* Toss out the special case of the empty run now */
@@ -678,7 +683,8 @@ static int rit_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
   start = col >> 1;
   aend  = (col + npixels) >> 1;
   end   = (col + npixels + 1) >> 1;
-  ritdbg("start: %d aend: %d end: %d\n", start, aend, end);
+
+  ritinfo("start: %d aend: %d end: %d\n", start, aend, end);
 
   /* Copy the run into the framebuffer, handling nibble alignment.
    *
@@ -814,7 +820,7 @@ static int rit_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
   FAR struct rit_dev_s *priv = (FAR struct rit_dev_s *)&g_oleddev;
   uint8_t cmd[3];
 
-  ritdbg("row: %d col: %d npixels: %d\n", row, col, npixels);
+  ritinfo("row: %d col: %d npixels: %d\n", row, col, npixels);
   DEBUGASSERT(buffer);
 
   if (npixels > 0)
@@ -885,7 +891,7 @@ static int rit_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
   int aend;
   int i;
 
-  ritdbg("row: %d col: %d npixels: %d\n", row, col, npixels);
+  ritinfo("row: %d col: %d npixels: %d\n", row, col, npixels);
   DEBUGASSERT(buffer);
 
   /* Can't read from OLED GDDRAM in SPI mode, but we can read from the framebuffer */
@@ -990,7 +996,7 @@ static int rit_getvideoinfo(FAR struct lcd_dev_s *dev,
                               FAR struct fb_videoinfo_s *vinfo)
 {
   DEBUGASSERT(dev && vinfo);
-  gvdbg("fmt: %d xres: %d yres: %d nplanes: %d\n",
+  ginfo("fmt: %d xres: %d yres: %d nplanes: %d\n",
         g_videoinfo.fmt, g_videoinfo.xres, g_videoinfo.yres, g_videoinfo.nplanes);
   memcpy(vinfo, &g_videoinfo, sizeof(struct fb_videoinfo_s));
   return OK;
@@ -1008,7 +1014,7 @@ static int rit_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
                               FAR struct lcd_planeinfo_s *pinfo)
 {
   DEBUGASSERT(pinfo && planeno == 0);
-  gvdbg("planeno: %d bpp: %d\n", planeno, g_planeinfo.bpp);
+  ginfo("planeno: %d bpp: %d\n", planeno, g_planeinfo.bpp);
   memcpy(pinfo, &g_planeinfo, sizeof(struct lcd_planeinfo_s));
   return OK;
 }
@@ -1027,7 +1033,7 @@ static int rit_getpower(FAR struct lcd_dev_s *dev)
   FAR struct rit_dev_s *priv = (FAR struct rit_dev_s *)dev;
   DEBUGASSERT(priv);
 
-  gvdbg("power: %s\n", priv->on ? "ON" : "OFF");
+  ginfo("power: %s\n", priv->on ? "ON" : "OFF");
   return priv->on ? CONFIG_LCD_MAXPOWER : 0;
 }
 
@@ -1045,7 +1051,7 @@ static int rit_setpower(struct lcd_dev_s *dev, int power)
   struct rit_dev_s *priv = (struct rit_dev_s *)dev;
   DEBUGASSERT(priv && (unsigned)power <= CONFIG_LCD_MAXPOWER && priv->spi);
 
-  gvdbg("power: %d\n", power);
+  ginfo("power: %d\n", power);
 
   /* Select the SD1329 controller */
 
@@ -1090,7 +1096,7 @@ static int rit_getcontrast(struct lcd_dev_s *dev)
 {
   struct rit_dev_s *priv = (struct rit_dev_s *)dev;
 
-  gvdbg("contrast: %d\n", priv->contrast);
+  ginfo("contrast: %d\n", priv->contrast);
   return priv->contrast;
 }
 
@@ -1107,7 +1113,7 @@ static int rit_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
   struct rit_dev_s *priv = (struct rit_dev_s *)dev;
   uint8_t cmd[3];
 
-  gvdbg("contrast: %d\n", contrast);
+  ginfo("contrast: %d\n", contrast);
   DEBUGASSERT(contrast <= CONFIG_LCD_MAXCONTRAST);
 
   /* Select the SD1329 controller */
@@ -1156,7 +1162,7 @@ FAR struct lcd_dev_s *rit_initialize(FAR struct spi_dev_s *spi, unsigned int dev
   FAR struct rit_dev_s *priv = (FAR struct rit_dev_s *)&g_oleddev;
   DEBUGASSERT(devno == 0 && spi);
 
-  gvdbg("Initializing devno: %d\n", devno);
+  ginfo("Initializing devno: %d\n", devno);
 
   /* Driver state data */
 

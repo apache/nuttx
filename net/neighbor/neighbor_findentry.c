@@ -72,7 +72,7 @@ FAR struct neighbor_entry *neighbor_findentry(const net_ipv6addr_t ipaddr)
 {
   int i;
 
-  nllvdbg("Find neighbor: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
+  nllinfo("Find neighbor: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
           ntohs(ipaddr[0]), ntohs(ipaddr[1]), ntohs(ipaddr[2]),
           ntohs(ipaddr[3]), ntohs(ipaddr[4]), ntohs(ipaddr[5]),
           ntohs(ipaddr[6]), ntohs(ipaddr[7]));
@@ -83,7 +83,7 @@ FAR struct neighbor_entry *neighbor_findentry(const net_ipv6addr_t ipaddr)
 
       if (net_ipv6addr_cmp(neighbor->ne_ipaddr, ipaddr))
         {
-          nllvdbg("  at: %02x:%02x:%02x:%02x:%02x:%02x\n",
+          nllinfo("  at: %02x:%02x:%02x:%02x:%02x:%02x\n",
                   neighbor->ne_addr.na_addr.ether_addr_octet[0],
                   neighbor->ne_addr.na_addr.ether_addr_octet[1],
                   neighbor->ne_addr.na_addr.ether_addr_octet[2],
@@ -95,6 +95,6 @@ FAR struct neighbor_entry *neighbor_findentry(const net_ipv6addr_t ipaddr)
         }
     }
 
-  nllvdbg("  Not found\n");
+  nllinfo("  Not found\n");
   return NULL;
 }

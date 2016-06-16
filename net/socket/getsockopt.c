@@ -96,13 +96,13 @@
 int psock_getsockopt(FAR struct socket *psock, int level, int option,
                      FAR void *value, FAR socklen_t *value_len)
 {
-  int err;
+  int errcode;
 
   /* Verify that the socket option if valid (but might not be supported ) */
 
   if (!_SO_GETVALID(option) || !value || !value_len)
     {
-      err = EINVAL;
+      errcode = EINVAL;
       goto errout;
     }
 
@@ -131,7 +131,7 @@ int psock_getsockopt(FAR struct socket *psock, int level, int option,
 
           if (*value_len < sizeof(int))
             {
-              err = EINVAL;
+              errcode = EINVAL;
               goto errout;
            }
 
@@ -155,7 +155,7 @@ int psock_getsockopt(FAR struct socket *psock, int level, int option,
 
           if (*value_len < sizeof(int))
             {
-              err = EINVAL;
+              errcode = EINVAL;
               goto errout;
             }
 
@@ -179,7 +179,7 @@ int psock_getsockopt(FAR struct socket *psock, int level, int option,
 
           if (*value_len < sizeof(struct timeval))
             {
-              err = EINVAL;
+              errcode = EINVAL;
               goto errout;
             }
 
@@ -214,14 +214,14 @@ int psock_getsockopt(FAR struct socket *psock, int level, int option,
       case SO_SNDLOWAT:   /* Sets the minimum number of bytes to output */
 
       default:
-        err = ENOPROTOOPT;
+        errcode = ENOPROTOOPT;
         goto errout;
     }
 
   return OK;
 
 errout:
-  set_errno(err);
+  set_errno(errcode);
   return ERROR;
 }
 

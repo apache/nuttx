@@ -2,12 +2,14 @@
  * configs/cc3200-launchpad/src/cc3200_boot.c
  *
  *   Copyright (C) 2014 Droidifi LLC. All rights reserved.
+ *   Copyright (C) 2014, 2016 Gregory Nutt.
  *   Author: Jim Ewing <jim@droidifi.com>
+ *           Gregory Nutt <gnutt@nuttx.org>
  *
- *   Adapted for the cc3200 from code:
+ * Adapted for the cc3200 from code:
  *
- *   Copyright (C) Gregory Nutt.
- *   Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2014 Gregory Nutt.
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -48,7 +50,6 @@
 #include <nuttx/board.h>
 #include <arch/board/board.h>
 #include <arch/board/cc3200_utils.h>
-#include <apps/nsh.h>
 
 #include "cc3200_launchpad.h"
 
@@ -56,13 +57,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
+#define CC3200_SRAM1_BASE 0x20000000
+#define CC3200_SRAM1_SIZE 0x4000
 
 /****************************************************************************
  * Public Functions
@@ -133,13 +129,8 @@ void tiva_boardinitialize(void)
  ****************************************************************************/
 
 #if CONFIG_MM_REGIONS > 1
-
-#define CC3200_SRAM1_BASE 0x20000000
-#define CC3200_SRAM1_SIZE 0x4000
-
 void up_addregion(void)
 {
   kumm_addregion((FAR void*)CC3200_SRAM1_BASE, CC3200_SRAM1_SIZE);
 }
-
 #endif

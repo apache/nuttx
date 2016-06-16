@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>
 
-#if defined(CONFIG_DEBUG) && defined(CONFIG_IOB_DEBUG)
+#if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_IOB_DEBUG)
 /* Force debug output (from this file only) */
 
 #  undef  CONFIG_DEBUG_NET
@@ -161,7 +161,7 @@ int iob_contig(FAR struct iob_s *iob, unsigned int len)
 
   else
     {
-      ndbg("ERROR: pktlen=%u < requested len=%u\n", iob->io_pktlen, len);
+      nerr("ERROR: pktlen=%u < requested len=%u\n", iob->io_pktlen, len);
       return -ENOSPC;
     }
 }

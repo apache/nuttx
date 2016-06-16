@@ -106,7 +106,7 @@ int shmdt(FAR const void *shmaddr)
 
   if (shmid >= CONFIG_ARCH_SHM_MAXREGIONS)
     {
-      shmdbg("No region matching this virtual address: %p\n", shmaddr);
+      shmerr("ERROR: No region matching this virtual address: %p\n", shmaddr);
       ret = -EINVAL;
       goto errout_with_errno;
     }
@@ -121,7 +121,7 @@ int shmdt(FAR const void *shmaddr)
   ret = sem_wait(&region->sr_sem);
   if (ret < 0)
     {
-      shmdbg("sem_wait failed: %d\n", ret);
+      shmerr("ERROR: sem_wait failed: %d\n", ret);
       goto errout;
     }
 
@@ -141,7 +141,7 @@ int shmdt(FAR const void *shmaddr)
   ret = up_shmdt((uintptr_t)shmaddr, npages);
   if (ret < 0)
     {
-      shmdbg("up_shmdt() failed\n");
+      shmerr("ERROR: up_shmdt() failed\n");
     }
 
   /* Indicate that there is no longer any mapping for this region. */

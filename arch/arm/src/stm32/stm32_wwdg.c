@@ -81,18 +81,8 @@
 #  define CONFIG_STM32_WWDG_DEFTIMOUT WWDG_MAXTIMEOUT
 #endif
 
-/* Debug ********************************************************************/
-/* Non-standard debug that may be enabled just for testing the watchdog
- * driver.  NOTE: that only lldbg types are used so that the output is
- * immediately available.
- */
-
-#ifdef CONFIG_DEBUG_WATCHDOG
-#  define wddbg    lldbg
-#  define wdvdbg   llvdbg
-#else
-#  define wddbg(x...)
-#  define wdvdbg(x...)
+#ifndef CONFIG_DEBUG_WATCHDOG_INFO
+#  undef CONFIG_STM32_WWDG_REGDEBUG
 #endif
 
 /****************************************************************************
@@ -119,7 +109,7 @@ struct stm32_lowerhalf_s
  ****************************************************************************/
 /* Register operations ******************************************************/
 
-#if defined(CONFIG_STM32_WWDG_REGDEBUG) && defined(CONFIG_DEBUG)
+#ifdef CONFIG_STM32_WWDG_REGDEBUG
 static uint16_t stm32_getreg(uint32_t addr);
 static void     stm32_putreg(uint16_t val, uint32_t addr);
 #else
@@ -179,7 +169,7 @@ static struct stm32_lowerhalf_s g_wdgdev;
  *
  ****************************************************************************/
 
-#if defined(CONFIG_STM32_WWDG_REGDEBUG) && defined(CONFIG_DEBUG)
+#ifdef CONFIG_STM32_WWDG_REGDEBUG
 static uint16_t stm32_getreg(uint32_t addr)
 {
   static uint32_t prevaddr = 0;
@@ -200,7 +190,7 @@ static uint16_t stm32_getreg(uint32_t addr)
         {
           if (count == 4)
             {
-              lldbg("...\n");
+              wdinfo("...\n");
             }
 
           return val;
@@ -217,7 +207,7 @@ static uint16_t stm32_getreg(uint32_t addr)
         {
           /* Yes.. then show how many times the value repeated */
 
-          lldbg("[repeats %d more times]\n", count-3);
+          wdinfo("[repeats %d more times]\n", count-3);
         }
 
       /* Save the new address, value, and count */
@@ -229,7 +219,7 @@ static uint16_t stm32_getreg(uint32_t addr)
 
   /* Show the register value read */
 
-  lldbg("%08x->%04x\n", addr, val);
+  wdinfo("%08x->%04x\n", addr, val);
   return val;
 }
 #endif
@@ -242,12 +232,12 @@ static uint16_t stm32_getreg(uint32_t addr)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_STM32_WWDG_REGDEBUG) && defined(CONFIG_DEBUG)
+#ifdef CONFIG_STM32_WWDG_REGDEBUG
 static void stm32_putreg(uint16_t val, uint32_t addr)
 {
   /* Show the register value being written */
 
-  lldbg("%08x<-%04x\n", addr, val);
+  wdinfo("%08x<-%04x\n", addr, val);
 
   /* Write the value */
 
@@ -348,7 +338,7 @@ static int stm32_start(FAR struct watchdog_lowerhalf_s *lower)
 {
   FAR struct stm32_lowerhalf_s *priv = (FAR struct stm32_lowerhalf_s *)lower;
 
-  wdvdbg("Entry\n");
+  wdinfo("Entry\n");
   DEBUGASSERT(priv);
 
   /* The watchdog is always disabled after a reset. It is enabled by setting
@@ -383,7 +373,7 @@ static int stm32_stop(FAR struct watchdog_lowerhalf_s *lower)
    * except by a reset.
    */
 
-  wdvdbg("Entry\n");
+  wdinfo("Entry\n");
   return -ENOSYS;
 }
 
@@ -414,7 +404,7 @@ static int stm32_keepalive(FAR struct watchdog_lowerhalf_s *lower)
 {
   FAR struct stm32_lowerhalf_s *priv = (FAR struct stm32_lowerhalf_s *)lower;
 
-  wdvdbg("Entry\n");
+  wdinfo("Entry\n");
   DEBUGASSERT(priv);
 
   /* Write to T[6:0] bits to configure the counter value, no need to do
@@ -448,7 +438,7 @@ static int stm32_getstatus(FAR struct watchdog_lowerhalf_s *lower,
   uint32_t elapsed;
   uint16_t reload;
 
-  wdvdbg("Entry\n");
+  wdinfo("Entry\n");
   DEBUGASSERT(priv);
 
   /* Return the status bit */
@@ -474,10 +464,10 @@ static int stm32_getstatus(FAR struct watchdog_lowerhalf_s *lower,
   elapsed = priv->reload - reload;
   status->timeleft = (priv->timeout * elapsed) / (priv->reload + 1);
 
-  wdvdbg("Status     :\n");
-  wdvdbg("  flags    : %08x\n", status->flags);
-  wdvdbg("  timeout  : %d\n", status->timeout);
-  wdvdbg("  timeleft : %d\n", status->flags);
+  wdinfo("Status     :\n");
+  wdinfo("  flags    : %08x\n", status->flags);
+  wdinfo("  timeout  : %d\n", status->timeout);
+  wdinfo("  timeleft : %d\n", status->flags);
   return OK;
 }
 
@@ -507,13 +497,13 @@ static int stm32_settimeout(FAR struct watchdog_lowerhalf_s *lower,
   int wdgtb;
 
   DEBUGASSERT(priv);
-  wdvdbg("Entry: timeout=%d\n", timeout);
+  wdinfo("Entry: timeout=%d\n", timeout);
 
   /* Can this timeout be represented? */
 
   if (timeout < 1 || timeout > WWDG_MAXTIMEOUT)
     {
-      wddbg("Cannot represent timeout=%d > %d\n",
+      wderr("ERROR: Cannot represent timeout=%d > %d\n",
             timeout, WWDG_MAXTIMEOUT);
       return -ERANGE;
     }
@@ -562,7 +552,7 @@ static int stm32_settimeout(FAR struct watchdog_lowerhalf_s *lower,
        */
 
 #if 0
-      wdvdbg("wdgtb=%d fwwdg=%d reload=%d timout=%d\n",
+      wdinfo("wdgtb=%d fwwdg=%d reload=%d timout=%d\n",
              wdgtb, fwwdg, reload,  1000 * (reload + 1) / fwwdg);
 #endif
       if (reload <= WWDG_CR_T_MAX || wdgtb == 3)
@@ -595,7 +585,7 @@ static int stm32_settimeout(FAR struct watchdog_lowerhalf_s *lower,
   priv->fwwdg  = fwwdg;
   priv->reload = reload;
 
-  wdvdbg("wdgtb=%d fwwdg=%d reload=%d timout=%d\n",
+  wdinfo("wdgtb=%d fwwdg=%d reload=%d timout=%d\n",
          wdgtb, fwwdg, reload, priv->timeout);
 
   /* Set WDGTB[1:0] bits according to calculated value */
@@ -644,7 +634,7 @@ static xcpt_t stm32_capture(FAR struct watchdog_lowerhalf_s *lower,
   uint16_t regval;
 
   DEBUGASSERT(priv);
-  wdvdbg("Entry: handler=%p\n", handler);
+  wdinfo("Entry: handler=%p\n", handler);
 
   /* Get the old handler return value */
 
@@ -708,7 +698,7 @@ static int stm32_ioctl(FAR struct watchdog_lowerhalf_s *lower, int cmd,
   int ret = -ENOTTY;
 
   DEBUGASSERT(priv);
-  wdvdbg("Entry: cmd=%d arg=%ld\n", cmd, arg);
+  wdinfo("Entry: cmd=%d arg=%ld\n", cmd, arg);
 
   /* WDIOC_MINTIME: Set the minimum ping time.  If two keepalive ioctls
    * are received within this time, a reset event will be generated.
@@ -761,7 +751,7 @@ void stm32_wwdginitialize(FAR const char *devpath)
 {
   FAR struct stm32_lowerhalf_s *priv = &g_wdgdev;
 
-  wdvdbg("Entry: devpath=%s\n", devpath);
+  wdinfo("Entry: devpath=%s\n", devpath);
 
   /* NOTE we assume that clocking to the IWDG has already been provided by
    * the RCC initialization logic.

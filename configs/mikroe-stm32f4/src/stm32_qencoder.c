@@ -145,11 +145,11 @@ int qe_devinit(void)
     {
       /* Initialize a quadrature encoder interface. */
 
-      snvdbg("Initializing the quadrature encoder using TIM%d\n", TIMID);
+      sninfo("Initializing the quadrature encoder using TIM%d\n", TIMID);
       ret = stm32_qeinitialize("/dev/qe0", TIMID);
       if (ret < 0)
         {
-          sndbg("stm32_qeinitialize failed: %d\n", ret);
+          snerr("ERROR: stm32_qeinitialize failed: %d\n", ret);
           return ret;
         }
 

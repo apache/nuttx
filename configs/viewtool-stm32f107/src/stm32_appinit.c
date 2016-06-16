@@ -95,7 +95,7 @@ static int rtc_driver_initialize(void)
   lower = stm32_rtc_lowerhalf();
   if (lower == NULL)
     {
-      sdbg("ERROR: Failed to instantiate the RTC lower-half driver\n");
+      serr("ERROR: Failed to instantiate the RTC lower-half driver\n");
       ret = -ENOMEM;
     }
   else
@@ -107,7 +107,7 @@ static int rtc_driver_initialize(void)
       ret = rtc_initialize(0, lower);
       if (ret < 0)
         {
-          sdbg("ERROR: Failed to bind/register the RTC driver: %d\n", ret);
+          serr("ERROR: Failed to bind/register the RTC driver: %d\n", ret);
         }
     }
 

@@ -92,7 +92,7 @@ void up_schedule_sigaction(FAR struct tcb_s *tcb, sig_deliver_t sigdeliver)
 {
   irqstate_t flags;
 
-  dbg("tcb=0x%p sigdeliver=0x%06x\n", tcb, (uint32_t)sigdeliver);
+  sinfo("tcb=0x%p sigdeliver=0x%06x\n", tcb, (uint32_t)sigdeliver);
 
   /* Make sure that interrupts are disabled */
 
@@ -106,7 +106,7 @@ void up_schedule_sigaction(FAR struct tcb_s *tcb, sig_deliver_t sigdeliver)
        * being delivered to the currently executing task.
        */
 
-      dbg("rtcb=0x%p g_current_regs=0x%p\n", this_task(), g_current_regs);
+      sinfo("rtcb=0x%p g_current_regs=0x%p\n", this_task(), g_current_regs);
 
       if (tcb == this_task())
         {

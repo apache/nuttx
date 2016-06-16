@@ -42,9 +42,9 @@ CONFIG_RAW_BINARY=y
 #
 # Debug Options
 #
-CONFIG_DEBUG=y
+CONFIG_DEBUG_FEATURES=y
 CONFIG_ARCH_HAVE_HEAPCHECK=y
-CONFIG_DEBUG_VERBOSE=y
+CONFIG_DEBUG_INFO=y
 
 #
 # Subsystem Debug Options
@@ -60,7 +60,7 @@ CONFIG_DEBUG_LIB=y
 # OS Function Debug Options
 #
 # CONFIG_DEBUG_DMA is not set
-# CONFIG_DEBUG_HEAP is not set
+# CONFIG_HEAP_COLORATION is not set
 # CONFIG_DEBUG_IRQ is not set
 
 #

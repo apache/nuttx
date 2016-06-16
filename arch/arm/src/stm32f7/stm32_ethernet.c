@@ -263,7 +263,7 @@
  * enabled.
  */
 
-#ifndef CONFIG_DEBUG
+#ifndef CONFIG_DEBUG_NET_INFO
 #  undef CONFIG_STM32F7_ETHMAC_REGDEBUG
 #endif
 
@@ -664,7 +664,7 @@ static struct stm32_ethmac_s g_stm32ethmac[STM32F7_NETHERNET];
  ****************************************************************************/
 /* Register operations ******************************************************/
 
-#if defined(CONFIG_STM32F7_ETHMAC_REGDEBUG) && defined(CONFIG_DEBUG)
+#ifdef CONFIG_STM32F7_ETHMAC_REGDEBUG
 static uint32_t stm32_getreg(uint32_t addr);
 static void stm32_putreg(uint32_t val, uint32_t addr);
 static void stm32_checksetup(void);
@@ -795,7 +795,7 @@ static int  stm32_ethconfig(struct stm32_ethmac_s *priv);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_STM32F7_ETHMAC_REGDEBUG) && defined(CONFIG_DEBUG)
+#ifdef CONFIG_STM32F7_ETHMAC_REGDEBUG
 static uint32_t stm32_getreg(uint32_t addr)
 {
   static uint32_t prevaddr = 0;
@@ -816,7 +816,7 @@ static uint32_t stm32_getreg(uint32_t addr)
         {
           if (count == 4)
             {
-              lldbg("...\n");
+              ninfo("...\n");
             }
 
           return val;
@@ -833,7 +833,7 @@ static uint32_t stm32_getreg(uint32_t addr)
         {
           /* Yes.. then show how many times the value repeated */
 
-          lldbg("[repeats %d more times]\n", count-3);
+          ninfo("[repeats %d more times]\n", count-3);
         }
 
       /* Save the new address, value, and count */
@@ -845,7 +845,7 @@ static uint32_t stm32_getreg(uint32_t addr)
 
   /* Show the register value read */
 
-  lldbg("%08x->%08x\n", addr, val);
+  ninfo("%08x->%08x\n", addr, val);
   return val;
 }
 #endif
@@ -867,12 +867,12 @@ static uint32_t stm32_getreg(uint32_t addr)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_STM32F7_ETHMAC_REGDEBUG) && defined(CONFIG_DEBUG)
+#ifdef CONFIG_STM32F7_ETHMAC_REGDEBUG
 static void stm32_putreg(uint32_t val, uint32_t addr)
 {
   /* Show the register value being written */
 
-  lldbg("%08x<-%08x\n", addr, val);
+  ninfo("%08x<-%08x\n", addr, val);
 
   /* Write the value */
 
@@ -894,7 +894,7 @@ static void stm32_putreg(uint32_t val, uint32_t addr)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_STM32F7_ETHMAC_REGDEBUG) && defined(CONFIG_DEBUG)
+#ifdef CONFIG_STM32F7_ETHMAC_REGDEBUG
 static void stm32_checksetup(void)
 {
 }
@@ -1060,7 +1060,7 @@ static int stm32_transmit(struct stm32_ethmac_s *priv)
   txdesc  = priv->txhead;
   txfirst = txdesc;
 
-  nllvdbg("d_len: %d d_buf: %p txhead: %p tdes0: %08x\n",
+  nllinfo("d_len: %d d_buf: %p txhead: %p tdes0: %08x\n",
           priv->dev.d_len, priv->dev.d_buf, txdesc, txdesc->tdes0);
 
   DEBUGASSERT(txdesc && (txdesc->tdes0 & ETH_TDES0_OWN) == 0);
@@ -1082,7 +1082,7 @@ static int stm32_transmit(struct stm32_ethmac_s *priv)
       bufcount = (priv->dev.d_len + (ALIGNED_BUFSIZE-1)) / ALIGNED_BUFSIZE;
       lastsize = priv->dev.d_len - (bufcount - 1) * ALIGNED_BUFSIZE;
 
-      nllvdbg("bufcount: %d lastsize: %d\n", bufcount, lastsize);
+      nllinfo("bufcount: %d lastsize: %d\n", bufcount, lastsize);
 
       /* Set the first segment bit in the first TX descriptor */
 
@@ -1209,7 +1209,7 @@ static int stm32_transmit(struct stm32_ethmac_s *priv)
 
   priv->inflight++;
 
-  nllvdbg("txhead: %p txtail: %p inflight: %d\n",
+  nllinfo("txhead: %p txtail: %p inflight: %d\n",
           priv->txhead, priv->txtail, priv->inflight);
 
   /* If all TX descriptors are in-flight, then we have to disable receive interrupts
@@ -1508,7 +1508,7 @@ static void stm32_freesegment(struct stm32_ethmac_s *priv,
   struct eth_rxdesc_s *rxdesc;
   int i;
 
-  nllvdbg("rxfirst: %p segments: %d\n", rxfirst, segments);
+  nllinfo("rxfirst: %p segments: %d\n", rxfirst, segments);
 
   /* Give the freed RX buffers back to the Ethernet MAC to be refilled */
 
@@ -1580,7 +1580,7 @@ static int stm32_recvframe(struct stm32_ethmac_s *priv)
   uint8_t *buffer;
   int i;
 
-  nllvdbg("rxhead: %p rxcurr: %p segments: %d\n",
+  nllinfo("rxhead: %p rxcurr: %p segments: %d\n",
           priv->rxhead, priv->rxcurr, priv->segments);
 
   /* Check if there are free buffers.  We cannot receive new frames in this
@@ -1589,7 +1589,7 @@ static int stm32_recvframe(struct stm32_ethmac_s *priv)
 
   if (!stm32_isfreebuffer(priv))
     {
-      nlldbg("No free buffers\n");
+      nllerr("ERROR: No free buffers\n");
       return -ENOMEM;
     }
 
@@ -1652,7 +1652,7 @@ static int stm32_recvframe(struct stm32_ethmac_s *priv)
               rxcurr = priv->rxcurr;
             }
 
-          nllvdbg("rxhead: %p rxcurr: %p segments: %d\n",
+          nllinfo("rxhead: %p rxcurr: %p segments: %d\n",
               priv->rxhead, priv->rxcurr, priv->segments);
 
           /* Check if any errors are reported in the frame */
@@ -1705,7 +1705,7 @@ static int stm32_recvframe(struct stm32_ethmac_s *priv)
               arch_invalidate_dcache((uintptr_t)dev->d_buf,
                                      (uintptr_t)dev->d_buf + dev->d_len);
 
-              nllvdbg("rxhead: %p d_buf: %p d_len: %d\n",
+              nllinfo("rxhead: %p d_buf: %p d_len: %d\n",
                       priv->rxhead, dev->d_buf, dev->d_len);
 
               /* Return success */
@@ -1718,7 +1718,7 @@ static int stm32_recvframe(struct stm32_ethmac_s *priv)
                * scanning logic, and continue scanning with the next frame.
                */
 
-              nlldbg("DROPPED: RX descriptor errors: %08x\n", rxdesc->rdes0);
+              nllwarn("WARNING: DROPPED RX descriptor errors: %08x\n", rxdesc->rdes0);
               stm32_freesegment(priv, rxcurr, priv->segments);
             }
         }
@@ -1739,7 +1739,7 @@ static int stm32_recvframe(struct stm32_ethmac_s *priv)
 
   priv->rxhead = rxdesc;
 
-  nllvdbg("rxhead: %p rxcurr: %p segments: %d\n",
+  nllinfo("rxhead: %p rxcurr: %p segments: %d\n",
           priv->rxhead, priv->rxcurr, priv->segments);
 
   return -EAGAIN;
@@ -1784,7 +1784,7 @@ static void stm32_receive(struct stm32_ethmac_s *priv)
 
       if (dev->d_len > CONFIG_NET_ETH_MTU)
         {
-          nlldbg("DROPPED: Too big: %d\n", dev->d_len);
+          nllwarn("WARNING: DROPPED Too big: %d\n", dev->d_len);
           continue;
         }
 
@@ -1799,7 +1799,7 @@ static void stm32_receive(struct stm32_ethmac_s *priv)
 #ifdef CONFIG_NET_IPv4
       if (BUF->type == HTONS(ETHTYPE_IP))
         {
-          nllvdbg("IPv4 frame\n");
+          nllinfo("IPv4 frame\n");
 
           /* Handle ARP on input then give the IPv4 packet to the network
            * layer
@@ -1839,7 +1839,7 @@ static void stm32_receive(struct stm32_ethmac_s *priv)
 #ifdef CONFIG_NET_IPv6
       if (BUF->type == HTONS(ETHTYPE_IP6))
         {
-          nllvdbg("Iv6 frame\n");
+          nllinfo("Iv6 frame\n");
 
           /* Give the IPv6 packet to the network layer */
 
@@ -1876,7 +1876,7 @@ static void stm32_receive(struct stm32_ethmac_s *priv)
 #ifdef CONFIG_NET_ARP
       if (BUF->type == htons(ETHTYPE_ARP))
         {
-          nllvdbg("ARP frame\n");
+          nllinfo("ARP frame\n");
 
           /* Handle ARP packet */
 
@@ -1894,7 +1894,7 @@ static void stm32_receive(struct stm32_ethmac_s *priv)
       else
 #endif
         {
-          nlldbg("DROPPED: Unknown type: %04x\n", BUF->type);
+          nllwarn("WARNING: DROPPED Unknown type: %04x\n", BUF->type);
         }
 
       /* We are finished with the RX buffer.  NOTE:  If the buffer is
@@ -1935,7 +1935,7 @@ static void stm32_freeframe(struct stm32_ethmac_s *priv)
   struct eth_txdesc_s *txdesc;
   int i;
 
-  nllvdbg("txhead: %p txtail: %p inflight: %d\n",
+  nllinfo("txhead: %p txtail: %p inflight: %d\n",
           priv->txhead, priv->txtail, priv->inflight);
 
   /* Scan for "in-flight" descriptors owned by the CPU */
@@ -1956,7 +1956,7 @@ static void stm32_freeframe(struct stm32_ethmac_s *priv)
            * TX descriptors.
            */
 
-          nllvdbg("txtail: %p tdes0: %08x tdes2: %08x tdes3: %08x\n",
+          nllinfo("txtail: %p tdes0: %08x tdes2: %08x tdes3: %08x\n",
                   txdesc, txdesc->tdes0, txdesc->tdes2, txdesc->tdes3);
 
           DEBUGASSERT(txdesc->tdes2 != 0);
@@ -2021,7 +2021,7 @@ static void stm32_freeframe(struct stm32_ethmac_s *priv)
 
       priv->txtail = txdesc;
 
-      nllvdbg("txhead: %p txtail: %p inflight: %d\n",
+      nllinfo("txhead: %p txtail: %p inflight: %d\n",
               priv->txhead, priv->txtail, priv->inflight);
     }
 }
@@ -2158,7 +2158,7 @@ static inline void stm32_interrupt_process(struct stm32_ethmac_s *priv)
     {
       /* Just let the user know what happened */
 
-      nlldbg("Abormal event(s): %08x\n", dmasr);
+      nllerr("ERROR: Abormal event(s): %08x\n", dmasr);
 
       /* Clear all pending abnormal events */
 
@@ -2362,7 +2362,7 @@ static void stm32_txtimeout_expiry(int argc, uint32_t arg, ...)
 {
   struct stm32_ethmac_s *priv = (struct stm32_ethmac_s *)arg;
 
-  nlldbg("Timeout!\n");
+  nllerr("ERROR: Timeout!\n");
 
 #ifdef CONFIG_NET_NOINTS
   /* Disable further Ethernet interrupts.  This will prevent some race
@@ -2563,12 +2563,12 @@ static int stm32_ifup(struct net_driver_s *dev)
   int ret;
 
 #ifdef CONFIG_NET_IPv4
-  nvdbg("Bringing up: %d.%d.%d.%d\n",
+  ninfo("Bringing up: %d.%d.%d.%d\n",
         dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
         (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
 #endif
 #ifdef CONFIG_NET_IPv6
-  nvdbg("Bringing up: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
+  ninfo("Bringing up: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
         dev->d_ipv6addr[0], dev->d_ipv6addr[1], dev->d_ipv6addr[2],
         dev->d_ipv6addr[3], dev->d_ipv6addr[4], dev->d_ipv6addr[5],
         dev->d_ipv6addr[6], dev->d_ipv6addr[7]);
@@ -2616,7 +2616,7 @@ static int stm32_ifdown(struct net_driver_s *dev)
   struct stm32_ethmac_s *priv = (struct stm32_ethmac_s *)dev->d_private;
   irqstate_t flags;
 
-  nvdbg("Taking the network down\n");
+  ninfo("Taking the network down\n");
 
   /* Disable the Ethernet interrupt */
 
@@ -2661,7 +2661,7 @@ static int stm32_ifdown(struct net_driver_s *dev)
 
 static inline void stm32_txavail_process(struct stm32_ethmac_s *priv)
 {
-  nvdbg("ifup: %d\n", priv->ifup);
+  ninfo("ifup: %d\n", priv->ifup);
 
   /* Ignore the notification if the interface is not yet up */
 
@@ -2829,7 +2829,7 @@ static int stm32_addmac(struct net_driver_s *dev, const uint8_t *mac)
   uint32_t temp;
   uint32_t registeraddress;
 
-  nllvdbg("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
+  nllinfo("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
           mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 
   /* Add the MAC address to the hardware multicast hash table */
@@ -2886,7 +2886,7 @@ static int stm32_rmmac(struct net_driver_s *dev, const uint8_t *mac)
   uint32_t temp;
   uint32_t registeraddress;
 
-  nllvdbg("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
+  nllinfo("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
           mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 
   /* Remove the MAC address to the hardware multicast hash table */
@@ -3267,7 +3267,7 @@ static int stm32_phyread(uint16_t phydevaddr, uint16_t phyregaddr, uint16_t *val
         }
     }
 
-  nvdbg("MII transfer timed out: phydevaddr: %04x phyregaddr: %04x\n",
+  ninfo("MII transfer timed out: phydevaddr: %04x phyregaddr: %04x\n",
         phydevaddr, phyregaddr);
 
   return -ETIMEDOUT;
@@ -3326,7 +3326,7 @@ static int stm32_phywrite(uint16_t phydevaddr, uint16_t phyregaddr, uint16_t val
         }
     }
 
-  nvdbg("MII transfer timed out: phydevaddr: %04x phyregaddr: %04x value: %04x\n",
+  ninfo("MII transfer timed out: phydevaddr: %04x phyregaddr: %04x value: %04x\n",
         phydevaddr, phyregaddr, value);
 
   return -ETIMEDOUT;
@@ -3363,7 +3363,7 @@ static inline int stm32_dm9161(struct stm32_ethmac_s *priv)
   ret = stm32_phyread(CONFIG_STM32F7_PHYADDR, MII_PHYID1, &phyval);
   if (ret < 0)
     {
-      ndbg("ERROR: Failed to read the PHY ID1: %d\n", ret);
+      nerr("ERROR: Failed to read the PHY ID1: %d\n", ret);
       return ret;
     }
 
@@ -3374,14 +3374,14 @@ static inline int stm32_dm9161(struct stm32_ethmac_s *priv)
       up_systemreset();
     }
 
-  nvdbg("PHY ID1: 0x%04X\n", phyval);
+  ninfo("PHY ID1: 0x%04X\n", phyval);
 
   /* Now check the "DAVICOM Specified Configuration Register (DSCR)", Register 16 */
 
   ret = stm32_phyread(CONFIG_STM32F7_PHYADDR, 16, &phyval);
   if (ret < 0)
     {
-      ndbg("ERROR: Failed to read the PHY Register 0x10: %d\n", ret);
+      nerr("ERROR: Failed to read the PHY Register 0x10: %d\n", ret);
       return ret;
     }
 
@@ -3438,7 +3438,7 @@ static int stm32_phyinit(struct stm32_ethmac_s *priv)
   ret = stm32_phywrite(CONFIG_STM32F7_PHYADDR, MII_MCR, MII_MCR_RESET);
   if (ret < 0)
     {
-      ndbg("ERROR: Failed to reset the PHY: %d\n", ret);
+      nerr("ERROR: Failed to reset the PHY: %d\n", ret);
       return ret;
     }
   up_mdelay(PHY_RESET_DELAY);
@@ -3449,7 +3449,7 @@ static int stm32_phyinit(struct stm32_ethmac_s *priv)
   ret = stm32_phy_boardinitialize(0);
   if (ret < 0)
     {
-      ndbg("ERROR: Failed to initialize the PHY: %d\n", ret);
+      nerr("ERROR: Failed to initialize the PHY: %d\n", ret);
       return ret;
     }
 #endif
@@ -3474,7 +3474,7 @@ static int stm32_phyinit(struct stm32_ethmac_s *priv)
       ret = stm32_phyread(CONFIG_STM32F7_PHYADDR, MII_MSR, &phyval);
       if (ret < 0)
         {
-          ndbg("ERROR: Failed to read the PHY MSR: %d\n", ret);
+          nerr("ERROR: Failed to read the PHY MSR: %d\n", ret);
           return ret;
         }
       else if ((phyval & MII_MSR_LINKSTATUS) != 0)
@@ -3485,7 +3485,7 @@ static int stm32_phyinit(struct stm32_ethmac_s *priv)
 
   if (timeout >= PHY_RETRY_TIMEOUT)
     {
-      ndbg("ERROR: Timed out waiting for link status: %04x\n", phyval);
+      nerr("ERROR: Timed out waiting for link status: %04x\n", phyval);
       return -ETIMEDOUT;
     }
 
@@ -3494,7 +3494,7 @@ static int stm32_phyinit(struct stm32_ethmac_s *priv)
   ret = stm32_phywrite(CONFIG_STM32F7_PHYADDR, MII_MCR, MII_MCR_ANENABLE);
   if (ret < 0)
     {
-      ndbg("ERROR: Failed to enable auto-negotiation: %d\n", ret);
+      nerr("ERROR: Failed to enable auto-negotiation: %d\n", ret);
       return ret;
     }
 
@@ -3505,7 +3505,7 @@ static int stm32_phyinit(struct stm32_ethmac_s *priv)
       ret = stm32_phyread(CONFIG_STM32F7_PHYADDR, MII_MSR, &phyval);
       if (ret < 0)
         {
-          ndbg("ERROR: Failed to read the PHY MSR: %d\n", ret);
+          nerr("ERROR: Failed to read the PHY MSR: %d\n", ret);
           return ret;
         }
       else if ((phyval & MII_MSR_ANEGCOMPLETE) != 0)
@@ -3516,7 +3516,7 @@ static int stm32_phyinit(struct stm32_ethmac_s *priv)
 
   if (timeout >= PHY_RETRY_TIMEOUT)
     {
-      ndbg("ERROR: Timed out waiting for auto-negotiation\n");
+      nerr("ERROR: Timed out waiting for auto-negotiation\n");
       return -ETIMEDOUT;
     }
 
@@ -3525,13 +3525,13 @@ static int stm32_phyinit(struct stm32_ethmac_s *priv)
   ret = stm32_phyread(CONFIG_STM32F7_PHYADDR, CONFIG_STM32F7_PHYSR, &phyval);
   if (ret < 0)
     {
-      ndbg("ERROR: Failed to read PHY status register\n");
+      nerr("ERROR: Failed to read PHY status register\n");
       return ret;
     }
 
   /* Remember the selected speed and duplex modes */
 
-  nvdbg("PHYSR[%d]: %04x\n", CONFIG_STM32F7_PHYSR, phyval);
+  ninfo("PHYSR[%d]: %04x\n", CONFIG_STM32F7_PHYSR, phyval);
 
   /* Different PHYs present speed and mode information in different ways.  IF
    * This CONFIG_STM32F7_PHYSR_ALTCONFIG is selected, this indicates that the PHY
@@ -3543,7 +3543,7 @@ static int stm32_phyinit(struct stm32_ethmac_s *priv)
   switch (phyval & CONFIG_STM32F7_PHYSR_ALTMODE)
     {
       default:
-        ndbg("ERROR: Unrecognized PHY status setting\n");
+        nerr("ERROR: Unrecognized PHY status setting\n");
 
       case CONFIG_STM32F7_PHYSR_10HD:
         priv->fduplex = 0;
@@ -3597,7 +3597,7 @@ static int stm32_phyinit(struct stm32_ethmac_s *priv)
   ret = stm32_phywrite(CONFIG_STM32F7_PHYADDR, MII_MCR, phyval);
   if (ret < 0)
     {
-     ndbg("ERROR: Failed to write the PHY MCR: %d\n", ret);
+     nerr("ERROR: Failed to write the PHY MCR: %d\n", ret);
       return ret;
     }
 
@@ -3613,7 +3613,7 @@ static int stm32_phyinit(struct stm32_ethmac_s *priv)
 #endif
 #endif
 
-  nvdbg("Duplex: %s Speed: %d MBps\n",
+  ninfo("Duplex: %s Speed: %d MBps\n",
         priv->fduplex ? "FULL" : "HALF",
         priv->mbps100 ? 100 : 10);
 
@@ -3973,7 +3973,7 @@ static void stm32_macaddress(struct stm32_ethmac_s *priv)
   struct net_driver_s *dev = &priv->dev;
   uint32_t regval;
 
-  nllvdbg("%s MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
+  nllinfo("%s MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
           dev->d_ifname,
           dev->d_mac.ether_addr_octet[0], dev->d_mac.ether_addr_octet[1],
           dev->d_mac.ether_addr_octet[2], dev->d_mac.ether_addr_octet[3],
@@ -4041,7 +4041,7 @@ static void stm32_ipv6multicast(struct stm32_ethmac_s *priv)
   mac[4] = tmp16 & 0xff;
   mac[5] = tmp16 >> 8;
 
-  nvdbg("IPv6 Multicast: %02x:%02x:%02x:%02x:%02x:%02x\n",
+  ninfo("IPv6 Multicast: %02x:%02x:%02x:%02x:%02x:%02x\n",
         mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 
   (void)stm32_addmac(dev, mac);
@@ -4179,12 +4179,12 @@ static int stm32_ethconfig(struct stm32_ethmac_s *priv)
 
   /* Reset the Ethernet block */
 
-  nllvdbg("Reset the Ethernet block\n");
+  nllinfo("Reset the Ethernet block\n");
   stm32_ethreset(priv);
 
   /* Initialize the PHY */
 
-  nllvdbg("Initialize the PHY\n");
+  nllinfo("Initialize the PHY\n");
   ret = stm32_phyinit(priv);
   if (ret < 0)
     {
@@ -4193,7 +4193,7 @@ static int stm32_ethconfig(struct stm32_ethmac_s *priv)
 
   /* Initialize the MAC and DMA */
 
-  nllvdbg("Initialize the MAC and DMA\n");
+  nllinfo("Initialize the MAC and DMA\n");
   ret = stm32_macconfig(priv);
   if (ret < 0)
     {
@@ -4217,7 +4217,7 @@ static int stm32_ethconfig(struct stm32_ethmac_s *priv)
 
   /* Enable normal MAC operation */
 
-  nllvdbg("Enable normal operation\n");
+  nllinfo("Enable normal operation\n");
   return stm32_macenable(priv);
 }
 
@@ -4253,7 +4253,7 @@ int stm32_ethinitialize(int intf)
 {
   struct stm32_ethmac_s *priv;
 
-  nvdbg("intf: %d\n", intf);
+  ninfo("intf: %d\n", intf);
 
   /* Get the interface structure associated with this interface number. */
 

@@ -70,7 +70,7 @@ int pthread_attr_setschedpolicy(FAR pthread_attr_t *attr, int policy)
 {
   int ret;
 
-  sdbg("attr=0x%p policy=%d\n", attr, policy);
+  linfo("attr=0x%p policy=%d\n", attr, policy);
 
   if (!attr ||
       (policy != SCHED_FIFO
@@ -90,6 +90,6 @@ int pthread_attr_setschedpolicy(FAR pthread_attr_t *attr, int policy)
       ret = OK;
     }
 
-  sdbg("Returning %d\n", ret);
+  linfo("Returning %d\n", ret);
   return ret;
 }

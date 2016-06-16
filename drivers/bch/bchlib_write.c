@@ -162,7 +162,7 @@ ssize_t bchlib_write(FAR void *handle, FAR const char *buffer, size_t offset, si
                                         sector, nsectors);
       if (ret < 0)
         {
-          fdbg("Write failed: %d\n", ret);
+          ferr("ERROR: Write failed: %d\n", ret);
           return ret;
         }
 
@@ -204,7 +204,7 @@ ssize_t bchlib_write(FAR void *handle, FAR const char *buffer, size_t offset, si
   ret = bchlib_flushsector(bch);
   if (ret < 0)
     {
-      fdbg("Flush failed: %d\n", ret);
+      ferr("ERROR: Flush failed: %d\n", ret);
       return ret;
     }
 

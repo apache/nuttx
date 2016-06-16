@@ -152,7 +152,7 @@ static inline void os_pgworker(void)
    * resolve page faults in other threads
    */
 
-  svdbg("Starting paging thread\n");
+  sinfo("Starting paging thread\n");
 
   g_pgworker = kernel_thread("pgfill", CONFIG_PAGING_DEFPRIO,
                              CONFIG_PAGING_STACKSIZE,
@@ -253,7 +253,7 @@ static inline void os_do_appstart(void)
    * entrypoint from the header at the beginning of the user-space blob.
    */
 
-  svdbg("Starting init thread\n");
+  sinfo("Starting init thread\n");
 
 #ifdef CONFIG_BUILD_PROTECTED
   DEBUGASSERT(USERSPACE->us_entrypoint != NULL);
@@ -287,7 +287,7 @@ static inline void os_do_appstart(void)
    * of the board_initialize() operation.
    */
 
-  svdbg("Starting init task: %s\n", CONFIG_USER_INITPATH);
+  sinfo("Starting init task: %s\n", CONFIG_USER_INITPATH);
 
   ret = exec(CONFIG_USER_INITPATH, NULL, CONFIG_INIT_SYMTAB,
              CONFIG_INIT_NEXPORTS);

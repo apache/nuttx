@@ -50,9 +50,9 @@
  ****************************************************************************/
 
 #ifdef CONFIG_BOARD_INITIALIZE
-#  define SYSLOG lldbg
+#  define SYSLOG  _llerr
 #else
-#  define SYSLOG dbg
+#  define SYSLOG  _err
 #endif
 
 /****************************************************************************

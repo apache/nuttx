@@ -62,28 +62,9 @@
  * Pre-processor Definitions
  ************************************************************************************/
 /* Configuration ********************************************************************/
+
 #define CAN_PORT1 1
 #define CAN_PORT2 2
-
-
-/* Debug ***************************************************************************/
-/* Non-standard debug that may be enabled just for testing CAN */
-
-#ifdef CONFIG_DEBUG_CAN
-#  define candbg    dbg
-#  define canvdbg   vdbg
-#  define canlldbg  lldbg
-#  define canllvdbg llvdbg
-#else
-#  define candbg(x...)
-#  define canvdbg(x...)
-#  define canlldbg(x...)
-#  define canllvdbg(x...)
-#endif
-
-/************************************************************************************
- * Private Functions
- ************************************************************************************/
 
 /************************************************************************************
  * Public Functions
@@ -114,7 +95,7 @@ int board_can_initialize(void)
       can = lpc17_caninitialize(CAN_PORT1);
       if (can == NULL)
         {
-          candbg("ERROR:  Failed to get CAN1 interface\n");
+          canerr("ERROR:  Failed to get CAN1 interface\n");
           return -ENODEV;
         }
 
@@ -123,7 +104,7 @@ int board_can_initialize(void)
       ret = can_register("/dev/can0", can);
       if (ret < 0)
         {
-          candbg("ERROR: CAN1 register failed: %d\n", ret);
+          canerr("ERROR: CAN1 register failed: %d\n", ret);
           return ret;
         }
 #endif
@@ -134,7 +115,7 @@ int board_can_initialize(void)
       can = lpc17_caninitialize(CAN_PORT2);
       if (can == NULL)
         {
-          candbg("ERROR:  Failed to get CAN2 interface\n");
+          canerr("ERROR:  Failed to get CAN2 interface\n");
           return -ENODEV;
         }
 
@@ -143,7 +124,7 @@ int board_can_initialize(void)
       ret = can_register("/dev/can1", can);
       if (ret < 0)
         {
-          candbg("ERROR: CAN2 register failed: %d\n", ret);
+          canerr("ERROR: CAN2 register failed: %d\n", ret);
           return ret;
         }
 #endif

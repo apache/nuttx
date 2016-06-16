@@ -181,7 +181,7 @@ static size_t recvfrom_newdata(FAR struct net_driver_s *dev,
   /* Copy the new appdata into the user buffer */
 
   memcpy(pstate->rf_buffer, dev->d_appdata, recvlen);
-  nllvdbg("Received %d bytes (of %d)\n", (int)recvlen, (int)dev->d_len);
+  nllinfo("Received %d bytes (of %d)\n", (int)recvlen, (int)dev->d_len);
 
   /* Update the accumulated size of the data read */
 
@@ -227,7 +227,7 @@ static void recvfrom_newpktdata(FAR struct net_driver_s *dev,
   /* Copy the new packet data into the user buffer */
 
   memcpy(pstate->rf_buffer, dev->d_buf, recvlen);
-  nllvdbg("Received %d bytes (of %d)\n", (int)recvlen, (int)dev->d_len);
+  nllinfo("Received %d bytes (of %d)\n", (int)recvlen, (int)dev->d_len);
 
   /* Update the accumulated size of the data read */
 
@@ -293,11 +293,11 @@ static inline void recvfrom_newtcpdata(FAR struct net_driver_s *dev,
 #ifdef CONFIG_DEBUG_NET
       if (nsaved < buflen)
         {
-          ndbg("ERROR: packet data not saved (%d bytes)\n", buflen - nsaved);
+          nerr("ERROR: packet data not saved (%d bytes)\n", buflen - nsaved);
         }
 #endif
 #else
-      ndbg("ERROR: packet data lost (%d bytes)\n", dev->d_len - recvlen);
+      nerr("ERROR: packet data lost (%d bytes)\n", dev->d_len - recvlen);
 #endif
    }
 
@@ -378,7 +378,7 @@ static inline void recvfrom_tcpreadahead(struct recvfrom_s *pstate)
        */
 
       recvlen = iob_copyout(pstate->rf_buffer, iob, pstate->rf_buflen, 0);
-      nllvdbg("Received %d bytes (of %d)\n", recvlen, iob->io_pktlen);
+      nllinfo("Received %d bytes (of %d)\n", recvlen, iob->io_pktlen);
 
       /* Update the accumulated size of the data read */
 
@@ -478,7 +478,7 @@ static inline void recvfrom_udpreadahead(struct recvfrom_s *pstate)
           recvlen = iob_copyout(pstate->rf_buffer, iob, pstate->rf_buflen,
                                 src_addr_size + sizeof(uint8_t));
 
-          nllvdbg("Received %d bytes (of %d)\n", recvlen, iob->io_pktlen);
+          nllinfo("Received %d bytes (of %d)\n", recvlen, iob->io_pktlen);
 
           /* Update the accumulated size of the data read */
 
@@ -621,7 +621,7 @@ static uint16_t recvfrom_pktinterrupt(FAR struct net_driver_s *dev,
 {
   struct recvfrom_s *pstate = (struct recvfrom_s *)pvpriv;
 
-  nllvdbg("flags: %04x\n", flags);
+  nllinfo("flags: %04x\n", flags);
 
   /* 'priv' might be null in some race conditions (?) */
 
@@ -636,7 +636,7 @@ static uint16_t recvfrom_pktinterrupt(FAR struct net_driver_s *dev,
 
           /* We are finished. */
 
-          nllvdbg("PKT done\n");
+          nllinfo("PKT done\n");
 
           /* Don't allow any further call backs. */
 
@@ -778,7 +778,7 @@ static uint16_t recvfrom_tcpinterrupt(FAR struct net_driver_s *dev,
 #endif
 #endif
 
-  nllvdbg("flags: %04x\n", flags);
+  nllinfo("flags: %04x\n", flags);
 
   /* 'priv' might be null in some race conditions (?) */
 
@@ -827,7 +827,7 @@ static uint16_t recvfrom_tcpinterrupt(FAR struct net_driver_s *dev,
           if (pstate->rf_recvlen > 0)
 #endif
             {
-              nllvdbg("TCP resume\n");
+              nllinfo("TCP resume\n");
 
               /* The TCP receive buffer is full.  Return now and don't allow
                * any further TCP call backs.
@@ -864,7 +864,7 @@ static uint16_t recvfrom_tcpinterrupt(FAR struct net_driver_s *dev,
 
       else if ((flags & TCP_DISCONN_EVENTS) != 0)
         {
-          nllvdbg("Lost connection\n");
+          nllinfo("Lost connection\n");
 
           /* Stop further callbacks */
 
@@ -924,7 +924,7 @@ static uint16_t recvfrom_tcpinterrupt(FAR struct net_driver_s *dev,
            * callbacks
            */
 
-          nllvdbg("TCP timeout\n");
+          nllinfo("TCP timeout\n");
 
           pstate->rf_cb->flags   = 0;
           pstate->rf_cb->priv    = NULL;
@@ -1122,7 +1122,7 @@ static uint16_t recvfrom_udp_interrupt(FAR struct net_driver_s *dev,
 {
   FAR struct recvfrom_s *pstate = (FAR struct recvfrom_s *)pvpriv;
 
-  nllvdbg("flags: %04x\n", flags);
+  nllinfo("flags: %04x\n", flags);
 
   /* 'priv' might be null in some race conditions (?) */
 
@@ -1136,7 +1136,7 @@ static uint16_t recvfrom_udp_interrupt(FAR struct net_driver_s *dev,
         {
           /* Terminate the transfer with an error. */
 
-          nlldbg("ERROR: Network is down\n");
+          nllerr("ERROR: Network is down\n");
           recvfrom_udp_terminate(pstate, -ENETUNREACH);
         }
 
@@ -1150,7 +1150,7 @@ static uint16_t recvfrom_udp_interrupt(FAR struct net_driver_s *dev,
 
           /* We are finished. */
 
-          nllvdbg("UDP done\n");
+          nllinfo("UDP done\n");
 
           /* Save the sender's address in the caller's 'from' location */
 
@@ -1176,7 +1176,7 @@ static uint16_t recvfrom_udp_interrupt(FAR struct net_driver_s *dev,
            * callbacks
            */
 
-          nllvdbg("ERROR: UDP timeout\n");
+          nllinfo("ERROR: UDP timeout\n");
 
           /* Terminate the transfer with an -EAGAIN error */
 
@@ -1844,21 +1844,21 @@ ssize_t psock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
                        FAR socklen_t *fromlen)
 {
   ssize_t ret;
-  int err;
+  int errcode;
 
   /* Verify that non-NULL pointers were passed */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!buf)
     {
-      err = EINVAL;
+      errcode = EINVAL;
       goto errout;
     }
 #endif
 
   if (from && !fromlen)
     {
-      err = EINVAL;
+      errcode = EINVAL;
       goto errout;
     }
 
@@ -1866,7 +1866,7 @@ ssize_t psock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
   if (!psock || psock->s_crefs <= 0)
     {
-      err = EBADF;
+      errcode = EBADF;
       goto errout;
     }
 
@@ -1908,13 +1908,13 @@ ssize_t psock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
         default:
           DEBUGPANIC();
-          err = EINVAL;
+          errcode = EINVAL;
           goto errout;
         }
 
       if (*fromlen < minlen)
         {
-          err = EINVAL;
+          errcode = EINVAL;
           goto errout;
         }
     }
@@ -1988,7 +1988,7 @@ ssize_t psock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
     default:
       {
-        ndbg("ERROR: Unsupported socket type: %d\n", psock->s_type);
+        nerr("ERROR: Unsupported socket type: %d\n", psock->s_type);
         ret = -ENOSYS;
       }
       break;
@@ -2002,7 +2002,7 @@ ssize_t psock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
   if (ret < 0)
     {
-      err = -ret;
+      errcode = -ret;
       goto errout;
     }
 
@@ -2011,7 +2011,7 @@ ssize_t psock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
   return ret;
 
 errout:
-  set_errno(err);
+  set_errno(errcode);
   return ERROR;
 }
 

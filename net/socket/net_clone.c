@@ -116,7 +116,7 @@ int net_clone(FAR struct socket *psock1, FAR struct socket *psock2)
   else
 #endif
     {
-      ndbg("Unsupported type: %d\n", psock2->s_type);
+      nerr("ERROR: Unsupported type: %d\n", psock2->s_type);
       ret = -EBADF;
     }
 

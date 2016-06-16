@@ -131,18 +131,18 @@ FAR void *mmap(FAR void *start, size_t length, int prot, int flags,
    * things.
    */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (prot == PROT_NONE ||
       (flags & (MAP_PRIVATE | MAP_FIXED | MAP_ANONYMOUS | MAP_DENYWRITE)) != 0)
     {
-      fdbg("Unsupported options, prot=%x flags=%04x\n", prot, flags);
+      ferr("ERROR: Unsupported options, prot=%x flags=%04x\n", prot, flags);
       set_errno(ENOSYS);
       return MAP_FAILED;
     }
 
   if (length == 0 || (flags & MAP_SHARED) == 0)
     {
-      fdbg("Invalid options, lengt=%d flags=%04x\n", length, flags);
+      ferr("ERROR: Invalid options, lengt=%d flags=%04x\n", length, flags);
       set_errno(EINVAL);
       return MAP_FAILED;
     }
@@ -163,7 +163,7 @@ FAR void *mmap(FAR void *start, size_t length, int prot, int flags,
 #ifdef CONFIG_FS_RAMMAP
       return rammap(fd, length, offset);
 #else
-      fdbg("ioctl(FIOC_MMAP) failed: %d\n", get_errno());
+      ferr("ERROR: ioctl(FIOC_MMAP) failed: %d\n", get_errno());
       return MAP_FAILED;
 #endif
     }

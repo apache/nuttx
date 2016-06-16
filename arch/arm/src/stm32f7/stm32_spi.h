@@ -2,7 +2,8 @@
  * arch/arm/src/stm32f7/stm32_spi.h
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            David Sidrane <david_s5@nscdg.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,8 +34,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_STC_STM32F7_STM32_SPI_H
-#define __ARCH_ARM_STC_STM32F7_STM32_SPI_H
+#ifndef __ARCH_ARM_SRC_STM32F7_STM32_SPI_H
+#define __ARCH_ARM_SRC_STM32F7_STM32_SPI_H
 
 /************************************************************************************
  * Included Files
@@ -45,7 +46,7 @@
 #include <stdbool.h>
 
 #include "chip.h"
-//#include "chip/stm32_spi.h"
+#include "chip/stm32_spi.h"
 
 /************************************************************************************
  * Public Functions
@@ -110,37 +111,37 @@ FAR struct spi_dev_s *stm32_spibus_initialize(int bus);
  *
  ************************************************************************************/
 
-#ifdef CONFIG_STM32_SPI1
+#ifdef CONFIG_STM32F7_SPI1
 void stm32_spi1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
 uint8_t stm32_spi1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
 int stm32_spi1cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
 #endif
 
-#ifdef CONFIG_STM32_SPI2
+#ifdef CONFIG_STM32F7_SPI2
 void stm32_spi2select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
 uint8_t stm32_spi2status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
 int stm32_spi2cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
 #endif
 
-#ifdef CONFIG_STM32_SPI3
+#ifdef CONFIG_STM32F7_SPI3
 void stm32_spi3select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
 uint8_t stm32_spi3status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
 int stm32_spi3cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
 #endif
 
-#ifdef CONFIG_STM32_SPI4
+#ifdef CONFIG_STM32F7_SPI4
 void stm32_spi4select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
 uint8_t stm32_spi4status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
 int stm32_spi4cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
 #endif
 
-#ifdef CONFIG_STM32_SPI5
+#ifdef CONFIG_STM32F7_SPI5
 void stm32_spi5select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
 uint8_t stm32_spi5status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
 int stm32_spi5cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
 #endif
 
-#ifdef CONFIG_STM32_SPI6
+#ifdef CONFIG_STM32F7_SPI6
 void stm32_spi6select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
 uint8_t stm32_spi6status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
 int stm32_spi6cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
@@ -167,32 +168,32 @@ int stm32_spi6cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
  ****************************************************************************/
 
 #ifdef CONFIG_SPI_CALLBACK
-#ifdef CONFIG_STM32_SPI1
+#ifdef CONFIG_STM32F7_SPI1
 int stm32_spi1register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
                        FAR void *arg);
 #endif
 
-#ifdef CONFIG_STM32_SPI2
+#ifdef CONFIG_STM32F7_SPI2
 int stm32_spi2register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
                        FAR void *arg);
 #endif
 
-#ifdef CONFIG_STM32_SPI3
+#ifdef CONFIG_STM32F7_SPI3
 int stm32_spi3register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
                        FAR void *arg);
 #endif
 
-#ifdef CONFIG_STM32_SPI4
+#ifdef CONFIG_STM32F7_SPI4
 int stm32_spi4register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
                        FAR void *arg);
 #endif
 
-#ifdef CONFIG_STM32_SPI5
+#ifdef CONFIG_STM32F7_SPI5
 int stm32_spi5register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
                        FAR void *arg);
 #endif
 
-#ifdef CONFIG_STM32_SPI6
+#ifdef CONFIG_STM32F7_SPI6
 int stm32_spi6register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
                        FAR void *arg);
 #endif
@@ -204,5 +205,5 @@ int stm32_spi6register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_STC_STM32F7_STM32_SPI_H */
+#endif /* __ARCH_ARM_SRC_STM32F7_STM32_SPI_H */
 

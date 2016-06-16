@@ -649,14 +649,27 @@ config ARCH_BOARD_PIRELLI_DPL10
 
 config ARCH_BOARD_NUCLEO_144
 	bool "STMicro NUCLEO-144"
-	depends on ARCH_CHIP_STM32F746
+	depends on ARCH_CHIP_STM32F746ZG || ARCH_CHIP_STM32F767ZI
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
 	---help---
-		STMicro Nucleo-144 development board featuring the STM32F746ZGT6U
-		MCU. The STM32F746ZGT6U is a 216MHz Cortex-M7 operation with 1024Kb Flash
-		memory and 300Kb SRAM.
+		STMicro Nucleo-144 development board featuring STMicroelectronics
+		F2, F3, F4 and F7 MCU families.  The board is a "Hardware pattern"
+		that can be populated with the 144 pin package of the following MCUs:
+
+			Target STM32    Order code
+			STM32F207ZGT6   NUCLEO-F207ZG
+			STM32F303ZET6   NUCLEO-F303ZE
+			STM32F429ZIT6   NUCLEO-F429ZI
+			STM32F446ZET6   NUCLEO-F446ZE
+
+		Supported in this release are:
+
+			NUCLEO-F746ZG - STM32F746ZGT6 a 216MHz Cortex-M7, w/FPU - 1024KiB
+				Flash memory and 320KiB SRAM.
+			NUCLEO-F767ZI - STM32F767ZIT6 a 216MHz Cortex-M7, w/DPFPU -
+				2048KiB Flash memory and 512KiB SRAM.
 
 config ARCH_BOARD_NUCLEO_F303RE
 	bool "STM32F303 Nucleo F303RE"

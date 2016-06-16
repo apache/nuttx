@@ -163,7 +163,7 @@ int group_addrenv(FAR struct tcb_s *tcb)
       ret = up_addrenv_select(&group->tg_addrenv, NULL);
       if (ret < 0)
         {
-          bdbg("ERROR: up_addrenv_select failed: %d\n", ret);
+          berr("ERROR: up_addrenv_select failed: %d\n", ret);
         }
 
       /* Save the new, current group */

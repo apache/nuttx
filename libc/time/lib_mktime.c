@@ -94,14 +94,14 @@ time_t mktime(FAR struct tm *tp)
    */
 
   jdn = clock_calendar2utc(tp->tm_year + 1900, tp->tm_mon, tp->tm_mday);
-  sdbg("jdn=%d tm_year=%d tm_mon=%d tm_mday=%d\n",
-       (int)jdn, tp->tm_year, tp->tm_mon, tp->tm_mday);
+  linfo("jdn=%d tm_year=%d tm_mon=%d tm_mday=%d\n",
+        (int)jdn, tp->tm_year, tp->tm_mon, tp->tm_mday);
 
   /* Return the seconds into the julian day. */
 
   ret = ((jdn * 24 + tp->tm_hour) * 60 + tp->tm_min) * 60 + tp->tm_sec;
-  sdbg("ret=%d tm_hour=%d tm_min=%d tm_sec=%d\n",
-       (int)ret, tp->tm_hour, tp->tm_min, tp->tm_sec);
+  linfo("ret=%d tm_hour=%d tm_min=%d tm_sec=%d\n",
+        (int)ret, tp->tm_hour, tp->tm_min, tp->tm_sec);
 
   return ret;
 }

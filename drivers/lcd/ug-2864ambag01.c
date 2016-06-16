@@ -260,16 +260,6 @@
 #define LS_BIT                     (1 << 0)
 #define MS_BIT                     (1 << 7)
 
-/* Debug ******************************************************************************/
-
-#ifdef CONFIG_DEBUG_LCD
-#  define lcddbg(format, ...)      dbg(format, ##__VA_ARGS__)
-#  define lcdvdbg(format, ...)     vdbg(format, ##__VA_ARGS__)
-#else
-#  define lcddbg(x...)
-#  define lcdvdbg(x...)
-#endif
-
 /**************************************************************************************
  * Private Type Definition
  **************************************************************************************/
@@ -487,7 +477,7 @@ static int ug2864ambag01_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_
   int pixlen;
   uint8_t i;
 
-  lcdvdbg("row: %d col: %d npixels: %d\n", row, col, npixels);
+  lcdinfo("row: %d col: %d npixels: %d\n", row, col, npixels);
   DEBUGASSERT(buffer);
 
   /* Clip the run to the display */
@@ -697,7 +687,7 @@ static int ug2864ambag01_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buf
   int pixlen;
   uint8_t i;
 
-  lcdvdbg("row: %d col: %d npixels: %d\n", row, col, npixels);
+  lcdinfo("row: %d col: %d npixels: %d\n", row, col, npixels);
   DEBUGASSERT(buffer);
 
   /* Clip the run to the display */
@@ -842,7 +832,7 @@ static int ug2864ambag01_getvideoinfo(FAR struct lcd_dev_s *dev,
                               FAR struct fb_videoinfo_s *vinfo)
 {
   DEBUGASSERT(dev && vinfo);
-  lcdvdbg("fmt: %d xres: %d yres: %d nplanes: %d\n",
+  lcdinfo("fmt: %d xres: %d yres: %d nplanes: %d\n",
           g_videoinfo.fmt, g_videoinfo.xres, g_videoinfo.yres, g_videoinfo.nplanes);
   memcpy(vinfo, &g_videoinfo, sizeof(struct fb_videoinfo_s));
   return OK;
@@ -860,7 +850,7 @@ static int ug2864ambag01_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int pl
                               FAR struct lcd_planeinfo_s *pinfo)
 {
   DEBUGASSERT(pinfo && planeno == 0);
-  lcdvdbg("planeno: %d bpp: %d\n", planeno, g_planeinfo.bpp);
+  lcdinfo("planeno: %d bpp: %d\n", planeno, g_planeinfo.bpp);
   memcpy(pinfo, &g_planeinfo, sizeof(struct lcd_planeinfo_s));
   return OK;
 }
@@ -879,7 +869,7 @@ static int ug2864ambag01_getpower(FAR struct lcd_dev_s *dev)
   FAR struct ug2864ambag01_dev_s *priv = (FAR struct ug2864ambag01_dev_s *)dev;
   DEBUGASSERT(priv);
 
-  lcdvdbg("power: %s\n", priv->on ? "ON" : "OFF");
+  lcdinfo("power: %s\n", priv->on ? "ON" : "OFF");
   return priv->on ? CONFIG_LCD_MAXPOWER : 0;
 }
 
@@ -897,7 +887,7 @@ static int ug2864ambag01_setpower(struct lcd_dev_s *dev, int power)
   struct ug2864ambag01_dev_s *priv = (struct ug2864ambag01_dev_s *)dev;
   DEBUGASSERT(priv && (unsigned)power <= CONFIG_LCD_MAXPOWER && priv->spi);
 
-  lcdvdbg("power: %d [%d]\n", power, priv->on ? CONFIG_LCD_MAXPOWER : 0);
+  lcdinfo("power: %d [%d]\n", power, priv->on ? CONFIG_LCD_MAXPOWER : 0);
 
   /* Lock and select device */
 
@@ -939,7 +929,7 @@ static int ug2864ambag01_getcontrast(struct lcd_dev_s *dev)
   struct ug2864ambag01_dev_s *priv = (struct ug2864ambag01_dev_s *)dev;
   DEBUGASSERT(priv);
 
-  lcdvdbg("contrast: %d\n", priv->contrast);
+  lcdinfo("contrast: %d\n", priv->contrast);
   return priv->contrast;
 }
 
@@ -956,12 +946,12 @@ static int ug2864ambag01_setcontrast(struct lcd_dev_s *dev, unsigned int contras
   struct ug2864ambag01_dev_s *priv = (struct ug2864ambag01_dev_s *)dev;
   unsigned int scaled;
 
-  lcdvdbg("contrast: %d\n", contrast);
+  lcdinfo("contrast: %d\n", contrast);
   DEBUGASSERT(priv);
 
   /* Verify the contrast value */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (contrast > CONFIG_LCD_MAXCONTRAST)
     {
       return -EINVAL;
@@ -1029,7 +1019,7 @@ FAR struct lcd_dev_s *ug2864ambag01_initialize(FAR struct spi_dev_s *spi, unsign
 {
   FAR struct ug2864ambag01_dev_s  *priv = &g_oleddev;
 
-  lcdvdbg("Initializing\n");
+  lcdinfo("Initializing\n");
   DEBUGASSERT(spi && devno == 0);
 
   /* Save the reference to the SPI device */

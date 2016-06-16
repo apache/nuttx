@@ -86,14 +86,14 @@ int stm32_pca9635_initialize(void)
   i2c = stm32_i2cbus_initialize(PCA9635_I2CBUS);
   if (!i2c)
     {
-      dbg("ERROR: Failed to initialize I2C%d\n", PCA9635_I2CBUS);
+      _err("ERROR: Failed to initialize I2C%d\n", PCA9635_I2CBUS);
       return -1;
     }
 
   ret = pca9635pw_register("/dev/leddrv0", i2c, PCA9635_I2CADDR);
   if (ret < 0)
     {
-      sndbg("Failed to register PCA9635 driver: %d\n", ret);
+      snerr("ERROR: Failed to register PCA9635 driver: %d\n", ret);
      return ret;
     }
 

@@ -140,7 +140,7 @@ static int mcp9844_read_u16(FAR struct mcp9844_dev_s *priv,
   ret = i2c_write(priv->i2c, &config, &regaddr, 1);
   if (ret < 0)
     {
-      sndbg ("i2c_write failed: %d\n", ret);
+      snerr ("i2c_write failed: %d\n", ret);
       return ret;
     }
 
@@ -149,7 +149,7 @@ static int mcp9844_read_u16(FAR struct mcp9844_dev_s *priv,
   ret = i2c_read(priv->i2c, &config, buffer, 2);
   if (ret < 0)
     {
-      sndbg ("i2c_read failed: %d\n", ret);
+      snerr ("i2c_read failed: %d\n", ret);
       return ret;
     }
 
@@ -157,7 +157,7 @@ static int mcp9844_read_u16(FAR struct mcp9844_dev_s *priv,
 
   *value = (((uint16_t)(buffer[0]))<<8) + ((uint16_t)(buffer[1]));
 
-  sndbg("addr: %02x value: %08x ret: %d\n", regaddr, *value, ret);
+  sninfo("addr: %02x value: %08x ret: %d\n", regaddr, *value, ret);
   return OK;
 }
 
@@ -174,7 +174,7 @@ static int mcp9844_write_u16(FAR struct mcp9844_dev_s *priv,
 {
   struct i2c_config_s config;
 
-  sndbg("addr: %02x value: %08x\n", regaddr, regval);
+  sninfo("addr: %02x value: %08x\n", regaddr, regval);
 
   /* Set up a 3 byte message to send */
 
@@ -293,7 +293,7 @@ static int mcp9844_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             }
           else
             {
-              sndbg("ioctl::SNIOC_READTEMP - mcp9844_read_u16 failed - no temperature retrieved\n");
+              snerr("ERROR: ioctl::SNIOC_READTEMP - mcp9844_read_u16 failed - no temperature retrieved\n");
             }
         }
         break;
@@ -303,13 +303,13 @@ static int mcp9844_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           ret = mcp9844_write_u16(priv, MCP9844_RESO_REG, (uint16_t)(arg));
           if (ret != OK)
             {
-              sndbg("ioctl::SNIOC_SETRESOLUTION - mcp9844_write_u16 failed - no resolution set\n");
+              snerr("ERROR: ioctl::SNIOC_SETRESOLUTION - mcp9844_write_u16 failed - no resolution set\n");
             }
         }
         break;
 
       default:
-        sndbg("Unrecognized cmd: %d\n", cmd);
+        snerr("ERROR: Unrecognized cmd: %d\n", cmd);
         ret = -ENOTTY;
         break;
     }
@@ -351,7 +351,7 @@ int mcp9844_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
 
   if (priv == NULL)
     {
-      sndbg("Failed to allocate instance\n");
+      snerr("ERROR: Failed to allocate instance\n");
       return -ENOMEM;
     }
 
@@ -363,7 +363,7 @@ int mcp9844_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
   int ret = register_driver(devpath, &g_mcp9844_fops, 0666, priv);
   if (ret < 0)
     {
-      sndbg("Failed to register driver: %d\n", ret);
+      snerr("ERROR: Failed to register driver: %d\n", ret);
       kmm_free(priv);
     }
 

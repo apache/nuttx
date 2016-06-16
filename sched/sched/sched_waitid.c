@@ -161,7 +161,7 @@ int waitid(idtype_t idtype, id_t id, FAR siginfo_t *info, int options)
   bool retains;
 #endif
   sigset_t set;
-  int err;
+  int errcode;
   int ret;
 
   /* MISSING LOGIC:   If WNOHANG is provided in the options, then this function
@@ -175,7 +175,7 @@ int waitid(idtype_t idtype, id_t id, FAR siginfo_t *info, int options)
    * distinguish any other events.
    */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (options != WEXITED)
     {
       set_errno(ENOSYS);
@@ -205,7 +205,7 @@ int waitid(idtype_t idtype, id_t id, FAR siginfo_t *info, int options)
     {
       /* There are no children */
 
-      err = ECHILD;
+      errcode = ECHILD;
       goto errout_with_errno;
     }
   else if (idtype == P_PID)
@@ -219,7 +219,7 @@ int waitid(idtype_t idtype, id_t id, FAR siginfo_t *info, int options)
       if (!ctcb || ctcb->ppid != rtcb->pid)
 #endif
         {
-          err = ECHILD;
+          errcode = ECHILD;
           goto errout_with_errno;
         }
 
@@ -233,7 +233,7 @@ int waitid(idtype_t idtype, id_t id, FAR siginfo_t *info, int options)
             {
               /* This specific pid is not a child */
 
-              err = ECHILD;
+              errcode = ECHILD;
               goto errout_with_errno;
             }
         }
@@ -243,7 +243,7 @@ int waitid(idtype_t idtype, id_t id, FAR siginfo_t *info, int options)
     {
       /* There are no children */
 
-      err = ECHILD;
+      errcode = ECHILD;
       goto errout_with_errno;
     }
   else if (idtype == P_PID)
@@ -257,7 +257,7 @@ int waitid(idtype_t idtype, id_t id, FAR siginfo_t *info, int options)
       if (!ctcb || ctcb->ppid != rtcb->pid)
 #endif
         {
-          err = ECHILD;
+          errcode = ECHILD;
           goto errout_with_errno;
         }
     }
@@ -327,7 +327,7 @@ int waitid(idtype_t idtype, id_t id, FAR siginfo_t *info, int options)
                * to reported ECHILD than bogus status.
                */
 
-              err = ECHILD;
+              errcode = ECHILD;
               goto errout_with_errno;
             }
         }
@@ -346,7 +346,7 @@ int waitid(idtype_t idtype, id_t id, FAR siginfo_t *info, int options)
            * Let's return ECHILD.. that is at least informative.
            */
 
-          err = ECHILD;
+          errcode = ECHILD;
           goto errout_with_errno;
         }
 #endif
@@ -400,7 +400,7 @@ int waitid(idtype_t idtype, id_t id, FAR siginfo_t *info, int options)
   return OK;
 
 errout_with_errno:
-  set_errno(err);
+  set_errno(errcode);
 errout:
   sched_unlock();
   return ERROR;

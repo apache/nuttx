@@ -60,7 +60,7 @@
 
 /* Processor Exceptions (vectors 0-15) */
 
-#define EFM32_IRQ_RESERVED     (0) /* Reserved vector (only used with CONFIG_DEBUG) */
+#define EFM32_IRQ_RESERVED     (0) /* Reserved vector (only used with CONFIG_DEBUG_FEATURES) */
                                    /* Vector  0: Reset stack pointer value */
                                    /* Vector  1: Reset (not handler as an IRQ) */
 #define EFM32_IRQ_NMI          (2) /* Vector  2: Non-Maskable Interrupt (NMI) */

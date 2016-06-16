@@ -79,7 +79,7 @@
 
 int close(int fd)
 {
-  int err;
+  int errcode;
 #if CONFIG_NFILE_DESCRIPTORS > 0
   int ret;
 
@@ -98,7 +98,7 @@ int close(int fd)
       else
 #endif
         {
-          err = EBADF;
+          errcode = EBADF;
           goto errout;
         }
     }
@@ -119,7 +119,7 @@ int close(int fd)
     {
       /* An error occurred while closing the driver */
 
-      err = -ret;
+      errcode = -ret;
       goto errout;
     }
 
@@ -128,7 +128,6 @@ int close(int fd)
 #endif
 
 errout:
-  set_errno(err);
+  set_errno(errcode);
   return ERROR;
 }
-

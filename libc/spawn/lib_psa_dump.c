@@ -39,10 +39,19 @@
 
 #include <nuttx/config.h>
 
+/* Output debug info even if debug output is not selected. */
+
+#undef  CONFIG_DEBUG_ERROR
+#undef  CONFIG_DEBUG_WARN
+#undef  CONFIG_DEBUG_INFO
+#define CONFIG_DEBUG_ERROR 1
+#define CONFIG_DEBUG_WARN 1
+#define CONFIG_DEBUG_INFO 1
+
 #include <spawn.h>
 #include <debug.h>
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
 
 /****************************************************************************
  * Public Functions
@@ -64,64 +73,66 @@
 
 void posix_spawnattr_dump(posix_spawnattr_t *attr)
 {
-  dbg("attr[%p]:\n", attr);
-  dbg("  flags:    %04x\n", attr->flags);
+#ifdef CONFIG_DEBUG_ERROR
+  _err("attr[%p]:\n", attr);
+  _err("  flags:    %04x\n", attr->flags);
   if (attr->flags == 0)
     {
-      dbg("            None\n");
+      _err("            None\n");
     }
   else
     {
       if ((attr->flags & POSIX_SPAWN_RESETIDS) != 0)
         {
-          dbg("            POSIX_SPAWN_RESETIDS\n");
+          _err("            POSIX_SPAWN_RESETIDS\n");
         }
 
       if ((attr->flags & POSIX_SPAWN_SETPGROUP) != 0)
         {
-          dbg("            POSIX_SPAWN_SETPGROUP\n");
+          _err("            POSIX_SPAWN_SETPGROUP\n");
         }
 
       if ((attr->flags & POSIX_SPAWN_SETSCHEDPARAM) != 0)
         {
-          dbg("            POSIX_SPAWN_SETSCHEDPARAM\n");
+          _err("            POSIX_SPAWN_SETSCHEDPARAM\n");
         }
 
       if ((attr->flags & POSIX_SPAWN_SETSCHEDULER) != 0)
         {
-          dbg("            POSIX_SPAWN_SETSCHEDULER\n");
+          _err("            POSIX_SPAWN_SETSCHEDULER\n");
         }
 
       if ((attr->flags & POSIX_SPAWN_SETSIGDEF) != 0)
         {
-          dbg("            POSIX_SPAWN_SETSIGDEF\n");
+          _err("            POSIX_SPAWN_SETSIGDEF\n");
         }
 
       if ((attr->flags & POSIX_SPAWN_SETSIGMASK) != 0)
         {
-          dbg("            POSIX_SPAWN_SETSIGMASK\n");
+          _err("            POSIX_SPAWN_SETSIGMASK\n");
         }
     }
 
-  dbg("  priority: %d\n", attr->priority);
+  _err("  priority: %d\n", attr->priority);
 
-  dbg("  policy:   %d\n", attr->policy);
+  _err("  policy:   %d\n", attr->policy);
   if (attr->policy == SCHED_FIFO)
     {
-      dbg("            SCHED_FIFO\n");
+      _err("            SCHED_FIFO\n");
     }
   else if (attr->policy == SCHED_RR)
     {
-      dbg("            SCHED_RR\n");
+      _err("            SCHED_RR\n");
     }
   else
     {
-      dbg("            Unrecognized\n");
+      _err("            Unrecognized\n");
     }
 
 #ifndef CONFIG_DISABLE_SIGNALS
-  dbg("  sigmask:  %08x\n", attr->sigmask);
+  _err("  sigmask:  %08x\n", attr->sigmask);
 #endif
+#endif /* CONFIG_DEBUG_ERROR */
 }
 
-#endif /* CONFIG_DEBUG */
+#endif /* CONFIG_DEBUG_FEATURES */

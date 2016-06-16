@@ -93,20 +93,12 @@
 /* Debug ********************************************************************/
 
 #ifdef CONFIG_BOARD_INITIALIZE
-#  define SYSLOG lldbg
+#  define SYSLOG  _llerr
 #else
-#  define SYSLOG dbg
+#  define SYSLOG  _err
 #endif
 
 /****************************************************************************
- * Private Type Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
- /****************************************************************************
  * Private Data
  ****************************************************************************/
 
@@ -188,7 +180,7 @@ FAR struct mtd_dev_s *mtd_temp;
   rtclower = stm32l4_rtc_lowerhalf();
   if (!rtclower)
     {
-      sdbg("ERROR: Failed to instantiate the RTC lower-half driver\n");
+      serr("ERROR: Failed to instantiate the RTC lower-half driver\n");
       return -ENOMEM;
     }
   else
@@ -200,7 +192,7 @@ FAR struct mtd_dev_s *mtd_temp;
       ret = rtc_initialize(0, rtclower);
       if (ret < 0)
         {
-          sdbg("ERROR: Failed to bind/register the RTC driver: %d\n", ret);
+          serr("ERROR: Failed to bind/register the RTC driver: %d\n", ret);
           return ret;
         }
     }

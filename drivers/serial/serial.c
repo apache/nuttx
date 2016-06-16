@@ -178,7 +178,7 @@ static void uart_pollnotify(FAR uart_dev_t *dev, pollevent_t eventset)
 #endif
           if (fds->revents != 0)
             {
-              fvdbg("Report events: %02x\n", fds->revents);
+              finfo("Report events: %02x\n", fds->revents);
               sem_post(fds->sem);
             }
         }
@@ -998,7 +998,7 @@ int uart_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
 
   /* Some sanity checking */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!dev || !fds)
     {
       return -ENODEV;
@@ -1104,7 +1104,7 @@ int uart_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
 
       struct pollfd **slot = (struct pollfd **)fds->priv;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
       if (!slot)
         {
           ret              = -EIO;
@@ -1369,7 +1369,7 @@ int uart_register(FAR const char *path, FAR uart_dev_t *dev)
   sem_init(&dev->pollsem,  0, 1);
 #endif
 
-  dbg("Registering %s\n", path);
+  _info("Registering %s\n", path);
   return register_driver(path, &g_serialops, 0666, dev);
 }
 

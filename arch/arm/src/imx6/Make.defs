@@ -83,7 +83,7 @@ ifeq ($(CONFIG_SMP),y)
 CMN_CSRCS += arm_cpuindex.c arm_cpustart.c arm_cpupause.c arm_cpuidlestack.c
 endif
 
-ifeq ($(CONFIG_DEBUG_IRQ),y)
+ifeq ($(CONFIG_DEBUG_IRQ_INFO),y)
 CMN_CSRCS += arm_gicv2_dump.c
 endif
 

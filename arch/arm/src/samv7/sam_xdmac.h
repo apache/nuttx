@@ -50,12 +50,6 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-/* Configuration ********************************************************************/
-
-#ifndef CONFIG_DEBUG
-#  undef CONFIG_DEBUG_DMA
-#endif
-
 /* DMA ******************************************************************************/
 
 /* Flags used to characterize the DMA channel.  The naming convention is that one
@@ -172,7 +166,7 @@ typedef void (*dma_callback_t)(DMA_HANDLE handle, void *arg, int result);
 
 /* The following is used for sampling DMA registers when CONFIG DEBUG_DMA is selected */
 
-#ifdef CONFIG_DEBUG_DMA
+#ifdef CONFIG_DEBUG_DMA_INFO
 struct sam_dmaregs_s
 {
   /* Global Registers.
@@ -210,7 +204,7 @@ struct sam_dmaregs_s
   uint32_t csus;    /* Channel Source Microblock Stride */
   uint32_t cdus;    /* Channel Destination Microblock Stride */
 };
-#endif /* CONFIG_DEBUG_DMA */
+#endif /* CONFIG_DEBUG_DMA_INFO */
 
 /************************************************************************************
  * Inline Functions
@@ -342,7 +336,7 @@ void sam_dmastop(DMA_HANDLE handle);
  *
  ************************************************************************************/
 
-#ifdef CONFIG_DEBUG_DMA
+#ifdef CONFIG_DEBUG_DMA_INFO
 void sam_dmasample(DMA_HANDLE handle, struct sam_dmaregs_s *regs);
 #else
 #  define sam_dmasample(handle,regs)
@@ -356,7 +350,7 @@ void sam_dmasample(DMA_HANDLE handle, struct sam_dmaregs_s *regs);
  *
  ************************************************************************************/
 
-#ifdef CONFIG_DEBUG_DMA
+#ifdef CONFIG_DEBUG_DMA_INFO
 void sam_dmadump(DMA_HANDLE handle, const struct sam_dmaregs_s *regs, const char *msg);
 #else
 #  define sam_dmadump(handle,regs,msg)

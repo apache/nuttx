@@ -151,7 +151,7 @@ uint32_t sam_pck_configure(enum pckid_e pckid, enum pckid_clksrc_e clksrc,
       break;
 
     default:
-      dbg("ERROR: Unknown clock source\n");
+      _err("ERROR: Unknown clock source\n");
       return 0;
     }
 
@@ -213,8 +213,8 @@ uint32_t sam_pck_configure(enum pckid_e pckid, enum pckid_clksrc_e clksrc,
     }
   else
     {
-      sdbg("ERROR: frequency cannot be realized.\n");
-      sdbg("       frequency=%lu clkin=%lu\n",
+      serr("ERROR: frequency cannot be realized.\n");
+      serr("       frequency=%lu clkin=%lu\n",
            (unsigned long)frequency, (unsigned long)clkin);
       return 0;
     }

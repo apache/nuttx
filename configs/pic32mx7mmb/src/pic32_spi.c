@@ -75,23 +75,6 @@
 #define GPIO_SD_WP (GPIO_INPUT|GPIO_PORTG|GPIO_PIN6)
 #define GPIO_SD_CD (GPIO_INPUT|GPIO_INT|GPIO_PORTG|GPIO_PIN7)
 
-/* The following enable debug output from this file (needs CONFIG_DEBUG too).
- *
- * CONFIG_DEBUG_SPI - Define to enable basic SPI debug
- */
-
-#ifdef CONFIG_DEBUG_SPI
-#  define spidbg  lldbg
-#  define spivdbg llvdbg
-#else
-#  define spidbg(x...)
-#  define spivdbg(x...)
-#endif
-
-/************************************************************************************
- * Private Functions
- ************************************************************************************/
-
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
@@ -150,7 +133,7 @@ enum spi_dev_e;
 #ifdef CONFIG_PIC32MX_SPI1
 void  pic32mx_spi1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
-  spidbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 
   if (devid == SPIDEV_MMCSD)
     {
@@ -179,7 +162,7 @@ uint8_t pic32mx_spi1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
         }
     }
 
-  spidbg("Returning %02x\n", ret);
+  spiinfo("Returning %02x\n", ret);
   return ret;
 }
 #ifdef CONFIG_SPI_CMDDATA
@@ -194,13 +177,13 @@ int pic32mx_spi1cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cm
 #ifdef CONFIG_PIC32MX_SPI2
 void  pic31mx_spi2select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
-  spidbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 #warning "Missing logic"
 }
 
 uint8_t pic31mx_spi2status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 {
-  spidbg("Returning nothing\n");
+  spiinfo("Returning nothing\n");
 #warning "Missing logic"
   return 0;
 }
@@ -217,13 +200,13 @@ int pic31mx_spi2cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cm
 #ifdef CONFIG_PIC32MX_SPI3
 void  pic32mx_spi3select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
-  spidbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 #warning "Missing logic"
 }
 
 uint8_t pic32mx_spi3status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 {
-  spidbg("Returning nothing\n");
+  spiinfo("Returning nothing\n");
 #warning "Missing logic"
   return 0;
 }
@@ -240,13 +223,13 @@ int pic32mx_spi3cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cm
 #ifdef CONFIG_PIC32MX_SPI4
 void  pic32mx_spi4select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
-  spidbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 #warning "Missing logic"
 }
 
 uint8_t pic32mx_spi4status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 {
-  spidbg("Returning nothing\n");
+  spiinfo("Returning nothing\n");
 #warning "Missing logic"
   return 0;
 }

@@ -66,7 +66,7 @@ void up_release_pending(void)
 {
   FAR struct tcb_s *rtcb = this_task();
 
-  sdbg("From TCB=%p\n", rtcb);
+  sinfo("From TCB=%p\n", rtcb);
 
   /* Merge the g_pendingtasks list into the ready-to-run task list */
 
@@ -93,7 +93,7 @@ void up_release_pending(void)
            */
 
           rtcb = this_task();
-          sdbg("New Active Task TCB=%p\n", rtcb);
+          sinfo("New Active Task TCB=%p\n", rtcb);
 
           /* The way that we handle signals in the simulation is kind of
            * a kludge.  This would be unsafe in a truly multi-threaded, interrupt
@@ -102,7 +102,7 @@ void up_release_pending(void)
 
           if (rtcb->xcp.sigdeliver)
             {
-              sdbg("Delivering signals TCB=%p\n", rtcb);
+              sinfo("Delivering signals TCB=%p\n", rtcb);
               ((sig_deliver_t)rtcb->xcp.sigdeliver)(rtcb);
               rtcb->xcp.sigdeliver = NULL;
             }

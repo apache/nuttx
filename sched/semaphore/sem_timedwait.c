@@ -107,7 +107,7 @@ int sem_timedwait(FAR sem_t *sem, FAR const struct timespec *abstime)
    * errno appropriately.
    */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!abstime || !sem)
     {
       errcode = EINVAL;

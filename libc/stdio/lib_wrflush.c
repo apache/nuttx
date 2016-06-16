@@ -91,7 +91,7 @@ int lib_wrflush(FAR FILE *stream)
 #if CONFIG_STDIO_BUFFER_SIZE > 0
   /* Verify that we were passed a valid (i.e., non-NULL) stream */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!stream)
     {
       return -EINVAL;
@@ -122,7 +122,7 @@ int lib_wrflush(FAR FILE *stream)
 #else
   /* Verify that we were passed a valid (i.e., non-NULL) stream */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!stream)
     {
       return -EINVAL;

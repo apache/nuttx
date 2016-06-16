@@ -188,7 +188,7 @@ static int shm_extend(int shmid, size_t size)
       region->sr_pages[pgalloc] = mm_pgalloc(1);
       if (region->sr_pages[pgalloc] == 0)
         {
-          shmdbg("mm_pgalloc(1) failed\n");
+          shmerr("ERROR: mm_pgalloc(1) failed\n");
           break;
         }
 
@@ -249,7 +249,7 @@ static int shm_create(key_t key, size_t size, int shmflg)
   ret = shm_reserve(key, shmflg);
   if (ret < 0)
     {
-      shmdbg("shm_reserve failed: %d\n", ret);
+      shmerr("ERROR: shm_reserve failed: %d\n", ret);
       return ret;
     }
 
@@ -400,7 +400,7 @@ int shmget(key_t key, size_t size, int shmflg)
               ret = shm_create(key, size, shmflg);
               if (ret < 0)
                 {
-                  shmdbg("shm_create failed: %d\n", ret);
+                  shmerr("ERROR: shm_create failed: %d\n", ret);
                   goto errout_with_semaphore;
                 }
 
@@ -443,7 +443,7 @@ int shmget(key_t key, size_t size, int shmflg)
                   ret = shm_extend(shmid, size);
                   if (ret < 0)
                     {
-                      shmdbg("shm_create failed: %d\n", ret);
+                      shmerr("ERROR: shm_create failed: %d\n", ret);
                       goto errout_with_semaphore;
                     }
                 }

@@ -71,7 +71,7 @@ int dup2(int sockfd1, int sockfd2)
 {
   FAR struct socket *psock1;
   FAR struct socket *psock2;
-  int err;
+  int errcode;
   int ret;
 
   /* Lock the scheduler throughout the following */
@@ -89,7 +89,7 @@ int dup2(int sockfd1, int sockfd2)
 
   if (!psock1 || !psock2 || psock1->s_crefs <= 0)
     {
-      err = EBADF;
+      errcode = EBADF;
       goto errout;
     }
 
@@ -107,7 +107,7 @@ int dup2(int sockfd1, int sockfd2)
   ret = net_clone(psock1, psock2);
   if (ret < 0)
     {
-      err = -ret;
+      errcode = -ret;
       goto errout;
     }
 
@@ -116,10 +116,8 @@ int dup2(int sockfd1, int sockfd2)
 
 errout:
   sched_unlock();
-  set_errno(err);
+  set_errno(errcode);
   return ERROR;
 }
 
 #endif /* CONFIG_NET && CONFIG_NSOCKET_DESCRIPTORS > 0 */
-
-

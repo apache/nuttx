@@ -54,7 +54,7 @@
 /* Trace macros, use like trace 'i' to print char to serial port. */
 
 	.macro	chout, addr, ch
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
 	mov		$\addr, %dx
 	mov		$\ch, %al
 	out		%al, %dx
@@ -62,7 +62,7 @@
 	.endm
 
 	.macro	trace, ch
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
 	push	%eax
 	push	%edx
 	chout	0x3f8, \ch

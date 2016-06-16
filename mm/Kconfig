@@ -116,7 +116,7 @@ config GRAN_INTR
 config DEBUG_GRAN
 	bool "Granule Allocator Debug"
 	default n
-	depends on GRAN && DEBUG
+	depends on GRAN && DEBUG_FEATURES
 	---help---
 		Just like DEBUG_MM, but only generates output from the gran
 		allocation logic.
@@ -143,7 +143,7 @@ config MM_PGSIZE
 config DEBUG_PGALLOC
 	bool "Page Allocator Debug"
 	default n
-	depends on DEBUG
+	depends on DEBUG_FEATURES
 	---help---
 		Just like DEBUG_MM, but only generates output from the page
 		allocation logic.

@@ -272,7 +272,7 @@ static int ssd1306_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buf
   int pixlen;
   uint8_t i;
 
-  lcdvdbg("row: %d col: %d npixels: %d\n", row, col, npixels);
+  lcdinfo("row: %d col: %d npixels: %d\n", row, col, npixels);
   DEBUGASSERT(buffer);
 
   /* Clip the run to the display */
@@ -480,7 +480,7 @@ static int ssd1306_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
   int pixlen;
   uint8_t i;
 
-  lcdvdbg("row: %d col: %d npixels: %d\n", row, col, npixels);
+  lcdinfo("row: %d col: %d npixels: %d\n", row, col, npixels);
   DEBUGASSERT(buffer);
 
   /* Clip the run to the display */
@@ -625,7 +625,7 @@ static int ssd1306_getvideoinfo(FAR struct lcd_dev_s *dev,
                                 FAR struct fb_videoinfo_s *vinfo)
 {
   DEBUGASSERT(dev && vinfo);
-  lcdvdbg("fmt: %d xres: %d yres: %d nplanes: %d\n",
+  lcdinfo("fmt: %d xres: %d yres: %d nplanes: %d\n",
           g_videoinfo.fmt, g_videoinfo.xres, g_videoinfo.yres, g_videoinfo.nplanes);
   memcpy(vinfo, &g_videoinfo, sizeof(struct fb_videoinfo_s));
   return OK;
@@ -643,7 +643,7 @@ static int ssd1306_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
                                 FAR struct lcd_planeinfo_s *pinfo)
 {
   DEBUGASSERT(pinfo && planeno == 0);
-  lcdvdbg("planeno: %d bpp: %d\n", planeno, g_planeinfo.bpp);
+  lcdinfo("planeno: %d bpp: %d\n", planeno, g_planeinfo.bpp);
   memcpy(pinfo, &g_planeinfo, sizeof(struct lcd_planeinfo_s));
   return OK;
 }
@@ -662,7 +662,7 @@ static int ssd1306_getpower(FAR struct lcd_dev_s *dev)
   FAR struct ssd1306_dev_s *priv = (FAR struct ssd1306_dev_s *)dev;
   DEBUGASSERT(priv);
 
-  lcdvdbg("power: %s\n", priv->on ? "ON" : "OFF");
+  lcdinfo("power: %s\n", priv->on ? "ON" : "OFF");
   return priv->on ? CONFIG_LCD_MAXPOWER : 0;
 }
 
@@ -680,7 +680,7 @@ static int ssd1306_setpower(FAR struct lcd_dev_s *dev, int power)
   struct ssd1306_dev_s *priv = (struct ssd1306_dev_s *)dev;
   DEBUGASSERT(priv && (unsigned)power <= CONFIG_LCD_MAXPOWER);
 
-  lcdvdbg("power: %d [%d]\n", power, priv->on ? CONFIG_LCD_MAXPOWER : 0);
+  lcdinfo("power: %d [%d]\n", power, priv->on ? CONFIG_LCD_MAXPOWER : 0);
 
   /* Lock and select device */
 
@@ -720,7 +720,7 @@ static int ssd1306_getcontrast(struct lcd_dev_s *dev)
   struct ssd1306_dev_s *priv = (struct ssd1306_dev_s *)dev;
   DEBUGASSERT(priv);
 
-  lcdvdbg("contrast: %d\n", priv->contrast);
+  lcdinfo("contrast: %d\n", priv->contrast);
   return priv->contrast;
 }
 
@@ -737,12 +737,12 @@ static int ssd1306_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
   struct ssd1306_dev_s *priv = (struct ssd1306_dev_s *)dev;
   unsigned int scaled;
 
-  lcdvdbg("contrast: %d\n", contrast);
+  lcdinfo("contrast: %d\n", contrast);
   DEBUGASSERT(priv);
 
   /* Verify the contrast value */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (contrast > CONFIG_LCD_MAXCONTRAST)
     {
       return -EINVAL;
@@ -812,7 +812,7 @@ FAR struct lcd_dev_s *ssd1306_initialize(FAR struct i2c_master_s *dev, unsigned 
 {
   FAR struct ssd1306_dev_s  *priv = &g_oleddev;
 
-  lcdvdbg("Initializing\n");
+  lcdinfo("Initializing\n");
   DEBUGASSERT(spi && devno == 0);
 
 #ifdef CONFIG_LCD_SSD1306_SPI

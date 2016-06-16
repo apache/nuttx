@@ -109,16 +109,6 @@
 #define LS_BIT               (1 << 0)
 #define MS_BIT               (1 << 7)
 
-/* Debug */
-
-#ifdef CONFIG_DEBUG_LCD
-#  define lcddbg(format, ...)  dbg(format, ##__VA_ARGS__)
-#  define lcdvdbg(format, ...) vdbg(format, ##__VA_ARGS__)
-#else
-#  define lcddbg(x...)
-#  define lcdvdbg(x...)
-#endif
-
 /****************************************************************************
  * Private Type Definition
  ****************************************************************************/
@@ -339,7 +329,8 @@ static void memlcd_deselect(FAR struct spi_dev_s *spi)
 static inline void memlcd_clear(FAR struct memlcd_dev_s *mlcd)
 {
   uint16_t cmd = MEMLCD_CMD_ALL_CLEAR;
-  lcddbg("Clear display\n");
+
+  lcdinfo("Clear display\n");
   memlcd_select(mlcd->spi);
   /* XXX Ensure 2us here */
   SPI_SNDBLOCK(mlcd->spi, &cmd, 2);
@@ -408,7 +399,7 @@ static int memlcd_putrun(fb_coord_t row, fb_coord_t col,
   int i;
 
   DEBUGASSERT(buffer);
-  lcdvdbg("row: %d col: %d npixels: %d\n", row, col, npixels);
+  lcdinfo("row: %d col: %d npixels: %d\n", row, col, npixels);
 
 #ifdef CONFIG_NX_PACKEDMSFIRST
   usrmask = MS_BIT;
@@ -499,7 +490,7 @@ static int memlcd_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t * buffer,
   int i;
 
   DEBUGASSERT(buffer);
-  lcdvdbg("row: %d col: %d npixels: %d\n", row, col, npixels);
+  lcdinfo("row: %d col: %d npixels: %d\n", row, col, npixels);
 
 #ifdef CONFIG_NX_PACKEDMSFIRST
   usrmask = MS_BIT;
@@ -557,7 +548,7 @@ static int memlcd_getvideoinfo(FAR struct lcd_dev_s *dev,
                                FAR struct fb_videoinfo_s *vinfo)
 {
   DEBUGASSERT(dev && vinfo);
-  lcdvdbg("fmt: %d xres: %d yres: %d nplanes: %d\n",
+  lcdinfo("fmt: %d xres: %d yres: %d nplanes: %d\n",
           g_videoinfo.fmt, g_videoinfo.xres, g_videoinfo.yres,
           g_videoinfo.nplanes);
   memcpy(vinfo, &g_videoinfo, sizeof(struct fb_videoinfo_s));
@@ -576,7 +567,7 @@ static int memlcd_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
                                FAR struct lcd_planeinfo_s *pinfo)
 {
   DEBUGASSERT(pinfo && planeno == 0);
-  lcdvdbg("planeno: %d bpp: %d\n", planeno, g_planeinfo.bpp);
+  lcdinfo("planeno: %d bpp: %d\n", planeno, g_planeinfo.bpp);
   memcpy(pinfo, &g_planeinfo, sizeof(struct lcd_planeinfo_s));
   return OK;
 }
@@ -593,8 +584,9 @@ static int memlcd_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
 static int memlcd_getpower(FAR struct lcd_dev_s *dev)
 {
   FAR struct memlcd_dev_s *mlcd = (FAR struct memlcd_dev_s *)dev;
+
   DEBUGASSERT(mlcd);
-  lcddbg("%d\n", mlcd->power);
+  lcdinfo("%d\n", mlcd->power);
   return mlcd->power;
 }
 
@@ -610,8 +602,9 @@ static int memlcd_getpower(FAR struct lcd_dev_s *dev)
 static int memlcd_setpower(FAR struct lcd_dev_s *dev, int power)
 {
   struct memlcd_dev_s *mlcd = (struct memlcd_dev_s *)dev;
+
   DEBUGASSERT(mlcd && (unsigned)power <= CONFIG_LCD_MAXPOWER && mlcd->spi);
-  lcddbg("%d\n", power);
+  lcdinfo("%d\n", power);
   mlcd->power = power;
 
   if (power > 0)
@@ -638,8 +631,9 @@ static int memlcd_setpower(FAR struct lcd_dev_s *dev, int power)
 static int memlcd_getcontrast(struct lcd_dev_s *dev)
 {
   struct memlcd_dev_s *mlcd = (struct memlcd_dev_s *)dev;
+
   DEBUGASSERT(mlcd);
-  lcddbg("contrast: %d\n", mlcd->contrast);
+  lcdinfo("contrast: %d\n", mlcd->contrast);
   return mlcd->contrast;
 }
 
@@ -654,8 +648,9 @@ static int memlcd_getcontrast(struct lcd_dev_s *dev)
 static int memlcd_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
 {
   struct memlcd_dev_s *mlcd = (struct memlcd_dev_s *)dev;
+
   DEBUGASSERT(mlcd);
-  lcddbg("contrast: %d\n", contrast);
+  lcdinfo("contrast: %d\n", contrast);
   if (contrast > MEMLCD_MAXCONTRAST)
     {
       contrast = MEMLCD_MAXCONTRAST;
@@ -710,6 +705,6 @@ FAR struct lcd_dev_s *memlcd_initialize(FAR struct spi_dev_s *spi,
 
   mlcd->priv->attachirq(memlcd_extcominisr);
 
-  lcddbg("done\n");
+  lcdinfo("done\n");
   return &mlcd->dev;
 }

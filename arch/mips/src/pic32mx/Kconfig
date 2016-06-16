@@ -1034,11 +1034,11 @@ config PIC32MX_SPI_ENHBUF
 
 config PIC32MX_SPI_REGDEBUG
 	bool "SPI Register level debug"
-	depends on DEBUG
+	depends on DEBUG_INFO
 	default n
 	---help---
 		Output detailed register-level SPI device debug information.
-		Requires also DEBUG.
+		Requires also CONFIG_DEBUG_FEATURES.
 
 endmenu # SPI Driver Configuration
 
@@ -1097,9 +1097,9 @@ config NET_WOL
 config NET_REGDEBUG
 	bool "Register level debug"
 	default n
-	depends on PIC32MX_ETHERNET && DEBUG
+	depends on PIC32MX_ETHERNET && DEBUG_NET_INFO
 	---help---
-		Enabled low level register debug.  Also needs DEBUG.
+		Enabled low level register debug.  Also needs CONFIG_DEBUG_FEATURES.
 
 config NET_HASH
 	bool "Hash"

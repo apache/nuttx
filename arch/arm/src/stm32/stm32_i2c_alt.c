@@ -169,15 +169,6 @@
 #define MKI2C_OUTPUT(p) (((p) & (GPIO_PORT_MASK | GPIO_PIN_MASK)) | I2C_OUTPUT)
 
 /* Debug ****************************************************************************/
-/* CONFIG_DEBUG_I2C + CONFIG_DEBUG enables general I2C debug output. */
-
-#ifdef CONFIG_DEBUG_I2C
-#  define i2cdbg dbg
-#  define i2cvdbg vdbg
-#else
-#  define i2cdbg(x...)
-#  define i2cvdbg(x...)
-#endif
 
 /* I2C event trace logic.  NOTE:  trace uses the internal, non-standard, low-level
  * debug interface syslog() but does not require that any other debug
@@ -701,7 +692,7 @@ static int stm32_i2c_sem_waitdone(FAR struct stm32_i2c_priv_s *priv)
 
   while (priv->intstate != INTSTATE_DONE && elapsed < timeout);
 
-  i2cvdbg("intstate: %d elapsed: %ld threshold: %ld status: %08x\n",
+  i2cinfo("intstate: %d elapsed: %ld threshold: %ld status: %08x\n",
           priv->intstate, (long)elapsed, (long)timeout, priv->status);
 
   /* Set the interrupt state back to IDLE */
@@ -774,7 +765,7 @@ static inline void stm32_i2c_sem_waitstop(FAR struct stm32_i2c_priv_s *priv)
    * still pending.
    */
 
-  i2cvdbg("Timeout with CR1: %04x SR1: %04x\n", cr1, sr1);
+  i2cinfo("Timeout with CR1: %04x SR1: %04x\n", cr1, sr1);
 }
 
 /************************************************************************************
@@ -867,7 +858,7 @@ static void stm32_i2c_tracenew(FAR struct stm32_i2c_priv_s *priv, uint16_t statu
 
           if (priv->tndx >= (CONFIG_I2C_NTRACE-1))
             {
-              i2cdbg("Trace table overflow\n");
+              i2cerr("ERROR: Trace table overflow\n");
               return;
             }
 
@@ -908,7 +899,7 @@ static void stm32_i2c_traceevent(FAR struct stm32_i2c_priv_s *priv,
 
       if (priv->tndx >= (CONFIG_I2C_NTRACE-1))
         {
-          i2cdbg("Trace table overflow\n");
+          i2cerr("ERROR: Trace table overflow\n");
           return;
         }
 
@@ -1208,7 +1199,7 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
 {
   uint32_t status;
 
-  i2cvdbg("I2C ISR called\n");
+  i2cinfo("I2C ISR called\n");
 
   /* Get state of the I2C controller (register SR1 only)
    *
@@ -1252,7 +1243,7 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
 
   if (priv->dcnt == -1 && priv->msgc > 0)
     {
-      i2cvdbg("Switch to new message\n");
+      i2cinfo("Switch to new message\n");
 
       /* Get current message to process data and copy to private structure */
 
@@ -1261,7 +1252,7 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
       priv->total_msg_len = priv->msgv->length;   /* Set total msg length */
       priv->flags         = priv->msgv->flags;    /* Copy flags to private struct */
 
-      i2cvdbg("Current flags %i\n", priv->flags);
+      i2cinfo("Current flags %i\n", priv->flags);
 
       /* Decrease counter to indicate the number of messages left to process */
 
@@ -1314,7 +1305,7 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
     {
       /* Start bit is set */
 
-      i2cvdbg("Entering address handling, status = %i\n", status);
+      i2cinfo("Entering address handling, status = %i\n", status);
 
       /* Check for empty message (for robustness) */
 
@@ -1326,7 +1317,7 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
 
           if (priv->total_msg_len == 1 && (priv->flags & I2C_M_READ))
             {
-              i2cvdbg("short read N=1: setting NACK\n");
+              i2cinfo("short read N=1: setting NACK\n");
 
               /* Set POS bit to zero (can be up from a previous 2 byte receive) */
 
@@ -1339,7 +1330,7 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
             }
           else if (priv->total_msg_len == 2 && (priv->flags & I2C_M_READ))
             {
-              i2cvdbg("short read N=2: setting POS and ACK bits\n");
+              i2cinfo("short read N=2: setting POS and ACK bits\n");
 
               stm32_i2c_modifyreg(priv, STM32_I2C_CR1_OFFSET, 0, I2C_CR1_POS);
               stm32_i2c_modifyreg(priv, STM32_I2C_CR1_OFFSET, 0, I2C_CR1_ACK);
@@ -1349,7 +1340,7 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
             {
               /* Enable ACK after address byte */
 
-              i2cvdbg("setting ACK\n");
+              i2cinfo("setting ACK\n");
 
               /* Set POS bit to zero (can be up from a previous 2 byte receive) */
 
@@ -1369,7 +1360,7 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
                            (priv->flags & I2C_M_TEN) ?
                            0 :((priv->msgv->addr << 1) | (priv->flags & I2C_M_READ)));
 
-          i2cvdbg("Address sent. Addr=%#02x Write/Read bit=%i\n",
+          i2cinfo("Address sent. Addr=%#02x Write/Read bit=%i\n",
                   priv->msgv->addr, (priv->flags & I2C_M_READ));
 
           /* Flag that address has just been sent */
@@ -1382,7 +1373,7 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
         {
           /* TODO: untested!! */
 
-          i2cdbg(" An empty message has been detected, ignoring and passing to next message.\n");
+          i2cwarn("WARNING:  An empty message has been detected, ignoring and passing to next message.\n");
 
           /* Trace event */
 
@@ -1428,15 +1419,15 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
 
   else if ((status & I2C_SR1_ADDR) == 0 && priv->check_addr_ACK)
     {
-      i2cvdbg("Invalid Address. Setting stop bit and clearing message\n");
-      i2cvdbg("status %i\n", status);
+      i2cinfo("Invalid Address. Setting stop bit and clearing message\n");
+      i2cinfo("status %i\n", status);
 
       /* Set condition to terminate msg chain transmission as address is invalid. */
 
       priv->dcnt = -1;
       priv->msgc = 0;
 
-      i2cvdbg("dcnt %i , msgc %i\n", priv->dcnt, priv->msgc);
+      i2cinfo("dcnt %i , msgc %i\n", priv->dcnt, priv->msgc);
 
       /* Reset flag to check for valid address */
 
@@ -1482,8 +1473,8 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
           stm32_i2c_modifyreg(priv, STM32_I2C_CR2_OFFSET, 0, I2C_CR2_ITBUFEN);
           stm32_i2c_sendstop(priv);
 
-          i2cvdbg("Address ACKed beginning data reception\n");
-          i2cvdbg("short read N=1: programming stop bit\n");
+          i2cinfo("Address ACKed beginning data reception\n");
+          i2cinfo("short read N=1: programming stop bit\n");
           priv->dcnt--;
 
           /* Trace */
@@ -1498,8 +1489,8 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
 
           stm32_i2c_modifyreg(priv, STM32_I2C_CR1_OFFSET, I2C_CR1_ACK, 0);
 
-          i2cvdbg("Address ACKed beginning data reception\n");
-          i2cvdbg("short read N=2: programming NACK\n");
+          i2cinfo("Address ACKed beginning data reception\n");
+          i2cinfo("short read N=2: programming NACK\n");
 
           /* Trace */
 
@@ -1507,7 +1498,7 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
         }
       else
         {
-          i2cvdbg("Address ACKed beginning data reception\n");
+          i2cinfo("Address ACKed beginning data reception\n");
 
           /* Trace */
 
@@ -1530,7 +1521,7 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
        * transmit the next byte.
        */
 
-      i2cvdbg("Entering write mode dcnt = %i msgc = %i\n",
+      i2cinfo("Entering write mode dcnt = %i msgc = %i\n",
               priv->dcnt, priv->msgc);
 
       /* Clear ADDR flag by reading SR2 and adding it to status */
@@ -1567,12 +1558,12 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
               /* If last message send stop bit */
 
               stm32_i2c_sendstop(priv);
-              i2cvdbg("Stop sent dcnt = %i msgc = %i\n", priv->dcnt, priv->msgc);
+              i2cinfo("Stop sent dcnt = %i msgc = %i\n", priv->dcnt, priv->msgc);
 
               /* Decrease counter to get to next message */
 
               priv->dcnt--;
-              i2cvdbg("dcnt %i\n", priv->dcnt);
+              i2cinfo("dcnt %i\n", priv->dcnt);
               stm32_i2c_traceevent(priv, I2CEVENT_WRITE_STOP, priv->dcnt);
             }
 
@@ -1586,13 +1577,13 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
             {
               stm32_i2c_sendstart(priv);
 
-              i2cvdbg("Restart detected!\n");
-              i2cvdbg("Nextflag %i\n", priv->msgv[0].flags);
+              i2cinfo("Restart detected!\n");
+              i2cinfo("Nextflag %i\n", priv->msgv[0].flags);
 
               /* Decrease counter to get to next message */
 
               priv->dcnt--;
-              i2cvdbg("dcnt %i\n", priv->dcnt);
+              i2cinfo("dcnt %i\n", priv->dcnt);
               stm32_i2c_traceevent(priv, I2CEVENT_WRITE_RESTART, priv->dcnt);
             }
 
@@ -1609,14 +1600,14 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
             }
           else
             {
-              i2cdbg("Write mode: next message has an unrecognized flag.\n");
+              i2cerr("ERROR: Write mode: next message has an unrecognized flag.\n");
               stm32_i2c_traceevent(priv, I2CEVENT_WRITE_FLAG_ERROR, priv->msgv->flags);
             }
 
         }
       else
         {
-          i2cdbg("Write mode error.\n");
+          i2cerr("ERROR: Write mode error.\n");
           stm32_i2c_traceevent(priv, I2CEVENT_WRITE_ERROR, 0);
         }
     }
@@ -1654,7 +1645,7 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
        * (RXNE is set) then the driver can read from the data register.
        */
 
-      i2cvdbg("Entering read mode dcnt = %i msgc = %i, status %i\n",
+      i2cinfo("Entering read mode dcnt = %i msgc = %i, status %i\n",
               priv->dcnt, priv->msgc, status);
 
       /* Implementation of method 2 for receiving data following
@@ -1665,7 +1656,7 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
 
       if (priv->dcnt == 0 && priv->total_msg_len == 1)
         {
-          i2cvdbg("short read N=1: Read data from data register(DR)\n");
+          i2cinfo("short read N=1: Read data from data register(DR)\n");
 
           *priv->ptr++ = stm32_i2c_getreg(priv, STM32_I2C_DR_OFFSET);
           priv->dcnt--;
@@ -1676,12 +1667,12 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
 
       else if (priv->dcnt == 2 && priv->total_msg_len == 2 && !(status & I2C_SR1_BTF))
         {
-          i2cvdbg("short read N=2: DR full, SR empty. Waiting for more bytes.\n");
+          i2cinfo("short read N=2: DR full, SR empty. Waiting for more bytes.\n");
           stm32_i2c_traceevent(priv, I2CEVENT_READ_SR_EMPTY, 0);
         }
       else if (priv->dcnt == 2 && priv->total_msg_len == 2 && (status & I2C_SR1_BTF))
         {
-          i2cvdbg("short read N=2: DR and SR full setting stop bit and reading twice\n");
+          i2cinfo("short read N=2: DR and SR full setting stop bit and reading twice\n");
 
           stm32_i2c_sendstop(priv);
           *priv->ptr++ = stm32_i2c_getreg(priv, STM32_I2C_DR_OFFSET);
@@ -1708,7 +1699,7 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
            * this should be able to handle it).
            */
 
-          i2cvdbg("DR full, SR empty. Waiting for more bytes.\n");
+          i2cinfo("DR full, SR empty. Waiting for more bytes.\n");
           stm32_i2c_traceevent(priv, I2CEVENT_READ_SR_EMPTY, 0);
         }
       else if (priv->dcnt >= 4 && priv->total_msg_len >= 3 && (status & I2C_SR1_BTF))
@@ -1717,7 +1708,7 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
            * RXNE(receive buffer not empty) flag.
            */
 
-          i2cvdbg("Read data from data register(DR)\n");
+          i2cinfo("Read data from data register(DR)\n");
           *priv->ptr++ = stm32_i2c_getreg(priv, STM32_I2C_DR_OFFSET);
 
           /* Decrease current message length */
@@ -1732,8 +1723,8 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
            * This coincides with EV7_2 in the reference manual.
            */
 
-          i2cvdbg("Program NACK\n");
-          i2cvdbg("Read data from data register(DR) dcnt=3\n");
+          i2cinfo("Program NACK\n");
+          i2cinfo("Read data from data register(DR) dcnt=3\n");
 
           stm32_i2c_traceevent(priv, I2CEVENT_READ_3, priv->dcnt);
 
@@ -1753,10 +1744,10 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
         }
       else if (priv->dcnt == 2 && (status & I2C_SR1_BTF) && priv->total_msg_len >= 3)
         {
-          i2cvdbg("Program stop\n");
-          i2cvdbg("Read data from data register(DR) dcnt=2\n");
-          i2cvdbg("Read data from data register(SR) dcnt=1\n");
-          i2cvdbg("Setting condition to stop ISR dcnt = -1\n");
+          i2cinfo("Program stop\n");
+          i2cinfo("Read data from data register(DR) dcnt=2\n");
+          i2cinfo("Read data from data register(SR) dcnt=1\n");
+          i2cinfo("Setting condition to stop ISR dcnt = -1\n");
 
           stm32_i2c_traceevent(priv, I2CEVENT_READ_3, priv->dcnt);
 
@@ -1783,8 +1774,8 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
 
       else
         {
-          i2cdbg("I2C read mode no correct state detected\n");
-          i2cdbg(" state %i, dcnt=%i\n", status, priv->dcnt);
+          i2cerr("ERROR: I2C read mode no correct state detected\n");
+          i2cerr("  state %i, dcnt=%i\n", status, priv->dcnt);
 
           /* set condition to terminate ISR and wake waiting thread */
 
@@ -1809,7 +1800,7 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
       /* Read rest of the state */
 
       status |= (stm32_i2c_getreg(priv, STM32_I2C_SR2_OFFSET) << 16);
-      i2cdbg("Empty call to ISR: Stopping ISR\n");
+      i2cwarn("WARNING: Empty call to ISR: Stopping ISR\n");
       stm32_i2c_traceevent(priv, I2CEVENT_ISR_EMPTY_CALL, 0);
     }
 
@@ -1833,8 +1824,8 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
 
       status |= (stm32_i2c_getreg(priv, STM32_I2C_SR2_OFFSET) << 16);
 
-      i2cdbg(" No correct state detected(start bit, read or write) \n");
-      i2cdbg(" state %i\n", status);
+      i2cerr("ERROR:  No correct state detected(start bit, read or write) \n");
+      i2cerr("   state %i\n", status);
 
       /* set condition to terminate ISR and wake waiting thread */
 
@@ -1853,7 +1844,7 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
 
   if (priv->dcnt == -1 && priv->msgc == 0)
     {
-      i2cvdbg("Shutting down I2C ISR\n");
+      i2cinfo("Shutting down I2C ISR\n");
 
       stm32_i2c_traceevent(priv, I2CEVENT_ISR_SHUTDOWN, 0);
 
@@ -2126,7 +2117,7 @@ static int stm32_i2c_transfer(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s
       status = stm32_i2c_getstatus(priv);
       ret = -ETIMEDOUT;
 
-      i2cdbg("Timed out: CR1: 0x%04x status: 0x%08x\n",
+      i2cerr("ERROR: Timed out: CR1: 0x%04x status: 0x%08x\n",
              stm32_i2c_getreg(priv, STM32_I2C_CR1_OFFSET), status);
 
       /* "Note: When the STOP, START or PEC bit is set, the software must
@@ -2156,7 +2147,8 @@ static int stm32_i2c_transfer(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s
        * Note: this commentary is found in both places.
        *
        */
-      i2cdbg("Check if the address was valid\n");
+
+      i2cinfo("Check if the address was valid\n");
       stm32_i2c_sendstop(priv);
 #endif
       /* Clear busy flag in case of timeout */

@@ -45,10 +45,14 @@
 #include <assert.h>
 
 #if defined(CONFIG_VNCSERVER_DEBUG) && !defined(CONFIG_DEBUG_GRAPHICS)
-#  undef  CONFIG_DEBUG
-#  undef  CONFIG_DEBUG_VERBOSE
-#  define CONFIG_DEBUG          1
-#  define CONFIG_DEBUG_VERBOSE  1
+#  undef  CONFIG_DEBUG_FEATURES
+#  undef  CONFIG_DEBUG_ERROR
+#  undef  CONFIG_DEBUG_WARN
+#  undef  CONFIG_DEBUG_INFO
+#  define CONFIG_DEBUG_FEATURES 1
+#  define CONFIG_DEBUG_ERROR    1
+#  define CONFIG_DEBUG_WARN     1
+#  define CONFIG_DEBUG_INFO     1
 #  define CONFIG_DEBUG_GRAPHICS 1
 #endif
 #include <debug.h>
@@ -128,7 +132,7 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
   if (ret < 0)
     {
       errcode = get_errno();
-      gdbg("ERROR: Failed to set receive timeout: %d\n", errcode);
+      gerr("ERROR: Failed to set receive timeout: %d\n", errcode);
       DEBUGASSERT(errcode > 0);
       return -errcode;
     }
@@ -136,14 +140,14 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
 
   /* Inform the client of the VNC protocol version */
 
-  gvdbg("Send protocol version: %s\n", g_vncproto);
+  ginfo("Send protocol version: %s\n", g_vncproto);
 
   len = strlen(g_vncproto);
   nsent = psock_send(&session->connect, g_vncproto, len, 0);
   if (nsent < 0)
     {
       errcode = get_errno();
-      gdbg("ERROR: Send ProtocolVersion failed: %d\n", errcode);
+      gerr("ERROR: Send ProtocolVersion failed: %d\n", errcode);
       DEBUGASSERT(errcode > 0);
       return -errcode;
     }
@@ -152,19 +156,19 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
 
   /* Receive the echo of the protocol string */
 
-  gvdbg("Receive echo from VNC client\n");
+  ginfo("Receive echo from VNC client\n");
 
   nrecvd = psock_recv(&session->connect, session->inbuf, len, 0);
   if (nrecvd < 0)
     {
       errcode = get_errno();
-      gdbg("ERROR: Receive protocol confirmation failed: %d\n", errcode);
+      gerr("ERROR: Receive protocol confirmation failed: %d\n", errcode);
       DEBUGASSERT(errcode > 0);
       return -errcode;
     }
   else if (nrecvd == 0)
     {
-      gdbg("Connection closed\n");
+      gwarn("WARNING: Connection closed\n");
       return -ECONNABORTED;
     }
 
@@ -176,7 +180,7 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
    * any stinkin' security.
    */
 
-  gvdbg("Send SecurityType\n");
+  ginfo("Send SecurityType\n");
 
   sectype = (FAR struct rfb_sectype_s *)session->outbuf;
   rfb_putbe32(sectype->type, RFB_SECTYPE_NONE);
@@ -186,7 +190,7 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
   if (nsent < 0)
     {
       errcode = get_errno();
-      gdbg("ERROR: Send Security failed: %d\n", errcode);
+      gerr("ERROR: Send Security failed: %d\n", errcode);
       DEBUGASSERT(errcode > 0);
       return -errcode;
     }
@@ -198,7 +202,7 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
    * only option offered.
    */
 
-  gvdbg("Send SupportedSecurityTypes\n");
+  ginfo("Send SupportedSecurityTypes\n");
 
   sectypes         = (FAR struct rfb_supported_sectypes_s *)session->outbuf;
   sectypes->ntypes = 1;
@@ -209,7 +213,7 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
   if (nsent < 0)
     {
       errcode = get_errno();
-      gdbg("ERROR: Send SupportedSecurityTypes failed: %d\n", errcode);
+      gerr("ERROR: Send SupportedSecurityTypes failed: %d\n", errcode);
       DEBUGASSERT(errcode > 0);
       return -errcode;
     }
@@ -221,7 +225,7 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
    * type is to be used on the connection.
    */
 
-  gvdbg("Receive SecurityType\n");
+  ginfo("Receive SecurityType\n");
 
   sectype = (FAR struct rfb_selected_sectype_s *)session->inbuf;
 
@@ -230,25 +234,25 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
   if (nrecvd < 0)
     {
       errcode = get_errno();
-      gdbg("ERROR: Receive SecurityType failed: %d\n", errcode);
+      gerr("ERROR: Receive SecurityType failed: %d\n", errcode);
       DEBUGASSERT(errcode > 0);
       return -errcode;
     }
   else if (nrecvd == 0)
     {
-      gdbg("Connection closed\n");
+      gwarn("WARNING: Connection closed\n");
       return -ECONNABORTED;
     }
 
   DEBUGASSERT(nrecvd == sizeof(struct rfb_selected_sectype_s));
 
-  gvdbg("Send SecurityResult\n");
+  ginfo("Send SecurityResult\n");
 
   secresult = (FAR struct rfb_sectype_result_s *)session->outbuf;
 
   if (sectype->type != RFB_SECTYPE_NONE)
     {
-      gdbg("ERROR: Received unsupported SecurityType: %d\n", sectype->type);
+      gerr("ERROR: Received unsupported SecurityType: %d\n", sectype->type);
 
       /* REVISIT: Should send the reason string here */
 
@@ -259,14 +263,14 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
       if (nsent < 0)
         {
           errcode = get_errno();
-          gdbg("ERROR: Send SecurityResult failed: %d\n", errcode);
+          gerr("ERROR: Send SecurityResult failed: %d\n", errcode);
           DEBUGASSERT(errcode > 0);
           return -errcode;
         }
 
       DEBUGASSERT(nsent == sizeof(struct rfb_sectype_result_s));
 
-      gvdbg("Send failure reason\n");
+      ginfo("Send failure reason\n");
 
       secfail = (FAR struct rfb_sectype_fail_s *)session->outbuf;
       len     = strlen(g_nosecurity);
@@ -278,7 +282,7 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
       if (nsent < 0)
         {
           errcode = get_errno();
-          gdbg("ERROR: Send failure reason failed: %d\n", errcode);
+          gerr("ERROR: Send failure reason failed: %d\n", errcode);
           DEBUGASSERT(errcode > 0);
           return -errcode;
         }
@@ -294,7 +298,7 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
   if (nsent < 0)
     {
       errcode = get_errno();
-      gdbg("ERROR: Send SecurityResult failed: %d\n", errcode);
+      gerr("ERROR: Send SecurityResult failed: %d\n", errcode);
       DEBUGASSERT(errcode > 0);
       return -errcode;
     }
@@ -312,20 +316,20 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
    * In this implementation, the sharing flag is ignored.
    */
 
-  gvdbg("Receive ClientInit\n");
+  ginfo("Receive ClientInit\n");
 
   nrecvd = psock_recv(&session->connect, session->inbuf,
                       sizeof(struct rfb_clientinit_s), 0);
   if (nrecvd < 0)
     {
       errcode = get_errno();
-      gdbg("ERROR: Receive ClientInit failed: %d\n", errcode);
+      gerr("ERROR: Receive ClientInit failed: %d\n", errcode);
       DEBUGASSERT(errcode > 0);
       return -errcode;
     }
   else if (nrecvd == 0)
     {
-      gdbg("Connection closed\n");
+      gwarn("WARNING: Connection closed\n");
       return -ECONNABORTED;
     }
 
@@ -344,7 +348,7 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
    *   Very Low (8 colors) - RGB3 1:1:1 (TrueColor)
    */
 
-  gvdbg("Send ServerInit\n");
+  ginfo("Send ServerInit\n");
 
   serverinit          = (FAR struct rfb_serverinit_s *)session->outbuf;
 
@@ -375,7 +379,7 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
   if (nsent < 0)
     {
       errcode = get_errno();
-      gdbg("ERROR: Send ServerInit failed: %d\n", errcode);
+      gerr("ERROR: Send ServerInit failed: %d\n", errcode);
       return -errcode;
     }
 
@@ -385,7 +389,7 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
    * This may override some of our framebuffer settings.
    */
 
-  gvdbg("Receive SetPixelFormat\n");
+  ginfo("Receive SetPixelFormat\n");
 
   setformat = (FAR struct rfb_setpixelformat_s *)session->inbuf;
 
@@ -394,25 +398,25 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
   if (nrecvd < 0)
     {
       errcode = get_errno();
-      gdbg("ERROR: Receive SetPixelFormat failed: %d\n", errcode);
+      gerr("ERROR: Receive SetPixelFormat failed: %d\n", errcode);
       DEBUGASSERT(errcode > 0);
       return -errcode;
     }
   else if (nrecvd == 0)
     {
-      gdbg("Connection closed\n");
+      gwarn("WARNING: Connection closed\n");
       return -ECONNABORTED;
     }
   else if (nrecvd != sizeof(struct rfb_setpixelformat_s))
     {
       /* Must not be a SetPixelFormat message? */
 
-      gdbg("ERROR: SetFormat wrong size: %d\n", (int)nrecvd);
+      gerr("ERROR: SetFormat wrong size: %d\n", (int)nrecvd);
       return -EPROTO;
     }
   else if (setformat->msgtype != RFB_SETPIXELFMT_MSG)
     {
-      gdbg("ERROR: Not a SetPixelFormat message: %d\n",
+      gerr("ERROR: Not a SetPixelFormat message: %d\n",
            (int)setformat->msgtype);
       return -EPROTO;
     }
@@ -426,13 +430,13 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
     {
       /* We do not support this pixel format */
 
-      gdbg("ERROR: PixelFormat not supported\n");
+      gerr("ERROR: PixelFormat not supported\n");
       return ret;
     }
 
   /* Receive supported encoding types from client. */
 
-  gvdbg("Receive encoding types\n");
+  ginfo("Receive encoding types\n");
 
   encodings = (FAR struct rfb_setencodings_s *)session->inbuf;
 
@@ -441,13 +445,13 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
   if (nrecvd < 0)
     {
       errcode = get_errno();
-      gdbg("ERROR: Receive SetEncodings failed: %d\n", errcode);
+      gerr("ERROR: Receive SetEncodings failed: %d\n", errcode);
       DEBUGASSERT(errcode > 0);
       return -errcode;
     }
   else if (nrecvd == 0)
     {
-      gdbg("Connection closed\n");
+      gwarn("WARNING: Connection closed\n");
       return -ECONNABORTED;
     }
 
@@ -460,7 +464,7 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
       ret = vnc_client_encodings(session, encodings);
       if (ret < 0)
         {
-          gdbg("ERROR: vnc_set_encodings failed: %d\n", ret);
+          gerr("ERROR: vnc_set_encodings failed: %d\n", ret);
           return ret;
         }
     }
@@ -492,41 +496,41 @@ int vnc_client_pixelformat(FAR struct vnc_session_s *session,
     {
       /* At present, we support only TrueColor formats */
 
-      gdbg("ERROR: No support for palette colors\n");
+      gerr("ERROR: No support for palette colors\n");
       return -ENOSYS;
     }
 
   if (pixelfmt->bpp == 8 && pixelfmt->depth == 6)
     {
-      gvdbg("Client pixel format: RGB8 2:2:2\n");
+      ginfo("Client pixel format: RGB8 2:2:2\n");
       session->colorfmt  = FB_FMT_RGB8_222;
       session->bpp       = 8;
       session->bigendian = false;
     }
   else if (pixelfmt->bpp == 8 && pixelfmt->depth == 8)
     {
-      gvdbg("Client pixel format: RGB8 3:3:2\n");
+      ginfo("Client pixel format: RGB8 3:3:2\n");
       session->colorfmt  = FB_FMT_RGB8_332;
       session->bpp       = 8;
       session->bigendian = false;
     }
   else if (pixelfmt->bpp == 16 && pixelfmt->depth == 15)
     {
-      gvdbg("Client pixel format: RGB16 5:5:5\n");
+      ginfo("Client pixel format: RGB16 5:5:5\n");
       session->colorfmt  = FB_FMT_RGB16_555;
       session->bpp       = 16;
       session->bigendian = (pixelfmt->bigendian != 0) ? true : false;
     }
   else if (pixelfmt->bpp == 16 && pixelfmt->depth == 16)
     {
-      gvdbg("Client pixel format: RGB16 5:6:5\n");
+      ginfo("Client pixel format: RGB16 5:6:5\n");
       session->colorfmt  = FB_FMT_RGB16_565;
       session->bpp       = 16;
       session->bigendian = (pixelfmt->bigendian != 0) ? true : false;
     }
   else if (pixelfmt->bpp == 32 && pixelfmt->depth == 24)
     {
-      gvdbg("Client pixel format: RGB32 8:8:8\n");
+      ginfo("Client pixel format: RGB32 8:8:8\n");
       session->colorfmt  = FB_FMT_RGB32;
       session->bpp       = 32;
       session->bigendian = (pixelfmt->bigendian != 0) ? true : false;
@@ -541,7 +545,7 @@ int vnc_client_pixelformat(FAR struct vnc_session_s *session,
     {
       /* We do not support any other conversions */
 
-      gdbg("ERROR: No support for this BPP=%d and depth=%d\n",
+      gerr("ERROR: No support for this BPP=%d and depth=%d\n",
             pixelfmt->bpp, pixelfmt->depth);
       return -ENOSYS;
     }

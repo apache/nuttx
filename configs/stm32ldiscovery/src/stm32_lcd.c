@@ -76,22 +76,10 @@
  ****************************************************************************/
 /* Configuration ************************************************************/
 
-/* Define CONFIG_DEBUG_LCD to enable detailed LCD debug output. Verbose debug
- * must also be enabled.
- */
+/* Define CONFIG_DEBUG_LCD_INFO to enable detailed LCD debug output. */
 
 #ifndef CONFIG_LIB_SLCDCODEC
 #  error "This SLCD driver requires CONFIG_LIB_SLCDCODEC"
-#endif
-
-#ifndef CONFIG_DEBUG
-#  undef CONFIG_DEBUG_VERBOSE
-#  undef CONFIG_DEBUG_GRAPHICS
-#  undef CONFIG_DEBUG_LCD
-#endif
-
-#ifndef CONFIG_DEBUG_VERBOSE
-#  undef CONFIG_DEBUG_LCD
 #endif
 
 /* The ever-present MIN/MAX macros ******************************************/
@@ -259,16 +247,6 @@
                               (((uint32_t)(s) & 0x03) << 14)
 #define SLCD_CHAR6_UPDATE3(s) SLCD_CHAR6_UPDATE2(s)
 
-/* Debug ********************************************************************/
-
-#ifdef CONFIG_DEBUG_LCD
-#  define lcddbg              dbg
-#  define lcdvdbg             vdbg
-#else
-#  define lcddbg(x...)
-#  define lcdvdbg(x...)
-#endif
-
 /****************************************************************************
  * Private Type Definition
  ****************************************************************************/
@@ -298,7 +276,7 @@ struct stm32_slcdstate_s
  ****************************************************************************/
 /* Debug */
 
-#if defined(CONFIG_DEBUG_LCD) && defined(CONFIG_DEBUG_VERBOSE)
+#ifdef CONFIG_DEBUG_LCD_INFO
 static void slcd_dumpstate(FAR const char *msg);
 static void slcd_dumpslcd(FAR const char *msg);
 #else
@@ -440,19 +418,19 @@ static uint32_t g_slcdgpio[BOARD_SLCD_NGPIOS] =
  * Name: slcd_dumpstate
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG_LCD) && defined(CONFIG_DEBUG_VERBOSE)
+#ifdef CONFIG_DEBUG_LCD_INFO
 static void slcd_dumpstate(FAR const char *msg)
 {
-  lcdvdbg("%s:\n", msg);
-  lcdvdbg("  curpos: %d\n",
+  lcdinfo("%s:\n", msg);
+  lcdinfo("  curpos: %d\n",
           g_slcdstate.curpos);
-  lcdvdbg("  Display: [%c%c%c%c%c%c]\n",
+  lcdinfo("  Display: [%c%c%c%c%c%c]\n",
           g_slcdstate.buffer[0], g_slcdstate.buffer[1], g_slcdstate.buffer[2],
           g_slcdstate.buffer[3], g_slcdstate.buffer[4], g_slcdstate.buffer[5]);
-  lcdvdbg("  Options: [%d%d%d%d%d%d]\n",
+  lcdinfo("  Options: [%d%d%d%d%d%d]\n",
           g_slcdstate.options[0], g_slcdstate.options[1], g_slcdstate.options[2],
           g_slcdstate.options[3], g_slcdstate.options[4], g_slcdstate.options[5]);
-  lcdvdbg("  Bar:     %02x %02x\n",
+  lcdinfo("  Bar:     %02x %02x\n",
           g_slcdstate.bar[0], g_slcdstate.bar[1]);
 }
 #endif
@@ -461,14 +439,14 @@ static void slcd_dumpstate(FAR const char *msg)
  * Name: slcd_dumpslcd
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG_LCD) && defined(CONFIG_DEBUG_VERBOSE)
+#ifdef CONFIG_DEBUG_LCD_INFO
 static void slcd_dumpslcd(FAR const char *msg)
 {
-  lcdvdbg("%s:\n", msg);
-  lcdvdbg("  CR: %08x FCR: %08x SR: %08x CLR: %08x\n",
+  lcdinfo("%s:\n", msg);
+  lcdinfo("  CR: %08x FCR: %08x SR: %08x CLR: %08x\n",
           getreg32(STM32_LCD_CR), getreg32(STM32_LCD_FCR),
           getreg32(STM32_LCD_SR), getreg32(STM32_LCD_CLR));
-  lcdvdbg("  RAM0L: %08x RAM1L: %08x RAM2L: %08x RAM3L: %08x\n",
+  lcdinfo("  RAM0L: %08x RAM1L: %08x RAM2L: %08x RAM3L: %08x\n",
           getreg32(STM32_LCD_RAM0L), getreg32(STM32_LCD_RAM1L),
           getreg32(STM32_LCD_RAM2L), getreg32(STM32_LCD_RAM3L));
 }
@@ -482,7 +460,7 @@ static void slcd_clear(void)
 {
   uint32_t regaddr;
 
-  lvdbg("Clearing\n");
+  linfo("Clearing\n");
 
   /* Make sure that any previous transfer is complete.  The firmware sets
    * the UDR each it modifies the LCD_RAM. The UDR bit stays set until the
@@ -565,7 +543,7 @@ static int slcd_setcontrast(uint8_t contrast)
   regval |= contrast << LCD_FCR_CC_SHIFT;
   putreg32(regval, STM32_LCD_FCR);
 
-  lcdvdbg("contrast: %d FCR: %08x\n",
+  lcdinfo("contrast: %d FCR: %08x\n",
           getreg32(STM32_LCD_FCR), contrast);
 
   return ret;
@@ -579,7 +557,7 @@ static void slcd_writebar(void)
 {
   uint32_t regval;
 
-  lcdvdbg("bar: %02x %02x\n", g_slcdstate.bar[0], g_slcdstate.bar[1]);
+  lcdinfo("bar: %02x %02x\n", g_slcdstate.bar[0], g_slcdstate.bar[1]);
   slcd_dumpslcd("BEFORE WRITE");
 
   /* Make sure that any previous transfer is complete.  The firmware sets
@@ -695,7 +673,7 @@ static inline void slcd_writemem(uint16_t segset, int curpos)
   int i;
   int j;
 
-  lcdvdbg("segset: %04x curpos: %d\n", segset, curpos);
+  lcdinfo("segset: %04x curpos: %d\n", segset, curpos);
   slcd_dumpslcd("BEFORE WRITE");
 
   /* Isolate the least significant bits
@@ -714,7 +692,7 @@ static inline void slcd_writemem(uint16_t segset, int curpos)
       segments[j] = (segset >> i) & 0x0f;
     }
 
-  lcdvdbg("segments: %02x %02x %02x %02x\n",
+  lcdinfo("segments: %02x %02x %02x %02x\n",
           segments[0], segments[1], segments[2], segments[3]);
 
   /* Make sure that any previous transfer is complete.  The firmware sets
@@ -859,7 +837,7 @@ static void slcd_writech(uint8_t ch, uint8_t curpos, uint8_t options)
       segset |= 0x0020;
     }
 
-  lcdvdbg("ch: [%c] options: %02x segset: %04x\n", ch, options, segset);
+  lcdinfo("ch: [%c] options: %02x segset: %04x\n", ch, options, segset);
 
   /* Decode the value and write it to the SLCD segment memory */
 
@@ -879,7 +857,7 @@ static void slcd_writech(uint8_t ch, uint8_t curpos, uint8_t options)
 
 static void slcd_appendch(uint8_t ch, uint8_t options)
 {
-  lcdvdbg("ch: [%c] options: %02x\n", ch, options);
+  lcdinfo("ch: [%c] options: %02x\n", ch, options);
 
   /* Write the character at the current cursor position */
 
@@ -898,7 +876,7 @@ static void slcd_appendch(uint8_t ch, uint8_t options)
 
 static void slcd_action(enum slcdcode_e code, uint8_t count)
 {
-  lcdvdbg("Action: %d count: %d\n", code, count);
+  lcdinfo("Action: %d count: %d\n", code, count);
   slcd_dumpstate("BEFORE ACTION");
 
   switch (code)
@@ -1152,7 +1130,7 @@ static ssize_t slcd_write(FAR struct file *filep,
   memset(&state, 0, sizeof(struct slcdstate_s));
   result = slcd_decode(&instream.stream, &state, &prev, &count);
 
-  lcdvdbg("slcd_decode returned result=%d char=%d count=%d\n",
+  lcdinfo("slcd_decode returned result=%d char=%d count=%d\n",
            result, prev, count);
 
   switch (result)
@@ -1176,7 +1154,7 @@ static ssize_t slcd_write(FAR struct file *filep,
 
   while ((result = slcd_decode(&instream.stream, &state, &ch, &count)) != SLCDRET_EOF)
     {
-      lcdvdbg("slcd_decode returned result=%d char=%d count=%d\n",
+      lcdinfo("slcd_decode returned result=%d char=%d count=%d\n",
               result, ch, count);
 
       if (result == SLCDRET_CHAR)          /* A normal character was returned */
@@ -1329,7 +1307,7 @@ static int slcd_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         {
           FAR struct slcd_attributes_s *attr = (FAR struct slcd_attributes_s *)((uintptr_t)arg);
 
-          lcdvdbg("SLCDIOC_GETATTRIBUTES:\n");
+          lcdinfo("SLCDIOC_GETATTRIBUTES:\n");
 
           if (!attr)
             {
@@ -1354,7 +1332,7 @@ static int slcd_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         {
           FAR struct slcd_curpos_s *curpos = (FAR struct slcd_curpos_s *)((uintptr_t)arg);
 
-          lcdvdbg("SLCDIOC_CURPOS: row=0 column=%d\n", g_slcdstate.curpos);
+          lcdinfo("SLCDIOC_CURPOS: row=0 column=%d\n", g_slcdstate.curpos);
 
           if (!curpos)
             {
@@ -1373,7 +1351,7 @@ static int slcd_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case SLCDIOC_SETBAR:
         {
-          lcdvdbg("SLCDIOC_SETBAR: arg=0x%02lx\n", arg);
+          lcdinfo("SLCDIOC_SETBAR: arg=0x%02lx\n", arg);
 
           /* Format the bar */
 
@@ -1421,7 +1399,7 @@ static int slcd_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             }
 
           *contrast = (int)slcd_getcontrast();
-          lcdvdbg("SLCDIOC_GETCONTRAST: contrast=%d\n", *contrast);
+          lcdinfo("SLCDIOC_GETCONTRAST: contrast=%d\n", *contrast);
         }
         break;
 
@@ -1432,7 +1410,7 @@ static int slcd_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case SLCDIOC_SETCONTRAST:
         {
-          lcdvdbg("SLCDIOC_SETCONTRAST: arg=%ld\n", arg);
+          lcdinfo("SLCDIOC_SETCONTRAST: arg=%ld\n", arg);
 
           if (arg > SLCD_MAXCONTRAST)
             {
@@ -1498,7 +1476,7 @@ int stm32_slcd_initialize(void)
 
   if (!g_slcdstate.initialized)
     {
-      lcdvdbg("Initializing\n");
+      lcdinfo("Initializing\n");
 
       /* Configure LCD GPIO pins */
 
@@ -1515,7 +1493,7 @@ int stm32_slcd_initialize(void)
 
       stm32_rcc_enablelse();
 
-      lcdvdbg("APB1ENR: %08x CSR: %08x\n",
+      lcdinfo("APB1ENR: %08x CSR: %08x\n",
               getreg32(STM32_RCC_APB1ENR), getreg32(STM32_RCC_CSR));
 
       /* Set the LCD prescaler and divider values */
@@ -1527,7 +1505,7 @@ int stm32_slcd_initialize(void)
 
       /* Wait for the FCRSF flag to be set */
 
-      lcdvdbg("Wait for FCRSF, FSR: %08x SR: %08x\n",
+      lcdinfo("Wait for FCRSF, FSR: %08x SR: %08x\n",
               getreg32(STM32_LCD_FCR), getreg32(STM32_LCD_SR));
 
       while ((getreg32(STM32_LCD_SR) & LCD_SR_FCRSF) == 0);
@@ -1564,7 +1542,7 @@ int stm32_slcd_initialize(void)
 
       /* Wait Until the LCD FCR register is synchronized */
 
-      lcdvdbg("Wait for FCRSF, FSR: %08x SR: %08x\n",
+      lcdinfo("Wait for FCRSF, FSR: %08x SR: %08x\n",
               getreg32(STM32_LCD_FCR), getreg32(STM32_LCD_SR));
 
       while ((getreg32(STM32_LCD_SR) & LCD_SR_FCRSF) == 0);
@@ -1575,7 +1553,7 @@ int stm32_slcd_initialize(void)
 
       /* Wait Until the LCD is enabled and the LCD booster is ready */
 
-      lcdvdbg("Wait for LCD_SR_ENS and LCD_SR_RDY, CR: %08x SR: %08x\n",
+      lcdinfo("Wait for LCD_SR_ENS and LCD_SR_RDY, CR: %08x SR: %08x\n",
               getreg32(STM32_LCD_CR), getreg32(STM32_LCD_SR));
 
       while ((getreg32(STM32_LCD_SR) & (LCD_SR_ENS | LCD_SR_RDY)) != (LCD_SR_ENS | LCD_SR_RDY));

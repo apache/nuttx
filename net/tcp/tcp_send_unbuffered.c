@@ -302,7 +302,7 @@ static uint16_t tcpsend_interrupt(FAR struct net_driver_s *dev,
     }
 #endif
 
-  nllvdbg("flags: %04x acked: %d sent: %d\n",
+  nllinfo("flags: %04x acked: %d sent: %d\n",
           flags, pstate->snd_acked, pstate->snd_sent);
 
   /* If this packet contains an acknowledgement, then update the count of
@@ -348,7 +348,7 @@ static uint16_t tcpsend_interrupt(FAR struct net_driver_s *dev,
        */
 
       pstate->snd_acked = tcp_getsequence(tcp->ackno) - pstate->snd_isn;
-      nllvdbg("ACK: acked=%d sent=%d buflen=%d\n",
+      nllinfo("ACK: acked=%d sent=%d buflen=%d\n",
               pstate->snd_acked, pstate->snd_sent, pstate->snd_buflen);
 
       /* Have all of the bytes in the buffer been sent and acknowledged? */
@@ -392,7 +392,7 @@ static uint16_t tcpsend_interrupt(FAR struct net_driver_s *dev,
     {
       /* Report not connected */
 
-      nllvdbg("Lost connection\n");
+      nllinfo("Lost connection\n");
 
       net_lostconnection(pstate->snd_sock, flags);
       pstate->snd_sent = -ENOTCONN;
@@ -526,7 +526,7 @@ static uint16_t tcpsend_interrupt(FAR struct net_driver_s *dev,
            */
 
           seqno = pstate->snd_sent + pstate->snd_isn;
-          nllvdbg("SEND: sndseq %08x->%08x\n", conn->sndseq, seqno);
+          nllinfo("SEND: sndseq %08x->%08x\n", conn->sndseq, seqno);
           tcp_setsequence(conn->sndseq, seqno);
 
 #ifdef NEED_IPDOMAIN_SUPPORT
@@ -554,7 +554,7 @@ static uint16_t tcpsend_interrupt(FAR struct net_driver_s *dev,
               /* Update the amount of data sent (but not necessarily ACKed) */
 
               pstate->snd_sent += sndlen;
-              nllvdbg("SEND: acked=%d sent=%d buflen=%d\n",
+              nllinfo("SEND: acked=%d sent=%d buflen=%d\n",
                       pstate->snd_acked, pstate->snd_sent, pstate->snd_buflen);
 
             }
@@ -570,7 +570,7 @@ static uint16_t tcpsend_interrupt(FAR struct net_driver_s *dev,
     {
       /* Yes.. report the timeout */
 
-      nlldbg("SEND timeout\n");
+      nllwarn("WARNING: SEND timeout\n");
       pstate->snd_sent = -ETIMEDOUT;
       goto end_wait;
     }
@@ -719,15 +719,15 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
   FAR struct tcp_conn_s *conn = (FAR struct tcp_conn_s *)psock->s_conn;
   struct send_s state;
   net_lock_t save;
-  int err;
+  int errcode;
   int ret = OK;
 
   /* Verify that the sockfd corresponds to valid, allocated socket */
 
   if (!psock || psock->s_crefs <= 0)
     {
-      ndbg("ERROR: Invalid socket\n");
-      err = EBADF;
+      nerr("ERROR: Invalid socket\n");
+      errcode = EBADF;
       goto errout;
     }
 
@@ -735,8 +735,8 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
 
   if (psock->s_type != SOCK_STREAM || !_SS_ISCONNECTED(psock->s_flags))
     {
-      ndbg("ERROR: Not connected\n");
-      err = ENOTCONN;
+      nerr("ERROR: Not connected\n");
+      errcode = ENOTCONN;
       goto errout;
     }
 
@@ -773,8 +773,8 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
 
   if (ret < 0)
     {
-      ndbg("ERROR: Not reachable\n");
-      err = ENETUNREACH;
+      nerr("ERROR: Not reachable\n");
+      errcode = ENETUNREACH;
       goto errout;
     }
 #endif /* CONFIG_NET_ARP_SEND || CONFIG_NET_ICMPv6_NEIGHBOR */
@@ -857,7 +857,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
 
   if (state.snd_sent < 0)
     {
-      err = state.snd_sent;
+      errcode = state.snd_sent;
       goto errout;
     }
 
@@ -867,7 +867,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
 
   if (ret < 0)
     {
-      err = -ret;
+      errcode = -ret;
       goto errout;
     }
 
@@ -876,7 +876,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
   return state.snd_sent;
 
 errout:
-  set_errno(err);
+  set_errno(errcode);
   return ERROR;
 }
 

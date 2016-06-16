@@ -67,7 +67,7 @@
 #ifdef CONFIG_ARCH_LEDS
 	.globl	_board_autoled_initialize	/* Boot LED setup */
 #endif
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
 	.globl	_up_lowputc					/* Low-level debug output */
 #endif
 	.globl	_os_start					/* NuttX entry point */
@@ -161,7 +161,7 @@
  *****************************************************************************/
 
 	.macro	showprogress, code
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
 	mov.l	.Llowputc, r0				/* Address of up_earlyconsoleinit */
 	jsr		@r0							/* Call it */
 	mov		#\code, r4					/* Delay slot */
@@ -488,7 +488,7 @@ __start0:
 #endif
 .Llowsetup:
 	.long	_up_lowsetup
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
 .Llowputc:
 	.long	_up_lowputc
 #endif

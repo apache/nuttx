@@ -115,7 +115,7 @@ int nx_requestbkgd(NXHANDLE handle, FAR const struct nx_callback_s *cb,
   FAR struct nxfe_state_s *fe = (FAR struct nxfe_state_s *)handle;
   FAR struct nxbe_state_s *be = &fe->be;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!fe || !cb)
     {
       errno = EINVAL;

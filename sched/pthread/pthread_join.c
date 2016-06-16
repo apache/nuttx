@@ -87,7 +87,7 @@ int pthread_join(pthread_t thread, FAR pthread_addr_t *pexit_value)
   FAR struct join_s *pjoin;
   int ret;
 
-  sdbg("thread=%d group=%p\n", thread, group);
+  sinfo("thread=%d group=%p\n", thread, group);
   DEBUGASSERT(group);
 
   /* First make sure that this is not an attempt to join to
@@ -121,7 +121,7 @@ int pthread_join(pthread_t thread, FAR pthread_addr_t *pexit_value)
 
       FAR struct tcb_s *tcb = sched_gettcb((pthread_t)thread);
 
-      sdbg("Could not find thread data\n");
+      serr("ERROR: Could not find thread data\n");
 
       /* Case (1) or (3) -- we can't tell which.  Assume (3) */
 
@@ -159,19 +159,19 @@ int pthread_join(pthread_t thread, FAR pthread_addr_t *pexit_value)
 
       if (pjoin->terminated)
         {
-          sdbg("Thread has terminated\n");
+          sinfo("Thread has terminated\n");
 
           /* Get the thread exit value from the terminated thread. */
 
           if (pexit_value)
             {
-              sdbg("exit_value=0x%p\n", pjoin->exit_value);
+              sinfo("exit_value=0x%p\n", pjoin->exit_value);
               *pexit_value = pjoin->exit_value;
             }
         }
       else
         {
-          sdbg("Thread is still running\n");
+          sinfo("Thread is still running\n");
 
           /* Relinquish the data set semaphore.  Since pre-emption is
            * disabled, we can be certain that no task has the
@@ -195,7 +195,7 @@ int pthread_join(pthread_t thread, FAR pthread_addr_t *pexit_value)
           if (pexit_value)
             {
              *pexit_value = pjoin->exit_value;
-              sdbg("exit_value=0x%p\n", pjoin->exit_value);
+              sinfo("exit_value=0x%p\n", pjoin->exit_value);
             }
 
           /* Post the thread's data semaphore so that the exiting thread
@@ -230,6 +230,6 @@ int pthread_join(pthread_t thread, FAR pthread_addr_t *pexit_value)
       ret = OK;
     }
 
-  sdbg("Returning %d\n", ret);
+  sinfo("Returning %d\n", ret);
   return ret;
 }

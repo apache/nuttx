@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated May 28, 2016)
+NuttX TODO List (Last updated June 6, 2016)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -23,7 +23,7 @@ nuttx/:
  (11)  Libraries (libc/, libm/)
  (11)  File system/Generic drivers (fs/, drivers/)
   (8)  Graphics subsystem (graphics/)
-  (1)  Build system / Toolchains
+  (2)  Build system / Toolchains
   (3)  Linux/Cywgin simulation (arch/sim)
   (4)  ARM (arch/arm/)
 
@@ -1600,6 +1600,19 @@ o Build system
                   some new argument, perhaps -u.
   Status:      Open
   Priority:    Low.
+
+  Title:       NATIVE WINDOWS BUILD BROKEN
+  Description: The way that apps/ no generates Kmenu files depends on changes added
+               to apps/tools/mkkconfig.sh.  Similar changes need to be made to
+               apps/tools/mkkconfig.bat to restore the Windows Native build.
+               UPDATE: The mkkconfig.bat script has been updated and appears to work.
+               A native build has still not been attempted and there could likely be
+               issues the carriage returns in Kconfig files.  There are also some
+               issues the interpreters/ficl and bas directories during 'make menuconfig'
+               that still need to be investigated.
+  Status:      Open
+  Priority:    Low, since I am not aware of anyone using the Windows Native build.
+               But, of course, very high if you want to use it.
 
 o Other drivers (drivers/)
   ^^^^^^^^^^^^^^^^^^^^^^^^

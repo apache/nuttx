@@ -49,7 +49,7 @@
 
 	/* This macro will modify r0, r1, r2 and r14 */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
 	.macro	showprogress, code
 	mov	r0, #\code
 	bl	up_lowputc
@@ -115,7 +115,7 @@ __start:
 	bl		up_earlyserialinit
 #endif
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
 	mov		r0, #'C'
 	bl		up_putc
 	mov		r0, #'\n'

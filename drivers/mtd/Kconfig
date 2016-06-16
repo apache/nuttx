@@ -397,6 +397,23 @@ config AT45DB_PWRSAVE
 
 endif # MTD_AT45DB
 
+config MTD_IS25XP
+	bool "SPI-based IS25XP FLASH"
+	default n
+	select SPI
+
+if MTD_IS25XP
+
+config IS25XP_SPIMODE
+	int "IS25 SPI Mode"
+	default 0
+
+config IS25XP_SPIFREQUENCY
+	int "IS25 SPI Frequency"
+	default 20000000
+
+endif # MTD_IS25XP
+
 config MTD_M25P
 	bool "SPI-based M25P FLASH"
 	default n
@@ -496,7 +513,7 @@ config MTD_N25QXXX
 	default n
 	---help---
 		Support the N25Q016A, N25Q032A, N25Q064A, N25Q128A, N25Q256A
-		
+
 
 if MTD_N25QXXX
 

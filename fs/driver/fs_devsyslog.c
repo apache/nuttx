@@ -167,7 +167,7 @@ static inline int syslog_takesem(void)
 
 static inline void syslog_givesem(void)
 {
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_ASSERTIONS
   pid_t me = getpid();
   DEBUGASSERT(g_sysdev.sl_holder == me);
 #endif

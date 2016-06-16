@@ -66,7 +66,7 @@
  *    going high, it will start high and will go low when an interrupt
  *    is fired. Default:  Active high/rising edge.
  * CONFIG_ADXL345_REGDEBUG
- *   Enable very low register-level debug output.  Requires CONFIG_DEBUG.
+ *   Enable very low register-level debug output.  Requires CONFIG_DEBUG_FEATURES.
  */
 
 #ifdef CONFIG_DISABLE_SIGNALS

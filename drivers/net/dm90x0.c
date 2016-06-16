@@ -433,7 +433,7 @@ static void putreg(int reg, uint8_t value)
 
 static void read8(FAR uint8_t *ptr, int len)
 {
-  nvdbg("Read %d bytes (8-bit mode)\n", len);
+  ninfo("Read %d bytes (8-bit mode)\n", len);
   for (; len > 0; len--)
     {
       *ptr++ = DM9X_DATA;
@@ -444,7 +444,7 @@ static void read16(FAR uint8_t *ptr, int len)
 {
   FAR uint16_t *ptr16 = (FAR uint16_t *)ptr;
 
-  nvdbg("Read %d bytes (16-bit mode)\n", len);
+  ninfo("Read %d bytes (16-bit mode)\n", len);
   for (; len > 0; len -= sizeof(uint16_t))
     {
       *ptr16++ = DM9X_DATA;
@@ -455,7 +455,7 @@ static void read32(FAR uint8_t *ptr, int len)
 {
   FAR uint32_t *ptr32 = (FAR uint32_t *)ptr;
 
-  nvdbg("Read %d bytes (32-bit mode)\n", len);
+  ninfo("Read %d bytes (32-bit mode)\n", len);
   for (; len > 0; len -= sizeof(uint32_t))
     {
       *ptr32++ = DM9X_DATA;
@@ -481,7 +481,7 @@ static void read32(FAR uint8_t *ptr, int len)
 
 static void discard8(int len)
 {
-  nvdbg("Discard %d bytes (8-bit mode)\n", len);
+  ninfo("Discard %d bytes (8-bit mode)\n", len);
   for (; len > 0; len--)
     {
       DM9X_DATA;
@@ -490,7 +490,7 @@ static void discard8(int len)
 
 static void discard16(int len)
 {
-  nvdbg("Discard %d bytes (16-bit mode)\n", len);
+  ninfo("Discard %d bytes (16-bit mode)\n", len);
   for (; len > 0; len -= sizeof(uint16_t))
     {
       DM9X_DATA;
@@ -499,7 +499,7 @@ static void discard16(int len)
 
 static void discard32(int len)
 {
-  nvdbg("Discard %d bytes (32-bit mode)\n", len);
+  ninfo("Discard %d bytes (32-bit mode)\n", len);
   for (; len > 0; len -= sizeof(uint32_t))
     {
       DM9X_DATA;
@@ -525,7 +525,7 @@ static void discard32(int len)
 
 static void write8(FAR const uint8_t *ptr, int len)
 {
-  nvdbg("Write %d bytes (8-bit mode)\n", len);
+  ninfo("Write %d bytes (8-bit mode)\n", len);
 
   for (; len > 0; len--)
     {
@@ -537,7 +537,7 @@ static void write16(const uint8_t *ptr, int len)
 {
   FAR uint16_t *ptr16 = (FAR uint16_t *)ptr;
 
-  nvdbg("Write %d bytes (16-bit mode)\n", len);
+  ninfo("Write %d bytes (16-bit mode)\n", len);
 
   for (; len > 0; len -= sizeof(uint16_t))
     {
@@ -549,7 +549,7 @@ static void write32(FAR const uint8_t *ptr, int len)
 {
   FAR uint32_t *ptr32 = (FAR uint32_t *)ptr;
 
-  nvdbg("Write %d bytes (32-bit mode)\n", len);
+  ninfo("Write %d bytes (32-bit mode)\n", len);
 
   for (; len > 0; len -= sizeof(uint32_t))
     {
@@ -831,7 +831,7 @@ static void dm9x_receive(FAR struct dm9x_driver_s *dm9x)
   bool bchecksumready;
   uint8_t rxbyte;
 
-  nvdbg("Packet received\n");
+  ninfo("Packet received\n");
 
   do
     {
@@ -865,7 +865,7 @@ static void dm9x_receive(FAR struct dm9x_driver_s *dm9x)
         {
           /* Bad RX packet... update statistics */
 
-          ndbg("Received packet with errors: %02x\n", rx.desc.rx_status);
+          nerr("ERROR: Received packet with errors: %02x\n", rx.desc.rx_status);
           NETDEV_RXERRORS(&dm9x->dm_dev);
 
           /* Drop this packet and continue to check the next packet */
@@ -877,7 +877,7 @@ static void dm9x_receive(FAR struct dm9x_driver_s *dm9x)
 
       else if (rx.desc.rx_len < ETH_HDRLEN || rx.desc.rx_len > (CONFIG_NET_ETH_MTU + 2))
         {
-          ndbg("RX length error\n");
+          nerr("ERROR: RX length error\n");
           NETDEV_RXERRORS(&dm9x->dm_dev);
 
           /* Drop this packet and continue to check the next packet */
@@ -902,7 +902,7 @@ static void dm9x_receive(FAR struct dm9x_driver_s *dm9x)
 #ifdef CONFIG_NET_IPv4
           if (BUF->type == HTONS(ETHTYPE_IP))
             {
-              nllvdbg("IPv4 frame\n");
+              nllinfo("IPv4 frame\n");
               NETDEV_RXIPV4(&priv->dm_dev);
 
               /* Handle ARP on input then give the IPv4 packet to the network
@@ -943,7 +943,7 @@ static void dm9x_receive(FAR struct dm9x_driver_s *dm9x)
 #ifdef CONFIG_NET_IPv6
           if (BUF->type == HTONS(ETHTYPE_IP6))
             {
-              nllvdbg("Iv6 frame\n");
+              nllinfo("Iv6 frame\n");
               NETDEV_RXIPV6(&priv->dm_dev);
 
               /* Give the IPv6 packet to the network layer */
@@ -1004,7 +1004,7 @@ static void dm9x_receive(FAR struct dm9x_driver_s *dm9x)
       dm9x->ncrxpackets++;
     }
   while ((rxbyte & 0x01) == DM9X_PKTRDY && dm9x->ncrxpackets < DM9X_CRXTHRES);
-  nvdbg("All RX packets processed\n");
+  ninfo("All RX packets processed\n");
 }
 
 /****************************************************************************
@@ -1027,7 +1027,7 @@ static void dm9x_txdone(struct dm9x_driver_s *dm9x)
 {
   int  nsr;
 
-  nvdbg("TX done\n");
+  ninfo("TX done\n");
 
   /* Another packet has completed transmission.  Decrement the count of
    * of pending TX transmissions.
@@ -1042,7 +1042,7 @@ static void dm9x_txdone(struct dm9x_driver_s *dm9x)
         }
       else
         {
-          ndbg("Bad TX count (TX1END)\n");
+          nerr("ERROR: Bad TX count (TX1END)\n");
         }
     }
 
@@ -1054,7 +1054,7 @@ static void dm9x_txdone(struct dm9x_driver_s *dm9x)
         }
       else
         {
-          ndbg("Bad TX count (TX2END)\n");
+          nerr("ERROR: Bad TX count (TX2END)\n");
         }
     }
 
@@ -1110,7 +1110,7 @@ static int dm9x_interrupt(int irq, FAR void *context)
 
   isr = getreg(DM9X_ISR);
   putreg(DM9X_ISR, isr);
-  nvdbg("Interrupt status: %02x\n", isr);
+  ninfo("Interrupt status: %02x\n", isr);
 
   /* Check for link status change */
 
@@ -1144,7 +1144,8 @@ static int dm9x_interrupt(int irq, FAR void *context)
             }
           up_mdelay(1);
         }
-      ndbg("delay: %dmS speed: %s\n", i, dm9x->dm_b100M ? "100M" : "10M");
+
+      nerr("ERROR: delay: %dmS speed: %s\n", i, dm9x->dm_b100M ? "100M" : "10M");
     }
 
   /* Check if we received an incoming packet */
@@ -1206,17 +1207,17 @@ static void dm9x_txtimeout(int argc, uint32_t arg, ...)
 {
   struct dm9x_driver_s *dm9x = (struct dm9x_driver_s *)arg;
 
-  ndbg("TX timeout\n");
+  nerr("ERROR: TX timeout\n");
 
   /* Increment statistics and dump debug info */
 
   NETDEV_TXTIMEOUTS(dm9x->dm_dev);
 
-  ndbg("  TX packet count:           %d\n", dm9x->dm_ntxpending);
-  ndbg("  TX read pointer address:   0x%02x:%02x\n",
-       getreg(DM9X_TRPAH), getreg(DM9X_TRPAL));
-  ndbg("  Memory data write address: 0x%02x:%02x (DM9010)\n",
-       getreg(DM9X_MDWAH), getreg(DM9X_MDWAL));
+  ninfo("  TX packet count:           %d\n", dm9x->dm_ntxpending);
+  ninfo("  TX read pointer address:   0x%02x:%02x\n",
+        getreg(DM9X_TRPAH), getreg(DM9X_TRPAL));
+  ninfo("  Memory data write address: 0x%02x:%02x (DM9010)\n",
+        getreg(DM9X_MDWAH), getreg(DM9X_MDWAL));
 
   /* Then reset the DM90x0 */
 
@@ -1342,9 +1343,9 @@ static int dm9x_ifup(struct net_driver_s *dev)
   uint8_t netstatus;
   int i;
 
-  ndbg("Bringing up: %d.%d.%d.%d\n",
-       dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
-       (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
+  ninfo("Bringing up: %d.%d.%d.%d\n",
+        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
+        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
 
   /* Initilize DM90x0 chip */
 
@@ -1372,7 +1373,7 @@ static int dm9x_ifup(struct net_driver_s *dev)
       up_mdelay(1);
     }
 
-  ndbg("delay: %dmS speed: %s\n", i, dm9x->dm_b100M ? "100M" : "10M");
+  ninfo("delay: %dmS speed: %s\n", i, dm9x->dm_b100M ? "100M" : "10M");
 
   /* Set and activate a timer process */
 
@@ -1407,7 +1408,7 @@ static int dm9x_ifdown(struct net_driver_s *dev)
   struct dm9x_driver_s *dm9x = (struct dm9x_driver_s *)dev->d_private;
   irqstate_t flags;
 
-  ndbg("Stopping\n");
+  ninfo("Stopping\n");
 
   /* Disable the DM9X interrupt */
 
@@ -1456,7 +1457,7 @@ static int dm9x_txavail(struct net_driver_s *dev)
   struct dm9x_driver_s *dm9x = (struct dm9x_driver_s *)dev->d_private;
   irqstate_t flags;
 
-  ndbg("Polling\n");
+  ninfo("Polling\n");
   flags = enter_critical_section();
 
   /* Ignore the notification if the interface is not yet up */
@@ -1557,7 +1558,7 @@ static int dm9x_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 
 static void dm9x_bringup(struct dm9x_driver_s *dm9x)
 {
-  ndbg("Initializing\n");
+  ninfo("Initializing\n");
 
   /* Set the internal PHY power-on, GPIOs normal, and wait 2ms */
 
@@ -1722,13 +1723,13 @@ int dm9x_initialize(void)
 
   vid = (((uint16_t)getreg(DM9X_VIDH)) << 8) | (uint16_t)getreg(DM9X_VIDL);
   pid = (((uint16_t)getreg(DM9X_PIDH)) << 8) | (uint16_t)getreg(DM9X_PIDL);
-  nlldbg("I/O base: %08x VID: %04x PID: %04x\n", CONFIG_DM9X_BASE, vid, pid);
+  nllinfo("I/O base: %08x VID: %04x PID: %04x\n", CONFIG_DM9X_BASE, vid, pid);
 
   /* Check if a DM90x0 chip is recognized at this I/O base */
 
   if (vid != DM9X_DAVICOMVID || (pid != DM9X_DM9000PID && pid != DM9X_DM9010PID))
     {
-      nlldbg("DM90x0 vendor/product ID not found at this base address\n");
+      nllerr("ERROR: DM90x0 vendor/product ID not found at this base address\n");
       return -ENODEV;
     }
 
@@ -1738,7 +1739,7 @@ int dm9x_initialize(void)
     {
       /* We could not attach the ISR to the ISR */
 
-      nlldbg("irq_attach() failed\n");
+      nllerr("ERROR: irq_attach() failed\n");
       return -EAGAIN;
     }
 
@@ -1767,7 +1768,7 @@ int dm9x_initialize(void)
       mptr[i] = getreg(j);
     }
 
-  nlldbg("MAC: %0x:%0x:%0x:%0x:%0x:%0x\n",
+  nllinfo("MAC: %0x:%0x:%0x:%0x:%0x:%0x\n",
          mptr[0], mptr[1], mptr[2], mptr[3], mptr[4], mptr[5]);
 
   /* Register the device with the OS so that socket IOCTLs can be performed */

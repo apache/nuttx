@@ -73,27 +73,27 @@
 
 #ifdef CONFIG_CPP_HAVE_VARARGS
 #  ifdef IGMP_GTMRDEBUG
-#    define gtmrdbg(format, ...)    ndbg(format, ##__VA_ARGS__)
-#    define gtmrlldbg(format, ...)  nlldbg(format, ##__VA_ARGS__)
-#    define gtmrvdbg(format, ...)   nvdbg(format, ##__VA_ARGS__)
-#    define gtmrllvdbg(format, ...) nllvdbg(format, ##__VA_ARGS__)
+#    define gtmrerr(format, ...)    nerr(format, ##__VA_ARGS__)
+#    define gtmrllerr(format, ...)  nllerr(format, ##__VA_ARGS__)
+#    define gtmrinfo(format, ...)   ninfo(format, ##__VA_ARGS__)
+#    define gtmrllinfo(format, ...) nllinfo(format, ##__VA_ARGS__)
 #  else
-#    define gtmrdbg(x...)
-#    define gtmrlldbg(x...)
-#    define gtmrvdbg(x...)
-#    define gtmrllvdbg(x...)
+#    define gtmrerr(x...)
+#    define gtmrllerr(x...)
+#    define gtmrinfo(x...)
+#    define gtmrllinfo(x...)
 #  endif
 #else
 #  ifdef IGMP_GTMRDEBUG
-#    define gtmrdbg    ndbg
-#    define gtmrlldbg  nlldbg
-#    define gtmrvdbg   nvdbg
-#    define gtmrllvdbg nllvdbg
+#    define gtmrerr    nerr
+#    define gtmrllerr  nllerr
+#    define gtmrinfo   ninfo
+#    define gtmrllinfo nllinfo
 #  else
-#    define gtmrdbg    (void)
-#    define gtmrlldbg  (void)
-#    define gtmrvdbg   (void)
-#    define gtmrllvdbg (void)
+#    define gtmrerr    (void)
+#    define gtmrllerr  (void)
+#    define gtmrinfo   (void)
+#    define gtmrllinfo (void)
 #  endif
 #endif
 
@@ -119,7 +119,7 @@ static void igmp_timeout(int argc, uint32_t arg, ...)
 
   /* If the state is DELAYING_MEMBER then we send a report for this group */
 
-  nllvdbg("Timeout!\n");
+  nllinfo("Timeout!\n");
   group = (FAR struct igmp_group_s *)arg;
   DEBUGASSERT(argc == 1 && group);
 
@@ -170,7 +170,7 @@ void igmp_startticks(FAR struct igmp_group_s *group, unsigned int ticks)
 
   /* Start the timer */
 
-  gtmrlldbg("ticks: %d\n", ticks);
+  gtmrllinfo("ticks: %d\n", ticks);
 
   ret = wd_start(group->wdog, ticks, igmp_timeout, 1, (uint32_t)group);
 
@@ -184,7 +184,7 @@ void igmp_starttimer(FAR struct igmp_group_s *group, uint8_t decisecs)
    * Important!! this should be a random timer from 0 to decisecs
    */
 
-  gtmrdbg("decisecs: %d\n", decisecs);
+  gtmrinfo("decisecs: %d\n", decisecs);
   igmp_startticks(group, net_dsec2tick(decisecs));
 }
 
@@ -224,7 +224,7 @@ bool igmp_cmptimer(FAR struct igmp_group_s *group, int maxticks)
    * test as well.
    */
 
-  gtmrdbg("maxticks: %d remaining: %d\n", maxticks, remaining);
+  gtmrinfo("maxticks: %d remaining: %d\n", maxticks, remaining);
   if (maxticks > remaining)
     {
       /* Cancel the watchdog timer and return true */

@@ -89,7 +89,7 @@ int nxbe_configure(FAR NX_DRIVERTYPE *dev, FAR struct nxbe_state_s *be)
   ret = dev->getvideoinfo(dev, &be->vinfo);
   if (ret < 0)
     {
-      gdbg("Failed to get vinfo\n");
+      gerr("ERROR: Failed to get vinfo\n");
       return ret;
     }
 
@@ -99,16 +99,16 @@ int nxbe_configure(FAR NX_DRIVERTYPE *dev, FAR struct nxbe_state_s *be)
 
   /* Check the number of color planes */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (be->vinfo.nplanes > CONFIG_NX_NPLANES)
     {
-      gdbg("NX configured for only %d planes, controller wants %d\n",
+      gerr("ERROR: NX configured for only %d planes, controller wants %d\n",
            CONFIG_NX_NPLANES, be->vinfo.nplanes);
       return -E2BIG;
     }
   else if (be->vinfo.nplanes < CONFIG_NX_NPLANES)
     {
-      gdbg("NX configured for %d planes, controller only needs %d\n",
+      gwarn("WARNING: NX configured for %d planes, controller only needs %d\n",
            CONFIG_NX_NPLANES, be->vinfo.nplanes);
     }
 #endif
@@ -120,7 +120,7 @@ int nxbe_configure(FAR NX_DRIVERTYPE *dev, FAR struct nxbe_state_s *be)
       ret = dev->getplaneinfo(dev, i, &be->plane[i].pinfo);
       if (ret < 0)
         {
-          gdbg("Failed to get pinfo[%d]\n", i);
+          gerr("ERROR: Failed to get pinfo[%d]\n", i);
           return ret;
         }
 
@@ -216,7 +216,7 @@ int nxbe_configure(FAR NX_DRIVERTYPE *dev, FAR struct nxbe_state_s *be)
       else
 #endif
         {
-          gdbg("Unsupported pinfo[%d] BPP: %d\n", i, be->plane[i].pinfo.bpp);
+          gerr("ERROR: Unsupported pinfo[%d] BPP: %d\n", i, be->plane[i].pinfo.bpp);
           return -ENOSYS;
         }
     }

@@ -181,7 +181,7 @@ static void tsc_enable(FAR struct ads7843e_config_s *state, bool enable)
 
   /* Attach and enable, or detach and disable */
 
-  ivdbg("enable:%d\n", enable);
+  iinfo("enable:%d\n", enable);
   if (enable)
     {
       (void)stm32_gpiosetevent(GPIO_TP_INT, true, true, false,
@@ -220,7 +220,7 @@ static bool tsc_pendown(FAR struct ads7843e_config_s *state)
    */
 
   bool pendown = !stm32_gpioread(GPIO_TP_INT);
-  ivdbg("pendown:%d\n", pendown);
+  iinfo("pendown:%d\n", pendown);
   return pendown;
 }
 
@@ -251,7 +251,7 @@ int board_tsc_setup(int minor)
   FAR struct spi_dev_s *dev;
   int ret;
 
-  idbg("minor %d\n", minor);
+  iinfo("minor %d\n", minor);
   DEBUGASSERT(minor == 0);
 
   /* Configure and enable the ADS7843E interrupt pin as an input. */
@@ -263,7 +263,7 @@ int board_tsc_setup(int minor)
   dev = stm32_spibus_initialize(CONFIG_ADS7843E_SPIDEV);
   if (!dev)
     {
-      idbg("Failed to initialize SPI bus %d\n", CONFIG_ADS7843E_SPIDEV);
+      ierr("ERROR: Failed to initialize SPI bus %d\n", CONFIG_ADS7843E_SPIDEV);
       return -ENODEV;
     }
 
@@ -272,7 +272,7 @@ int board_tsc_setup(int minor)
   ret = ads7843e_register(dev, &g_tscinfo.dev, CONFIG_ADS7843E_DEVMINOR);
   if (ret < 0)
     {
-      idbg("Failed to initialize SPI bus %d\n", CONFIG_ADS7843E_SPIDEV);
+      ierr("ERROR: Failed to initialize SPI bus %d\n", CONFIG_ADS7843E_SPIDEV);
       /* up_spiuninitialize(dev); */
       return -ENODEV;
     }

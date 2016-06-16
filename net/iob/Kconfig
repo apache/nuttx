@@ -63,7 +63,7 @@ config IOB_THROTTLE
 config IOB_DEBUG
 	bool "Force I/O buffer debug"
 	default n
-	depends on DEBUG
+	depends on DEBUG_FEATURES
 	---help---
 		This option will force debug output from I/O buffer logic,
 		even without network debug output.  This is not normally something

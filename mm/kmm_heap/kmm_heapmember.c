@@ -43,7 +43,7 @@
 
 #include <nuttx/mm/mm.h>
 
-#if defined(CONFIG_MM_KERNEL_HEAP) && defined(CONFIG_DEBUG)
+#if defined(CONFIG_MM_KERNEL_HEAP) && defined(CONFIG_DEBUG_FEATURES)
 
 /****************************************************************************
  * Public Functions
@@ -105,4 +105,4 @@ bool kmm_heapmember(FAR void *mem)
 #endif
 }
 
-#endif /* CONFIG_MM_KERNEL_HEAP && CONFIG_DEBUG */
+#endif /* CONFIG_MM_KERNEL_HEAP && CONFIG_DEBUG_FEATURES */

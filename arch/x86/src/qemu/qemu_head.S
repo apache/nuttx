@@ -64,7 +64,7 @@
 /* Trace macros, use like trace 'i' to print char to serial port. */
 
 	.macro	trace, ch
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
 	mov		$0x3f8, %dx
 	mov		$\ch, %al
 	out		%al, %dx

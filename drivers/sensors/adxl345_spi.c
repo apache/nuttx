@@ -113,7 +113,7 @@ uint8_t adxl345_getreg8(FAR struct adxl345_dev_s *priv, uint8_t regaddr)
   (void)SPI_LOCK(priv->spi, false);
 
 #ifdef CONFIG_ADXL345_REGDEBUG
-  dbg("%02x->%02x\n", regaddr, regval);
+  _err("%02x->%02x\n", regaddr, regval);
 #endif
   return regval;
 }
@@ -130,7 +130,7 @@ void adxl345_putreg8(FAR struct adxl345_dev_s *priv, uint8_t regaddr,
                      uint8_t regval)
 {
 #ifdef CONFIG_ADXL345_REGDEBUG
-  dbg("%02x<-%02x\n", regaddr, regval);
+  _err("%02x<-%02x\n", regaddr, regval);
 #endif
 
   /* If SPI bus is shared then lock and configure it */
@@ -191,7 +191,7 @@ uint16_t adxl345_getreg16(FAR struct adxl345_dev_s *priv, uint8_t regaddr)
   (void)SPI_LOCK(priv->spi, false);
 
 #ifdef CONFIG_ADXL345_REGDEBUG
-  dbg("%02x->%04x\n", regaddr, regval);
+  _err("%02x->%04x\n", regaddr, regval);
 #endif
 
   return regval;

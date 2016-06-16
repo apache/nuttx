@@ -660,7 +660,7 @@ static int lsm9ds1_readreg8(FAR struct lsm9ds1_dev_s *priv, uint8_t regaddr,
   ret = i2c_write(priv->i2c, &config, &regaddr, sizeof(regaddr));
   if (ret < 0)
     {
-      sndbg("i2c_write failed: %d\n", ret);
+      snerr("ERROR: i2c_write failed: %d\n", ret);
       return ret;
     }
 
@@ -669,11 +669,11 @@ static int lsm9ds1_readreg8(FAR struct lsm9ds1_dev_s *priv, uint8_t regaddr,
   ret = i2c_read(priv->i2c, &config, regval, sizeof(*regval));
   if (ret < 0)
     {
-      sndbg("i2c_read failed: %d\n", ret);
+      snerr("ERROR: i2c_read failed: %d\n", ret);
       return ret;
     }
 
-  snvdbg("addr: %02x value: %02x\n", regaddr, *regval);
+  sninfo("addr: %02x value: %02x\n", regaddr, *regval);
   return OK;
 }
 
@@ -712,11 +712,11 @@ static int lsm9ds1_writereg8(FAR struct lsm9ds1_dev_s *priv, uint8_t regaddr,
   ret = i2c_write(priv->i2c, &config, buffer, sizeof(buffer));
   if (ret < 0)
     {
-      sndbg("i2c_write failed: %d\n", ret);
+      snerr("ERROR: i2c_write failed: %d\n", ret);
       return ret;
     }
 
-  snvdbg("addr: %02x value: %02x\n", regaddr, regval);
+  sninfo("addr: %02x value: %02x\n", regaddr, regval);
   return OK;
 }
 
@@ -741,7 +741,7 @@ static int lsm9ds1_modifyreg8(FAR struct lsm9ds1_dev_s *priv, uint8_t regaddr,
   ret = lsm9ds1_readreg8(priv, regaddr, &regval);
   if (ret < 0)
     {
-      sndbg("lsm9ds1_readreg8 failed: %d\n", ret);
+      snerr("ERROR: lsm9ds1_readreg8 failed: %d\n", ret);
       return ret;
     }
 
@@ -751,7 +751,7 @@ static int lsm9ds1_modifyreg8(FAR struct lsm9ds1_dev_s *priv, uint8_t regaddr,
   ret = lsm9ds1_writereg8(priv, regaddr, regval);
   if (ret < 0)
     {
-      sndbg("lsm9ds1_writereg8 failed: %d\n", ret);
+      snerr("ERROR: lsm9ds1_writereg8 failed: %d\n", ret);
       return ret;
     }
 
@@ -793,13 +793,13 @@ static int lsm9ds1accelgyro_config(FAR struct lsm9ds1_dev_s *priv)
   ret = lsm9ds1_readreg8(priv, LSM9DS1_WHO_AM_I, &regval);
   if (ret < 0)
     {
-      sndbg("lsm9ds1_readreg8 failed: %d\n", ret);
+      snerr("ERROR: lsm9ds1_readreg8 failed: %d\n", ret);
       return ret;
     }
 
   if (regval != LSM9DS1_WHO_AM_I_VALUE)
     {
-      sndbg("Invalid device identification %02x\n", regval);
+      snerr("ERROR: Invalid device identification %02x\n", regval);
       return -ENODEV;
     }
 
@@ -1047,13 +1047,13 @@ static int lsm9ds1mag_config(FAR struct lsm9ds1_dev_s *priv)
   ret = lsm9ds1_readreg8(priv, LSM9DS1_WHO_AM_I_M, &regval);
   if (ret < 0)
     {
-      sndbg("lsm9ds1_readreg8 failed: %d\n", ret);
+      snerr("ERROR: lsm9ds1_readreg8 failed: %d\n", ret);
       return ret;
     }
 
   if (regval != LSM9DS1_WHO_AM_I_M_VALUE)
     {
-      sndbg("Invalid device identification %02x\n", regval);
+      snerr("ERROR: Invalid device identification %02x\n", regval);
       return -ENODEV;
     }
 
@@ -1280,7 +1280,7 @@ static ssize_t lsm9ds1_read(FAR struct file *filep, FAR char *buffer,
           ret = lsm9ds1_readreg8(priv, regaddr, &lo);
           if (ret < 0)
             {
-              sndbg("lsm9ds1_readreg8 failed: %d\n", ret);
+              snerr("ERROR: lsm9ds1_readreg8 failed: %d\n", ret);
               return (ssize_t)ret;
             }
 
@@ -1291,7 +1291,7 @@ static ssize_t lsm9ds1_read(FAR struct file *filep, FAR char *buffer,
           ret = lsm9ds1_readreg8(priv, regaddr, &hi);
           if (ret < 0)
             {
-              sndbg("lsm9ds1_readreg8 failed: %d\n", ret);
+              snerr("ERROR: lsm9ds1_readreg8 failed: %d\n", ret);
               return (ssize_t)ret;
             }
 
@@ -1390,20 +1390,20 @@ static int lsm9ds1_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case SNIOC_SETSAMPLERATE:
         ret = priv->ops->setsamplerate(priv, (uint32_t)arg);
-        sndbg("sample rate: %08x ret: %d\n", (uint32_t)arg, ret);
+        sninfo("sample rate: %08x ret: %d\n", (uint32_t)arg, ret);
         break;
 
       /* Set the full-scale range. Arg: uint32_t value. */
 
       case SNIOC_SETFULLSCALE:
         ret = priv->ops->setfullscale(priv, (uint32_t)arg);
-        sndbg("full-scale range: %08x ret: %d\n", (uint32_t)arg, ret);
+        sninfo("full-scale range: %08x ret: %d\n", (uint32_t)arg, ret);
         break;
 
       /* Unrecognized commands */
 
       default:
-        sndbg("Unrecognized cmd: %d arg: %lu\n", cmd, arg);
+        snerr("ERROR: Unrecognized cmd: %d arg: %lu\n", cmd, arg);
         ret = -ENOTTY;
         break;
     }
@@ -1453,7 +1453,7 @@ static int lsm9ds1_register(FAR const char *devpath,
   priv = (FAR struct lsm9ds1_dev_s *)kmm_malloc(sizeof(*priv));
   if (priv == NULL)
     {
-      sndbg("Failed to allocate instance\n");
+      snerr("ERROR: Failed to allocate instance\n");
       return -ENOMEM;
     }
 
@@ -1468,7 +1468,7 @@ static int lsm9ds1_register(FAR const char *devpath,
   ret = priv->ops->config(priv);
   if (ret < 0)
     {
-      sndbg("Failed to configure device: %d\n", ret);
+      snerr("ERROR: Failed to configure device: %d\n", ret);
       kmm_free(priv);
       return ret;
     }
@@ -1478,7 +1478,7 @@ static int lsm9ds1_register(FAR const char *devpath,
   ret = register_driver(devpath, &g_fops, 0666, priv);
   if (ret < 0)
     {
-      sndbg("Failed to register driver: %d\n", ret);
+      snerr("ERROR: Failed to register driver: %d\n", ret);
       kmm_free(priv);
       return ret;
     }

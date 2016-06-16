@@ -69,16 +69,16 @@
 
 void arp_dump(FAR struct arp_hdr_s *arp)
 {
-  nlldbg("  HW type: %04x Protocol: %04x\n",
+  nllerr("  HW type: %04x Protocol: %04x\n",
          arp->ah_hwtype, arp->ah_protocol);
-  nlldbg("  HW len: %02x Proto len: %02x Operation: %04x\n",
+  nllerr("  HW len: %02x Proto len: %02x Operation: %04x\n",
          arp->ah_hwlen, arp->ah_protolen, arp->ah_opcode);
-  nlldbg("  Sender MAC: %02x:%02x:%02x:%02x:%02x:%02x IP: %d.%d.%d.%d\n",
+  nllerr("  Sender MAC: %02x:%02x:%02x:%02x:%02x:%02x IP: %d.%d.%d.%d\n",
          arp->ah_shwaddr[0], arp->ah_shwaddr[1], arp->ah_shwaddr[2],
          arp->ah_shwaddr[3], arp->ah_shwaddr[4], arp->ah_shwaddr[5],
          arp->ah_sipaddr[0] & 0xff, arp->ah_sipaddr[0] >> 8,
          arp->ah_sipaddr[1] & 0xff, arp->ah_sipaddr[1] >> 8);
-  nlldbg("  Dest MAC:   %02x:%02x:%02x:%02x:%02x:%02x IP: %d.%d.%d.%d\n",
+  nllerr("  Dest MAC:   %02x:%02x:%02x:%02x:%02x:%02x IP: %d.%d.%d.%d\n",
          arp->ah_dhwaddr[0], arp->ah_dhwaddr[1], arp->ah_dhwaddr[2],
          arp->ah_dhwaddr[3], arp->ah_dhwaddr[4], arp->ah_dhwaddr[5],
          arp->ah_dipaddr[0] & 0xff, arp->ah_dipaddr[0] >> 8,

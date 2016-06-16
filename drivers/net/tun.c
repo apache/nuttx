@@ -425,7 +425,7 @@ static void tun_receive(FAR struct tun_device_s *priv)
   /* We only accept IP packets of the configured type and ARP packets */
 
 #if defined(CONFIG_NET_IPv4)
-  nllvdbg("IPv4 frame\n");
+  nllinfo("IPv4 frame\n");
   NETDEV_RXIPV4(&priv->dev);
 
   /* Give the IPv4 packet to the network layer */
@@ -448,7 +448,7 @@ static void tun_receive(FAR struct tun_device_s *priv)
     }
 
 #elif defined(CONFIG_NET_IPv6)
-  nllvdbg("Iv6 frame\n");
+  nllinfo("Iv6 frame\n");
   NETDEV_RXIPV6(&priv->dev);
 
   /* Give the IPv6 packet to the network layer */
@@ -646,15 +646,15 @@ static int tun_ifup(struct net_driver_s *dev)
   FAR struct tun_device_s *priv = (FAR struct tun_device_s *)dev->d_private;
 
 #ifdef CONFIG_NET_IPv4
-  ndbg("Bringing up: %d.%d.%d.%d\n",
-       dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
-       (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
+  ninfo("Bringing up: %d.%d.%d.%d\n",
+        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
+        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
 #endif
 #ifdef CONFIG_NET_IPv6
-  ndbg("Bringing up: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
-       dev->d_ipv6addr[0], dev->d_ipv6addr[1], dev->d_ipv6addr[2],
-       dev->d_ipv6addr[3], dev->d_ipv6addr[4], dev->d_ipv6addr[5],
-       dev->d_ipv6addr[6], dev->d_ipv6addr[7]);
+  ninfo("Bringing up: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
+        dev->d_ipv6addr[0], dev->d_ipv6addr[1], dev->d_ipv6addr[2],
+        dev->d_ipv6addr[3], dev->d_ipv6addr[4], dev->d_ipv6addr[5],
+        dev->d_ipv6addr[6], dev->d_ipv6addr[7]);
 #endif
 
   /* Initialize PHYs, the Ethernet interface, and setup up Ethernet interrupts */

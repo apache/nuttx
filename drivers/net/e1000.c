@@ -602,7 +602,7 @@ static void e1000_receive(struct e1000_dev *e1000)
 #ifdef CONFIG_NET_IPv4
       if (BUF->type == HTONS(ETHTYPE_IP))
         {
-          nllvdbg("IPv4 frame\n");
+          nllinfo("IPv4 frame\n");
 
           /* Handle ARP on input then give the IPv4 packet to the network
            * layer
@@ -642,7 +642,7 @@ static void e1000_receive(struct e1000_dev *e1000)
 #ifdef CONFIG_NET_IPv6
       if (BUF->type == HTONS(ETHTYPE_IP6))
         {
-          nllvdbg("Iv6 frame\n");
+          nllinfo("Iv6 frame\n");
 
           /* Give the IPv6 packet to the network layer */
 
@@ -799,9 +799,9 @@ static int e1000_ifup(struct net_driver_s *dev)
 {
   struct e1000_dev *e1000 = (struct e1000_dev *)dev->d_private;
 
-  ndbg("Bringing up: %d.%d.%d.%d\n",
-       dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
-       (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
+  ninfo("Bringing up: %d.%d.%d.%d\n",
+        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
+        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
 
   /* Initialize PHYs, the Ethernet interface, and setup up Ethernet interrupts */
 
@@ -1089,7 +1089,7 @@ static int e1000_probe(uint16_t addr, pci_id_t id)
 {
   uint32_t mmio_base, mmio_size;
   uint32_t size;
-  int err;
+  int errcode;
   void *kmem;
   void *omem;
   struct e1000_dev *dev;
@@ -1107,7 +1107,7 @@ static int e1000_probe(uint16_t addr, pci_id_t id)
 
   /* enable device */
 
-  if ((err = pci_enable_device(addr, PCI_BUS_MASTER)) < 0)
+  if ((errcode = pci_enable_device(addr, PCI_BUS_MASTER)) < 0)
     {
       goto error;
     }
@@ -1120,8 +1120,8 @@ static int e1000_probe(uint16_t addr, pci_id_t id)
 
   mmio_base = pci_resource_start(addr, 0);
   mmio_size = pci_resource_len(addr, 0);
-  err = rgmp_memmap_nocache(mmio_base, mmio_size, mmio_base);
-  if (err)
+  errcode = rgmp_memmap_nocache(mmio_base, mmio_size, mmio_base);
+  if (errcode)
     {
       goto error;
     }
@@ -1139,7 +1139,7 @@ static int e1000_probe(uint16_t addr, pci_id_t id)
 
   dev->int_desc.handler = e1000_interrupt_handler;
   dev->int_desc.dev_id = dev;
-  if ((err = pci_request_irq(addr, &dev->int_desc, 0)) < 0)
+  if ((errcode = pci_request_irq(addr, &dev->int_desc, 0)) < 0)
     {
       goto err0;
     }
@@ -1164,7 +1164,7 @@ static int e1000_probe(uint16_t addr, pci_id_t id)
   omem = kmem = memalign(PGSIZE, size);
   if (kmem == NULL)
     {
-      err = -ENOMEM;
+      errcode = -ENOMEM;
       goto err1;
     }
 
@@ -1211,8 +1211,8 @@ static int e1000_probe(uint16_t addr, pci_id_t id)
 
   /* Register the device with the OS so that socket IOCTLs can be performed */
 
-  err = netdev_register(&dev->netdev, NET_LL_ETHERNET);
-  if (err)
+  errcode = netdev_register(&dev->netdev, NET_LL_ETHERNET);
+  if (errcode)
     {
       goto err2;
     }
@@ -1234,8 +1234,8 @@ err0:
   rgmp_memunmap(mmio_base, mmio_size);
 error:
   kmm_free(dev);
-  cprintf("e1000 device probe fail: %d\n", err);
-  return err;
+  cprintf("e1000 device probe fail: %d\n", errcode);
+  return errcode;
 }
 
 /****************************************************************************

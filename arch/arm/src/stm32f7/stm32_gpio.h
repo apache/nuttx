@@ -345,7 +345,7 @@ xcpt_t stm32_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
  *
  ************************************************************************************/
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_GPIO_INFO
 int stm32_dumpgpio(uint32_t pinset, const char *msg);
 #else
 #  define stm32_dumpgpio(p,m)

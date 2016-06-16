@@ -54,16 +54,16 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* CONFIG_DEBUG, CONFIG_DEBUG_VERBOSE, and CONFIG_DEBUG_BINFMT have to be
+/* CONFIG_DEBUG_FEATURES, CONFIG_DEBUG_INFO, and CONFIG_DEBUG_BINFMT have to be
  * defined or CONFIG_NXFLAT_DUMPBUFFER does nothing.
  */
 
-#if !defined(CONFIG_DEBUG_VERBOSE) || !defined (CONFIG_DEBUG_BINFMT)
+#if !defined(CONFIG_DEBUG_INFO) || !defined (CONFIG_DEBUG_BINFMT)
 #  undef CONFIG_NXFLAT_DUMPBUFFER
 #endif
 
 #ifdef CONFIG_NXFLAT_DUMPBUFFER
-# define nxflat_dumpbuffer(m,b,n) bvdbgdumpbuffer(m,b,n)
+# define nxflat_dumpbuffer(m,b,n) binfodumpbuffer(m,b,n)
 #else
 # define nxflat_dumpbuffer(m,b,n)
 #endif
@@ -100,7 +100,7 @@ int nxflat_init(const char *filename, struct nxflat_loadinfo_s *loadinfo)
   uint32_t bssend;
   int      ret;
 
-  bvdbg("filename: %s loadinfo: %p\n", filename, loadinfo);
+  binfo("filename: %s loadinfo: %p\n", filename, loadinfo);
 
   /* Clear the load info structure */
 
@@ -112,7 +112,7 @@ int nxflat_init(const char *filename, struct nxflat_loadinfo_s *loadinfo)
   if (loadinfo->filfd < 0)
     {
       int errval = errno;
-      bdbg("Failed to open NXFLAT binary %s: %d\n", filename, errval);
+      berr("Failed to open NXFLAT binary %s: %d\n", filename, errval);
       return -errval;
     }
 
@@ -122,7 +122,7 @@ int nxflat_init(const char *filename, struct nxflat_loadinfo_s *loadinfo)
                     sizeof(struct nxflat_hdr_s), 0);
   if (ret < 0)
     {
-      bdbg("Failed to read NXFLAT header: %d\n", ret);
+      berr("Failed to read NXFLAT header: %d\n", ret);
       return ret;
     }
 
@@ -140,7 +140,7 @@ int nxflat_init(const char *filename, struct nxflat_loadinfo_s *loadinfo)
        * done so.
        */
 
-      bdbg("Bad NXFLAT header\n");
+      berr("Bad NXFLAT header\n");
       return -ENOEXEC;
     }
 

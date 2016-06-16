@@ -53,24 +53,24 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Enables debug output from this file (needs CONFIG_DEBUG with
- * CONFIG_DEBUG_VERBOSE too)
+/* Enables debug output from this file (needs CONFIG_DEBUG_FEATURES with
+ * CONFIG_DEBUG_INFO too)
  */
 
 #undef BUTTON_DEBUG   /* Define to enable debug */
 #undef BUTTON_VERBOSE /* Define to enable verbose debug */
 
 #ifdef BUTTON_DEBUG
-#  define btndbg  lldbg
+#  define btnerr  _llerr
 #  ifdef BUTTON_VERBOSE
-#    define btnvdbg lldbg
+#    define btninfo  _llerr
 #  else
-#    define btnvdbg(x...)
+#    define btninfo(x...)
 #  endif
 #else
 #  undef BUTTON_VERBOSE
-#  define btndbg(x...)
-#  define btnvdbg(x...)
+#  define btnerr(x...)
+#  define btninfo(x...)
 #endif
 
 /* Dump GPIO registers */

@@ -106,7 +106,7 @@ static ssize_t nxffs_rdseek(FAR struct nxffs_volume_s *volume,
       ret = nxffs_nextblock(volume, offset, blkentry);
       if (ret < 0)
         {
-          fdbg("ERROR: nxffs_nextblock failed: %d\n", -ret);
+          ferr("ERROR: nxffs_nextblock failed: %d\n", -ret);
           return ret;
         }
 
@@ -150,7 +150,7 @@ ssize_t nxffs_read(FAR struct file *filep, FAR char *buffer, size_t buflen)
   size_t readsize;
   int ret;
 
-  fvdbg("Read %d bytes from offset %d\n", buflen, filep->f_pos);
+  finfo("Read %d bytes from offset %d\n", buflen, filep->f_pos);
 
   /* Sanity checks */
 
@@ -173,7 +173,7 @@ ssize_t nxffs_read(FAR struct file *filep, FAR char *buffer, size_t buflen)
   if (ret != OK)
     {
       ret = -get_errno();
-      fdbg("ERROR: sem_wait failed: %d\n", ret);
+      ferr("ERROR: sem_wait failed: %d\n", ret);
       goto errout;
     }
 
@@ -181,7 +181,7 @@ ssize_t nxffs_read(FAR struct file *filep, FAR char *buffer, size_t buflen)
 
   if ((ofile->oflags & O_RDOK) == 0)
     {
-      fdbg("ERROR: File not open for read access\n");
+      ferr("ERROR: File not open for read access\n");
       ret = -EACCES;
       goto errout_with_semaphore;
     }
@@ -205,7 +205,7 @@ ssize_t nxffs_read(FAR struct file *filep, FAR char *buffer, size_t buflen)
       ret = nxffs_rdseek(volume, &ofile->entry, filep->f_pos, &blkentry);
       if (ret < 0)
         {
-          fdbg("ERROR: nxffs_rdseek failed: %d\n", -ret);
+          ferr("ERROR: nxffs_rdseek failed: %d\n", -ret);
           ret = -EACCES;
           goto errout_with_semaphore;
         }
@@ -289,7 +289,7 @@ int nxffs_nextblock(FAR struct nxffs_volume_s *volume, off_t offset,
       ch = nxffs_getc(volume, SIZEOF_NXFFS_DATA_HDR - nmagic);
       if (ch < 0)
         {
-          fdbg("ERROR: nxffs_getc failed: %d\n", -ch);
+          ferr("ERROR: nxffs_getc failed: %d\n", -ch);
           return ch;
         }
 
@@ -304,7 +304,7 @@ int nxffs_nextblock(FAR struct nxffs_volume_s *volume, off_t offset,
 
           if (++nerased >= NXFFS_NERASED)
             {
-              fvdbg("No entry found\n");
+              finfo("No entry found\n");
               return -ENOENT;
             }
         }
@@ -358,7 +358,7 @@ int nxffs_nextblock(FAR struct nxffs_volume_s *volume, off_t offset,
               ret = nxffs_rdblkhdr(volume, blkentry->hoffset, &blkentry->datlen);
               if (ret == OK)
                 {
-                  fvdbg("Found a valid data block, offset: %d datlen: %d\n",
+                  finfo("Found a valid data block, offset: %d datlen: %d\n",
                         blkentry->hoffset, blkentry->datlen);
                   return OK;
                 }
@@ -412,7 +412,7 @@ int nxffs_rdblkhdr(FAR struct nxffs_volume_s *volume, off_t offset,
   ret = nxffs_rdcache(volume, volume->ioblock);
   if (ret < 0)
     {
-      fdbg("ERROR: Failed to read data into cache: %d\n", ret);
+      ferr("ERROR: Failed to read data into cache: %d\n", ret);
       return ret;
     }
 
@@ -433,7 +433,7 @@ int nxffs_rdblkhdr(FAR struct nxffs_volume_s *volume, off_t offset,
 
   if ((uint32_t)doffset + (uint32_t)dlen > (uint32_t)volume->geo.blocksize)
     {
-      fdbg("ERROR: Data length=%d is unreasonable at offset=%d\n", dlen, doffset);
+      ferr("ERROR: Data length=%d is unreasonable at offset=%d\n", dlen, doffset);
       return -EIO;
     }
 
@@ -447,7 +447,7 @@ int nxffs_rdblkhdr(FAR struct nxffs_volume_s *volume, off_t offset,
 
   if (crc != ecrc)
     {
-      fdbg("ERROR: CRC failure\n");
+      ferr("ERROR: CRC failure\n");
       return -EIO;
     }
 

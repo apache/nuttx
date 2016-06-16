@@ -187,7 +187,7 @@ int sercomm_register(FAR const char *path, FAR uart_dev_t *dev)
   sem_init(&dev->pollsem,  0, 1);
 #endif
 
-  dbg("Registering %s\n", path);
+  _info("Registering %s\n", path);
   return register_driver(path, &g_sercom_console_ops, 0666, NULL);
 }
 

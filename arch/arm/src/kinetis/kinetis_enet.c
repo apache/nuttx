@@ -557,7 +557,7 @@ static void kinetis_receive(FAR struct kinetis_driver_s *priv)
 #ifdef CONFIG_NET_IPv4
       if (BUF->type == HTONS(ETHTYPE_IP))
         {
-          nllvdbg("IPv4 frame\n");
+          nllinfo("IPv4 frame\n");
           NETDEV_RXIPV4(&priv->dev);
 
           /* Handle ARP on input then give the IPv4 packet to the network
@@ -598,7 +598,7 @@ static void kinetis_receive(FAR struct kinetis_driver_s *priv)
 #ifdef CONFIG_NET_IPv6
       if (BUF->type == HTONS(ETHTYPE_IP6))
         {
-          nllvdbg("Iv6 frame\n");
+          nllinfo("Iv6 frame\n");
           NETDEV_RXIPV6(&priv->dev);
 
           /* Give the IPv6 packet to the network layer */
@@ -918,7 +918,7 @@ static int kinetis_ifup(struct net_driver_s *dev)
   uint8_t *mac = dev->d_mac.ether_addr_octet;
   uint32_t regval;
 
-  ndbg("Bringing up: %d.%d.%d.%d\n",
+  nerr("Bringing up: %d.%d.%d.%d\n",
        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
 
@@ -1695,7 +1695,7 @@ int kinetis_netinitialize(int intf)
     {
       /* We could not attach the ISR to the interrupt */
 
-      ndbg("Failed to attach EMACTMR IRQ\n");
+      nerr("Failed to attach EMACTMR IRQ\n");
       return -EAGAIN;
     }
 #endif
@@ -1706,7 +1706,7 @@ int kinetis_netinitialize(int intf)
     {
       /* We could not attach the ISR to the interrupt */
 
-      ndbg("Failed to attach EMACTX IRQ\n");
+      nerr("Failed to attach EMACTX IRQ\n");
       return -EAGAIN;
     }
 
@@ -1716,7 +1716,7 @@ int kinetis_netinitialize(int intf)
     {
       /* We could not attach the ISR to the interrupt */
 
-      ndbg("Failed to attach EMACRX IRQ\n");
+      nerr("Failed to attach EMACRX IRQ\n");
       return -EAGAIN;
     }
 
@@ -1726,7 +1726,7 @@ int kinetis_netinitialize(int intf)
     {
       /* We could not attach the ISR to the interrupt */
 
-      ndbg("Failed to attach EMACMISC IRQ\n");
+      nerr("Failed to attach EMACMISC IRQ\n");
       return -EAGAIN;
     }
 

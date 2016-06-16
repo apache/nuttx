@@ -71,24 +71,6 @@
 
 #define RAMVEC_ALIGN ((~NVIC_VECTAB_TBLOFF_MASK & 0xffff) + 1)
 
-/* Debug ********************************************************************/
-/* Non-standard debug that may be enabled just for testing the interrupt
- * config.  NOTE: that only lldbg types are used so that the output is
- * immediately available.
- */
-
-#ifdef CONFIG_DEBUG_IRQ
-#  define intdbg    lldbg
-#  define intvdbg   llvdbg
-#else
-#  define intdbg(x...)
-#  define intvdbg(x...)
-#endif
-
-/****************************************************************************
- * Private Type Declarations
- ****************************************************************************/
-
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -147,7 +129,7 @@ void up_ramvec_initialize(void)
   src  = (const CODE up_vector_t *)getreg32(NVIC_VECTAB);
   dest = g_ram_vectors;
 
-  intvdbg("src=%p dest=%p\n", src, dest);
+  irqinfo("src=%p dest=%p\n", src, dest);
 
   for (i = 0; i < ARMV7M_VECTAB_SIZE; i++)
     {
@@ -163,7 +145,7 @@ void up_ramvec_initialize(void)
    * the table alignment is insufficient.
    */
 
-  intvdbg("NVIC_VECTAB=%08x\n", getreg32(NVIC_VECTAB));
+  irqinfo("NVIC_VECTAB=%08x\n", getreg32(NVIC_VECTAB));
   DEBUGASSERT(getreg32(NVIC_VECTAB) == (uint32_t)g_ram_vectors);
 }
 

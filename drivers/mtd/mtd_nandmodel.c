@@ -92,13 +92,13 @@ int nandmodel_find(FAR const struct nand_model_s *modeltab, size_t size,
   id2 = (uint8_t)(chipid >> 8);
   id4 = (uint8_t)(chipid >> 24);
 
-  fvdbg("NAND ID is 0x%08x\n", (int)chipid);
+  finfo("NAND ID is 0x%08x\n", (int)chipid);
 
   for (i = 0; i < size; i++)
     {
       if (modeltab[i].devid == id2)
         {
-          fvdbg("NAND Model found: ID2=0x%02x ID4=0x%02x\n", id2, id4);
+          finfo("NAND Model found: ID2=0x%02x ID4=0x%02x\n", id2, id4);
           found = true;
 
           if (model)
@@ -155,11 +155,11 @@ int nandmodel_find(FAR const struct nand_model_s *modeltab, size_t size,
                     }
                 }
 
-              fvdbg("  devid:     0x%02x\n",  model->devid);
-              fvdbg("  devsize:   %d (MB)\n", model->devsize);
-              fvdbg("  blocksize: %d (KB)\n", model->blocksize);
-              fvdbg("  pagesize:  %d (B)\n",  model->pagesize);
-              fvdbg("  options:   0x%02x\n",  model->options);
+              finfo("  devid:     0x%02x\n",  model->devid);
+              finfo("  devsize:   %d (MB)\n", model->devsize);
+              finfo("  blocksize: %d (KB)\n", model->blocksize);
+              finfo("  pagesize:  %d (B)\n",  model->pagesize);
+              finfo("  options:   0x%02x\n",  model->options);
             }
           break;
         }
@@ -205,7 +205,7 @@ int nandmodel_translate(FAR const struct nand_model_s *model, off_t address,
 
   if ((address + size) > nandmodel_getdevbytesize(model))
     {
-      fvdbg("nandmodel_translate: out-of-bounds access.\n");
+      finfo("nandmodel_translate: out-of-bounds access.\n");
       return -ESPIPE;
     }
 

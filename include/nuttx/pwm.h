@@ -72,8 +72,7 @@
  *   number of pulses.  This might be used, for example to support a stepper
  *   motor.  If the hardware will support a fixed pulse count, then this
  *   configuration should be set to enable the capability.
- * CONFIG_DEBUG_PWM - If enabled (with CONFIG_DEBUG and, optionally,
- *   CONFIG_DEBUG_VERBOSE), this will generate output that can be use dto
+ * CONFIG_DEBUG_PWM_INFO - This will generate output that can be use to
  *   debug the PWM driver.
  */
 

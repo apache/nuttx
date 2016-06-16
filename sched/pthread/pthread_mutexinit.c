@@ -75,7 +75,7 @@ int pthread_mutex_init(FAR pthread_mutex_t *mutex, FAR const pthread_mutexattr_t
   int ret       = OK;
   int status;
 
-  sdbg("mutex=0x%p attr=0x%p\n", mutex, attr);
+  sinfo("mutex=0x%p attr=0x%p\n", mutex, attr);
 
   if (!mutex)
     {
@@ -113,6 +113,6 @@ int pthread_mutex_init(FAR pthread_mutex_t *mutex, FAR const pthread_mutexattr_t
 #endif
     }
 
-  sdbg("Returning %d\n", ret);
+  sinfo("Returning %d\n", ret);
   return ret;
 }

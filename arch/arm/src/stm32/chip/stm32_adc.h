@@ -1,7 +1,7 @@
 /****************************************************************************************************
  * arch/arm/src/stm32/chip/stm32_adc.h
  *
- *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -261,6 +261,7 @@
 #    define ADC_CR1_RES_8BIT         (2 << ADC_CR1_RES_SHIFT) /* 11 ADCCLK cycles. For STM32L15XX: 9 ADCCLK cycles */
 #    define ADC_CR1_RES_6BIT         (3 << ADC_CR1_RES_SHIFT) /* 9 ADCCLK cycles. For STM32L15XX: 7 ADCCLK cycles */
 #  define ADC_CR1_OVRIE              (1 << 26) /* Bit 26: Overrun interrupt enable */
+#  define ADC_CR1_RESERVED           (0xfb3f0000)
 #endif
 
 /* ADC control register 2 */
@@ -391,7 +392,7 @@
 #    define ADC_CR2_EXTEN_BOTH       (3 << ADC_CR2_EXTEN_SHIFT) /* 11: Trigger detection on both the rising and falling edges */
 
 #  define ADC_CR2_SWSTART            (1 << 30) /* Bit 30: Start Conversion of regular channels */
-
+#  define ADC_CR2_RESERVED           (0x8080f0fc)
 #else
 #  define ADC_CR2_JEXTSEL_SHIFT      (12)      /* Bits 12-14: External event select for injected group */
 #  define ADC_CR2_JEXTSEL_MASK       (7 << ADC_CR2_JEXTSEL_SHIFT)

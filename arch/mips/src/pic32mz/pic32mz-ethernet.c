@@ -141,11 +141,11 @@
 #define PIC32MZ_NBUFFERS (CONFIG_NET_NRXDESC + CONFIG_NET_NTXDESC + 1)
 
 /* Debug Configuration *****************************************************/
-/* Register/Descriptor debug -- can only happen of CONFIG_DEBUG is selected.
+/* Register/Descriptor debug -- can only happen of CONFIG_DEBUG_FEATURES is selected.
  * This will probably generate much more output than you care to see.
  */
 
-#ifndef CONFIG_DEBUG
+#ifndef CONFIG_DEBUG_FEATURES
 #  undef CONFIG_NET_REGDEBUG
 #  undef CONFIG_NET_DESCDEBUG
 #endif
@@ -154,7 +154,7 @@
  * console.
  */
 
-#ifndef CONFIG_DEBUG
+#ifndef CONFIG_DEBUG_FEATURES
 #  undef  CONFIG_NET_DUMPPACKET
 #endif
 
@@ -465,7 +465,7 @@ static void pic32mz_ethreset(struct pic32mz_driver_s *priv);
 #ifdef CONFIG_NET_REGDEBUG
 static void pic32mz_printreg(uint32_t addr, uint32_t val, bool iswrite)
 {
-  lldbg("%08x%s%08x\n", addr, iswrite ? "<-" : "->", val);
+  nllinfo("%08x%s%08x\n", addr, iswrite ? "<-" : "->", val);
 }
 #endif
 
@@ -515,7 +515,7 @@ static void pic32mz_checkreg(uint32_t addr, uint32_t val, bool iswrite)
             {
               /* No.. More than one. */
 
-              lldbg("[repeats %d more times]\n", count);
+              nllinfo("[repeats %d more times]\n", count);
             }
         }
 
@@ -594,12 +594,12 @@ static void pic32mz_putreg(uint32_t val, uint32_t addr)
 #ifdef CONFIG_NET_DESCDEBUG
 static void pic32mz_dumptxdesc(struct pic32mz_txdesc_s *txdesc, const char *msg)
 {
-  lldbg("TX Descriptor [%p]: %s\n", txdesc, msg);
-  lldbg("   status: %08x\n", txdesc->status);
-  lldbg("  address: %08x [%08x]\n", txdesc->address, VIRT_ADDR(txdesc->address));
-  lldbg("     tsv1: %08x\n", txdesc->tsv1);
-  lldbg("     tsv2: %08x\n", txdesc->tsv2);
-  lldbg("   nexted: %08x [%08x]\n", txdesc->nexted, VIRT_ADDR(txdesc->nexted));
+  nllinfo("TX Descriptor [%p]: %s\n", txdesc, msg);
+  nllinfo("   status: %08x\n", txdesc->status);
+  nllinfo("  address: %08x [%08x]\n", txdesc->address, VIRT_ADDR(txdesc->address));
+  nllinfo("     tsv1: %08x\n", txdesc->tsv1);
+  nllinfo("     tsv2: %08x\n", txdesc->tsv2);
+  nllinfo("   nexted: %08x [%08x]\n", txdesc->nexted, VIRT_ADDR(txdesc->nexted));
 }
 #endif
 
@@ -621,12 +621,12 @@ static void pic32mz_dumptxdesc(struct pic32mz_txdesc_s *txdesc, const char *msg)
 #ifdef CONFIG_NET_DESCDEBUG
 static void pic32mz_dumprxdesc(struct pic32mz_rxdesc_s *rxdesc, const char *msg)
 {
-  lldbg("RX Descriptor [%p]: %s\n", rxdesc, msg);
-  lldbg("   status: %08x\n", rxdesc->status);
-  lldbg("  address: %08x [%08x]\n", rxdesc->address, VIRT_ADDR(rxdesc->address));
-  lldbg("     rsv1: %08x\n", rxdesc->rsv1);
-  lldbg("     rsv2: %08x\n", rxdesc->rsv2);
-  lldbg("   nexted: %08x [%08x]\n", rxdesc->nexted, VIRT_ADDR(rxdesc->nexted));
+  nllinfo("RX Descriptor [%p]: %s\n", rxdesc, msg);
+  nllinfo("   status: %08x\n", rxdesc->status);
+  nllinfo("  address: %08x [%08x]\n", rxdesc->address, VIRT_ADDR(rxdesc->address));
+  nllinfo("     rsv1: %08x\n", rxdesc->rsv1);
+  nllinfo("     rsv2: %08x\n", rxdesc->rsv2);
+  nllinfo("   nexted: %08x [%08x]\n", rxdesc->nexted, VIRT_ADDR(rxdesc->nexted));
 }
 #endif
 
@@ -1384,7 +1384,8 @@ static void pic32mz_rxdone(struct pic32mz_driver_s *priv)
 
       if ((rxdesc->rsv2 & RXDESC_RSV2_OK) == 0)
         {
-          nlldbg("ERROR. rsv1: %08x rsv2: %08x\n", rxdesc->rsv1, rxdesc->rsv2);
+          nllwarn("WARNING. rsv1: %08x rsv2: %08x\n",
+                 rxdesc->rsv1, rxdesc->rsv2);
           NETDEV_RXERRORS(&priv->pd_dev);
           pic32mz_rxreturn(rxdesc);
         }
@@ -1397,7 +1398,8 @@ static void pic32mz_rxdone(struct pic32mz_driver_s *priv)
 
       else if (priv->pd_dev.d_len > CONFIG_NET_ETH_MTU)
         {
-          nlldbg("Too big. packet length: %d rxdesc: %08x\n", priv->pd_dev.d_len, rxdesc->status);
+          nllwarn("WARNING: Too big. packet length: %d rxdesc: %08x\n",
+                  priv->pd_dev.d_len, rxdesc->status);
           NETDEV_RXERRORS(&priv->pd_dev);
           pic32mz_rxreturn(rxdesc);
         }
@@ -1407,7 +1409,8 @@ static void pic32mz_rxdone(struct pic32mz_driver_s *priv)
       else if ((rxdesc->status & (RXDESC_STATUS_EOP | RXDESC_STATUS_SOP)) !=
                (RXDESC_STATUS_EOP | RXDESC_STATUS_SOP))
         {
-          nlldbg("Fragment. packet length: %d rxdesc: %08x\n", priv->pd_dev.d_len, rxdesc->status);
+          nllwarn("WARNING: Fragment. packet length: %d rxdesc: %08x\n",
+                 priv->pd_dev.d_len, rxdesc->status);
           NETDEV_RXFRAGMENTS(&priv->pd_dev);
           pic32mz_rxreturn(rxdesc);
         }
@@ -1445,7 +1448,7 @@ static void pic32mz_rxdone(struct pic32mz_driver_s *priv)
 #ifdef CONFIG_NET_IPv4
           if (BUF->type == HTONS(ETHTYPE_IP))
             {
-              nllvdbg("IPv4 frame\n");
+              nllinfo("IPv4 frame\n");
               NETDEV_RXIPV4(&priv->pd_dev);
 
               /* Handle ARP on input then give the IPv4 packet to the network
@@ -1487,7 +1490,7 @@ static void pic32mz_rxdone(struct pic32mz_driver_s *priv)
 #ifdef CONFIG_NET_IPv6
           if (BUF->type == HTONS(ETHTYPE_IP6))
             {
-              nllvdbg("Iv6 frame\n");
+              nllinfo("Iv6 frame\n");
               NETDEV_RXIPV6(&priv->pd_dev);
 
               /* Give the IPv6 packet to the network layer */
@@ -1546,7 +1549,8 @@ static void pic32mz_rxdone(struct pic32mz_driver_s *priv)
             {
               /* Unrecognized... drop it. */
 
-              nlldbg("Unrecognized packet type dropped: %04x\n", ntohs(BUF->type));
+              nllwarn("WARNING: Unrecognized packet type dropped: %04x\n",
+                      ntohs(BUF->type));
               NETDEV_RXDROPPED(&priv->pd_dev);
             }
 
@@ -1708,7 +1712,7 @@ static int pic32mz_interrupt(int irq, void *context)
 
       if ((status & ETH_INT_RXOVFLW) != 0)
         {
-          nlldbg("RX Overrun. status: %08x\n", status);
+          nllerr("ERROR: RX Overrun. status: %08x\n", status);
           NETDEV_RXERRORS(&priv->pd_dev);
         }
 
@@ -1719,7 +1723,7 @@ static int pic32mz_interrupt(int irq, void *context)
 
       if ((status & ETH_INT_RXBUFNA) != 0)
         {
-          nlldbg("RX buffer descriptor overrun. status: %08x\n", status);
+          nllerr("ERROR: RX buffer descriptor overrun. status: %08x\n", status);
           NETDEV_RXERRORS(&priv->pd_dev);
         }
 
@@ -1730,7 +1734,7 @@ static int pic32mz_interrupt(int irq, void *context)
 
       if ((status & ETH_INT_RXBUSE) != 0)
         {
-          nlldbg("RX BVCI bus error. status: %08x\n", status);
+          nllerr("ERROR: RX BVCI bus error. status: %08x\n", status);
           NETDEV_RXERRORS(&priv->pd_dev);
         }
 
@@ -1773,7 +1777,7 @@ static int pic32mz_interrupt(int irq, void *context)
 
       if ((status & ETH_INT_TXABORT) != 0)
         {
-          nlldbg("TX abort. status: %08x\n", status);
+          nllerr("ERROR: TX abort. status: %08x\n", status);
           NETDEV_TXERRORS(&priv->pd_dev);
         }
 
@@ -1784,7 +1788,7 @@ static int pic32mz_interrupt(int irq, void *context)
 
       if ((status & ETH_INT_TXBUSE) != 0)
         {
-          nlldbg("TX BVCI bus error. status: %08x\n", status);
+          nllerr("ERROR: TX BVCI bus error. status: %08x\n", status);
           NETDEV_TXERRORS(&priv->pd_dev);
         }
 
@@ -1938,9 +1942,9 @@ static int pic32mz_ifup(struct net_driver_s *dev)
   uint32_t regval;
   int ret;
 
-  ndbg("Bringing up: %d.%d.%d.%d\n",
-       dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
-       (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
+  nnllinfoBringing up: %d.%d.%d.%d\n",
+        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
+        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
 
   /* Reset the Ethernet controller (again) */
 
@@ -2028,7 +2032,7 @@ static int pic32mz_ifup(struct net_driver_s *dev)
   ret = pic32mz_phyinit(priv);
   if (ret != 0)
     {
-      ndbg("pic32mz_phyinit failed: %d\n", ret);
+      nerr("ERROR: pic32mz_phyinit failed: %d\n", ret);
       return ret;
     }
 
@@ -2105,11 +2109,10 @@ static int pic32mz_ifup(struct net_driver_s *dev)
   priv->pd_dev.d_mac.ether_addr_octet[0] = (uint32_t)(regval & 0xff);
   priv->pd_dev.d_mac.ether_addr_octet[1] = (uint32_t)((regval >> 8) & 0xff);
 
-  ndbg("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
-         dev->d_mac.ether_addr_octet[0], dev->d_mac.ether_addr_octet[1],
-         dev->d_mac.ether_addr_octet[2], dev->d_mac.ether_addr_octet[3],
-         dev->d_mac.ether_addr_octet[4], dev->d_mac.ether_addr_octet[5]);
-
+  ninfo("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
+        dev->d_mac.ether_addr_octet[0], dev->d_mac.ether_addr_octet[1],
+        dev->d_mac.ether_addr_octet[2], dev->d_mac.ether_addr_octet[3],
+        dev->d_mac.ether_addr_octet[4], dev->d_mac.ether_addr_octet[5]);
 #endif
 
   /* Continue Ethernet Controller Initialization ****************************/
@@ -2396,14 +2399,14 @@ static int pic32mz_rmmac(struct net_driver_s *dev, const uint8_t *mac)
 #if defined(CONFIG_NET_REGDEBUG) && defined(PIC32MZ_HAVE_PHY)
 static void pic32mz_showmii(uint8_t phyaddr, const char *msg)
 {
-  dbg("PHY " PIC32MZ_PHYNAME ": %s\n", msg);
-  dbg("  MCR:       %04x\n", pic32mz_phyread(phyaddr, MII_MCR));
-  dbg("  MSR:       %04x\n", pic32mz_phyread(phyaddr, MII_MSR));
-  dbg("  ADVERTISE: %04x\n", pic32mz_phyread(phyaddr, MII_ADVERTISE));
-  dbg("  LPA:       %04x\n", pic32mz_phyread(phyaddr, MII_LPA));
-  dbg("  EXPANSION: %04x\n", pic32mz_phyread(phyaddr, MII_EXPANSION));
+  nllinfo("PHY " PIC32MZ_PHYNAME ": %s\n", msg);
+  nllinfo("  MCR:       %04x\n", pic32mz_phyread(phyaddr, MII_MCR));
+  nllinfo("  MSR:       %04x\n", pic32mz_phyread(phyaddr, MII_MSR));
+  nllinfo("  ADVERTISE: %04x\n", pic32mz_phyread(phyaddr, MII_ADVERTISE));
+  nllinfo("  LPA:       %04x\n", pic32mz_phyread(phyaddr, MII_LPA));
+  nllinfo("  EXPANSION: %04x\n", pic32mz_phyread(phyaddr, MII_EXPANSION));
 #ifdef CONFIG_ETH0_PHY_KS8721
-  dbg("  10BTCR:    %04x\n", pic32mz_phyread(phyaddr, MII_KS8721_10BTCR));
+  nllinfo("  10BTCR:    %04x\n", pic32mz_phyread(phyaddr, MII_KS8721_10BTCR));
 #endif
 }
 #endif
@@ -2566,7 +2569,7 @@ static inline int pic32mz_phyreset(uint8_t phyaddr)
         }
     }
 
-  ndbg("Reset failed. MCR: %04x\n", phyreg);
+  nerr("ERROR: Reset failed. MCR: %04x\n", phyreg);
   return -ETIMEDOUT;
 }
 #endif
@@ -2613,7 +2616,7 @@ static inline int pic32mz_phyautoneg(uint8_t phyaddr)
         }
     }
 
-  ndbg("Auto-negotiation failed. MSR: %04x\n", phyreg);
+  nerr("ERROR: Auto-negotiation failed. MSR: %04x\n", phyreg);
   return -ETIMEDOUT;
 }
 #endif
@@ -2692,7 +2695,7 @@ static int pic32mz_phymode(uint8_t phyaddr, uint8_t mode)
 #endif
     }
 
-  ndbg("Link failed. MSR: %04x\n", phyreg);
+  nerr("ERROR: Link failed. MSR: %04x\n", phyreg);
   return -ETIMEDOUT;
 }
 #endif
@@ -2761,7 +2764,7 @@ static inline int pic32mz_phyinit(struct pic32mz_driver_s *priv)
       ret = pic32mz_phyreset(phyaddr);
       if (ret < 0)
         {
-          ndbg("Failed to reset PHY at address %d\n", phyaddr);
+          nerr("ERROR: Failed to reset PHY at address %d\n", phyaddr);
           continue;
         }
 
@@ -2774,12 +2777,12 @@ static inline int pic32mz_phyinit(struct pic32mz_driver_s *priv)
        */
 
        phyreg = (unsigned int)pic32mz_phyread(phyaddr, MII_PHYID1);
-       nvdbg("Addr: %d PHY ID1: %04x EXPECT: %04x\n", phyaddr, phyreg, PIC32MZ_PHYID1);
+       ninfo("Addr: %d PHY ID1: %04x EXPECT: %04x\n", phyaddr, phyreg, PIC32MZ_PHYID1);
 
        if (phyreg == PIC32MZ_PHYID1)
         {
           phyreg = pic32mz_phyread(phyaddr, MII_PHYID2);
-          nvdbg("Addr: %d PHY ID2: %04x EXPECT: %04x\n", phyaddr, phyreg, PIC32MZ_PHYID2);
+          ninfo("Addr: %d PHY ID2: %04x EXPECT: %04x\n", phyaddr, phyreg, PIC32MZ_PHYID2);
 
           if (phyreg == PIC32MZ_PHYID2)
             {
@@ -2794,10 +2797,10 @@ static inline int pic32mz_phyinit(struct pic32mz_driver_s *priv)
     {
       /* Failed to find PHY at any location */
 
-      ndbg("No PHY detected\n");
+      nerr("ERROR: No PHY detected\n");
       return -ENODEV;
     }
-  nvdbg("phyaddr: %d\n", phyaddr);
+  ninfo("phyaddr: %d\n", phyaddr);
 
   /* Save the discovered PHY device address */
 
@@ -2898,7 +2901,7 @@ static inline int pic32mz_phyinit(struct pic32mz_driver_s *priv)
         priv->pd_mode = PIC32MZ_100BASET_FD;
         break;
       default:
-        ndbg("Unrecognized mode: %04x\n", phyreg);
+        nerr("ERROR: Unrecognized mode: %04x\n", phyreg);
         return -ENODEV;
     }
 #elif defined(CONFIG_ETH0_PHY_DP83848C)
@@ -2921,7 +2924,7 @@ static inline int pic32mz_phyinit(struct pic32mz_driver_s *priv)
         priv->pd_mode = PIC32MZ_10BASET_FD;
         break;
       default:
-        ndbg("Unrecognized mode: %04x\n", phyreg);
+        nerr("ERROR: Unrecognized mode: %04x\n", phyreg);
         return -ENODEV;
     }
 #elif defined(CONFIG_ETH0_PHY_LAN8720) || defined(CONFIG_ETH0_PHY_LAN8740) || defined(CONFIG_ETH0_PHY_LAN8740A)
@@ -2966,7 +2969,7 @@ static inline int pic32mz_phyinit(struct pic32mz_driver_s *priv)
       }
     else
       {
-        ndbg("Unrecognized mode: %04x\n", phyreg);
+        nerr("ERROR: Unrecognized mode: %04x\n", phyreg);
         return -ENODEV;
       }
   }
@@ -2974,9 +2977,9 @@ static inline int pic32mz_phyinit(struct pic32mz_driver_s *priv)
 #  warning "PHY Unknown: speed and duplex are bogus"
 #endif
 
-  ndbg("%dBase-T %s duplex\n",
-       (priv->pd_mode & PIC32MZ_SPEED_MASK) ==  PIC32MZ_SPEED_100 ? 100 : 10,
-       (priv->pd_mode & PIC32MZ_DUPLEX_MASK) == PIC32MZ_DUPLEX_FULL ?"full" : "half");
+  ninfo("%dBase-T %s duplex\n",
+        (priv->pd_mode & PIC32MZ_SPEED_MASK) ==  PIC32MZ_SPEED_100 ? 100 : 10,
+        (priv->pd_mode & PIC32MZ_DUPLEX_MASK) == PIC32MZ_DUPLEX_FULL ?"full" : "half");
 
   /* Disable auto-configuration.  Set the fixed speed/duplex mode.
    * (probably more than little redundant).

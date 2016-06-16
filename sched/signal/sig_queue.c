@@ -98,9 +98,9 @@ int sigqueue(int pid, int signo, void *sival_ptr)
   int ret;
 
 #ifdef CONFIG_CAN_PASS_STRUCTS
-  sdbg("pid=0x%08x signo=%d value=%d\n", pid, signo, value.sival_int);
+  sinfo("pid=0x%08x signo=%d value=%d\n", pid, signo, value.sival_int);
 #else
-  sdbg("pid=0x%08x signo=%d value=%p\n", pid, signo, sival_ptr);
+  sinfo("pid=0x%08x signo=%d value=%p\n", pid, signo, sival_ptr);
 #endif
 
   /* Sanity checks */

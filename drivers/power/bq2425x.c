@@ -78,12 +78,15 @@
 /* Debug ********************************************************************/
 
 #ifdef CONFIG_DEBUG_BQ2425X
-#  define batdbg dbg
+#  define baterr  _err
+#  define batreg  _err
 #else
 #  ifdef CONFIG_CPP_HAVE_VARARGS
-#    define batdbg(x...)
+#    define baterr(x...)
+#    define batreg(x...)
 #  else
-#    define batdbg (void)
+#    define baterr (void)
+#    define batreg (void)
 #  endif
 #endif
 
@@ -176,7 +179,7 @@ static int bq2425x_getreg8(FAR struct bq2425x_dev_s *priv, uint8_t regaddr,
   ret = i2c_write(priv->i2c, &config, &regaddr, 1);
   if (ret < 0)
     {
-      batdbg("i2c_write failed: %d\n", ret);
+      baterr("ERROR: i2c_write failed: %d\n", ret);
       return ret;
     }
 
@@ -185,7 +188,7 @@ static int bq2425x_getreg8(FAR struct bq2425x_dev_s *priv, uint8_t regaddr,
   ret = i2c_read(priv->i2c, &config, &val, 1);
   if (ret < 0)
     {
-      batdbg("i2c_read failed: %d\n", ret);
+      baterr("ERROR: i2c_read failed: %d\n", ret);
       return ret;
     }
 
@@ -217,7 +220,7 @@ static int bq2425x_putreg8(FAR struct bq2425x_dev_s *priv, uint8_t regaddr,
   config.address   = priv->addr;
   config.addrlen   = 7;
 
-  batdbg("addr: %02x regval: %08x\n", regaddr, regval);
+  batreg("addr: %02x regval: %08x\n", regaddr, regval);
 
   /* Set up a 3 byte message to send */
 
@@ -270,7 +273,7 @@ static inline int bq2425x_reset(FAR struct bq2425x_dev_s *priv)
   ret = bq2425x_getreg8(priv, BQ2425X_REG_2, &regval);
   if (ret < 0)
     {
-      batdbg("Error reading from BQ2425X! Error =  %d\n", ret);
+      baterr("ERROR: Error reading from BQ2425X! Error =  %d\n", ret);
       return ret;
     }
 
@@ -280,7 +283,7 @@ static inline int bq2425x_reset(FAR struct bq2425x_dev_s *priv)
   ret = bq2425x_putreg8(priv, BQ2425X_REG_2, regval);
   if (ret < 0)
     {
-      batdbg("Error writing to BQ2425X! Error =  %d\n", ret);
+      baterr("ERROR: Error writing to BQ2425X! Error =  %d\n", ret);
       return ret;
     }
 
@@ -294,7 +297,7 @@ static inline int bq2425x_reset(FAR struct bq2425x_dev_s *priv)
   ret = bq2425x_putreg8(priv, BQ2425X_REG_2, regval);
   if (ret < 0)
     {
-      batdbg("Error writing to BQ2425X! Error =  %d\n", ret);
+      baterr("ERROR: Error writing to BQ2425X! Error =  %d\n", ret);
       return ret;
     }
 
@@ -317,7 +320,7 @@ static inline int bq2425x_watchdog(FAR struct bq2425x_dev_s *priv, bool enable)
   ret = bq2425x_getreg8(priv, BQ2425X_REG_1, &regval);
   if (ret < 0)
     {
-      batdbg("Error reading from BQ2425X! Error =  %d\n", ret);
+      baterr("ERROR: Error reading from BQ2425X! Error =  %d\n", ret);
       return ret;
     }
 
@@ -333,7 +336,7 @@ static inline int bq2425x_watchdog(FAR struct bq2425x_dev_s *priv, bool enable)
   ret = bq2425x_putreg8(priv, BQ2425X_REG_1, regval);
   if (ret < 0)
     {
-      batdbg("Error writing to BQ2425X! Error =  %d\n", ret);
+      baterr("ERROR: Error writing to BQ2425X! Error =  %d\n", ret);
       return ret;
     }
 
@@ -515,7 +518,7 @@ static inline int bq2425x_powersupply(FAR struct bq2425x_dev_s *priv, int curren
     break;
 
   default:
-    batdbg("Current not supported, setting default to 100mA.!\n");
+    baterr("ERROR: Current not supported, setting default to 100mA.!\n");
     idx = BQ2425X_INP_CURR_LIM_100MA;
     break;
   }
@@ -525,7 +528,7 @@ static inline int bq2425x_powersupply(FAR struct bq2425x_dev_s *priv, int curren
   ret = bq2425x_getreg8(priv, BQ2425X_REG_2, &regval);
   if (ret < 0)
     {
-      batdbg("Error reading from BQ2425X! Error =  %d\n", ret);
+      baterr("ERROR: Error reading from BQ2425X! Error =  %d\n", ret);
       return ret;
     }
 
@@ -541,7 +544,7 @@ static inline int bq2425x_powersupply(FAR struct bq2425x_dev_s *priv, int curren
   ret = bq2425x_putreg8(priv, BQ2425X_REG_2, regval);
   if (ret < 0)
     {
-      batdbg("Error writing to BQ2425X! Error =  %d\n", ret);
+      baterr("ERROR: Error writing to BQ2425X! Error =  %d\n", ret);
       return ret;
     }
 
@@ -565,14 +568,14 @@ static inline int bq2425x_setvolt(FAR struct bq2425x_dev_s *priv, int volts)
 
   if (volts < BQ2425X_VOLT_MIN || volts > BQ2425X_VOLT_MAX)
     {
-      batdbg("Voltage %d mV is out of range.\n", volts);
+      baterr("ERROR: Voltage %d mV is out of range.\n", volts);
       return -EINVAL;
     }
 
   ret = bq2425x_getreg8(priv, BQ2425X_REG_3, &regval);
   if (ret < 0)
     {
-      batdbg("Error reading from BQ2425X! Error =  %d\n", ret);
+      baterr("ERROR: Error reading from BQ2425X! Error =  %d\n", ret);
       return ret;
     }
 
@@ -589,7 +592,7 @@ static inline int bq2425x_setvolt(FAR struct bq2425x_dev_s *priv, int volts)
   ret = bq2425x_putreg8(priv, BQ2425X_REG_3, regval);
   if (ret < 0)
     {
-      batdbg("Error writing to BQ2425X! Error =  %d\n", ret);
+      baterr("ERROR: Error writing to BQ2425X! Error =  %d\n", ret);
       return ret;
     }
 
@@ -613,14 +616,14 @@ static inline int bq2425x_setcurr(FAR struct bq2425x_dev_s *priv, int current)
 
   if (current < BQ2425X_CURR_MIN || current > BQ2425X_CURR_MAX)
     {
-      batdbg("Current %d mA is out of range.\n", volts);
+      baterr("ERROR: Current %d mA is out of range.\n", volts);
       return -EINVAL;
     }
 
   ret = bq2425x_getreg8(priv, BQ2425X_REG_4, &regval);
   if (ret < 0)
     {
-      batdbg("Error reading from BQ2425X! Error =  %d\n", ret);
+      baterr("ERROR: Error reading from BQ2425X! Error =  %d\n", ret);
       return ret;
     }
 
@@ -637,7 +640,7 @@ static inline int bq2425x_setcurr(FAR struct bq2425x_dev_s *priv, int current)
   ret = bq2425x_putreg8(priv, BQ2425X_REG_4, regval);
   if (ret < 0)
     {
-      batdbg("Error writing to BQ2425X! Error =  %d\n", ret);
+      baterr("ERROR: Error writing to BQ2425X! Error =  %d\n", ret);
       return ret;
     }
 
@@ -663,7 +666,7 @@ static int bq2425x_voltage(struct battery_charger_dev_s *dev, int value)
   ret = bq2425x_setvolt(priv, value);
   if (ret < 0)
     {
-      batdbg("Error setting voltage to BQ2425X! Error =  %d\n", ret);
+      baterr("ERROR: Error setting voltage to BQ2425X! Error =  %d\n", ret);
       return ret;
     }
 
@@ -688,7 +691,7 @@ static int bq2425x_current(struct battery_charger_dev_s *dev, int value)
   ret = bq2425x_setcurr(priv, value);
   if (ret < 0)
     {
-      batdbg("Error setting current to BQ2425X! Error =  %d\n", ret);
+      baterr("ERROR: Error setting current to BQ2425X! Error =  %d\n", ret);
       return ret;
     }
 
@@ -749,7 +752,7 @@ FAR struct battery_charger_dev_s *
       ret = bq2425x_reset(priv);
       if (ret < 0)
         {
-          batdbg("Failed to reset the BQ2425x: %d\n", ret);
+          baterr("ERROR: Failed to reset the BQ2425x: %d\n", ret);
           kmm_free(priv);
           return NULL;
         }
@@ -759,7 +762,7 @@ FAR struct battery_charger_dev_s *
       ret = bq2425x_watchdog(priv, false);
       if (ret < 0)
         {
-          batdbg("Failed to disable BQ2425x watchdog: %d\n", ret);
+          baterr("ERROR: Failed to disable BQ2425x watchdog: %d\n", ret);
           kmm_free(priv);
           return NULL;
         }
@@ -769,7 +772,7 @@ FAR struct battery_charger_dev_s *
       ret = bq2425x_powersupply(priv, 2000);
       if (ret < 0)
         {
-          batdbg("Failed to set BQ2425x power supply current: %d\n", ret);
+          baterr("ERROR: Failed to set BQ2425x power supply current: %d\n", ret);
           kmm_free(priv);
           return NULL;
         }

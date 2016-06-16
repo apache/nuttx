@@ -104,7 +104,7 @@ static int ehci_waiter(int argc, char *argv[])
 {
   FAR struct usbhost_hubport_s *hport;
 
-  uvdbg("ehci_waiter:  Running\n");
+  uinfo("ehci_waiter:  Running\n");
   for (;;)
     {
       /* Wait for the device to change state */
@@ -206,7 +206,7 @@ int lpc31_usbhost_initialize(void)
   ret = usbhost_cdcacm_initialize();
   if (ret != OK)
     {
-      udbg("ERROR: Failed to register the CDC/ACM serial class\n");
+      uerr("ERROR: Failed to register the CDC/ACM serial class\n");
     }
 #endif
 
@@ -216,7 +216,7 @@ int lpc31_usbhost_initialize(void)
   ret = usbhost_kbdinit();
   if (ret != OK)
     {
-      udbg("ERROR: Failed to register the KBD class\n");
+      uerr("ERROR: Failed to register the KBD class\n");
     }
 #endif
 
@@ -225,7 +225,7 @@ int lpc31_usbhost_initialize(void)
   g_ehciconn = lpc31_ehci_initialize(0);
   if (!g_ehciconn)
     {
-      udbg("ERROR: lpc31_ehci_initialize failed\n");
+      uerr("ERROR: lpc31_ehci_initialize failed\n");
       return -ENODEV;
     }
 
@@ -235,7 +235,7 @@ int lpc31_usbhost_initialize(void)
                     (main_t)ehci_waiter, (FAR char * const *)NULL);
   if (pid < 0)
     {
-      udbg("ERROR: Failed to create ehci_waiter task: %d\n", ret);
+      uerr("ERROR: Failed to create ehci_waiter task: %d\n", ret);
       return -ENODEV;
     }
 
@@ -262,7 +262,7 @@ int lpc31_usbhost_initialize(void)
 
 void lpc31_usbhost_vbusdrive(int rhport, bool enable)
 {
-  uvdbg("RHPort%d: enable=%d\n", rhport+1, enable);
+  uinfo("RHPort%d: enable=%d\n", rhport+1, enable);
 
   /* The LPC3131 has only a single root hub port */
 

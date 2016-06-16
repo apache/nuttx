@@ -91,14 +91,6 @@
 
 #define LCD_ID           0x1505
 
-/* Debug ******************************************************************************/
-
-#ifdef CONFIG_DEBUG_LCD
-# define lcddbg(format, ...)  vdbg(format, ##__VA_ARGS__)
-#else
-# define lcddbg(x...)
-#endif
-
 /* This should be put elsewhere (possibly include/nuttx/compiler.h) */
 
 #ifdef __CC_ARM               /* ARM Compiler        */
@@ -562,7 +554,7 @@ static int lcd_getvideoinfo(FAR struct lcd_dev_s *dev,
                             FAR struct fb_videoinfo_s *vinfo)
 {
   DEBUGASSERT(dev && vinfo);
-  gvdbg("fmt: %d xres: %d yres: %d nplanes: %d\n",
+  ginfo("fmt: %d xres: %d yres: %d nplanes: %d\n",
         g_videoinfo.fmt, g_videoinfo.xres, g_videoinfo.yres, g_videoinfo.nplanes);
 
   memcpy(vinfo, &g_videoinfo, sizeof(struct fb_videoinfo_s));
@@ -581,7 +573,7 @@ static int lcd_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
                             FAR struct lcd_planeinfo_s *pinfo)
 {
   DEBUGASSERT(dev && pinfo && planeno == 0);
-  gvdbg("planeno: %d bpp: %d\n", planeno, g_planeinfo.bpp);
+  ginfo("planeno: %d bpp: %d\n", planeno, g_planeinfo.bpp);
 
   memcpy(pinfo, &g_planeinfo, sizeof(struct lcd_planeinfo_s));
   return OK;
@@ -598,7 +590,7 @@ static int lcd_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
 
 static int lcd_getpower(struct lcd_dev_s *dev)
 {
-  gvdbg("power: %d\n", 0);
+  ginfo("power: %d\n", 0);
   return g_lcddev.power;
 }
 
@@ -618,7 +610,7 @@ static int lcd_setpower(struct lcd_dev_s *dev, int power)
       return OK;
     }
 
-  gvdbg("power: %d\n", power);
+  ginfo("power: %d\n", power);
   DEBUGASSERT(power <= CONFIG_LCD_MAXPOWER);
 
   /* Set new power level */
@@ -639,7 +631,7 @@ static int lcd_setpower(struct lcd_dev_s *dev, int power)
           duty = LCD_BL_TIMER_PERIOD - 1;
         }
 
-      gvdbg("PWM duty: %d\n", duty);
+      ginfo("PWM duty: %d\n", duty);
       putreg16((uint16_t)duty, STM32_TIM3_CCR2);
 #endif
       /* TODO turn the display on */
@@ -648,7 +640,7 @@ static int lcd_setpower(struct lcd_dev_s *dev, int power)
     {
       /* FIXME: Turn display off ? */
 
-      gvdbg("Force PWM to 0\n");
+      ginfo("Force PWM to 0\n");
       putreg16((uint16_t)0, STM32_TIM3_CCR2);
     }
 
@@ -666,7 +658,7 @@ static int lcd_setpower(struct lcd_dev_s *dev, int power)
 
 static int lcd_getcontrast(struct lcd_dev_s *dev)
 {
-  gvdbg("Not implemented\n");
+  ginfo("Not implemented\n");
   return -ENOSYS;
 }
 
@@ -680,7 +672,7 @@ static int lcd_getcontrast(struct lcd_dev_s *dev)
 
 static int lcd_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
 {
-  gvdbg("Not implemented\n");
+  ginfo("Not implemented\n");
   return -ENOSYS;
 }
 
@@ -880,26 +872,26 @@ static void lcd_backlight(void)
 
   /* Dump timer3 registers */
 
-  lcddbg("APB1ENR: %08x\n", getreg32(STM32_RCC_APB1ENR));
-  lcddbg("CR1:     %04x\n", getreg32(STM32_TIM3_CR1));
-  lcddbg("CR2:     %04x\n", getreg32(STM32_TIM3_CR2));
-  lcddbg("SMCR:    %04x\n", getreg32(STM32_TIM3_SMCR));
-  lcddbg("DIER:    %04x\n", getreg32(STM32_TIM3_DIER));
-  lcddbg("SR:      %04x\n", getreg32(STM32_TIM3_SR));
-  lcddbg("EGR:     %04x\n", getreg32(STM32_TIM3_EGR));
-  lcddbg("CCMR1:   %04x\n", getreg32(STM32_TIM3_CCMR1));
-  lcddbg("CCMR2:   %04x\n", getreg32(STM32_TIM3_CCMR2));
-  lcddbg("CCER:    %04x\n", getreg32(STM32_TIM3_CCER));
-  lcddbg("CNT:     %04x\n", getreg32(STM32_TIM3_CNT));
-  lcddbg("PSC:     %04x\n", getreg32(STM32_TIM3_PSC));
-  lcddbg("ARR:     %04x\n", getreg32(STM32_TIM3_ARR));
-  lcddbg("CCR1:    %04x\n", getreg32(STM32_TIM3_CCR1));
-  lcddbg("CCR2:    %04x\n", getreg32(STM32_TIM3_CCR2));
-  lcddbg("CCR3:    %04x\n", getreg32(STM32_TIM3_CCR3));
-  lcddbg("CCR4:    %04x\n", getreg32(STM32_TIM3_CCR4));
-  lcddbg("CCR4:    %04x\n", getreg32(STM32_TIM3_CCR4));
-  lcddbg("CCR4:    %04x\n", getreg32(STM32_TIM3_CCR4));
-  lcddbg("DMAR:    %04x\n", getreg32(STM32_TIM3_DMAR));
+  lcdinfo("APB1ENR: %08x\n", getreg32(STM32_RCC_APB1ENR));
+  lcdinfo("CR1:     %04x\n", getreg32(STM32_TIM3_CR1));
+  lcdinfo("CR2:     %04x\n", getreg32(STM32_TIM3_CR2));
+  lcdinfo("SMCR:    %04x\n", getreg32(STM32_TIM3_SMCR));
+  lcdinfo("DIER:    %04x\n", getreg32(STM32_TIM3_DIER));
+  lcdinfo("SR:      %04x\n", getreg32(STM32_TIM3_SR));
+  lcdinfo("EGR:     %04x\n", getreg32(STM32_TIM3_EGR));
+  lcdinfo("CCMR1:   %04x\n", getreg32(STM32_TIM3_CCMR1));
+  lcdinfo("CCMR2:   %04x\n", getreg32(STM32_TIM3_CCMR2));
+  lcdinfo("CCER:    %04x\n", getreg32(STM32_TIM3_CCER));
+  lcdinfo("CNT:     %04x\n", getreg32(STM32_TIM3_CNT));
+  lcdinfo("PSC:     %04x\n", getreg32(STM32_TIM3_PSC));
+  lcdinfo("ARR:     %04x\n", getreg32(STM32_TIM3_ARR));
+  lcdinfo("CCR1:    %04x\n", getreg32(STM32_TIM3_CCR1));
+  lcdinfo("CCR2:    %04x\n", getreg32(STM32_TIM3_CCR2));
+  lcdinfo("CCR3:    %04x\n", getreg32(STM32_TIM3_CCR3));
+  lcdinfo("CCR4:    %04x\n", getreg32(STM32_TIM3_CCR4));
+  lcdinfo("CCR4:    %04x\n", getreg32(STM32_TIM3_CCR4));
+  lcdinfo("CCR4:    %04x\n", getreg32(STM32_TIM3_CCR4));
+  lcdinfo("DMAR:    %04x\n", getreg32(STM32_TIM3_DMAR));
 }
 #endif
 
@@ -921,7 +913,7 @@ int board_lcd_initialize(void)
 {
   unsigned short id;
 
-  gvdbg("Initializing\n");
+  ginfo("Initializing\n");
 
   /* Configure GPIO pins and configure the FSMC to support the LCD */
 
@@ -938,7 +930,7 @@ int board_lcd_initialize(void)
     {
       /* Not a R61505U ? */
 
-      gdbg("board_lcd_initialize: LCD ctrl is not a R61505U");
+      lcderr("ERROR: board_lcd_initialize: LCD ctrl is not a R61505U");
       return ERROR;
     }
 

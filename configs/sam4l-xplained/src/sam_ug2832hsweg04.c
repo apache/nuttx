@@ -114,16 +114,6 @@
 #  error "The OLED driver requires CONFIG_SPI_CMDDATA in the configuration"
 #endif
 
-/* Debug ********************************************************************/
-
-#ifdef CONFIG_DEBUG_LCD
-#  define lcddbg(format, ...)   dbg(format, ##__VA_ARGS__)
-#  define lcdvdbg(format, ...)  vdbg(format, ##__VA_ARGS__)
-#else
-#  define lcddbg(x...)
-#  define lcdvdbg(x...)
-#endif
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -157,7 +147,7 @@ FAR struct lcd_dev_s *board_graphics_setup(unsigned int devno)
   spi = sam_spibus_initialize(OLED_CSNO);
   if (!spi)
     {
-      lcddbg("Failed to initialize SPI port 1\n");
+      lcderr("ERROR: Failed to initialize SPI port 1\n");
     }
   else
     {
@@ -166,11 +156,11 @@ FAR struct lcd_dev_s *board_graphics_setup(unsigned int devno)
       dev = ssd1306_initialize(spi, devno);
       if (!dev)
         {
-          lcddbg("Failed to bind SPI port 1 to OLED %d: %d\n", devno);
+          lcderr("ERROR: Failed to bind SPI port 1 to OLED %d: %d\n", devno);
         }
      else
         {
-          lcdvdbg("Bound SPI port 1 to OLED %d\n", devno);
+          lcdinfo("Bound SPI port 1 to OLED %d\n", devno);
 
           /* And turn the OLED on */
 

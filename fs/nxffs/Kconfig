@@ -31,8 +31,8 @@ config NXFFS_SCAN_VOLUME
 
 		The down side is that scanning the volume can adversely affect
 		your start-up time.  An option is to just erase the FLASH and
-		reboot in these cases.  That can be done with
-		apps/system/flash_eraseall.
+		reboot in these cases.  That can be done with MDIOC_BULKERASE
+		IOCTL command.
 
 config NXFFS_NAND
 	bool "Enable NAND support"

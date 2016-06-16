@@ -77,7 +77,7 @@ volatile uint32_t *g_current_regs[1];
  *
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG_IRQ)
+#if defined(CONFIG_DEBUG_IRQ_INFO)
 static void a1x_dumpintc(const char *msg, int irq)
 {
   irqstate_t flags;
@@ -85,40 +85,42 @@ static void a1x_dumpintc(const char *msg, int irq)
   /* Dump some relevant ARMv7 register contents */
 
   flags = enter_critical_section();
-  lldbg("ARMv7 (%s, irq=%d):\n", msg, irq);
-  lldbg("  CPSR: %08x SCTLR: %08x\n", flags, cp15_rdsctlr());
+
+  irqinfo("ARMv7 (%s, irq=%d):\n", msg, irq);
+  irqinfo("  CPSR: %08x SCTLR: %08x\n", flags, cp15_rdsctlr());
 
   /* Dump all of the (readable) INTC register contents */
 
-  lldbg("INTC (%s, irq=%d):\n", msg, irq);
-  lldbg("  VECTOR: %08x BASE: %08x PROTECT: %08x NMICTRL: %08x\n",
-        getreg32(A1X_INTC_VECTOR),    getreg32(A1X_INTC_BASEADDR),
-        getreg32(A1X_INTC_PROTECT),   getreg32(A1X_INTC_NMICTRL));
-  lldbg("  IRQ PEND: %08x %08x %08x\n",
-        getreg32(A1X_INTC_IRQ_PEND0), getreg32(A1X_INTC_IRQ_PEND1),
-        getreg32(A1X_INTC_IRQ_PEND2));
-  lldbg("  FIQ PEND: %08x %08x %08x\n",
-        getreg32(A1X_INTC_FIQ_PEND0), getreg32(A1X_INTC_FIQ_PEND1),
-        getreg32(A1X_INTC_FIQ_PEND2));
-  lldbg("  SEL:      %08x %08x %08x\n",
-        getreg32(A1X_INTC_IRQ_SEL0),  getreg32(A1X_INTC_IRQ_SEL1),
-        getreg32(A1X_INTC_IRQ_SEL2));
-  lldbg("  EN:       %08x %08x %08x\n",
-        getreg32(A1X_INTC_EN0),       getreg32(A1X_INTC_EN1),
-        getreg32(A1X_INTC_EN2));
-  lldbg("  MASK:     %08x %08x %08x\n",
-        getreg32(A1X_INTC_MASK0),     getreg32(A1X_INTC_MASK1),
-        getreg32(A1X_INTC_MASK2));
-  lldbg("  RESP:     %08x %08x %08x\n",
-        getreg32(A1X_INTC_RESP0),     getreg32(A1X_INTC_RESP1),
-        getreg32(A1X_INTC_RESP2));
-  lldbg("  FF:       %08x %08x %08x\n",
-        getreg32(A1X_INTC_FF0),       getreg32(A1X_INTC_FF1),
-        getreg32(A1X_INTC_FF2));
-  lldbg("  PRIO:     %08x %08x %08x %08x %08x\n",
-        getreg32(A1X_INTC_PRIO0),     getreg32(A1X_INTC_PRIO1),
-        getreg32(A1X_INTC_PRIO2),     getreg32(A1X_INTC_PRIO3),
-        getreg32(A1X_INTC_PRIO4));
+  irqinfo("INTC (%s, irq=%d):\n", msg, irq);
+  irqinfo("  VECTOR: %08x BASE: %08x PROTECT: %08x NMICTRL: %08x\n",
+          getreg32(A1X_INTC_VECTOR),    getreg32(A1X_INTC_BASEADDR),
+          getreg32(A1X_INTC_PROTECT),   getreg32(A1X_INTC_NMICTRL));
+  irqinfo("  IRQ PEND: %08x %08x %08x\n",
+          getreg32(A1X_INTC_IRQ_PEND0), getreg32(A1X_INTC_IRQ_PEND1),
+          getreg32(A1X_INTC_IRQ_PEND2));
+  irqinfo("  FIQ PEND: %08x %08x %08x\n",
+          getreg32(A1X_INTC_FIQ_PEND0), getreg32(A1X_INTC_FIQ_PEND1),
+          getreg32(A1X_INTC_FIQ_PEND2));
+  irqinfo("  SEL:      %08x %08x %08x\n",
+          getreg32(A1X_INTC_IRQ_SEL0),  getreg32(A1X_INTC_IRQ_SEL1),
+          getreg32(A1X_INTC_IRQ_SEL2));
+  irqinfo("  EN:       %08x %08x %08x\n",
+          getreg32(A1X_INTC_EN0),       getreg32(A1X_INTC_EN1),
+          getreg32(A1X_INTC_EN2));
+  irqinfo("  MASK:     %08x %08x %08x\n",
+          getreg32(A1X_INTC_MASK0),     getreg32(A1X_INTC_MASK1),
+          getreg32(A1X_INTC_MASK2));
+  irqinfo("  RESP:     %08x %08x %08x\n",
+          getreg32(A1X_INTC_RESP0),     getreg32(A1X_INTC_RESP1),
+          getreg32(A1X_INTC_RESP2));
+  irqinfo("  FF:       %08x %08x %08x\n",
+          getreg32(A1X_INTC_FF0),       getreg32(A1X_INTC_FF1),
+          getreg32(A1X_INTC_FF2));
+  irqinfo("  PRIO:     %08x %08x %08x %08x %08x\n",
+          getreg32(A1X_INTC_PRIO0),     getreg32(A1X_INTC_PRIO1),
+          getreg32(A1X_INTC_PRIO2),     getreg32(A1X_INTC_PRIO3),
+          getreg32(A1X_INTC_PRIO4));
+
   leave_critical_section(flags);
 }
 #else

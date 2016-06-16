@@ -73,13 +73,13 @@ ssize_t file_write(FAR struct file *filep, FAR const void *buf, size_t nbytes)
 {
   FAR struct inode *inode;
   int ret;
-  int err;
+  int errcode;
 
   /* Was this file opened for write access? */
 
   if ((filep->f_oflags & O_WROK) == 0)
     {
-      err = EBADF;
+      errcode = EBADF;
       goto errout;
     }
 
@@ -88,7 +88,7 @@ ssize_t file_write(FAR struct file *filep, FAR const void *buf, size_t nbytes)
   inode = filep->f_inode;
   if (!inode || !inode->u.i_ops || !inode->u.i_ops->write)
     {
-      err = EBADF;
+      errcode = EBADF;
       goto errout;
     }
 
@@ -97,14 +97,14 @@ ssize_t file_write(FAR struct file *filep, FAR const void *buf, size_t nbytes)
   ret = inode->u.i_ops->write(filep, buf, nbytes);
   if (ret < 0)
     {
-      err = -ret;
+      errcode = -ret;
       goto errout;
     }
 
   return ret;
 
 errout:
-  set_errno(err);
+  set_errno(errcode);
   return ERROR;
 }
 

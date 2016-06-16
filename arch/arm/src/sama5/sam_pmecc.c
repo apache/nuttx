@@ -632,7 +632,7 @@ static uint32_t pmecc_errorcorrection(uintptr_t sectorbase,
 
           if (bytepos < sectorsz + nand_getreg(SAM_HSMC_PMECCSADDR))
             {
-              fdbg("Correct error bit @[Byte %d, Bit %d]\n",
+              fwarn("WARNING: Correct error bit @[Byte %d, Bit %d]\n",
                       (int)bytepos, (int)bitpos);
 
               if (*(uint8_t *)(sectorbase + bytepos) & (1 << bitpos))
@@ -858,7 +858,7 @@ static int pmecc_pagelayout(uint16_t datasize, uint16_t eccsize)
   int bcherr1k;
   int selector;
 
-  fvdbg("datasize=%d eccsize=%d\n", datasize, eccsize);
+  finfo("datasize=%d eccsize=%d\n", datasize, eccsize);
   DEBUGASSERT(datasize > 0 && eccsize > 0);
 
   /* Try for 512 byte sectors */
@@ -870,14 +870,14 @@ static int pmecc_pagelayout(uint16_t datasize, uint16_t eccsize)
   bcherr512   = pmecc_bcherr512(nsectors512, eccsize);
   if (bcherr512 < 0)
     {
-      fdbg("WARNING: Cannot realize 512B sectors\n");
+      fwarn("WARNING: Cannot realize 512B sectors\n");
     }
   else
     {
       selector = 1;
     }
 
-  fvdbg("nsectors512=%d bcherr512=%d selector=%d\n",
+  finfo("nsectors512=%d bcherr512=%d selector=%d\n",
         nsectors512, bcherr512, selector);
 
   /* Try for 1024 byte sectors */
@@ -895,14 +895,14 @@ static int pmecc_pagelayout(uint16_t datasize, uint16_t eccsize)
 
   if (bcherr1k < 0)
     {
-      fdbg("WARNING: Cannot realize 1KB sectors\n");
+      fwarn("WARNING: Cannot realize 1KB sectors\n");
     }
   else
     {
       selector |= 2;
     }
 
-  fvdbg("nsectors1k=%d bcherr1k=%d selector=%d\n",
+  finfo("nsectors1k=%d bcherr1k=%d selector=%d\n",
         nsectors1k, bcherr1k, selector);
 
   /* Now pick the best (most likely 1024) */
@@ -960,7 +960,7 @@ static int pmecc_pagelayout(uint16_t datasize, uint16_t eccsize)
 
   g_pmecc.desc.bcherr = ((uint32_t)bcherr << HSMC_PMECCFG_BCHERR_SHIFT);
 
-  fvdbg("sector1k=%d nsectors=%d bcherr=%d correctability=%d\n",
+  finfo("sector1k=%d nsectors=%d bcherr=%d correctability=%d\n",
         g_pmecc.sector1k, g_pmecc.nsectors, bcherr, g_pmecc.correctability);
 
   return OK;
@@ -1018,7 +1018,7 @@ int pmecc_configure(struct sam_nandcs_s *priv, bool protected)
   uint32_t regval;
   int ret;
 
-  fvdbg("protected=%d configured=%d\n", protected, g_pmecc.configured);
+  finfo("protected=%d configured=%d\n", protected, g_pmecc.configured);
 
   /* Check if we need to re-configure */
 
@@ -1030,7 +1030,7 @@ int pmecc_configure(struct sam_nandcs_s *priv, bool protected)
     {
       /* No, we are already configured */
 
-      fvdbg("Already configured\n");
+      finfo("Already configured\n");
       return OK;
     }
 
@@ -1059,7 +1059,7 @@ int pmecc_configure(struct sam_nandcs_s *priv, bool protected)
   ret = pmecc_pagelayout(priv->raw.model.pagesize, eccsize);
   if (ret < 0)
     {
-      fdbg("ERROR: pmecc_pagelayout failed: %d\n", ret);
+      ferr("ERROR: pmecc_pagelayout failed: %d\n", ret);
       return ret;
     }
 
@@ -1096,7 +1096,7 @@ int pmecc_configure(struct sam_nandcs_s *priv, bool protected)
 #endif
     }
 
-  fvdbg("sectorsz=%08x sectorsperpage=%d mm=%d\n",
+  finfo("sectorsz=%08x sectorsperpage=%d mm=%d\n",
         g_pmecc.desc.sectorsz, sectorsperpage, g_pmecc.desc.mm);
 
   switch (sectorsperpage)
@@ -1114,13 +1114,13 @@ int pmecc_configure(struct sam_nandcs_s *priv, bool protected)
           g_pmecc.desc.pagesize = HSMC_PMECCFG_PAGESIZE_8SEC;
           break;
       default:
-        fdbg("ERROR: Unsupported sectors per page: %d\n", sectorsperpage);
+        ferr("ERROR: Unsupported sectors per page: %d\n", sectorsperpage);
         return -EINVAL;
     }
 
   g_pmecc.desc.nn = (1 << g_pmecc.desc.mm) - 1;
 
-  fvdbg("pagesize=%08x nn=%d\n", g_pmecc.desc.pagesize, g_pmecc.desc.nn);
+  finfo("pagesize=%08x nn=%d\n", g_pmecc.desc.pagesize, g_pmecc.desc.nn);
 
   /* Real value of ECC bit number correction (2, 4, 8, 12, 24) */
 
@@ -1136,19 +1136,19 @@ int pmecc_configure(struct sam_nandcs_s *priv, bool protected)
         (((g_pmecc.desc.mm * g_pmecc.correctability) >> 3) + 1) * sectorsperpage;
     }
 
-  fvdbg("mm=%d correctability=%d eccsize=%d\n",
+  finfo("mm=%d correctability=%d eccsize=%d\n",
         g_pmecc.desc.mm, g_pmecc.correctability, g_pmecc.desc.eccsize);
 
   g_pmecc.desc.eccstart = eccoffset;
   g_pmecc.desc.eccend   = eccoffset + g_pmecc.desc.eccsize;
 
-  fvdbg("eccstart=%d eccend=%d sparesize=%d\n",
+  finfo("eccstart=%d eccend=%d sparesize=%d\n",
         g_pmecc.desc.eccstart, g_pmecc.desc.eccend,
         priv->raw.model.sparesize);
 
   if (g_pmecc.desc.eccend > priv->raw.model.sparesize)
     {
-      fdbg("ERROR: No room for ECC in spare bytes %d > %d\n",
+      ferr("ERROR: No room for ECC in spare bytes %d > %d\n",
            g_pmecc.desc.eccend, priv->raw.model.sparesize);
 
       return -ENOSPC;

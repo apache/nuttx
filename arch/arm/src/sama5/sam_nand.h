@@ -259,14 +259,13 @@
 
 /* Debug */
 
-#if !defined(CONFIG_DEBUG) || !defined(CONFIG_DEBUG_FS)
-#  undef CONFIG_DEBUG_FS
+#ifndef defined(CONFIG_DEBUG_FS_INFO
 #  undef CONFIG_SAMA5_NAND_DMADEBUG
 #  undef CONFIG_SAMA5_NAND_REGDEBUG
 #  undef CONFIG_SAMA5_NAND_DUMP
 #endif
 
-#if !defined(CONFIG_SAMA5_NAND_DMA) || !defined(CONFIG_DEBUG_DMA)
+#if !defined(CONFIG_SAMA5_NAND_DMA) || !defined(CONFIG_DEBUG_DMA_INFO)
 #  undef CONFIG_SAMA5_NAND_DMADEBUG
 #endif
 
@@ -518,7 +517,7 @@ static inline uint32_t nand_getreg(uintptr_t regaddr)
 #ifdef CONFIG_SAMA5_NAND_REGDEBUG
   if (nand_checkreg(false, regaddr, regval))
     {
-      lldbg("%08x->%08x\n", regaddr, regval);
+      sinfo("%08x->%08x\n", regaddr, regval);
     }
 #endif
 
@@ -538,7 +537,7 @@ static inline void nand_putreg(uintptr_t regaddr, uint32_t regval)
 #ifdef CONFIG_SAMA5_NAND_REGDEBUG
   if (nand_checkreg(true, regaddr, regval))
     {
-      lldbg("%08x<-%08x\n", regaddr, regval);
+      sinfo("%08x<-%08x\n", regaddr, regval);
     }
 #endif
 

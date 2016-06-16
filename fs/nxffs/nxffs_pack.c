@@ -331,7 +331,7 @@ static inline int nxffs_startpos(FAR struct nxffs_volume_s *volume,
           ret = nxffs_nextblock(volume, offset, &blkentry);
           if (ret < 0)
             {
-              fdbg("ERROR: Failed to find next data block: %d\n", -ret);
+              ferr("ERROR: Failed to find next data block: %d\n", -ret);
               return ret;
             }
 
@@ -421,7 +421,7 @@ static int nxffs_srcsetup(FAR struct nxffs_volume_s *volume,
       int ret = nxffs_rdblkhdr(volume, offset, &pack->src.blklen);
       if (ret < 0)
         {
-          fdbg("ERROR: Failed to verify the data block header: %d\n", -ret);
+          ferr("ERROR: Failed to verify the data block header: %d\n", -ret);
         }
 
       return ret;
@@ -706,7 +706,7 @@ static int nxffs_wrinodehdr(FAR struct nxffs_volume_s *volume,
       ret = nxffs_updateinode(volume, &pack->dest.entry);
       if (ret < 0)
         {
-          fdbg("ERROR: Failed to update inode info: %s\n", -ret);
+          ferr("ERROR: Failed to update inode info: %s\n", -ret);
         }
     }
 
@@ -849,7 +849,7 @@ static int nxffs_endsrcblock(FAR struct nxffs_volume_s *volume,
   ret    = nxffs_nextblock(volume, offset, &blkentry);
   if (ret < 0)
     {
-      fdbg("ERROR: Failed to find next data block: %d\n", -ret);
+      ferr("ERROR: Failed to find next data block: %d\n", -ret);
       return ret;
     }
 
@@ -893,7 +893,7 @@ static inline int nxffs_packblock(FAR struct nxffs_volume_s *volume,
       ret = nxffs_srcsetup(volume, pack, pack->src.entry.doffset);
       if (ret < 0)
         {
-          fdbg("ERROR: Failed to configure the src stream: %d\n", -ret);
+          ferr("ERROR: Failed to configure the src stream: %d\n", -ret);
           return ret;
         }
     }
@@ -919,7 +919,7 @@ static inline int nxffs_packblock(FAR struct nxffs_volume_s *volume,
         }
       else
         {
-          fdbg("ERROR: Failed to configure the dest stream: %d\n", -ret);
+          ferr("ERROR: Failed to configure the dest stream: %d\n", -ret);
           return ret;
         }
     }
@@ -1011,7 +1011,7 @@ static inline int nxffs_packblock(FAR struct nxffs_volume_s *volume,
                 }
               else
                 {
-                  fdbg("ERROR: Failed to configure the dest stream: %d\n", -ret);
+                  ferr("ERROR: Failed to configure the dest stream: %d\n", -ret);
                   return ret;
                 }
             }
@@ -1146,7 +1146,7 @@ static inline int nxffs_packwriter(FAR struct nxffs_volume_s *volume,
       ret = nxffs_srcsetup(volume, pack, pack->src.entry.doffset);
       if (ret < 0)
         {
-          fdbg("ERROR: Failed to configure the src stream: %d\n", -ret);
+          ferr("ERROR: Failed to configure the src stream: %d\n", -ret);
           return ret;
         }
     }
@@ -1172,7 +1172,7 @@ static inline int nxffs_packwriter(FAR struct nxffs_volume_s *volume,
         }
       else
         {
-          fdbg("ERROR: Failed to configure the dest stream: %d\n", -ret);
+          ferr("ERROR: Failed to configure the dest stream: %d\n", -ret);
           return ret;
         }
     }
@@ -1380,7 +1380,7 @@ int nxffs_pack(FAR struct nxffs_volume_s *volume)
         }
       else
         {
-          fdbg("ERROR: Failed to find a packing position: %d\n", -ret);
+          ferr("ERROR: Failed to find a packing position: %d\n", -ret);
           return ret;
         }
     }
@@ -1418,7 +1418,7 @@ start_pack:
       ret = MTD_BREAD(volume->mtd, pack.block0, volume->blkper, volume->pack);
       if (ret < 0)
         {
-          fdbg("ERROR: Failed to read erase block %d: %d\n", eblock, -ret);
+          ferr("ERROR: Failed to read erase block %d: %d\n", eblock, -ret);
           goto errout_with_pack;
         }
 
@@ -1446,7 +1446,7 @@ start_pack:
             {
               /* Force a the block to be an NXFFS bad block */
 
-              fdbg("ERROR: Failed to read block %d: %d\n", block, ret);
+              ferr("ERROR: Failed to read block %d: %d\n", block, ret);
               nxffs_blkinit(volume, pack.iobuffer, BLOCK_STATE_BAD);
             }
         }
@@ -1514,7 +1514,7 @@ start_pack:
                             {
                               /* Otherwise, something really bad happened */
 
-                              fdbg("ERROR: Failed to pack into block %d: %d\n",
+                              ferr("ERROR: Failed to pack into block %d: %d\n",
                                    block, ret);
                               goto errout_with_pack;
                             }
@@ -1546,7 +1546,7 @@ start_pack:
                             {
                               /* Otherwise, something really bad happened */
 
-                              fdbg("ERROR: Failed to pack into block %d: %d\n",
+                              ferr("ERROR: Failed to pack into block %d: %d\n",
                                    block, ret);
                               goto errout_with_pack;
                             }
@@ -1580,7 +1580,7 @@ start_pack:
       ret = MTD_ERASE(volume->mtd, eblock, 1);
       if (ret < 0)
         {
-          fdbg("ERROR: Failed to erase block %d [%d]: %d\n",
+          ferr("ERROR: Failed to erase block %d [%d]: %d\n",
                eblock, pack.block0, -ret);
           goto errout_with_pack;
         }
@@ -1590,7 +1590,7 @@ start_pack:
       ret = MTD_BWRITE(volume->mtd, pack.block0, volume->blkper, volume->pack);
       if (ret < 0)
         {
-          fdbg("ERROR: Failed to write erase block %d [%d]: %d\n",
+          ferr("ERROR: Failed to write erase block %d [%d]: %d\n",
                eblock, pack.block0, -ret);
           goto errout_with_pack;
         }
