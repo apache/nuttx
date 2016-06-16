@@ -237,6 +237,30 @@
 #  define sllinfo(x...)
 #endif
 
+#ifdef CONFIG_DEBUG_SYSCALL_ERROR
+#  define svcerr(format, ...)    err(format, ##__VA_ARGS__)
+#  define svcllerr(format, ...)  llerr(format, ##__VA_ARGS__)
+#else
+#  define svcerr(x...)
+#  define svcllerr(x...)
+#endif
+
+#ifdef CONFIG_DEBUG_SYSCALL_WARN
+#  define svcwarn(format, ...)   warn(format, ##__VA_ARGS__)
+#  define svcllwarn(format, ...) llwarn(format, ##__VA_ARGS__)
+#else
+#  define svcwarn(x...)
+#  define svcllwarn(x...)
+#endif
+
+#ifdef CONFIG_DEBUG_SYSCALL_INFO
+#  define svcinfo(format, ...)   info(format, ##__VA_ARGS__)
+#  define svcllinfo(format, ...) llinfo(format, ##__VA_ARGS__)
+#else
+#  define svcinfo(x...)
+#  define svcllinfo(x...)
+#endif
+
 #ifdef CONFIG_DEBUG_PAGING_ERROR
 #  define pgerr(format, ...)    err(format, ##__VA_ARGS__)
 #  define pgllerr(format, ...)  llerr(format, ##__VA_ARGS__)
@@ -946,6 +970,30 @@
 #  define sllinfo     (void)
 #endif
 
+#ifdef CONFIG_DEBUG_SYSCALL_ERROR
+#  define svcerr      err
+#  define svcllerr    llerr
+#else
+#  define svcerr      (void)
+#  define svcllerr    (void)
+#endif
+
+#ifdef CONFIG_DEBUG_SYSCALL_WARN
+#  define svcwarn     warn
+#  define svcllwarn   llwarn
+#else
+#  define svcwarn     (void)
+#  define svcllwarn   (void)
+#endif
+
+#ifdef CONFIG_DEBUG_SYSCALL_INFO
+#  define svcinfo     info
+#  define svcllinfo   llinfo
+#else
+#  define svcinfo     (void)
+#  define svcllinfo   (void)
+#endif
+
 #ifdef CONFIG_DEBUG_PAGING_ERROR
 #  define pgerr       err
 #  define pgllerr     llerr
@@ -1602,6 +1650,14 @@
 #else
 #  define serrdumpbuffer(m,b,n)
 #  define sinfodumpbuffer(m,b,n)
+#endif
+
+#ifdef CONFIG_DEBUG_SYSCALL
+#  define svcerrdumpbuffer(m,b,n)  errdumpbuffer(m,b,n)
+#  define svcinfodumpbuffer(m,b,n) infodumpbuffer(m,b,n)
+#else
+#  define svcerrdumpbuffer(m,b,n)
+#  define svcinfodumpbuffer(m,b,n)
 #endif
 
 #ifdef CONFIG_DEBUG_PAGING

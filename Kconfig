@@ -741,12 +741,38 @@ config DEBUG_SCHED_INFO
 endif # DEBUG_SCHED
 
 config DEBUG_SYSCALL
-	bool "SYSCALL Debug Output"
+	bool "SYSCALL Debug Features"
 	default n
 	depends on LIB_SYSCALL
 	---help---
-		Enable very low level output related to system calls.  This gives
-		you basically a poor man's version of strace.
+		Enable very low level features related to system calls.  If SYSCAL
+		output is enabled, this gives you basically a poor man's version of
+		strace.
+
+if DEBUG_SYSCALL
+
+config DEBUG_SYSCALL_ERROR
+	bool "SYSCALL Error Output"
+	default n
+	depends on DEBUG_ERROR
+	---help---
+		Enable OS SYSCALL error output to SYSLOG.
+
+config DEBUG_SYSCALL_WARN
+	bool "SYSCALL Warnings Output"
+	default n
+	depends on DEBUG_WARN
+	---help---
+		Enable OS SYSCALL warning output to SYSLOG.
+
+config DEBUG_SYSCALL_INFO
+	bool "SYSCALL Informational Output"
+	default n
+	depends on DEBUG_INFO
+	---help---
+		Enable OS SYSCALL informational output to SYSLOG.
+
+endif # DEBUG_SYSCALL
 
 config DEBUG_WIRELESS
 	bool "Wireless Device Debug Output"

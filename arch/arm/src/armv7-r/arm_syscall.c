@@ -53,22 +53,6 @@
 #include "up_internal.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* Debug ********************************************************************/
-
-#if defined(CONFIG_DEBUG_SYSCALL)
-# define svcerr(format, ...)  llerr(format, ##__VA_ARGS__)
-# define svcwarn(format, ...) llwarn(format, ##__VA_ARGS__)
-# define svcinfo(format, ...) llinfo(format, ##__VA_ARGS__)
-#else
-# define svcerr(x...)
-# define svcwarn(x...)
-# define svcinfo(x...)
-#endif
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -170,16 +154,14 @@ uint32_t *arm_syscall(uint32_t *regs)
    * and R1..R7 =  variable number of arguments depending on the system call.
    */
 
-#if defined(CONFIG_DEBUG_SYSCALL)
-  svcinfo("SYSCALL Entry: regs: %p cmd: %d\n", regs, cmd);
-  svcinfo("  R0: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-          regs[REG_R0],  regs[REG_R1],  regs[REG_R2],  regs[REG_R3],
-          regs[REG_R4],  regs[REG_R5],  regs[REG_R6],  regs[REG_R7]);
-  svcinfo("  R8: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-          regs[REG_R8],  regs[REG_R9],  regs[REG_R10], regs[REG_R11],
-          regs[REG_R12], regs[REG_R13], regs[REG_R14], regs[REG_R15]);
-  svcinfo("CPSR: %08x\n", regs[REG_CPSR]);
-#endif
+  svcllinfo("SYSCALL Entry: regs: %p cmd: %d\n", regs, cmd);
+  svcllinfo("  R0: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+            regs[REG_R0],  regs[REG_R1],  regs[REG_R2],  regs[REG_R3],
+            regs[REG_R4],  regs[REG_R5],  regs[REG_R6],  regs[REG_R7]);
+  svcllinfo("  R8: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+            regs[REG_R8],  regs[REG_R9],  regs[REG_R10], regs[REG_R11],
+            regs[REG_R12], regs[REG_R13], regs[REG_R14], regs[REG_R15]);
+  svcllinfo("CPSR: %08x\n", regs[REG_CPSR]);
 
   /* Handle the SVCall according to the command in R0 */
 
@@ -472,7 +454,7 @@ uint32_t *arm_syscall(uint32_t *regs)
 
           regs[REG_R0] -= CONFIG_SYS_RESERVED;
 #else
-          svcerr("ERROR: Bad SYS call: %d\n", regs[REG_R0]);
+          svcllerr("ERROR: Bad SYS call: %d\n", regs[REG_R0]);
 #endif
 
 #ifdef CONFIG_ARCH_KERNEL_STACK
@@ -493,18 +475,16 @@ uint32_t *arm_syscall(uint32_t *regs)
         break;
     }
 
-#if defined(CONFIG_DEBUG_SYSCALL)
   /* Report what happened */
 
-  svcinfo("SYSCALL Exit: regs: %p\n", regs);
-  svcinfo("  R0: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-          regs[REG_R0],  regs[REG_R1],  regs[REG_R2],  regs[REG_R3],
-          regs[REG_R4],  regs[REG_R5],  regs[REG_R6],  regs[REG_R7]);
-  svcinfo("  R8: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-          regs[REG_R8],  regs[REG_R9],  regs[REG_R10], regs[REG_R11],
-          regs[REG_R12], regs[REG_R13], regs[REG_R14], regs[REG_R15]);
-  svcinfo("CPSR: %08x\n", regs[REG_CPSR]);
-#endif
+  svcllinfo("SYSCALL Exit: regs: %p\n", regs);
+  svcllinfo("  R0: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+            regs[REG_R0],  regs[REG_R1],  regs[REG_R2],  regs[REG_R3],
+            regs[REG_R4],  regs[REG_R5],  regs[REG_R6],  regs[REG_R7]);
+  svcllinfo("  R8: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+            regs[REG_R8],  regs[REG_R9],  regs[REG_R10], regs[REG_R11],
+            regs[REG_R12], regs[REG_R13], regs[REG_R14], regs[REG_R15]);
+  svcllinfo("CPSR: %08x\n", regs[REG_CPSR]);
 
   /* Return the last value of curent_regs.  This supports context switches
    * on return from the exception.  That capability is only used with the
