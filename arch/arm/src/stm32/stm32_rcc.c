@@ -68,10 +68,6 @@
 #define HSERDY_TIMEOUT (100 * CONFIG_BOARD_LOOPSPERMSEC)
 
 /****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -106,7 +102,7 @@
  ****************************************************************************/
 
 /************************************************************************************
- * Name: rcc_enablebkp
+ * Name: rcc_resetbkp
  *
  * Description:
  *   The RTC needs to reset the Backup Domain to change RTCSEL and resetting the
@@ -122,8 +118,8 @@
  *
  ************************************************************************************/
 
-#if defined(CONFIG_STM32_PWR) && !defined(CONFIG_STM32_STM32F10XX)
-static inline rcc_enablebkp(void)
+#if defined(CONFIG_RTC) && defined(CONFIG_STM32_PWR) && !defined(CONFIG_STM32_STM32F10XX)
+static inline rcc_resetbkp(void)
 {
   uint32_t regval;
 
@@ -145,7 +141,7 @@ static inline rcc_enablebkp(void)
     }
 }
 #else
-#  define rcc_enablebkp()
+#  define rcc_resetbkp()
 #endif
 
 /****************************************************************************
@@ -181,9 +177,9 @@ void stm32_clockconfig(void)
 
   rcc_reset();
 
-  /* Reset backup domain */
+  /* Reset backup domain if appropriate */
 
-  rcc_enablebkp();
+  rcc_resetbkp();
 
 #if defined(CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG)
 
