@@ -84,20 +84,10 @@
 #  endif
 #endif
 
-#if !defined(CONFIG_RTC_MAGIC)
-# define CONFIG_RTC_MAGIC (0xfacefeee)
-#endif
-
-#if !defined(CONFIG_RTC_MAGIC_REG)
-# define CONFIG_RTC_MAGIC_REG (0)
-#endif
-
 /* Constants ************************************************************************/
 
 #define SYNCHRO_TIMEOUT  (0x00020000)
 #define INITMODE_TIMEOUT (0x00010000)
-#define RTC_MAGIC        CONFIG_RTC_MAGIC
-#define RTC_MAGIC_REG    STM32_RTC_BKR(CONFIG_RTC_MAGIC_REG)
 
 /* Proxy definitions to make the same code work for all the STM32 series ************/
 
@@ -612,13 +602,6 @@ int up_rtc_initialize(void)
 
   if (regval != RTC_MAGIC)
     {
-      /* We might be changing RTCSEL - to ensure such changes work, we must reset the
-       * backup domain (having backed up the RTC_MAGIC token)
-       */
-
-      modifyreg32(STM32_RCC_XXX, 0, RCC_XXX_YYYRST);
-      modifyreg32(STM32_RCC_XXX, RCC_XXX_YYYRST, 0);
-
       /* Some boards do not have the external 32khz oscillator installed, for those
        * boards we must fallback to the crummy internal RC clock or the external high
        * rate clock
