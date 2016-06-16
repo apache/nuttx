@@ -122,7 +122,7 @@
  *
  ************************************************************************************/
 
-#ifdef CONFIG_STM32_PWR
+#if defined(CONFIG_STM32_PWR) && !defined(CONFIG_STM32_STM32F10XX)
 static inline rcc_enablebkp(void)
 {
   uint32_t regval;
