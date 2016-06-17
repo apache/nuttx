@@ -1163,6 +1163,11 @@ config STM32F7_I2C3
 	default n
 	select STM32F7_I2C
 
+config STM32F7_I2C4
+	bool "I2C4"
+	default n
+	select STM32F7_I2C
+
 config STM32F7_LPTIM1
 	bool "Low-power timer 1"
 	default n
@@ -1665,6 +1670,46 @@ config STM32F7_SPI_DMA
 		Use DMA to improve SPI transfer performance.  Cannot be used with STM32F7_SPI_INTERRUPT.
 
 endmenu # "SPI Configuration"
+
+menu "I2C Configuration"
+	depends on STM32F7_I2C
+
+config STM32F7_I2C_DYNTIMEO
+	bool "Use dynamic timeouts"
+	default n
+	depends on STM32F7_I2C
+
+config STM32F7_I2C_DYNTIMEO_USECPERBYTE
+	int "Timeout Microseconds per Byte"
+	default 500
+	depends on STM32F7_I2C_DYNTIMEO
+
+config STM32F7_I2C_DYNTIMEO_STARTSTOP
+	int "Timeout for Start/Stop (Milliseconds)"
+	default 1000
+	depends on STM32F7_I2C_DYNTIMEO
+
+config STM32F7_I2CTIMEOSEC
+	int "Timeout seconds"
+	default 0
+	depends on STM32F7_I2C
+
+config STM32F7_I2CTIMEOMS
+	int "Timeout Milliseconds"
+	default 500
+	depends on STM32F7_I2C && !STM32F7_I2C_DYNTIMEO
+
+config STM32F7_I2CTIMEOTICKS
+	int "Timeout for Done and Stop (ticks)"
+	default 500
+	depends on STM32F7_I2C && !STM32F7_I2C_DYNTIMEO
+
+config STM32F7_I2C_DUTY16_9
+	bool "Frequency with Tlow/Thigh = 16/9 "
+	default n
+	depends on STM32F7_I2C
+
+endmenu # "I2C Configuration"
 
 config STM32F7_CUSTOM_CLOCKCONFIG
 		bool "Custom clock configuration"

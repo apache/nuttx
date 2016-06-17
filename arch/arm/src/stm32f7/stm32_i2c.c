@@ -52,17 +52,22 @@
  * STM32 F7 I2C Driver
  *
  * Supports:
- *  - Master operation at up to 400Khz (Fast Mode)
+ *  - Master operation:
+ *      Standard-mode (up to 100 kHz)
+ *      Fast-mode (up to 400 kHz)
+ *      Fast-mode Plus (up to 1 MHz)
+ *      fI2CCLK clock source selection is based on STM32_RCC_DCKCFGR2_I2CxSRC
+ *      being set to HSI and the calulations are based on STM32_HSI_FREQUENCY
+ *      of 16mHz
+ *
  *  - Multiple instances (shared bus)
  *  - Interrupt based operation
  *  - RELOAD support
  *
  * Unsupported, possible future work:
  *  - More effective error reporting to higher layers
- *  - Fast mode plus (1Mhz)
  *  - Slave operation
- *  - Peripheral clock source selection (SYSCLK vs HSI)
- *  - Support of SYSCLK frequencies other than 8Mhz
+ *  - Support of fI2CCLK frequencies other than 16Mhz
  *  - Polled operation (code present but untested)
  *  - SMBus support
  *  - Multi-master support
@@ -70,8 +75,7 @@
  *
  * Test Environment:
  *
- *  - STM32F303VC on ST F3 Discovery Board (ST Part STM32F3DISCOVERY)
- *    256K Flash, 40K SRAM available for all operations, 8K SRAM CCM
+ *  - STM32F7676ZI on ST Nucleo-144 Board (ST Part STM32F429ZIT6)
  *
  * Operational Status:
  *
@@ -83,18 +87,18 @@
  *  payloads has not been  tested as the author lacked access to a real
  *  device supporting these types of transfers.
  *
- * Performance Benchmarks:
+ * Performance Benchmarks: TBD
  *
  *  Time to transfer two messages, each a byte in length, in addition to the
  *  START condition, in interrupt mode:
  *
- *  DEBUG enabled (development): 80ms
+ *  DEBUG enabled (development): TBDms
  *      Excessive delay here is caused by printing to the console and
  *      is of no concern.
  *
- *  DEBUG disabled (production): 120us
- *      Between Messages: 38us
- *      Between Bytes: 7us
+ *  DEBUG disabled (production): TBSus
+ *      Between Messages: TBDus
+ *      Between Bytes: TBDus
  *
  * Implementation:
  *
@@ -153,48 +157,55 @@
  *
  *  To use this driver, enable the following configuration variable:
  *
- *    CONFIG_STM32F7_STM32F30XX
+ *  One of:
+ *
+ *    CONFIG_STM32F7_STM32F74XX
+ *    CONFIG_STM32F7_STM32F75XX
+ *    CONFIG_STM32F7_STM32F76XX
+ *    CONFIG_STM32F7_STM32F77XX
+ *
  *
  *  and one or more interfaces:
  *
  *    CONFIG_STM32F7_I2C1
  *    CONFIG_STM32F7_I2C2
  *    CONFIG_STM32F7_I2C3
+ *    CONFIG_STM32F7_I2C4
  *
- *  To configure the ISR timeout using fixed values (STM32_I2C_DYNTIMEO=n):
+ *  To configure the ISR timeout using fixed values (CONFIG_STM32F7_I2C_DYNTIMEO=n):
  *
- *    CONFIG_STM32F7_I2CTIMEOMS    (Timeout in milliseconds)
  *    CONFIG_STM32F7_I2CTIMEOSEC   (Timeout in seconds)
+ *    CONFIG_STM32F7_I2CTIMEOMS    (Timeout in milliseconds)
  *    CONFIG_STM32F7_I2CTIMEOTICKS (Timeout in ticks)
  *
- *  To configure the ISR timeout using dynamic values (STM32_I2C_DYNTIMEO=y):
+ *  To configure the ISR timeout using dynamic values (CONFIG_STM32F7_I2C_DYNTIMEO=y):
  *
- *    STM32_I2C_DYNTIMEO_USECPERBYTE  (Timeout in microseconds per byte)
- *    STM32_I2C_DYNTIMEO_STARTSTOP    (Timeout for start/stop in milliseconds)
+ *    CONFIG_STM32F7_I2C_DYNTIMEO_USECPERBYTE  (Timeout in microseconds per byte)
+ *    CONFIG_STM32F7_I2C_DYNTIMEO_STARTSTOP    (Timeout for start/stop in milliseconds)
  *
  *  Debugging output enabled with:
  *
- *    CONFIG_DEBUG_I2C_INFO
+ *    CONFIG_DEBUG_FEATURES and CONFIG_DEBUG_I2C_{ERROR|WARN|INFO}
  *
  *  ISR Debugging output may be enabled with:
  *
- *    CONFIG_DEBUG_VERBOSE
+ *    CONFIG_DEBUG_FEATURES and CONFIG_DEBUG_I2C_INFO
  *
  * ------------------------------------------------------------------------------
  *
  * References:
  *
  *  RM0316:
- *     ST STM32F303xB/C/D/E, etc. Reference Manual
- *     Document ID: DM00043574, Revision 6, August 2015.
+ *     ST STM32F76xxx and STM32F77xxx Reference Manual
+ *     Document ID: DocID028270 Revision 2, April 2016.
  *
  *  DATASHEET:
- *     ST STM32F303xB/STM32F303xC Datasheet
- *     Document ID: DM00058181, Revision 12, December 2015.
+ *     ST STM32F777xx/STM32F778Ax/STM32F779x Datasheet
+ *     Document ID: DocID028294, Revision 3, May 2016.
  *
- *  303ZYERRATA:
- *     STM32F303xB/C Rev Z and Y device limitations
- *     Document ID: DM00063985, Revision 7, September 2015.
+ *  ERRATA:
+ *     STM32F76xxx/STM32F77xxx Errata sheet Rev A device limitations
+ *     Document ID: DocID028806, Revision 2, April 2016.
  *
  *  I2CSPEC:
  *     I2C Bus Specification and User Manual
@@ -235,13 +246,39 @@
 
 /* At least one I2C peripheral must be enabled */
 
-#if defined(CONFIG_STM32F7_I2C1) || defined(CONFIG_STM32F7_I2C2) || defined(CONFIG_STM32F7_I2C3)
-/* This implementation is for the STM32 F1, F2, and F4 only */
-
+#if defined(CONFIG_STM32F7_I2C1) || defined(CONFIG_STM32F7_I2C2) || \
+    defined(CONFIG_STM32F7_I2C3) || defined(CONFIG_STM32F7_I2C4)
 
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+
+#undef INVALID_CLOCK_SOURCE
+
+#ifdef CONFIG_STM32F7_I2C1
+#  if STM32_RCC_DCKCFGR2_I2C1SRC != RCC_DCKCFGR2_I2C1SEL_HSI
+#    warning "Clock Source STM32_RCC_DCKCFGR2_I2C1SRC must be HSI"
+#    define INVALID_CLOCK_SOURCE
+#  endif
+#endif
+#ifdef CONFIG_STM32F7_I2C1
+#  if STM32_RCC_DCKCFGR2_I2C2SRC != RCC_DCKCFGR2_I2C2SEL_HSI
+#    warning "Clock Source STM32_RCC_DCKCFGR2_I2C2SRC must be HSI"
+#    define INVALID_CLOCK_SOURCE
+#  endif
+#endif
+#ifdef CONFIG_STM32F7_I2C3
+#  if STM32_RCC_DCKCFGR2_I2C3SRC != RCC_DCKCFGR2_I2C3SEL_HSI
+#    warning "Clock Source STM32_RCC_DCKCFGR2_I2C3SRC must be HSI"
+#    define INVALID_CLOCK_SOURCE
+#  endif
+#endif
+#ifdef CONFIG_STM32F7_I2C4
+#  if STM32_RCC_DCKCFGR2_I2C4SRC != RCC_DCKCFGR2_I2C4SEL_HSI
+#    warning "Clock Source STM32_RCC_DCKCFGR2_I2C4SRC must be HSI"
+#    define INVALID_CLOCK_SOURCE
+#  endif
+#endif
 
 /* CONFIG_I2C_POLLED may be set so that I2C interrupts will not be used.  Instead,
  * CPU-intensive polling will be used.
@@ -252,6 +289,7 @@
 #if !defined(CONFIG_STM32F7_I2CTIMEOSEC) && !defined(CONFIG_STM32F7_I2CTIMEOMS)
 #  define CONFIG_STM32F7_I2CTIMEOSEC 0
 #  define CONFIG_STM32F7_I2CTIMEOMS  500   /* Default is 500 milliseconds */
+#  warning "Using Defualt 500 Ms Timeout"
 #elif !defined(CONFIG_STM32F7_I2CTIMEOSEC)
 #  define CONFIG_STM32F7_I2CTIMEOSEC 0     /* User provided milliseconds */
 #elif !defined(CONFIG_STM32F7_I2CTIMEOMS)
@@ -276,12 +314,8 @@
 
 #define MKI2C_OUTPUT(p) (((p) & (GPIO_PORT_MASK | GPIO_PIN_MASK)) | I2C_OUTPUT)
 
-/* Register setting unique to the STM32F30xx */
-
-#define I2C_CR1_TXRX \
-  (I2C_CR1_RXIE | I2C_CR1_TXIE)
-#define I2C_CR1_ALLINTS \
-  (I2C_CR1_TXRX | I2C_CR1_TCIE | I2C_CR1_ERRIE)
+#define I2C_CR1_TXRX (I2C_CR1_RXIE | I2C_CR1_TXIE)
+#define I2C_CR1_ALLINTS (I2C_CR1_TXRX | I2C_CR1_TCIE | I2C_CR1_ERRIE)
 
 /* I2C event tracing
  *
@@ -451,15 +485,18 @@ static inline void stm32_i2c_sendstop(FAR struct stm32_i2c_priv_s *priv);
 static inline uint32_t stm32_i2c_getstatus(FAR struct stm32_i2c_priv_s *priv);
 static int stm32_i2c_isr(struct stm32_i2c_priv_s * priv);
 #ifndef CONFIG_I2C_POLLED
-#ifdef CONFIG_STM32F7_I2C1
+#  ifdef CONFIG_STM32F7_I2C1
 static int stm32_i2c1_isr(int irq, void *context);
-#endif
-#ifdef CONFIG_STM32F7_I2C2
+#  endif
+#  ifdef CONFIG_STM32F7_I2C2
 static int stm32_i2c2_isr(int irq, void *context);
-#endif
-#ifdef CONFIG_STM32F7_I2C3
+#  endif
+#  ifdef CONFIG_STM32F7_I2C3
 static int stm32_i2c3_isr(int irq, void *context);
-#endif
+#  endif
+#  ifdef CONFIG_STM32F7_I2C4
+static int stm32_i2c4_isr(int irq, void *context);
+#  endif
 #endif
 static int stm32_i2c_init(FAR struct stm32_i2c_priv_s *priv);
 static int stm32_i2c_deinit(FAR struct stm32_i2c_priv_s *priv);
@@ -554,6 +591,36 @@ static const struct stm32_i2c_config_s stm32_i2c3_config =
 struct stm32_i2c_priv_s stm32_i2c3_priv =
 {
   .config     = &stm32_i2c3_config,
+  .refs       = 0,
+  .intstate   = INTSTATE_IDLE,
+  .msgc       = 0,
+  .msgv       = NULL,
+  .ptr        = NULL,
+  .frequency  = 0,
+  .dcnt       = 0,
+  .flags      = 0,
+  .status     = 0
+};
+#endif
+
+#ifdef CONFIG_STM32F7_I2C4
+static const struct stm32_i2c_config_s stm32_i2c4_config =
+{
+  .base       = STM32_I2C4_BASE,
+  .clk_bit    = RCC_APB1ENR_I2C4EN,
+  .reset_bit  = RCC_APB1RSTR_I2C4RST,
+  .scl_pin    = GPIO_I2C4_SCL,
+  .sda_pin    = GPIO_I2C4_SDA,
+#ifndef CONFIG_I2C_POLLED
+  .isr        = stm32_i2c4_isr,
+  .ev_irq     = STM32_IRQ_I2C4EV,
+  .er_irq     = STM32_IRQ_I2C4ER
+#endif
+};
+
+struct stm32_i2c_priv_s stm32_i2c4_priv =
+{
+  .config     = &stm32_i2c4_config,
   .refs       = 0,
   .intstate   = INTSTATE_IDLE,
   .msgc       = 0,
@@ -1167,10 +1234,10 @@ static void stm32_i2c_tracedump(FAR struct stm32_i2c_priv_s *priv)
  *
  *   This function supports bus clock frequencies of:
  *
- *      500Khz
- *      400Khz
- *      100Khz
- *       10Khz
+ *      1000Khz (Fast Mode+)
+ *      400Khz  (Fast Mode)
+ *      100Khz  (Standard Mode)
+ *      10Khz   (Standard Mode)
  *
  *   Attempts to set a different frequency will quietly provision the default
  *   of 10Khz.
@@ -1186,15 +1253,15 @@ static void stm32_i2c_tracedump(FAR struct stm32_i2c_priv_s *priv)
  *
  * Clock Selection:
  *
- *   The I2C peripheral clock can be provided by either SYSCLK or the HSI.
+ *   The I2C peripheral clock can be provided by either PCLK1, SYSCLK or the HSI.
  *
- *   SYSCLK >------|\   I2CCLK
- *                 | |--------->
+ *    PCLK1 >------|\   I2CCLK
+ *   SYSCLK >------| |--------->
  *      HSI >------|/
  *
- *   HSI is the default and is always 8Mhz.
+ *   HSI is the default and is always 16Mhz.
  *
- *   SYSCLK can, in turn, be derived from the HSI, PLL or HSE.
+ *   SYSCLK can, in turn, be derived from the HSI, HSE, PPLCLK.
  *
  *      HSI >------|\
  *                 | |  SYSCLK
@@ -1202,19 +1269,10 @@ static void stm32_i2c_tracedump(FAR struct stm32_i2c_priv_s *priv)
  *                 | |
  *      HSE >------|/
  *
- *   The ability to select the I2C peripheral clock source is not yet supported
- *   so all of this really only works at 8Mhz.  The values provided are copied
- *   directly from the 8Mhz example table in RM0316 (See References).
- *
- * TODO:
- *
- *  - Add support for peripheral clock source selection (SYSCLK vs HSI).
- *  - Calculate values for a given SYSCLK frequency.
- *  - Add support for Fast Mode Plus (up to 1Mhz)
  *
  * References:
  *
- *  RM0316: Section: 28.4.9: I2C_TIMINGR register configuration examples
+ *  App Note AN4235 and the associated software STSW-STM32126.
  *
  ************************************************************************************/
 
@@ -1237,33 +1295,46 @@ static void stm32_i2c_setclock(FAR struct stm32_i2c_priv_s *priv, uint32_t frequ
           stm32_i2c_modifyreg32(priv, STM32_I2C_CR1_OFFSET, I2C_CR1_PE, 0);
         }
 
-      /* TODO: speed/timing calcs, at the moment 45Mhz = STM32_PCLK1_FREQUENCY, analog filter is on,
-          digital off from STM32F0-F3_AN4235_V1.0.1 */
+      /*  The Sppeed and timing calculation are based on the following
+       *  fI2CCLK = HSI and is 16Mhz
+       *  Analog filter is on,
+       *  Digital filter off
+       *  Rise Time is 120 ns and fall is 10ns
+       *  Mode is FastMode
+       */
 
         if (frequency == 100000)
           {
-            presc        = 0x06;
-            scl_delay    = 0x02;
-            sda_delay    = 0x00;
-            scl_h_period = 0x1e;
-            scl_l_period = 0x2b;
+            presc        = 0;
+            scl_delay    = 3;
+            sda_delay    = 0;
+            scl_h_period = 30;
+            scl_l_period = 120;
 
           }
-       else if (frequency == 400000)
-          {
-            presc        = 0x00;
-            scl_delay    = 0x0A;
-            sda_delay    = 0x00;
-            scl_h_period = 0x1b;
-            scl_l_period = 0x5b;
-          }
+        else if (frequency == 400000)
+           {
+             presc        = 0;
+             scl_delay    = 3;
+             sda_delay    = 9;
+             scl_h_period = 6;
+             scl_l_period = 24;
+           }
+         else if (frequency == 1000000)
+            {
+              presc        = 0;
+              scl_delay    = 2;
+              sda_delay    = 0;
+              scl_h_period = 1;
+              scl_l_period = 5;
+            }
         else
           {
-            presc        = 0x00;
-            scl_delay    = 0x08;
-            sda_delay    = 0x00;
-            scl_h_period = 0x09;
-            scl_l_period = 0x1c;
+            presc        = 7;
+            scl_delay    = 0;
+            sda_delay    = 0;
+            scl_h_period = 35;
+            scl_l_period = 162;
           }
 
       uint32_t timingr =
@@ -2069,12 +2140,12 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
  ************************************************************************************/
 
 #ifndef CONFIG_I2C_POLLED
-#ifdef CONFIG_STM32F7_I2C1
+#  ifdef CONFIG_STM32F7_I2C1
 static int stm32_i2c1_isr(int irq, void *context)
 {
   return stm32_i2c_isr(&stm32_i2c1_priv);
 }
-#endif
+#  endif
 
 /************************************************************************************
  * Name: stm32_i2c2_isr
@@ -2084,12 +2155,12 @@ static int stm32_i2c1_isr(int irq, void *context)
  *
  ************************************************************************************/
 
-#ifdef CONFIG_STM32F7_I2C2
+# ifdef CONFIG_STM32F7_I2C2
 static int stm32_i2c2_isr(int irq, void *context)
 {
   return stm32_i2c_isr(&stm32_i2c2_priv);
 }
-#endif
+#  endif
 
 /************************************************************************************
  * Name: stm32_i2c3_isr
@@ -2099,12 +2170,27 @@ static int stm32_i2c2_isr(int irq, void *context)
  *
  ************************************************************************************/
 
-#ifdef CONFIG_STM32F7_I2C3
+#  ifdef CONFIG_STM32F7_I2C3
 static int stm32_i2c3_isr(int irq, void *context)
 {
   return stm32_i2c_isr(&stm32_i2c3_priv);
 }
-#endif
+#  endif
+
+/************************************************************************************
+ * Name: stm32_i2c4_isr
+ *
+ * Description:
+ *   I2C2 interrupt service routine
+ *
+ ************************************************************************************/
+
+#  ifdef CONFIG_STM32F7_I2C4
+static int stm32_i2c4_isr(int irq, void *context)
+{
+  return stm32_i2c_isr(&stm32_i2c4_priv);
+}
+#  endif
 #endif
 
 /************************************************************************************
@@ -2465,13 +2551,9 @@ FAR struct i2c_master_s *stm32_i2cbus_initialize(int port)
   struct stm32_i2c_inst_s * inst = NULL;  /* device, single instance */
   int irqs;
 
-#if STM32_PCLK1_FREQUENCY < 4000000
-#   warning STM32_I2C_INIT: Peripheral clock must be at least 4 MHz to support 400 kHz operation.
-#endif
-
-#if STM32_PCLK1_FREQUENCY < 2000000
-#   warning STM32_I2C_INIT: Peripheral clock must be at least 2 MHz to support 100 kHz operation.
-  return NULL;
+#if STM32_HSI_FREQUENCY != 16000000 || defined(INVALID_CLOCK_SOURCE)
+#   warning STM32_I2C_INIT: Peripheral clock is HSI and it must be 16mHz or the speed/timing calculations need to be redone.
+    return NULL;
 #endif
 
   /* Get I2C private structure */
@@ -2491,6 +2573,11 @@ FAR struct i2c_master_s *stm32_i2cbus_initialize(int port)
 #ifdef CONFIG_STM32F7_I2C3
       case 3:
         priv = (struct stm32_i2c_priv_s *)&stm32_i2c3_priv;
+        break;
+#endif
+#ifdef CONFIG_STM32F7_I2C4
+      case 4:
+        priv = (struct stm32_i2c_priv_s *)&stm32_i2c4_priv;
         break;
 #endif
       default:

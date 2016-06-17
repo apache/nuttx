@@ -134,7 +134,6 @@
 #define I2C_CR1_RXDMAEN             (1 << 15) /* Bit 15: DMA reception requests enable */
 #define I2C_CR1_SBC                 (1 << 16) /* Bit 16: Slave byte control */
 #define I2C_CR1_NOSTRETCH           (1 << 17) /* Bit 17: Clock stretching disable */
-#define I2C_CR1_WUPEN               (1 << 18) /* Bit 18: Wakeup from STOP enable */
 #define I2C_CR1_GCEN                (1 << 19) /* Bit 19: General call enable */
 #define I2C_CR1_SMBHEN              (1 << 20) /* Bit 20: SMBus Host address enable */
 #define I2C_CR1_SMBDEN              (1 << 21) /* Bit 21: SMBus Device Default address enable */
@@ -195,15 +194,15 @@
 #  define I2C_TIMINGR_SCLH(n)       (((n)-1) << I2C_TIMINGR_SCLH_SHIFT) /* tSCLH = n x tPRESC */
 
 #define I2C_TIMINGR_SDADEL_SHIFT    (16)        /* Bits 16-19: Data hold time */
-#define I2C_TIMINGR_SDADEL_MASK     (15 << I2C_TIMINGR_SDADEL_SHIFT)
+#define I2C_TIMINGR_SDADEL_MASK     (0xf << I2C_TIMINGR_SDADEL_SHIFT)
 #  define I2C_TIMINGR_SDADEL(n)     ((n) << I2C_TIMINGR_SDADEL_SHIFT) /* tSDADEL= n x tPRESC */
 
 #define I2C_TIMINGR_SCLDEL_SHIFT    (20)        /* Bits 20-23: Data setup time */
-#define I2C_TIMINGR_SCLDEL_MASK     (15 << I2C_TIMINGR_SCLDEL_SHIFT)
+#define I2C_TIMINGR_SCLDEL_MASK     (0xf << I2C_TIMINGR_SCLDEL_SHIFT)
 #  define I2C_TIMINGR_SCLDEL(n)     (((n)-1) << I2C_TIMINGR_SCLDEL_SHIFT) /* tSCLDEL = n x tPRESC */
 
 #define I2C_TIMINGR_PRESC_SHIFT     (28)        /* Bits 28-31: Timing prescaler */
-#define I2C_TIMINGR_PRESC_MASK      (15 << I2C_TIMINGR_PRESC_SHIFT)
+#define I2C_TIMINGR_PRESC_MASK      (0xf << I2C_TIMINGR_PRESC_SHIFT)
 #  define I2C_TIMINGR_PRESC(n)      (((n)-1) << I2C_TIMINGR_PRESC_SHIFT) /* tPRESC = n x tI2CCLK */
 
 /* Timeout register */
