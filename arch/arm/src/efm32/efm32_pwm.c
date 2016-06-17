@@ -395,7 +395,7 @@ static int pwm_timer(FAR struct efm32_pwmtimer_s *priv,
 
   if (efm32_timer_set_freq(priv->base, priv->pclk, info->frequency) < 0)
     {
-      pwmerr("Cannot set TIMER frequency %dHz from clock %dHz\n",
+      pwmerr("ERROR: Cannot set TIMER frequency %dHz from clock %dHz\n",
              info->frequency, priv->pclk);
       return -EINVAL;
     }
@@ -914,7 +914,7 @@ FAR struct pwm_lowerhalf_s *efm32_pwminitialize(int timer)
 #endif
 
       default:
-        pwmerr("No such timer configured\n");
+        pwmerr("ERROR: No such timer configured\n");
         return NULL;
     }
 

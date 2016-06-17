@@ -745,7 +745,7 @@ void efm32_dmastop(DMA_HANDLE handle)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG_DMA
+#ifdef CONFIG_DEBUG_DMA_INFO
 void efm32_dmasample(DMA_HANDLE handle, struct efm32_dmaregs_s *regs)
 {
   struct dma_channel_s *dmach = (struct dma_channel_s *)handle;
@@ -798,35 +798,35 @@ void efm32_dmasample(DMA_HANDLE handle, struct efm32_dmaregs_s *regs)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG_DMA
+#ifdef CONFIG_DEBUG_DMA_INFO
 void efm32_dmadump(DMA_HANDLE handle, const struct efm32_dmaregs_s *regs,
                    const char *msg)
 {
   struct dma_channel_s *dmach = (struct dma_channel_s *)handle;
 
-  dmaerr("%s\n", msg);
-  dmaerr("  DMA Registers:\n");
-  dmaerr("        STATUS: %08x\n", regs->status);
-  dmaerr("      CTRLBASE: %08x\n", regs->ctrlbase);
-  dmaerr("   ALTCTRLBASE: %08x\n", regs->altctrlbase);
-  dmaerr("  CHWAITSTATUS: %08x\n", regs->chwaitstatus);
-  dmaerr("   CHUSEBURSTS: %08x\n", regs->chusebursts);
-  dmaerr("    CHREQMASKS: %08x\n", regs->chreqmasks);
-  dmaerr("         CHENS: %08x\n", regs->chens);
-  dmaerr("        CHALTS: %08x\n", regs->chalts);
-  dmaerr("        CHPRIS: %08x\n", regs->chpris);
-  dmaerr("        ERRORC: %08x\n", regs->errorc);
-  dmaerr("   CHREQSTATUS: %08x\n", regs->chreqstatus);
-  dmaerr("  CHSREQSTATUS: %08x\n", regs->chsreqstatus);
-  dmaerr("           IEN: %08x\n", regs->ien);
+  dmainfo("%s\n", msg);
+  dmainfo("  DMA Registers:\n");
+  dmainfo("        STATUS: %08x\n", regs->status);
+  dmainfo("      CTRLBASE: %08x\n", regs->ctrlbase);
+  dmainfo("   ALTCTRLBASE: %08x\n", regs->altctrlbase);
+  dmainfo("  CHWAITSTATUS: %08x\n", regs->chwaitstatus);
+  dmainfo("   CHUSEBURSTS: %08x\n", regs->chusebursts);
+  dmainfo("    CHREQMASKS: %08x\n", regs->chreqmasks);
+  dmainfo("         CHENS: %08x\n", regs->chens);
+  dmainfo("        CHALTS: %08x\n", regs->chalts);
+  dmainfo("        CHPRIS: %08x\n", regs->chpris);
+  dmainfo("        ERRORC: %08x\n", regs->errorc);
+  dmainfo("   CHREQSTATUS: %08x\n", regs->chreqstatus);
+  dmainfo("  CHSREQSTATUS: %08x\n", regs->chsreqstatus);
+  dmainfo("           IEN: %08x\n", regs->ien);
 #if defined(CONFIG_EFM32_EFM32GG)
-  dmaerr("          CTRL: %08x\n", regs->ctrl);
-  dmaerr("           RDS: %08x\n", regs->rds);
-  dmaerr("         LOOP0: %08x\n", regs->loop0);
-  dmaerr("         LOOP1: %08x\n", regs->loop1);
-  dmaerr("         RECT0: %08x\n", regs->rect0);
+  dmainfo("          CTRL: %08x\n", regs->ctrl);
+  dmainfo("           RDS: %08x\n", regs->rds);
+  dmainfo("         LOOP0: %08x\n", regs->loop0);
+  dmainfo("         LOOP1: %08x\n", regs->loop1);
+  dmainfo("         RECT0: %08x\n", regs->rect0);
 #endif
-  dmaerr("  DMA Channel %d Registers:\n", dmach->chan);
-  dmaerr("        CHCTRL: %08x\n", regs->chnctrl);
+  dmainfo("  DMA Channel %d Registers:\n", dmach->chan);
+  dmainfo("        CHCTRL: %08x\n", regs->chnctrl);
 }
 #endif

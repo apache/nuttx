@@ -114,6 +114,10 @@
 #  error "FIFO allocations exceed FIFO memory size"
 #endif
 
+#ifndef CONFIG_DEBUG_USB_INFO
+#  undef CONFIG_EFM32_USBDEV_REGDEBUG
+#endif
+
 /* The actual FIFO addresses that we use must be aligned to 4-byte boundaries;
  * FIFO sizes must be provided in units of 32-bit words.
  */
@@ -474,7 +478,7 @@ struct efm32_usbdev_s
 
 /* Register operations ********************************************************/
 
-#if defined(CONFIG_EFM32_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
+#ifdef CONFIG_EFM32_USBDEV_REGDEBUG
 static uint32_t    efm32_getreg(uint32_t addr);
 static void        efm32_putreg(uint32_t val, uint32_t addr);
 #else
@@ -794,7 +798,7 @@ const struct trace_msg_t g_usb_trace_strings_intdecode[] =
  *
  ****************************************************************************/
 
-#if defined(CONFIG_EFM32_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
+#ifdef CONFIG_EFM32_USBDEV_REGDEBUG
 static uint32_t efm32_getreg(uint32_t addr)
 {
   static uint32_t prevaddr = 0;
@@ -815,7 +819,7 @@ static uint32_t efm32_getreg(uint32_t addr)
         {
           if (count == 4)
             {
-              _llerr("...\n");
+              ullinfo("...\n");
             }
 
           return val;
@@ -832,7 +836,7 @@ static uint32_t efm32_getreg(uint32_t addr)
         {
           /* Yes.. then show how many times the value repeated */
 
-          _llerr("[repeats %d more times]\n", count-3);
+          ullinfo("[repeats %d more times]\n", count-3);
         }
 
       /* Save the new address, value, and count */
@@ -844,7 +848,7 @@ static uint32_t efm32_getreg(uint32_t addr)
 
   /* Show the register value read */
 
-  _llerr("%08x->%08x\n", addr, val);
+  ullinfo("%08x->%08x\n", addr, val);
   return val;
 }
 #endif
@@ -857,12 +861,12 @@ static uint32_t efm32_getreg(uint32_t addr)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_EFM32_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
+#ifdef CONFIG_EFM32_USBDEV_REGDEBUG
 static void efm32_putreg(uint32_t val, uint32_t addr)
 {
   /* Show the register value being written */
 
-  _llerr("%08x<-%08x\n", addr, val);
+  ullinfo("%08x<-%08x\n", addr, val);
 
   /* Write the value */
 
@@ -2629,7 +2633,7 @@ static inline void efm32_epout_interrupt(FAR struct efm32_usbdev_s *priv)
           if ((daint & 1) != 0)
             {
               regval = efm32_getreg(EFM32_USB_DOEPINT(epno));
-              ullerr("DOEPINT(%d) = %08x\n", epno, regval);
+              ullinfo("DOEPINT(%d) = %08x\n", epno, regval);
               efm32_putreg(0xFF, EFM32_USB_DOEPINT(epno));
             }
 
@@ -2859,8 +2863,8 @@ static inline void efm32_epin_interrupt(FAR struct efm32_usbdev_s *priv)
         {
           if ((daint & 1) != 0)
             {
-              ullerr("DIEPINT(%d) = %08x\n",
-                     epno, efm32_getreg(EFM32_USB_DIEPINT(epno)));
+              ullinfo("DIEPINT(%d) = %08x\n",
+                      epno, efm32_getreg(EFM32_USB_DIEPINT(epno)));
               efm32_putreg(0xFF, EFM32_USB_DIEPINT(epno));
             }
 
@@ -3799,7 +3803,7 @@ static int efm32_epout_configure(FAR struct efm32_ep_s *privep, uint8_t eptype,
             break;
 
           default:
-            uerr("Unsupported maxpacket: %d\n", maxpacket);
+            uerr("ERROR: Unsupported maxpacket: %d\n", maxpacket);
             return -EINVAL;
         }
     }
@@ -3894,7 +3898,7 @@ static int efm32_epin_configure(FAR struct efm32_ep_s *privep, uint8_t eptype,
             break;
 
           default:
-            uerr("Unsupported maxpacket: %d\n", maxpacket);
+            uerr("ERROR: Unsupported maxpacket: %d\n", maxpacket);
             return -EINVAL;
         }
     }
@@ -5482,7 +5486,7 @@ void up_usbinitialize(void)
   ret = irq_attach(EFM32_IRQ_USB, efm32_usbinterrupt);
   if (ret < 0)
     {
-      uerr("irq_attach failed\n", ret);
+      uerr("ERROR: irq_attach failed\n", ret);
       goto errout;
     }
 
