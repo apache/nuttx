@@ -51,22 +51,22 @@
 /* Maximum allowed speed as per data sheet for all SPIs (both pclk1 and pclk2)*/
 
 #if defined(CONFIG_STM32F7_STM32F74XX) || defined(CONFIG_STM32F7_STM32F75XX)
-#  define STM32_SPI_CLK_MAX     50000000UL
+#  define STM32_SPI_CLK_MAX       50000000UL
 #elif defined(CONFIG_STM32F7_STM32F76XX) || defined(CONFIG_STM32F7_STM32F77XX)
-#  define STM32_SPI_CLK_MAX     54000000UL
+#  define STM32_SPI_CLK_MAX       54000000UL
 #endif
 
 /* Register Offsets *****************************************************************/
 
-#define STM32_SPI_CR1_OFFSET       0x0000  /* SPI Control Register 1 (16-bit) */
-#define STM32_SPI_CR2_OFFSET       0x0004  /* SPI control register 2 (16-bit) */
-#define STM32_SPI_SR_OFFSET        0x0008  /* SPI status register (16-bit) */
-#define STM32_SPI_DR_OFFSET        0x000c  /* SPI data register (16-bit) */
-#define STM32_SPI_CRCPR_OFFSET     0x0010  /* SPI CRC polynomial register (16-bit) */
-#define STM32_SPI_RXCRCR_OFFSET    0x0014  /* SPI Rx CRC register (16-bit) */
-#define STM32_SPI_TXCRCR_OFFSET    0x0018  /* SPI Tx CRC register (16-bit) */
-#define STM32_SPI_I2SCFGR_OFFSET   0x001c  /* I2S configuration register */
-#define STM32_SPI_I2SPR_OFFSET     0x0020  /* I2S prescaler register */
+#define STM32_SPI_CR1_OFFSET      0x0000  /* SPI Control Register 1 (16-bit) */
+#define STM32_SPI_CR2_OFFSET      0x0004  /* SPI control register 2 (16-bit) */
+#define STM32_SPI_SR_OFFSET       0x0008  /* SPI status register (16-bit) */
+#define STM32_SPI_DR_OFFSET       0x000c  /* SPI data register (16-bit) */
+#define STM32_SPI_CRCPR_OFFSET    0x0010  /* SPI CRC polynomial register (16-bit) */
+#define STM32_SPI_RXCRCR_OFFSET   0x0014  /* SPI Rx CRC register (16-bit) */
+#define STM32_SPI_TXCRCR_OFFSET   0x0018  /* SPI Tx CRC register (16-bit) */
+#define STM32_SPI_I2SCFGR_OFFSET  0x001c  /* I2S configuration register */
+#define STM32_SPI_I2SPR_OFFSET    0x0020  /* I2S prescaler register */
 
 /* Register Addresses ***************************************************************/
 
@@ -209,18 +209,18 @@
 #define SPI_SR_OVR                (1 << 6)  /* Bit 6: Overrun flag */
 #define SPI_SR_BSY                (1 << 7)  /* Bit 7: Busy flag */
 #define SPI_SR_FRE                (1 << 8)  /* Bit 8: Frame format error */
-#define SPI_SR_FRLVL_SHIFT       (9)       /* Bits 9-10: FIFO reception level */
-#define SPI_SR_FRLVL_MASK        (0x3 << SPI_SR_FRLVL_SHIFT)
-#  define SPI_SR_FRLVL_EMPTY     (0 << SPI_SR_FRLVL_SHIFT) /* FIFO empty */
-#  define SPI_SR_FRLVL_QUARTER   (1 << SPI_SR_FRLVL_SHIFT) /* 1/4 FIFO */
-#  define SPI_SR_FRLVL_HALF      (2 << SPI_SR_FRLVL_SHIFT) /* 1/2 FIFO */
-#  define SPI_SR_FRLVL_FULL      (3 << SPI_SR_FRLVL_SHIFT) /* FIFO full */
-#define SPI_SR_FTLVL_SHIFT       (11)      /* Bits 11-12: FIFO transmission level */
-#define SPI_SR_FTLVL_MASK        (0x3 << SPI_SR_FTLVL_SHIFT)
-#  define SPI_SR_FTLVL_EMPTY     (0 << SPI_SR_FTLVL_SHIFT) /* FIFO empty */
-#  define SPI_SR_FTLVL_QUARTER   (1 << SPI_SR_FTLVL_SHIFT) /* 1/4 FIFO */
-#  define SPI_SR_FTLVL_HALF      (2 << SPI_SR_FTLVL_SHIFT) /* 1/2 FIFO */
-#  define SPI_SR_FTLVL_FULL      (3 << SPI_SR_FTLVL_SHIFT) /* FIFO full */
+#define SPI_SR_FRLVL_SHIFT        (9)       /* Bits 9-10: FIFO reception level */
+#define SPI_SR_FRLVL_MASK         (3 << SPI_SR_FRLVL_SHIFT)
+#  define SPI_SR_FRLVL_EMPTY      (0 << SPI_SR_FRLVL_SHIFT) /* FIFO empty */
+#  define SPI_SR_FRLVL_QUARTER    (1 << SPI_SR_FRLVL_SHIFT) /* 1/4 FIFO */
+#  define SPI_SR_FRLVL_HALF       (2 << SPI_SR_FRLVL_SHIFT) /* 1/2 FIFO */
+#  define SPI_SR_FRLVL_FULL       (3 << SPI_SR_FRLVL_SHIFT) /* FIFO full */
+#define SPI_SR_FTLVL_SHIFT        (11)      /* Bits 11-12: FIFO transmission level */
+#define SPI_SR_FTLVL_MASK         (3 << SPI_SR_FTLVL_SHIFT)
+#  define SPI_SR_FTLVL_EMPTY      (0 << SPI_SR_FTLVL_SHIFT) /* FIFO empty */
+#  define SPI_SR_FTLVL_QUARTER    (1 << SPI_SR_FTLVL_SHIFT) /* 1/4 FIFO */
+#  define SPI_SR_FTLVL_HALF       (2 << SPI_SR_FTLVL_SHIFT) /* 1/2 FIFO */
+#  define SPI_SR_FTLVL_FULL       (3 << SPI_SR_FTLVL_SHIFT) /* FIFO full */
 
 /* I2S configuration register */
 
@@ -233,10 +233,10 @@
 #define SPI_I2SCFGR_CKPOL          (1 << 3)  /* Bit 3: Steady state clock polarity */
 #define SPI_I2SCFGR_I2SSTD_SHIFT   (4)       /* Bit 4-5: I2S standard selection */
 #define SPI_I2SCFGR_I2SSTD_MASK    (3 << SPI_I2SCFGR_I2SSTD_SHIFT)
-#  define SPI_I2SCFGR_I2SSTD_PHILLIPS    (00 << SPI_I2SCFGR_I2SSTD_SHIFT) /* 00: I2S Phillips standard. */
-#  define SPI_I2SCFGR_I2SSTD_MSB   (1 << SPI_I2SCFGR_I2SSTD_SHIFT) /* 01: MSB justified standard (left justified) */
-#  define SPI_I2SCFGR_I2SSTD_LSB   (2 << SPI_I2SCFGR_I2SSTD_SHIFT) /* 10: LSB justified standard (right justified) */
-#  define SPI_I2SCFGR_I2SSTD_PCM   (3 << SPI_I2SCFGR_I2SSTD_SHIFT) /* 11: PCM standard */
+#  define SPI_I2SCFGR_I2SSTD_PHILLIPS (0 << SPI_I2SCFGR_I2SSTD_SHIFT) /* 00: I2S Phillips standard. */
+#  define SPI_I2SCFGR_I2SSTD_MSB      (1 << SPI_I2SCFGR_I2SSTD_SHIFT) /* 01: MSB justified standard (left justified) */
+#  define SPI_I2SCFGR_I2SSTD_LSB      (2 << SPI_I2SCFGR_I2SSTD_SHIFT) /* 10: LSB justified standard (right justified) */
+#  define SPI_I2SCFGR_I2SSTD_PCM      (3 << SPI_I2SCFGR_I2SSTD_SHIFT) /* 11: PCM standard */
 #define SPI_I2SCFGR_PCMSYNC        (1 << 7)  /* Bit 7: PCM frame synchronization */
 #define SPI_I2SCFGR_I2SCFG_SHIFT   (8)       /* Bit 8-9: I2S configuration mode */
 #define SPI_I2SCFGR_I2SCFG_MASK    (3 << SPI_I2SCFGR_I2SCFG_SHIFT)
@@ -250,9 +250,9 @@
 
 /* I2S prescaler register */
 
-#define SPI_I2SPR_I2SDIV_SHIFT     (0)       /* Bit 0-7: I2S Linear prescaler */
-#define SPI_I2SPR_I2SDIV_MASK      (0xff << SPI_I2SPR_I2SDIV_SHIFT)
-#define SPI_I2SPR_ODD              (1 << 8)  /* Bit 8: Odd factor for the prescaler */
-#define SPI_I2SPR_MCKOE            (1 << 9)  /* Bit 9: Master clock output enable */
+#define SPI_I2SPR_I2SDIV_SHIFT    (0)       /* Bit 0-7: I2S Linear prescaler */
+#define SPI_I2SPR_I2SDIV_MASK     (0xff << SPI_I2SPR_I2SDIV_SHIFT)
+#define SPI_I2SPR_ODD             (1 << 8)  /* Bit 8: Odd factor for the prescaler */
+#define SPI_I2SPR_MCKOE           (1 << 9)  /* Bit 9: Master clock output enable */
 
 #endif /* __ARCH_ARM_SRC_STM32F7_CHIP_STM32F74XX77XX_SPI_H */

@@ -95,9 +95,8 @@
 
 #define GPIO_BTN_USER  (GPIO_INPUT | GPIO_FLOAT | GPIO_EXTI | GPIO_PORTC | GPIO_PIN13)
 
-/* SPI ***************************************************************************
- *
- */
+/* SPI ***************************************************************************/
+
 #define GPIO_SPI_CS    (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | \
                         GPIO_OUTPUT_SET)
 
@@ -196,8 +195,6 @@ int stm32_dma_alloc_init(void);
 #ifdef CONFIG_ADC
 int board_adc_initialize(void);
 #endif
-
-
 
 #endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_NUCLEO_144_SRC_NUCLEO_144_H */

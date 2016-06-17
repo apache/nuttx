@@ -1445,11 +1445,14 @@ static inline void stm32_i2c_sendstart(FAR struct stm32_i2c_priv_s *priv)
    * exceed the hardware maximum allowed.
    */
 
-  if (priv->dcnt > 255) {
+  if (priv->dcnt > 255)
+    {
       stm32_i2c_set_bytes_to_transfer(priv, 255);
-  } else {
+    }
+  else
+    {
       stm32_i2c_set_bytes_to_transfer(priv, priv->dcnt);
-  }
+    }
 
   /* Set the (7 bit) address.
    * 10 bit addressing is not yet supported.
@@ -1475,7 +1478,7 @@ static inline void stm32_i2c_sendstart(FAR struct stm32_i2c_priv_s *priv)
    */
 
   i2cinfo("Sending START: dcnt=%i msgc=%i flags=0x%04x\n",
-     priv->dcnt, priv->msgc, priv->flags);
+          priv->dcnt, priv->msgc, priv->flags);
 
   stm32_i2c_modifyreg32(priv, STM32_I2C_CR2_OFFSET, 0, I2C_CR2_START);
 }
@@ -2019,7 +2022,7 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
                * we receive a TC event next time which will allow us to
                * either RESTART and continue sending the contents of the
                * next message or send a STOP condition and exit the ISR.
-              */
+               */
 
               i2cinfo("TCR: DISABLE RELOAD: NBYTES = dcnt = %i msgc = %i\n",
                       priv->dcnt, priv->msgc);
@@ -2057,7 +2060,7 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
    * in one of the supported states when polled.
    */
 
-   else
+  else
     {
 #ifdef CONFIG_I2C_POLLED
       stm32_i2c_traceevent(priv, I2CEVENT_POLL_DEV_NOT_RDY, 0);
@@ -2107,7 +2110,8 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
        * vs data) to the upper layers once we exit the ISR.
        *
        * Note: We do this prior to clearing interrupts because the NACKF
-       * flag will naturally be cleared by that process. */
+       * flag will naturally be cleared by that process.
+       */
 
       priv->status = status;
 
@@ -2367,6 +2371,7 @@ static int stm32_i2c_process(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s 
   UNUSED(cr1);
   UNUSED(cr2);
 #endif
+
   /* Status after a normal / good exit is usually 0x00000001, meaning the TXE
    * bit is set.  That occurs as a result of the I2C_TXDR register being
    * empty, and it naturally will be after the last byte is transmitted.

@@ -251,12 +251,13 @@
 #define GPIO_SPI1_MISO GPIO_SPI1_MISO_1
 #define GPIO_SPI1_MOSI GPIO_SPI1_MOSI_1
 
-#define GPIO_I2C1_SCL GPIO_I2C1_SCL_1
-#define GPIO_I2C1_SDA GPIO_I2C1_SDA_1
+#define GPIO_I2C1_SCL  GPIO_I2C1_SCL_1
+#define GPIO_I2C1_SDA  GPIO_I2C1_SDA_1
 
 /************************************************************************************
  * Public Data
  ************************************************************************************/
+
 #ifndef __ASSEMBLY__
 
 #undef EXTERN
