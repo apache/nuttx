@@ -478,7 +478,7 @@
 #  define ADC_SMPR1_SMP17_SHIFT      (21)      /* Bits 21-23: Channel 17 Sample time selection */
 #  define ADC_SMPR1_SMP17_MASK       (7 << ADC_SMPR1_SMP17_SHIFT)
 #  if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
-#    define ADC_SMPR1_SMP18_SHIFT    (21)      /* Bits 24-26: Channel 18 Sample time selection */
+#    define ADC_SMPR1_SMP18_SHIFT    (24)      /* Bits 24-26: Channel 18 Sample time selection */
 #    define ADC_SMPR1_SMP18_MASK     (7 << ADC_SMPR1_SMP17_SHIFT)
 #  endif
 #else
