@@ -197,7 +197,7 @@
  * enabled.
  */
 
-#ifndef CONFIG_DEBUG_FEATURES
+#ifndef CONFIG_DEBUG_NET_INFO
 #  undef CONFIG_LPC43_ETHMAC_REGDEBUG
 #endif
 
@@ -559,7 +559,7 @@ static struct lpc43_ethmac_s g_lpc43ethmac;
  ****************************************************************************/
 /* Register operations ******************************************************/
 
-#if defined(CONFIG_LPC43_ETHMAC_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
+#ifdef CONFIG_LPC43_ETHMAC_REGDEBUG
 static uint32_t lpc43_getreg(uint32_t addr);
 static void lpc43_putreg(uint32_t val, uint32_t addr);
 static void lpc43_checksetup(void);
@@ -683,7 +683,7 @@ static int  lpc43_ethconfig(FAR struct lpc43_ethmac_s *priv);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_LPC43_ETHMAC_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
+#ifdef CONFIG_LPC43_ETHMAC_REGDEBUG
 static uint32_t lpc43_getreg(uint32_t addr)
 {
   static uint32_t prevaddr = 0;
@@ -704,7 +704,7 @@ static uint32_t lpc43_getreg(uint32_t addr)
         {
           if (count == 4)
             {
-              _llerr("...\n");
+              nllinfo("...\n");
             }
 
           return val;
@@ -721,7 +721,7 @@ static uint32_t lpc43_getreg(uint32_t addr)
         {
           /* Yes.. then show how many times the value repeated */
 
-          _llerr("[repeats %d more times]\n", count-3);
+          nllinfo("[repeats %d more times]\n", count-3);
         }
 
       /* Save the new address, value, and count */
@@ -733,7 +733,7 @@ static uint32_t lpc43_getreg(uint32_t addr)
 
   /* Show the register value read */
 
-  _llerr("%08x->%08x\n", addr, val);
+  nllinfo("%08x->%08x\n", addr, val);
   return val;
 }
 #endif
@@ -755,12 +755,12 @@ static uint32_t lpc43_getreg(uint32_t addr)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_LPC43_ETHMAC_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
+#ifdef CONFIG_LPC43_ETHMAC_REGDEBUG
 static void lpc43_putreg(uint32_t val, uint32_t addr)
 {
   /* Show the register value being written */
 
-  _llerr("%08x<-%08x\n", addr, val);
+  nllinfo("%08x<-%08x\n", addr, val);
 
   /* Write the value */
 
@@ -782,7 +782,7 @@ static void lpc43_putreg(uint32_t val, uint32_t addr)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_LPC43_ETHMAC_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
+#ifdef CONFIG_LPC43_ETHMAC_REGDEBUG
 static void lpc43_checksetup(void)
 {
 }
@@ -1440,7 +1440,7 @@ static int lpc43_recvframe(FAR struct lpc43_ethmac_s *priv)
 
   if (!lpc43_isfreebuffer(priv))
     {
-      nllerr("No free buffers\n");
+      nllerr("ERROR: No free buffers\n");
       return -ENOMEM;
     }
 
@@ -1547,7 +1547,7 @@ static int lpc43_recvframe(FAR struct lpc43_ethmac_s *priv)
                * scanning logic, and continue scanning with the next frame.
                */
 
-              nllerr("DROPPED: RX descriptor errors: %08x\n", rxdesc->rdes0);
+              nllwarn("WARNING: Dropped, RX descriptor errors: %08x\n", rxdesc->rdes0);
               lpc43_freesegment(priv, rxcurr, priv->segments);
             }
         }
@@ -1608,7 +1608,7 @@ static void lpc43_receive(FAR struct lpc43_ethmac_s *priv)
 
       if (dev->d_len > CONFIG_NET_ETH_MTU)
         {
-          nllerr("DROPPED: Too big: %d\n", dev->d_len);
+          nllwarn("WARNING: Dropped, Too big: %d\n", dev->d_len);
           /* Free dropped packet buffer */
 
           if (dev->d_buf)
@@ -1727,7 +1727,7 @@ static void lpc43_receive(FAR struct lpc43_ethmac_s *priv)
       else
 #endif
         {
-          nllerr("DROPPED: Unknown type: %04x\n", BUF->type);
+          nllwarn("WARNING: Dropped, Unknown type: %04x\n", BUF->type);
         }
 
       /* We are finished with the RX buffer.  NOTE:  If the buffer is
@@ -1975,7 +1975,7 @@ static inline void lpc43_interrupt_process(FAR struct lpc43_ethmac_s *priv)
     {
       /* Just let the user know what happened */
 
-      nllerr("Abnormal event(s): %08x\n", dmasr);
+      nllerr("ERROR: Abnormal event(s): %08x\n", dmasr);
 
       /* Clear all pending abnormal events */
 
@@ -2179,7 +2179,7 @@ static void lpc43_txtimeout_expiry(int argc, uint32_t arg, ...)
 {
   FAR struct lpc43_ethmac_s *priv = (FAR struct lpc43_ethmac_s *)arg;
 
-  nllerr("Timeout!\n");
+  nllinfo("Timeout!\n");
 
 #ifdef CONFIG_NET_NOINTS
   /* Disable further Ethernet interrupts.  This will prevent some race
@@ -2381,15 +2381,15 @@ static int lpc43_ifup(struct net_driver_s *dev)
   int ret;
 
 #ifdef CONFIG_NET_IPv4
-  nerr("Bringing up: %d.%d.%d.%d\n",
-       dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
-       (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
+  ninfo("Bringing up: %d.%d.%d.%d\n",
+        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
+        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
 #endif
 #ifdef CONFIG_NET_IPv6
-  nerr("Bringing up: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
-       dev->d_ipv6addr[0], dev->d_ipv6addr[1], dev->d_ipv6addr[2],
-       dev->d_ipv6addr[3], dev->d_ipv6addr[4], dev->d_ipv6addr[5],
-       dev->d_ipv6addr[6], dev->d_ipv6addr[7]);
+  ninfo("Bringing up: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
+        dev->d_ipv6addr[0], dev->d_ipv6addr[1], dev->d_ipv6addr[2],
+        dev->d_ipv6addr[3], dev->d_ipv6addr[4], dev->d_ipv6addr[5],
+        dev->d_ipv6addr[6], dev->d_ipv6addr[7]);
 #endif
 
   /* Configure the Ethernet interface for DMA operation. */
@@ -2435,7 +2435,7 @@ static int lpc43_ifdown(struct net_driver_s *dev)
   FAR struct lpc43_ethmac_s *priv = (FAR struct lpc43_ethmac_s *)dev->d_private;
   irqstate_t flags;
 
-  nerr("Taking the network down\n");
+  ninfo("Taking the network down\n");
 
   /* Disable the Ethernet interrupt */
 
@@ -3065,7 +3065,7 @@ static int lpc43_phyread(uint16_t phydevaddr, uint16_t phyregaddr, uint16_t *val
         }
     }
 
-  nerr("MII transfer timed out: phydevaddr: %04x phyregaddr: %04x\n",
+  nerr("ERROR: MII transfer timed out: phydevaddr: %04x phyregaddr: %04x\n",
        phydevaddr, phyregaddr);
 
   return -ETIMEDOUT;
@@ -3124,7 +3124,7 @@ static int lpc43_phywrite(uint16_t phydevaddr, uint16_t phyregaddr, uint16_t val
         }
     }
 
-  nerr("MII transfer timed out: phydevaddr: %04x phyregaddr: %04x value: %04x\n",
+  nerr("ERROR: MII transfer timed out: phydevaddr: %04x phyregaddr: %04x value: %04x\n",
        phydevaddr, phyregaddr, value);
 
   return -ETIMEDOUT;
@@ -3161,7 +3161,7 @@ static inline int lpc43_dm9161(FAR struct lpc43_ethmac_s *priv)
   ret = lpc43_phyread(CONFIG_LPC43_PHYADDR, MII_PHYID1, &phyval);
   if (ret < 0)
     {
-      nerr("Failed to read the PHY ID1: %d\n", ret);
+      nerr("ERROR: Failed to read the PHY ID1: %d\n", ret);
       return ret;
     }
 
@@ -3179,7 +3179,7 @@ static inline int lpc43_dm9161(FAR struct lpc43_ethmac_s *priv)
   ret = lpc43_phyread(CONFIG_LPC43_PHYADDR, 16, &phyval);
   if (ret < 0)
     {
-      nerr("Failed to read the PHY Register 0x10: %d\n", ret);
+      nerr("ERROR: Failed to read the PHY Register 0x10: %d\n", ret);
       return ret;
     }
 
@@ -3236,7 +3236,7 @@ static int lpc43_phyinit(FAR struct lpc43_ethmac_s *priv)
   ret = lpc43_phywrite(CONFIG_LPC43_PHYADDR, MII_MCR, MII_MCR_RESET);
   if (ret < 0)
     {
-      nerr("Failed to reset the PHY: %d\n", ret);
+      nerr("ERROR: Failed to reset the PHY: %d\n", ret);
       return ret;
     }
 
@@ -3248,7 +3248,7 @@ static int lpc43_phyinit(FAR struct lpc43_ethmac_s *priv)
   ret = lpc43_phy_boardinitialize(0);
   if (ret < 0)
     {
-      nerr("Failed to initialize the PHY: %d\n", ret);
+      nerr("ERROR: Failed to initialize the PHY: %d\n", ret);
       return ret;
     }
 #endif
@@ -3273,7 +3273,7 @@ static int lpc43_phyinit(FAR struct lpc43_ethmac_s *priv)
       ret = lpc43_phyread(CONFIG_LPC43_PHYADDR, MII_MSR, &phyval);
       if (ret < 0)
         {
-          nerr("Failed to read the PHY MSR: %d\n", ret);
+          nerr("ERROR: Failed to read the PHY MSR: %d\n", ret);
           return ret;
         }
       else if ((phyval & MII_MSR_LINKSTATUS) != 0)
@@ -3284,7 +3284,7 @@ static int lpc43_phyinit(FAR struct lpc43_ethmac_s *priv)
 
   if (timeout >= PHY_RETRY_TIMEOUT)
     {
-      nerr("Timed out waiting for link status: %04x\n", phyval);
+      nerr("ERROR: Timed out waiting for link status: %04x\n", phyval);
       return -ETIMEDOUT;
     }
 
@@ -3293,7 +3293,7 @@ static int lpc43_phyinit(FAR struct lpc43_ethmac_s *priv)
   ret = lpc43_phywrite(CONFIG_LPC43_PHYADDR, MII_MCR, MII_MCR_ANENABLE);
   if (ret < 0)
     {
-      nerr("Failed to enable auto-negotiation: %d\n", ret);
+      nerr("ERROR: Failed to enable auto-negotiation: %d\n", ret);
       return ret;
     }
 
@@ -3304,7 +3304,7 @@ static int lpc43_phyinit(FAR struct lpc43_ethmac_s *priv)
       ret = lpc43_phyread(CONFIG_LPC43_PHYADDR, MII_MSR, &phyval);
       if (ret < 0)
         {
-          nerr("Failed to read the PHY MSR: %d\n", ret);
+          nerr("ERROR: Failed to read the PHY MSR: %d\n", ret);
           return ret;
         }
       else if ((phyval & MII_MSR_ANEGCOMPLETE) != 0)
@@ -3315,7 +3315,7 @@ static int lpc43_phyinit(FAR struct lpc43_ethmac_s *priv)
 
   if (timeout >= PHY_RETRY_TIMEOUT)
     {
-      nerr("Timed out waiting for auto-negotiation\n");
+      nerr("ERROR: Timed out waiting for auto-negotiation\n");
       return -ETIMEDOUT;
     }
 
@@ -3324,7 +3324,7 @@ static int lpc43_phyinit(FAR struct lpc43_ethmac_s *priv)
   ret = lpc43_phyread(CONFIG_LPC43_PHYADDR, CONFIG_LPC43_PHYSR, &phyval);
   if (ret < 0)
     {
-      nerr("Failed to read PHY status register\n");
+      nerr("ERROR: Failed to read PHY status register\n");
       return ret;
     }
 
@@ -3418,7 +3418,7 @@ static int lpc43_phyinit(FAR struct lpc43_ethmac_s *priv)
   ret = lpc43_phywrite(CONFIG_LPC43_PHYADDR, MII_MCR, phyval);
   if (ret < 0)
     {
-     nerr("Failed to write the PHY MCR: %d\n", ret);
+     nerr("ERROR: Failed to write the PHY MCR: %d\n", ret);
       return ret;
     }
 
@@ -3434,9 +3434,9 @@ static int lpc43_phyinit(FAR struct lpc43_ethmac_s *priv)
 #endif
 #endif
 
-  nerr("Duplex: %s Speed: %d MBps\n",
-       priv->fduplex ? "FULL" : "HALF",
-       priv->mbps100 ? 100 : 10);
+  ninfo("Duplex: %s Speed: %d MBps\n",
+        priv->fduplex ? "FULL" : "HALF",
+        priv->mbps100 ? 100 : 10);
 
   return OK;
 }

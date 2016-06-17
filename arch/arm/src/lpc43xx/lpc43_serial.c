@@ -873,7 +873,7 @@ static int up_interrupt(int irq, void *context)
 
           default:
             {
-              _err("Unexpected IIR: %02x\n", status);
+              _llerr("ERROR: Unexpected IIR: %02x\n", status);
               break;
             }
         }
