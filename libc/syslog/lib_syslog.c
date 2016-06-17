@@ -163,9 +163,15 @@ int vsyslog(int priority, FAR const IPTR char *fmt, va_list ap)
 {
   int ret = 0;
 
+#if defined(CONFIG_BUILD_FLAT) || defined (__KERNEL__)
+  /* up_interrupt_context() and lowvsyslog() are only available in the FLAT
+   * build or during the kernel pass of the protected or kernel two pass
+   * builds.
+   */
+
 #if !defined(CONFIG_SYSLOG) && CONFIG_NFILE_DESCRIPTORS > 0
-  /* Are we are generating output on stdout?  If so, was this function
-   * called from an interrupt handler?  We cannot send data to stdout from
+  /* We are generating output on stdout.  So check if this function was
+   * called from an interrupt handler.  We cannot send data to stdout from
    * an interrupt handler.
    */
 
@@ -178,17 +184,13 @@ int vsyslog(int priority, FAR const IPTR char *fmt, va_list ap)
        * output destination as stdout!
        */
 
-#if defined(CONFIG_BUILD_FLAT) || defined (__KERNEL__)
-      /* lowvsyslog() in only available in the FLAT build or during the
-       * kernel pass of the protected or kernel two pass builds.
-       */
-
       ret = lowvsyslog(priority, fmt, ap);
-#endif
-#endif
+
+#endif /* CONFIG_ARCH_LOWPUTC */
     }
   else
-#endif
+#endif /* !CONFIG_SYSLOG && CONFIG_NFILE_DESCRIPTORS > 0 */
+#endif /* CONFIG_BUILD_FLAT || __KERNEL */
     {
       /* Check if this priority is enabled */
 
