@@ -2629,7 +2629,7 @@ static inline void stm32_epout_interrupt(FAR struct stm32_usbdev_s *priv)
           if ((daint & 1) != 0)
             {
               regval = stm32_getreg(STM32_OTGHS_DOEPINT(epno));
-              ulinfo("("DOEPINT(%d) = %08x\n", epno, regval);
+              ulinfo("DOEPINT(%d) = %08x\n", epno, regval);
               stm32_putreg(0xFF, STM32_OTGHS_DOEPINT(epno));
             }
 
@@ -2859,7 +2859,7 @@ static inline void stm32_epin_interrupt(FAR struct stm32_usbdev_s *priv)
         {
           if ((daint & 1) != 0)
             {
-              ulinfo("("DIEPINT(%d) = %08x\n",
+              ulinfo("DIEPINT(%d) = %08x\n",
                      epno, stm32_getreg(STM32_OTGHS_DIEPINT(epno)));
               stm32_putreg(0xFF, STM32_OTGHS_DIEPINT(epno));
             }
