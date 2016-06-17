@@ -47,6 +47,15 @@
 #include "syslog/syslog.h"
 
 #if defined(CONFIG_ARCH_LOWPUTC) || defined(CONFIG_SYSLOG)
+/* The low-level SYSLOG functions can be used only if we have access to
+ * either the low-level serial interface, up_putc(), and to syslog_putc()
+ */
+
+#if defined(CONFIG_BUILD_FLAT) || defined (__KERNEL__)
+/* The low-level serial interface, up_putc(), and syslog_putc() are only
+ * available in the FLAT build or during the kernel pass of the protected or
+ * kernel two pass builds.
+ */
 
 /****************************************************************************
  * Private Functions
@@ -136,4 +145,5 @@ int lowsyslog(int priority, FAR const IPTR char *fmt, ...)
   return ret;
 }
 
+#endif /* CONFIG_BUILD_FLAT) || __KERNEL__ */
 #endif /* CONFIG_ARCH_LOWPUTC || CONFIG_SYSLOG */
