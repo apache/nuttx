@@ -702,7 +702,7 @@ static bool sam_checkreg(struct sam_tc_s *tc, bool wr, uint32_t regaddr,
         {
           /* Yes... show how many times we did it */
 
-          tmrinfo("...[Repeats %d times]...\n", tc->ntimes);
+          tmrllinfo("...[Repeats %d times]...\n", tc->ntimes);
         }
 
       /* Save information about the new access */
@@ -737,7 +737,7 @@ static inline uint32_t sam_tc_getreg(struct sam_chan_s *chan,
 #ifdef CONFIG_SAMV7_TC_REGDEBUG
   if (sam_checkreg(tc, false, regaddr, regval))
     {
-      tmrinfo("%08x->%08x\n", regaddr, regval);
+      tmrllinfo("%08x->%08x\n", regaddr, regval);
     }
 #endif
 
@@ -761,7 +761,7 @@ static inline void sam_tc_putreg(struct sam_chan_s *chan, uint32_t regval,
 #ifdef CONFIG_SAMV7_TC_REGDEBUG
   if (sam_checkreg(tc, true, regaddr, regval))
     {
-      tmrinfo("%08x<-%08x\n", regaddr, regval);
+      tmrllinfo("%08x<-%08x\n", regaddr, regval);
     }
 #endif
 
@@ -785,7 +785,7 @@ static inline uint32_t sam_chan_getreg(struct sam_chan_s *chan,
 #ifdef CONFIG_SAMV7_TC_REGDEBUG
   if (sam_checkreg(chan->tc, false, regaddr, regval))
     {
-      tmrinfo("%08x->%08x\n", regaddr, regval);
+      tmrllinfo("%08x->%08x\n", regaddr, regval);
     }
 #endif
 
@@ -808,7 +808,7 @@ static inline void sam_chan_putreg(struct sam_chan_s *chan, unsigned int offset,
 #ifdef CONFIG_SAMV7_TC_REGDEBUG
   if (sam_checkreg(chan->tc, true, regaddr, regval))
     {
-      tmrinfo("%08x<-%08x\n", regaddr, regval);
+      tmrllinfo("%08x<-%08x\n", regaddr, regval);
     }
 #endif
 
@@ -845,8 +845,8 @@ static int sam_tc_interrupt(struct sam_tc_s *tc, struct sam_chan_s *chan)
   imr     = sam_chan_getreg(chan, SAM_TC_IMR_OFFSET);
   pending = sr & imr;
 
-  tcllinfo("TC%d Channel %d: pending=%08lx\n",
-           tc->tc, chan->chan, (unsigned long)pending);
+  tmrllinfo("TC%d Channel %d: pending=%08lx\n",
+            tc->tc, chan->chan, (unsigned long)pending);
 
   /* Are there any pending interrupts for this channel? */
 
