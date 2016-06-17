@@ -92,6 +92,8 @@ static inline int vsyslog_internal(FAR const IPTR char *fmt, va_list ap)
 #if defined(CONFIG_SYSLOG)
   /* Wrap the low-level output in a stream object and let lib_vsprintf
    * do the work.
+   * REVISIT: lib_syslogstream() is only available in the FLAT build or
+   * the kernel phase of other builds.   
    */
 
   lib_syslogstream((FAR struct lib_outstream_s *)&stream);
@@ -125,6 +127,8 @@ static inline int vsyslog_internal(FAR const IPTR char *fmt, va_list ap)
 #elif defined(CONFIG_ARCH_LOWPUTC)
   /* Wrap the low-level output in a stream object and let lib_vsprintf
    * do the work.
+   * REVISIT: lib_lowoutstream() is only available in the FLAT build or
+   * the kernel phase of other builds.   
    */
 
   lib_lowoutstream((FAR struct lib_outstream_s *)&stream);
