@@ -51,6 +51,10 @@
 #undef  CONFIG_SUPPRESS_UART_CONFIG   /* Do not reconfig UART */
 #undef  CONFIG_DUMP_ON_EXIT           /* Dump task state on exit */
 
+#ifndef CONFIG_DEBUG_SCHED_INFO
+#  undef CONFIG_DUMP_ON_EXIT          /* Needs CONFIG_DEBUG_SCHED_INFO */
+#endif
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
