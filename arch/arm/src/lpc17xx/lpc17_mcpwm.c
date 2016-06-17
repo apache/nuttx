@@ -655,7 +655,7 @@ FAR struct pwm_lowerhalf_s *lpc17_mcpwminitialize(int timer)
 #endif
 
       default:
-        pwmerr("No such timer configured\n");
+        pwmerr("ERROR: No such timer configured\n");
         return NULL;
     }
 

@@ -202,14 +202,14 @@ struct fb_vtable_s g_fbobject =
 static int lpc17_getvideoinfo(FAR struct fb_vtable_s *vtable,
                               FAR struct fb_videoinfo_s *vinfo)
 {
-  ginfo("vtable=%p vinfo=%p\n", vtable, vinfo);
+  lcdinfo("vtable=%p vinfo=%p\n", vtable, vinfo);
   if (vtable && vinfo)
     {
       memcpy(vinfo, &g_videoinfo, sizeof(struct fb_videoinfo_s));
       return OK;
     }
 
-  gerr("Returning EINVAL\n");
+  lcderr("ERROR: Returning EINVAL\n");
   return -EINVAL;
 }
 
@@ -220,14 +220,14 @@ static int lpc17_getvideoinfo(FAR struct fb_vtable_s *vtable,
 static int lpc17_getplaneinfo(FAR struct fb_vtable_s *vtable, int planeno,
                               FAR struct fb_planeinfo_s *pinfo)
 {
-  ginfo("vtable=%p planeno=%d pinfo=%p\n", vtable, planeno, pinfo);
+  lcdinfo("vtable=%p planeno=%d pinfo=%p\n", vtable, planeno, pinfo);
   if (vtable && planeno == 0 && pinfo)
     {
       memcpy(pinfo, &g_planeinfo, sizeof(struct fb_planeinfo_s));
       return OK;
     }
 
-  gerr("Returning EINVAL\n");
+  lcderr("ERROR: Returning EINVAL\n");
   return -EINVAL;
 }
 
@@ -244,8 +244,8 @@ static int lpc17_getcmap(FAR struct fb_vtable_s *vtable,
   int last;
   int i;
 
-  ginfo("vtable=%p cmap=%p first=%d len=%d\n",
-        vtable, cmap, cmap->first, cmap->len);
+  lcdinfo("vtable=%p cmap=%p first=%d len=%d\n",
+          vtable, cmap, cmap->first, cmap->len);
 
   DEBUGASSERT(vtable && cmap &&
               cmap->first < 256 && (cmap->first + cmap->len) < 256);
@@ -319,8 +319,8 @@ static int lpc17_putcmap(FAR struct fb_vtable_s *vtable,
   int last;
   int i;
 
-  ginfo("vtable=%p cmap=%p first=%d len=%d\n",
-        vtable, cmap, cmap->first, cmap->len);
+  lcdinfo("vtable=%p cmap=%p first=%d len=%d\n",
+          vtable, cmap, cmap->first, cmap->len);
 
   DEBUGASSERT(vtable && cmap);
 
@@ -383,27 +383,27 @@ static int lpc17_putcmap(FAR struct fb_vtable_s *vtable,
 static int lpc17_getcursor(FAR struct fb_vtable_s *vtable,
                         FAR struct fb_cursorattrib_s *attrib)
 {
-  ginfo("vtable=%p attrib=%p\n", vtable, attrib);
+  lcdinfo("vtable=%p attrib=%p\n", vtable, attrib);
   if (vtable && attrib)
     {
 #ifdef CONFIG_FB_HWCURSORIMAGE
       attrib->fmt = LPC17_COLOR_FMT;
 #endif
 
-      ginfo("pos: (x=%d, y=%d)\n", g_cpos.x, g_cpos.y);
+      lcdinfo("pos: (x=%d, y=%d)\n", g_cpos.x, g_cpos.y);
       attrib->pos = g_cpos;
 
 #ifdef CONFIG_FB_HWCURSORSIZE
       attrib->mxsize.h = CONFIG_LPC17_LCD_VHEIGHT;
       attrib->mxsize.w = CONFIG_LPC17_LCD_HWIDTH;
 
-      ginfo("size: (h=%d, w=%d)\n", g_csize.h, g_csize.w);
+      lcdinfo("size: (h=%d, w=%d)\n", g_csize.h, g_csize.w);
       attrib->size = g_csize;
 #endif
       return OK;
     }
 
-  gerr("Returning EINVAL\n");
+  lcderr("ERROR: Returning EINVAL\n");
   return -EINVAL;
 }
 #endif
@@ -416,34 +416,34 @@ static int lpc17_getcursor(FAR struct fb_vtable_s *vtable,
 static int lpc17_setcursor(FAR struct fb_vtable_s *vtable,
                        FAR struct fb_setcursor_s *setttings)
 {
-  ginfo("vtable=%p setttings=%p\n", vtable, setttings);
+  lcdinfo("vtable=%p setttings=%p\n", vtable, setttings);
   if (vtable && setttings)
     {
-      ginfo("flags: %02x\n", settings->flags);
+      lcdinfo("flags: %02x\n", settings->flags);
       if ((flags & FB_CUR_SETPOSITION) != 0)
         {
           g_cpos = settings->pos;
-          ginfo("pos: (h:%d, w:%d)\n", g_cpos.x, g_cpos.y);
+          lcdinfo("pos: (h:%d, w:%d)\n", g_cpos.x, g_cpos.y);
         }
 #ifdef CONFIG_FB_HWCURSORSIZE
       if ((flags & FB_CUR_SETSIZE) != 0)
         {
           g_csize = settings->size;
-          ginfo("size: (h:%d, w:%d)\n", g_csize.h, g_csize.w);
+          lcdinfo("size: (h:%d, w:%d)\n", g_csize.h, g_csize.w);
         }
 #endif
 #ifdef CONFIG_FB_HWCURSORIMAGE
       if ((flags & FB_CUR_SETIMAGE) != 0)
         {
-          ginfo("image: (h:%d, w:%d) @ %p\n",
-                settings->img.height, settings->img.width,
-                settings->img.image);
+          lcdinfo("image: (h:%d, w:%d) @ %p\n",
+                  settings->img.height, settings->img.width,
+                  settings->img.image);
         }
 #endif
       return OK;
     }
 
-  gerr("Returning EINVAL\n");
+  lcderr("ERROR: Returning EINVAL\n");
   return -EINVAL;
 }
 #endif
@@ -473,7 +473,7 @@ int up_fbinitialize(int display)
   uint32_t regval;
   int i;
 
-  ginfo("Entry\n");
+  lcdinfo("Entry\n");
 
   /* Give LCD bus priority */
 
@@ -485,7 +485,7 @@ int up_fbinitialize(int display)
   /* Configure pins */
   /* Video data */
 
-  ginfo("Configuring pins\n");
+  lcdinfo("Configuring pins\n");
 
   lpc17_configgpio(GPIO_LCD_VD0);
   lpc17_configgpio(GPIO_LCD_VD1);
@@ -528,7 +528,7 @@ int up_fbinitialize(int display)
 
   modifyreg32(LPC17_SYSCON_PCONP, 0, SYSCON_PCONP_PCLCD);
 
-  ginfo("Configuring the LCD controller\n");
+  lcdinfo("Configuring the LCD controller\n");
 
   /* Disable the cursor */
 
@@ -686,7 +686,7 @@ int up_fbinitialize(int display)
 #endif
 
   putreg32(0, LPC17_LCD_INTMSK);
-  ginfo("Enabling the display\n");
+  lcdinfo("Enabling the display\n");
 
   for (i = LPC17_LCD_PWREN_DELAY; i; i--);
 
@@ -727,7 +727,7 @@ int up_fbinitialize(int display)
 
 FAR struct fb_vtable_s *up_fbgetvplane(int display, int vplane)
 {
-  ginfo("vplane: %d\n", vplane);
+  lcdinfo("vplane: %d\n", vplane);
   if (vplane == 0)
     {
       return &g_fbobject;
@@ -801,16 +801,16 @@ void lpc17_lcdclear(nxgl_mxpixel_t color)
 #if LPC17_BPP > 16
   uint32_t *dest = (uint32_t *)CONFIG_LPC17_LCD_VRAMBASE;
 
-  ginfo("Clearing display: color=%08x VRAM=%08x size=%d\n",
-        color, CONFIG_LPC17_LCD_VRAMBASE,
-        CONFIG_LPC17_LCD_HWIDTH * CONFIG_LPC17_LCD_VHEIGHT * sizeof(uint32_t));
+  lcdinfo("Clearing display: color=%08x VRAM=%08x size=%d\n",
+          color, CONFIG_LPC17_LCD_VRAMBASE,
+          CONFIG_LPC17_LCD_HWIDTH * CONFIG_LPC17_LCD_VHEIGHT * sizeof(uint32_t));
 
 #else
   uint16_t *dest = (uint16_t *)CONFIG_LPC17_LCD_VRAMBASE;
 
-  ginfo("Clearing display: color=%08x VRAM=%08x size=%d\n",
-        color, CONFIG_LPC17_LCD_VRAMBASE,
-        CONFIG_LPC17_LCD_HWIDTH * CONFIG_LPC17_LCD_VHEIGHT * sizeof(uint16_t));
+  lcdinfo("Clearing display: color=%08x VRAM=%08x size=%d\n",
+          color, CONFIG_LPC17_LCD_VRAMBASE,
+          CONFIG_LPC17_LCD_HWIDTH * CONFIG_LPC17_LCD_VHEIGHT * sizeof(uint16_t));
 #endif
 
   for (i = 0; i < (CONFIG_LPC17_LCD_HWIDTH * CONFIG_LPC17_LCD_VHEIGHT); i++)
