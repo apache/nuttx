@@ -308,7 +308,7 @@ int stm32l4_configgpio(uint32_t cfgset)
 
   /* Otherwise, it is an input pin.  Should it configured as an EXTI interrupt? */
 
-  else if ((cfgset & GPIO_EXTI) != 0)
+  if ((cfgset & GPIO_EXTI) != 0)
     {
 #if 0
       /* "In STM32 F1 the selection of the EXTI line source is performed through
