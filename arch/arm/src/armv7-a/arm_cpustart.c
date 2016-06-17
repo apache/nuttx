@@ -64,19 +64,19 @@ static inline void arm_registerdump(FAR struct tcb_s *tcb)
 {
   int regndx;
 
-  _llerr("CPU%d:\n", up_cpu_index());
+  _llinfo("CPU%d:\n", up_cpu_index());
 
   /* Dump the startup registers */
 
   for (regndx = REG_R0; regndx <= REG_R15; regndx += 8)
     {
       uint32_t *ptr = (uint32_t *)&tcb->xcp.regs[regndx];
-      _llerr("R%d: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-             regndx, ptr[0], ptr[1], ptr[2], ptr[3],
-             ptr[4], ptr[5], ptr[6], ptr[7]);
+      _llinfo("R%d: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+              regndx, ptr[0], ptr[1], ptr[2], ptr[3],
+              ptr[4], ptr[5], ptr[6], ptr[7]);
     }
 
-  _llerr("CPSR: %08x\n", tcb->xcp.regs[REG_CPSR]);
+  _llinfo("CPSR: %08x\n", tcb->xcp.regs[REG_CPSR]);
 }
 #else
 # define arm_registerdump(tcb)

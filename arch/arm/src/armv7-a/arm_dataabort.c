@@ -104,7 +104,7 @@ uint32_t *arm_dataabort(uint32_t *regs, uint32_t dfar, uint32_t dfsr)
    * fatal error.
    */
 
-  pgllerr("DFSR: %08x DFAR: %08x\n", dfsr, dfar);
+  pgllinfo("DFSR: %08x DFAR: %08x\n", dfsr, dfar);
   if ((dfsr & FSR_MASK) != FSR_PAGE)
     {
       goto segfault;

@@ -107,7 +107,7 @@ void up_dataabort(uint32_t *regs, uint32_t far, uint32_t fsr)
    * fatal error.
    */
 
-  pgllerr("FSR: %08x FAR: %08x\n", fsr, far);
+  pgllinfo("FSR: %08x FAR: %08x\n", fsr, far);
   if ((fsr & FSR_MASK) != FSR_PAGE)
     {
       goto segfault;
