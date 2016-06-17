@@ -1013,7 +1013,7 @@ config ARCH_BOARD_STM32F746_WS
 		Waveshare STM32F746 development board featuring the STM32F746IG MCU.
 
 config ARCH_BOARD_STM32L476VG_DISCO
-	bool "STMicro STM32F746VG-Discovery board"
+	bool "STMicro STM32L476VG -Discovery board"
 	depends on ARCH_CHIP_STM32L476RG
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
