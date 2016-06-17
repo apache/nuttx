@@ -1018,7 +1018,6 @@ config STM32F7_ADC2
 	bool "ADC2"
 	default n
 	select STM32F7_ADC
-	depends on STM32F7_HAVE_ADC2
 	select STM32F7_HAVE_ADC2_DMA if STM32F7_DMA2
 
 config STM32F7_ADC3
