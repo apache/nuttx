@@ -113,7 +113,7 @@
 
 /* Debug options */
 
-#ifndef CONFIG_DEBUG_FEATURES
+#ifndef CONFIG_DEBUG_USB_INFO
 #  undef CONFIG_LPC31_EHCI_REGDEBUG
 #endif
 
@@ -826,7 +826,7 @@ static uint32_t lpc31_swap32(uint32_t value)
 static void lpc31_printreg(volatile uint32_t *regaddr, uint32_t regval,
                           bool iswrite)
 {
-  _llerr("%08x%s%08x\n", (uintptr_t)regaddr, iswrite ? "<-" : "->", regval);
+  ullinfo("%08x%s%08x\n", (uintptr_t)regaddr, iswrite ? "<-" : "->", regval);
 }
 #endif
 
@@ -877,7 +877,7 @@ static void lpc31_checkreg(volatile uint32_t *regaddr, uint32_t regval, bool isw
             {
               /* No.. More than one. */
 
-              _llerr("[repeats %d more times]\n", count);
+              ullinfo("[repeats %d more times]\n", count);
             }
         }
 
@@ -1456,13 +1456,13 @@ static int lpc31_qh_flush(struct lpc31_qh_s *qh)
 #ifdef CONFIG_LPC31_EHCI_REGDEBUG
 static void lpc31_qtd_print(struct lpc31_qtd_s *qtd)
 {
-  uerr("  QTD[%p]:\n", qtd);
-  uerr("    hw:\n");
-  uerr("      nqp: %08x alt: %08x token: %08x\n",
-       qtd->hw.nqp, qtd->hw.alt, qtd->hw.token);
-  uerr("      bpl: %08x %08x %08x %08x %08x\n",
-       qtd->hw.bpl[0], qtd->hw.bpl[1], qtd->hw.bpl[2],
-       qtd->hw.bpl[3], qtd->hw.bpl[4]);
+  uinfo("  QTD[%p]:\n", qtd);
+  uinfo("    hw:\n");
+  uinfo("      nqp: %08x alt: %08x token: %08x\n",
+        qtd->hw.nqp, qtd->hw.alt, qtd->hw.token);
+  uinfo("      bpl: %08x %08x %08x %08x %08x\n",
+        qtd->hw.bpl[0], qtd->hw.bpl[1], qtd->hw.bpl[2],
+        qtd->hw.bpl[3], qtd->hw.bpl[4]);
 }
 #endif
 
@@ -1480,30 +1480,30 @@ static void lpc31_qh_print(struct lpc31_qh_s *qh)
   struct lpc31_epinfo_s *epinfo;
   struct ehci_overlay_s *overlay;
 
-  uerr("QH[%p]:\n", qh);
-  uerr("  hw:\n");
-  uerr("    hlp: %08x epchar: %08x epcaps: %08x cqp: %08x\n",
-       qh->hw.hlp, qh->hw.epchar, qh->hw.epcaps, qh->hw.cqp);
+  uinfo("QH[%p]:\n", qh);
+  uinfo("  hw:\n");
+  uinfo("    hlp: %08x epchar: %08x epcaps: %08x cqp: %08x\n",
+        qh->hw.hlp, qh->hw.epchar, qh->hw.epcaps, qh->hw.cqp);
 
   overlay = &qh->hw.overlay;
-  uerr("  overlay:\n");
-  uerr("    nqp: %08x alt: %08x token: %08x\n",
-       overlay->nqp, overlay->alt, overlay->token);
-  uerr("    bpl: %08x %08x %08x %08x %08x\n",
-       overlay->bpl[0], overlay->bpl[1], overlay->bpl[2],
-       overlay->bpl[3], overlay->bpl[4]);
+  uinfo("  overlay:\n");
+  uinfo("    nqp: %08x alt: %08x token: %08x\n",
+        overlay->nqp, overlay->alt, overlay->token);
+  uinfo("    bpl: %08x %08x %08x %08x %08x\n",
+        overlay->bpl[0], overlay->bpl[1], overlay->bpl[2],
+        overlay->bpl[3], overlay->bpl[4]);
 
-  uerr("  fqp:\n", qh->fqp);
+  uinfo("  fqp:\n", qh->fqp);
 
   epinfo = qh->epinfo;
-  uerr("  epinfo[%p]:\n", epinfo);
+  uinfo("  epinfo[%p]:\n", epinfo);
   if (epinfo)
     {
-      uerr("    EP%d DIR=%s FA=%08x TYPE=%d MaxPacket=%d\n",
-           epinfo->epno, epinfo->dirin ? "IN" : "OUT", epinfo->devaddr,
-           epinfo->xfrtype, epinfo->maxpacket);
-      uerr("    Toggle=%d iocwait=%d speed=%d result=%d\n",
-           epinfo->toggle, epinfo->iocwait, epinfo->speed, epinfo->result);
+      uinfo("    EP%d DIR=%s FA=%08x TYPE=%d MaxPacket=%d\n",
+            epinfo->epno, epinfo->dirin ? "IN" : "OUT", epinfo->devaddr,
+            epinfo->xfrtype, epinfo->maxpacket);
+      uinfo("    Toggle=%d iocwait=%d speed=%d result=%d\n",
+            epinfo->toggle, epinfo->iocwait, epinfo->speed, epinfo->result);
     }
 }
 #endif
