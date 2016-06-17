@@ -1009,9 +1009,6 @@ config ARCH_BOARD_STM32F746G_DISCO
 config ARCH_BOARD_STM32F746_WS
 	bool "Waveshare STM32F746 board"
 	depends on ARCH_CHIP_STM32F746IG
-	select ARCH_HAVE_LEDS
-	select ARCH_HAVE_BUTTONS
-	select ARCH_HAVE_IRQBUTTONS
 	---help---
 		Waveshare STM32F746 development board featuring the STM32F746IG MCU.
 

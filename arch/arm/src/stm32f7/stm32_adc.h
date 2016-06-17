@@ -103,19 +103,19 @@
 
 /* Up to 3 ADC interfaces are supported */
 
-#if STM32_NADC < 4
+#if STM32F7_NADC < 4
 #  undef CONFIG_STM32F7_ADC4
 #endif
 
-#if STM32_NADC < 3
+#if STM32F7_NADC < 3
 #  undef CONFIG_STM32F7_ADC3
 #endif
 
-#if STM32_NADC < 2
+#if STM32F7_NADC < 2
 #  undef CONFIG_STM32F7_ADC2
 #endif
 
-#if STM32_NADC < 1
+#if STM32F7_NADC < 1
 #  undef CONFIG_STM32F7_ADC1
 #endif
 

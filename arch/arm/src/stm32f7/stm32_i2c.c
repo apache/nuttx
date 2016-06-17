@@ -2221,8 +2221,8 @@ static int stm32_i2c_process(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s 
   struct stm32_i2c_inst_s     *inst = (struct stm32_i2c_inst_s *)dev;
   FAR struct stm32_i2c_priv_s *priv = inst->priv;
   uint32_t    status = 0;
-  uint32_t    cr1 = 0;
-  uint32_t    cr2 = 0;
+  uint32_t    cr1;
+  uint32_t    cr2;
   int         errval = 0;
   int         waitrc = 0;
 
