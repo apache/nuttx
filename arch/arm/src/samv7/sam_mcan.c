@@ -794,7 +794,7 @@
 #endif
 
 #ifdef CONFIG_SAMV7_MCAN_REGDEBUG
-#  define reginfo caninfo
+#  define reginfo canllinfo
 #else
 #  define reginfo(x...)
 #endif
@@ -1195,7 +1195,7 @@ static uint32_t mcan_getreg(FAR struct sam_mcan_s *priv, int offset)
         {
           if (priv->count == 4)
             {
-              caninfo("...\n");
+              canllinfo("...\n");
             }
 
           return regval;
@@ -1212,7 +1212,7 @@ static uint32_t mcan_getreg(FAR struct sam_mcan_s *priv, int offset)
         {
           /* Yes.. then show how many times the value repeated */
 
-          caninfo("[repeats %d more times]\n", priv->count - 3);
+          canllinfo("[repeats %d more times]\n", priv->count - 3);
         }
 
       /* Save the new address, value, and count */
@@ -1224,7 +1224,7 @@ static uint32_t mcan_getreg(FAR struct sam_mcan_s *priv, int offset)
 
   /* Show the register value read */
 
-  caninfo("%08x->%08x\n", regaddr, regval);
+  canllinfo("%08x->%08x\n", regaddr, regval);
   return regval;
 }
 
@@ -1261,7 +1261,7 @@ static void mcan_putreg(FAR struct sam_mcan_s *priv, int offset, uint32_t regval
 
   /* Show the register value being written */
 
-  caninfo("%08x<-%08x\n", regaddr, regval);
+  canllinfo("%08x<-%08x\n", regaddr, regval);
 
   /* Write the value */
 
