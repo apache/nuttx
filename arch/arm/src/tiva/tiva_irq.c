@@ -186,7 +186,7 @@ static void tiva_dumpnvic(const char *msg, int irq)
 
 /****************************************************************************
  * Name: tiva_nmi, tiva_busfault, tiva_usagefault, tiva_pendsv,
- *       tiva_errmonitor, tiva_pendsv, tiva_reserved
+ *       tiva_dbgmonitor, tiva_pendsv, tiva_reserved
  *
  * Description:
  *   Handlers for various execptions.  None are handled and all are fatal
@@ -228,7 +228,7 @@ static int tiva_pendsv(int irq, FAR void *context)
   return 0;
 }
 
-static int tiva_errmonitor(int irq, FAR void *context)
+static int tiva_dbgmonitor(int irq, FAR void *context)
 {
   (void)up_irq_save();
   _err("PANIC!!! Debug Monitor received\n");
@@ -482,7 +482,7 @@ void up_irqinitialize(void)
   irq_attach(TIVA_IRQ_BUSFAULT, tiva_busfault);
   irq_attach(TIVA_IRQ_USAGEFAULT, tiva_usagefault);
   irq_attach(TIVA_IRQ_PENDSV, tiva_pendsv);
-  irq_attach(TIVA_IRQ_DBGMONITOR, tiva_errmonitor);
+  irq_attach(TIVA_IRQ_DBGMONITOR, tiva_dbgmonitor);
   irq_attach(TIVA_IRQ_RESERVED, tiva_reserved);
 #endif
 

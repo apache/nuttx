@@ -139,7 +139,7 @@ static void lpc17_dumpnvic(const char *msg, int irq)
 
 /****************************************************************************
  * Name: lpc17_nmi, lpc17_busfault, lpc17_usagefault, lpc17_pendsv,
- *       lpc17_errmonitor, lpc17_pendsv, lpc17_reserved
+ *       lpc17_dbgmonitor, lpc17_pendsv, lpc17_reserved
  *
  * Description:
  *   Handlers for various execptions.  None are handled and all are fatal
@@ -181,7 +181,7 @@ static int lpc17_pendsv(int irq, FAR void *context)
   return 0;
 }
 
-static int lpc17_errmonitor(int irq, FAR void *context)
+static int lpc17_dbgmonitor(int irq, FAR void *context)
 {
   (void)up_irq_save();
   _err("PANIC!!! Debug Monitor received\n");
@@ -402,7 +402,7 @@ void up_irqinitialize(void)
   irq_attach(LPC17_IRQ_BUSFAULT, lpc17_busfault);
   irq_attach(LPC17_IRQ_USAGEFAULT, lpc17_usagefault);
   irq_attach(LPC17_IRQ_PENDSV, lpc17_pendsv);
-  irq_attach(LPC17_IRQ_DBGMONITOR, lpc17_errmonitor);
+  irq_attach(LPC17_IRQ_DBGMONITOR, lpc17_dbgmonitor);
   irq_attach(LPC17_IRQ_RESERVED, lpc17_reserved);
 #endif
 

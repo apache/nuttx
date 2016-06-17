@@ -128,7 +128,7 @@ static void kl_dumpnvic(const char *msg, int irq)
 
 /****************************************************************************
  * Name: kl_nmi, kl_busfault, kl_usagefault, kl_pendsv,
- *       kl_errmonitor, kl_pendsv, kl_reserved
+ *       kl_dbgmonitor, kl_pendsv, kl_reserved
  *
  * Description:
  *   Handlers for various execptions.  None are handled and all are fatal
