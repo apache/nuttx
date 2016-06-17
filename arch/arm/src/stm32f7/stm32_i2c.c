@@ -1807,7 +1807,7 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
           /* Unsupported state */
 
           stm32_i2c_traceevent(priv, I2CEVENT_READ_ERROR, 0);
-          status = stm32_i2c_getreg(priv, STM32F7_I2C_ISR_OFFSET);
+          status = stm32_i2c_getreg(priv, STM32_I2C_ISR_OFFSET);
           i2cerr("ERROR: RXNE Unsupported state detected, dcnt=%i, status 0x%08x\n",
                  priv->dcnt, status);
 
@@ -2042,7 +2042,7 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
 
   else if (priv->dcnt == -1 && priv->msgc == 0)
     {
-      status = stm32_i2c_getreg(priv, STM32F7_I2C_ISR_OFFSET);
+      status = stm32_i2c_getreg(priv, STM32_I2C_ISR_OFFSET);
       i2cwarn("WARNING: EMPTY CALL: Stopping ISR: status 0x%08x\n", status);
       stm32_i2c_traceevent(priv, I2CEVENT_ISR_EMPTY_CALL, 0);
     }
