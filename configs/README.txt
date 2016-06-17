@@ -658,6 +658,9 @@ configs/stm32f746g-disco
   MCU. The STM32F746NGH6  is a 216MHz Cortex-M7 operation with 1024Kb Flash
   memory and 300Kb SRAM.
 
+configs/stm32f746g-ws
+  Waveshare STM32F746 development board featuring the STM32F746IG MCU.
+
 configs/stm32l476vg-disco
   STMicro STM32L476VG_DISCO development board featuring the STM32L476VG
   MCU. The STM32L476VG  is a Cortex-M4 optimised for low-power operation

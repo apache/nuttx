@@ -997,7 +997,7 @@ config ARCH_BOARD_STM32F429I_DISCO
 
 config ARCH_BOARD_STM32F746G_DISCO
 	bool "STMicro STM32F746G-Discovery board"
-	depends on ARCH_CHIP_STM32F746
+	depends on ARCH_CHIP_STM32F746NG
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
@@ -1005,6 +1005,15 @@ config ARCH_BOARD_STM32F746G_DISCO
 		STMicro STM32F746G-DISCO development board featuring the STM32F746NGH6
 		MCU. The STM32F746NGH6  is a 216MHz Cortex-M7 operation with 1024Kb Flash
 		memory and 320Kb SRAM.
+
+config ARCH_BOARD_STM32F746_WS
+	bool "Waveshare STM32F746 board"
+	depends on ARCH_CHIP_STM32F746IG
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		Waveshare STM32F746 development board featuring the STM32F746IG MCU.
 
 config ARCH_BOARD_STM32L476VG_DISCO
 	bool "STMicro STM32F746VG-Discovery board"
@@ -1438,6 +1447,7 @@ config ARCH_BOARD
 	default "stm32f411e-disco"         if ARCH_BOARD_STM32F411E_DISCO
 	default "stm32f429i-disco"         if ARCH_BOARD_STM32F429I_DISCO
 	default "stm32f746g-disco"         if ARCH_BOARD_STM32F746G_DISCO
+	default "stm32f746-ws"             if ARCH_BOARD_STM32F746_WS
 	default "stm32l476vg-disco"        if ARCH_BOARD_STM32L476VG_DISCO
 	default "stm32ldiscovery"          if ARCH_BOARD_STM32L_DISCOVERY
 	default "stm32vldiscovery"         if ARCH_BOARD_STM32VL_DISCOVERY
@@ -1811,6 +1821,9 @@ source "configs/stm32f429i-disco/Kconfig"
 endif
 if ARCH_BOARD_STM32F746G_DISCO
 source "configs/stm32f746g-disco/Kconfig"
+endif
+if ARCH_BOARD_STM32F746_WS
+source "configs/stm32f746-ws/Kconfig"
 endif
 if ARCH_BOARD_STM32L476VG_DISCO
 source "configs/stm32l476vg-disco/Kconfig"
