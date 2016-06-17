@@ -736,7 +736,7 @@ const struct trace_msg_t g_usb_trace_strings_intdecode[] =
 #ifdef CONFIG_SAMV7_USBHS_REGDEBUG
 static void sam_printreg(uintptr_t regaddr, uint32_t regval, bool iswrite)
 {
-  uinfo("%p%s%08x\n", regaddr, iswrite ? "<-" : "->", regval);
+  ullinfo("%p%s%08x\n", regaddr, iswrite ? "<-" : "->", regval);
 }
 #endif
 
@@ -787,7 +787,7 @@ static void sam_checkreg(uintptr_t regaddr, uint32_t regval, bool iswrite)
             {
               /* No.. More than one. */
 
-              uinfo("[repeats %d more times]\n", count);
+              ullinfo("[repeats %d more times]\n", count);
             }
         }
 
