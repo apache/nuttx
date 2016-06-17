@@ -2312,6 +2312,9 @@ static int stm32_i2c_process(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s 
              cr1, cr2,status );
     }
 
+  UNUSED(cr1);
+  UNUSED(cr2);
+
   i2cinfo("priv->status: 0x%08x\n", priv->status);
 
   /* Check for error status conditions */
