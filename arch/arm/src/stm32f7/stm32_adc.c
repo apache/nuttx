@@ -1479,17 +1479,19 @@ static uint32_t adc_sqrbits(FAR struct stm32_dev_s *priv, int first, int last,
 static bool adc_internal(FAR struct stm32_dev_s * priv)
 {
   int i;
+
   if (priv->intf == 1)
     {
       for (i  = 0; i < priv->nchannels; i++)
         {
-            if (priv->chanlist[i] > ADC_LAST_EXTERNAL_CHAN)
-              {
-                return true;
-              }
+          if (priv->chanlist[i] > ADC_LAST_EXTERNAL_CHAN)
+            {
+              return true;
+            }
 
         }
     }
+
   return false;
 }
 

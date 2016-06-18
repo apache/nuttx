@@ -1667,6 +1667,7 @@ static void adc_dmaconvcallback(DMA_HANDLE handle, uint8_t isr, FAR void *arg)
             }
         }
     }
+
   /* Restart DMA for the next conversion series */
 
   adc_modifyreg(priv, STM32_ADC_DMAREG_OFFSET, ADC_DMAREG_DMA, 0);
