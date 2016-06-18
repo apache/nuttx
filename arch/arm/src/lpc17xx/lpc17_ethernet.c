@@ -2660,7 +2660,7 @@ static inline int lpc17_phyinit(struct lpc17_driver_s *priv)
            * 4-bit revision number).
            */
 
-          if ((phyreg & 0xfff0) == LPC17_PHYID2)
+          if ((phyreg & 0xfff0) == (LPC17_PHYID2 & 0xfff0))
             {
               break;
             }
