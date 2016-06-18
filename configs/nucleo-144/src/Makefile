@@ -56,6 +56,9 @@ endif
 ifeq ($(CONFIG_SPI),y)
 CSRCS += stm32_spi.c
 endif
+ifeq ($(CONFIG_ADC),y)
+CSRCS += stm32_adc.c
+endif
 
 ifeq ($(HAVE_SDIO),y)
 CSRCS += stm32_sdio.c

@@ -12045,3 +12045,32 @@
 	    - escape LASTXFER: this suppresses the LASTXFER bit at the end of the
 	      next transfer. The "escape"-Flag is reset automatically.
 	  From Frank Benkert (2016-06-14)
+	* Many CONFIG_DEBUG_* options did not have matching macros defined in
+	  include/debug.h.  Rather, there were various definitions scattered
+	  throughout the sourse tree.  These were collected together and
+	  centralized with single macro definitions in include/debug.h
+	  (2016-06-15)
+	* STM32F7: Add SPI, I2C, and ADC drivers.  From Lok Tep (2016-06-15).
+	* err(), warn(), info(), and alert() renamed to include leading '_'.
+	  This was done to avoid some naming collisions (2-06-16
+	* STM32: Move backup domain reset to to earlier in the initialization
+	  sequence (stm32_rcc.c() in order to avoid disabling LSE during RTC
+	  initialiation.  From Alan Carvalho de Assis (2016-06-16).
+	* SYSLOG: syslog() will now automatically redirect output to lowsyslog()
+	  if called from an interrupt handler (2016-06-16).
+	* STM32: When configuring a GPIO via stm32_configgpio() the function
+	  will first set the mode to output and then set the initial state of
+	  the gpio later on.  If you have an application with an externaly
+	  pulled-up pin, this would lead to a glitch on the line that may be
+	  dangerous in some applications (e.G. Reset Line for other chips,
+	  etc).  This changes sets the output state before configuring the pin
+	  as an output.  From Pascal Speck  (2016-06-17).
+	* STM32 F7: Apply Pascal Speck's GPIO STM32 change to STM32 L4
+	  (2016-06-17).
+	* STM32 L4: Apply Pascal Speck's GPIO STM32 change to STM32 L4.
+	  From Sebastien Lorquet (2016-06-17).
+	* Review all uses of *err().  These macro family should indicate only
+	  error conditions.  Convert *err() to either *info() or add ERROR:,
+	  depending on if an error is reported (2016-06-17).
+	* STM32F7: Review, correct, and update I2C, SPI, and ADC drivers.  From
+	  David Sidrane (2016-06-17).

@@ -57,6 +57,11 @@
  * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
+
+#ifndef CONFIG_DEBUG_WATCHDOG_INFO
+#  undef CONFIG_SAMV7_RSWDT_REGDEBUG
+#endif
+
 /* The Watchdog Timer uses the Slow Clock divided by 128 to establish the
  * maximum Watchdog period to be 16 seconds (with a typical Slow Clock of
  * 32768 kHz).
@@ -79,20 +84,6 @@
 
 #define RSWDT_MINTIMEOUT ((1000 + RSWDT_FREQUENCY - 1) / RSWDT_FREQUENCY)
 #define RSWDT_MAXTIMEOUT ((4096 * 1000) / RSWDT_FREQUENCY)
-
-/* Debug ********************************************************************/
-/* Non-standard debug that may be enabled just for testing the watchdog
- * driver.  NOTE: that only llerr types are used so that the output is
- * immediately available.
- */
-
-#ifdef CONFIG_DEBUG_WATCHDOG
-#  define wderr    llerr
-#  define wdinfo   llinfo
-#else
-#  define wderr(x...)
-#  define wdinfo(x...)
-#endif
 
 /****************************************************************************
  * Private Types
@@ -118,7 +109,7 @@ struct sam_lowerhalf_s
  ****************************************************************************/
 /* Register operations ******************************************************/
 
-#if defined(CONFIG_SAMV7_RSWDT_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
+#ifdef CONFIG_SAMV7_RSWDT_REGDEBUG
 static uint32_t sam_getreg(uintptr_t regaddr);
 static void     sam_putreg(uint32_t regval, uintptr_t regaddr);
 #else
@@ -178,7 +169,7 @@ static struct sam_lowerhalf_s g_wdtdev;
  *
  ****************************************************************************/
 
-#if defined(CONFIG_SAMV7_RSWDT_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
+#ifdef CONFIG_SAMV7_RSWDT_REGDEBUG
 static uint32_t sam_getreg(uintptr_t regaddr)
 {
   static uint32_t prevaddr = 0;
@@ -199,7 +190,7 @@ static uint32_t sam_getreg(uintptr_t regaddr)
         {
           if (count == 4)
             {
-              llerr("...\n");
+              wdllinfo("...\n");
             }
 
           return regval;
@@ -216,7 +207,7 @@ static uint32_t sam_getreg(uintptr_t regaddr)
         {
           /* Yes.. then show how many times the value repeated */
 
-          llerr("[repeats %d more times]\n", count-3);
+          wdllinfo("[repeats %d more times]\n", count-3);
         }
 
       /* Save the new address, value, and count */
@@ -228,7 +219,7 @@ static uint32_t sam_getreg(uintptr_t regaddr)
 
   /* Show the register value read */
 
-  llerr("%08x->%048\n", regaddr, regval);
+  wdllinfo("%08x->%048\n", regaddr, regval);
   return regval;
 }
 #endif
@@ -241,12 +232,12 @@ static uint32_t sam_getreg(uintptr_t regaddr)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_SAMV7_RSWDT_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
+#ifdef CONFIG_SAMV7_RSWDT_REGDEBUG
 static void sam_putreg(uint32_t regval, uintptr_t regaddr)
 {
   /* Show the register value being written */
 
-  llerr("%08x<-%08x\n", regaddr, regval);
+  wdinfo("%08x<-%08x\n", regaddr, regval);
 
   /* Write the value */
 
@@ -463,7 +454,7 @@ static int sam_settimeout(FAR struct watchdog_lowerhalf_s *lower,
 
   if (timeout < RSWDT_MINTIMEOUT || timeout >= RSWDT_MAXTIMEOUT)
     {
-      wderr("Cannot represent timeout: %d < %d > %d\n",
+      wderr("ERROR: Cannot represent timeout: %d < %d > %d\n",
             RSWDT_MINTIMEOUT, timeout, RSWDT_MAXTIMEOUT);
       return -ERANGE;
     }

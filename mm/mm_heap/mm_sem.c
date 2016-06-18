@@ -54,16 +54,16 @@
 
 #ifdef MONITOR_MM_SEMAPHORE
 #  include <debug.h>
-#  define msemerr  err
-#  define msemwarn warn
-#  define mseminfo info
+#  define msemerr  _err
+#  define msemwarn _warn
+#  define mseminfo _info
 #else
 #  ifdef CONFIG_CPP_HAVE_VARARGS
 #    define msemerr(x...)
 #    define msemwarn(x...)
 #    define mseminfo(x...)
 #  else
-#    define msemerr (void)
+#    define msemerr  (void)
 #    define msemwarn (void)
 #    define mseminfo (void)
 #  endif

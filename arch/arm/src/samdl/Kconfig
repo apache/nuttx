@@ -711,7 +711,7 @@ if SAMDL_HAVE_SPI
 config SAMDL_SPI_REGDEBUG
 	bool "SPI register-Level Debug"
 	default n
-	depends on DEBUG_SPI
+	depends on DEBUG_SPI_INFO
 	---help---
 		Enable very low-level register access debug.  Depends on DEBUG_SPI.
 

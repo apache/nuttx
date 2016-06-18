@@ -701,7 +701,7 @@ config SAMV7_WDT_IDLEHALT
 config SAMV7_WDT_REGDEBUG
 	bool "Register level debug"
 	default n
-	depends on DEBUG_FEATURES
+	depends on DEBUG_WATCHDOG_INFO
 	---help---
 		Enable low-level register debug output
 
@@ -735,7 +735,7 @@ config SAMV7_RSWDT_IDLEHALT
 config SAMV7_RSWDT_REGDEBUG
 	bool "Register level debug"
 	default n
-	depends on DEBUG_FEATURES
+	depends on DEBUG_WATCHDOG_INFO
 	---help---
 		Enable low-level register debug output
 
@@ -894,11 +894,11 @@ endif # SAMV7_SPI_SLAVE
 
 config SAMV7_SPI_REGDEBUG
 	bool "SPI Register level debug"
-	depends on DEBUG_FEATURES
+	depends on DEBUG_SPI_INFO
 	default n
 	---help---
 		Output detailed register-level SPI device debug information.
-		Requires also CONFIG_DEBUG_FEATURES.
+		Requires also CONFIG_DEBUG_SPI_INFO.
 
 endmenu # SPI device driver options
 
@@ -941,11 +941,11 @@ config SAMV7_QSPI_DMADEBUG
 
 config SAMV7_QSPI_REGDEBUG
 	bool "QSPI Register level debug"
-	depends on DEBUG_FEATURES
+	depends on DEBUG_SPI_INFO
 	default n
 	---help---
 		Output detailed register-level QSPI device debug information.
-		Requires also CONFIG_DEBUG_FEATURES.
+		Requires also CONFIG_DEBUG_SPI_INFO.
 
 endmenu # QSPI device driver options
 
@@ -969,11 +969,11 @@ config SAMV7_TWIHS2_FREQUENCY
 
 config SAMV7_TWIHS_REGDEBUG
 	bool "TWIHS register level debug"
-	depends on DEBUG_FEATURES
+	depends on DEBUG_I2C_INFO
 	default n
 	---help---
 		Output detailed register-level TWIHS device debug information.
-		Very invasive! Requires also CONFIG_DEBUG_FEATURES.
+		Very invasive! Requires also CONFIG_DEBUG_I2C_INFO.
 
 endmenu # TWIHS device driver options
 
@@ -1345,11 +1345,11 @@ config SAMV7_SSC_DMADEBUG
 
 config SAMV7_SSC_REGDEBUG
 	bool "SSC Register level debug"
-	depends on DEBUG_FEATURES
+	depends on DEBUG_I2S_INFO
 	default n
 	---help---
 		Output detailed register-level SSC device debug information.
-		Very invasive! Requires also CONFIG_DEBUG_FEATURES.
+		Very invasive! Requires also CONFIG_DEBUG_I2S_INFO.
 
 config SAMV7_SSC_QDEBUG
 	bool "SSC Queue debug"
@@ -1580,11 +1580,11 @@ config SAMV7_TC_DEBUG
 
 config SAMV7_TC_REGDEBUG
 	bool "TC register level debug"
-	depends on DEBUG_FEATURES
+	depends on DEBUG_TIMER_INFO
 	default n
 	---help---
 		Output detailed register-level Timer/Counter device debug
-		information. Very invasive! Requires also CONFIG_DEBUG_FEATURES.
+		information. Very invasive! Requires also CONFIG_DEBUG_TIMER_INFO.
 
 endmenu # Timer/counter Configuration
 endif # SAMV7_HAVE_TC
@@ -1634,7 +1634,7 @@ config SAMV7_HSMCI_UNALIGNED
 
 config SAMV7_HSMCI_XFRDEBUG
 	bool "HSMCI transfer debug"
-	depends on DEBUG_FS && CONFIG_DEBUG_INFO
+	depends on DEBUG_FS_INFO
 	default n
 	---help---
 		Enable special debug instrumentation analyze HSMCI data transfers.
@@ -1646,7 +1646,7 @@ config SAMV7_HSMCI_XFRDEBUG
 
 config SAMV7_HSMCI_CMDDEBUG
 	bool "HSMCI command debug"
-	depends on DEBUG_FS && CONFIG_DEBUG_INFO
+	depends on DEBUG_FS_INFO
 	default n
 	---help---
 		Enable special debug instrumentation analyze HSMCI commands. This
@@ -1658,11 +1658,11 @@ config SAMV7_HSMCI_CMDDEBUG
 
 config SAMV7_HSMCI_REGDEBUG
 	bool "HSMCI Register level debug"
-	depends on DEBUG_FEATURES
+	depends on DEBUG_MEMCARD_INFO
 	default n
 	---help---
 		Output detailed register-level HSCMI device debug information.
-		Very invasive! Requires also CONFIG_DEBUG_FEATURES.
+		Very invasive! Requires also DEBUG_MEMCARD_INFO.
 
 endmenu # HSMCI device driver options
 
@@ -1882,9 +1882,9 @@ config SAMV7_EMAC_DEBUG
 config SAMV7_EMAC_REGDEBUG
 	bool "Register-Level Debug"
 	default n
-	depends on DEBUG_FEATURES
+	depends on DEBUG_NET_INFO
 	---help---
-		Enable very low-level register access debug.  Depends on CONFIG_DEBUG_FEATURES.
+		Enable very low-level register access debug.  Depends on CONFIG_DEBUG_NET_INFO.
 
 endmenu # EMAC0 device driver options
 
@@ -1940,7 +1940,7 @@ config SAMV7_USBHS_EP7DMA_WAR
 config SAMV7_USBHS_REGDEBUG
 	bool "Enable low-level USBHS register debug"
 	default n
-	depends on DEBUG_FEATURES
+	depends on DEBUG_USB_INFO
 
 endmenu # USB High Speed Device Controller driver (DCD) options
 

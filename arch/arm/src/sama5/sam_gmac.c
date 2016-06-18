@@ -149,7 +149,7 @@
  * enabled.
  */
 
-#ifndef CONFIG_DEBUG_FEATURES
+#ifndef CONFIG_DEBUG_NET_INFO
 #  undef CONFIG_SAMA5_GMAC_REGDEBUG
 #endif
 
@@ -392,7 +392,7 @@ static bool sam_checkreg(struct sam_gmac_s *priv, bool wr, uint32_t regval,
         {
           /* Yes... show how many times we did it */
 
-          llerr("...[Repeats %d times]...\n", priv->ntimes);
+          ninfo("...[Repeats %d times]...\n", priv->ntimes);
         }
 
       /* Save information about the new access */
@@ -424,7 +424,7 @@ static uint32_t sam_getreg(struct sam_gmac_s *priv, uintptr_t address)
 
   if (sam_checkreg(priv, false, regval, address))
     {
-      llerr("%08x->%08x\n", address, regval);
+      ninfo("%08x->%08x\n", address, regval);
     }
 
   return regval;
@@ -445,7 +445,7 @@ static void sam_putreg(struct sam_gmac_s *priv, uintptr_t address,
 {
   if (sam_checkreg(priv, true, regval, address))
     {
-      llerr("%08x<-%08x\n", address, regval);
+      ninfo("%08x<-%08x\n", address, regval);
     }
 
   putreg32(regval, address);
@@ -1142,7 +1142,7 @@ static void sam_receive(struct sam_gmac_s *priv)
 
       if (dev->d_len > CONFIG_NET_ETH_MTU)
         {
-          nllerr("DROPPED: Too big: %d\n", dev->d_len);
+          nllwarn("WARNING: Dropped, Too big: %d\n", dev->d_len);
           continue;
         }
 
@@ -1252,7 +1252,7 @@ static void sam_receive(struct sam_gmac_s *priv)
       else
 #endif
         {
-          nllerr("DROPPED: Unknown type: %04x\n", BUF->type);
+          nllwarn("WARNING: Dropped, Unknown type: %04x\n", BUF->type);
         }
     }
 }
@@ -1536,7 +1536,7 @@ static int sam_gmac_interrupt(int irq, void *context)
 
   if ((pending & GMAC_INT_PFNZ) != 0)
     {
-      nllerr("Pause frame received\n");
+      nllwarn("WARNING: Pause frame received\n");
     }
 
   /* Check for Pause Time Zero (PTZ)
@@ -1546,7 +1546,7 @@ static int sam_gmac_interrupt(int irq, void *context)
 
   if ((pending & GMAC_INT_PTZ) != 0)
     {
-      nllerr("Pause TO!\n");
+      nllwarn("WARNING: Pause TO!\n");
     }
 #endif
 
@@ -1576,7 +1576,7 @@ static void sam_txtimeout(int argc, uint32_t arg, ...)
 {
   struct sam_gmac_s *priv = (struct sam_gmac_s *)arg;
 
-  nllerr("Timeout!\n");
+  nllerr("ERROR: Timeout!\n");
 
   /* Then reset the hardware.  Just take the interface down, then back
    * up again.
@@ -1651,9 +1651,9 @@ static int sam_ifup(struct net_driver_s *dev)
   struct sam_gmac_s *priv = (struct sam_gmac_s *)dev->d_private;
   int ret;
 
-  nllerr("Bringing up: %d.%d.%d.%d\n",
-         dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
-         (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
+  ninfo("Bringing up: %d.%d.%d.%d\n",
+        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
+        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
 
   /* Configure the GMAC interface for normal operation. */
 
@@ -1730,7 +1730,7 @@ static int sam_ifdown(struct net_driver_s *dev)
   struct sam_gmac_s *priv = (struct sam_gmac_s *)dev->d_private;
   irqstate_t flags;
 
-  nllerr("Taking the network down\n");
+  ninfo("Taking the network down\n");
 
   /* Disable the GMAC interrupt */
 

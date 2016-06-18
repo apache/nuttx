@@ -99,7 +99,7 @@ static void up_stackdump(uint32_t sp, uint32_t stack_base)
   for (stack = sp & ~0x1f; stack < stack_base; stack += 32)
     {
       uint32_t *ptr = (uint32_t *)stack;
-      alert("%08x: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+      _alert("%08x: %08x %08x %08x %08x %08x %08x %08x %08x\n",
              stack, ptr[0], ptr[1], ptr[2], ptr[3],
              ptr[4], ptr[5], ptr[6], ptr[7]);
     }
@@ -126,12 +126,12 @@ static inline void up_registerdump(void)
       for (regs = REG_R0; regs <= REG_R15; regs += 8)
         {
           uint32_t *ptr = (uint32_t *)&CURRENT_REGS[regs];
-          alert("R%d: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+          _alert("R%d: %08x %08x %08x %08x %08x %08x %08x %08x\n",
                  regs, ptr[0], ptr[1], ptr[2], ptr[3],
                  ptr[4], ptr[5], ptr[6], ptr[7]);
         }
 
-      alert("CPSR: %08x\n", CURRENT_REGS[REG_CPSR]);
+      _alert("CPSR: %08x\n", CURRENT_REGS[REG_CPSR]);
     }
 }
 #else
@@ -200,12 +200,12 @@ static void up_dumpstate(void)
 
   /* Show interrupt stack info */
 
-  alert("sp:     %08x\n", sp);
-  alert("IRQ stack:\n");
-  alert("  base: %08x\n", istackbase);
-  alert("  size: %08x\n", istacksize);
+  _alert("sp:     %08x\n", sp);
+  _alert("IRQ stack:\n");
+  _alert("  base: %08x\n", istackbase);
+  _alert("  size: %08x\n", istacksize);
 #ifdef CONFIG_STACK_COLORATION
-  alert("  used: %08x\n", up_check_intstack());
+  _alert("  used: %08x\n", up_check_intstack());
 #endif
 
   /* Does the current stack pointer lie within the interrupt
@@ -223,24 +223,24 @@ static void up_dumpstate(void)
        */
 
       sp = g_intstackbase;
-      alert("sp:     %08x\n", sp);
+      _alert("sp:     %08x\n", sp);
     }
 
   /* Show user stack info */
 
-  alert("User stack:\n");
-  alert("  base: %08x\n", ustackbase);
-  alert("  size: %08x\n", ustacksize);
+  _alert("User stack:\n");
+  _alert("  base: %08x\n", ustackbase);
+  _alert("  size: %08x\n", ustacksize);
 #ifdef CONFIG_STACK_COLORATION
-  alert("  used: %08x\n", up_check_tcbstack(rtcb));
+  _alert("  used: %08x\n", up_check_tcbstack(rtcb));
 #endif
 
 #else
-  alert("sp:         %08x\n", sp);
-  alert("stack base: %08x\n", ustackbase);
-  alert("stack size: %08x\n", ustacksize);
+  _alert("sp:         %08x\n", sp);
+  _alert("stack base: %08x\n", ustackbase);
+  _alert("stack size: %08x\n", ustacksize);
 #ifdef CONFIG_STACK_COLORATION
-  alert("stack used: %08x\n", up_check_tcbstack(rtcb));
+  _alert("stack used: %08x\n", up_check_tcbstack(rtcb));
 #endif
 #endif
 
@@ -251,7 +251,7 @@ static void up_dumpstate(void)
   if (sp > ustackbase || sp <= ustackbase - ustacksize)
     {
 #if !defined(CONFIG_ARCH_INTERRUPTSTACK) || CONFIG_ARCH_INTERRUPTSTACK < 4
-      alert("ERROR: Stack pointer is not within allocated stack\n");
+      _alert("ERROR: Stack pointer is not within allocated stack\n");
 #endif
     }
   else
@@ -318,10 +318,10 @@ void up_assert(const uint8_t *filename, int lineno)
   board_autoled_on(LED_ASSERTION);
 
 #if CONFIG_TASK_NAME_SIZE > 0
-  alert("Assertion failed at file:%s line: %d task: %s\n",
+  _alert("Assertion failed at file:%s line: %d task: %s\n",
         filename, lineno, rtcb->name);
 #else
-  alert("Assertion failed at file:%s line: %d\n",
+  _alert("Assertion failed at file:%s line: %d\n",
         filename, lineno);
 #endif
 

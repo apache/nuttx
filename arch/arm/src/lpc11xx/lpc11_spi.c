@@ -272,7 +272,7 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
   priv->frequency = frequency;
   priv->actual    = actual;
 
-  spierr("Frequency %d->%d\n", frequency, actual);
+  spiinfo("Frequency %d->%d\n", frequency, actual);
   return actual;
 }
 
@@ -436,7 +436,7 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer,
   FAR uint8_t *ptr = (FAR uint8_t *)buffer;
   uint8_t data;
 
-  spierr("nwords: %d\n", nwords);
+  spiinfo("nwords: %d\n", nwords);
   while (nwords)
     {
       /* Write the data to transmitted to the SPI Data Register */
@@ -483,7 +483,7 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer,
 {
   FAR uint8_t *ptr = (FAR uint8_t *)buffer;
 
-  spierr("nwords: %d\n", nwords);
+  spiinfo("nwords: %d\n", nwords);
   while (nwords)
     {
       /* Write some dummy data to the SPI Data Register in order to clock the

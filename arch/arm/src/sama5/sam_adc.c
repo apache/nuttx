@@ -371,6 +371,10 @@
 
 #define SAMA5_ADC_SAMPLES (CONFIG_SAMA5_ADC_DMASAMPLES * SAMA5_NCHANNELS)
 
+#ifndef CONFIG_DEBUG_ANALOG_INFO
+#  undef CONFIG_SAMA5_ADC_REGDEBUG
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -423,7 +427,7 @@ struct sam_adc_s
  ****************************************************************************/
 /* Register operations ******************************************************/
 
-#if defined(CONFIG_SAMA5_ADC_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
+#ifdef CONFIG_SAMA5_ADC_REGDEBUG
 static bool sam_adc_checkreg(struct sam_adc_s *priv, bool wr,
                              uint32_t regval, uintptr_t address);
 #endif
@@ -544,7 +548,7 @@ static bool sam_adc_checkreg(struct sam_adc_s *priv, bool wr,
         {
           /* Yes... show how many times we did it */
 
-          llerr("...[Repeats %d times]...\n", priv->ntimes);
+          ainfo("...[Repeats %d times]...\n", priv->ntimes);
         }
 
       /* Save information about the new access */
@@ -2187,7 +2191,7 @@ uint32_t sam_adc_getreg(struct sam_adc_s *priv, uintptr_t address)
 
   if (sam_adc_checkreg(priv, false, regval, address))
     {
-      llerr("%08x->%08x\n", address, regval);
+      ainfo("%08x->%08x\n", address, regval);
     }
 
   return regval;
@@ -2207,7 +2211,7 @@ void sam_adc_putreg(struct sam_adc_s *priv, uintptr_t address, uint32_t regval)
 {
   if (sam_adc_checkreg(priv, true, regval, address))
     {
-      llerr("%08x<-%08x\n", address, regval);
+      ainfo("%08x<-%08x\n", address, regval);
     }
 
   putreg32(regval, address);

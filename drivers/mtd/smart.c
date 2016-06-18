@@ -1387,7 +1387,7 @@ static int smart_add_sector_to_cache(FAR struct smart_struct_s *dev,
 
   if (dev->debuglevel > 1)
     {
-      err("Add Cache sector:  Log=%d, Phys=%d at index %d from line %d\n",
+      _err("Add Cache sector:  Log=%d, Phys=%d at index %d from line %d\n",
           logical, physical, index, line);
     }
 
@@ -1575,7 +1575,7 @@ static void smart_update_cache(FAR struct smart_struct_s *dev, uint16_t
 
           if (dev->debuglevel > 1)
             {
-              err("Update Cache:  Log=%d, Phys=%d at index %d\n", logical, physical, x);
+              _err("Update Cache:  Log=%d, Phys=%d at index %d\n", logical, physical, x);
             }
 
           break;
@@ -1712,7 +1712,7 @@ static int smart_set_wear_level(FAR struct smart_struct_s *dev, uint16_t block,
 
   if (level > 15)
     {
-      err("ERROR: Fatal Design Error!  Wear level > 15, block=%d\n", block);
+      _err("ERROR: Fatal Design Error!  Wear level > 15, block=%d\n", block);
 
       /* This is a design flaw, but we still allow processing, otherwise we
        * will corrupt the volume.  It's better to have a few blocks that are

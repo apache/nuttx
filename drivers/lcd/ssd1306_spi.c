@@ -89,7 +89,7 @@ static inline void ssd1306_configspi(FAR struct spi_dev_s *spi)
 void ssd1306_sendbyte(FAR struct ssd1306_dev_s *priv, uint8_t regval)
 {
 #ifdef CONFIG_LCD_SSD1306_REGDEBUG
-  llerr("->0x%02x\n", regval);
+  _llerr("->0x%02x\n", regval);
 #endif
 
   /* Send byte value to display */

@@ -405,10 +405,6 @@ config DEBUG_FEATURES
 		Note that enabling this option by itself does not produce debug output.
 		Debug output must also be selected on a subsystem-by-subsystem basis.
 
-config ARCH_HAVE_HEAPCHECK
-	bool
-	default n
-
 if DEBUG_FEATURES
 
 comment "Debug SYSLOG Output Controls"
@@ -417,7 +413,7 @@ config DEBUG_ERROR
 	bool "Enable Error Output"
 	default n
 	---help---
-		Enables output from err() statements.  Errors are significant system
+		Enables output from [a-z]err() statements.  Errors are significant system
 		exceptions that require immediate attention.
 
 config DEBUG_WARN
@@ -425,7 +421,7 @@ config DEBUG_WARN
 	default n
 	depends on DEBUG_ERROR
 	---help---
-		Enables output from warn() statements.  Warnings are considered to
+		Enables output from [a-z]warn() statements.  Warnings are considered to
 		be various unexpected conditions, potential errors or errors that will
 		not have serious consequences.
 
@@ -745,12 +741,38 @@ config DEBUG_SCHED_INFO
 endif # DEBUG_SCHED
 
 config DEBUG_SYSCALL
-	bool "SYSCALL Debug Output"
+	bool "SYSCALL Debug Features"
 	default n
 	depends on LIB_SYSCALL
 	---help---
-		Enable very low level output related to system calls.  This gives
-		you basically a poor man's version of strace.
+		Enable very low level features related to system calls.  If SYSCAL
+		output is enabled, this gives you basically a poor man's version of
+		strace.
+
+if DEBUG_SYSCALL
+
+config DEBUG_SYSCALL_ERROR
+	bool "SYSCALL Error Output"
+	default n
+	depends on DEBUG_ERROR
+	---help---
+		Enable OS SYSCALL error output to SYSLOG.
+
+config DEBUG_SYSCALL_WARN
+	bool "SYSCALL Warnings Output"
+	default n
+	depends on DEBUG_WARN
+	---help---
+		Enable OS SYSCALL warning output to SYSLOG.
+
+config DEBUG_SYSCALL_INFO
+	bool "SYSCALL Informational Output"
+	default n
+	depends on DEBUG_INFO
+	---help---
+		Enable OS SYSCALL informational output to SYSLOG.
+
+endif # DEBUG_SYSCALL
 
 config DEBUG_WIRELESS
 	bool "Wireless Device Debug Output"
@@ -1192,22 +1214,80 @@ config DEBUG_PWM_INFO
 endif # DEBUG_PWM
 
 config DEBUG_RTC
-	bool "RTC Debug Output"
+	bool "RTC Debug Features"
 	default n
 	depends on RTC
 	---help---
-		Enable RTC driver debug SYSLOG output (disabled by default).
+		Enable RTC debug features.
+
 		Support for this debug option is architecture-specific and may not
 		be available for some MCUs.
 
-config DEBUG_SDIO
-	bool "SDIO Debug Output"
+if DEBUG_RTC
+
+config DEBUG_RTC_ERROR
+	bool "RTC Error Output"
+	default n
+	depends on DEBUG_ERROR
+	---help---
+		Enable RTC driver error output to SYSLOG.
+
+		Support for this debug option is architecture-specific and may not
+		be available for some MCUs.
+
+config DEBUG_RTC_WARN
+	bool "RTC Warnings Output"
+	default n
+	depends on DEBUG_WARN
+	---help---
+		Enable RTC driver warning output to SYSLOG.
+
+config DEBUG_RTC_INFO
+	bool "RTC Informational Output"
+	default n
+	depends on DEBUG_INFO
+	---help---
+		Enable RTC driver informational output to SYSLOG.
+
+endif # DEBUG_RTC
+
+config DEBUG_MEMCARD
+	bool "Memory Card Driver Debug Features"
 	default n
 	depends on MMCSD_SDIO
 	---help---
-		Enable SDIO driver debug SYSLOG output (disabled by default).
+		Enable MMC/SD memory card Driver debug features.
+
 		Support for this debug option is architecture-specific and may not
 		be available for some MCUs.
+
+if DEBUG_MEMCARD
+
+config DEBUG_MEMCARD_ERROR
+	bool "Memory Card Driver Error Output"
+	default n
+	depends on DEBUG_ERROR
+	---help---
+		Enable MMC/SD memory card driver error output to SYSLOG.
+
+		Support for this debug option is architecture-specific and may not
+		be available for some MCUs.
+
+config DEBUG_MEMCARD_WARN
+	bool "Memory Card Driver Warnings Output"
+	default n
+	depends on DEBUG_WARN
+	---help---
+		Enable MMC/SD memory card driver warning output to SYSLOG.
+
+config DEBUG_MEMCARD_INFO
+	bool "Memory Card Driver Informational Output"
+	default n
+	depends on DEBUG_INFO
+	---help---
+		Enable MMC/SD memory card driver informational output to SYSLOG.
+
+endif # DEBUG_MEMCARD
 
 config DEBUG_SENSORS
 	bool "Sensor Debug Features"
@@ -1280,13 +1360,39 @@ config DEBUG_SPI_INFO
 endif # DEBUG_SPI
 
 config DEBUG_TIMER
-	bool "Timer Debug Output"
+	bool "Timer Debug Features"
 	default n
 	depends on TIMER
 	---help---
-		Enable timer debug SYSLOG output (disabled by default).
+		Enable timer debug features.
+
 		Support for this debug option is architecture-specific and may not
 		be available for some MCUs.
+
+if DEBUG_TIMER
+
+config DEBUG_TIMER_ERROR
+	bool "Timer Error Output"
+	default n
+	depends on DEBUG_ERROR
+	---help---
+		Enable timer error output to SYSLOG.
+
+config DEBUG_TIMER_WARN
+	bool "Timer Warnings Output"
+	default n
+	depends on DEBUG_WARN
+	---help---
+		Enable timer warning output to SYSLOG.
+
+config DEBUG_TIMER_INFO
+	bool "Timer Informational Output"
+	default n
+	depends on DEBUG_INFO
+	---help---
+		Enable timer informational output to SYSLOG.
+
+endif # DEBUG_TIMER
 
 config DEBUG_USB
 	bool "USB Debug Features"
@@ -1321,14 +1427,39 @@ config DEBUG_USB_INFO
 endif # DEBUG_USB
 
 config DEBUG_WATCHDOG
-	bool "Watchdog Timer Debug Output"
+	bool "Watchdog Timer Debug Features"
 	default n
 	depends on WATCHDOG
 	---help---
-		Enable watchdog timer debug SYSLOG output (disabled by default).
+		Enable watchdog timer debug features.
+
 		Support for this debug option is architecture-specific and may not
 		be available for some MCUs.
 
+if DEBUG_WATCHDOG
+
+config DEBUG_WATCHDOG_ERROR
+	bool "Watchdog Timer Error Output"
+	default n
+	depends on DEBUG_ERROR
+	---help---
+		Enable watchdog time error output to SYSLOG.
+
+config DEBUG_WATCHDOG_WARN
+	bool "Watchdog Timer Warnings Output"
+	default n
+	depends on DEBUG_WARN
+	---help---
+		Enable watchdog time warning output to SYSLOG.
+
+config DEBUG_WATCHDOG_INFO
+	bool "Watchdog Timer Informational Output"
+	default n
+	depends on DEBUG_INFO
+	---help---
+		Enable watchdog time informational output to SYSLOG.
+
+endif # DEBUG_WATCHDOG
 endif # DEBUG_FEATURES
 
 config ARCH_HAVE_STACKCHECK
@@ -1345,6 +1476,10 @@ config STACK_COLORATION
 		to monitor the level of stack usage.
 
 		Only supported by a few architectures.
+
+config ARCH_HAVE_HEAPCHECK
+	bool
+	default n
 
 config HEAP_COLORATION
 	bool "Heap coloration"

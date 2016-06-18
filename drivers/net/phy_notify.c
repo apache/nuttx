@@ -82,10 +82,10 @@
  */
 
 #ifdef CONFIG_NETDEV_PHY_DEBUG
-#  define phyinfo   info
-#  define phyllinfo llinfo
-#  define phyerr    err
-#  define phyllerr  llerr
+#  define phyinfo   _info
+#  define phyllinfo _llinfo
+#  define phyerr    _err
+#  define phyllerr  _llerr
 #else
 #  define phyinfo(x...)
 #  define phyllinfo(x...)

@@ -105,6 +105,26 @@ extern "C"
  * Public Functions
  ****************************************************************************/
 
+/************************************************************************************
+ * Name: rtc_is_inits
+ *
+ * Description:
+ *    Returns 'true' if the RTC has been initialized (according to the RTC itself).
+ *    It will be 'false' if the RTC has never been initialized since first time power
+ *    up, and the counters are stopped until it is first initialized.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   bool -- true if the INITS flag is set in the ISR.
+ *
+ ************************************************************************************/
+#ifdef CONFIG_RTC_DRIVER
+bool rtc_is_inits(void);
+#endif
+
+
 /****************************************************************************
  * Name: stm32l4_rtc_getdatetime_with_subseconds
  *

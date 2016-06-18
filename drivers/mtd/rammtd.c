@@ -172,7 +172,7 @@ static void *ram_write(FAR void *dest, FAR const void *src, size_t len)
 #ifdef CONFIG_DEBUG_FEATURES
       if (newvalue != srcvalue)
         {
-          err("ERROR: Bad write: source=%02x dest=%02x result=%02x\n",
+          _err("ERROR: Bad write: source=%02x dest=%02x result=%02x\n",
               srcvalue, oldvalue, newvalue);
         }
 #endif

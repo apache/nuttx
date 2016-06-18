@@ -93,7 +93,7 @@ void *operator new[](unsigned int nbytes)
       // Oh my.. we are required to return a valid pointer and
       // we cannot throw an exception!  We are bad.
 
-      err("ERROR: Failed to allocate\n");
+      _err("ERROR: Failed to allocate\n");
     }
 #endif
 

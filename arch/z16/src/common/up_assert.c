@@ -143,17 +143,17 @@ void up_assert(void)
 
 #ifdef CONFIG_HAVE_FILENAME
 #if CONFIG_TASK_NAME_SIZE > 0
-  alert("Assertion failed at file:%s line: %d task: %s\n",
+  _alert("Assertion failed at file:%s line: %d task: %s\n",
         filename, lineno, rtcb->name);
 #else
-  alert("Assertion failed at file:%s line: %d\n",
+  _alert("Assertion failed at file:%s line: %d\n",
         filename, lineno);
 #endif
 #else
 #if CONFIG_TASK_NAME_SIZE > 0
-  alert("Assertion failed: task: %s\n", rtcb->name);
+  _alert("Assertion failed: task: %s\n", rtcb->name);
 #else
-  alert("Assertion failed\n");
+  _alert("Assertion failed\n");
 #endif
 #endif
 

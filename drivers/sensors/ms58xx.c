@@ -1178,14 +1178,14 @@ int ms58xx_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
   if (ret < 0)
     {
       snerr("ERROR: ms58xx_setosr failed: %d\n", ret);
-      goto err;
+      goto errout;
     }
 
   ret = ms58xx_reset(priv);
   if (ret < 0)
     {
       snerr("ERROR: ms58xx_reset failed: %d\n", ret);
-      goto err;
+      goto errout;
     }
 
   /* Register the character driver */
@@ -1194,12 +1194,12 @@ int ms58xx_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
   if (ret < 0)
     {
       snerr("ERROR: Failed to register driver: %d\n", ret);
-      goto err;
+      goto errout;
     }
 
   return ret;
 
-err:
+errout:
   kmm_free(priv);
   return ret;
 }

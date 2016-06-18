@@ -605,8 +605,8 @@ void stm32_dmasetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
   uint32_t regoffset;
   uint32_t regval;
 
-  dmaerr("paddr: %08x maddr: %08x ntransfers: %d scr: %08x\n",
-         paddr, maddr, ntransfers, scr);
+  dmainfo("paddr: %08x maddr: %08x ntransfers: %d scr: %08x\n",
+          paddr, maddr, ntransfers, scr);
 
 #ifdef CONFIG_STM32_DMACAPABLE
   DEBUGASSERT(stm32_dmacapable(maddr, ntransfers, scr));

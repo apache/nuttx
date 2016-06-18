@@ -1163,7 +1163,7 @@ static void nand_dma_sampleinit(struct sam_nandcs_s *priv)
 #ifdef CONFIG_SAMA5_NAND_DMADEBUG
 static void nand_dma_sampledone(struct sam_nandcs_s *priv, int result)
 {
-  llerr("result: %d\n", result);
+  finfo("result: %d\n", result);
 
   /* Sample the final registers */
 
@@ -2098,7 +2098,7 @@ static int nand_readpage_pmecc(struct sam_nandcs_s *priv, off_t block,
         {
           /* Yes.. clear sector errors */
 
-          ferr("Block=%d page=%d has been erased: %08x\n",
+          finfo("Block=%d page=%d has been erased: %08x\n",
                block, page, regval);
           regval = 0;
         }
@@ -2983,7 +2983,7 @@ struct mtd_dev_s *sam_nand_initialize(int cs)
       ret = irq_attach(SAM_IRQ_HSMC, hsmc_interrupt);
       if (ret < 0)
         {
-          ferr("Failed to attach HSMC IRQ (%d)", SAM_IRQ_HSMC);
+          ferr("ERROR: Failed to attach HSMC IRQ (%d)", SAM_IRQ_HSMC);
           return NULL;
         }
 #endif
@@ -3088,7 +3088,7 @@ bool nand_checkreg(bool wr, uintptr_t regaddr, uint32_t regval)
         {
           /* Yes... show how many times we did it */
 
-          llerr("...[Repeats %d times]...\n", g_nand.ntimes);
+          finfo("...[Repeats %d times]...\n", g_nand.ntimes);
         }
 
       /* Save information about the new access */

@@ -160,7 +160,7 @@
 /* Debug ********************************************************************/
 
 #ifdef CONFIG_DEBUG_MAX1704X
-#  define baterr err
+#  define baterr  _err
 #else
 #  ifdef CONFIG_CPP_HAVE_VARARGS
 #    define baterr(x...)

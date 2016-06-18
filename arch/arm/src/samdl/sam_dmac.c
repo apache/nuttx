@@ -1259,7 +1259,7 @@ void sam_dmastop(DMA_HANDLE handle)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG_DMA
+#ifdef CONFIG_DEBUG_DMA_INFO
 void sam_dmasample(DMA_HANDLE handle, struct sam_dmaregs_s *regs)
 {
   struct sam_dmach_s *dmach = (struct sam_dmach_s *)handle;
@@ -1291,7 +1291,7 @@ void sam_dmasample(DMA_HANDLE handle, struct sam_dmaregs_s *regs)
   regs->chintflag  = getreg8(SAM_DMAC_CHINTFLAG);   /* Channel Interrupt Flag Status and Clear Register */
   regs->chstatus   = getreg8(SAM_DMAC_CHSTATUS);    /* Channel Status Register */
 }
-#endif /* CONFIG_DEBUG_DMA */
+#endif /* CONFIG_DEBUG_DMA_INFO */
 
 /****************************************************************************
  * Name: sam_dmadump
@@ -1304,26 +1304,26 @@ void sam_dmasample(DMA_HANDLE handle, struct sam_dmaregs_s *regs)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG_DMA
+#ifdef CONFIG_DEBUG_DMA_INFO
 void sam_dmadump(DMA_HANDLE handle, const struct sam_dmaregs_s *regs,
                  const char *msg)
 {
   struct sam_dmach_s *dmach = (struct sam_dmach_s *)handle;
 
-  dmaerr("%s\n", msg);
-  dmaerr("  DMAC Registers:\n");
-  dmaerr("         CTRL: %04x      CRCCTRL: %04x      CRCDATAIN: %08x  CRCCHKSUM: %08x\n",
-         regs->ctrl, regs->crcctrl, regs->crcdatain, regs->crcchksum);
-  dmaerr("    CRCSTATUS: %02x        DBGCTRL: %02x          QOSCTRL: %02x       SWTRIGCTRL: %08x\n",
-         regs->crcstatus, regs->errctrl, regs->qosctrl, regs->swtrigctrl);
-  dmaerr("     PRICTRL0: %08x  INTPEND: %04x     INSTSTATUS: %08x     BUSYCH: %08x\n",
-         regs->prictrl0, regs->intpend, regs->intstatus, regs->busych);
-  dmaerr("       PENDCH: %08x   ACTIVE: %08x   BASEADDR: %08x    WRBADDR: %08x\n",
-         regs->pendch, regs->active, regs->baseaddr, regs->wrbaddr);
-  dmaerr("         CHID: %02x       CHCRTRLA: %02x         CHCRTRLB: %08x   CHINFLAG: %02x\n",
-         regs->chid, regs->chctrla, regs->chctrlb, regs->chintflag,
-  dmaerr("     CHSTATUS: %02x\n",
-         regs->chstatus);
+  dmainfo("%s\n", msg);
+  dmainfo("  DMAC Registers:\n");
+  dmainfo("         CTRL: %04x      CRCCTRL: %04x      CRCDATAIN: %08x  CRCCHKSUM: %08x\n",
+          regs->ctrl, regs->crcctrl, regs->crcdatain, regs->crcchksum);
+  dmainfo("    CRCSTATUS: %02x        DBGCTRL: %02x          QOSCTRL: %02x       SWTRIGCTRL: %08x\n",
+          regs->crcstatus, regs->errctrl, regs->qosctrl, regs->swtrigctrl);
+  dmainfo("     PRICTRL0: %08x  INTPEND: %04x     INSTSTATUS: %08x     BUSYCH: %08x\n",
+          regs->prictrl0, regs->intpend, regs->intstatus, regs->busych);
+  dmainfo("       PENDCH: %08x   ACTIVE: %08x   BASEADDR: %08x    WRBADDR: %08x\n",
+          regs->pendch, regs->active, regs->baseaddr, regs->wrbaddr);
+  dmainfo("         CHID: %02x       CHCRTRLA: %02x         CHCRTRLB: %08x   CHINFLAG: %02x\n",
+          regs->chid, regs->chctrla, regs->chctrlb, regs->chintflag,
+  dmainfo("     CHSTATUS: %02x\n",
+          regs->chstatus);
 }
-#endif /* CONFIG_DEBUG_DMA */
+#endif /* CONFIG_DEBUG_DMA_INFO */
 #endif /* CONFIG_SAMDL_DMAC */

@@ -240,7 +240,7 @@
  * enabled.
  */
 
-#ifndef CONFIG_DEBUG_FEATURES
+#ifndef CONFIG_DEBUG_NET_INFO
 #  undef CONFIG_STM32_ETHMAC_REGDEBUG
 #endif
 
@@ -748,7 +748,7 @@ static int  stm32_ethconfig(FAR struct stm32_ethmac_s *priv);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_STM32_ETHMAC_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
+#ifdef CONFIG_STM32_ETHMAC_REGDEBUG
 static uint32_t stm32_getreg(uint32_t addr)
 {
   static uint32_t prevaddr = 0;
@@ -769,7 +769,7 @@ static uint32_t stm32_getreg(uint32_t addr)
         {
           if (count == 4)
             {
-              llerr("...\n");
+              ninfo("...\n");
             }
 
           return val;
@@ -786,7 +786,7 @@ static uint32_t stm32_getreg(uint32_t addr)
         {
           /* Yes.. then show how many times the value repeated */
 
-          llerr("[repeats %d more times]\n", count-3);
+          ninfo("[repeats %d more times]\n", count-3);
         }
 
       /* Save the new address, value, and count */
@@ -798,7 +798,7 @@ static uint32_t stm32_getreg(uint32_t addr)
 
   /* Show the register value read */
 
-  llerr("%08x->%08x\n", addr, val);
+  ninfo("%08x->%08x\n", addr, val);
   return val;
 }
 #endif
@@ -820,12 +820,12 @@ static uint32_t stm32_getreg(uint32_t addr)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_STM32_ETHMAC_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
+#ifdef CONFIG_STM32_ETHMAC_REGDEBUG
 static void stm32_putreg(uint32_t val, uint32_t addr)
 {
   /* Show the register value being written */
 
-  llerr("%08x<-%08x\n", addr, val);
+  ninfo("%08x<-%08x\n", addr, val);
 
   /* Write the value */
 
@@ -847,7 +847,7 @@ static void stm32_putreg(uint32_t val, uint32_t addr)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_STM32_ETHMAC_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
+#ifdef CONFIG_STM32_ETHMAC_REGDEBUG
 static void stm32_checksetup(void)
 {
 }
@@ -1505,7 +1505,7 @@ static int stm32_recvframe(FAR struct stm32_ethmac_s *priv)
 
   if (!stm32_isfreebuffer(priv))
     {
-      nllerr("No free buffers\n");
+      nllerr("ERROR: No free buffers\n");
       return -ENOMEM;
     }
 
@@ -1612,7 +1612,7 @@ static int stm32_recvframe(FAR struct stm32_ethmac_s *priv)
                * scanning logic, and continue scanning with the next frame.
                */
 
-              nllerr("DROPPED: RX descriptor errors: %08x\n", rxdesc->rdes0);
+              nllerr("ERROR: Dropped, RX descriptor errors: %08x\n", rxdesc->rdes0);
               stm32_freesegment(priv, rxcurr, priv->segments);
             }
         }
@@ -1673,7 +1673,7 @@ static void stm32_receive(FAR struct stm32_ethmac_s *priv)
 
       if (dev->d_len > CONFIG_NET_ETH_MTU)
         {
-          nllerr("DROPPED: Too big: %d\n", dev->d_len);
+          nllerr("ERROR: Dropped, Too big: %d\n", dev->d_len);
 
           /* Free dropped packet buffer */
 
@@ -1793,7 +1793,7 @@ static void stm32_receive(FAR struct stm32_ethmac_s *priv)
       else
 #endif
         {
-          nllerr("DROPPED: Unknown type: %04x\n", BUF->type);
+          nllerr("ERROR: Dropped, Unknown type: %04x\n", BUF->type);
         }
 
       /* We are finished with the RX buffer.  NOTE:  If the buffer is
@@ -2042,7 +2042,7 @@ static inline void stm32_interrupt_process(FAR struct stm32_ethmac_s *priv)
     {
       /* Just let the user know what happened */
 
-      nllerr("Abormal event(s): %08x\n", dmasr);
+      nllerr("ERROR: Abormal event(s): %08x\n", dmasr);
 
       /* Clear all pending abnormal events */
 
@@ -2246,7 +2246,7 @@ static void stm32_txtimeout_expiry(int argc, uint32_t arg, ...)
 {
   FAR struct stm32_ethmac_s *priv = (FAR struct stm32_ethmac_s *)arg;
 
-  nllerr("Timeout!\n");
+  nllerr("ERROR: Timeout!\n");
 
 #ifdef CONFIG_NET_NOINTS
   /* Disable further Ethernet interrupts.  This will prevent some race
@@ -2447,15 +2447,15 @@ static int stm32_ifup(struct net_driver_s *dev)
   int ret;
 
 #ifdef CONFIG_NET_IPv4
-  nerr("Bringing up: %d.%d.%d.%d\n",
-       dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
+  ninfo("Bringing up: %d.%d.%d.%d\n",
+        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
 #endif
 #ifdef CONFIG_NET_IPv6
-  nerr("Bringing up: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
-       dev->d_ipv6addr[0], dev->d_ipv6addr[1], dev->d_ipv6addr[2],
-       dev->d_ipv6addr[3], dev->d_ipv6addr[4], dev->d_ipv6addr[5],
-       dev->d_ipv6addr[6], dev->d_ipv6addr[7]);
+  ninfo("Bringing up: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
+        dev->d_ipv6addr[0], dev->d_ipv6addr[1], dev->d_ipv6addr[2],
+        dev->d_ipv6addr[3], dev->d_ipv6addr[4], dev->d_ipv6addr[5],
+        dev->d_ipv6addr[6], dev->d_ipv6addr[7]);
 #endif
 
   /* Configure the Ethernet interface for DMA operation. */
@@ -2500,7 +2500,7 @@ static int stm32_ifdown(struct net_driver_s *dev)
   FAR struct stm32_ethmac_s *priv = (FAR struct stm32_ethmac_s *)dev->d_private;
   irqstate_t flags;
 
-  nerr("Taking the network down\n");
+  ninfo("Taking the network down\n");
 
   /* Disable the Ethernet interrupt */
 
@@ -3129,7 +3129,7 @@ static int stm32_phyread(uint16_t phydevaddr, uint16_t phyregaddr, uint16_t *val
         }
     }
 
-  nerr("MII transfer timed out: phydevaddr: %04x phyregaddr: %04x\n",
+  nerr("ERROR: MII transfer timed out: phydevaddr: %04x phyregaddr: %04x\n",
        phydevaddr, phyregaddr);
 
   return -ETIMEDOUT;
@@ -3188,7 +3188,7 @@ static int stm32_phywrite(uint16_t phydevaddr, uint16_t phyregaddr, uint16_t val
         }
     }
 
-  nerr("MII transfer timed out: phydevaddr: %04x phyregaddr: %04x value: %04x\n",
+  nerr("ERROR: MII transfer timed out: phydevaddr: %04x phyregaddr: %04x value: %04x\n",
        phydevaddr, phyregaddr, value);
 
   return -ETIMEDOUT;
@@ -3225,7 +3225,7 @@ static inline int stm32_dm9161(FAR struct stm32_ethmac_s *priv)
   ret = stm32_phyread(CONFIG_STM32_PHYADDR, MII_PHYID1, &phyval);
   if (ret < 0)
     {
-      nerr("Failed to read the PHY ID1: %d\n", ret);
+      nerr("ERROR: Failed to read the PHY ID1: %d\n", ret);
       return ret;
     }
 
@@ -3243,7 +3243,7 @@ static inline int stm32_dm9161(FAR struct stm32_ethmac_s *priv)
   ret = stm32_phyread(CONFIG_STM32_PHYADDR, 16, &phyval);
   if (ret < 0)
     {
-      nerr("Failed to read the PHY Register 0x10: %d\n", ret);
+      nerr("ERROR: Failed to read the PHY Register 0x10: %d\n", ret);
       return ret;
     }
 
@@ -3300,7 +3300,7 @@ static int stm32_phyinit(FAR struct stm32_ethmac_s *priv)
   ret = stm32_phywrite(CONFIG_STM32_PHYADDR, MII_MCR, MII_MCR_RESET);
   if (ret < 0)
     {
-      nerr("Failed to reset the PHY: %d\n", ret);
+      nerr("ERROR: Failed to reset the PHY: %d\n", ret);
       return ret;
     }
   up_mdelay(PHY_RESET_DELAY);
@@ -3311,7 +3311,7 @@ static int stm32_phyinit(FAR struct stm32_ethmac_s *priv)
   ret = stm32_phy_boardinitialize(0);
   if (ret < 0)
     {
-      nerr("Failed to initialize the PHY: %d\n", ret);
+      nerr("ERROR: Failed to initialize the PHY: %d\n", ret);
       return ret;
     }
 #endif
@@ -3336,7 +3336,7 @@ static int stm32_phyinit(FAR struct stm32_ethmac_s *priv)
       ret = stm32_phyread(CONFIG_STM32_PHYADDR, MII_MSR, &phyval);
       if (ret < 0)
         {
-          nerr("Failed to read the PHY MSR: %d\n", ret);
+          nerr("ERROR: Failed to read the PHY MSR: %d\n", ret);
           return ret;
         }
       else if ((phyval & MII_MSR_LINKSTATUS) != 0)
@@ -3347,7 +3347,7 @@ static int stm32_phyinit(FAR struct stm32_ethmac_s *priv)
 
   if (timeout >= PHY_RETRY_TIMEOUT)
     {
-      nerr("Timed out waiting for link status: %04x\n", phyval);
+      nerr("ERROR: Timed out waiting for link status: %04x\n", phyval);
       return -ETIMEDOUT;
     }
 
@@ -3356,7 +3356,7 @@ static int stm32_phyinit(FAR struct stm32_ethmac_s *priv)
   ret = stm32_phywrite(CONFIG_STM32_PHYADDR, MII_MCR, MII_MCR_ANENABLE);
   if (ret < 0)
     {
-      nerr("Failed to enable auto-negotiation: %d\n", ret);
+      nerr("ERROR: Failed to enable auto-negotiation: %d\n", ret);
       return ret;
     }
 
@@ -3367,7 +3367,7 @@ static int stm32_phyinit(FAR struct stm32_ethmac_s *priv)
       ret = stm32_phyread(CONFIG_STM32_PHYADDR, MII_MSR, &phyval);
       if (ret < 0)
         {
-          nerr("Failed to read the PHY MSR: %d\n", ret);
+          nerr("ERROR: Failed to read the PHY MSR: %d\n", ret);
           return ret;
         }
       else if ((phyval & MII_MSR_ANEGCOMPLETE) != 0)
@@ -3378,7 +3378,7 @@ static int stm32_phyinit(FAR struct stm32_ethmac_s *priv)
 
   if (timeout >= PHY_RETRY_TIMEOUT)
     {
-      nerr("Timed out waiting for auto-negotiation\n");
+      nerr("ERROR: Timed out waiting for auto-negotiation\n");
       return -ETIMEDOUT;
     }
 
@@ -3387,7 +3387,7 @@ static int stm32_phyinit(FAR struct stm32_ethmac_s *priv)
   ret = stm32_phyread(CONFIG_STM32_PHYADDR, CONFIG_STM32_PHYSR, &phyval);
   if (ret < 0)
     {
-      nerr("Failed to read PHY status register\n");
+      nerr("ERROR: Failed to read PHY status register\n");
       return ret;
     }
 
@@ -3457,7 +3457,7 @@ static int stm32_phyinit(FAR struct stm32_ethmac_s *priv)
   ret = stm32_phywrite(CONFIG_STM32_PHYADDR, MII_MCR, phyval);
   if (ret < 0)
     {
-     nerr("Failed to write the PHY MCR: %d\n", ret);
+     nerr("ERROR: Failed to write the PHY MCR: %d\n", ret);
       return ret;
     }
   up_mdelay(PHY_CONFIG_DELAY);
@@ -3472,9 +3472,9 @@ static int stm32_phyinit(FAR struct stm32_ethmac_s *priv)
 #endif
 #endif
 
-  nerr("Duplex: %s Speed: %d MBps\n",
-       priv->fduplex ? "FULL" : "HALF",
-       priv->mbps100 ? 100 : 10);
+  ninfo("Duplex: %s Speed: %d MBps\n",
+        priv->fduplex ? "FULL" : "HALF",
+        priv->mbps100 ? 100 : 10);
 
   return OK;
 }

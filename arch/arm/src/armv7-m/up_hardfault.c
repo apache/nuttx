@@ -60,24 +60,12 @@
  */
 
 #ifdef CONFIG_DEBUG_HARDFAULT
-# define hferr(format, ...) llerr(format, ##__VA_ARGS__)
+# define hfalert(format, ...)  _alert(format, ##__VA_ARGS__)
 #else
-# define hferr(x...)
+# define hfalert(x...)
 #endif
 
 #define INSN_SVC0        0xdf00 /* insn: svc 0 */
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -127,7 +115,7 @@ int up_hardfault(int irq, FAR void *context)
       /* Fetch the instruction that caused the Hard fault */
 
       uint16_t insn = *pc;
-      hferr("  PC: %p INSN: %04x\n", pc, insn);
+      hfalert("  PC: %p INSN: %04x\n", pc, insn);
 
       /* If this was the instruction 'svc 0', then forward processing
        * to the SVCall handler
@@ -135,7 +123,7 @@ int up_hardfault(int irq, FAR void *context)
 
       if (insn == INSN_SVC0)
         {
-          hferr("Forward SVCall\n");
+          hfalert("Forward SVCall\n");
           return up_svcall(irq, context);
         }
     }
@@ -143,43 +131,43 @@ int up_hardfault(int irq, FAR void *context)
 
   /* Dump some hard fault info */
 
-  hferr("Hard Fault:\n");
-  hferr("  IRQ: %d regs: %p\n", irq, regs);
-  hferr("  BASEPRI: %08x PRIMASK: %08x IPSR: %08x CONTROL: %08x\n",
-        getbasepri(), getprimask(), getipsr(), getcontrol());
-  hferr("  CFAULTS: %08x HFAULTS: %08x DFAULTS: %08x BFAULTADDR: %08x AFAULTS: %08x\n",
-        getreg32(NVIC_CFAULTS), getreg32(NVIC_HFAULTS),
-        getreg32(NVIC_DFAULTS), getreg32(NVIC_BFAULT_ADDR),
-        getreg32(NVIC_AFAULTS));
-  hferr("  R0: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-        regs[REG_R0],  regs[REG_R1],  regs[REG_R2],  regs[REG_R3],
-        regs[REG_R4],  regs[REG_R5],  regs[REG_R6],  regs[REG_R7]);
-  hferr("  R8: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-        regs[REG_R8],  regs[REG_R9],  regs[REG_R10], regs[REG_R11],
-        regs[REG_R12], regs[REG_R13], regs[REG_R14], regs[REG_R15]);
+  hfalert("Hard Fault:\n");
+  hfalert("  IRQ: %d regs: %p\n", irq, regs);
+  hfalert("  BASEPRI: %08x PRIMASK: %08x IPSR: %08x CONTROL: %08x\n",
+          getbasepri(), getprimask(), getipsr(), getcontrol());
+  hfalert("  CFAULTS: %08x HFAULTS: %08x DFAULTS: %08x BFAULTADDR: %08x AFAULTS: %08x\n",
+          getreg32(NVIC_CFAULTS), getreg32(NVIC_HFAULTS),
+          getreg32(NVIC_DFAULTS), getreg32(NVIC_BFAULT_ADDR),
+          getreg32(NVIC_AFAULTS));
+  hfalert("  R0: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+          regs[REG_R0],  regs[REG_R1],  regs[REG_R2],  regs[REG_R3],
+          regs[REG_R4],  regs[REG_R5],  regs[REG_R6],  regs[REG_R7]);
+  hfalert("  R8: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+          regs[REG_R8],  regs[REG_R9],  regs[REG_R10], regs[REG_R11],
+          regs[REG_R12], regs[REG_R13], regs[REG_R14], regs[REG_R15]);
 
 #ifdef CONFIG_ARMV7M_USEBASEPRI
 #  ifdef REG_EXC_RETURN
-  hferr("  xPSR: %08x BASEPRI: %08x EXC_RETURN: %08x (saved)\n",
-        CURRENT_REGS[REG_XPSR],  CURRENT_REGS[REG_BASEPRI],
-        CURRENT_REGS[REG_EXC_RETURN]);
+  hfalert("  xPSR: %08x BASEPRI: %08x EXC_RETURN: %08x (saved)\n",
+          CURRENT_REGS[REG_XPSR],  CURRENT_REGS[REG_BASEPRI],
+          CURRENT_REGS[REG_EXC_RETURN]);
 #  else
-  hferr("  xPSR: %08x BASEPRI: %08x (saved)\n",
-        CURRENT_REGS[REG_XPSR],  CURRENT_REGS[REG_BASEPRI]);
+  hfalert("  xPSR: %08x BASEPRI: %08x (saved)\n",
+          CURRENT_REGS[REG_XPSR],  CURRENT_REGS[REG_BASEPRI]);
 #  endif
 #else
 #  ifdef REG_EXC_RETURN
-  hferr("  xPSR: %08x PRIMASK: %08x EXC_RETURN: %08x (saved)\n",
-        CURRENT_REGS[REG_XPSR],  CURRENT_REGS[REG_PRIMASK],
-        CURRENT_REGS[REG_EXC_RETURN]);
+  hfalert("  xPSR: %08x PRIMASK: %08x EXC_RETURN: %08x (saved)\n",
+          CURRENT_REGS[REG_XPSR],  CURRENT_REGS[REG_PRIMASK],
+          CURRENT_REGS[REG_EXC_RETURN]);
 #  else
-  hferr("  xPSR: %08x PRIMASK: %08x (saved)\n",
-        CURRENT_REGS[REG_XPSR],  CURRENT_REGS[REG_PRIMASK]);
+  hfalert("  xPSR: %08x PRIMASK: %08x (saved)\n",
+          CURRENT_REGS[REG_XPSR],  CURRENT_REGS[REG_PRIMASK]);
 #  endif
 #endif
 
   (void)up_irq_save();
-  llerr("PANIC!!! Hard fault: %08x\n", getreg32(NVIC_HFAULTS));
+  _alert("PANIC!!! Hard fault: %08x\n", getreg32(NVIC_HFAULTS));
   PANIC();
   return OK;
 }

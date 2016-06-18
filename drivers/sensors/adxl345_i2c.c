@@ -102,7 +102,7 @@ uint8_t adxl345_getreg8(FAR struct adxl345_dev_s *priv, uint8_t regaddr)
     }
 
 #ifdef CONFIG_ADXL345_REGDEBUG
-  err("%02x->%02x\n", regaddr, regval);
+  _err("%02x->%02x\n", regaddr, regval);
 #endif
   return regval;
 }
@@ -130,7 +130,7 @@ void adxl345_putreg8(FAR struct adxl345_dev_s *priv,
   int ret;
 
 #ifdef CONFIG_ADXL345_REGDEBUG
-  err("%02x<-%02x\n", regaddr, regval);
+  _err("%02x<-%02x\n", regaddr, regval);
 #endif
 
   /* Setup to the data to be transferred.  Two bytes:  The ADXL345 register
@@ -209,7 +209,7 @@ uint16_t adxl345_getreg16(FAR struct adxl345_dev_s *priv, uint8_t regaddr)
     }
 
 #ifdef CONFIG_ADXL345_REGDEBUG
-  err("%02x->%02x%02x\n", regaddr, rxbuffer[0], rxbuffer[1]);
+  _err("%02x->%02x%02x\n", regaddr, rxbuffer[0], rxbuffer[1]);
 #endif
   return (uint16_t)rxbuffer[0] << 8 | (uint16_t)rxbuffer[1];
 }

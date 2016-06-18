@@ -632,7 +632,7 @@ static uint32_t pmecc_errorcorrection(uintptr_t sectorbase,
 
           if (bytepos < sectorsz + nand_getreg(SAM_HSMC_PMECCSADDR))
             {
-              ferr("Correct error bit @[Byte %d, Bit %d]\n",
+              fwarn("WARNING: Correct error bit @[Byte %d, Bit %d]\n",
                       (int)bytepos, (int)bitpos);
 
               if (*(uint8_t *)(sectorbase + bytepos) & (1 << bitpos))
@@ -870,7 +870,7 @@ static int pmecc_pagelayout(uint16_t datasize, uint16_t eccsize)
   bcherr512   = pmecc_bcherr512(nsectors512, eccsize);
   if (bcherr512 < 0)
     {
-      ferr("WARNING: Cannot realize 512B sectors\n");
+      fwarn("WARNING: Cannot realize 512B sectors\n");
     }
   else
     {
@@ -895,7 +895,7 @@ static int pmecc_pagelayout(uint16_t datasize, uint16_t eccsize)
 
   if (bcherr1k < 0)
     {
-      ferr("WARNING: Cannot realize 1KB sectors\n");
+      fwarn("WARNING: Cannot realize 1KB sectors\n");
     }
   else
     {

@@ -2,7 +2,8 @@
  * arch/arm/include/stm32f7/chip.h
  *
  *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            David Sidrane <david_s5@nscdg.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions

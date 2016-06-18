@@ -103,7 +103,7 @@
  * enabled.
  */
 
-#ifndef CONFIG_DEBUG_FEATURES
+#ifndef CONFIG_DEBUG_USB_INFO
 #  undef CONFIG_STM32_USBDEV_REGDEBUG
 #endif
 
@@ -388,7 +388,7 @@ struct stm32_usbdev_s
 
 /* Register operations ******************************************************/
 
-#if defined(CONFIG_STM32_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
+#ifdef CONFIG_STM32_USBDEV_REGDEBUG
 static uint16_t stm32_getreg(uint32_t addr);
 static void stm32_putreg(uint16_t val, uint32_t addr);
 static void stm32_checksetup(void);
@@ -648,11 +648,12 @@ const struct trace_msg_t g_usb_trace_strings_deverror[] =
 /****************************************************************************
  * Register Operations
  ****************************************************************************/
+
 /****************************************************************************
  * Name: stm32_getreg
  ****************************************************************************/
 
-#if defined(CONFIG_STM32_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
+#ifdef CONFIG_STM32_USBDEV_REGDEBUG
 static uint16_t stm32_getreg(uint32_t addr)
 {
   static uint32_t prevaddr = 0;
@@ -673,7 +674,7 @@ static uint16_t stm32_getreg(uint32_t addr)
         {
            if (count == 4)
              {
-               llerr("...\n");
+               uinfo("...\n");
              }
           return val;
         }
@@ -689,7 +690,7 @@ static uint16_t stm32_getreg(uint32_t addr)
          {
            /* Yes.. then show how many times the value repeated */
 
-           llerr("[repeats %d more times]\n", count-3);
+           uinfo("[repeats %d more times]\n", count-3);
          }
 
        /* Save the new address, value, and count */
@@ -701,7 +702,7 @@ static uint16_t stm32_getreg(uint32_t addr)
 
   /* Show the register value read */
 
-  llerr("%08x->%04x\n", addr, val);
+  uinfo("%08x->%04x\n", addr, val);
   return val;
 }
 #endif
@@ -710,12 +711,12 @@ static uint16_t stm32_getreg(uint32_t addr)
  * Name: stm32_putreg
  ****************************************************************************/
 
-#if defined(CONFIG_STM32_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
+#ifdef CONFIG_STM32_USBDEV_REGDEBUG
 static void stm32_putreg(uint16_t val, uint32_t addr)
 {
   /* Show the register value being written */
 
-  llerr("%08x<-%04x\n", addr, val);
+  uinfo("%08x<-%04x\n", addr, val);
 
   /* Write the value */
 
@@ -727,42 +728,42 @@ static void stm32_putreg(uint16_t val, uint32_t addr)
  * Name: stm32_dumpep
  ****************************************************************************/
 
-#if defined(CONFIG_STM32_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
+#ifdef CONFIG_STM32_USBDEV_REGDEBUG
 static void stm32_dumpep(int epno)
 {
   uint32_t addr;
 
   /* Common registers */
 
-  llerr("CNTR:   %04x\n", getreg16(STM32_USB_CNTR));
-  llerr("ISTR:   %04x\n", getreg16(STM32_USB_ISTR));
-  llerr("FNR:    %04x\n", getreg16(STM32_USB_FNR));
-  llerr("DADDR:  %04x\n", getreg16(STM32_USB_DADDR));
-  llerr("BTABLE: %04x\n", getreg16(STM32_USB_BTABLE));
+  uinfo("CNTR:   %04x\n", getreg16(STM32_USB_CNTR));
+  uinfo("ISTR:   %04x\n", getreg16(STM32_USB_ISTR));
+  uinfo("FNR:    %04x\n", getreg16(STM32_USB_FNR));
+  uinfo("DADDR:  %04x\n", getreg16(STM32_USB_DADDR));
+  uinfo("BTABLE: %04x\n", getreg16(STM32_USB_BTABLE));
 
   /* Endpoint register */
 
   addr = STM32_USB_EPR(epno);
-  llerr("EPR%d:   [%08x] %04x\n", epno, addr, getreg16(addr));
+  uinfo("EPR%d:   [%08x] %04x\n", epno, addr, getreg16(addr));
 
   /* Endpoint descriptor */
 
   addr = STM32_USB_BTABLE_ADDR(epno, 0);
-  llerr("DESC:   %08x\n", addr);
+  uinfo("DESC:   %08x\n", addr);
 
   /* Endpoint buffer descriptor */
 
   addr = STM32_USB_ADDR_TX(epno);
-  llerr("  TX ADDR:  [%08x] %04x\n",  addr, getreg16(addr));
+  uinfo("  TX ADDR:  [%08x] %04x\n",  addr, getreg16(addr));
 
   addr = STM32_USB_COUNT_TX(epno);
-  llerr("     COUNT: [%08x] %04x\n",  addr, getreg16(addr));
+  uinfo("     COUNT: [%08x] %04x\n",  addr, getreg16(addr));
 
   addr = STM32_USB_ADDR_RX(epno);
-  llerr("  RX ADDR:  [%08x] %04x\n",  addr, getreg16(addr));
+  uinfo("  RX ADDR:  [%08x] %04x\n",  addr, getreg16(addr));
 
   addr = STM32_USB_COUNT_RX(epno);
-  llerr("     COUNT: [%08x] %04x\n",  addr, getreg16(addr));
+  uinfo("     COUNT: [%08x] %04x\n",  addr, getreg16(addr));
 }
 #endif
 
@@ -770,19 +771,19 @@ static void stm32_dumpep(int epno)
  * Name: stm32_checksetup
  ****************************************************************************/
 
-#if defined(CONFIG_STM32_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
+#ifdef CONFIG_STM32_USBDEV_REGDEBUG
 static void stm32_checksetup(void)
 {
   uint32_t cfgr     = getreg32(STM32_RCC_CFGR);
   uint32_t apb1rstr = getreg32(STM32_RCC_APB1RSTR);
   uint32_t apb1enr  = getreg32(STM32_RCC_APB1ENR);
 
-  llerr("CFGR: %08x APB1RSTR: %08x APB1ENR: %08x\n", cfgr, apb1rstr, apb1enr);
+  uinfo("CFGR: %08x APB1RSTR: %08x APB1ENR: %08x\n", cfgr, apb1rstr, apb1enr);
 
   if ((apb1rstr & RCC_APB1RSTR_USBRST) != 0 ||
       (apb1enr & RCC_APB1ENR_USBEN) == 0)
     {
-      llerr("ERROR: USB is NOT setup correctly\n");
+      uinfo("ERROR: USB is NOT setup correctly\n");
     }
 }
 #endif
@@ -2844,7 +2845,7 @@ static int stm32_epconfigure(struct usbdev_ep_s *ep,
   if (!ep || !desc)
     {
       usbtrace(TRACE_DEVERROR(STM32_TRACEERR_INVALIDPARMS), 0);
-      ullerr("ERROR: ep=%p desc=%p\n");
+      uerr("ERROR: ep=%p desc=%p\n");
       return -EINVAL;
     }
 #endif
@@ -2940,7 +2941,7 @@ static int stm32_epdisable(struct usbdev_ep_s *ep)
   if (!ep)
     {
       usbtrace(TRACE_DEVERROR(STM32_TRACEERR_INVALIDPARMS), 0);
-      ullerr("ERROR: ep=%p\n", ep);
+      uerr("ERROR: ep=%p\n", ep);
       return -EINVAL;
     }
 #endif
@@ -3028,7 +3029,7 @@ static int stm32_epsubmit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
   if (!req || !req->callback || !req->buf || !ep)
     {
       usbtrace(TRACE_DEVERROR(STM32_TRACEERR_INVALIDPARMS), 0);
-      ullerr("ERROR: req=%p callback=%p buf=%p ep=%p\n", req, req->callback, req->buf, ep);
+      uerr("ERROR: req=%p callback=%p buf=%p ep=%p\n", req, req->callback, req->buf, ep);
       return -EINVAL;
     }
 #endif
@@ -3040,7 +3041,7 @@ static int stm32_epsubmit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
   if (!priv->driver)
     {
       usbtrace(TRACE_DEVERROR(STM32_TRACEERR_NOTCONFIGURED), priv->usbdev.speed);
-      ullerr("ERROR: driver=%p\n", priv->driver);
+      uerr("ERROR: driver=%p\n", priv->driver);
       return -ESHUTDOWN;
     }
 #endif
@@ -3057,7 +3058,7 @@ static int stm32_epsubmit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
   if (privep->stalled)
     {
       stm32_abortrequest(privep, privreq, -EBUSY);
-      ullerr("ERROR: stalled\n");
+      uerr("ERROR: stalled\n");
       ret = -EBUSY;
     }
 
@@ -3136,7 +3137,7 @@ static int stm32_epcancel(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
   struct stm32_ep_s *privep = (struct stm32_ep_s *)ep;
   irqstate_t flags;
 
-#ifdef CONFIG_DEBUG_FEATURES
+#ifdef CONFIG_DEBUG_USB
   if (!ep || !req)
     {
       usbtrace(TRACE_DEVERROR(STM32_TRACEERR_INVALIDPARMS), 0);
@@ -3163,7 +3164,7 @@ static int stm32_epstall(struct usbdev_ep_s *ep, bool resume)
   uint16_t status;
   irqstate_t flags;
 
-#ifdef CONFIG_DEBUG_FEATURES
+#ifdef CONFIG_DEBUG_USB
   if (!ep)
     {
       usbtrace(TRACE_DEVERROR(STM32_TRACEERR_INVALIDPARMS), 0);
@@ -3305,7 +3306,7 @@ static struct usbdev_ep_s *stm32_allocep(struct usbdev_s *dev, uint8_t epno,
   int bufno;
 
   usbtrace(TRACE_DEVALLOCEP, (uint16_t)epno);
-#ifdef CONFIG_DEBUG_FEATURES
+#ifdef CONFIG_DEBUG_USB
   if (!dev)
     {
       usbtrace(TRACE_DEVERROR(STM32_TRACEERR_INVALIDPARMS), 0);
@@ -3379,7 +3380,7 @@ static void stm32_freeep(struct usbdev_s *dev, struct usbdev_ep_s *ep)
   struct stm32_usbdev_s *priv;
   struct stm32_ep_s *privep;
 
-#ifdef CONFIG_DEBUG_FEATURES
+#ifdef CONFIG_DEBUG_USB
   if (!dev || !ep)
     {
       usbtrace(TRACE_DEVERROR(STM32_TRACEERR_INVALIDPARMS), 0);
@@ -3410,7 +3411,7 @@ static int stm32_getframe(struct usbdev_s *dev)
 {
   uint16_t fnr;
 
-#ifdef CONFIG_DEBUG_FEATURES
+#ifdef CONFIG_DEBUG_USB
   if (!dev)
     {
       usbtrace(TRACE_DEVERROR(STM32_TRACEERR_INVALIDPARMS), 0);
@@ -3435,7 +3436,7 @@ static int stm32_wakeup(struct usbdev_s *dev)
   irqstate_t flags;
 
   usbtrace(TRACE_DEVWAKEUP, 0);
-#ifdef CONFIG_DEBUG_FEATURES
+#ifdef CONFIG_DEBUG_USB
   if (!dev)
     {
       usbtrace(TRACE_DEVERROR(STM32_TRACEERR_INVALIDPARMS), 0);
@@ -3473,7 +3474,7 @@ static int stm32_selfpowered(struct usbdev_s *dev, bool selfpowered)
 
   usbtrace(TRACE_DEVSELFPOWERED, (uint16_t)selfpowered);
 
-#ifdef CONFIG_DEBUG_FEATURES
+#ifdef CONFIG_DEBUG_USB
   if (!dev)
     {
       usbtrace(TRACE_DEVERROR(STM32_TRACEERR_INVALIDPARMS), 0);
@@ -3834,7 +3835,7 @@ int usbdev_register(struct usbdevclass_driver_s *driver)
 
   usbtrace(TRACE_DEVREGISTER, 0);
 
-#ifdef CONFIG_DEBUG_FEATURES
+#ifdef CONFIG_DEBUG_USB
   if (!driver || !driver->ops->bind || !driver->ops->unbind ||
       !driver->ops->disconnect || !driver->ops->setup)
     {
@@ -3912,7 +3913,7 @@ int usbdev_unregister(struct usbdevclass_driver_s *driver)
 
   usbtrace(TRACE_DEVUNREGISTER, 0);
 
-#ifdef CONFIG_DEBUG_FEATURES
+#ifdef CONFIG_DEBUG_USB
   if (driver != priv->driver)
     {
       usbtrace(TRACE_DEVERROR(STM32_TRACEERR_INVALIDPARMS), 0);

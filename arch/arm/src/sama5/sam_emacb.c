@@ -295,7 +295,7 @@
  * enabled.
  */
 
-#ifndef CONFIG_DEBUG_FEATURES
+#ifndef CONFIG_DEBUG_NET_INFO
 #  undef CONFIG_SAMA5_EMACB_REGDEBUG
 #endif
 
@@ -820,7 +820,7 @@ static bool sam_checkreg(struct sam_emac_s *priv, bool wr, uint32_t regval,
         {
           /* Yes... show how many times we did it */
 
-          llerr("...[Repeats %d times]...\n", priv->ntimes);
+          ninfo("...[Repeats %d times]...\n", priv->ntimes);
         }
 
       /* Save information about the new access */
@@ -853,7 +853,7 @@ static uint32_t sam_getreg(struct sam_emac_s *priv, uint16_t offset)
 #ifdef CONFIG_SAMA5_EMACB_REGDEBUG
   if (sam_checkreg(priv, false, regval, regaddr))
     {
-      llerr("%08x->%08x\n", regaddr, regval);
+      ninfo("%08x->%08x\n", regaddr, regval);
     }
 #endif
 
@@ -877,7 +877,7 @@ static void sam_putreg(struct sam_emac_s *priv, uint16_t offset,
 #ifdef CONFIG_SAMA5_EMACB_REGDEBUG
   if (sam_checkreg(priv, true, regval, regaddr))
     {
-      llerr("%08x<-%08x\n", regaddr, regval);
+      ninfo("%08x<-%08x\n", regaddr, regval);
     }
 #endif
 
@@ -1575,7 +1575,7 @@ static void sam_receive(struct sam_emac_s *priv)
 
       if (dev->d_len > CONFIG_NET_ETH_MTU)
         {
-          nllerr("DROPPED: Too big: %d\n", dev->d_len);
+          nllwarn("WARNING: Dropped, Too big: %d\n", dev->d_len);
           continue;
         }
 
@@ -1685,7 +1685,7 @@ static void sam_receive(struct sam_emac_s *priv)
       else
 #endif
         {
-          nllerr("DROPPED: Unknown type: %04x\n", BUF->type);
+          nllwarn("WARNING: Dropped, Unknown type: %04x\n", BUF->type);
         }
     }
 }
@@ -1972,7 +1972,7 @@ static inline void sam_interrupt_process(FAR struct sam_emac_s *priv)
 
   if ((pending & EMAC_INT_PFNZ) != 0)
     {
-      nllerr("Pause frame received\n");
+      nllwarn("WARNING: Pause frame received\n");
     }
 
   /* Check for Pause Time Zero (PTZ)
@@ -1982,7 +1982,7 @@ static inline void sam_interrupt_process(FAR struct sam_emac_s *priv)
 
   if ((pending & EMAC_INT_PTZ) != 0)
     {
-      nllerr("Pause TO!\n");
+      nllwarn("WARNING: Pause TO!\n");
     }
 #endif
 }
@@ -2147,7 +2147,7 @@ static int sam_emac1_interrupt(int irq, void *context)
 
 static inline void sam_txtimeout_process(FAR struct sam_emac_s *priv)
 {
-  nllerr("Timeout!\n");
+  nllerr("ERROR: Timeout!\n");
 
   /* Reset the hardware.  Just take the interface down, then back up again. */
 
@@ -2377,15 +2377,15 @@ static int sam_ifup(struct net_driver_s *dev)
   int ret;
 
 #ifdef CONFIG_NET_IPv4
-  nerr("Bringing up: %d.%d.%d.%d\n",
-       dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
-       (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
+  ninfo("Bringing up: %d.%d.%d.%d\n",
+        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
+        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
 #endif
 #ifdef CONFIG_NET_IPv6
-  nerr("Bringing up: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
-       dev->d_ipv6addr[0], dev->d_ipv6addr[1], dev->d_ipv6addr[2],
-       dev->d_ipv6addr[3], dev->d_ipv6addr[4], dev->d_ipv6addr[5],
-       dev->d_ipv6addr[6], dev->d_ipv6addr[7]);
+  ninfo("Bringing up: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
+        dev->d_ipv6addr[0], dev->d_ipv6addr[1], dev->d_ipv6addr[2],
+        dev->d_ipv6addr[3], dev->d_ipv6addr[4], dev->d_ipv6addr[5],
+        dev->d_ipv6addr[6], dev->d_ipv6addr[7]);
 #endif
 
   /* Configure the EMAC interface for normal operation. */
@@ -2460,7 +2460,7 @@ static int sam_ifdown(struct net_driver_s *dev)
   struct sam_emac_s *priv = (struct sam_emac_s *)dev->d_private;
   irqstate_t flags;
 
-  nllerr("Taking the network down\n");
+  nllinfo("Taking the network down\n");
 
   /* Disable the EMAC interrupt */
 

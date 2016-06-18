@@ -97,7 +97,7 @@ static void m16c_stackdump(uint16_t sp, uint16_t stack_base)
   for (stack = sp & ~7; stack < stack_base; stack += 8)
     {
       uint8_t *ptr = (uint8_t*)stack;
-      alert("%04x: %02x %02x %02x %02x %02x %02x %02x %02x\n",
+      _alert("%04x: %02x %02x %02x %02x %02x %02x %02x %02x\n",
              stack, ptr[0], ptr[1], ptr[2], ptr[3], ptr[4], ptr[5], ptr[6], ptr[7]);
     }
 }
@@ -116,14 +116,14 @@ static inline void m16c_registerdump(void)
     {
       /* Yes.. dump the interrupt registers */
 
-      alert("PC: %02x%02x%02x FLG: %02x00%02x FB: %02x%02x SB: %02x%02x SP: %02x%02x\n",
+      _alert("PC: %02x%02x%02x FLG: %02x00%02x FB: %02x%02x SB: %02x%02x SP: %02x%02x\n",
             ptr[REG_FLGPCHI] & 0xff, ptr[REG_PC], ptr[REG_PC+1],
             ptr[REG_FLGPCHI] >> 8, ptr[REG_FLG],
             ptr[REG_FB], ptr[REG_FB+1],
             ptr[REG_SB], ptr[REG_SB+1],
             ptr[REG_SP], ptr[REG_SP+1]);
 
-      alert("R0: %02x%02x R1: %02x%02x R2: %02x%02x A0: %02x%02x A1: %02x%02x\n",
+      _alert("R0: %02x%02x R1: %02x%02x R2: %02x%02x A0: %02x%02x A1: %02x%02x\n",
             ptr[REG_R0], ptr[REG_R0+1], ptr[REG_R1], ptr[REG_R1+1],
             ptr[REG_R2], ptr[REG_R2+1], ptr[REG_R3], ptr[REG_R3+1],
             ptr[REG_A0], ptr[REG_A0+1], ptr[REG_A1], ptr[REG_A1+1]);
@@ -179,10 +179,10 @@ void up_dumpstate(void)
 
   /* Show interrupt stack info */
 
-  alert("sp:     %04x\n", sp);
-  alert("IRQ stack:\n");
-  alert("  base: %04x\n", istackbase);
-  alert("  size: %04x\n", istacksize);
+  _alert("sp:     %04x\n", sp);
+  _alert("IRQ stack:\n");
+  _alert("  base: %04x\n", istackbase);
+  _alert("  size: %04x\n", istacksize);
 
   /* Does the current stack pointer lie within the interrupt
    * stack?
@@ -197,18 +197,18 @@ void up_dumpstate(void)
       /* Extract the user stack pointer from the register area */
 
       sp = m16c_getusersp();
-      alert("sp:     %04x\n", sp);
+      _alert("sp:     %04x\n", sp);
     }
 
   /* Show user stack info */
 
-  alert("User stack:\n");
-  alert("  base: %04x\n", ustackbase);
-  alert("  size: %04x\n", ustacksize);
+  _alert("User stack:\n");
+  _alert("  base: %04x\n", ustackbase);
+  _alert("  size: %04x\n", ustacksize);
 #else
-  alert("sp:         %04x\n", sp);
-  alert("stack base: %04x\n", ustackbase);
-  alert("stack size: %04x\n", ustacksize);
+  _alert("sp:         %04x\n", sp);
+  _alert("stack base: %04x\n", ustackbase);
+  _alert("stack size: %04x\n", ustacksize);
 #endif
 
   /* Dump the user stack if the stack pointer lies within the allocated user
@@ -218,7 +218,7 @@ void up_dumpstate(void)
   if (sp > ustackbase || sp <= ustackbase - ustacksize)
     {
 #if !defined(CONFIG_ARCH_INTERRUPTSTACK) || CONFIG_ARCH_INTERRUPTSTACK < 4
-      alert("ERROR: Stack pointer is not within allocated stack\n");
+      _alert("ERROR: Stack pointer is not within allocated stack\n");
 #endif
     }
   else

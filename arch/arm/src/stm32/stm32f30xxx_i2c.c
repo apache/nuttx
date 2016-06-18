@@ -966,7 +966,7 @@ static void stm32_i2c_tracenew(FAR struct stm32_i2c_priv_s *priv,
 
           if (priv->tndx >= (CONFIG_I2C_NTRACE-1))
             {
-              i2cerr("Trace table overflow\n");
+              i2cerr("ERROR: Trace table overflow\n");
               return;
             }
 
@@ -1007,7 +1007,7 @@ static void stm32_i2c_traceevent(FAR struct stm32_i2c_priv_s *priv,
 
       if (priv->tndx >= (CONFIG_I2C_NTRACE-1))
         {
-          i2cerr("Trace table overflow\n");
+          i2cerr("ERROR: Trace table overflow\n");
           return;
         }
 
@@ -1700,7 +1700,7 @@ static int stm32_i2c_transfer(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s
       status = stm32_i2c_getstatus(priv);
       ret = -ETIMEDOUT;
 
-      i2cerr("Timed out: CR1: %04x status: %08x\n",
+      i2cerr("ERROR: Timed out: CR1: %04x status: %08x\n",
              stm32_i2c_getreg(priv, STM32_I2C_CR1_OFFSET), status);
 
       /* "Note: When the STOP, START or PEC bit is set, the software must

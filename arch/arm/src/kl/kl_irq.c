@@ -128,7 +128,7 @@ static void kl_dumpnvic(const char *msg, int irq)
 
 /****************************************************************************
  * Name: kl_nmi, kl_busfault, kl_usagefault, kl_pendsv,
- *       kl_errmonitor, kl_pendsv, kl_reserved
+ *       kl_dbgmonitor, kl_pendsv, kl_reserved
  *
  * Description:
  *   Handlers for various execptions.  None are handled and all are fatal
@@ -141,7 +141,7 @@ static void kl_dumpnvic(const char *msg, int irq)
 static int kl_nmi(int irq, FAR void *context)
 {
   (void)up_irq_save();
-  err("PANIC!!! NMI received\n");
+  _err("PANIC!!! NMI received\n");
   PANIC();
   return 0;
 }
@@ -149,7 +149,7 @@ static int kl_nmi(int irq, FAR void *context)
 static int kl_pendsv(int irq, FAR void *context)
 {
   (void)up_irq_save();
-  err("PANIC!!! PendSV received\n");
+  _err("PANIC!!! PendSV received\n");
   PANIC();
   return 0;
 }
@@ -157,7 +157,7 @@ static int kl_pendsv(int irq, FAR void *context)
 static int kl_reserved(int irq, FAR void *context)
 {
   (void)up_irq_save();
-  err("PANIC!!! Reserved interrupt\n");
+  _err("PANIC!!! Reserved interrupt\n");
   PANIC();
   return 0;
 }

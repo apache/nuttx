@@ -95,9 +95,8 @@
 
 #define GPIO_BTN_USER  (GPIO_INPUT | GPIO_FLOAT | GPIO_EXTI | GPIO_PORTC | GPIO_PIN13)
 
-/* SPI ***************************************************************************
- *
- */
+/* SPI ***************************************************************************/
+
 #define GPIO_SPI_CS    (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | \
                         GPIO_OUTPUT_SET)
 
@@ -183,6 +182,18 @@ void stm32_dma_alloc_init(void);
 
 #if defined (CONFIG_FAT_DMAMEMORY)
 int stm32_dma_alloc_init(void);
+#endif
+
+/****************************************************************************
+ * Name: stm32_adc_initialize
+ *
+ * Description:
+ *   Called at application startup time to initialize the ADC functionality.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ADC
+int board_adc_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */

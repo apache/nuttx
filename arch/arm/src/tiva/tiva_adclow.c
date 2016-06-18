@@ -686,7 +686,7 @@ static void tiva_adc_read(void *arg)
        * and should cause a full system stop.
        */
 
-      allerr("PANIC!!! Invalid ADC device number given %d\n", sse->adc);
+      allerr("ERROR: Invalid ADC device number given %d\n", sse->adc);
       PANIC();
       return;
     }
@@ -879,8 +879,8 @@ int tiva_adc_initialize(const char *devpath, struct tiva_adc_cfg_s *cfg,
   adc = tiva_adc_struct_init(cfg);
   if (adc == NULL)
     {
-      aerr("Invalid ADC device number: expected=%d actual=%d\n",
-            0, cfg->adc);
+      aerr("ERROR: Invalid ADC device number: expected=%d actual=%d\n",
+           0, cfg->adc);
       return -ENODEV;
     }
 
@@ -889,7 +889,7 @@ int tiva_adc_initialize(const char *devpath, struct tiva_adc_cfg_s *cfg,
   if (tiva_adc_enable(adc->devno, true) < 0)
     {
       aerr("ERROR: failure to power ADC peripheral (devno=%d)\n",
-            cfg->adc);
+           cfg->adc);
       return ret;
     }
 
@@ -926,7 +926,7 @@ int tiva_adc_initialize(const char *devpath, struct tiva_adc_cfg_s *cfg,
   if (ret < 0)
     {
       aerr("ERROR: Failed to register %s to character driver: %d\n",
-            devpath, ret);
+           devpath, ret);
       return ret;
     }
 

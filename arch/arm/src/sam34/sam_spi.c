@@ -102,7 +102,11 @@
 #  endif
 #endif
 
-#ifndef CONFIG_SAM34_SPI_DMA
+#ifndef CONFIG_DEBUG_SPI_INFO
+#  undef CONFIG_SAM34_SPI_REGDEBUG
+#endif
+
+#ifndef CONFIG_DEBUG_DMA_INFO
 #  undef CONFIG_SAM34_SPI_DMADEBUG
 #endif
 
@@ -134,7 +138,7 @@
 /* Debug *******************************************************************/
 /* Check if SPI debut is enabled */
 
-#ifndef CONFIG_DEBUG_DMA
+#ifndef CONFIG_DEBUG_DMA_INFO
 #  undef CONFIG_SAM34_SPI_DMADEBUG
 #endif
 
@@ -420,7 +424,7 @@ static bool spi_checkreg(struct sam_spidev_s *spi, bool wr, uint32_t value,
         {
           /* Yes... show how many times we did it */
 
-          llerr("...[Repeats %d times]...\n", spi->ntimes);
+          spiinfo("...[Repeats %d times]...\n", spi->ntimes);
         }
 
       /* Save information about the new access */
@@ -454,7 +458,7 @@ static inline uint32_t spi_getreg(struct sam_spidev_s *spi,
 #ifdef CONFIG_SAM34_SPI_REGDEBUG
   if (spi_checkreg(spi, false, value, address))
     {
-      llerr("%08x->%08x\n", address, value);
+      spiinfo("%08x->%08x\n", address, value);
     }
 #endif
 
@@ -477,7 +481,7 @@ static inline void spi_putreg(struct sam_spidev_s *spi, uint32_t value,
 #ifdef CONFIG_SAM34_SPI_REGDEBUG
   if (spi_checkreg(spi, true, value, address))
     {
-      llerr("%08x<-%08x\n", address, value);
+      spiinfo("%08x<-%08x\n", address, value);
     }
 #endif
 
@@ -1055,7 +1059,7 @@ static uint32_t spi_setfrequency(struct spi_dev_s *dev, uint32_t frequency)
   spics->frequency = frequency;
   spics->actual    = actual;
 
-  spierr("Frequency %d->%d\n", frequency, actual);
+  spiinfo("Frequency %d->%d\n", frequency, actual);
   return actual;
 }
 

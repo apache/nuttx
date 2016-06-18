@@ -808,7 +808,7 @@ static uint32_t tiva_getreg(uint32_t addr)
         {
           if (count == 4)
             {
-              llinfo("...\n");
+              _llinfo("...\n");
             }
 
           return val;
@@ -825,7 +825,7 @@ static uint32_t tiva_getreg(uint32_t addr)
         {
           /* Yes.. then show how many times the value repeated */
 
-          llinfo("[repeats %d more times]\n", count-3);
+          _llinfo("[repeats %d more times]\n", count-3);
         }
 
       /* Save the new address, value, and count */
@@ -837,7 +837,7 @@ static uint32_t tiva_getreg(uint32_t addr)
 
   /* Show the register value read */
 
-  llinfo("%08x->%08x\n", addr, val);
+  _llinfo("%08x->%08x\n", addr, val);
   return val;
 }
 #endif
@@ -864,7 +864,7 @@ static void tiva_putreg(uint32_t val, uint32_t addr)
 {
   /* Show the register value being written */
 
-  llinfo("%08x<-%08x\n", addr, val);
+  _llinfo("%08x<-%08x\n", addr, val);
 
   /* Write the value */
 

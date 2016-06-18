@@ -61,13 +61,13 @@ static void z80_registerdump(void)
 {
   if (g_current_regs)
     {
-      alert("AF: %04x  I: %04x\n",
+      _alert("AF: %04x  I: %04x\n",
             g_current_regs[XCPT_AF], g_current_regs[XCPT_I]);
-      alert("BC: %04x DE: %04x HL: %04x\n",
+      _alert("BC: %04x DE: %04x HL: %04x\n",
             g_current_regs[XCPT_BC], g_current_regs[XCPT_DE], g_current_regs[XCPT_HL]);
-      alert("IX: %04x IY: %04x\n",
+      _alert("IX: %04x IY: %04x\n",
             g_current_regs[XCPT_IX], g_current_regs[XCPT_IY]);
-      alert("SP: %04x PC: %04x\n"
+      _alert("SP: %04x PC: %04x\n"
             g_current_regs[XCPT_SP], g_current_regs[XCPT_PC]);
     }
 }

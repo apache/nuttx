@@ -130,7 +130,7 @@
 
 /* Register/packet debug depends on CONFIG_DEBUG_FEATURES */
 
-#ifndef CONFIG_DEBUG_FEATURES
+#ifndef CONFIG_DEBUG_USB_INFO
 #  undef CONFIG_STM32_USBHOST_REGDEBUG
 #  undef CONFIG_STM32_USBHOST_PKTDUMP
 #endif
@@ -506,7 +506,7 @@ static struct usbhost_connection_s g_usbconn =
 #ifdef CONFIG_STM32_USBHOST_REGDEBUG
 static void stm32_printreg(uint32_t addr, uint32_t val, bool iswrite)
 {
-  llerr("%08x%s%08x\n", addr, iswrite ? "<-" : "->", val);
+  uinfo("%08x%s%08x\n", addr, iswrite ? "<-" : "->", val);
 }
 #endif
 
@@ -556,7 +556,7 @@ static void stm32_checkreg(uint32_t addr, uint32_t val, bool iswrite)
             {
               /* No.. More than one. */
 
-              llerr("[repeats %d more times]\n", count);
+              uinfo("[repeats %d more times]\n", count);
             }
         }
 

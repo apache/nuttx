@@ -88,6 +88,10 @@
 #  define CONFIG_LPC17_USBHOST_NPREALLOC 8
 #endif
 
+#ifndef CONFIG_DEBUG_USB_INFO
+#  undef CONFIG_LPC17_USBHOST_REGDEBUG
+#endif
+
 /* OHCI Setup ******************************************************************/
 /* Frame Interval / Periodic Start */
 
@@ -114,7 +118,7 @@
 
 /* Dump GPIO registers */
 
-#if defined(CONFIG_LPC17_USBHOST_REGDEBUG) && defined(CONFIG_DEBUG_GPIO_INFO)
+#ifdef CONFIG_LPC17_USBHOST_REGDEBUG
 #  define usbhost_dumpgpio() \
    do { \
      lpc17_dumpgpio(GPIO_USB_DP, "D+ P0.29; D- P0.30"); \
@@ -456,7 +460,7 @@ static struct lpc17_xfrinfo_s g_xfrbuffers[CONFIG_LPC17_USBHOST_NPREALLOC];
 #ifdef CONFIG_LPC17_USBHOST_REGDEBUG
 static void lpc17_printreg(uint32_t addr, uint32_t val, bool iswrite)
 {
-  llerr("%08x%s%08x\n", addr, iswrite ? "<-" : "->", val);
+  ullinfo("%08x%s%08x\n", addr, iswrite ? "<-" : "->", val);
 }
 #endif
 
@@ -506,7 +510,7 @@ static void lpc17_checkreg(uint32_t addr, uint32_t val, bool iswrite)
             {
               /* No.. More than one. */
 
-              llerr("[repeats %d more times]\n", count);
+              ullinfo("[repeats %d more times]\n", count);
             }
         }
 
@@ -1694,7 +1698,7 @@ static int lpc17_usbinterrupt(int irq, void *context)
                         }
                       else
                         {
-                          ullerr("Spurious status change (connected)\n");
+                          ullwarn("WARNING: Spurious status change (connected)\n");
                         }
 
                       /* The LSDA (Low speed device attached) bit is valid
@@ -1750,7 +1754,7 @@ static int lpc17_usbinterrupt(int irq, void *context)
                     }
                   else
                     {
-                       ullerr("Spurious status change (disconnected)\n");
+                       ullwarn("WARNING: Spurious status change (disconnected)\n");
                     }
                 }
 
@@ -1967,8 +1971,8 @@ static int lpc17_wait(struct usbhost_connection_s *conn,
               *hport = connport;
               leave_critical_section(flags);
 
-              uerr("RHport Connected: %s\n",
-                   connport->connected ? "YES" : "NO");
+              uinfo("RHport Connected: %s\n",
+                    connport->connected ? "YES" : "NO");
 
               return OK;
             }
@@ -1987,7 +1991,7 @@ static int lpc17_wait(struct usbhost_connection_s *conn,
           *hport = connport;
           leave_critical_section(flags);
 
-          uerr("Hub port Connected: %s\n", connport->connected ? "YES" : "NO");
+          uinfo("Hub port Connected: %s\n", connport->connected ? "YES" : "NO");
           return OK;
         }
 #endif
@@ -2041,7 +2045,7 @@ static int lpc17_rh_enumerate(struct usbhost_connection_s *conn,
     {
       /* No, return an error */
 
-      uerr("Not connected\n");
+      uwarn("WARNING: Not connected\n");
       return -ENODEV;
     }
 
@@ -3695,7 +3699,7 @@ struct usbhost_connection_s *lpc17_usbhost_initialize(int controller)
   lpc17_configgpio(GPIO_USB_OVRCR);   /* USB port Over-Current status */
   usbhost_dumpgpio();
 
-  uerr("Initializing Host Stack\n");
+  uinfo("Initializing Host Stack\n");
 
   /* Show AHB SRAM memory map */
 
@@ -3825,7 +3829,7 @@ struct usbhost_connection_s *lpc17_usbhost_initialize(int controller)
 
   if (irq_attach(LPC17_IRQ_USB, lpc17_usbinterrupt) != 0)
     {
-      uerr("Failed to attach IRQ\n");
+      uerr("ERROR: Failed to attach IRQ\n");
       return NULL;
     }
 
@@ -3850,8 +3854,8 @@ struct usbhost_connection_s *lpc17_usbhost_initialize(int controller)
   /* Enable interrupts at the interrupt controller */
 
   up_enable_irq(LPC17_IRQ_USB); /* enable USB interrupt */
-  uerr("USB host Initialized, Device connected:%s\n",
-       priv->connected ? "YES" : "NO");
+  uinfo("USB host Initialized, Device connected:%s\n",
+        priv->connected ? "YES" : "NO");
 
   return &g_usbconn;
 }

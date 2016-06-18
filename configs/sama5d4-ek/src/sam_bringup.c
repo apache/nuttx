@@ -72,9 +72,9 @@
 /* Debug ********************************************************************/
 
 #ifdef CONFIG_BOARD_INITIALIZE
-#  define SYSLOG llerr
+#  define SYSLOG  _llerr
 #else
-#  define SYSLOG err
+#  define SYSLOG  _err
 #endif
 
 /****************************************************************************
@@ -98,14 +98,14 @@ static void sam_i2c_register(int bus)
   i2c = sam_i2cbus_initialize(bus);
   if (i2c == NULL)
     {
-      err("ERROR: Failed to get I2C%d interface\n", bus);
+      _err("ERROR: Failed to get I2C%d interface\n", bus);
     }
   else
     {
       ret = i2c_register(i2c, bus);
       if (ret < 0)
         {
-          err("ERROR: Failed to register I2C%d driver: %d\n", bus, ret);
+          _err("ERROR: Failed to register I2C%d driver: %d\n", bus, ret);
           sam_i2cbus_uninitialize(i2c);
         }
     }

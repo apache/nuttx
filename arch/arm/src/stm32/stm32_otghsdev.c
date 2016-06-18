@@ -81,6 +81,10 @@
 #  define CONFIG_USBDEV_MAXPOWER 100  /* mA */
 #endif
 
+#ifndef CONFIG_DEBUG_USB_INFO
+#  undef CONFIG_STM32_USBDEV_REGDEBUG
+#endif
+
 /* There is 1.25Kb of FIFO memory.  The default partitions this memory
  * so that there is a TxFIFO allocated for each endpoint and with more
  * memory provided for the common RxFIFO.  A more knowledge-able
@@ -472,7 +476,7 @@ struct stm32_usbdev_s
 
 /* Register operations ********************************************************/
 
-#if defined(CONFIG_STM32_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
+#ifdef CONFIG_STM32_USBDEV_REGDEBUG
 static uint32_t    stm32_getreg(uint32_t addr);
 static void        stm32_putreg(uint32_t val, uint32_t addr);
 #else
@@ -792,7 +796,7 @@ const struct trace_msg_t g_usb_trace_strings_intdecode[] =
  *
  ****************************************************************************/
 
-#if defined(CONFIG_STM32_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
+#ifdef CONFIG_STM32_USBDEV_REGDEBUG
 static uint32_t stm32_getreg(uint32_t addr)
 {
   static uint32_t prevaddr = 0;
@@ -813,7 +817,7 @@ static uint32_t stm32_getreg(uint32_t addr)
         {
           if (count == 4)
             {
-              llerr("...\n");
+              uinfo("...\n");
             }
 
           return val;
@@ -830,7 +834,7 @@ static uint32_t stm32_getreg(uint32_t addr)
         {
           /* Yes.. then show how many times the value repeated */
 
-          llerr("[repeats %d more times]\n", count-3);
+          uinfo("[repeats %d more times]\n", count-3);
         }
 
       /* Save the new address, value, and count */
@@ -842,7 +846,7 @@ static uint32_t stm32_getreg(uint32_t addr)
 
   /* Show the register value read */
 
-  llerr("%08x->%08x\n", addr, val);
+  uinfo("%08x->%08x\n", addr, val);
   return val;
 }
 #endif
@@ -855,12 +859,12 @@ static uint32_t stm32_getreg(uint32_t addr)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_STM32_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
+#ifdef CONFIG_STM32_USBDEV_REGDEBUG
 static void stm32_putreg(uint32_t val, uint32_t addr)
 {
   /* Show the register value being written */
 
-  llerr("%08x<-%08x\n", addr, val);
+  uinfo("%08x<-%08x\n", addr, val);
 
   /* Write the value */
 
@@ -2625,7 +2629,7 @@ static inline void stm32_epout_interrupt(FAR struct stm32_usbdev_s *priv)
           if ((daint & 1) != 0)
             {
               regval = stm32_getreg(STM32_OTGHS_DOEPINT(epno));
-              ullerr("DOEPINT(%d) = %08x\n", epno, regval);
+              ulinfo("DOEPINT(%d) = %08x\n", epno, regval);
               stm32_putreg(0xFF, STM32_OTGHS_DOEPINT(epno));
             }
 
@@ -2855,7 +2859,7 @@ static inline void stm32_epin_interrupt(FAR struct stm32_usbdev_s *priv)
         {
           if ((daint & 1) != 0)
             {
-              ullerr("DIEPINT(%d) = %08x\n",
+              ulinfo("DIEPINT(%d) = %08x\n",
                      epno, stm32_getreg(STM32_OTGHS_DIEPINT(epno)));
               stm32_putreg(0xFF, STM32_OTGHS_DIEPINT(epno));
             }
@@ -3801,7 +3805,7 @@ static int stm32_epout_configure(FAR struct stm32_ep_s *privep, uint8_t eptype,
             break;
 
           default:
-            uerr("Unsupported maxpacket: %d\n", maxpacket);
+            uerr("ERROR: Unsupported maxpacket: %d\n", maxpacket);
             return -EINVAL;
         }
     }
@@ -3896,7 +3900,7 @@ static int stm32_epin_configure(FAR struct stm32_ep_s *privep, uint8_t eptype,
             break;
 
           default:
-            uerr("Unsupported maxpacket: %d\n", maxpacket);
+            uerr("ERROR: Unsupported maxpacket: %d\n", maxpacket);
             return -EINVAL;
         }
     }
@@ -5436,7 +5440,7 @@ void up_usbinitialize(void)
   ret = irq_attach(STM32_IRQ_OTGHS, stm32_usbinterrupt);
   if (ret < 0)
     {
-      uerr("irq_attach failed\n", ret);
+      uerr("ERROR: irq_attach failed\n", ret);
       goto errout;
     }
 

@@ -402,10 +402,10 @@ static int sem_dumpholder(FAR struct semholder_s *pholder, FAR sem_t *sem,
                           FAR void *arg)
 {
 #if CONFIG_SEM_PREALLOCHOLDERS > 0
-  info("  %08x: %08x %08x %04x\n",
+  _info("  %08x: %08x %08x %04x\n",
       pholder, pholder->flink, pholder->htcb, pholder->counts);
 #else
-  info("  %08x: %08x %04x\n", pholder, pholder->htcb, pholder->counts);
+  _info("  %08x: %08x %04x\n", pholder, pholder->htcb, pholder->counts);
 #endif
   return 0;
 }

@@ -102,8 +102,11 @@
 #ifdef CONFIG_DEBUG_USB
 #  define USB_ERROR_INT USBDEV_INT_ERRINT
 #else
-#  undef  CONFIG_LPC17_USBDEV_REGDEBUG
 #  define USB_ERROR_INT 0
+#endif
+
+#ifndef CONFIG_DEBUG_USB_INFO
+#  undef  CONFIG_LPC17_USBDEV_REGDEBUG
 #endif
 
 /* CLKCTRL enable bits */
@@ -531,7 +534,7 @@ static struct lpc17_dmadesc_s  g_usbddesc[CONFIG_LPC17_USBDEV_NDMADESCRIPTORS];
 #ifdef CONFIG_LPC17_USBDEV_REGDEBUG
 static void lpc17_printreg(uint32_t addr, uint32_t val, bool iswrite)
 {
-  llerr("%08x%s%08x\n", addr, iswrite ? "<-" : "->", val);
+  ullinfo("%08x%s%08x\n", addr, iswrite ? "<-" : "->", val);
 }
 #endif
 
@@ -581,7 +584,7 @@ static void lpc17_checkreg(uint32_t addr, uint32_t val, bool iswrite)
             {
               /* No.. More than one. */
 
-              llerr("[repeats %d more times]\n", count);
+              ullinfo("[repeats %d more times]\n", count);
             }
         }
 

@@ -61,7 +61,7 @@
 int irq_unexpected_isr(int irq, FAR void *context)
 {
   (void)up_irq_save();
-  llerr("ERROR irq: %d\n", irq);
+  _llerr("ERROR irq: %d\n", irq);
   PANIC();
   return OK; /* Won't get here */
 }

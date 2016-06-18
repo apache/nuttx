@@ -163,11 +163,11 @@ ifeq ($(CONFIG_STM32F7_TIM),y)
 CHIP_CSRCS += stm32_tim.c
 endif
 
-ifeq ($(CONFIG_ADC),y)
+ifeq ($(CONFIG_STM32F7_ADC),y)
 CHIP_CSRCS += stm32_adc.c
 endif
 
-ifeq ($(CONFIG_RTC),y)
+ifeq ($(CONFIG_STM32F7_RTC),y)
 ifeq ($(CONFIG_RTC_ALARM),y)
 CHIP_CSRCS += stm32_exti_alarm.c
 endif

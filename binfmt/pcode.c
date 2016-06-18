@@ -366,7 +366,7 @@ static int pcode_load(struct binary_s *binp)
 
   if (memcmp(&hdr.fh_ident, FHI_POFF_MAG, 4) != 0 || hdr.fh_type != FHT_EXEC)
     {
-      err("ERROR: File is not a P-code executable: %d\n");
+      _err("ERROR: File is not a P-code executable: %d\n");
       ret = -ENOEXEC;
       goto errout_with_fd;
     }

@@ -157,7 +157,7 @@ static void efm32_dumpnvic(const char *msg, int irq)
 
 /****************************************************************************
  * Name: efm32_nmi, efm32_busfault, efm32_usagefault, efm32_pendsv,
- *       efm32_errmonitor, efm32_pendsv, efm32_reserved
+ *       efm32_dbgmonitor, efm32_pendsv, efm32_reserved
  *
  * Description:
  *   Handlers for various exceptions.  None are handled and all are fatal
@@ -170,7 +170,7 @@ static void efm32_dumpnvic(const char *msg, int irq)
 static int efm32_nmi(int irq, FAR void *context)
 {
   (void)up_irq_save();
-  err("PANIC!!! NMI received\n");
+  _err("PANIC!!! NMI received\n");
   PANIC();
   return 0;
 }
@@ -178,7 +178,7 @@ static int efm32_nmi(int irq, FAR void *context)
 static int efm32_busfault(int irq, FAR void *context)
 {
   (void)up_irq_save();
-  err("PANIC!!! Bus fault received: %08x\n", getreg32(NVIC_CFAULTS));
+  _err("PANIC!!! Bus fault received: %08x\n", getreg32(NVIC_CFAULTS));
   PANIC();
   return 0;
 }
@@ -186,7 +186,7 @@ static int efm32_busfault(int irq, FAR void *context)
 static int efm32_usagefault(int irq, FAR void *context)
 {
   (void)up_irq_save();
-  err("PANIC!!! Usage fault received: %08x\n", getreg32(NVIC_CFAULTS));
+  _err("PANIC!!! Usage fault received: %08x\n", getreg32(NVIC_CFAULTS));
   PANIC();
   return 0;
 }
@@ -194,15 +194,15 @@ static int efm32_usagefault(int irq, FAR void *context)
 static int efm32_pendsv(int irq, FAR void *context)
 {
   (void)up_irq_save();
-  err("PANIC!!! PendSV received\n");
+  _err("PANIC!!! PendSV received\n");
   PANIC();
   return 0;
 }
 
-static int efm32_errmonitor(int irq, FAR void *context)
+static int efm32_dbgmonitor(int irq, FAR void *context)
 {
   (void)up_irq_save();
-  err("PANIC!!! Debug Monitor received\n");
+  _err("PANIC!!! Debug Monitor received\n");
   PANIC();
   return 0;
 }
@@ -210,7 +210,7 @@ static int efm32_errmonitor(int irq, FAR void *context)
 static int efm32_reserved(int irq, FAR void *context)
 {
   (void)up_irq_save();
-  err("PANIC!!! Reserved interrupt\n");
+  _err("PANIC!!! Reserved interrupt\n");
   PANIC();
   return 0;
 }
@@ -458,7 +458,7 @@ void up_irqinitialize(void)
   irq_attach(EFM32_IRQ_BUSFAULT, efm32_busfault);
   irq_attach(EFM32_IRQ_USAGEFAULT, efm32_usagefault);
   irq_attach(EFM32_IRQ_PENDSV, efm32_pendsv);
-  irq_attach(EFM32_IRQ_DBGMONITOR, efm32_errmonitor);
+  irq_attach(EFM32_IRQ_DBGMONITOR, efm32_dbgmonitor);
   irq_attach(EFM32_IRQ_RESERVED, efm32_reserved);
 #endif
 

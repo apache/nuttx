@@ -405,7 +405,7 @@ static bool qspi_checkreg(struct stm32l4_qspidev_s *priv, bool wr, uint32_t valu
         {
           /* Yes... show how many times we did it */
 
-          llerr("...[Repeats %d times]...\n", priv->ntimes);
+          spillinfo("...[Repeats %d times]...\n", priv->ntimes);
         }
 
       /* Save information about the new access */
@@ -439,7 +439,7 @@ static inline uint32_t qspi_getreg(struct stm32l4_qspidev_s *priv,
 #ifdef CONFIG_STM32L4_QSPI_REGDEBUG
   if (qspi_checkreg(priv, false, value, address))
     {
-      llerr("%08x->%08x\n", address, value);
+      spillinfo("%08x->%08x\n", address, value);
     }
 #endif
 
@@ -462,7 +462,7 @@ static inline void qspi_putreg(struct stm32l4_qspidev_s *priv, uint32_t value,
 #ifdef CONFIG_STM32L4_QSPI_REGDEBUG
   if (qspi_checkreg(priv, true, value, address))
     {
-      llerr("%08x<-%08x\n", address, value);
+      spillinfo("%08x<-%08x\n", address, value);
     }
 #endif
 

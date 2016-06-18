@@ -224,6 +224,7 @@ static inline void rcc_enableahb1(void)
   /* USB OTG HS */
 
   regval |= RCC_AHB1ENR_OTGHSEN;
+
 #endif  /* CONFIG_STM32F7_OTGHS */
 
   putreg32(regval, STM32_RCC_AHB1ENR);   /* Enable peripherals */
@@ -823,18 +824,41 @@ static void stm32_stdclockconfig(void)
         {
         }
 
-#ifdef CONFIG_STM32F7_LTDC
+#if defined(CONFIG_STM32F7_LTDC) || defined(CONFIG_STM32F7_PLLSAI)
+
       /* Configure PLLSAI */
 
       regval = getreg32(STM32_RCC_PLLSAICFGR);
+      regval &= ~(  RCC_PLLSAICFGR_PLLSAIN_MASK
+                  | RCC_PLLSAICFGR_PLLSAIP_MASK
+                  | RCC_PLLSAICFGR_PLLSAIQ_MASK
+                  | RCC_PLLSAICFGR_PLLSAIR_MASK);
       regval |= (STM32_RCC_PLLSAICFGR_PLLSAIN
-                | STM32_RCC_PLLSAICFGR_PLLSAIR
-                | STM32_RCC_PLLSAICFGR_PLLSAIQ);
+                 | STM32_RCC_PLLSAICFGR_PLLSAIP
+                 | STM32_RCC_PLLSAICFGR_PLLSAIQ
+                 | STM32_RCC_PLLSAICFGR_PLLSAIR);
       putreg32(regval, STM32_RCC_PLLSAICFGR);
 
-      regval = getreg32(STM32_RCC_DCKCFGR);
-      regval |= STM32_RCC_DCKCFGR_PLLSAIDIVR;
-      putreg32(regval, STM32_RCC_DCKCFGR);
+      regval  = getreg32(STM32_RCC_DCKCFGR1);
+      regval &= ~(RCC_DCKCFGR1_PLLI2SDIVQ_MASK
+                  | RCC_DCKCFGR1_PLLSAIDIVQ_MASK
+                  | RCC_DCKCFGR1_PLLSAIDIVR_MASK
+                  | RCC_DCKCFGR1_SAI1SEL_MASK
+                  | RCC_DCKCFGR1_SAI2SEL_MASK
+                  | RCC_DCKCFGR1_TIMPRESEL
+                  | RCC_DCKCFGR1_DFSDM1SEL
+                  | RCC_DCKCFGR1_ADFSDM1SEL);
+
+      regval |= (STM32_RCC_DCKCFGR1_PLLI2SDIVQ
+                 | STM32_RCC_DCKCFGR1_PLLSAIDIVQ
+                 | STM32_RCC_DCKCFGR1_PLLSAIDIVR
+                 | STM32_RCC_DCKCFGR1_SAI1SRC
+                 | STM32_RCC_DCKCFGR1_SAI2SRC
+                 | STM32_RCC_DCKCFGR1_TIMPRESRC
+                 | STM32_RCC_DCKCFGR1_DFSDM1SRC
+                 | STM32_RCC_DCKCFGR1_ADFSDM1SRC);
+
+      putreg32(regval, STM32_RCC_DCKCFGR1);
 
       /* Enable PLLSAI */
 
@@ -845,6 +869,72 @@ static void stm32_stdclockconfig(void)
       /* Wait until the PLLSAI is ready */
 
       while ((getreg32(STM32_RCC_CR) & RCC_CR_PLLSAIRDY) == 0)
+        {
+        }
+#endif
+#if defined(CONFIG_STM32F7_LTDC) || defined(CONFIG_STM32F7_PLLI2S)
+
+      /* Configure PLLI2S */
+
+      regval = getreg32(STM32_RCC_PLLI2SCFGR);
+      regval &= ~(  RCC_PLLI2SCFGR_PLLI2SN_MASK
+                  | RCC_PLLI2SCFGR_PLLI2SP_MASK
+                  | RCC_PLLI2SCFGR_PLLI2SQ_MASK
+                  | RCC_PLLI2SCFGR_PLLI2SR_MASK);
+      regval |= (STM32_RCC_PLLSAICFGR_PLLSAIN
+                 | STM32_RCC_PLLSAICFGR_PLLSAIP
+                 | STM32_RCC_PLLSAICFGR_PLLSAIQ
+                 | STM32_RCC_PLLSAICFGR_PLLSAIR);
+      putreg32(regval, STM32_RCC_PLLI2SCFGR);
+
+      regval  = getreg32(STM32_RCC_DCKCFGR2);
+      regval &= ~(  RCC_DCKCFGR2_USART1SEL_MASK
+                  | RCC_DCKCFGR2_USART2SEL_MASK
+                  | RCC_DCKCFGR2_UART4SEL_MASK
+                  | RCC_DCKCFGR2_UART5SEL_MASK
+                  | RCC_DCKCFGR2_USART6SEL_MASK
+                  | RCC_DCKCFGR2_UART7SEL_MASK
+                  | RCC_DCKCFGR2_UART8SEL_MASK
+                  | RCC_DCKCFGR2_I2C1SEL_MASK
+                  | RCC_DCKCFGR2_I2C2SEL_MASK
+                  | RCC_DCKCFGR2_I2C3SEL_MASK
+                  | RCC_DCKCFGR2_I2C4SEL_MASK
+                  | RCC_DCKCFGR2_LPTIM1SEL_MASK
+                  | RCC_DCKCFGR2_CECSEL_MASK
+                  | RCC_DCKCFGR2_CK48MSEL_MASK
+                  | RCC_DCKCFGR2_SDMMCSEL_MASK
+                  | RCC_DCKCFGR2_SDMMC2SEL_MASK
+                  | RCC_DCKCFGR2_DSISELL_MASK);
+
+      regval |= (  STM32_RCC_DCKCFGR2_USART1SRC
+                 | STM32_RCC_DCKCFGR2_USART2SRC
+                 | STM32_RCC_DCKCFGR2_UART4SRC
+                 | STM32_RCC_DCKCFGR2_UART5SRC
+                 | STM32_RCC_DCKCFGR2_USART6SRC
+                 | STM32_RCC_DCKCFGR2_UART7SRC
+                 | STM32_RCC_DCKCFGR2_UART8SRC
+                 | STM32_RCC_DCKCFGR2_I2C1SRC
+                 | STM32_RCC_DCKCFGR2_I2C2SRC
+                 | STM32_RCC_DCKCFGR2_I2C3SRC
+                 | STM32_RCC_DCKCFGR2_I2C4SRC
+                 | STM32_RCC_DCKCFGR2_LPTIM1SRC
+                 | STM32_RCC_DCKCFGR2_CECSRC
+                 | STM32_RCC_DCKCFGR2_CK48MSRC
+                 | STM32_RCC_DCKCFGR2_SDMMCSRC
+                 | STM32_RCC_DCKCFGR2_SDMMC2SRC
+                 | STM32_RCC_DCKCFGR2_DSISRC);
+
+      putreg32(regval, STM32_RCC_DCKCFGR2);
+
+      /* Enable PLLI2S */
+
+      regval = getreg32(STM32_RCC_CR);
+      regval |= RCC_CR_PLLI2SON;
+      putreg32(regval, STM32_RCC_CR);
+
+      /* Wait until the PLLI2S is ready */
+
+      while ((getreg32(STM32_RCC_CR) & RCC_CR_PLLI2SRDY) == 0)
         {
         }
 #endif

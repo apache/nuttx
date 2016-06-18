@@ -1190,7 +1190,7 @@ static int pwm_timer(FAR struct stm32_pwmtimer_s *priv,
             break;
 
           default:
-            pwmerr("No such timer mode: %u\n", (unsigned int)priv->mode);
+            pwmerr("ERROR: No such timer mode: %u\n", (unsigned int)priv->mode);
             return -EINVAL;
         }
     }
@@ -1317,7 +1317,7 @@ static int pwm_timer(FAR struct stm32_pwmtimer_s *priv,
 
       if (j >= PWM_NCHANNELS)
         {
-          pwmerr("No such channel: %u\n", channel);
+          pwmerr("ERROR: No such channel: %u\n", channel);
           return -EINVAL;
         }
 #else
@@ -1368,7 +1368,7 @@ static int pwm_timer(FAR struct stm32_pwmtimer_s *priv,
 #endif
 
           default:
-            pwmerr("No such mode: %u\n", (unsigned int)mode);
+            pwmerr("ERROR: No such mode: %u\n", (unsigned int)mode);
             return -EINVAL;
         }
 
@@ -1475,7 +1475,7 @@ static int pwm_timer(FAR struct stm32_pwmtimer_s *priv,
             break;
 
           default:
-            pwmerr("No such channel: %u\n", channel);
+            pwmerr("ERROR: No such channel: %u\n", channel);
             return -EINVAL;
         }
     }
@@ -1688,7 +1688,7 @@ static  int pwm_update_duty(FAR struct stm32_pwmtimer_s *priv, uint8_t channel,
         break;
 
       default:
-        pwmerr("No such channel: %u\n", channel);
+        pwmerr("ERROR: No such channel: %u\n", channel);
         return -EINVAL;
     }
 
@@ -2508,7 +2508,7 @@ FAR struct pwm_lowerhalf_s *stm32_pwminitialize(int timer)
 #endif
 
       default:
-        pwmerr("No such timer configured\n");
+        pwmerr("ERROR: No such timer configured\n");
         return NULL;
     }
 

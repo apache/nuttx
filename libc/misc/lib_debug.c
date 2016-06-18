@@ -51,7 +51,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: alert, err, llerr, warn, llwarn, info, llinfo
+ * Name: alert, err, llerr, warn, llwarn, info, _llinfo
  *
  * Description:
  *  If the cross-compiler's pre-processor does not support variable
@@ -60,7 +60,7 @@
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_LOWPUTC
-int alert(const char *format, ...)
+int _alert(const char *format, ...)
 {
   va_list ap;
   int     ret;
@@ -74,7 +74,7 @@ int alert(const char *format, ...)
 #endif /* CONFIG_ARCH_LOWPUTC */
 
 #ifdef CONFIG_DEBUG_FEATURES
-int err(const char *format, ...)
+int  _err(const char *format, ...)
 {
   va_list ap;
   int     ret;
@@ -87,7 +87,7 @@ int err(const char *format, ...)
 }
 
 #ifdef CONFIG_ARCH_LOWPUTC
-int llerr(const char *format, ...)
+int  _llerr(const char *format, ...)
 {
   va_list ap;
   int     ret;
@@ -102,7 +102,7 @@ int llerr(const char *format, ...)
 #endif /* CONFIG_DEBUG_FEATURES */
 
 #ifdef CONFIG_DEBUG_WARN
-int warn(const char *format, ...)
+int _warn(const char *format, ...)
 {
   va_list ap;
   int     ret;
@@ -115,7 +115,7 @@ int warn(const char *format, ...)
 }
 
 #ifdef CONFIG_ARCH_LOWPUTC
-int llwarn(const char *format, ...)
+int _llwarn(const char *format, ...)
 {
   va_list ap;
   int     ret;
@@ -130,7 +130,7 @@ int llwarn(const char *format, ...)
 #endif /* CONFIG_DEBUG_INFO */
 
 #ifdef CONFIG_DEBUG_INFO
-int info(const char *format, ...)
+int _info(const char *format, ...)
 {
   va_list ap;
   int     ret;
@@ -143,7 +143,7 @@ int info(const char *format, ...)
 }
 
 #ifdef CONFIG_ARCH_LOWPUTC
-int llinfo(const char *format, ...)
+int _llinfo(const char *format, ...)
 {
   va_list ap;
   int     ret;

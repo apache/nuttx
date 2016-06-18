@@ -50,20 +50,17 @@
  ****************************************************************************/
 /* Configuration ************************************************************/
 
-#ifndef CONFIG_DEBUG_FEATURES
-#  undef CONFIG_DEBUG_INFO
+#ifndef CONFIG_DEBUG_ERROR
 #  undef CONFIG_EFM32_RMU_DEBUG
 #endif
 
 #ifdef CONFIG_EFM32_RMU_DEBUG
-#  define rmuerr llerr
-#  ifdef CONFIG_DEBUG_INFO
-#    define rmuinfo llerr
-#  else
-#    define rmuinfo(x...)
-#  endif
+#  define rmuerr   _llerr
+#  define rmuwarn  _llwarn
+#  define rmuinfo  _llinfo
 #else
 #  define rmuerr(x...)
+#  define rmuwarn(x...)
 #  define rmuinfo(x...)
 #endif
 

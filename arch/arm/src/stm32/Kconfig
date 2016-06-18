@@ -6215,7 +6215,7 @@ endchoice
 config STM32_ETHMAC_REGDEBUG
 	bool "Register-Level Debug"
 	default n
-	depends on DEBUG_FEATURES
+	depends on DEBUG_NET_INFO
 	---help---
 		Enable very low-level register access debug.  Depends on CONFIG_DEBUG_FEATURES.
 
@@ -6305,14 +6305,14 @@ menu "USB Host Debug Configuration"
 config STM32_USBHOST_REGDEBUG
 	bool "Register-Level Debug"
 	default n
-	depends on USBHOST && (STM32_OTGFS || STM32_OTGHS)
+	depends on USBHOST && DEBUG_USB_INFO && (STM32_OTGFS || STM32_OTGHS)
 	---help---
 		Enable very low-level register access debug.
 
 config STM32_USBHOST_PKTDUMP
 	bool "Packet Dump Debug"
 	default n
-	depends on USBHOST && (STM32_OTGFS || STM32_OTGHS)
+	depends on USBHOST && DEBUG_USB_INFO && (STM32_OTGFS || STM32_OTGHS)
 	---help---
 		Dump all incoming and outgoing USB packets.
 

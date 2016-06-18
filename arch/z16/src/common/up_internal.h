@@ -60,6 +60,10 @@
 #undef  CONFIG_Z16_LOWPUTC            /* Support up_lowputc for debug */
 #undef  CONFIG_Z16_LOWGETC            /* support z16_lowgetc for debug */
 
+#ifndef CONFIG_DEBUG_SCHED_INFO
+#  undef CONFIG_DUMP_ON_EXIT          /* Needs CONFIG_DEBUG_SCHED_INFO */
+#endif
+
 /* Determine which (if any) console driver to use.  If a console is enabled
  * and no other console device is specified, then a serial console is
  * assumed.

@@ -259,23 +259,23 @@ static void pcm_callback(FAR void *arg, uint16_t reason,
 #ifdef CONFIG_PCM_DEBUG
 static void pcm_dump(FAR const struct wav_header_s *wav)
 {
-  info("Wave file header\n");
-  info("  Header Chunk:\n");
-  info("    Chunk ID:        0x%08x\n", wav->hdr.chunkid);
-  info("    Chunk Size:      %u\n",     wav->hdr.chunklen);
-  info("    Format:          0x%08x\n", wav->hdr.format);
-  info("  Format Chunk:\n");
-  info("    Chunk ID:        0x%08x\n", wav->fmt.chunkid);
-  info("    Chunk Size:      %u\n",     wav->fmt.chunklen);
-  info("    Audio Format:    0x%04x\n", wav->fmt.format);
-  info("    Num. Channels:   %d\n",     wav->fmt.nchannels);
-  info("    Sample Rate:     %u\n",     wav->fmt.samprate);
-  info("    Byte Rate:       %u\n",     wav->fmt.byterate);
-  info("    Block Align:     %d\n",     wav->fmt.align);
-  info("    Bits Per Sample: %d\n",     wav->fmt.bpsamp);
-  info("  Data Chunk:\n");
-  info("    Chunk ID:        0x%08x\n", wav->data.chunkid);
-  info("    Chunk Size:      %u\n",     wav->data.chunklen);
+  _info("Wave file header\n");
+  _info("  Header Chunk:\n");
+  _info("    Chunk ID:        0x%08x\n", wav->hdr.chunkid);
+  _info("    Chunk Size:      %u\n",     wav->hdr.chunklen);
+  _info("    Format:          0x%08x\n", wav->hdr.format);
+  _info("  Format Chunk:\n");
+  _info("    Chunk ID:        0x%08x\n", wav->fmt.chunkid);
+  _info("    Chunk Size:      %u\n",     wav->fmt.chunklen);
+  _info("    Audio Format:    0x%04x\n", wav->fmt.format);
+  _info("    Num. Channels:   %d\n",     wav->fmt.nchannels);
+  _info("    Sample Rate:     %u\n",     wav->fmt.samprate);
+  _info("    Byte Rate:       %u\n",     wav->fmt.byterate);
+  _info("    Block Align:     %d\n",     wav->fmt.align);
+  _info("    Bits Per Sample: %d\n",     wav->fmt.bpsamp);
+  _info("  Data Chunk:\n");
+  _info("    Chunk ID:        0x%08x\n", wav->data.chunkid);
+  _info("    Chunk Size:      %u\n",     wav->data.chunklen);
 }
 #endif
 

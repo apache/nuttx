@@ -60,9 +60,9 @@ int trv_mount_world(int minor, FAR const char *mountpoint);
 /* Debug ********************************************************************/
 
 #ifdef CONFIG_BOARD_INITIALIZE
-#  define SYSLOG llerr
+#  define SYSLOG  _llerr
 #else
-#  define SYSLOG err
+#  define SYSLOG  _err
 #endif
 
 /****************************************************************************

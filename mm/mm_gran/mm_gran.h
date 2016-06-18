@@ -63,9 +63,9 @@
 
 #ifdef CONFIG_CPP_HAVE_VARARGS
 #  ifdef CONFIG_DEBUG_GRAM
-#    define granerr(format, ...)       err(format, ##__VA_ARGS__)
-#    define granwarn(format, ...)      warn(format, ##__VA_ARGS__)
-#    define graninfo(format, ...)      info(format, ##__VA_ARGS__)
+#    define granerr(format, ...)       _err(format, ##__VA_ARGS__)
+#    define granwarn(format, ...)      _warn(format, ##__VA_ARGS__)
+#    define graninfo(format, ...)      _info(format, ##__VA_ARGS__)
 #  else
 #    define granerr(format, ...)       merr(format, ##__VA_ARGS__)
 #    define granwarn(format, ...)      mwarn(format, ##__VA_ARGS__)
@@ -73,9 +73,9 @@
 #  endif
 #else
 #  ifdef CONFIG_DEBUG_GRAM
-#    define granerr                    err
-#    define granwarn                   warn
-#    define graninfo                   info
+#    define granerr                    _err
+#    define granwarn                   _warn
+#    define graninfo                   _info
 #  else
 #    define granerr                    merr
 #    define granwarn                   mwarn

@@ -151,7 +151,7 @@
 
 /* Debug */
 
-#ifndef CONFIG_DEBUG_FEATURES
+#ifndef CONFIG_DEBUG_USB_INFO
 #  undef CONFIG_SAMA5_OHCI_REGDEBUG
 #endif
 
@@ -506,10 +506,6 @@ static uint8_t            g_bufalloc[SAM_BUFALLOC]
                           __attribute__ ((aligned (SAMA5_DMA_ALIGN)));
 
 /****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -524,7 +520,7 @@ static uint8_t            g_bufalloc[SAM_BUFALLOC]
 #ifdef CONFIG_SAMA5_OHCI_REGDEBUG
 static void sam_printreg(uint32_t addr, uint32_t val, bool iswrite)
 {
-  llerr("%08x%s%08x\n", addr, iswrite ? "<-" : "->", val);
+  uinfo("%08x%s%08x\n", addr, iswrite ? "<-" : "->", val);
 }
 #endif
 
@@ -574,7 +570,7 @@ static void sam_checkreg(uint32_t addr, uint32_t val, bool iswrite)
             {
               /* No.. More than one. */
 
-              llerr("[repeats %d more times]\n", count);
+              uinfo("[repeats %d more times]\n", count);
             }
         }
 

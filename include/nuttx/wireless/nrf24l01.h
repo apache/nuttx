@@ -91,10 +91,10 @@
 /* NRF24L01 debug */
 
 #ifdef NRF24L01_DEBUG
-# define werr(format, ...)           err(format, ##__VA_ARGS__)
-# define wllerr(format, ...)         llerr(format, ##__VA_ARGS__)
-# define winfo(format, ...)          info(format, ##__VA_ARGS__)
-# define wllinfo(format, ...)        llinfo(format, ##__VA_ARGS__)
+# define werr(format, ...)           _err(format, ##__VA_ARGS__)
+# define wllerr(format, ...)         _llerr(format, ##__VA_ARGS__)
+# define winfo(format, ...)          _info(format, ##__VA_ARGS__)
+# define wllinfo(format, ...)        _llinfo(format, ##__VA_ARGS__)
 #else
 # define werr(x...)
 # define wllerr(x...)

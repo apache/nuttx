@@ -263,7 +263,7 @@
  * enabled.
  */
 
-#ifndef CONFIG_DEBUG_FEATURES
+#ifndef CONFIG_DEBUG_NET_INFO
 #  undef CONFIG_STM32F7_ETHMAC_REGDEBUG
 #endif
 
@@ -664,7 +664,7 @@ static struct stm32_ethmac_s g_stm32ethmac[STM32F7_NETHERNET];
  ****************************************************************************/
 /* Register operations ******************************************************/
 
-#if defined(CONFIG_STM32F7_ETHMAC_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
+#ifdef CONFIG_STM32F7_ETHMAC_REGDEBUG
 static uint32_t stm32_getreg(uint32_t addr);
 static void stm32_putreg(uint32_t val, uint32_t addr);
 static void stm32_checksetup(void);
@@ -795,7 +795,7 @@ static int  stm32_ethconfig(struct stm32_ethmac_s *priv);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_STM32F7_ETHMAC_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
+#ifdef CONFIG_STM32F7_ETHMAC_REGDEBUG
 static uint32_t stm32_getreg(uint32_t addr)
 {
   static uint32_t prevaddr = 0;
@@ -816,7 +816,7 @@ static uint32_t stm32_getreg(uint32_t addr)
         {
           if (count == 4)
             {
-              llerr("...\n");
+              ninfo("...\n");
             }
 
           return val;
@@ -833,7 +833,7 @@ static uint32_t stm32_getreg(uint32_t addr)
         {
           /* Yes.. then show how many times the value repeated */
 
-          llerr("[repeats %d more times]\n", count-3);
+          ninfo("[repeats %d more times]\n", count-3);
         }
 
       /* Save the new address, value, and count */
@@ -845,7 +845,7 @@ static uint32_t stm32_getreg(uint32_t addr)
 
   /* Show the register value read */
 
-  llerr("%08x->%08x\n", addr, val);
+  ninfo("%08x->%08x\n", addr, val);
   return val;
 }
 #endif
@@ -867,12 +867,12 @@ static uint32_t stm32_getreg(uint32_t addr)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_STM32F7_ETHMAC_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
+#ifdef CONFIG_STM32F7_ETHMAC_REGDEBUG
 static void stm32_putreg(uint32_t val, uint32_t addr)
 {
   /* Show the register value being written */
 
-  llerr("%08x<-%08x\n", addr, val);
+  ninfo("%08x<-%08x\n", addr, val);
 
   /* Write the value */
 
@@ -894,7 +894,7 @@ static void stm32_putreg(uint32_t val, uint32_t addr)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_STM32F7_ETHMAC_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
+#ifdef CONFIG_STM32F7_ETHMAC_REGDEBUG
 static void stm32_checksetup(void)
 {
 }
@@ -1589,7 +1589,7 @@ static int stm32_recvframe(struct stm32_ethmac_s *priv)
 
   if (!stm32_isfreebuffer(priv))
     {
-      nllerr("No free buffers\n");
+      nllerr("ERROR: No free buffers\n");
       return -ENOMEM;
     }
 
@@ -1718,7 +1718,7 @@ static int stm32_recvframe(struct stm32_ethmac_s *priv)
                * scanning logic, and continue scanning with the next frame.
                */
 
-              nllerr("DROPPED: RX descriptor errors: %08x\n", rxdesc->rdes0);
+              nllwarn("WARNING: DROPPED RX descriptor errors: %08x\n", rxdesc->rdes0);
               stm32_freesegment(priv, rxcurr, priv->segments);
             }
         }
@@ -1784,7 +1784,7 @@ static void stm32_receive(struct stm32_ethmac_s *priv)
 
       if (dev->d_len > CONFIG_NET_ETH_MTU)
         {
-          nllerr("DROPPED: Too big: %d\n", dev->d_len);
+          nllwarn("WARNING: DROPPED Too big: %d\n", dev->d_len);
           continue;
         }
 
@@ -1894,7 +1894,7 @@ static void stm32_receive(struct stm32_ethmac_s *priv)
       else
 #endif
         {
-          nllerr("DROPPED: Unknown type: %04x\n", BUF->type);
+          nllwarn("WARNING: DROPPED Unknown type: %04x\n", BUF->type);
         }
 
       /* We are finished with the RX buffer.  NOTE:  If the buffer is
@@ -2158,7 +2158,7 @@ static inline void stm32_interrupt_process(struct stm32_ethmac_s *priv)
     {
       /* Just let the user know what happened */
 
-      nllerr("Abormal event(s): %08x\n", dmasr);
+      nllerr("ERROR: Abormal event(s): %08x\n", dmasr);
 
       /* Clear all pending abnormal events */
 
@@ -2362,7 +2362,7 @@ static void stm32_txtimeout_expiry(int argc, uint32_t arg, ...)
 {
   struct stm32_ethmac_s *priv = (struct stm32_ethmac_s *)arg;
 
-  nllerr("Timeout!\n");
+  nllerr("ERROR: Timeout!\n");
 
 #ifdef CONFIG_NET_NOINTS
   /* Disable further Ethernet interrupts.  This will prevent some race

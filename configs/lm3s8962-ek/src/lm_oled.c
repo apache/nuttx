@@ -72,7 +72,7 @@
 #endif
 
 #ifdef CONFIG_LCD_RITDEBUG
-#  define riterr(format, ...) info(format, ##__VA_ARGS__)
+#  define riterr(format, ...) _info(format, ##__VA_ARGS__)
 #  define oleddc_dumpgpio(m)  tiva_dumpgpio(OLEDDC_GPIO, m)
 #  define oledcs_dumpgpio(m)  tiva_dumpgpio(OLEDCS_GPIO, m)
 #else

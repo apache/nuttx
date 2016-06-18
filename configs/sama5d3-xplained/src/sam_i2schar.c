@@ -99,7 +99,7 @@ int i2schar_devinit(void)
       i2s = sam_ssc_initialize(CONFIG_SAMA5D3XPLAINED_SSC_PORT);
       if (!i2s)
         {
-          err("ERROR: Failed to get the SAMA5 SSC/I2S driver for SSC%d\n",
+          _err("ERROR: Failed to get the SAMA5 SSC/I2S driver for SSC%d\n",
               CONFIG_SAMA5D3XPLAINED_SSC_PORT);
           return -ENODEV;
         }

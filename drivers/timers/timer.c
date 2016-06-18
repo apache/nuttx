@@ -58,24 +58,6 @@
 #ifdef CONFIG_TIMER
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-/* Debug ********************************************************************/
-/* Non-standard debug that may be enabled just for testing the timer driver */
-
-#ifdef CONFIG_DEBUG_TIMER
-#  define tmrerr    err
-#  define tmrinfo   info
-#  define tmrllerr  llerr
-#  define tmrllinfo llinfo
-#else
-#  define tmrerr(x...)
-#  define tmrinfo(x...)
-#  define tmrllerr(x...)
-#  define tmrllinfo(x...)
-#endif
-
-/****************************************************************************
  * Private Type Definitions
  ****************************************************************************/
 

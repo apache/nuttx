@@ -928,7 +928,7 @@ static void dm320_hwinitialize(void)
   /* Set up the rectangular cursor with defaults */
 
 #ifdef CONFIG_FB_HWCURSOR
-  gerr("Initialize rectangular cursor\n");
+  lcdinfo("Initialize rectangular cursor\n");
 
   putreg16(0, DM320_OSD_CURXP);
   putreg16(0, DM320_OSD_CURYP);
@@ -1385,7 +1385,7 @@ int up_fbinitialize(int display)
   ret = dm320_allocvideomemory();
   if (ret != 0)
     {
-      gerr("Failed to allocate video buffers\n");
+      lcderr("ERROR: Failed to allocate video buffers\n");
       return ret;
     }
 

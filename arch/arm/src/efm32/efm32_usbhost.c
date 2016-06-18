@@ -123,7 +123,7 @@
 
 /* Register/packet debug depends on CONFIG_DEBUG_FEATURES */
 
-#ifndef CONFIG_DEBUG_FEATURES
+#ifndef CONFIG_DEBUG_USB_INFO
 #  undef CONFIG_EFM32_USBHOST_REGDEBUG
 #  undef CONFIG_EFM32_USBHOST_PKTDUMP
 #endif
@@ -582,7 +582,7 @@ static const struct efm32_usbhost_trace_s g_trace2[TRACE2_NSTRINGS] =
 #ifdef CONFIG_EFM32_USBHOST_REGDEBUG
 static void efm32_printreg(uint32_t addr, uint32_t val, bool iswrite)
 {
-  llerr("%08x%s%08x\n", addr, iswrite ? "<-" : "->", val);
+  ullinfo("%08x%s%08x\n", addr, iswrite ? "<-" : "->", val);
 }
 #endif
 
@@ -632,7 +632,7 @@ static void efm32_checkreg(uint32_t addr, uint32_t val, bool iswrite)
             {
               /* No.. More than one. */
 
-              llerr("[repeats %d more times]\n", count);
+              ullinfo("[repeats %d more times]\n", count);
             }
         }
 

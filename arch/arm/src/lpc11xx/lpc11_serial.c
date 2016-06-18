@@ -630,7 +630,7 @@ static int up_interrupt(int irq, void *context)
               /* Read the line status register (LSR) to clear */
 
               status = up_serialin(priv, LPC11_UART_LSR_OFFSET);
-              info("LSR: %02x\n", status);
+              _info("LSR: %02x\n", status);
               break;
             }
 
@@ -638,7 +638,7 @@ static int up_interrupt(int irq, void *context)
 
           default:
             {
-              err("Unexpected IIR: %02x\n", status);
+              _err("ERROR: Unexpected IIR: %02x\n", status);
               break;
             }
         }

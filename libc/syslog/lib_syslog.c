@@ -43,6 +43,7 @@
 #include <syslog.h>
 
 #include <nuttx/init.h>
+#include <nuttx/arch.h>
 #include <nuttx/clock.h>
 #include <nuttx/streams.h>
 
@@ -91,6 +92,8 @@ static inline int vsyslog_internal(FAR const IPTR char *fmt, va_list ap)
 #if defined(CONFIG_SYSLOG)
   /* Wrap the low-level output in a stream object and let lib_vsprintf
    * do the work.
+   * REVISIT: lib_syslogstream() is only available in the FLAT build or
+   * the kernel phase of other builds.   
    */
 
   lib_syslogstream((FAR struct lib_outstream_s *)&stream);
@@ -124,6 +127,8 @@ static inline int vsyslog_internal(FAR const IPTR char *fmt, va_list ap)
 #elif defined(CONFIG_ARCH_LOWPUTC)
   /* Wrap the low-level output in a stream object and let lib_vsprintf
    * do the work.
+   * REVISIT: lib_lowoutstream() is only available in the FLAT build or
+   * the kernel phase of other builds.   
    */
 
   lib_lowoutstream((FAR struct lib_outstream_s *)&stream);
@@ -162,13 +167,43 @@ int vsyslog(int priority, FAR const IPTR char *fmt, va_list ap)
 {
   int ret = 0;
 
-  /* Check if this priority is enabled */
+#if defined(CONFIG_BUILD_FLAT) || defined (__KERNEL__)
+  /* up_interrupt_context() and lowvsyslog() are only available in the FLAT
+   * build or during the kernel pass of the protected or kernel two pass
+   * builds.
+   */
 
-  if ((g_syslog_mask & LOG_MASK(priority)) != 0)
+#if !defined(CONFIG_SYSLOG) && CONFIG_NFILE_DESCRIPTORS > 0
+  /* We are generating output on stdout.  So check if this function was
+   * called from an interrupt handler.  We cannot send data to stdout from
+   * an interrupt handler.
+   */
+
+  if (up_interrupt_context())
     {
-      /* Yes.. let vsylog_internal do the deed */
+#ifdef CONFIG_ARCH_LOWPUTC
+      /* But the low-level serial interface up_putc() is provided so we may
+       * be able to generate low-level serial output instead.
+       * NOTE: The low-level serial output is not necessarily the same
+       * output destination as stdout!
+       */
 
-      ret = vsyslog_internal(fmt, ap);
+      ret = lowvsyslog(priority, fmt, ap);
+
+#endif /* CONFIG_ARCH_LOWPUTC */
+    }
+  else
+#endif /* !CONFIG_SYSLOG && CONFIG_NFILE_DESCRIPTORS > 0 */
+#endif /* CONFIG_BUILD_FLAT || __KERNEL */
+    {
+      /* Check if this priority is enabled */
+
+      if ((g_syslog_mask & LOG_MASK(priority)) != 0)
+        {
+          /* Yes.. let vsylog_internal do the deed */
+
+          ret = vsyslog_internal(fmt, ap);
+        }
     }
 
   return ret;

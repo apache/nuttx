@@ -57,8 +57,8 @@
  ****************************************************************************/
 
 #ifdef CONFIG_WL_PN532_DEBUG
-#  define pn532err    err
-#  define pn532info   info
+#  define pn532err    _err
+#  define pn532info   _info
 #else
 #  ifdef CONFIG_CPP_HAVE_VARARGS
 #    define pn532err(x...)

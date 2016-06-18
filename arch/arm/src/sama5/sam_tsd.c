@@ -644,7 +644,7 @@ static void sam_tsd_bottomhalf(void *arg)
 
       if (xraw == 0 || xraw >= xscale || yraw == 0 || yraw > yscale)
         {
-          ierr("Discarding: x %d:%d y %d:%d\n", xraw, xscale);
+          iwarn("WARNING: Discarding: x %d:%d y %d:%d\n", xraw, xscale);
           goto ignored;
         }
 
@@ -799,7 +799,7 @@ static int sam_tsd_schedule(struct sam_tsd_s *priv)
   ret = work_queue(HPWORK, &priv->work, sam_tsd_bottomhalf, priv, 0);
   if (ret != 0)
     {
-      illerr("Failed to queue work: %d\n", ret);
+      illerr("ERROR: Failed to queue work: %d\n", ret);
     }
 
   return OK;

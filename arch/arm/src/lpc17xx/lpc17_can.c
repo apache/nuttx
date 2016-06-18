@@ -308,7 +308,7 @@ static void can_printreg(uint32_t addr, uint32_t value)
         {
           if (count == 4)
             {
-              llerr("...\n");
+              canllinfo("...\n");
             }
 
           return;
@@ -325,7 +325,7 @@ static void can_printreg(uint32_t addr, uint32_t value)
         {
           /* Yes.. then show how many times the value repeated */
 
-          llerr("[repeats %d more times]\n", count-3);
+          canllinfo("[repeats %d more times]\n", count-3);
         }
 
       /* Save the new address, value, and count */
@@ -337,7 +337,7 @@ static void can_printreg(uint32_t addr, uint32_t value)
 
   /* Show the register value read */
 
-  llerr("%08x->%08x\n", addr, value);
+  canllinfo("%08x->%08x\n", addr, value);
 }
 #endif
 
@@ -398,7 +398,7 @@ static void can_putreg(struct up_dev_s *priv, int offset, uint32_t value)
 
   /* Show the register value being written */
 
-  llerr("%08x<-%08x\n", addr, value);
+  canllinfo("%08x<-%08x\n", addr, value);
 
   /* Write the value */
 
@@ -458,7 +458,7 @@ static void can_putcommon(uint32_t addr, uint32_t value)
 {
   /* Show the register value being written */
 
-  llerr("%08x<-%08x\n", addr, value);
+  canllinfo("%08x<-%08x\n", addr, value);
 
   /* Write the value */
 
@@ -681,7 +681,7 @@ static void can_txint(FAR struct can_dev_s *dev, bool enable)
 
 static int can_ioctl(FAR struct can_dev_s *dev, int cmd, unsigned long arg)
 {
-  err("Fix me:Not Implemented\n");
+  canerr("ERROR: Fix me -- Not Implemented\n");
   return 0;
 }
 
@@ -701,7 +701,7 @@ static int can_ioctl(FAR struct can_dev_s *dev, int cmd, unsigned long arg)
 
 static int can_remoterequest(FAR struct can_dev_s *dev, uint16_t id)
 {
-  err("Fix me:Not Implemented\n");
+  canerr("ERROR: Fix me -- Not Implemented\n");
   return 0;
 }
 
@@ -862,7 +862,7 @@ static int can_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
     }
   else
     {
-      canerr("No available transmission buffer, SR: %08x\n", regval);
+      canerr("ERROR: No available transmission buffer, SR: %08x\n", regval);
       ret = -EBUSY;
     }
 
@@ -1283,7 +1283,7 @@ FAR struct can_dev_s *lpc17_caninitialize(int port)
   else
 #endif
     {
-      canerr("Unsupported port: %d\n", port);
+      canerr("ERROR: Unsupported port: %d\n", port);
       leave_critical_section(flags);
       return NULL;
     }

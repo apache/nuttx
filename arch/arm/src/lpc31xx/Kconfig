@@ -243,11 +243,11 @@ config LPC31_USBDEV_DMA
 
 config LPC31_USBDEV_REGDEBUG
 	bool "Register level debug"
-	depends on DEBUG_FEATURES
+	depends on DEBUG_USB_INFO
 	default n
 	---help---
 		Output detailed register-level USB device debug information.  Requires
-		also CONFIG_DEBUG_FEATURES.
+		also CONFIG_DEBUG_USB_INFO.
 
 endmenu # USB device driver controller (DCD) options
 endif # LPC31_USBOTG && USBDEV
@@ -301,7 +301,7 @@ config LPC31_EHCI_PREALLOCATE
 config LPC31_EHCI_REGDEBUG
 	bool "Enable low-level EHCI register debug"
 	default n
-	depends on DEBUG_FEATURES
+	depends on DEBUG_USB_INFO
 
 endmenu # USB host controller driver (HCD) options
 endif # LPC31_USBOTG && USBHOST
@@ -310,9 +310,9 @@ menu "SPI device driver options"
 
 config LPC31_SPI_REGDEBUG
 	bool "SPI Register level debug"
-	depends on LPC31_SPI && DEBUG_FEATURES
+	depends on LPC31_SPI && DEBUG_SPI_INFO
 	default n
 	---help---
-		Output detailed register-level SPI device debug information.  Requires also CONFIG_DEBUG_FEATURES.
+		Output detailed register-level SPI device debug information.  Requires also CONFIG_DEBUG_SPI_INFO.
 
 endmenu # SPI device driver options

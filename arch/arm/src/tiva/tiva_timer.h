@@ -127,20 +127,6 @@
 #define TIMER_ISDMARTCM(c)    ((((c)->flags) & TIMER_FLAG_DMARTCM) != 0)
 #define TIMER_ISDMAMATCH(c)   ((((c)->flags) & TIMER_FLAG_DMAMATCH) != 0)
 
-/* Debug ********************************************************************/
-/* Non-standard debug that may be enabled just for testing the timer
- * driver.  NOTE: that only llerr types are used so that the output is
- * immediately available.
- */
-
-#ifdef CONFIG_DEBUG_TIMER
-#  define timerr  llerr
-#  define timinfo llinfo
-#else
-#  define timerr(x...)
-#  define timinfo(x...)
-#endif
-
 /****************************************************************************
  * Public Types
  ****************************************************************************/

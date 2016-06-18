@@ -569,18 +569,18 @@ static struct stm32_dev_s g_lcddev =
 #ifdef CONFIG_LCD_REGDEBUG
 static void stm32_lcdshow(FAR struct stm32_lower_s *priv, FAR const char *msg)
 {
-  info("%s:\n", msg);
-  info("  CRTL   RS: %d CS: %d RD: %d WR: %d LE: %d\n",
+  _info("%s:\n", msg);
+  _info("  CRTL   RS: %d CS: %d RD: %d WR: %d LE: %d\n",
        getreg32(LCD_RS_READ), getreg32(LCD_CS_READ), getreg32(LCD_RD_READ),
        getreg32(LCD_WR_READ), getreg32(LCD_LE_READ));
-  info("  DATA   CR: %08x %08x\n", getreg32(LCD_CRL), getreg32(LCD_CRH));
+  _info("  DATA   CR: %08x %08x\n", getreg32(LCD_CRL), getreg32(LCD_CRH));
   if (priv->output)
     {
-      info("  OUTPUT: %08x\n", getreg32(LCD_ODR));
+      _info("  OUTPUT: %08x\n", getreg32(LCD_ODR));
     }
   else
     {
-      info("  INPUT:  %08x\n", getreg32(LCD_IDR));
+      _info("  INPUT:  %08x\n", getreg32(LCD_IDR));
     }
 }
 #endif

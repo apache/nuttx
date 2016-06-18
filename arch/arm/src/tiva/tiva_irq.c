@@ -186,7 +186,7 @@ static void tiva_dumpnvic(const char *msg, int irq)
 
 /****************************************************************************
  * Name: tiva_nmi, tiva_busfault, tiva_usagefault, tiva_pendsv,
- *       tiva_errmonitor, tiva_pendsv, tiva_reserved
+ *       tiva_dbgmonitor, tiva_pendsv, tiva_reserved
  *
  * Description:
  *   Handlers for various execptions.  None are handled and all are fatal
@@ -199,7 +199,7 @@ static void tiva_dumpnvic(const char *msg, int irq)
 static int tiva_nmi(int irq, FAR void *context)
 {
   (void)up_irq_save();
-  err("PANIC!!! NMI received\n");
+  _err("PANIC!!! NMI received\n");
   PANIC();
   return 0;
 }
@@ -207,7 +207,7 @@ static int tiva_nmi(int irq, FAR void *context)
 static int tiva_busfault(int irq, FAR void *context)
 {
   (void)up_irq_save();
-  err("PANIC!!! Bus fault recived\n");
+  _err("PANIC!!! Bus fault recived\n");
   PANIC();
   return 0;
 }
@@ -215,7 +215,7 @@ static int tiva_busfault(int irq, FAR void *context)
 static int tiva_usagefault(int irq, FAR void *context)
 {
   (void)up_irq_save();
-  err("PANIC!!! Usage fault received\n");
+  _err("PANIC!!! Usage fault received\n");
   PANIC();
   return 0;
 }
@@ -223,15 +223,15 @@ static int tiva_usagefault(int irq, FAR void *context)
 static int tiva_pendsv(int irq, FAR void *context)
 {
   (void)up_irq_save();
-  err("PANIC!!! PendSV received\n");
+  _err("PANIC!!! PendSV received\n");
   PANIC();
   return 0;
 }
 
-static int tiva_errmonitor(int irq, FAR void *context)
+static int tiva_dbgmonitor(int irq, FAR void *context)
 {
   (void)up_irq_save();
-  err("PANIC!!! Debug Monitor received\n");
+  _err("PANIC!!! Debug Monitor received\n");
   PANIC();
   return 0;
 }
@@ -239,7 +239,7 @@ static int tiva_errmonitor(int irq, FAR void *context)
 static int tiva_reserved(int irq, FAR void *context)
 {
   (void)up_irq_save();
-  err("PANIC!!! Reserved interrupt\n");
+  _err("PANIC!!! Reserved interrupt\n");
   PANIC();
   return 0;
 }
@@ -482,7 +482,7 @@ void up_irqinitialize(void)
   irq_attach(TIVA_IRQ_BUSFAULT, tiva_busfault);
   irq_attach(TIVA_IRQ_USAGEFAULT, tiva_usagefault);
   irq_attach(TIVA_IRQ_PENDSV, tiva_pendsv);
-  irq_attach(TIVA_IRQ_DBGMONITOR, tiva_errmonitor);
+  irq_attach(TIVA_IRQ_DBGMONITOR, tiva_dbgmonitor);
   irq_attach(TIVA_IRQ_RESERVED, tiva_reserved);
 #endif
 

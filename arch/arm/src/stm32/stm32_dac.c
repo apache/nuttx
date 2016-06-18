@@ -852,7 +852,7 @@ static int dac_timinit(FAR struct stm32_chan_s *chan)
         break;
 #endif
       default:
-        aerr("Could not enable timer\n");
+        aerr("ERROR: Could not enable timer\n");
         break;
     }
 
@@ -1016,7 +1016,7 @@ static int dac_chaninit(FAR struct stm32_chan_s *chan)
       chan->dma = stm32_dmachannel(chan->dmachan);
       if (!chan->dma)
         {
-          aerr("Failed to allocate a DMA channel\n");
+          aerr("ERROR: Failed to allocate a DMA channel\n");
           return -EBUSY;
         }
 
@@ -1025,7 +1025,7 @@ static int dac_chaninit(FAR struct stm32_chan_s *chan)
       ret = dac_timinit(chan);
       if (ret < 0)
         {
-          aerr("Failed to initialize the DMA timer: %d\n", ret);
+          aerr("ERROR: Failed to initialize the DMA timer: %d\n", ret);
           return ret;
         }
     }
@@ -1128,7 +1128,7 @@ FAR struct dac_dev_s *stm32_dacinitialize(int intf)
   else
 #endif
     {
-      aerr("No such DAC interface: %d\n", intf);
+      aerr("ERROR: No such DAC interface: %d\n", intf);
       errno = ENODEV;
       return NULL;
     }
@@ -1138,7 +1138,7 @@ FAR struct dac_dev_s *stm32_dacinitialize(int intf)
   ret = dac_blockinit();
   if (ret < 0)
     {
-      aerr("Failed to initialize the DAC block: %d\n", ret);
+      aerr("ERROR: Failed to initialize the DAC block: %d\n", ret);
       errno = -ret;
       return NULL;
     }
@@ -1149,7 +1149,7 @@ FAR struct dac_dev_s *stm32_dacinitialize(int intf)
   ret  = dac_chaninit(chan);
   if (ret < 0)
     {
-      aerr("Failed to initialize DAC channel %d: %d\n", intf, ret);
+      aerr("ERROR: Failed to initialize DAC channel %d: %d\n", intf, ret);
       errno = -ret;
       return NULL;
     }

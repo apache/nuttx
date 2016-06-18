@@ -90,6 +90,10 @@
 #  define CONFIG_USBDEV_EP0_MAXSIZE 64
 #endif
 
+#ifndef CONFIG_DEBUG_USB_INFO
+# undef CONFIG_SAMV7_USBHS_REGDEBUG
+#endif
+
 /* Number of DMA transfer descriptors.  Default: 8 */
 
 #ifndef CONFIG_SAMV7_USBDEVHS_NDTDS
@@ -106,14 +110,6 @@
 
 #if !defined(CONFIG_USBDEV_DUALSPEED) && !defined(CONFIG_SAMV7_USBDEVHS_LOWPOWER)
 #  warning CONFIG_USBDEV_DUALSPEED should be defined for high speed support
-#endif
-
-/* Extremely detailed register debug that you would normally never want
- * enabled.
- */
-
-#ifndef CONFIG_DEBUG_FEATURES
-#  undef CONFIG_SAMV7_USBHS_REGDEBUG
 #endif
 
 /* Not yet supported */
@@ -722,16 +718,13 @@ const struct trace_msg_t g_usb_trace_strings_intdecode[] =
 #endif
 
 /****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
  * Private Private Functions
  ****************************************************************************/
 
 /****************************************************************************
  * Register Operations
  ****************************************************************************/
+
 /****************************************************************************
  * Name: sam_printreg
  *
@@ -743,7 +736,7 @@ const struct trace_msg_t g_usb_trace_strings_intdecode[] =
 #ifdef CONFIG_SAMV7_USBHS_REGDEBUG
 static void sam_printreg(uintptr_t regaddr, uint32_t regval, bool iswrite)
 {
-  llerr("%p%s%08x\n", regaddr, iswrite ? "<-" : "->", regval);
+  ullinfo("%p%s%08x\n", regaddr, iswrite ? "<-" : "->", regval);
 }
 #endif
 
@@ -794,7 +787,7 @@ static void sam_checkreg(uintptr_t regaddr, uint32_t regval, bool iswrite)
             {
               /* No.. More than one. */
 
-              llerr("[repeats %d more times]\n", count);
+              ullinfo("[repeats %d more times]\n", count);
             }
         }
 
@@ -869,36 +862,36 @@ static inline void sam_putreg(uint32_t regval, uint32_t regaddr)
  * Name: sam_dumpep
  ****************************************************************************/
 
-#if defined(CONFIG_SAMV7_USBHS_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
+#ifdef CONFIG_SAMV7_USBHS_REGDEBUG
 static void sam_dumpep(struct sam_usbdev_s *priv, int epno)
 {
   /* Global Registers */
 
-  llerr("Global Register:\n");
-  llerr("  CTRL:    %08x\n", sam_getreg(SAM_USBHS_DEVCTRL));
-  llerr("  ISR:     %08x\n", sam_getreg(SAM_USBHS_DEVISR));
-  llerr("  IMR:     %08x\n", sam_getreg(SAM_USBHS_DEVIMR));
-  llerr("  EPT:     %08x\n", sam_getreg(SAM_USBHS_DEVEPT));
-  llerr("  FNUM:    %08x\n", sam_getreg(SAM_USBHS_DEVFNUM));
+  uinfo("Global Register:\n");
+  uinfo("  CTRL:    %08x\n", sam_getreg(SAM_USBHS_DEVCTRL));
+  uinfo("  ISR:     %08x\n", sam_getreg(SAM_USBHS_DEVISR));
+  uinfo("  IMR:     %08x\n", sam_getreg(SAM_USBHS_DEVIMR));
+  uinfo("  EPT:     %08x\n", sam_getreg(SAM_USBHS_DEVEPT));
+  uinfo("  FNUM:    %08x\n", sam_getreg(SAM_USBHS_DEVFNUM));
 
   /* Endpoint registers */
 
-  llerr("Endpoint %d Register:\n", epno);
-  llerr("  CFG:     %08x\n", sam_getreg(SAM_USBHS_DEVEPTCFG(epno)));
-  llerr("  ISR:     %08x\n", sam_getreg(SAM_USBHS_DEVEPTISR(epno)));
-  llerr("  IMR:     %08x\n", sam_getreg(SAM_USBHS_DEVEPTIMR(epno)));
+  uinfo("Endpoint %d Register:\n", epno);
+  uinfo("  CFG:     %08x\n", sam_getreg(SAM_USBHS_DEVEPTCFG(epno)));
+  uinfo("  ISR:     %08x\n", sam_getreg(SAM_USBHS_DEVEPTISR(epno)));
+  uinfo("  IMR:     %08x\n", sam_getreg(SAM_USBHS_DEVEPTIMR(epno)));
 
-  llerr("DMA %d Register:\n", epno);
+  uinfo("DMA %d Register:\n", epno);
   if ((SAM_EPSET_DMA & SAM_EP_BIT(epno)) != 0)
     {
-      llerr("  NXTDSC:  %08x\n", sam_getreg(SAM_USBHS_DEVDMANXTDSC(epno)));
-      llerr("  ADDRESS: %08x\n", sam_getreg(SAM_USBHS_DEVDMAADDR(epno)));
-      llerr("  CONTROL: %08x\n", sam_getreg(SAM_USBHS_DEVDMACTRL(epno)));
-      llerr("  STATUS:  %08x\n", sam_getreg(SAM_USBHS_DEVDMASTA(epno)));
+      uinfo("  NXTDSC:  %08x\n", sam_getreg(SAM_USBHS_DEVDMANXTDSC(epno)));
+      uinfo("  ADDRESS: %08x\n", sam_getreg(SAM_USBHS_DEVDMAADDR(epno)));
+      uinfo("  CONTROL: %08x\n", sam_getreg(SAM_USBHS_DEVDMACTRL(epno)));
+      uinfo("  STATUS:  %08x\n", sam_getreg(SAM_USBHS_DEVDMASTA(epno)));
     }
   else
     {
-      llerr("  None\n");
+      uinfo("  None\n");
     }
 }
 #endif

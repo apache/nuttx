@@ -51,6 +51,7 @@
 
 #include "chip.h"
 #include "stm32_rcc.h"
+#include "stm32_rtc.h"
 #include "stm32_flash.h"
 #include "stm32.h"
 #include "stm32_waste.h"
@@ -65,10 +66,6 @@
  */
 
 #define HSERDY_TIMEOUT (100 * CONFIG_BOARD_LOOPSPERMSEC)
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
@@ -92,21 +89,76 @@
 #  error "Unsupported STM32 chip"
 #endif
 
+#if defined(CONFIG_STM32_STM32L15XX)
+# define STM32_RCC_XXX       STM32_RCC_CSR
+# define RCC_XXX_YYYRST      RCC_CSR_RTCRST
+#else
+# define STM32_RCC_XXX       STM32_RCC_BDCR
+# define RCC_XXX_YYYRST      RCC_BDCR_BDRST
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
+ * Name: rcc_resetbkp
+ *
+ * Description:
+ *   The RTC needs to reset the Backup Domain to change RTCSEL and resetting
+ *   the Backup Domain renders to disabling the LSE as consequence.   In order
+ *   to avoid resetting the Backup Domain when we already configured LSE we
+ *   will reset the Backup Domain early (here).
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_RTC) && defined(CONFIG_STM32_PWR) && !defined(CONFIG_STM32_STM32F10XX)
+static inline void rcc_resetbkp(void)
+{
+  uint32_t regval;
+
+  /* Check if the RTC is already configured */
+
+  regval = getreg32(RTC_MAGIC_REG);
+  if (regval != RTC_MAGIC)
+    {
+      (void)stm32_pwr_enablebkp(true);
+
+      /* We might be changing RTCSEL - to ensure such changes work, we must
+       * reset the backup domain (having backed up the RTC_MAGIC token)
+       */
+
+      modifyreg32(STM32_RCC_XXX, 0, RCC_XXX_YYYRST);
+      modifyreg32(STM32_RCC_XXX, RCC_XXX_YYYRST, 0);
+
+      (void)stm32_pwr_enablebkp(false);
+    }
+}
+#else
+#  define rcc_resetbkp()
+#endif
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
  * Name: stm32_clockconfig
  *
  * Description:
- *   Called to establish the clock settings based on the values in board.h.  This
- *   function (by default) will reset most everything, enable the PLL, and enable
- *   peripheral clocking for all periperipherals enabled in the NuttX configuration
- *   file.
+ *   Called to establish the clock settings based on the values in board.h.
+ *   This function (by default) will reset most everything, enable the PLL,
+ *   and enable peripheral clocking for all peripherals enabled in the NuttX
+ *   configuration file.
  *
- *   If CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG is defined, then clocking will
- *   be enabled by an externally provided, board-specific function called
+ *   If CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG is defined, then clocking
+ *   will be enabled by an externally provided, board-specific function called
  *   stm32_board_clockconfig().
  *
  * Input Parameters:
@@ -115,13 +167,17 @@
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void stm32_clockconfig(void)
 {
   /* Make sure that we are starting in the reset state */
 
   rcc_reset();
+
+  /* Reset backup domain if appropriate */
+
+  rcc_resetbkp();
 
 #if defined(CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG)
 
@@ -185,4 +241,3 @@ void stm32_clockenable(void)
 #endif
 }
 #endif
-

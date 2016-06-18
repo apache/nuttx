@@ -107,7 +107,7 @@ void up_dataabort(uint32_t *regs, uint32_t far, uint32_t fsr)
    * fatal error.
    */
 
-  pgllerr("FSR: %08x FAR: %08x\n", fsr, far);
+  pgllinfo("FSR: %08x FAR: %08x\n", fsr, far);
   if ((fsr & FSR_MASK) != FSR_PAGE)
     {
       goto segfault;
@@ -156,7 +156,7 @@ void up_dataabort(uint32_t *regs, uint32_t far, uint32_t fsr)
 
 segfault:
 #endif
-  alert("Data abort. PC: %08x FAR: %08x FSR: %08x\n", regs[REG_PC], far, fsr);
+  _alert("Data abort. PC: %08x FAR: %08x FSR: %08x\n", regs[REG_PC], far, fsr);
   PANIC();
 }
 
@@ -172,7 +172,7 @@ void up_dataabort(uint32_t *regs)
 
   /* Crash -- possibly showing diagnost debug information. */
 
-  alert("Data abort. PC: %08x\n", regs[REG_PC]);
+  _alert("Data abort. PC: %08x\n", regs[REG_PC]);
   PANIC();
 }
 
