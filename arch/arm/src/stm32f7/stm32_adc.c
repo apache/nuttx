@@ -165,6 +165,26 @@
                                (ADC_SMPR_DEFAULT << ADC_SMPR2_SMP8_SHIFT) | \
                                (ADC_SMPR_DEFAULT << ADC_SMPR2_SMP9_SHIFT))
 
+/* The last external channel on ADC 1 to enable Reading Vref or Vbat / Vsence */
+
+#define ADC_LAST_EXTERNAL_CHAN 15
+
+/* Assuming VDC 2.4 - 3.6 */
+
+#define ADC_MAX_FADC 36000000
+
+#if STM32_PCLK2_FREQUENCY/2 <= ADC_MAX_FADC
+# define ADC_CCR_ADCPRE_DIV     ADC_CCR_ADCPRE_DIV2
+#elif STM32_PCLK2_FREQUENCY/4 <= ADC_MAX_FADC
+# define ADC_CCR_ADCPRE_DIV     ADC_CCR_ADCPRE_DIV4
+#elif STM32_PCLK2_FREQUENCY/6 <= ADC_MAX_FADC
+# define ADC_CCR_ADCPRE_DIV     ADC_CCR_ADCPRE_DIV6
+#elif STM32_PCLK2_FREQUENCY/8 <= ADC_MAX_FADC
+# define ADC_CCR_ADCPRE_DIV     ADC_CCR_ADCPRE_DIV8
+#else
+# error "PCLK2 too high - no divisor found "
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -253,6 +273,7 @@ static void adc_enable(FAR struct stm32_dev_s *priv, bool enable);
 static uint32_t adc_sqrbits(FAR struct stm32_dev_s *priv, int first, int last,
                             int offset);
 static int      adc_set_ch(FAR struct adc_dev_s *dev, uint8_t ch);
+static bool     adc_internal(FAR struct stm32_dev_s * priv);
 
 #ifdef ADC_HAVE_TIMER
 static void adc_timstart(FAR struct stm32_dev_s *priv, bool enable);
@@ -1066,19 +1087,14 @@ static void adc_rccreset(FAR struct stm32_dev_s *priv, bool reset)
 
 static void adc_enable(FAR struct stm32_dev_s *priv, bool enable)
 {
-#ifdef ADC_SR_ADONS
-  bool enabled = (adc_getreg(priv, STM32_ADC_SR_OFFSET) & ADC_SR_ADONS) != 0;
-#else
-  bool enabled = false;
-#endif
 
   ainfo("enable: %d\n", enable ? 1 : 0);
 
-  if (!enabled && enable)
+  if (enable)
     {
       adc_modifyreg(priv, STM32_ADC_CR2_OFFSET, 0, ADC_CR2_ADON);
     }
-  else if (enabled && !enable)
+  else
     {
       adc_modifyreg(priv, STM32_ADC_CR2_OFFSET, ADC_CR2_ADON, 0);
     }
@@ -1255,7 +1271,12 @@ static void adc_reset(FAR struct adc_dev_s *dev)
   /* ADC CCR configuration */
 
   clrbits  = ADC_CCR_ADCPRE_MASK | ADC_CCR_TSVREFE;
-  setbits  = ADC_CCR_ADCPRE_DIV2;
+  setbits  = ADC_CCR_ADCPRE_DIV;
+
+  if (adc_internal(priv))
+    {
+      setbits  = ADC_CCR_TSVREFE;
+    }
 
   clrbits |= ADC_CCR_MULTI_MASK | ADC_CCR_DELAY_MASK | ADC_CCR_DDS |
              ADC_CCR_DMA_MASK | ADC_CCR_VBATE;
@@ -1452,6 +1473,29 @@ static uint32_t adc_sqrbits(FAR struct stm32_dev_s *priv, int first, int last,
 }
 
 /****************************************************************************
+ * Name: adc_internal
+ ****************************************************************************/
+
+static bool adc_internal(FAR struct stm32_dev_s * priv)
+{
+  int i;
+
+  if (priv->intf == 1)
+    {
+      for (i  = 0; i < priv->nchannels; i++)
+        {
+          if (priv->chanlist[i] > ADC_LAST_EXTERNAL_CHAN)
+            {
+              return true;
+            }
+
+        }
+    }
+
+  return false;
+}
+
+/****************************************************************************
  * Name: adc_set_ch
  *
  * Description:
@@ -1489,16 +1533,6 @@ static int adc_set_ch(FAR struct adc_dev_s *dev, uint8_t ch)
       priv->current   = i;
       priv->nchannels = 1;
     }
-
-#ifdef STM32_ADC_SQR5_OFFSET
-  bits = adc_sqrbits(priv, ADC_SQR5_FIRST, ADC_SQR5_LAST, ADC_SQR5_SQ_OFFSET);
-  adc_modifyreg(priv, STM32_ADC_SQR5_OFFSET, ~ADC_SQR5_RESERVED, bits);
-#endif
-
-#ifdef STM32_ADC_SQR4_OFFSET
-  bits = adc_sqrbits(priv, ADC_SQR4_FIRST, ADC_SQR4_LAST, ADC_SQR4_SQ_OFFSET);
-  adc_modifyreg(priv, STM32_ADC_SQR4_OFFSET, ~ADC_SQR4_RESERVED, bits);
-#endif
 
   bits = adc_sqrbits(priv, ADC_SQR3_FIRST, ADC_SQR3_LAST, ADC_SQR3_SQ_OFFSET);
   adc_modifyreg(priv, STM32_ADC_SQR3_OFFSET, ~ADC_SQR3_RESERVED, bits);
@@ -1725,15 +1759,15 @@ struct adc_dev_s *stm32_adc_initialize(int intf, FAR const uint8_t *chanlist,
 
   /* Configure the selected ADC */
 
-  priv = (FAR struct stm32_dev_s *)dev->ad_priv;
-
-  priv->cb        = NULL;
+  priv     = (FAR struct stm32_dev_s *)dev->ad_priv;
+  priv->cb = NULL;
 
   DEBUGASSERT(cchannels <= ADC_MAX_SAMPLES);
- if (cchannels > ADC_MAX_SAMPLES)
-   {
-     cchannels = ADC_MAX_SAMPLES;
-   }
+  if (cchannels > ADC_MAX_SAMPLES)
+    {
+      cchannels = ADC_MAX_SAMPLES;
+    }
+
   priv->cchannels = cchannels;
 
   memcpy(priv->chanlist, chanlist, cchannels);
