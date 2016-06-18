@@ -413,7 +413,7 @@ static bool spi_checkreg(struct sam_spidev_s *spi, bool wr, uint32_t value,
         {
           /* Yes... show how many times we did it */
 
-          spiinfo("...[Repeats %d times]...\n", spi->ntimes);
+          spillinfo("...[Repeats %d times]...\n", spi->ntimes);
         }
 
       /* Save information about the new access */
@@ -447,7 +447,7 @@ static inline uint32_t spi_getreg(struct sam_spidev_s *spi,
 #ifdef CONFIG_SAMA5_SPI_REGDEBUG
   if (spi_checkreg(spi, false, value, address))
     {
-      spiinfo("%08x->%08x\n", address, value);
+      spillinfo("%08x->%08x\n", address, value);
     }
 #endif
 
@@ -470,7 +470,7 @@ static inline void spi_putreg(struct sam_spidev_s *spi, uint32_t value,
 #ifdef CONFIG_SAMA5_SPI_REGDEBUG
   if (spi_checkreg(spi, true, value, address))
     {
-      spiinfo("%08x<-%08x\n", address, value);
+      spillinfo("%08x<-%08x\n", address, value);
     }
 #endif
 

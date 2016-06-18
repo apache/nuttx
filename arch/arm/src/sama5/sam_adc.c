@@ -548,7 +548,7 @@ static bool sam_adc_checkreg(struct sam_adc_s *priv, bool wr,
         {
           /* Yes... show how many times we did it */
 
-          ainfo("...[Repeats %d times]...\n", priv->ntimes);
+          allinfo("...[Repeats %d times]...\n", priv->ntimes);
         }
 
       /* Save information about the new access */
@@ -2191,7 +2191,7 @@ uint32_t sam_adc_getreg(struct sam_adc_s *priv, uintptr_t address)
 
   if (sam_adc_checkreg(priv, false, regval, address))
     {
-      ainfo("%08x->%08x\n", address, regval);
+      allinfo("%08x->%08x\n", address, regval);
     }
 
   return regval;
@@ -2211,7 +2211,7 @@ void sam_adc_putreg(struct sam_adc_s *priv, uintptr_t address, uint32_t regval)
 {
   if (sam_adc_checkreg(priv, true, regval, address))
     {
-      ainfo("%08x<-%08x\n", address, regval);
+      allinfo("%08x<-%08x\n", address, regval);
     }
 
   putreg32(regval, address);

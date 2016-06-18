@@ -667,7 +667,7 @@ const struct trace_msg_t g_usb_trace_strings_intdecode[] =
 #ifdef CONFIG_SAMA5_UDPHS_REGDEBUG
 static void sam_printreg(uintptr_t regaddr, uint32_t regval, bool iswrite)
 {
-  uinfo("%p%s%08x\n", regaddr, iswrite ? "<-" : "->", regval);
+  ullinfo("%p%s%08x\n", regaddr, iswrite ? "<-" : "->", regval);
 }
 #endif
 
@@ -718,7 +718,7 @@ static void sam_checkreg(uintptr_t regaddr, uint32_t regval, bool iswrite)
             {
               /* No.. More than one. */
 
-              uinfo("[repeats %d more times]\n", count);
+              ullinfo("[repeats %d more times]\n", count);
             }
         }
 
@@ -798,31 +798,31 @@ static void sam_dumpep(struct sam_usbdev_s *priv, int epno)
 {
   /* Global Registers */
 
-  uinfo("Global Register:\n");
-  uinfo("  CTRL:    %04x\n", sam_getreg(SAM_UDPHS_CTRL));
-  uinfo("  FNUM:    %04x\n", sam_getreg(SAM_UDPHS_FNUM));
-  uinfo("  IEN:     %04x\n", sam_getreg(SAM_UDPHS_IEN));
-  uinfo("  INSTA:   %04x\n", sam_getreg(SAM_UDPHS_INTSTA));
-  uinfo("  TST:     %04x\n", sam_getreg(SAM_UDPHS_TST));
+  ullinfo("Global Register:\n");
+  ullinfo("  CTRL:    %04x\n", sam_getreg(SAM_UDPHS_CTRL));
+  ullinfo("  FNUM:    %04x\n", sam_getreg(SAM_UDPHS_FNUM));
+  ullinfo("  IEN:     %04x\n", sam_getreg(SAM_UDPHS_IEN));
+  ullinfo("  INSTA:   %04x\n", sam_getreg(SAM_UDPHS_INTSTA));
+  ullinfo("  TST:     %04x\n", sam_getreg(SAM_UDPHS_TST));
 
   /* Endpoint registers */
 
-  uinfo("Endpoint %d Register:\n", epno);
-  uinfo("  CFG:     %04x\n", sam_getreg(SAM_UDPHS_EPTCFG(epno)));
-  uinfo("  CTL:     %04x\n", sam_getreg(SAM_UDPHS_EPTCTL(epno)));
-  uinfo("  STA:     %04x\n", sam_getreg(SAM_UDPHS_EPTSTA(epno)));
+  ullinfo("Endpoint %d Register:\n", epno);
+  ullinfo("  CFG:     %04x\n", sam_getreg(SAM_UDPHS_EPTCFG(epno)));
+  ullinfo("  CTL:     %04x\n", sam_getreg(SAM_UDPHS_EPTCTL(epno)));
+  ullinfo("  STA:     %04x\n", sam_getreg(SAM_UDPHS_EPTSTA(epno)));
 
-  uinfo("DMA %d Register:\n", epno);
+  ullinfo("DMA %d Register:\n", epno);
   if ((SAM_EPSET_DMA & SAM_EP_BIT(epno)) != 0)
     {
-      uinfo("  NXTDSC:  %04x\n", sam_getreg(SAM_UDPHS_DMANXTDSC(epno)));
-      uinfo("  ADDRESS: %04x\n", sam_getreg(SAM_UDPHS_DMAADDRESS(epno)));
-      uinfo("  CONTROL: %04x\n", sam_getreg(SAM_UDPHS_DMACONTROL(epno)));
-      uinfo("  STATUS:  %04x\n", sam_getreg(SAM_UDPHS_DMASTATUS(epno)));
+      ullinfo("  NXTDSC:  %04x\n", sam_getreg(SAM_UDPHS_DMANXTDSC(epno)));
+      ullinfo("  ADDRESS: %04x\n", sam_getreg(SAM_UDPHS_DMAADDRESS(epno)));
+      ullinfo("  CONTROL: %04x\n", sam_getreg(SAM_UDPHS_DMACONTROL(epno)));
+      ullinfo("  STATUS:  %04x\n", sam_getreg(SAM_UDPHS_DMASTATUS(epno)));
     }
   else
     {
-      uinfo("  None\n");
+      ullinfo("  None\n");
     }
 }
 #endif

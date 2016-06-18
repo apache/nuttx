@@ -1163,7 +1163,7 @@ static void nand_dma_sampleinit(struct sam_nandcs_s *priv)
 #ifdef CONFIG_SAMA5_NAND_DMADEBUG
 static void nand_dma_sampledone(struct sam_nandcs_s *priv, int result)
 {
-  finfo("result: %d\n", result);
+  fllinfo("result: %d\n", result);
 
   /* Sample the final registers */
 
@@ -3088,7 +3088,7 @@ bool nand_checkreg(bool wr, uintptr_t regaddr, uint32_t regval)
         {
           /* Yes... show how many times we did it */
 
-          finfo("...[Repeats %d times]...\n", g_nand.ntimes);
+          fllinfo("...[Repeats %d times]...\n", g_nand.ntimes);
         }
 
       /* Save information about the new access */

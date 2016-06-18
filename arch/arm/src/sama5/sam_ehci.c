@@ -628,7 +628,7 @@ static uint32_t sam_swap32(uint32_t value)
 static void sam_printreg(volatile uint32_t *regaddr, uint32_t regval,
                           bool iswrite)
 {
-  uinfo("%08x%s%08x\n", (uintptr_t)regaddr, iswrite ? "<-" : "->", regval);
+  ullinfo("%08x%s%08x\n", (uintptr_t)regaddr, iswrite ? "<-" : "->", regval);
 }
 #endif
 
@@ -679,7 +679,7 @@ static void sam_checkreg(volatile uint32_t *regaddr, uint32_t regval, bool iswri
             {
               /* No.. More than one. */
 
-              uinfo("[repeats %d more times]\n", count);
+              ullinfo("[repeats %d more times]\n", count);
             }
         }
 

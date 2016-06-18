@@ -520,7 +520,7 @@ static uint8_t            g_bufalloc[SAM_BUFALLOC]
 #ifdef CONFIG_SAMA5_OHCI_REGDEBUG
 static void sam_printreg(uint32_t addr, uint32_t val, bool iswrite)
 {
-  uinfo("%08x%s%08x\n", addr, iswrite ? "<-" : "->", val);
+  ullinfo("%08x%s%08x\n", addr, iswrite ? "<-" : "->", val);
 }
 #endif
 
@@ -570,7 +570,7 @@ static void sam_checkreg(uint32_t addr, uint32_t val, bool iswrite)
             {
               /* No.. More than one. */
 
-              uinfo("[repeats %d more times]\n", count);
+              ullinfo("[repeats %d more times]\n", count);
             }
         }
 

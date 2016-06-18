@@ -371,7 +371,7 @@ static uint32_t can_getreg(FAR struct sam_can_s *priv, int offset)
         {
           if (priv->count == 4)
             {
-              caninfo("...\n");
+              canllinfo("...\n");
             }
 
           return regval;
@@ -388,7 +388,7 @@ static uint32_t can_getreg(FAR struct sam_can_s *priv, int offset)
         {
           /* Yes.. then show how many times the value repeated */
 
-          caninfo("[repeats %d more times]\n", priv->count - 3);
+          canllinfo("[repeats %d more times]\n", priv->count - 3);
         }
 
       /* Save the new address, value, and count */
@@ -400,7 +400,7 @@ static uint32_t can_getreg(FAR struct sam_can_s *priv, int offset)
 
   /* Show the register value read */
 
-  caninfo("%08x->%08x\n", regaddr, regval);
+  canllinfo("%08x->%08x\n", regaddr, regval);
   return regval;
 }
 
@@ -437,7 +437,7 @@ static void can_putreg(FAR struct sam_can_s *priv, int offset, uint32_t regval)
 
   /* Show the register value being written */
 
-  caninfo("%08x<-%08x\n", regaddr, regval);
+  canllinfo("%08x<-%08x\n", regaddr, regval);
 
   /* Write the value */
 
@@ -474,29 +474,29 @@ static void can_dumpctrlregs(FAR struct sam_can_s *priv, FAR const char *msg)
 
   if (msg)
     {
-      caninfo("Control Registers: %s\n", msg);
+      canllinfo("Control Registers: %s\n", msg);
     }
   else
     {
-      caninfo("Control Registers:\n");
+      canllinfo("Control Registers:\n");
     }
 
   /* CAN control and status registers */
 
-  caninfo("   MR: %08x      IMR: %08x      SR: %08x\n",
-          getreg32(config->base + SAM_CAN_MR_OFFSET),
-          getreg32(config->base + SAM_CAN_IMR_OFFSET),
-          getreg32(config->base + SAM_CAN_SR_OFFSET));
+  canllinfo("   MR: %08x      IMR: %08x      SR: %08x\n",
+            getreg32(config->base + SAM_CAN_MR_OFFSET),
+            getreg32(config->base + SAM_CAN_IMR_OFFSET),
+            getreg32(config->base + SAM_CAN_SR_OFFSET));
 
-  caninfo("   BR: %08x      TIM: %08x TIMESTP: %08x\n",
-          getreg32(config->base + SAM_CAN_BR_OFFSET),
-          getreg32(config->base + SAM_CAN_TIM_OFFSET),
-          getreg32(config->base + SAM_CAN_TIMESTP_OFFSET));
+  canllinfo("   BR: %08x      TIM: %08x TIMESTP: %08x\n",
+            getreg32(config->base + SAM_CAN_BR_OFFSET),
+            getreg32(config->base + SAM_CAN_TIM_OFFSET),
+            getreg32(config->base + SAM_CAN_TIMESTP_OFFSET));
 
-  caninfo("  ECR: %08x     WPMR: %08x    WPSR: %08x\n",
-          getreg32(config->base + SAM_CAN_ECR_OFFSET),
-          getreg32(config->base + SAM_CAN_TCR_OFFSET),
-          getreg32(config->base + SAM_CAN_ACR_OFFSET));
+  canllinfo("  ECR: %08x     WPMR: %08x    WPSR: %08x\n",
+            getreg32(config->base + SAM_CAN_ECR_OFFSET),
+            getreg32(config->base + SAM_CAN_TCR_OFFSET),
+            getreg32(config->base + SAM_CAN_ACR_OFFSET));
 }
 #endif
 
@@ -523,30 +523,30 @@ static void can_dumpmbregs(FAR struct sam_can_s *priv, FAR const char *msg)
 
   if (msg)
     {
-      caninfo("Mailbox Registers: %s\n", msg);
+      canllinfo("Mailbox Registers: %s\n", msg);
     }
   else
     {
-      caninfo("Mailbox Registers:\n");
+      canllinfo("Mailbox Registers:\n");
     }
 
   for (i = 0; i < SAM_CAN_NMAILBOXES; i++)
     {
       mbbase = config->base + SAM_CAN_MBn_OFFSET(i);
-      caninfo("  MB%d:\n", i);
+      canllinfo("  MB%d:\n", i);
 
       /* CAN mailbox registers */
 
-      caninfo("    MMR: %08x MAM: %08x MID: %08x MFID: %08x\n",
-              getreg32(mbbase + SAM_CAN_MMR_OFFSET),
-              getreg32(mbbase + SAM_CAN_MAM_OFFSET),
-              getreg32(mbbase + SAM_CAN_MID_OFFSET),
-              getreg32(mbbase + SAM_CAN_MFID_OFFSET));
+      canllinfo("    MMR: %08x MAM: %08x MID: %08x MFID: %08x\n",
+                getreg32(mbbase + SAM_CAN_MMR_OFFSET),
+                getreg32(mbbase + SAM_CAN_MAM_OFFSET),
+                getreg32(mbbase + SAM_CAN_MID_OFFSET),
+                getreg32(mbbase + SAM_CAN_MFID_OFFSET));
 
-      caninfo("    MSR: %08x MDL: %08x MDH: %08x\n",
-              getreg32(mbbase + SAM_CAN_MSR_OFFSET),
-              getreg32(mbbase + SAM_CAN_MDL_OFFSET),
-              getreg32(mbbase + SAM_CAN_MDH_OFFSET));
+      canllinfo("    MSR: %08x MDL: %08x MDH: %08x\n",
+                getreg32(mbbase + SAM_CAN_MSR_OFFSET),
+                getreg32(mbbase + SAM_CAN_MDL_OFFSET),
+                getreg32(mbbase + SAM_CAN_MDH_OFFSET));
     }
 }
 #endif

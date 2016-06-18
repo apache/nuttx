@@ -461,7 +461,7 @@ static bool sam_checkreg(struct sam_emac_s *priv, bool wr, uint32_t regval,
         {
           /* Yes... show how many times we did it */
 
-          ninfo("...[Repeats %d times]...\n", priv->ntimes);
+          nllinfo("...[Repeats %d times]...\n", priv->ntimes);
         }
 
       /* Save information about the new access */
@@ -493,7 +493,7 @@ static uint32_t sam_getreg(struct sam_emac_s *priv, uintptr_t address)
 
   if (sam_checkreg(priv, false, regval, address))
     {
-      ninfo("%08x->%08x\n", address, regval);
+      nllinfo("%08x->%08x\n", address, regval);
     }
 
   return regval;
@@ -514,7 +514,7 @@ static void sam_putreg(struct sam_emac_s *priv, uintptr_t address,
 {
   if (sam_checkreg(priv, true, regval, address))
     {
-      ninfo("%08x<-%08x\n", address, regval);
+      nllinfo("%08x<-%08x\n", address, regval);
     }
 
   putreg32(regval, address);
