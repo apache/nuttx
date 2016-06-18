@@ -84,9 +84,6 @@
 /************************************************************************************
  * Private Data
  ************************************************************************************/
-/* The Olimex STM32-P405 has a 10 Kohm potentiometer AN_TR connected to PC0
- * ADC123_IN10
- */
 
 /* Identifying number of each ADC channel: Variable Resistor.
  *
@@ -94,7 +91,7 @@
  */
 
 #ifdef CONFIG_STM32F7_ADC1
-static const uint8_t  g_chanlist[ADC1_NCHANNELS] = {1};
+static const uint8_t  g_chanlist[ADC1_NCHANNELS] = {3};
 
 /* Configurations of pins used byte each ADC channels
  *
@@ -103,7 +100,7 @@ static const uint8_t  g_chanlist[ADC1_NCHANNELS] = {1};
  *  GPIO_ADC1_IN11, GPIO_ADC1_IN12, GPIO_ADC1_IN13, GPIO_ADC1_IN15};
  */
 
-static const uint32_t g_pinlist[ADC1_NCHANNELS]  = {GPIO_ADC1_IN0};
+static const uint32_t g_pinlist[ADC1_NCHANNELS] = {GPIO_ADC1_IN3};
 #endif
 
 /************************************************************************************
@@ -152,7 +149,10 @@ int board_adc_initialize(void)
 
       for (i = 0; i < ADC1_NCHANNELS; i++)
         {
-          stm32_configgpio(g_pinlist[i]);
+          if (g_pinlist[i] != 0)
+            {
+              stm32_configgpio(g_pinlist[i]);
+            }
         }
 
       /* Call stm32_adcinitialize() to get an instance of the ADC interface */
