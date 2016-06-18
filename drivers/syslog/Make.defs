@@ -35,60 +35,42 @@
 ############################################################################
 
 ############################################################################
-# Include SYSLOG drivers (only one should be enabled)
+# Include SYSLOG Infrastructure
 
-ifeq ($(CONFIG_SYSLOG),y)
+CSRCS += syslog_channel.c
 
-# If no special loggin devices are implemented, then the default SYSLOG
-# logic at fs/fs_syslog.c will be used
-
-# (Add other SYSLOG drivers here)
-
-ifeq ($(CONFIG_RAMLOG),y)
-  CSRCS += ramlog.c
+ifeq ($(CONFIG_SYSLOG_INTBUFFER),y)
+  CSRCS += syslog_intbuffer.c
 endif
+
+# The note driver is hosted in this directory, but is not associated with
+# SYSLOGging
 
 ifeq ($(CONFIG_DRIVER_NOTE),y)
   CSRCS += note_driver.c
 endif
 
-# (Add other SYSLOG_CONSOLE drivers here)
+############################################################################
+# Include SYSLOG drivers (only one should be enabled)
+
+ifeq ($(CONFIG_RAMLOG),y)
+  CSRCS += ramlog.c
+else ifeq ($(CONFIG_SYSLOG),y)
+
+# If no special logging devices are implemented, then the default SYSLOG
+# logic at fs/fs_syslog.c will be used
+
+# (Add other SYSLOG drivers here)
 
 ifeq ($(CONFIG_SYSLOG_CONSOLE),y)
   CSRCS += syslog_console.c
+endif
+
+# (Add other SYSLOG_CONSOLE drivers here)
+
 endif
 
 # Include SYSLOG build support
 
 DEPPATH += --dep-path syslog
 VPATH += :syslog
-
-############################################################################
-# The RAMLOG can be used even if system logging is not enabled.
-
-else ifeq ($(CONFIG_RAMLOG),y)
-
-CSRCS += ramlog.c
-
-ifeq ($(CONFIG_DRIVER_NOTE),y)
-  CSRCS += note_driver.c
-endif
-
-# Include RAMLOG build support
-
-DEPPATH += --dep-path syslog
-VPATH += :syslog
-
-############################################################################
-# The scheduler note driver can be used in any event.
-
-else ifeq ($(CONFIG_DRIVER_NOTE),y)
-
-CSRCS += note_driver.c
-
-# Include note driver build support
-
-DEPPATH += --dep-path syslog
-VPATH += :syslog
-
-endif

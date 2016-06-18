@@ -2,7 +2,7 @@
  * include/nuttx/syslog/syslog.h
  * The NuttX SYSLOGing interface
  *
- *   Copyright (C) 2012, 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2014-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,6 +42,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/compiler.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -80,6 +81,23 @@
 #endif
 
 /****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
+/* This structure provides the interface to a SYSLOG device */
+
+struct syslog_channel_s
+{
+  /* I/O redirection methods */
+
+  CODE int (*sc_putc)(int ch);  /* Normal buffered output */
+  CODE int (*sc_force)(int ch); /* Low-level output for interrupt handlers */
+  CODE int (*sc_flush)(void);   /* Flush buffered output (on crash) */
+
+  /* Implementation specific logic may follow */
+};
+
+/****************************************************************************
  * Public Data
  ****************************************************************************/
 
@@ -97,6 +115,24 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 /****************************************************************************
+ * Name: syslog_channel
+ *
+ * Description:
+ *   Configure the SYSLOGging function to use the provided channel to
+ *   generate SYSLOG output.
+ *
+ * Input buffer:
+ *   channel - Provides the interface to the channel to be used.
+ *
+ * Returned Value:
+ *   Zero (OK)is returned on  success.  A negated errno value is returned
+ *   on any failure.
+ *
+ ****************************************************************************/
+
+int syslog_channel(FAR const struct syslog_channel_s *channel);
+
+/****************************************************************************
  * Name: syslog_initialize
  *
  * Description:
@@ -105,6 +141,13 @@ extern "C"
  *
  *   NOTE that this implementation excludes using a network connection as
  *   SYSLOG device.  That would be a good extension.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero (OK)is returned on  success.  A negated errno value is returned
+ *   on any failure.
  *
  ****************************************************************************/
 
@@ -116,17 +159,39 @@ int syslog_initialize(void);
  * Name: syslog_putc
  *
  * Description:
- *   This is the low-level system logging interface.  The debugging/syslogging
- *   interfaces are syslog() and lowsyslog().  The difference is that
- *   the syslog() internface writes to fd=1 (stdout) whereas lowsyslog() uses
- *   a lower level interface that works from interrupt handlers.  This
- *   function is the low-level interface used to implement lowsyslog().
+ *   This is the low-level system logging interface.
+ *
+ * Input Parameters:
+ *   ch - The character to add to the SYSLOG (must be positive).
+ *
+ * Returned Value:
+ *   On success, the character is echoed back to the caller.  A negated
+ *   errno value is returned on any failure.
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SYSLOG
 int syslog_putc(int ch);
-#endif
+
+/****************************************************************************
+ * Name: syslog_flush
+ *
+ * Description:
+ *   This is called by system crash-handling logic.  It must flush any
+ *   buffered data to the SYSLOG device.
+ *
+ *   Interrupts are disabled at the time of the crash and this logic must
+ *   perform the flush using low-level, non-interrupt driven logic.
+ *
+ * Input Parameters:
+ *   ch - The character to add to the SYSLOG (must be positive).
+ *
+ * Returned Value:
+ *   Zero (OK)is returned on  success.  A negated errno value is returned
+ *   on any failure.
+ *
+ ****************************************************************************/
+
+int syslog_flush(void);
 
 #undef EXTERN
 #ifdef __cplusplus
