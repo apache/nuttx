@@ -1759,15 +1759,15 @@ struct adc_dev_s *stm32_adc_initialize(int intf, FAR const uint8_t *chanlist,
 
   /* Configure the selected ADC */
 
-  priv = (FAR struct stm32_dev_s *)dev->ad_priv;
-
-  priv->cb        = NULL;
+  priv     = (FAR struct stm32_dev_s *)dev->ad_priv;
+  priv->cb = NULL;
 
   DEBUGASSERT(cchannels <= ADC_MAX_SAMPLES);
- if (cchannels > ADC_MAX_SAMPLES)
-   {
-     cchannels = ADC_MAX_SAMPLES;
-   }
+  if (cchannels > ADC_MAX_SAMPLES)
+    {
+      cchannels = ADC_MAX_SAMPLES;
+    }
+
   priv->cchannels = cchannels;
 
   memcpy(priv->chanlist, chanlist, cchannels);
