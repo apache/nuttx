@@ -5,6 +5,20 @@
 
 comment "System Logging"
 
+config SYSLOG_INTBUFFER
+	bool "Use interrupt buffer"
+	default n
+	---help---
+		Enables an interrupt buffer that will be used to serialize debug
+		output from interrupt handlers.
+
+config SYSLOG_INTBUFSIZE
+	int "Interrupt buffer size"
+	default 2048
+	depends on SYSLOG_INTBUFFER
+	---help---
+		The size of the interrupt buffer in bytes.
+
 config RAMLOG
 	bool "RAM log device support"
 	default n
@@ -77,7 +91,7 @@ config SYSLOG_CONSOLE
 	default n
 	depends on DEV_CONSOLE
 	---help---
-		Use the syslog logging device as a system console. If this feature is enabled 
+		Use the syslog logging device as a system console. If this feature is enabled
 		(along with DEV_CONSOLE), then all console output will be re-directed to syslog
 		output (syslog_putc). This is useful, for example, if the only console is a Telnet
 		console.  Then in that case, console output from non-Telnet threads will go to

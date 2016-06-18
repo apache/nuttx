@@ -49,6 +49,9 @@
  ****************************************************************************/
 /* Configuration ************************************************************/
 /* CONFIG_SYSLOG - Enables generic system logging features.
+ * CONFIG_SYSLOG_INTBUFFER - Enables an interrupt buffer that will be used
+ *   to serialize debug output from interrupt handlers.
+ * CONFIG_SYSLOG_INTBUFSIZE - The size of the interrupt buffer in bytes.
  * CONFIG_SYSLOG_DEVPATH - The full path to the system logging device
  *
  * In addition, some SYSLOG device must also be enabled that will provide
@@ -80,19 +83,31 @@
 #  define CONFIG_SYSLOG_DEVPATH "/dev/ttyS1"
 #endif
 
+#if defined(CONFIG_SYSLOG_INTBUFFER) && !defined(CONFIG_SYSLOG_INTBUFSIZE)
+#  define CONFIG_SYSLOG_INTBUFSIZE 2048
+#endif
+
+#if CONFIG_SYSLOG_INTBUFSIZE > 65535
+#  undef  CONFIG_SYSLOG_INTBUFSIZE
+#  define CONFIG_SYSLOG_INTBUFSIZE 65535
+#endif
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
 
 /* This structure provides the interface to a SYSLOG device */
 
+typedef CODE int (*syslog_putc_t)(int ch);
+typedef CODE int (*syslog_flush_t)(void);
+
 struct syslog_channel_s
 {
   /* I/O redirection methods */
 
-  CODE int (*sc_putc)(int ch);  /* Normal buffered output */
-  CODE int (*sc_force)(int ch); /* Low-level output for interrupt handlers */
-  CODE int (*sc_flush)(void);   /* Flush buffered output (on crash) */
+  syslog_putc_t sc_putc;    /* Normal buffered output */
+  syslog_putc_t sc_force;   /* Low-level output for interrupt handlers */
+  syslog_flush_t sc_flush;  /* Flush buffered output (on crash) */
 
   /* Implementation specific logic may follow */
 };

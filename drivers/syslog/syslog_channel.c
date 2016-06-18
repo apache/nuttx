@@ -73,12 +73,14 @@ static int syslog_default_flush(void)
   return OK;
 }
 
+#ifndef CONFIG_SYSLOG_INTBUFFER
 static int syslog_force(int ch)
 {
   DEBUGASSERT(g_syslog_channel != NULL && g_syslog_channel->sc_force != NULL);
 
   return g_syslog_channel->sc_force(ch);
 }
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -163,7 +165,7 @@ int syslog_putc(int ch)
        * buffer.
        */
 
-      (void)syslog_flush_intbuffer(&g_syslog_channel, false);
+      (void)syslog_flush_intbuffer(g_syslog_channel, false);
 #endif
 
       return g_syslog_channel->sc_putc(ch);
@@ -198,7 +200,7 @@ int syslog_flush(void)
    * buffer.
    */
 
-  (void)syslog_flush_intbuffer(&g_syslog_channel, true);
+  (void)syslog_flush_intbuffer(g_syslog_channel, true);
 #endif
 
   /* Then flush all of the buffered output to the SYSLOG device */
