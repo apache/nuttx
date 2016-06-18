@@ -187,7 +187,7 @@ static uint32_t sam34_getreg(uint32_t addr)
         {
           if (count == 4)
             {
-              wdinfo("...\n");
+              wdllinfo("...\n");
             }
 
           return val;
@@ -204,7 +204,7 @@ static uint32_t sam34_getreg(uint32_t addr)
         {
           /* Yes.. then show how many times the value repeated */
 
-          wdinfo("[repeats %d more times]\n", count-3);
+          wdllinfo("[repeats %d more times]\n", count-3);
         }
 
       /* Save the new address, value, and count */
@@ -216,7 +216,7 @@ static uint32_t sam34_getreg(uint32_t addr)
 
   /* Show the register value read */
 
-  wdinfo("%08x->%08x\n", addr, val);
+  wdllinfo("%08x->%08x\n", addr, val);
   return val;
 }
 #endif
@@ -234,7 +234,7 @@ static void sam34_putreg(uint32_t val, uint32_t addr)
 {
   /* Show the register value being written */
 
-  wdinfo("%08x<-%08x\n", addr, val);
+  wdllinfo("%08x<-%08x\n", addr, val);
 
   /* Write the value */
 
