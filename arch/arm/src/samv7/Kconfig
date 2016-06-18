@@ -1634,7 +1634,7 @@ config SAMV7_HSMCI_UNALIGNED
 
 config SAMV7_HSMCI_XFRDEBUG
 	bool "HSMCI transfer debug"
-	depends on DEBUG_FS && CONFIG_DEBUG_INFO
+	depends on DEBUG_FS_INFO
 	default n
 	---help---
 		Enable special debug instrumentation analyze HSMCI data transfers.
@@ -1646,7 +1646,7 @@ config SAMV7_HSMCI_XFRDEBUG
 
 config SAMV7_HSMCI_CMDDEBUG
 	bool "HSMCI command debug"
-	depends on DEBUG_FS && CONFIG_DEBUG_INFO
+	depends on DEBUG_FS_INFO
 	default n
 	---help---
 		Enable special debug instrumentation analyze HSMCI commands. This
