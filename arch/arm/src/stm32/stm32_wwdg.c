@@ -190,7 +190,7 @@ static uint16_t stm32_getreg(uint32_t addr)
         {
           if (count == 4)
             {
-              wdinfo("...\n");
+              wdllinfo("...\n");
             }
 
           return val;
@@ -207,7 +207,7 @@ static uint16_t stm32_getreg(uint32_t addr)
         {
           /* Yes.. then show how many times the value repeated */
 
-          wdinfo("[repeats %d more times]\n", count-3);
+          wdllinfo("[repeats %d more times]\n", count-3);
         }
 
       /* Save the new address, value, and count */
@@ -219,7 +219,7 @@ static uint16_t stm32_getreg(uint32_t addr)
 
   /* Show the register value read */
 
-  wdinfo("%08x->%04x\n", addr, val);
+  wdllinfo("%08x->%04x\n", addr, val);
   return val;
 }
 #endif
@@ -237,7 +237,7 @@ static void stm32_putreg(uint16_t val, uint32_t addr)
 {
   /* Show the register value being written */
 
-  wdinfo("%08x<-%04x\n", addr, val);
+  wdllinfo("%08x<-%04x\n", addr, val);
 
   /* Write the value */
 

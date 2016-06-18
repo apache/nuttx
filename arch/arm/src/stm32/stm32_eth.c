@@ -769,7 +769,7 @@ static uint32_t stm32_getreg(uint32_t addr)
         {
           if (count == 4)
             {
-              ninfo("...\n");
+              nllinfo("...\n");
             }
 
           return val;
@@ -786,7 +786,7 @@ static uint32_t stm32_getreg(uint32_t addr)
         {
           /* Yes.. then show how many times the value repeated */
 
-          ninfo("[repeats %d more times]\n", count-3);
+          nllinfo("[repeats %d more times]\n", count-3);
         }
 
       /* Save the new address, value, and count */
@@ -798,7 +798,7 @@ static uint32_t stm32_getreg(uint32_t addr)
 
   /* Show the register value read */
 
-  ninfo("%08x->%08x\n", addr, val);
+  nllinfo("%08x->%08x\n", addr, val);
   return val;
 }
 #endif
@@ -820,12 +820,12 @@ static uint32_t stm32_getreg(uint32_t addr)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32_ETHMAC_REGDEBUG
+#if defined(CONFIG_STM32_ETHMAC_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
 static void stm32_putreg(uint32_t val, uint32_t addr)
 {
   /* Show the register value being written */
 
-  ninfo("%08x<-%08x\n", addr, val);
+  nllinfo("%08x<-%08x\n", addr, val);
 
   /* Write the value */
 
