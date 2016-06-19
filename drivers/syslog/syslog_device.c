@@ -1,7 +1,7 @@
 /****************************************************************************
- * fs/driver/fs_devsyslog.c
+ * driver/syslog/syslog_device.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,8 +52,6 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/arch.h>
 #include <nuttx/syslog/syslog.h>
-
-#include "inode/inode.h"
 
 #if defined(CONFIG_SYSLOG) && defined(CONFIG_SYSLOG_CHAR)
 
@@ -193,6 +191,8 @@ static inline ssize_t syslog_write(FAR const void *buf, size_t nbytes)
   /* Let the driver perform the write */
 
   inode = g_sysdev.sl_file.f_inode;
+  DEBUGASSERT(inode != NULL);
+
   return inode->u.i_ops->write(&g_sysdev.sl_file, buf, nbytes);
 }
 
@@ -211,7 +211,8 @@ static inline void syslog_flush(void)
 
   /* Is this a mountpoint? Does it support the sync method? */
 
-  if (INODE_IS_MOUNTPT(inode) && inode->u.i_mops->sync)
+  DEBUGASSERT(inode != NULL);
+  if (inode->u.i_mops->sync)
     {
       /* Yes... synchronize to the stream */
 
@@ -238,9 +239,8 @@ static inline void syslog_flush(void)
 
 int syslog_initialize(void)
 {
-  FAR struct inode    *inode;
-  FAR const char      *relpath = NULL;
-  int                  ret;
+  int fd;
+  int ret;
 
   /* At this point, the only expected states are SYSLOG_UNINITIALIZED or
    * SYSLOG_REOPEN..  Not SYSLOG_INITIALIZING, SYSLOG_FAILURE, SYSLOG_OPENED.
@@ -251,93 +251,43 @@ int syslog_initialize(void)
 
   g_sysdev.sl_state = SYSLOG_INITIALIZING;
 
-  /* Try to open the device.
-   *
-   * Note that we cannot just call open.  The syslog device must work on all
-   * threads.  Open returns a file descriptor that is valid only for the
-   * task that opened the device (and its pthread children).  Instead, we
-   * essentially re-implement the guts of open() here so that we can get to
-   * the thread-independent structures of the inode.
-   */
+  /* Open the device driver. */
 
-  /* Get an inode for this file/device */
-
-  inode = inode_find(CONFIG_SYSLOG_DEVPATH, &relpath);
-  if (!inode)
+  fd = open(CONFIG_SYSLOG_DEVPATH, O_WRONLY);
+  if (fd < 0)
     {
-      /* The inode was not found.  In this case, we will attempt to re-open
-       * the device repeatedly.  The assumption is that the device path is
-       * valid but that the driver has not yet been registered.
+       int errcode = get_errno();
+       DEBUGASSERT(errcode > 0);
+
+      /* We failed to open the file. Perhaps it does exist?  Perhaps it
+       * exists, but is not ready because it depends on insertion of a
+       * removable device?
+       *
+       * In any case we will attempt to re-open the device repeatedly.
+       * The assumption is that the device path is valid but that the
+       * driver has not yet been registered or a removable device has
+       * not yet been installed.
        */
 
       g_sysdev.sl_state = SYSLOG_REOPEN;
-      return -ENOENT;
+      return -errcode;
     }
 
-  /* Verify that the inode is valid and either a character driver or a
-   * mountpoint.
+  /* Detach the file descriptor from the file structure.  The file
+   * descriptor is a task-specific concept.  Detaching the file
+   * descriptor allows us to use the device on all threads in all tasks.
    */
 
-#ifndef CONFIG_DISABLE_MOUNTPOINT
-  if ((!INODE_IS_DRIVER(inode) && !INODE_IS_MOUNTPT(inode)))
-#else
-  if (!INODE_IS_DRIVER(inode))
-#endif
-    {
-      ret = -ENXIO;
-      goto errout_with_inode;
-    }
-
-  /* Make sure that the "entity" at this inode supports write access */
-
-  if (!inode->u.i_ops || !inode->u.i_ops->write)
-    {
-      ret = -EACCES;
-      goto errout_with_inode;
-    }
-
-  /* Initialize the file structure */
-
-  g_sysdev.sl_file.f_oflags = SYSLOG_OFLAGS;
-  g_sysdev.sl_file.f_pos    = 0;
-  g_sysdev.sl_file.f_inode  = inode;
-
-  /* Perform the low-level open operation. */
-
-  ret = OK;
-  if (inode->u.i_ops->open)
-    {
-      /* Is the inode a mountpoint? */
-
-#ifndef CONFIG_DISABLE_MOUNTPOINT
-      if (INODE_IS_MOUNTPT(inode))
-        {
-          /* Yes.  Open the device write-only, try to create it if it
-           * doesn't exist, if the file that already exists, then append the
-           * new log data to end of the file.
-           */
-
-          ret = inode->u.i_mops->open(&g_sysdev.sl_file, relpath,
-                                      SYSLOG_OFLAGS, 0666);
-        }
-
-      /* No... then it must be a character driver in the NuttX pseudo-
-       * file system.
-       */
-
-      else
-#endif
-        {
-          ret = inode->u.i_ops->open(&g_sysdev.sl_file);
-        }
-    }
-
-  /* Was the file/device successfully opened? */
-
+  ret = file_detach(fd, &g_sysdev.sl_file);
   if (ret < 0)
     {
-      ret = -ret;
-      goto errout_with_inode;
+      /* This should not happen and means that something very bad has
+       * occurred.
+       */
+
+      g_sysdev.sl_state = SYSLOG_FAILURE;
+      close(fd);
+      return ret;
     }
 
   /* The SYSLOG device is open and ready for writing. */
@@ -346,11 +296,6 @@ int syslog_initialize(void)
   g_sysdev.sl_holder = NO_HOLDER;
   g_sysdev.sl_state  = SYSLOG_OPENED;
   return OK;
-
-errout_with_inode:
-  inode_release(inode);
-  g_sysdev.sl_state = SYSLOG_FAILURE;
-  return ret;
 }
 
 /****************************************************************************
