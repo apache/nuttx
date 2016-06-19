@@ -64,14 +64,14 @@
  *
  ****************************************************************************/
 
-int _lowvsyslog(FAR const IPTR char *fmt, va_list ap)
+int _lowvsyslog(FAR const IPTR char *fmt, FAR va_list *ap)
 {
   struct lib_outstream_s stream;
 
   /* Wrap the stdout in a stream object and let lib_vsprintf do the work. */
 
   syslogstream((FAR struct lib_outstream_s *)&stream);
-  return lib_vsprintf((FAR struct lib_outstream_s *)&stream, fmt, ap);
+  return lib_vsprintf((FAR struct lib_outstream_s *)&stream, fmt, *ap);
 }
 
 #endif /* CONFIG_ARCH_LOWPUTC */

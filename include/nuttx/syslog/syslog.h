@@ -216,8 +216,8 @@ int syslog_flush(void);
  *
  ****************************************************************************/
 
-int _vsyslog(FAR const IPTR char *src, va_list ap);
-int _lowvsyslog(FAR const IPTR char *src, va_list ap);
+int _vsyslog(FAR const IPTR char *src, FAR va_list *ap);
+int _lowvsyslog(FAR const IPTR char *src, FAR va_list *ap);
 
 #undef EXTERN
 #ifdef __cplusplus

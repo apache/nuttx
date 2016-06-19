@@ -69,7 +69,7 @@ int vsyslog(int priority, FAR const IPTR char *fmt, va_list ap)
     {
       /* Yes.. lPerform the _vsyslog system cal */
 
-      ret = _vsyslog(fmt, ap);
+      ret = _vsyslog(fmt, &ap);
     }
 
   return ret;

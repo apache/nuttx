@@ -80,7 +80,7 @@ int lowvsyslog(int priority, FAR const IPTR char *fmt, va_list ap)
     {
       /* Perform the _lowvsyslog system call */
 
-      ret = _lowvsyslog(fmt, ap);
+      ret = _lowvsyslog(fmt, &ap);
     }
 
   return ret;

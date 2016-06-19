@@ -62,7 +62,7 @@
  *
  ****************************************************************************/
 
-int _vsyslog(FAR const IPTR char *fmt, va_list ap)
+int _vsyslog(FAR const IPTR char *fmt, FAR va_list *ap)
 {
   struct lib_outstream_s stream;
 #ifdef CONFIG_SYSLOG_TIMESTAMP
@@ -96,5 +96,5 @@ int _vsyslog(FAR const IPTR char *fmt, va_list ap)
 
 #endif
 
-  return lib_vsprintf((FAR struct lib_outstream_s *)&stream, fmt, ap);
+  return lib_vsprintf((FAR struct lib_outstream_s *)&stream, fmt, *ap);
 }
