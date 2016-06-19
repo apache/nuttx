@@ -7,7 +7,7 @@ comment "System Logging"
 
 # Selected if the architecture has its own, built-in SYSLOGgin enabled
 
-config ARCH_HAVE_SYSLOG
+config ARCH_SYSLOG
 	bool
 	default n
 
@@ -29,7 +29,7 @@ if RAMLOG
 config RAMLOG_SYSLOG
 	bool "Use RAMLOG for SYSLOG"
 	default n
-	depends on SYSLOG && !ARCH_HAVE_SYSLOG
+	depends on SYSLOG && !ARCH_SYSLOG
 	---help---
 		Use the RAM logging device for the syslogging interface.  If this feature
 		is enabled (along with SYSLOG), then all debug output (only) will be re-directed
@@ -107,7 +107,7 @@ if SYSLOG
 config SYSLOG_CHAR
 	bool "System log character device support"
 	default y
-	depends on !ARCH_HAVE_SYSLOG
+	depends on !ARCH_SYSLOG
 	---help---
 		Enable the generic character device for the SYSLOG. The full path to the
 		SYSLOG device is provided by SYSLOG_DEVPATH. A valid character device (or

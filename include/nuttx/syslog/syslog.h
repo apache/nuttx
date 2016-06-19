@@ -97,14 +97,24 @@ extern "C"
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
 /****************************************************************************
  * Name: syslog_initialize
  *
  * Description:
  *   One power up, the SYSLOG facility is non-existent or limited to very
- *   low-level output.  This function is called later in the intialization
+ *   low-level output.  This function is called later in the initialization
  *   sequence after full driver support has been initialized.  It installs
  *   the configured SYSLOG drivers and enables full SYSLOGing capability.
+ *
+ *   This function performs these basic operations:
+ *
+ *   - Initialize the SYSLOG device
+ *   - Call syslog_channel() to begin using that device.
+ *
+ *   If CONFIG_ARCH_SYSLOG is selected, then the architecture-specifica
+ *   logic will provide its own SYSLOG device initialize which must include
+ *   as a minimum a call to syslog_channel() to use the device.
  *
  * Input Parameters:
  *   None
@@ -115,7 +125,11 @@ extern "C"
  *
  ****************************************************************************/
 
+#ifndef CONFIG_ARCH_SYSLOG
 int syslog_initialize(void);
+#else
+#  define syslog_initialize()
+#endif
 
 /****************************************************************************
  * Name: syslog_putc

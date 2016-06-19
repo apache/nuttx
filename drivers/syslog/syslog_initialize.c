@@ -45,6 +45,8 @@
 
 #include "syslog.h"
 
+#ifndef CONFIG_ARCH_SYSLOG
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -54,9 +56,18 @@
  *
  * Description:
  *   One power up, the SYSLOG facility is non-existent or limited to very
- *   low-level output.  This function is called later in the intialization
+ *   low-level output.  This function is called later in the initialization
  *   sequence after full driver support has been initialized.  It installs
  *   the configured SYSLOG drivers and enables full SYSLOGing capability.
+ *
+ *   This function performs these basic operations:
+ *
+ *   - Initialize the SYSLOG device
+ *   - Call syslog_channel() to begin using that device.
+ *
+ *   If CONFIG_ARCH_SYSLOG is selected, then the architecture-specifica
+ *   logic will provide its own SYSLOG device initialize which must include
+ *   as a minimum a call to syslog_channel() to use the device.
  *
  * Input Parameters:
  *   None
@@ -92,3 +103,5 @@ int syslog_initialize(void)
 
   return ret;
 }
+
+#endif /* CONFIG_ARCH_SYSLOG */

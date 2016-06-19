@@ -39,6 +39,10 @@
 
 CSRCS += syslog_initialize.c vsyslog.c vlowsyslog.c syslogstream.c
 
+ifneq ($(CONFIG_ARCH_SYSLOG),y)
+  CSRCS += syslog_initialize.c
+endif
+
 # The note driver is hosted in this directory, but is not associated with
 # SYSLOGging
 
