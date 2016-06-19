@@ -47,6 +47,8 @@
 #include <nuttx/syslog/syslog.h>
 #include <nuttx/streams.h>
 
+#include "syslog.h"
+
 #ifdef CONFIG_SYSLOG
 
 /****************************************************************************

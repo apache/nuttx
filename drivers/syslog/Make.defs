@@ -68,8 +68,14 @@ ifeq ($(CONFIG_SYSLOG),y)
 
 # System logging to a character device (or file)
 
-ifeq ($(CONFIG_SYSLOG_CHAR),y)
 CSRCS += syslog_device.c
+
+ifeq ($(CONFIG_SYSLOG_CHAR),y)
+CSRCS += syslog_devchannel.c
+endif
+
+ifeq ($(CONFIG_DEV_CONSOLE),y)
+CSRCS += syslog_consolechannel.c
 endif
 
 # (Add other SYSLOG drivers here)

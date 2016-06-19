@@ -51,10 +51,10 @@
 /* Configuration ************************************************************/
 /* CONFIG_SYSLOG_CONSOLE - Use the syslog logging output as a system console.
  *   If this feature is enabled (along with CONFIG_DEV_CONSOLE), then all
- *   console output will be re-directed to a syslog_putc function.  This
+ *   console output will be re-directed to the SYSLOG output channel.  This
  *   is useful, for example, if the only console is a Telnet console.  Then
  *   in that case, console output from non-Telnet threads will go to the
- *   syslog_putc output.
+ *   SYSLOG output channel.
  */
 
 #ifndef CONFIG_DEV_CONSOLE

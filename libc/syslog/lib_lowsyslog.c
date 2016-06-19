@@ -47,13 +47,13 @@
 
 #if defined(CONFIG_ARCH_LOWPUTC) || defined(CONFIG_SYSLOG)
 /* The low-level SYSLOG functions can be used only if we have access to
- * either the low-level serial interface, up_putc(), and to syslog_putc()
+ * either the low-level serial interface, up_putc().
  */
 
 #if defined(CONFIG_BUILD_FLAT) || defined (__KERNEL__)
-/* The low-level serial interface, up_putc(), and syslog_putc() are only
- * available in the FLAT build or during the kernel pass of the protected or
- * kernel two pass builds.
+/* The low-level serial interface, up_putc(), is only available in the FLAT
+ * build or during the kernel pass of the protected or kernel two pass
+ * builds.
  */
 
 /****************************************************************************

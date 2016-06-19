@@ -183,7 +183,7 @@ int ramlog_consoleinit(void);
 #endif
 
 /****************************************************************************
- * Name: ramlog_syslog_initialize
+ * Name: ramlog_syslog_channel
  *
  * Description:
  *   Create the RAM logging device and register it at the specified path.
@@ -195,7 +195,24 @@ int ramlog_consoleinit(void);
  ****************************************************************************/
 
 #ifdef CONFIG_RAMLOG_SYSLOG
-int ramlog_syslog_initialize(void);
+int ramlog_syslog_channel(void);
+#endif
+
+/****************************************************************************
+ * Name: ramlog_putc
+ *
+ * Description:
+ *   This is the low-level system logging interface.  The debugging/syslogging
+ *   interfaces are syslog() and lowsyslog().  The difference is that
+ *   the syslog() internface writes to syslog device (usually fd=1, stdout)
+ *   whereas lowsyslog() uses a lower level interface that works from
+ *   interrupt handlers.  This function is a a low-level interface used to
+ *   implement lowsyslog() when CONFIG_RAMLOG_SYSLOG=y and CONFIG_SYSLOG=y
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_RAMLOG_CONSOLE) || defined(CONFIG_RAMLOG_SYSLOG)
+int ramlog_putc(int ch);
 #endif
 
 #undef EXTERN

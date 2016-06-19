@@ -56,7 +56,7 @@
  * CONFIG_SYSLOG_DEVPATH - The full path to the system logging device
  *
  * In addition, some SYSLOG device must also be enabled that will provide
- * the syslog_putc() function.  As of this writing, there are two SYSLOG
+ * the syslog output "channel.  As of this writing, there are two SYSLOG
  * devices avaiable:
  *
  *   1. A RAM SYSLOGing device that will log data into a circular buffer
@@ -190,23 +190,6 @@ int syslog_initialize(void);
 #else
 #  define syslog_initialize()
 #endif
-
-/****************************************************************************
- * Name: syslog_putc
- *
- * Description:
- *   This is the low-level system logging interface.
- *
- * Input Parameters:
- *   ch - The character to add to the SYSLOG (must be positive).
- *
- * Returned Value:
- *   On success, the character is echoed back to the caller.  A negated
- *   errno value is returned on any failure.
- *
- ****************************************************************************/
-
-int syslog_putc(int ch);
 
 /****************************************************************************
  * Name: syslog_flush

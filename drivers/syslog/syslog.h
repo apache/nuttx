@@ -87,6 +87,34 @@ extern "C"
  *   SYSLOG device.  That would be a good extension.
  *
  * Input Parameters:
+ *   devpath - The full path to the character device to be used.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure.
+ *
+ ****************************************************************************/
+
+#if CONFIG_NFILE_DESCRIPTORS > 0
+int syslog_dev_initialize(FAR const char *devpath);
+#endif
+
+/****************************************************************************
+ * Name: syslog_dev_channel
+ *
+ * Description:
+ *   Configure to use the character device (or file) at
+ *   CONFIG_SYSLOG_DEVPATH as the SYSLOG channel.
+ *
+ *   This tiny function is simply a wrapper around syslog_dev_initialize()
+ *   and syslog_channel().  It calls syslog_dev_initialize() to configure
+ *   the character device at CONFIG_SYSLOG_DEVPATH then calls
+ *   syslog_channel() to use that device as the SYSLOG output channel.
+ *
+ *   NOTE interrupt level SYSLOG output will be lost in this case unless
+ *   the interrupt buffer is used.
+ *
+ * Input Parameters:
  *   None
  *
  * Returned Value:
@@ -96,7 +124,38 @@ extern "C"
  ****************************************************************************/
 
 #ifdef CONFIG_SYSLOG_CHAR
-int syslog_dev_initialize(void);
+int syslog_dev_channel(void);
+#endif
+
+/****************************************************************************
+ * Name: syslog_console_channel
+ *
+ * Description:
+ *   Configure to use the character device (or file) at /dev/console as the
+ *   SYSLOG channel.
+ *
+ *   This tiny function is simply a wrapper around syslog_dev_initialize()
+ *   and syslog_channel().  It calls syslog_dev_initialize() to configure
+ *   the character device at /dev/console then calls syslog_channel() to
+ *   use that device as the SYSLOG output channel.
+ *
+ *   NOTE interrupt level SYSLOG output will be lost in the general case
+ *   unless the interrupt buffer is used.  As a special case:  If the serial
+ *   console is used and the architecture provides up_putc(), the interrupt
+ *   level output will be directed to up_putc() is the interrupt buffer is
+ *   disabled.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DEV_CONSOLE
+int syslog_console_channel(void);
 #endif
 
 /****************************************************************************
@@ -146,6 +205,61 @@ int syslog_add_intbuffer(int ch);
 #ifdef CONFIG_SYSLOG_INTBUFFER
 int syslog_flush_intbuffer(FAR const struct syslog_channel_s *channel,
                            bool force);
+#endif
+
+/****************************************************************************
+ * Name: syslog_putc
+ *
+ * Description:
+ *   This is the low-level system logging interface.
+ *
+ * Input Parameters:
+ *   ch - The character to add to the SYSLOG (must be positive).
+ *
+ * Returned Value:
+ *   On success, the character is echoed back to the caller.  A negated
+ *   errno value is returned on any failure.
+ *
+ ****************************************************************************/
+
+int syslog_putc(int ch);
+
+/****************************************************************************
+ * Name: syslog_dev_putc
+ *
+ * Description:
+ *   This is the low-level system logging interface provided for the
+ *   character driver interface.
+ *
+ * Input Parameters:
+ *   ch - The character to add to the SYSLOG (must be positive).
+ *
+ * Returned Value:
+ *   On success, the character is echoed back to the caller.  A negated
+ *   errno value is returned on any failure.
+ *
+ ****************************************************************************/
+
+#if CONFIG_NFILE_DESCRIPTORS > 0
+int syslog_dev_putc(int ch);
+#endif
+
+/****************************************************************************
+ * Name: syslog_dev_flush
+ *
+ * Description:
+ *   Flush any buffer data in the file system to media.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value is returned on any failure.
+ *
+ ****************************************************************************/
+
+#if CONFIG_NFILE_DESCRIPTORS > 0
+int syslog_dev_flush(void);
 #endif
 
 #undef EXTERN
