@@ -73,15 +73,6 @@ static int syslog_default_flush(void)
   return OK;
 }
 
-#ifndef CONFIG_SYSLOG_INTBUFFER
-static int syslog_force(int ch)
-{
-  DEBUGASSERT(g_syslog_channel != NULL && g_syslog_channel->sc_force != NULL);
-
-  return g_syslog_channel->sc_force(ch);
-}
-#endif
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -141,7 +132,7 @@ int syslog_putc(int ch)
 
   if (up_interrupt_context())
     {
-#ifdef CONFIG_SYSLOG_INTBUFFER
+#if defined(CONFIG_SYSLOG_INTBUFFER)
       /* Buffer the character in the interrupt buffer.  The interrupt buffer
        * will be flushed before the next normal, non-interrupt SYSLOG output.
        */
@@ -153,7 +144,9 @@ int syslog_putc(int ch)
        * with output data that may have been buffered by sc_putc().
        */
 
-      return syslog_force(ch);
+      DEBUGASSERT(g_syslog_channel->sc_force != NULL);
+
+      return g_syslog_channel->sc_force(ch);
 #endif
     }
   else

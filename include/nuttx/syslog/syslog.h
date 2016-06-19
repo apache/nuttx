@@ -83,13 +83,15 @@
 #  define CONFIG_SYSLOG_DEVPATH "/dev/ttyS1"
 #endif
 
-#if defined(CONFIG_SYSLOG_INTBUFFER) && !defined(CONFIG_SYSLOG_INTBUFSIZE)
-#  define CONFIG_SYSLOG_INTBUFSIZE 2048
-#endif
 
-#if CONFIG_SYSLOG_INTBUFSIZE > 65535
-#  undef  CONFIG_SYSLOG_INTBUFSIZE
-#  define CONFIG_SYSLOG_INTBUFSIZE 65535
+#ifdef CONFIG_SYSLOG_INTBUFFER
+#  ifndef CONFIG_SYSLOG_INTBUFSIZE
+#    define CONFIG_SYSLOG_INTBUFSIZE 512
+#  endif
+#  if CONFIG_SYSLOG_INTBUFSIZE > 65535
+#    undef  CONFIG_SYSLOG_INTBUFSIZE
+#    define CONFIG_SYSLOG_INTBUFSIZE 65535
+#  endif
 #endif
 
 /****************************************************************************

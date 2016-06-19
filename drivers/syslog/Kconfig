@@ -14,7 +14,7 @@ config SYSLOG_INTBUFFER
 
 config SYSLOG_INTBUFSIZE
 	int "Interrupt buffer size"
-	default 2048
+	default 512
 	depends on SYSLOG_INTBUFFER
 	---help---
 		The size of the interrupt buffer in bytes.
