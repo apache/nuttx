@@ -1327,7 +1327,6 @@ Where <subdir> is one of the following:
 
     There are some special settings to make life with only a Telnet
 
-    CONFIG_SYSLOG=y - Enables the System Logging feature.
     CONFIG_RAMLOG=y - Enable the RAM-based logging feature.
     CONFIG_RAMLOG_CONSOLE=y - Use the RAM logger as the default console.
       This means that any console output from non-Telnet threads will

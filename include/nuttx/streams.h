@@ -369,9 +369,7 @@ void lib_nulloutstream(FAR struct lib_outstream_s *nulloutstream);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SYSLOG
 void syslogstream(FAR struct lib_outstream_s *stream);
-#endif
 
 /****************************************************************************
  * Name: lib_noflush

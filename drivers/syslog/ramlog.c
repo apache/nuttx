@@ -760,7 +760,7 @@ int ramlog_syslog_channel(void)
  *   the syslog() internface writes to syslog device (usually fd=1, stdout)
  *   whereas lowsyslog() uses a lower level interface that works from
  *   interrupt handlers.  This function is a a low-level interface used to
- *   implement lowsyslog() when CONFIG_RAMLOG_SYSLOG=y and CONFIG_SYSLOG=y
+ *   implement lowsyslog() when CONFIG_RAMLOG_SYSLOG=y.
  *
  ****************************************************************************/
 

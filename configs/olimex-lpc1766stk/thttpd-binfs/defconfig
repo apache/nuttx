@@ -663,7 +663,6 @@ CONFIG_FS_UNIONFS=y
 #
 # System Logging
 #
-# CONFIG_SYSLOG is not set
 # CONFIG_SYSLOG_TIMESTAMP is not set
 
 #

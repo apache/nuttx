@@ -49,8 +49,6 @@
 
 #include "syslog.h"
 
-#ifdef CONFIG_SYSLOG
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -116,5 +114,3 @@ void syslogstream(FAR struct lib_outstream_s *stream)
 #endif
   stream->nput  = 0;
 }
-
-#endif /* CONFIG_SYSLOG */

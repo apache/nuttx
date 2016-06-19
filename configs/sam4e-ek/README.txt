@@ -1554,7 +1554,6 @@ Configurations
        the system logging device:
 
            File Systems -> Advanced SYSLOG Features
-             CONFIG_SYSLOG=y               : Enable output to syslog, not console
              CONFIG_SYSLOG_CHAR=y          : Use a character device for system logging
              CONFIG_SYSLOG_DEVPATH="/dev/ttyS0" : UART0 will be /dev/ttyS0
 

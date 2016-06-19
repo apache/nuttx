@@ -1,8 +1,8 @@
 /****************************************************************************
- * drivers/syslog/syslog_console.c
+ * drivers/syslog/syslog_consolechannel.c
  *
- *   Copyright (C) 2015 Pierre-noel Bouteville. All rights reserved.
- *   Author: Pierre-noel Bouteville <pnb990@gmail.com>
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -39,40 +39,49 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
-#include <errno.h>
-#include <debug.h>
-
 #include <nuttx/arch.h>
-#include <nuttx/fs/fs.h>
 #include <nuttx/syslog/syslog.h>
+
+#include "syslog.h"
+
+#ifdef CONFIG_DEV_CONSOLE
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+#undef HAVE_LOWPUTC
+#if defined(CONFIG_SERIAL_CONSOLE) && defined(CONFIG_ARCH_LOWPUTC)
+#  define HAVE_LOWPUTC 1
+#endif
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
-static ssize_t syslog_console_read(FAR struct file *filep, FAR char *buffer, 
-                                   size_t buflen);
-static ssize_t syslog_console_write(FAR struct file *filep,
-                                    FAR const char *buffer, size_t buflen);
-static int     syslog_console_ioctl(FAR struct file *filep, int cmd, 
-                                    unsigned long arg);
+/* SYSLOG channel methods */
+
+static int syslog_console_force(int ch);
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static const struct file_operations g_consoleops =
+/* This structure describes the ITM SYSLOG channel */
+
+static const struct syslog_channel_s g_syslog_console_channel =
 {
-  0,                    /* open */
-  0,                    /* close */
-  syslog_console_read,  /* read */
-  syslog_console_write, /* write */
-  0,                    /* seek */
-  syslog_console_ioctl  /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  , 0                   /* poll */
+  syslog_dev_putc,
+#ifdef HAVE_LOWPUTC
+  up_putc,
+#else
+  syslog_console_force,
 #endif
+  syslog_dev_flush,
 };
 
 /****************************************************************************
@@ -80,51 +89,66 @@ static const struct file_operations g_consoleops =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: syslog_console_ioctl
+ * Name: syslog_console_force
+ *
+ * Description:
+ *   A dummy FORCE method
+ *
  ****************************************************************************/
 
-static int syslog_console_ioctl(FAR struct file *filep, int cmd,
-                                unsigned long arg)
+#ifndef HAVE_LOWPUTC
+static int syslog_console_force(int ch)
 {
-  return -ENOTTY;
+  return ch;
 }
-
-/****************************************************************************
- * Name: syslog_console_read
- ****************************************************************************/
-
-static ssize_t syslog_console_read(FAR struct file *filep, FAR char *buffer, 
-                                   size_t buflen)
-{
-  return 0;
-}
-
-/****************************************************************************
- * Name: syslog_console_write
- ****************************************************************************/
-
-static ssize_t syslog_console_write(FAR struct file *filep,
-                                    FAR const char *buffer, size_t buflen)
-{
-  ssize_t ret = buflen;
-
-  for (; buflen; buflen--)
-    {
-      syslog_putc(*buffer++);
-    }
-
-  return ret;
-}
+#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: syslog_console_init
+ * Name: syslog_console_channel
+ *
+ * Description:
+ *   Configure to use the character device (or file) at /dev/console as the
+ *   SYSLOG channel.
+ *
+ *   This tiny function is simply a wrapper around syslog_dev_initialize()
+ *   and syslog_channel().  It calls syslog_dev_initialize() to configure
+ *   the character device at /dev/console then calls syslog_channel() to
+ *   use that device as the SYSLOG output channel.
+ *
+ *   NOTE interrupt level SYSLOG output will be lost in the general case
+ *   unless the interrupt buffer is used.  As a special case:  If the serial
+ *   console is used and the architecture provides up_putc(), the interrupt
+ *   level output will be directed to up_putc() is the interrupt buffer is
+ *   disabled.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure.
+ *
  ****************************************************************************/
 
-void syslog_console_init(void)
+int syslog_console_channel(void)
 {
-  (void)register_driver("/dev/console", &g_consoleops, 0666, NULL);
+  int ret;
+
+  /* Initialize the character driver interface */
+
+  ret = syslog_dev_initialize("/dev/console");
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  /* Use the character driver as the SYSLOG channel */
+
+  return syslog_channel(&g_syslog_console_channel);
 }
+
+#endif /* CONFIG_SYSLOG_CHAR */

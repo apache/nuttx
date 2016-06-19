@@ -583,7 +583,6 @@ Where <subdir> is one of the following:
     3. This configuration does have UART2 output enabled and set up as
        the system logging device:
 
-       CONFIG_SYSLOG=y                    : Enable output to syslog, not console
        CONFIG_SYSLOG_CHAR=y               : Use a character device for system logging
        CONFIG_SYSLOG_DEVPATH="/dev/ttyS0" : UART2 will be /dev/ttyS0
 

@@ -52,7 +52,7 @@
 #include "up_arch.h"
 #include "itm_syslog.h"
 
-#if defined(CONFIG_SYSLOG) || defined(CONFIG_ARMV7M_ITMSYSLOG)
+#ifdef CONFIG_ARMV7M_ITMSYSLOG
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -189,4 +189,4 @@ void itm_syslog_initialize(void)
   (void)syslog_channel(&g_itm_channel);
 }
 
-#endif /* CONFIG_SYSLOG && CONFIG_ARMV7M_ITMSYSLOG */
+#endif /* CONFIG_ARMV7M_ITMSYSLOG */

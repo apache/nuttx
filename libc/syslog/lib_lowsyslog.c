@@ -45,7 +45,7 @@
 
 #include "syslog/syslog.h"
 
-#if defined(CONFIG_ARCH_LOWPUTC) || defined(CONFIG_SYSLOG)
+#ifdef CONFIG_ARCH_LOWPUTC
 /* The low-level SYSLOG functions can be used only if we have access to
  * either the low-level serial interface, up_putc().
  */
@@ -118,4 +118,4 @@ int lowsyslog(int priority, FAR const IPTR char *fmt, ...)
 }
 
 #endif /* CONFIG_BUILD_FLAT) || __KERNEL__ */
-#endif /* CONFIG_ARCH_LOWPUTC || CONFIG_SYSLOG */
+#endif /* CONFIG_ARCH_LOWPUTC */

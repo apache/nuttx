@@ -49,8 +49,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
-/* CONFIG_SYSLOG - Enables generic system logging features.
- * CONFIG_SYSLOG_INTBUFFER - Enables an interrupt buffer that will be used
+/* CONFIG_SYSLOG_INTBUFFER - Enables an interrupt buffer that will be used
  *   to serialize debug output from interrupt handlers.
  * CONFIG_SYSLOG_INTBUFSIZE - The size of the interrupt buffer in bytes.
  * CONFIG_SYSLOG_DEVPATH - The full path to the system logging device
@@ -76,14 +75,9 @@
  *   NOTE:  No more than one SYSLOG device should be configured.
  */
 
-#ifndef CONFIG_SYSLOG
-#  undef CONFIG_SYSLOG_CHAR
-#endif
-
 #if defined(CONFIG_SYSLOG_CHAR) && !defined(CONFIG_SYSLOG_DEVPATH)
 #  define CONFIG_SYSLOG_DEVPATH "/dev/ttyS1"
 #endif
-
 
 #ifdef CONFIG_SYSLOG_INTBUFFER
 #  ifndef CONFIG_SYSLOG_INTBUFSIZE
@@ -213,7 +207,7 @@ int syslog_initialize(void);
 int syslog_flush(void);
 
 /****************************************************************************
- * Name: _vsyslog and _vlowsyslog
+ * Name: _vsyslog and _lowvsyslog
  *
  * Description:
  *   _vsyslog() handles the system logging system calls. It is functionally

@@ -64,8 +64,6 @@ endif
 ############################################################################
 # Include SYSLOG drivers (only one should be enabled)
 
-ifeq ($(CONFIG_SYSLOG),y)
-
 # System logging to a character device (or file)
 
 CSRCS += syslog_device.c
@@ -85,8 +83,6 @@ ifeq ($(CONFIG_SYSLOG_CONSOLE),y)
 endif
 
 # (Add other SYSLOG_CONSOLE drivers here)
-
-endif
 
 # Include SYSLOG build support
 
