@@ -72,6 +72,7 @@
 #include <signal.h>
 #include <mqueue.h>
 #include <spawn.h>
+#include <syslog.h>
 #include <assert.h>
 
 /* Errno access is awkward. We need to generate get_errno() and set_errno()

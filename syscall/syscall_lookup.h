@@ -163,6 +163,10 @@ SYSCALL_LOOKUP(up_assert,                 2, STUB_up_assert)
   SYSCALL_LOOKUP(timer_settime,           4, STUB_timer_settime)
 #endif
 
+/* System logging */
+
+  SYSCALL_LOOKUP(vsyslog,                 3, STUB_vsyslog)
+
 /* The following are defined if either file or socket descriptor are
  * enabled.
  */
