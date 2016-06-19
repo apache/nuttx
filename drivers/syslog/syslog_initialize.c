@@ -81,12 +81,13 @@ int syslog_initialize(void)
 #elif defined(CONFIG_RAMLOG_SYSLOG)
   /* Use the RAMLOG as the SYSLOG device */
 
-  ramlog_syslog_initialize();
-#endif
+  ret = ramlog_syslog_initialize();
+
 #else
   /* Nothing needs to be done */
 
   ret = 0;
+
 #endif
 
   return ret;
