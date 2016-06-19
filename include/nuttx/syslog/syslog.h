@@ -2,7 +2,7 @@
  * include/nuttx/syslog/syslog.h
  * The NuttX SYSLOGing interface
  *
- *   Copyright (C) 2012, 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2014-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -127,6 +127,19 @@ int syslog_initialize(void);
 #ifdef CONFIG_SYSLOG
 int syslog_putc(int ch);
 #endif
+
+/****************************************************************************
+ * Name: _vsyslog and _vlowsyslog
+ *
+ * Description:
+ *   _vsyslog() handles the system logging system calls. It is functionally
+ *   equivalent to vsyslog() except that the pre-process priority filtering
+ *   has already been performed and, hence, there is no priority argument.
+ *
+ ****************************************************************************/
+
+int _vsyslog(FAR const IPTR char *src, va_list ap);
+int _lowvsyslog(FAR const IPTR char *src, va_list ap);
 
 #undef EXTERN
 #ifdef __cplusplus
