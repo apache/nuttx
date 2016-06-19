@@ -37,7 +37,7 @@
 ############################################################################
 # Include SYSLOG Infrastructure
 
-CSRCS += vsyslog.c vlowsyslog.c syslogstream.c
+CSRCS += syslog_initialize.c vsyslog.c vlowsyslog.c syslogstream.c
 
 # The note driver is hosted in this directory, but is not associated with
 # SYSLOGging

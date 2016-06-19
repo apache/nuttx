@@ -226,18 +226,31 @@ static inline void syslog_flush(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: syslog_initialize
+ * Name: syslog_dev_initialize
  *
  * Description:
  *   Initialize to use the character device (or file) at
  *   CONFIG_SYSLOG_DEVPATH as the SYSLOG sink.
  *
+ *   One power up, the SYSLOG facility is non-existent or limited to very
+ *   low-level output.  This function may be called later in the
+ *   intialization sequence after full driver support has been initialized.
+ *   (via syslog_initialize())  It installs the configured SYSLOG drivers
+ *   and enables full SYSLOGing capability.
+ *
  *   NOTE that this implementation excludes using a network connection as
  *   SYSLOG device.  That would be a good extension.
  *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure.
+ *
  ****************************************************************************/
 
-int syslog_initialize(void)
+int syslog_dev_initialize(void)
 {
   int fd;
   int ret;
@@ -322,9 +335,9 @@ int syslog_putc(int ch)
    *
    * (1) Before the SYSLOG device has been initialized.  This could happen
    *     from debug output that occurs early in the boot sequence before
-   *     syslog_initialize() is called (SYSLOG_UNINITIALIZED).
+   *     syslog_dev_initialize() is called (SYSLOG_UNINITIALIZED).
    * (2) While the device is being initialized.  The case could happen if
-   *     debug output is generated while syslog_initialize() executes
+   *     debug output is generated while syslog_dev_initialize() executes
    *     (SYSLOG_INITIALIZING).
    * (3) While we are generating SYSLOG output.  The case could happen if
    *     debug output is generated while syslog_putc() executes
@@ -374,7 +387,7 @@ int syslog_putc(int ch)
           goto errout_with_errcode;
         }
 
-      /* syslog_initialize() is called as soon as enough of the operating
+      /* syslog_dev_initialize() is called as soon as enough of the operating
        * system is in place to support the open operation... but it is
        * possible that the SYSLOG device is not yet registered at that time.
        * In this case, we know that the system is sufficiently initialized
@@ -390,12 +403,12 @@ int syslog_putc(int ch)
         {
           /* Try again to initialize the device.  We may do this repeatedly
            * because the log device might be something that was not ready
-           * the first time that syslog_initializee() was called (such as a
+           * the first time that syslog_dev_initializee() was called (such as a
            * USB serial device that has not yet been connected or a file in
            * an NFS mounted file system that has not yet been mounted).
            */
 
-          ret = syslog_initialize();
+          ret = syslog_dev_initialize();
           if (ret < 0)
             {
               sched_unlock();
