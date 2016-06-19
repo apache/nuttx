@@ -515,7 +515,7 @@ errout_with_errcode:
 
 int syslog_dev_flush(void)
 {
-  int ret;
+  int ret = 0;;
 
 #ifndef CONFIG_DISABLE_MOUNTPOINT
   FAR struct inode *inode = g_syslog_dev.sl_file.f_inode;
@@ -529,10 +529,6 @@ int syslog_dev_flush(void)
 
       ret = inode->u.i_mops->sync(&g_syslog_dev.sl_file);
     }
-
-#else
-  ret = 0;
-
 #endif
 
   return ret;
