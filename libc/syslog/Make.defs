@@ -37,10 +37,6 @@
 
 CSRCS += lib_syslog.c lib_lowsyslog.c lib_setlogmask.c
 
-ifeq ($(CONFIG_SYSLOG),y)
-CSRCS += lib_syslogstream.c
-endif
-
 # Add the syslog directory to the build
 
 DEPPATH += --dep-path syslog

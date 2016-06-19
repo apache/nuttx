@@ -210,6 +210,19 @@ int syslog_putc(int ch);
 
 int syslog_flush(void);
 
+/****************************************************************************
+ * Name: _vsyslog and _vlowsyslog
+ *
+ * Description:
+ *   _vsyslog() handles the system logging system calls. It is functionally
+ *   equivalent to vsyslog() except that the pre-process priority filtering
+ *   has already been performed and, hence, there is no priority argument.
+ *
+ ****************************************************************************/
+
+int _vsyslog(FAR const IPTR char *src, va_list ap);
+int _lowvsyslog(FAR const IPTR char *src, va_list ap);
+
 #undef EXTERN
 #ifdef __cplusplus
 }

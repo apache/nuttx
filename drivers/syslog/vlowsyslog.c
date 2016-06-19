@@ -1,7 +1,7 @@
 /****************************************************************************
- * libc/syslog/lib_syslogstream.c
+ * drivers/syslog/vlowsyslog.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,84 +40,42 @@
 #include <nuttx/config.h>
 
 #include <stdio.h>
-#include <unistd.h>
-#include <assert.h>
-#include <errno.h>
+#include <syslog.h>
 
-#include <nuttx/syslog/syslog.h>
 #include <nuttx/streams.h>
+#include <nuttx/syslog/syslog.h>
 
-#include "syslog/syslog.h"
-
-#ifdef CONFIG_SYSLOG
-
-/****************************************************************************
- * Pre-processor definition
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: syslogstream_putc
- ****************************************************************************/
-
-static void syslogstream_putc(FAR struct lib_outstream_s *this, int ch)
-{
-  int ret;
-
-  /* Try writing until the write was successful or until an irrecoverable
-   * error occurs.
-   */
-
-  do
-    {
-      /* Write the character to the supported logging device.  On failure,
-       * syslog_putc returns EOF with the errno value set;
-       */
-
-      ret = syslog_putc(ch);
-      if (ret != EOF)
-        {
-          this->nput++;
-          return;
-        }
-
-      /* The special errno value -EINTR means that syslog_putc() was
-       * awakened by a signal.  This is not a real error and must be
-       * ignored in this context.
-       */
-    }
-  while (errno == -EINTR);
-}
+#if defined(CONFIG_ARCH_LOWPUTC) || defined(CONFIG_SYSLOG)
+/* The low-level SYSLOG functions can be used only if we have access to
+ * either the low-level serial interface, up_putc(), and to syslog_putc()
+ */
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lib_syslogstream
+ * Name: _vlowsyslog
  *
  * Description:
- *   Initializes a stream for use with the configured syslog interface.
- *
- * Input parameters:
- *   lowoutstream - User allocated, uninitialized instance of struct
- *                  lib_lowoutstream_s to be initialized.
- *
- * Returned Value:
- *   None (User allocated instance initialized).
+ *   _vlowsyslog() handles the system logging system calls. It is functionally
+ *   equivalent to vlowsyslog() except that the pre-process priority filtering
+ *   has already been performed and, hence, there is no priority argument.
  *
  ****************************************************************************/
 
-void lib_syslogstream(FAR struct lib_outstream_s *stream)
+int _vlowsyslog(FAR const IPTR char *fmt, va_list ap)
 {
-  stream->put   = syslogstream_putc;
-#ifdef CONFIG_STDIO_LINEBUFFER
-  stream->flush = lib_noflush;
+  struct lib_outstream_s stream;
+
+  /* Wrap the stdout in a stream object and let lib_vsprintf do the work. */
+
+#ifdef CONFIG_SYSLOG
+  syslogstream((FAR struct lib_outstream_s *)&stream);
+#else
+  lib_lowoutstream((FAR struct lib_outstream_s *)&stream);
 #endif
-  stream->nput  = 0;
+  return lib_vsprintf((FAR struct lib_outstream_s *)&stream, fmt, ap);
 }
 
-#endif /* CONFIG_SYSLOG */
+#endif /* CONFIG_ARCH_LOWPUTC || CONFIG_SYSLOG */

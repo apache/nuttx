@@ -1,7 +1,7 @@
 /****************************************************************************
  * lib/syslog/lib_lowsyslog.c
  *
- *   Copyright (C) 2007-2009, 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,10 +39,9 @@
 
 #include <nuttx/config.h>
 
-#include <stdio.h>
 #include <syslog.h>
 
-#include <nuttx/streams.h>
+#include <nuttx/syslog/syslog.h>
 
 #include "syslog/syslog.h"
 
@@ -56,33 +55,6 @@
  * available in the FLAT build or during the kernel pass of the protected or
  * kernel two pass builds.
  */
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: lowvsyslog_internal
- *
- * Description:
- *   This is the internal implementation of lowvsyslog (see the description
- *   of lowsyslog and lowvsyslog below)
- *
- ****************************************************************************/
-
-static inline int lowvsyslog_internal(FAR const IPTR char *fmt, va_list ap)
-{
-  struct lib_outstream_s stream;
-
-  /* Wrap the stdout in a stream object and let lib_vsprintf do the work. */
-
-#ifdef CONFIG_SYSLOG
-  lib_syslogstream((FAR struct lib_outstream_s *)&stream);
-#else
-  lib_lowoutstream((FAR struct lib_outstream_s *)&stream);
-#endif
-  return lib_vsprintf((FAR struct lib_outstream_s *)&stream, fmt, ap);
-}
 
 /****************************************************************************
  * Public Functions
@@ -106,9 +78,9 @@ int lowvsyslog(int priority, FAR const IPTR char *fmt, va_list ap)
 
   if ((g_syslog_mask & LOG_MASK(priority)) != 0)
     {
-      /* Yes.. let vsylog_internal to the deed */
+      /* Perform the _lowvsyslog system call */
 
-      ret = lowvsyslog_internal(fmt, ap);
+      ret = _lowvsyslog(fmt, ap);
     }
 
   return ret;
