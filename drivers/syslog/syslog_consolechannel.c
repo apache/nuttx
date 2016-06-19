@@ -65,7 +65,9 @@
 
 /* SYSLOG channel methods */
 
+#ifndef HAVE_LOWPUTC
 static int syslog_console_force(int ch);
+#endif
 
 /****************************************************************************
  * Private Data
