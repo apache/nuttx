@@ -95,7 +95,6 @@ Status
     -CONFIG_RAMLOG_BUFSIZE=16384
     -CONFIG_RAMLOG_NONBLOCKING=y
     -CONFIG_RAMLOG_NPOLLWAITERS=4
-    -CONFIG_SYSLOG=y
 
   I would also disable debug output from CPU0 so that I could better see the
   debug output from CPU1:
@@ -653,7 +652,6 @@ Configuration sub-directories
        RAMLOG and will not be visible unless you use the nsh 'dmesg'
        command.  To disable this RAMLOG feature, disable the following:
 
-       File Systems:    CONFIG_SYSLOG
        Device Drivers:  CONFIG_RAMLOG
 
 

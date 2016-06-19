@@ -47,7 +47,7 @@
 #include <nuttx/syslog/syslog.h>
 #include <nuttx/streams.h>
 
-#ifdef CONFIG_SYSLOG
+#include "syslog.h"
 
 /****************************************************************************
  * Private Functions
@@ -114,5 +114,3 @@ void syslogstream(FAR struct lib_outstream_s *stream)
 #endif
   stream->nput  = 0;
 }
-
-#endif /* CONFIG_SYSLOG */

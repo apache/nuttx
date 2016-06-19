@@ -884,7 +884,7 @@ static inline void efm32_gpioclock(void)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_SYSLOG) || defined(CONFIG_ARMV7M_ITMSYSLOG)
+#ifdef CONFIG_ARMV7M_ITMSYSLOG
 static inline void efm32_itm_syslog(void)
 {
   int regval;

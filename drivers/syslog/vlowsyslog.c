@@ -45,7 +45,7 @@
 #include <nuttx/streams.h>
 #include <nuttx/syslog/syslog.h>
 
-#if defined(CONFIG_ARCH_LOWPUTC) || defined(CONFIG_SYSLOG)
+#ifdef CONFIG_ARCH_LOWPUTC
 /* The low-level SYSLOG functions can be used only if we have access to
  * either the low-level serial interface, up_putc(), and to syslog_putc()
  */
@@ -55,27 +55,23 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: _vlowsyslog
+ * Name: _lowvsyslog
  *
  * Description:
- *   _vlowsyslog() handles the system logging system calls. It is functionally
+ *   _lowvsyslog() handles the system logging system calls. It is functionally
  *   equivalent to vlowsyslog() except that the pre-process priority filtering
  *   has already been performed and, hence, there is no priority argument.
  *
  ****************************************************************************/
 
-int _vlowsyslog(FAR const IPTR char *fmt, va_list ap)
+int _lowvsyslog(FAR const IPTR char *fmt, va_list ap)
 {
   struct lib_outstream_s stream;
 
   /* Wrap the stdout in a stream object and let lib_vsprintf do the work. */
 
-#ifdef CONFIG_SYSLOG
   syslogstream((FAR struct lib_outstream_s *)&stream);
-#else
-  lib_lowoutstream((FAR struct lib_outstream_s *)&stream);
-#endif
   return lib_vsprintf((FAR struct lib_outstream_s *)&stream, fmt, ap);
 }
 
-#endif /* CONFIG_ARCH_LOWPUTC || CONFIG_SYSLOG */
+#endif /* CONFIG_ARCH_LOWPUTC */

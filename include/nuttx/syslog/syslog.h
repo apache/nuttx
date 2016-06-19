@@ -42,17 +42,20 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/compiler.h>
 #include <stdarg.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
-/* CONFIG_SYSLOG - Enables generic system logging features.
+/* CONFIG_SYSLOG_INTBUFFER - Enables an interrupt buffer that will be used
+ *   to serialize debug output from interrupt handlers.
+ * CONFIG_SYSLOG_INTBUFSIZE - The size of the interrupt buffer in bytes.
  * CONFIG_SYSLOG_DEVPATH - The full path to the system logging device
  *
  * In addition, some SYSLOG device must also be enabled that will provide
- * the syslog_putc() function.  As of this writing, there are two SYSLOG
+ * the syslog output "channel.  As of this writing, there are two SYSLOG
  * devices avaiable:
  *
  *   1. A RAM SYSLOGing device that will log data into a circular buffer
@@ -72,13 +75,39 @@
  *   NOTE:  No more than one SYSLOG device should be configured.
  */
 
-#ifndef CONFIG_SYSLOG
-#  undef CONFIG_SYSLOG_CHAR
-#endif
-
 #if defined(CONFIG_SYSLOG_CHAR) && !defined(CONFIG_SYSLOG_DEVPATH)
 #  define CONFIG_SYSLOG_DEVPATH "/dev/ttyS1"
 #endif
+
+#ifdef CONFIG_SYSLOG_INTBUFFER
+#  ifndef CONFIG_SYSLOG_INTBUFSIZE
+#    define CONFIG_SYSLOG_INTBUFSIZE 512
+#  endif
+#  if CONFIG_SYSLOG_INTBUFSIZE > 65535
+#    undef  CONFIG_SYSLOG_INTBUFSIZE
+#    define CONFIG_SYSLOG_INTBUFSIZE 65535
+#  endif
+#endif
+
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
+/* This structure provides the interface to a SYSLOG device */
+
+typedef CODE int (*syslog_putc_t)(int ch);
+typedef CODE int (*syslog_flush_t)(void);
+
+struct syslog_channel_s
+{
+  /* I/O redirection methods */
+
+  syslog_putc_t sc_putc;    /* Normal buffered output */
+  syslog_putc_t sc_force;   /* Low-level output for interrupt handlers */
+  syslog_flush_t sc_flush;  /* Flush buffered output (on crash) */
+
+  /* Implementation specific logic may follow */
+};
 
 /****************************************************************************
  * Public Data
@@ -97,6 +126,24 @@ extern "C"
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: syslog_channel
+ *
+ * Description:
+ *   Configure the SYSLOGging function to use the provided channel to
+ *   generate SYSLOG output.
+ *
+ * Input buffer:
+ *   channel - Provides the interface to the channel to be used.
+ *
+ * Returned Value:
+ *   Zero (OK)is returned on  success.  A negated errno value is returned
+ *   on any failure.
+ *
+ ****************************************************************************/
+
+int syslog_channel(FAR const struct syslog_channel_s *channel);
 
 /****************************************************************************
  * Name: syslog_initialize
@@ -123,6 +170,13 @@ extern "C"
  *   Zero (OK) is returned on success; a negated errno value is returned on
  *   any failure.
  *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero (OK)is returned on  success.  A negated errno value is returned
+ *   on any failure.
+ *
  ****************************************************************************/
 
 #ifndef CONFIG_ARCH_SYSLOG
@@ -132,23 +186,28 @@ int syslog_initialize(void);
 #endif
 
 /****************************************************************************
- * Name: syslog_putc
+ * Name: syslog_flush
  *
  * Description:
- *   This is the low-level system logging interface.  The debugging/syslogging
- *   interfaces are syslog() and lowsyslog().  The difference is that
- *   the syslog() internface writes to fd=1 (stdout) whereas lowsyslog() uses
- *   a lower level interface that works from interrupt handlers.  This
- *   function is the low-level interface used to implement lowsyslog().
+ *   This is called by system crash-handling logic.  It must flush any
+ *   buffered data to the SYSLOG device.
+ *
+ *   Interrupts are disabled at the time of the crash and this logic must
+ *   perform the flush using low-level, non-interrupt driven logic.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero (OK)is returned on  success.  A negated errno value is returned
+ *   on any failure.
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SYSLOG
-int syslog_putc(int ch);
-#endif
+int syslog_flush(void);
 
 /****************************************************************************
- * Name: _vsyslog and _vlowsyslog
+ * Name: _vsyslog and _lowvsyslog
  *
  * Description:
  *   _vsyslog() handles the system logging system calls. It is functionally

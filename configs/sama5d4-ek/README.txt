@@ -4272,7 +4272,6 @@ Configurations
        configuration settings are summarized below:
 
        File System:
-       CONFIG_SYSLOG=y             : Enables the System Logging feature.
 
        Device Drivers:
        CONFIG_RAMLOG=y             : Enable the RAM-based logging feature.

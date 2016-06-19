@@ -44,6 +44,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <string.h>
 #include <fcntl.h>
 #include <semaphore.h>
 #include <errno.h>
@@ -53,7 +54,9 @@
 #include <nuttx/arch.h>
 #include <nuttx/syslog/syslog.h>
 
-#if defined(CONFIG_SYSLOG) && defined(CONFIG_SYSLOG_CHAR)
+#include "syslog.h"
+
+#if CONFIG_NFILE_DESCRIPTORS > 0
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -89,10 +92,11 @@ enum syslog_dev_state
 
 struct syslog_dev_s
 {
-  uint8_t     sl_state;     /* See enum syslog_dev_state */
-  sem_t       sl_sem;       /* Enforces mutually exclusive access */
-  pid_t       sl_holder;    /* PID of the thread that holds the semaphore */
-  struct file sl_file;      /* The syslog file structure */
+  uint8_t         sl_state;   /* See enum syslog_dev_state */
+  sem_t           sl_sem;     /* Enforces mutually exclusive access */
+  pid_t           sl_holder;  /* PID of the thread that holds the semaphore */
+  struct file     sl_file;    /* The syslog file structure */
+  FAR const char *sl_devpath; /* Full path to the character device */
 };
 
 /****************************************************************************
@@ -197,31 +201,6 @@ static inline ssize_t syslog_dev_write(FAR const void *buf, size_t nbytes)
 }
 
 /****************************************************************************
- * Name: syslog_dev_flush
- *
- * Description:
- *   Flush any buffer data in the file system to media.
- *
- ****************************************************************************/
-
-#ifndef CONFIG_DISABLE_MOUNTPOINT
-static inline void syslog_dev_flush(void)
-{
-  FAR struct inode *inode = g_syslog_dev.sl_file.f_inode;
-
-  /* Is this a mountpoint? Does it support the sync method? */
-
-  DEBUGASSERT(inode != NULL);
-  if (inode->u.i_mops->sync)
-    {
-      /* Yes... synchronize to the stream */
-
-      (void)inode->u.i_mops->sync(&g_syslog_dev.sl_file);
-    }
-}
-#endif
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -242,7 +221,7 @@ static inline void syslog_dev_flush(void)
  *   SYSLOG device.  That would be a good extension.
  *
  * Input Parameters:
- *   None
+ *   devpath - The full path to the character device to be used.
  *
  * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is returned on
@@ -250,7 +229,7 @@ static inline void syslog_dev_flush(void)
  *
  ****************************************************************************/
 
-int syslog_dev_initialize(void)
+int syslog_dev_initialize(FAR const char *devpath)
 {
   int fd;
   int ret;
@@ -262,11 +241,36 @@ int syslog_dev_initialize(void)
   DEBUGASSERT(g_syslog_dev.sl_state == SYSLOG_UNINITIALIZED ||
               g_syslog_dev.sl_state == SYSLOG_REOPEN);
 
+  /* Save the the path to the device in case we have to re-open it.
+   * If we get here and sl_devpath is not equal to NULL, that is a clue
+   * that we will are re-openingthe file.
+   */
+
+  if (g_syslog_dev.sl_state == SYSLOG_REOPEN)
+    {
+      /* Re-opening: Then we should already have a copy of the path to the
+       * device.
+       */
+
+      DEBUGASSERT(g_syslog_dev.sl_devpath != NULL &&
+                  strcmp(g_syslog_dev.sl_devpath, devpath) == 0);
+    }
+  else
+    {
+      /* Initializing.  Copy the device path so that we can use it if we
+       * have to re-open the file.
+       */
+
+      DEBUGASSERT(g_syslog_dev.sl_devpath == NULL);
+      g_syslog_dev.sl_devpath = strdup(devpath);
+      DEBUGASSERT(g_syslog_dev.sl_devpath != NULL);
+    }
+
   g_syslog_dev.sl_state = SYSLOG_INITIALIZING;
 
   /* Open the device driver. */
 
-  fd = open(CONFIG_SYSLOG_DEVPATH, O_WRONLY);
+  fd = open(devpath, O_WRONLY);
   if (fd < 0)
     {
        int errcode = get_errno();
@@ -312,19 +316,22 @@ int syslog_dev_initialize(void)
 }
 
 /****************************************************************************
- * Name: syslog_putc
+ * Name: syslog_dev_putc
  *
  * Description:
- *   This is the low-level system logging interface.  The debugging/syslogging
- *   interfaces are syslog() and lowsyslog().  The difference is is that
- *   the syslog() function writes to syslogging device (usually fd=1, stdout)
- *   whereas lowsyslog() uses a lower level interface that works from
- *   interrupt handlers.  This function is a a low-level interface used to
- *   implement lowsyslog().
+ *   This is the low-level system logging interface provided for the
+ *   character driver interface.
+ *
+ * Input Parameters:
+ *   ch - The character to add to the SYSLOG (must be positive).
+ *
+ * Returned Value:
+ *   On success, the character is echoed back to the caller.  A negated
+ *   errno value is returned on any failure.
  *
  ****************************************************************************/
 
-int syslog_putc(int ch)
+int syslog_dev_putc(int ch)
 {
   ssize_t nbytes;
   uint8_t uch;
@@ -340,7 +347,7 @@ int syslog_putc(int ch)
    *     debug output is generated while syslog_dev_initialize() executes
    *     (SYSLOG_INITIALIZING).
    * (3) While we are generating SYSLOG output.  The case could happen if
-   *     debug output is generated while syslog_putc() executes
+   *     debug output is generated while syslog_dev_putc() executes
    *     (This case is actually handled inside of syslog_semtake()).
    * (4) Any debug output generated from interrupt handlers.  A disadvantage
    *     of using the generic character device for the SYSLOG is that it
@@ -408,7 +415,8 @@ int syslog_putc(int ch)
            * an NFS mounted file system that has not yet been mounted).
            */
 
-          ret = syslog_dev_initialize();
+          DEBUGASSERT(g_syslog_dev.sl_devpath != NULL);
+          ret = syslog_dev_initialize(g_syslog_dev.sl_devpath);
           if (ret < 0)
             {
               sched_unlock();
@@ -460,7 +468,7 @@ int syslog_putc(int ch)
 #ifndef CONFIG_DISABLE_MOUNTPOINT
       if (nbytes > 0)
         {
-          syslog_dev_flush();
+          (void)syslog_dev_flush();
         }
 #endif
     }
@@ -491,4 +499,43 @@ errout_with_errcode:
   return EOF;
 }
 
-#endif /* CONFIG_SYSLOG && CONFIG_SYSLOG_CHAR */
+/****************************************************************************
+ * Name: syslog_dev_flush
+ *
+ * Description:
+ *   Flush any buffer data in the file system to media.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value is returned on any failure.
+ *
+ ****************************************************************************/
+
+int syslog_dev_flush(void)
+{
+  int ret;
+
+#ifndef CONFIG_DISABLE_MOUNTPOINT
+  FAR struct inode *inode = g_syslog_dev.sl_file.f_inode;
+
+  /* Is this a mountpoint? Does it support the sync method? */
+
+  DEBUGASSERT(inode != NULL);
+  if (inode->u.i_mops->sync)
+    {
+      /* Yes... synchronize to the stream */
+
+      ret = inode->u.i_mops->sync(&g_syslog_dev.sl_file);
+    }
+
+#else
+  ret = 0;
+
+#endif
+
+  return ret;
+}
+
+#endif /* CONFIG_NFILE_DESCRIPTORS > 0 */

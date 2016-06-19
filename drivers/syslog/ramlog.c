@@ -67,10 +67,6 @@
  * Private Types
  ****************************************************************************/
 
-/****************************************************************************
- * Private Types
- ****************************************************************************/
-
 struct ramlog_dev_s
 {
 #ifndef CONFIG_RAMLOG_NONBLOCKING
@@ -94,6 +90,27 @@ struct ramlog_dev_s
   FAR struct pollfd *rl_fds[CONFIG_RAMLOG_NPOLLWAITERS];
 #endif
 };
+
+/****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+
+#ifdef CONFIG_RAMLOG_SYSLOG
+static int ramlog_flush(void);
+#endif
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+#ifdef CONFIG_RAMLOG_SYSLOG
+static const struct syslog_channel_s g_ramlog_syslog_channel =
+{
+  ramlog_putc,
+  ramlog_putc,
+  ramlog_flush
+};
+#endif
 
 /****************************************************************************
  * Private Function Prototypes
@@ -145,7 +162,7 @@ static const struct file_operations g_ramlogfops =
 static char g_sysbuffer[CONFIG_RAMLOG_BUFSIZE];
 
 /* This is the device structure for the console or syslogging function.  It
- * must be statically initialized because the RAMLOG syslog_putc function
+ * must be statically initialized because the RAMLOG ramlog_putc function
  * could be called before the driver initialization logic executes.
  */
 
@@ -704,7 +721,7 @@ int ramlog_consoleinit(void)
 #endif
 
 /****************************************************************************
- * Name: ramlog_syslog_initialize
+ * Name: ramlog_syslog_channel
  *
  * Description:
  *   Use a pre-allocated RAM logging device and register it at the path
@@ -716,16 +733,26 @@ int ramlog_consoleinit(void)
  ****************************************************************************/
 
 #ifdef CONFIG_RAMLOG_SYSLOG
-int ramlog_syslog_initialize(void)
+int ramlog_syslog_channel(void)
 {
+  int ret;
+
   /* Register the syslog character driver */
 
-  return register_driver(CONFIG_SYSLOG_DEVPATH, &g_ramlogfops, 0666, &g_sysdev);
+  ret = register_driver(CONFIG_SYSLOG_DEVPATH, &g_ramlogfops, 0666, &g_sysdev);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  /* Use the RAMLOG as the SYSLOG channel */
+
+  return syslog_channel(&g_ramlog_syslog_channel);
 }
 #endif
 
 /****************************************************************************
- * Name: syslog_putc
+ * Name: ramlog_putc
  *
  * Description:
  *   This is the low-level system logging interface.  The debugging/syslogging
@@ -733,12 +760,12 @@ int ramlog_syslog_initialize(void)
  *   the syslog() internface writes to syslog device (usually fd=1, stdout)
  *   whereas lowsyslog() uses a lower level interface that works from
  *   interrupt handlers.  This function is a a low-level interface used to
- *   implement lowsyslog() when CONFIG_RAMLOG_SYSLOG=y and CONFIG_SYSLOG=y
+ *   implement lowsyslog() when CONFIG_RAMLOG_SYSLOG=y.
  *
  ****************************************************************************/
 
 #if defined(CONFIG_RAMLOG_CONSOLE) || defined(CONFIG_RAMLOG_SYSLOG)
-int syslog_putc(int ch)
+int ramlog_putc(int ch)
 {
   FAR struct ramlog_dev_s *priv = &g_sysdev;
   int ret;

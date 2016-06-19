@@ -1042,7 +1042,6 @@ CONFIG_FS_PROCFS=y
 #
 # System Logging
 #
-CONFIG_SYSLOG=y
 # CONFIG_SYSLOG_TIMESTAMP is not set
 # CONFIG_SYSLOG_CHAR is not set
 

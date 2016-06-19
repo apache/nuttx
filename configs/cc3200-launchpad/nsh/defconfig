@@ -453,7 +453,6 @@ CONFIG_FS_PROCFS=y
 # System Logging
 #
 
-# CONFIG_SYSLOG is not set
 
 #
 # Graphics Support
