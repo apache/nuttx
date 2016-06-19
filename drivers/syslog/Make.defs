@@ -50,15 +50,22 @@ ifeq ($(CONFIG_DRIVER_NOTE),y)
   CSRCS += note_driver.c
 endif
 
-############################################################################
-# Include SYSLOG drivers (only one should be enabled)
+# The RAMLOG device is usable as a system logging device or standalone
 
 ifeq ($(CONFIG_RAMLOG),y)
   CSRCS += ramlog.c
-else ifeq ($(CONFIG_SYSLOG),y)
+endif
 
-# If no special logging devices are implemented, then the default SYSLOG
-# logic at fs/fs_syslog.c will be used
+############################################################################
+# Include SYSLOG drivers (only one should be enabled)
+
+ifeq ($(CONFIG_SYSLOG),y)
+
+# System logging to a character device (or file)
+
+ifeq ($(CONFIG_SYSLOG_CHAR),y)
+CSRCS += syslog_device.c
+endif
 
 # (Add other SYSLOG drivers here)
 

@@ -50,14 +50,6 @@ CSRCS += fs_blockproxy.c
 endif
 endif
 
-# System logging to a character device (or file)
-
-ifeq ($(CONFIG_SYSLOG),y)
-ifeq ($(CONFIG_SYSLOG_CHAR),y)
-CSRCS += fs_devsyslog.c
-endif
-endif
-
 # Include driver build support
 
 DEPPATH += --dep-path driver
