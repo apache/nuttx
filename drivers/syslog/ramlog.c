@@ -704,7 +704,7 @@ int ramlog_consoleinit(void)
 #endif
 
 /****************************************************************************
- * Name: ramlog_sysloginit
+ * Name: ramlog_syslog_initialize
  *
  * Description:
  *   Use a pre-allocated RAM logging device and register it at the path
@@ -716,7 +716,7 @@ int ramlog_consoleinit(void)
  ****************************************************************************/
 
 #ifdef CONFIG_RAMLOG_SYSLOG
-int ramlog_sysloginit(void)
+int ramlog_syslog_initialize(void)
 {
   /* Register the syslog character driver */
 

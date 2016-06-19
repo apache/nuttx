@@ -71,6 +71,35 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: syslog_dev_initialize
+ *
+ * Description:
+ *   Initialize to use the character device (or file) at
+ *   CONFIG_SYSLOG_DEVPATH as the SYSLOG sink.
+ *
+ *   One power up, the SYSLOG facility is non-existent or limited to very
+ *   low-level output.  This function may be called later in the
+ *   intialization sequence after full driver support has been initialized.
+ *   (via syslog_initialize())  It installs the configured SYSLOG drivers
+ *   and enables full SYSLOGing capability.
+ *
+ *   NOTE that this implementation excludes using a network connection as
+ *   SYSLOG device.  That would be a good extension.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SYSLOG_CHAR
+int syslog_dev_initialize(void);
+#endif
+
+/****************************************************************************
  * Name: syslog_add_intbuffer
  *
  * Description:

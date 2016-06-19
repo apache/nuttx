@@ -71,7 +71,7 @@
  * CONFIG_SYSLOG_CHAR - Enable the generic character device for the SYSLOG.
  *   The full path to the SYSLOG device is provided by CONFIG_SYSLOG_DEVPATH.
  *   A valid character device must exist at this path.  It will by opened
- *   by syslog_initialize.
+ *   by logic in syslog_initialize() based on the current configuration.
  *
  *   NOTE:  No more than one SYSLOG device should be configured.
  */
@@ -154,11 +154,17 @@ int syslog_channel(FAR const struct syslog_channel_s *channel);
  * Name: syslog_initialize
  *
  * Description:
- *   Initialize to use the character device (or file) at
- *   CONFIG_SYSLOG_DEVPATH as the SYSLOG sink.
+ *   One power up, the SYSLOG facility is non-existent or limited to very
+ *   low-level output.  This function is called later in the intialization
+ *   sequence after full driver support has been initialized.  It installs
+ *   the configured SYSLOG drivers and enables full SYSLOGing capability.
  *
- *   NOTE that this implementation excludes using a network connection as
- *   SYSLOG device.  That would be a good extension.
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure.
  *
  * Input Parameters:
  *   None
@@ -169,9 +175,7 @@ int syslog_channel(FAR const struct syslog_channel_s *channel);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SYSLOG_CHAR
 int syslog_initialize(void);
-#endif
 
 /****************************************************************************
  * Name: syslog_putc
