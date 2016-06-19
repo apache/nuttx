@@ -44,6 +44,10 @@ ifeq ($(CONFIG_SYSLOG_INTBUFFER),y)
   CSRCS += syslog_intbuffer.c
 endif
 
+ifneq ($(CONFIG_ARCH_SYSLOG),y)
+  CSRCS += syslog_initialize.c
+endif
+
 # The note driver is hosted in this directory, but is not associated with
 # SYSLOGging
 
