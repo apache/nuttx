@@ -48,7 +48,8 @@
 #include <nuttx/fs/loop.h>
 #include <nuttx/net/loopback.h>
 #include <nuttx/net/tun.h>
-#include <nuttx/net/telnet.h>
+#include <nuttx/syslog/syslog.h>
+#include <nuttx/syslog/syslog_console.h>
 
 #include <arch/board/board.h>
 
@@ -181,6 +182,10 @@ void up_initialize(void)
 #elif defined(CONFIG_RAMLOG_CONSOLE)
   ramlog_consoleinit();
 #endif
+
+  /* Initialize the system logging device */
+
+  syslog_initialize();
 
 #ifndef CONFIG_NETDEV_LATEINIT
   /* Initialize the network */

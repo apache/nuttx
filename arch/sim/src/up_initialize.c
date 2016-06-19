@@ -50,7 +50,7 @@
 #include <nuttx/net/tun.h>
 #include <nuttx/net/telnet.h>
 #include <nuttx/mtd/mtd.h>
-#include <nuttx/syslog/ramlog.h>
+#include <nuttx/syslog/syslog.h>
 #include <nuttx/syslog/syslog_console.h>
 
 #include "up_internal.h"
@@ -168,12 +168,9 @@ void up_initialize(void)
   ramlog_consoleinit();
 #endif
 
-#ifdef CONFIG_SYSLOG_CHAR
+  /* Initialize the system logging device */
+
   syslog_initialize();
-#endif
-#ifdef CONFIG_RAMLOG_SYSLOG
-  ramlog_sysloginit();      /* System logging device */
-#endif
 
 #if defined(CONFIG_FS_FAT) && !defined(CONFIG_DISABLE_MOUNTPOINT)
   up_registerblockdevice(); /* Our FAT ramdisk at /dev/ram0 */

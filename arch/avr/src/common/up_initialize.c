@@ -48,7 +48,7 @@
 #include <nuttx/net/loopback.h>
 #include <nuttx/net/tun.h>
 #include <nuttx/net/telnet.h>
-#include <nuttx/syslog/ramlog.h>
+#include <nuttx/syslog/syslog.h>
 #include <nuttx/syslog/syslog_console.h>
 
 #include <arch/board/board.h>
@@ -267,12 +267,7 @@ void up_initialize(void)
 
   /* Initialize the system logging device */
 
-#ifdef CONFIG_SYSLOG_CHAR
   syslog_initialize();
-#endif
-#ifdef CONFIG_RAMLOG_SYSLOG
-  ramlog_sysloginit();
-#endif
 
 #ifndef CONFIG_NETDEV_LATEINIT
   /* Initialize the network */

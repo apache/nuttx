@@ -73,10 +73,16 @@ int syslog_initialize(void)
 
   /* Not much to this yet... more is coming */
 
-#if defined(CONFIG_SYSLOG) && defined(CONFIG_SYSLOG_CHAR)
+#if defined(CONFIG_SYSLOG_CHAR)
   /* Enable use of a character device as the SYSLOG device */
 
   ret = syslog_dev_initialize();
+
+#elif defined(CONFIG_RAMLOG_SYSLOG)
+  /* Use the RAMLOG as the SYSLOG device */
+
+  ramlog_syslog_initialize();
+#endif
 #else
   /* Nothing needs to be done */
 
