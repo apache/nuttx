@@ -57,12 +57,13 @@
 #include <arch/board/board.h>
 
 #include "chip.h"
+#include "stm32_gpio.h"
 #include "stm32_otg.h"
 #include "up_arch.h"
 #include "up_internal.h"
 
 
-#if defined(CONFIG_USBDEV) && (defined(CONFIG_STM32_OTGFS) || defined(CONFIG_STM32_OTGHS))
+#if defined(CONFIG_USBDEV) && (defined(CONFIG_STM32F7_OTGFS) || defined(CONFIG_STM32F7_OTGHS))
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -469,7 +470,7 @@ struct stm32_usbdev_s
 
 /* Register operations ********************************************************/
 
-#if defined(CONFIG_STM32_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
+#if defined(CONFIG_STM32F7_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
 static uint32_t    stm32_getreg(uint32_t addr);
 static void        stm32_putreg(uint32_t val, uint32_t addr);
 #else
@@ -789,7 +790,7 @@ const struct trace_msg_t g_usb_trace_strings_intdecode[] =
  *
  ****************************************************************************/
 
-#if defined(CONFIG_STM32_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
+#if defined(CONFIG_STM32F7_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
 static uint32_t stm32_getreg(uint32_t addr)
 {
   static uint32_t prevaddr = 0;
@@ -852,7 +853,7 @@ static uint32_t stm32_getreg(uint32_t addr)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_STM32_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
+#if defined(CONFIG_STM32F7_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
 static void stm32_putreg(uint32_t val, uint32_t addr)
 {
   /* Show the register value being written */
@@ -5134,7 +5135,7 @@ static void stm32_hwinitialize(FAR struct stm32_usbdev_s *priv)
 
   stm32_putreg(OTG_GAHBCFG_TXFELVL, STM32_OTG_GAHBCFG);
 
-#if defined(CONFIG_STM32_OTGHS)
+#if defined(CONFIG_STM32F7_OTGHS)
   /* Set the PHYSEL bit in the GUSBCFG register to select the OTG HS serial
    * transceiver: "This bit is always 1 with write-only access"
    */
@@ -5329,7 +5330,7 @@ static void stm32_hwinitialize(FAR struct stm32_usbdev_s *priv)
 
   stm32_putreg(0xbfffffff, STM32_OTG_GINTSTS);
 
-#ifdef defined(CONFIG_STM32_OTGHS)
+#if defined(CONFIG_STM32F7_OTGHS)
   /* Disable the ULPI Clock enable in RCC AHB1 Register.  This must
    * be done because if both the ULPI and the FS PHY clock enable bits
    * are set at the same time, the ARM never awakens from WFI due to
@@ -5424,7 +5425,7 @@ void up_usbinitialize(void)
 
   /* SOF output pin configuration is configurable. */
 
-#ifdef CONFIG_STM32_OTG_SOFOUTPUT
+#ifdef CONFIG_STM32F7_OTG_SOFOUTPUT
   stm32_configgpio(GPIO_OTG_SOF);
 #endif
 
@@ -5663,4 +5664,4 @@ int usbdev_unregister(struct usbdevclass_driver_s *driver)
   return OK;
 }
 
-#endif /* CONFIG_USBDEV && CONFIG_STM32_OTGDEV */
+#endif /* CONFIG_USBDEV && CONFIG_STM32F7_OTGDEV */

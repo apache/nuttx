@@ -964,6 +964,11 @@ static void stm32_dataconfig(uint32_t timeout, uint32_t dlen, uint32_t dctrl)
   regval &= ~(SDIO_DCTRL_DTDIR | SDIO_DCTRL_DTMODE | SDIO_DCTRL_DBLOCKSIZE_MASK);
   dctrl  &=  (SDIO_DCTRL_DTDIR | SDIO_DCTRL_DTMODE | SDIO_DCTRL_DBLOCKSIZE_MASK);
   regval |=  (dctrl | SDIO_DCTRL_DTEN);
+
+#ifdef CONFIG_SDIO_DMA
+  regval |= SDIO_DCTRL_DMAEN;
+#endif
+
   putreg32(regval, STM32_SDMMC1_DCTRL);
 }
 
