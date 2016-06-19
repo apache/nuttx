@@ -5,6 +5,12 @@
 
 comment "System Logging"
 
+# Selected if the architecture has its own, built-in SYSLOGgin enabled
+
+config ARCH_HAVE_SYSLOG
+	bool
+	default n
+
 config RAMLOG
 	bool "RAM log device support"
 	default n
@@ -23,7 +29,7 @@ if RAMLOG
 config RAMLOG_SYSLOG
 	bool "Use RAMLOG for SYSLOG"
 	default n
-	depends on SYSLOG
+	depends on SYSLOG && !ARCH_HAVE_SYSLOG
 	---help---
 		Use the RAM logging device for the syslogging interface.  If this feature
 		is enabled (along with SYSLOG), then all debug output (only) will be re-directed
@@ -72,7 +78,13 @@ config RAMLOG_NPOLLWAITERS
 
 endif
 
-comment "System Logging"
+config DRIVER_NOTE
+	bool "Scheduler instrumentation driver"
+	default n
+	depends on SCHED_INSTRUMENTATION_BUFFER
+	---help---
+		Enable building a serial driver that can be used by an application to read data
+		from the in-memory, scheduler instrumentatin "note" buffer.
 
 config SYSLOG
 	bool "Advanced SYSLOG features"
@@ -95,6 +107,7 @@ if SYSLOG
 config SYSLOG_CHAR
 	bool "System log character device support"
 	default y
+	depends on !ARCH_HAVE_SYSLOG
 	---help---
 		Enable the generic character device for the SYSLOG. The full path to the
 		SYSLOG device is provided by SYSLOG_DEVPATH. A valid character device (or
@@ -124,11 +137,3 @@ config SYSLOG_CONSOLE
 		output (syslog_putc). This is useful, for example, if the only console is a Telnet
 		console.  Then in that case, console output from non-Telnet threads will go to
 		the syslog output.
-
-config DRIVER_NOTE
-	bool "Scheduler instrumentation driver"
-	default n
-	depends on SCHED_INSTRUMENTATION_BUFFER
-	---help---
-		Enable building a serial driver that can be used by an application to read data
-		from the in-memory, scheduler instrumentatin "note" buffer.
