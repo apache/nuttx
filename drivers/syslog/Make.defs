@@ -37,7 +37,7 @@
 ############################################################################
 # Include SYSLOG Infrastructure
 
-CSRCS += vsyslog.c vlowsyslog.c syslogstream.c syslog_channel.c
+CSRCS += vsyslog.c vlowsyslog.c syslog_stream.c syslog_channel.c
 
 ifeq ($(CONFIG_SYSLOG_INTBUFFER),y)
   CSRCS += syslog_intbuffer.c

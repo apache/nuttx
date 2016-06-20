@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/syslog/syslogstream.c
+ * drivers/syslog/syslog_stream.c
  *
  *   Copyright (C) 2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
