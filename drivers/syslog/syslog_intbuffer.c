@@ -139,9 +139,9 @@ int syslog_remove_intbuffer(void)
   outndx = (uint32_t)g_syslog_intbuffer.si_outndx;
   if (inndx != outndx)
     {
-      /* Handle the case where the endndx has wrapped around */
+      /* Handle the case where the inndx has wrapped around */
 
-      endndx = outndx;
+      endndx = inndx;
       if (endndx < outndx)
         {
           endndx += SYSLOG_INTBUFSIZE;
@@ -190,8 +190,8 @@ int syslog_remove_intbuffer(void)
  *   errno value is returned on any failure.
  *
  * Assumptions:
- *   - Called only from interrupt handling logic; Interrupts will be
- *     disabled.
+ *   - Called either from (1) interrupt handling logic with interrupts
+ *     disabled or from an IDLE thread with interrupts enabled.
  *   - Requires caution because there may be an interrupted execution of
  *     syslog_flush_intbuffer():  Only the outndx can be modified.
  *
@@ -199,18 +199,24 @@ int syslog_remove_intbuffer(void)
 
 int syslog_add_intbuffer(int ch)
 {
+  irqstate_t flags;
   uint32_t inndx;
   uint32_t outndx;
   uint32_t endndx;
   unsigned int inuse;
+  int ret;
   int i;
+
+  /* Disable concurrent modification from interrupt handling logic */
+
+  flags = enter_critical_section();
 
   /* How much space is left in the inbuffer? */
 
   inndx  = (uint32_t)g_syslog_intbuffer.si_inndx;
   outndx = (uint32_t)g_syslog_intbuffer.si_outndx;
 
-  endndx = outndx;
+  endndx = inndx;
   if (endndx < outndx)
     {
       endndx += SYSLOG_INTBUFSIZE;
@@ -245,7 +251,7 @@ int syslog_add_intbuffer(int ch)
         }
 
       g_syslog_intbuffer.si_inndx = (uint16_t)inndx;
-      return -ENOSPC;
+      ret = -ENOSPC;
     }
   else if (inuse < USABLE_INTBUFSIZE)
     {
@@ -261,7 +267,7 @@ int syslog_add_intbuffer(int ch)
          }
 
       g_syslog_intbuffer.si_inndx = (uint16_t)inndx;
-      return OK;
+      ret = OK;
     }
   else
     {
@@ -269,8 +275,11 @@ int syslog_add_intbuffer(int ch)
        * the overrun message so there is nothing else to do.
        */
 
-      return -ENOSPC;
+      ret = -ENOSPC;
     }
+
+  leave_critical_section(flags);
+  return ret;
 }
 
 /****************************************************************************
