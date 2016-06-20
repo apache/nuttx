@@ -67,7 +67,12 @@ int vsyslog(int priority, FAR const IPTR char *fmt, va_list ap)
 
   if ((g_syslog_mask & LOG_MASK(priority)) != 0)
     {
-      /* Yes.. lPerform the _vsyslog system cal */
+      /* Yes.. lPerform the _vsyslog system call.
+       *
+       * NOTE:  The va_list parameter is passed by reference.  That is
+       * because the va_list is a structure in some compilers and passing
+       * of structures in the NuttX sycalls does not work.
+       */
 
       ret = _vsyslog(fmt, &ap);
     }

@@ -60,6 +60,10 @@
  *   equivalent to vsyslog() except that the pre-process priority filtering
  *   has already been performed and, hence, there is no priority argument.
  *
+ *   NOTE:  The va_list parameter is passed by reference.  That is because
+ *   the va_list is a structure in some compilers and passing of structures
+ *   in the NuttX sycalls does not work.
+ *
  ****************************************************************************/
 
 int _vsyslog(FAR const IPTR char *fmt, FAR va_list *ap)
