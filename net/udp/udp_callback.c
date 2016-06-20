@@ -98,7 +98,7 @@ static uint16_t udp_datahandler(FAR struct net_driver_s *dev, FAR struct udp_con
   iob = iob_tryalloc(true);
   if (iob == NULL)
     {
-      nllerr("ERROR: Failed to create new I/O buffer chain\n");
+      nerr("ERROR: Failed to create new I/O buffer chain\n");
       return 0;
     }
 
@@ -178,7 +178,7 @@ static uint16_t udp_datahandler(FAR struct net_driver_s *dev, FAR struct udp_con
        * not free any I/O buffers.
        */
 
-      nllerr("ERROR: Failed to add data to the I/O buffer chain: %d\n", ret);
+      nerr("ERROR: Failed to add data to the I/O buffer chain: %d\n", ret);
       (void)iob_free_chain(iob);
       return 0;
     }
@@ -191,7 +191,7 @@ static uint16_t udp_datahandler(FAR struct net_driver_s *dev, FAR struct udp_con
        * not free any I/O buffers.
        */
 
-      nllerr("ERROR: Failed to add data to the I/O buffer chain: %d\n", ret);
+      nerr("ERROR: Failed to add data to the I/O buffer chain: %d\n", ret);
       (void)iob_free_chain(iob);
       return 0;
     }
@@ -208,8 +208,8 @@ static uint16_t udp_datahandler(FAR struct net_driver_s *dev, FAR struct udp_con
            * does not free any I/O buffers.
            */
 
-          nllerr("ERROR: Failed to add data to the I/O buffer chain: %d\n",
-                 ret);
+          nerr("ERROR: Failed to add data to the I/O buffer chain: %d\n",
+               ret);
           (void)iob_free_chain(iob);
           return 0;
         }
@@ -220,7 +220,7 @@ static uint16_t udp_datahandler(FAR struct net_driver_s *dev, FAR struct udp_con
   ret = iob_tryadd_queue(iob, &conn->readahead);
   if (ret < 0)
     {
-      nllerr("ERROR: Failed to queue the I/O buffer chain: %d\n", ret);
+      nerr("ERROR: Failed to queue the I/O buffer chain: %d\n", ret);
       (void)iob_free_chain(iob);
       return 0;
     }

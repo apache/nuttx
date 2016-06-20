@@ -260,7 +260,7 @@ FAR struct devif_callback_s *
 #ifdef CONFIG_DEBUG_FEATURES
   else
     {
-      nllerr("ERROR: Failed to allocate callback\n");
+      nerr("ERROR: Failed to allocate callback\n");
     }
 #endif
 

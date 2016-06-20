@@ -760,7 +760,7 @@ static int sam_transmit(struct sam_emac_s *priv)
 
   if (dev->d_len > EMAC_TX_UNITSIZE)
     {
-      nllerr("ERROR: Packet too big: %d\n", dev->d_len);
+      nerr("ERROR: Packet too big: %d\n", dev->d_len);
       return -EINVAL;
     }
 
@@ -772,7 +772,7 @@ static int sam_transmit(struct sam_emac_s *priv)
 
   if (sam_txfree(priv) < 1)
     {
-      nllerr("ERROR: No free TX descriptors\n");
+      nerr("ERROR: No free TX descriptors\n");
       return -EBUSY;
     }
 
@@ -1060,7 +1060,7 @@ static int sam_recvframe(struct sam_emac_s *priv)
         {
           if (rxndx == priv->rxndx)
             {
-              nllerr("ERROR: No EOF (Invalid of buffers too small)\n");
+              nerr("ERROR: No EOF (Invalid of buffers too small)\n");
               do
                 {
                   /* Give ownership back to the EMAC */
@@ -1136,7 +1136,7 @@ static int sam_recvframe(struct sam_emac_s *priv)
 
               if (pktlen < dev->d_len)
                 {
-                  nllerr("ERROR: Buffer size %d; frame size %d\n", dev->d_len, pktlen);
+                  nerr("ERROR: Buffer size %d; frame size %d\n", dev->d_len, pktlen);
                   return -E2BIG;
                 }
 
@@ -1468,7 +1468,7 @@ static inline void sam_interrupt_process(FAR struct sam_emac_s *priv)
           clrbits = EMAC_TSR_RLE | sam_txinuse(priv);
           sam_txreset(priv);
 
-          nllerr("ERROR: Retry Limit Exceeded TSR: %08x\n", tsr);
+          nerr("ERROR: Retry Limit Exceeded TSR: %08x\n", tsr);
 
           regval = sam_getreg(priv, SAM_EMAC_NCR);
           regval |= EMAC_NCR_TXEN;
@@ -1479,7 +1479,7 @@ static inline void sam_interrupt_process(FAR struct sam_emac_s *priv)
 
       if ((tsr & EMAC_TSR_COL) != 0)
         {
-          nllerr("ERROR: Collision occurred TSR: %08x\n", tsr);
+          nerr("ERROR: Collision occurred TSR: %08x\n", tsr);
           clrbits |= EMAC_TSR_COL;
         }
 
@@ -1487,7 +1487,7 @@ static inline void sam_interrupt_process(FAR struct sam_emac_s *priv)
 
       if ((tsr & EMAC_TSR_TFC) != 0)
         {
-          nllerr("ERROR: Transmit Frame Corruption due to AHB error: %08x\n", tsr);
+          nerr("ERROR: Transmit Frame Corruption due to AHB error: %08x\n", tsr);
           clrbits |= EMAC_TSR_TFC;
         }
 
@@ -1502,7 +1502,7 @@ static inline void sam_interrupt_process(FAR struct sam_emac_s *priv)
 
       if ((tsr & EMAC_TSR_UND) != 0)
         {
-          nllerr("ERROR: Transmit Underrun TSR: %08x\n", tsr);
+          nerr("ERROR: Transmit Underrun TSR: %08x\n", tsr);
           clrbits |= EMAC_TSR_UND;
         }
 
@@ -1539,7 +1539,7 @@ static inline void sam_interrupt_process(FAR struct sam_emac_s *priv)
 
       if ((rsr & EMAC_RSR_RXOVR) != 0)
         {
-          nllerr("ERROR: Receiver overrun RSR: %08x\n", rsr);
+          nerr("ERROR: Receiver overrun RSR: %08x\n", rsr);
           clrbits |= EMAC_RSR_RXOVR;
         }
 
@@ -1556,7 +1556,7 @@ static inline void sam_interrupt_process(FAR struct sam_emac_s *priv)
 
       if ((rsr & EMAC_RSR_BNA) != 0)
         {
-          nllerr("ERROR: Buffer not available RSR: %08x\n", rsr);
+          nerr("ERROR: Buffer not available RSR: %08x\n", rsr);
           clrbits |= EMAC_RSR_BNA;
         }
 
@@ -1725,7 +1725,7 @@ static int sam_emac_interrupt(int irq, void *context)
 
 static inline void sam_txtimeout_process(FAR struct sam_emac_s *priv)
 {
-  nllerr("ERROR: Timeout!\n");
+  nerr("ERROR: Timeout!\n");
 
   /* Then reset the hardware.  Just take the interface down, then back
    * up again.

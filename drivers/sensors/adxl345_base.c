@@ -305,7 +305,7 @@ static void adxl345_interrupt(FAR struct adxl345_config_s *config, FAR void *arg
       ret = work_queue(HPWORK, &priv->work, adxl345_worker, priv, 0);
       if (ret != 0)
         {
-          snllerr("ERROR: Failed to queue work: %d\n", ret);
+          snerr("ERROR: Failed to queue work: %d\n", ret);
         }
     }
 

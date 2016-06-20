@@ -125,7 +125,7 @@ int group_setupidlefiles(FAR struct task_tcb_s *tcb)
         }
       else
         {
-          sllerr("ERROR: Failed to open /dev/console: %d\n", errno);
+          serr("ERROR: Failed to open /dev/console: %d\n", errno);
         }
 
       return -ENFILE;

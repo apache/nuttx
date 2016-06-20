@@ -199,7 +199,7 @@ static int stmpe811_interrupt(int irq, FAR void *context)
       ret = work_queue(HPWORK, &priv->work, stmpe811_worker, priv, 0);
       if (ret != 0)
         {
-          illerr("ERROR: Failed to queue work: %d\n", ret);
+          ierr("ERROR: Failed to queue work: %d\n", ret);
         }
     }
 

@@ -73,7 +73,7 @@ static void up_stackdump(void)
 
   if (sp >= stack_base || sp < stack_base - stack_size)
     {
-      _llerr("ERROR: Stack pointer is not within allocated stack\n");
+      _err("ERROR: Stack pointer is not within allocated stack\n");
       return;
     }
   else

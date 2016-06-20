@@ -62,7 +62,7 @@
 #  define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
 #endif
 
-#define waitllerr(x,...) //  _err
+#define waiterr(x,...) //  _err
 #define waitinfo(x,...) // _info
 
 /****************************************************************************

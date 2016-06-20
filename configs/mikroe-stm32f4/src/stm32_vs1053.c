@@ -187,7 +187,7 @@ void up_vs1053initialize(FAR struct spi_dev_s* spi)
   pVs1053 = vs1053_initialize(spi, &g_vs1053lower.lower, VS1053_DEVNO);
   if (pVs1053 == NULL)
     {
-      audllerr("ERROR: Failed to bind SPI port %d VS1053 device\n", VS1053_DEVNO);
+      auderr("ERROR: Failed to bind SPI port %d VS1053 device\n", VS1053_DEVNO);
       return;
     }
 

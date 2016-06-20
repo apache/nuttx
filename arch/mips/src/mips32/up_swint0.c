@@ -263,7 +263,7 @@ int up_swint0(int irq, FAR void *context)
 
           g_current_regs[REG_R0] -= CONFIG_SYS_RESERVED;
 #else
-          svcllerr("ERROR: Bad SYS call: %d\n", regs[REG_A0]);
+          svcerr("ERROR: Bad SYS call: %d\n", regs[REG_A0]);
 #endif
         }
         break;

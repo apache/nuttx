@@ -85,11 +85,6 @@
  *    information that you probably not want to suppress during normal debug
  *    general debugging.
  *
- * [a-z]llerr() -- Identical to [a-z]info() except that it also requires that
- *    CONFIG_DEBUG_ERROR be defined. This is intended for important error-related
- *    information that you probably not want to suppress during normal debug
- *    general debugging.
- *
  * _alert() - is a special, high-priority, unconditional version that is really
  *    intended only for crash error reporting.
  */
@@ -124,16 +119,8 @@
 #ifdef CONFIG_DEBUG_ERROR
 #  define  _err(format, ...) \
    __arch_syslog(LOG_ERR, EXTRA_FMT format EXTRA_ARG, ##__VA_ARGS__)
-
-# ifdef CONFIG_ARCH_LOWPUTC
-#  define  _llerr(format, ...) \
-   __arch_syslog(LOG_ERR, EXTRA_FMT format EXTRA_ARG, ##__VA_ARGS__)
-# else
-#  define  _llerr(x...)
-# endif
 #else /* CONFIG_DEBUG_ERROR */
 #  define  _err(x...)
-#  define  _llerr(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_WARN
@@ -154,10 +141,8 @@
 
 #ifdef CONFIG_DEBUG_MM_ERROR
 #  define merr(format, ...)     _err(format, ##__VA_ARGS__)
-#  define mllerr(format, ...)   _llerr(format, ##__VA_ARGS__)
 #else
 #  define merr(x...)
-#  define mllerr(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_MM_WARN
@@ -174,10 +159,8 @@
 
 #ifdef CONFIG_DEBUG_SCHED_ERROR
 #  define serr(format, ...)     _err(format, ##__VA_ARGS__)
-#  define sllerr(format, ...)   _llerr(format, ##__VA_ARGS__)
 #else
 #  define serr(x...)
-#  define sllerr(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_SCHED_WARN
@@ -194,10 +177,8 @@
 
 #ifdef CONFIG_DEBUG_SYSCALL_ERROR
 #  define svcerr(format, ...)     _err(format, ##__VA_ARGS__)
-#  define svcllerr(format, ...)   _llerr(format, ##__VA_ARGS__)
 #else
 #  define svcerr(x...)
-#  define svcllerr(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_SYSCALL_WARN
@@ -214,10 +195,8 @@
 
 #ifdef CONFIG_DEBUG_PAGING_ERROR
 #  define pgerr(format, ...)     _err(format, ##__VA_ARGS__)
-#  define pgllerr(format, ...)   _llerr(format, ##__VA_ARGS__)
 #else
 #  define pgerr(x...)
-#  define pgllerr(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_PAGING_WARN
@@ -234,10 +213,8 @@
 
 #ifdef CONFIG_DEBUG_NET_ERROR
 #  define nerr(format, ...)     _err(format, ##__VA_ARGS__)
-#  define nllerr(format, ...)   _llerr(format, ##__VA_ARGS__)
 #else
 #  define nerr(x...)
-#  define nllerr(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_NET_WARN
@@ -254,10 +231,8 @@
 
 #ifdef CONFIG_DEBUG_FS_ERROR
 #  define ferr(format, ...)     _err(format, ##__VA_ARGS__)
-#  define fllerr(format, ...)   _llerr(format, ##__VA_ARGS__)
 #else
 #  define ferr(x...)
-#  define fllerr(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_FS_WARN
@@ -274,10 +249,8 @@
 
 #ifdef CONFIG_DEBUG_CRYPTO_ERROR
 #  define crypterr(format, ...)     _err(format, ##__VA_ARGS__)
-#  define cryptllerr(format, ...)   _llerr(format, ##__VA_ARGS__)
 #else
 #  define crypterr(x...)
-#  define cryptllerr(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_CRYPTO_WARN
@@ -294,10 +267,8 @@
 
 #ifdef CONFIG_DEBUG_INPUT_ERROR
 #  define ierr(format, ...)     _err(format, ##__VA_ARGS__)
-#  define illerr(format, ...)   _llerr(format, ##__VA_ARGS__)
 #else
 #  define ierr(x...)
-#  define illerr(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_INPUT_WARN
@@ -332,10 +303,8 @@
 
 #ifdef CONFIG_DEBUG_CAN_ERROR
 #  define canerr(format, ...)     _err(format, ##__VA_ARGS__)
-#  define canllerr(format, ...)   _llerr(format, ##__VA_ARGS__)
 #else
 #  define canerr(x...)
-#  define canllerr(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_CAN_WARN
@@ -352,10 +321,8 @@
 
 #ifdef CONFIG_DEBUG_GRAPHICS_ERROR
 #  define gerr(format, ...)     _err(format, ##__VA_ARGS__)
-#  define gllerr(format, ...)   _llerr(format, ##__VA_ARGS__)
 #else
 #  define gerr(x...)
-#  define gllerr(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_GRAPHICS_WARN
@@ -372,10 +339,8 @@
 
 #ifdef CONFIG_DEBUG_BINFMT_ERROR
 #  define berr(format, ...)     _err(format, ##__VA_ARGS__)
-#  define bllerr(format, ...)   _llerr(format, ##__VA_ARGS__)
 #else
 #  define berr(x...)
-#  define bllerr(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_BINFMT_WARN
@@ -392,10 +357,8 @@
 
 #ifdef CONFIG_DEBUG_LIB_ERROR
 #  define lerr(format, ...)     _err(format, ##__VA_ARGS__)
-#  define lllerr(format, ...)   _llerr(format, ##__VA_ARGS__)
 #else
 #  define lerr(x...)
-#  define lllerr(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_LIB_WARN
@@ -412,10 +375,8 @@
 
 #ifdef CONFIG_DEBUG_AUDIO_ERROR
 #  define auderr(format, ...)     _err(format, ##__VA_ARGS__)
-#  define audllerr(format, ...)   _llerr(format, ##__VA_ARGS__)
 #else
 #  define auderr(x...)
-#  define audllerr(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_AUDIO_WARN
@@ -432,10 +393,8 @@
 
 #ifdef CONFIG_DEBUG_DMA_ERROR
 #  define dmaerr(format, ...)     _err(format, ##__VA_ARGS__)
-#  define dmallerr(format, ...)   _llerr(format, ##__VA_ARGS__)
 #else
 #  define dmaerr(x...)
-#  define dmallerr(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_DMA_WARN
@@ -452,10 +411,8 @@
 
 #ifdef CONFIG_DEBUG_IRQ_ERROR
 #  define irqerr(format, ...)     _err(format, ##__VA_ARGS__)
-#  define irqllerr(format, ...)   _llerr(format, ##__VA_ARGS__)
 #else
 #  define irqerr(x...)
-#  define irqllerr(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_IRQ_WARN
@@ -472,10 +429,8 @@
 
 #ifdef CONFIG_DEBUG_LCD_ERROR
 #  define lcderr(format, ...)     _err(format, ##__VA_ARGS__)
-#  define lcdllerr(format, ...)   _llerr(format, ##__VA_ARGS__)
 #else
 #  define lcderr(x...)
-#  define lcdllerr(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_LCD_WARN
@@ -492,10 +447,8 @@
 
 #ifdef CONFIG_DEBUG_LEDS_ERROR
 #  define lederr(format, ...)     _err(format, ##__VA_ARGS__)
-#  define ledllerr(format, ...)   _llerr(format, ##__VA_ARGS__)
 #else
 #  define lederr(x...)
-#  define ledllerr(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_LEDS_WARN
@@ -512,10 +465,8 @@
 
 #ifdef CONFIG_DEBUG_GPIO_ERROR
 #  define gpioerr(format, ...)    _err(format, ##__VA_ARGS__)
-#  define gpiollerr(format, ...)  _llerr(format, ##__VA_ARGS__)
 #else
 #  define gpioerr(x...)
-#  define gpiollerr(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_GPIO_WARN
@@ -532,10 +483,8 @@
 
 #ifdef CONFIG_DEBUG_I2C_ERROR
 #  define i2cerr(format, ...)    _err(format, ##__VA_ARGS__)
-#  define i2cllerr(format, ...)  _llerr(format, ##__VA_ARGS__)
 #else
 #  define i2cerr(x...)
-#  define i2cllerr(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_I2C_WARN
@@ -552,10 +501,8 @@
 
 #ifdef CONFIG_DEBUG_I2S_ERROR
 #  define i2serr(format, ...)    _err(format, ##__VA_ARGS__)
-#  define i2sllerr(format, ...)  _llerr(format, ##__VA_ARGS__)
 #else
 #  define i2serr(x...)
-#  define i2sllerr(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_I2S_WARN
@@ -590,10 +537,8 @@
 
 #ifdef CONFIG_DEBUG_RTC_ERROR
 #  define rtcerr(format, ...)    _err(format, ##__VA_ARGS__)
-#  define rtcllerr(format, ...)  _llerr(format, ##__VA_ARGS__)
 #else
 #  define rtcerr(x...)
-#  define rtcllerr(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_RTC_WARN
@@ -610,10 +555,8 @@
 
 #ifdef CONFIG_DEBUG_MEMCARD_ERROR
 #  define mcerr(format, ...)    _err(format, ##__VA_ARGS__)
-#  define mcllerr(format, ...)  _llerr(format, ##__VA_ARGS__)
 #else
 #  define mcerr(x...)
-#  define mcllerr(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_MEMCARD_WARN
@@ -630,10 +573,8 @@
 
 #ifdef CONFIG_DEBUG_SENSORS_ERROR
 #  define snerr(format, ...)     _err(format, ##__VA_ARGS__)
-#  define snllerr(format, ...)   _llerr(format, ##__VA_ARGS__)
 #else
 #  define snerr(x...)
-#  define snllerr(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_SENSORS_WARN
@@ -650,10 +591,8 @@
 
 #ifdef CONFIG_DEBUG_SPI_ERROR
 #  define spierr(format, ...)     _err(format, ##__VA_ARGS__)
-#  define spillerr(format, ...)   _llerr(format, ##__VA_ARGS__)
 #else
 #  define spierr(x...)
-#  define spillerr(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_SPI_WARN
@@ -670,10 +609,8 @@
 
 #ifdef CONFIG_DEBUG_TIMER_ERROR
 #  define tmrerr(format, ...)     _err(format, ##__VA_ARGS__)
-#  define tmrllerr(format, ...)   _llerr(format, ##__VA_ARGS__)
 #else
 #  define tmrerr(x...)
-#  define tmrllerr(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_TIMER_WARN
@@ -690,10 +627,8 @@
 
 #ifdef CONFIG_DEBUG_USB_ERROR
 #  define uerr(format, ...)     _err(format, ##__VA_ARGS__)
-#  define ullerr(format, ...)   _llerr(format, ##__VA_ARGS__)
 #else
 #  define uerr(x...)
-#  define ullerr(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_USB_WARN
@@ -710,10 +645,8 @@
 
 #ifdef CONFIG_DEBUG_WATCHDOG_ERROR
 #  define wderr(format, ...)     _err(format, ##__VA_ARGS__)
-#  define wdllerr(format, ...)   _llerr(format, ##__VA_ARGS__)
 #else
 #  define wderr(x...)
-#  define wdllerr(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_WATCHDOG_WARN
@@ -736,13 +669,8 @@
 #  define _alert      (void)
 # endif
 
-#ifdef CONFIG_DEBUG_ERROR
-#  ifndef CONFIG_ARCH_LOWPUTC
-#    define _llerr    (void)
-#  endif
-#else
+#ifndef CONFIG_DEBUG_ERROR
 #  define _err        (void)
-#  define _llerr      (void)
 #endif
 
 #ifndef CONFIG_DEBUG_WARN
@@ -757,10 +685,8 @@
 
 #ifdef CONFIG_DEBUG_MM_ERROR
 #  define merr         _err
-#  define mllerr       _llerr
 #else
 #  define merr        (void)
-#  define mllerr      (void)
 #endif
 
 #ifdef CONFIG_DEBUG_MM_WARN
@@ -777,10 +703,8 @@
 
 #ifdef CONFIG_DEBUG_SCHED_ERROR
 #  define serr         _err
-#  define sllerr       _llerr
 #else
 #  define serr        (void)
-#  define sllerr      (void)
 #endif
 
 #ifdef CONFIG_DEBUG_SCHED_WARN
@@ -797,10 +721,8 @@
 
 #ifdef CONFIG_DEBUG_SYSCALL_ERROR
 #  define svcerr       _err
-#  define svcllerr     _llerr
 #else
 #  define svcerr      (void)
-#  define svcllerr    (void)
 #endif
 
 #ifdef CONFIG_DEBUG_SYSCALL_WARN
@@ -817,10 +739,8 @@
 
 #ifdef CONFIG_DEBUG_PAGING_ERROR
 #  define pgerr        _err
-#  define pgllerr      _llerr
 #else
 #  define pgerr       (void)
-#  define pgllerr     (void)
 #endif
 
 #ifdef CONFIG_DEBUG_PAGING_WARN
@@ -837,10 +757,8 @@
 
 #ifdef CONFIG_DEBUG_NET_ERROR
 #  define nerr         _err
-#  define nllerr       _llerr
 #else
 #  define nerr        (void)
-#  define nllerr      (void)
 #endif
 
 #ifdef CONFIG_DEBUG_NET_WARN
@@ -857,10 +775,8 @@
 
 #ifdef CONFIG_DEBUG_FS_ERROR
 #  define ferr         _err
-#  define fllerr       _llerr
 #else
 #  define ferr        (void)
-#  define fllerr      (void)
 #endif
 
 #ifdef CONFIG_DEBUG_FS_WARN
@@ -877,10 +793,8 @@
 
 #ifdef CONFIG_DEBUG_CRYPTO_ERROR
 #  define crypterr     _err
-#  define cryptllerr   _llerr
 #else
 #  define crypterr    (void)
-#  define cryptllerr  (void)
 #endif
 
 #ifdef CONFIG_DEBUG_CRYPTO_WARN
@@ -897,10 +811,8 @@
 
 #ifdef CONFIG_DEBUG_INPUT_ERROR
 #  define ierr         _err
-#  define illerr       _llerr
 #else
 #  define ierr        (void)
-#  define illerr      (void)
 #endif
 
 #ifdef CONFIG_DEBUG_INPUT_WARN
@@ -917,10 +829,8 @@
 
 #ifdef CONFIG_DEBUG_ANALOG_ERROR
 #  define aerr         _err
-#  define allerr       _llerr
 #else
 #  define aerr        (void)
-#  define allerr      (void)
 #endif
 
 #ifdef CONFIG_DEBUG_ANALOG_WARN
@@ -937,10 +847,8 @@
 
 #ifdef CONFIG_DEBUG_CAN_ERROR
 #  define canerr       _err
-#  define canllerr     _llerr
 #else
 #  define canerr      (void)
-#  define canllerr    (void)
 #endif
 
 #ifdef CONFIG_DEBUG_CAN_WARN
@@ -957,10 +865,8 @@
 
 #ifdef CONFIG_DEBUG_GRAPHICS_ERROR
 #  define gerr         _err
-#  define gllerr       _llerr
 #else
 #  define gerr        (void)
-#  define gllerr      (void)
 #endif
 
 #ifdef CONFIG_DEBUG_GRAPHICS_WARN
@@ -977,10 +883,8 @@
 
 #ifdef CONFIG_DEBUG_BINFMT_ERROR
 #  define berr         _err
-#  define bllerr       _llerr
 #else
 #  define berr        (void)
-#  define bllerr      (void)
 #endif
 
 #ifdef CONFIG_DEBUG_BINFMT_WARN
@@ -997,10 +901,8 @@
 
 #ifdef CONFIG_DEBUG_LIB_ERROR
 #  define lerr         _err
-#  define lllerr       _llerr
 #else
 #  define lerr        (void)
-#  define lllerr      (void)
 #endif
 
 #ifdef CONFIG_DEBUG_LIB_WARN
@@ -1017,10 +919,8 @@
 
 #ifdef CONFIG_DEBUG_AUDIO_ERROR
 #  define auderr       _err
-#  define audllerr     _llerr
 #else
 #  define auderr      (void)
-#  define audllerr    (void)
 #endif
 
 #ifdef CONFIG_DEBUG_AUDIO_WARN
@@ -1037,10 +937,8 @@
 
 #ifdef CONFIG_DEBUG_DMA_ERROR
 #  define dmaerr       _err
-#  define dmallerr     _llerr
 #else
 #  define dmaerr      (void)
-#  define dmallerr    (void)
 #endif
 
 #ifdef CONFIG_DEBUG_DMA_WARN
@@ -1057,10 +955,8 @@
 
 #ifdef CONFIG_DEBUG_IRQ_ERROR
 #  define irqerr       _err
-#  define irqllerr     _llerr
 #else
 #  define irqerr      (void)
-#  define irqllerr    (void)
 #endif
 
 #ifdef CONFIG_DEBUG_IRQ_WARN
@@ -1077,10 +973,8 @@
 
 #ifdef CONFIG_DEBUG_LCD_ERROR
 #  define lcderr       _err
-#  define lcdllerr     _llerr
 #else
 #  define lcderr      (void)
-#  define lcdllerr    (void)
 #endif
 
 #ifdef CONFIG_DEBUG_LCD_WARN
@@ -1097,10 +991,8 @@
 
 #ifdef CONFIG_DEBUG_LEDS_ERROR
 #  define lederr       _err
-#  define ledllerr     _llerr
 #else
 #  define lederr      (void)
-#  define ledllerr    (void)
 #endif
 
 #ifdef CONFIG_DEBUG_LEDS_WARN
@@ -1117,10 +1009,8 @@
 
 #ifdef CONFIG_DEBUG_GPIO_ERROR
 #  define gpioerr      _err
-#  define gpiollerr    _llerr
 #else
 #  define gpioerr     (void)
-#  define gpiollerr   (void)
 #endif
 
 #ifdef CONFIG_DEBUG_GPIO_WARN
@@ -1137,10 +1027,8 @@
 
 #ifdef CONFIG_DEBUG_I2C_ERROR
 #  define i2cerr       _err
-#  define i2cllerr     _llerr
 #else
 #  define i2cerr      (void)
-#  define i2cllerr    (void)
 #endif
 
 #ifdef CONFIG_DEBUG_I2C_WARN
@@ -1157,10 +1045,8 @@
 
 #ifdef CONFIG_DEBUG_I2S_ERROR
 #  define i2serr       _err
-#  define i2sllerr     _llerr
 #else
 #  define i2serr      (void)
-#  define i2sllerr    (void)
 #endif
 
 #ifdef CONFIG_DEBUG_I2S_WARN
@@ -1177,10 +1063,8 @@
 
 #ifdef CONFIG_DEBUG_PWM_ERROR
 #  define pwmerr       _err
-#  define pwmllerr     _llerr
 #else
 #  define pwmerr      (void)
-#  define pwmllerr    (void)
 #endif
 
 #ifdef CONFIG_DEBUG_PWM_WARN
@@ -1197,10 +1081,8 @@
 
 #ifdef CONFIG_DEBUG_RTC_ERROR
 #  define rtcerr       _err
-#  define rtcllerr     _llerr
 #else
 #  define rtcerr      (void)
-#  define rtcllerr    (void)
 #endif
 
 #ifdef CONFIG_DEBUG_RTC_WARN
@@ -1217,10 +1099,8 @@
 
 #ifdef CONFIG_DEBUG_MEMCARD_ERROR
 #  define mcerr        _err
-#  define mcllerr      _llerr
 #else
 #  define mcerr       (void)
-#  define mcllerr     (void)
 #endif
 
 #ifdef CONFIG_DEBUG_MEMCARD_WARN
@@ -1237,10 +1117,8 @@
 
 #ifdef CONFIG_DEBUG_SENSORS_ERROR
 #  define snerr        _err
-#  define snllerr      _llerr
 #else
 #  define snerr       (void)
-#  define snllerr     (void)
 #endif
 
 #ifdef CONFIG_DEBUG_SENSORS_WARN
@@ -1257,10 +1135,8 @@
 
 #ifdef CONFIG_DEBUG_SPI_ERROR
 #  define spierr       _err
-#  define spillerr     _llerr
 #else
 #  define spierr      (void)
-#  define spillerr    (void)
 #endif
 
 #ifdef CONFIG_DEBUG_SPI_WARN
@@ -1277,10 +1153,8 @@
 
 #ifdef CONFIG_DEBUG_TIMER_ERROR
 #  define tmrerr       _err
-#  define tmrllerr     _llerr
 #else
 #  define tmrerr      (void)
-#  define tmrllerr    (void)
 #endif
 
 #ifdef CONFIG_DEBUG_TIMER_WARN
@@ -1297,10 +1171,8 @@
 
 #ifdef CONFIG_DEBUG_USB_ERROR
 #  define uerr         _err
-#  define ullerr       _llerr
 #else
 #  define uerr        (void)
-#  define ullerr      (void)
 #endif
 
 #ifdef CONFIG_DEBUG_USB_WARN
@@ -1317,10 +1189,8 @@
 
 #ifdef CONFIG_DEBUG_WATCHDOG_ERROR
 #  define wderr        _err
-#  define wdllerr      _llerr
 #else
 #  define wderr       (void)
-#  define wdllerr     (void)
 #endif
 
 #ifdef CONFIG_DEBUG_WATCHDOG_WARN
@@ -1615,11 +1485,7 @@ int _alert(const char *format, ...);
 
 #ifdef CONFIG_DEBUG_ERROR
 int  _err(const char *format, ...);
-
-# ifdef CONFIG_ARCH_LOWPUTC
-int  _llerr(const char *format, ...);
-# endif
-#endif /* CONFIG_DEBUG_ERROR */
+#endif
 
 #ifdef CONFIG_DEBUG_WARN
 int _warn(const char *format, ...);

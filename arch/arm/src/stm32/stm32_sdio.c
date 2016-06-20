@@ -907,7 +907,7 @@ static void stm32_dmacallback(DMA_HANDLE handle, uint8_t status, void *arg)
 
   if ((status & DMA_STATUS_ERROR) != 0)
     {
-      mcllerr("ERROR: DMA error %02x, remaining: %d\n", status, priv->remaining);
+      mcerr("ERROR: DMA error %02x, remaining: %d\n", status, priv->remaining);
       result = SDIOWAIT_ERROR;
     }
   else
@@ -1172,7 +1172,7 @@ static void stm32_eventtimeout(int argc, uint32_t arg)
       /* Yes.. wake up any waiting threads */
 
       stm32_endwait(priv, SDIOWAIT_TIMEOUT);
-      mcllerr("ERROR: Timeout, remaining: %d\n", priv->remaining);
+      mcerr("ERROR: Timeout, remaining: %d\n", priv->remaining);
     }
 }
 
@@ -1412,7 +1412,7 @@ static int stm32_interrupt(int irq, void *context)
             {
               /* Terminate the transfer with an error */
 
-              mcllerr("ERROR: Data block CRC failure, remaining: %d\n", priv->remaining);
+              mcerr("ERROR: Data block CRC failure, remaining: %d\n", priv->remaining);
               stm32_endtransfer(priv, SDIOWAIT_TRANSFERDONE | SDIOWAIT_ERROR);
             }
 
@@ -1422,7 +1422,7 @@ static int stm32_interrupt(int irq, void *context)
             {
               /* Terminate the transfer with an error */
 
-              mcllerr("ERROR: Data timeout, remaining: %d\n", priv->remaining);
+              mcerr("ERROR: Data timeout, remaining: %d\n", priv->remaining);
               stm32_endtransfer(priv, SDIOWAIT_TRANSFERDONE | SDIOWAIT_TIMEOUT);
             }
 
@@ -1432,7 +1432,7 @@ static int stm32_interrupt(int irq, void *context)
             {
               /* Terminate the transfer with an error */
 
-              mcllerr("ERROR: RX FIFO overrun, remaining: %d\n", priv->remaining);
+              mcerr("ERROR: RX FIFO overrun, remaining: %d\n", priv->remaining);
               stm32_endtransfer(priv, SDIOWAIT_TRANSFERDONE | SDIOWAIT_ERROR);
             }
 
@@ -1442,7 +1442,7 @@ static int stm32_interrupt(int irq, void *context)
             {
               /* Terminate the transfer with an error */
 
-              mcllerr("ERROR: TX FIFO underrun, remaining: %d\n", priv->remaining);
+              mcerr("ERROR: TX FIFO underrun, remaining: %d\n", priv->remaining);
               stm32_endtransfer(priv, SDIOWAIT_TRANSFERDONE | SDIOWAIT_ERROR);
             }
 
@@ -1452,7 +1452,7 @@ static int stm32_interrupt(int irq, void *context)
             {
               /* Terminate the transfer with an error */
 
-              mcllerr("ERROR: Start bit, remaining: %d\n", priv->remaining);
+              mcerr("ERROR: Start bit, remaining: %d\n", priv->remaining);
               stm32_endtransfer(priv, SDIOWAIT_TRANSFERDONE | SDIOWAIT_ERROR);
             }
         }

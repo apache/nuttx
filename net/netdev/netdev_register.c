@@ -248,7 +248,7 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
 #endif
 
           default:
-            nllerr("ERROR: Unrecognized link type: %d\n", lltype);
+            nerr("ERROR: Unrecognized link type: %d\n", lltype);
             return -EINVAL;
         }
 

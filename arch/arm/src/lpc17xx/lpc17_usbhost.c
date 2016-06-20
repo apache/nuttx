@@ -1834,9 +1834,9 @@ static int lpc17_usbinterrupt(int irq, void *context)
                     {
                       /* The transfer failed for some reason... dump some diagnostic info. */
 
-                      ullerr("ERROR: ED xfrtype:%d TD CTRL:%08x/CC:%d RHPORTST1:%08x\n",
-                             ed->xfrtype, td->hw.ctrl, xfrinfo->tdstatus,
-                             lpc17_getreg(LPC17_USBHOST_RHPORTST1));
+                      uerr("ERROR: ED xfrtype:%d TD CTRL:%08x/CC:%d RHPORTST1:%08x\n",
+                           ed->xfrtype, td->hw.ctrl, xfrinfo->tdstatus,
+                           lpc17_getreg(LPC17_USBHOST_RHPORTST1));
                     }
 #endif
 
@@ -1898,7 +1898,7 @@ static int lpc17_usbinterrupt(int irq, void *context)
 #ifdef CONFIG_DEBUG_USB
       if ((pending & LPC17_DEBUG_INTS) != 0)
         {
-          ullerr("ERROR: Unhandled interrupts INTST:%08x\n", intst);
+          uerr("ERROR: Unhandled interrupts INTST:%08x\n", intst);
         }
 #endif
 

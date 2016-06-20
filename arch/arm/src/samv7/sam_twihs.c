@@ -616,7 +616,7 @@ static int twi_interrupt(struct twi_dev_s *priv)
     {
       /* Wake up the thread with an I/O error indication */
 
-      i2cllerr("ERROR: TWIHS%d pending: %08x\n", priv->attr->twi, pending);
+      i2cerr("ERROR: TWIHS%d pending: %08x\n", priv->attr->twi, pending);
       twi_wakeup(priv, -EIO);
     }
 
@@ -739,7 +739,7 @@ static void twi_timeout(int argc, uint32_t arg, ...)
 {
   struct twi_dev_s *priv = (struct twi_dev_s *)arg;
 
-  i2cllerr("ERROR: TWIHS%d Timeout!\n", priv->attr->twi);
+  i2cerr("ERROR: TWIHS%d Timeout!\n", priv->attr->twi);
   twi_wakeup(priv, -ETIMEDOUT);
 }
 

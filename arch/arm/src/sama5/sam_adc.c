@@ -755,7 +755,7 @@ static void sam_adc_dmacallback(DMA_HANDLE handle, void *arg, int result)
       ret = work_queue(HPWORK, &priv->work, sam_adc_dmadone, priv, 0);
       if (ret != 0)
         {
-          allerr("ERROR: Failed to queue work: %d\n", ret);
+          aerr("ERROR: Failed to queue work: %d\n", ret);
         }
     }
 
@@ -961,7 +961,7 @@ static int sam_adc_interrupt(int irq, void *context)
       ret = work_queue(HPWORK, &priv->work, sam_adc_endconversion, priv, 0);
       if (ret != 0)
         {
-          allerr("ERROR: Failed to queue work: %d\n", ret);
+          aerr("ERROR: Failed to queue work: %d\n", ret);
         }
 
       pending &= ~ADC_INT_EOCALL;

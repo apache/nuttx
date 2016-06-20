@@ -1136,7 +1136,7 @@ static uint16_t recvfrom_udp_interrupt(FAR struct net_driver_s *dev,
         {
           /* Terminate the transfer with an error. */
 
-          nllerr("ERROR: Network is down\n");
+          nerr("ERROR: Network is down\n");
           recvfrom_udp_terminate(pstate, -ENETUNREACH);
         }
 
@@ -1176,7 +1176,7 @@ static uint16_t recvfrom_udp_interrupt(FAR struct net_driver_s *dev,
            * callbacks
            */
 
-          nllerr("ERROR: UDP timeout\n");
+          nerr("ERROR: UDP timeout\n");
 
           /* Terminate the transfer with an -EAGAIN error */
 

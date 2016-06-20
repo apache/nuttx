@@ -229,7 +229,7 @@ static int stm32_rtc_alarm(time_t tv_sec, time_t tv_nsec, bool exti)
   ret = stm32_rtc_setalarm(&alarmtime, stm32_alarmcb);
   if (ret < 0)
     {
-      sllerr("ERROR: Warning: The alarm is already set\n");
+      serr("ERROR: Warning: The alarm is already set\n");
     }
 
   return ret;

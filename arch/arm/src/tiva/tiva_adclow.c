@@ -686,7 +686,7 @@ static void tiva_adc_read(void *arg)
        * and should cause a full system stop.
        */
 
-      allerr("ERROR: Invalid ADC device number given %d\n", sse->adc);
+      aerr("ERROR: Invalid ADC device number given %d\n", sse->adc);
       PANIC();
       return;
     }

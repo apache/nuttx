@@ -112,7 +112,7 @@ FAR struct lcd_dev_s *board_graphics_setup(unsigned int devno)
   spi = lpc17_sspbus_initialize(1);
   if (!spi)
     {
-      gllerr("ERROR: Failed to initialize SPI port 1\n");
+      gerr("ERROR: Failed to initialize SPI port 1\n");
     }
   else
     {
@@ -121,7 +121,7 @@ FAR struct lcd_dev_s *board_graphics_setup(unsigned int devno)
       dev = ug_initialize(spi, devno);
       if (!dev)
         {
-          gllerr("ERROR: Failed to bind SPI port 1 to OLED %d: %d\n", devno);
+          gerr("ERROR: Failed to bind SPI port 1 to OLED %d: %d\n", devno);
         }
      else
         {

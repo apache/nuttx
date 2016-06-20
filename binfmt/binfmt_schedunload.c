@@ -209,7 +209,7 @@ static void unload_callback(int signo, siginfo_t *info, void *ucontext)
 
   if (!info || signo != SIGCHLD)
     {
-      bllerr("ERROR:Bad signal callback: signo=%d info=%p\n", signo, info);
+      berr("ERROR:Bad signal callback: signo=%d info=%p\n", signo, info);
       return;
     }
 
@@ -218,7 +218,7 @@ static void unload_callback(int signo, siginfo_t *info, void *ucontext)
   bin = unload_list_remove(info->si_pid);
   if (!bin)
     {
-      bllerr("ERROR: Could not find load info for PID=%d\n", info->si_pid);
+      berr("ERROR: Could not find load info for PID=%d\n", info->si_pid);
       return;
     }
 
@@ -227,7 +227,7 @@ static void unload_callback(int signo, siginfo_t *info, void *ucontext)
   ret = unload_module(bin);
   if (ret < 0)
     {
-      bllerr("ERROR: unload_module failed: %d\n", get_errno());
+      berr("ERROR: unload_module failed: %d\n", get_errno());
     }
 
   /* Free the load structure */
@@ -317,7 +317,7 @@ int schedule_unload(pid_t pid, FAR struct binary_s *bin)
       flags = enter_critical_section();
       if (unload_list_remove(pid) != bin)
         {
-          bllerr("ERROR: Failed to remove structure\n");
+          berr("ERROR: Failed to remove structure\n");
         }
 
       leave_critical_section(flags);

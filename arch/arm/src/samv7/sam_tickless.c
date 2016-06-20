@@ -265,7 +265,7 @@ void up_timer_initialize(void)
                                CONFIG_USEC_PER_TICK);
   if (ret < 0)
     {
-      tmrllerr("ERROR: sam_oneshot_initialize failed\n");
+      tmrerr("ERROR: sam_oneshot_initialize failed\n");
       PANIC();
     }
 
@@ -278,7 +278,7 @@ void up_timer_initialize(void)
                                CONFIG_USEC_PER_TICK);
   if (ret < 0)
     {
-      tmrllerr("ERROR: sam_freerun_initialize failed\n");
+      tmrerr("ERROR: sam_freerun_initialize failed\n");
       PANIC();
     }
 

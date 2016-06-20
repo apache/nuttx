@@ -143,7 +143,7 @@ void igmp_input(struct net_driver_s *dev)
   group = igmp_grpallocfind(dev, &destipaddr);
   if (!group)
     {
-      nllerr("ERROR: Failed to allocate/find group: %08x\n", destipaddr);
+      nerr("ERROR: Failed to allocate/find group: %08x\n", destipaddr);
       return;
     }
 

@@ -2241,7 +2241,7 @@ void up_netinitialize(void)
     {
       /* We could not attach the ISR to the ISR */
 
-      nllerr("ERROR: irq_attach() failed\n");
+      nerr("ERROR: irq_attach() failed\n");
       return;
     }
 

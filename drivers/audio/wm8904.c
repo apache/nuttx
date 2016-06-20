@@ -1345,7 +1345,7 @@ static void  wm8904_senddone(FAR struct i2s_dev_s *i2s,
                 CONFIG_WM8904_MSG_PRIO);
   if (ret < 0)
     {
-      audllerr("ERROR: mq_send failed: %d\n", errno);
+      auderr("ERROR: mq_send failed: %d\n", errno);
     }
 }
 
@@ -1971,7 +1971,7 @@ static int wm8904_interrupt(FAR const struct wm8904_lower_s *lower,
   ret = work_queue(LPWORK, &priv->work, wm8904_interrupt_work, priv, 0);
   if (ret < 0)
     {
-      audllerr("ERROR: Failed to schedule work\n");
+      auderr("ERROR: Failed to schedule work\n");
     }
 
   return OK;
