@@ -201,7 +201,8 @@ static inline void psock_lost_connection(FAR struct socket *psock,
 
   sq_init(&conn->unacked_q);
   sq_init(&conn->write_q);
-  conn->sent = 0;
+  conn->sent       = 0;
+  conn->sndseq_max = 0;
 }
 
 /****************************************************************************
@@ -654,7 +655,7 @@ static uint16_t psock_send_interrupt(FAR struct net_driver_s *dev,
             {
               /* Insert the write buffer into the write_q (in sequence
                * number order).  The retransmission will occur below
-               * when the write buffer with the lowest sequenc number
+               * when the write buffer with the lowest sequence number
                * is pulled from the write_q again.
                */
 
@@ -696,6 +697,7 @@ static uint16_t psock_send_interrupt(FAR struct net_driver_s *dev,
       if (psock_send_addrchck(conn))
         {
           FAR struct tcp_wrbuffer_s *wrb;
+          uint32_t predicted_seqno;
           size_t sndlen;
 
           /* Peek at the head of the write queue (but don't remove anything
@@ -769,6 +771,16 @@ static uint16_t psock_send_interrupt(FAR struct net_driver_s *dev,
 
           conn->unacked += sndlen;
           conn->sent    += sndlen;
+
+          /* Below prediction will become true, unless retransmission occurrence */
+
+          predicted_seqno = tcp_getsequence(conn->sndseq) + sndlen;
+
+          if ((predicted_seqno > conn->sndseq_max) ||
+              (tcp_getsequence(conn->sndseq) > predicted_seqno)) /* overflow */
+            {
+               conn->sndseq_max = predicted_seqno;
+            }
 
           nllinfo("SEND: wrb=%p nrtx=%u unacked=%u sent=%u\n",
                   wrb, WRB_NRTX(wrb), conn->unacked, conn->sent);

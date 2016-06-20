@@ -12084,3 +12084,21 @@
 	  option.  Without this configuration setting, interrupt level output
 	  will be asynchronous.  And (3) vsyslog is now a system call and is
 	  usable with other-than-FLAT builds (2016-06-19).
+	* TCP Networking: While working with version 7.10 I discovered a
+	  problem in TCP stack that could be observed on high network load.
+	  Generally speaking, the problem is that RST flag is set in
+	  unnecessary case, in which between loss of some TCP packet and its
+	  proper retransmission, another packets had been successfully sent.
+	  The scenario is as follows:  NuttX did not receive ACK for some
+	  sent packet, so it has been probably lost somewhere. But before
+	  its retransmission starts, NuttX is correctly issuing next TCP
+	  packets, with sequence numbers increasing properly. When the
+	  retransmission of previously lost packet finally succeeds, tcp_input
+	  receives the accumulated ACK value, which acknowledges also the
+	  packets sent in the meantime (i.e. between unsuccessful sending of
+	  lost packet and its proper retransmission). However, variable unackseq
+	  is still set to conn->isn + conn->sent, which is truth only if no
+	  further packets transmission occurred in the meantime.  Because of
+	  incorrect (in such specific case) unackseq value, few lines further
+	  condition if (ackseq <= unackseq)is not met, and, as a result, we
+	  are going to reset label.  From  Jakub Łągwa (2016-06-20).

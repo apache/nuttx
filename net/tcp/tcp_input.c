@@ -364,7 +364,7 @@ found:
        */
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
-      unackseq = conn->isn + conn->sent;
+      unackseq = conn->sndseq_max;
 #else
       unackseq = tcp_addsequence(conn->sndseq, conn->unacked);
 #endif
@@ -468,6 +468,7 @@ found:
             conn->isn           = tcp_getsequence(tcp->ackno);
             tcp_setsequence(conn->sndseq, conn->isn);
             conn->sent          = 0;
+            conn->sndseq_max    = 0;
 #endif
             conn->unacked       = 0;
             flags               = TCP_CONNECTED;

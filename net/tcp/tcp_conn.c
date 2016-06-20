@@ -1083,11 +1083,12 @@ FAR struct tcp_conn_s *tcp_alloc_accept(FAR struct net_driver_s *dev,
       conn->tcpstateflags = TCP_SYN_RCVD;
 
       tcp_initsequence(conn->sndseq);
-      conn->unacked = 1;
+      conn->unacked       = 1;
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
-      conn->expired = 0;
-      conn->isn     = 0;
-      conn->sent    = 0;
+      conn->expired       = 0;
+      conn->isn           = 0;
+      conn->sent          = 0;
+      conn->sndseq_max    = 0;
 #endif
 
       /* rcvseq should be the seqno from the incoming packet + 1. */
@@ -1344,6 +1345,7 @@ int tcp_connect(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr)
   conn->expired    = 0;
   conn->isn        = 0;
   conn->sent       = 0;
+  conn->sndseq_max = 0;
 #endif
 
 #ifdef CONFIG_NET_TCP_READAHEAD
