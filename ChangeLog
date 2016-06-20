@@ -12105,3 +12105,7 @@
 	* SYSLOG: Remove lowsyslog(), vlowsyslog(), and associated macros
 	  *llinfo(), *llwarn(), and llerr().  In the redesigned syslog() logic,
 	  these serve no purpose (2016-06-20).
+	* Make system: Need to build the drivers/ directory even it file
+	  descriptors are not supported.  There are things in the drivers/
+	  directory that are still needed (like SYSLOG logic).
+
