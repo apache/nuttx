@@ -95,26 +95,12 @@ struct ramlog_dev_s
  * Private Function Prototypes
  ****************************************************************************/
 
+/* Syslog channel methods */
+
 #ifdef CONFIG_RAMLOG_SYSLOG
 static int ramlog_flush(void);
 #endif
 
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-#ifdef CONFIG_RAMLOG_SYSLOG
-static const struct syslog_channel_s g_ramlog_syslog_channel =
-{
-  ramlog_putc,
-  ramlog_putc,
-  ramlog_flush
-};
-#endif
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
 /* Helper functions */
 
 #ifndef CONFIG_DISABLE_POLL
@@ -132,6 +118,19 @@ static ssize_t ramlog_write(FAR struct file *filep, FAR const char *buffer,
 #ifndef CONFIG_DISABLE_POLL
 static int     ramlog_poll(FAR struct file *filep, FAR struct pollfd *fds,
                            bool setup);
+#endif
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+#ifdef CONFIG_RAMLOG_SYSLOG
+static const struct syslog_channel_s g_ramlog_syslog_channel =
+{
+  ramlog_putc,
+  ramlog_putc,
+  ramlog_flush
+};
 #endif
 
 /****************************************************************************
@@ -185,6 +184,17 @@ static struct ramlog_dev_s g_sysdev =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: ramlog_flush
+ ****************************************************************************/
+
+#ifdef CONFIG_RAMLOG_SYSLOG
+static int ramlog_flush(void)
+{
+  return OK;
+}
+#endif
 
 /****************************************************************************
  * Name: ramlog_pollnotify
