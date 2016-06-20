@@ -12102,3 +12102,6 @@
 	  incorrect (in such specific case) unackseq value, few lines further
 	  condition if (ackseq <= unackseq)is not met, and, as a result, we
 	  are going to reset label.  From  Jakub Łągwa (2016-06-20).
+	* SYSLOG: Remove lowsyslog(), vlowsyslog(), and associated macros
+	  *llinfo(), *llwarn(), and llerr().  In the redesigned syslog() logic,
+	  these serve no purpose (2016-06-20).
