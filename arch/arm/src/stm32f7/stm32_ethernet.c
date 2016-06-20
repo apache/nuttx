@@ -1718,7 +1718,7 @@ static int stm32_recvframe(struct stm32_ethmac_s *priv)
                * scanning logic, and continue scanning with the next frame.
                */
 
-              nllwarn("WARNING: DROPPED RX descriptor errors: %08x\n", rxdesc->rdes0);
+              nwarn("WARNING: DROPPED RX descriptor errors: %08x\n", rxdesc->rdes0);
               stm32_freesegment(priv, rxcurr, priv->segments);
             }
         }
@@ -1784,7 +1784,7 @@ static void stm32_receive(struct stm32_ethmac_s *priv)
 
       if (dev->d_len > CONFIG_NET_ETH_MTU)
         {
-          nllwarn("WARNING: DROPPED Too big: %d\n", dev->d_len);
+          nwarn("WARNING: DROPPED Too big: %d\n", dev->d_len);
           continue;
         }
 
@@ -1894,7 +1894,7 @@ static void stm32_receive(struct stm32_ethmac_s *priv)
       else
 #endif
         {
-          nllwarn("WARNING: DROPPED Unknown type: %04x\n", BUF->type);
+          nwarn("WARNING: DROPPED Unknown type: %04x\n", BUF->type);
         }
 
       /* We are finished with the RX buffer.  NOTE:  If the buffer is

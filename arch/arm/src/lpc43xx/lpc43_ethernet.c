@@ -1547,7 +1547,7 @@ static int lpc43_recvframe(FAR struct lpc43_ethmac_s *priv)
                * scanning logic, and continue scanning with the next frame.
                */
 
-              nllwarn("WARNING: Dropped, RX descriptor errors: %08x\n", rxdesc->rdes0);
+              nwarn("WARNING: Dropped, RX descriptor errors: %08x\n", rxdesc->rdes0);
               lpc43_freesegment(priv, rxcurr, priv->segments);
             }
         }
@@ -1608,7 +1608,7 @@ static void lpc43_receive(FAR struct lpc43_ethmac_s *priv)
 
       if (dev->d_len > CONFIG_NET_ETH_MTU)
         {
-          nllwarn("WARNING: Dropped, Too big: %d\n", dev->d_len);
+          nwarn("WARNING: Dropped, Too big: %d\n", dev->d_len);
           /* Free dropped packet buffer */
 
           if (dev->d_buf)
@@ -1727,7 +1727,7 @@ static void lpc43_receive(FAR struct lpc43_ethmac_s *priv)
       else
 #endif
         {
-          nllwarn("WARNING: Dropped, Unknown type: %04x\n", BUF->type);
+          nwarn("WARNING: Dropped, Unknown type: %04x\n", BUF->type);
         }
 
       /* We are finished with the RX buffer.  NOTE:  If the buffer is

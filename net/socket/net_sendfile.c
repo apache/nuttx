@@ -206,7 +206,7 @@ static uint16_t ack_interrupt(FAR struct net_driver_s *dev, FAR void *pvconn,
     }
   else if ((flags & TCP_REXMIT) != 0)
     {
-      nllwarn("WARNING: TCP_REXMIT\n");
+      nwarn("WARNING: TCP_REXMIT\n");
 
       /* Yes.. in this case, reset the number of bytes that have been sent
        * to the number of bytes that have been ACKed.
@@ -221,7 +221,7 @@ static uint16_t ack_interrupt(FAR struct net_driver_s *dev, FAR void *pvconn,
     {
       /* Report not connected */
 
-      nllwarn("WARNING: Lost connection\n");
+      nwarn("WARNING: Lost connection\n");
 
       net_lostconnection(pstate->snd_sock, flags);
       pstate->snd_sent = -ENOTCONN;
@@ -345,7 +345,7 @@ static uint16_t sendfile_interrupt(FAR struct net_driver_s *dev, FAR void *pvcon
     {
       /* Report not connected */
 
-      nllwarn("WARNING: Lost connection\n");
+      nwarn("WARNING: Lost connection\n");
 
       net_lostconnection(pstate->snd_sock, flags);
       pstate->snd_sent = -ENOTCONN;
@@ -430,7 +430,7 @@ static uint16_t sendfile_interrupt(FAR struct net_driver_s *dev, FAR void *pvcon
         }
       else
         {
-          nllwarn("WARNING: Window full, wait for ack\n");
+          nwarn("WARNING: Window full, wait for ack\n");
           goto wait;
         }
     }
@@ -444,7 +444,7 @@ static uint16_t sendfile_interrupt(FAR struct net_driver_s *dev, FAR void *pvcon
     {
       /* Yes.. report the timeout */
 
-      nllwarn("WARNING: SEND timeout\n");
+      nwarn("WARNING: SEND timeout\n");
       pstate->snd_sent = -ETIMEDOUT;
       goto end_wait;
     }

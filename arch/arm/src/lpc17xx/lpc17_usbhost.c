@@ -1698,7 +1698,7 @@ static int lpc17_usbinterrupt(int irq, void *context)
                         }
                       else
                         {
-                          ullwarn("WARNING: Spurious status change (connected)\n");
+                          uwarn("WARNING: Spurious status change (connected)\n");
                         }
 
                       /* The LSDA (Low speed device attached) bit is valid
@@ -1754,7 +1754,7 @@ static int lpc17_usbinterrupt(int irq, void *context)
                     }
                   else
                     {
-                       ullwarn("WARNING: Spurious status change (disconnected)\n");
+                       uwarn("WARNING: Spurious status change (disconnected)\n");
                     }
                 }
 

@@ -2473,7 +2473,7 @@ static int enc_reset(FAR struct enc_driver_s *priv)
 {
   uint8_t regval;
 
-  nllwarn("WARNING: Reset\n");
+  nwarn("WARNING: Reset\n");
 
   /* Configure SPI for the ENC28J60 */
 

@@ -96,11 +96,6 @@
  *    in low-level code where it is inappropriate to use file descriptors.  For
  *    example, only [a-z]llinfo() should be used in interrupt handlers.
  *
- * [a-z]llwarn() -- Identical to [a-z]llinfo() except that it also requires that
- *    CONFIG_DEBUG_WARN be defined.  This is intended for important exception
- *    conditions that are potential errors (or perhaps real errors with non-
- *    fatal consequences).
- *
  * [a-z]llerr() -- Identical to [a-z]llinfo() except that it also requires that
  *    CONFIG_DEBUG_ERROR be defined. This is intended for important error-related
  *    information that you probably not want to suppress during normal debug
@@ -155,16 +150,8 @@
 #ifdef CONFIG_DEBUG_WARN
 #  define _warn(format, ...) \
    __arch_syslog(LOG_WARNING, EXTRA_FMT format EXTRA_ARG, ##__VA_ARGS__)
-
-#  ifdef CONFIG_ARCH_LOWPUTC
-#    define _llwarn(format, ...) \
-     __arch_syslog(LOG_WARNING, EXTRA_FMT format EXTRA_ARG, ##__VA_ARGS__)
-#  else
-#    define _llwarn(x...)
-#  endif
 #else /* CONFIG_DEBUG_INFO */
 #  define _warn(x...)
-#  define _llwarn(x...)
 #endif /* CONFIG_DEBUG_INFO */
 
 #ifdef CONFIG_DEBUG_INFO
@@ -194,10 +181,8 @@
 
 #ifdef CONFIG_DEBUG_MM_WARN
 #  define mwarn(format, ...)   _warn(format, ##__VA_ARGS__)
-#  define mllwarn(format, ...) _llwarn(format, ##__VA_ARGS__)
 #else
 #  define mwarn(x...)
-#  define mllwarn(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_MM_INFO
@@ -218,10 +203,8 @@
 
 #ifdef CONFIG_DEBUG_SCHED_WARN
 #  define swarn(format, ...)   _warn(format, ##__VA_ARGS__)
-#  define sllwarn(format, ...) _llwarn(format, ##__VA_ARGS__)
 #else
 #  define swarn(x...)
-#  define sllwarn(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_SCHED_INFO
@@ -242,10 +225,8 @@
 
 #ifdef CONFIG_DEBUG_SYSCALL_WARN
 #  define svcwarn(format, ...)   _warn(format, ##__VA_ARGS__)
-#  define svcllwarn(format, ...) _llwarn(format, ##__VA_ARGS__)
 #else
 #  define svcwarn(x...)
-#  define svcllwarn(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_SYSCALL_INFO
@@ -266,10 +247,8 @@
 
 #ifdef CONFIG_DEBUG_PAGING_WARN
 #  define pgwarn(format, ...)   _warn(format, ##__VA_ARGS__)
-#  define pgllwarn(format, ...) _llwarn(format, ##__VA_ARGS__)
 #else
 #  define pgwarn(x...)
-#  define pgllwarn(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_PAGING_INFO
@@ -290,10 +269,8 @@
 
 #ifdef CONFIG_DEBUG_NET_WARN
 #  define nwarn(format, ...)   _warn(format, ##__VA_ARGS__)
-#  define nllwarn(format, ...) _llwarn(format, ##__VA_ARGS__)
 #else
 #  define nwarn(x...)
-#  define nllwarn(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_NET_INFO
@@ -314,10 +291,8 @@
 
 #ifdef CONFIG_DEBUG_FS_WARN
 #  define fwarn(format, ...)   _warn(format, ##__VA_ARGS__)
-#  define fllwarn(format, ...) _llwarn(format, ##__VA_ARGS__)
 #else
 #  define fwarn(x...)
-#  define fllwarn(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_FS_INFO
@@ -338,10 +313,8 @@
 
 #ifdef CONFIG_DEBUG_CRYPTO_WARN
 #  define cryptwarn(format, ...)   _warn(format, ##__VA_ARGS__)
-#  define cryptllwarn(format, ...) _llwarn(format, ##__VA_ARGS__)
 #else
 #  define cryptwarn(x...)
-#  define cryptllwarn(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_CRYPTO_INFO
@@ -362,10 +335,8 @@
 
 #ifdef CONFIG_DEBUG_INPUT_WARN
 #  define iwarn(format, ...)   _warn(format, ##__VA_ARGS__)
-#  define illwarn(format, ...) _llwarn(format, ##__VA_ARGS__)
 #else
 #  define iwarn(x...)
-#  define illwarn(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_INPUT_INFO
@@ -386,10 +357,8 @@
 
 #ifdef CONFIG_DEBUG_ANALOG_WARN
 #  define awarn(format, ...)   _warn(format, ##__VA_ARGS__)
-#  define allwarn(format, ...) _llwarn(format, ##__VA_ARGS__)
 #else
 #  define awarn(x...)
-#  define allwarn(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_ANALOG_INFO
@@ -410,10 +379,8 @@
 
 #ifdef CONFIG_DEBUG_CAN_WARN
 #  define canwarn(format, ...)   _warn(format, ##__VA_ARGS__)
-#  define canllwarn(format, ...) _llwarn(format, ##__VA_ARGS__)
 #else
 #  define canwarn(x...)
-#  define canllwarn(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_CAN_INFO
@@ -434,10 +401,8 @@
 
 #ifdef CONFIG_DEBUG_GRAPHICS_WARN
 #  define gwarn(format, ...)   _warn(format, ##__VA_ARGS__)
-#  define gllwarn(format, ...) _llwarn(format, ##__VA_ARGS__)
 #else
 #  define gwarn(x...)
-#  define gllwarn(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_GRAPHICS_INFO
@@ -458,10 +423,8 @@
 
 #ifdef CONFIG_DEBUG_BINFMT_WARN
 #  define bwarn(format, ...)   _warn(format, ##__VA_ARGS__)
-#  define bllwarn(format, ...) _llwarn(format, ##__VA_ARGS__)
 #else
 #  define bwarn(x...)
-#  define bllwarn(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_BINFMT_INFO
@@ -482,10 +445,8 @@
 
 #ifdef CONFIG_DEBUG_LIB_WARN
 #  define lwarn(format, ...)   _warn(format, ##__VA_ARGS__)
-#  define lllwarn(format, ...) _llwarn(format, ##__VA_ARGS__)
 #else
 #  define lwarn(x...)
-#  define lllwarn(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_LIB_INFO
@@ -506,10 +467,8 @@
 
 #ifdef CONFIG_DEBUG_AUDIO_WARN
 #  define audwarn(format, ...)   _warn(format, ##__VA_ARGS__)
-#  define audllwarn(format, ...) _llwarn(format, ##__VA_ARGS__)
 #else
 #  define audwarn(x...)
-#  define audllwarn(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_AUDIO_INFO
@@ -530,10 +489,8 @@
 
 #ifdef CONFIG_DEBUG_DMA_WARN
 #  define dmawarn(format, ...)   _warn(format, ##__VA_ARGS__)
-#  define dmallwarn(format, ...) _llwarn(format, ##__VA_ARGS__)
 #else
 #  define dmawarn(x...)
-#  define dmallwarn(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_DMA_INFO
@@ -554,10 +511,8 @@
 
 #ifdef CONFIG_DEBUG_IRQ_WARN
 #  define irqwarn(format, ...)   _warn(format, ##__VA_ARGS__)
-#  define irqllwarn(format, ...) _llwarn(format, ##__VA_ARGS__)
 #else
 #  define irqwarn(x...)
-#  define irqllwarn(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_IRQ_INFO
@@ -578,10 +533,8 @@
 
 #ifdef CONFIG_DEBUG_LCD_WARN
 #  define lcdwarn(format, ...)   _warn(format, ##__VA_ARGS__)
-#  define lcdllwarn(format, ...) _llwarn(format, ##__VA_ARGS__)
 #else
 #  define lcdwarn(x...)
-#  define lcdllwarn(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_LCD_INFO
@@ -602,10 +555,8 @@
 
 #ifdef CONFIG_DEBUG_LEDS_WARN
 #  define ledwarn(format, ...)   _warn(format, ##__VA_ARGS__)
-#  define ledllwarn(format, ...) _llwarn(format, ##__VA_ARGS__)
 #else
 #  define ledwarn(x...)
-#  define ledllwarn(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_LEDS_INFO
@@ -626,10 +577,8 @@
 
 #ifdef CONFIG_DEBUG_GPIO_WARN
 #  define gpiowarn(format, ...)   _warn(format, ##__VA_ARGS__)
-#  define gpiollwarn(format, ...) _llwarn(format, ##__VA_ARGS__)
 #else
 #  define gpiowarn(x...)
-#  define gpiollwarn(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_GPIO_INFO
@@ -650,10 +599,8 @@
 
 #ifdef CONFIG_DEBUG_I2C_WARN
 #  define i2cwarn(format, ...)   _warn(format, ##__VA_ARGS__)
-#  define i2cllwarn(format, ...) _llwarn(format, ##__VA_ARGS__)
 #else
 #  define i2cwarn(x...)
-#  define i2cllwarn(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_I2C_INFO
@@ -674,10 +621,8 @@
 
 #ifdef CONFIG_DEBUG_I2S_WARN
 #  define i2swarn(format, ...)   _warn(format, ##__VA_ARGS__)
-#  define i2sllwarn(format, ...) _llwarn(format, ##__VA_ARGS__)
 #else
 #  define i2swarn(x...)
-#  define i2sllwarn(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_I2S_INFO
@@ -698,10 +643,8 @@
 
 #ifdef CONFIG_DEBUG_PWM_WARN
 #  define pwmwarn(format, ...)   _warn(format, ##__VA_ARGS__)
-#  define pwmllwarn(format, ...) _llwarn(format, ##__VA_ARGS__)
 #else
 #  define pwmwarn(x...)
-#  define pwmllwarn(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_PWM_INFO
@@ -722,10 +665,8 @@
 
 #ifdef CONFIG_DEBUG_RTC_WARN
 #  define rtcwarn(format, ...)   _warn(format, ##__VA_ARGS__)
-#  define rtcllwarn(format, ...) _llwarn(format, ##__VA_ARGS__)
 #else
 #  define rtcwarn(x...)
-#  define rtcllwarn(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_RTC_INFO
@@ -746,10 +687,8 @@
 
 #ifdef CONFIG_DEBUG_MEMCARD_WARN
 #  define mcwarn(format, ...)   _warn(format, ##__VA_ARGS__)
-#  define mcllwarn(format, ...) _llwarn(format, ##__VA_ARGS__)
 #else
 #  define mcwarn(x...)
-#  define mcllwarn(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_MEMCARD_INFO
@@ -770,10 +709,8 @@
 
 #ifdef CONFIG_DEBUG_SENSORS_WARN
 #  define snwarn(format, ...)   _warn(format, ##__VA_ARGS__)
-#  define snllwarn(format, ...) _llwarn(format, ##__VA_ARGS__)
 #else
 #  define snwarn(x...)
-#  define snllwarn(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_SENSORS_INFO
@@ -794,10 +731,8 @@
 
 #ifdef CONFIG_DEBUG_SPI_WARN
 #  define spiwarn(format, ...)   _warn(format, ##__VA_ARGS__)
-#  define spillwarn(format, ...) _llwarn(format, ##__VA_ARGS__)
 #else
 #  define spiwarn(x...)
-#  define spillwarn(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_SPI_INFO
@@ -818,10 +753,8 @@
 
 #ifdef CONFIG_DEBUG_TIMER_WARN
 #  define tmrwarn(format, ...)   _warn(format, ##__VA_ARGS__)
-#  define tmrllwarn(format, ...) _llwarn(format, ##__VA_ARGS__)
 #else
 #  define tmrwarn(x...)
-#  define tmrllwarn(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_TIMER_INFO
@@ -842,10 +775,8 @@
 
 #ifdef CONFIG_DEBUG_USB_WARN
 #  define uwarn(format, ...)   _warn(format, ##__VA_ARGS__)
-#  define ullwarn(format, ...) _llwarn(format, ##__VA_ARGS__)
 #else
 #  define uwarn(x...)
-#  define ullwarn(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_USB_INFO
@@ -866,10 +797,8 @@
 
 #ifdef CONFIG_DEBUG_WATCHDOG_WARN
 #  define wdwarn(format, ...)   _warn(format, ##__VA_ARGS__)
-#  define wdllwarn(format, ...) _llwarn(format, ##__VA_ARGS__)
 #else
 #  define wdwarn(x...)
-#  define wdllwarn(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_WATCHDOG_INFO
@@ -897,13 +826,8 @@
 #  define _llerr      (void)
 #endif
 
-#ifdef CONFIG_DEBUG_WARN
-#  ifndef CONFIG_ARCH_LOWPUTC
-#    define _llwarn   (void)
-#  endif
-#else
+#ifndef CONFIG_DEBUG_WARN
 #  define _warn       (void)
-#  define _llwarn     (void)
 #endif
 
 #ifdef CONFIG_DEBUG_INFO
@@ -927,10 +851,8 @@
 
 #ifdef CONFIG_DEBUG_MM_WARN
 #  define mwarn       _warn
-#  define mllwarn     _llwarn
 #else
 #  define mwarn       (void)
-#  define mllwarn     (void)
 #endif
 
 #ifdef CONFIG_DEBUG_MM_INFO
@@ -951,10 +873,8 @@
 
 #ifdef CONFIG_DEBUG_SCHED_WARN
 #  define swarn       _warn
-#  define sllwarn     _llwarn
 #else
 #  define swarn       (void)
-#  define sllwarn     (void)
 #endif
 
 #ifdef CONFIG_DEBUG_SCHED_INFO
@@ -975,10 +895,8 @@
 
 #ifdef CONFIG_DEBUG_SYSCALL_WARN
 #  define svcwarn     _warn
-#  define svcllwarn   _llwarn
 #else
 #  define svcwarn     (void)
-#  define svcllwarn   (void)
 #endif
 
 #ifdef CONFIG_DEBUG_SYSCALL_INFO
@@ -999,10 +917,8 @@
 
 #ifdef CONFIG_DEBUG_PAGING_WARN
 #  define pgwarn      _warn
-#  define pgllwarn    _llwarn
 #else
 #  define pgwarn      (void)
-#  define pgllwarn    (void)
 #endif
 
 #ifdef CONFIG_DEBUG_PAGING_INFO
@@ -1023,10 +939,8 @@
 
 #ifdef CONFIG_DEBUG_NET_WARN
 #  define nwarn       _warn
-#  define nllwarn     _llwarn
 #else
 #  define nwarn       (void)
-#  define nllwarn     (void)
 #endif
 
 #ifdef CONFIG_DEBUG_NET_INFO
@@ -1047,10 +961,8 @@
 
 #ifdef CONFIG_DEBUG_FS_WARN
 #  define fwarn       _warn
-#  define fllwarn     _llwarn
 #else
 #  define fwarn       (void)
-#  define fllwarn     (void)
 #endif
 
 #ifdef CONFIG_DEBUG_FS_INFO
@@ -1071,10 +983,8 @@
 
 #ifdef CONFIG_DEBUG_CRYPTO_WARN
 #  define cryptwarn   _warn
-#  define cryptllwarn _llwarn
 #else
 #  define cryptwarn   (void)
-#  define cryptllwarn (void)
 #endif
 
 #ifdef CONFIG_DEBUG_CRYPTO_INFO
@@ -1095,10 +1005,8 @@
 
 #ifdef CONFIG_DEBUG_INPUT_WARN
 #  define iwarn       _warn
-#  define illwarn     _llwarn
 #else
 #  define iwarn       (void)
-#  define illwarn     (void)
 #endif
 
 #ifdef CONFIG_DEBUG_INPUT_INFO
@@ -1119,10 +1027,8 @@
 
 #ifdef CONFIG_DEBUG_ANALOG_WARN
 #  define awarn       _warn
-#  define allwarn     _llwarn
 #else
 #  define awarn       (void)
-#  define allwarn     (void)
 #endif
 
 #ifdef CONFIG_DEBUG_ANALOG_INFO
@@ -1143,10 +1049,8 @@
 
 #ifdef CONFIG_DEBUG_CAN_WARN
 #  define canwarn     _warn
-#  define canllwarn   _llwarn
 #else
 #  define canwarn     (void)
-#  define canllwarn   (void)
 #endif
 
 #ifdef CONFIG_DEBUG_CAN_INFO
@@ -1167,10 +1071,8 @@
 
 #ifdef CONFIG_DEBUG_GRAPHICS_WARN
 #  define gwarn       _warn
-#  define gllwarn     _llwarn
 #else
 #  define gwarn       (void)
-#  define gllwarn     (void)
 #endif
 
 #ifdef CONFIG_DEBUG_GRAPHICS_INFO
@@ -1191,10 +1093,8 @@
 
 #ifdef CONFIG_DEBUG_BINFMT_WARN
 #  define bwarn       _warn
-#  define bllwarn     _llwarn
 #else
 #  define bwarn       (void)
-#  define bllwarn     (void)
 #endif
 
 #ifdef CONFIG_DEBUG_BINFMT_INFO
@@ -1215,10 +1115,8 @@
 
 #ifdef CONFIG_DEBUG_LIB_WARN
 #  define lwarn       _warn
-#  define lllwarn     _llwarn
 #else
 #  define lwarn       (void)
-#  define lllwarn     (void)
 #endif
 
 #ifdef CONFIG_DEBUG_LIB_INFO
@@ -1239,10 +1137,8 @@
 
 #ifdef CONFIG_DEBUG_AUDIO_WARN
 #  define audwarn     _warn
-#  define audllwarn   _llwarn
 #else
 #  define audwarn     (void)
-#  define audllwarn   (void)
 #endif
 
 #ifdef CONFIG_DEBUG_AUDIO_INFO
@@ -1263,10 +1159,8 @@
 
 #ifdef CONFIG_DEBUG_DMA_WARN
 #  define dmawarn     _warn
-#  define dmallwarn   _llwarn
 #else
 #  define dmawarn     (void)
-#  define dmallwarn   (void)
 #endif
 
 #ifdef CONFIG_DEBUG_DMA_INFO
@@ -1287,10 +1181,8 @@
 
 #ifdef CONFIG_DEBUG_IRQ_WARN
 #  define irqwarn     _warn
-#  define irqllwarn   _llwarn
 #else
 #  define irqwarn     (void)
-#  define irqllwarn   (void)
 #endif
 
 #ifdef CONFIG_DEBUG_IRQ_INFO
@@ -1311,10 +1203,8 @@
 
 #ifdef CONFIG_DEBUG_LCD_WARN
 #  define lcdwarn     _warn
-#  define lcdllwarn   _llwarn
 #else
 #  define lcdwarn     (void)
-#  define lcdllwarn   (void)
 #endif
 
 #ifdef CONFIG_DEBUG_LCD_INFO
@@ -1335,10 +1225,8 @@
 
 #ifdef CONFIG_DEBUG_LEDS_WARN
 #  define ledwarn     _warn
-#  define ledllwarn   _llwarn
 #else
 #  define ledwarn     (void)
-#  define ledllwarn   (void)
 #endif
 
 #ifdef CONFIG_DEBUG_LEDS_INFO
@@ -1359,10 +1247,8 @@
 
 #ifdef CONFIG_DEBUG_GPIO_WARN
 #  define gpiowarn    _warn
-#  define gpiollwarn  _llwarn
 #else
 #  define gpiowarn    (void)
-#  define gpiollwarn  (void)
 #endif
 
 #ifdef CONFIG_DEBUG_GPIO_INFO
@@ -1383,10 +1269,8 @@
 
 #ifdef CONFIG_DEBUG_I2C_WARN
 #  define i2cwarn     _warn
-#  define i2cllwarn   _llwarn
 #else
 #  define i2cwarn     (void)
-#  define i2cllwarn   (void)
 #endif
 
 #ifdef CONFIG_DEBUG_I2C_INFO
@@ -1407,10 +1291,8 @@
 
 #ifdef CONFIG_DEBUG_I2S_WARN
 #  define i2swarn     _warn
-#  define i2sllwarn   _llwarn
 #else
 #  define i2swarn     (void)
-#  define i2sllwarn   (void)
 #endif
 
 #ifdef CONFIG_DEBUG_I2S_INFO
@@ -1431,10 +1313,8 @@
 
 #ifdef CONFIG_DEBUG_PWM_WARN
 #  define pwmwarn     _warn
-#  define pwmllwarn   _llwarn
 #else
 #  define pwmwarn     (void)
-#  define pwmllwarn   (void)
 #endif
 
 #ifdef CONFIG_DEBUG_PWM_INFO
@@ -1455,10 +1335,8 @@
 
 #ifdef CONFIG_DEBUG_RTC_WARN
 #  define rtcwarn     _warn
-#  define rtcllwarn   _llwarn
 #else
 #  define rtcwarn     (void)
-#  define rtcllwarn   (void)
 #endif
 
 #ifdef CONFIG_DEBUG_RTC_INFO
@@ -1479,10 +1357,8 @@
 
 #ifdef CONFIG_DEBUG_MEMCARD_WARN
 #  define mcwarn      _warn
-#  define mcllwarn    _llwarn
 #else
 #  define mcwarn      (void)
-#  define mcllwarn    (void)
 #endif
 
 #ifdef CONFIG_DEBUG_MEMCARD_INFO
@@ -1503,10 +1379,8 @@
 
 #ifdef CONFIG_DEBUG_SENSORS_WARN
 #  define snwarn      _warn
-#  define snllwarn    _llwarn
 #else
 #  define snwarn      (void)
-#  define snllwarn    (void)
 #endif
 
 #ifdef CONFIG_DEBUG_SENSORS_INFO
@@ -1527,10 +1401,8 @@
 
 #ifdef CONFIG_DEBUG_SPI_WARN
 #  define spiwarn     _warn
-#  define spillwarn   _llwarn
 #else
 #  define spiwarn     (void)
-#  define spillwarn   (void)
 #endif
 
 #ifdef CONFIG_DEBUG_SPI_INFO
@@ -1551,10 +1423,8 @@
 
 #ifdef CONFIG_DEBUG_TIMER_WARN
 #  define tmrwarn     _warn
-#  define tmrllwarn   _llwarn
 #else
 #  define tmrwarn     (void)
-#  define tmrllwarn   (void)
 #endif
 
 #ifdef CONFIG_DEBUG_TIMER_INFO
@@ -1575,10 +1445,8 @@
 
 #ifdef CONFIG_DEBUG_USB_WARN
 #  define uwarn       _warn
-#  define ullwarn     _llwarn
 #else
 #  define uwarn       (void)
-#  define ullwarn     (void)
 #endif
 
 #ifdef CONFIG_DEBUG_USB_INFO
@@ -1599,10 +1467,8 @@
 
 #ifdef CONFIG_DEBUG_WATCHDOG_WARN
 #  define wdwarn      _warn
-#  define wdllwarn    _llwarn
 #else
 #  define wdwarn      (void)
-#  define wdllwarn    (void)
 #endif
 
 #ifdef CONFIG_DEBUG_WATCHDOG_INFO
@@ -1901,11 +1767,7 @@ int  _llerr(const char *format, ...);
 
 #ifdef CONFIG_DEBUG_WARN
 int _warn(const char *format, ...);
-
-# ifdef CONFIG_ARCH_LOWPUTC
-int _llwarn(const char *format, ...);
-# endif
-#endif /* CONFIG_DEBUG_WARN */
+#endif
 
 #ifdef CONFIG_DEBUG_INFO
 int _info(const char *format, ...);

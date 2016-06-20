@@ -686,7 +686,7 @@ static void tiva_receive(struct tiva_driver_s *priv)
 
           /* We will have to drop this packet */
 
-          nllwarn("WARNING: Bad packet size dropped (%d)\n", pktlen);
+          nwarn("WARNING: Bad packet size dropped (%d)\n", pktlen);
           NETDEV_RXERRORS(&priv->ld_dev);
 
           /* The number of bytes and words left to read is pktlen - 4 (including,
@@ -867,7 +867,7 @@ static void tiva_receive(struct tiva_driver_s *priv)
       else
 #endif
         {
-          nllwarn("WARNING: Unsupported packet type dropped (%02x)\n",
+          nwarn("WARNING: Unsupported packet type dropped (%02x)\n",
                   htons(ETHBUF->type));
           NETDEV_RXDROPPED(&priv->ld_dev);
         }

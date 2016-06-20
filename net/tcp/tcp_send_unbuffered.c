@@ -570,7 +570,7 @@ static uint16_t tcpsend_interrupt(FAR struct net_driver_s *dev,
     {
       /* Yes.. report the timeout */
 
-      nllwarn("WARNING: SEND timeout\n");
+      nwarn("WARNING: SEND timeout\n");
       pstate->snd_sent = -ETIMEDOUT;
       goto end_wait;
     }

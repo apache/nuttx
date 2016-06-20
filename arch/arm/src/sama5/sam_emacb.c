@@ -1575,7 +1575,7 @@ static void sam_receive(struct sam_emac_s *priv)
 
       if (dev->d_len > CONFIG_NET_ETH_MTU)
         {
-          nllwarn("WARNING: Dropped, Too big: %d\n", dev->d_len);
+          nwarn("WARNING: Dropped, Too big: %d\n", dev->d_len);
           continue;
         }
 
@@ -1685,7 +1685,7 @@ static void sam_receive(struct sam_emac_s *priv)
       else
 #endif
         {
-          nllwarn("WARNING: Dropped, Unknown type: %04x\n", BUF->type);
+          nwarn("WARNING: Dropped, Unknown type: %04x\n", BUF->type);
         }
     }
 }
@@ -1972,7 +1972,7 @@ static inline void sam_interrupt_process(FAR struct sam_emac_s *priv)
 
   if ((pending & EMAC_INT_PFNZ) != 0)
     {
-      nllwarn("WARNING: Pause frame received\n");
+      nwarn("WARNING: Pause frame received\n");
     }
 
   /* Check for Pause Time Zero (PTZ)
@@ -1982,7 +1982,7 @@ static inline void sam_interrupt_process(FAR struct sam_emac_s *priv)
 
   if ((pending & EMAC_INT_PTZ) != 0)
     {
-      nllwarn("WARNING: Pause TO!\n");
+      nwarn("WARNING: Pause TO!\n");
     }
 #endif
 }

@@ -280,9 +280,9 @@
 #  undef CONFIG_PIC32MX_USBDEV_BDTDEBUG
 #  define CONFIG_PIC32MX_USBDEV_BDTDEBUG 1
 
-#  define regerr  _llerr
-#  define regwarn _llwarn
-#  define reginfo _llinfo
+#  define regerr  _err
+#  define regwarn _warn
+#  define reginfo _info
 
 #else
 
@@ -298,9 +298,9 @@
 
 #ifdef CONFIG_PIC32MX_USBDEV_BDTDEBUG
 
-#  define bdterr  _llerr
-#  define bdtwarn _llwarn
-#  define bdtinfo _llinfo
+#  define bdterr  _err
+#  define bdtwarn _warn
+#  define bdtinfo _info
 
 #else
 

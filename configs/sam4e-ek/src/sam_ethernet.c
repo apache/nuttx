@@ -77,16 +77,10 @@
 #  define phyerr    _err
 #  define phywarn   _warn
 #  define phyinfo   _info
-#  define phyllerr  _llerr
-#  define phyllwarn _llwarn
-#  define phyllinfo _llinfo
 #else
 #  define phyerr(x...)
 #  define phywarn(x...)
 #  define phyinfo(x...)
-#  define phyllerr(x...)
-#  define phyllwarn(x...)
-#  define phyllinfo(x...)
 #endif
 
 /************************************************************************************

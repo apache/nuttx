@@ -1384,8 +1384,8 @@ static void pic32mz_rxdone(struct pic32mz_driver_s *priv)
 
       if ((rxdesc->rsv2 & RXDESC_RSV2_OK) == 0)
         {
-          nllwarn("WARNING. rsv1: %08x rsv2: %08x\n",
-                 rxdesc->rsv1, rxdesc->rsv2);
+          nwarn("WARNING. rsv1: %08x rsv2: %08x\n",
+                rxdesc->rsv1, rxdesc->rsv2);
           NETDEV_RXERRORS(&priv->pd_dev);
           pic32mz_rxreturn(rxdesc);
         }
@@ -1398,8 +1398,8 @@ static void pic32mz_rxdone(struct pic32mz_driver_s *priv)
 
       else if (priv->pd_dev.d_len > CONFIG_NET_ETH_MTU)
         {
-          nllwarn("WARNING: Too big. packet length: %d rxdesc: %08x\n",
-                  priv->pd_dev.d_len, rxdesc->status);
+          nwarn("WARNING: Too big. packet length: %d rxdesc: %08x\n",
+                priv->pd_dev.d_len, rxdesc->status);
           NETDEV_RXERRORS(&priv->pd_dev);
           pic32mz_rxreturn(rxdesc);
         }
@@ -1409,8 +1409,8 @@ static void pic32mz_rxdone(struct pic32mz_driver_s *priv)
       else if ((rxdesc->status & (RXDESC_STATUS_EOP | RXDESC_STATUS_SOP)) !=
                (RXDESC_STATUS_EOP | RXDESC_STATUS_SOP))
         {
-          nllwarn("WARNING: Fragment. packet length: %d rxdesc: %08x\n",
-                 priv->pd_dev.d_len, rxdesc->status);
+          nwarn("WARNING: Fragment. packet length: %d rxdesc: %08x\n",
+                priv->pd_dev.d_len, rxdesc->status);
           NETDEV_RXFRAGMENTS(&priv->pd_dev);
           pic32mz_rxreturn(rxdesc);
         }
@@ -1549,8 +1549,8 @@ static void pic32mz_rxdone(struct pic32mz_driver_s *priv)
             {
               /* Unrecognized... drop it. */
 
-              nllwarn("WARNING: Unrecognized packet type dropped: %04x\n",
-                      ntohs(BUF->type));
+              nwarn("WARNING: Unrecognized packet type dropped: %04x\n",
+                    ntohs(BUF->type));
               NETDEV_RXDROPPED(&priv->pd_dev);
             }
 

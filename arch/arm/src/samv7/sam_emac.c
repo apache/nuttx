@@ -1896,7 +1896,7 @@ static void sam_receive(struct sam_emac_s *priv, int qid)
 
       if (dev->d_len > CONFIG_NET_ETH_MTU)
         {
-          nllwarn("WARNING: Dropped, Too big: %d\n", dev->d_len);
+          nwarn("WARNING: Dropped, Too big: %d\n", dev->d_len);
           NETDEV_RXERRORS(&priv->dev);
           continue;
         }
@@ -2010,7 +2010,7 @@ static void sam_receive(struct sam_emac_s *priv, int qid)
       else
 #endif
         {
-          nllwarn("WARNING: Dropped, Unknown type: %04x\n", BUF->type);
+          nwarn("WARNING: Dropped, Unknown type: %04x\n", BUF->type);
           NETDEV_RXDROPPED(&priv->dev);
         }
     }

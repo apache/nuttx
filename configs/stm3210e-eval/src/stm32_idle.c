@@ -366,7 +366,7 @@ static void stm32_idlepm(void)
             ret = stm32_rtc_cancelalarm();
             if (ret < 0)
               {
-                sllwarn("WARNING: Cancel alarm failed\n");
+                swarn("WARNING: Cancel alarm failed\n");
               }
 #endif
             /* Note:  See the additional PM_STANDBY related logic at the

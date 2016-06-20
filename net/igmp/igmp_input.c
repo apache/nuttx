@@ -124,7 +124,7 @@ void igmp_input(struct net_driver_s *dev)
   if (dev->d_len < NET_LL_HDRLEN(dev) + IPIGMP_HDRLEN)
     {
       IGMP_STATINCR(g_netstats.igmp.length_errors);
-      nllwarn("WARNING: Length error\n");
+      nwarn("WARNING: Length error\n");
       return;
     }
 
@@ -133,7 +133,7 @@ void igmp_input(struct net_driver_s *dev)
   if (net_chksum((FAR uint16_t *)&IGMPBUF->type, IGMP_HDRLEN) != 0)
     {
       IGMP_STATINCR(g_netstats.igmp.chksum_errors);
-      nllwarn("WARNING: Checksum error\n");
+      nwarn("WARNING: Checksum error\n");
       return;
     }
 
@@ -192,7 +192,7 @@ void igmp_input(struct net_driver_s *dev)
                     IGMP_STATINCR(g_netstats.igmp.v1_received);
                     IGMPBUF->maxresp = 10;
 
-                    nllwarn("WARNING: V1 not implemented\n");
+                    nwarn("WARNING: V1 not implemented\n");
                   }
 
                 IGMP_STATINCR(g_netstats.igmp.query_received);
@@ -270,7 +270,7 @@ void igmp_input(struct net_driver_s *dev)
 
       default:
         {
-          nllwarn("WARNING: Unexpected msg %02x\n", IGMPBUF->type);
+          nwarn("WARNING: Unexpected msg %02x\n", IGMPBUF->type);
         }
       break;
     }

@@ -837,8 +837,8 @@ static void lpc17_rxdone_process(struct lpc17_driver_s *priv)
 
       if ((*rxstat & RXSTAT_INFO_ERROR) != 0)
         {
-          nllerr("ERROR: considx: %08x prodidx: %08x rxstat: %08x\n",
-                 considx, prodidx, *rxstat);
+          nerr("ERROR: considx: %08x prodidx: %08x rxstat: %08x\n",
+               considx, prodidx, *rxstat);
           NETDEV_RXERRORS(&priv->lp_dev);
         }
 
@@ -850,21 +850,21 @@ static void lpc17_rxdone_process(struct lpc17_driver_s *priv)
 
       /* else */ if (pktlen > CONFIG_NET_ETH_MTU + CONFIG_NET_GUARDSIZE)
         {
-          nllwarn("WARNING: Too big. considx: %08x prodidx: %08x pktlen: %d rxstat: %08x\n",
-                  considx, prodidx, pktlen, *rxstat);
+          nwarn("WARNING: Too big. considx: %08x prodidx: %08x pktlen: %d rxstat: %08x\n",
+                considx, prodidx, pktlen, *rxstat);
           NETDEV_RXERRORS(&priv->lp_dev);
         }
       else if ((*rxstat & RXSTAT_INFO_LASTFLAG) == 0)
         {
-          nllinfo("Fragment. considx: %08x prodidx: %08x pktlen: %d rxstat: %08x\n",
-                  considx, prodidx, pktlen, *rxstat);
+          ninfo("Fragment. considx: %08x prodidx: %08x pktlen: %d rxstat: %08x\n",
+                considx, prodidx, pktlen, *rxstat);
           NETDEV_RXFRAGMENTS(&priv->lp_dev);
           fragment = true;
         }
       else if (fragment)
         {
-          nllinfo("Last fragment. considx: %08x prodidx: %08x pktlen: %d rxstat: %08x\n",
-                  considx, prodidx, pktlen, *rxstat);
+          ninfo("Last fragment. considx: %08x prodidx: %08x pktlen: %d rxstat: %08x\n",
+                considx, prodidx, pktlen, *rxstat);
           NETDEV_RXFRAGMENTS(&priv->lp_dev);
           fragment = false;
         }
@@ -906,7 +906,7 @@ static void lpc17_rxdone_process(struct lpc17_driver_s *priv)
 #ifdef CONFIG_NET_IPv4
           if (BUF->type == HTONS(ETHTYPE_IP))
             {
-              nllinfo("IPv4 frame\n");
+              ninfo("IPv4 frame\n");
               NETDEV_RXIPV4(&priv->lp_dev);
 
               /* Handle ARP on input then give the IPv4 packet to the
@@ -948,7 +948,7 @@ static void lpc17_rxdone_process(struct lpc17_driver_s *priv)
 #ifdef CONFIG_NET_IPv6
           if (BUF->type == HTONS(ETHTYPE_IP6))
             {
-              nllinfo("Iv6 frame\n");
+              ninfo("Iv6 frame\n");
               NETDEV_RXIPV6(&priv->lp_dev);
 
               /* Give the IPv6 packet to the network layer */
@@ -1202,13 +1202,13 @@ static int lpc17_interrupt(int irq, void *context)
         {
           if ((status & ETH_INT_RXOVR) != 0)
             {
-              nllerr("ERROR: RX Overrun. status: %08x\n", status);
+              nerr("ERROR: RX Overrun. status: %08x\n", status);
               NETDEV_RXERRORS(&priv->lp_dev);
             }
 
           if ((status & ETH_INT_TXUNR) != 0)
             {
-              nllerr("ERROR: TX Underrun. status: %08x\n", status);
+              nerr("ERROR: TX Underrun. status: %08x\n", status);
               NETDEV_TXERRORS(&priv->lp_dev);
             }
 
@@ -1229,7 +1229,7 @@ static int lpc17_interrupt(int irq, void *context)
 
           if ((status & ETH_INT_RXERR) != 0)
             {
-              nllerr("ERROR: RX ERROR: status: %08x\n", status);
+              nerr("ERROR: RX ERROR: status: %08x\n", status);
               NETDEV_RXERRORS(&priv->lp_dev);
             }
 
@@ -1281,7 +1281,7 @@ static int lpc17_interrupt(int irq, void *context)
 
           if ((status & ETH_INT_TXERR) != 0)
             {
-              nllerr("ERROR: TX ERROR: status: %08x\n", status);
+              nerr("ERROR: TX ERROR: status: %08x\n", status);
               NETDEV_TXERRORS(&priv->lp_dev);
             }
 
@@ -2145,8 +2145,8 @@ static int lpc17_addmac(struct net_driver_s *dev, const uint8_t *mac)
   uint32_t crc;
   unsigned int ndx;
 
-  nllinfo("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
-          mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+  ninfo("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
+        mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 
   /* Hash function:
    *
@@ -2221,8 +2221,8 @@ static int lpc17_rmmac(struct net_driver_s *dev, const uint8_t *mac)
   uint32_t crc;
   unsigned int ndx;
 
-  nllinfo("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
-          mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+  ninfo("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
+        mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 
   /* Hash function:
    *

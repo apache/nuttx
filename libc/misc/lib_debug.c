@@ -51,7 +51,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: alert, err, llerr, warn, llwarn, info, _llinfo
+ * Name: alert, err, llerr, warn, and info, _llinfo
  *
  * Description:
  *  If the cross-compiler's pre-processor does not support variable
@@ -113,21 +113,7 @@ int _warn(const char *format, ...)
 
   return ret;
 }
-
-#ifdef CONFIG_ARCH_LOWPUTC
-int _llwarn(const char *format, ...)
-{
-  va_list ap;
-  int     ret;
-
-  va_start(ap, format);
-  ret = lowvsyslog(LOG_WARNING, format, ap);
-  va_end(ap);
-
-  return ret;
-}
-#endif /* CONFIG_ARCH_LOWPUTC */
-#endif /* CONFIG_DEBUG_INFO */
+#endif /* CONFIG_DEBUG_WARN */
 
 #ifdef CONFIG_DEBUG_INFO
 int _info(const char *format, ...)

@@ -1651,7 +1651,7 @@ static int tiva_recvframe(FAR struct tiva_ethmac_s *priv)
                * scanning logic, and continue scanning with the next frame.
                */
 
-              nllwarn("DROPPED: RX descriptor errors: %08x\n", rxdesc->rdes0);
+              nwarn("DROPPED: RX descriptor errors: %08x\n", rxdesc->rdes0);
               tiva_freesegment(priv, rxcurr, priv->segments);
             }
         }
@@ -1712,7 +1712,7 @@ static void tiva_receive(FAR struct tiva_ethmac_s *priv)
 
       if (dev->d_len > CONFIG_NET_ETH_MTU)
         {
-          nllwarn("DROPPED: Too big: %d\n", dev->d_len);
+          nwarn("DROPPED: Too big: %d\n", dev->d_len);
         }
       else
 
@@ -1815,7 +1815,7 @@ static void tiva_receive(FAR struct tiva_ethmac_s *priv)
       else
 #endif
         {
-          nllwarn("DROPPED: Unknown type: %04x\n", BUF->type);
+          nwarn("DROPPED: Unknown type: %04x\n", BUF->type);
         }
 
       /* We are finished with the RX buffer.  NOTE:  If the buffer is
