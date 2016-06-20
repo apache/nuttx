@@ -1616,7 +1616,7 @@ void sam_dmainitialize(struct sam_xdmac_s *xdmac)
 
 void weak_function up_dmainitialize(void)
 {
-  dmallinfo("Initialize XDMAC\n");
+  dmainfo("Initialize XDMAC\n");
 
   /* Enable peripheral clock */
 

@@ -1354,7 +1354,7 @@ static int sam_dmainterrupt(int irq, void *context)
 
 void weak_function up_dmainitialize(void)
 {
-  dmallinfo("Initialize DMAC0\n");
+  dmainfo("Initialize DMAC0\n");
 
   /* Enable peripheral clock */
 

@@ -769,7 +769,7 @@ static int sam_rxbuffer(struct sam_dmach_s *dmach, uint32_t paddr,
 
 void weak_function up_dmainitialize(void)
 {
-  dmallinfo("Initialize DMAC\n");
+  dmainfo("Initialize DMAC\n");
   int i;
 
   /* Initialize global semaphores */
