@@ -85,18 +85,7 @@
  *    information that you probably not want to suppress during normal debug
  *    general debugging.
  *
- * [a-z]llinfo() -- Identical to [a-z]err() except this is uses special
- *    interfaces provided by architecture-specific logic to talk directly
- *    to the underlying console hardware.  If the architecture provides such
- *    logic, it should define CONFIG_ARCH_LOWPUTC.
- *
- *    [a-z]llinfo() should not be used in normal code because the implementation
- *    probably disables interrupts and does things that are not consistent with
- *    good real-time performance.  However, [a-z]llinfo() is particularly useful
- *    in low-level code where it is inappropriate to use file descriptors.  For
- *    example, only [a-z]llinfo() should be used in interrupt handlers.
- *
- * [a-z]llerr() -- Identical to [a-z]llinfo() except that it also requires that
+ * [a-z]llerr() -- Identical to [a-z]info() except that it also requires that
  *    CONFIG_DEBUG_ERROR be defined. This is intended for important error-related
  *    information that you probably not want to suppress during normal debug
  *    general debugging.
@@ -157,16 +146,8 @@
 #ifdef CONFIG_DEBUG_INFO
 #  define _info(format, ...) \
    __arch_syslog(LOG_INFO, EXTRA_FMT format EXTRA_ARG, ##__VA_ARGS__)
-
-#  ifdef CONFIG_ARCH_LOWPUTC
-#    define _llinfo(format, ...) \
-     __arch_syslog(LOG_INFO, EXTRA_FMT format EXTRA_ARG, ##__VA_ARGS__)
-#  else
-#    define _llinfo(x...)
-#  endif
 #else /* CONFIG_DEBUG_INFO */
 #  define _info(x...)
-#  define _llinfo(x...)
 #endif /* CONFIG_DEBUG_INFO */
 
 /* Subsystem specific debug */
@@ -187,10 +168,8 @@
 
 #ifdef CONFIG_DEBUG_MM_INFO
 #  define minfo(format, ...)   _info(format, ##__VA_ARGS__)
-#  define mllinfo(format, ...) _llinfo(format, ##__VA_ARGS__)
 #else
 #  define minfo(x...)
-#  define mllinfo(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_SCHED_ERROR
@@ -209,10 +188,8 @@
 
 #ifdef CONFIG_DEBUG_SCHED_INFO
 #  define sinfo(format, ...)   _info(format, ##__VA_ARGS__)
-#  define sllinfo(format, ...) _llinfo(format, ##__VA_ARGS__)
 #else
 #  define sinfo(x...)
-#  define sllinfo(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_SYSCALL_ERROR
@@ -231,10 +208,8 @@
 
 #ifdef CONFIG_DEBUG_SYSCALL_INFO
 #  define svcinfo(format, ...)   _info(format, ##__VA_ARGS__)
-#  define svcllinfo(format, ...) _llinfo(format, ##__VA_ARGS__)
 #else
 #  define svcinfo(x...)
-#  define svcllinfo(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_PAGING_ERROR
@@ -253,10 +228,8 @@
 
 #ifdef CONFIG_DEBUG_PAGING_INFO
 #  define pginfo(format, ...)   _info(format, ##__VA_ARGS__)
-#  define pgllinfo(format, ...) _llinfo(format, ##__VA_ARGS__)
 #else
-#  define pgerr(x...)
-#  define pgllerr(x...)
+#  define pginfo(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_NET_ERROR
@@ -275,10 +248,8 @@
 
 #ifdef CONFIG_DEBUG_NET_INFO
 #  define ninfo(format, ...)   _info(format, ##__VA_ARGS__)
-#  define nllinfo(format, ...) _llinfo(format, ##__VA_ARGS__)
 #else
 #  define ninfo(x...)
-#  define nllinfo(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_FS_ERROR
@@ -297,10 +268,8 @@
 
 #ifdef CONFIG_DEBUG_FS_INFO
 #  define finfo(format, ...)   _info(format, ##__VA_ARGS__)
-#  define fllinfo(format, ...) _llinfo(format, ##__VA_ARGS__)
 #else
 #  define finfo(x...)
-#  define fllinfo(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_CRYPTO_ERROR
@@ -319,10 +288,8 @@
 
 #ifdef CONFIG_DEBUG_CRYPTO_INFO
 #  define cryptinfo(format, ...)   _info(format, ##__VA_ARGS__)
-#  define cryptllinfo(format, ...) _llinfo(format, ##__VA_ARGS__)
 #else
 #  define cryptinfo(x...)
-#  define cryptllinfo(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_INPUT_ERROR
@@ -341,18 +308,14 @@
 
 #ifdef CONFIG_DEBUG_INPUT_INFO
 #  define iinfo(format, ...)   _info(format, ##__VA_ARGS__)
-#  define illinfo(format, ...) _llinfo(format, ##__VA_ARGS__)
 #else
 #  define iinfo(x...)
-#  define illinfo(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_ANALOG_ERROR
 #  define aerr(format, ...)     _err(format, ##__VA_ARGS__)
-#  define allerr(format, ...)   _llerr(format, ##__VA_ARGS__)
 #else
 #  define aerr(x...)
-#  define allerr(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_ANALOG_WARN
@@ -363,10 +326,8 @@
 
 #ifdef CONFIG_DEBUG_ANALOG_INFO
 #  define ainfo(format, ...)   _info(format, ##__VA_ARGS__)
-#  define allinfo(format, ...) _llinfo(format, ##__VA_ARGS__)
 #else
 #  define ainfo(x...)
-#  define allinfo(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_CAN_ERROR
@@ -385,10 +346,8 @@
 
 #ifdef CONFIG_DEBUG_CAN_INFO
 #  define caninfo(format, ...)   _info(format, ##__VA_ARGS__)
-#  define canllinfo(format, ...) _llinfo(format, ##__VA_ARGS__)
 #else
 #  define caninfo(x...)
-#  define canllinfo(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_GRAPHICS_ERROR
@@ -407,10 +366,8 @@
 
 #ifdef CONFIG_DEBUG_GRAPHICS_INFO
 #  define ginfo(format, ...)   _info(format, ##__VA_ARGS__)
-#  define gllinfo(format, ...) _llinfo(format, ##__VA_ARGS__)
 #else
 #  define ginfo(x...)
-#  define gllinfo(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_BINFMT_ERROR
@@ -429,10 +386,8 @@
 
 #ifdef CONFIG_DEBUG_BINFMT_INFO
 #  define binfo(format, ...)   _info(format, ##__VA_ARGS__)
-#  define bllinfo(format, ...) _llinfo(format, ##__VA_ARGS__)
 #else
 #  define binfo(x...)
-#  define bllinfo(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_LIB_ERROR
@@ -451,10 +406,8 @@
 
 #ifdef CONFIG_DEBUG_LIB_INFO
 #  define linfo(format, ...)   _info(format, ##__VA_ARGS__)
-#  define lllinfo(format, ...) _llinfo(format, ##__VA_ARGS__)
 #else
 #  define linfo(x...)
-#  define lllinfo(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_AUDIO_ERROR
@@ -473,10 +426,8 @@
 
 #ifdef CONFIG_DEBUG_AUDIO_INFO
 #  define audinfo(format, ...)   _info(format, ##__VA_ARGS__)
-#  define audllinfo(format, ...) _llinfo(format, ##__VA_ARGS__)
 #else
 #  define audinfo(x...)
-#  define audllinfo(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_DMA_ERROR
@@ -495,10 +446,8 @@
 
 #ifdef CONFIG_DEBUG_DMA_INFO
 #  define dmainfo(format, ...)   _info(format, ##__VA_ARGS__)
-#  define dmallinfo(format, ...) _llinfo(format, ##__VA_ARGS__)
 #else
 #  define dmainfo(x...)
-#  define dmallinfo(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_IRQ_ERROR
@@ -517,10 +466,8 @@
 
 #ifdef CONFIG_DEBUG_IRQ_INFO
 #  define irqinfo(format, ...)   _info(format, ##__VA_ARGS__)
-#  define irqllinfo(format, ...) _llinfo(format, ##__VA_ARGS__)
 #else
 #  define irqinfo(x...)
-#  define irqllinfo(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_LCD_ERROR
@@ -539,10 +486,8 @@
 
 #ifdef CONFIG_DEBUG_LCD_INFO
 #  define lcdinfo(format, ...)   _info(format, ##__VA_ARGS__)
-#  define lcdllinfo(format, ...) _llinfo(format, ##__VA_ARGS__)
 #else
 #  define lcdinfo(x...)
-#  define lcdllinfo(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_LEDS_ERROR
@@ -561,10 +506,8 @@
 
 #ifdef CONFIG_DEBUG_LEDS_INFO
 #  define ledinfo(format, ...)   _info(format, ##__VA_ARGS__)
-#  define ledllinfo(format, ...) _llinfo(format, ##__VA_ARGS__)
 #else
 #  define ledinfo(x...)
-#  define ledllinfo(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_GPIO_ERROR
@@ -583,10 +526,8 @@
 
 #ifdef CONFIG_DEBUG_GPIO_INFO
 #  define gpioinfo(format, ...)   _info(format, ##__VA_ARGS__)
-#  define gpiollinfo(format, ...) _llinfo(format, ##__VA_ARGS__)
 #else
 #  define gpioinfo(x...)
-#  define gpiollinfo(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_I2C_ERROR
@@ -605,10 +546,8 @@
 
 #ifdef CONFIG_DEBUG_I2C_INFO
 #  define i2cinfo(format, ...)   _info(format, ##__VA_ARGS__)
-#  define i2cllinfo(format, ...) _llinfo(format, ##__VA_ARGS__)
 #else
 #  define i2cinfo(x...)
-#  define i2cllinfo(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_I2S_ERROR
@@ -627,18 +566,14 @@
 
 #ifdef CONFIG_DEBUG_I2S_INFO
 #  define i2sinfo(format, ...)   _info(format, ##__VA_ARGS__)
-#  define i2sllinfo(format, ...) _llinfo(format, ##__VA_ARGS__)
 #else
 #  define i2sinfo(x...)
-#  define i2sllinfo(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_PWM_ERROR
 #  define pwmerr(format, ...)    _err(format, ##__VA_ARGS__)
-#  define pwmllerr(format, ...)  _llerr(format, ##__VA_ARGS__)
 #else
 #  define pwmerr(x...)
-#  define pwmllerr(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_PWM_WARN
@@ -649,10 +584,8 @@
 
 #ifdef CONFIG_DEBUG_PWM_INFO
 #  define pwminfo(format, ...)   _info(format, ##__VA_ARGS__)
-#  define pwmllinfo(format, ...) _llinfo(format, ##__VA_ARGS__)
 #else
 #  define pwminfo(x...)
-#  define pwmllinfo(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_RTC_ERROR
@@ -671,10 +604,8 @@
 
 #ifdef CONFIG_DEBUG_RTC_INFO
 #  define rtcinfo(format, ...)   _info(format, ##__VA_ARGS__)
-#  define rtcllinfo(format, ...) _llinfo(format, ##__VA_ARGS__)
 #else
 #  define rtcinfo(x...)
-#  define rtcllinfo(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_MEMCARD_ERROR
@@ -693,10 +624,8 @@
 
 #ifdef CONFIG_DEBUG_MEMCARD_INFO
 #  define mcinfo(format, ...)   _info(format, ##__VA_ARGS__)
-#  define mcllinfo(format, ...) _llinfo(format, ##__VA_ARGS__)
 #else
 #  define mcinfo(x...)
-#  define mcllinfo(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_SENSORS_ERROR
@@ -715,10 +644,8 @@
 
 #ifdef CONFIG_DEBUG_SENSORS_INFO
 #  define sninfo(format, ...)   _info(format, ##__VA_ARGS__)
-#  define snllinfo(format, ...) _llinfo(format, ##__VA_ARGS__)
 #else
 #  define sninfo(x...)
-#  define snllinfo(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_SPI_ERROR
@@ -737,10 +664,8 @@
 
 #ifdef CONFIG_DEBUG_SPI_INFO
 #  define spiinfo(format, ...)   _info(format, ##__VA_ARGS__)
-#  define spillinfo(format, ...) _llinfo(format, ##__VA_ARGS__)
 #else
 #  define spiinfo(x...)
-#  define spillinfo(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_TIMER_ERROR
@@ -759,10 +684,8 @@
 
 #ifdef CONFIG_DEBUG_TIMER_INFO
 #  define tmrinfo(format, ...)   _info(format, ##__VA_ARGS__)
-#  define tmrllinfo(format, ...) _llinfo(format, ##__VA_ARGS__)
 #else
 #  define tmrinfo(x...)
-#  define tmrllinfo(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_USB_ERROR
@@ -781,10 +704,8 @@
 
 #ifdef CONFIG_DEBUG_USB_INFO
 #  define uinfo(format, ...)   _info(format, ##__VA_ARGS__)
-#  define ullinfo(format, ...) _llinfo(format, ##__VA_ARGS__)
 #else
 #  define uinfo(x...)
-#  define ullinfo(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_WATCHDOG_ERROR
@@ -803,10 +724,8 @@
 
 #ifdef CONFIG_DEBUG_WATCHDOG_INFO
 #  define wdinfo(format, ...)   _info(format, ##__VA_ARGS__)
-#  define wdllinfo(format, ...) _llinfo(format, ##__VA_ARGS__)
 #else
 #  define wdinfo(x...)
-#  define wdllinfo(x...)
 #endif
 
 #else /* CONFIG_CPP_HAVE_VARARGS */
@@ -830,13 +749,8 @@
 #  define _warn       (void)
 #endif
 
-#ifdef CONFIG_DEBUG_INFO
-#  ifndef CONFIG_ARCH_LOWPUTC
-#    define _llinfo   (void)
-#  endif
-#else
+#ifndef CONFIG_DEBUG_INFO
 #  define _info       (void)
-#  define _llinfo     (void)
 #endif
 
 /* Subsystem specific debug */
@@ -857,10 +771,8 @@
 
 #ifdef CONFIG_DEBUG_MM_INFO
 #  define minfo       _info
-#  define mllinfo     _llinfo
 #else
 #  define minfo       (void)
-#  define mllinfo     (void)
 #endif
 
 #ifdef CONFIG_DEBUG_SCHED_ERROR
@@ -879,10 +791,8 @@
 
 #ifdef CONFIG_DEBUG_SCHED_INFO
 #  define sinfo       _info
-#  define sllinfo     _llinfo
 #else
 #  define sinfo       (void)
-#  define sllinfo     (void)
 #endif
 
 #ifdef CONFIG_DEBUG_SYSCALL_ERROR
@@ -901,10 +811,8 @@
 
 #ifdef CONFIG_DEBUG_SYSCALL_INFO
 #  define svcinfo     _info
-#  define svcllinfo   _llinfo
 #else
 #  define svcinfo     (void)
-#  define svcllinfo   (void)
 #endif
 
 #ifdef CONFIG_DEBUG_PAGING_ERROR
@@ -923,10 +831,8 @@
 
 #ifdef CONFIG_DEBUG_PAGING_INFO
 #  define pginfo      _info
-#  define pgllinfo    _llinfo
 #else
 #  define pginfo      (void)
-#  define pgllinfo    (void)
 #endif
 
 #ifdef CONFIG_DEBUG_NET_ERROR
@@ -945,10 +851,8 @@
 
 #ifdef CONFIG_DEBUG_NET_INFO
 #  define ninfo       _info
-#  define nllinfo     _llinfo
 #else
 #  define ninfo       (void)
-#  define nllinfo     (void)
 #endif
 
 #ifdef CONFIG_DEBUG_FS_ERROR
@@ -967,10 +871,8 @@
 
 #ifdef CONFIG_DEBUG_FS_INFO
 #  define finfo       _info
-#  define fllinfo     _llinfo
 #else
 #  define finfo       (void)
-#  define fllinfo     (void)
 #endif
 
 #ifdef CONFIG_DEBUG_CRYPTO_ERROR
@@ -989,10 +891,8 @@
 
 #ifdef CONFIG_DEBUG_CRYPTO_INFO
 #  define cryptinfo   _info
-#  define cryptllinfo _llinfo
 #else
 #  define cryptinfo(x...)
-#  define cryptllinfo(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_INPUT_ERROR
@@ -1011,10 +911,8 @@
 
 #ifdef CONFIG_DEBUG_INPUT_INFO
 #  define iinfo       _info
-#  define illinfo     _llinfo
 #else
 #  define iinfo       (void)
-#  define illinfo     (void)
 #endif
 
 #ifdef CONFIG_DEBUG_ANALOG_ERROR
@@ -1033,10 +931,8 @@
 
 #ifdef CONFIG_DEBUG_ANALOG_INFO
 #  define ainfo       _info
-#  define allinfo     _llinfo
 #else
 #  define ainfo       (void)
-#  define allinfo     (void)
 #endif
 
 #ifdef CONFIG_DEBUG_CAN_ERROR
@@ -1055,10 +951,8 @@
 
 #ifdef CONFIG_DEBUG_CAN_INFO
 #  define caninfo     _info
-#  define canllinfo   _llinfo
 #else
 #  define caninfo     (void)
-#  define canllinfo   (void)
 #endif
 
 #ifdef CONFIG_DEBUG_GRAPHICS_ERROR
@@ -1077,10 +971,8 @@
 
 #ifdef CONFIG_DEBUG_GRAPHICS_INFO
 #  define ginfo       _info
-#  define gllinfo     _llinfo
 #else
 #  define ginfo       (void)
-#  define gllinfo     (void)
 #endif
 
 #ifdef CONFIG_DEBUG_BINFMT_ERROR
@@ -1099,10 +991,8 @@
 
 #ifdef CONFIG_DEBUG_BINFMT_INFO
 #  define binfo       _info
-#  define bllinfo     _llinfo
 #else
 #  define binfo       (void)
-#  define bllinfo     (void)
 #endif
 
 #ifdef CONFIG_DEBUG_LIB_ERROR
@@ -1121,10 +1011,8 @@
 
 #ifdef CONFIG_DEBUG_LIB_INFO
 #  define linfo       _info
-#  define lllinfo     _llinfo
 #else
 #  define linfo       (void)
-#  define lllinfo     (void)
 #endif
 
 #ifdef CONFIG_DEBUG_AUDIO_ERROR
@@ -1143,10 +1031,8 @@
 
 #ifdef CONFIG_DEBUG_AUDIO_INFO
 #  define audinfo     _info
-#  define audllinfo   _llinfo
 #else
 #  define audinfo     (void)
-#  define audllinfo   (void)
 #endif
 
 #ifdef CONFIG_DEBUG_DMA_ERROR
@@ -1165,10 +1051,8 @@
 
 #ifdef CONFIG_DEBUG_DMA_INFO
 #  define dmainfo     _info
-#  define dmallinfo   _llinfo
 #else
 #  define dmainfo     (void)
-#  define dmallinfo   (void)
 #endif
 
 #ifdef CONFIG_DEBUG_IRQ_ERROR
@@ -1187,10 +1071,8 @@
 
 #ifdef CONFIG_DEBUG_IRQ_INFO
 #  define irqinfo     _info
-#  define irqllinfo   _llinfo
 #else
 #  define irqinfo     (void)
-#  define irqllinfo   (void)
 #endif
 
 #ifdef CONFIG_DEBUG_LCD_ERROR
@@ -1209,10 +1091,8 @@
 
 #ifdef CONFIG_DEBUG_LCD_INFO
 #  define lcdinfo     _info
-#  define lcdllinfo   _llinfo
 #else
 #  define lcdinfo     (void)
-#  define lcdllinfo   (void)
 #endif
 
 #ifdef CONFIG_DEBUG_LEDS_ERROR
@@ -1231,10 +1111,8 @@
 
 #ifdef CONFIG_DEBUG_LEDS_INFO
 #  define ledinfo     _info
-#  define ledllinfo   _llinfo
 #else
 #  define ledinfo     (void)
-#  define ledllinfo   (void)
 #endif
 
 #ifdef CONFIG_DEBUG_GPIO_ERROR
@@ -1253,10 +1131,8 @@
 
 #ifdef CONFIG_DEBUG_GPIO_INFO
 #  define gpioinfo    _info
-#  define gpiollinfo  _llinfo
 #else
 #  define gpioinfo    (void)
-#  define gpiollinfo  (void)
 #endif
 
 #ifdef CONFIG_DEBUG_I2C_ERROR
@@ -1275,10 +1151,8 @@
 
 #ifdef CONFIG_DEBUG_I2C_INFO
 #  define i2cinfo     _info
-#  define i2cllinfo   _llinfo
 #else
 #  define i2cinfo     (void)
-#  define i2cllinfo   (void)
 #endif
 
 #ifdef CONFIG_DEBUG_I2S_ERROR
@@ -1297,10 +1171,8 @@
 
 #ifdef CONFIG_DEBUG_I2S_INFO
 #  define i2sinfo     _info
-#  define i2sllinfo   _llinfo
 #else
 #  define i2sinfo     (void)
-#  define i2sllinfo   (void)
 #endif
 
 #ifdef CONFIG_DEBUG_PWM_ERROR
@@ -1319,10 +1191,8 @@
 
 #ifdef CONFIG_DEBUG_PWM_INFO
 #  define pwminfo     _info
-#  define pwmllinfo   _llinfo
 #else
 #  define pwminfo     (void)
-#  define pwmllinfo   (void)
 #endif
 
 #ifdef CONFIG_DEBUG_RTC_ERROR
@@ -1341,10 +1211,8 @@
 
 #ifdef CONFIG_DEBUG_RTC_INFO
 #  define rtcinfo     _info
-#  define rtcllinfo   _llinfo
 #else
 #  define rtcinfo     (void)
-#  define rtcllinfo   (void)
 #endif
 
 #ifdef CONFIG_DEBUG_MEMCARD_ERROR
@@ -1363,10 +1231,8 @@
 
 #ifdef CONFIG_DEBUG_MEMCARD_INFO
 #  define mcinfo      _info
-#  define mcllinfo    _llinfo
 #else
 #  define mcinfo      (void)
-#  define mcllinfo    (void)
 #endif
 
 #ifdef CONFIG_DEBUG_SENSORS_ERROR
@@ -1385,10 +1251,8 @@
 
 #ifdef CONFIG_DEBUG_SENSORS_INFO
 #  define sninfo      _info
-#  define snllinfo    _llinfo
 #else
 #  define sninfo      (void)
-#  define snllinfo    (void)
 #endif
 
 #ifdef CONFIG_DEBUG_SPI_ERROR
@@ -1407,10 +1271,8 @@
 
 #ifdef CONFIG_DEBUG_SPI_INFO
 #  define spiinfo     _info
-#  define spillinfo   _llinfo
 #else
 #  define spiinfo     (void)
-#  define spillinfo   (void)
 #endif
 
 #ifdef CONFIG_DEBUG_TIMER_ERROR
@@ -1429,10 +1291,8 @@
 
 #ifdef CONFIG_DEBUG_TIMER_INFO
 #  define tmrinfo     _info
-#  define tmrllinfo   _llinfo
 #else
 #  define tmrinfo     (void)
-#  define tmrllinfo   (void)
 #endif
 
 #ifdef CONFIG_DEBUG_USB_ERROR
@@ -1451,10 +1311,8 @@
 
 #ifdef CONFIG_DEBUG_USB_INFO
 #  define uinfo       _info
-#  define ullinfo     _llinfo
 #else
 #  define uinfo       (void)
-#  define ullinfo     (void)
 #endif
 
 #ifdef CONFIG_DEBUG_WATCHDOG_ERROR
@@ -1473,10 +1331,8 @@
 
 #ifdef CONFIG_DEBUG_WATCHDOG_INFO
 #  define wdinfo      _info
-#  define wdllinfo    _llinfo
 #else
 #  define wdinfo      (void)
-#  define wdllinfo    (void)
 #endif
 
 #endif /* CONFIG_CPP_HAVE_VARARGS */
@@ -1771,11 +1627,7 @@ int _warn(const char *format, ...);
 
 #ifdef CONFIG_DEBUG_INFO
 int _info(const char *format, ...);
-
-# ifdef CONFIG_ARCH_LOWPUTC
-int _llinfo(const char *format, ...);
-# endif
-#endif /* CONFIG_DEBUG_INFO */
+#endif
 #endif /* CONFIG_CPP_HAVE_VARARGS */
 
 #if defined(__cplusplus)

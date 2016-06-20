@@ -826,7 +826,7 @@ static uint32_t lpc31_swap32(uint32_t value)
 static void lpc31_printreg(volatile uint32_t *regaddr, uint32_t regval,
                           bool iswrite)
 {
-  ullinfo("%08x%s%08x\n", (uintptr_t)regaddr, iswrite ? "<-" : "->", regval);
+  uinfo("%08x%s%08x\n", (uintptr_t)regaddr, iswrite ? "<-" : "->", regval);
 }
 #endif
 
@@ -877,7 +877,7 @@ static void lpc31_checkreg(volatile uint32_t *regaddr, uint32_t regval, bool isw
             {
               /* No.. More than one. */
 
-              ullinfo("[repeats %d more times]\n", count);
+              uinfo("[repeats %d more times]\n", count);
             }
         }
 
@@ -3370,7 +3370,7 @@ static int lpc31_ehci_interrupt(int irq, FAR void *context)
 #ifdef CONFIG_USBHOST_TRACE
   usbhost_vtrace1(EHCI_VTRACE1_TOPHALF, usbsts & regval);
 #else
-  ullinfo("USBSTS: %08x USBINTR: %08x\n", usbsts, regval);
+  uinfo("USBSTS: %08x USBINTR: %08x\n", usbsts, regval);
 #endif
 
   /* Handle all unmasked interrupt sources */
@@ -4680,7 +4680,7 @@ static int lpc31_connect(FAR struct usbhost_driver_s *drvr,
   /* Set the connected/disconnected flag */
 
   hport->connected = connected;
-  ullinfo("Hub port %d connected: %s\n", hport->port, connected ? "YES" : "NO");
+  uinfo("Hub port %d connected: %s\n", hport->port, connected ? "YES" : "NO");
 
   /* Report the connection event */
 

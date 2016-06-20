@@ -218,7 +218,7 @@ FAR struct lcd_dev_s *board_graphics_setup(unsigned int devno)
         }
      else
         {
-          gllinfo("Bound SSP port 0 to LCD %d\n", devno);
+          ginfo("Bound SSP port 0 to LCD %d\n", devno);
 
           /* And turn the LCD on (CONFIG_LCD_MAXPOWER should be 1) */
 

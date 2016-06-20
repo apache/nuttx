@@ -225,7 +225,7 @@ static uint16_t udp_datahandler(FAR struct net_driver_s *dev, FAR struct udp_con
       return 0;
     }
 
-  nllinfo("Buffered %d bytes\n", buflen);
+  ninfo("Buffered %d bytes\n", buflen);
   return buflen;
 }
 #endif /* CONFIG_NET_UDP_READAHEAD */
@@ -255,7 +255,7 @@ net_dataevent(FAR struct net_driver_s *dev, FAR struct udp_conn_s *conn,
    * can have zero-length with UDP_NEWDATA set just to cause an ACK).
    */
 
-  nllinfo("No receive on connection\n");
+  ninfo("No receive on connection\n");
 
 #ifdef CONFIG_NET_UDP_READAHEAD
   /* Save as the packet data as in the read-ahead buffer.  NOTE that
@@ -270,7 +270,7 @@ net_dataevent(FAR struct net_driver_s *dev, FAR struct udp_conn_s *conn,
        * read-ahead buffers to retain the data -- drop the packet.
        */
 
-     nllinfo("Dropped %d bytes\n", dev->d_len);
+     ninfo("Dropped %d bytes\n", dev->d_len);
 
 #ifdef CONFIG_NET_STATISTICS
       g_netstats.udp.drop++;
@@ -304,7 +304,7 @@ net_dataevent(FAR struct net_driver_s *dev, FAR struct udp_conn_s *conn,
 uint16_t udp_callback(FAR struct net_driver_s *dev,
                       FAR struct udp_conn_s *conn, uint16_t flags)
 {
-  nllinfo("flags: %04x\n", flags);
+  ninfo("flags: %04x\n", flags);
 
   /* Some sanity checking */
 

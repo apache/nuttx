@@ -113,7 +113,7 @@ FAR struct lcd_dev_s *board_lcd_getdev(int lcddev)
     }
   else
     {
-      lcdllinfo("Bound SSI port 0 to OLCD %d\n", lcddev);
+      lcdinfo("Bound SSI port 0 to OLCD %d\n", lcddev);
 
       /* And turn the OLCD on (CONFIG_LCD_MAXPOWER should be 1) */
 

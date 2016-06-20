@@ -190,7 +190,7 @@ static uint32_t sam_getreg(uintptr_t regaddr)
         {
           if (count == 4)
             {
-              wdllinfo("...\n");
+              wdinfo("...\n");
             }
 
           return regval;
@@ -207,7 +207,7 @@ static uint32_t sam_getreg(uintptr_t regaddr)
         {
           /* Yes.. then show how many times the value repeated */
 
-          wdllinfo("[repeats %d more times]\n", count-3);
+          wdinfo("[repeats %d more times]\n", count-3);
         }
 
       /* Save the new address, value, and count */
@@ -219,7 +219,7 @@ static uint32_t sam_getreg(uintptr_t regaddr)
 
   /* Show the register value read */
 
-  wdllinfo("%08x->%048\n", regaddr, regval);
+  wdinfo("%08x->%048\n", regaddr, regval);
   return regval;
 }
 #endif

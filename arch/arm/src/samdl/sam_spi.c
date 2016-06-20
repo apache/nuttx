@@ -548,7 +548,7 @@ static bool spi_checkreg(struct sam_spidev_s *priv, bool wr, uint32_t regval,
         {
           /* Yes... show how many times we did it */
 
-          spillinfo("...[Repeats %d times]...\n", priv->ntimes);
+          spiinfo("...[Repeats %d times]...\n", priv->ntimes);
         }
 
       /* Save information about the new access */
@@ -581,7 +581,7 @@ static uint8_t spi_getreg8(struct sam_spidev_s *priv, unsigned int offset)
 #ifdef CONFIG_SAMDL_SPI_REGDEBUG
   if (spi_checkreg(priv, false, (uint32_t)regval, regaddr))
     {
-      spillinfo("%08x->%02x\n", regaddr, regval);
+      spiinfo("%08x->%02x\n", regaddr, regval);
     }
 #endif
 
@@ -604,7 +604,7 @@ static void spi_putreg8(struct sam_spidev_s *priv, uint8_t regval,
 #ifdef CONFIG_SAMDL_SPI_REGDEBUG
   if (spi_checkreg(priv, true, (uint32_t)regval, regaddr))
     {
-      spillinfo("%08x<-%02x\n", regaddr, regval);
+      spiinfo("%08x<-%02x\n", regaddr, regval);
     }
 #endif
 
@@ -627,7 +627,7 @@ static uint16_t spi_getreg16(struct sam_spidev_s *priv, unsigned int offset)
 #ifdef CONFIG_SAMDL_SPI_REGDEBUG
   if (spi_checkreg(priv, false, (uint32_t)regval, regaddr))
     {
-      spillinfo("%08x->%04x\n", regaddr, regval);
+      spiinfo("%08x->%04x\n", regaddr, regval);
     }
 #endif
 
@@ -650,7 +650,7 @@ static void spi_putreg16(struct sam_spidev_s *priv, uint16_t regval,
 #ifdef CONFIG_SAMDL_SPI_REGDEBUG
   if (spi_checkreg(priv, true, (uint32_t)regval, regaddr))
     {
-      spillinfo("%08x<-%04x\n", regaddr, regval);
+      spiinfo("%08x<-%04x\n", regaddr, regval);
     }
 #endif
 
@@ -673,7 +673,7 @@ static uint32_t spi_getreg32(struct sam_spidev_s *priv, unsigned int offset)
 #ifdef CONFIG_SAMDL_SPI_REGDEBUG
   if (spi_checkreg(priv, false, regval, regaddr))
     {
-      spillinfo("%08x->%08x\n", regaddr, regval);
+      spiinfo("%08x->%08x\n", regaddr, regval);
     }
 #endif
 
@@ -696,7 +696,7 @@ static void spi_putreg32(struct sam_spidev_s *priv, uint32_t regval,
 #ifdef CONFIG_SAMDL_SPI_REGDEBUG
   if (spi_checkreg(priv, true, regval, regaddr))
     {
-      spillinfo("%08x<-%08x\n", regaddr, regval);
+      spiinfo("%08x<-%08x\n", regaddr, regval);
     }
 #endif
 

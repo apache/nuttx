@@ -729,7 +729,7 @@ static bool sam_checkreg(struct sam_dev_s *priv, bool wr, uint32_t value,
         {
           /* Yes... show how many times we did it */
 
-          mcllinfo("...[Repeats %d times]...\n", priv->ntimes);
+          mcinfo("...[Repeats %d times]...\n", priv->ntimes);
         }
 
       /* Save information about the new access */
@@ -762,7 +762,7 @@ static inline uint32_t sam_getreg(struct sam_dev_s *priv, unsigned int offset)
 #ifdef CONFIG_SAMA5_HSMCI_REGDEBUG
   if (sam_checkreg(priv, false, value, address))
     {
-      mcllinfo("%08x->%08x\n", address, value);
+      mcinfo("%08x->%08x\n", address, value);
     }
 #endif
 
@@ -785,7 +785,7 @@ static inline void sam_putreg(struct sam_dev_s *priv, uint32_t value,
 #ifdef CONFIG_SAMA5_HSMCI_REGDEBUG
   if (sam_checkreg(priv, true, value, address))
     {
-      mcllinfo("%08x<-%08x\n", address, value);
+      mcinfo("%08x<-%08x\n", address, value);
     }
 #endif
 
@@ -1613,7 +1613,7 @@ static int sam_hsmci_interrupt(struct sam_dev_s *priv)
                 {
                   /* Yes.. Was the error some kind of timeout? */
 
-                  fllinfo("ERROR: events: %08x SR: %08x\n",
+                  fllerr("ERROR: events: %08x SR: %08x\n",
                           priv->cmdrmask, enabled);
 
                   if ((pending & HSMCI_RESPONSE_TIMEOUT_ERRORS) != 0)
@@ -3157,7 +3157,7 @@ static void sam_callback(void *arg)
           lcderr("ERROR: Failed to cancel work: %d\n", ret);
         }
 
-      fllinfo("Queuing callback to %p(%p)\n", priv->callback, priv->cbarg);
+      finfo("Queuing callback to %p(%p)\n", priv->callback, priv->cbarg);
       ret = work_queue(LPWORK, &priv->cbwork, (worker_t)priv->callback,
                        priv->cbarg, 0);
       if (ret < 0)
@@ -3397,7 +3397,7 @@ void sdio_mediachange(FAR struct sdio_dev_s *dev, bool cardinslot)
       priv->cdstatus &= ~SDIO_STATUS_PRESENT;
     }
 
-  fllinfo("cdstatus OLD: %02x NEW: %02x\n", cdstatus, priv->cdstatus);
+  finfo("cdstatus OLD: %02x NEW: %02x\n", cdstatus, priv->cdstatus);
 
   /* Perform any requested callback if the status has changed */
 

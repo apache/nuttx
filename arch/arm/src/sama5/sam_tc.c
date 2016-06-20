@@ -562,7 +562,7 @@ static bool sam_checkreg(struct sam_tc_s *tc, bool wr, uint32_t regaddr,
         {
           /* Yes... show how many times we did it */
 
-          tmllinfo("...[Repeats %d times]...\n", tc->ntimes);
+          tmrinfo("...[Repeats %d times]...\n", tc->ntimes);
         }
 
       /* Save information about the new access */
@@ -597,7 +597,7 @@ static inline uint32_t sam_tc_getreg(struct sam_chan_s *chan,
 #ifdef CONFIG_SAMA5_TC_REGDEBUG
   if (sam_checkreg(tc, false, regaddr, regval))
     {
-      tmllinfo("%08x->%08x\n", regaddr, regval);
+      tmrinfo("%08x->%08x\n", regaddr, regval);
     }
 #endif
 
@@ -621,7 +621,7 @@ static inline void sam_tc_putreg(struct sam_chan_s *chan, uint32_t regval,
 #ifdef CONFIG_SAMA5_TC_REGDEBUG
   if (sam_checkreg(tc, true, regaddr, regval))
     {
-      tmllinfo("%08x<-%08x\n", regaddr, regval);
+      tmrinfo("%08x<-%08x\n", regaddr, regval);
     }
 #endif
 
@@ -645,7 +645,7 @@ static inline uint32_t sam_chan_getreg(struct sam_chan_s *chan,
 #ifdef CONFIG_SAMA5_TC_REGDEBUG
   if (sam_checkreg(chan->tc, false, regaddr, regval))
     {
-      tmllinfo("%08x->%08x\n", regaddr, regval);
+      tmrinfo("%08x->%08x\n", regaddr, regval);
     }
 #endif
 
@@ -668,7 +668,7 @@ static inline void sam_chan_putreg(struct sam_chan_s *chan, unsigned int offset,
 #ifdef CONFIG_SAMA5_TC_REGDEBUG
   if (sam_checkreg(chan->tc, true, regaddr, regval))
     {
-      tmllinfo("%08x<-%08x\n", regaddr, regval);
+      tmrinfo("%08x<-%08x\n", regaddr, regval);
     }
 #endif
 

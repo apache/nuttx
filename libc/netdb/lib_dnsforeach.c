@@ -276,7 +276,7 @@ int dns_foreach_nameserver(dns_callback_t callback, FAR void *arg)
       else
 #endif
         {
-          ninfo("ERROR: Unsupported family: %d\n",
+          nerr("ERROR: Unsupported family: %d\n",
                 g_dns_server.addr.sa_family);
           ret = -ENOSYS;
         }

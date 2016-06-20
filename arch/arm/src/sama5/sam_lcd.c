@@ -1017,7 +1017,7 @@ static bool sam_checkreg(bool wr, uint32_t regval, uintptr_t address)
         {
           /* Yes... show how many times we did it */
 
-          lcdllinfo("...[Repeats %d times]...\n", g_lcdc.ntimes);
+          lcdinfo("...[Repeats %d times]...\n", g_lcdc.ntimes);
         }
 
       /* Save information about the new access */
@@ -1049,7 +1049,7 @@ static uint32_t sam_getreg(uintptr_t address)
 
   if (sam_checkreg(false, regval, address))
     {
-      lcdllinfo("%08x->%08x\n", address, regval);
+      lcdinfo("%08x->%08x\n", address, regval);
     }
 
   return regval;
@@ -1069,7 +1069,7 @@ static void sam_putreg(uintptr_t address, uint32_t regval)
 {
   if (sam_checkreg(true, regval, address))
     {
-      lcdllinfo("%08x<-%08x\n", address, regval);
+      lcdinfo("%08x<-%08x\n", address, regval);
     }
 
   putreg32(regval, address);

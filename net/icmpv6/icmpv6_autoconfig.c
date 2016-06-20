@@ -119,7 +119,7 @@ static uint16_t icmpv6_router_interrupt(FAR struct net_driver_s *dev,
 {
   FAR struct icmpv6_router_s *state = (FAR struct icmpv6_router_s *)priv;
 
-  nllinfo("flags: %04x sent: %d\n", flags, state->snd_sent);
+  ninfo("flags: %04x sent: %d\n", flags, state->snd_sent);
 
   if (state)
     {

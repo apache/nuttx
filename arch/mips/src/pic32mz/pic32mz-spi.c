@@ -482,7 +482,7 @@ static bool spi_checkreg(struct pic32mz_dev_s *priv, uintptr_t regaddr,
         {
           /* Yes... show how many times we did it */
 
-          _llinfo("...[Repeats %d times]...\n", priv->ntimes);
+          _info("...[Repeats %d times]...\n", priv->ntimes);
         }
 
       /* Save information about the new access */
@@ -532,8 +532,8 @@ static uint32_t spi_getreg(FAR struct pic32mz_dev_s *priv,
     {
       /* Yes.. */
 
-      _llinfo("%08lx->%08lx\n",
-             (unsigned long)regaddr, (unsigned long)regval);
+      _info("%08lx->%08lx\n",
+           (unsigned long)regaddr, (unsigned long)regval);
     }
 
   /* Return the value read */
@@ -574,8 +574,8 @@ static void spi_putaddr(FAR struct pic32mz_dev_s *priv, uintptr_t regaddr,
     {
       /* Yes.. */
 
-      _llinfo("%08lx<-%08lx\n",
-             (unsigned long)regaddr, (unsigned long)regval);
+      _info("%08lx<-%08lx\n",
+           (unsigned long)regaddr, (unsigned long)regval);
     }
 
   /* Write the value to the register */

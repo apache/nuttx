@@ -185,7 +185,7 @@ static uint32_t sam34_getreg(uint32_t addr)
         {
           if (count == 4)
             {
-              tmrllinfo("...\n");
+              tmrinfo("...\n");
             }
 
           return val;
@@ -202,7 +202,7 @@ static uint32_t sam34_getreg(uint32_t addr)
         {
           /* Yes.. then show how many times the value repeated */
 
-          tmrllinfo("[repeats %d more times]\n", count-3);
+          tmrinfo("[repeats %d more times]\n", count-3);
         }
 
       /* Save the new address, value, and count */
@@ -214,7 +214,7 @@ static uint32_t sam34_getreg(uint32_t addr)
 
   /* Show the register value read */
 
-  tmrllinfo("%08lx->%08lx\n", addr, val);
+  tmrinfo("%08lx->%08lx\n", addr, val);
   return val;
 }
 #endif
@@ -232,7 +232,7 @@ static void sam34_putreg(uint32_t val, uint32_t addr)
 {
   /* Show the register value being written */
 
-  tmrllinfo("%08lx<-%08lx\n", addr, val);
+  tmrinfo("%08lx<-%08lx\n", addr, val);
 
   /* Write the value */
 

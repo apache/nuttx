@@ -146,10 +146,10 @@ void _exit(int status)
 
   (void)up_irq_save();
 
-  sllinfo("TCB=%p exiting\n", this_task());
+  sinfo("TCB=%p exiting\n", this_task());
 
 #ifdef CONFIG_DUMP_ON_EXIT
-  sllinfo("Other tasks:\n");
+  sinfo("Other tasks:\n");
   sched_foreach(_up_dumponexit, NULL);
 #endif
 

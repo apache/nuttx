@@ -499,7 +499,7 @@ static void can_reset(FAR struct can_dev_s *dev)
   uint32_t regbit = 0;
   irqstate_t flags;
 
-  canllinfo("CAN%d\n", priv->port);
+  caninfo("CAN%d\n", priv->port);
 
   /* Get the bits in the AHB1RSTR1 register needed to reset this CAN device */
 
@@ -554,7 +554,7 @@ static int can_setup(FAR struct can_dev_s *dev)
   FAR struct stm32l4_can_s *priv = dev->cd_priv;
   int ret;
 
-  canllinfo("CAN%d RX0 irq: %d TX irq: %d\n", priv->port, priv->canrx0, priv->cantx);
+  caninfo("CAN%d RX0 irq: %d TX irq: %d\n", priv->port, priv->canrx0, priv->cantx);
 
   /* CAN cell initialization */
 
@@ -624,7 +624,7 @@ static void can_shutdown(FAR struct can_dev_s *dev)
 {
   FAR struct stm32l4_can_s *priv = dev->cd_priv;
 
-  canllinfo("CAN%d\n", priv->port);
+  caninfo("CAN%d\n", priv->port);
 
   /* Disable the RX FIFO 0 and TX interrupts */
 
@@ -660,7 +660,7 @@ static void can_rxint(FAR struct can_dev_s *dev, bool enable)
   FAR struct stm32l4_can_s *priv = dev->cd_priv;
   uint32_t regval;
 
-  canllinfo("CAN%d enable: %d\n", priv->port, enable);
+  caninfo("CAN%d enable: %d\n", priv->port, enable);
 
   /* Enable/disable the FIFO 0 message pending interrupt */
 
@@ -696,7 +696,7 @@ static void can_txint(FAR struct can_dev_s *dev, bool enable)
   FAR struct stm32l4_can_s *priv = dev->cd_priv;
   uint32_t regval;
 
-  canllinfo("CAN%d enable: %d\n", priv->port, enable);
+  caninfo("CAN%d enable: %d\n", priv->port, enable);
 
   /* Support only disabling the transmit mailbox interrupt */
 
@@ -781,7 +781,8 @@ static int can_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
   int dlc;
   int txmb;
 
-  canllinfo("CAN%d ID: %d DLC: %d\n", priv->port, msg->cm_hdr.ch_id, msg->cm_hdr.ch_dlc);
+  caninfo("CAN%d ID: %d DLC: %d\n",
+          priv->port, msg->cm_hdr.ch_id, msg->cm_hdr.ch_dlc);
 
   /* Select one empty transmit mailbox */
 
@@ -934,7 +935,7 @@ static bool can_txready(FAR struct can_dev_s *dev)
   /* Return true if any mailbox is available */
 
   regval = can_getreg(priv, STM32L4_CAN_TSR_OFFSET);
-  canllinfo("CAN%d TSR: %08x\n", priv->port, regval);
+  caninfo("CAN%d TSR: %08x\n", priv->port, regval);
 
   if ((regval & CAN_ALL_MAILBOXES) != 0)
     {
@@ -970,7 +971,7 @@ static bool can_txempty(FAR struct can_dev_s *dev)
   /* Return true if all mailboxes are available */
 
   regval = can_getreg(priv, STM32L4_CAN_TSR_OFFSET);
-  canllinfo("CAN%d TSR: %08x\n", priv->port, regval);
+  caninfo("CAN%d TSR: %08x\n", priv->port, regval);
 
   if ((regval & CAN_ALL_MAILBOXES) == CAN_ALL_MAILBOXES)
     {
@@ -1245,8 +1246,8 @@ static int can_bittiming(struct stm32l4_can_s *priv)
   uint32_t ts1;
   uint32_t ts2;
 
-  canllinfo("CAN%d PCLK1: %d baud: %d\n",
-            priv->port, STM32L4_PCLK1_FREQUENCY, priv->baud);
+  caninfo("CAN%d PCLK1: %d baud: %d\n",
+          priv->port, STM32L4_PCLK1_FREQUENCY, priv->baud);
 
   /* Try to get CAN_BIT_QUANTA quanta in one bit_time.
    *
@@ -1299,7 +1300,7 @@ static int can_bittiming(struct stm32l4_can_s *priv)
       DEBUGASSERT(brp >= 1 && brp <= CAN_BTR_BRP_MAX);
     }
 
-  canllinfo("TS1: %d TS2: %d BRP: %d\n", ts1, ts2, brp);
+  caninfo("TS1: %d TS2: %d BRP: %d\n", ts1, ts2, brp);
 
   /* Configure bit timing.  This also does the following, less obvious
    * things.  Unless loopback mode is enabled, it:
@@ -1342,7 +1343,7 @@ static int can_cellinit(struct stm32l4_can_s *priv)
   uint32_t regval;
   int ret;
 
-  canllinfo("CAN%d\n", priv->port);
+  caninfo("CAN%d\n", priv->port);
 
   /* Exit from sleep mode */
 
@@ -1471,7 +1472,7 @@ static int can_filterinit(struct stm32l4_can_s *priv)
   uint32_t regval;
   uint32_t bitmask;
 
-  canllinfo("CAN%d filter: %d\n", priv->port, priv->filter);
+  caninfo("CAN%d filter: %d\n", priv->port, priv->filter);
 
   /* Get the bitmask associated with the filter used by this CAN block */
 

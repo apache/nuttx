@@ -302,8 +302,8 @@ static uint16_t tcpsend_interrupt(FAR struct net_driver_s *dev,
     }
 #endif
 
-  nllinfo("flags: %04x acked: %d sent: %d\n",
-          flags, pstate->snd_acked, pstate->snd_sent);
+  ninfo("flags: %04x acked: %d sent: %d\n",
+        flags, pstate->snd_acked, pstate->snd_sent);
 
   /* If this packet contains an acknowledgement, then update the count of
    * acknowledged bytes.
@@ -348,8 +348,8 @@ static uint16_t tcpsend_interrupt(FAR struct net_driver_s *dev,
        */
 
       pstate->snd_acked = tcp_getsequence(tcp->ackno) - pstate->snd_isn;
-      nllinfo("ACK: acked=%d sent=%d buflen=%d\n",
-              pstate->snd_acked, pstate->snd_sent, pstate->snd_buflen);
+      ninfo("ACK: acked=%d sent=%d buflen=%d\n",
+            pstate->snd_acked, pstate->snd_sent, pstate->snd_buflen);
 
       /* Have all of the bytes in the buffer been sent and acknowledged? */
 
@@ -392,7 +392,7 @@ static uint16_t tcpsend_interrupt(FAR struct net_driver_s *dev,
     {
       /* Report not connected */
 
-      nllinfo("Lost connection\n");
+      ninfo("Lost connection\n");
 
       net_lostconnection(pstate->snd_sock, flags);
       pstate->snd_sent = -ENOTCONN;
@@ -526,7 +526,7 @@ static uint16_t tcpsend_interrupt(FAR struct net_driver_s *dev,
            */
 
           seqno = pstate->snd_sent + pstate->snd_isn;
-          nllinfo("SEND: sndseq %08x->%08x\n", conn->sndseq, seqno);
+          ninfo("SEND: sndseq %08x->%08x\n", conn->sndseq, seqno);
           tcp_setsequence(conn->sndseq, seqno);
 
 #ifdef NEED_IPDOMAIN_SUPPORT
@@ -554,8 +554,8 @@ static uint16_t tcpsend_interrupt(FAR struct net_driver_s *dev,
               /* Update the amount of data sent (but not necessarily ACKed) */
 
               pstate->snd_sent += sndlen;
-              nllinfo("SEND: acked=%d sent=%d buflen=%d\n",
-                      pstate->snd_acked, pstate->snd_sent, pstate->snd_buflen);
+              ninfo("SEND: acked=%d sent=%d buflen=%d\n",
+                    pstate->snd_acked, pstate->snd_sent, pstate->snd_buflen);
 
             }
         }

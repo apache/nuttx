@@ -85,7 +85,7 @@ int up_cryptoinitialize(void)
     }
   else
     {
-      cryptllinfo("crypto test OK\n");
+      cryptinfo("crypto test OK\n");
     }
 #endif
 

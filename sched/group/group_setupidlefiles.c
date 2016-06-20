@@ -120,7 +120,7 @@ int group_setupidlefiles(FAR struct task_tcb_s *tcb)
 
       if (fd > 0)
         {
-          sllinfo("Open /dev/console fd: %d\n", fd);
+          sinfo("Open /dev/console fd: %d\n", fd);
           (void)close(fd);
         }
       else

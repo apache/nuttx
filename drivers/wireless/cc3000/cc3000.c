@@ -124,8 +124,8 @@ CCASSERT(sizeof(cc3000_buffer_desc) <= CONFIG_MQ_MAXMSGSIZE);
 #  define PROBE(pin,state)
 #endif
 
-#define waitllerr(x,...) //  _llerr
-#define waitllinfo(x,...) // _llinfo
+#define waiterr(x,...) //  _err
+#define waitinfo(x,...) // _info
 
 /****************************************************************************
  * Private Function Prototypes
@@ -419,7 +419,7 @@ static void cc3000_pollnotify(FAR struct cc3000_dev_s *priv, uint32_t type)
       if (fds)
         {
           fds->revents |= type;
-          nllinfo("Report events: %02x\n", fds->revents);
+          ninfo("Report events: %02x\n", fds->revents);
           sem_post(fds->sem);
         }
     }
@@ -497,7 +497,7 @@ static void * select_thread_func(FAR void *arg)
               if (priv->sockets[s].sd == CLOSE_SLOT)
                 {
                   priv->sockets[s].sd = FREE_SLOT;
-                  waitllinfo("Close\n");
+                  waitinfo("Close\n");
                   int count;
                   do
                     {
@@ -506,7 +506,7 @@ static void * select_thread_func(FAR void *arg)
                         {
                           /* Release the waiting threads */
 
-                          waitllinfo("Closed Signaled %d\n", count);
+                          waitinfo("Closed Signaled %d\n", count);
                           sem_post(&priv->sockets[s].semwait);
                         }
                     }
@@ -553,17 +553,17 @@ static void * select_thread_func(FAR void *arg)
             {
               if (ret > 0 && CC3000_FD_ISSET(priv->sockets[s].sd, &readsds)) /* and has pending data */
                 {
-                  waitllinfo("Signaled %d\n", priv->sockets[s].sd);
+                  waitinfo("Signaled %d\n", priv->sockets[s].sd);
                   sem_post(&priv->sockets[s].semwait);                       /* release the waiting thread */
                 }
               else if (ret > 0 && CC3000_FD_ISSET(priv->sockets[s].sd, &exceptsds)) /* or has pending exception */
                 {
-                  waitllinfo("Signaled %d (exception)\n", priv->sockets[s].sd);
+                  waitinfo("Signaled %d (exception)\n", priv->sockets[s].sd);
                   sem_post(&priv->sockets[s].semwait);                       /* release the waiting thread */
                 }
               else if (priv->sockets[s].received_closed_event)               /* or remote has closed connection and we have now read all of HW buffer. */
                 {
-                  waitllinfo("Signaled %d (closed & empty)\n", priv->sockets[s].sd);
+                  waitinfo("Signaled %d (closed & empty)\n", priv->sockets[s].sd);
                   priv->sockets[s].emptied_and_remotely_closed = true;
                   sem_post(&priv->sockets[s].semwait);                       /* release the waiting thread */
                 }
@@ -620,7 +620,7 @@ static void * cc3000_worker(FAR void *arg)
       if ((cc3000_wait_irq(priv) != -EINTR) && (priv->workertid != -1))
         {
           PROBE(0, 0);
-          nllinfo("State%d\n", priv->state);
+          ninfo("State%d\n", priv->state);
           switch (priv->state)
             {
             case eSPI_STATE_POWERUP:
@@ -707,10 +707,10 @@ static void * cc3000_worker(FAR void *arg)
 
                     cc3000_devgive(priv);
 
-                    nllinfo("Wait On Completion\n");
+                    ninfo("Wait On Completion\n");
                     sem_wait(priv->wrkwaitsem);
-                    nllinfo("Completed S:%d irq :%d\n",
-                            priv->state, priv->config->irq_read(priv->config));
+                    ninfo("Completed S:%d irq :%d\n",
+                          priv->state, priv->config->irq_read(priv->config));
 
                     sem_getvalue(&priv->irqsem, &count);
                     if (priv->config->irq_read(priv->config) && count == 0)
@@ -729,7 +729,7 @@ static void * cc3000_worker(FAR void *arg)
               break;
 
             default:
-              nllinfo("default: State%d\n", priv->state);
+              ninfo("default: State%d\n", priv->state);
               break;
             }
         }
@@ -799,7 +799,7 @@ static int cc3000_open(FAR struct file *filep)
 
   CHECK_GUARD(priv);
 
-  nllinfo("crefs: %d\n", priv->crefs);
+  ninfo("crefs: %d\n", priv->crefs);
 
   /* Get exclusive access to the driver data structure */
 
@@ -979,7 +979,7 @@ static int cc3000_close(FAR struct file *filep)
 
   CHECK_GUARD(priv);
 
-  nllinfo("crefs: %d\n", priv->crefs);
+  ninfo("crefs: %d\n", priv->crefs);
 
   /* Get exclusive access to the driver data structure */
 
@@ -1049,7 +1049,7 @@ static ssize_t cc3000_read(FAR struct file *filep, FAR char *buffer, size_t len)
   int ret;
   ssize_t nread;
 
-  nllinfo("buffer:%p len:%d\n", buffer, len);
+  ninfo("buffer:%p len:%d\n", buffer, len);
   DEBUGASSERT(filep);
   inode = filep->f_inode;
 
@@ -1088,7 +1088,7 @@ static ssize_t cc3000_read(FAR struct file *filep, FAR char *buffer, size_t len)
        * option, then just return an error.
        */
 
-      nllinfo("CC3000 data is not available\n");
+      ninfo("CC3000 data is not available\n");
       if (filep->f_oflags & O_NONBLOCK)
         {
           nread = -EAGAIN;
@@ -1109,7 +1109,7 @@ static ssize_t cc3000_read(FAR struct file *filep, FAR char *buffer, size_t len)
        * but will be re-enabled while we are waiting.
        */
 
-      nllinfo("Waiting..\n");
+      ninfo("Waiting..\n");
       ret = sem_wait(&priv->waitsem);
       priv->nwaiters--;
       sched_unlock();
@@ -1163,7 +1163,7 @@ errout_with_sem:
   cc3000_devgive(priv);
 
 errout_without_sem:
-  nllinfo("Returning: %d\n", nread);
+  ninfo("Returning: %d\n", nread);
 #ifndef CONFIG_DISABLE_POLL
   if (nread > 0)
     {
@@ -1195,7 +1195,7 @@ static ssize_t cc3000_write(FAR struct file *filep, FAR const char *usrbuffer, s
 
   size_t tx_len = (len & 1) ? len : len +1;
 
-  nllinfo("buffer:%p len:%d tx_len:%d\n", buffer, len, tx_len);
+  ninfo("buffer:%p len:%d tx_len:%d\n", buffer, len, tx_len);
 
   DEBUGASSERT(filep);
   inode = filep->f_inode;
@@ -1260,18 +1260,18 @@ static ssize_t cc3000_write(FAR struct file *filep, FAR const char *usrbuffer, s
     }
   else
     {
-      nllinfo("Assert CS\n");
+      ninfo("Assert CS\n");
       priv->state  = eSPI_STATE_WRITE_WAIT_IRQ;
       cc3000_lock_and_select(priv->spi); /* Assert CS */
-      nllinfo("Wait on IRQ Active\n");
+      ninfo("Wait on IRQ Active\n");
       ret = cc3000_wait_ready(priv);
-      nllinfo("IRQ Signaled\n");
+      ninfo("IRQ Signaled\n");
       if (ret < 0)
         {
           /* This should only happen if the wait was canceled by an signal */
 
           cc3000_deselect_and_unlock(priv->spi);
-          nllinfo("sem_wait: %d\n", errno);
+          ninfo("sem_wait: %d\n", errno);
           DEBUGASSERT(errno == EINTR);
           nwritten = ret;
           goto errout_without_sem;
@@ -1281,13 +1281,13 @@ static ssize_t cc3000_write(FAR struct file *filep, FAR const char *usrbuffer, s
     }
 
   priv->state  = eSPI_STATE_WRITE_DONE;
-  nllinfo("Deassert CS S:eSPI_STATE_WRITE_DONE\n");
+  ninfo("Deassert CS S:eSPI_STATE_WRITE_DONE\n");
   cc3000_deselect_and_unlock(priv->spi);
   nwritten = tx_len;
   cc3000_devgive(priv);
 
 errout_without_sem:
-  nllinfo("Returning: %d\n", ret);
+  ninfo("Returning: %d\n", ret);
   return nwritten;
 }
 
@@ -1301,7 +1301,7 @@ static int cc3000_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   FAR struct cc3000_dev_s *priv;
   int ret;
 
-  nllinfo("cmd: %d arg: %ld\n", cmd, arg);
+  ninfo("cmd: %d arg: %ld\n", cmd, arg);
   DEBUGASSERT(filep);
   inode = filep->f_inode;
 
@@ -1406,7 +1406,7 @@ static int cc3000_poll(FAR struct file *filep, FAR struct pollfd *fds,
   int ret = OK;
   int i;
 
-  nllinfo("setup: %d\n", (int)setup);
+  ninfo("setup: %d\n", (int)setup);
   DEBUGASSERT(filep && fds);
   inode = filep->f_inode;
 
@@ -1514,7 +1514,7 @@ int cc3000_register(FAR struct spi_dev_s *spi,
 #endif
   int ret;
 
-  nllinfo("spi: %p minor: %d\n", spi, minor);
+  ninfo("spi: %p minor: %d\n", spi, minor);
 
   /* Debug-only sanity checks */
 
@@ -1569,7 +1569,7 @@ int cc3000_register(FAR struct spi_dev_s *spi,
   /* Register the device as an input device */
 
   (void)snprintf(drvname, DEV_NAMELEN, DEV_FORMAT, minor);
-  nllinfo("Registering %s\n", drvname);
+  ninfo("Registering %s\n", drvname);
 
   ret = register_driver(drvname, &cc3000_fops, 0666, priv);
   if (ret < 0)

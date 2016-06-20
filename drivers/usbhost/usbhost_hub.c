@@ -479,7 +479,7 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_class_s *hubclass,
       return ret;
     }
 
-  ullinfo("Endpoint allocated\n");
+  uinfo("Endpoint allocated\n");
   return OK;
 }
 

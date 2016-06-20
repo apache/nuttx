@@ -109,7 +109,7 @@ static void sam_oneshot_handler(TC_HANDLE tch, void *arg, uint32_t sr)
   oneshot_handler_t oneshot_handler;
   void *oneshot_arg;
 
-  tmrllinfo("Expired...\n");
+  tmrinfo("Expired...\n");
   DEBUGASSERT(oneshot && oneshot->handler);
 
   /* The clock was stopped, but not disabled when the RC match occurred.

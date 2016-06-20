@@ -83,14 +83,10 @@
 
 #ifdef CONFIG_NETDEV_PHY_DEBUG
 #  define phyinfo   _info
-#  define phyllinfo _llinfo
 #  define phyerr    _err
-#  define phyllerr  _llerr
 #else
 #  define phyinfo(x...)
-#  define phyllinfo(x...)
 #  define phyerr(x...)
-#  define phyllerr(x...)
 #endif
 
 /****************************************************************************
@@ -270,8 +266,8 @@ static int phy_handler(FAR struct phy_notify_s *client)
   int ret;
 
   DEBUGASSERT(client && client->assigned && client->enable);
-  phyllinfo("Entry client %d, signalling PID=%d with signal %d\n",
-            client->index, client->pid, client->signo);
+  phyinfo("Entry client %d, signalling PID=%d with signal %d\n",
+          client->index, client->pid, client->signo);
 
   /* Disable further interrupts */
 
@@ -291,7 +287,7 @@ static int phy_handler(FAR struct phy_notify_s *client)
       int errcode = errno;
       DEBUGASSERT(errcode > 0);
 
-      nllinfo("ERROR: sigqueue failed: %d\n", errcode);
+      nerr("ERROR: sigqueue failed: %d\n", errcode);
       UNUSED(errcode);
     }
 

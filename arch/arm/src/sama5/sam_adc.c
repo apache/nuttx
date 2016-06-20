@@ -548,7 +548,7 @@ static bool sam_adc_checkreg(struct sam_adc_s *priv, bool wr,
         {
           /* Yes... show how many times we did it */
 
-          allinfo("...[Repeats %d times]...\n", priv->ntimes);
+          ainfo("...[Repeats %d times]...\n", priv->ntimes);
         }
 
       /* Save information about the new access */
@@ -729,7 +729,7 @@ static void sam_adc_dmacallback(DMA_HANDLE handle, void *arg, int result)
   struct sam_adc_s *priv = (struct sam_adc_s *)arg;
   int ret;
 
-  allinfo("ready=%d enabled=%d\n", priv->enabled, priv->ready);
+  ainfo("ready=%d enabled=%d\n", priv->enabled, priv->ready);
   DEBUGASSERT(priv->ready);
 
   /* Check of the bottom half is keeping up with us.
@@ -2191,7 +2191,7 @@ uint32_t sam_adc_getreg(struct sam_adc_s *priv, uintptr_t address)
 
   if (sam_adc_checkreg(priv, false, regval, address))
     {
-      allinfo("%08x->%08x\n", address, regval);
+      ainfo("%08x->%08x\n", address, regval);
     }
 
   return regval;
@@ -2211,7 +2211,7 @@ void sam_adc_putreg(struct sam_adc_s *priv, uintptr_t address, uint32_t regval)
 {
   if (sam_adc_checkreg(priv, true, regval, address))
     {
-      allinfo("%08x<-%08x\n", address, regval);
+      ainfo("%08x<-%08x\n", address, regval);
     }
 
   putreg32(regval, address);

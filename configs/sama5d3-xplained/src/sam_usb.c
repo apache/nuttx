@@ -546,7 +546,7 @@ xcpt_t sam_setup_overcurrent(xcpt_t handler)
 #ifdef CONFIG_USBDEV
 void sam_usbsuspend(FAR struct usbdev_s *dev, bool resume)
 {
-  ullinfo("resume: %d\n", resume);
+  uinfo("resume: %d\n", resume);
 }
 #endif
 

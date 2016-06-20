@@ -674,7 +674,7 @@ static uint16_t stm32_getreg(uint32_t addr)
         {
            if (count == 4)
              {
-               ullinfo("...\n");
+               uinfo("...\n");
              }
           return val;
         }
@@ -690,7 +690,7 @@ static uint16_t stm32_getreg(uint32_t addr)
          {
            /* Yes.. then show how many times the value repeated */
 
-           ullinfo("[repeats %d more times]\n", count-3);
+           uinfo("[repeats %d more times]\n", count-3);
          }
 
        /* Save the new address, value, and count */
@@ -702,7 +702,7 @@ static uint16_t stm32_getreg(uint32_t addr)
 
   /* Show the register value read */
 
-  ullinfo("%08x->%04x\n", addr, val);
+  uinfo("%08x->%04x\n", addr, val);
   return val;
 }
 #endif
@@ -716,7 +716,7 @@ static void stm32_putreg(uint16_t val, uint32_t addr)
 {
   /* Show the register value being written */
 
-  ullinfo("%08x<-%04x\n", addr, val);
+  uinfo("%08x<-%04x\n", addr, val);
 
   /* Write the value */
 
@@ -735,35 +735,35 @@ static void stm32_dumpep(int epno)
 
   /* Common registers */
 
-  ullinfo("CNTR:   %04x\n", getreg16(STM32_USB_CNTR));
-  ullinfo("ISTR:   %04x\n", getreg16(STM32_USB_ISTR));
-  ullinfo("FNR:    %04x\n", getreg16(STM32_USB_FNR));
-  ullinfo("DADDR:  %04x\n", getreg16(STM32_USB_DADDR));
-  ullinfo("BTABLE: %04x\n", getreg16(STM32_USB_BTABLE));
+  uinfo("CNTR:   %04x\n", getreg16(STM32_USB_CNTR));
+  uinfo("ISTR:   %04x\n", getreg16(STM32_USB_ISTR));
+  uinfo("FNR:    %04x\n", getreg16(STM32_USB_FNR));
+  uinfo("DADDR:  %04x\n", getreg16(STM32_USB_DADDR));
+  uinfo("BTABLE: %04x\n", getreg16(STM32_USB_BTABLE));
 
   /* Endpoint register */
 
   addr = STM32_USB_EPR(epno);
-  ullinfo("EPR%d:   [%08x] %04x\n", epno, addr, getreg16(addr));
+  uinfo("EPR%d:   [%08x] %04x\n", epno, addr, getreg16(addr));
 
   /* Endpoint descriptor */
 
   addr = STM32_USB_BTABLE_ADDR(epno, 0);
-  ullinfo("DESC:   %08x\n", addr);
+  uinfo("DESC:   %08x\n", addr);
 
   /* Endpoint buffer descriptor */
 
   addr = STM32_USB_ADDR_TX(epno);
-  ullinfo("  TX ADDR:  [%08x] %04x\n",  addr, getreg16(addr));
+  uinfo("  TX ADDR:  [%08x] %04x\n",  addr, getreg16(addr));
 
   addr = STM32_USB_COUNT_TX(epno);
-  ullinfo("     COUNT: [%08x] %04x\n",  addr, getreg16(addr));
+  uinfo("     COUNT: [%08x] %04x\n",  addr, getreg16(addr));
 
   addr = STM32_USB_ADDR_RX(epno);
-  ullinfo("  RX ADDR:  [%08x] %04x\n",  addr, getreg16(addr));
+  uinfo("  RX ADDR:  [%08x] %04x\n",  addr, getreg16(addr));
 
   addr = STM32_USB_COUNT_RX(epno);
-  ullinfo("     COUNT: [%08x] %04x\n",  addr, getreg16(addr));
+  uinfo("     COUNT: [%08x] %04x\n",  addr, getreg16(addr));
 }
 #endif
 
@@ -778,12 +778,12 @@ static void stm32_checksetup(void)
   uint32_t apb1rstr = getreg32(STM32_RCC_APB1RSTR);
   uint32_t apb1enr  = getreg32(STM32_RCC_APB1ENR);
 
-  ullinfo("CFGR: %08x APB1RSTR: %08x APB1ENR: %08x\n", cfgr, apb1rstr, apb1enr);
+  uinfo("CFGR: %08x APB1RSTR: %08x APB1ENR: %08x\n", cfgr, apb1rstr, apb1enr);
 
   if ((apb1rstr & RCC_APB1RSTR_USBRST) != 0 ||
       (apb1enr & RCC_APB1ENR_USBEN) == 0)
     {
-      uinfo("ERROR: USB is NOT setup correctly\n");
+      uerr("ERROR: USB is NOT setup correctly\n");
     }
 }
 #endif
@@ -1368,8 +1368,8 @@ static int stm32_wrrequest(struct stm32_usbdev_s *priv, struct stm32_ep_s *prive
     }
 
   epno = USB_EPNO(privep->ep.eplog);
-  ullinfo("epno=%d req=%p: len=%d xfrd=%d nullpkt=%d\n",
-          epno, privreq, privreq->req.len, privreq->req.xfrd, privep->txnullpkt);
+  uinfo("epno=%d req=%p: len=%d xfrd=%d nullpkt=%d\n",
+        epno, privreq, privreq->req.len, privreq->req.xfrd, privep->txnullpkt);
   UNUSED(epno);
 
   /* Get the number of bytes left to be sent in the packet */
@@ -1459,7 +1459,7 @@ static inline int stm32_ep0_rdrequest(struct stm32_usbdev_s *priv)
 
   pmalen  = stm32_geteprxcount(EP0);
 
-  ullinfo("EP0: pmalen=%d\n", pmalen);
+  uinfo("EP0: pmalen=%d\n", pmalen);
   usbtrace(TRACE_READ(EP0), pmalen);
 
   /* Read the data into our special buffer for SETUP data */
@@ -1511,7 +1511,7 @@ static int stm32_rdrequest(struct stm32_usbdev_s *priv, struct stm32_ep_s *prive
       return -ENOENT;
     }
 
-  ullinfo("EP%d: len=%d xfrd=%d\n", epno, privreq->req.len, privreq->req.xfrd);
+  uinfo("EP%d: len=%d xfrd=%d\n", epno, privreq->req.len, privreq->req.xfrd);
 
   /* Ignore any attempt to receive a zero length packet */
 
@@ -1769,8 +1769,8 @@ static void stm32_ep0setup(struct stm32_usbdev_s *priv)
       index.w = GETUINT16(priv->ctrl.index);
       len.w   = GETUINT16(priv->ctrl.len);
 
-      ullinfo("SETUP: type=%02x req=%02x value=%04x index=%04x len=%04x\n",
-              priv->ctrl.type, priv->ctrl.req, value.w, index.w, len.w);
+      uinfo("SETUP: type=%02x req=%02x value=%04x index=%04x len=%04x\n",
+            priv->ctrl.type, priv->ctrl.req, value.w, index.w, len.w);
 
       /* Is this an setup with OUT and data of length > 0 */
 
@@ -1960,7 +1960,7 @@ static void stm32_ep0setup(struct stm32_usbdev_s *priv)
           {
             /* Special case recipient=device test mode */
 
-            ullinfo("test mode: %d\n", index.w);
+            uinfo("test mode: %d\n", index.w);
           }
         else if ((priv->ctrl.type & USB_REQ_RECIPIENT_MASK) != USB_REQ_RECIPIENT_ENDPOINT)
           {
@@ -2845,7 +2845,7 @@ static int stm32_epconfigure(struct usbdev_ep_s *ep,
   if (!ep || !desc)
     {
       usbtrace(TRACE_DEVERROR(STM32_TRACEERR_INVALIDPARMS), 0);
-      ullerr("ERROR: ep=%p desc=%p\n");
+      uerr("ERROR: ep=%p desc=%p\n");
       return -EINVAL;
     }
 #endif
@@ -2941,7 +2941,7 @@ static int stm32_epdisable(struct usbdev_ep_s *ep)
   if (!ep)
     {
       usbtrace(TRACE_DEVERROR(STM32_TRACEERR_INVALIDPARMS), 0);
-      ullerr("ERROR: ep=%p\n", ep);
+      uerr("ERROR: ep=%p\n", ep);
       return -EINVAL;
     }
 #endif
@@ -3029,7 +3029,8 @@ static int stm32_epsubmit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
   if (!req || !req->callback || !req->buf || !ep)
     {
       usbtrace(TRACE_DEVERROR(STM32_TRACEERR_INVALIDPARMS), 0);
-      ullerr("ERROR: req=%p callback=%p buf=%p ep=%p\n", req, req->callback, req->buf, ep);
+      uerr("ERROR: req=%p callback=%p buf=%p ep=%p\n",
+           req, req->callback, req->buf, ep);
       return -EINVAL;
     }
 #endif
@@ -3041,7 +3042,7 @@ static int stm32_epsubmit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
   if (!priv->driver)
     {
       usbtrace(TRACE_DEVERROR(STM32_TRACEERR_NOTCONFIGURED), priv->usbdev.speed);
-      ullerr("ERROR: driver=%p\n", priv->driver);
+      uerr("ERROR: driver=%p\n", priv->driver);
       return -ESHUTDOWN;
     }
 #endif
@@ -3058,7 +3059,7 @@ static int stm32_epsubmit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
   if (privep->stalled)
     {
       stm32_abortrequest(privep, privreq, -EBUSY);
-      ullerr("ERROR: stalled\n");
+      uerr("ERROR: stalled\n");
       ret = -EBUSY;
     }
 

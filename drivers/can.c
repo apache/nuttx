@@ -281,9 +281,9 @@ static void can_txready_work(FAR void *arg)
   irqstate_t flags;
   int ret;
 
-  canllinfo("xmit head: %d queue: %d tail: %d\n",
-            dev->cd_xmit.tx_head, dev->cd_xmit.tx_queue,
-            dev->cd_xmit.tx_tail);
+  caninfo("xmit head: %d queue: %d tail: %d\n",
+          dev->cd_xmit.tx_head, dev->cd_xmit.tx_queue,
+          dev->cd_xmit.tx_tail);
 
   /* Verify that the xmit FIFO is not empty.  The following operations must
    * be performed with interrupt disabled.
@@ -634,8 +634,8 @@ static int can_xmit(FAR struct can_dev_s *dev)
   int tmpndx;
   int ret = -EBUSY;
 
-  canllinfo("xmit head: %d queue: %d tail: %d\n",
-            dev->cd_xmit.tx_head, dev->cd_xmit.tx_queue, dev->cd_xmit.tx_tail);
+  caninfo("xmit head: %d queue: %d tail: %d\n",
+          dev->cd_xmit.tx_head, dev->cd_xmit.tx_queue, dev->cd_xmit.tx_tail);
 
   /* If there is nothing to send, then just disable interrupts and return */
 
@@ -1003,7 +1003,7 @@ int can_receive(FAR struct can_dev_s *dev, FAR struct can_hdr_s *hdr,
   int                      errcode = -ENOMEM;
   int                      i;
 
-  canllinfo("ID: %d DLC: %d\n", hdr->ch_id, hdr->ch_dlc);
+  caninfo("ID: %d DLC: %d\n", hdr->ch_id, hdr->ch_dlc);
 
   /* Check if adding this new message would over-run the drivers ability to
    * enqueue read data.
@@ -1188,8 +1188,8 @@ int can_txdone(FAR struct can_dev_s *dev)
 {
   int ret = -ENOENT;
 
-  canllinfo("xmit head: %d queue: %d tail: %d\n",
-            dev->cd_xmit.tx_head, dev->cd_xmit.tx_queue, dev->cd_xmit.tx_tail);
+  caninfo("xmit head: %d queue: %d tail: %d\n",
+          dev->cd_xmit.tx_head, dev->cd_xmit.tx_queue, dev->cd_xmit.tx_tail);
 
   /* Verify that the xmit FIFO is not empty */
 
@@ -1292,9 +1292,9 @@ int can_txready(FAR struct can_dev_s *dev)
 {
   int ret = -ENOENT;
 
-  canllinfo("xmit head: %d queue: %d tail: %d waiters: %d\n",
-            dev->cd_xmit.tx_head, dev->cd_xmit.tx_queue, dev->cd_xmit.tx_tail,
-            dev->cd_ntxwaiters);
+  caninfo("xmit head: %d queue: %d tail: %d waiters: %d\n",
+          dev->cd_xmit.tx_head, dev->cd_xmit.tx_queue, dev->cd_xmit.tx_tail,
+          dev->cd_ntxwaiters);
 
   /* Verify that the xmit FIFO is not empty.  This is safe because interrupts
    * are always disabled when calling into can_xmit(); this cannot collide

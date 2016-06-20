@@ -635,7 +635,7 @@ int up_fbinitialize(int display)
   ret = vnc_start_server(display);
   if (ret < 0)
     {
-      ginfo("ERROR: vnc_start_server() failed: %d\n", ret);
+      gerr("ERROR: vnc_start_server() failed: %d\n", ret);
       return ret;
     }
 
@@ -644,7 +644,7 @@ int up_fbinitialize(int display)
   ret = vnc_wait_connect(display);
   if (ret < 0)
     {
-      ginfo("ERROR: vnc_wait_connect() failed: %d\n", ret);
+      gerr("ERROR: vnc_wait_connect() failed: %d\n", ret);
     }
 
   return ret;
@@ -716,7 +716,7 @@ int vnc_fbinitialize(int display, vnc_kbdout_t kbdout,
   ret = vnc_start_server(display);
   if (ret < 0)
     {
-      ginfo("ERROR: vnc_start_server() failed: %d\n", ret);
+      gerr("ERROR: vnc_start_server() failed: %d\n", ret);
       return ret;
     }
 
@@ -725,7 +725,7 @@ int vnc_fbinitialize(int display, vnc_kbdout_t kbdout,
   ret = vnc_wait_start(display);
   if (ret < 0)
     {
-      ginfo("ERROR: vnc_wait_start() failed: %d\n", ret);
+      gerr("ERROR: vnc_wait_start() failed: %d\n", ret);
       return ret;
     }
 

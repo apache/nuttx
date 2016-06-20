@@ -98,7 +98,7 @@ void cc3000_resume(void)
 {
   DEBUGASSERT(spiconf.cc3000fd >= 0 && spiconf.done);
   sem_post(spiconf.done);
-  nllinfo("Done\n");
+  ninfo("Done\n");
 }
 
 /****************************************************************************
@@ -203,7 +203,7 @@ static void *unsoliced_thread_func(void *parameter)
                           sizeof(spiconf.rx_buffer), 0);
       if (nbytes > 0)
         {
-          nllinfo("%d Processed\n", nbytes);
+          ninfo("%d Processed\n", nbytes);
           spiconf.pfRxHandler(spiconf.rx_buffer.pbuffer);
         }
     }

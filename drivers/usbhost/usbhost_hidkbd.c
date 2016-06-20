@@ -178,12 +178,8 @@
 #ifndef CONFIG_DEBUG_INPUT
 #  undef  ierr
 #  define ierr    uerr
-#  undef  illerr
-#  define illerr  ullerr
 #  undef  iinfo
 #  define iinfo   uinfo
-#  undef  illinfo
-#  define illinfo ullinfo
 #endif
 
 /****************************************************************************
@@ -1524,9 +1520,9 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
 
   if ((found & USBHOST_RQDFOUND) != USBHOST_RQDFOUND)
     {
-      ullerr("ERROR: Found IF:%s EPIN:%s\n",
-             (found & USBHOST_IFFOUND) != 0  ? "YES" : "NO",
-             (found & USBHOST_EPINFOUND) != 0 ? "YES" : "NO");
+      uerr("ERROR: Found IF:%s EPIN:%s\n",
+           (found & USBHOST_IFFOUND) != 0  ? "YES" : "NO",
+           (found & USBHOST_EPINFOUND) != 0 ? "YES" : "NO");
       return -EINVAL;
     }
 
@@ -1543,8 +1539,8 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
 
   /* Then the optional interrupt OUT endpoint */
 
-  ullinfo("Found EPOOUT:%s\n",
-         (found & USBHOST_EPOUTFOUND) != 0 ? "YES" : "NO");
+  uinfo("Found EPOOUT:%s\n",
+       (found & USBHOST_EPOUTFOUND) != 0 ? "YES" : "NO");
 
   if ((found & USBHOST_EPOUTFOUND) != 0)
     {
@@ -1557,7 +1553,7 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
         }
     }
 
-  ullinfo("Endpoints allocated\n");
+  uinfo("Endpoints allocated\n");
   return OK;
 }
 
@@ -1991,7 +1987,7 @@ static int usbhost_disconnected(struct usbhost_class_s *usbclass)
    */
 
   priv->disconnected = true;
-  ullinfo("Disconnected\n");
+  uinfo("Disconnected\n");
 
   /* Is there a thread waiting for keyboard data that will never come? */
 

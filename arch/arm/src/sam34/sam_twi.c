@@ -277,7 +277,7 @@ static bool twi_checkreg(struct twi_dev_s *priv, bool wr, uint32_t value,
         {
           /* Yes... show how many times we did it */
 
-          i2cllinfo("...[Repeats %d times]...\n", priv->ntimes);
+          i2cinfo("...[Repeats %d times]...\n", priv->ntimes);
         }
 
       /* Save information about the new access */
@@ -309,7 +309,7 @@ static uint32_t twi_getabs(struct twi_dev_s *priv, uintptr_t address)
 
   if (twi_checkreg(priv, false, value, address))
     {
-      i2cllinfo("%08x->%08x\n", address, value);
+      i2cinfo("%08x->%08x\n", address, value);
     }
 
   return value;
@@ -330,7 +330,7 @@ static void twi_putabs(struct twi_dev_s *priv, uintptr_t address,
 {
   if (twi_checkreg(priv, true, value, address))
     {
-      i2cllinfo("%08x<-%08x\n", address, value);
+      i2cinfo("%08x<-%08x\n", address, value);
     }
 
   putreg32(value, address);
@@ -390,9 +390,9 @@ static int twi_wait(struct twi_dev_s *priv)
 
   do
     {
-      i2cllinfo("TWI%d Waiting...\n", priv->twi);
+      i2cinfo("TWI%d Waiting...\n", priv->twi);
       twi_takesem(&priv->waitsem);
-      i2cllinfo("TWI%d Awakened with result: %d\n", priv->twi, priv->result);
+      i2cinfo("TWI%d Awakened with result: %d\n", priv->twi, priv->result);
     }
   while (priv->result == -EBUSY);
 
@@ -449,7 +449,7 @@ static int twi_interrupt(struct twi_dev_s *priv)
   imr     = twi_getrel(priv, SAM_TWI_IMR_OFFSET);
   pending = sr & imr;
 
-  i2cllinfo("TWI%d pending: %08x\n", priv->twi, pending);
+  i2cinfo("TWI%d pending: %08x\n", priv->twi, pending);
 
   msg = priv->msg;
 

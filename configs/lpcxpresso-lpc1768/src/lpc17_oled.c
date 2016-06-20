@@ -125,7 +125,7 @@ FAR struct lcd_dev_s *board_graphics_setup(unsigned int devno)
         }
      else
         {
-          gllinfo("Bound SPI port 1 to OLED %d\n", devno);
+          ginfo("Bound SPI port 1 to OLED %d\n", devno);
 
           /* And turn the OLED on (dim) */
 
@@ -193,7 +193,7 @@ int lpc17_ssp1cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
 #ifdef CONFIG_UG9664HSWAG01_POWER
 void ug_power(unsigned int devno, bool on)
 {
-  gllinfo("power %s\n", on ? "ON" : "OFF");
+  ginfo("power %s\n", on ? "ON" : "OFF");
   (void)lpc17_gpiowrite(LPCXPRESSO_OLED_POWER, on);
 }
 #endif

@@ -703,7 +703,7 @@ static bool ssc_checkreg(struct sam_ssc_s *priv, bool wr, uint32_t regval,
         {
           /* Yes... show how many times we did it */
 
-          i2sllinfo("...[Repeats %d times]...\n", priv->count);
+          i2sinfo("...[Repeats %d times]...\n", priv->count);
         }
 
       /* Save information about the new access */
@@ -737,7 +737,7 @@ static inline uint32_t ssc_getreg(struct sam_ssc_s *priv,
 #ifdef CONFIG_SAMA5_SSC_REGDEBUG
   if (ssc_checkreg(priv, false, regval, regaddr))
     {
-      i2sllinfo("%08x->%08x\n", regaddr, regval);
+      i2sinfo("%08x->%08x\n", regaddr, regval);
     }
 #endif
 
@@ -760,7 +760,7 @@ static inline void ssc_putreg(struct sam_ssc_s *priv, unsigned int offset,
 #ifdef CONFIG_SAMA5_SSC_REGDEBUG
   if (ssc_checkreg(priv, true, regval, regaddr))
     {
-      i2sllinfo("%08x<-%08x\n", regaddr, regval);
+      i2sinfo("%08x<-%08x\n", regaddr, regval);
     }
 #endif
 
@@ -847,12 +847,12 @@ static void ssc_dump_queue(sq_queue_t *queue)
 
       if (!apb)
         {
-          i2sllinfo("    %p: No buffer\n", bfcontainer);
+          i2sinfo("    %p: No buffer\n", bfcontainer);
         }
       else
         {
-          i2sllinfo("    %p: buffer=%p nmaxbytes=%d nbytes=%d\n",
-                    bfcontainer, apb, apb->nmaxbytes, apb->nbytes);
+          i2sinfo("    %p: buffer=%p nmaxbytes=%d nbytes=%d\n",
+                  bfcontainer, apb, apb->nmaxbytes, apb->nbytes);
         }
     }
 }
@@ -862,12 +862,12 @@ static void ssc_dump_queues(struct sam_transport_s *xpt, const char *msg)
   irqstate_t flags;
 
   flags = enter_critical_section();
-  i2sllinfo("%s\n", msg);
-  i2sllinfo("  Pending:\n");
+  i2sinfo("%s\n", msg);
+  i2sinfo("  Pending:\n");
   ssc_dump_queue(&xpt->pend);
-  i2sllinfo("  Active:\n");
+  i2sinfo("  Active:\n");
   ssc_dump_queue(&xpt->act);
-  i2sllinfo("  Done:\n");
+  i2sinfo("  Done:\n");
   ssc_dump_queue(&xpt->done);
   leave_critical_section(flags);
 }
@@ -1090,7 +1090,7 @@ static void ssc_dma_sampleinit(struct sam_ssc_s *priv,
 #if defined(CONFIG_SAMA5_SSC_DMADEBUG) && defined(SSC_HAVE_RX)
 static void ssc_rxdma_sampledone(struct sam_ssc_s *priv, int result)
 {
-  i2sllinfo("result: %d\n", result);
+  i2sinfo("result: %d\n", result);
 
   /* Sample the final registers */
 
@@ -1155,7 +1155,7 @@ static void ssc_rxdma_sampledone(struct sam_ssc_s *priv, int result)
 #if defined(CONFIG_SAMA5_SSC_DMADEBUG) && defined(SSC_HAVE_TX)
 static void ssc_txdma_sampledone(struct sam_ssc_s *priv, int result)
 {
-  i2sllinfo("result: %d\n", result);
+  i2sinfo("result: %d\n", result);
 
   /* Sample the final registers */
 
@@ -1377,7 +1377,7 @@ static int ssc_rxdma_setup(struct sam_ssc_s *priv)
 
       if (ret < 0)
         {
-          i2sllerr("ERROR: wd_start failed: %d\n", errno);
+          i2serr("ERROR: wd_start failed: %d\n", errno);
         }
     }
 
@@ -1565,7 +1565,7 @@ static void ssc_rx_schedule(struct sam_ssc_s *priv, int result)
       ret = work_queue(HPWORK, &priv->rx.work, ssc_rx_worker, priv, 0);
       if (ret != 0)
         {
-          i2sllerr("ERROR: Failed to queue RX work: %d\n", ret);
+          i2serr("ERROR: Failed to queue RX work: %d\n", ret);
         }
     }
 }
@@ -1790,7 +1790,7 @@ static int ssc_txdma_setup(struct sam_ssc_s *priv)
 
       if (ret < 0)
         {
-          i2sllerr("ERROR: wd_start failed: %d\n", errno);
+          i2serr("ERROR: wd_start failed: %d\n", errno);
         }
     }
 
@@ -1965,7 +1965,7 @@ static void ssc_tx_schedule(struct sam_ssc_s *priv, int result)
       ret = work_queue(HPWORK, &priv->tx.work, ssc_tx_worker, priv, 0);
       if (ret != 0)
         {
-          i2sllerr("ERROR: Failed to queue TX work: %d\n", ret);
+          i2serr("ERROR: Failed to queue TX work: %d\n", ret);
         }
     }
 }

@@ -308,7 +308,7 @@ static void can_printreg(uint32_t addr, uint32_t value)
         {
           if (count == 4)
             {
-              canllinfo("...\n");
+              caninfo("...\n");
             }
 
           return;
@@ -325,7 +325,7 @@ static void can_printreg(uint32_t addr, uint32_t value)
         {
           /* Yes.. then show how many times the value repeated */
 
-          canllinfo("[repeats %d more times]\n", count-3);
+          caninfo("[repeats %d more times]\n", count-3);
         }
 
       /* Save the new address, value, and count */
@@ -337,7 +337,7 @@ static void can_printreg(uint32_t addr, uint32_t value)
 
   /* Show the register value read */
 
-  canllinfo("%08x->%08x\n", addr, value);
+  caninfo("%08x->%08x\n", addr, value);
 }
 #endif
 
@@ -398,7 +398,7 @@ static void can_putreg(struct up_dev_s *priv, int offset, uint32_t value)
 
   /* Show the register value being written */
 
-  canllinfo("%08x<-%08x\n", addr, value);
+  caninfo("%08x<-%08x\n", addr, value);
 
   /* Write the value */
 
@@ -458,7 +458,7 @@ static void can_putcommon(uint32_t addr, uint32_t value)
 {
   /* Show the register value being written */
 
-  canllinfo("%08x<-%08x\n", addr, value);
+  caninfo("%08x<-%08x\n", addr, value);
 
   /* Write the value */
 
@@ -942,7 +942,7 @@ static void can_interrupt(FAR struct can_dev_s *dev)
   /* Read the interrupt and capture register (also clearing most status bits) */
 
   regval = can_getreg(priv, LPC17_CAN_ICR_OFFSET);
-  canllinfo("CAN%d ICR: %08x\n",  priv->port, regval);
+  caninfo("CAN%d ICR: %08x\n",  priv->port, regval);
 
   /* Check for a receive interrupt */
 
@@ -972,7 +972,7 @@ static void can_interrupt(FAR struct can_dev_s *dev)
 
       if ((rfs & CAN_RFS_FF) != 0)
         {
-          canllerr("ERROR: Received message with extended identifier.  Dropped\n");
+          canerr("ERROR: Received message with extended identifier.  Dropped\n");
         }
       else
 #endif
@@ -1049,7 +1049,7 @@ static int can12_interrupt(int irq, void *context)
 {
   /* Handle CAN1/2 interrupts */
 
-  canllinfo("irq: %d\n",  irq);
+  caninfo("irq: %d\n",  irq);
 
 #ifdef CONFIG_LPC17_CAN1
   can_interrupt(&g_can1dev);
@@ -1126,8 +1126,8 @@ static int can_bittiming(struct up_dev_s *priv)
   uint32_t ts2;
   uint32_t sjw;
 
-  canllinfo("CAN%d PCLK: %d baud: %d\n", priv->port,
-            CAN_CLOCK_FREQUENCY(priv->divisor), priv->baud);
+  caninfo("CAN%d PCLK: %d baud: %d\n", priv->port,
+          CAN_CLOCK_FREQUENCY(priv->divisor), priv->baud);
 
   /* Try to get CAN_BIT_QUANTA quanta in one bit_time.
    *
@@ -1179,7 +1179,7 @@ static int can_bittiming(struct up_dev_s *priv)
 
   sjw = 1;
 
-  canllinfo("TS1: %d TS2: %d BRP: %d SJW= %d\n", ts1, ts2, brp, sjw);
+  caninfo("TS1: %d TS2: %d BRP: %d SJW= %d\n", ts1, ts2, brp, sjw);
 
   /* Configure bit timing */
 
@@ -1196,7 +1196,7 @@ static int can_bittiming(struct up_dev_s *priv)
   btr |= CAN_BTR_SAM;
 #endif
 
-  canllinfo("Setting CANxBTR= 0x%08x\n", btr);
+  caninfo("Setting CANxBTR= 0x%08x\n", btr);
   can_putreg(priv, LPC17_CAN_BTR_OFFSET, btr);        /* Set bit timing */
   return OK;
 }
@@ -1224,7 +1224,7 @@ FAR struct can_dev_s *lpc17_caninitialize(int port)
   irqstate_t flags;
   uint32_t regval;
 
-  canllinfo("CAN%d\n",  port);
+  caninfo("CAN%d\n",  port);
 
   flags = enter_critical_section();
 

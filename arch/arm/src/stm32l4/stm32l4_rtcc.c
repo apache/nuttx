@@ -1284,7 +1284,7 @@ int stm32l4_rtc_setalarm(FAR struct alm_setalarm_s *alminfo)
         break;
 
       default:
-        rtcinfo("ERROR: Invalid ALARM%d\n", alminfo->as_id);
+        rtcerr("ERROR: Invalid ALARM%d\n", alminfo->as_id);
         break;
     }
 
@@ -1384,7 +1384,7 @@ int stm32l4_rtc_cancelalarm(enum alm_id_e alarmid)
         break;
 
       default:
-        rtcinfo("ERROR: Invalid ALARM%d\n", alarmid);
+        rtcerr("ERROR: Invalid ALARM%d\n", alarmid);
         break;
     }
 

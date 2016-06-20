@@ -582,7 +582,7 @@ static const struct efm32_usbhost_trace_s g_trace2[TRACE2_NSTRINGS] =
 #ifdef CONFIG_EFM32_USBHOST_REGDEBUG
 static void efm32_printreg(uint32_t addr, uint32_t val, bool iswrite)
 {
-  ullinfo("%08x%s%08x\n", addr, iswrite ? "<-" : "->", val);
+  uinfo("%08x%s%08x\n", addr, iswrite ? "<-" : "->", val);
 }
 #endif
 
@@ -632,7 +632,7 @@ static void efm32_checkreg(uint32_t addr, uint32_t val, bool iswrite)
             {
               /* No.. More than one. */
 
-              ullinfo("[repeats %d more times]\n", count);
+              uinfo("[repeats %d more times]\n", count);
             }
         }
 
@@ -2448,7 +2448,7 @@ static inline void efm32_gint_hcinisr(FAR struct efm32_usbhost_s *priv,
   /* AND the two to get the set of enabled, pending HC interrupts */
 
   pending &= regval;
-  ullinfo("HCINTMSK%d: %08x pending: %08x\n", chidx, regval, pending);
+  uinfo("HCINTMSK%d: %08x pending: %08x\n", chidx, regval, pending);
 
   /* Check for a pending ACK response received/transmitted (ACK) interrupt */
 
@@ -2709,7 +2709,7 @@ static inline void efm32_gint_hcoutisr(FAR struct efm32_usbhost_s *priv,
   /* AND the two to get the set of enabled, pending HC interrupts */
 
   pending &= regval;
-  ullinfo("HCINTMSK%d: %08x pending: %08x\n", chidx, regval, pending);
+  uinfo("HCINTMSK%d: %08x pending: %08x\n", chidx, regval, pending);
 
   /* Check for a pending ACK response received/transmitted (ACK) interrupt */
 
@@ -3012,7 +3012,7 @@ static inline void efm32_gint_rxflvlisr(FAR struct efm32_usbhost_s *priv)
   /* Read and pop the next status from the Rx FIFO */
 
   grxsts = efm32_getreg(EFM32_USB_GRXSTSP);
-  ullinfo("GRXSTS: %08x\n", grxsts);
+  uinfo("GRXSTS: %08x\n", grxsts);
 
   /* Isolate the channel number/index in the status word */
 
@@ -3166,8 +3166,8 @@ static inline void efm32_gint_nptxfeisr(FAR struct efm32_usbhost_s *priv)
 
   /* Write the next group of packets into the Tx FIFO */
 
-  ullinfo("HNPTXSTS: %08x chidx: %d avail: %d buflen: %d xfrd: %d wrsize: %d\n",
-           regval, chidx, avail, chan->buflen, chan->xfrd, wrsize);
+  uinfo("HNPTXSTS: %08x chidx: %d avail: %d buflen: %d xfrd: %d wrsize: %d\n",
+         regval, chidx, avail, chan->buflen, chan->xfrd, wrsize);
 
   efm32_gint_wrpacket(priv, chan->buffer, chidx, wrsize);
 }
@@ -3254,8 +3254,8 @@ static inline void efm32_gint_ptxfeisr(FAR struct efm32_usbhost_s *priv)
 
   /* Write the next group of packets into the Tx FIFO */
 
-  ullinfo("HPTXSTS: %08x chidx: %d avail: %d buflen: %d xfrd: %d wrsize: %d\n",
-           regval, chidx, avail, chan->buflen, chan->xfrd, wrsize);
+  uinfo("HPTXSTS: %08x chidx: %d avail: %d buflen: %d xfrd: %d wrsize: %d\n",
+        regval, chidx, avail, chan->buflen, chan->xfrd, wrsize);
 
   efm32_gint_wrpacket(priv, chan->buffer, chidx, wrsize);
 }
@@ -4795,7 +4795,8 @@ static int efm32_connect(FAR struct usbhost_driver_s *drvr,
   /* Set the connected/disconnected flag */
 
   hport->connected = connected;
-  ullinfo("Hub port %d connected: %s\n", hport->port, connected ? "YES" : "NO");
+  uinfo("Hub port %d connected: %s\n",
+        hport->port, connected ? "YES" : "NO");
 
   /* Report the connection event */
 

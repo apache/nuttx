@@ -93,7 +93,7 @@ static uint16_t psock_send_interrupt(FAR struct net_driver_s *dev,
 {
   FAR struct send_s *pstate = (FAR struct send_s *)pvpriv;
 
-  nllinfo("flags: %04x sent: %d\n", flags, pstate->snd_sent);
+  ninfo("flags: %04x sent: %d\n", flags, pstate->snd_sent);
 
   if (pstate)
     {

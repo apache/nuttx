@@ -329,7 +329,7 @@ xcpt_t stm32_setup_overcurrent(xcpt_t handler)
 #ifdef CONFIG_USBDEV
 void stm32_usbsuspend(FAR struct usbdev_s *dev, bool resume)
 {
-  ullinfo("resume: %d\n", resume);
+  uinfo("resume: %d\n", resume);
 }
 #endif
 

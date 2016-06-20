@@ -234,17 +234,17 @@ static int wdt_setusec(uint32_t usec)
 
 static int wdt_interrupt(int irq, void *context)
 {
-  wdllinfo("expired\n");
+  wdinfo("expired\n");
 
 #if defined(CONFIG_SOFTWARE_REBOOT)
 #  if defined(CONFIG_SOFTWARE_TEST)
-  wdllinfo("  Test only\n");
+  wdinfo("  Test only\n");
 #  else
-  wdllinfo("  Re-booting\n");
+  wdinfo("  Re-booting\n");
 #    warning "Add logic to reset CPU here"
 #  endif
 #else
-  wdllinfo("  No reboot\n");
+  wdinfo("  No reboot\n");
 #endif
   return OK;
 }

@@ -126,7 +126,7 @@ FAR struct lcd_dev_s *board_graphics_setup(unsigned int devno)
         }
      else
         {
-          gllinfo("Bound SSI port 0 to OLED %d\n", devno);
+          ginfo("Bound SSI port 0 to OLED %d\n", devno);
 
           /* And turn the OLED on (CONFIG_LCD_MAXPOWER should be 1) */
 

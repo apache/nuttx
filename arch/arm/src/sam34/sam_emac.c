@@ -490,7 +490,7 @@ static bool sam_checkreg(struct sam_emac_s *priv, bool wr, uint32_t regval,
         {
           /* Yes... show how many times we did it */
 
-          nllinfo("...[Repeats %d times]...\n", priv->ntimes);
+          ninfo("...[Repeats %d times]...\n", priv->ntimes);
         }
 
       /* Save information about the new access */
@@ -522,7 +522,7 @@ static uint32_t sam_getreg(struct sam_emac_s *priv, uintptr_t address)
 
   if (sam_checkreg(priv, false, regval, address))
     {
-      nllinfo("%08x->%08x\n", address, regval);
+      ninfo("%08x->%08x\n", address, regval);
     }
 
   return regval;
@@ -543,7 +543,7 @@ static void sam_putreg(struct sam_emac_s *priv, uintptr_t address,
 {
   if (sam_checkreg(priv, true, regval, address))
     {
-      nllinfo("%08x<-%08x\n", address, regval);
+      ninfo("%08x<-%08x\n", address, regval);
     }
 
   putreg32(regval, address);
@@ -753,7 +753,7 @@ static int sam_transmit(struct sam_emac_s *priv)
   uint32_t regval;
   uint32_t status;
 
-  nllinfo("d_len: %d txhead: %d\n",  dev->d_len, priv->txhead);
+  ninfo("d_len: %d txhead: %d\n",  dev->d_len, priv->txhead);
   sam_dumppacket("Transmit packet", dev->d_buf, dev->d_len);
 
   /* Check parameter */
@@ -830,7 +830,7 @@ static int sam_transmit(struct sam_emac_s *priv)
 
   if (sam_txfree(priv) < 1)
     {
-      nllinfo("Disabling RX interrupts\n");
+      ninfo("Disabling RX interrupts\n");
       sam_putreg(priv, SAM_EMAC_IDR, EMAC_INT_RCOMP);
     }
 
@@ -1010,7 +1010,7 @@ static int sam_recvframe(struct sam_emac_s *priv)
   sam_cmcc_invalidate((uintptr_t)rxdesc,
                       (uintptr_t)rxdesc + sizeof(struct emac_rxdesc_s));
 
-  nllinfo("rxndx: %d\n", rxndx);
+  ninfo("rxndx: %d\n", rxndx);
 
   while ((rxdesc->addr & EMACRXD_ADDR_OWNER) != 0)
     {
@@ -1060,7 +1060,7 @@ static int sam_recvframe(struct sam_emac_s *priv)
         {
           if (rxndx == priv->rxndx)
             {
-              nllinfo("ERROR: No EOF (Invalid of buffers too small)\n");
+              nllerr("ERROR: No EOF (Invalid of buffers too small)\n");
               do
                 {
                   /* Give ownership back to the EMAC */
@@ -1107,7 +1107,7 @@ static int sam_recvframe(struct sam_emac_s *priv)
               /* Frame size from the EMAC */
 
               dev->d_len = (rxdesc->status & EMACRXD_STA_FRLEN_MASK);
-              nllinfo("packet %d-%d (%d)\n", priv->rxndx, rxndx, dev->d_len);
+              ninfo("packet %d-%d (%d)\n", priv->rxndx, rxndx, dev->d_len);
 
               /* All data have been copied in the application frame buffer,
                * release the RX descriptor
@@ -1132,7 +1132,7 @@ static int sam_recvframe(struct sam_emac_s *priv)
                * all of the data.
                */
 
-              nllinfo("rxndx: %d d_len: %d\n", priv->rxndx, dev->d_len);
+              ninfo("rxndx: %d d_len: %d\n", priv->rxndx, dev->d_len);
 
               if (pktlen < dev->d_len)
                 {
@@ -1167,7 +1167,7 @@ static int sam_recvframe(struct sam_emac_s *priv)
   /* No packet was found */
 
   priv->rxndx = rxndx;
-  nllinfo("rxndx: %d\n", priv->rxndx);
+  ninfo("rxndx: %d\n", priv->rxndx);
   return -EAGAIN;
 }
 
@@ -1222,7 +1222,7 @@ static void sam_receive(struct sam_emac_s *priv)
 #ifdef CONFIG_NET_IPv4
       if (BUF->type == HTONS(ETHTYPE_IP))
         {
-          nllinfo("IPv4 frame\n");
+          ninfo("IPv4 frame\n");
 
           /* Handle ARP on input then give the IPv4 packet to the network
            * layer
@@ -1262,7 +1262,7 @@ static void sam_receive(struct sam_emac_s *priv)
 #ifdef CONFIG_NET_IPv6
       if (BUF->type == HTONS(ETHTYPE_IP6))
         {
-          nllinfo("Iv6 frame\n");
+          ninfo("Iv6 frame\n");
 
           /* Give the IPv6 packet to the network layer */
 
@@ -1299,7 +1299,7 @@ static void sam_receive(struct sam_emac_s *priv)
 #ifdef CONFIG_NET_ARP
       if (BUF->type == htons(ETHTYPE_ARP))
         {
-          nllinfo("ARP frame\n");
+          ninfo("ARP frame\n");
 
           /* Handle ARP packet */
 
@@ -1442,7 +1442,7 @@ static inline void sam_interrupt_process(FAR struct sam_emac_s *priv)
   imr = sam_getreg(priv, SAM_EMAC_IMR);
 
   pending = isr & ~(imr | EMAC_INT_UNUSED);
-  nllinfo("isr: %08x pending: %08x\n", isr, pending);
+  ninfo("isr: %08x pending: %08x\n", isr, pending);
 
   /* Check for the completion of a transmission.  This should be done before
    * checking for received data (because receiving can cause another transmission
@@ -2077,7 +2077,7 @@ static int sam_ifdown(struct net_driver_s *dev)
 
 static inline void sam_txavail_process(FAR struct sam_emac_s *priv)
 {
-  nllinfo("ifup: %d\n", priv->ifup);
+  ninfo("ifup: %d\n", priv->ifup);
 
   /* Ignore the notification if the interface is not yet up */
 

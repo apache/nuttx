@@ -224,7 +224,7 @@ static uint16_t sendto_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
 {
   FAR struct sendto_s *pstate = (FAR struct sendto_s *)pvpriv;
 
-  nllinfo("flags: %04x\n", flags);
+  ninfo("flags: %04x\n", flags);
   if (pstate)
     {
       /* If the network device has gone down, then we will have terminate

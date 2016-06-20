@@ -1191,7 +1191,7 @@ static void adc_reset(FAR struct adc_dev_s *dev)
   int ret;
 #endif
 
-  allinfo("intf: %d\n", priv->intf);
+  ainfo("intf: %d\n", priv->intf);
   flags = enter_critical_section();
 
   /* Enable ADC reset state */

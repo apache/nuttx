@@ -460,7 +460,7 @@ static struct lpc17_xfrinfo_s g_xfrbuffers[CONFIG_LPC17_USBHOST_NPREALLOC];
 #ifdef CONFIG_LPC17_USBHOST_REGDEBUG
 static void lpc17_printreg(uint32_t addr, uint32_t val, bool iswrite)
 {
-  ullinfo("%08x%s%08x\n", addr, iswrite ? "<-" : "->", val);
+  uinfo("%08x%s%08x\n", addr, iswrite ? "<-" : "->", val);
 }
 #endif
 
@@ -510,7 +510,7 @@ static void lpc17_checkreg(uint32_t addr, uint32_t val, bool iswrite)
             {
               /* No.. More than one. */
 
-              ullinfo("[repeats %d more times]\n", count);
+              uinfo("[repeats %d more times]\n", count);
             }
         }
 
@@ -1646,7 +1646,7 @@ static int lpc17_usbinterrupt(int irq, void *context)
 
   intst  = lpc17_getreg(LPC17_USBHOST_INTST);
   regval = lpc17_getreg(LPC17_USBHOST_INTEN);
-  ullinfo("INST: %08x INTEN: %08x\n", intst, regval);
+  uinfo("INST: %08x INTEN: %08x\n", intst, regval);
 
   pending = intst & regval;
   if (pending != 0)
@@ -1656,18 +1656,18 @@ static int lpc17_usbinterrupt(int irq, void *context)
       if ((pending & OHCI_INT_RHSC) != 0)
         {
           uint32_t rhportst1 = lpc17_getreg(LPC17_USBHOST_RHPORTST1);
-          ullinfo("Root Hub Status Change, RHPORTST1: %08x\n", rhportst1);
+          uinfo("Root Hub Status Change, RHPORTST1: %08x\n", rhportst1);
 
           if ((rhportst1 & OHCI_RHPORTST_CSC) != 0)
             {
               uint32_t rhstatus = lpc17_getreg(LPC17_USBHOST_RHSTATUS);
-              ullinfo("Connect Status Change, RHSTATUS: %08x\n", rhstatus);
+              uinfo("Connect Status Change, RHSTATUS: %08x\n", rhstatus);
 
               /* If DRWE is set, Connect Status Change indicates a remote wake-up event */
 
               if (rhstatus & OHCI_RHSTATUS_DRWE)
                 {
-                  ullinfo("DRWE: Remote wake-up\n");
+                  uinfo("DRWE: Remote wake-up\n");
                 }
 
               /* Otherwise... Not a remote wake-up event */
@@ -1684,7 +1684,7 @@ static int lpc17_usbinterrupt(int irq, void *context)
                         {
                           /* Yes.. connected. */
 
-                          ullinfo("Connected\n");
+                          uinfo("Connected\n");
                           priv->connected = true;
                           priv->change    = true;
 
@@ -1714,7 +1714,7 @@ static int lpc17_usbinterrupt(int irq, void *context)
                           priv->rhport.hport.speed = USB_SPEED_FULL;
                         }
 
-                      ullinfo("Speed:%d\n", priv->rhport.hport.speed);
+                      uinfo("Speed:%d\n", priv->rhport.hport.speed);
                     }
 
                   /* Check if we are now disconnected */
@@ -1723,7 +1723,7 @@ static int lpc17_usbinterrupt(int irq, void *context)
                     {
                       /* Yes.. disconnect the device */
 
-                      ullinfo("Disconnected\n");
+                      uinfo("Disconnected\n");
                       priv->connected = false;
                       priv->change    = true;
 
@@ -3458,7 +3458,7 @@ static int lpc17_connect(FAR struct usbhost_driver_s *drvr,
   /* Set the connected/disconnected flag */
 
   hport->connected = connected;
-  ullinfo("Hub port %d connected: %s\n", hport->port, connected ? "YES" : "NO");
+  uinfo("Hub port %d connected: %s\n", hport->port, connected ? "YES" : "NO");
 
   /* Report the connection event */
 

@@ -808,7 +808,7 @@ static uint32_t tiva_getreg(uint32_t addr)
         {
           if (count == 4)
             {
-              _llinfo("...\n");
+              _info("...\n");
             }
 
           return val;
@@ -825,7 +825,7 @@ static uint32_t tiva_getreg(uint32_t addr)
         {
           /* Yes.. then show how many times the value repeated */
 
-          _llinfo("[repeats %d more times]\n", count-3);
+          _info("[repeats %d more times]\n", count-3);
         }
 
       /* Save the new address, value, and count */
@@ -837,7 +837,7 @@ static uint32_t tiva_getreg(uint32_t addr)
 
   /* Show the register value read */
 
-  _llinfo("%08x->%08x\n", addr, val);
+  _info("%08x->%08x\n", addr, val);
   return val;
 }
 #endif
@@ -864,7 +864,7 @@ static void tiva_putreg(uint32_t val, uint32_t addr)
 {
   /* Show the register value being written */
 
-  _llinfo("%08x<-%08x\n", addr, val);
+  _info("%08x<-%08x\n", addr, val);
 
   /* Write the value */
 
@@ -1544,7 +1544,7 @@ static int tiva_recvframe(FAR struct tiva_ethmac_s *priv)
 
   if (!tiva_isfreebuffer(priv))
     {
-      nllerr("ERROR: No free buffers\n");
+      nerr("ERROR: No free buffers\n");
       return -ENOMEM;
     }
 
@@ -1721,7 +1721,7 @@ static void tiva_receive(FAR struct tiva_ethmac_s *priv)
 #ifdef CONFIG_NET_IPv4
       if (BUF->type == HTONS(ETHTYPE_IP))
         {
-          nllinfo("IPv4 frame\n");
+          ninfo("IPv4 frame\n");
 
           /* Handle ARP on input then give the IPv4 packet to the network
            * layer
@@ -1760,7 +1760,7 @@ static void tiva_receive(FAR struct tiva_ethmac_s *priv)
 #ifdef CONFIG_NET_IPv6
       if (BUF->type == HTONS(ETHTYPE_IP6))
         {
-          nllinfo("IPv6 frame\n");
+          ninfo("IPv6 frame\n");
 
           /* Give the IPv6 packet to the network layer */
 
@@ -2067,7 +2067,7 @@ static inline void tiva_interrupt_process(FAR struct tiva_ethmac_s *priv)
     {
       /* Just let the user know what happened */
 
-      nllerr("ERROR: Abnormal event(s): %08x\n", dmaris);
+      nerr("ERROR: Abnormal event(s): %08x\n", dmaris);
 
       /* Clear all pending abnormal events */
 
@@ -2287,7 +2287,7 @@ static void tiva_txtimeout_expiry(int argc, uint32_t arg, ...)
 {
   FAR struct tiva_ethmac_s *priv = (FAR struct tiva_ethmac_s *)arg;
 
-  nllerr("ERROR: Timeout!\n");
+  nerr("ERROR: Timeout!\n");
 
 #ifdef CONFIG_NET_NOINTS
   /* Disable further Ethernet interrupts.  This will prevent some race
@@ -3599,7 +3599,7 @@ static inline void tiva_phy_initialize(FAR struct tiva_ethmac_s *priv)
 {
   /* Enable the clock to the PHY module */
 
-  nllinfo("Enable EPHY clocking\n");
+  ninfo("Enable EPHY clocking\n");
   tiva_ephy_enableclk();
 
   /* What until the PREPHY register indicates that the PHY is ready before
@@ -3611,7 +3611,7 @@ static inline void tiva_phy_initialize(FAR struct tiva_ethmac_s *priv)
 
   /* Enable power to the Ethernet PHY */
 
-  nllinfo("Enable EPHY power\n");
+  ninfo("Enable EPHY power\n");
   tiva_ephy_enablepwr();
 
   /* What until the PREPHY register indicates that the PHY registers are ready
@@ -3621,11 +3621,11 @@ static inline void tiva_phy_initialize(FAR struct tiva_ethmac_s *priv)
   while (!tiva_ephy_periphrdy());
   up_udelay(250);
 
-  nllinfo("RCGCEPHY: %08x PCEPHY: %08x PREPHY: %08x\n",
-          getreg32(TIVA_SYSCON_RCGCEPHY),
-          getreg32(TIVA_SYSCON_PCEPHY),
-          getreg32(TIVA_SYSCON_PREPHY));
-  nllinfo("Configure PHY GPIOs\n");
+  ninfo("RCGCEPHY: %08x PCEPHY: %08x PREPHY: %08x\n",
+        getreg32(TIVA_SYSCON_RCGCEPHY),
+        getreg32(TIVA_SYSCON_PCEPHY),
+        getreg32(TIVA_SYSCON_PREPHY));
+  ninfo("Configure PHY GPIOs\n");
 
 #ifdef CONFIG_TIVA_PHY_INTERNAL
   /* Integrated PHY:
@@ -4201,7 +4201,7 @@ int tiva_ethinitialize(int intf)
   struct tiva_ethmac_s *priv;
   uint32_t regval;
 
-  nllinfo("intf: %d\n", intf);
+  ninfo("intf: %d\n", intf);
 
   /* Get the interface structure associated with this interface number. */
 
@@ -4247,7 +4247,7 @@ int tiva_ethinitialize(int intf)
    *   bringing it a fully functional state.
    */
 
-  nllinfo("Enable EMAC clocking\n");
+  ninfo("Enable EMAC clocking\n");
   tiva_emac_enablepwr();   /* Ethernet MAC Power Control */
   tiva_emac_enableclk();   /* Ethernet MAC Run Mode Clock Gating Control */
 
@@ -4260,11 +4260,11 @@ int tiva_ethinitialize(int intf)
 
   /* Show all EMAC clocks */
 
-  nllinfo("RCGCEMAC: %08x PCEMAC: %08x PREMAC: %08x MOSCCTL: %08x\n",
-          getreg32(TIVA_SYSCON_RCGCEMAC),
-          getreg32(TIVA_SYSCON_PCEMAC),
-          getreg32(TIVA_SYSCON_PREMAC),
-          getreg32(TIVA_SYSCON_MOSCCTL));
+  ninfo("RCGCEMAC: %08x PCEMAC: %08x PREMAC: %08x MOSCCTL: %08x\n",
+        getreg32(TIVA_SYSCON_RCGCEMAC),
+        getreg32(TIVA_SYSCON_PCEMAC),
+        getreg32(TIVA_SYSCON_PREMAC),
+        getreg32(TIVA_SYSCON_MOSCCTL));
 
   /* Configure clocking and GPIOs to support the internal/eternal PHY */
 
@@ -4309,7 +4309,7 @@ int tiva_ethinitialize(int intf)
 
   /* Register the device with the OS so that socket IOCTLs can be performed */
 
-  nllinfo("Registering Ethernet device\n");
+  ninfo("Registering Ethernet device\n");
   return netdev_register(&priv->dev, NET_LL_ETHERNET);
 }
 

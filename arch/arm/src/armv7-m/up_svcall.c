@@ -142,18 +142,18 @@ int up_svcall(int irq, FAR void *context)
   if (cmd > SYS_switch_context)
 # endif
     {
-      svcllinfo("SVCALL Entry: regs: %p cmd: %d\n", regs, cmd);
-      svcllinfo("  R0: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-                regs[REG_R0],  regs[REG_R1],  regs[REG_R2],  regs[REG_R3],
-                regs[REG_R4],  regs[REG_R5],  regs[REG_R6],  regs[REG_R7]);
-      svcllinfo("  R8: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-                regs[REG_R8],  regs[REG_R9],  regs[REG_R10], regs[REG_R11],
-                regs[REG_R12], regs[REG_R13], regs[REG_R14], regs[REG_R15]);
+      svcinfo("SVCALL Entry: regs: %p cmd: %d\n", regs, cmd);
+      svcinfo("  R0: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+              regs[REG_R0],  regs[REG_R1],  regs[REG_R2],  regs[REG_R3],
+              regs[REG_R4],  regs[REG_R5],  regs[REG_R6],  regs[REG_R7]);
+      svcinfo("  R8: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+              regs[REG_R8],  regs[REG_R9],  regs[REG_R10], regs[REG_R11],
+              regs[REG_R12], regs[REG_R13], regs[REG_R14], regs[REG_R15]);
 # ifdef REG_EXC_RETURN
-      svcllinfo(" PSR: %08x EXC_RETURN: %08x\n",
-                regs[REG_XPSR], regs[REG_EXC_RETURN]);
+      svcinfo(" PSR: %08x EXC_RETURN: %08x\n",
+              regs[REG_XPSR], regs[REG_EXC_RETURN]);
 # else
-      svcllinfo(" PSR: %08x\n", regs[REG_XPSR]);
+      svcinfo(" PSR: %08x\n", regs[REG_XPSR]);
 # endif
     }
 #endif
@@ -446,7 +446,7 @@ int up_svcall(int irq, FAR void *context)
 
           regs[REG_R0] -= CONFIG_SYS_RESERVED;
 #else
-          svcllerr("ERROR: Bad SYS call: %d\n", regs[REG_R0]);
+          svcerr("ERROR: Bad SYS call: %d\n", regs[REG_R0]);
 #endif
         }
         break;
@@ -461,28 +461,28 @@ int up_svcall(int irq, FAR void *context)
   if (regs != CURRENT_REGS)
 # endif
     {
-      svcllinfo("SVCall Return:\n");
-      svcllinfo("  R0: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-                CURRENT_REGS[REG_R0],  CURRENT_REGS[REG_R1],
-                CURRENT_REGS[REG_R2],  CURRENT_REGS[REG_R3],
-                CURRENT_REGS[REG_R4],  CURRENT_REGS[REG_R5],
-                CURRENT_REGS[REG_R6],  CURRENT_REGS[REG_R7]);
-      svcllinfo("  R8: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-                CURRENT_REGS[REG_R8],  CURRENT_REGS[REG_R9],
-                CURRENT_REGS[REG_R10], CURRENT_REGS[REG_R11],
-                CURRENT_REGS[REG_R12], CURRENT_REGS[REG_R13],
-                CURRENT_REGS[REG_R14], CURRENT_REGS[REG_R15]);
+      svcinfo("SVCall Return:\n");
+      svcinfo("  R0: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+              CURRENT_REGS[REG_R0],  CURRENT_REGS[REG_R1],
+              CURRENT_REGS[REG_R2],  CURRENT_REGS[REG_R3],
+              CURRENT_REGS[REG_R4],  CURRENT_REGS[REG_R5],
+              CURRENT_REGS[REG_R6],  CURRENT_REGS[REG_R7]);
+      svcinfo("  R8: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+              CURRENT_REGS[REG_R8],  CURRENT_REGS[REG_R9],
+              CURRENT_REGS[REG_R10], CURRENT_REGS[REG_R11],
+              CURRENT_REGS[REG_R12], CURRENT_REGS[REG_R13],
+              CURRENT_REGS[REG_R14], CURRENT_REGS[REG_R15]);
 # ifdef REG_EXC_RETURN
-      svcllinfo(" PSR: %08x EXC_RETURN: %08x\n",
-                CURRENT_REGS[REG_XPSR], CURRENT_REGS[REG_EXC_RETURN]);
+      svcinfo(" PSR: %08x EXC_RETURN: %08x\n",
+              CURRENT_REGS[REG_XPSR], CURRENT_REGS[REG_EXC_RETURN]);
 # else
-      svcllinfo(" PSR: %08x\n", CURRENT_REGS[REG_XPSR]);
+      svcinfo(" PSR: %08x\n", CURRENT_REGS[REG_XPSR]);
 # endif
     }
 # ifdef CONFIG_DEBUG_SVCALL
   else
     {
-      svcllinfo("SVCall Return: %d\n", regs[REG_R0]);
+      svcinfo("SVCall Return: %d\n", regs[REG_R0]);
     }
 # endif
 #endif

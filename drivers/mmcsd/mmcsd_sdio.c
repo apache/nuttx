@@ -413,7 +413,7 @@ static int mmcsd_recvR1(FAR struct mmcsd_state_s *priv, uint32_t cmd)
            * indication for later use.
            */
 
-          finfo("ERROR: R1=%08x\n", r1);
+          ferr("ERROR: R1=%08x\n", r1);
           priv->locked = ((r1 & MMCSD_R1_CARDISLOCKED) != 0);
           ret = -EIO;
         }

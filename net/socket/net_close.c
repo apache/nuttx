@@ -161,7 +161,7 @@ static uint16_t netclose_interrupt(FAR struct net_driver_s *dev,
 
   DEBUGASSERT(conn != NULL);
 
-  nllinfo("conn: %p flags: %04x\n", conn, flags);
+  ninfo("conn: %p flags: %04x\n", conn, flags);
 
   /* TCP_DISCONN_EVENTS:
    *   TCP_CLOSE:    The remote host has closed the connection
@@ -250,7 +250,7 @@ end_wait:
   pstate->cl_cb->event = NULL;
   sem_post(&pstate->cl_sem);
 
-  nllinfo("Resuming\n");
+  ninfo("Resuming\n");
   return 0;
 #endif
 }

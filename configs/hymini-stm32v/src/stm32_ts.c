@@ -106,7 +106,7 @@ static int hymini_ts_irq_attach(FAR struct ads7843e_config_s *state, xcpt_t isr)
 static void hymini_ts_irq_enable(FAR struct ads7843e_config_s *state,
     bool enable)
 {
-  illinfo("%d\n", enable);
+  iinfo("%d\n", enable);
 
   stm32_gpiosetevent(GPIO_TS_IRQ, true, true, true, enable? tc_isr:NULL);
 }

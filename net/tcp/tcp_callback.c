@@ -95,7 +95,7 @@ tcp_data_event(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
       uint16_t recvlen;
 #endif
 
-      nllinfo("No listener on connection\n");
+      ninfo("No listener on connection\n");
 
 #ifdef CONFIG_NET_TCP_READAHEAD
       /* Save as the packet data as in the read-ahead buffer.  NOTE that
@@ -110,7 +110,7 @@ tcp_data_event(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
            * read-ahead buffers to retain the data -- drop the packet.
            */
 
-         nllinfo("Dropped %d bytes\n", dev->d_len);
+         ninfo("Dropped %d bytes\n", dev->d_len);
 
 #ifdef CONFIG_NET_STATISTICS
           g_netstats.tcp.syndrop++;
@@ -152,7 +152,7 @@ uint16_t tcp_callback(FAR struct net_driver_s *dev,
    * explicitly set in the callback.
    */
 
-  nllinfo("flags: %04x\n", flags);
+  ninfo("flags: %04x\n", flags);
 
   /* Perform the data callback.  When a data callback is executed from 'list',
    * the input flags are normally returned, however, the implementation
@@ -275,7 +275,7 @@ uint16_t tcp_datahandler(FAR struct tcp_conn_s *conn, FAR uint8_t *buffer,
       return 0;
     }
 
-  nllinfo("Buffered %d bytes\n", buflen);
+  ninfo("Buffered %d bytes\n", buflen);
   return buflen;
 }
 #endif /* CONFIG_NET_TCP_READAHEAD */

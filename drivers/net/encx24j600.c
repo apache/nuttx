@@ -1127,7 +1127,7 @@ static int enc_txenqueue(FAR struct enc_driver_s *priv)
     }
   else
     {
-      nllerr("ERROR: no free descriptors\n");
+      nerr("ERROR: no free descriptors\n");
       ret = -ENOMEM;
     }
 
@@ -1165,7 +1165,7 @@ static int enc_txpoll(struct net_driver_s *dev)
    * the field d_len is set to a value > 0.
    */
 
-  nllinfo("Poll result: d_len=%d\n", priv->dev.d_len);
+  ninfo("Poll result: d_len=%d\n", priv->dev.d_len);
 
   if (priv->dev.d_len > 0)
     {
@@ -1331,7 +1331,7 @@ static void enc_rxldpkt(FAR struct enc_driver_s *priv,
 {
   DEBUGASSERT(priv != NULL && descr != NULL);
 
-  nllinfo("load packet @%04x len: %d\n", descr->addr, descr->len);
+  ninfo("load packet @%04x len: %d\n", descr->addr, descr->len);
 
   /* Set the rx data pointer to the start of the received packet (ERXRDPT) */
 
@@ -1403,7 +1403,7 @@ static void enc_rxrmpkt(FAR struct enc_driver_s *priv, FAR struct enc_descr_s *d
 {
   uint16_t addr;
 
-  nllinfo("free descr: %p\n", descr);
+  ninfo("free descr: %p\n", descr);
 
   /* If it is the last descriptor in the queue, advance ERXTAIL.
    * This way it is possible that gaps occcur. Maybe pending packets
@@ -1420,7 +1420,7 @@ static void enc_rxrmpkt(FAR struct enc_driver_s *priv, FAR struct enc_descr_s *d
 
           DEBUGASSERT(addr >= PKTMEM_RX_START &&  addr < PKTMEM_RX_END);
 
-          nllinfo("ERXTAIL %04x\n", addr);
+          ninfo("ERXTAIL %04x\n", addr);
 
           enc_wrreg(priv, ENC_ERXTAIL, addr);
 
@@ -1490,7 +1490,7 @@ static void enc_rxdispatch(FAR struct enc_driver_s *priv)
 #ifdef CONFIG_NET_IPv4
       if (BUF->type == HTONS(ETHTYPE_IP))
         {
-          nllinfo("IPv4 frame\n");
+          ninfo("IPv4 frame\n");
           NETDEV_RXIPV4(&priv->dev);
 
           /* Handle ARP on input then give the IPv4 packet to the network
@@ -1540,7 +1540,7 @@ static void enc_rxdispatch(FAR struct enc_driver_s *priv)
 #ifdef CONFIG_NET_IPv6
       if (BUF->type == HTONS(ETHTYPE_IP6))
         {
-          nllinfo("Iv6 frame\n");
+          ninfo("Iv6 frame\n");
           NETDEV_RXIPV6(&priv->dev);
 
           /* Give the IPv6 packet to the network layer */
@@ -1587,7 +1587,7 @@ static void enc_rxdispatch(FAR struct enc_driver_s *priv)
 #ifdef CONFIG_NET_ARP
       if (BUF->type == htons(ETHTYPE_ARP))
         {
-          nllinfo("ARP packet received (%02x)\n", BUF->type);
+          ninfo("ARP packet received (%02x)\n", BUF->type);
           NETDEV_RXARP(&priv->dev);
 
           arp_arpin(&priv->dev);
@@ -1612,7 +1612,7 @@ static void enc_rxdispatch(FAR struct enc_driver_s *priv)
 
           enc_rxrmpkt(priv, descr);
 
-          nllerr("ERROR: Unsupported packet type dropped (%02x)\n", htons(BUF->type));
+          nerr("ERROR: Unsupported packet type dropped (%02x)\n", htons(BUF->type));
           NETDEV_RXDROPPED(&priv->dev);
         }
 
@@ -1684,8 +1684,8 @@ static void enc_pktif(FAR struct enc_driver_s *priv)
       rxstat        = (uint32_t)rsv[7] << 24 | (uint32_t)rsv[6] << 16 |
                       (uint32_t)rsv[5] << 8  | (uint32_t)rsv[4];
 
-      nllinfo("Receiving packet, nextpkt: %04x pktlen: %d rxstat: %08x pktcnt: %d\n",
-             priv->nextpkt, pktlen, rxstat, pktcnt);
+      ninfo("Receiving packet, nextpkt: %04x pktlen: %d rxstat: %08x pktcnt: %d\n",
+            priv->nextpkt, pktlen, rxstat, pktcnt);
 
       /* We enqueue the packet first and remove it later if its faulty.
        * This way we avoid freeing packets that are not processed yet.
@@ -1707,7 +1707,7 @@ static void enc_pktif(FAR struct enc_driver_s *priv)
 
       if ((rxstat & RXSTAT_OK) == 0)
         {
-          nllerr("ERROR: RXSTAT: %08x\n", rxstat);
+          nerr("ERROR: RXSTAT: %08x\n", rxstat);
 
           /* Discard packet */
 
@@ -1719,7 +1719,7 @@ static void enc_pktif(FAR struct enc_driver_s *priv)
 
       else if (pktlen > (CONFIG_NET_ETH_MTU + 4) || pktlen <= (ETH_HDRLEN + 4))
         {
-          nllerr("ERROR: Bad packet size dropped (%d)\n", pktlen);
+          nerr("ERROR: Bad packet size dropped (%d)\n", pktlen);
 
           /* Discard packet */
 
@@ -1774,17 +1774,17 @@ static void enc_rxabtif(FAR struct enc_driver_s *priv)
 #if 0
   /* Free the last received packet from the RX queue */
 
-  nllinfo("rx abort\n");
-  nllinfo("ESTAT:   %04x\n", enc_rdreg(priv, ENC_ESTAT));
-  nllinfo("EIR:     %04x\n", enc_rdreg(priv, ENC_EIR));
-  nllinfo("ERXTAIL: %04x\n", enc_rdreg(priv, ENC_ERXTAIL));
-  nllinfo("ERXHAED: %04x\n", enc_rdreg(priv, ENC_ERXHEAD));
+  ninfo("rx abort\n");
+  ninfo("ESTAT:   %04x\n", enc_rdreg(priv, ENC_ESTAT));
+  ninfo("EIR:     %04x\n", enc_rdreg(priv, ENC_EIR));
+  ninfo("ERXTAIL: %04x\n", enc_rdreg(priv, ENC_ERXTAIL));
+  ninfo("ERXHAED: %04x\n", enc_rdreg(priv, ENC_ERXHEAD));
 
   descr = (FAR struct enc_descr_s *)sq_peek(&priv->rxqueue);
 
   while (descr != NULL)
     {
-      nllinfo("addr: %04x len: %d\n", descr->addr, descr->len);
+      ninfo("addr: %04x len: %d\n", descr->addr, descr->len);
       descr = (FAR struct enc_descr_s *)sq_next(descr);
     }
 
@@ -1797,7 +1797,7 @@ static void enc_rxabtif(FAR struct enc_driver_s *priv)
     {
       enc_rxrmpkt(priv, descr);
 
-      nllinfo("pending packet freed\n");
+      ninfo("pending packet freed\n");
     }
   else
     {
@@ -1859,7 +1859,7 @@ static void enc_irqworker(FAR void *arg)
        * settings.
        */
 
-      nllinfo("EIR: %04x\n", eir);
+      ninfo("EIR: %04x\n", eir);
 
       if ((eir & EIR_DMAIF) != 0) /* DMA interrupt */
         {
@@ -2043,7 +2043,7 @@ static void enc_toworker(FAR void *arg)
   net_lock_t lock;
   int ret;
 
-  nllerr("ERROR: Tx timeout\n");
+  nerr("ERROR: Tx timeout\n");
   DEBUGASSERT(priv);
 
   /* Get exclusive access to the network. */
@@ -2231,9 +2231,9 @@ static int enc_ifup(struct net_driver_s *dev)
   FAR struct enc_driver_s *priv = (FAR struct enc_driver_s *)dev->d_private;
   int ret;
 
-  nllinfo("Bringing up: %d.%d.%d.%d\n",
-          dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
-          (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
+  ninfo("Bringing up: %d.%d.%d.%d\n",
+        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
+        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
 
   /* Lock the SPI bus so that we have exclusive access */
 
@@ -2307,9 +2307,9 @@ static int enc_ifdown(struct net_driver_s *dev)
   irqstate_t flags;
   int ret;
 
-  nllinfo("Taking down: %d.%d.%d.%d\n",
-          dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
-          (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
+  ninfo("Taking down: %d.%d.%d.%d\n",
+        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
+        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
 
   /* Lock the SPI bus so that we have exclusive access */
 
@@ -2420,7 +2420,7 @@ static int enc_rxavail(struct net_driver_s *dev)
 
   if (!sq_empty(&priv->rxqueue))
     {
-      nllinfo("RX queue not empty, trying to dispatch\n");
+      ninfo("RX queue not empty, trying to dispatch\n");
       enc_rxdispatch(priv);
     }
 
@@ -2546,7 +2546,7 @@ static void enc_pwrsave(FAR struct enc_driver_s *priv)
 {
   uint16_t regval;
 
-  nllinfo("Set PWRSV\n");
+  ninfo("Set PWRSV\n");
 
   /* 1. Turn off AES */
 
@@ -2728,7 +2728,7 @@ static int enc_reset(FAR struct enc_driver_s *priv)
   int ret;
   uint16_t regval;
 
-  nllinfo("Reset\n");
+  ninfo("Reset\n");
 
   do
     {
@@ -2742,7 +2742,7 @@ static int enc_reset(FAR struct enc_driver_s *priv)
 
   if (ret != OK)
     {
-      nllerr("ERROR: encx24j600 clock failed to become ready\n");
+      nerr("ERROR: encx24j600 clock failed to become ready\n");
       return -ENODEV;
     }
 
@@ -2756,7 +2756,7 @@ static int enc_reset(FAR struct enc_driver_s *priv)
 
   if (regval != 0x0000)
     {
-      nllerr("ERROR: encx24j600 seems not to be reset properly\n");
+      nerr("ERROR: encx24j600 seems not to be reset properly\n");
       return -ENODEV;
     }
 
@@ -2793,7 +2793,7 @@ static int enc_reset(FAR struct enc_driver_s *priv)
     }
   while ((regval & PHSTAT1_ANDONE) != 0);
 
-  nllinfo("Auto-negotation completed\n");
+  ninfo("Auto-negotation completed\n");
 
 #endif
 
@@ -2813,7 +2813,7 @@ static int enc_reset(FAR struct enc_driver_s *priv)
 #if 0
   if (ret != OK)
     {
-      nllerr("ERROR: encx24j600 failed to establish link\n");
+      nerr("ERROR: encx24j600 failed to establish link\n");
       return -ENODEV;
     }
 #endif

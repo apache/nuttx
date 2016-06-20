@@ -181,7 +181,7 @@ static size_t recvfrom_newdata(FAR struct net_driver_s *dev,
   /* Copy the new appdata into the user buffer */
 
   memcpy(pstate->rf_buffer, dev->d_appdata, recvlen);
-  nllinfo("Received %d bytes (of %d)\n", (int)recvlen, (int)dev->d_len);
+  ninfo("Received %d bytes (of %d)\n", (int)recvlen, (int)dev->d_len);
 
   /* Update the accumulated size of the data read */
 
@@ -227,7 +227,7 @@ static void recvfrom_newpktdata(FAR struct net_driver_s *dev,
   /* Copy the new packet data into the user buffer */
 
   memcpy(pstate->rf_buffer, dev->d_buf, recvlen);
-  nllinfo("Received %d bytes (of %d)\n", (int)recvlen, (int)dev->d_len);
+  ninfo("Received %d bytes (of %d)\n", (int)recvlen, (int)dev->d_len);
 
   /* Update the accumulated size of the data read */
 
@@ -378,7 +378,7 @@ static inline void recvfrom_tcpreadahead(struct recvfrom_s *pstate)
        */
 
       recvlen = iob_copyout(pstate->rf_buffer, iob, pstate->rf_buflen, 0);
-      nllinfo("Received %d bytes (of %d)\n", recvlen, iob->io_pktlen);
+      ninfo("Received %d bytes (of %d)\n", recvlen, iob->io_pktlen);
 
       /* Update the accumulated size of the data read */
 
@@ -478,7 +478,7 @@ static inline void recvfrom_udpreadahead(struct recvfrom_s *pstate)
           recvlen = iob_copyout(pstate->rf_buffer, iob, pstate->rf_buflen,
                                 src_addr_size + sizeof(uint8_t));
 
-          nllinfo("Received %d bytes (of %d)\n", recvlen, iob->io_pktlen);
+          ninfo("Received %d bytes (of %d)\n", recvlen, iob->io_pktlen);
 
           /* Update the accumulated size of the data read */
 
@@ -621,7 +621,7 @@ static uint16_t recvfrom_pktinterrupt(FAR struct net_driver_s *dev,
 {
   struct recvfrom_s *pstate = (struct recvfrom_s *)pvpriv;
 
-  nllinfo("flags: %04x\n", flags);
+  ninfo("flags: %04x\n", flags);
 
   /* 'priv' might be null in some race conditions (?) */
 
@@ -636,7 +636,7 @@ static uint16_t recvfrom_pktinterrupt(FAR struct net_driver_s *dev,
 
           /* We are finished. */
 
-          nllinfo("PKT done\n");
+          ninfo("PKT done\n");
 
           /* Don't allow any further call backs. */
 
@@ -778,7 +778,7 @@ static uint16_t recvfrom_tcpinterrupt(FAR struct net_driver_s *dev,
 #endif
 #endif
 
-  nllinfo("flags: %04x\n", flags);
+  ninfo("flags: %04x\n", flags);
 
   /* 'priv' might be null in some race conditions (?) */
 
@@ -827,7 +827,7 @@ static uint16_t recvfrom_tcpinterrupt(FAR struct net_driver_s *dev,
           if (pstate->rf_recvlen > 0)
 #endif
             {
-              nllinfo("TCP resume\n");
+              ninfo("TCP resume\n");
 
               /* The TCP receive buffer is full.  Return now and don't allow
                * any further TCP call backs.
@@ -864,7 +864,7 @@ static uint16_t recvfrom_tcpinterrupt(FAR struct net_driver_s *dev,
 
       else if ((flags & TCP_DISCONN_EVENTS) != 0)
         {
-          nllinfo("Lost connection\n");
+          ninfo("Lost connection\n");
 
           /* Stop further callbacks */
 
@@ -924,7 +924,7 @@ static uint16_t recvfrom_tcpinterrupt(FAR struct net_driver_s *dev,
            * callbacks
            */
 
-          nllinfo("TCP timeout\n");
+          ninfo("TCP timeout\n");
 
           pstate->rf_cb->flags   = 0;
           pstate->rf_cb->priv    = NULL;
@@ -1122,7 +1122,7 @@ static uint16_t recvfrom_udp_interrupt(FAR struct net_driver_s *dev,
 {
   FAR struct recvfrom_s *pstate = (FAR struct recvfrom_s *)pvpriv;
 
-  nllinfo("flags: %04x\n", flags);
+  ninfo("flags: %04x\n", flags);
 
   /* 'priv' might be null in some race conditions (?) */
 
@@ -1150,7 +1150,7 @@ static uint16_t recvfrom_udp_interrupt(FAR struct net_driver_s *dev,
 
           /* We are finished. */
 
-          nllinfo("UDP done\n");
+          ninfo("UDP done\n");
 
           /* Save the sender's address in the caller's 'from' location */
 
@@ -1176,7 +1176,7 @@ static uint16_t recvfrom_udp_interrupt(FAR struct net_driver_s *dev,
            * callbacks
            */
 
-          nllinfo("ERROR: UDP timeout\n");
+          nllerr("ERROR: UDP timeout\n");
 
           /* Terminate the transfer with an -EAGAIN error */
 

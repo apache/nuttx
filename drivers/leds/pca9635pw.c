@@ -121,8 +121,8 @@ static int pca9635pw_i2c_write_byte(FAR struct pca9635pw_dev_s *priv,
 
   /* Write the register address followed by the data (no RESTART) */
 
-  lcdllinfo("i2c addr: 0x%02X reg addr: 0x%02X value: 0x%02X\n", priv->i2c_addr,
-        buffer[0], buffer[1]);
+  lcdinfo("i2c addr: 0x%02X reg addr: 0x%02X value: 0x%02X\n", priv->i2c_addr,
+          buffer[0], buffer[1]);
 
   ret = i2c_write(priv->i2c, &config, buffer, BUFFER_SIZE);
   if (ret != OK)
@@ -280,7 +280,7 @@ static int pca9635pw_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   FAR struct pca9635pw_dev_s *priv = inode->i_private;
   int ret = OK;
 
-  lcdllinfo("cmd: %d arg: %ld\n", cmd, arg);
+  lcdinfo("cmd: %d arg: %ld\n", cmd, arg);
 
   switch (cmd)
     {

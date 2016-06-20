@@ -177,8 +177,8 @@ static void djoy_enable(FAR const struct djoy_lowerhalf_s *lower,
   flags = enter_critical_section();
   djoy_disable();
 
-  illinfo("press: %02x release: %02x handler: %p arg: %p\n",
-          press, release, handler, arg);
+  iinfo("press: %02x release: %02x handler: %p arg: %p\n",
+        press, release, handler, arg);
 
   /* If no events are indicated or if no handler is provided, then this
    * must really be a request to disable interrupts.
@@ -209,8 +209,8 @@ static void djoy_enable(FAR const struct djoy_lowerhalf_s *lower,
                falling = ((press & bit) != 0);
                rising  = ((release & bit) != 0);
 
-               illinfo("GPIO %d: rising: %d falling: %d\n",
-                        i, rising, falling);
+               iinfo("GPIO %d: rising: %d falling: %d\n",
+                      i, rising, falling);
 
                (void)stm32_gpiosetevent(g_joygpio[i], rising, falling,
                                         true, djoy_interrupt);

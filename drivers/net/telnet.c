@@ -277,12 +277,12 @@ static ssize_t telnet_receive(FAR struct telnet_dev_s *priv, FAR const char *src
   int nread;
   uint8_t ch;
 
-  nllinfo("srclen: %d destlen: %d\n", srclen, destlen);
+  ninfo("srclen: %d destlen: %d\n", srclen, destlen);
 
   for (nread = 0; srclen > 0 && nread < destlen; srclen--)
     {
       ch = *src++;
-      nllinfo("ch=%02x state=%d\n", ch, priv->td_state);
+      ninfo("ch=%02x state=%d\n", ch, priv->td_state);
 
       switch (priv->td_state)
         {
@@ -462,7 +462,7 @@ static int telnet_open(FAR struct file *filep)
   int tmp;
   int ret;
 
-  nllinfo("td_crefs: %d\n", priv->td_crefs);
+  ninfo("td_crefs: %d\n", priv->td_crefs);
 
   /* O_NONBLOCK is not supported */
 
@@ -518,7 +518,7 @@ static int telnet_close(FAR struct file *filep)
   FAR char *devpath;
   int ret;
 
-  nllinfo("td_crefs: %d\n", priv->td_crefs);
+  ninfo("td_crefs: %d\n", priv->td_crefs);
 
   /* Get exclusive access to the device structures */
 
@@ -608,7 +608,7 @@ static ssize_t telnet_read(FAR struct file *filep, FAR char *buffer, size_t len)
   FAR struct telnet_dev_s *priv = inode->i_private;
   ssize_t ret;
 
-  nllinfo("len: %d\n", len);
+  ninfo("len: %d\n", len);
 
   /* First, handle the case where there are still valid bytes left in the
    * I/O buffer from the last time that read was called.  NOTE:  Much of
@@ -681,7 +681,7 @@ static ssize_t telnet_write(FAR struct file *filep, FAR const char *buffer, size
   char ch;
   bool eol;
 
-  nllinfo("len: %d\n", len);
+  ninfo("len: %d\n", len);
 
   /* Process each character from the user buffer */
 

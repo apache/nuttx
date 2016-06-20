@@ -410,7 +410,7 @@ static int btn_open(FAR struct file *filep)
   ret = btn_takesem(&priv->bu_exclsem);
   if (ret < 0)
     {
-      iinfo("ERROR: btn_takesem failed: %d\n", ret);
+      ierr("ERROR: btn_takesem failed: %d\n", ret);
       return ret;
     }
 
@@ -419,7 +419,7 @@ static int btn_open(FAR struct file *filep)
   opriv = (FAR struct btn_open_s *)kmm_zalloc(sizeof(struct btn_open_s));
   if (!opriv)
     {
-      iinfo("ERROR: Failled to allocate open structure\n");
+      ierr("ERROR: Failled to allocate open structure\n");
       ret = -ENOMEM;
       goto errout_with_sem;
     }
@@ -498,7 +498,7 @@ static int btn_close(FAR struct file *filep)
   ret = btn_takesem(&priv->bu_exclsem);
   if (ret < 0)
     {
-      iinfo("ERROR: btn_takesem failed: %d\n", ret);
+      ierr("ERROR: btn_takesem failed: %d\n", ret);
       return ret;
     }
 
@@ -511,7 +511,7 @@ static int btn_close(FAR struct file *filep)
   DEBUGASSERT(curr);
   if (!curr)
     {
-      iinfo("ERROR: Failed to find open entry\n");
+      ierr("ERROR: Failed to find open entry\n");
       ret = -ENOENT;
       goto errout_with_exclsem;
     }
@@ -566,7 +566,7 @@ static ssize_t btn_read(FAR struct file *filep, FAR char *buffer,
 
   if (len < sizeof(btn_buttonset_t))
     {
-      iinfo("ERROR: buffer too small: %lu\n", (unsigned long)len);
+      ierr("ERROR: buffer too small: %lu\n", (unsigned long)len);
       return -EINVAL;
     }
 
@@ -575,7 +575,7 @@ static ssize_t btn_read(FAR struct file *filep, FAR char *buffer,
   ret = btn_takesem(&priv->bu_exclsem);
   if (ret < 0)
     {
-      iinfo("ERROR: btn_takesem failed: %d\n", ret);
+      ierr("ERROR: btn_takesem failed: %d\n", ret);
       return ret;
     }
 
@@ -612,7 +612,7 @@ static int btn_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   ret = btn_takesem(&priv->bu_exclsem);
   if (ret < 0)
     {
-      iinfo("ERROR: btn_takesem failed: %d\n", ret);
+      ierr("ERROR: btn_takesem failed: %d\n", ret);
       return ret;
     }
 
@@ -712,7 +712,7 @@ static int btn_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 #endif
 
     default:
-      iinfo("ERROR: Unrecognized command: %ld\n", cmd);
+      ierr("ERROR: Unrecognized command: %ld\n", cmd);
       ret = -ENOTTY;
       break;
     }
@@ -746,7 +746,7 @@ static int btn_poll(FAR struct file *filep, FAR struct pollfd *fds,
   ret = btn_takesem(&priv->bu_exclsem);
   if (ret < 0)
     {
-      iinfo("ERROR: btn_takesem failed: %d\n", ret);
+      ierr("ERROR: btn_takesem failed: %d\n", ret);
       return ret;
     }
 
@@ -774,7 +774,7 @@ static int btn_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
       if (i >= CONFIG_BUTTONS_NPOLLWAITERS)
         {
-          iinfo("ERROR: Too man poll waiters\n");
+          ierr("ERROR: Too man poll waiters\n");
           fds->priv    = NULL;
           ret          = -EBUSY;
           goto errout_with_dusem;
@@ -789,7 +789,7 @@ static int btn_poll(FAR struct file *filep, FAR struct pollfd *fds,
 #ifdef CONFIG_DEBUG_FEATURES
       if (!slot)
         {
-          iinfo("ERROR: Poll slot not found\n");
+          ierr("ERROR: Poll slot not found\n");
           ret = -EIO;
           goto errout_with_dusem;
         }
@@ -847,7 +847,7 @@ int btn_register(FAR const char *devname,
 
   if (!priv)
     {
-      iinfo("ERROR: Failed to allocate device structure\n");
+      ierr("ERROR: Failed to allocate device structure\n");
       return -ENOMEM;
     }
 
@@ -869,7 +869,7 @@ int btn_register(FAR const char *devname,
   ret = register_driver(devname, &btn_fops, 0666, priv);
   if (ret < 0)
     {
-      iinfo("ERROR: register_driver failed: %d\n", ret);
+      ierr("ERROR: register_driver failed: %d\n", ret);
       goto errout_with_priv;
     }
 

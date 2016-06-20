@@ -102,7 +102,7 @@ static uint16_t arp_send_interrupt(FAR struct net_driver_s *dev,
 {
   FAR struct arp_send_s *state = (FAR struct arp_send_s *)priv;
 
-  nllinfo("flags: %04x sent: %d\n", flags, state->snd_sent);
+  ninfo("flags: %04x sent: %d\n", flags, state->snd_sent);
 
   if (state)
     {

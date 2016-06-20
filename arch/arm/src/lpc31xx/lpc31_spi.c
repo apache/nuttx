@@ -207,7 +207,7 @@ static bool spi_checkreg(bool wr, uint32_t value, uint32_t address)
     {
       if (g_ntimes > 0)
         {
-          spillinfo("...[Repeats %d times]...\n", g_ntimes);
+          spiinfo("...[Repeats %d times]...\n", g_ntimes);
         }
 
       g_wrlast      = wr;
@@ -239,7 +239,7 @@ static void spi_putreg(uint32_t value, uint32_t address)
 {
   if (spi_checkreg(true, value, address))
     {
-      spillinfo("%08x<-%08x\n", address, value);
+      spiinfo("%08x<-%08x\n", address, value);
     }
   putreg32(value, address);
 }
@@ -265,7 +265,7 @@ static uint32_t spi_getreg(uint32_t address)
   uint32_t value = getreg32(address);
   if (spi_checkreg(false, value, address))
     {
-      spillinfo("%08x->%08x\n", address, value);
+      spiinfo("%08x->%08x\n", address, value);
     }
   return value;
 }

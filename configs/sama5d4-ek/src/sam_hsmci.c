@@ -167,7 +167,7 @@ bool sam_cardinserted_internal(struct sam_hsmci_state_s *state)
   /* Get the state of the PIO pin */
 
   inserted = sam_pioread(state->cdcfg);
-  fllinfo("Slot %d inserted: %s\n", state->slotno, inserted ? "NO" : "YES");
+  finfo("Slot %d inserted: %s\n", state->slotno, inserted ? "NO" : "YES");
   return !inserted;
 }
 

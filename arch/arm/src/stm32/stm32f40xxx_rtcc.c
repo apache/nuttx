@@ -954,13 +954,13 @@ int up_rtc_initialize(void)
         {
           case OK:
             {
-              rtcllinfo("rtc_syncwait() okay\n");
+              rtcinfo("rtc_syncwait() okay\n");
               break;
             }
 
           default:
             {
-              rtcllerr("ERROR: rtc_syncwait() failed (%d)\n", ret);
+              rtcerr("ERROR: rtc_syncwait() failed (%d)\n", ret);
               break;
             }
         }
@@ -974,7 +974,7 @@ int up_rtc_initialize(void)
 
   if (regval != RTC_MAGIC)
     {
-      rtcllinfo("Do setup\n");
+      rtcinfo("Do setup\n");
 
       /* Perform the one-time setup of the LSE clocking to the RTC */
 
@@ -992,7 +992,7 @@ int up_rtc_initialize(void)
     }
   else
     {
-      rtcllinfo("Do resume\n");
+      rtcinfo("Do resume\n");
 
       /* RTC already set-up, just resume normal operation */
 
@@ -1008,8 +1008,8 @@ int up_rtc_initialize(void)
 
   if (ret != OK && nretry > 0)
     {
-      rtcllinfo("setup/resume ran %d times and failed with %d\n",
-                nretry, ret);
+      rtcinfo("setup/resume ran %d times and failed with %d\n",
+              nretry, ret);
       return -ETIMEDOUT;
     }
 
@@ -1374,7 +1374,7 @@ int stm32_rtc_setalarm(FAR struct alm_setalarm_s *alminfo)
 #endif
 
       default:
-        rtcinfo("ERROR: Invalid ALARM%d\n", alminfo->as_id);
+        rtcerr("ERROR: Invalid ALARM%d\n", alminfo->as_id);
         break;
     }
 
@@ -1472,7 +1472,7 @@ int stm32_rtc_cancelalarm(enum alm_id_e alarmid)
 #endif
 
       default:
-        rtcinfo("ERROR: Invalid ALARM%d\n", alarmid);
+        rtcerr("ERROR: Invalid ALARM%d\n", alarmid);
         break;
     }
 

@@ -78,7 +78,7 @@ FAR struct iob_s *iob_trimhead(FAR struct iob_s *iob, unsigned int trimlen)
 {
   uint16_t pktlen;
 
-  nllinfo("iob=%p trimlen=%d\n", iob, trimlen);
+  ninfo("iob=%p trimlen=%d\n", iob, trimlen);
 
   if (iob && trimlen > 0)
     {
@@ -89,8 +89,8 @@ FAR struct iob_s *iob_trimhead(FAR struct iob_s *iob, unsigned int trimlen)
         {
           /* Do we trim this entire I/O buffer away? */
 
-          nllinfo("iob=%p io_len=%d pktlen=%d trimlen=%d\n",
-                  iob, iob->io_len, pktlen, trimlen);
+          ninfo("iob=%p io_len=%d pktlen=%d trimlen=%d\n",
+                iob, iob->io_len, pktlen, trimlen);
 
           if (iob->io_len <= trimlen)
             {
@@ -120,7 +120,7 @@ FAR struct iob_s *iob_trimhead(FAR struct iob_s *iob, unsigned int trimlen)
 
               /* Free this entry and set the next I/O buffer as the head */
 
-              nllinfo("iob=%p: Freeing\n", iob);
+              ninfo("iob=%p: Freeing\n", iob);
               (void)iob_free(iob);
               iob = next;
             }

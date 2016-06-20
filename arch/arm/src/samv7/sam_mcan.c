@@ -794,7 +794,7 @@
 #endif
 
 #ifdef CONFIG_SAMV7_MCAN_REGDEBUG
-#  define reginfo canllinfo
+#  define reginfo caninfo
 #else
 #  define reginfo(x...)
 #endif
@@ -1195,7 +1195,7 @@ static uint32_t mcan_getreg(FAR struct sam_mcan_s *priv, int offset)
         {
           if (priv->count == 4)
             {
-              canllinfo("...\n");
+              caninfo("...\n");
             }
 
           return regval;
@@ -1212,7 +1212,7 @@ static uint32_t mcan_getreg(FAR struct sam_mcan_s *priv, int offset)
         {
           /* Yes.. then show how many times the value repeated */
 
-          canllinfo("[repeats %d more times]\n", priv->count - 3);
+          caninfo("[repeats %d more times]\n", priv->count - 3);
         }
 
       /* Save the new address, value, and count */
@@ -1224,7 +1224,7 @@ static uint32_t mcan_getreg(FAR struct sam_mcan_s *priv, int offset)
 
   /* Show the register value read */
 
-  canllinfo("%08x->%08x\n", regaddr, regval);
+  caninfo("%08x->%08x\n", regaddr, regval);
   return regval;
 }
 
@@ -1261,7 +1261,7 @@ static void mcan_putreg(FAR struct sam_mcan_s *priv, int offset, uint32_t regval
 
   /* Show the register value being written */
 
-  canllinfo("%08x<-%08x\n", regaddr, regval);
+  caninfo("%08x<-%08x\n", regaddr, regval);
 
   /* Write the value */
 
@@ -2137,7 +2137,7 @@ static void mcan_reset(FAR struct can_dev_s *dev)
   config = priv->config;
   DEBUGASSERT(config);
 
-  canllinfo("MCAN%d\n", config->port);
+  caninfo("MCAN%d\n", config->port);
   UNUSED(config);
 
   /* Get exclusive access to the MCAN peripheral */
@@ -2194,7 +2194,7 @@ static int mcan_setup(FAR struct can_dev_s *dev)
   config = priv->config;
   DEBUGASSERT(config);
 
-  canllinfo("MCAN%d pid: %d\n", config->port, config->pid);
+  caninfo("MCAN%d pid: %d\n", config->port, config->pid);
 
   /* Get exclusive access to the MCAN peripheral */
 
@@ -2205,7 +2205,7 @@ static int mcan_setup(FAR struct can_dev_s *dev)
   ret = mcan_hw_initialize(priv);
   if (ret < 0)
     {
-      canllerr("ERROR: MCAN%d H/W initialization failed: %d\n", config->port, ret);
+      canerr("ERROR: MCAN%d H/W initialization failed: %d\n", config->port, ret);
       return ret;
     }
 
@@ -2216,7 +2216,7 @@ static int mcan_setup(FAR struct can_dev_s *dev)
   ret = irq_attach(config->irq0, config->handler);
   if (ret < 0)
     {
-      canllerr("ERROR: Failed to attach MCAN%d line 0 IRQ (%d)",
+      canerr("ERROR: Failed to attach MCAN%d line 0 IRQ (%d)",
       config->port, config->irq0);
       return ret;
     }
@@ -2224,7 +2224,7 @@ static int mcan_setup(FAR struct can_dev_s *dev)
   ret = irq_attach(config->irq1, config->handler);
   if (ret < 0)
     {
-      canllerr("ERROR: Failed to attach MCAN%d line 1 IRQ (%d)",
+      canerr("ERROR: Failed to attach MCAN%d line 1 IRQ (%d)",
       config->port, config->irq1);
       return ret;
     }
@@ -2271,7 +2271,7 @@ static void mcan_shutdown(FAR struct can_dev_s *dev)
   config = priv->config;
   DEBUGASSERT(config);
 
-  canllinfo("MCAN%d\n", config->port);
+  caninfo("MCAN%d\n", config->port);
 
   /* Get exclusive access to the MCAN peripheral */
 
@@ -2320,7 +2320,7 @@ static void mcan_rxint(FAR struct can_dev_s *dev, bool enable)
 
   DEBUGASSERT(priv && priv->config);
 
-  canllinfo("MCAN%d enable: %d\n", priv->config->port, enable);
+  caninfo("MCAN%d enable: %d\n", priv->config->port, enable);
 
   /* Enable/disable the receive interrupts */
 
@@ -2362,7 +2362,7 @@ static void mcan_txint(FAR struct can_dev_s *dev, bool enable)
 
   DEBUGASSERT(priv && priv->config);
 
-  canllinfo("MCAN%d enable: %d\n", priv->config->port, enable);
+  caninfo("MCAN%d enable: %d\n", priv->config->port, enable);
 
   /* Enable/disable the receive interrupts */
 
@@ -2669,9 +2669,9 @@ static int mcan_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
   DEBUGASSERT(priv && priv->config);
   config = priv->config;
 
-  canllinfo("MCAN%d\n", config->port);
-  canllinfo("MCAN%d ID: %d DLC: %d\n",
-            config->port, msg->cm_hdr.ch_id, msg->cm_hdr.ch_dlc);
+  caninfo("MCAN%d\n", config->port);
+  caninfo("MCAN%d ID: %d DLC: %d\n",
+          config->port, msg->cm_hdr.ch_id, msg->cm_hdr.ch_dlc);
 
   /* That that FIFO elements were configured.
    *
@@ -3141,7 +3141,7 @@ static void mcan_error(FAR struct can_dev_s *dev, uint32_t status,
       ret = can_receive(dev, &hdr, data);
       if (ret < 0)
         {
-          canllerr("ERROR: can_receive failed: %d\n", ret);
+          canerr("ERROR: can_receive failed: %d\n", ret);
         }
     }
 }
@@ -3235,7 +3235,7 @@ static void mcan_receive(FAR struct can_dev_s *dev, FAR uint32_t *rxbuffer,
   ret = can_receive(dev, &hdr, (FAR uint8_t *)rxbuffer);
   if (ret < 0)
     {
-      canllerr("ERROR: can_receive failed: %d\n", ret);
+      canerr("ERROR: can_receive failed: %d\n", ret);
     }
 }
 
@@ -3288,7 +3288,7 @@ static void mcan_interrupt(FAR struct can_dev_s *dev)
 
           if ((pending & MCAN_CMNERR_INTS) != 0)
             {
-              canllerr("ERROR: Common %08x\n", pending & MCAN_CMNERR_INTS);
+              canerr("ERROR: Common %08x\n", pending & MCAN_CMNERR_INTS);
 
               /* Clear the error indications */
 
@@ -3299,7 +3299,7 @@ static void mcan_interrupt(FAR struct can_dev_s *dev)
 
           if ((pending & MCAN_TXERR_INTS) != 0)
             {
-              canllerr("ERROR: TX %08x\n", pending & MCAN_TXERR_INTS);
+              canerr("ERROR: TX %08x\n", pending & MCAN_TXERR_INTS);
 
               /* Clear the error indications */
 
@@ -3320,7 +3320,7 @@ static void mcan_interrupt(FAR struct can_dev_s *dev)
 
           if ((pending & MCAN_RXERR_INTS) != 0)
             {
-              canllerr("ERROR: RX %08x\n", pending & MCAN_RXERR_INTS);
+              canerr("ERROR: RX %08x\n", pending & MCAN_RXERR_INTS);
 
               /* Clear the error indications */
 
@@ -3341,7 +3341,7 @@ static void mcan_interrupt(FAR struct can_dev_s *dev)
         {
           /* All (old) errors cleared  */
 
-          canllerr("ERROR: CLEARED\n");
+          canerr("ERROR: CLEARED\n");
 
           mcan_error(dev, 0, priv->olderrors);
 
@@ -3466,7 +3466,7 @@ static void mcan_interrupt(FAR struct can_dev_s *dev)
 
           if ((regval & MCAN_RXF0S_RF0L) != 0)
             {
-              canllerr("ERROR: Message lost: %08x\n", regval);
+              canerr("ERROR: Message lost: %08x\n", regval);
             }
           else
             {
@@ -3500,7 +3500,7 @@ static void mcan_interrupt(FAR struct can_dev_s *dev)
 
           if ((regval & MCAN_RXF0S_RF0L) != 0)
             {
-              canllerr("ERROR: Message lost: %08x\n", regval);
+              canerr("ERROR: Message lost: %08x\n", regval);
             }
           else
             {
@@ -3594,7 +3594,7 @@ static int mcan_hw_initialize(struct sam_mcan_s *priv)
   uint32_t cntr;
   uint32_t cmr;
 
-  canllinfo("MCAN%d\n", config->port);
+  caninfo("MCAN%d\n", config->port);
 
   /* Configure MCAN pins */
 

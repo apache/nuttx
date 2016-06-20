@@ -1776,8 +1776,8 @@ static int pwm_interrupt(struct stm32_pwmtimer_s *priv)
 
   /* Now all of the time critical stuff is done so we can do some debug output */
 
-  pwmllinfo("Update interrupt SR: %04x prev: %u curr: %u count: %u\n",
-            regval, priv->prev, priv->curr, priv->count);
+  pwminfo("Update interrupt SR: %04x prev: %u curr: %u count: %u\n",
+          regval, priv->prev, priv->curr, priv->count);
 
   return OK;
 }

@@ -156,7 +156,7 @@ static uint16_t ack_interrupt(FAR struct net_driver_s *dev, FAR void *pvconn,
 {
   FAR struct sendfile_s *pstate = (FAR struct sendfile_s *)pvpriv;
 
-  nllinfo("flags: %04x\n", flags);
+  ninfo("flags: %04x\n", flags);
 
   if ((flags & TCP_ACKDATA) != 0)
     {
@@ -197,8 +197,8 @@ static uint16_t ack_interrupt(FAR struct net_driver_s *dev, FAR void *pvconn,
        */
 
       pstate->snd_acked = tcp_getsequence(tcp->ackno) - pstate->snd_isn;
-      nllinfo("ACK: acked=%d sent=%d flen=%d\n",
-             pstate->snd_acked, pstate->snd_sent, pstate->snd_flen);
+      ninfo("ACK: acked=%d sent=%d flen=%d\n",
+            pstate->snd_acked, pstate->snd_sent, pstate->snd_flen);
 
       dev->d_sndlen = 0;
 
@@ -336,8 +336,8 @@ static uint16_t sendfile_interrupt(FAR struct net_driver_s *dev, FAR void *pvcon
     }
 #endif
 
-  nllinfo("flags: %04x acked: %d sent: %d\n",
-          flags, pstate->snd_acked, pstate->snd_sent);
+  ninfo("flags: %04x acked: %d sent: %d\n",
+        flags, pstate->snd_acked, pstate->snd_sent);
 
   /* Check for a loss of connection */
 
@@ -386,7 +386,7 @@ static uint16_t sendfile_interrupt(FAR struct net_driver_s *dev, FAR void *pvcon
           if (ret < 0)
             {
               int errcode = get_errno();
-              nllerr("ERROR: Failed to lseek: %d\n", errcode);
+              nerr("ERROR: Failed to lseek: %d\n", errcode);
               pstate->snd_sent = -errcode;
               goto end_wait;
             }
@@ -395,7 +395,7 @@ static uint16_t sendfile_interrupt(FAR struct net_driver_s *dev, FAR void *pvcon
           if (ret < 0)
             {
               int errcode = get_errno();
-              nllerr("ERROR: Failed to read from input file: %d\n", errcode);
+              nerr("ERROR: Failed to read from input file: %d\n", errcode);
               pstate->snd_sent = -errcode;
               goto end_wait;
             }
@@ -410,7 +410,7 @@ static uint16_t sendfile_interrupt(FAR struct net_driver_s *dev, FAR void *pvcon
            */
 
           seqno = pstate->snd_sent + pstate->snd_isn;
-          nllinfo("SEND: sndseq %08x->%08x len: %d\n", conn->sndseq, seqno, ret);
+          ninfo("SEND: sndseq %08x->%08x len: %d\n", conn->sndseq, seqno, ret);
 
           tcp_setsequence(conn->sndseq, seqno);
 
@@ -424,8 +424,8 @@ static uint16_t sendfile_interrupt(FAR struct net_driver_s *dev, FAR void *pvcon
               /* Update the amount of data sent (but not necessarily ACKed) */
 
               pstate->snd_sent += sndlen;
-              nllinfo("pid: %d SEND: acked=%d sent=%d flen=%d\n", getpid(),
-                     pstate->snd_acked, pstate->snd_sent, pstate->snd_flen);
+              ninfo("pid: %d SEND: acked=%d sent=%d flen=%d\n", getpid(),
+                    pstate->snd_acked, pstate->snd_sent, pstate->snd_flen);
             }
         }
       else
@@ -687,7 +687,7 @@ ssize_t net_sendfile(int outfd, struct file *infile, off_t *offset,
 
   if (state.snd_datacb == NULL)
     {
-      nllerr("ERROR: Failed to allocate data callback\n");
+      nerr("ERROR: Failed to allocate data callback\n");
       errcode = ENOMEM;
       goto errout_locked;
     }
@@ -696,7 +696,7 @@ ssize_t net_sendfile(int outfd, struct file *infile, off_t *offset,
 
   if (state.snd_ackcb == NULL)
     {
-      nllerr("ERROR: Failed to allocate ack callback\n");
+      nerr("ERROR: Failed to allocate ack callback\n");
       errcode = ENOMEM;
       goto errout_datacb;
     }
