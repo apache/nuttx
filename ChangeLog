@@ -12074,3 +12074,13 @@
 	  depending on if an error is reported (2016-06-17).
 	* STM32F7: Review, correct, and update I2C, SPI, and ADC drivers.  From
 	  David Sidrane (2016-06-17).
+	* LPC17 Ethernet:  Needs to correctly ignore PHYID2 revision number
+	  when comparing PHY IDs (2016-06-18).
+	* SYSLOG: Consolidate all SYSLOG logic in drivers/syslog.  Add an
+	  abstraction layer that supports:  (1) redirection of SYSLOG outpout.
+	  This is usually so that you can boot with one SYSLOG output but
+	  transition to another SYSLOG output when the OS has initialialized,
+	  (2) adds common serialization of interrupt output as a configuration
+	  option.  Without this configuration setting, interrupt level output
+	  will be asynchronous.  And (3) vsyslog is now a system call and is
+	  usable with other-than-FLAT builds (2016-06-19).
