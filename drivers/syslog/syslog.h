@@ -66,6 +66,11 @@ extern "C"
 #define EXTERN extern
 #endif
 
+/* This is the current syslog channel in use */
+
+struct syslog_channel_s; /* Forward reference */
+FAR const struct syslog_channel_s *g_syslog_channel;
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/

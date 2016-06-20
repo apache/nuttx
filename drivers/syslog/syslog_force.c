@@ -1,7 +1,7 @@
 /****************************************************************************
- * drivers/syslog/syslog_stream.c
+ * drivers/syslog/syslog_force.c
  *
- *   Copyright (C) 2012, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,78 +39,47 @@
 
 #include <nuttx/config.h>
 
-#include <stdio.h>
-#include <unistd.h>
+#include <stdbool.h>
 #include <assert.h>
-#include <errno.h>
 
 #include <nuttx/syslog/syslog.h>
-#include <nuttx/streams.h>
 
 #include "syslog.h"
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: syslogstream_putc
- ****************************************************************************/
-
-static void syslogstream_putc(FAR struct lib_outstream_s *this, int ch)
-{
-  int ret;
-
-  /* Try writing until the write was successful or until an irrecoverable
-   * error occurs.
-   */
-
-  do
-    {
-      /* Write the character to the supported logging device.  On failure,
-       * syslog_putc returns EOF with the errno value set;
-       */
-
-      ret = syslog_putc(ch);
-      if (ret != EOF)
-        {
-          this->nput++;
-          return;
-        }
-
-      /* The special errno value -EINTR means that syslog_putc() was
-       * awakened by a signal.  This is not a real error and must be
-       * ignored in this context.
-       */
-    }
-  while (errno == -EINTR);
-}
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: syslogstream
+ * Name: syslog_force
  *
  * Description:
- *   Initializes a stream for use with the configured syslog interface.
- *   Only accessible from with the OS SYSLOG logic.
+ *   This is the low-level system logging interface.  This version forces
+ *   the output and is only used in emergency situations (e.g., in assertion
+ *   handling).
  *
- * Input parameters:
- *   stream - User allocated, uninitialized instance of struct
- *            lib_lowoutstream_s to be initialized.
+ * Input Parameters:
+ *   ch - The character to add to the SYSLOG (must be positive).
  *
  * Returned Value:
- *   None (User allocated instance initialized).
+ *   On success, the character is echoed back to the caller.  A negated
+ *   errno value is returned on any failure.
  *
  ****************************************************************************/
 
-void syslogstream(FAR struct lib_outstream_s *stream)
+int syslog_force(int ch)
 {
-  stream->put   = syslogstream_putc;
-#ifdef CONFIG_STDIO_LINEBUFFER
-  stream->flush = lib_noflush;
+  DEBUGASSERT(g_syslog_channel != NULL && g_syslog_channel->sc_force != NULL);
+
+#ifdef CONFIG_SYSLOG_INTBUFFER
+  /* Flush any characters that may have been added to the interrupt
+   * buffer through the emergency channel
+   */
+
+  (void)syslog_flush_intbuffer(g_syslog_channel, true);
 #endif
-  stream->nput  = 0;
+
+  /* Then send the character to the emergency channel */
+
+  return g_syslog_channel->sc_force(ch);
 }

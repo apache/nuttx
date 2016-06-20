@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/syslog/syslog_channel.c
+ * drivers/syslog/syslog_emergtream.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,86 +39,51 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#include <stdio.h>
+#include <unistd.h>
 #include <assert.h>
 #include <errno.h>
 
 #include <nuttx/syslog/syslog.h>
-
-#ifdef CONFIG_RAMLOG_SYSLOG
-#  include <nuttx/syslog/ramlog.h>
-#elif defined(CONFIG_ARCH_LOWPUTC)
-#  include <nuttx/arch.h>
-#endif
+#include <nuttx/streams.h>
 
 #include "syslog.h"
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-#ifndef CONFIG_ARCH_LOWPUTC
-static int syslog_default_putc(int ch);
-#endif
-static int syslog_default_flush(void);
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-#if defined(CONFIG_RAMLOG_SYSLOG)
-static const struct syslog_channel_s g_default_channel =
-{
-  ramlog_putc,
-  ramlog_putc,
-  syslog_default_flush
-};
-#elif defined(CONFIG_ARCH_LOWPUTC)
-static const struct syslog_channel_s g_default_channel =
-{
-  up_putc,
-  up_putc,
-  syslog_default_flush
-};
-#else
-static const struct syslog_channel_s g_default_channel =
-{
-  syslog_default_putc,
-  syslog_default_putc,
-  syslog_default_flush
-};
-#endif
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/* This is the current syslog channel in use */
-
-FAR const struct syslog_channel_s *g_syslog_channel = &g_default_channel;
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: syslog_default_putc and syslog_default_flush
- *
- * Description:
- *   Dummy, no-nothing channel interface methods
- *
+ * Name: emergstream_putc
  ****************************************************************************/
 
-#ifndef CONFIG_ARCH_LOWPUTC
-static int syslog_default_putc(int ch)
+static void emergstream_putc(FAR struct lib_outstream_s *this, int ch)
 {
-  return ch;
-}
-#endif
+  int ret;
 
-static int syslog_default_flush(void)
-{
-  return OK;
+  /* Try writing until the write was successful or until an irrecoverable
+   * error occurs.
+   */
+
+  do
+    {
+      /* Write the character to the supported logging device.  On failure,
+       * syslog_putc returns EOF with the errno value set;
+       */
+
+      ret = syslog_force(ch);
+      if (ret != EOF)
+        {
+          this->nput++;
+          return;
+        }
+
+      /* The special errno value -EINTR means that syslog_putc() was
+       * awakened by a signal.  This is not a real error and must be
+       * ignored in this context.
+       */
+    }
+  while (errno == -EINTR);
 }
 
 /****************************************************************************
@@ -126,33 +91,26 @@ static int syslog_default_flush(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: syslog_channel
+ * Name: emergstream
  *
  * Description:
- *   Configure the SYSLOGging function to use the provided channel to
- *   generate SYSLOG output.
+ *   Initializes a stream for use with the configured emergency syslog
+ *   interface.  Only accessible from with the OS SYSLOG logic.
  *
- * Input Parameters:
- *   channel - Provides the interface to the channel to be used.
+ * Input parameters:
+ *   stream - User allocated, uninitialized instance of struct
+ *            lib_lowoutstream_s to be initialized.
  *
  * Returned Value:
- *   Zero (OK)is returned on  success.  A negated errno value is returned
- *   on any failure.
+ *   None (User allocated instance initialized).
  *
  ****************************************************************************/
 
-int syslog_channel(FAR const struct syslog_channel_s *channel)
+void emergstream(FAR struct lib_outstream_s *stream)
 {
-  DEBUGASSERT(channel != NULL);
-
-  if (channel != NULL)
-    {
-      DEBUGASSERT(channel->sc_putc != NULL && channel->sc_force != NULL &&
-                  channel->sc_flush != NULL);
-
-      g_syslog_channel = channel;
-      return OK;
-    }
-
-  return -EINVAL;
+  stream->put   = emergstream_putc;
+#ifdef CONFIG_STDIO_LINEBUFFER
+  stream->flush = lib_noflush;
+#endif
+  stream->nput  = 0;
 }
