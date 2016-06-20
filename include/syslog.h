@@ -164,48 +164,6 @@ int syslog(int priority, FAR const IPTR char *format, ...);
 int vsyslog(int priority, FAR const IPTR char *src, va_list ap);
 
 /****************************************************************************
- * Name: lowsyslog and lowvsyslog
- *
- * Description:
- *   syslog() generates a log message. The priority argument is formed by
- *   ORing the facility and the level values (see include/syslog.h). The
- *   remaining arguments are a format, as in printf and any arguments to the
- *   format.
- *
- *   This is a non-standard, low-level system logging interface.  The
- *   difference between syslog() and lowsyslog() is that the syslog()
- *   interface writes to the syslog device (usually fd=1, stdout) whereas
- *   lowsyslog() uses a lower level interface that works even from interrupt
- *   handlers.
- *
- *   If the platform cannot support lowsyslog, then we will substitute the
- *   standard syslogging functions.  These will, however, probably cause
- *   problems if called from interrupt handlers, depending upon the nature of
- *   the underlying syslog device.
- *
- *   The function lowvsyslog() performs the same task as lowsyslog() with
- *   the difference that it takes a set of arguments which have been
- *   obtained using the stdarg variable argument list macros.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_ARCH_LOWPUTC
-
-int lowsyslog(int priority, FAR const IPTR char *format, ...);
-int lowvsyslog(int priority, FAR const IPTR char *format, va_list ap);
-
-#else
-
-#  ifdef CONFIG_CPP_HAVE_VARARGS
-#    define lowsyslog(p,f,...) syslog(p,f,##__VA_ARGS__)
-#  else
-#    define lowsyslog (void)
-#  endif
-#  define lowvsyslog(p,f,a) vsyslog(p,f,a)
-
-#endif
-
-/****************************************************************************
  * Name: setlogmask
  *
  * Description:

@@ -253,9 +253,9 @@ void board_button_initialize(void)
       xcpt_t oldhandler = board_button_irq(i, button_handler);
       if (oldhandler != NULL)
         {
-          lowsyslog(LOG_WARNING, "WARNING: oldhandler:%p is not NULL!  "
-                   "Button events may be lost or aliased!\n",
-                   oldhandler);
+          warn("WARNING: oldhandler:%p is not NULL!  "
+               "Button events may be lost or aliased!\n",
+               oldhandler);
         }
 #endif
 #endif

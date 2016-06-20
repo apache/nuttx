@@ -676,7 +676,7 @@ static void * cc3000_worker(FAR void *arg)
 
                     if (data_to_recv >= priv->rx_buffer_max_len)
                       {
-                        lowsyslog(LOG_INFO, "data_to_recv %d", data_to_recv);
+                        ninfo("data_to_recv %d", data_to_recv);
                       }
 
                     DEBUGASSERT(data_to_recv < priv->rx_buffer_max_len);

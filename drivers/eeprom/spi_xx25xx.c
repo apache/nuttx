@@ -815,9 +815,9 @@ int ee25xx_initialize(FAR struct spi_dev_s *dev, FAR char *devname,
 
   eedev->readonly = !!readonly;
 
-  lowsyslog(LOG_NOTICE,
-            "EEPROM device %s, %d bytes, %d per page, addrlen %d, readonly %d\n",
-            devname, eedev->size, eedev->pgsize, eedev->addrlen, eedev->readonly);
+  info(LOG_NOTICE,
+       "EEPROM device %s, %d bytes, %d per page, addrlen %d, readonly %d\n",
+       devname, eedev->size, eedev->pgsize, eedev->addrlen, eedev->readonly);
 
   return register_driver(devname, &ee25xx_fops, 0666, eedev);
 }

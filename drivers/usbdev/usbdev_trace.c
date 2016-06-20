@@ -190,7 +190,7 @@ void usbtrace(uint16_t event, uint16_t value)
             }
         }
 #else
-      /* Just print the data using lowsyslog */
+      /* Just print the data using syslog */
 
       usbtrace_trprintf(usbtrace_syslog, event, value);
 #endif

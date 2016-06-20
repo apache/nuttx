@@ -133,16 +133,9 @@
 #ifndef __arch_syslog
 #  define __arch_syslog syslog
 #endif
-#ifndef __arch_lowsyslog
-#  define __arch_lowsyslog lowsyslog
-#endif
 
-#ifdef CONFIG_ARCH_LOWPUTC
-#  define _alert(format, ...) \
-   __arch_lowsyslog(LOG_EMERG, EXTRA_FMT format EXTRA_ARG, ##__VA_ARGS__)
-# else
-#  define _alert(x...)
-# endif
+#define _alert(format, ...) \
+   __arch_syslog(LOG_EMERG, EXTRA_FMT format EXTRA_ARG, ##__VA_ARGS__)
 
 #ifdef CONFIG_DEBUG_ERROR
 #  define  _err(format, ...) \
@@ -150,7 +143,7 @@
 
 # ifdef CONFIG_ARCH_LOWPUTC
 #  define  _llerr(format, ...) \
-   __arch_lowsyslog(LOG_ERR, EXTRA_FMT format EXTRA_ARG, ##__VA_ARGS__)
+   __arch_syslog(LOG_ERR, EXTRA_FMT format EXTRA_ARG, ##__VA_ARGS__)
 # else
 #  define  _llerr(x...)
 # endif
@@ -165,7 +158,7 @@
 
 #  ifdef CONFIG_ARCH_LOWPUTC
 #    define _llwarn(format, ...) \
-     __arch_lowsyslog(LOG_WARNING, EXTRA_FMT format EXTRA_ARG, ##__VA_ARGS__)
+     __arch_syslog(LOG_WARNING, EXTRA_FMT format EXTRA_ARG, ##__VA_ARGS__)
 #  else
 #    define _llwarn(x...)
 #  endif
@@ -180,7 +173,7 @@
 
 #  ifdef CONFIG_ARCH_LOWPUTC
 #    define _llinfo(format, ...) \
-     __arch_lowsyslog(LOG_INFO, EXTRA_FMT format EXTRA_ARG, ##__VA_ARGS__)
+     __arch_syslog(LOG_INFO, EXTRA_FMT format EXTRA_ARG, ##__VA_ARGS__)
 #  else
 #    define _llinfo(x...)
 #  endif

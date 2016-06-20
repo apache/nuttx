@@ -142,9 +142,9 @@ void stm32_pm_buttons(void)
 
       if (oldhandler != NULL)
         {
-          lowsyslog(LOG_WARNING, "WARNING: oldhandler:%p is not NULL!  "
-                   "Button events may be lost or aliased!\n",
-                   oldhandler);
+          warn(LOG_WARNING, "WARNING: oldhandler:%p is not NULL!  "
+               "Button events may be lost or aliased!\n",
+               oldhandler);
         }
 #endif
 }

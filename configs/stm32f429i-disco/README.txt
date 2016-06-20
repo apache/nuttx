@@ -726,7 +726,7 @@ Where <subdir> is one of the following:
 
         - /dev/console still exists and still refers to the serial port. So
           you can still use certain kinds of debug output (see include/debug.h, all
-          of the interfaces based on lowsyslog will work in this configuration).
+          debug output from interrupt handlers will be lost.
 
         - But don't enable USB debug output!  Since USB is console is used for
           USB debug output and you are using a USB console, there will be

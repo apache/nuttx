@@ -57,7 +57,7 @@
  *
  * Description:
  *   _vsyslog() handles the system logging system calls. It is functionally
- *   equivalent to vsyslog() except that the pre-process priority filtering
+ *   equivalent to vsyslog() except that the per-process priority filtering
  *   has already been performed and, hence, there is no priority argument.
  *
  *   NOTE:  The va_list parameter is passed by reference.  That is because
