@@ -204,7 +204,15 @@ int syslog_initialize(void);
  *
  ****************************************************************************/
 
+#if 0
+/* REVISIT: (1) Not yet integrated into assertion handlers and (2) there is
+ * an implementation problem in that if a character driver is the underlying
+ * device, then there is no mechanism to flush the data buffered in the
+ * driver with interrupts disabled.
+ */
+
 int syslog_flush(void);
+#endif
 
 /****************************************************************************
  * Name: _vsyslog and _lowvsyslog

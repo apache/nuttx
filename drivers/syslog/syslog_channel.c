@@ -39,9 +39,11 @@
 
 #include <nuttx/config.h>
 
+#include <sys/types.h>
 #include <assert.h>
 #include <errno.h>
 
+#include <nuttx/sched.h>
 #include <nuttx/syslog/syslog.h>
 
 #ifdef CONFIG_RAMLOG_SYSLOG
@@ -96,6 +98,14 @@ static FAR const struct syslog_channel_s *g_syslog_channel = &g_default_channel;
  * Private Functions
  ****************************************************************************/
 
+/****************************************************************************
+ * Name: syslog_default_putc and syslog_default_flush
+ *
+ * Description:
+ *   Dummy, no-nothing channel interface methods
+ *
+ ****************************************************************************/
+
 #ifndef CONFIG_ARCH_LOWPUTC
 static int syslog_default_putc(int ch)
 {
@@ -119,7 +129,7 @@ static int syslog_default_flush(void)
  *   Configure the SYSLOGging function to use the provided channel to
  *   generate SYSLOG output.
  *
- * Input buffer:
+ * Input Parameters:
  *   channel - Provides the interface to the channel to be used.
  *
  * Returned Value:
@@ -165,7 +175,7 @@ int syslog_putc(int ch)
 
   /* Is this an attempt to do SYSLOG output from an interrupt handler? */
 
-  if (up_interrupt_context())
+  if (up_interrupt_context() || sched_idletask())
     {
 #if defined(CONFIG_SYSLOG_INTBUFFER)
       /* Buffer the character in the interrupt buffer.  The interrupt buffer
@@ -219,6 +229,13 @@ int syslog_putc(int ch)
  *
  ****************************************************************************/
 
+#if 0
+/* REVISIT: (1) Not yet integrated into assertion handlers and (2) there is
+ * an implementation problem in that if a character driver is the underlying
+ * device, then there is no mechanism to flush the data buffered in the
+ * driver with interrupts disabled.
+ */
+
 int syslog_flush(void)
 {
   DEBUGASSERT(g_syslog_channel != NULL && g_syslog_channel->sc_flush != NULL);
@@ -235,3 +252,4 @@ int syslog_flush(void)
 
   return g_syslog_channel->sc_flush();
 }
+#endif
