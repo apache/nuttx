@@ -13,6 +13,11 @@ config DEV_LOWCONSOLE
 
 config SERIAL_REMOVABLE
 	bool
+	default n
+
+config SERIAL_CONSOLE
+	bool
+	default n
 
 config 16550_UART
 	bool "16550 UART Chip support"
@@ -283,10 +288,6 @@ config 16550_UART3_OFLOWCONTROL
 		Enable 16550 UART3 CTS flow control
 
 endif # 16550_UART3
-
-config SERIAL_CONSOLE
-	bool
-	default n
 
 choice
 	prompt "16550 Serial Console"
