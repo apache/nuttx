@@ -219,16 +219,15 @@ int syslog_flush(void);
  *
  * Description:
  *   _vsyslog() handles the system logging system calls. It is functionally
- *   equivalent to vsyslog() except that the per-process priority filtering
- *   has already been performed and, hence, there is no priority argument.
- *
- *   NOTE:  The va_list parameter is passed by reference.  That is because
- *   the va_list is a structure in some compilers and passing of structures
- *   in the NuttX sycalls does not work.
+ *   equivalent to vsyslog() except that (1) the per-process priority
+ *   filtering has already been performed and the va_list parameter is
+ *   passed by reference.  That is because the va_list is a structure in
+ *   some compilers and passing of structures in the NuttX sycalls does
+ *   not work.
  *
  ****************************************************************************/
 
-int _vsyslog(FAR const IPTR char *src, FAR va_list *ap);
+int _vsyslog(int priority, FAR const IPTR char *src, FAR va_list *ap);
 
 #undef EXTERN
 #ifdef __cplusplus

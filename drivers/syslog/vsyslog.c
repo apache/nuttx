@@ -57,16 +57,15 @@
  *
  * Description:
  *   _vsyslog() handles the system logging system calls. It is functionally
- *   equivalent to vsyslog() except that the per-process priority filtering
- *   has already been performed and, hence, there is no priority argument.
- *
- *   NOTE:  The va_list parameter is passed by reference.  That is because
- *   the va_list is a structure in some compilers and passing of structures
- *   in the NuttX sycalls does not work.
+ *   equivalent to vsyslog() except that (1) the per-process priority
+ *   filtering has already been performed and the va_list parameter is
+ *   passed by reference.  That is because the va_list is a structure in
+ *   some compilers and passing of structures in the NuttX sycalls does
+ *   not work.
  *
  ****************************************************************************/
 
-int _vsyslog(FAR const IPTR char *fmt, FAR va_list *ap)
+int _vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
 {
   struct lib_outstream_s stream;
 #ifdef CONFIG_SYSLOG_TIMESTAMP
@@ -87,17 +86,28 @@ int _vsyslog(FAR const IPTR char *fmt, FAR va_list *ap)
 #endif
 
   /* Wrap the low-level output in a stream object and let lib_vsprintf
-   * do the work.
+   * do the work.  NOTE that emergency priority output is handled
+   * differently.. it will use the SYSLOG emergency stream.
    */
 
-  syslogstream((FAR struct lib_outstream_s *)&stream);
+  if (priority == LOG_EMERG)
+    {
+      /* Use the SYSLOG emergency stream */
+
+      emergstream((FAR struct lib_outstream_s *)&stream);
+    }
+  else
+    {
+      /* Use the normal SYSLOG stream */
+
+      syslogstream((FAR struct lib_outstream_s *)&stream);
+    }
 
 #if defined(CONFIG_SYSLOG_TIMESTAMP)
   /* Pre-pend the message with the current time, if available */
 
   (void)lib_sprintf((FAR struct lib_outstream_s *)&stream,
                     "[%6d.%06d]", ts.tv_sec, ts.tv_nsec/1000);
-
 #endif
 
   return lib_vsprintf((FAR struct lib_outstream_s *)&stream, fmt, *ap);

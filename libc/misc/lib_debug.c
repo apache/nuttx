@@ -66,7 +66,7 @@ int _alert(const char *format, ...)
   int     ret;
 
   va_start(ap, format);
-  ret = lowvsyslog(LOG_EMERG, format, ap);
+  ret = vsyslog(LOG_EMERG, format, ap);
   va_end(ap);
 
   return ret;

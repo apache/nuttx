@@ -225,6 +225,25 @@ int syslog_flush_intbuffer(FAR const struct syslog_channel_s *channel,
 int syslog_putc(int ch);
 
 /****************************************************************************
+ * Name: syslog_force
+ *
+ * Description:
+ *   This is the low-level system logging interface.  This version forces
+ *   the output and is only used in emergency situations (e.g., in assertion
+ *   handling).
+ *
+ * Input Parameters:
+ *   ch - The character to add to the SYSLOG (must be positive).
+ *
+ * Returned Value:
+ *   On success, the character is echoed back to the caller.  A negated
+ *   errno value is returned on any failure.
+ *
+ ****************************************************************************/
+
+int syslog_force(int ch);
+
+/****************************************************************************
  * Name: syslog_dev_putc
  *
  * Description:

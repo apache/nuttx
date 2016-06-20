@@ -372,6 +372,24 @@ void lib_nulloutstream(FAR struct lib_outstream_s *nulloutstream);
 void syslogstream(FAR struct lib_outstream_s *stream);
 
 /****************************************************************************
+ * Name: emergstream
+ *
+ * Description:
+ *   Initializes a stream for use with the configured emergency syslog
+ *   interface.  Only accessible from with the OS SYSLOG logic.
+ *
+ * Input parameters:
+ *   stream - User allocated, uninitialized instance of struct
+ *            lib_lowoutstream_s to be initialized.
+ *
+ * Returned Value:
+ *   None (User allocated instance initialized).
+ *
+ ****************************************************************************/
+
+void emergstream(FAR struct lib_outstream_s *stream);
+
+/****************************************************************************
  * Name: lib_noflush
  *
  * Description:

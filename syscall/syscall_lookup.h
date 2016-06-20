@@ -165,7 +165,7 @@ SYSCALL_LOOKUP(up_assert,                 2, STUB_up_assert)
 
 /* System logging */
 
-  SYSCALL_LOOKUP(_vsyslog,                2, STUB__vsyslog)
+  SYSCALL_LOOKUP(_vsyslog,                3, STUB__vsyslog)
 
 /* The following are defined if either file or socket descriptor are
  * enabled.

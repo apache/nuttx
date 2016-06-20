@@ -87,6 +87,39 @@ static void syslogstream_putc(FAR struct lib_outstream_s *this, int ch)
 }
 
 /****************************************************************************
+ * Name: emergstream_putc
+ ****************************************************************************/
+
+static void emergstream_putc(FAR struct lib_outstream_s *this, int ch)
+{
+  int ret;
+
+  /* Try writing until the write was successful or until an irrecoverable
+   * error occurs.
+   */
+
+  do
+    {
+      /* Write the character to the supported logging device.  On failure,
+       * syslog_putc returns EOF with the errno value set;
+       */
+
+      ret = syslog_force(ch);
+      if (ret != EOF)
+        {
+          this->nput++;
+          return;
+        }
+
+      /* The special errno value -EINTR means that syslog_putc() was
+       * awakened by a signal.  This is not a real error and must be
+       * ignored in this context.
+       */
+    }
+  while (errno == -EINTR);
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -109,6 +142,31 @@ static void syslogstream_putc(FAR struct lib_outstream_s *this, int ch)
 void syslogstream(FAR struct lib_outstream_s *stream)
 {
   stream->put   = syslogstream_putc;
+#ifdef CONFIG_STDIO_LINEBUFFER
+  stream->flush = lib_noflush;
+#endif
+  stream->nput  = 0;
+}
+
+/****************************************************************************
+ * Name: emergstream
+ *
+ * Description:
+ *   Initializes a stream for use with the configured emergency syslog
+ *   interface.  Only accessible from with the OS SYSLOG logic.
+ *
+ * Input parameters:
+ *   stream - User allocated, uninitialized instance of struct
+ *            lib_lowoutstream_s to be initialized.
+ *
+ * Returned Value:
+ *   None (User allocated instance initialized).
+ *
+ ****************************************************************************/
+
+void emergstream(FAR struct lib_outstream_s *stream)
+{
+  stream->put   = emergstream_putc;
 #ifdef CONFIG_STDIO_LINEBUFFER
   stream->flush = lib_noflush;
 #endif
