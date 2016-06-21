@@ -322,7 +322,7 @@ int syslog_flush_intbuffer(FAR const struct syslog_channel_s *channel,
     {
       /* Transfer one character to time.  This is inefficient, but is
        * done in this way to: (1) Deal with concurrent modification of
-       * the interrutp buffer from interrupt activity, (2) Avoid keeper
+       * the interrupt buffer from interrupt activity, (2) Avoid keeper
        * interrupts disabled for a long time, and (3) to handler
        * wraparound of the circular buffer indices.
        */
