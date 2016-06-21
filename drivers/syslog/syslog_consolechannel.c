@@ -39,6 +39,9 @@
 
 #include <nuttx/config.h>
 
+#include <sys/stat.h>
+#include <fcntl.h>
+
 #include <nuttx/arch.h>
 #include <nuttx/syslog/syslog.h>
 
@@ -47,13 +50,16 @@
 #ifdef CONFIG_SYSLOG_CONSOLE
 
 /****************************************************************************
- * Private Functions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 #undef HAVE_LOWPUTC
 #if defined(CONFIG_SYSLOG_SERIAL_CONSOLE) && defined(CONFIG_ARCH_LOWPUTC)
 #  define HAVE_LOWPUTC 1
 #endif
+
+#define OPEN_FLAGS (O_WRONLY)
+#define OPEN_MODE  (S_IROTH | S_IRGRP | S_IRUSR | S_IWUSR)
 
 /****************************************************************************
  * Private Functions
@@ -73,7 +79,7 @@ static int syslog_console_force(int ch);
  * Private Data
  ****************************************************************************/
 
-/* This structure describes the ITM SYSLOG channel */
+/* This structure describes the SYSLOG channel */
 
 static const struct syslog_channel_s g_syslog_console_channel =
 {
@@ -142,7 +148,7 @@ int syslog_console_channel(void)
 
   /* Initialize the character driver interface */
 
-  ret = syslog_dev_initialize("/dev/console");
+  ret = syslog_dev_initialize("/dev/console", OPEN_FLAGS, OPEN_MODE);
   if (ret < 0)
     {
       return ret;

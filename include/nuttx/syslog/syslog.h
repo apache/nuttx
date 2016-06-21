@@ -195,6 +195,46 @@ int syslog_initialize(enum syslog_init_e phase);
 #endif
 
 /****************************************************************************
+ * Name: syslog_file_channel
+ *
+ * Description:
+ *   Configure to use a file in a mounted file system at 'devpath' as the
+ *   SYSLOG channel.
+ *
+ *   This tiny function is simply a wrapper around syslog_dev_initialize()
+ *   and syslog_channel().  It calls syslog_dev_initialize() to configure
+ *   the character file at 'devpath then calls syslog_channel() to use that
+ *   device as the SYSLOG output channel.
+ *
+ *   File SYSLOG channels differ from other SYSLOG channels in that they
+ *   cannot be established until after fully booting and mounting the target
+ *   file system.  This function would need to be called from board-specific
+ *   bring-up logic AFTER mounting the file system containing 'devpath'.
+ *
+ *   SYSLOG data generated prior to calling syslog_file_channel will, of
+ *   course, not be included in the file.
+ *
+ *   NOTE interrupt level SYSLOG output will be lost in this case unless
+ *   the interrupt buffer is used.
+ *
+ * Input Parameters:
+ *   devpath - The full path to the file to be used for SYSLOG output.
+ *     This may be an existing file or not.  If the file exists,
+ *     syslog_file_channel() will append new SYSLOG data to the end of the
+ *     file.  If it does not, then syslog_file_channel() will create the
+ *     file.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SYSLOG_FILE
+int syslog_file_channel(FAR const char *devpath);
+#endif
+
+/****************************************************************************
  * Name: syslog_flush
  *
  * Description:

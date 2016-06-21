@@ -136,6 +136,20 @@ config SYSLOG_NONE
 
 endchoice
 
+config SYSLOG_FILE
+	bool "Sylog file output"
+	default n
+	---help---
+		Build in support to use a file to collect SYSOG output.  File SYSLOG
+		channels differ from other SYSLOG channels in that they cannot be
+		established until after fully booting and mounting the target file
+		system.  The function syslog_file_channel() would need to be called
+		from board-specific bring-up logic AFTER mounting the file system
+		containing 'devpath'.
+
+		NOTE interrupt level SYSLOG output will be lost in this case unless
+		the interrupt buffer is used.
+
 config CONSOLE_SYSLOG
 	bool "Use SYSLOG for /dev/console"
 	default n

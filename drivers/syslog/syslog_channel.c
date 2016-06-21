@@ -63,35 +63,31 @@ static int syslog_default_putc(int ch);
 static int syslog_default_flush(void);
 
 /****************************************************************************
- * Private Data
+ * Public Data
  ****************************************************************************/
 
 #if defined(CONFIG_RAMLOG_SYSLOG)
-static const struct syslog_channel_s g_default_channel =
+const struct syslog_channel_s g_default_channel =
 {
   ramlog_putc,
   ramlog_putc,
   syslog_default_flush
 };
 #elif defined(CONFIG_SYSLOG_SERIAL_CONSOLE) && defined(CONFIG_ARCH_LOWPUTC)
-static const struct syslog_channel_s g_default_channel =
+const struct syslog_channel_s g_default_channel =
 {
   up_putc,
   up_putc,
   syslog_default_flush
 };
 #else
-static const struct syslog_channel_s g_default_channel =
+const struct syslog_channel_s g_default_channel =
 {
   syslog_default_putc,
   syslog_default_putc,
   syslog_default_flush
 };
 #endif
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
 
 /* This is the current syslog channel in use */
 

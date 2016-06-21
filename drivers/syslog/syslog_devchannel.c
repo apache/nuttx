@@ -39,6 +39,9 @@
 
 #include <nuttx/config.h>
 
+#include <sys/stat.h>
+#include <fcntl.h>
+
 #include <nuttx/syslog/syslog.h>
 
 #include "syslog.h"
@@ -46,8 +49,11 @@
 #ifdef CONFIG_SYSLOG_CHAR
 
 /****************************************************************************
- * Private Functions
+ * Pre-processor Definitions
  ****************************************************************************/
+
+#define OPEN_FLAGS (O_WRONLY)
+#define OPEN_MODE  (S_IROTH | S_IRGRP | S_IRUSR | S_IWUSR)
 
 /****************************************************************************
  * Private Function Prototypes
@@ -61,7 +67,7 @@ static int syslog_dev_force(int ch);
  * Private Data
  ****************************************************************************/
 
-/* This structure describes the ITM SYSLOG channel */
+/* This structure describes the SYSLOG channel */
 
 static const struct syslog_channel_s g_syslog_dev_channel =
 {
@@ -95,8 +101,8 @@ static int syslog_dev_force(int ch)
  * Name: syslog_dev_channel
  *
  * Description:
- *   Configure to use the character device (or file) at
- *   CONFIG_SYSLOG_DEVPATH as the SYSLOG channel.
+ *   Configure to use the character device at CONFIG_SYSLOG_DEVPATH as the
+ *   SYSLOG channel.
  *
  *   This tiny function is simply a wrapper around syslog_dev_initialize()
  *   and syslog_channel().  It calls syslog_dev_initialize() to configure
@@ -121,7 +127,7 @@ int syslog_dev_channel(void)
 
   /* Initialize the character driver interface */
 
-  ret = syslog_dev_initialize(CONFIG_SYSLOG_DEVPATH);
+  ret = syslog_dev_initialize(CONFIG_SYSLOG_DEVPATH, OPEN_FLAGS, OPEN_MODE);
   if (ret < 0)
     {
       return ret;

@@ -45,13 +45,15 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
+#include <sched.h>
 #include <fcntl.h>
 #include <semaphore.h>
 #include <errno.h>
 #include <assert.h>
 
-#include <nuttx/fs/fs.h>
 #include <nuttx/arch.h>
+#include <nuttx/kmalloc.h>
+#include <nuttx/fs/fs.h>
 #include <nuttx/syslog/syslog.h>
 
 #include "syslog.h"
@@ -92,11 +94,13 @@ enum syslog_dev_state
 
 struct syslog_dev_s
 {
-  uint8_t         sl_state;   /* See enum syslog_dev_state */
-  sem_t           sl_sem;     /* Enforces mutually exclusive access */
-  pid_t           sl_holder;  /* PID of the thread that holds the semaphore */
-  struct file     sl_file;    /* The syslog file structure */
-  FAR const char *sl_devpath; /* Full path to the character device */
+  uint8_t      sl_state;    /* See enum syslog_dev_state */
+  uint8_t      sl_oflags;   /* Saved open mode (for re-open) */
+  uint16_t     sl_mode;     /* Saved open flags (for re-open) */
+  sem_t        sl_sem;      /* Enforces mutually exclusive access */
+  pid_t        sl_holder;   /* PID of the thread that holds the semaphore */
+  struct file  sl_file;     /* The syslog file structure */
+  FAR char    *sl_devpath;  /* Full path to the character device */
 };
 
 /****************************************************************************
@@ -222,6 +226,8 @@ static inline ssize_t syslog_dev_write(FAR const void *buf, size_t nbytes)
  *
  * Input Parameters:
  *   devpath - The full path to the character device to be used.
+ *   oflags  - File open flags
+ *   mode    - File open mode (only if oflags include O_CREAT)
  *
  * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is returned on
@@ -229,7 +235,7 @@ static inline ssize_t syslog_dev_write(FAR const void *buf, size_t nbytes)
  *
  ****************************************************************************/
 
-int syslog_dev_initialize(FAR const char *devpath)
+int syslog_dev_initialize(FAR const char *devpath, int oflags, int mode)
 {
   int fd;
   int ret;
@@ -262,6 +268,8 @@ int syslog_dev_initialize(FAR const char *devpath)
        */
 
       DEBUGASSERT(g_syslog_dev.sl_devpath == NULL);
+      g_syslog_dev.sl_oflags  = oflags;
+      g_syslog_dev.sl_mode    = mode;
       g_syslog_dev.sl_devpath = strdup(devpath);
       DEBUGASSERT(g_syslog_dev.sl_devpath != NULL);
     }
@@ -270,7 +278,7 @@ int syslog_dev_initialize(FAR const char *devpath)
 
   /* Open the device driver. */
 
-  fd = open(devpath, O_WRONLY);
+  fd = open(devpath, oflags, mode);
   if (fd < 0)
     {
        int errcode = get_errno();
@@ -314,6 +322,57 @@ int syslog_dev_initialize(FAR const char *devpath)
   g_syslog_dev.sl_state  = SYSLOG_OPENED;
   return OK;
 }
+
+/****************************************************************************
+ * Name: syslog_dev_uninitialize
+ *
+ * Description:
+ *   Called to disable the last device/file channel in preparation to use
+ *   a different SYSLOG device. Currently only used for CONFIG_SYSLOG_FILE.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure.
+ *
+ * Assumptions:
+ *   The caller has already switched the SYSLOG source to some safe channel
+ *   (the default channel).
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SYSLOG_FILE /* Currently only used in this configuration */
+int syslog_dev_uninitialize(void)
+{
+  /* Attempt to flush any buffered data */
+
+  sched_lock();
+  (void)syslog_dev_flush();
+
+  /* Close the detached file instance */
+
+  (void)file_close_detached(&g_syslog_dev.sl_file);
+
+  /* Free the device path */
+
+  if (g_syslog_dev.sl_devpath != NULL)
+    {
+      kmm_free(g_syslog_dev.sl_devpath);
+    }
+
+  /* Destroy the semaphore */
+
+  sem_destroy(&g_syslog_dev.sl_sem);
+
+  /* Reset the state structure */
+
+  memset(&g_syslog_dev, 0, sizeof(struct syslog_dev_s));
+  sched_unlock();
+  return OK;
+}
+#endif /* CONFIG_SYSLOG_FILE */
 
 /****************************************************************************
  * Name: syslog_dev_putc
@@ -416,7 +475,9 @@ int syslog_dev_putc(int ch)
            */
 
           DEBUGASSERT(g_syslog_dev.sl_devpath != NULL);
-          ret = syslog_dev_initialize(g_syslog_dev.sl_devpath);
+          ret = syslog_dev_initialize(g_syslog_dev.sl_devpath,
+                                      (int)g_syslog_dev.sl_oflags,
+                                      (int)g_syslog_dev.sl_mode);
           if (ret < 0)
             {
               sched_unlock();
@@ -522,8 +583,7 @@ int syslog_dev_flush(void)
 
   /* Is this a mountpoint? Does it support the sync method? */
 
-  DEBUGASSERT(inode != NULL);
-  if (inode->u.i_mops->sync)
+  if (inode && inode->u.i_mops->sync)
     {
       /* Yes... synchronize to the stream */
 

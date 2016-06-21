@@ -72,8 +72,12 @@ ifeq ($(CONFIG_SYSLOG_CHAR),y)
 CSRCS += syslog_devchannel.c
 endif
 
-ifeq ($(CONFIG_DEV_CONSOLE),y)
+ifeq ($(CONFIG_SYSLOG_CONSOLE),y)
 CSRCS += syslog_consolechannel.c
+endif
+
+ifeq ($(CONFIG_SYSLOG_FILE),y)
+CSRCS += syslog_filechannel.c
 endif
 
 # (Add other SYSLOG drivers here)

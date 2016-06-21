@@ -58,9 +58,15 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/* This is the current syslog channel in use */
+/* The default SYSLOG channel */
 
 struct syslog_channel_s; /* Forward reference */
+EXTERN const struct syslog_channel_s g_default_syslog_channel;
+
+/* This is the current syslog channel in use.  It initially points to
+ * g_default_syslog_channel.
+ */
+
 EXTERN FAR const struct syslog_channel_s *g_syslog_channel;
 
 /****************************************************************************
@@ -85,6 +91,8 @@ EXTERN FAR const struct syslog_channel_s *g_syslog_channel;
  *
  * Input Parameters:
  *   devpath - The full path to the character device to be used.
+ *   oflags  - File open flags
+ *   mode    - File open mode (only if oflags include O_CREAT)
  *
  * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is returned on
@@ -93,8 +101,32 @@ EXTERN FAR const struct syslog_channel_s *g_syslog_channel;
  ****************************************************************************/
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
-int syslog_dev_initialize(FAR const char *devpath);
+int syslog_dev_initialize(FAR const char *devpath, int oflags, int mode);
 #endif
+
+/****************************************************************************
+ * Name: syslog_dev_uninitialize
+ *
+ * Description:
+ *   Called to disable the last device/file channel in preparation to use
+ *   a different SYSLOG device. Currently only used for CONFIG_SYSLOG_FILE.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure.
+ *
+ * Assumptions:
+ *   The caller has already switched the SYSLOG source to some safe channel
+ *   (the default channel).
+ *
+ ****************************************************************************/
+
+#if CONFIG_NFILE_DESCRIPTORS > 0 && defined(CONFIG_SYSLOG_FILE)
+int syslog_dev_uninitialize(void);
+#endif /* CONFIG_SYSLOG_FILE */
 
 /****************************************************************************
  * Name: syslog_dev_channel
@@ -151,7 +183,7 @@ int syslog_dev_channel(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DEV_CONSOLE
+#ifdef CONFIG_SYSLOG_CONSOLE
 int syslog_console_channel(void);
 #endif
 
