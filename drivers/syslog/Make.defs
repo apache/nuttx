@@ -78,11 +78,11 @@ endif
 
 # (Add other SYSLOG drivers here)
 
-ifeq ($(CONFIG_SYSLOG_CONSOLE),y)
+ifeq ($(CONFIG_CONSOLE_SYSLOG),y)
   CSRCS += syslog_console.c
 endif
 
-# (Add other SYSLOG_CONSOLE drivers here)
+# (Add other SYSLOG drivers here)
 
 # Include SYSLOG build support
 

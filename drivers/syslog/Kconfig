@@ -132,7 +132,7 @@ config SYSLOG_DEVPATH
 
 endif
 
-config SYSLOG_CONSOLE
+config CONSOLE_SYSLOG
 	bool "Use SYSLOG for /dev/console"
 	default n
 	depends on DEV_CONSOLE

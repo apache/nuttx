@@ -43,13 +43,13 @@
 #include <nuttx/config.h>
 #include <nuttx/syslog/syslog.h>
 
-#ifdef CONFIG_SYSLOG_CONSOLE
+#ifdef CONFIG_CONSOLE_SYSLOG
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
-/* CONFIG_SYSLOG_CONSOLE - Use the syslog logging output as a system console.
+/* CONFIG_CONSOLE_SYSLOG - Use the syslog logging output as a system console.
  *   If this feature is enabled (along with CONFIG_DEV_CONSOLE), then all
  *   console output will be re-directed to the SYSLOG output channel.  This
  *   is useful, for example, if the only console is a Telnet console.  Then
@@ -58,7 +58,7 @@
  */
 
 #ifndef CONFIG_DEV_CONSOLE
-#  undef CONFIG_SYSLOG_CONSOLE
+#  undef CONFIG_CONSOLE_SYSLOG
 #endif
 
 /****************************************************************************
@@ -88,7 +88,7 @@ extern "C"
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SYSLOG_CONSOLE
+#ifdef CONFIG_CONSOLE_SYSLOG
 int syslog_console_init(void);
 #endif
 
@@ -98,5 +98,5 @@ int syslog_console_init(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* CONFIG_SYSLOG_CONSOLE */
+#endif /* CONFIG_CONSOLE_SYSLOG */
 #endif /* __INCLUDE_NUTTX_SYSLOG_SYSLOG_CONSOLE_H */

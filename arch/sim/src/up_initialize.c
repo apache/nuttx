@@ -162,7 +162,7 @@ void up_initialize(void)
   /* Register a console (or not) */
 
   up_devconsole();          /* Our private /dev/console */
-#elif defined(CONFIG_SYSLOG_CONSOLE)
+#elif defined(CONFIG_CONSOLE_SYSLOG)
   syslog_console_init();
 #elif defined(CONFIG_RAMLOG_CONSOLE)
   ramlog_consoleinit();
