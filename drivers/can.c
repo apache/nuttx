@@ -4,6 +4,9 @@
  *   Copyright (C) 2008-2009, 2011-2012, 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
+ *   Copyright (C) 2016 Omni Hoverboards Inc. All rights reserved.
+ *   Author: Paul Alexander Patience <paul-a.patience@polymtl.ca>
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -47,6 +50,7 @@
 #include <semaphore.h>
 #include <fcntl.h>
 #include <assert.h>
+#include <poll.h>
 #include <errno.h>
 #include <debug.h>
 
@@ -105,6 +109,17 @@
  * Private Function Prototypes
  ****************************************************************************/
 
+/* Semaphore helpers */
+
+static int            can_takesem(FAR sem_t *sem);
+
+/* Poll helpers */
+
+#ifndef CONFIG_DISABLE_POLL
+static void           can_pollnotify(FAR struct can_dev_s *dev,
+                                     pollevent_t eventset);
+#endif
+
 /* CAN helpers */
 
 static uint8_t        can_dlc2bytes(uint8_t dlc);
@@ -120,14 +135,18 @@ static void           can_txready_work(FAR void *arg);
 static int            can_open(FAR struct file *filep);
 static int            can_close(FAR struct file *filep);
 static ssize_t        can_read(FAR struct file *filep, FAR char *buffer,
-                         size_t buflen);
+                               size_t buflen);
 static int            can_xmit(FAR struct can_dev_s *dev);
 static ssize_t        can_write(FAR struct file *filep,
-                         FAR const char *buffer, size_t buflen);
+                                FAR const char *buffer, size_t buflen);
 static inline ssize_t can_rtrread(FAR struct can_dev_s *dev,
-                         FAR struct canioc_rtr_s *rtr);
+                                  FAR struct canioc_rtr_s *rtr);
 static int            can_ioctl(FAR struct file *filep, int cmd,
-                         unsigned long arg);
+                                unsigned long arg);
+#ifndef CONFIG_DISABLE_POLL
+static int            can_poll(FAR struct file *filep, FAR struct pollfd *fds,
+                               bool setup);
+#endif
 
 /****************************************************************************
  * Private Data
@@ -139,19 +158,77 @@ static const struct file_operations g_canops =
   can_close, /* close */
   can_read,  /* read */
   can_write, /* write */
-  0,         /* seek */
+  NULL,      /* seek */
   can_ioctl  /* ioctl */
 #ifndef CONFIG_DISABLE_POLL
-  , 0        /* poll */
+  , can_poll /* poll */
 #endif
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , 0        /* unlink */
+  , NULL     /* unlink */
 #endif
 };
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: can_takesem
+ ****************************************************************************/
+
+static int can_takesem(FAR sem_t *sem)
+{
+  int errcode;
+
+  /* Take a count from the semaphore, possibly waiting */
+
+  if (sem_wait(sem) < 0)
+    {
+      /* The only case that an error should occur here is if the wait
+       * was awakened by a signal
+       */
+
+      errcode = get_errno();
+      DEBUGASSERT(errcode == EINTR);
+      return -errcode;
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: can_givesem
+ ****************************************************************************/
+
+#define can_givesem(sem) sem_post(sem)
+
+/****************************************************************************
+ * Name: can_pollnotify
+ ****************************************************************************/
+
+#ifndef CONFIG_DISABLE_POLL
+static void can_pollnotify(FAR struct can_dev_s *dev, pollevent_t eventset)
+{
+  FAR struct pollfd *fds;
+  int i;
+
+  for (i = 0; i < CONFIG_CAN_NPOLLWAITERS; i++)
+    {
+      fds = dev->cd_fds[i];
+      if (fds != NULL)
+        {
+          fds->revents |= fds->events & eventset;
+          if (fds->revents != 0)
+            {
+              caninfo("Report events: %02x\n", fds->revents);
+              sem_post(fds->sem);
+            }
+        }
+    }
+}
+#else
+#  define can_pollnotify(dev, eventset)
+#endif
 
 /****************************************************************************
  * Name: can_dlc2bytes
@@ -309,7 +386,7 @@ static void can_txready_work(FAR void *arg)
             {
               /* Yes.. Inform them that new xmit space is available */
 
-              (void)sem_post(&dev->cd_xmit.tx_sem);
+              can_givesem(&dev->cd_xmit.tx_sem);
             }
         }
     }
@@ -331,72 +408,70 @@ static int can_open(FAR struct file *filep)
   FAR struct inode     *inode = filep->f_inode;
   FAR struct can_dev_s *dev   = inode->i_private;
   uint8_t               tmp;
-  int                   ret   = OK;
+  int                   ret;
 
   caninfo("ocount: %d\n", dev->cd_ocount);
 
   /* If the port is the middle of closing, wait until the close is finished */
 
-  if (sem_wait(&dev->cd_closesem) != OK)
+  ret = can_takesem(&dev->cd_closesem);
+  if (ret < 0)
     {
-      ret = -get_errno();
+      return ret;
+    }
+
+  /* Increment the count of references to the device.  If this is the first
+   * time that the driver has been opened for this device, then initialize
+   * the device.
+   */
+
+  tmp = dev->cd_ocount + 1;
+  if (tmp == 0)
+    {
+      /* More than 255 opens; uint8_t overflows to zero */
+
+      ret = -EMFILE;
     }
   else
     {
-      /* Increment the count of references to the device.  If this is the first
-       * time that the driver has been opened for this device, then initialize
-       * the device.
-       */
+      /* Check if this is the first time that the driver has been opened. */
 
-      tmp = dev->cd_ocount + 1;
-      if (tmp == 0)
+      if (tmp == 1)
         {
-          /* More than 255 opens; uint8_t overflows to zero */
+          /* Yes.. perform one time hardware initialization. */
 
-          ret = -EMFILE;
+          irqstate_t flags = enter_critical_section();
+          ret = dev_setup(dev);
+          if (ret >= 0)
+            {
+              /* Mark the FIFOs empty */
+
+              dev->cd_xmit.tx_head  = 0;
+              dev->cd_xmit.tx_queue = 0;
+              dev->cd_xmit.tx_tail  = 0;
+              dev->cd_recv.rx_head  = 0;
+              dev->cd_recv.rx_tail  = 0;
+
+              /* Finally, Enable the CAN RX interrupt */
+
+              dev_rxint(dev, true);
+
+              /* Save the new open count only on success */
+
+              dev->cd_ocount = 1;
+            }
+
+          leave_critical_section(flags);
         }
       else
         {
-          /* Check if this is the first time that the driver has been opened. */
+          /* Save the incremented open count */
 
-          if (tmp == 1)
-            {
-              /* Yes.. perform one time hardware initialization. */
-
-              irqstate_t flags = enter_critical_section();
-              ret = dev_setup(dev);
-              if (ret == OK)
-                {
-                  /* Mark the FIFOs empty */
-
-                  dev->cd_xmit.tx_head  = 0;
-                  dev->cd_xmit.tx_queue = 0;
-                  dev->cd_xmit.tx_tail  = 0;
-                  dev->cd_recv.rx_head  = 0;
-                  dev->cd_recv.rx_tail  = 0;
-
-                  /* Finally, Enable the CAN RX interrupt */
-
-                  dev_rxint(dev, true);
-
-                  /* Save the new open count only on success */
-
-                  dev->cd_ocount = 1;
-                }
-
-              leave_critical_section(flags);
-            }
-          else
-            {
-              /* Save the incremented open count */
-
-              dev->cd_ocount = tmp;
-            }
+          dev->cd_ocount = tmp;
         }
-
-      sem_post(&dev->cd_closesem);
     }
 
+  can_givesem(&dev->cd_closesem);
   return ret;
 }
 
@@ -414,67 +489,64 @@ static int can_close(FAR struct file *filep)
   FAR struct inode     *inode = filep->f_inode;
   FAR struct can_dev_s *dev   = inode->i_private;
   irqstate_t            flags;
-  int                   ret = OK;
+  int                   ret;
 
   caninfo("ocount: %d\n", dev->cd_ocount);
 
-  if (sem_wait(&dev->cd_closesem) != OK)
+  ret = can_takesem(&dev->cd_closesem);
+  if (ret < 0)
     {
-      ret = -get_errno();
-    }
-  else
-    {
-      /* Decrement the references to the driver.  If the reference count will
-       * decrement to 0, then uninitialize the driver.
-       */
-
-      if (dev->cd_ocount > 1)
-        {
-          dev->cd_ocount--;
-          sem_post(&dev->cd_closesem);
-        }
-      else
-        {
-          /* There are no more references to the port */
-
-          dev->cd_ocount = 0;
-
-          /* Stop accepting input */
-
-          dev_rxint(dev, false);
-
-          /* Now we wait for the transmit FIFO to clear */
-
-          while (dev->cd_xmit.tx_head != dev->cd_xmit.tx_tail)
-            {
-#ifndef CONFIG_DISABLE_SIGNALS
-               usleep(HALF_SECOND_USEC);
-#else
-               up_mdelay(HALF_SECOND_MSEC);
-#endif
-            }
-
-          /* And wait for the TX hardware FIFO to drain */
-
-          while (!dev_txempty(dev))
-            {
-#ifndef CONFIG_DISABLE_SIGNALS
-              usleep(HALF_SECOND_USEC);
-#else
-              up_mdelay(HALF_SECOND_MSEC);
-#endif
-            }
-
-          /* Free the IRQ and disable the CAN device */
-
-          flags = enter_critical_section();       /* Disable interrupts */
-          dev_shutdown(dev);       /* Disable the CAN */
-          leave_critical_section(flags);
-
-          sem_post(&dev->cd_closesem);
-        }
+      return ret;
     }
 
+  /* Decrement the references to the driver.  If the reference count will
+   * decrement to 0, then uninitialize the driver.
+   */
+
+  if (dev->cd_ocount > 1)
+    {
+      dev->cd_ocount--;
+      goto errout;
+    }
+
+  /* There are no more references to the port */
+
+  dev->cd_ocount = 0;
+
+  /* Stop accepting input */
+
+  dev_rxint(dev, false);
+
+  /* Now we wait for the transmit FIFO to clear */
+
+  while (dev->cd_xmit.tx_head != dev->cd_xmit.tx_tail)
+    {
+#ifndef CONFIG_DISABLE_SIGNALS
+       usleep(HALF_SECOND_USEC);
+#else
+       up_mdelay(HALF_SECOND_MSEC);
+#endif
+    }
+
+  /* And wait for the TX hardware FIFO to drain */
+
+  while (!dev_txempty(dev))
+    {
+#ifndef CONFIG_DISABLE_SIGNALS
+      usleep(HALF_SECOND_USEC);
+#else
+      up_mdelay(HALF_SECOND_MSEC);
+#endif
+    }
+
+  /* Free the IRQ and disable the CAN device */
+
+  flags = enter_critical_section(); /* Disable interrupts */
+  dev_shutdown(dev);                /* Disable the CAN */
+  leave_critical_section(flags);
+
+errout:
+  can_givesem(&dev->cd_closesem);
   return ret;
 }
 
@@ -557,18 +629,12 @@ static ssize_t can_read(FAR struct file *filep, FAR char *buffer,
 
           /* Wait for a message to be received */
 
+          DEBUGASSERT(dev->cd_nrxwaiters < 255);
           dev->cd_nrxwaiters++;
-          do
-            {
-              ret = sem_wait(&dev->cd_recv.rx_sem);
-            }
-          while (ret >= 0 && dev->cd_recv.rx_head == dev->cd_recv.rx_tail);
-
+          ret = can_takesem(&dev->cd_recv.rx_sem);
           dev->cd_nrxwaiters--;
-
           if (ret < 0)
             {
-              ret = -get_errno();
               goto return_with_irqdisabled;
             }
         }
@@ -685,7 +751,7 @@ static int can_xmit(FAR struct can_dev_s *dev)
       /* Send the next message at the FIFO queue index */
 
       ret = dev_send(dev, &dev->cd_xmit.tx_buffer[tmpndx]);
-      if (ret != OK)
+      if (ret < 0)
         {
           canerr("dev_send failed: %d\n", ret);
           break;
@@ -779,20 +845,14 @@ static ssize_t can_write(FAR struct file *filep, FAR const char *buffer,
 
           /* Wait for a message to be sent */
 
-          do
+          DEBUGASSERT(dev->cd_ntxwaiters < 255);
+          dev->cd_ntxwaiters++;
+          ret = can_takesem(&fifo->tx_sem);
+          dev->cd_ntxwaiters--;
+          if (ret < 0)
             {
-              DEBUGASSERT(dev->cd_ntxwaiters < 255);
-              dev->cd_ntxwaiters++;
-              ret = sem_wait(&fifo->tx_sem);
-              dev->cd_ntxwaiters--;
-
-              if (ret < 0 && get_errno() != EINTR)
-                {
-                  ret = -get_errno();
-                  goto return_with_irqdisabled;
-                }
+              goto return_with_irqdisabled;
             }
-          while (ret < 0);
 
           /* Re-check the FIFO state */
 
@@ -818,7 +878,7 @@ static ssize_t can_write(FAR struct file *filep, FAR const char *buffer,
     }
 
   /* We get here after all messages have been added to the FIFO.  Check if
-   * we need to kick of the XMIT sequence.
+   * we need to kick off the XMIT sequence.
    */
 
   if (inactive)
@@ -878,11 +938,11 @@ static inline ssize_t can_rtrread(FAR struct can_dev_s *dev,
       /* Send the remote transmission request */
 
       ret = dev_remoterequest(dev, wait->cr_id);
-      if (ret == OK)
+      if (ret >= 0)
         {
           /* Then wait for the response */
 
-          ret = sem_wait(&wait->cr_sem);
+          ret = can_takesem(&wait->cr_sem);
         }
     }
 
@@ -930,6 +990,157 @@ static int can_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 }
 
 /****************************************************************************
+ * Name: can_poll
+ ****************************************************************************/
+
+#ifndef CONFIG_DISABLE_POLL
+static int can_poll(FAR struct file *filep, FAR struct pollfd *fds,
+                    bool setup)
+{
+  FAR struct inode     *inode = (FAR struct inode *)filep->f_inode;
+  FAR struct can_dev_s *dev   = (FAR struct can_dev_s *)inode->i_private;
+  pollevent_t eventset;
+  int ndx;
+  int ret;
+  int i;
+
+  /* Some sanity checking */
+
+#ifdef CONFIG_DEBUG_FEATURES
+  if (dev == NULL || fds == NULL)
+    {
+      return -ENODEV;
+    }
+#endif
+
+  /* Get exclusive access to the poll structures */
+
+  ret = can_takesem(&dev->cd_pollsem);
+  if (ret < 0)
+    {
+      /* A signal received while waiting for access to the poll data
+       * will abort the operation
+       */
+
+      return ret;
+    }
+
+  /* Are we setting up the poll?  Or tearing it down? */
+
+  if (setup)
+    {
+      /* This is a request to set up the poll.  Find an available
+       * slot for the poll structure reference.
+       */
+
+      for (i = 0; i < CONFIG_CAN_NPOLLWAITERS; i++)
+        {
+          /* Find an available slot */
+
+          if (dev->cd_fds[i] == NULL)
+            {
+              /* Bind the poll structure and this slot */
+
+              dev->cd_fds[i] = fds;
+              fds->priv       = &dev->cd_fds[i];
+              break;
+            }
+        }
+
+      if (i >= CONFIG_CAN_NPOLLWAITERS)
+        {
+          fds->priv = NULL;
+          ret       = -EBUSY;
+          goto errout;
+        }
+
+      /* Should we immediately notify on any of the requested events?
+       * First, check if the xmit buffer is full.
+       *
+       * Get exclusive access to the cd_xmit buffer indices.  NOTE: that
+       * we do not let this wait be interrupted by a signal (we probably
+       * should, but that would be a little awkward).
+       */
+
+      eventset = 0;
+
+      DEBUGASSERT(dev->cd_ntxwaiters < 255);
+      dev->cd_ntxwaiters++;
+      do
+        {
+          ret = can_takesem(&dev->cd_xmit.tx_sem);
+        }
+      while (ret < 0);
+      dev->cd_ntxwaiters--;
+
+      ndx = dev->cd_xmit.tx_head + 1;
+      if (ndx >= CONFIG_CAN_FIFOSIZE)
+        {
+          ndx = 0;
+        }
+
+      if (ndx != dev->cd_xmit.tx_tail)
+        {
+          eventset |= fds->events & POLLOUT;
+        }
+
+      can_givesem(&dev->cd_xmit.tx_sem);
+
+      /* Check if the receive buffer is empty.
+       *
+       * Get exclusive access to the cd_recv buffer indices.  NOTE: that
+       * we do not let this wait be interrupted by a signal (we probably
+       * should, but that would be a little awkward).
+       */
+
+      DEBUGASSERT(dev->cd_nrxwaiters < 255);
+      dev->cd_nrxwaiters++;
+      do
+        {
+          ret = can_takesem(&dev->cd_recv.rx_sem);
+        }
+      while (ret < 0);
+      dev->cd_nrxwaiters--;
+
+      if (dev->cd_recv.rx_head != dev->cd_recv.rx_tail)
+        {
+          eventset |= fds->events & POLLIN;
+        }
+
+      can_givesem(&dev->cd_recv.rx_sem);
+
+      if (eventset != 0)
+        {
+          can_pollnotify(dev, eventset);
+        }
+    }
+  else if (fds->priv != NULL)
+    {
+      /* This is a request to tear down the poll */
+
+      struct pollfd **slot = (struct pollfd **)fds->priv;
+
+#ifdef CONFIG_DEBUG_FEATURES
+      if (slot == NULL)
+        {
+          ret = -EIO;
+          goto errout;
+        }
+#endif
+
+      /* Remove all memory of the poll setup */
+
+      *slot     = NULL;
+      fds->priv = NULL;
+    }
+
+errout:
+  can_givesem(&dev->cd_pollsem);
+  return ret;
+}
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -955,9 +1166,12 @@ int can_register(FAR const char *path, FAR struct can_dev_s *dev)
   dev->cd_error      = 0;
 #endif
 
-  sem_init(&dev->cd_xmit.tx_sem, 0, 0);
-  sem_init(&dev->cd_recv.rx_sem, 0, 0);
-  sem_init(&dev->cd_closesem, 0, 1);
+  sem_init(&dev->cd_xmit.tx_sem, 0, 1);
+  sem_init(&dev->cd_recv.rx_sem, 0, 1);
+  sem_init(&dev->cd_closesem,    0, 1);
+#ifndef CONFIG_DISABLE_POLL
+  sem_init(&dev->cd_pollsem,     0, 1);
+#endif
 
   for (i = 0; i < CONFIG_CAN_NPENDINGRTR; i++)
     {
@@ -1055,7 +1269,7 @@ int can_receive(FAR struct can_dev_s *dev, FAR struct can_hdr_s *hdr,
 
               /* And restart the waiting thread */
 
-              sem_post(&rtr->cr_sem);
+              can_givesem(&rtr->cr_sem);
             }
         }
     }
@@ -1095,10 +1309,16 @@ int can_receive(FAR struct can_dev_s *dev, FAR struct can_hdr_s *hdr,
 
       if (dev->cd_nrxwaiters > 0)
         {
-          sem_post(&fifo->rx_sem);
+          can_givesem(&fifo->rx_sem);
         }
 
       errcode = OK;
+
+      /* Notify all poll/select waiters that they can read from the
+       * cd_recv buffer
+       */
+
+      can_pollnotify(dev, POLLIN);
     }
 #ifdef CONFIG_CAN_ERRORS
   else
@@ -1220,13 +1440,19 @@ int can_txdone(FAR struct can_dev_s *dev)
         {
           /* Yes.. Inform them that new xmit space is available */
 
-          ret = sem_post(&dev->cd_xmit.tx_sem);
+          ret = can_givesem(&dev->cd_xmit.tx_sem);
         }
       else
         {
           ret = OK;
         }
     }
+
+  /* Notify all poll/select waiters that they can write to the cd_xmit
+   * buffer
+   */
+
+  can_pollnotify(dev, POLLOUT);
 
   return ret;
 }
