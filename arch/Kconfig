@@ -525,6 +525,7 @@ config ARCH_IRQPRIO
 config ARCH_STACKDUMP
 	bool "Dump stack on assertions"
 	default n
+	depends on DEBUG_FEATURES
 	---help---
 		Enable to do stack dumps after assertions
 
