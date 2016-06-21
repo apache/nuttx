@@ -113,29 +113,33 @@
 #  define __arch_syslog syslog
 #endif
 
-#define _alert(format, ...) \
+#ifdef CONFIG_DEBUG_FEATURES
+#  define _alert(format, ...) \
    __arch_syslog(LOG_EMERG, EXTRA_FMT format EXTRA_ARG, ##__VA_ARGS__)
+#else /* CONFIG_DEBUG_ERROR */
+#  define  _alert(x...)
+#endif
 
 #ifdef CONFIG_DEBUG_ERROR
 #  define  _err(format, ...) \
    __arch_syslog(LOG_ERR, EXTRA_FMT format EXTRA_ARG, ##__VA_ARGS__)
-#else /* CONFIG_DEBUG_ERROR */
+#else
 #  define  _err(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_WARN
 #  define _warn(format, ...) \
    __arch_syslog(LOG_WARNING, EXTRA_FMT format EXTRA_ARG, ##__VA_ARGS__)
-#else /* CONFIG_DEBUG_INFO */
+#else
 #  define _warn(x...)
-#endif /* CONFIG_DEBUG_INFO */
+#endif
 
 #ifdef CONFIG_DEBUG_INFO
 #  define _info(format, ...) \
    __arch_syslog(LOG_INFO, EXTRA_FMT format EXTRA_ARG, ##__VA_ARGS__)
-#else /* CONFIG_DEBUG_INFO */
+#else
 #  define _info(x...)
-#endif /* CONFIG_DEBUG_INFO */
+#endif
 
 /* Subsystem specific debug */
 
@@ -665,7 +669,7 @@
 
 /* Variadic macros NOT supported */
 
-#ifndef CONFIG_ARCH_LOWPUTC
+#ifndef CONFIG_DEBUG_FEATURES
 #  define _alert      (void)
 # endif
 
@@ -1479,7 +1483,7 @@ void lib_dumpbuffer(FAR const char *msg, FAR const uint8_t *buffer,
  */
 
 #ifndef CONFIG_CPP_HAVE_VARARGS
-#ifndef CONFIG_ARCH_LOWPUTC
+#ifndef CONFIG_DEBUG_FEATURES
 int _alert(const char *format, ...);
 #endif
 
