@@ -57,7 +57,17 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-#ifndef CONFIG_ARCH_LOWPUTC
+#if defined(CONFIG_SYSLOG_SERIAL_CONSOLE) && defined(CONFIG_ARCH_LOWPUTC)
+#  define HAVE_LOWPUTC
+#elif !defined(CONFIG_RAMLOG_SYSLOG)
+#  define NEED_LOWPUTC
+#endif
+
+/****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+
+#ifdef NEED_LOWPUTC
 static int syslog_default_putc(int ch);
 #endif
 static int syslog_default_flush(void);
@@ -73,7 +83,7 @@ const struct syslog_channel_s g_default_channel =
   ramlog_putc,
   syslog_default_flush
 };
-#elif defined(CONFIG_SYSLOG_SERIAL_CONSOLE) && defined(CONFIG_ARCH_LOWPUTC)
+#elif defined(HAVE_LOWPUTC)
 const struct syslog_channel_s g_default_channel =
 {
   up_putc,
@@ -105,7 +115,7 @@ FAR const struct syslog_channel_s *g_syslog_channel = &g_default_channel;
  *
  ****************************************************************************/
 
-#ifndef CONFIG_ARCH_LOWPUTC
+#ifdef NEED_LOWPUTC
 static int syslog_default_putc(int ch)
 {
   return ch;
