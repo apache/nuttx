@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <sys/stat.h>
+#include <sched.h>
 #include <fcntl.h>
 
 #include <nuttx/syslog/syslog.h>
@@ -143,14 +144,15 @@ int syslog_file_channel(FAR const char *devpath)
    * after the default channel has been selected.
    *
    * We disable pre-emption only so that we are not suspended and a lot of
-   * important debug output is lost.
+   * important debug output is lost while we futz with the channels.
    */
 
+  sched_lock();
   saved_channel = g_syslog_channel;
   ret = syslog_channel(&g_default_syslog_channel);
   if (ret < 0)
     {
-      return ret;
+      goto errout_with_lock;
     }
 
   /* Uninitialize any driver interface that may have been in place */
@@ -163,7 +165,7 @@ int syslog_file_channel(FAR const char *devpath)
        */
 
       (void)syslog_channel(saved_channel);
-      return ret;
+      goto errout_with_lock;
     }
   
   /* Then initialize the file interface */
@@ -171,16 +173,22 @@ int syslog_file_channel(FAR const char *devpath)
   ret = syslog_dev_initialize(devpath, OPEN_FLAGS, OPEN_MODE);
   if (ret < 0)
     {
-      /* We should still be able to back-up an re-initialized everything */
+      /* We should still be able to back-up and re-initialized everything */
 
       (void)syslog_initialize(SYSLOG_INIT_EARLY);
       (void)syslog_initialize(SYSLOG_INIT_LATE);
-      return ret;
+      goto errout_with_lock;
     }
 
-  /* Use the file as the SYSLOG channel */
+  /* Use the file as the SYSLOG channel. If this fails we are pretty much
+   * screwed.
+   */
 
-  return syslog_channel(&g_syslog_file_channel);
+  ret = syslog_channel(&g_syslog_file_channel);
+
+errout_with_lock:
+  sched_unlock();
+  return ret;
 }
 
 #endif /* CONFIG_SYSLOG_FILE */
