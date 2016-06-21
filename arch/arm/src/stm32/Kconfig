@@ -6333,21 +6333,21 @@ config STM32_USB_ITRMP
 		F3 family and selects the use of the dedicated USB interrupts.
 
 menu "CAN driver configuration"
-	depends on STM32_CAN1 || STM32_CAN2
+	depends on STM32_CAN
 
 config CAN1_BAUD
 	int "CAN1 BAUD"
 	default 250000
 	depends on STM32_CAN1
 	---help---
-		CAN1 BAUD rate.  Required if STM32_CAN1 is defined.
+		CAN1 BAUD rate.  Required if CONFIG_STM32_CAN1 is defined.
 
 config CAN2_BAUD
 	int "CAN2 BAUD"
 	default 250000
 	depends on STM32_CAN2
 	---help---
-		CAN2 BAUD rate.  Required if STM32_CAN2 is defined.
+		CAN2 BAUD rate.  Required if CONFIG_STM32_CAN2 is defined.
 
 config CAN_TSEG1
 	int "TSEG1 quanta"
@@ -6360,6 +6360,15 @@ config CAN_TSEG2
 	default 7
 	---help---
 		The number of CAN time quanta in segment 2. Default: 7
+
+config STM32_CAN_REGDEBUG
+	bool "CAN Register level debug"
+	depends on DEBUG_CAN_INFO
+	default n
+	---help---
+		Output detailed register-level CAN device debug information.
+		Requires also CONFIG_DEBUG_CAN_INFO.
+
 endmenu
 
 if STM32_LTDC

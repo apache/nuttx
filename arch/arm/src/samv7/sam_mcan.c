@@ -2602,8 +2602,6 @@ static int mcan_ioctl(FAR struct can_dev_s *dev, int cmd, unsigned long arg)
         break;
     }
 
-  /* No CAN ioctls are supported */
-
   return ret;
 }
 
