@@ -12107,5 +12107,13 @@
 	  these serve no purpose (2016-06-20).
 	* Make system: Need to build the drivers/ directory even it file
 	  descriptors are not supported.  There are things in the drivers/
-	  directory that are still needed (like SYSLOG logic).
-
+	  directory that are still needed (like SYSLOG logic) (2016-06-20).
+	* assert.h: Define static assert for C++ usage.  From Paul Alexander
+	  Patience (2016-06-21).
+	* arch/arm/src/stm32l4:  Add ioctls to set/get bit timing in stm32l4.
+	  Add ioctl hooks to allow future management of can id filters. From
+	  Sebastien Lorquet (2016-06-21).
+	* drivers/can.c:  Add support for poll. From Paul Alexander Patience
+	  (2016-06-21).
+	* drivers/syslog: Extend SYSLOG logic so that we can send SYSLOG output
+	  to a file.  Not verified on initial commit  (2016-06-21).
