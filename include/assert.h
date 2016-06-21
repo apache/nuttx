@@ -89,11 +89,13 @@
 #  define assert(f) ASSERT(f)
 #endif
 
-/* Definition required for C++11 compile timer assertion checking.  The
+/* Definition required for C11 compile-time assertion checking.  The
  * static_assert macro simply expands to the _Static_assert keyword.
  */
 
-#define static_assert _Static_assert
+#ifndef __cplusplus
+#  define static_assert _Static_assert
+#endif
 
 /****************************************************************************
  * Included Files
