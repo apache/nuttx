@@ -2694,6 +2694,10 @@ static int stm32_dmasendsetup(FAR struct sdio_dev_s *dev,
   stm32_sampleinit();
   stm32_sample(priv, SAMPLENDX_BEFORE_SETUP);
 
+  /* Flush cache to physical memory */
+
+  arch_flush_dcache((uintptr_t)buffer, (uintptr_t)buffer + buflen);
+
   /* Save the source buffer information for use by the interrupt handler */
 
   priv->buffer    = (uint32_t *)buffer;
@@ -2711,10 +2715,6 @@ static int stm32_dmasendsetup(FAR struct sdio_dev_s *dev,
                  (buflen + 3) >> 2, SDIO_TXDMA32_CONFIG);
 
   stm32_sample(priv, SAMPLENDX_BEFORE_ENABLE);
-
-  /* Flush cache to physical memory */
-
-  arch_flush_dcache((uintptr_t)buffer, (uintptr_t)buffer + buflen);
 
   /* Start the DMA */
 
