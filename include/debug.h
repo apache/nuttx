@@ -113,7 +113,7 @@
 #  define __arch_syslog syslog
 #endif
 
-#ifdef CONFIG_DEBUG_FEATURES
+#ifdef CONFIG_DEBUG_ALERT
 #  define _alert(format, ...) \
    __arch_syslog(LOG_EMERG, EXTRA_FMT format EXTRA_ARG, ##__VA_ARGS__)
 #else /* CONFIG_DEBUG_ERROR */
@@ -669,7 +669,7 @@
 
 /* Variadic macros NOT supported */
 
-#ifndef CONFIG_DEBUG_FEATURES
+#ifndef CONFIG_DEBUG_ALERT
 #  define _alert      (void)
 # endif
 
@@ -1483,7 +1483,7 @@ void lib_dumpbuffer(FAR const char *msg, FAR const uint8_t *buffer,
  */
 
 #ifndef CONFIG_CPP_HAVE_VARARGS
-#ifndef CONFIG_DEBUG_FEATURES
+#ifdef CONFIG_DEBUG_ALERT
 int _alert(const char *format, ...);
 #endif
 

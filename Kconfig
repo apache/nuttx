@@ -395,9 +395,14 @@ endmenu # Customize Header Files
 
 menu "Debug Options"
 
+config DEBUG_ALERT
+	bool
+	default n
+
 config DEBUG_FEATURES
 	bool "Enable Debug Features"
 	default n
+	select DEBUG_ALERT
 	---help---
 		Enables built-in debug features.  Selecting this option will (1) Enable
 		debug assertions in the code, (2) enable extended parameter testing in

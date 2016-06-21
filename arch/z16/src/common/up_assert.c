@@ -135,7 +135,7 @@ void up_assert(const uint8_t *filename, int lineno)
 void up_assert(void)
 #endif
 {
-#if CONFIG_TASK_NAME_SIZE > 0 && defined(CONFIG_DEBUG_FEATURES)
+#if CONFIG_TASK_NAME_SIZE > 0 && defined(CONFIG_DEBUG_ALERT)
   struct tcb_s *rtcb = this_task();
 #endif
 
@@ -150,7 +150,7 @@ void up_assert(void)
         filename, lineno);
 #endif
 #else
-#if CONFIG_TASK_NAME_SIZE > 0 && defined(CONFIG_DEBUG_FEATURES)
+#if CONFIG_TASK_NAME_SIZE > 0 && defined(CONFIG_DEBUG_ALERT)
   _alert("Assertion failed: task: %s\n", rtcb->name);
 #else
   _alert("Assertion failed\n");

@@ -59,7 +59,7 @@
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG_FEATURES
+#ifdef CONFIG_DEBUG_ALERT
 int _alert(const char *format, ...)
 {
   va_list ap;
@@ -71,7 +71,7 @@ int _alert(const char *format, ...)
 
   return ret;
 }
-#endif /* CONFIG_DEBUG_FEATURES */
+#endif /* CONFIG_DEBUG_ALERT */
 
 #ifdef CONFIG_DEBUG_ERROR
 int  _err(const char *format, ...)
