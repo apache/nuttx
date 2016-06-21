@@ -173,18 +173,11 @@ int syslog_channel(FAR const struct syslog_channel_s *channel);
  *   as a minimum a call to syslog_channel() to use the device.
  *
  * Input Parameters:
- *   None
+ *   phase - One of {SYSLOG_INIT_EARLY, SYSLOG_INIT_LATE}
  *
  * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is returned on
  *   any failure.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   Zero (OK)is returned on  success.  A negated errno value is returned
- *   on any failure.
  *
  ****************************************************************************/
 
