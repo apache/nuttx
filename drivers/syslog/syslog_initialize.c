@@ -41,6 +41,7 @@
 
 #include <stdio.h>
 
+#include <nuttx/syslog/ramlog.h>
 #include <nuttx/syslog/syslog.h>
 
 #include "syslog.h"
