@@ -2093,7 +2093,7 @@ static int stm32_recvshortcrc(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t
   else
 #endif
     {
-      /* Check if a timeout or CRC error occurred (not for SD_CMD55 - see ERRATA) */
+      /* Check if a timeout or CRC error occurred */
 
       regval = getreg32(STM32_SDMMC1_STA);
       if ((regval & SDIO_STA_CTIMEOUT) != 0)
@@ -2101,7 +2101,7 @@ static int stm32_recvshortcrc(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t
           ferr("ERROR: Command timeout: %08x\n", regval);
           ret = -ETIMEDOUT;
         }
-      else if (cmd != SD_CMD55 && (regval & SDIO_STA_CCRCFAIL) != 0)
+      else if ((regval & SDIO_STA_CCRCFAIL) != 0)
         {
           ferr("ERROR: CRC failure: %08x\n", regval);
           ret = -EIO;
