@@ -70,7 +70,7 @@
  *   as a minimum a call to syslog_channel() to use the device.
  *
  * Input Parameters:
- *   None
+ *   phase - One of {SYSLOG_INIT_EARLY, SYSLOG_INIT_LATE}
  *
  * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is returned on
@@ -78,31 +78,33 @@
  *
  ****************************************************************************/
 
-int syslog_initialize(void)
+int syslog_initialize(enum syslog_init_e phase)
 {
-  int ret;
-
-  /* Not much to this yet... more is coming */
+  int ret = OK;
 
 #if defined(CONFIG_SYSLOG_CHAR)
-  /* Enable use of a character device as the SYSLOG device */
+  if (phase == SYSLOG_INIT_LATE)
+    {
+      /* Enable use of a character device as the SYSLOG device */
 
-  ret = syslog_dev_channel();
+      ret = syslog_dev_channel();
+    }
 
 #elif defined(CONFIG_RAMLOG_SYSLOG)
-  /* Use the RAMLOG as the SYSLOG device */
+  if (phase == SYSLOG_INIT_EARLY)
+    {
+      /* Use the RAMLOG as the SYSLOG device */
 
-  ret = ramlog_syslog_channel();
+      ret = ramlog_syslog_channel();
+    }
 
 #elif defined(CONFIG_DEV_CONSOLE)
-  /* Use the console device as the SYSLOG device */
+  if (phase == SYSLOG_INIT_LATE)
+    {
+      /* Use the console device as the SYSLOG device */
 
-  ret = syslog_console_channel();
-
-#else
-  /* Nothing needs to be done */
-
-  ret = 0;
+      ret = syslog_console_channel();
+    }
 
 #endif
 

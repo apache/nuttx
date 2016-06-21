@@ -258,9 +258,12 @@ void up_initialize(void)
   ramlog_consoleinit();
 #endif
 
-  /* Initialize the system logging device */
+  /* Early initialization of the system logging device.  Some SYSLOG channel
+   * can be initialized early in the initialization sequence because they
+   * depend on only minimal OS initialization.
+   */
 
-  syslog_initialize();
+  syslog_initialize(SYSLOG_INIT_EARLY);
 
 #ifndef CONFIG_NETDEV_LATEINIT
   /* Initialize the network */

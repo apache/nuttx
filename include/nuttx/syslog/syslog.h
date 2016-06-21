@@ -93,6 +93,15 @@
  * Public Types
  ****************************************************************************/
 
+/* Initialization phases */
+
+enum syslog_init_e
+{
+  SYSLOG_INIT_RESET = 0, /* Power on SYSLOG initializaton phase */
+  SYSLOG_INIT_EARLY,     /* Early initialization in up_initialize() */
+  SYSLOG_INIT_LATE       /* Late initialization in os_start(). */
+};
+
 /* This structure provides the interface to a SYSLOG device */
 
 typedef CODE int (*syslog_putc_t)(int ch);
@@ -180,9 +189,9 @@ int syslog_channel(FAR const struct syslog_channel_s *channel);
  ****************************************************************************/
 
 #ifndef CONFIG_ARCH_SYSLOG
-int syslog_initialize(void);
+int syslog_initialize(enum syslog_init_e phase);
 #else
-#  define syslog_initialize()
+#  define syslog_initialize(phase)
 #endif
 
 /****************************************************************************

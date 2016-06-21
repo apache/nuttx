@@ -335,6 +335,7 @@ int syslog_flush_intbuffer(FAR const struct syslog_channel_s *channel,
     }
   while (ch != EOF && ret >= 0);
 
+  sched_unlock();
   return ret;
 }
 
