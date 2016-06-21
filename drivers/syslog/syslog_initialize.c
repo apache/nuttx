@@ -98,7 +98,7 @@ int syslog_initialize(enum syslog_init_e phase)
       ret = ramlog_syslog_channel();
     }
 
-#elif defined(CONFIG_DEV_CONSOLE)
+#elif defined(CONFIG_SYSLOG_CONSOLE)
   if (phase == SYSLOG_INIT_LATE)
     {
       /* Use the console device as the SYSLOG device */

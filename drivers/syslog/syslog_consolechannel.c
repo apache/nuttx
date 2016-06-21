@@ -44,14 +44,14 @@
 
 #include "syslog.h"
 
-#ifdef CONFIG_DEV_CONSOLE
+#ifdef CONFIG_SYSLOG_CONSOLE
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 #undef HAVE_LOWPUTC
-#if defined(CONFIG_SERIAL_CONSOLE) && defined(CONFIG_ARCH_LOWPUTC)
+#if defined(CONFIG_SYSLOG_SERIAL_CONSOLE) && defined(CONFIG_ARCH_LOWPUTC)
 #  define HAVE_LOWPUTC 1
 #endif
 
@@ -153,4 +153,4 @@ int syslog_console_channel(void)
   return syslog_channel(&g_syslog_console_channel);
 }
 
-#endif /* CONFIG_SYSLOG_CHAR */
+#endif /* CONFIG_SYSLOG_CONSOLE */

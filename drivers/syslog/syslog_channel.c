@@ -73,7 +73,7 @@ static const struct syslog_channel_s g_default_channel =
   ramlog_putc,
   syslog_default_flush
 };
-#elif defined(CONFIG_ARCH_LOWPUTC)
+#elif defined(CONFIG_SYSLOG_SERIAL_CONSOLE) && defined(CONFIG_ARCH_LOWPUTC)
 static const struct syslog_channel_s g_default_channel =
 {
   up_putc,

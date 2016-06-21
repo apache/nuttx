@@ -3,7 +3,7 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
-comment "System Logging"
+menu "System Logging"
 
 # Selected if the architecture has its own, built-in SYSLOGging enabled
 
@@ -26,18 +26,6 @@ config RAMLOG
 		details as needed to support logging.
 
 if RAMLOG
-config RAMLOG_SYSLOG
-	bool "Use RAMLOG for SYSLOG"
-	default n
-	depends on SYSLOG && !ARCH_SYSLOG
-	---help---
-		Use the RAM logging device for the syslogging interface.  If this feature
-		is enabled (along with SYSLOG), then all debug output (only) will be re-directed
-		to the circular buffer in RAM.  This RAM log can be view from NSH using the
-		'dmesg'command.
-
-		Do not enable more than one SYSLOG device.
-
 config RAMLOG_CONSOLE
 	bool "Use RAMLOG for /dev/console"
 	default n
@@ -107,18 +95,57 @@ config SYSLOG_TIMESTAMP
 	---help---
 		Prepend timestamp to syslog message.
 
-if SYSLOG
+config SYSLOG_SERIAL_CONSOLE
+	bool
+	default n
+
+choice
+	prompt "System log device"
+	default SYSLOG_CONSOLE if DEV_CONSOLE
+	default SYSLOG_NONE if !DEV_CONSOLE
+	depends on !ARCH_SYSLOG
 
 config SYSLOG_CHAR
-	bool "System log character device support"
-	default y
-	depends on !ARCH_SYSLOG
+	bool "Log to a character device"
 	---help---
 		Enable the generic character device for the SYSLOG. The full path to the
 		SYSLOG device is provided by SYSLOG_DEVPATH. A valid character device (or
 		file) must exist at this path.  It will by opened by syslog_initialize.
 
-		Do not enable more than one SYSLOG device.
+config RAMLOG_SYSLOG
+	bool "Use RAMLOG for SYSLOG"
+	depends on RAMLOG && !ARCH_SYSLOG
+	---help---
+		Use the RAM logging device for the syslogging interface.  If this
+		feature is enabled (along with SYSLOG), then all debug output (only)
+		will be re-directed to the circular buffer in RAM.  This RAM log can
+		be viewed from NSH using the 'dmesg'command.
+
+config SYSLOG_CONSOLE
+	bool "Log to /dev/console"
+	depends on DEV_CONSOLE
+	select SYSLOG_SERIAL_CONSOLE if SERIAL_CONSOLE
+	---help---
+		Use the system console as a SYSLOG output device.
+
+config SYSLOG_NONE
+	bool "No SYSLOG device"
+	---help---
+		syslog() interfaces will be present, but all output will go to the
+		bit-bucket.
+
+endchoice
+
+config CONSOLE_SYSLOG
+	bool "Use SYSLOG for /dev/console"
+	default n
+	depends on DEV_CONSOLE && !SYSLOG_CONSOLE
+	---help---
+		Use the syslog logging device as a system console. If this feature is
+		enabled (along with DEV_CONSOLE), then all console output will be
+		re-directed to syslog output (syslog_putc). This is useful, for
+		example, if the only console is a Telnet console.  Then in that case,
+		console output from non-Telnet threads will go to the syslog output.
 
 config SYSLOG_DEVPATH
 	string "System log device"
@@ -130,15 +157,4 @@ config SYSLOG_DEVPATH
 		some other existing character device (or file) supported by the configuration
 		(such as "/dev/ttyS1")/
 
-endif
-
-config CONSOLE_SYSLOG
-	bool "Use SYSLOG for /dev/console"
-	default n
-	depends on DEV_CONSOLE
-	---help---
-		Use the syslog logging device as a system console. If this feature is enabled
-		(along with DEV_CONSOLE), then all console output will be re-directed to syslog
-		output (syslog_putc). This is useful, for example, if the only console is a Telnet
-		console.  Then in that case, console output from non-Telnet threads will go to
-		the syslog output.
+endmenu # System logging

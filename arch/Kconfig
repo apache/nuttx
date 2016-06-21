@@ -58,6 +58,7 @@ config ARCH_SIM
 	select ARCH_HAVE_TLS
 	select ARCH_HAVE_TICKLESS
 	select ARCH_HAVE_POWEROFF
+	select SERIAL_CONSOLE
 	---help---
 		Linux/Cywgin user-mode simulation.
 
