@@ -548,15 +548,12 @@ Where <subdir> is one of the following:
     console device was about 5 KB (primarily OS support) and the cost of
     the NSH 'ls' command (including OS support) is about 2KB.
 
-    2016-02-20:  There has been some size increase due primarily, I believe
-    to the enhanced SYSLOG logic:
+    2016-06-21:  Just checking the size after some big system changes:  The
+    size of the base configuration has actually dropped by a few bytes:
 
      $ arm-none-eabi-size nuttx
-       text    data     bss     dec     hex filename
-      13002       8     816   13826    3602 nuttx
-
-    No single large new things were included in the link.  Apparently
-    several new smaller things are now included.  No idea what.
+        text    data     bss     dec     hex filename
+      12526       4     816   13346    3422 nuttx
 
   nsh:
   ---
