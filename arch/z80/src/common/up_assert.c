@@ -134,7 +134,7 @@ void up_assert(const uint8_t *filename, int lineno)
 void up_assert(void)
 #endif
 {
-#if CONFIG_TASK_NAME_SIZE > 0
+#if CONFIG_TASK_NAME_SIZE > 0 && defined(CONFIG_DEBUG_FEATURES)
   struct tcb_s *rtcb = this_task();
 #endif
 
