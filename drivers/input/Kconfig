@@ -179,7 +179,7 @@ config MXT_NPOLLWAITERS
 config MXT_DISABLE_CONFIG_DEBUG_INFO
 	bool "Disable verbose debug output"
 	default y
-	depends on CONFIG_DEBUG_INFO && DEBUG_INPUT
+	depends on DEBUG_INPUT_INFO
 	---help---
 		The maXTouch tends to generate interrupts at a high rate during the
 		contact.  If verbose debug is enabled in this driver, you may not

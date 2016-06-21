@@ -395,7 +395,7 @@ static int pwm_timer(FAR struct efm32_pwmtimer_s *priv,
 
   if (efm32_timer_set_freq(priv->base, priv->pclk, info->frequency) < 0)
     {
-      pwmerr("Cannot set TIMER frequency %dHz from clock %dHz\n",
+      pwmerr("ERROR: Cannot set TIMER frequency %dHz from clock %dHz\n",
              info->frequency, priv->pclk);
       return -EINVAL;
     }
@@ -522,8 +522,8 @@ static int pwm_interrupt(struct efm32_pwmtimer_s *priv)
 
   /* Now all of the time critical stuff is done so we can do some debug output */
 
-  pwmllinfo("Update interrupt SR: %04x prev: %d curr: %d count: %d\n",
-            regval, priv->prev, priv->curr, priv->count);
+  pwminfo("Update interrupt SR: %04x prev: %d curr: %d count: %d\n",
+          regval, priv->prev, priv->curr, priv->count);
 
   return OK;
 #else
@@ -914,7 +914,7 @@ FAR struct pwm_lowerhalf_s *efm32_pwminitialize(int timer)
 #endif
 
       default:
-        pwmerr("No such timer configured\n");
+        pwmerr("ERROR: No such timer configured\n");
         return NULL;
     }
 

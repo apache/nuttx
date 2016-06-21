@@ -5,6 +5,7 @@
  *   Copyright (C) 2015 Omni Hoverboards Inc. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            Paul Alexander Patience <paul-a.patience@polymtl.ca>
+ *            David Sidrane <david_s5@nscdg.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -103,19 +104,15 @@
 
 /* Up to 3 ADC interfaces are supported */
 
-#if STM32_NADC < 4
-#  undef CONFIG_STM32F7_ADC4
-#endif
-
-#if STM32_NADC < 3
+#if STM32F7_NADC < 3
 #  undef CONFIG_STM32F7_ADC3
 #endif
 
-#if STM32_NADC < 2
+#if STM32F7_NADC < 2
 #  undef CONFIG_STM32F7_ADC2
 #endif
 
-#if STM32_NADC < 1
+#if STM32F7_NADC < 1
 #  undef CONFIG_STM32F7_ADC1
 #endif
 
@@ -758,7 +755,7 @@ extern "C"
  ****************************************************************************/
 
 struct adc_dev_s;
-struct adc_dev_s *stm32_adc_initialiize(int intf,
+struct adc_dev_s *stm32_adc_initialize(int intf,
                                         FAR const uint8_t *chanlist,
                                         int nchannels);
 #undef EXTERN

@@ -315,7 +315,7 @@ static uint32_t spi_getreg(FAR struct pic32mx_dev_s *priv, unsigned int offset)
         {
            if (count == 4)
              {
-               _llinfo("...\n");
+               _info("...\n");
              }
           return value;
         }
@@ -331,7 +331,7 @@ static uint32_t spi_getreg(FAR struct pic32mx_dev_s *priv, unsigned int offset)
          {
            /* Yes.. then show how many times the value repeated */
 
-           _llinfo("[repeats %d more times]\n", count-3);
+           _info("[repeats %d more times]\n", count-3);
          }
 
        /* Save the new address, value, and count */
@@ -343,7 +343,7 @@ static uint32_t spi_getreg(FAR struct pic32mx_dev_s *priv, unsigned int offset)
 
   /* Show the register value read */
 
-  _llinfo("%08x->%08x\n", addr, value);
+  _info("%08x->%08x\n", addr, value);
   return value;
 }
 #else
@@ -381,7 +381,7 @@ static void spi_putreg(FAR struct pic32mx_dev_s *priv, unsigned int offset,
 
   /* Show the register value being written */
 
-  _llinfo("%08x<-%08x\n", addr, value);
+  _info("%08x<-%08x\n", addr, value);
 
   /* Then do the write */
 

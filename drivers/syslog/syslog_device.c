@@ -1,7 +1,7 @@
 /****************************************************************************
- * fs/driver/fs_devsyslog.c
+ * driver/syslog/syslog_device.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,18 +44,21 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <string.h>
+#include <sched.h>
 #include <fcntl.h>
 #include <semaphore.h>
 #include <errno.h>
 #include <assert.h>
 
-#include <nuttx/fs/fs.h>
 #include <nuttx/arch.h>
+#include <nuttx/kmalloc.h>
+#include <nuttx/fs/fs.h>
 #include <nuttx/syslog/syslog.h>
 
-#include "inode/inode.h"
+#include "syslog.h"
 
-#if defined(CONFIG_SYSLOG) && defined(CONFIG_SYSLOG_CHAR)
+#if CONFIG_NFILE_DESCRIPTORS > 0
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -78,7 +81,7 @@
 
 /* This enumeration represents the state of the SYSLOG device interface */
 
-enum syslog_state_e
+enum syslog_dev_state
 {
   SYSLOG_UNINITIALIZED = 0, /* SYSLOG has not been initialized */
   SYSLOG_INITIALIZING,      /* SYSLOG is being initialized */
@@ -91,10 +94,13 @@ enum syslog_state_e
 
 struct syslog_dev_s
 {
-  uint8_t     sl_state;     /* See enum syslog_state_e */
-  sem_t       sl_sem;       /* Enforces mutually exclusive access */
-  pid_t       sl_holder;    /* PID of the thread that holds the semaphore */
-  struct file sl_file;      /* The syslog file structure */
+  uint8_t      sl_state;    /* See enum syslog_dev_state */
+  uint8_t      sl_oflags;   /* Saved open mode (for re-open) */
+  uint16_t     sl_mode;     /* Saved open flags (for re-open) */
+  sem_t        sl_sem;      /* Enforces mutually exclusive access */
+  pid_t        sl_holder;   /* PID of the thread that holds the semaphore */
+  struct file  sl_file;     /* The syslog file structure */
+  FAR char    *sl_devpath;  /* Full path to the character device */
 };
 
 /****************************************************************************
@@ -103,7 +109,7 @@ struct syslog_dev_s
 
 /* This is the device structure for the console or syslogging function. */
 
-static struct syslog_dev_s g_sysdev;
+static struct syslog_dev_s g_syslog_dev;
 static const uint8_t g_syscrlf[2] =
 {
   '\r', '\n'
@@ -114,25 +120,25 @@ static const uint8_t g_syscrlf[2] =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: syslog_takesem
+ * Name: syslog_dev_takesem
  *
  * Description:
  *   Write to the syslog device
  *
  ****************************************************************************/
 
-static inline int syslog_takesem(void)
+static inline int syslog_dev_takesem(void)
 {
   pid_t me = getpid();
   int ret;
 
   /* Does this thread already hold the semaphore?  That could happen if
    * we wer called recursively, i.e., if the logic kicked off by
-   * syslog_write() where to generate more debug output.  Return an error
+   * syslog_dev_write() where to generate more debug output.  Return an error
    * in that case.
    */
 
-  if (g_sysdev.sl_holder == me)
+  if (g_syslog_dev.sl_holder == me)
     {
       /* Return an error (instead of deadlocking) */
 
@@ -143,7 +149,7 @@ static inline int syslog_takesem(void)
    * thread.  Wait for it to become available.
    */
 
-  ret = sem_wait(&g_sysdev.sl_sem);
+  ret = sem_wait(&g_syslog_dev.sl_sem);
   if (ret < 0)
     {
       return -get_errno();
@@ -153,220 +159,238 @@ static inline int syslog_takesem(void)
    * of the semaphore.
    */
 
-  g_sysdev.sl_holder = me;
+  g_syslog_dev.sl_holder = me;
   return OK;
 }
 
 /****************************************************************************
- * Name: syslog_givesem
+ * Name: syslog_dev_givesem
  *
  * Description:
  *   Write to the syslog device
  *
  ****************************************************************************/
 
-static inline void syslog_givesem(void)
+static inline void syslog_dev_givesem(void)
 {
 #ifdef CONFIG_DEBUG_ASSERTIONS
   pid_t me = getpid();
-  DEBUGASSERT(g_sysdev.sl_holder == me);
+  DEBUGASSERT(g_syslog_dev.sl_holder == me);
 #endif
 
   /* Relinquish the semaphore */
 
-  g_sysdev.sl_holder = NO_HOLDER;
-  sem_post(&g_sysdev.sl_sem);
+  g_syslog_dev.sl_holder = NO_HOLDER;
+  sem_post(&g_syslog_dev.sl_sem);
 }
 
 /****************************************************************************
- * Name: syslog_write
+ * Name: syslog_dev_write
  *
  * Description:
  *   Write to the syslog device
  *
  ****************************************************************************/
 
-static inline ssize_t syslog_write(FAR const void *buf, size_t nbytes)
+static inline ssize_t syslog_dev_write(FAR const void *buf, size_t nbytes)
 {
   FAR struct inode *inode;
 
   /* Let the driver perform the write */
 
-  inode = g_sysdev.sl_file.f_inode;
-  return inode->u.i_ops->write(&g_sysdev.sl_file, buf, nbytes);
+  inode = g_syslog_dev.sl_file.f_inode;
+  DEBUGASSERT(inode != NULL);
+
+  return inode->u.i_ops->write(&g_syslog_dev.sl_file, buf, nbytes);
 }
-
-/****************************************************************************
- * Name: syslog_flush
- *
- * Description:
- *   Flush any buffer data in the file system to media.
- *
- ****************************************************************************/
-
-#ifndef CONFIG_DISABLE_MOUNTPOINT
-static inline void syslog_flush(void)
-{
-  FAR struct inode *inode = g_sysdev.sl_file.f_inode;
-
-  /* Is this a mountpoint? Does it support the sync method? */
-
-  if (INODE_IS_MOUNTPT(inode) && inode->u.i_mops->sync)
-    {
-      /* Yes... synchronize to the stream */
-
-      (void)inode->u.i_mops->sync(&g_sysdev.sl_file);
-    }
-}
-#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: syslog_initialize
+ * Name: syslog_dev_initialize
  *
  * Description:
  *   Initialize to use the character device (or file) at
  *   CONFIG_SYSLOG_DEVPATH as the SYSLOG sink.
  *
+ *   One power up, the SYSLOG facility is non-existent or limited to very
+ *   low-level output.  This function may be called later in the
+ *   intialization sequence after full driver support has been initialized.
+ *   (via syslog_initialize())  It installs the configured SYSLOG drivers
+ *   and enables full SYSLOGing capability.
+ *
  *   NOTE that this implementation excludes using a network connection as
  *   SYSLOG device.  That would be a good extension.
  *
+ * Input Parameters:
+ *   devpath - The full path to the character device to be used.
+ *   oflags  - File open flags
+ *   mode    - File open mode (only if oflags include O_CREAT)
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure.
+ *
  ****************************************************************************/
 
-int syslog_initialize(void)
+int syslog_dev_initialize(FAR const char *devpath, int oflags, int mode)
 {
-  FAR struct inode    *inode;
-  FAR const char      *relpath = NULL;
-  int                  ret;
+  int fd;
+  int ret;
 
   /* At this point, the only expected states are SYSLOG_UNINITIALIZED or
    * SYSLOG_REOPEN..  Not SYSLOG_INITIALIZING, SYSLOG_FAILURE, SYSLOG_OPENED.
    */
 
-  DEBUGASSERT(g_sysdev.sl_state == SYSLOG_UNINITIALIZED ||
-              g_sysdev.sl_state == SYSLOG_REOPEN);
+  DEBUGASSERT(g_syslog_dev.sl_state == SYSLOG_UNINITIALIZED ||
+              g_syslog_dev.sl_state == SYSLOG_REOPEN);
 
-  g_sysdev.sl_state = SYSLOG_INITIALIZING;
-
-  /* Try to open the device.
-   *
-   * Note that we cannot just call open.  The syslog device must work on all
-   * threads.  Open returns a file descriptor that is valid only for the
-   * task that opened the device (and its pthread children).  Instead, we
-   * essentially re-implement the guts of open() here so that we can get to
-   * the thread-independent structures of the inode.
+  /* Save the the path to the device in case we have to re-open it.
+   * If we get here and sl_devpath is not equal to NULL, that is a clue
+   * that we will are re-openingthe file.
    */
 
-  /* Get an inode for this file/device */
-
-  inode = inode_find(CONFIG_SYSLOG_DEVPATH, &relpath);
-  if (!inode)
+  if (g_syslog_dev.sl_state == SYSLOG_REOPEN)
     {
-      /* The inode was not found.  In this case, we will attempt to re-open
-       * the device repeatedly.  The assumption is that the device path is
-       * valid but that the driver has not yet been registered.
+      /* Re-opening: Then we should already have a copy of the path to the
+       * device.
        */
 
-      g_sysdev.sl_state = SYSLOG_REOPEN;
-      return -ENOENT;
+      DEBUGASSERT(g_syslog_dev.sl_devpath != NULL &&
+                  strcmp(g_syslog_dev.sl_devpath, devpath) == 0);
+    }
+  else
+    {
+      /* Initializing.  Copy the device path so that we can use it if we
+       * have to re-open the file.
+       */
+
+      DEBUGASSERT(g_syslog_dev.sl_devpath == NULL);
+      g_syslog_dev.sl_oflags  = oflags;
+      g_syslog_dev.sl_mode    = mode;
+      g_syslog_dev.sl_devpath = strdup(devpath);
+      DEBUGASSERT(g_syslog_dev.sl_devpath != NULL);
     }
 
-  /* Verify that the inode is valid and either a character driver or a
-   * mountpoint.
+  g_syslog_dev.sl_state = SYSLOG_INITIALIZING;
+
+  /* Open the device driver. */
+
+  fd = open(devpath, oflags, mode);
+  if (fd < 0)
+    {
+       int errcode = get_errno();
+       DEBUGASSERT(errcode > 0);
+
+      /* We failed to open the file. Perhaps it does exist?  Perhaps it
+       * exists, but is not ready because it depends on insertion of a
+       * removable device?
+       *
+       * In any case we will attempt to re-open the device repeatedly.
+       * The assumption is that the device path is valid but that the
+       * driver has not yet been registered or a removable device has
+       * not yet been installed.
+       */
+
+      g_syslog_dev.sl_state = SYSLOG_REOPEN;
+      return -errcode;
+    }
+
+  /* Detach the file descriptor from the file structure.  The file
+   * descriptor is a task-specific concept.  Detaching the file
+   * descriptor allows us to use the device on all threads in all tasks.
    */
 
-#ifndef CONFIG_DISABLE_MOUNTPOINT
-  if ((!INODE_IS_DRIVER(inode) && !INODE_IS_MOUNTPT(inode)))
-#else
-  if (!INODE_IS_DRIVER(inode))
-#endif
-    {
-      ret = -ENXIO;
-      goto errout_with_inode;
-    }
-
-  /* Make sure that the "entity" at this inode supports write access */
-
-  if (!inode->u.i_ops || !inode->u.i_ops->write)
-    {
-      ret = -EACCES;
-      goto errout_with_inode;
-    }
-
-  /* Initialize the file structure */
-
-  g_sysdev.sl_file.f_oflags = SYSLOG_OFLAGS;
-  g_sysdev.sl_file.f_pos    = 0;
-  g_sysdev.sl_file.f_inode  = inode;
-
-  /* Perform the low-level open operation. */
-
-  ret = OK;
-  if (inode->u.i_ops->open)
-    {
-      /* Is the inode a mountpoint? */
-
-#ifndef CONFIG_DISABLE_MOUNTPOINT
-      if (INODE_IS_MOUNTPT(inode))
-        {
-          /* Yes.  Open the device write-only, try to create it if it
-           * doesn't exist, if the file that already exists, then append the
-           * new log data to end of the file.
-           */
-
-          ret = inode->u.i_mops->open(&g_sysdev.sl_file, relpath,
-                                      SYSLOG_OFLAGS, 0666);
-        }
-
-      /* No... then it must be a character driver in the NuttX pseudo-
-       * file system.
-       */
-
-      else
-#endif
-        {
-          ret = inode->u.i_ops->open(&g_sysdev.sl_file);
-        }
-    }
-
-  /* Was the file/device successfully opened? */
-
+  ret = file_detach(fd, &g_syslog_dev.sl_file);
   if (ret < 0)
     {
-      ret = -ret;
-      goto errout_with_inode;
+      /* This should not happen and means that something very bad has
+       * occurred.
+       */
+
+      g_syslog_dev.sl_state = SYSLOG_FAILURE;
+      close(fd);
+      return ret;
     }
 
   /* The SYSLOG device is open and ready for writing. */
 
-  sem_init(&g_sysdev.sl_sem, 0, 1);
-  g_sysdev.sl_holder = NO_HOLDER;
-  g_sysdev.sl_state  = SYSLOG_OPENED;
+  sem_init(&g_syslog_dev.sl_sem, 0, 1);
+  g_syslog_dev.sl_holder = NO_HOLDER;
+  g_syslog_dev.sl_state  = SYSLOG_OPENED;
   return OK;
-
-errout_with_inode:
-  inode_release(inode);
-  g_sysdev.sl_state = SYSLOG_FAILURE;
-  return ret;
 }
 
 /****************************************************************************
- * Name: syslog_putc
+ * Name: syslog_dev_uninitialize
  *
  * Description:
- *   This is the low-level system logging interface.  The debugging/syslogging
- *   interfaces are syslog() and lowsyslog().  The difference is is that
- *   the syslog() function writes to syslogging device (usually fd=1, stdout)
- *   whereas lowsyslog() uses a lower level interface that works from
- *   interrupt handlers.  This function is a a low-level interface used to
- *   implement lowsyslog().
+ *   Called to disable the last device/file channel in preparation to use
+ *   a different SYSLOG device. Currently only used for CONFIG_SYSLOG_FILE.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure.
+ *
+ * Assumptions:
+ *   The caller has already switched the SYSLOG source to some safe channel
+ *   (the default channel).
  *
  ****************************************************************************/
 
-int syslog_putc(int ch)
+#ifdef CONFIG_SYSLOG_FILE /* Currently only used in this configuration */
+int syslog_dev_uninitialize(void)
+{
+  /* Attempt to flush any buffered data */
+
+  sched_lock();
+  (void)syslog_dev_flush();
+
+  /* Close the detached file instance */
+
+  (void)file_close_detached(&g_syslog_dev.sl_file);
+
+  /* Free the device path */
+
+  if (g_syslog_dev.sl_devpath != NULL)
+    {
+      kmm_free(g_syslog_dev.sl_devpath);
+    }
+
+  /* Destroy the semaphore */
+
+  sem_destroy(&g_syslog_dev.sl_sem);
+
+  /* Reset the state structure */
+
+  memset(&g_syslog_dev, 0, sizeof(struct syslog_dev_s));
+  sched_unlock();
+  return OK;
+}
+#endif /* CONFIG_SYSLOG_FILE */
+
+/****************************************************************************
+ * Name: syslog_dev_putc
+ *
+ * Description:
+ *   This is the low-level system logging interface provided for the
+ *   character driver interface.
+ *
+ * Input Parameters:
+ *   ch - The character to add to the SYSLOG (must be positive).
+ *
+ * Returned Value:
+ *   On success, the character is echoed back to the caller.  A negated
+ *   errno value is returned on any failure.
+ *
+ ****************************************************************************/
+
+int syslog_dev_putc(int ch)
 {
   ssize_t nbytes;
   uint8_t uch;
@@ -377,12 +401,12 @@ int syslog_putc(int ch)
    *
    * (1) Before the SYSLOG device has been initialized.  This could happen
    *     from debug output that occurs early in the boot sequence before
-   *     syslog_initialize() is called (SYSLOG_UNINITIALIZED).
+   *     syslog_dev_initialize() is called (SYSLOG_UNINITIALIZED).
    * (2) While the device is being initialized.  The case could happen if
-   *     debug output is generated while syslog_initialize() executes
+   *     debug output is generated while syslog_dev_initialize() executes
    *     (SYSLOG_INITIALIZING).
    * (3) While we are generating SYSLOG output.  The case could happen if
-   *     debug output is generated while syslog_putc() executes
+   *     debug output is generated while syslog_dev_putc() executes
    *     (This case is actually handled inside of syslog_semtake()).
    * (4) Any debug output generated from interrupt handlers.  A disadvantage
    *     of using the generic character device for the SYSLOG is that it
@@ -410,12 +434,12 @@ int syslog_putc(int ch)
    * has been successfully opened.
    */
 
-  if (g_sysdev.sl_state != SYSLOG_OPENED)
+  if (g_syslog_dev.sl_state != SYSLOG_OPENED)
     {
       /* Case (1) and (2) */
 
-      if (g_sysdev.sl_state == SYSLOG_UNINITIALIZED ||
-          g_sysdev.sl_state == SYSLOG_INITIALIZING)
+      if (g_syslog_dev.sl_state == SYSLOG_UNINITIALIZED ||
+          g_syslog_dev.sl_state == SYSLOG_INITIALIZING)
        {
          errcode = EAGAIN; /* Can't access the SYSLOG now... maybe next time? */
          goto errout_with_errcode;
@@ -423,13 +447,13 @@ int syslog_putc(int ch)
 
       /* Case (6) */
 
-      if (g_sysdev.sl_state == SYSLOG_FAILURE)
+      if (g_syslog_dev.sl_state == SYSLOG_FAILURE)
         {
           errcode = ENXIO;  /* There is no SYSLOG device */
           goto errout_with_errcode;
         }
 
-      /* syslog_initialize() is called as soon as enough of the operating
+      /* syslog_dev_initialize() is called as soon as enough of the operating
        * system is in place to support the open operation... but it is
        * possible that the SYSLOG device is not yet registered at that time.
        * In this case, we know that the system is sufficiently initialized
@@ -441,16 +465,19 @@ int syslog_putc(int ch)
        */
 
       sched_lock();
-      if (g_sysdev.sl_state == SYSLOG_REOPEN)
+      if (g_syslog_dev.sl_state == SYSLOG_REOPEN)
         {
           /* Try again to initialize the device.  We may do this repeatedly
            * because the log device might be something that was not ready
-           * the first time that syslog_initializee() was called (such as a
+           * the first time that syslog_dev_initializee() was called (such as a
            * USB serial device that has not yet been connected or a file in
            * an NFS mounted file system that has not yet been mounted).
            */
 
-          ret = syslog_initialize();
+          DEBUGASSERT(g_syslog_dev.sl_devpath != NULL);
+          ret = syslog_dev_initialize(g_syslog_dev.sl_devpath,
+                                      (int)g_syslog_dev.sl_oflags,
+                                      (int)g_syslog_dev.sl_mode);
           if (ret < 0)
             {
               sched_unlock();
@@ -460,7 +487,7 @@ int syslog_putc(int ch)
         }
 
       sched_unlock();
-      DEBUGASSERT(g_sysdev.sl_state == SYSLOG_OPENED);
+      DEBUGASSERT(g_syslog_dev.sl_state == SYSLOG_OPENED);
     }
 
   /* Ignore carriage returns */
@@ -474,11 +501,11 @@ int syslog_putc(int ch)
    * value to write.
    */
 
-  ret = syslog_takesem();
+  ret = syslog_dev_takesem();
   if (ret < 0)
     {
       /* We probably already hold the semaphore and were probably
-       * re-entered by the logic kicked off by syslog_write().
+       * re-entered by the logic kicked off by syslog_dev_write().
        * We might also have been interrupted by a signal.  Either
        * way, we are outta here.
        */
@@ -493,7 +520,7 @@ int syslog_putc(int ch)
     {
       /* Write the CR-LF sequence */
 
-      nbytes = syslog_write(g_syscrlf, 2);
+      nbytes = syslog_dev_write(g_syscrlf, 2);
 
       /* Synchronize the file when each CR-LF is encountered (i.e.,
        * implements line buffering always).
@@ -502,7 +529,7 @@ int syslog_putc(int ch)
 #ifndef CONFIG_DISABLE_MOUNTPOINT
       if (nbytes > 0)
         {
-          syslog_flush();
+          (void)syslog_dev_flush();
         }
 #endif
     }
@@ -511,10 +538,10 @@ int syslog_putc(int ch)
       /* Write the non-newline character (and don't flush) */
 
       uch = (uint8_t)ch;
-      nbytes = syslog_write(&uch, 1);
+      nbytes = syslog_dev_write(&uch, 1);
     }
 
-  syslog_givesem();
+  syslog_dev_givesem();
 
   /* Check if the write was successful.  If not, nbytes will be
    * a negated errno value.
@@ -533,4 +560,38 @@ errout_with_errcode:
   return EOF;
 }
 
-#endif /* CONFIG_SYSLOG && CONFIG_SYSLOG_CHAR */
+/****************************************************************************
+ * Name: syslog_dev_flush
+ *
+ * Description:
+ *   Flush any buffer data in the file system to media.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value is returned on any failure.
+ *
+ ****************************************************************************/
+
+int syslog_dev_flush(void)
+{
+  int ret = 0;;
+
+#ifndef CONFIG_DISABLE_MOUNTPOINT
+  FAR struct inode *inode = g_syslog_dev.sl_file.f_inode;
+
+  /* Is this a mountpoint? Does it support the sync method? */
+
+  if (inode && inode->u.i_mops->sync)
+    {
+      /* Yes... synchronize to the stream */
+
+      ret = inode->u.i_mops->sync(&g_syslog_dev.sl_file);
+    }
+#endif
+
+  return ret;
+}
+
+#endif /* CONFIG_NFILE_DESCRIPTORS > 0 */

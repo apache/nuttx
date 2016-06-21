@@ -778,7 +778,6 @@ Where <subdir> is one of the following:
        the system logging device:
 
        Device Drivers -> System Logging Device Options:
-         CONFIG_SYSLOG=y                    : Enable output to syslog, not console
          CONFIG_SYSLOG_CHAR=y               : Use a character device for system logging
          CONFIG_SYSLOG_DEVPATH="/dev/ttyS0" : USART2 will be /dev/ttyS0
 

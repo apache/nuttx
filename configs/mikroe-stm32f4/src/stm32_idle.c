@@ -125,7 +125,7 @@ static void up_idlepm(void)
 
   if (newstate != oldstate)
     {
-      _llinfo("newstate= %d oldstate=%d\n", newstate, oldstate);
+      _info("newstate= %d oldstate=%d\n", newstate, oldstate);
 
       flags = enter_critical_section();
 

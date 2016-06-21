@@ -100,10 +100,10 @@ static int usbtrace_syslog(const char *fmt, ...)
   va_list ap;
   int ret;
 
-  /* Let lowvsyslog do the real work */
+  /* Let vsyslog do the real work */
 
   va_start(ap, fmt);
-  ret = lowvsyslog(LOG_INFO, fmt, ap);
+  ret = vsyslog(LOG_INFO, fmt, ap);
   va_end(ap);
   return ret;
 }
@@ -190,7 +190,7 @@ void usbtrace(uint16_t event, uint16_t value)
             }
         }
 #else
-      /* Just print the data using lowsyslog */
+      /* Just print the data using syslog */
 
       usbtrace_trprintf(usbtrace_syslog, event, value);
 #endif

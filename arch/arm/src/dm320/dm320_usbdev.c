@@ -268,7 +268,7 @@ struct dm320_epinfo_s
 
 /* Register operations */
 
-#if defined(CONFIG_DM320_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
+#ifdef CONFIG_DM320_USBDEV_REGDEBUG
 static uint32_t dm320_getreg8(uint32_t addr);
 static uint32_t dm320_getreg16(uint32_t addr);
 static uint32_t dm320_getreg32(uint32_t addr);
@@ -422,7 +422,7 @@ static const struct dm320_epinfo_s g_epinfo[DM320_NENDPOINTS] =
  *
  ****************************************************************************/
 
-#if defined(CONFIG_DM320_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
+#ifdef CONFIG_DM320_USBDEV_REGDEBUG
 static uint8_t dm320_getreg8(uint32_t addr)
 {
   static uint32_t prevaddr = 0;
@@ -443,7 +443,7 @@ static uint8_t dm320_getreg8(uint32_t addr)
         {
           if (count == 4)
             {
-              _llerr("...\n");
+              uinfo("...\n");
             }
 
           return val;
@@ -460,7 +460,7 @@ static uint8_t dm320_getreg8(uint32_t addr)
         {
           /* Yes.. then show how many times the value repeated */
 
-          _llerr("[repeats %d more times]\n", count-3);
+          uinfo("[repeats %d more times]\n", count-3);
         }
 
       /* Save the new address, value, and count */
@@ -472,7 +472,7 @@ static uint8_t dm320_getreg8(uint32_t addr)
 
   /* Show the register value read */
 
-  _llerr("%08x->%02x\n", addr, val);
+  uinfo("%08x->%02x\n", addr, val);
   return val;
 }
 #endif
@@ -485,7 +485,7 @@ static uint8_t dm320_getreg8(uint32_t addr)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_DM320_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
+#ifdef CONFIG_DM320_USBDEV_REGDEBUG
 static uint32_t dm320_getreg16(uint32_t addr)
 {
   static uint32_t prevaddr = 0;
@@ -506,7 +506,7 @@ static uint32_t dm320_getreg16(uint32_t addr)
         {
           if (count == 4)
             {
-              _llerr("...\n");
+              uinfo("...\n");
             }
 
           return val;
@@ -523,7 +523,7 @@ static uint32_t dm320_getreg16(uint32_t addr)
         {
           /* Yes.. then show how many times the value repeated */
 
-          _llerr("[repeats %d more times]\n", count-3);
+          uinfo("[repeats %d more times]\n", count-3);
         }
 
       /* Save the new address, value, and count */
@@ -535,7 +535,7 @@ static uint32_t dm320_getreg16(uint32_t addr)
 
   /* Show the register value read */
 
-  _llerr("%08x->%04x\n", addr, val);
+  uinfo("%08x->%04x\n", addr, val);
   return val;
 }
 #endif
@@ -548,7 +548,7 @@ static uint32_t dm320_getreg16(uint32_t addr)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_DM320_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
+#ifdef CONFIG_DM320_USBDEV_REGDEBUG
 static uint32_t dm320_getreg32(uint32_t addr)
 {
   static uint32_t prevaddr = 0;
@@ -569,7 +569,7 @@ static uint32_t dm320_getreg32(uint32_t addr)
         {
           if (count == 4)
             {
-              _llerr("...\n");
+              uinfo("...\n");
             }
 
           return val;
@@ -586,7 +586,7 @@ static uint32_t dm320_getreg32(uint32_t addr)
         {
           /* Yes.. then show how many times the value repeated */
 
-          _llerr("[repeats %d more times]\n", count-3);
+          uinfo("[repeats %d more times]\n", count-3);
         }
 
       /* Save the new address, value, and count */
@@ -598,7 +598,7 @@ static uint32_t dm320_getreg32(uint32_t addr)
 
   /* Show the register value read */
 
-  _llerr("%08x->%08x\n", addr, val);
+  uinfo("%08x->%08x\n", addr, val);
   return val;
 }
 #endif
@@ -611,12 +611,12 @@ static uint32_t dm320_getreg32(uint32_t addr)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_DM320_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
+#ifdef CONFIG_DM320_USBDEV_REGDEBUG
 static void dm320_putreg8(uint8_t val, uint32_t addr)
 {
   /* Show the register value being written */
 
-  _llerr("%08x<-%02x\n", addr, val);
+  uinfo("%08x<-%02x\n", addr, val);
 
   /* Write the value */
 
@@ -632,12 +632,12 @@ static void dm320_putreg8(uint8_t val, uint32_t addr)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_DM320_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
+#ifdef CONFIG_DM320_USBDEV_REGDEBUG
 static void dm320_putreg16(uint16_t val, uint32_t addr)
 {
   /* Show the register value being written */
 
-  _llerr("%08x<-%04x\n", addr, val);
+  uinfo("%08x<-%04x\n", addr, val);
 
   /* Write the value */
 
@@ -653,12 +653,12 @@ static void dm320_putreg16(uint16_t val, uint32_t addr)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_DM320_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
+#ifdef CONFIG_DM320_USBDEV_REGDEBUG
 static void dm320_putreg32(uint32_t val, uint32_t addr)
 {
   /* Show the register value being written */
 
-  _llerr("%08x<-%08x\n", addr, val);
+  uinfo("%08x<-%08x\n", addr, val);
 
   /* Write the value */
 
@@ -1216,8 +1216,8 @@ static inline void dm320_ep0setup(struct dm320_usbdev_s *priv)
   value = GETUINT16(ctrl.value);
   len   = GETUINT16(ctrl.len);
 
-  ullinfo("type=%02x req=%02x value=%04x index=%04x len=%04x\n",
-          ctrl.type, ctrl.req, value, index, len);
+  uinfo("type=%02x req=%02x value=%04x index=%04x len=%04x\n",
+        ctrl.type, ctrl.req, value, index, len);
 
   /* Dispatch any non-standard requests */
 
@@ -1618,7 +1618,7 @@ static int dm320_ctlrinterrupt(int irq, FAR void *context)
               }
             else
               {
-                ullinfo("Pending data on OUT endpoint\n");
+                uinfo("Pending data on OUT endpoint\n");
                 priv->rxpending = 1;
               }
           }
@@ -2415,9 +2415,9 @@ void up_usbinitialize(void)
   memset(priv, 0, sizeof(struct dm320_usbdev_s));
   priv->usbdev.ops = &g_devops;
 
-#ifdef CONFIG_DEBUG_USB
+#ifdef CONFIG_DEBUG_USB_INFO
   chiprev = dm320_getreg16(DM320_BUSC_REVR);
-  ullerr("DM320 revision : %d.%d\n", chiprev >> 4, chiprev & 0x0f);
+  uinfo("DM320 revision : %d.%d\n", chiprev >> 4, chiprev & 0x0f);
 #endif
 
   /* Enable USB clock & GIO clock  */

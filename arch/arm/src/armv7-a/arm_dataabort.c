@@ -104,7 +104,7 @@ uint32_t *arm_dataabort(uint32_t *regs, uint32_t dfar, uint32_t dfsr)
    * fatal error.
    */
 
-  pgllerr("DFSR: %08x DFAR: %08x\n", dfsr, dfar);
+  pginfo("DFSR: %08x DFAR: %08x\n", dfsr, dfar);
   if ((dfsr & FSR_MASK) != FSR_PAGE)
     {
       goto segfault;
@@ -115,7 +115,7 @@ uint32_t *arm_dataabort(uint32_t *regs, uint32_t dfar, uint32_t dfsr)
    * (It has not yet been saved in the register context save area).
    */
 
-  pgllinfo("VBASE: %08x VEND: %08x\n", PG_PAGED_VBASE, PG_PAGED_VEND);
+  pginfo("VBASE: %08x VEND: %08x\n", PG_PAGED_VBASE, PG_PAGED_VEND);
   if (dfar < PG_PAGED_VBASE || dfar >= PG_PAGED_VEND)
     {
       goto segfault;

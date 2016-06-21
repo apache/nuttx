@@ -84,7 +84,7 @@ volatile uint32_t *g_current_regs[1];
 
 /****************************************************************************
  * Name: sam_nmi, sam_busfault, sam_usagefault, sam_pendsv,
- *       sam_errmonitor, sam_pendsv, sam_reserved
+ *       sam_dbgmonitor, sam_pendsv, sam_reserved
  *
  * Description:
  *   Handlers for various execptions.  None are handled and all are fatal

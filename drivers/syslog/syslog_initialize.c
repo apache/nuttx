@@ -1,7 +1,7 @@
 /****************************************************************************
- * libc/syslog/lib_syslogstream.c
+ * drivers/syslog/syslog_initialize.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,84 +40,75 @@
 #include <nuttx/config.h>
 
 #include <stdio.h>
-#include <unistd.h>
-#include <assert.h>
-#include <errno.h>
 
 #include <nuttx/syslog/syslog.h>
-#include <nuttx/streams.h>
 
-#include "syslog/syslog.h"
+#include "syslog.h"
 
-#ifdef CONFIG_SYSLOG
-
-/****************************************************************************
- * Pre-processor definition
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: syslogstream_putc
- ****************************************************************************/
-
-static void syslogstream_putc(FAR struct lib_outstream_s *this, int ch)
-{
-  int ret;
-
-  /* Try writing until the write was successful or until an irrecoverable
-   * error occurs.
-   */
-
-  do
-    {
-      /* Write the character to the supported logging device.  On failure,
-       * syslog_putc returns EOF with the errno value set;
-       */
-
-      ret = syslog_putc(ch);
-      if (ret != EOF)
-        {
-          this->nput++;
-          return;
-        }
-
-      /* The special errno value -EINTR means that syslog_putc() was
-       * awakened by a signal.  This is not a real error and must be
-       * ignored in this context.
-       */
-    }
-  while (errno == -EINTR);
-}
+#ifndef CONFIG_ARCH_SYSLOG
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lib_syslogstream
+ * Name: syslog_initialize
  *
  * Description:
- *   Initializes a stream for use with the configured syslog interface.
+ *   One power up, the SYSLOG facility is non-existent or limited to very
+ *   low-level output.  This function is called later in the initialization
+ *   sequence after full driver support has been initialized.  It installs
+ *   the configured SYSLOG drivers and enables full SYSLOGing capability.
  *
- * Input parameters:
- *   lowoutstream - User allocated, uninitialized instance of struct
- *                  lib_lowoutstream_s to be initialized.
+ *   This function performs these basic operations:
+ *
+ *   - Initialize the SYSLOG device
+ *   - Call syslog_channel() to begin using that device.
+ *
+ *   If CONFIG_ARCH_SYSLOG is selected, then the architecture-specifica
+ *   logic will provide its own SYSLOG device initialize which must include
+ *   as a minimum a call to syslog_channel() to use the device.
+ *
+ * Input Parameters:
+ *   phase - One of {SYSLOG_INIT_EARLY, SYSLOG_INIT_LATE}
  *
  * Returned Value:
- *   None (User allocated instance initialized).
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure.
  *
  ****************************************************************************/
 
-void lib_syslogstream(FAR struct lib_outstream_s *stream)
+int syslog_initialize(enum syslog_init_e phase)
 {
-  stream->put   = syslogstream_putc;
-#ifdef CONFIG_STDIO_LINEBUFFER
-  stream->flush = lib_noflush;
+  int ret = OK;
+
+#if defined(CONFIG_SYSLOG_CHAR)
+  if (phase == SYSLOG_INIT_LATE)
+    {
+      /* Enable use of a character device as the SYSLOG device */
+
+      ret = syslog_dev_channel();
+    }
+
+#elif defined(CONFIG_RAMLOG_SYSLOG)
+  if (phase == SYSLOG_INIT_EARLY)
+    {
+      /* Use the RAMLOG as the SYSLOG device */
+
+      ret = ramlog_syslog_channel();
+    }
+
+#elif defined(CONFIG_SYSLOG_CONSOLE)
+  if (phase == SYSLOG_INIT_LATE)
+    {
+      /* Use the console device as the SYSLOG device */
+
+      ret = syslog_console_channel();
+    }
+
 #endif
-  stream->nput  = 0;
+
+  return ret;
 }
 
-#endif /* CONFIG_SYSLOG */
+#endif /* CONFIG_ARCH_SYSLOG */

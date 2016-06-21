@@ -154,7 +154,7 @@ static uint16_t ping_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
   FAR uint8_t *ptr;
   int i;
 
-  nllinfo("flags: %04x\n", flags);
+  ninfo("flags: %04x\n", flags);
 
   if (pstate)
     {
@@ -162,7 +162,7 @@ static uint16_t ping_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
 
       if ((flags & NETDEV_DOWN) != 0)
         {
-          nllerr("ERROR: Interface is down\n");
+          nerr("ERROR: Interface is down\n");
           pstate->png_result = -ENETUNREACH;
           goto end_wait;
         }
@@ -177,8 +177,8 @@ static uint16_t ping_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
         {
           FAR struct icmp_iphdr_s *icmp = (FAR struct icmp_iphdr_s *)conn;
 
-          nllinfo("ECHO reply: id=%d seqno=%d\n",
-                  ntohs(icmp->id), ntohs(icmp->seqno));
+          ninfo("ECHO reply: id=%d seqno=%d\n",
+                ntohs(icmp->id), ntohs(icmp->seqno));
 
           if (ntohs(icmp->id) == pstate->png_id)
             {
@@ -236,7 +236,7 @@ static uint16_t ping_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
            * of the ICMP header.
            */
 
-          nllinfo("Send ECHO request: seqno=%d\n", pstate->png_seqno);
+          ninfo("Send ECHO request: seqno=%d\n", pstate->png_seqno);
 
           dev->d_sndlen = pstate->png_datlen + 4;
           icmp_send(dev, &pstate->png_addr);
@@ -262,12 +262,12 @@ static uint16_t ping_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
                * that the destination address is not reachable.
                */
 
-              nllerr("ERROR:Not reachable\n");
+              nerr("ERROR:Not reachable\n");
               failcode = -ENETUNREACH;
             }
           else
             {
-              nllerr("ERROR:Ping timeout\n");
+              nerr("ERROR:Ping timeout\n");
               failcode = -ETIMEDOUT;
             }
 
@@ -283,7 +283,7 @@ static uint16_t ping_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
   return flags;
 
 end_wait:
-  nllinfo("Resuming\n");
+  ninfo("Resuming\n");
 
   /* Do not allow any further callbacks */
 
@@ -397,7 +397,7 @@ int icmp_ping(in_addr_t addr, uint16_t id, uint16_t seqno, uint16_t datalen,
        * re-enabled when the task restarts.
        */
 
-      nllinfo("Start time: 0x%08x seqno: %d\n", state.png_time, seqno);
+      ninfo("Start time: 0x%08x seqno: %d\n", state.png_time, seqno);
       net_lockedwait(&state.png_sem);
 
       icmp_callback_free(dev, state.png_cb);
@@ -411,12 +411,12 @@ int icmp_ping(in_addr_t addr, uint16_t id, uint16_t seqno, uint16_t datalen,
 
   if (!state.png_result)
     {
-      nllinfo("Return seqno=%d\n", state.png_seqno);
+      ninfo("Return seqno=%d\n", state.png_seqno);
       return (int)state.png_seqno;
     }
   else
     {
-      nllerr("ERROR: Return error=%d\n", -state.png_result);
+      nerr("ERROR: Return error=%d\n", -state.png_result);
       return state.png_result;
     }
 }

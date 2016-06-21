@@ -1,8 +1,9 @@
 /****************************************************************************************************
  * arch/arm/src/stm32f7/chip/stm32f74xx75xx_rcc.h
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            David Sidrane <david_s5@nscdg.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -616,7 +617,7 @@
 #define RCC_DCKCFGR1_SAI2SEL_SHIFT   (22)      /* Bits 22-23: SAI 2 clock source selection */
 #define RCC_DCKCFGR1_SAI2SEL_MASK    (0x3 << RCC_DCKCFGR1_SAI2SEL_SHIFT)
 #  define RCC_DCKCFGR1_SAI2SEL(n)    ((n) << RCC_DCKCFGR1_SAI2SEL_SHIFT)
-#define RCC_DCKCFGR1_TIMPRE          (1 << 24) /* Bit 24: Timer clock prescaler selection */
+#define RCC_DCKCFGR1_TIMPRESEL       (1 << 24) /* Bit 24: Timer clock prescaler selection */
 
 /* Dedicated clocks configuration register 2 */
 

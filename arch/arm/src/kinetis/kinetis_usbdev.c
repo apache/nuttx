@@ -86,7 +86,7 @@
  * enabled.
  */
 
-#ifndef CONFIG_DEBUG_FEATURES
+#ifndef CONFIG_DEBUG_USB_INFO
 #  undef CONFIG_KHCI_USBDEV_REGDEBUG
 #  undef CONFIG_KHCI_USBDEV_BDTDEBUG
 #endif
@@ -365,42 +365,21 @@ const struct trace_msg_t g_usb_trace_strings_deverror[] =
  */
 
 #ifdef CONFIG_KHCI_USBDEV_REGDEBUG
-
 #  undef CONFIG_KHCI_USBDEV_BDTDEBUG
 #  define CONFIG_KHCI_USBDEV_BDTDEBUG 1
-
-#  define regerr  _llerr
-#  ifdef CONFIG_DEBUG_INFO
-#    define reginfo  _llerr
-#  else
-#    define reginfo(x...)
-#  endif
-
 #else
-
 #  define khci_getreg(addr)      getreg8(addr)
 #  define khci_putreg(val,addr)  putreg8(val,addr)
-#  define regerr(x...)
-#  define reginfo(x...)
-
 #endif
 
 /* CONFIG_KHCI_USBDEV_BDTDEBUG dumps most BDT settings */
 
 #ifdef CONFIG_KHCI_USBDEV_BDTDEBUG
-
-#  define bdterr  _llerr
-#  ifdef CONFIG_DEBUG_INFO
-#    define bdtinfo  _llerr
-#  else
-#    define bdtinfo(x...)
-#  endif
-
+#  define bdterr  uerr
+#  define bdtinfo uinfo
 #else
-
 #  define bdterr(x...)
 #  define bdtinfo(x...)
-
 #endif
 
 /****************************************************************************
@@ -714,7 +693,7 @@ static uint16_t khci_getreg(uint32_t addr)
         {
            if (count == 4)
              {
-               _llerr("...\n");
+               uinfo("...\n");
              }
           return val;
         }
@@ -730,7 +709,7 @@ static uint16_t khci_getreg(uint32_t addr)
          {
            /* Yes.. then show how many times the value repeated */
 
-           _llerr("[repeats %d more times]\n", count-3);
+           uinfo("[repeats %d more times]\n", count-3);
          }
 
        /* Save the new address, value, and count */
@@ -742,7 +721,7 @@ static uint16_t khci_getreg(uint32_t addr)
 
   /* Show the register value read */
 
-  _llerr("%08x->%04x\n", addr, val);
+  uinfo("%08x->%04x\n", addr, val);
   return val;
 }
 #endif
@@ -756,7 +735,7 @@ static void khci_putreg(uint32_t val, uint32_t addr)
 {
   /* Show the register value being written */
 
-  _llerr("%08x<-%04x\n", addr, val);
+  uinfo("%08x<-%04x\n", addr, val);
 
   /* Write the value */
 
@@ -953,8 +932,8 @@ static void khci_epwrite(struct khci_ep_s *privep,
 
   /* And, finally, give the BDT to the USB */
 
-  bdterr("EP%d BDT IN [%p] {%08x, %08x}\n",
-         USB_EPNO(privep->ep.eplog), bdt, status, bdt->addr);
+  bdtinfo("EP%d BDT IN [%p] {%08x, %08x}\n",
+          USB_EPNO(privep->ep.eplog), bdt, status, bdt->addr);
 
   bdt->status = status;
 }
@@ -987,15 +966,15 @@ static void khci_wrcomplete(struct khci_usbdev_s *priv,
   epno   = USB_EPNO(privep->ep.eplog);
 
 #ifdef CONFIG_USBDEV_NOWRITEAHEAD
-  ullinfo("EP%d: len=%d xfrd=%d inflight=%d\n",
-          epno, privreq->req.len, privreq->req.xfrd, privreq->inflight[0]);
+  uinfo("EP%d: len=%d xfrd=%d inflight=%d\n",
+        epno, privreq->req.len, privreq->req.xfrd, privreq->inflight[0]);
 #else
-  ullinfo("EP%d: len=%d xfrd=%d inflight={%d, %d}\n",
-          epno, privreq->req.len, privreq->req.xfrd,
-          privreq->inflight[0], privreq->inflight[1]);
+  uinfo("EP%d: len=%d xfrd=%d inflight={%d, %d}\n",
+        epno, privreq->req.len, privreq->req.xfrd,
+        privreq->inflight[0], privreq->inflight[1]);
 #endif
-  bdterr("EP%d BDT IN [%p] {%08x, %08x}\n",
-         epno, bdtin, bdtin->status, bdtin->addr);
+  bdtinfo("EP%d BDT IN [%p] {%08x, %08x}\n",
+        epno, bdtin, bdtin->status, bdtin->addr);
 
   /* We should own the BDT that just completed. But NULLify the entire BDT IN.
    * Why?  So that we can tell later that the BDT available.  No, it is not
@@ -1303,8 +1282,8 @@ static int khci_wrstart(struct khci_usbdev_s *priv,
       bytesleft = privreq->req.len;
     }
 
-  ullinfo("epno=%d req=%p: len=%d xfrd=%d index=%d nullpkt=%d\n",
-          epno, privreq, privreq->req.len, xfrd, index, privep->txnullpkt);
+  uinfo("epno=%d req=%p: len=%d xfrd=%d index=%d nullpkt=%d\n",
+        epno, privreq, privreq->req.len, xfrd, index, privep->txnullpkt);
 
   /* Get the number of bytes left to be sent in the packet */
 
@@ -1417,10 +1396,10 @@ static int khci_rdcomplete(struct khci_usbdev_s *priv,
   bdtout = privep->bdtout;
   epno   = USB_EPNO(privep->ep.eplog);
 
-  ullinfo("EP%d: len=%d xfrd=%d\n",
-          epno, privreq->req.len, privreq->req.xfrd);
-  bdterr("EP%d BDT OUT [%p] {%08x, %08x}\n",
-         epno, bdtout, bdtout->status, bdtout->addr);
+  uinfo("EP%d: len=%d xfrd=%d\n",
+        epno, privreq->req.len, privreq->req.xfrd);
+  bdtinfo("EP%d BDT OUT [%p] {%08x, %08x}\n",
+        epno, bdtout, bdtout->status, bdtout->addr);
 
   /* We should own the BDT that just completed */
 
@@ -1563,7 +1542,7 @@ static int khci_ep0rdsetup(struct khci_usbdev_s *priv, uint8_t *dest,
 
   /* Then give the BDT to the USB */
 
-  bdterr("EP0 BDT OUT [%p] {%08x, %08x}\n", bdtout, status, bdtout->addr);
+  bdtinfo("EP0 BDT OUT [%p] {%08x, %08x}\n", bdtout, status, bdtout->addr);
   bdtout->status = status;
 
   priv->ctrlstate = CTRLSTATE_RDREQUEST;
@@ -1664,7 +1643,8 @@ static int khci_rdsetup(struct khci_ep_s *privep, uint8_t *dest, int readlen)
 
   /* Then give the BDT to the USB */
 
-  bdterr("EP%d BDT OUT [%p] {%08x, %08x}\n",  epno, bdtout, status, bdtout->addr);
+  bdtinfo("EP%d BDT OUT [%p] {%08x, %08x}\n", 
+          epno, bdtout, status, bdtout->addr);
 
   bdtout->status = status;
   return OK;
@@ -1705,7 +1685,7 @@ static int khci_rdrequest(struct khci_usbdev_s *priv,
       return OK;
     }
 
-  ullinfo("EP%d: len=%d\n", USB_EPNO(privep->ep.eplog), privreq->req.len);
+  uinfo("EP%d: len=%d\n", USB_EPNO(privep->ep.eplog), privreq->req.len);
 
   /* Ignore any attempt to receive a zero length packet */
 
@@ -1995,8 +1975,8 @@ static void khci_ep0setup(struct khci_usbdev_s *priv)
   index.w = GETUINT16(priv->ctrl.index);
   len.w   = GETUINT16(priv->ctrl.len);
 
-  ullinfo("SETUP: type=%02x req=%02x value=%04x index=%04x len=%04x\n",
-          priv->ctrl.type, priv->ctrl.req, value.w, index.w, len.w);
+  uinfo("SETUP: type=%02x req=%02x value=%04x index=%04x len=%04x\n",
+        priv->ctrl.type, priv->ctrl.req, value.w, index.w, len.w);
 
   /* Dispatch any non-standard requests */
 
@@ -2239,7 +2219,7 @@ static void khci_ep0setup(struct khci_usbdev_s *priv)
               {
                 /* Special case recipient=device test mode */
 
-                ullinfo("test mode: %d\n", index.w);
+                uinfo("test mode: %d\n", index.w);
               }
             else
               {
@@ -2676,7 +2656,7 @@ static void khci_ep0transfer(struct khci_usbdev_s *priv, uint16_t ustat)
       bdt   = &g_bdt[index];
       priv->eplist[0].bdtout = bdt;
 
-      bdterr("EP0 BDT OUT [%p] {%08x, %08x}\n", bdt, bdt->status, bdt->addr);
+      bdtinfo("EP0 BDT OUT [%p] {%08x, %08x}\n", bdt, bdt->status, bdt->addr);
 
       /* Check the current EP0 OUT buffer contains a SETUP packet */
 
@@ -2913,7 +2893,7 @@ x
   if ((usbir & USB_INT_ERROR) != 0)
     {
       usbtrace(TRACE_INTDECODE(KHCI_TRACEINTID_UERR), usbir);
-      ullerr("Error: EIR=%04x\n", khci_getreg(KINETIS_USB0_ERRSTAT));
+      uerr("ERROR: EIR=%04x\n", khci_getreg(KINETIS_USB0_ERRSTAT));
 
       /* Clear all pending USB error interrupts */
 
@@ -3241,7 +3221,7 @@ static int khci_epconfigure(struct usbdev_ep_s *ep,
   if (!ep || !desc)
     {
       usbtrace(TRACE_DEVERROR(KHCI_TRACEERR_INVALIDPARMS), 0);
-      ullerr("ERROR: ep=%p desc=%p\n");
+      uerr("ERROR: ep=%p desc=%p\n");
       return -EINVAL;
     }
 #endif
@@ -3299,7 +3279,8 @@ static int khci_epconfigure(struct usbdev_ep_s *ep,
       bdt->status = 0;
       bdt->addr   = 0;
 
-      bdterr("EP%d BDT IN [%p] {%08x, %08x}\n", epno, bdt, bdt->status, bdt->addr);
+      bdtinfo("EP%d BDT IN [%p] {%08x, %08x}\n",
+              epno, bdt, bdt->status, bdt->addr);
 
       /* Now do the same for the other buffer. */
 
@@ -3307,7 +3288,8 @@ static int khci_epconfigure(struct usbdev_ep_s *ep,
       bdt->status = 0;
       bdt->addr   = 0;
 
-      bdterr("EP%d BDT IN [%p] {%08x, %08x}\n", epno, bdt, bdt->status, bdt->addr);
+      bdtinfo("EP%d BDT IN [%p] {%08x, %08x}\n",
+              epno, bdt, bdt->status, bdt->addr);
     }
 
   if (!epin || bidi)
@@ -3321,7 +3303,8 @@ static int khci_epconfigure(struct usbdev_ep_s *ep,
       bdt->status = 0;
       bdt->addr   = 0;
 
-      bdterr("EP%d BDT OUT [%p] {%08x, %08x}\n", epno, bdt, bdt->status, bdt->addr);
+      bdtinfo("EP%d BDT OUT [%p] {%08x, %08x}\n",
+              epno, bdt, bdt->status, bdt->addr);
 
       /* Now do the same for the other buffer. */
 
@@ -3329,7 +3312,8 @@ static int khci_epconfigure(struct usbdev_ep_s *ep,
       bdt->status = 0;
       bdt->addr   = 0;
 
-      bdterr("EP%d BDT OUT [%p] {%08x, %08x}\n", epno, bdt, bdt->status, bdt->addr);
+      bdtinfo("EP%d BDT OUT [%p] {%08x, %08x}\n",
+              epno, bdt, bdt->status, bdt->addr);
     }
 
   /* Get the maxpacket size of the endpoint. */
@@ -3368,7 +3352,7 @@ static int khci_epdisable(struct usbdev_ep_s *ep)
   if (!ep)
     {
       usbtrace(TRACE_DEVERROR(KHCI_TRACEERR_INVALIDPARMS), 0);
-      ullerr("ERROR: ep=%p\n", ep);
+      uerr("ERROR: ep=%p\n", ep);
       return -EINVAL;
     }
 #endif
@@ -3467,7 +3451,8 @@ static int khci_epsubmit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
   if (!req || !req->callback || !req->buf || !ep)
     {
       usbtrace(TRACE_DEVERROR(KHCI_TRACEERR_INVALIDPARMS), 0);
-      ullerr("ERROR: req=%p callback=%p buf=%p ep=%p\n", req, req->callback, req->buf, ep);
+      uerr("ERROR: req=%p callback=%p buf=%p ep=%p\n",
+           req, req->callback, req->buf, ep);
       return -EINVAL;
     }
 #endif
@@ -3479,7 +3464,7 @@ static int khci_epsubmit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
   if (!priv->driver)
     {
       usbtrace(TRACE_DEVERROR(KHCI_TRACEERR_NOTCONFIGURED), priv->usbdev.speed);
-      ullerr("ERROR: driver=%p\n", priv->driver);
+      uerr("ERROR: driver=%p\n", priv->driver);
       return -ESHUTDOWN;
     }
 #endif
@@ -3666,10 +3651,10 @@ static int khci_epbdtstall(struct usbdev_ep_s *ep, bool resume, bool epin)
           bdt->addr          = (uint8_t *)physaddr;
           bdt->status        = (USB_BDT_UOWN | bytecount);
 
-          bdterr("EP0 BDT IN [%p] {%08x, %08x}\n",
-                 bdt, bdt->status, bdt->addr);
-          bdterr("EP0 BDT IN [%p] {%08x, %08x}\n",
-                 otherbdt, otherbdt->status, otherbdt->addr);
+          bdtinfo("EP0 BDT IN [%p] {%08x, %08x}\n",
+                  bdt, bdt->status, bdt->addr);
+          bdtinfo("EP0 BDT IN [%p] {%08x, %08x}\n",
+                  otherbdt, otherbdt->status, otherbdt->addr);
         }
       else
         {
@@ -3683,10 +3668,10 @@ static int khci_epbdtstall(struct usbdev_ep_s *ep, bool resume, bool epin)
           bdt->addr        = 0;
           bdt->status      = 0;
 
-          bdterr("EP%d BDT %s [%p] {%08x, %08x}\n",
-                 epno, epin ? "IN" : "OUT", bdt, bdt->status, bdt->addr);
-          bdterr("EP%d BDT %s [%p] {%08x, %08x}\n",
-                 epno, epin ? "IN" : "OUT", otherbdt, otherbdt->status, otherbdt->addr);
+          bdtinfo("EP%d BDT %s [%p] {%08x, %08x}\n",
+                  epno, epin ? "IN" : "OUT", bdt, bdt->status, bdt->addr);
+          bdtinfo("EP%d BDT %s [%p] {%08x, %08x}\n",
+                  epno, epin ? "IN" : "OUT", otherbdt, otherbdt->status, otherbdt->addr);
 
           /* Restart any queued requests (after a delay so that we can be assured
            * that the hardware has recovered from the stall -- I don't know of any
@@ -3718,10 +3703,10 @@ static int khci_epbdtstall(struct usbdev_ep_s *ep, bool resume, bool epin)
 
       khci_rqstop(privep);
 
-      bdterr("EP%d BDT %s [%p] {%08x, %08x}\n",
-             epno, epin ? "IN" : "OUT", bdt, bdt->status, bdt->addr);
-      bdterr("EP%d BDT %s [%p] {%08x, %08x}\n",
-             epno, epin ? "IN" : "OUT", otherbdt, otherbdt->status, otherbdt->addr);
+      bdtinfo("EP%d BDT %s [%p] {%08x, %08x}\n",
+              epno, epin ? "IN" : "OUT", bdt, bdt->status, bdt->addr);
+      bdtinfo("EP%d BDT %s [%p] {%08x, %08x}\n",
+              epno, epin ? "IN" : "OUT", otherbdt, otherbdt->status, otherbdt->addr);
     }
 
   return OK;
@@ -4248,10 +4233,10 @@ static void khci_hwreset(struct khci_usbdev_s *priv)
   khci_putreg((uint8_t)((uint32_t)g_bdt >> 16), KINETIS_USB0_BDTPAGE2);
   khci_putreg((uint8_t)(((uint32_t)g_bdt >>  8) & USB_BDTPAGE1_MASK), KINETIS_USB0_BDTPAGE1);
 
-  ullerr("BDT Address %hhx \n" ,&g_bdt);
-  ullerr("BDTPAGE3 %hhx\n",khci_getreg(KINETIS_USB0_BDTPAGE3));
-  ullerr("BDTPAGE2 %hhx\n",khci_getreg(KINETIS_USB0_BDTPAGE2));
-  ullerr("BDTPAGE1 %hhx\n",khci_getreg(KINETIS_USB0_BDTPAGE1));
+  uinfo("BDT Address %hhx \n" ,&g_bdt);
+  uinfo("BDTPAGE3 %hhx\n",khci_getreg(KINETIS_USB0_BDTPAGE3));
+  uinfo("BDTPAGE2 %hhx\n",khci_getreg(KINETIS_USB0_BDTPAGE2));
+  uinfo("BDTPAGE1 %hhx\n",khci_getreg(KINETIS_USB0_BDTPAGE1));
 
   /* Clear any pending interrupts */
 

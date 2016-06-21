@@ -91,8 +91,8 @@ void up_decodeirq(uint32_t *regs)
 {
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
   board_autoled_on(LED_INIRQ);
-  lowsyslog(LOG_ERR, "Unexpected IRQ\n");
   CURRENT_REGS = regs;
+  err("ERROR: Unexpected IRQ\n");
   PANIC();
 #else
   unsigned int irq;

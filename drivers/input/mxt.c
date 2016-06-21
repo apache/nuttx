@@ -1097,7 +1097,7 @@ static int mxt_interrupt(FAR const struct mxt_lower_s *lower, FAR void *arg)
   ret = work_queue(HPWORK, &priv->work, mxt_worker, priv, 0);
   if (ret != 0)
     {
-      illerr("ERROR: Failed to queue work: %d\n", ret);
+      ierr("ERROR: Failed to queue work: %d\n", ret);
     }
 
   /* Clear any pending interrupts and return success */

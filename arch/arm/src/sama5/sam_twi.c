@@ -563,7 +563,7 @@ static int twi_interrupt(struct twi_dev_s *priv)
   imr     = twi_getrel(priv, SAM_TWI_IMR_OFFSET);
   pending = sr & imr;
 
-  i2cllinfo("TWI%d pending: %08x\n", priv->attr->twi, pending);
+  i2cinfo("TWI%d pending: %08x\n", priv->attr->twi, pending);
 
   /* Byte received */
 
@@ -659,7 +659,7 @@ static int twi_interrupt(struct twi_dev_s *priv)
     {
       /* Wake up the thread with an I/O error indication */
 
-      i2cllerr("ERROR: TWI%d pending: %08x\n", priv->attr->twi, pending);
+      i2cerr("ERROR: TWI%d pending: %08x\n", priv->attr->twi, pending);
       twi_wakeup(priv, -EIO);
     }
 
@@ -709,7 +709,7 @@ static void twi_timeout(int argc, uint32_t arg, ...)
 {
   struct twi_dev_s *priv = (struct twi_dev_s *)arg;
 
-  i2cllerr("ERROR: TWI%d Timeout!\n", priv->attr->twi);
+  i2cerr("ERROR: TWI%d Timeout!\n", priv->attr->twi);
   twi_wakeup(priv, -ETIMEDOUT);
 }
 

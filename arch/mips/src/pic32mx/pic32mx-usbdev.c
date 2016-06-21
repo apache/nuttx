@@ -280,9 +280,9 @@
 #  undef CONFIG_PIC32MX_USBDEV_BDTDEBUG
 #  define CONFIG_PIC32MX_USBDEV_BDTDEBUG 1
 
-#  define regerr  _llerr
-#  define regwarn _llwarn
-#  define reginfo _llinfo
+#  define regerr  _err
+#  define regwarn _warn
+#  define reginfo _info
 
 #else
 
@@ -298,9 +298,9 @@
 
 #ifdef CONFIG_PIC32MX_USBDEV_BDTDEBUG
 
-#  define bdterr  _llerr
-#  define bdtwarn _llwarn
-#  define bdtinfo _llinfo
+#  define bdterr  _err
+#  define bdtwarn _warn
+#  define bdtinfo _info
 
 #else
 
@@ -893,15 +893,15 @@ static void pic32mx_wrcomplete(struct pic32mx_usbdev_s *priv,
   epno   = USB_EPNO(privep->ep.eplog);
 
 #ifdef CONFIG_USBDEV_NOWRITEAHEAD
-  ullinfo("EP%d: len=%d xfrd=%d inflight=%d\n",
-          epno, privreq->req.len, privreq->req.xfrd, privreq->inflight[0]);
+  uinfo("EP%d: len=%d xfrd=%d inflight=%d\n",
+        epno, privreq->req.len, privreq->req.xfrd, privreq->inflight[0]);
 #else
-  ullinfo("EP%d: len=%d xfrd=%d inflight={%d, %d}\n",
-          epno, privreq->req.len, privreq->req.xfrd,
-          privreq->inflight[0], privreq->inflight[1]);
+  uinfo("EP%d: len=%d xfrd=%d inflight={%d, %d}\n",
+        epno, privreq->req.len, privreq->req.xfrd,
+        privreq->inflight[0], privreq->inflight[1]);
 #endif
   bdtinfo("EP%d BDT IN [%p] {%08x, %08x}\n",
-          epno, bdtin, bdtin->status, bdtin->addr);
+        epno, bdtin, bdtin->status, bdtin->addr);
 
   /* We should own the BDT that just completed. But NULLify the entire BDT IN.
    * Why?  So that we can tell later that the BDT available.  No, it is not
@@ -1209,8 +1209,8 @@ static int pic32mx_wrstart(struct pic32mx_usbdev_s *priv,
       bytesleft = privreq->req.len;
     }
 
-  ullinfo("epno=%d req=%p: len=%d xfrd=%d index=%d nullpkt=%d\n",
-          epno, privreq, privreq->req.len, xfrd, index, privep->txnullpkt);
+  uinfo("epno=%d req=%p: len=%d xfrd=%d index=%d nullpkt=%d\n",
+        epno, privreq, privreq->req.len, xfrd, index, privep->txnullpkt);
 
   /* Get the number of bytes left to be sent in the packet */
 
@@ -1323,10 +1323,10 @@ static int pic32mx_rdcomplete(struct pic32mx_usbdev_s *priv,
   bdtout = privep->bdtout;
   epno   = USB_EPNO(privep->ep.eplog);
 
-  ullinfo("EP%d: len=%d xfrd=%d\n",
-          epno, privreq->req.len, privreq->req.xfrd);
+  uinfo("EP%d: len=%d xfrd=%d\n",
+        epno, privreq->req.len, privreq->req.xfrd);
   bdtinfo("EP%d BDT OUT [%p] {%08x, %08x}\n",
-          epno, bdtout, bdtout->status, bdtout->addr);
+        epno, bdtout, bdtout->status, bdtout->addr);
 
   /* We should own the BDT that just completed */
 
@@ -1613,7 +1613,7 @@ static int pic32mx_rdrequest(struct pic32mx_usbdev_s *priv,
       return OK;
     }
 
-  ullinfo("EP%d: len=%d\n", USB_EPNO(privep->ep.eplog), privreq->req.len);
+  uinfo("EP%d: len=%d\n", USB_EPNO(privep->ep.eplog), privreq->req.len);
 
   /* Ignore any attempt to receive a zero length packet */
 
@@ -1902,8 +1902,8 @@ static void pic32mx_ep0setup(struct pic32mx_usbdev_s *priv)
   index.w = GETUINT16(priv->ctrl.index);
   len.w   = GETUINT16(priv->ctrl.len);
 
-  ullinfo("SETUP: type=%02x req=%02x value=%04x index=%04x len=%04x\n",
-          priv->ctrl.type, priv->ctrl.req, value.w, index.w, len.w);
+  uinfo("SETUP: type=%02x req=%02x value=%04x index=%04x len=%04x\n",
+        priv->ctrl.type, priv->ctrl.req, value.w, index.w, len.w);
 
   /* Dispatch any non-standard requests */
 
@@ -2146,7 +2146,7 @@ static void pic32mx_ep0setup(struct pic32mx_usbdev_s *priv)
               {
                 /* Special case recipient=device test mode */
 
-                ullinfo("test mode: %d\n", index.w);
+                uinfo("test mode: %d\n", index.w);
               }
             else
               {
@@ -2820,7 +2820,7 @@ static int pic32mx_interrupt(int irq, void *context)
   if ((usbir & USB_INT_UERR) != 0)
     {
       usbtrace(TRACE_INTDECODE(PIC32MX_TRACEINTID_UERR), usbir);
-      ullerr("ERROR: EIR=%04x\n", pic32mx_getreg(PIC32MX_USB_EIR));
+      uerr("ERROR: EIR=%04x\n", pic32mx_getreg(PIC32MX_USB_EIR));
 
       /* Clear all pending USB error interrupts */
 
@@ -3140,7 +3140,7 @@ static int pic32mx_epconfigure(struct usbdev_ep_s *ep,
   if (!ep || !desc)
     {
       usbtrace(TRACE_DEVERROR(PIC32MX_TRACEERR_INVALIDPARMS), 0);
-      ullerr("ERROR: ep=%p desc=%p\n");
+      uerr("ERROR: ep=%p desc=%p\n");
       return -EINVAL;
     }
 #endif
@@ -3271,7 +3271,7 @@ static int pic32mx_epdisable(struct usbdev_ep_s *ep)
   if (!ep)
     {
       usbtrace(TRACE_DEVERROR(PIC32MX_TRACEERR_INVALIDPARMS), 0);
-      ullerr("ERROR: ep=%p\n", ep);
+      uerr("ERROR: ep=%p\n", ep);
       return -EINVAL;
     }
 #endif
@@ -3368,8 +3368,8 @@ static int pic32mx_epsubmit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
   if (!req || !req->callback || !req->buf || !ep)
     {
       usbtrace(TRACE_DEVERROR(PIC32MX_TRACEERR_INVALIDPARMS), 0);
-      ullerr("ERROR: req=%p callback=%p buf=%p ep=%p\n",
-             req, req->callback, req->buf, ep);
+      uerr("ERROR: req=%p callback=%p buf=%p ep=%p\n",
+           req, req->callback, req->buf, ep);
       return -EINVAL;
     }
 #endif
@@ -3381,7 +3381,7 @@ static int pic32mx_epsubmit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
   if (!priv->driver)
     {
       usbtrace(TRACE_DEVERROR(PIC32MX_TRACEERR_NOTCONFIGURED), priv->usbdev.speed);
-      ullerr("ERROR: driver=%p\n", priv->driver);
+      uerr("ERROR: driver=%p\n", priv->driver);
       return -ESHUTDOWN;
     }
 #endif

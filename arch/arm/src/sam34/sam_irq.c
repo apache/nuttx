@@ -163,7 +163,7 @@ static void sam_dumpnvic(const char *msg, int irq)
 #endif
 
 /****************************************************************************
- * Name: sam_nmi, sam_busfault, sam_usagefault, sam_pendsv, sam_errmonitor,
+ * Name: sam_nmi, sam_busfault, sam_usagefault, sam_pendsv, sam_dbgmonitor,
  *       sam_pendsv, sam_reserved
  *
  * Description:
@@ -206,7 +206,7 @@ static int sam_pendsv(int irq, FAR void *context)
   return 0;
 }
 
-static int sam_errmonitor(int irq, FAR void *context)
+static int sam_dbgmonitor(int irq, FAR void *context)
 {
   (void)up_irq_save();
   _err("PANIC!!! Debug Monitor received\n");
@@ -466,7 +466,7 @@ void up_irqinitialize(void)
   irq_attach(SAM_IRQ_BUSFAULT, sam_busfault);
   irq_attach(SAM_IRQ_USAGEFAULT, sam_usagefault);
   irq_attach(SAM_IRQ_PENDSV, sam_pendsv);
-  irq_attach(SAM_IRQ_DBGMONITOR, sam_errmonitor);
+  irq_attach(SAM_IRQ_DBGMONITOR, sam_dbgmonitor);
   irq_attach(SAM_IRQ_RESERVED, sam_reserved);
 #endif
 

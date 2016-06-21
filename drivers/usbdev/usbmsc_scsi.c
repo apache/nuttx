@@ -200,13 +200,13 @@ static void usbmsc_dumpdata(const char *msg, const uint8_t *buf, int buflen)
 {
   int i;
 
-  lowsyslog(LOG_DEBUG, "%s:", msg);
+  syslog(LOG_DEBUG, "%s:", msg);
   for (i = 0; i < buflen; i++)
     {
-      lowsyslog(LOG_DEBUG, " %02x", buf[i]);
+      syslog(LOG_DEBUG, " %02x", buf[i]);
     }
 
-  lowsyslog(LOG_DEBUG, "\n");
+  syslog(LOG_DEBUG, "\n");
 }
 #endif
 

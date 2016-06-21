@@ -124,7 +124,7 @@ static void lpc11_dumpnvic(const char *msg, int irq)
 
 /****************************************************************************
  * Name: lpc11_nmi, lpc11_busfault, lpc11_usagefault, lpc11_pendsv,
- *       lpc11_errmonitor, lpc11_pendsv, lpc11_reserved
+ *       lpc11_dbgmonitor, lpc11_pendsv, lpc11_reserved
  *
  * Description:
  *   Handlers for various execptions.  None are handled and all are fatal

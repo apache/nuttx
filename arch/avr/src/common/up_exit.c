@@ -53,6 +53,14 @@
 #include "up_internal.h"
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#ifndef CONFIG_DEBUG_SCHED_INFO
+#  undef CONFIG_DUMP_ON_EXIT
+#endif
+
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -66,7 +74,7 @@
  *
  ****************************************************************************/
 
-#if defined(CONFIG_DUMP_ON_EXIT) && defined(CONFIG_DEBUG_FEATURES)
+#ifdef CONFIG_DUMP_ON_EXIT
 static void _up_dumponexit(FAR struct tcb_s *tcb, FAR void *arg)
 {
 #if CONFIG_NFILE_DESCRIPTORS > 0
@@ -138,10 +146,10 @@ void _exit(int status)
 
   (void)up_irq_save();
 
-  sllinfo("TCB=%p exiting\n", this_task());
+  sinfo("TCB=%p exiting\n", this_task());
 
-#if defined(CONFIG_DUMP_ON_EXIT) && defined(CONFIG_DEBUG_FEATURES)
-  sllinfo("Other tasks:\n");
+#ifdef CONFIG_DUMP_ON_EXIT
+  sinfo("Other tasks:\n");
   sched_foreach(_up_dumponexit, NULL);
 #endif
 

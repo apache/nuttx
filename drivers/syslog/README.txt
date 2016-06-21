@@ -7,10 +7,10 @@ header file include/syslog.h.  In NuttX, "syslog output" is really
 synonymous to "debug output" and, therefore, the debugging interfaces
 defined in the header file include/debug.h are also sysloggin interfaces.
 
-By default, all system log output goes to console (/dev/console).  But that
-behavior can be changed by the defining CONFIG_SYSLOG in the NuttX
-configuration.  In that, case all low-level debug output will go through
-syslog_putc().
+All SYSLOG output gots to syslog_putc.  What syslog_putc does, however,
+depends on the configuration.  By default, all system log output will go
+to the console device (/dev/console).  But that behavior can be changed
+reconfiguring NuttX.
 
 One version of syslog_putc() is defined in fs/fs_syslog.c; that version is
 used when CONFIG_SYSLOG_CHAR is defined.  That version of syslog_putc()
@@ -60,12 +60,11 @@ ramlog.c
       in that case, console output from non-Telnet threads will go to the
       circular buffer and can be viewed using the NSH 'dmesg' command.
     CONFIG_RAMLOG_SYSLOG - Use the RAM logging device for the syslogging
-      interface.  If this feature is enabled (along with CONFIG_SYSLOG),
-      then all debug output (only) will be re-directed to the circular
-      buffer in RAM.  This RAM log can be view from NSH using the 'dmesg'
-      command.  NOTE:  Unlike the limited, generic character driver SYSLOG
-      device, the RAMLOG *can* be used to generate debug output from interrupt
-      level handlers.
+      interface.  If this feature is enabled then all debug output (only)
+      will be re-directed to the circular buffer in RAM.  This RAM log can
+      be view from NSH using the 'dmesg' command.  NOTE:  Unlike the
+      limited, generic character driver SYSLOG device, the RAMLOG *can*
+      be used to generate debug output from interrupt level handlers.
     CONFIG_RAMLOG_NPOLLWAITERS - The number of threads than can be waiting
       for this driver on poll().  Default: 4
 

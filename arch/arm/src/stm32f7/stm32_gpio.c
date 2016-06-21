@@ -182,6 +182,7 @@ int stm32_configgpio(uint32_t cfgset)
         break;
 
       case GPIO_OUTPUT:     /* General purpose output mode */
+        stm32_gpiowrite(cfgset, (cfgset & GPIO_OUTPUT_SET) != 0); /* Set the initial output value */
         pinmode = GPIO_MODER_OUTPUT;
         break;
 
@@ -311,17 +312,9 @@ int stm32_configgpio(uint32_t cfgset)
 
   putreg32(regval, base + STM32_GPIO_OTYPER_OFFSET);
 
-  /* If it is an output... set the pin to the correct initial state. */
-
-  if (pinmode == GPIO_MODER_OUTPUT)
-    {
-      bool value = ((cfgset & GPIO_OUTPUT_SET) != 0);
-      stm32_gpiowrite(cfgset, value);
-    }
-
   /* Otherwise, it is an input pin.  Should it configured as an EXTI interrupt? */
 
-  else if ((cfgset & GPIO_EXTI) != 0)
+  if (pinmode != GPIO_MODER_OUTPUT && (cfgset & GPIO_EXTI) != 0)
     {
       /* "In STM32 F1 the selection of the EXTI line source is performed through
        *  the EXTIx bits in the AFIO_EXTICRx registers, while in F2 series this

@@ -77,7 +77,7 @@ void iob_dump(FAR const char *msg, FAR struct iob_s *iob, unsigned int len,
   unsigned int cndx;
 
   head = iob;
-  lowsyslog(LOG_DEBUG, "%s: iob=%p pktlen=%d\n", msg, head, head->io_pktlen);
+  syslog(LOG_DEBUG, "%s: iob=%p pktlen=%d\n", msg, head, head->io_pktlen);
 
   /* Check if the offset is beyond the data in the I/O buffer chain */
 
@@ -92,8 +92,8 @@ void iob_dump(FAR const char *msg, FAR struct iob_s *iob, unsigned int len,
 
   for (; iob; iob = iob->io_flink)
     {
-      lowsyslog(LOG_DEBUG, "  iob=%p len=%d offset=%d\n",
-                iob, iob->io_len, iob->io_offset);
+      syslog(LOG_DEBUG, "  iob=%p len=%d offset=%d\n",
+             iob, iob->io_len, iob->io_offset);
     }
 
   /* Get the amount of data to be displayed, limited by the amount that we
@@ -117,47 +117,47 @@ void iob_dump(FAR const char *msg, FAR struct iob_s *iob, unsigned int len,
 
       if (nbytes > 0)
         {
-          lowsyslog(LOG_DEBUG, "  %04x: ", offset);
+          syslog(LOG_DEBUG, "  %04x: ", offset);
 
           for (cndx = 0; cndx < 32; cndx++)
             {
               if (cndx == 16)
                 {
-                  lowsyslog(LOG_DEBUG, " ");
+                  syslog(LOG_DEBUG, " ");
                 }
 
               if ((lndx + cndx) < len)
                 {
-                  lowsyslog(LOG_DEBUG, "%02x", data[cndx]);
+                  syslog(LOG_DEBUG, "%02x", data[cndx]);
                 }
               else
                 {
-                  lowsyslog(LOG_DEBUG, "  ");
+                  syslog(LOG_DEBUG, "  ");
                 }
             }
 
-          lowsyslog(LOG_DEBUG, " ");
+          syslog(LOG_DEBUG, " ");
           for (cndx = 0; cndx < 32; cndx++)
             {
               if (cndx == 16)
                 {
-                  lowsyslog(LOG_DEBUG, " ");
+                  syslog(LOG_DEBUG, " ");
                 }
 
               if ((lndx + cndx) < len)
                 {
                   if (data[cndx] >= 0x20 && data[cndx] < 0x7f)
                     {
-                      lowsyslog(LOG_DEBUG, "%c", data[cndx]);
+                      syslog(LOG_DEBUG, "%c", data[cndx]);
                     }
                   else
                     {
-                      lowsyslog(LOG_DEBUG, ".");
+                      syslog(LOG_DEBUG, ".");
                     }
                 }
             }
 
-          lowsyslog(LOG_DEBUG, "\n");
+          syslog(LOG_DEBUG, "\n");
         }
     }
 }

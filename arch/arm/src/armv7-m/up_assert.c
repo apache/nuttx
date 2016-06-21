@@ -198,7 +198,7 @@ static int usbtrace_syslog(FAR const char *fmt, ...)
   /* Let vsyslog do the real work */
 
   va_start(ap, fmt);
-  ret = lowvsyslog(LOG_INFO, fmt, ap);
+  ret = vsyslog(LOG_EMERG, fmt, ap);
   va_end(ap);
   return ret;
 }
@@ -375,7 +375,7 @@ static void _up_assert(int errorcode)
 
 void up_assert(const uint8_t *filename, int lineno)
 {
-#if CONFIG_TASK_NAME_SIZE > 0
+#if CONFIG_TASK_NAME_SIZE > 0 && defined(CONFIG_DEBUG_ALERT)
   struct tcb_s *rtcb = this_task();
 #endif
 

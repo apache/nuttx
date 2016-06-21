@@ -307,12 +307,12 @@ void icmpv6_input(FAR struct net_driver_s *dev)
 
     default:
       {
-        nllwarn("WARNING: Unknown ICMPv6 type: %d\n", icmp->type);
+        nwarn("WARNING: Unknown ICMPv6 type: %d\n", icmp->type);
         goto icmpv6_type_error;
       }
     }
 
-  nllinfo("Outgoing ICMPv6 packet length: %d (%d)\n",
+  ninfo("Outgoing ICMPv6 packet length: %d (%d)\n",
           dev->d_len, (icmp->len[0] << 8) | icmp->len[1]);
 
 #ifdef CONFIG_NET_STATISTICS

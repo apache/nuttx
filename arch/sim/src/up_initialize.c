@@ -50,7 +50,7 @@
 #include <nuttx/net/tun.h>
 #include <nuttx/net/telnet.h>
 #include <nuttx/mtd/mtd.h>
-#include <nuttx/syslog/ramlog.h>
+#include <nuttx/syslog/syslog.h>
 #include <nuttx/syslog/syslog_console.h>
 
 #include "up_internal.h"
@@ -162,18 +162,18 @@ void up_initialize(void)
   /* Register a console (or not) */
 
   up_devconsole();          /* Our private /dev/console */
-#elif defined(CONFIG_SYSLOG_CONSOLE)
+#elif defined(CONFIG_CONSOLE_SYSLOG)
   syslog_console_init();
 #elif defined(CONFIG_RAMLOG_CONSOLE)
   ramlog_consoleinit();
 #endif
 
-#ifdef CONFIG_SYSLOG_CHAR
-  syslog_initialize();
-#endif
-#ifdef CONFIG_RAMLOG_SYSLOG
-  ramlog_sysloginit();      /* System logging device */
-#endif
+  /* Early initialization of the system logging device.  Some SYSLOG channel
+   * can be initialized early in the initialization sequence because they
+   * depend on only minimal OS initialization.
+   */
+
+  syslog_initialize(SYSLOG_INIT_EARLY);
 
 #if defined(CONFIG_FS_FAT) && !defined(CONFIG_DISABLE_MOUNTPOINT)
   up_registerblockdevice(); /* Our FAT ramdisk at /dev/ram0 */

@@ -2632,9 +2632,6 @@
       <name>$PROJ_DIR$/../../../../../libc/syslog/lib_syslog.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$/../../../../../libc/syslog/lib_lowsyslog.c</name>
-    </file>
-    <file>
       <name>$PROJ_DIR$/../../../../../libc/syslog/lib_setlogmask.c</name>
     </file>
     <file>

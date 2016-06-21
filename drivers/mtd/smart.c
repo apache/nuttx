@@ -4678,7 +4678,7 @@ static int smart_readsector(FAR struct smart_struct_s *dev,
           sizeof(struct smart_sect_header_s), (FAR uint8_t *) &header);
   if (ret != sizeof(struct smart_sect_header_s))
     {
-      finfo("ERROR: Error reading sector %d header\n", physsector);
+      ferr("ERROR: Error reading sector %d header\n", physsector);
       ret = -EIO;
       goto errout;
     }

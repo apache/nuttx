@@ -462,7 +462,6 @@ CONFIG_FS_MQUEUE_MPATH="/var/mqueue"
 #
 # System Logging
 #
-# CONFIG_SYSLOG is not set
 
 #
 # Graphics Support

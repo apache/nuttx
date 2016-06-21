@@ -845,8 +845,8 @@ static int sam_tc_interrupt(struct sam_tc_s *tc, struct sam_chan_s *chan)
   imr     = sam_chan_getreg(chan, SAM_TC_IMR_OFFSET);
   pending = sr & imr;
 
-  tcllinfo("TC%d Channel %d: pending=%08lx\n",
-           tc->tc, chan->chan, (unsigned long)pending);
+  tmrinfo("TC%d Channel %d: pending=%08lx\n",
+          tc->tc, chan->chan, (unsigned long)pending);
 
   /* Are there any pending interrupts for this channel? */
 

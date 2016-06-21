@@ -54,6 +54,14 @@
 #include "up_internal.h"
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#ifndef CONFIG_DEBUG_SCHED_INFO
+#  undef CONFIG_DUMP_ON_EXIT
+#endif
+
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -67,7 +75,7 @@
  *
  ****************************************************************************/
 
-#if defined(CONFIG_DUMP_ON_EXIT) && defined(CONFIG_DEBUG_FEATURES)
+#ifdef CONFIG_DUMP_ON_EXIT
 static void _up_dumponexit(FAR struct tcb_s *tcb, FAR void *arg)
 {
 #if CONFIG_NFILE_DESCRIPTORS > 0
@@ -78,8 +86,8 @@ static void _up_dumponexit(FAR struct tcb_s *tcb, FAR void *arg)
   int i;
 #endif
 
-  sllinfo("  TCB=%p name=%s\n", tcb, tcb->argv[0]);
-  sllinfo("    priority=%d state=%d\n", tcb->sched_priority, tcb->task_state);
+  sinfo("  TCB=%p name=%s\n", tcb, tcb->argv[0]);
+  sinfo("    priority=%d state=%d\n", tcb->sched_priority, tcb->task_state);
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
   filelist = tcb->group->tg_filelist;
@@ -88,8 +96,8 @@ static void _up_dumponexit(FAR struct tcb_s *tcb, FAR void *arg)
       struct inode *inode = filelist->fl_files[i].f_inode;
       if (inode)
         {
-          sllinfo("      fd=%d refcount=%d\n",
-                  i, inode->i_crefs);
+          sinfo("      fd=%d refcount=%d\n",
+                i, inode->i_crefs);
         }
     }
 #endif
@@ -102,11 +110,11 @@ static void _up_dumponexit(FAR struct tcb_s *tcb, FAR void *arg)
       if (filep->fs_fd >= 0)
         {
 #if CONFIG_STDIO_BUFFER_SIZE > 0
-          sllinfo("      fd=%d nbytes=%d\n",
-                  filep->fs_fd,
-                  filep->fs_bufpos - filep->fs_bufstart);
+          sinfo("      fd=%d nbytes=%d\n",
+                filep->fs_fd,
+                filep->fs_bufpos - filep->fs_bufstart);
 #else
-          sllinfo("      fd=%d\n", filep->fs_fd);
+          sinfo("      fd=%d\n", filep->fs_fd);
 #endif
         }
     }
@@ -139,10 +147,10 @@ void _exit(int status)
 
   (void)up_irq_save();
 
-  sllinfo("TCB=%p exiting\n", tcb);
+  sinfo("TCB=%p exiting\n", tcb);
 
-#if defined(CONFIG_DUMP_ON_EXIT) && defined(CONFIG_DEBUG_FEATURES)
-  sllinfo("Other tasks:\n");
+#ifdef CONFIG_DUMP_ON_EXIT
+  sinfo("Other tasks:\n");
   sched_foreach(_up_dumponexit, NULL);
 #endif
 
@@ -155,7 +163,7 @@ void _exit(int status)
    */
 
   tcb = this_task();
-  sllinfo("New Active Task TCB=%p\n", tcb);
+  sinfo("New Active Task TCB=%p\n", tcb);
 
   /* Then switch contexts */
 

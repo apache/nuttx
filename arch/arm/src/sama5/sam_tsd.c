@@ -799,7 +799,7 @@ static int sam_tsd_schedule(struct sam_tsd_s *priv)
   ret = work_queue(HPWORK, &priv->work, sam_tsd_bottomhalf, priv, 0);
   if (ret != 0)
     {
-      illerr("ERROR: Failed to queue work: %d\n", ret);
+      ierr("ERROR: Failed to queue work: %d\n", ret);
     }
 
   return OK;

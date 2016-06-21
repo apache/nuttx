@@ -128,7 +128,7 @@ static void nuc_dumpnvic(const char *msg, int irq)
 
 /****************************************************************************
  * Name: nuc_nmi, nuc_busfault, nuc_usagefault, nuc_pendsv,
- *       nuc_errmonitor, nuc_pendsv, nuc_reserved
+ *       nuc_dbgmonitor, nuc_pendsv, nuc_reserved
  *
  * Description:
  *   Handlers for various execptions.  None are handled and all are fatal

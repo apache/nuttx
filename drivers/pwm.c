@@ -652,7 +652,7 @@ void pwm_expired(FAR void *handle)
 {
   FAR struct pwm_upperhalf_s *upper = (FAR struct pwm_upperhalf_s *)handle;
 
-  pwmllinfo("started: %d waiting: %d\n", upper->started, upper->waiting);
+  pwminfo("started: %d waiting: %d\n", upper->started, upper->waiting);
 
   /* Make sure that the PWM is started */
 

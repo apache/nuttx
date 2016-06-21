@@ -1083,7 +1083,7 @@ static void sam_eventtimeout(int argc, uint32_t arg)
       /* Yes.. wake up any waiting threads */
 
       sam_endwait(priv, SDIOWAIT_TIMEOUT);
-      mcllerr("ERROR: Timeout\n");
+      mcerr("ERROR: Timeout\n");
     }
 }
 
@@ -1278,7 +1278,7 @@ static int sam_interrupt(int irq, void *context)
             {
               /* Yes.. Was it some kind of timeout error? */
 
-              mcllerr("ERROR: enabled: %08x pending: %08x\n", enabled, pending);
+              mcerr("ERROR: enabled: %08x pending: %08x\n", enabled, pending);
               if ((pending & HSMCI_DATA_TIMEOUT_ERRORS) != 0)
                 {
                   /* Yes.. Terminate with a timeout. */
@@ -1320,8 +1320,8 @@ static int sam_interrupt(int irq, void *context)
                 {
                   /* Yes.. Was the error some kind of timeout? */
 
-                  mcllinfo("ERROR: events: %08x SR: %08x\n",
-                          priv->cmdrmask, enabled);
+                  mcerr("ERROR: events: %08x SR: %08x\n",
+                        priv->cmdrmask, enabled);
 
                   if ((pending & HSMCI_RESPONSE_TIMEOUT_ERRORS) != 0)
                     {
@@ -2628,7 +2628,7 @@ static void sam_callback(void *arg)
         {
           /* Yes.. queue it */
 
-           mcllinfo("Queuing callback to %p(%p)\n", priv->callback, priv->cbarg);
+           mcinfo("Queuing callback to %p(%p)\n", priv->callback, priv->cbarg);
           (void)work_queue(LPWORK, &priv->cbwork, (worker_t)priv->callback, priv->cbarg, 0);
         }
       else
@@ -2743,7 +2743,7 @@ void sdio_mediachange(FAR struct sdio_dev_s *dev, bool cardinslot)
       priv->cdstatus &= ~SDIO_STATUS_PRESENT;
     }
 
-  mcllinfo("cdstatus OLD: %02x NEW: %02x\n", cdstatus, priv->cdstatus);
+  mcinfo("cdstatus OLD: %02x NEW: %02x\n", cdstatus, priv->cdstatus);
 
   /* Perform any requested callback if the status has changed */
 

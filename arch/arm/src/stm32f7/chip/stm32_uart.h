@@ -1,6 +1,7 @@
 /************************************************************************************
  * arch/arm/src/stm32f7/chip/stm32_uart.h
  *
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            David Sidrane <david_s5@nscdg.com>
  *

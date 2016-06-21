@@ -1405,9 +1405,9 @@ static int sam_req_write(struct sam_usbdev_s *priv, struct sam_ep_s *privep)
           return -ENOENT;
         }
 
-      ullinfo("epno=%d req=%p: len=%d xfrd=%d inflight=%d zlpneeded=%d\n",
-              epno, privreq, privreq->req.len, privreq->req.xfrd,
-              privreq->inflight, privep->zlpneeded);
+      uinfo("epno=%d req=%p: len=%d xfrd=%d inflight=%d zlpneeded=%d\n",
+            epno, privreq, privreq->req.len, privreq->req.xfrd,
+            privreq->inflight, privep->zlpneeded);
 
       /* Handle any bytes in flight. */
 
@@ -1640,8 +1640,8 @@ static int sam_req_read(struct sam_usbdev_s *priv, struct sam_ep_s *privep,
           return -ENOENT;
         }
 
-      ullinfo("EP%d: len=%d xfrd=%d\n",
-              epno, privreq->req.len, privreq->req.xfrd);
+      uinfo("EP%d: len=%d xfrd=%d\n",
+            epno, privreq->req.len, privreq->req.xfrd);
 
       /* Ignore any attempt to receive a zero length packet */
 
@@ -1975,8 +1975,8 @@ static void sam_ep0_setup(struct sam_usbdev_s *priv)
   index.w = GETUINT16(priv->ctrl.index);
   len.w   = GETUINT16(priv->ctrl.len);
 
-  ullinfo("SETUP: type=%02x req=%02x value=%04x index=%04x len=%04x\n",
-          priv->ctrl.type, priv->ctrl.req, value.w, index.w, len.w);
+  uinfo("SETUP: type=%02x req=%02x value=%04x index=%04x len=%04x\n",
+        priv->ctrl.type, priv->ctrl.req, value.w, index.w, len.w);
 
   /* Dispatch any non-standard requests */
 
@@ -2139,7 +2139,7 @@ static void sam_ep0_setup(struct sam_usbdev_s *priv)
           {
             /* Special case recipient=device test mode */
 
-            ullinfo("test mode: %d\n", index.w);
+            uinfo("test mode: %d\n", index.w);
           }
         else if ((priv->ctrl.type & USB_REQ_RECIPIENT_MASK) != USB_REQ_RECIPIENT_ENDPOINT)
           {
@@ -3902,7 +3902,7 @@ static int sam_ep_submit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
       if (privep->stalled)
         {
           sam_req_abort(privep, privreq, -EBUSY);
-          ullerr("ERROR: stalled\n");
+          uerr("ERROR: stalled\n");
           ret = -EPERM;
         }
       else

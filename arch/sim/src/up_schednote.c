@@ -68,19 +68,19 @@ void sched_note_start(FAR struct tcb_s *tcb)
 {
 #ifdef CONFIG_SMP
 #if CONFIG_TASK_NAME_SIZE > 0
-  lowsyslog(LOG_INFO, "CPU%d: Start %s, TCB@%p, state=%d\n",
-            tcb->cpu, tcb->name, tcb, tcb->task_state);
+  syslog(LOG_INFO, "CPU%d: Start %s, TCB@%p, state=%d\n",
+         tcb->cpu, tcb->name, tcb, tcb->task_state);
 #else
-  lowsyslog(LOG_INFO, "CPU%d: Start TCB@%p, state=%d\n"
-            tcb->cpu, tcb, tcb->task_state);
+  syslog(LOG_INFO, "CPU%d: Start TCB@%p, state=%d\n"
+         tcb->cpu, tcb, tcb->task_state);
 #endif
 #else
 #if CONFIG_TASK_NAME_SIZE > 0
-  lowsyslog(LOG_INFO, "Start %s, TCB@%p, state=%d\n",
-            tcb->name, tcb, tcb->task_state);
+  syslog(LOG_INFO, "Start %s, TCB@%p, state=%d\n",
+         tcb->name, tcb, tcb->task_state);
 #else
-  lowsyslog(LOG_INFO, "Start TCB@%p, state=%d\n",
-            tcb, tcb->task_state);
+  syslog(LOG_INFO, "Start TCB@%p, state=%d\n",
+         tcb, tcb->task_state);
 #endif
 #endif
 }
@@ -89,19 +89,19 @@ void sched_note_stop(FAR struct tcb_s *tcb)
 {
 #ifdef CONFIG_SMP
 #if CONFIG_TASK_NAME_SIZE > 0
-  lowsyslog(LOG_INFO, "CPU%d: Stop %s, TCB@%p, state=%d\n",
-            tcb->cpu, tcb->name, tcb, tcb->task_state);
+  syslog(LOG_INFO, "CPU%d: Stop %s, TCB@%p, state=%d\n",
+         tcb->cpu, tcb->name, tcb, tcb->task_state);
 #else
-  lowsyslog(LOG_INFO, "CPU%d: Stop TCB@%p, state=%d\n",
-            tcb->cpu, tcb, tcb->task_state);
+  syslog(LOG_INFO, "CPU%d: Stop TCB@%p, state=%d\n",
+         tcb->cpu, tcb, tcb->task_state);
 #endif
 #else
 #if CONFIG_TASK_NAME_SIZE > 0
-  lowsyslog(LOG_INFO, "Stop %s, TCB@%p, state=%d\n",
-            tcb->name, tcb, tcb->task_state);
+  syslog(LOG_INFO, "Stop %s, TCB@%p, state=%d\n",
+         tcb->name, tcb, tcb->task_state);
 #else
-  lowsyslog(LOG_INFO, "Stop TCB@%p, state=%d\n",
-            tcb, tcb->task_state);
+  syslog(LOG_INFO, "Stop TCB@%p, state=%d\n",
+         tcb, tcb->task_state);
 #endif
 #endif
 }
@@ -110,19 +110,19 @@ void sched_note_suspend(FAR struct tcb_s *tcb)
 {
 #ifdef CONFIG_SMP
 #if CONFIG_TASK_NAME_SIZE > 0
-  lowsyslog(LOG_INFO, "CPU%d: Suspend %s, TCB@%p, state=%d\n",
-            tcb->cpu, tcb->name, tcb, tcb->task_state);
+  syslog(LOG_INFO, "CPU%d: Suspend %s, TCB@%p, state=%d\n",
+         tcb->cpu, tcb->name, tcb, tcb->task_state);
 #else
-  lowsyslog(LOG_INFO, "CPU%d: Suspend TCB@%p, state=%d\n",
-            tcb->cpu, tcb, tcb->task_state);
+  syslog(LOG_INFO, "CPU%d: Suspend TCB@%p, state=%d\n",
+         tcb->cpu, tcb, tcb->task_state);
 #endif
 #else
 #if CONFIG_TASK_NAME_SIZE > 0
-  lowsyslog(LOG_INFO, "Suspend %s, TCB@%p, state=%d\n",
-            tcb->name, tcb, tcb->task_state);
+  syslog(LOG_INFO, "Suspend %s, TCB@%p, state=%d\n",
+         tcb->name, tcb, tcb->task_state);
 #else
-  lowsyslog(LOG_INFO, "Suspend TCB@%p, state=%d\n",
-            tcb, tcb->task_state);
+  syslog(LOG_INFO, "Suspend TCB@%p, state=%d\n",
+         tcb, tcb->task_state);
 #endif
 #endif
 }
@@ -131,19 +131,19 @@ void sched_note_resume(FAR struct tcb_s *tcb)
 {
 #ifdef CONFIG_SMP
 #if CONFIG_TASK_NAME_SIZE > 0
-  lowsyslog(LOG_INFO, "CPU%d: Resume %s, TCB@%p, state=%d\n",
-            tcb->cpu, tcb->name, tcb, tcb->task_state);
+  syslog(LOG_INFO, "CPU%d: Resume %s, TCB@%p, state=%d\n",
+         tcb->cpu, tcb->name, tcb, tcb->task_state);
 #else
-  lowsyslog(LOG_INFO, "CPU%d: Resume TCB@%p, state=%d\n",
-            tcb->cpu, tcb, tcb->task_state);
+  syslog(LOG_INFO, "CPU%d: Resume TCB@%p, state=%d\n",
+         tcb->cpu, tcb, tcb->task_state);
 #endif
 #else
 #if CONFIG_TASK_NAME_SIZE > 0
-  lowsyslog(LOG_INFO, "Resume %s, TCB@%p, state=%d\n",
-            tcb->name, tcb, tcb->task_state);
+  syslog(LOG_INFO, "Resume %s, TCB@%p, state=%d\n",
+         tcb->name, tcb, tcb->task_state);
 #else
-  lowsyslog(LOG_INFO, "Resume TCB@%p, state=%d\n",
-            tcb, tcb->task_state);
+  syslog(LOG_INFO, "Resume TCB@%p, state=%d\n",
+         tcb, tcb->task_state);
 #endif
 #endif
 }
@@ -160,19 +160,19 @@ void sched_note_premption(FAR struct tcb_s *tcb, bool locked)
 {
 #ifdef CONFIG_SMP
 #if CONFIG_TASK_NAME_SIZE > 0
-  lowsyslog(LOG_INFO, "CPU%d: Task %s TCB@%p preemption %s\n",
-            tcb->cpu, tcb->name, tcb, locked ? "LOCKED" : "UNLOCKED");
+  syslog(LOG_INFO, "CPU%d: Task %s TCB@%p preemption %s\n",
+         tcb->cpu, tcb->name, tcb, locked ? "LOCKED" : "UNLOCKED");
 #else
-  lowsyslog(LOG_INFO, "CPU%d: TCB@%p preemption %s\n",
-            tcb->cpu, tcb, locked ? "LOCKED" : "UNLOCKED");
+  syslog(LOG_INFO, "CPU%d: TCB@%p preemption %s\n",
+         tcb->cpu, tcb, locked ? "LOCKED" : "UNLOCKED");
 #endif
 #else
 #if CONFIG_TASK_NAME_SIZE > 0
-  lowsyslog(LOG_INFO, "Task %s, TCB@%p preemption %s\n",
-            tcb->name, tcb, locked ? "LOCKED" : "UNLOCKED");
+  syslog(LOG_INFO, "Task %s, TCB@%p preemption %s\n",
+         tcb->name, tcb, locked ? "LOCKED" : "UNLOCKED");
 #else
-  lowsyslog(LOG_INFO, "TCB@%p preemption %s\n",
-            tcb, locked ? "LOCKED" : "UNLOCKED");
+  syslog(LOG_INFO, "TCB@%p preemption %s\n",
+         tcb, locked ? "LOCKED" : "UNLOCKED");
 #endif
 #endif
 }
@@ -190,19 +190,19 @@ void sched_note_csection(FAR struct tcb_s *tcb, bool enter)
 {
 #ifdef CONFIG_SMP
 #if CONFIG_TASK_NAME_SIZE > 0
-  lowsyslog(LOG_INFO, "CPU%d: Task %s TCB@%p critical section %s\n",
-            tcb->cpu, tcb->name, tcb, enter ? "ENTER" : "LEAVE");
+  syslog(LOG_INFO, "CPU%d: Task %s TCB@%p critical section %s\n",
+         tcb->cpu, tcb->name, tcb, enter ? "ENTER" : "LEAVE");
 #else
-  lowsyslog(LOG_INFO, "CPU%d: TCB@%p critical section %s\n",
-            tcb->cpu, tcb, enter ? "ENTER" : "LEAVE");
+  syslog(LOG_INFO, "CPU%d: TCB@%p critical section %s\n",
+         tcb->cpu, tcb, enter ? "ENTER" : "LEAVE");
 #endif
 #else
 #if CONFIG_TASK_NAME_SIZE > 0
-  lowsyslog(LOG_INFO, "Task %s, TCB@%p critical section %s\n",
-            tcb->name, tcb, enter ? "ENTER" : "LEAVE");
+  syslog(LOG_INFO, "Task %s, TCB@%p critical section %s\n",
+         tcb->name, tcb, enter ? "ENTER" : "LEAVE");
 #else
-  lowsyslog(LOG_INFO, "TCB@%p critical section %s\n",
-            tcb, enter ? "ENTER" : "LEAVE");
+  syslog(LOG_INFO, "TCB@%p critical section %s\n",
+         tcb, enter ? "ENTER" : "LEAVE");
 #endif
 #endif
 }

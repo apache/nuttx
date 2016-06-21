@@ -737,22 +737,22 @@ static int c5471_phyinit (void)
   phyid = (c5471_mdread(0, MD_PHY_MSB_REG) << 16) | c5471_mdread(0, MD_PHY_LSB_REG);
   if (phyid != LU3X31_T64_PHYID)
     {
-      nerr("Unrecognized PHY ID: %08x\n", phyid);
+      nerr("ERROR: Unrecognized PHY ID: %08x\n", phyid);
       return ERROR;
     }
 
   /* Next, Set desired network rate, 10BaseT, 100BaseT, or auto. */
 
 #ifdef CONFIG_C5471_AUTONEGOTIATION
-  nerr("Setting PHY Transceiver for Autonegotiation\n");
+  ninfo("Setting PHY Transceiver for Autonegotiation\n");
   c5471_mdwrite(0, MD_PHY_CONTROL_REG, MODE_AUTONEG);
 #endif
 #ifdef CONFIG_C5471_BASET100
-  nerr("Setting PHY Transceiver for 100BaseT FullDuplex\n");
+  ninfo("Setting PHY Transceiver for 100BaseT FullDuplex\n");
   c5471_mdwrite(0, MD_PHY_CONTROL_REG, MODE_100MBIT_FULLDUP);
 #endif
 #ifdef CONFIG_C5471_BASET10
-  nerr("Setting PHY Transceiver for 10BaseT FullDuplex\n");
+  ninfo("Setting PHY Transceiver for 10BaseT FullDuplex\n");
   c5471_mdwrite(0, MD_PHY_CONTROL_REG, MODE_10MBIT_FULLDUP);
 #endif
 
@@ -1267,7 +1267,7 @@ static void c5471_receive(struct c5471_driver_s *c5471)
 #ifdef CONFIG_NET_IPv4
       if (BUF->type == HTONS(ETHTYPE_IP))
         {
-          nllinfo("IPv4 frame\n");
+          ninfo("IPv4 frame\n");
 
           /* Handle ARP on input then give the IPv4 packet to the network
            * layer
@@ -1310,7 +1310,7 @@ static void c5471_receive(struct c5471_driver_s *c5471)
 #ifdef CONFIG_NET_IPv6
       if (BUF->type == HTONS(ETHTYPE_IP6))
         {
-          nllinfo("Iv6 frame\n");
+          ninfo("Iv6 frame\n");
 
           /* Give the IPv6 packet to the network layer */
 
@@ -1371,7 +1371,7 @@ static void c5471_receive(struct c5471_driver_s *c5471)
     {
       /* Increment the count of dropped packets */
 
-      nerr("Too big! packetlen: %d\n", packetlen);
+      nwarn("WARNING: Too big! packetlen: %d\n", packetlen);
       c5471->c_rxdropped++;
     }
 #endif
@@ -1680,9 +1680,9 @@ static int c5471_ifup(struct net_driver_s *dev)
   struct c5471_driver_s *c5471 = (struct c5471_driver_s *)dev->d_private;
   volatile uint32_t clearbits;
 
-  nerr("Bringing up: %d.%d.%d.%d\n",
-       dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
-       (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
+  ninfo("Bringing up: %d.%d.%d.%d\n",
+        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
+        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
 
   /* Initilize Ethernet interface */
 
@@ -1742,7 +1742,7 @@ static int c5471_ifdown(struct net_driver_s *dev)
   struct c5471_driver_s *c5471 = (struct c5471_driver_s *)dev->d_private;
   irqstate_t flags;
 
-  nerr("Stopping\n");
+  ninfo("Stopping\n");
 
   /* Disable the Ethernet interrupt */
 
@@ -1798,7 +1798,7 @@ static int c5471_txavail(struct net_driver_s *dev)
   struct c5471_driver_s *c5471 = (struct c5471_driver_s *)dev->d_private;
   irqstate_t flags;
 
-  nerr("Polling\n");
+  ninfo("Polling\n");
   flags = enter_critical_section();
 
   /* Ignore the notification if the interface is not yet up */
@@ -1951,7 +1951,7 @@ static void c5471_eimconfig(struct c5471_driver_s *c5471)
 
   /* TX ENET 0 */
 
-  nerr("TX ENET0 desc: %08x pbuf: %08x\n", desc, pbuf);
+  ninfo("TX ENET0 desc: %08x pbuf: %08x\n", desc, pbuf);
   putreg32((desc & 0x0000ffff), ENET0_TDBA); /* 16-bit offset address */
   for (i = NUM_DESC_TX-1; i >= 0; i--)
     {
@@ -1978,7 +1978,7 @@ static void c5471_eimconfig(struct c5471_driver_s *c5471)
 
   /* RX ENET 0 */
 
-  nerr("RX ENET0 desc: %08x pbuf: %08x\n", desc, pbuf);
+  ninfo("RX ENET0 desc: %08x pbuf: %08x\n", desc, pbuf);
   putreg32((desc & 0x0000ffff), ENET0_RDBA); /* 16-bit offset address */
   for (i = NUM_DESC_RX-1; i >= 0; i--)
     {
@@ -2005,7 +2005,7 @@ static void c5471_eimconfig(struct c5471_driver_s *c5471)
 
   /* TX CPU */
 
-  nerr("TX CPU desc: %08x pbuf: %08x\n", desc, pbuf);
+  ninfo("TX CPU desc: %08x pbuf: %08x\n", desc, pbuf);
   c5471->c_txcpudesc = desc;
   putreg32((desc & 0x0000ffff), EIM_CPU_TXBA); /* 16-bit offset address */
   for (i = NUM_DESC_TX-1; i >= 0; i--)
@@ -2035,7 +2035,7 @@ static void c5471_eimconfig(struct c5471_driver_s *c5471)
 
   /* RX CPU */
 
-  nerr("RX CPU desc: %08x pbuf: %08x\n", desc, pbuf);
+  ninfo("RX CPU desc: %08x pbuf: %08x\n", desc, pbuf);
   c5471->c_rxcpudesc = desc;
   putreg32((desc & 0x0000ffff), EIM_CPU_RXBA); /* 16-bit offset address */
   for (i = NUM_DESC_RX-1; i >= 0; i--)
@@ -2063,7 +2063,7 @@ static void c5471_eimconfig(struct c5471_driver_s *c5471)
       pbuf += sizeof(uint32_t); /* Ether Module's "Buffer Usage Word" */
     }
 
-  nerr("END desc: %08x pbuf: %08x\n", desc, pbuf);
+  ninfo("END desc: %08x pbuf: %08x\n", desc, pbuf);
 
   /* Save the descriptor packet size */
 
@@ -2150,13 +2150,13 @@ static void c5471_eimconfig(struct c5471_driver_s *c5471)
 static void c5471_reset(struct c5471_driver_s *c5471)
 {
 #if defined(CONFIG_C5471_PHY_LU3X31T_T64)
-  nerr("EIM reset\n");
+  ninfo("EIM reset\n");
   c5471_eimreset(c5471);
 #endif
-  nerr("PHY init\n");
+  ninfo("PHY init\n");
   c5471_phyinit();
 
-  nerr("EIM config\n");
+  ninfo("EIM config\n");
   c5471_eimconfig(c5471);
 }
 
@@ -2178,7 +2178,7 @@ static void c5471_macassign(struct c5471_driver_s *c5471)
   uint8_t *mptr = dev->d_mac.ether_addr_octet;
   register uint32_t tmp;
 
-  nerr("MAC: %0x:%0x:%0x:%0x:%0x:%0x\n",
+  ninfo("MAC: %0x:%0x:%0x:%0x:%0x:%0x\n",
         mptr[0], mptr[1], mptr[2], mptr[3], mptr[4], mptr[5]);
 
   /* Set CPU port MAC address. S/W will only see incoming packets that match
@@ -2241,7 +2241,7 @@ void up_netinitialize(void)
     {
       /* We could not attach the ISR to the ISR */
 
-      nllerr("irq_attach() failed\n");
+      nerr("ERROR: irq_attach() failed\n");
       return;
     }
 

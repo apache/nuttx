@@ -60,6 +60,10 @@
 #undef  CONFIG_SUPPRESS_UART_CONFIG   /* DEFINED: Do not reconfig UART */
 #undef  CONFIG_DUMP_ON_EXIT           /* DEFINED: Dump task state on exit */
 
+#ifndef CONFIG_DEBUG_SCHED_INFO
+#  undef CONFIG_DUMP_ON_EXIT          /* Needs CONFIG_DEBUG_SCHED_INFO */
+#endif
+
 /* Determine which (if any) console driver to use.  If a console is enabled
  * and no other console device is specified, then a serial console is
  * assumed.
@@ -92,13 +96,6 @@
 
 #if !defined(USE_SERIALDRIVER) && defined(CONFIG_STANDARD_SERIAL)
 #  define USE_SERIALDRIVER 1
-#endif
-
-/* Determine which device to use as the system logging device */
-
-#ifndef CONFIG_SYSLOG
-#  undef CONFIG_SYSLOG_CHAR
-#  undef CONFIG_RAMLOG_SYSLOG
 #endif
 
 /* Check if an interrupt stack size is configured */

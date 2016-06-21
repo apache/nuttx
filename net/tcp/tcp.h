@@ -206,6 +206,8 @@ struct tcp_conn_s
                            * it can only be updated at TCP_ESTABLISHED state */
   uint32_t   sent;        /* The number of bytes sent (ACKed and un-ACKed) */
   uint32_t   isn;         /* Initial sequence number */
+  uint32_t   sndseq_max;  /* The sequence number of next not-retransmitted
+                           * segment (next greater sndseq) */
 #endif
 
 #ifdef CONFIG_NET_TCPBACKLOG
@@ -665,7 +667,7 @@ void tcp_poll(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn);
  * Parameters:
  *   dev  - The device driver structure to use in the send operation
  *   conn - The TCP "connection" to poll for TX data
- *   hsed - The polling interval in halves of a second
+ *   hsec - The polling interval in halves of a second
  *
  * Return:
  *   None

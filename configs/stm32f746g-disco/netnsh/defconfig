@@ -719,7 +719,7 @@ CONFIG_USART6_2STOP=0
 # System Logging
 #
 # CONFIG_RAMLOG is not set
-# CONFIG_SYSLOG_CONSOLE is not set
+# CONFIG_CONSOLE_SYSLOG is not set
 
 #
 # Networking Support
@@ -883,7 +883,6 @@ CONFIG_FS_MQUEUE_MPATH="/var/mqueue"
 #
 # System Logging
 #
-# CONFIG_SYSLOG is not set
 # CONFIG_SYSLOG_TIMESTAMP is not set
 
 #

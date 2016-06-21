@@ -176,7 +176,7 @@ static int userled_open(FAR struct file *filep)
   ret = userled_takesem(&priv->lu_exclsem);
   if (ret < 0)
     {
-      lcdinfo("ERROR: userled_takesem failed: %d\n", ret);
+      lcderr("ERROR: userled_takesem failed: %d\n", ret);
       return ret;
     }
 
@@ -185,7 +185,7 @@ static int userled_open(FAR struct file *filep)
   opriv = (FAR struct userled_open_s *)kmm_zalloc(sizeof(struct userled_open_s));
   if (!opriv)
     {
-      lcdinfo("ERROR: Failled to allocate open structure\n");
+      lcderr("ERROR: Failled to allocate open structure\n");
       ret = -ENOMEM;
       goto errout_with_sem;
     }
@@ -253,7 +253,7 @@ static int userled_close(FAR struct file *filep)
   ret = userled_takesem(&priv->lu_exclsem);
   if (ret < 0)
     {
-      lcdinfo("ERROR: userled_takesem failed: %d\n", ret);
+      lcderr("ERROR: userled_takesem failed: %d\n", ret);
       return ret;
     }
 
@@ -266,7 +266,7 @@ static int userled_close(FAR struct file *filep)
   DEBUGASSERT(curr);
   if (!curr)
     {
-      lcdinfo("ERROR: Failed to find open entry\n");
+      lcderr("ERROR: Failed to find open entry\n");
       ret = -ENOENT;
       goto errout_with_exclsem;
     }
@@ -318,7 +318,7 @@ static ssize_t userled_write(FAR struct file *filep, FAR const char *buffer,
 
   if (len < sizeof(userled_set_t))
     {
-      lcdinfo("ERROR: buffer too small: %lu\n", (unsigned long)len);
+      lcderr("ERROR: buffer too small: %lu\n", (unsigned long)len);
       return -EINVAL;
     }
 
@@ -335,7 +335,7 @@ static ssize_t userled_write(FAR struct file *filep, FAR const char *buffer,
   ret = userled_takesem(&priv->lu_exclsem);
   if (ret < 0)
     {
-      lcdinfo("ERROR: userled_takesem failed: %d\n", ret);
+      lcderr("ERROR: userled_takesem failed: %d\n", ret);
       return ret;
     }
 
@@ -370,7 +370,7 @@ static int userled_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   ret = userled_takesem(&priv->lu_exclsem);
   if (ret < 0)
     {
-      lcdinfo("ERROR: userled_takesem failed: %d\n", ret);
+      lcderr("ERROR: userled_takesem failed: %d\n", ret);
       return ret;
     }
 
@@ -500,7 +500,7 @@ static int userled_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       break;
 
     default:
-      lcdinfo("ERROR: Unrecognized command: %ld\n", cmd);
+      lcderr("ERROR: Unrecognized command: %ld\n", cmd);
       ret = -ENOTTY;
       break;
     }
@@ -548,7 +548,7 @@ int userled_register(FAR const char *devname,
 
   if (!priv)
     {
-      lcdinfo("ERROR: Failed to allocate device structure\n");
+      lcderr("ERROR: Failed to allocate device structure\n");
       return -ENOMEM;
     }
 
@@ -569,7 +569,7 @@ int userled_register(FAR const char *devname,
   ret = register_driver(devname, &userled_fops, 0666, priv);
   if (ret < 0)
     {
-      lcdinfo("ERROR: register_driver failed: %d\n", ret);
+      lcderr("ERROR: register_driver failed: %d\n", ret);
       goto errout_with_priv;
     }
 

@@ -212,7 +212,7 @@ int insmod(FAR const char *filename, FAR const char *modulename)
   mod_dumploadinfo(&loadinfo);
   if (ret != 0)
     {
-      sinfo("ERROR: Failed to initialize to load module: %d\n", ret);
+      serr("ERROR: Failed to initialize to load module: %d\n", ret);
       goto errout_with_lock;
     }
 

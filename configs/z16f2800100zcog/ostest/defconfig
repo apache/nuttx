@@ -335,7 +335,6 @@ CONFIG_UART1_2STOP=0
 # System Logging
 #
 
-# CONFIG_SYSLOG is not set
 
 #
 # Graphics Support

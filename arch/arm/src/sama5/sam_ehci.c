@@ -3180,7 +3180,7 @@ static int sam_ehci_tophalf(int irq, FAR void *context)
 #ifdef CONFIG_USBHOST_TRACE
   usbhost_vtrace1(EHCI_VTRACE1_TOPHALF, usbsts & regval);
 #else
-  ullinfo("USBSTS: %08x USBINTR: %08x\n", usbsts, regval);
+  uinfo("USBSTS: %08x USBINTR: %08x\n", usbsts, regval);
 #endif
 
   /* Handle all unmasked interrupt sources */
@@ -4493,7 +4493,7 @@ static int sam_connect(FAR struct usbhost_driver_s *drvr,
   /* Set the connected/disconnected flag */
 
   hport->connected = connected;
-  ullinfo("Hub port %d connected: %s\n", hport->port, connected ? "YES" : "NO");
+  uinfo("Hub port %d connected: %s\n", hport->port, connected ? "YES" : "NO");
 
   /* Report the connection event */
 

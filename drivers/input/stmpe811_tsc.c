@@ -786,7 +786,7 @@ static void stmpe811_timeout(int argc, uint32_t arg1, ...)
           ret = work_queue(HPWORK, &priv->timeout, stmpe811_timeoutworker, priv, 0);
           if (ret != 0)
             {
-              illerr("ERROR: Failed to queue work: %d\n", ret);
+              ierr("ERROR: Failed to queue work: %d\n", ret);
             }
         }
     }

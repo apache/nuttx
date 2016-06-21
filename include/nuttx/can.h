@@ -504,6 +504,9 @@ struct can_dev_s
   uint8_t              cd_error;         /* Flags to indicate internal device errors */
 #endif
   sem_t                cd_closesem;      /* Locks out new opens while close is in progress */
+#ifndef CONFIG_DISABLE_POLL
+  sem_t                cd_pollsem;       /* Manages exclusive access to cd_fds[] */
+#endif
   struct can_txfifo_s  cd_xmit;          /* Describes transmit FIFO */
   struct can_rxfifo_s  cd_recv;          /* Describes receive FIFO */
 #ifdef CONFIG_CAN_TXREADY
@@ -513,6 +516,10 @@ struct can_dev_s
   struct can_rtrwait_s cd_rtr[CONFIG_CAN_NPENDINGRTR];
   FAR const struct can_ops_s *cd_ops;    /* Arch-specific operations */
   FAR void            *cd_priv;          /* Used by the arch-specific logic */
+
+#ifndef CONFIG_DISABLE_POLL
+  FAR struct pollfd   *cd_fds[CONFIG_CAN_NPOLLWAITERS];
+#endif
 };
 
 /* Structures used with ioctl calls */

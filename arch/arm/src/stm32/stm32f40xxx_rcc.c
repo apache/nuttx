@@ -911,7 +911,7 @@ static void stm32_stdclockconfig(void)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_SYSLOG) && defined(CONFIG_ARMV7M_ITMSYSLOG)
+#ifdef CONFIG_ARMV7M_ITMSYSLOG
 static inline void rcc_itm_syslog(void)
 {
   /* Enable SWO output */

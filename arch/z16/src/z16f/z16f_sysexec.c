@@ -88,42 +88,42 @@ void z16f_sysexec(FAR chipreg_t *regs)
   excp = getreg16(Z16F_SYSEXCP);
   if ((excp & Z16F_SYSEXCP_SPOVF) != 0)
     {
-      lowsyslog(LOG_ERR, "SP OVERFLOW\n");
+      err("ERROR: SP OVERFLOW\n");
     }
 
   if ((excp & Z16F_SYSEXCP_PCOVF) != 0)
     {
-      lowsyslog(LOG_ERR, "PC OVERFLOW\n");
+      err("ERROR: PC OVERFLOW\n");
     }
 
   if ((excp & Z16F_SYSEXCP_DIV0) != 0)
     {
-      lowsyslog(LOG_ERR, "Divide by zero\n");
+      err("ERROR: Divide by zero\n");
     }
 
   if ((excp & Z16F_SYSEXCP_DIVOVF) != 0)
     {
-      lowsyslog(LOG_ERR, "Divide overflow\n");
+      err("ERROR: Divide overflow\n");
     }
 
   if ((excp & Z16F_SYSEXCP_ILL) != 0)
     {
-      lowsyslog(LOG_ERR, "Illegal instruction\n");
+      err("ERROR: Illegal instruction\n");
     }
 
   if ((excp & Z16F_SYSEXCP_WDTOSC) != 0)
     {
-      lowsyslog(LOG_ERR, "WDT oscillator failure\n");
+      err("ERROR: WDT oscillator failure\n");
     }
 
   if ((excp & Z16F_SYSEXCP_PRIOSC) != 0)
     {
-      lowsyslog(LOG_ERR, "Primary Oscillator Failure\n");
+      err("ERROR: Primary Oscillator Failure\n");
     }
 
   if ((excp & Z16F_SYSEXCP_WDT) != 0)
     {
-      lowsyslog(LOG_ERR, "Watchdog timeout\n");
+      err("ERROR: Watchdog timeout\n");
       z16f_reset();
     }
 

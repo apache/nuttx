@@ -638,7 +638,7 @@
 #define RCC_DCKCFGR1_SAI2SEL_SHIFT   (22)      /* Bits 22-23: SAI 2 clock source selection */
 #define RCC_DCKCFGR1_SAI2SEL_MASK    (0x3 << RCC_DCKCFGR1_SAI2SEL_SHIFT)
 #  define RCC_DCKCFGR1_SAI2SEL(n)    ((n) << RCC_DCKCFGR1_SAI2SEL_SHIFT)
-#define RCC_DCKCFGR1_TIMPRE          (1 << 24) /* Bit 24: Timer clock prescaler selection */
+#define RCC_DCKCFGR1_TIMPRESEL       (1 << 24) /* Bit 24: Timer clock prescaler selection */
 #define RCC_DCKCFGR1_DFSDM1SEL       (1 << 25) /* Bit 25: DFSDM1 clock prescaler selection */
 #define RCC_DCKCFGR1_ADFSDM1SEL      (1 << 26) /* Bit 26: DFSDM1 AUDIO clock prescaler selection */
 

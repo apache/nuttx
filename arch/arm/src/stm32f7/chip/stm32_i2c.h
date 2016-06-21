@@ -2,7 +2,8 @@
  * arch/arm/src/stm32f7/chip/stm32_i2c.h
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            David Sidrane <david_s5@nscdg.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -43,10 +44,11 @@
 #include <nuttx/config.h>
 #include "chip.h"
 
-#if defined(CONFIG_STM32F7_STM32F74XX) || defined(CONFIG_STM32F7_STM32F75XX)
-#  include "chip/stm32f74xx75xx_i2c.h"
+#if defined(CONFIG_STM32F7_STM32F74XX) || defined(CONFIG_STM32F7_STM32F75XX) || \
+    defined(CONFIG_STM32F7_STM32F76XX) || defined(CONFIG_STM32F7_STM32F77XX)
+#  include "chip/stm32f74xx77xx_i2c.h"
 #else
-#  error "Unsupported STM32 F7 part"
+#  error "Unsupported STM32 F7 sub family"
 #endif
 
 #endif /* __ARCH_ARM_SRC_STM32F7_CHIP_STM32_I2C_H */

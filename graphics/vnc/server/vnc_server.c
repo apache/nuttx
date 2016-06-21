@@ -248,17 +248,25 @@ int vnc_server(int argc, FAR char *argv[])
 
   if (argc != 2)
     {
+      /* In this case the start-up logic will probably hang, waiting for the
+       * display-related semaphore to be set.
+       */
+
       gerr("ERROR: Unexpected number of arguments: %d\n", argc);
       ret = -EINVAL;
-      goto errout_with_post;
+      goto errout_with_hang;
     }
 
   display = atoi(argv[1]);
   if (display < 0 || display >= RFB_MAX_DISPLAYS)
     {
+      /* In this case the start-up logic will probably hang, waiting for the
+       * display-related semaphore to be set.
+       */
+
       gerr("ERROR: Invalid display number: %d\n", display);
       ret = -EINVAL;
-      goto errout_with_post;
+      goto errout_with_hang;
     }
 
   ginfo("Server started for Display %d\n", display);
@@ -373,5 +381,7 @@ errout_with_fb:
 errout_with_post:
   g_fbstartup[display].result = ret;
   sem_post(&g_fbstartup[display].fbconnect);
+
+errout_with_hang:
   return EXIT_FAILURE;
 }

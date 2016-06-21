@@ -751,7 +751,7 @@ static void efm32_i2c_tracenew(FAR struct efm32_i2c_priv_s *priv)
 
           if (priv->tndx >= (CONFIG_I2C_NTRACE - 1))
             {
-              i2cerr("Trace table overflow\n");
+              i2cerr("ERROR: Trace table overflow\n");
               return;
             }
 
@@ -1526,9 +1526,9 @@ static int efm32_i2c_transfer(FAR struct i2c_master_s *dev,
     {
       ret = -ETIMEDOUT;
 
-      i2cerr("Timed out: I2Cx_STATE: 0x%04x I2Cx_STATUS: 0x%08x\n",
-             efm32_i2c_getreg(priv, EFM32_I2C_STATE_OFFSET),
-             efm32_i2c_getreg(priv, EFM32_I2C_STATUS_OFFSET));
+      i2cerr("ERROR: Timed out: I2Cx_STATE: 0x%04x I2Cx_STATUS: 0x%08x\n",
+              efm32_i2c_getreg(priv, EFM32_I2C_STATE_OFFSET),
+              efm32_i2c_getreg(priv, EFM32_I2C_STATUS_OFFSET));
 
       /* Abort */
 

@@ -820,7 +820,7 @@ static uint32_t stm32_getreg(uint32_t addr)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32_ETHMAC_REGDEBUG
+#if defined(CONFIG_STM32_ETHMAC_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
 static void stm32_putreg(uint32_t val, uint32_t addr)
 {
   /* Show the register value being written */
@@ -1012,8 +1012,8 @@ static int stm32_transmit(FAR struct stm32_ethmac_s *priv)
   txdesc  = priv->txhead;
   txfirst = txdesc;
 
-  nllinfo("d_len: %d d_buf: %p txhead: %p tdes0: %08x\n",
-          priv->dev.d_len, priv->dev.d_buf, txdesc, txdesc->tdes0);
+  ninfo("d_len: %d d_buf: %p txhead: %p tdes0: %08x\n",
+        priv->dev.d_len, priv->dev.d_buf, txdesc, txdesc->tdes0);
 
   DEBUGASSERT(txdesc && (txdesc->tdes0 & ETH_TDES0_OWN) == 0);
 
@@ -1029,7 +1029,7 @@ static int stm32_transmit(FAR struct stm32_ethmac_s *priv)
       bufcount = (priv->dev.d_len + (CONFIG_STM32_ETH_BUFSIZE-1)) / CONFIG_STM32_ETH_BUFSIZE;
       lastsize = priv->dev.d_len - (bufcount - 1) * CONFIG_STM32_ETH_BUFSIZE;
 
-      nllinfo("bufcount: %d lastsize: %d\n", bufcount, lastsize);
+      ninfo("bufcount: %d lastsize: %d\n", bufcount, lastsize);
 
       /* Set the first segment bit in the first TX descriptor */
 
@@ -1139,8 +1139,8 @@ static int stm32_transmit(FAR struct stm32_ethmac_s *priv)
 
   priv->inflight++;
 
-  nllinfo("txhead: %p txtail: %p inflight: %d\n",
-          priv->txhead, priv->txtail, priv->inflight);
+  ninfo("txhead: %p txtail: %p inflight: %d\n",
+        priv->txhead, priv->txtail, priv->inflight);
 
   /* If all TX descriptors are in-flight, then we have to disable receive interrupts
    * too.  This is because receive events can trigger more un-stoppable transmit
@@ -1438,7 +1438,7 @@ static void stm32_freesegment(FAR struct stm32_ethmac_s *priv,
   struct eth_rxdesc_s *rxdesc;
   int i;
 
-  nllinfo("rxfirst: %p segments: %d\n", rxfirst, segments);
+  ninfo("rxfirst: %p segments: %d\n", rxfirst, segments);
 
   /* Set OWN bit in RX descriptors.  This gives the buffers back to DMA */
 
@@ -1496,8 +1496,8 @@ static int stm32_recvframe(FAR struct stm32_ethmac_s *priv)
   uint8_t *buffer;
   int i;
 
-  nllinfo("rxhead: %p rxcurr: %p segments: %d\n",
-          priv->rxhead, priv->rxcurr, priv->segments);
+  ninfo("rxhead: %p rxcurr: %p segments: %d\n",
+        priv->rxhead, priv->rxcurr, priv->segments);
 
   /* Check if there are free buffers.  We cannot receive new frames in this
    * design unless there is at least one free buffer.
@@ -1505,7 +1505,7 @@ static int stm32_recvframe(FAR struct stm32_ethmac_s *priv)
 
   if (!stm32_isfreebuffer(priv))
     {
-      nllerr("ERROR: No free buffers\n");
+      nerr("ERROR: No free buffers\n");
       return -ENOMEM;
     }
 
@@ -1562,7 +1562,7 @@ static int stm32_recvframe(FAR struct stm32_ethmac_s *priv)
               rxcurr = priv->rxcurr;
             }
 
-          nllinfo("rxhead: %p rxcurr: %p segments: %d\n",
+          ninfo("rxhead: %p rxcurr: %p segments: %d\n",
               priv->rxhead, priv->rxcurr, priv->segments);
 
           /* Check if any errors are reported in the frame */
@@ -1601,8 +1601,8 @@ static int stm32_recvframe(FAR struct stm32_ethmac_s *priv)
               priv->rxhead   = (struct eth_rxdesc_s *)rxdesc->rdes3;
               stm32_freesegment(priv, rxcurr, priv->segments);
 
-              nllinfo("rxhead: %p d_buf: %p d_len: %d\n",
-                      priv->rxhead, dev->d_buf, dev->d_len);
+              ninfo("rxhead: %p d_buf: %p d_len: %d\n",
+                    priv->rxhead, dev->d_buf, dev->d_len);
 
               return OK;
             }
@@ -1612,7 +1612,7 @@ static int stm32_recvframe(FAR struct stm32_ethmac_s *priv)
                * scanning logic, and continue scanning with the next frame.
                */
 
-              nllerr("ERROR: Dropped, RX descriptor errors: %08x\n", rxdesc->rdes0);
+              nerr("ERROR: Dropped, RX descriptor errors: %08x\n", rxdesc->rdes0);
               stm32_freesegment(priv, rxcurr, priv->segments);
             }
         }
@@ -1628,8 +1628,8 @@ static int stm32_recvframe(FAR struct stm32_ethmac_s *priv)
 
   priv->rxhead = rxdesc;
 
-  nllinfo("rxhead: %p rxcurr: %p segments: %d\n",
-          priv->rxhead, priv->rxcurr, priv->segments);
+  ninfo("rxhead: %p rxcurr: %p segments: %d\n",
+        priv->rxhead, priv->rxcurr, priv->segments);
 
   return -EAGAIN;
 }
@@ -1673,7 +1673,7 @@ static void stm32_receive(FAR struct stm32_ethmac_s *priv)
 
       if (dev->d_len > CONFIG_NET_ETH_MTU)
         {
-          nllerr("ERROR: Dropped, Too big: %d\n", dev->d_len);
+          nerr("ERROR: Dropped, Too big: %d\n", dev->d_len);
 
           /* Free dropped packet buffer */
 
@@ -1698,7 +1698,7 @@ static void stm32_receive(FAR struct stm32_ethmac_s *priv)
 #ifdef CONFIG_NET_IPv4
       if (BUF->type == HTONS(ETHTYPE_IP))
         {
-          nllinfo("IPv4 frame\n");
+          ninfo("IPv4 frame\n");
 
           /* Handle ARP on input then give the IPv4 packet to the network
            * layer
@@ -1738,7 +1738,7 @@ static void stm32_receive(FAR struct stm32_ethmac_s *priv)
 #ifdef CONFIG_NET_IPv6
       if (BUF->type == HTONS(ETHTYPE_IP6))
         {
-          nllinfo("Iv6 frame\n");
+          ninfo("Iv6 frame\n");
 
           /* Give the IPv6 packet to the network layer */
 
@@ -1775,7 +1775,7 @@ static void stm32_receive(FAR struct stm32_ethmac_s *priv)
 #ifdef CONFIG_NET_ARP
       if (BUF->type == htons(ETHTYPE_ARP))
         {
-          nllinfo("ARP frame\n");
+          ninfo("ARP frame\n");
 
           /* Handle ARP packet */
 
@@ -1793,7 +1793,7 @@ static void stm32_receive(FAR struct stm32_ethmac_s *priv)
       else
 #endif
         {
-          nllerr("ERROR: Dropped, Unknown type: %04x\n", BUF->type);
+          nerr("ERROR: Dropped, Unknown type: %04x\n", BUF->type);
         }
 
       /* We are finished with the RX buffer.  NOTE:  If the buffer is
@@ -1834,8 +1834,8 @@ static void stm32_freeframe(FAR struct stm32_ethmac_s *priv)
   struct eth_txdesc_s *txdesc;
   int i;
 
-  nllinfo("txhead: %p txtail: %p inflight: %d\n",
-          priv->txhead, priv->txtail, priv->inflight);
+  ninfo("txhead: %p txtail: %p inflight: %d\n",
+        priv->txhead, priv->txtail, priv->inflight);
 
   /* Scan for "in-flight" descriptors owned by the CPU */
 
@@ -1850,8 +1850,8 @@ static void stm32_freeframe(FAR struct stm32_ethmac_s *priv)
            * TX descriptors.
            */
 
-          nllinfo("txtail: %p tdes0: %08x tdes2: %08x tdes3: %08x\n",
-                  txdesc, txdesc->tdes0, txdesc->tdes2, txdesc->tdes3);
+          ninfo("txtail: %p tdes0: %08x tdes2: %08x tdes3: %08x\n",
+                txdesc, txdesc->tdes0, txdesc->tdes2, txdesc->tdes3);
 
           DEBUGASSERT(txdesc->tdes2 != 0);
 
@@ -1903,8 +1903,8 @@ static void stm32_freeframe(FAR struct stm32_ethmac_s *priv)
 
       priv->txtail = txdesc;
 
-      nllinfo("txhead: %p txtail: %p inflight: %d\n",
-              priv->txhead, priv->txtail, priv->inflight);
+      ninfo("txhead: %p txtail: %p inflight: %d\n",
+            priv->txhead, priv->txtail, priv->inflight);
     }
 }
 
@@ -2042,7 +2042,7 @@ static inline void stm32_interrupt_process(FAR struct stm32_ethmac_s *priv)
     {
       /* Just let the user know what happened */
 
-      nllerr("ERROR: Abormal event(s): %08x\n", dmasr);
+      nerr("ERROR: Abormal event(s): %08x\n", dmasr);
 
       /* Clear all pending abnormal events */
 
@@ -2246,7 +2246,7 @@ static void stm32_txtimeout_expiry(int argc, uint32_t arg, ...)
 {
   FAR struct stm32_ethmac_s *priv = (FAR struct stm32_ethmac_s *)arg;
 
-  nllerr("ERROR: Timeout!\n");
+  nerr("ERROR: Timeout!\n");
 
 #ifdef CONFIG_NET_NOINTS
   /* Disable further Ethernet interrupts.  This will prevent some race
@@ -2712,8 +2712,8 @@ static int stm32_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
   uint32_t temp;
   uint32_t registeraddress;
 
-  nllinfo("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
-          mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+  ninfo("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
+        mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 
   /* Add the MAC address to the hardware multicast hash table */
 
@@ -2769,8 +2769,8 @@ static int stm32_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
   uint32_t temp;
   uint32_t registeraddress;
 
-  nllinfo("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
-          mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+  ninfo("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
+        mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 
   /* Remove the MAC address to the hardware multicast hash table */
 
@@ -3853,11 +3853,11 @@ static void stm32_macaddress(FAR struct stm32_ethmac_s *priv)
   FAR struct net_driver_s *dev = &priv->dev;
   uint32_t regval;
 
-  nllinfo("%s MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
-          dev->d_ifname,
-          dev->d_mac.ether_addr_octet[0], dev->d_mac.ether_addr_octet[1],
-          dev->d_mac.ether_addr_octet[2], dev->d_mac.ether_addr_octet[3],
-          dev->d_mac.ether_addr_octet[4], dev->d_mac.ether_addr_octet[5]);
+  ninfo("%s MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
+        dev->d_ifname,
+        dev->d_mac.ether_addr_octet[0], dev->d_mac.ether_addr_octet[1],
+        dev->d_mac.ether_addr_octet[2], dev->d_mac.ether_addr_octet[3],
+        dev->d_mac.ether_addr_octet[4], dev->d_mac.ether_addr_octet[5]);
 
   /* Set the MAC address high register */
 
@@ -4059,12 +4059,12 @@ static int stm32_ethconfig(FAR struct stm32_ethmac_s *priv)
 
   /* Reset the Ethernet block */
 
-  nllinfo("Reset the Ethernet block\n");
+  ninfo("Reset the Ethernet block\n");
   stm32_ethreset(priv);
 
   /* Initialize the PHY */
 
-  nllinfo("Initialize the PHY\n");
+  ninfo("Initialize the PHY\n");
   ret = stm32_phyinit(priv);
   if (ret < 0)
     {
@@ -4073,7 +4073,7 @@ static int stm32_ethconfig(FAR struct stm32_ethmac_s *priv)
 
   /* Initialize the MAC and DMA */
 
-  nllinfo("Initialize the MAC and DMA\n");
+  ninfo("Initialize the MAC and DMA\n");
   ret = stm32_macconfig(priv);
   if (ret < 0)
     {
@@ -4094,7 +4094,7 @@ static int stm32_ethconfig(FAR struct stm32_ethmac_s *priv)
 
   /* Enable normal MAC operation */
 
-  nllinfo("Enable normal operation\n");
+  ninfo("Enable normal operation\n");
   return stm32_macenable(priv);
 }
 

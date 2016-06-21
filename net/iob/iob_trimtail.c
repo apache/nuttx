@@ -72,7 +72,7 @@ FAR struct iob_s *iob_trimtail(FAR struct iob_s *iob, unsigned int trimlen)
   FAR struct iob_s *last;
   int len;
 
-  nllinfo("iob=%p pktlen=%d trimlen=%d\n", iob, iob->io_pktlen, trimlen);
+  ninfo("iob=%p pktlen=%d trimlen=%d\n", iob, iob->io_pktlen, trimlen);
 
   if (iob && trimlen > 0)
     {
@@ -101,7 +101,7 @@ FAR struct iob_s *iob_trimtail(FAR struct iob_s *iob, unsigned int trimlen)
            * I/O buffer away?
            */
 
-          nllinfo("iob=%p len=%d vs %d\n", last, last->io_len, len);
+          ninfo("iob=%p len=%d vs %d\n", last, last->io_len, len);
           if (last->io_len <= len)
             {
               /* Yes.. Consume the entire buffer */

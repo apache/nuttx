@@ -90,7 +90,7 @@ int board_lcd_initialize(void)
   g_spidev = lpc17_sspbus_initialize(0);
   if (!g_spidev)
     {
-      lcdllerr("ERROR: Failed to initialize SSP port 0\n");
+      lcderr("ERROR: Failed to initialize SSP port 0\n");
       return 0;
     }
 
@@ -109,11 +109,11 @@ FAR struct lcd_dev_s *board_lcd_getdev(int lcddev)
   g_lcddev = st7567_initialize(g_spidev, lcddev);
   if (!g_lcddev)
     {
-      lcdllerr("ERROR: Failed to bind SSI port 0 to OLCD %d: %d\n", lcddev);
+      lcderr("ERROR: Failed to bind SSI port 0 to OLCD %d: %d\n", lcddev);
     }
   else
     {
-      lcdllinfo("Bound SSI port 0 to OLCD %d\n", lcddev);
+      lcdinfo("Bound SSI port 0 to OLCD %d\n", lcddev);
 
       /* And turn the OLCD on (CONFIG_LCD_MAXPOWER should be 1) */
 

@@ -753,14 +753,14 @@ static int sam_transmit(struct sam_emac_s *priv)
   uint32_t regval;
   uint32_t status;
 
-  nllinfo("d_len: %d txhead: %d\n",  dev->d_len, priv->txhead);
+  ninfo("d_len: %d txhead: %d\n",  dev->d_len, priv->txhead);
   sam_dumppacket("Transmit packet", dev->d_buf, dev->d_len);
 
   /* Check parameter */
 
   if (dev->d_len > EMAC_TX_UNITSIZE)
     {
-      nllerr("ERROR: Packet too big: %d\n", dev->d_len);
+      nerr("ERROR: Packet too big: %d\n", dev->d_len);
       return -EINVAL;
     }
 
@@ -772,7 +772,7 @@ static int sam_transmit(struct sam_emac_s *priv)
 
   if (sam_txfree(priv) < 1)
     {
-      nllerr("ERROR: No free TX descriptors\n");
+      nerr("ERROR: No free TX descriptors\n");
       return -EBUSY;
     }
 
@@ -830,7 +830,7 @@ static int sam_transmit(struct sam_emac_s *priv)
 
   if (sam_txfree(priv) < 1)
     {
-      nllinfo("Disabling RX interrupts\n");
+      ninfo("Disabling RX interrupts\n");
       sam_putreg(priv, SAM_EMAC_IDR, EMAC_INT_RCOMP);
     }
 
@@ -1010,7 +1010,7 @@ static int sam_recvframe(struct sam_emac_s *priv)
   sam_cmcc_invalidate((uintptr_t)rxdesc,
                       (uintptr_t)rxdesc + sizeof(struct emac_rxdesc_s));
 
-  nllinfo("rxndx: %d\n", rxndx);
+  ninfo("rxndx: %d\n", rxndx);
 
   while ((rxdesc->addr & EMACRXD_ADDR_OWNER) != 0)
     {
@@ -1060,7 +1060,7 @@ static int sam_recvframe(struct sam_emac_s *priv)
         {
           if (rxndx == priv->rxndx)
             {
-              nllinfo("ERROR: No EOF (Invalid of buffers too small)\n");
+              nerr("ERROR: No EOF (Invalid of buffers too small)\n");
               do
                 {
                   /* Give ownership back to the EMAC */
@@ -1107,7 +1107,7 @@ static int sam_recvframe(struct sam_emac_s *priv)
               /* Frame size from the EMAC */
 
               dev->d_len = (rxdesc->status & EMACRXD_STA_FRLEN_MASK);
-              nllinfo("packet %d-%d (%d)\n", priv->rxndx, rxndx, dev->d_len);
+              ninfo("packet %d-%d (%d)\n", priv->rxndx, rxndx, dev->d_len);
 
               /* All data have been copied in the application frame buffer,
                * release the RX descriptor
@@ -1132,11 +1132,11 @@ static int sam_recvframe(struct sam_emac_s *priv)
                * all of the data.
                */
 
-              nllinfo("rxndx: %d d_len: %d\n", priv->rxndx, dev->d_len);
+              ninfo("rxndx: %d d_len: %d\n", priv->rxndx, dev->d_len);
 
               if (pktlen < dev->d_len)
                 {
-                  nllerr("ERROR: Buffer size %d; frame size %d\n", dev->d_len, pktlen);
+                  nerr("ERROR: Buffer size %d; frame size %d\n", dev->d_len, pktlen);
                   return -E2BIG;
                 }
 
@@ -1167,7 +1167,7 @@ static int sam_recvframe(struct sam_emac_s *priv)
   /* No packet was found */
 
   priv->rxndx = rxndx;
-  nllinfo("rxndx: %d\n", priv->rxndx);
+  ninfo("rxndx: %d\n", priv->rxndx);
   return -EAGAIN;
 }
 
@@ -1207,7 +1207,7 @@ static void sam_receive(struct sam_emac_s *priv)
 
       if (dev->d_len > CONFIG_NET_ETH_MTU)
         {
-          nllwarn("WARNING: Dropped, Too big: %d\n", dev->d_len);
+          nwarn("WARNING: Dropped, Too big: %d\n", dev->d_len);
           continue;
         }
 
@@ -1222,7 +1222,7 @@ static void sam_receive(struct sam_emac_s *priv)
 #ifdef CONFIG_NET_IPv4
       if (BUF->type == HTONS(ETHTYPE_IP))
         {
-          nllinfo("IPv4 frame\n");
+          ninfo("IPv4 frame\n");
 
           /* Handle ARP on input then give the IPv4 packet to the network
            * layer
@@ -1262,7 +1262,7 @@ static void sam_receive(struct sam_emac_s *priv)
 #ifdef CONFIG_NET_IPv6
       if (BUF->type == HTONS(ETHTYPE_IP6))
         {
-          nllinfo("Iv6 frame\n");
+          ninfo("Iv6 frame\n");
 
           /* Give the IPv6 packet to the network layer */
 
@@ -1299,7 +1299,7 @@ static void sam_receive(struct sam_emac_s *priv)
 #ifdef CONFIG_NET_ARP
       if (BUF->type == htons(ETHTYPE_ARP))
         {
-          nllinfo("ARP frame\n");
+          ninfo("ARP frame\n");
 
           /* Handle ARP packet */
 
@@ -1317,7 +1317,7 @@ static void sam_receive(struct sam_emac_s *priv)
       else
 #endif
         {
-          nllwarn("WARNING: Dropped, Unknown type: %04x\n", BUF->type);
+          nwarn("WARNING: Dropped, Unknown type: %04x\n", BUF->type);
         }
     }
 }
@@ -1442,7 +1442,7 @@ static inline void sam_interrupt_process(FAR struct sam_emac_s *priv)
   imr = sam_getreg(priv, SAM_EMAC_IMR);
 
   pending = isr & ~(imr | EMAC_INT_UNUSED);
-  nllinfo("isr: %08x pending: %08x\n", isr, pending);
+  ninfo("isr: %08x pending: %08x\n", isr, pending);
 
   /* Check for the completion of a transmission.  This should be done before
    * checking for received data (because receiving can cause another transmission
@@ -1468,7 +1468,7 @@ static inline void sam_interrupt_process(FAR struct sam_emac_s *priv)
           clrbits = EMAC_TSR_RLE | sam_txinuse(priv);
           sam_txreset(priv);
 
-          nllerr("ERROR: Retry Limit Exceeded TSR: %08x\n", tsr);
+          nerr("ERROR: Retry Limit Exceeded TSR: %08x\n", tsr);
 
           regval = sam_getreg(priv, SAM_EMAC_NCR);
           regval |= EMAC_NCR_TXEN;
@@ -1479,7 +1479,7 @@ static inline void sam_interrupt_process(FAR struct sam_emac_s *priv)
 
       if ((tsr & EMAC_TSR_COL) != 0)
         {
-          nllerr("ERROR: Collision occurred TSR: %08x\n", tsr);
+          nerr("ERROR: Collision occurred TSR: %08x\n", tsr);
           clrbits |= EMAC_TSR_COL;
         }
 
@@ -1487,7 +1487,7 @@ static inline void sam_interrupt_process(FAR struct sam_emac_s *priv)
 
       if ((tsr & EMAC_TSR_TFC) != 0)
         {
-          nllerr("ERROR: Transmit Frame Corruption due to AHB error: %08x\n", tsr);
+          nerr("ERROR: Transmit Frame Corruption due to AHB error: %08x\n", tsr);
           clrbits |= EMAC_TSR_TFC;
         }
 
@@ -1502,7 +1502,7 @@ static inline void sam_interrupt_process(FAR struct sam_emac_s *priv)
 
       if ((tsr & EMAC_TSR_UND) != 0)
         {
-          nllerr("ERROR: Transmit Underrun TSR: %08x\n", tsr);
+          nerr("ERROR: Transmit Underrun TSR: %08x\n", tsr);
           clrbits |= EMAC_TSR_UND;
         }
 
@@ -1539,7 +1539,7 @@ static inline void sam_interrupt_process(FAR struct sam_emac_s *priv)
 
       if ((rsr & EMAC_RSR_RXOVR) != 0)
         {
-          nllerr("ERROR: Receiver overrun RSR: %08x\n", rsr);
+          nerr("ERROR: Receiver overrun RSR: %08x\n", rsr);
           clrbits |= EMAC_RSR_RXOVR;
         }
 
@@ -1556,7 +1556,7 @@ static inline void sam_interrupt_process(FAR struct sam_emac_s *priv)
 
       if ((rsr & EMAC_RSR_BNA) != 0)
         {
-          nllerr("ERROR: Buffer not available RSR: %08x\n", rsr);
+          nerr("ERROR: Buffer not available RSR: %08x\n", rsr);
           clrbits |= EMAC_RSR_BNA;
         }
 
@@ -1578,7 +1578,7 @@ static inline void sam_interrupt_process(FAR struct sam_emac_s *priv)
 
   if ((pending & EMAC_INT_PFNZ) != 0)
     {
-      nllwarn("WARNING: Pause frame received\n");
+      nwarn("WARNING: Pause frame received\n");
     }
 
   /* Check for Pause Time Zero (PTZ)
@@ -1588,7 +1588,7 @@ static inline void sam_interrupt_process(FAR struct sam_emac_s *priv)
 
   if ((pending & EMAC_INT_PTZ) != 0)
     {
-      nllwarn("WARNING: Pause TO!\n");
+      nwarn("WARNING: Pause TO!\n");
     }
 #endif
 }
@@ -1725,7 +1725,7 @@ static int sam_emac_interrupt(int irq, void *context)
 
 static inline void sam_txtimeout_process(FAR struct sam_emac_s *priv)
 {
-  nllerr("ERROR: Timeout!\n");
+  nerr("ERROR: Timeout!\n");
 
   /* Then reset the hardware.  Just take the interface down, then back
    * up again.

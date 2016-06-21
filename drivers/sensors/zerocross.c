@@ -244,7 +244,7 @@ static int zc_open(FAR struct file *filep)
   ret = sem_wait(&priv->exclsem);
   if (ret < 0)
     {
-      sninfo("ERROR: sem_wait failed: %d\n", ret);
+      snerr("ERROR: sem_wait failed: %d\n", ret);
       return ret;
     }
 
@@ -253,7 +253,7 @@ static int zc_open(FAR struct file *filep)
   opriv = (FAR struct zc_open_s *)kmm_zalloc(sizeof(struct zc_open_s));
   if (!opriv)
     {
-      sninfo("ERROR: Failled to allocate open structure\n");
+      snerr("ERROR: Failled to allocate open structure\n");
       ret = -ENOMEM;
       goto errout_with_sem;
     }
@@ -325,7 +325,7 @@ static int zc_close(FAR struct file *filep)
   ret = sem_wait(&priv->exclsem);
   if (ret < 0)
     {
-      sninfo("ERROR: sem_wait failed: %d\n", ret);
+      snerr("ERROR: sem_wait failed: %d\n", ret);
       return ret;
     }
 
@@ -338,7 +338,7 @@ static int zc_close(FAR struct file *filep)
   DEBUGASSERT(curr);
   if (!curr)
     {
-      sninfo("ERROR: Failed to find open entry\n");
+      snerr("ERROR: Failed to find open entry\n");
       ret = -ENOENT;
       goto errout_with_exclsem;
     }
@@ -516,7 +516,7 @@ int zc_register(FAR const char *devname, FAR struct zc_lowerhalf_s *lower)
 
   if (!priv)
     {
-      sninfo("ERROR: Failed to allocate device structure\n");
+      snerr("ERROR: Failed to allocate device structure\n");
       return -ENOMEM;
     }
 
@@ -535,7 +535,7 @@ int zc_register(FAR const char *devname, FAR struct zc_lowerhalf_s *lower)
   ret = register_driver(devname, &g_zcops, 0666, priv);
   if (ret < 0)
     {
-      sninfo("ERROR: register_driver failed: %d\n", ret);
+      snerr("ERROR: register_driver failed: %d\n", ret);
       sem_destroy(&priv->exclsem);
       kmm_free(priv);
     }

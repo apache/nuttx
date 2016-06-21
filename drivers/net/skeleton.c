@@ -334,7 +334,7 @@ static void skel_receive(FAR struct skel_driver_s *priv)
 #ifdef CONFIG_NET_IPv4
       if (BUF->type == HTONS(ETHTYPE_IP))
         {
-          nllinfo("IPv4 frame\n");
+          ninfo("IPv4 frame\n");
           NETDEV_RXIPV4(&priv->sk_dev);
 
           /* Handle ARP on input then give the IPv4 packet to the network
@@ -375,7 +375,7 @@ static void skel_receive(FAR struct skel_driver_s *priv)
 #ifdef CONFIG_NET_IPv6
       if (BUF->type == HTONS(ETHTYPE_IP6))
         {
-          nllinfo("Iv6 frame\n");
+          ninfo("Iv6 frame\n");
           NETDEV_RXIPV6(&priv->sk_dev);
 
           /* Give the IPv6 packet to the network layer */

@@ -53,41 +53,22 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Enables debug output from this file (needs CONFIG_DEBUG_FEATURES with
- * CONFIG_DEBUG_INFO too)
- */
-
-#undef BUTTON_DEBUG   /* Define to enable debug */
-#undef BUTTON_VERBOSE /* Define to enable verbose debug */
-
-#ifdef BUTTON_DEBUG
-#  define btnerr  _llerr
-#  ifdef BUTTON_VERBOSE
-#    define btninfo  _llerr
-#  else
-#    define btninfo(x...)
+#ifdef CONFIG_DEBUG_INPUT
+#  define btnerr        _err
+#  define btninfo(x...) _info
 #  endif
 #else
-#  undef BUTTON_VERBOSE
 #  define btnerr(x...)
 #  define btninfo(x...)
 #endif
 
 /* Dump GPIO registers */
 
-#ifdef BUTTON_VERBOSE
+#ifdef CONFIG_DEBUG_INPUT
 #  define btn_dumpgpio(m) m9s12_dumpgpio(m)
 #else
 #  define btn_dumpgpio(m)
 #endif
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions

@@ -293,7 +293,7 @@ static int tiva_gpioporthandler(uint8_t port, void *context)
   uint8_t   pin;                                   /* Pin number */
 
   tiva_gpioirqclear(port, 0xff);
-  gpiollinfo("mis=0b%08b\n", mis & 0xff);
+  gpioinfo("mis=0b%08b\n", mis & 0xff);
 
   /* Now process each IRQ pending in the MIS */
 
@@ -303,10 +303,10 @@ static int tiva_gpioporthandler(uint8_t port, void *context)
         {
           if (((mis >> pin) & 1) != 0)
             {
-              gpiollinfo("port=%d pin=%d irq=%p index=%d\n",
-                         port, pin,
-                         g_gpioportirqvector[TIVA_GPIO_IRQ_IDX(port, pin)],
-                         TIVA_GPIO_IRQ_IDX(port, pin));
+              gpioinfo("port=%d pin=%d irq=%p index=%d\n",
+                       port, pin,
+                       g_gpioportirqvector[TIVA_GPIO_IRQ_IDX(port, pin)],
+                       TIVA_GPIO_IRQ_IDX(port, pin));
 
               g_gpioportirqvector[TIVA_GPIO_IRQ_IDX(port, pin)](irq, context);
             }

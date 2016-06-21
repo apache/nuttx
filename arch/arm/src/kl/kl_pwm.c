@@ -464,7 +464,7 @@ static int pwm_timer(FAR struct kl_pwmtimer_s *priv,
         break;
 
       default:
-        pwmerr("No such channel: %d\n", priv->channel);
+        pwmerr("ERROR: No such channel: %d\n", priv->channel);
         return -EINVAL;
     }
 
@@ -644,7 +644,7 @@ static int pwm_stop(FAR struct pwm_lowerhalf_s *dev)
         break;
 
       default:
-        pwmerr("No such channel: %d\n", priv->channel);
+        pwmerr("ERROR: No such channel: %d\n", priv->channel);
         return -EINVAL;
     }
 
@@ -731,7 +731,7 @@ FAR struct pwm_lowerhalf_s *kl_pwminitialize(int timer)
 #endif
 
       default:
-        pwmerr("No such timer configured\n");
+        pwmerr("ERROR: No such timer configured\n");
         return NULL;
     }
 

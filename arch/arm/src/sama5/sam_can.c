@@ -783,7 +783,7 @@ static void can_reset(FAR struct can_dev_s *dev)
   config = priv->config;
   DEBUGASSERT(config);
 
-  canllinfo("CAN%d\n", config->port);
+  caninfo("CAN%d\n", config->port);
   UNUSED(config);
 
   /* Get exclusive access to the CAN peripheral */
@@ -840,7 +840,7 @@ static int can_setup(FAR struct can_dev_s *dev)
   config = priv->config;
   DEBUGASSERT(config);
 
-  canllinfo("CAN%d pid: %d\n", config->port, config->pid);
+  caninfo("CAN%d pid: %d\n", config->port, config->pid);
 
   /* Get exclusive access to the CAN peripheral */
 
@@ -851,7 +851,7 @@ static int can_setup(FAR struct can_dev_s *dev)
   ret = can_hwinitialize(priv);
   if (ret < 0)
     {
-      canllerr("ERROR: CAN%d H/W initialization failed: %d\n", config->port, ret);
+      canerr("ERROR: CAN%d H/W initialization failed: %d\n", config->port, ret);
       return ret;
     }
 
@@ -863,7 +863,7 @@ static int can_setup(FAR struct can_dev_s *dev)
   ret = irq_attach(config->pid, config->handler);
   if (ret < 0)
     {
-      canllerr("ERROR: Failed to attach CAN%d IRQ (%d)", config->port, config->pid);
+      canerr("ERROR: Failed to attach CAN%d IRQ (%d)", config->port, config->pid);
       return ret;
     }
 
@@ -872,7 +872,7 @@ static int can_setup(FAR struct can_dev_s *dev)
   ret = can_recvsetup(priv);
   if (ret < 0)
     {
-      canllerr("ERROR: CAN%d H/W initialization failed: %d\n", config->port, ret);
+      canerr("ERROR: CAN%d H/W initialization failed: %d\n", config->port, ret);
       return ret;
     }
 
@@ -918,7 +918,7 @@ static void can_shutdown(FAR struct can_dev_s *dev)
   config = priv->config;
   DEBUGASSERT(config);
 
-  canllinfo("CAN%d\n", config->port);
+  caninfo("CAN%d\n", config->port);
 
   /* Get exclusive access to the CAN peripheral */
 
@@ -957,7 +957,7 @@ static void can_rxint(FAR struct can_dev_s *dev, bool enable)
   FAR struct sam_can_s *priv = dev->cd_priv;
   DEBUGASSERT(priv && priv->config);
 
-  canllinfo("CAN%d enable: %d\n", priv->config->port, enable);
+  caninfo("CAN%d enable: %d\n", priv->config->port, enable);
 
   /* Enable/disable the mailbox interrupts from all receive mailboxes */
 
@@ -990,7 +990,7 @@ static void can_txint(FAR struct can_dev_s *dev, bool enable)
   FAR struct sam_can_s *priv = dev->cd_priv;
   DEBUGASSERT(priv && priv->config);
 
-  canllinfo("CAN%d enable: %d\n", priv->config->port, enable);
+  caninfo("CAN%d enable: %d\n", priv->config->port, enable);
 
   /* Get exclusive access to the CAN peripheral */
 
@@ -1091,9 +1091,9 @@ static int can_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
   priv = dev->cd_priv;
   DEBUGASSERT(priv && priv->config);
 
-  canllinfo("CAN%d\n", priv->config->port);
-  canllinfo("CAN%d ID: %d DLC: %d\n",
-            priv->config->port, msg->cm_hdr.ch_id, msg->cm_hdr.ch_dlc);
+  caninfo("CAN%d\n", priv->config->port);
+  caninfo("CAN%d ID: %d DLC: %d\n",
+          priv->config->port, msg->cm_hdr.ch_id, msg->cm_hdr.ch_dlc);
 
   /* Get exclusive access to the CAN peripheral */
 
@@ -1327,7 +1327,7 @@ static inline void can_rxinterrupt(FAR struct can_dev_s *dev, int mbndx,
   ret = can_receive(dev, &hdr, (FAR uint8_t *)md);
   if (ret < 0)
     {
-      canllerr("ERROR: can_receive failed: %d\n", ret);
+      canerr("ERROR: can_receive failed: %d\n", ret);
     }
 
   /* Set the MTCR flag in the CAN_MCRx register.  This clears the
@@ -1422,9 +1422,9 @@ static inline void can_mbinterrupt(FAR struct can_dev_s *dev, int mbndx)
           case CAN_MMR_MOT_CONSUMER: /* Consumer Mailbox */
           case CAN_MMR_MOT_PRODUCER: /* Producer Mailbox */
           case CAN_MMR_MOT_DISABLED: /* Mailbox is disabled */
-            canllerr("ERROR: CAN%d MB%d: Unsupported or invalid mailbox type\n",
-                     priv->config->port, mbndx);
-            canllerr("       MSR: %08x MMR: %08x\n", msr, mmr);
+            canerr("ERROR: CAN%d MB%d: Unsupported or invalid mailbox type\n",
+                   priv->config->port, mbndx);
+            canerr("       MSR: %08x MMR: %08x\n", msr, mmr);
             break;
         }
     }
@@ -1515,8 +1515,8 @@ static void can_interrupt(FAR struct can_dev_s *dev)
 
   if ((pending & ~CAN_INT_MBALL) != 0)
     {
-      canllerr("ERROR: CAN%d system interrupt, SR=%08x IMR=%08x\n",
-               priv->config->port, sr, imr);
+      canerr("ERROR: CAN%d system interrupt, SR=%08x IMR=%08x\n",
+             priv->config->port, sr, imr);
     }
 }
 
@@ -1773,7 +1773,7 @@ static int can_autobaud(struct sam_can_s *priv)
   uint32_t regval;
   int ret;
 
-  canllinfo("CAN%d\n", config->port);
+  caninfo("CAN%d\n", config->port);
 
   /* The CAN controller can start listening to the network in Autobaud Mode.
    * In this case, the error counters are locked and a mailbox may be
@@ -1843,7 +1843,7 @@ static int can_hwinitialize(struct sam_can_s *priv)
   uint32_t mck;
   int ret;
 
-  canllinfo("CAN%d\n", config->port);
+  caninfo("CAN%d\n", config->port);
 
   /* Configure CAN pins */
 

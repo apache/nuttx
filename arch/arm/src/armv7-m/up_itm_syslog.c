@@ -2,7 +2,7 @@
  * arch/arm/src/armv7-m/up_itm_syslog.c
  *
  *   Copyright (C) 2014 Pierre-noel Bouteville . All rights reserved.
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
  *   Authors: Pierre-noel Bouteville <pnb990@gmail.com>
  *            Gregory Nutt <gnutt@nuttx.org>
  *
@@ -52,7 +52,7 @@
 #include "up_arch.h"
 #include "itm_syslog.h"
 
-#if defined(CONFIG_SYSLOG) || defined(CONFIG_ARMV7M_ITMSYSLOG)
+#ifdef CONFIG_ARMV7M_ITMSYSLOG
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -71,6 +71,73 @@
 #ifndef CONFIG_ARMV7M_ITMSYSLOG_PORT
 #  define CONFIG_ARMV7M_ITMSYSLOG_PORT 0
 #endif
+
+/****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+
+/* SYSLOG channel methods */
+
+static int itm_putc(int ch);
+static int itm_flush(void);
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+/* This structure describes the ITM SYSLOG channel */
+
+static const struct syslog_channel_s g_itm_channel =
+{
+  .sc_putc  = itm_putc,
+  .sc_force = itm_putc,
+  .sc_flush = itm_flush,
+};
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: itm_putc
+ *
+ * Description:
+ *   This is the low-level system logging interface.
+ *
+ ****************************************************************************/
+
+static int itm_putc(int ch)
+{
+  /* ITM enabled */
+
+  if ((getreg32(ITM_TCR) & ITM_TCR_ITMENA_Msk) == 0)
+    {
+      return EOF;
+    }
+
+  /* ITM Port "CONFIG_ARMV7M_ITMSYSLOG_PORT" enabled */
+
+  if (getreg32(ITM_TER) & (1 << CONFIG_ARMV7M_ITMSYSLOG_PORT))
+    {
+      while (getreg32(ITM_PORT(CONFIG_ARMV7M_ITMSYSLOG_PORT)) == 0);
+      putreg8((uint8_t)ch, ITM_PORT(CONFIG_ARMV7M_ITMSYSLOG_PORT));
+    }
+
+  return ch;
+}
+
+/****************************************************************************
+ * Name: itm_flush
+ *
+ * Description:
+ *   A dummy FLUSH method
+ *
+ ****************************************************************************/
+
+static int itm_flush(void)
+{
+  return OK;
+}
 
 /****************************************************************************
  * Public Functions
@@ -116,38 +183,10 @@ void itm_syslog_initialize(void)
   putreg32(0x0001000d, ITM_TCR);
   putreg32(0x00000100, TPI_FFCR);
   putreg32(0xffffffff, ITM_TER); /* Enable 32 Ports */
+
+  /* Setup the SYSLOG channel */
+
+  (void)syslog_channel(&g_itm_channel);
 }
 
-/****************************************************************************
- * Name: syslog_putc
- *
- * Description:
- *   This is the low-level system logging interface.  The debugging/syslogging
- *   interfaces are syslog() and lowsyslog().  The difference is that
- *   the syslog() internface writes to fd=1 (stdout) whereas lowsyslog() uses
- *   a lower level interface that works from interrupt handlers.  This
- *   function is the low-level interface used to implement lowsyslog().
- *
- ****************************************************************************/
-
-int syslog_putc(int ch)
-{
-  /* ITM enabled */
-
-  if ((getreg32(ITM_TCR) & ITM_TCR_ITMENA_Msk) == 0)
-    {
-      return EOF;
-    }
-
-  /* ITM Port "CONFIG_ARMV7M_ITMSYSLOG_PORT" enabled */
-
-  if (getreg32(ITM_TER) & (1 << CONFIG_ARMV7M_ITMSYSLOG_PORT))
-    {
-      while (getreg32(ITM_PORT(CONFIG_ARMV7M_ITMSYSLOG_PORT)) == 0);
-      putreg8((uint8_t)ch, ITM_PORT(CONFIG_ARMV7M_ITMSYSLOG_PORT));
-    }
-
-  return ch;
-}
-
-#endif /* CONFIG_SYSLOG && CONFIG_ARMV7M_ITMSYSLOG */
+#endif /* CONFIG_ARMV7M_ITMSYSLOG */

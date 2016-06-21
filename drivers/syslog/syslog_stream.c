@@ -1,7 +1,7 @@
 /****************************************************************************
- * lib/syslog/lib_lowsyslog.c
+ * drivers/syslog/syslog_stream.c
  *
- *   Copyright (C) 2007-2009, 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,39 +40,50 @@
 #include <nuttx/config.h>
 
 #include <stdio.h>
-#include <syslog.h>
+#include <unistd.h>
+#include <assert.h>
+#include <errno.h>
 
+#include <nuttx/syslog/syslog.h>
 #include <nuttx/streams.h>
 
-#include "syslog/syslog.h"
-
-#if defined(CONFIG_ARCH_LOWPUTC) || defined(CONFIG_SYSLOG)
+#include "syslog.h"
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lowvsyslog_internal
- *
- * Description:
- *   This is the internal implementation of lowvsyslog (see the description
- *   of lowsyslog and lowvsyslog below)
- *
+ * Name: syslogstream_putc
  ****************************************************************************/
 
-static inline int lowvsyslog_internal(FAR const IPTR char *fmt, va_list ap)
+static void syslogstream_putc(FAR struct lib_outstream_s *this, int ch)
 {
-  struct lib_outstream_s stream;
+  int ret;
 
-  /* Wrap the stdout in a stream object and let lib_vsprintf do the work. */
+  /* Try writing until the write was successful or until an irrecoverable
+   * error occurs.
+   */
 
-#ifdef CONFIG_SYSLOG
-  lib_syslogstream((FAR struct lib_outstream_s *)&stream);
-#else
-  lib_lowoutstream((FAR struct lib_outstream_s *)&stream);
-#endif
-  return lib_vsprintf((FAR struct lib_outstream_s *)&stream, fmt, ap);
+  do
+    {
+      /* Write the character to the supported logging device.  On failure,
+       * syslog_putc returns EOF with the errno value set;
+       */
+
+      ret = syslog_putc(ch);
+      if (ret != EOF)
+        {
+          this->nput++;
+          return;
+        }
+
+      /* The special errno value -EINTR means that syslog_putc() was
+       * awakened by a signal.  This is not a real error and must be
+       * ignored in this context.
+       */
+    }
+  while (errno == -EINTR);
 }
 
 /****************************************************************************
@@ -80,60 +91,26 @@ static inline int lowvsyslog_internal(FAR const IPTR char *fmt, va_list ap)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lowvsyslog
+ * Name: syslogstream
  *
  * Description:
- *   The function lowvsyslog() performs the same task as lowsyslog() with
- *   the difference that it takes a set of arguments which have been
- *   obtained using the stdarg variable argument list macros.
+ *   Initializes a stream for use with the configured syslog interface.
+ *   Only accessible from with the OS SYSLOG logic.
+ *
+ * Input parameters:
+ *   stream - User allocated, uninitialized instance of struct
+ *            lib_lowoutstream_s to be initialized.
+ *
+ * Returned Value:
+ *   None (User allocated instance initialized).
  *
  ****************************************************************************/
 
-int lowvsyslog(int priority, FAR const IPTR char *fmt, va_list ap)
+void syslogstream(FAR struct lib_outstream_s *stream)
 {
-  int ret = 0;
-
-  /* Check if this priority is enabled */
-
-  if ((g_syslog_mask & LOG_MASK(priority)) != 0)
-    {
-      /* Yes.. let vsylog_internal to the deed */
-
-      ret = lowvsyslog_internal(fmt, ap);
-    }
-
-  return ret;
+  stream->put   = syslogstream_putc;
+#ifdef CONFIG_STDIO_LINEBUFFER
+  stream->flush = lib_noflush;
+#endif
+  stream->nput  = 0;
 }
-
-/****************************************************************************
- * Name: lowsyslog
- *
- * Description:
- *   syslog() generates a log message. The priority argument is formed by
- *   ORing the facility and the level values (see include/syslog.h). The
- *   remaining arguments are a format, as in printf and any arguments to the
- *   format.
- *
- *   This is a non-standard, low-level system logging interface.  The
- *   difference between syslog() and lowsyslog() is that the syslog()
- *   interface writes to the syslog device (usually fd=1, stdout) whereas
- *   lowsyslog() uses a lower level interface that works even from interrupt
- *   handlers.
- *
- ****************************************************************************/
-
-int lowsyslog(int priority, FAR const IPTR char *fmt, ...)
-{
-  va_list ap;
-  int ret;
-
-  /* Let lowvsyslog do the work */
-
-  va_start(ap, fmt);
-  ret = lowvsyslog(priority, fmt, ap);
-  va_end(ap);
-
-  return ret;
-}
-
-#endif /* CONFIG_ARCH_LOWPUTC || CONFIG_SYSLOG */

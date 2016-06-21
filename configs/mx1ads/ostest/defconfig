@@ -406,7 +406,6 @@ CONFIG_DISABLE_MOUNTPOINT=y
 # System Logging
 #
 
-# CONFIG_SYSLOG is not set
 
 #
 # Graphics Support

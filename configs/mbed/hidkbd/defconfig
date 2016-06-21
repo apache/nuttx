@@ -438,7 +438,6 @@ CONFIG_HIDKBD_NPOLLWAITERS=2
 # System Logging
 #
 
-# CONFIG_SYSLOG is not set
 
 #
 # Graphics Support

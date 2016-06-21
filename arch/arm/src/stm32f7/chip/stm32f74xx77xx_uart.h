@@ -34,8 +34,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_STC_STM32F7_CHIP_STM32F74XX77XX_UART_H
-#define __ARCH_ARM_STC_STM32F7_CHIP_STM32F74XX77XX_UART_H
+#ifndef __ARCH_ARM_SRC_STM32F7_CHIP_STM32F74XX77XX_UART_H
+#define __ARCH_ARM_SRC_STM32F7_CHIP_STM32F74XX77XX_UART_H
 
 /************************************************************************************
  * Included Files
@@ -368,4 +368,4 @@
 #define USART_TDR_MASK            (0x1ff << USART_TDR_SHIFT)
 
 #endif /* CONFIG_STM32F7_STM32F74XX || CONFIG_STM32F7_STM32F75XX */
-#endif /* __ARCH_ARM_STC_STM32F7_CHIP_STM32F74XX77XX_UART_H */
+#endif /* __ARCH_ARM_SRC_STM32F7_CHIP_STM32F74XX77XX_UART_H */

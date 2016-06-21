@@ -1652,7 +1652,7 @@ Where <subdir> is one of the following:
 
         - /dev/console still exists and still refers to the serial port. So
           you can still use certain kinds of debug output (see include/debug.h, all
-          of the interfaces based on lowsyslog will work in this configuration).
+          of the debug output from interrupt handlers will be lost.
 
         - But don't enable USB debug output!  Since USB is console is used for
           USB debug output and you are using a USB console, there will be
@@ -1979,7 +1979,6 @@ Where <subdir> is one of the following:
     3. This configuration does have UART2 output enabled and set up as
        the system logging device:
 
-       CONFIG_SYSLOG=y                    : Enable output to syslog, not console
        CONFIG_SYSLOG_CHAR=y               : Use a character device for system logging
        CONFIG_SYSLOG_DEVPATH="/dev/ttyS0" : UART2 will be /dev/ttyS0
 

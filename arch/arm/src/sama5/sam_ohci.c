@@ -3784,7 +3784,7 @@ static int sam_connect(struct usbhost_driver_s *drvr,
   /* Set the connected/disconnected flag */
 
   hport->connected = connected;
-  ullinfo("Hub port %d connected: %s\n", hport->port, connected ? "YES" : "NO");
+  uinfo("Hub port %d connected: %s\n", hport->port, connected ? "YES" : "NO");
 
   /* Report the connection event */
 

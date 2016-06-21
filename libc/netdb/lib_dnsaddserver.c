@@ -161,7 +161,7 @@ int dns_add_nameserver(FAR const struct sockaddr *addr, socklen_t addrlen)
   else
 #endif
     {
-      ninfo("ERROR: Unsupported family: %d\n",
+      nerr("ERROR: Unsupported family: %d\n",
             g_dns_server.addr.sa_family);
       ret = -ENOSYS;
       goto errout;
@@ -242,7 +242,7 @@ int dns_add_nameserver(FAR const struct sockaddr *addr, socklen_t addrlen)
   else
 #endif
     {
-      ninfo("ERROR: Unsupported family: %d\n", addr->sa_family);
+      nerr("ERROR: Unsupported family: %d\n", addr->sa_family);
       return -ENOSYS;
     }
 
@@ -250,7 +250,7 @@ int dns_add_nameserver(FAR const struct sockaddr *addr, socklen_t addrlen)
 
   if (addrlen < copylen)
     {
-      ninfo("ERROR: Invalid addrlen %ld for family %d\n",
+      nerr("ERROR: Invalid addrlen %ld for family %d\n",
             (long)addrlen, addr->sa_family);
       return -EINVAL;
     }
