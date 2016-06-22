@@ -809,7 +809,7 @@ static int stm32l4_canioctl(FAR struct can_dev_s *dev, int cmd,
        *   Description:    Set new current bit timing values
        *   Argument:       A pointer to a read-able instance of struct
        *                   canioc_bittiming_s in which the new bit timing
-       *                   valuesare provided.
+       *                   values are provided.
        *   Returned Value: Zero (OK) is returned on success.  Otherwise -1
        *                   (ERROR)is returned with the errno variable set
        *                    to indicate thenature of the error.
@@ -827,14 +827,17 @@ static int stm32l4_canioctl(FAR struct can_dev_s *dev, int cmd,
           FAR const struct canioc_bittiming_s *bt =
             (FAR const struct canioc_bittiming_s *)arg;
           uint32_t brp;
-          uint32_t stm32l4_canbit_quanta;
+          uint32_t can_bit_quanta;
           uint32_t tmp;
+          uint32_t regval;
 
           DEBUGASSERT(bt != NULL);
           DEBUGASSERT(bt->bt_baud < STM32L4_PCLK1_FREQUENCY);
           DEBUGASSERT(bt->bt_sjw > 0 && bt->bt_sjw <= 4);
           DEBUGASSERT(bt->bt_tseg1 > 0 && bt->bt_tseg1 <= 16);
           DEBUGASSERT(bt->bt_tseg2 > 0 && bt->bt_tseg2 <=  8);
+
+          regval = stm32l4_cangetreg(priv, STM32L4_CAN_BTR_OFFSET);
 
           /* Extract bit timing data */
           /* tmp is in clocks per bit time */
@@ -843,35 +846,13 @@ static int stm32l4_canioctl(FAR struct can_dev_s *dev, int cmd,
 
           /* This value is dynamic as requested by user */
 
-          stm32l4_canbit_quanta = bt->bt_tseg1 + bt->bt_tseg2 + 1;
+          can_bit_quanta = bt->bt_tseg1 + bt->bt_tseg2 + 1;
 
-          if (tmp < stm32l4_canbit_quanta)
+          if (tmp < can_bit_quanta)
             {
-#if 0
-              /* At the smallest brp value (1), there are already too few
-               * bit times (PCLK1 / baud) to meet our goal.  brp must be one
-               * and we need make some reasonable guesses about ts1 and ts2.
-               */
+              /* This timing is not possible */
 
-              brp = 1;
-
-              /* In this case, we have to guess a good value for ts1 and ts2 */
-
-              tseg1 = (tmp - 1) >> 1; /* cut available time in half */
-              tseg2 = tmp - tseg1 - 1; /* ts2 uses the rest minus one */
-
-              /* if we can, try to approximate the CAN requirements,
-               * which are not exactly "cut baud time in half"
-               */
-
-              if (tseg1 == tseg2 && tseg1 > 1 && tseg2 < CAN_BTR_TSEG2_MAX)
-                {
-                  tseg1--;
-                  tseg2++;
-                }
-#else
               ret = -EINVAL;
-#endif
             }
 
           /* Otherwise, nquanta is stm32l4_canbit_quanta, ts1 and ts2 are
@@ -881,31 +862,21 @@ static int stm32l4_canioctl(FAR struct can_dev_s *dev, int cmd,
 
           else
             {
-              brp = (tmp + (stm32l4_canbit_quanta/2)) / stm32l4_canbit_quanta;
+              brp = (tmp + (can_bit_quanta/2)) / can_bit_quanta;
               DEBUGASSERT(brp >= 1 && brp <= CAN_BTR_BRP_MAX);
             }
 
           caninfo("TS1: %d TS2: %d BRP: %d\n", bt->bt_tseg1, bt->bt_tseg2, brp);
 
-          /* Configure bit timing.  This also does the following, less obvious
-           * things.  Unless loopback mode is enabled, it:
-           *
-           * - Disables silent mode.
-           * - Disables loopback mode.
-           *
-           */
+          /* Configure bit timing. */
 
-          tmp = ((brp          - 1) << CAN_BTR_BRP_SHIFT) |
-                ((bt->bt_tseg1 - 1) << CAN_BTR_TS1_SHIFT) |
-                ((bt->bt_tseg2 - 1) << CAN_BTR_TS2_SHIFT) |
-                ((bt->bt_sjw   - 1) << CAN_BTR_SJW_SHIFT);
-#ifdef CONFIG_CAN_LOOPBACK
-          tmp |= CAN_BTR_LBKM;
-#endif
-
-          /* Bit timing can only be configured in init mode.
-           * No registers are changed.
-           */
+          regval &= ~(CAN_BTR_BRP_MASK | CAN_BTR_TS1_MASK | CAN_BTR_TS2_MASK | CAN_BTR_SJW_MASK);
+          regval |= ((brp          - 1) << CAN_BTR_BRP_SHIFT) |
+                    ((bt->bt_tseg1 - 1) << CAN_BTR_TS1_SHIFT) |
+                    ((bt->bt_tseg2 - 1) << CAN_BTR_TS2_SHIFT) |
+                    ((bt->bt_sjw   - 1) << CAN_BTR_SJW_SHIFT);
+  
+          /* Bit timing can only be configured in init mode. */
 
           ret = stm32l4_canenterinitmode(priv);
           if (ret != 0)
@@ -913,13 +884,94 @@ static int stm32l4_canioctl(FAR struct can_dev_s *dev, int cmd,
               break;
             }
 
-          stm32l4_canputreg(priv, STM32L4_CAN_BTR_OFFSET, tmp);
+          stm32l4_canputreg(priv, STM32L4_CAN_BTR_OFFSET, regval);
+
           ret = stm32l4_canexitinitmode(priv);
 
           if (ret == 0)
             {
               priv->baud  = STM32L4_PCLK1_FREQUENCY / (brp * (bt->bt_tseg1 + bt->bt_tseg2 + 1));
             }
+        }
+        break;
+
+      /* CANIOC_GET_CONNMODES:
+       *   Description:    Get the current bus connection modes
+       *   Argument:       A pointer to a write-able instance of struct
+       *                   canioc_connmodes_s in which the new bus modes will
+       *                   be returned.
+       *   Returned Value: Zero (OK) is returned on success.  Otherwise -1
+       *                   (ERROR)is returned with the errno variable set
+       *                   to indicate the nature of the error.
+       *   Dependencies:   None
+       */
+
+      case CANIOC_GET_CONNMODES:
+        {
+          FAR struct canioc_connmodes_s *bm =
+            (FAR struct canioc_connmodes_s *)arg;
+          uint32_t regval;
+
+          DEBUGASSERT(bm != NULL);
+
+          regval          = stm32l4_cangetreg(priv, STM32L4_CAN_BTR_OFFSET);
+
+          bm->bm_loopback = ((regval & CAN_BTR_LBKM) == CAN_BTR_LBKM);
+          bm->bm_silent   = ((regval & CAN_BTR_SILM) == CAN_BTR_SILM);
+          ret = OK;
+          break;
+        }
+
+      /* CANIOC_SET_CONNMODES:
+       *   Description:    Set new bus connection modes values
+       *   Argument:       A pointer to a read-able instance of struct
+       *                   canioc_connmodes_s in which the new bus modes
+       *                   are provided.
+       *   Returned Value: Zero (OK) is returned on success.  Otherwise -1
+       *                   (ERROR) is returned with the errno variable set
+       *                   to indicate the nature of the error.
+       *   Dependencies:   None
+      */
+
+      case CANIOC_SET_CONNMODES:
+        {
+          FAR struct canioc_connmodes_s *bm =
+            (FAR struct canioc_connmodes_s *)arg;
+          uint32_t regval;
+
+          DEBUGASSERT(bm != NULL);
+
+          regval = stm32l4_cangetreg(priv, STM32L4_CAN_BTR_OFFSET);
+
+          if (bm->bm_loopback)
+            {
+            regval |= CAN_BTR_LBKM;
+            }
+          else
+            {
+            regval &= ~CAN_BTR_LBKM;
+            }
+
+          if (bm->bm_silent)
+            {
+            regval |= CAN_BTR_SILM;
+            }
+          else
+            {
+            regval &= ~CAN_BTR_SILM;
+            }
+
+          /* This register can only be configured in init mode. */
+
+          ret = stm32l4_canenterinitmode(priv);
+          if (ret != 0)
+            {
+              break;
+            }
+
+          stm32l4_canputreg(priv, STM32L4_CAN_BTR_OFFSET, regval);
+
+          ret = stm32l4_canexitinitmode(priv);
         }
         break;
 

@@ -192,8 +192,8 @@
 #define CANIOC_ADD_EXTFILTER      _CANIOC(5)
 #define CANIOC_DEL_STDFILTER      _CANIOC(6)
 #define CANIOC_DEL_EXTFILTER      _CANIOC(7)
-#define CANIOC_GET_CONNMODE       _CANIOC(8)
-#define CANIOC_SET_CONNMODE       _CANIOC(9)
+#define CANIOC_GET_CONNMODES      _CANIOC(8)
+#define CANIOC_SET_CONNMODES      _CANIOC(9)
 
 /* CANIOC_USER: Device specific ioctl calls can be supported with cmds greater
  * than this value
