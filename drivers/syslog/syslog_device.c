@@ -583,7 +583,9 @@ int syslog_dev_flush(void)
 
   /* Is this a mountpoint? Does it support the sync method? */
 
-  if (inode && inode->u.i_mops->sync)
+  if (inode != NULL &&                /* File opened (i.e., has inode)? */
+      INODE_IS_MOUNTPT(inode) &&      /* Inode is a mountpoint? */
+      inode->u.i_mops->sync != NULL)  /* And supports synce method? */
     {
       /* Yes... synchronize to the stream */
 
