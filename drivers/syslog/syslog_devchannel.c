@@ -61,7 +61,9 @@
 
 /* SYSLOG channel methods */
 
+#ifdef CONFIG_SYSLOG_CHAR_CRLF
 static int syslog_devchan_putc(int ch);
+#endif
 static int syslog_devchan_force(int ch);
 
 /****************************************************************************
@@ -72,7 +74,11 @@ static int syslog_devchan_force(int ch);
 
 static const struct syslog_channel_s g_syslog_dev_channel =
 {
+#ifdef CONFIG_SYSLOG_CHAR_CRLF
   syslog_devchan_putc,
+#else
+  syslog_dev_putc,
+#endif
   syslog_devchan_force,
   syslog_dev_flush,
 };
@@ -89,6 +95,7 @@ static const struct syslog_channel_s g_syslog_dev_channel =
  *
  ****************************************************************************/
 
+#ifdef CONFIG_SYSLOG_CHAR_CRLF
 static int syslog_devchan_putc(int ch)
 {
   int ret;
@@ -110,6 +117,7 @@ static int syslog_devchan_putc(int ch)
 
   return syslog_dev_putc(ch);
 }
+#endif
 
 /****************************************************************************
  * Name: syslog_devchan_force

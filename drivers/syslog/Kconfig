@@ -48,7 +48,8 @@ config RAMLOG_CRLF
 	bool "RAMLOG CR/LF"
 	default n
 	---help---
-		Pre-pend a carriage return before every linefeed that goes into the RAM log.
+		Pre-pend a carriage return before every linefeed that goes into the
+		RAM log.
 
 config RAMLOG_NONBLOCKING
 	bool "RAMLOG non-block reads"
@@ -160,6 +161,14 @@ config CONSOLE_SYSLOG
 		re-directed to syslog output (syslog_putc). This is useful, for
 		example, if the only console is a Telnet console.  Then in that case,
 		console output from non-Telnet threads will go to the syslog output.
+
+config SYSLOG_CHAR_CRLF
+	bool "SYSLOG device CR/LF"
+	default y
+	depends on SYSLOG_CHAR
+	---help---
+		Pre-pend a carriage return before every linefeed that goes to the
+		character device.
 
 config SYSLOG_DEVPATH
 	string "System log device"
