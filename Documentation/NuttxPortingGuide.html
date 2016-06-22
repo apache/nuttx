@@ -5566,6 +5566,7 @@ int kbd_decode(FAR struct lib_instream_s *stream, FAR struct kbd_getstate_s *sta
 <h4><a name="vsyslog">6.4.1.2 <code>syslog()</code> and <code>vsyslog()</code></a></h4>
 <p><b>Function Prototypes:</b></p>
 <ul><pre>
+#include &lt;syslog.h&gt;
 int syslog(int priority, FAR const IPTR char *format, ...);
 int vsyslog(int priority, FAR const IPTR char *src, va_list ap);
 </pre></ul>
@@ -5585,6 +5586,7 @@ int vsyslog(int priority, FAR const IPTR char *src, va_list ap);
 </p>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
+#include &lt;syslog.h&gt;
 int setlogmask(int mask);
 </pre></ul>
 <p><b>Description:</b>
@@ -5614,7 +5616,7 @@ int setlogmask(int mask);
       <i>Kernel Build</i>:  The kernel build is compliant with the POSIX requirement: There will be one mask for for each user process, controlling the SYSLOG output only form that process.  There will be a separate mask accessable only in the kernel code to control kernel SYSLOG output.
 </ul>
 <p>
-  These are all standard interfaces as defined at <a href="http://pubs.opengroup.org/onlinepubs/009695399/functions/closelog.html">OpenGroup.org</a>.
+  The above are all standard interfaces as defined at <a href="http://pubs.opengroup.org/onlinepubs/009695399/functions/closelog.html">OpenGroup.org</a>.  Those interfaces are available for use by application software.  The remaining interfaces discussed in this section are non-standard, OS-internal interfaces.
 </p>
 
 <h4><a name="debugifs">6.4.1.4 Debug Interfaces</a></h4>
@@ -5695,6 +5697,7 @@ int setlogmask(int mask);
 <h4><a name="syslogchannel">6.4.2.1 <code>syslog_channel()</code></a></h4>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
+#include &lt;nuttx/syslog/syslog.h&gt;
 int syslog_channel(FAR const struct syslog_channel_s *channel);
 </pre></ul>
 <p><b>Description:</b>
@@ -5744,6 +5747,7 @@ int syslog_channel(FAR const struct syslog_channel_s *channel);
 <h4><a name="sysloginit">6.4.2.3 <code>syslog_initialize()</code></a></h4>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
+#include &lt;nuttx/syslog/syslog.h&gt;
 #ifndef CONFIG_ARCH_SYSLOG
 int syslog_initialize(enum syslog_init_e phase);
 #else
@@ -5936,6 +5940,7 @@ int syslog_initialize(enum syslog_init_e phase);
 <h4><a name="syslogfiledev">6.4.3.4 <code>syslog_file_channel()</code></a></h4>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
+#include &lt;nuttx/syslog/syslog.h&gt;
 #ifdef CONFIG_SYSLOG_FILE
 int syslog_file_channel(FAR const char *devpath);
 #endif
