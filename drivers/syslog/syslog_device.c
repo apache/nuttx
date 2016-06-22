@@ -578,7 +578,7 @@ int syslog_dev_flush(void)
 {
   int ret = 0;;
 
-#ifndef CONFIG_DISABLE_MOUNTPOINT
+#if defined(CONFIG_SYSLOG_FILE) && !defined(CONFIG_DISABLE_MOUNTPOINT)
   FAR struct inode *inode = g_syslog_dev.sl_file.f_inode;
 
   /* Is this a mountpoint? Does it support the sync method? */
