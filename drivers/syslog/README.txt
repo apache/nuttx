@@ -149,6 +149,10 @@ SYSLOG Channels
     Configure the SYSLOGging function to use the provided channel to
     generate SYSLOG output.
 
+    syslog_channel() is a non-standard, internal OS interface and is not
+    available to applications.  It may be called numerous times as
+    necessary to change channel interfaces.
+
   Input Parmeters:
 
      * channel - Provides the interface to the channel to be used.
@@ -157,21 +161,6 @@ SYSLOG Channels
 
     Zero (OK)is returned on  success.  A negated errno value is returned
     on any failure.
-
-  syslog_channel() is a non-standard, internal OS interface and is not
-  avaiable to applications.  It may be called numerous times as necessary to
-  change channel interfaces.
-
-  By default, all system log output goes to console (/dev/console).  But
-  that behavior can be changed by the defining CONFIG_SYSLOG in the NuttX
-  configuration.  In that, case all low-level debug output will go through
-  syslog_putc().
-
-  NOTE: Using the NuttX configuration tool, you will need to enable basic
-  SYSLOG features under the File System menu.  Later we will talk about the
-  RAMLOG device.  That device is configured in the SYSLOG section under the
-  Device Drivers menu.  But you will only see the options there if you
-  enable the basic SYSLOG capability in the File System menu first.
 
   SYSLOG Channel Initialization
   -----------------------------
@@ -218,6 +207,7 @@ SYSLOG Channels
       as a minimum a call to syslog_channel() to use the device.
 
   Input Parameters:
+
     * phase - One of {SYSLOG_INIT_EARLY, SYSLOG_INIT_LATE}
 
   Returned Value:
@@ -302,7 +292,7 @@ SYSLOG Channel Options
   support only a Telnet console but want to capture debug output
   /dev/ttyS0.
 
-  This SYSLOG device chhannl is selected with CONFIG_SYSLOG_CHAR and has no
+  This SYSLOG device channel is selected with CONFIG_SYSLOG_CHAR and has no
   other dependencies.  Differences fromthe SYSLOG console channel include:
 
     * CONFIG_SYSLOG_DEVPATH.  This configuration option string must be set
@@ -330,7 +320,7 @@ SYSLOG Channel Options
   can be instantiated later when board level logic configures the application
   environment, including mounting of the file systems.
 
-  The interface syslog_file_channal() is used to configure the SYSLOG file
+  The interface syslog_file_channel() is used to configure the SYSLOG file
   channel:
 
   syslog_file_channel()
@@ -363,6 +353,7 @@ SYSLOG Channel Options
     the interrupt buffer is used.
 
   Input Parameters:
+
     * devpath - The full path to the file to be used for SYSLOG output.
       This may be an existing file or not.  If the file exists,
       syslog_file_channel() will append new SYSLOG data to the end of the
@@ -370,6 +361,7 @@ SYSLOG Channel Options
       file.
 
   Returned Value:
+
     Zero (OK) is returned on success; a negated errno value is returned on
     any failure.
 
@@ -424,12 +416,11 @@ RAM Logging Device
       threads will go to the circular buffer and can be viewed using the NSH
       dmesg command.  This optional is not useful in other scenarios.
     * CONFIG_RAMLOG_SYSLOG - Use the RAM logging device for the syslogging
-      interface.  If this feature is enabled (along with CONFIG_SYSLOG),
-      then all debug output (only) will be re-directed to the circular
-      buffer in RAM.  This RAM log can be viewed from NSH using the 'dmesg'
-      command.  NOTE:  Unlike the limited, generic character driver SYSLOG
-      device, the RAMLOG *can* be used to capture debug output from
-      interrupt level handlers.
+      interface.  If this feature is enabled, then all debug output (only)
+      will be re-directed to the circular buffer in RAM.  This RAM log can
+      be viewed from NSH using the 'dmesg' command.  NOTE:  Unlike the
+      limited, generic character driver SYSLOG device, the RAMLOG *can* be
+      used to capture debug output from interrupt level handlers.
     * CONFIG_RAMLOG_NPOLLWAITERS - The number of threads than can be waiting
       for this driver on poll().  Default: 4
 
