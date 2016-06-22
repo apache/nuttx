@@ -107,7 +107,7 @@ SYSLOG Interfaces
     * alert(). The highest priority debug macro (LOG_EMERG) and is
       controlled by CONFIG_DEBUG_ALERT.  The alert() macro is reserved for
       use solely by assertion and crash handling logic.  It also differs
-      from the other macros in that there it cannot be enabled per
+      from the other macros in that it cannot be enabled or disabled per
       subsystem.
 
 SYSLOG Channels
