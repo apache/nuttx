@@ -42,9 +42,14 @@ CONFIG_INTELHEX_BINARY=y
 #
 # Debug Options
 #
+CONFIG_DEBUG_ALERT=y
 CONFIG_DEBUG_FEATURES=y
-CONFIG_ARCH_HAVE_HEAPCHECK=y
-# CONFIG_DEBUG_INFO is not set
+
+#
+# Debug SYSLOG Output Controls
+#
+# CONFIG_DEBUG_ERROR is not set
+# CONFIG_DEBUG_ASSERTIONS is not set
 
 #
 # Subsystem Debug Options
@@ -60,19 +65,19 @@ CONFIG_ARCH_HAVE_HEAPCHECK=y
 #
 # OS Function Debug Options
 #
-# CONFIG_HEAP_COLORATION is not set
 # CONFIG_DEBUG_IRQ is not set
 
 #
 # Driver Debug Options
 #
 # CONFIG_DEBUG_LEDS is not set
-# CONFIG_DEBUG_ANALOG is not set
 # CONFIG_DEBUG_GPIO is not set
 # CONFIG_DEBUG_RTC is not set
 # CONFIG_DEBUG_SPI is not set
 CONFIG_ARCH_HAVE_STACKCHECK=y
 # CONFIG_STACK_COLORATION is not set
+CONFIG_ARCH_HAVE_HEAPCHECK=y
+# CONFIG_HEAP_COLORATION is not set
 # CONFIG_DEBUG_SYMBOLS is not set
 CONFIG_ARCH_HAVE_CUSTOMOPT=y
 # CONFIG_DEBUG_NOOPT is not set
@@ -499,7 +504,6 @@ CONFIG_STM32_PHYSR_100FD=0x8000
 CONFIG_STM32_RMII=y
 CONFIG_STM32_RMII_MCO=y
 # CONFIG_STM32_RMII_EXTCLK is not set
-# CONFIG_STM32_ETHMAC_REGDEBUG is not set
 
 #
 # USB FS Host Configuration
@@ -734,6 +738,8 @@ CONFIG_SPI_EXCHANGE=y
 # CONFIG_SPI_BITBANG is not set
 # CONFIG_SPI_HWFEATURES is not set
 # CONFIG_SPI_CRCGENERATION is not set
+# CONFIG_SPI_CS_CONTROL is not set
+# CONFIG_SPI_CS_DELAY_CONTROL is not set
 # CONFIG_I2S is not set
 
 #
@@ -766,6 +772,7 @@ CONFIG_RTC=y
 # CONFIG_USERLED is not set
 # CONFIG_RGBLED is not set
 # CONFIG_PCA9635PW is not set
+# CONFIG_NCP5623C is not set
 # CONFIG_MMCSD is not set
 # CONFIG_MODEM is not set
 CONFIG_MTD=y
@@ -788,6 +795,7 @@ CONFIG_MTD=y
 # CONFIG_MTD_AT24XX is not set
 # CONFIG_MTD_AT25 is not set
 # CONFIG_MTD_AT45DB is not set
+# CONFIG_MTD_IS25XP is not set
 # CONFIG_MTD_M25P is not set
 # CONFIG_MTD_S25FL1 is not set
 # CONFIG_MTD_N25QXXX is not set
@@ -855,6 +863,8 @@ CONFIG_ETH0_PHY_DM9161=y
 # CONFIG_SERCOMM_CONSOLE is not set
 CONFIG_SERIAL=y
 # CONFIG_DEV_LOWCONSOLE is not set
+# CONFIG_SERIAL_REMOVABLE is not set
+CONFIG_SERIAL_CONSOLE=y
 # CONFIG_16550_UART is not set
 # CONFIG_UART_SERIALDRIVER is not set
 # CONFIG_UART0_SERIALDRIVER is not set
@@ -907,14 +917,17 @@ CONFIG_USART2_2STOP=0
 # CONFIG_DRIVERS_WIRELESS is not set
 
 #
-# System Logging Device Options
-#
-
-#
 # System Logging
 #
+# CONFIG_ARCH_SYSLOG is not set
 # CONFIG_RAMLOG is not set
-# CONFIG_CONSOLE_SYSLOG is not set
+# CONFIG_SYSLOG_INTBUFFER is not set
+# CONFIG_SYSLOG_TIMESTAMP is not set
+CONFIG_SYSLOG_SERIAL_CONSOLE=y
+# CONFIG_SYSLOG_CHAR is not set
+CONFIG_SYSLOG_CONSOLE=y
+# CONFIG_SYSLOG_NONE is not set
+# CONFIG_SYSLOG_FILE is not set
 
 #
 # Networking Support
@@ -1013,7 +1026,6 @@ CONFIG_NET_ARPTAB_SIZE=16
 CONFIG_NET_ARP_MAXAGE=120
 # CONFIG_NET_ARP_IPIN is not set
 # CONFIG_NET_ARP_SEND is not set
-# CONFIG_NET_ARP_DUMP is not set
 
 #
 # Network I/O Buffer Support
@@ -1068,11 +1080,6 @@ CONFIG_FS_ROMFS=y
 # CONFIG_FS_BINFS is not set
 # CONFIG_FS_PROCFS is not set
 # CONFIG_FS_UNIONFS is not set
-
-#
-# System Logging
-#
-# CONFIG_SYSLOG_TIMESTAMP is not set
 
 #
 # Graphics Support
@@ -1157,6 +1164,7 @@ CONFIG_NETDB_DNSSERVER_NOADDR=y
 #
 # Non-standard Library Support
 #
+# CONFIG_LIB_CRC64_FAST is not set
 # CONFIG_LIB_KBDCODEC is not set
 # CONFIG_LIB_SLCDCODEC is not set
 

@@ -49,14 +49,6 @@ STATUS
   2015-07-20:  STM32 F7 Ethernet appears to be functional, but has had
     only light testing.
 
-  2015-07-21:  Added a protected build version of the NSH configuration
-    (called knsh).  That configuration is close:  It boots, but I get
-    a hard fault each time I do the NSH "help" command.  Everything else
-    works fine.  I am thinking this is a corrupted binary; I am thinking
-    that there is a bad pointer in the command table.  But this is hard
-    to prove but possible because the steps to produce and load the
-    binary are awkward.
-
 Development Environment
 =======================
 

@@ -46,10 +46,11 @@ CONFIG_RAW_BINARY=y
 #
 # Debug Options
 #
+CONFIG_DEBUG_ALERT=y
 # CONFIG_DEBUG_FEATURES is not set
-# CONFIG_ARCH_HAVE_HEAPCHECK is not set
 CONFIG_ARCH_HAVE_STACKCHECK=y
 # CONFIG_STACK_COLORATION is not set
+# CONFIG_ARCH_HAVE_HEAPCHECK is not set
 # CONFIG_DEBUG_SYMBOLS is not set
 CONFIG_ARCH_HAVE_CUSTOMOPT=y
 # CONFIG_DEBUG_NOOPT is not set
@@ -480,6 +481,7 @@ CONFIG_DEV_NULL=y
 # CONFIG_USERLED is not set
 # CONFIG_RGBLED is not set
 # CONFIG_PCA9635PW is not set
+# CONFIG_NCP5623C is not set
 # CONFIG_MMCSD is not set
 # CONFIG_MODEM is not set
 # CONFIG_MTD is not set
@@ -534,6 +536,8 @@ CONFIG_ETH0_PHY_KSZ8041=y
 # CONFIG_SERCOMM_CONSOLE is not set
 CONFIG_SERIAL=y
 # CONFIG_DEV_LOWCONSOLE is not set
+# CONFIG_SERIAL_REMOVABLE is not set
+CONFIG_SERIAL_CONSOLE=y
 # CONFIG_16550_UART is not set
 # CONFIG_UART_SERIALDRIVER is not set
 CONFIG_UART0_SERIALDRIVER=y
@@ -584,14 +588,17 @@ CONFIG_UART0_2STOP=0
 # CONFIG_DRIVERS_WIRELESS is not set
 
 #
-# System Logging Device Options
-#
-
-#
 # System Logging
 #
+# CONFIG_ARCH_SYSLOG is not set
 # CONFIG_RAMLOG is not set
-# CONFIG_CONSOLE_SYSLOG is not set
+# CONFIG_SYSLOG_INTBUFFER is not set
+# CONFIG_SYSLOG_TIMESTAMP is not set
+CONFIG_SYSLOG_SERIAL_CONSOLE=y
+# CONFIG_SYSLOG_CHAR is not set
+CONFIG_SYSLOG_CONSOLE=y
+# CONFIG_SYSLOG_NONE is not set
+# CONFIG_SYSLOG_FILE is not set
 
 #
 # Networking Support
@@ -747,11 +754,6 @@ CONFIG_FS_FAT=y
 # CONFIG_FS_UNIONFS is not set
 
 #
-# System Logging
-#
-# CONFIG_SYSLOG_TIMESTAMP is not set
-
-#
 # Graphics Support
 #
 # CONFIG_NX is not set
@@ -834,6 +836,7 @@ CONFIG_NETDB_DNSSERVER_NOADDR=y
 #
 # Non-standard Library Support
 #
+# CONFIG_LIB_CRC64_FAST is not set
 # CONFIG_LIB_KBDCODEC is not set
 # CONFIG_LIB_SLCDCODEC is not set
 
