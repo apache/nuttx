@@ -120,7 +120,7 @@ int stm32_bringup(void)
   ret = stm32_pca9635_initialize();
   if (ret < 0)
     {
-      sdbg("ERROR: stm32_pca9635_initialize failed: %d\n", ret);
+      serr("ERROR: stm32_pca9635_initialize failed: %d\n", ret);
     }
 #endif
 
@@ -130,7 +130,7 @@ int stm32_bringup(void)
   ret = stm32_sdio_initialize();
   if (ret != OK)
     {
-      fdbg("ERROR: Failed to initialize MMC/SD driver: %d\n", ret);
+      ferr("ERROR: Failed to initialize MMC/SD driver: %d\n", ret);
       return ret;
     }
 #endif
@@ -143,7 +143,7 @@ int stm32_bringup(void)
   ret = stm32_usbhost_initialize();
   if (ret != OK)
     {
-      udbg("ERROR: Failed to initialize USB host: %d\n", ret);
+      uerr("ERROR: Failed to initialize USB host: %d\n", ret);
       return ret;
     }
 #endif
@@ -154,7 +154,7 @@ int stm32_bringup(void)
   ret = usbmonitor_start(0, NULL);
   if (ret != OK)
     {
-      udbg("ERROR: Failed to start USB monitor: %d\n", ret);
+      uerr("ERROR: Failed to start USB monitor: %d\n", ret);
       return ret;
     }
 #endif
@@ -165,7 +165,7 @@ int stm32_bringup(void)
   lower = stm32_rtc_lowerhalf();
   if (!lower)
     {
-      sdbg("ERROR: Failed to instantiate the RTC lower-half driver\n");
+      serr("ERROR: Failed to instantiate the RTC lower-half driver\n");
       return -ENOMEM;
     }
   else
@@ -177,7 +177,7 @@ int stm32_bringup(void)
       ret = rtc_initialize(0, lower);
       if (ret < 0)
         {
-          sdbg("ERROR: Failed to bind/register the RTC driver: %d\n", ret);
+          serr("ERROR: Failed to bind/register the RTC driver: %d\n", ret);
           return ret;
         }
     }
@@ -189,7 +189,7 @@ int stm32_bringup(void)
   ret = elf_initialize();
   if (ret < 0)
     {
-      sdbg("ERROR: Initialization of the ELF loader failed: %d\n", ret);
+      serr("ERROR: Initialization of the ELF loader failed: %d\n", ret);
     }
 #endif
 
@@ -207,7 +207,7 @@ int stm32_bringup(void)
   ret = mount(NULL, STM32_PROCFS_MOUNTPOINT, "procfs", 0, NULL);
   if (ret < 0)
     {
-      sdbg("ERROR: Failed to mount procfs at %s: %d\n",
+      serr("ERROR: Failed to mount procfs at %s: %d\n",
            STM32_PROCFS_MOUNTPOINT, ret);
     }
 #endif

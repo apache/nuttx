@@ -72,7 +72,7 @@ int net_checksd(int sd, int oflags)
 
   if (!psock || psock->s_crefs <= 0)
     {
-      nvdbg("No valid socket for sd: %d\n", sd);
+      ninfo("No valid socket for sd: %d\n", sd);
       return -EBADF;
     }
 

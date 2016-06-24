@@ -43,10 +43,14 @@
 #include <errno.h>
 
 #if defined(CONFIG_VNCSERVER_DEBUG) && !defined(CONFIG_DEBUG_GRAPHICS)
-#  undef  CONFIG_DEBUG
-#  undef  CONFIG_DEBUG_VERBOSE
-#  define CONFIG_DEBUG          1
-#  define CONFIG_DEBUG_VERBOSE  1
+#  undef  CONFIG_DEBUG_FEATURES
+#  undef  CONFIG_DEBUG_ERROR
+#  undef  CONFIG_DEBUG_WARN
+#  undef  CONFIG_DEBUG_INFO
+#  define CONFIG_DEBUG_FEATURES 1
+#  define CONFIG_DEBUG_ERROR    1
+#  define CONFIG_DEBUG_WARN     1
+#  define CONFIG_DEBUG_INFO     1
 #  define CONFIG_DEBUG_GRAPHICS 1
 #endif
 #include <debug.h>
@@ -101,7 +105,7 @@ int vnc_read_remainder(FAR struct vnc_session_s *session, size_t msglen,
       if (nrecvd < 0)
         {
           errcode = get_errno();
-          gdbg("ERROR: Receive message failed: %d\n", errcode);
+          gerr("ERROR: Receive message failed: %d\n", errcode);
           DEBUGASSERT(errcode > 0);
           return -errcode;
         }
@@ -138,7 +142,7 @@ int vnc_receiver(FAR struct vnc_session_s *session)
   int ret;
 
   DEBUGASSERT(session);
-  gvdbg("Receiver running for Display %d\n", session->display);
+  ginfo("Receiver running for Display %d\n", session->display);
 
 #ifdef CONFIG_NET_SOCKOPTS
   /* Disable the receive timeout so that we will wait indefinitely for the
@@ -152,7 +156,7 @@ int vnc_receiver(FAR struct vnc_session_s *session)
   if (ret < 0)
     {
       errcode = get_errno();
-      gdbg("ERROR: Failed to disable receive timeout: %d\n", errcode);
+      gerr("ERROR: Failed to disable receive timeout: %d\n", errcode);
       DEBUGASSERT(errcode > 0);
       return -errcode;
     }
@@ -171,7 +175,7 @@ int vnc_receiver(FAR struct vnc_session_s *session)
       if (nrecvd < 0)
         {
           errcode = get_errno();
-          gdbg("ERROR: Receive byte failed: %d\n", errcode);
+          gerr("ERROR: Receive byte failed: %d\n", errcode);
           DEBUGASSERT(errcode > 0);
           return -errcode;
         }
@@ -182,7 +186,7 @@ int vnc_receiver(FAR struct vnc_session_s *session)
 
       else if (nrecvd == 0)
         {
-          gdbg("Connection closed\n", errcode);
+          gwarn("WARNING: Connection closed\n", errcode);
           return OK;
         }
 
@@ -196,7 +200,7 @@ int vnc_receiver(FAR struct vnc_session_s *session)
         {
           case RFB_SETPIXELFMT_MSG:    /* SetPixelFormat */
             {
-              gvdbg("Received SetPixelFormat\n");
+              ginfo("Received SetPixelFormat\n");
 
               /* Read the rest of the SetPixelFormat message */
 
@@ -205,7 +209,7 @@ int vnc_receiver(FAR struct vnc_session_s *session)
                                        1);
               if (ret < 0)
                 {
-                  gdbg("ERROR: Failed to read SetPixelFormat message: %d\n",
+                  gerr("ERROR: Failed to read SetPixelFormat message: %d\n",
                        ret);
                 }
               else
@@ -219,7 +223,7 @@ int vnc_receiver(FAR struct vnc_session_s *session)
                       /* We do not support this pixel format */
                       /* REVISIT:  We are going to be putting garbage on the RFB */
 
-                      gdbg("ERROR: PixelFormat not supported\n");
+                      gerr("ERROR: PixelFormat not supported\n");
                     }
                 }
             }
@@ -230,7 +234,7 @@ int vnc_receiver(FAR struct vnc_session_s *session)
               FAR struct rfb_setencodings_s *encodings;
               unsigned int nencodings;
 
-              gvdbg("Received SetEncodings\n");
+              ginfo("Received SetEncodings\n");
 
               /* Read the SetEncodings message without the following
                * encodings.
@@ -241,7 +245,7 @@ int vnc_receiver(FAR struct vnc_session_s *session)
                                        1);
               if (ret < 0)
                 {
-                  gdbg("ERROR: Failed to read SetEncodings message: %d\n",
+                  gerr("ERROR: Failed to read SetEncodings message: %d\n",
                        ret);
                 }
               else
@@ -256,7 +260,7 @@ int vnc_receiver(FAR struct vnc_session_s *session)
                                            SIZEOF_RFB_SERVERINIT_S(0));
                   if (ret < 0)
                     {
-                      gdbg("ERROR: Failed to read encodings: %d\n",
+                      gerr("ERROR: Failed to read encodings: %d\n",
                            ret);
                     }
                   else
@@ -266,7 +270,7 @@ int vnc_receiver(FAR struct vnc_session_s *session)
                       ret = vnc_client_encodings(session, encodings);
                       if (ret < 0)
                         {
-                          gdbg("ERROR: vnc_set_encodings failed: %d\n", ret);
+                          gerr("ERROR: vnc_set_encodings failed: %d\n", ret);
                         }
                     }
                 }
@@ -278,7 +282,7 @@ int vnc_receiver(FAR struct vnc_session_s *session)
               FAR struct rfb_fbupdatereq_s *update;
               struct nxgl_rect_s rect;
 
-              gvdbg("Received FramebufferUpdateRequest\n");
+              ginfo("Received FramebufferUpdateRequest\n");
 
               /* Read the rest of the SetPixelFormat message */
 
@@ -287,7 +291,7 @@ int vnc_receiver(FAR struct vnc_session_s *session)
                                        1);
               if (ret < 0)
                 {
-                  gdbg("ERROR: Failed to read FramebufferUpdateRequest message: %d\n",
+                  gerr("ERROR: Failed to read FramebufferUpdateRequest message: %d\n",
                        ret);
                 }
               else
@@ -304,7 +308,7 @@ int vnc_receiver(FAR struct vnc_session_s *session)
                   ret = vnc_update_rectangle(session, &rect, false);
                   if (ret < 0)
                     {
-                      gdbg("ERROR: Failed to queue update: %d\n", ret);
+                      gerr("ERROR: Failed to queue update: %d\n", ret);
                     }
                 }
             }
@@ -314,7 +318,7 @@ int vnc_receiver(FAR struct vnc_session_s *session)
             {
               FAR struct rfb_keyevent_s *keyevent;
 
-              gvdbg("Received KeyEvent\n");
+              ginfo("Received KeyEvent\n");
 
               /* Read the rest of the KeyEvent message */
 
@@ -323,7 +327,7 @@ int vnc_receiver(FAR struct vnc_session_s *session)
                                        1);
               if (ret < 0)
                 {
-                  gdbg("ERROR: Failed to read KeyEvent message: %d\n",
+                  gerr("ERROR: Failed to read KeyEvent message: %d\n",
                        ret);
                 }
               else
@@ -343,7 +347,7 @@ int vnc_receiver(FAR struct vnc_session_s *session)
               FAR struct rfb_pointerevent_s *event;
               uint8_t buttons;
 #endif
-              gvdbg("Received PointerEvent\n");
+              ginfo("Received PointerEvent\n");
 
               /* Read the rest of the PointerEvent message */
 
@@ -352,7 +356,7 @@ int vnc_receiver(FAR struct vnc_session_s *session)
                                        1);
               if (ret < 0)
                 {
-                  gdbg("ERROR: Failed to read PointerEvent message: %d\n",
+                  gerr("ERROR: Failed to read PointerEvent message: %d\n",
                        ret);
                 }
 #ifdef CONFIG_NX_XYINPUT
@@ -397,7 +401,7 @@ int vnc_receiver(FAR struct vnc_session_s *session)
               FAR struct rfb_clientcuttext_s *cuttext;
               uint32_t length;
 
-              gvdbg("Received ClientCutText\n");
+              ginfo("Received ClientCutText\n");
 
               /* Read the ClientCutText message without the following
                * text.
@@ -408,7 +412,7 @@ int vnc_receiver(FAR struct vnc_session_s *session)
                                        1);
               if (ret < 0)
                 {
-                  gdbg("ERROR: Failed to read ClientCutText message: %d\n",
+                  gerr("ERROR: Failed to read ClientCutText message: %d\n",
                        ret);
                 }
               else
@@ -422,7 +426,7 @@ int vnc_receiver(FAR struct vnc_session_s *session)
                                            SIZEOF_RFB_CLIENTCUTTEXT_S(0));
                   if (ret < 0)
                     {
-                      gdbg("ERROR: Failed to read text: %d\n",
+                      gerr("ERROR: Failed to read text: %d\n",
                            ret);
                     }
                   else
@@ -434,7 +438,7 @@ int vnc_receiver(FAR struct vnc_session_s *session)
             break;
 
           default:
-            gdbg("ERROR: Unsynchronized, msgtype=%d\n", session->inbuf[0]);
+            gerr("ERROR: Unsynchronized, msgtype=%d\n", session->inbuf[0]);
             return -EPROTO;
         }
     }

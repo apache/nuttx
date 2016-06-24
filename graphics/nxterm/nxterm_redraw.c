@@ -105,7 +105,7 @@ void nxterm_redraw(NXTERM handle, FAR const struct nxgl_rect_s *rect, bool more)
   int i;
 
   DEBUGASSERT(handle && rect);
-  gvdbg("rect={(%d,%d),(%d,%d)} more=%s\n",
+  ginfo("rect={(%d,%d),(%d,%d)} more=%s\n",
         rect->pt1.x, rect->pt1.y, rect->pt2.x, rect->pt2.y,
         more ? "true" : "false");
 
@@ -137,7 +137,7 @@ void nxterm_redraw(NXTERM handle, FAR const struct nxgl_rect_s *rect, bool more)
   ret = priv->ops->fill(priv, rect, priv->wndo.wcolor);
   if (ret < 0)
     {
-      gdbg("fill failed: %d\n", errno);
+      gerr("ERROR: fill failed: %d\n", errno);
     }
 
   /* Then redraw each character on the display (Only the characters within

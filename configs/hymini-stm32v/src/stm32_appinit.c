@@ -216,7 +216,7 @@ int board_app_initialize(uintptr_t arg)
   /* Use SD card detect pin to check if a card is inserted */
 
   cd_status = !stm32_gpioread(GPIO_SD_CD);
-  vdbg("Card detect : %hhu\n", cd_status);
+  _info("Card detect : %hhu\n", cd_status);
 
   sdio_mediachange(g_sdiodev, cd_status);
 #endif

@@ -180,7 +180,7 @@ void icmpv6_advertise(FAR struct net_driver_s *dev,
 
   IFF_SET_NOARP(dev->d_flags);
 
-  nllvdbg("Outgoing ICMPv6 Neighbor Advertise length: %d (%d)\n",
+  ninfo("Outgoing ICMPv6 Neighbor Advertise length: %d (%d)\n",
           dev->d_len, (icmp->len[0] << 8) | icmp->len[1]);
 
 #ifdef CONFIG_NET_STATISTICS

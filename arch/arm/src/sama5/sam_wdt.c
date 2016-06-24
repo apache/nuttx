@@ -57,6 +57,11 @@
  * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
+
+#ifndef CONFIG_DEBUG_WATCHDOG_INFO
+#  undef CONFIG_SAMA5_WDT_REGDEBUG
+#endif
+
 /* The Watchdog Timer uses the Slow Clock divided by 128 to establish the
  * maximum Watchdog period to be 16 seconds (with a typical Slow Clock of
  * 32768 kHz).
@@ -79,20 +84,6 @@
 
 #define WDT_MINTIMEOUT ((1000 + WDT_FREQUENCY - 1) / WDT_FREQUENCY)
 #define WDT_MAXTIMEOUT ((4096 * 1000) / WDT_FREQUENCY)
-
-/* Debug ********************************************************************/
-/* Non-standard debug that may be enabled just for testing the watchdog
- * driver.  NOTE: that only lldbg types are used so that the output is
- * immediately available.
- */
-
-#ifdef CONFIG_DEBUG_WATCHDOG
-#  define wddbg    lldbg
-#  define wdvdbg   llvdbg
-#else
-#  define wddbg(x...)
-#  define wdvdbg(x...)
-#endif
 
 /****************************************************************************
  * Private Types
@@ -118,7 +109,7 @@ struct sam_lowerhalf_s
  ****************************************************************************/
 /* Register operations ******************************************************/
 
-#if defined(CONFIG_SAMA5_WDT_REGDEBUG) && defined(CONFIG_DEBUG)
+#ifdef CONFIG_SAMA5_WDT_REGDEBUG
 static uint32_t sam_getreg(uintptr_t regaddr);
 static void     sam_putreg(uint32_t regval, uintptr_t regaddr);
 #else
@@ -178,7 +169,7 @@ static struct sam_lowerhalf_s g_wdtdev;
  *
  ****************************************************************************/
 
-#if defined(CONFIG_SAMA5_WDT_REGDEBUG) && defined(CONFIG_DEBUG)
+#ifdef CONFIG_SAMA5_WDT_REGDEBUG
 static uint32_t sam_getreg(uintptr_t regaddr)
 {
   static uint32_t prevaddr = 0;
@@ -199,7 +190,7 @@ static uint32_t sam_getreg(uintptr_t regaddr)
         {
           if (count == 4)
             {
-              lldbg("...\n");
+              wdinfo("...\n");
             }
 
           return regval;
@@ -216,7 +207,7 @@ static uint32_t sam_getreg(uintptr_t regaddr)
         {
           /* Yes.. then show how many times the value repeated */
 
-          lldbg("[repeats %d more times]\n", count-3);
+          wdinfo("[repeats %d more times]\n", count-3);
         }
 
       /* Save the new address, value, and count */
@@ -228,7 +219,7 @@ static uint32_t sam_getreg(uintptr_t regaddr)
 
   /* Show the register value read */
 
-  lldbg("%08x->%048\n", regaddr, regval);
+  wdinfo("%08x->%048\n", regaddr, regval);
   return regval;
 }
 #endif
@@ -241,12 +232,12 @@ static uint32_t sam_getreg(uintptr_t regaddr)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_SAMA5_WDT_REGDEBUG) && defined(CONFIG_DEBUG)
+#ifdef CONFIG_SAMA5_WDT_REGDEBUG
 static void sam_putreg(uint32_t regval, uintptr_t regaddr)
 {
   /* Show the register value being written */
 
-  lldbg("%08x<-%08x\n", regaddr, regval);
+  wdinfo("%08x<-%08x\n", regaddr, regval);
 
   /* Write the value */
 
@@ -315,7 +306,7 @@ static int sam_start(FAR struct watchdog_lowerhalf_s *lower)
    * timer with the newly programmed mode parameters.
    */
 
-  wdvdbg("Entry\n");
+  wdinfo("Entry\n");
   return priv->started ? OK : -ENOSYS;
 }
 
@@ -343,7 +334,7 @@ static int sam_stop(FAR struct watchdog_lowerhalf_s *lower)
    * timer with the newly programmed mode parameters.
    */
 
-  wdvdbg("Entry\n");
+  wdinfo("Entry\n");
   return -ENOSYS;
 }
 
@@ -366,7 +357,7 @@ static int sam_stop(FAR struct watchdog_lowerhalf_s *lower)
 
 static int sam_keepalive(FAR struct watchdog_lowerhalf_s *lower)
 {
-  wdvdbg("Entry\n");
+  wdinfo("Entry\n");
 
   /* Write WDT_CR_WDRSTT to the WDT CR regiser (along with the KEY value)
    * will restart the watchdog timer.
@@ -397,7 +388,7 @@ static int sam_getstatus(FAR struct watchdog_lowerhalf_s *lower,
 {
   FAR struct sam_lowerhalf_s *priv = (FAR struct sam_lowerhalf_s *)lower;
 
-  wdvdbg("Entry\n");
+  wdinfo("Entry\n");
   DEBUGASSERT(priv);
 
   /* Return the status bit */
@@ -426,10 +417,10 @@ static int sam_getstatus(FAR struct watchdog_lowerhalf_s *lower,
 
   status->timeleft = 0;
 
-  wdvdbg("Status     :\n");
-  wdvdbg("  flags    : %08x\n", status->flags);
-  wdvdbg("  timeout  : %d\n", status->timeout);
-  wdvdbg("  timeleft : %d\n", status->timeleft);
+  wdinfo("Status     :\n");
+  wdinfo("  flags    : %08x\n", status->flags);
+  wdinfo("  timeout  : %d\n", status->timeout);
+  wdinfo("  timeleft : %d\n", status->timeleft);
   return OK;
 }
 
@@ -457,13 +448,13 @@ static int sam_settimeout(FAR struct watchdog_lowerhalf_s *lower,
   uint32_t regval;
 
   DEBUGASSERT(priv);
-  wdvdbg("Entry: timeout=%d\n", timeout);
+  wdinfo("Entry: timeout=%d\n", timeout);
 
   /* Can this timeout be represented? */
 
   if (timeout < WDT_MINTIMEOUT || timeout >= WDT_MAXTIMEOUT)
     {
-      wddbg("Cannot represent timeout: %d < %d > %d\n",
+      wderr("ERROR: Cannot represent timeout: %d < %d > %d\n",
             WDT_MINTIMEOUT, timeout, WDT_MAXTIMEOUT);
       return -ERANGE;
     }
@@ -496,7 +487,7 @@ static int sam_settimeout(FAR struct watchdog_lowerhalf_s *lower,
 
   priv->reload = reload;
 
-  wdvdbg("reload=%d timout: %d->%d\n",
+  wdinfo("reload=%d timout: %d->%d\n",
          reload, timeout, priv->timeout);
 
   /* Set the WDT_MR according to calculated value
@@ -541,7 +532,7 @@ static int sam_settimeout(FAR struct watchdog_lowerhalf_s *lower,
 
   priv->started = true;
 
-  wdvdbg("Setup: CR: %08x MR: %08x SR: %08x\n",
+  wdinfo("Setup: CR: %08x MR: %08x SR: %08x\n",
          sam_getreg(SAM_WDT_CR), sam_getreg(SAM_WDT_MR),
          sam_getreg(SAM_WDT_SR));
 
@@ -574,7 +565,7 @@ static xcpt_t sam_capture(FAR struct watchdog_lowerhalf_s *lower,
                             xcpt_t handler)
 {
 #ifndef CONFIG_SAMA5_WDT_INTERRUPT
-  wddbg("ERROR: Not configured for this mode\n");
+  wderr("ERROR: Not configured for this mode\n");
   return NULL;
 #else
   FAR struct sam_lowerhalf_s *priv = (FAR struct sam_lowerhalf_s *)lower;
@@ -582,7 +573,7 @@ static xcpt_t sam_capture(FAR struct watchdog_lowerhalf_s *lower,
   xcpt_t oldhandler;
 
   DEBUGASSERT(priv);
-  wdvdbg("Entry: handler=%p\n", handler);
+  wdinfo("Entry: handler=%p\n", handler);
 
   /* Get the old handler return value */
 
@@ -636,7 +627,7 @@ static xcpt_t sam_capture(FAR struct watchdog_lowerhalf_s *lower,
 static int sam_ioctl(FAR struct watchdog_lowerhalf_s *lower, int cmd,
                     unsigned long arg)
 {
-  wdvdbg("cmd=%d arg=%ld\n", cmd, arg);
+  wdinfo("cmd=%d arg=%ld\n", cmd, arg);
 
   /* No ioctls are supported */
 
@@ -667,7 +658,7 @@ int sam_wdt_initialize(void)
 {
   FAR struct sam_lowerhalf_s *priv = &g_wdtdev;
 
-  wdvdbg("Entry: CR: %08x MR: %08x SR: %08x\n",
+  wdinfo("Entry: CR: %08x MR: %08x SR: %08x\n",
          sam_getreg(SAM_WDT_CR), sam_getreg(SAM_WDT_MR),
          sam_getreg(SAM_WDT_SR));
 

@@ -495,7 +495,7 @@ static int nrf24l01_irqhandler(int irq, FAR void *context)
 {
   FAR struct nrf24l01_dev_s *dev = g_nrf24l01dev;
 
-  wllvdbg("*IRQ*");
+  winfo("*IRQ*");
 
 #ifdef CONFIG_WL_NRF24L01_RXSUPPORT
 
@@ -551,7 +551,7 @@ static void nrf24l01_worker(FAR void *arg)
 
       bool ce = nrf24l01_chipenable(dev, false);
 
-      wdbg("RX_DR is set!\n");
+      winfo("RX_DR is set!\n");
 
       /* Read and store all received payloads */
 
@@ -586,8 +586,8 @@ static void nrf24l01_worker(FAR void *arg)
 
           status = nrf24l01_readreg(dev, NRF24L01_FIFO_STATUS, &fifo_status, 1);
 
-          wdbg("FIFO_STATUS=%02x\n", fifo_status);
-          wdbg("STATUS=%02x\n", status);
+          winfo("FIFO_STATUS=%02x\n", fifo_status);
+          winfo("STATUS=%02x\n", status);
         }
       while (!(fifo_status | NRF24L01_RX_EMPTY));
 
@@ -604,7 +604,7 @@ static void nrf24l01_worker(FAR void *arg)
         {
           dev->pfd->revents |= POLLIN;  /* Data available for input */
 
-          wvdbg("Wake up polled fd");
+          winfo("Wake up polled fd");
           sem_post(dev->pfd->sem);
         }
 #endif
@@ -720,11 +720,11 @@ static int dosend(FAR struct nrf24l01_dev_s *dev, FAR const uint8_t *data, size_
       dev->lastxmitcount = (obsvalue & NRF24L01_ARC_CNT_MASK)
           >> NRF24L01_ARC_CNT_SHIFT;
 
-      wvdbg("Transmission OK (lastxmitcount=%d)\n", dev->lastxmitcount);
+      winfo("Transmission OK (lastxmitcount=%d)\n", dev->lastxmitcount);
     }
   else if (status & NRF24L01_MAX_RT)
     {
-      wvdbg("MAX_RT!\n", dev->lastxmitcount);
+      winfo("MAX_RT!\n", dev->lastxmitcount);
       result = -ECOMM;
       dev->lastxmitcount = NRF24L01_XMIT_MAXRT;
 
@@ -736,7 +736,7 @@ static int dosend(FAR struct nrf24l01_dev_s *dev, FAR const uint8_t *data, size_
     {
       /* Unexpected... */
 
-      wdbg("No TX_DS nor MAX_RT bit set in STATUS reg!\n");
+      werr("ERROR: No TX_DS nor MAX_RT bit set in STATUS reg!\n");
       result = -EIO;
     }
 
@@ -758,7 +758,7 @@ static int nrf24l01_open(FAR struct file *filep)
   FAR struct nrf24l01_dev_s *dev;
   int result;
 
-  wvdbg("Opening nRF24L01 dev\n");
+  winfo("Opening nRF24L01 dev\n");
 
   DEBUGASSERT(filep);
   inode = filep->f_inode;
@@ -800,7 +800,7 @@ static int nrf24l01_close(FAR struct file *filep)
   FAR struct inode *inode;
   FAR struct nrf24l01_dev_s *dev;
 
-  wvdbg("Closing nRF24L01 dev\n");
+  winfo("Closing nRF24L01 dev\n");
   DEBUGASSERT(filep);
   inode = filep->f_inode;
 
@@ -885,7 +885,7 @@ static int nrf24l01_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   FAR struct nrf24l01_dev_s *dev;
   int result = OK;
 
-  wvdbg("cmd: %d arg: %ld\n", cmd, arg);
+  winfo("cmd: %d arg: %ld\n", cmd, arg);
   DEBUGASSERT(filep);
   inode = filep->f_inode;
 
@@ -1117,7 +1117,7 @@ static int nrf24l01_poll(FAR struct file *filep, FAR struct pollfd *fds,
   FAR struct nrf24l01_dev_s *dev;
   int result = OK;
 
-  wvdbg("setup: %d\n", (int)setup);
+  winfo("setup: %d\n", (int)setup);
   DEBUGASSERT(filep && fds);
   inode = filep->f_inode;
 
@@ -1252,12 +1252,12 @@ int nrf24l01_register(FAR struct spi_dev_s *spi, FAR struct nrf24l01_config_s *c
 
   /* Register the device as an input device */
 
-  ivdbg("Registering " DEV_NAME "\n");
+  iinfo("Registering " DEV_NAME "\n");
 
   result = register_driver(DEV_NAME, &nrf24l01_fops, 0666, dev);
   if (result < 0)
     {
-      wdbg("register_driver() failed: %d\n", result);
+      werr("ERROR: register_driver() failed: %d\n", result);
       nrf24l01_unregister(dev);
     }
 
@@ -1658,7 +1658,7 @@ int nrf24l01_sendto(FAR struct nrf24l01_dev_s *dev, FAR const uint8_t *data,
 
   if ((dev->en_aa & 1) && (memcmp(destaddr, dev->pipe0addr, dev->addrlen)))
     {
-      wdbg("Change pipe #0 addr to dest addr\n");
+      winfo("Change pipe #0 addr to dest addr\n");
       nrf24l01_writereg(dev, NRF24L01_RX_ADDR_P0, destaddr, NRF24L01_MAX_ADDR_LEN);
       pipeaddrchg = true;
     }
@@ -1670,7 +1670,7 @@ int nrf24l01_sendto(FAR struct nrf24l01_dev_s *dev, FAR const uint8_t *data,
       /* Restore pipe #0 addr */
 
       nrf24l01_writereg(dev, NRF24L01_RX_ADDR_P0, dev->pipe0addr, NRF24L01_MAX_ADDR_LEN);
-      wdbg("Pipe #0 default addr restored\n");
+      winfo("Pipe #0 default addr restored\n");
     }
 
   nrf24l01_unlock(dev->spi);

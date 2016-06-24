@@ -54,6 +54,7 @@
 #include  <nuttx/mm/shm.h>
 #include  <nuttx/kmalloc.h>
 #include  <nuttx/sched_note.h>
+#include  <nuttx/syslog/syslog.h>
 #include  <nuttx/init.h>
 
 #include  "sched/sched.h"
@@ -372,7 +373,7 @@ void os_start(void)
 #endif
   int i;
 
-  slldbg("Entry\n");
+  sinfo("Entry\n");
 
   /* Boot up is complete */
 
@@ -757,7 +758,15 @@ void os_start(void)
       DEBUGVERIFY(group_initialize(&g_idletcb[cpu]));
       g_idletcb[cpu].cmn.group->tg_flags = GROUP_FLAG_NOCLDWAIT;
 #endif
-}
+    }
+
+  /* Start SYSLOG ***********************************************************/
+  /* Late initialization of the system logging device.  Some SYSLOG channel
+   * must be initialized late in the initialization sequence because it may
+   * depend on having IDLE task file structures setup.
+   */
+
+  syslog_initialize(SYSLOG_INIT_LATE);
 
 #ifdef CONFIG_SMP
   /* Start all CPUs *********************************************************/
@@ -797,7 +806,7 @@ void os_start(void)
   /* The IDLE Loop **********************************************************/
   /* When control is return to this point, the system is idle. */
 
-  sdbg("CPU0: Beginning Idle Loop\n");
+  sinfo("CPU0: Beginning Idle Loop\n");
   for (; ; )
     {
       /* Perform garbage collection (if it is not being done by the worker

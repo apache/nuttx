@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_STC_STM32F7_STM32_UART_H
-#define __ARCH_ARM_STC_STM32F7_STM32_UART_H
+#ifndef __ARCH_ARM_SRC_STM32F7_STM32_UART_H
+#define __ARCH_ARM_SRC_STM32F7_STM32_UART_H
 
 /************************************************************************************
  * Included Files
@@ -342,4 +342,4 @@ void stm32_serial_dma_poll(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_STC_STM32F7_STM32_UART_H */
+#endif /* __ARCH_ARM_SRC_STM32F7_STM32_UART_H */

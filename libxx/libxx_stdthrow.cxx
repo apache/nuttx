@@ -56,25 +56,25 @@ namespace std
 {
   void __throw_out_of_range(const char*)
   {
-    dbg("C++: Vector .at() with argument out of range\n");
+    _err("ERROR: C++: Vector .at() with argument out of range\n");
     abort();
    }
 
   void __throw_length_error(const char*)
   {
-    dbg("C++: Vector resize to excessive length\n");
+    _err("ERROR: C++: Vector resize to excessive length\n");
     abort();
   }
 
   void __throw_bad_alloc()
   {
-    dbg("C++: Bad allocation\n");
+    _err("ERROR: C++: Bad allocation\n");
     abort();
   }
 
   void __throw_bad_function_call()
   {
-    dbg("C++: Bad function call\n");
+    _err("ERROR: C++: Bad function call\n");
     abort();
   }
 }

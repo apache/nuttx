@@ -99,9 +99,9 @@ struct lo_driver_s
   WDOG_ID lo_polldog;          /* TX poll timer */
   struct work_s lo_work;       /* For deferring work to the work queue */
 
-  /* This holds the information visible to uIP/NuttX */
+  /* This holds the information visible to the NuttX network */
 
-  struct net_driver_s lo_dev;  /* Interface understood by uIP */
+  struct net_driver_s lo_dev;  /* Interface understood by the network */
 };
 
 /****************************************************************************
@@ -187,7 +187,7 @@ static int lo_txpoll(FAR struct net_driver_s *dev)
 #ifdef CONFIG_NET_IPv4
       if ((IPv4BUF->vhl & IP_VERSION_MASK) == IPv4_VERSION)
         {
-          nllvdbg("IPv4 frame\n");
+          ninfo("IPv4 frame\n");
           NETDEV_RXIPV4(&priv->lo_dev);
           ipv4_input(&priv->lo_dev);
         }
@@ -196,14 +196,14 @@ static int lo_txpoll(FAR struct net_driver_s *dev)
 #ifdef CONFIG_NET_IPv6
       if ((IPv6BUF->vtc & IP_VERSION_MASK) == IPv6_VERSION)
         {
-          nllvdbg("Iv6 frame\n");
+          ninfo("Iv6 frame\n");
           NETDEV_RXIPV6(&priv->lo_dev);
           ipv6_input(&priv->lo_dev);
         }
       else
 #endif
         {
-          ndbg("WARNING: Unrecognized packet type dropped: %02x\n", IPv4BUF->vhl);
+          nwarn("WARNING: Unrecognized packet type dropped: %02x\n", IPv4BUF->vhl);
           NETDEV_RXDROPPED(&priv->lo_dev);
           priv->lo_dev.d_len = 0;
         }
@@ -323,15 +323,15 @@ static int lo_ifup(FAR struct net_driver_s *dev)
   FAR struct lo_driver_s *priv = (FAR struct lo_driver_s *)dev->d_private;
 
 #ifdef CONFIG_NET_IPv4
-  ndbg("Bringing up: %d.%d.%d.%d\n",
-       dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
-       (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
+  ninfo("Bringing up: %d.%d.%d.%d\n",
+        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
+        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
 #endif
 #ifdef CONFIG_NET_IPv6
-  ndbg("Bringing up: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
-       dev->d_ipv6addr[0], dev->d_ipv6addr[1], dev->d_ipv6addr[2],
-       dev->d_ipv6addr[3], dev->d_ipv6addr[4], dev->d_ipv6addr[5],
-       dev->d_ipv6addr[6], dev->d_ipv6addr[7]);
+  ninfo("Bringing up: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
+        dev->d_ipv6addr[0], dev->d_ipv6addr[1], dev->d_ipv6addr[2],
+        dev->d_ipv6addr[3], dev->d_ipv6addr[4], dev->d_ipv6addr[5],
+        dev->d_ipv6addr[6], dev->d_ipv6addr[7]);
 #endif
 
   /* Set and activate a timer process */

@@ -86,14 +86,14 @@ static void tm4c_i2c_register(int bus)
   i2c = tiva_i2cbus_initialize(bus);
   if (i2c == NULL)
     {
-      dbg("ERROR: Failed to get I2C%d interface\n", bus);
+      _err("ERROR: Failed to get I2C%d interface\n", bus);
     }
   else
     {
       ret = i2c_register(i2c, bus);
       if (ret < 0)
         {
-          dbg("ERROR: Failed to register I2C%d driver: %d\n", bus, ret);
+          _err("ERROR: Failed to register I2C%d driver: %d\n", bus, ret);
           tiva_i2cbus_uninitialize(i2c);
         }
     }
@@ -174,7 +174,7 @@ int tm4c_bringup(void)
   ret = tiva_tmp100_initialize(TMP100_DEVNAME);
   if (ret < 0)
     {
-      dbg("ERROR: Failed to initialize TMP100 driver: %d\n", ret);
+      _err("ERROR: Failed to initialize TMP100 driver: %d\n", ret);
     }
 #endif
 
@@ -184,7 +184,7 @@ int tm4c_bringup(void)
   ret = tiva_timer_configure();
   if (ret < 0)
     {
-      dbg("ERROR: Failed to initialize timer driver: %d\n", ret);
+      _err("ERROR: Failed to initialize timer driver: %d\n", ret);
     }
 #endif
 

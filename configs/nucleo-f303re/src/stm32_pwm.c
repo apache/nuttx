@@ -54,37 +54,6 @@
 #ifdef CONFIG_PWM
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* Debug ********************************************************************/
-/* Non-standard debug that may be enabled just for testing PWM */
-
-#ifdef CONFIG_DEBUG_PWM
-#  define pwmdbg    dbg
-#  define pwmvdbg   vdbg
-#  define pwmlldbg  lldbg
-#  define pwmllvdbg llvdbg
-#else
-#  define pwmdbg(x...)
-#  define pwmvdbg(x...)
-#  define pwmlldbg(x...)
-#  define pwmllvdbg(x...)
-#endif
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -112,7 +81,7 @@ int board_pwm_setup(void)
       pwm = stm32_pwminitialize(NUCLEO_F303RE_PWMTIMER);
       if (pwm == NULL)
         {
-          pwmdbg("Failed to get the STM32 PWM lower half\n");
+          pwmerr("ERROR: Failed to get the STM32 PWM lower half\n");
           return -ENODEV;
         }
 
@@ -121,7 +90,7 @@ int board_pwm_setup(void)
       ret = pwm_register("/dev/pwm0", pwm);
       if (ret < 0)
         {
-          pwmdbg("pwm_register failed: %d\n", ret);
+          pwmerr("ERROR: pwm_register failed: %d\n", ret);
           return ret;
         }
 

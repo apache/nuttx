@@ -306,14 +306,14 @@ static int ms58xx_readu16(FAR struct ms58xx_dev_s *priv, uint8_t regaddr,
   uint8_t buffer[2];
   int ret;
 
-  sndbg("addr: %02x\n", regaddr);
+  sninfo("addr: %02x\n", regaddr);
 
   /* Write the register address */
 
   ret = ms58xx_i2c_write(priv, &regaddr, sizeof(regaddr));
   if (ret < 0)
     {
-      sndbg("i2c_write failed: %d\n", ret);
+      snerr("ERROR: i2c_write failed: %d\n", ret);
       return ret;
     }
 
@@ -322,12 +322,12 @@ static int ms58xx_readu16(FAR struct ms58xx_dev_s *priv, uint8_t regaddr,
   ret = ms58xx_i2c_read(priv, buffer, sizeof(buffer));
   if (ret < 0)
     {
-      sndbg("i2c_read failed: %d\n", ret);
+      snerr("ERROR: i2c_read failed: %d\n", ret);
       return ret;
     }
 
   *regval = (uint16_t)buffer[0] << 8 | (uint16_t)buffer[1];
-  sndbg("value: %04x ret: %d\n", *regval, ret);
+  sninfo("value: %04x ret: %d\n", *regval, ret);
   return ret;
 }
 
@@ -346,14 +346,14 @@ static int ms58xx_readadc(FAR struct ms58xx_dev_s *priv, FAR uint32_t *adc)
   int ret;
 
   regaddr = MS58XX_ADC_REG;
-  sndbg("addr: %02x\n", regaddr);
+  sninfo("addr: %02x\n", regaddr);
 
   /* Write the register address */
 
   ret = ms58xx_i2c_write(priv, &regaddr, sizeof(regaddr));
   if (ret < 0)
     {
-      sndbg("i2c_write failed: %d\n", ret);
+      snerr("ERROR: i2c_write failed: %d\n", ret);
       return ret;
     }
 
@@ -362,7 +362,7 @@ static int ms58xx_readadc(FAR struct ms58xx_dev_s *priv, FAR uint32_t *adc)
   ret = ms58xx_i2c_read(priv, buffer, sizeof(buffer));
   if (ret < 0)
     {
-      sndbg("i2c_read failed: %d\n", ret);
+      snerr("ERROR: i2c_read failed: %d\n", ret);
       return ret;
     }
 
@@ -370,7 +370,7 @@ static int ms58xx_readadc(FAR struct ms58xx_dev_s *priv, FAR uint32_t *adc)
          (uint32_t)buffer[1] << 8 |
          (uint32_t)buffer[2];
 
-  sndbg("adc: %06x ret: %d\n", *adc, ret);
+  sninfo("adc: %06x ret: %d\n", *adc, ret);
   return ret;
 }
 
@@ -483,7 +483,7 @@ static int ms58xx_setosr(FAR struct ms58xx_dev_s *priv, uint16_t osr)
 {
   int ret = OK;
 
-  sndbg("osr: %04x\n", osr);
+  sninfo("osr: %04x\n", osr);
 
   switch (priv->model)
     {
@@ -558,7 +558,7 @@ static int ms58xx_readprom(FAR struct ms58xx_dev_s *priv)
       ret = ms58xx_readu16(priv, MS58XX_PROM_REG + i * 2, prom + i);
       if (ret < 0)
         {
-          sndbg("ms58xx_readu16 failed: %d\n", ret);
+          snerr("ERROR: ms58xx_readu16 failed: %d\n", ret);
           return ret;
         }
     }
@@ -568,7 +568,7 @@ static int ms58xx_readprom(FAR struct ms58xx_dev_s *priv)
 
   if (crc != ms58xx_crc(prom, crcindex, crcmask))
     {
-      sndbg("crc mismatch\n");
+      snerr("ERROR: crc mismatch\n");
       return -ENODEV;
     }
 
@@ -620,14 +620,14 @@ static int ms58xx_reset(FAR struct ms58xx_dev_s *priv)
   int ret;
 
   regaddr = MS58XX_RESET_REG;
-  sndbg("addr: %02x\n", regaddr);
+  sninfo("addr: %02x\n", regaddr);
 
   /* Write the register address */
 
   ret = ms58xx_i2c_write(priv, &regaddr, sizeof(regaddr));
   if (ret < 0)
     {
-      sndbg("i2c_write failed: %d\n", ret);
+      snerr("ERROR: i2c_write failed: %d\n", ret);
       return ret;
     }
 
@@ -636,7 +636,7 @@ static int ms58xx_reset(FAR struct ms58xx_dev_s *priv)
   ret = ms58xx_readprom(priv);
   if (ret < 0)
     {
-      sndbg("ms58xx_readprom failed: %d\n", ret);
+      snerr("ERROR: ms58xx_readprom failed: %d\n", ret);
     }
 
   return ret;
@@ -656,14 +656,14 @@ static int ms58xx_convert(FAR struct ms58xx_dev_s *priv, uint8_t regaddr,
   int ret;
 
   regaddr |= priv->osr;
-  sndbg("addr: %02x\n", regaddr);
+  sninfo("addr: %02x\n", regaddr);
 
   /* Write the register address */
 
   ret = ms58xx_i2c_write(priv, &regaddr, sizeof(regaddr));
   if (ret < 0)
     {
-      sndbg("i2c_write failed: %d\n", ret);
+      snerr("ERROR: i2c_write failed: %d\n", ret);
     }
 
   /* Wait for the conversion to end */
@@ -675,7 +675,7 @@ static int ms58xx_convert(FAR struct ms58xx_dev_s *priv, uint8_t regaddr,
   ret = ms58xx_readadc(priv, regval);
   if (ret < 0)
     {
-      sndbg("ms58xx_readadc failed: %d\n", ret);
+      snerr("ERROR: ms58xx_readadc failed: %d\n", ret);
       return ret;
     }
 
@@ -714,14 +714,14 @@ static int ms58xx_measure(FAR struct ms58xx_dev_s *priv)
   ret = ms58xx_convert(priv, MS58XX_PRESS_REG, &rawpress);
   if (ret < 0)
     {
-      sndbg("ms58xx_convert failed: %d\n", ret);
+      snerr("ERROR: ms58xx_convert failed: %d\n", ret);
       return ret;
     }
 
   ret = ms58xx_convert(priv, MS58XX_TEMP_REG, &rawtemp);
   if (ret < 0)
     {
-      sndbg("ms58xx_convert failed: %d\n", ret);
+      snerr("ERROR: ms58xx_convert failed: %d\n", ret);
       return ret;
     }
 
@@ -923,7 +923,7 @@ static int ms58xx_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           FAR int32_t *ptr = (FAR int32_t *)((uintptr_t)arg);
           DEBUGASSERT(ptr != NULL);
           *ptr = priv->temp;
-          sndbg("temp: %08x\n", *ptr);
+          sninfo("temp: %08x\n", *ptr);
         }
         break;
 
@@ -934,7 +934,7 @@ static int ms58xx_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           FAR int32_t *ptr = (FAR int32_t *)((uintptr_t)arg);
           DEBUGASSERT(ptr != NULL);
           *ptr = priv->press;
-          sndbg("press: %08x\n", *ptr);
+          sninfo("press: %08x\n", *ptr);
         }
         break;
 
@@ -949,13 +949,13 @@ static int ms58xx_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case SNIOC_OVERSAMPLING:
         ret = ms58xx_setosr(priv, (uint16_t)arg);
-        sndbg("osr: %04x ret: %d\n", *(uint16_t *)arg, ret);
+        sninfo("osr: %04x ret: %d\n", *(uint16_t *)arg, ret);
         break;
 
       /* Unrecognized commands */
 
       default:
-        sndbg("Unrecognized cmd: %d arg: %ld\n", cmd, arg);
+        snerr("ERROR: Unrecognized cmd: %d arg: %ld\n", cmd, arg);
         ret = -ENOTTY;
         break;
     }
@@ -1010,7 +1010,7 @@ int ms58xx_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
   priv = (FAR struct ms58xx_dev_s *)kmm_malloc(sizeof(*priv));
   if (priv == NULL)
     {
-      sndbg("Failed to allocate instance\n");
+      snerr("ERROR: Failed to allocate instance\n");
       return -ENOMEM;
     }
 
@@ -1177,15 +1177,15 @@ int ms58xx_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
   ret = ms58xx_setosr(priv, osr);
   if (ret < 0)
     {
-      sndbg("ms58xx_setosr failed: %d\n", ret);
-      goto err;
+      snerr("ERROR: ms58xx_setosr failed: %d\n", ret);
+      goto errout;
     }
 
   ret = ms58xx_reset(priv);
   if (ret < 0)
     {
-      sndbg("ms58xx_reset failed: %d\n", ret);
-      goto err;
+      snerr("ERROR: ms58xx_reset failed: %d\n", ret);
+      goto errout;
     }
 
   /* Register the character driver */
@@ -1193,13 +1193,13 @@ int ms58xx_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
   ret = register_driver(devpath, &g_fops, 0666, priv);
   if (ret < 0)
     {
-      sndbg("Failed to register driver: %d\n", ret);
-      goto err;
+      snerr("ERROR: Failed to register driver: %d\n", ret);
+      goto errout;
     }
 
   return ret;
 
-err:
+errout:
   kmm_free(priv);
   return ret;
 }

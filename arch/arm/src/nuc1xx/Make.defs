@@ -65,7 +65,7 @@ else ifeq ($(CONFIG_MODULE),y)
 CMN_CSRCS += up_elf.c
 endif
 
-ifeq ($(CONFIG_DEBUG),y)
+ifeq ($(CONFIG_DEBUG_FEATURES),y)
 CMN_CSRCS += up_dumpnvic.c
 endif
 
@@ -81,6 +81,6 @@ ifeq ($(CONFIG_BUILD_PROTECTED),y)
 CHIP_CSRCS += nuc_userspace.c
 endif
 
-ifeq ($(CONFIG_DEBUG),y)
+ifeq ($(CONFIG_DEBUG_FEATURES),y)
 CHIP_CSRCS += nuc_dumpgpio.c
 endif

@@ -56,7 +56,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/ioctl.h>
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
 #  include <nuttx/arch.h>
 #endif
 
@@ -135,7 +135,7 @@ static void pipecommon_pollnotify(FAR struct pipe_dev_s *dev,
 
           if (fds->revents != 0)
             {
-              fvdbg("Report events: %02x\n", fds->revents);
+              finfo("Report events: %02x\n", fds->revents);
               sem_post(fds->sem);
             }
         }
@@ -205,7 +205,7 @@ int pipecommon_open(FAR struct file *filep)
   ret = sem_wait(&dev->d_bfsem);
   if (ret != OK)
     {
-      fdbg("sem_wait failed: %d\n", get_errno());
+      ferr("ERROR: sem_wait failed: %d\n", get_errno());
       DEBUGASSERT(get_errno() > 0);
       return -get_errno();
     }
@@ -283,7 +283,7 @@ int pipecommon_open(FAR struct file *filep)
            * a signal.
            */
 
-          fdbg("sem_wait failed: %d\n", get_errno());
+          ferr("ERROR: sem_wait failed: %d\n", get_errno());
           DEBUGASSERT(get_errno() > 0);
           ret = -get_errno();
 
@@ -519,9 +519,9 @@ ssize_t pipecommon_write(FAR struct file *filep, FAR const char *buffer,
   /* At present, this method cannot be called from interrupt handlers.  That is
    * because it calls sem_wait (via pipecommon_semtake below) and sem_wait cannot
    * be called from interrupt level.  This actually happens fairly commonly
-   * IF dbg() is called from interrupt handlers and stdout is being redirected
+   * IF [a-z]err() is called from interrupt handlers and stdout is being redirected
    * via a pipe.  In that case, the debug output will try to go out the pipe
-   * (interrupt handlers should use the lldbg() APIs).
+   * (interrupt handlers should use the  _err() APIs).
    *
    * On the other hand, it would be very valuable to be able to feed the pipe
    * from an interrupt handler!  TODO:  Consider disabling interrupts instead
@@ -722,7 +722,7 @@ int pipecommon_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
       FAR struct pollfd **slot = (FAR struct pollfd **)fds->priv;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
       if (!slot)
         {
           ret              = -EIO;
@@ -752,7 +752,7 @@ int pipecommon_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   FAR struct pipe_dev_s *dev   = inode->i_private;
   int                    ret   = -EINVAL;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   /* Some sanity checking */
 
   if (dev == NULL)
@@ -795,7 +795,7 @@ int pipecommon_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
               count = dev->d_wrndx - dev->d_rdndx;
             }
 
-          *(FAR int *)arg = count;
+          *(FAR int *)((uintptr_t)arg) = count;
           ret = 0;
         }
         break;
@@ -815,7 +815,7 @@ int pipecommon_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
               count = ((CONFIG_DEV_PIPE_SIZE - dev->d_wrndx) + dev->d_rdndx) - 1;
             }
 
-          *(FAR int *)arg = count;
+          *(FAR int *)((uintptr_t)arg) = count;
           ret = 0;
         }
         break;

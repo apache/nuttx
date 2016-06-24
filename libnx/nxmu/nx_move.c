@@ -92,7 +92,7 @@ int nx_move(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
   FAR struct nxbe_window_s *wnd = (FAR struct nxbe_window_s *)hwnd;
   struct nxsvrmsg_move_s    outmsg;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!wnd)
     {
       set_errno(EINVAL);

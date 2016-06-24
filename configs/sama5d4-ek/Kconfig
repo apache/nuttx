@@ -52,7 +52,7 @@ endchoice # SAMA4D4-EK DRAM Type
 config SAMA5D4EK_DRAM_MAIN
 	bool "Build dram_main"
 	default n
-	depends on SAMA5_BOOT_ISRAM
+	depends on SAMA5_BOOT_ISRAM && BUILD_FLAT
 	---help---
 		dram_main is a tiny program that runs in ISRAM.  dram_main will
 		enable SDRAM and load an Intel HEX program into SDRAM over the
@@ -78,7 +78,7 @@ config SAMA5D4EK_DRAM_START
 config SAMA5D4EK_AT25_MAIN
 	bool "Build at25_main"
 	default n
-	depends on SAMA5_BOOT_ISRAM
+	depends on SAMA5_BOOT_ISRAM && BUILD_FLAT
 	---help---
 		at25_main is a tiny program that runs in ISRAM.  at25_main will
 		enable SDRAM and configure the AT25 Serial FLASH.  It will prompt

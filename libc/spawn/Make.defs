@@ -38,7 +38,7 @@
 CSRCS += lib_psfa_addaction.c lib_psfa_addclose.c lib_psfa_adddup2.c
 CSRCS += lib_psfa_addopen.c lib_psfa_destroy.c lib_psfa_init.c
 
-ifeq ($(CONFIG_DEBUG),y)
+ifeq ($(CONFIG_DEBUG_FEATURES),y)
 CSRCS += lib_psfa_dump.c
 endif
 
@@ -54,7 +54,7 @@ ifneq ($(CONFIG_BUILD_KERNEL),y)
 CSRCS += lib_psa_getstacksize.c lib_psa_setstacksize.c
 endif
 
-ifeq ($(CONFIG_DEBUG),y)
+ifeq ($(CONFIG_DEBUG_FEATURES),y)
 CSRCS += lib_psa_dump.c
 endif
 

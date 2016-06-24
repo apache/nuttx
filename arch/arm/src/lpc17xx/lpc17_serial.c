@@ -1134,7 +1134,7 @@ static int up_interrupt(int irq, void *context)
               /* Read the modem status register (MSR) to clear */
 
               status = up_serialin(priv, LPC17_UART_MSR_OFFSET);
-              vdbg("MSR: %02x\n", status);
+              _info("MSR: %02x\n", status);
               break;
             }
 
@@ -1145,7 +1145,7 @@ static int up_interrupt(int irq, void *context)
               /* Read the line status register (LSR) to clear */
 
               status = up_serialin(priv, LPC17_UART_LSR_OFFSET);
-              vdbg("LSR: %02x\n", status);
+              _info("LSR: %02x\n", status);
               break;
             }
 
@@ -1153,7 +1153,7 @@ static int up_interrupt(int irq, void *context)
 
           default:
             {
-              dbg("Unexpected IIR: %02x\n", status);
+              _err("ERROR: Unexpected IIR: %02x\n", status);
               break;
             }
         }

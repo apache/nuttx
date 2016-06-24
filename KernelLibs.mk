@@ -45,6 +45,12 @@
 NUTTXLIBS = lib$(DELIM)libsched$(LIBEXT)
 USERLIBS =
 
+# Driver support.  Generally depends on file descriptor support but there
+# are some components in the drivers directory that are needed even if file
+# descriptors are not supported.
+
+NUTTXLIBS += lib$(DELIM)libdrivers$(LIBEXT)
+
 # Add libraries for board support
 
 NUTTXLIBS += lib$(DELIM)libconfigs$(LIBEXT)
@@ -83,11 +89,8 @@ ifeq ($(CONFIG_NFILE_DESCRIPTORS),0)
 ifneq ($(CONFIG_NSOCKET_DESCRIPTORS),0)
 NUTTXLIBS += lib$(DELIM)libfs$(LIBEXT)
 endif
-ifeq ($(CONFIG_NET),y)
-NUTTXLIBS += lib$(DELIM)libdrivers$(LIBEXT)
-endif
 else
-NUTTXLIBS += lib$(DELIM)libfs$(LIBEXT) lib$(DELIM)libdrivers$(LIBEXT) lib$(DELIM)libbinfmt$(LIBEXT)
+NUTTXLIBS += lib$(DELIM)libfs$(LIBEXT) lib$(DELIM)libbinfmt$(LIBEXT)
 endif
 
 # Add libraries for the NX graphics sub-system

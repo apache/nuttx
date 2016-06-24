@@ -46,16 +46,6 @@
 #include "sama5d2-xult.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#ifdef CONFIG_BOARD_INITIALIZE
-#  define SYSLOG lldbg
-#else
-#  define SYSLOG dbg
-#endif
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -77,8 +67,8 @@ int sam_bringup(void)
   ret = mount(NULL, SAMA5_PROCFS_MOUNTPOINT, "procfs", 0, NULL);
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: Failed to mount procfs at %s: %d\n",
-             SAMA5_PROCFS_MOUNTPOINT, ret);
+      _err("ERROR: Failed to mount procfs at %s: %d\n",
+           SAMA5_PROCFS_MOUNTPOINT, ret);
     }
 #endif
 

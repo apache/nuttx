@@ -1,7 +1,7 @@
 /****************************************************************************
  *  arch/arm/src/arm/up_syscall.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,17 +39,6 @@
 
 #include <nuttx/config.h>
 
-/* Output debug info if stack dump is selected -- even if debug is not
- * selected.
- */
-
-#ifdef CONFIG_ARCH_STACKDUMP
-# undef  CONFIG_DEBUG
-# undef  CONFIG_DEBUG_VERBOSE
-# define CONFIG_DEBUG 1
-# define CONFIG_DEBUG_VERBOSE 1
-#endif
-
 #include <stdint.h>
 #include <debug.h>
 
@@ -59,22 +48,6 @@
 #include "up_internal.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * vectors
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -82,8 +55,8 @@
  * Name: up_syscall
  *
  * Description:
- *   SWI interrupts will vection here with insn=the SWI
- *   instruction and xcp=the interrupt context
+ *   SWI interrupts will vector here with insn=the SWI instruction and
+ *   xcp=the interrupt context
  *
  *   The handler may get the SWI number be de-referencing
  *   the return address saved in the xcp and decoding
@@ -93,7 +66,7 @@
 
 void up_syscall(uint32_t *regs)
 {
-  lldbg("Syscall from 0x%x\n", regs[REG_PC]);
+  _alert("Syscall from 0x%x\n", regs[REG_PC]);
   CURRENT_REGS = regs;
   PANIC();
 }

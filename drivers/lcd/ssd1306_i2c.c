@@ -71,7 +71,7 @@ void ssd1306_sendbyte(FAR struct ssd1306_dev_s *priv, uint8_t regval)
   int ret;
 
 #ifdef CONFIG_LCD_SSD1306_REGDEBUG
-  lldbg("-> 0x%02x\n", regval);
+  _err("-> 0x%02x\n", regval);
 #endif
 
   /* Setup to the data to be transferred.  Two bytes:  The SSD1306 register
@@ -94,7 +94,7 @@ void ssd1306_sendbyte(FAR struct ssd1306_dev_s *priv, uint8_t regval)
   ret = I2C_TRANSFER(priv->i2c, &msg, 1);
   if (ret < 0)
     {
-      sndbg("I2C_TRANSFER failed: %d\n", ret);
+      snerr("ERROR: I2C_TRANSFER failed: %d\n", ret);
     }
 }
 
@@ -130,7 +130,7 @@ void ssd1306_sendblk(FAR struct ssd1306_dev_s *priv, uint8_t *data, uint8_t len)
   ret = I2C_TRANSFER(priv->i2c, &msg, 1);
   if (ret < 0)
     {
-      sndbg("I2C_TRANSFER failed: %d\n", ret);
+      snerr("ERROR: I2C_TRANSFER failed: %d\n", ret);
     }
 }
 

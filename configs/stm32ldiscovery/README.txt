@@ -707,7 +707,7 @@ STM32L-Discovery-specific Configuration Options
     CONFIG_CAN2_BAUD - CAN1 BAUD rate.  Required if CONFIG_STM32_CAN2 is defined.
     CONFIG_CAN_TSEG1 - The number of CAN time quanta in segment 1. Default: 6
     CONFIG_CAN_TSEG2 - the number of CAN time quanta in segment 2. Default: 7
-    CONFIG_CAN_REGDEBUG - If CONFIG_DEBUG is set, this will generate an
+    CONFIG_STM32_CAN_REGDEBUG - If CONFIG_DEBUG_FEATURES is set, this will generate an
       dump of all CAN registers.
 
   STM32L-Discovery SPI Configuration
@@ -813,8 +813,8 @@ Configuration sub-directories
          CONFIG_LCD=y                            : (Needed to enable LCD debug)
 
        Build Setup -> Debug Options:
-         CONFIG_DEBUG=y                          : Enable debug features
-         CONFIG_DEBUG_VERBOSE=y                  : Enable LCD debug
+         CONFIG_DEBUG_FEATURES=y                 : Enable debug features
+         CONFIG_DEBUG_INFO=y                     : Enable LCD debug
 
        NOTE:  At this point in time, testing of the SLCD is very limited because
        there is not much in apps/examples/slcd.  Certainly there are more bugs

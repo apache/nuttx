@@ -33,6 +33,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  **************************************************************************************/
+
 /* This driver supports the following LCDs on the STM324xG_EVAL board:
  *
  *   AM-240320L8TNQW00H (LCD_ILI9320 or LCD_ILI9321) OR
@@ -107,20 +108,6 @@
 #  endif
 #elif !defined(CONFIG_LCD_RLANDSCAPE)
 #  define CONFIG_LCD_LANDSCAPE 1
-#endif
-
-/* Define CONFIG_DEBUG_LCD to enable detailed LCD debug output. Verbose debug must
- * also be enabled.
- */
-
-#ifndef CONFIG_DEBUG
-#  undef CONFIG_DEBUG_VERBOSE
-#  undef CONFIG_DEBUG_GRAPHICS
-#  undef CONFIG_DEBUG_LCD
-#endif
-
-#ifndef CONFIG_DEBUG_VERBOSE
-#  undef CONFIG_DEBUG_LCD
 #endif
 
 /* Display/Color Properties ***********************************************************/
@@ -261,16 +248,6 @@
 #define ILI9320_ID            0x9320
 #define ILI9321_ID            0x9321
 #define ILI9325_ID            0x9325
-
-/* Debug ******************************************************************************/
-
-#ifdef CONFIG_DEBUG_LCD
-#  define lcddbg              dbg
-#  define lcdvdbg             vdbg
-#else
-#  define lcddbg(x...)
-#  define lcdvdbg(x...)
-#endif
 
 /**************************************************************************************
  * Private Type Definition
@@ -585,7 +562,7 @@ static int stm3240g_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *bu
 
   /* Buffer must be provided and aligned to a 16-bit address boundary */
 
-  lcdvdbg("row: %d col: %d npixels: %d\n", row, col, npixels);
+  lcdinfo("row: %d col: %d npixels: %d\n", row, col, npixels);
   DEBUGASSERT(buffer && ((uintptr_t)buffer & 1) == 0);
 
   /* Write the run to GRAM. */
@@ -703,7 +680,7 @@ static int stm3240g_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
 
   /* Buffer must be provided and aligned to a 16-bit address boundary */
 
-  lcdvdbg("row: %d col: %d npixels: %d\n", row, col, npixels);
+  lcdinfo("row: %d col: %d npixels: %d\n", row, col, npixels);
   DEBUGASSERT(buffer && ((uintptr_t)buffer & 1) == 0);
 
   /* Configure according to the LCD type.  Kind of silly with only one LCD type. */
@@ -829,7 +806,7 @@ static int stm3240g_getvideoinfo(FAR struct lcd_dev_s *dev,
                                  FAR struct fb_videoinfo_s *vinfo)
 {
   DEBUGASSERT(dev && vinfo);
-  lcdvdbg("fmt: %d xres: %d yres: %d nplanes: %d\n",
+  lcdinfo("fmt: %d xres: %d yres: %d nplanes: %d\n",
           g_videoinfo.fmt, g_videoinfo.xres, g_videoinfo.yres, g_videoinfo.nplanes);
   memcpy(vinfo, &g_videoinfo, sizeof(struct fb_videoinfo_s));
   return OK;
@@ -847,7 +824,7 @@ static int stm3240g_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno
                               FAR struct lcd_planeinfo_s *pinfo)
 {
   DEBUGASSERT(dev && pinfo && planeno == 0);
-  lcdvdbg("planeno: %d bpp: %d\n", planeno, g_planeinfo.bpp);
+  lcdinfo("planeno: %d bpp: %d\n", planeno, g_planeinfo.bpp);
   memcpy(pinfo, &g_planeinfo, sizeof(struct lcd_planeinfo_s));
   return OK;
 }
@@ -863,7 +840,7 @@ static int stm3240g_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno
 
 static int stm3240g_getpower(struct lcd_dev_s *dev)
 {
-  lcdvdbg("power: %d\n", 0);
+  lcdinfo("power: %d\n", 0);
   return g_lcddev.power;
 }
 
@@ -899,7 +876,7 @@ static int stm3240g_poweroff(void)
 
 static int stm3240g_setpower(struct lcd_dev_s *dev, int power)
 {
-  lcdvdbg("power: %d\n", power);
+  lcdinfo("power: %d\n", power);
   DEBUGASSERT((unsigned)power <= CONFIG_LCD_MAXPOWER);
 
   /* Set new power level */
@@ -933,7 +910,7 @@ static int stm3240g_setpower(struct lcd_dev_s *dev, int power)
 
 static int stm3240g_getcontrast(struct lcd_dev_s *dev)
 {
-  lcdvdbg("Not implemented\n");
+  lcdinfo("Not implemented\n");
   return -ENOSYS;
 }
 
@@ -947,7 +924,7 @@ static int stm3240g_getcontrast(struct lcd_dev_s *dev)
 
 static int stm3240g_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
 {
-  lcdvdbg("contrast: %d\n", contrast);
+  lcdinfo("contrast: %d\n", contrast);
   return -ENOSYS;
 }
 
@@ -966,7 +943,7 @@ static inline void stm3240g_lcdinitialize(void)
   /* Check LCD ID */
 
   id = stm3240g_readreg(LCD_REG_0);
-  lcddbg("LCD ID: %04x\n", id);
+  lcdinfo("LCD ID: %04x\n", id);
 
   /* Check if the ID is for the STM32_ILI9320 (or ILI9321) or STM32_ILI9325 */
 
@@ -995,7 +972,7 @@ static inline void stm3240g_lcdinitialize(void)
 #else /* if !defined(CONFIG_STM3240G_ILI9325_DISABLE) */
       g_lcddev.type = LCD_TYPE_ILI9325;
 #endif
-      lcddbg("LCD type: %d\n", g_lcddev.type);
+      lcdinfo("LCD type: %d\n", g_lcddev.type);
 
       /* Start Initial Sequence */
 
@@ -1113,7 +1090,7 @@ static inline void stm3240g_lcdinitialize(void)
     }
   else
     {
-      lcddbg("Unsupported LCD type\n");
+      lcderr("ERROR: Unsupported LCD type\n");
     }
 }
 
@@ -1133,7 +1110,7 @@ static inline void stm3240g_lcdinitialize(void)
 
 int board_lcd_initialize(void)
 {
-  lcdvdbg("Initializing\n");
+  lcdinfo("Initializing\n");
 
   /* Configure GPIO pins and configure the FSMC to support the LCD */
 

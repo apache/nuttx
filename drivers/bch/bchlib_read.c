@@ -160,7 +160,7 @@ ssize_t bchlib_read(FAR void *handle, FAR char *buffer, size_t offset, size_t le
                                        sector, nsectors);
       if (ret < 0)
         {
-          fdbg("Read failed: %d\n");
+          ferr("ERROR: Read failed: %d\n");
           return ret;
         }
 

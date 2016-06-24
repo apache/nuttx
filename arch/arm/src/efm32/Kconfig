@@ -140,7 +140,7 @@ config EFM32_FLASHPROG
 config EFM32_RMU_DEBUG
 	bool "Reset Management Unit (RMU) DEBUG "
 	default n
-	depends on EFM32_RMU && DEBUG
+	depends on EFM32_RMU && DEBUG_FEATURES
 
 config EFM32_I2C0
 	bool "I2C0"

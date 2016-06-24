@@ -278,7 +278,7 @@ static void tsc2007_notify(FAR struct tsc2007_dev_s *priv)
       if (fds)
         {
           fds->revents |= POLLIN;
-          ivdbg("Report events: %02x\n", fds->revents);
+          iinfo("Report events: %02x\n", fds->revents);
           sem_post(fds->sem);
         }
     }
@@ -456,7 +456,7 @@ static int tsc2007_activate(FAR struct tsc2007_dev_s *priv, uint8_t cmd)
    ret = I2C_TRANSFER(priv->i2c, &msg, 1);
    if (ret < 0)
      {
-       idbg("I2C_TRANSFER failed: %d\n", ret);
+       ierr("ERROR: I2C_TRANSFER failed: %d\n", ret);
      }
    return ret;
 }
@@ -495,7 +495,7 @@ static int tsc2007_transfer(FAR struct tsc2007_dev_s *priv, uint8_t cmd)
    ret = I2C_TRANSFER(priv->i2c, &msg, 1);
    if (ret < 0)
      {
-       idbg("I2C_TRANSFER failed: %d\n", ret);
+       ierr("ERROR: I2C_TRANSFER failed: %d\n", ret);
        return ret;
      }
 
@@ -540,7 +540,7 @@ static int tsc2007_transfer(FAR struct tsc2007_dev_s *priv, uint8_t cmd)
    ret = I2C_TRANSFER(priv->i2c, &msg, 1);
    if (ret < 0)
      {
-       idbg("I2C_TRANSFER failed: %d\n", ret);
+       ierr("ERROR: I2C_TRANSFER failed: %d\n", ret);
        return ret;
      }
 
@@ -550,7 +550,7 @@ static int tsc2007_transfer(FAR struct tsc2007_dev_s *priv, uint8_t cmd)
    */
 
    ret = (unsigned int)data12[0] << 4 | (unsigned int)data12[1] >> 4;
-   ivdbg("data: 0x%04x\n", ret);
+   iinfo("data: 0x%04x\n", ret);
    return ret;
 }
 
@@ -672,7 +672,7 @@ static void tsc2007_worker(FAR void *arg)
 
       if (z1 == 0)
         {
-          idbg("Z1 zero\n");
+          ierr("ERROR: Z1 zero\n");
           pressure = 0;
         }
       else
@@ -680,14 +680,14 @@ static void tsc2007_worker(FAR void *arg)
           pressure = (x * config->rxplate * (z2 - z1)) / z1;
           pressure = (pressure + 2048) >> 12;
 
-          ivdbg("Position: (%d,%4d) pressure: %u z1/2: (%d,%d)\n",
+          iinfo("Position: (%d,%4d) pressure: %u z1/2: (%d,%d)\n",
                 x, y, pressure, z1, z2);
 
           /* Ignore out of range caculcations */
 
           if (pressure > 0x0fff)
             {
-              idbg("Dropped out-of-range pressure: %d\n", pressure);
+              ierr("ERROR: Dropped out-of-range pressure: %d\n", pressure);
               pressure = 0;
             }
         }
@@ -783,7 +783,7 @@ static int tsc2007_interrupt(int irq, FAR void *context)
   ret = work_queue(HPWORK, &priv->work, tsc2007_worker, priv, 0);
   if (ret != 0)
     {
-      illdbg("Failed to queue work: %d\n", ret);
+      ierr("ERROR: Failed to queue work: %d\n", ret);
     }
 
   /* Clear any pending interrupts and return success */
@@ -1031,7 +1031,7 @@ static int tsc2007_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   FAR struct tsc2007_dev_s *priv;
   int                       ret;
 
-  ivdbg("cmd: %d arg: %ld\n", cmd, arg);
+  iinfo("cmd: %d arg: %ld\n", cmd, arg);
   DEBUGASSERT(filep);
   inode = filep->f_inode;
 
@@ -1107,7 +1107,7 @@ static int tsc2007_poll(FAR struct file *filep, FAR struct pollfd *fds,
   int                       ret;
   int                       i;
 
-  ivdbg("setup: %d\n", (int)setup);
+  iinfo("setup: %d\n", (int)setup);
   DEBUGASSERT(filep && fds);
   inode = filep->f_inode;
 
@@ -1131,7 +1131,7 @@ static int tsc2007_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
       if ((fds->events & POLLIN) == 0)
         {
-          idbg("Missing POLLIN: revents: %08x\n", fds->revents);
+          ierr("ERROR: Missing POLLIN: revents: %08x\n", fds->revents);
           ret = -EDEADLK;
           goto errout;
         }
@@ -1156,7 +1156,7 @@ static int tsc2007_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
       if (i >= CONFIG_TSC2007_NPOLLWAITERS)
         {
-          idbg("No availabled slot found: %d\n", i);
+          ierr("ERROR: No available slot found: %d\n", i);
           fds->priv    = NULL;
           ret          = -EBUSY;
           goto errout;
@@ -1225,7 +1225,7 @@ int tsc2007_register(FAR struct i2c_master_s *dev,
 #endif
   int ret;
 
-  ivdbg("dev: %p minor: %d\n", dev, minor);
+  iinfo("dev: %p minor: %d\n", dev, minor);
 
   /* Debug-only sanity checks */
 
@@ -1242,7 +1242,7 @@ int tsc2007_register(FAR struct i2c_master_s *dev,
   priv = (FAR struct tsc2007_dev_s *)kmm_malloc(sizeof(struct tsc2007_dev_s));
   if (!priv)
     {
-      idbg("kmm_malloc(%d) failed\n", sizeof(struct tsc2007_dev_s));
+      ierr("ERROR: kmm_malloc(%d) failed\n", sizeof(struct tsc2007_dev_s));
       return -ENOMEM;
     }
 #endif
@@ -1265,7 +1265,7 @@ int tsc2007_register(FAR struct i2c_master_s *dev,
   ret = config->attach(config, tsc2007_interrupt);
   if (ret < 0)
     {
-      idbg("Failed to attach interrupt\n");
+      ierr("ERROR: Failed to attach interrupt\n");
       goto errout_with_priv;
     }
 
@@ -1276,19 +1276,19 @@ int tsc2007_register(FAR struct i2c_master_s *dev,
   ret = tsc2007_transfer(priv, TSC2007_ENABLE_PENIRQ);
   if (ret < 0)
     {
-      idbg("tsc2007_transfer failed: %d\n", ret);
+      ierr("ERROR: tsc2007_transfer failed: %d\n", ret);
       goto errout_with_priv;
     }
 
   /* Register the device as an input device */
 
   (void)snprintf(devname, DEV_NAMELEN, DEV_FORMAT, minor);
-  ivdbg("Registering %s\n", devname);
+  iinfo("Registering %s\n", devname);
 
   ret = register_driver(devname, &tsc2007_fops, 0666, priv);
   if (ret < 0)
     {
-      idbg("register_driver() failed: %d\n", ret);
+      ierr("ERROR: register_driver() failed: %d\n", ret);
       goto errout_with_priv;
     }
 
@@ -1311,7 +1311,7 @@ int tsc2007_register(FAR struct i2c_master_s *dev,
   ret = work_queue(HPWORK, &priv->work, tsc2007_worker, priv, 0);
   if (ret != 0)
     {
-      idbg("Failed to queue work: %d\n", ret);
+      ierr("ERROR: Failed to queue work: %d\n", ret);
       goto errout_with_priv;
     }
 

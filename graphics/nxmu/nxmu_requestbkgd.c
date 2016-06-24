@@ -92,7 +92,7 @@ void nxmu_requestbkgd(FAR struct nxfe_conn_s *conn,
                       FAR const struct nx_callback_s *cb,
                       FAR void *arg)
 {
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!conn || !be || !cb)
     {
       errno = EINVAL;

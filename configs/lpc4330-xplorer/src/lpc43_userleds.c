@@ -66,30 +66,6 @@
  * LEDs are pulled high to a low output illuminates the LED.
  */
 
-/* Debug definitions ********************************************************/
-/* CONFIG_DEBUG_LEDS enables debug output from this file (needs CONFIG_DEBUG
- * with CONFIG_DEBUG_VERBOSE too)
- */
-
-#ifdef CONFIG_DEBUG_LEDS
-#  define leddbg  lldbg
-#  ifdef CONFIG_DEBUG_VERBOSE
-#    define LED_VERBOSE 1
-#    define ledvdbg lldbg
-#  else
-#    undef LED_VERBOSE
-#    define ledvdbg(x...)
-#  endif
-#else
-#  undef LED_VERBOSE
-#  define leddbg(x...)
-#  define ledvdbg(x...)
-#endif
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/

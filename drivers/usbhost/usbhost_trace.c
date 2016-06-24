@@ -190,7 +190,7 @@ void usbhost_trace_common(uint32_t event)
  ****************************************************************************/
 
 #if defined(CONFIG_USBHOST_TRACE) || \
-   (defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_USB))
+   (defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_DEBUG_USB))
 
 void usbhost_trace1(uint16_t id, uint32_t u23)
 {
@@ -228,7 +228,7 @@ void usbhost_trace2(uint16_t id, uint8_t u7, uint16_t u16)
 #endif
 }
 
-#endif /* CONFIG_USBHOST_TRACE || CONFIG_DEBUG && CONFIG_DEBUG_USB */
+#endif /* CONFIG_USBHOST_TRACE || CONFIG_DEBUG_FEATURES && CONFIG_DEBUG_USB */
 
 /****************************************************************************
  * Name: usbtrace_enumerate

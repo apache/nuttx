@@ -73,7 +73,7 @@
  * Private Data
  ****************************************************************************/
 
-/* The array containing all uIP TCP connections. */
+/* The array containing all TCP connections. */
 
 static struct tcp_conn_s g_tcp_connections[CONFIG_NET_TCP_CONNS];
 
@@ -532,7 +532,7 @@ static inline int tcp_ipv4_bind(FAR struct tcp_conn_s *conn,
 
   if (port < 0)
     {
-      ndbg("tcp_selectport failed: %d\n", port);
+      nerr("ERROR: tcp_selectport failed: %d\n", port);
       return port;
     }
 
@@ -552,7 +552,7 @@ static inline int tcp_ipv4_bind(FAR struct tcp_conn_s *conn,
     {
       /* If no device is found, then the address is not reachable */
 
-      ndbg("tcp_local_ipv4_device failed: %d\n", ret);
+      nerr("ERROR: tcp_local_ipv4_device failed: %d\n", ret);
 
       /* Back out the local address setting */
 
@@ -613,7 +613,7 @@ static inline int tcp_ipv6_bind(FAR struct tcp_conn_s *conn,
 
   if (port < 0)
     {
-      ndbg("tcp_selectport failed: %d\n", port);
+      nerr("ERROR: tcp_selectport failed: %d\n", port);
       return port;
     }
 
@@ -633,7 +633,7 @@ static inline int tcp_ipv6_bind(FAR struct tcp_conn_s *conn,
     {
       /* If no device is found, then the address is not reachable */
 
-      ndbg("tcp_local_ipv6_device failed: %d\n", ret);
+      nerr("ERROR: tcp_local_ipv6_device failed: %d\n", ret);
 
       /* Back out the local address setting */
 
@@ -727,7 +727,7 @@ FAR struct tcp_conn_s *tcp_alloc(uint8_t domain)
 
       while (tmp)
         {
-          nllvdbg("conn: %p state: %02x\n", tmp, tmp->tcpstateflags);
+          ninfo("conn: %p state: %02x\n", tmp, tmp->tcpstateflags);
 
           /* Is this connection in a state we can sacrifice. */
 
@@ -760,7 +760,7 @@ FAR struct tcp_conn_s *tcp_alloc(uint8_t domain)
 
       if (conn != NULL)
         {
-          nlldbg("Closing unestablished connection: %p\n", conn);
+          nwarn("WARNING: Closing unestablished connection: %p\n", conn);
 
           /* Yes... free it.  This will remove the connection from the list
            * of active connections and release all resources held by the
@@ -1066,7 +1066,7 @@ FAR struct tcp_conn_s *tcp_alloc_accept(FAR struct net_driver_s *dev,
            * probably really just assert here.
            */
 
-          ndbg("Failed to find network device: %d\n", ret);
+          nerr("ERROR: Failed to find network device: %d\n", ret);
           tcp_free(conn);
           return NULL;
         }
@@ -1083,11 +1083,12 @@ FAR struct tcp_conn_s *tcp_alloc_accept(FAR struct net_driver_s *dev,
       conn->tcpstateflags = TCP_SYN_RCVD;
 
       tcp_initsequence(conn->sndseq);
-      conn->unacked = 1;
+      conn->unacked       = 1;
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
-      conn->expired = 0;
-      conn->isn     = 0;
-      conn->sent    = 0;
+      conn->expired       = 0;
+      conn->isn           = 0;
+      conn->sent          = 0;
+      conn->sndseq_max    = 0;
 #endif
 
       /* rcvseq should be the seqno from the incoming packet + 1. */
@@ -1320,7 +1321,7 @@ int tcp_connect(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr)
        * just assert here.
        */
 
-      ndbg("Failed to find network device: %d\n", ret);
+      nerr("ERROR: Failed to find network device: %d\n", ret);
       goto errout_with_lock;
     }
 
@@ -1344,6 +1345,7 @@ int tcp_connect(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr)
   conn->expired    = 0;
   conn->isn        = 0;
   conn->sent       = 0;
+  conn->sndseq_max = 0;
 #endif
 
 #ifdef CONFIG_NET_TCP_READAHEAD

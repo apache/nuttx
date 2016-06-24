@@ -251,7 +251,7 @@ static inline FAR struct usbhost_state_s *usbhost_allocclass(void)
 
   DEBUGASSERT(!up_interrupt_context());
   priv = (FAR struct usbhost_state_s *)kmm_malloc(sizeof(struct usbhost_state_s));
-  uvdbg("Allocated: %p\n", priv);
+  uinfo("Allocated: %p\n", priv);
   return priv;
 }
 
@@ -277,7 +277,7 @@ static inline void usbhost_freeclass(FAR struct usbhost_state_s *usbclass)
    * executing from an interrupt handler.
    */
 
-  uvdbg("Freeing: %p\n", usbclass);
+  uinfo("Freeing: %p\n", usbclass);
   kmm_free(usbclass);
 }
 
@@ -357,7 +357,7 @@ static void usbhost_destroy(FAR void *arg)
   DEBUGASSERT(hport->drvr);
   drvr = hport->drvr;
 
-  uvdbg("crefs: %d\n", priv->crefs);
+  uinfo("crefs: %d\n", priv->crefs);
 
   /* Unregister the driver */
 
@@ -465,7 +465,7 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
           {
             FAR struct usb_ifdesc_s *ifdesc = (FAR struct usb_ifdesc_s *)configdesc;
 
-            uvdbg("Interface descriptor\n");
+            uinfo("Interface descriptor\n");
             DEBUGASSERT(remaining >= USB_SIZEOF_IFDESC);
 
             /* Save the interface number and mark ONLY the interface found */
@@ -483,7 +483,7 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
           {
             FAR struct usb_epdesc_s *epdesc = (FAR struct usb_epdesc_s *)configdesc;
 
-            uvdbg("Endpoint descriptor\n");
+            uinfo("Endpoint descriptor\n");
             DEBUGASSERT(remaining >= USB_SIZEOF_EPDESC);
 
             /* Check for a bulk endpoint. */
@@ -516,7 +516,7 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
                     boutdesc.xfrtype      = USB_EP_ATTR_XFER_BULK;
                     boutdesc.interval     = epdesc->interval;
                     boutdesc.mxpacketsize = usbhost_getle16(epdesc->mxpacketsize);
-                    uvdbg("Bulk OUT EP addr:%d mxpacketsize:%d\n",
+                    uinfo("Bulk OUT EP addr:%d mxpacketsize:%d\n",
                           boutdesc.addr, boutdesc.mxpacketsize);
                   }
                 else
@@ -544,7 +544,7 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
                     bindesc.xfrtype      = USB_EP_ATTR_XFER_BULK;
                     bindesc.interval     = epdesc->interval;
                     bindesc.mxpacketsize = usbhost_getle16(epdesc->mxpacketsize);
-                    uvdbg("Bulk IN EP addr:%d mxpacketsize:%d\n",
+                    uinfo("Bulk IN EP addr:%d mxpacketsize:%d\n",
                           bindesc.addr, bindesc.mxpacketsize);
                   }
               }
@@ -576,10 +576,10 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
 
   if (found != USBHOST_ALLFOUND)
     {
-      ulldbg("ERROR: Found IF:%s BIN:%s BOUT:%s\n",
-             (found & USBHOST_IFFOUND) != 0  ? "YES" : "NO",
-             (found & USBHOST_BINFOUND) != 0 ? "YES" : "NO",
-             (found & USBHOST_BOUTFOUND) != 0 ? "YES" : "NO");
+      uerr("ERROR: Found IF:%s BIN:%s BOUT:%s\n",
+           (found & USBHOST_IFFOUND) != 0  ? "YES" : "NO",
+           (found & USBHOST_BINFOUND) != 0 ? "YES" : "NO",
+           (found & USBHOST_BOUTFOUND) != 0 ? "YES" : "NO");
       return -EINVAL;
     }
 
@@ -588,19 +588,19 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
   ret = DRVR_EPALLOC(hport->drvr, &boutdesc, &priv->epout);
   if (ret < 0)
     {
-      udbg("ERROR: Failed to allocate Bulk OUT endpoint\n");
+      uerr("ERROR: Failed to allocate Bulk OUT endpoint\n");
       return ret;
     }
 
   ret = DRVR_EPALLOC(hport->drvr, &bindesc, &priv->epin);
   if (ret < 0)
     {
-      udbg("ERROR: Failed to allocate Bulk IN endpoint\n");
+      uerr("ERROR: Failed to allocate Bulk IN endpoint\n");
       (void)DRVR_EPFREE(hport->drvr, priv->epout);
       return ret;
     }
 
-  ullvdbg("Endpoints allocated\n");
+  uinfo("Endpoints allocated\n");
   return OK;
 }
 
@@ -644,7 +644,7 @@ static inline int usbhost_devinit(FAR struct usbhost_state_s *priv)
     {
       char devname[DEV_NAMELEN];
 
-      uvdbg("Register block driver\n");
+      uinfo("Register block driver\n");
       usbhost_mkdevname(priv, devname);
       // ret = register_blockdriver(devname, &g_bops, 0, priv);
     }
@@ -677,7 +677,7 @@ static inline int usbhost_devinit(FAR struct usbhost_state_s *priv)
         {
           /* Ready for normal operation as a block device driver */
 
-          uvdbg("Successfully initialized\n");
+          uinfo("Successfully initialized\n");
           priv->crefs--;
           usbhost_givesem(&priv->exclsem);
         }
@@ -955,7 +955,7 @@ static int usbhost_connect(FAR struct usbhost_class_s *usbclass,
   ret = usbhost_cfgdesc(priv, configdesc, desclen);
   if (ret < 0)
     {
-      udbg("usbhost_cfgdesc() failed: %d\n", ret);
+      uerr("ERROR: usbhost_cfgdesc() failed: %d\n", ret);
     }
   else
     {
@@ -964,7 +964,7 @@ static int usbhost_connect(FAR struct usbhost_class_s *usbclass,
       ret = usbhost_devinit(priv);
       if (ret < 0)
         {
-          udbg("usbhost_devinit() failed: %d\n", ret);
+          uerr("ERROR: usbhost_devinit() failed: %d\n", ret);
         }
     }
 
@@ -1013,7 +1013,7 @@ static int usbhost_disconnected(struct usbhost_class_s *usbclass)
    * block driver.
    */
 
-  ullvdbg("crefs: %d\n", priv->crefs);
+  uinfo("crefs: %d\n", priv->crefs);
   if (priv->crefs == 1)
     {
       /* Destroy the class instance.  If we are executing from an interrupt
@@ -1025,7 +1025,7 @@ static int usbhost_disconnected(struct usbhost_class_s *usbclass)
         {
           /* Destroy the instance on the worker thread. */
 
-          uvdbg("Queuing destruction: worker %p->%p\n", priv->work.worker, usbhost_destroy);
+          uinfo("Queuing destruction: worker %p->%p\n", priv->work.worker, usbhost_destroy);
           DEBUGASSERT(priv->work.worker == NULL);
           (void)work_queue(HPWORK, &priv->work, usbhost_destroy, priv, 0);
        }

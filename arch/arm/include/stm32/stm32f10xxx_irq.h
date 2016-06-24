@@ -199,7 +199,7 @@
 #  define STM32_IRQ_ETH         (77) /* 61: Ethernet global interrupt */
 #  define STM32_IRQ_ETHWKUP     (78) /* 62: Ethernet Wakeup through EXTI line interrupt */
 #  define STM32_IRQ_CAN2TX      (79) /* 63: CAN2 TX interrupts */
-#  define STM32_IRQ_CAN2RX0     (70) /* 64: CAN2 RX0 interrupts */
+#  define STM32_IRQ_CAN2RX0     (80) /* 64: CAN2 RX0 interrupts */
 #  define STM32_IRQ_CAN2RX1     (81) /* 65: CAN2 RX1 interrupt */
 #  define STM32_IRQ_CAN2SCE     (82) /* 66: CAN2 SCE interrupt */
 #  define STM32_IRQ_OTGFS       (83) /* 67: USB On The Go FS global interrupt */

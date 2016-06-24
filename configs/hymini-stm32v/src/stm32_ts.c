@@ -95,7 +95,7 @@ static xcpt_t tc_isr;
 /* Attach the ADS7843E interrupt handler to the GPIO interrupt */
 static int hymini_ts_irq_attach(FAR struct ads7843e_config_s *state, xcpt_t isr)
 {
-  ivdbg("hymini_ts_irq_attach\n");
+  iinfo("hymini_ts_irq_attach\n");
 
   tc_isr = isr;
   stm32_gpiosetevent(GPIO_TS_IRQ, true, true, true, isr);
@@ -106,7 +106,7 @@ static int hymini_ts_irq_attach(FAR struct ads7843e_config_s *state, xcpt_t isr)
 static void hymini_ts_irq_enable(FAR struct ads7843e_config_s *state,
     bool enable)
 {
-  illvdbg("%d\n", enable);
+  iinfo("%d\n", enable);
 
   stm32_gpiosetevent(GPIO_TS_IRQ, true, true, true, enable? tc_isr:NULL);
 }
@@ -153,12 +153,12 @@ int board_tsc_setup(int minor)
 {
   FAR struct spi_dev_s *dev;
 
-  idbg("minor %d\n", minor);
+  iinfo("minor %d\n", minor);
 
   dev = stm32_spibus_initialize(1);
   if (!dev)
     {
-      idbg("Failed to initialize SPI bus\n");
+      ierr("ERROR: Failed to initialize SPI bus\n");
       return -ENODEV;
     }
 

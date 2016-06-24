@@ -171,9 +171,9 @@ struct ftmac100_driver_s
   struct work_s ft_work;       /* For deferring work to the work queue */
 #endif
 
-  /* This holds the information visible to uIP/NuttX */
+  /* This holds the information visible to the NuttX network */
 
-  struct net_driver_s ft_dev;  /* Interface understood by uIP */
+  struct net_driver_s ft_dev;  /* Interface understood by the network */
 };
 
 /****************************************************************************
@@ -285,7 +285,7 @@ static int ftmac100_transmit(FAR struct ftmac100_driver_s *priv)
   int len = priv->ft_dev.d_len;
 //irqstate_t flags;
 //flags = enter_critical_section();
-//nvdbg("flags=%08x\n", flags);
+//ninfo("flags=%08x\n", flags);
 
   txdes = ftmac100_current_txdes(priv);
 
@@ -307,7 +307,7 @@ static int ftmac100_transmit(FAR struct ftmac100_driver_s *priv)
                     FTMAC100_TXDES1_TXBUF_SIZE(len));
   txdes->txdes0 |= FTMAC100_TXDES0_TXDMA_OWN;
 
-  nvdbg("ftmac100_transmit[%x]: copy %08x to %08x %04x\n",
+  ninfo("ftmac100_transmit[%x]: copy %08x to %08x %04x\n",
         priv->tx_pointer, priv->ft_dev.d_buf, txdes->txdes2, len);
 
   priv->tx_pointer = (priv->tx_pointer + 1) & (CONFIG_FTMAC100_TX_DESC - 1);
@@ -331,7 +331,7 @@ static int ftmac100_transmit(FAR struct ftmac100_driver_s *priv)
  * Function: ftmac100_txpoll
  *
  * Description:
- *   The transmitter is available, check if uIP has any outgoing packets
+ *   The transmitter is available, check if the network has any outgoing packets
  *   ready to send.  This is a callback from devif_poll().  devif_poll() may
  *   be called:
  *
@@ -422,7 +422,7 @@ static void ftmac100_reset(FAR struct ftmac100_driver_s *priv)
 {
   FAR struct ftmac100_register_s *iobase = (FAR struct ftmac100_register_s *)priv->iobase;
 
-  nvdbg("%s(): iobase=%p\n", __func__, iobase);
+  ninfo("%s(): iobase=%p\n", __func__, iobase);
 
   putreg32 (FTMAC100_MACCR_SW_RST, &iobase->maccr);
 
@@ -455,7 +455,7 @@ static void ftmac100_init(FAR struct ftmac100_driver_s *priv)
   FAR unsigned char *kmem;
   int i;
 
-  ndbg ("%s()\n", __func__);
+  nerr ("%s()\n", __func__);
 
   /* Disable all interrupts */
 
@@ -472,7 +472,7 @@ static void ftmac100_init(FAR struct ftmac100_driver_s *priv)
 
   kmem = memalign(RX_BUF_SIZE, CONFIG_FTMAC100_RX_DESC * RX_BUF_SIZE);
 
-  nvdbg("KMEM=%08x\n", kmem);
+  ninfo("KMEM=%08x\n", kmem);
 
   for (i = 0; i < CONFIG_FTMAC100_RX_DESC; i++)
     {
@@ -502,7 +502,7 @@ static void ftmac100_init(FAR struct ftmac100_driver_s *priv)
 
   /* transmit ring */
 
-  nvdbg("priv=%08x txdes=%08x rxdes=%08x\n", priv, txdes, rxdes);
+  ninfo("priv=%08x txdes=%08x rxdes=%08x\n", priv, txdes, rxdes);
 
   putreg32 ((unsigned int)txdes, &iobase->txr_badr);
 
@@ -568,7 +568,7 @@ static uint32_t ftmac100_mdio_read(FAR struct ftmac100_register_s *iobase, int r
   for (i = 0; i < 10; i++)
     {
       phycr = getreg32(&iobase->phycr);
-      nvdbg("%02x %d phycr=%08x\n", reg, i, phycr);
+      ninfo("%02x %d phycr=%08x\n", reg, i, phycr);
 
       if ((phycr & FTMAC100_PHYCR_MIIRD) == 0)
         {
@@ -603,7 +603,7 @@ static void ftmac100_set_mac(FAR struct ftmac100_driver_s *priv,
   unsigned int maddr = mac[0] << 8 | mac[1];
   unsigned int laddr = mac[2] << 24 | mac[3] << 16 | mac[4] << 8 | mac[5];
 
-  nvdbg("%s(%x %x)\n", __func__, maddr, laddr);
+  ninfo("%s(%x %x)\n", __func__, maddr, laddr);
 
   putreg32(maddr, &iobase->mac_madr);
   putreg32(laddr, &iobase->mac_ladr);
@@ -656,7 +656,7 @@ static void ftmac100_receive(FAR struct ftmac100_driver_s *priv)
 
       if (!found)
         {
-          nvdbg("\nNOT FOUND\nCurrent RX %d rxdes0=%08x\n",
+          ninfo("\nNOT FOUND\nCurrent RX %d rxdes0=%08x\n",
                 priv->rx_pointer, rxdes->rxdes0);
           return;
         }
@@ -664,7 +664,7 @@ static void ftmac100_receive(FAR struct ftmac100_driver_s *priv)
       len = FTMAC100_RXDES0_RFL(rxdes->rxdes0);
       data = (uint8_t *)rxdes->rxdes2;
 
-      nvdbg ("RX buffer %d (%08x), %x received (%d)\n",
+      ninfo ("RX buffer %d (%08x), %x received (%d)\n",
              priv->rx_pointer, data, len, (rxdes->rxdes0 & FTMAC100_RXDES0_LRS));
 
       /* Copy the data data from the hardware to priv->ft_dev.d_buf.  Set
@@ -685,7 +685,7 @@ static void ftmac100_receive(FAR struct ftmac100_driver_s *priv)
 #ifdef CONFIG_NET_IPv4
       if (BUF->type == HTONS(ETHTYPE_IP))
         {
-          nllvdbg("IPv4 frame\n");
+          ninfo("IPv4 frame\n");
 
           /* Handle ARP on input then give the IPv4 packet to the network
            * layer
@@ -725,7 +725,7 @@ static void ftmac100_receive(FAR struct ftmac100_driver_s *priv)
 #ifdef CONFIG_NET_IPv6
       if (BUF->type == HTONS(ETHTYPE_IP6))
         {
-          nllvdbg("Iv6 frame\n");
+          ninfo("Iv6 frame\n");
 
           /* Give the IPv6 packet to the network layer */
 
@@ -835,7 +835,7 @@ static void ftmac100_txdone(FAR struct ftmac100_driver_s *priv)
    * disable further Tx interrupts.
    */
 
-  nvdbg("txpending=%d\n", priv->tx_pending);
+  ninfo("txpending=%d\n", priv->tx_pending);
 
   /* Cancel the TX timeout */
 
@@ -849,7 +849,7 @@ static void ftmac100_txdone(FAR struct ftmac100_driver_s *priv)
   (void)wd_start(priv->ft_txpoll, FTMAC100_WDDELAY, ftmac100_poll_expiry, 1,
                  (wdparm_t)priv);
 
-  /* Then poll uIP for new XMIT data */
+  /* Then poll the network for new XMIT data */
 
   (void)devif_poll(&priv->ft_dev, ftmac100_txpoll);
 }
@@ -884,7 +884,7 @@ static inline void ftmac100_interrupt_process(FAR struct ftmac100_driver_s *priv
   status = getreg32 (&iobase->isr);
 #endif
 
-  nvdbg("status=%08x(%08x) BASE=%p ISR=%p PHYCR=%p\n",
+  ninfo("status=%08x(%08x) BASE=%p ISR=%p PHYCR=%p\n",
         status, getreg32(&iobase->isr), iobase, &iobase->isr, &iobase->phycr);
 
   if (!status)
@@ -913,7 +913,7 @@ static inline void ftmac100_interrupt_process(FAR struct ftmac100_driver_s *priv
 
   if (status & (FTMAC100_INT_XPKT_OK))
     {
-      nvdbg("\n\nTXDONE\n\n");
+      ninfo("\n\nTXDONE\n\n");
       ftmac100_txdone(priv);
     }
 
@@ -931,27 +931,27 @@ static inline void ftmac100_interrupt_process(FAR struct ftmac100_driver_s *priv
           priv->ft_bifup = false;
         }
 
-      nvdbg("Link: %s\n", priv->ft_bifup ? "UP" : "DOWN");
+      ninfo("Link: %s\n", priv->ft_bifup ? "UP" : "DOWN");
       ftmac100_mdio_read(iobase, 5);
     }
 
 #if 0
 #define REG(x) (*(volatile uint32_t *)(x))
-  nvdbg("\n=============================================================\n");
-  nvdbg("TM CNTL=%08x INTRS=%08x MASK=%08x LOAD=%08x COUNT=%08x M1=%08x\n",
+  ninfo("\n=============================================================\n");
+  ninfo("TM CNTL=%08x INTRS=%08x MASK=%08x LOAD=%08x COUNT=%08x M1=%08x\n",
         REG(0x98400030), REG(0x98400034), REG(0x98400038), REG(0x98400004),
         REG(0x98400000), REG(0x98400008));
-  nvdbg("IRQ STATUS=%08x MASK=%08x MODE=%08x LEVEL=%08x\n",
+  ninfo("IRQ STATUS=%08x MASK=%08x MODE=%08x LEVEL=%08x\n",
         REG(0x98800014), REG(0x98800004), REG(0x9880000C), REG(0x98800010));
-  nvdbg("FIQ STATUS=%08x MASK=%08x MODE=%08x LEVEL=%08x\n", REG(0x98800034),
+  ninfo("FIQ STATUS=%08x MASK=%08x MODE=%08x LEVEL=%08x\n", REG(0x98800034),
         REG(0x98800024), REG(0x9880002C), REG(0x98800020));
-  nvdbg("=============================================================\n");
+  ninfo("=============================================================\n");
 #endif
 
 out:
   putreg32 (INT_MASK_ALL_ENABLED, &iobase->imr);
 
-  nvdbg("ISR-done\n");
+  ninfo("ISR-done\n");
 }
 
 /****************************************************************************
@@ -1034,7 +1034,7 @@ static int ftmac100_interrupt(int irq, FAR void *context)
 
   /* TODO: Determine if a TX transfer just completed */
 
-  nvdbg("===> status=%08x\n", priv->status);
+  ninfo("===> status=%08x\n", priv->status);
 
   if (priv->status & (FTMAC100_INT_XPKT_OK))
     {
@@ -1043,7 +1043,7 @@ static int ftmac100_interrupt(int irq, FAR void *context)
        * expiration and the deferred interrupt processing.
        */
 
-      nvdbg("\n\nTXDONE 0\n\n");
+      ninfo("\n\nTXDONE 0\n\n");
       wd_cancel(priv->ft_txtimeout);
     }
 
@@ -1087,9 +1087,9 @@ static inline void ftmac100_txtimeout_process(FAR struct ftmac100_driver_s *priv
 {
   /* Then reset the hardware */
 
-  nvdbg("TXTIMEOUT\n");
+  ninfo("TXTIMEOUT\n");
 
-  /* Then poll uIP for new XMIT data */
+  /* Then poll the network for new XMIT data */
 
   (void)devif_poll(&priv->ft_dev, ftmac100_txpoll);
 }
@@ -1195,7 +1195,7 @@ static inline void ftmac100_poll_process(FAR struct ftmac100_driver_s *priv)
    * the TX poll if he are unable to accept another packet for transmission.
    */
 
-  /* If so, update TCP timing states and poll uIP for new XMIT data. Hmmm..
+  /* If so, update TCP timing states and poll the network for new XMIT data. Hmmm..
    * might be bug here.  Does this mean if there is a transmit in progress,
    * we will missing TCP time state updates?
    */
@@ -1311,15 +1311,15 @@ static int ftmac100_ifup(struct net_driver_s *dev)
   FAR struct ftmac100_driver_s *priv = (FAR struct ftmac100_driver_s *)dev->d_private;
 
 #ifdef CONFIG_NET_IPv4
-  ndbg("Bringing up: %d.%d.%d.%d\n",
-       dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
-       (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
+  ninfo("Bringing up: %d.%d.%d.%d\n",
+        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
+        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
 #endif
 #ifdef CONFIG_NET_IPv6
-  ndbg("Bringing up: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
-       dev->d_ipv6addr[0], dev->d_ipv6addr[1], dev->d_ipv6addr[2],
-       dev->d_ipv6addr[3], dev->d_ipv6addr[4], dev->d_ipv6addr[5],
-       dev->d_ipv6addr[6], dev->d_ipv6addr[7]);
+  ninfo("Bringing up: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
+        dev->d_ipv6addr[0], dev->d_ipv6addr[1], dev->d_ipv6addr[2],
+        dev->d_ipv6addr[3], dev->d_ipv6addr[4], dev->d_ipv6addr[5],
+        dev->d_ipv6addr[6], dev->d_ipv6addr[7]);
 #endif
 
   /* Initialize PHYs, the Ethernet interface, and setup up Ethernet
@@ -1421,7 +1421,7 @@ static inline void ftmac100_txavail_process(FAR struct ftmac100_driver_s *priv)
     {
       /* Check if there is room in the hardware to hold another outgoing packet. */
 
-      /* If so, then poll uIP for new XMIT data */
+      /* If so, then poll the network for new XMIT data */
 
       (void)devif_poll(&priv->ft_dev, ftmac100_txpoll);
     }
@@ -1658,7 +1658,7 @@ static void ftmac100_ipv6multicast(FAR struct ftmac100_driver_s *priv)
   mac[4] = tmp16 & 0xff;
   mac[5] = tmp16 >> 8;
 
-  nvdbg("IPv6 Multicast: %02x:%02x:%02x:%02x:%02x:%02x\n",
+  ninfo("IPv6 Multicast: %02x:%02x:%02x:%02x:%02x:%02x\n",
         mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 
   (void)ftmac100_addmac(dev, mac);

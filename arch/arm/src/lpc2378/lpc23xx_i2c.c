@@ -490,7 +490,7 @@ struct i2c_master_s *lpc2378_i2cbus_initialize(int port)
 
   if (port > 1)
     {
-      dbg("lpc I2C Only support 0,1\n");
+      l2cerr("ERROR: lpc I2C Only support 0,1\n");
       return NULL;
     }
 

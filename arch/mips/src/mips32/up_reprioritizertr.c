@@ -97,7 +97,7 @@ void up_reprioritize_rtr(struct tcb_s *tcb, uint8_t priority)
       struct tcb_s *rtcb = this_task();
       bool switch_needed;
 
-      slldbg("TCB=%p PRI=%d\n", tcb, priority);
+      sinfo("TCB=%p PRI=%d\n", tcb, priority);
 
       /* Remove the tcb task from the ready-to-run list.
        * sched_removereadytorun will return true if we just

@@ -67,7 +67,7 @@
 #ifdef CONFIG_ARCH_LEDS
 	.globl	board_autoled_initialize	/* Boot LED setup */
 #endif
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
 	.globl	up_lowputc					/* Low-level debug output */
 #endif
 	.globl	os_start					/* NuttX entry point */
@@ -86,7 +86,7 @@
  *****************************************************************************/
 
 	.macro	showprogress, code
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
 	mov		r0, #\code
 	bl		up_lowputc
 #endif

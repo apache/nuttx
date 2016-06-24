@@ -109,6 +109,9 @@
 #  elif defined(CONFIG_ARCH_CHIP_STM32F105VB)
 #    include "chip/stm32f105v_pinmap.h"
 
+#  elif defined(CONFIG_ARCH_CHIP_STM32F105RB)
+#    include "chip/stm32f105r_pinmap.h"
+
 #  elif defined(CONFIG_ARCH_CHIP_STM32F107VC)
 #    include "chip/stm32f107v_pinmap.h"
 #  else

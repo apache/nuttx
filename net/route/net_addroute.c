@@ -81,7 +81,7 @@ int net_addroute(in_addr_t target, in_addr_t netmask, in_addr_t router)
   route = net_allocroute();
   if (!route)
     {
-      ndbg("ERROR:  Failed to allocate a route\n");
+      nerr("ERROR:  Failed to allocate a route\n");
       return -ENOMEM;
     }
 
@@ -114,7 +114,7 @@ int net_addroute_ipv6(net_ipv6addr_t target, net_ipv6addr_t netmask, net_ipv6add
   route = net_allocroute_ipv6();
   if (!route)
     {
-      ndbg("ERROR:  Failed to allocate a route\n");
+      nerr("ERROR:  Failed to allocate a route\n");
       return -ENOMEM;
     }
 

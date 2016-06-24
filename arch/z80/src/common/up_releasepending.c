@@ -70,7 +70,7 @@ void up_release_pending(void)
 {
   FAR struct tcb_s *rtcb = this_task();
 
-  slldbg("From TCB=%p\n", rtcb);
+  sinfo("From TCB=%p\n", rtcb);
 
   /* Merge the g_pendingtasks list into the ready-to-run task list */
 

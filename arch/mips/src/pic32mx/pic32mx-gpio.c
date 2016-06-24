@@ -303,7 +303,7 @@ bool pic32mx_gpioread(uint16_t pinset)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_VERBOSE) && defined(CONFIG_DEBUG_GPIO)
+#ifdef CONFIG_DEBUG_GPIO_INFO
 void pic32mx_dumpgpio(uint32_t pinset, const char *msg)
 {
   unsigned int port = pic32mx_portno(pinset);
@@ -321,17 +321,17 @@ void pic32mx_dumpgpio(uint32_t pinset, const char *msg)
       /* The following requires exclusive access to the GPIO registers */
 
       sched_lock();
-      lldbg("IOPORT%c pinset: %04x base: %08x -- %s\n",
-            'A'+port, pinset, base, msg);
-      lldbg("   TRIS: %08x   PORT: %08x    LAT: %08x    ODC: %08x\n",
-            getreg32(base + PIC32MX_IOPORT_TRIS_OFFSET),
-            getreg32(base + PIC32MX_IOPORT_PORT_OFFSET),
-            getreg32(base + PIC32MX_IOPORT_LAT_OFFSET),
-            getreg32(base + PIC32MX_IOPORT_ODC_OFFSET));
-      lldbg("  CNCON: %08x   CNEN: %08x  CNPUE: %08x\n",
-            getreg32(PIC32MX_IOPORT_CNCON),
-            getreg32(PIC32MX_IOPORT_CNEN),
-            getreg32(PIC32MX_IOPORT_CNPUE));
+      gpioinfo("IOPORT%c pinset: %04x base: %08x -- %s\n",
+               'A'+port, pinset, base, msg);
+      gpioinfo("   TRIS: %08x   PORT: %08x    LAT: %08x    ODC: %08x\n",
+               getreg32(base + PIC32MX_IOPORT_TRIS_OFFSET),
+               getreg32(base + PIC32MX_IOPORT_PORT_OFFSET),
+               getreg32(base + PIC32MX_IOPORT_LAT_OFFSET),
+               getreg32(base + PIC32MX_IOPORT_ODC_OFFSET));
+      gpioinfo("  CNCON: %08x   CNEN: %08x  CNPUE: %08x\n",
+               getreg32(PIC32MX_IOPORT_CNCON),
+               getreg32(PIC32MX_IOPORT_CNEN),
+               getreg32(PIC32MX_IOPORT_CNPUE));
       sched_unlock();
     }
 }

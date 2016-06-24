@@ -396,7 +396,7 @@ static void adc_rxint(FAR struct adc_dev_s *dev, bool enable)
 
 static int adc_ioctl(FAR struct adc_dev_s *dev, int cmd, unsigned long arg)
 {
-  dbg("Fix me:Not Implemented\n");
+  _err("ERROR: Fix me; Not Implemented\n");
   return 0;
 }
 

@@ -351,13 +351,13 @@ int getsockname(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen)
 {
   FAR struct socket *psock = sockfd_socket(sockfd);
   int ret;
-  int err;
+  int errcode;
 
   /* Verify that the sockfd corresponds to valid, allocated socket */
 
   if (!psock || psock->s_crefs <= 0)
     {
-      err = EBADF;
+      errcode = EBADF;
       goto errout;
     }
 
@@ -365,10 +365,10 @@ int getsockname(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen)
    * system (?)
    */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!addr || !addrlen)
     {
-      err = EINVAL;
+      errcode = EINVAL;
       goto errout;
     }
 #endif
@@ -391,7 +391,7 @@ int getsockname(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen)
 
     case PF_PACKET:
     default:
-      err = EAFNOSUPPORT;
+      errcode = EAFNOSUPPORT;
       goto errout;
     }
 
@@ -399,14 +399,14 @@ int getsockname(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen)
 
   if (ret < 0)
     {
-      err = -ret;
+      errcode = -ret;
       goto errout;
     }
 
   return OK;
 
 errout:
-  set_errno(err);
+  set_errno(errcode);
   return ERROR;
 }
 

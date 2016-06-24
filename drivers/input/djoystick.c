@@ -352,7 +352,7 @@ static void djoy_sample(FAR struct djoy_upperhalf_s *priv)
                   fds->revents |= (fds->events & POLLIN);
                   if (fds->revents != 0)
                     {
-                      illvdbg("Report events: %02x\n", fds->revents);
+                      iinfo("Report events: %02x\n", fds->revents);
                       sem_post(fds->sem);
                     }
                 }
@@ -414,7 +414,7 @@ static int djoy_open(FAR struct file *filep)
   ret = djoy_takesem(&priv->du_exclsem);
   if (ret < 0)
     {
-      ivdbg("ERROR: djoy_takesem failed: %d\n", ret);
+      ierr("ERROR: djoy_takesem failed: %d\n", ret);
       return ret;
     }
 
@@ -423,7 +423,7 @@ static int djoy_open(FAR struct file *filep)
   opriv = (FAR struct djoy_open_s *)kmm_zalloc(sizeof(struct djoy_open_s));
   if (!opriv)
     {
-      ivdbg("ERROR: Failled to allocate open structure\n");
+      ierr("ERROR: Failled to allocate open structure\n");
       ret = -ENOMEM;
       goto errout_with_sem;
     }
@@ -502,7 +502,7 @@ static int djoy_close(FAR struct file *filep)
   ret = djoy_takesem(&priv->du_exclsem);
   if (ret < 0)
     {
-      ivdbg("ERROR: djoy_takesem failed: %d\n", ret);
+      ierr("ERROR: djoy_takesem failed: %d\n", ret);
       return ret;
     }
 
@@ -515,7 +515,7 @@ static int djoy_close(FAR struct file *filep)
   DEBUGASSERT(curr);
   if (!curr)
     {
-      ivdbg("ERROR: Failed to find open entry\n");
+      ierr("ERROR: Failed to find open entry\n");
       ret = -ENOENT;
       goto errout_with_exclsem;
     }
@@ -568,7 +568,7 @@ static ssize_t djoy_read(FAR struct file *filep, FAR char *buffer,
 
   if (len < sizeof(djoy_buttonset_t))
     {
-      ivdbg("ERROR: buffer too small: %lu\n", (unsigned long)len);
+      ierr("ERROR: buffer too small: %lu\n", (unsigned long)len);
       return -EINVAL;
     }
 
@@ -577,7 +577,7 @@ static ssize_t djoy_read(FAR struct file *filep, FAR char *buffer,
   ret = djoy_takesem(&priv->du_exclsem);
   if (ret < 0)
     {
-      ivdbg("ERROR: djoy_takesem failed: %d\n", ret);
+      ierr("ERROR: djoy_takesem failed: %d\n", ret);
       return ret;
     }
 
@@ -616,7 +616,7 @@ static int djoy_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   ret = djoy_takesem(&priv->du_exclsem);
   if (ret < 0)
     {
-      ivdbg("ERROR: djoy_takesem failed: %d\n", ret);
+      ierr("ERROR: djoy_takesem failed: %d\n", ret);
       return ret;
     }
 
@@ -716,7 +716,7 @@ static int djoy_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 #endif
 
     default:
-      ivdbg("ERROR: Unrecognized command: %ld\n", cmd);
+      ierr("ERROR: Unrecognized command: %ld\n", cmd);
       ret = -ENOTTY;
       break;
     }
@@ -750,7 +750,7 @@ static int djoy_poll(FAR struct file *filep, FAR struct pollfd *fds,
   ret = djoy_takesem(&priv->du_exclsem);
   if (ret < 0)
     {
-      ivdbg("ERROR: djoy_takesem failed: %d\n", ret);
+      ierr("ERROR: djoy_takesem failed: %d\n", ret);
       return ret;
     }
 
@@ -778,7 +778,7 @@ static int djoy_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
       if (i >= CONFIG_DJOYSTICK_NPOLLWAITERS)
         {
-          ivdbg("ERROR: Too man poll waiters\n");
+          ierr("ERROR: Too man poll waiters\n");
           fds->priv    = NULL;
           ret          = -EBUSY;
           goto errout_with_dusem;
@@ -790,10 +790,10 @@ static int djoy_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
       FAR struct pollfd **slot = (FAR struct pollfd **)fds->priv;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
       if (!slot)
         {
-          ivdbg("ERROR: Poll slot not found\n");
+          ierr("ERROR: Poll slot not found\n");
           ret = -EIO;
           goto errout_with_dusem;
         }
@@ -852,7 +852,7 @@ int djoy_register(FAR const char *devname,
 
   if (!priv)
     {
-      ivdbg("ERROR: Failed to allocate device structure\n");
+      ierr("ERROR: Failed to allocate device structure\n");
       return -ENOMEM;
     }
 
@@ -874,7 +874,7 @@ int djoy_register(FAR const char *devname,
   ret = register_driver(devname, &djoy_fops, 0666, priv);
   if (ret < 0)
     {
-      ivdbg("ERROR: register_driver failed: %d\n", ret);
+      ierr("ERROR: register_driver failed: %d\n", ret);
       sem_destroy(&priv->du_exclsem);
       kmm_free(priv);
     }

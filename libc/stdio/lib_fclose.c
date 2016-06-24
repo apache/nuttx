@@ -69,7 +69,7 @@
 
 int fclose(FAR FILE *stream)
 {
-  int err = EINVAL;
+  int errcode = EINVAL;
   int ret = ERROR;
   int status;
 
@@ -89,7 +89,7 @@ int fclose(FAR FILE *stream)
           if ((stream->fs_oflags & O_WROK) != 0)
             {
               ret = lib_fflush(stream, true);
-              err = errno;
+              errcode = errno;
             }
 
           /* Close the underlying file descriptor and save the return status */
@@ -103,7 +103,7 @@ int fclose(FAR FILE *stream)
           if (ret == OK)
             {
               ret = status;
-              err = errno;
+              errcode = errno;
             }
         }
 
@@ -143,7 +143,7 @@ int fclose(FAR FILE *stream)
 
   if (ret != OK)
     {
-      set_errno(err);
+      set_errno(errcode);
       return EOF;
     }
 

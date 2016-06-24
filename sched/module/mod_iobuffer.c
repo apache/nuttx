@@ -75,7 +75,7 @@ int mod_allocbuffer(FAR struct mod_loadinfo_s *loadinfo)
       loadinfo->iobuffer = (FAR uint8_t *)kmm_malloc(CONFIG_MODULE_BUFFERSIZE);
       if (!loadinfo->iobuffer)
         {
-          sdbg("Failed to allocate an I/O buffer\n");
+          serr("ERROR: Failed to allocate an I/O buffer\n");
           return -ENOMEM;
         }
 
@@ -111,7 +111,7 @@ int mod_reallocbuffer(FAR struct mod_loadinfo_s *loadinfo, size_t increment)
    buffer = kmm_realloc((FAR void *)loadinfo->iobuffer, newsize);
    if (!buffer)
     {
-      sdbg("Failed to reallocate the I/O buffer\n");
+      serr("ERROR: Failed to reallocate the I/O buffer\n");
       return -ENOMEM;
     }
 

@@ -320,14 +320,14 @@ static inline void up_configbaud(struct up_dev_s *priv)
   /* Test values calculated for every multiplier/divisor combination */
 
   uint32_t tdiv;
-  uint32_t terr;
+  uint32_t tmperr;
   int tmulval;
   int tdivaddval;
 
   /* Optimal multiplier/divider values */
 
   uint32_t div = 0;
-  uint32_t err = 100000;
+  uint32_t errval = 100000;
   int mulval = 1;
   int divaddval = 0;
 
@@ -350,13 +350,13 @@ static inline void up_configbaud(struct up_dev_s *priv)
 
   /* Try every valid multiplier, tmulval (or until a perfect match is found). */
 
-  for (tmulval = 1; tmulval <= 15 && err > 0; tmulval++)
+  for (tmulval = 1; tmulval <= 15 && errval > 0; tmulval++)
     {
       /* Try every valid pre-scale div, tdivaddval (or until a perfect match is
        * found).
        */
 
-      for (tdivaddval = 0; tdivaddval <= 15 && err > 0; tdivaddval++)
+      for (tdivaddval = 0; tdivaddval <= 15 && errval > 0; tdivaddval++)
         {
           /* Calculate the divisor with these fractional divider settings */
 
@@ -373,16 +373,16 @@ static inline void up_configbaud(struct up_dev_s *priv)
 
               if (actualbaud <= priv->baud)
                 {
-                  terr = priv->baud - actualbaud;
+                  tmperr = priv->baud - actualbaud;
                 }
               else
                 {
-                  terr = actualbaud - priv->baud;
+                  tmperr = actualbaud - priv->baud;
                 }
 
               /* Is this the smallest error we have encountered? */
 
-              if (terr < err)
+              if (tmperr < errval)
                 {
                   /* Yes, save these settings as the new, candidate optimal
                    * settings
@@ -391,7 +391,7 @@ static inline void up_configbaud(struct up_dev_s *priv)
                   mulval = tmulval;
                   divaddval = tdivaddval;
                   div = tdiv;
-                  err = terr;
+                  errval = tmperr;
                 }
             }
         }
@@ -648,7 +648,7 @@ static int up_interrupt(int irq, void *context)
             /* Read the modem status register (MSR) to clear */
 
             status = up_serialin(priv, UART_MSR_OFFSET);
-            vdbg("MSR: %02x\n", status);
+            _info("MSR: %02x\n", status);
             break;
           }
 
@@ -659,7 +659,7 @@ static int up_interrupt(int irq, void *context)
             /* Read the line status register (LSR) to clear */
 
             status = up_serialin(priv, UART_LSR_OFFSET);
-            vdbg("LSR: %02x\n", status);
+            _info("LSR: %02x\n", status);
             break;
           }
 
@@ -667,7 +667,7 @@ static int up_interrupt(int irq, void *context)
 
         default:
           {
-            dbg("Unexpected IIR: %02x\n", status);
+            _err("ERROR: Unexpected IIR: %02x\n", status);
             break;
           }
         }

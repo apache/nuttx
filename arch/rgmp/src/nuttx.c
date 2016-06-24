@@ -258,7 +258,7 @@ void up_block_task(struct tcb_s *tcb, tstate_t task_state)
   if ((tcb->task_state < FIRST_READY_TO_RUN_STATE) ||
       (tcb->task_state > LAST_READY_TO_RUN_STATE))
     {
-      warn("%s: task sched error\n", __func__);
+      _warn("%s: task sched error\n", __func__);
       return;
     }
   else
@@ -304,7 +304,7 @@ void up_block_task(struct tcb_s *tcb, tstate_t task_state)
 
           if (g_pendingtasks.head)
             {
-              warn("Disable preemption failed for task block itself\n");
+              _warn("Disable preemption failed for task block itself\n");
               sched_mergepending();
             }
 
@@ -353,7 +353,7 @@ void up_unblock_task(struct tcb_s *tcb)
   if ((tcb->task_state < FIRST_BLOCKED_STATE) ||
       (tcb->task_state > LAST_BLOCKED_STATE))
     {
-      warn("%s: task sched error\n", __func__);
+      _warn("%s: task sched error\n", __func__);
       return;
     }
   else
@@ -453,7 +453,7 @@ void up_reprioritize_rtr(struct tcb_s *tcb, uint8_t priority)
 #endif
       )
     {
-      warn("%s: task sched error\n", __func__);
+      _warn("%s: task sched error\n", __func__);
       return;
     }
   else
@@ -496,7 +496,7 @@ void up_reprioritize_rtr(struct tcb_s *tcb, uint8_t priority)
 
           if (g_pendingtasks.head)
             {
-              warn("Disable preemption failed for reprioritize task\n");
+              _warn("Disable preemption failed for reprioritize task\n");
               sched_mergepending();
             }
 

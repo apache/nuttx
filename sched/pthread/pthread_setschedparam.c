@@ -103,7 +103,7 @@ int pthread_setschedparam(pthread_t thread, int policy,
 {
   int ret;
 
-  sdbg("thread ID=%d policy=%d param=0x%p\n", thread, policy, param);
+  sinfo("thread ID=%d policy=%d param=0x%p\n", thread, policy, param);
 
   /* Set the errno to some non-zero value (failsafe) */
 

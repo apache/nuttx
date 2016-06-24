@@ -293,7 +293,7 @@ static int tiva_gpioporthandler(uint8_t port, void *context)
   uint8_t   pin;                                   /* Pin number */
 
   tiva_gpioirqclear(port, 0xff);
-  gpiollvdbg("mis=0b%08b\n", mis & 0xff);
+  gpioinfo("mis=0b%08b\n", mis & 0xff);
 
   /* Now process each IRQ pending in the MIS */
 
@@ -303,10 +303,10 @@ static int tiva_gpioporthandler(uint8_t port, void *context)
         {
           if (((mis >> pin) & 1) != 0)
             {
-              gpiollvdbg("port=%d pin=%d irq=%p index=%d\n",
-                         port, pin,
-                         g_gpioportirqvector[TIVA_GPIO_IRQ_IDX(port, pin)],
-                         TIVA_GPIO_IRQ_IDX(port, pin));
+              gpioinfo("port=%d pin=%d irq=%p index=%d\n",
+                       port, pin,
+                       g_gpioportirqvector[TIVA_GPIO_IRQ_IDX(port, pin)],
+                       TIVA_GPIO_IRQ_IDX(port, pin));
 
               g_gpioportirqvector[TIVA_GPIO_IRQ_IDX(port, pin)](irq, context);
             }
@@ -560,7 +560,7 @@ int tiva_gpioirqinitialize(void)
       g_gpioportirqvector[i] = irq_unexpected_isr;
     }
 
-  gpiovdbg("tiva_gpioirqinitialize isr=%d/%d irq_unexpected_isr=%p\n",
+  gpioinfo("tiva_gpioirqinitialize isr=%d/%d irq_unexpected_isr=%p\n",
            i, TIVA_NIRQ_PINS, irq_unexpected_isr);
 
   /* Then attach each GPIO interrupt handlers and enable corresponding GPIO
@@ -692,7 +692,7 @@ xcpt_t tiva_gpioirqattach(uint32_t pinset, xcpt_t isr)
        * to the unexpected interrupt handler.
        */
 
-      gpiovdbg("assign port=%d pin=%d function=%p to idx=%d\n",
+      gpioinfo("assign port=%d pin=%d function=%p to idx=%d\n",
                port, pinno, isr, TIVA_GPIO_IRQ_IDX(port, pinno));
 
       if (isr == NULL)
@@ -737,7 +737,7 @@ void tiva_gpioportirqattach(uint8_t port, xcpt_t isr)
        * to the unexpected interrupt handler.
        */
 
-      gpiovdbg("assign function=%p to port=%d\n", isr, port);
+      gpioinfo("assign function=%p to port=%d\n", isr, port);
 
       if (isr == NULL)
         {

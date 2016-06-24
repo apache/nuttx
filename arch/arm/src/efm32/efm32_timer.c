@@ -55,49 +55,17 @@
 #include "efm32_config.h"
 #include "efm32_gpio.h"
 
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
 /* Debug ********************************************************************/
-/* Non-standard debug that may be enabled just for testing TIMER */
 
-#ifndef CONFIG_DEBUG
-#  undef CONFIG_DEBUG_TIMER
-#endif
-
-#ifdef CONFIG_DEBUG_TIMER
-#  define efm32_timerdbg              dbg
-#  define efm32_timerlldbg            lldbg
-#  ifdef CONFIG_DEBUG_VERBOSE
-#    define efm32_timervdbg           vdbg
-#    define efm32_timerllvdbg         llvdbg
-#    define efm32_timer_dumpgpio(p,m) efm32_dumpgpio(p,m)
-#  else
-#    define efm32_timerlldbg(x...)
-#    define efm32_timerllvdbg(x...)
-#    define efm32_timer_dumpgpio(p,m)
-#  endif
+#ifdef CONFIG_DEBUG_TIMER_INFO
+#  define efm32_timer_dumpgpio(p,m) efm32_dumpgpio(p,m)
 #else
-#  define efm32_timerdbg(x...)
-#  define efm32_timerlldbg(x...)
-#  define efm32_timervdbg(x...)
-#  define efm32_timerllvdbg(x...)
 #  define efm32_timer_dumpgpio(p,m)
 #endif
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
- * Static Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
@@ -119,48 +87,43 @@
 
 void efm32_timer_dumpregs(uintptr_t base, FAR const char *msg)
 {
+#ifdef CONFIG_DEBUG_TIMER_INFO
   int i;
 
-  efm32_timervdbg("%s:\n", msg);
-  efm32_timervdbg("  CTRL: %04x STATUS: %04x   IEN: %04x     IF: %04x\n",
-                  getreg32(base + EFM32_TIMER_CTRL_OFFSET   ),
-                  getreg32(base + EFM32_TIMER_STATUS_OFFSET ),
-                  getreg32(base + EFM32_TIMER_IEN_OFFSET    ),
-                  getreg32(base + EFM32_TIMER_IF_OFFSET     )
-                 );
-  efm32_timervdbg("   TOP: %04x   TOPB: %04x   CNT: %04x  ROUTE: %04x\n",
-                  getreg32(base + EFM32_TIMER_TOP_OFFSET    ),
-                  getreg32(base + EFM32_TIMER_TOPB_OFFSET   ),
-                  getreg32(base + EFM32_TIMER_CNT_OFFSET    ),
-                  getreg32(base + EFM32_TIMER_ROUTE_OFFSET  )
-                 );
+  tmrinfo("%s:\n", msg);
+  tmrinfo("  CTRL: %04x STATUS: %04x   IEN: %04x     IF: %04x\n",
+          getreg32(base + EFM32_TIMER_CTRL_OFFSET   ),
+          getreg32(base + EFM32_TIMER_STATUS_OFFSET ),
+          getreg32(base + EFM32_TIMER_IEN_OFFSET    ),
+          getreg32(base + EFM32_TIMER_IF_OFFSET     ));
+  tmrinfo("   TOP: %04x   TOPB: %04x   CNT: %04x  ROUTE: %04x\n",
+          getreg32(base + EFM32_TIMER_TOP_OFFSET    ),
+          getreg32(base + EFM32_TIMER_TOPB_OFFSET   ),
+          getreg32(base + EFM32_TIMER_CNT_OFFSET    ),
+          getreg32(base + EFM32_TIMER_ROUTE_OFFSET  ));
 
   for (i = 0; i < EFM32_TIMER_NCC; i++)
     {
-#if defined(CONFIG_DEBUG_TIMER) && defined(CONFIG_DEBUG_VERBOSE)
       uintptr_t base_cc = base + EFM32_TIMER_CC_OFFSET(i);
-#endif
-      efm32_timervdbg("CC%d => CTRL: %04x    CCV:  %04x  CCVP: %04x CCVB: %04x\n",
-                      i
-                      getreg32(base_cc + EFM32_TIMER_CC_CTRL_OFFSET ),
-                      getreg32(base_cc + EFM32_TIMER_CC_CCV_OFFSET  ),
-                      getreg32(base_cc + EFM32_TIMER_CC_CCVP_OFFSET ),
-                      getreg32(base_cc + EFM32_TIMER_CC_CCVB_OFFSET )
-                     );
+
+      tmrinfo("CC%d => CTRL: %04x    CCV:  %04x  CCVP: %04x CCVB: %04x\n",
+              i
+              getreg32(base_cc + EFM32_TIMER_CC_CTRL_OFFSET ),
+              getreg32(base_cc + EFM32_TIMER_CC_CCV_OFFSET  ),
+              getreg32(base_cc + EFM32_TIMER_CC_CCVP_OFFSET ),
+              getreg32(base_cc + EFM32_TIMER_CC_CCVB_OFFSET ));
     }
 
-  efm32_timervdbg("DTCTRL: %04x DTTIME: %04x  DTFC: %04x DTOGEN:  %04x\n",
-                  getreg32(base + EFM32_TIMER_CTRL_OFFSET   ),
-                  getreg32(base + EFM32_TIMER_STATUS_OFFSET ),
-                  getreg32(base + EFM32_TIMER_IEN_OFFSET    ),
-                  getreg32(base + EFM32_TIMER_IF_OFFSET     )
-                 );
-  efm32_timervdbg("DTFAULT: %04x DTFAULTC: %04x  DTLOCK: %04x \n",
-                  getreg32(base + EFM32_TIMER_CTRL_OFFSET   ),
-                  getreg32(base + EFM32_TIMER_STATUS_OFFSET ),
-                  getreg32(base + EFM32_TIMER_IEN_OFFSET    ),
-                  getreg32(base + EFM32_TIMER_IF_OFFSET     )
-                 );
+  tmrinfo("DTCTRL: %04x DTTIME: %04x  DTFC: %04x DTOGEN:  %04x\n",
+          getreg32(base + EFM32_TIMER_CTRL_OFFSET   ),
+          getreg32(base + EFM32_TIMER_STATUS_OFFSET ),
+          getreg32(base + EFM32_TIMER_IEN_OFFSET    ),
+          getreg32(base + EFM32_TIMER_IF_OFFSET     ));
+  tmrinfo("DTFAULT: %04x DTFAULTC: %04x  DTLOCK: %04x \n",
+          getreg32(base + EFM32_TIMER_CTRL_OFFSET   ),
+          getreg32(base + EFM32_TIMER_STATUS_OFFSET ),
+          getreg32(base + EFM32_TIMER_IEN_OFFSET    ),
+#endif
 }
 
 /****************************************************************************
@@ -238,6 +201,7 @@ void efm32_timer_reset(uintptr_t base)
  *   prescaler setted, -1 in case of error.
  *
  ****************************************************************************/
+
 int efm32_timer_set_freq(uintptr_t base, uint32_t clk_freq, uint32_t freq)
 {
   int prescaler = 0;
@@ -262,8 +226,7 @@ int efm32_timer_set_freq(uintptr_t base, uint32_t clk_freq, uint32_t freq)
 
   reload = (clk_freq / prescaler / freq);
 
-  efm32_timerdbg("Source: %4xHz Div: %4x Reload: %4x \n",
-                 clk_freq, prescaler, reload);
+  tmrinfo("Source: %4xHz Div: %4x Reload: %4x \n", clk_freq, prescaler, reload);
 
   putreg32(reload, base + EFM32_TIMER_TOP_OFFSET);
 

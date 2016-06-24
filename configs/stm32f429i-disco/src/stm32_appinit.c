@@ -205,7 +205,7 @@ int board_app_initialize(uintptr_t arg)
       ret = mtd->ioctl(mtd, MTDIOC_GEOMETRY, (unsigned long)((uintptr_t)&geo));
       if (ret < 0)
         {
-          fdbg("ERROR: mtd->ioctl failed: %d\n", ret);
+          ferr("ERROR: mtd->ioctl failed: %d\n", ret);
           return ret;
         }
 
@@ -242,7 +242,7 @@ int board_app_initialize(uintptr_t arg)
 
             if (partszbytes < erasesize)
               {
-                fdbg("ERROR: Partition size is lesser than erasesize!\n");
+                ferr("ERROR: Partition size is lesser than erasesize!\n");
                 return -1;
               }
 
@@ -250,7 +250,7 @@ int board_app_initialize(uintptr_t arg)
 
             if ((partszbytes % erasesize) != 0)
               {
-                fdbg("ERROR: Partition size is not multiple of erasesize!\n");
+                ferr("ERROR: Partition size is not multiple of erasesize!\n");
                 return -1;
               }
 
@@ -284,7 +284,7 @@ int board_app_initialize(uintptr_t arg)
 
             if (mtd_part == NULL)
               {
-                dbg("Error: failed to create partition %s\n", partname);
+                ferr("ERROR: failed to create partition %s\n", partname);
                 return -1;
               }
 

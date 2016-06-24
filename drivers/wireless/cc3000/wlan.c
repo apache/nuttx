@@ -261,7 +261,7 @@ void SpiReceiveHandler(void *pvBuffer)
   STREAM_TO_UINT16((char *)tSLInformation.pucReceivedData,
                    HCI_EVENT_OPCODE_OFFSET, event_type);
 
-  nllvdbg("Evnt:0x%x\n", event_type);
+  ninfo("Evnt:0x%x\n", event_type);
   UNUSED(event_type);
 
   hci_unsolicited_event_handler();

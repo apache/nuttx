@@ -157,7 +157,7 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
           DEBUGASSERT(conn->dev != NULL);
           if (dev != conn->dev)
             {
-              nllvdbg("TCP: TCP_CLOSED pending\n");
+              ninfo("TCP: TCP_CLOSED pending\n");
             }
           else
 #endif
@@ -168,7 +168,7 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
 
               result = tcp_callback(dev, conn, TCP_TIMEDOUT);
 
-              nllvdbg("TCP state: TCP_CLOSED\n");
+              ninfo("TCP state: TCP_CLOSED\n");
             }
         }
       else
@@ -213,7 +213,7 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
               DEBUGASSERT(conn->dev != NULL);
               if (dev != conn->dev)
                 {
-                  nllvdbg("TCP: TCP_CLOSED pending\n");
+                  ninfo("TCP: TCP_CLOSED pending\n");
                   goto done;
                 }
 #endif
@@ -231,7 +231,7 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
                  )
                 {
                   conn->tcpstateflags = TCP_CLOSED;
-                  nllvdbg("TCP state: TCP_CLOSED\n");
+                  ninfo("TCP state: TCP_CLOSED\n");
 
                   /* We call tcp_callback() with TCP_TIMEDOUT to
                    * inform the application that the connection has

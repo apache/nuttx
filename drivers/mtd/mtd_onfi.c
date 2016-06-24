@@ -273,12 +273,12 @@ int onfi_read(uintptr_t cmdaddr, uintptr_t addraddr, uintptr_t dataaddr,
   uint8_t parmtab[ONFI_PARAM_TABLE_SIZE];
   int i;
 
-  fvdbg("cmdaddr=%08x addraddr=%08x dataaddr=%08x\n",
+  finfo("cmdaddr=%08x addraddr=%08x dataaddr=%08x\n",
         (int)cmdaddr, (int)addraddr, (int)dataaddr);
 
   if (!onfi_compatible(cmdaddr, addraddr, dataaddr))
     {
-      fdbg("ERROR: No ONFI compatible device detected\n");
+      ferr("ERROR: No ONFI compatible device detected\n");
       return -ENODEV;
     }
 
@@ -316,7 +316,7 @@ int onfi_read(uintptr_t cmdaddr, uintptr_t addraddr, uintptr_t dataaddr,
 
   if (i == ONFI_PARAM_TABLE_SIZE)
     {
-      fdbg("ERROR: Failed to read ONFI parameter table\n");
+      ferr("ERROR: Failed to read ONFI parameter table\n");
       return -EIO;
    }
 
@@ -356,16 +356,16 @@ int onfi_read(uintptr_t cmdaddr, uintptr_t addraddr, uintptr_t dataaddr,
 
   onfi->model = *(FAR uint8_t *)(parmtab + 49);
 
-  fvdbg("Returning:\n");
-  fvdbg("  manufacturer:  0x%02x\n", onfi->manufacturer);
-  fvdbg("  buswidth:      %d\n",     onfi->buswidth);
-  fvdbg("  luns:          %d\n",     onfi->luns);
-  fvdbg("  eccsize:       %d\n",     onfi->eccsize);
-  fvdbg("  model:         0x%02s\n", onfi->model);
-  fvdbg("  sparesize:     %d\n",     onfi->sparesize);
-  fvdbg("  pagesperblock: %d\n",     onfi->pagesperblock);
-  fvdbg("  blocksperlun:  %d\n",     onfi->blocksperlun);
-  fvdbg("  pagesize:      %d\n",     onfi->pagesize);
+  finfo("Returning:\n");
+  finfo("  manufacturer:  0x%02x\n", onfi->manufacturer);
+  finfo("  buswidth:      %d\n",     onfi->buswidth);
+  finfo("  luns:          %d\n",     onfi->luns);
+  finfo("  eccsize:       %d\n",     onfi->eccsize);
+  finfo("  model:         0x%02s\n", onfi->model);
+  finfo("  sparesize:     %d\n",     onfi->sparesize);
+  finfo("  pagesperblock: %d\n",     onfi->pagesperblock);
+  finfo("  blocksperlun:  %d\n",     onfi->blocksperlun);
+  finfo("  pagesize:      %d\n",     onfi->pagesize);
   return OK;
 }
 
@@ -455,7 +455,7 @@ bool onfi_ebidetect(uintptr_t cmdaddr, uintptr_t addraddr,
   uint8_t ids[4];
   uint8_t i;
 
-  fvdbg("cmdaddr=%08x addraddr=%08x dataaddr=%08x\n",
+  finfo("cmdaddr=%08x addraddr=%08x dataaddr=%08x\n",
         (int)cmdaddr, (int)addraddr, (int)dataaddr);
 
   /* Send Reset command */

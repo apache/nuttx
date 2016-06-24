@@ -332,11 +332,11 @@ config PIC32MZ_SPI_ENHBUF
 
 config PIC32MZ_SPI_REGDEBUG
 	bool "SPI Register level debug"
-	depends on DEBUG
+	depends on DEBUG_INFO
 	default n
 	---help---
 		Output detailed register-level SPI device debug information.
-		Requires also DEBUG.
+		Requires also CONFIG_DEBUG_FEATURES.
 
 endmenu # SPI Driver Configuration
 
@@ -400,9 +400,9 @@ config NET_WOL
 config NET_REGDEBUG
 	bool "Register level debug"
 	default n
-	depends on PIC32MZ_ETHERNET && DEBUG
+	depends on PIC32MZ_ETHERNET && DEBUG_NET_INFO
 	---help---
-		Enabled low level register debug.  Also needs DEBUG.
+		Enabled low level register debug.  Also needs CONFIG_DEBUG_FEATURES.
 
 config NET_HASH
 	bool "Hash"
@@ -425,8 +425,8 @@ menu "Device Configuration 0 (DEVCFG0)"
 
 config PIC32MZ_DEBUGGER_ENABLE
 	bool "Background debugger enable"
-	default y if DEBUG
-	default n if !DEBUG
+	default y if DEBUG_FEATURES
+	default n if !DEBUG_FEATURES
 	---help---
 		Background Debugger Enable
 
@@ -444,8 +444,8 @@ config PIC32MZ_ICESEL_CH2
 
 config PIC32MZ_TRACE_ENABLE
 	bool "Trace enable"
-	default y if DEBUG
-	default n if !DEBUG
+	default y if DEBUG_FEATURES
+	default n if !DEBUG_FEATURES
 	---help---
 		Trace Enable
 

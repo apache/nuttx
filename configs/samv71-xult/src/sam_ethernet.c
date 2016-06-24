@@ -42,8 +42,8 @@
 /* Force verbose debug on in this file only to support unit-level testing. */
 
 #ifdef CONFIG_NETDEV_PHY_DEBUG
-#  undef  CONFIG_DEBUG_VERBOSE
-#  define CONFIG_DEBUG_VERBOSE 1
+#  undef  CONFIG_DEBUG_INFO
+#  define CONFIG_DEBUG_INFO 1
 #  undef  CONFIG_DEBUG_NET
 #  define CONFIG_DEBUG_NET 1
 #endif
@@ -80,11 +80,13 @@
  */
 
 #ifdef CONFIG_NETDEV_PHY_DEBUG
-#  define phydbg    dbg
-#  define phylldbg  lldbg
+#  define phyerr    _err
+#  define phywarn   _warn
+#  define phyinfo   _info
 #else
-#  define phydbg(x...)
-#  define phylldbg(x...)
+#  define phyerr(x...)
+#  define phywarn(x...)
+#  define phyinfo(x...)
 #endif
 
 /************************************************************************************
@@ -106,7 +108,7 @@ static xcpt_t g_emac0_handler;
 #ifdef CONFIG_SAMV7_GPIOA_IRQ
 static void sam_emac0_phy_enable(bool enable)
 {
-  phydbg("IRQ%d: enable=%d\n", IRQ_EMAC0_INT, enable);
+  phyinfo("IRQ%d: enable=%d\n", IRQ_EMAC0_INT, enable);
   if (enable)
     {
       sam_gpioirqenable(IRQ_EMAC0_INT);
@@ -134,7 +136,7 @@ void weak_function sam_netinitialize(void)
 {
   /* Configure the PHY interrupt GPIO */
 
-  phydbg("Configuring %08x\n", GPIO_EMAC0_INT);
+  phyinfo("Configuring %08x\n", GPIO_EMAC0_INT);
   sam_configgpio(GPIO_EMAC0_INT);
 
   /* Configure the PHY SIGDET input */
@@ -169,7 +171,7 @@ int sam_emac0_setmac(void)
   i2c = sam_i2cbus_initialize(0);
   if (!i2c)
     {
-      ndbg("ERROR: Failed to initialize TWI0\n");
+      nerr("ERROR: Failed to initialize TWI0\n");
       return -ENODEV;
     }
 
@@ -178,7 +180,7 @@ int sam_emac0_setmac(void)
   at24 = at24c_initialize(i2c);
   if (!at24)
     {
-      ndbg("ERROR: Failed to initialize the AT24 driver\n");
+      nerr("ERROR: Failed to initialize the AT24 driver\n");
       (void)sam_i2cbus_uninitialize(i2c);
       return -ENODEV;
     }
@@ -188,7 +190,7 @@ int sam_emac0_setmac(void)
   ret = at24->ioctl(at24, MTDIOC_EXTENDED, 1);
   if (ret < 0)
     {
-      ndbg("ERROR: AT24 ioctl(MTDIOC_EXTENDED) failed: %d\n", ret);
+      nerr("ERROR: AT24 ioctl(MTDIOC_EXTENDED) failed: %d\n", ret);
       (void)sam_i2cbus_uninitialize(i2c);
       return ret;
     }
@@ -198,7 +200,7 @@ int sam_emac0_setmac(void)
   nread = at24->read(at24, AT24XX_MACADDR_OFFSET, 6, mac);
   if (nread < 6)
     {
-      ndbg("ERROR: AT24 read(AT24XX_MACADDR_OFFSET) failed: ld\n", (long)nread);
+      nerr("ERROR: AT24 read(AT24XX_MACADDR_OFFSET) failed: ld\n", (long)nread);
       (void)sam_i2cbus_uninitialize(i2c);
       return (int)nread;
     }
@@ -208,7 +210,7 @@ int sam_emac0_setmac(void)
   ret = at24->ioctl(at24, MTDIOC_EXTENDED, 0);
   if (ret < 0)
     {
-      ndbg("ERROR: AT24 ioctl(MTDIOC_EXTENDED) failed: %d\n", ret);
+      nerr("ERROR: AT24 ioctl(MTDIOC_EXTENDED) failed: %d\n", ret);
     }
 
   /* Release the I2C instance.
@@ -218,10 +220,10 @@ int sam_emac0_setmac(void)
   ret = sam_i2cbus_uninitialize(i2c);
   if (ret < 0)
     {
-      ndbg("ERROR: Failed to release the I2C interface: %d\n", ret);
+      nerr("ERROR: Failed to release the I2C interface: %d\n", ret);
     }
 
-  nvdbg("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
+  ninfo("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
         mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 
   /* Now configure the EMAC driver to use this MAC address */
@@ -229,7 +231,7 @@ int sam_emac0_setmac(void)
   ret = sam_emac_setmacaddr(EMAC0_INTF, mac);
   if (ret < 0)
     {
-      ndbg("ERROR: Failed to set MAC address: %d\n", ret);
+      nerr("ERROR: Failed to set MAC address: %d\n", ret);
     }
 
   return ret;
@@ -313,12 +315,13 @@ xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler, phy_enable_t *enable)
 
   DEBUGASSERT(intf);
 
-  nvdbg("%s: handler=%p\n", intf, handler);
-  phydbg("EMAC0: devname=%s\n", SAMV7_EMAC0_DEVNAME);
+  ninfo("%s: handler=%p\n", intf, handler);
+  phyinfo("EMAC0: devname=%s\n", SAMV7_EMAC0_DEVNAME);
 
   if (strcmp(intf, SAMV7_EMAC0_DEVNAME) == 0)
     {
-      phydbg("Select EMAC0\n");
+      phyinfo("Select EMAC0\n");
+
       phandler = &g_emac0_handler;
       pinset   = GPIO_EMAC0_INT;
       irq      = IRQ_EMAC0_INT;
@@ -326,7 +329,7 @@ xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler, phy_enable_t *enable)
     }
   else
     {
-      ndbg("Unsupported interface: %s\n", intf);
+      nerr("ERROR: Unsupported interface: %s\n", intf);
       return NULL;
     }
 
@@ -345,15 +348,15 @@ xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler, phy_enable_t *enable)
 
   if (handler)
     {
-      phydbg("Configure pin: %08x\n", pinset);
+      phyinfo("Configure pin: %08x\n", pinset);
       sam_gpioirq(pinset);
 
-      phydbg("Attach IRQ%d\n", irq);
+      phyinfo("Attach IRQ%d\n", irq);
       (void)irq_attach(irq, handler);
     }
   else
     {
-      phydbg("Detach IRQ%d\n", irq);
+      phyinfo("Detach IRQ%d\n", irq);
       (void)irq_detach(irq);
       enabler = NULL;
     }

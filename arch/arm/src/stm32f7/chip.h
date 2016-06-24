@@ -48,6 +48,7 @@
 
 #include <arch/irq.h>
 #include <arch/stm32f7/chip.h>
+#include "chip/stm32_pinmap.h"
 #include "chip/stm32_memorymap.h"
 
 /* If the common ARMv7-M vector handling logic is used, then it expects the

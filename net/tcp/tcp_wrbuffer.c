@@ -41,7 +41,7 @@
 #include <nuttx/net/netconfig.h>
 #if defined(CONFIG_NET) && defined(CONFIG_NET_TCP) && defined(CONFIG_NET_TCP_WRITE_BUFFERS)
 
-#if defined(CONFIG_DEBUG) && defined(CONFIG_NET_TCP_WRBUFFER_DEBUG)
+#if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_NET_TCP_WRBUFFER_DEBUG)
 /* Force debug output (from this file only) */
 
 #  undef  CONFIG_DEBUG_NET
@@ -160,7 +160,7 @@ FAR struct tcp_wrbuffer_s *tcp_wrbuffer_alloc(void)
   wrb->wb_iob = iob_alloc(false);
   if (!wrb->wb_iob)
     {
-      ndbg("ERROR: Failed to allocate I/O buffer\n");
+      nerr("ERROR: Failed to allocate I/O buffer\n");
       tcp_wrbuffer_release(wrb);
       return NULL;
     }

@@ -216,8 +216,8 @@ int spi_xfer(uint8_t dev_idx, uint8_t bitlen, const void *dout, void *din)
       tmp <<= (32-bitlen);    /* align to MSB */
     }
 
-  dbg("spi_xfer(dev_idx=%u, bitlen=%u, data_out=0x%08x): ",
-      dev_idx, bitlen, tmp);
+  spiinfo("spi_xfer(dev_idx=%u, bitlen=%u, data_out=0x%08x): ",
+          dev_idx, bitlen, tmp);
 
   /* fill transmit registers */
 
@@ -236,14 +236,14 @@ int spi_xfer(uint8_t dev_idx, uint8_t bitlen, const void *dout, void *din)
     }
 
   putreg16(reg_ctrl, SPI_REG(REG_CTRL));
-  dbg("reg_ctrl=0x%04x ", reg_ctrl);
+  spiinfo("reg_ctrl=0x%04x ", reg_ctrl);
 
   /* wait until the transfer is complete */
 
   while (1)
     {
       reg_status = getreg16(SPI_REG(REG_STATUS));
-      dbg("status=0x%04x ", reg_status);
+      spiinfo("status=0x%04x ", reg_status);
       if (din && (reg_status & SPI_STATUS_RE))
         {
           break;
@@ -262,7 +262,7 @@ int spi_xfer(uint8_t dev_idx, uint8_t bitlen, const void *dout, void *din)
     {
       tmp = getreg16(SPI_REG(REG_RX_MSB)) << 16;
       tmp |= getreg16(SPI_REG(REG_RX_LSB));
-      dbg("data_in=0x%08x ", tmp);
+      spiinfo("data_in=0x%08x ", tmp);
 
       if (bitlen <= 8)
         {
@@ -278,7 +278,7 @@ int spi_xfer(uint8_t dev_idx, uint8_t bitlen, const void *dout, void *din)
         }
     }
 
-  dbg("\n");
+  spiinfo("\n");
 
   return 0;
 }

@@ -95,7 +95,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
   irqstate_t flags;
   uint32_t status;
 
-  sdbg("tcb=0x%p sigdeliver=0x%p\n", tcb, sigdeliver);
+  sinfo("tcb=0x%p sigdeliver=0x%p\n", tcb, sigdeliver);
 
   /* Make sure that interrupts are disabled */
 
@@ -109,7 +109,8 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
        * being delivered to the currently executing task.
        */
 
-      sdbg("rtcb=0x%p g_current_regs=0x%p\n", this_task(), g_current_regs);
+      sinfo("rtcb=0x%p g_current_regs=0x%p\n",
+            this_task(), g_current_regs);
 
       if (tcb == this_task())
         {
@@ -163,7 +164,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 
               up_savestate(tcb->xcp.regs);
 
-              svdbg("PC/STATUS Saved: %08x/%08x New: %08x/%08x\n",
+              sinfo("PC/STATUS Saved: %08x/%08x New: %08x/%08x\n",
                     tcb->xcp.saved_epc, tcb->xcp.saved_status,
                     g_current_regs[REG_EPC], g_current_regs[REG_STATUS]);
             }
@@ -196,7 +197,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
           status                    |= CP0_STATUS_IM_SWINTS;
           tcb->xcp.regs[REG_STATUS]  = status;
 
-          svdbg("PC/STATUS Saved: %08x/%08x New: %08x/%08x\n",
+          sinfo("PC/STATUS Saved: %08x/%08x New: %08x/%08x\n",
                 tcb->xcp.saved_epc, tcb->xcp.saved_status,
                 tcb->xcp.regs[REG_EPC], tcb->xcp.regs[REG_STATUS]);
         }

@@ -138,7 +138,7 @@ int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
 int up_relocateadd(FAR const Elf32_Rela *rel, FAR const Elf32_Sym *sym,
                    uintptr_t addr)
 {
-  bdbg("Not supported\n");
+  berr("ERROR: Not supported\n");
   return -ENOSYS;
 }
 

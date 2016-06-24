@@ -130,7 +130,7 @@ config VNCSERVER_INBUFFER_SIZE
 config VNCSERVER_DEBUG
 	bool "VNC Server debug"
 	default n
-	depends on DEBUG && !DEBUG_GRAPHICS
+	depends on DEBUG_FEATURES && !DEBUG_GRAPHICS
 	---help---
 		Normally VNC debug output is selected with DEBUG_GRAPHICS.  The VNC
 		server server suupport this special option to enable GRAPHICS debug

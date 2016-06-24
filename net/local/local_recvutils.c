@@ -93,12 +93,12 @@ int local_fifo_read(int fd, FAR uint8_t *buf, size_t *len)
 
           if (errcode != EINTR)
             {
-              ndbg("ERROR: Read failed: %d\n", errcode);
+              nerr("ERROR: Read failed: %d\n", errcode);
               ret = -errcode;
               goto errout;
             }
 
-          nvdbg("Ignoring signal\n");
+          ninfo("Ignoring signal\n");
         }
       else if (nread == 0)
         {
@@ -160,7 +160,7 @@ int local_sync(int fd)
           ret     = local_fifo_read(fd, &sync, &readlen);
           if (ret < 0)
             {
-              ndbg("ERROR: Failed to read sync bytes: %d\n", ret);
+              nerr("ERROR: Failed to read sync bytes: %d\n", ret);
               return ret;
             }
         }
@@ -174,7 +174,7 @@ int local_sync(int fd)
           ret     = local_fifo_read(fd, &sync, &readlen);
           if (ret < 0)
             {
-              ndbg("ERROR: Failed to read sync bytes: %d\n", ret);
+              nerr("ERROR: Failed to read sync bytes: %d\n", ret);
               return ret;
             }
         }

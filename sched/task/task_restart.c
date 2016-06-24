@@ -83,7 +83,7 @@ int task_restart(pid_t pid)
   FAR struct task_tcb_s *tcb;
   FAR dq_queue_t *tasklist;
   irqstate_t flags;
-  int err;
+  int errcode;
   int status;
 
   /* Make sure this task does not become ready-to-run while we are futzing
@@ -99,7 +99,7 @@ int task_restart(pid_t pid)
     {
       /* Not implemented */
 
-      err = ENOSYS;
+      errcode = ENOSYS;
       goto errout_with_lock;
     }
 
@@ -115,7 +115,7 @@ int task_restart(pid_t pid)
     {
       /* There is no TCB with this pid or, if there is, it is not a task. */
 
-      err = ESRCH;
+      errcode = ESRCH;
       goto errout_with_lock;
     }
 
@@ -133,7 +133,7 @@ int task_restart(pid_t pid)
     {
       /* Not implemented */
 
-      err = ENOSYS;
+      errcode = ENOSYS;
       goto errout_with_lock;
     }
 #endif /* CONFIG_SMP */
@@ -197,7 +197,7 @@ int task_restart(pid_t pid)
   if (status != OK)
     {
       (void)task_delete(pid);
-      err = -status;
+      errcode = -status;
       goto errout_with_lock;
     }
 
@@ -205,7 +205,7 @@ int task_restart(pid_t pid)
   return OK;
 
 errout_with_lock:
-  set_errno(err);
+  set_errno(errcode);
   sched_unlock();
   return ERROR;
 }

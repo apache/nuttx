@@ -88,7 +88,7 @@ static inline void up_gmac_initialize(void)
   ret = sam_gmac_initialize();
   if (ret < 0)
     {
-      nlldbg("ERROR: sam_gmac_initialize failed: %d\n", ret);
+      nerr("ERROR: sam_gmac_initialize failed: %d\n", ret);
     }
 }
 #else
@@ -119,7 +119,7 @@ static inline void up_emac_initialize(void)
   ret = sam_emac_initialize();
   if (ret < 0)
     {
-      nlldbg("ERROR: up_emac_initialize failed: %d\n", ret);
+      nerr("ERROR: up_emac_initialize failed: %d\n", ret);
     }
 }
 #elif defined(CONFIG_SAMA5_EMACB)
@@ -133,7 +133,7 @@ static inline void up_emac_initialize(void)
   ret = sam_emac_initialize(EMAC0_INTF);
   if (ret < 0)
     {
-      nlldbg("ERROR: up_emac_initialize(EMAC0) failed: %d\n", ret);
+      nerr("ERROR: up_emac_initialize(EMAC0) failed: %d\n", ret);
     }
 #endif
 
@@ -143,7 +143,7 @@ static inline void up_emac_initialize(void)
   ret = sam_emac_initialize(EMAC1_INTF);
   if (ret < 0)
     {
-      nlldbg("ERROR: up_emac_initialize(EMAC1) failed: %d\n", ret);
+      nerr("ERROR: up_emac_initialize(EMAC1) failed: %d\n", ret);
     }
 #endif
 }

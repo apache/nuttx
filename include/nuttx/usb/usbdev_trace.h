@@ -480,7 +480,7 @@ EXTERN const struct trace_msg_t g_usb_trace_strings_intdecode[];
  *
  ****************************************************************************/
 
-#if defined(CONFIG_USBDEV_TRACE) || (defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_USB))
+#if defined(CONFIG_USBDEV_TRACE) || (defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_DEBUG_USB))
 usbtrace_idset_t usbtrace_enable(usbtrace_idset_t idset);
 #else
 #  define usbtrace_enable(idset)
@@ -497,7 +497,7 @@ usbtrace_idset_t usbtrace_enable(usbtrace_idset_t idset);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_USBDEV_TRACE) || (defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_USB))
+#if defined(CONFIG_USBDEV_TRACE) || (defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_DEBUG_USB))
 void usbtrace(uint16_t event, uint16_t value);
 #else
 #  define usbtrace(event, value)

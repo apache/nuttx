@@ -105,7 +105,7 @@ int imx_uart_configure(uint32_t base, FAR const struct uart_config_s *config);
  *
  ************************************************************************************/
 
-#if defined(IMX_HAVE_UART) && defined(CONFIG_DEBUG)
+#if defined(IMX_HAVE_UART) && defined(CONFIG_DEBUG_FEATURES)
 void imx_lowputc(int ch);
 #else
 #  define imx_lowputc(ch)

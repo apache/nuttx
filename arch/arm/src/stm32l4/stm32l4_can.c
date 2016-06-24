@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32l4/stm32l4_can.c
  *
  *   Copyright (C) 2011, 2016 Gregory Nutt. All rights reserved.
@@ -35,7 +35,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 /****************************************************************************
  * Included Files
@@ -82,23 +82,8 @@
 
 #define CAN_BIT_QUANTA (CONFIG_CAN_TSEG1 + CONFIG_CAN_TSEG2 + 1)
 
-/* Debug ********************************************************************/
-/* Non-standard debug that may be enabled just for testing CAN */
-
-#ifdef CONFIG_DEBUG_CAN
-#  define candbg    dbg
-#  define canvdbg   vdbg
-#  define canlldbg  lldbg
-#  define canllvdbg llvdbg
-#else
-#  define candbg(x...)
-#  define canvdbg(x...)
-#  define canlldbg(x...)
-#  define canllvdbg(x...)
-#endif
-
-#if !defined(CONFIG_DEBUG) || !defined(CONFIG_DEBUG_CAN)
-#  undef CONFIG_CAN_REGDEBUG
+#ifndef CONFIG_DEBUG_CAN_INFO
+#  undef CONFIG_STM32L4_CAN_REGDEBUG
 #endif
 
 /****************************************************************************
@@ -122,43 +107,66 @@ struct stm32l4_can_s
 
 /* CAN Register access */
 
-static uint32_t can_getreg(struct stm32l4_can_s *priv, int offset);
-static uint32_t can_getfreg(struct stm32l4_can_s *priv, int offset);
-static void can_putreg(struct stm32l4_can_s *priv, int offset, uint32_t value);
-static void can_putfreg(struct stm32l4_can_s *priv, int offset, uint32_t value);
-#ifdef CONFIG_CAN_REGDEBUG
-static void can_dumpctrlregs(struct stm32l4_can_s *priv, FAR const char *msg);
-static void can_dumpmbregs(struct stm32l4_can_s *priv, FAR const char *msg);
-static void can_dumpfiltregs(struct stm32l4_can_s *priv, FAR const char *msg);
+static uint32_t stm32l4can_getreg(FAR struct stm32l4_can_s *priv,
+              int offset);
+static uint32_t stm32l4can_getfreg(FAR struct stm32l4_can_s *priv,
+              int offset);
+static void stm32l4can_putreg(FAR struct stm32l4_can_s *priv, int offset,
+              uint32_t value);
+static void stm32l4can_putfreg(FAR struct stm32l4_can_s *priv, int offset,
+              uint32_t value);
+#ifdef CONFIG_STM32L4_CAN_REGDEBUG
+static void stm32l4can_dumpctrlregs(FAR struct stm32l4_can_s *priv,
+              FAR const char *msg);
+static void stm32l4can_dumpmbregs(FAR struct stm32l4_can_s *priv,
+              FAR const char *msg);
+static void stm32l4can_dumpfiltregs(FAR struct stm32l4_can_s *priv,
+              FAR const char *msg);
 #else
-#  define can_dumpctrlregs(priv,msg)
-#  define can_dumpmbregs(priv,msg)
-#  define can_dumpfiltregs(priv,msg)
+#  define stm32l4can_dumpctrlregs(priv,msg)
+#  define stm32l4can_dumpmbregs(priv,msg)
+#  define stm32l4can_dumpfiltregs(priv,msg)
 #endif
+
+/* Filtering (todo) */
+
+static int  stm32l4can_addextfilter(FAR struct stm32l4_can_s *priv,
+              FAR struct canioc_extfilter_s *arg);
+static int  stm32l4can_delextfilter(FAR struct stm32l4_can_s *priv,
+              int arg);
+static int  stm32l4can_addstdfilter(FAR struct stm32l4_can_s *priv,
+              FAR struct canioc_stdfilter_s *arg);
+static int  stm32l4can_delstdfilter(FAR struct stm32l4_can_s *priv,
+              int arg);
 
 /* CAN driver methods */
 
-static void can_reset(FAR struct can_dev_s *dev);
-static int  can_setup(FAR struct can_dev_s *dev);
-static void can_shutdown(FAR struct can_dev_s *dev);
-static void can_rxint(FAR struct can_dev_s *dev, bool enable);
-static void can_txint(FAR struct can_dev_s *dev, bool enable);
-static int  can_ioctl(FAR struct can_dev_s *dev, int cmd, unsigned long arg);
-static int  can_remoterequest(FAR struct can_dev_s *dev, uint16_t id);
-static int  can_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg);
-static bool can_txready(FAR struct can_dev_s *dev);
-static bool can_txempty(FAR struct can_dev_s *dev);
+static void stm32l4can_reset(FAR struct can_dev_s *dev);
+static int  stm32l4can_setup(FAR struct can_dev_s *dev);
+static void stm32l4can_shutdown(FAR struct can_dev_s *dev);
+static void stm32l4can_rxint(FAR struct can_dev_s *dev, bool enable);
+static void stm32l4can_txint(FAR struct can_dev_s *dev, bool enable);
+static int  stm32l4can_ioctl(FAR struct can_dev_s *dev, int cmd,
+              unsigned long arg);
+static int  stm32l4can_remoterequest(FAR struct can_dev_s *dev,
+              uint16_t id);
+static int  stm32l4can_send(FAR struct can_dev_s *dev,
+              FAR struct can_msg_s *msg);
+static bool stm32l4can_txready(FAR struct can_dev_s *dev);
+static bool stm32l4can_txempty(FAR struct can_dev_s *dev);
 
 /* CAN interrupt handling */
 
-static int  can_rx0interrupt(int irq, void *context);
-static int  can_txinterrupt(int irq, void *context);
+static int  stm32l4can_rx0interrupt(int irq, FAR void *context);
+static int  stm32l4can_txinterrupt(int irq, FAR void *context);
 
 /* Initialization */
 
-static int  can_bittiming(struct stm32l4_can_s *priv);
-static int  can_cellinit(struct stm32l4_can_s *priv);
-static int  can_filterinit(struct stm32l4_can_s *priv);
+static int  stm32l4can_enterinitmode(FAR struct stm32l4_can_s *priv);
+static int  stm32l4can_exitinitmode(FAR struct stm32l4_can_s *priv);
+static int  stm32l4can_bittiming(FAR struct stm32l4_can_s *priv);
+static int  stm32l4can_cellinit(FAR struct stm32l4_can_s *priv);
+static int  stm32l4can_filterinit(FAR struct stm32l4_can_s *priv);
 
 /****************************************************************************
  * Private Data
@@ -166,16 +174,16 @@ static int  can_filterinit(struct stm32l4_can_s *priv);
 
 static const struct can_ops_s g_canops =
 {
-  .co_reset         = can_reset,
-  .co_setup         = can_setup,
-  .co_shutdown      = can_shutdown,
-  .co_rxint         = can_rxint,
-  .co_txint         = can_txint,
-  .co_ioctl         = can_ioctl,
-  .co_remoterequest = can_remoterequest,
-  .co_send          = can_send,
-  .co_txready       = can_txready,
-  .co_txempty       = can_txempty,
+  .co_reset         = stm32l4can_reset,
+  .co_setup         = stm32l4can_setup,
+  .co_shutdown      = stm32l4can_shutdown,
+  .co_rxint         = stm32l4can_rxint,
+  .co_txint         = stm32l4can_txint,
+  .co_ioctl         = stm32l4can_ioctl,
+  .co_remoterequest = stm32l4can_remoterequest,
+  .co_send          = stm32l4can_send,
+  .co_txready       = stm32l4can_txready,
+  .co_txempty       = stm32l4can_txempty,
 };
 
 #ifdef CONFIG_STM32L4_CAN1
@@ -202,8 +210,8 @@ static struct can_dev_s g_can1dev =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: can_getreg
- * Name: can_getfreg
+ * Name: stm32l4can_getreg
+ * Name: stm32l4can_getfreg
  *
  * Description:
  *   Read the value of a CAN register or filter block register.
@@ -216,8 +224,8 @@ static struct can_dev_s g_can1dev =
  *
  ****************************************************************************/
 
-#ifdef CONFIG_CAN_REGDEBUG
-static uint32_t can_vgetreg(uint32_t addr)
+#ifdef CONFIG_STM32L4_CAN_REGDEBUG
+static uint32_t stm32l4can_vgetreg(uint32_t addr)
 {
   static uint32_t prevaddr = 0;
   static uint32_t preval   = 0;
@@ -237,7 +245,7 @@ static uint32_t can_vgetreg(uint32_t addr)
         {
           if (count == 4)
             {
-              lldbg("...\n");
+              caninfo("...\n");
             }
 
           return val;
@@ -254,7 +262,7 @@ static uint32_t can_vgetreg(uint32_t addr)
         {
           /* Yes.. then show how many times the value repeated */
 
-          lldbg("[repeats %d more times]\n", count-3);
+          caninfo("[repeats %d more times]\n", count-3);
         }
 
       /* Save the new address, value, and count */
@@ -266,27 +274,27 @@ static uint32_t can_vgetreg(uint32_t addr)
 
   /* Show the register value read */
 
-  lldbg("%08x->%08x\n", addr, val);
+  caninfo("%08x->%08x\n", addr, val);
   return val;
 }
 
-static uint32_t can_getreg(struct stm32l4_can_s *priv, int offset)
+static uint32_t stm32l4can_getreg(FAR struct stm32l4_can_s *priv, int offset)
 {
-  return can_vgetreg(priv->base + offset);
+  return stm32l4can_vgetreg(priv->base + offset);
 }
 
-static uint32_t can_getfreg(struct stm32l4_can_s *priv, int offset)
+static uint32_t stm32l4can_getfreg(FAR struct stm32l4_can_s *priv, int offset)
 {
-  return can_vgetreg(priv->fbase + offset);
+  return stm32l4can_vgetreg(priv->fbase + offset);
 }
 
 #else
-static uint32_t can_getreg(struct stm32l4_can_s *priv, int offset)
+static uint32_t stm32l4can_getreg(FAR struct stm32l4_can_s *priv, int offset)
 {
   return getreg32(priv->base + offset);
 }
 
-static uint32_t can_getfreg(struct stm32l4_can_s *priv, int offset)
+static uint32_t stm32l4can_getfreg(FAR struct stm32l4_can_s *priv, int offset)
 {
   return getreg32(priv->fbase + offset);
 }
@@ -294,8 +302,8 @@ static uint32_t can_getfreg(struct stm32l4_can_s *priv, int offset)
 #endif
 
 /****************************************************************************
- * Name: can_putreg
- * Name: can_putfreg
+ * Name: stm32l4can_putreg
+ * Name: stm32l4can_putfreg
  *
  * Description:
  *   Set the value of a CAN register or filter block register.
@@ -310,42 +318,46 @@ static uint32_t can_getfreg(struct stm32l4_can_s *priv, int offset)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_CAN_REGDEBUG
-static void can_vputreg(uint32_t addr, uint32_t value)
+#ifdef CONFIG_STM32L4_CAN_REGDEBUG
+static void stm32l4can_vputreg(uint32_t addr, uint32_t value)
 {
   /* Show the register value being written */
 
-  lldbg("%08x<-%08x\n", addr, value);
+  caninfo("%08x<-%08x\n", addr, value);
 
   /* Write the value */
 
   putreg32(value, addr);
 }
 
-static void can_putreg(struct stm32l4_can_s *priv, int offset, uint32_t value)
+static void stm32l4can_putreg(FAR struct stm32l4_can_s *priv, int offset,
+                              uint32_t value)
 {
-  can_vputreg(priv->base + offset, value);
+  stm32l4can_vputreg(priv->base + offset, value);
 }
 
-static void can_putfreg(struct stm32l4_can_s *priv, int offset, uint32_t value)
+static void stm32l4can_putfreg(FAR struct stm32l4_can_s *priv, int offset,
+                               uint32_t value)
 {
-  can_vputreg(priv->fbase + offset, value);
+  stm32l4can_vputreg(priv->fbase + offset, value);
 }
 
 #else
-static void can_putreg(struct stm32l4_can_s *priv, int offset, uint32_t value)
+static void stm32l4can_putreg(FAR struct stm32l4_can_s *priv, int offset,
+                              uint32_t value)
 {
   putreg32(value, priv->base + offset);
 }
 
-static void can_putfreg(struct stm32l4_can_s *priv, int offset, uint32_t value)
+static void stm32l4can_putfreg(FAR struct stm32l4_can_s *priv, int offset,
+                               uint32_t value)
 {
   putreg32(value, priv->fbase + offset);
 }
 #endif
 
 /****************************************************************************
- * Name: can_dumpctrlregs
+ * Name: stm32l4can_dumpctrlregs
  *
  * Description:
  *   Dump the contents of all CAN control registers
@@ -358,38 +370,39 @@ static void can_putfreg(struct stm32l4_can_s *priv, int offset, uint32_t value)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_CAN_REGDEBUG
-static void can_dumpctrlregs(struct stm32l4_can_s *priv, FAR const char *msg)
+#ifdef CONFIG_STM32L4_CAN_REGDEBUG
+static void stm32l4can_dumpctrlregs(FAR struct stm32l4_can_s *priv,
+                                    FAR const char *msg)
 {
   if (msg)
     {
-      canlldbg("Control Registers: %s\n", msg);
+      caninfo("Control Registers: %s\n", msg);
     }
   else
     {
-      canlldbg("Control Registers:\n");
+      caninfo("Control Registers:\n");
     }
 
   /* CAN control and status registers */
 
-  lldbg("  MCR: %08x   MSR: %08x   TSR: %08x\n",
-        getreg32(priv->base + STM32L4_CAN_MCR_OFFSET),
-        getreg32(priv->base + STM32L4_CAN_MSR_OFFSET),
-        getreg32(priv->base + STM32L4_CAN_TSR_OFFSET));
+  caninfo("  MCR: %08x   MSR: %08x   TSR: %08x\n",
+          getreg32(priv->base + STM32L4_CAN_MCR_OFFSET),
+          getreg32(priv->base + STM32L4_CAN_MSR_OFFSET),
+          getreg32(priv->base + STM32L4_CAN_TSR_OFFSET));
 
-  lldbg(" RF0R: %08x  RF1R: %08x\n",
-        getreg32(priv->base + STM32L4_CAN_RF0R_OFFSET),
-        getreg32(priv->base + STM32L4_CAN_RF1R_OFFSET));
+  caninfo(" RF0R: %08x  RF1R: %08x\n",
+          getreg32(priv->base + STM32L4_CAN_RF0R_OFFSET),
+          getreg32(priv->base + STM32L4_CAN_RF1R_OFFSET));
 
-  lldbg("  IER: %08x   ESR: %08x   BTR: %08x\n",
-        getreg32(priv->base + STM32L4_CAN_IER_OFFSET),
-        getreg32(priv->base + STM32L4_CAN_ESR_OFFSET),
-        getreg32(priv->base + STM32L4_CAN_BTR_OFFSET));
+  caninfo("  IER: %08x   ESR: %08x   BTR: %08x\n",
+          getreg32(priv->base + STM32L4_CAN_IER_OFFSET),
+          getreg32(priv->base + STM32L4_CAN_ESR_OFFSET),
+          getreg32(priv->base + STM32L4_CAN_BTR_OFFSET));
 }
 #endif
 
 /****************************************************************************
- * Name: can_dumpmbregs
+ * Name: stm32l4can_dumpmbregs
  *
  * Description:
  *   Dump the contents of all CAN mailbox registers
@@ -402,54 +415,55 @@ static void can_dumpctrlregs(struct stm32l4_can_s *priv, FAR const char *msg)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_CAN_REGDEBUG
-static void can_dumpmbregs(struct stm32l4_can_s *priv, FAR const char *msg)
+#ifdef CONFIG_STM32L4_CAN_REGDEBUG
+static void stm32l4can_dumpmbregs(FAR struct stm32l4_can_s *priv,
+                                  FAR const char *msg)
 {
   if (msg)
     {
-      canlldbg("Mailbox Registers: %s\n", msg);
+      caninfo("Mailbox Registers: %s\n", msg);
     }
   else
     {
-      canlldbg("Mailbox Registers:\n");
+      caninfo("Mailbox Registers:\n");
     }
 
   /* CAN mailbox registers (3 TX and 2 RX) */
 
-  lldbg(" TI0R: %08x TDT0R: %08x TDL0R: %08x TDH0R: %08x\n",
-        getreg32(priv->base + STM32L4_CAN_TI0R_OFFSET),
-        getreg32(priv->base + STM32L4_CAN_TDT0R_OFFSET),
-        getreg32(priv->base + STM32L4_CAN_TDL0R_OFFSET),
-        getreg32(priv->base + STM32L4_CAN_TDH0R_OFFSET));
+  caninfo(" TI0R: %08x TDT0R: %08x TDL0R: %08x TDH0R: %08x\n",
+          getreg32(priv->base + STM32L4_CAN_TI0R_OFFSET),
+          getreg32(priv->base + STM32L4_CAN_TDT0R_OFFSET),
+          getreg32(priv->base + STM32L4_CAN_TDL0R_OFFSET),
+          getreg32(priv->base + STM32L4_CAN_TDH0R_OFFSET));
 
-  lldbg(" TI1R: %08x TDT1R: %08x TDL1R: %08x TDH1R: %08x\n",
-        getreg32(priv->base + STM32L4_CAN_TI1R_OFFSET),
-        getreg32(priv->base + STM32L4_CAN_TDT1R_OFFSET),
-        getreg32(priv->base + STM32L4_CAN_TDL1R_OFFSET),
-        getreg32(priv->base + STM32L4_CAN_TDH1R_OFFSET));
+  caninfo(" TI1R: %08x TDT1R: %08x TDL1R: %08x TDH1R: %08x\n",
+          getreg32(priv->base + STM32L4_CAN_TI1R_OFFSET),
+          getreg32(priv->base + STM32L4_CAN_TDT1R_OFFSET),
+          getreg32(priv->base + STM32L4_CAN_TDL1R_OFFSET),
+          getreg32(priv->base + STM32L4_CAN_TDH1R_OFFSET));
 
-  lldbg(" TI2R: %08x TDT2R: %08x TDL2R: %08x TDH2R: %08x\n",
-        getreg32(priv->base + STM32L4_CAN_TI2R_OFFSET),
-        getreg32(priv->base + STM32L4_CAN_TDT2R_OFFSET),
-        getreg32(priv->base + STM32L4_CAN_TDL2R_OFFSET),
-        getreg32(priv->base + STM32L4_CAN_TDH2R_OFFSET));
+  caninfo(" TI2R: %08x TDT2R: %08x TDL2R: %08x TDH2R: %08x\n",
+          getreg32(priv->base + STM32L4_CAN_TI2R_OFFSET),
+          getreg32(priv->base + STM32L4_CAN_TDT2R_OFFSET),
+          getreg32(priv->base + STM32L4_CAN_TDL2R_OFFSET),
+          getreg32(priv->base + STM32L4_CAN_TDH2R_OFFSET));
 
-  lldbg(" RI0R: %08x RDT0R: %08x RDL0R: %08x RDH0R: %08x\n",
-        getreg32(priv->base + STM32L4_CAN_RI0R_OFFSET),
-        getreg32(priv->base + STM32L4_CAN_RDT0R_OFFSET),
-        getreg32(priv->base + STM32L4_CAN_RDL0R_OFFSET),
-        getreg32(priv->base + STM32L4_CAN_RDH0R_OFFSET));
+  caninfo(" RI0R: %08x RDT0R: %08x RDL0R: %08x RDH0R: %08x\n",
+          getreg32(priv->base + STM32L4_CAN_RI0R_OFFSET),
+          getreg32(priv->base + STM32L4_CAN_RDT0R_OFFSET),
+          getreg32(priv->base + STM32L4_CAN_RDL0R_OFFSET),
+          getreg32(priv->base + STM32L4_CAN_RDH0R_OFFSET));
 
-  lldbg(" RI1R: %08x RDT1R: %08x RDL1R: %08x RDH1R: %08x\n",
-        getreg32(priv->base + STM32L4_CAN_RI1R_OFFSET),
-        getreg32(priv->base + STM32L4_CAN_RDT1R_OFFSET),
-        getreg32(priv->base + STM32L4_CAN_RDL1R_OFFSET),
-        getreg32(priv->base + STM32L4_CAN_RDH1R_OFFSET));
+  caninfo(" RI1R: %08x RDT1R: %08x RDL1R: %08x RDH1R: %08x\n",
+          getreg32(priv->base + STM32L4_CAN_RI1R_OFFSET),
+          getreg32(priv->base + STM32L4_CAN_RDT1R_OFFSET),
+          getreg32(priv->base + STM32L4_CAN_RDL1R_OFFSET),
+          getreg32(priv->base + STM32L4_CAN_RDH1R_OFFSET));
 }
 #endif
 
 /****************************************************************************
- * Name: can_dumpfiltregs
+ * Name: stm32l4can_dumpfiltregs
  *
  * Description:
  *   Dump the contents of all CAN filter registers
@@ -462,42 +476,43 @@ static void can_dumpmbregs(struct stm32l4_can_s *priv, FAR const char *msg)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_CAN_REGDEBUG
-static void can_dumpfiltregs(struct stm32l4_can_s *priv, FAR const char *msg)
+#ifdef CONFIG_STM32L4_CAN_REGDEBUG
+static void stm32l4can_dumpfiltregs(FAR struct stm32l4_can_s *priv,
+                                    FAR const char *msg)
 {
   int i;
 
   if (msg)
     {
-      canlldbg("Filter Registers: %s\n", msg);
+      caninfo("Filter Registers: %s\n", msg);
     }
   else
     {
-      canlldbg("Filter Registers:\n");
+      caninfo("Filter Registers:\n");
     }
 
-  lldbg(" FMR: %08x   FM1R: %08x  FS1R: %08x FFA1R: %08x  FA1R: %08x\n",
-        getreg32(priv->base + STM32L4_CAN_FMR_OFFSET),
-        getreg32(priv->base + STM32L4_CAN_FM1R_OFFSET),
-        getreg32(priv->base + STM32L4_CAN_FS1R_OFFSET),
-        getreg32(priv->base + STM32L4_CAN_FFA1R_OFFSET),
-        getreg32(priv->base + STM32L4_CAN_FA1R_OFFSET));
+  caninfo(" FMR: %08x   FM1R: %08x  FS1R: %08x FFA1R: %08x  FA1R: %08x\n",
+          getreg32(priv->base + STM32L4_CAN_FMR_OFFSET),
+          getreg32(priv->base + STM32L4_CAN_FM1R_OFFSET),
+          getreg32(priv->base + STM32L4_CAN_FS1R_OFFSET),
+          getreg32(priv->base + STM32L4_CAN_FFA1R_OFFSET),
+          getreg32(priv->base + STM32L4_CAN_FA1R_OFFSET));
 
   for (i = 0; i < CAN_NFILTERS; i++)
     {
-      lldbg(" F%dR1: %08x F%dR2: %08x\n",
-            i, getreg32(priv->base + STM32L4_CAN_FIR_OFFSET(i, 1)),
-            i, getreg32(priv->base + STM32L4_CAN_FIR_OFFSET(i, 2)));
+      caninfo(" F%dR1: %08x F%dR2: %08x\n",
+              i, getreg32(priv->base + STM32L4_CAN_FIR_OFFSET(i, 1)),
+              i, getreg32(priv->base + STM32L4_CAN_FIR_OFFSET(i, 2)));
     }
 }
 #endif
 
 /****************************************************************************
- * Name: can_reset
+ * Name: stm32l4can_reset
  *
  * Description:
  *   Reset the CAN device.  Called early to initialize the hardware. This
- *   function is called, before can_setup() and on error conditions.
+ *   function is called, before stm32l4can_setup() and on error conditions.
  *
  * Input Parameters:
  *   dev - An instance of the "upper half" can driver state structure.
@@ -507,14 +522,14 @@ static void can_dumpfiltregs(struct stm32l4_can_s *priv, FAR const char *msg)
  *
  ****************************************************************************/
 
-static void can_reset(FAR struct can_dev_s *dev)
+static void stm32l4can_reset(FAR struct can_dev_s *dev)
 {
   FAR struct stm32l4_can_s *priv = dev->cd_priv;
   uint32_t regval;
   uint32_t regbit = 0;
   irqstate_t flags;
 
-  canllvdbg("CAN%d\n", priv->port);
+  caninfo("CAN%d\n", priv->port);
 
   /* Get the bits in the AHB1RSTR1 register needed to reset this CAN device */
 
@@ -526,12 +541,12 @@ static void can_reset(FAR struct can_dev_s *dev)
   else
 #endif
     {
-      canlldbg("Unsupported port %d\n", priv->port);
+      canerr("ERROR: Unsupported port %d\n", priv->port);
       return;
     }
 
-  /* Disable interrupts momentary to stop any ongoing CAN event processing and
-   * to prevent any concurrent access to the AHB1RSTR1 register.
+  /* Disable interrupts momentary to stop any ongoing CAN event processing
+   * and to prevent any concurrent access to the AHB1RSTR1 register.
    */
 
   flags = enter_critical_section();
@@ -548,7 +563,7 @@ static void can_reset(FAR struct can_dev_s *dev)
 }
 
 /****************************************************************************
- * Name: can_setup
+ * Name: stm32l4can_setup
  *
  * Description:
  *   Configure the CAN. This method is called the first time that the CAN
@@ -564,49 +579,56 @@ static void can_reset(FAR struct can_dev_s *dev)
  *
  ****************************************************************************/
 
-static int can_setup(FAR struct can_dev_s *dev)
+static int stm32l4can_setup(FAR struct can_dev_s *dev)
 {
   FAR struct stm32l4_can_s *priv = dev->cd_priv;
   int ret;
 
-  canllvdbg("CAN%d RX0 irq: %d TX irq: %d\n", priv->port, priv->canrx0, priv->cantx);
+  caninfo("CAN%d RX0 irq: %d TX irq: %d\n",
+          priv->port, priv->canrx0, priv->cantx);
 
   /* CAN cell initialization */
 
-  ret = can_cellinit(priv);
+  ret = stm32l4can_cellinit(priv);
   if (ret < 0)
     {
-      canlldbg("CAN%d cell initialization failed: %d\n", priv->port, ret);
+      canerr("ERROR: CAN%d cell initialization failed: %d\n",
+             priv->port, ret);
       return ret;
     }
 
-  can_dumpctrlregs(priv, "After cell initialization");
-  can_dumpmbregs(priv, NULL);
+  stm32l4can_dumpctrlregs(priv, "After cell initialization");
+  stm32l4can_dumpmbregs(priv, NULL);
 
   /* CAN filter initialization */
 
-  ret = can_filterinit(priv);
+  ret = stm32l4can_filterinit(priv);
   if (ret < 0)
     {
-      canlldbg("CAN%d filter initialization failed: %d\n", priv->port, ret);
+      canerr("ERROR: CAN%d filter initialization failed: %d\n",
+             priv->port, ret);
       return ret;
     }
 
-  can_dumpfiltregs(priv, "After filter initialization");
+  stm32l4can_dumpfiltregs(priv, "After filter initialization");
 
-  /* Attach the CAN RX FIFO 0 interrupt and TX interrupts.  The others are not used */
+  /* Attach the CAN RX FIFO 0 interrupt and TX interrupts.  The others are
+   * not used.
+   */
 
-  ret = irq_attach(priv->canrx0, can_rx0interrupt);
+  ret = irq_attach(priv->canrx0, stm32l4can_rx0interrupt);
   if (ret < 0)
     {
-      canlldbg("Failed to attach CAN%d RX0 IRQ (%d)", priv->port, priv->canrx0);
+      canerr("ERROR: Failed to attach CAN%d RX0 IRQ (%d)",
+             priv->port, priv->canrx0);
       return ret;
     }
 
-  ret = irq_attach(priv->cantx, can_txinterrupt);
+  ret = irq_attach(priv->cantx, stm32l4can_txinterrupt);
   if (ret < 0)
     {
-      canlldbg("Failed to attach CAN%d TX IRQ (%d)", priv->port, priv->cantx);
+      canerr("ERROR: Failed to attach CAN%d TX IRQ (%d)",
+             priv->port, priv->cantx);
       return ret;
     }
 
@@ -621,7 +643,7 @@ static int can_setup(FAR struct can_dev_s *dev)
 }
 
 /****************************************************************************
- * Name: can_shutdown
+ * Name: stm32l4can_shutdown
  *
  * Description:
  *   Disable the CAN.  This method is called when the CAN device is closed.
@@ -635,11 +657,11 @@ static int can_setup(FAR struct can_dev_s *dev)
  *
  ****************************************************************************/
 
-static void can_shutdown(FAR struct can_dev_s *dev)
+static void stm32l4can_shutdown(FAR struct can_dev_s *dev)
 {
   FAR struct stm32l4_can_s *priv = dev->cd_priv;
 
-  canllvdbg("CAN%d\n", priv->port);
+  caninfo("CAN%d\n", priv->port);
 
   /* Disable the RX FIFO 0 and TX interrupts */
 
@@ -653,11 +675,11 @@ static void can_shutdown(FAR struct can_dev_s *dev)
 
   /* And reset the hardware */
 
-  can_reset(dev);
+  stm32l4can_reset(dev);
 }
 
 /****************************************************************************
- * Name: can_rxint
+ * Name: stm32l4can_rxint
  *
  * Description:
  *   Call to enable or disable RX interrupts.
@@ -670,16 +692,16 @@ static void can_shutdown(FAR struct can_dev_s *dev)
  *
  ****************************************************************************/
 
-static void can_rxint(FAR struct can_dev_s *dev, bool enable)
+static void stm32l4can_rxint(FAR struct can_dev_s *dev, bool enable)
 {
   FAR struct stm32l4_can_s *priv = dev->cd_priv;
   uint32_t regval;
 
-  canllvdbg("CAN%d enable: %d\n", priv->port, enable);
+  caninfo("CAN%d enable: %d\n", priv->port, enable);
 
   /* Enable/disable the FIFO 0 message pending interrupt */
 
-  regval = can_getreg(priv, STM32L4_CAN_IER_OFFSET);
+  regval = stm32l4can_getreg(priv, STM32L4_CAN_IER_OFFSET);
   if (enable)
     {
       regval |= CAN_IER_FMPIE0;
@@ -689,11 +711,11 @@ static void can_rxint(FAR struct can_dev_s *dev, bool enable)
       regval &= ~CAN_IER_FMPIE0;
     }
 
-  can_putreg(priv, STM32L4_CAN_IER_OFFSET, regval);
+  stm32l4can_putreg(priv, STM32L4_CAN_IER_OFFSET, regval);
 }
 
 /****************************************************************************
- * Name: can_txint
+ * Name: stm32l4can_txint
  *
  * Description:
  *   Call to enable or disable TX interrupts.
@@ -706,25 +728,25 @@ static void can_rxint(FAR struct can_dev_s *dev, bool enable)
  *
  ****************************************************************************/
 
-static void can_txint(FAR struct can_dev_s *dev, bool enable)
+static void stm32l4can_txint(FAR struct can_dev_s *dev, bool enable)
 {
   FAR struct stm32l4_can_s *priv = dev->cd_priv;
   uint32_t regval;
 
-  canllvdbg("CAN%d enable: %d\n", priv->port, enable);
+  caninfo("CAN%d enable: %d\n", priv->port, enable);
 
   /* Support only disabling the transmit mailbox interrupt */
 
   if (!enable)
     {
-      regval  = can_getreg(priv, STM32L4_CAN_IER_OFFSET);
+      regval  = stm32l4can_getreg(priv, STM32L4_CAN_IER_OFFSET);
       regval &= ~CAN_IER_TMEIE;
-      can_putreg(priv, STM32L4_CAN_IER_OFFSET, regval);
+      stm32l4can_putreg(priv, STM32L4_CAN_IER_OFFSET, regval);
     }
 }
 
 /****************************************************************************
- * Name: can_ioctl
+ * Name: stm32l4can_ioctl
  *
  * Description:
  *   All ioctl calls will be routed through this method
@@ -737,15 +759,302 @@ static void can_txint(FAR struct can_dev_s *dev, bool enable)
  *
  ****************************************************************************/
 
-static int can_ioctl(FAR struct can_dev_s *dev, int cmd, unsigned long arg)
+static int stm32l4can_ioctl(FAR struct can_dev_s *dev, int cmd,
+                            unsigned long arg)
 {
-  /* No CAN ioctls are supported */
+  FAR struct stm32l4_can_s *priv;
+  int ret = -ENOTTY;
 
-  return -ENOTTY;
+  caninfo("cmd=%04x arg=%lu\n", cmd, arg);
+
+  DEBUGASSERT(dev && dev->cd_priv);
+  priv = dev->cd_priv;
+
+  /* Handle the command */
+
+  switch (cmd)
+    {
+      /* CANIOC_GET_BITTIMING:
+       *   Description:    Return the current bit timing settings
+       *   Argument:       A pointer to a write-able instance of struct
+       *                   canioc_bittiming_s in which current bit timing
+       *                   values will be returned.
+       *   Returned Value: Zero (OK) is returned on success.  Otherwise -1
+       *                   (ERROR) is returned with the errno variable set
+       *                   to indicate the nature of the error.
+       *   Dependencies:   None
+       */
+
+      case CANIOC_GET_BITTIMING:
+        {
+          FAR struct canioc_bittiming_s *bt =
+            (FAR struct canioc_bittiming_s *)arg;
+          uint32_t regval;
+          uint32_t brp;
+
+          DEBUGASSERT(bt != NULL);
+          regval       = stm32l4can_getreg(priv, STM32L4_CAN_BTR_OFFSET);
+          bt->bt_sjw   = ((regval & CAN_BTR_SJW_MASK) >> CAN_BTR_SJW_SHIFT) + 1;
+          bt->bt_tseg1 = ((regval & CAN_BTR_TS1_MASK) >> CAN_BTR_TS1_SHIFT) + 1;
+          bt->bt_tseg2 = ((regval & CAN_BTR_TS2_MASK) >> CAN_BTR_TS2_SHIFT) + 1;
+
+          brp          = ((regval & CAN_BTR_BRP_MASK) >> CAN_BTR_BRP_SHIFT) + 1;
+          bt->bt_baud  = STM32L4_PCLK1_FREQUENCY /
+                         (brp * (bt->bt_tseg1 + bt->bt_tseg2 + 1));
+          ret = OK;
+        }
+        break;
+
+      /* CANIOC_SET_BITTIMING:
+       *   Description:    Set new current bit timing values
+       *   Argument:       A pointer to a read-able instance of struct
+       *                   canioc_bittiming_s in which the new bit timing
+       *                   values are provided.
+       *   Returned Value: Zero (OK) is returned on success.  Otherwise -1
+       *                   (ERROR)is returned with the errno variable set
+       *                    to indicate thenature of the error.
+       *   Dependencies:   None
+       *
+       * REVISIT: There is probably a limitation here:  If there are multiple
+       * threads trying to send CAN packets, when one of these threads
+       * reconfigures the bitrate, the MCAN hardware will be reset and the
+       * context of operation will be lost.  Hence, this IOCTL can only safely
+       * be executed in quiescent time periods.
+       */
+
+      case CANIOC_SET_BITTIMING:
+        {
+          FAR const struct canioc_bittiming_s *bt =
+            (FAR const struct canioc_bittiming_s *)arg;
+          uint32_t brp;
+          uint32_t can_bit_quanta;
+          uint32_t tmp;
+          uint32_t regval;
+
+          DEBUGASSERT(bt != NULL);
+          DEBUGASSERT(bt->bt_baud < STM32L4_PCLK1_FREQUENCY);
+          DEBUGASSERT(bt->bt_sjw > 0 && bt->bt_sjw <= 4);
+          DEBUGASSERT(bt->bt_tseg1 > 0 && bt->bt_tseg1 <= 16);
+          DEBUGASSERT(bt->bt_tseg2 > 0 && bt->bt_tseg2 <=  8);
+
+          regval = stm32l4can_getreg(priv, STM32L4_CAN_BTR_OFFSET);
+
+          /* Extract bit timing data */
+          /* tmp is in clocks per bit time */
+
+          tmp = STM32L4_PCLK1_FREQUENCY / bt->bt_baud;
+
+          /* This value is dynamic as requested by user */
+
+          can_bit_quanta = bt->bt_tseg1 + bt->bt_tseg2 + 1;
+
+          if (tmp < can_bit_quanta)
+            {
+              /* This timing is not possible */
+
+              ret = -EINVAL;
+            }
+
+          /* Otherwise, nquanta is can_bit_quanta, ts1 and ts2 are
+           * provided by the user and we calculate brp to achieve
+           * can_bit_quanta quanta in the bit times
+           */
+
+          else
+            {
+              brp = (tmp + (can_bit_quanta/2)) / can_bit_quanta;
+              DEBUGASSERT(brp >= 1 && brp <= CAN_BTR_BRP_MAX);
+            }
+
+          caninfo("TS1: %d TS2: %d BRP: %d\n", bt->bt_tseg1, bt->bt_tseg2, brp);
+
+          /* Configure bit timing. */
+
+          regval &= ~(CAN_BTR_BRP_MASK | CAN_BTR_TS1_MASK | CAN_BTR_TS2_MASK | CAN_BTR_SJW_MASK);
+          regval |= ((brp          - 1) << CAN_BTR_BRP_SHIFT) |
+                    ((bt->bt_tseg1 - 1) << CAN_BTR_TS1_SHIFT) |
+                    ((bt->bt_tseg2 - 1) << CAN_BTR_TS2_SHIFT) |
+                    ((bt->bt_sjw   - 1) << CAN_BTR_SJW_SHIFT);
+  
+          /* Bit timing can only be configured in init mode. */
+
+          ret = stm32l4can_enterinitmode(priv);
+          if (ret != 0)
+            {
+              break;
+            }
+
+          stm32l4can_putreg(priv, STM32L4_CAN_BTR_OFFSET, regval);
+
+          ret = stm32l4can_exitinitmode(priv);
+
+          if (ret == 0)
+            {
+              priv->baud  = STM32L4_PCLK1_FREQUENCY / (brp * (bt->bt_tseg1 + bt->bt_tseg2 + 1));
+            }
+        }
+        break;
+
+      /* CANIOC_GET_CONNMODES:
+       *   Description:    Get the current bus connection modes
+       *   Argument:       A pointer to a write-able instance of struct
+       *                   canioc_connmodes_s in which the new bus modes will
+       *                   be returned.
+       *   Returned Value: Zero (OK) is returned on success.  Otherwise -1
+       *                   (ERROR)is returned with the errno variable set
+       *                   to indicate the nature of the error.
+       *   Dependencies:   None
+       */
+
+      case CANIOC_GET_CONNMODES:
+        {
+          FAR struct canioc_connmodes_s *bm =
+            (FAR struct canioc_connmodes_s *)arg;
+          uint32_t regval;
+
+          DEBUGASSERT(bm != NULL);
+
+          regval          = stm32l4can_getreg(priv, STM32L4_CAN_BTR_OFFSET);
+
+          bm->bm_loopback = ((regval & CAN_BTR_LBKM) == CAN_BTR_LBKM);
+          bm->bm_silent   = ((regval & CAN_BTR_SILM) == CAN_BTR_SILM);
+          ret = OK;
+          break;
+        }
+
+      /* CANIOC_SET_CONNMODES:
+       *   Description:    Set new bus connection modes values
+       *   Argument:       A pointer to a read-able instance of struct
+       *                   canioc_connmodes_s in which the new bus modes
+       *                   are provided.
+       *   Returned Value: Zero (OK) is returned on success.  Otherwise -1
+       *                   (ERROR) is returned with the errno variable set
+       *                   to indicate the nature of the error.
+       *   Dependencies:   None
+      */
+
+      case CANIOC_SET_CONNMODES:
+        {
+          FAR struct canioc_connmodes_s *bm =
+            (FAR struct canioc_connmodes_s *)arg;
+          uint32_t regval;
+
+          DEBUGASSERT(bm != NULL);
+
+          regval = stm32l4can_getreg(priv, STM32L4_CAN_BTR_OFFSET);
+
+          if (bm->bm_loopback)
+            {
+            regval |= CAN_BTR_LBKM;
+            }
+          else
+            {
+            regval &= ~CAN_BTR_LBKM;
+            }
+
+          if (bm->bm_silent)
+            {
+            regval |= CAN_BTR_SILM;
+            }
+          else
+            {
+            regval &= ~CAN_BTR_SILM;
+            }
+
+          /* This register can only be configured in init mode. */
+
+          ret = stm32l4can_enterinitmode(priv);
+          if (ret != 0)
+            {
+              break;
+            }
+
+          stm32l4can_putreg(priv, STM32L4_CAN_BTR_OFFSET, regval);
+
+          ret = stm32l4can_exitinitmode(priv);
+        }
+        break;
+
+#ifdef CONFIG_CAN_EXTID
+      /* CANIOC_ADD_EXTFILTER:
+       *   Description:    Add an address filter for a extended 29 bit
+       *                   address.
+       *   Argument:       A reference to struct canioc_extfilter_s
+       *   Returned Value: A non-negative filter ID is returned on success.
+       *                   Otherwise -1 (ERROR) is returned with the errno
+       *                   variable set to indicate the nature of the error.
+       */
+
+      case CANIOC_ADD_EXTFILTER:
+        {
+          DEBUGASSERT(arg != 0);
+          ret = stm32l4can_addextfilter(priv, (FAR struct canioc_extfilter_s *)arg);
+        }
+        break;
+
+      /* CANIOC_DEL_EXTFILTER:
+       *   Description:    Remove an address filter for a standard 29 bit
+       *                   address.
+       *   Argument:       The filter index previously returned by the
+       *                   CANIOC_ADD_EXTFILTER command
+       *   Returned Value: Zero (OK) is returned on success.  Otherwise -1
+       *                   (ERROR)is returned with the errno variable set
+       *                   to indicate the nature of the error.
+       */
+
+      case CANIOC_DEL_EXTFILTER:
+        {
+          DEBUGASSERT(arg <= priv->config->nextfilters);
+          ret = stm32l4can_delextfilter(priv, (int)arg);
+        }
+        break;
+#endif
+
+      /* CANIOC_ADD_STDFILTER:
+       *   Description:    Add an address filter for a standard 11 bit
+       *                   address.
+       *   Argument:       A reference to struct canioc_stdfilter_s
+       *   Returned Value: A non-negative filter ID is returned on success.
+       *                   Otherwise -1 (ERROR) is returned with the errno
+       *                   variable set to indicate the nature of the error.
+       */
+
+      case CANIOC_ADD_STDFILTER:
+        {
+          DEBUGASSERT(arg != 0);
+          ret = stm32l4can_addstdfilter(priv, (FAR struct canioc_stdfilter_s *)arg);
+        }
+        break;
+
+      /* CANIOC_DEL_STDFILTER:
+       *   Description:    Remove an address filter for a standard 11 bit
+       *                   address.
+       *   Argument:       The filter index previously returned by the
+       *                   CANIOC_ADD_STDFILTER command
+       *   Returned Value: Zero (OK) is returned on success.  Otherwise -1
+       *                   (ERROR) is returned with the errno variable set
+       *                   to indicate the nature of the error.
+       */
+
+      case CANIOC_DEL_STDFILTER:
+        {
+          DEBUGASSERT(arg <= priv->config->nstdfilters);
+          ret = stm32l4can_delstdfilter(priv, (int)arg);
+        }
+        break;
+
+      /* Unsupported/unrecognized command */
+
+      default:
+        canerr("ERROR: Unrecognized command: %04x\n", cmd);
+        break;
+    }
+
+  return ret;
 }
 
 /****************************************************************************
- * Name: can_remoterequest
+ * Name: stm32l4can_remoterequest
  *
  * Description:
  *   Send a remote request
@@ -758,14 +1067,14 @@ static int can_ioctl(FAR struct can_dev_s *dev, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-static int can_remoterequest(FAR struct can_dev_s *dev, uint16_t id)
+static int stm32l4can_remoterequest(FAR struct can_dev_s *dev, uint16_t id)
 {
 #warning "Remote request not implemented"
   return -ENOSYS;
 }
 
 /****************************************************************************
- * Name: can_send
+ * Name: stm32l4can_send
  *
  * Description:
  *    Send one can message.
@@ -787,7 +1096,8 @@ static int can_remoterequest(FAR struct can_dev_s *dev, uint16_t id)
  *
  ****************************************************************************/
 
-static int can_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
+static int stm32l4can_send(FAR struct can_dev_s *dev,
+                           FAR struct can_msg_s *msg)
 {
   FAR struct stm32l4_can_s *priv = dev->cd_priv;
   FAR uint8_t *ptr;
@@ -796,11 +1106,12 @@ static int can_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
   int dlc;
   int txmb;
 
-  canllvdbg("CAN%d ID: %d DLC: %d\n", priv->port, msg->cm_hdr.ch_id, msg->cm_hdr.ch_dlc);
+  caninfo("CAN%d ID: %d DLC: %d\n",
+          priv->port, msg->cm_hdr.ch_id, msg->cm_hdr.ch_dlc);
 
   /* Select one empty transmit mailbox */
 
-  regval = can_getreg(priv, STM32L4_CAN_TSR_OFFSET);
+  regval = stm32l4can_getreg(priv, STM32L4_CAN_TSR_OFFSET);
   if ((regval & CAN_TSR_TME0) != 0 && (regval & CAN_TSR_RQCP0) == 0)
     {
       txmb = 0;
@@ -815,15 +1126,16 @@ static int can_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
     }
   else
     {
-      canlldbg("ERROR: No available mailbox\n");
+      canerr("ERROR: No available mailbox\n");
       return -EBUSY;
     }
 
   /* Clear TXRQ, RTR, IDE, EXID, and STID fields */
 
-  regval  = can_getreg(priv, STM32L4_CAN_TIR_OFFSET(txmb));
-  regval &= ~(CAN_TIR_TXRQ | CAN_TIR_RTR | CAN_TIR_IDE | CAN_TIR_EXID_MASK | CAN_TIR_STID_MASK);
-  can_putreg(priv, STM32L4_CAN_TIR_OFFSET(txmb), regval);
+  regval  = stm32l4can_getreg(priv, STM32L4_CAN_TIR_OFFSET(txmb));
+  regval &= ~(CAN_TIR_TXRQ | CAN_TIR_RTR | CAN_TIR_IDE | CAN_TIR_EXID_MASK |
+              CAN_TIR_STID_MASK);
+  stm32l4can_putreg(priv, STM32L4_CAN_TIR_OFFSET(txmb), regval);
 
   /* Set up the ID, standard 11-bit or extended 29-bit. */
 
@@ -843,15 +1155,15 @@ static int can_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
   regval &= ~CAN_TIR_STID_MASK;
   regval |= (uint32_t)msg->cm_hdr.ch_id << CAN_TIR_STID_SHIFT;
 #endif
-  can_putreg(priv, STM32L4_CAN_TIR_OFFSET(txmb), regval);
+  stm32l4can_putreg(priv, STM32L4_CAN_TIR_OFFSET(txmb), regval);
 
   /* Set up the DLC */
 
   dlc     = msg->cm_hdr.ch_dlc;
-  regval  = can_getreg(priv, STM32L4_CAN_TDTR_OFFSET(txmb));
+  regval  = stm32l4can_getreg(priv, STM32L4_CAN_TDTR_OFFSET(txmb));
   regval &= ~(CAN_TDTR_DLC_MASK | CAN_TDTR_TGT);
   regval |= (uint32_t)dlc << CAN_TDTR_DLC_SHIFT;
-  can_putreg(priv, STM32L4_CAN_TDTR_OFFSET(txmb), regval);
+  stm32l4can_putreg(priv, STM32L4_CAN_TDTR_OFFSET(txmb), regval);
 
   /* Set up the data fields */
 
@@ -882,7 +1194,7 @@ static int can_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
         }
     }
 
-  can_putreg(priv, STM32L4_CAN_TDLR_OFFSET(txmb), regval);
+  stm32l4can_putreg(priv, STM32L4_CAN_TDLR_OFFSET(txmb), regval);
 
   regval = 0;
   if (dlc > 4)
@@ -909,26 +1221,26 @@ static int can_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
         }
     }
 
-  can_putreg(priv, STM32L4_CAN_TDHR_OFFSET(txmb), regval);
+  stm32l4can_putreg(priv, STM32L4_CAN_TDHR_OFFSET(txmb), regval);
 
   /* Enable the transmit mailbox empty interrupt (may already be enabled) */
 
-  regval  = can_getreg(priv, STM32L4_CAN_IER_OFFSET);
+  regval  = stm32l4can_getreg(priv, STM32L4_CAN_IER_OFFSET);
   regval |= CAN_IER_TMEIE;
-  can_putreg(priv, STM32L4_CAN_IER_OFFSET, regval);
+  stm32l4can_putreg(priv, STM32L4_CAN_IER_OFFSET, regval);
 
   /* Request transmission */
 
-  regval  = can_getreg(priv, STM32L4_CAN_TIR_OFFSET(txmb));
+  regval  = stm32l4can_getreg(priv, STM32L4_CAN_TIR_OFFSET(txmb));
   regval |= CAN_TIR_TXRQ;  /* Transmit Mailbox Request */
-  can_putreg(priv, STM32L4_CAN_TIR_OFFSET(txmb), regval);
+  stm32l4can_putreg(priv, STM32L4_CAN_TIR_OFFSET(txmb), regval);
 
-  can_dumpmbregs(priv, "After send");
+  stm32l4can_dumpmbregs(priv, "After send");
   return OK;
 }
 
 /****************************************************************************
- * Name: can_txready
+ * Name: stm32l4can_txready
  *
  * Description:
  *   Return true if the CAN hardware can accept another TX message.
@@ -941,15 +1253,15 @@ static int can_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
  *
  ****************************************************************************/
 
-static bool can_txready(FAR struct can_dev_s *dev)
+static bool stm32l4can_txready(FAR struct can_dev_s *dev)
 {
   FAR struct stm32l4_can_s *priv = dev->cd_priv;
   uint32_t regval;
 
   /* Return true if any mailbox is available */
 
-  regval = can_getreg(priv, STM32L4_CAN_TSR_OFFSET);
-  canllvdbg("CAN%d TSR: %08x\n", priv->port, regval);
+  regval = stm32l4can_getreg(priv, STM32L4_CAN_TSR_OFFSET);
+  caninfo("CAN%d TSR: %08x\n", priv->port, regval);
 
   if ((regval & CAN_ALL_MAILBOXES) != 0)
     {
@@ -960,7 +1272,7 @@ static bool can_txready(FAR struct can_dev_s *dev)
 }
 
 /****************************************************************************
- * Name: can_txempty
+ * Name: stm32l4can_txempty
  *
  * Description:
  *   Return true if all message have been sent.  If for example, the CAN
@@ -977,15 +1289,15 @@ static bool can_txready(FAR struct can_dev_s *dev)
  *
  ****************************************************************************/
 
-static bool can_txempty(FAR struct can_dev_s *dev)
+static bool stm32l4can_txempty(FAR struct can_dev_s *dev)
 {
   FAR struct stm32l4_can_s *priv = dev->cd_priv;
   uint32_t regval;
 
   /* Return true if all mailboxes are available */
 
-  regval = can_getreg(priv, STM32L4_CAN_TSR_OFFSET);
-  canllvdbg("CAN%d TSR: %08x\n", priv->port, regval);
+  regval = stm32l4can_getreg(priv, STM32L4_CAN_TSR_OFFSET);
+  caninfo("CAN%d TSR: %08x\n", priv->port, regval);
 
   if ((regval & CAN_ALL_MAILBOXES) == CAN_ALL_MAILBOXES)
     {
@@ -996,7 +1308,7 @@ static bool can_txempty(FAR struct can_dev_s *dev)
 }
 
 /****************************************************************************
- * Name: can_rx0interrupt
+ * Name: stm32l4can_rx0interrupt
  *
  * Description:
  *   CAN RX FIFO 0 interrupt handler
@@ -1010,7 +1322,7 @@ static bool can_txempty(FAR struct can_dev_s *dev)
  *
  ****************************************************************************/
 
-static int can_rx0interrupt(int irq, void *context)
+static int stm32l4can_rx0interrupt(int irq, FAR void *context)
 {
   FAR struct can_dev_s *dev = NULL;
   FAR struct stm32l4_can_s *priv;
@@ -1025,19 +1337,19 @@ static int can_rx0interrupt(int irq, void *context)
 
   /* Verify that a message is pending in FIFO 0 */
 
-  regval   = can_getreg(priv, STM32L4_CAN_RF0R_OFFSET);
+  regval   = stm32l4can_getreg(priv, STM32L4_CAN_RF0R_OFFSET);
   npending = (regval & CAN_RFR_FMP_MASK) >> CAN_RFR_FMP_SHIFT;
   if (npending < 1)
     {
-      canlldbg("WARNING: No messages pending\n");
+      canwarn("WARNING: No messages pending\n");
       return OK;
     }
 
-  can_dumpmbregs(priv, "RX0 interrupt");
+  stm32l4can_dumpmbregs(priv, "RX0 interrupt");
 
   /* Get the CAN identifier. */
 
-  regval = can_getreg(priv, STM32L4_CAN_RI0R_OFFSET);
+  regval = stm32l4can_getreg(priv, STM32L4_CAN_RI0R_OFFSET);
 
 #ifdef CONFIG_CAN_EXTID
   if ((regval & CAN_RIR_IDE) != 0)
@@ -1053,7 +1365,7 @@ static int can_rx0interrupt(int irq, void *context)
 #else
   if ((regval & CAN_RIR_IDE) != 0)
     {
-      canlldbg("ERROR: Received message with extended identifier.  Dropped\n");
+      canerr("ERROR: Received message with extended identifier.  Dropped\n");
       ret = -ENOSYS;
       goto errout;
     }
@@ -1074,18 +1386,18 @@ static int can_rx0interrupt(int irq, void *context)
 
   /* Get the DLC */
 
-  regval     = can_getreg(priv, STM32L4_CAN_RDT0R_OFFSET);
+  regval     = stm32l4can_getreg(priv, STM32L4_CAN_RDT0R_OFFSET);
   hdr.ch_dlc = (regval & CAN_RDTR_DLC_MASK) >> CAN_RDTR_DLC_SHIFT;
 
   /* Save the message data */
 
-  regval  = can_getreg(priv, STM32L4_CAN_RDL0R_OFFSET);
+  regval  = stm32l4can_getreg(priv, STM32L4_CAN_RDL0R_OFFSET);
   data[0] = (regval & CAN_RDLR_DATA0_MASK) >> CAN_RDLR_DATA0_SHIFT;
   data[1] = (regval & CAN_RDLR_DATA1_MASK) >> CAN_RDLR_DATA1_SHIFT;
   data[2] = (regval & CAN_RDLR_DATA2_MASK) >> CAN_RDLR_DATA2_SHIFT;
   data[3] = (regval & CAN_RDLR_DATA3_MASK) >> CAN_RDLR_DATA3_SHIFT;
 
-  regval  = can_getreg(priv, STM32L4_CAN_RDH0R_OFFSET);
+  regval  = stm32l4can_getreg(priv, STM32L4_CAN_RDH0R_OFFSET);
   data[4] = (regval & CAN_RDHR_DATA4_MASK) >> CAN_RDHR_DATA4_SHIFT;
   data[5] = (regval & CAN_RDHR_DATA5_MASK) >> CAN_RDHR_DATA5_SHIFT;
   data[6] = (regval & CAN_RDHR_DATA6_MASK) >> CAN_RDHR_DATA6_SHIFT;
@@ -1100,14 +1412,14 @@ static int can_rx0interrupt(int irq, void *context)
 #ifndef CONFIG_CAN_EXTID
 errout:
 #endif
-  regval  = can_getreg(priv, STM32L4_CAN_RF0R_OFFSET);
+  regval  = stm32l4can_getreg(priv, STM32L4_CAN_RF0R_OFFSET);
   regval |= CAN_RFR_RFOM;
-  can_putreg(priv, STM32L4_CAN_RF0R_OFFSET, regval);
+  stm32l4can_putreg(priv, STM32L4_CAN_RF0R_OFFSET, regval);
   return ret;
 }
 
 /****************************************************************************
- * Name: can_txinterrupt
+ * Name: stm32l4can_txinterrupt
  *
  * Description:
  *   CAN TX mailbox complete interrupt handler
@@ -1121,7 +1433,7 @@ errout:
  *
  ****************************************************************************/
 
-static int can_txinterrupt(int irq, void *context)
+static int stm32l4can_txinterrupt(int irq, FAR void *context)
 {
   FAR struct can_dev_s *dev = NULL;
   FAR struct stm32l4_can_s *priv;
@@ -1132,7 +1444,7 @@ static int can_txinterrupt(int irq, void *context)
 
   /* Get the transmit status */
 
-  regval = can_getreg(priv, STM32L4_CAN_TSR_OFFSET);
+  regval = stm32l4can_getreg(priv, STM32L4_CAN_TSR_OFFSET);
 
   /* Check for RQCP0: Request completed mailbox 0 */
 
@@ -1142,7 +1454,7 @@ static int can_txinterrupt(int irq, void *context)
        * ALST0 and TERR0) for Mailbox 0.
        */
 
-      can_putreg(priv, STM32L4_CAN_TSR_OFFSET, CAN_TSR_RQCP0);
+      stm32l4can_putreg(priv, STM32L4_CAN_TSR_OFFSET, CAN_TSR_RQCP0);
 
       /* Check for errors */
 
@@ -1162,7 +1474,7 @@ static int can_txinterrupt(int irq, void *context)
        * ALST1 and TERR1) for Mailbox 1.
        */
 
-      can_putreg(priv, STM32L4_CAN_TSR_OFFSET, CAN_TSR_RQCP1);
+      stm32l4can_putreg(priv, STM32L4_CAN_TSR_OFFSET, CAN_TSR_RQCP1);
 
       /* Check for errors */
 
@@ -1182,7 +1494,7 @@ static int can_txinterrupt(int irq, void *context)
        * ALST2 and TERR2) for Mailbox 2.
        */
 
-      can_putreg(priv, STM32L4_CAN_TSR_OFFSET, CAN_TSR_RQCP2);
+      stm32l4can_putreg(priv, STM32L4_CAN_TSR_OFFSET, CAN_TSR_RQCP2);
 
       /* Check for errors */
 
@@ -1198,7 +1510,7 @@ static int can_txinterrupt(int irq, void *context)
 }
 
 /****************************************************************************
- * Name: can_bittiming
+ * Name: stm32l4can_bittiming
  *
  * Description:
  *   Set the CAN bit timing register (BTR) based on the configured BAUD.
@@ -1241,6 +1553,7 @@ static int can_txinterrupt(int irq, void *context)
  *   Tbs1 = Tq * ts1
  *   Tbs2 = Tq * ts2
  *   Tq = brp * Tpclk1
+ *   baud = Fpclk1 / (brp  * (1 + ts1 + ts2)))
  *
  * Where:
  *   Tpclk1 is the period of the APB1 clock (PCLK1).
@@ -1253,15 +1566,15 @@ static int can_txinterrupt(int irq, void *context)
  *
  ****************************************************************************/
 
-static int can_bittiming(struct stm32l4_can_s *priv)
+static int stm32l4can_bittiming(FAR struct stm32l4_can_s *priv)
 {
   uint32_t tmp;
   uint32_t brp;
   uint32_t ts1;
   uint32_t ts2;
 
-  canllvdbg("CAN%d PCLK1: %d baud: %d\n",
-            priv->port, STM32L4_PCLK1_FREQUENCY, priv->baud);
+  caninfo("CAN%d PCLK1: %d baud: %d\n",
+          priv->port, STM32L4_PCLK1_FREQUENCY, priv->baud);
 
   /* Try to get CAN_BIT_QUANTA quanta in one bit_time.
    *
@@ -1314,7 +1627,7 @@ static int can_bittiming(struct stm32l4_can_s *priv)
       DEBUGASSERT(brp >= 1 && brp <= CAN_BTR_BRP_MAX);
     }
 
-  canllvdbg("TS1: %d TS2: %d BRP: %d\n", ts1, ts2, brp);
+  caninfo("TS1: %d TS2: %d BRP: %d\n", ts1, ts2, brp);
 
   /* Configure bit timing.  This also does the following, less obvious
    * things.  Unless loopback mode is enabled, it:
@@ -1333,15 +1646,17 @@ static int can_bittiming(struct stm32l4_can_s *priv)
   tmp |= CAN_BTR_LBKM;
 #endif
 
-  can_putreg(priv, STM32L4_CAN_BTR_OFFSET, tmp);
+  stm32l4can_putreg(priv, STM32L4_CAN_BTR_OFFSET, tmp);
   return OK;
 }
 
 /****************************************************************************
- * Name: can_cellinit
+ * Name: stm32l4can_enterinitmode
  *
  * Description:
- *   CAN cell initialization
+ *   Put the CAN cell in Initialization mode. This only disconnects the CAN
+ *   peripheral, no registers are changed. The initialization mode is
+ *   required to change the baud rate.
  *
  * Input Parameter:
  *   priv - A pointer to the private data structure for this CAN block
@@ -1351,35 +1666,24 @@ static int can_bittiming(struct stm32l4_can_s *priv)
  *
  ****************************************************************************/
 
-static int can_cellinit(struct stm32l4_can_s *priv)
+static int stm32l4can_enterinitmode(FAR struct stm32l4_can_s *priv)
 {
-  volatile uint32_t timeout;
   uint32_t regval;
-  int ret;
+  volatile uint32_t timeout;
 
-  canllvdbg("CAN%d\n", priv->port);
-
-  /* Exit from sleep mode */
-
-  regval  = can_getreg(priv, STM32L4_CAN_MCR_OFFSET);
-  regval &= ~CAN_MCR_SLEEP;
-  can_putreg(priv, STM32L4_CAN_MCR_OFFSET, regval);
-
-  /* Configure CAN behavior.  Priority driven request order, not message ID. */
-
-  regval |= CAN_MCR_TXFP;
-  can_putreg(priv, STM32L4_CAN_MCR_OFFSET, regval);
+  caninfo("CAN%d\n", priv->port);
 
   /* Enter initialization mode */
 
+  regval  = stm32l4can_getreg(priv, STM32L4_CAN_MCR_OFFSET);
   regval |= CAN_MCR_INRQ;
-  can_putreg(priv, STM32L4_CAN_MCR_OFFSET, regval);
+  stm32l4can_putreg(priv, STM32L4_CAN_MCR_OFFSET, regval);
 
   /* Wait until initialization mode is acknowledged */
 
   for (timeout = INAK_TIMEOUT; timeout > 0; timeout--)
     {
-      regval = can_getreg(priv, STM32L4_CAN_MSR_OFFSET);
+      regval = stm32l4can_getreg(priv, STM32L4_CAN_MSR_OFFSET);
       if ((regval & CAN_MSR_INAK) != 0)
         {
           /* We are in initialization mode */
@@ -1392,44 +1696,43 @@ static int can_cellinit(struct stm32l4_can_s *priv)
 
   if (timeout < 1)
     {
-      canlldbg("ERROR: Timed out waiting to enter initialization mode\n");
+      canerr("ERROR: Timed out waiting to enter initialization mode\n");
       return -ETIMEDOUT;
     }
 
-  /* Disable the following modes:
-   *
-   *  - Time triggered communication mode
-   *  - Automatic bus-off management
-   *  - Automatic wake-up mode
-   *  - No automatic retransmission
-   *  - Receive FIFO locked mode
-   *  - Transmit FIFO priority
-   */
+  return 0;
+}
 
-  regval   = can_getreg(priv, STM32L4_CAN_MCR_OFFSET);
-  regval &= ~(CAN_MCR_TXFP | CAN_MCR_RFLM | CAN_MCR_NART | CAN_MCR_AWUM | CAN_MCR_ABOM | CAN_MCR_TTCM);
-  can_putreg(priv, STM32L4_CAN_MCR_OFFSET, regval);
+/****************************************************************************
+ * Name: stm32l4can_exitinitmode
+ *
+ * Description:
+ *   Put the CAN cell out of the Initialization mode (to Normal mode)
+ *
+ * Input Parameter:
+ *   priv - A pointer to the private data structure for this CAN block
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
 
-  /* Configure bit timing. */
+static int stm32l4can_exitinitmode(FAR struct stm32l4_can_s *priv)
+{
+  uint32_t regval;
+  volatile uint32_t timeout;
 
-  ret = can_bittiming(priv);
-  if (ret < 0)
-    {
-      canlldbg("ERROR: Failed to set bit timing: %d\n", ret);
-      return ret;
-    }
+  /* Exit Initialization mode, enter Normal mode */
 
-  /* Exit initialization mode */
-
-  regval  = can_getreg(priv, STM32L4_CAN_MCR_OFFSET);
+  regval  = stm32l4can_getreg(priv, STM32L4_CAN_MCR_OFFSET);
   regval &= ~CAN_MCR_INRQ;
-  can_putreg(priv, STM32L4_CAN_MCR_OFFSET, regval);
+  stm32l4can_putreg(priv, STM32L4_CAN_MCR_OFFSET, regval);
 
   /* Wait until the initialization mode exit is acknowledged */
 
   for (timeout = INAK_TIMEOUT; timeout > 0; timeout--)
     {
-      regval = can_getreg(priv, STM32L4_CAN_MSR_OFFSET);
+      regval = stm32l4can_getreg(priv, STM32L4_CAN_MSR_OFFSET);
       if ((regval & CAN_MSR_INAK) == 0)
         {
           /* We are out of initialization mode */
@@ -1442,15 +1745,80 @@ static int can_cellinit(struct stm32l4_can_s *priv)
 
   if (timeout < 1)
     {
-      canlldbg("ERROR: Timed out waiting to exit initialization mode: %08x\n", regval);
+      canerr("ERROR: Timed out waiting to exit initialization mode: %08x\n", regval);
       return -ETIMEDOUT;
     }
 
-  return OK;
+  return 0;
 }
 
 /****************************************************************************
- * Name: can_filterinit
+ * Name: stm32l4can_cellinit
+ *
+ * Description:
+ *   CAN cell initialization
+ *
+ * Input Parameter:
+ *   priv - A pointer to the private data structure for this CAN block
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int stm32l4can_cellinit(FAR struct stm32l4_can_s *priv)
+{
+  uint32_t regval;
+  int ret;
+
+  caninfo("CAN%d\n", priv->port);
+
+  /* Exit from sleep mode */
+
+  regval  = stm32l4can_getreg(priv, STM32L4_CAN_MCR_OFFSET);
+  regval &= ~CAN_MCR_SLEEP;
+  stm32l4can_putreg(priv, STM32L4_CAN_MCR_OFFSET, regval);
+
+  /* Configure CAN behavior.  Priority driven request order, not message ID. */
+
+  regval |= CAN_MCR_TXFP;
+  stm32l4can_putreg(priv, STM32L4_CAN_MCR_OFFSET, regval);
+
+  ret = stm32l4can_enterinitmode(priv);
+  if(ret != 0)
+    {
+      return ret;
+    }
+
+  /* Disable the following modes:
+   *
+   *  - Time triggered communication mode
+   *  - Automatic bus-off management
+   *  - Automatic wake-up mode
+   *  - No automatic retransmission
+   *  - Receive FIFO locked mode
+   *  - Transmit FIFO priority
+   */
+
+  regval   = stm32l4can_getreg(priv, STM32L4_CAN_MCR_OFFSET);
+  regval &= ~(CAN_MCR_TXFP | CAN_MCR_RFLM | CAN_MCR_NART | CAN_MCR_AWUM |
+              CAN_MCR_ABOM | CAN_MCR_TTCM);
+  stm32l4can_putreg(priv, STM32L4_CAN_MCR_OFFSET, regval);
+
+  /* Configure bit timing. */
+
+  ret = stm32l4can_bittiming(priv);
+  if (ret < 0)
+    {
+      canerr("ERROR: Failed to set bit timing: %d\n", ret);
+      return ret;
+    }
+
+  return stm32l4can_exitinitmode(priv);
+}
+
+/****************************************************************************
+ * Name: stm32l4can_filterinit
  *
  * Description:
  *   CAN filter initialization.  CAN filters are not currently used by this
@@ -1466,7 +1834,7 @@ static int can_cellinit(struct stm32l4_can_s *priv)
  *      finer control of the filtering.
  *
  *   There is no need to set up one filter for each CAN since STM32L4 only
- *   contains one CAN devices. If one day some STM32L4 has 2 CANs, then
+ *   contains one CAN device. If one day some STM32L4 has 2 CANs, then
  *   code will have to be imported from the STM32 port.
  *
  *   32-bit IdMask mode is configured.  However, both the ID and the MASK
@@ -1481,12 +1849,12 @@ static int can_cellinit(struct stm32l4_can_s *priv)
  *
  ****************************************************************************/
 
-static int can_filterinit(struct stm32l4_can_s *priv)
+static int stm32l4can_filterinit(FAR struct stm32l4_can_s *priv)
 {
   uint32_t regval;
   uint32_t bitmask;
 
-  canllvdbg("CAN%d filter: %d\n", priv->port, priv->filter);
+  caninfo("CAN%d filter: %d\n", priv->port, priv->filter);
 
   /* Get the bitmask associated with the filter used by this CAN block */
 
@@ -1494,53 +1862,145 @@ static int can_filterinit(struct stm32l4_can_s *priv)
 
   /* Enter filter initialization mode */
 
-  regval  = can_getfreg(priv, STM32L4_CAN_FMR_OFFSET);
+  regval  = stm32l4can_getfreg(priv, STM32L4_CAN_FMR_OFFSET);
   regval |= CAN_FMR_FINIT;
-  can_putfreg(priv, STM32L4_CAN_FMR_OFFSET, regval);
+  stm32l4can_putfreg(priv, STM32L4_CAN_FMR_OFFSET, regval);
 
   /* Disable the filter */
 
-  regval  = can_getfreg(priv, STM32L4_CAN_FA1R_OFFSET);
+  regval  = stm32l4can_getfreg(priv, STM32L4_CAN_FA1R_OFFSET);
   regval &= ~bitmask;
-  can_putfreg(priv, STM32L4_CAN_FA1R_OFFSET, regval);
+  stm32l4can_putfreg(priv, STM32L4_CAN_FA1R_OFFSET, regval);
 
   /* Select the 32-bit scale for the filter */
 
-  regval  = can_getfreg(priv, STM32L4_CAN_FS1R_OFFSET);
+  regval  = stm32l4can_getfreg(priv, STM32L4_CAN_FS1R_OFFSET);
   regval |= bitmask;
-  can_putfreg(priv, STM32L4_CAN_FS1R_OFFSET, regval);
+  stm32l4can_putfreg(priv, STM32L4_CAN_FS1R_OFFSET, regval);
 
   /* There are 14 or 28 filter banks (depending) on the device.  Each filter bank is
    * composed of two 32-bit registers, CAN_FiR:
    */
 
-  can_putfreg(priv,  STM32L4_CAN_FIR_OFFSET(priv->filter, 1), 0);
-  can_putfreg(priv,  STM32L4_CAN_FIR_OFFSET(priv->filter, 2), 0);
+  stm32l4can_putfreg(priv,  STM32L4_CAN_FIR_OFFSET(priv->filter, 1), 0);
+  stm32l4can_putfreg(priv,  STM32L4_CAN_FIR_OFFSET(priv->filter, 2), 0);
 
   /* Set Id/Mask mode for the filter */
 
-  regval  = can_getfreg(priv, STM32L4_CAN_FM1R_OFFSET);
+  regval  = stm32l4can_getfreg(priv, STM32L4_CAN_FM1R_OFFSET);
   regval &= ~bitmask;
-  can_putfreg(priv, STM32L4_CAN_FM1R_OFFSET, regval);
+  stm32l4can_putfreg(priv, STM32L4_CAN_FM1R_OFFSET, regval);
 
   /* Assign FIFO 0 for the filter */
 
-  regval  = can_getfreg(priv, STM32L4_CAN_FFA1R_OFFSET);
+  regval  = stm32l4can_getfreg(priv, STM32L4_CAN_FFA1R_OFFSET);
   regval &= ~bitmask;
-  can_putfreg(priv, STM32L4_CAN_FFA1R_OFFSET, regval);
+  stm32l4can_putfreg(priv, STM32L4_CAN_FFA1R_OFFSET, regval);
 
   /* Enable the filter */
 
-  regval  = can_getfreg(priv, STM32L4_CAN_FA1R_OFFSET);
+  regval  = stm32l4can_getfreg(priv, STM32L4_CAN_FA1R_OFFSET);
   regval |= bitmask;
-  can_putfreg(priv, STM32L4_CAN_FA1R_OFFSET, regval);
+  stm32l4can_putfreg(priv, STM32L4_CAN_FA1R_OFFSET, regval);
 
   /* Exit filter initialization mode */
 
-  regval  = can_getfreg(priv, STM32L4_CAN_FMR_OFFSET);
+  regval  = stm32l4can_getfreg(priv, STM32L4_CAN_FMR_OFFSET);
   regval &= ~CAN_FMR_FINIT;
-  can_putfreg(priv, STM32L4_CAN_FMR_OFFSET, regval);
+  stm32l4can_putfreg(priv, STM32L4_CAN_FMR_OFFSET, regval);
   return OK;
+}
+
+/****************************************************************************
+ * Name: stm32l4can_addextfilter
+ *
+ * Description:
+ *   Add a filter for extended CAN IDs
+ *
+ * Input Parameter:
+ *   priv - A pointer to the private data structure for this CAN block
+ *   arg  - A pointer to a structure describing the filter
+ *
+ * Returned Value:
+ *   A non-negative filter ID is returned on success.
+ *   Otherwise -1 (ERROR) is returned with the errno
+ *   set to indicate the nature of the error.
+ *
+ ****************************************************************************/
+
+static int  stm32l4can_addextfilter(FAR struct stm32l4_can_s *priv,
+                                    FAR struct canioc_extfilter_s *arg)
+{
+  return -ENOTTY;
+}
+
+/****************************************************************************
+ * Name: stm32l4can_delextfilter
+ *
+ * Description:
+ *   Remove a filter for extended CAN IDs
+ *
+ * Input Parameter:
+ *   priv - A pointer to the private data structure for this CAN block
+ *   arg  - The filter index previously returned by the
+ *            CANIOC_ADD_EXTFILTER command
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success.  Otherwise -1 (ERROR)
+ *   returned with the errno variable set to indicate the
+ *   of the error.
+ *
+ ****************************************************************************/
+
+static int  stm32l4can_delextfilter(FAR struct stm32l4_can_s *priv, int arg)
+{
+  return -ENOTTY;
+}
+
+/****************************************************************************
+ * Name: stm32l4can_addextfilter
+ *
+ * Description:
+ *   Add a filter for standard CAN IDs
+ *
+ * Input Parameter:
+ *   priv - A pointer to the private data structure for this CAN block
+ *   arg  - A pointer to a structure describing the filter
+ *
+ * Returned Value:
+ *   A non-negative filter ID is returned on success.
+ *   Otherwise -1 (ERROR) is returned with the errno
+ *   set to indicate the nature of the error.
+ *
+ ****************************************************************************/
+
+static int  stm32l4can_addstdfilter(FAR struct stm32l4_can_s *priv,
+                                    FAR struct canioc_stdfilter_s *arg)
+{
+  return -ENOTTY;
+}
+
+/****************************************************************************
+ * Name: stm32l4can_delstdfilter
+ *
+ * Description:
+ *   Remove a filter for standard CAN IDs
+ *
+ * Input Parameter:
+ *   priv - A pointer to the private data structure for this CAN block
+ *   arg  - The filter index previously returned by the
+ *            CANIOC_ADD_STDFILTER command
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success.  Otherwise -1 (ERROR)
+ *   returned with the errno variable set to indicate the
+ *   of the error.
+ *
+ ****************************************************************************/
+
+static int  stm32l4can_delstdfilter(FAR struct stm32l4_can_s *priv, int arg)
+{
+  return -ENOTTY;
 }
 
 /****************************************************************************
@@ -1548,7 +2008,7 @@ static int can_filterinit(struct stm32l4_can_s *priv)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32l4_caninitialize
+ * Name: stm32l4can_initialize
  *
  * Description:
  *   Initialize the selected CAN port
@@ -1561,11 +2021,11 @@ static int can_filterinit(struct stm32l4_can_s *priv)
  *
  ****************************************************************************/
 
-FAR struct can_dev_s *stm32l4_caninitialize(int port)
+FAR struct can_dev_s *stm32l4can_initialize(int port)
 {
-  struct can_dev_s *dev = NULL;
+  FAR struct can_dev_s *dev = NULL;
 
-  canvdbg("CAN%d\n", port);
+  caninfo("CAN%d\n", port);
 
   /* NOTE:  Peripherical clocking for CAN1 and/or CAN2 was already provided
    * by stm32l4_clockconfig() early in the reset sequence.
@@ -1588,7 +2048,7 @@ FAR struct can_dev_s *stm32l4_caninitialize(int port)
   else
 #endif
     {
-      candbg("ERROR: Unsupported port %d\n", port);
+      canerr("ERROR: Unsupported port %d\n", port);
       return NULL;
     }
 

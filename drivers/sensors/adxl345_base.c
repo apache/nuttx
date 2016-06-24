@@ -125,7 +125,7 @@ static ssize_t adxl345_read(FAR struct file *filep, FAR char *buffer, size_t len
   struct adxl345_sample_s   sample;
   int                       ret;
 
-  snvdbg("len=%d\n", len);
+  sninfo("len=%d\n", len);
   DEBUGASSERT(filep);
   inode = filep->f_inode;
 
@@ -196,7 +196,7 @@ int adxl345_register(ADXL345_HANDLE handle, int minor)
   char devname[DEV_NAMELEN];
   int ret;
 
-  snvdbg("handle=%p minor=%d\n", handle, minor);
+  sninfo("handle=%p minor=%d\n", handle, minor);
   DEBUGASSERT(priv);
 
   /* Get exclusive access to the device structure */
@@ -205,7 +205,7 @@ int adxl345_register(ADXL345_HANDLE handle, int minor)
   if (ret < 0)
     {
       int errval = errno;
-      sndbg("ERROR: sem_wait failed: %d\n", errval);
+      snerr("ERROR: sem_wait failed: %d\n", errval);
       return -errval;
     }
 
@@ -221,7 +221,7 @@ int adxl345_register(ADXL345_HANDLE handle, int minor)
   ret = register_driver(devname, &g_adxl345fops, 0666, priv);
   if (ret < 0)
     {
-      sndbg("ERROR: Failed to register driver %s: %d\n", devname, ret);
+      snerr("ERROR: Failed to register driver %s: %d\n", devname, ret);
       sem_post(&priv->exclsem);
       return ret;
     }
@@ -305,7 +305,7 @@ static void adxl345_interrupt(FAR struct adxl345_config_s *config, FAR void *arg
       ret = work_queue(HPWORK, &priv->work, adxl345_worker, priv, 0);
       if (ret != 0)
         {
-          snlldbg("Failed to queue work: %d\n", ret);
+          snerr("ERROR: Failed to queue work: %d\n", ret);
         }
     }
 
@@ -329,7 +329,7 @@ static int adxl345_checkid(FAR struct adxl345_dev_s *priv)
   /* Read device ID  */
 
   devid = adxl345_getreg8(priv, ADXL345_DEVID);
-  snvdbg("devid: %04x\n", devid);
+  sninfo("devid: %04x\n", devid);
 
   if (devid != (uint16_t) DEVID)
     {
@@ -397,7 +397,7 @@ ADXL345_HANDLE adxl345_instantiate(FAR struct i2c_master_s *dev,
   priv = (FAR struct adxl345_dev_s *)kmm_zalloc(sizeof(struct adxl345_dev_s));
   if (!priv)
     {
-      sndbg("Failed to allocate the device structure!\n");
+      snerr("ERROR: Failed to allocate the device structure!\n");
       return NULL;
     }
 
@@ -418,7 +418,7 @@ ADXL345_HANDLE adxl345_instantiate(FAR struct i2c_master_s *dev,
   ret = adxl345_checkid(priv);
   if (ret < 0)
     {
-      sndbg("Wrong Device ID!\n");
+      snerr("ERROR: Wrong Device ID!\n");
       kmm_free(priv);
       return NULL;
     }

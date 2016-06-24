@@ -206,7 +206,7 @@ int board_app_initialize(uintptr_t arg)
     ret = ftl_initialize(CONFIG_SPARK_FLASH_MINOR, mtd);
     if (ret < 0)
       {
-        fdbg("ERROR: Initialize the FTL layer\n");
+        ferr("ERROR: Initialize the FTL layer\n");
         return ret;
       }
 
@@ -227,7 +227,7 @@ int board_app_initialize(uintptr_t arg)
       ret = mount(partname, mntpoint, "vfat", 0, NULL);
       if (ret < 0)
         {
-          fdbg("ERROR: Failed to mount the FAT volume: %d\n", errno);
+          ferr("ERROR: Failed to mount the FAT volume: %d\n", errno);
           return ret;
         }
     }
@@ -261,7 +261,7 @@ int board_app_initialize(uintptr_t arg)
           ret = ftl_initialize(partno, mtd_part);
           if (ret < 0)
             {
-              fdbg("ERROR: Initialize the FTL layer\n");
+              ferr("ERROR: Initialize the FTL layer\n");
               return ret;
             }
 
@@ -274,7 +274,7 @@ int board_app_initialize(uintptr_t arg)
           ret = mount(partname, mntpoint, "vfat", 0, NULL);
           if (ret < 0)
             {
-              fdbg("ERROR: Failed to mount the FAT volume: %d\n", errno);
+              ferr("ERROR: Failed to mount the FAT volume: %d\n", errno);
               return ret;
             }
 

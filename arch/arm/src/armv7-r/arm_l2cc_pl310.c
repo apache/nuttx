@@ -411,8 +411,8 @@ void up_l2ccinitialize(void)
       putreg32(L2CC_CR_L2CEN, L2CC_CR);
     }
 
-  lldbg("(%d ways) * (%d bytes/way) = %d bytes\n",
-        PL310_NWAYS, PL310_WAYSIZE, PL310_CACHE_SIZE);
+  sinfo("(%d ways) * (%d bytes/way) = %d bytes\n",
+          PL310_NWAYS, PL310_WAYSIZE, PL310_CACHE_SIZE);
 }
 
 /****************************************************************************

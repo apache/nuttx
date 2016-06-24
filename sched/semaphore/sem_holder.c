@@ -116,7 +116,7 @@ static inline FAR struct semholder_s *sem_allocholder(sem_t *sem)
 #endif
   else
     {
-      sdbg("Insufficient pre-allocated holders\n");
+      serr("ERROR: Insufficient pre-allocated holders\n");
       pholder = NULL;
     }
 
@@ -283,7 +283,7 @@ static int sem_boostholderprio(FAR struct semholder_s *pholder,
 
   if (!sched_verifytcb(htcb))
     {
-      sdbg("TCB 0x%08x is a stale handle, counts lost\n", htcb);
+      serr("ERROR: TCB 0x%08x is a stale handle, counts lost\n", htcb);
       sem_freeholder(sem, pholder);
     }
 
@@ -321,7 +321,7 @@ static int sem_boostholderprio(FAR struct semholder_s *pholder,
                 }
               else
                 {
-                  sdbg("CONFIG_SEM_NNESTPRIO exceeded\n");
+                  serr("ERROR: CONFIG_SEM_NNESTPRIO exceeded\n");
                 }
             }
 
@@ -372,7 +372,7 @@ static int sem_boostholderprio(FAR struct semholder_s *pholder,
  * Name: sem_verifyholder
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_ASSERTIONS
 static int sem_verifyholder(FAR struct semholder_s *pholder, FAR sem_t *sem,
                             FAR void *arg)
 {
@@ -397,15 +397,15 @@ static int sem_verifyholder(FAR struct semholder_s *pholder, FAR sem_t *sem,
  * Name: sem_dumpholder
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG) && defined(CONFIG_SEM_PHDEBUG)
+#if defined(CONFIG_DEBUG_INFO) && defined(CONFIG_SEM_PHDEBUG)
 static int sem_dumpholder(FAR struct semholder_s *pholder, FAR sem_t *sem,
                           FAR void *arg)
 {
 #if CONFIG_SEM_PREALLOCHOLDERS > 0
-  dbg("  %08x: %08x %08x %04x\n",
+  _info("  %08x: %08x %08x %04x\n",
       pholder, pholder->flink, pholder->htcb, pholder->counts);
 #else
-  dbg("  %08x: %08x %04x\n", pholder, pholder->htcb, pholder->counts);
+  _info("  %08x: %08x %04x\n", pholder, pholder->htcb, pholder->counts);
 #endif
   return 0;
 }
@@ -434,7 +434,7 @@ static int sem_restoreholderprio(FAR struct semholder_s *pholder,
 
   if (!sched_verifytcb(htcb))
     {
-      sdbg("TCB 0x%08x is a stale handle, counts lost\n", htcb);
+      serr("ERROR: TCB 0x%08x is a stale handle, counts lost\n", htcb);
       sem_freeholder(sem, pholder);
     }
 
@@ -648,7 +648,7 @@ static inline void sem_restorebaseprio_irq(FAR struct tcb_s *stcb,
    * should be at their base priority.
    */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_ASSERTIONS
   else
     {
       (void)sem_foreachholder(sem, sem_verifyholder, NULL);
@@ -723,7 +723,7 @@ static inline void sem_restorebaseprio_task(FAR struct tcb_s *stcb,
    * should be at their base priority.
    */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_ASSERTIONS
   else
     {
       (void)sem_foreachholder(sem, sem_verifyholder, NULL);
@@ -819,13 +819,13 @@ void sem_destroyholder(FAR sem_t *sem)
 #if CONFIG_SEM_PREALLOCHOLDERS > 0
   if (sem->hhead)
     {
-      sdbg("Semaphore destroyed with holders\n");
+      serr("ERROR: Semaphore destroyed with holders\n");
       (void)sem_foreachholder(sem, sem_recoverholders, NULL);
     }
 #else
   if (sem->holder.htcb)
     {
-      sdbg("Semaphore destroyed with holder\n");
+      serr("ERROR: Semaphore destroyed with holder\n");
     }
 
   sem->holder.htcb = NULL;
@@ -1036,10 +1036,12 @@ void sem_canceled(FAR struct tcb_s *stcb, FAR sem_t *sem)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG) && defined(CONFIG_SEM_PHDEBUG)
+#if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_SEM_PHDEBUG)
 void sem_enumholders(FAR sem_t *sem)
 {
+#ifdef CONFIG_DEBUG_INFO
   (void)sem_foreachholder(sem, sem_dumpholder, NULL);
+#endif
 }
 #endif
 
@@ -1060,7 +1062,7 @@ void sem_enumholders(FAR sem_t *sem)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG) && defined(CONFIG_SEM_PHDEBUG)
+#if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_SEM_PHDEBUG)
 int sem_nfreeholders(void)
 {
 #if CONFIG_SEM_PREALLOCHOLDERS > 0

@@ -96,7 +96,7 @@ void arp_arpin(FAR struct net_driver_s *dev)
 
   if (dev->d_len < (sizeof(struct arp_hdr_s) + ETH_HDRLEN))
     {
-      nlldbg("Too small\n");
+      nerr("ERROR: Packet Too small\n");
       dev->d_len = 0;
       return;
     }
@@ -107,7 +107,7 @@ void arp_arpin(FAR struct net_driver_s *dev)
   switch (arp->ah_opcode)
     {
       case HTONS(ARP_REQUEST):
-        nllvdbg("ARP request for IP %04lx\n", (long)ipaddr);
+        ninfo("ARP request for IP %04lx\n", (long)ipaddr);
 
         /* ARP request. If it asked for our address, we send out a reply. */
 
@@ -139,7 +139,7 @@ void arp_arpin(FAR struct net_driver_s *dev)
         break;
 
       case HTONS(ARP_REPLY):
-        nllvdbg("ARP reply for IP %04lx\n", (long)ipaddr);
+        ninfo("ARP reply for IP %04lx\n", (long)ipaddr);
 
         /* ARP reply. We insert or update the ARP table if it was meant
          * for us.

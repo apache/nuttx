@@ -86,7 +86,7 @@
 
 int nx_setposition(NXWINDOW hwnd, FAR const struct nxgl_point_s *pos)
 {
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!hwnd || !pos)
     {
       errno = EINVAL;

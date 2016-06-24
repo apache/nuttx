@@ -90,7 +90,7 @@ int nx_setbgcolor(NXHANDLE handle,
   FAR struct nxfe_conn_s *conn = (FAR struct nxfe_conn_s *)handle;
   struct nxsvrmsg_setbgcolor_s outmsg;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!conn)
     {
       set_errno(EINVAL);

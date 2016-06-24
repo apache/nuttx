@@ -49,7 +49,7 @@ FAR char *strpbrk(FAR const char *str, FAR const char *charset)
 {
   /* Sanity checking */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!str || !charset)
     {
       return NULL;

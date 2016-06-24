@@ -107,7 +107,7 @@
 #  define USB_FRAME_INT 0
 #endif
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
 #  define USB_ERROR_INT USBDEV_USBINTR_UEE
 #else
 #  define USB_ERROR_INT 0
@@ -361,7 +361,7 @@ struct lpc43_usbdev_s
 
 /* Register operations ********************************************************/
 
-#if defined(CONFIG_LPC43_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG)
+#ifdef CONFIG_LPC43_USBDEV_REGDEBUG
 static uint32_t lpc43_getreg(uint32_t addr);
 static void lpc43_putreg(uint32_t val, uint32_t addr);
 #else
@@ -501,7 +501,7 @@ static const struct usbdev_ops_s g_devops =
  *
  ****************************************************************************/
 
-#if defined(CONFIG_LPC43_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG)
+#ifdef CONFIG_LPC43_USBDEV_REGDEBUG
 static uint32_t lpc43_getreg(uint32_t addr)
 {
   static uint32_t prevaddr = 0;
@@ -522,7 +522,7 @@ static uint32_t lpc43_getreg(uint32_t addr)
         {
           if (count == 4)
             {
-              lldbg("...\n");
+              usbinfo("...\n");
             }
 
           return val;
@@ -539,7 +539,7 @@ static uint32_t lpc43_getreg(uint32_t addr)
         {
           /* Yes.. then show how many times the value repeated */
 
-          lldbg("[repeats %d more times]\n", count-3);
+          usbinfo("[repeats %d more times]\n", count-3);
         }
 
       /* Save the new address, value, and count */
@@ -551,7 +551,7 @@ static uint32_t lpc43_getreg(uint32_t addr)
 
   /* Show the register value read */
 
-  lldbg("%08x->%08x\n", addr, val);
+  usbinfo("%08x->%08x\n", addr, val);
   return val;
 }
 #endif
@@ -564,12 +564,12 @@ static uint32_t lpc43_getreg(uint32_t addr)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_LPC43_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG)
+#ifdef CONFIG_LPC43_USBDEV_REGDEBUG
 static void lpc43_putreg(uint32_t val, uint32_t addr)
 {
   /* Show the register value being written */
 
-  lldbg("%08x<-%08x\n", addr, val);
+  usbinfo("%08x<-%08x\n", addr, val);
 
   /* Write the value */
 
@@ -1228,8 +1228,8 @@ static inline void lpc43_ep0setup(struct lpc43_usbdev_s *priv)
 
   priv->ep0buf_len = len;
 
-  ullvdbg("type=%02x req=%02x value=%04x index=%04x len=%04x\n",
-          ctrl->type, ctrl->req, value, index, len);
+  uinfo("type=%02x req=%02x value=%04x index=%04x len=%04x\n",
+        ctrl->type, ctrl->req, value, index, len);
 
   /* Starting a control request - update state */
 
@@ -1393,7 +1393,7 @@ static inline void lpc43_ep0setup(struct lpc43_usbdev_s *priv)
           if (((ctrl->type & USB_REQ_RECIPIENT_MASK) == USB_REQ_RECIPIENT_DEVICE) &&
               value == USB_FEATURE_TESTMODE)
             {
-              ullvdbg("test mode: %d\n", index);
+              uinfo("test mode: %d\n", index);
             }
           else if ((ctrl->type & USB_REQ_RECIPIENT_MASK) != USB_REQ_RECIPIENT_ENDPOINT)
             {
@@ -1623,7 +1623,7 @@ static void lpc43_ep0complete(struct lpc43_usbdev_s *priv, uint8_t epphy)
       break;
 
     default:
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
       DEBUGASSERT(priv->ep0state != EP0STATE_DATA_IN &&
           priv->ep0state != EP0STATE_DATA_OUT        &&
           priv->ep0state != EP0STATE_SHORTWRITE      &&
@@ -1667,7 +1667,7 @@ static void lpc43_ep0nak(struct lpc43_usbdev_s *priv, uint8_t epphy)
       break;
 
     default:
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
       DEBUGASSERT(priv->ep0state != EP0STATE_WAIT_NAK_IN &&
                   priv->ep0state != EP0STATE_WAIT_NAK_OUT);
 #endif
@@ -2056,7 +2056,7 @@ static int lpc43_epdisable(FAR struct usbdev_ep_s *ep)
   FAR struct lpc43_ep_s *privep = (FAR struct lpc43_ep_s *)ep;
   irqstate_t flags;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!ep)
     {
       usbtrace(TRACE_DEVERROR(LPC43_TRACEERR_INVALIDPARMS), 0);
@@ -2100,7 +2100,7 @@ static FAR struct usbdev_req_s *lpc43_epallocreq(FAR struct usbdev_ep_s *ep)
 {
   FAR struct lpc43_req_s *privreq;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!ep)
     {
       usbtrace(TRACE_DEVERROR(LPC43_TRACEERR_INVALIDPARMS), 0);
@@ -2132,7 +2132,7 @@ static void lpc43_epfreereq(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s 
 {
   FAR struct lpc43_req_s *privreq = (FAR struct lpc43_req_s *)req;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!ep || !req)
     {
       usbtrace(TRACE_DEVERROR(LPC43_TRACEERR_INVALIDPARMS), 0);
@@ -2202,11 +2202,11 @@ static int lpc43_epsubmit(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *r
   irqstate_t flags;
   int ret = OK;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!req || !req->callback || !req->buf || !ep)
     {
       usbtrace(TRACE_DEVERROR(LPC43_TRACEERR_INVALIDPARMS), 0);
-      ullvdbg("req=%p callback=%p buf=%p ep=%p\n", req, req->callback, req->buf, ep);
+      uinfo("req=%p callback=%p buf=%p ep=%p\n", req, req->callback, req->buf, ep);
       return -EINVAL;
     }
 #endif
@@ -2271,7 +2271,7 @@ static int lpc43_epcancel(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *r
   FAR struct lpc43_ep_s *privep = (FAR struct lpc43_ep_s *)ep;
   irqstate_t flags;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!ep || !req)
     {
       usbtrace(TRACE_DEVERROR(LPC43_TRACEERR_INVALIDPARMS), 0);
@@ -2554,7 +2554,7 @@ static int lpc43_selfpowered(struct usbdev_s *dev, bool selfpowered)
 
   usbtrace(TRACE_DEVSELFPOWERED, (uint16_t)selfpowered);
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!dev)
     {
       usbtrace(TRACE_DEVERROR(LPC43_TRACEERR_INVALIDPARMS), 0);
@@ -2790,7 +2790,7 @@ int usbdev_register(struct usbdevclass_driver_s *driver)
 
   usbtrace(TRACE_DEVREGISTER, 0);
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!driver || !driver->ops->bind || !driver->ops->unbind ||
       !driver->ops->disconnect || !driver->ops->setup)
     {
@@ -2851,7 +2851,7 @@ int usbdev_unregister(struct usbdevclass_driver_s *driver)
 {
   usbtrace(TRACE_DEVUNREGISTER, 0);
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (driver != g_usbdev.driver)
     {
       usbtrace(TRACE_DEVERROR(LPC43_TRACEERR_INVALIDPARMS), 0);

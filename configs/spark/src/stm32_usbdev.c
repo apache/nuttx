@@ -74,7 +74,7 @@
 
 void stm32_usbinitialize(void)
 {
-  ulldbg("called\n");
+  uinfo("called\n");
 
   /* USB Soft Connect Pullup */
 
@@ -113,5 +113,5 @@ int stm32_usbpullup(FAR struct usbdev_s *dev, bool enable)
 
 void stm32_usbsuspend(FAR struct usbdev_s *dev, bool resume)
 {
-  ulldbg("resume: %d\n", resume);
+  uinfo("resume: %d\n", resume);
 }

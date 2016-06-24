@@ -50,39 +50,6 @@
 #ifdef CONFIG_ARCH_RAMVECTORS
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-/* Debug ********************************************************************/
-/* Non-standard debug that may be enabled just for testing the interrupt
- * config.  NOTE: that only lldbg types are used so that the output is
- * immediately available.
- */
-
-#ifdef CONFIG_DEBUG_IRQ
-#  define intdbg    lldbg
-#  define intvdbg   llvdbg
-#else
-#  define intdbg(x...)
-#  define intvdbg(x...)
-#endif
-
-/****************************************************************************
- * Private Type Declarations
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -103,7 +70,7 @@ int up_ramvec_attach(int irq, up_vector_t vector)
 {
   int ret = -EINVAL;
 
-  intvdbg("%s IRQ%d\n", vector ? "Attaching" : "Detaching", irq);
+  irqinfo("%s IRQ%d\n", vector ? "Attaching" : "Detaching", irq);
 
   if ((unsigned)irq < NR_VECTORS)
     {

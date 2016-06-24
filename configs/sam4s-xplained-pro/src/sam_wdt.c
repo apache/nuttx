@@ -82,34 +82,6 @@
 #  error "WDT_THREAD_INTERVAL must be greater than or equal to WDT_MINTIME"
 #endif
 
-/* Debug ***************************************************************************/
-/* Non-standard debug that may be enabled just for testing the watchdog timer */
-
-#ifndef CONFIG_DEBUG
-#  undef CONFIG_DEBUG_WATCHDOG
-#endif
-
-#ifdef CONFIG_DEBUG_WATCHDOG
-#  define wdgdbg                 dbg
-#  define wdglldbg               lldbg
-#  ifdef CONFIG_DEBUG_VERBOSE
-#    define wdgvdbg              vdbg
-#    define wdgllvdbg            llvdbg
-#  else
-#    define wdgvdbg(x...)
-#    define wdgllvdbg(x...)
-#  endif
-#else
-#  define wdgdbg(x...)
-#  define wdglldbg(x...)
-#  define wdgvdbg(x...)
-#  define wdgllvdbg(x...)
-#endif
-
-/************************************************************************************
- * Private Functions
- ************************************************************************************/
-
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
@@ -124,21 +96,21 @@ static int wdog_daemon(int argc, char *argv[])
 
   /* Open the watchdog device for reading */
 
-  wdgvdbg("Opening.\n");
+  wdinfo("Opening.\n");
   fd = open(CONFIG_WATCHDOG_DEVPATH, O_RDONLY);
   if (fd < 0)
     {
-      wdgdbg("open %s failed: %d\n", CONFIG_WATCHDOG_DEVPATH, errno);
+      wderr("ERROR: open %s failed: %d\n", CONFIG_WATCHDOG_DEVPATH, errno);
       goto errout;
     }
 
   /* Start the watchdog timer. */
 
-  wdgvdbg("Starting.\n");
+  wdinfo("Starting.\n");
   ret = ioctl(fd, WDIOC_START, 0);
   if (ret < 0)
     {
-      wdgdbg("ioctl(WDIOC_START) failed: %d\n", errno);
+      wderr("ERROR: ioctl(WDIOC_START) failed: %d\n", errno);
       goto errout_with_dev;
     }
 
@@ -147,11 +119,11 @@ static int wdog_daemon(int argc, char *argv[])
     {
       usleep((CONFIG_WDT_THREAD_INTERVAL)*1000);
 
-      wdgvdbg("ping\n");
+      wdinfo("ping\n");
       ret = ioctl(fd, WDIOC_KEEPALIVE, 0);
       if (ret < 0)
         {
-          wdgdbg("ioctl(WDIOC_KEEPALIVE) failed: %d\n", errno);
+          wderr("ERROR: ioctl(WDIOC_KEEPALIVE) failed: %d\n", errno);
           goto errout_with_dev;
         }
     }
@@ -181,36 +153,36 @@ int sam_watchdog_initialize(void)
 
   /* Initialize tha register the watchdog timer device */
 
-  wdgvdbg("Initializing Watchdog driver...\n");
+  wdinfo("Initializing Watchdog driver...\n");
   sam_wdtinitialize(CONFIG_WATCHDOG_DEVPATH);
 
   /* Open the watchdog device */
 
-  wdgvdbg("Opening.\n");
+  wdinfo("Opening.\n");
   fd = open(CONFIG_WATCHDOG_DEVPATH, O_RDONLY);
   if (fd < 0)
     {
-      wdgdbg("open %s failed: %d\n", CONFIG_WATCHDOG_DEVPATH, errno);
+      wderr("ERROR: open %s failed: %d\n", CONFIG_WATCHDOG_DEVPATH, errno);
       goto errout;
     }
 
   /* Set the watchdog timeout */
 
-  wdgvdbg("Timeout = %d.\n", CONFIG_WDT_TIMEOUT);
+  wdinfo("Timeout = %d.\n", CONFIG_WDT_TIMEOUT);
   ret = ioctl(fd, WDIOC_SETTIMEOUT, (unsigned long)CONFIG_WDT_TIMEOUT);
   if (ret < 0)
     {
-      wdgdbg("ioctl(WDIOC_SETTIMEOUT) failed: %d\n", errno);
+      wderr("ERROR: ioctl(WDIOC_SETTIMEOUT) failed: %d\n", errno);
       goto errout_with_dev;
     }
 
   /* Set the watchdog minimum time */
 
-  wdgvdbg("MinTime = %d.\n", CONFIG_WDT_MINTIME);
+  wdinfo("MinTime = %d.\n", CONFIG_WDT_MINTIME);
   ret = ioctl(fd, WDIOC_MINTIME, (unsigned long)CONFIG_WDT_MINTIME);
   if (ret < 0)
     {
-      wdgdbg("ioctl(WDIOC_MINTIME) failed: %d\n", errno);
+      wderr("ERROR: ioctl(WDIOC_MINTIME) failed: %d\n", errno);
       goto errout_with_dev;
     }
 

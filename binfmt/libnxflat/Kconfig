@@ -6,4 +6,4 @@
 config NXFLAT_DUMPBUFFER
 	bool "Dump NXFLAT buffers"
 	default n
-	depends on DEBUG && DEBUG_VERBOSE
+	depends on DEBUG_INFO

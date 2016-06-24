@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/lpc11xx/lpc11_gpiodbg.c
  *
- *   Copyright (C) 2010-2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2011, 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,6 +39,11 @@
 
 #include <nuttx/config.h>
 
+/* Output debug info even if debug output is not selected. */
+
+#undef  CONFIG_DEBUG_INFO
+#define CONFIG_DEBUG_INFO 1
+
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -49,23 +54,7 @@
 #include "chip.h"
 #include "lpc11_gpio.h"
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#ifndef CONFIG_DEBUG
-#  undef CONFIG_DEBUG_GPIO
-#endif
-
-#ifdef CONFIG_DEBUG_GPIO
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
+#ifdef CONFIG_DEBUG_GPIO_INFO
 
 /****************************************************************************
  * Private Functions
@@ -157,34 +146,34 @@ int lpc11_dumpgpio(lpc11_pinset_t pinset, const char *msg)
   /* The following requires exclusive access to the GPIO registers */
 
   flags = enter_critical_section();
-  lldbg("GPIO%c pin%d (pinset: %08x) -- %s\n",
-        port + '0', pin, pinset, msg);
+  gpioinfo("GPIO%c pin%d (pinset: %08x) -- %s\n",
+           port + '0', pin, pinset, msg);
 
 #if defined(LPC176x)
-  lldbg("  PINSEL[%08x]: %08x PINMODE[%08x]: %08x ODMODE[%08x]: %08x\n",
-        pinsel,  pinsel  ? getreg32(pinsel) : 0,
-        pinmode, pinmode ? getreg32(pinmode) : 0,
-        g_odmode[port],    getreg32(g_odmode[port]));
+  gpioinfo("  PINSEL[%08x]: %08x PINMODE[%08x]: %08x ODMODE[%08x]: %08x\n",
+           pinsel,  pinsel  ? getreg32(pinsel) : 0,
+           pinmode, pinmode ? getreg32(pinmode) : 0,
+           g_odmode[port],    getreg32(g_odmode[port]));
 #elif defined(LPC178x)
-  lldbg("  IOCON[%08x]: %08x\n", iocon, getreg32(iocon));
+  gpioinfo("  IOCON[%08x]: %08x\n", iocon, getreg32(iocon));
 #endif
 
   base = g_fiobase[port];
-  lldbg("  FIODIR[%08x]: %08x FIOMASK[%08x]: %08x FIOPIN[%08x]: %08x\n",
-        base+LPC11_FIO_DIR_OFFSET,  getreg32(base+LPC11_FIO_DIR_OFFSET),
-        base+LPC11_FIO_MASK_OFFSET, getreg32(base+LPC11_FIO_MASK_OFFSET),
-        base+LPC11_FIO_PIN_OFFSET,  getreg32(base+LPC11_FIO_PIN_OFFSET));
+  gpioinfo("  FIODIR[%08x]: %08x FIOMASK[%08x]: %08x FIOPIN[%08x]: %08x\n",
+           base+LPC11_FIO_DIR_OFFSET,  getreg32(base+LPC11_FIO_DIR_OFFSET),
+           base+LPC11_FIO_MASK_OFFSET, getreg32(base+LPC11_FIO_MASK_OFFSET),
+           base+LPC11_FIO_PIN_OFFSET,  getreg32(base+LPC11_FIO_PIN_OFFSET));
 
   base = g_intbase[port];
-  lldbg("  IOINTSTATUS[%08x]: %08x INTSTATR[%08x]: %08x INSTATF[%08x]: %08x\n",
-        LPC11_GPIOINT_IOINTSTATUS,          getreg32(LPC11_GPIOINT_IOINTSTATUS),
-        base+LPC11_GPIOINT_INTSTATR_OFFSET, getreg32(base+LPC11_GPIOINT_INTSTATR_OFFSET),
-        base+LPC11_GPIOINT_INTSTATF_OFFSET, getreg32(base+LPC11_GPIOINT_INTSTATF_OFFSET));
-  lldbg("  INTENR[%08x]: %08x INTENF[%08x]: %08x\n",
-        base+LPC11_GPIOINT_INTENR_OFFSET,   getreg32(base+LPC11_GPIOINT_INTENR_OFFSET),
-        base+LPC11_GPIOINT_INTENF_OFFSET,   getreg32(base+LPC11_GPIOINT_INTENF_OFFSET));
+  gpioinfo("  IOINTSTATUS[%08x]: %08x INTSTATR[%08x]: %08x INSTATF[%08x]: %08x\n",
+           LPC11_GPIOINT_IOINTSTATUS,          getreg32(LPC11_GPIOINT_IOINTSTATUS),
+           base+LPC11_GPIOINT_INTSTATR_OFFSET, getreg32(base+LPC11_GPIOINT_INTSTATR_OFFSET),
+           base+LPC11_GPIOINT_INTSTATF_OFFSET, getreg32(base+LPC11_GPIOINT_INTSTATF_OFFSET));
+  gpioinfo("  INTENR[%08x]: %08x INTENF[%08x]: %08x\n",
+           base+LPC11_GPIOINT_INTENR_OFFSET,   getreg32(base+LPC11_GPIOINT_INTENR_OFFSET),
+           base+LPC11_GPIOINT_INTENF_OFFSET,   getreg32(base+LPC11_GPIOINT_INTENF_OFFSET));
+
   leave_critical_section(flags);
   return OK;
 }
-#endif /* CONFIG_DEBUG_GPIO */
-
+#endif /* CONFIG_DEBUG_GPIO_INFO */

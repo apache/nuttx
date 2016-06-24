@@ -184,10 +184,10 @@ static ssize_t filemtd_write(FAR struct file_dev_s *priv, size_t offset,
        * erased state.
        */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
       if (newvalue != srcvalue)
         {
-          dbg("ERROR: Bad write: source=%02x dest=%02x result=%02x\n",
+          _err("ERROR: Bad write: source=%02x dest=%02x result=%02x\n",
               srcvalue, oldvalue, newvalue);
         }
 #endif
@@ -498,7 +498,7 @@ FAR struct mtd_dev_s *filemtd_initialize(FAR const char *path, size_t offset,
   priv = (FAR struct file_dev_s *)kmm_zalloc(sizeof(struct file_dev_s));
   if (!priv)
     {
-      fdbg("Failed to allocate the FILE MTD state structure\n");
+      ferr("ERROR: Failed to allocate the FILE MTD state structure\n");
       return NULL;
     }
 
@@ -514,7 +514,7 @@ FAR struct mtd_dev_s *filemtd_initialize(FAR const char *path, size_t offset,
   ret = stat(path, &sb);
   if (ret < 0)
     {
-      dbg("Failed to stat %s: %d\n", path, get_errno());
+      _err("ERROR: Failed to stat %s: %d\n", path, get_errno());
       return NULL;
     }
 
@@ -525,7 +525,7 @@ FAR struct mtd_dev_s *filemtd_initialize(FAR const char *path, size_t offset,
   priv->fd = open(path, mode);
   if (priv->fd == -1)
     {
-      fdbg("Failed to open the FILE MTD file %s\n", path);
+      ferr("ERROR: Failed to open the FILE MTD file %s\n", path);
       kmm_free(priv);
       return NULL;
     }
@@ -557,7 +557,7 @@ FAR struct mtd_dev_s *filemtd_initialize(FAR const char *path, size_t offset,
   nblocks = (filelen - offset) / priv->erasesize;
   if (nblocks < 3)
     {
-      fdbg("Need to provide at least three full erase block\n");
+      ferr("ERROR: Need to provide at least three full erase block\n");
       kmm_free(priv);
       return NULL;
     }

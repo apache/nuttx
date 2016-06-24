@@ -43,7 +43,7 @@ CONFIG_WINDOWS_NATIVE=y
 #
 # Debug Options
 #
-# CONFIG_DEBUG is not set
+# CONFIG_DEBUG_FEATURES is not set
 # CONFIG_DEBUG_SYMBOLS is not set
 
 #
@@ -306,7 +306,6 @@ CONFIG_DEV_LOWCONSOLE=y
 #
 # System Logging
 #
-# CONFIG_SYSLOG is not set
 
 #
 # Graphics Support

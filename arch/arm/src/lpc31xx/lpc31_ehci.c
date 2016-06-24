@@ -113,7 +113,7 @@
 
 /* Debug options */
 
-#ifndef CONFIG_DEBUG
+#ifndef CONFIG_DEBUG_USB_INFO
 #  undef CONFIG_LPC31_EHCI_REGDEBUG
 #endif
 
@@ -121,13 +121,6 @@
 
 #undef CONFIG_USBHOST_ISOC_DISABLE
 #define CONFIG_USBHOST_ISOC_DISABLE 1
-
-/* Simplify DEBUG checks */
-
-#ifndef CONFIG_DEBUG
-#  undef CONFIG_DEBUG_VERBOSE
-#  undef CONFIG_DEBUG_USB
-#endif
 
 /* Registers *******************************************************************/
 /* Traditionally, NuttX specifies register locations using individual
@@ -833,7 +826,7 @@ static uint32_t lpc31_swap32(uint32_t value)
 static void lpc31_printreg(volatile uint32_t *regaddr, uint32_t regval,
                           bool iswrite)
 {
-  lldbg("%08x%s%08x\n", (uintptr_t)regaddr, iswrite ? "<-" : "->", regval);
+  uinfo("%08x%s%08x\n", (uintptr_t)regaddr, iswrite ? "<-" : "->", regval);
 }
 #endif
 
@@ -884,7 +877,7 @@ static void lpc31_checkreg(volatile uint32_t *regaddr, uint32_t regval, bool isw
             {
               /* No.. More than one. */
 
-              lldbg("[repeats %d more times]\n", count);
+              uinfo("[repeats %d more times]\n", count);
             }
         }
 
@@ -1463,13 +1456,13 @@ static int lpc31_qh_flush(struct lpc31_qh_s *qh)
 #ifdef CONFIG_LPC31_EHCI_REGDEBUG
 static void lpc31_qtd_print(struct lpc31_qtd_s *qtd)
 {
-  udbg("  QTD[%p]:\n", qtd);
-  udbg("    hw:\n");
-  udbg("      nqp: %08x alt: %08x token: %08x\n",
-       qtd->hw.nqp, qtd->hw.alt, qtd->hw.token);
-  udbg("      bpl: %08x %08x %08x %08x %08x\n",
-       qtd->hw.bpl[0], qtd->hw.bpl[1], qtd->hw.bpl[2],
-       qtd->hw.bpl[3], qtd->hw.bpl[4]);
+  uinfo("  QTD[%p]:\n", qtd);
+  uinfo("    hw:\n");
+  uinfo("      nqp: %08x alt: %08x token: %08x\n",
+        qtd->hw.nqp, qtd->hw.alt, qtd->hw.token);
+  uinfo("      bpl: %08x %08x %08x %08x %08x\n",
+        qtd->hw.bpl[0], qtd->hw.bpl[1], qtd->hw.bpl[2],
+        qtd->hw.bpl[3], qtd->hw.bpl[4]);
 }
 #endif
 
@@ -1487,30 +1480,30 @@ static void lpc31_qh_print(struct lpc31_qh_s *qh)
   struct lpc31_epinfo_s *epinfo;
   struct ehci_overlay_s *overlay;
 
-  udbg("QH[%p]:\n", qh);
-  udbg("  hw:\n");
-  udbg("    hlp: %08x epchar: %08x epcaps: %08x cqp: %08x\n",
-       qh->hw.hlp, qh->hw.epchar, qh->hw.epcaps, qh->hw.cqp);
+  uinfo("QH[%p]:\n", qh);
+  uinfo("  hw:\n");
+  uinfo("    hlp: %08x epchar: %08x epcaps: %08x cqp: %08x\n",
+        qh->hw.hlp, qh->hw.epchar, qh->hw.epcaps, qh->hw.cqp);
 
   overlay = &qh->hw.overlay;
-  udbg("  overlay:\n");
-  udbg("    nqp: %08x alt: %08x token: %08x\n",
-       overlay->nqp, overlay->alt, overlay->token);
-  udbg("    bpl: %08x %08x %08x %08x %08x\n",
-       overlay->bpl[0], overlay->bpl[1], overlay->bpl[2],
-       overlay->bpl[3], overlay->bpl[4]);
+  uinfo("  overlay:\n");
+  uinfo("    nqp: %08x alt: %08x token: %08x\n",
+        overlay->nqp, overlay->alt, overlay->token);
+  uinfo("    bpl: %08x %08x %08x %08x %08x\n",
+        overlay->bpl[0], overlay->bpl[1], overlay->bpl[2],
+        overlay->bpl[3], overlay->bpl[4]);
 
-  udbg("  fqp:\n", qh->fqp);
+  uinfo("  fqp:\n", qh->fqp);
 
   epinfo = qh->epinfo;
-  udbg("  epinfo[%p]:\n", epinfo);
+  uinfo("  epinfo[%p]:\n", epinfo);
   if (epinfo)
     {
-      udbg("    EP%d DIR=%s FA=%08x TYPE=%d MaxPacket=%d\n",
-           epinfo->epno, epinfo->dirin ? "IN" : "OUT", epinfo->devaddr,
-           epinfo->xfrtype, epinfo->maxpacket);
-      udbg("    Toggle=%d iocwait=%d speed=%d result=%d\n",
-           epinfo->toggle, epinfo->iocwait, epinfo->speed, epinfo->result);
+      uinfo("    EP%d DIR=%s FA=%08x TYPE=%d MaxPacket=%d\n",
+            epinfo->epno, epinfo->dirin ? "IN" : "OUT", epinfo->devaddr,
+            epinfo->xfrtype, epinfo->maxpacket);
+      uinfo("    Toggle=%d iocwait=%d speed=%d result=%d\n",
+            epinfo->toggle, epinfo->iocwait, epinfo->speed, epinfo->result);
     }
 }
 #endif
@@ -2113,7 +2106,7 @@ static int lpc31_async_setup(struct lpc31_rhport_s *rhport,
 #ifdef CONFIG_USBHOST_TRACE
   usbhost_vtrace2(EHCI_VTRACE2_ASYNCXFR, epinfo->epno, buflen);
 #else
-  uvdbg("RHport%d EP%d: buffer=%p, buflen=%d, req=%p\n",
+  uinfo("RHport%d EP%d: buffer=%p, buflen=%d, req=%p\n",
         RHPORT(rhport), epinfo->epno, buffer, buflen, req);
 #endif
 
@@ -2391,7 +2384,7 @@ static int lpc31_intr_setup(struct lpc31_rhport_s *rhport,
 #ifdef CONFIG_USBHOST_TRACE
   usbhost_vtrace2(EHCI_VTRACE2_INTRXFR, epinfo->epno, buflen);
 #else
-  uvdbg("RHport%d EP%d: buffer=%p, buflen=%d\n",
+  uinfo("RHport%d EP%d: buffer=%p, buflen=%d\n",
         RHPORT(rhport), epinfo->epno, buffer, buflen);
 #endif
 
@@ -3377,7 +3370,7 @@ static int lpc31_ehci_interrupt(int irq, FAR void *context)
 #ifdef CONFIG_USBHOST_TRACE
   usbhost_vtrace1(EHCI_VTRACE1_TOPHALF, usbsts & regval);
 #else
-  ullvdbg("USBSTS: %08x USBINTR: %08x\n", usbsts, regval);
+  uinfo("USBSTS: %08x USBINTR: %08x\n", usbsts, regval);
 #endif
 
   /* Handle all unmasked interrupt sources */
@@ -3909,7 +3902,7 @@ static int lpc31_epalloc(FAR struct usbhost_driver_s *drvr,
 #ifdef CONFIG_USBHOST_TRACE
   usbhost_vtrace2(EHCI_VTRACE2_EPALLOC, epdesc->addr, epdesc->xfrtype);
 #else
-  uvdbg("EP%d DIR=%s FA=%08x TYPE=%d Interval=%d MaxPacket=%d\n",
+  uinfo("EP%d DIR=%s FA=%08x TYPE=%d Interval=%d MaxPacket=%d\n",
         epdesc->addr, epdesc->in ? "IN" : "OUT", hport->funcaddr,
         epdesc->xfrtype, epdesc->interval, epdesc->mxpacketsize);
 #endif
@@ -4199,7 +4192,7 @@ static int lpc31_ctrlin(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
 #ifdef CONFIG_USBHOST_TRACE
   usbhost_vtrace2(EHCI_VTRACE2_CTRLINOUT, RHPORT(rhport), req->req);
 #else
-  uvdbg("RHPort%d type: %02x req: %02x value: %02x%02x index: %02x%02x len: %04x\n",
+  uinfo("RHPort%d type: %02x req: %02x value: %02x%02x index: %02x%02x len: %04x\n",
         RHPORT(rhport), req->type, req->req, req->value[1], req->value[0],
         req->index[1], req->index[0], len);
 #endif
@@ -4222,7 +4215,7 @@ static int lpc31_ctrlin(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
   ret = lpc31_async_setup(rhport, ep0info, req, buffer, len);
   if (ret < 0)
     {
-      udbg("ERROR: lpc31_async_setup failed: %d\n", ret);
+      uerr("ERROR: lpc31_async_setup failed: %d\n", ret);
       goto errout_with_iocwait;
     }
 
@@ -4687,7 +4680,7 @@ static int lpc31_connect(FAR struct usbhost_driver_s *drvr,
   /* Set the connected/disconnected flag */
 
   hport->connected = connected;
-  ullvdbg("Hub port %d connected: %s\n", hport->port, connected ? "YES" : "NO");
+  uinfo("Hub port %d connected: %s\n", hport->port, connected ? "YES" : "NO");
 
   /* Report the connection event */
 
@@ -4887,7 +4880,7 @@ FAR struct usbhost_connection_s *lpc31_ehci_initialize(int controller)
 {
   FAR struct usbhost_hubport_s *hport;
   uint32_t regval;
-#if defined(CONFIG_DEBUG_USB) && defined(CONFIG_DEBUG_VERBOSE)
+#if defined(CONFIG_DEBUG_USB) && defined(CONFIG_DEBUG_ASSERTIONS)
   uint16_t regval16;
   unsigned int nports;
 #endif
@@ -5140,7 +5133,7 @@ FAR struct usbhost_connection_s *lpc31_ehci_initialize(int controller)
 
   lpc31_putreg(EHCI_INT_ALLINTS, &HCOR->usbsts);
 
-#if defined(CONFIG_DEBUG_USB) && defined(CONFIG_DEBUG_VERBOSE)
+#if defined(CONFIG_DEBUG_USB) && defined(CONFIG_DEBUG_ASSERTIONS)
   /* Show the EHCI version */
 
   regval16 = lpc31_swap16(HCCR->hciversion);

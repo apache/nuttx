@@ -410,7 +410,7 @@ int iob_contig(FAR struct iob_s *iob, unsigned int len);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
 void iob_dump(FAR const char *msg, FAR struct iob_s *iob, unsigned int len,
               unsigned int offset);
 #else

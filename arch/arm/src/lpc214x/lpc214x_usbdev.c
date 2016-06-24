@@ -104,7 +104,7 @@
 #  define USB_FRAME_INT 0
 #endif
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
 #  define USB_ERROR_INT USBDEV_DEVINT_EPRINT
 #else
 #  define USB_ERROR_INT 0
@@ -382,7 +382,7 @@ struct lpc214x_usbdev_s
 
 /* Register operations ********************************************************/
 
-#if defined(CONFIG_LPC214X_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG)
+#ifdef CONFIG_LPC214X_USBDEV_REGDEBUG
 static uint32_t lpc214x_getreg(uint32_t addr);
 static void lpc214x_putreg(uint32_t val, uint32_t addr);
 #else
@@ -518,7 +518,7 @@ static const struct usbdev_ops_s g_devops =
  *
  ****************************************************************************/
 
-#if defined(CONFIG_LPC214X_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG)
+#ifdef CONFIG_LPC214X_USBDEV_REGDEBUG
 static uint32_t lpc214x_getreg(uint32_t addr)
 {
   static uint32_t prevaddr = 0;
@@ -539,7 +539,7 @@ static uint32_t lpc214x_getreg(uint32_t addr)
         {
           if (count == 4)
             {
-              lldbg("...\n");
+              uinfo("...\n");
             }
 
           return val;
@@ -556,7 +556,7 @@ static uint32_t lpc214x_getreg(uint32_t addr)
         {
           /* Yes.. then show how many times the value repeated */
 
-          lldbg("[repeats %d more times]\n", count-3);
+          uinfo("[repeats %d more times]\n", count-3);
         }
 
       /* Save the new address, value, and count */
@@ -568,7 +568,7 @@ static uint32_t lpc214x_getreg(uint32_t addr)
 
   /* Show the register value read */
 
-  lldbg("%08x->%08x\n", addr, val);
+  uinfo("%08x->%08x\n", addr, val);
   return val;
 }
 #endif
@@ -581,12 +581,12 @@ static uint32_t lpc214x_getreg(uint32_t addr)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_LPC214X_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG)
+#ifdef CONFIG_LPC214X_USBDEV_REGDEBUG
 static void lpc214x_putreg(uint32_t val, uint32_t addr)
 {
   /* Show the register value being written */
 
-  lldbg("%08x<-%08x\n", addr, val);
+  uinfo("%08x<-%08x\n", addr, val);
 
   /* Write the value */
 
@@ -1021,8 +1021,9 @@ static int lpc214x_wrrequest(struct lpc214x_ep_s *privep)
       return OK;
     }
 
-  ullvdbg("epphy=%d req=%p: len=%d xfrd=%d nullpkt=%d\n",
-          privep->epphy, privreq, privreq->req.len, privreq->req.xfrd, privep->txnullpkt);
+  uinfo("epphy=%d req=%p: len=%d xfrd=%d nullpkt=%d\n",
+        privep->epphy, privreq, privreq->req.len, privreq->req.xfrd,
+        privep->txnullpkt);
 
   /* Ignore any attempt to send a zero length packet on anything but EP0IN */
 
@@ -1130,8 +1131,8 @@ static int lpc214x_rdrequest(struct lpc214x_ep_s *privep)
       return OK;
     }
 
-  ullvdbg("len=%d xfrd=%d nullpkt=%d\n",
-          privreq->req.len, privreq->req.xfrd, privep->txnullpkt);
+  uinfo("len=%d xfrd=%d nullpkt=%d\n",
+        privreq->req.len, privreq->req.xfrd, privep->txnullpkt);
 
   /* Ignore any attempt to receive a zero length packet */
 
@@ -1552,8 +1553,8 @@ static inline void lpc214x_ep0setup(struct lpc214x_usbdev_s *priv)
   index = GETUINT16(ctrl.index);
   len   = GETUINT16(ctrl.len);
 
-  ullvdbg("type=%02x req=%02x value=%04x index=%04x len=%04x\n",
-          ctrl.type, ctrl.req, value, index, len);
+  uinfo("type=%02x req=%02x value=%04x index=%04x len=%04x\n",
+        ctrl.type, ctrl.req, value, index, len);
 
   /* Dispatch any non-standard requests */
 
@@ -1697,7 +1698,7 @@ static inline void lpc214x_ep0setup(struct lpc214x_usbdev_s *priv)
         if (((ctrl.type & USB_REQ_RECIPIENT_MASK) == USB_REQ_RECIPIENT_DEVICE) &&
             value == USB_FEATURE_TESTMODE)
           {
-            ullvdbg("test mode: %d\n", index);
+            uinfo("test mode: %d\n", index);
           }
         else if ((ctrl.type & USB_REQ_RECIPIENT_MASK) != USB_REQ_RECIPIENT_ENDPOINT)
           {
@@ -2055,7 +2056,7 @@ static int lpc214x_usbinterrupt(int irq, FAR void *context)
 
 #endif
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
       /* USB engine error interrupt */
 
       if ((devintstatus & USBDEV_DEVINT_EPRINT))
@@ -2287,7 +2288,7 @@ static int lpc214x_usbinterrupt(int irq, FAR void *context)
                                 }
                               else
                                 {
-                                  ullvdbg("Pending data on OUT endpoint\n");
+                                  uinfo("Pending data on OUT endpoint\n");
                                   priv->rxpending = 1;
                                 }
                             }
@@ -2378,7 +2379,7 @@ static int lpc214x_dmasetup(struct lpc214x_usbdev_s *priv, uint8_t epphy,
   struct lpc214x_dmadesc_s *dmadesc = priv;
   uint32_t reg;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!priv || epphy < 2)
     {
       usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_INVALIDPARMS), 0);
@@ -2577,7 +2578,7 @@ static int lpc214x_epdisable(FAR struct usbdev_ep_s *ep)
   uint32_t mask = (1 << privep->epphy);
   uint32_t reg;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!ep)
     {
       usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_INVALIDPARMS), 0);
@@ -2619,7 +2620,7 @@ static FAR struct usbdev_req_s *lpc214x_epallocreq(FAR struct usbdev_ep_s *ep)
 {
   FAR struct lpc214x_req_s *privreq;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!ep)
     {
       usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_INVALIDPARMS), 0);
@@ -2651,7 +2652,7 @@ static void lpc214x_epfreereq(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_
 {
   FAR struct lpc214x_req_s *privreq = (FAR struct lpc214x_req_s *)req;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!ep || !req)
     {
       usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_INVALIDPARMS), 0);
@@ -2759,11 +2760,12 @@ static int lpc214x_epsubmit(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s 
   irqstate_t flags;
   int ret = OK;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!req || !req->callback || !req->buf || !ep)
     {
       usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_INVALIDPARMS), 0);
-      ullvdbg("req=%p callback=%p buf=%p ep=%p\n", req, req->callback, req->buf, ep);
+      uinfo("req=%p callback=%p buf=%p ep=%p\n",
+            req, req->callback, req->buf, ep);
       return -EINVAL;
     }
 #endif
@@ -2844,7 +2846,7 @@ static int lpc214x_epcancel(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s 
   FAR struct lpc214x_ep_s *privep = (FAR struct lpc214x_ep_s *)ep;
   irqstate_t flags;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!ep || !req)
     {
       usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_INVALIDPARMS), 0);
@@ -3107,7 +3109,7 @@ static int lpc214x_selfpowered(struct usbdev_s *dev, bool selfpowered)
 
   usbtrace(TRACE_DEVSELFPOWERED, (uint16_t)selfpowered);
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!dev)
     {
       usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_INVALIDPARMS), 0);
@@ -3322,7 +3324,7 @@ int usbdev_register(struct usbdevclass_driver_s *driver)
 
   usbtrace(TRACE_DEVREGISTER, 0);
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!driver || !driver->ops->bind || !driver->ops->unbind ||
       !driver->ops->disconnect || !driver->ops->setup)
     {
@@ -3372,7 +3374,7 @@ int usbdev_unregister(struct usbdevclass_driver_s *driver)
 {
   usbtrace(TRACE_DEVUNREGISTER, 0);
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (driver != g_usbdev.driver)
     {
       usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_INVALIDPARMS), 0);

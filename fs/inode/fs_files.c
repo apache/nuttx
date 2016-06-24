@@ -196,12 +196,12 @@ int file_dup2(FAR struct file *filep1, FAR struct file *filep2)
 {
   FAR struct filelist *list;
   FAR struct inode *inode;
-  int err;
+  int errcode;
   int ret;
 
   if (!filep1 || !filep1->f_inode || !filep2)
     {
-      err = EBADF;
+      errcode = EBADF;
       goto errout;
     }
 
@@ -287,7 +287,7 @@ errout_with_inode:
   filep2->f_inode  = NULL;
 
 errout_with_ret:
-  err              = -ret;
+  errcode              = -ret;
 
   if (list != NULL)
     {
@@ -295,7 +295,7 @@ errout_with_ret:
     }
 
 errout:
-  set_errno(err);
+  set_errno(errcode);
   return ERROR;
 }
 

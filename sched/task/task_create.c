@@ -98,7 +98,7 @@ static int thread_create(FAR const char *name, uint8_t ttype, int priority,
   tcb = (FAR struct task_tcb_s *)kmm_zalloc(sizeof(struct task_tcb_s));
   if (!tcb)
     {
-      sdbg("ERROR: Failed to allocate TCB\n");
+      serr("ERROR: Failed to allocate TCB\n");
       errcode = ENOMEM;
       goto errout;
     }

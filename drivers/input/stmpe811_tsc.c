@@ -196,7 +196,7 @@ static void stmpe811_notify(FAR struct stmpe811_dev_s *priv)
       if (fds)
         {
           fds->revents |= POLLIN;
-          ivdbg("Report events: %02x\n", fds->revents);
+          iinfo("Report events: %02x\n", fds->revents);
           sem_post(fds->sem);
         }
     }
@@ -306,7 +306,7 @@ static inline int stmpe811_waitsample(FAR struct stmpe811_dev_s *priv,
 
       if (ret < 0)
         {
-#ifdef CONFIG_DEBUG
+#if defined(CONFIG_DEBUG_INPUT_ERROR) || defined(CONFIG_DEBUG_ASSERTIONS)
           /* Sample the errno (debug output could change it) */
 
           int errval = errno;
@@ -315,7 +315,7 @@ static inline int stmpe811_waitsample(FAR struct stmpe811_dev_s *priv,
            * the failure now.
            */
 
-          idbg("ERROR: sem_wait failed: %d\n", errval);
+          ierr("ERROR: sem_wait failed: %d\n", errval);
           DEBUGASSERT(errval == EINTR);
 #endif
           ret = -EINTR;
@@ -464,7 +464,7 @@ static ssize_t stmpe811_read(FAR struct file *filep, FAR char *buffer, size_t le
   struct stmpe811_sample_s   sample;
   int                        ret;
 
-  ivdbg("len=%d\n", len);
+  iinfo("len=%d\n", len);
   DEBUGASSERT(filep);
   inode = filep->f_inode;
 
@@ -589,7 +589,7 @@ static int stmpe811_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   FAR struct stmpe811_dev_s *priv;
   int                        ret;
 
-  ivdbg("cmd: %d arg: %ld\n", cmd, arg);
+  iinfo("cmd: %d arg: %ld\n", cmd, arg);
   DEBUGASSERT(filep);
   inode = filep->f_inode;
 
@@ -653,7 +653,7 @@ static int stmpe811_poll(FAR struct file *filep, FAR struct pollfd *fds,
   int                        ret;
   int                        i;
 
-  ivdbg("setup: %d\n", (int)setup);
+  iinfo("setup: %d\n", (int)setup);
   DEBUGASSERT(filep && fds);
   inode = filep->f_inode;
 
@@ -677,7 +677,7 @@ static int stmpe811_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
       if ((fds->events & POLLIN) == 0)
         {
-          idbg("ERROR: Missing POLLIN: revents: %08x\n", fds->revents);
+          ierr("ERROR: Missing POLLIN: revents: %08x\n", fds->revents);
           ret = -EDEADLK;
           goto errout;
         }
@@ -702,7 +702,7 @@ static int stmpe811_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
       if (i >= CONFIG_STMPE811_NPOLLWAITERS)
         {
-          idbg("ERROR: No available slot found: %d\n", i);
+          ierr("ERROR: No available slot found: %d\n", i);
           fds->priv    = NULL;
           ret          = -EBUSY;
           goto errout;
@@ -786,7 +786,7 @@ static void stmpe811_timeout(int argc, uint32_t arg1, ...)
           ret = work_queue(HPWORK, &priv->timeout, stmpe811_timeoutworker, priv, 0);
           if (ret != 0)
             {
-              illdbg("Failed to queue work: %d\n", ret);
+              ierr("ERROR: Failed to queue work: %d\n", ret);
             }
         }
     }
@@ -805,7 +805,7 @@ static inline void stmpe811_tscinitialize(FAR struct stmpe811_dev_s *priv)
 {
   uint8_t regval;
 
-  ivdbg("Initializing touchscreen controller\n");
+  iinfo("Initializing touchscreen controller\n");
 
   /* Enable TSC and ADC functions */
 
@@ -898,7 +898,7 @@ int stmpe811_register(STMPE811_HANDLE handle, int minor)
   char devname[DEV_NAMELEN];
   int ret;
 
-  ivdbg("handle=%p minor=%d\n", handle, minor);
+  iinfo("handle=%p minor=%d\n", handle, minor);
   DEBUGASSERT(priv);
 
   /* Get exclusive access to the device structure */
@@ -907,7 +907,7 @@ int stmpe811_register(STMPE811_HANDLE handle, int minor)
   if (ret < 0)
     {
       int errval = errno;
-      idbg("ERROR: sem_wait failed: %d\n", errval);
+      ierr("ERROR: sem_wait failed: %d\n", errval);
       return -errval;
     }
 
@@ -915,7 +915,7 @@ int stmpe811_register(STMPE811_HANDLE handle, int minor)
 
   if ((priv->inuse & TSC_PIN_SET) != 0)
     {
-      idbg("ERROR: TSC pins is already in-use: %02x\n", priv->inuse);
+      ierr("ERROR: TSC pins is already in-use: %02x\n", priv->inuse);
       sem_post(&priv->exclsem);
       return -EBUSY;
     }
@@ -932,7 +932,7 @@ int stmpe811_register(STMPE811_HANDLE handle, int minor)
   priv->wdog      = wd_create();
   if (!priv->wdog)
     {
-      idbg("ERROR: Failed to create a watchdog\n", errno);
+      ierr("ERROR: Failed to create a watchdog\n", errno);
       sem_post(&priv->exclsem);
       return -ENOSPC;
     }
@@ -943,7 +943,7 @@ int stmpe811_register(STMPE811_HANDLE handle, int minor)
   ret = register_driver(devname, &g_stmpe811fops, 0666, priv);
   if (ret < 0)
     {
-      idbg("ERROR: Failed to register driver %s: %d\n", devname, ret);
+      ierr("ERROR: Failed to register driver %s: %d\n", devname, ret);
       sem_post(&priv->exclsem);
       return ret;
     }

@@ -90,7 +90,7 @@ int nx_releasebkgd(NXWINDOW hwnd)
   FAR struct nxbe_window_s *wnd = (FAR struct nxbe_window_s *)hwnd;
   struct nxsvrmsg_releasebkgd_s outmsg;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!wnd)
     {
       set_errno(EINVAL);

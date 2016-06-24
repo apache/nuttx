@@ -64,6 +64,6 @@ endif # PCODE_TEST_FS
 config PCODE_DUMPBUFFER
 	bool "Dump P-code buffers"
 	default n
-	depends on DEBUG && DEBUG_VERBOSE
+	depends on DEBUG_INFO
 	---help---
 		Dump various P-code buffers for debug purposes

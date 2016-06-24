@@ -139,7 +139,7 @@ static int mtd_open(FAR struct file *filep, FAR const char *relpath,
 {
   FAR struct mtd_file_s *attr;
 
-  fvdbg("Open '%s'\n", relpath);
+  finfo("Open '%s'\n", relpath);
 
   /* PROCFS is read-only.  Any attempt to open with any kind of write
    * access is not permitted.
@@ -149,7 +149,7 @@ static int mtd_open(FAR struct file *filep, FAR const char *relpath,
 
   if ((oflags & O_WRONLY) != 0 || (oflags & O_RDONLY) == 0)
     {
-      fdbg("ERROR: Only O_RDONLY supported\n");
+      ferr("ERROR: Only O_RDONLY supported\n");
       return -EACCES;
     }
 
@@ -158,7 +158,7 @@ static int mtd_open(FAR struct file *filep, FAR const char *relpath,
   attr = (FAR struct mtd_file_s *)kmm_zalloc(sizeof(struct mtd_file_s));
   if (!attr)
     {
-      fdbg("ERROR: Failed to allocate file attributes\n");
+      ferr("ERROR: Failed to allocate file attributes\n");
       return -ENOMEM;
     }
 
@@ -201,7 +201,7 @@ static ssize_t mtd_read(FAR struct file *filep, FAR char *buffer,
   ssize_t total = 0;
   ssize_t ret;
 
-  fvdbg("buffer=%p buflen=%d\n", buffer, (int)buflen);
+  finfo("buffer=%p buflen=%d\n", buffer, (int)buflen);
 
   /* Recover our private data from the struct file instance */
 
@@ -266,7 +266,7 @@ static int mtd_dup(FAR const struct file *oldp, FAR struct file *newp)
   FAR struct mtd_file_s *oldattr;
   FAR struct mtd_file_s *newattr;
 
-  fvdbg("Dup %p->%p\n", oldp, newp);
+  finfo("Dup %p->%p\n", oldp, newp);
 
   /* Recover our private data from the old struct file instance */
 
@@ -278,7 +278,7 @@ static int mtd_dup(FAR const struct file *oldp, FAR struct file *newp)
   newattr = (FAR struct mtd_file_s *)kmm_zalloc(sizeof(struct mtd_file_s));
   if (!newattr)
     {
-      fdbg("ERROR: Failed to allocate file attributes\n");
+      ferr("ERROR: Failed to allocate file attributes\n");
       return -ENOMEM;
     }
 

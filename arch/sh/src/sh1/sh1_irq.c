@@ -92,10 +92,10 @@ void up_prioritize_irq(int irq, int priority)
   uint32_t reg;
   int      shift;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if ((unsigned) irq > NR_IRQS || (unsigned)priority > 15)
     {
-      dbg("Invalid parameters\n");
+      _err("ERROR: Invalid parameters\n");
       return;
     }
 #endif
@@ -260,7 +260,7 @@ void up_prioritize_irq(int irq, int priority)
 #endif
 
     default:
-      dbg("Invalid irq=%d\n", irq);
+      _err("ERROR: Invalid irq=%d\n", irq);
       return;
     }
 

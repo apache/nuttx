@@ -93,7 +93,7 @@ static uint16_t tcp_poll_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
 {
   FAR struct tcp_poll_s *info = (FAR struct tcp_poll_s *)pvpriv;
 
-  nllvdbg("flags: %04x\n", flags);
+  ninfo("flags: %04x\n", flags);
 
   DEBUGASSERT(!info || (info->psock && info->fds));
 
@@ -169,7 +169,7 @@ int tcp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
 
   /* Sanity check */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!conn || !fds)
     {
       return -EINVAL;
@@ -329,7 +329,7 @@ int tcp_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds)
 
   /* Sanity check */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!conn || !fds->priv)
     {
       return -EINVAL;

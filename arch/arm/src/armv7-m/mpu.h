@@ -219,12 +219,13 @@ uint32_t mpu_subregion(uintptr_t base, size_t size, uint8_t l2size);
 
 static inline void mpu_showtype(void)
 {
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_SCHED_INFO
   uint32_t regval = getreg32(MPU_TYPE);
-  dbg("%s MPU Regions: data=%d instr=%d\n",
-      (regval & MPU_TYPE_SEPARATE) != 0 ? "Separate" : "Unified",
-      (regval & MPU_TYPE_DREGION_MASK) >> MPU_TYPE_DREGION_SHIFT,
-      (regval & MPU_TYPE_IREGION_MASK) >> MPU_TYPE_IREGION_SHIFT);
+
+  sinfo("%s MPU Regions: data=%d instr=%d\n",
+        (regval & MPU_TYPE_SEPARATE) != 0 ? "Separate" : "Unified",
+        (regval & MPU_TYPE_DREGION_MASK) >> MPU_TYPE_DREGION_SHIFT,
+        (regval & MPU_TYPE_IREGION_MASK) >> MPU_TYPE_IREGION_SHIFT);
 #endif
 }
 

@@ -63,31 +63,13 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-/* CONFIG_DEBUG_SPI enables debug output from this file (needs CONFIG_DEBUG too) */
-
-#ifdef CONFIG_DEBUG_SPI
-#  define spidbg  lldbg
-#  ifdef CONFIG_DEBUG_VERBOSE
-#    define spivdbg lldbg
-#  else
-#    define spivdbg(x...)
-#  endif
-#else
-#  define spidbg(x...)
-#  define spivdbg(x...)
-#endif
-
 /* Dump GPIO registers */
 
-#if defined(CONFIG_DEBUG_SPI) && defined(CONFIG_DEBUG_VERBOSE)
+#if CONFIG_DEBUG_SPI_INFO
 #  define spi_dumpgpio(m) lpc17_dumpgpio(SDCCS_GPIO, m)
 #else
 #  define spi_dumpgpio(m)
 #endif
-
-/************************************************************************************
- * Private Functions
- ************************************************************************************/
 
 /************************************************************************************
  * Public Functions
@@ -143,7 +125,7 @@ void weak_function zkit_spidev_initialize(void)
 
 void  lpc17_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
-  spidbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
   spi_dumpgpio("lpc17_spiselect() Entry");
 
   if (devid == SPIDEV_MMCSD)
@@ -164,12 +146,12 @@ uint8_t lpc17_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 
       if (lpc17_gpioread(ZKITARM_SD_CD) == 0)
         {
-          spidbg("Returning SPI_STATUS_PRESENT\n");
+          spiinfo("Returning SPI_STATUS_PRESENT\n");
           return SPI_STATUS_PRESENT;
         }
     }
 
-  spidbg("Returning zero\n");
+  spiinfo("Returning zero\n");
   return 0;
 }
 

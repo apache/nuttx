@@ -127,17 +127,17 @@
 #endif
 
 /* Debug Configuration *****************************************************/
-/* Register debug -- can only happen of CONFIG_DEBUG is selected */
+/* Register debug -- can only happen of CONFIG_DEBUG_NET_INFO is selected */
 
-#ifndef CONFIG_DEBUG
-#  undef  CONFIG_NET_REGDEBUG
+#ifndef CONFIG_DEBUG_NET_INFO
+#  undef  CONFIG_LPC17_NET_REGDEBUG
 #endif
 
 /* CONFIG_NET_DUMPPACKET will dump the contents of each packet to the
  * console.
  */
 
-#ifndef CONFIG_DEBUG
+#ifndef CONFIG_DEBUG_NET_INFO
 #  undef  CONFIG_NET_DUMPPACKET
 #endif
 
@@ -301,7 +301,7 @@ static const uint16_t g_enetpins[GPIO_NENET_PINS] =
 
 /* Register operations */
 
-#ifdef CONFIG_NET_REGDEBUG
+#ifdef CONFIG_LPC17_NET_REGDEBUG
 static void lpc17_printreg(uint32_t addr, uint32_t val, bool iswrite);
 static void lpc17_checkreg(uint32_t addr, uint32_t val, bool iswrite);
 static uint32_t lpc17_getreg(uint32_t addr);
@@ -365,7 +365,7 @@ static int lpc17_rmmac(struct net_driver_s *dev, const uint8_t *mac);
 
 /* Initialization functions */
 
-#if defined(CONFIG_NET_REGDEBUG) && defined(CONFIG_DEBUG_GPIO)
+#if defined(CONFIG_LPC17_NET_REGDEBUG) && defined(CONFIG_DEBUG_GPIO_INFO)
 static void lpc17_showpins(void);
 #else
 #  define lpc17_showpins()
@@ -374,7 +374,7 @@ static void lpc17_showpins(void);
 /* PHY initialization functions */
 
 #ifdef LPC17_HAVE_PHY
-#  ifdef CONFIG_NET_REGDEBUG
+#  ifdef CONFIG_LPC17_NET_REGDEBUG
 static void lpc17_showmii(uint8_t phyaddr, const char *msg);
 #  else
 #    define lpc17_showmii(phyaddr,msg)
@@ -412,10 +412,10 @@ static void lpc17_ethreset(struct lpc17_driver_s *priv);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_REGDEBUG
+#ifdef CONFIG_LPC17_NET_REGDEBUG
 static void lpc17_printreg(uint32_t addr, uint32_t val, bool iswrite)
 {
-  dbg("%08x%s%08x\n", addr, iswrite ? "<-" : "->", val);
+  ninfo("%08x%s%08x\n", addr, iswrite ? "<-" : "->", val);
 }
 #endif
 
@@ -427,7 +427,7 @@ static void lpc17_printreg(uint32_t addr, uint32_t val, bool iswrite)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_REGDEBUG
+#ifdef CONFIG_LPC17_NET_REGDEBUG
 static void lpc17_checkreg(uint32_t addr, uint32_t val, bool iswrite)
 {
   static uint32_t prevaddr = 0;
@@ -465,7 +465,7 @@ static void lpc17_checkreg(uint32_t addr, uint32_t val, bool iswrite)
             {
               /* No.. More than one. */
 
-              dbg("[repeats %d more times]\n", count);
+              ninfo("[repeats %d more times]\n", count);
             }
         }
 
@@ -491,7 +491,7 @@ static void lpc17_checkreg(uint32_t addr, uint32_t val, bool iswrite)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_REGDEBUG
+#ifdef CONFIG_LPC17_NET_REGDEBUG
 static uint32_t lpc17_getreg(uint32_t addr)
 {
   /* Read the value from the register */
@@ -513,7 +513,7 @@ static uint32_t lpc17_getreg(uint32_t addr)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_REGDEBUG
+#ifdef CONFIG_LPC17_NET_REGDEBUG
 static void lpc17_putreg(uint32_t val, uint32_t addr)
 {
   /* Check if we need to print this value */
@@ -837,8 +837,8 @@ static void lpc17_rxdone_process(struct lpc17_driver_s *priv)
 
       if ((*rxstat & RXSTAT_INFO_ERROR) != 0)
         {
-          nlldbg("Error. considx: %08x prodidx: %08x rxstat: %08x\n",
-                 considx, prodidx, *rxstat);
+          nerr("ERROR: considx: %08x prodidx: %08x rxstat: %08x\n",
+               considx, prodidx, *rxstat);
           NETDEV_RXERRORS(&priv->lp_dev);
         }
 
@@ -850,21 +850,21 @@ static void lpc17_rxdone_process(struct lpc17_driver_s *priv)
 
       /* else */ if (pktlen > CONFIG_NET_ETH_MTU + CONFIG_NET_GUARDSIZE)
         {
-          nlldbg("Too big. considx: %08x prodidx: %08x pktlen: %d rxstat: %08x\n",
-                 considx, prodidx, pktlen, *rxstat);
+          nwarn("WARNING: Too big. considx: %08x prodidx: %08x pktlen: %d rxstat: %08x\n",
+                considx, prodidx, pktlen, *rxstat);
           NETDEV_RXERRORS(&priv->lp_dev);
         }
       else if ((*rxstat & RXSTAT_INFO_LASTFLAG) == 0)
         {
-          nlldbg("Fragment. considx: %08x prodidx: %08x pktlen: %d rxstat: %08x\n",
-                 considx, prodidx, pktlen, *rxstat);
+          ninfo("Fragment. considx: %08x prodidx: %08x pktlen: %d rxstat: %08x\n",
+                considx, prodidx, pktlen, *rxstat);
           NETDEV_RXFRAGMENTS(&priv->lp_dev);
           fragment = true;
         }
       else if (fragment)
         {
-          nlldbg("Last fragment. considx: %08x prodidx: %08x pktlen: %d rxstat: %08x\n",
-                 considx, prodidx, pktlen, *rxstat);
+          ninfo("Last fragment. considx: %08x prodidx: %08x pktlen: %d rxstat: %08x\n",
+                considx, prodidx, pktlen, *rxstat);
           NETDEV_RXFRAGMENTS(&priv->lp_dev);
           fragment = false;
         }
@@ -906,7 +906,7 @@ static void lpc17_rxdone_process(struct lpc17_driver_s *priv)
 #ifdef CONFIG_NET_IPv4
           if (BUF->type == HTONS(ETHTYPE_IP))
             {
-              nllvdbg("IPv4 frame\n");
+              ninfo("IPv4 frame\n");
               NETDEV_RXIPV4(&priv->lp_dev);
 
               /* Handle ARP on input then give the IPv4 packet to the
@@ -948,7 +948,7 @@ static void lpc17_rxdone_process(struct lpc17_driver_s *priv)
 #ifdef CONFIG_NET_IPv6
           if (BUF->type == HTONS(ETHTYPE_IP6))
             {
-              nllvdbg("Iv6 frame\n");
+              ninfo("Iv6 frame\n");
               NETDEV_RXIPV6(&priv->lp_dev);
 
               /* Give the IPv6 packet to the network layer */
@@ -1202,13 +1202,13 @@ static int lpc17_interrupt(int irq, void *context)
         {
           if ((status & ETH_INT_RXOVR) != 0)
             {
-              nlldbg("RX Overrun. status: %08x\n", status);
+              nerr("ERROR: RX Overrun. status: %08x\n", status);
               NETDEV_RXERRORS(&priv->lp_dev);
             }
 
           if ((status & ETH_INT_TXUNR) != 0)
             {
-              nlldbg("TX Underrun. status: %08x\n", status);
+              nerr("ERROR: TX Underrun. status: %08x\n", status);
               NETDEV_TXERRORS(&priv->lp_dev);
             }
 
@@ -1229,7 +1229,7 @@ static int lpc17_interrupt(int irq, void *context)
 
           if ((status & ETH_INT_RXERR) != 0)
             {
-              nlldbg("RX Error. status: %08x\n", status);
+              nerr("ERROR: RX ERROR: status: %08x\n", status);
               NETDEV_RXERRORS(&priv->lp_dev);
             }
 
@@ -1281,7 +1281,7 @@ static int lpc17_interrupt(int irq, void *context)
 
           if ((status & ETH_INT_TXERR) != 0)
             {
-              nlldbg("TX Error. status: %08x\n", status);
+              nerr("ERROR: TX ERROR: status: %08x\n", status);
               NETDEV_TXERRORS(&priv->lp_dev);
             }
 
@@ -1671,7 +1671,7 @@ static void lpc17_ipv6multicast(FAR struct lpc17_driver_s *priv)
   mac[4] = tmp16 & 0xff;
   mac[5] = tmp16 >> 8;
 
-  nvdbg("IPv6 Multicast: %02x:%02x:%02x:%02x:%02x:%02x\n",
+  ninfo("IPv6 Multicast: %02x:%02x:%02x:%02x:%02x:%02x\n",
         mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 
   (void)lpc17_addmac(dev, mac);
@@ -1720,9 +1720,9 @@ static int lpc17_ifup(struct net_driver_s *dev)
   uint32_t regval;
   int ret;
 
-  ndbg("Bringing up: %d.%d.%d.%d\n",
-       dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
-       (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
+  ninfo("Bringing up: %d.%d.%d.%d\n",
+        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
+        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
 
   /* Reset the Ethernet controller (again) */
 
@@ -1733,7 +1733,7 @@ static int lpc17_ifup(struct net_driver_s *dev)
   ret = lpc17_phyinit(priv);
   if (ret != 0)
     {
-      ndbg("lpc17_phyinit failed: %d\n", ret);
+      nerr("ERROR: lpc17_phyinit failed: %d\n", ret);
       return ret;
     }
 
@@ -2145,8 +2145,8 @@ static int lpc17_addmac(struct net_driver_s *dev, const uint8_t *mac)
   uint32_t crc;
   unsigned int ndx;
 
-  nllvdbg("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
-          mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+  ninfo("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
+        mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 
   /* Hash function:
    *
@@ -2221,8 +2221,8 @@ static int lpc17_rmmac(struct net_driver_s *dev, const uint8_t *mac)
   uint32_t crc;
   unsigned int ndx;
 
-  nllvdbg("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
-          mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+  ninfo("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
+        mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 
   /* Hash function:
    *
@@ -2292,7 +2292,7 @@ static int lpc17_rmmac(struct net_driver_s *dev, const uint8_t *mac)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NET_REGDEBUG) && defined(CONFIG_DEBUG_GPIO)
+#if defined(CONFIG_LPC17_NET_REGDEBUG) && defined(CONFIG_DEBUG_GPIO_INFO)
 static void lpc17_showpins(void)
 {
   lpc17_dumpgpio(GPIO_PORT1 | GPIO_PIN0, "P1[1-15]");
@@ -2316,17 +2316,17 @@ static void lpc17_showpins(void)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NET_REGDEBUG) && defined(LPC17_HAVE_PHY)
+#if defined(CONFIG_LPC17_NET_REGDEBUG) && defined(LPC17_HAVE_PHY)
 static void lpc17_showmii(uint8_t phyaddr, const char *msg)
 {
-  dbg("PHY " LPC17_PHYNAME ": %s\n", msg);
-  dbg("  MCR:       %04x\n", lpc17_phyread(phyaddr, MII_MCR));
-  dbg("  MSR:       %04x\n", lpc17_phyread(phyaddr, MII_MSR));
-  dbg("  ADVERTISE: %04x\n", lpc17_phyread(phyaddr, MII_ADVERTISE));
-  dbg("  LPA:       %04x\n", lpc17_phyread(phyaddr, MII_LPA));
-  dbg("  EXPANSION: %04x\n", lpc17_phyread(phyaddr, MII_EXPANSION));
+  ninfo("PHY " LPC17_PHYNAME ": %s\n", msg);
+  ninfo("  MCR:       %04x\n", lpc17_phyread(phyaddr, MII_MCR));
+  ninfo("  MSR:       %04x\n", lpc17_phyread(phyaddr, MII_MSR));
+  ninfo("  ADVERTISE: %04x\n", lpc17_phyread(phyaddr, MII_ADVERTISE));
+  ninfo("  LPA:       %04x\n", lpc17_phyread(phyaddr, MII_LPA));
+  ninfo("  EXPANSION: %04x\n", lpc17_phyread(phyaddr, MII_EXPANSION));
 #ifdef CONFIG_ETH0_PHY_KS8721
-  dbg("  10BTCR:    %04x\n", lpc17_phyread(phyaddr, MII_KS8721_10BTCR));
+  ninfo("  10BTCR:    %04x\n", lpc17_phyread(phyaddr, MII_KS8721_10BTCR));
 #endif
 }
 #endif
@@ -2462,7 +2462,7 @@ static inline int lpc17_phyreset(uint8_t phyaddr)
         }
     }
 
-  ndbg("Reset failed. MCR: %04x\n", phyreg);
+  nerr("ERROR: Reset failed. MCR: %04x\n", phyreg);
   return -ETIMEDOUT;
 }
 #endif
@@ -2509,7 +2509,7 @@ static inline int lpc17_phyautoneg(uint8_t phyaddr)
         }
     }
 
-  ndbg("Auto-negotiation failed. MSR: %04x\n", phyreg);
+  nerr("ERROR: Auto-negotiation failed. MSR: %04x\n", phyreg);
   return -ETIMEDOUT;
 }
 #endif
@@ -2593,7 +2593,7 @@ static int lpc17_phymode(uint8_t phyaddr, uint8_t mode)
 #endif
     }
 
-  ndbg("Link failed. MSR: %04x\n", phyreg);
+  nerr("ERROR: Link failed. MSR: %04x\n", phyreg);
   return -ETIMEDOUT;
 }
 #endif
@@ -2647,20 +2647,20 @@ static inline int lpc17_phyinit(struct lpc17_driver_s *priv)
        */
 
       phyreg = (unsigned int)lpc17_phyread(phyaddr, MII_PHYID1);
-      nvdbg("Addr: %d PHY ID1: %04x\n", phyaddr, phyreg);
+      ninfo("Addr: %d PHY ID1: %04x\n", phyaddr, phyreg);
 
       /* Compare OUI bits 3-18 */
 
       if (phyreg == LPC17_PHYID1)
         {
           phyreg = lpc17_phyread(phyaddr, MII_PHYID2);
-          nvdbg("Addr: %d PHY ID2: %04x\n", phyaddr, phyreg);
+          ninfo("Addr: %d PHY ID2: %04x\n", phyaddr, phyreg);
 
           /* Compare OUI bits 19-24 and the 6-bit model number (ignoring the
            * 4-bit revision number).
            */
 
-          if ((phyreg & 0xfff0) == LPC17_PHYID2)
+          if ((phyreg & 0xfff0) == (LPC17_PHYID2 & 0xfff0))
             {
               break;
             }
@@ -2673,10 +2673,10 @@ static inline int lpc17_phyinit(struct lpc17_driver_s *priv)
     {
       /* Failed to find PHY at any location */
 
-      ndbg("No PHY detected\n");
+      nerr("ERROR: No PHY detected\n");
       return -ENODEV;
     }
-  nvdbg("phyaddr: %d\n", phyaddr);
+  ninfo("phyaddr: %d\n", phyaddr);
 
   /* Save the discovered PHY device address */
 
@@ -2760,7 +2760,7 @@ static inline int lpc17_phyinit(struct lpc17_driver_s *priv)
         break;
 
       default:
-        ndbg("Unrecognized mode: %04x\n", phyreg);
+        nerr("ERROR: Unrecognized mode: %04x\n", phyreg);
         return -ENODEV;
     }
 
@@ -2788,7 +2788,7 @@ static inline int lpc17_phyinit(struct lpc17_driver_s *priv)
         break;
 
       default:
-        ndbg("Unrecognized mode: %04x\n", phyreg);
+        nerr("ERROR: Unrecognized mode: %04x\n", phyreg);
         return -ENODEV;
     }
 
@@ -2816,7 +2816,7 @@ static inline int lpc17_phyinit(struct lpc17_driver_s *priv)
         break;
 
       default:
-        ndbg("Unrecognized mode: %04x\n", phyreg);
+        nerr("ERROR: Unrecognized mode: %04x\n", phyreg);
         return -ENODEV;
     }
 
@@ -2862,7 +2862,7 @@ static inline int lpc17_phyinit(struct lpc17_driver_s *priv)
       }
     else
       {
-        ndbg("Unrecognized mode: %04x\n", phyreg);
+        nerr("ERROR: Unrecognized mode: %04x\n", phyreg);
         return -ENODEV;
       }
   }
@@ -2871,9 +2871,9 @@ static inline int lpc17_phyinit(struct lpc17_driver_s *priv)
 #  warning "PHY Unknown: speed and duplex are bogus"
 #endif
 
-  ndbg("%dBase-T %s duplex\n",
-       (priv->lp_mode & LPC17_SPEED_MASK) ==  LPC17_SPEED_100 ? 100 : 10,
-       (priv->lp_mode & LPC17_DUPLEX_MASK) == LPC17_DUPLEX_FULL ?"full" : "half");
+  ninfo("%dBase-T %s duplex\n",
+        (priv->lp_mode & LPC17_SPEED_MASK) ==  LPC17_SPEED_100 ? 100 : 10,
+        (priv->lp_mode & LPC17_DUPLEX_MASK) == LPC17_DUPLEX_FULL ?"full" : "half");
 
   /* Disable auto-configuration.  Set the fixed speed/duplex mode.
    * (probably more than little redundant).

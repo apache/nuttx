@@ -228,8 +228,8 @@ static void gpio_porthandler(uint32_t regbase, int irqbase, uint32_t irqset, voi
                 }
               else
                 {
-                  lldbg("No handler: pin=%d ifr=%08x irqset=%08x",
-                        pin, ifr, irqset);
+                  _err("ERROR: No handler: pin=%d ifr=%08x irqset=%08x",
+                       pin, ifr, irqset);
                 }
             }
 
@@ -247,8 +247,8 @@ static void gpio_porthandler(uint32_t regbase, int irqbase, uint32_t irqset, voi
           putreg32(bit, regbase + AVR32_GPIO_IFRC_OFFSET);
           ifr &= ~bit;
 
-          lldbg("IRQ on unconfigured pin: pin=%d ifr=%08x irqset=%08x",
-                pin, ifr, irqset);
+          warn("WARNING: IRQ on unconfigured pin: pin=%d ifr=%08x irqset=%08x",
+               pin, ifr, irqset);
         }
     }
 }

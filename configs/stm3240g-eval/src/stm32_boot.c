@@ -164,7 +164,7 @@ static int board_initthread(int argc, char *argv[])
   ret = board_app_initialize(0);
   if (ret < 0)
     {
-      gdbg("ERROR: board_app_initialize failed: %d\n", ret);
+      gerr("ERROR: board_app_initialize failed: %d\n", ret);
     }
 #endif
 
@@ -174,7 +174,7 @@ static int board_initthread(int argc, char *argv[])
   ret = nx_start();
   if (ret < 0)
     {
-      gdbg("ERROR: nx_start failed: %d\n", ret);
+      gerr("ERROR: nx_start failed: %d\n", ret);
     }
 #endif
 
@@ -184,7 +184,7 @@ static int board_initthread(int argc, char *argv[])
   ret = board_tsc_setup(CONFIG_NXWM_TOUCHSCREEN_DEVNO);
   if (ret < 0)
     {
-      gdbg("ERROR: board_tsc_setup failed: %d\n", ret);
+      gerr("ERROR: board_tsc_setup failed: %d\n", ret);
     }
 #endif
 

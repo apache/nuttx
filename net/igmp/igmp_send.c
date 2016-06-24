@@ -116,7 +116,7 @@ static uint16_t igmp_chksum(FAR uint8_t *buffer, int buflen)
 void igmp_send(FAR struct net_driver_s *dev, FAR struct igmp_group_s *group,
                FAR in_addr_t *destipaddr)
 {
-  nllvdbg("msgid: %02x destipaddr: %08x\n", group->msgid, (int)*destipaddr);
+  ninfo("msgid: %02x destipaddr: %08x\n", group->msgid, (int)*destipaddr);
 
   /* The total length to send is the size of the IP and IGMP headers and 4
    * bytes for the ROUTER ALERT (and, eventually, the Ethernet header)
@@ -169,7 +169,7 @@ void igmp_send(FAR struct net_driver_s *dev, FAR struct igmp_group_s *group,
   IGMP_STATINCR(g_netstats.igmp.poll_send);
   IGMP_STATINCR(g_netstats.ipv4.sent);
 
-  nllvdbg("Outgoing IGMP packet length: %d (%d)\n",
+  ninfo("Outgoing IGMP packet length: %d (%d)\n",
           dev->d_len, (IGMPBUF->len[0] << 8) | IGMPBUF->len[1]);
   igmp_dumppkt(RA, IPIGMP_HDRLEN + RASIZE);
 }

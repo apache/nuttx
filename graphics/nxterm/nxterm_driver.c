@@ -128,7 +128,7 @@ static int nxterm_open(FAR struct file *filep)
 #ifndef CONFIG_NXTERM_NXKBDIN
   if ((filep->f_oflags & O_RDOK) != 0)
     {
-      gdbg("ERROR: Attempted open with read access\n");
+      gerr("ERROR: Attempted open with read access\n");
       return -EACCES;
     }
 #endif

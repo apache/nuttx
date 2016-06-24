@@ -119,7 +119,7 @@ static uint16_t icmpv6_router_interrupt(FAR struct net_driver_s *dev,
 {
   FAR struct icmpv6_router_s *state = (FAR struct icmpv6_router_s *)priv;
 
-  nllvdbg("flags: %04x sent: %d\n", flags, state->snd_sent);
+  ninfo("flags: %04x sent: %d\n", flags, state->snd_sent);
 
   if (state)
     {
@@ -127,7 +127,7 @@ static uint16_t icmpv6_router_interrupt(FAR struct net_driver_s *dev,
 
       if ((flags & NETDEV_DOWN) != 0)
         {
-          nlldbg("ERROR: Interface is down\n");
+          nerr("ERROR: Interface is down\n");
           icmpv6_router_terminate(state, -ENETUNREACH);
           return flags;
         }
@@ -225,7 +225,7 @@ static int icmpv6_send_message(FAR struct net_driver_s *dev, bool advertise)
   state.snd_cb = icmpv6_callback_alloc(dev);
   if (!state.snd_cb)
     {
-      ndbg("ERROR: Failed to allocate a cllback\n");
+      nerr("ERROR: Failed to allocate a cllback\n");
       ret = -ENOMEM;
       goto errout_with_semaphore;
     }
@@ -341,7 +341,7 @@ int icmpv6_autoconfig(FAR struct net_driver_s *dev)
 #ifndef CONFIG_NET_ETHERNET
   /* Only Ethernet supported for now */
 
-  ndbg("ERROR: Only Ethernet is supported\n");
+  nerr("ERROR: Only Ethernet is supported\n");
   return -ENOSYS;
 
 #else /* CONFIG_NET_ETHERNET */
@@ -354,14 +354,14 @@ int icmpv6_autoconfig(FAR struct net_driver_s *dev)
   /* Sanity checks */
 
   DEBUGASSERT(dev);
-  nvdbg("Auto-configuring %s\n", dev->d_ifname);
+  ninfo("Auto-configuring %s\n", dev->d_ifname);
 
 #ifdef CONFIG_NET_MULTILINK
   /* Only Ethernet devices are supported for now */
 
   if (dev->d_lltype != NET_LL_ETHERNET)
     {
-      ndbg("ERROR: Only Ethernet is supported\n");
+      nerr("ERROR: Only Ethernet is supported\n");
       return -ENOSYS;
     }
 #endif
@@ -402,7 +402,7 @@ int icmpv6_autoconfig(FAR struct net_driver_s *dev)
   memcpy(&lladdr[5], dev->d_mac.ether_addr_octet,
         sizeof(struct ether_addr));                 /* 48-bit Ethernet address */
 
-  nvdbg("lladdr=%04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
+  ninfo("lladdr=%04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
         lladdr[0], lladdr[1], lladdr[2], lladdr[3],
         lladdr[4], lladdr[6], lladdr[6], lladdr[7]);
 
@@ -439,7 +439,7 @@ int icmpv6_autoconfig(FAR struct net_driver_s *dev)
        * have not back-up plan in place.  Just bail.
        */
 
-      ndbg("ERROR: IP conflict\n");
+      nerr("ERROR: IP conflict\n");
       return -EEXIST;
     }
 #endif
@@ -477,7 +477,7 @@ int icmpv6_autoconfig(FAR struct net_driver_s *dev)
       ret = icmpv6_send_message(dev, false);
       if (ret < 0)
         {
-          ndbg("ERROR: Failed send router solicitation: %d\n", ret);
+          nerr("ERROR: Failed send router solicitation: %d\n", ret);
           break;
         }
 
@@ -493,7 +493,7 @@ int icmpv6_autoconfig(FAR struct net_driver_s *dev)
           break;
         }
 
-      nvdbg("Timed out... retrying %d\n", retries + 1);
+      ninfo("Timed out... retrying %d\n", retries + 1);
     }
 
   /* Check for failures.  Note:  On successful return, the network will be 
@@ -502,7 +502,7 @@ int icmpv6_autoconfig(FAR struct net_driver_s *dev)
 
   if (ret < 0)
     {
-      ndbg("ERROR: Failed to get the router advertisement: %d (retries=%d)\n",
+      nerr("ERROR: Failed to get the router advertisement: %d (retries=%d)\n",
            ret, retries);
 
       /* Claim the link local address as ours by sending the ICMPv6 Neighbor
@@ -512,7 +512,7 @@ int icmpv6_autoconfig(FAR struct net_driver_s *dev)
       ret = icmpv6_send_message(dev, true);
       if (ret < 0)
         {
-          ndbg("ERROR: Failed send neighbor advertisement: %d\n", ret);
+          nerr("ERROR: Failed send neighbor advertisement: %d\n", ret);
           netdev_ifdown(dev);
         }
 

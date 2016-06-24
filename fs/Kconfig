@@ -21,7 +21,7 @@ config FS_AUTOMOUNTER
 config FS_AUTOMOUNTER_DEBUG
 	bool "Auto-mounter debug"
 	default n
-	depends on FS_AUTOMOUNTER && DEBUG
+	depends on FS_AUTOMOUNTER && DEBUG_FEATURES
 	---help---
 		Normally, the auto-mounter will generate debug output when sub-system
 		level file system debug is enabled.  This option will select debug
@@ -74,45 +74,3 @@ source fs/binfs/Kconfig
 source fs/procfs/Kconfig
 source fs/unionfs/Kconfig
 source fs/hostfs/Kconfig
-
-comment "System Logging"
-
-config SYSLOG
-	bool "Advanced SYSLOG features"
-	default n
-	---help---
-		Enables generic system logging features.  NOTE: This setting is not
-		required to enable system logging.  If this feature is not enable
-		system logging will still be available and will log to the system
-		console (like printf()).  This setting is required to enable
-		customization of the basic system loggin capability.
-
-config SYSLOG_TIMESTAMP
-	bool "Prepend timestamp to syslog message"
-	default n
-	---help---
-		Prepend timestamp to syslog message.
-
-if SYSLOG
-
-config SYSLOG_CHAR
-	bool "System log character device support"
-	default y
-	---help---
-		Enable the generic character device for the SYSLOG. The full path to the
-		SYSLOG device is provided by SYSLOG_DEVPATH. A valid character device (or
-		file) must exist at this path.  It will by opened by syslog_initialize.
-
-		Do not enable more than one SYSLOG device.
-
-config SYSLOG_DEVPATH
-	string "System log device"
-	default "/dev/syslog"
-	depends on SYSLOG_CHAR
-	---help---
-		The full path to the system logging device.  For the RAMLOG SYSLOG device,
-		this is normally "/dev/ramlog".  For character SYSLOG devices, it should be
-		some other existing character device (or file) supported by the configuration
-		(such as "/dev/ttyS1")/
-
-endif

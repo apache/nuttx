@@ -399,12 +399,12 @@ static int ez80_i2c_sendaddr(struct ez80_i2cdev_s *priv, uint8_t readbit)
    */
 
   sr = ez80_i2c_waitiflg();
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (sr != I2C_SR_MSTART)
     {
       /* This error should never occur */
 
-      dbg("Bad START status: %02x\n", sr);
+      _err("ERROR: Bad START status: %02x\n", sr);
       ez80_i2c_clriflg();
       return -EIO;
     }
@@ -426,7 +426,7 @@ static int ez80_i2c_sendaddr(struct ez80_i2cdev_s *priv, uint8_t readbit)
       sr = ez80_i2c_waitiflg();
       if (sr != I2C_SR_MADDRWRACK && sr != I2C_SR_MADDRWR)
         {
-          dbg("Bad ADDR8 status: %02x\n", sr);
+          _err("ERROR: Bad ADDR8 status: %02x\n", sr);
           goto failure;
         }
     }
@@ -445,7 +445,7 @@ static int ez80_i2c_sendaddr(struct ez80_i2cdev_s *priv, uint8_t readbit)
       sr = ez80_i2c_waitiflg();
       if (sr != I2C_SR_MADDRWRACK && sr != I2C_SR_MADDRWR)
         {
-         dbg("Bad ADDR10H status: %02x\n", sr);
+         _err("ERROR: Bad ADDR10H status: %02x\n", sr);
          goto failure;
         }
 
@@ -459,7 +459,7 @@ static int ez80_i2c_sendaddr(struct ez80_i2cdev_s *priv, uint8_t readbit)
       sr = ez80_i2c_waitiflg();
       if (sr != I2C_SR_MADDR2WRACK && sr != I2C_SR_MADDR2WR)
         {
-          dbg("Bad ADDR10L status: %02x\n", sr);
+          _err("ERROR: Bad ADDR10L status: %02x\n", sr);
           goto failure;
         }
     }
@@ -469,7 +469,7 @@ static int ez80_i2c_sendaddr(struct ez80_i2cdev_s *priv, uint8_t readbit)
   /* We don't attempt any fancy status-based error recovery */
 
 failure:
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   switch (sr)
     {
       case I2C_SR_ARBLOST1: /* Arbitration lost in address or data byte */
@@ -479,12 +479,12 @@ failure:
                              * Call address received, ACK transmitted */
       case I2C_SR_ARBLOST4: /* Arbitration lost in address as master, slave
                              * address and Read bit received, ACK transmitted */
-        dbg("Arbitration lost: %02x\n", sr);
+        _err("ERROR: Arbitration lost: %02x\n", sr);
         ez80_i2c_clriflg();
         return -EAGAIN;
 
       default:
-        dbg("Unexpected status: %02x\n", sr);
+        _err("ERROR: Unexpected status: %02x\n", sr);
         ez80_i2c_clriflg();
         return -EIO;
     }
@@ -634,7 +634,7 @@ static int ez80_i2c_read_transfer(FAR struct ez80_i2cdev_s *priv,
              * this will cause the whole transfer to start over
              */
 
-            dbg("Arbitration lost: %02x\n", regval);
+            _err("ERROR: Arbitration lost: %02x\n", regval);
             ez80_i2c_clriflg();
             break;
           }
@@ -643,7 +643,7 @@ static int ez80_i2c_read_transfer(FAR struct ez80_i2cdev_s *priv,
 
         else
           {
-            dbg("Unexpected status: %02x\n", regval);
+            _err("ERROR: Unexpected status: %02x\n", regval);
             ez80_i2c_clriflg();
             return-EIO;
           }
@@ -731,7 +731,7 @@ static int ez80_i2c_write_transfer(FAR struct ez80_i2cdev_s *priv,
           sr = ez80_i2c_waitiflg();
           if (sr != I2C_SR_MDATAWRACK && sr != I2C_SR_MDATAWR)
             {
-              dbg("Bad DATA status: %02x\n", sr);
+              _err("ERROR: Bad DATA status: %02x\n", sr);
               ez80_i2c_clriflg();
               if (sr == I2C_SR_ARBLOST1)
                 {

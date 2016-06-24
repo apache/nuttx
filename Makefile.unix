@@ -480,22 +480,22 @@ pass2dep: context tools/mkdeps$(HOSTEXEEXT) tools/cnvwindeps$(HOSTEXEEXT)
 # location: http://ymorin.is-a-geek.org/projects/kconfig-frontends.  See
 # README.txt file in the NuttX tools GIT repository for additional information.
 
-config: apps_preconfig
+config: context apps_preconfig
 	$(Q) APPSDIR=${CONFIG_APPS_DIR} kconfig-conf Kconfig
 
-oldconfig: apps_preconfig
+oldconfig: context apps_preconfig
 	$(Q) APPSDIR=${CONFIG_APPS_DIR} kconfig-conf --oldconfig Kconfig
 
-olddefconfig: apps_preconfig
+olddefconfig: context apps_preconfig
 	$(Q) APPSDIR=${CONFIG_APPS_DIR} kconfig-conf --olddefconfig Kconfig
 
-menuconfig: apps_preconfig
+menuconfig: context apps_preconfig
 	$(Q) APPSDIR=${CONFIG_APPS_DIR} kconfig-mconf Kconfig
 
-qconfig: apps_preconfig
+qconfig: context apps_preconfig
 	$(Q) APPSDIR=${CONFIG_APPS_DIR} kconfig-qconf Kconfig
 
-gconfig: apps_preconfig
+gconfig: context apps_preconfig
 	$(Q) APPSDIR=${CONFIG_APPS_DIR} kconfig-gconf Kconfig
 
 # export

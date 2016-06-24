@@ -53,21 +53,6 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-/* Additional Configuration *********************************************************/
-/* Custom debug settings used in the STM32L4 port.  These are managed by
- * STM32L4-specific logic and not the common logic in include/debug.h.
- * NOTE:  Some of these also depend on CONFIG_DEBUG_VERBOSE
- */
-
-#ifndef CONFIG_DEBUG
-#  undef CONFIG_DEBUG_DMA
-#  undef CONFIG_DEBUG_RTC
-#  undef CONFIG_DEBUG_I2C
-#  undef CONFIG_DEBUG_CAN
-#  undef CONFIG_DEBUG_PWM
-#  undef CONFIG_DEBUG_SENSORS
-#endif
-
 /* Peripherals **********************************************************************/
 
 #include "chip.h"

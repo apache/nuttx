@@ -72,20 +72,6 @@
 #  error "CONFIG_STM32_FSMC is required to use the LCD"
 #endif
 
-/* Define CONFIG_DEBUG_LCD to enable detailed LCD debug output. Verbose debug must
- * also be enabled.
- */
-
-#ifndef CONFIG_DEBUG
-#  undef CONFIG_DEBUG_VERBOSE
-#  undef CONFIG_DEBUG_GRAPHICS
-#  undef CONFIG_DEBUG_LCD
-#endif
-
-#ifndef CONFIG_DEBUG_VERBOSE
-#  undef CONFIG_DEBUG_LCD
-#endif
-
 /* STM32F4Discovery LCD Hardware Definitions ******************************************/
 /* LCD /CS is CE1 ==  NOR/SRAM Bank 1
  *
@@ -107,23 +93,10 @@
 #define LCD_NADDRLINES   1   /* A16 */
 #define LCD_NDATALINES   16  /* D0-15 */
 
-/* Debug ******************************************************************************/
-
-#ifdef CONFIG_DEBUG_LCD
-#  define lcddbg         dbg
-#  define lcdvdbg        vdbg
-#else
-#  define lcddbg(x...)
-#  define lcdvdbg(x...)
-#endif
-
-/**************************************************************************************
- * Private Type Definition
- **************************************************************************************/
-
 /**************************************************************************************
  * Private Function Protototypes
  **************************************************************************************/
+
 /* Low Level LCD access */
 
 static void stm32_select(FAR struct ssd1289_lcd_s *dev);
@@ -355,7 +328,7 @@ int board_lcd_initialize(void)
 
   if (!g_ssd1289drvr)
     {
-      lcdvdbg("Initializing\n");
+      lcdinfo("Initializing\n");
 
       /* Configure GPIO pins and configure the FSMC to support the LCD */
 
@@ -373,7 +346,7 @@ int board_lcd_initialize(void)
       g_ssd1289drvr = ssd1289_lcdinitialize(&g_ssd1289);
       if (!g_ssd1289drvr)
         {
-          lcddbg("ERROR: ssd1289_lcdinitialize failed\n");
+          lcderr("ERROR: ssd1289_lcdinitialize failed\n");
           return -ENODEV;
         }
     }

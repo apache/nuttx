@@ -84,7 +84,7 @@ int nx_server(int argc, char *argv[])
   dev = board_graphics_setup(CONFIG_NXSTART_DEVNO);
   if (!dev)
     {
-      gdbg("ERROR: board_graphics_setup failed, devno=%d\n", CONFIG_NXSTART_DEVNO);
+      gerr("ERROR: board_graphics_setup failed, devno=%d\n", CONFIG_NXSTART_DEVNO);
       return EXIT_FAILURE;
     }
 
@@ -94,7 +94,7 @@ int nx_server(int argc, char *argv[])
   ret = board_lcd_initialize();
   if (ret < 0)
     {
-      gdbg("ERROR: board_lcd_initialize failed: %d\n", ret);
+      gerr("ERROR: board_lcd_initialize failed: %d\n", ret);
       return EXIT_FAILURE;
     }
 
@@ -103,7 +103,7 @@ int nx_server(int argc, char *argv[])
   dev = board_lcd_getdev(CONFIG_NXSTART_DEVNO);
   if (!dev)
     {
-      gdbg("ERROR: board_lcd_getdev failed, devno=%d\n", CONFIG_NXSTART_DEVNO);
+      gerr("ERROR: board_lcd_getdev failed, devno=%d\n", CONFIG_NXSTART_DEVNO);
       return EXIT_FAILURE;
     }
 
@@ -119,14 +119,14 @@ int nx_server(int argc, char *argv[])
   ret = up_fbinitialize(0);
   if (ret < 0)
     {
-      gdbg("ERROR: up_fbinitialize failed: %d\n", ret);
+      gerr("ERROR: up_fbinitialize failed: %d\n", ret);
       return EXIT_FAILURE;
     }
 
   dev = up_fbgetvplane(0, CONFIG_NXSTART_VPLANE);
   if (!dev)
     {
-      gdbg("ERROR: up_fbgetvplane failed, vplane=%d\n", CONFIG_NXSTART_VPLANE);
+      gerr("ERROR: up_fbgetvplane failed, vplane=%d\n", CONFIG_NXSTART_VPLANE);
       return EXIT_FAILURE;
     }
 
@@ -135,7 +135,7 @@ int nx_server(int argc, char *argv[])
   /* Then start the server (nx_run does not normally return) */
 
   ret = nx_run(dev);
-  gvdbg("nx_run returned: %d\n", ret);
+  ginfo("nx_run returned: %d\n", ret);
   return EXIT_FAILURE;
 }
 
@@ -174,7 +174,7 @@ int nx_start(void)
 
   /* Start the server kernel thread */
 
-  gvdbg("Starting server task\n");
+  ginfo("Starting server task\n");
   server = kernel_thread("NX Server", CONFIG_NXSTART_SERVERPRIO,
                          CONFIG_NXSTART_SERVERSTACK, nx_server, NULL);
   if (server < 0)
@@ -182,7 +182,7 @@ int nx_start(void)
       int errcode = errno;
       DEBUGASSERT(errcode > 0);
 
-      gdbg("ERROR: Failed to create nx_server kernel thread: %d\n", errcode);
+      gerr("ERROR: Failed to create nx_server kernel thread: %d\n", errcode);
       return -errcode;
     }
 

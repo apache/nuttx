@@ -93,7 +93,7 @@ static uint16_t udp_poll_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
 {
   FAR struct udp_poll_s *info = (FAR struct udp_poll_s *)pvpriv;
 
-  nllvdbg("flags: %04x\n", flags);
+  ninfo("flags: %04x\n", flags);
 
   DEBUGASSERT(!info || (info->psock && info->fds));
 
@@ -166,7 +166,7 @@ int udp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
 
   /* Sanity check */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!conn || !fds)
     {
       return -EINVAL;
@@ -295,7 +295,7 @@ int udp_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds)
 
   /* Sanity check */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!conn || !fds->priv)
     {
       return -EINVAL;

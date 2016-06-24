@@ -112,7 +112,7 @@ int uwire_xfer(int cs, int bitlen, const void *dout, void *din)
 
   /* FIXME uwire_init always selects CS0 for now */
 
-  dbg("uwire_xfer(dev_idx=%u, bitlen=%u\n", cs, bitlen);
+  _info("uwire_xfer(dev_idx=%u, bitlen=%u\n", cs, bitlen);
 
   /* select the chip */
 
@@ -128,7 +128,7 @@ int uwire_xfer(int cs, int bitlen, const void *dout, void *din)
 
       tmp <<= 16 - bitlen; /* align to MSB */
       putreg16(tmp, UWIRE_REG(REG_DATA));
-      dbg(", data_out=0x%04hx", tmp);
+      _info(", data_out=0x%04hx", tmp);
     }
 
   tmp = (dout ? UWIRE_CSR_BITS_WR(bitlen) : 0) |
@@ -142,7 +142,7 @@ int uwire_xfer(int cs, int bitlen, const void *dout, void *din)
       _uwire_wait(UWIRE_CSR_RDRB, UWIRE_CSR_RDRB);
 
       tmp = getreg16(UWIRE_REG(REG_DATA));
-      dbg(", data_in=0x%08x", tmp);
+      _info(", data_in=0x%08x", tmp);
 
       if (bitlen <= 8)
           *(uint8_t *)din = tmp & 0xff;
@@ -155,7 +155,7 @@ int uwire_xfer(int cs, int bitlen, const void *dout, void *din)
   putreg16(UWIRE_CSR_IDX(0) | 0, UWIRE_REG(REG_CSR));
   _uwire_wait(UWIRE_CSR_CSRB, 0);
 
-  dbg(")\n");
+  _info(")\n");
 
   return 0;
 }

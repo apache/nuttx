@@ -71,6 +71,25 @@ config SPI_CRCGENERATION
 		generation of SPI CRCs.  Enables the HWFEAT_CRCGENERATION option
 		as well as the hwfeartures() interface method.
 
+config SPI_CS_CONTROL
+	bool "SPI CS Behavior Control"
+	default n
+	select SPI_HWFEATURES
+	---help---
+		Enables possibilities to define the behavior of CS.
+		Also enables the hwfeatures() interface method.
+
+config SPI_CS_DELAY_CONTROL
+	bool "SPI CS Delay Control"
+	default n
+	---help---
+		Enables possibilities to define the SPI-ChipSelect-Delays like
+		time between ChipSelect assertion and first Data-Bit, the time
+		between the last Data-Bit and the de-assertion and the minimum
+		delay between two ChipSelects.
+
+		This option enables the setdelay() interface method.
+
 if SPI_BITBANG
 
 config SPI_BITBANG_VARWIDTH

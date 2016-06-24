@@ -98,7 +98,7 @@ static FAR void *g_btnarg;
 
 static btn_buttonset_t btn_supported(FAR const struct btn_lowerhalf_s *lower)
 {
-  ivdbg("NUM_BUTTONS: %02x\n", NUM_BUTTONS);
+  iinfo("NUM_BUTTONS: %02x\n", NUM_BUTTONS);
   return (btn_buttonset_t)((1 << NUM_BUTTONS) - 1);
 }
 
@@ -138,8 +138,8 @@ static void btn_enable(FAR const struct btn_lowerhalf_s *lower,
   flags = enter_critical_section();
   btn_disable();
 
-  illvdbg("press: %02x release: %02x handler: %p arg: %p\n",
-          press, release, handler, arg);
+  iinfo("press: %02x release: %02x handler: %p arg: %p\n",
+        press, release, handler, arg);
 
   /* If no events are indicated or if no handler is provided, then this
    * must really be a request to disable interrupts.

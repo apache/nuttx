@@ -80,7 +80,7 @@ int stm32_bmp180initialize(FAR const char *devpath)
   FAR struct i2c_master_s *i2c;
   int ret;
 
-  sndbg("Initializing BMP180!\n");
+  sninfo("Initializing BMP180!\n");
 
   /* Initialize I2C */
 
@@ -96,7 +96,7 @@ int stm32_bmp180initialize(FAR const char *devpath)
   ret = bmp180_register(devpath, i2c);
   if (ret < 0)
     {
-      sndbg("Error registering BM180\n");
+      snerr("ERROR: Error registering BM180\n");
     }
 
   return ret;

@@ -94,7 +94,7 @@ int nx_fill(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
   FAR struct nxbe_window_s *wnd = (FAR struct nxbe_window_s *)hwnd;
   struct nxsvrmsg_fill_s  outmsg;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!wnd || !rect || !color)
     {
       set_errno(EINVAL);

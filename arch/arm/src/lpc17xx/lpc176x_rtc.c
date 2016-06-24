@@ -72,30 +72,6 @@
 #  error "CONFIG_RTC_HIRES must NOT be set with this driver"
 #endif
 
-#ifndef CONFIG_DEBUG
-#  undef CONFIG_DEBUG_RTC
-#endif
-
-/* Constants ************************************************************************/
-
-/* Debug ****************************************************************************/
-
-#ifdef CONFIG_DEBUG_RTC
-#  define rtcdbg    dbg
-#  define rtcvdbg   vdbg
-#  define rtclldbg  lldbg
-#  define rtcllvdbg llvdbg
-#else
-#  define rtcdbg(x...)
-#  define rtcvdbg(x...)
-#  define rtclldbg(x...)
-#  define rtcllvdbg(x...)
-#endif
-
-/************************************************************************************
- * Private Types
- ************************************************************************************/
-
 /************************************************************************************
  * Private Data
  ************************************************************************************/
@@ -131,12 +107,12 @@ volatile bool g_rtc_enabled = false;
  *
  ************************************************************************************/
 
-#ifdef CONFIG_DEBUG_RTC
+#ifdef CONFIG_DEBUG_RTC_INFO
 static void rtc_dumpregs(FAR const char *msg)
 {
-  rtclldbg("%s:\n", msg);
-  rtclldbg("  DOM : %08x\n", (getreg32(LPC17_RTC_DOM) & RTC_DOM_MASK));
-  rtclldbg("  DOW : %08x\n", (getreg32(LPC17_RTC_DOW) & RTC_DOW_MASK));
+  rtcinfo("%s:\n", msg);
+  rtcinfo("  DOM : %08x\n", (getreg32(LPC17_RTC_DOM) & RTC_DOM_MASK));
+  rtcinfo("  DOW : %08x\n", (getreg32(LPC17_RTC_DOW) & RTC_DOW_MASK));
 }
 #else
 #  define rtc_dumpregs(msg)
@@ -156,16 +132,16 @@ static void rtc_dumpregs(FAR const char *msg)
  *
  ************************************************************************************/
 
-#ifdef CONFIG_DEBUG_RTC
+#ifdef CONFIG_DEBUG_RTC_INFO
 static void rtc_dumptime(FAR struct tm *tp, FAR const char *msg)
 {
-  rtclldbg("%s:\n", msg);
-  rtclldbg("  tm_sec: %08x\n", tp->tm_sec);
-  rtclldbg("  tm_min: %08x\n", tp->tm_min);
-  rtclldbg(" tm_hour: %08x\n", tp->tm_hour);
-  rtclldbg(" tm_mday: %08x\n", tp->tm_mday);
-  rtclldbg("  tm_mon: %08x\n", tp->tm_mon);
-  rtclldbg(" tm_year: %08x\n", tp->tm_year);
+  rtcinfo("%s:\n", msg);
+  rtcinfo("  tm_sec: %08x\n", tp->tm_sec);
+  rtcinfo("  tm_min: %08x\n", tp->tm_min);
+  rtcinfo(" tm_hour: %08x\n", tp->tm_hour);
+  rtcinfo(" tm_mday: %08x\n", tp->tm_mday);
+  rtcinfo("  tm_mon: %08x\n", tp->tm_mon);
+  rtcinfo(" tm_year: %08x\n", tp->tm_year);
 }
 #else
 #  define rtc_dumptime(tp, msg)

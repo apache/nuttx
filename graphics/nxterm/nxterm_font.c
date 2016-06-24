@@ -318,7 +318,7 @@ nxterm_renderglyph(FAR struct nxterm_state_s *priv,
         {
           /* Actually, the RENDERER never returns a failure */
 
-          gdbg("nxterm_renderglyph: RENDERER failed\n");
+          gerr("ERROR: nxterm_renderglyph: RENDERER failed\n");
           nxterm_freeglyph(glyph);
           glyph = NULL;
         }

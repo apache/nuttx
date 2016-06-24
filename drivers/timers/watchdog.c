@@ -57,24 +57,6 @@
 #ifdef CONFIG_WATCHDOG
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-/* Debug ********************************************************************/
-/* Non-standard debug that may be enabled just for testing the watchdog driver */
-
-#ifdef CONFIG_DEBUG_WATCHDOG
-#  define wddbg    dbg
-#  define wdvdbg   vdbg
-#  define wdlldbg  lldbg
-#  define wdllvdbg llvdbg
-#else
-#  define wddbg(x...)
-#  define wdvdbg(x...)
-#  define wdlldbg(x...)
-#  define wdllvdbg(x...)
-#endif
-
-/****************************************************************************
  * Private Type Definitions
  ****************************************************************************/
 
@@ -140,7 +122,7 @@ static int wdog_open(FAR struct file *filep)
   uint8_t                          tmp;
   int                              ret;
 
-  wdvdbg("crefs: %d\n", upper->crefs);
+  wdinfo("crefs: %d\n", upper->crefs);
 
   /* Get exclusive access to the device structures */
 
@@ -191,7 +173,7 @@ static int wdog_close(FAR struct file *filep)
   FAR struct watchdog_upperhalf_s *upper = inode->i_private;
   int                              ret;
 
-  wdvdbg("crefs: %d\n", upper->crefs);
+  wdinfo("crefs: %d\n", upper->crefs);
 
   /* Get exclusive access to the device structures */
 
@@ -262,7 +244,7 @@ static int wdog_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   FAR struct watchdog_lowerhalf_s *lower = upper->lower;
   int                              ret;
 
-  wdvdbg("cmd: %d arg: %ld\n", cmd, arg);
+  wdinfo("cmd: %d arg: %ld\n", cmd, arg);
   DEBUGASSERT(upper && lower);
 
   /* Get exclusive access to the device structures */
@@ -418,7 +400,7 @@ static int wdog_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
     default:
       {
-        wdvdbg("Forwarding unrecognized cmd: %d arg: %ld\n", cmd, arg);
+        wdinfo("Forwarding unrecognized cmd: %d arg: %ld\n", cmd, arg);
 
         /* An ioctl commands that are not recognized by the "upper-half"
          * driver are forwarded to the lower half driver through this
@@ -478,7 +460,7 @@ FAR void *watchdog_register(FAR const char *path,
   int ret;
 
   DEBUGASSERT(path && lower);
-  wdvdbg("Entry: path=%s\n", path);
+  wdinfo("Entry: path=%s\n", path);
 
   /* Allocate the upper-half data structure */
 
@@ -486,7 +468,7 @@ FAR void *watchdog_register(FAR const char *path,
     kmm_zalloc(sizeof(struct watchdog_upperhalf_s));
   if (!upper)
     {
-      wddbg("Upper half allocation failed\n");
+      wderr("Upper half allocation failed\n");
       goto errout;
     }
 
@@ -502,7 +484,7 @@ FAR void *watchdog_register(FAR const char *path,
   upper->path = strdup(path);
   if (!upper->path)
     {
-      wddbg("Path allocation failed\n");
+      wderr("Path allocation failed\n");
       goto errout_with_upper;
     }
 
@@ -511,7 +493,7 @@ FAR void *watchdog_register(FAR const char *path,
   ret = register_driver(path, &g_wdogops, 0666, upper);
   if (ret < 0)
     {
-      wddbg("register_driver failed: %d\n", ret);
+      wderr("register_driver failed: %d\n", ret);
       goto errout_with_path;
     }
 
@@ -554,7 +536,7 @@ void watchdog_unregister(FAR void *handle)
   lower = upper->lower;
   DEBUGASSERT(upper && lower);
 
-  wdvdbg("Unregistering: %s\n", upper->path);
+  wdinfo("Unregistering: %s\n", upper->path);
 
   /* Disable the watchdog timer */
 

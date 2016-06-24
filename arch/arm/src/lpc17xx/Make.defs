@@ -137,7 +137,7 @@ ifeq ($(CONFIG_GPIO_IRQ),y)
 CHIP_CSRCS += lpc17_gpioint.c
 endif
 
-ifeq ($(CONFIG_DEBUG_GPIO),y)
+ifeq ($(CONFIG_DEBUG_GPIO_INFO),y)
 CHIP_CSRCS += lpc17_gpiodbg.c
 endif
 

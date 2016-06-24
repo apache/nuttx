@@ -82,7 +82,7 @@
  */
 
 	.macro	showprogress, code
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
 	ldab	\code
 #ifdef CONFIG_HCS12_SERIALMON
 	jsr		#PutChar

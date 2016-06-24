@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/x86/src/i486/up_regdump.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,46 +39,28 @@
 
 #include <nuttx/config.h>
 
-/* Output debug info -- even if debug is not selected. */
-
-#undef  CONFIG_DEBUG
-#undef  CONFIG_DEBUG_VERBOSE
-#define CONFIG_DEBUG 1
-#define CONFIG_DEBUG_VERBOSE 1
-
 #include <debug.h>
 #include <nuttx/irq.h>
 
 #include "up_internal.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
+
 /****************************************************************************
  * Name: up_registerdump
  ****************************************************************************/
 
 void up_registerdump(uint32_t *regs)
 {
-  lldbg(" ds:%08x irq:%08x err:%08x\n",
+  _alert(" ds:%08x irq:%08x err:%08x\n",
         regs[REG_DS], regs[REG_IRQNO], regs[REG_ERRCODE]);
-  lldbg("edi:%08x esi:%08x ebp:%08x esp:%08x\n",
+  _alert("edi:%08x esi:%08x ebp:%08x esp:%08x\n",
         regs[REG_EDI], regs[REG_ESI], regs[REG_EBP], regs[REG_ESP]);
-  lldbg("ebx:%08x edx:%08x ecx:%08x eax:%08x\n",
+  _alert("ebx:%08x edx:%08x ecx:%08x eax:%08x\n",
         regs[REG_EBX], regs[REG_EDX], regs[REG_ECX], regs[REG_EAX]);
-  lldbg("eip:%08x  cs:%08x flg:%08x  sp:%08x ss:%08x\n",
+  _alert("eip:%08x  cs:%08x flg:%08x  sp:%08x ss:%08x\n",
         regs[REG_EIP], regs[REG_CS], regs[REG_EFLAGS], regs[REG_SP],
         regs[REG_SS]);
 }

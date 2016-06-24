@@ -248,7 +248,7 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
 #endif
 
           default:
-            nlldbg("ERROR: Unrecognized link type: %d\n", lltype);
+            nerr("ERROR: Unrecognized link type: %d\n", lltype);
             return -EINVAL;
         }
 
@@ -319,13 +319,13 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
       net_unlock(save);
 
 #ifdef CONFIG_NET_ETHERNET
-      nlldbg("Registered MAC: %02x:%02x:%02x:%02x:%02x:%02x as dev: %s\n",
-             dev->d_mac.ether_addr_octet[0], dev->d_mac.ether_addr_octet[1],
-             dev->d_mac.ether_addr_octet[2], dev->d_mac.ether_addr_octet[3],
-             dev->d_mac.ether_addr_octet[4], dev->d_mac.ether_addr_octet[5],
-             dev->d_ifname);
+      ninfo("Registered MAC: %02x:%02x:%02x:%02x:%02x:%02x as dev: %s\n",
+            dev->d_mac.ether_addr_octet[0], dev->d_mac.ether_addr_octet[1],
+            dev->d_mac.ether_addr_octet[2], dev->d_mac.ether_addr_octet[3],
+            dev->d_mac.ether_addr_octet[4], dev->d_mac.ether_addr_octet[5],
+            dev->d_ifname);
 #else
-      nlldbg("Registered dev: %s\n", dev->d_ifname);
+      ninfo("Registered dev: %s\n", dev->d_ifname);
 #endif
       return OK;
     }

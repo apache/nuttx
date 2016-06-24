@@ -70,12 +70,11 @@
  *   in that case, console output from non-Telnet threads will go to the
  *   circular buffer and can be viewed using the NSH 'dmesg' command.
  * CONFIG_RAMLOG_SYSLOG - Use the RAM logging device for the syslogging
- *   interface.  If this feature is enabled (along with CONFIG_SYSLOG),
- *   then all debug output (only) will be re-directed to the circular
- *   buffer in RAM.  This RAM log can be view from NSH using the 'dmesg'
- *   command.  NOTE:  Unlike the limited, generic character driver SYSLOG
- *   device, the RAMLOG *can* be used to generate debug output from interrupt
- *   level handlers.
+ *   interface.  If this feature is enabled then all debug output (only)
+ *   will be re-directed to the circular buffer in RAM.  This RAM log can
+ *   be viewied from NSH using the 'dmesg' command.  NOTE:  Unlike the
+ *   limited, generic character driver SYSLOG device, the RAMLOG *can* be
+ *   used to generate debug output from interrupt level handlers.
  * CONFIG_RAMLOG_NPOLLWAITERS - The number of threads than can be waiting
  *   for this driver on poll().  Default: 4
  *
@@ -89,10 +88,6 @@
 #  undef CONFIG_RAMLOG_CONSOLE
 #endif
 
-#ifndef CONFIG_SYSLOG
-#  undef CONFIG_RAMLOG_SYSLOG
-#endif
-
 #if defined(CONFIG_RAMLOG_SYSLOG) && !defined(CONFIG_SYSLOG_DEVPATH)
 #  define CONFIG_SYSLOG_DEVPATH "/dev/ramlog"
 #endif
@@ -101,23 +96,8 @@
 #  define CONFIG_RAMLOG_NPOLLWAITERS 4
 #endif
 
-#ifndef CONFIG_SYSLOG
-#  undef CONFIG_RAMLOG_SYSLOG
-#endif
-
 #ifndef CONFIG_RAMLOG_BUFSIZE
 #  define CONFIG_RAMLOG_BUFSIZE 1024
-#endif
-
-/* The normal behavior of the RAM log when used as a SYSLOG is to return
- * end-of-file if there is no data in the RAM log (rather than blocking until
- * data is available).  That allows you to 'cat' the SYSLOG with no ill
- * consequences.
- */
-
-#ifdef CONFIG_SYSLOG
-#  undef CONFIG_RAMLOG_NONBLOCKING
-#  define CONFIG_RAMLOG_NONBLOCKING 1
 #endif
 
 /* When used as a console or syslogging device, the RAM log will pre-pend
@@ -183,7 +163,7 @@ int ramlog_consoleinit(void);
 #endif
 
 /****************************************************************************
- * Name: ramlog_sysloginit
+ * Name: ramlog_syslog_channel
  *
  * Description:
  *   Create the RAM logging device and register it at the specified path.
@@ -195,7 +175,19 @@ int ramlog_consoleinit(void);
  ****************************************************************************/
 
 #ifdef CONFIG_RAMLOG_SYSLOG
-int ramlog_sysloginit(void);
+int ramlog_syslog_channel(void);
+#endif
+
+/****************************************************************************
+ * Name: ramlog_putc
+ *
+ * Description:
+ *   This is the low-level system logging interface.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_RAMLOG_CONSOLE) || defined(CONFIG_RAMLOG_SYSLOG)
+int ramlog_putc(int ch);
 #endif
 
 #undef EXTERN

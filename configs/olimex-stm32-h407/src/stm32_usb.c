@@ -103,13 +103,13 @@ static int usbhost_waiter(int argc, char *argv[])
 {
   struct usbhost_hubport_s *hport;
 
-  uvdbg("Running\n");
+  uinfo("Running\n");
   for (;;)
     {
       /* Wait for the device to change state */
 
       DEBUGVERIFY(CONN_WAIT(g_usbconn, &hport));
-      uvdbg("%s\n", hport->connected ? "connected" : "disconnected");
+      uinfo("%s\n", hport->connected ? "connected" : "disconnected");
 
       /* Did we just become connected? */
 
@@ -173,7 +173,7 @@ int stm32_usbhost_initialize(void)
    * that we care about:
    */
 
-  uvdbg("Register class drivers\n");
+  uinfo("Register class drivers\n");
 
 #ifdef CONFIG_USBHOST_HUB
   /* Initialize USB hub class support */
@@ -181,7 +181,7 @@ int stm32_usbhost_initialize(void)
   ret = usbhost_hub_initialize();
   if (ret < 0)
     {
-      udbg("ERROR: usbhost_hub_initialize failed: %d\n", ret);
+      uerr("ERROR: usbhost_hub_initialize failed: %d\n", ret);
     }
 #endif
 
@@ -191,7 +191,7 @@ int stm32_usbhost_initialize(void)
   ret = usbhost_msc_initialize();
   if (ret != OK)
     {
-      udbg("ERROR: Failed to register the mass storage class: %d\n", ret);
+      uerr("ERROR: Failed to register the mass storage class: %d\n", ret);
     }
 #endif
 
@@ -201,19 +201,19 @@ int stm32_usbhost_initialize(void)
   ret = usbhost_cdcacm_initialize();
   if (ret != OK)
     {
-      udbg("ERROR: Failed to register the CDC/ACM serial class: %d\n", ret);
+      uerr("ERROR: Failed to register the CDC/ACM serial class: %d\n", ret);
     }
 #endif
 
   /* Then get an instance of the USB host interface */
 
-  uvdbg("Initialize USB host\n");
+  uinfo("Initialize USB host\n");
   g_usbconn = stm32_otghshost_initialize(0);
   if (g_usbconn)
     {
       /* Start a thread to handle device connection. */
 
-      uvdbg("Start usbhost_waiter\n");
+      uinfo("Start usbhost_waiter\n");
 
       pid = task_create("usbhost", CONFIG_STM32H407_USBHOST_PRIO,
                         CONFIG_STM32H407_USBHOST_STACKSIZE,
@@ -307,7 +307,7 @@ xcpt_t stm32_setup_overcurrent(xcpt_t handler)
 #ifdef CONFIG_USBDEV
 void stm32_usbsuspend(FAR struct usbdev_s *dev, bool resume)
 {
-  ulldbg("resume: %d\n", resume);
+  uinfo("resume: %d\n", resume);
 }
 #endif
 

@@ -87,7 +87,7 @@
 
 int nx_getposition(NXWINDOW hwnd)
 {
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!hwnd)
     {
       errno = EINVAL;

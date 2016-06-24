@@ -3,7 +3,7 @@
  *
  * This file is a part of NuttX:
  *
- *   Copyright (C) 2012, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2015-2016 Gregory Nutt. All rights reserved.
  *   Ported by: Darcy Gong
  *
  * It derives from the Rhombs OS math library by Nick Johnson which has
@@ -55,7 +55,7 @@ double asin(double x)
 
   /* Verify that the input value is in the domain of the function */
 
-  if (x < -1.0 || x > 1.0)
+  if (x < -1.0 || x > 1.0 || isnan(x))
     {
       return NAN;
     }

@@ -106,7 +106,7 @@ static void icmpv6_setaddresses(FAR struct net_driver_s *dev,
 
   net_ipv6_pref2mask(preflen, dev->d_ipv6netmask);
 
-  nvdbg("preflen=%d netmask=%04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
+  ninfo("preflen=%d netmask=%04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
         preflen, dev->d_ipv6netmask[0], dev->d_ipv6netmask[1],
         dev->d_ipv6netmask[2], dev->d_ipv6netmask[3], dev->d_ipv6netmask[4],
         dev->d_ipv6netmask[5], dev->d_ipv6netmask[6], dev->d_ipv6netmask[7]);
@@ -119,10 +119,10 @@ static void icmpv6_setaddresses(FAR struct net_driver_s *dev,
                            (prefix[i] & dev->d_ipv6netmask[i]);
     }
 
-  nvdbg("prefix=%04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
+  ninfo("prefix=%04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
         prefix[0], prefix[1], prefix[2], prefix[3],
         prefix[4], prefix[6], prefix[6], prefix[7]);
-  nvdbg("IP address=%04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
+  ninfo("IP address=%04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
         dev->d_ipv6addr[0], dev->d_ipv6addr[1], dev->d_ipv6addr[2],
         dev->d_ipv6addr[3], dev->d_ipv6addr[4], dev->d_ipv6addr[6],
         dev->d_ipv6addr[6], dev->d_ipv6addr[7]);
@@ -131,7 +131,7 @@ static void icmpv6_setaddresses(FAR struct net_driver_s *dev,
 
   net_ipv6addr_copy(dev->d_ipv6draddr, draddr);
 
-  nvdbg("DR address=%04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
+  ninfo("DR address=%04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
         dev->d_ipv6draddr[0], dev->d_ipv6draddr[1], dev->d_ipv6draddr[2],
         dev->d_ipv6draddr[3], dev->d_ipv6draddr[4], dev->d_ipv6draddr[6],
         dev->d_ipv6draddr[6], dev->d_ipv6draddr[7]);
@@ -212,7 +212,7 @@ int icmpv6_rwait_cancel(FAR struct icmpv6_rnotify_s *notify)
   irqstate_t flags;
   int ret = -ENOENT;
 
-  nvdbg("Cancelling...\n");
+  ninfo("Cancelling...\n");
 
   /* Remove our wait structure from the list (we may no longer be at the
    * head of the list).
@@ -243,7 +243,7 @@ int icmpv6_rwait_cancel(FAR struct icmpv6_rnotify_s *notify)
   return ret;
 
 #else
-  nvdbg("Cancelling...\n");
+  ninfo("Cancelling...\n");
 
   /* If there is only one network device, then there can be only one entry
    * in the list of waiters.
@@ -276,7 +276,7 @@ int icmpv6_rwait(FAR struct icmpv6_rnotify_s *notify,
   irqstate_t flags;
   int ret;
 
-  nvdbg("Waiting...\n");
+  ninfo("Waiting...\n");
 
   /* And wait for the Neighbor Advertisement (or a timeout).  Interrupts will
    * be re-enabled while we wait.
@@ -335,7 +335,7 @@ void icmpv6_rnotify(FAR struct net_driver_s *dev, const net_ipv6addr_t draddr,
 #ifdef CONFIG_NETDEV_MULTINIC
   FAR struct icmpv6_rnotify_s *curr;
 
-  nvdbg("Notified\n");
+  ninfo("Notified\n");
 
   /* Find an entry with the matching device name in the list of waiters */
 
@@ -364,7 +364,7 @@ void icmpv6_rnotify(FAR struct net_driver_s *dev, const net_ipv6addr_t draddr,
 #else
   FAR struct icmpv6_rnotify_s *waiter = g_icmpv6_rwaiters;
 
-  nvdbg("Notified\n");
+  ninfo("Notified\n");
 
   if (waiter)
     {

@@ -92,7 +92,7 @@ int stm32_max6675initialize(FAR const char *devpath)
   ret = max6675_register(devpath, spi);
   if (ret < 0)
     {
-      sndbg("Error registering MAX6675\n");
+      snerr("ERROR: Error registering MAX6675\n");
     }
 
   return ret;

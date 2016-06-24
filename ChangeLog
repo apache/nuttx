@@ -11586,7 +11586,7 @@
 	* configs/stm32l476vg-disco: Add support for the STM32L476VG Discovery
 	  board.  From Dave (2016-03-25).
 
-7.16 2016-xx-xx Gregory Nutt <gnutt@nuttx.org>
+7.16 2016-06-01 Gregory Nutt <gnutt@nuttx.org>
 
 	* PM: Add activity domain to all PM interfaces and driver callbacks.  If
 	  CONFIG_PM_NDOMAINS == 1, then the legacy behavior is preserved.  If
@@ -11615,7 +11615,7 @@
 	* STM3220G-EVAL:  Add support for both the IAR and uVision GCC IDEs
 	  From Kha Vo (2016-04-08).
 	* STM32F429I Discovery:  Add support for the uVision GCC IDE.   From
-	* Kha Vo (2016-04-08).
+	  Kha Vo (2016-04-08).
 	* libc/signal and include/signal.h: Rename sigset() to signal().
 	  sigset() is the System V function; signal() is the obsoleted POSIX
 	  name.  These seem to be equivalent.  Neither are relevant in modern
@@ -11640,7 +11640,7 @@
 	  is interpreted as a packed dual frame exchange. Sebastien Lorquet
 	  (2016-04-13).
 	* net/sockets/listen.c and accept.c and include/nuttx/net:  Separate
-	  out psock_listen() and psock_accepti() for internal OS usage
+	  out psock_listen() and psock_accept() for internal OS usage
 	  (2016-04-14).
 	* fs/inode/, fs/vfs/, and sched/task/:  File and socket descriptors are
 	  no longer allocated for kernel threads.  They must use SYSLOG for
@@ -11753,7 +11753,7 @@
 	* arch/srm/src/stm32l4: Add CAN support for STM32L4.  From Sebastien
 	  Lorquet (2016-05-19).
 	* arch/arm/src/samv7: Adds a JTAG config and ERASE config to  Kconfig to
-	  set the CCFG_SYSIO SYSIO Pins.  From Davide Sidrane (2016-05-19).
+	  set the CCFG_SYSIO SYSIO Pins.  From David Sidrane (2016-05-19).
 	* arch/sim/src:  Enhance networking support for the simulation under Linux.
 	  Includes updated support for Linux TUN/TAP, and the addition of support
 	  for Linux bridge devices.  From Steve (2016-05-20).
@@ -11767,7 +11767,7 @@
 	  configurations (2016-05-22).
 	* include/nuttx/crypto/aes.h:  Modifications to the crypto API needed
 	  for LPC43xx.  From Alexander Vasiljev (2016-05-23).
-	* arch/arm/src/lpc32xx:  Add AES support.  From Alexander Vasiljev
+	* arch/arm/src/lpc43xx:  Add AES support.  From Alexander Vasiljev
 	  (2016-05-24).
 	* configs/*/src/tiva_timer.c:  Tiva boards:  Fix a naming collision,
 	  rename board-specific function from tiva_timer_initialize() to
@@ -11813,3 +11813,361 @@
 	* fs/: Add logic to detach a file structure from a file descriptor.
 	  This is for use only within the OS.  It permits an open file or driver
 	  to be used across multiple threads (2016-05-26).
+	* arch/arm/src/stm32l4: Get I2C working for STM32L4.  From Dave
+	  (ziggurat29) (2016-05-25).
+	* fs/ and include/nuttx/fs: Add logic to detach a file structure from a
+	  file descriptor.  This is for use only within the OS.  It permits an
+	  open file or driver to be used across multiple threads.  (2016-05-26).
+	* drivers/analog/adc.c, include/nuttx/analog/adc.h, and all ADC lower
+	  half drivers:  No longer uses global adc_receive() call.  Added a new
+	  bind() method to the ADC interface.  Now the ADC upper half driver
+	  will register its receipt-of-data callback.  This change allows the
+	  ADC lower half driver to be used with a differ ADC upper half
+	  (2016-05-26).
+	* drivers/analog/ads1255.c: Must not do SPI access from interrupt
+	  handler.  Use the worker thread instead.  Must also lock the SPI bus
+	  before using it. (2015-05-26).
+	* drivers/:  Several SPI-based drivers modified.  All drivers that use
+	  SPI must call SPI_LOCK and SPI_UNLOCK.  This is not optional
+	  (2016-05-26).
+	* drivers/sensors:  Fix a bug in crc computation for ms583730.
+	  Implement POSIX read (2016-05-27).
+	* arch/arm/src/samv7: This is a fix to a problem in the handling of the
+	  oneshot timer. Due to a wrong assumption concerning the behavior
+	  directly after the start of the timer/counter the function
+	  sam_oneshot_cancel(…) calculates the wrong remaining time. The code
+	  assumes that the counter register is zero directly after the start of
+	  the timer, but this is not true. To start the time/counter a software
+	  trigger is invoked, this trigger starts the timer/count and sets the
+	  counter register to zero, but the reset of the counter register is not
+	  performed instantly. According to the datasheet: "The counter can be
+	  reset by a trigger. In this case, the counter value passes to zero on
+	  the next valid edge of the selected clock." Thus the counter is set to
+	  zero between 0 and USEC_PER_TICK microseconds after the clock was
+	  started.
+	  In my fix I use the freerun count value to determine if at least one
+	  tick passed since the start of the timer and thus if the value of the
+	  oneshot counter is correct. I also tried to use the function
+	  up_timer_gettime(…) to achieve this but, at least if compiled with no
+	  optimization the problem vanishes without using the value of the
+	  function, the function call takes too long.
+	  Another problem treated in the fix is that if the oneshot timer/counter
+	  is canceled, we only know the remaining time with a precision of
+	  USEC_PER_TICK microseconds. This means the calculated remaining time
+	  is between 0 and USEC_PER_TICK microseconds  too long. To fix this I
+	  subtract one tick if the calculated remaining time is greater than one
+	  tick and otherwise set the remaining time to zero. By doing so the
+	  measured times are much more precise as without it.  From Stefan Kolb
+	  (2016-05-27).
+	* arch/arm/src/sama5:  Stefan Kolb's change to the SAMV7 Oneshot Timer
+	  should also be applied to the SAMA5 oneshot time since the drivers are
+	  identical (2016-05-27).
+	* arch/arm/src/stm32l4: Add support for SPI 4 and 5 on stm32f411 chips.
+	  From Konstantin Berezenko (2016-05-27).
+	* arch/arm/src/sam34:  Stefan Kolb's change to the SAMV7 Oneshot Timer
+	  should also be applied to the SAM3/4 oneshot time since the drivers
+	  are identical (2016-05-29).
+	* arch/arm/src/stm32: Allow to not use all channel in a lower part of
+	  PWM.  From Pierre-noel Bouteville (2016-05-30).
+	* libc/math: Add a NAN test on 'x' in asin function of lib_asin.c.
+	  Suggested by Pierre-noel Bouteville (2016-05-31).
+	* arch/arm/src/stm32: Fix logic in F4 RTCC driver that prevent ALARM
+	  interrupt.  From Neil Hancock (2016-05-31).
+	* arch/arm/src/stm32: Fix STM32 ValueLine ADC IRQ number selection.
+	  From David Sidrane (2016-05-31).
+	* arch/arm/src/samv7: Fix missing unlock of device in MCAN
+	  mcan_txempty().  From Frank Benkert (2016-06-01).
+
+7.17 2016-xx-xx Gregory Nutt <gnutt@nuttx.org>
+
+	* drivers/mtd/flash_eraseall.c:  Removed.  This is no longer used
+	  in the OS and is simply a wrapper around the MDIOC_BULKERASE
+	  IOCTL command.  It used to be called (only) from
+	  apps/system/flash_eraseall, but that has been removed because it
+	  violated the OS/application interface -- by calling flash_eraseall().
+	  The old code can be found in the Obsoleted' repository (and a revised
+	  version can be found at apps/fsutils/flash_eraseall) (2016-06-03).
+	* arch/arm/src/stm32: STM32 Timer Driver: Change calculation of per-
+	  timer pre-scaler value.  Add support for all timers (2016-6-03)
+	* drivers/lcd:  Correct conditional compilation in ST7565 driver.  From
+	  Pierre-noel Bouteville (2016-6-03)
+	* arch/arm/src/stm32: Correct conditional compilation in STM32 timer
+	  capture logic.  From Pierre-noel Bouteville (2016-6-03)
+	* arch/arm/src/efm32: Fix EFM32 FLASH conditional compilation.  From
+	  Pierre-noel Bouteville (2016-6-03)
+	* arch/arm/src/lpc43xx: Fix errors in GPIO interrupt logic.  From v01d
+	  (phreakuencies) (2016-06-04)
+	* arch/arm/src/kl and lpc11xx: rename xyz_lowputc to up_putc.  Remove
+	  all references to up_lowputc, everywhere (2016-06-04).
+	* configs/stm32f103-minimum: Add minnsh configuration.  From Alan
+	  Carvalho de Assis  (2016-06-04).
+	* arch/arm/src/stm32: Add the up_getc() function to STM32 in order to
+	  support the minnsh configuration.  From Alan Carvalho de Assis
+	  (2016-06-04).
+	* include/sys/boardctl.h:  Needs to be usable with C++ files (2016-06-05).
+	* tools/tesbuild.sh will now build NxWM configurations (2016-06-05).
+	* arch/arm/src/stm32:  In PWM driver, just update duty if frequency is
+	  not changed and PSM started.  This removeis glitch or blinking when
+	  only duty is frequently changed.  From Pierre-noel Bouteville (2016-06-05).
+	* arch/arm/src/kinetis:  Add a USB device controller driver.  Derived from
+	  the pic32mx usb driver, which uses the same usb controller.  From kfazz
+	  (2016-06).
+	* configs/teensy-3.x:  Add USB support and a usbnsh configuration.  From
+	  kfazz (2016-06).
+	* arch/arm/src/stm32:  Add support for the STM32F105R.  From Konstantin
+	  Berezenko  (2016-06-06).
+	* include/signal.h:  Change type of SIG_ERR, SIG_IGN, ... to
+	  _sa_handler_t.  They type void does not work with the IAR toolchain.
+	  From Aleksandr Vyhovanec (2016-06-07).
+	* arch/arm/src/stm32f7 and include/stm32f7:  Added STM32FF76xxx and
+	  STM32FF7xx families. From David Sidrane (2016-06-08).
+	* Refactoring configs/nucleo-144 sub-directories to support additional
+	  nucleo-144 board.  Add support for the Nucleo-F767ZI board. From David
+	  Sidrane (2016-06-08).
+	* arch/arm/src/kinetis: Add a USB device controller driver for kinetis.
+	  Derived from pic32mx usb driver, which uses the same usb controller.
+	  From kfazz (2016-06-06).
+	* configs/teensy-3.x:  Add USB device support and usbnsh configuration.
+	  From kfazz (2016-06-06.
+	* arch/arm/src/stm32:  Add STM32F105R support.  From Konstantin Berezenko
+	  (2016-06-06).
+	* include/signal.h:  Change type of SIG_IGN and related defines to
+	  _sa_handler_t.  From Aleksandr Vyhovanec (2016-06-07).
+	* configs/nucleo-144: Refactored configs/nucleo-144 sub-directories to
+	  support additional nucleo-144 board.  Add support for the Nucleo-F767ZI
+	  board.  From David Sidrane (2016-06-07).
+	* arch/arm/src/stm32f7: Add support for STM32FF76xxx and STM32FF7xx
+	  families.  From David Sidrane (2016-06-08).
+	* include/assert.h: Check if NDEBUG is defined.  From Paul Alexander
+	  Patience (2016-06-08).
+	* arch/arm/src/stm32: Fix STM32 DMA code and configuration for STM32F37X
+	  chips.  From Marten Svanfeldt (2016-06-08).
+	* drivers/mtd: Add a driver of IS25xP SPI flash devices.  From Marten
+	  Svanfeldt (2016-06-09).
+	* arch/arm/src/Kconfig and configs/teensy-3.x: Teensy clock fixes.  The
+	  High Gain bit in MCG_C1 was preventing teensy from booting except
+	  after a programming session. The second change doesn't appear to
+	  change any functionality, but complies with restrictions in the k20
+	  family reference manual on FEI -> FBE clock transiions.  From kfazz
+	  (2016-06-09).
+	* configs/*/include/board.h: Fix timer input clock definitions.  From
+	  David Sidrane (2016-06-09).
+	* Networking:  In both IPv6 and IPv4 incoming logic:  (1) Should check
+	  if the packet size is large enough before trying to access the packet
+	  length in the IP header.  (2) In the comparison between the IP length
+	  and the full packet length, need to subtract the size of the link
+	  layer header before making the comparison or we will get false
+	  positives (i.e., the packet is really too small) (2016-06-09)
+	* drivers/mtd: Added driver of IS25xP SPI flash devices.  Based on
+	  sst25xx driver. From Marten Svanfeldt (2016-06-09).
+	* arch/arm/src/kinetis:  Teensy clock fixes.  The High Gain bit in
+	  MCG_C1 was preventing teensy from booting except after a programming
+	  session. The second change doesn't appear to change any functionality,
+	  but complies with restrictions in the k20  family reference manual on
+	  FEI -> FBE clock transiions.  From kfazz (2016-06-09).
+	* arch/arm/src/stm32: Fix timer input clock definitions.  From David
+	  Sidrane (2016-06-09).
+	* configs/: All configurations that have both CONFIG_NSH_LIBRARY=y and
+	  CONFIG_NET=y must now also have CONFIG_NSH_NETINIT=y (2016-06-09).
+	* arch/arm/src/kinetis: Kinetis pwm support, based on kl_pwm driver.
+	  From kfazz (2016-06-09).
+	* net/: In both IPv6 and IPv4 incoming logic:  (1) Should check if the
+	  packet size is large enough before trying to access the packet length
+	  in the IP header.  (2) In the comparison between the IP length and the
+	  full packet length, need to subtract the size of the link layer header
+	  before making the comparison or we will get false positives (i.e., the
+	  packet is really too small) (2016-06-09).
+	* arch/srm/src/stm32: Fix compilation errors in debug mode of
+	  stm32_pwm.c.  From Konstantin Berezenko (2016-06-09).
+	* arch/arm/src/kinetis: Support up to 8 channels per timer.  From kfazz
+	  (2016-06-09).
+	* lib/: crc16: fix error. From  Paul Alexander Patience (2016-06-10).
+	* lib/: Add crc64 support. From  Paul Alexander Patience (2016-06-10).
+	* arch/arm/src/kinetis: Added kl_dumpgpio functionality as
+	  kinetis_pindump. From kfazz (2016-06-10).
+	* arch/arm/src/sam34: Fix some errors in AFEC header file.  From
+	  OrbitalFox (2016-06-10).
+	* arch/arm/include/stm32: Correct the can2 rx irq number for stm32f10xx
+	  chips. From Konstantin Berezenko (2016-06-10).
+	* drivers/include/input: Button upper half driver:  Add definitions
+	  needed for compilation with the poll() interface is not disabled
+	  (2016-06-11).  
+	* Kconfig/, include/debug.h, and many other files:  (1) Debug features
+	  are now enabled separately from debug output. CONFIG_DEBUG is gone.
+	  It is replaced with CONFIG_DEBUG_FEATURES. (2) The macros dbg() and
+	  vdbg() have renamed as err() and info(), respectively. This also
+	  applies to all of the variants as well, lldbg(), llvdbg(), XXdbg(),
+	  XXvdbg(), XXlldbg(), and XXllvdbg().  (3) Add a new debug level,
+	  warn() (and all variants vwarn(), llwarn(), etc.). (4) Debug
+	  assertions can now be enabled separately from debug output. (5) You
+	  can now enable subsystem/device driver debug output at different
+	  output levels. For example, CONFIG_DEBUG_FS no longer enables file
+	  system debug output. It enables general file system debug logic and
+	  enables selection of CONFIG_DEBUG_FS_ERROR, CONFIG_DEBUG_FS_WARN,
+	  and CONFIG_DEBUG_FS_INFO (2016-06-12).
+	* strtoul() and strtoull():  Fix errno settings required by function
+	  definition.  Resolved Bitbucket Issue #1. From Sebastien Lorquet
+	  (2016-06-13)
+	* arch/arm/src/stm32f7:  Add SPI driver.  DMA not yet supported.  From
+	  David Sidrane (2016-06-14).
+	* configs/nucleo-144:  Add test for STM32 F7 SPI.  From David Sidrane
+	  (2016-06-14).
+	* alert(): New debug macro: alert().  This is high priority,
+	  unconditional output and is used to simplify and stanardize crash
+	  error reporting(2016-06-14).
+	* arch/arm/src/tiva: Bug Fix in tiva_serial.c - UART5, UART6 and UART7
+	  were not being configured as TTYS0 for printing over serial console.
+	  From Shirshak Sengupta (2016-06-14).
+	* SAMV7: SPI: SPI-Freq. 40MHz; VARSELECT; hw-features
+	  This change adds the following improvements:
+	  - Increase the allowed SPI-Frequency from 20 to 40 MHz.
+	  - Correct and rename the "VARSELECT" option
+	    This option was included in the code as "CONFIG_SPI_VARSELECT" but
+	    nowhere  defined in a Kconfig file. The change renames it to
+	    "CONFIG_SAMV7_SPI_VARSELECT" and corrects the implementation
+	    according the datasheet of Atmel. In short, this option switches
+	    the processor from "fixed peripheral selection" (single device) to
+	    "variable peripheral selection" (multiple devices on the bus).
+	  - Add a new Function to the interface to control the timing and delays
+	    of the chip according the ChipSelect lines. This function can
+	    control the delay between the assertion of the ChipSelect and the
+	    first bit, between the last bit and the de-assertion of the
+	    ChipSelect and between two ChipSelects. This is needed to tune the
+	    transfer according the specification of the connected devices.  
+	  - Add three "hw-features" for the SAMV7, which controls the behavior
+	    of the ChipSelect:
+	    - force CS inactive after transfer: this forces a (short)
+	      de-assertion of the CS after a transfer, even if more data is
+	      available in time
+	    - force CS active after transfer: this forces the CS to stay active
+	      after a transfer, even if the chip runs out of data.
+	      Btw.: this is a prerequisit to make the LASTXFER bit working at all.
+	    - escape LASTXFER: this suppresses the LASTXFER bit at the end of the
+	      next transfer. The "escape"-Flag is reset automatically.
+	  From Frank Benkert (2016-06-14)
+	* Many CONFIG_DEBUG_* options did not have matching macros defined in
+	  include/debug.h.  Rather, there were various definitions scattered
+	  throughout the sourse tree.  These were collected together and
+	  centralized with single macro definitions in include/debug.h
+	  (2016-06-15)
+	* STM32F7: Add SPI, I2C, and ADC drivers.  From Lok Tep (2016-06-15).
+	* err(), warn(), info(), and alert() renamed to include leading '_'.
+	  This was done to avoid some naming collisions (2-06-16
+	* STM32: Move backup domain reset to to earlier in the initialization
+	  sequence (stm32_rcc.c() in order to avoid disabling LSE during RTC
+	  initialiation.  From Alan Carvalho de Assis (2016-06-16).
+	* SYSLOG: syslog() will now automatically redirect output to lowsyslog()
+	  if called from an interrupt handler (2016-06-16).
+	* STM32: When configuring a GPIO via stm32_configgpio() the function
+	  will first set the mode to output and then set the initial state of
+	  the gpio later on.  If you have an application with an externaly
+	  pulled-up pin, this would lead to a glitch on the line that may be
+	  dangerous in some applications (e.G. Reset Line for other chips,
+	  etc).  This changes sets the output state before configuring the pin
+	  as an output.  From Pascal Speck  (2016-06-17).
+	* STM32 F7: Apply Pascal Speck's GPIO STM32 change to STM32 L4
+	  (2016-06-17).
+	* STM32 L4: Apply Pascal Speck's GPIO STM32 change to STM32 L4.
+	  From Sebastien Lorquet (2016-06-17).
+	* Review all uses of *err().  These macro family should indicate only
+	  error conditions.  Convert *err() to either *info() or add ERROR:,
+	  depending on if an error is reported (2016-06-17).
+	* STM32F7: Review, correct, and update I2C, SPI, and ADC drivers.  From
+	  David Sidrane (2016-06-17).
+	* LPC17 Ethernet:  Needs to correctly ignore PHYID2 revision number
+	  when comparing PHY IDs (2016-06-18).
+	* SYSLOG: Consolidate all SYSLOG logic in drivers/syslog.  Add an
+	  abstraction layer that supports:  (1) redirection of SYSLOG outpout.
+	  This is usually so that you can boot with one SYSLOG output but
+	  transition to another SYSLOG output when the OS has initialialized,
+	  (2) adds common serialization of interrupt output as a configuration
+	  option.  Without this configuration setting, interrupt level output
+	  will be asynchronous.  And (3) vsyslog is now a system call and is
+	  usable with other-than-FLAT builds (2016-06-19).
+	* TCP Networking: While working with version 7.10 I discovered a
+	  problem in TCP stack that could be observed on high network load.
+	  Generally speaking, the problem is that RST flag is set in
+	  unnecessary case, in which between loss of some TCP packet and its
+	  proper retransmission, another packets had been successfully sent.
+	  The scenario is as follows:  NuttX did not receive ACK for some
+	  sent packet, so it has been probably lost somewhere. But before
+	  its retransmission starts, NuttX is correctly issuing next TCP
+	  packets, with sequence numbers increasing properly. When the
+	  retransmission of previously lost packet finally succeeds, tcp_input
+	  receives the accumulated ACK value, which acknowledges also the
+	  packets sent in the meantime (i.e. between unsuccessful sending of
+	  lost packet and its proper retransmission). However, variable unackseq
+	  is still set to conn->isn + conn->sent, which is truth only if no
+	  further packets transmission occurred in the meantime.  Because of
+	  incorrect (in such specific case) unackseq value, few lines further
+	  condition if (ackseq <= unackseq)is not met, and, as a result, we
+	  are going to reset label.  From  Jakub Łągwa (2016-06-20).
+	* SYSLOG: Remove lowsyslog(), vlowsyslog(), and associated macros
+	  *llinfo(), *llwarn(), and llerr().  In the redesigned syslog() logic,
+	  these serve no purpose (2016-06-20).
+	* Make system: Need to build the drivers/ directory even it file
+	  descriptors are not supported.  There are things in the drivers/
+	  directory that are still needed (like SYSLOG logic) (2016-06-20).
+	* assert.h: Define static assert for C++ usage.  From Paul Alexander
+	  Patience (2016-06-21).
+	* arch/arm/src/stm32l4:  Add ioctls to set/get bit timing in stm32l4.
+	  Add ioctl hooks to allow future management of can id filters. From
+	  Sebastien Lorquet (2016-06-21).
+	* drivers/can.c:  Add support for poll. From Paul Alexander Patience
+	  (2016-06-21).
+	* drivers/syslog: Extend SYSLOG logic so that we can send SYSLOG output
+	  to a file.  Not verified on initial commit  (2016-06-21).
+	* arch/arm/src/stm32l4: Add some CAN mode IOCTL calls.  These will be
+	  useful for device autotest when the application boots.  They are
+	  redundant with the CONFIG_CAN_LOOPBACK option, which can now just be
+	  interpreted as a default setting.  From Sebastien Lorquet (2016-06-22).
+	* drivers/syslog: syslog_dev_flush() needs to check if the inode is a
+	  mountpoint before calling the flush() method.  Noted by David Sidrane
+	  (2016-06-22).
+	* arch/arm/src/stm32f7: Adds SDMMC1 for stm32F7 74-75.  From Lok Tep
+	  (2016-06-22).
+	* drivers/syslog: SYSLOG character device channel will now expand LF to
+	  CR-LF.  Controllable with a configuration option (2016-06-22).
+	* arch/arm/src/stm32l4: Implementation of loopback IOCTLs.  From
+	  Sebastien Lorquet (2016-06-22).
+	* Documentation: Add SYSLOG documentation to the porting guide
+	  (2016-06-22).
+	* configs/stm32f746g-disco:  Removed knsh configuration it failed to
+	  refresh (via tools/refresh.sh).  I assume that it is a hand-edited
+	  configuration and, hence, must be removed from the repository
+	  (2016-06-23).
+	* arch/arm/arc/sam34: DAC bugfix: DACC_WPMR_WPKEY_MASK -> DACC_WPMR_WPKEY. 
+	  Timer bugfix:  Fix ops check in TCIOC_STOP.  From Wolfgang Reissnegge
+	  (2016-06-23).
+	* arch/arm/src/stm32: Port STM32L4 CAN IOCTLs to STM32.  From Sebastien
+	  Lorquet (2016-06-24).
+	* configs/Konfig:Add configuration logic to include a Kconfig file in
+	  each custom configuration.  Includes adding a dummy custom board
+	  configuration directory.  A consequence of this that each custom board
+	  directory will now need to contain a Kconfig file.  NOTE also that
+	  the new board directory does not take effect in the configuration
+	  menus until the NEXT time you run 'make menuconfig' (2016-06-24).
+	* drivers/ioexpander:  Add support for a very simple GPIO driver.  It
+	  supports only pre-conrigured input and output pins and only basic
+	  input and output operations (2016-06-24).
+	* arch/arm/src/lpc43xx:  Correct auto-negotiation mode in the LPC43xx
+	  Ethernet.  From Alexander Vasiljev (2016-06-24)
+	* arch/arm/src/samv7: TWIHS Driver improved and GPIO-Driver fixed for
+	  Open-Drain Pins
+	  - sam_gpioread: Now the actual line level from the pin is read back.
+	    This is extremely important for Open-Drain Pins, which can be used
+	    bidirectionally
+	  - Re-Implemented twi_reset-function and enhanced it so it can be
+	    called from inside the driver (see next point)
+	  - Glitch-Filter: Added a configuration option to enable the twi-built-
+	    in glitch filter
+	  - Added a "Single Master Mode": In EMC Testing the TWI-Bus got stuck
+	    because the TWI-Master detected a Multi-Master access (but there is
+	    no second master). With the option "Single Master" we detect these
+	    events and automatically trigger a twi_reset. We also do an
+	    automatic recovery if a slave got stuck (SDA stays low).
+	  With the above changes I²C-Bus reliability in harsh environments (eg.
+	  EMC) is greatly improved. The small change in the GPIO-Driver was
+	  necessary because otherwise you cannot read back the correct line
+	  status of Open-Drain Outputs and this is needed by the twi_reset
+	  function.  From Michael Spahlinger (2016-06-24)

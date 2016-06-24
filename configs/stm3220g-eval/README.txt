@@ -486,7 +486,7 @@ Configuration Options:
   CONFIG_CAN2_BAUD - CAN1 BAUD rate.  Required if CONFIG_STM32_CAN2 is defined.
   CONFIG_CAN_TSEG1 - The number of CAN time quanta in segment 1. Default: 6
   CONFIG_CAN_TSEG2 - the number of CAN time quanta in segment 2. Default: 7
-  CONFIG_CAN_REGDEBUG - If CONFIG_DEBUG is set, this will generate an
+  CONFIG_STM32_CAN_REGDEBUG - If CONFIG_DEBUG_FEATURES is set, this will generate an
     dump of all CAN registers.
 
 FSMC SRAM
@@ -817,7 +817,7 @@ STM3220G-EVAL-specific Configuration Options
     CONFIG_CAN2_BAUD - CAN1 BAUD rate.  Required if CONFIG_STM32_CAN2 is defined.
     CONFIG_CAN_TSEG1 - The number of CAN time quanta in segment 1. Default: 6
     CONFIG_CAN_TSEG2 - the number of CAN time quanta in segment 2. Default: 7
-    CONFIG_CAN_REGDEBUG - If CONFIG_DEBUG is set, this will generate an
+    CONFIG_STM32_CAN_REGDEBUG - If CONFIG_DEBUG_FEATURES is set, this will generate an
       dump of all CAN registers.
 
   STM3220G-EVAL LCD Hardware Configuration
@@ -842,9 +842,9 @@ STM3220G-EVAL-specific Configuration Options
    CONFIG_STM32_OTGFS_SOFINTR - Enable SOF interrupts.  Why would you ever
      want to do that?
    CONFIG_STM32_USBHOST_REGDEBUG - Enable very low-level register access
-     debug.  Depends on CONFIG_DEBUG.
+     debug.  Depends on CONFIG_DEBUG_FEATURES.
    CONFIG_STM32_USBHOST_PKTDUMP - Dump all incoming and outgoing USB
-     packets. Depends on CONFIG_DEBUG.
+     packets. Depends on CONFIG_DEBUG_FEATURES.
 
 Configurations
 ==============
@@ -989,7 +989,7 @@ Where <subdir> is one of the following:
 
        Special PWM-only debug options:
 
-       CONFIG_DEBUG_PWM
+       CONFIG_DEBUG_PWM_INFO
 
     5. This example supports the CAN loopback test (apps/examples/can) but this
        must be manually enabled by selecting:
@@ -1003,8 +1003,8 @@ Where <subdir> is one of the following:
 
        Special CAN-only debug options:
 
-       CONFIG_DEBUG_CAN
-       CONFIG_CAN_REGDEBUG
+       CONFIG_DEBUG_CAN_INFO
+       CONFIG_STM32_CAN_REGDEBUG
 
     6. This example can support an FTP client.  In order to build in FTP client
        support simply reconfigure NuttX, adding:
@@ -1087,7 +1087,6 @@ Where <subdir> is one of the following:
 
     There are some special settings to make life with only a Telnet
 
-    CONFIG_SYSLOG=y - Enables the System Logging feature.
     CONFIG_RAMLOG=y - Enable the RAM-based logging feature.
     CONFIG_RAMLOG_CONSOLE=y - Use the RAM logger as the default console.
       This means that any console output from non-Telnet threads will

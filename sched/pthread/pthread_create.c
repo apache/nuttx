@@ -249,7 +249,7 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
   ptcb = (FAR struct pthread_tcb_s *)kmm_zalloc(sizeof(struct pthread_tcb_s));
   if (!ptcb)
     {
-      sdbg("ERROR: Failed to allocate TCB\n");
+      serr("ERROR: Failed to allocate TCB\n");
       return ENOMEM;
     }
 
@@ -282,7 +282,7 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
   pjoin = (FAR struct join_s *)kmm_zalloc(sizeof(struct join_s));
   if (!pjoin)
     {
-      sdbg("ERROR: Failed to allocate join\n");
+      serr("ERROR: Failed to allocate join\n");
       errcode = ENOMEM;
       goto errout_with_tcb;
     }

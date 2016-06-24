@@ -78,31 +78,6 @@
  *    information.
  */
 
-/* Debug ********************************************************************/
-/* Check if SPI debut is enabled (non-standard.. no support in
- * include/debug.h
- */
-
-#ifndef CONFIG_DEBUG
-#  undef CONFIG_DEBUG_VERBOSE
-#  undef CONFIG_DEBUG_SPI
-#endif
-
-#ifdef CONFIG_DEBUG_SPI
-#  define spidbg lldbg
-#  ifdef CONFIG_DEBUG_VERBOSE
-#    define spivdbg lldbg
-#  else
-#    define spivdbg(x...)
-#  endif
-#else
-#  define spidbg(x...)
-#  define spivdbg(x...)
-#endif
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
 
 /****************************************************************************
  * Private Function Prototypes
@@ -193,7 +168,7 @@ static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
 {
   FAR struct spi_bitbang_s *priv = (FAR struct spi_bitbang_s *)dev;
 
-  spivdbg("lock=%d\n", lock);
+  spiinfo("lock=%d\n", lock);
   if (lock)
     {
       /* Take the semaphore (perhaps waiting) */
@@ -236,7 +211,7 @@ static void spi_select(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
 {
   FAR struct spi_bitbang_s *priv = (FAR struct spi_bitbang_s *)dev;
 
-  spivdbg("devid=%d selected=%d\n", devid, selected);
+  spiinfo("devid=%d selected=%d\n", devid, selected);
   DEBUGASSERT(priv && priv->low->select);
   priv->low->select(priv, devid, selected);
 }
@@ -263,7 +238,7 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
 
   DEBUGASSERT(priv && priv->low->setfrequency);
   actual = priv->low->setfrequency(priv, frequency);
-  spivdbg("frequency=%d holdtime=%d actual=%d\n",
+  spiinfo("frequency=%d holdtime=%d actual=%d\n",
           frequency, priv->holdtime, actual);
   return actual;
 }
@@ -289,7 +264,7 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
 
   DEBUGASSERT(priv && priv->low->setmode);
   priv->low->setmode(priv, mode);
-  spivdbg("mode=%d exchange=%p\n", mode, priv->exchange);
+  spiinfo("mode=%d exchange=%p\n", mode, priv->exchange);
 }
 
 /****************************************************************************
@@ -312,11 +287,11 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
 #ifdef CONFIG_SPI_BITBANG_VARWIDTH
   FAR struct spi_bitbang_s *priv = (FAR struct spi_bitbang_s *)dev;
 
-  spivdbg("nbits=%d\n", nbits);
+  spiinfo("nbits=%d\n", nbits);
   DEBUGASSERT(priv && nbits > 0 && nbits <= 16);
   priv->nbits = nbits;
 #else
-  spivdbg("nbits=%d\n", nbits);
+  spiinfo("nbits=%d\n", nbits);
   DEBUGASSERT(nbits == 8);
 #endif
 }
@@ -376,7 +351,7 @@ static void spi_exchange(FAR struct spi_dev_s *dev,
   uint16_t dataout;
   uint16_t datain;
 
-  spivdbg("txbuffer=%p rxbuffer=%p nwords=%d\n", txbuffer, rxbuffer, nwords);
+  spiinfo("txbuffer=%p rxbuffer=%p nwords=%d\n", txbuffer, rxbuffer, nwords);
   DEBUGASSERT(priv && priv->low && priv->low->exchange);
 
   /* If there is no data source, send 0xff */
@@ -564,7 +539,7 @@ FAR struct spi_dev_s *spi_create_bitbang(FAR const struct spi_bitbang_ops_s *low
   priv = (FAR struct spi_bitbang_s *)zalloc(sizeof(struct spi_bitbang_s));
   if (!priv)
     {
-      spidbg("Failed to allocate the device structure\n");
+      spierr("ERROR: Failed to allocate the device structure\n");
       return NULL;
     }
 

@@ -339,7 +339,7 @@ static void composite_unbind(FAR struct usbdevclass_driver_s *driver,
 
   usbtrace(TRACE_CLASSUNBIND, 0);
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!driver || !dev || !dev->ep0)
     {
       usbtrace(TRACE_CLSERROR(USBCOMPOSITE_TRACEERR_INVALIDARG), 0);
@@ -351,7 +351,7 @@ static void composite_unbind(FAR struct usbdevclass_driver_s *driver,
 
   priv = ((FAR struct composite_driver_s *)driver)->dev;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!priv)
     {
       usbtrace(TRACE_CLSERROR(USBCOMPOSITE_TRACEERR_EP0NOTBOUND), 0);
@@ -403,7 +403,7 @@ static int composite_setup(FAR struct usbdevclass_driver_s *driver,
   bool dispatched = false;
   int ret = -EOPNOTSUPP;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!driver || !dev || !dev->ep0 || !ctrl)
     {
       usbtrace(TRACE_CLSERROR(USBCOMPOSITE_TRACEERR_SETUPINVALIDARGS), 0);
@@ -416,7 +416,7 @@ static int composite_setup(FAR struct usbdevclass_driver_s *driver,
   usbtrace(TRACE_CLASSSETUP, ctrl->req);
   priv = ((FAR struct composite_driver_s *)driver)->dev;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!priv)
     {
       usbtrace(TRACE_CLSERROR(USBCOMPOSITE_TRACEERR_EP0NOTBOUND2), 0);
@@ -431,7 +431,7 @@ static int composite_setup(FAR struct usbdevclass_driver_s *driver,
   index     = GETUINT16(ctrl->index);
   len       = GETUINT16(ctrl->len);
 
-  uvdbg("type=%02x req=%02x value=%04x index=%04x len=%04x\n",
+  uinfo("type=%02x req=%02x value=%04x index=%04x len=%04x\n",
         ctrl->type, ctrl->req, value, index, len);
   UNUSED(index);
 
@@ -638,7 +638,7 @@ static void composite_disconnect(FAR struct usbdevclass_driver_s *driver,
 
   usbtrace(TRACE_CLASSDISCONNECT, 0);
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!driver || !dev)
     {
       usbtrace(TRACE_CLSERROR(USBCOMPOSITE_TRACEERR_INVALIDARG), 0);
@@ -650,7 +650,7 @@ static void composite_disconnect(FAR struct usbdevclass_driver_s *driver,
 
   priv = ((FAR struct composite_driver_s *)driver)->dev;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!priv)
     {
       usbtrace(TRACE_CLSERROR(USBCOMPOSITE_TRACEERR_EP0NOTBOUND), 0);
@@ -691,7 +691,7 @@ static void composite_suspend(FAR struct usbdevclass_driver_s *driver,
 
   usbtrace(TRACE_CLASSSUSPEND, 0);
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!dev)
     {
       usbtrace(TRACE_CLSERROR(USBCOMPOSITE_TRACEERR_INVALIDARG), 0);
@@ -703,7 +703,7 @@ static void composite_suspend(FAR struct usbdevclass_driver_s *driver,
 
   priv = ((FAR struct composite_driver_s *)driver)->dev;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!priv)
     {
       usbtrace(TRACE_CLSERROR(USBCOMPOSITE_TRACEERR_EP0NOTBOUND), 0);
@@ -733,7 +733,7 @@ static void composite_resume(FAR struct usbdevclass_driver_s *driver,
   FAR struct composite_dev_s *priv = NULL;
   irqstate_t flags;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!dev)
     {
       usbtrace(TRACE_CLSERROR(USBCOMPOSITE_TRACEERR_INVALIDARG), 0);
@@ -745,7 +745,7 @@ static void composite_resume(FAR struct usbdevclass_driver_s *driver,
 
   priv = ((FAR struct composite_driver_s *)driver)->dev;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!priv)
     {
       usbtrace(TRACE_CLSERROR(USBCOMPOSITE_TRACEERR_EP0NOTBOUND), 0);

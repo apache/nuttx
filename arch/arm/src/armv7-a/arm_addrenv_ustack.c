@@ -143,7 +143,7 @@ int up_addrenv_ustackalloc(FAR struct tcb_s *tcb, size_t stacksize)
 {
   int ret;
 
-  bvdbg("tcb=%p stacksize=%lu\n", tcb, (unsigned long)stacksize);
+  binfo("tcb=%p stacksize=%lu\n", tcb, (unsigned long)stacksize);
 
   DEBUGASSERT(tcb);
 
@@ -163,7 +163,7 @@ int up_addrenv_ustackalloc(FAR struct tcb_s *tcb, size_t stacksize)
                                   MMU_L2_UDATAFLAGS);
   if (ret < 0)
     {
-      bdbg("ERROR: Failed to create stack region: %d\n", ret);
+      berr("ERROR: Failed to create stack region: %d\n", ret);
       up_addrenv_ustackfree(tcb);
       return ret;
     }
@@ -190,7 +190,7 @@ int up_addrenv_ustackalloc(FAR struct tcb_s *tcb, size_t stacksize)
 
 int up_addrenv_ustackfree(FAR struct tcb_s *tcb)
 {
-  bvdbg("tcb=%p\n", tcb);
+  binfo("tcb=%p\n", tcb);
   DEBUGASSERT(tcb);
 
   /* Destroy the stack region */
@@ -221,7 +221,7 @@ int up_addrenv_ustackfree(FAR struct tcb_s *tcb)
 
 int up_addrenv_vustack(FAR const struct tcb_s *tcb, FAR void **vstack)
 {
-  bvdbg("Return=%p\n", (FAR void *)CONFIG_ARCH_STACK_VBASE);
+  binfo("Return=%p\n", (FAR void *)CONFIG_ARCH_STACK_VBASE);
 
   /* Not much to do in this case */
 

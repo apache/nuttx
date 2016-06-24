@@ -1,7 +1,7 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc43xx/lpc43_gpioint.h
  *
- *   Copyright (C) 2012, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,7 +31,8 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
+
 /* GPIO pin interrupts
  *
  * From all available GPIO pins, up to eight pins can be selected in the system
@@ -52,31 +53,19 @@
 #ifndef __ARCH_ARM_SRC_LPC43XX_LPC43_GPIOINT_H
 #define __ARCH_ARM_SRC_LPC43XX_LPC43_GPIOINT_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "chip.h"
 #include "chip/lpc43_gpio.h"
 
-#ifdef CONFIG_GPIO_IRQ
+#ifdef CONFIG_LPC43_GPIO_IRQ
 
-/************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
-
-/************************************************************************************
- * Public Types
- ************************************************************************************/
-
-/************************************************************************************
- * Public Data
- ************************************************************************************/
-
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
 
 /****************************************************************************
  * Name: lpc43_gpioint_grpinitialize
@@ -136,5 +125,21 @@ int lpc43_gpioint_pinconfig(uint16_t gpiocfg);
 
 int lpc43_gpioint_grpconfig(uint16_t gpiocfg);
 
-#endif /* CONFIG_GPIO_IRQ */
+/****************************************************************************
+ * Name: lpc43_gpioint_ack
+ *
+ * Description:
+ *   Acknowledge the interrupt for a given pint interrupt number. Call this
+ *   inside the interrupt handler. For edge sensitive interrupts, the interrupt
+ *   status is cleared. For level sensitive interrupts, the active-high/-low
+ *   sensitivity is inverted.
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int lpc43_gpioint_ack(uint8_t intnumber);
+
+#endif /* CONFIG_LPC43_GPIO_IRQ */
 #endif /* __ARCH_ARM_SRC_LPC43XX_LPC43_GPIOINT_H */

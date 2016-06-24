@@ -697,7 +697,7 @@ static ssize_t sst39vf_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
 static ssize_t sst39vf_read(FAR struct mtd_dev_s *dev, off_t offset,
                             size_t nbytes, FAR uint8_t *buffer)
 {
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   FAR struct sst39vf_dev_s *priv = (FAR struct sst39vf_dev_s *)dev;
 #endif
   FAR const uint8_t *source;
@@ -814,12 +814,12 @@ FAR struct mtd_dev_s *sst39vf_initialize(void)
 
   /* Now see if we can suport the part */
 
-  fvdbg("Manufacturer: %02x\n", manufacturer);
-  fvdbg("Chip ID:      %04x\n", chipid);
+  finfo("Manufacturer: %02x\n", manufacturer);
+  finfo("Chip ID:      %04x\n", chipid);
 
   if (manufacturer != SST_MANUFACTURER_ID)
     {
-      fdbg("Unrecognized manufacturer: %02x\n", manufacturer);
+      ferr("ERROR: Unrecognized manufacturer: %02x\n", manufacturer);
       return NULL;
     }
   else if (chipid == g_sst39vf1601.chipid)
@@ -840,7 +840,7 @@ FAR struct mtd_dev_s *sst39vf_initialize(void)
     }
   else
     {
-      fdbg("Unrecognized chip ID: %04x\n", chipid);
+      ferr("ERROR: Unrecognized chip ID: %04x\n", chipid);
       return NULL;
     }
 

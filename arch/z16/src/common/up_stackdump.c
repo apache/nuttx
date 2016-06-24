@@ -1,7 +1,7 @@
 /****************************************************************************
  * common/up_stackdump.c
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,13 +39,6 @@
 
 #include <nuttx/config.h>
 
-/* Output debug info -- even if debug is not selected. */
-
-#undef  CONFIG_DEBUG
-#undef  CONFIG_DEBUG_VERBOSE
-#define CONFIG_DEBUG 1
-#define CONFIG_DEBUG_VERBOSE 1
-
 #include <debug.h>
 
 #include "chip/chip.h"
@@ -74,13 +67,13 @@ static void up_stackdump(void)
   chipreg_t stack_base = (chipreg_t)rtcb->adj_stack_ptr;
   chipreg_t stack_size = (chipreg_t)rtcb->adj_stack_size;
 
-  lldbg("stack_base: %08x\n", stack_base);
-  lldbg("stack_size: %08x\n", stack_size);
-  lldbg("sp:         %08x\n", sp);
+  _alert("stack_base: %08x\n", stack_base);
+  _alert("stack_size: %08x\n", stack_size);
+  _alert("sp:         %08x\n", sp);
 
   if (sp >= stack_base || sp < stack_base - stack_size)
     {
-      lldbg("ERROR: Stack pointer is not within allocated stack\n");
+      _err("ERROR: Stack pointer is not within allocated stack\n");
       return;
     }
   else
@@ -90,9 +83,9 @@ static void up_stackdump(void)
       for (stack = sp & ~0x0f; stack < stack_base; stack += 8*sizeof(chipreg_t))
         {
           chipreg_t *ptr = (chipreg_t*)stack;
-          lldbg("%08x: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-                 stack, ptr[0], ptr[1], ptr[2], ptr[3],
-                 ptr[4], ptr[5], ptr[6], ptr[7]);
+          _alert("%08x: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+                stack, ptr[0], ptr[1], ptr[2], ptr[3],
+                ptr[4], ptr[5], ptr[6], ptr[7]);
         }
     }
 }

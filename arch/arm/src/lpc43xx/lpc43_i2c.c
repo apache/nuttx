@@ -464,7 +464,7 @@ struct i2c_master_s *lpc43_i2cbus_initialize(int port)
 
   if (port > 1)
     {
-      dbg("lpc I2C Only support 0,1\n");
+      i2cerr("ERROR: lpc I2C Only suppors ports 0 and 1\n");
       return NULL;
     }
 

@@ -86,7 +86,7 @@ int board_app_initialize(uintptr_t arg)
   ret = adxl345_archinitialize(0);
   if (ret < 0)
     {
-      dbg("ERROR: adxl345_archinitialize failed: %d\n", ret);
+      _err("ERROR: adxl345_archinitialize failed: %d\n", ret);
     }
 #endif
   return OK;

@@ -103,7 +103,7 @@ static uint16_t icmpv6_neighbor_interrupt(FAR struct net_driver_s *dev,
 {
   FAR struct icmpv6_neighbor_s *state = (FAR struct icmpv6_neighbor_s *)priv;
 
-  nllvdbg("flags: %04x sent: %d\n", flags, state->snd_sent);
+  ninfo("flags: %04x sent: %d\n", flags, state->snd_sent);
 
   if (state)
     {
@@ -232,7 +232,7 @@ int icmpv6_neighbor(const net_ipv6addr_t ipaddr)
 #endif
   if (!dev)
     {
-      ndbg("ERROR: Unreachable: %08lx\n", (unsigned long)ipaddr);
+      nerr("ERROR: Unreachable: %08lx\n", (unsigned long)ipaddr);
       ret = -EHOSTUNREACH;
       goto errout;
     }
@@ -298,7 +298,7 @@ int icmpv6_neighbor(const net_ipv6addr_t ipaddr)
   state.snd_cb = icmpv6_callback_alloc(dev);
   if (!state.snd_cb)
     {
-      ndbg("ERROR: Failed to allocate a cllback\n");
+      nerr("ERROR: Failed to allocate a callback\n");
       ret = -ENOMEM;
       goto errout_with_lock;
     }

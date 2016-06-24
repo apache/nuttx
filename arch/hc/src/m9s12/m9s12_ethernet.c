@@ -97,9 +97,9 @@ struct emac_driver_s
   WDOG_ID d_txpoll;           /* TX poll timer */
   WDOG_ID d_txtimeout;        /* TX timeout timer */
 
-  /* This holds the information visible to uIP/NuttX */
+  /* This holds the information visible to the NuttX network */
 
-  struct net_driver_s d_dev;  /* Interface understood by uIP */
+  struct net_driver_s d_dev;  /* Interface understood by the network */
 };
 
 /****************************************************************************
@@ -185,8 +185,9 @@ static int emac_transmit(FAR struct emac_driver_s *priv)
  * Function: emac_txpoll
  *
  * Description:
- *   The transmitter is available, check if uIP has any outgoing packets ready
- *   to send.  This is a callback from devif_poll().  devif_poll() may be called:
+ *   The transmitter is available, check if the network has any outgoing
+ *   packets ready to send.  This is a callback from devif_poll().
+ *   devif_poll() may be called:
  *
  *   1. When the preceding TX packet send is complete,
  *   2. When the preceding TX packet send timesout and the interface is reset
@@ -276,7 +277,7 @@ static void emac_receive(FAR struct emac_driver_s *priv)
     {
       /* Check for errors and update statistics */
 
-      /* Check if the packet is a valid size for the uIP buffer configuration */
+      /* Check if the packet is a valid size for the network buffer configuration */
 
       /* Copy the data data from the hardware to priv->d_dev.d_buf.  Set
        * amount of data in priv->d_dev.d_len
@@ -293,7 +294,7 @@ static void emac_receive(FAR struct emac_driver_s *priv)
 #ifdef CONFIG_NET_IPv4
       if (BUF->type == HTONS(ETHTYPE_IP))
         {
-          nllvdbg("IPv4 frame\n");
+          ninfo("IPv4 frame\n");
 
           /* Handle ARP on input then give the IPv4 packet to the network
            * layer
@@ -333,7 +334,7 @@ static void emac_receive(FAR struct emac_driver_s *priv)
 #ifdef CONFIG_NET_IPv6
       if (BUF->type == HTONS(ETHTYPE_IP6))
         {
-          nllvdbg("Iv6 frame\n");
+          ninfo("Iv6 frame\n");
 
           /* Give the IPv6 packet to the network layer */
 
@@ -413,7 +414,7 @@ static void emac_txdone(FAR struct emac_driver_s *priv)
 
   wd_cancel(priv->d_txtimeout);
 
-  /* Then poll uIP for new XMIT data */
+  /* Then poll the network for new XMIT data */
 
   (void)devif_poll(&priv->d_dev, emac_txpoll);
 }
@@ -484,7 +485,7 @@ static void emac_txtimeout(int argc, uint32_t arg, ...)
 
   /* Then reset the hardware */
 
-  /* Then poll uIP for new XMIT data */
+  /* Then poll the network for new XMIT data */
 
   (void)devif_poll(&priv->d_dev, emac_txpoll);
 }
@@ -515,7 +516,7 @@ static void emac_polltimer(int argc, uint32_t arg, ...)
    * the TX poll if he are unable to accept another packet for transmission.
    */
 
-  /* If so, update TCP timing states and poll uIP for new XMIT data. Hmmm..
+  /* If so, update TCP timing states and poll the network for new XMIT data. Hmmm..
    * might be bug here.  Does this mean if there is a transmit in progress,
    * we will missing TCP time state updates?
    */
@@ -548,9 +549,9 @@ static int emac_ifup(struct net_driver_s *dev)
 {
   FAR struct emac_driver_s *priv = (FAR struct emac_driver_s *)dev->d_private;
 
-  ndbg("Bringing up: %d.%d.%d.%d\n",
-       dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
-       (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24 );
+  ninfo("Bringing up: %d.%d.%d.%d\n",
+        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
+        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24 );
 
   /* Initialize PHYs, the Ethernet interface, and setup up Ethernet interrupts */
 
@@ -644,7 +645,7 @@ static int emac_txavail(struct net_driver_s *dev)
     {
       /* Check if there is room in the hardware to hold another outgoing packet. */
 
-      /* If so, then poll uIP for new XMIT data */
+      /* If so, then poll the network for new XMIT data */
 
       (void)devif_poll(&priv->d_dev, emac_txpoll);
     }

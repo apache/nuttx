@@ -59,35 +59,13 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-/* Enables debug output from this file (needs CONFIG_DEBUG too) */
+/* CONFIG_DEBUG_SPI enables debug output from this file */
 
-#undef SSI_DEBUG   /* Define to enable debug */
-#undef SSI_VERBOSE /* Define to enable verbose debug */
-
-#ifdef SSI_DEBUG
-#  define ssidbg  lldbg
-#  ifdef SSI_VERBOSE
-#    define ssivdbg lldbg
-#  else
-#    define ssivdbg(x...)
-#  endif
-#else
-#  undef SSI_VERBOSE
-#  define ssidbg(x...)
-#  define ssivdbg(x...)
-#endif
-
-/* Dump GPIO registers */
-
-#ifdef SSI_VERBOSE
+#ifdef CONFIG_DEBUG_SPI
 #  define ssi_dumpgpio(m) tiva_dumpgpio(SDCCS_GPIO, m)
 #else
 #  define ssi_dumpgpio(m)
 #endif
-
-/************************************************************************************
- * Private Functions
- ************************************************************************************/
 
 /************************************************************************************
  * Public Functions
@@ -134,7 +112,7 @@ void weak_function lm_ssidev_initialize(void)
 
 void tiva_ssiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
-  ssidbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
   ssi_dumpgpio("tiva_ssiselect() Entry");
 
   if (devid == SPIDEV_MMCSD)
@@ -156,7 +134,7 @@ void tiva_ssiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool select
 
 uint8_t tiva_ssistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 {
-  ssidbg("Returning SPI_STATUS_PRESENT\n");
+  spiinfo("Returning SPI_STATUS_PRESENT\n");
   return SPI_STATUS_PRESENT;
 }
 

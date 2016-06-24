@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/x86/src/up_elf.c
  *
- *   Copyright (C) 2012, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -146,7 +146,6 @@ int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
 int up_relocateadd(FAR const Elf32_Rela *rel, FAR const Elf32_Sym *sym,
                    uintptr_t addr)
 {
-  bdbg("Not supported\n");
+  bwarn("WARNING: Not supported\n");
   return -ENOSYS;
 }
-

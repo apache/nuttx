@@ -484,7 +484,7 @@ config PREALLOC_CHILDSTATUS
 config DEBUG_CHILDSTATUS
 	bool "Enable Child Status Debug Output"
 	default n
-	depends on SCHED_CHILD_STATUS && DEBUG
+	depends on SCHED_CHILD_STATUS && DEBUG_FEATURES
 	---help---
 		Very detailed... I am sure that you do not want this.
 
@@ -1013,7 +1013,7 @@ config MODULE_BUFFERINCR
 config MODULE_DUMPBUFFER
 	bool "Dump module buffers"
 	default n
-	depends on DEBUG && DEBUG_VERBOSE
+	depends on DEBUG_INFO
 	---help---
 		Dump various module buffers for debug purposes
 

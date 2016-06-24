@@ -155,7 +155,7 @@ static inline unsigned int wdt_prescaletoptv(unsigned int prescale)
         }
     }
 
-  dbg("prescale=%d -> ptv=%d\n", prescale, ptv);
+  wdinfo("prescale=%d -> ptv=%d\n", prescale, ptv);
   return ptv;
 }
 
@@ -173,7 +173,7 @@ static int wdt_setusec(uint32_t usec)
   uint32_t divisor   = 1;
   uint32_t mode;
 
-  dbg("usec=%d\n", usec);
+  wdinfo("usec=%d\n", usec);
 
   /* Calculate a value of prescaler and divisor that will be able
    * to count to the usec.  It may not be exact or the best
@@ -186,7 +186,7 @@ static int wdt_setusec(uint32_t usec)
   do
     {
       divisor = (CLOCK_MHZx2 * usec) / (prescaler * 2);
-      dbg("divisor=0x%x prescaler=0x%x\n", divisor, prescaler);
+      wdinfo("divisor=0x%x prescaler=0x%x\n", divisor, prescaler);
 
       if (divisor >= 0x10000)
         {
@@ -194,7 +194,7 @@ static int wdt_setusec(uint32_t usec)
             {
               /* This is the max possible ~2.5 seconds. */
 
-              dbg("prescaler=0x%x too big!\n", prescaler);
+              wderr("ERROR: prescaler=0x%x too big!\n", prescaler);
               return ERROR;
             }
 
@@ -207,19 +207,19 @@ static int wdt_setusec(uint32_t usec)
     }
   while (divisor >= 0x10000);
 
-  dbg("prescaler=0x%x divisor=0x%x\n", prescaler, divisor);
+  wdinfo("prescaler=0x%x divisor=0x%x\n", prescaler, divisor);
 
   mode  = wdt_prescaletoptv(prescaler);
   mode &= ~C5471_TIMER_AUTORELOAD; /* One shot mode. */
   mode |= divisor << 5;
-  dbg("mode=0x%x\n", mode);
+  wdinfo("mode=0x%x\n", mode);
 
   c5471_wdt_cntl = mode;
 
   /* Now start the watchdog */
 
   c5471_wdt_cntl |= C5471_TIMER_STARTBIT;
-  dbg("cntl_timer=0x%x\n", c5471_wdt_cntl);
+  wdinfo("cntl_timer=0x%x\n", c5471_wdt_cntl);
 
   return 0;
 }
@@ -234,17 +234,17 @@ static int wdt_setusec(uint32_t usec)
 
 static int wdt_interrupt(int irq, void *context)
 {
-  dbg("expired\n");
+  wdinfo("expired\n");
 
 #if defined(CONFIG_SOFTWARE_REBOOT)
 #  if defined(CONFIG_SOFTWARE_TEST)
-  dbg("  Test only\n");
+  wdinfo("  Test only\n");
 #  else
-  dbg("  Re-booting\n");
+  wdinfo("  Re-booting\n");
 #    warning "Add logic to reset CPU here"
 #  endif
 #else
-  dbg("  No reboot\n");
+  wdinfo("  No reboot\n");
 #endif
   return OK;
 }
@@ -259,7 +259,7 @@ static ssize_t wdt_read(struct file *filep, char *buffer, size_t buflen)
    * not work if the user provides a buffer smaller than 18 bytes.
    */
 
-  dbg("buflen=%d\n", buflen);
+  wdinfo("buflen=%d\n", buflen);
   if (buflen >= 18)
     {
       sprintf(buffer, "%08x %08x\n", c5471_wdt_cntl, c5471_wdt_count);
@@ -274,7 +274,7 @@ static ssize_t wdt_read(struct file *filep, char *buffer, size_t buflen)
 
 static ssize_t wdt_write(struct file *filep, const char *buffer, size_t buflen)
 {
-  dbg("buflen=%d\n", buflen);
+  wdinfo("buflen=%d\n", buflen);
   if (buflen)
     {
       /* Reset the timer to the maximum delay */
@@ -292,7 +292,7 @@ static ssize_t wdt_write(struct file *filep, const char *buffer, size_t buflen)
 
 static int wdt_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
-  dbg("ioctl Call: cmd=0x%x arg=0x%x", cmd, arg);
+  wdinfo("ioctl Call: cmd=0x%x arg=0x%x", cmd, arg);
 
   /* Process the IOCTL command (see arch/watchdog.h) */
 
@@ -315,8 +315,6 @@ static int wdt_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
 static int wdt_open(struct file *filep)
 {
-  dbg("");
-
   if (g_wdtopen)
     {
       return -EBUSY;
@@ -339,11 +337,8 @@ static int wdt_open(struct file *filep)
 
 static int wdt_close(struct file *filep)
 {
-  dbg("");
-
   /* The task controlling the watchdog has terminated.  Take the timer
-   *  the
-   * watchdog in interrupt mode -- we are going to reset unless the
+   * the watchdog in interrupt mode -- we are going to reset unless the
    * reopened again soon.
    */
 
@@ -367,7 +362,7 @@ int up_wdtinit(void)
 {
   int ret;
 
-  dbg("C547x Watchdog Driver\n");
+  wdinfo("C547x Watchdog Driver\n");
 
   /* Register as /dev/wdt */
 
@@ -379,7 +374,7 @@ int up_wdtinit(void)
 
   /* Register for an interrupt level callback through wdt_interrupt */
 
-  dbg("Attach to IRQ=%d\n", C5471_IRQ_WATCHDOG);
+  wdinfo("Attach to IRQ=%d\n", C5471_IRQ_WATCHDOG);
 
   /* Make sure that the timer is stopped */
 

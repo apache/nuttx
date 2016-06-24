@@ -387,7 +387,7 @@ uint32_t *arm_decodeirq(uint32_t *regs)
   regval = getreg32(GIC_ICCIAR);
   irq    = (regval & GIC_ICCIAR_INTID_MASK) >> GIC_ICCIAR_INTID_SHIFT;
 
-  gicllvdbg("irq=%d\n", irq);
+  irqinfo("irq=%d\n", irq);
 
   /* Ignore spurions IRQs.  ICCIAR will report 1023 if there is no pending
    * interrupt.

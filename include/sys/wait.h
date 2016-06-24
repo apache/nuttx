@@ -50,7 +50,7 @@
  ****************************************************************************/
 
 /* The following are provided for analysis of returned status values.
- * Encoded is as follows as 2 bytes of info(MS) then two bytes of code (LS).
+ * Encoded is as follows as 2 bytes of _info(MS) then two bytes of code (LS).
  * Code:
  *   0 - Child has exited, info is the exit code.
  *   Other values - Not implemented

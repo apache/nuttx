@@ -657,7 +657,7 @@ STM3210E-EVAL-specific Configuration Options
     CONFIG_CAN2_BAUD - CAN1 BAUD rate.  Required if CONFIG_STM32_CAN2 is defined.
     CONFIG_CAN_TSEG1 - The number of CAN time quanta in segment 1. Default: 6
     CONFIG_CAN_TSEG2 - the number of CAN time quanta in segment 2. Default: 7
-    CONFIG_CAN_REGDEBUG - If CONFIG_DEBUG is set, this will generate an
+    CONFIG_STM32_CAN_REGDEBUG - If CONFIG_DEBUG_FEATURES is set, this will generate an
       dump of all CAN registers.
 
   STM3210E-EVAL LCD Hardware Configuration
@@ -1064,11 +1064,11 @@ Where <subdir> is one of the following:
     USB debug output can be enabled as by changing the following
     settings in the configuration file:
 
-      -CONFIG_DEBUG=n
-      -CONFIG_DEBUG_VERBOSE=n
+      -CONFIG_DEBUG_FEATURES=n
+      -CONFIG_DEBUG_INFO=n
       -CONFIG_DEBUG_USB=n
-      +CONFIG_DEBUG=y
-      +CONFIG_DEBUG_VERBOSE=y
+      +CONFIG_DEBUG_FEATURES=y
+      +CONFIG_DEBUG_INFO=y
       +CONFIG_DEBUG_USB=y
 
       -CONFIG_EXAMPLES_USBSERIAL_TRACEINIT=n

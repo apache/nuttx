@@ -140,7 +140,7 @@ void icmp_input(FAR struct net_driver_s *dev)
         }
 #endif
 
-      nllvdbg("Outgoing ICMP packet length: %d (%d)\n",
+      ninfo("Outgoing ICMP packet length: %d (%d)\n",
               dev->d_len, (picmp->len[0] << 8) | picmp->len[1]);
 
 #ifdef CONFIG_NET_STATISTICS
@@ -164,7 +164,7 @@ void icmp_input(FAR struct net_driver_s *dev)
 
   else
     {
-      nlldbg("Unknown ICMP cmd: %d\n", picmp->type);
+      nwarn("WARNING: Unknown ICMP cmd: %d\n", picmp->type);
       goto typeerr;
     }
 

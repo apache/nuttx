@@ -2,7 +2,7 @@
  * configs/stm32f429i-disco/include/board.h
  * include/arch/board/board.h
  *
- *   Copyright (C) 2012, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -154,8 +154,14 @@
  * Note: TIM1,8 are on APB2, others on APB1
  */
 
-#define STM32_TIM18_FREQUENCY   STM32_HCLK_FREQUENCY
-#define STM32_TIM27_FREQUENCY   (STM32_HCLK_FREQUENCY/2)
+#define BOARD_TIM1_FREQUENCY    STM32_HCLK_FREQUENCY
+#define BOARD_TIM2_FREQUENCY    (STM32_HCLK_FREQUENCY/2)
+#define BOARD_TIM3_FREQUENCY    (STM32_HCLK_FREQUENCY/2)
+#define BOARD_TIM4_FREQUENCY    (STM32_HCLK_FREQUENCY/2)
+#define BOARD_TIM5_FREQUENCY    (STM32_HCLK_FREQUENCY/2)
+#define BOARD_TIM6_FREQUENCY    (STM32_HCLK_FREQUENCY/2)
+#define BOARD_TIM7_FREQUENCY    (STM32_HCLK_FREQUENCY/2)
+#define BOARD_TIM8_FREQUENCY    STM32_HCLK_FREQUENCY
 
 /* LED definitions ******************************************************************/
 /* If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in any

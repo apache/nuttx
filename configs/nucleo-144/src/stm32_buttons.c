@@ -2,7 +2,8 @@
  * configs/nucleo-144/src/stm32_buttons.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            David Sidrane <david_s5@nscdg.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -102,7 +103,14 @@ uint8_t board_buttons(void)
 #ifdef CONFIG_ARCH_IRQBUTTONS
 xcpt_t board_button_irq(int id, xcpt_t irqhandler)
 {
-#warning Missing logic
+  xcpt_t oldhandler = NULL;
+
+  if (id == BUTTON_USER)
+    {
+      oldhandler = stm32_gpiosetevent(GPIO_BTN_USER, true, true, true, irqhandler);
+    }
+
+  return oldhandler;
 }
 #endif
 #endif /* CONFIG_ARCH_BUTTONS */

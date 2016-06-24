@@ -65,7 +65,7 @@ endif # NET_ARP_SEND
 config NET_ARP_DUMP
 	bool "Dump ARP packet header"
 	default n
-	depends on DEBUG
+	depends on DEBUG_NET_INFO
 	---help---
 		Dump ARP packets to the SYSLOG device.
 

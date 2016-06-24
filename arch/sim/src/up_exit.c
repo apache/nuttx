@@ -67,7 +67,7 @@ void _exit(int status)
 {
   FAR struct tcb_s *tcb;
 
-  sdbg("TCB=%p exiting\n", tcb);
+  sinfo("TCB=%p exiting\n", tcb);
 
   /* Destroy the task at the head of the ready to run list. */
 
@@ -78,7 +78,7 @@ void _exit(int status)
    */
 
   tcb = this_task();
-  sdbg("New Active Task TCB=%p\n", tcb);
+  sinfo("New Active Task TCB=%p\n", tcb);
 
   /* The way that we handle signals in the simulation is kind of
    * a kludge.  This would be unsafe in a truly multi-threaded, interrupt
@@ -87,7 +87,7 @@ void _exit(int status)
 
   if (tcb->xcp.sigdeliver)
     {
-      sdbg("Delivering signals TCB=%p\n", tcb);
+      sinfo("Delivering signals TCB=%p\n", tcb);
       ((sig_deliver_t)tcb->xcp.sigdeliver)(tcb);
       tcb->xcp.sigdeliver = NULL;
     }
@@ -96,4 +96,3 @@ void _exit(int status)
 
   up_longjmp(tcb->xcp.regs, 1);
 }
-

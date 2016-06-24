@@ -198,21 +198,6 @@
 #  define CONFIG_SAM4EEK_LCD_BGCOLOR 0
 #endif
 
-/* Define CONFIG_DEBUG_LCD to enable detailed LCD debug output. Verbose debug must
- * also be enabled.
- */
-
-#ifndef CONFIG_DEBUG
-#  undef CONFIG_DEBUG_VERBOSE
-#  undef CONFIG_DEBUG_GRAPHICS
-#  undef CONFIG_DEBUG_LCD
-#  undef CONFIG_LCD_REGDEBUG
-#endif
-
-#ifndef CONFIG_DEBUG_VERBOSE
-#  undef CONFIG_DEBUG_LCD
-#endif
-
 /* Display/Color Properties ***********************************************************/
 /* Display Resolution */
 
@@ -268,16 +253,6 @@
 #define BKL_PULSE_DURATION    24
 #define BKL_ENABLE_DURATION   (128*1024)
 #define BKL_DISABLE_DURATION  (128*1024)
-
-/* Debug ******************************************************************************/
-
-#ifdef CONFIG_DEBUG_LCD
-#  define lcddbg              dbg
-#  define lcdvdbg             vdbg
-#else
-#  define lcddbg(x...)
-#  define lcdvdbg(x...)
-#endif
 
 /************************************************************************************
  * Private Type Definition
@@ -503,7 +478,7 @@ static void sam_setwindow(sam_color_t row, sam_color_t col,
 {
   uint8_t buffer[4];
 
-  lcdvdbg("row=%d col=%d width=%d height=%d\n", row, col, width, height);
+  lcdinfo("row=%d col=%d width=%d height=%d\n", row, col, width, height);
 
   /* Set Column Address Position */
 
@@ -654,7 +629,7 @@ static void sam_set_backlight(unsigned int power)
   unsigned int level;
   int i;
 
-  lcdvdbg("power=%d\n", power);
+  lcdinfo("power=%d\n", power);
 
   /* Scale the power setting to the range 1...BKL_LEVELS */
 
@@ -696,7 +671,7 @@ static void sam_set_backlight(unsigned int power)
 
 static int sam_poweroff(FAR struct sam_dev_s *priv)
 {
-  lcdvdbg("OFF\n");
+  lcdinfo("OFF\n");
 
   /* Turn the display off */
 
@@ -739,7 +714,7 @@ static int sam_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
 
   /* Buffer must be provided and aligned to a 16-bit address boundary */
 
-  lcdvdbg("row: %d col: %d npixels: %d\n", row, col, npixels);
+  lcdinfo("row: %d col: %d npixels: %d\n", row, col, npixels);
 
 #if defined(CONFIG_SAM4EEK_LCD_RGB565)
   DEBUGASSERT(src && ((uintptr_t)src & 1) == 0);
@@ -797,7 +772,7 @@ static int sam_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
 
   /* Buffer must be provided and aligned to a 16-bit address boundary */
 
-  lcdvdbg("row: %d col: %d npixels: %d\n", row, col, npixels);
+  lcdinfo("row: %d col: %d npixels: %d\n", row, col, npixels);
 
 #if defined(CONFIG_SAM4EEK_LCD_RGB565)
   DEBUGASSERT(dest && ((uintptr_t)dest & 1) == 0);
@@ -840,7 +815,7 @@ static int sam_getvideoinfo(FAR struct lcd_dev_s *dev,
                             FAR struct fb_videoinfo_s *vinfo)
 {
   DEBUGASSERT(dev && vinfo);
-  lcdvdbg("fmt: %d xres: %d yres: %d nplanes: %d\n",
+  lcdinfo("fmt: %d xres: %d yres: %d nplanes: %d\n",
           g_videoinfo.fmt, g_videoinfo.xres, g_videoinfo.yres, g_videoinfo.nplanes);
   memcpy(vinfo, &g_videoinfo, sizeof(struct fb_videoinfo_s));
   return OK;
@@ -858,7 +833,7 @@ static int sam_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
                               FAR struct lcd_planeinfo_s *pinfo)
 {
   DEBUGASSERT(dev && pinfo && planeno == 0);
-  lcdvdbg("planeno: %d bpp: %d\n", planeno, g_planeinfo.bpp);
+  lcdinfo("planeno: %d bpp: %d\n", planeno, g_planeinfo.bpp);
   memcpy(pinfo, &g_planeinfo, sizeof(struct lcd_planeinfo_s));
   return OK;
 }
@@ -876,7 +851,7 @@ static int sam_getpower(struct lcd_dev_s *dev)
 {
   FAR struct sam_dev_s *priv = (FAR struct sam_dev_s *)dev;
 
-  lcdvdbg("power: %d\n", 0);
+  lcdinfo("power: %d\n", 0);
   return priv->power;
 }
 
@@ -893,7 +868,7 @@ static int sam_setpower(struct lcd_dev_s *dev, int power)
 {
   FAR struct sam_dev_s *priv = (FAR struct sam_dev_s *)dev;
 
-  lcdvdbg("power: %d\n", power);
+  lcdinfo("power: %d\n", power);
   DEBUGASSERT((unsigned)power <= CONFIG_LCD_MAXPOWER);
 
   /* Set new power level */
@@ -930,7 +905,7 @@ static int sam_setpower(struct lcd_dev_s *dev, int power)
 
 static int sam_getcontrast(struct lcd_dev_s *dev)
 {
-  lcdvdbg("Not implemented\n");
+  lcdinfo("Not implemented\n");
   return -ENOSYS;
 }
 
@@ -944,7 +919,7 @@ static int sam_getcontrast(struct lcd_dev_s *dev)
 
 static int sam_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
 {
-  lcdvdbg("contrast: %d\n", contrast);
+  lcdinfo("contrast: %d\n", contrast);
   return -ENOSYS;
 }
 
@@ -1171,7 +1146,7 @@ static inline int sam_lcd_initialize(void)
   id = ((uint16_t)buffer[2] << 8) | (uint16_t)buffer[3];
   if (id != ILI9341_DEVICE_CODE)
     {
-      lcddbg("ERROR: Unsupported LCD: %04x\n", id);
+      lcderr("ERROR: Unsupported LCD: %04x\n", id);
       return -ENODEV;
     }
 
@@ -1198,7 +1173,7 @@ int board_lcd_initialize(void)
   FAR struct sam_dev_s *priv = &g_lcddev;
   int ret;
 
-  lcdvdbg("Initializing\n");
+  lcdinfo("Initializing\n");
 
   /* Configure all LCD pins pins (backlight is initially off) */
 

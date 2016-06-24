@@ -93,7 +93,7 @@ static uint16_t psock_send_interrupt(FAR struct net_driver_s *dev,
 {
   FAR struct send_s *pstate = (FAR struct send_s *)pvpriv;
 
-  nllvdbg("flags: %04x sent: %d\n", flags, pstate->snd_sent);
+  ninfo("flags: %04x sent: %d\n", flags, pstate->snd_sent);
 
   if (pstate)
     {
@@ -212,14 +212,14 @@ ssize_t psock_pkt_send(FAR struct socket *psock, FAR const void *buf,
   FAR struct net_driver_s *dev;
   struct send_s state;
   net_lock_t save;
-  int err;
+  int errcode;
   int ret = OK;
 
   /* Verify that the sockfd corresponds to valid, allocated socket */
 
   if (!psock || psock->s_crefs <= 0)
     {
-      err = EBADF;
+      errcode = EBADF;
       goto errout;
     }
 
@@ -228,7 +228,7 @@ ssize_t psock_pkt_send(FAR struct socket *psock, FAR const void *buf,
   dev = pkt_find_device((FAR struct pkt_conn_s *)psock->s_conn);
   if (dev == NULL)
     {
-      err = ENODEV;
+      errcode = ENODEV;
       goto errout;
     }
 
@@ -296,7 +296,7 @@ ssize_t psock_pkt_send(FAR struct socket *psock, FAR const void *buf,
 
   if (state.snd_sent < 0)
     {
-      err = state.snd_sent;
+      errcode = state.snd_sent;
       goto errout;
     }
 
@@ -306,7 +306,7 @@ ssize_t psock_pkt_send(FAR struct socket *psock, FAR const void *buf,
 
   if (ret < 0)
     {
-      err = -ret;
+      errcode = -ret;
       goto errout;
     }
 
@@ -315,7 +315,7 @@ ssize_t psock_pkt_send(FAR struct socket *psock, FAR const void *buf,
   return state.snd_sent;
 
 errout:
-  set_errno(err);
+  set_errno(errcode);
   return ERROR;
 }
 

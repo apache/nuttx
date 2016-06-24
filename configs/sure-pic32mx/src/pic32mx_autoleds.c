@@ -86,22 +86,6 @@
 #define LED_ON  1
 #define LED_NC  2
 
-/* Debug ********************************************************************/
-
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_LEDS)
-#  define leddbg  lldbg
-#  ifdef CONFIG_DEBUG_VERBOSE
-#    define ledvdbg lldbg
-#  else
-#    define ledvdbg(x...)
-#  endif
-#else
-#  undef CONFIG_DEBUG_LEDS
-#  undef CONFIG_DEBUG_VERBOSE
-#  define leddbg(x...)
-#  define ledvdbg(x...)
-#endif
-
 /****************************************************************************
  * Private types
  ****************************************************************************/

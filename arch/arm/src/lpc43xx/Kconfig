@@ -314,6 +314,12 @@ config LPC43_WWDT
 
 endmenu # LPC43xx Peripheral Support
 
+config LPC43_GPIO_IRQ
+	bool "GPIO interrupt support"
+	default n
+	---help---
+		Enable support for GPIO interrupts
+
 if LPC43_ETHERNET
 menu "Ethernet MAC configuration"
 
@@ -451,9 +457,9 @@ config LPC43_RMII
 config LPC43_ETHERNET_REGDEBUG
 	bool "Register-Level Debug"
 	default n
-	depends on DEBUG
+	depends on DEBUG_NET_INFO
 	---help---
-		Enable very low-level register access debug.  Depends on DEBUG.
+		Enable very low-level register access debug.  Depends on CONFIG_DEBUG_NET_INFO.
 
 endmenu # Ethernet MAC configuration
 endif # LPC43_ETHERNET

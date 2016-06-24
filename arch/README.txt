@@ -134,6 +134,8 @@ src/Makefile
 
 Supported Architectures
 ^^^^^^^^^^^^^^^^^^^^^^^
+NOTE: nuttx/Documentation/NuttX.html for current information about the
+state of these MCU ports.
 
 arch/sim - Linux/Cygwin simulation
     A user-mode port of NuttX to the x86 Linux platform is available.
@@ -145,135 +147,68 @@ arch/arm - ARM-based micro-controllers
     This directory holds common ARM architectures.  At present, this includes
     the following subdirectories:
 
-    arch/arm/include and arch/arm/src/common
-        Common ARM/Cortex-M3 logic.
+    Architecture Support
+      arch/arm/include and arch/arm/src/common
+      arch/arm/src/arm and arch/arm/include/arm
+      arch/arm/src/armv7-a and arch/arm/include/armv7-a
+      arch/arm/src/armv7-m and arch/arm/include/armv7-m
+      arch/arm/src/armv7-r and arch/arm/include/armv7-4
 
-    arch/arm/src/arm and arch/arm/include/arm
-        Common ARM-specific logic
-
-    arch/arm/src/armv7-m and arch/arm/include/armv7-m
-        Common ARMv7-M logic (Cortex-M3 and Cortex-M4)
-
-    arch/arm/include/c5471 and arch/arm/src/c5471
-        TI TMS320C5471 (also called TMS320DM180 or just C5471).
-        NuttX operates on the ARM7 of this dual core processor. This port
-        complete, verified, and included in the NuttX release 0.1.1.
-
-    arch/arm/include/calypso and arch/arm/src/calypso
-        TI "Calypso" MCU used in various cell phones (and, in particular,
-        by the Osmocom-bb project).  Like the c5471, NuttX operates on the
-        ARM7 of this dual core processor. This port was contributed by
-        Denis Carilki and includes the work of Denis, Alan Carvalho de Assis,
-        and Stefan Richter.  Calypso support first appeared in NuttX-6.17.
-
-    arch/arm/include/dm320 and arch/arm/src/dm320
-        TI TMS320DM320 (also called just DM320).
-        NuttX operates on the ARM9EJS of this dual core processor.  This port
-        complete, verified, and included in the NuttX release 0.2.1.
-
-    arch/arm/include/imx and arch/arm/src/imx
-        Freescale MC9328MX1 or i.MX1. This port uses the Freescale MX1ADS
-        development board with a GNU arm-elf toolchain* under either Linux or Cygwin.
-        STATUS: This port has stalled because of development tool issues. Coding
-        is complete on the basic port (timer, serial console, SPI).
-
-    arch/arm/include/lm and arch/arm/src/lm
-        These directories contain support for the Luminary LM3S/4F family. The
-        initial, release of this port was included in NuttX version 0.4.6.  The
-        current port includes timer, serial console, Ethernet, SSI, and microSD
-        support. There are working configurations the NuttX OS test, to run the
-        NuttShell (NSH), the NuttX networking test, and the uIP web server.
-
-    arch/arm/include/lpc214x and arch/arm/src/lpc214x
-        These directories provide support for NXP LPC214x family of
-        ARM7TDMI processors.  This port boots and passes the OS test (examples/ostest).
-        The port is complete and verifed.  As of NuttX 0.3.17, the port includes:
-        timer interrupts, serial console, USB driver, and SPI-based MMC/SD card
-        support.  A verifed NuttShell (NSH) configuration is also available.
-
-    arch/arm/include/lpc2378 and arch/arm/src/lpc2378.
-        NXP LPC2378. Support is provided for the NXP LPC2378 MCU. This port was
-        contributed by Rommel Marcelo is was first released in NuttX-5.3.
-        STATUS: This port boots and passes the OS test (examples/ostest) and
-        includes a working implementation of the NuttShell (NSH). The port is
-        complete and verified. As of NuttX 5.3, the port includes only basic
-        timer interrupts and serial console support.
-
-    arch/arm/include/lpc31xx and arch/arm/src/lpc31xx
-        These directories provide support for NXP LPC31xx family of
-        ARM926EJ-S processors.  The port for the NXP LPC3131 was first
-        released in NuttX-5.1 (but was not functional until NuttX-5.2).
-        STATUS: The basic EA3131 port is complete and verified in NuttX-5.2
-        This basic port includes basic boot-up, serial console, and timer
-        interrupts. This port was extended in NuttX 5.3 with a USB high
-        speed driver contributed by David Hewson. This port has been
-        verified using the NuttX OS test, USB serial and mass storage tests
-        and includes a working implementation of the NuttShell ((NSH)).
-
-        This port was later extended to support additional members of the
-        LPC31xx family including, specifically, the LPC3152.
-
-    arch/arm/include/sam3u and arch/arm/src/sam3u
-        Atmel AT91SAM3U. This port is for Atmel AT91SAM3U4E MCU.
-        STATUS: The basic AT91SAM3U port was released in NuttX version 5.1.
-        The basic port includes boot-up logic, interrupt driven serial
-        console, and system timer interrupts. That release passes the
-        NuttX OS test and is proven to have a valid OS implementation. A
-        onfiguration to support the NuttShell is also included.
-
-    arch/arm/include/stm32 and arch/arm/src/stm32
-        These directories contain support for the STMicro STM32 F1, F2, and
-        F4 families.
-
-        STATUS: The basic STM32 F1 port was released in NuttX version 0.4.12.
-        and has continued to develop consistently over time.  It now includes
-        support for the F2 and F4 families and a rich offering of peripheral
-        drivers.
-
-    arch/arm/include/str71x and arch/arm/src/str71x
-        These directories provide support for the STMicro STR71x processors.
-        Coding is complete on the basic port (boot logic, system time, serial console),
-        but no testing has been performed due to some problems I am having with my
-        JTAG wiggler and OpenOCD on Linux.
+    MCU support
+      arch/arm/include/c5471 and arch/arm/src/c5471
+      arch/arm/include/calypso and arch/arm/src/calypso
+      arch/arm/include/dm320 and arch/arm/src/dm320
+      arch/arm/include/efm32 and arch/arm/src/efm32
+      arch/arm/include/imx1 and arch/arm/src/imx1
+      arch/arm/include/imx6 and arch/arm/src/imx6
+      arch/arm/include/kinetis and arch/arm/src/kinetis
+      arch/arm/include/kl and arch/arm/src/kl
+      arch/arm/include/lpc11xx and arch/arm/src/lpc11xx
+      arch/arm/include/lpc17xx and arch/arm/src/lpc17xx
+      arch/arm/include/lpc214x and arch/arm/src/lpc214x
+      arch/arm/include/lpc2378 and arch/arm/src/lpc2378.
+      arch/arm/include/lpc31xx and arch/arm/src/lpc31xx
+      arch/arm/include/lpc43xx and arch/arm/src/lpc43xx
+      arch/arm/include/moxart and arch/arm/src/moxart
+      arch/arm/include/nuc1xx and arch/arm/src/nuc1xx
+      arch/arm/include/sam34 and arch/arm/src/sam34
+      arch/arm/include/sama45 and arch/arm/src/sama5
+      arch/arm/include/samdl and arch/arm/src/samdl
+      arch/arm/include/samv7 and arch/arm/src/samv7
+      arch/arm/include/stm32 and arch/arm/src/stm32
+      arch/arm/include/stm32f7 and arch/arm/src/stm32f7
+      arch/arm/include/stm32l4 and arch/arm/src/stm32l4
+      arch/arm/include/str71x and arch/arm/src/str71x
+      arch/arm/include/tiva and arch/arm/src/tiva
+      arch/arm/include/tms570 and arch/arm/src/tms570
 
 arch/avr
     This directory is dedicated to ports to the Atmel AVR (8-bit) and AVR32 (32-bit)
     MCU families.  STATUS:  Under development.
 
-    arch/avr/include/avr and arch/avr/src/avr
-      Common support for all 8-bit AVR MCUs
+    Architecture Support
+      arch/avr/include/avr and arch/avr/src/avr
+      arch/avr/include/avr32 and arch/avr/src/avr32
 
-    arch/avr/include/atmega and arch/avr/src/atmega
-      Support specifically for the AVR ATMega family (specifically only for
-      the ATMega128 at the moment).
-
-    arch/avr/include/at90usb and arch/avr/src/at90usb
-      Support specifically for the AVR AT90USB646, 647, 1286, and 1287 family.
-
-    arch/avr/include/avr32 and arch/avr/src/avr32
-      Common support for all AVR32 MCUs
-
-    arch/avr/include/at32uc3 and arch/avr/src/at32uc3
-      Support specifically for the AT32UC3Bxxx family (specifically only for
-      the AT32UC3B0256 at the moment).
+    MCU support
+      arch/avr/include/atmega and arch/avr/src/atmega
+      arch/avr/include/at90usb and arch/avr/src/at90usb
+      arch/avr/include/at32uc3 and arch/avr/src/at32uc3
 
 arch/hc
     This directory is dedicated to ports to the Freescale HC family.
 
     arch/arm/include/m9s12 and arch/arm/src/m9s12
-      These directories provide support for the Freescale mc9s12x family.
-      STATUS:  Fragments of this port were first released in nuttx-5.0 and
-      the port was "code-complete" as nuttx-5.18.  However, the final
-      verification effort has been stalled because of higher priority tasks.
 
 arch/mips
     This directory is dedicated to ports to the MIPS family.
 
-    arch/mips/include/mips32 and arch/mips/src/mips32
-      Common support for all MIPS32 architectures
+    Architecture Support
+      arch/mips/include/mips32 and arch/mips/src/mips32
 
-    arch/mips/include/pic32mx and arch/mips/src/pic32mx
-      Support for all MicroChip PIC32MX architectures
+    MCU support
+      arch/mips/include/pic32mx and arch/mips/src/pic32mx
+      arch/mips/include/pic32mz and arch/mips/src/pic32mz
 
 arch/rgmp
 
@@ -288,52 +223,42 @@ arch/rgmp
 
 arch/sh - SuperH and related Hitachi/Renesas microcontrollers
 
-    arch/sh/include and arch/sh/src/common
-        Common SuperH logic.
+    Architecture Support
+      arch/sh/include and arch/sh/src/common
 
-    arch/sh/include/shs and arch/sh/src/sh1
-        Support for the SH-1 processor.
+    MCU support
+      arch/sh/include/m16c and arch/sh/src/m16c
+      arch/sh/include/sh1 and arch/sh/src/sh1
 
 arch/x86 - Intel x86 architectures
     This directory holds related, 32- and 64-bit architectures from Intel.
     At present, this includes the following subdirectories:
 
-    arch/x86/include and arch/x86/src/common
-        Common x86 logic.
+    Architecture Support
+      arch/x86/include and arch/x86/src/common
 
-    arch/x86/include/i486 and arch/x86/src/i486
-        These directories hold definitions and logic appropriate for any
-        instantiation of the 32-bit i486 architecture.
-
-    arch/x86/include/qemu and arch/x86/src/qemu
-        This is the implementation of NuttX on the QEMU x86 simulation.
+    MCU support
+      arch/x86/include/i486 and arch/x86/src/i486
+      arch/x86/include/qemu and arch/x86/src/qemu
 
 arch/z16 - ZiLOG 16-bit processors
     This directory holds related, 16-bit architectures from ZiLOG.  At
     present, this includes the following subdirectories:
 
-    arch/z16/include and arch/z16/src/common
-        Common microcontroller logic.
+    Architecture Support
+      arch/z16/include and arch/z16/src/common
 
-    arch/z16/include/z16f and arch/z16/src/z16f
-        ZiLOG z16f Microcontroller.
-        STATUS: Released in nuttx-0.3.7.  Fully functional other than issues
-        addressed in ${TOPDIR}/TODO.
+    MCU support
+      arch/z16/include/z16f and arch/z16/src/z16f
 
 arch/z80 - ZiLOG 8-bit microcontrollers
     This directory holds related, 8-bit architectures from ZiLOG.  At
     present, this includes the following subdirectories:
 
-    arch/z80/include and arch/z80/src/common
-        Common microcontroller logic.
+    Architecture Support
+      arch/z80/include and arch/z80/src/common
 
-    arch/z80/include/z80 and arch/z80/src/z80
-        Classic ZiLOG z80 Microcontroller.
-        STATUS: Functional with no known defects.  There are still several
-         OS features that have not yet been tested (e.g., networking).
-
-    arch/z80/include/z8 and arch/z80/src/z8
-        ZiLOG Z8Encore! Microcontroller
-
-    arch/z80/include/ez80 and arch/z80/src/ez80
-        ZiLOG ez80 Acclaim! Microcontroller
+    MCU support
+      arch/z80/include/z80 and arch/z80/src/z80
+      arch/z80/include/z8 and arch/z80/src/z8
+      arch/z80/include/ez80 and arch/z80/src/ez80

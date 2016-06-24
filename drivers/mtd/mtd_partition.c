@@ -235,7 +235,7 @@ static int part_erase(FAR struct mtd_dev_s *dev, off_t startblock,
 
   if (!part_blockcheck(priv, (startblock + nblocks - 1) * priv->blkpererase))
     {
-      fdbg("ERROR: Erase beyond the end of the partition\n");
+      ferr("ERROR: Erase beyond the end of the partition\n");
       return -ENXIO;
     }
 
@@ -270,7 +270,7 @@ static ssize_t part_bread(FAR struct mtd_dev_s *dev, off_t startblock,
 
   if (!part_blockcheck(priv, startblock + nblocks - 1))
     {
-      fdbg("ERROR: Read beyond the end of the partition\n");
+      ferr("ERROR: Read beyond the end of the partition\n");
       return -ENXIO;
     }
 
@@ -301,7 +301,7 @@ static ssize_t part_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
 
   if (!part_blockcheck(priv, startblock + nblocks - 1))
     {
-      fdbg("ERROR: Write beyond the end of the partition\n");
+      ferr("ERROR: Write beyond the end of the partition\n");
       return -ENXIO;
     }
 
@@ -337,7 +337,7 @@ static ssize_t part_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
 
       if (!part_bytecheck(priv, offset + nbytes - 1))
         {
-          fdbg("ERROR: Read beyond the end of the partition\n");
+          ferr("ERROR: Read beyond the end of the partition\n");
           return -ENXIO;
         }
 
@@ -375,7 +375,7 @@ static ssize_t part_write(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes
 
       if (!part_bytecheck(priv, offset + nbytes - 1))
         {
-          fdbg("ERROR: Write beyond the end of the partition\n");
+          ferr("ERROR: Write beyond the end of the partition\n");
           return -ENXIO;
         }
 
@@ -479,7 +479,7 @@ static int part_procfs_open(FAR struct file *filep, FAR const char *relpath,
 {
   FAR struct part_procfs_file_s *attr;
 
-  fvdbg("Open '%s'\n", relpath);
+  finfo("Open '%s'\n", relpath);
 
   /* PROCFS is read-only.  Any attempt to open with any kind of write
    * access is not permitted.
@@ -489,7 +489,7 @@ static int part_procfs_open(FAR struct file *filep, FAR const char *relpath,
 
   if ((oflags & O_WRONLY) != 0 || (oflags & O_RDONLY) == 0)
     {
-      fdbg("ERROR: Only O_RDONLY supported\n");
+      ferr("ERROR: Only O_RDONLY supported\n");
       return -EACCES;
     }
 
@@ -498,7 +498,7 @@ static int part_procfs_open(FAR struct file *filep, FAR const char *relpath,
   attr = (FAR struct part_procfs_file_s *)kmm_zalloc(sizeof(struct part_procfs_file_s));
   if (!attr)
     {
-      fdbg("ERROR: Failed to allocate file attributes\n");
+      ferr("ERROR: Failed to allocate file attributes\n");
       return -ENOMEM;
     }
 
@@ -550,7 +550,7 @@ static ssize_t part_procfs_read(FAR struct file *filep, FAR char *buffer,
   uint8_t x;
 #endif
 
-  fvdbg("buffer=%p buflen=%d\n", buffer, (int)buflen);
+  finfo("buffer=%p buflen=%d\n", buffer, (int)buflen);
 
   /* Recover our private data from the struct file instance */
 
@@ -591,7 +591,7 @@ static ssize_t part_procfs_read(FAR struct file *filep, FAR char *buffer,
                   MTDIOC_GEOMETRY, (unsigned long)((uintptr_t)&geo));
           if (ret < 0)
             {
-              fdbg("ERROR: mtd->ioctl failed: %d\n", ret);
+              ferr("ERROR: mtd->ioctl failed: %d\n", ret);
               return 0;
             }
 
@@ -702,7 +702,7 @@ static int part_procfs_dup(FAR const struct file *oldp, FAR struct file *newp)
   FAR struct part_procfs_file_s *oldattr;
   FAR struct part_procfs_file_s *newattr;
 
-  fvdbg("Dup %p->%p\n", oldp, newp);
+  finfo("Dup %p->%p\n", oldp, newp);
 
   /* Recover our private data from the old struct file instance */
 
@@ -714,7 +714,7 @@ static int part_procfs_dup(FAR const struct file *oldp, FAR struct file *newp)
   newattr = (FAR struct part_procfs_file_s *)kmm_zalloc(sizeof(struct part_procfs_file_s));
   if (!newattr)
     {
-      fdbg("ERROR: Failed to allocate file attributes\n");
+      ferr("ERROR: Failed to allocate file attributes\n");
       return -ENOMEM;
     }
 
@@ -796,7 +796,7 @@ FAR struct mtd_dev_s *mtd_partition(FAR struct mtd_dev_s *mtd, off_t firstblock,
   ret = mtd->ioctl(mtd, MTDIOC_GEOMETRY, (unsigned long)((uintptr_t)&geo));
   if (ret < 0)
     {
-      fdbg("ERROR: mtd->ioctl failed: %d\n", ret);
+      ferr("ERROR: mtd->ioctl failed: %d\n", ret);
       return NULL;
     }
 
@@ -818,7 +818,7 @@ FAR struct mtd_dev_s *mtd_partition(FAR struct mtd_dev_s *mtd, off_t firstblock,
 
   if (erasestart >= eraseend)
     {
-      fdbg("ERROR: sub-region too small\n");
+      ferr("ERROR: sub-region too small\n");
       return NULL;
     }
 
@@ -827,7 +827,7 @@ FAR struct mtd_dev_s *mtd_partition(FAR struct mtd_dev_s *mtd, off_t firstblock,
   devblocks = blkpererase * geo.neraseblocks;
   if (eraseend > devblocks)
     {
-      fdbg("ERROR: sub-region too big\n");
+      ferr("ERROR: sub-region too big\n");
       return NULL;
     }
 
@@ -836,7 +836,7 @@ FAR struct mtd_dev_s *mtd_partition(FAR struct mtd_dev_s *mtd, off_t firstblock,
   part = (FAR struct mtd_partition_s *)kmm_zalloc(sizeof(struct mtd_partition_s));
   if (!part)
     {
-      fdbg("ERROR: Failed to allocate memory for the partition device\n");
+      ferr("ERROR: Failed to allocate memory for the partition device\n");
       return NULL;
     }
 

@@ -180,7 +180,7 @@ void lpc11_gpioirqdisable(int irq);
  *
  ************************************************************************************/
 
-#ifdef CONFIG_DEBUG_GPIO
+#ifdef CONFIG_DEBUG_GPIO_INFO
 int lpc11_dumpgpio(lpc11_pinset_t pinset, const char *msg);
 #else
 #  define lpc11_dumpgpio(p,m)

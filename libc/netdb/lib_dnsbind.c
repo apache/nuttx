@@ -91,7 +91,7 @@ int dns_bind(void)
 
   if (!dns_initialize())
     {
-      ndbg("ERROR: DNS client has not been initialized\n");
+      nerr("ERROR: DNS client has not been initialized\n");
       return -EDESTADDRREQ;
     }
 
@@ -101,7 +101,7 @@ int dns_bind(void)
   if (sd < 0)
     {
       errcode = get_errno();
-      ndbg("ERROR: socket() failed: %d\n", errcode);
+      nerr("ERROR: socket() failed: %d\n", errcode);
       return -errcode;
     }
 
@@ -114,7 +114,7 @@ int dns_bind(void)
   if (ret < 0)
     {
       errcode = get_errno();
-      ndbg("ERROR: setsockopt() failed: %d\n", errcode);
+      nerr("ERROR: setsockopt() failed: %d\n", errcode);
       close(sd);
       return -errcode;
     }

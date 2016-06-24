@@ -1393,9 +1393,9 @@ endif # SAMA5_LCDC_HCR
 config SAMA5_LCDC_REGDEBUG
 	bool "Register-Level Debug"
 	default n
-	depends on DEBUG
+	depends on DEBUG_LCD_INFO
 	---help---
-		Enable very low-level register access debug.  Depends on DEBUG.
+		Enable very low-level register access debug.  Depends on CONFIG_DEBUG_LCD_INFO.
 
 endmenu # LCDC configuration
 endif # SAMA5_LCDC
@@ -1499,9 +1499,9 @@ endif # !SAMA5_GMAC_AUTONEG
 config SAMA5_GMAC_REGDEBUG
 	bool "Register-Level Debug"
 	default n
-	depends on DEBUG
+	depends on DEBUG_NET_INFO
 	---help---
-		Enable very low-level register access debug.  Depends on DEBUG.
+		Enable very low-level register access debug.  Depends on CONFIG_DEBUG_NET_INFO.
 
 endmenu # GMAC device driver options
 endif # SAMA5_GMAC
@@ -1678,9 +1678,9 @@ config SAMA5_EMACA_NBC
 config SAMA5_EMACA_REGDEBUG
 	bool "Register-Level Debug"
 	default n
-	depends on DEBUG
+	depends on DEBUG_NET_FEATURES
 	---help---
-		Enable very low-level register access debug.  Depends on DEBUG.
+		Enable very low-level register access debug.  Depends on CONFIG_DEBUG_NET_FEATURES.
 
 endmenu # EMAC device driver options
 endif # SAMA5_EMACA
@@ -2076,7 +2076,7 @@ config SAMA5_EMACB_NBC
 config SAMA5_EMACB_DEBUG
 	bool "Force EMAC0/1 DEBUG"
 	default n
-	depends on DEBUG && !DEBUG_NET
+	depends on DEBUG_FEATURES && !DEBUG_NET
 	---help---
 		This option will force debug output from EMAC driver even without
 		network debug output enabled.  This is not normally something
@@ -2087,9 +2087,9 @@ config SAMA5_EMACB_DEBUG
 config SAMA5_EMACB_REGDEBUG
 	bool "Register-Level Debug"
 	default n
-	depends on DEBUG
+	depends on DEBUG_NET_INFO
 	---help---
-		Enable very low-level register access debug.  Depends on DEBUG.
+		Enable very low-level register access debug.  Depends on CONFIG_DEBUG_NET_INFO.
 
 endmenu # EMAC device driver options
 endif # SAMA5_EMACB
@@ -2323,11 +2323,11 @@ config SAMA5_CAN_AUTOBAUD
 
 config SAMA5_CAN_REGDEBUG
 	bool "CAN Register level debug"
-	depends on DEBUG
+	depends on DEBUG_CAN_INFO
 	default n
 	---help---
 		Output detailed register-level CAN device debug information.
-		Requires also DEBUG.
+		Requires also CONFIG_DEBUG_CAN_INFO.
 
 endmenu # CAN device driver options
 endif # SAMA5_CAN0 || SAMA5_CAN1
@@ -2354,7 +2354,7 @@ config SAMA5_SPI_DMATHRESHOLD
 
 config SAMA5_SPI_DMADEBUG
 	bool "SPI DMA transfer debug"
-	depends on SAMA5_SPI_DMA && DEBUG && DEBUG_DMA
+	depends on SAMA5_SPI_DMA && DEBUG_FEATURES && DEBUG_DMA
 	default n
 	---help---
 		Enable special debug instrumentation analyze SPI DMA data transfers.
@@ -2364,11 +2364,11 @@ config SAMA5_SPI_DMADEBUG
 
 config SAMA5_SPI_REGDEBUG
 	bool "SPI Register level debug"
-	depends on DEBUG
+	depends on DEBUG_SPI_INFO
 	default n
 	---help---
 		Output detailed register-level SPI device debug information.
-		Requires also DEBUG.
+		Requires also CONFIG_DEBUG_SPI_INFO.
 
 endmenu # SPI device driver options
 endif # SAMA5_SPI0 || SAMA5_SPI1
@@ -2399,11 +2399,11 @@ config SAMA5_TWI3_FREQUENCY
 
 config SAMA5_TWI_REGDEBUG
 	bool "TWI register level debug"
-	depends on DEBUG
+	depends on DEBUG_I2C_INFO
 	default n
 	---help---
 		Output detailed register-level TWI device debug information.
-		Very invasive! Requires also DEBUG.
+		Very invasive! Requires also CONFIG_DEBUG_I2C_INFO.
 
 endmenu # TWI device driver options
 endif # SAMA5_TWI0 || SAMA5_TWI1 || SAMA5_TWI2 || SAMA5_TWI3
@@ -2766,7 +2766,7 @@ endif # SAMA5_SSC1
 
 config SAMA5_SSC_DMADEBUG
 	bool "SSC DMA transfer debug"
-	depends on DEBUG && DEBUG_DMA
+	depends on DEBUG_FEATURES && DEBUG_DMA
 	default n
 	---help---
 		Enable special debug instrumentation analyze SSC DMA data transfers.
@@ -2776,11 +2776,11 @@ config SAMA5_SSC_DMADEBUG
 
 config SAMA5_SSC_REGDEBUG
 	bool "SSC Register level debug"
-	depends on DEBUG
+	depends on DEBUG_I2S_INFO
 	default n
 	---help---
 		Output detailed register-level SSC device debug information.
-		Very invasive! Requires also DEBUG.
+		Very invasive! Requires also CONFIG_DEBUG_I2S_INFO.
 
 config SAMA5_SSC_QDEBUG
 	bool "SSC Queue debug"
@@ -2857,7 +2857,7 @@ config SAMA5_HSMCI_WRPROOF
 
 config SAMA5_HSMCI_XFRDEBUG
 	bool "HSMCI transfer debug"
-	depends on DEBUG_FS && DEBUG_VERBOSE
+	depends on DEBUG_FS_INFO
 	default n
 	---help---
 		Enable special debug instrumentation analyze HSMCI data transfers.
@@ -2865,11 +2865,11 @@ config SAMA5_HSMCI_XFRDEBUG
 		registers at key points in the data transfer and then dumps all of
 		the registers at the end of the transfer.  If DEBUG_DMA is also
 		enabled, then DMA register will be collected as well.  Requires also
-		DEBUG_FS and DEBUG_VERBOSE.
+		DEBUG_FS and CONFIG_DEBUG_INFO.
 
 config SAMA5_HSMCI_CMDDEBUG
 	bool "HSMCI command debug"
-	depends on DEBUG_FS && DEBUG_VERBOSE
+	depends on DEBUG_FS_INFO
 	default n
 	---help---
 		Enable special debug instrumentation analyze HSMCI commands. This
@@ -2877,15 +2877,15 @@ config SAMA5_HSMCI_CMDDEBUG
 		key points in the data transfer and then dumps all of the registers
 		at the end of the transfer.  If DEBUG_DMA is also enabled, then DMA
 		register will be collected as well.  Requires also DEBUG_FS and
-		DEBUG_VERBOSE.
+		CONFIG_DEBUG_INFO.
 
 config SAMA5_HSMCI_REGDEBUG
 	bool "HSMCI Register level debug"
-	depends on DEBUG
+	depends on DEBUG_MEMCARD_INFO
 	default n
 	---help---
 		Output detailed register-level HSCMI device debug information.
-		Very invasive! Requires also DEBUG.
+		Very invasive! Requires also CONFIG_DEBUG_MEMCARD_INFO.
 
 endmenu # HSMCI device driver options
 endif # SAMA5_HSMCI0 || SAMA5_HSMCI1 || SAMA5_HSMCI2
@@ -2920,7 +2920,7 @@ config SAMA5_UDPHS_PREALLOCATE
 config SAMA5_UDPHS_REGDEBUG
 	bool "Enable low-level UDPHS register debug"
 	default n
-	depends on DEBUG
+	depends on DEBUG_USB_INFO
 
 endmenu # USB High Speed Device Controller driver (DCD) options
 endif # SAMA5_UDPHS
@@ -2960,7 +2960,7 @@ config SAMA5_OHCI_TDBUFSIZE
 config SAMA5_OHCI_REGDEBUG
 	bool "Enable low-level OHCI register debug"
 	default n
-	depends on DEBUG
+	depends on DEBUG_USB_INFO
 
 endif # SAMA5_OHCI
 
@@ -3009,7 +3009,7 @@ config SAMA5_EHCI_PREALLOCATE
 config SAMA5_EHCI_REGDEBUG
 	bool "Enable low-level EHCI register debug"
 	default n
-	depends on DEBUG
+	depends on DEBUG_USB_INFO
 
 endif # SAMA5_EHCI
 
@@ -3661,7 +3661,7 @@ endif # SAMA5_ADC_HAVE_CHAN
 config SAMA5_ADC_REGDEBUG
 	bool "Enable register-level ADC/touchscreen debug"
 	default n
-	depends on DEBUG
+	depends on DEBUG_ANALOG_INFO
 	---help---
 		Enable very low register-level debug output.
 
@@ -3903,23 +3903,23 @@ endif
 
 config SAMA5_TC_DEBUG
 	bool "TC debug"
-	depends on DEBUG
+	depends on DEBUG_FEATURES
 	default n
 	---help---
 		Output high level Timer/Counter device debug information.
-		Requires also DEBUG.  If this option AND DEBUG_VERBOSE are
+		Requires also CONFIG_DEBUG_FEATURES.  If this option AND CONFIG_DEBUG_INFO are
 		enabled, then the system will be overwhelmed the timer debug
-		output.  If DEBUG_VERBOSE is disabled, then debug output will
+		output.  If CONFIG_DEBUG_INFO is disabled, then debug output will
 		only indicate if/when timer-related errors occur.  This
 		latter mode is completely usable.
 
 config SAMA5_TC_REGDEBUG
 	bool "TC register level debug"
-	depends on DEBUG
+	depends on DEBUG_TIMER_INFO
 	default n
 	---help---
 		Output detailed register-level Timer/Counter device debug
-		information. Very invasive! Requires also DEBUG.
+		information. Very invasive! Requires also CONFIG_DEBUG_TIMER_INFO.
 
 endmenu # Timer/counter Configuration
 endif # SAMA5_HAVE_TC
@@ -4150,7 +4150,7 @@ endif # SAMA5_PWM_CHAN3
 config SAMA5_PWM_REGDEBUG
 	bool "Enable register-level PWM debug"
 	default n
-	depends on DEBUG
+	depends on DEBUG_PWM_INFO
 	---help---
 		Enable very low register-level debug output.
 
@@ -4171,8 +4171,8 @@ config SAMA5_WDT_INTERRUPT
 
 config SAMA5_WDT_DEBUGHALT
 	bool "Halt on DEBUG"
-	default y if DEBUG
-	default n if !DEBUG
+	default y if DEBUG_FEATURES
+	default n if !DEBUG_FEATURES
 	---help---
 		Halt the watchdog timer in the debug state
 
@@ -4185,7 +4185,7 @@ config SAMA5_WDT_IDLEHALT
 config SAMA5_WDT_REGDEBUG
 	bool "Register level debug"
 	default n
-	depends on DEBUG
+	depends on DEBUG_WATCHDOG_INFO
 	---help---
 		Enable low-level register debug output
 
@@ -4688,7 +4688,7 @@ endif # SAMA5_HAVE_PMECC
 
 config SAMA5_NAND_DMADEBUG
 	bool "NAND DMA transfer debug"
-	depends on SAMA5_NAND_DMA && DEBUG && DEBUG_DMA
+	depends on SAMA5_NAND_DMA && DEBUG_FEATURES && DEBUG_DMA
 	default n
 	---help---
 		Enable special debug instrumentation analyze NAND DMA data transfers.
@@ -4699,18 +4699,17 @@ config SAMA5_NAND_DMADEBUG
 config SAMA5_NAND_REGDEBUG
 	bool "Register-Level NAND Debug"
 	default n
-	depends on DEBUG && DEBUG_FS
+	depends on DEBUG_FS_INFO
 	---help---
-		Enable very low-level register access debug.  Depends on DEBUG and
-		DEBUG_FS.
+		Enable very low-level register access debug.  Depends on CONFIG_DEBUG_FS_INFO.
 
 config SAMA5_NAND_DUMP
 	bool "NAND data dump"
 	default n
-	depends on DEBUG && DEBUG_FS
+	depends on DEBUG_FEATURES && DEBUG_FS
 	---help---
 		Dump the contents of all data read and written to FLAH.  Depends on
-		DEBUG and DEBUG_FS.
+		CONFIG_DEBUG_FEATURES and DEBUG_FS.
 
 endif # SAMA5_HAVE_NAND
 endmenu # External Memory Configuration

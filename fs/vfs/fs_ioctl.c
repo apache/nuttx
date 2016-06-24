@@ -91,7 +91,7 @@ int fs_ioctl(int fd, int req, unsigned long arg)
 int ioctl(int fd, int req, unsigned long arg)
 #endif
 {
-  int err;
+  int errcode;
 #if CONFIG_NFILE_DESCRIPTORS > 0
   FAR struct file     *filep;
   FAR struct inode    *inode;
@@ -112,7 +112,7 @@ int ioctl(int fd, int req, unsigned long arg)
       else
 #endif
         {
-          err = EBADF;
+          errcode = EBADF;
           goto errout;
         }
     }
@@ -138,7 +138,7 @@ int ioctl(int fd, int req, unsigned long arg)
       ret = (int)inode->u.i_ops->ioctl(filep, req, arg);
       if (ret < 0)
         {
-          err = -ret;
+          errcode = -ret;
           goto errout;
         }
     }
@@ -147,7 +147,6 @@ int ioctl(int fd, int req, unsigned long arg)
 #endif
 
 errout:
-  set_errno(err);
+  set_errno(errcode);
   return ERROR;
 }
-

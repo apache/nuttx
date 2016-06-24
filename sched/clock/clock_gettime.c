@@ -68,7 +68,7 @@ int clock_gettime(clockid_t clock_id, struct timespec *tp)
   uint32_t carry;
   int ret = OK;
 
-  sdbg("clock_id=%d\n", clock_id);
+  sinfo("clock_id=%d\n", clock_id);
   DEBUGASSERT(tp != NULL);
 
 #ifdef CONFIG_CLOCK_MONOTONIC
@@ -148,14 +148,14 @@ int clock_gettime(clockid_t clock_id, struct timespec *tp)
 
   if (ret < 0)
     {
-      sdbg("Returning ERROR\n");
+      serr("Returning ERROR\n");
 
       set_errno(-ret);
       ret = ERROR;
     }
   else
     {
-      sdbg("Returning tp=(%d,%d)\n", (int)tp->tv_sec, (int)tp->tv_nsec);
+      sinfo("Returning tp=(%d,%d)\n", (int)tp->tv_sec, (int)tp->tv_nsec);
     }
 
   return ret;

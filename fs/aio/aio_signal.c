@@ -102,7 +102,7 @@ int aio_signal(pid_t pid, FAR struct aiocb *aiocbp)
       if (status < 0)
         {
           errcode = get_errno();
-          fdbg("ERROR: sigqueue #1 failed: %d\n", errcode);
+          ferr("ERROR: sigqueue #1 failed: %d\n", errcode);
           ret = ERROR;
         }
     }
@@ -115,7 +115,7 @@ int aio_signal(pid_t pid, FAR struct aiocb *aiocbp)
       ret = sig_notification(pid, &aiocbp->aio_sigevent);
       if (ret < 0)
         {
-          fdbg("ERROR: sig_notification failed: %d\n", ret);
+          ferr("ERROR: sig_notification failed: %d\n", ret);
         }
     }
 #endif
@@ -133,7 +133,7 @@ int aio_signal(pid_t pid, FAR struct aiocb *aiocbp)
   if (status && ret == OK)
     {
       errcode = get_errno();
-      fdbg("ERROR: sigqueue #2 failed: %d\n", errcode);
+      ferr("ERROR: sigqueue #2 failed: %d\n", errcode);
       ret = ERROR;
     }
 

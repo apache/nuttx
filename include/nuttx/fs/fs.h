@@ -65,6 +65,52 @@
 #define __FS_FLAG_EOF   (1 << 0) /* EOF detected by a read operation */
 #define __FS_FLAG_ERROR (1 << 1) /* Error detected by any operation */
 
+/* Inode i_flag values */
+
+#define FSNODEFLAG_TYPE_MASK       0x00000007 /* Isolates type field        */
+#define   FSNODEFLAG_TYPE_DRIVER   0x00000000 /*   Character driver         */
+#define   FSNODEFLAG_TYPE_BLOCK    0x00000001 /*   Block driver             */
+#define   FSNODEFLAG_TYPE_MOUNTPT  0x00000002 /*   Mount point              */
+#define FSNODEFLAG_TYPE_SPECIAL    0x00000004 /* Special OS type            */
+#define   FSNODEFLAG_TYPE_NAMEDSEM 0x00000004 /*   Named semaphore          */
+#define   FSNODEFLAG_TYPE_MQUEUE   0x00000005 /*   Message Queue            */
+#define   FSNODEFLAG_TYPE_SHM      0x00000006 /*   Shared memory region     */
+#define FSNODEFLAG_DELETED         0x00000008 /* Unlinked                   */
+
+#define INODE_IS_TYPE(i,t) \
+  (((i)->i_flags & FSNODEFLAG_TYPE_MASK) == (t))
+#define INODE_IS_SPECIAL(i) \
+  (((i)->i_flags & FSNODEFLAG_TYPE_SPECIAL) != 0)
+
+#define INODE_IS_DRIVER(i)    INODE_IS_TYPE(i,FSNODEFLAG_TYPE_DRIVER)
+#define INODE_IS_BLOCK(i)     INODE_IS_TYPE(i,FSNODEFLAG_TYPE_BLOCK)
+#define INODE_IS_MOUNTPT(i)   INODE_IS_TYPE(i,FSNODEFLAG_TYPE_MOUNTPT)
+#define INODE_IS_NAMEDSEM(i)  INODE_IS_TYPE(i,FSNODEFLAG_TYPE_NAMEDSEM)
+#define INODE_IS_MQUEUE(i)    INODE_IS_TYPE(i,FSNODEFLAG_TYPE_MQUEUE)
+#define INODE_IS_SHM(i)       INODE_IS_TYPE(i,FSNODEFLAG_TYPE_SHM)
+
+#define INODE_GET_TYPE(i)     ((i)->i_flags & FSNODEFLAG_TYPE_MASK)
+#define INODE_SET_TYPE(i,t) \
+  do \
+    { \
+      (i)->i_flags = ((i)->i_flags & ~FSNODEFLAG_TYPE_MASK) | (t); \
+    } \
+  while (0)
+
+#define INODE_SET_DRIVER(i)   INODE_SET_TYPE(i,FSNODEFLAG_TYPE_DRIVER)
+#define INODE_SET_BLOCK(i)    INODE_SET_TYPE(i,FSNODEFLAG_TYPE_BLOCK)
+#define INODE_SET_MOUNTPT(i)  INODE_SET_TYPE(i,FSNODEFLAG_TYPE_MOUNTPT)
+#define INODE_SET_NAMEDSEM(i) INODE_SET_TYPE(i,FSNODEFLAG_TYPE_NAMEDSEM)
+#define INODE_SET_MQUEUE(i)   INODE_SET_TYPE(i,FSNODEFLAG_TYPE_MQUEUE)
+#define INODE_SET_SHM(i)      INODE_SET_TYPE(i,FSNODEFLAG_TYPE_SHM)
+
+/* Mountpoint fd_flags values */
+
+#define DIRENTFLAGS_PSEUDONODE 1
+
+#define DIRENT_SETPSEUDONODE(f) do (f) |= DIRENTFLAGS_PSEUDONODE; while (0)
+#define DIRENT_ISPSEUDONODE(f) (((f) & DIRENTFLAGS_PSEUDONODE) != 0)
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/

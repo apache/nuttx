@@ -92,7 +92,7 @@ int stm32_max31855initialize(FAR const char *devpath)
   ret = max31855_register(devpath, spi);
   if (ret < 0)
     {
-      sndbg("Error registering MAX31855\n");
+      snerr("ERROR: Error registering MAX31855\n");
     }
 
   return ret;

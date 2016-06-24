@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/net/ip.h
  *
- * The uIP header file contains IP-related definitions for a number of C
+ * This header file contains IP-related definitions for a number of C
  * macros that are used by applications as well as internally by the
  * OS networking logic.
  *

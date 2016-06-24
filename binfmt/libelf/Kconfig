@@ -35,7 +35,7 @@ config ELF_BUFFERINCR
 config ELF_DUMPBUFFER
 	bool "Dump ELF buffers"
 	default n
-	depends on DEBUG && DEBUG_VERBOSE
+	depends on DEBUG_INFO
 	---help---
 		Dump various ELF buffers for debug purposes
 

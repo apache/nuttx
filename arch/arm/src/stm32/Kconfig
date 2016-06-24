@@ -484,6 +484,16 @@ config ARCH_CHIP_STM32F105VB
 	select STM32_HAVE_I2C2
 	select STM32_HAVE_TIM4
 
+config ARCH_CHIP_STM32F105RB
+	bool "STM32F105RB"
+	select ARCH_CORTEXM3
+	select STM32_STM32F10XX
+	select STM32_CONNECTIVITYLINE
+	select STM32_HAVE_DAC1
+	select STM32_HAVE_DAC2
+	select STM32_HAVE_I2C2
+	select STM32_HAVE_TIM4
+
 config ARCH_CHIP_STM32F107VC
 	bool "STM32F107VC"
 	select ARCH_CORTEXM3
@@ -1182,7 +1192,6 @@ config STM32_VALUELINE
 	select STM32_HAVE_TIM15
 	select STM32_HAVE_TIM16
 	select STM32_HAVE_TIM17
-	select STM32_HAVE_ADC2
 	select STM32_HAVE_SPI2 if STM32_HIGHDENSITY
 	select STM32_HAVE_SPI3 if STM32_HIGHDENSITY
 
@@ -2532,6 +2541,8 @@ config STM32_FSMC_SRAM
 	select ARCH_HAVE_HEAP2
 	---help---
 		In addition to internal SRAM, SRAM may also be available through the FSMC.
+
+menu "Timer Configuration"
 
 config STM32_TIM1_PWM
 	bool "TIM1 PWM"
@@ -5300,6 +5311,8 @@ config STM32_TIM14_CAP
 		Timer devices may be used for different purposes.  One special purpose is
 		to capture input.
 
+endmenu # Timer Configuration
+
 menu "ADC Configuration"
 	depends on STM32_ADC
 
@@ -6202,9 +6215,9 @@ endchoice
 config STM32_ETHMAC_REGDEBUG
 	bool "Register-Level Debug"
 	default n
-	depends on DEBUG
+	depends on DEBUG_NET_INFO
 	---help---
-		Enable very low-level register access debug.  Depends on DEBUG.
+		Enable very low-level register access debug.  Depends on CONFIG_DEBUG_FEATURES.
 
 endmenu
 endif
@@ -6292,16 +6305,16 @@ menu "USB Host Debug Configuration"
 config STM32_USBHOST_REGDEBUG
 	bool "Register-Level Debug"
 	default n
-	depends on USBHOST && (STM32_OTGFS || STM32_OTGHS)
+	depends on USBHOST && DEBUG_USB_INFO && (STM32_OTGFS || STM32_OTGHS)
 	---help---
-		Enable very low-level register access debug.  Depends on DEBUG.
+		Enable very low-level register access debug.
 
 config STM32_USBHOST_PKTDUMP
 	bool "Packet Dump Debug"
 	default n
-	depends on USBHOST && (STM32_OTGFS || STM32_OTGHS)
+	depends on USBHOST && DEBUG_USB_INFO && (STM32_OTGFS || STM32_OTGHS)
 	---help---
-		Dump all incoming and outgoing USB packets. Depends on DEBUG.
+		Dump all incoming and outgoing USB packets.
 
 endmenu
 
@@ -6320,21 +6333,21 @@ config STM32_USB_ITRMP
 		F3 family and selects the use of the dedicated USB interrupts.
 
 menu "CAN driver configuration"
-	depends on STM32_CAN1 || STM32_CAN2
+	depends on STM32_CAN
 
 config CAN1_BAUD
 	int "CAN1 BAUD"
 	default 250000
 	depends on STM32_CAN1
 	---help---
-		CAN1 BAUD rate.  Required if STM32_CAN1 is defined.
+		CAN1 BAUD rate.  Required if CONFIG_STM32_CAN1 is defined.
 
 config CAN2_BAUD
 	int "CAN2 BAUD"
 	default 250000
 	depends on STM32_CAN2
 	---help---
-		CAN2 BAUD rate.  Required if STM32_CAN2 is defined.
+		CAN2 BAUD rate.  Required if CONFIG_STM32_CAN2 is defined.
 
 config CAN_TSEG1
 	int "TSEG1 quanta"
@@ -6347,6 +6360,15 @@ config CAN_TSEG2
 	default 7
 	---help---
 		The number of CAN time quanta in segment 2. Default: 7
+
+config STM32_CAN_REGDEBUG
+	bool "CAN Register level debug"
+	depends on DEBUG_CAN_INFO
+	default n
+	---help---
+		Output detailed register-level CAN device debug information.
+		Requires also CONFIG_DEBUG_CAN_INFO.
+
 endmenu
 
 if STM32_LTDC

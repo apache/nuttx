@@ -245,7 +245,7 @@ bool nuc_gpioread(gpio_cfgset_t pinset);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
 void nuc_dumpgpio(gpio_cfgset_t pinset, const char *msg);
 #else
 #  define nuc_dumpgpio(p,m)

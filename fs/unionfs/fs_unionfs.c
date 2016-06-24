@@ -843,7 +843,7 @@ static int unionfs_open(FAR struct file *filep, FAR const char *relpath,
   DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
   ui = (FAR struct unionfs_inode_s *)filep->f_inode->i_private;
 
-  fvdbg("Opening: ui_nopen=%d\n", ui->ui_nopen);
+  finfo("Opening: ui_nopen=%d\n", ui->ui_nopen);
 
   /* Get exclusive access to the file system data structures */
 
@@ -946,7 +946,7 @@ static int unionfs_close(FAR struct file *filep)
   DEBUGASSERT(um != NULL && um->um_node != NULL && um->um_node->u.i_mops != NULL);
   ops = um->um_node->u.i_mops;
 
-  fvdbg("Closing: ui_nopen=%d\n", ui->ui_nopen);
+  finfo("Closing: ui_nopen=%d\n", ui->ui_nopen);
 
   /* Perform the lower level close operation */
 
@@ -986,7 +986,7 @@ static ssize_t unionfs_read(FAR struct file *filep, FAR char *buffer,
   FAR const struct mountpt_operations *ops;
   int ret = -EPERM;
 
-  fvdbg("buflen: %lu\n", (unsigned long)buflen);
+  finfo("buflen: %lu\n", (unsigned long)buflen);
 
   /* Recover the open file data from the struct file instance */
 
@@ -1034,7 +1034,7 @@ static ssize_t unionfs_write(FAR struct file *filep, FAR const char *buffer,
   FAR const struct mountpt_operations *ops;
   int ret = -EPERM;
 
-  fvdbg("buflen: %lu\n", (unsigned long)buflen);
+  finfo("buflen: %lu\n", (unsigned long)buflen);
 
   /* Recover the open file data from the struct file instance */
 
@@ -1081,7 +1081,7 @@ static off_t unionfs_seek(FAR struct file *filep, off_t offset, int whence)
   FAR const struct mountpt_operations *ops;
   int ret;
 
-  fvdbg("offset: %lu whence: %d\n", (unsigned long)offset, whence);
+  finfo("offset: %lu whence: %d\n", (unsigned long)offset, whence);
 
   /* Recover the open file data from the struct file instance */
 
@@ -1157,7 +1157,7 @@ static int unionfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   FAR const struct mountpt_operations *ops;
   int ret = -ENOTTY;
 
-  fvdbg("cmd: %d arg: %lu\n", cmd, arg);
+  finfo("cmd: %d arg: %lu\n", cmd, arg);
 
   /* Recover the open file data from the struct file instance */
 
@@ -1204,7 +1204,7 @@ static int unionfs_sync(FAR struct file *filep)
   FAR const struct mountpt_operations *ops;
   int ret = -EINVAL;
 
-  fvdbg("Entry\n");
+  finfo("Entry\n");
 
   /* Recover the open file data from the struct file instance */
 
@@ -1252,7 +1252,7 @@ static int unionfs_dup(FAR const struct file *oldp, FAR struct file *newp)
   FAR const struct mountpt_operations *ops;
   int ret = -ENOMEM;
 
-  fvdbg("Entry\n");
+  finfo("Entry\n");
 
   /* Recover the open file data from the struct file instance */
 
@@ -1323,7 +1323,7 @@ static int unionfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
   FAR struct fs_dirent_s *lowerdir;
   int ret;
 
-  fvdbg("relpath: \"%s\"\n", relpath ? relpath : "NULL");
+  finfo("relpath: \"%s\"\n", relpath ? relpath : "NULL");
 
   /* Recover the filesystem data from the struct inode instance */
 
@@ -1486,7 +1486,7 @@ static int unionfs_closedir(FAR struct inode *mountpt,
   int ret = OK;
   int i;
 
-  fvdbg("Entry\n");
+  finfo("Entry\n");
 
   /* Recover the union file system data from the struct inode instance */
 
@@ -1638,7 +1638,7 @@ static int unionfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
   DEBUGASSERT(um->um_node != NULL && um->um_node->u.i_mops != NULL);
   ops = um->um_node->u.i_mops;
 
-  fvdbg("fu_ndx: %d\n", fu->fu_ndx);
+  finfo("fu_ndx: %d\n", fu->fu_ndx);
 
   /* Perform the lower level readdir operation */
 
@@ -1819,7 +1819,7 @@ static int unionfs_rewinddir(struct inode *mountpt, struct fs_dirent_s *dir)
   FAR struct fs_unionfsdir_s *fu;
   int ret;
 
-  fvdbg("Entry\n");
+  finfo("Entry\n");
 
   /* Recover the union file system data from the struct inode instance */
 
@@ -1883,7 +1883,7 @@ static int unionfs_unbind(FAR void *handle, FAR struct inode **blkdriver,
 {
   FAR struct unionfs_inode_s *ui;
 
-  fvdbg("Entry\n");
+  finfo("Entry\n");
 
   /* Recover the union file system data from the struct inode instance */
 
@@ -1929,7 +1929,7 @@ static int unionfs_statfs(FAR struct inode *mountpt, FAR struct statfs *buf)
   uint32_t ratiob16;
   int ret;
 
-  fvdbg("Entry\n");
+  finfo("Entry\n");
 
   /* Recover the union file system data from the struct inode instance */
 
@@ -2065,7 +2065,7 @@ static int unionfs_unlink(FAR struct inode *mountpt,
   struct stat buf;
   int ret;
 
-  fvdbg("relpath: %s\n", relpath);
+  finfo("relpath: %s\n", relpath);
 
   /* Recover the union file system data from the struct inode instance */
 
@@ -2137,7 +2137,7 @@ static int unionfs_mkdir(FAR struct inode *mountpt, FAR const char *relpath,
   int ret2;
   int ret;
 
-  fvdbg("relpath: %s\n", relpath);
+  finfo("relpath: %s\n", relpath);
 
   /* Recover the union file system data from the struct inode instance */
 
@@ -2210,7 +2210,7 @@ static int unionfs_rmdir(FAR struct inode *mountpt, FAR const char *relpath)
   int tmp;
   int ret;
 
-  fvdbg("relpath: %s\n", relpath);
+  finfo("relpath: %s\n", relpath);
 
   /* Recover the union file system data from the struct inode instance */
 
@@ -2285,7 +2285,7 @@ static int unionfs_rename(FAR struct inode *mountpt,
   int tmp;
   int ret = -ENOENT;
 
-  fvdbg("oldrelpath: %s newrelpath\n", oldrelpath, newrelpath);
+  finfo("oldrelpath: %s newrelpath\n", oldrelpath, newrelpath);
 
   /* Recover the union file system data from the struct inode instance */
 
@@ -2359,7 +2359,7 @@ static int unionfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
   FAR struct unionfs_mountpt_s *um;
   int ret;
 
-  fvdbg("relpath: %s\n", relpath);
+  finfo("relpath: %s\n", relpath);
 
   /* Recover the union file system data from the struct inode instance */
 
@@ -2512,7 +2512,7 @@ int unionfs_mount(FAR const char *fspath1, FAR const char *prefix1,
   ui = (FAR struct unionfs_inode_s *)kmm_zalloc(sizeof(struct unionfs_inode_s));
   if (!ui)
     {
-      fdbg("ERROR: Failed to allocated union FS state structure\n");
+      ferr("ERROR: Failed to allocated union FS state structure\n");
       return -ENOMEM;
     }
 
@@ -2523,14 +2523,14 @@ int unionfs_mount(FAR const char *fspath1, FAR const char *prefix1,
   ret = unionfs_getmount(fspath1, &ui->ui_fs[0].um_node);
   if (ret < 0)
     {
-      fdbg("ERROR: unionfs_getmount(fspath1) failed: %d\n", ret);
+      ferr("ERROR: unionfs_getmount(fspath1) failed: %d\n", ret);
       goto errout_with_uinode;
     }
 
   ret = unionfs_getmount(fspath2, &ui->ui_fs[1].um_node);
   if (ret < 0)
     {
-      fdbg("ERROR: unionfs_getmount(fspath2) failed: %d\n", ret);
+      ferr("ERROR: unionfs_getmount(fspath2) failed: %d\n", ret);
       goto errout_with_fs1;
     }
 
@@ -2541,7 +2541,7 @@ int unionfs_mount(FAR const char *fspath1, FAR const char *prefix1,
       ui->ui_fs[0].um_prefix = strdup(prefix1);
       if (ui->ui_fs[0].um_prefix == NULL)
         {
-          fdbg("ERROR: strdup(prefix1) failed\n");
+          ferr("ERROR: strdup(prefix1) failed\n");
           ret = -ENOMEM;
           goto errout_with_fs2;
         }
@@ -2552,7 +2552,7 @@ int unionfs_mount(FAR const char *fspath1, FAR const char *prefix1,
       ui->ui_fs[1].um_prefix = strdup(prefix2);
       if (ui->ui_fs[1].um_prefix == NULL)
         {
-          fdbg("ERROR: strdup(prefix2) failed\n");
+          ferr("ERROR: strdup(prefix2) failed\n");
           ret = -ENOMEM;
           goto errout_with_prefix1;
         }
@@ -2580,7 +2580,7 @@ int unionfs_mount(FAR const char *fspath1, FAR const char *prefix1,
        *  -ENOMEM - Failed to allocate in-memory resources for the operation
        */
 
-      fdbg("ERROR: Failed to reserve inode\n");
+      ferr("ERROR: Failed to reserve inode\n");
       goto errout_with_semaphore;
     }
 

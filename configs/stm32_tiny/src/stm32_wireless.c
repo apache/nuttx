@@ -79,7 +79,7 @@ static xcpt_t g_isr;
 
 static int stm32tiny_wl_irq_attach(xcpt_t isr)
 {
-  vdbg("Attach IRQ\n");
+  _info("Attach IRQ\n");
   g_isr = isr;
   stm32_gpiosetevent(GPIO_NRF24L01_IRQ, false, true, false, g_isr);
   return OK;
@@ -87,7 +87,7 @@ static int stm32tiny_wl_irq_attach(xcpt_t isr)
 
 static void stm32tiny_wl_chip_enable(bool enable)
 {
-  vdbg("CE:%d\n", enable);
+  _info("CE:%d\n", enable);
   stm32_gpiowrite(GPIO_NRF24L01_CE, enable);
 }
 
@@ -114,14 +114,14 @@ void stm32_wlinitialize(void)
   spidev = stm32_spibus_initialize(2);
   if (!spidev)
     {
-      dbg("Failed to initialize SPI bus\n");
+      _err("ERROR: Failed to initialize SPI bus\n");
       return;
     }
 
   result = nrf24l01_register(spidev, &nrf_cfg);
   if (result != OK)
     {
-      dbg("Failed to register initialize SPI bus\n");
+      _err("ERROR: Failed to register initialize SPI bus\n");
       return;
     }
 }

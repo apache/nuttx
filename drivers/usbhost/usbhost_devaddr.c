@@ -296,7 +296,7 @@ int usbhost_devaddr_create(FAR struct usbhost_hubport_s *hport)
 
   if (devaddr < 0)
     {
-      udbg("ERROR: Failed to allocate a device address\n");
+      uerr("ERROR: Failed to allocate a device address\n");
     }
 
   return devaddr;

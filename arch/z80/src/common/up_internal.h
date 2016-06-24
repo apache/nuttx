@@ -51,6 +51,10 @@
 #undef  CONFIG_SUPPRESS_UART_CONFIG   /* Do not reconfig UART */
 #undef  CONFIG_DUMP_ON_EXIT           /* Dump task state on exit */
 
+#ifndef CONFIG_DEBUG_SCHED_INFO
+#  undef CONFIG_DUMP_ON_EXIT          /* Needs CONFIG_DEBUG_SCHED_INFO */
+#endif
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
@@ -88,7 +92,7 @@
 #  if defined(CONFIG_RAMLOG_CONSOLE)
 #    undef  USE_SERIALDRIVER
 #    undef  CONFIG_DEV_LOWCONSOLE
-#  elif defined(CONFIG_SYSLOG_CONSOLE)
+#  elif defined(CONFIG_CONSOLE_SYSLOG)
 #    undef  USE_SERIALDRIVER
 #    undef  CONFIG_DEV_LOWCONSOLE
 #  elif defined(CONFIG_DEV_LOWCONSOLE)
@@ -173,7 +177,7 @@ void lowconsole_init(void);
 
 /* Defined in drivers/syslog_console.c */
 
-#ifdef CONFIG_SYSLOG_CONSOLE
+#ifdef CONFIG_CONSOLE_SYSLOG
 void syslog_console_init();
 #else
 # define syslog_console_init()

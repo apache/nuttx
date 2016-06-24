@@ -383,6 +383,69 @@ config KINETIS_PIT
 
 endmenu
 
+config KINETIS_FTM0_PWM
+	bool "FTM0 PWM"
+	default n
+	depends on KINETIS_FTM0
+	---help---
+		Reserve timer 0 for use by PWM
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to generate modulated outputs for such things as motor control.  If KINETIS_FTM0
+		is defined then THIS following may also be defined to indicate that
+		the timer is intended to be used for pulsed output modulation.
+
+config KINETIS_FTM0_CHANNEL
+	int "FTM0 PWM Output Channel"
+	default 0
+	range 0 7
+	depends on KINETIS_FTM0_PWM
+	---help---
+		If FTM0 is enabled for PWM usage, you also need specifies the timer output
+		channel {0,..,7}
+
+config KINETIS_FTM1_PWM
+	bool "FTM1 PWM"
+	default n
+	depends on KINETIS_FTM1
+	---help---
+		Reserve timer 1 for use by PWM
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to generate modulated outputs for such things as motor control.  If KINETIS_FTM1
+		is defined then THIS following may also be defined to indicate that
+		the timer is intended to be used for pulsed output modulation.
+
+config KINETIS_FTM1_CHANNEL
+	int "FTM1 PWM Output Channel"
+	default 0
+	range 0 1
+	depends on KINETIS_FTM1_PWM
+	---help---
+		If FTM1 is enabled for PWM usage, you also need specifies the timer output
+		channel {0,..,1}
+
+config KINETIS_FTM2_PWM
+	bool "FTM2 PWM"
+	default n
+	depends on KINETIS_FTM2
+	---help---
+		Reserve timer 2 for use by PWM
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to generate modulated outputs for such things as motor control.  If KINETIS_FTM2
+		is defined then THIS following may also be defined to indicate that
+		the timer is intended to be used for pulsed output modulation.
+
+config KINETIS_FTM2_CHANNEL
+	int "FTM2 PWM Output Channel"
+	default 0
+	range 0 1
+	depends on KINETIS_FTM2_PWM
+	---help---
+		If FTM2 is enabled for PWM usage, you also need specifies the timer output
+		channel {0,..,1}
+
 comment "Kinetis GPIO Interrupt Configuration"
 
 config GPIO_IRQ

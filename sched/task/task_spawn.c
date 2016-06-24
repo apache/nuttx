@@ -155,7 +155,7 @@ static int task_spawn_exec(FAR pid_t *pidp, FAR const char *name,
   if (pid < 0)
     {
       ret = get_errno();
-      sdbg("ERROR: task_create failed: %d\n", ret);
+      serr("ERROR: task_create failed: %d\n", ret);
       goto errout;
     }
 
@@ -252,7 +252,7 @@ static int task_spawn_proxy(int argc, FAR char *argv[])
           int tmp = task_reparent(0, *g_spawn_parms.pid);
           if (tmp < 0)
             {
-              sdbg("ERROR: task_reparent() failed: %d\n", tmp);
+              serr("ERROR: task_reparent() failed: %d\n", tmp);
             }
         }
 #endif
@@ -350,7 +350,7 @@ int task_spawn(FAR pid_t *pid, FAR const char *name, main_t entry,
 #endif
   int ret;
 
-  svdbg("pid=%p name=%s entry=%p file_actions=%p attr=%p argv=%p\n",
+  sinfo("pid=%p name=%s entry=%p file_actions=%p attr=%p argv=%p\n",
         pid, name, entry, file_actions, attr, argv);
 
   /* If there are no file actions to be performed and there is no change to
@@ -399,7 +399,7 @@ int task_spawn(FAR pid_t *pid, FAR const char *name, main_t entry,
     {
       int errcode = get_errno();
 
-      sdbg("ERROR: sched_getparam failed: %d\n", errcode);
+      serr("ERROR: sched_getparam failed: %d\n", errcode);
       spawn_semgive(&g_spawn_parmsem);
       return errcode;
     }
@@ -425,7 +425,7 @@ int task_spawn(FAR pid_t *pid, FAR const char *name, main_t entry,
   if (proxy < 0)
     {
       ret = get_errno();
-      sdbg("ERROR: Failed to start task_spawn_proxy: %d\n", ret);
+      serr("ERROR: Failed to start task_spawn_proxy: %d\n", ret);
 
       goto errout_with_lock;
     }
@@ -436,7 +436,7 @@ int task_spawn(FAR pid_t *pid, FAR const char *name, main_t entry,
   ret = waitpid(proxy, &status, 0);
   if (ret < 0)
     {
-      sdbg("ERROR: waitpid() failed: %d\n", errno);
+      serr("ERROR: waitpid() failed: %d\n", errno);
       goto errout_with_lock;
     }
 #else

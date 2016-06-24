@@ -108,7 +108,7 @@ int board_tsc_setup(int minor)
   static bool initialized = false;
   int ret;
 
-  idbg("initialized:%d minor:%d\n", initialized, minor);
+  iinfo("initialized:%d minor:%d\n", initialized, minor);
   DEBUGASSERT(minor == 0);
 
   /* Since there is no uninitialized logic, this initialization can be
@@ -122,7 +122,7 @@ int board_tsc_setup(int minor)
       adc = sam_adc_initialize();
       if (!adc)
         {
-          idbg("ERROR: Failed to initialize the ADC driver\n");
+          ierr("ERROR: Failed to initialize the ADC driver\n");
           return -ENODEV;
         }
 
@@ -131,7 +131,7 @@ int board_tsc_setup(int minor)
       ret = sam_tsd_register(adc, CONFIG_SAMA5D3xEK_TSD_DEVMINOR);
       if (ret < 0)
         {
-          idbg("ERROR: Failed to register touchscreen device /dev/input%d: %d\n",
+          ierr("ERROR: Failed to register touchscreen device /dev/input%d: %d\n",
                CONFIG_SAMA5D3xEK_TSD_DEVMINOR, ret);
           return -ENODEV;
         }

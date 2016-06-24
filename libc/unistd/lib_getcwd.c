@@ -99,7 +99,7 @@ FAR char *getcwd(FAR char *buf, size_t size)
 
   /* Verify input parameters */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!buf || !size)
     {
       set_errno(EINVAL);

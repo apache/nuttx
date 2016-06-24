@@ -167,7 +167,7 @@ bool sam_cardinserted_internal(struct sam_hsmci_state_s *state)
   /* Get the state of the PIO pin */
 
   inserted = sam_pioread(state->cdcfg);
-  fllvdbg("Slot %d inserted: %s\n", state->slotno, inserted ? "NO" : "YES");
+  finfo("Slot %d inserted: %s\n", state->slotno, inserted ? "NO" : "YES");
   return !inserted;
 }
 
@@ -300,7 +300,7 @@ int sam_hsmci_initialize(int slotno, int minor)
   state = sam_hsmci_state(slotno);
   if (!state)
     {
-      fdbg("ERROR: No state for slotno %d\n", slotno);
+      ferr("ERROR: No state for slotno %d\n", slotno);
       return -EINVAL;
     }
 
@@ -321,7 +321,7 @@ int sam_hsmci_initialize(int slotno, int minor)
   state->hsmci = sdio_initialize(slotno);
   if (!state->hsmci)
     {
-      fdbg("ERROR: Failed to initialize SDIO slot %d\n",  slotno);
+      ferr("ERROR: Failed to initialize SDIO slot %d\n",  slotno);
       return -ENODEV;
     }
 
@@ -330,7 +330,7 @@ int sam_hsmci_initialize(int slotno, int minor)
   ret = mmcsd_slotinitialize(minor, state->hsmci);
   if (ret != OK)
     {
-      fdbg("ERROR: Failed to bind SDIO to the MMC/SD driver: %d\n", ret);
+      ferr("ERROR: Failed to bind SDIO to the MMC/SD driver: %d\n", ret);
       return ret;
     }
 
@@ -367,7 +367,7 @@ bool sam_cardinserted(int slotno)
   state = sam_hsmci_state(slotno);
   if (!state)
     {
-      fdbg("ERROR: No state for slotno %d\n", slotno);
+      ferr("ERROR: No state for slotno %d\n", slotno);
       return false;
     }
 

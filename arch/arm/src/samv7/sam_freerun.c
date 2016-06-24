@@ -124,7 +124,7 @@ int sam_freerun_initialize(struct sam_freerun_s *freerun, int chan,
   uint32_t cmr;
   int ret;
 
-  tcvdbg("chan=%d resolution=%d usec\n", chan, resolution);
+  tmrinfo("chan=%d resolution=%d usec\n", chan, resolution);
   DEBUGASSERT(freerun && resolution > 0);
 
   /* Get the TC frequency the corresponds to the requested resolution */
@@ -136,13 +136,13 @@ int sam_freerun_initialize(struct sam_freerun_s *freerun, int chan,
   ret = sam_tc_clockselect(frequency, &cmr, &actual);
   if (ret < 0)
     {
-      tcdbg("ERROR: sam_tc_clockselect failed: %d\n", ret);
+      tmrerr("ERROR: sam_tc_clockselect failed: %d\n", ret);
       return ret;
     }
 
-  tcvdbg("frequency=%lu, actual=%lu, cmr=%08lx\n",
-         (unsigned long)frequency, (unsigned long)actual,
-         (unsigned long)cmr);
+  tmrinfo("frequency=%lu, actual=%lu, cmr=%08lx\n",
+          (unsigned long)frequency, (unsigned long)actual,
+          (unsigned long)cmr);
 
   /* Allocate the timer/counter and select its mode of operation
    *
@@ -175,7 +175,7 @@ int sam_freerun_initialize(struct sam_freerun_s *freerun, int chan,
   freerun->tch = sam_tc_allocate(chan, cmr);
   if (!freerun->tch)
     {
-      tcdbg("ERROR: Failed to allocate timer channel %d\n", chan);
+      tmrerr("ERROR: Failed to allocate timer channel %d\n", chan);
       return -EBUSY;
     }
 
@@ -260,9 +260,9 @@ int sam_freerun_counter(struct sam_freerun_s *freerun, struct timespec *ts)
 
   leave_critical_section(flags);
 
-  tcvdbg("counter=%lu (%lu) overflow=%lu, sr=%08lx\n",
-         (unsigned long)counter,  (unsigned long)verify,
-         (unsigned long)overflow, (unsigned long)sr);
+  tmrinfo("counter=%lu (%lu) overflow=%lu, sr=%08lx\n",
+          (unsigned long)counter,  (unsigned long)verify,
+          (unsigned long)overflow, (unsigned long)sr);
 
   /* Convert the whole thing to units of microseconds.
    *
@@ -280,7 +280,7 @@ int sam_freerun_counter(struct sam_freerun_s *freerun, struct timespec *ts)
   ts->tv_sec  = sec;
   ts->tv_nsec = (usec - (sec * USEC_PER_SEC)) * NSEC_PER_USEC;
 
-  tcvdbg("usec=%llu ts=(%lu, %lu)\n",
+  tmrinfo("usec=%llu ts=(%lu, %lu)\n",
           usec, (unsigned long)ts->tv_sec, (unsigned long)ts->tv_nsec);
 
   return OK;

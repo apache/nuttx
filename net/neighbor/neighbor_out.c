@@ -227,7 +227,7 @@ void neighbor_out(FAR struct net_driver_s *dev)
       naddr = neighbor_lookup(ipaddr);
       if (!naddr)
         {
-           nllvdbg("IPv6 Neighbor solicitation for IPv6\n");
+           ninfo("IPv6 Neighbor solicitation for IPv6\n");
 
           /* The destination address was not in our Neighbor Table, so we
            * overwrite the IPv6 packet with an ICMDv6 Neighbor Solicitation
@@ -253,6 +253,6 @@ void neighbor_out(FAR struct net_driver_s *dev)
    */
 
   dev->d_len += netdev_ipv6_hdrlen(dev);
-  nllvdbg("Outgoing IPv6 Packet length: %d (%d)\n",
+  ninfo("Outgoing IPv6 Packet length: %d (%d)\n",
           dev->d_len, (ip->len[0] << 8) | ip->len[1]);
 }

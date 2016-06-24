@@ -95,12 +95,12 @@ config NETDEV_LATEINIT
 
 config NET_DUMPPACKET
 	bool "Enable packet dumping"
-	depends on DEBUG
+	depends on DEBUG_FEATURES
 	default n
 	---help---
 		Some Ethernet MAC drivers supporting dumping of received and
 		transmitted packets as a debug option.  This setting enables that
-		debug option. Also needs DEBUG.
+		debug option. Also needs CONFIG_DEBUG_FEATURES.
 
 comment "External Ethernet MAC Device Support"
 
@@ -234,9 +234,10 @@ config ENC28J60_DUMPPACKET
 config ENC28J60_REGDEBUG
 	bool "Register-Level Debug"
 	default n
-	depends on DEBUG && DEBUG_NET
+	depends on DEBUG_FEATURES && DEBUG_NET
 	---help---
-		Enable very low-level register access debug.  Depends on DEBUG and DEBUG_NET.
+		Enable very low-level register access debug.  Depends on
+		CONFIG_DEBUG_FEATURES and CONFIG_DEBUG_NET.
 
 endif # ENC28J60
 
@@ -296,9 +297,10 @@ config ENCX24J600_DUMPPACKET
 config ENCX24J600_REGDEBUG
 	bool "Register-Level Debug"
 	default n
-	depends on DEBUG && DEBUG_NET
+	depends on DEBUG_FEATURES && DEBUG_NET
 	---help---
-		Enable very low-level register access debug.  Depends on DEBUG and DEBUG_NET.
+		Enable very low-level register access debug.  Depends on
+		CONFIG_DEBUG_FEATURES and CONFIG_DEBUG_NET.
 
 endif # ENCX24J600
 
@@ -495,12 +497,12 @@ endchoice
 config NETDEV_PHY_DEBUG
 	bool "PHY debug"
 	default n
-	depends on DEBUG
+	depends on DEBUG_FEATURES
 	---help---
 		Normally debug output is controlled by DEBUG_NET.  However, that
-		may generate a LOT of debug output, especially if DEBUG_VERBOSE is
+		may generate a LOT of debug output, especially if CONFIG_DEBUG_INFO is
 		also selected.  This option is intended to force VERVOSE debug
-		output from certain PHY-related even if DEBUG_NET or DEBUG_VERBOSE
+		output from certain PHY-related even if DEBUG_NET or CONFIG_DEBUG_INFO
 		are not selected.  This allows for focused, unit-level debug of
 		the NSH network initialization logic.
 

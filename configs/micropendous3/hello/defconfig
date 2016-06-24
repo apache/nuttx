@@ -42,7 +42,7 @@ CONFIG_INTELHEX_BINARY=y
 #
 # Debug Options
 #
-# CONFIG_DEBUG is not set
+# CONFIG_DEBUG_FEATURES is not set
 CONFIG_ARCH_HAVE_STACKCHECK=y
 # CONFIG_ARCH_HAVE_HEAPCHECK is not set
 # CONFIG_DEBUG_SYMBOLS is not set
@@ -306,7 +306,6 @@ CONFIG_DISABLE_PSEUDOFS_OPERATIONS=y
 # System Logging
 #
 
-# CONFIG_SYSLOG is not set
 
 #
 # Graphics Support

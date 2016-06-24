@@ -228,7 +228,7 @@ static int bat_charger_ioctl(FAR struct file *filep, int cmd,
         break;
 
       default:
-        dbg("Unrecognized cmd: %d\n", cmd);
+        _err("ERROR: Unrecognized cmd: %d\n", cmd);
         ret = -ENOTTY;
         break;
     }
@@ -268,7 +268,7 @@ int battery_charger_register(FAR const char *devpath,
   ret = register_driver(devpath, &g_batteryops, 0555, dev);
   if (ret < 0)
     {
-      dbg("Failed to register driver: %d\n", ret);
+      _err("ERROR: Failed to register driver: %d\n", ret);
     }
 
   return ret;

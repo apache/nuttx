@@ -101,7 +101,7 @@ int stmpe811_adcinitialize(STMPE811_HANDLE handle)
   if (ret < 0)
     {
       int errval = errno;
-      idbg("sem_wait failed: %d\n", errval);
+      ierr("ERROR: sem_wait failed: %d\n", errval);
       return -errval;
     }
 
@@ -161,7 +161,7 @@ int stmpe811_adcconfig(STMPE811_HANDLE handle, int pin)
   if (ret < 0)
     {
       int errval = errno;
-      idbg("sem_wait failed: %d\n", errval);
+      ierr("ERROR: sem_wait failed: %d\n", errval);
       return -errval;
     }
 
@@ -169,7 +169,7 @@ int stmpe811_adcconfig(STMPE811_HANDLE handle, int pin)
 
   if ((priv->inuse & pinmask) != 0)
     {
-      idbg("PIN%d is already in-use\n", pin);
+      ierr("ERROR: PIN%d is already in-use\n", pin);
       sem_post(&priv->exclsem);
       return -EBUSY;
     }
@@ -221,7 +221,7 @@ uint16_t stmpe811_adcread(STMPE811_HANDLE handle, int pin)
   if (ret < 0)
     {
       int errval = errno;
-      idbg("sem_wait failed: %d\n", errval);
+      ierr("ERROR: sem_wait failed: %d\n", errval);
       return -errval;
     }
 

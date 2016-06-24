@@ -438,8 +438,8 @@ CONFIGURATION
           debug output can be enabled with:
 
           Build Setup:
-            CONFIG_DEBUG=y                    : Enable debug features
-            CONFIG_DEBUG_VERBOSE=y            : Enable verbose debug output
+            CONFIG_DEBUG_FEATURES=y           : Enable debug features
+            CONFIG_DEBUG_INFO=y               : Enable verbose debug output
             CONFIG_DEBUG_INPUT=y              : Enable debug output from input devices
 
        c) You will also have to disable SD card support to use this test.  The
@@ -463,8 +463,8 @@ CONFIGURATION
           For touchscreen debug output:
 
           Build Setup:
-            CONFIG_DEBUG=y
-            CONFIG_DEBUG_VERBOSE=y
+            CONFIG_DEBUG_FEATURES=y
+            CONFIG_DEBUG_INFO=y
             CONFIG_DEBUG_INPUT=y
 
     7. The button test (apps/examples/buttons) can be built-in by adding

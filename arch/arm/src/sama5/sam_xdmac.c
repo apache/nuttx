@@ -807,7 +807,7 @@ static uint8_t sam_channel(uint8_t pid, const struct sam_pidmap_s *table,
         }
     }
 
-  dmadbg("No channel found for pid %d\n", pid);
+  dmaerr("ERROR: No channel found for pid %d\n", pid);
   DEBUGPANIC();
   return 0x3f;
 }
@@ -1330,7 +1330,7 @@ sam_allocdesc(struct sam_xdmach_s *xdmach, struct chnext_view1_s *prev,
    * Obviously setting it to zero would break that usage.
    */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (csa != 0)
 #endif
     {
@@ -1650,7 +1650,7 @@ static inline int sam_single(struct sam_xdmach_s *xdmach)
 static inline int sam_multiple(struct sam_xdmach_s *xdmach)
 {
   struct sam_xdmac_s *xdmac = sam_controller(xdmach);
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_ASSERTIONS
   struct chnext_view1_s *llhead = xdmach->llhead;
 #endif
   uintptr_t paddr;
@@ -1860,7 +1860,7 @@ static int sam_xdmac_interrupt(struct sam_xdmac_s *xdmac)
             {
               /* Yes... Terminate the transfer with an error? */
 
-              dmalldbg("ERROR: DMA failed: %08x\n", chpending);
+              dmaerr("ERROR: DMA failed: %08x\n", chpending);
               sam_dmaterminate(xdmach, -EIO);
             }
 
@@ -1877,7 +1877,7 @@ static int sam_xdmac_interrupt(struct sam_xdmac_s *xdmac)
 
           else
             {
-              dmalldbg("ERROR: Unexpected interrupt: %08x\n", chpending);
+              dmaerr("ERROR: Unexpected interrupt: %08x\n", chpending);
               DEBUGPANIC();
             }
 
@@ -1957,7 +1957,7 @@ void sam_dmainitialize(struct sam_xdmac_s *xdmac)
 void weak_function up_dmainitialize(void)
 {
 #ifdef CONFIG_SAMA5_XDMAC0
-  dmallvdbg("Initialize XDMAC0\n");
+  dmainfo("Initialize XDMAC0\n");
 
   /* Enable peripheral clock */
 
@@ -1977,7 +1977,7 @@ void weak_function up_dmainitialize(void)
 #endif
 
 #ifdef CONFIG_SAMA5_XDMAC1
-  dmallvdbg("Initialize XDMAC1\n");
+  dmainfo("Initialize XDMAC1\n");
 
   /* Enable peripheral clock */
 
@@ -2039,7 +2039,7 @@ DMA_HANDLE sam_dmachannel(uint8_t dmacno, uint32_t chflags)
 #endif
 
     {
-      dmadbg("ERROR: Bad XDMAC number: %d\n", dmacno);
+      dmaerr("ERROR: Bad XDMAC number: %d\n", dmacno);
       DEBUGPANIC();
       return (DMA_HANDLE)NULL;
     }
@@ -2083,12 +2083,12 @@ DMA_HANDLE sam_dmachannel(uint8_t dmacno, uint32_t chflags)
 
   if (xdmach)
     {
-      dmavdbg("XDMAC%d CH%d: chflags: %08x returning xdmach: %p\n",
+      dmainfo("XDMAC%d CH%d: chflags: %08x returning xdmach: %p\n",
               (int)dmacno, xdmach->chan, (int)chflags, xdmach);
     }
   else
     {
-      dmadbg("ERROR: Failed allocate XDMAC%d channel\n", (int)dmacno);
+      dmaerr("ERROR: Failed allocate XDMAC%d channel\n", (int)dmacno);
     }
 
   return (DMA_HANDLE)xdmach;
@@ -2119,13 +2119,13 @@ void sam_dmaconfig(DMA_HANDLE handle, uint32_t chflags)
   xdmach->flags = chflags;
 
 #if defined(CONFIG_SAMA5_XDMAC0) && defined(CONFIG_SAMA5_XDMAC1)
-  dmavdbg("XDMAC%d CH%d: chflags: %08x\n",
+  dmainfo("XDMAC%d CH%d: chflags: %08x\n",
           xdmach->xdmac, xdmach->chan, (int)chflags);
 #elif defined(CONFIG_SAMA5_XDMAC0)
-  dmavdbg("XDMAC0 CH%d: chflags: %08x\n",
+  dmainfo("XDMAC0 CH%d: chflags: %08x\n",
           xdmach->chan, (int)chflags);
 #else
-  dmavdbg("XDMAC1 CH%d: chflags: %08x\n",
+  dmainfo("XDMAC1 CH%d: chflags: %08x\n",
           xdmach->chan, (int)chflags);
 #endif
 }
@@ -2148,7 +2148,7 @@ void sam_dmafree(DMA_HANDLE handle)
   struct sam_xdmach_s *xdmach = (struct sam_xdmach_s *)handle;
   struct sam_xdmac_s *xdmac;
 
-  dmavdbg("xdmach: %p\n", xdmach);
+  dmainfo("xdmach: %p\n", xdmach);
   DEBUGASSERT((xdmach != NULL) && (xdmach->inuse));
 
   xdmac = sam_controller(xdmach);
@@ -2186,10 +2186,10 @@ int sam_dmatxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
   size_t remaining;
   int ret = OK;
 
-  dmavdbg("xdmach: %p paddr: %08x maddr: %08x nbytes: %d\n",
+  dmainfo("xdmach: %p paddr: %08x maddr: %08x nbytes: %d\n",
           xdmach, (int)paddr, (int)maddr, (int)nbytes);
   DEBUGASSERT(xdmach);
-  dmavdbg("llhead: %p lltail: %p\n", xdmach->llhead, xdmach->lltail);
+  dmainfo("llhead: %p lltail: %p\n", xdmach->llhead, xdmach->lltail);
 
   /* The maximum transfer size in bytes depends upon the maximum number of
    * transfers and the number of bytes per transfer.
@@ -2265,10 +2265,10 @@ int sam_dmarxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
   size_t remaining;
   int ret = OK;
 
-  dmavdbg("xdmach: %p paddr: %08x maddr: %08x nbytes: %d\n",
+  dmainfo("xdmach: %p paddr: %08x maddr: %08x nbytes: %d\n",
           xdmach, (int)paddr, (int)maddr, (int)nbytes);
   DEBUGASSERT(xdmach);
-  dmavdbg("llhead: %p lltail: %p\n", xdmach->llhead, xdmach->lltail);
+  dmainfo("llhead: %p lltail: %p\n", xdmach->llhead, xdmach->lltail);
 
   /* The maximum transfer size in bytes depends upon the maximum number of
    * transfers and the number of bytes per transfer.
@@ -2340,7 +2340,7 @@ int sam_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg)
   struct sam_xdmach_s *xdmach = (struct sam_xdmach_s *)handle;
   int ret = -EINVAL;
 
-  dmavdbg("xdmach: %p callback: %p arg: %p\n", xdmach, callback, arg);
+  dmainfo("xdmach: %p callback: %p arg: %p\n", xdmach, callback, arg);
   DEBUGASSERT(xdmach != NULL);
 
   /* Verify that the DMA has been setup (i.e., at least one entry in the
@@ -2384,7 +2384,7 @@ void sam_dmastop(DMA_HANDLE handle)
   struct sam_xdmach_s *xdmach = (struct sam_xdmach_s *)handle;
   irqstate_t flags;
 
-  dmavdbg("xdmach: %p\n", xdmach);
+  dmainfo("xdmach: %p\n", xdmach);
   DEBUGASSERT(xdmach != NULL);
 
   flags = enter_critical_section();
@@ -2403,7 +2403,7 @@ void sam_dmastop(DMA_HANDLE handle)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG_DMA
+#ifdef CONFIG_DEBUG_DMA_INFO
 void sam_dmasample(DMA_HANDLE handle, struct sam_dmaregs_s *regs)
 {
   struct sam_xdmach_s *xdmach = (struct sam_xdmach_s *)handle;
@@ -2445,7 +2445,7 @@ void sam_dmasample(DMA_HANDLE handle, struct sam_dmaregs_s *regs)
 
   leave_critical_section(flags);
 }
-#endif /* CONFIG_DEBUG_DMA */
+#endif /* CONFIG_DEBUG_DMA_INFO */
 
 /****************************************************************************
  * Name: sam_dmadump
@@ -2458,37 +2458,37 @@ void sam_dmasample(DMA_HANDLE handle, struct sam_dmaregs_s *regs)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG_DMA
+#ifdef CONFIG_DEBUG_DMA_INFO
 void sam_dmadump(DMA_HANDLE handle, const struct sam_dmaregs_s *regs,
                  const char *msg)
 {
   struct sam_xdmach_s *xdmach = (struct sam_xdmach_s *)handle;
   struct sam_xdmac_s *xdmac = sam_controller(xdmach);
 
-  dmadbg("%s\n", msg);
-  dmadbg("  DMA Global Registers:\n");
-  dmadbg("     GTYPE[%08x]: %08x\n", xdmac->base + SAM_XDMAC_GTYPE_OFFSET, regs->gtype);
-  dmadbg("      GCFG[%08x]: %08x\n", xdmac->base + SAM_XDMAC_GCFG_OFFSET, regs->gcfg);
-  dmadbg("      GWAC[%08x]: %08x\n", xdmac->base + SAM_XDMAC_GWAC_OFFSET, regs->gwac);
-  dmadbg("       GIM[%08x]: %08x\n", xdmac->base + SAM_XDMAC_GIM_OFFSET, regs->gim);
-  dmadbg("       GIS[%08x]: %08x\n", xdmac->base + SAM_XDMAC_GIS_OFFSET, regs->gis);
-  dmadbg("        GS[%08x]: %08x\n", xdmac->base + SAM_XDMAC_GS_OFFSET, regs->gs);
-  dmadbg("       GRS[%08x]: %08x\n", xdmac->base + SAM_XDMAC_GRS_OFFSET, regs->grs);
-  dmadbg("       GWS[%08x]: %08x\n", xdmac->base + SAM_XDMAC_GWS_OFFSET, regs->gws);
-  dmadbg("      GSWS[%08x]: %08x\n", xdmac->base + SAM_XDMAC_GSWS_OFFSET, regs->gsws);
-  dmadbg("  DMA Channel Registers:\n");
-  dmadbg("       CIM[%08x]: %08x\n", xdmach->base + SAM_XDMACH_CIM_OFFSET, regs->cim);
-  dmadbg("       CIS[%08x]: %08x\n", xdmach->base + SAM_XDMACH_CIS_OFFSET, regs->cis);
-  dmadbg("       CSA[%08x]: %08x\n", xdmach->base + SAM_XDMACH_CSA_OFFSET, regs->csa);
-  dmadbg("       CDA[%08x]: %08x\n", xdmach->base + SAM_XDMACH_CDA_OFFSET, regs->cda);
-  dmadbg("      CNDA[%08x]: %08x\n", xdmach->base + SAM_XDMACH_CNDA_OFFSET, regs->cnda);
-  dmadbg("      CNDC[%08x]: %08x\n", xdmach->base + SAM_XDMACH_CNDC_OFFSET, regs->cndc);
-  dmadbg("      CUBC[%08x]: %08x\n", xdmach->base + SAM_XDMACH_CUBC_OFFSET, regs->cubc);
-  dmadbg("       CBC[%08x]: %08x\n", xdmach->base + SAM_XDMACH_CBC_OFFSET, regs->cbc);
-  dmadbg("        CC[%08x]: %08x\n", xdmach->base + SAM_XDMACH_CC_OFFSET, regs->cc);
-  dmadbg("    CDSMSP[%08x]: %08x\n", xdmach->base + SAM_XDMACH_CDSMSP_OFFSET, regs->cdsmsp);
-  dmadbg("      CSUS[%08x]: %08x\n", xdmach->base + SAM_XDMACH_CSUS_OFFSET, regs->csus);
-  dmadbg("      CDUS[%08x]: %08x\n", xdmach->base + SAM_XDMACH_CDUS_OFFSET, regs->cdus);
+  dmainfo("%s\n", msg);
+  dmainfo("  DMA Global Registers:\n");
+  dmainfo("     GTYPE[%08x]: %08x\n", xdmac->base + SAM_XDMAC_GTYPE_OFFSET, regs->gtype);
+  dmainfo("      GCFG[%08x]: %08x\n", xdmac->base + SAM_XDMAC_GCFG_OFFSET, regs->gcfg);
+  dmainfo("      GWAC[%08x]: %08x\n", xdmac->base + SAM_XDMAC_GWAC_OFFSET, regs->gwac);
+  dmainfo("       GIM[%08x]: %08x\n", xdmac->base + SAM_XDMAC_GIM_OFFSET, regs->gim);
+  dmainfo("       GIS[%08x]: %08x\n", xdmac->base + SAM_XDMAC_GIS_OFFSET, regs->gis);
+  dmainfo("        GS[%08x]: %08x\n", xdmac->base + SAM_XDMAC_GS_OFFSET, regs->gs);
+  dmainfo("       GRS[%08x]: %08x\n", xdmac->base + SAM_XDMAC_GRS_OFFSET, regs->grs);
+  dmainfo("       GWS[%08x]: %08x\n", xdmac->base + SAM_XDMAC_GWS_OFFSET, regs->gws);
+  dmainfo("      GSWS[%08x]: %08x\n", xdmac->base + SAM_XDMAC_GSWS_OFFSET, regs->gsws);
+  dmainfo("  DMA Channel Registers:\n");
+  dmainfo("       CIM[%08x]: %08x\n", xdmach->base + SAM_XDMACH_CIM_OFFSET, regs->cim);
+  dmainfo("       CIS[%08x]: %08x\n", xdmach->base + SAM_XDMACH_CIS_OFFSET, regs->cis);
+  dmainfo("       CSA[%08x]: %08x\n", xdmach->base + SAM_XDMACH_CSA_OFFSET, regs->csa);
+  dmainfo("       CDA[%08x]: %08x\n", xdmach->base + SAM_XDMACH_CDA_OFFSET, regs->cda);
+  dmainfo("      CNDA[%08x]: %08x\n", xdmach->base + SAM_XDMACH_CNDA_OFFSET, regs->cnda);
+  dmainfo("      CNDC[%08x]: %08x\n", xdmach->base + SAM_XDMACH_CNDC_OFFSET, regs->cndc);
+  dmainfo("      CUBC[%08x]: %08x\n", xdmach->base + SAM_XDMACH_CUBC_OFFSET, regs->cubc);
+  dmainfo("       CBC[%08x]: %08x\n", xdmach->base + SAM_XDMACH_CBC_OFFSET, regs->cbc);
+  dmainfo("        CC[%08x]: %08x\n", xdmach->base + SAM_XDMACH_CC_OFFSET, regs->cc);
+  dmainfo("    CDSMSP[%08x]: %08x\n", xdmach->base + SAM_XDMACH_CDSMSP_OFFSET, regs->cdsmsp);
+  dmainfo("      CSUS[%08x]: %08x\n", xdmach->base + SAM_XDMACH_CSUS_OFFSET, regs->csus);
+  dmainfo("      CDUS[%08x]: %08x\n", xdmach->base + SAM_XDMACH_CDUS_OFFSET, regs->cdus);
 }
-#endif /* CONFIG_DEBUG_DMA */
+#endif /* CONFIG_DEBUG_DMA_INFO */
 #endif /* CONFIG_SAMA5_XDMAC0 || CONFIG_SAMA5_XDMAC1 */

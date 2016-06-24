@@ -33,7 +33,7 @@ menu "Z16F ESPI Configuration"
 config Z16F_ESPI_REGDEBUG
 	bool "ESPI register-level debug"
 	default n
-	depends on DEBUG
+	depends on DEBUG_FEATURES
 
 endmenu # Z16F ESPI Configuration
 endif # ARCH_CHIP_Z16F

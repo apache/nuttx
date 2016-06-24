@@ -79,8 +79,8 @@ Status
   configuration that I used for testing.  I enabled DEBUG output, ran with
   only 2 CPUS, and disabled the RAMLOG:
 
-    +CONFIG_DEBUG=y
-    +CONFIG_DEBUG_VERBOSE=y
+    +CONFIG_DEBUG_FEATURES=y
+    +CONFIG_DEBUG_INFO=y
     +CONFIG_DEBUG_SCHED=y
     +CONFIG_DEBUG_SYMBOLS=y
 
@@ -95,34 +95,11 @@ Status
     -CONFIG_RAMLOG_BUFSIZE=16384
     -CONFIG_RAMLOG_NONBLOCKING=y
     -CONFIG_RAMLOG_NPOLLWAITERS=4
-    -CONFIG_SYSLOG=y
 
   I would also disable debug output from CPU0 so that I could better see the
-  debug output from CPU1:
+  debug output from CPU1.  In drivers/syslog/vsyslog.c:
 
-    $ diff -u libc/syslog/lib_lowsyslog.c libc/syslog/lib_lowsyslog.c.SAVE
-    --- libc/syslog/lib_lowsyslog.c 2016-05-22 14:56:35.130096500 -0600
-    +++ libc/syslog/lib_lowsyslog.c.SAVE    2016-05-20 13:36:22.588330100 -0600
-    @@ -126,7 +126,0 @@
-     {
-       va_list ap;
-       int ret;
     +if (up_cpu_index() == 0) return 17; // REMOVE ME
-      
-       /* Let lowvsyslog do the work */
-    
-       va_start(ap, fmt);
-  
-    $ diff -u libc/syslog/lib_syslog.c libc/syslog/lib_syslog.c.SAVE
-    --- libc/syslog/lib_syslog.c    2016-05-22 14:56:35.156098100 -0600
-    +++ libc/syslog/lib_syslog.c.SAVE       2016-05-20 13:36:15.331284000 -0600
-    @@ -192,6 +192,7 @@
-     {
-       va_list ap;
-       int ret;
-    +if (up_cpu_index() == 0) return 17; // REMOVE ME
-    
-       /* Let vsyslog do the work */
 
 Platform Features
 =================
@@ -653,7 +630,6 @@ Configuration sub-directories
        RAMLOG and will not be visible unless you use the nsh 'dmesg'
        command.  To disable this RAMLOG feature, disable the following:
 
-       File Systems:    CONFIG_SYSLOG
        Device Drivers:  CONFIG_RAMLOG
 
 

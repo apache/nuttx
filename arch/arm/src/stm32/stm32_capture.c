@@ -185,7 +185,7 @@ static inline uint32_t stm32_cap_gpio(FAR const struct stm32_cap_priv_s *priv,
 {
   switch(priv->base)
     {
-#ifdef CONFIG_STM32_TIM1
+#ifdef CONFIG_STM32_TIM1_CAP
       case STM32_TIM1_BASE:
         switch (channel)
           {
@@ -212,7 +212,7 @@ static inline uint32_t stm32_cap_gpio(FAR const struct stm32_cap_priv_s *priv,
           }
         break;
 #endif
-#ifdef CONFIG_STM32_TIM2
+#ifdef CONFIG_STM32_TIM2_CAP
       case STM32_TIM2_BASE:
         switch (channel)
           {
@@ -239,7 +239,7 @@ static inline uint32_t stm32_cap_gpio(FAR const struct stm32_cap_priv_s *priv,
           }
         break;
 #endif
-#ifdef CONFIG_STM32_TIM3
+#ifdef CONFIG_STM32_TIM3_CAP
       case STM32_TIM3_BASE:
         switch (channel)
           {
@@ -266,7 +266,7 @@ static inline uint32_t stm32_cap_gpio(FAR const struct stm32_cap_priv_s *priv,
           }
         break;
 #endif
-#ifdef CONFIG_STM32_TIM4
+#ifdef CONFIG_STM32_TIM4_CAP
       case STM32_TIM4_BASE:
         switch (channel)
           {
@@ -293,7 +293,7 @@ static inline uint32_t stm32_cap_gpio(FAR const struct stm32_cap_priv_s *priv,
           }
         break;
 #endif
-#ifdef CONFIG_STM32_TIM5
+#ifdef CONFIG_STM32_TIM5_CAP
       case STM32_TIM5_BASE:
         switch (channel)
           {
@@ -323,7 +323,7 @@ static inline uint32_t stm32_cap_gpio(FAR const struct stm32_cap_priv_s *priv,
 
 /* TIM6 and TIM7 cannot be used in capture */
 
-#ifdef CONFIG_STM32_TIM8
+#ifdef CONFIG_STM32_TIM8_CAP
       case STM32_TIM8_BASE:
         switch (channel)
           {
@@ -351,7 +351,7 @@ static inline uint32_t stm32_cap_gpio(FAR const struct stm32_cap_priv_s *priv,
         break;
 #endif
 
-#ifdef CONFIG_STM32_TIM9
+#ifdef CONFIG_STM32_TIM9_CAP
       case STM32_TIM9_BASE:
         switch (channel)
           {
@@ -379,7 +379,7 @@ static inline uint32_t stm32_cap_gpio(FAR const struct stm32_cap_priv_s *priv,
         break;
 #endif
 
-#ifdef CONFIG_STM32_TIM10
+#ifdef CONFIG_STM32_TIM10_CAP
       case STM32_TIM10_BASE:
         switch (channel)
           {
@@ -407,7 +407,7 @@ static inline uint32_t stm32_cap_gpio(FAR const struct stm32_cap_priv_s *priv,
         break;
 #endif
 
-#ifdef CONFIG_STM32_TIM11
+#ifdef CONFIG_STM32_TIM11_CAP
       case STM32_TIM11_BASE:
         switch (channel)
           {
@@ -435,7 +435,7 @@ static inline uint32_t stm32_cap_gpio(FAR const struct stm32_cap_priv_s *priv,
         break;
 #endif
 
-#ifdef CONFIG_STM32_TIM12
+#ifdef CONFIG_STM32_TIM12_CAP
       case STM32_TIM12_BASE:
         switch (channel)
           {
@@ -463,7 +463,7 @@ static inline uint32_t stm32_cap_gpio(FAR const struct stm32_cap_priv_s *priv,
         break;
 #endif
 
-#ifdef CONFIG_STM32_TIM13
+#ifdef CONFIG_STM32_TIM13_CAP
       case STM32_TIM13_BASE:
         switch (channel)
           {
@@ -491,7 +491,7 @@ static inline uint32_t stm32_cap_gpio(FAR const struct stm32_cap_priv_s *priv,
         break;
 #endif
 
-#ifdef CONFIG_STM32_TIM14
+#ifdef CONFIG_STM32_TIM14_CAP
       case STM32_TIM14_BASE:
         switch (channel)
           {
@@ -531,31 +531,31 @@ static inline int stm32_cap_set_rcc(FAR const struct stm32_cap_priv_s *priv,
   switch (priv->base)
     {
 #ifdef CONFIG_STM32_TIM1_CAP
-      case 1:
+      case STM32_TIM1_BASE:
         offset = STM32_RCC_APB2ENR;
         mask   = RCC_APB2ENR_TIM1EN;
         break;
 #endif
 #ifdef CONFIG_STM32_TIM2_CAP
-      case 2:
+      case STM32_TIM2_BASE:
         offset = STM32_RCC_APB1ENR;
         mask   = RCC_APB1ENR_TIM2EN;
         break;
 #endif
 #ifdef CONFIG_STM32_TIM3_CAP
-      case 3:
+      case STM32_TIM3_BASE:
         offset = STM32_RCC_APB1ENR;
         mask   = RCC_APB1ENR_TIM3EN;
         break;
 #endif
 #ifdef CONFIG_STM32_TIM4_CAP
-      case 4:
+      case STM32_TIM4_BASE:
         offset = STM32_RCC_APB1ENR;
         mask   = RCC_APB1ENR_TIM4EN;
         break;
 #endif
 #ifdef CONFIG_STM32_TIM5_CAP
-      case 5:
+      case STM32_TIM5_BASE:
         offset = STM32_RCC_APB1ENR;
         mask   = RCC_APB1ENR_TIM5EN;
         break;
@@ -564,43 +564,43 @@ static inline int stm32_cap_set_rcc(FAR const struct stm32_cap_priv_s *priv,
       /* TIM6 and TIM7 cannot be used in capture */
 
 #ifdef CONFIG_STM32_TIM8_CAP
-      case 8:
+      case STM32_TIM8_BASE:
         offset = STM32_RCC_APB2ENR;
         mask   = RCC_APB2ENR_TIM8EN;
         break;
 #endif
 #ifdef CONFIG_STM32_TIM9_CAP
-      case 9:
+      case STM32_TIM9_BASE:
         offset = STM32_RCC_APB2ENR;
         mask   = RCC_APB2ENR_TIM9EN;
         break;
 #endif
 #ifdef CONFIG_STM32_TIM10_CAP
-      case 10:
+      case STM32_TIM10_BASE:
         offset = STM32_RCC_APB2ENR;
         mask   = RCC_APB2ENR_TIM10EN;
         break;
 #endif
 #ifdef CONFIG_STM32_TIM11_CAP
-      case 11:
+      case STM32_TIM11_BASE:
         offset = STM32_RCC_APB2ENR;
         mask   = RCC_APB2ENR_TIM11EN;
         break;
 #endif
 #ifdef CONFIG_STM32_TIM12_CAP
-      case 12:
+      case STM32_TIM12_BASE:
         offset = STM32_RCC_APB1ENR;
         mask   = RCC_APB2ENR_TIM12EN;
         break;
 #endif
 #ifdef CONFIG_STM32_TIM13_CAP
-      case 13:
+      case STM32_TIM13_BASE:
         offset = STM32_RCC_APB1ENR;
         mask   = RCC_APB2ENR_TIM13EN;
         break;
 #endif
 #ifdef CONFIG_STM32_TIM14_CAP
-      case 14:
+      case STM32_TIM14_BASE:
         offset = STM32_RCC_APB1ENR;
         mask   = RCC_APB2ENR_TIM14EN;
         break;
@@ -1097,9 +1097,9 @@ const struct stm32_cap_priv_s stm32_tim1_priv =
 {
   .ops          = &stm32_cap_ops,
   .base         = STM32_TIM1_BASE,
-  .irq          = STM32_IRQ_TIM1,
+  .irq          = STM32_IRQ_TIM1CC,
 #ifdef USE_ADVENCED_TIM
-  .irg_of       = STM32_IRQ_TIM1UP,
+  .irq_of       = STM32_IRQ_TIM1UP,
 #endif
 };
 #endif
@@ -1111,7 +1111,7 @@ const struct stm32_cap_priv_s stm32_tim2_priv =
   .base         = STM32_TIM2_BASE,
   .irq          = STM32_IRQ_TIM2,
 #ifdef USE_ADVENCED_TIM
-  .irg_of       = 0,
+  .irq_of       = 0,
 #endif
 };
 #endif
@@ -1123,7 +1123,7 @@ const struct stm32_cap_priv_s stm32_tim3_priv =
   .base         = STM32_TIM3_BASE,
   .irq          = STM32_IRQ_TIM3,
 #ifdef USE_ADVENCED_TIM
-  .irg_of       = 0,
+  .irq_of       = 0,
 #endif
 };
 #endif
@@ -1135,7 +1135,7 @@ const struct stm32_cap_priv_s stm32_tim4_priv =
   .base         = STM32_TIM4_BASE,
   .irq          = STM32_IRQ_TIM4,
 #ifdef USE_ADVENCED_TIM
-  .irg_of       = 0,
+  .irq_of       = 0,
 #endif
 };
 #endif
@@ -1147,7 +1147,7 @@ const struct stm32_cap_priv_s stm32_tim5_priv =
   .base         = STM32_TIM5_BASE,
   .irq          = STM32_IRQ_TIM5,
 #ifdef USE_ADVENCED_TIM
-  .irg_of       = 0,
+  .irq_of       = 0,
 #endif
 };
 #endif
@@ -1159,9 +1159,9 @@ const struct stm32_cap_priv_s stm32_tim8_priv =
 {
   .ops          = &stm32_cap_ops,
   .base         = STM32_TIM8_BASE,
-  .irq          = STM32_IRQ_TIM8,
+  .irq          = STM32_IRQ_TIM8CC,
 #ifdef USE_ADVENCED_TIM
-  .irg_of       = STM32_IRQ_TIM8UP,
+  .irq_of       = STM32_IRQ_TIM8UP,
 #endif
 };
 #endif
@@ -1173,7 +1173,7 @@ const struct stm32_cap_priv_s stm32_tim9_priv =
   .base         = STM32_TIM9_BASE,
   .irq          = STM32_IRQ_TIM9,
 #ifdef USE_ADVENCED_TIM
-  .irg_of       = 0,
+  .irq_of       = 0,
 #endif
 };
 #endif
@@ -1185,7 +1185,7 @@ const struct stm32_cap_priv_s stm32_tim10_priv =
   .base         = STM32_TIM10_BASE,
   .irq          = STM32_IRQ_TIM10,
 #ifdef USE_ADVENCED_TIM
-  .irg_of       = 0,
+  .irq_of       = 0,
 #endif
 };
 #endif
@@ -1197,7 +1197,7 @@ const struct stm32_cap_priv_s stm32_tim11_priv =
   .base         = STM32_TIM11_BASE,
   .irq          = STM32_IRQ_TIM11,
 #ifdef USE_ADVENCED_TIM
-  .irg_of       = 0,
+  .irq_of       = 0,
 #endif
 };
 #endif
@@ -1209,7 +1209,7 @@ const struct stm32_cap_priv_s stm32_tim12_priv =
   .base         = STM32_TIM12_BASE,
   .irq          = STM32_IRQ_TIM12,
 #ifdef USE_ADVENCED_TIM
-  .irg_of       = 0,
+  .irq_of       = 0,
 #endif
 };
 #endif
@@ -1221,7 +1221,7 @@ const struct stm32_cap_priv_s stm32_tim13_priv =
   .base         = STM32_TIM13_BASE,
   .irq          = STM32_IRQ_TIM13,
 #ifdef USE_ADVENCED_TIM
-  .irg_of       = 0,
+  .irq_of       = 0,
 #endif
 };
 #endif
@@ -1233,7 +1233,7 @@ const struct stm32_cap_priv_s stm32_tim14_priv =
   .base         = STM32_TIM14_BASE,
   .irq          = STM32_IRQ_TIM14,
 #ifdef USE_ADVENCED_TIM
-  .irg_of       = 0,
+  .irq_of       = 0,
 #endif
 };
 #endif

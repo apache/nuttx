@@ -58,16 +58,16 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* CONFIG_DEBUG, CONFIG_DEBUG_VERBOSE, and CONFIG_DEBUG_BINFMT have to be
- * defined or CONFIG_MODULE_DUMPBUFFER does nothing.
+/* CONFIG_DEBUG_INFO, and CONFIG_DEBUG_BINFMT have to be defined or
+ * CONFIG_MODULE_DUMPBUFFER does nothing.
  */
 
-#if !defined(CONFIG_DEBUG_VERBOSE) || !defined (CONFIG_DEBUG_BINFMT)
+#if !defined(CONFIG_DEBUG_INFO) || !defined (CONFIG_DEBUG_BINFMT)
 #  undef CONFIG_MODULE_DUMPBUFFER
 #endif
 
 #ifdef CONFIG_MODULE_DUMPBUFFER
-# define mod_dumpbuffer(m,b,n) svdbgdumpbuffer(m,b,n)
+# define mod_dumpbuffer(m,b,n) sinfodumpbuffer(m,b,n)
 #else
 # define mod_dumpbuffer(m,b,n)
 #endif
@@ -84,55 +84,55 @@
  * Name: mod_dumploadinfo
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_BINFMT)
+#if defined(CONFIG_DEBUG_INFO) && defined(CONFIG_DEBUG_BINFMT)
 static void mod_dumploadinfo(FAR struct mod_loadinfo_s *loadinfo)
 {
   int i;
 
-  sdbg("LOAD_INFO:\n");
-  sdbg("  textalloc:    %08lx\n", (long)loadinfo->textalloc);
-  sdbg("  datastart:    %08lx\n", (long)loadinfo->datastart);
-  sdbg("  textsize:     %ld\n",   (long)loadinfo->textsize);
-  sdbg("  datasize:     %ld\n",   (long)loadinfo->datasize);
-  sdbg("  filelen:      %ld\n",   (long)loadinfo->filelen);
-  sdbg("  filfd:        %d\n",    loadinfo->filfd);
-  sdbg("  symtabidx:    %d\n",    loadinfo->symtabidx);
-  sdbg("  strtabidx:    %d\n",    loadinfo->strtabidx);
+  sinfo("LOAD_INFO:\n");
+  sinfo("  textalloc:    %08lx\n", (long)loadinfo->textalloc);
+  sinfo("  datastart:    %08lx\n", (long)loadinfo->datastart);
+  sinfo("  textsize:     %ld\n",   (long)loadinfo->textsize);
+  sinfo("  datasize:     %ld\n",   (long)loadinfo->datasize);
+  sinfo("  filelen:      %ld\n",   (long)loadinfo->filelen);
+  sinfo("  filfd:        %d\n",    loadinfo->filfd);
+  sinfo("  symtabidx:    %d\n",    loadinfo->symtabidx);
+  sinfo("  strtabidx:    %d\n",    loadinfo->strtabidx);
 
-  sdbg("ELF Header:\n");
-  sdbg("  e_ident:      %02x %02x %02x %02x\n",
+  sinfo("ELF Header:\n");
+  sinfo("  e_ident:      %02x %02x %02x %02x\n",
     loadinfo->ehdr.e_ident[0], loadinfo->ehdr.e_ident[1],
     loadinfo->ehdr.e_ident[2], loadinfo->ehdr.e_ident[3]);
-  sdbg("  e_type:       %04x\n",  loadinfo->ehdr.e_type);
-  sdbg("  e_machine:    %04x\n",  loadinfo->ehdr.e_machine);
-  sdbg("  e_version:    %08x\n",  loadinfo->ehdr.e_version);
-  sdbg("  e_entry:      %08lx\n", (long)loadinfo->ehdr.e_entry);
-  sdbg("  e_phoff:      %d\n",    loadinfo->ehdr.e_phoff);
-  sdbg("  e_shoff:      %d\n",    loadinfo->ehdr.e_shoff);
-  sdbg("  e_flags:      %08x\n" , loadinfo->ehdr.e_flags);
-  sdbg("  e_ehsize:     %d\n",    loadinfo->ehdr.e_ehsize);
-  sdbg("  e_phentsize:  %d\n",    loadinfo->ehdr.e_phentsize);
-  sdbg("  e_phnum:      %d\n",    loadinfo->ehdr.e_phnum);
-  sdbg("  e_shentsize:  %d\n",    loadinfo->ehdr.e_shentsize);
-  sdbg("  e_shnum:      %d\n",    loadinfo->ehdr.e_shnum);
-  sdbg("  e_shstrndx:   %d\n",    loadinfo->ehdr.e_shstrndx);
+  sinfo("  e_type:       %04x\n",  loadinfo->ehdr.e_type);
+  sinfo("  e_machine:    %04x\n",  loadinfo->ehdr.e_machine);
+  sinfo("  e_version:    %08x\n",  loadinfo->ehdr.e_version);
+  sinfo("  e_entry:      %08lx\n", (long)loadinfo->ehdr.e_entry);
+  sinfo("  e_phoff:      %d\n",    loadinfo->ehdr.e_phoff);
+  sinfo("  e_shoff:      %d\n",    loadinfo->ehdr.e_shoff);
+  sinfo("  e_flags:      %08x\n" , loadinfo->ehdr.e_flags);
+  sinfo("  e_ehsize:     %d\n",    loadinfo->ehdr.e_ehsize);
+  sinfo("  e_phentsize:  %d\n",    loadinfo->ehdr.e_phentsize);
+  sinfo("  e_phnum:      %d\n",    loadinfo->ehdr.e_phnum);
+  sinfo("  e_shentsize:  %d\n",    loadinfo->ehdr.e_shentsize);
+  sinfo("  e_shnum:      %d\n",    loadinfo->ehdr.e_shnum);
+  sinfo("  e_shstrndx:   %d\n",    loadinfo->ehdr.e_shstrndx);
 
   if (loadinfo->shdr && loadinfo->ehdr.e_shnum > 0)
     {
       for (i = 0; i < loadinfo->ehdr.e_shnum; i++)
         {
           FAR Elf32_Shdr *shdr = &loadinfo->shdr[i];
-          sdbg("Sections %d:\n", i);
-          sdbg("  sh_name:      %08x\n", shdr->sh_name);
-          sdbg("  sh_type:      %08x\n", shdr->sh_type);
-          sdbg("  sh_flags:     %08x\n", shdr->sh_flags);
-          sdbg("  sh_addr:      %08x\n", shdr->sh_addr);
-          sdbg("  sh_offset:    %d\n",   shdr->sh_offset);
-          sdbg("  sh_size:      %d\n",   shdr->sh_size);
-          sdbg("  sh_link:      %d\n",   shdr->sh_link);
-          sdbg("  sh_info:      %d\n",   shdr->sh_info);
-          sdbg("  sh_addralign: %d\n",   shdr->sh_addralign);
-          sdbg("  sh_entsize:   %d\n",   shdr->sh_entsize);
+          sinfo("Sections %d:\n", i);
+          sinfo("  sh_name:      %08x\n", shdr->sh_name);
+          sinfo("  sh_type:      %08x\n", shdr->sh_type);
+          sinfo("  sh_flags:     %08x\n", shdr->sh_flags);
+          sinfo("  sh_addr:      %08x\n", shdr->sh_addr);
+          sinfo("  sh_offset:    %d\n",   shdr->sh_offset);
+          sinfo("  sh_size:      %d\n",   shdr->sh_size);
+          sinfo("  sh_link:      %d\n",   shdr->sh_link);
+          sinfo("  sh_info:      %d\n",   shdr->sh_info);
+          sinfo("  sh_addralign: %d\n",   shdr->sh_addralign);
+          sinfo("  sh_entsize:   %d\n",   shdr->sh_entsize);
         }
     }
 }
@@ -191,7 +191,7 @@ int insmod(FAR const char *filename, FAR const char *modulename)
   int ret;
 
   DEBUGASSERT(filename != NULL && modulename != NULL);
-  svdbg("Loading file: %s\n", filename);
+  sinfo("Loading file: %s\n", filename);
 
   /* Get exclusive access to the module registry */
 
@@ -212,7 +212,7 @@ int insmod(FAR const char *filename, FAR const char *modulename)
   mod_dumploadinfo(&loadinfo);
   if (ret != 0)
     {
-      sdbg("ERROR: Failed to initialize to load module: %d\n", ret);
+      serr("ERROR: Failed to initialize to load module: %d\n", ret);
       goto errout_with_lock;
     }
 
@@ -221,7 +221,7 @@ int insmod(FAR const char *filename, FAR const char *modulename)
   modp = (FAR struct module_s *)kmm_zalloc(sizeof(struct module_s));
   if (ret != 0)
     {
-      sdbg("Failed to initialize for load of ELF program: %d\n", ret);
+      sinfo("Failed to initialize for load of ELF program: %d\n", ret);
       goto errout_with_loadinfo;
     }
 
@@ -235,7 +235,7 @@ int insmod(FAR const char *filename, FAR const char *modulename)
   mod_dumploadinfo(&loadinfo);
   if (ret != 0)
     {
-      sdbg("Failed to load ELF program binary: %d\n", ret);
+      sinfo("Failed to load ELF program binary: %d\n", ret);
       goto errout_with_registry_entry;
     }
 
@@ -244,7 +244,7 @@ int insmod(FAR const char *filename, FAR const char *modulename)
   ret = mod_bind(&loadinfo);
   if (ret != 0)
     {
-      sdbg("Failed to bind symbols program binary: %d\n", ret);
+      sinfo("Failed to bind symbols program binary: %d\n", ret);
       goto errout_with_load;
     }
 
@@ -269,7 +269,7 @@ int insmod(FAR const char *filename, FAR const char *modulename)
   ret = initializer(&modp->uninitializer, &modp->arg);
   if (ret < 0)
     {
-      sdbg("Failed to initialize the module: %d\n", ret);
+      sinfo("Failed to initialize the module: %d\n", ret);
       goto errout_with_load;
     }
 

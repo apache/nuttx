@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/input/button_upper.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -230,8 +230,8 @@ static void btn_enable(FAR struct btn_upperhalf_s *priv)
             {
               /* Yes.. OR in the poll event buttons */
 
-              press   |= opriv->bo_pollevents.ap_press;
-              release |= opriv->bo_pollevents.ap_release;
+              press   |= opriv->bo_pollevents.bp_press;
+              release |= opriv->bo_pollevents.bp_release;
               break;
             }
         }
@@ -322,8 +322,8 @@ static void btn_sample(FAR struct btn_upperhalf_s *priv)
    * newly released.
    */
 
-  change  = sample ^ priv->bu_sample;
-  press   = change & sample;
+  change = sample ^ priv->bu_sample;
+  press  = change & sample;
 
   DEBUGASSERT(lower->bl_supported);
   release = change & (lower->bl_supported(lower) & ~sample);
@@ -335,8 +335,8 @@ static void btn_sample(FAR struct btn_upperhalf_s *priv)
 #ifndef CONFIG_DISABLE_POLL
       /* Have any poll events occurred? */
 
-      if ((press & opriv->bo_pollevents.ap_press)     != 0 ||
-          (release & opriv->bo_pollevents.ap_release) != 0)
+      if ((press & opriv->bo_pollevents.bp_press)     != 0 ||
+          (release & opriv->bo_pollevents.bp_release) != 0)
         {
           /* Yes.. Notify all waiters */
 
@@ -348,7 +348,7 @@ static void btn_sample(FAR struct btn_upperhalf_s *priv)
                   fds->revents |= (fds->events & POLLIN);
                   if (fds->revents != 0)
                     {
-                      ivdbg("Report events: %02x\n", fds->revents);
+                      iinfo("Report events: %02x\n", fds->revents);
                       sem_post(fds->sem);
                     }
                 }
@@ -410,7 +410,7 @@ static int btn_open(FAR struct file *filep)
   ret = btn_takesem(&priv->bu_exclsem);
   if (ret < 0)
     {
-      ivdbg("ERROR: btn_takesem failed: %d\n", ret);
+      ierr("ERROR: btn_takesem failed: %d\n", ret);
       return ret;
     }
 
@@ -419,7 +419,7 @@ static int btn_open(FAR struct file *filep)
   opriv = (FAR struct btn_open_s *)kmm_zalloc(sizeof(struct btn_open_s));
   if (!opriv)
     {
-      ivdbg("ERROR: Failled to allocate open structure\n");
+      ierr("ERROR: Failled to allocate open structure\n");
       ret = -ENOMEM;
       goto errout_with_sem;
     }
@@ -431,8 +431,8 @@ static int btn_open(FAR struct file *filep)
   DEBUGASSERT(lower && lower->bl_supported);
   supported = lower->bl_supported(lower);
 
-  opriv->bo_pollevents.ap_press   = supported;
-  opriv->bo_pollevents.ap_release = supported;
+  opriv->bo_pollevents.bp_press   = supported;
+  opriv->bo_pollevents.bp_release = supported;
 #endif
 
   /* Attach the open structure to the device */
@@ -498,7 +498,7 @@ static int btn_close(FAR struct file *filep)
   ret = btn_takesem(&priv->bu_exclsem);
   if (ret < 0)
     {
-      ivdbg("ERROR: btn_takesem failed: %d\n", ret);
+      ierr("ERROR: btn_takesem failed: %d\n", ret);
       return ret;
     }
 
@@ -511,7 +511,7 @@ static int btn_close(FAR struct file *filep)
   DEBUGASSERT(curr);
   if (!curr)
     {
-      ivdbg("ERROR: Failed to find open entry\n");
+      ierr("ERROR: Failed to find open entry\n");
       ret = -ENOENT;
       goto errout_with_exclsem;
     }
@@ -566,7 +566,7 @@ static ssize_t btn_read(FAR struct file *filep, FAR char *buffer,
 
   if (len < sizeof(btn_buttonset_t))
     {
-      ivdbg("ERROR: buffer too small: %lu\n", (unsigned long)len);
+      ierr("ERROR: buffer too small: %lu\n", (unsigned long)len);
       return -EINVAL;
     }
 
@@ -575,7 +575,7 @@ static ssize_t btn_read(FAR struct file *filep, FAR char *buffer,
   ret = btn_takesem(&priv->bu_exclsem);
   if (ret < 0)
     {
-      ivdbg("ERROR: btn_takesem failed: %d\n", ret);
+      ierr("ERROR: btn_takesem failed: %d\n", ret);
       return ret;
     }
 
@@ -612,7 +612,7 @@ static int btn_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   ret = btn_takesem(&priv->bu_exclsem);
   if (ret < 0)
     {
-      ivdbg("ERROR: btn_takesem failed: %d\n", ret);
+      ierr("ERROR: btn_takesem failed: %d\n", ret);
       return ret;
     }
 
@@ -664,8 +664,8 @@ static int btn_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           {
             /* Save the poll events */
 
-            opriv->bo_pollevents.ap_press   = pollevents->ap_press;
-            opriv->bo_pollevents.ap_release = pollevents->ap_release;
+            opriv->bo_pollevents.bp_press   = pollevents->bp_press;
+            opriv->bo_pollevents.bp_release = pollevents->bp_release;
 
             /* Enable/disable interrupt handling */
 
@@ -712,7 +712,7 @@ static int btn_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 #endif
 
     default:
-      ivdbg("ERROR: Unrecognized command: %ld\n", cmd);
+      ierr("ERROR: Unrecognized command: %ld\n", cmd);
       ret = -ENOTTY;
       break;
     }
@@ -746,7 +746,7 @@ static int btn_poll(FAR struct file *filep, FAR struct pollfd *fds,
   ret = btn_takesem(&priv->bu_exclsem);
   if (ret < 0)
     {
-      ivdbg("ERROR: btn_takesem failed: %d\n", ret);
+      ierr("ERROR: btn_takesem failed: %d\n", ret);
       return ret;
     }
 
@@ -774,7 +774,7 @@ static int btn_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
       if (i >= CONFIG_BUTTONS_NPOLLWAITERS)
         {
-          ivdbg("ERROR: Too man poll waiters\n");
+          ierr("ERROR: Too man poll waiters\n");
           fds->priv    = NULL;
           ret          = -EBUSY;
           goto errout_with_dusem;
@@ -786,10 +786,10 @@ static int btn_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
       FAR struct pollfd **slot = (FAR struct pollfd **)fds->priv;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
       if (!slot)
         {
-          ivdbg("ERROR: Poll slot not found\n");
+          ierr("ERROR: Poll slot not found\n");
           ret = -EIO;
           goto errout_with_dusem;
         }
@@ -847,7 +847,7 @@ int btn_register(FAR const char *devname,
 
   if (!priv)
     {
-      ivdbg("ERROR: Failed to allocate device structure\n");
+      ierr("ERROR: Failed to allocate device structure\n");
       return -ENOMEM;
     }
 
@@ -869,7 +869,7 @@ int btn_register(FAR const char *devname,
   ret = register_driver(devname, &btn_fops, 0666, priv);
   if (ret < 0)
     {
-      ivdbg("ERROR: register_driver failed: %d\n", ret);
+      ierr("ERROR: register_driver failed: %d\n", ret);
       goto errout_with_priv;
     }
 

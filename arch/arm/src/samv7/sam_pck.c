@@ -128,7 +128,7 @@ uint32_t sam_pck_configure(enum pckid_e pckid, enum pckid_clksrc_e clksrc,
       break;
 
     default:
-      dbg("ERROR: Unknown clock source\n");
+      _err("ERROR: Unknown clock source\n");
       return 0;
     }
 
@@ -272,7 +272,7 @@ uint32_t sam_pck_frequency(enum pckid_e pckid)
       break;
 
     default:
-      dbg("ERROR: Unknown clock source\n");
+      _err("ERROR: Unknown clock source\n");
       return 0;
     }
 

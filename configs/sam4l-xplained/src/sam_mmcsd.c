@@ -94,31 +94,31 @@ int sam_sdinitialize(int minor)
 
   /* Get the SPI driver instance for the SD chip select */
 
-  fvdbg("Initializing SPI chip select %d\n", SD_CSNO);
+  finfo("Initializing SPI chip select %d\n", SD_CSNO);
 
   spi = sam_spibus_initialize(SD_CSNO);
   if (!spi)
     {
-      fdbg("Failed to initialize SPI chip select %d\n", SD_CSNO);
+      ferr("ERROR: Failed to initialize SPI chip select %d\n", SD_CSNO);
       return -ENODEV;
     }
 
-  fvdbg("Successfully initialized SPI chip select %d\n", SD_CSNO);
+  finfo("Successfully initialized SPI chip select %d\n", SD_CSNO);
 
   /* Bind the SPI device for the chip select to the slot */
 
-  fvdbg("Binding SPI chip select %d to MMC/SD slot %d\n",
+  finfo("Binding SPI chip select %d to MMC/SD slot %d\n",
           SD_CSNO, SAM34_MMCSDSLOTNO);
 
   ret = mmcsd_spislotinitialize(minor, SAM34_MMCSDSLOTNO, spi);
   if (ret < 0)
     {
-      fdbg("Failed to bind SPI chip select %d to MMC/SD slot %d: %d\n",
+      ferr("ERROR: Failed to bind SPI chip select %d to MMC/SD slot %d: %d\n",
             SD_CSNO, SAM34_MMCSDSLOTNO, ret);
       return ret;
     }
 
-  fvdbg("Successfuly bound SPI chip select %d to MMC/SD slot %d\n",
+  finfo("Successfuly bound SPI chip select %d to MMC/SD slot %d\n",
         SD_CSNO, SAM34_MMCSDSLOTNO);
 
   return OK;

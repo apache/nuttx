@@ -99,20 +99,6 @@
 #  define CONFIG_LCD_LANDSCAPE 1
 #endif
 
-/* Define CONFIG_DEBUG_LCD to enable detailed LCD debug output. Verbose debug must
- * also be enabled.
- */
-
-#ifndef CONFIG_DEBUG
-#  undef CONFIG_DEBUG_VERBOSE
-#  undef CONFIG_DEBUG_GRAPHICS
-#  undef CONFIG_DEBUG_LCD
-#endif
-
-#ifndef CONFIG_DEBUG_VERBOSE
-#  undef CONFIG_DEBUG_LCD
-#endif
-
 /* Display/Color Properties ***********************************************************/
 /* Display Resolution */
 
@@ -170,16 +156,6 @@
 #  undef RA8875_2LAYER_POSSIBLE
 #else
 #  define RA8875_2LAYER_POSSIBLE 1
-#endif
-
-/* Debug ******************************************************************************/
-
-#ifdef CONFIG_DEBUG_LCD
-#  define lcddbg  dbg
-#  define lcdvdbg vdbg
-#else
-#  define lcddbg(x...)
-#  define lcdvdbg(x...)
 #endif
 
 /**************************************************************************************
@@ -334,7 +310,7 @@ static void ra8875_putreg(FAR struct ra8875_lcd_s *lcd, uint8_t regaddr,
 {
   /* Set the index register to the register address and write the register contents */
 
-  lcdvdbg("putreg 0x%02x = 0x%02x\n", regaddr, regval);
+  lcdinfo("putreg 0x%02x = 0x%02x\n", regaddr, regval);
 
   lcd->write_reg(lcd, regaddr, regval);
 }
@@ -352,7 +328,7 @@ static void ra8875_putreg16(FAR struct ra8875_lcd_s *lcd, uint8_t regaddr,
 {
   /* Set the index register to the register address and write the register contents */
 
-  lcdvdbg("putreg 0x%02x = 0x%04x\n", regaddr, regval);
+  lcdinfo("putreg 0x%02x = 0x%04x\n", regaddr, regval);
 
   lcd->write_reg16(lcd, regaddr, regval);
 }
@@ -373,7 +349,7 @@ static uint8_t ra8875_readreg(FAR struct ra8875_lcd_s *lcd, uint8_t regaddr)
 
   regval = lcd->read_reg(lcd, regaddr);
 
-  lcdvdbg("readreg 0x%02x = 0x%02x\n", regaddr, regval);
+  lcdinfo("readreg 0x%02x = 0x%02x\n", regaddr, regval);
   return regval;
 }
 #endif
@@ -533,13 +509,13 @@ static inline void ra8875_setforeground(FAR struct ra8875_lcd_s *lcd, uint16_t c
 
 static void ra8875_clearmem(FAR struct ra8875_lcd_s *lcd)
 {
-  lcdvdbg("clearmem start\n");
+  lcdinfo("clearmem start\n");
   ra8875_putreg(lcd, RA8875_MCLR, RA8875_MCLR_CLEAR | RA8875_MCLR_FULL);
 
   /* Wait for operation to finish */
 
   ra8875_waitreg(lcd, RA8875_MCLR, RA8875_MCLR_CLEAR);
-  lcdvdbg("clearmem done\n");
+  lcdinfo("clearmem done\n");
 }
 
 /**************************************************************************************
@@ -574,18 +550,18 @@ static void ra8875_showrun(FAR struct ra8875_dev_s *priv, fb_coord_t row,
 
       if (priv->firstrow != priv->lastrow)
         {
-          lcddbg("...\n");
-          lcddbg("%s row: %d col: %d npixels: %d\n",
-                 priv->put ? "PUT" : "GET",
-                 priv->lastrow, priv->col, priv->npixels);
+          lcdinfo("...\n");
+          lcdinfo("%s row: %d col: %d npixels: %d\n",
+                  priv->put ? "PUT" : "GET",
+                  priv->lastrow, priv->col, priv->npixels);
         }
 
       /* And we are starting a new sequence.  Output the first run of the
        * new sequence
        */
 
-      lcddbg("%s row: %d col: %d npixels: %d\n",
-             put ? "PUT" : "GET", row, col, npixels);
+      lcdinfo("%s row: %d col: %d npixels: %d\n",
+              put ? "PUT" : "GET", row, col, npixels);
 
       /* And save information about the run so that we can detect continuations
        * of the sequence.
@@ -829,7 +805,7 @@ static int ra8875_getvideoinfo(FAR struct lcd_dev_s *dev,
                                FAR struct fb_videoinfo_s *vinfo)
 {
   DEBUGASSERT(dev && vinfo);
-  lcdvdbg("fmt: %d xres: %d yres: %d nplanes: 1\n",
+  lcdinfo("fmt: %d xres: %d yres: %d nplanes: 1\n",
           RA8875_COLORFMT, RA8875_XRES, RA8875_YRES);
 
   vinfo->fmt     = RA8875_COLORFMT;    /* Color format: RGB16-565: RRRR RGGG GGGB BBBB */
@@ -853,7 +829,7 @@ static int ra8875_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
   FAR struct ra8875_dev_s *priv = (FAR struct ra8875_dev_s *)dev;
 
   DEBUGASSERT(dev && pinfo && planeno == 0);
-  lcdvdbg("planeno: %d bpp: %d\n", planeno, RA8875_BPP);
+  lcdinfo("planeno: %d bpp: %d\n", planeno, RA8875_BPP);
 
   pinfo->putrun = ra8875_putrun;                  /* Put a run into LCD memory */
   pinfo->getrun = ra8875_getrun;                  /* Get a run from LCD memory */
@@ -873,7 +849,7 @@ static int ra8875_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
 
 static int ra8875_getpower(FAR struct lcd_dev_s *dev)
 {
-  lcdvdbg("power: %d\n", 0);
+  lcdinfo("power: %d\n", 0);
   return g_lcddev.power;
 }
 
@@ -917,7 +893,7 @@ static int ra8875_setpower(FAR struct lcd_dev_s *dev, int power)
   FAR struct ra8875_dev_s *priv = (FAR struct ra8875_dev_s *)dev;
   FAR struct ra8875_lcd_s *lcd  = priv->lcd;
 
-  lcdvdbg("power: %d\n", power);
+  lcdinfo("power: %d\n", power);
   DEBUGASSERT((unsigned)power <= CONFIG_LCD_MAXPOWER);
 
   /* Set new power level */
@@ -960,7 +936,7 @@ static int ra8875_setpower(FAR struct lcd_dev_s *dev, int power)
 
 static int ra8875_getcontrast(FAR struct lcd_dev_s *dev)
 {
-  lcdvdbg("Not implemented\n");
+  lcdinfo("Not implemented\n");
   return -ENOSYS;
 }
 
@@ -974,7 +950,7 @@ static int ra8875_getcontrast(FAR struct lcd_dev_s *dev)
 
 static int ra8875_setcontrast(FAR struct lcd_dev_s *dev, unsigned int contrast)
 {
-  lcdvdbg("contrast: %d\n", contrast);
+  lcdinfo("contrast: %d\n", contrast);
   return -ENOSYS;
 }
 
@@ -993,7 +969,7 @@ static inline int ra8875_hwinitialize(FAR struct ra8875_dev_s *priv)
 
   /* REVISIT: Maybe some of these values needs to be configurable?? */
 
-  lcdvdbg("hwinitialize\n");
+  lcdinfo("hwinitialize\n");
 
   /* Reset */
 
@@ -1076,7 +1052,7 @@ static inline int ra8875_hwinitialize(FAR struct ra8875_dev_s *priv)
   priv->shadow_w_curh = 0;
   priv->shadow_w_curv = 0;
 
-  lcdvdbg("hwinitialize done\n");
+  lcdinfo("hwinitialize done\n");
   return OK;
 }
 
@@ -1098,7 +1074,7 @@ FAR struct lcd_dev_s *ra8875_lcdinitialize(FAR struct ra8875_lcd_s *lcd)
 {
   int ret;
 
-  lcdvdbg("Initializing\n");
+  lcdinfo("Initializing\n");
 
   /* If we could support multiple RA8875 devices, this is where we would allocate
    * a new driver data structure... but we can't.  Why not?  Because of a bad should
@@ -1130,7 +1106,7 @@ FAR struct lcd_dev_s *ra8875_lcdinitialize(FAR struct ra8875_lcd_s *lcd)
 
       ra8875_poweroff(lcd);
 
-      lcdvdbg("Initialized\n");
+      lcdinfo("Initialized\n");
 
       return &g_lcddev.dev;
     }

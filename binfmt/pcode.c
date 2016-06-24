@@ -169,18 +169,18 @@ static int pcode_mount_testfs(void)
 
   /* Create a ROM disk for the ROMFS filesystem */
 
-  bvdbg("Registering romdisk at /dev/ram%d\n", CONFIG_PCODE_TEST_DEVMINOR);
+  binfo("Registering romdisk at /dev/ram%d\n", CONFIG_PCODE_TEST_DEVMINOR);
   ret = romdisk_register(CONFIG_PCODE_TEST_DEVMINOR, (FAR uint8_t *)romfs_img,
                          NSECTORS(ROMFS_IMG_LEN), SECTORSIZE);
   if (ret < 0)
     {
-      bdbg("ERROR: romdisk_register failed: %d\n", ret);
+      berr("ERROR: romdisk_register failed: %d\n", ret);
       return ret;
     }
 
   /* Mount the test file system */
 
-  bvdbg("Mounting ROMFS filesystem at target=%s with source=%s\n",
+  binfo("Mounting ROMFS filesystem at target=%s with source=%s\n",
          CONFIG_PCODE_TEST_MOUNTPOINT, CONFIG_PCODE_TEST_DEVPATH);
 
   ret = mount(CONFIG_PCODE_TEST_DEVPATH, CONFIG_PCODE_TEST_MOUNTPOINT,
@@ -190,7 +190,7 @@ static int pcode_mount_testfs(void)
       int errval = get_errno();
       DEBUGASSERT(errval > 0);
 
-      bdbg("ERROR: mount(%s,%s,romfs) failed: %d\n",
+      berr("ERROR: mount(%s,%s,romfs) failed: %d\n",
            CONFIG_PCODE_TEST_DEVPATH, CONFIG_PCODE_TEST_MOUNTPOINT, errval);
       return -errval;
     }
@@ -259,14 +259,14 @@ static int pcode_proxy(int argc, char **argv)
   sem_post(&g_pcode_handoff.exclsem);
   DEBUGASSERT(binp && fullpath);
 
-  bvdbg("Executing %s\n", fullpath);
+  binfo("Executing %s\n", fullpath);
 
   /* Set-up the on-exit handler that will unload the module on exit */
 
   ret = on_exit(pcode_onexit, binp);
   if (ret < 0)
     {
-      bdbg("ERROR: on_exit failed: %d\n", get_errno());
+      berr("ERROR: on_exit failed: %d\n", get_errno());
       kmm_free(fullpath);
       return EXIT_FAILURE;
     }
@@ -283,7 +283,7 @@ static int pcode_proxy(int argc, char **argv)
 
   if (ret < 0)
     {
-      bdbg("ERROR: Execution failed\n");
+      berr("ERROR: Execution failed\n");
       return EXIT_FAILURE;
     }
 
@@ -310,7 +310,7 @@ static int pcode_load(struct binary_s *binp)
   int fd;
   int ret;
 
-  bvdbg("Loading file: %s\n", binp->filename);
+  binfo("Loading file: %s\n", binp->filename);
 
   /* Open the binary file for reading (only) */
 
@@ -318,7 +318,7 @@ static int pcode_load(struct binary_s *binp)
   if (fd < 0)
     {
       int errval = get_errno();
-      bdbg("ERROR: Failed to open binary %s: %d\n", binp->filename, errval);
+      berr("ERROR: Failed to open binary %s: %d\n", binp->filename, errval);
       return -errval;
     }
 
@@ -341,12 +341,12 @@ static int pcode_load(struct binary_s *binp)
 
           if (errval != EINTR)
             {
-              bdbg("ERROR: read failed: %d\n", errval);
+              berr("ERROR: read failed: %d\n", errval);
               ret = -errval;
               goto errout_with_fd;
             }
 
-          bdbg("Interrupted by a signal\n");
+          berr("Interrupted by a signal\n");
         }
       else
         {
@@ -366,7 +366,7 @@ static int pcode_load(struct binary_s *binp)
 
   if (memcmp(&hdr.fh_ident, FHI_POFF_MAG, 4) != 0 || hdr.fh_type != FHT_EXEC)
     {
-      dbg("ERROR: File is not a P-code executable: %d\n");
+      _err("ERROR: File is not a P-code executable: %d\n");
       ret = -ENOEXEC;
       goto errout_with_fd;
     }
@@ -399,7 +399,7 @@ static int pcode_load(struct binary_s *binp)
   g_pcode_handoff.fullpath = strdup(binp->filename);
   if (!g_pcode_handoff.fullpath)
     {
-      bdbg("ERROR: Failed to duplicate the full path: %d\n",
+      berr("ERROR: Failed to duplicate the full path: %d\n",
            binp->filename);
 
       sem_post(&g_pcode_handoff.exclsem);
@@ -473,18 +473,18 @@ int pcode_initialize(void)
   ret = pcode_mount_testfs();
   if (ret < 0)
     {
-      bdbg("ERROR: Failed to mount test file system: %d\n", ret);
+      berr("ERROR: Failed to mount test file system: %d\n", ret);
       return ret;
     }
 
   /* Register ourselves as a binfmt loader */
 
-  bvdbg("Registering P-Code Loader\n");
+  binfo("Registering P-Code Loader\n");
 
   ret = register_binfmt(&g_pcode_binfmt);
   if (ret != 0)
     {
-      bdbg("Failed to register binfmt: %d\n", ret);
+      berr("Failed to register binfmt: %d\n", ret);
     }
 
   return ret;
@@ -513,7 +513,7 @@ void pcode_uninitialize(void)
       int errval = get_errno();
       DEBUGASSERT(errval > 0);
 
-      bdbg("ERROR: unregister_binfmt() failed: %d\n", errval);
+      berr("ERROR: unregister_binfmt() failed: %d\n", errval);
       UNUSED(errval);
     }
 
@@ -524,7 +524,7 @@ void pcode_uninitialize(void)
       int errval = get_errno();
       DEBUGASSERT(errval > 0);
 
-      bdbg("ERROR: umount(%s) failed: %d\n", CONFIG_PCODE_TEST_MOUNTPOINT, errval);
+      berr("ERROR: umount(%s) failed: %d\n", CONFIG_PCODE_TEST_MOUNTPOINT, errval);
       UNUSED(errval);
     }
 #endif

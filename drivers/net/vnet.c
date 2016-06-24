@@ -169,7 +169,7 @@ static int vnet_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac);
 
 static int vnet_transmit(FAR struct vnet_driver_s *vnet)
 {
-  int err;
+  int errcode;
 
   /* Verify that the hardware is ready to send another packet.  If we get
    * here, then we are committed to sending a packet; Higher level logic
@@ -178,15 +178,15 @@ static int vnet_transmit(FAR struct vnet_driver_s *vnet)
 
   /* Send the packet: address=vnet->sk_dev.d_buf, length=vnet->sk_dev.d_len */
 
-  err = vnet_xmit(vnet->vnet, (char *)vnet->sk_dev.d_buf, vnet->sk_dev.d_len);
-  if (err)
+  errcode = vnet_xmit(vnet->vnet, (char *)vnet->sk_dev.d_buf, vnet->sk_dev.d_len);
+  if (errcode)
     {
       /* When vnet_xmit fail, it means TX buffer is full. Watchdog
        * is of no use here because no TX done INT will happen. So
        * we reset the TX buffer directly.
        */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
       cprintf("VNET: TX buffer is full\n");
 #endif
       return ERROR;
@@ -308,7 +308,7 @@ void rtos_vnet_recv(struct rgmp_vnet *rgmp_vnet, char *data, int len)
 
       if (len > CONFIG_NET_ETH_MTU || len < 14)
         {
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
           cprintf("VNET: receive invalid packet of size %d\n", len);
 #endif
           return;
@@ -332,7 +332,7 @@ void rtos_vnet_recv(struct rgmp_vnet *rgmp_vnet, char *data, int len)
 #ifdef CONFIG_NET_IPv4
       if (BUF->type == HTONS(ETHTYPE_IP))
         {
-          nllvdbg("IPv4 frame\n");
+          ninfo("IPv4 frame\n");
 
           /* Handle ARP on input then give the IPv4 packet to the network
            * layer
@@ -372,7 +372,7 @@ void rtos_vnet_recv(struct rgmp_vnet *rgmp_vnet, char *data, int len)
 #ifdef CONFIG_NET_IPv6
       if (BUF->type == HTONS(ETHTYPE_IP6))
         {
-          nllvdbg("Iv6 frame\n");
+          ninfo("Iv6 frame\n");
 
           /* Give the IPv6 packet to the network layer */
 
@@ -506,7 +506,7 @@ static void vnet_polltimer(int argc, uint32_t arg, ...)
 
   if (vnet_is_txbuff_full(vnet->vnet))
     {
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
       cprintf("VNET: TX buffer is full\n");
 #endif
       return;
@@ -546,9 +546,9 @@ static int vnet_ifup(struct net_driver_s *dev)
 {
   FAR struct vnet_driver_s *vnet = (FAR struct vnet_driver_s *)dev->d_private;
 
-  ndbg("Bringing up: %d.%d.%d.%d\n",
-     dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
-     (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
+  ninfo("Bringing up: %d.%d.%d.%d\n",
+        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
+        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
 
   /* Initialize PHYs, the Ethernet interface, and setup up Ethernet interrupts */
 
@@ -640,7 +640,7 @@ static int vnet_txavail(struct net_driver_s *dev)
 
       if (vnet_is_txbuff_full(vnet->vnet))
         {
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
           cprintf("VNET: TX buffer is full\n");
 #endif
           goto out;

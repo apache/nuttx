@@ -70,7 +70,7 @@ int nxffs_statfs(FAR struct inode *mountpt, FAR struct statfs *buf)
   FAR struct nxffs_volume_s *volume;
   int ret;
 
-  fvdbg("Entry\n");
+  finfo("Entry\n");
 
   /* Sanity checks */
 
@@ -116,7 +116,7 @@ int nxffs_stat(FAR struct inode *mountpt, FAR const char *relpath,
   struct nxffs_entry_s entry;
   int ret;
 
-  fvdbg("Entry\n");
+  finfo("Entry\n");
 
   /* Sanity checks */
 
@@ -145,7 +145,7 @@ int nxffs_stat(FAR struct inode *mountpt, FAR const char *relpath,
       ret = nxffs_findinode(volume, relpath, &entry);
       if (ret < 0)
         {
-          fdbg("ERROR: Inode '%s' not found: %d\n", -ret);
+          ferr("ERROR: Inode '%s' not found: %d\n", -ret);
           goto errout_with_semaphore;
         }
 

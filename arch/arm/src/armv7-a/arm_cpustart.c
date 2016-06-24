@@ -64,19 +64,19 @@ static inline void arm_registerdump(FAR struct tcb_s *tcb)
 {
   int regndx;
 
-  lldbg("CPU%d:\n", up_cpu_index());
+  _info("CPU%d:\n", up_cpu_index());
 
   /* Dump the startup registers */
 
   for (regndx = REG_R0; regndx <= REG_R15; regndx += 8)
     {
       uint32_t *ptr = (uint32_t *)&tcb->xcp.regs[regndx];
-      lldbg("R%d: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-             regndx, ptr[0], ptr[1], ptr[2], ptr[3],
-             ptr[4], ptr[5], ptr[6], ptr[7]);
+      _info("R%d: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+            regndx, ptr[0], ptr[1], ptr[2], ptr[3],
+            ptr[4], ptr[5], ptr[6], ptr[7]);
     }
 
-  lldbg("CPSR: %08x\n", tcb->xcp.regs[REG_CPSR]);
+  _info("CPSR: %08x\n", tcb->xcp.regs[REG_CPSR]);
 }
 #else
 # define arm_registerdump(tcb)
@@ -106,7 +106,7 @@ int arm_start_handler(int irq, FAR void *context)
 {
   FAR struct tcb_s *tcb;
 
-  sllvdbg("CPU%d Started\n", up_cpu_index());
+  sinfo("CPU%d Started\n", up_cpu_index());
 
   /* Reset scheduler parameters */
 
@@ -155,7 +155,7 @@ int arm_start_handler(int irq, FAR void *context)
 
 int up_cpu_start(int cpu)
 {
-  sllvdbg("Starting CPU%d\n", cpu);
+  sinfo("Starting CPU%d\n", cpu);
 
   DEBUGASSERT(cpu >= 0 && cpu < CONFIG_SMP_NCPUS && cpu != this_cpu());
 

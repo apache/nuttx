@@ -107,7 +107,7 @@ static const struct file_operations g_rngops =
 
 static int stm32l4_rnginitialize(void)
 {
-  vdbg("Initializing RNG\n");
+  _info("Initializing RNG\n");
 
   memset(&g_rngdev, 0, sizeof(struct rng_dev_s));
 
@@ -117,7 +117,7 @@ static int stm32l4_rnginitialize(void)
     {
       /* We could not attach the ISR to the interrupt */
 
-      vdbg("Could not attach IRQ.\n");
+      _info("Could not attach IRQ.\n");
 
       return -EAGAIN;
     }

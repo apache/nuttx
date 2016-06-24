@@ -100,7 +100,7 @@ void udp_send(FAR struct net_driver_s *dev, FAR struct udp_conn_s *conn)
 {
   FAR struct udp_hdr_s *udp;
 
-  nllvdbg("UDP payload: %d (%d) bytes\n", dev->d_sndlen, dev->d_len);
+  ninfo("UDP payload: %d (%d) bytes\n", dev->d_sndlen, dev->d_len);
 
   if (dev->d_sndlen > 0)
     {
@@ -252,7 +252,7 @@ void udp_send(FAR struct net_driver_s *dev, FAR struct udp_conn_s *conn)
         }
 #endif /* CONFIG_NET_UDP_CHECKSUMS */
 
-      nllvdbg("Outgoing UDP packet length: %d\n", dev->d_len);
+      ninfo("Outgoing UDP packet length: %d\n", dev->d_len);
 
 #ifdef CONFIG_NET_STATISTICS
       g_netstats.udp.sent++;

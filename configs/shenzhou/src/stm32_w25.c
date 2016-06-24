@@ -107,7 +107,7 @@ int stm32_w25initialize(int minor)
   spi = stm32_spibus_initialize(1);
   if (!spi)
     {
-      fdbg("ERROR: Failed to initialize SPI port 2\n");
+      ferr("ERROR: Failed to initialize SPI port 2\n");
       return -ENODEV;
     }
 
@@ -116,7 +116,7 @@ int stm32_w25initialize(int minor)
   mtd = w25_initialize(spi);
   if (!mtd)
     {
-      fdbg("ERROR: Failed to bind SPI port 2 to the SST 25 FLASH driver\n");
+      ferr("ERROR: Failed to bind SPI port 2 to the SST 25 FLASH driver\n");
       return -ENODEV;
     }
 
@@ -126,7 +126,7 @@ int stm32_w25initialize(int minor)
   ret = ftl_initialize(minor, mtd);
   if (ret < 0)
     {
-      fdbg("ERROR: Initialize the FTL layer\n");
+      ferr("ERROR: Initialize the FTL layer\n");
       return ret;
     }
 #else
@@ -135,7 +135,7 @@ int stm32_w25initialize(int minor)
   ret = nxffs_initialize(mtd);
   if (ret < 0)
     {
-      fdbg("ERROR: NXFFS initialization failed: %d\n", -ret);
+      ferr("ERROR: NXFFS initialization failed: %d\n", -ret);
       return ret;
     }
 
@@ -145,7 +145,7 @@ int stm32_w25initialize(int minor)
   ret = mount(NULL, devname, "nxffs", 0, NULL);
   if (ret < 0)
     {
-      fdbg("ERROR: Failed to mount the NXFFS volume: %d\n", errno);
+      ferr("ERROR: Failed to mount the NXFFS volume: %d\n", errno);
       return ret;
     }
 #endif

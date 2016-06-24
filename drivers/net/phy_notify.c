@@ -42,8 +42,8 @@
 /* Force verbose debug on in this file only to support unit-level testing. */
 
 #ifdef CONFIG_NETDEV_PHY_DEBUG
-#  undef  CONFIG_DEBUG_VERBOSE
-#  define CONFIG_DEBUG_VERBOSE 1
+#  undef  CONFIG_DEBUG_INFO
+#  define CONFIG_DEBUG_INFO 1
 #  undef  CONFIG_DEBUG_NET
 #  define CONFIG_DEBUG_NET 1
 #endif
@@ -82,11 +82,11 @@
  */
 
 #ifdef CONFIG_NETDEV_PHY_DEBUG
-#  define phydbg    dbg
-#  define phylldbg  lldbg
+#  define phyinfo   _info
+#  define phyerr    _err
 #else
-#  define phydbg(x...)
-#  define phylldbg(x...)
+#  define phyinfo(x...)
+#  define phyerr(x...)
 #endif
 
 /****************************************************************************
@@ -208,14 +208,14 @@ static FAR struct phy_notify_s *phy_find_unassigned(void)
           /* Return the client entry assigned to the caller */
 
           phy_semgive();
-          phydbg("Returning client %d\n", i);
+          phyinfo("Returning client %d\n", i);
           return client;
         }
     }
 
   /* Ooops... too many */
 
-  ndbg("ERROR: No free client entries\n");
+  nerr("ERROR: No free client entries\n");
   phy_semgive();
   return NULL;
 }
@@ -243,7 +243,7 @@ static FAR struct phy_notify_s *phy_find_assigned(FAR const char *intf,
           /* Return the matching client entry to the caller */
 
           phy_semgive();
-          phydbg("Returning client %d\n", i);
+          phyinfo("Returning client %d\n", i);
           return client;
         }
     }
@@ -266,8 +266,8 @@ static int phy_handler(FAR struct phy_notify_s *client)
   int ret;
 
   DEBUGASSERT(client && client->assigned && client->enable);
-  phylldbg("Entry client %d, signalling PID=%d with signal %d\n",
-           client->index, client->pid, client->signo);
+  phyinfo("Entry client %d, signalling PID=%d with signal %d\n",
+          client->index, client->pid, client->signo);
 
   /* Disable further interrupts */
 
@@ -287,7 +287,7 @@ static int phy_handler(FAR struct phy_notify_s *client)
       int errcode = errno;
       DEBUGASSERT(errcode > 0);
 
-      nlldbg("ERROR: sigqueue failed: %d\n", errcode);
+      nerr("ERROR: sigqueue failed: %d\n", errcode);
       UNUSED(errcode);
     }
 
@@ -360,14 +360,14 @@ int phy_notify_subscribe(FAR const char *intf, pid_t pid, int signo,
   FAR struct phy_notify_s *client;
   DEBUGASSERT(intf);
 
-  nvdbg("%s: PID=%d signo=%d arg=%p\n", intf, pid, signo, arg);
+  ninfo("%s: PID=%d signo=%d arg=%p\n", intf, pid, signo, arg);
 
   /* The special value pid == 0 means to use the pid of the current task. */
 
   if (pid == 0)
     {
       pid = getpid();
-      phydbg("Actual PID=%d\n", pid);
+      phyinfo("Actual PID=%d\n", pid);
     }
 
   /* Check if this client already exists */
@@ -387,7 +387,7 @@ int phy_notify_subscribe(FAR const char *intf, pid_t pid, int signo,
       client = phy_find_unassigned();
       if (!client)
         {
-          ndbg("ERROR: Failed to allocate a client entry\n");
+          nerr("ERROR: Failed to allocate a client entry\n");
           return -ENOMEM;
         }
 
@@ -439,14 +439,14 @@ int phy_notify_unsubscribe(FAR const char *intf, pid_t pid)
 {
   FAR struct phy_notify_s *client;
 
-  nvdbg("%s: PID=%d\n", intf, pid);
+  ninfo("%s: PID=%d\n", intf, pid);
 
   /* Find the client entry for this interface */
 
   client = phy_find_assigned(intf, pid);
   if (!client)
     {
-      ndbg("ERROR: No such client\n");
+      nerr("ERROR: No such client\n");
       return -ENOENT;
     }
 

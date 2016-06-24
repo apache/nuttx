@@ -50,10 +50,6 @@
  ************************************************************************************/
 /* Configuration ********************************************************************/
 
-#ifndef CONFIG_DEBUG
-#  undef CONFIG_DEBUG_GPIO
-#endif
-
 #define EFM32_NGPIO                5 /* (5) GPIOA-F */
 
 /* Bit-encoded input to efm32_configgpio() *******************************************/
@@ -350,7 +346,7 @@ void efm32_gpioirqclear(int irq);
  *
  ************************************************************************************/
 
-#ifdef CONFIG_DEBUG_GPIO
+#ifdef CONFIG_DEBUG_GPIO_INFO
 int efm32_dumpgpio(uint32_t pinset, const char *msg);
 #else
 #  define efm32_dumpgpio(p,m)

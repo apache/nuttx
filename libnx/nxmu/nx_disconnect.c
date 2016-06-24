@@ -102,6 +102,6 @@ void nx_disconnect(NXHANDLE handle)
   ret = nxmu_sendserver(conn, &outmsg, sizeof(struct nxsvrmsg_s));
   if (ret < 0)
     {
-      gdbg("ERROR: nxmu_sendserver() returned %d\n", ret);
+      gerr("ERROR: nxmu_sendserver() returned %d\n", ret);
     }
 }

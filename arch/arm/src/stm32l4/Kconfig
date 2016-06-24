@@ -333,7 +333,7 @@ config STM32L4_QSPI_DMATHRESHOLD
 
 config STM32L4_QSPI_DMADEBUG
 	bool "QSPI DMA transfer debug"
-	depends on STM32L4_QSPI_DMA && DEBUG && DEBUG_DMA
+	depends on STM32L4_QSPI_DMA && DEBUG_SPI && DEBUG_DMA
 	default n
 	---help---
 		Enable special debug instrumentation to analyze QSPI DMA data transfers.
@@ -343,11 +343,11 @@ config STM32L4_QSPI_DMADEBUG
 
 config STM32L4_QSPI_REGDEBUG
 	bool "QSPI Register level debug"
-	depends on DEBUG
+	depends on DEBUG_SPI_INFO
 	default n
 	---help---
 		Output detailed register-level QSPI device debug information.
-		Requires also DEBUG.
+		Requires also CONFIG_DEBUG_SPI_INFO.
 
 endif
 
@@ -871,7 +871,7 @@ config CAN1_BAUD
 	default 250000
 	depends on STM32L4_CAN1
 	---help---
-		CAN1 BAUD rate.  Required if STM32L4_CAN1 is defined.
+		CAN1 BAUD rate.  Required if CONFIG_STM32L4_CAN1 is defined.
 
 config CAN_TSEG1
 	int "TSEG1 quanta"
@@ -884,6 +884,15 @@ config CAN_TSEG2
 	default 7
 	---help---
 		The number of CAN time quanta in segment 2. Default: 7
+
+config STM32L4_CAN_REGDEBUG
+	bool "CAN Register level debug"
+	depends on DEBUG_CAN_INFO
+	default n
+	---help---
+		Output detailed register-level CAN device debug information.
+		Requires also CONFIG_DEBUG_CAN_INFO.
+
 endmenu
 
 endif # ARCH_CHIP_STM32L4

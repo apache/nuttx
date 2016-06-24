@@ -224,7 +224,7 @@ static uint16_t sendto_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
 {
   FAR struct sendto_s *pstate = (FAR struct sendto_s *)pvpriv;
 
-  nllvdbg("flags: %04x\n", flags);
+  ninfo("flags: %04x\n", flags);
   if (pstate)
     {
       /* If the network device has gone down, then we will have terminate
@@ -235,7 +235,7 @@ static uint16_t sendto_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
         {
           /* Terminate the transfer with an error. */
 
-          nlldbg("ERROR: Network is down\n");
+          nwarn("WARNING: Network is down\n");
           pstate->st_sndlen = -ENETUNREACH;
         }
 
@@ -257,7 +257,7 @@ static uint16_t sendto_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
             {
               /* Yes.. report the timeout */
 
-              nlldbg("ERROR: SEND timeout\n");
+              nwarn("WARNING: SEND timeout\n");
               pstate->st_sndlen = -ETIMEDOUT;
             }
           else
@@ -375,7 +375,7 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
 
   if (ret < 0)
     {
-      ndbg("ERROR: Peer not reachable\n");
+      nerr("ERROR: Peer not reachable\n");
       return -ENETUNREACH;
     }
 #endif /* CONFIG_NET_ARP_SEND || CONFIG_NET_ICMPv6_NEIGHBOR */
@@ -419,7 +419,7 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
   ret = udp_connect(conn, to);
   if (ret < 0)
     {
-      ndbg("ERROR: udp_connect failed: %d\n", ret);
+      nerr("ERROR: udp_connect failed: %d\n", ret);
       goto errout_with_lock;
     }
 
@@ -430,7 +430,7 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
   dev = udp_find_raddr_device(conn);
   if (dev == NULL)
     {
-      ndbg("ERROR: udp_find_raddr_device failed\n");
+      nerr("ERROR: udp_find_raddr_device failed\n");
       ret = -ENETUNREACH;
       goto errout_with_lock;
    }
