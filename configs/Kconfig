@@ -444,6 +444,12 @@ config ARCH_BOARD_MIRTOO
 		This is the port to the DTX1-4000L "Mirtoo" module.  This module uses MicroChip
 		PIC32MX250F128D.  See http://www.dimitech.com/ for further information.
 
+config ARCH_BOARD_MOXA
+	bool "Moxa board"
+	depends on ARCH_CHIP_MOXART
+	---help---
+		Moxa
+
 config ARCH_BOARD_NUTINY_NUC120
 	bool "Nuvoton NuTiny NUC120"
 	depends on ARCH_CHIP_NUC120LE3AN
@@ -1257,26 +1263,13 @@ config ARCH_BOARD_CUSTOM
 		Don't see the board you want?  You must first select the exact MCU part
 		number, then the boards supporting that part will be available for selection.
 
-config ARCH_BOARD_MOXA
-	bool "Moxa board"
-	depends on ARCH_CHIP_MOXART
-	---help---
-		Moxa
-
 endchoice
 
-if ARCH_BOARD_CUSTOM
 menu "Custom Board Configuration"
-
-config ARCH_BOARD_CUSTOM_NAME
-	string "Custom board name"
-	default ""
-	---help---
-		This is a name for the board.  It is not used except to return the
-		information via the NSH uname command.
 
 config ARCH_BOARD_CUSTOM_DIR
 	string "Custom board directory"
+	default "configs/dummy"
 	---help---
 		If the custom board configuration is selected, then it is necessary
 		to also tell the build system where it can find the board directory
@@ -1289,33 +1282,17 @@ config ARCH_BOARD_CUSTOM_DIR
 
 config ARCH_BOARD_CUSTOM_DIR_RELPATH
 	bool "Relative custom board directory"
+	default y
 	---help---
 		Specifies that the board directory is relative to the NuttX directory.
 
-config BOARD_CRASHDUMP
-	bool "Enable Board level logging of crash dumps"
-	default n
+if ARCH_BOARD_CUSTOM
+
+config ARCH_BOARD_CUSTOM_NAME
+	string "Custom board name"
 	---help---
-		If selected up_asseert will call out to board_crashdump, in the case
-		of an assertion failure, prior to calling exit. Or in the
-		case of a hardfault prior to looping indefinitely. board_crashdump
-		then has a chance to save the state of the machine.
-
-		The purpose of board_crashdump is to save as much information as it can
-		about the cause of the fault and then most likely reset the system.
-
-		 N.B. There is limited system resources that can be used, who knows
-		 what memory is trashed? So all we can expect to do is save the
-		"machine state" in a place where on the next reset can write it
-		to more sophisticated storage in a sane operating environment.
-
-config BOARD_RESET_ON_CRASH
-	bool "Eanble Board Reset after the crashdump is saved"
-	default n
-	depends on BOARD_CRASHDUMP
-	---help---
-		If selected the board_crashdump should reset the machine after
-		saveing the state of the machine
+		This is a name for the board.  It is not used except to return the
+		information via the NSH uname command.
 
 config BOARD_CUSTOM_LEDS
 	bool "Custom board LEDs"
@@ -1341,8 +1318,8 @@ config BOARD_CUSTOM_INTERRUPT
 	depends on NETDEVICES
 	select ARCH_PHY_INTERRUPT if NETDEVICES
 
-endmenu # Custom Board Configuration
 endif #ARCH_BOARD_CUSTOM
+endmenu # Custom Board Configuration
 
 config ARCH_BOARD
 	string
@@ -1503,33 +1480,8 @@ config ARCH_IRQBUTTONS
 	---help---
 		"Support interrupts on button presses and releases."
 
-config NSH_MMCSDMINOR
-	int "MMC/SD minor number"
-	default 0
-	depends on NSH_LIBRARY && MMCSD
-	---help---
-		If board-specific NSH start-up logic needs to mount an MMC/SD device, then the
-		setting should be provided to identify the MMC/SD minor device number (i.e., the N ini
-		/dev/mmcsdN).  Default 0
-
-config NSH_MMCSDSLOTNO
-	int "MMC/SD slot number"
-	default 0
-	depends on NSH_LIBRARY && MMCSD
-	---help---
-		If board-specific NSH start-up supports more than one MMC/SD slot, then this setting
-		should be provided to indicate which slot should be used.  Default: 0.
-
-config NSH_MMCSDSPIPORTNO
-	int "MMC/SD SPI device number"
-	default 0
-	depends on NSH_LIBRARY && MMCSD && MMCSD_SPI
-	---help---
-		If board-specif NSH start-up logic will mount an SPI-based MMC/SD volume, then this
-		setting may be needed to tell the board logic which SPI bus to use.  Default: 0
-		(meaning is board-specific).
-
 comment "Board-Specific Options"
+
 
 if ARCH_BOARD_AMBER
 source "configs/amber/Kconfig"
@@ -1656,6 +1608,9 @@ source "configs/mirtoo/Kconfig"
 endif
 if ARCH_BOARD_MOTEINO_MEGA
 source "configs/moteino-mega/Kconfig"
+endif
+if ARCH_BOARD_MOXA
+source "configs/moxa/Kconfig"
 endif
 if ARCH_BOARD_MX1ADS
 source "configs/mx1ads/Kconfig"
@@ -1891,9 +1846,34 @@ endif
 if ARCH_BOARD_SIM
 source "configs/sim/Kconfig"
 endif
-if ARCH_BOARD_MOXA
-source "configs/moxa/Kconfig"
+if ARCH_BOARD_CUSTOM
+source "$ARCH_BOARD_CUSTOM_DIR/Kconfig"
 endif
+
+config BOARD_CRASHDUMP
+	bool "Enable Board level logging of crash dumps"
+	default n
+	---help---
+		If selected up_assert will call out to board_crashdump, in the case
+		of an assertion failure, prior to calling exit. Or in the
+		case of a hardfault prior to looping indefinitely. board_crashdump
+		then has a chance to save the state of the machine.
+
+		The purpose of board_crashdump is to save as much information as it can
+		about the cause of the fault and then most likely reset the system.
+
+		 N.B. There is limited system resources that can be used, who knows
+		 what memory is trashed? So all we can expect to do is save the
+		"machine state" in a place where on the next reset can write it
+		to more sophisticated storage in a sane operating environment.
+
+config BOARD_RESET_ON_CRASH
+	bool "Enable Board Reset after the crashdump is saved"
+	default n
+	depends on BOARD_CRASHDUMP
+	---help---
+		If selected the board_crashdump should reset the machine after
+		saveing the state of the machine
 
 config LIB_BOARDCTL
 	bool "Enable boardctl() interface"
