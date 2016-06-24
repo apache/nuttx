@@ -213,6 +213,7 @@ config ARCH_CHIP_SAMV7
 	select ARCH_HAVE_RAMFUNCS
 	select ARCH_HAVE_TICKLESS
 	select ARMV7M_HAVE_STACKCHECK
+	select ARCH_HAVE_I2CRESET
 	---help---
 		Atmel SAMV7 (ARM Cortex-M7) architectures
 
