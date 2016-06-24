@@ -128,6 +128,17 @@ static void stm32l4can_dumpfiltregs(FAR struct stm32l4_can_s *priv,
 #  define stm32l4can_dumpfiltregs(priv,msg)
 #endif
 
+/* Filtering (todo) */
+
+static int  stm32l4can_addextfilter(FAR struct stm32l4_can_s *priv,
+              FAR struct canioc_extfilter_s *arg);
+static int  stm32l4can_delextfilter(FAR struct stm32l4_can_s *priv,
+              int arg);
+static int  stm32l4can_addstdfilter(FAR struct stm32l4_can_s *priv,
+              FAR struct canioc_stdfilter_s *arg);
+static int  stm32l4can_delstdfilter(FAR struct stm32l4_can_s *priv,
+              int arg);
+
 /* CAN driver methods */
 
 static void stm32l4can_reset(FAR struct can_dev_s *dev);
@@ -156,17 +167,6 @@ static int  stm32l4can_exitinitmode(FAR struct stm32l4_can_s *priv);
 static int  stm32l4can_bittiming(FAR struct stm32l4_can_s *priv);
 static int  stm32l4can_cellinit(FAR struct stm32l4_can_s *priv);
 static int  stm32l4can_filterinit(FAR struct stm32l4_can_s *priv);
-
-/* Filtering (todo) */
-
-static int  stm32l4can_addextfilter(FAR struct stm32l4_can_s *priv,
-              FAR struct canioc_extfilter_s *arg);
-static int  stm32l4can_delextfilter(FAR struct stm32l4_can_s *priv,
-              int arg);
-static int  stm32l4can_addstdfilter(FAR struct stm32l4_can_s *priv,
-              FAR struct canioc_stdfilter_s *arg);
-static int  stm32l4can_delstdfilter(FAR struct stm32l4_can_s *priv,
-              int arg);
 
 /****************************************************************************
  * Private Data
@@ -855,9 +855,9 @@ static int stm32l4can_ioctl(FAR struct can_dev_s *dev, int cmd,
               ret = -EINVAL;
             }
 
-          /* Otherwise, nquanta is stm32l4can_bit_quanta, ts1 and ts2 are
+          /* Otherwise, nquanta is can_bit_quanta, ts1 and ts2 are
            * provided by the user and we calculate brp to achieve
-           * stm32l4can_bit_quanta quanta in the bit times
+           * can_bit_quanta quanta in the bit times
            */
 
           else

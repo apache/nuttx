@@ -125,6 +125,17 @@ static void stm32can_dumpfiltregs(FAR struct stm32_can_s *priv,
 #  define stm32can_dumpfiltregs(priv,msg)
 #endif
 
+/* Filtering (todo) */
+
+static int  stm32l4can_addextfilter(FAR struct stm32l4_can_s *priv,
+              FAR struct canioc_extfilter_s *arg);
+static int  stm32l4can_delextfilter(FAR struct stm32l4_can_s *priv,
+              int arg);
+static int  stm32l4can_addstdfilter(FAR struct stm32l4_can_s *priv,
+              FAR struct canioc_stdfilter_s *arg);
+static int  stm32l4can_delstdfilter(FAR struct stm32l4_can_s *priv,
+              int arg);
+
 /* CAN driver methods */
 
 static void stm32can_reset(FAR struct can_dev_s *dev);
@@ -786,9 +797,295 @@ static void stm32can_txint(FAR struct can_dev_s *dev, bool enable)
 
 static int stm32can_ioctl(FAR struct can_dev_s *dev, int cmd, unsigned long arg)
 {
-  /* No CAN ioctls are supported */
+  FAR struct stm32_can_s *priv;
+  int ret = -ENOTTY;
 
-  return -ENOTTY;
+  caninfo("cmd=%04x arg=%lu\n", cmd, arg);
+
+  DEBUGASSERT(dev && dev->cd_priv);
+  priv = dev->cd_priv;
+
+  /* Handle the command */
+
+  switch (cmd)
+    {
+      /* CANIOC_GET_BITTIMING:
+       *   Description:    Return the current bit timing settings
+       *   Argument:       A pointer to a write-able instance of struct
+       *                   canioc_bittiming_s in which current bit timing
+       *                   values will be returned.
+       *   Returned Value: Zero (OK) is returned on success.  Otherwise -1
+       *                   (ERROR) is returned with the errno variable set
+       *                   to indicate the nature of the error.
+       *   Dependencies:   None
+       */
+
+      case CANIOC_GET_BITTIMING:
+        {
+          FAR struct canioc_bittiming_s *bt =
+            (FAR struct canioc_bittiming_s *)arg;
+          uint32_t regval;
+          uint32_t brp;
+
+          DEBUGASSERT(bt != NULL);
+          regval       = stm32can_getreg(priv, STM32_CAN_BTR_OFFSET);
+          bt->bt_sjw   = ((regval & CAN_BTR_SJW_MASK) >> CAN_BTR_SJW_SHIFT) + 1;
+          bt->bt_tseg1 = ((regval & CAN_BTR_TS1_MASK) >> CAN_BTR_TS1_SHIFT) + 1;
+          bt->bt_tseg2 = ((regval & CAN_BTR_TS2_MASK) >> CAN_BTR_TS2_SHIFT) + 1;
+
+          brp          = ((regval & CAN_BTR_BRP_MASK) >> CAN_BTR_BRP_SHIFT) + 1;
+          bt->bt_baud  = STM32_PCLK1_FREQUENCY /
+                         (brp * (bt->bt_tseg1 + bt->bt_tseg2 + 1));
+          ret = OK;
+        }
+        break;
+
+      /* CANIOC_SET_BITTIMING:
+       *   Description:    Set new current bit timing values
+       *   Argument:       A pointer to a read-able instance of struct
+       *                   canioc_bittiming_s in which the new bit timing
+       *                   values are provided.
+       *   Returned Value: Zero (OK) is returned on success.  Otherwise -1
+       *                   (ERROR)is returned with the errno variable set
+       *                    to indicate thenature of the error.
+       *   Dependencies:   None
+       *
+       * REVISIT: There is probably a limitation here:  If there are multiple
+       * threads trying to send CAN packets, when one of these threads
+       * reconfigures the bitrate, the MCAN hardware will be reset and the
+       * context of operation will be lost.  Hence, this IOCTL can only safely
+       * be executed in quiescent time periods.
+       */
+
+      case CANIOC_SET_BITTIMING:
+        {
+          FAR const struct canioc_bittiming_s *bt =
+            (FAR const struct canioc_bittiming_s *)arg;
+          uint32_t brp;
+          uint32_t can_bit_quanta;
+          uint32_t tmp;
+          uint32_t regval;
+
+          DEBUGASSERT(bt != NULL);
+          DEBUGASSERT(bt->bt_baud < STM32_PCLK1_FREQUENCY);
+          DEBUGASSERT(bt->bt_sjw > 0 && bt->bt_sjw <= 4);
+          DEBUGASSERT(bt->bt_tseg1 > 0 && bt->bt_tseg1 <= 16);
+          DEBUGASSERT(bt->bt_tseg2 > 0 && bt->bt_tseg2 <=  8);
+
+          regval = stm32can_getreg(priv, STM32_CAN_BTR_OFFSET);
+
+          /* Extract bit timing data */
+          /* tmp is in clocks per bit time */
+
+          tmp = STM32_PCLK1_FREQUENCY / bt->bt_baud;
+
+          /* This value is dynamic as requested by user */
+
+          can_bit_quanta = bt->bt_tseg1 + bt->bt_tseg2 + 1;
+
+          if (tmp < can_bit_quanta)
+            {
+              /* This timing is not possible */
+
+              ret = -EINVAL;
+            }
+
+          /* Otherwise, nquanta is can_bit_quanta, ts1 and ts2 are
+           * provided by the user and we calculate brp to achieve
+           * can_bit_quanta quanta in the bit times
+           */
+
+          else
+            {
+              brp = (tmp + (can_bit_quanta/2)) / can_bit_quanta;
+              DEBUGASSERT(brp >= 1 && brp <= CAN_BTR_BRP_MAX);
+            }
+
+          caninfo("TS1: %d TS2: %d BRP: %d\n", bt->bt_tseg1, bt->bt_tseg2, brp);
+
+          /* Configure bit timing. */
+
+          regval &= ~(CAN_BTR_BRP_MASK | CAN_BTR_TS1_MASK | CAN_BTR_TS2_MASK | CAN_BTR_SJW_MASK);
+          regval |= ((brp          - 1) << CAN_BTR_BRP_SHIFT) |
+                    ((bt->bt_tseg1 - 1) << CAN_BTR_TS1_SHIFT) |
+                    ((bt->bt_tseg2 - 1) << CAN_BTR_TS2_SHIFT) |
+                    ((bt->bt_sjw   - 1) << CAN_BTR_SJW_SHIFT);
+
+          /* Bit timing can only be configured in init mode. */
+
+          ret = stm32can_enterinitmode(priv);
+          if (ret != 0)
+            {
+              break;
+            }
+
+          stm32can_putreg(priv, STM32_CAN_BTR_OFFSET, regval);
+
+          ret = stm32can_exitinitmode(priv);
+
+          if (ret == 0)
+            {
+              priv->baud  = STM32_PCLK1_FREQUENCY / (brp * (bt->bt_tseg1 + bt->bt_tseg2 + 1));
+            }
+        }
+        break;
+
+      /* CANIOC_GET_CONNMODES:
+       *   Description:    Get the current bus connection modes
+       *   Argument:       A pointer to a write-able instance of struct
+       *                   canioc_connmodes_s in which the new bus modes will
+       *                   be returned.
+       *   Returned Value: Zero (OK) is returned on success.  Otherwise -1
+       *                   (ERROR)is returned with the errno variable set
+       *                   to indicate the nature of the error.
+       *   Dependencies:   None
+       */
+
+      case CANIOC_GET_CONNMODES:
+        {
+          FAR struct canioc_connmodes_s *bm =
+            (FAR struct canioc_connmodes_s *)arg;
+          uint32_t regval;
+
+          DEBUGASSERT(bm != NULL);
+
+          regval          = stm32can_getreg(priv, STM32_CAN_BTR_OFFSET);
+
+          bm->bm_loopback = ((regval & CAN_BTR_LBKM) == CAN_BTR_LBKM);
+          bm->bm_silent   = ((regval & CAN_BTR_SILM) == CAN_BTR_SILM);
+          ret = OK;
+          break;
+        }
+
+      /* CANIOC_SET_CONNMODES:
+       *   Description:    Set new bus connection modes values
+       *   Argument:       A pointer to a read-able instance of struct
+       *                   canioc_connmodes_s in which the new bus modes
+       *                   are provided.
+       *   Returned Value: Zero (OK) is returned on success.  Otherwise -1
+       *                   (ERROR) is returned with the errno variable set
+       *                   to indicate the nature of the error.
+       *   Dependencies:   None
+      */
+
+      case CANIOC_SET_CONNMODES:
+        {
+          FAR struct canioc_connmodes_s *bm =
+            (FAR struct canioc_connmodes_s *)arg;
+          uint32_t regval;
+
+          DEBUGASSERT(bm != NULL);
+
+          regval = stm32can_getreg(priv, STM32_CAN_BTR_OFFSET);
+
+          if (bm->bm_loopback)
+            {
+            regval |= CAN_BTR_LBKM;
+            }
+          else
+            {
+            regval &= ~CAN_BTR_LBKM;
+            }
+
+          if (bm->bm_silent)
+            {
+            regval |= CAN_BTR_SILM;
+            }
+          else
+            {
+            regval &= ~CAN_BTR_SILM;
+            }
+
+          /* This register can only be configured in init mode. */
+
+          ret = stm32can_enterinitmode(priv);
+          if (ret != 0)
+            {
+              break;
+            }
+
+          stm32can_putreg(priv, STM32_CAN_BTR_OFFSET, regval);
+
+          ret = stm32can_exitinitmode(priv);
+        }
+        break;
+
+#ifdef CONFIG_CAN_EXTID
+      /* CANIOC_ADD_EXTFILTER:
+       *   Description:    Add an address filter for a extended 29 bit
+       *                   address.
+       *   Argument:       A reference to struct canioc_extfilter_s
+       *   Returned Value: A non-negative filter ID is returned on success.
+       *                   Otherwise -1 (ERROR) is returned with the errno
+       *                   variable set to indicate the nature of the error.
+       */
+
+      case CANIOC_ADD_EXTFILTER:
+        {
+          DEBUGASSERT(arg != 0);
+          ret = stm32can_addextfilter(priv, (FAR struct canioc_extfilter_s *)arg);
+        }
+        break;
+
+      /* CANIOC_DEL_EXTFILTER:
+       *   Description:    Remove an address filter for a standard 29 bit
+       *                   address.
+       *   Argument:       The filter index previously returned by the
+       *                   CANIOC_ADD_EXTFILTER command
+       *   Returned Value: Zero (OK) is returned on success.  Otherwise -1
+       *                   (ERROR)is returned with the errno variable set
+       *                   to indicate the nature of the error.
+       */
+
+      case CANIOC_DEL_EXTFILTER:
+        {
+          DEBUGASSERT(arg <= priv->config->nextfilters);
+          ret = stm32can_delextfilter(priv, (int)arg);
+        }
+        break;
+#endif
+
+      /* CANIOC_ADD_STDFILTER:
+       *   Description:    Add an address filter for a standard 11 bit
+       *                   address.
+       *   Argument:       A reference to struct canioc_stdfilter_s
+       *   Returned Value: A non-negative filter ID is returned on success.
+       *                   Otherwise -1 (ERROR) is returned with the errno
+       *                   variable set to indicate the nature of the error.
+       */
+
+      case CANIOC_ADD_STDFILTER:
+        {
+          DEBUGASSERT(arg != 0);
+          ret = stm32can_addstdfilter(priv, (FAR struct canioc_stdfilter_s *)arg);
+        }
+        break;
+
+      /* CANIOC_DEL_STDFILTER:
+       *   Description:    Remove an address filter for a standard 11 bit
+       *                   address.
+       *   Argument:       The filter index previously returned by the
+       *                   CANIOC_ADD_STDFILTER command
+       *   Returned Value: Zero (OK) is returned on success.  Otherwise -1
+       *                   (ERROR) is returned with the errno variable set
+       *                   to indicate the nature of the error.
+       */
+
+      case CANIOC_DEL_STDFILTER:
+        {
+          DEBUGASSERT(arg <= priv->config->nstdfilters);
+          ret = stm32can_delstdfilter(priv, (int)arg);
+        }
+        break;
+
+      /* Unsupported/unrecognized command */
+
+      default:
+        canerr("ERROR: Unrecognized command: %04x\n", cmd);
+        break;
+    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -1667,6 +1964,98 @@ static int stm32can_filterinit(FAR struct stm32_can_s *priv)
   regval &= ~CAN_FMR_FINIT;
   stm32can_putfreg(priv, STM32_CAN_FMR_OFFSET, regval);
   return OK;
+}
+
+/****************************************************************************
+ * Name: stm32can_addextfilter
+ *
+ * Description:
+ *   Add a filter for extended CAN IDs
+ *
+ * Input Parameter:
+ *   priv - A pointer to the private data structure for this CAN block
+ *   arg  - A pointer to a structure describing the filter
+ *
+ * Returned Value:
+ *   A non-negative filter ID is returned on success.
+ *   Otherwise -1 (ERROR) is returned with the errno
+ *   set to indicate the nature of the error.
+ *
+ ****************************************************************************/
+
+static int  stm32can_addextfilter(FAR struct stm32_can_s *priv,
+                                    FAR struct canioc_extfilter_s *arg)
+{
+  return -ENOTTY;
+}
+
+/****************************************************************************
+ * Name: stm32can_delextfilter
+ *
+ * Description:
+ *   Remove a filter for extended CAN IDs
+ *
+ * Input Parameter:
+ *   priv - A pointer to the private data structure for this CAN block
+ *   arg  - The filter index previously returned by the
+ *            CANIOC_ADD_EXTFILTER command
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success.  Otherwise -1 (ERROR)
+ *   returned with the errno variable set to indicate the
+ *   of the error.
+ *
+ ****************************************************************************/
+
+static int  stm32can_delextfilter(FAR struct stm32_can_s *priv, int arg)
+{
+  return -ENOTTY;
+}
+
+/****************************************************************************
+ * Name: stm32can_addextfilter
+ *
+ * Description:
+ *   Add a filter for standard CAN IDs
+ *
+ * Input Parameter:
+ *   priv - A pointer to the private data structure for this CAN block
+ *   arg  - A pointer to a structure describing the filter
+ *
+ * Returned Value:
+ *   A non-negative filter ID is returned on success.
+ *   Otherwise -1 (ERROR) is returned with the errno
+ *   set to indicate the nature of the error.
+ *
+ ****************************************************************************/
+
+static int  stm32can_addstdfilter(FAR struct stm32_can_s *priv,
+                                    FAR struct canioc_stdfilter_s *arg)
+{
+  return -ENOTTY;
+}
+
+/****************************************************************************
+ * Name: stm32can_delstdfilter
+ *
+ * Description:
+ *   Remove a filter for standard CAN IDs
+ *
+ * Input Parameter:
+ *   priv - A pointer to the private data structure for this CAN block
+ *   arg  - The filter index previously returned by the
+ *            CANIOC_ADD_STDFILTER command
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success.  Otherwise -1 (ERROR)
+ *   returned with the errno variable set to indicate the
+ *   of the error.
+ *
+ ****************************************************************************/
+
+static int  stm32can_delstdfilter(FAR struct stm32_can_s *priv, int arg)
+{
+  return -ENOTTY;
 }
 
 /****************************************************************************
