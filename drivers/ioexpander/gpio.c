@@ -188,7 +188,8 @@ static int gpio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         FAR struct gpio_output_dev_s *outdev =
           (FAR struct gpio_output_dev_s *)dev;
 
-        DEBUGASSERT(outdev->gpout_write != NULL);
+        DEBUGASSERT(outdev->gpout_write != NULL &&
+                    ((arg == 0UL) || (arg == 1UL)));
         ret = outdev->gpout_write(outdev, (int)arg);
       }
     else
@@ -242,9 +243,10 @@ int gpio_input_register(FAR struct gpio_input_dev_s *dev, int minor)
 {
   char devname[16];
 
-  DEBUGASSERT(dev != NULL && !dev->output && (unsigned int)minor < 100);
-  snprintf(devname, 16, "/dev/gpin%u", (unsigned int)minor);
+  DEBUGASSERT(dev != NULL && !dev->gpin_output && dev->gpin_read != NULL &&
+              (unsigned int)minor < 100);
 
+  snprintf(devname, 16, "/dev/gpin%u", (unsigned int)minor);
   return register_driver(devname, &g_gpio_input_ops, 0444, dev);
 }
 
@@ -260,9 +262,10 @@ int gpio_output_register(FAR struct gpio_output_dev_s *dev, int minor)
 {
   char devname[16];
 
-  DEBUGASSERT(dev != NULL && dev->output && (unsigned int)minor < 100);
-  snprintf(devname, 16, "/dev/gpout%u", (unsigned int)minor);
+  DEBUGASSERT(dev != NULL && dev->gpout_output && dev->gpout_read != NULL &&
+              dev->gpout_write != NULL &&(unsigned int)minor < 100);
 
+  snprintf(devname, 16, "/dev/gpout%u", (unsigned int)minor);
   return register_driver(devname, &g_gpio_output_ops, 0222, dev);
 }
 
