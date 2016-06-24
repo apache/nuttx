@@ -1,7 +1,7 @@
 /****************************************************************************
  * /libc/stdlib/lib_strtoul.c
  *
- *   Copyright (C) 2007, 2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,12 +40,9 @@
 #include <nuttx/config.h>
 
 #include <stdlib.h>
+#include <errno.h>
 
 #include "libc.h"
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -59,13 +56,18 @@
  *   nptr to a long unsigned integer value according to the given base, which
  *   must be between 2 and 36 inclusive, or be the special value 0.
  *
- * Warning: does not check for integer overflow!
+ * Returns:
+ *   - The converted value, if the base and number are valid
+ *   - 0 if an error occurs, and seterrno to:
+ *     * EINVAL if base < 2 or base > 36
+ *     * ERANGE if the number cannot be represented using unsigned long
  *
  ****************************************************************************/
 
 unsigned long strtoul(FAR const char *nptr, FAR char **endptr, int base)
 {
   unsigned long accum = 0;
+  unsigned long prev;
   int value;
 
   if (nptr)
@@ -74,16 +76,32 @@ unsigned long strtoul(FAR const char *nptr, FAR char **endptr, int base)
 
       lib_skipspace(&nptr);
 
-      /* Check for unspecified base */
+      /* Check for unspecified or incorrect base */
 
       base = lib_checkbase(base, &nptr);
+
+      if (base < 0)
+        {
+          set_errno(EINVAL);
+          return 0;
+        }
 
       /* Accumulate each "digit" */
 
       while (lib_isbasedigit(*nptr, base, &value))
         {
-            accum = accum*base + value;
-            nptr++;
+          prev  = accum;
+          accum = accum*base + value;
+          nptr++;
+
+          /* Check for overflow */
+
+          if (accum < prev)
+            {
+              set_errno(ERANGE);
+              accum = 0;
+              break;
+            }
         }
 
       /* Return the final pointer to the unused value */

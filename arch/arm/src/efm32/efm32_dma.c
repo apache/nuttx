@@ -270,7 +270,7 @@ void weak_function up_dmainitialize(void)
   uint32_t regval;
   int i;
 
-  dmallvdbg("Initialize XDMAC0\n");
+  dmainfo("Initialize XDMAC0\n");
 
   /* Initialize the channel list  */
 
@@ -416,7 +416,7 @@ void efm32_dmafree(DMA_HANDLE handle)
   struct dma_channel_s *dmach = (struct dma_channel_s *)handle;
 
   DEBUGASSERT(dmach != NULL && dmach->inuse);
-  dmavdbg("DMA channel %d\n", dmach->chan);
+  dmainfo("DMA channel %d\n", dmach->chan);
 
   /* Disable the channel */
 
@@ -745,7 +745,7 @@ void efm32_dmastop(DMA_HANDLE handle)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG_DMA
+#ifdef CONFIG_DEBUG_DMA_INFO
 void efm32_dmasample(DMA_HANDLE handle, struct efm32_dmaregs_s *regs)
 {
   struct dma_channel_s *dmach = (struct dma_channel_s *)handle;
@@ -798,35 +798,35 @@ void efm32_dmasample(DMA_HANDLE handle, struct efm32_dmaregs_s *regs)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG_DMA
+#ifdef CONFIG_DEBUG_DMA_INFO
 void efm32_dmadump(DMA_HANDLE handle, const struct efm32_dmaregs_s *regs,
                    const char *msg)
 {
   struct dma_channel_s *dmach = (struct dma_channel_s *)handle;
 
-  dmadbg("%s\n", msg);
-  dmadbg("  DMA Registers:\n");
-  dmadbg("        STATUS: %08x\n", regs->status);
-  dmadbg("      CTRLBASE: %08x\n", regs->ctrlbase);
-  dmadbg("   ALTCTRLBASE: %08x\n", regs->altctrlbase);
-  dmadbg("  CHWAITSTATUS: %08x\n", regs->chwaitstatus);
-  dmadbg("   CHUSEBURSTS: %08x\n", regs->chusebursts);
-  dmadbg("    CHREQMASKS: %08x\n", regs->chreqmasks);
-  dmadbg("         CHENS: %08x\n", regs->chens);
-  dmadbg("        CHALTS: %08x\n", regs->chalts);
-  dmadbg("        CHPRIS: %08x\n", regs->chpris);
-  dmadbg("        ERRORC: %08x\n", regs->errorc);
-  dmadbg("   CHREQSTATUS: %08x\n", regs->chreqstatus);
-  dmadbg("  CHSREQSTATUS: %08x\n", regs->chsreqstatus);
-  dmadbg("           IEN: %08x\n", regs->ien);
+  dmainfo("%s\n", msg);
+  dmainfo("  DMA Registers:\n");
+  dmainfo("        STATUS: %08x\n", regs->status);
+  dmainfo("      CTRLBASE: %08x\n", regs->ctrlbase);
+  dmainfo("   ALTCTRLBASE: %08x\n", regs->altctrlbase);
+  dmainfo("  CHWAITSTATUS: %08x\n", regs->chwaitstatus);
+  dmainfo("   CHUSEBURSTS: %08x\n", regs->chusebursts);
+  dmainfo("    CHREQMASKS: %08x\n", regs->chreqmasks);
+  dmainfo("         CHENS: %08x\n", regs->chens);
+  dmainfo("        CHALTS: %08x\n", regs->chalts);
+  dmainfo("        CHPRIS: %08x\n", regs->chpris);
+  dmainfo("        ERRORC: %08x\n", regs->errorc);
+  dmainfo("   CHREQSTATUS: %08x\n", regs->chreqstatus);
+  dmainfo("  CHSREQSTATUS: %08x\n", regs->chsreqstatus);
+  dmainfo("           IEN: %08x\n", regs->ien);
 #if defined(CONFIG_EFM32_EFM32GG)
-  dmadbg("          CTRL: %08x\n", regs->ctrl);
-  dmadbg("           RDS: %08x\n", regs->rds);
-  dmadbg("         LOOP0: %08x\n", regs->loop0);
-  dmadbg("         LOOP1: %08x\n", regs->loop1);
-  dmadbg("         RECT0: %08x\n", regs->rect0);
+  dmainfo("          CTRL: %08x\n", regs->ctrl);
+  dmainfo("           RDS: %08x\n", regs->rds);
+  dmainfo("         LOOP0: %08x\n", regs->loop0);
+  dmainfo("         LOOP1: %08x\n", regs->loop1);
+  dmainfo("         RECT0: %08x\n", regs->rect0);
 #endif
-  dmadbg("  DMA Channel %d Registers:\n", dmach->chan);
-  dmadbg("        CHCTRL: %08x\n", regs->chnctrl);
+  dmainfo("  DMA Channel %d Registers:\n", dmach->chan);
+  dmainfo("        CHCTRL: %08x\n", regs->chnctrl);
 }
 #endif

@@ -56,16 +56,16 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* CONFIG_DEBUG, CONFIG_DEBUG_VERBOSE, and CONFIG_DEBUG_BINFMT have to be
+/* CONFIG_DEBUG_FEATURES, CONFIG_DEBUG_INFO, and CONFIG_DEBUG_BINFMT have to be
  * defined or CONFIG_NXFLAT_DUMPBUFFER does nothing.
  */
 
-#if !defined(CONFIG_DEBUG_VERBOSE) || !defined (CONFIG_DEBUG_BINFMT)
+#if !defined(CONFIG_DEBUG_INFO) || !defined (CONFIG_DEBUG_BINFMT)
 #  undef CONFIG_NXFLAT_DUMPBUFFER
 #endif
 
 #ifdef CONFIG_NXFLAT_DUMPBUFFER
-# define nxflat_dumpbuffer(m,b,n) bvdbgdumpbuffer(m,b,n)
+# define nxflat_dumpbuffer(m,b,n) binfodumpbuffer(m,b,n)
 #else
 # define nxflat_dumpbuffer(m,b,n)
 #endif
@@ -79,7 +79,7 @@
  ****************************************************************************/
 
 static int nxflat_loadbinary(struct binary_s *binp);
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_BINFMT)
+#if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_DEBUG_BINFMT)
 static void nxflat_dumploadinfo(struct nxflat_loadinfo_s *loadinfo);
 #endif
 
@@ -102,36 +102,36 @@ static struct binfmt_s g_nxflatbinfmt =
  * Name: nxflat_dumploadinfo
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_BINFMT)
+#if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_DEBUG_BINFMT)
 static void nxflat_dumploadinfo(struct nxflat_loadinfo_s *loadinfo)
 {
   unsigned long dsize = loadinfo->datasize + loadinfo->bsssize;
 
-  bdbg("LOAD_INFO:\n");
-  bdbg("  ISPACE:\n");
-  bdbg("    ispace:       %08lx\n", loadinfo->ispace);
-  bdbg("    entryoffs:    %08lx\n", loadinfo->entryoffs);
-  bdbg("    isize:        %08lx\n", loadinfo->isize);
+  berr("LOAD_INFO:\n");
+  berr("  ISPACE:\n");
+  berr("    ispace:       %08lx\n", loadinfo->ispace);
+  berr("    entryoffs:    %08lx\n", loadinfo->entryoffs);
+  berr("    isize:        %08lx\n", loadinfo->isize);
 
-  bdbg("  DSPACE:\n");
-  bdbg("    dspace:       %08lx\n", loadinfo->dspace);
+  berr("  DSPACE:\n");
+  berr("    dspace:       %08lx\n", loadinfo->dspace);
   if (loadinfo->dspace != NULL)
     {
-      bdbg("      crefs:      %d\n",    loadinfo->dspace->crefs);
-      bdbg("      region:     %08lx\n", loadinfo->dspace->region);
+      berr("      crefs:      %d\n",    loadinfo->dspace->crefs);
+      berr("      region:     %08lx\n", loadinfo->dspace->region);
     }
-  bdbg("    datasize:     %08lx\n", loadinfo->datasize);
-  bdbg("    bsssize:      %08lx\n", loadinfo->bsssize);
-  bdbg("      (pad):      %08lx\n", loadinfo->dsize - dsize);
-  bdbg("    stacksize:    %08lx\n", loadinfo->stacksize);
-  bdbg("    dsize:        %08lx\n", loadinfo->dsize);
+  berr("    datasize:     %08lx\n", loadinfo->datasize);
+  berr("    bsssize:      %08lx\n", loadinfo->bsssize);
+  berr("      (pad):      %08lx\n", loadinfo->dsize - dsize);
+  berr("    stacksize:    %08lx\n", loadinfo->stacksize);
+  berr("    dsize:        %08lx\n", loadinfo->dsize);
 
-  bdbg("  RELOCS:\n");
-  bdbg("    relocstart:   %08lx\n", loadinfo->relocstart);
-  bdbg("    reloccount:   %d\n",    loadinfo->reloccount);
+  berr("  RELOCS:\n");
+  berr("    relocstart:   %08lx\n", loadinfo->relocstart);
+  berr("    reloccount:   %d\n",    loadinfo->reloccount);
 
-  bdbg("  HANDLES:\n");
-  bdbg("    filfd:        %d\n",    loadinfo->filfd);
+  berr("  HANDLES:\n");
+  berr("    filfd:        %d\n",    loadinfo->filfd);
 }
 #else
 # define nxflat_dumploadinfo(i)
@@ -151,7 +151,7 @@ static int nxflat_loadbinary(struct binary_s *binp)
   struct nxflat_loadinfo_s loadinfo;  /* Contains globals for libnxflat */
   int                      ret;
 
-  bvdbg("Loading file: %s\n", binp->filename);
+  binfo("Loading file: %s\n", binp->filename);
 
   /* Initialize the xflat library to load the program binary. */
 
@@ -159,7 +159,7 @@ static int nxflat_loadbinary(struct binary_s *binp)
   nxflat_dumploadinfo(&loadinfo);
   if (ret != 0)
     {
-      bdbg("Failed to initialize for load of NXFLAT program: %d\n", ret);
+      berr("Failed to initialize for load of NXFLAT program: %d\n", ret);
       goto errout;
     }
 
@@ -169,7 +169,7 @@ static int nxflat_loadbinary(struct binary_s *binp)
   nxflat_dumploadinfo(&loadinfo);
   if (ret != 0)
     {
-      bdbg("Failed to load NXFLAT program binary: %d\n", ret);
+      berr("Failed to load NXFLAT program binary: %d\n", ret);
       goto errout_with_init;
     }
 
@@ -178,7 +178,7 @@ static int nxflat_loadbinary(struct binary_s *binp)
   ret = nxflat_bind(&loadinfo, binp->exports, binp->nexports);
   if (ret != 0)
     {
-      bdbg("Failed to bind symbols program binary: %d\n", ret);
+      berr("Failed to bind symbols program binary: %d\n", ret);
       goto errout_with_load;
     }
 
@@ -252,11 +252,11 @@ int nxflat_initialize(void)
 
   /* Register ourselves as a binfmt loader */
 
-  bvdbg("Registering NXFLAT\n");
+  binfo("Registering NXFLAT\n");
   ret = register_binfmt(&g_nxflatbinfmt);
   if (ret != 0)
     {
-      bdbg("Failed to register binfmt: %d\n", ret);
+      berr("Failed to register binfmt: %d\n", ret);
     }
   return ret;
 }

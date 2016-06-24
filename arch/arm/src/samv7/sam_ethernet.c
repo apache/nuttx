@@ -99,7 +99,7 @@ void up_netinitialize(void)
   ret = sam_emac_initialize(EMAC0_INTF);
   if (ret < 0)
     {
-      nlldbg("ERROR: up_emac_initialize(EMAC0) failed: %d\n", ret);
+      nerr("ERROR: up_emac_initialize(EMAC0) failed: %d\n", ret);
     }
 #endif
 
@@ -109,7 +109,7 @@ void up_netinitialize(void)
   ret = sam_emac_initialize(EMAC1_INTF);
   if (ret < 0)
     {
-      nlldbg("ERROR: up_emac_initialize(EMAC1) failed: %d\n", ret);
+      nerr("ERROR: up_emac_initialize(EMAC1) failed: %d\n", ret);
     }
 #endif
 #endif

@@ -96,13 +96,6 @@
 #  endif
 #endif
 
-/* Determine which device to use as the system logging device */
-
-#ifndef CONFIG_SYSLOG
-#  undef CONFIG_SYSLOG_CHAR
-#  undef CONFIG_RAMLOG_SYSLOG
-#endif
-
 /* The design for how we signal UART data availability is up in the air */
 
 #undef CONFIG_SIM_UART_DATAPOST

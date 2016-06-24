@@ -89,7 +89,7 @@ int nx_setbgcolor(NXHANDLE handle,
 {
   FAR struct nxfe_state_s *fe = (FAR struct nxfe_state_s *)handle;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!fe)
     {
       errno = EINVAL;

@@ -222,10 +222,11 @@ void net_initialize(void);
 
 /****************************************************************************
  * Critical section management.  The NuttX configuration setting
- * CONFIG_NET_NOINTS indicates that uIP not called from the interrupt level.
- * If CONFIG_NET_NOINTS is defined, then these will map to semaphore
- * controls.  Otherwise, it assumed that uIP will be called from interrupt
- * level handling and these will map to interrupt enable/disable controls.
+ * CONFIG_NET_NOINTS indicates that the network stack not called from the
+ * interrupt level.  If CONFIG_NET_NOINTS is defined, then these will map
+ * to semaphore controls.  Otherwise, it assumed that the stack will be
+ * called from interrupt level handling and these will map to interrupt
+ * enable/disable controls.
  *
  *
  * If CONFIG_NET_NOINTS is defined, then semaphore based locking is used:

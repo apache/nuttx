@@ -494,14 +494,14 @@ static int up_interrupt(int irq, void *context)
        *  - Overflow condition for the receive buffer OERR (UxSTA bit 1) occurs
        */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
       if (up_pending_irq(priv->irqe))
         {
            /* Clear the pending error interrupt */
 
            up_clrpend_irq(priv->irqe);
-           lldbg("ERROR: interrupt STA: %08x\n",
-                 up_serialin(priv, PIC32MX_UART_STA_OFFSET));
+           _err("ERROR: interrupt STA: %08x\n",
+               up_serialin(priv, PIC32MX_UART_STA_OFFSET));
            handled = true;
         }
 #endif
@@ -700,7 +700,7 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
        */
 
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
       up_enable_irq(priv->irqe);
 #endif
       up_enable_irq(priv->irqrx);
@@ -709,7 +709,7 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
     }
   else
     {
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
       up_disable_irq(priv->irqe);
 #endif
       up_disable_irq(priv->irqrx);

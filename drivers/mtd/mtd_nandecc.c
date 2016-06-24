@@ -97,7 +97,7 @@ int nandecc_readpage(FAR struct nand_dev_s *nand, off_t block,
   unsigned int sparesize;
   int ret;
 
-  fvdbg("block=%d page=%d data=%p spare=%d\n", (int)block, page, data, spare);
+  finfo("block=%d page=%d data=%p spare=%d\n", (int)block, page, data, spare);
 
   /* Get convenience pointers */
 
@@ -125,7 +125,7 @@ int nandecc_readpage(FAR struct nand_dev_s *nand, off_t block,
   ret = NAND_RAWREAD(raw, block, page, 0, spare);
   if (ret < 0)
     {
-      fdbg("ERROR: Failed to read page:d\n", ret);
+      ferr("ERROR: Failed to read page:d\n", ret);
       return ret;
     }
 
@@ -134,7 +134,7 @@ int nandecc_readpage(FAR struct nand_dev_s *nand, off_t block,
   ret = NAND_RAWREAD(nand->raw, block, page, data, 0);
   if (ret < 0)
     {
-      fdbg("ERROR: Failed to read page:d\n", ret);
+      ferr("ERROR: Failed to read page:d\n", ret);
       return ret;
     }
 
@@ -148,7 +148,7 @@ int nandecc_readpage(FAR struct nand_dev_s *nand, off_t block,
   ret = hamming_verify256x(data, pagesize, raw->ecc);
   if (ret && (ret != HAMMING_ERROR_SINGLEBIT))
     {
-      fdbg("ERROR: Block=%d page=%d Unrecoverable error: %d\n",
+      ferr("ERROR: Block=%d page=%d Unrecoverable error: %d\n",
            block, page, ret);
       return -EIO;
     }
@@ -189,7 +189,7 @@ int nandecc_writepage(FAR struct nand_dev_s *nand, off_t block,
   unsigned int sparesize;
   int ret;
 
-  fvdbg("block=%d page=%d data=%p spare=%d\n", (int)block, page, data, spare);
+  finfo("block=%d page=%d data=%p spare=%d\n", (int)block, page, data, spare);
 
   /* Get convenience pointers */
 
@@ -235,7 +235,7 @@ int nandecc_writepage(FAR struct nand_dev_s *nand, off_t block,
   ret = NAND_RAWWRITE(nand->raw, block, page, data, spare);
   if (ret < 0)
     {
-      fdbg("ERROR: Failed to write page:d\n", ret);
+      ferr("ERROR: Failed to write page:d\n", ret);
     }
 
   return ret;

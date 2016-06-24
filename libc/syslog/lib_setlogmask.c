@@ -70,8 +70,12 @@ uint8_t g_syslog_mask = LOG_ALL;
  *   to a priority p is LOG_MASK(p); LOG_UPTO(p) provides the mask of all
  *   priorities in the above list up to and including p.
  *
+ *   Per OpenGroup.org "If the maskpri argument is 0, the current log mask
+ *   is not modified."  In this implementation, the value zero is permitted
+ *   in order to disable all syslog levels.
+ *
  *   REVISIT: Per POSIX the syslog mask should be a per-process value but in
- *   NuttX, the scope of the mask is dependent on the nature of the build.
+ *   NuttX, the scope of the mask is dependent on the nature of the build:
  *
  *   Flat Build:  There is one, global SYSLOG mask that controls all output.
  *   Protected Build:  There are two SYSLOG masks.  One within the kernel

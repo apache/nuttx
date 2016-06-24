@@ -136,10 +136,10 @@ static inline int close_timeout(FAR struct tcp_close_s *pstate)
  * Function: netclose_interrupt
  *
  * Description:
- *   Handle uIP callback events.
+ *   Handle network callback events.
  *
  * Parameters:
- *   conn - uIP TCP connection structure
+ *   conn - TCP connection structure
  *
  * Returned Value:
  *   None
@@ -161,7 +161,7 @@ static uint16_t netclose_interrupt(FAR struct net_driver_s *dev,
 
   DEBUGASSERT(conn != NULL);
 
-  nllvdbg("conn: %p flags: %04x\n", conn, flags);
+  ninfo("conn: %p flags: %04x\n", conn, flags);
 
   /* TCP_DISCONN_EVENTS:
    *   TCP_CLOSE:    The remote host has closed the connection
@@ -209,7 +209,7 @@ static uint16_t netclose_interrupt(FAR struct net_driver_s *dev,
     {
       /* Yes.. Wake up the waiting thread and report the timeout */
 
-      nlldbg("CLOSE timeout\n");
+      nerr("ERROR: CLOSE timeout\n");
       pstate->cl_result = -ETIMEDOUT;
       goto end_wait;
     }
@@ -250,7 +250,7 @@ end_wait:
   pstate->cl_cb->event = NULL;
   sem_post(&pstate->cl_sem);
 
-  nllvdbg("Resuming\n");
+  ninfo("Resuming\n");
   return 0;
 #endif
 }
@@ -320,7 +320,7 @@ static inline void netclose_txnotify(FAR struct socket *psock,
  *   Break any current TCP connection
  *
  * Parameters:
- *   conn - uIP TCP connection structure
+ *   conn - TCP connection structure
  *
  * Returned Value:
  *   None
@@ -428,7 +428,7 @@ static inline int netclose_disconnect(FAR struct socket *psock)
           /* Free the connection */
 
           conn->crefs = 0;          /* No more references on the connection */
-          tcp_free(conn);           /* Free uIP resources */
+          tcp_free(conn);           /* Free network resources */
 
           /* Get the result of the close */
 
@@ -507,17 +507,17 @@ static void local_close(FAR struct socket *psock)
 
 int psock_close(FAR struct socket *psock)
 {
-  int err;
+  int errcode;
 
   /* Verify that the sockfd corresponds to valid, allocated socket */
 
   if (!psock || psock->s_crefs <= 0)
     {
-      err = EBADF;
+      errcode = EBADF;
       goto errout;
     }
 
-  /* We perform the uIP close operation only if this is the last count on
+  /* We perform the close operation only if this is the last count on
    * the socket. (actually, I think the socket crefs only takes the values
    * 0 and 1 right now).
    *
@@ -527,7 +527,7 @@ int psock_close(FAR struct socket *psock)
 
   if (psock->s_crefs <= 1 && psock->s_conn != NULL)
     {
-      /* Perform uIP side of the close depending on the protocol type */
+      /* Perform local side of the close depending on the protocol type */
 
       switch (psock->s_type)
         {
@@ -565,8 +565,8 @@ int psock_close(FAR struct socket *psock)
 
                       /* Break any current connections */
 
-                      err = netclose_disconnect(psock);
-                      if (err < 0)
+                      errcode = netclose_disconnect(psock);
+                      if (errcode < 0)
                         {
                           /* This would normally occur only if there is a
                            * timeout from a lingering close.
@@ -649,7 +649,7 @@ int psock_close(FAR struct socket *psock)
                   /* Yes... free the connection structure */
 
                   conn->crefs = 0;          /* No more references on the connection */
-                  pkt_free(psock->s_conn);  /* Free uIP resources */
+                  pkt_free(psock->s_conn);  /* Free network resources */
                 }
               else
                 {
@@ -662,7 +662,7 @@ int psock_close(FAR struct socket *psock)
 #endif
 
           default:
-            err = EBADF;
+            errcode = EBADF;
             goto errout;
         }
     }
@@ -678,7 +678,7 @@ errout_with_psock:
 #endif
 
 errout:
-  set_errno(err);
+  set_errno(errcode);
   return ERROR;
 }
 

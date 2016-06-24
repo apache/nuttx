@@ -184,11 +184,6 @@ int main(int argc, char **argv, char **envp)
   printf("#  define CONFIG_NFILE_STREAMS 0\n");
   printf("#endif\n\n");
 
-  printf("/* There must be at least one memory region. */\n\n");
-  printf("#ifndef CONFIG_MM_REGIONS\n");
-  printf("#  define CONFIG_MM_REGIONS 1\n");
-  printf("#endif\n\n");
-
   printf("/* If the end of RAM is not specified then it is assumed to be the beginning\n");
   printf(" * of RAM plus the RAM size.\n");
   printf(" */\n\n");
@@ -214,13 +209,6 @@ int main(int argc, char **argv, char **envp)
   printf("#  define CONFIG_STDIO_BUFFER_SIZE 0\n");
   printf("#endif\n\n");
 
-  printf("/* If no standard C buffered I/O is not supported, then line-oriented buffering\n");
-  printf(" * cannot be supported.\n");
-  printf(" */\n\n");
-  printf("#if CONFIG_STDIO_BUFFER_SIZE == 0\n");
-  printf("#  undef CONFIG_STDIO_LINEBUFFER\n");
-  printf("#endif\n\n");
-
   printf("/* If the maximum message size is zero, then we assume that message queues\n");
   printf(" * support should be disabled\n");
   printf(" */\n\n");
@@ -232,19 +220,6 @@ int main(int argc, char **argv, char **envp)
   printf("#  define CONFIG_DISABLE_MQUEUE 1\n");
   printf("#endif\n\n");
 
-  printf("/* If mountpoint support in not included, then no filesystem can be supported */\n\n");
-  printf("#ifdef CONFIG_DISABLE_MOUNTPOINT\n");
-  printf("#  undef CONFIG_FS_BINFS\n");
-  printf("#  undef CONFIG_FS_FAT\n");
-  printf("#  undef CONFIG_FS_HOSTFS\n");
-  printf("#  undef CONFIG_NFS\n");
-  printf("#  undef CONFIG_FS_NXFFS\n");
-  printf("#  undef CONFIG_FS_PROCFS\n");
-  printf("#  undef CONFIG_FS_ROMFS\n");
-  printf("#  undef CONFIG_FS_SMARTFS\n");
-  printf("#  undef CONFIG_FS_TMPFS\n");
-  printf("#endif\n\n");
-
   printf("/* There can be no network support with no socket descriptors */\n\n");
   printf("#if CONFIG_NSOCKET_DESCRIPTORS <= 0\n");
   printf("#  undef CONFIG_NET\n");
@@ -253,57 +228,8 @@ int main(int argc, char **argv, char **envp)
   printf(" * socket descriptors\n");
   printf(" */\n\n");
   printf("#ifndef CONFIG_NET\n");
-  printf("#  undef CONFIG_NSOCKET_DESCRIPTORS\n");
+  printf("#  undef  CONFIG_NSOCKET_DESCRIPTORS\n");
   printf("#  define CONFIG_NSOCKET_DESCRIPTORS 0\n");
-  printf("#endif\n\n");
-
-  printf("/* Protocol support can only be provided on top of basic network support */\n\n");
-  printf("#ifndef CONFIG_NET\n");
-  printf("#  undef CONFIG_NET_TCP\n");
-  printf("#  undef CONFIG_NET_UDP\n");
-  printf("#  undef CONFIG_NET_ICMP\n");
-  printf("#endif\n\n");
-
-  printf("/* NFS client can only be provided on top of UDP network support */\n\n");
-  printf("#if !defined(CONFIG_NET) || !defined(CONFIG_NET_UDP)\n");
-  printf("#  undef CONFIG_NFS\n");
-  printf("#endif\n\n");
-
-  printf("/* Verbose debug and sub-system debug only make sense if debug is enabled */\n\n");
-  printf("#ifndef CONFIG_DEBUG\n");
-  printf("#  undef CONFIG_DEBUG_VERBOSE\n");
-  printf("#  undef CONFIG_DEBUG_ANALOG\n");
-  printf("#  undef CONFIG_DEBUG_AUDIO\n");
-  printf("#  undef CONFIG_DEBUG_BINFMT\n");
-  printf("#  undef CONFIG_DEBUG_CRYPTO\n");
-  printf("#  undef CONFIG_DEBUG_CAN\n");
-  printf("#  undef CONFIG_DEBUG_DMA\n");
-  printf("#  undef CONFIG_DEBUG_FS\n");
-  printf("#  undef CONFIG_DEBUG_GPIO\n");
-  printf("#  undef CONFIG_DEBUG_GRAPHICS\n");
-  printf("#  undef CONFIG_DEBUG_HEAP\n");
-  printf("#  undef CONFIG_DEBUG_I2C\n");
-  printf("#  undef CONFIG_DEBUG_I2S\n");
-  printf("#  undef CONFIG_DEBUG_INPUT\n");
-  printf("#  undef CONFIG_DEBUG_IRQ\n");
-  printf("#  undef CONFIG_DEBUG_LCD\n");
-  printf("#  undef CONFIG_DEBUG_LEDS\n");
-  printf("#  undef CONFIG_DEBUG_LIB\n");
-  printf("#  undef CONFIG_DEBUG_MM\n");
-  printf("#  undef CONFIG_DEBUG_NET\n");
-  printf("#  undef CONFIG_DEBUG_PAGING\n");
-  printf("#  undef CONFIG_DEBUG_PWM\n");
-  printf("#  undef CONFIG_DEBUG_RTC\n");
-  printf("#  undef CONFIG_DEBUG_SCHED\n");
-  printf("#  undef CONFIG_DEBUG_SDIO\n");
-  printf("#  undef CONFIG_DEBUG_SENSORS\n");
-  printf("#  undef CONFIG_DEBUG_SHM\n");
-  printf("#  undef CONFIG_DEBUG_SPI\n");
-  printf("#  undef CONFIG_DEBUG_SYSCALL\n");
-  printf("#  undef CONFIG_DEBUG_TIMER\n");
-  printf("#  undef CONFIG_DEBUG_USB\n");
-  printf("#  undef CONFIG_DEBUG_WATCHDOG\n");
-  printf("#  undef CONFIG_DEBUG_WIRELESS\n");
   printf("#endif\n\n");
 
   printf("#endif /* __INCLUDE_NUTTX_CONFIG_H */\n");

@@ -187,9 +187,9 @@ struct tiva_driver_s
   WDOG_ID  ld_txpoll;          /* TX poll timer */
   WDOG_ID  ld_txtimeout;       /* TX timeout timer */
 
-  /* This holds the information visible to uIP/NuttX */
+  /* This holds the information visible to the NuttX network */
 
-  struct net_driver_s ld_dev;  /* Interface understood by uIP */
+  struct net_driver_s ld_dev;  /* Interface understood by the network */
 };
 
 /****************************************************************************
@@ -333,7 +333,7 @@ static void tiva_ethreset(struct tiva_driver_s *priv)
   regval  = getreg32(TIVA_SYSCON_RCGC2);
   regval |= (SYSCON_RCGC2_EMAC0 | SYSCON_RCGC2_EPHY0);
   putreg32(regval, TIVA_SYSCON_RCGC2);
-  nllvdbg("RCGC2: %08x\n", regval);
+  ninfo("RCGC2: %08x\n", regval);
 
   /* Put the Ethernet controller into the reset state */
 
@@ -349,7 +349,7 @@ static void tiva_ethreset(struct tiva_driver_s *priv)
 
   regval &= ~(SYSCON_SRCR2_EMAC0 | SYSCON_SRCR2_EPHY0);
   putreg32(regval, TIVA_SYSCON_SRCR2);
-  nllvdbg("SRCR2: %08x\n", regval);
+  ninfo("SRCR2: %08x\n", regval);
 
   /* Wait just a bit, again.  If we touch the ethernet too soon, we may busfault. */
 
@@ -495,7 +495,7 @@ static int tiva_transmit(struct tiva_driver_s *priv)
        */
 
       pktlen     = priv->ld_dev.d_len;
-      nllvdbg("Sending packet, pktlen: %d\n", pktlen);
+      ninfo("Sending packet, pktlen: %d\n", pktlen);
       DEBUGASSERT(pktlen > ETH_HDRLEN);
 
       dbuf       = priv->ld_dev.d_buf;
@@ -558,7 +558,7 @@ static int tiva_transmit(struct tiva_driver_s *priv)
  * Function: tiva_txpoll
  *
  * Description:
- *   The transmitter is available, check if uIP has any outgoing packets ready
+ *   The transmitter is available, check if the network has any outgoing packets ready
  *   to send.  This is a callback from devif_poll().  devif_poll() may be called:
  *
  *   1. When the preceding TX packet send is complete,
@@ -584,7 +584,7 @@ static int tiva_txpoll(struct net_driver_s *dev)
    * the field d_len is set to a value > 0.
    */
 
-  nllvdbg("Poll result: d_len=%d\n", priv->ld_dev.d_len);
+  ninfo("Poll result: d_len=%d\n", priv->ld_dev.d_len);
   if (priv->ld_dev.d_len > 0)
     {
       DEBUGASSERT((tiva_ethin(priv, TIVA_MAC_TR_OFFSET) & MAC_TR_NEWTX) == 0);
@@ -672,12 +672,12 @@ static void tiva_receive(struct tiva_driver_s *priv)
 
       regval = tiva_ethin(priv, TIVA_MAC_DATA_OFFSET);
       pktlen = (int)(regval & 0x0000ffff);
-      nllvdbg("Receiving packet, pktlen: %d\n", pktlen);
+      ninfo("Receiving packet, pktlen: %d\n", pktlen);
 
       /* Check if the pktlen is valid.  It should be large enough to hold
        * an Ethernet header and small enough to fit entirely in the I/O
        * buffer.  Six is subtracted to acount for the 2-byte length/type
-       * and 4 byte FCS that are not copied into the uIP packet.
+       * and 4 byte FCS that are not copied into the network packet.
        */
 
       if (pktlen > (CONFIG_NET_ETH_MTU + 6) || pktlen <= (ETH_HDRLEN + 6))
@@ -686,7 +686,7 @@ static void tiva_receive(struct tiva_driver_s *priv)
 
           /* We will have to drop this packet */
 
-          nlldbg("Bad packet size dropped (%d)\n", pktlen);
+          nwarn("WARNING: Bad packet size dropped (%d)\n", pktlen);
           NETDEV_RXERRORS(&priv->ld_dev);
 
           /* The number of bytes and words left to read is pktlen - 4 (including,
@@ -752,7 +752,7 @@ static void tiva_receive(struct tiva_driver_s *priv)
             }
         }
 
-      /* Pass the packet length to uIP MINUS 2 bytes for the length and
+      /* Pass the packet length to the network MINUS 2 bytes for the length and
        * 4 bytes for the FCS.
        */
 
@@ -770,7 +770,7 @@ static void tiva_receive(struct tiva_driver_s *priv)
 #ifdef CONFIG_NET_IPv4
       if (ETHBUF->type == HTONS(ETHTYPE_IP))
         {
-          nllvdbg("IPv4 frame\n");
+          ninfo("IPv4 frame\n");
           NETDEV_RXIPV4(&priv->ld_dev);
 
           /* Handle ARP on input then give the IPv4 packet to the network
@@ -811,7 +811,7 @@ static void tiva_receive(struct tiva_driver_s *priv)
 #ifdef CONFIG_NET_IPv6
       if (ETHBUF->type == HTONS(ETHTYPE_IP6))
         {
-          nllvdbg("Iv6 frame\n");
+          ninfo("Iv6 frame\n");
           NETDEV_RXIPV6(&priv->ld_dev);
 
           /* Give the IPv6 packet to the network layer */
@@ -850,7 +850,7 @@ static void tiva_receive(struct tiva_driver_s *priv)
 #ifdef CONFIG_NET_ARP
       if (ETHBUF->type == htons(ETHTYPE_ARP))
         {
-          nllvdbg("ARP packet received (%02x)\n", ETHBUF->type);
+          ninfo("ARP packet received (%02x)\n", ETHBUF->type);
           NETDEV_RXARP(&priv->ld_dev);
 
           arp_arpin(&priv->ld_dev);
@@ -867,7 +867,8 @@ static void tiva_receive(struct tiva_driver_s *priv)
       else
 #endif
         {
-          nlldbg("Unsupported packet type dropped (%02x)\n", htons(ETHBUF->type));
+          nwarn("WARNING: Unsupported packet type dropped (%02x)\n",
+                  htons(ETHBUF->type));
           NETDEV_RXDROPPED(&priv->ld_dev);
         }
     }
@@ -905,7 +906,7 @@ static void tiva_txdone(struct tiva_driver_s *priv)
 
   DEBUGASSERT((tiva_ethin(priv, TIVA_MAC_TR_OFFSET) & MAC_TR_NEWTX) == 0);
 
-  /* Then poll uIP for new XMIT data */
+  /* Then poll the network for new XMIT data */
 
   (void)devif_poll(&priv->ld_dev, tiva_txpoll);
 }
@@ -1024,7 +1025,7 @@ static void tiva_txtimeout(int argc, uint32_t arg, ...)
 
   /* Increment statistics */
 
-  nlldbg("Tx timeout\n");
+  nerr("ERROR: Tx timeout\n");
   NETDEV_TXTIMEOUTS(&priv->ld_dev);
 
   /* Then reset the hardware */
@@ -1033,7 +1034,7 @@ static void tiva_txtimeout(int argc, uint32_t arg, ...)
   tiva_ifdown(&priv->ld_dev);
   tiva_ifup(&priv->ld_dev);
 
-  /* Then poll uIP for new XMIT data */
+  /* Then poll the network for new XMIT data */
 
   (void)devif_poll(&priv->ld_dev, tiva_txpoll);
 }
@@ -1069,7 +1070,7 @@ static void tiva_polltimer(int argc, uint32_t arg, ...)
 
   if ((tiva_ethin(priv, TIVA_MAC_TR_OFFSET) & MAC_TR_NEWTX) == 0)
     {
-      /* If so, update TCP timing states and poll uIP for new XMIT data */
+      /* If so, update TCP timing states and poll the network for new XMIT data */
 
       (void)devif_timer(&priv->ld_dev, tiva_txpoll);
 
@@ -1104,9 +1105,9 @@ static int tiva_ifup(struct net_driver_s *dev)
   uint32_t div;
   uint16_t phyreg;
 
-  nlldbg("Bringing up: %d.%d.%d.%d\n",
-       dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
-       (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
+  ninfo("Bringing up: %d.%d.%d.%d\n",
+        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
+        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
 
   /* Enable and reset the Ethernet controller */
 
@@ -1125,7 +1126,7 @@ static int tiva_ifup(struct net_driver_s *dev)
 
   div = SYSCLK_FREQUENCY / 2 / TIVA_MAX_MDCCLK;
   tiva_ethout(priv, TIVA_MAC_MDV_OFFSET, div);
-  nllvdbg("MDV:   %08x\n", div);
+  ninfo("MDV:   %08x\n", div);
 
   /* Then configure the Ethernet Controller for normal operation
    *
@@ -1137,7 +1138,7 @@ static int tiva_ifup(struct net_driver_s *dev)
   regval &= ~TIVA_TCTCL_CLRBITS;
   regval |= TIVA_TCTCL_SETBITS;
   tiva_ethout(priv, TIVA_MAC_TCTL_OFFSET, regval);
-  nllvdbg("TCTL:  %08x\n", regval);
+  ninfo("TCTL:  %08x\n", regval);
 
   /* Setup the receive control register (Disable multicast frames, disable
    * promiscuous mode, disable bad CRC rejection).
@@ -1147,7 +1148,7 @@ static int tiva_ifup(struct net_driver_s *dev)
   regval &= ~TIVA_RCTCL_CLRBITS;
   regval |= TIVA_RCTCL_SETBITS;
   tiva_ethout(priv, TIVA_MAC_RCTL_OFFSET, regval);
-  nllvdbg("RCTL:  %08x\n", regval);
+  ninfo("RCTL:  %08x\n", regval);
 
   /* Setup the time stamp configuration register */
 
@@ -1159,7 +1160,7 @@ static int tiva_ifup(struct net_driver_s *dev)
   regval &= ~(MAC_TS_EN);
 #endif
   tiva_ethout(priv, TIVA_MAC_TS_OFFSET, regval);
-  nllvdbg("TS:    %08x\n", regval);
+  ninfo("TS:    %08x\n", regval);
 #endif
 
   /* Wait for the link to come up.  This following is not very conservative
@@ -1168,13 +1169,13 @@ static int tiva_ifup(struct net_driver_s *dev)
    * set
    */
 
-  nlldbg("Waiting for link\n");
+  ninfo("Waiting for link\n");
   do
     {
       phyreg = tiva_phyread(priv, MII_MSR);
     }
   while ((phyreg & MII_MSR_LINKSTATUS) == 0);
-  nlldbg("Link established\n");
+  ninfo("Link established\n");
 
   /* Reset the receive FIFO */
 
@@ -1258,9 +1259,9 @@ static int tiva_ifdown(struct net_driver_s *dev)
   irqstate_t flags;
   uint32_t regval;
 
-  nlldbg("Taking down: %d.%d.%d.%d\n",
-       dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
-       (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
+  ninfo("Taking down: %d.%d.%d.%d\n",
+        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
+        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
 
   /* Cancel the TX poll timer and TX timeout timers */
 
@@ -1353,7 +1354,7 @@ static int tiva_txavail(struct net_driver_s *dev)
   flags = enter_critical_section();
   if (priv->ld_bifup && (tiva_ethin(priv, TIVA_MAC_TR_OFFSET) & MAC_TR_NEWTX) == 0)
     {
-      /* If the interface is up and we can use the Tx FIFO, then poll uIP
+      /* If the interface is up and we can use the Tx FIFO, then poll the network
        * for new Tx data
        */
 
@@ -1455,7 +1456,7 @@ static inline int tiva_ethinitialize(int intf)
 
   /* Check if the Ethernet module is present */
 
-  ndbg("Setting up eth%d\n", intf);
+  ninfo("Setting up eth%d\n", intf);
 
 #if TIVA_NETHCONTROLLERS > 1
 # error "This debug check only works with one interface"

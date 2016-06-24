@@ -101,7 +101,7 @@ int elf_addrenv_alloc(FAR struct elf_loadinfo_s *loadinfo, size_t textsize,
   ret = up_addrenv_create(textsize, datasize, heapsize, &loadinfo->addrenv);
   if (ret < 0)
     {
-      bdbg("ERROR: up_addrenv_create failed: %d\n", ret);
+      berr("ERROR: up_addrenv_create failed: %d\n", ret);
       return ret;
     }
 
@@ -114,14 +114,14 @@ int elf_addrenv_alloc(FAR struct elf_loadinfo_s *loadinfo, size_t textsize,
   ret = up_addrenv_vtext(&loadinfo->addrenv, &vtext);
   if (ret < 0)
     {
-      bdbg("ERROR: up_addrenv_vtext failed: %d\n", ret);
+      berr("ERROR: up_addrenv_vtext failed: %d\n", ret);
       return ret;
     }
 
   ret = up_addrenv_vdata(&loadinfo->addrenv, textsize, &vdata);
   if (ret < 0)
     {
-      bdbg("ERROR: up_adup_addrenv_vdatadrenv_vtext failed: %d\n", ret);
+      berr("ERROR: up_adup_addrenv_vdatadrenv_vtext failed: %d\n", ret);
       return ret;
     }
 
@@ -170,7 +170,7 @@ void elf_addrenv_free(FAR struct elf_loadinfo_s *loadinfo)
   ret = up_addrenv_destroy(&loadinfo->addrenv);
   if (ret < 0)
     {
-      bdbg("ERROR: up_addrenv_destroy failed: %d\n", ret);
+      berr("ERROR: up_addrenv_destroy failed: %d\n", ret);
     }
 #else
   /* If there is an allocation for the ELF image, free it */

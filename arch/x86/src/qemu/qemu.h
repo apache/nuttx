@@ -187,7 +187,7 @@ void i486_gpioirqdisable(int irq);
  *
  ************************************************************************************/
 
-#ifdef CONFIG_DEBUG_GPIO
+#ifdef CONFIG_DEBUG_GPIO_INFO
 int i486_dumpgpio(uint16_t pinset, const char *msg);
 #else
 #  define i486_dumpgpio(p,m)

@@ -999,7 +999,7 @@ static uint32_t nand_nfc_poll(void)
   sr = nand_getreg(SAM_HSMC_SR);
 
 #ifndef CONFIG_SAMA5_NAND_REGDEBUG
-  // fllvdbg("sr=%08x\n", sr);
+  // finfo("sr=%08x\n", sr);
 #endif
 
   /* When set to one, this XFRDONE indicates that the NFC has terminated
@@ -1065,7 +1065,7 @@ static int hsmc_interrupt(int irq, void *context)
   uint32_t pending = sr & imr;
 
 #ifndef CONFIG_SAMA5_NAND_REGDEBUG
-  fllvdbg("sr=%08x imr=%08x\n", sr, imr);
+  finfo("sr=%08x imr=%08x\n", sr, imr);
 #endif
 
   /* When set to one, this XFRDONE indicates that the NFC has terminated
@@ -1163,7 +1163,7 @@ static void nand_dma_sampleinit(struct sam_nandcs_s *priv)
 #ifdef CONFIG_SAMA5_NAND_DMADEBUG
 static void nand_dma_sampledone(struct sam_nandcs_s *priv, int result)
 {
-  lldbg("result: %d\n", result);
+  finfo("result: %d\n", result);
 
   /* Sample the final registers */
 
@@ -1233,7 +1233,7 @@ static int nand_wait_dma(struct sam_nandcs_s *priv)
         }
     }
 
-  fvdbg("Awakened: result=%d\n", priv->result);
+  finfo("Awakened: result=%d\n", priv->result);
   priv->dmadone = false;
   return priv->result;
 }
@@ -1293,7 +1293,7 @@ static int nand_dma_read(struct sam_nandcs_s *priv,
 
   DEBUGASSERT(priv->dma);
 
-  fvdbg("vsrc=%08x vdest=%08x nbytes=%d\n",
+  finfo("vsrc=%08x vdest=%08x nbytes=%d\n",
         (int)vsrc, (int)vdest, (int)nbytes);
 
   /* Initialize sampling */
@@ -1325,7 +1325,7 @@ static int nand_dma_read(struct sam_nandcs_s *priv,
   ret = sam_dmarxsetup(priv->dma, psrc, pdest, nbytes);
   if (ret < 0)
     {
-      fdbg("ERROR: sam_dmarxsetup failed: %d\n", ret);
+      ferr("ERROR: sam_dmarxsetup failed: %d\n", ret);
       return ret;
     }
 
@@ -1344,7 +1344,7 @@ static int nand_dma_read(struct sam_nandcs_s *priv,
   ret = nand_wait_dma(priv);
   if (ret < 0)
     {
-      fdbg("ERROR: DMA failed: %d\n", ret);
+      ferr("ERROR: DMA failed: %d\n", ret);
     }
 
   nand_dma_sample(priv, DMA_END_TRANSFER);
@@ -1410,7 +1410,7 @@ static int nand_dma_write(struct sam_nandcs_s *priv,
   ret = sam_dmatxsetup(priv->dma, pdest, psrc, nbytes);
   if (ret < 0)
     {
-      fdbg("ERROR: sam_dmatxsetup failed: %d\n", ret);
+      ferr("ERROR: sam_dmatxsetup failed: %d\n", ret);
       return ret;
     }
 
@@ -1429,7 +1429,7 @@ static int nand_dma_write(struct sam_nandcs_s *priv,
   ret = nand_wait_dma(priv);
   if (ret < 0)
     {
-      fdbg("ERROR: DMA failed: %d\n", ret);
+      ferr("ERROR: DMA failed: %d\n", ret);
     }
 
   nand_dma_sample(priv, DMA_END_TRANSFER);
@@ -1463,7 +1463,7 @@ static int nand_nfcsram_read(struct sam_nandcs_s *priv, uint8_t *buffer,
   int remaining;
   int ret;
 
-  fvdbg("buffer=%p buflen=%d\n", buffer, buflen);
+  finfo("buffer=%p buflen=%d\n", buffer, buflen);
 
   /* Get the offset data source address */
 
@@ -1530,7 +1530,7 @@ static int nand_read(struct sam_nandcs_s *priv, uint8_t *buffer,
   int buswidth;
   int ret;
 
-  fvdbg("buffer=%p buflen=%d\n", buffer, (int)buflen);
+  finfo("buffer=%p buflen=%d\n", buffer, (int)buflen);
 
   /* Get the buswidth */
 
@@ -1622,7 +1622,7 @@ static int nand_read_pmecc(struct sam_nandcs_s *priv, off_t block,
   uint16_t sparesize;
   int ret;
 
-  fvdbg("block=%d page=%d data=%p\n", (int)block, page, data);
+  finfo("block=%d page=%d data=%p\n", (int)block, page, data);
   DEBUGASSERT(priv && data);
 
   /* Get page and spare sizes */
@@ -1655,7 +1655,7 @@ static int nand_read_pmecc(struct sam_nandcs_s *priv, off_t block,
       break;
 
     default:
-      fdbg("ERROR:  Unsupported page size: %d\n", pagesize);
+      ferr("ERROR:  Unsupported page size: %d\n", pagesize);
       return -EINVAL;
     }
 
@@ -1719,7 +1719,7 @@ static int nand_read_pmecc(struct sam_nandcs_s *priv, off_t block,
 #endif
   if (ret < 0)
     {
-      fdbg("ERROR: nand_read for data region failed: %d\n", ret);
+      ferr("ERROR: nand_read for data region failed: %d\n", ret);
       return ret;
     }
 
@@ -1732,7 +1732,7 @@ static int nand_read_pmecc(struct sam_nandcs_s *priv, off_t block,
 #endif
   if (ret < 0)
     {
-      fdbg("ERROR: nand_read for spare region failed: %d\n", ret);
+      ferr("ERROR: nand_read for spare region failed: %d\n", ret);
       return ret;
     }
 
@@ -1765,7 +1765,7 @@ static int nand_nfcsram_write(struct sam_nandcs_s *priv, uint8_t *buffer,
   uintptr_t dest;
   int ret;
 
-  fvdbg("buffer=%p buflen=%d offset=%d\n", buffer, buflen, offset);
+  finfo("buffer=%p buflen=%d offset=%d\n", buffer, buflen, offset);
   nand_dump("NFC SRAM Write", buffer, buflen);
 
   /* Apply the offset to the destination address */
@@ -1829,7 +1829,7 @@ static int nand_write(struct sam_nandcs_s *priv, uint8_t *buffer,
   int buswidth;
   int ret;
 
-  fvdbg("buffer=%p buflen=%d offset=%d\n", buffer, buflen, offset);
+  finfo("buffer=%p buflen=%d offset=%d\n", buffer, buflen, offset);
   nand_dump("NAND Write", buffer, buflen);
 
   /* Apply the offset to the destination address */
@@ -1924,7 +1924,7 @@ static int nand_readpage_noecc(struct sam_nandcs_s *priv, off_t block,
   off_t coladdr;
   int ret;
 
-  fvdbg("block=%d page=%d data=%p spare=%p\n", (int)block, page, data, spare);
+  finfo("block=%d page=%d data=%p spare=%p\n", (int)block, page, data, spare);
   DEBUGASSERT(priv && (data || spare));
 
   /* Get page and spare sizes */
@@ -1957,7 +1957,7 @@ static int nand_readpage_noecc(struct sam_nandcs_s *priv, off_t block,
       break;
 
     default:
-      fdbg("ERROR:  Unsupported page size: %d\n", pagesize);
+      ferr("ERROR:  Unsupported page size: %d\n", pagesize);
       return -EINVAL;
     }
 
@@ -1987,7 +1987,7 @@ static int nand_readpage_noecc(struct sam_nandcs_s *priv, off_t block,
       ret = nand_nfcsram_read(priv, (uint8_t *)data, pagesize, 0);
       if (ret < 0)
         {
-          fdbg("ERROR: nand_nfcsram_read for data region failed: %d\n", ret);
+          ferr("ERROR: nand_nfcsram_read for data region failed: %d\n", ret);
           return ret;
         }
     }
@@ -2003,7 +2003,7 @@ static int nand_readpage_noecc(struct sam_nandcs_s *priv, off_t block,
       ret = nand_nfcsram_read(priv, (uint8_t *)spare, sparesize, offset);
       if (ret < 0)
         {
-          fdbg("ERROR: nand_nfcsram_read for spare region failed: %d\n", ret);
+          ferr("ERROR: nand_nfcsram_read for spare region failed: %d\n", ret);
           return ret;
         }
     }
@@ -2038,7 +2038,7 @@ static int nand_readpage_pmecc(struct sam_nandcs_s *priv, off_t block,
   int ret;
   int i;
 
-  fvdbg("block=%d page=%d data=%p\n", (int)block, page, data);
+  finfo("block=%d page=%d data=%p\n", (int)block, page, data);
   DEBUGASSERT(priv && data);
 
   /* Make sure that we have exclusive access to the PMECC and that the PMECC
@@ -2049,7 +2049,7 @@ static int nand_readpage_pmecc(struct sam_nandcs_s *priv, off_t block,
   ret = pmecc_configure(priv, false);
   if (ret < 0)
     {
-      fdbg("ERROR: pmecc_configure failed: %d\n", ret);
+      ferr("ERROR: pmecc_configure failed: %d\n", ret);
       goto errout;
     }
 
@@ -2060,7 +2060,7 @@ static int nand_readpage_pmecc(struct sam_nandcs_s *priv, off_t block,
   ret = nand_read_pmecc(priv, block, page, data);
   if (ret < 0)
     {
-      fdbg("ERROR: Block %d page %d Failed to read page\n",
+      ferr("ERROR: Block %d page %d Failed to read page\n",
            block, page, ret);
       goto errout;
     }
@@ -2076,7 +2076,7 @@ static int nand_readpage_pmecc(struct sam_nandcs_s *priv, off_t block,
       ret = nand_readpage_noecc(priv, block, page, NULL, priv->raw.spare);
       if (ret < 0)
         {
-          fdbg("ERROR: Block %d page %d Failed to re-read spare area: %d\n",
+          ferr("ERROR: Block %d page %d Failed to re-read spare area: %d\n",
                block, page, ret);
           goto errout;
         }
@@ -2098,13 +2098,13 @@ static int nand_readpage_pmecc(struct sam_nandcs_s *priv, off_t block,
         {
           /* Yes.. clear sector errors */
 
-          fdbg("Block=%d page=%d has been erased: %08x\n",
+          finfo("Block=%d page=%d has been erased: %08x\n",
                block, page, regval);
           regval = 0;
         }
       else
         {
-          fdbg("ERROR: block=%d page=%d Corrupted sectors: %08x\n",
+          ferr("ERROR: block=%d page=%d Corrupted sectors: %08x\n",
                block, page, regval);
         }
     }
@@ -2114,7 +2114,7 @@ static int nand_readpage_pmecc(struct sam_nandcs_s *priv, off_t block,
   ret = pmecc_correction(regval, (uintptr_t)data);
   if (ret < 0)
     {
-      fdbg("ERROR: block=%d page=%d Unrecoverable data error: %d\n",
+      ferr("ERROR: block=%d page=%d Unrecoverable data error: %d\n",
            block, page, ret);
     }
 
@@ -2159,7 +2159,7 @@ static int nand_writepage_noecc(struct sam_nandcs_s *priv, off_t block,
   off_t rowaddr;
   int ret = OK;
 
-  fvdbg("block=%d page=%d data=%p spare=%p\n", (int)block, page, data, spare);
+  finfo("block=%d page=%d data=%p spare=%p\n", (int)block, page, data, spare);
 
   /* Get page and spare sizes */
 
@@ -2191,7 +2191,7 @@ static int nand_writepage_noecc(struct sam_nandcs_s *priv, off_t block,
       break;
 
     default:
-      fdbg("ERROR:  Unsupported page size: %d\n", pagesize);
+      ferr("ERROR:  Unsupported page size: %d\n", pagesize);
       return -EINVAL;
     }
 
@@ -2220,7 +2220,7 @@ static int nand_writepage_noecc(struct sam_nandcs_s *priv, off_t block,
       ret = nand_nfcsram_write(priv, (uint8_t *)data, pagesize, 0);
       if (ret < 0)
         {
-          fdbg("ERROR: nand_nfcsram_write for data region failed: %d\n", ret);
+          ferr("ERROR: nand_nfcsram_write for data region failed: %d\n", ret);
           return ret;
         }
 
@@ -2229,7 +2229,7 @@ static int nand_writepage_noecc(struct sam_nandcs_s *priv, off_t block,
           ret = nand_nfcsram_write(priv, (uint8_t *)spare, sparesize, pagesize);
           if (ret < 0)
             {
-              fdbg("ERROR: nand_nfcsram_write for data region failed: %d\n", ret);
+              ferr("ERROR: nand_nfcsram_write for data region failed: %d\n", ret);
               return ret;
             }
         }
@@ -2257,7 +2257,7 @@ static int nand_writepage_noecc(struct sam_nandcs_s *priv, off_t block,
       ret = nand_operation_complete(priv);
       if (ret < 0)
         {
-          fdbg("ERROR: Failed writing data area: %d\n", ret);
+          ferr("ERROR: Failed writing data area: %d\n", ret);
         }
     }
 
@@ -2272,7 +2272,7 @@ static int nand_writepage_noecc(struct sam_nandcs_s *priv, off_t block,
       ret = nand_write(priv, (uint8_t *)spare, sparesize, 0);
       if (ret < 0)
         {
-          fdbg("ERROR: nand_write for spare region failed: %d\n", ret);
+          ferr("ERROR: nand_write for spare region failed: %d\n", ret);
           ret = -EPERM;
         }
 
@@ -2320,7 +2320,7 @@ static int nand_writepage_pmecc(struct sam_nandcs_s *priv, off_t block,
   unsigned int i;
   int ret = 0;
 
-  fvdbg("block=%d page=%d data=%p\n", (int)block, page, data);
+  finfo("block=%d page=%d data=%p\n", (int)block, page, data);
   DEBUGASSERT(priv && data);
 
   /* Make sure that we have exclusive access to the PMECC and that the PMECC
@@ -2331,7 +2331,7 @@ static int nand_writepage_pmecc(struct sam_nandcs_s *priv, off_t block,
   ret = pmecc_configure(priv, false);
   if (ret < 0)
     {
-      fdbg("ERROR: pmecc_configure failed: %d\n", ret);
+      ferr("ERROR: pmecc_configure failed: %d\n", ret);
       goto errout;
     }
 
@@ -2344,7 +2344,7 @@ static int nand_writepage_pmecc(struct sam_nandcs_s *priv, off_t block,
   /* Calculate physical address of the page */
 
   rowaddr = block * nandmodel_pagesperblock(&priv->raw.model) + page;
-  fvdbg("pagesize=%d eccsaddr=%d rowaddr=%d\n", pagesize, eccsaddr, rowaddr);
+  finfo("pagesize=%d eccsaddr=%d rowaddr=%d\n", pagesize, eccsaddr, rowaddr);
 
 #if 1 /* Use NFC SRAM */
   /* Write the data area to NFC SRAM */
@@ -2352,7 +2352,7 @@ static int nand_writepage_pmecc(struct sam_nandcs_s *priv, off_t block,
   ret = nand_nfcsram_write(priv, (uint8_t *)data, pagesize, 0);
   if (ret < 0)
     {
-      fdbg("ERROR: Block %d page %d nand_nfcsram_write for data region failed: %d\n",
+      ferr("ERROR: Block %d page %d nand_nfcsram_write for data region failed: %d\n",
            block, page, ret);
       goto errout;
     }
@@ -2417,7 +2417,7 @@ static int nand_writepage_pmecc(struct sam_nandcs_s *priv, off_t block,
   ret = nand_write(priv, (uint8_t *)data, pagesize, 0);
   if (ret < 0)
     {
-      fdbg("ERROR: Block %d page %d nand_write for data region failed: %d\n",
+      ferr("ERROR: Block %d page %d nand_write for data region failed: %d\n",
            block, page, ret);
       goto errout;
     }
@@ -2437,7 +2437,7 @@ static int nand_writepage_pmecc(struct sam_nandcs_s *priv, off_t block,
   eccpersector = (pmecc_get_eccsize()) / sectersperpage;
   eccsize      = sectersperpage * eccpersector;
 
-  fvdbg("sectersperpage=%d eccpersector=%d eccsize=%d\n",
+  finfo("sectersperpage=%d eccpersector=%d eccsize=%d\n",
         sectersperpage, eccpersector, eccsize);
 
 #ifdef CONFIG_SAMA5_PMECC_TRIMPAGE
@@ -2474,7 +2474,7 @@ static int nand_writepage_pmecc(struct sam_nandcs_s *priv, off_t block,
   ret = nand_write(priv, (uint8_t *)g_nand.ecctab, eccsize, 0);
   if (ret < 0)
     {
-      fdbg("ERROR: Block %d page %d nand_write for spare region failed: %d\n",
+      ferr("ERROR: Block %d page %d nand_write for spare region failed: %d\n",
            block, page, ret);
       goto errout;
     }
@@ -2487,7 +2487,7 @@ static int nand_writepage_pmecc(struct sam_nandcs_s *priv, off_t block,
   ret = nand_operation_complete(priv);
   if (ret < 0)
     {
-      fdbg("ERROR: Block %d page %d Failed writing data area: %d\n",
+      ferr("ERROR: Block %d page %d Failed writing data area: %d\n",
            block, page, ret);
     }
 
@@ -2536,7 +2536,7 @@ static inline int nand_tryeraseblock(struct sam_nandcs_s *priv, off_t block)
   ret = nand_operation_complete(priv);
   if (ret < 0)
     {
-      fdbg("ERROR: Block %d Could not erase: %d\n", block, ret);
+      ferr("ERROR: Block %d Could not erase: %d\n", block, ret);
     }
 
   return ret;
@@ -2550,7 +2550,7 @@ static int nand_eraseblock(struct nand_raw_s *raw, off_t block)
 
   DEBUGASSERT(priv);
 
-  fvdbg("block=%d\n", (int)block);
+  finfo("block=%d\n", (int)block);
 
   /* Get exclusvie access to the HSMC hardware.
    * REVISIT:  The scope of this exclusivity is just NAND.
@@ -2572,7 +2572,7 @@ static int nand_eraseblock(struct nand_raw_s *raw, off_t block)
       retries--;
     }
 
-  fdbg("ERROR: Block %d Failed to erase after %d tries\n",
+  ferr("ERROR: Block %d Failed to erase after %d tries\n",
        (int)block, NAND_ERASE_NRETRIES);
 
   nand_unlock();
@@ -2796,7 +2796,7 @@ static int nand_writepage(struct nand_raw_s *raw, off_t block,
 
 static void nand_reset(struct sam_nandcs_s *priv)
 {
-  fvdbg("Resetting\n");
+  finfo("Resetting\n");
   nand_nfc_cleale(priv, 0, COMMAND_RESET, 0, 0, 0);
   nand_wait_ready(priv);
 }
@@ -2834,7 +2834,7 @@ struct mtd_dev_s *sam_nand_initialize(int cs)
   uint8_t ecctype;
   int ret;
 
-  fvdbg("CS%d\n", cs);
+  finfo("CS%d\n", cs);
 
   /* Select the device structure (In SAMA5D3, NAND is only supported on CS3). */
 
@@ -2923,7 +2923,7 @@ struct mtd_dev_s *sam_nand_initialize(int cs)
   else
 #endif
     {
-      fdbg("ERROR: CS%d unsupported or invalid\n", cs);
+      ferr("ERROR: CS%d unsupported or invalid\n", cs);
       return NULL;
     }
 
@@ -2983,7 +2983,7 @@ struct mtd_dev_s *sam_nand_initialize(int cs)
       ret = irq_attach(SAM_IRQ_HSMC, hsmc_interrupt);
       if (ret < 0)
         {
-          fdbg("Failed to attach HSMC IRQ (%d)", SAM_IRQ_HSMC);
+          ferr("ERROR: Failed to attach HSMC IRQ (%d)", SAM_IRQ_HSMC);
           return NULL;
         }
 #endif
@@ -3013,7 +3013,7 @@ struct mtd_dev_s *sam_nand_initialize(int cs)
   ret = board_nandflash_config(cs);
   if (ret < 0)
     {
-      fdbg("ERROR: board_nandflash_config failed for CS%d: %d\n",
+      ferr("ERROR: board_nandflash_config failed for CS%d: %d\n",
            cs, ret);
       return NULL;
     }
@@ -3029,7 +3029,7 @@ struct mtd_dev_s *sam_nand_initialize(int cs)
   mtd = nand_initialize(&priv->raw);
   if (!mtd)
     {
-      fdbg("ERROR: CS%d nand_initialize failed %d\n", cs);
+      ferr("ERROR: CS%d nand_initialize failed %d\n", cs);
       return NULL;
     }
 
@@ -3043,7 +3043,7 @@ struct mtd_dev_s *sam_nand_initialize(int cs)
   priv->dma = sam_dmachannel(NAND_DMAC, 0);
   if (!priv->dma)
     {
-      fdbg("ERROR: Failed to allocate the DMA channel for CS%d\n", cs);
+      ferr("ERROR: Failed to allocate the DMA channel for CS%d\n", cs);
     }
 #endif
 
@@ -3088,7 +3088,7 @@ bool nand_checkreg(bool wr, uintptr_t regaddr, uint32_t regval)
         {
           /* Yes... show how many times we did it */
 
-          lldbg("...[Repeats %d times]...\n", g_nand.ntimes);
+          finfo("...[Repeats %d times]...\n", g_nand.ntimes);
         }
 
       /* Save information about the new access */

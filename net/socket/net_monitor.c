@@ -145,7 +145,7 @@ static uint16_t connection_event(FAR struct net_driver_s *dev,
 
   if (psock)
     {
-      nllvdbg("flags: %04x s_flags: %02x\n", flags, psock->s_flags);
+      ninfo("flags: %04x s_flags: %02x\n", flags, psock->s_flags);
 
       /* TCP_DISCONN_EVENTS: TCP_CLOSE, TCP_ABORT, TCP_TIMEDOUT, or
        * NETDEV_DOWN.  All loss-of-connection events.

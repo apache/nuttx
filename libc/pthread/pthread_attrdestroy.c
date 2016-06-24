@@ -69,7 +69,7 @@ int pthread_attr_destroy(FAR pthread_attr_t *attr)
 {
   int ret;
 
-  sdbg("attr=0x%p\n", attr);
+  linfo("attr=0x%p\n", attr);
 
   if (!attr)
     {
@@ -81,7 +81,7 @@ int pthread_attr_destroy(FAR pthread_attr_t *attr)
       ret = OK;
     }
 
-  sdbg("Returning %d\n", ret);
+  linfo("Returning %d\n", ret);
   return ret;
 }
 

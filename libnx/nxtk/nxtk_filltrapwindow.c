@@ -96,7 +96,7 @@ int nxtk_filltrapwindow(NXTKWINDOW hfwnd,
   struct nxgl_rect_s relclip;
   struct nxgl_trapezoid_s reltrap;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!hfwnd || !trap || !color)
     {
       set_errno(EINVAL);

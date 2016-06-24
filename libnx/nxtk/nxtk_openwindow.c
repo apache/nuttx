@@ -120,7 +120,7 @@ NXTKWINDOW nxtk_openwindow(NXHANDLE handle,
   FAR struct nxtk_framedwindow_s *fwnd;
   int ret;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!handle || !cb)
     {
       set_errno(EINVAL);

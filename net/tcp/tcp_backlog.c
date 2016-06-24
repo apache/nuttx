@@ -77,9 +77,9 @@ int tcp_backlogcreate(FAR struct tcp_conn_s *conn, int nblg)
   int offset;
   int i;
 
-  nllvdbg("conn=%p nblg=%d\n", conn, nblg);
+  ninfo("conn=%p nblg=%d\n", conn, nblg);
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!conn)
     {
       return -EINVAL;
@@ -109,7 +109,7 @@ int tcp_backlogcreate(FAR struct tcp_conn_s *conn, int nblg)
       bls = (FAR struct tcp_backlog_s *)kmm_zalloc(size);
       if (!bls)
         {
-          nlldbg("Failed to allocate backlog\n");
+          nerr("ERROR: Failed to allocate backlog\n");
           return -ENOMEM;
         }
 
@@ -161,9 +161,9 @@ int tcp_backlogdestroy(FAR struct tcp_conn_s *conn)
   FAR struct tcp_blcontainer_s *blc;
   FAR struct tcp_conn_s        *blconn;
 
-  nllvdbg("conn=%p\n", conn);
+  ninfo("conn=%p\n", conn);
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!conn)
     {
       return -EINVAL;
@@ -222,9 +222,9 @@ int tcp_backlogadd(FAR struct tcp_conn_s *conn, FAR struct tcp_conn_s *blconn)
   FAR struct tcp_blcontainer_s *blc;
   int ret = -EINVAL;
 
-  nllvdbg("conn=%p blconn=%p\n", conn, blconn);
+  ninfo("conn=%p blconn=%p\n", conn, blconn);
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!conn)
     {
       return -EINVAL;
@@ -239,7 +239,7 @@ int tcp_backlogadd(FAR struct tcp_conn_s *conn, FAR struct tcp_conn_s *blconn)
       blc = (FAR struct tcp_blcontainer_s *)sq_remfirst(&bls->bl_free);
       if (!blc)
         {
-          nlldbg("Failed to allocate container\n");
+          nerr("ERROR: Failed to allocate container\n");
           ret = -ENOMEM;
         }
       else
@@ -294,7 +294,7 @@ FAR struct tcp_conn_s *tcp_backlogremove(FAR struct tcp_conn_s *conn)
   FAR struct tcp_blcontainer_s *blc;
   FAR struct tcp_conn_s        *blconn = NULL;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!conn)
     {
       return NULL;
@@ -321,7 +321,7 @@ FAR struct tcp_conn_s *tcp_backlogremove(FAR struct tcp_conn_s *conn)
         }
     }
 
-  nllvdbg("conn=%p, returning %p\n", conn, blconn);
+  ninfo("conn=%p, returning %p\n", conn, blconn);
   return blconn;
 }
 
@@ -345,9 +345,9 @@ int tcp_backlogdelete(FAR struct tcp_conn_s *conn,
   FAR struct tcp_blcontainer_s *blc;
   FAR struct tcp_blcontainer_s *prev;
 
-  nllvdbg("conn=%p blconn=%p\n", conn, blconn);
+  ninfo("conn=%p blconn=%p\n", conn, blconn);
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!conn)
     {
       return -EINVAL;
@@ -390,7 +390,7 @@ int tcp_backlogdelete(FAR struct tcp_conn_s *conn,
             }
         }
 
-      nlldbg("Failed to find pending connection\n");
+      nerr("ERROR: Failed to find pending connection\n");
       return -EINVAL;
     }
 

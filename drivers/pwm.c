@@ -65,24 +65,6 @@
 #ifdef CONFIG_PWM
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-/* Debug ********************************************************************/
-/* Non-standard debug that may be enabled just for testing PWM */
-
-#ifdef CONFIG_DEBUG_PWM
-#  define pwmdbg    dbg
-#  define pwmvdbg   vdbg
-#  define pwmlldbg  lldbg
-#  define pwmllvdbg llvdbg
-#else
-#  define pwmdbg(x...)
-#  define pwmvdbg(x...)
-#  define pwmlldbg(x...)
-#  define pwmllvdbg(x...)
-#endif
-
-/****************************************************************************
  * Private Type Definitions
  ****************************************************************************/
 
@@ -152,23 +134,23 @@ static void pwm_dump(FAR const char *msg, FAR const struct pwm_info_s *info,
   int i;
 #endif
 
-  pwmvdbg("%s: frequency: %d", msg, info->frequency);
+  pwminfo("%s: frequency: %d", msg, info->frequency);
 
 #ifdef CONFIG_PWM_MULTICHAN
   for (i = 0; i < CONFIG_PWM_NCHANNELS; i++)
     {
-      pwmvdbg(" channel: %d duty: %08x",
+      pwminfo(" channel: %d duty: %08x",
               info->channels[i].channel, info->channels[i].duty);
     }
 #else
-  pwmvdbg(" duty: %08x", info->duty);
+  pwminfo(" duty: %08x", info->duty);
 #endif
 
 #ifdef CONFIG_PWM_PULSECOUNT
-  pwmvdbg(" count: %d\n", info->count);
+  pwminfo(" count: %d\n", info->count);
 #endif
 
-  pwmvdbg(" started: %d\n", started);
+  pwminfo(" started: %d\n", started);
 }
 
 /****************************************************************************
@@ -186,7 +168,7 @@ static int pwm_open(FAR struct file *filep)
   uint8_t                     tmp;
   int                         ret;
 
-  pwmvdbg("crefs: %d\n", upper->crefs);
+  pwminfo("crefs: %d\n", upper->crefs);
 
   /* Get exclusive access to the device structures */
 
@@ -220,7 +202,7 @@ static int pwm_open(FAR struct file *filep)
       /* Yes.. perform one time hardware initialization. */
 
       DEBUGASSERT(lower->ops->setup != NULL);
-      pwmvdbg("calling setup\n");
+      pwminfo("calling setup\n");
 
       ret = lower->ops->setup(lower);
       if (ret < 0)
@@ -255,7 +237,7 @@ static int pwm_close(FAR struct file *filep)
   FAR struct pwm_upperhalf_s *upper = inode->i_private;
   int                         ret;
 
-  pwmvdbg("crefs: %d\n", upper->crefs);
+  pwminfo("crefs: %d\n", upper->crefs);
 
   /* Get exclusive access to the device structures */
 
@@ -285,7 +267,7 @@ static int pwm_close(FAR struct file *filep)
       /* Disable the PWM device */
 
       DEBUGASSERT(lower->ops->shutdown != NULL);
-      pwmvdbg("calling shutdown: %d\n");
+      pwminfo("calling shutdown: %d\n");
 
       lower->ops->shutdown(lower);
     }
@@ -393,7 +375,7 @@ static int pwm_start(FAR struct pwm_upperhalf_s *upper, unsigned int oflags)
         {
           /* Looks like we won't be waiting after all */
 
-          pwmvdbg("start failed: %d\n", ret);
+          pwminfo("start failed: %d\n", ret);
           upper->started = false;
           upper->waiting = false;
         }
@@ -450,7 +432,7 @@ static int pwm_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   FAR struct pwm_lowerhalf_s *lower = upper->dev;
   int                         ret;
 
-  pwmvdbg("cmd: %d arg: %ld\n", cmd, arg);
+  pwminfo("cmd: %d arg: %ld\n", cmd, arg);
 
   /* Get exclusive access to the device structures */
 
@@ -540,7 +522,7 @@ static int pwm_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case PWMIOC_STOP:
         {
-          pwmvdbg("PWMIOC_STOP: started: %d\n", upper->started);
+          pwminfo("PWMIOC_STOP: started: %d\n", upper->started);
           DEBUGASSERT(lower->ops->stop != NULL);
 
           if (upper->started)
@@ -561,7 +543,7 @@ static int pwm_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       default:
         {
-          pwmvdbg("Forwarding unrecognized cmd: %d arg: %ld\n", cmd, arg);
+          pwminfo("Forwarding unrecognized cmd: %d arg: %ld\n", cmd, arg);
           DEBUGASSERT(lower->ops->ioctl != NULL);
           ret = lower->ops->ioctl(lower, cmd, arg);
         }
@@ -610,7 +592,7 @@ int pwm_register(FAR const char *path, FAR struct pwm_lowerhalf_s *dev)
   upper = (FAR struct pwm_upperhalf_s *)kmm_zalloc(sizeof(struct pwm_upperhalf_s));
   if (!upper)
     {
-      pwmdbg("Allocation failed\n");
+      pwmerr("Allocation failed\n");
       return -ENOMEM;
     }
 
@@ -624,7 +606,7 @@ int pwm_register(FAR const char *path, FAR struct pwm_lowerhalf_s *dev)
 
   /* Register the PWM device */
 
-  pwmvdbg("Registering %s\n", path);
+  pwminfo("Registering %s\n", path);
   return register_driver(path, &g_pwmops, 0666, upper);
 }
 
@@ -670,7 +652,7 @@ void pwm_expired(FAR void *handle)
 {
   FAR struct pwm_upperhalf_s *upper = (FAR struct pwm_upperhalf_s *)handle;
 
-  pwmllvdbg("started: %d waiting: %d\n", upper->started, upper->waiting);
+  pwminfo("started: %d waiting: %d\n", upper->started, upper->waiting);
 
   /* Make sure that the PWM is started */
 

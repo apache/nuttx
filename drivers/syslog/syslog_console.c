@@ -48,14 +48,6 @@
 #include <nuttx/syslog/syslog.h>
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* The architecture must provide syslog_putc for this driver */
-
-#if defined(CONFIG_SYSLOG)
-
-/****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
@@ -136,4 +128,3 @@ void syslog_console_init(void)
 {
   (void)register_driver("/dev/console", &g_consoleops, 0666, NULL);
 }
-#endif /* CONFIG_SYSLOG */

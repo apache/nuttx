@@ -1,6 +1,7 @@
 /****************************************************************************
  * include/nuttx/net/netdev.h
- * Defines architecture-specific device driver interfaces to the uIP network.
+ * Defines architecture-specific device driver interfaces to the NuttX
+ * network.
  *
  *   Copyright (C) 2007, 2009, 2011-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -232,9 +233,9 @@ struct net_driver_s
    * headers from this buffer. The size of the link level headers is
    * configured by the NET_LL_HDRLEN(dev) define.
    *
-   * uIP will handle only a single buffer for both incoming and outgoing
-   * packets.  However, the drive design may be concurrently send and
-   * filling separate, break-off buffers if CONFIG_NET_MULTIBUFFER is
+   * The network will handle only a single buffer for both incoming and
+   * outgoing packets.  However, the driver design may be concurrently send
+   * and filling separate, break-off buffers if CONFIG_NET_MULTIBUFFER is
    * defined.  That buffer management must be controlled by the driver.
    */
 
@@ -266,7 +267,7 @@ struct net_driver_s
  *
  * Holds the length of the packet in the d_buf buffer.
  *
- * When the network device driver calls the uIP input function,
+ * When the network device driver calls the network input function,
  * d_len should be set to the length of the packet in the d_buf
  * buffer.
  *
@@ -353,10 +354,10 @@ typedef int (*devif_poll_callback_t)(FAR struct net_driver_s *dev);
  ****************************************************************************/
 
 /****************************************************************************
- * uIP device driver functions
+ * Network device driver functions
  *
  * These functions are used by a network device driver for interacting
- * with uIP.
+ * with the NuttX network.
  *
  * Process an incoming IP packet.
  *
@@ -383,9 +384,9 @@ typedef int (*devif_poll_callback_t)(FAR struct net_driver_s *dev);
  *           }
  *       }
  *
- * Note: If you are writing a uIP device driver that needs ARP
- * (Address Resolution Protocol), e.g., when running uIP over
- * Ethernet, you will need to call the uIP ARP code before calling
+ * Note: If you are writing a network device driver that needs ARP
+ * (Address Resolution Protocol), e.g., when running the network over
+ * Ethernet, you will need to call the network ARP code before calling
  * this function:
  *
  *     #define BUF ((struct eth_hdr_s *)&dev->d_buf[0])
@@ -424,8 +425,8 @@ int ipv6_input(FAR struct net_driver_s *dev);
 /****************************************************************************
  * Polling of connections
  *
- * These functions will traverse each active uIP connection structure and
- * perform appropriate operations:  devif_timer() will perform TCP timer
+ * These functions will traverse each active network connection structure
+ * and perform appropriate operations:  devif_timer() will perform TCP timer
  * operations (and UDP polling operations); devif_poll() will perform TCP
  * and UDP polling operations. The CAN driver MUST implement logic to
  * periodically call devif_timer(); devif_poll() may be called asynchronously
@@ -437,7 +438,7 @@ int ipv6_input(FAR struct net_driver_s *dev);
  * value (which it should do only if it cannot accept further write data).
  *
  * When the callback function is called, there may be an outbound packet
- * waiting for service in the uIP packet buffer, and if so the d_len field
+ * waiting for service in the device packet buffer, and if so the d_len field
  * is set to a value larger than zero. The device driver should then send
  * out the packet.
  *
@@ -455,9 +456,9 @@ int ipv6_input(FAR struct net_driver_s *dev);
  *   ...
  *   devif_poll(dev, driver_callback);
  *
- * Note: If you are writing a uIP device driver that needs ARP (Address
- * Resolution Protocol), e.g., when running uIP over Ethernet, you will
- * need to call the arp_out() function in the callback function
+ * Note: If you are writing a network device driver that needs ARP (Address
+ * Resolution Protocol), e.g., when running the networ over Ethernet, you
+ * will need to call the arp_out() function in the callback function
  * before sending the packet:
  *
  *   int driver_callback(FAR struct net_driver_s *dev)

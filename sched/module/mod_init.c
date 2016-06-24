@@ -56,16 +56,16 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* CONFIG_DEBUG, CONFIG_DEBUG_VERBOSE, and CONFIG_MODULE_DUMPBUFFER have to
+/* CONFIG_DEBUG_FEATURES, CONFIG_DEBUG_INFO, and CONFIG_MODULE_DUMPBUFFER have to
  * be defined or CONFIG_MODULE_DUMPBUFFER does nothing.
  */
 
-#if !defined(CONFIG_DEBUG_VERBOSE) || !defined (CONFIG_MODULE_DUMPBUFFER)
+#if !defined(CONFIG_DEBUG_INFO) || !defined (CONFIG_MODULE_DUMPBUFFER)
 #  undef CONFIG_MODULE_DUMPBUFFER
 #endif
 
 #ifdef CONFIG_MODULE_DUMPBUFFER
-# define mod_dumpbuffer(m,b,n) svdbgdumpbuffer(m,b,n)
+# define mod_dumpbuffer(m,b,n) sinfodumpbuffer(m,b,n)
 #else
 # define mod_dumpbuffer(m,b,n)
 #endif
@@ -102,7 +102,7 @@ static inline int mod_filelen(FAR struct mod_loadinfo_s *loadinfo,
   if (ret < 0)
     {
       int errval = errno;
-      sdbg("Failed to stat file: %d\n", errval);
+      serr("ERROR: Failed to stat file: %d\n", errval);
       return -errval;
     }
 
@@ -110,7 +110,7 @@ static inline int mod_filelen(FAR struct mod_loadinfo_s *loadinfo,
 
   if (!S_ISREG(buf.st_mode))
     {
-      sdbg("Not a regular file.  mode: %d\n", buf.st_mode);
+      serr("ERROR: Not a regular file.  mode: %d\n", buf.st_mode);
       return -ENOENT;
     }
 
@@ -146,7 +146,7 @@ int mod_initialize(FAR const char *filename,
 {
   int ret;
 
-  svdbg("filename: %s loadinfo: %p\n", filename, loadinfo);
+  sinfo("filename: %s loadinfo: %p\n", filename, loadinfo);
 
   /* Clear the load info structure */
 
@@ -157,7 +157,7 @@ int mod_initialize(FAR const char *filename,
   ret = mod_filelen(loadinfo, filename);
   if (ret < 0)
     {
-      sdbg("mod_filelen failed: %d\n", ret);
+      serr("ERROR: mod_filelen failed: %d\n", ret);
       return ret;
     }
 
@@ -167,7 +167,7 @@ int mod_initialize(FAR const char *filename,
   if (loadinfo->filfd < 0)
     {
       int errval = errno;
-      sdbg("Failed to open ELF binary %s: %d\n", filename, errval);
+      serr("ERROR: Failed to open ELF binary %s: %d\n", filename, errval);
       return -errval;
     }
 
@@ -177,7 +177,7 @@ int mod_initialize(FAR const char *filename,
                     sizeof(Elf32_Ehdr), 0);
   if (ret < 0)
     {
-      sdbg("Failed to read ELF header: %d\n", ret);
+      serr("ERROR: Failed to read ELF header: %d\n", ret);
       return ret;
     }
 
@@ -196,7 +196,7 @@ int mod_initialize(FAR const char *filename,
        * is not correctly formed.
        */
 
-      sdbg("Bad ELF header: %d\n", ret);
+      serr("ERROR: Bad ELF header: %d\n", ret);
       return ret;
     }
 

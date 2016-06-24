@@ -117,14 +117,14 @@ void igmp_input(struct net_driver_s *dev)
   in_addr_t grpaddr;
   unsigned int ticks;
 
-  nllvdbg("IGMP message: %04x%04x\n", IGMPBUF->destipaddr[1], IGMPBUF->destipaddr[0]);
+  ninfo("IGMP message: %04x%04x\n", IGMPBUF->destipaddr[1], IGMPBUF->destipaddr[0]);
 
   /* Verify the message length */
 
   if (dev->d_len < NET_LL_HDRLEN(dev) + IPIGMP_HDRLEN)
     {
       IGMP_STATINCR(g_netstats.igmp.length_errors);
-      nlldbg("Length error\n");
+      nwarn("WARNING: Length error\n");
       return;
     }
 
@@ -133,7 +133,7 @@ void igmp_input(struct net_driver_s *dev)
   if (net_chksum((FAR uint16_t *)&IGMPBUF->type, IGMP_HDRLEN) != 0)
     {
       IGMP_STATINCR(g_netstats.igmp.chksum_errors);
-      nlldbg("Checksum error\n");
+      nwarn("WARNING: Checksum error\n");
       return;
     }
 
@@ -143,7 +143,7 @@ void igmp_input(struct net_driver_s *dev)
   group = igmp_grpallocfind(dev, &destipaddr);
   if (!group)
     {
-      nlldbg("Failed to allocate/find group: %08x\n", destipaddr);
+      nerr("ERROR: Failed to allocate/find group: %08x\n", destipaddr);
       return;
     }
 
@@ -186,13 +186,13 @@ void igmp_input(struct net_driver_s *dev)
 
                 /* This is the general query */
 
-                nllvdbg("General multicast query\n");
+                ninfo("General multicast query\n");
                 if (IGMPBUF->maxresp == 0)
                   {
                     IGMP_STATINCR(g_netstats.igmp.v1_received);
                     IGMPBUF->maxresp = 10;
 
-                    nlldbg("V1 not implemented\n");
+                    nwarn("WARNING: V1 not implemented\n");
                   }
 
                 IGMP_STATINCR(g_netstats.igmp.query_received);
@@ -216,7 +216,7 @@ void igmp_input(struct net_driver_s *dev)
               }
             else /* if (IGMPBUF->grpaddr != 0) */
               {
-                nllvdbg("Group-specific multicast queury\n");
+                ninfo("Group-specific multicast queury\n");
 
                 /* We first need to re-lookup the group since we used dest last time.
                  * Use the incoming IPaddress!
@@ -238,10 +238,10 @@ void igmp_input(struct net_driver_s *dev)
 
         else if (group->grpaddr != 0)
           {
-            nllvdbg("Unicast query\n");
+            ninfo("Unicast query\n");
             IGMP_STATINCR(g_netstats.igmp.ucast_query);
 
-            nlldbg("Query to a specific group with the group address as destination\n");
+            ninfo("Query to a specific group with the group address as destination\n");
 
             ticks = net_dsec2tick((int)IGMPBUF->maxresp);
             if (IS_IDLEMEMBER(group->flags) || igmp_cmptimer(group, ticks))
@@ -254,7 +254,7 @@ void igmp_input(struct net_driver_s *dev)
 
       case IGMPv2_MEMBERSHIP_REPORT:
         {
-          nllvdbg("Membership report\n");
+          ninfo("Membership report\n");
 
           IGMP_STATINCR(g_netstats.igmp.report_received);
           if (!IS_IDLEMEMBER(group->flags))
@@ -270,7 +270,7 @@ void igmp_input(struct net_driver_s *dev)
 
       default:
         {
-          nlldbg("Unexpected msg %02x\n", IGMPBUF->type);
+          nwarn("WARNING: Unexpected msg %02x\n", IGMPBUF->type);
         }
       break;
     }

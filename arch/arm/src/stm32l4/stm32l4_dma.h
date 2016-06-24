@@ -90,7 +90,7 @@ typedef FAR void *DMA_HANDLE;
 
 typedef void (*dma_callback_t)(DMA_HANDLE handle, uint8_t status, void *arg);
 
-#ifdef CONFIG_DEBUG_DMA
+#ifdef CONFIG_DEBUG_DMA_INFO
 struct stm32l4_dmaregs_s
 {
   uint32_t isr;       /* Interrupt Status Register; each channel gets 4 bits */
@@ -267,7 +267,7 @@ bool stm32l4_dmacapable(uintptr_t maddr, uint32_t count, uint32_t ccr);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG_DMA
+#ifdef CONFIG_DEBUG_DMA_INFO
 void stm32l4_dmasample(DMA_HANDLE handle, struct stm32l4_dmaregs_s *regs);
 #else
 #  define stm32l4_dmasample(handle,regs)
@@ -284,7 +284,7 @@ void stm32l4_dmasample(DMA_HANDLE handle, struct stm32l4_dmaregs_s *regs);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG_DMA
+#ifdef CONFIG_DEBUG_DMA_INFO
 void stm32l4_dmadump(DMA_HANDLE handle, const struct stm32l4_dmaregs_s *regs,
                    const char *msg);
 #else

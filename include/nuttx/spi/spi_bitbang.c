@@ -64,32 +64,6 @@
  *   in the bit bang interface and calls spi_create_bitbang().
  */
 
-/* Debug ********************************************************************/
-/* Check if SPI debut is enabled (non-standard.. no support in
- * include/debug.h
- */
-
-#ifndef CONFIG_DEBUG
-#  undef CONFIG_DEBUG_VERBOSE
-#  undef CONFIG_DEBUG_SPI
-#endif
-
-#ifdef CONFIG_DEBUG_SPI
-#  define spidbg lldbg
-#  ifdef CONFIG_DEBUG_VERBOSE
-#    define spivdbg lldbg
-#  else
-#    define spivdbg(x...)
-#  endif
-#else
-#  define spidbg(x...)
-#  define spivdbg(x...)
-#endif
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
-
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
@@ -273,7 +247,7 @@ static uint32_t spi_setfrequency(FAR struct spi_bitbang_s *priv, uint32_t freque
 static void spi_setmode(FAR struct spi_bitbang_s *priv,
                         enum spi_mode_e mode)
 {
-  spivdbg("mode=%d\n", mode);
+  spiinfo("mode=%d\n", mode);
 
   switch (mode)
     {

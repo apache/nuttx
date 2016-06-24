@@ -88,7 +88,7 @@ ssize_t psock_local_send(FAR struct socket *psock, FAR const void *buf,
   if (peer->lc_state != LOCAL_STATE_CONNECTED ||
       peer->lc_outfd < 0)
     {
-      ndbg("ERROR: not connected\n");
+      nerr("ERROR: not connected\n");
       return -ENOTCONN;
     }
 

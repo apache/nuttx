@@ -48,7 +48,7 @@
 #include <nuttx/net/loopback.h>
 #include <nuttx/net/tun.h>
 #include <nuttx/net/telnet.h>
-#include <nuttx/syslog/ramlog.h>
+#include <nuttx/syslog/syslog.h>
 #include <nuttx/syslog/syslog_console.h>
 
 #include <arch/board/board.h>
@@ -99,13 +99,6 @@
 #  define USE_SERIALDRIVER 1
 #endif
 
-/* Determine which device to use as the system logging device */
-
-#ifndef CONFIG_SYSLOG
-#  undef CONFIG_SYSLOG_CHAR
-#  undef CONFIG_RAMLOG_SYSLOG
-#endif
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -120,18 +113,18 @@
  *
  ****************************************************************************/
 
-#if defined(CONFIG_ARCH_CALIBRATION) && defined(CONFIG_DEBUG)
+#if defined(CONFIG_ARCH_CALIBRATION) && defined(CONFIG_DEBUG_FEATURES)
 static void up_calibratedelay(void)
 {
   int i;
 
-  lldbg("Beginning 100s delay\n");
+  _warn("Beginning 100s delay\n");
   for (i = 0; i < 100; i++)
     {
       up_mdelay(1000);
     }
 
-  lldbg("End 100s delay\n");
+  _warn("End 100s delay\n");
 }
 #else
 # define up_calibratedelay()
@@ -259,20 +252,18 @@ void up_initialize(void)
 
 #if defined(CONFIG_DEV_LOWCONSOLE)
   lowconsole_init();
-#elif defined(CONFIG_SYSLOG_CONSOLE)
+#elif defined(CONFIG_CONSOLE_SYSLOG)
   syslog_console_init();
 #elif defined(CONFIG_RAMLOG_CONSOLE)
   ramlog_consoleinit();
 #endif
 
-  /* Initialize the system logging device */
+  /* Early initialization of the system logging device.  Some SYSLOG channel
+   * can be initialized early in the initialization sequence because they
+   * depend on only minimal OS initialization.
+   */
 
-#ifdef CONFIG_SYSLOG_CHAR
-  syslog_initialize();
-#endif
-#ifdef CONFIG_RAMLOG_SYSLOG
-  ramlog_sysloginit();
-#endif
+  syslog_initialize(SYSLOG_INIT_EARLY);
 
 #ifndef CONFIG_NETDEV_LATEINIT
   /* Initialize the network */

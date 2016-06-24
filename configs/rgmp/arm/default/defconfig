@@ -39,7 +39,7 @@ CONFIG_ARCH_MATH_H=y
 #
 # Debug Options
 #
-# CONFIG_DEBUG is not set
+# CONFIG_DEBUG_FEATURES is not set
 # CONFIG_ARCH_HAVE_STACKCHECK is not set
 # CONFIG_ARCH_HAVE_HEAPCHECK is not set
 # CONFIG_DEBUG_SYMBOLS is not set
@@ -365,7 +365,6 @@ CONFIG_NET_ETHERNET=y
 # System Logging
 #
 
-# CONFIG_SYSLOG is not set
 
 #
 # Graphics Support

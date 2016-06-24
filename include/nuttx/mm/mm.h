@@ -427,7 +427,7 @@ FAR void *kmm_memalign(size_t alignment, size_t size);
 
 /* Functions contained in kmm_heapmember.c **********************************/
 
-#if defined(CONFIG_MM_KERNEL_HEAP) && defined(CONFIG_DEBUG)
+#if defined(CONFIG_MM_KERNEL_HEAP) && defined(CONFIG_DEBUG_FEATURES)
 bool kmm_heapmember(FAR void *mem);
 #endif
 

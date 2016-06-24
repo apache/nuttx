@@ -637,7 +637,7 @@ STM32F3Discovery-specific Configuration Options
     CONFIG_CAN2_BAUD - CAN1 BAUD rate.  Required if CONFIG_STM32_CAN2 is defined.
     CONFIG_CAN_TSEG1 - The number of CAN time quanta in segment 1. Default: 6
     CONFIG_CAN_TSEG2 - the number of CAN time quanta in segment 2. Default: 7
-    CONFIG_CAN_REGDEBUG - If CONFIG_DEBUG is set, this will generate an
+    CONFIG_STM32_CAN_REGDEBUG - If CONFIG_DEBUG_FEATURES is set, this will generate an
       dump of all CAN registers.
 
   STM32F3Discovery SPI Configuration
@@ -778,7 +778,6 @@ Where <subdir> is one of the following:
        the system logging device:
 
        Device Drivers -> System Logging Device Options:
-         CONFIG_SYSLOG=y                    : Enable output to syslog, not console
          CONFIG_SYSLOG_CHAR=y               : Use a character device for system logging
          CONFIG_SYSLOG_DEVPATH="/dev/ttyS0" : USART2 will be /dev/ttyS0
 

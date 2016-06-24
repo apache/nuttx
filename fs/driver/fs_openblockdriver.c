@@ -81,7 +81,7 @@ int open_blockdriver(FAR const char *pathname, int mountflags,
 
   /* Minimal sanity checks */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!ppinode)
     {
       ret = -EINVAL;
@@ -96,7 +96,7 @@ int open_blockdriver(FAR const char *pathname, int mountflags,
   ret = find_blockdriver(pathname, mountflags, &inode);
   if (ret < 0)
     {
-      fdbg("Failed to file %s block driver\n", pathname);
+      ferr("ERROR: Failed to file %s block driver\n", pathname);
       goto errout;
     }
 
@@ -110,7 +110,7 @@ int open_blockdriver(FAR const char *pathname, int mountflags,
       ret = inode->u.i_bops->open(inode);
       if (ret < 0)
         {
-          fdbg("%s driver open failed\n", pathname);
+          ferr("ERROR: %s driver open failed\n", pathname);
           goto errout_with_inode;
         }
     }

@@ -125,13 +125,13 @@ static const uint32_t g_h64mxpids[3] =
  *
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG_IRQ)
+#if defined(CONFIG_DEBUG_IRQ_INFO)
 static void sam_dumpaic(const char *msg, uintptr_t base, int irq)
 {
   irqstate_t flags;
 
   flags = enter_critical_section();
-  lldbg("AIC (%s, base=%08x irq=%d):\n", msg, base, irq);
+  irqinfo("AIC (%s, base=%08x irq=%d):\n", msg, base, irq);
 
   /* Select the register set associated with this irq */
 
@@ -139,39 +139,39 @@ static void sam_dumpaic(const char *msg, uintptr_t base, int irq)
 
   /* Then dump all of the (readable) register contents */
 
-  lldbg("  SSR: %08x  SMR: %08x  SVR: %08x  IVR: %08x\n",
-        getreg32(base + SAM_AIC_SSR_OFFSET),
-        getreg32(base + SAM_AIC_SMR_OFFSET),
-        getreg32(base + SAM_AIC_SVR_OFFSET),
-        getreg32(base + SAM_AIC_IVR_OFFSET));
-  lldbg("  FVR: %08x  ISR: %08x\n",
-        getreg32(base + SAM_AIC_FVR_OFFSET),
-        getreg32(base + SAM_AIC_ISR_OFFSET));
-  lldbg("  IPR: %08x       %08x       %08x       %08x\n",
-        getreg32(base + SAM_AIC_IPR0_OFFSET),
-        getreg32(base + SAM_AIC_IPR1_OFFSET),
-        getreg32(base + SAM_AIC_IPR2_OFFSET),
-        getreg32(base + SAM_AIC_IPR3_OFFSET));
+  irqinfo("  SSR: %08x  SMR: %08x  SVR: %08x  IVR: %08x\n",
+          getreg32(base + SAM_AIC_SSR_OFFSET),
+          getreg32(base + SAM_AIC_SMR_OFFSET),
+          getreg32(base + SAM_AIC_SVR_OFFSET),
+          getreg32(base + SAM_AIC_IVR_OFFSET));
+  irqinfo("  FVR: %08x  ISR: %08x\n",
+          getreg32(base + SAM_AIC_FVR_OFFSET),
+          getreg32(base + SAM_AIC_ISR_OFFSET));
+  irqinfo("  IPR: %08x       %08x       %08x       %08x\n",
+          getreg32(base + SAM_AIC_IPR0_OFFSET),
+          getreg32(base + SAM_AIC_IPR1_OFFSET),
+          getreg32(base + SAM_AIC_IPR2_OFFSET),
+          getreg32(base + SAM_AIC_IPR3_OFFSET));
 
   /* SAMA5D4 does not have the FFSR register */
 
 #if defined(SAM_AIC_FFSR)
-  lldbg("  IMR: %08x CISR: %08x  SPU: %08x FFSR: %08x\n",
-        getreg32(base + SAM_AIC_IMR_OFFSET),
-        getreg32(base + SAM_AIC_CISR_OFFSET),
-        getreg32(base + SAM_AIC_SPU_OFFSET),
-        getreg32(base + SAM_AIC_FFSR_OFFSET));
+  irqinfo("  IMR: %08x CISR: %08x  SPU: %08x FFSR: %08x\n",
+          getreg32(base + SAM_AIC_IMR_OFFSET),
+          getreg32(base + SAM_AIC_CISR_OFFSET),
+          getreg32(base + SAM_AIC_SPU_OFFSET),
+          getreg32(base + SAM_AIC_FFSR_OFFSET));
 #else
-  lldbg("  IMR: %08x CISR: %08x  SPU: %08x\n",
-        getreg32(base + SAM_AIC_IMR_OFFSET),
-        getreg32(base + SAM_AIC_CISR_OFFSET),
-        getreg32(base + SAM_AIC_SPU_OFFSET));
+  irqinfo("  IMR: %08x CISR: %08x  SPU: %08x\n",
+          getreg32(base + SAM_AIC_IMR_OFFSET),
+          getreg32(base + SAM_AIC_CISR_OFFSET),
+          getreg32(base + SAM_AIC_SPU_OFFSET));
 #endif
 
-  lldbg("  DCR: %08x WPMR: %08x WPSR: %08x\n",
-        getreg32(base + SAM_AIC_DCR_OFFSET),
-        getreg32(base + SAM_AIC_WPMR_OFFSET),
-        getreg32(base + SAM_AIC_WPSR_OFFSET));
+  irqinfo("  DCR: %08x WPMR: %08x WPSR: %08x\n",
+          getreg32(base + SAM_AIC_DCR_OFFSET),
+          getreg32(base + SAM_AIC_WPMR_OFFSET),
+          getreg32(base + SAM_AIC_WPSR_OFFSET));
 
   leave_critical_section(flags);
 }
@@ -234,8 +234,8 @@ static uint32_t *sam_spurious(int irq, uint32_t *regs)
    * in this implementation.  The value of AIC_IVR is ignored.
    */
 
-#if defined(CONFIG_DEBUG_IRQ)
-  lldbg("Spurious interrupt: IRQ %d\n", irq);
+#if defined(CONFIG_DEBUG_IRQ_INFO)
+  irqinfo("Spurious interrupt: IRQ %d\n", irq);
 #endif
   return regs;
 }
@@ -327,12 +327,12 @@ static void sam_aic_redirection(void)
       regval |= SFR_AICREDIR_ENABLE;
       putreg32(regval, SAM_SFR_AICREDIR);
 
-#if defined(CONFIG_DEBUG_IRQ)
+#if defined(CONFIG_DEBUG_IRQ_INFO)
       /* Check if redirection was successfully enabled */
 
       regval = getreg32(SAM_SFR_AICREDIR);
-      lldbg("Interrupts %s redirected to the AIC\n",
-           (regval & SFR_AICREDIR_ENABLE) != 0 ? "ARE" : "NOT");
+      irqinfo("Interrupts %s redirected to the AIC\n",
+              (regval & SFR_AICREDIR_ENABLE) != 0 ? "ARE" : "NOT");
 #endif
     }
 }

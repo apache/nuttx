@@ -285,7 +285,7 @@ void sam_automount_initialize(void)
 {
   FAR void *handle;
 
-  fvdbg("Initializing automounter(s)\n");
+  finfo("Initializing automounter(s)\n");
 
 #ifdef CONFIG_SAMA5D4EK_HSMCI0_AUTOMOUNT
   /* Initialize the HSMCI0 auto-mounter */
@@ -293,7 +293,7 @@ void sam_automount_initialize(void)
   handle = automount_initialize(&g_hsmci0config.lower);
   if (!handle)
     {
-      fdbg("ERROR: Failed to initialize auto-mounter for HSMCI0\n");
+      ferr("ERROR: Failed to initialize auto-mounter for HSMCI0\n");
     }
 #endif
 
@@ -303,7 +303,7 @@ void sam_automount_initialize(void)
   handle = automount_initialize(&g_hsmci1config.lower);
   if (!handle)
     {
-      fdbg("ERROR: Failed to initialize auto-mounter for HSMCI1\n");
+      ferr("ERROR: Failed to initialize auto-mounter for HSMCI1\n");
     }
 #endif
 }
@@ -363,7 +363,7 @@ void sam_automount_event(int slotno, bool inserted)
   else
 #endif
     {
-      fdbg("ERROR: Unsupported HSCMI%d\n", slotno);
+      ferr("ERROR: Unsupported HSCMI%d\n", slotno);
       return;
     }
 

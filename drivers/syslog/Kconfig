@@ -3,7 +3,13 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
-comment "System Logging"
+menu "System Logging"
+
+# Selected if the architecture has its own, built-in SYSLOGging enabled
+
+config ARCH_SYSLOG
+	bool
+	default n
 
 config RAMLOG
 	bool "RAM log device support"
@@ -20,18 +26,6 @@ config RAMLOG
 		details as needed to support logging.
 
 if RAMLOG
-config RAMLOG_SYSLOG
-	bool "Use RAMLOG for SYSLOG"
-	default n
-	depends on SYSLOG
-	---help---
-		Use the RAM logging device for the syslogging interface.  If this feature
-		is enabled (along with SYSLOG), then all debug output (only) will be re-directed
-		to the circular buffer in RAM.  This RAM log can be view from NSH using the
-		'dmesg'command.
-
-		Do not enable more than one SYSLOG device.
-
 config RAMLOG_CONSOLE
 	bool "Use RAMLOG for /dev/console"
 	default n
@@ -54,7 +48,8 @@ config RAMLOG_CRLF
 	bool "RAMLOG CR/LF"
 	default n
 	---help---
-		Pre-pend a carriage return before every linefeed that goes into the RAM log.
+		Pre-pend a carriage return before every linefeed that goes into the
+		RAM log.
 
 config RAMLOG_NONBLOCKING
 	bool "RAMLOG non-block reads"
@@ -72,21 +67,117 @@ config RAMLOG_NPOLLWAITERS
 
 endif
 
-config SYSLOG_CONSOLE
-	bool "Use SYSLOG for /dev/console"
-	default n
-	depends on DEV_CONSOLE
-	---help---
-		Use the syslog logging device as a system console. If this feature is enabled 
-		(along with DEV_CONSOLE), then all console output will be re-directed to syslog
-		output (syslog_putc). This is useful, for example, if the only console is a Telnet
-		console.  Then in that case, console output from non-Telnet threads will go to
-		the syslog output.
-
 config DRIVER_NOTE
 	bool "Scheduler instrumentation driver"
 	default n
 	depends on SCHED_INSTRUMENTATION_BUFFER
 	---help---
-		Enable building a serial driver that can be used by an application to read data
-		from the in-memory, scheduler instrumentatin "note" buffer.
+		Enable building a serial driver that can be used by an application
+		to read data from the in-memory, scheduler instrumentatin "note"
+		buffer.
+
+config SYSLOG_INTBUFFER
+	bool "Use interrupt buffer"
+	default n
+	---help---
+		Enables an interrupt buffer that will be used to serialize debug
+		output from interrupt handlers.
+
+config SYSLOG_INTBUFSIZE
+	int "Interrupt buffer size"
+	default 512
+	depends on SYSLOG_INTBUFFER
+	---help---
+		The size of the interrupt buffer in bytes.
+
+config SYSLOG_TIMESTAMP
+	bool "Prepend timestamp to syslog message"
+	default n
+	---help---
+		Prepend timestamp to syslog message.
+
+config SYSLOG_SERIAL_CONSOLE
+	bool
+	default n
+
+choice
+	prompt "System log device"
+	default SYSLOG_CONSOLE if DEV_CONSOLE
+	default SYSLOG_NONE if !DEV_CONSOLE
+	depends on !ARCH_SYSLOG
+
+config SYSLOG_CHAR
+	bool "Log to a character device"
+	---help---
+		Enable the generic character device for the SYSLOG. The full path to the
+		SYSLOG device is provided by SYSLOG_DEVPATH. A valid character device (or
+		file) must exist at this path.  It will by opened by syslog_initialize.
+
+config RAMLOG_SYSLOG
+	bool "Use RAMLOG for SYSLOG"
+	depends on RAMLOG && !ARCH_SYSLOG
+	---help---
+		Use the RAM logging device for the syslogging interface.  If this
+		feature is enabled (along with SYSLOG), then all debug output (only)
+		will be re-directed to the circular buffer in RAM.  This RAM log can
+		be viewed from NSH using the 'dmesg'command.
+
+config SYSLOG_CONSOLE
+	bool "Log to /dev/console"
+	depends on DEV_CONSOLE
+	select SYSLOG_SERIAL_CONSOLE if SERIAL_CONSOLE
+	---help---
+		Use the system console as a SYSLOG output device.
+
+config SYSLOG_NONE
+	bool "No SYSLOG device"
+	---help---
+		syslog() interfaces will be present, but all output will go to the
+		bit-bucket.
+
+endchoice
+
+config SYSLOG_FILE
+	bool "Sylog file output"
+	default n
+	---help---
+		Build in support to use a file to collect SYSOG output.  File SYSLOG
+		channels differ from other SYSLOG channels in that they cannot be
+		established until after fully booting and mounting the target file
+		system.  The function syslog_file_channel() would need to be called
+		from board-specific bring-up logic AFTER mounting the file system
+		containing 'devpath'.
+
+		NOTE interrupt level SYSLOG output will be lost in this case unless
+		the interrupt buffer is used.
+
+config CONSOLE_SYSLOG
+	bool "Use SYSLOG for /dev/console"
+	default n
+	depends on DEV_CONSOLE && !SYSLOG_CONSOLE
+	---help---
+		Use the syslog logging device as a system console. If this feature is
+		enabled (along with DEV_CONSOLE), then all console output will be
+		re-directed to syslog output (syslog_putc). This is useful, for
+		example, if the only console is a Telnet console.  Then in that case,
+		console output from non-Telnet threads will go to the syslog output.
+
+config SYSLOG_CHAR_CRLF
+	bool "SYSLOG device CR/LF"
+	default y
+	depends on SYSLOG_CHAR
+	---help---
+		Pre-pend a carriage return before every linefeed that goes to the
+		character device.
+
+config SYSLOG_DEVPATH
+	string "System log device"
+	default "/dev/syslog"
+	depends on SYSLOG_CHAR
+	---help---
+		The full path to the system logging device.  For the RAMLOG SYSLOG device,
+		this is normally "/dev/ramlog".  For character SYSLOG devices, it should be
+		some other existing character device (or file) supported by the configuration
+		(such as "/dev/ttyS1")/
+
+endmenu # System logging

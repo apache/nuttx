@@ -556,15 +556,16 @@ static int cmp(Bigint * a, Bigint * b)
 
   i = a->wds;
   j = b->wds;
+
 #ifdef CONFIG_DEBUG_LIB
   if (i > 1 && !a->x[i - 1])
    {
-    ldbg("cmp called with a->x[a->wds-1] == 0\n");
+    lerr("ERROR: cmp called with a->x[a->wds-1] == 0\n");
    }
 
   if (j > 1 && !b->x[j - 1])
    {
-    ldbg("cmp called with b->x[b->wds-1] == 0\n");
+    lerr("ERROR: cmp called with b->x[b->wds-1] == 0\n");
    }
 #endif
 
@@ -722,7 +723,7 @@ static Bigint *d2b(double d, int *e, int *bits)
 #ifdef CONFIG_DEBUG_LIB
       if (!z)
         {
-          ldbg("Zero passed to d2b\n");
+          lerr("ERROR: Zero passed to d2b\n");
         }
 #endif
       k = lo0bits(&z);
@@ -763,7 +764,7 @@ static Bigint *d2b(double d, int *e, int *bits)
 #ifdef CONFIG_DEBUG_LIB
       if (!z)
         {
-          ldbg("Zero passed to d2b\n");
+          lerr("ERROR: Zero passed to d2b\n");
         }
 #endif
       k = lo0bits(&z);
@@ -851,7 +852,7 @@ static int quorem(Bigint * b, Bigint * S)
 #ifdef CONFIG_DEBUG_LIB
   if (b->wds > n)
     {
-      ldbg("oversize b in quorem\n");
+      lerr("ERROR: oversize b in quorem\n");
     }
 #endif
   if (b->wds < n)
@@ -867,7 +868,7 @@ static int quorem(Bigint * b, Bigint * S)
 #ifdef CONFIG_DEBUG_LIB
   if (q > 9)
    {
-     ldbg("oversized quotient in quorem\n");
+     lerr("ERROR: oversized quotient in quorem\n");
    }
 #endif
 

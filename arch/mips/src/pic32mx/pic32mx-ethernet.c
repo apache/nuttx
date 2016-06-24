@@ -141,20 +141,11 @@
 #define PIC32MX_NBUFFERS (CONFIG_NET_NRXDESC + CONFIG_NET_NTXDESC + 1)
 
 /* Debug Configuration *****************************************************/
-/* Register/Descriptor debug -- can only happen of CONFIG_DEBUG is selected.
- * This will probably generate much more output than you care to see.
- */
-
-#ifndef CONFIG_DEBUG
-#  undef CONFIG_NET_REGDEBUG
-#  undef CONFIG_NET_DESCDEBUG
-#endif
-
 /* CONFIG_NET_DUMPPACKET will dump the contents of each packet to the
  * console.
  */
 
-#ifndef CONFIG_DEBUG
+#ifndef CONFIG_DEBUG_FEATURES
 #  undef  CONFIG_NET_DUMPPACKET
 #endif
 
@@ -319,9 +310,9 @@ struct pic32mx_driver_s
 
   sq_queue_t pd_freebuffers;    /* The free buffer list */
 
-  /* This holds the information visible to uIP/NuttX */
+  /* This holds the information visible to the NuttX network */
 
-  struct net_driver_s pd_dev;  /* Interface understood by uIP */
+  struct net_driver_s pd_dev;  /* Interface understood by the network */
 
   /* Descriptors and packet buffers */
 
@@ -447,7 +438,7 @@ static void pic32mx_ethreset(struct pic32mx_driver_s *priv);
 #ifdef CONFIG_NET_REGDEBUG
 static void pic32mx_printreg(uint32_t addr, uint32_t val, bool iswrite)
 {
-  lldbg("%08x%s%08x\n", addr, iswrite ? "<-" : "->", val);
+  ninfo("%08x%s%08x\n", addr, iswrite ? "<-" : "->", val);
 }
 #endif
 
@@ -497,7 +488,7 @@ static void pic32mx_checkreg(uint32_t addr, uint32_t val, bool iswrite)
             {
               /* No.. More than one. */
 
-              lldbg("[repeats %d more times]\n", count);
+              ninfo("[repeats %d more times]\n", count);
             }
         }
 
@@ -576,12 +567,12 @@ static void pic32mx_putreg(uint32_t val, uint32_t addr)
 #ifdef CONFIG_NET_DESCDEBUG
 static void pic32mx_dumptxdesc(struct pic32mx_txdesc_s *txdesc, const char *msg)
 {
-  lldbg("TX Descriptor [%p]: %s\n", txdesc, msg);
-  lldbg("   status: %08x\n", txdesc->status);
-  lldbg("  address: %08x [%08x]\n", txdesc->address, VIRT_ADDR(txdesc->address));
-  lldbg("     tsv1: %08x\n", txdesc->tsv1);
-  lldbg("     tsv2: %08x\n", txdesc->tsv2);
-  lldbg("   nexted: %08x [%08x]\n", txdesc->nexted, VIRT_ADDR(txdesc->nexted));
+  ninfo("TX Descriptor [%p]: %s\n", txdesc, msg);
+  ninfo("   status: %08x\n", txdesc->status);
+  ninfo("  address: %08x [%08x]\n", txdesc->address, VIRT_ADDR(txdesc->address));
+  ninfo("     tsv1: %08x\n", txdesc->tsv1);
+  ninfo("     tsv2: %08x\n", txdesc->tsv2);
+  ninfo("   nexted: %08x [%08x]\n", txdesc->nexted, VIRT_ADDR(txdesc->nexted));
 }
 #endif
 
@@ -603,12 +594,12 @@ static void pic32mx_dumptxdesc(struct pic32mx_txdesc_s *txdesc, const char *msg)
 #ifdef CONFIG_NET_DESCDEBUG
 static void pic32mx_dumprxdesc(struct pic32mx_rxdesc_s *rxdesc, const char *msg)
 {
-  lldbg("RX Descriptor [%p]: %s\n", rxdesc, msg);
-  lldbg("   status: %08x\n", rxdesc->status);
-  lldbg("  address: %08x [%08x]\n", rxdesc->address, VIRT_ADDR(rxdesc->address));
-  lldbg("     rsv1: %08x\n", rxdesc->rsv1);
-  lldbg("     rsv2: %08x\n", rxdesc->rsv2);
-  lldbg("   nexted: %08x [%08x]\n", rxdesc->nexted, VIRT_ADDR(rxdesc->nexted));
+  ninfo("RX Descriptor [%p]: %s\n", rxdesc, msg);
+  ninfo("   status: %08x\n", rxdesc->status);
+  ninfo("  address: %08x [%08x]\n", rxdesc->address, VIRT_ADDR(rxdesc->address));
+  ninfo("     rsv1: %08x\n", rxdesc->rsv1);
+  ninfo("     rsv2: %08x\n", rxdesc->rsv2);
+  ninfo("   nexted: %08x [%08x]\n", rxdesc->nexted, VIRT_ADDR(rxdesc->nexted));
 }
 #endif
 
@@ -1024,7 +1015,7 @@ static int pic32mx_transmit(struct pic32mx_driver_s *priv)
 
   /* Find the next available TX descriptor.  We are guaranteed that is will
    * not fail by upstream logic that assures that a TX packet is available
-   * before polling uIP.
+   * before polling the network.
    */
 
   txdesc = pic32mx_txdesc(priv);
@@ -1080,8 +1071,9 @@ static int pic32mx_transmit(struct pic32mx_driver_s *priv)
  * Function: pic32mx_txpoll
  *
  * Description:
- *   The transmitter is available, check if uIP has any outgoing packets ready
- *   to send.  This is a callback from devif_poll().  devif_poll() may be called:
+ *   The transmitter is available, check if the network has any outgoing
+ *   packets ready to send.  This is a callback from devif_poll().
+ *   devif_poll() may be called:
  *
  *   1. When the preceding TX packet send is complete,
  *   2. When the preceding TX packet send timesout and the interface is reset
@@ -1172,7 +1164,7 @@ static int pic32mx_txpoll(struct net_driver_s *dev)
  * Function: pic32mx_poll
  *
  * Description:
- *   Perform the uIP poll.
+ *   Perform the network poll.
  *
  * Parameters:
  *   priv  - Reference to the driver state structure
@@ -1220,7 +1212,7 @@ static void pic32mx_poll(struct pic32mx_driver_s *priv)
  * Function: pic32mx_timerpoll
  *
  * Description:
- *   Perform the uIP timer poll.
+ *   Perform the network timer poll.
  *
  * Parameters:
  *   priv  - Reference to the driver state structure
@@ -1365,7 +1357,8 @@ static void pic32mx_rxdone(struct pic32mx_driver_s *priv)
 
       if ((rxdesc->rsv2 & RXDESC_RSV2_OK) == 0)
         {
-          nlldbg("ERROR. rsv1: %08x rsv2: %08x\n", rxdesc->rsv1, rxdesc->rsv2);
+          nerr("ERROR. rsv1: %08x rsv2: %08x\n",
+               rxdesc->rsv1, rxdesc->rsv2);
           NETDEV_RXERRORS(&priv->pd_dev);
           pic32mx_rxreturn(rxdesc);
         }
@@ -1378,8 +1371,8 @@ static void pic32mx_rxdone(struct pic32mx_driver_s *priv)
 
       else if (priv->pd_dev.d_len > CONFIG_NET_ETH_MTU)
         {
-          nlldbg("Too big. packet length: %d rxdesc: %08x\n",
-                 priv->pd_dev.d_len, rxdesc->status);
+          nerr("ERROR: Too big. packet length: %d rxdesc: %08x\n",
+               priv->pd_dev.d_len, rxdesc->status);
           NETDEV_RXERRORS(&priv->pd_dev);
           pic32mx_rxreturn(rxdesc);
         }
@@ -1389,7 +1382,8 @@ static void pic32mx_rxdone(struct pic32mx_driver_s *priv)
       else if ((rxdesc->status & (RXDESC_STATUS_EOP | RXDESC_STATUS_SOP)) !=
                (RXDESC_STATUS_EOP | RXDESC_STATUS_SOP))
         {
-          nlldbg("Fragment. packet length: %d rxdesc: %08x\n", priv->pd_dev.d_len, rxdesc->status);
+          nerr("ERROR: Fragment. packet length: %d rxdesc: %08x\n",
+               priv->pd_dev.d_len, rxdesc->status);
           NETDEV_RXFRAGMENTS(&priv->pd_dev);
           pic32mx_rxreturn(rxdesc);
         }
@@ -1427,7 +1421,7 @@ static void pic32mx_rxdone(struct pic32mx_driver_s *priv)
 #ifdef CONFIG_NET_IPv4
           if (BUF->type == HTONS(ETHTYPE_IP))
             {
-              nllvdbg("IPv4 frame\n");
+              ninfo("IPv4 frame\n");
               NETDEV_RXIPV4(&priv->pd_dev);
 
               /* Handle ARP on input then give the IPv4 packet to the network
@@ -1469,7 +1463,7 @@ static void pic32mx_rxdone(struct pic32mx_driver_s *priv)
 #ifdef CONFIG_NET_IPv6
           if (BUF->type == HTONS(ETHTYPE_IP6))
             {
-              nllvdbg("Iv6 frame\n");
+              ninfo("Iv6 frame\n");
               NETDEV_RXIPV6(&priv->pd_dev);
 
               /* Give the IPv6 packet to the network layer */
@@ -1528,7 +1522,8 @@ static void pic32mx_rxdone(struct pic32mx_driver_s *priv)
             {
               /* Unrecognized... drop it. */
 
-              nlldbg("Unrecognized packet type dropped: %04x\n", ntohs(BUF->type));
+              nerr("ERROR: Unrecognized packet type dropped: %04x\n",
+                   ntohs(BUF->type));
               NETDEV_RXDROPPED(&priv->pd_dev);
             }
 
@@ -1634,11 +1629,11 @@ static void pic32mx_txdone(struct pic32mx_driver_s *priv)
       pic32mx_putreg(priv->pd_inten, PIC32MX_ETH_IEN);
     }
 
-  /* Otherwise poll uIP for new XMIT data */
+  /* Otherwise poll the network for new XMIT data */
 
   else
     {
-      /* Perform the uIP poll */
+      /* Perform the network poll */
 
       pic32mx_poll(priv);
     }
@@ -1690,7 +1685,7 @@ static int pic32mx_interrupt(int irq, void *context)
 
       if ((status & ETH_INT_RXOVFLW) != 0)
         {
-          nlldbg("RX Overrun. status: %08x\n", status);
+          nerr("ERROR: RX Overrun. status: %08x\n", status);
           NETDEV_RXERRORS(&priv->pd_dev);
         }
 
@@ -1701,7 +1696,7 @@ static int pic32mx_interrupt(int irq, void *context)
 
       if ((status & ETH_INT_RXBUFNA) != 0)
         {
-          nlldbg("RX buffer descriptor overrun. status: %08x\n", status);
+          nerr("ERROR: RX buffer descriptor overrun. status: %08x\n", status);
           NETDEV_RXERRORS(&priv->pd_dev);
         }
 
@@ -1712,7 +1707,7 @@ static int pic32mx_interrupt(int irq, void *context)
 
       if ((status & ETH_INT_RXBUSE) != 0)
         {
-          nlldbg("RX BVCI bus error. status: %08x\n", status);
+          nerr("ERROR: RX BVCI bus error. status: %08x\n", status);
           NETDEV_RXERRORS(&priv->pd_dev);
         }
 
@@ -1755,7 +1750,7 @@ static int pic32mx_interrupt(int irq, void *context)
 
       if ((status & ETH_INT_TXABORT) != 0)
         {
-          nlldbg("TX abort. status: %08x\n", status);
+          nerr("ERROR: TX abort. status: %08x\n", status);
           NETDEV_TXERRORS(&priv->pd_dev);
         }
 
@@ -1766,7 +1761,7 @@ static int pic32mx_interrupt(int irq, void *context)
 
       if ((status & ETH_INT_TXBUSE) != 0)
         {
-          nlldbg("TX BVCI bus error. status: %08x\n", status);
+          nerr("ERROR: TX BVCI bus error. status: %08x\n", status);
           NETDEV_TXERRORS(&priv->pd_dev);
         }
 
@@ -1848,7 +1843,7 @@ static void pic32mx_txtimeout(int argc, uint32_t arg, ...)
 
       (void)pic32mx_ifup(&priv->pd_dev);
 
-      /* Then poll uIP for new XMIT data (We are guaranteed to have a free
+      /* Then poll the network for new XMIT data (We are guaranteed to have a free
        * buffer here).
        */
 
@@ -1884,7 +1879,7 @@ static void pic32mx_polltimer(int argc, uint32_t arg, ...)
 
   if (pic32mx_txdesc(priv) != NULL)
     {
-      /* If so, update TCP timing states and poll uIP for new XMIT data. Hmmm..
+      /* If so, update TCP timing states and poll the network for new XMIT data. Hmmm..
        * might be bug here.  Does this mean if there is a transmit in progress,
        * we will missing TCP time state updates?
        */
@@ -1920,9 +1915,9 @@ static int pic32mx_ifup(struct net_driver_s *dev)
   uint32_t regval;
   int ret;
 
-  ndbg("Bringing up: %d.%d.%d.%d\n",
-       dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
-       (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
+  ninfo("Bringing up: %d.%d.%d.%d\n",
+        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
+        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
 
   /* Reset the Ethernet controller (again) */
 
@@ -2010,7 +2005,7 @@ static int pic32mx_ifup(struct net_driver_s *dev)
   ret = pic32mx_phyinit(priv);
   if (ret != 0)
     {
-      ndbg("pic32mx_phyinit failed: %d\n", ret);
+      nerr("ERROR: pic32mx_phyinit failed: %d\n", ret);
       return ret;
     }
 
@@ -2281,7 +2276,7 @@ static int pic32mx_txavail(struct net_driver_s *dev)
 
       if (pic32mx_txdesc(priv) != NULL)
         {
-          /* If so, then poll uIP for new XMIT data.  First allocate a buffer
+          /* If so, then poll the network for new XMIT data.  First allocate a buffer
            * to perform the poll
            */
 
@@ -2372,14 +2367,14 @@ static int pic32mx_rmmac(struct net_driver_s *dev, const uint8_t *mac)
 #if defined(CONFIG_NET_REGDEBUG) && defined(PIC32MX_HAVE_PHY)
 static void pic32mx_showmii(uint8_t phyaddr, const char *msg)
 {
-  dbg("PHY " PIC32MX_PHYNAME ": %s\n", msg);
-  dbg("  MCR:       %04x\n", pic32mx_phyread(phyaddr, MII_MCR));
-  dbg("  MSR:       %04x\n", pic32mx_phyread(phyaddr, MII_MSR));
-  dbg("  ADVERTISE: %04x\n", pic32mx_phyread(phyaddr, MII_ADVERTISE));
-  dbg("  LPA:       %04x\n", pic32mx_phyread(phyaddr, MII_LPA));
-  dbg("  EXPANSION: %04x\n", pic32mx_phyread(phyaddr, MII_EXPANSION));
+  ninfo("PHY " PIC32MX_PHYNAME ": %s\n", msg);
+  ninfo("  MCR:       %04x\n", pic32mx_phyread(phyaddr, MII_MCR));
+  ninfo("  MSR:       %04x\n", pic32mx_phyread(phyaddr, MII_MSR));
+  ninfo("  ADVERTISE: %04x\n", pic32mx_phyread(phyaddr, MII_ADVERTISE));
+  ninfo("  LPA:       %04x\n", pic32mx_phyread(phyaddr, MII_LPA));
+  ninfo("  EXPANSION: %04x\n", pic32mx_phyread(phyaddr, MII_EXPANSION));
 #ifdef CONFIG_ETH0_PHY_KS8721
-  dbg("  10BTCR:    %04x\n", pic32mx_phyread(phyaddr, MII_KS8721_10BTCR));
+  ninfo("  10BTCR:    %04x\n", pic32mx_phyread(phyaddr, MII_KS8721_10BTCR));
 #endif
 }
 #endif
@@ -2542,7 +2537,7 @@ static inline int pic32mx_phyreset(uint8_t phyaddr)
         }
     }
 
-  ndbg("Reset failed. MCR: %04x\n", phyreg);
+  nerr("ERROR: Reset failed. MCR: %04x\n", phyreg);
   return -ETIMEDOUT;
 }
 #endif
@@ -2589,7 +2584,7 @@ static inline int pic32mx_phyautoneg(uint8_t phyaddr)
         }
     }
 
-  ndbg("Auto-negotiation failed. MSR: %04x\n", phyreg);
+  nerr("ERROR: Auto-negotiation failed. MSR: %04x\n", phyreg);
   return -ETIMEDOUT;
 }
 #endif
@@ -2668,7 +2663,7 @@ static int pic32mx_phymode(uint8_t phyaddr, uint8_t mode)
 #endif
     }
 
-  ndbg("Link failed. MSR: %04x\n", phyreg);
+  nerr("ERROR: Link failed. MSR: %04x\n", phyreg);
   return -ETIMEDOUT;
 }
 #endif
@@ -2737,7 +2732,7 @@ static inline int pic32mx_phyinit(struct pic32mx_driver_s *priv)
       ret = pic32mx_phyreset(phyaddr);
       if (ret < 0)
         {
-          ndbg("Failed to reset PHY at address %d\n", phyaddr);
+          nerr("ERROR: Failed to reset PHY at address %d\n", phyaddr);
           continue;
         }
 
@@ -2750,12 +2745,12 @@ static inline int pic32mx_phyinit(struct pic32mx_driver_s *priv)
        */
 
        phyreg = (unsigned int)pic32mx_phyread(phyaddr, MII_PHYID1);
-       nvdbg("Addr: %d PHY ID1: %04x\n", phyaddr, phyreg);
+       ninfo("Addr: %d PHY ID1: %04x\n", phyaddr, phyreg);
 
        if (phyreg == PIC32MX_PHYID1)
         {
           phyreg = pic32mx_phyread(phyaddr, MII_PHYID2);
-          nvdbg("Addr: %d PHY ID2: %04x\n", phyaddr, phyreg);
+          ninfo("Addr: %d PHY ID2: %04x\n", phyaddr, phyreg);
 
           if (phyreg == PIC32MX_PHYID2)
             {
@@ -2770,10 +2765,10 @@ static inline int pic32mx_phyinit(struct pic32mx_driver_s *priv)
     {
       /* Failed to find PHY at any location */
 
-      ndbg("No PHY detected\n");
+      nerr("ERROR: No PHY detected\n");
       return -ENODEV;
     }
-  nvdbg("phyaddr: %d\n", phyaddr);
+  ninfo("phyaddr: %d\n", phyaddr);
 
   /* Save the discovered PHY device address */
 
@@ -2874,7 +2869,7 @@ static inline int pic32mx_phyinit(struct pic32mx_driver_s *priv)
         priv->pd_mode = PIC32MX_100BASET_FD;
         break;
       default:
-        ndbg("Unrecognized mode: %04x\n", phyreg);
+        nerr("ERROR: Unrecognized mode: %04x\n", phyreg);
         return -ENODEV;
     }
 #elif defined(CONFIG_ETH0_PHY_DP83848C)
@@ -2897,7 +2892,7 @@ static inline int pic32mx_phyinit(struct pic32mx_driver_s *priv)
         priv->pd_mode = PIC32MX_10BASET_FD;
         break;
       default:
-        ndbg("Unrecognized mode: %04x\n", phyreg);
+        nerr("ERROR: Unrecognized mode: %04x\n", phyreg);
         return -ENODEV;
     }
 #elif defined(CONFIG_ETH0_PHY_LAN8720)
@@ -2942,7 +2937,7 @@ static inline int pic32mx_phyinit(struct pic32mx_driver_s *priv)
       }
     else
       {
-        ndbg("Unrecognized mode: %04x\n", phyreg);
+        nerr("ERROR: Unrecognized mode: %04x\n", phyreg);
         return -ENODEV;
       }
   }
@@ -2950,9 +2945,9 @@ static inline int pic32mx_phyinit(struct pic32mx_driver_s *priv)
 #  warning "PHY Unknown: speed and duplex are bogus"
 #endif
 
-  ndbg("%dBase-T %s duplex\n",
-       (priv->pd_mode & PIC32MX_SPEED_MASK) ==  PIC32MX_SPEED_100 ? 100 : 10,
-       (priv->pd_mode & PIC32MX_DUPLEX_MASK) == PIC32MX_DUPLEX_FULL ?"full" : "half");
+  ninfo("%dBase-T %s duplex\n",
+        (priv->pd_mode & PIC32MX_SPEED_MASK) ==  PIC32MX_SPEED_100 ? 100 : 10,
+        (priv->pd_mode & PIC32MX_DUPLEX_MASK) == PIC32MX_DUPLEX_FULL ?"full" : "half");
 
   /* Disable auto-configuration.  Set the fixed speed/duplex mode.
    * (probably more than little redundant).

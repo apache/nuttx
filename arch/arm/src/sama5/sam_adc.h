@@ -57,7 +57,7 @@
 #  error Work queue support is required (CONFIG_SCHED_WORKQUEUE)
 #endif
 
-#ifndef CONFIG_DEBUG
+#ifndef CONFIG_DEBUG_FEATURES
 #  undef CONFIG_SAMA5_ADC_REGDEBUG
 #endif
 

@@ -58,10 +58,6 @@
 #  undef CONFIG_SAMA5_PIO_IRQ
 #endif
 
-#ifndef CONFIG_DEBUG
-#  undef CONFIG_DEBUG_GPIO
-#endif
-
 #define PIO_HAVE_PULLDOWN         1
 #define PIO_HAVE_PERIPHCD         1
 #define PIO_HAVE_SCHMITT          1

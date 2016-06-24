@@ -125,7 +125,7 @@ void up_schedule_sigaction(FAR struct tcb_s *tcb, sig_deliver_t sigdeliver)
 {
   irqstate_t flags;
 
-  sdbg("tcb=0x%p sigdeliver=0x%04x\n", tcb, (uint16_t)sigdeliver);
+  sinfo("tcb=0x%p sigdeliver=0x%04x\n", tcb, (uint16_t)sigdeliver);
 
   /* Make sure that interrupts are disabled */
 

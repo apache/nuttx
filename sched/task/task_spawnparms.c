@@ -83,7 +83,7 @@ static inline int spawn_close(FAR struct spawn_close_file_action_s *action)
 {
   /* The return value from close() is ignored */
 
-  svdbg("Closing fd=%d\n", action->fd);
+  sinfo("Closing fd=%d\n", action->fd);
 
   (void)close(action->fd);
   return OK;
@@ -95,14 +95,14 @@ static inline int spawn_dup2(FAR struct spawn_dup2_file_action_s *action)
 
   /* Perform the dup */
 
-  svdbg("Dup'ing %d->%d\n", action->fd1, action->fd2);
+  sinfo("Dup'ing %d->%d\n", action->fd1, action->fd2);
 
   ret = dup2(action->fd1, action->fd2);
   if (ret < 0)
     {
       int errcode = get_errno();
 
-      sdbg("ERROR: dup2 failed: %d\n", errcode);
+      serr("ERROR: dup2 failed: %d\n", errcode);
       return -errcode;
     }
 
@@ -116,14 +116,14 @@ static inline int spawn_open(FAR struct spawn_open_file_action_s *action)
 
   /* Open the file */
 
-  svdbg("Open'ing path=%s oflags=%04x mode=%04x\n",
+  sinfo("Open'ing path=%s oflags=%04x mode=%04x\n",
         action->path, action->oflags, action->mode);
 
   fd = open(action->path, action->oflags, action->mode);
   if (fd < 0)
     {
       ret = get_errno();
-      sdbg("ERROR: open failed: %d\n", ret);
+      serr("ERROR: open failed: %d\n", ret);
     }
 
   /* Does the return file descriptor happen to match the required file
@@ -134,16 +134,16 @@ static inline int spawn_open(FAR struct spawn_open_file_action_s *action)
     {
       /* No.. dup2 to get the correct file number */
 
-      svdbg("Dup'ing %d->%d\n", fd, action->fd);
+      sinfo("Dup'ing %d->%d\n", fd, action->fd);
 
       ret = dup2(fd, action->fd);
       if (ret < 0)
         {
           ret = get_errno();
-          sdbg("ERROR: dup2 failed: %d\n", ret);
+          serr("ERROR: dup2 failed: %d\n", ret);
         }
 
-      svdbg("Closing fd=%d\n", fd);
+      sinfo("Closing fd=%d\n", fd);
       close(fd);
     }
 
@@ -246,7 +246,7 @@ int spawn_execattrs(pid_t pid, FAR const posix_spawnattr_t *attr)
 
       if ((attr->flags & POSIX_SPAWN_SETSCHEDULER) == 0)
         {
-          svdbg("Setting priority=%d for pid=%d\n",
+          sinfo("Setting priority=%d for pid=%d\n",
                 param.sched_priority, pid);
 
           (void)sched_setparam(pid, &param);
@@ -269,7 +269,7 @@ int spawn_execattrs(pid_t pid, FAR const posix_spawnattr_t *attr)
 
   if ((attr->flags & POSIX_SPAWN_SETSCHEDULER) != 0)
     {
-      svdbg("Setting policy=%d priority=%d for pid=%d\n",
+      sinfo("Setting policy=%d priority=%d for pid=%d\n",
             attr->policy, param.sched_priority, pid);
 
 #ifdef CONFIG_SCHED_SPORADIC
@@ -347,7 +347,7 @@ int spawn_proxyattrs(FAR const posix_spawnattr_t *attr,
 
             case SPAWN_FILE_ACTION_NONE:
             default:
-              sdbg("ERROR: Unknown action: %d\n", entry->action);
+              serr("ERROR: Unknown action: %d\n", entry->action);
               ret = EINVAL;
               break;
             }

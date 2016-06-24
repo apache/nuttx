@@ -90,7 +90,7 @@ static int nsh_spifi_initialize(void)
   mtd = lpc43_spifi_initialize();
   if (!mtd)
     {
-      fdbg("ERROR: lpc43_spifi_initialize failed\n");
+      ferr("ERROR: lpc43_spifi_initialize failed\n");
       return -ENODEV;
     }
 
@@ -100,7 +100,7 @@ static int nsh_spifi_initialize(void)
   ret = ftl_initialize(CONFIG_SPIFI_DEVNO, mtd);
   if (ret < 0)
     {
-      fdbg("ERROR: Initializing the FTL layer: %d\n", ret);
+      ferr("ERROR: Initializing the FTL layer: %d\n", ret);
       return ret;
     }
 #else
@@ -109,7 +109,7 @@ static int nsh_spifi_initialize(void)
   ret = nxffs_initialize(mtd);
   if (ret < 0)
     {
-      fdbg("ERROR: NXFFS initialization failed: %d\n", ret);
+      ferr("ERROR: NXFFS initialization failed: %d\n", ret);
       return ret;
     }
 
@@ -118,7 +118,7 @@ static int nsh_spifi_initialize(void)
   ret = mount(NULL, "/mnt/spifi", "nxffs", 0, NULL);
   if (ret < 0)
     {
-      fdbg("ERROR: Failed to mount the NXFFS volume: %d\n", errno);
+      ferr("ERROR: Failed to mount the NXFFS volume: %d\n", errno);
       return ret;
     }
 #endif

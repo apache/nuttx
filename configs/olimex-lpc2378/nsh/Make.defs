@@ -76,7 +76,7 @@ ifneq ($(HOSTOS),Cygwin)
 endif
 endif
 
-ifeq ("${CONFIG_DEBUG}","y")
+ifeq ("${CONFIG_DEBUG_FEATURES}","y")
   ARCHOPTIMIZATION = -g
 endif
 
@@ -120,7 +120,7 @@ EXEEXT =
 ifneq ($(CROSSDEV),arm-nuttx-elf-)
   LDFLAGS += -nostartfiles -nodefaultlibs
 endif
-ifeq ($(CONFIG_DEBUG),y)
+ifeq ($(CONFIG_DEBUG_FEATURES),y)
   LDFLAGS += -g
 endif
 

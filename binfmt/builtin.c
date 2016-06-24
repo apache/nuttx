@@ -95,7 +95,7 @@ static int builtin_loadbinary(struct binary_s *binp)
   int index;
   int ret;
 
-  bvdbg("Loading file: %s\n", binp->filename);
+  binfo("Loading file: %s\n", binp->filename);
 
   /* Open the binary file for reading (only) */
 
@@ -103,7 +103,7 @@ static int builtin_loadbinary(struct binary_s *binp)
   if (fd < 0)
     {
       int errval = get_errno();
-      bdbg("ERROR: Failed to open binary %s: %d\n", binp->filename, errval);
+      berr("ERROR: Failed to open binary %s: %d\n", binp->filename, errval);
       return -errval;
     }
 
@@ -115,7 +115,7 @@ static int builtin_loadbinary(struct binary_s *binp)
   if (ret < 0)
     {
       int errval = get_errno();
-      bdbg("ERROR: FIOC_FILENAME ioctl failed: %d\n", errval);
+      berr("ERROR: FIOC_FILENAME ioctl failed: %d\n", errval);
       close(fd);
       return -errval;
     }
@@ -128,7 +128,7 @@ static int builtin_loadbinary(struct binary_s *binp)
   if (index < 0)
     {
       int errval = get_errno();
-      bdbg("ERROR: %s is not a builtin application\n", filename);
+      berr("ERROR: %s is not a builtin application\n", filename);
       close(fd);
       return -errval;
 
@@ -171,12 +171,12 @@ int builtin_initialize(void)
 
   /* Register ourselves as a binfmt loader */
 
-  bvdbg("Registering Builtin Loader\n");
+  binfo("Registering Builtin Loader\n");
 
   ret = register_binfmt(&g_builtin_binfmt);
   if (ret != 0)
     {
-      bdbg("Failed to register binfmt: %d\n", ret);
+      berr("Failed to register binfmt: %d\n", ret);
     }
 
   return ret;

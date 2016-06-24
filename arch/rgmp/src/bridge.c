@@ -98,7 +98,7 @@ static const struct file_operations up_bridge_fops =
 
 int rtos_bridge_init(struct rgmp_bridge *b)
 {
-  int err;
+  int errcode;
   struct bridge *bridge;
   char path[30] = {'/', 'd', 'e', 'v', '/'};
 
@@ -106,10 +106,10 @@ int rtos_bridge_init(struct rgmp_bridge *b)
     goto err0;
 
   bridge->b = b;
-  if ((err = sem_init(&bridge->rd_lock, 0, 1)) == ERROR)
+  if ((errcode = sem_init(&bridge->rd_lock, 0, 1)) == ERROR)
     goto err1;
 
-  if ((err = sem_init(&bridge->wr_lock, 0, 1)) == ERROR)
+  if ((errcode = sem_init(&bridge->wr_lock, 0, 1)) == ERROR)
     goto err1;
 
   // make rgmp_bridge0 to be the console
@@ -119,7 +119,7 @@ int rtos_bridge_init(struct rgmp_bridge *b)
   else
       strlcpy(path + 5, b->vdev->name, 25);
 
-  if ((err = register_driver(path, &up_bridge_fops, 0666, bridge)) == ERROR)
+  if ((errcode = register_driver(path, &up_bridge_fops, 0666, bridge)) == ERROR)
     {
       cprintf("NuttX: register bridge %s fail\n", b->vdev->name);
       goto err1;

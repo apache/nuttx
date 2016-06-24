@@ -85,7 +85,7 @@ int pthread_mutex_trylock(FAR pthread_mutex_t *mutex)
 {
   int ret = OK;
 
-  sdbg("mutex=0x%p\n", mutex);
+  sinfo("mutex=0x%p\n", mutex);
 
   if (!mutex)
     {
@@ -149,7 +149,7 @@ int pthread_mutex_trylock(FAR pthread_mutex_t *mutex)
       sched_unlock();
     }
 
-  sdbg("Returning %d\n", ret);
+  sinfo("Returning %d\n", ret);
   return ret;
 }
 

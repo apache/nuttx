@@ -301,9 +301,9 @@ int sig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
   irqstate_t flags;
   int ret = OK;
 
-  sdbg("TCB=0x%08x signo=%d code=%d value=%d mask=%08x\n",
-       stcb, info->si_signo, info->si_code,
-       info->si_value.sival_int, stcb->sigprocmask);
+  sinfo("TCB=0x%08x signo=%d code=%d value=%d mask=%08x\n",
+        stcb, info->si_signo, info->si_code,
+        info->si_value.sival_int, stcb->sigprocmask);
 
   DEBUGASSERT(stcb != NULL && info != NULL);
 

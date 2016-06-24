@@ -54,18 +54,6 @@ int trv_mount_world(int minor, FAR const char *mountpoint);
 #endif
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* Debug ********************************************************************/
-
-#ifdef CONFIG_BOARD_INITIALIZE
-#  define SYSLOG lldbg
-#else
-#  define SYSLOG dbg
-#endif
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -107,8 +95,8 @@ int sim_bringup(void)
   ret = mount(NULL, SIM_PROCFS_MOUNTPOINT, "procfs", 0, NULL);
   if (ret < 0)
     {
-      SYSLOG("ERROR: Failed to mount procfs at %s: %d\n",
-             SIM_PROCFS_MOUNTPOINT, ret);
+      _err("ERROR: Failed to mount procfs at %s: %d\n",
+           SIM_PROCFS_MOUNTPOINT, ret);
     }
 #endif
 

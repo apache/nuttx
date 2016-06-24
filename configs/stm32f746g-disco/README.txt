@@ -49,14 +49,6 @@ STATUS
   2015-07-20:  STM32 F7 Ethernet appears to be functional, but has had
     only light testing.
 
-  2015-07-21:  Added a protected build version of the NSH configuration
-    (called knsh).  That configuration is close:  It boots, but I get
-    a hard fault each time I do the NSH "help" command.  Everything else
-    works fine.  I am thinking this is a corrupted binary; I am thinking
-    that there is a bad pointer in the command table.  But this is hard
-    to prove but possible because the steps to produce and load the
-    binary are awkward.
-
 Development Environment
 =======================
 
@@ -416,7 +408,7 @@ STM32F746G-DISCO-specific Configuration Options
     CONFIG_CAN2_BAUD - CAN1 BAUD rate.  Required if CONFIG_STM32F7_CAN2 is defined.
     CONFIG_CAN_TSEG1 - The number of CAN time quanta in segment 1. Default: 6
     CONFIG_CAN_TSEG2 - the number of CAN time quanta in segment 2. Default: 7
-    CONFIG_CAN_REGDEBUG - If CONFIG_DEBUG is set, this will generate an
+    CONFIG_STM32_CAN_REGDEBUG - If CONFIG_DEBUG_FEATURES is set, this will generate an
       dump of all CAN registers.
 
   STM32F746G-DISCO SPI Configuration
@@ -459,9 +451,9 @@ STM32F746G-DISCO-specific Configuration Options
    CONFIG_STM32F7_OTGFS_SOFINTR - Enable SOF interrupts.  Why would you ever
      want to do that?
    CONFIG_STM32F7_USBHOST_REGDEBUG - Enable very low-level register access
-     debug.  Depends on CONFIG_DEBUG.
+     debug.  Depends on CONFIG_DEBUG_FEATURES.
    CONFIG_STM32F7_USBHOST_PKTDUMP - Dump all incoming and outgoing USB
-     packets. Depends on CONFIG_DEBUG.
+     packets. Depends on CONFIG_DEBUG_FEATURES.
 
 Configurations
 ==============

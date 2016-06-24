@@ -594,12 +594,13 @@ config CAN_LOOPBACK
 	---help---
 		Enable CAN loopback mode
 
-config CAN_REGDEBUG
+config LPC17_CAN_REGDEBUG
 	bool "Register level debug"
-	depends on DEBUG
+	depends on DEBUG_CAN_INFO
 	default n
 	---help---
-		Output detailed register-level CAN debug information.  Requires also DEBUG and DEBUG_CAN.
+		Output detailed register-level CAN debug information.  Requires also
+		CONFIG_DEBUG_CAN_INFO.
 
 endmenu
 
@@ -703,12 +704,12 @@ config NET_WOL
 	---help---
 		Enable Wake-up on Lan (not fully implemented).
 
-config NET_REGDEBUG
+config LPC17_NET_REGDEBUG
 	bool "Ethernet register-level debug"
-	depends on DEBUG
+	depends on DEBUG_NET_INFO
 	default n
 	---help---
-		Enable low level register debug.  Also needs DEBUG.
+		Enable low level register debug.  Also needs CONFIG_DEBUG_NET_INFO.
 
 config NET_HASH
 	bool "Hashing"
@@ -900,10 +901,11 @@ config LPC17_USBDEV_NOLED
 
 config LPC17_USBDEV_REGDEBUG
 	bool "Register level debug"
-	depends on DEBUG
+	depends on DEBUG_USB_INFO
 	default n
 	---help---
-		Output detailed register-level USB device debug information.  Requires also DEBUG.
+		Output detailed register-level USB device debug information.  Requires
+		also CONFIG_DEBUG_USB_INFO.
 
 endmenu
 
@@ -976,9 +978,10 @@ config USBHOST_ISOC_DISABLE
 
 config LPC17_USBHOST_REGDEBUG
 	bool "Register level debug"
-	depends on DEBUG
+	depends on DEBUG_USB_INFO
 	default n
 	---help---
-		Output detailed register-level USB host debug information.  Requires also DEBUG.
+		Output detailed register-level USB host debug information.  Requires
+		also CONFIG_DEBUG_USB_INFO.
 
 endmenu

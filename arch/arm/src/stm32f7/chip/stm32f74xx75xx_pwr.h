@@ -1,8 +1,9 @@
 /************************************************************************************
- * arch/arm/src/stm32f7/chip/stm32_pwr.h
+ * arch/arm/src/stm32f7/chip/stm32f74xx75xx_pwr.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            David Sidrane <david_s5@nscdg.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -103,6 +104,7 @@
 #define PWR_CSR1_SBF            (1 << 1)  /* Bit 1:  Standby flag */
 #define PWR_CSR1_PVDO           (1 << 2)  /* Bit 2:  PVD Output */
 #define PWR_CSR1_BRR            (1 << 3)  /* Bit 3:  Backup regulator ready */
+#define PWR_CSR1_EIWUP          (1 << 8)  /* Bit 8:  Enable internal wakeup */
 #define PWR_CSR1_BRE            (1 << 9)  /* Bit 9:  Backup regulator enable */
 #define PWR_CSR1_VOSRDY         (1 << 14) /* Bit 14: Regulator voltage scaling output selection ready bite */
 #define PWR_CSR1_ODRDY          (1 << 16) /* Bit 16: Over Drive generator ready */

@@ -55,21 +55,9 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* CONFIG_DEBUG_LEDS enables debug output from this file (needs CONFIG_DEBUG
- * with CONFIG_DEBUG_VERBOSE too)
- */
-
-#ifdef CONFIG_DEBUG_LEDS
-#  define leddbg  lldbg
-#  define ledvdbg llvdbg
-#else
-#  define leddbg(x...)
-#  define ledvdbg(x...)
-#endif
-
 /* Dump GPIO registers */
 
-#ifdef CONFIG_DEBUG_LEDS
+#ifdef CONFIG_DEBUG_LEDS_INFO
 #  define led_dumpgpio(m) tiva_dumpgpio(LED_GPIO, m)
 #else
 #  define led_dumpgpio(m)
@@ -79,15 +67,11 @@
  * Private Data
  ****************************************************************************/
 
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
+static uint8_t g_nest;
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-
-static uint8_t g_nest;
 
 /****************************************************************************
  * Name: board_autoled_initialize
@@ -100,7 +84,7 @@ static uint8_t g_nest;
 #ifdef CONFIG_ARCH_LEDS
 void board_autoled_initialize(void)
 {
-  leddbg("Initializing\n");
+  ledinfo("Initializing\n");
 
   /* Configure Port E, Bit 1 as an output, initial value=OFF */
 

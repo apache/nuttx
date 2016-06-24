@@ -2,7 +2,8 @@
  * arch/arm/src/stm32f7/chip/stm32f74xx75xx_pinmap.h
  *
  *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            David Sidrane <david_s5@nscdg.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -50,7 +51,7 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-/* Alternate Pin Functions.  All members of the STM32F40xxx family share the same
+/* Alternate Pin Functions.  All members of the STM32F74|5xxx family share the same
  * pin multiplexing (although they may differ in the pins physically available).
  *
  * Alternative pin selections are provided with a numeric suffix like _1, _2, etc.

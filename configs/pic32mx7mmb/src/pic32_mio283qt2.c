@@ -69,20 +69,6 @@
 #  error "CONFIG_PIC32MX_PMP is required to use the LCD"
 #endif
 
-/* Define CONFIG_DEBUG_LCD to enable detailed LCD debug output. Verbose debug must
- * also be enabled.
- */
-
-#ifndef CONFIG_DEBUG
-#  undef CONFIG_DEBUG_VERBOSE
-#  undef CONFIG_DEBUG_GRAPHICS
-#  undef CONFIG_DEBUG_LCD
-#endif
-
-#ifndef CONFIG_DEBUG_VERBOSE
-#  undef CONFIG_DEBUG_LCD
-#endif
-
 /* PIC32MX7MMB LCD Hardware Definitions ***********************************************/
 /* --- ---------------------------------- -------------------- ------------------------
  * PIN CONFIGURATIONS                     SIGNAL NAME          ON-BOARD CONNECTIONS
@@ -135,16 +121,6 @@
 /* RB15, RS -- High values selects data */
 
 #define GPIO_LCD_RS   (GPIO_OUTPUT|GPIO_VALUE_ZERO|GPIO_PORTB|GPIO_PIN15)
-
-/* Debug ******************************************************************************/
-
-#ifdef CONFIG_DEBUG_LCD
-#  define lcddbg       dbg
-#  define lcdvdbg      vdbg
-#else
-#  define lcddbg(x...)
-#  define lcdvdbg(x...)
-#endif
 
 #ifdef CONFIG_LCD_MIO283QT2
 
@@ -430,7 +406,7 @@ int board_lcd_initialize(void)
 
   if (!g_pic32mx7mmb_lcd.drvr)
     {
-      lcdvdbg("Initializing\n");
+      lcdinfo("Initializing\n");
 
       /* Hold the LCD in reset (active low)  */
 
@@ -468,7 +444,7 @@ int board_lcd_initialize(void)
       g_pic32mx7mmb_lcd.drvr = mio283qt2_lcdinitialize(&g_pic32mx7mmb_lcd.dev);
       if (!g_pic32mx7mmb_lcd.drvr)
         {
-          lcddbg("ERROR: mio283qt2_lcdinitialize failed\n");
+          lcderr("ERROR: mio283qt2_lcdinitialize failed\n");
           return -ENODEV;
         }
     }

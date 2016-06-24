@@ -279,7 +279,7 @@ static uint16_t ads7843e_sendcmd(FAR struct ads7843e_dev_s *priv, uint8_t cmd)
   result = ((uint16_t)buffer[0] << 8) | (uint16_t)buffer[1];
   result = result >> 4;
 
-  ivdbg("cmd:%02x response:%04x\n", cmd, result);
+  iinfo("cmd:%02x response:%04x\n", cmd, result);
   return result;
 }
 
@@ -319,7 +319,7 @@ static void ads7843e_notify(FAR struct ads7843e_dev_s *priv)
       if (fds)
         {
           fds->revents |= POLLIN;
-          ivdbg("Report events: %02x\n", fds->revents);
+          iinfo("Report events: %02x\n", fds->revents);
           sem_post(fds->sem);
         }
     }
@@ -416,7 +416,7 @@ static int ads7843e_waitsample(FAR struct ads7843e_dev_s *priv,
     {
       /* Wait for a change in the ADS7843E state */
 
-      ivdbg("Waiting..\n");
+      iinfo("Waiting..\n");
       priv->nwaiters++;
       ret = sem_wait(&priv->waitsem);
       priv->nwaiters--;
@@ -427,14 +427,14 @@ static int ads7843e_waitsample(FAR struct ads7843e_dev_s *priv,
            * the failure now.
            */
 
-          idbg("sem_wait: %d\n", errno);
+          ierr("ERROR: sem_wait: %d\n", errno);
           DEBUGASSERT(errno == EINTR);
           ret = -EINTR;
           goto errout;
         }
     }
 
-  ivdbg("Sampled\n");
+  iinfo("Sampled\n");
 
   /* Re-acquire the semaphore that manages mutually exclusive access to
    * the device structure.  We may have to wait here.  But we have our sample.
@@ -498,7 +498,7 @@ static int ads7843e_schedule(FAR struct ads7843e_dev_s *priv)
   ret = work_queue(HPWORK, &priv->work, ads7843e_worker, priv, 0);
   if (ret != 0)
     {
-      illdbg("Failed to queue work: %d\n", ret);
+      ierr("ERROR: Failed to queue work: %d\n", ret);
     }
 
   return OK;
@@ -749,7 +749,7 @@ static int ads7843e_open(FAR struct file *filep)
   uint8_t                   tmp;
   int                       ret;
 
-  ivdbg("Opening\n");
+  iinfo("Opening\n");
 
   DEBUGASSERT(filep);
   inode = filep->f_inode;
@@ -791,7 +791,7 @@ errout_with_sem:
   sem_post(&priv->devsem);
   return ret;
 #else
-  ivdbg("Opening\n");
+  iinfo("Opening\n");
   return OK;
 #endif
 }
@@ -807,7 +807,7 @@ static int ads7843e_close(FAR struct file *filep)
   FAR struct ads7843e_dev_s *priv;
   int                       ret;
 
-  ivdbg("Closing\n");
+  iinfo("Closing\n");
   DEBUGASSERT(filep);
   inode = filep->f_inode;
 
@@ -837,7 +837,7 @@ static int ads7843e_close(FAR struct file *filep)
 
   sem_post(&priv->devsem);
 #endif
-  ivdbg("Closing\n");
+  iinfo("Closing\n");
   return OK;
 }
 
@@ -853,7 +853,7 @@ static ssize_t ads7843e_read(FAR struct file *filep, FAR char *buffer, size_t le
   struct ads7843e_sample_s   sample;
   int                        ret;
 
-  ivdbg("buffer:%p len:%d\n", buffer, len);
+  iinfo("buffer:%p len:%d\n", buffer, len);
   DEBUGASSERT(filep);
   inode = filep->f_inode;
 
@@ -870,7 +870,7 @@ static ssize_t ads7843e_read(FAR struct file *filep, FAR char *buffer, size_t le
        * handle smaller reads... but why?
        */
 
-      idbg("Unsupported read size: %d\n", len);
+      ierr("ERROR: Unsupported read size: %d\n", len);
       return -ENOSYS;
     }
 
@@ -881,7 +881,7 @@ static ssize_t ads7843e_read(FAR struct file *filep, FAR char *buffer, size_t le
     {
       /* This should only happen if the wait was cancelled by an signal */
 
-      idbg("sem_wait: %d\n", errno);
+      ierr("ERROR: sem_wait: %d\n", errno);
       DEBUGASSERT(errno == EINTR);
       return -EINTR;
     }
@@ -896,7 +896,7 @@ static ssize_t ads7843e_read(FAR struct file *filep, FAR char *buffer, size_t le
        * option, then just return an error.
        */
 
-      ivdbg("Sample data is not available\n");
+      iinfo("Sample data is not available\n");
       if (filep->f_oflags & O_NONBLOCK)
         {
           ret = -EAGAIN;
@@ -910,7 +910,7 @@ static ssize_t ads7843e_read(FAR struct file *filep, FAR char *buffer, size_t le
         {
           /* We might have been awakened by a signal */
 
-          idbg("ads7843e_waitsample: %d\n", ret);
+          ierr("ERROR: ads7843e_waitsample: %d\n", ret);
           goto errout;
         }
     }
@@ -957,16 +957,16 @@ static ssize_t ads7843e_read(FAR struct file *filep, FAR char *buffer, size_t le
       report->point[0].flags  = TOUCH_MOVE | TOUCH_ID_VALID | TOUCH_POS_VALID;
     }
 
-  ivdbg("  id:      %d\n", report->point[0].id);
-  ivdbg("  flags:   %02x\n", report->point[0].flags);
-  ivdbg("  x:       %d\n", report->point[0].x);
-  ivdbg("  y:       %d\n", report->point[0].y);
+  iinfo("  id:      %d\n", report->point[0].id);
+  iinfo("  flags:   %02x\n", report->point[0].flags);
+  iinfo("  x:       %d\n", report->point[0].x);
+  iinfo("  y:       %d\n", report->point[0].y);
 
   ret = SIZEOF_TOUCH_SAMPLE_S(1);
 
 errout:
   sem_post(&priv->devsem);
-  ivdbg("Returning: %d\n", ret);
+  iinfo("Returning: %d\n", ret);
   return ret;
 }
 
@@ -980,7 +980,7 @@ static int ads7843e_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   FAR struct ads7843e_dev_s *priv;
   int                       ret;
 
-  ivdbg("cmd: %d arg: %ld\n", cmd, arg);
+  iinfo("cmd: %d arg: %ld\n", cmd, arg);
   DEBUGASSERT(filep);
   inode = filep->f_inode;
 
@@ -1040,7 +1040,7 @@ static int ads7843e_poll(FAR struct file *filep, FAR struct pollfd *fds,
   int ret;
   int i;
 
-  ivdbg("setup: %d\n", (int)setup);
+  iinfo("setup: %d\n", (int)setup);
   DEBUGASSERT(filep && fds);
   inode = filep->f_inode;
 
@@ -1156,7 +1156,7 @@ int ads7843e_register(FAR struct spi_dev_s *spi,
 #endif
   int ret;
 
-  ivdbg("spi: %p minor: %d\n", spi, minor);
+  iinfo("spi: %p minor: %d\n", spi, minor);
 
   /* Debug-only sanity checks */
 
@@ -1170,7 +1170,7 @@ int ads7843e_register(FAR struct spi_dev_s *spi,
   priv = (FAR struct ads7843e_dev_s *)kmm_malloc(sizeof(struct ads7843e_dev_s));
   if (!priv)
     {
-      idbg("kmm_malloc(%d) failed\n", sizeof(struct ads7843e_dev_s));
+      ierr("ERROR: kmm_malloc(%d) failed\n", sizeof(struct ads7843e_dev_s));
       return -ENOMEM;
     }
 #endif
@@ -1197,12 +1197,12 @@ int ads7843e_register(FAR struct spi_dev_s *spi,
   ret = config->attach(config, ads7843e_interrupt);
   if (ret < 0)
     {
-      idbg("Failed to attach interrupt\n");
+      ierr("ERROR: Failed to attach interrupt\n");
       goto errout_with_priv;
     }
 
-  idbg("Mode: %d Bits: 8 Frequency: %d\n",
-       CONFIG_ADS7843E_SPIMODE, CONFIG_ADS7843E_FREQUENCY);
+  iinfo("Mode: %d Bits: 8 Frequency: %d\n",
+        CONFIG_ADS7843E_SPIMODE, CONFIG_ADS7843E_FREQUENCY);
 
   /* Lock the SPI bus so that we have exclusive access */
 
@@ -1219,12 +1219,12 @@ int ads7843e_register(FAR struct spi_dev_s *spi,
   /* Register the device as an input device */
 
   (void)snprintf(devname, DEV_NAMELEN, DEV_FORMAT, minor);
-  ivdbg("Registering %s\n", devname);
+  iinfo("Registering %s\n", devname);
 
   ret = register_driver(devname, &ads7843e_fops, 0666, priv);
   if (ret < 0)
     {
-      idbg("register_driver() failed: %d\n", ret);
+      ierr("ERROR: register_driver() failed: %d\n", ret);
       goto errout_with_priv;
     }
 
@@ -1246,7 +1246,7 @@ int ads7843e_register(FAR struct spi_dev_s *spi,
   ret = work_queue(HPWORK, &priv->work, ads7843e_worker, priv, 0);
   if (ret != 0)
     {
-      idbg("Failed to queue work: %d\n", ret);
+      ierr("ERROR: Failed to queue work: %d\n", ret);
       goto errout_with_priv;
     }
 

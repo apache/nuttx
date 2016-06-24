@@ -52,9 +52,6 @@
 
 #include "pcduino_a10.h"
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
 /* The pcDuino v1 has four green LEDs; three can be controlled from software.
  * Two are tied to ground and, hence, illuminated by driving the output pins
  * to a high value:
@@ -89,26 +86,6 @@
  * other purposes by the application (Of course, all LEDs are available to the
  * application if CONFIG_ARCH_LEDS is not defined.
  */
-
-/* CONFIG_DEBUG_LEDS enables debug output from this file (needs CONFIG_DEBUG
- * with CONFIG_DEBUG_VERBOSE too)
- */
-
-#ifdef CONFIG_DEBUG_LEDS
-#  define leddbg  lldbg
-#  define ledvdbg llvdbg
-#else
-#  define leddbg(x...)
-#  define ledvdbg(x...)
-#endif
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions

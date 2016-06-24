@@ -231,7 +231,7 @@ void arp_out(FAR struct net_driver_s *dev)
       tabptr = arp_find(ipaddr);
       if (!tabptr)
         {
-           nllvdbg("ARP request for IP %08lx\n", (unsigned long)ipaddr);
+           ninfo("ARP request for IP %08lx\n", (unsigned long)ipaddr);
 
           /* The destination address was not in our ARP table, so we
            * overwrite the IP packet with an ARP request.

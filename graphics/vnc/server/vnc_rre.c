@@ -44,10 +44,14 @@
 #include <errno.h>
 
 #if defined(CONFIG_VNCSERVER_DEBUG) && !defined(CONFIG_DEBUG_GRAPHICS)
-#  undef  CONFIG_DEBUG
-#  undef  CONFIG_DEBUG_VERBOSE
-#  define CONFIG_DEBUG          1
-#  define CONFIG_DEBUG_VERBOSE  1
+#  undef  CONFIG_DEBUG_FEATURES
+#  undef  CONFIG_DEBUG_ERROR
+#  undef  CONFIG_DEBUG_WARN
+#  undef  CONFIG_DEBUG_INFO
+#  define CONFIG_DEBUG_FEATURES 1
+#  define CONFIG_DEBUG_ERROR    1
+#  define CONFIG_DEBUG_WARN     1
+#  define CONFIG_DEBUG_INFO     1
 #  define CONFIG_DEBUG_GRAPHICS 1
 #endif
 #include <debug.h>
@@ -272,7 +276,7 @@ int vnc_rre(FAR struct vnc_session_s *session, FAR struct nxgl_rect_s *rect)
                 break;
 
               default:
-                gdbg("ERROR: Unrecognized color format: %d\n",
+                gerr("ERROR: Unrecognized color format: %d\n",
                      session->colorfmt);
                 return -EINVAL;
             }
@@ -292,14 +296,14 @@ int vnc_rre(FAR struct vnc_session_s *session, FAR struct nxgl_rect_s *rect)
               if (nsent < 0)
                 {
                   int errcode = get_errno();
-                  gdbg("ERROR: Send RRE FrameBufferUpdate failed: %d\n",
+                  gerr("ERROR: Send RRE FrameBufferUpdate failed: %d\n",
                        errcode);
                   DEBUGASSERT(errcode > 0);
                   return -errcode;
                 }
 
               DEBUGASSERT(nsent == nbytes);
-              updvdbg("Sent {(%d, %d),(%d, %d)}\n",
+              updinfo("Sent {(%d, %d),(%d, %d)}\n",
                       rect->pt1.x, rect->pt1.y, rect->pt2.x, rect->pt2.y);
               return nbytes;
             }

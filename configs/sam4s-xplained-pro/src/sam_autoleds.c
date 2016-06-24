@@ -53,9 +53,6 @@
 
 #ifdef CONFIG_ARCH_LEDS
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
 /* If CONFIG_ARCH_LEDs is defined, then NuttX will control the LED on
  * board the SAM4S Xplained Pro.  The following definitions describe how NuttX
  * controls the LEDs:
@@ -73,26 +70,6 @@
  *   LED_PANIC            The system has crashed     OFF
  *   LED_IDLE             MCU is is sleep mode       Not used
  */
-
-/* CONFIG_DEBUG_LEDS enables debug output from this file (needs CONFIG_DEBUG
- * with CONFIG_DEBUG_VERBOSE too)
- */
-
-#ifdef CONFIG_DEBUG_LEDS
-#  define leddbg  lldbg
-#  define ledvdbg llvdbg
-#else
-#  define leddbg(x...)
-#  define ledvdbg(x...)
-#endif
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions

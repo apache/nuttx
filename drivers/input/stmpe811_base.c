@@ -199,7 +199,7 @@ static int stmpe811_interrupt(int irq, FAR void *context)
       ret = work_queue(HPWORK, &priv->work, stmpe811_worker, priv, 0);
       if (ret != 0)
         {
-          illdbg("Failed to queue work: %d\n", ret);
+          ierr("ERROR: Failed to queue work: %d\n", ret);
         }
     }
 
@@ -226,7 +226,7 @@ static int stmpe811_checkid(FAR struct stmpe811_dev_s *priv)
   devid = stmpe811_getreg8(priv, STMPE811_CHIP_ID);
   devid = (uint32_t)(devid << 8);
   devid |= (uint32_t)stmpe811_getreg8(priv, STMPE811_CHIP_ID+1);
-  ivdbg("devid: %04x\n", devid);
+  iinfo("devid: %04x\n", devid);
 
   if (devid != (uint16_t)CHIP_ID)
     {
@@ -422,12 +422,12 @@ uint8_t stmpe811_getreg8(FAR struct stmpe811_dev_s *priv, uint8_t regaddr)
   ret = I2C_TRANSFER(priv->i2c, msg, 2);
   if (ret < 0)
     {
-      idbg("I2C_TRANSFER failed: %d\n", ret);
+      ierr("ERROR: I2C_TRANSFER failed: %d\n", ret);
       return 0;
     }
 
 #ifdef CONFIG_STMPE811_REGDEBUG
-  dbg("%02x->%02x\n", regaddr, regval);
+  _err("%02x->%02x\n", regaddr, regval);
 #endif
   return regval;
 }
@@ -455,7 +455,7 @@ void stmpe811_putreg8(FAR struct stmpe811_dev_s *priv,
   int ret;
 
 #ifdef CONFIG_STMPE811_REGDEBUG
-  dbg("%02x<-%02x\n", regaddr, regval);
+  _err("%02x<-%02x\n", regaddr, regval);
 #endif
 
   /* Setup to the data to be transferred.  Two bytes:  The STMPE811 register
@@ -479,7 +479,7 @@ void stmpe811_putreg8(FAR struct stmpe811_dev_s *priv,
   ret = I2C_TRANSFER(priv->i2c, &msg, 1);
   if (ret < 0)
     {
-      idbg("I2C_TRANSFER failed: %d\n", ret);
+      ierr("ERROR: I2C_TRANSFER failed: %d\n", ret);
     }
 }
 #endif
@@ -530,12 +530,12 @@ uint16_t stmpe811_getreg16(FAR struct stmpe811_dev_s *priv, uint8_t regaddr)
   ret = I2C_TRANSFER(priv->i2c, msg, 2);
   if (ret < 0)
     {
-      idbg("I2C_TRANSFER failed: %d\n", ret);
+      ierr("ERROR: I2C_TRANSFER failed: %d\n", ret);
       return 0;
     }
 
 #ifdef CONFIG_STMPE811_REGDEBUG
-  dbg("%02x->%02x%02x\n", regaddr, rxbuffer[0], rxbuffer[1]);
+  _err("%02x->%02x%02x\n", regaddr, rxbuffer[0], rxbuffer[1]);
 #endif
   return (uint16_t)rxbuffer[0] << 8 | (uint16_t)rxbuffer[1];
 }

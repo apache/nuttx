@@ -41,6 +41,7 @@
 
 #include <sys/types.h>
 #include <stdint.h>
+#include <string.h>
 #include <assert.h>
 #include <debug.h>
 
@@ -438,7 +439,7 @@
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG_HEAP
+#ifdef CONFIG_HEAP_COLORATION
 static inline void up_heap_color(FAR void *start, size_t size)
 {
   memset(start, HEAP_COLOR, size);

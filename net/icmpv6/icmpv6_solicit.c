@@ -211,7 +211,7 @@ void icmpv6_solicit(FAR struct net_driver_s *dev,
    * outgoing packet.
    */
   dev->d_len += netdev_ipv6_hdrlen(dev);
-  nllvdbg("Outgoing ICMPv6 Neighbor Solicitation length: %d (%d)\n",
+  ninfo("Outgoing ICMPv6 Neighbor Solicitation length: %d (%d)\n",
           dev->d_len, (icmp->len[0] << 8) | icmp->len[1]);
 
 #ifdef CONFIG_NET_STATISTICS

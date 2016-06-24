@@ -696,7 +696,7 @@ static int ov2640_putreg(FAR struct i2c_master_s *i2c, uint8_t regaddr,
   int ret;
 
 #ifdef CONFIG_OV2640_REGDEBUG
-   dbg("%02x <- %02x\n", regaddr, regval);
+   _err("%02x <- %02x\n", regaddr, regval);
 #endif
 
   /* Set up for the transfer */
@@ -715,7 +715,7 @@ static int ov2640_putreg(FAR struct i2c_master_s *i2c, uint8_t regaddr,
   ret = i2c_write(i2c, &config, buffer, 2);
   if (ret < 0)
     {
-      gdbg("ERROR: i2c_write failed: %d\n", ret);
+      gerr("ERROR: i2c_write failed: %d\n", ret);
       return ret;
     }
 
@@ -756,7 +756,7 @@ static uint8_t ov2640_getreg(FAR struct i2c_master_s *i2c, uint8_t regaddr)
   ret = i2c_write(i2c, &config, &regaddr, 1);
   if (ret < 0)
     {
-      gdbg("ERROR: i2c_write failed: %d\n", ret);
+      gerr("ERROR: i2c_write failed: %d\n", ret);
       return 0;
     }
 
@@ -765,13 +765,13 @@ static uint8_t ov2640_getreg(FAR struct i2c_master_s *i2c, uint8_t regaddr)
   ret = i2c_read(i2c, &config, &regval, 1);
   if (ret < 0)
     {
-      gdbg("ERROR: i2c_read failed: %d\n", ret);
+      gerr("ERROR: i2c_read failed: %d\n", ret);
       return 0;
     }
 #ifdef CONFIG_OV2640_REGDEBUG
   else
     {
-      dbg("%02x -> %02x\n", regaddr, regval);
+      _err("%02x -> %02x\n", regaddr, regval);
     }
 #endif
 
@@ -807,7 +807,7 @@ static int ov2640_putreglist(FAR struct i2c_master_s *i2c,
       ret = ov2640_putreg(i2c, entry->regaddr, entry->regval);
       if (ret < 0)
         {
-          gdbg("ERROR: ov2640_putreg failed: %d\n", ret);
+          gerr("ERROR: ov2640_putreg failed: %d\n", ret);
           return ret;
         }
     }
@@ -845,7 +845,7 @@ static int ovr2640_chipid(FAR struct i2c_master_s *i2c)
   ret = ov2640_putreg(i2c, 0xff, 0x01); /* Select the sensor address bank */
   if (ret < 0)
     {
-      gdbg("ERROR: ov2640_putreg failed: %d\n", ret);
+      gerr("ERROR: ov2640_putreg failed: %d\n", ret);
       return ret;
     }
 
@@ -859,12 +859,12 @@ static int ovr2640_chipid(FAR struct i2c_master_s *i2c)
 
   if (pidl != OVR2640_PRODUCT_IDL || pidh != OVR2640_PRODUCT_IDH)
     {
-      gdbg("ERROR: Unsupported PID=%02x$02x MID=%02x%02x\n",
+      gerr("ERROR: Unsupported PID=%02x$02x MID=%02x%02x\n",
             pidh, pidl, midh, midl);
       return -ENOSYS;
     }
 
-  gvdbg("PID=%02x$02x MID=%02x%02x\n", pidh, pidl, midh, midl);
+  ginfo("PID=%02x$02x MID=%02x%02x\n", pidh, pidl, midh, midl);
   return OK;
 }
 
@@ -892,7 +892,7 @@ static int ov2640_reset(FAR struct i2c_master_s *i2c)
   ret = ov2640_putreglist(i2c, g_ov2640_reset, OV2640_RESET_NENTRIES);
   if (ret < 0)
     {
-      gdbg("ERROR: ov2640_putreglist failed: %d\n", ret);
+      gerr("ERROR: ov2640_putreglist failed: %d\n", ret);
       return ret;
     }
 
@@ -927,7 +927,7 @@ int ov2640_initialize(FAR struct i2c_master_s *i2c)
   ret = ov2640_reset(i2c);
   if (ret < 0)
     {
-      gdbg("ERROR: ov2640_reset failed: %d\n", ret);
+      gerr("ERROR: ov2640_reset failed: %d\n", ret);
       goto errout;
     }
 
@@ -936,7 +936,7 @@ int ov2640_initialize(FAR struct i2c_master_s *i2c)
   ret = ovr2640_chipid(i2c);
   if (ret < 0)
     {
-      gdbg("ERROR: ovr2640_chipid failed: %d\n", ret);
+      gerr("ERROR: ovr2640_chipid failed: %d\n", ret);
       goto errout;
     }
 
@@ -948,35 +948,35 @@ int ov2640_initialize(FAR struct i2c_master_s *i2c)
   ret = ov2640_putreglist(i2c, g_ov2640_jpeg_init, OV2640_JPEG_INIT_NENTRIES);
   if (ret < 0)
     {
-      gdbg("ERROR: ov2640_putreglist failed: %d\n", ret);
+      gerr("ERROR: ov2640_putreglist failed: %d\n", ret);
       goto errout;
     }
 
   ret = ov2640_putreglist(i2c, g_ov2640_yuv422, OV2640_YUV422_NENTRIES);
   if (ret < 0)
     {
-      gdbg("ERROR: ov2640_putreglist failed: %d\n", ret);
+      gerr("ERROR: ov2640_putreglist failed: %d\n", ret);
       goto errout;
     }
 
   ret = ov2640_putreglist(i2c, g_ov2640_jpeg, OV2640_JPEG_NENTRIES);
   if (ret < 0)
     {
-      gdbg("ERROR: ov2640_putreglist failed: %d\n", ret);
+      gerr("ERROR: ov2640_putreglist failed: %d\n", ret);
       goto errout;
     }
 
   ret = ov2640_putreg(i2c, 0xff, 0x01);
   if (ret < 0)
     {
-      gdbg("ERROR: ov2640_putreg failed: %d\n", ret);
+      gerr("ERROR: ov2640_putreg failed: %d\n", ret);
       goto errout;
     }
 
   ret = ov2640_putreg(i2c, 0x15, 0x00);
   if (ret < 0)
     {
-      gdbg("ERROR: ov2640_putreg failed: %d\n", ret);
+      gerr("ERROR: ov2640_putreg failed: %d\n", ret);
       goto errout;
     }
 
@@ -1018,7 +1018,7 @@ int ov2640_initialize(FAR struct i2c_master_s *i2c)
 
   if (ret < 0)
     {
-      gdbg("ERROR: ov2640_putreglist failed: %d\n", ret);
+      gerr("ERROR: ov2640_putreglist failed: %d\n", ret);
       goto errout;
     }
 
@@ -1030,7 +1030,7 @@ int ov2640_initialize(FAR struct i2c_master_s *i2c)
                           OV2640_INITIALREGS_NENTRIES);
   if (ret < 0)
     {
-      gdbg("ERROR: ov2640_putreglist failed: %d\n", ret);
+      gerr("ERROR: ov2640_putreglist failed: %d\n", ret);
       goto errout;
     }
 
@@ -1040,7 +1040,7 @@ int ov2640_initialize(FAR struct i2c_master_s *i2c)
                           OV2640_RESOLUTION_COMMON_NENTRIES);
   if (ret < 0)
     {
-      gdbg("ERROR: ov2640_putreglist failed: %d\n", ret);
+      gerr("ERROR: ov2640_putreglist failed: %d\n", ret);
       goto errout;
     }
 
@@ -1082,7 +1082,7 @@ int ov2640_initialize(FAR struct i2c_master_s *i2c)
 
   if (ret < 0)
     {
-      gdbg("ERROR: ov2640_putreglist failed: %d\n", ret);
+      gerr("ERROR: ov2640_putreglist failed: %d\n", ret);
       goto errout;
     }
 
@@ -1092,7 +1092,7 @@ int ov2640_initialize(FAR struct i2c_master_s *i2c)
                     OV2640_COLORFMT_COMMON_NENTRIES);
   if (ret < 0)
     {
-      gdbg("ERROR: ov2640_putreglist failed: %d\n", ret);
+      gerr("ERROR: ov2640_putreglist failed: %d\n", ret);
       goto errout;
     }
 
@@ -1110,7 +1110,7 @@ int ov2640_initialize(FAR struct i2c_master_s *i2c)
 
   if (ret < 0)
     {
-      gdbg("ERROR: ov2640_putreglist failed: %d\n", ret);
+      gerr("ERROR: ov2640_putreglist failed: %d\n", ret);
       goto errout;
     }
 
@@ -1119,7 +1119,7 @@ int ov2640_initialize(FAR struct i2c_master_s *i2c)
   return OK;
 
 errout:
-  gdbg("ERROR: Failed to initialize the OV2640: %d\n", ret);
+  gerr("ERROR: Failed to initialize the OV2640: %d\n", ret);
   (void)ov2640_reset(i2c);
   return ret;
 }

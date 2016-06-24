@@ -136,7 +136,7 @@ FAR void *shmat(int shmid, FAR const void *shmaddr, int shmflg)
   ret = sem_wait(&region->sr_sem);
   if (ret < 0)
     {
-      shmdbg("sem_wait failed: %d\n", ret);
+      shmerr("ERROR: sem_wait failed: %d\n", ret);
       goto errout;
     }
 
@@ -146,7 +146,7 @@ FAR void *shmat(int shmid, FAR const void *shmaddr, int shmflg)
                                 region->sr_ds.shm_segsz);
   if (vaddr == 0)
     {
-      shmdbg("gran_alloc() failed\n");
+      shmerr("ERROR: gran_alloc() failed\n");
       ret = -ENOMEM;
       goto errout_with_semaphore;
     }
@@ -160,7 +160,7 @@ FAR void *shmat(int shmid, FAR const void *shmaddr, int shmflg)
   ret = up_shmat(region->sr_pages, npages, vaddr);
   if (ret < 0)
     {
-      shmdbg("up_shmat() failed\n");
+      shmerr("ERROR: up_shmat() failed\n");
       goto errout_with_vaddr;
     }
 

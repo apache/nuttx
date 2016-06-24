@@ -283,16 +283,16 @@ uint16_t wm8904_readreg(FAR struct wm8904_dev_s *priv, uint8_t regaddr)
 #ifdef CONFIG_I2C_RESET
           /* Perhaps the I2C bus is locked up?  Try to shake the bus free */
 
-          auddbg("WARNING: I2C_TRANSFER failed: %d ... Resetting\n", ret);
+          audwarn("WARNING: I2C_TRANSFER failed: %d ... Resetting\n", ret);
 
           ret = I2C_RESET(priv->i2c);
           if (ret < 0)
             {
-              auddbg("ERROR: I2C_RESET failed: %d\n", ret);
+              auderr("ERROR: I2C_RESET failed: %d\n", ret);
               break;
             }
 #else
-          auddbg("ERROR: I2C_TRANSFER failed: %d\n", ret);
+          auderr("ERROR: I2C_TRANSFER failed: %d\n", ret);
 #endif
         }
       else
@@ -304,11 +304,11 @@ uint16_t wm8904_readreg(FAR struct wm8904_dev_s *priv, uint8_t regaddr)
            */
 
           regval = ((uint16_t)data[0] << 8) | (uint16_t)data[1];
-          audvdbg("Read: %02x -> %04x\n", regaddr, regval);
+          audinfo("Read: %02x -> %04x\n", regaddr, regval);
           return regval;
         }
 
-      audvdbg("retries=%d regaddr=%02x\n", retries, regaddr);
+      audinfo("retries=%d regaddr=%02x\n", retries, regaddr);
     }
 
   /* No error indication is returned on a failure... just return zero */
@@ -359,16 +359,16 @@ static void wm8904_writereg(FAR struct wm8904_dev_s *priv, uint8_t regaddr,
 #ifdef CONFIG_I2C_RESET
           /* Perhaps the I2C bus is locked up?  Try to shake the bus free */
 
-          auddbg("WARNING: i2c_write failed: %d ... Resetting\n", ret);
+          audwarn("WARNING: i2c_write failed: %d ... Resetting\n", ret);
 
           ret = I2C_RESET(priv->i2c);
           if (ret < 0)
             {
-              auddbg("ERROR: I2C_RESET failed: %d\n", ret);
+              auderr("ERROR: I2C_RESET failed: %d\n", ret);
               break;
             }
 #else
-          auddbg("ERROR: I2C_TRANSFER failed: %d\n", ret);
+          auderr("ERROR: I2C_TRANSFER failed: %d\n", ret);
 #endif
         }
       else
@@ -377,11 +377,11 @@ static void wm8904_writereg(FAR struct wm8904_dev_s *priv, uint8_t regaddr,
            * return the value read.
            */
 
-          audvdbg("Write: %02x <- %04x\n", regaddr, regval);
+          audinfo("Write: %02x <- %04x\n", regaddr, regval);
           return;
         }
 
-      audvdbg("retries=%d regaddr=%02x\n", retries, regaddr);
+      audinfo("retries=%d regaddr=%02x\n", retries, regaddr);
     }
 }
 
@@ -439,7 +439,7 @@ static void wm8904_setvolume(FAR struct wm8904_dev_s *priv, uint16_t volume,
   uint32_t rightlevel;
   uint16_t regval;
 
-  audvdbg("volume=%u mute=%u\n", volume, mute);
+  audinfo("volume=%u mute=%u\n", volume, mute);
 
 #ifndef CONFIG_AUDIO_EXCLUDE_BALANCE
   /* Calculate the left channel volume level {0..1000} */
@@ -514,7 +514,7 @@ static void wm8904_setvolume(FAR struct wm8904_dev_s *priv, uint16_t volume,
 #ifndef CONFIG_AUDIO_EXCLUDE_TONE
 static void wm8904_setbass(FAR struct wm8904_dev_s *priv, uint8_t bass)
 {
-  audvdbg("bass=%u\n", bass);
+  audinfo("bass=%u\n", bass);
 #warning Missing logic
 }
 #endif /* CONFIG_AUDIO_EXCLUDE_TONE */
@@ -532,7 +532,7 @@ static void wm8904_setbass(FAR struct wm8904_dev_s *priv, uint8_t bass)
 #ifndef CONFIG_AUDIO_EXCLUDE_TONE
 static void wm8904_settreble(FAR struct wm8904_dev_s *priv, uint8_t treble)
 {
-  audvdbg("treble=%u\n", treble);
+  audinfo("treble=%u\n", treble);
 #warning Missing logic
 }
 #endif /* CONFIG_AUDIO_EXCLUDE_TONE */
@@ -658,7 +658,7 @@ static void wm8904_setbitrate(FAR struct wm8904_dev_s *priv)
   regval = WM8904_LRCLK_DIR | WM8904_LRCLK_RATE(framelen << 1);
   wm8904_writereg(priv, WM8904_AIF3, regval);
 
-  audvdbg("sample rate=%u nchannels=%u bpsamp=%u framelen=%d fout=%lu\n",
+  audinfo("sample rate=%u nchannels=%u bpsamp=%u framelen=%d fout=%lu\n",
           priv->samprate, priv->nchannels, priv->bpsamp, framelen,
           (unsigned long)fout);
 
@@ -815,10 +815,10 @@ static void wm8904_setbitrate(FAR struct wm8904_dev_s *priv)
   tmp64 = ((uint64_t)fvco << 16) / (g_fllratio[fllndx] * fref);
   nk    = (b16_t)tmp64;
 
-  audvdbg("mclk=%lu fref=%lu fvco=%lu fout=%lu divndx=%u\n",
+  audinfo("mclk=%lu fref=%lu fvco=%lu fout=%lu divndx=%u\n",
           (unsigned long)priv->lower->mclk, (unsigned long)fref,
           (unsigned long)fvco, (unsigned long)fout, divndx);
-  audvdbg("N.K=%08lx outdiv=%u fllratio=%u\n",
+  audinfo("N.K=%08lx outdiv=%u fllratio=%u\n",
           (unsigned long)nk, outdiv, g_fllratio[fllndx]);
 
   /* Save the actual bit rate that we are using.  This will be used by the
@@ -961,7 +961,7 @@ static int wm8904_getcaps(FAR struct audio_lowerhalf_s *dev, int type,
   /* Validate the structure */
 
   DEBUGASSERT(caps && caps->ac_len >= sizeof(struct audio_caps_s));
-  audvdbg("type=%d ac_type=%d\n", type, caps->ac_type);
+  audinfo("type=%d ac_type=%d\n", type, caps->ac_type);
 
   /* Fill in the caller's structure based on requested info */
 
@@ -1129,14 +1129,14 @@ static int wm8904_configure(FAR struct audio_lowerhalf_s *dev,
   int ret = OK;
 
   DEBUGASSERT(priv && caps);
-  audvdbg("ac_type: %d\n", caps->ac_type);
+  audinfo("ac_type: %d\n", caps->ac_type);
 
   /* Process the configure operation */
 
   switch (caps->ac_type)
     {
     case AUDIO_TYPE_FEATURE:
-      audvdbg("  AUDIO_TYPE_FEATURE\n");
+      audinfo("  AUDIO_TYPE_FEATURE\n");
 
       /* Process based on Feature Unit */
 
@@ -1148,7 +1148,7 @@ static int wm8904_configure(FAR struct audio_lowerhalf_s *dev,
             /* Set the volume */
 
             uint16_t volume = caps->ac_controls.hw[0];
-            audvdbg("    Volume: %d\n", volume);
+            audinfo("    Volume: %d\n", volume);
 
             if (volume >= 0 && volume <= 1000)
               {
@@ -1172,7 +1172,7 @@ static int wm8904_configure(FAR struct audio_lowerhalf_s *dev,
              */
 
             uint8_t bass = caps->ac_controls.b[0];
-            audvdbg("    Bass: %d\n", bass);
+            audinfo("    Bass: %d\n", bass);
 
             if (bass <= 100)
               {
@@ -1192,7 +1192,7 @@ static int wm8904_configure(FAR struct audio_lowerhalf_s *dev,
              */
 
             uint8_t treble = caps->ac_controls.b[0];
-            audvdbg("    Treble: %d\n", treble);
+            audinfo("    Treble: %d\n", treble);
 
             if (treble <= 100)
               {
@@ -1207,7 +1207,7 @@ static int wm8904_configure(FAR struct audio_lowerhalf_s *dev,
 #endif  /* CONFIG_AUDIO_EXCLUDE_TONE */
 
         default:
-          auddbg("    Unrecognized feature unit\n");
+          auderr("    ERROR: Unrecognized feature unit\n");
           ret = -ENOTTY;
           break;
         }
@@ -1215,24 +1215,24 @@ static int wm8904_configure(FAR struct audio_lowerhalf_s *dev,
 
     case AUDIO_TYPE_OUTPUT:
       {
-        audvdbg("  AUDIO_TYPE_OUTPUT:\n");
-        audvdbg("    Number of channels: %u\n", caps->ac_channels);
-        audvdbg("    Sample rate:        %u\n", caps->ac_controls.hw[0]);
-        audvdbg("    Sample width:       %u\n", caps->ac_controls.b[2]);
+        audinfo("  AUDIO_TYPE_OUTPUT:\n");
+        audinfo("    Number of channels: %u\n", caps->ac_channels);
+        audinfo("    Sample rate:        %u\n", caps->ac_controls.hw[0]);
+        audinfo("    Sample width:       %u\n", caps->ac_controls.b[2]);
 
         /* Verify that all of the requested values are supported */
 
         ret = -ERANGE;
         if (caps->ac_channels != 1 && caps->ac_channels != 2)
           {
-            auddbg("ERROR: Unsupported number of channels: %d\n",
+            auderr("ERROR: Unsupported number of channels: %d\n",
                    caps->ac_channels);
             break;
           }
 
         if (caps->ac_controls.b[2] != 8 && caps->ac_controls.b[2] != 16)
           {
-            auddbg("ERROR: Unsupported bits per sample: %d\n",
+            auderr("ERROR: Unsupported bits per sample: %d\n",
                    caps->ac_controls.b[2]);
             break;
           }
@@ -1308,7 +1308,7 @@ static void  wm8904_senddone(FAR struct i2s_dev_s *i2s,
   int ret;
 
   DEBUGASSERT(i2s && priv && priv->running && apb);
-  audvdbg("apb=%p inflight=%d result=%d\n", apb, priv->inflight, result);
+  audinfo("apb=%p inflight=%d result=%d\n", apb, priv->inflight, result);
 
   /* We do not place any restriction on the context in which this function
    * is called.  It may be called from an interrupt handler.  Therefore, the
@@ -1345,7 +1345,7 @@ static void  wm8904_senddone(FAR struct i2s_dev_s *i2s,
                 CONFIG_WM8904_MSG_PRIO);
   if (ret < 0)
     {
-      audlldbg("ERROR: mq_send failed: %d\n", errno);
+      auderr("ERROR: mq_send failed: %d\n", errno);
     }
 }
 
@@ -1377,7 +1377,7 @@ static void wm8904_returnbuffers(FAR struct wm8904_dev_s *priv)
       apb = (FAR struct ap_buffer_s *)dq_remfirst(&priv->doneq);
       leave_critical_section(flags);
 
-      audvdbg("Returning: apb=%p curbyte=%d nbytes=%d flags=%04x\n",
+      audinfo("Returning: apb=%p curbyte=%d nbytes=%d flags=%04x\n",
               apb, apb->curbyte, apb->nbytes, apb->flags);
 
       /* Are we returning the final buffer in the stream? */
@@ -1395,7 +1395,7 @@ static void wm8904_returnbuffers(FAR struct wm8904_dev_s *priv)
            * worker thread to exit (if it is not already terminating).
            */
 
-          audvdbg("Terminating\n");
+          audinfo("Terminating\n");
           priv->terminating = true;
         }
 
@@ -1454,7 +1454,7 @@ static int wm8904_sendbuffer(FAR struct wm8904_dev_s *priv)
       /* Take next buffer from the queue of pending transfers */
 
       apb = (FAR struct ap_buffer_s *)dq_remfirst(&priv->pendq);
-      audvdbg("Sending apb=%p, size=%d inflight=%d\n",
+      audinfo("Sending apb=%p, size=%d inflight=%d\n",
               apb, apb->nbytes, priv->inflight);
 
       /* Increment the number of buffers in-flight before sending in order
@@ -1496,7 +1496,7 @@ static int wm8904_sendbuffer(FAR struct wm8904_dev_s *priv)
       ret = I2S_SEND(priv->i2s, apb, wm8904_senddone, priv, timeout);
       if (ret < 0)
         {
-          auddbg("ERROR: I2S_SEND failed: %d\n", ret);
+          auderr("ERROR: I2S_SEND failed: %d\n", ret);
           break;
         }
     }
@@ -1526,7 +1526,7 @@ static int wm8904_start(FAR struct audio_lowerhalf_s *dev)
   FAR void *value;
   int ret;
 
-  audvdbg("Entry\n");
+  audinfo("Entry\n");
 
   /* Exit reduced power modes of operation */
   /* REVISIT */
@@ -1545,7 +1545,7 @@ static int wm8904_start(FAR struct audio_lowerhalf_s *dev)
     {
       /* Error creating message queue! */
 
-      auddbg("ERROR: Couldn't allocate message queue\n");
+      auderr("ERROR: Couldn't allocate message queue\n");
       return -ENOMEM;
     }
 
@@ -1553,7 +1553,7 @@ static int wm8904_start(FAR struct audio_lowerhalf_s *dev)
 
   if (priv->threadid != 0)
     {
-      audvdbg("Joining old thread\n");
+      audinfo("Joining old thread\n");
       pthread_join(priv->threadid, &value);
     }
 
@@ -1564,17 +1564,17 @@ static int wm8904_start(FAR struct audio_lowerhalf_s *dev)
   (void)pthread_attr_setschedparam(&tattr, &sparam);
   (void)pthread_attr_setstacksize(&tattr, CONFIG_WM8904_WORKER_STACKSIZE);
 
-  audvdbg("Starting worker thread\n");
+  audinfo("Starting worker thread\n");
   ret = pthread_create(&priv->threadid, &tattr, wm8904_workerthread,
                        (pthread_addr_t)priv);
   if (ret != OK)
     {
-      auddbg("ERROR: pthread_create failed: %d\n", ret);
+      auderr("ERROR: pthread_create failed: %d\n", ret);
     }
   else
     {
       pthread_setname_np(priv->threadid, "wm8904");
-      audvdbg("Created worker thread\n");
+      audinfo("Created worker thread\n");
     }
 
   return ret;
@@ -1694,7 +1694,7 @@ static int wm8904_enqueuebuffer(FAR struct audio_lowerhalf_s *dev,
   struct audio_msg_s  term_msg;
   int ret;
 
-  audvdbg("Enqueueing: apb=%p curbyte=%d nbytes=%d flags=%04x\n",
+  audinfo("Enqueueing: apb=%p curbyte=%d nbytes=%d flags=%04x\n",
           apb, apb->curbyte, apb->nbytes, apb->flags);
 
   /* Take a reference on the new audio buffer */
@@ -1726,7 +1726,7 @@ static int wm8904_enqueuebuffer(FAR struct audio_lowerhalf_s *dev,
           int errcode = errno;
           DEBUGASSERT(errcode > 0);
 
-          auddbg("ERROR: mq_send failed: %d\n", errcode);
+          auderr("ERROR: mq_send failed: %d\n", errcode);
           UNUSED(errcode);
         }
     }
@@ -1744,7 +1744,7 @@ static int wm8904_enqueuebuffer(FAR struct audio_lowerhalf_s *dev,
 static int wm8904_cancelbuffer(FAR struct audio_lowerhalf_s *dev,
                                FAR struct ap_buffer_s *apb)
 {
-  audvdbg("apb=%p\n", apb);
+  audinfo("apb=%p\n", apb);
   return OK;
 }
 
@@ -1777,7 +1777,7 @@ static int wm8904_ioctl(FAR struct audio_lowerhalf_s *dev, int cmd,
            * registers back in their default state.
            */
 
-          audvdbg("AUDIOIOC_HWRESET:\n");
+          audinfo("AUDIOIOC_HWRESET:\n");
         }
         break;
 
@@ -1786,7 +1786,7 @@ static int wm8904_ioctl(FAR struct audio_lowerhalf_s *dev, int cmd,
 #ifdef CONFIG_AUDIO_DRIVER_SPECIFIC_BUFFERS
       case AUDIOIOC_GETBUFFERINFO:
         {
-          audvdbg("AUDIOIOC_GETBUFFERINFO:\n");
+          audinfo("AUDIOIOC_GETBUFFERINFO:\n");
           bufinfo              = (FAR struct ap_buffer_info_s *) arg;
           bufinfo->buffer_size = CONFIG_WM8904_BUFFER_SIZE;
           bufinfo->nbuffers    = CONFIG_WM8904_NUM_BUFFERS;
@@ -1795,7 +1795,7 @@ static int wm8904_ioctl(FAR struct audio_lowerhalf_s *dev, int cmd,
 #endif
 
       default:
-        audvdbg("Ignored\n");
+        audinfo("Ignored\n");
         break;
     }
 
@@ -1908,7 +1908,7 @@ static void wm8904_interrupt_work(FAR void *arg)
   /* Sample the interrupt status */
 
   regval = wm8904_readreg(priv, WM8904_INT_STATUS);
-  audvdbg("INT_STATUS: %04x\n", regval);
+  audinfo("INT_STATUS: %04x\n", regval);
 
   /* Check for the FLL lock interrupt.  We are sloppy here since at
    * present, only the FLL lock interrupt is used.
@@ -1971,7 +1971,7 @@ static int wm8904_interrupt(FAR const struct wm8904_lower_s *lower,
   ret = work_queue(LPWORK, &priv->work, wm8904_interrupt_work, priv, 0);
   if (ret < 0)
     {
-      audlldbg("ERROR: Failed to schedule work\n");
+      auderr("ERROR: Failed to schedule work\n");
     }
 
   return OK;
@@ -1994,7 +1994,7 @@ static void *wm8904_workerthread(pthread_addr_t pvarg)
   int msglen;
   int prio;
 
-  audvdbg("Entry\n");
+  audinfo("Entry\n");
 
 #ifndef CONFIG_AUDIO_EXCLUDE_STOP
   priv->terminating = false;
@@ -2042,7 +2042,7 @@ static void *wm8904_workerthread(pthread_addr_t pvarg)
 
       if (msglen < sizeof(struct audio_msg_s))
         {
-          auddbg("ERROR: Message too small: %d\n", msglen);
+          auderr("ERROR: Message too small: %d\n", msglen);
           continue;
         }
 
@@ -2055,7 +2055,7 @@ static void *wm8904_workerthread(pthread_addr_t pvarg)
            */
 
           case AUDIO_MSG_DATA_REQUEST:
-            audvdbg("AUDIO_MSG_DATA_REQUEST\n");
+            audinfo("AUDIO_MSG_DATA_REQUEST\n");
             break;
 
           /* Stop the playback */
@@ -2064,7 +2064,7 @@ static void *wm8904_workerthread(pthread_addr_t pvarg)
           case AUDIO_MSG_STOP:
             /* Indicate that we are terminating */
 
-            audvdbg("AUDIO_MSG_STOP: Terminating\n");
+            audinfo("AUDIO_MSG_STOP: Terminating\n");
             priv->terminating = true;
             break;
 #endif
@@ -2074,18 +2074,18 @@ static void *wm8904_workerthread(pthread_addr_t pvarg)
            */
 
           case AUDIO_MSG_ENQUEUE:
-            audvdbg("AUDIO_MSG_ENQUEUE\n");
+            audinfo("AUDIO_MSG_ENQUEUE\n");
             break;
 
           /* We will wake up from the I2S callback with this message */
 
           case AUDIO_MSG_COMPLETE:
-            audvdbg("AUDIO_MSG_COMPLETE\n");
+            audinfo("AUDIO_MSG_COMPLETE\n");
             wm8904_returnbuffers(priv);
             break;
 
           default:
-            auddbg("ERROR: Ignoring message ID %d\n", msg.msgId);
+            auderr("ERROR: Ignoring message ID %d\n", msg.msgId);
             break;
         }
     }
@@ -2132,7 +2132,7 @@ static void *wm8904_workerthread(pthread_addr_t pvarg)
   priv->dev.upper(priv->dev.priv, AUDIO_CALLBACK_COMPLETE, NULL, OK);
 #endif
 
-  audvdbg("Exit\n");
+  audinfo("Exit\n");
   return NULL;
 }
 
@@ -2506,7 +2506,7 @@ FAR struct audio_lowerhalf_s *
       regval = wm8904_readreg(priv, WM8904_ID);
       if (regval != WM8904_SW_RST_DEV_ID1)
         {
-          auddbg("ERROR: WM8904 not found: ID=%04x\n", regval);
+          auderr("ERROR: WM8904 not found: ID=%04x\n", regval);
           goto errout_with_dev;
         }
 

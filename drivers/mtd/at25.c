@@ -213,7 +213,7 @@ static inline int at25_readid(struct at25_dev_s *priv)
   uint16_t manufacturer;
   uint16_t memory;
 
-  fvdbg("priv: %p\n", priv);
+  finfo("priv: %p\n", priv);
 
   /* Lock the SPI bus, configure the bus, and select this FLASH part. */
 
@@ -231,7 +231,7 @@ static inline int at25_readid(struct at25_dev_s *priv)
   SPI_SELECT(priv->dev, SPIDEV_FLASH, false);
   at25_unlock(priv->dev);
 
-  fvdbg("manufacturer: %02x memory: %02x\n",
+  finfo("manufacturer: %02x memory: %02x\n",
         manufacturer, memory);
 
   /* Check for a valid manufacturer and memory type */
@@ -292,10 +292,10 @@ static void at25_waitwritecomplete(struct at25_dev_s *priv)
 
   if (status & AT25_SR_EPE)
     {
-      fdbg("ERROR: Write error, status: 0x%02x\n", status);
+      ferr("ERROR: Write error, status: 0x%02x\n", status);
     }
 
-  fvdbg("Complete, status: 0x%02x\n", status);
+  finfo("Complete, status: 0x%02x\n", status);
 }
 
 /************************************************************************************
@@ -307,7 +307,7 @@ static void at25_writeenable(struct at25_dev_s *priv)
   SPI_SELECT(priv->dev, SPIDEV_FLASH, true);
   (void)SPI_SEND(priv->dev, AT25_WREN);
   SPI_SELECT(priv->dev, SPIDEV_FLASH, false);
-  fvdbg("Enabled\n");
+  finfo("Enabled\n");
 }
 
 /************************************************************************************
@@ -318,7 +318,7 @@ static inline void at25_sectorerase(struct at25_dev_s *priv, off_t sector)
 {
   off_t offset = sector << priv->sectorshift;
 
-  fvdbg("sector: %08lx\n", (long)sector);
+  finfo("sector: %08lx\n", (long)sector);
 
   /* Wait for any preceding write to complete.  We could simplify things by
    * perform this wait at the end of each write operation (rather than at
@@ -352,7 +352,7 @@ static inline void at25_sectorerase(struct at25_dev_s *priv, off_t sector)
   /* Deselect the FLASH */
 
   SPI_SELECT(priv->dev, SPIDEV_FLASH, false);
-  fvdbg("Erased\n");
+  finfo("Erased\n");
 }
 
 /************************************************************************************
@@ -361,7 +361,7 @@ static inline void at25_sectorerase(struct at25_dev_s *priv, off_t sector)
 
 static inline int at25_bulkerase(struct at25_dev_s *priv)
 {
-  fvdbg("priv: %p\n", priv);
+  finfo("priv: %p\n", priv);
 
   /* Wait for any preceding write to complete.  We could simplify things by
    * perform this wait at the end of each write operation (rather than at
@@ -386,7 +386,7 @@ static inline int at25_bulkerase(struct at25_dev_s *priv)
   /* Deselect the FLASH */
 
   SPI_SELECT(priv->dev, SPIDEV_FLASH, false);
-  fvdbg("Return: OK\n");
+  finfo("Return: OK\n");
   return OK;
 }
 
@@ -399,7 +399,7 @@ static inline void at25_pagewrite(struct at25_dev_s *priv, FAR const uint8_t *bu
 {
   off_t offset = page << 8;
 
-  fvdbg("page: %08lx offset: %08lx\n", (long)page, (long)offset);
+  finfo("page: %08lx offset: %08lx\n", (long)page, (long)offset);
 
   /* Wait for any preceding write to complete.  We could simplify things by
    * perform this wait at the end of each write operation (rather than at
@@ -434,7 +434,7 @@ static inline void at25_pagewrite(struct at25_dev_s *priv, FAR const uint8_t *bu
   /* Deselect the FLASH: Chip Select high */
 
   SPI_SELECT(priv->dev, SPIDEV_FLASH, false);
-  fvdbg("Written\n");
+  finfo("Written\n");
 }
 
 /************************************************************************************
@@ -446,7 +446,7 @@ static int at25_erase(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblock
   FAR struct at25_dev_s *priv = (FAR struct at25_dev_s *)dev;
   size_t blocksleft = nblocks;
 
-  fvdbg("startblock: %08lx nblocks: %d\n", (long)startblock, (int)nblocks);
+  finfo("startblock: %08lx nblocks: %d\n", (long)startblock, (int)nblocks);
 
   /* Lock access to the SPI bus until we complete the erase */
 
@@ -473,7 +473,7 @@ static ssize_t at25_bread(FAR struct mtd_dev_s *dev, off_t startblock, size_t nb
   FAR struct at25_dev_s *priv = (FAR struct at25_dev_s *)dev;
   ssize_t nbytes;
 
-  fvdbg("startblock: %08lx nblocks: %d\n", (long)startblock, (int)nblocks);
+  finfo("startblock: %08lx nblocks: %d\n", (long)startblock, (int)nblocks);
 
   /* On this device, we can handle the block read just like the byte-oriented read */
 
@@ -496,7 +496,7 @@ static ssize_t at25_bwrite(FAR struct mtd_dev_s *dev, off_t startblock, size_t n
   FAR struct at25_dev_s *priv = (FAR struct at25_dev_s *)dev;
   size_t blocksleft = nblocks;
 
-  fvdbg("startblock: %08lx nblocks: %d\n", (long)startblock, (int)nblocks);
+  finfo("startblock: %08lx nblocks: %d\n", (long)startblock, (int)nblocks);
 
   /* Lock the SPI bus and write each page to FLASH */
 
@@ -522,7 +522,7 @@ static ssize_t at25_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
 {
   FAR struct at25_dev_s *priv = (FAR struct at25_dev_s *)dev;
 
-  fvdbg("offset: %08lx nbytes: %d\n", (long)offset, (int)nbytes);
+  finfo("offset: %08lx nbytes: %d\n", (long)offset, (int)nbytes);
 
   /* Wait for any preceding write to complete.  We could simplify things by
    * perform this wait at the end of each write operation (rather than at
@@ -556,7 +556,7 @@ static ssize_t at25_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
   SPI_SELECT(priv->dev, SPIDEV_FLASH, false);
   at25_unlock(priv->dev);
 
-  fvdbg("return nbytes: %d\n", (int)nbytes);
+  finfo("return nbytes: %d\n", (int)nbytes);
   return nbytes;
 }
 
@@ -569,7 +569,7 @@ static int at25_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
   FAR struct at25_dev_s *priv = (FAR struct at25_dev_s *)dev;
   int ret = -EINVAL; /* Assume good command with bad parameters */
 
-  fvdbg("cmd: %d \n", cmd);
+  finfo("cmd: %d \n", cmd);
 
   switch (cmd)
     {
@@ -592,7 +592,7 @@ static int at25_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
               geo->neraseblocks = priv->nsectors;
               ret               = OK;
 
-              fvdbg("blocksize: %d erasesize: %d neraseblocks: %d\n",
+              finfo("blocksize: %d erasesize: %d neraseblocks: %d\n",
                     geo->blocksize, geo->erasesize, geo->neraseblocks);
             }
         }
@@ -614,7 +614,7 @@ static int at25_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
         break;
     }
 
-  fvdbg("return %d\n", ret);
+  finfo("return %d\n", ret);
   return ret;
 }
 
@@ -637,7 +637,7 @@ FAR struct mtd_dev_s *at25_initialize(FAR struct spi_dev_s *dev)
   FAR struct at25_dev_s *priv;
   int ret;
 
-  fvdbg("dev: %p\n", dev);
+  finfo("dev: %p\n", dev);
 
   /* Allocate a state structure (we allocate the structure instead of using
    * a fixed, static allocation so that we can handle multiple FLASH devices.
@@ -671,7 +671,7 @@ FAR struct mtd_dev_s *at25_initialize(FAR struct spi_dev_s *dev)
         {
           /* Unrecognized! Discard all of that work we just did and return NULL */
 
-          fdbg("ERROR: Unrecognized\n");
+          ferr("ERROR: Unrecognized\n");
           kmm_free(priv);
           priv = NULL;
         }
@@ -695,6 +695,6 @@ FAR struct mtd_dev_s *at25_initialize(FAR struct spi_dev_s *dev)
 
   /* Return the implementation-specific state structure as the MTD device */
 
-  fvdbg("Return %p\n", priv);
+  finfo("Return %p\n", priv);
   return (FAR struct mtd_dev_s *)priv;
 }

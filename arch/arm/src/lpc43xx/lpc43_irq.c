@@ -107,37 +107,39 @@ extern uint32_t _vectors[];
  *
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG_IRQ)
+#if defined(CONFIG_DEBUG_IRQ_INFO)
 static void lpc43_dumpnvic(const char *msg, int irq)
 {
   irqstate_t flags;
 
   flags = enter_critical_section();
-  lldbg("NVIC (%s, irq=%d):\n", msg, irq);
-  lldbg("  INTCTRL:    %08x VECTAB: %08x\n",
-        getreg32(NVIC_INTCTRL), getreg32(NVIC_VECTAB));
+
+  irqinfo("NVIC (%s, irq=%d):\n", msg, irq);
+  irqinfo("  INTCTRL:    %08x VECTAB: %08x\n",
+          getreg32(NVIC_INTCTRL), getreg32(NVIC_VECTAB));
 #if 0
-  lldbg("  SYSH ENABLE MEMFAULT: %08x BUSFAULT: %08x USGFAULT: %08x SYSTICK: %08x\n",
-        getreg32(NVIC_SYSHCON_MEMFAULTENA), getreg32(NVIC_SYSHCON_BUSFAULTENA),
-        getreg32(NVIC_SYSHCON_USGFAULTENA), getreg32(NVIC_SYSTICK_CTRL_ENABLE));
+  irqinfo("  SYSH ENABLE MEMFAULT: %08x BUSFAULT: %08x USGFAULT: %08x SYSTICK: %08x\n",
+          getreg32(NVIC_SYSHCON_MEMFAULTENA), getreg32(NVIC_SYSHCON_BUSFAULTENA),
+          getreg32(NVIC_SYSHCON_USGFAULTENA), getreg32(NVIC_SYSTICK_CTRL_ENABLE));
 #endif
-  lldbg("  IRQ ENABLE: %08x %08x\n",
-        getreg32(NVIC_IRQ0_31_ENABLE), getreg32(NVIC_IRQ32_63_ENABLE));
-  lldbg("  SYSH_PRIO:  %08x %08x %08x\n",
-        getreg32(NVIC_SYSH4_7_PRIORITY), getreg32(NVIC_SYSH8_11_PRIORITY),
-        getreg32(NVIC_SYSH12_15_PRIORITY));
-  lldbg("  IRQ PRIO:   %08x %08x %08x %08x\n",
-        getreg32(NVIC_IRQ0_3_PRIORITY), getreg32(NVIC_IRQ4_7_PRIORITY),
-        getreg32(NVIC_IRQ8_11_PRIORITY), getreg32(NVIC_IRQ12_15_PRIORITY));
-  lldbg("              %08x %08x %08x %08x\n",
-        getreg32(NVIC_IRQ16_19_PRIORITY), getreg32(NVIC_IRQ20_23_PRIORITY),
-        getreg32(NVIC_IRQ24_27_PRIORITY), getreg32(NVIC_IRQ28_31_PRIORITY));
-  lldbg("              %08x %08x %08x %08x\n",
-        getreg32(NVIC_IRQ32_35_PRIORITY), getreg32(NVIC_IRQ36_39_PRIORITY),
-        getreg32(NVIC_IRQ40_43_PRIORITY), getreg32(NVIC_IRQ44_47_PRIORITY));
-  lldbg("              %08x %08x %08x\n",
-        getreg32(NVIC_IRQ48_51_PRIORITY), getreg32(NVIC_IRQ52_55_PRIORITY),
-        getreg32(NVIC_IRQ56_59_PRIORITY));
+  irqinfo("  IRQ ENABLE: %08x %08x\n",
+          getreg32(NVIC_IRQ0_31_ENABLE), getreg32(NVIC_IRQ32_63_ENABLE));
+  irqinfo("  SYSH_PRIO:  %08x %08x %08x\n",
+          getreg32(NVIC_SYSH4_7_PRIORITY), getreg32(NVIC_SYSH8_11_PRIORITY),
+          getreg32(NVIC_SYSH12_15_PRIORITY));
+  irqinfo("  IRQ PRIO:   %08x %08x %08x %08x\n",
+          getreg32(NVIC_IRQ0_3_PRIORITY), getreg32(NVIC_IRQ4_7_PRIORITY),
+          getreg32(NVIC_IRQ8_11_PRIORITY), getreg32(NVIC_IRQ12_15_PRIORITY));
+  irqinfo("              %08x %08x %08x %08x\n",
+          getreg32(NVIC_IRQ16_19_PRIORITY), getreg32(NVIC_IRQ20_23_PRIORITY),
+          getreg32(NVIC_IRQ24_27_PRIORITY), getreg32(NVIC_IRQ28_31_PRIORITY));
+  irqinfo("              %08x %08x %08x %08x\n",
+          getreg32(NVIC_IRQ32_35_PRIORITY), getreg32(NVIC_IRQ36_39_PRIORITY),
+          getreg32(NVIC_IRQ40_43_PRIORITY), getreg32(NVIC_IRQ44_47_PRIORITY));
+  irqinfo("              %08x %08x %08x\n",
+          getreg32(NVIC_IRQ48_51_PRIORITY), getreg32(NVIC_IRQ52_55_PRIORITY),
+          getreg32(NVIC_IRQ56_59_PRIORITY));
+
   leave_critical_section(flags);
 }
 #else
@@ -155,11 +157,11 @@ static void lpc43_dumpnvic(const char *msg, int irq)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
 static int lpc43_nmi(int irq, FAR void *context)
 {
   (void)up_irq_save();
-  dbg("PANIC!!! NMI received\n");
+  _err("PANIC!!! NMI received\n");
   PANIC();
   return 0;
 }
@@ -167,7 +169,7 @@ static int lpc43_nmi(int irq, FAR void *context)
 static int lpc43_busfault(int irq, FAR void *context)
 {
   (void)up_irq_save();
-  dbg("PANIC!!! Bus fault recived\n");
+  _err("PANIC!!! Bus fault recived\n");
   PANIC();
   return 0;
 }
@@ -175,7 +177,7 @@ static int lpc43_busfault(int irq, FAR void *context)
 static int lpc43_usagefault(int irq, FAR void *context)
 {
   (void)up_irq_save();
-  dbg("PANIC!!! Usage fault received\n");
+  _err("PANIC!!! Usage fault received\n");
   PANIC();
   return 0;
 }
@@ -183,7 +185,7 @@ static int lpc43_usagefault(int irq, FAR void *context)
 static int lpc43_pendsv(int irq, FAR void *context)
 {
   (void)up_irq_save();
-  dbg("PANIC!!! PendSV received\n");
+  _err("PANIC!!! PendSV received\n");
   PANIC();
   return 0;
 }
@@ -191,7 +193,7 @@ static int lpc43_pendsv(int irq, FAR void *context)
 static int lpc43_dbgmonitor(int irq, FAR void *context)
 {
   (void)up_irq_save();
-  dbg("PANIC!!! Debug Monitor received\n");
+  _err("PANIC!!! Debug Monitor received\n");
   PANIC();
   return 0;
 }
@@ -199,7 +201,7 @@ static int lpc43_dbgmonitor(int irq, FAR void *context)
 static int lpc43_reserved(int irq, FAR void *context)
 {
   (void)up_irq_save();
-  dbg("PANIC!!! Reserved interrupt\n");
+  _err("PANIC!!! Reserved interrupt\n");
   PANIC();
   return 0;
 }
@@ -246,18 +248,45 @@ static int lpc43_irqinfo(int irq, uintptr_t *regaddr, uint32_t *bit,
 
   if (irq >= LPC43_IRQ_EXTINT)
     {
+      /* NOTE: We assume that there are at least 32 interrupts */
+
       if (irq < (LPC43_IRQ_EXTINT + 32))
         {
+           /* Interrupt in range {0-31} */
+
            *regaddr = (NVIC_IRQ0_31_ENABLE + offset);
            *bit     = 1 << (irq - LPC43_IRQ_EXTINT);
         }
-      else if (irq < LPC43M4_IRQ_NIRQS)
+#if LPC43M4_IRQ_NEXTINT > 95
+#  error Extension to interrupt logic needed
+#elif LPC43M4_IRQ_NEXTINT > 63
+      else if (irq < (LPC43_IRQ_EXTINT + 64))
         {
+           /* Interrupt in range {32-63} */
+
            *regaddr = (NVIC_IRQ32_63_ENABLE + offset);
            *bit     = 1 << (irq - LPC43_IRQ_EXTINT - 32);
         }
+      else if (irq < LPC43M4_IRQ_NIRQS)
+        {
+           /* Interrupt in range {64-LPC43M4_IRQ_NIRQS}, LPC43M4_IRQ_NIRQS <= 95 */
+
+           *regaddr = (NVIC_IRQ64_95_ENABLE + offset);
+           *bit     = 1 << (irq - LPC43_IRQ_EXTINT - 64);
+        }
+#else /* if LPC43M4_IRQ_NEXTINT > 31 */
+      else if (irq < LPC43M4_IRQ_NIRQS)
+        {
+           /* Interrupt in range {32-LPC43M4_IRQ_NIRQS}, LPC43M4_IRQ_NIRQS <= 63 */
+
+           *regaddr = (NVIC_IRQ32_63_ENABLE + offset);
+           *bit     = 1 << (irq - LPC43_IRQ_EXTINT - 32);
+        }
+#endif
       else
         {
+           /* Interrupt >= LPC43M4_IRQ_NIRQS */
+
           return ERROR; /* Invalid interrupt */
         }
     }
@@ -309,7 +338,7 @@ static int lpc43_irqinfo(int irq, uintptr_t *regaddr, uint32_t *bit,
 void up_irqinitialize(void)
 {
   uint32_t regaddr;
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   uint32_t regval;
 #endif
   int num_priority_registers;
@@ -317,7 +346,12 @@ void up_irqinitialize(void)
   /* Disable all interrupts */
 
   putreg32(0, NVIC_IRQ0_31_ENABLE);
+#if LPC43M4_IRQ_NEXTINT > 31
   putreg32(0, NVIC_IRQ32_63_ENABLE);
+#if LPC43M4_IRQ_NEXTINT > 63
+  putreg32(0, NVIC_IRQ64_95_ENABLE);
+#endif
+#endif
 
   /* Make sure that we are using the correct vector table.  The default
    * vector address is 0x0000:0000 but if we are executing code that is
@@ -395,7 +429,7 @@ void up_irqinitialize(void)
 
   /* Attach all other processor exceptions (except reset and sys tick) */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   irq_attach(LPC43_IRQ_NMI, lpc43_nmi);
 #ifndef CONFIG_ARM_MPU
   irq_attach(LPC43_IRQ_MEMFAULT, up_memfault);
@@ -414,7 +448,7 @@ void up_irqinitialize(void)
    * operation.
    */
 
-#if defined(CONFIG_DEBUG) && !defined(CONFIG_ARMV7M_USEBASEPRI)
+#if defined(CONFIG_DEBUG_FEATURES) && !defined(CONFIG_ARMV7M_USEBASEPRI)
   regval  = getreg32(NVIC_DEMCR);
   regval &= ~NVIC_DEMCR_VCHARDERR;
   putreg32(regval, NVIC_DEMCR);

@@ -1,7 +1,7 @@
 /****************************************************************************
  * libc/stdio/lib_printf.c
  *
- *   Copyright (C) 2007-2008, 2011-2012, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2008, 2011-2012, 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -60,8 +60,6 @@ int printf(FAR const IPTR char *fmt, ...)
   ret = vfprintf(stdout, fmt, ap);
 #elif CONFIG_NFILE_DESCRIPTORS > 0
   ret = vsyslog(LOG_INFO, fmt, ap);
-#elif defined(CONFIG_ARCH_LOWPUTC)
-  ret = lowvsyslog(LOG_INFO, fmt, ap);
 #else
 # ifdef CONFIG_CPP_HAVE_WARNING
 #   warning "printf has no data sink"

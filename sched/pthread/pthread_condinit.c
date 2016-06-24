@@ -69,7 +69,7 @@ int pthread_cond_init(FAR pthread_cond_t *cond, FAR const pthread_condattr_t *at
 {
   int ret = OK;
 
-  sdbg("cond=0x%p attr=0x%p\n", cond, attr);
+  sinfo("cond=0x%p attr=0x%p\n", cond, attr);
 
   if (!cond)
     {
@@ -85,7 +85,7 @@ int pthread_cond_init(FAR pthread_cond_t *cond, FAR const pthread_condattr_t *at
       ret = EINVAL;
     }
 
-  sdbg("Returning %d\n", ret);
+  sinfo("Returning %d\n", ret);
   return ret;
 }
 

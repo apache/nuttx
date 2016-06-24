@@ -1,7 +1,7 @@
 /********************************************************************************************
  * arch/arm/src/kinetis/kinetis_usbotg.h
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -217,6 +217,8 @@
 #define USB_INT_ATTACH              (1 << 6)  /* Bit 6:  Attach Interrupt */
 #define USB_INT_STALL               (1 << 7)  /* Bit 7:  Stall Interrupt */
 
+#define USB_INT_ALL                0xFF
+
 /* Error Interrupt Status Register and Error Interrupt Enable Register (8-bit) */
 
 #define USB_ERRSTAT_PIDERR          (1 << 0)  /* Bit 0:  This bit is set when the PID check field fails */
@@ -227,6 +229,8 @@
 #define USB_ERRSTAT_DMAERR          (1 << 5)  /* Bit 5:  DMA error */
                                               /* Bit 6:  Reserved */
 #define USB_ERRSTAT_BTSERR          (1 << 7)  /* Bit 7:  Bit stuff error is detected */
+
+#define USB_EINT_ALL               0xBF
 
 /* Status Register (8-bit) */
 
@@ -259,6 +263,7 @@
 #define USB_BDTPAGE1_MASK           (0x7f << USB_BDTPAGE1_SHIFT)
 
 /* Frame Number Register Low (8-bit, bits 0-7 of the 11 bit frame number) */
+#define USB_FRMNUML_MASK            0xFF
 /* Frame Number Register High (8-bit) */
                                               /* Bits 3-7:  Reserved */
 #define USB_FRMNUMH_SHIFT           (0)       /* Bits 0-2: Bits 8-10 of the 11-bit frame number */
@@ -313,16 +318,58 @@
 #define USB_USBTRC0_SYNC_DET        (1 << 1)  /* Bit 1:  Synchronous USB Interrupt Detect */
 #define USB_USBTRC0_RESUME_INT      (1 << 0)  /* Bit 0:  USB Asynchronous Interrupt */
 
-/********************************************************************************************
- * Public Types
- ********************************************************************************************/
+/* Buffer Descriptor Table (BDT) ****************************************************/
+/* Offset 0: On write (software->hardware) */
 
-/********************************************************************************************
- * Public Data
- ********************************************************************************************/
+#define USB_BDT_STATUS_MASK        0xfc     /* Bits 2-7: Status bits */
+#define USB_BDT_BSTALL             (1 << 2) /*   Bit 2: Buffer Stall Enable bit */
+#define USB_BDT_DTS                (1 << 3) /*   Bit 3: Data Toggle Synchronization Enable bit */
+#define USB_BDT_NINC               (1 << 4) /*   Bit 4: DMA Address Increment Disable bit */
+#define USB_BDT_KEEP               (1 << 5) /*   Bit 5: BD Keep Enable bit */
+#define USB_BDT_DATA01             (1 << 6) /*   Bit 6: Data Toggle Packet bit */
+#define USB_BDT_UOWN               (1 << 7) /*   Bit 7: USB Own bit */
+#define USB_BDT_BYTECOUNT_SHIFT    (16)     /* Bits 16-25: Byte Count bits */
+#define USB_BDT_BYTECOUNT_MASK     (0x3ff << USB_BDT_BYTECOUNT_SHIFT)
+
+#define USB_BDT_DATA0              0              /* DATA0 packet expected next */
+#define USB_BDT_DATA1              USB_BDT_DATA01 /* DATA1 packet expected next */
+#define USB_BDT_COWN               0              /* CPU owns the descriptor */
+
+/* Offset 0: On read (hardware->software) */
+
+#define USB_BDT_PID_SHIFT          (2)      /* Bits 2-5: Packet Identifier bits */
+#define USB_BDT_PID_MASK           (15 << USB_BDT_PID_SHIFT)
+                                            /* Bit 7: USB Own bit (same) */
+                                            /* Bits 16-25: Byte Count bits (same) */
+
+/* Offset 4: BUFFER_ADDRESS, 32-bit Buffer Address bits */
+
+#define USB_BDT_BYTES_SIZE         8        /* Eight bytes per BDT */
+#define USB_BDT_WORD_SIZE          2        /* Two 32-bit words per BDT */
+#define USB_NBDTS_PER_EP           4        /* Number of BDTS per endpoint: IN/OUT and EVEN/ODD */
+
+/************************************************************************************
+ * Public Types
+ ************************************************************************************/
+
+#ifndef __ASSEMBLY__
+
+/* Buffer Descriptor Status Register layout. */
+
+struct usbotg_bdtentry_s
+{
+  uint32_t status;  /* Status, byte count, and PID */
+  uint8_t *addr;    /* Buffer address */
+};
+#endif
 
 /********************************************************************************************
  * Public Functions
  ********************************************************************************************/
+
+struct usbdev_s;
+int kinetis_usbpullup(FAR struct usbdev_s *dev,  bool enable);
+void kinetis_usbsuspend(FAR struct usbdev_s *dev, bool resume);
+void khci_usbattach(void);
 
 #endif /* __ARCH_ARM_SRC_KINETIS_KINETIS_USBOTG_H */

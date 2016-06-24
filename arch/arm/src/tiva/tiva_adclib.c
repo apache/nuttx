@@ -209,7 +209,7 @@ void tiva_adc_one_time_init(uint32_t clock, uint8_t sample_rate)
   static bool one_time_init = false;
 
 #ifdef CONFIG_DEBUG_ANALOG
-  avdbg("setting clock=%d MHz sample rate=%d\n",
+  ainfo("setting clock=%d MHz sample rate=%d\n",
          clock, sample_rate);
 #endif
 
@@ -219,7 +219,7 @@ void tiva_adc_one_time_init(uint32_t clock, uint8_t sample_rate)
 
   if (one_time_init == false)
     {
-      avdbg("performing ADC one-time initialization...\n");
+      ainfo("performing ADC one-time initialization...\n");
       /* set clock */
 
       tiva_adc_clock(clock);
@@ -238,7 +238,7 @@ void tiva_adc_one_time_init(uint32_t clock, uint8_t sample_rate)
 #ifdef CONFIG_DEBUG_ANALOG
   else
     {
-      avdbg("one time initialization previously completed\n");
+      ainfo("one time initialization previously completed\n");
     }
 #endif
 }
@@ -257,7 +257,7 @@ void tiva_adc_configure(struct tiva_adc_cfg_s *cfg)
   uint8_t s;
   uint8_t c;
 
-  avdbg("configure ADC%d...\n", cfg->adc);
+  ainfo("configure ADC%d...\n", cfg->adc);
 
   /* Configure each SSE */
 
@@ -270,7 +270,7 @@ void tiva_adc_configure(struct tiva_adc_cfg_s *cfg)
 #ifdef CONFIG_DEBUG_ANALOG
       else
         {
-          avdbg("ADC%d SSE%d has no configuration\n", cfg->adc, s);
+          ainfo("ADC%d SSE%d has no configuration\n", cfg->adc, s);
         }
 #endif
     }
@@ -298,9 +298,9 @@ void tiva_adc_configure(struct tiva_adc_cfg_s *cfg)
 void tiva_adc_sse_cfg(uint8_t adc, uint8_t sse,
                       struct tiva_adc_sse_cfg_s *ssecfg)
 {
-  avdbg("configure ADC%d SSE%d...\n", adc, sse);
+  ainfo("configure ADC%d SSE%d...\n", adc, sse);
 #ifdef CONFIG_DEBUG_ANALOG
-  avdbg("priority=%d trigger=%d...\n", ssecfg->priority, ssecfg->trigger);
+  ainfo("priority=%d trigger=%d...\n", ssecfg->priority, ssecfg->trigger);
 #endif
 
   uint8_t priority = ssecfg->priority;
@@ -327,7 +327,7 @@ void tiva_adc_sse_cfg(uint8_t adc, uint8_t sse,
 void tiva_adc_step_cfg(struct tiva_adc_step_cfg_s *stepcfg)
 {
 #ifdef CONFIG_DEBUG_ANALOG
-  avdbg("  shold=0x%02x flags=0x%02x ain=%d...\n",
+  ainfo("  shold=0x%02x flags=0x%02x ain=%d...\n",
         stepcfg->shold, stepcfg->flags, stepcfg->ain);
 #endif
 
@@ -341,7 +341,7 @@ void tiva_adc_step_cfg(struct tiva_adc_step_cfg_s *stepcfg)
   uint8_t  ain   = stepcfg->ain;
   uint32_t gpio  = ain2gpio[stepcfg->ain];
 
-  avdbg("configure ADC%d SSE%d STEP%d...\n", adc, sse, step);
+  ainfo("configure ADC%d SSE%d STEP%d...\n", adc, sse, step);
 
   /* Configure the AIN GPIO for analog input if not flagged to be muxed to
    * the internal temperature sensor
@@ -410,14 +410,14 @@ void tiva_adc_irq_attach(uint8_t adc, uint8_t sse, xcpt_t isr)
   int irq = sse2irq[SSE_IDX(adc, sse)];
 
 #ifdef CONFIG_DEBUG_ANALOG
-  avdbg("assigning ISR=0x%p to ADC%d SSE%d IRQ=0x%02x...\n",
+  ainfo("assigning ISR=0x%p to ADC%d SSE%d IRQ=0x%02x...\n",
         isr, adc, sse, irq);
 #endif
 
   ret = irq_attach(irq, isr);
   if (ret < 0)
     {
-      adbg("ERROR: Failed to attach IRQ %d: %d\n", irq, ret);
+      aerr("ERROR: Failed to attach IRQ %d: %d\n", irq, ret);
       return;
     }
 
@@ -446,7 +446,7 @@ void tiva_adc_irq_detach(uint8_t adc, uint8_t sse)
   ret = irq_detach(irq);
   if (ret < 0)
     {
-      adbg("ERROR: Failed to detach IRQ %d: %d\n", irq, ret);
+      aerr("ERROR: Failed to detach IRQ %d: %d\n", irq, ret);
       return;
     }
 }
@@ -682,7 +682,7 @@ uint32_t tiva_adc_int_status(uint8_t adc)
 
 uint8_t tiva_adc_sse_enable(uint8_t adc, uint8_t sse, bool state)
 {
-  avdbg("ADC%d SSE%d=%01d\n", adc, sse, state);
+  ainfo("ADC%d SSE%d=%01d\n", adc, sse, state);
 
   uintptr_t actssreg = TIVA_ADC_ACTSS(adc);
   if (state == true)
@@ -867,7 +867,7 @@ uint8_t tiva_adc_sse_data(uint8_t adc, uint8_t sse, int32_t *buf)
       ssfstatreg = getreg32(TIVA_ADC_BASE(adc) + TIVA_ADC_SSFSTAT(sse));
     }
 
-  avdbg("fifo=%d\n", fifo_count);
+  ainfo("fifo=%d\n", fifo_count);
 
   return fifo_count;
 }
@@ -1086,20 +1086,20 @@ void tiva_adc_dump_reg_cfg(uint8_t adc, uint8_t sse)
 
   /* Dump register contents */
 
-  avdbg("CC     [0x%08x]=0x%08x\n", ccreg, cc);
-  avdbg("PC     [0x%08x]=0x%08x\n", pcreg, pc);
-  avdbg("ACTSS  [0x%08x]=0x%08x\n", actssreg, actss);
-  avdbg("SSPRI  [0x%08x]=0x%08x\n", ssprireg, sspri);
-  avdbg("EMUX   [0x%08x]=0x%08x\n", emuxreg, emux);
-  avdbg("SSMUX  [0x%08x]=0x%08x\n", ssmuxreg, ssmux);
+  ainfo("CC     [0x%08x]=0x%08x\n", ccreg, cc);
+  ainfo("PC     [0x%08x]=0x%08x\n", pcreg, pc);
+  ainfo("ACTSS  [0x%08x]=0x%08x\n", actssreg, actss);
+  ainfo("SSPRI  [0x%08x]=0x%08x\n", ssprireg, sspri);
+  ainfo("EMUX   [0x%08x]=0x%08x\n", emuxreg, emux);
+  ainfo("SSMUX  [0x%08x]=0x%08x\n", ssmuxreg, ssmux);
 #ifdef CONFIG_ARCH_CHIP_TM4C129
-  avdbg("SSEMUX [0x%08x]=0x%08x\n", ssemuxreg, ssemux);
+  ainfo("SSEMUX [0x%08x]=0x%08x\n", ssemuxreg, ssemux);
 #endif
-  avdbg("SSOP   [0x%08x]=0x%08x\n", ssopreg, ssop);
+  ainfo("SSOP   [0x%08x]=0x%08x\n", ssopreg, ssop);
 #ifdef CONFIG_EXPERIMENTAL
-  avdbg("SSTSH  [0x%08x]=0x%08x\n", sstshreg, sstsh);
+  ainfo("SSTSH  [0x%08x]=0x%08x\n", sstshreg, sstsh);
 #endif
-  avdbg("SSCTL  [0x%08x]=0x%08x\n", ssctlreg, ssctl);
+  ainfo("SSCTL  [0x%08x]=0x%08x\n", ssctlreg, ssctl);
 
 }
 #endif /* CONFIG_DEBUG_ANALOG */

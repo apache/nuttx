@@ -82,7 +82,7 @@ bool up_checkarch(FAR const Elf32_Ehdr *ehdr)
 
   if (ehdr->e_machine != EM_ARM)
     {
-      bdbg("Not for ARM: e_machine=%04x\n", ehdr->e_machine);
+      berr("ERROR: Not for ARM: e_machine=%04x\n", ehdr->e_machine);
       return -ENOEXEC;
     }
 
@@ -90,7 +90,7 @@ bool up_checkarch(FAR const Elf32_Ehdr *ehdr)
 
   if (ehdr->e_ident[EI_CLASS] != ELFCLASS32)
     {
-      bdbg("Need 32-bit objects: e_ident[EI_CLASS]=%02x\n", ehdr->e_ident[EI_CLASS]);
+      berr("ERROR: Need 32-bit objects: e_ident[EI_CLASS]=%02x\n", ehdr->e_ident[EI_CLASS]);
       return -ENOEXEC;
     }
 
@@ -102,7 +102,7 @@ bool up_checkarch(FAR const Elf32_Ehdr *ehdr)
   if (ehdr->e_ident[EI_DATA] != ELFDATA2LSB)
 #endif
     {
-      bdbg("Wrong endian-ness: e_ident[EI_DATA]=%02x\n", ehdr->e_ident[EI_DATA]);
+      berr("ERROR: Wrong endian-ness: e_ident[EI_DATA]=%02x\n", ehdr->e_ident[EI_DATA]);
       return -ENOEXEC;
     }
 
@@ -164,7 +164,7 @@ int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
     case R_ARM_CALL:
     case R_ARM_JUMP24:
       {
-        bvdbg("Performing PC24 [%d] link at addr %08lx [%08lx] to sym '%s' st_value=%08lx\n",
+        binfo("Performing PC24 [%d] link at addr %08lx [%08lx] to sym '%s' st_value=%08lx\n",
               ELF32_R_TYPE(rel->r_info), (long)addr, (long)(*(uint32_t *)addr),
               sym, (long)sym->st_value);
 
@@ -177,7 +177,7 @@ int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
         offset += sym->st_value - addr;
         if (offset & 3 || offset <= (int32_t) 0xfe000000 || offset >= (int32_t) 0x02000000)
           {
-            bdbg("  ERROR: PC24 [%d] relocation out of range, offset=%08lx\n",
+            berr("ERROR:   ERROR: PC24 [%d] relocation out of range, offset=%08lx\n",
                  ELF32_R_TYPE(rel->r_info), offset);
 
             return -EINVAL;
@@ -193,7 +193,7 @@ int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
     case R_ARM_ABS32:
     case R_ARM_TARGET1:  /* New ABI:  TARGET1 always treated as ABS32 */
       {
-        bvdbg("Performing ABS32 link at addr=%08lx [%08lx] to sym=%p st_value=%08lx\n",
+        binfo("Performing ABS32 link at addr=%08lx [%08lx] to sym=%p st_value=%08lx\n",
               (long)addr, (long)(*(uint32_t *)addr), sym, (long)sym->st_value);
 
         *(uint32_t *)addr += sym->st_value;
@@ -204,7 +204,7 @@ int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
     case R_ARM_TARGET2:  /* TARGET2 is a platform-specific relocation: gcc-arm-none-eabi
                           * performs a self relocation */
       {
-        bvdbg("Performing TARGET2 link at addr=%08lx [%08lx] to sym=%p st_value=%08lx\n",
+        binfo("Performing TARGET2 link at addr=%08lx [%08lx] to sym=%p st_value=%08lx\n",
               (long)addr, (long)(*(uint32_t *)addr), sym, (long)sym->st_value);
 
         *(uint32_t *)addr += sym->st_value - addr;
@@ -253,7 +253,7 @@ int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
         upper_insn = (uint32_t)(*(uint16_t *)addr);
         lower_insn = (uint32_t)(*(uint16_t *)(addr + 2));
 
-        bvdbg("Performing THM_JUMP24 [%d] link at addr=%08lx [%04x %04x] to sym=%p st_value=%08lx\n",
+        binfo("Performing THM_JUMP24 [%d] link at addr=%08lx [%04x %04x] to sym=%p st_value=%08lx\n",
               ELF32_R_TYPE(rel->r_info), (long)addr, (int)upper_insn, (int)lower_insn,
               sym, (long)sym->st_value);
 
@@ -287,7 +287,7 @@ int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
 
         /* And perform the relocation */
 
-        bvdbg("  S=%d J1=%d J2=%d offset=%08lx branch target=%08lx\n",
+        binfo("  S=%d J1=%d J2=%d offset=%08lx branch target=%08lx\n",
               S, J1, J2, (long)offset, offset + sym->st_value - addr);
 
         offset += sym->st_value - addr;
@@ -298,7 +298,7 @@ int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
 
         if (ELF32_ST_TYPE(sym->st_info) == STT_FUNC && (offset & 1) == 0)
           {
-            bdbg("  ERROR: JUMP24 [%d] requires odd offset, offset=%08lx\n",
+            berr("ERROR:   ERROR: JUMP24 [%d] requires odd offset, offset=%08lx\n",
                  ELF32_R_TYPE(rel->r_info), offset);
 
             return -EINVAL;
@@ -308,7 +308,7 @@ int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
 
         if (offset <= (int32_t)0xff000000 || offset >= (int32_t)0x01000000)
           {
-            bdbg("  ERROR: JUMP24 [%d] relocation out of range, branch taget=%08lx\n",
+            berr("ERROR:   ERROR: JUMP24 [%d] relocation out of range, branch taget=%08lx\n",
                  ELF32_R_TYPE(rel->r_info), offset);
 
             return -EINVAL;
@@ -328,14 +328,14 @@ int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
         lower_insn = ((lower_insn & 0xd000) | (J1 << 13) | (J2 << 11) | ((offset >> 1) & 0x07ff));
         *(uint16_t *)(addr + 2) = (uint16_t)lower_insn;
 
-        bvdbg("  S=%d J1=%d J2=%d insn [%04x %04x]\n",
+        binfo("  S=%d J1=%d J2=%d insn [%04x %04x]\n",
               S, J1, J2, (int)upper_insn, (int)lower_insn);
       }
       break;
 
     case R_ARM_V4BX:
       {
-        bvdbg("Performing V4BX link at addr=%08lx [%08lx]\n",
+        binfo("Performing V4BX link at addr=%08lx [%08lx]\n",
               (long)addr, (long)(*(uint32_t *)addr));
 
          /* Preserve only Rm and the condition code */
@@ -350,7 +350,7 @@ int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
 
     case R_ARM_PREL31:
       {
-        bvdbg("Performing PREL31 link at addr=%08lx [%08lx] to sym=%p st_value=%08lx\n",
+        binfo("Performing PREL31 link at addr=%08lx [%08lx] to sym=%p st_value=%08lx\n",
               (long)addr, (long)(*(uint32_t *)addr), sym, (long)sym->st_value);
 
         offset            = *(uint32_t *)addr + sym->st_value - addr;
@@ -361,7 +361,7 @@ int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
     case R_ARM_MOVW_ABS_NC:
     case R_ARM_MOVT_ABS:
       {
-        bvdbg("Performing MOVx_ABS [%d] link at addr=%08lx [%08lx] to sym=%p st_value=%08lx\n",
+        binfo("Performing MOVx_ABS [%d] link at addr=%08lx [%08lx] to sym=%p st_value=%08lx\n",
               ELF32_R_TYPE(rel->r_info), (long)addr, (long)(*(uint32_t *)addr),
               sym, (long)sym->st_value);
 
@@ -416,7 +416,7 @@ int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
         upper_insn = (uint32_t)(*(uint16_t *)addr);
         lower_insn = (uint32_t)(*(uint16_t *)(addr + 2));
 
-        bvdbg("Performing THM_MOVx [%d] link at addr=%08lx [%04x %04x] to sym=%p st_value=%08lx\n",
+        binfo("Performing THM_MOVx [%d] link at addr=%08lx [%04x %04x] to sym=%p st_value=%08lx\n",
               ELF32_R_TYPE(rel->r_info), (long)addr, (int)upper_insn, (int)lower_insn,
               sym, (long)sym->st_value);
 
@@ -433,7 +433,7 @@ int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
 
         /* And perform the relocation */
 
-        bvdbg("  offset=%08lx branch target=%08lx\n",
+        binfo("  offset=%08lx branch target=%08lx\n",
               (long)offset, offset + sym->st_value);
 
         offset += sym->st_value;
@@ -455,13 +455,13 @@ int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
                       (offset & 0x00ff));
         *(uint16_t *)(addr + 2) = (uint16_t)lower_insn;
 
-        bvdbg("  insn [%04x %04x]\n",
+        binfo("  insn [%04x %04x]\n",
              (int)upper_insn, (int)lower_insn);
       }
       break;
 
     default:
-      bdbg("Unsupported relocation: %d\n", ELF32_R_TYPE(rel->r_info));
+      berr("ERROR: Unsupported relocation: %d\n", ELF32_R_TYPE(rel->r_info));
       return -EINVAL;
     }
 
@@ -471,7 +471,7 @@ int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
 int up_relocateadd(FAR const Elf32_Rela *rel, FAR const Elf32_Sym *sym,
                    uintptr_t addr)
 {
-  bdbg("RELA relocation not supported\n");
+  berr("ERROR: RELA relocation not supported\n");
   return -ENOSYS;
 }
 

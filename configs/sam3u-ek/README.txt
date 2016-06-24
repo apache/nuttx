@@ -624,8 +624,8 @@ Configurations
           debug output on UART0 can be enabled with:
 
           Build Setup:
-            CONFIG_DEBUG=y                    : Enable debug features
-            CONFIG_DEBUG_VERBOSE=y            : Enable verbose debug output
+            CONFIG_DEBUG_FEATURES=y           : Enable debug features
+            CONFIG_DEBUG_INFO=y               : Enable verbose debug output
             CONFIG_DEBUG_INPUT=y              : Enable debug output from input devices
 
     3. Enabling HSMCI support. The SAM3U-KE provides a an SD memory card

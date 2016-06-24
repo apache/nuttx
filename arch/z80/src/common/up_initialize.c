@@ -48,7 +48,8 @@
 #include <nuttx/fs/loop.h>
 #include <nuttx/net/loopback.h>
 #include <nuttx/net/tun.h>
-#include <nuttx/net/telnet.h>
+#include <nuttx/syslog/syslog.h>
+#include <nuttx/syslog/syslog_console.h>
 
 #include <arch/board/board.h>
 
@@ -70,18 +71,18 @@
  *
  ****************************************************************************/
 
-#if defined(CONFIG_ARCH_CALIBRATION) && defined(CONFIG_DEBUG)
+#if defined(CONFIG_ARCH_CALIBRATION) && defined(CONFIG_DEBUG_FEATURES)
 static void up_calibratedelay(void)
 {
   int i;
 
-  lldbg("Beginning 100s delay\n");
+  _warn("Beginning 100s delay\n");
   for (i = 0; i < 100; i++)
     {
       up_mdelay(1000);
     }
 
-  lldbg("End 100s delay\n");
+  _warn("End 100s delay\n");
 }
 #else
 # define up_calibratedelay()
@@ -176,11 +177,18 @@ void up_initialize(void)
 
 #if defined(CONFIG_DEV_LOWCONSOLE)
   lowconsole_init();
-#elif defined(CONFIG_SYSLOG_CONSOLE)
+#elif defined(CONFIG_CONSOLE_SYSLOG)
   syslog_console_init();
 #elif defined(CONFIG_RAMLOG_CONSOLE)
   ramlog_consoleinit();
 #endif
+
+  /* Early initialization of the system logging device.  Some SYSLOG channel
+   * can be initialized early in the initialization sequence because they
+   * depend on minimal OS initialization.
+   */
+
+  syslog_initialize(SYSLOG_INIT_EARLY);
 
 #ifndef CONFIG_NETDEV_LATEINIT
   /* Initialize the network */

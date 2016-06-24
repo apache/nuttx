@@ -1,8 +1,11 @@
 /****************************************************************************
  * include/assert.h
  *
- *   Copyright (C) 2007-2009, 2011-2013, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2013, 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *
+ *   Copyright (C) 2016 Omni Hoverboards Inc. All rights reserved.
+ *   Author: Paul Alexander Patience <paul-a.patience@polymtl.ca>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -47,95 +50,51 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Macro Name: ASSERT, VERIFY, et al. */
+/* Macro Name: PANIC, ASSERT, VERIFY, et al. */
 
+#undef PANIC        /* Unconditional abort */
 #undef ASSERT       /* Assert if the condition is not true */
 #undef VERIFY       /* Assert if a function returns a negative value */
-#undef DEBUGASSERT  /* Like ASSERT, but only if CONFIG_DEBUG is defined */
-#undef DEBUGVERIFY  /* Like VERIFY, but only if CONFIG_DEBUG is defined */
-#undef PANIC        /* Unconditional abort */
+#undef DEBUGPANIC   /* Like PANIC, but only if CONFIG_DEBUG_ASSERTIONS is defined */
+#undef DEBUGASSERT  /* Like ASSERT, but only if CONFIG_DEBUG_ASSERTIONS is defined */
+#undef DEBUGVERIFY  /* Like VERIFY, but only if CONFIG_DEBUG_ASSERTIONS is defined */
 
 #ifdef CONFIG_HAVE_FILENAME
-
-#  define ASSERT(f) \
-     do \
-       { \
-         if (!(f)) \
-           { \
-             up_assert((const uint8_t *)__FILE__, (int)__LINE__); \
-           } \
-       } \
-     while (0)
-
-#  define VERIFY(f) \
-     do \
-       { \
-         if ((f) < 0) \
-           { \
-             up_assert((const uint8_t *)__FILE__, (int)__LINE__); \
-           } \
-       } \
-     while (0)
-
-#  define PANIC() \
-     up_assert((const uint8_t *)__FILE__, (int)__LINE__)
-
-#  ifdef CONFIG_DEBUG
-
-#    define DEBUGASSERT(f) \
-       do \
-         { \
-           if (!(f)) \
-             { \
-               up_assert((const uint8_t *)__FILE__, (int)__LINE__); \
-             } \
-         } \
-       while (0)
-
-#    define DEBUGVERIFY(f) \
-       do \
-         { \
-           if ((f) < 0) \
-             { \
-               up_assert((const uint8_t *)__FILE__, (int)__LINE__); \
-             } \
-         } \
-       while (0)
-
-#    define DEBUGPANIC() \
-       up_assert((const uint8_t *)__FILE__, (int)__LINE__)
-
-#  else
-
-#    define DEBUGASSERT(f)
-#    define DEBUGVERIFY(f) ((void)(f))
-#    define DEBUGPANIC()
-
-#  endif /* CONFIG_DEBUG */
-
+#  define PANIC()        up_assert((const uint8_t *)__FILE__, (int)__LINE__)
 #else
-
-#  define ASSERT(f)        { if (!(f)) up_assert(); }
-#  define VERIFY(f)        { if ((f) < 0) up_assert(); }
-#  define PANIC()          up_assert()
-
-#  ifdef CONFIG_DEBUG
-
-#    define DEBUGASSERT(f) { if (!(f)) up_assert(); }
-#    define DEBUGVERIFY(f) { if ((f) < 0) up_assert(); }
-#    define DEBUGPANIC()   up_assert()
-
-#  else
-
-#    define DEBUGASSERT(f)
-#    define DEBUGVERIFY(f) ((void)(f))
-#    define DEBUGPANIC()
-
-#  endif /* CONFIG_DEBUG */
+#  define PANIC()        up_assert()
 #endif
 
-#ifndef assert
-#  define assert ASSERT
+#define ASSERT(f)        do { if (!(f)) PANIC(); } while (0)
+#define VERIFY(f)        do { if ((f) < 0) PANIC(); } while (0)
+
+#ifdef CONFIG_DEBUG_ASSERTIONS
+#  define DEBUGPANIC()   PANIC()
+#  define DEBUGASSERT(f) ASSERT(f)
+#  define DEBUGVERIFY(f) VERIFY(f)
+#else
+#  define DEBUGPANIC()
+#  define DEBUGASSERT(f)
+#  define DEBUGVERIFY(f) ((void)(f))
+#endif
+
+/* The C standard states that if NDEBUG is defined, assert will do nothing.
+ * Users can define and undefine NDEBUG as they see fit to choose when assert
+ * does something or does not do anything.
+ */
+
+#ifdef NDEBUG
+#  define assert(f)
+#else
+#  define assert(f) ASSERT(f)
+#endif
+
+/* Definition required for C11 compile-time assertion checking.  The
+ * static_assert macro simply expands to the _Static_assert keyword.
+ */
+
+#ifndef __cplusplus
+#  define static_assert _Static_assert
 #endif
 
 /****************************************************************************

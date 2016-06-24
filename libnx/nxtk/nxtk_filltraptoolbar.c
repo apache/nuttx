@@ -95,7 +95,7 @@ int nxtk_filltraptoolbar(NXTKWINDOW hfwnd,
   FAR struct nxtk_framedwindow_s *fwnd = (FAR struct nxtk_framedwindow_s *)hfwnd;
   struct nxgl_rect_s relclip;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!hfwnd || !trap || !color)
     {
       set_errno(EINVAL);

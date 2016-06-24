@@ -86,7 +86,7 @@ static void devif_callback_free(FAR struct net_driver_s *dev,
     {
       save = net_lock();
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
       /* Check for double freed callbacks */
 
       curr = g_cbfreelist;
@@ -257,10 +257,10 @@ FAR struct devif_callback_s *
            *list = ret;
         }
     }
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   else
     {
-      nlldbg("Failed to allocate callback\n");
+      nerr("ERROR: Failed to allocate callback\n");
     }
 #endif
 
@@ -410,7 +410,7 @@ uint16_t devif_conn_event(FAR struct net_driver_s *dev, void *pvconn,
            * beginning of the list (which will be ignored on this pass)
            */
 
-          nllvdbg("Call event=%p with flags=%04x\n", list->event, flags);
+          ninfo("Call event=%p with flags=%04x\n", list->event, flags);
           flags = list->event(dev, pvconn, list->priv, flags);
         }
 
@@ -475,7 +475,7 @@ uint16_t devif_dev_event(FAR struct net_driver_s *dev, void *pvconn,
            * beginning of the list (which will be ignored on this pass)
            */
 
-          nllvdbg("Call event=%p with flags=%04x\n", cb->event, flags);
+          ninfo("Call event=%p with flags=%04x\n", cb->event, flags);
           flags = cb->event(dev, pvconn, cb->priv, flags);
         }
 

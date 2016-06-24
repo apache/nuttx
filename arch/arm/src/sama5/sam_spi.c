@@ -90,6 +90,10 @@
 #  define CONFIG_SAMA5_SPI_DMATHRESHOLD 4
 #endif
 
+#ifndef CONFIG_DEBUG_SPI_INFO
+#  undef CONFIG_SAMA5_SPI_REGDEBUG
+#endif
+
 #ifdef CONFIG_SAMA5_SPI_DMA
 
 #  if defined(CONFIG_SAMA5_SPI0) && defined(CONFIG_SAMA5_DMAC0)
@@ -125,31 +129,10 @@
 #define DMA_TIMEOUT_TICKS MSEC2TICK(DMA_TIMEOUT_MS)
 
 /* Debug *******************************************************************/
-/* Check if SPI debut is enabled (non-standard.. no support in
- * include/debug.h
- */
-
-#ifndef CONFIG_DEBUG
-#  undef CONFIG_DEBUG_VERBOSE
-#  undef CONFIG_DEBUG_SPI
-#  undef CONFIG_SAMA5_SPI_DMADEBUG
-#  undef CONFIG_SAMA5_SPI_REGDEBUG
-#endif
+/* Check if SPI debug is enabled */
 
 #ifndef CONFIG_DEBUG_DMA
 #  undef CONFIG_SAMA5_SPI_DMADEBUG
-#endif
-
-#ifdef CONFIG_DEBUG_SPI
-#  define spidbg lldbg
-#  ifdef CONFIG_DEBUG_VERBOSE
-#    define spivdbg lldbg
-#  else
-#    define spivdbg(x...)
-#  endif
-#else
-#  define spidbg(x...)
-#  define spivdbg(x...)
 #endif
 
 #define DMA_INITIAL      0
@@ -243,7 +226,7 @@ static inline void spi_putreg(struct sam_spidev_s *spi, uint32_t value,
                   unsigned int offset);
 static inline struct sam_spidev_s *spi_device(struct sam_spics_s *spics);
 
-#if defined(CONFIG_DEBUG_SPI) && defined(CONFIG_DEBUG_VERBOSE)
+#ifdef CONFIG_DEBUG_SPI_INFO
 static void     spi_dumpregs(struct sam_spidev_s *spi, const char *msg);
 #else
 # define        spi_dumpregs(spi,msg)
@@ -430,7 +413,7 @@ static bool spi_checkreg(struct sam_spidev_s *spi, bool wr, uint32_t value,
         {
           /* Yes... show how many times we did it */
 
-          lldbg("...[Repeats %d times]...\n", spi->ntimes);
+          spiinfo("...[Repeats %d times]...\n", spi->ntimes);
         }
 
       /* Save information about the new access */
@@ -464,7 +447,7 @@ static inline uint32_t spi_getreg(struct sam_spidev_s *spi,
 #ifdef CONFIG_SAMA5_SPI_REGDEBUG
   if (spi_checkreg(spi, false, value, address))
     {
-      lldbg("%08x->%08x\n", address, value);
+      spiinfo("%08x->%08x\n", address, value);
     }
 #endif
 
@@ -487,7 +470,7 @@ static inline void spi_putreg(struct sam_spidev_s *spi, uint32_t value,
 #ifdef CONFIG_SAMA5_SPI_REGDEBUG
   if (spi_checkreg(spi, true, value, address))
     {
-      lldbg("%08x<-%08x\n", address, value);
+      spiinfo("%08x<-%08x\n", address, value);
     }
 #endif
 
@@ -509,20 +492,20 @@ static inline void spi_putreg(struct sam_spidev_s *spi, uint32_t value,
  *
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG_SPI) && defined(CONFIG_DEBUG_VERBOSE)
+#ifdef CONFIG_DEBUG_SPI_INFO
 static void spi_dumpregs(struct sam_spidev_s *spi, const char *msg)
 {
-  spivdbg("%s:\n", msg);
-  spivdbg("    MR:%08x   SR:%08x  IMR:%08x\n",
+  spiinfo("%s:\n", msg);
+  spiinfo("    MR:%08x   SR:%08x  IMR:%08x\n",
           getreg32(spi->base + SAM_SPI_MR_OFFSET),
           getreg32(spi->base + SAM_SPI_SR_OFFSET),
           getreg32(spi->base + SAM_SPI_IMR_OFFSET));
-  spivdbg("  CSR0:%08x CSR1:%08x CSR2:%08x CSR3:%08x\n",
+  spiinfo("  CSR0:%08x CSR1:%08x CSR2:%08x CSR3:%08x\n",
           getreg32(spi->base + SAM_SPI_CSR0_OFFSET),
           getreg32(spi->base + SAM_SPI_CSR1_OFFSET),
           getreg32(spi->base + SAM_SPI_CSR2_OFFSET),
           getreg32(spi->base + SAM_SPI_CSR3_OFFSET));
-  spivdbg("  WPCR:%08x WPSR:%08x\n",
+  spiinfo("  WPCR:%08x WPSR:%08x\n",
           getreg32(spi->base + SAM_SPI_WPCR_OFFSET),
           getreg32(spi->base + SAM_SPI_WPSR_OFFSET));
 }
@@ -882,7 +865,7 @@ static int spi_lock(struct spi_dev_s *dev, bool lock)
   struct sam_spics_s *spics = (struct sam_spics_s *)dev;
   struct sam_spidev_s *spi = spi_device(spics);
 
-  spivdbg("lock=%d\n", lock);
+  spiinfo("lock=%d\n", lock);
   if (lock)
     {
       /* Take the semaphore (perhaps waiting) */
@@ -930,10 +913,10 @@ static void spi_select(struct spi_dev_s *dev, enum spi_dev_e devid,
 
   /* Are we selecting or de-selecting the device? */
 
-  spivdbg("selected=%d\n", selected);
+  spiinfo("selected=%d\n", selected);
   if (selected)
     {
-      spivdbg("cs=%d\n", spics->cs);
+      spiinfo("cs=%d\n", spics->cs);
 
       /* Before writing the TDR, the PCS field in the SPI_MR register must be set
        * in order to select a slave.
@@ -988,7 +971,7 @@ static uint32_t spi_setfrequency(struct spi_dev_s *dev, uint32_t frequency)
   uint32_t regval;
   unsigned int offset;
 
-  spivdbg("cs=%d frequency=%d\n", spics->cs, frequency);
+  spiinfo("cs=%d frequency=%d\n", spics->cs, frequency);
 
   /* Check if the requested frequency is the same as the frequency selection */
 
@@ -1058,14 +1041,14 @@ static uint32_t spi_setfrequency(struct spi_dev_s *dev, uint32_t frequency)
   /* Calculate the new actual frequency */
 
   actual = SAM_SPI_CLOCK / scbr;
-  spivdbg("csr[offset=%02x]=%08x actual=%d\n", offset, regval, actual);
+  spiinfo("csr[offset=%02x]=%08x actual=%d\n", offset, regval, actual);
 
   /* Save the frequency setting */
 
   spics->frequency = frequency;
   spics->actual    = actual;
 
-  spidbg("Frequency %d->%d\n", frequency, actual);
+  spiinfo("Frequency %d->%d\n", frequency, actual);
   return actual;
 }
 
@@ -1091,7 +1074,7 @@ static void spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode)
   uint32_t regval;
   unsigned int offset;
 
-  spivdbg("cs=%d mode=%d\n", spics->cs, mode);
+  spiinfo("cs=%d mode=%d\n", spics->cs, mode);
 
   /* Has the mode changed? */
 
@@ -1134,7 +1117,7 @@ static void spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode)
         }
 
       spi_putreg(spi, regval, offset);
-      spivdbg("csr[offset=%02x]=%08x\n", offset, regval);
+      spiinfo("csr[offset=%02x]=%08x\n", offset, regval);
 
       /* Save the mode so that subsequent re-configurations will be faster */
 
@@ -1164,7 +1147,7 @@ static void spi_setbits(struct spi_dev_s *dev, int nbits)
   uint32_t regval;
   unsigned int offset;
 
-  spivdbg("cs=%d nbits=%d\n", spics->cs, nbits);
+  spiinfo("cs=%d nbits=%d\n", spics->cs, nbits);
   DEBUGASSERT(spics && nbits > 7 && nbits < 17);
 
   /* NOTE:  The logic in spi_send and in spi_exchange only handles 8-bit
@@ -1186,7 +1169,7 @@ static void spi_setbits(struct spi_dev_s *dev, int nbits)
       regval |= SPI_CSR_BITS(nbits);
       spi_putreg(spi, regval, offset);
 
-      spivdbg("csr[offset=%02x]=%08x\n", offset, regval);
+      spiinfo("csr[offset=%02x]=%08x\n", offset, regval);
 
       /* Save the selection so the subsequence re-configurations will be faster */
 
@@ -1224,7 +1207,7 @@ static uint16_t spi_send(struct spi_dev_s *dev, uint16_t wd)
   rxbyte = (uint8_t)0;
   spi_exchange(dev, &txbyte, &rxbyte, 1);
 
-  spivdbg("Sent %02x received %02x\n", txbyte, rxbyte);
+  spiinfo("Sent %02x received %02x\n", txbyte, rxbyte);
   return (uint16_t)rxbyte;
 }
 
@@ -1270,7 +1253,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
   uint32_t pcs;
   uint32_t data;
 
-  spivdbg("txbuffer=%p rxbuffer=%p nwords=%d\n", txbuffer, rxbuffer, nwords);
+  spiinfo("txbuffer=%p rxbuffer=%p nwords=%d\n", txbuffer, rxbuffer, nwords);
 
   /* Set up PCS bits */
 
@@ -1390,7 +1373,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
       return;
     }
 
-  spivdbg("txbuffer=%p rxbuffer=%p nwords=%d\n", txbuffer, rxbuffer, nwords);
+  spiinfo("txbuffer=%p rxbuffer=%p nwords=%d\n", txbuffer, rxbuffer, nwords);
 
   spics = (struct sam_spics_s *)dev;
   spi = spi_device(spics);
@@ -1476,7 +1459,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
   ret = sam_dmarxsetup(spics->rxdma, paddr, maddr, nwords);
   if (ret < 0)
     {
-      dmadbg("ERROR: sam_dmarxsetup failed: %d\n", ret);
+      dmaerr("ERROR: sam_dmarxsetup failed: %d\n", ret);
       return;
     }
 
@@ -1488,7 +1471,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
   ret = sam_dmatxsetup(spics->txdma, paddr, maddr, nwords);
   if (ret < 0)
     {
-      dmadbg("ERROR: sam_dmatxsetup failed: %d\n", ret);
+      dmaerr("ERROR: sam_dmatxsetup failed: %d\n", ret);
       return;
     }
 
@@ -1500,7 +1483,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
   ret = sam_dmastart(spics->rxdma, spi_rxcallback, (void *)spics);
   if (ret < 0)
     {
-      dmadbg("ERROR: RX sam_dmastart failed: %d\n", ret);
+      dmaerr("ERROR: RX sam_dmastart failed: %d\n", ret);
       return;
     }
 
@@ -1509,7 +1492,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
   ret = sam_dmastart(spics->txdma, spi_txcallback, (void *)spics);
   if (ret < 0)
     {
-      dmadbg("ERROR: RX sam_dmastart failed: %d\n", ret);
+      dmaerr("ERROR: RX sam_dmastart failed: %d\n", ret);
       sam_dmastop(spics->rxdma);
       return;
     }
@@ -1531,7 +1514,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
                      (wdentry_t)spi_dmatimeout, 1, (uint32_t)spics);
       if (ret != OK)
         {
-           spidbg("ERROR: wd_start failed: %d\n", ret);
+           spierr("ERROR: wd_start failed: %d\n", ret);
         }
 
       /* Wait for the DMA complete */
@@ -1582,7 +1565,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
 
   if (spics->result)
     {
-      spidbg("ERROR: DMA failed with result: %d\n", spics->result);
+      spierr("ERROR: DMA failed with result: %d\n", spics->result);
     }
 }
 #endif /* CONFIG_SAMA5_SPI_DMA */
@@ -1673,7 +1656,7 @@ struct spi_dev_s *sam_spibus_initialize(int port)
 
   /* The support SAM parts have only a single SPI port */
 
-  spivdbg("port: %d csno: %d spino: %d\n", port, csno, spino);
+  spiinfo("port: %d csno: %d spino: %d\n", port, csno, spino);
   DEBUGASSERT(csno >= 0 && csno <= SAM_SPI_NCS);
 
 #if defined(CONFIG_SAMA5_SPI0) && defined(CONFIG_SAMA5_SPI1)
@@ -1692,7 +1675,7 @@ struct spi_dev_s *sam_spibus_initialize(int port)
   spics = (struct sam_spics_s *)zalloc(sizeof(struct sam_spics_s));
   if (!spics)
     {
-      spidbg("ERROR: Failed to allocate a chip select structure\n");
+      spierr("ERROR: Failed to allocate a chip select structure\n");
       return NULL;
     }
 
@@ -1715,7 +1698,7 @@ struct spi_dev_s *sam_spibus_initialize(int port)
       spics->rxdma = sam_dmachannel(spino, 0);
       if (!spics->rxdma)
         {
-          spidbg("ERROR: Failed to allocate the RX DMA channel\n");
+          spierr("ERROR: Failed to allocate the RX DMA channel\n");
           spics->candma = false;
         }
     }
@@ -1725,7 +1708,7 @@ struct spi_dev_s *sam_spibus_initialize(int port)
       spics->txdma = sam_dmachannel(spino, 0);
       if (!spics->txdma)
         {
-          spidbg("ERROR: Failed to allocate the TX DMA channel\n");
+          spierr("ERROR: Failed to allocate the TX DMA channel\n");
           sam_dmafree(spics->rxdma);
           spics->rxdma  = NULL;
           spics->candma = false;
@@ -1852,7 +1835,7 @@ struct spi_dev_s *sam_spibus_initialize(int port)
   spi_putreg(spi, regval, offset);
 
   spics->nbits = 8;
-  spivdbg("csr[offset=%02x]=%08x\n", offset, regval);
+  spiinfo("csr[offset=%02x]=%08x\n", offset, regval);
 
   return &spics->spidev;
 }

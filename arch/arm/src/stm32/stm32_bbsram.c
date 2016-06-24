@@ -75,6 +75,10 @@
 
 #define MAX_OPENCNT           (255) /* Limit of uint8_t */
 
+#ifndef CONFIG_DEBUG_INFO
+#  undef CONFIG_BBSRAM_DEBUG
+#endif
+
 #if defined(CONFIG_BBSRAM_DEBUG)
 #  define BBSRAM_DEBUG_READ() stm32_bbsram_rd()
 #  define BBSRAM_DUMP(p,s)    stm32_bbsram_dump(p,s)
@@ -183,15 +187,15 @@ static void stm32_bbsram_rd(void)
 static void stm32_bbsram_dump(FAR struct bbsramfh_s *bbf, char *op)
 {
   BBSRAM_DEBUG_READ();
-  lldbg("%s:\n", op);
-  lldbg(" File Address:0x%8x\n", bbf);
-  lldbg("  crc:0x%8x\n", bbf->crc);
-  lldbg("  fileno:%d\n", (int) bbf->fileno);
-  lldbg("  dirty:%d\n", (int) bbf->dirty);
-  lldbg("  length:%d\n", (int) bbf->len);
-  lldbg("  time:%ld:%ld\n", bbf->lastwrite.tv_sec, bbf->lastwrite.tv_nsec);
-  lldbg("  data: 0x%2x 0x%2x 0x%2x 0x%2x 0x%2x\n",
-        bbf->data[0], bbf->data[1], bbf->data[2], bbf->data[3], bbf->data[4]);
+  _info("%s:\n", op);
+  _info(" File Address:0x%8x\n", bbf);
+  _info("  crc:0x%8x\n", bbf->crc);
+  _info("  fileno:%d\n", (int) bbf->fileno);
+  _info("  dirty:%d\n", (int) bbf->dirty);
+  _info("  length:%d\n", (int) bbf->len);
+  _info("  time:%ld:%ld\n", bbf->lastwrite.tv_sec, bbf->lastwrite.tv_nsec);
+  _info("  data: 0x%2x 0x%2x 0x%2x 0x%2x 0x%2x\n",
+       bbf->data[0], bbf->data[1], bbf->data[2], bbf->data[3], bbf->data[4]);
 }
 #endif
 

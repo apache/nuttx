@@ -86,7 +86,7 @@ int exec(FAR const char *filename, FAR char * const *argv,
 #if defined(CONFIG_SCHED_ONEXIT) && defined(CONFIG_SCHED_HAVE_PARENT)
   FAR struct binary_s *bin;
   int pid;
-  int err;
+  int errcode;
   int ret;
 
   /* Allocate the load information */
@@ -94,8 +94,8 @@ int exec(FAR const char *filename, FAR char * const *argv,
   bin = (FAR struct binary_s *)kmm_zalloc(sizeof(struct binary_s));
   if (!bin)
     {
-      bdbg("ERROR: Failed to allocate binary_s\n");
-      err = ENOMEM;
+      berr("ERROR: Failed to allocate binary_s\n");
+      errcode = ENOMEM;
       goto errout;
     }
 
@@ -110,8 +110,8 @@ int exec(FAR const char *filename, FAR char * const *argv,
   ret = binfmt_copyargv(bin, argv);
   if (ret < 0)
     {
-      err = -ret;
-      bdbg("ERROR: Failed to copy argv[]: %d\n", err);
+      errcode = -ret;
+      berr("ERROR: Failed to copy argv[]: %d\n", errcode);
       goto errout_with_bin;
     }
 
@@ -120,8 +120,8 @@ int exec(FAR const char *filename, FAR char * const *argv,
   ret = load_module(bin);
   if (ret < 0)
     {
-      err = get_errno();
-      bdbg("ERROR: Failed to load program '%s': %d\n", filename, err);
+      errcode = get_errno();
+      berr("ERROR: Failed to load program '%s': %d\n", filename, errcode);
       goto errout_with_argv;
     }
 
@@ -137,8 +137,8 @@ int exec(FAR const char *filename, FAR char * const *argv,
   pid = exec_module(bin);
   if (pid < 0)
     {
-      err = get_errno();
-      bdbg("ERROR: Failed to execute program '%s': %d\n", filename, err);
+      errcode = get_errno();
+      berr("ERROR: Failed to execute program '%s': %d\n", filename, errcode);
       goto errout_with_lock;
     }
 
@@ -149,8 +149,8 @@ int exec(FAR const char *filename, FAR char * const *argv,
   ret = schedule_unload(pid, bin);
   if (ret < 0)
     {
-      err = get_errno();
-      bdbg("ERROR: Failed to schedule unload '%s': %d\n", filename, err);
+      errcode = get_errno();
+      berr("ERROR: Failed to schedule unload '%s': %d\n", filename, errcode);
     }
 
   sched_unlock();
@@ -164,12 +164,12 @@ errout_with_argv:
 errout_with_bin:
   kmm_free(bin);
 errout:
-  set_errno(err);
+  set_errno(errcode);
   return ERROR;
 
 #else
   struct binary_s bin;
-  int err;
+  int errcode;
   int ret;
 
   /* Load the module into memory */
@@ -182,8 +182,8 @@ errout:
   ret = load_module(&bin);
   if (ret < 0)
     {
-      err = get_errno();
-      bdbg("ERROR: Failed to load program '%s': %d\n", filename, err);
+      errcode = get_errno();
+      berr("ERROR: Failed to load program '%s': %d\n", filename, errcode);
       goto errout;
     }
 
@@ -192,8 +192,8 @@ errout:
   ret = exec_module(&bin);
   if (ret < 0)
     {
-      err = get_errno();
-      bdbg("ERROR: Failed to execute program '%s': %d\n", filename, err);
+      errcode = get_errno();
+      berr("ERROR: Failed to execute program '%s': %d\n", filename, errcode);
       goto errout_with_module;
     }
 
@@ -204,10 +204,9 @@ errout:
 errout_with_module:
   unload_module(&bin);
 errout:
-  set_errno(err);
+  set_errno(errcode);
   return ERROR;
 #endif
 }
 
 #endif /* !CONFIG_BINFMT_DISABLE */
-

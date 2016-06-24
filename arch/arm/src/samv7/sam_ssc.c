@@ -91,6 +91,10 @@
 #  define CONFIG_SAMV7_SSC_MAXINFLIGHT 16
 #endif
 
+#ifndef CONFIG_DEBUG_I2S_INFO
+#  undef CONFIG_SAMV7_SSC_REGDEBUG
+#endif
+
 /* Assume no RX/TX support until we learn better */
 
 #undef SSC_HAVE_RX
@@ -366,16 +370,9 @@
 #define DMA_TIMEOUT_TICKS MSEC2TICK(DMA_TIMEOUT_MS)
 
 /* Debug *******************************************************************/
-/* Check if SSC debug is enabled (non-standard.. no support in
- * include/debug.h
- */
+/* Check if SSC debug is enabled */
 
-#ifndef CONFIG_DEBUG
-#  undef CONFIG_DEBUG_VERBOSE
-#  undef CONFIG_DEBUG_I2S
-#endif
-
-#ifndef CONFIG_DEBUG_I2S
+#ifndef CONFIG_DEBUG_I2S_INFO
 #  undef CONFIG_SAMV7_SSC_DMADEBUG
 #  undef CONFIG_SAMV7_SSC_REGDEBUG
 #  undef CONFIG_SAMV7_SSC_QDEBUG
@@ -384,22 +381,6 @@
 
 #ifndef CONFIG_DEBUG_DMA
 #  undef CONFIG_SAMV7_SSC_DMADEBUG
-#endif
-
-#ifdef CONFIG_DEBUG_I2S
-#  define i2sdbg         dbg
-#  define i2slldbg       lldbg
-#  ifdef CONFIG_DEBUG_VERBOSE
-#    define i2svdbg      dbg
-#    define i2sllvdbg    lldbg
-#  else
-#    define i2svdbg(x...)
-#  endif
-#else
-#  define i2sdbg(x...)
-#  define i2slldbg(x...)
-#  define i2svdbg(x...)
-#  define i2sllvdbg(x...)
 #endif
 
 #define DMA_INITIAL      0
@@ -449,7 +430,7 @@ struct sam_ssc_s
   uintptr_t base;              /* SSC controller register base address */
   sem_t exclsem;               /* Assures mutually exclusive acess to SSC */
   uint8_t datalen;             /* Data width (8, 16, or 32) */
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   uint8_t align;               /* Log2 of data width (0, 1, or 3) */
 #endif
   uint8_t pid;                 /* Peripheral ID */
@@ -512,7 +493,7 @@ static inline void ssc_putreg(struct sam_ssc_s *priv, unsigned int offset,
 static inline uintptr_t ssc_regaddr(struct sam_ssc_s *priv,
                   unsigned int offset);
 
-#if defined(CONFIG_DEBUG_I2S) && defined(CONFIG_DEBUG_VERBOSE)
+#ifdef CONFIG_DEBUG_I2S_INFO
 static void     scc_dump_regs(struct sam_ssc_s *priv, const char *msg);
 #else
 #  define       scc_dump_regs(s,m)
@@ -697,7 +678,7 @@ static bool ssc_checkreg(struct sam_ssc_s *priv, bool wr, uint32_t regval,
         {
           /* Yes... show how many times we did it */
 
-          lldbg("...[Repeats %d times]...\n", priv->count);
+          i2sinfo("...[Repeats %d times]...\n", priv->count);
         }
 
       /* Save information about the new access */
@@ -731,7 +712,7 @@ static inline uint32_t ssc_getreg(struct sam_ssc_s *priv,
 #ifdef CONFIG_SAMV7_SSC_REGDEBUG
   if (ssc_checkreg(priv, false, regval, regaddr))
     {
-      lldbg("%08x->%08x\n", regaddr, regval);
+      i2sinfo("%08x->%08x\n", regaddr, regval);
     }
 #endif
 
@@ -754,7 +735,7 @@ static inline void ssc_putreg(struct sam_ssc_s *priv, unsigned int offset,
 #ifdef CONFIG_SAMV7_SSC_REGDEBUG
   if (ssc_checkreg(priv, true, regval, regaddr))
     {
-      lldbg("%08x<-%08x\n", regaddr, regval);
+      i2sinfo("%08x<-%08x\n", regaddr, regval);
     }
 #endif
 
@@ -789,21 +770,21 @@ static inline uintptr_t ssc_regaddr(struct sam_ssc_s *priv, unsigned int offset)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG_I2S) && defined(CONFIG_DEBUG_VERBOSE)
+#ifdef CONFIG_DEBUG_I2S_INFO
 static void scc_dump_regs(struct sam_ssc_s *priv, const char *msg)
 {
-  i2svdbg("SSC%d: %s\n", priv->sscno, msg);
-  i2svdbg("   CMR:%08x RCMR:%08x RFMR:%08x TCMR:%08x\n",
+  i2sinfo("SSC%d: %s\n", priv->sscno, msg);
+  i2sinfo("   CMR:%08x RCMR:%08x RFMR:%08x TCMR:%08x\n",
           getreg32(priv->base + SAM_SSC_CMR_OFFSET),
           getreg32(priv->base + SAM_SSC_RCMR_OFFSET),
           getreg32(priv->base + SAM_SSC_RFMR_OFFSET),
           getreg32(priv->base + SAM_SSC_TCMR_OFFSET));
-  i2svdbg("  TFMR:%08x RC0R:%08x RC1R:%08x   SR:%08x\n",
+  i2sinfo("  TFMR:%08x RC0R:%08x RC1R:%08x   SR:%08x\n",
           getreg32(priv->base + SAM_SSC_TFMR_OFFSET),
           getreg32(priv->base + SAM_SSC_RC0R_OFFSET),
           getreg32(priv->base + SAM_SSC_RC1R_OFFSET),
           getreg32(priv->base + SAM_SSC_SR_OFFSET));
-  i2svdbg("   IMR:%08x WPMR:%08x WPSR:%08x\n",
+  i2sinfo("   IMR:%08x WPMR:%08x WPSR:%08x\n",
           getreg32(priv->base + SAM_SSC_IMR_OFFSET),
           getreg32(priv->base + SAM_SSC_WPMR_OFFSET),
           getreg32(priv->base + SAM_SSC_WPSR_OFFSET));
@@ -840,12 +821,12 @@ static void ssc_dump_queue(sq_queue_t *queue)
 
       if (!apb)
         {
-          i2sllvdbg("    %p: No buffer\n", bfcontainer);
+          i2sinfo("    %p: No buffer\n", bfcontainer);
         }
       else
         {
-          i2sllvdbg("    %p: buffer=%p nmaxbytes=%d nbytes=%d\n",
-                    bfcontainer, apb, apb->nmaxbytes, apb->nbytes);
+          i2sinfo("    %p: buffer=%p nmaxbytes=%d nbytes=%d\n",
+                  bfcontainer, apb, apb->nmaxbytes, apb->nbytes);
         }
     }
 }
@@ -855,12 +836,12 @@ static void ssc_dump_queues(struct sam_transport_s *xpt, const char *msg)
   irqstate_t flags;
 
   flags = enter_critical_section();
-  i2sllvdbg("%s\n", msg);
-  i2sllvdbg("  Pending:\n");
+  i2sinfo("%s\n", msg);
+  i2sinfo("  Pending:\n");
   ssc_dump_queue(&xpt->pend);
-  i2sllvdbg("  Active:\n");
+  i2sinfo("  Active:\n");
   ssc_dump_queue(&xpt->act);
-  i2sllvdbg("  Done:\n");
+  i2sinfo("  Done:\n");
   ssc_dump_queue(&xpt->done);
   leave_critical_section(flags);
 }
@@ -1083,7 +1064,7 @@ static void ssc_dma_sampleinit(struct sam_ssc_s *priv,
 #if defined(CONFIG_SAMV7_SSC_DMADEBUG) && defined(SSC_HAVE_RX)
 static void ssc_rxdma_sampledone(struct sam_ssc_s *priv, int result)
 {
-  lldbg("result: %d\n", result);
+  i2llsinfo("result: %d\n", result);
 
   /* Sample the final registers */
 
@@ -1148,7 +1129,7 @@ static void ssc_rxdma_sampledone(struct sam_ssc_s *priv, int result)
 #if defined(CONFIG_SAMV7_SSC_DMADEBUG) && defined(SSC_HAVE_TX)
 static void ssc_txdma_sampledone(struct sam_ssc_s *priv, int result)
 {
-  lldbg("result: %d\n", result);
+  i2sinfo("result: %d\n", result);
 
   /* Sample the final registers */
 
@@ -1371,7 +1352,7 @@ static int ssc_rxdma_setup(struct sam_ssc_s *priv)
 
       if (ret < 0)
         {
-          i2slldbg("ERROR: wd_start failed: %d\n", errno);
+          i2serr("ERROR: wd_start failed: %d\n", errno);
         }
     }
 
@@ -1420,7 +1401,7 @@ static void ssc_rx_worker(void *arg)
    * So we have to start the next DMA here.
    */
 
-  i2svdbg("rx.act.head=%p rx.done.head=%p\n",
+  i2sinfo("rx.act.head=%p rx.done.head=%p\n",
           priv->rx.act.head, priv->rx.done.head);
   ssc_dump_rxqueues(priv, "RX worker start");
 
@@ -1559,7 +1540,7 @@ static void ssc_rx_schedule(struct sam_ssc_s *priv, int result)
       ret = work_queue(HPWORK, &priv->rx.work, ssc_rx_worker, priv, 0);
       if (ret != 0)
         {
-          i2slldbg("ERROR: Failed to queue RX work: %d\n", ret);
+          i2serr("ERROR: Failed to queue RX work: %d\n", ret);
         }
     }
 }
@@ -1788,7 +1769,7 @@ static int ssc_txdma_setup(struct sam_ssc_s *priv)
 
       if (ret < 0)
         {
-          i2slldbg("ERROR: wd_start failed: %d\n", errno);
+          i2serr("ERROR: wd_start failed: %d\n", errno);
         }
     }
 
@@ -1836,7 +1817,7 @@ static void ssc_tx_worker(void *arg)
    * So we have to start the next DMA here.
    */
 
-  i2svdbg("tx.act.head=%p tx.done.head=%p\n",
+  i2sinfo("tx.act.head=%p tx.done.head=%p\n",
            priv->tx.act.head, priv->tx.done.head);
   ssc_dump_txqueues(priv, "TX worker start");
 
@@ -1963,7 +1944,7 @@ static void ssc_tx_schedule(struct sam_ssc_s *priv, int result)
       ret = work_queue(HPWORK, &priv->tx.work, ssc_tx_worker, priv, 0);
       if (ret != 0)
         {
-          i2slldbg("ERROR: Failed to queue TX work: %d\n", ret);
+          i2serr("ERROR: Failed to queue TX work: %d\n", ret);
         }
     }
 }
@@ -2036,25 +2017,25 @@ static int ssc_checkwidth(struct sam_ssc_s *priv, int bits)
   switch (bits)
     {
     case 8:
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
       priv->align = 0;
 #endif
       break;
 
     case 16:
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
       priv->align = 1;
 #endif
       break;
 
     case 32:
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
       priv->align = 3;
 #endif
       break;
 
     default:
-      i2sdbg("ERROR: Unsupported or invalid data width: %d\n", bits);
+      i2serr("ERROR: Unsupported or invalid data width: %d\n", bits);
       return (bits < 2 || bits > 32) ? -EINVAL : -ENOSYS;
     }
 
@@ -2132,7 +2113,7 @@ static uint32_t ssc_rxdatawidth(struct i2s_dev_s *dev, int bits)
   ret = ssc_checkwidth(priv, bits);
   if (ret < 0)
     {
-      i2sdbg("ERROR: ssc_checkwidth failed: %d\n", ret);
+      i2serr("ERROR: ssc_checkwidth failed: %d\n", ret);
       return 0;
     }
 
@@ -2141,7 +2122,7 @@ static uint32_t ssc_rxdatawidth(struct i2s_dev_s *dev, int bits)
   ret = ssc_dma_flags(priv, &dmaflags);
   if (ret < 0)
     {
-      i2sdbg("ERROR: ssc_dma_flags failed: %d\n", ret);
+      i2serr("ERROR: ssc_dma_flags failed: %d\n", ret);
       return 0;
     }
 
@@ -2211,7 +2192,7 @@ static int ssc_receive(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
 #endif
 
   DEBUGASSERT(priv && apb && ((uintptr_t)apb->samp & priv->align) == 0);
-  i2svdbg("apb=%p nmaxbytes=%d arg=%p timeout=%d\n",
+  i2sinfo("apb=%p nmaxbytes=%d arg=%p timeout=%d\n",
           apb, apb->nmaxbytes, arg, timeout);
 
   ssc_init_buffer(apb->samp, apb->nmaxbytes);
@@ -2230,7 +2211,7 @@ static int ssc_receive(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
 
   if (!priv->rxenab)
     {
-      i2sdbg("ERROR: SSC%d has no receiver\n", priv->sscno);
+      i2serr("ERROR: SSC%d has no receiver\n", priv->sscno);
       ret = -EAGAIN;
       goto errout_with_exclsem;
     }
@@ -2269,7 +2250,7 @@ errout_with_exclsem:
   return ret;
 
 #else
-  i2sdbg("ERROR: SSC%d has no receiver\n", priv->sscno);
+  i2serr("ERROR: SSC%d has no receiver\n", priv->sscno);
   UNUSED(priv);
   return -ENOSYS;
 #endif
@@ -2343,7 +2324,7 @@ static uint32_t ssc_txdatawidth(struct i2s_dev_s *dev, int bits)
   ret = ssc_checkwidth(priv, bits);
   if (ret < 0)
     {
-      i2sdbg("ERROR: ssc_checkwidth failed: %d\n", ret);
+      i2serr("ERROR: ssc_checkwidth failed: %d\n", ret);
       return 0;
     }
 
@@ -2352,7 +2333,7 @@ static uint32_t ssc_txdatawidth(struct i2s_dev_s *dev, int bits)
   ret = ssc_dma_flags(priv, &dmaflags);
   if (ret < 0)
     {
-      i2sdbg("ERROR: ssc_dma_flags failed: %d\n", ret);
+      i2serr("ERROR: ssc_dma_flags failed: %d\n", ret);
       return 0;
     }
 
@@ -2426,7 +2407,7 @@ static int ssc_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
    */
 
   DEBUGASSERT(priv && apb);
-  i2svdbg("apb=%p nbytes=%d arg=%p timeout=%d\n",
+  i2sinfo("apb=%p nbytes=%d arg=%p timeout=%d\n",
           apb, apb->nbytes - apb->curbyte, arg, timeout);
 
   ssc_dump_buffer("Sending", &apb->samp[apb->curbyte],
@@ -2447,7 +2428,7 @@ static int ssc_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
 
   if (!priv->txenab)
     {
-      i2sdbg("ERROR: SSC%d has no transmitter\n", priv->sscno);
+      i2serr("ERROR: SSC%d has no transmitter\n", priv->sscno);
       ret = -EAGAIN;
       goto errout_with_exclsem;
     }
@@ -2486,7 +2467,7 @@ errout_with_exclsem:
   return ret;
 
 #else
-  i2sdbg("ERROR: SSC%d has no transmitter\n", priv->sscno);
+  i2serr("ERROR: SSC%d has no transmitter\n", priv->sscno);
   UNUSED(priv);
   return -ENOSYS;
 #endif
@@ -2540,7 +2521,7 @@ static int ssc_rx_configure(struct sam_ssc_s *priv)
 
     case SSC_CLKSRC_NONE: /* No clock */
     default:
-      i2sdbg("ERROR:  No receiver clock\n");
+      i2serr("ERROR:  No receiver clock\n");
       return -EINVAL;
     }
 
@@ -2561,7 +2542,7 @@ static int ssc_rx_configure(struct sam_ssc_s *priv)
       break;
 
     default:
-      i2sdbg("ERROR: Invalid clock output selection\n");
+      i2serr("ERROR: Invalid clock output selection\n");
       return -EINVAL;
     }
 
@@ -2665,7 +2646,7 @@ static int ssc_tx_configure(struct sam_ssc_s *priv)
 
     case SSC_CLKSRC_NONE: /* No clock */
     default:
-      i2sdbg("ERROR:  No transmitter clock\n");
+      i2serr("ERROR:  No transmitter clock\n");
       return -EINVAL;
     }
 
@@ -2686,7 +2667,7 @@ static int ssc_tx_configure(struct sam_ssc_s *priv)
       break;
 
     default:
-      i2sdbg("ERROR: Invalid clock output selection\n");
+      i2serr("ERROR: Invalid clock output selection\n");
       return -EINVAL;
     }
 
@@ -2906,7 +2887,7 @@ static void ssc_clocking(struct sam_ssc_s *priv)
 
   sam_enableperiph1(priv->pid);
 
-  i2svdbg("PCSR1=%08x PCR=%08x CMR=%08x\n",
+  i2sinfo("PCSR1=%08x PCR=%08x CMR=%08x\n",
           getreg32(SAM_PMC_PCSR1), regval,
           ssc_getreg(priv, SAM_SSC_CMR_OFFSET));
 }
@@ -2945,7 +2926,7 @@ static int ssc_dma_flags(struct sam_ssc_s *priv, uint32_t *dmaflags)
       break;
 
     default:
-      i2sdbg("ERROR: Unsupported data width: %d\n", priv->datalen);
+      i2serr("ERROR: Unsupported data width: %d\n", priv->datalen);
       return -ENOSYS;
     }
 
@@ -2978,7 +2959,7 @@ static int ssc_dma_allocate(struct sam_ssc_s *priv)
   ret = ssc_dma_flags(priv, &dmaflags);
   if (ret < 0)
     {
-      i2sdbg("ERROR: ssc_dma_flags failed: %d\n", ret);
+      i2serr("ERROR: ssc_dma_flags failed: %d\n", ret);
       return ret;
     }
 
@@ -2992,7 +2973,7 @@ static int ssc_dma_allocate(struct sam_ssc_s *priv)
       priv->rx.dma = sam_dmachannel(0, dmaflags);
       if (!priv->rx.dma)
         {
-          i2sdbg("ERROR: Failed to allocate the RX DMA channel\n");
+          i2serr("ERROR: Failed to allocate the RX DMA channel\n");
           goto errout;
         }
 
@@ -3001,7 +2982,7 @@ static int ssc_dma_allocate(struct sam_ssc_s *priv)
       priv->rx.dog = wd_create();
       if (!priv->rx.dog)
         {
-          i2sdbg("ERROR: Failed to create the RX DMA watchdog\n");
+          i2serr("ERROR: Failed to create the RX DMA watchdog\n");
           goto errout;
         }
     }
@@ -3015,7 +2996,7 @@ static int ssc_dma_allocate(struct sam_ssc_s *priv)
       priv->tx.dma = sam_dmachannel(0, dmaflags);
       if (!priv->tx.dma)
         {
-          i2sdbg("ERROR: Failed to allocate the TX DMA channel\n");
+          i2serr("ERROR: Failed to allocate the TX DMA channel\n");
           goto errout;
         }
 
@@ -3024,7 +3005,7 @@ static int ssc_dma_allocate(struct sam_ssc_s *priv)
       priv->tx.dog = wd_create();
       if (!priv->tx.dog)
         {
-          i2sdbg("ERROR: Failed to create the TX DMA watchdog\n");
+          i2serr("ERROR: Failed to create the TX DMA watchdog\n");
           goto errout;
         }
     }
@@ -3231,7 +3212,7 @@ static void ssc0_configure(struct sam_ssc_s *priv)
 
   priv->base    = SAM_SSC0_BASE;
   priv->datalen = CONFIG_SAMV7_SSC0_DATALEN;
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   priv->align   = SAMV7_SSC0_DATAMASK;
 #endif
   priv->pid     = SAM_PID_SSC0;
@@ -3372,7 +3353,7 @@ static void ssc1_configure(struct sam_ssc_s *priv)
 
   priv->base    = SAM_SSC1_BASE;
   priv->datalen = CONFIG_SAMV7_SSC1_DATALEN;
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   priv->align   = SAMV7_SSC1_DATAMASK;
 #endif
   priv->pid     = SAM_PID_SSC1;
@@ -3405,7 +3386,7 @@ struct i2s_dev_s *sam_ssc_initialize(int port)
 
   /* The support SAM parts have only a single SSC port */
 
-  i2svdbg("port: %d\n", port);
+  i2sinfo("port: %d\n", port);
 
   /* Allocate a new state structure for this chip select.  NOTE that there
    * is no protection if the same chip select is used in two different
@@ -3415,7 +3396,7 @@ struct i2s_dev_s *sam_ssc_initialize(int port)
   priv = (struct sam_ssc_s *)zalloc(sizeof(struct sam_ssc_s));
   if (!priv)
     {
-      i2sdbg("ERROR: Failed to allocate a chip select structure\n");
+      i2serr("ERROR: Failed to allocate a chip select structure\n");
       return NULL;
     }
 
@@ -3449,7 +3430,7 @@ struct i2s_dev_s *sam_ssc_initialize(int port)
   else
 #endif /* CONFIG_SAMV7_SSC1 */
     {
-      i2sdbg("ERROR:  Unsupported I2S port: %d\n", port);
+      i2serr("ERROR:  Unsupported I2S port: %d\n", port);
       goto errout_with_alloc;
     }
 
@@ -3470,7 +3451,7 @@ struct i2s_dev_s *sam_ssc_initialize(int port)
   ret = ssc_rx_configure(priv);
   if (ret < 0)
     {
-      i2sdbg("ERROR: Failed to configure the receiver: %d\n", ret);
+      i2serr("ERROR: Failed to configure the receiver: %d\n", ret);
       goto errout_with_clocking;
     }
 
@@ -3479,7 +3460,7 @@ struct i2s_dev_s *sam_ssc_initialize(int port)
   ret = ssc_tx_configure(priv);
   if (ret < 0)
     {
-      i2sdbg("ERROR: Failed to configure the transmitter: %d\n", ret);
+      i2serr("ERROR: Failed to configure the transmitter: %d\n", ret);
       goto errout_with_clocking;
     }
 

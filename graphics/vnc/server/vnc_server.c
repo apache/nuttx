@@ -48,10 +48,14 @@
 #include <errno.h>
 
 #if defined(CONFIG_VNCSERVER_DEBUG) && !defined(CONFIG_DEBUG_GRAPHICS)
-#  undef  CONFIG_DEBUG
-#  undef  CONFIG_DEBUG_VERBOSE
-#  define CONFIG_DEBUG          1
-#  define CONFIG_DEBUG_VERBOSE  1
+#  undef  CONFIG_DEBUG_FEATURES
+#  undef  CONFIG_DEBUG_ERROR
+#  undef  CONFIG_DEBUG_WARN
+#  undef  CONFIG_DEBUG_INFO
+#  define CONFIG_DEBUG_FEATURES 1
+#  define CONFIG_DEBUG_ERROR    1
+#  define CONFIG_DEBUG_WARN     1
+#  define CONFIG_DEBUG_INFO     1
 #  define CONFIG_DEBUG_GRAPHICS 1
 #endif
 #include <debug.h>
@@ -161,7 +165,7 @@ static int vnc_connect(FAR struct vnc_session_s *session, int port)
   struct sockaddr_in addr;
   int ret;
 
-  gvdbg("Connecting display %d\n", session->display);
+  ginfo("Connecting display %d\n", session->display);
 
   /* Create a listening socket */
 
@@ -197,7 +201,7 @@ static int vnc_connect(FAR struct vnc_session_s *session, int port)
 
   /* Connect to the client */
 
-  gvdbg("Accepting connection for Display %d\n", session->display);
+  ginfo("Accepting connection for Display %d\n", session->display);
 
   ret = psock_accept(&session->listen, NULL, NULL, &session->connect);
   if (ret < 0)
@@ -206,7 +210,7 @@ static int vnc_connect(FAR struct vnc_session_s *session, int port)
       goto errout_with_listener;
     }
 
-  gvdbg("Display %d connected\n", session->display);
+  ginfo("Display %d connected\n", session->display);
   session->state = VNCSERVER_CONNECTED;
   return OK;
 
@@ -244,20 +248,28 @@ int vnc_server(int argc, FAR char *argv[])
 
   if (argc != 2)
     {
-      gdbg("ERROR: Unexpected number of arguments: %d\n", argc);
+      /* In this case the start-up logic will probably hang, waiting for the
+       * display-related semaphore to be set.
+       */
+
+      gerr("ERROR: Unexpected number of arguments: %d\n", argc);
       ret = -EINVAL;
-      goto errout_with_post;
+      goto errout_with_hang;
     }
 
   display = atoi(argv[1]);
   if (display < 0 || display >= RFB_MAX_DISPLAYS)
     {
-      gdbg("ERROR: Invalid display number: %d\n", display);
+      /* In this case the start-up logic will probably hang, waiting for the
+       * display-related semaphore to be set.
+       */
+
+      gerr("ERROR: Invalid display number: %d\n", display);
       ret = -EINVAL;
-      goto errout_with_post;
+      goto errout_with_hang;
     }
 
-  gvdbg("Server started for Display %d\n", display);
+  ginfo("Server started for Display %d\n", display);
 
   /* Allocate the framebuffer memory.  We rely on the fact that
    * the KMM allocator will align memory to 32-bits or better.
@@ -266,7 +278,7 @@ int vnc_server(int argc, FAR char *argv[])
   fb = (FAR uint8_t *)kmm_zalloc(RFB_SIZE);
   if (fb == NULL)
     {
-      gdbg("ERROR: Failed to allocate framebuffer memory: %lu KB\n",
+      gerr("ERROR: Failed to allocate framebuffer memory: %lu KB\n",
            (unsigned long)(RFB_SIZE / 1024));
       ret = -ENOMEM;
       goto errout_with_post;
@@ -277,7 +289,7 @@ int vnc_server(int argc, FAR char *argv[])
   session = kmm_zalloc(sizeof(struct vnc_session_s));
   if (session == NULL)
     {
-      gdbg("ERROR: Failed to allocate session\n");
+      gerr("ERROR: Failed to allocate session\n");
       ret = -ENOMEM;
       goto errout_with_fb;
     }
@@ -310,7 +322,7 @@ int vnc_server(int argc, FAR char *argv[])
       ret = vnc_connect(session, RFB_DISPLAY_PORT(display));
       if (ret >= 0)
         {
-          gvdbg("New VNC connection\n");
+          ginfo("New VNC connection\n");
 
           /* Perform the VNC initialization sequence after the client has
            * sucessfully connected to the server.  Negotiate security,
@@ -320,7 +332,7 @@ int vnc_server(int argc, FAR char *argv[])
           ret = vnc_negotiate(session);
           if (ret < 0)
             {
-              gdbg("ERROR: Failed to negotiate security/framebuffer: %d\n",
+              gerr("ERROR: Failed to negotiate security/framebuffer: %d\n",
                    ret);
               continue;
             }
@@ -332,7 +344,7 @@ int vnc_server(int argc, FAR char *argv[])
           ret = vnc_start_updater(session);
           if (ret < 0)
             {
-              gdbg("ERROR: Failed to start updater thread: %d\n", ret);
+              gerr("ERROR: Failed to start updater thread: %d\n", ret);
               continue;
             }
 
@@ -350,7 +362,7 @@ int vnc_server(int argc, FAR char *argv[])
            */
 
           ret = vnc_receiver(session);
-          gvdbg("Session terminated with %d\n", ret);
+          ginfo("Session terminated with %d\n", ret);
           UNUSED(ret);
 
           /* Stop the VNC updater thread. */
@@ -358,7 +370,7 @@ int vnc_server(int argc, FAR char *argv[])
           ret = vnc_stop_updater(session);
           if (ret < 0)
             {
-              gdbg("ERROR: Failed to stop updater thread: %d\n", ret);
+              gerr("ERROR: Failed to stop updater thread: %d\n", ret);
             }
         }
     }
@@ -369,5 +381,7 @@ errout_with_fb:
 errout_with_post:
   g_fbstartup[display].result = ret;
   sem_post(&g_fbstartup[display].fbconnect);
+
+errout_with_hang:
   return EXIT_FAILURE;
 }

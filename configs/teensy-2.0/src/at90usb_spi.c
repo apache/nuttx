@@ -80,29 +80,6 @@
 #define TEENSY_CD (1 << 4)
 #define TEENSY_WP (1 << 5)
 
-/* The following enable debug output from this file (needs CONFIG_DEBUG too).
- *
- * CONFIG_SPI_DEBUG - Define to enable basic SSP debug
- * CONFIG_SPI_VERBOSE - Define to enable verbose SSP debug
- */
-
-#ifdef CONFIG_SPI_DEBUG
-#  define sspdbg  lldbg
-#  ifdef CONFIG_SPI_VERBOSE
-#    define sspvdbg lldbg
-#  else
-#    define sspvdbg(x...)
-#  endif
-#else
-#  undef CONFIG_SPI_VERBOSE
-#  define sspdbg(x...)
-#  define sspvdbg(x...)
-#endif
-
-/************************************************************************************
- * Private Functions
- ************************************************************************************/
-
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
@@ -161,7 +138,7 @@ void weak_function at90usb_spidev_initialize(void)
 
 void  avr_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
-  sspdbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 
   /* Assert/de-assert the CS pin to the card */
 
@@ -194,7 +171,7 @@ uint8_t avr_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
       ret |= SPI_STATUS_WRPROTECTED;
     }
 
-  sspdbg("Returning %02x\n", ret);
+  spiinfo("Returning %02x\n", ret);
   return ret;
 }
 

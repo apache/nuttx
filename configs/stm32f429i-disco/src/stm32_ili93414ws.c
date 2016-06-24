@@ -132,16 +132,6 @@
 #  define ILI93414WS_SPI
 #endif
 
-/* Debug option */
-
-#ifdef CONFIG_DEBUG_LCD
-#  define lcddbg       dbg
-#  define lcdvdbg      vdbg
-#else
-#  define lcddbg(x...)
-#  define lcdvdbg(x...)
-#endif
-
 /****************************************************************************
  * Private Type Definition
  ****************************************************************************/
@@ -503,7 +493,6 @@ static int stm32_ili93414ws_sendblock(FAR struct ili93414ws_lcd_s *lcd,
   return OK;
 }
 
-
 /****************************************************************************
  * Name: stm32_ili93414ws_recvword
  *
@@ -587,7 +576,7 @@ static uint16_t stm32_ili93414ws_recvword(void)
         }
     }
 
-  dbg("Timeout during receiving pixel word\n");
+  lcdinfo("Timeout during receiving pixel word\n");
 
   return 0;
 }
@@ -1021,7 +1010,7 @@ static int stm32_ili93414ws_sendcmd(
 
   stm32_ili93414ws_set8bitmode(priv);
 
-  lcdvdbg("cmd=%04x\n", bw);
+  lcdinfo("cmd=%04x\n", bw);
   stm32_ili93414ws_cmddata(lcd, true);
   ret = stm32_ili93414ws_sendblock(priv, &bw, 1);
   stm32_ili93414ws_cmddata(lcd, false);
@@ -1055,7 +1044,7 @@ static int stm32_ili93414ws_sendparam(FAR struct ili9341_lcd_s *lcd,
 
   stm32_ili93414ws_set8bitmode(priv);
 
-  lcdvdbg("param=%04x\n", bw);
+  lcdinfo("param=%04x\n", bw);
   return stm32_ili93414ws_sendblock(priv, &bw, 1);
 }
 
@@ -1081,7 +1070,7 @@ static int stm32_ili93414ws_sendgram(FAR struct ili9341_lcd_s *lcd,
 {
   FAR struct ili93414ws_lcd_s *priv = (FAR struct ili93414ws_lcd_s *)lcd;
 
-  lcdvdbg("wd=%p, nwords=%d\n", wd, nwords);
+  lcdinfo("wd=%p, nwords=%d\n", wd, nwords);
 
   /* Set to 16-bit mode transfer mode, spi device is in disabled state */
 
@@ -1117,7 +1106,7 @@ static int stm32_ili93414ws_recvparam(FAR struct ili9341_lcd_s *lcd,
   stm32_ili93414ws_set8bitmode(priv);
 #endif
 
-  lcdvdbg("param=%04x\n", param);
+  lcdinfo("param=%04x\n", param);
   return stm32_ili93414ws_recvblock(priv, (uint16_t*)param, 1);
 }
 
@@ -1143,7 +1132,7 @@ static int stm32_ili93414ws_recvgram(FAR struct ili9341_lcd_s *lcd,
 {
   FAR struct ili93414ws_lcd_s *priv = (FAR struct ili93414ws_lcd_s *)lcd;
 
-  lcdvdbg("wd=%p, nwords=%d\n", wd, nwords);
+  lcdinfo("wd=%p, nwords=%d\n", wd, nwords);
 
   /* Set to 16-bit mode in disabled state */
 
@@ -1174,9 +1163,9 @@ FAR struct ili9341_lcd_s *stm32_ili93414ws_initialize(void)
   FAR struct spi_dev_s *spi;
   FAR struct ili93414ws_lcd_s *priv = &g_lcddev;
 
-  lcddbg("initialize ili9341 4-wire serial subdriver\n");
+  lcdinfo("initialize ili9341 4-wire serial subdriver\n");
 
-  lcdvdbg("initialize spi device: %d\n", ILI93414WS_SPI_DEVICE);
+  lcdinfo("initialize spi device: %d\n", ILI93414WS_SPI_DEVICE);
   spi = stm32_spi5initialize();
 
   if (spi)
@@ -1206,7 +1195,7 @@ FAR struct ili9341_lcd_s *stm32_ili93414ws_initialize(void)
   uint32_t    regval;
   FAR struct ili93414ws_lcd_s *priv = &g_lcddev;
 
-  lcddbg("initialize ili9341 4-wire serial subdriver\n");
+  lcdinfo("initialize ili9341 4-wire serial subdriver\n");
 
   /* Enable spi bus */
 
@@ -1236,7 +1225,7 @@ FAR struct ili9341_lcd_s *stm32_ili93414ws_initialize(void)
 
   /* Configure to bidirectional transfer mode */
 
-  lcdvdbg("Configure spi device %d to bidirectional transfer mode\n",
+  lcdinfo("Configure spi device %d to bidirectional transfer mode\n",
             ILI93414WS_SPI_DEVICE);
 
   stm32_ili93414ws_spiconfig(&priv->dev);

@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/arm/up_dataabort.c
  *
- *   Copyright (C) 2007-2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2011, 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,17 +39,6 @@
 
 #include <nuttx/config.h>
 
-/* Output debug info if stack dump is selected -- even if debug is not
- * selected.
- */
-
-#ifdef CONFIG_ARCH_STACKDUMP
-# undef  CONFIG_DEBUG
-# undef  CONFIG_DEBUG_VERBOSE
-# define CONFIG_DEBUG 1
-# define CONFIG_DEBUG_VERBOSE 1
-#endif
-
 #include <stdint.h>
 #include <debug.h>
 
@@ -62,18 +51,6 @@
 #  include <nuttx/page.h>
 #  include "arm.h"
 #endif
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -112,7 +89,6 @@ void up_dataabort(uint32_t *regs, uint32_t far, uint32_t fsr)
    * for register dumps and possibly context switching.
    */
 
-
   savestate    = (uint32_t *)CURRENT_REGS;
 #endif
   CURRENT_REGS = regs;
@@ -131,7 +107,7 @@ void up_dataabort(uint32_t *regs, uint32_t far, uint32_t fsr)
    * fatal error.
    */
 
-  pglldbg("FSR: %08x FAR: %08x\n", fsr, far);
+  pginfo("FSR: %08x FAR: %08x\n", fsr, far);
   if ((fsr & FSR_MASK) != FSR_PAGE)
     {
       goto segfault;
@@ -142,7 +118,7 @@ void up_dataabort(uint32_t *regs, uint32_t far, uint32_t fsr)
    * (It has not yet been saved in the register context save area).
    */
 
-  pgllvdbg("VBASE: %08x VEND: %08x\n", PG_PAGED_VBASE, PG_PAGED_VEND);
+  pginfo("VBASE: %08x VEND: %08x\n", PG_PAGED_VBASE, PG_PAGED_VEND);
   if (far < PG_PAGED_VBASE || far >= PG_PAGED_VEND)
     {
       goto segfault;
@@ -180,7 +156,7 @@ void up_dataabort(uint32_t *regs, uint32_t far, uint32_t fsr)
 
 segfault:
 #endif
-  lldbg("Data abort. PC: %08x FAR: %08x FSR: %08x\n", regs[REG_PC], far, fsr);
+  _alert("Data abort. PC: %08x FAR: %08x FSR: %08x\n", regs[REG_PC], far, fsr);
   PANIC();
 }
 
@@ -196,7 +172,7 @@ void up_dataabort(uint32_t *regs)
 
   /* Crash -- possibly showing diagnost debug information. */
 
-  lldbg("Data abort. PC: %08x\n", regs[REG_PC]);
+  _alert("Data abort. PC: %08x\n", regs[REG_PC]);
   PANIC();
 }
 

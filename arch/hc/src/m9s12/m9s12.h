@@ -294,7 +294,7 @@ void hcs12_gpioirqdisable(int irq);
  *
  ************************************************************************************/
 
-#ifdef CONFIG_DEBUG_GPIO
+#ifdef CONFIG_DEBUG_GPIO_INFO
 int hcs12_dumpgpio(uint16_t pinset, const char *msg);
 #else
 #  define hcs12_dumpgpio(p,m)

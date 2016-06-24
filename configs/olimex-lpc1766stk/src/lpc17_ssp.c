@@ -74,28 +74,9 @@
 #endif
 
 /* Debug ********************************************************************/
-/* The following enable debug output from this file (needs CONFIG_DEBUG too).
- *
- * CONFIG_SSP_DEBUG - Define to enable basic SSP debug
- * CONFIG_SSP_VERBOSE - Define to enable verbose SSP debug
- */
-
-#ifdef CONFIG_SSP_DEBUG
-#  define sspdbg  lldbg
-#  ifdef CONFIG_SSP_VERBOSE
-#    define sspvdbg lldbg
-#  else
-#    define sspvdbg(x...)
-#  endif
-#else
-#  undef CONFIG_SSP_VERBOSE
-#  define sspdbg(x...)
-#  define sspvdbg(x...)
-#endif
-
 /* Dump GPIO registers */
 
-#ifdef CONFIG_SSP_VERBOSE
+#ifdef CONFIG_DEBUG_GPIO_INFO
 #  define ssp_dumpssp0gpio(m) lpc17_dumpgpio(LPC1766STK_LCD_CS, m)
 #  define ssp_dumpssp1gpio(m) lpc17_dumpgpio(LPC1766STK_MMC_CS, m)
 #else
@@ -284,7 +265,7 @@ void weak_function lpc1766stk_sspdev_initialize(void)
 #ifdef CONFIG_LPC17_SSP0
 void  lpc17_ssp0select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
-  sspdbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
   if (devid == SPIDEV_DISPLAY)
     {
       /* Assert/de-assert the CS pin to the card */
@@ -297,7 +278,7 @@ void  lpc17_ssp0select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool sel
 
 uint8_t lpc17_ssp0status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 {
-  sspdbg("Returning nothing\n");
+  spiinfo("Returning nothing\n");
   return 0;
 }
 #endif
@@ -305,7 +286,7 @@ uint8_t lpc17_ssp0status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 #ifdef CONFIG_LPC17_SSP1
 void  lpc17_ssp1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
-  sspdbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
   if (devid == SPIDEV_MMCSD)
     {
       /* Assert/de-assert the CS pin to the card */
@@ -318,7 +299,7 @@ void  lpc17_ssp1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool sel
 
 uint8_t lpc17_ssp1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 {
-  sspdbg("Returning SPI_STATUS_PRESENT\n");
+  spiinfo("Returning SPI_STATUS_PRESENT\n");
   return SPI_STATUS_PRESENT;
 }
 #endif

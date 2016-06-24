@@ -58,10 +58,6 @@
 #if defined(CONFIG_TIMER) && defined(CONFIG_TIVA_TIMER)
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
  * Private Types
  ****************************************************************************/
 /* This structure provides the private representation of the "lower-half"
@@ -200,7 +196,7 @@ static uint32_t tiva_ticks2usec(struct tiva_lowerhalf_s *priv, uint32_t ticks)
 
 static void tiva_timeout(struct tiva_lowerhalf_s *priv, uint32_t timeout)
 {
-  timvdbg("Entry: timeout=%d\n", timeout);
+  tmrinfo("Entry: timeout=%d\n", timeout);
 
   /* Save the desired timeout value */
 
@@ -215,7 +211,7 @@ static void tiva_timeout(struct tiva_lowerhalf_s *priv, uint32_t timeout)
   timeout  = tiva_ticks2usec(priv, priv->clkticks);
   priv->adjustment = priv->timeout - timeout;
 
-  timvdbg("clkin=%d clkticks=%d timeout=%d, adjustment=%d\n",
+  tmrinfo("clkin=%d clkticks=%d timeout=%d, adjustment=%d\n",
           priv->clkin, priv->clkticks, priv->timeout, priv->adjustment);
 }
 
@@ -237,7 +233,7 @@ static void tiva_timer_handler(TIMER_HANDLE handle, void *arg, uint32_t status)
 {
   struct tiva_lowerhalf_s *priv = (struct tiva_lowerhalf_s *)arg;
 
-  timvdbg("Entry: status=%08x\n", status);
+  tmrinfo("Entry: status=%08x\n", status);
   DEBUGASSERT(arg && status);
 
   /* Check if the timeout interrupt is pending */
@@ -276,7 +272,7 @@ static void tiva_timer_handler(TIMER_HANDLE handle, void *arg, uint32_t status)
           /* No handler or the handler returned false.. stop the timer */
 
           tiva_timer32_stop(priv->handle);
-          timvdbg("Stopped\n");
+          tmrinfo("Stopped\n");
         }
     }
 }
@@ -300,7 +296,7 @@ static int tiva_start(struct timer_lowerhalf_s *lower)
 {
   struct tiva_lowerhalf_s *priv = (struct tiva_lowerhalf_s *)lower;
 
-  timvdbg("Entry: started %d\n", priv->started);
+  tmrinfo("Entry: started %d\n", priv->started);
 
   /* Has the timer already been started? */
 
@@ -337,7 +333,7 @@ static int tiva_stop(struct timer_lowerhalf_s *lower)
 {
   struct tiva_lowerhalf_s *priv = (struct tiva_lowerhalf_s *)lower;
 
-  timvdbg("Entry: started %d\n", priv->started);
+  tmrinfo("Entry: started %d\n", priv->started);
 
   /* Has the timer already been started? */
 
@@ -377,7 +373,7 @@ static int tiva_getstatus(struct timer_lowerhalf_s *lower,
   struct tiva_lowerhalf_s *priv = (struct tiva_lowerhalf_s *)lower;
   uint32_t remaining;
 
-  timvdbg("Entry\n");
+  tmrinfo("Entry\n");
   DEBUGASSERT(priv);
 
   /* Return the status bit */
@@ -402,9 +398,9 @@ static int tiva_getstatus(struct timer_lowerhalf_s *lower,
   remaining = tiva_timer32_remaining(priv->handle);
   status->timeleft = tiva_ticks2usec(priv, remaining);
 
-  timvdbg("  flags    : %08x\n", status->flags);
-  timvdbg("  timeout  : %d\n",   status->timeout);
-  timvdbg("  timeleft : %d\n",   status->timeleft);
+  tmrinfo("  flags    : %08x\n", status->flags);
+  tmrinfo("  timeout  : %d\n",   status->timeout);
+  tmrinfo("  timeleft : %d\n",   status->timeleft);
   return OK;
 }
 
@@ -435,7 +431,7 @@ static int tiva_settimeout(struct timer_lowerhalf_s *lower, uint32_t timeout)
       return -EPERM;
     }
 
-  timvdbg("Entry: timeout=%d\n", timeout);
+  tmrinfo("Entry: timeout=%d\n", timeout);
 
   /* Calculate the the new time settings */
 
@@ -476,7 +472,7 @@ static tccb_t tiva_sethandler(struct timer_lowerhalf_s *lower,
   flags = enter_critical_section();
 
   DEBUGASSERT(priv);
-  timvdbg("Entry: handler=%p\n", handler);
+  tmrinfo("Entry: handler=%p\n", handler);
 
   /* Get the old handler return value */
 
@@ -516,7 +512,7 @@ static int tiva_ioctl(struct timer_lowerhalf_s *lower, int cmd,
   int ret = -ENOTTY;
 
   DEBUGASSERT(priv);
-  timvdbg("Entry: cmd=%d arg=%ld\n", cmd, arg);
+  tmrinfo("Entry: cmd=%d arg=%ld\n", cmd, arg);
 
   return ret;
 }
@@ -557,7 +553,7 @@ int tiva_timer_initialize(FAR const char *devpath,
   void *drvr;
   int ret;
 
-  timvdbg("\n");
+  tmrinfo("\n");
   DEBUGASSERT(devpath);
 
   /* Allocate an instance of the lower half state structure */
@@ -565,7 +561,7 @@ int tiva_timer_initialize(FAR const char *devpath,
   priv = (struct tiva_lowerhalf_s *)kmm_zalloc(sizeof(struct tiva_lowerhalf_s));
   if (!priv)
     {
-      timdbg("ERROR: Failed to allocate driver structure\n");
+      tmrerr("ERROR: Failed to allocate driver structure\n");
       return -ENOMEM;
     }
 
@@ -577,7 +573,7 @@ int tiva_timer_initialize(FAR const char *devpath,
 #else
   if (config->cmn.alternate)
     {
-      timdbg("ERROR: Alternate clock unsupported on TM4C123 architecture\n");
+      tmrerr("ERROR: Alternate clock unsupported on TM4C123 architecture\n");
       return -ENOMEM;
     }
   else
@@ -599,7 +595,7 @@ int tiva_timer_initialize(FAR const char *devpath,
   priv->handle = tiva_gptm_configure((const struct tiva_gptmconfig_s *)&priv->config);
   if (!priv->handle)
     {
-      timdbg("ERROR: Failed to create timer handle\n");
+      tmrerr("ERROR: Failed to create timer handle\n");
       ret = -EINVAL;
       goto errout_with_alloc;
     }

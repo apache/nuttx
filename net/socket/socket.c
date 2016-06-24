@@ -248,7 +248,7 @@ int psock_socket(int domain, int type, int protocol, FAR struct socket *psock)
 #endif
   bool dgramok  = false;
   int ret;
-  int err;
+  int errcode;
 
   /* Only PF_INET, PF_INET6 or PF_PACKET domains supported */
 
@@ -284,7 +284,7 @@ int psock_socket(int domain, int type, int protocol, FAR struct socket *psock)
 #endif
 
     default:
-      err = EAFNOSUPPORT;
+      errcode = EAFNOSUPPORT;
       goto errout;
     }
 
@@ -305,7 +305,7 @@ int psock_socket(int domain, int type, int protocol, FAR struct socket *psock)
           {
             if ((protocol != 0 && protocol != IPPROTO_TCP) || !dgramok)
               {
-                err = EPROTONOSUPPORT;
+                errcode = EPROTONOSUPPORT;
                 goto errout;
               }
           }
@@ -318,7 +318,7 @@ int psock_socket(int domain, int type, int protocol, FAR struct socket *psock)
           {
             if (protocol != 0 || !dgramok)
               {
-                err = EPROTONOSUPPORT;
+                errcode = EPROTONOSUPPORT;
                 goto errout;
               }
           }
@@ -336,7 +336,7 @@ int psock_socket(int domain, int type, int protocol, FAR struct socket *psock)
           {
             if ((protocol != 0 && protocol != IPPROTO_UDP) || !dgramok)
               {
-                err = EPROTONOSUPPORT;
+                errcode = EPROTONOSUPPORT;
                 goto errout;
               }
           }
@@ -349,7 +349,7 @@ int psock_socket(int domain, int type, int protocol, FAR struct socket *psock)
           {
             if (protocol != 0 || !dgramok)
               {
-                err = EPROTONOSUPPORT;
+                errcode = EPROTONOSUPPORT;
                 goto errout;
               }
           }
@@ -362,7 +362,7 @@ int psock_socket(int domain, int type, int protocol, FAR struct socket *psock)
       case SOCK_RAW:
         if (dgramok)
           {
-            err = EPROTONOSUPPORT;
+            errcode = EPROTONOSUPPORT;
             goto errout;
           }
 
@@ -370,7 +370,7 @@ int psock_socket(int domain, int type, int protocol, FAR struct socket *psock)
 #endif
 
       default:
-        err = EPROTONOSUPPORT;
+        errcode = EPROTONOSUPPORT;
         goto errout;
     }
 
@@ -389,7 +389,7 @@ int psock_socket(int domain, int type, int protocol, FAR struct socket *psock)
    * not actually be initialized until the socket is connected.
    */
 
-  err = ENOMEM; /* Assume failure to allocate connection instance */
+  errcode = ENOMEM; /* Assume failure to allocate connection instance */
   switch (type)
     {
 #if defined(CONFIG_NET_TCP) || defined(CONFIG_NET_LOCAL_STREAM)
@@ -423,7 +423,7 @@ int psock_socket(int domain, int type, int protocol, FAR struct socket *psock)
             {
               /* Failed to reserve a connection structure */
 
-              err = -ret;
+              errcode = -ret;
               goto errout;
             }
         }
@@ -461,7 +461,7 @@ int psock_socket(int domain, int type, int protocol, FAR struct socket *psock)
             {
               /* Failed to reserve a connection structure */
 
-              err = -ret;
+              errcode = -ret;
               goto errout;
             }
         }
@@ -476,7 +476,7 @@ int psock_socket(int domain, int type, int protocol, FAR struct socket *psock)
             {
               /* Failed to reserve a connection structure */
 
-              err = -ret;
+              errcode = -ret;
               goto errout;
             }
         }
@@ -490,7 +490,7 @@ int psock_socket(int domain, int type, int protocol, FAR struct socket *psock)
   return OK;
 
 errout:
-  set_errno(err);
+  set_errno(errcode);
   return ERROR;
 }
 

@@ -42,8 +42,8 @@
 /* Force verbose debug on in this file only to support unit-level testing. */
 
 #ifdef CONFIG_NETDEV_PHY_DEBUG
-#  undef  CONFIG_DEBUG_VERBOSE
-#  define CONFIG_DEBUG_VERBOSE 1
+#  undef  CONFIG_DEBUG_INFO
+#  define CONFIG_DEBUG_INFO 1
 #  undef  CONFIG_DEBUG_NET
 #  define CONFIG_DEBUG_NET 1
 #endif
@@ -79,11 +79,13 @@
  */
 
 #ifdef CONFIG_NETDEV_PHY_DEBUG
-#  define phydbg    dbg
-#  define phylldbg  lldbg
+#  define phyerr    _err
+#  define phywarn   _warn
+#  define phyinfo   _info
 #else
-#  define phydbg(x...)
-#  define phylldbg(x...)
+#  define phyerr(x...)
+#  define phywarn(x...)
+#  define phyinfo(x...)
 #endif
 
 /************************************************************************************
@@ -105,7 +107,7 @@ static xcpt_t g_ethmac_handler;
 #ifdef HAVE_NETMONITOR
 static void stm32_emac0_phy_enable(bool enable)
 {
-  phydbg("enable=%d\n", enable);
+  phyinfo("enable=%d\n", enable);
   if (enable && g_ethmac_handler != NULL)
     {
       /* Attach and enable GPIO interrupt (and event) on the falling edge */
@@ -138,7 +140,7 @@ void weak_function stm32_netinitialize(void)
 #ifdef HAVE_NETMONITOR
   /* Configure the PHY interrupt GPIO */
 
-  phydbg("Configuring %08x\n", GPIO_EMAC_NINT);
+  phyinfo("Configuring %08x\n", GPIO_EMAC_NINT);
   stm32_configgpio(GPIO_EMAC_NINT);
 #endif
 
@@ -217,8 +219,8 @@ xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler, phy_enable_t *enable)
   xcpt_t oldhandler;
   irqstate_t flags;
 
-  nvdbg("%s: handler=%p\n", intf, handler);
-  phydbg("ETHMAC: devname=%s\n", STM32_ETHMAC_DEVNAME);
+  ninfo("%s: handler=%p\n", intf, handler);
+  phyinfo("ETHMAC: devname=%s\n", STM32_ETHMAC_DEVNAME);
 
   DEBUGASSERT(intf);
 
@@ -227,13 +229,13 @@ xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler, phy_enable_t *enable)
 
   if (strcmp(intf, STM32_ETHMAC_DEVNAME) == 0)
     {
-      phydbg("Select ETHMAC\n");
+      phyinfo("Select ETHMAC\n");
       g_ethmac_handler = handler;
       enabler          = stm32_emac0_phy_enable;
     }
   else
     {
-      ndbg("Unsupported interface: %s\n", intf);
+      nerr("ERROR: Unsupported interface: %s\n", intf);
       enabler          = NULL;
     }
 

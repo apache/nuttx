@@ -38,9 +38,10 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
+#include <sys/types.h>
 #include <nuttx/board.h>
 
+#include "kinetis_usbotg.h"
 #include "teensy-3x.h"
 
 /****************************************************************************
@@ -74,5 +75,13 @@
 
 int board_app_initialize(uintptr_t arg)
 {
+#ifdef CONFIG_USBDEV
+  /* Teensy is powered from usb and (bug?) only boots from being programmed, 
+   * so if usb is compiled in signal the controller driver that we're attached now.
+   */
+
+  khci_usbattach();
+#endif
+
   return OK;
 }

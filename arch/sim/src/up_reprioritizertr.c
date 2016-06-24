@@ -95,7 +95,7 @@ void up_reprioritize_rtr(struct tcb_s *tcb, uint8_t priority)
       FAR struct tcb_s *rtcb = this_task();
       bool switch_needed;
 
-      sdbg("TCB=%p PRI=%d\n", tcb, priority);
+      sinfo("TCB=%p PRI=%d\n", tcb, priority);
 
       /* Remove the tcb task from the ready-to-run list.
        * sched_removereadytorun will return true if we just
@@ -148,7 +148,7 @@ void up_reprioritize_rtr(struct tcb_s *tcb, uint8_t priority)
                */
 
               rtcb = this_task();
-              sdbg("New Active Task TCB=%p\n", rtcb);
+              sinfo("New Active Task TCB=%p\n", rtcb);
 
               /* The way that we handle signals in the simulation is kind of
                * a kludge.  This would be unsafe in a truly multi-threaded, interrupt
@@ -157,7 +157,7 @@ void up_reprioritize_rtr(struct tcb_s *tcb, uint8_t priority)
 
               if (rtcb->xcp.sigdeliver)
                 {
-                  sdbg("Delivering signals TCB=%p\n", rtcb);
+                  sinfo("Delivering signals TCB=%p\n", rtcb);
                   ((sig_deliver_t)rtcb->xcp.sigdeliver)(rtcb);
                   rtcb->xcp.sigdeliver = NULL;
                 }

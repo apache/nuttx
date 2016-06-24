@@ -102,7 +102,7 @@ static int stm32_rnginitialize()
 {
   uint32_t regval;
 
-  vdbg("Initializing RNG\n");
+  _info("Initializing RNG\n");
 
   memset(&g_rngdev, 0, sizeof(struct rng_dev_s));
 
@@ -112,7 +112,7 @@ static int stm32_rnginitialize()
     {
       /* We could not attach the ISR to the interrupt */
 
-      vdbg("Could not attach IRQ.\n");
+      _info("Could not attach IRQ.\n");
 
       return -EAGAIN;
     }

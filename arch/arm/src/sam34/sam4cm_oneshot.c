@@ -91,7 +91,7 @@ static void sam_oneshot_handler(TC_HANDLE tch, void *arg, uint32_t sr)
   oneshot_handler_t oneshot_handler;
   void *oneshot_arg;
 
-  tcllvdbg("Expired...\n");
+  tmrinfo("Expired...\n");
   DEBUGASSERT(oneshot && oneshot->handler);
 
   /* The clock was stopped, but not disabled when the RC match occurred.
@@ -148,7 +148,7 @@ int sam_oneshot_initialize(struct sam_oneshot_s *oneshot, int chan,
   uint32_t cmr;
   int ret;
 
-  tcvdbg("chan=%d resolution=%d usec\n", chan, resolution);
+  tmrinfo("chan=%d resolution=%d usec\n", chan, resolution);
   DEBUGASSERT(oneshot && resolution > 0);
 
   /* Get the TC frequency the corresponds to the requested resolution */
@@ -160,13 +160,13 @@ int sam_oneshot_initialize(struct sam_oneshot_s *oneshot, int chan,
   ret = sam_tc_divisor(frequency, &divisor, &cmr);
   if (ret < 0)
     {
-      tcdbg("ERROR: sam_tc_divisor failed: %d\n", ret);
+      tmrerr("ERROR: sam_tc_divisor failed: %d\n", ret);
       return ret;
     }
 
-  tcvdbg("frequency=%lu, divisor=%lu, cmr=%08lx\n",
-         (unsigned long)frequency, (unsigned long)divisor,
-         (unsigned long)cmr);
+  tmrinfo("frequency=%lu, divisor=%lu, cmr=%08lx\n",
+          (unsigned long)frequency, (unsigned long)divisor,
+          (unsigned long)cmr);
 
   /* Allocate the timer/counter and select its mode of operation
    *
@@ -200,7 +200,7 @@ int sam_oneshot_initialize(struct sam_oneshot_s *oneshot, int chan,
   oneshot->tch = sam_tc_allocate(chan, cmr);
   if (!oneshot->tch)
     {
-      tcdbg("ERROR: Failed to allocate timer channel %d\n", chan);
+      tmrerr("ERROR: Failed to allocate timer channel %d\n", chan);
       return -EBUSY;
     }
 
@@ -258,8 +258,8 @@ int sam_oneshot_start(struct sam_oneshot_s *oneshot, struct sam_freerun_s *freer
   uint64_t regval;
   irqstate_t flags;
 
-  tcvdbg("handler=%p arg=%p, ts=(%lu, %lu)\n",
-         handler, arg, (unsigned long)ts->tv_sec, (unsigned long)ts->tv_nsec);
+  tmrinfo("handler=%p arg=%p, ts=(%lu, %lu)\n",
+          handler, arg, (unsigned long)ts->tv_sec, (unsigned long)ts->tv_nsec);
   DEBUGASSERT(oneshot && handler && ts);
 
   /* Was the oneshot already running? */
@@ -269,7 +269,7 @@ int sam_oneshot_start(struct sam_oneshot_s *oneshot, struct sam_freerun_s *freer
     {
       /* Yes.. then cancel it */
 
-      tcvdbg("Already running... cancelling\n");
+      tmrinfo("Already running... cancelling\n");
       (void)sam_oneshot_cancel(oneshot, freerun, NULL);
     }
 
@@ -291,7 +291,7 @@ int sam_oneshot_start(struct sam_oneshot_s *oneshot, struct sam_freerun_s *freer
 
   regval = (usec * (uint64_t)sam_tc_divfreq(oneshot->tch)) / USEC_PER_SEC;
 
-  tcvdbg("usec=%llu regval=%08llx\n", usec, regval);
+  tmrinfo("usec=%llu regval=%08llx\n", usec, regval);
   DEBUGASSERT(regval <= UINT16_MAX);
 
   /* Set up to receive the callback when the interrupt occurs */
@@ -400,7 +400,7 @@ int sam_oneshot_cancel(struct sam_oneshot_s *oneshot, struct sam_freerun_s *free
    * REVISIT:  This does not appear to be the case.
    */
 
-  tcvdbg("Cancelling...\n");
+  tmrinfo("Cancelling...\n");
 
   count = sam_tc_getcounter(oneshot->tch);
   rc    = sam_tc_getregister(oneshot->tch, TC_REGC);
@@ -436,8 +436,8 @@ int sam_oneshot_cancel(struct sam_oneshot_s *oneshot, struct sam_freerun_s *free
        * oneshot timer.
        */
 
-      tcvdbg("rc=%lu count=%lu usec=%lu\n",
-             (unsigned long)rc, (unsigned long)count, (unsigned long)usec);
+      tmrinfo("rc=%lu count=%lu usec=%lu\n",
+              (unsigned long)rc, (unsigned long)count, (unsigned long)usec);
 
       /* REVISIT: I am not certain why the timer counter value sometimes
        * exceeds RC.  Might be a bug, or perhaps the counter does not stop
@@ -481,8 +481,8 @@ int sam_oneshot_cancel(struct sam_oneshot_s *oneshot, struct sam_freerun_s *free
           ts->tv_nsec = (unsigned long)nsec;
         }
 
-      tcvdbg("remaining (%lu, %lu)\n",
-             (unsigned long)ts->tv_sec, (unsigned long)ts->tv_nsec);
+      tmrinfo("remaining (%lu, %lu)\n",
+              (unsigned long)ts->tv_sec, (unsigned long)ts->tv_nsec);
     }
 
   return OK;

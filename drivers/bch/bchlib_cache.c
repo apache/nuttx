@@ -156,7 +156,7 @@ int bchlib_flushsector(FAR struct bchlib_s *bch)
       ret = inode->u.i_bops->write(inode, bch->buffer, bch->sector, 1);
       if (ret < 0)
         {
-          fdbg("Write failed: %d\n");
+          ferr("Write failed: %d\n");
         }
 
 #if defined(CONFIG_BCH_ENCRYPTION)
@@ -201,7 +201,7 @@ int bchlib_readsector(FAR struct bchlib_s *bch, size_t sector)
       ret = inode->u.i_bops->read(inode, bch->buffer, sector, 1);
       if (ret < 0)
         {
-          fdbg("Read failed: %d\n");
+          ferr("Read failed: %d\n");
         }
       bch->sector = sector;
 #if defined(CONFIG_BCH_ENCRYPTION)

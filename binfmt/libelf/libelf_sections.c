@@ -93,7 +93,7 @@ static inline int elf_sectname(FAR struct elf_loadinfo_s *loadinfo,
   shstrndx = loadinfo->ehdr.e_shstrndx;
   if (shstrndx == SHN_UNDEF)
     {
-      bdbg("No section header string table\n");
+      berr("No section header string table\n");
       return -EINVAL;
     }
 
@@ -126,7 +126,7 @@ static inline int elf_sectname(FAR struct elf_loadinfo_s *loadinfo,
         {
           if (loadinfo->filelen <= offset)
             {
-              bdbg("At end of file\n");
+              berr("At end of file\n");
               return -EINVAL;
             }
 
@@ -139,7 +139,7 @@ static inline int elf_sectname(FAR struct elf_loadinfo_s *loadinfo,
       ret = elf_read(loadinfo, buffer, readlen, offset);
       if (ret < 0)
         {
-          bdbg("Failed to read section name\n");
+          berr("Failed to read section name\n");
           return ret;
         }
 
@@ -159,7 +159,7 @@ static inline int elf_sectname(FAR struct elf_loadinfo_s *loadinfo,
       ret = elf_reallocbuffer(loadinfo, CONFIG_ELF_BUFFERINCR);
       if (ret < 0)
         {
-          bdbg("elf_reallocbuffer failed: %d\n", ret);
+          berr("elf_reallocbuffer failed: %d\n", ret);
           return ret;
         }
     }
@@ -196,7 +196,7 @@ int elf_loadshdrs(FAR struct elf_loadinfo_s *loadinfo)
 
   if (loadinfo->ehdr.e_shnum < 1)
     {
-      bdbg("No sections(?)\n");
+      berr("No sections(?)\n");
       return -EINVAL;
     }
 
@@ -205,7 +205,7 @@ int elf_loadshdrs(FAR struct elf_loadinfo_s *loadinfo)
   shdrsize = (size_t)loadinfo->ehdr.e_shentsize * (size_t)loadinfo->ehdr.e_shnum;
   if (loadinfo->ehdr.e_shoff + shdrsize > loadinfo->filelen)
     {
-      bdbg("Insufficent space in file for section header table\n");
+      berr("Insufficent space in file for section header table\n");
       return -ESPIPE;
     }
 
@@ -214,7 +214,7 @@ int elf_loadshdrs(FAR struct elf_loadinfo_s *loadinfo)
   loadinfo->shdr = (FAR FAR Elf32_Shdr *)kmm_malloc(shdrsize);
   if (!loadinfo->shdr)
     {
-      bdbg("Failed to allocate the section header table. Size: %ld\n",
+      berr("Failed to allocate the section header table. Size: %ld\n",
            (long)shdrsize);
       return -ENOMEM;
     }
@@ -225,7 +225,7 @@ int elf_loadshdrs(FAR struct elf_loadinfo_s *loadinfo)
                  loadinfo->ehdr.e_shoff);
   if (ret < 0)
     {
-      bdbg("Failed to read section header table: %d\n", ret);
+      berr("Failed to read section header table: %d\n", ret);
     }
 
   return ret;
@@ -264,13 +264,13 @@ int elf_findsection(FAR struct elf_loadinfo_s *loadinfo,
       ret  = elf_sectname(loadinfo, shdr);
       if (ret < 0)
         {
-          bdbg("elf_sectname failed: %d\n", ret);
+          berr("elf_sectname failed: %d\n", ret);
           return ret;
         }
 
       /* Check if the name of this section is 'sectname' */
 
-      bvdbg("%d. Comparing \"%s\" and .\"%s\"\n",
+      binfo("%d. Comparing \"%s\" and .\"%s\"\n",
             i, loadinfo->iobuffer, sectname);
 
       if (strcmp((FAR const char *)loadinfo->iobuffer, sectname) == 0)

@@ -68,7 +68,7 @@ int net_dupsd(int sockfd, int minsd)
   FAR struct socket *psock1;
   FAR struct socket *psock2;
   int sockfd2;
-  int err;
+  int errcode;
   int ret;
 
   /* Make sure that the minimum socket descriptor is within the legal range.
@@ -99,7 +99,7 @@ int net_dupsd(int sockfd, int minsd)
 
   if (!psock1 || psock1->s_crefs <= 0)
     {
-      err = EBADF;
+      errcode = EBADF;
       goto errout;
     }
 
@@ -108,7 +108,7 @@ int net_dupsd(int sockfd, int minsd)
   sockfd2 = sockfd_allocate(minsd);
   if (sockfd2 < 0)
     {
-      err = ENFILE;
+      errcode = ENFILE;
       goto errout;
     }
 
@@ -117,7 +117,7 @@ int net_dupsd(int sockfd, int minsd)
   psock2 = sockfd_socket(sockfd2);
   if (!psock2)
     {
-      err = ENOSYS; /* should not happen */
+      errcode = ENOSYS; /* should not happen */
       goto errout;
     }
 
@@ -126,7 +126,7 @@ int net_dupsd(int sockfd, int minsd)
   ret = net_clone(psock1, psock2);
   if (ret < 0)
     {
-      err = -ret;
+      errcode = -ret;
       goto errout;
 
     }
@@ -136,10 +136,8 @@ int net_dupsd(int sockfd, int minsd)
 
 errout:
   sched_unlock();
-  set_errno(err);
+  set_errno(errcode);
   return ERROR;
 }
 
 #endif /* defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0 */
-
-

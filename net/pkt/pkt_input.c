@@ -118,7 +118,7 @@ int pkt_input(struct net_driver_s *dev)
     }
   else
     {
-      nlldbg("No listener\n");
+      nerr("ERROR: No listener\n");
     }
 
   return ret;

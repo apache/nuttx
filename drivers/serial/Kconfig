@@ -13,6 +13,11 @@ config DEV_LOWCONSOLE
 
 config SERIAL_REMOVABLE
 	bool
+	default n
+
+config SERIAL_CONSOLE
+	bool
+	default n
 
 config 16550_UART
 	bool "16550 UART Chip support"
@@ -292,18 +297,22 @@ choice
 config 16550_UART0_SERIAL_CONSOLE
 	bool "16550 UART0 serial console"
 	depends on 16550_UART0
+	select SERIAL_CONSOLE
 
 config 16550_UART1_SERIAL_CONSOLE
 	bool "16550 UART1 serial console"
 	depends on 16550_UART1
+	select SERIAL_CONSOLE
 
 config 16550_UART2_SERIAL_CONSOLE
 	bool "16550 UART2 serial console"
 	depends on 16550_UART2
+	select SERIAL_CONSOLE
 
 config 16550_UART3_SERIAL_CONSOLE
 	bool "16550 UART3 serial console"
 	depends on 16550_UART3
+	select SERIAL_CONSOLE
 
 config 16550_NO_SERIAL_CONSOLE
 	bool "No 16550 serial console"
@@ -531,7 +540,7 @@ endif # SERIAL_IFLOWCONTROL_WATERMARKS
 config SERIAL_TIOCSERGSTRUCT
 	bool "Support TIOCSERGSTRUCT"
 	default n
-	depends on DEBUG && (MCU_SERIAL || 16550_UART)
+	depends on DEBUG_FEATURES && (MCU_SERIAL || 16550_UART)
 	---help---
 		As a debug option, many serial bottom half drivers support the TIOCSERGSTRUCT
 		that allows you to get the internal driver data structure.  By default, this
@@ -566,89 +575,111 @@ choice
 config UART_SERIAL_CONSOLE
 	bool "UART"
 	depends on UART_SERIALDRIVER
+	select SERIAL_CONSOLE
 
 config UART0_SERIAL_CONSOLE
 	bool "UART0"
 	depends on UART0_SERIALDRIVER
+	select SERIAL_CONSOLE
 
 config USART0_SERIAL_CONSOLE
 	bool "USART0"
 	depends on USART0_SERIALDRIVER
+	select SERIAL_CONSOLE
 
 config UART1_SERIAL_CONSOLE
 	bool "UART1"
 	depends on UART1_SERIALDRIVER
+	select SERIAL_CONSOLE
 
 config USART1_SERIAL_CONSOLE
 	bool "USART1"
 	depends on USART1_SERIALDRIVER
+	select SERIAL_CONSOLE
 
 config UART2_SERIAL_CONSOLE
 	bool "UART2"
 	depends on UART2_SERIALDRIVER
+	select SERIAL_CONSOLE
 
 config USART2_SERIAL_CONSOLE
 	bool "USART2"
 	depends on USART2_SERIALDRIVER
+	select SERIAL_CONSOLE
 
 config UART3_SERIAL_CONSOLE
 	bool "UART3"
 	depends on UART3_SERIALDRIVER
+	select SERIAL_CONSOLE
 
 config USART3_SERIAL_CONSOLE
 	bool "USART3"
 	depends on USART3_SERIALDRIVER
+	select SERIAL_CONSOLE
 
 config UART4_SERIAL_CONSOLE
 	bool "UART4"
 	depends on UART4_SERIALDRIVER
+	select SERIAL_CONSOLE
 
 config USART4_SERIAL_CONSOLE
 	bool "USART4"
 	depends on USART4_SERIALDRIVER
+	select SERIAL_CONSOLE
 
 config UART5_SERIAL_CONSOLE
 	bool "UART5"
 	depends on UART5_SERIALDRIVER
+	select SERIAL_CONSOLE
 
 config USART5_SERIAL_CONSOLE
 	bool "USART5"
 	depends on USART5_SERIALDRIVER
+	select SERIAL_CONSOLE
 
 config UART6_SERIAL_CONSOLE
 	bool "UART6"
 	depends on UART6_SERIALDRIVER
+	select SERIAL_CONSOLE
 
 config USART6_SERIAL_CONSOLE
 	bool "USART6"
 	depends on USART6_SERIALDRIVER
+	select SERIAL_CONSOLE
 
 config UART7_SERIAL_CONSOLE
 	bool "UART7"
 	depends on UART7_SERIALDRIVER
+	select SERIAL_CONSOLE
 
 config USART7_SERIAL_CONSOLE
 	bool "USART7"
 	depends on USART7_SERIALDRIVER
+	select SERIAL_CONSOLE
 
 config UART8_SERIAL_CONSOLE
 	bool "UART8"
 	depends on UART8_SERIALDRIVER
+	select SERIAL_CONSOLE
 
 config USART8_SERIAL_CONSOLE
 	bool "USART8"
 	depends on USART8_SERIALDRIVER
+	select SERIAL_CONSOLE
 
 config SCI0_SERIAL_CONSOLE
 	bool "SCI0"
 	depends on SCI0_SERIALDRIVER
+	select SERIAL_CONSOLE
 
 config SCI1_SERIAL_CONSOLE
 	bool "SCI1"
 	depends on SCI1_SERIALDRIVER
+	select SERIAL_CONSOLE
 
 config OTHER_SERIAL_CONSOLE
 	bool "Other serial console"
+	select SERIAL_CONSOLE
 
 config NO_SERIAL_CONSOLE
 	bool "No serial console"

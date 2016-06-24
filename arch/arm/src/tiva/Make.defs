@@ -78,7 +78,10 @@ endif
 CHIP_ASRCS  =
 CHIP_CSRCS  = tiva_allocateheap.c tiva_start.c tiva_irq.c tiva_gpio.c
 CHIP_CSRCS += tiva_gpioirq.c tiva_lowputc.c tiva_serial.c tiva_ssi.c
+
+ifeq ($(CONFIG_DEBUG_GPIO_INFO),y)
 CHIP_CSRCS += tiva_dumpgpio.c
+endif
 
 ifeq ($(CONFIG_ARCH_CHIP_TM4C129),y)
 CHIP_CSRCS += tm4c129_syscontrol.c

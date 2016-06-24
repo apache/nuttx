@@ -58,15 +58,11 @@
 /* Non-standard debug that may be enabled just for testing the modem driver */
 
 #ifdef CONFIG_MODEM_U_BLOX_DEBUG
-#  define m_dbg    dbg
-#  define m_vdbg   vdbg
-#  define m_vlldbg  lldbg
-#  define m_vllvdbg llvdbg
+#  define m_err     _err
+#  define m_info    _info
 #else
-#  define m_dbg(x...)
-#  define m_vdbg(x...)
-#  define m_lldbg(x...)
-#  define m_llvdbg(x...)
+#  define m_err(x...)
+#  define m_info(x...)
 #endif
 
 /****************************************************************************
@@ -149,7 +145,7 @@ static int ubxmdm_ioctl(FAR struct file* filep,
   int                       ret;
   FAR struct ubxmdm_status* status;
 
-  m_vdbg("cmd: %d arg: %ld\n", cmd, arg);
+  m_info("cmd: %d arg: %ld\n", cmd, arg);
   DEBUGASSERT(upper && lower);
 
   switch (cmd)
@@ -235,7 +231,7 @@ static int ubxmdm_ioctl(FAR struct file* filep,
        */
 
     default:
-      m_vdbg("Forwarding unrecognized cmd: %d arg: %ld\n", cmd, arg);
+      m_info("Forwarding unrecognized cmd: %d arg: %ld\n", cmd, arg);
 
       if (lower->ops->ioctl)
         {
@@ -286,7 +282,7 @@ FAR void* ubxmdm_register(FAR const char *path,
     kmm_zalloc(sizeof(struct ubxmdm_upper));
   if (!upper)
     {
-      m_dbg("Upper half allocation failed\n");
+      m_err("ERROR: Upper half allocation failed\n");
       goto errout;
     }
 
@@ -294,14 +290,14 @@ FAR void* ubxmdm_register(FAR const char *path,
   upper->path = strdup(path);
   if (!upper->path)
     {
-      m_dbg("Path allocation failed\n");
+      m_err("ERROR: Path allocation failed\n");
       goto errout_with_upper;
     }
 
   ret = register_driver(path, &ubxmdm_fops, 0666, upper);
   if (ret < 0)
     {
-      m_dbg("register_driver failed: %d\n", ret);
+      m_err("ERROR: register_driver failed: %d\n", ret);
       goto errout_with_path;
     }
 
@@ -326,7 +322,7 @@ void ubxmdm_unregister(FAR void *handle)
   lower = upper->lower;
   DEBUGASSERT(upper && lower);
 
-  m_vdbg("Unregistering: %s\n", upper->path);
+  m_info("Unregistering: %s\n", upper->path);
 
   DEBUGASSERT(lower->ops->poweroff);
   (void) lower->ops->poweroff(lower);

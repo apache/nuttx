@@ -56,22 +56,6 @@
 #include "pic32mx.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -85,7 +69,7 @@
 
 uint32_t *pic32mx_exception(uint32_t *regs)
 {
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   uint32_t cause;
   uint32_t epc;
 #endif
@@ -96,98 +80,98 @@ uint32_t *pic32mx_exception(uint32_t *regs)
 
   board_autoled_on(LED_INIRQ);
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   /* Get the cause of the exception from the CAUSE register */
 
   asm volatile("\tmfc0 %0,$13,0\n" : "=r"(cause));
   asm volatile("\tmfc0 %0,$14,0\n" : "=r"(epc));
 
-#ifdef CONFIG_DEBUG_VERBOSE
+#ifdef CONFIG_DEBUG_INFO
   switch (cause & CP0_CAUSE_EXCCODE_MASK)
     {
     case CP0_CAUSE_EXCCODE_INT:      /* Interrupt */
-      llvdbg("EXCEPTION: Interrupt"
-             " CAUSE: %08x EPC: %08x\n", cause, epc);
+      _alert("EXCEPTION: Interrupt"
+            " CAUSE: %08x EPC: %08x\n", cause, epc);
       break;
     case CP0_CAUSE_EXCCODE_TLBL:     /* TLB exception (load or instruction fetch) */
-      llvdbg("EXCEPTION: TLB exception (load or instruction fetch)"
-             " CAUSE: %08x EPC:%08x\n", cause, epc);
+      _alert("EXCEPTION: TLB exception (load or instruction fetch)"
+            " CAUSE: %08x EPC:%08x\n", cause, epc);
       break;
     case CP0_CAUSE_EXCCODE_TLBS:     /* TLB exception (store) */
-      llvdbg("EXCEPTION: TLB exception (store)"
-             " CAUSE: %08x EPC: %08x\n", cause, epc);
+      _alert("EXCEPTION: TLB exception (store)"
+            " CAUSE: %08x EPC: %08x\n", cause, epc);
       break;
     case CP0_CAUSE_EXCCODE_ADEL:     /* Address error exception (load or instruction fetch) */
-      llvdbg("EXCEPTION: Address error exception (load or instruction fetch)"
-             " CAUSE: %08x EPC: %08x\n", cause, epc);
+      _alert("EXCEPTION: Address error exception (load or instruction fetch)"
+            " CAUSE: %08x EPC: %08x\n", cause, epc);
       break;
     case CP0_CAUSE_EXCCODE_ADES:     /* Address error exception (store) */
-      llvdbg("EXCEPTION: Address error exception (store)"
-             " CAUSE: %08x EPC: %08x\n", cause, epc);
+      _alert("EXCEPTION: Address error exception (store)"
+            " CAUSE: %08x EPC: %08x\n", cause, epc);
       break;
     case CP0_CAUSE_EXCCODE_IBE:      /* Bus error exception (instruction fetch) */
-      llvdbg("EXCEPTION: Bus error exception (instruction fetch)"
-             " CAUSE: %08x EPC: %08x\n", cause, epc);
+      _alert("EXCEPTION: Bus error exception (instruction fetch)"
+            " CAUSE: %08x EPC: %08x\n", cause, epc);
       break;
     case CP0_CAUSE_EXCCODE_DBE:      /* Bus error exception (data reference: load or store) */
-      llvdbg("EXCEPTION: Bus error exception (data reference: load or store)"
-             " CAUSE: %08x EPC: %08x\n", cause, epc);
+      _alert("EXCEPTION: Bus error exception (data reference: load or store)"
+            " CAUSE: %08x EPC: %08x\n", cause, epc);
       break;
     case CP0_CAUSE_EXCCODE_SYS:      /* Syscall exception */
-      llvdbg("EXCEPTION: Syscall exception"
-             " CAUSE: %08x EPC: %08x\n", cause, epc);
+      _alert("EXCEPTION: Syscall exception"
+            " CAUSE: %08x EPC: %08x\n", cause, epc);
       break;
     case CP0_CAUSE_EXCCODE_BP:       /* Breakpoint exception */
-      llvdbg("EXCEPTION: Breakpoint exception"
-             " CAUSE: %08x EPC: %08x\n", cause, epc);
+      _alert("EXCEPTION: Breakpoint exception"
+            " CAUSE: %08x EPC: %08x\n", cause, epc);
       break;
     case CP0_CAUSE_EXCCODE_RI:       /* Reserved instruction exception */
-      llvdbg("EXCEPTION: Reserved instruction exception"
-             " CAUSE: %08x EPC: %08x\n", cause, epc);
+      _alert("EXCEPTION: Reserved instruction exception"
+            " CAUSE: %08x EPC: %08x\n", cause, epc);
       break;
     case CP0_CAUSE_EXCCODE_CPU:      /* Coprocessor Unusable exception */
-      llvdbg("EXCEPTION: Coprocessor Unusable exception"
-             " CAUSE: %08x EPC: %08x\n", cause, epc);
+      _alert("EXCEPTION: Coprocessor Unusable exception"
+            " CAUSE: %08x EPC: %08x\n", cause, epc);
       break;
     case CP0_CAUSE_EXCCODE_OV:       /* Arithmetic Overflow exception */
-      llvdbg("EXCEPTION: Arithmetic Overflow exception"
-             " CAUSE: %08x EPC: %08x\n", cause, epc);
+      _alert("EXCEPTION: Arithmetic Overflow exception"
+            " CAUSE: %08x EPC: %08x\n", cause, epc);
       break;
     case CP0_CAUSE_EXCCODE_TR:       /* Trap exception */
-      llvdbg("EXCEPTION: Trap exception"
-             " CAUSE: %08x EPC: %08x\n", cause, epc);
+      _alert("EXCEPTION: Trap exception"
+            " CAUSE: %08x EPC: %08x\n", cause, epc);
       break;
     case CP0_CAUSE_EXCCODE_FPE:      /* Floating point exception */
-      llvdbg("EXCEPTION: Floating point exception"
-             " CAUSE: %08x EPC: %08x\n", cause, epc);
+      _alert("EXCEPTION: Floating point exception"
+            " CAUSE: %08x EPC: %08x\n", cause, epc);
       break;
     case CP0_CAUSE_EXCCODE_C2E:      /* Precise Coprocessor 2 exceptions */
-      llvdbg("EXCEPTION: Precise Coprocessor 2 exceptions"
-             " CAUSE: %08x EPC: %08x\n", cause, epc);
+      _alert("EXCEPTION: Precise Coprocessor 2 exceptions"
+            " CAUSE: %08x EPC: %08x\n", cause, epc);
       break;
     case CP0_CAUSE_EXCCODE_MDMX:     /* MDMX Unusable (MIPS64) */
-      llvdbg("EXCEPTION: MDMX Unusable (MIPS64)"
-             " CAUSE: %08x EPC: %08x\n", cause, epc);
+      _alert("EXCEPTION: MDMX Unusable (MIPS64)"
+            " CAUSE: %08x EPC: %08x\n", cause, epc);
       break;
     case CP0_CAUSE_EXCCODE_WATCH:    /* WatchHi/WatchLo address */
-      llvdbg("EXCEPTION: WatchHi/WatchLo address"
-             " CAUSE: %08x EPC: %08x\n", cause, epc);
+      _alert("EXCEPTION: WatchHi/WatchLo address"
+            " CAUSE: %08x EPC: %08x\n", cause, epc);
       break;
     case CP0_CAUSE_EXCCODE_MCHECK:   /* Machine check */
-      llvdbg("EXCEPTION: Machine check"
-             " CAUSE: %08x EPC: %08x\n", cause, epc);
+      _alert("EXCEPTION: Machine check"
+            " CAUSE: %08x EPC: %08x\n", cause, epc);
       break;
     case CP0_CAUSE_EXCCODE_CACHEERR: /* Cache error */
-      llvdbg("EXCEPTION: Cache error"
-             " CAUSE: %08x EPC: %08x\n", cause, epc);
+      _alert("EXCEPTION: Cache error"
+            " CAUSE: %08x EPC: %08x\n", cause, epc);
       break;
     default:
-      llvdbg("EXCEPTION: Unknown"
-             " CAUSE: %08x EPC: %08x\n", cause, epc);
+      _alert("EXCEPTION: Unknown"
+            " CAUSE: %08x EPC: %08x\n", cause, epc);
       break;
     }
 #else
-  lldbg("EXCEPTION: CAUSE: %08x EPC: %08x\n", cause, epc);
+  _alert("EXCEPTION: CAUSE: %08x EPC: %08x\n", cause, epc);
 #endif
 #endif
 

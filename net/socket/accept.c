@@ -127,7 +127,7 @@
 int psock_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
                  FAR socklen_t *addrlen, FAR struct socket *newsock)
 {
-  int err;
+  int errcode;
   int ret;
 
   DEBUGASSERT(psock != NULL);
@@ -136,7 +136,7 @@ int psock_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
 
   if (psock->s_type != SOCK_STREAM)
     {
-      err = EOPNOTSUPP;
+      errcode = EOPNOTSUPP;
       goto errout;
     }
 
@@ -144,7 +144,7 @@ int psock_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
 
   if (!_SS_ISLISTENING(psock->s_flags))
     {
-      err = EINVAL;
+      errcode = EINVAL;
       goto errout;
     }
 
@@ -167,7 +167,7 @@ int psock_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
           {
             if (*addrlen < sizeof(struct sockaddr_in))
               {
-                err = EBADF;
+                errcode = EBADF;
                 goto errout;
               }
           }
@@ -179,7 +179,7 @@ int psock_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
           {
             if (*addrlen < sizeof(struct sockaddr_in6))
               {
-                err = EBADF;
+                errcode = EBADF;
                 goto errout;
               }
           }
@@ -191,7 +191,7 @@ int psock_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
           {
             if (*addrlen < sizeof(sa_family_t))
               {
-                err = EBADF;
+                errcode = EBADF;
                 goto errout;
               }
           }
@@ -200,7 +200,7 @@ int psock_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
 
         default:
           DEBUGPANIC();
-          err = EINVAL;
+          errcode = EINVAL;
           goto errout;
         }
     }
@@ -222,7 +222,7 @@ int psock_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
       ret = psock_local_accept(psock, addr, addrlen, &newsock->s_conn);
       if (ret < 0)
         {
-          err = -ret;
+          errcode = -ret;
           goto errout;
         }
     }
@@ -242,7 +242,7 @@ int psock_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
       if (ret < 0)
         {
           net_unlock(state);
-          err = -ret;
+          errcode = -ret;
           goto errout;
         }
 
@@ -259,7 +259,7 @@ int psock_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
            */
 
           net_unlock(state);
-          err = -ret;
+          errcode = -ret;
           goto errout_after_accept;
         }
 
@@ -277,7 +277,7 @@ errout_after_accept:
   psock_close(newsock);
 
 errout:
-  set_errno(err);
+  set_errno(errcode);
   return ERROR;
 }
 
@@ -354,7 +354,7 @@ int accept(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen)
   FAR struct socket *psock = sockfd_socket(sockfd);
   FAR struct socket *newsock;
   int newfd;
-  int err;
+  int errcode;
   int ret;
 
   /* Verify that the sockfd corresponds to valid, allocated socket */
@@ -369,12 +369,12 @@ int accept(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen)
 #if CONFIG_NFILE_DESCRIPTORS > 0
       if ((unsigned int)sockfd < CONFIG_NFILE_DESCRIPTORS)
         {
-          err = ENOTSOCK;
+          errcode = ENOTSOCK;
         }
       else
 #endif
         {
-          err = EBADF;
+          errcode = EBADF;
         }
 
       goto errout;
@@ -387,14 +387,14 @@ int accept(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen)
   newfd = sockfd_allocate(0);
   if (newfd < 0)
     {
-      err = ENFILE;
+      errcode = ENFILE;
       goto errout;
     }
 
   newsock = sockfd_socket(newfd);
   if (newsock == NULL)
     {
-      err = ENFILE;
+      errcode = ENFILE;
       goto errout_with_socket;
     }
 
@@ -413,7 +413,7 @@ errout_with_socket:
   sockfd_release(newfd);
 
 errout:
-  set_errno(err);
+  set_errno(errcode);
   return ERROR;
 }
 

@@ -122,7 +122,7 @@ NXHANDLE nx_connectinstance(FAR const char *svrmqname)
 
   /* Sanity checking */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!svrmqname)
     {
       set_errno(EINVAL);
@@ -160,7 +160,7 @@ NXHANDLE nx_connectinstance(FAR const char *svrmqname)
 #endif
   if (conn->crdmq == (mqd_t)-1)
     {
-      gdbg("mq_open(%s) failed: %d\n", climqname, errno);
+      gerr("ERROR: mq_open(%s) failed: %d\n", climqname, errno);
       goto errout_with_conn;
     }
 
@@ -173,7 +173,7 @@ NXHANDLE nx_connectinstance(FAR const char *svrmqname)
   conn->cwrmq = mq_open(svrmqname, O_WRONLY|O_CREAT, 0666, &attr);
   if (conn->cwrmq == (mqd_t)-1)
     {
-      gdbg("mq_open(%s) failed: %d\n", svrmqname, errno);
+      gerr("ERROR: mq_open(%s) failed: %d\n", svrmqname, errno);
       goto errout_with_rmq;
     }
 
@@ -185,7 +185,7 @@ NXHANDLE nx_connectinstance(FAR const char *svrmqname)
   ret = nxmu_sendserver(conn, &outmsg, sizeof(struct nxsvrmsg_s));
   if (ret < 0)
     {
-      gdbg("nxmu_sendserver failed: %d\n", errno);
+      gerr("ERROR: nxmu_sendserver failed: %d\n", errno);
       goto errout_with_wmq;
     }
 
@@ -201,7 +201,7 @@ NXHANDLE nx_connectinstance(FAR const char *svrmqname)
       ret = nx_eventhandler((NXHANDLE)conn);
       if (ret < 0)
         {
-          gdbg("nx_message failed: %d\n", errno);
+          gerr("ERROR: nx_message failed: %d\n", errno);
           goto errout_with_wmq;
         }
       usleep(300000);

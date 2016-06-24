@@ -144,14 +144,14 @@ static inline void up_configbaud(void)
   /* Test values calculated for every multiplier/divisor combination */
 
   uint32_t tdiv;
-  uint32_t terr;
+  uint32_t tmperr;
   int      tmulval;
   int      tdivaddval;
 
   /* Optimal multiplier/divider values */
 
   uint32_t div       = 0;
-  uint32_t err       = 100000;
+  uint32_t errval    = 100000;
   int      mulval    = 1;
   int      divaddval = 0;
 
@@ -176,13 +176,13 @@ static inline void up_configbaud(void)
    * match is found).
    */
 
-  for (tmulval = 1 ; tmulval <= 15 && err > 0; tmulval++)
+  for (tmulval = 1 ; tmulval <= 15 && errval > 0; tmulval++)
     {
       /* Try every valid pre-scale div, tdivaddval (or until a perfect
        * match is found).
        */
 
-      for (tdivaddval = 0 ; tdivaddval <= 15 && err > 0; tdivaddval++)
+      for (tdivaddval = 0 ; tdivaddval <= 15 && errval > 0; tdivaddval++)
         {
           /* Calculate the divisor with these fractional divider settings */
 
@@ -199,23 +199,23 @@ static inline void up_configbaud(void)
 
               if (actualbaud <= CONFIG_UART_BAUD)
                 {
-                  terr = CONFIG_UART_BAUD - actualbaud;
+                  tmperr = CONFIG_UART_BAUD - actualbaud;
                 }
               else
                 {
-                  terr = actualbaud - CONFIG_UART_BAUD;
+                  tmperr = actualbaud - CONFIG_UART_BAUD;
                 }
 
               /* Is this the smallest error we have encountered? */
 
-              if (terr < err)
+              if (tmperr < errval)
                 {
                   /* Yes, save these settings as the new, candidate optimal settings */
 
-                  mulval     = tmulval ;
+                  mulval    = tmulval ;
                   divaddval = tdivaddval;
                   div       = tdiv;
-                  err       = terr;
+                  errval    = tmperr;
                 }
             }
         }

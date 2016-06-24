@@ -81,96 +81,96 @@
  *
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG_VERBOSE) && defined(CONFIG_DEBUG_FS)
+#if defined(CONFIG_DEBUG_INFO) && defined(CONFIG_DEBUG_FS)
 void mmcsd_dmpcsd(FAR const uint8_t *csd, uint8_t cardtype)
 {
   bool mmc = (cardtype == MMCSD_CARDTYPE_MMC);
   bool sd2 = (MMCSD_CSD_CSDSTRUCT(csd) == 1);
 
-  fvdbg("CSD\n");
-  fvdbg("  CSD_STRUCTURE:           1.%d\n",   MMCSD_CSD_CSDSTRUCT(csd));
+  finfo("CSD\n");
+  finfo("  CSD_STRUCTURE:           1.%d\n",   MMCSD_CSD_CSDSTRUCT(csd));
   if (mmc)
     {
-      fvdbg("  MMC SPEC_VERS:           %d\n", MMC_CSD_SPECVERS(csd));
+      finfo("  MMC SPEC_VERS:           %d\n", MMC_CSD_SPECVERS(csd));
     }
 
-  fvdbg("  TAAC:\n",
+  finfo("  TAAC:\n",
       sd2 ? SD20_CSD_TAC_TIMEVALUE(csd) : MMCSD_CSD_TAAC_TIMEVALUE(csd));
-  fvdbg("    TIME_VALUE:            0x%02x\n",
+  finfo("    TIME_VALUE:            0x%02x\n",
       sd2 ? SD20_CSD_TAC_TIMEVALUE(csd) : MMCSD_CSD_TAAC_TIMEVALUE(csd));
-  fvdbg("    TIME_UNIT:             0x%02x\n",
+  finfo("    TIME_UNIT:             0x%02x\n",
       sd2 ? SD20_CSD_TAC_TIMEUNIT(csd) : MMCSD_CSD_TAAC_TIMEUNIT(csd));
-  fvdbg("  NSAC:                    0x%02x\n",
+  finfo("  NSAC:                    0x%02x\n",
       sd2 ? SD20_CSD_NSAC(csd) : MMCSD_CSD_NSAC(csd));
-  fvdbg("  TRAN_SPEED:\n");
-  fvdbg("    TIME_VALUE:            0x%02x\n",
+  finfo("  TRAN_SPEED:\n");
+  finfo("    TIME_VALUE:            0x%02x\n",
       sd2 ? SD20_CSD_TRANSPEED_TIMEVALUE(csd) : MMCSD_CSD_TRANSPEED_TIMEVALUE(csd));
-  fvdbg("    RATE_UNIT:             0x%02x\n",
+  finfo("    RATE_UNIT:             0x%02x\n",
       sd2 ? SD20_CSD_TRANSPEED_TRANSFERRATEUNIT(csd) : MMCSD_CSD_TRANSPEED_TRANSFERRATEUNIT(csd));
-  fvdbg("  CCC:                     0x%03x\n",
+  finfo("  CCC:                     0x%03x\n",
       sd2 ? SD20_CSD_CCC(csd) : MMCSD_CSD_CCC(csd));
-  fvdbg("  READ_BL_LEN:             %d\n",
+  finfo("  READ_BL_LEN:             %d\n",
       sd2 ? SD20_CSD_READBLLEN(csd) : MMCSD_CSD_READBLLEN(csd));
-  fvdbg("  READ_BL_PARTIAL:         %d\n",
+  finfo("  READ_BL_PARTIAL:         %d\n",
       sd2 ? SD20_CSD_READBLPARTIAL(csd) : MMCSD_CSD_READBLPARTIAL(csd));
-  fvdbg("  WRITE_BLK_MISALIGN:      %d\n",
+  finfo("  WRITE_BLK_MISALIGN:      %d\n",
       sd2 ? SD20_CSD_WRITEBLKMISALIGN(csd) : MMCSD_CSD_WRITEBLKMISALIGN(csd));
-  fvdbg("  READ_BLK_MISALIGN:       %d\n",
+  finfo("  READ_BLK_MISALIGN:       %d\n",
       sd2 ? SD20_CSD_READBLKMISALIGN(csd) : MMCSD_CSD_READBLKMISALIGN(csd));
-  fvdbg("  DSR_IMP:                 %d\n",
+  finfo("  DSR_IMP:                 %d\n",
       sd2 ? SD20_CSD_DSRIMP(csd) : MMCSD_CSD_DSRIMP(csd));
-  fvdbg("  C_SIZE:                  %d\n",
+  finfo("  C_SIZE:                  %d\n",
       sd2 ? SD20_CSD_CSIZE(csd) : MMCSD_CSD_CSIZE(csd));
-  fvdbg("  VDD_R_CURR_MIN:          %d\n",
+  finfo("  VDD_R_CURR_MIN:          %d\n",
       sd2 ? SD20_CSD_VDDRCURRMIN(csd) : MMCSD_CSD_VDDRCURRMIN(csd));
-  fvdbg("  VDD_R_CURR_MAX:          %d\n",
+  finfo("  VDD_R_CURR_MAX:          %d\n",
       sd2 ? SD20_CSD_VDDRCURRMAX(csd) : MMCSD_CSD_VDDRCURRMAX(csd));
-  fvdbg("  VDD_W_CURR_MIN:          %d\n",
+  finfo("  VDD_W_CURR_MIN:          %d\n",
       sd2 ? SD20_CSD_VDDWCURRMIN(csd) : MMCSD_CSD_VDDWCURRMIN(csd));
-  fvdbg("  VDD_W_CURR_MAX:          %d\n",
+  finfo("  VDD_W_CURR_MAX:          %d\n",
       sd2 ? SD20_CSD_VDDWCURRMAX(csd) : MMCSD_CSD_VDDWCURRMAX(csd));
-  fvdbg("  C_SIZE_MULT:             %d\n",
+  finfo("  C_SIZE_MULT:             %d\n",
       sd2 ? SD20_CSD_CSIZEMULT(csd) : MMCSD_CSD_CSIZEMULT(csd));
   if (mmc)
     {
-      fvdbg("  MMC SECTOR_SIZE:        %d\n", MMC_CSD_SECTORSIZE(csd));
-      fvdbg("  MMC ER_GRP_SIZE:        %d\n", MMC_CSD_ERGRPSIZE(csd));
-      fvdbg("  MMC WP_GRP_SIZE:        %d\n",  MMC_CSD_WPGRPSIZE(csd));
-      fvdbg("  MMC DFLT_ECC:           %d\n",  MMC_CSD_DFLTECC(csd));
+      finfo("  MMC SECTOR_SIZE:        %d\n", MMC_CSD_SECTORSIZE(csd));
+      finfo("  MMC ER_GRP_SIZE:        %d\n", MMC_CSD_ERGRPSIZE(csd));
+      finfo("  MMC WP_GRP_SIZE:        %d\n",  MMC_CSD_WPGRPSIZE(csd));
+      finfo("  MMC DFLT_ECC:           %d\n",  MMC_CSD_DFLTECC(csd));
     }
   else
     {
-      fvdbg("  SD ER_BLK_EN:            %d\n",
+      finfo("  SD ER_BLK_EN:            %d\n",
           sd2 ? SD20_CSD_SDERBLKEN(csd) : SD_CSD_SDERBLKEN(csd));
-      fvdbg("  SD SECTOR_SIZE:          %d\n",
+      finfo("  SD SECTOR_SIZE:          %d\n",
           sd2 ? SD20_CSD_SECTORSIZE(csd) : SD_CSD_SECTORSIZE(csd));
-      fvdbg("  SD WP_GRP_SIZE:          %d\n",
+      finfo("  SD WP_GRP_SIZE:          %d\n",
           sd2 ? SD_CSD_WPGRPSIZE(csd) : SD_CSD_WPGRPSIZE(csd));
     }
-  fvdbg("  WP_GRP_EN:               %d\n",
+  finfo("  WP_GRP_EN:               %d\n",
       sd2 ? SD20_WPGRPEN(csd) : MMCSD_WPGRPEN(csd));
-  fvdbg("  R2W_FACTOR:              %d\n",
+  finfo("  R2W_FACTOR:              %d\n",
       sd2 ? SD20_CSD_R2WFACTOR(csd) : MMCSD_CSD_R2WFACTOR(csd));
-  fvdbg("  WRITE_BL_LEN:            %d\n",
+  finfo("  WRITE_BL_LEN:            %d\n",
       sd2 ? SD20_CSD_WRITEBLLEN(csd) : MMCSD_CSD_WRITEBLLEN(csd));
-  fvdbg("  WRITE_BL_PARTIAL:        %d\n",
+  finfo("  WRITE_BL_PARTIAL:        %d\n",
       sd2 ? SD20_CSD_WRITEBLPARTIAL(csd) : MMCSD_CSD_WRITEBLPARTIAL(csd));
-  fvdbg("  FILE_FORMAT_GROUP:       %d\n",
+  finfo("  FILE_FORMAT_GROUP:       %d\n",
       sd2 ? SD20_CSD_FILEFORMATGRP(csd) : MMCSD_CSD_FILEFORMATGRP(csd));
-  fvdbg("  COPY:                    %d\n",
+  finfo("  COPY:                    %d\n",
       sd2 ? SD20_CSD_COPY(csd) : MMCSD_CSD_COPY(csd));
-  fvdbg("  PERM_WRITE_PROTECT:      %d\n",
+  finfo("  PERM_WRITE_PROTECT:      %d\n",
       sd2 ? SD20_CSD_PERMWRITEPROTECT(csd) : MMCSD_CSD_PERMWRITEPROTECT(csd));
-  fvdbg("  TMP_WRITE_PROTECT:       %d\n",
+  finfo("  TMP_WRITE_PROTECT:       %d\n",
       sd2 ?SD20_CSD_TMPWRITEPROTECT(csd) : MMCSD_CSD_TMPWRITEPROTECT(csd));
-  fvdbg("  FILE_FORMAT:             %d\n",
+  finfo("  FILE_FORMAT:             %d\n",
       sd2 ? SD20_CSD_FILEFORMAT(csd) : MMCSD_CSD_FILEFORMAT(csd));
   if (mmc)
     {
-      fvdbg("  MMC ECC:                 %d\n",
+      finfo("  MMC ECC:                 %d\n",
           sd2 ? MMC_CSD_ECC(csd) : MMC_CSD_ECC(csd));
     }
-  fvdbg("  CRC:                     %02x\n",
+  finfo("  CRC:                     %02x\n",
       sd2 ? SD20_CSD_CRC(csd) : MMCSD_CSD_CRC(csd));
 }
 #endif

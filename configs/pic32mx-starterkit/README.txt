@@ -991,9 +991,9 @@ PIC32MX specific PHY/Ethernet device driver settings
     CONFIG_NET_NRXDESC - Configured number of Rx descriptors. Default: 4
     CONFIG_NET_WOL - Enable Wake-up on Lan (not fully implemented).
     CONFIG_NET_DUMPPACKET - Dump all received and transmitted packets.
-      Also needs CONFIG_DEBUG.
+      Also needs CONFIG_DEBUG_FEATURES.
     CONFIG_NET_REGDEBUG - Enabled low level register debug.  Also needs
-      CONFIG_DEBUG.
+      CONFIG_DEBUG_FEATURES.
     CONFIG_NET_HASH - Enable receipt of near-perfect match frames.
     CONFIG_PIC32MX_MULTICAST - Enable receipt of multicast (and unicast) frames.
       Automatically set if CONFIG_NET_IGMP is selected.
@@ -1137,7 +1137,6 @@ Where <subdir> is one of the following:
 
     3. The RAM log is enabled"
 
-      CONFIG_SYSLOG=y             : Enables the System Logging feature.
       CONFIG_RAMLOG=y             : Enable the RAM-based logging feature.
       CONFIG_RAMLOG_CONSOLE=n     : (there is no default console device)
       CONFIG_RAMLOG_SYSLOG=y      : This enables the RAM-based logger as the

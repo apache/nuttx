@@ -1,7 +1,7 @@
 /****************************************************************************
  * libc/stdlib/lib_checkbase.c
  *
- *   Copyright (C) 2007, 2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,10 +45,6 @@
 #include "libc.h"
 
 /****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -63,11 +59,16 @@
  * Assumptions:
  *   *ptr points to the first, non-whitespace character in the string.
  *
+ * Returns:
+ *   - if base is valid, the actual base to use, and pptr is updated to point
+ *     at the first digit.
+ *   - if base is invalid (<2 or >36), return -1.
+ *
  ****************************************************************************/
 
 int lib_checkbase(int base, FAR const char **pptr)
 {
-   const char *ptr = *pptr;
+  FAR const char *ptr = *pptr;
 
   /* Check for unspecified base */
 
@@ -107,9 +108,15 @@ int lib_checkbase(int base, FAR const char **pptr)
         }
     }
 
+  /* Check for incorrect bases. */
+
+  else if (base < 2 || base > 26)
+    {
+      return -1; /* Means incorrect base */
+    }
+
   /* Return the updated pointer and base */
 
   *pptr = ptr;
   return base;
 }
-

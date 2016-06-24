@@ -19,7 +19,7 @@ menuconfig LCD
 
 if LCD
 
-comment "Common Graphipc LCD Settings"
+comment "Common Graphic LCD Settings"
 
 config LCD_CONSOLE
 	bool "LCD console output"

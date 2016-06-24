@@ -2,7 +2,7 @@
  * configs/teensy-3.x/include/board.h
  * include/arch/board/board.h
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,6 +56,15 @@
 /* The teensy-3.1 has a 16MHz crystal on board */
 
 #undef  BOARD_EXTCLOCK                      /* Crystal */
+#define BOARD_EXTAL_LP                      /* Low Power, as opposed to Hi Gain */
+
+/* BOARD_FR_DIV is MCG_C1_FRDIV_DIV512 from kinetis_mcg.h. According to the k20
+ * reference manual, when transitioning MCG clock modes to FLL Bypassed External
+ * the C1 divider must be set so that the FLL clock is between 31.25 and 39.0625 khz.
+ * For teensy-3.x that works out to a divider of 512.
+ */
+
+#define BOARD_FR_DIV (4 << 3)
 #define BOARD_EXTAL_FREQ     16000000       /* 16MHz crystal frequency (REFCLK) */
 #define BOARD_XTAL32_FREQ    32768          /* 32KHz RTC Oscillator (not populated) */
 
@@ -131,6 +140,28 @@
 #define BOARD_BUS_FREQ       (BOARD_MCG_FREQ / BOARD_OUTDIV2)
 #define BOARD_FLEXBUS_FREQ   (BOARD_MCG_FREQ / BOARD_OUTDIV3)
 #define BOARD_FLASHCLK_FREQ  (BOARD_MCG_FREQ / BOARD_OUTDIV4)
+
+/* PWM Configuration */
+/* FTM0 Channels */
+
+#define GPIO_FTM0_CH0OUT PIN_FTM0_CH0_2  /* Pin 22: PTC1 */
+#define GPIO_FTM0_CH1OUT PIN_FTM0_CH1_2  /* Pin 23: PTC2 */
+#define GPIO_FTM0_CH2OUT PIN_FTM0_CH2_2  /* Pin  9: PTC3 */
+#define GPIO_FTM0_CH3OUT PIN_FTM0_CH3    /* Pin 10: PTC4 */
+#define GPIO_FTM0_CH4OUT PIN_FTM0_CH4    /* Pin  6: PTD4 */
+#define GPIO_FTM0_CH5OUT PIN_FTM0_CH5_2  /* Pin 20: PTD5 */
+#define GPIO_FTM0_CH6OUT PIN_FTM0_CH6_2  /* Pin 21: PTD6 */
+#define GPIO_FTM0_CH7OUT PIN_FTM0_CH7_2  /* Pin  5: PTD7 */
+
+/* FTM1 Channels */
+
+#define GPIO_FTM1_CH0OUT PIN_FTM1_CH0_1  /* Pin  3: PTA12 */
+#define GPIO_FTM1_CH1OUT PIN_FTM1_CH1_1  /* Pin  4: PTA13 */
+
+/* FTM2 Channels */
+
+#define GPIO_FTM2_CH0OUT PIN_FTM2_CH0    /* Pin 25: PTB18 */
+#define GPIO_FTM2_CH1OUT PIN_FTM2_CH1    /* Pin 32: PTB19 */
 
 /* LED definitions ******************************************************************/
 /* A single LED is available driven by PTC5.  The LED is grounded so bringing PTC5

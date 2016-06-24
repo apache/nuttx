@@ -62,21 +62,21 @@
  * Verbose debug must also be enabled
  */
 
-#ifndef CONFIG_DEBUG
-#  undef CONFIG_DEBUG_VERBOSE
+#ifndef CONFIG_DEBUG_FEATURES
+#  undef CONFIG_DEBUG_INFO
 #  undef CONFIG_DEBUG_GRAPHICS
 #endif
 
-#ifndef CONFIG_DEBUG_VERBOSE
+#ifndef CONFIG_DEBUG_INFO
 #  undef CONFIG_LCD_RITDEBUG
 #endif
 
 #ifdef CONFIG_LCD_RITDEBUG
-#  define ritdbg(format, ...) vdbg(format, ##__VA_ARGS__)
+#  define riterr(format, ...) _info(format, ##__VA_ARGS__)
 #  define oleddc_dumpgpio(m)  tiva_dumpgpio(OLEDDC_GPIO, m)
 #  define oledcs_dumpgpio(m)  tiva_dumpgpio(OLEDCS_GPIO, m)
 #else
-#  define ritdbg(x...)
+#  define riterr(x...)
 #  define oleddc_dumpgpio(m)
 #  define oledcs_dumpgpio(m)
 #endif
@@ -113,7 +113,7 @@ FAR struct lcd_dev_s *board_graphics_setup(unsigned int devno)
   spi = tiva_ssibus_initialize(0);
   if (!spi)
     {
-      glldbg("Failed to initialize SSI port 0\n");
+      gerr("ERROR: Failed to initialize SSI port 0\n");
     }
   else
     {
@@ -122,11 +122,11 @@ FAR struct lcd_dev_s *board_graphics_setup(unsigned int devno)
       dev = rit_initialize(spi, devno);
       if (!dev)
         {
-          glldbg("Failed to bind SSI port 0 to OLED %d: %d\n", devno);
+          gerr("ERROR: Failed to bind SSI port 0 to OLED %d: %d\n", devno);
         }
      else
         {
-          gllvdbg("Bound SSI port 0 to OLED %d\n", devno);
+          ginfo("Bound SSI port 0 to OLED %d\n", devno);
 
           /* And turn the OLED on (CONFIG_LCD_MAXPOWER should be 1) */
 

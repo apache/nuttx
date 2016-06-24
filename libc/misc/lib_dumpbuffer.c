@@ -66,52 +66,52 @@ void lib_dumpbuffer(FAR const char *msg, FAR const uint8_t *buffer,
   unsigned int j;
   unsigned int k;
 
-  lowsyslog(LOG_INFO, "%s (%p):\n", msg, buffer);
+  syslog(LOG_INFO, "%s (%p):\n", msg, buffer);
   for (i = 0; i < buflen; i += 32)
     {
-      lowsyslog(LOG_INFO, "%04x: ", i);
+      syslog(LOG_INFO, "%04x: ", i);
       for (j = 0; j < 32; j++)
         {
           k = i + j;
 
           if (j == 16)
             {
-              lowsyslog(LOG_INFO, " ");
+              syslog(LOG_INFO, " ");
             }
 
           if (k < buflen)
             {
-              lowsyslog(LOG_INFO, "%02x", buffer[k]);
+              syslog(LOG_INFO, "%02x", buffer[k]);
             }
           else
             {
-              lowsyslog(LOG_INFO, "  ");
+              syslog(LOG_INFO, "  ");
             }
         }
 
-      lowsyslog(LOG_INFO, " ");
+      syslog(LOG_INFO, " ");
       for (j = 0; j < 32; j++)
         {
          k = i + j;
 
           if (j == 16)
             {
-              lowsyslog(LOG_INFO, " ");
+              syslog(LOG_INFO, " ");
             }
 
           if (k < buflen)
             {
               if (buffer[k] >= 0x20 && buffer[k] < 0x7f)
                 {
-                  lowsyslog(LOG_INFO, "%c", buffer[k]);
+                  syslog(LOG_INFO, "%c", buffer[k]);
                 }
               else
                 {
-                  lowsyslog(LOG_INFO, ".");
+                  syslog(LOG_INFO, ".");
                 }
             }
         }
 
-      lowsyslog(LOG_INFO, "\n");
+      syslog(LOG_INFO, "\n");
    }
 }

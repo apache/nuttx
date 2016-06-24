@@ -107,7 +107,7 @@ config NET_TCP_NWRBCHAINS
 config NET_TCP_WRBUFFER_DEBUG
 	bool "Force write buffer debug"
 	default n
-	depends on DEBUG
+	depends on DEBUG_FEATURES
 	select IOB_DEBUG
 	---help---
 		This option will force debug output from TCP write buffer logic,

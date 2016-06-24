@@ -102,12 +102,12 @@ int tiva_timer_configure(void)
 {
   int ret;
 
-  timvdbg("Registering TIMER%d at %s\n", GPTM, CONFIG_DK_TM4C129X_TIMER_DEVNAME);
+  tmrinfo("Registering TIMER%d at %s\n", GPTM, CONFIG_DK_TM4C129X_TIMER_DEVNAME);
 
   ret = tiva_timer_register(CONFIG_DK_TM4C129X_TIMER_DEVNAME, GPTM, ALTCLK);
   if (ret < 0)
     {
-      timdbg("ERROR: Failed to register timer driver: %d\n", ret);
+      tmrerr("ERROR: Failed to register timer driver: %d\n", ret);
     }
 
   return ret;

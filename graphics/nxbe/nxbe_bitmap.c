@@ -125,7 +125,7 @@ void nxbe_bitmap(FAR struct nxbe_window_s *wnd, FAR const struct nxgl_rect_s *de
   unsigned int deststride;
   int i;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!wnd || !dest || !src || !origin)
     {
       return;
@@ -138,7 +138,7 @@ void nxbe_bitmap(FAR struct nxbe_window_s *wnd, FAR const struct nxgl_rect_s *de
 
   if (dest->pt1.x < origin->x || dest->pt1.y < origin->y)
     {
-      gdbg("Bad dest start position\n");
+      gerr("ERROR: Bad dest start position\n");
       return;
     }
 
@@ -149,7 +149,7 @@ void nxbe_bitmap(FAR struct nxbe_window_s *wnd, FAR const struct nxgl_rect_s *de
   deststride = (((dest->pt2.x - origin->x + 1) * wnd->be->plane[0].pinfo.bpp + 7) >> 3);
   if (deststride > stride)
     {
-      gdbg("Bad dest width\n");
+      gerr("ERROR: Bad dest width\n");
       return;
     }
 

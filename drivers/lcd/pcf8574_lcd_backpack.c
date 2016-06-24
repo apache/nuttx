@@ -78,14 +78,6 @@
 #define CMD_SET_CGADDR      0x40
 #define CMD_SET_DDADDR      0x80
 
-#ifdef CONFIG_DEBUG_LCD
-#  define lcddbg            dbg
-#  define lcdvdbg           vdbg
-#else
-#  define lcddbg(x...)
-#  define lcdvdbg(x...)
-#endif
-
 #define MAX_OPENCNT     (255)                  /* Limit of uint8_t */
 
 /****************************************************************************
@@ -185,7 +177,7 @@ static void pca8574_write(FAR struct pcf8574_lcd_dev_s *priv, uint8_t data)
   ret = i2c_write(priv->i2c, &config, &data, 1);
   if (ret < 0)
     {
-      lcdvdbg("pca8574_write() failed: %d\n", ret);
+      lcdinfo("pca8574_write() failed: %d\n", ret);
       return;
     }
 
@@ -222,7 +214,7 @@ static int pca8574_read(FAR struct pcf8574_lcd_dev_s *priv, uint8_t* data)
   ret = i2c_read(priv->i2c, &config, data, 1);
   if (ret < 0)
     {
-      lcdvdbg("pca8574_read() failed: %d\n", ret);
+      lcdinfo("pca8574_read() failed: %d\n", ret);
     }
 
   return ret;
@@ -704,7 +696,7 @@ static void lcd_scroll_up(FAR struct pcf8574_lcd_dev_s *priv)
   data = (uint8_t *)malloc(priv->cfg.cols);
   if (NULL == data)
     {
-       lcdvdbg("Failed to allocate buffer in lcd_scroll_up()\n");
+       lcdinfo("Failed to allocate buffer in lcd_scroll_up()\n");
       return;
     }
 
@@ -1428,7 +1420,7 @@ static int pcf8574_lcd_ioctl(FAR struct file *filep, int cmd,
           FAR struct pcf8574_lcd_dev_s *priv = (FAR struct pcf8574_lcd_dev_s *)inode->i_private;
           FAR struct slcd_attributes_s *attr = (FAR struct slcd_attributes_s *)((uintptr_t)arg);
 
-          lcdvdbg("SLCDIOC_GETATTRIBUTES:\n");
+          lcdinfo("SLCDIOC_GETATTRIBUTES:\n");
 
           if (!attr)
             {
@@ -1578,13 +1570,13 @@ int pcf8574_lcd_backpack_register(FAR const char *devpath,
 
   if (cfg->rows < 1 || cfg->rows > 4)
     {
-      lcdvdbg("Display rows must be 1-4\n");
+      lcdinfo("Display rows must be 1-4\n");
       return -EINVAL;
     }
 
   if ((cfg->cols < 1 || cfg->cols > 64) || (cfg->rows == 4 && cfg->cols > 32))
     {
-      lcdvdbg("Display cols must be 1-64, and may not be part of a 4x40 configuration\n");
+      lcdinfo("Display cols must be 1-64, and may not be part of a 4x40 configuration\n");
       return -EINVAL;
     }
 
@@ -1593,7 +1585,7 @@ int pcf8574_lcd_backpack_register(FAR const char *devpath,
   priv = (FAR struct pcf8574_lcd_dev_s *)kmm_malloc(sizeof(struct pcf8574_lcd_dev_s));
   if (!priv)
     {
-      lcdvdbg("Failed to allocate instance\n");
+      lcdinfo("Failed to allocate instance\n");
       return -ENOMEM;
     }
 
@@ -1613,10 +1605,10 @@ int pcf8574_lcd_backpack_register(FAR const char *devpath,
   ret = register_driver(devpath, &g_pcf8574_lcd_fops, 0666, priv);
   if (ret < 0)
     {
-      lcdvdbg("Failed to register driver: %d\n", ret);
+      lcdinfo("Failed to register driver: %d\n", ret);
       kmm_free(priv);
     }
 
-  lcdvdbg("pcf8574_lcd_backpack driver loaded successfully!\n");
+  lcdinfo("pcf8574_lcd_backpack driver loaded successfully!\n");
   return ret;
 }

@@ -173,7 +173,7 @@ static int  dac_send(FAR struct dac_dev_s *dev, FAR struct dac_msg_s *msg)
 
 static int  dac_ioctl(FAR struct dac_dev_s *dev, int cmd, unsigned long arg)
 {
-  dbg("Fix me:Not Implemented\n");
+  aerr("ERROR: Fix me:Not Implemented\n");
   return 0;
 }
 

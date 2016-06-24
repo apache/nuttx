@@ -137,7 +137,7 @@ static int kmm_open(FAR struct file *filep, FAR const char *relpath,
 {
   FAR struct kmm_file_s *procfile;
 
-  fvdbg("Open '%s'\n", relpath);
+  finfo("Open '%s'\n", relpath);
 
   /* PROCFS is read-only.  Any attempt to open with any kind of write
    * access is not permitted.
@@ -147,7 +147,7 @@ static int kmm_open(FAR struct file *filep, FAR const char *relpath,
 
   if ((oflags & O_WRONLY) != 0 || (oflags & O_RDONLY) == 0)
     {
-      fdbg("ERROR: Only O_RDONLY supported\n");
+      ferr("ERROR: Only O_RDONLY supported\n");
       return -EACCES;
     }
 
@@ -155,7 +155,7 @@ static int kmm_open(FAR struct file *filep, FAR const char *relpath,
 
   if (strcmp(relpath, "kmm") != 0)
     {
-      fdbg("ERROR: relpath is '%s'\n", relpath);
+      ferr("ERROR: relpath is '%s'\n", relpath);
       return -ENOENT;
     }
 
@@ -164,7 +164,7 @@ static int kmm_open(FAR struct file *filep, FAR const char *relpath,
   procfile = (FAR struct kmm_file_s *)kmm_zalloc(sizeof(struct kmm_file_s));
   if (!procfile)
     {
-      fdbg("ERROR: Failed to allocate file attributes\n");
+      ferr("ERROR: Failed to allocate file attributes\n");
       return -ENOMEM;
     }
 
@@ -208,7 +208,7 @@ static ssize_t kmm_read(FAR struct file *filep, FAR char *buffer,
   size_t totalsize;
   off_t offset;
 
-  fvdbg("buffer=%p buflen=%d\n", buffer, (int)buflen);
+  finfo("buffer=%p buflen=%d\n", buffer, (int)buflen);
 
   DEBUGASSERT(filep != NULL && buffer != NULL && buflen > 0);
   offset = filep->f_pos;
@@ -267,7 +267,7 @@ static int kmm_dup(FAR const struct file *oldp, FAR struct file *newp)
   FAR struct kmm_file_s *oldattr;
   FAR struct kmm_file_s *newattr;
 
-  fvdbg("Dup %p->%p\n", oldp, newp);
+  finfo("Dup %p->%p\n", oldp, newp);
 
   /* Recover our private data from the old struct file instance */
 
@@ -279,7 +279,7 @@ static int kmm_dup(FAR const struct file *oldp, FAR struct file *newp)
   newattr = (FAR struct kmm_file_s *)kmm_malloc(sizeof(struct kmm_file_s));
   if (!newattr)
     {
-      fdbg("ERROR: Failed to allocate file attributes\n");
+      ferr("ERROR: Failed to allocate file attributes\n");
       return -ENOMEM;
     }
 
@@ -306,7 +306,7 @@ static int kmm_stat(FAR const char *relpath, FAR struct stat *buf)
 
   if (strcmp(relpath, "kmm") != 0)
     {
-      fdbg("ERROR: relpath is '%s'\n", relpath);
+      ferr("ERROR: relpath is '%s'\n", relpath);
       return -ENOENT;
     }
 

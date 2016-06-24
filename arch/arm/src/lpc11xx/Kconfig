@@ -229,10 +229,11 @@ config CAN_LOOPBACK
 
 config CAN_REGDEBUG
 	bool "Register level debug"
-	depends on DEBUG
+	depends on DEBUG_CAN_INFO
 	default n
 	---help---
-		Output detailed register-level CAN debug information.  Requires also DEBUG and DEBUG_CAN.
+		Output detailed register-level CAN debug information.  Requires also
+		CONFIG_DEBUG_CAN_INFO.
 
 endmenu
 

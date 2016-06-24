@@ -769,7 +769,7 @@ static int sam_rxbuffer(struct sam_dmach_s *dmach, uint32_t paddr,
 
 void weak_function up_dmainitialize(void)
 {
-  dmallvdbg("Initialize DMAC\n");
+  dmainfo("Initialize DMAC\n");
   int i;
 
   /* Initialize global semaphores */
@@ -888,7 +888,7 @@ DMA_HANDLE sam_dmachannel(uint32_t chflags)
 
   sam_givechsem();
 
-  dmavdbg("chflags: %08x returning dmach: %p\n",  (int)chflags, dmach);
+  dmainfo("chflags: %08x returning dmach: %p\n",  (int)chflags, dmach);
   return (DMA_HANDLE)dmach;
 }
 
@@ -914,7 +914,7 @@ void sam_dmaconfig(DMA_HANDLE handle, uint32_t chflags)
 
   /* Set the new DMA channel flags. */
 
-  dmavdbg("chflags: %08x\n",  (int)chflags);
+  dmainfo("chflags: %08x\n",  (int)chflags);
   dmach->dc_flags = chflags;
 }
 
@@ -935,7 +935,7 @@ void sam_dmafree(DMA_HANDLE handle)
 {
   struct sam_dmach_s *dmach = (struct sam_dmach_s *)handle;
 
-  dmavdbg("dmach: %p\n", dmach);
+  dmainfo("dmach: %p\n", dmach);
   DEBUGASSERT((dmach != NULL) && (dmach->dc_inuse));
 
   /* Mark the channel no longer in use.  Clearing the inuse flag is an atomic
@@ -965,12 +965,12 @@ int sam_dmatxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
   size_t maxtransfer;
   int ret = OK;
 
-  dmavdbg("dmach: %p paddr: %08x maddr: %08x nbytes: %d\n",
+  dmainfo("dmach: %p paddr: %08x maddr: %08x nbytes: %d\n",
           dmach, (int)paddr, (int)maddr, (int)nbytes);
   DEBUGASSERT(dmach);
 
 #if CONFIG_SAMDL_DMAC_NDESC > 0
-  dmavdbg("dc_head: %p dc_tail: %p\n", dmach->dc_head, dmach->dc_tail);
+  dmainfo("dc_head: %p dc_tail: %p\n", dmach->dc_head, dmach->dc_tail);
 #endif
 
   /* The maximum transfer size in bytes depends upon the maximum number of
@@ -1039,12 +1039,12 @@ int sam_dmarxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
   size_t maxtransfer;
   int ret = OK;
 
-  dmavdbg("dmach: %p paddr: %08x maddr: %08x nbytes: %d\n",
+  dmainfo("dmach: %p paddr: %08x maddr: %08x nbytes: %d\n",
           dmach, (int)paddr, (int)maddr, (int)nbytes);
   DEBUGASSERT(dmach);
 
 #if CONFIG_SAMDL_DMAC_NDESC > 0
-  dmavdbg("dc_head: %p dc_tail: %p\n", dmach->dc_head, dmach->dc_tail);
+  dmainfo("dc_head: %p dc_tail: %p\n", dmach->dc_head, dmach->dc_tail);
 #endif
 
   /* The maximum transfer size in bytes depends upon the maximum number of
@@ -1115,7 +1115,7 @@ int sam_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg)
   uint8_t memqos;
   int ret = -EINVAL;
 
-  dmavdbg("dmach: %p callback: %p arg: %p\n", dmach, callback, arg);
+  dmainfo("dmach: %p callback: %p arg: %p\n", dmach, callback, arg);
   DEBUGASSERT(dmach != NULL && dmach->dc_chan < SAMDL_NDMACHAN);
   head = &g_base_desc[dmach->dc_chan];
 
@@ -1240,7 +1240,7 @@ void sam_dmastop(DMA_HANDLE handle)
   struct sam_dmach_s *dmach = (struct sam_dmach_s *)handle;
   irqstate_t flags;
 
-  dmavdbg("dmach: %p\n", dmach);
+  dmainfo("dmach: %p\n", dmach);
   DEBUGASSERT(dmach != NULL);
 
   flags = enter_critical_section();
@@ -1259,7 +1259,7 @@ void sam_dmastop(DMA_HANDLE handle)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG_DMA
+#ifdef CONFIG_DEBUG_DMA_INFO
 void sam_dmasample(DMA_HANDLE handle, struct sam_dmaregs_s *regs)
 {
   struct sam_dmach_s *dmach = (struct sam_dmach_s *)handle;
@@ -1274,7 +1274,7 @@ void sam_dmasample(DMA_HANDLE handle, struct sam_dmaregs_s *regs)
   regs->crcdatain  = getreg32(SAM_DMAC_CRCDATAIN);  /* CRC Data Input Register */
   regs->crcchksum  = getreg32(SAM_DMAC_CRCCHKSUM);  /* CRC Checksum Register */
   regs->crcstatus  = getreg8(SAM_DMAC_CRCSTATUS);   /* CRC Status Register */
-  regs->dbgctrl    = getreg8(SAM_DMAC_DBGCTRL);     /* Debug Control Register */
+  regs->errctrl    = getreg8(SAM_DMAC_DBGCTRL);     /* Debug Control Register */
   regs->qosctrl    = getreg8(SAM_DMAC_QOSCTRL);     /* Quality of Service Control Register */
   regs->swtrigctrl = getreg32(SAM_DMAC_SWTRIGCTRL); /* Software Trigger Control Register */
   regs->prictrl0   = getreg32(SAM_DMAC_PRICTRL0);   /* Priority Control 0 Register */
@@ -1291,7 +1291,7 @@ void sam_dmasample(DMA_HANDLE handle, struct sam_dmaregs_s *regs)
   regs->chintflag  = getreg8(SAM_DMAC_CHINTFLAG);   /* Channel Interrupt Flag Status and Clear Register */
   regs->chstatus   = getreg8(SAM_DMAC_CHSTATUS);    /* Channel Status Register */
 }
-#endif /* CONFIG_DEBUG_DMA */
+#endif /* CONFIG_DEBUG_DMA_INFO */
 
 /****************************************************************************
  * Name: sam_dmadump
@@ -1304,26 +1304,26 @@ void sam_dmasample(DMA_HANDLE handle, struct sam_dmaregs_s *regs)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG_DMA
+#ifdef CONFIG_DEBUG_DMA_INFO
 void sam_dmadump(DMA_HANDLE handle, const struct sam_dmaregs_s *regs,
                  const char *msg)
 {
   struct sam_dmach_s *dmach = (struct sam_dmach_s *)handle;
 
-  dmadbg("%s\n", msg);
-  dmadbg("  DMAC Registers:\n");
-  dmadbg("         CTRL: %04x      CRCCTRL: %04x      CRCDATAIN: %08x  CRCCHKSUM: %08x\n",
-         regs->ctrl, regs->crcctrl, regs->crcdatain, regs->crcchksum);
-  dmadbg("    CRCSTATUS: %02x        DBGCTRL: %02x          QOSCTRL: %02x       SWTRIGCTRL: %08x\n",
-         regs->crcstatus, regs->dbgctrl, regs->qosctrl, regs->swtrigctrl);
-  dmadbg("     PRICTRL0: %08x  INTPEND: %04x     INSTSTATUS: %08x     BUSYCH: %08x\n",
-         regs->prictrl0, regs->intpend, regs->intstatus, regs->busych);
-  dmadbg("       PENDCH: %08x   ACTIVE: %08x   BASEADDR: %08x    WRBADDR: %08x\n",
-         regs->pendch, regs->active, regs->baseaddr, regs->wrbaddr);
-  dmadbg("         CHID: %02x       CHCRTRLA: %02x         CHCRTRLB: %08x   CHINFLAG: %02x\n",
-         regs->chid, regs->chctrla, regs->chctrlb, regs->chintflag,
-  dmadbg("     CHSTATUS: %02x\n",
-         regs->chstatus);
+  dmainfo("%s\n", msg);
+  dmainfo("  DMAC Registers:\n");
+  dmainfo("         CTRL: %04x      CRCCTRL: %04x      CRCDATAIN: %08x  CRCCHKSUM: %08x\n",
+          regs->ctrl, regs->crcctrl, regs->crcdatain, regs->crcchksum);
+  dmainfo("    CRCSTATUS: %02x        DBGCTRL: %02x          QOSCTRL: %02x       SWTRIGCTRL: %08x\n",
+          regs->crcstatus, regs->errctrl, regs->qosctrl, regs->swtrigctrl);
+  dmainfo("     PRICTRL0: %08x  INTPEND: %04x     INSTSTATUS: %08x     BUSYCH: %08x\n",
+          regs->prictrl0, regs->intpend, regs->intstatus, regs->busych);
+  dmainfo("       PENDCH: %08x   ACTIVE: %08x   BASEADDR: %08x    WRBADDR: %08x\n",
+          regs->pendch, regs->active, regs->baseaddr, regs->wrbaddr);
+  dmainfo("         CHID: %02x       CHCRTRLA: %02x         CHCRTRLB: %08x   CHINFLAG: %02x\n",
+          regs->chid, regs->chctrla, regs->chctrlb, regs->chintflag,
+  dmainfo("     CHSTATUS: %02x\n",
+          regs->chstatus);
 }
-#endif /* CONFIG_DEBUG_DMA */
+#endif /* CONFIG_DEBUG_DMA_INFO */
 #endif /* CONFIG_SAMDL_DMAC */

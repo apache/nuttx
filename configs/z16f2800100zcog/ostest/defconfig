@@ -41,10 +41,10 @@ CONFIG_WINDOWS_CYGWIN=y
 #
 # Debug Options
 #
-CONFIG_DEBUG=y
+CONFIG_DEBUG_FEATURES=y
 # CONFIG_ARCH_HAVE_STACKCHECK is not set
 # CONFIG_ARCH_HAVE_HEAPCHECK is not set
-# CONFIG_DEBUG_VERBOSE is not set
+# CONFIG_DEBUG_INFO is not set
 
 #
 # Subsystem Debug Options
@@ -335,7 +335,6 @@ CONFIG_UART1_2STOP=0
 # System Logging
 #
 
-# CONFIG_SYSLOG is not set
 
 #
 # Graphics Support

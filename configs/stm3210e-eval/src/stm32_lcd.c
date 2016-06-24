@@ -36,6 +36,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  **************************************************************************************/
+
 /* This driver supports the following LCDs:
  *
  * 1. Ampire AM-240320LTNQW00H
@@ -81,6 +82,7 @@
 /**************************************************************************************
  * Pre-processor Definitions
  **************************************************************************************/
+
 /* Configuration **********************************************************************/
 /* Check contrast selection */
 
@@ -156,20 +158,6 @@
  */
 
 #define SPFD5408B_RDSHIFT 5
-
-/* Define CONFIG_DEBUG_LCD to enable detailed LCD debug output. Verbose debug must
- * also be enabled.
- */
-
-#ifndef CONFIG_DEBUG
-#  undef CONFIG_DEBUG_VERBOSE
-#  undef CONFIG_DEBUG_GRAPHICS
-#  undef CONFIG_DEBUG_LCD
-#endif
-
-#ifndef CONFIG_DEBUG_VERBOSE
-#  undef CONFIG_DEBUG_LCD
-#endif
 
 /* Display/Color Properties ***********************************************************/
 /* Display Resolution */
@@ -308,14 +296,6 @@
 
 #define SPFD5408B_ID          0x5408
 #define R61580_ID             0x1580
-
-/* Debug ******************************************************************************/
-
-#ifdef CONFIG_DEBUG_LCD
-# define lcddbg(format, ...)  vdbg(format, ##__VA_ARGS__)
-#else
-# define lcddbg(x...)
-#endif
 
 /**************************************************************************************
  * Private Type Definition
@@ -742,7 +722,7 @@ static int stm3210e_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *bu
 
   /* Buffer must be provided and aligned to a 16-bit address boundary */
 
-  lcddbg("row: %d col: %d npixels: %d\n", row, col, npixels);
+  lcdinfo("row: %d col: %d npixels: %d\n", row, col, npixels);
   DEBUGASSERT(buffer && ((uintptr_t)buffer & 1) == 0);
 
   /* Write the run to GRAM. */
@@ -835,7 +815,7 @@ static int stm3210e_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
 
   /* Buffer must be provided and aligned to a 16-bit address boundary */
 
-  lcddbg("row: %d col: %d npixels: %d\n", row, col, npixels);
+  lcdinfo("row: %d col: %d npixels: %d\n", row, col, npixels);
   DEBUGASSERT(buffer && ((uintptr_t)buffer & 1) == 0);
 
   /* Configure according to the LCD type */
@@ -952,7 +932,7 @@ static int stm3210e_getvideoinfo(FAR struct lcd_dev_s *dev,
                               FAR struct fb_videoinfo_s *vinfo)
 {
   DEBUGASSERT(dev && vinfo);
-  gvdbg("fmt: %d xres: %d yres: %d nplanes: %d\n",
+  ginfo("fmt: %d xres: %d yres: %d nplanes: %d\n",
          g_videoinfo.fmt, g_videoinfo.xres, g_videoinfo.yres, g_videoinfo.nplanes);
   memcpy(vinfo, &g_videoinfo, sizeof(struct fb_videoinfo_s));
   return OK;
@@ -970,7 +950,7 @@ static int stm3210e_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno
                               FAR struct lcd_planeinfo_s *pinfo)
 {
   DEBUGASSERT(dev && pinfo && planeno == 0);
-  gvdbg("planeno: %d bpp: %d\n", planeno, g_planeinfo.bpp);
+  ginfo("planeno: %d bpp: %d\n", planeno, g_planeinfo.bpp);
   memcpy(pinfo, &g_planeinfo, sizeof(struct lcd_planeinfo_s));
   return OK;
 }
@@ -986,7 +966,7 @@ static int stm3210e_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno
 
 static int stm3210e_getpower(struct lcd_dev_s *dev)
 {
-  gvdbg("power: %d\n", 0);
+  ginfo("power: %d\n", 0);
   return g_lcddev.power;
 }
 
@@ -1038,7 +1018,7 @@ static int stm3210e_poweroff(void)
 
 static int stm3210e_setpower(struct lcd_dev_s *dev, int power)
 {
-  gvdbg("power: %d\n", power);
+  ginfo("power: %d\n", power);
   DEBUGASSERT((unsigned)power <= CONFIG_LCD_MAXPOWER);
 
   /* Set new power level */
@@ -1114,7 +1094,7 @@ static int stm3210e_setpower(struct lcd_dev_s *dev, int power)
 
 static int stm3210e_getcontrast(struct lcd_dev_s *dev)
 {
-  gvdbg("Not implemented\n");
+  ginfo("Not implemented\n");
   return -ENOSYS;
 }
 
@@ -1128,7 +1108,7 @@ static int stm3210e_getcontrast(struct lcd_dev_s *dev)
 
 static int stm3210e_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
 {
-  gvdbg("contrast: %d\n", contrast);
+  ginfo("contrast: %d\n", contrast);
   return -ENOSYS;
 }
 
@@ -1321,7 +1301,7 @@ static inline void stm3210e_lcdinitialize(void)
    */
 
   id = stm3210e_readreg(LCD_REG_0);
-  lcddbg("LCD ID: %04x\n", id);
+  lcdinfo("LCD ID: %04x\n", id);
 
   /* Check if the ID is for the SPFD5408B */
 
@@ -1331,7 +1311,7 @@ static inline void stm3210e_lcdinitialize(void)
       /* Set the LCD type for the SPFD5408B */
 
       g_lcddev.type = LCD_TYPE_SPFD5408B;
-      lcddbg("LCD type: %d\n", g_lcddev.type);
+      lcdinfo("LCD type: %d\n", g_lcddev.type);
 
       /* Start Initial Sequence */
 
@@ -1436,7 +1416,7 @@ static inline void stm3210e_lcdinitialize(void)
       /* Set the LCD type for the R61580 */
 
       g_lcddev.type = LCD_TYPE_R61580;
-      lcddbg("LCD type: %d\n", g_lcddev.type);
+      lcdinfo("LCD type: %d\n", g_lcddev.type);
 
       /* Start Initial Sequence */
 
@@ -1506,7 +1486,7 @@ static inline void stm3210e_lcdinitialize(void)
       /* Set the LCD type for the AM240320 */
 
       g_lcddev.type = LCD_TYPE_AM240320;
-      lcddbg("LCD type: %d\n", g_lcddev.type);
+      lcdinfo("LCD type: %d\n", g_lcddev.type);
 
       /* Start Initial Sequence */
 
@@ -1595,7 +1575,7 @@ static inline void stm3210e_lcdinitialize(void)
       stm3210e_writereg(LCD_REG_3, 0x1018);
       stm3210e_writereg(LCD_REG_7, 0);       /* Display off */
 #else
-      lcddbg("Unsupported LCD type\n");
+      lcderr("ERROR: Unsupported LCD type\n");
 #endif
   }
 }
@@ -1743,25 +1723,25 @@ static void stm3210e_backlight(void)
 
   /* Dump timer1 registers */
 
-  lcddbg("APB2ENR: %08x\n", getreg32(STM32_RCC_APB2ENR));
-  lcddbg("CR1:     %04x\n", getreg32(STM32_TIM1_CR1));
-  lcddbg("CR2:     %04x\n", getreg32(STM32_TIM1_CR2));
-  lcddbg("SMCR:    %04x\n", getreg32(STM32_TIM1_SMCR));
-  lcddbg("DIER:    %04x\n", getreg32(STM32_TIM1_DIER));
-  lcddbg("SR:      %04x\n", getreg32(STM32_TIM1_SR));
-  lcddbg("BDTR:    %04x\n", getreg32(STM32_TIM1_BDTR));
-  lcddbg("CCMR1:   %04x\n", getreg32(STM32_TIM1_CCMR1));
-  lcddbg("CCMR2:   %04x\n", getreg32(STM32_TIM1_CCMR2));
-  lcddbg("CCER:    %04x\n", getreg32(STM32_TIM1_CCER));
-  lcddbg("CNT:     %04x\n", getreg32(STM32_TIM1_CNT));
-  lcddbg("PSC:     %04x\n", getreg32(STM32_TIM1_PSC));
-  lcddbg("ARR:     %04x\n", getreg32(STM32_TIM1_ARR));
-  lcddbg("RCR:     %04x\n", getreg32(STM32_TIM1_RCR));
-  lcddbg("CCR1:    %04x\n", getreg32(STM32_TIM1_CCR1));
-  lcddbg("CCR2:    %04x\n", getreg32(STM32_TIM1_CCR2));
-  lcddbg("CCR3:    %04x\n", getreg32(STM32_TIM1_CCR3));
-  lcddbg("CCR4:    %04x\n", getreg32(STM32_TIM1_CCR4));
-  lcddbg("DMAR:    %04x\n", getreg32(STM32_TIM1_DMAR));
+  lcdinfo("APB2ENR: %08x\n", getreg32(STM32_RCC_APB2ENR));
+  lcdinfo("CR1:     %04x\n", getreg32(STM32_TIM1_CR1));
+  lcdinfo("CR2:     %04x\n", getreg32(STM32_TIM1_CR2));
+  lcdinfo("SMCR:    %04x\n", getreg32(STM32_TIM1_SMCR));
+  lcdinfo("DIER:    %04x\n", getreg32(STM32_TIM1_DIER));
+  lcdinfo("SR:      %04x\n", getreg32(STM32_TIM1_SR));
+  lcdinfo("BDTR:    %04x\n", getreg32(STM32_TIM1_BDTR));
+  lcdinfo("CCMR1:   %04x\n", getreg32(STM32_TIM1_CCMR1));
+  lcdinfo("CCMR2:   %04x\n", getreg32(STM32_TIM1_CCMR2));
+  lcdinfo("CCER:    %04x\n", getreg32(STM32_TIM1_CCER));
+  lcdinfo("CNT:     %04x\n", getreg32(STM32_TIM1_CNT));
+  lcdinfo("PSC:     %04x\n", getreg32(STM32_TIM1_PSC));
+  lcdinfo("ARR:     %04x\n", getreg32(STM32_TIM1_ARR));
+  lcdinfo("RCR:     %04x\n", getreg32(STM32_TIM1_RCR));
+  lcdinfo("CCR1:    %04x\n", getreg32(STM32_TIM1_CCR1));
+  lcdinfo("CCR2:    %04x\n", getreg32(STM32_TIM1_CCR2));
+  lcdinfo("CCR3:    %04x\n", getreg32(STM32_TIM1_CCR3));
+  lcdinfo("CCR4:    %04x\n", getreg32(STM32_TIM1_CCR4));
+  lcdinfo("DMAR:    %04x\n", getreg32(STM32_TIM1_DMAR));
 #endif
 }
 #endif
@@ -1786,16 +1766,16 @@ int board_lcd_initialize(void)
   int ret;
 #endif
 
-  gvdbg("Initializing\n");
+  ginfo("Initializing\n");
 
   /* Register to receive power management callbacks */
 
 #ifdef CONFIG_PM
   ret = pm_register(&g_lcdcb);
   if (ret != OK)
-  {
-    lcddbg("ERROR: pm_register failed: %d\n", ret);
-  }
+    {
+      lcderr("ERROR: pm_register failed: %d\n", ret);
+    }
 #endif
 
   /* Configure GPIO pins and configure the FSMC to support the LCD */

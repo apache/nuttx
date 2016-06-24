@@ -109,7 +109,7 @@ typedef FAR void *DMA_HANDLE;
 
 typedef void (*dma_callback_t)(DMA_HANDLE handle, uint8_t status, void *arg);
 
-#ifdef CONFIG_DEBUG_DMA
+#ifdef CONFIG_DEBUG_DMA_INFO
 struct efm32_dmaregs_s
 {
   uint32_t status;            /* DMA Status Register */
@@ -282,7 +282,7 @@ void efm32_dmastop(DMA_HANDLE handle);
  *
  ************************************************************************************/
 
-#ifdef CONFIG_DEBUG_DMA
+#ifdef CONFIG_DEBUG_DMA_INFO
 void efm32_dmasample(DMA_HANDLE handle, struct efm32_dmaregs_s *regs);
 #else
 #  define efm32_dmasample(handle,regs)
@@ -299,7 +299,7 @@ void efm32_dmasample(DMA_HANDLE handle, struct efm32_dmaregs_s *regs);
  *
  ************************************************************************************/
 
-#ifdef CONFIG_DEBUG_DMA
+#ifdef CONFIG_DEBUG_DMA_INFO
 void efm32_dmadump(DMA_HANDLE handle, const struct efm32_dmaregs_s *regs,
                    const char *msg);
 #else

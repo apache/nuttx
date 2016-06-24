@@ -209,7 +209,7 @@ static struct sam_tickless_s g_tickless;
 
 static void sam_oneshot_handler(void *arg)
 {
-  tcllvdbg("Expired...\n");
+  tmrinfo("Expired...\n");
   sched_timer_expiration();
 }
 
@@ -256,7 +256,7 @@ void up_timer_initialize(void)
                                CONFIG_USEC_PER_TICK);
   if (ret < 0)
     {
-      tclldbg("ERROR: sam_oneshot_initialize failed\n");
+      tmrerr("ERROR: sam_oneshot_initialize failed\n");
       PANIC();
     }
 
@@ -268,7 +268,7 @@ void up_timer_initialize(void)
   ret = sam_oneshot_max_delay(&g_tickless.oneshot, &max_delay);
   if (ret < 0)
     {
-      tclldbg("ERROR: sam_oneshot_max_delay failed\n");
+      tmrerr("ERROR: sam_oneshot_max_delay failed\n");
       PANIC();
     }
 
@@ -292,7 +292,7 @@ void up_timer_initialize(void)
                                CONFIG_USEC_PER_TICK);
   if (ret < 0)
     {
-      tclldbg("ERROR: sam_freerun_initialize failed\n");
+      tmrerr("ERROR: sam_freerun_initialize failed\n");
       PANIC();
     }
 

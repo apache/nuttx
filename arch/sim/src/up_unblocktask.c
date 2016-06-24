@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/sim/src/up_unblocktask.c
  *
- *   Copyright (C) 2007-2009, 2013, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2013, 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -77,7 +77,7 @@ void up_unblock_task(FAR struct tcb_s *tcb)
   ASSERT((tcb->task_state >= FIRST_BLOCKED_STATE) &&
          (tcb->task_state <= LAST_BLOCKED_STATE));
 
-  sdbg("Unblocking TCB=%p\n", tcb);
+  sinfo("Unblocking TCB=%p\n", tcb);
 
   /* Remove the task from the blocked task list */
 
@@ -107,7 +107,7 @@ void up_unblock_task(FAR struct tcb_s *tcb)
            */
 
           rtcb = this_task();
-          sdbg("New Active Task TCB=%p\n", rtcb);
+          sinfo("New Active Task TCB=%p\n", rtcb);
 
           /* The way that we handle signals in the simulation is kind of
            * a kludge.  This would be unsafe in a truly multi-threaded, interrupt
@@ -116,7 +116,7 @@ void up_unblock_task(FAR struct tcb_s *tcb)
 
           if (rtcb->xcp.sigdeliver)
             {
-              sdbg("Delivering signals TCB=%p\n", rtcb);
+              sinfo("Delivering signals TCB=%p\n", rtcb);
               ((sig_deliver_t)rtcb->xcp.sigdeliver)(rtcb);
               rtcb->xcp.sigdeliver = NULL;
             }

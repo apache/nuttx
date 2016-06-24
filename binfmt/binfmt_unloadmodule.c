@@ -99,7 +99,7 @@ static inline int exec_dtors(FAR struct binary_s *binp)
   ret = up_addrenv_select(&binp->addrenv, &oldenv);
   if (ret < 0)
     {
-      bdbg("ERROR: up_addrenv_select() failed: %d\n", ret);
+      berr("ERROR: up_addrenv_select() failed: %d\n", ret);
       return ret;
     }
 #endif
@@ -108,7 +108,7 @@ static inline int exec_dtors(FAR struct binary_s *binp)
 
   for (i = 0; i < binp->ndtors; i++)
     {
-      bvdbg("Calling dtor %d at %p\n", i, (FAR void *)dtor);
+      binfo("Calling dtor %d at %p\n", i, (FAR void *)dtor);
 
       (*dtor)();
       dtor++;
@@ -161,7 +161,7 @@ int unload_module(FAR struct binary_s *binp)
           ret = binp->unload(binp);
           if (ret < 0)
             {
-              bdbg("binp->unload() failed: %d\n", ret);
+              berr("binp->unload() failed: %d\n", ret);
               set_errno(-ret);
               return ERROR;
             }
@@ -173,7 +173,7 @@ int unload_module(FAR struct binary_s *binp)
       ret = exec_dtors(binp);
       if (ret < 0)
         {
-          bdbg("exec_ctors() failed: %d\n", ret);
+          berr("exec_ctors() failed: %d\n", ret);
           set_errno(-ret);
           return ERROR;
         }
@@ -187,7 +187,7 @@ int unload_module(FAR struct binary_s *binp)
 
       if (binp->mapped)
         {
-          bvdbg("Unmapping address space: %p\n", binp->mapped);
+          binfo("Unmapping address space: %p\n", binp->mapped);
 
           munmap(binp->mapped, binp->mapsize);
         }
@@ -198,7 +198,7 @@ int unload_module(FAR struct binary_s *binp)
         {
           if (binp->alloc[i])
             {
-              bvdbg("Freeing alloc[%d]: %p\n", i, binp->alloc[i]);
+              binfo("Freeing alloc[%d]: %p\n", i, binp->alloc[i]);
               kumm_free((FAR void *)binp->alloc[i]);
             }
         }

@@ -84,7 +84,7 @@ static inline void _files_semtake(FAR struct filelist *list)
  * Name: file_detach
  *
  * Description:
- *   This function is used to device drivers to create a task-independent
+ *   This function is used in device drivers to create a task-independent
  *   handle to an entity in the file system.  file_detach() duplicates the
  *   'struct file' that underlies the file descriptor, then closes the file
  *   descriptor.

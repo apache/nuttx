@@ -654,7 +654,7 @@ void lpc17_dmastop(DMA_HANDLE handle)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG_DMA
+#ifdef CONFIG__DEBUG_DMA_INFO
 void lpc17_dmasample(DMA_HANDLE handle, struct lpc17_dmaregs_s *regs)
 {
   struct lpc17_dmach_s *dmach = (DMA_HANDLE)handle;
@@ -686,7 +686,7 @@ void lpc17_dmasample(DMA_HANDLE handle, struct lpc17_dmaregs_s *regs)
   regs->ch.control      = getreg32(base + LPC17_DMACH_CONTROL_OFFSET);
   regs->ch.config       = getreg32(base + LPC17_DMACH_CONFIG_OFFSET);
 }
-#endif /* CONFIG_DEBUG_DMA */
+#endif /* CONFIG__DEBUG_DMA_INFO */
 
 /****************************************************************************
  * Name: lpc17_dmadump
@@ -696,7 +696,7 @@ void lpc17_dmasample(DMA_HANDLE handle, struct lpc17_dmaregs_s *regs)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG_DMA
+#ifdef CONFIG__DEBUG_DMA_INFO
 void lpc17_dmadump(DMA_HANDLE handle, const struct lpc17_dmaregs_s *regs,
                    const char *msg)
 {
@@ -707,49 +707,49 @@ void lpc17_dmadump(DMA_HANDLE handle, const struct lpc17_dmaregs_s *regs,
 
   /* Dump the sampled global DMA registers */
 
-  dmadbg("Global GPDMA Registers: %s\n", msg);
-  dmadbg("       INTST[%08x]: %08x\n",
-         LPC17_DMA_INTST, regs->gbl.intst);
-  dmadbg("     INTTCST[%08x]: %08x\n",
-         LPC17_DMA_INTTCST, regs->gbl.inttcst);
-  dmadbg("    INTERRST[%08x]: %08x\n",
-         LPC17_DMA_INTERRST, regs->gbl.interrst);
-  dmadbg("  RAWINTTCST[%08x]: %08x\n",
-         LPC17_DMA_RAWINTTCST, regs->gbl.rawinttcst);
-  dmadbg(" RAWINTERRST[%08x]: %08x\n",
-         LPC17_DMA_RAWINTERRST, regs->gbl.rawinterrst);
-  dmadbg("   ENBLDCHNS[%08x]: %08x\n",
-         LPC17_DMA_ENBLDCHNS, regs->gbl.enbldchns);
-  dmadbg("    SOFTBREQ[%08x]: %08x\n",
-         LPC17_DMA_SOFTBREQ, regs->gbl.softbreq);
-  dmadbg("    SOFTSREQ[%08x]: %08x\n",
-         LPC17_DMA_SOFTSREQ, regs->gbl.softsreq);
-  dmadbg("   SOFTLBREQ[%08x]: %08x\n",
-         LPC17_DMA_SOFTLBREQ, regs->gbl.softlbreq);
-  dmadbg("   SOFTLSREQ[%08x]: %08x\n",
-         LPC17_DMA_SOFTLSREQ, regs->gbl.softlsreq);
-  dmadbg("      CONFIG[%08x]: %08x\n",
-         LPC17_DMA_CONFIG, regs->gbl.config);
-  dmadbg("        SYNC[%08x]: %08x\n",
-         LPC17_DMA_SYNC, regs->gbl.sync);
+  dmainfo("Global GPDMA Registers: %s\n", msg);
+  dmainfo("       INTST[%08x]: %08x\n",
+          LPC17_DMA_INTST, regs->gbl.intst);
+  dmainfo("     INTTCST[%08x]: %08x\n",
+          LPC17_DMA_INTTCST, regs->gbl.inttcst);
+  dmainfo("    INTERRST[%08x]: %08x\n",
+          LPC17_DMA_INTERRST, regs->gbl.interrst);
+  dmainfo("  RAWINTTCST[%08x]: %08x\n",
+          LPC17_DMA_RAWINTTCST, regs->gbl.rawinttcst);
+  dmainfo(" RAWINTERRST[%08x]: %08x\n",
+          LPC17_DMA_RAWINTERRST, regs->gbl.rawinterrst);
+  dmainfo("   ENBLDCHNS[%08x]: %08x\n",
+          LPC17_DMA_ENBLDCHNS, regs->gbl.enbldchns);
+  dmainfo("    SOFTBREQ[%08x]: %08x\n",
+          LPC17_DMA_SOFTBREQ, regs->gbl.softbreq);
+  dmainfo("    SOFTSREQ[%08x]: %08x\n",
+          LPC17_DMA_SOFTSREQ, regs->gbl.softsreq);
+  dmainfo("   SOFTLBREQ[%08x]: %08x\n",
+          LPC17_DMA_SOFTLBREQ, regs->gbl.softlbreq);
+  dmainfo("   SOFTLSREQ[%08x]: %08x\n",
+          LPC17_DMA_SOFTLSREQ, regs->gbl.softlsreq);
+  dmainfo("      CONFIG[%08x]: %08x\n",
+          LPC17_DMA_CONFIG, regs->gbl.config);
+  dmainfo("        SYNC[%08x]: %08x\n",
+          LPC17_DMA_SYNC, regs->gbl.sync);
 
   /* Dump the DMA channel registers */
 
   base = LPC17_DMACH_BASE((uint32_t)dmach->chn);
 
-  dmadbg("Channel GPDMA Registers: %d\n", dmach->chn);
+  dmainfo("Channel GPDMA Registers: %d\n", dmach->chn);
 
-  dmadbg("     SRCADDR[%08x]: %08x\n",
-         base + LPC17_DMACH_SRCADDR_OFFSET, regs->ch.srcaddr);
-  dmadbg("    DESTADDR[%08x]: %08x\n",
-         base + LPC17_DMACH_DESTADDR_OFFSET, regs->ch.destaddr);
-  dmadbg("         LLI[%08x]: %08x\n",
-         base + LPC17_DMACH_LLI_OFFSET, regs->ch.lli);
-  dmadbg("     CONTROL[%08x]: %08x\n",
-         base + LPC17_DMACH_CONTROL_OFFSET, regs->ch.control);
-  dmadbg("      CONFIG[%08x]: %08x\n",
-         base + LPC17_DMACH_CONFIG_OFFSET, regs->ch.config);
+  dmainfo("     SRCADDR[%08x]: %08x\n",
+          base + LPC17_DMACH_SRCADDR_OFFSET, regs->ch.srcaddr);
+  dmainfo("    DESTADDR[%08x]: %08x\n",
+          base + LPC17_DMACH_DESTADDR_OFFSET, regs->ch.destaddr);
+  dmainfo("         LLI[%08x]: %08x\n",
+          base + LPC17_DMACH_LLI_OFFSET, regs->ch.lli);
+  dmainfo("     CONTROL[%08x]: %08x\n",
+          base + LPC17_DMACH_CONTROL_OFFSET, regs->ch.control);
+  dmainfo("      CONFIG[%08x]: %08x\n",
+          base + LPC17_DMACH_CONFIG_OFFSET, regs->ch.config);
 }
-#endif /* CONFIG_DEBUG_DMA */
+#endif /* CONFIG__DEBUG_DMA_INFO */
 
 #endif /* CONFIG_LPC17_GPDMA */

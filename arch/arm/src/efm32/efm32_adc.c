@@ -716,23 +716,23 @@ endif /* defined(ADC_COUNT) && (ADC_COUNT > 0) */
 #ifdef ADC_HAVE_TIMER
 static void adc_tim_dumpregs(struct efm32_dev_s *priv, FAR const char *msg)
 {
-#if defined(CONFIG_DEBUG_ANALOG) && defined(CONFIG_DEBUG_VERBOSE)
-  avdbg("%s:\n", msg);
-  avdbg("  CR1: %04x CR2:  %04x SMCR:  %04x DIER:  %04x\n",
+#if defined(CONFIG_DEBUG_ANALOG) && defined(CONFIG_DEBUG_INFO)
+  ainfo("%s:\n", msg);
+  ainfo("  CR1: %04x CR2:  %04x SMCR:  %04x DIER:  %04x\n",
         tim_getreg(priv, EFM32_GTIM_CR1_OFFSET),
         tim_getreg(priv, EFM32_GTIM_CR2_OFFSET),
         tim_getreg(priv, EFM32_GTIM_SMCR_OFFSET),
         tim_getreg(priv, EFM32_GTIM_DIER_OFFSET));
-  avdbg("   SR: %04x EGR:  0000 CCMR1: %04x CCMR2: %04x\n",
+  ainfo("   SR: %04x EGR:  0000 CCMR1: %04x CCMR2: %04x\n",
         tim_getreg(priv, EFM32_GTIM_SR_OFFSET),
         tim_getreg(priv, EFM32_GTIM_CCMR1_OFFSET),
         tim_getreg(priv, EFM32_GTIM_CCMR2_OFFSET));
-  avdbg(" CCER: %04x CNT:  %04x PSC:   %04x ARR:   %04x\n",
+  ainfo(" CCER: %04x CNT:  %04x PSC:   %04x ARR:   %04x\n",
         tim_getreg(priv, EFM32_GTIM_CCER_OFFSET),
         tim_getreg(priv, EFM32_GTIM_CNT_OFFSET),
         tim_getreg(priv, EFM32_GTIM_PSC_OFFSET),
         tim_getreg(priv, EFM32_GTIM_ARR_OFFSET));
-  avdbg(" CCR1: %04x CCR2: %04x CCR3:  %04x CCR4:  %04x\n",
+  ainfo(" CCR1: %04x CCR2: %04x CCR3:  %04x CCR4:  %04x\n",
         tim_getreg(priv, EFM32_GTIM_CCR1_OFFSET),
         tim_getreg(priv, EFM32_GTIM_CCR2_OFFSET),
         tim_getreg(priv, EFM32_GTIM_CCR3_OFFSET),
@@ -740,7 +740,7 @@ static void adc_tim_dumpregs(struct efm32_dev_s *priv, FAR const char *msg)
 
   if (priv->tbase == EFM32_TIM1_BASE || priv->tbase == EFM32_TIM8_BASE)
     {
-      avdbg("  RCR: %04x BDTR: %04x DCR:   %04x DMAR:  %04x\n",
+      ainfo("  RCR: %04x BDTR: %04x DCR:   %04x DMAR:  %04x\n",
             tim_getreg(priv, EFM32_ATIM_RCR_OFFSET),
             tim_getreg(priv, EFM32_ATIM_BDTR_OFFSET),
             tim_getreg(priv, EFM32_ATIM_DCR_OFFSET),
@@ -748,7 +748,7 @@ static void adc_tim_dumpregs(struct efm32_dev_s *priv, FAR const char *msg)
     }
   else
     {
-      avdbg("  DCR: %04x DMAR: %04x\n",
+      ainfo("  DCR: %04x DMAR: %04x\n",
             tim_getreg(priv, EFM32_GTIM_DCR_OFFSET),
             tim_getreg(priv, EFM32_GTIM_DMAR_OFFSET));
     }
@@ -775,7 +775,7 @@ static void adc_startconv(struct efm32_dev_s *priv, bool enable)
 {
   uint32_t regval;
 
-  avdbg("enable: %d\n", enable);
+  ainfo("enable: %d\n", enable);
 
   regval = adc_getreg(priv, EFM32_ADC_CR2_OFFSET);
   if (enable)
@@ -864,7 +864,7 @@ static void adc_enable(FAR struct efm32_dev_s *priv, bool enable)
 {
   uint32_t regval;
 
-  avdbg("enable: %d\n", enable);
+  ainfo("enable: %d\n", enable);
 
   regval  = adc_getreg(priv, EFM32_ADC_CR2_OFFSET);
   if (enable)
@@ -922,7 +922,7 @@ static void adc_reset(FAR struct adc_dev_s *dev)
   int ret;
 #endif
 
-  avdbg("intf: ADC%d\n", priv->intf);
+  ainfo("intf: ADC%d\n", priv->intf);
   flags = enter_critical_section();
 
   /* Enable ADC reset state */
@@ -1040,11 +1040,11 @@ static void adc_reset(FAR struct adc_dev_s *dev)
 
   leave_critical_section(flags);
 
-  avdbg("SR:   0x%08x CR1:  0x%08x CR2:  0x%08x\n",
+  ainfo("SR:   0x%08x CR1:  0x%08x CR2:  0x%08x\n",
         adc_getreg(priv, EFM32_ADC_SR_OFFSET),
         adc_getreg(priv, EFM32_ADC_CR1_OFFSET),
         adc_getreg(priv, EFM32_ADC_CR2_OFFSET));
-  avdbg("SQR1: 0x%08x SQR2: 0x%08x SQR3: 0x%08x\n",
+  ainfo("SQR1: 0x%08x SQR2: 0x%08x SQR3: 0x%08x\n",
         adc_getreg(priv, EFM32_ADC_SQR1_OFFSET),
         adc_getreg(priv, EFM32_ADC_SQR2_OFFSET),
         adc_getreg(priv, EFM32_ADC_SQR3_OFFSET));
@@ -1081,7 +1081,7 @@ static int adc_setup(FAR struct adc_dev_s *dev)
 
       /* Enable the ADC interrupt */
 
-      avdbg("Enable the ADC interrupt: irq=%d\n", priv->irq);
+      ainfo("Enable the ADC interrupt: irq=%d\n", priv->irq);
       up_enable_irq(priv->irq);
     }
 
@@ -1132,7 +1132,7 @@ static void adc_rxint(FAR struct adc_dev_s *dev, bool enable)
   FAR struct efm32_dev_s *priv = (FAR struct efm32_dev_s *)dev->ad_priv;
   uint32_t regval;
 
-  avdbg("intf: %d enable: %d\n", priv->intf, enable);
+  ainfo("intf: %d enable: %d\n", priv->intf, enable);
 
   regval = adc_getreg(priv, EFM32_ADC_CR1_OFFSET);
   if (enable)
@@ -1191,7 +1191,7 @@ static int adc_interrupt(FAR struct adc_dev_s *dev)
   adcsr = adc_getreg(priv, EFM32_ADC_SR_OFFSET);
   if ((adcsr & ADC_SR_AWD) != 0)
     {
-      alldbg("WARNING: Analog Watchdog, Value converted out of range!\n");
+      awarn("WARNING: Analog Watchdog, Value converted out of range!\n");
     }
 
   /* EOC: End of conversion */
@@ -1271,12 +1271,12 @@ struct adc_dev_s *efm32_adcinitialize(int intf, const uint8_t *chanlist, int nch
   FAR struct adc_dev_s   *dev;
   FAR struct efm32_dev_s *priv;
 
-  avdbg("intf: %d nchannels: %d\n", intf, nchannels);
+  ainfo("intf: %d nchannels: %d\n", intf, nchannels);
 
 #ifdef CONFIG_EFM32_ADC1
   if (intf == 1)
     {
-      avdbg("ADC1 Selected\n");
+      ainfo("ADC1 Selected\n");
       dev = &g_adcdev1;
     }
   else
@@ -1284,7 +1284,7 @@ struct adc_dev_s *efm32_adcinitialize(int intf, const uint8_t *chanlist, int nch
 #ifdef CONFIG_EFM32_ADC2
   if (intf == 2)
     {
-      avdbg("ADC2 Selected\n");
+      ainfo("ADC2 Selected\n");
       dev = &g_adcdev2;
     }
   else
@@ -1292,13 +1292,13 @@ struct adc_dev_s *efm32_adcinitialize(int intf, const uint8_t *chanlist, int nch
 #ifdef CONFIG_EFM32_ADC3
   if (intf == 3)
     {
-      avdbg("ADC3 Selected\n");
+      ainfo("ADC3 Selected\n");
       dev = &g_adcdev3;
     }
   else
 #endif
     {
-      adbg("No ADC interface defined\n");
+      aerr("ERROR: No ADC interface defined\n");
       return NULL;
     }
 

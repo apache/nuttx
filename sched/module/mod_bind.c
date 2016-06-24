@@ -73,7 +73,7 @@ static inline int mod_readrel(FAR struct mod_loadinfo_s *loadinfo,
 
   if (index < 0 || index > (relsec->sh_size / sizeof(Elf32_Rel)))
     {
-      sdbg("Bad relocation symbol index: %d\n", index);
+      serr("ERROR: Bad relocation symbol index: %d\n", index);
       return -EINVAL;
     }
 
@@ -125,7 +125,7 @@ static int mod_relocate(FAR struct mod_loadinfo_s *loadinfo, int relidx)
       ret = mod_readrel(loadinfo, relsec, i, &rel);
       if (ret < 0)
         {
-          sdbg("Section %d reloc %d: Failed to read relocation entry: %d\n",
+          serr("ERROR: Section %d reloc %d: Failed to read relocation entry: %d\n",
                relidx, i, ret);
           return ret;
         }
@@ -141,7 +141,7 @@ static int mod_relocate(FAR struct mod_loadinfo_s *loadinfo, int relidx)
       ret = mod_readsym(loadinfo, symidx, &sym);
       if (ret < 0)
         {
-          sdbg("Section %d reloc %d: Failed to read symbol[%d]: %d\n",
+          serr("ERROR: Section %d reloc %d: Failed to read symbol[%d]: %d\n",
                relidx, i, symidx, ret);
           return ret;
         }
@@ -163,13 +163,13 @@ static int mod_relocate(FAR struct mod_loadinfo_s *loadinfo, int relidx)
 
           if (ret == -ESRCH)
             {
-              sdbg("Section %d reloc %d: Undefined symbol[%d] has no name: %d\n",
+              serr("ERROR: Section %d reloc %d: Undefined symbol[%d] has no name: %d\n",
                   relidx, i, symidx, ret);
               psym = NULL;
             }
           else
             {
-              sdbg("Section %d reloc %d: Failed to get value of symbol[%d]: %d\n",
+              serr("ERROR: Section %d reloc %d: Failed to get value of symbol[%d]: %d\n",
                   relidx, i, symidx, ret);
               return ret;
             }
@@ -179,7 +179,7 @@ static int mod_relocate(FAR struct mod_loadinfo_s *loadinfo, int relidx)
 
       if (rel.r_offset < 0 || rel.r_offset > dstsec->sh_size - sizeof(uint32_t))
         {
-          sdbg("Section %d reloc %d: Relocation address out of range, offset %d size %d\n",
+          serr("ERROR: Section %d reloc %d: Relocation address out of range, offset %d size %d\n",
                relidx, i, rel.r_offset, dstsec->sh_size);
           return -EINVAL;
         }
@@ -191,7 +191,7 @@ static int mod_relocate(FAR struct mod_loadinfo_s *loadinfo, int relidx)
       ret = up_relocate(&rel, psym, addr);
       if (ret < 0)
         {
-          sdbg("ERROR: Section %d reloc %d: Relocation failed: %d\n", relidx, i, ret);
+          serr("ERROR: Section %d reloc %d: Relocation failed: %d\n", relidx, i, ret);
           return ret;
         }
     }
@@ -201,7 +201,7 @@ static int mod_relocate(FAR struct mod_loadinfo_s *loadinfo, int relidx)
 
 static int mod_relocateadd(FAR struct mod_loadinfo_s *loadinfo, int relidx)
 {
-  sdbg("Not implemented\n");
+  serr("ERROR: Not implemented\n");
   return -ENOSYS;
 }
 
@@ -242,7 +242,7 @@ int mod_bind(FAR struct mod_loadinfo_s *loadinfo)
   ret = mod_allocbuffer(loadinfo);
   if (ret < 0)
     {
-      sdbg("mod_allocbuffer failed: %d\n", ret);
+      serr("ERROR: mod_allocbuffer failed: %d\n", ret);
       return -ENOMEM;
     }
 

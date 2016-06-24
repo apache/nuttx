@@ -1,7 +1,7 @@
 /****************************************************************************
  *  arch/arm/src/arm/up_reprioritizertr.c
  *
- *   Copyright (C) 2011, 2013-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -95,7 +95,7 @@ void up_reprioritize_rtr(struct tcb_s *tcb, uint8_t priority)
       struct tcb_s *rtcb = this_task();
       bool switch_needed;
 
-      slldbg("TCB=%p PRI=%d\n", tcb, priority);
+      sinfo("TCB=%p PRI=%d\n", tcb, priority);
 
       /* Remove the tcb task from the ready-to-run list.
        * sched_removereadytorun will return true if we just

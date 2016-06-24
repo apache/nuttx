@@ -119,7 +119,7 @@
 #define EFM32_TXERR_INTS      (LEUART_IEN_TXOF)
 #define EFM32_RXERR_INTS      (LEUART_IEN_RXOF | LEUART_IEN_PERR | \
                                LEUART_IEN_FERR)
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
 #  define EFM32_TX_INTS       (LEUART_IEN_TXBL | EFM32_TXERR_INTS)
 #  define EFM32_RX_INTS       (LEUART_IEN_RXDATAV | EFM32_RXERR_INTS)
 #else
@@ -506,7 +506,7 @@ static int  efm32_interrupt(struct uart_dev_s *dev)
       uart_xmitchars(dev);
     }
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   /* Check for receive errors */
 
   if ((intflags & EFM32_RXERR_INTS) != 0)
@@ -518,7 +518,7 @@ static int  efm32_interrupt(struct uart_dev_s *dev)
        * FERR - Framing Error Interrupt Enable
        */
 
-      lldbg("RX ERROR: %08x\n", intflags);
+      _err("RX ERROR: %08x\n", intflags);
     }
 
   /* Check for transmit errors */
@@ -527,7 +527,7 @@ static int  efm32_interrupt(struct uart_dev_s *dev)
     {
       /* TXOF - TX Overflow Interrupt Enable */
 
-      lldbg("RX ERROR: %08x\n", intflags);
+      _err("RX ERROR: %08x\n", intflags);
     }
 #endif
 

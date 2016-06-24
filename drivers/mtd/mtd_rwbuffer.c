@@ -174,7 +174,7 @@ static int mtd_erase(FAR struct mtd_dev_s *dev, off_t block, size_t nblocks)
   size_t nsectors;
   int ret;
 
-  fvdbg("block: %08lx nsectors: %lu\n",
+  finfo("block: %08lx nsectors: %lu\n",
         (unsigned long)block, (unsigned int)nsectors);
 
   /* Convert to logical sectors and sector numbers */
@@ -187,7 +187,7 @@ static int mtd_erase(FAR struct mtd_dev_s *dev, off_t block, size_t nblocks)
   ret = rwb_invalidate(&priv->rwb, sector, nsectors);
   if (ret < 0)
     {
-      fdbg("ERROR: rwb_invalidate failed: %d\n", ret);
+      ferr("ERROR: rwb_invalidate failed: %d\n", ret);
       return ret;
     }
 
@@ -253,7 +253,7 @@ static int mtd_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
   FAR struct mtd_rwbuffer_s *priv = (FAR struct mtd_rwbuffer_s *)dev;
   int ret = -EINVAL; /* Assume good command with bad parameters */
 
-  fvdbg("cmd: %d \n", cmd);
+  finfo("cmd: %d \n", cmd);
 
   switch (cmd)
     {
@@ -276,7 +276,7 @@ static int mtd_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
               geo->neraseblocks = priv->rwb.nblocks / priv->spb;
               ret               = OK;
 
-              fvdbg("blocksize: %d erasesize: %d neraseblocks: %d\n",
+              finfo("blocksize: %d erasesize: %d neraseblocks: %d\n",
                     geo->blocksize, geo->erasesize, geo->neraseblocks);
             }
         }
@@ -289,7 +289,7 @@ static int mtd_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
           ret = priv->dev->ioctl(priv->dev, MTDIOC_BULKERASE, 0);
           if (ret >= 0)
             {
-              fdbg("ERROR: Device ioctl failed: %d\n", ret);
+              ferr("ERROR: Device ioctl failed: %d\n", ret);
               break;
             }
 
@@ -298,7 +298,7 @@ static int mtd_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
          ret = rwb_invalidate(&priv->rwb, 0, priv->rwb.nblocks);
          if (ret < 0)
            {
-              fdbg("ERROR: rwb_invalidate failed: %d\n", ret);
+              ferr("ERROR: rwb_invalidate failed: %d\n", ret);
            }
         }
         break;
@@ -309,7 +309,7 @@ static int mtd_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
         break;
     }
 
-  fvdbg("return %d\n", ret);
+  finfo("return %d\n", ret);
   return ret;
 }
 
@@ -337,7 +337,7 @@ FAR struct mtd_dev_s *mtd_rwb_initialize(FAR struct mtd_dev_s *mtd)
   struct mtd_geometry_s geo;
   int ret;
 
-  fvdbg("mtd: %p\n", mtd);
+  finfo("mtd: %p\n", mtd);
   DEBUGASSERT(mtd && mtd->ioctl);
 
   /* Get the device geometry */
@@ -345,7 +345,7 @@ FAR struct mtd_dev_s *mtd_rwb_initialize(FAR struct mtd_dev_s *mtd)
   ret = mtd->ioctl(mtd, MTDIOC_GEOMETRY, (unsigned long)((uintptr_t)&geo));
   if (ret < 0)
     {
-      fdbg("ERROR: MTDIOC_GEOMETRY ioctl failed: %d\n", ret);
+      ferr("ERROR: MTDIOC_GEOMETRY ioctl failed: %d\n", ret);
       return NULL;
     }
 
@@ -404,7 +404,7 @@ FAR struct mtd_dev_s *mtd_rwb_initialize(FAR struct mtd_dev_s *mtd)
       ret = rwb_initialize(&priv->rwb);
       if (ret < 0)
         {
-          fdbg("ERROR: rwb_initialize failed: %d\n", ret);
+          ferr("ERROR: rwb_initialize failed: %d\n", ret);
           kmm_free(priv);
           return NULL;
         }
@@ -418,7 +418,7 @@ FAR struct mtd_dev_s *mtd_rwb_initialize(FAR struct mtd_dev_s *mtd)
 
   /* Return the implementation-specific state structure as the MTD device */
 
-  fvdbg("Return %p\n", priv);
+  finfo("Return %p\n", priv);
   return &priv->mtd;
 }
 

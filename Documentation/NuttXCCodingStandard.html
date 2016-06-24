@@ -162,10 +162,10 @@
     Pre-processor Definitions
   </li>
   <li>
-    Private Types
+    Private Types (definitions)
   </li>
   <li>
-    Private Function Prototypes
+    Private Function Prototypes (declarations)
   </li>
   <li>
     Private Data (definitions)
@@ -191,7 +191,7 @@
     Pre-processor Definitions
   </li>
   <li>
-    Public Types
+    Public Types (definitions)
   </li>
   <li>
     Public Data (declarations)
@@ -212,12 +212,12 @@
 </p>
 <p>
   <a name="idempotence"><b>Header File Idempotence</b></a>.
-  C header file must protect against multipleinclusion through the use of macros that &quot;guard&quot; against multiple definitions if the header file is included multiple times.
+  C header file must protect against multiple inclusion through the use of macros that &quot;guard&quot; against multiple definitions if the header file is included multiple times.
 </p>
 <ul>
   <li>
     <p>
-      Each header file must contain the following pre-processor commands near the beginning of the header file:  Between the file header and the &quot;Included Files&quot; block comment.
+      Each header file must contain the following pre-processor conditional logic near the beginning of the header file:  Between the file header and the &quot;Included Files&quot; block comment.
       For example,
     </p>
     <ul><pre>
@@ -248,7 +248,7 @@
 
 <p>
   <b>Deoxygen Information</b>.
-  NuttX does not use Deoxygen for documentation and no file should contain Doxygen tags.
+  NuttX does not use Deoxygen for documentation and no file should contain Doxygen tags or Doxygen style comments.
 </p>
 
 <p>

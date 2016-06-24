@@ -2,7 +2,8 @@
  * arch/arm/src/stm3fr2/chip/stm32f74xxx75xxx_memorymap.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            David Sidrane <david_s5@nscdg.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -59,9 +60,8 @@
 #define STM32_FSMC_BASE34    0x80000000     /* 0x80000000-0x8fffffff: 512Mb FSMC bank3&4 block */
 #  define STM32_FSMC_BANK3   0x80000000     /* 0x80000000-0x8fffffff:       256Mb NAND FLASH */
 #  define STM32_FSMC_BANK4   0x90000000     /* 0x90000000-0x9fffffff:       256Mb PC CARD */
-#define STM32_AHB3_BASE      0xa0000000     /* 0xa0000000-0xa0001fff: 256Mb AHB3 peripheral block */
 #define STM32_FSMC_BASE5     0xc0000000     /* 0xc0000000-0xcfffffff: 256Mb FSMC */
-#define STM32_FSMC_BASE6     0xc0000000     /* 0xd0000000-0xdfffffff: 256Mb FSMC */
+#define STM32_FSMC_BASE6     0xd0000000     /* 0xd0000000-0xdfffffff: 256Mb FSMC */
 #define STM32_CORTEX_BASE    0xe0000000     /* 0xe0000000-0xffffffff: 512Mb Cortex-M7 block */
 
 #define STM32_REGION_MASK    0xf0000000
@@ -82,6 +82,7 @@
 
 
 #define STM32_SYSMEM_AXIM    0x1ff00000     /* 0x1ff00000-0x1ff0edbf: System memory (AXIM) */
+#define STM32_SYSMEM_UID     0x1ff0f420     /* The 96-bit unique device identifier */
 #define STM32_OTP_ICTM       0x0010f000     /* 0x0010f000-0x0010edbf: OTP (ITCM) */
 #define STM32_OTP_AXIM       0x1ff0f000     /* 0x1ff00000-0x1ff0f41f: OTP (AXIM) */
 
@@ -97,6 +98,7 @@
 #define STM32_APB2_BASE      0x40010000     /* 0x40010000-0x40016bff: APB2 */
 #define STM32_AHB1_BASE      0x40020000     /* 0x40020000-0x4007ffff: APB1 */
 #define STM32_AHB2_BASE      0x50000000     /* 0x50000000-0x5003ffff: AHB2 */
+#define STM32_AHB3_BASE      0x60000000     /* 0x60000000-0xdfffffff: AHB3 */
 
 /* APB1 Base Addresses **************************************************************/
 
@@ -142,6 +144,10 @@
 #define STM32_USART1_BASE    0x40011000     /* 0x40011000-0x400113ff: USART1 */
 #define STM32_USART6_BASE    0x40011400     /* 0x40011400-0x400117ff: USART6 */
 #define STM32_ADC_BASE       0x40012000     /* 0x40012000-0x400123ff: ADC1 - ADC2 - ADC3 */
+#  define STM32_ADC1_BASE    0x40012000     /*                        ADC1 */
+#  define STM32_ADC2_BASE    0x40012100     /*                        ADC2 */
+#  define STM32_ADC3_BASE    0x40012200     /*                        ADC3 */
+#  define STM32_ADCCMN_BASE  0x40012300     /*                        Common */
 #define STM32_SDMMC1_BASE    0x40012c00     /* 0x40012c00-0x40012fff: SDMMC1 */
 #define STM32_SPI1_BASE      0x40013000     /* 0x40013000-0x400133ff: SPI1 */
 #define STM32_SPI4_BASE      0x40013400     /* 0x40013400-0x400137ff: SPI4 */
@@ -203,5 +209,7 @@
  * address range
  */
 
+#define STM32_DEBUGMCU_BASE 0xe0042000
+ 
 #endif /* CONFIG_STM32F7_STM32F74XX || CONFIG_STM32F7_STM32F75XX */
 #endif /* __ARCH_ARM_SRC_STM32F7_CHIP_STM32F74XXX75XXX_MEMORYMAP_H */

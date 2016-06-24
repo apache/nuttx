@@ -195,7 +195,7 @@ static int lm75_readb16(FAR struct lm75_dev_s *priv, uint8_t regaddr,
   ret = lm75_i2c_write(priv, &regaddr, 1);
   if (ret < 0)
     {
-      sndbg("i2c_write failed: %d\n", ret);
+      snerr("ERROR: i2c_write failed: %d\n", ret);
       return ret;
     }
 
@@ -204,7 +204,7 @@ static int lm75_readb16(FAR struct lm75_dev_s *priv, uint8_t regaddr,
   ret = lm75_i2c_read(priv, buffer, 2);
   if (ret < 0)
     {
-      sndbg("i2c_read failed: %d\n", ret);
+      snerr("ERROR: i2c_read failed: %d\n", ret);
       return ret;
     }
 
@@ -214,7 +214,7 @@ static int lm75_readb16(FAR struct lm75_dev_s *priv, uint8_t regaddr,
    */
 
   *regvalue = b8tob16((b8_t)buffer[0] << 8 | (b8_t)buffer[1]);
-  sndbg("addr: %02x value: %08x ret: %d\n", regaddr, *regvalue, ret);
+  sninfo("addr: %02x value: %08x ret: %d\n", regaddr, *regvalue, ret);
   return OK;
 }
 
@@ -232,7 +232,7 @@ static int lm75_writeb16(FAR struct lm75_dev_s *priv, uint8_t regaddr,
   uint8_t buffer[3];
   b8_t regb8;
 
-  sndbg("addr: %02x value: %08x\n", regaddr, regval);
+  sninfo("addr: %02x value: %08x\n", regaddr, regval);
 
   /* Set up a 3 byte message to send */
 
@@ -265,11 +265,11 @@ static int lm75_readtemp(FAR struct lm75_dev_s *priv, FAR b16_t *temp)
   ret = lm75_readb16(priv, LM75_TEMP_REG, &temp16);
   if (ret < 0)
     {
-      sndbg("lm75_readb16 failed: %d\n", ret);
+      snerr("ERROR: lm75_readb16 failed: %d\n", ret);
       return ret;
     }
 
-  sndbg("Centigrade: %08x\n", temp16);
+  sninfo("Centigrade: %08x\n", temp16);
 
   /* Was fahrenheit requested? */
 
@@ -278,7 +278,7 @@ static int lm75_readtemp(FAR struct lm75_dev_s *priv, FAR b16_t *temp)
       /* Centigrade to Fahrenheit conversion:  F = 9*C/5 + 32 */
 
       temp16 =  b16mulb16(temp16, B16_9DIV5) + B16_32;
-      sndbg("Fahrenheit: %08x\n", temp16);
+      sninfo("Fahrenheit: %08x\n", temp16);
     }
 
   *temp = temp16;
@@ -305,14 +305,14 @@ static int lm75_readconf(FAR struct lm75_dev_s *priv, FAR uint8_t *conf)
   ret = lm75_i2c_write(priv, &buffer, 1);
   if (ret < 0)
     {
-      sndbg("i2c_write failed: %d\n", ret);
+      snerr("ERROR: i2c_write failed: %d\n", ret);
       return ret;
     }
 
   /* Restart and read 8-bits from the register */
 
   ret = lm75_i2c_read(priv, conf, 1);
-  sndbg("conf: %02x ret: %d\n", *conf, ret);
+  sninfo("conf: %02x ret: %d\n", *conf, ret);
   return ret;
 }
 
@@ -328,7 +328,7 @@ static int lm75_writeconf(FAR struct lm75_dev_s *priv, uint8_t conf)
 {
   uint8_t buffer[2];
 
-  sndbg("conf: %02x\n", conf);
+  sninfo("conf: %02x\n", conf);
 
   /* Set up a 2 byte message to send */
 
@@ -384,7 +384,7 @@ static ssize_t lm75_read(FAR struct file *filep, FAR char *buffer, size_t buflen
   nsamples = buflen / sizeof(b16_t);
   ptr      = (FAR b16_t *)buffer;
 
-  sndbg("buflen: %d nsamples: %d\n", buflen, nsamples);
+  sninfo("buflen: %d nsamples: %d\n", buflen, nsamples);
 
   /* Get the requested number of samples */
 
@@ -397,7 +397,7 @@ static ssize_t lm75_read(FAR struct file *filep, FAR char *buffer, size_t buflen
       ret = lm75_readtemp(priv, &temp);
       if (ret < 0)
         {
-          sndbg("lm75_readtemp failed: %d\n", ret);
+          snerr("ERROR: lm75_readtemp failed: %d\n", ret);
           return (ssize_t)ret;
         }
 
@@ -438,7 +438,7 @@ static int lm75_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           FAR uint8_t *ptr = (FAR uint8_t *)((uintptr_t)arg);
           DEBUGASSERT(ptr != NULL);
           ret = lm75_readconf(priv, ptr);
-          sndbg("conf: %02x ret: %d\n", *ptr, ret);
+          sninfo("conf: %02x ret: %d\n", *ptr, ret);
         }
         break;
 
@@ -446,7 +446,7 @@ static int lm75_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case SNIOC_WRITECONF:
         ret = lm75_writeconf(priv, (uint8_t)arg);
-        sndbg("conf: %02x ret: %d\n", *(FAR uint8_t *)arg, ret);
+        sninfo("conf: %02x ret: %d\n", *(FAR uint8_t *)arg, ret);
         break;
 
       /* Shutdown the LM75, Arg: None */
@@ -460,7 +460,7 @@ static int lm75_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
               ret = lm75_writeconf(priv, conf | LM75_CONF_SHUTDOWN);
             }
 
-          sndbg("conf: %02x ret: %d\n", conf | LM75_CONF_SHUTDOWN, ret);
+          sninfo("conf: %02x ret: %d\n", conf | LM75_CONF_SHUTDOWN, ret);
         }
         break;
 
@@ -475,7 +475,7 @@ static int lm75_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
               ret = lm75_writeconf(priv, conf & ~LM75_CONF_SHUTDOWN);
             }
 
-          sndbg("conf: %02x ret: %d\n", conf & ~LM75_CONF_SHUTDOWN, ret);
+          sninfo("conf: %02x ret: %d\n", conf & ~LM75_CONF_SHUTDOWN, ret);
         }
         break;
 
@@ -483,14 +483,14 @@ static int lm75_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case SNIOC_FAHRENHEIT:
         priv->fahrenheit = true;
-        sndbg("Fahrenheit\n");
+        sninfo("Fahrenheit\n");
         break;
 
       /* Report Samples in Centigrade */
 
       case SNIOC_CENTIGRADE:
         priv->fahrenheit = false;
-        sndbg("Centigrade\n");
+        sninfo("Centigrade\n");
         break;
 
       /* Read THYS temperature register.  Arg: b16_t* pointer */
@@ -500,7 +500,7 @@ static int lm75_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           FAR b16_t *ptr = (FAR b16_t *)((uintptr_t)arg);
           DEBUGASSERT(ptr != NULL);
           ret = lm75_readb16(priv, LM75_THYS_REG, ptr);
-          sndbg("THYS: %08x ret: %d\n", *ptr, ret);
+          sninfo("THYS: %08x ret: %d\n", *ptr, ret);
         }
         break;
 
@@ -508,7 +508,7 @@ static int lm75_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case SNIOC_WRITETHYS:
         ret = lm75_writeb16(priv, LM75_THYS_REG, (b16_t)arg);
-        sndbg("THYS: %08x ret: %d\n", (b16_t)arg, ret);
+        sninfo("THYS: %08x ret: %d\n", (b16_t)arg, ret);
         break;
 
       /* Read TOS (Over-temp Shutdown Threshold) Register. Arg: b16_t* pointer */
@@ -518,7 +518,7 @@ static int lm75_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           FAR b16_t *ptr = (FAR b16_t *)((uintptr_t)arg);
           DEBUGASSERT(ptr != NULL);
           ret = lm75_readb16(priv, LM75_TOS_REG, ptr);
-          sndbg("TOS: %08x ret: %d\n", *ptr, ret);
+          sninfo("TOS: %08x ret: %d\n", *ptr, ret);
         }
         break;
 
@@ -526,11 +526,11 @@ static int lm75_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case SNIOC_WRITETOS:
         ret = lm75_writeb16(priv, LM75_TOS_REG, (b16_t)arg);
-        sndbg("TOS: %08x ret: %d\n", (b16_t)arg, ret);
+        sninfo("TOS: %08x ret: %d\n", (b16_t)arg, ret);
         break;
 
       default:
-        sndbg("Unrecognized cmd: %d\n", cmd);
+        sninfo("Unrecognized cmd: %d\n", cmd);
         ret = -ENOTTY;
         break;
     }
@@ -578,7 +578,7 @@ int lm75_register(FAR const char *devpath, FAR struct i2c_master_s *i2c, uint8_t
   priv = (FAR struct lm75_dev_s *)kmm_malloc(sizeof(struct lm75_dev_s));
   if (priv == NULL)
     {
-      sndbg("Failed to allocate instance\n");
+      snerr("ERROR: Failed to allocate instance\n");
       return -ENOMEM;
     }
 
@@ -591,7 +591,7 @@ int lm75_register(FAR const char *devpath, FAR struct i2c_master_s *i2c, uint8_t
   ret = register_driver(devpath, &g_lm75fops, 0666, priv);
   if (ret < 0)
     {
-      sndbg("Failed to register driver: %d\n", ret);
+      snerr("ERROR: Failed to register driver: %d\n", ret);
       kmm_free(priv);
     }
 

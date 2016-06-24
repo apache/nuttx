@@ -111,7 +111,7 @@ static void zcross_enable(FAR const struct zc_lowerhalf_s *lower,
   flags = enter_critical_section();
   zcross_disable();
 
-  snllvdbg("handler: %p arg: %p\n", handler, arg);
+  sninfo("handler: %p arg: %p\n", handler, arg);
 
   if (handler)
     {

@@ -265,7 +265,7 @@ bool stm32_dmacapable(uintptr_t maddr, uint32_t count, uint32_t ccr);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG_DMA
+#ifdef CONFIG_DEBUG_DMA_INFO
 void stm32_dmasample(DMA_HANDLE handle, struct stm32_dmaregs_s *regs);
 #else
 #  define stm32_dmasample(handle,regs)
@@ -282,7 +282,7 @@ void stm32_dmasample(DMA_HANDLE handle, struct stm32_dmaregs_s *regs);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG_DMA
+#ifdef CONFIG_DEBUG_DMA_INFO
 void stm32_dmadump(DMA_HANDLE handle, const struct stm32_dmaregs_s *regs,
                    const char *msg);
 #else

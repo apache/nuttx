@@ -151,7 +151,7 @@
 
 /* Debug */
 
-#ifndef CONFIG_DEBUG
+#ifndef CONFIG_DEBUG_USB_INFO
 #  undef CONFIG_SAMA5_OHCI_REGDEBUG
 #endif
 
@@ -506,10 +506,6 @@ static uint8_t            g_bufalloc[SAM_BUFALLOC]
                           __attribute__ ((aligned (SAMA5_DMA_ALIGN)));
 
 /****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -524,7 +520,7 @@ static uint8_t            g_bufalloc[SAM_BUFALLOC]
 #ifdef CONFIG_SAMA5_OHCI_REGDEBUG
 static void sam_printreg(uint32_t addr, uint32_t val, bool iswrite)
 {
-  lldbg("%08x%s%08x\n", addr, iswrite ? "<-" : "->", val);
+  uinfo("%08x%s%08x\n", addr, iswrite ? "<-" : "->", val);
 }
 #endif
 
@@ -574,7 +570,7 @@ static void sam_checkreg(uint32_t addr, uint32_t val, bool iswrite)
             {
               /* No.. More than one. */
 
-              lldbg("[repeats %d more times]\n", count);
+              uinfo("[repeats %d more times]\n", count);
             }
         }
 
@@ -1318,7 +1314,7 @@ static inline int sam_reminted(struct sam_ed_s *ed)
 #ifdef CONFIG_USBHOST_TRACE
   usbhost_vtrace1(OHCI_VTRACE1_VIRTED, (uintptr_t)ed);
 #else
-  uvdbg("ed: %08x head: %08x next: %08x offset: %d\n",
+  uinfo("ed: %08x head: %08x next: %08x offset: %d\n",
         ed, physhead, head ? head->hw.nexted : 0, offset);
 #endif
 
@@ -1358,7 +1354,7 @@ static inline int sam_reminted(struct sam_ed_s *ed)
 #ifdef CONFIG_USBHOST_TRACE
       usbhost_vtrace1(OHCI_VTRACE1_VIRTED, (uintptr_t)ed);
 #else
-      uvdbg("ed: %08x head: %08x next: %08x\n",
+      uinfo("ed: %08x head: %08x next: %08x\n",
             ed, physhead, head ? head->hw.nexted : 0);
 #endif
 
@@ -2835,7 +2831,7 @@ errout:
 
 static int sam_epfree(struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 {
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_ASSERTIONS
   struct sam_rhport_s *rhport = (struct sam_rhport_s *)drvr;
 #endif
   struct sam_eplist_s *eplist = (struct sam_eplist_s *)ep;
@@ -3103,7 +3099,7 @@ static int sam_ctrlin(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
 #ifdef CONFIG_USBHOST_TRACE
   usbhost_vtrace2(OHCI_VTRACE2_CTRLIN, RHPORT(rhport), req->req);
 #else
-  uvdbg("RHPort%d type: %02x req: %02x value: %02x%02x index: %02x%02x len: %02x%02x\n",
+  uinfo("RHPort%d type: %02x req: %02x value: %02x%02x index: %02x%02x len: %02x%02x\n",
         RHPORT(rhport), req->type, req->req, req->value[1],
         req->value[0], req->index[1], req->index[0], req->len[1],
         req->len[0]);
@@ -3152,7 +3148,7 @@ static int sam_ctrlout(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
 #ifdef CONFIG_USBHOST_TRACE
   usbhost_vtrace2(OHCI_VTRACE2_CTRLOUT, RHPORT(rhport), req->req);
 #else
-  uvdbg("RHPort%d type: %02x req: %02x value: %02x%02x index: %02x%02x len: %02x%02x\n",
+  uinfo("RHPort%d type: %02x req: %02x value: %02x%02x index: %02x%02x len: %02x%02x\n",
         RHPORT(rhport), req->type, req->req, req->value[1],
         req->value[0], req->index[1], req->index[0], req->len[1],
         req->len[0]);
@@ -3227,7 +3223,7 @@ static int sam_transfer_common(struct sam_rhport_s *rhport,
                   (ed->hw.ctrl  & ED_CONTROL_EN_MASK) >> ED_CONTROL_EN_SHIFT,
                   (uint16_t)buflen);
 #else
-  uvdbg("EP%d %s toggle: %d maxpacket: %d buflen: %d\n",
+  uinfo("EP%d %s toggle: %d maxpacket: %d buflen: %d\n",
         (ed->hw.ctrl  & ED_CONTROL_EN_MASK) >> ED_CONTROL_EN_SHIFT,
         in ? "IN" : "OUT",
         (ed->hw.headp & ED_HEADP_C) != 0 ? 1 : 0,
@@ -3342,7 +3338,7 @@ static ssize_t sam_transfer(struct usbhost_driver_s *drvr, usbhost_ep_t ep,
   ret = sam_transfer_common(rhport, eplist, buffer, buflen);
   if (ret < 0)
     {
-      udbg("ERROR: sam_transfer_common failed: %d\n", ret);
+      uerr("ERROR: sam_transfer_common failed: %d\n", ret);
       goto errout;
     }
 
@@ -3593,7 +3589,7 @@ static int sam_asynch(struct usbhost_driver_s *drvr, usbhost_ep_t ep,
   ret = sam_transfer_common(rhport, eplist, buffer, buflen);
   if (ret < 0)
     {
-      udbg("ERROR: sam_transfer_common failed: %d\n", ret);
+      uerr("ERROR: sam_transfer_common failed: %d\n", ret);
       goto errout;
     }
 
@@ -3788,7 +3784,7 @@ static int sam_connect(struct usbhost_driver_s *drvr,
   /* Set the connected/disconnected flag */
 
   hport->connected = connected;
-  ullvdbg("Hub port %d connected: %s\n", hport->port, connected ? "YES" : "NO");
+  uinfo("Hub port %d connected: %s\n", hport->port, connected ? "YES" : "NO");
 
   /* Report the connection event */
 

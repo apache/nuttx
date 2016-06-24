@@ -144,7 +144,7 @@ int stmpe811_gpioconfig(STMPE811_HANDLE handle, uint8_t pinconfig)
   if (ret < 0)
     {
       int errval = errno;
-      idbg("sem_wait failed: %d\n", errval);
+      ierr("ERROR: sem_wait failed: %d\n", errval);
       return -errval;
     }
 
@@ -152,7 +152,7 @@ int stmpe811_gpioconfig(STMPE811_HANDLE handle, uint8_t pinconfig)
 
   if ((priv->inuse & pinmask) != 0)
     {
-      idbg("PIN%d is already in-use\n", pin);
+      ierr("ERROR: PIN%d is already in-use\n", pin);
       sem_post(&priv->exclsem);
       return -EBUSY;
     }
@@ -259,7 +259,7 @@ void stmpe811_gpiowrite(STMPE811_HANDLE handle, uint8_t pinconfig, bool value)
   ret = sem_wait(&priv->exclsem);
   if (ret < 0)
     {
-      idbg("sem_wait failed: %d\n", errno);
+      ierr("ERROR: sem_wait failed: %d\n", errno);
       return;
     }
 
@@ -313,7 +313,7 @@ int stmpe811_gpioread(STMPE811_HANDLE handle, uint8_t pinconfig, bool *value)
   if (ret < 0)
     {
       int errval = errno;
-      idbg("sem_wait failed: %d\n", errval);
+      ierr("ERROR: sem_wait failed: %d\n", errval);
       return -errval;
     }
 
@@ -362,7 +362,7 @@ int stmpe811_gpioattach(STMPE811_HANDLE handle, uint8_t pinconfig,
   if (ret < 0)
     {
       int errval = errno;
-      idbg("sem_wait failed: %d\n", errval);
+      ierr("ERROR: sem_wait failed: %d\n", errval);
       return -errval;
     }
 
@@ -438,7 +438,7 @@ void stmpe811_gpioworker(FAR struct stmpe811_dev_s *priv)
             }
           else
             {
-              illdbg("No handler for PIN%d, GPIO_INTSTA: %02x\n", pin, regval);
+              ierr("ERROR: No handler for PIN%d, GPIO_INTSTA: %02x\n", pin, regval);
             }
 
           /* Clear the pending GPIO interrupt by writing a '1' to the

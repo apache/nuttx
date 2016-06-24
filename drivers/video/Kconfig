@@ -104,7 +104,7 @@ endchoice
 config OV2640_REGDEBUG
 	bool "Register level debug output"
 	default n
-	depends on DEBUG
+	depends on DEBUG_FEATURES
 	---help---
 		Enable details, register level debug output.
 

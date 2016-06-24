@@ -67,34 +67,9 @@
  * Pre-processor Definitions
  ************************************************************************************/
 /* Configuration ********************************************************************/
-/* Define CONFIG_DEBUG_LCD to enable detailed LCD debug output. Verbose debug must
- * also be enabled.
- */
-
-#ifndef CONFIG_DEBUG
-#  undef CONFIG_DEBUG_VERBOSE
-#  undef CONFIG_DEBUG_GRAPHICS
-#  undef CONFIG_DEBUG_LCD
-#  undef CONFIG_LCD_REGDEBUG
-#endif
-
-#ifndef CONFIG_DEBUG_VERBOSE
-#  undef CONFIG_DEBUG_LCD
-#endif
 
 #undef CONFIG_LCD_FASTCONFIG
 #define CONFIG_LCD_FASTCONFIG 1
-
-/* Shenzhou LCD Hardware Definitions ************************************************/
-/* Debug ****************************************************************************/
-
-#ifdef CONFIG_DEBUG_LCD
-#  define lcddbg         dbg
-#  define lcdvdbg        vdbg
-#else
-#  define lcddbg(x...)
-#  define lcdvdbg(x...)
-#endif
 
 /************************************************************************************
  * Private Type Definition
@@ -277,18 +252,18 @@ static struct stm32_lower_s g_lcdlower =
 #ifdef CONFIG_LCD_REGDEBUG
 static void stm32_lcdshow(FAR struct stm32_lower_s *priv, FAR const char *msg)
 {
-  dbg("%s:\n", msg);
-  dbg("  CRTL   RS: %d CS: %d RD: %d WR: %d LE: %d\n",
-      getreg32(LCD_RS_READ), getreg32(LCD_CS_READ), getreg32(LCD_RD_READ),
-      getreg32(LCD_WR_READ), getreg32(LCD_LE_READ));
-  dbg("  DATA   CR: %08x %08x\n", getreg32(LCD_CRL), getreg32(LCD_CRH));
+  _info("%s:\n", msg);
+  _info("  CRTL   RS: %d CS: %d RD: %d WR: %d LE: %d\n",
+       getreg32(LCD_RS_READ), getreg32(LCD_CS_READ), getreg32(LCD_RD_READ),
+       getreg32(LCD_WR_READ), getreg32(LCD_LE_READ));
+  _info("  DATA   CR: %08x %08x\n", getreg32(LCD_CRL), getreg32(LCD_CRH));
   if (priv->output)
     {
-      dbg("  OUTPUT: %08x\n", getreg32(LCD_ODR));
+      _info("  OUTPUT: %08x\n", getreg32(LCD_ODR));
     }
   else
     {
-      dbg("  INPUT:  %08x\n", getreg32(LCD_IDR));
+      _info("  INPUT:  %08x\n", getreg32(LCD_IDR));
     }
 }
 #endif
@@ -548,7 +523,7 @@ int board_lcd_initialize(void)
 
   if (!priv->drvr)
     {
-      lcdvdbg("Initializing\n");
+      lcdinfo("Initializing\n");
 
       /* Configure GPIO pins */
 
@@ -563,7 +538,7 @@ int board_lcd_initialize(void)
       priv->drvr = ssd1289_lcdinitialize(&priv->dev);
       if (!priv->drvr)
         {
-          lcddbg("ERROR: ssd1289_lcdinitialize failed\n");
+          lcderr("ERROR: ssd1289_lcdinitialize failed\n");
           return -ENODEV;
         }
     }

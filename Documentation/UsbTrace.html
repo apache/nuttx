@@ -125,7 +125,7 @@
 </p>
 <ul>
   <li><code>CONFIG_USBDEV_TRACE</code>, or</li>
-  <li><code>CONFIG_DEBUG and CONFIG_DEBUG_USB</code></li>
+  <li><code>CONFIG_DEBUG_FEATURES and CONFIG_DEBUG_USB</code></li>
 </ul>
 <p><b>Log Data Sink</b>.
   The logged data itself may go to either (1) an internal circular buffer, or (2) may be provided on the console.
@@ -137,7 +137,7 @@
   Here is an example of USB trace output using <code>apps/examples/usbserial</code> for an LPC1768 platform with the following NuttX configuration settings:
 </p>
 <ul>
-  <li><code>CONFIG_DEBUG</code>, <code>CONFIG_DEBUG_VERBOSE</code>, <code>CONFIG_USB</code>
+  <li><code>CONFIG_DEBUG_FEATURES</code>, <code>CONFIG_DEBUG_INFO</code>, <code>CONFIG_USB</code>
   <li><code>CONFIG_EXAMPLES_USBSERIAL_TRACEINIT</code>, <code>CONFIG_EXAMPLES_USBSERIAL_TRACECLASS</code>,
     <code>CONFIG_EXAMPLES_USBSERIAL_TRACETRANSFERS</code>, <code>CONFIG_EXAMPLES_USBSERIAL_TRACECONTROLLER</code>,
     <code>CONFIG_EXAMPLES_USBSERIAL_TRACEINTERRUPTS</code>

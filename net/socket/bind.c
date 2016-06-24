@@ -156,14 +156,14 @@ int psock_bind(FAR struct socket *psock, const struct sockaddr *addr,
   FAR const struct sockaddr_ll *lladdr = (const struct sockaddr_ll *)addr;
 #endif
   socklen_t minlen;
-  int err;
+  int errcode;
   int ret = OK;
 
   /* Verify that the psock corresponds to valid, allocated socket */
 
   if (!psock || psock->s_crefs <= 0)
     {
-      err = ENOTSOCK;
+      errcode = ENOTSOCK;
       goto errout;
     }
 
@@ -196,15 +196,15 @@ int psock_bind(FAR struct socket *psock, const struct sockaddr *addr,
 #endif
 
     default:
-      ndbg("ERROR: Unrecognized address family: %d\n", addr->sa_family);
-      err = EAFNOSUPPORT;
+      nerr("ERROR: Unrecognized address family: %d\n", addr->sa_family);
+      errcode = EAFNOSUPPORT;
       goto errout;
     }
 
   if (addrlen < minlen)
     {
-      ndbg("ERROR: Invalid address length: %d < %d\n", addrlen, minlen);
-      err = EBADF;
+      nerr("ERROR: Invalid address length: %d < %d\n", addrlen, minlen);
+      errcode = EBADF;
       goto errout;
     }
 
@@ -301,7 +301,7 @@ int psock_bind(FAR struct socket *psock, const struct sockaddr *addr,
 #endif /* CONFIG_NET_UDP || CONFIG_NET_LOCAL_DGRAM */
 
       default:
-        err = EBADF;
+        errcode = EBADF;
         goto errout;
     }
 
@@ -309,14 +309,14 @@ int psock_bind(FAR struct socket *psock, const struct sockaddr *addr,
 
   if (ret < 0)
     {
-      err = -ret;
+      errcode = -ret;
       goto errout;
     }
 
   return OK;
 
 errout:
-  set_errno(err);
+  set_errno(errcode);
   return ERROR;
 }
 

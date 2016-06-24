@@ -39,17 +39,6 @@
 
 #include <nuttx/config.h>
 
-/* Output debug info if stack dump is selected -- even if debug is not
- * selected.
- */
-
-#ifdef CONFIG_ARCH_STACKDUMP
-# undef  CONFIG_DEBUG
-# undef  CONFIG_DEBUG_VERBOSE
-# define CONFIG_DEBUG 1
-# define CONFIG_DEBUG_VERBOSE 1
-#endif
-
 #include <stdint.h>
 #include <string.h>
 #include <syscall.h>
@@ -64,18 +53,7 @@
 #include "up_internal.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-/* Debug ********************************************************************/
-
-#if defined(CONFIG_DEBUG_SYSCALL)
-# define svcdbg(format, ...) lldbg(format, ##__VA_ARGS__)
-#else
-# define svcdbg(x...)
-#endif
-
-/****************************************************************************
- * Private Data
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -176,16 +154,14 @@ uint32_t *arm_syscall(uint32_t *regs)
    * and R1..R7 =  variable number of arguments depending on the system call.
    */
 
-#if defined(CONFIG_DEBUG_SYSCALL)
-  svcdbg("SYSCALL Entry: regs: %p cmd: %d\n", regs, cmd);
-  svcdbg("  R0: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-         regs[REG_R0],  regs[REG_R1],  regs[REG_R2],  regs[REG_R3],
-         regs[REG_R4],  regs[REG_R5],  regs[REG_R6],  regs[REG_R7]);
-  svcdbg("  R8: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-         regs[REG_R8],  regs[REG_R9],  regs[REG_R10], regs[REG_R11],
-         regs[REG_R12], regs[REG_R13], regs[REG_R14], regs[REG_R15]);
-  svcdbg("CPSR: %08x\n", regs[REG_CPSR]);
-#endif
+  svcinfo("SYSCALL Entry: regs: %p cmd: %d\n", regs, cmd);
+  svcinfo("  R0: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+          regs[REG_R0],  regs[REG_R1],  regs[REG_R2],  regs[REG_R3],
+          regs[REG_R4],  regs[REG_R5],  regs[REG_R6],  regs[REG_R7]);
+  svcinfo("  R8: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+          regs[REG_R8],  regs[REG_R9],  regs[REG_R10], regs[REG_R11],
+          regs[REG_R12], regs[REG_R13], regs[REG_R14], regs[REG_R15]);
+  svcinfo("CPSR: %08x\n", regs[REG_CPSR]);
 
   /* Handle the SVCall according to the command in R0 */
 
@@ -478,7 +454,7 @@ uint32_t *arm_syscall(uint32_t *regs)
 
           regs[REG_R0] -= CONFIG_SYS_RESERVED;
 #else
-          svcdbg("ERROR: Bad SYS call: %d\n", regs[REG_R0]);
+          svcerr("ERROR: Bad SYS call: %d\n", regs[REG_R0]);
 #endif
 
 #ifdef CONFIG_ARCH_KERNEL_STACK
@@ -499,18 +475,16 @@ uint32_t *arm_syscall(uint32_t *regs)
         break;
     }
 
-#if defined(CONFIG_DEBUG_SYSCALL)
   /* Report what happened */
 
-  svcdbg("SYSCALL Exit: regs: %p\n", regs);
-  svcdbg("  R0: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-         regs[REG_R0],  regs[REG_R1],  regs[REG_R2],  regs[REG_R3],
-         regs[REG_R4],  regs[REG_R5],  regs[REG_R6],  regs[REG_R7]);
-  svcdbg("  R8: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-         regs[REG_R8],  regs[REG_R9],  regs[REG_R10], regs[REG_R11],
-         regs[REG_R12], regs[REG_R13], regs[REG_R14], regs[REG_R15]);
-  svcdbg("CPSR: %08x\n", regs[REG_CPSR]);
-#endif
+  svcinfo("SYSCALL Exit: regs: %p\n", regs);
+  svcinfo("  R0: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+          regs[REG_R0],  regs[REG_R1],  regs[REG_R2],  regs[REG_R3],
+          regs[REG_R4],  regs[REG_R5],  regs[REG_R6],  regs[REG_R7]);
+  svcinfo("  R8: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+          regs[REG_R8],  regs[REG_R9],  regs[REG_R10], regs[REG_R11],
+          regs[REG_R12], regs[REG_R13], regs[REG_R14], regs[REG_R15]);
+  svcinfo("CPSR: %08x\n", regs[REG_CPSR]);
 
   /* Return the last value of curent_regs.  This supports context switches
    * on return from the exception.  That capability is only used with the
@@ -524,7 +498,7 @@ uint32_t *arm_syscall(uint32_t *regs)
 
 uint32_t *arm_syscall(uint32_t *regs)
 {
-  lldbg("SYSCALL from 0x%x\n", regs[REG_PC]);
+  _alert("SYSCALL from 0x%x\n", regs[REG_PC]);
   CURRENT_REGS = regs;
   PANIC();
 }

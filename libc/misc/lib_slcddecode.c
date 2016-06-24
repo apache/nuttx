@@ -52,19 +52,6 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* Configuration ************************************************************/
-/* Define CONFIG_DEBUG_LCD to enable detailed LCD debug output. Verbose
- * debug must also be enabled.
- */
-
-#ifndef CONFIG_DEBUG
-#  undef CONFIG_DEBUG_VERBOSE
-#  undef CONFIG_DEBUG_LCD
-#endif
-
-#ifndef CONFIG_DEBUG_VERBOSE
-#  undef CONFIG_DEBUG_LCD
-#endif
 
 /* Indices, counts, helper macros ******************************************/
 
@@ -88,16 +75,6 @@
 #define CODE_MAX       ('A' + LAST_SLCDCODE)
 #define IS_CODE(a)     (((a) >= CODE_MIN) && ((a) <= CODE_MAX))
 #define CODE_RETURN(a) (enum slcdcode_e)((a) - 'A')
-
-/* Debug ********************************************************************/
-
-#ifdef CONFIG_DEBUG_LCD
-#  define lcddbg         dbg
-#  define lcdvdbg        vdbg
-#else
-#  define lcddbg(x...)
-#  define lcdvdbg(x...)
-#endif
 
 /****************************************************************************
  * Private Functions
@@ -264,7 +241,7 @@ enum slcdret_e slcd_decode(FAR struct lib_instream_s *stream,
        * return the following characters later.
        */
 
-      lcddbg("Parsing failed: ESC followed by %02x\n", ch);
+      lcderr("ERROR: Parsing failed: ESC followed by %02x\n", ch);
       return slcd_reget(state, pch, parg);
     }
 
@@ -295,7 +272,7 @@ enum slcdret_e slcd_decode(FAR struct lib_instream_s *stream,
 
       if (code < (int)FIRST_SLCDCODE || code > (int)LAST_SLCDCODE)
         {
-          lcddbg("Parsing failed: ESC-L followed by %02x\n", ch);
+          lcderr("ERROR: Parsing failed: ESC-L followed by %02x\n", ch);
 
           /* Not a special command code.. put the character in the reget
            * buffer.
@@ -338,7 +315,7 @@ enum slcdret_e slcd_decode(FAR struct lib_instream_s *stream,
            * following characters later.
            */
 
-          lcddbg("Parsing failed: ESC-L-%c followed by %02x\n",
+          lcderr("ERROR: Parsing failed: ESC-L-%c followed by %02x\n",
                  state->buf[NDX_COUNTH], ch);
 
           return slcd_reget(state, pch, parg);
@@ -384,7 +361,7 @@ enum slcdret_e slcd_decode(FAR struct lib_instream_s *stream,
            * of the characters later.
            */
 
-          lcddbg("Parsing failed: ESC-L-%c-%c followed by %02x\n",
+          lcderr("ERROR: Parsing failed: ESC-L-%c-%c followed by %02x\n",
                  state->buf[NDX_COUNTH], state->buf[NDX_COUNTL], ch);
 
           return slcd_reget(state, pch, parg);

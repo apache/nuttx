@@ -144,7 +144,7 @@ int sam_hsmci_initialize(int minor)
       g_hsmci.hsmci = sdio_initialize(0);
       if (!g_hsmci.hsmci)
         {
-          fdbg("Failed to initialize SDIO\n");
+          ferr("ERROR: Failed to initialize SDIO\n");
           return -ENODEV;
         }
 
@@ -153,7 +153,7 @@ int sam_hsmci_initialize(int minor)
       ret = mmcsd_slotinitialize(minor, g_hsmci.hsmci);
       if (ret != OK)
         {
-          fdbg("Failed to bind SDIO to the MMC/SD driver: %d\n", ret);
+          ferr("ERROR: Failed to bind SDIO to the MMC/SD driver: %d\n", ret);
           return ret;
         }
 
@@ -194,7 +194,7 @@ bool sam_cardinserted(int slotno)
   /* Get the state of the GPIO pin */
 
   removed = sam_gpioread(GPIO_MCI_CD);
-  fllvdbg("Slot %d inserted: %s\n", slotno, removed ? "NO" : "YES");
+  finfo("Slot %d inserted: %s\n", slotno, removed ? "NO" : "YES");
 
   return !removed;
 }

@@ -152,7 +152,7 @@ int work_hpstart(void)
 
   /* Start the high-priority, kernel mode worker thread */
 
-  svdbg("Starting high-priority kernel worker thread\n");
+  sinfo("Starting high-priority kernel worker thread\n");
 
   pid = kernel_thread(HPWORKNAME, CONFIG_SCHED_HPWORKPRIORITY,
                       CONFIG_SCHED_HPWORKSTACKSIZE,
@@ -165,7 +165,7 @@ int work_hpstart(void)
       int errcode = errno;
       DEBUGASSERT(errcode > 0);
 
-      slldbg("kernel_thread failed: %d\n", errcode);
+      serr("ERROR: kernel_thread failed: %d\n", errcode);
       return -errcode;
     }
 

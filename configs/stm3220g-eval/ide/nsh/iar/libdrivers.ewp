@@ -1992,9 +1992,6 @@
       <name>$PROJ_DIR$/../../../../../drivers/mtd/at45db.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$/../../../../../drivers/mtd/flash_eraseall.c</name>
-    </file>
-    <file>
       <name>$PROJ_DIR$/../../../../../drivers/mtd/ftl.c</name>
     </file>
     <file>

@@ -125,7 +125,7 @@ static void stm32_idlepm(void)
 
   if (newstate != oldstate)
     {
-      lldbg("newstate= %d oldstate=%d\n", newstate, oldstate);
+      sinfo("newstate= %d oldstate=%d\n", newstate, oldstate);
 
       flags = enter_critical_section();
 

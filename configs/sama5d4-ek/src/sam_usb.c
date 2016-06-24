@@ -115,13 +115,13 @@ static int usbhost_waiter(struct usbhost_connection_s *dev)
 {
   struct usbhost_hubport_s *hport;
 
-  uvdbg("Running\n");
+  uinfo("Running\n");
   for (;;)
     {
       /* Wait for the device to change state */
 
       DEBUGVERIFY(CONN_WAIT(dev, &hport));
-      uvdbg("%s\n", hport->connected ? "connected" : "disconnected");
+      uinfo("%s\n", hport->connected ? "connected" : "disconnected");
 
       /* Did we just become connected? */
 
@@ -308,7 +308,7 @@ int sam_usbhost_initialize(void)
   ret = usbhost_hub_initialize();
   if (ret < 0)
     {
-      udbg("ERROR: usbhost_hub_initialize failed: %d\n", ret);
+      uerr("ERROR: usbhost_hub_initialize failed: %d\n", ret);
     }
 #endif
 
@@ -318,7 +318,7 @@ int sam_usbhost_initialize(void)
   ret = usbhost_msc_initialize();
   if (ret != OK)
     {
-      udbg("ERROR: Failed to register the mass storage class: %d\n", ret);
+      uerr("ERROR: Failed to register the mass storage class: %d\n", ret);
     }
 #endif
 
@@ -328,7 +328,7 @@ int sam_usbhost_initialize(void)
   ret = usbhost_cdcacm_initialize();
   if (ret != OK)
     {
-      udbg("ERROR: Failed to register the CDC/ACM serial class: %d\n", ret);
+      uerr("ERROR: Failed to register the CDC/ACM serial class: %d\n", ret);
     }
 #endif
 
@@ -338,7 +338,7 @@ int sam_usbhost_initialize(void)
   ret = usbhost_kbdinit();
   if (ret != OK)
     {
-      udbg("ERROR: Failed to register the KBD class\n");
+      uerr("ERROR: Failed to register the KBD class\n");
     }
 #endif
 
@@ -350,7 +350,7 @@ int sam_usbhost_initialize(void)
   g_ohciconn = sam_ohci_initialize(0);
   if (!g_ohciconn)
     {
-      udbg("ERROR: sam_ohci_initialize failed\n");
+      uerr("ERROR: sam_ohci_initialize failed\n");
       return -ENODEV;
     }
 
@@ -361,7 +361,7 @@ int sam_usbhost_initialize(void)
                     (main_t)ohci_waiter, (FAR char * const *)NULL);
   if (pid < 0)
     {
-      udbg("ERROR: Failed to create ohci_waiter task: %d\n", ret);
+      uerr("ERROR: Failed to create ohci_waiter task: %d\n", ret);
       return -ENODEV;
     }
 #endif
@@ -372,7 +372,7 @@ int sam_usbhost_initialize(void)
   g_ehciconn = sam_ehci_initialize(0);
   if (!g_ehciconn)
     {
-      udbg("ERROR: sam_ehci_initialize failed\n");
+      uerr("ERROR: sam_ehci_initialize failed\n");
       return -ENODEV;
     }
 
@@ -383,7 +383,7 @@ int sam_usbhost_initialize(void)
                     (main_t)ehci_waiter, (FAR char * const *)NULL);
   if (pid < 0)
     {
-      udbg("ERROR: Failed to create ehci_waiter task: %d\n", ret);
+      uerr("ERROR: Failed to create ehci_waiter task: %d\n", ret);
       return -ENODEV;
     }
 #endif
@@ -414,7 +414,7 @@ void sam_usbhost_vbusdrive(int rhport, bool enable)
 {
   pio_pinset_t pinset = 0;
 
-  uvdbg("RHPort%d: enable=%d\n", rhport+1, enable);
+  uinfo("RHPort%d: enable=%d\n", rhport+1, enable);
 
   /* Pick the PIO configuration associated with the selected root hub port */
 
@@ -422,7 +422,7 @@ void sam_usbhost_vbusdrive(int rhport, bool enable)
     {
     case SAM_RHPORT1:
 #ifndef CONFIG_SAMA5_UHPHS_RHPORT1
-      udbg("ERROR: RHPort1 is not available in this configuration\n");
+      uerr("ERROR: RHPort1 is not available in this configuration\n");
       return;
 #else
       pinset = PIO_USBA_VBUS_ENABLE;
@@ -431,7 +431,7 @@ void sam_usbhost_vbusdrive(int rhport, bool enable)
 
     case SAM_RHPORT2:
 #ifndef CONFIG_SAMA5_UHPHS_RHPORT2
-      udbg("ERROR: RHPort2 is not available in this configuration\n");
+      uerr("ERROR: RHPort2 is not available in this configuration\n");
       return;
 #else
       pinset = PIO_USBB_VBUS_ENABLE;
@@ -440,7 +440,7 @@ void sam_usbhost_vbusdrive(int rhport, bool enable)
 
     case SAM_RHPORT3:
 #ifndef CONFIG_SAMA5_UHPHS_RHPORT3
-      udbg("ERROR: RHPort3 is not available in this configuration\n");
+      uerr("ERROR: RHPort3 is not available in this configuration\n");
       return;
 #else
       pinset = PIO_USBC_VBUS_ENABLE;
@@ -448,7 +448,7 @@ void sam_usbhost_vbusdrive(int rhport, bool enable)
 #endif
 
     default:
-      udbg("ERROR: RHPort%d is not supported\n", rhport+1);
+      uerr("ERROR: RHPort%d is not supported\n", rhport+1);
       return;
     }
 
@@ -539,7 +539,7 @@ xcpt_t sam_setup_overcurrent(xcpt_t handler)
 #ifdef CONFIG_USBDEV
 void sam_usbsuspend(FAR struct usbdev_s *dev, bool resume)
 {
-  ulldbg("resume: %d\n", resume);
+  uinfo("resume: %d\n", resume);
 }
 #endif
 

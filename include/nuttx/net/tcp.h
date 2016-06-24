@@ -1,10 +1,10 @@
 /****************************************************************************
  * include/nuttx/net/tcp.h
- * Header file for the uIP TCP/IP stack.
+ * Header file for the NuttX TCP/IP stack.
  *
- * The uIP TCP/IP stack header file contains definitions for a number
- * of C macros that are used by uIP programs as well as internal uIP
- * structures, TCP/IP header structures and function declarations.
+ * This TCP/IP stack header file contains definitions for a number of C
+ * macros that are used by internal network structures, TCP/IP header
+ * structures and function declarations.
  *
  *   Copyright (C) 2007, 2009-2010, 2012-2014 Gregory Nutt. All rights
  *      reserved.

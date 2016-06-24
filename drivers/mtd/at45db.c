@@ -341,7 +341,7 @@ static inline int at45db_rdid(FAR struct at45db_dev_s *priv)
   uint8_t capacity;
   uint8_t devid[3];
 
-  fvdbg("priv: %p\n", priv);
+  finfo("priv: %p\n", priv);
 
   /* Configure the bus, and select this FLASH part. (The caller should already have
    * locked the bus for exclusive access)
@@ -360,7 +360,7 @@ static inline int at45db_rdid(FAR struct at45db_dev_s *priv)
 
   SPI_SELECT(priv->spi, SPIDEV_FLASH, false);
 
-  fvdbg("manufacturer: %02x devid1: %02x devid2: %02x\n",
+  finfo("manufacturer: %02x devid1: %02x devid2: %02x\n",
         devid[0], devid[1], devid[2]);
 
   /* Check for a valid manufacturer and memory family */
@@ -474,7 +474,7 @@ static inline void at45db_pgerase(FAR struct at45db_dev_s *priv, off_t sector)
   uint8_t erasecmd[4];
   off_t offset = sector << priv->pageshift;
 
-  fvdbg("sector: %08lx\n", (long)sector);
+  finfo("sector: %08lx\n", (long)sector);
 
   /* Higher performance write logic:  We leave the chip busy after write and erase
    * operations.  This improves write and erase performance because we do not have
@@ -514,7 +514,7 @@ static inline void at45db_pgerase(FAR struct at45db_dev_s *priv, off_t sector)
 #ifndef CONFIG_AT45DB_PREWAIT
   at45db_waitbusy(priv);
 #endif
-  fvdbg("Erased\n");
+  finfo("Erased\n");
 }
 
 /************************************************************************************
@@ -523,7 +523,7 @@ static inline void at45db_pgerase(FAR struct at45db_dev_s *priv, off_t sector)
 
 static inline int at32db_chiperase(FAR struct at45db_dev_s *priv)
 {
-  fvdbg("priv: %p\n", priv);
+  finfo("priv: %p\n", priv);
 
   /* Higher performance write logic:  We leave the chip busy after write and erase
    * operations.  This improves write and erase performance because we do not have
@@ -569,7 +569,7 @@ static inline void at45db_pgwrite(FAR struct at45db_dev_s *priv,
   uint8_t wrcmd [4];
   off_t offset = page << priv->pageshift;
 
-  fvdbg("page: %08lx offset: %08lx\n", (long)page, (long)offset);
+  finfo("page: %08lx offset: %08lx\n", (long)page, (long)offset);
 
   /* We assume that sectors are not write protected */
 
@@ -601,7 +601,7 @@ static inline void at45db_pgwrite(FAR struct at45db_dev_s *priv,
 #ifndef CONFIG_AT45DB_PREWAIT
   at45db_waitbusy(priv);
 #endif
-  fvdbg("Written\n");
+  finfo("Written\n");
 }
 
 /************************************************************************************
@@ -613,7 +613,7 @@ static int at45db_erase(FAR struct mtd_dev_s *mtd, off_t startblock, size_t nblo
   FAR struct at45db_dev_s *priv = (FAR struct at45db_dev_s *)mtd;
   size_t pgsleft = nblocks;
 
-  fvdbg("startblock: %08lx nblocks: %d\n", (long)startblock, (int)nblocks);
+  finfo("startblock: %08lx nblocks: %d\n", (long)startblock, (int)nblocks);
 
   /* Take the lock so that we have exclusive access to the bus, then power up the
    * FLASH device.
@@ -669,7 +669,7 @@ static ssize_t at45db_bwrite(FAR struct mtd_dev_s *mtd, off_t startblock,
   FAR struct at45db_dev_s *priv = (FAR struct at45db_dev_s *)mtd;
   size_t pgsleft = nblocks;
 
-  fvdbg("startblock: %08lx nblocks: %d\n", (long)startblock, (int)nblocks);
+  finfo("startblock: %08lx nblocks: %d\n", (long)startblock, (int)nblocks);
 
   /* Take the lock so that we have exclusive access to the bus, then power up the
    * FLASH device.
@@ -703,7 +703,7 @@ static ssize_t at45db_read(FAR struct mtd_dev_s *mtd, off_t offset, size_t nbyte
   FAR struct at45db_dev_s *priv = (FAR struct at45db_dev_s *)mtd;
   uint8_t rdcmd [5];
 
-  fvdbg("offset: %08lx nbytes: %d\n", (long)offset, (int)nbytes);
+  finfo("offset: %08lx nbytes: %d\n", (long)offset, (int)nbytes);
 
   /* Set up for the read */
 
@@ -741,7 +741,7 @@ static ssize_t at45db_read(FAR struct mtd_dev_s *mtd, off_t offset, size_t nbyte
   at45db_pwrdown(priv);
   at45db_unlock(priv);
 
-  fvdbg("return nbytes: %d\n", (int)nbytes);
+  finfo("return nbytes: %d\n", (int)nbytes);
   return nbytes;
 }
 
@@ -754,7 +754,7 @@ static int at45db_ioctl(FAR struct mtd_dev_s *mtd, int cmd, unsigned long arg)
   FAR struct at45db_dev_s *priv = (FAR struct at45db_dev_s *)mtd;
   int ret = -EINVAL; /* Assume good command with bad parameters */
 
-  fvdbg("cmd: %d \n", cmd);
+  finfo("cmd: %d \n", cmd);
 
   switch (cmd)
     {
@@ -777,7 +777,7 @@ static int at45db_ioctl(FAR struct mtd_dev_s *mtd, int cmd, unsigned long arg)
               geo->neraseblocks = priv->npages;
               ret               = OK;
 
-              fvdbg("blocksize: %d erasesize: %d neraseblocks: %d\n",
+              finfo("blocksize: %d erasesize: %d neraseblocks: %d\n",
                     geo->blocksize, geo->erasesize, geo->neraseblocks);
             }
         }
@@ -806,7 +806,7 @@ static int at45db_ioctl(FAR struct mtd_dev_s *mtd, int cmd, unsigned long arg)
         break;
     }
 
-  fvdbg("return %d\n", ret);
+  finfo("return %d\n", ret);
   return ret;
 }
 
@@ -830,7 +830,7 @@ FAR struct mtd_dev_s *at45db_initialize(FAR struct spi_dev_s *spi)
   uint8_t sr;
   int ret;
 
-  fvdbg("spi: %p\n", spi);
+  finfo("spi: %p\n", spi);
 
   /* Allocate a state structure (we allocate the structure instead of using a fixed,
    * static allocation so that we can handle multiple FLASH devices.  The current
@@ -869,7 +869,7 @@ FAR struct mtd_dev_s *at45db_initialize(FAR struct spi_dev_s *spi)
         {
           /* Unrecognized! Discard all of that work we just did and return NULL */
 
-          fdbg("Unrecognized\n");
+          ferr("ERROR: Unrecognized\n");
           goto errout;
         }
 
@@ -887,7 +887,8 @@ FAR struct mtd_dev_s *at45db_initialize(FAR struct spi_dev_s *spi)
            * is required after the device has be re-programmed.
            */
 
-          fdbg("Reprogramming page size\n");
+          fwarn("WARNING: Reprogramming page size\n");
+
           SPI_SELECT(priv->spi, SPIDEV_FLASH, true);
           SPI_SNDBLOCK(priv->spi, g_binpgsize, BINPGSIZE_SIZE);
           SPI_SELECT(priv->spi, SPIDEV_FLASH, false);
@@ -906,7 +907,7 @@ FAR struct mtd_dev_s *at45db_initialize(FAR struct spi_dev_s *spi)
   mtd_register(&priv->mtd, "at45db");
 #endif
 
-  fvdbg("Return %p\n", priv);
+  finfo("Return %p\n", priv);
   return (FAR struct mtd_dev_s *)priv;
 
   /* On any failure, we need free memory allocations and release the lock that

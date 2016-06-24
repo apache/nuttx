@@ -101,26 +101,6 @@
 
 #define SPI_DUMMY 0xff
 
-/* Debug ********************************************************************/
-/* Check if (non-standard) SPI debug is enabled */
-
-#ifndef CONFIG_DEBUG
-#  undef CONFIG_DEBUG_VERBOSE
-#  undef CONFIG_DEBUG_SPI
-#endif
-
-#ifdef CONFIG_DEBUG_SPI
-#  define spidbg dbg
-#  ifdef CONFIG_DEBUG_VERBOSE
-#    define spivdbg dbg
-#  else
-#    define spivdbg(x...)
-#  endif
-#else
-#  define spidbg(x...)
-#  define spivdbg(x...)
-#endif
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -138,7 +118,7 @@
 
 static void pga11x_configure(FAR struct spi_dev_s *spi)
 {
-  spivdbg("MODE: %d BITS: 8 Frequency: %d\n",
+  spiinfo("MODE: %d BITS: 8 Frequency: %d\n",
           CONFIG_PGA11X_SPIMODE, CONFIG_PGA11X_SPIFREQUENCY);
 
   /* Call the setfrequency, setbits, and setmode methods to make sure that
@@ -164,7 +144,7 @@ static void pga11x_configure(FAR struct spi_dev_s *spi)
 
 static void pga11x_lock(FAR struct spi_dev_s *spi)
 {
-  spivdbg("Locking\n");
+  spiinfo("Locking\n");
 
   /* On SPI busses where there are multiple devices, it will be necessary to
    * lock SPI to have exclusive access to the busses for a sequence of
@@ -198,7 +178,7 @@ static void pga11x_lock(FAR struct spi_dev_s *spi)
 
 static inline void pga11x_unlock(FAR struct spi_dev_s *spi)
 {
-  spivdbg("Unlocking\n");
+  spiinfo("Unlocking\n");
 
   SPI_LOCK(spi, false);
 }
@@ -223,7 +203,7 @@ static inline void pga11x_unlock(FAR struct spi_dev_s *spi)
 
 static void pga11x_send16(FAR struct spi_dev_s *spi, uint16_t word)
 {
-  spivdbg("Send %04x\n", word);
+  spiinfo("Send %04x\n", word);
 
   /* The logical interface is 16-bits wide.  However, this driver uses a
    * 8-bit configuration for greaer portability.
@@ -265,7 +245,7 @@ static uint16_t pga11x_recv16(FAR struct spi_dev_s *spi)
 
   msb = SPI_SEND(spi, SPI_DUMMY);
   lsb = SPI_SEND(spi, SPI_DUMMY);
-  spivdbg("Received %02x %02x\n", msb, lsb);
+  spiinfo("Received %02x %02x\n", msb, lsb);
 
   return ((uint16_t)msb << 8) | (uint16_t)lsb;
 }
@@ -293,7 +273,7 @@ static uint16_t pga11x_recv16(FAR struct spi_dev_s *spi)
 #ifndef CONFIG_PGA11X_DAISYCHAIN
 static void pga11x_write(FAR struct spi_dev_s *spi, uint16_t cmd)
 {
-  spivdbg("cmd %04x\n", cmd);
+  spiinfo("cmd %04x\n", cmd);
 
   /* Lock, select, send the 16-bit command, de-select, and un-lock. */
 
@@ -306,7 +286,7 @@ static void pga11x_write(FAR struct spi_dev_s *spi, uint16_t cmd)
 #else
 static void pga11x_write(FAR struct spi_dev_s *spi, uint16_t u1cmd, uint16_t u2cmd)
 {
-  spivdbg("U1 cmd: %04x U2 cmd: %04x\n", u1cmd, u2cmd);
+  spiinfo("U1 cmd: %04x U2 cmd: %04x\n", u1cmd, u2cmd);
 
   /* Lock, select, send the U2 16-bit command, the U1 16-bit command, de-select,
    * and un-lock.
@@ -343,7 +323,7 @@ static void pga11x_write(FAR struct spi_dev_s *spi, uint16_t u1cmd, uint16_t u2c
 
 PGA11X_HANDLE pga11x_initialize(FAR struct spi_dev_s *spi)
 {
-  spivdbg("Entry\n");
+  spiinfo("Entry\n");
 
   /* No Special state is required, just return the SPI driver instance as
    * the handle.  This gives us a place to extend functionality in the
@@ -380,7 +360,7 @@ int pga11x_select(PGA11X_HANDLE handle,
   uint16_t cmd;
 
   DEBUGASSERT(handle && settings);
-  spivdbg("channel: %d gain: %d\n", settings->channel, settings->gain);
+  spiinfo("channel: %d gain: %d\n", settings->channel, settings->gain);
 
   /* Format the command */
 
@@ -398,8 +378,8 @@ int pga11x_select(PGA11X_HANDLE handle,
   uint16_t u2cmd;
 
   DEBUGASSERT(handle && settings);
-  spivdbg("U1 channel: %d gain: %d\n", settings->u1.channel, settings->u1.gain);
-  spivdbg("U1 channel: %d gain: %d\n", settings->u1.channel, settings->u1.gain);
+  spiinfo("U1 channel: %d gain: %d\n", settings->u1.channel, settings->u1.gain);
+  spiinfo("U1 channel: %d gain: %d\n", settings->u1.channel, settings->u1.gain);
 
   /* Format the commands */
 
@@ -445,7 +425,7 @@ int pga11x_uselect(PGA11X_HANDLE handle, int pos,
   uint16_t u1cmd;
   uint16_t u2cmd;
 
-  spivdbg("channel: %d gain: %d\n", settings->channel, settings->gain);
+  spiinfo("channel: %d gain: %d\n", settings->channel, settings->gain);
   DEBUGASSERT(handle);
 
   /* Format the commands */
@@ -498,7 +478,7 @@ int pga11x_read(PGA11X_HANDLE handle, FAR struct pga11x_settings_s *settings)
   uint16_t u1value;
   uint16_t u2value;
 
-  spivdbg("Entry\n");
+  spiinfo("Entry\n");
   DEBUGASSERT(handle && settings);
 
   /* Lock the bus and read the configuration */
@@ -526,7 +506,7 @@ int pga11x_read(PGA11X_HANDLE handle, FAR struct pga11x_settings_s *settings)
 
   /* Decode the returned value */
 
-  spivdbg("Returning %04x %04x\n", u2value, u1value);
+  spiinfo("Returning %04x %04x\n", u2value, u1value);
   settings->u1.channel = (uint8_t)((u1value & PGA11X_CHAN_MASK) >> PGA11X_CHAN_SHIFT);
   settings->u1.gain    = (uint8_t)((u1value & PGA11X_GAIN_MASK) >> PGA11X_GAIN_SHIFT);
   settings->u2.channel = (uint8_t)((u2value & PGA11X_CHAN_MASK) >> PGA11X_CHAN_SHIFT);
@@ -536,7 +516,7 @@ int pga11x_read(PGA11X_HANDLE handle, FAR struct pga11x_settings_s *settings)
   FAR struct spi_dev_s *spi = (FAR struct spi_dev_s *)handle;
   uint16_t value;
 
-  spivdbg("Entry\n");
+  spiinfo("Entry\n");
   DEBUGASSERT(handle);
 
   /* Lock the bus and read the configuration */
@@ -561,7 +541,7 @@ int pga11x_read(PGA11X_HANDLE handle, FAR struct pga11x_settings_s *settings)
 
   /* Decode the returned value */
 
-  spivdbg("Returning: %04x\n", value);
+  spiinfo("Returning: %04x\n", value);
   settings->channel = (uint8_t)((value & PGA11X_CHAN_MASK) >> PGA11X_CHAN_SHIFT);
   settings->gain    = (uint8_t)((value & PGA11X_GAIN_MASK) >> PGA11X_GAIN_SHIFT);
   return OK;
@@ -633,7 +613,7 @@ int pga11x_shutdown(PGA11X_HANDLE handle)
 {
   FAR struct spi_dev_s *spi = (FAR struct spi_dev_s *)handle;
 
-  spivdbg("Entry\n");
+  spiinfo("Entry\n");
   DEBUGASSERT(handle);
 
   /* Enter shutdown mode by issuing an SDN_EN command */
@@ -669,7 +649,7 @@ int pga11x_ushutdown(PGA11X_HANDLE handle, int pos)
 {
   FAR struct spi_dev_s *spi = (FAR struct spi_dev_s *)handle;
 
-  spivdbg("Entry\n");
+  spiinfo("Entry\n");
   DEBUGASSERT(handle);
 
   /* Enter shutdown mode by issuing an SDN_EN command */
@@ -709,7 +689,7 @@ int pga11x_enable(PGA11X_HANDLE handle)
 {
   FAR struct spi_dev_s *spi = (FAR struct spi_dev_s *)handle;
 
-  spivdbg("Entry\n");
+  spiinfo("Entry\n");
   DEBUGASSERT(handle);
 
   /* Lock the bus and send the shutdown disable command.  Shutdown mode is
@@ -748,7 +728,7 @@ int pga11x_uenable(PGA11X_HANDLE handle, int pos)
 {
   FAR struct spi_dev_s *spi = (FAR struct spi_dev_s *)handle;
 
-  spivdbg("Entry\n");
+  spiinfo("Entry\n");
   DEBUGASSERT(handle);
 
   /* Enter shutdown mode by issuing an SDN_EN command */

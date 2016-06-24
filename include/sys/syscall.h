@@ -225,10 +225,15 @@
 #  define SYS_timer_getoverrun         (__SYS_timers+2)
 #  define SYS_timer_gettime            (__SYS_timers+3)
 #  define SYS_timer_settime            (__SYS_timers+4)
-#  define __SYS_descriptors            (__SYS_timers+5)
+#  define __SYS_syslog                 (__SYS_timers+5)
 #else
-#  define __SYS_descriptors             __SYS_timers
+#  define __SYS_syslog                 __SYS_timers
 #endif
+
+/* Unconditional system logging */
+
+#define SYS__vsyslog                   (__SYS_syslog+0)
+#define __SYS_descriptors              (__SYS_syslog+1)
 
 /* The following are defined if either file or socket descriptor are
  * enabled.

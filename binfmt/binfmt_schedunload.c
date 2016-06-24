@@ -209,7 +209,7 @@ static void unload_callback(int signo, siginfo_t *info, void *ucontext)
 
   if (!info || signo != SIGCHLD)
     {
-      blldbg("ERROR:Bad signal callback: signo=%d info=%p\n", signo, info);
+      berr("ERROR:Bad signal callback: signo=%d info=%p\n", signo, info);
       return;
     }
 
@@ -218,7 +218,7 @@ static void unload_callback(int signo, siginfo_t *info, void *ucontext)
   bin = unload_list_remove(info->si_pid);
   if (!bin)
     {
-      blldbg("ERROR: Could not find load info for PID=%d\n", info->si_pid);
+      berr("ERROR: Could not find load info for PID=%d\n", info->si_pid);
       return;
     }
 
@@ -227,7 +227,7 @@ static void unload_callback(int signo, siginfo_t *info, void *ucontext)
   ret = unload_module(bin);
   if (ret < 0)
     {
-      blldbg("ERROR: unload_module failed: %d\n", get_errno());
+      berr("ERROR: unload_module failed: %d\n", get_errno());
     }
 
   /* Free the load structure */
@@ -284,7 +284,7 @@ int schedule_unload(pid_t pid, FAR struct binary_s *bin)
       /* The errno value will get trashed by the following debug output */
 
       errorcode = get_errno();
-      bvdbg("ERROR: sigprocmask failed: %d\n", ret);
+      berr("ERROR: sigprocmask failed: %d\n", ret);
       goto errout;
     }
 
@@ -310,14 +310,14 @@ int schedule_unload(pid_t pid, FAR struct binary_s *bin)
       /* The errno value will get trashed by the following debug output */
 
       errorcode = get_errno();
-      bvdbg("ERROR: sigaction failed: %d\n" , ret);
+      berr("ERROR: sigaction failed: %d\n" , ret);
 
       /* Emergency removal from the list */
 
       flags = enter_critical_section();
       if (unload_list_remove(pid) != bin)
         {
-          blldbg("ERROR: Failed to remove structure\n");
+          berr("ERROR: Failed to remove structure\n");
         }
 
       leave_critical_section(flags);

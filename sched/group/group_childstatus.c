@@ -66,7 +66,7 @@
 #  define CONFIG_PREALLOC_CHILDSTATUS (2*CONFIG_MAX_TASKS)
 #endif
 
-#ifndef CONFIG_DEBUG
+#ifndef CONFIG_DEBUG_INFO
 #  undef CONFIG_DEBUG_CHILDSTATUS
 #endif
 
@@ -115,11 +115,11 @@ static void group_dumpchildren(FAR struct task_group_s *group,
   FAR struct child_status_s *child;
   int i;
 
-  dbg("Task group=%p: %s\n", group, msg);
+  _info("Task group=%p: %s\n", group, msg);
   for (i = 0, child = group->tg_children; child; i++, child = child->flink)
     {
-      dbg("  %d. ch_flags=%02x ch_pid=%d ch_status=%d\n",
-          i, child->ch_flags, child->ch_pid, child->ch_status);
+      _info("  %d. ch_flags=%02x ch_pid=%d ch_status=%d\n",
+           i, child->ch_flags, child->ch_pid, child->ch_status);
     }
 }
 #else

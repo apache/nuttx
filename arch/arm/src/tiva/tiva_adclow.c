@@ -327,7 +327,7 @@ static int tiva_adc1_sse3_interrupt(int irq, void *context)
 
 static void tiva_adc_irqinitialize(struct tiva_adc_cfg_s *cfg)
 {
-  avdbg("initialize irqs for ADC%d...\n", cfg->adc);
+  ainfo("initialize irqs for ADC%d...\n", cfg->adc);
 
 #ifdef CONFIG_TIVA_ADC0
   if (cfg->adc == 0)
@@ -411,7 +411,7 @@ static int tiva_adc_bind(FAR struct adc_dev_s *dev,
 
 static void tiva_adc_reset(struct adc_dev_s *dev)
 {
-  avdbg("Resetting...\n");
+  ainfo("Resetting...\n");
 
   struct tiva_adc_s *priv = (struct tiva_adc_s *)dev->ad_priv;
   struct tiva_adc_sse_s *sse;
@@ -443,7 +443,7 @@ static void tiva_adc_reset(struct adc_dev_s *dev)
 
 static int tiva_adc_setup(struct adc_dev_s *dev)
 {
-  avdbg("Setup\n");
+  ainfo("Setup\n");
 
   struct tiva_adc_s *priv = (struct tiva_adc_s *)dev->ad_priv;
   struct tiva_adc_sse_s *sse;
@@ -477,7 +477,7 @@ static int tiva_adc_setup(struct adc_dev_s *dev)
 static void tiva_adc_shutdown(struct adc_dev_s *dev)
 {
   struct tiva_adc_s *priv = (struct tiva_adc_s *)dev->ad_priv;
-  avdbg("Shutdown\n");
+  ainfo("Shutdown\n");
 
   DEBUGASSERT(priv->ena);
 
@@ -512,7 +512,7 @@ static void tiva_adc_shutdown(struct adc_dev_s *dev)
 
 static void tiva_adc_rxint(struct adc_dev_s *dev, bool enable)
 {
-  avdbg("RXINT=%d\n", enable);
+  ainfo("RXINT=%d\n", enable);
 
   struct tiva_adc_s *priv = (struct tiva_adc_s *)dev->ad_priv;
   struct tiva_adc_sse_s *sse;
@@ -552,7 +552,7 @@ static int tiva_adc_ioctl(struct adc_dev_s *dev, int cmd, unsigned long arg)
 {
   int ret = OK;
 
-  avdbg("cmd=%d arg=%ld\n", cmd, arg);
+  ainfo("cmd=%d arg=%ld\n", cmd, arg);
 
   switch (cmd)
     {
@@ -686,7 +686,7 @@ static void tiva_adc_read(void *arg)
        * and should cause a full system stop.
        */
 
-      alldbg("PANIC!!! Invalid ADC device number given %d\n", sse->adc);
+      aerr("ERROR: Invalid ADC device number given %d\n", sse->adc);
       PANIC();
       return;
     }
@@ -704,7 +704,7 @@ static void tiva_adc_read(void *arg)
           priv->cb->au_receive(dev,
                                tiva_adc_get_ain(sse->adc, sse->num, i),
                                buf[i]);
-          avdbg("AIN%d = 0x%04x\n",
+          ainfo("AIN%d = 0x%04x\n",
                 tiva_adc_get_ain(sse->adc, sse->num, i), buf[i]);
         }
     }
@@ -753,7 +753,7 @@ static void tiva_adc_interrupt(struct tiva_adc_sse_s *sse)
   ret = work_queue(HPWORK, &sse->work, tiva_adc_read, sse, 0);
   if (ret != 0)
     {
-      adbg("ERROR: Failed to queue work: %d ADC.SSE: %d.%d\n",
+      aerr("ERROR: Failed to queue work: %d ADC.SSE: %d.%d\n",
            ret, sse->adc, sse->num);
     }
 }
@@ -832,9 +832,9 @@ static struct tiva_adc_s *tiva_adc_struct_init(struct tiva_adc_cfg_s *cfg)
     }
 
 tiva_adc_struct_init_error:
-  avdbg("Invalid ADC device number: expected=%d actual=%d\n",
+  ainfo("Invalid ADC device number: expected=%d actual=%d\n",
         0, cfg->adc);
-  avdbg("ADC%d (CONFIG_TIVA_ADC%d) must be enabled in Kconfig first!",
+  ainfo("ADC%d (CONFIG_TIVA_ADC%d) must be enabled in Kconfig first!",
         cfg->adc, cfg->adc);
   return NULL;
 
@@ -872,15 +872,15 @@ int tiva_adc_initialize(const char *devpath, struct tiva_adc_cfg_s *cfg,
   struct tiva_adc_s *adc;
   int ret = 0;
 
-  avdbg("initializing...\n");
+  ainfo("initializing...\n");
 
   /* Initialize the private ADC device data structure */
 
   adc = tiva_adc_struct_init(cfg);
   if (adc == NULL)
     {
-      adbg("Invalid ADC device number: expected=%d actual=%d\n",
-            0, cfg->adc);
+      aerr("ERROR: Invalid ADC device number: expected=%d actual=%d\n",
+           0, cfg->adc);
       return -ENODEV;
     }
 
@@ -888,8 +888,8 @@ int tiva_adc_initialize(const char *devpath, struct tiva_adc_cfg_s *cfg,
 
   if (tiva_adc_enable(adc->devno, true) < 0)
     {
-      adbg("ERROR: failure to power ADC peripheral (devno=%d)\n",
-            cfg->adc);
+      aerr("ERROR: failure to power ADC peripheral (devno=%d)\n",
+           cfg->adc);
       return ret;
     }
 
@@ -912,21 +912,21 @@ int tiva_adc_initialize(const char *devpath, struct tiva_adc_cfg_s *cfg,
 
   if (adc->dev == NULL)
     {
-      adbg("ERROR: Failed to get interface %s\n", devpath);
+      aerr("ERROR: Failed to get interface %s\n", devpath);
       return -ENODEV;
     }
 
-  avdbg("adc_dev_s=0x%08x\n", adc->dev);
+  ainfo("adc_dev_s=0x%08x\n", adc->dev);
 
   /* Register the ADC driver */
 
-  avdbg("Register the ADC driver at %s\n", devpath);
+  ainfo("Register the ADC driver at %s\n", devpath);
 
   ret = adc_register(devpath, adc->dev);
   if (ret < 0)
     {
-      adbg("ERROR: Failed to register %s to character driver: %d\n",
-            devpath, ret);
+      aerr("ERROR: Failed to register %s to character driver: %d\n",
+           devpath, ret);
       return ret;
     }
 
@@ -943,7 +943,7 @@ int tiva_adc_initialize(const char *devpath, struct tiva_adc_cfg_s *cfg,
 
 void tiva_adc_lock(FAR struct tiva_adc_s *priv, int sse)
 {
-  avdbg("Locking...\n");
+  ainfo("Locking...\n");
 
   struct tiva_adc_sse_s *s = g_sses[SSE_IDX(priv->devno, sse)];
   int ret;
@@ -964,7 +964,7 @@ void tiva_adc_lock(FAR struct tiva_adc_s *priv, int sse)
 #ifdef CONFIG_DEBUG_ANALOG
       if (loop_count % 1000)
         {
-          avdbg("loop=%d\n");
+          ainfo("loop=%d\n");
         }
       ++loop_count;
 #endif
@@ -982,7 +982,7 @@ void tiva_adc_lock(FAR struct tiva_adc_s *priv, int sse)
 
 void tiva_adc_unlock(FAR struct tiva_adc_s *priv, int sse)
 {
-  avdbg("Unlocking\n");
+  ainfo("Unlocking\n");
   struct tiva_adc_sse_s *s = g_sses[SSE_IDX(priv->devno, sse)];
   sem_post(&s->exclsem);
 }
@@ -1002,33 +1002,33 @@ void tiva_adc_unlock(FAR struct tiva_adc_s *priv, int sse)
 static void tiva_adc_runtimeobj_ptrs(void)
 {
 #  ifdef CONFIG_TIVA_ADC0
-  avdbg("ADC0 [struct]       [global value]   [array value]\n");
-  avdbg("     adc_dev_s      dev0=0x%08x   g_devs[0]=0x%08x\n",
+  ainfo("ADC0 [struct]       [global value]   [array value]\n");
+  ainfo("     adc_dev_s      dev0=0x%08x   g_devs[0]=0x%08x\n",
         &dev0, g_devs[0]);
-  avdbg("     tiva_adc_s     adc0=0x%08x   g_adcs[0]=0x%08x\n",
+  ainfo("     tiva_adc_s     adc0=0x%08x   g_adcs[0]=0x%08x\n",
         &adc0, g_adcs[0]);
-  avdbg("     tiva_adc_sse_s sse0=0x%08x   g_sses[0,0]=0x%08x\n",
+  ainfo("     tiva_adc_sse_s sse0=0x%08x   g_sses[0,0]=0x%08x\n",
         &sse00, g_sses[SSE_IDX(0, 0)]);
-  avdbg("     tiva_adc_sse_s sse1=0x%08x   g_sses[0,1]=0x%08x\n",
+  ainfo("     tiva_adc_sse_s sse1=0x%08x   g_sses[0,1]=0x%08x\n",
         &sse01, g_sses[SSE_IDX(0, 1)]);
-  avdbg("     tiva_adc_sse_s sse2=0x%08x   g_sses[0,2]=0x%08x\n",
+  ainfo("     tiva_adc_sse_s sse2=0x%08x   g_sses[0,2]=0x%08x\n",
         &sse02, g_sses[SSE_IDX(0, 2)]);
-  avdbg("     tiva_adc_sse_s sse3=0x%08x   g_sses[0,3]=0x%08x\n",
+  ainfo("     tiva_adc_sse_s sse3=0x%08x   g_sses[0,3]=0x%08x\n",
         &sse03, g_sses[SSE_IDX(0, 3)]);
 #  endif
 #  ifdef CONFIG_TIVA_ADC1
-  avdbg("ADC1 [struct]       [global value]   [array value]\n");
-  avdbg("     adc_dev_s      dev1=0x%08x   g_devs[1]=0x%08x\n",
+  ainfo("ADC1 [struct]       [global value]   [array value]\n");
+  ainfo("     adc_dev_s      dev1=0x%08x   g_devs[1]=0x%08x\n",
         &dev1, g_devs[1]);
-  avdbg("     tiva_adc_s     adc1=0x%08x   g_adcs[1]=0x%08x\n",
+  ainfo("     tiva_adc_s     adc1=0x%08x   g_adcs[1]=0x%08x\n",
         &adc1, g_adcs[1]);
-  avdbg("     tiva_adc_sse_s sse0=0x%08x   g_sses[1,0]=0x%08x\n",
+  ainfo("     tiva_adc_sse_s sse0=0x%08x   g_sses[1,0]=0x%08x\n",
         &sse10, g_sses[SSE_IDX(1, 0)]);
-  avdbg("     tiva_adc_sse_s sse1=0x%08x   g_sses[1,1]=0x%08x\n",
+  ainfo("     tiva_adc_sse_s sse1=0x%08x   g_sses[1,1]=0x%08x\n",
         &sse11, g_sses[SSE_IDX(1, 1)]);
-  avdbg("     tiva_adc_sse_s sse2=0x%08x   g_sses[1,2]=0x%08x\n",
+  ainfo("     tiva_adc_sse_s sse2=0x%08x   g_sses[1,2]=0x%08x\n",
         &sse12, g_sses[SSE_IDX(1, 2)]);
-  avdbg("     tiva_adc_sse_s sse3=0x%08x   g_sses[1,3]=0x%08x\n",
+  ainfo("     tiva_adc_sse_s sse3=0x%08x   g_sses[1,3]=0x%08x\n",
         &sse13, g_sses[SSE_IDX(1, 3)]);
 #  endif
 }
@@ -1038,24 +1038,24 @@ static void tiva_adc_runtimeobj_vals(void)
   struct tiva_adc_sse_s *sse;
   uint8_t s;
 #  ifdef CONFIG_TIVA_ADC0
-  avdbg("ADC0 [0x%08x] cfg=%d ena=%d devno=%d\n",
+  ainfo("ADC0 [0x%08x] cfg=%d ena=%d devno=%d\n",
          &adc0, adc0.cfg, adc0.ena, adc0.devno);
 
   for (s = 0; s < 4; ++s)
     {
       sse = g_sses[SSE_IDX(0, s)];
-      avdbg("SSE%d [0x%08x] adc=%d cfg=%d ena=%d num=%d\n",
+      ainfo("SSE%d [0x%08x] adc=%d cfg=%d ena=%d num=%d\n",
              s, sse, sse->adc, sse->cfg, sse->ena, sse->num);
     }
 #  endif
 #  ifdef CONFIG_TIVA_ADC1
-  avdbg("ADC1 [0x%08x] cfg=%d ena=%d devno=%d\n",
+  ainfo("ADC1 [0x%08x] cfg=%d ena=%d devno=%d\n",
          &adc1, adc1.cfg, adc1.ena, adc1.devno);
 
   for (s = 0; s < 4; ++s)
     {
       sse = g_sses[SSE_IDX(1, s)];
-      avdbg("SSE%d [0x%08x] adc=%d cfg=%d ena=%d num=%d\n",
+      ainfo("SSE%d [0x%08x] adc=%d cfg=%d ena=%d num=%d\n",
              s, sse, sse->adc, sse->cfg, sse->ena, sse->num);
     }
 #  endif
@@ -1072,15 +1072,15 @@ static void tiva_adc_runtimeobj_vals(void)
 static void tiva_adc_dump_dev(void)
 {
 #  ifdef CONFIG_TIVA_ADC0
-  avdbg("adc_ops_s  g_adcops=0x%08x adc0.dev->ad_ops=0x%08x\n",
+  ainfo("adc_ops_s  g_adcops=0x%08x adc0.dev->ad_ops=0x%08x\n",
          &g_adcops, adc0.dev->ad_ops);
-  avdbg("tiva_adc_s adc0=0x%08x      adc0.dev->ad_priv=0x%08x\n",
+  ainfo("tiva_adc_s adc0=0x%08x      adc0.dev->ad_priv=0x%08x\n",
          &adc0, adc0.dev->ad_priv);
 #  endif
 #  ifdef CONFIG_TIVA_ADC1
-  avdbg("adc_ops_s  g_adcops=0x%08x adc1.dev->ad_ops=0x%08x\n",
+  ainfo("adc_ops_s  g_adcops=0x%08x adc1.dev->ad_ops=0x%08x\n",
          &g_adcops, adc1.dev->ad_ops);
-  avdbg("tiva_adc_s adc1=0x%08x      adc1.dev->ad_priv=0x%08x\n",
+  ainfo("tiva_adc_s adc1=0x%08x      adc1.dev->ad_priv=0x%08x\n",
          &adc1, adc1.dev->ad_priv);
 #  endif
 }

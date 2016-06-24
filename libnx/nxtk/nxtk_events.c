@@ -119,7 +119,7 @@ static void nxtk_redraw(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
 
   DEBUGASSERT(hwnd && rect && fwnd->fwcb);
 
-  gvdbg("hwnd=%p rect={(%d,%d),(%d,%d)} more=%d\n",
+  ginfo("hwnd=%p rect={(%d,%d),(%d,%d)} more=%d\n",
         hwnd, rect->pt1.x, rect->pt1.y, rect->pt2.x, rect->pt2.y, more);
 
   /* The incoming rectangle (rect) is relative to the containing window
@@ -137,7 +137,7 @@ static void nxtk_redraw(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
 
       nxtk_containerclip(fwnd, &intersection, rect, &fwnd->fwrect);
 
-      gvdbg("fwrect intersection={(%d,%d),(%d,%d)}\n",
+      ginfo("fwrect intersection={(%d,%d),(%d,%d)}\n",
            intersection.pt1.x, intersection.pt1.y,
            intersection.pt2.x, intersection.pt2.y);
 
@@ -160,7 +160,7 @@ static void nxtk_redraw(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
 
       nxtk_containerclip(fwnd, &intersection, rect, &fwnd->tbrect);
 
-      gvdbg("tbrect intersection={(%d,%d),(%d,%d)}\n",
+      ginfo("tbrect intersection={(%d,%d),(%d,%d)}\n",
            intersection.pt1.x, intersection.pt1.y,
            intersection.pt2.x, intersection.pt2.y);
 
@@ -187,7 +187,7 @@ static void nxtk_position(NXWINDOW hwnd, FAR const struct nxgl_size_s *size,
   FAR struct nxtk_framedwindow_s *fwnd = (FAR struct nxtk_framedwindow_s *)hwnd;
   struct nxgl_size_s subwindowsize;
 
-  gvdbg("hwnd=%p size=(%d,%d) pos=(%d,%d) bounds={(%d,%d),(%d,%d)}\n",
+  ginfo("hwnd=%p size=(%d,%d) pos=(%d,%d) bounds={(%d,%d),(%d,%d)}\n",
         hwnd, size->w, size->h, pos->x, pos->y,
         bounds->pt1.x, bounds->pt1.y, bounds->pt2.x, bounds->pt2.y);
 

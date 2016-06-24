@@ -245,38 +245,45 @@ static int up_setup(struct uart_dev_s *dev)
     } data;
 
     // clear and disable FIFO
+
     outb(base+COM_FCR, 1);
     outb(base+COM_FCR, 3);
     outb(base+COM_FCR, 0);
 
     // Clear any preexisting overrun indications and interrupts
     // Serial port doesn't exist if COM_LSR returns 0xFF
+
     inb(base+COM_LSR);
     inb(base+COM_IIR);
     inb(base+COM_RX);
-    if (inb(base+COM_LSR) == 0xff) {
-        dbg("COM %d does not exist\n", base);
+    if (inb(base+COM_LSR) == 0xff)
+      {
+        _err("ERROR: COM %d does not exist\n", base);
         return -1;
-    }
+      }
 
     // Set speed; requires DLAB latch
+
     outb(base+COM_LCR, COM_LCR_DLAB);
     data.val = 115200 / priv->baud;
     outb(base+COM_DLL, data.sep.low);
     outb(base+COM_DLM, data.sep.high);
 
     // set data bits, stop bit, parity; turn off DLAB latch
+
     outb(base+COM_LCR, priv->lcr.val);
 
     // OUT2 must be set to enable interrupt
+
     outb(base+COM_MCR, COM_MCR_OUT2);
 
     // setup FIFO
+
     outb(base+COM_FCR, 1);
 
     // disable COM interrupts
-    outb(base+COM_IER, 0);
 
+    outb(base+COM_IER, 0);
     return OK;
 }
 
@@ -315,11 +322,11 @@ static void up_shutdown(struct uart_dev_s *dev)
 static int up_attach(struct uart_dev_s *dev)
 {
     struct up_dev_s *priv = dev->priv;
-    int err;
+    int errcode;
 
-    err = rgmp_request_irq(priv->irq, &priv->action, 0);
+    errcode = rgmp_request_irq(priv->irq, &priv->action, 0);
 
-    return err;
+    return errcode;
 }
 
 /****************************************************************************
@@ -578,47 +585,67 @@ void up_earlyserialinit(void)
 void up_serialinit(void)
 {
     uart_dev_t *dev;
-    int err;
+    int errcode;
 
 #ifdef CONFIG_COM1
     dev = up_alloc_com(COM1, 4);
     if (dev == NULL)
-        dbg("alloc com1 fail\n");
-    else {
-        err = uart_register("/dev/ttyS0", dev);
-        if (err)
-            dbg("register com1 fail\n");
-    }
+      {
+        _err("ERROR: alloc com1 fail\n");
+      }
+    else
+      {
+        errcode = uart_register("/dev/ttyS0", dev);
+        if (errcode)
+          {
+            _err("ERROR: register com1 fail\n");
+          }
+      }
 #endif
 #ifdef CONFIG_COM2
     dev = up_alloc_com(COM2, 3);
     if (dev == NULL)
-        dbg("alloc com2 fail\n");
-    else {
-        err = uart_register("/dev/ttyS1", dev);
-        if (err)
-            dbg("register com2 fail\n");
-    }
+      {
+        _err("ERROR: alloc com2 fail\n");
+      }
+    else
+      {
+        errcode = uart_register("/dev/ttyS1", dev);
+        if (errcode)
+          {
+            _err("ERROR: register com2 fail\n");
+          }
+      }
 #endif
 #ifdef CONFIG_COM3
     dev = up_alloc_com(COM3, 4);
     if (dev == NULL)
-        dbg("alloc com3 fail\n");
-    else {
-        err = uart_register("/dev/ttyS2", dev);
-        if (err)
-            dbg("register com3 fail\n");
-    }
+      {
+        _err("ERROR: alloc com3 fail\n");
+      }
+    else
+      {
+        errcode = uart_register("/dev/ttyS2", dev);
+        if (errcode)
+          {
+            _err("ERROR: register com3 fail\n");
+          }
+      }
 #endif
 #ifdef CONFIG_COM4
     dev = up_alloc_com(COM4, 3);
     if (dev == NULL)
-        dbg("alloc com4 fail\n");
-    else {
-        err = uart_register("/dev/ttyS3", dev);
-        if (err)
-            dbg("register com4 fail\n");
-    }
+      {
+        _err("ERROR: alloc com4 fail\n");
+      }
+    else
+      {
+        errcode = uart_register("/dev/ttyS3", dev);
+        if (errcode)
+          {
+            _err("ERROR: register com4 fail\n");
+          }
+      }
 #endif
 }
 

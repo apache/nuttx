@@ -66,12 +66,12 @@
 
 /* Verbose debug must also be enabled */
 
-#ifndef CONFIG_DEBUG
-#  undef CONFIG_DEBUG_VERBOSE
+#ifndef CONFIG_DEBUG_FEATURES
+#  undef CONFIG_DEBUG_INFO
 #  undef CONFIG_DEBUG_GRAPHICS
 #endif
 
-#ifndef CONFIG_DEBUG_VERBOSE
+#ifndef CONFIG_DEBUG_INFO
 #  undef CONFIG_LCD_SKELDEBUG
 #endif
 
@@ -90,9 +90,13 @@
 /* Debug ******************************************************************************/
 
 #ifdef CONFIG_LCD_SKELDEBUG
-# define skeldbg(format, ...)  vdbg(format, ##__VA_ARGS__)
+# define skelerr(format, ...)  _err(format, ##__VA_ARGS__)
+# define skelwarn(format, ...) _warn(format, ##__VA_ARGS__)
+# define skelinfo(format, ...) _info(format, ##__VA_ARGS__)
 #else
-# define skeldbg(x...)
+# define skelerr(x...)
+# define skelwarn(x...)
+# define skelinfo(x...)
 #endif
 
 /**************************************************************************************
@@ -230,7 +234,7 @@ static int skel_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer
 {
   /* Buffer must be provided and aligned to a 16-bit address boundary */
 
-  gvdbg("row: %d col: %d npixels: %d\n", row, col, npixels);
+  ginfo("row: %d col: %d npixels: %d\n", row, col, npixels);
   DEBUGASSERT(buffer && ((uintptr_t)buffer & 1) == 0);
 
   /* Set up to write the run. */
@@ -259,7 +263,7 @@ static int skel_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
 {
   /* Buffer must be provided and aligned to a 16-bit address boundary */
 
-  gvdbg("row: %d col: %d npixels: %d\n", row, col, npixels);
+  ginfo("row: %d col: %d npixels: %d\n", row, col, npixels);
   DEBUGASSERT(buffer && ((uintptr_t)buffer & 1) == 0);
 
 #warning "Missing logic"
@@ -278,7 +282,7 @@ static int skel_getvideoinfo(FAR struct lcd_dev_s *dev,
                               FAR struct fb_videoinfo_s *vinfo)
 {
   DEBUGASSERT(dev && vinfo);
-  gvdbg("fmt: %d xres: %d yres: %d nplanes: %d\n",
+  ginfo("fmt: %d xres: %d yres: %d nplanes: %d\n",
          g_videoinfo.fmt, g_videoinfo.xres, g_videoinfo.yres, g_videoinfo.nplanes);
   memcpy(vinfo, &g_videoinfo, sizeof(struct fb_videoinfo_s));
   return OK;
@@ -296,7 +300,7 @@ static int skel_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
                               FAR struct lcd_planeinfo_s *pinfo)
 {
   DEBUGASSERT(dev && pinfo && planeno == 0);
-  gvdbg("planeno: %d bpp: %d\n", planeno, g_planeinfo.bpp);
+  ginfo("planeno: %d bpp: %d\n", planeno, g_planeinfo.bpp);
   memcpy(pinfo, &g_planeinfo, sizeof(struct lcd_planeinfo_s));
   return OK;
 }
@@ -313,7 +317,7 @@ static int skel_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
 static int skel_getpower(struct lcd_dev_s *dev)
 {
   struct skel_dev_s *priv = (struct skel_dev_s *)dev;
-  gvdbg("power: %d\n", 0);
+  ginfo("power: %d\n", 0);
 #warning "Missing logic"
   return 0;
 }
@@ -331,7 +335,7 @@ static int skel_setpower(struct lcd_dev_s *dev, int power)
 {
   struct skel_dev_s *priv = (struct skel_dev_s *)dev;
 
-  gvdbg("power: %d\n", power);
+  ginfo("power: %d\n", power);
   DEBUGASSERT(power <= CONFIG_LCD_MAXPOWER);
 
   /* Set new power level */
@@ -350,7 +354,7 @@ static int skel_setpower(struct lcd_dev_s *dev, int power)
 
 static int skel_getcontrast(struct lcd_dev_s *dev)
 {
-  gvdbg("Not implemented\n");
+  ginfo("Not implemented\n");
 #warning "Missing logic"
   return -ENOSYS;
 }
@@ -365,7 +369,7 @@ static int skel_getcontrast(struct lcd_dev_s *dev)
 
 static int skel_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
 {
-  gvdbg("contrast: %d\n", contrast);
+  ginfo("contrast: %d\n", contrast);
 #warning "Missing logic"
   return -ENOSYS;
 }
@@ -386,7 +390,7 @@ static int skel_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
 
 FAR struct lcd_dev_s *up_oledinitialize(FAR struct spi_dev_s *spi)
 {
-  gvdbg("Initializing\n");
+  ginfo("Initializing\n");
 
   /* Configure GPIO pins */
 #warning "Missing logic"

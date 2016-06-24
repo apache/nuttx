@@ -39,6 +39,11 @@
 
 #include <nuttx/config.h>
 
+/* Output debug info even if debug output is not selected. */
+
+#undef  CONFIG_DEBUG_INFO
+#define CONFIG_DEBUG_INFO 1
+
 #include <sys/types.h>
 #include <debug.h>
 
@@ -48,14 +53,13 @@
 #include "chip.h"
 #include "kl_gpio.h"
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 /* Port letters for prettier debug output */
 
-#ifdef CONFIG_DEBUG
 static const char g_portchar[KL_GPIO_NPORTS] =
 {
 #if KL_GPIO_NPORTS > 9
@@ -82,15 +86,6 @@ static const char g_portchar[KL_GPIO_NPORTS] =
 #  error "Bad number of GPIOs"
 #endif
 };
-#endif
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -123,14 +118,14 @@ void kl_dumpgpio(gpio_cfgset_t pinset, const char *msg)
 
   flags = enter_critical_section();
 
-  lldbg("GPIO%c pinset: %08x base: %08x -- %s\n",
-        g_portchar[port], pinset, base, msg);
-  lldbg("  PDOR: %08x  PDIR: %08x  PDDR: %08x\n",
-        getreg32(base + KL_GPIO_PDOR_OFFSET),
-        getreg32(base + KL_GPIO_PDIR_OFFSET),
-        getreg32(base + KL_GPIO_PDDR_OFFSET));
+  _info("GPIO%c pinset: %08x base: %08x -- %s\n",
+       g_portchar[port], pinset, base, msg);
+  _info("  PDOR: %08x  PDIR: %08x  PDDR: %08x\n",
+       getreg32(base + KL_GPIO_PDOR_OFFSET),
+       getreg32(base + KL_GPIO_PDIR_OFFSET),
+       getreg32(base + KL_GPIO_PDDR_OFFSET));
 
   leave_critical_section(flags);
 }
 
-#endif /* CONFIG_DEBUG */
+#endif /* CONFIG_DEBUG_FEATURES */

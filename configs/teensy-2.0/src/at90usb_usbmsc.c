@@ -49,6 +49,7 @@
 #include <nuttx/mmcsd.h>
 #include <nuttx/spi/spi.h>
 
+#include "avr.h"
 #include "at90usb.h"
 #include "teensy-20.h"
 
@@ -62,17 +63,10 @@
 #  define CONFIG_SYSTEM_USBMSC_DEVMINOR1 0
 #endif
 
-/* PORT and SLOT number probably depend on the board configuration */
+/* MMC/SD PORT and SLOT number */
 
-#ifdef CONFIG_ARCH_BOARD_TEENSY_20
-#  undef AVR_MMCSDSPIPORTNO
-#  define AVR_MMCSDSPIPORTNO 0
-#  undef AVR_MMCSDSLOTNO
-#  define AVR_MMCSDSLOTNO 0
-#else
-   /* Add configuration for new AVR boards here */
-#  error "Unrecognized AVR board"
-#endif
+#define AVR_MMCSDSPIPORTNO 0
+#define AVR_MMCSDSLOTNO 0
 
 /****************************************************************************
  * Public Functions

@@ -960,10 +960,13 @@ Native Windows Build
   In this build, you cannot use a Cygwin or MSYS shell. Rather the build must
   be performed in a Windows console window. Here is a better terminal than the
   standard issue, CMD.exe terminal:  ConEmu which can be downloaded from:
-  http://code.google.com/p/conemu-maximus5/
+  https://sourceforge.net/projects/conemu/ or https://conemu.github.io/ .
 
   Build Tools.  The build still relies on some Unix-like commands.  I use
-  the GNUWin32 tools that can be downloaded from http://gnuwin32.sourceforge.net/.
+  the GNUWin32 tools that can be downloaded from http://gnuwin32.sourceforge.net/
+  using the 'Download all' selection.  Individual packages can be download
+  instead if you know what you are doing and want a faster download (No, I
+  can't tell you which packages you should or should not download).
 
   Host Compiler:  I use the MingGW GCC compiler which can be downloaded from
   http://www.mingw.org/.  If you are using GNUWin32, then it is recommended
@@ -971,12 +974,13 @@ Native Windows Build
 
   This capability should still be considered a work in progress because:
 
-  (1) It has not been verified on all targets and tools, and
-  (2) it still lacks some of the creature-comforts of the more mature environments.
+    (1) It has not been verified on all targets and tools, and
+    (2) it still lacks some of the creature-comforts of the more mature
+        environments.
 
-   There is an alternative to the setenv.sh script available for the Windows
-   native environment: tools/configure.bat.  See tools/README.txt for additional
-   information.
+  There is an alternative to the setenv.sh script available for the Windows
+  native environment: tools/configure.bat.  See tools/README.txt for additional
+  information.
 
 Installing GNUWin32
 -------------------

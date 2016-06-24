@@ -92,23 +92,6 @@
 #define GPIO_PGA117_CS      (GPIO_OUTPUT|GPIO_VALUE_ONE|GPIO_PORTB|GPIO_PIN7)
 #define GPIO_SST25VF032B_CS (GPIO_OUTPUT|GPIO_VALUE_ONE|GPIO_PORTB|GPIO_PIN13)
 
-/* The following enable debug output from this file (needs CONFIG_DEBUG too).
- *
- * CONFIG_DEBUG_SPI - Define to enable basic SPI debug
- */
-
-#ifdef CONFIG_DEBUG_SPI
-#  define spidbg  lldbg
-#  define spivdbg llvdbg
-#else
-#  define spidbg(x...)
-#  define spivdbg(x...)
-#endif
-
-/************************************************************************************
- * Private Functions
- ************************************************************************************/
-
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
@@ -175,7 +158,7 @@ enum spi_dev_e;
 
 void  pic32mx_spi2select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
-  spidbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 
   if (devid == SPIDEV_FLASH)
     {

@@ -77,7 +77,7 @@
 int prctl(int option, ...)
 {
   va_list ap;
-  int err;
+  int errcode;
 
   va_start(ap, option);
   switch (option)
@@ -111,8 +111,8 @@ int prctl(int option, ...)
 
         if (!tcb)
           {
-            sdbg("Pid does not correspond to a task: %d\n", pid);
-            err = ESRCH;
+            serr("ERROR: Pid does not correspond to a task: %d\n", pid);
+            errcode = ESRCH;
             goto errout;
           }
 
@@ -120,8 +120,8 @@ int prctl(int option, ...)
 
         if (!name)
           {
-            sdbg("No name provide\n");
-            err = EFAULT;
+            serr("ERROR: No name provide\n");
+            errcode = EFAULT;
             goto errout;
           }
 
@@ -144,14 +144,14 @@ int prctl(int option, ...)
       }
       break;
 #else
-      sdbg("Option not enabled: %d\n", option);
-      err = ENOSYS;
+      serr("ERROR: Option not enabled: %d\n", option);
+      errcode = ENOSYS;
       goto errout;
 #endif
 
     default:
-      sdbg("Unrecognized option: %d\n", option);
-      err = EINVAL;
+      serr("ERROR: Unrecognized option: %d\n", option);
+      errcode = EINVAL;
       goto errout;
     }
 
@@ -166,6 +166,6 @@ int prctl(int option, ...)
 
 errout:
   va_end(ap);
-  set_errno(err);
+  set_errno(errcode);
   return ERROR;
 }

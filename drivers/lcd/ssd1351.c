@@ -499,7 +499,8 @@ static void ssd1351_select(FAR struct ssd1351_dev_s *priv)
    * competing for the SPI bus
    */
 
-  gdbg("SELECTED\n");
+  ginfo("SELECTED\n");
+
   SPI_LOCK(spi, true);
   SPI_SELECT(spi, SPIDEV_DISPLAY, true);
 
@@ -529,7 +530,8 @@ static void ssd1351_deselect(FAR struct ssd1351_dev_s *priv)
 
   /* De-select the chip and relinquish the SPI bus */
 
-  gdbg("DE-SELECTED\n");
+  ginfo("DE-SELECTED\n");
+
   SPI_SELECT(spi, SPIDEV_DISPLAY, false);
   SPI_LOCK(spi, false);
 }
@@ -821,7 +823,7 @@ static int ssd1351_getvideoinfo(FAR struct lcd_dev_s *dev,
   vinfo->yres    = SSD1351_YRES;
   vinfo->nplanes = 1;
 
-  gvdbg("fmt: %u xres: %u yres: %u nplanes: %u\n",
+  ginfo("fmt: %u xres: %u yres: %u nplanes: %u\n",
         vinfo->fmt, vinfo->xres, vinfo->yres, vinfo->nplanes);
   return OK;
 }
@@ -847,7 +849,7 @@ static int ssd1351_getplaneinfo(FAR struct lcd_dev_s *dev,
   pinfo->buffer = (uint8_t *)priv->runbuffer;
   pinfo->bpp    = SSD1351_BPP;
 
-  gvdbg("planeno: %u bpp: %u\n", planeno, pinfo->bpp);
+  ginfo("planeno: %u bpp: %u\n", planeno, pinfo->bpp);
   return OK;
 }
 
@@ -868,7 +870,7 @@ static int ssd1351_getpower(FAR struct lcd_dev_s *dev)
   /* Sanity check */
 
   DEBUGASSERT(priv != NULL);
-  gvdbg("power: %d\n", priv->power);
+  ginfo("power: %d\n", priv->power);
 
   return priv->power;
 }
@@ -890,7 +892,7 @@ static int ssd1351_setpower(FAR struct lcd_dev_s *dev, int power)
   /* Sanity check */
 
   DEBUGASSERT(priv != NULL && (unsigned int)power <= LCD_FULL_ON);
-  gvdbg("power: %d\n", power);
+  ginfo("power: %d\n", power);
 
   /* Select and lock the device */
 

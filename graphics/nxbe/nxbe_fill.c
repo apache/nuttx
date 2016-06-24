@@ -112,7 +112,7 @@ void nxbe_fill(FAR struct nxbe_window_s *wnd,
   struct nxgl_rect_s remaining;
   int i;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!wnd || !rect)
     {
       return;

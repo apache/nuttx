@@ -92,7 +92,7 @@ int nx_filltrapezoid(NXWINDOW hwnd, FAR const struct nxgl_rect_s *clip,
                      FAR const struct nxgl_trapezoid_s *trap,
                      nxgl_mxpixel_t color[CONFIG_NX_NPLANES])
 {
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!hwnd || !trap || !color)
     {
       errno = EINVAL;

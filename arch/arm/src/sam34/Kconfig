@@ -1118,7 +1118,7 @@ config SAM34_SPI_DMATHRESHOLD
 
 config SAM34_SPI_DMADEBUG
 	bool "SPI DMA transfer debug"
-	depends on SAM34_SPI_DMA && DEBUG && DEBUG_DMA
+	depends on SAM34_SPI_DMA && DEBUG_FEATURES && DEBUG_DMA
 	default n
 	---help---
 		Enable special debug instrumentation analyze SPI DMA data transfers.
@@ -1128,11 +1128,11 @@ config SAM34_SPI_DMADEBUG
 
 config SAM34_SPI_REGDEBUG
 	bool "SPI Register level debug"
-	depends on DEBUG
+	depends on DEBUG_SPI_INFO
 	default n
 	---help---
 		Output detailed register-level SPI device debug information.
-		Requires also DEBUG.
+		Requires also CONFIG_SPI_INFO.
 
 endmenu # AT91SAM3/4 SPI device driver options
 endif # SAM34_SPI0 || SAM34_SPI1
@@ -1336,9 +1336,9 @@ config SAM34_EMAC_PHYSR_100FD
 config SAM34_EMAC_REGDEBUG
 	bool "Register-Level Debug"
 	default n
-	depends on DEBUG
+	depends on DEBUG_NET_INFO
 	---help---
-		Enable very low-level register access debug.  Depends on DEBUG.
+		Enable very low-level register access debug.  Depends on CONFIG_DEBUG_NET_INFO.
 
 config SAM34_EMAC_ISETH0
 	bool
@@ -1369,7 +1369,7 @@ config SAM34_HSMCI_WRPROOF
 
 config SAM34_HSMCI_XFRDEBUG
 	bool "HSMCI transfer debug"
-	depends on DEBUG_FS && DEBUG_VERBOSE
+	depends on DEBUG_FS_INFO
 	default n
 	---help---
 		Enable special debug instrumentation analyze HSMCI data transfers.
@@ -1377,11 +1377,11 @@ config SAM34_HSMCI_XFRDEBUG
 		registers at key points in the data transfer and then dumps all of
 		the registers at the end of the transfer.  If DEBUG_DMA is also
 		enabled, then DMA register will be collected as well.  Requires also
-		DEBUG_FS and DEBUG_VERBOSE.
+		DEBUG_FS and CONFIG_DEBUG_INFO.
 
 config SAM34_HSMCI_CMDDEBUG
 	bool "HSMCI command debug"
-	depends on DEBUG_FS && DEBUG_VERBOSE
+	depends on DEBUG_FS_INFO
 	default n
 	---help---
 		Enable special debug instrumentation analyze HSMCI commands. This
@@ -1389,7 +1389,7 @@ config SAM34_HSMCI_CMDDEBUG
 		key points in the data transfer and then dumps all of the registers
 		at the end of the transfer.  If DEBUG_DMA is also enabled, then DMA
 		register will be collected as well.  Requires also DEBUG_FS and
-		DEBUG_VERBOSE.
+		CONFIG_DEBUG_INFO.
 
 endmenu # HSMCI device driver options
 endif # SAM34_HSMCI
@@ -1400,7 +1400,7 @@ menu "AT91SAM3/4 USB Full Speed Device Controller driver (DCD) options"
 config SAM34_UDP_REGDEBUG
 	bool "Enable low-level UDP register debug"
 	default n
-	depends on DEBUG
+	depends on DEBUG_USB_INFO
 
 endmenu # USB Full Speed Device Controller driver (DCD) options
 
@@ -1415,7 +1415,7 @@ menu "AT91SAM3/4 Timer/Counter options"
 config SAM34_TC_REGDEBUG
 	bool "Enable low-level timer/counter register debug"
 	default n
-	depends on DEBUG
+	depends on DEBUG_TIMER_INFO
 
 endmenu # USB Full Speed Device Controller driver (DCD) options
 

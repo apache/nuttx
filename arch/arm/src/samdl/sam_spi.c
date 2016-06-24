@@ -74,32 +74,11 @@
 #ifdef SAMDL_HAVE_SPI
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Pre-process Definitions
  ****************************************************************************/
 
-/* Clocking *****************************************************************/
-
-/* Debug *******************************************************************/
-/* Check if SPI debug is enabled (non-standard.. no support in
- * include/debug.h
- */
-
-#ifndef CONFIG_DEBUG
-#  undef CONFIG_DEBUG_VERBOSE
-#  undef CONFIG_DEBUG_SPI
+#ifndef CONFIG_DEBUG_SPI_INFO
 #  undef CONFIG_SAMDL_SPI_REGDEBUG
-#endif
-
-#ifdef CONFIG_DEBUG_SPI
-#  define spidbg lldbg
-#  ifdef CONFIG_DEBUG_VERBOSE
-#    define spivdbg lldbg
-#  else
-#    define spivdbg(x...)
-#  endif
-#else
-#  define spidbg(x...)
-#  define spivdbg(x...)
 #endif
 
 /****************************************************************************
@@ -175,7 +154,7 @@ static uint32_t spi_getreg32(struct sam_spidev_s *priv,
 static void     spi_putreg32(struct sam_spidev_s *priv, uint32_t regval,
                   unsigned int offset);
 
-#if defined(CONFIG_DEBUG_SPI) && defined(CONFIG_DEBUG_VERBOSE)
+#ifdef CONFIG_DEBUG_SPI_INFO
 static void     spi_dumpregs(struct sam_spidev_s *priv, const char *msg);
 #else
 # define        spi_dumpregs(priv,msg)
@@ -569,7 +548,7 @@ static bool spi_checkreg(struct sam_spidev_s *priv, bool wr, uint32_t regval,
         {
           /* Yes... show how many times we did it */
 
-          lldbg("...[Repeats %d times]...\n", priv->ntimes);
+          spiinfo("...[Repeats %d times]...\n", priv->ntimes);
         }
 
       /* Save information about the new access */
@@ -602,7 +581,7 @@ static uint8_t spi_getreg8(struct sam_spidev_s *priv, unsigned int offset)
 #ifdef CONFIG_SAMDL_SPI_REGDEBUG
   if (spi_checkreg(priv, false, (uint32_t)regval, regaddr))
     {
-      lldbg("%08x->%02x\n", regaddr, regval);
+      spiinfo("%08x->%02x\n", regaddr, regval);
     }
 #endif
 
@@ -625,7 +604,7 @@ static void spi_putreg8(struct sam_spidev_s *priv, uint8_t regval,
 #ifdef CONFIG_SAMDL_SPI_REGDEBUG
   if (spi_checkreg(priv, true, (uint32_t)regval, regaddr))
     {
-      lldbg("%08x<-%02x\n", regaddr, regval);
+      spiinfo("%08x<-%02x\n", regaddr, regval);
     }
 #endif
 
@@ -648,7 +627,7 @@ static uint16_t spi_getreg16(struct sam_spidev_s *priv, unsigned int offset)
 #ifdef CONFIG_SAMDL_SPI_REGDEBUG
   if (spi_checkreg(priv, false, (uint32_t)regval, regaddr))
     {
-      lldbg("%08x->%04x\n", regaddr, regval);
+      spiinfo("%08x->%04x\n", regaddr, regval);
     }
 #endif
 
@@ -671,7 +650,7 @@ static void spi_putreg16(struct sam_spidev_s *priv, uint16_t regval,
 #ifdef CONFIG_SAMDL_SPI_REGDEBUG
   if (spi_checkreg(priv, true, (uint32_t)regval, regaddr))
     {
-      lldbg("%08x<-%04x\n", regaddr, regval);
+      spiinfo("%08x<-%04x\n", regaddr, regval);
     }
 #endif
 
@@ -694,7 +673,7 @@ static uint32_t spi_getreg32(struct sam_spidev_s *priv, unsigned int offset)
 #ifdef CONFIG_SAMDL_SPI_REGDEBUG
   if (spi_checkreg(priv, false, regval, regaddr))
     {
-      lldbg("%08x->%08x\n", regaddr, regval);
+      spiinfo("%08x->%08x\n", regaddr, regval);
     }
 #endif
 
@@ -717,7 +696,7 @@ static void spi_putreg32(struct sam_spidev_s *priv, uint32_t regval,
 #ifdef CONFIG_SAMDL_SPI_REGDEBUG
   if (spi_checkreg(priv, true, regval, regaddr))
     {
-      lldbg("%08x<-%08x\n", regaddr, regval);
+      spiinfo("%08x<-%08x\n", regaddr, regval);
     }
 #endif
 
@@ -739,19 +718,19 @@ static void spi_putreg32(struct sam_spidev_s *priv, uint32_t regval,
  *
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG_SPI) && defined(CONFIG_DEBUG_VERBOSE)
+#ifdef CONFIG_DEBUG_SPI_INFO
 static void spi_dumpregs(struct sam_spidev_s *priv, const char *msg)
 {
-  spivdbg("%s:\n", msg);
-  spivdbg("   CTRLA:%08x CTRLB:%08x DBGCTRL:%02x\n",
+  spiinfo("%s:\n", msg);
+  spiinfo("   CTRLA:%08x CTRLB:%08x DBGCTRL:%02x\n",
           getreg32(priv->base + SAM_SPI_CTRLA_OFFSET),
           getreg32(priv->base + SAM_SPI_CTRLB_OFFSET),
           getreg8(priv->base + SAM_SPI_DBGCTRL_OFFSET));
-  spivdbg("    BAUD:%02x       INTEN:%02x       INTFLAG:%02x\n",
+  spiinfo("    BAUD:%02x       INTEN:%02x       INTFLAG:%02x\n",
           getreg8(priv->base + SAM_SPI_BAUD_OFFSET),
           getreg8(priv->base + SAM_SPI_INTENCLR_OFFSET),
           getreg8(priv->base + SAM_SPI_INTFLAG_OFFSET));
-  spivdbg("  STATUS:%04x      ADDR:%08x\n",
+  spiinfo("  STATUS:%04x      ADDR:%08x\n",
           getreg16(priv->base + SAM_SPI_STATUS_OFFSET),
           getreg32(priv->base + SAM_SPI_ADDR_OFFSET));
 }
@@ -890,7 +869,7 @@ static int spi_lock(struct spi_dev_s *dev, bool lock)
 {
   struct sam_spidev_s *priv = (struct sam_spidev_s *)dev;
 
-  spivdbg("lock=%d\n", lock);
+  spiinfo("lock=%d\n", lock);
   if (lock)
     {
       /* Take the semaphore (perhaps waiting) */
@@ -935,7 +914,7 @@ static uint32_t spi_setfrequency(struct spi_dev_s *dev, uint32_t frequency)
   uint32_t baud;
   uint32_t ctrla;
 
-  spivdbg("sercom=%d frequency=%d\n", priv->sercom, frequency);
+  spiinfo("sercom=%d frequency=%d\n", priv->sercom, frequency);
 
   /* Check if the configured BAUD is within the valid range */
 
@@ -944,7 +923,7 @@ static uint32_t spi_setfrequency(struct spi_dev_s *dev, uint32_t frequency)
     {
       /* Set the frequency to the maximum */
 
-      spidbg("ERROR: Cannot realize frequency: %ld\n", (long)frequency);
+      spierr("ERROR: Cannot realize frequency: %ld\n", (long)frequency);
       frequency = maxfreq;
     }
 
@@ -975,7 +954,7 @@ static uint32_t spi_setfrequency(struct spi_dev_s *dev, uint32_t frequency)
 
   if (baud > 255)
     {
-      spidbg("ERROR: BAUD is out of range: %ld\n", (long)baud);
+      spierr("ERROR: BAUD is out of range: %ld\n", (long)baud);
       baud = 255;
     }
 
@@ -1016,7 +995,7 @@ static uint32_t spi_setfrequency(struct spi_dev_s *dev, uint32_t frequency)
   priv->frequency = frequency;
   priv->actual    = actual;
 
-  spivdbg("Frequency %d->%d\n", frequency, actual);
+  spiinfo("Frequency %d->%d\n", frequency, actual);
   return actual;
 }
 
@@ -1040,7 +1019,7 @@ static void spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode)
   struct sam_spidev_s *priv = (struct sam_spidev_s *)dev;
   uint32_t regval;
 
-  spivdbg("sercom=%d mode=%d\n", priv->sercom, mode);
+  spiinfo("sercom=%d mode=%d\n", priv->sercom, mode);
 
   /* Has the mode changed? */
 
@@ -1101,7 +1080,7 @@ static void spi_setbits(struct spi_dev_s *dev, int nbits)
   struct sam_spidev_s *priv = (struct sam_spidev_s *)dev;
   uint32_t regval;
 
-  spivdbg("sercom=%d nbits=%d\n", priv->sercom, nbits);
+  spiinfo("sercom=%d nbits=%d\n", priv->sercom, nbits);
   DEBUGASSERT(priv && nbits > 7 && nbits < 10);
 
   /* Has the number of bits changed? */
@@ -1156,7 +1135,7 @@ static uint16_t spi_send(struct spi_dev_s *dev, uint16_t wd)
   rxbyte = (uint8_t)0;
   spi_exchange(dev, &txbyte, &rxbyte, 1);
 
-  spivdbg("Sent %02x received %02x\n", txbyte, rxbyte);
+  spiinfo("Sent %02x received %02x\n", txbyte, rxbyte);
   return (uint16_t)rxbyte;
 }
 
@@ -1194,7 +1173,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
   uint8_t *prx8;
   uint16_t data;
 
-  spivdbg("txbuffer=%p rxbuffer=%p nwords=%d\n", txbuffer, rxbuffer, nwords);
+  spiinfo("txbuffer=%p rxbuffer=%p nwords=%d\n", txbuffer, rxbuffer, nwords);
 
   /* Set up data receive and transmit pointers */
 
@@ -1281,7 +1260,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
       data = spi_getreg16(priv, SAM_SPI_STATUS_OFFSET);
       if ((data & SPI_STATUS_BUFOVF) != 0)
         {
-          spidbg("ERROR: Buffer overflow!\n");
+          spierr("ERROR: Buffer overflow!\n");
 
           /* Clear the buffer overflow flag */
 
@@ -1438,7 +1417,7 @@ struct spi_dev_s *sam_spibus_initialize(int port)
 
   /* Get the port state structure */
 
-  spivdbg("port: %d \n", port);
+  spiinfo("port: %d \n", port);
 
 #ifdef SAMDL_HAVE_SPI0
   if (port == 0)
@@ -1488,7 +1467,7 @@ struct spi_dev_s *sam_spibus_initialize(int port)
   else
 #endif
     {
-      spidbg("ERROR: Unsupported port: %d\n", port);
+      spierr("ERROR: Unsupported port: %d\n", port);
       return NULL;
     }
 
@@ -1570,7 +1549,7 @@ struct spi_dev_s *sam_spibus_initialize(int port)
   ret = irq_attach(priv->irq, priv->handler);
   if (ret < 0)
     {
-      spidbg("ERROR: Failed to attach interrupt: %d\n", irq);
+      spierr("ERROR: Failed to attach interrupt: %d\n", irq);
       return NULL;
     }
 

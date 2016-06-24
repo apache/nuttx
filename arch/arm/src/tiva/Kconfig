@@ -783,7 +783,7 @@ config TIVA_I2C_HIGHSPEED
 config TIVA_I2C_REGDEBUG
 	bool "Register level debug"
 	default n
-	depends on DEBUG
+	depends on DEBUG_I2C_INFO
 	---help---
 		Enables extremely detailed register access debug output.
 
@@ -840,7 +840,7 @@ endif # TIVA_TIMER_16BIT
 config TIVA_TIMER_REGDEBUG
 	bool "Register level debug"
 	default n
-	depends on DEBUG
+	depends on DEBUG_TIMER_INFO
 	---help---
 		Enables extremely detailed register access debug output.
 
@@ -853,7 +853,7 @@ menu "ADC Configuration"
 config TIVA_ADC_REGDEBUG
 	bool "Register level debug"
 	default n
-	depends on DEBUG
+	depends on DEBUG_ANALOG_INFO
 	---help---
 		Enables extremely detailed register access debug output.
 
@@ -1103,9 +1103,9 @@ config TIVA_EMAC_HWCHECKSUM
 config TIVA_ETHERNET_REGDEBUG
 	bool "Register-Level Debug"
 	default n
-	depends on DEBUG
+	depends on DEBUG_NET_INFO
 	---help---
-		Enable very low-level register access debug.  Depends on DEBUG.
+		Enable very low-level register access debug.  Depends on CONFIG_DEBUG_FEATURES.
 
 endmenu # Tiva Ethernet Configuration
 

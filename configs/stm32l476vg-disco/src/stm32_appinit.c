@@ -87,26 +87,6 @@
 #endif
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* Debug ********************************************************************/
-
-#ifdef CONFIG_BOARD_INITIALIZE
-#  define SYSLOG lldbg
-#else
-#  define SYSLOG dbg
-#endif
-
-/****************************************************************************
- * Private Type Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
- /****************************************************************************
  * Private Data
  ****************************************************************************/
 
@@ -188,7 +168,7 @@ FAR struct mtd_dev_s *mtd_temp;
   rtclower = stm32l4_rtc_lowerhalf();
   if (!rtclower)
     {
-      sdbg("ERROR: Failed to instantiate the RTC lower-half driver\n");
+      serr("ERROR: Failed to instantiate the RTC lower-half driver\n");
       return -ENOMEM;
     }
   else
@@ -200,7 +180,7 @@ FAR struct mtd_dev_s *mtd_temp;
       ret = rtc_initialize(0, rtclower);
       if (ret < 0)
         {
-          sdbg("ERROR: Failed to bind/register the RTC driver: %d\n", ret);
+          serr("ERROR: Failed to bind/register the RTC driver: %d\n", ret);
           return ret;
         }
     }
@@ -212,7 +192,7 @@ FAR struct mtd_dev_s *mtd_temp;
   g_qspi = stm32l4_qspi_initialize(0);
   if (!g_qspi)
     {
-      SYSLOG("ERROR: stm32l4_qspi_initialize failed\n");
+      _err("ERROR: stm32l4_qspi_initialize failed\n");
       return ret;
     }
   else
@@ -224,7 +204,7 @@ FAR struct mtd_dev_s *mtd_temp;
       mtd_temp = n25qxxx_initialize(g_qspi, true);
       if (!mtd_temp)
         {
-          SYSLOG("ERROR: n25qxxx_initialize failed\n");
+          _err("ERROR: n25qxxx_initialize failed\n");
           return ret;
         }
       g_mtd_fs = mtd_temp;
@@ -239,7 +219,7 @@ FAR struct mtd_dev_s *mtd_temp;
 #endif
       if (!g_mtd_fs)
         {
-          SYSLOG("ERROR: mtd_partition failed\n");
+          _err("ERROR: mtd_partition failed\n");
           return ret;
         }
 
@@ -251,7 +231,7 @@ FAR struct mtd_dev_s *mtd_temp;
       ret = ftl_initialize(N25QXXX_MTD_MINOR, g_mtd_fs);
       if (ret < 0)
         {
-          SYSLOG("ERROR: Failed to initialize the FTL layer: %d\n", ret);
+          _err("ERROR: Failed to initialize the FTL layer: %d\n", ret);
           return ret;
         }
 
@@ -273,7 +253,7 @@ FAR struct mtd_dev_s *mtd_temp;
       ret = bchdev_register(blockdev, chardev, false);
       if (ret < 0)
         {
-          SYSLOG("ERROR: bchdev_register %s failed: %d\n", chardev, ret);
+          _err("ERROR: bchdev_register %s failed: %d\n", chardev, ret);
           return ret;
         }
     }

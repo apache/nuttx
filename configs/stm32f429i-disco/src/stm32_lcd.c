@@ -57,6 +57,7 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+
 #ifdef CONFIG_STM32F429I_DISCO_ILI9341_LCDDEVICE
 # define ILI9341_LCD_DEVICE CONFIG_STM32F429I_DISCO_ILI9341_LCDDEVICE
 #else
@@ -317,44 +318,46 @@ static int stm32_ili9341_initialize(void)
 
   /* Select spi device */
 
-  dbg("Initialize ili9341 lcd driver\n");
+  lcdinfo("Initialize ili9341 lcd driver\n");
   lcd->select(lcd);
 
-#ifdef CONFIG_DEBUG_LCD
+#ifdef CONFIG_DEBUG_LCD_INFO
   /* Read display identification */
 
   lcd->sendcmd(lcd, ILI9341_READ_ID1);
   lcd->recvparam(lcd, &param);
-  dbg("ili9341 LCD driver: LCD modules manufacturer ID: %d\n", param);
+  lcdinfo("ili9341 LCD driver: LCD modules manufacturer ID: %d\n", param);
+
   lcd->sendcmd(lcd, ILI9341_READ_ID2);
   lcd->recvparam(lcd, &param);
-  dbg("ili9341 LCD driver: LCD modules driver version ID: %d\n", param);
+  lcdinfo("ili9341 LCD driver: LCD modules driver version ID: %d\n", param);
+
   lcd->sendcmd(lcd, ILI9341_READ_ID3);
   lcd->recvparam(lcd, &param);
-  dbg("ili9341 LCD driver: LCD modules driver ID: %d\n", param);
+  lcdinfo("ili9341 LCD driver: LCD modules driver ID: %d\n", param);
 #endif
 
   /* Reset the lcd display to the default state */
 
-  vdbg("ili9341 LCD driver: Software Reset\n");
+  lcdinfo("ili9341 LCD driver: Software Reset\n");
   lcd->sendcmd(lcd, ILI9341_SOFTWARE_RESET);
   up_mdelay(5);
 
-  vdbg("ili9341 LCD driver: set Memory Access Control %08x\n",
+  lcdinfo("ili9341 LCD driver: set Memory Access Control %08x\n",
         STM32_ILI9341_MADCTL_PARAM);
   lcd->sendcmd(lcd, ILI9341_MEMORY_ACCESS_CONTROL);
   lcd->sendparam(lcd, STM32_ILI9341_MADCTL_PARAM);
 
   /* Pixel Format */
 
-  vdbg("ili9341 LCD driver: Set Pixel Format: %02x\n",
+  lcdinfo("ili9341 LCD driver: Set Pixel Format: %02x\n",
           STM32_ILI9341_PIXSET_PARAM);
   lcd->sendcmd(lcd, ILI9341_PIXEL_FORMAT_SET);
   lcd->sendparam(lcd, STM32_ILI9341_PIXSET_PARAM);
 
   /* Select column */
 
-  vdbg("ili9341 LCD driver: Set Column Address\n");
+  lcdinfo("ili9341 LCD driver: Set Column Address\n");
   lcd->sendcmd(lcd, ILI9341_COLUMN_ADDRESS_SET);
   lcd->sendparam(lcd, 0);
   lcd->sendparam(lcd, 0);
@@ -363,7 +366,7 @@ static int stm32_ili9341_initialize(void)
 
   /* Select page */
 
-  vdbg("ili9341 LCD driver: Set Page Address\n");
+  lcdinfo("ili9341 LCD driver: Set Page Address\n");
   lcd->sendcmd(lcd, ILI9341_PAGE_ADDRESS_SET);
   lcd->sendparam(lcd, 0);
   lcd->sendparam(lcd, 0);
@@ -372,14 +375,14 @@ static int stm32_ili9341_initialize(void)
 
   /* RGB Interface signal control */
 
-  vdbg("ili9341 LCD driver: Set RGB Interface signal control: %02x\n",
+  lcdinfo("ili9341 LCD driver: Set RGB Interface signal control: %02x\n",
           STM32_ILI9341_IFMODE_PARAM);
   lcd->sendcmd(lcd, ILI9341_RGB_SIGNAL_CONTROL);
   lcd->sendparam(lcd, STM32_ILI9341_IFMODE_PARAM);
 
   /* Interface control */
 
-  vdbg("ili9341 LCD driver: Set Interface control: %d:%d:%d\n",
+  lcdinfo("ili9341 LCD driver: Set Interface control: %d:%d:%d\n",
           STM32_ILI9341_IFCTL_PARAM1,
           STM32_ILI9341_IFCTL_PARAM2,
           STM32_ILI9341_IFCTL_PARAM3);
@@ -391,13 +394,13 @@ static int stm32_ili9341_initialize(void)
 
   /* Sleep out set to the end */
 
-  vdbg("ili9341 LCD driver: Sleep Out\n");
+  lcdinfo("ili9341 LCD driver: Sleep Out\n");
   lcd->sendcmd(lcd, ILI9341_SLEEP_OUT);
   up_mdelay(5); /* 120? */
 
   /* Display on */
 
-  vdbg("ili9341 LCD driver: Display On\n");
+  lcdinfo("ili9341 LCD driver: Display On\n");
   lcd->sendcmd(lcd, ILI9341_DISPLAY_ON);
 
   /* Deselect spi device */

@@ -161,7 +161,7 @@ static FAR void *g_ajoyarg;
 
 static ajoy_buttonset_t ajoy_supported(FAR const struct ajoy_lowerhalf_s *lower)
 {
-  ivdbg("Supported: %02x\n", AJOY_SUPPORTED);
+  iinfo("Supported: %02x\n", AJOY_SUPPORTED);
   return (ajoy_buttonset_t)AJOY_SUPPORTED;
 }
 
@@ -193,14 +193,14 @@ static int ajoy_sample(FAR const struct ajoy_lowerhalf_s *lower,
       int errcode = get_errno();
       if (errcode != EINTR)
         {
-          idbg("ERROR: read failed: %d\n", errcode);
+          ierr("ERROR: read failed: %d\n", errcode);
         }
 
       return -errcode;
     }
   else if (nread < 2 * sizeof(struct adc_msg_s))
     {
-      idbg("ERROR: read too small: %ld\n", (long)nread);
+      ierr("ERROR: read too small: %ld\n", (long)nread);
       return -EIO;
     }
 
@@ -220,7 +220,7 @@ static int ajoy_sample(FAR const struct ajoy_lowerhalf_s *lower,
           sample->as_x = (int16_t)tmp;
           have |= 1;
 
-          ivdbg("X sample: %ld -> %d\n", (long)tmp, (int)sample->as_x);
+          iinfo("X sample: %ld -> %d\n", (long)tmp, (int)sample->as_x);
         }
 
       if ((have & 2) == 0 && ptr->am_channel == 1)
@@ -229,13 +229,13 @@ static int ajoy_sample(FAR const struct ajoy_lowerhalf_s *lower,
           sample->as_y = (int16_t)tmp;
           have |= 2;
 
-          ivdbg("Y sample: %ld -> %d\n", (long)tmp, (int)sample->as_y);
+          iinfo("Y sample: %ld -> %d\n", (long)tmp, (int)sample->as_y);
         }
     }
 
   if (have != 3)
     {
-      idbg("ERROR: Could not find joystack channels\n");
+      ierr("ERROR: Could not find joystack channels\n");
       return -EIO;
     }
 
@@ -243,7 +243,7 @@ static int ajoy_sample(FAR const struct ajoy_lowerhalf_s *lower,
   /* Sample the discrete button inputs */
 
   sample->as_buttons = ajoy_buttons(lower);
-  ivdbg("Returning: %02x\n", AJOY_SUPPORTED);
+  iinfo("Returning: %02x\n", AJOY_SUPPORTED);
   return OK;
 }
 
@@ -274,7 +274,7 @@ static ajoy_buttonset_t ajoy_buttons(FAR const struct ajoy_lowerhalf_s *lower)
         }
     }
 
-  ivdbg("Returning: %02x\n", ret);
+  iinfo("Returning: %02x\n", ret);
   return ret;
 }
 
@@ -301,8 +301,8 @@ static void ajoy_enable(FAR const struct ajoy_lowerhalf_s *lower,
   flags = enter_critical_section();
   ajoy_disable();
 
-  illvdbg("press: %02x release: %02x handler: %p arg: %p\n",
-          press, release, handler, arg);
+  iinfo("press: %02x release: %02x handler: %p arg: %p\n",
+        press, release, handler, arg);
 
   /* If no events are indicated or if no handler is provided, then this
    * must really be a request to disable interrupts.
@@ -410,7 +410,7 @@ int sam_ajoy_initialization(void)
   ret = board_adc_initialize();
   if (ret < 0)
     {
-      idbg("ERROR: board_adc_initialize() failed: %d\n", ret);
+      ierr("ERROR: board_adc_initialize() failed: %d\n", ret);
       return ret;
     }
 
@@ -420,7 +420,7 @@ int sam_ajoy_initialization(void)
   if (fd < 0)
     {
       int errcode = get_errno();
-      idbg("ERROR: Failed to open /dev/adc0: %d\n", errcode);
+      ierr("ERROR: Failed to open /dev/adc0: %d\n", errcode);
       return -errcode;
     }
 
@@ -431,7 +431,7 @@ int sam_ajoy_initialization(void)
   ret = file_detach(fd, &g_adcfile);
   if (ret < 0)
     {
-      idbg("ERROR: Failed to detach from file descriptor: %d\n", ret);
+      ierr("ERROR: Failed to detach from file descriptor: %d\n", ret);
       (void)close(fd);
       return ret;
     }
@@ -458,7 +458,7 @@ int sam_ajoy_initialization(void)
   ret = ajoy_register("/dev/ajoy0", &g_ajoylower);
   if (ret < 0)
     {
-      idbg("ERROR: ajoy_register failed: %d\n", ret);
+      ierr("ERROR: ajoy_register failed: %d\n", ret);
       file_close_detached(&g_adcfile);
     }
 

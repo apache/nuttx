@@ -185,7 +185,7 @@ static uint16_t psock_connect_interrupt(FAR struct net_driver_s *dev,
 {
   struct tcp_connect_s *pstate = (struct tcp_connect_s *)pvpriv;
 
-  nllvdbg("flags: %04x\n", flags);
+  ninfo("flags: %04x\n", flags);
 
   /* 'priv' might be null in some race conditions (?) */
 
@@ -261,7 +261,7 @@ static uint16_t psock_connect_interrupt(FAR struct net_driver_s *dev,
           return flags & ~TCP_NEWDATA;
         }
 
-      nllvdbg("Resuming: %d\n", pstate->tc_result);
+      ninfo("Resuming: %d\n", pstate->tc_result);
 
       /* Stop further callbacks */
 
@@ -507,13 +507,13 @@ int psock_connect(FAR struct socket *psock, FAR const struct sockaddr *addr,
 #if defined(CONFIG_NET_TCP) || defined(CONFIG_NET_UDP) || defined(CONFIG_NET_LOCAL)
   int ret;
 #endif
-  int err;
+  int errcode;
 
   /* Verify that the psock corresponds to valid, allocated socket */
 
   if (!psock || psock->s_crefs <= 0)
     {
-      err = EBADF;
+      errcode = EBADF;
       goto errout;
     }
 
@@ -526,7 +526,7 @@ int psock_connect(FAR struct socket *psock, FAR const struct sockaddr *addr,
       {
         if (addrlen < sizeof(struct sockaddr_in))
           {
-            err = EBADF;
+            errcode = EBADF;
             goto errout;
           }
       }
@@ -538,7 +538,7 @@ int psock_connect(FAR struct socket *psock, FAR const struct sockaddr *addr,
       {
         if (addrlen < sizeof(struct sockaddr_in6))
           {
-            err = EBADF;
+            errcode = EBADF;
             goto errout;
           }
       }
@@ -550,7 +550,7 @@ int psock_connect(FAR struct socket *psock, FAR const struct sockaddr *addr,
       {
         if (addrlen < sizeof(sa_family_t))
           {
-            err = EBADF;
+            errcode = EBADF;
             goto errout;
           }
       }
@@ -559,7 +559,7 @@ int psock_connect(FAR struct socket *psock, FAR const struct sockaddr *addr,
 
     default:
       DEBUGPANIC();
-      err = EAFNOSUPPORT;
+      errcode = EAFNOSUPPORT;
       goto errout;
     }
 
@@ -574,7 +574,7 @@ int psock_connect(FAR struct socket *psock, FAR const struct sockaddr *addr,
 
           if (_SS_ISCONNECTED(psock->s_flags))
             {
-              err = EISCONN;
+              errcode = EISCONN;
               goto errout;
             }
 
@@ -604,7 +604,7 @@ int psock_connect(FAR struct socket *psock, FAR const struct sockaddr *addr,
 
           if (ret < 0)
             {
-              err = -ret;
+              errcode = -ret;
               goto errout;
             }
         }
@@ -644,7 +644,7 @@ int psock_connect(FAR struct socket *psock, FAR const struct sockaddr *addr,
 
           if (ret < 0)
             {
-              err = -ret;
+              errcode = -ret;
               goto errout;
             }
         }
@@ -652,14 +652,14 @@ int psock_connect(FAR struct socket *psock, FAR const struct sockaddr *addr,
 #endif /* CONFIG_NET_UDP || CONFIG_NET_LOCAL_DGRAM */
 
       default:
-        err = EBADF;
+        errcode = EBADF;
         goto errout;
     }
 
   return OK;
 
 errout:
-  set_errno(err);
+  set_errno(errcode);
   return ERROR;
 }
 

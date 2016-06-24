@@ -106,7 +106,7 @@ ssize_t psock_local_sendto(FAR struct socket *psock, FAR const void *buf,
     {
       /* Either not bound to address or it is connected */
 
-      ndbg("ERROR: Connected state\n");
+      nerr("ERROR: Connected state\n");
       return -EISCONN;
     }
 
@@ -130,7 +130,7 @@ ssize_t psock_local_sendto(FAR struct socket *psock, FAR const void *buf,
   ret = local_create_halfduplex(conn, unaddr->sun_path);
   if (ret < 0)
     {
-      ndbg("ERROR: Failed to create FIFO for %s: %d\n",
+      nerr("ERROR: Failed to create FIFO for %s: %d\n",
            conn->lc_path, ret);
       return ret;
     }
@@ -141,7 +141,7 @@ ssize_t psock_local_sendto(FAR struct socket *psock, FAR const void *buf,
                           _SS_ISNONBLOCK(psock->s_flags));
   if (ret < 0)
     {
-      ndbg("ERROR: Failed to open FIFO for %s: %d\n",
+      nerr("ERROR: Failed to open FIFO for %s: %d\n",
            unaddr->sun_path, ret);
 
       nsent = ret;
@@ -153,7 +153,7 @@ ssize_t psock_local_sendto(FAR struct socket *psock, FAR const void *buf,
   nsent = local_send_packet(conn->lc_outfd, buf, len);
   if (nsent < 0)
     {
-      ndbg("ERROR: Failed to send the packet: %d\n", ret);
+      nerr("ERROR: Failed to send the packet: %d\n", ret);
     }
   else
     {

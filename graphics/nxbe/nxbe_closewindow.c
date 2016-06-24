@@ -70,7 +70,7 @@ void nxbe_closewindow(struct nxbe_window_s *wnd)
 {
   FAR struct nxbe_state_s *be;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
   if (!wnd)
     {
       return;

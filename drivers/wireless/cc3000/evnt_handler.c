@@ -924,12 +924,12 @@ void SimpleLinkWaitEvent(uint16_t opcode, void *pRetParams)
    */
 
   tSLInformation.usRxEventOpcode = opcode;
-  nllvdbg("Looking for opcode 0x%x\n", opcode);
+  ninfo("Looking for opcode 0x%x\n", opcode);
   uint16_t event_type;
 
   do
     {
-      nllvdbg("cc3000_wait\n");
+      ninfo("cc3000_wait\n");
       tSLInformation.pucReceivedData = cc3000_wait();
       tSLInformation.usEventOrDataReceived = 1;
       STREAM_TO_UINT16((FAR char *)tSLInformation.pucReceivedData,
@@ -937,25 +937,25 @@ void SimpleLinkWaitEvent(uint16_t opcode, void *pRetParams)
 
       if (*tSLInformation.pucReceivedData == HCI_TYPE_EVNT)
         {
-          nllvdbg("Evtn:0x%x\n", event_type);
+          ninfo("Evtn:0x%x\n", event_type);
         }
 
       if (event_type != opcode)
         {
           if (hci_unsolicited_event_handler() == 1)
             {
-              nllvdbg("Processed Event  0x%x want 0x%x\n", event_type, opcode);
+              ninfo("Processed Event  0x%x want 0x%x\n", event_type, opcode);
             }
         }
       else
         {
-          nllvdbg("Processing opcode 0x%x\n", opcode);
+          ninfo("Processing opcode 0x%x\n", opcode);
           hci_event_handler(pRetParams, 0, 0);
         }
     }
   while (tSLInformation.usRxEventOpcode != 0);
 
-  nllvdbg("Done for opcode 0x%x\n", opcode);
+  ninfo("Done for opcode 0x%x\n", opcode);
 }
 
 /****************************************************************************
@@ -981,7 +981,7 @@ void SimpleLinkWaitData(uint8_t *pBuf, uint8_t *from, uint8_t *fromlen)
    * after the end of current transaction, i.e. only after data will be received
    */
 
-  nllvdbg("Looking for Data\n");
+  ninfo("Looking for Data\n");
   uint16_t event_type;
   uint16_t opcode = tSLInformation.usRxEventOpcode;
 
@@ -999,15 +999,15 @@ void SimpleLinkWaitData(uint8_t *pBuf, uint8_t *from, uint8_t *fromlen)
       else
         {
           STREAM_TO_UINT16((char *)tSLInformation.pucReceivedData, HCI_EVENT_OPCODE_OFFSET, event_type);
-          nllvdbg("Evtn:0x%x\n", event_type);
+          ninfo("Evtn:0x%x\n", event_type);
 
           if (hci_unsolicited_event_handler() == 1)
             {
-              nllvdbg("Processed Event  0x%x want Data! Opcode 0x%x\n", event_type, opcode);
+              ninfo("Processed Event  0x%x want Data! Opcode 0x%x\n", event_type, opcode);
             }
           else
             {
-              nllvdbg("!!!!!opcode 0x%x\n", opcode);
+              ninfo("!!!!!opcode 0x%x\n", opcode);
             }
 
           UNUSED(event_type);
@@ -1015,6 +1015,6 @@ void SimpleLinkWaitData(uint8_t *pBuf, uint8_t *from, uint8_t *fromlen)
     }
   while (*tSLInformation.pucReceivedData == HCI_TYPE_EVNT);
 
-  nllvdbg("Done for Data 0x%x\n", opcode);
+  ninfo("Done for Data 0x%x\n", opcode);
   UNUSED(opcode);
 }
