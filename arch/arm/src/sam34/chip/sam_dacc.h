@@ -209,7 +209,7 @@
 #define DACC_WPMR_WPEN             (1 << 0)  /* Bit 0:  Write Protect Enable */
 #define DACC_WPMR_WPKEY_SHIFT      (8)       /* Bits 8-31: Write Protect KEY */
 #define DACC_WPMR_WPKEY_MASK       (0x00ffffff << DACC_WPMR_WPKEY_SHIFT)
-#  define DACC_WPMR_WPKEY_MASK     (0x00444143 << DACC_WPMR_WPKEY_SHIFT)
+#  define DACC_WPMR_WPKEY          (0x00444143 << DACC_WPMR_WPKEY_SHIFT)
 
 /* Write Protect Status register */
 
