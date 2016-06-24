@@ -1265,6 +1265,20 @@ config ARCH_BOARD_CUSTOM
 
 endchoice
 
+if !ARCH_BOARD_CUSTOM
+
+config ARCH_BOARD_CUSTOM_DIR
+	string
+	default "configs/dummy"
+
+config ARCH_BOARD_CUSTOM_DIR_RELPATH
+	bool
+	default y
+
+endif # !ARCH_BOARD_CUSTOM
+
+if ARCH_BOARD_CUSTOM
+
 menu "Custom Board Configuration"
 
 config ARCH_BOARD_CUSTOM_DIR
@@ -1285,8 +1299,6 @@ config ARCH_BOARD_CUSTOM_DIR_RELPATH
 	default y
 	---help---
 		Specifies that the board directory is relative to the NuttX directory.
-
-if ARCH_BOARD_CUSTOM
 
 config ARCH_BOARD_CUSTOM_NAME
 	string "Custom board name"
@@ -1318,8 +1330,8 @@ config BOARD_CUSTOM_INTERRUPT
 	depends on NETDEVICES
 	select ARCH_PHY_INTERRUPT if NETDEVICES
 
-endif #ARCH_BOARD_CUSTOM
 endmenu # Custom Board Configuration
+endif #ARCH_BOARD_CUSTOM
 
 config ARCH_BOARD
 	string
