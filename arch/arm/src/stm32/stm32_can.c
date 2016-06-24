@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32/stm32_can.c
  *
  *   Copyright (C) 2011, 2016 Gregory Nutt. All rights reserved.
@@ -34,7 +34,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 /****************************************************************************
  * Included Files
@@ -109,16 +109,16 @@ struct stm32_can_s
 static uint32_t stm32can_getreg(FAR struct stm32_can_s *priv, int offset);
 static uint32_t stm32can_getfreg(FAR struct stm32_can_s *priv, int offset);
 static void stm32can_putreg(FAR struct stm32_can_s *priv, int offset,
-                       uint32_t value);
+              uint32_t value);
 static void stm32can_putfreg(FAR struct stm32_can_s *priv, int offset,
-                        uint32_t value);
+              uint32_t value);
 #ifdef CONFIG_STM32_CAN_REGDEBUG
 static void stm32can_dumpctrlregs(FAR struct stm32_can_s *priv,
-                             FAR const char *msg);
+              FAR const char *msg);
 static void stm32can_dumpmbregs(FAR struct stm32_can_s *priv,
-                           FAR const char *msg);
+              FAR const char *msg);
 static void stm32can_dumpfiltregs(FAR struct stm32_can_s *priv,
-                             FAR const char *msg);
+              FAR const char *msg);
 #else
 #  define stm32can_dumpctrlregs(priv,msg)
 #  define stm32can_dumpmbregs(priv,msg)
@@ -143,9 +143,11 @@ static int  stm32can_setup(FAR struct can_dev_s *dev);
 static void stm32can_shutdown(FAR struct can_dev_s *dev);
 static void stm32can_rxint(FAR struct can_dev_s *dev, bool enable);
 static void stm32can_txint(FAR struct can_dev_s *dev, bool enable);
-static int  stm32can_ioctl(FAR struct can_dev_s *dev, int cmd, unsigned long arg);
+static int  stm32can_ioctl(FAR struct can_dev_s *dev, int cmd,
+              unsigned long arg);
 static int  stm32can_remoterequest(FAR struct can_dev_s *dev, uint16_t id);
-static int  stm32can_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg);
+static int  stm32can_send(FAR struct can_dev_s *dev,
+              FAR struct can_msg_s *msg);
 static bool stm32can_txready(FAR struct can_dev_s *dev);
 static bool stm32can_txempty(FAR struct can_dev_s *dev);
 
@@ -353,26 +355,26 @@ static void stm32can_vputreg(uint32_t addr, uint32_t value)
 }
 
 static void stm32can_putreg(FAR struct stm32_can_s *priv, int offset,
-                       uint32_t value)
+                            uint32_t value)
 {
   stm32can_vputreg(priv->base + offset, value);
 }
 
 static void stm32can_putfreg(FAR struct stm32_can_s *priv, int offset,
-                        uint32_t value)
+                             uint32_t value)
 {
   stm32can_vputreg(priv->fbase + offset, value);
 }
 
 #else
 static void stm32can_putreg(FAR struct stm32_can_s *priv, int offset,
-                       uint32_t value)
+                            uint32_t value)
 {
   putreg32(value, priv->base + offset);
 }
 
 static void stm32can_putfreg(FAR struct stm32_can_s *priv, int offset,
-                        uint32_t value)
+                             uint32_t value)
 {
   putreg32(value, priv->fbase + offset);
 }
@@ -636,6 +638,7 @@ static int stm32can_setup(FAR struct can_dev_s *dev)
       canerr("ERROR: CAN%d filter initialization failed: %d\n", priv->port, ret);
       return ret;
     }
+
   stm32can_dumpfiltregs(priv, "After filter initialization");
 
   /* Attach the CAN RX FIFO 0/1 interrupts and TX interrupts.
@@ -795,7 +798,8 @@ static void stm32can_txint(FAR struct can_dev_s *dev, bool enable)
  *
  ****************************************************************************/
 
-static int stm32can_ioctl(FAR struct can_dev_s *dev, int cmd, unsigned long arg)
+static int stm32can_ioctl(FAR struct can_dev_s *dev, int cmd,
+                          unsigned long arg)
 {
   FAR struct stm32_can_s *priv;
   int ret = -ENOTTY;
@@ -966,7 +970,7 @@ static int stm32can_ioctl(FAR struct can_dev_s *dev, int cmd, unsigned long arg)
        *                   (ERROR) is returned with the errno variable set
        *                   to indicate the nature of the error.
        *   Dependencies:   None
-      */
+       */
 
       case CANIOC_SET_CONNMODES:
         {
