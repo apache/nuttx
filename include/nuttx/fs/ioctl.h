@@ -83,6 +83,7 @@
 #define _LOOPBASE       (0x1e00) /* Loop device commands */
 #define _MODEMBASE      (0x1f00) /* Modem ioctl commands */
 #define _I2CBASE        (0x2000) /* I2C driver commands */
+#define _GPIOBASE       (0x2100) /* GPIO driver commands */
 
 /* boardctl commands share the same number space */
 
@@ -380,6 +381,11 @@
 
 #define _I2CIOCVALID(c)    (_IOC_TYPE(c)==_I2CBASE)
 #define _I2CIOC(nr)        _IOC(_I2CBASE,nr)
+
+/* GPIO driver command definitions ******************************************/
+
+#define _GPIOCVALID(c)     (_IOC_TYPE(c)==_GPIOBASE)
+#define _GPIOC(nr)         _IOC(_GPIOBASE,nr)
 
 /* boardctl() command definitions *******************************************/
 
