@@ -1265,25 +1265,19 @@ config ARCH_BOARD_CUSTOM
 
 endchoice
 
-if !ARCH_BOARD_CUSTOM
-
-config ARCH_BOARD_CUSTOM_DIR
-	string
-	default "configs/dummy"
-
-config ARCH_BOARD_CUSTOM_DIR_RELPATH
-	bool
-	default y
-
-endif # !ARCH_BOARD_CUSTOM
-
 if ARCH_BOARD_CUSTOM
-
 menu "Custom Board Configuration"
+
+config ARCH_BOARD_CUSTOM_NAME
+	string "Custom board name"
+	default ""
+	---help---
+		This is a name for the board.  It is not used except to return the
+		information via the NSH uname command.
 
 config ARCH_BOARD_CUSTOM_DIR
 	string "Custom board directory"
-	default "configs/dummy"
+	default ""
 	---help---
 		If the custom board configuration is selected, then it is necessary
 		to also tell the build system where it can find the board directory
@@ -1299,12 +1293,6 @@ config ARCH_BOARD_CUSTOM_DIR_RELPATH
 	default y
 	---help---
 		Specifies that the board directory is relative to the NuttX directory.
-
-config ARCH_BOARD_CUSTOM_NAME
-	string "Custom board name"
-	---help---
-		This is a name for the board.  It is not used except to return the
-		information via the NSH uname command.
 
 config BOARD_CUSTOM_LEDS
 	bool "Custom board LEDs"
@@ -1857,9 +1845,6 @@ source "configs/zkit-arm-1769/Kconfig"
 endif
 if ARCH_BOARD_SIM
 source "configs/sim/Kconfig"
-endif
-if ARCH_BOARD_CUSTOM
-source "$ARCH_BOARD_CUSTOM_DIR/Kconfig"
 endif
 
 config BOARD_CRASHDUMP
