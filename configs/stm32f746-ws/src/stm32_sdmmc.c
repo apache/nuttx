@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/stm32f746-ws/src/stm32_sdio.c
+ * config/stm32f746-ws/src/stm32_sdmmc.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

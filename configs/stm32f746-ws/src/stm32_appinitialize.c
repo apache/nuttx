@@ -100,6 +100,7 @@ int board_app_initialize(void)
     }
 #endif
 
+#ifdef CONFIG_STM32F7_SDMMC1
   /* Initialize the SDIO block driver */
 
   int ret = OK;
@@ -110,6 +111,7 @@ int board_app_initialize(void)
 	  ferr("ERROR: Failed to initialize MMC/SD driver: %d\n", ret);
 	  return ret;
 	}
+#endif
 
   return OK;
 }
