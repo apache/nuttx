@@ -66,18 +66,18 @@
 #  define GPIO_OTG_DP           GPIO_OTGFS_DP
 #  define GPIO_OTG_ID           GPIO_OTGFS_ID
 #  define GPIO_OTG_SOF          GPIO_OTGFS_SOF
-
+#  define STM32_OTG_FIFO_SIZE   1280
 #endif
 
 #if defined(CONFIG_STM32F7_OTGHS)
 #  define STM32_IRQ_OTG         STM32_IRQ_OTGHS
 #  define STM32_OTG_BASE        STM32_USBOTGHS_BASE
-#  define STM32_NENDPOINTS      (8)          /* ep0-7 x 2 for IN and OUT */
+#  define STM32_NENDPOINTS      (7)          /* ep0-8 x 2 for IN and OUT but driver internals use byte to map + one bit for direction */
 #  define GPIO_OTG_DM           GPIO_OTGHS_DM
 #  define GPIO_OTG_DP           GPIO_OTGHS_DP
 #  define GPIO_OTG_ID           GPIO_OTGHS_ID
 #  define GPIO_OTG_SOF          GPIO_OTGHS_SOF
-
+#  define STM32_OTG_FIFO_SIZE   4096
 #endif
 
 /************************************************************************************

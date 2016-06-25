@@ -89,29 +89,81 @@
  */
 
 #ifndef CONFIG_USBDEV_RXFIFO_SIZE
-#  define CONFIG_USBDEV_RXFIFO_SIZE 512
+#  define CONFIG_USBDEV_RXFIFO_SIZE (STM32_OTG_FIFO_SIZE - STM32_OTG_FIFO_SIZE/4/2/STM32_NENDPOINTS*4*STM32_NENDPOINTS)
 #endif
 
-#ifndef CONFIG_USBDEV_EP0_TXFIFO_SIZE
-#  define CONFIG_USBDEV_EP0_TXFIFO_SIZE 192
+#if STM32_NENDPOINTS > 0
+#  ifndef CONFIG_USBDEV_EP0_TXFIFO_SIZE
+#    define CONFIG_USBDEV_EP0_TXFIFO_SIZE ((STM32_OTG_FIFO_SIZE - CONFIG_USBDEV_RXFIFO_SIZE)/STM32_NENDPOINTS)
+#  endif
+#else
+#  define CONFIG_USBDEV_EP0_TXFIFO_SIZE 0
 #endif
 
-#ifndef CONFIG_USBDEV_EP1_TXFIFO_SIZE
-#  define CONFIG_USBDEV_EP1_TXFIFO_SIZE 192
+#if STM32_NENDPOINTS > 1
+#  ifndef CONFIG_USBDEV_EP1_TXFIFO_SIZE
+#    define CONFIG_USBDEV_EP1_TXFIFO_SIZE ((STM32_OTG_FIFO_SIZE - CONFIG_USBDEV_RXFIFO_SIZE)/STM32_NENDPOINTS)
+#  endif
+#else
+#  define CONFIG_USBDEV_EP1_TXFIFO_SIZE 0
 #endif
 
-#ifndef CONFIG_USBDEV_EP2_TXFIFO_SIZE
-#  define CONFIG_USBDEV_EP2_TXFIFO_SIZE 192
+#if STM32_NENDPOINTS > 2
+#  ifndef CONFIG_USBDEV_EP2_TXFIFO_SIZE
+#    define CONFIG_USBDEV_EP2_TXFIFO_SIZE ((STM32_OTG_FIFO_SIZE - CONFIG_USBDEV_RXFIFO_SIZE)/STM32_NENDPOINTS)
+#  endif
+#else
+#  define CONFIG_USBDEV_EP2_TXFIFO_SIZE 0
 #endif
 
-#ifndef CONFIG_USBDEV_EP3_TXFIFO_SIZE
-#  define CONFIG_USBDEV_EP3_TXFIFO_SIZE 192
+#if STM32_NENDPOINTS > 3
+#  ifndef CONFIG_USBDEV_EP3_TXFIFO_SIZE
+#    define CONFIG_USBDEV_EP3_TXFIFO_SIZE ((STM32_OTG_FIFO_SIZE - CONFIG_USBDEV_RXFIFO_SIZE)/STM32_NENDPOINTS)
+#  endif
+#else
+#  define CONFIG_USBDEV_EP3_TXFIFO_SIZE 0
 #endif
 
-#if (CONFIG_USBDEV_RXFIFO_SIZE + CONFIG_USBDEV_EP0_TXFIFO_SIZE + \
-     CONFIG_USBDEV_EP2_TXFIFO_SIZE + CONFIG_USBDEV_EP3_TXFIFO_SIZE) > 1280
-#  error "FIFO allocations exceed FIFO memory size"
+#if STM32_NENDPOINTS > 4
+#  ifndef CONFIG_USBDEV_EP4_TXFIFO_SIZE
+#    define CONFIG_USBDEV_EP4_TXFIFO_SIZE ((STM32_OTG_FIFO_SIZE - CONFIG_USBDEV_RXFIFO_SIZE)/STM32_NENDPOINTS)
+#  endif
+#else
+#  define CONFIG_USBDEV_EP4_TXFIFO_SIZE 0
 #endif
+
+#if STM32_NENDPOINTS > 5
+#  ifndef CONFIG_USBDEV_EP5_TXFIFO_SIZE
+#    define CONFIG_USBDEV_EP5_TXFIFO_SIZE ((STM32_OTG_FIFO_SIZE - CONFIG_USBDEV_RXFIFO_SIZE)/STM32_NENDPOINTS)
+#  endif
+#else
+#  define CONFIG_USBDEV_EP5_TXFIFO_SIZE 0
+#endif
+
+#if STM32_NENDPOINTS > 6
+#  ifndef CONFIG_USBDEV_EP6_TXFIFO_SIZE
+#    define CONFIG_USBDEV_EP6_TXFIFO_SIZE ((STM32_OTG_FIFO_SIZE - CONFIG_USBDEV_RXFIFO_SIZE)/STM32_NENDPOINTS)
+#  endif
+#else
+#  define CONFIG_USBDEV_EP6_TXFIFO_SIZE 0
+#endif
+
+#if STM32_NENDPOINTS > 7
+#  ifndef CONFIG_USBDEV_EP7_TXFIFO_SIZE
+#    define CONFIG_USBDEV_EP7_TXFIFO_SIZE ((STM32_OTG_FIFO_SIZE - CONFIG_USBDEV_RXFIFO_SIZE)/STM32_NENDPOINTS)
+#  endif
+#else
+#  define CONFIG_USBDEV_EP7_TXFIFO_SIZE 0
+#endif
+
+#if STM32_NENDPOINTS > 8
+#  ifndef CONFIG_USBDEV_EP8_TXFIFO_SIZE
+#    define CONFIG_USBDEV_EP8_TXFIFO_SIZE ((STM32_OTG_FIFO_SIZE - CONFIG_USBDEV_RXFIFO_SIZE)/STM32_NENDPOINTS)
+#  endif
+#else
+#  define CONFIG_USBDEV_EP8_TXFIFO_SIZE 0
+#endif
+
 
 /* The actual FIFO addresses that we use must be aligned to 4-byte boundaries;
  * FIFO sizes must be provided in units of 32-bit words.
@@ -123,29 +175,36 @@
 #define STM32_EP0_TXFIFO_BYTES ((CONFIG_USBDEV_EP0_TXFIFO_SIZE + 3) & ~3)
 #define STM32_EP0_TXFIFO_WORDS ((CONFIG_USBDEV_EP0_TXFIFO_SIZE + 3) >> 2)
 
-#if STM32_EP0_TXFIFO_WORDS < 16 || STM32_EP0_TXFIFO_WORDS > 256
-#  error "CONFIG_USBDEV_EP0_TXFIFO_SIZE is out of range"
-#endif
-
 #define STM32_EP1_TXFIFO_BYTES ((CONFIG_USBDEV_EP1_TXFIFO_SIZE + 3) & ~3)
 #define STM32_EP1_TXFIFO_WORDS ((CONFIG_USBDEV_EP1_TXFIFO_SIZE + 3) >> 2)
-
-#if STM32_EP1_TXFIFO_WORDS < 16
-#  error "CONFIG_USBDEV_EP1_TXFIFO_SIZE is out of range"
-#endif
 
 #define STM32_EP2_TXFIFO_BYTES ((CONFIG_USBDEV_EP2_TXFIFO_SIZE + 3) & ~3)
 #define STM32_EP2_TXFIFO_WORDS ((CONFIG_USBDEV_EP2_TXFIFO_SIZE + 3) >> 2)
 
-#if STM32_EP2_TXFIFO_WORDS < 16
-#  error "CONFIG_USBDEV_EP2_TXFIFO_SIZE is out of range"
-#endif
-
 #define STM32_EP3_TXFIFO_BYTES ((CONFIG_USBDEV_EP3_TXFIFO_SIZE + 3) & ~3)
 #define STM32_EP3_TXFIFO_WORDS ((CONFIG_USBDEV_EP3_TXFIFO_SIZE + 3) >> 2)
 
-#if STM32_EP3_TXFIFO_WORDS < 16
-#  error "CONFIG_USBDEV_EP3_TXFIFO_SIZE is out of range"
+#define STM32_EP4_TXFIFO_BYTES ((CONFIG_USBDEV_EP4_TXFIFO_SIZE + 3) & ~3)
+#define STM32_EP4_TXFIFO_WORDS ((CONFIG_USBDEV_EP4_TXFIFO_SIZE + 3) >> 2)
+
+#define STM32_EP5_TXFIFO_BYTES ((CONFIG_USBDEV_EP5_TXFIFO_SIZE + 3) & ~3)
+#define STM32_EP5_TXFIFO_WORDS ((CONFIG_USBDEV_EP5_TXFIFO_SIZE + 3) >> 2)
+
+#define STM32_EP6_TXFIFO_BYTES ((CONFIG_USBDEV_EP6_TXFIFO_SIZE + 3) & ~3)
+#define STM32_EP6_TXFIFO_WORDS ((CONFIG_USBDEV_EP6_TXFIFO_SIZE + 3) >> 2)
+
+#define STM32_EP7_TXFIFO_BYTES ((CONFIG_USBDEV_EP7_TXFIFO_SIZE + 3) & ~3)
+#define STM32_EP7_TXFIFO_WORDS ((CONFIG_USBDEV_EP7_TXFIFO_SIZE + 3) >> 2)
+
+#define STM32_EP8_TXFIFO_BYTES ((CONFIG_USBDEV_EP8_TXFIFO_SIZE + 3) & ~3)
+#define STM32_EP8_TXFIFO_WORDS ((CONFIG_USBDEV_EP8_TXFIFO_SIZE + 3) >> 2)
+
+
+#if (STM32_RXFIFO_BYTES + \
+     STM32_EP0_TXFIFO_BYTES + STM32_EP1_TXFIFO_BYTES + STM32_EP2_TXFIFO_BYTES + STM32_EP3_TXFIFO_BYTES + \
+	 STM32_EP4_TXFIFO_BYTES + STM32_EP5_TXFIFO_BYTES + STM32_EP6_TXFIFO_BYTES + STM32_EP7_TXFIFO_BYTES + CONFIG_USBDEV_EP8_TXFIFO_SIZE   \
+	) > STM32_OTG_FIFO_SIZE
+#  error "FIFO allocations exceed FIFO memory size"
 #endif
 
 /* Debug ***********************************************************************/
@@ -962,7 +1021,7 @@ static void stm32_ep0in_activate(void)
 
   /* Set the max packet size  of the IN EP. */
 
-  regval  = stm32_getreg(STM32_OTG_DIEPCTL0);
+  regval  = stm32_getreg(STM32_OTG_DIEPCTL(0));
   regval &= ~OTG_DIEPCTL0_MPSIZ_MASK;
 
 #if CONFIG_USBDEV_EP0_MAXSIZE == 8
@@ -977,7 +1036,7 @@ static void stm32_ep0in_activate(void)
 #  error "Unsupported value of CONFIG_USBDEV_EP0_MAXSIZE"
 #endif
 
-  stm32_putreg(regval, STM32_OTG_DIEPCTL0);
+  stm32_putreg(regval, STM32_OTG_DIEPCTL(0));
 
   /* Clear global IN NAK */
 
@@ -1003,13 +1062,13 @@ static void stm32_ep0out_ctrlsetup(FAR struct stm32_usbdev_s *priv)
   regval = (USB_SIZEOF_CTRLREQ * 3 << OTG_DOEPTSIZ0_XFRSIZ_SHIFT) |
            (OTG_DOEPTSIZ0_PKTCNT) |
            (3 << OTG_DOEPTSIZ0_STUPCNT_SHIFT);
-  stm32_putreg(regval, STM32_OTG_DOEPTSIZ0);
+  stm32_putreg(regval, STM32_OTG_DOEPTSIZ(0));
 
   /* Then clear NAKing and enable the transfer */
 
-  regval  = stm32_getreg(STM32_OTG_DOEPCTL0);
+  regval  = stm32_getreg(STM32_OTG_DOEPCTL(0));
   regval |= (OTG_DOEPCTL0_CNAK | OTG_DOEPCTL0_EPENA);
-  stm32_putreg(regval, STM32_OTG_DOEPCTL0);
+  stm32_putreg(regval, STM32_OTG_DOEPCTL(0));
 }
 
 /****************************************************************************
@@ -3227,9 +3286,9 @@ static inline void stm32_rxinterrupt(FAR struct stm32_usbdev_s *priv)
               {
                 /* Clear NAKSTS so that we can receive the data */
 
-                regval  = stm32_getreg(STM32_OTG_DOEPCTL0);
+                regval  = stm32_getreg(STM32_OTG_DOEPCTL(0));
                 regval |= OTG_DOEPCTL0_CNAK;
-                stm32_putreg(regval, STM32_OTG_DOEPCTL0);
+                stm32_putreg(regval, STM32_OTG_DOEPCTL(0));
 
                 /* Wait for the data phase. */
 
@@ -5235,33 +5294,68 @@ static void stm32_hwinitialize(FAR struct stm32_usbdev_s *priv)
 
   stm32_putreg(STM32_RXFIFO_WORDS, STM32_OTG_GRXFSIZ);
 
-  /* EP0 TX */
-
+#if STM32_NENDPOINTS > 0
   address = STM32_RXFIFO_WORDS;
   regval  = (address << OTG_DIEPTXF0_TX0FD_SHIFT) |
             (STM32_EP0_TXFIFO_WORDS << OTG_DIEPTXF0_TX0FSA_SHIFT);
   stm32_putreg(regval, STM32_OTG_DIEPTXF0);
+#endif
 
-  /* EP1 TX */
-
+#if STM32_NENDPOINTS > 1
   address += STM32_EP0_TXFIFO_WORDS;
   regval   = (address << OTG_DIEPTXF_INEPTXSA_SHIFT) |
              (STM32_EP1_TXFIFO_WORDS << OTG_DIEPTXF_INEPTXFD_SHIFT);
-  stm32_putreg(regval, STM32_OTG_DIEPTXF1);
+  stm32_putreg(regval, STM32_OTG_DIEPTXF(1));
+#endif
 
-  /* EP2 TX */
-
+#if STM32_NENDPOINTS > 2
   address += STM32_EP1_TXFIFO_WORDS;
   regval   = (address << OTG_DIEPTXF_INEPTXSA_SHIFT) |
              (STM32_EP2_TXFIFO_WORDS << OTG_DIEPTXF_INEPTXFD_SHIFT);
-  stm32_putreg(regval, STM32_OTG_DIEPTXF2);
+  stm32_putreg(regval, STM32_OTG_DIEPTXF(2));
+#endif
 
-  /* EP3 TX */
-
+#if STM32_NENDPOINTS > 3
   address += STM32_EP2_TXFIFO_WORDS;
   regval   = (address << OTG_DIEPTXF_INEPTXSA_SHIFT) |
              (STM32_EP3_TXFIFO_WORDS << OTG_DIEPTXF_INEPTXFD_SHIFT);
-  stm32_putreg(regval, STM32_OTG_DIEPTXF3);
+  stm32_putreg(regval, STM32_OTG_DIEPTXF(3));
+#endif
+
+#if STM32_NENDPOINTS > 4
+  address += STM32_EP3_TXFIFO_WORDS;
+  regval   = (address << OTG_DIEPTXF_INEPTXSA_SHIFT) |
+             (STM32_EP4_TXFIFO_WORDS << OTG_DIEPTXF_INEPTXFD_SHIFT);
+  stm32_putreg(regval, STM32_OTG_DIEPTXF(4));
+#endif
+
+#if STM32_NENDPOINTS > 5
+  address += STM32_EP4_TXFIFO_WORDS;
+  regval   = (address << OTG_DIEPTXF_INEPTXSA_SHIFT) |
+             (STM32_EP5_TXFIFO_WORDS << OTG_DIEPTXF_INEPTXFD_SHIFT);
+  stm32_putreg(regval, STM32_OTG_DIEPTXF(5));
+#endif
+
+#if STM32_NENDPOINTS > 6
+  address += STM32_EP5_TXFIFO_WORDS;
+  regval   = (address << OTG_DIEPTXF_INEPTXSA_SHIFT) |
+             (STM32_EP6_TXFIFO_WORDS << OTG_DIEPTXF_INEPTXFD_SHIFT);
+  stm32_putreg(regval, STM32_OTG_DIEPTXF(6));
+#endif
+
+#if STM32_NENDPOINTS > 7
+  address += STM32_EP6_TXFIFO_WORDS;
+  regval   = (address << OTG_DIEPTXF_INEPTXSA_SHIFT) |
+             (STM32_EP7_TXFIFO_WORDS << OTG_DIEPTXF_INEPTXFD_SHIFT);
+  stm32_putreg(regval, STM32_OTG_DIEPTXF(7));
+#endif
+
+#if STM32_NENDPOINTS > 8
+  address += STM32_EP7_TXFIFO_WORDS;
+  regval   = (address << OTG_DIEPTXF_INEPTXSA_SHIFT) |
+             (STM32_EP8_TXFIFO_WORDS << OTG_DIEPTXF_INEPTXFD_SHIFT);
+  stm32_putreg(regval, STM32_OTG_DIEPTXF(8));
+#endif
 
   /* Flush the FIFOs */
 
