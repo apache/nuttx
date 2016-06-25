@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32f7/stm32_sdio.c
+ * arch/arm/src/stm32f7/stm32_sdmmc.c
  *
  *   Copyright (C) 2009, 2011-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

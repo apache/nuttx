@@ -1,7 +1,7 @@
 /************************************************************************************
- * arch/arm/src/stm32f7/chip/stm32_i2c.h
+ * arch/arm/src/stm32f7/chip/stm32_sdmmc.h
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
