@@ -86,7 +86,7 @@ static const struct file_operations g_gpio_output_ops =
 {
   gpio_open,  /* open */
   gpio_close, /* close */
-  NULL,       /* read */
+  gpio_read,  /* read */
   gpio_write, /* write */
   NULL,       /* seek */
   gpio_ioctl  /* ioctl */

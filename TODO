@@ -938,6 +938,7 @@ o Network (net/, drivers/net)
                  TM4C         YES                     YES
                eZ80           NO                      NO
                LPC17xx        YES                     YES (not tested)
+               LPC43xx        YES                     YES (not tested)
                DMxxx NIC      NO                      NO
                PIC32          NO                      NO
                RGMP           ???                     ???
@@ -1602,7 +1603,7 @@ o Build system
   Priority:    Low.
 
   Title:       NATIVE WINDOWS BUILD BROKEN
-  Description: The way that apps/ no generates Kmenu files depends on changes added
+  Description: The way that apps/ now generates Kmenu files depends on changes added
                to apps/tools/mkkconfig.sh.  Similar changes need to be made to
                apps/tools/mkkconfig.bat to restore the Windows Native build.
                UPDATE: The mkkconfig.bat script has been updated and appears to work.
