@@ -580,7 +580,7 @@ refresh.sh
 
   This is a bash script that automatics refreshing of board default
   configuration (defconfig) files.  It does not do anything special
-  thet you cannot do manually, but is useful for me when I have to
+  that you cannot do manually, but is useful for me when I have to
   update dozens of confuration files.
 
   Configuration files have to be updated because over time, the

@@ -70,27 +70,41 @@
 
 struct gpio_common_dev_s
 {
-  bool output;
-  uint8_t unused[3];
+  bool gp_output;
+  uint8_t gp_unused[3];
 };
 
 /* The interface to a GPIO input pin */
 
 struct gpio_input_dev_s
 {
-  bool output;
-  uint8_t unused[3];
+  /* Common fields */
+
+  bool gpin_output;
+  uint8_t gpin_unused[3];
+
+  /* Fields unique to input pins */
+
   CODE int (*gpin_read)(FAR struct gpio_input_dev_s *dev);
+
+  /* Lower-half private definitions may follow */
 };
 
 /* The interface to a GPIO input pin */
 
 struct gpio_output_dev_s
 {
-  bool output;
-  uint8_t unused[3];
+  /* Common fields */
+
+  bool gpout_output;
+  uint8_t gpout_unused[3];
+
+  /* Fields unique to output pins */
+
   CODE int (*gpout_read)(FAR struct gpio_output_dev_s *dev);
   CODE int (*gpout_write)(FAR struct gpio_output_dev_s *dev, int value);
+
+  /* Lower-half private definitions may follow */
 };
 
 /****************************************************************************

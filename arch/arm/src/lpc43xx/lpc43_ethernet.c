@@ -3392,6 +3392,9 @@ static int lpc43_phyinit(FAR struct lpc43_ethmac_s *priv)
       priv->mbps100 = 1;
     }
 #endif
+#endif
+
+#else /* Auto-negotion not selected */
 
 #ifdef CONFIG_LPC43_ETHFD
   priv->mbps100 = 1;
@@ -3400,11 +3403,9 @@ static int lpc43_phyinit(FAR struct lpc43_ethmac_s *priv)
 #ifdef CONFIG_LPC43_ETH100MBPS
   priv->fduplex = 1;
 #endif
-#endif
-
-  /* However we got here, commit to the hardware */
 
   phyval = 0;
+
   if (priv->mbps100)
     {
       phyval |= MII_MCR_FULLDPLX;

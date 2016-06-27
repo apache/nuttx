@@ -12117,3 +12117,57 @@
 	  (2016-06-21).
 	* drivers/syslog: Extend SYSLOG logic so that we can send SYSLOG output
 	  to a file.  Not verified on initial commit  (2016-06-21).
+	* arch/arm/src/stm32l4: Add some CAN mode IOCTL calls.  These will be
+	  useful for device autotest when the application boots.  They are
+	  redundant with the CONFIG_CAN_LOOPBACK option, which can now just be
+	  interpreted as a default setting.  From Sebastien Lorquet (2016-06-22).
+	* drivers/syslog: syslog_dev_flush() needs to check if the inode is a
+	  mountpoint before calling the flush() method.  Noted by David Sidrane
+	  (2016-06-22).
+	* arch/arm/src/stm32f7: Adds SDMMC1 for stm32F7 74-75.  From Lok Tep
+	  (2016-06-22).
+	* drivers/syslog: SYSLOG character device channel will now expand LF to
+	  CR-LF.  Controllable with a configuration option (2016-06-22).
+	* arch/arm/src/stm32l4: Implementation of loopback IOCTLs.  From
+	  Sebastien Lorquet (2016-06-22).
+	* Documentation: Add SYSLOG documentation to the porting guide
+	  (2016-06-22).
+	* configs/stm32f746g-disco:  Removed knsh configuration it failed to
+	  refresh (via tools/refresh.sh).  I assume that it is a hand-edited
+	  configuration and, hence, must be removed from the repository
+	  (2016-06-23).
+	* arch/arm/arc/sam34: DAC bugfix: DACC_WPMR_WPKEY_MASK -> DACC_WPMR_WPKEY. 
+	  Timer bugfix:  Fix ops check in TCIOC_STOP.  From Wolfgang Reissnegge
+	  (2016-06-23).
+	* arch/arm/src/stm32: Port STM32L4 CAN IOCTLs to STM32.  From Sebastien
+	  Lorquet (2016-06-24).
+	* configs/Konfig:Add configuration logic to include a Kconfig file in
+	  each custom configuration.  Includes adding a dummy custom board
+	  configuration directory.  A consequence of this that each custom board
+	  directory will now need to contain a Kconfig file.  NOTE also that
+	  the new board directory does not take effect in the configuration
+	  menus until the NEXT time you run 'make menuconfig' (2016-06-24).
+	* drivers/ioexpander:  Add support for a very simple GPIO driver.  It
+	  supports only pre-conrigured input and output pins and only basic
+	  input and output operations (2016-06-24).
+	* arch/arm/src/lpc43xx:  Correct auto-negotiation mode in the LPC43xx
+	  Ethernet.  From Alexander Vasiljev (2016-06-24)
+	* arch/arm/src/samv7: TWIHS Driver improved and GPIO-Driver fixed for
+	  Open-Drain Pins
+	  - sam_gpioread: Now the actual line level from the pin is read back.
+	    This is extremely important for Open-Drain Pins, which can be used
+	    bidirectionally
+	  - Re-Implemented twi_reset-function and enhanced it so it can be
+	    called from inside the driver (see next point)
+	  - Glitch-Filter: Added a configuration option to enable the twi-built-
+	    in glitch filter
+	  - Added a "Single Master Mode": In EMC Testing the TWI-Bus got stuck
+	    because the TWI-Master detected a Multi-Master access (but there is
+	    no second master). With the option "Single Master" we detect these
+	    events and automatically trigger a twi_reset. We also do an
+	    automatic recovery if a slave got stuck (SDA stays low).
+	  With the above changes I²C-Bus reliability in harsh environments (eg.
+	  EMC) is greatly improved. The small change in the GPIO-Driver was
+	  necessary because otherwise you cannot read back the correct line
+	  status of Open-Drain Outputs and this is needed by the twi_reset
+	  function.  From Michael Spahlinger (2016-06-24)

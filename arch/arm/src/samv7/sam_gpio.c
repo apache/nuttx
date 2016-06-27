@@ -543,15 +543,11 @@ bool sam_gpioread(gpio_pinset_t pinset)
   uint32_t  pin  = sam_gpio_pinmask(pinset);
   uint32_t  regval;
 
-  if ((pinset & GPIO_MODE_MASK) == GPIO_OUTPUT)
-    {
-      regval = getreg32(base + SAM_PIO_ODSR_OFFSET);
-    }
-  else
-    {
-      regval = getreg32(base + SAM_PIO_PDSR_OFFSET);
-    }
+  /* Always read the Pin Data Status Register.  Otherwise an Open-Drain
+   * Output pin will not be read back correctly.
+   */
 
+  regval = getreg32(base + SAM_PIO_PDSR_OFFSET);
   return (regval & pin) != 0;
 }
 
