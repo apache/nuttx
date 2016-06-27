@@ -127,10 +127,12 @@ static void stm32can_dumpfiltregs(FAR struct stm32_can_s *priv,
 
 /* Filtering (todo) */
 
+#ifdef CONFIG_CAN_EXTID
 static int  stm32can_addextfilter(FAR struct stm32_can_s *priv,
               FAR struct canioc_extfilter_s *arg);
 static int  stm32can_delextfilter(FAR struct stm32_can_s *priv,
               int arg);
+#endif
 static int  stm32can_addstdfilter(FAR struct stm32_can_s *priv,
               FAR struct canioc_stdfilter_s *arg);
 static int  stm32can_delstdfilter(FAR struct stm32_can_s *priv,
@@ -1987,11 +1989,13 @@ static int stm32can_filterinit(FAR struct stm32_can_s *priv)
  *
  ****************************************************************************/
 
-static int  stm32can_addextfilter(FAR struct stm32_can_s *priv,
-                                    FAR struct canioc_extfilter_s *arg)
+#ifdef CONFIG_CAN_EXTID
+static int stm32can_addextfilter(FAR struct stm32_can_s *priv,
+                                 FAR struct canioc_extfilter_s *arg)
 {
   return -ENOTTY;
 }
+#endif
 
 /****************************************************************************
  * Name: stm32can_delextfilter
@@ -2011,13 +2015,15 @@ static int  stm32can_addextfilter(FAR struct stm32_can_s *priv,
  *
  ****************************************************************************/
 
+#ifdef CONFIG_CAN_EXTID
 static int  stm32can_delextfilter(FAR struct stm32_can_s *priv, int arg)
 {
   return -ENOTTY;
 }
+#endif
 
 /****************************************************************************
- * Name: stm32can_addextfilter
+ * Name: stm32can_addstdfilter
  *
  * Description:
  *   Add a filter for standard CAN IDs
@@ -2033,8 +2039,8 @@ static int  stm32can_delextfilter(FAR struct stm32_can_s *priv, int arg)
  *
  ****************************************************************************/
 
-static int  stm32can_addstdfilter(FAR struct stm32_can_s *priv,
-                                    FAR struct canioc_stdfilter_s *arg)
+static int stm32can_addstdfilter(FAR struct stm32_can_s *priv,
+                                 FAR struct canioc_stdfilter_s *arg)
 {
   return -ENOTTY;
 }
