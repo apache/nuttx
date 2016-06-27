@@ -127,13 +127,13 @@ static void stm32can_dumpfiltregs(FAR struct stm32_can_s *priv,
 
 /* Filtering (todo) */
 
-static int  stm32l4can_addextfilter(FAR struct stm32l4_can_s *priv,
+static int  stm32can_addextfilter(FAR struct stm32_can_s *priv,
               FAR struct canioc_extfilter_s *arg);
-static int  stm32l4can_delextfilter(FAR struct stm32l4_can_s *priv,
+static int  stm32can_delextfilter(FAR struct stm32_can_s *priv,
               int arg);
-static int  stm32l4can_addstdfilter(FAR struct stm32l4_can_s *priv,
+static int  stm32can_addstdfilter(FAR struct stm32_can_s *priv,
               FAR struct canioc_stdfilter_s *arg);
-static int  stm32l4can_delstdfilter(FAR struct stm32l4_can_s *priv,
+static int  stm32can_delstdfilter(FAR struct stm32_can_s *priv,
               int arg);
 
 /* CAN driver methods */
