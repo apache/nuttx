@@ -91,8 +91,6 @@ void stm32_boardinitialize(void)
 
   board_button_initialize();
 #endif
-
-
 }
 
 /****************************************************************************
