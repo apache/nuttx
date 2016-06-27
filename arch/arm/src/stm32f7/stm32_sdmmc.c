@@ -3171,7 +3171,7 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
        */
 #ifndef CONFIG_SDIO_MUXBUS
         stm32_configgpio(GPIO_SDMMC1_D0);
-#ifndef CONFIG_SDMMC_WIDTH_D1_ONLY
+#ifndef CONFIG_SDMMC1_WIDTH_D1_ONLY
         stm32_configgpio(GPIO_SDMMC1_D1);
         stm32_configgpio(GPIO_SDMMC1_D2);
         stm32_configgpio(GPIO_SDMMC1_D3);
@@ -3195,7 +3195,7 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
 
 #ifndef CONFIG_SDIO_MUXBUS
         stm32_configgpio(GPIO_SDMMC2_D0);
-#ifndef CONFIG_SDMMC_WIDTH_D1_ONLY
+#ifndef CONFIG_SDMMC2_WIDTH_D1_ONLY
         stm32_configgpio(GPIO_SDMMC2_D1);
         stm32_configgpio(GPIO_SDMMC2_D2);
         stm32_configgpio(GPIO_SDMMC2_D3);
