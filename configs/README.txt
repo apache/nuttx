@@ -438,6 +438,10 @@ configs/olimex-stm32-h407
   further information. This board features the STMicro STM32F407ZGT6 (144
   pins). Contributed by Neil Hancock.
 
+configs/olimex-stm32-e407
+  Olimex STM32 E407 board based on the STMicro STM32F407ZGT6 (144pins).
+  Contributed by Mateusz Szafoni.
+
 configs/olimex-stm32-p107
   This port uses the Olimex STM32-P107 board (STM32F107VC) and a GNU arm-nuttx-elf
   toolchain* under Linux or Cygwin. See the https://www.olimex.com/dev/stm32-p107.html
