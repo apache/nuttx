@@ -12139,14 +12139,10 @@
 	* arch/arm/arc/sam34: DAC bugfix: DACC_WPMR_WPKEY_MASK -> DACC_WPMR_WPKEY. 
 	  Timer bugfix:  Fix ops check in TCIOC_STOP.  From Wolfgang Reissnegge
 	  (2016-06-23).
+	* configs/nucleo-144: Added SDMMC support to Nucleo-144. From David
+	  Sidrane (2016-06-23).
 	* arch/arm/src/stm32: Port STM32L4 CAN IOCTLs to STM32.  From Sebastien
 	  Lorquet (2016-06-24).
-	* configs/Konfig:Add configuration logic to include a Kconfig file in
-	  each custom configuration.  Includes adding a dummy custom board
-	  configuration directory.  A consequence of this that each custom board
-	  directory will now need to contain a Kconfig file.  NOTE also that
-	  the new board directory does not take effect in the configuration
-	  menus until the NEXT time you run 'make menuconfig' (2016-06-24).
 	* drivers/ioexpander:  Add support for a very simple GPIO driver.  It
 	  supports only pre-conrigured input and output pins and only basic
 	  input and output operations (2016-06-24).
@@ -12171,3 +12167,18 @@
 	  necessary because otherwise you cannot read back the correct line
 	  status of Open-Drain Outputs and this is needed by the twi_reset
 	  function.  From Michael Spahlinger (2016-06-24)
+	* arch/arm/src/stm32f7:  BUGFIX:PLLs IS2 and SAI P Calculation. From
+	  David Sidrane (2016-06-24).
+	* arch/arm/src/stm32f7: USB support.  From Lok Tep (2016-06-27).
+	* configs/olimex-stm32-e407:  Add support for Olimex STM32 E407
+	  board.  From Mateusz Szafoni (2016-06-27).
+	* drivers/ioexpander: Shadow-Mode: The output- and configuration
+	  registers of the IO-Expander are held in the microcontrollers memory
+	  and only written to the IO-Expander.  This reduces bus traffic and
+	  is more error-proof than the normal read-modify-write operation. Retry
+	  Mode: If enabled and an error occurs while writing to the IO-Expander
+	  the current transmission is automatically repeated once. From Michael
+	  Spahlinger (2016-06-27).
+	* libc/hex2bin:  Move the portable library portion of apps/system/hex2bin
+	  to nuttx/libc/hex2bin where it can be shared with the OS internals
+	  (2016-06-27).

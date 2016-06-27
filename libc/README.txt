@@ -44,6 +44,9 @@ we have:
   time      - time.h
   unistd    - unistd.h
 
+Most of these are "standard" header files; some are not: hex2bin.h and
+fixemath.h are non-standard.
+
 There is also a misc/ subdirectory that contains various internal functions
 and interfaces from header files that are too few to warrant their own sub-
 directory:
