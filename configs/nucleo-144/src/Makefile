@@ -64,4 +64,8 @@ ifeq ($(CONFIG_MMCSD),y)
 CSRCS += stm32_sdio.c
 endif
 
+ifeq ($(CONFIG_STM32F7_OTGFS),y)
+CSRCS += stm32_usb.c
+endif
+
 include $(TOPDIR)/configs/Board.mk
