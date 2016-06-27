@@ -28,7 +28,8 @@ The files in the libc/ directory are organized (mostly) according which file
 in the include/ directory provides the prototype for library functions.  So
 we have:
 
-  audio     - This part of the audio system: nuttx/audio/audio.h
+  audio     - This part of he audio system: nuttx/audio/audio.h
+  hex2bin   - hex2bin.h
   libgen    - libgen.h
   fixedmath - fixedmath.h
   math      - math.h

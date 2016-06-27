@@ -877,3 +877,10 @@ config LIB_SLCDCODEC
 		include/nuttx/lcd/slcd_codec.h.  While not correctly a part of the C
 		library, it is included here because the encoding side of this
 		interface must be accessible by end user programs.
+
+config LIB_HEX2BIN
+	bool "Intel HEX to binary conversion library"
+	default n
+	---help---
+		Build in support for conversions from Intel Hex format to binary.
+		This selection enables the interfaces of include/hex2bin.h.
