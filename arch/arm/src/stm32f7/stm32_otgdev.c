@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/stm32f7/stm32_otgdev.c
  *
- *   Copyright (C) 2012-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -63,12 +63,14 @@
 #include "up_internal.h"
 
 
-#if defined(CONFIG_USBDEV) && (defined(CONFIG_STM32F7_OTGFS) || defined(CONFIG_STM32F7_OTGHS))
+#if defined(CONFIG_USBDEV) && (defined(CONFIG_STM32F7_OTGFS) || \
+    defined(CONFIG_STM32F7_OTGHS))
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* Configuration ***************************************************************/
+
+/* Configuration ************************************************************/
 
 #ifndef CONFIG_USBDEV_EP0_MAXSIZE
 #  define CONFIG_USBDEV_EP0_MAXSIZE 64
@@ -164,7 +166,6 @@
 #  define CONFIG_USBDEV_EP8_TXFIFO_SIZE 0
 #endif
 
-
 /* The actual FIFO addresses that we use must be aligned to 4-byte boundaries;
  * FIFO sizes must be provided in units of 32-bit words.
  */
@@ -202,8 +203,8 @@
 
 #if (STM32_RXFIFO_BYTES + \
      STM32_EP0_TXFIFO_BYTES + STM32_EP1_TXFIFO_BYTES + STM32_EP2_TXFIFO_BYTES + STM32_EP3_TXFIFO_BYTES + \
-	 STM32_EP4_TXFIFO_BYTES + STM32_EP5_TXFIFO_BYTES + STM32_EP6_TXFIFO_BYTES + STM32_EP7_TXFIFO_BYTES + CONFIG_USBDEV_EP8_TXFIFO_SIZE   \
-	) > STM32_OTG_FIFO_SIZE
+     STM32_EP4_TXFIFO_BYTES + STM32_EP5_TXFIFO_BYTES + STM32_EP6_TXFIFO_BYTES + STM32_EP7_TXFIFO_BYTES + CONFIG_USBDEV_EP8_TXFIFO_SIZE   \
+    ) > STM32_OTG_FIFO_SIZE
 #  error "FIFO allocations exceed FIFO memory size"
 #endif
 
@@ -294,7 +295,6 @@
 #define STM32_TRACEINTID_SETUPRECVD         (90 + 4)
 
 /* Endpoints ******************************************************************/
-
 
 /* Odd physical endpoint numbers are IN; even are OUT */
 
@@ -527,7 +527,7 @@ struct stm32_usbdev_s
  * Private Function Prototypes
  ****************************************************************************/
 
-/* Register operations ********************************************************/
+/* Register operations ******************************************************/
 
 #if defined(CONFIG_STM32F7_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
 static uint32_t    stm32_getreg(uint32_t addr);
@@ -537,13 +537,13 @@ static void        stm32_putreg(uint32_t val, uint32_t addr);
 # define stm32_putreg(val,addr) putreg32(val,addr)
 #endif
 
-/* Request queue operations ****************************************************/
+/* Request queue operations **************************************************/
 
 static FAR struct stm32_req_s *stm32_req_remfirst(FAR struct stm32_ep_s *privep);
 static bool       stm32_req_addlast(FAR struct stm32_ep_s *privep,
                     FAR struct stm32_req_s *req);
 
-/* Low level data transfers and request operations *****************************/
+/* Low level data transfers and request operations ***************************/
 /* Special endpoint 0 data transfer logic */
 
 static void        stm32_ep0in_setupresponse(FAR struct stm32_usbdev_s *priv,
@@ -582,7 +582,7 @@ static void        stm32_req_complete(FAR struct stm32_ep_s *privep,
 static void        stm32_req_cancel(FAR struct stm32_ep_s *privep,
                      int16_t status);
 
-/* Interrupt handling **********************************************************/
+/* Interrupt handling ********************************************************/
 
 static struct      stm32_ep_s *stm32_ep_findbyaddr(struct stm32_usbdev_s *priv,
                      uint16_t eplog);
@@ -605,7 +605,8 @@ static inline void stm32_epout_interrupt(FAR struct stm32_usbdev_s *priv);
 
 static inline void stm32_epin_runtestmode(FAR struct stm32_usbdev_s *priv);
 static inline void stm32_epin(FAR struct stm32_usbdev_s *priv, uint8_t epno);
-static inline void stm32_epin_txfifoempty(FAR struct stm32_usbdev_s *priv, int epno);
+static inline void stm32_epin_txfifoempty(FAR struct stm32_usbdev_s *priv,
+                     int epno);
 static inline void stm32_epin_interrupt(FAR struct stm32_usbdev_s *priv);
 
 /* Other second level interrupt processing */
@@ -658,8 +659,10 @@ static void        stm32_ep_freereq(FAR struct usbdev_ep_s *ep,
 /* Endpoint buffer management */
 
 #ifdef CONFIG_USBDEV_DMA
-static void       *stm32_ep_allocbuffer(FAR struct usbdev_ep_s *ep, unsigned bytes);
-static void        stm32_ep_freebuffer(FAR struct usbdev_ep_s *ep, FAR void *buf);
+static void       *stm32_ep_allocbuffer(FAR struct usbdev_ep_s *ep,
+                     unsigned bytes);
+static void        stm32_ep_freebuffer(FAR struct usbdev_ep_s *ep,
+                     FAR void *buf);
 #endif
 
 /* Endpoint request submission */
@@ -707,6 +710,7 @@ static void        stm32_hwinitialize(FAR struct stm32_usbdev_s *priv);
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* Since there is only a single USB interface, all status information can be
  * be simply retained in a single global instance.
  */
@@ -832,10 +836,6 @@ const struct trace_msg_t g_usb_trace_strings_intdecode[] =
   TRACE_STR_END
 };
 #endif
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
@@ -975,6 +975,7 @@ static bool stm32_req_addlast(FAR struct stm32_ep_s *privep,
       privep->tail->flink = req;
       privep->tail        = req;
     }
+
   return is_empty;
 }
 
@@ -3822,8 +3823,8 @@ static void stm32_disablegonak(FAR struct stm32_ep_s *privep)
  *
  ****************************************************************************/
 
-static int stm32_epout_configure(FAR struct stm32_ep_s *privep, uint8_t eptype,
-                                 uint16_t maxpacket)
+static int stm32_epout_configure(FAR struct stm32_ep_s *privep,
+                                 uint8_t eptype, uint16_t maxpacket)
 {
   uint32_t mpsiz;
   uint32_t regaddr;
@@ -3917,8 +3918,8 @@ static int stm32_epout_configure(FAR struct stm32_ep_s *privep, uint8_t eptype,
  *
  ****************************************************************************/
 
-static int stm32_epin_configure(FAR struct stm32_ep_s *privep, uint8_t eptype,
-                                uint16_t maxpacket)
+static int stm32_epin_configure(FAR struct stm32_ep_s *privep,
+                                uint8_t eptype, uint16_t maxpacket)
 {
   uint32_t mpsiz;
   uint32_t regaddr;
@@ -3979,7 +3980,8 @@ static int stm32_epin_configure(FAR struct stm32_ep_s *privep, uint8_t eptype,
           regval |= OTG_DIEPCTL_CNAK;
         }
 
-      regval &= ~(OTG_DIEPCTL_MPSIZ_MASK | OTG_DIEPCTL_EPTYP_MASK | OTG_DIEPCTL_TXFNUM_MASK);
+      regval &= ~(OTG_DIEPCTL_MPSIZ_MASK | OTG_DIEPCTL_EPTYP_MASK |
+                  OTG_DIEPCTL_TXFNUM_MASK);
       regval |= mpsiz;
       regval |= (eptype << OTG_DIEPCTL_EPTYP_SHIFT);
       regval |= (eptype << OTG_DIEPCTL_TXFNUM_SHIFT);
@@ -5493,7 +5495,8 @@ void up_usbinitialize(void)
   /* At present, there is only a single OTG device support. Hence it is
    * pre-allocated as g_otghsdev.  However, in most code, the private data
    * structure will be referenced using the 'priv' pointer (rather than the
-   * global data) in order to simplify any future support for multiple devices.
+   * global data) in order to simplify any future support for multiple
+   * devices.
    */
 
   FAR struct stm32_usbdev_s *priv = &g_otghsdev;
