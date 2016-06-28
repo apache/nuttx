@@ -283,7 +283,7 @@ static const struct twi_attr_s g_twi2attr =
   .pid     = SAM_PID_TWIHS2,
   .irq     = SAM_IRQ_TWIHS2,
   .glitchfltr = CONFIG_SAMV7_TWIHS2_GLITCH_FILTER,
-#ifdef CONFIG_SAMV7_TWIHS0_SINGLE_MASTER
+#ifdef CONFIG_SAMV7_TWIHS2_SINGLE_MASTER
   .s_master = 1,
 #else
   .s_master = 0,
@@ -515,6 +515,7 @@ static int twi_wait(struct twi_dev_s *priv, unsigned int size)
    * all further interrupts for the TWIHS have been disabled.
    */
 
+#ifdef CONFIG_I2C_RESET
   /* Check if an Arbitration Lost has occured */
 
   if (priv->result == -EUSERS)
@@ -532,6 +533,7 @@ static int twi_wait(struct twi_dev_s *priv, unsigned int size)
           priv->result = -EIO;
        }
     }
+#endif
 
   return priv->result;
 }
@@ -646,6 +648,7 @@ static int twi_interrupt(struct twi_dev_s *priv)
         }
     }
 
+#ifdef CONFIG_I2C_RESET
   /* If Single-Master Mode is enabled and we lost arbitration (someone else or
    * an EMC-Pulse did something on the bus) something went very wrong. So we end
    * the current transfer with an EUSERS. The wait function will then reset
@@ -656,9 +659,10 @@ static int twi_interrupt(struct twi_dev_s *priv)
     {
       /* Wake up the thread with an Arbitration Lost error indication */
 
-      i2cllerr("ERROR: TWIHS%d Arbitration Lost\n");
+      i2cerr("ERROR: TWIHS%d Arbitration Lost\n");
       twi_wakeup(priv, -EUSERS);
     }
+#endif
 
   /* Check for errors.  We must check for errors *before* checking TXRDY or
    * TXCMP because the error can be signaled in combination with TXRDY or
@@ -945,6 +949,7 @@ static int twi_transfer(FAR struct i2c_master_s *dev,
 
   twi_setfrequency(priv, msgs->frequency);
 
+#ifdef CONFIG_I2C_RESET
   /* When we are in Single Master Mode check if the bus is ready (no stuck
    * DATA or CLK line).
    * Otherwise initiate a bus reset.
@@ -960,6 +965,7 @@ static int twi_transfer(FAR struct i2c_master_s *dev,
             goto errout;
         }
     }
+#endif
 
   /* Initiate the transfer.  The rest will be handled from interrupt
    * logic.  Interrupts must be disabled to prevent re-entrance from the
