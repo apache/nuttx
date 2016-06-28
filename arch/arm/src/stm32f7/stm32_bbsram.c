@@ -756,7 +756,7 @@ int stm32_bbsraminitialize(char *devpath, int *sizes)
   memset(g_bbsram, 0, sizeof(g_bbsram));
 
   /* Clocking for the PWR block must be provided.  However, this is done
-   * unconditionally in stm32f40xxx_rcc.c on power up.  This done
+   * unconditionally in stm32f7xxxx_rcc.c on power up.  This done
    * unconditionally because the PWR block is also needed to set the
    * internal voltage regulator for maximum performance.
    */

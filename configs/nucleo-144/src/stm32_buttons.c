@@ -40,8 +40,12 @@
 
 #include <nuttx/config.h>
 
+#include <stddef.h>
+
 #include <nuttx/irq.h>
 #include <nuttx/board.h>
+
+#include <arch/board/board.h>
 
 #include "stm32_gpio.h"
 #include "nucleo-144.h"
