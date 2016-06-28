@@ -1195,6 +1195,10 @@ config STM32F7_QUADSPI
 	bool "QuadSPI"
 	default n
 
+config STM32F7_PWR
+    bool "PWR"
+    default n
+
 config STM32F7_RNG
 	bool "RNG"
 	default n
@@ -1793,6 +1797,63 @@ config SDMMC2_WIDTH_D1_ONLY
 		Select 1-bit transfer mode.  Default: 4-bit transfer mode.
 
 endmenu # "SDMMC2 Configuration"
+
+if STM32F7_BKPSRAM
+
+config STM32F7_BBSRAM
+    bool "BBSRAM File Support"
+    default n
+
+config STM32F7_BBSRAM_FILES
+    int "Max Files to support in BBSRAM"
+    default 4
+
+config STM32F7_SAVE_CRASHDUMP
+    bool "Enable Saving Panic to BBSRAM"
+    default n
+
+endif # STM32F7_BKPSRAM
+
+config STM32F7_HAVE_RTC_COUNTER
+    bool
+    default n
+
+config STM32F7_HAVE_RTC_SUBSECONDS
+    bool
+    default n
+
+config RTC_MAGIC_REG
+    int "The BKP register used to store/check the Magic value to determine if RTC is set already"
+    default 0
+    range  0 31
+    depends on RTC && !STM32F7_HAVE_RTC_COUNTER
+
+config RTC_MAGIC
+    hex "Value used as Magic to determine if RTC is set already"
+    default 0xfacefeee
+    depends on RTC && !STM32F7_HAVE_RTC_COUNTER
+
+choice
+    prompt "RTC clock source"
+    default STM32F7_RTC_LSECLOCK
+    depends on RTC
+
+config STM32F7_RTC_HSECLOCK
+    bool "HSE clock"
+    ---help---
+        Drive the RTC with the HSE clock, divided down to 1MHz.
+
+config STM32F7_RTC_LSECLOCK
+    bool "LSE clock"
+    ---help---
+        Drive the RTC with the LSE clock
+
+config STM32F7_RTC_LSICLOCK
+    bool "LSI clock"
+    ---help---
+        Drive the RTC with the LSI clock
+
+endchoice #"RTC clock source"
 
 config STM32F7_CUSTOM_CLOCKCONFIG
 		bool "Custom clock configuration"
