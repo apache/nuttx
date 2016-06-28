@@ -293,6 +293,7 @@ static void copy_reverse(stack_word_t *dest, stack_word_t *src, int size)
       *dest++ = *src--;
     }
 }
+#endif /* CONFIG_STM32F7_SAVE_CRASHDUMP */
 
 /************************************************************************************
  * Public Functions
@@ -327,7 +328,7 @@ int stm32_bbsram_int(void)
           syslog(LOG_INFO, "stm32 bbsram: Failed to unlink Fault Log file [%s] (%d)\n", HARDFAULT_PATH, rv);
         }
     }
-#endif /* CONFIG_STM32_SAVE_CRASHDUMP */
+#endif /* CONFIG_STM32F7_SAVE_CRASHDUMP */
 
   return rv;
 }
@@ -336,6 +337,7 @@ int stm32_bbsram_int(void)
  * Name: board_crashdump
  ************************************************************************************/
 
+#if defined(CONFIG_STM32F7_SAVE_CRASHDUMP)
 void board_crashdump(uintptr_t currentsp, FAR void *tcb,
                      FAR const uint8_t *filename, int lineno)
 {
@@ -486,6 +488,6 @@ void board_crashdump(uintptr_t currentsp, FAR void *tcb,
   up_systemreset();
 #endif
 }
-#endif /* CONFIG_STM32_SAVE_CRASHDUMP */
+#endif /* CONFIG_STM32F7_SAVE_CRASHDUMP */
 
 #endif /* CONFIG_STM32_BBSRAM */
