@@ -199,11 +199,11 @@ typedef struct
 
 typedef enum
 {
-  eRegsPresent          = 0x01,
-  eUserStackPresent     = 0x02,
-  eIntStackPresent      = 0x04,
-  eInvalidUserStackPtr  = 0x20,
-  eInvalidIntStackPrt   = 0x40,
+  REGS_PRESENT          = 0x01,
+  USERSTACK_PRESENT     = 0x02,
+  INTSTACK_PRESENT      = 0x04,
+  INVALID_USERSTACK_PTR = 0x20,
+  INVALID_INTSTACK_PTR  = 0x40,
 } fault_flags_t;
 
 typedef struct
@@ -240,7 +240,7 @@ typedef struct
  * Private Data
  ************************************************************************************/
 
-static uint8_t sdata[STM32F7_BBSRAM_SIZE];
+static uint8_t g_sdata[STM32F7_BBSRAM_SIZE];
 
 /************************************************************************************
  * Private Functions
@@ -341,7 +341,7 @@ int stm32_bbsram_int(void)
 void board_crashdump(uintptr_t currentsp, FAR void *tcb,
                      FAR const uint8_t *filename, int lineno)
 {
-  fullcontext_t *pdump = (fullcontext_t *)&sdata;
+  fullcontext_t *pdump = (fullcontext_t *)&g_sdata;
   FAR struct tcb_s *rtcb;
   int rv;
 
@@ -395,7 +395,7 @@ void board_crashdump(uintptr_t currentsp, FAR void *tcb,
   if (CURRENT_REGS)
     {
       pdump->info.stacks.interrupt.sp = currentsp;
-      pdump->info.flags |= (eRegsPresent | eUserStackPresent | eIntStackPresent);
+      pdump->info.flags |= (REGS_PRESENT | USERSTACK_PRESENT | INTSTACK_PRESENT);
       memcpy(pdump->info.regs, (void *)CURRENT_REGS, sizeof(pdump->info.regs));
       pdump->info.stacks.user.sp = pdump->info.regs[REG_R13];
     }
@@ -403,7 +403,7 @@ void board_crashdump(uintptr_t currentsp, FAR void *tcb,
     {
       /* users context */
 
-      pdump->info.flags |= eUserStackPresent;
+      pdump->info.flags |= USERSTACK_PRESENT;
       pdump->info.stacks.user.sp = currentsp;
     }
 
@@ -428,7 +428,7 @@ void board_crashdump(uintptr_t currentsp, FAR void *tcb,
    * about the interrupt stack pointer
    */
 
-  if ((pdump->info.flags & eIntStackPresent) != 0)
+  if ((pdump->info.flags & INTSTACK_PRESENT) != 0)
     {
       stack_word_t *ps = (stack_word_t *) pdump->info.stacks.interrupt.sp;
       copy_reverse(pdump->istack, &ps[arraySize(pdump->istack) / 2], arraySize(pdump->istack));
@@ -440,7 +440,7 @@ void board_crashdump(uintptr_t currentsp, FAR void *tcb,
         pdump->info.stacks.interrupt.sp > pdump->info.stacks.interrupt.top -
           pdump->info.stacks.interrupt.size))
     {
-      pdump->info.flags |= eInvalidIntStackPrt;
+      pdump->info.flags |= INVALID_INTSTACK_PTR;
     }
 
 #endif
@@ -448,7 +448,7 @@ void board_crashdump(uintptr_t currentsp, FAR void *tcb,
    * about the user stack pointer
    */
 
-  if ((pdump->info.flags & eUserStackPresent) != 0)
+  if ((pdump->info.flags & USERSTACK_PRESENT) != 0)
     {
       stack_word_t *ps = (stack_word_t *) pdump->info.stacks.user.sp;
       copy_reverse(pdump->ustack, &ps[arraySize(pdump->ustack) / 2],
@@ -461,7 +461,7 @@ void board_crashdump(uintptr_t currentsp, FAR void *tcb,
         pdump->info.stacks.user.sp > pdump->info.stacks.user.top -
           pdump->info.stacks.user.size))
     {
-      pdump->info.flags |= eInvalidUserStackPtr;
+      pdump->info.flags |= INVALID_USERSTACK_PTR;
     }
 
   rv = stm32_bbsram_savepanic(HARDFAULT_FILENO, (uint8_t *)pdump, sizeof(fullcontext_t));
