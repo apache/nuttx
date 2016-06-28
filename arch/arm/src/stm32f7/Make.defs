@@ -135,8 +135,18 @@ ifeq ($(CONFIG_STM32F7_DMA),y)
 CHIP_CSRCS += stm32_dma.c
 endif
 
-ifeq ($(CONFIG_STM32_PWR),y)
-CHIP_CSRCS += stm32_exti_pwr.c
+ifeq ($(CONFIG_STM32F7_PWR),y)
+CHIP_CSRCS += stm32_pwr.c stm32_exti_pwr.c
+endif
+
+ifeq ($(CONFIG_RTC),y)
+CHIP_CSRCS += stm32_rtc.c
+ifeq ($(CONFIG_RTC_ALARM),y)
+CHIP_CSRCS += stm32_exti_alarm.c
+endif
+ifeq ($(CONFIG_RTC_DRIVER),y)
+CHIP_CSRCS += stm32_rtc_lowerhalf.c
+endif
 endif
 
 ifeq ($(CONFIG_STM32F7_I2C),y)
@@ -179,4 +189,8 @@ endif
 
 ifeq ($(CONFIG_DEBUG_FEATURES),y)
 CHIP_CSRCS += stm32_dumpgpio.c
+endif
+
+ifeq ($(CONFIG_STM32F7_BBSRAM),y)
+CHIP_CSRCS += stm32_bbsram.c
 endif
