@@ -133,9 +133,9 @@ struct twi_attr_s
 {
   uint8_t             twi;        /* TWIHS device number (for debug output) */
   uint8_t             pid;        /* TWIHS peripheral ID */
-  uint16_t            irq;        /* IRQ number for this TWIHS bus */
   uint8_t             glitchfltr; /* Pulse width of a glich to be suppressed by the filter */
-  uint8_t             s_master;   /* Single-Master Mode active */
+  bool                s_master;   /* true: Single-Master Mode active */
+  uint16_t            irq;        /* IRQ number for this TWIHS bus */
   gpio_pinset_t       sclcfg;     /* TWIHS CK pin configuration (SCL in I2C-ese) */
   gpio_pinset_t       sdacfg;     /* TWIHS D pin configuration (SDA in I2C-ese) */
   uintptr_t           base;       /* Base address of TWIHS registers */
@@ -237,19 +237,19 @@ static void twi_hw_initialize(struct twi_dev_s *priv, uint32_t frequency);
 #ifdef CONFIG_SAMV7_TWIHS0
 static const struct twi_attr_s g_twi0attr =
 {
-  .twi     = 0,
-  .pid     = SAM_PID_TWIHS0,
-  .irq     = SAM_IRQ_TWIHS0,
+  .twi        = 0,
+  .pid        = SAM_PID_TWIHS0,
+  .irq        = SAM_IRQ_TWIHS0,
   .glitchfltr = CONFIG_SAMV7_TWIHS0_GLITCH_FILTER,
 #ifdef CONFIG_SAMV7_TWIHS0_SINGLE_MASTER
-  .s_master = 1,
+  .s_master   = true,
 #else
-  .s_master = 0,
+  .s_master   = false,
 #endif
-  .sclcfg  = GPIO_TWIHS0_CK,
-  .sdacfg  = GPIO_TWIHS0_D,
-  .base    = SAM_TWIHS0_BASE,
-  .handler = twi0_interrupt,
+  .sclcfg     = GPIO_TWIHS0_CK,
+  .sdacfg     = GPIO_TWIHS0_D,
+  .base       = SAM_TWIHS0_BASE,
+  .handler    = twi0_interrupt,
 };
 
 static struct twi_dev_s g_twi0;
@@ -258,19 +258,19 @@ static struct twi_dev_s g_twi0;
 #ifdef CONFIG_SAMV7_TWIHS1
 static const struct twi_attr_s g_twi1attr =
 {
-  .twi     = 1,
-  .pid     = SAM_PID_TWIHS1,
-  .irq     = SAM_IRQ_TWIHS1,
+  .twi        = 1,
+  .pid        = SAM_PID_TWIHS1,
+  .irq        = SAM_IRQ_TWIHS1,
   .glitchfltr = CONFIG_SAMV7_TWIHS1_GLITCH_FILTER,
 #ifdef CONFIG_SAMV7_TWIHS1_SINGLE_MASTER
-  .s_master = 1,
+  .s_master   = true,
 #else
-  .s_master = 0,
+  .s_master   = false,
 #endif
-  .sclcfg  = GPIO_TWIHS1_CK,
-  .sdacfg  = GPIO_TWIHS1_D,
-  .base    = SAM_TWIHS1_BASE,
-  .handler = twi1_interrupt,
+  .sclcfg     = GPIO_TWIHS1_CK,
+  .sdacfg     = GPIO_TWIHS1_D,
+  .base       = SAM_TWIHS1_BASE,
+  .handler    = twi1_interrupt,
 };
 
 static struct twi_dev_s g_twi1;
@@ -279,19 +279,19 @@ static struct twi_dev_s g_twi1;
 #ifdef CONFIG_SAMV7_TWIHS2
 static const struct twi_attr_s g_twi2attr =
 {
-  .twi     = 2,
-  .pid     = SAM_PID_TWIHS2,
-  .irq     = SAM_IRQ_TWIHS2,
+  .twi        = 2,
+  .pid        = SAM_PID_TWIHS2,
+  .irq        = SAM_IRQ_TWIHS2,
   .glitchfltr = CONFIG_SAMV7_TWIHS2_GLITCH_FILTER,
 #ifdef CONFIG_SAMV7_TWIHS2_SINGLE_MASTER
-  .s_master = 1,
+  .s_master   = true,
 #else
-  .s_master = 0,
+  .s_master   = false,
 #endif
-  .sclcfg  = GPIO_TWIHS2_CK,
-  .sdacfg  = GPIO_TWIHS2_D,
-  .base    = SAM_TWIHS2_BASE,
-  .handler = twi2_interrupt,
+  .sclcfg     = GPIO_TWIHS2_CK,
+  .sdacfg     = GPIO_TWIHS2_D,
+  .base       = SAM_TWIHS2_BASE,
+  .handler    = twi2_interrupt,
 };
 
 static struct twi_dev_s g_twi2;
@@ -299,9 +299,9 @@ static struct twi_dev_s g_twi2;
 
 static const struct i2c_ops_s g_twiops =
 {
-  .transfer = twi_transfer
+  .transfer   = twi_transfer
 #ifdef CONFIG_I2C_RESET
-  , .reset  = twi_reset
+  , .reset    = twi_reset
 #endif
 };
 
@@ -964,7 +964,9 @@ static int twi_transfer(FAR struct i2c_master_s *dev,
         {
           ret = twi_reset_internal(&priv->dev);
           if (ret != OK)
-            goto errout;
+            {
+              goto errout;
+            }
         }
     }
 #endif
@@ -984,7 +986,9 @@ static int twi_transfer(FAR struct i2c_master_s *dev,
   ret = twi_wait(priv, size);
   leave_critical_section(flags);
 
+#ifdef CONFIG_I2C_RESET
 errout:
+#endif
   if (ret < 0)
     {
       i2cerr("ERROR: Transfer failed: %d\n", ret);
