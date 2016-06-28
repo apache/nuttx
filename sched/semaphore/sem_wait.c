@@ -86,9 +86,7 @@ int sem_wait(FAR sem_t *sem)
 
   DEBUGASSERT(up_interrupt_context() == false);
 
-  /* Assume any errors reported are due to invalid arguments. */
-
-  set_errno(EINVAL);
+  /* Make sure we were supplied with a valid semaphore. */
 
   if (sem)
     {
@@ -189,6 +187,10 @@ int sem_wait(FAR sem_t *sem)
       /* Interrupts may now be enabled. */
 
       leave_critical_section(flags);
+    }
+  else
+    {
+      set_errno(EINVAL);
     }
 
   return ret;
