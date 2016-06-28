@@ -913,7 +913,9 @@ static int twi_transfer(FAR struct i2c_master_s *dev,
   struct twi_dev_s *priv = (struct twi_dev_s *)dev;
   irqstate_t flags;
   unsigned int size;
+#ifdef CONFIG_I2C_RESET
   uint32_t sr;
+#endif
   int i;
   int ret;
 
