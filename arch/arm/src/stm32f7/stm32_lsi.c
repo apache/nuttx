@@ -45,18 +45,6 @@
 #include "stm32_rcc.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -70,8 +58,8 @@
 
 void stm32_rcc_enablelsi(void)
 {
-  /* Enable the Internal Low-Speed (LSI) RC Oscillator by setting the LSION bit
-   * the RCC CSR register.
+  /* Enable the Internal Low-Speed (LSI) RC Oscillator by setting the LSION
+   * bit the RCC CSR register.
    */
 
   modifyreg32(STM32_RCC_CSR, 0, RCC_CSR_LSION);
@@ -91,8 +79,8 @@ void stm32_rcc_enablelsi(void)
 
 void stm32_rcc_disablelsi(void)
 {
-  /* Enable the Internal Low-Speed (LSI) RC Oscillator by setting the LSION bit
-   * the RCC CSR register.
+  /* Enable the Internal Low-Speed (LSI) RC Oscillator by setting the LSION
+   * bit the RCC CSR register.
    */
 
   modifyreg32(STM32_RCC_CSR, RCC_CSR_LSION, 0);
