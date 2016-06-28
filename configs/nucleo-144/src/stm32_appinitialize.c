@@ -101,7 +101,10 @@ int board_app_initialize(uintptr_t arg)
       syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
     }
 #endif
+
 #ifdef CONFIG_STM32F7_BBSRAM
+  /* Initialize battery-backed RAM */
+
   (void)stm32_bbsram_int();
 #endif
 

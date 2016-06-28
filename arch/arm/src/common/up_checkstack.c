@@ -88,7 +88,9 @@ static size_t do_stackcheck(uintptr_t alloc, size_t size)
     {
       return 0;
     }
+
   /* Get aligned addresses of the top and bottom of the stack */
+
 #ifdef CONFIG_TLS
   /* Skip over the TLS data structure at the bottom of the stack */
 
@@ -126,7 +128,8 @@ static size_t do_stackcheck(uintptr_t alloc, size_t size)
 #if 0
   if (mark + 16 > nwords)
     {
-      int i, j;
+      int i;
+      int j;
 
       ptr = (FAR uint32_t *)start;
       for (i = 0; i < size; i += 4*64)

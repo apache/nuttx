@@ -277,7 +277,6 @@ int stm32_sdio_initialize(void);
  *
  ************************************************************************************/
 
-
 #ifdef CONFIG_STM32F7_OTGFS
 void stm32_usbinitialize(void);
 #endif
@@ -285,8 +284,10 @@ void stm32_usbinitialize(void);
 /************************************************************************************
  * Name: stm32_bbsram_int
  ************************************************************************************/
+
 #ifdef CONFIG_STM32F7_BBSRAM
 int stm32_bbsram_int(void);
 #endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_NUCLEO_144_SRC_NUCLEO_144_H */
