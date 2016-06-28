@@ -1861,6 +1861,14 @@ config STM32F7_CUSTOM_CLOCKCONFIG
 	---help---
 		Enables special, board-specific STM32 clock configuration.
 
+config STM32F7_DTCMEXCLUDE
+	bool "Exclude DTCM SRAM from the heap"
+	default y if ELF
+	depends on ARMV7M_HAVE_DTCM
+	---help---
+		Exclude DTCM SRAM from the HEAP because it appears to be impossible
+		to execute ELF modules from DTCM RAM (REVISIT!).
+
 config STM32F7_DTCM_PROCFS
 	bool "DTCM SRAM PROCFS support"
 	default n
@@ -3509,222 +3517,10 @@ endif # !STM32F7_PWM_MULTICHAN
 
 endif # STM32F7_TIM14_PWM
 
-config STM32F7_TIM15_PWM
-	bool "TIM15 PWM"
-	default n
-	depends on STM32F7_TIM15
-	---help---
-		Reserve timer 15 for use by PWM
-
-		Timer devices may be used for different purposes.  One special purpose is
-		to generate modulated outputs for such things as motor control.  If STM32F7_TIM15
-		is defined then THIS following may also be defined to indicate that
-		the timer is intended to be used for pulsed output modulation.
-
-if STM32F7_TIM15_PWM
-
-if STM32F7_PWM_MULTICHAN
-
-config STM32F7_TIM15_CHANNEL1
-	bool "TIM15 Channel 1"
-	default n
-	---help---
-		Enables channel 1.
-
-if STM32F7_TIM15_CHANNEL1
-
-config STM32F7_TIM15_CH1MODE
-	int "TIM15 Channel 1 Mode"
-	default 0
-	range 0 3 if STM32F7_STM32F30XX
-	range 0 1 if !STM32F7_STM32F30XX
-	---help---
-		Specifies the channel mode.
-
-config STM32F7_TIM15_CH1OUT
-	bool "TIM15 Channel 1 Output"
-	default n
-	---help---
-		Enables channel 1 output.
-
-endif # STM32F7_TIM15_CHANNEL1
-
-config STM32F7_TIM15_CHANNEL2
-	bool "TIM15 Channel 2"
-	default n
-	---help---
-		Enables channel 2.
-
-if STM32F7_TIM15_CHANNEL2
-
-config STM32F7_TIM15_CH2MODE
-	int "TIM15 Channel 2 Mode"
-	default 0
-	range 0 3 if STM32F7_STM32F30XX
-	range 0 1 if !STM32F7_STM32F30XX
-	---help---
-		Specifies the channel mode.
-
-config STM32F7_TIM15_CH2OUT
-	bool "TIM15 Channel 2 Output"
-	default n
-	---help---
-		Enables channel 2 output.
-
-endif # STM32F7_TIM15_CHANNEL2
-
-endif # STM32F7_PWM_MULTICHAN
-
-if !STM32F7_PWM_MULTICHAN
-
-config STM32F7_TIM15_CHANNEL
-	int "TIM15 PWM Output Channel"
-	default 1
-	range 1 2
-	---help---
-		If TIM15 is enabled for PWM usage, you also need specifies the timer output
-		channel {1,2}
-
-config STM32F7_TIM15_CHMODE
-	int "TIM15 Channel Mode"
-	default 0
-	range 0 3 if STM32F7_STM32F30XX
-	range 0 1 if !STM32F7_STM32F30XX
-	---help---
-		Specifies the channel mode.
-
-endif # !STM32F7_PWM_MULTICHAN
-
-endif # STM32F7_TIM15_PWM
-
-config STM32F7_TIM16_PWM
-	bool "TIM16 PWM"
-	default n
-	depends on STM32F7_TIM16
-	---help---
-		Reserve timer 16 for use by PWM
-
-		Timer devices may be used for different purposes.  One special purpose is
-		to generate modulated outputs for such things as motor control.  If STM32F7_TIM16
-		is defined then THIS following may also be defined to indicate that
-		the timer is intended to be used for pulsed output modulation.
-
-if STM32F7_TIM16_PWM
-
-if STM32F7_PWM_MULTICHAN
-
-config STM32F7_TIM16_CHANNEL1
-	bool "TIM16 Channel 1"
-	default n
-	---help---
-		Enables channel 1.
-
-if STM32F7_TIM16_CHANNEL1
-
-config STM32F7_TIM16_CH1MODE
-	int "TIM16 Channel 1 Mode"
-	default 0
-	range 0 1
-	---help---
-		Specifies the channel mode.
-
-config STM32F7_TIM16_CH1OUT
-	bool "TIM16 Channel 1 Output"
-	default n
-	---help---
-		Enables channel 1 output.
-
-endif # STM32F7_TIM16_CHANNEL1
-
-endif # STM32F7_PWM_MULTICHAN
-
-if !STM32F7_PWM_MULTICHAN
-
-config STM32F7_TIM16_CHANNEL
-	int "TIM16 PWM Output Channel"
-	default 1
-	range 1 1
-	---help---
-		If TIM16 is enabled for PWM usage, you also need specifies the timer output
-		channel {1}
-
-config STM32F7_TIM16_CHMODE
-	int "TIM16 Channel Mode"
-	default 0
-	range 0 1
-	---help---
-		Specifies the channel mode.
-
-endif # !STM32F7_PWM_MULTICHAN
-
-endif # STM32F7_TIM16_PWM
-
-config STM32F7_TIM17_PWM
-	bool "TIM17 PWM"
-	default n
-	depends on STM32F7_TIM17
-	---help---
-		Reserve timer 17 for use by PWM
-
-		Timer devices may be used for different purposes.  One special purpose is
-		to generate modulated outputs for such things as motor control.  If STM32F7_TIM17
-		is defined then THIS following may also be defined to indicate that
-		the timer is intended to be used for pulsed output modulation.
-
-if STM32F7_TIM17_PWM
-
-if STM32F7_PWM_MULTICHAN
-
-config STM32F7_TIM17_CHANNEL1
-	bool "TIM17 Channel 1"
-	default n
-	---help---
-		Enables channel 1.
-
-if STM32F7_TIM17_CHANNEL1
-
-config STM32F7_TIM17_CH1MODE
-	int "TIM17 Channel 1 Mode"
-	default 0
-	range 0 1
-	---help---
-		Specifies the channel mode.
-
-config STM32F7_TIM17_CH1OUT
-	bool "TIM17 Channel 1 Output"
-	default n
-	---help---
-		Enables channel 1 output.
-
-endif # STM32F7_TIM17_CHANNEL1
-
-endif # STM32F7_PWM_MULTICHAN
-
-if !STM32F7_PWM_MULTICHAN
-
-config STM32F7_TIM17_CHANNEL
-	int "TIM17 PWM Output Channel"
-	default 1
-	range 1 1
-	---help---
-		If TIM17 is enabled for PWM usage, you also need specifies the timer output
-		channel {1}
-
-config STM32F7_TIM17_CHMODE
-	int "TIM17 Channel Mode"
-	default 0
-	range 0 1
-	---help---
-		Specifies the channel mode.
-
-endif # !STM32F7_PWM_MULTICHAN
-
-endif # STM32F7_TIM17_PWM
-
 config STM32F7_PWM_MULTICHAN
 	bool "PWM Multiple Output Channels"
 	default n
-	depends on STM32F7_TIM1_PWM || STM32F7_TIM2_PWM || STM32F7_TIM3_PWM || STM32F7_TIM4_PWM || STM32F7_TIM5_PWM || STM32F7_TIM8_PWM || STM32F7_TIM9_PWM || STM32F7_TIM10_PWM || STM32F7_TIM11_PWM || STM32F7_TIM12_PWM || STM32F7_TIM13_PWM || STM32F7_TIM14_PWM || STM32F7_TIM15_PWM || STM32F7_TIM16_PWM || STM32F7_TIM17_PWM
+	depends on STM32F7_TIM1_PWM || STM32F7_TIM2_PWM || STM32F7_TIM3_PWM || STM32F7_TIM4_PWM || STM32F7_TIM5_PWM || STM32F7_TIM8_PWM || STM32F7_TIM9_PWM || STM32F7_TIM10_PWM || STM32F7_TIM11_PWM || STM32F7_TIM12_PWM || STM32F7_TIM13_PWM || STM32F7_TIM14_PWM
 	select ARCH_HAVE_PWM_MULTICHAN
 	---help---
 		Specifies that the PWM driver supports multiple output
