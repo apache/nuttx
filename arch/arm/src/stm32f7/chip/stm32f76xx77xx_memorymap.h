@@ -49,7 +49,7 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-/* STM32F40XXX Address Blocks *******************************************************/
+/* STM32F76XXX STM32F77XXX Address Blocks *******************************************/
 
 #define STM32_CODE_BASE      0x00000000     /* 0x00000000-0x1fffffff: 512Mb code block */
 #define STM32_SRAM_BASE      0x20000000     /* 0x20000000-0x3fffffff: 512Mb sram block */

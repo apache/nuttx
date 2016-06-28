@@ -48,6 +48,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
+#include <nuttx/time.h>
 
 #include "up_arch.h"
 
