@@ -84,7 +84,7 @@
 #define CONFIG_ISTACK_SIZE 800
 #define CONFIG_USTACK_SIZE 800
 
-#define arraySize(a) (sizeof((a))/sizeof(a[0]))
+#define ARRAYSIZE(a) (sizeof((a))/sizeof(a[0]))
 
 /************************************************************************************
  * Private Data
@@ -431,7 +431,7 @@ void board_crashdump(uintptr_t currentsp, FAR void *tcb,
   if ((pdump->info.flags & INTSTACK_PRESENT) != 0)
     {
       stack_word_t *ps = (stack_word_t *) pdump->info.stacks.interrupt.sp;
-      copy_reverse(pdump->istack, &ps[arraySize(pdump->istack) / 2], arraySize(pdump->istack));
+      copy_reverse(pdump->istack, &ps[ARRAYSIZE(pdump->istack) / 2], ARRAYSIZE(pdump->istack));
     }
 
   /* Is it Invalid? */
@@ -451,8 +451,8 @@ void board_crashdump(uintptr_t currentsp, FAR void *tcb,
   if ((pdump->info.flags & USERSTACK_PRESENT) != 0)
     {
       stack_word_t *ps = (stack_word_t *) pdump->info.stacks.user.sp;
-      copy_reverse(pdump->ustack, &ps[arraySize(pdump->ustack) / 2],
-                   arraySize(pdump->ustack));
+      copy_reverse(pdump->ustack, &ps[ARRAYSIZE(pdump->ustack) / 2],
+                   ARRAYSIZE(pdump->ustack));
     }
 
   /* Is it Invalid? */
