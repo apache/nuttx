@@ -606,57 +606,6 @@ Configuration Directories
        If you do this a lot, you will probably want to invest a little time
        to develop a tool to automate these steps.
 
-  netnsh:
-  ------
-    This is a NetShell (NSH) very similar to the nsh configuration described
-    below.  It differs in that it has networking enabled.
-
-    NOTES:
-
-    1. Both IPv4 and IPv6 protocoals are enabled.  Fixed IP addresses are
-       used.  The default configurationi target has these IP address:
-
-       IPv4: 10.0.0.2
-       IPv6: fc00::2
-
-       These are, of course, easily changes by reconfiguring via 'make
-       menuconfig'
-
-    2. UDP, TCIP/IP, ARP, ICMP, and ICMPv6 are also enabled.
-
-    3. NSH offers several network oriented commands such as:  ipconfig,
-       ifup, ifdown, ping, and ping6.
-
-    4. Telnet sessions are supported.  You can start a Telnet session from
-       any host on the network using a command like:
-
-         $ telnet 10.0.0.2
-         Trying 10.0.0.2...
-         Connected to 10.0.0.2.
-         Escape character is '^]'.
-
-         NuttShell (NSH) NuttX-7.10
-         nsh> help
-         help usage:  help [-v] [<cmd>]
-
-           [           dd          hexdump     mb          ping6       sleep
-           ?           echo        ifconfig    mkdir       ps          test
-           break       exec        ifdown      mkfifo      pwd         true
-           cat         exit        ifup        mh          rm          uname
-           cd          false       kill        mv          rmdir       unset
-           cp          free        losetup     mw          set         usleep
-           cmp         help        ls          ping        sh          xd
-
-         Builtin Apps:
-         nsh>
-
-       Under either Linux or Cygwin
-
-    5. The PHY address is either 0 or 1, depending on the state of the
-       LAN8720 RXER/PHYAD0 when the hardware is reset.  That connects to the
-       STM32 F7 via PG2. PG2 is not controlled but appears to result in a
-       PHY address of 0.
-
   nsh:
   ---
     Configures the NuttShell (NSH) located at apps/examples/nsh.  The
