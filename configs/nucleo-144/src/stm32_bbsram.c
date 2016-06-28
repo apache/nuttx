@@ -90,8 +90,6 @@
  * Private Data
  ************************************************************************************/
 
-typedef uint32_t stack_word_t;
-
 /* Used for stack frame storage */
 
 typedef uint32_t stack_word_t;
@@ -431,7 +429,8 @@ void board_crashdump(uintptr_t currentsp, FAR void *tcb,
   if ((pdump->info.flags & INTSTACK_PRESENT) != 0)
     {
       stack_word_t *ps = (stack_word_t *) pdump->info.stacks.interrupt.sp;
-      copy_reverse(pdump->istack, &ps[ARRAYSIZE(pdump->istack) / 2], ARRAYSIZE(pdump->istack));
+      copy_reverse(pdump->istack, &ps[ARRAYSIZE(pdump->istack) / 2],
+                   ARRAYSIZE(pdump->istack));
     }
 
   /* Is it Invalid? */
@@ -464,7 +463,8 @@ void board_crashdump(uintptr_t currentsp, FAR void *tcb,
       pdump->info.flags |= INVALID_USERSTACK_PTR;
     }
 
-  rv = stm32_bbsram_savepanic(HARDFAULT_FILENO, (uint8_t *)pdump, sizeof(fullcontext_t));
+  rv = stm32_bbsram_savepanic(HARDFAULT_FILENO, (uint8_t *)pdump,
+                              sizeof(fullcontext_t));
 
   /* Test if memory got wiped because of using _sdata */
 
