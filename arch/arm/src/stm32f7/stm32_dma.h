@@ -62,8 +62,8 @@
  * Public Types
  ************************************************************************************/
 
-/* DMA_HANDLE provides an opaque are reference that can be used to represent a DMA
- * channel (F1) or a DMA stream (F4).
+/* DMA_HANDLE Provides an opaque are reference that can be used to represent a DMA
+ * a DMA stream.
  */
 
 typedef FAR void *DMA_HANDLE;
@@ -137,10 +137,8 @@ extern "C"
  *
  * Input parameter:
  *   chan - Identifies the stream/channel resource
- *     For the STM32 F1, this is simply the channel number as provided by
- *     the DMACHAN_* definitions in chip/stm32f10xxx_dma.h.
- *     For the STM32 F4, this is a bit encoded value as provided by the
- *     the DMAMAP_* definitions in chip/stm32f40xxx_dma.h
+ *     For the STM32 F7, this is a bit encoded value as provided by the
+ *     the DMAMAP_* definitions  in chip/stm32f7xxxxxxx_dma.h
  *
  * Returned Value:
  *   Provided that 'chan' is valid, this function ALWAYS returns a non-NULL,
