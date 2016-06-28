@@ -84,6 +84,10 @@ static size_t do_stackcheck(uintptr_t alloc, size_t size)
   FAR uint32_t *ptr;
   size_t mark;
 
+  if (size == 0)
+    {
+      return 0;
+    }
   /* Get aligned addresses of the top and bottom of the stack */
 #ifdef CONFIG_TLS
   /* Skip over the TLS data structure at the bottom of the stack */
