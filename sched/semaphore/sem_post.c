@@ -41,6 +41,7 @@
 
 #include <limits.h>
 #include <semaphore.h>
+#include <errno.h>
 #include <sched.h>
 
 #include <nuttx/irq.h>
@@ -156,6 +157,10 @@ int sem_post(FAR sem_t *sem)
       /* Interrupts may now be enabled. */
 
       leave_critical_section(flags);
+    }
+  else
+    {
+      set_errno(EINVAL);
     }
 
   return ret;
