@@ -84,18 +84,18 @@
 
 /* Constants ************************************************************************/
 
+#if defined(CONFIG_STM32F7_RTC_HSECLOCK)
+#  define  RCC_BDCR_RTCSEL RCC_BDCR_RTCSEL_HSE
+#elif defined(CONFIG_STM32F7_RTC_LSICLOCK)
+#  define  RCC_BDCR_RTCSEL RCC_BDCR_RTCSEL_LSI
+#elif defined(CONFIG_STM32F7_RTC_LSECLOCK)
+#  define  RCC_BDCR_RTCSEL RCC_BDCR_RTCSEL_LSE
+#else
+#  warning "RCC_BDCR_RTCSEL_NOCLK has been selected - RTC will not count"
+#endif
+
 #define SYNCHRO_TIMEOUT      (0x00020000)
 #define INITMODE_TIMEOUT     (0x00010000)
-
-/* Proxy definitions to make the same code work for all the STM32 series ************/
-
-# define STM32_RCC_XXX       STM32_RCC_BDCR
-# define RCC_XXX_YYYRST      RCC_BDCR_BDRST
-# define RCC_XXX_RTCEN       RCC_BDCR_RTCEN
-# define RCC_XXX_RTCSEL_MASK RCC_BDCR_RTCSEL_MASK
-# define RCC_XXX_RTCSEL_LSE  RCC_BDCR_RTCSEL_LSE
-# define RCC_XXX_RTCSEL_LSI  RCC_BDCR_RTCSEL_LSI
-# define RCC_XXX_RTCSEL_HSE  RCC_BDCR_RTCSEL_HSE
 
 /* Time conversions */
 
@@ -844,7 +844,7 @@ int up_rtc_initialize(void)
   int nretry = 0;
 
   /* Clocking for the PWR block must be provided.  However, this is done
-   * unconditionally in stm32f40xxx_rcc.c on power up.  This done unconditionally
+   * unconditionally in stm32f7xxx_rcc.c on power up.  This done unconditionally
    * because the PWR block is also needed to set the internal voltage regulator for
    * maximum performance.
    */
@@ -858,79 +858,91 @@ int up_rtc_initialize(void)
 
   if (regval != RTC_MAGIC)
     {
-      /* Some boards do not have the external 32khz oscillator installed, for those
-       * boards we must fallback to the crummy internal RC clock or the external high
-       * rate clock
+
+      /* Issue the Backup domain Reset Per Section 5.3.20 DocID028270 Rev 2
+       * The LSEON, LSEBYP, RTCSEL and RTCEN bits in the RCC backup domain control
+       * register (RCC_BDCR) are in the Backup domain. As a result, after Reset,
+       * these bits are write-protected and the DBP bit in the PWR power control
+       * register (PWR_CR1) has to be set before these can be modified.
+       * Refer to Section 5.1.1: System reset on page 148 for further information.
+       * These bits are only reset after a Backup domain Reset
+       * (see Section 5.1.3: Backup domain reset).
+       *
+       * This has to be done here so that PWR is already enabled
        */
+
+      modifyreg32(STM32_RCC_BDCR, 0, RCC_BDCR_BDRST);
+      modifyreg32(STM32_RCC_BDCR, RCC_BDCR_BDRST, 0);
+
+#if RCC_BDCR_RTCSEL == RCC_BDCR_RTCSEL_LSE
+          /* Because of the Backup domain Reset - we must re enable the LSE */
+
+           stm32_rcc_enablelse();
+#endif
+
+      /* Some boards do not have the external 32khz oscillator installed, for those
+      * boards we must fallback to the crummy internal RC clock or the external high
+      * rate clock
+      */
 
 #ifdef CONFIG_STM32F7_RTC_HSECLOCK
       /* Use the HSE clock as the input to the RTC block */
 
       rtc_dumpregs("On reset HSE");
-      modifyreg32(STM32_RCC_XXX, RCC_XXX_RTCSEL_MASK, RCC_XXX_RTCSEL_HSE);
 
 #elif defined(CONFIG_STM32F7_RTC_LSICLOCK)
       /* Use the LSI clock as the input to the RTC block */
 
       rtc_dumpregs("On reset LSI");
-      modifyreg32(STM32_RCC_XXX, RCC_XXX_RTCSEL_MASK, RCC_XXX_RTCSEL_LSI);
 
 #elif defined(CONFIG_STM32F7_RTC_LSECLOCK)
       /* Use the LSE clock as the input to the RTC block */
 
       rtc_dumpregs("On reset LSE");
-      modifyreg32(STM32_RCC_XXX, RCC_XXX_RTCSEL_MASK, RCC_XXX_RTCSEL_LSE);
 
 #endif
+      modifyreg32(STM32_RCC_BDCR, RCC_BDCR_RTCSEL_MASK, RCC_BDCR_RTCSEL);
+
       /* Enable the RTC Clock by setting the RTCEN bit in the RCC register */
 
-      modifyreg32(STM32_RCC_XXX, 0, RCC_XXX_RTCEN);
+      modifyreg32(STM32_RCC_BDCR, 0, RCC_BDCR_RTCEN);
     }
-  else /* The RTC is already in use: check if the clock source is changed */
+  else
     {
-#if defined(CONFIG_STM32F7_RTC_HSECLOCK) || defined(CONFIG_RTC_LSICLOCK) || \
-    defined(CONFIG_STM32F7_RTC_LSECLOCK)
-
-      uint32_t clksrc = getreg32(STM32_RCC_XXX);
+      uint32_t clksrc = getreg32(STM32_RCC_BDCR);
 
       rtc_dumpregs("On reset warm");
 
-#if defined(CONFIG_STM32F7_RTC_HSECLOCK)
-      if ((clksrc & RCC_XXX_RTCSEL_MASK) != RCC_XXX_RTCSEL_HSE)
-#elif defined(CONFIG_STM32F7_RTC_LSICLOCK)
-      if ((clksrc & RCC_XXX_RTCSEL_MASK) != RCC_XXX_RTCSEL_LSI)
-#elif defined(CONFIG_STM32F7_RTC_LSECLOCK)
-      if ((clksrc & RCC_XXX_RTCSEL_MASK) != RCC_XXX_RTCSEL_LSE)
-#endif
-#endif
+      /* The RTC is already in use: check if the clock source has changed */
+
+      if ((clksrc & RCC_BDCR_RTCSEL_MASK) != RCC_BDCR_RTCSEL)
         {
           tr_bkp = getreg32(STM32_RTC_TR);
           dr_bkp = getreg32(STM32_RTC_DR);
-          modifyreg32(STM32_RCC_XXX, 0, RCC_XXX_YYYRST);
-          modifyreg32(STM32_RCC_XXX, RCC_XXX_YYYRST, 0);
+          modifyreg32(STM32_RCC_BDCR, 0, RCC_BDCR_BDRST);
+          modifyreg32(STM32_RCC_BDCR, RCC_BDCR_BDRST, 0);
 
-#if defined(CONFIG_STM32F7_RTC_HSECLOCK)
+# if RCC_BDCR_RTCSEL == RCC_BDCR_RTCSEL_LSE
+          /* Because of the Backup domain Reset - we must re enable the LSE
+           * if it is used
+           */
+
+           stm32_rcc_enablelse();
+#endif
           /* Change to the new clock as the input to the RTC block */
 
-          modifyreg32(STM32_RCC_XXX, RCC_XXX_RTCSEL_MASK, RCC_XXX_RTCSEL_HSE);
-
-#elif defined(CONFIG_STM32F7_RTC_LSICLOCK)
-          modifyreg32(STM32_RCC_XXX, RCC_XXX_RTCSEL_MASK, RCC_XXX_RTCSEL_LSI);
-
-#elif defined(CONFIG_STM32F7_RTC_LSECLOCK)
-          modifyreg32(STM32_RCC_XXX, RCC_XXX_RTCSEL_MASK, RCC_XXX_RTCSEL_LSE);
-#endif
+          modifyreg32(STM32_RCC_BDCR, RCC_BDCR_RTCSEL_MASK, RCC_BDCR_RTCSEL);
 
           putreg32(tr_bkp, STM32_RTC_TR);
           putreg32(dr_bkp, STM32_RTC_DR);
 
-          /* Remember that the RTC is initialized */
+          /* Keep the fact that the RTC is initialized */
 
           putreg32(RTC_MAGIC, RTC_MAGIC_REG);
 
           /* Enable the RTC Clock by setting the RTCEN bit in the RCC register */
 
-          modifyreg32(STM32_RCC_XXX, 0, RCC_XXX_RTCEN);
+          modifyreg32(STM32_RCC_BDCR, 0, RCC_BDCR_RTCEN);
         }
     }
 
