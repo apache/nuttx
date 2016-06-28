@@ -162,6 +162,8 @@ static int  stm32can_txinterrupt(int irq, FAR void *context);
 
 /* Initialization */
 
+static int  stm32can_enterinitmode(FAR struct stm32_can_s *priv);
+static int  stm32can_exitinitmode(FAR struct stm32_can_s *priv);
 static int  stm32can_bittiming(FAR struct stm32_can_s *priv);
 static int  stm32can_cellinit(FAR struct stm32_can_s *priv);
 static int  stm32can_filterinit(FAR struct stm32_can_s *priv);
@@ -894,6 +896,7 @@ static int stm32can_ioctl(FAR struct can_dev_s *dev, int cmd,
               /* This timing is not possible */
 
               ret = -EINVAL;
+              break;
             }
 
           /* Otherwise, nquanta is can_bit_quanta, ts1 and ts2 are
@@ -907,11 +910,13 @@ static int stm32can_ioctl(FAR struct can_dev_s *dev, int cmd,
               DEBUGASSERT(brp >= 1 && brp <= CAN_BTR_BRP_MAX);
             }
 
-          caninfo("TS1: %d TS2: %d BRP: %d\n", bt->bt_tseg1, bt->bt_tseg2, brp);
+          caninfo("TS1: %d TS2: %d BRP: %d\n",
+                  bt->bt_tseg1, bt->bt_tseg2, brp);
 
           /* Configure bit timing. */
 
-          regval &= ~(CAN_BTR_BRP_MASK | CAN_BTR_TS1_MASK | CAN_BTR_TS2_MASK | CAN_BTR_SJW_MASK);
+          regval &= ~(CAN_BTR_BRP_MASK | CAN_BTR_TS1_MASK |
+                      CAN_BTR_TS2_MASK | CAN_BTR_SJW_MASK);
           regval |= ((brp          - 1) << CAN_BTR_BRP_SHIFT) |
                     ((bt->bt_tseg1 - 1) << CAN_BTR_TS1_SHIFT) |
                     ((bt->bt_tseg2 - 1) << CAN_BTR_TS2_SHIFT) |
@@ -931,7 +936,8 @@ static int stm32can_ioctl(FAR struct can_dev_s *dev, int cmd,
 
           if (ret == 0)
             {
-              priv->baud  = STM32_PCLK1_FREQUENCY / (brp * (bt->bt_tseg1 + bt->bt_tseg2 + 1));
+              priv->baud  = STM32_PCLK1_FREQUENCY /
+                (brp * (bt->bt_tseg1 + bt->bt_tseg2 + 1));
             }
         }
         break;
@@ -1756,6 +1762,108 @@ static int stm32can_bittiming(FAR struct stm32_can_s *priv)
 
   stm32can_putreg(priv, STM32_CAN_BTR_OFFSET, tmp);
   return OK;
+}
+
+/****************************************************************************
+ * Name: stm32can_enterinitmode
+ *
+ * Description:
+ *   Put the CAN cell in Initialization mode. This only disconnects the CAN
+ *   peripheral, no registers are changed. The initialization mode is
+ *   required to change the baud rate.
+ *
+ * Input Parameter:
+ *   priv - A pointer to the private data structure for this CAN block
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int stm32can_enterinitmode(FAR struct stm32_can_s *priv)
+{
+  uint32_t regval;
+  volatile uint32_t timeout;
+
+  caninfo("CAN%d\n", priv->port);
+
+  /* Enter initialization mode */
+
+  regval  = stm32can_getreg(priv, STM32_CAN_MCR_OFFSET);
+  regval |= CAN_MCR_INRQ;
+  stm32can_putreg(priv, STM32_CAN_MCR_OFFSET, regval);
+
+  /* Wait until initialization mode is acknowledged */
+
+  for (timeout = INAK_TIMEOUT; timeout > 0; timeout--)
+    {
+      regval = stm32can_getreg(priv, STM32_CAN_MSR_OFFSET);
+      if ((regval & CAN_MSR_INAK) != 0)
+        {
+          /* We are in initialization mode */
+
+          break;
+        }
+    }
+
+  /* Check for a timeout */
+
+  if (timeout < 1)
+    {
+      canerr("ERROR: Timed out waiting to enter initialization mode\n");
+      return -ETIMEDOUT;
+    }
+
+  return 0;
+}
+
+/****************************************************************************
+ * Name: stm32can_exitinitmode
+ *
+ * Description:
+ *   Put the CAN cell out of the Initialization mode (to Normal mode)
+ *
+ * Input Parameter:
+ *   priv - A pointer to the private data structure for this CAN block
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int stm32can_exitinitmode(FAR struct stm32_can_s *priv)
+{
+  uint32_t regval;
+  volatile uint32_t timeout;
+
+  /* Exit Initialization mode, enter Normal mode */
+
+  regval  = stm32can_getreg(priv, STM32_CAN_MCR_OFFSET);
+  regval &= ~CAN_MCR_INRQ;
+  stm32can_putreg(priv, STM32_CAN_MCR_OFFSET, regval);
+
+  /* Wait until the initialization mode exit is acknowledged */
+
+  for (timeout = INAK_TIMEOUT; timeout > 0; timeout--)
+    {
+      regval = stm32can_getreg(priv, STM32_CAN_MSR_OFFSET);
+      if ((regval & CAN_MSR_INAK) == 0)
+        {
+          /* We are out of initialization mode */
+
+          break;
+        }
+    }
+
+  /* Check for a timeout */
+
+  if (timeout < 1)
+    {
+      canerr("ERROR: Timed out waiting to exit initialization mode: %08x\n", regval);
+      return -ETIMEDOUT;
+    }
+
+  return 0;
 }
 
 /****************************************************************************
