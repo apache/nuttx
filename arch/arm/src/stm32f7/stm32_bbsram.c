@@ -168,6 +168,7 @@ static struct stm32_bbsram_s g_bbsram[CONFIG_STM32F7_BBSRAM_FILES];
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
 /****************************************************************************
  * Name: stm32_bbsram_rd
  ****************************************************************************/
@@ -199,16 +200,16 @@ static void stm32_bbsram_dump(FAR struct bbsramfh_s *bbf, char *op)
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_bbsram_semgive
- ************************************************************************************/
+ ****************************************************************************/
 
 static void stm32_bbsram_semgive(FAR struct stm32_bbsram_s *priv)
 {
   sem_post(&priv->exclsem);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_bbsram_semtake
  *
  * Description:
@@ -504,8 +505,8 @@ static ssize_t stm32_bbsram_internal_write(FAR struct bbsramfh_s *bbf,
  * Name: stm32_bbsram_write
  ****************************************************************************/
 
-static ssize_t stm32_bbsram_write(FAR struct file *filep, FAR const char *buffer,
-                                  size_t len)
+static ssize_t stm32_bbsram_write(FAR struct file *filep,
+                                  FAR const char *buffer, size_t len)
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct stm32_bbsram_s *bbr;

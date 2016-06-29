@@ -106,13 +106,14 @@
 
 /* The sizes of the files to create (-1) use rest of BBSRAM memory */
 
-#define BSRAM_FILE_SIZES { \
-  BBSRAM_SIZE_FN0,   \
-  BBSRAM_SIZE_FN1,   \
-  BBSRAM_SIZE_FN2,   \
-  BBSRAM_SIZE_FN3,   \
-  0                  \
-    }
+#define BSRAM_FILE_SIZES \
+{ \
+  BBSRAM_SIZE_FN0, \
+  BBSRAM_SIZE_FN1, \
+  BBSRAM_SIZE_FN2, \
+  BBSRAM_SIZE_FN3, \
+  0 \
+}
 
 #define ARRAYSIZE(a) (sizeof((a))/sizeof(a[0]))
 
@@ -364,16 +365,20 @@ int stm32_bbsram_int(void)
     {
       printf("There is a hard fault logged.\n");
       state = (desc.lastwrite.tv_sec || desc.lastwrite.tv_nsec) ?  OK : 1;
+
       syslog(LOG_INFO, "Fault Log info File No %d Length %d flags:0x%02x "
           "state:%d\n",(unsigned int)desc.fileno, (unsigned int) desc.len,
           (unsigned int)desc.flags, state);
+
       if (state == OK)
         {
           time_sec = desc.lastwrite.tv_sec + (desc.lastwrite.tv_nsec / 1e9);
           gmtime_r(&time_sec, &tt);
           strftime(buf, HEADER_TIME_FMT_LEN , HEADER_TIME_FMT , &tt);
+
           syslog(LOG_INFO, "Fault Logged on %s - Valid\n", buf);
         }
+
       close(rv);
       rv = unlink(HARDFAULT_PATH);
       if (rv < 0)
