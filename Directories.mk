@@ -74,7 +74,7 @@ endif
 
 NONFSDIRS = sched drivers configs $(ARCH_SRC) $(NUTTX_ADDONS)
 FSDIRS = fs binfmt
-CONTEXTDIRS = $(APPDIR)
+CONTEXTDIRS = configs $(APPDIR)
 USERDIRS =
 OTHERDIRS = lib
 

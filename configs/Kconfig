@@ -1859,6 +1859,9 @@ endif
 if ARCH_BOARD_SIM
 source "configs/sim/Kconfig"
 endif
+if ARCH_BOARD_CUSTOM
+source "configs/dummy/Kconfig"
+endif
 
 config BOARD_CRASHDUMP
 	bool "Enable Board level logging of crash dumps"

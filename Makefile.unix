@@ -344,6 +344,7 @@ context: check_context include/nuttx/config.h include/nuttx/version.h include/ma
 # and symbolic links created by the context target.
 
 clean_context:
+	$(Q) $(MAKE) -C configs TOPDIR="$(TOPDIR)" clean_context
 	$(call DELFILE, include/nuttx/config.h)
 	$(call DELFILE, include/nuttx/version.h)
 	$(call DELFILE, include/math.h)
