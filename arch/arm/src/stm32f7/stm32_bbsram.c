@@ -593,8 +593,9 @@ static int stm32_bbsram_ioctl(FAR struct file *filep, int cmd,
           bbrr->fileno = bbr->bbf->fileno;
           bbrr->lastwrite = bbr->bbf->lastwrite;
           bbrr->len = bbr->bbf->len;
-          bbrr->flags = (bbr->bbf->crc == stm32_bbsram_crc(bbr->bbf)) ? eCRCValid : 0;
-          bbrr->flags = (bbr->bbf->dirty) ? eDirty : 0;
+          bbrr->flags = ((bbr->bbf->crc == stm32_bbsram_crc(bbr->bbf))
+                          ? BBSRAM_CRC_VALID : 0);
+          bbrr->flags |= ((bbr->bbf->dirty) ? BBSRAM_DIRTY : 0);
           ret = OK;
         }
 
