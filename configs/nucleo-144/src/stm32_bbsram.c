@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * configs/nucleo-144/src/stm32_bbsram.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ *****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -58,37 +58,76 @@
 
 #ifdef CONFIG_STM32F7_BBSRAM
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Configuration ********************************************************************/
+/* Configuration ************************************************************/
+
+#define FREEZE_STR(s)          #s
+#define STRINGIFY(s)           FREEZE_STR(s)
+#define HARDFAULT_FILENO       3
+#define HARDFAULT_PATH         BBSRAM_PATH""STRINGIFY(HARDFAULT_FILENO)
+#define HARDFAULT_REBOOT_      FILENO 0
+#define HARDFAULT_REBOOT_PATH  BBSRAM_PATH""STRINGIFY(HARDFAULT_REBOOT_FILENO)
+
+#define BBSRAM_SIZE_FN0        (sizeof(int))
+#define BBSRAM_SIZE_FN1        384
+#define BBSRAM_SIZE_FN2        384
+#define BBSRAM_SIZE_FN3 -      1
+
+/* The following guides in the amount of the user and interrupt stack
+ * data we can save. The amount of storage left will dictate the actual
+ * number of entries of the user stack data saved. If it is too big
+ * It will be truncated by the call to stm32_bbsram_savepanic
+ */
+#define BBSRAM_HEADER_SIZE     20 /* This is an assumption */
+#define BBSRAM_USED            ((4*BBSRAM_HEADER_SIZE)+ \
+                                (BBSRAM_SIZE_FN0+BBSRAM_SIZE_FN1+ \
+                                 BBSRAM_SIZE_FN2))
+#define BBSRAM_REAMINING       (STM32F7_BBSRAM_SIZE-BBSRAM_USED)
+#if CONFIG_ARCH_INTERRUPTSTACK <= 3
+#  define BBSRAM_NUMBER_STACKS 1
+#else
+#  define BBSRAM_NUMBER_STACKS 2
+#endif
+#define BBSRAM_FIXED_ELEMENTS_SIZE (sizeof(info_t))
+#define BBSRAM_LEFTOVER            (BBSRAM_REAMINING-\
+                                    BBSRAM_FIXED_ELEMENTS_SIZE)
+
+#define CONFIG_ISTACK_SIZE (BBSRAM_LEFTOVER/BBSRAM_NUMBER_STACKS/ \
+                            sizeof(stack_word_t))
+#define CONFIG_USTACK_SIZE (BBSRAM_LEFTOVER/BBSRAM_NUMBER_STACKS/ \
+                            sizeof(stack_word_t))
+
 /* The path to the Battery Backed up SRAM */
 
-#define BBSRAM_PATH "/bbr"
-#define HARDFAULT_FILENO 3
-#define HARDFAULT_PATH "/bbr3"
+#define BBSRAM_PATH "/fs/bbr"
 
 /* The sizes of the files to create (-1) use rest of BBSRAM memory */
 
-#define BSRAM_FILE_SIZES \
-  { \
-    256, \
-    256, \
-    1024, \
-    -1, \
-    0 \
-  }
-
-#define MAX_FILE_PATH_LENGTH 40
-#define CONFIG_ISTACK_SIZE 800
-#define CONFIG_USTACK_SIZE 800
+#define BSRAM_FILE_SIZES { \
+  BBSRAM_SIZE_FN0,   \
+  BBSRAM_SIZE_FN1,   \
+  BBSRAM_SIZE_FN2,   \
+  BBSRAM_SIZE_FN3,   \
+  0                  \
+    }
 
 #define ARRAYSIZE(a) (sizeof((a))/sizeof(a[0]))
 
-/************************************************************************************
+/* For Assert keep this much of the file name*/
+
+#define MAX_FILE_PATH_LENGTH 40
+
+#define HEADER_TIME_FMT      "%Y-%m-%d-%H:%M:%S"
+#define HEADER_TIME_FMT_NUM  (2+ 0+ 0+ 0+ 0+ 0)
+#define HEADER_TIME_FMT_LEN  (((ARRAYSIZE(HEADER_TIME_FMT)-1) + \
+                                HEADER_TIME_FMT_NUM))
+
+/****************************************************************************
  * Private Data
- ************************************************************************************/
+ ****************************************************************************/
 
 /* Used for stack frame storage */
 
@@ -234,19 +273,19 @@ typedef struct
   stack_word_t ustack[CONFIG_ISTACK_SIZE];
 } fullcontext_t;
 
-/************************************************************************************
+/****************************************************************************
  * Private Data
- ************************************************************************************/
+ ****************************************************************************/
 
 static uint8_t g_sdata[STM32F7_BBSRAM_SIZE];
 
-/************************************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: hardfault_get_desc
- ************************************************************************************/
+ ****************************************************************************/
 
 static int hardfault_get_desc(struct bbsramd_s *desc)
 {
@@ -256,8 +295,8 @@ static int hardfault_get_desc(struct bbsramd_s *desc)
 
   if (fd < 0)
     {
-      syslog(LOG_INFO, "stm32 bbsram: Failed to open Fault Log file [%s] (%d)\n",
-             HARDFAULT_PATH, fd);
+      syslog(LOG_INFO, "stm32 bbsram: Failed to open Fault Log file [%s] "
+          "(%d)\n", HARDFAULT_PATH, fd);
     }
   else
     {
@@ -271,17 +310,17 @@ static int hardfault_get_desc(struct bbsramd_s *desc)
         }
       else
         {
-          syslog(LOG_INFO, "stm32 bbsram: Failed to get Fault Log descriptor (%d)\n",
-                 rv);
+          syslog(LOG_INFO, "stm32 bbsram: Failed to get Fault Log descriptor "
+              "(%d)\n", rv);
         }
     }
 
   return ret;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: copy_reverse
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_STM32F7_SAVE_CRASHDUMP)
 static void copy_reverse(stack_word_t *dest, stack_word_t *src, int size)
@@ -293,19 +332,24 @@ static void copy_reverse(stack_word_t *dest, stack_word_t *src, int size)
 }
 #endif /* CONFIG_STM32F7_SAVE_CRASHDUMP */
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_bbsram_int
- ************************************************************************************/
+ ****************************************************************************/
 
 int stm32_bbsram_int(void)
 {
   int filesizes[CONFIG_STM32F7_BBSRAM_FILES + 1] = BSRAM_FILE_SIZES;
+  char buf[HEADER_TIME_FMT_LEN + 1];
   struct bbsramd_s desc;
   int rv;
+  int state;
+  struct tm tt;
+  time_t time_sec;
+
 
   /* Using Battery Backed Up SRAM */
 
@@ -319,11 +363,23 @@ int stm32_bbsram_int(void)
   if (rv >= OK)
     {
       printf("There is a hard fault logged.\n");
-
+      state = (desc.lastwrite.tv_sec || desc.lastwrite.tv_nsec) ?  OK : 1;
+      syslog(LOG_INFO, "Fault Log info File No %d Length %d flags:0x%02x "
+          "state:%d\n",(unsigned int)desc.fileno, (unsigned int) desc.len,
+          (unsigned int)desc.flags, state);
+      if (state == OK)
+        {
+          time_sec = desc.lastwrite.tv_sec + (desc.lastwrite.tv_nsec / 1e9);
+          gmtime_r(&time_sec, &tt);
+          strftime(buf, HEADER_TIME_FMT_LEN , HEADER_TIME_FMT , &tt);
+          syslog(LOG_INFO, "Fault Logged on %s - Valid\n", buf);
+        }
+      close(rv);
       rv = unlink(HARDFAULT_PATH);
       if (rv < 0)
         {
-          syslog(LOG_INFO, "stm32 bbsram: Failed to unlink Fault Log file [%s] (%d)\n", HARDFAULT_PATH, rv);
+          syslog(LOG_INFO, "stm32 bbsram: Failed to unlink Fault Log file [%s"
+                 "] (%d)\n", HARDFAULT_PATH, rv);
         }
     }
 #endif /* CONFIG_STM32F7_SAVE_CRASHDUMP */
@@ -331,9 +387,9 @@ int stm32_bbsram_int(void)
   return rv;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: board_crashdump
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_STM32F7_SAVE_CRASHDUMP)
 void board_crashdump(uintptr_t currentsp, FAR void *tcb,
@@ -393,8 +449,10 @@ void board_crashdump(uintptr_t currentsp, FAR void *tcb,
   if (CURRENT_REGS)
     {
       pdump->info.stacks.interrupt.sp = currentsp;
-      pdump->info.flags |= (REGS_PRESENT | USERSTACK_PRESENT | INTSTACK_PRESENT);
-      memcpy(pdump->info.regs, (void *)CURRENT_REGS, sizeof(pdump->info.regs));
+      pdump->info.flags |= (REGS_PRESENT | USERSTACK_PRESENT | \
+                            INTSTACK_PRESENT);
+      memcpy(pdump->info.regs, (void *)CURRENT_REGS,
+             sizeof(pdump->info.regs));
       pdump->info.stacks.user.sp = pdump->info.regs[REG_R13];
     }
   else
@@ -413,7 +471,7 @@ void board_crashdump(uintptr_t currentsp, FAR void *tcb,
   else
     {
       pdump->info.stacks.user.top = (uint32_t) rtcb->adj_stack_ptr;
-      pdump->info.stacks.user.size = (uint32_t) rtcb->adj_stack_size;;
+      pdump->info.stacks.user.size = (uint32_t) rtcb->adj_stack_size;
     }
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3

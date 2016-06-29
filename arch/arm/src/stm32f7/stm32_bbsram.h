@@ -2,8 +2,8 @@
  * arch/arm/src/stm32f7/stm32_bbsram.h
  *
  *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *           David Sidrane <david_s5@nscdg.com>
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            David Sidrane <david_s5@nscdg.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -83,8 +83,8 @@
 
 enum bbsramdf_e
 {
-  eCRCValid = 1,  /* The crc is valid */
-  eDirty    = 2,  /* The file was closed */
+  BBSRAM_CRC_VALID = 1,  /* The crc is valid */
+  BBSRAM_DIRTY     = 2,  /* The file was closed */
 
 };
 
