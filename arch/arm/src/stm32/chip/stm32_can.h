@@ -360,7 +360,7 @@
 #define CAN_BTR_SJW_SHIFT         (24)      /* Bits 25-24: Resynchronization Jump Width */
 #define CAN_BTR_SJW_MASK          (3 << CAN_BTR_SJW_SHIFT)
 #define CAN_BTR_LBKM              (1 << 30) /* Bit 30: Loop Back Mode (Debug) */
-#define CAN_BTR_SILM              (1 << 31) /* Bit 31: Silent Mode (Debug) */
+#define CAN_BTR_SILM              (1ul << 31) /* Bit 31: Silent Mode (Debug) */
 
 #define CAN_BTR_BRP_MAX           (1024)    /* Maximum BTR value (without decrement) */
 #define CAN_BTR_TSEG1_MAX         (16)      /* Maximum TSEG1 value (without decrement) */
