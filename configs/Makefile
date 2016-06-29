@@ -35,7 +35,7 @@
 
 -include $(TOPDIR)/Make.defs
 
-# Determine there is a Kconfig file for the any custom board configuration
+# Determine if there is a Kconfig file for any custom board configuration
 
 ifeq ($(CONFIG_ARCH_BOARD_CUSTOM),y)
   CUSTOM_DIR = $(patsubst "%",%,$(CONFIG_ARCH_BOARD_CUSTOM_DIR))
