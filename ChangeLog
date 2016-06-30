@@ -12182,3 +12182,70 @@
 	* libc/hex2bin:  Move the portable library portion of apps/system/hex2bin
 	  to nuttx/libc/hex2bin where it can be shared with the OS internals
 	  (2016-06-27).
+	* configs/nucleo-144: Added USB OTG device to Nucleo-144.  From David
+	  Sidrane (2016-06-27).
+	* arch/arm/src/stm32l4:  STM32 CAN fixes need to be backported to
+	  STM32L4 as well (2016-06-27).
+	* ARM stack check: Fix double fault on IDLE task with stack size = 0.
+	  From David Sidrane (2016-06-27).
+	* configs/nucleo-144: Added bbsram test to Nucleo-144.  From David
+	  Sidrane (2016-06-27).
+	* arch/arm/src/stm32f7: Added PWR, RTC, and BBSRAM support for stm32f7.
+	  From David Sidrane (2016-06-27).
+	* Build system: Fixed build of SAMV71-XULT/nsh.  With the changes from
+	  26f7b8c the build process of the default configuration did not succeed
+	  anymore.  From Michael Spahlinger (2016-06-28).
+	* sched/semaphore: Need to set errno to EINVAL on errors in sem_post()
+	  and sem_wait(). From Paul Alexander Patience (2016-06-28).
+	* Build system: This change fixes a build problem that only occurs when
+	  reconfiguring from Linux to Windows or vice-versa.  It is a problem
+	  that was present but not usually experienced until two things happened:
+	  (1) The pre_config target was added to run before the menconfig
+	  operation and (2) the context target was added before the pre_config
+	  target in order to set up the correct symbolic links (in the apps/platform
+	  directory) needed by the pre_config target.
+	  But then now if you start with a Linux system and run 'make menuconfig'
+	  to switch to Linux, the context target will execute first and set up
+	  POSIX style symbolic links before doing the menuconfig.  Then after the
+	  menuconfig, the make will fail on Windows if you are using a Windows
+	  native toolchain because that native toolchain cannot follow the Cygwin-
+	  style symbolic links.
+	  The fix here is to also execute the clean_context AFTER executing
+	  menuconfig.  A lot more happens now:  It used to be that doing 'make
+	  menuconfig' only did the menuconfig operation.  No it does context,
+	  pre_config, menuconfig, clean_context.  Not nearly as snappy as it used
+	  to be (2016-06-28).
+	* arch/arm/src/efm32, lcp43, stm32, stm32l4: disable interrupts with
+	  NVIC_IRQ_CLEAR.  From Paul Alexander Patience (2016-06-28).
+	* arch/arm/src/stm32f7: STMF7xxx RTC: (1) Remove proxy #defines, (2)
+	  Ensure the LSE(ON) etal are set and remembered in a) A cold start
+	  (RTC_MAGIC invalid) of the RTC, and b) A warm start (RTC_MAGIC valid)
+	  of the RTC but a clock change.  The change was needed because in bench
+	  testing a merge of the latest's STM32  53ec3ca (and friends) it became
+	  apparent that the sequence of operation is wrong in the reset of the
+	  Backup Domain in the RCC code.  PWR is required before the Backup
+	  Domain can be futzed with. !!!This Code should be tested on STM32 and
+	  if needed rippled to the STM32 families.  From David Sidrane
+	  (2016-06-28).
+	* arch/arm/src/stm32f7: Added STMF7xxx RTC.  From David Sidrane
+	  (2016-06-28).
+	* arch/arm/src/stm32: STM32 BBSRAM fixed (and formatted) flags.  From
+	  David Sidrane (2016-06-28).
+	* arch/arm/src/stm32f7: STM32F7 BBSRAM fixed (and formatted) flags.
+	  From David Sidrane (2016-06-28).
+	* arch/arm/src/stm32f7: Added STM32F7 DBGMCU.  From David Sidrane
+	  (2016-06-28).
+	* arch/arm/src/samv7: SAMV7: CAN Message Filtering fixed: (1) stdfilters
+	  didn't work because the filter was never enabled (wrong number of bits
+	  to shift), and (2) Filters were never used because the configuration
+	  register cannot be written without using the initialization mode.
+	  Both bugs are fixed by this change. Filtering has been tested with
+	  both standard and extended identifiers and is now working properly.
+	  From Michael Spahlinger (2016-06-29).
+	* configs/Kconfig and dummy/: Add logic to support custom board
+	  directories that include a Kconfig file.  During the context phase
+	  of the build, any Kconfig file in the custom board directory is copied
+	  into configs/dummy, replacing the existing Kconfig file with the
+	  target Kconfig file (2016-06-29).
+	* arch/arm/src/stm32l4: Port support for both RX FIFOs from STM32 CAN.
+	  From Paul Alexander Patience (2016-06-29).
