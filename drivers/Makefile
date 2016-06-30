@@ -73,6 +73,7 @@ include syslog$(DELIM)Make.defs
 include timers$(DELIM)Make.defs
 include usbdev$(DELIM)Make.defs
 include usbhost$(DELIM)Make.defs
+include usbmonitor$(DELIM)Make.defs
 include video$(DELIM)Make.defs
 include wireless$(DELIM)Make.defs
 

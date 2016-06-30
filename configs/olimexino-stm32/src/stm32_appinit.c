@@ -50,7 +50,7 @@
 #include <nuttx/mmcsd.h>
 
 #ifdef CONFIG_USBMONITOR
-#  include <apps/usbmonitor.h>
+#  include <nuttx/usb/usbmonitor.h>
 #endif
 
 #ifdef CONFIG_USBDEV

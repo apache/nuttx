@@ -188,7 +188,21 @@ static int usbmonitor_daemon(int argc, char **argv)
  * Public Functions
  ****************************************************************************/
 
-int usbmonitor_start(int argc, char **argv)
+/****************************************************************************
+ * Name: usbmonitor_start
+ *
+ *   Start the USB monitor kernal daemon.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned values:
+ *   Zero (OK) is returned on success; a negated errno value is return on
+ *   any failure.
+ *
+ ****************************************************************************/
+
+int usbmonitor_start(void)
 {
   /* Has the monitor already started? */
 
@@ -237,7 +251,21 @@ int usbmonitor_start(int argc, char **argv)
   return 0;
 }
 
-int usbmonitor_stop(int argc, char **argv)
+/****************************************************************************
+ * Name: usbmonitor_stop
+ *
+ *   Stop the USB monitor kernel daemon.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned values:
+ *   Zero (OK) is returned on success; a negated errno value is return on
+ *   any failure.
+ *
+ ****************************************************************************/
+
+int usbmonitor_stop(void)
 {
   /* Has the monitor already started? */
 

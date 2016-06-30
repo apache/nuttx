@@ -1,7 +1,7 @@
 /****************************************************************************
- * config/sam4e-ek/src/sam_appinit.c
+ * include/nuttx/usb/usbmonitor.h
  *
- *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,98 +33,58 @@
  *
  ****************************************************************************/
 
+#ifndef __INCLUDE_NUTTX_USB_USBMONITOR_H
+#define __INCLUDE_NUTTX_USB_USBMONITOR_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <sys/mount.h>
-
-#include <stdbool.h>
-#include <stdio.h>
-#include <errno.h>
-#include <syslog.h>
-
-#include <nuttx/board.h>
-
 #ifdef CONFIG_USBMONITOR
-#  include <nuttx/usb/usbmonitor.h>
-#endif
-
-#include "sam4e-ek.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Functions
+ * Public Data
+ ****************************************************************************/
+
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
+
+/****************************************************************************
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_app_initialize
+ * Name: usbmonitor_start and usbmonitor_stop
  *
- * Description:
- *   Perform application specific initialization.  This function is never
- *   called directly from application code, but only indirectly via the
- *   (non-standard) boardctl() interface using the command BOARDIOC_INIT.
+ *   Start and stop the USB monitor kernel deamon.
  *
  * Input Parameters:
- *   arg - The boardctl() argument is passed to the board_app_initialize()
- *         implementation without modification.  The argument has no
- *         meaning to NuttX; the meaning of the argument is a contract
- *         between the board-specific initalization logic and the the
- *         matching application logic.  The value cold be such things as a
- *         mode enumeration value, a set of DIP switch switch settings, a
- *         pointer to configuration data read from a file or serial FLASH,
- *         or whatever you would like to do with it.  Every implementation
- *         should accept zero/NULL as a default configuration.
+ *   None
  *
- * Returned Value:
- *   Zero (OK) is returned on success; a negated errno value is returned on
- *   any failure to indicate the nature of the failure.
+ * Returned values:
+ *   Zero (OK) is returned on success; a negated errno value is return on
+ *   any failure.
  *
  ****************************************************************************/
 
-int board_app_initialize(uintptr_t arg)
-{
-#if defined(HAVE_AT25) || defined(HAVE_HSMCI) || defined(HAVE_USBMONITOR)
-  int ret;
-#endif
+int usbmonitor_start(void);
+int usbmonitor_stop(void);
 
-#ifdef HAVE_AT25
-  /* Initialize the AT25 driver */
-
-  ret = sam_at25_automount(0);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: sam_at25_automount() failed: %d\n", ret);
-      return ret;
-    }
-#endif
-
-#ifdef HAVE_HSMCI
-  /* Initialize the HSMCI driver */
-
-  ret = sam_hsmci_initialize(0);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: sam_hsmci_initialize(0) failed: %d\n", ret);
-      return ret;
-    }
-#endif
-
-#ifdef HAVE_USBMONITOR
-  /* Start the USB Monitor */
-
-  ret = usbmonitor_start();
-  if (ret != OK)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to start USB monitor: %d\n", ret);
-      return ret;
-    }
-#endif
-
-  return OK;
+#undef EXTERN
+#ifdef __cplusplus
 }
+#endif
+
+#endif /* CONFIG_USBMONITOR */
+#endif /* __INCLUDE_NUTTX_USB_USBMONITOR_H */

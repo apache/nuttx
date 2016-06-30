@@ -52,7 +52,7 @@
 #include <nuttx/usb/usbhost.h>
 
 #ifdef CONFIG_USBMONITOR
-#  include <apps/usbmonitor.h>
+#  include <nuttx/usb/usbmonitor.h>
 #endif
 
 #include "pic32mx.h"
@@ -415,7 +415,7 @@ int board_app_initialize(uintptr_t arg)
     {
       /* Start the USB Monitor */
 
-      ret = usbmonitor_start(0, NULL);
+      ret = usbmonitor_start();
     }
 #endif
 

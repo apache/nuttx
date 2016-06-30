@@ -49,7 +49,7 @@
 #include <nuttx/board.h>
 
 #ifdef CONFIG_USBMONITOR
-#  include <apps/usbmonitor.h>
+#  include <nuttx/usb/usbmonitor.h>
 #endif
 
 #include "sama5d3x-ek.h"
@@ -170,7 +170,7 @@ int board_app_initialize(uintptr_t arg)
 #ifdef HAVE_USBMONITOR
   /* Start the USB Monitor */
 
-  ret = usbmonitor_start(0, NULL);
+  ret = usbmonitor_start();
   if (ret != OK)
     {
       syslog(LOG_ERR, "ERROR: Start USB monitor: %d\n", ret);

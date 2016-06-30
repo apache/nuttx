@@ -515,10 +515,14 @@ if USBHOST
 source drivers/usbhost/Kconfig
 endif # USBHOST
 
+config HAVE_USBTRACE
+	bool
+	default n
+
 menuconfig USBMONITOR
 	bool "USB Monitor"
 	default n
-	depends on (USBDEV && USBDEV_TRACE) || (USBHOST && USBHOST_TRACE)
+	depends on HAVE_USBTRACE
 	---help---
 		If USB device tracing (USBDEV_TRACE) AND/OR USB host tracing
 		(USBHOST_TRACE) are enabled then this option will select the USB
@@ -527,7 +531,7 @@ menuconfig USBMONITOR
 
 if USBMONITOR
 source drivers/usbmonitor/Kconfig
-endif
+endif # USBMONITOR
 
 menuconfig DRIVERS_WIRELESS
 	bool "Wireless Device Support"

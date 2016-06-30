@@ -55,7 +55,7 @@
 #endif
 
 #ifdef CONFIG_USBMONITOR
-#  include <apps/usbmonitor.h>
+#  include <nuttx/usb/usbmonitor.h>
 #endif
 
 #ifdef CONFIG_USBDEV
@@ -269,7 +269,7 @@ static int stm32_composite_initialize(void)
 #ifdef HAVE_USBMONITOR
   /* Start the USB Monitor */
 
-  ret = usbmonitor_start(0, NULL);
+  ret = usbmonitor_start();
   if (ret != OK)
     {
       ferr("ERROR: Failed to start USB monitor: %d\n", ret);

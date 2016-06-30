@@ -91,6 +91,7 @@ config ARCH_USBDEV_STALLQUEUE
 menuconfig USBDEV_TRACE
 	bool "Enable USB tracing for debug"
 	default n
+	select HAVE_USBTRACE
 	---help---
 		Enables USB tracing for debug
 
