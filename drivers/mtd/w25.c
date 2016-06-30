@@ -1258,7 +1258,7 @@ FAR struct mtd_dev_s *w25_initialize(FAR struct spi_dev_s *spi)
 
           ferr("ERROR: Unrecognized\n");
           kmm_free(priv);
-          priv = NULL;
+          return NULL;
         }
       else
         {

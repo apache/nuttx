@@ -934,7 +934,7 @@ FAR struct mtd_dev_s *sst26_initialize_spi(FAR struct spi_dev_s *dev)
 
           ssterr("ERROR: Unrecognized\n");
           kmm_free(priv);
-          priv = NULL;
+          return NULL;
         }
       else
         {
