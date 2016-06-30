@@ -1,7 +1,7 @@
 ############################################################################
-# configs/sim/src/Makefile
+# nuttx/zoneinfo/Make.defs
 #
-#   Copyright (C) 2007, 2008, 2011-2012, 2015 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2016 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -33,35 +33,15 @@
 #
 ############################################################################
 
-include $(TOPDIR)/Make.defs
-
-ASRCS =
-CSRCS =
-
-ifeq ($(CONFIG_BOARD_INITIALIZE),y)
-  CSRCS += sim_boot.c
-endif
-
-ifeq ($(CONFIG_LIB_BOARDCTL),y)
-  CSRCS += sim_appinit.c
-endif
-
-ifeq ($(CONFIG_BOARD_INITIALIZE),y)
-  CSRCS += sim_bringup.c
 ifeq ($(CONFIG_LIB_ZONEINFO_ROMFS),y)
-  CSRCS += sim_zoneinfo.c
-endif
-else ifeq ($(CONFIG_LIB_BOARDCTL),y)
-  CSRCS += sim_bringup.c
-ifeq ($(CONFIG_LIB_ZONEINFO_ROMFS),y)
-  CSRCS += sim_zoneinfo.c
-endif
-endif
 
-ifeq ($(CONFIG_SIM_X11FB),y)
-ifeq ($(CONFIG_SIM_TOUCHSCREEN),y)
-  CSRCS += sim_touchscreen.c
-endif
-endif
+# Add the zoneinifo sources to the build
 
-include $(TOPDIR)/configs/Board.mk
+CSRCS += tzromfs.c
+
+# Add the zoneinfo directory to the build
+
+DEPPATH += --dep-path zoneinfo
+VPATH += :zoneinfo
+
+endif

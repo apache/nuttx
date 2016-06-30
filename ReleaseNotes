@@ -8991,7 +8991,7 @@ Additional new features and extended functionality:
 
     * Applications: apps/system:
 
-      - apps/system/zoneinfo:  Add logic to build a ROMFS file system
+      - nuttx/zoneinfo:  Add logic to build a ROMFS file system
         containing the timezone data.
 
     * Applications: apps/nshlib:

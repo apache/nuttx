@@ -1524,6 +1524,8 @@ nuttx/
  |- lib/
  |   `- README.txt
  |- libc/
+ |   |- zoneinfo
+ |   |   `- README.txt
  |   `- README.txt
  |- libnx/
  |   `- README.txt
@@ -1590,9 +1592,7 @@ apps/
  |   |   `- README.txt
  |   |- usbmsc
  |   |  `- README.txt
- |   |- zmodem
- |   |  `- README.txt
- |   `- zoneinfo
+ |   `- zmodem
  |      `- README.txt
  `- README.txt
 

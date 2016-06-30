@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/sim/src/sam_bringup.c
+ * nuttx/zoneinfo/tzromfs.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -38,67 +38,14 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/compiler.h>
-
-#include <sys/types.h>
-#include <sys/mount.h>
-#include <debug.h>
-
-#include <nuttx/board.h>
-
-#include "up_internal.h"
-#include "sim.h"
-
-#ifdef CONFIG_GRAPHICS_TRAVELER_ROMFSDEMO
-int trv_mount_world(int minor, FAR const char *mountpoint);
-#endif
+#include <nuttx/zoneinfo.h>
 
 /****************************************************************************
- * Public Functions
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sam_bringup
- *
- * Description:
- *   Bring up simulated board features
- *
+ * Public Data
  ****************************************************************************/
 
-int sim_bringup(void)
-{
-#ifdef CONFIG_FS_PROCFS
-  int ret;
-#endif
-
-#ifdef CONFIG_LIB_ZONEINFO_ROMFS
-  /* Mount the TZ database */
-
-  (void)sim_zoneinfo(3);
-#endif
-
-#ifdef CONFIG_AJOYSTICK
-  /* Initialize the simulated analog joystick input device */
-
-  sim_ajoy_initialize();
-#endif
-
-#ifdef CONFIG_GRAPHICS_TRAVELER_ROMFSDEMO
-  /* Special initialization for the Traveler game simulation */
-
-  (void)trv_mount_world(0, CONFIG_GRAPHICS_TRAVELER_DEFPATH);
-#endif
-
-#ifdef CONFIG_FS_PROCFS
-  /* Mount the procfs file system */
-
-  ret = mount(NULL, SIM_PROCFS_MOUNTPOINT, "procfs", 0, NULL);
-  if (ret < 0)
-    {
-      _err("ERROR: Failed to mount procfs at %s: %d\n",
-           SIM_PROCFS_MOUNTPOINT, ret);
-    }
-#endif
-
-  return OK;
-}
+#include "romfs_zoneinfo.h"
