@@ -515,6 +515,20 @@ if USBHOST
 source drivers/usbhost/Kconfig
 endif # USBHOST
 
+menuconfig USBMONITOR
+	bool "USB Monitor"
+	default n
+	depends on (USBDEV && USBDEV_TRACE) || (USBHOST && USBHOST_TRACE)
+	---help---
+		If USB device tracing (USBDEV_TRACE) AND/OR USB host tracing
+		(USBHOST_TRACE) are enabled then this option will select the USB
+		monitor.  The USB monitor is a daemon that will periodically collect
+		the buffered USB trace data and dump it to the SYSLOG device.
+
+if USBMONITOR
+source drivers/usbmonitor/Kconfig
+endif
+
 menuconfig DRIVERS_WIRELESS
 	bool "Wireless Device Support"
 	default n

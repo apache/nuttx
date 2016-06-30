@@ -48,7 +48,7 @@
 
 #include <nuttx/board.h>
 
-#ifdef CONFIG_SYSTEM_USBMONITOR
+#ifdef CONFIG_USBMONITOR
 #  include <apps/usbmonitor.h>
 #endif
 

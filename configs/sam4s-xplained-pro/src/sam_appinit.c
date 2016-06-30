@@ -63,7 +63,7 @@
 #  include <nuttx/timers/timer.h>
 #endif
 
-#ifdef CONFIG_SYSTEM_USBMONITOR
+#ifdef CONFIG_USBMONITOR
 #  include <apps/usbmonitor.h>
 #endif
 

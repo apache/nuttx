@@ -45,7 +45,7 @@
 #include <debug.h>
 #include <errno.h>
 
-#ifdef CONFIG_SYSTEM_USBMONITOR
+#ifdef CONFIG_USBMONITOR
 #  include <apps/usbmonitor.h>
 #endif
 

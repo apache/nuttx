@@ -49,7 +49,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/mmcsd.h>
 
-#ifdef CONFIG_SYSTEM_USBMONITOR
+#ifdef CONFIG_USBMONITOR
 #  include <apps/usbmonitor.h>
 #endif
 

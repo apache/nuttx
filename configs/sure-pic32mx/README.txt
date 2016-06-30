@@ -882,15 +882,15 @@ Where <subdir> is one of the following:
           CONFIG_NSH_ARCHINIT=y                   : Automatically start the USB monitor
 
         Application Configuration -> System NSH Add-Ons:
-          CONFIG_SYSTEM_USBMONITOR=y              : Enable the USB monitor daemon
-          CONFIG_SYSTEM_USBMONITOR_STACKSIZE=2048 : USB monitor daemon stack size
-          CONFIG_SYSTEM_USBMONITOR_PRIORITY=50    : USB monitor daemon priority
-          CONFIG_SYSTEM_USBMONITOR_INTERVAL=1     : Dump trace data every second
-          CONFIG_SYSTEM_USBMONITOR_TRACEINIT=y    : Enable TRACE output
-          CONFIG_SYSTEM_USBMONITOR_TRACECLASS=y
-          CONFIG_SYSTEM_USBMONITOR_TRACETRANSFERS=y
-          CONFIG_SYSTEM_USBMONITOR_TRACECONTROLLER=y
-          CONFIG_SYSTEM_USBMONITOR_TRACEINTERRUPTS=y
+          CONFIG_USBMONITOR=y              : Enable the USB monitor daemon
+          CONFIG_USBMONITOR_STACKSIZE=2048 : USB monitor daemon stack size
+          CONFIG_USBMONITOR_PRIORITY=50    : USB monitor daemon priority
+          CONFIG_USBMONITOR_INTERVAL=1     : Dump trace data every second
+          CONFIG_USBMONITOR_TRACEINIT=y    : Enable TRACE output
+          CONFIG_USBMONITOR_TRACECLASS=y
+          CONFIG_USBMONITOR_TRACETRANSFERS=y
+          CONFIG_USBMONITOR_TRACECONTROLLER=y
+          CONFIG_USBMONITOR_TRACEINTERRUPTS=y
 
        NOTE: USB debug output also be enabled in this case.  Both will appear
        on the serial SYSLOG output.  However, the debug output will be

@@ -1,7 +1,7 @@
 ############################################################################
-# drivers/spi/Make.defs
+# drivers/usbmonitor/Make.defs
 #
-#   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2016 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -33,19 +33,19 @@
 #
 ############################################################################
 
-# Don't build anything if there is no SPI support
+# Don't build anything if there is no USB monitor support
 
-ifeq ($(CONFIG_SPI),y)
+ifeq ($(CONFIG_USBMONITOR),y)
 
-# Include the selected SPI drivers
+# Include the USB monitor
 
-ifeq ($(CONFIG_SPI_BITBANG),y)
-  CSRCS += spi_bitbang.c
+CSRCS += usbmonitor.c
+
+# Include USB monitor build support
+
+DEPPATH += --dep-path usbmonitor
+VPATH += :usbmonitor
+CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)usbmonitor}
+
 endif
 
-# Include SPI device driver build support
-
-DEPPATH += --dep-path spi
-VPATH += :spi
-CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)spi}
-endif

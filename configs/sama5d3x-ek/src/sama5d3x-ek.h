@@ -297,7 +297,7 @@
 
 /* Check if we should enable the USB monitor before starting NSH */
 
-#ifndef CONFIG_SYSTEM_USBMONITOR
+#ifndef CONFIG_USBMONITOR
 #  undef HAVE_USBMONITOR
 #endif
 
