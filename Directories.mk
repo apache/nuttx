@@ -114,6 +114,10 @@ else
 OTHERDIRS += syscall
 endif
 
+ifeq ($(CONFIG_LIB_ZONEINFO_ROMFS),y)
+CONTEXTDIRS += libc
+endif
+
 ifeq ($(CONFIG_NX),y)
 NONFSDIRS += graphics libnx
 CONTEXTDIRS += graphics libnx

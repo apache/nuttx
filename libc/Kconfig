@@ -321,7 +321,23 @@ config LIBC_TZDIR
 		This is the full path to the location where the TZ database is expected
 		to be found.
 
-endif
+config LIB_ZONEINFO
+	bool "TZ database"
+	default n
+	---help---
+		Download and build the TZ/Olson database.
+
+if LIB_ZONEINFO
+
+config LIB_ZONEINFO_ROMFS
+	bool "Build ROMFS filesystem"
+	default n
+	depends on FS_ROMFS
+	---help---
+		Build a mountable ROMFS filesystem containing the TZ/Olson database
+
+endif # LIB_ZONEINFO
+endif # LIBC_LOCALTIME
 
 config TIME_EXTENDED
 	bool "Add day of week, year support"
@@ -884,21 +900,3 @@ config LIB_HEX2BIN
 	---help---
 		Build in support for conversions from Intel Hex format to binary.
 		This selection enables the interfaces of include/hex2bin.h.
-
-config LIB_ZONEINFO
-	bool "TZ database"
-	default n
-	depends on LIBC_LOCALTIME
-	---help---
-		Build the TZ/Olson database.
-
-if LIB_ZONEINFO
-
-config LIB_ZONEINFO_ROMFS
-	bool "Build ROMFS filesystem"
-	default n
-	depends on FS_ROMFS
-	---help---
-		Build a mountable ROMFS filesystem containing the TZ database
-
-endif # LIB_ZONEINFO
