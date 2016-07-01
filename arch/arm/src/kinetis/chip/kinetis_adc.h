@@ -1,7 +1,7 @@
 /********************************************************************************************
- * arch/arm/src/kinetis/kinetis_adc.h
+ * arch/arm/src/kinetis/chip/kinetis_adc.h
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ********************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_KINETIS_KINETIS_ADC_H
-#define __ARCH_ARM_SRC_KINETIS_KINETIS_ADC_H
+#ifndef __ARCH_ARM_SRC_KINETIS_CHIP_KINETIS_ADC_H
+#define __ARCH_ARM_SRC_KINETIS_CHIP_KINETIS_ADC_H
 
 /********************************************************************************************
  * Included Files
@@ -70,7 +70,9 @@
 #define KINETIS_ADC_CLP2_OFFSET  0x0044 /* ADC plus-side general calibration value register */
 #define KINETIS_ADC_CLP1_OFFSET  0x0048 /* ADC plus-side general calibration value register */
 #define KINETIS_ADC_CLP0_OFFSET  0x004c /* ADC plus-side general calibration value register */
-#define KINETIS_ADC_PGA_OFFSET   0x0050 /* ADC PGA register */
+#ifndef KINETIS_K64
+#  define KINETIS_ADC_PGA_OFFSET 0x0050 /* ADC PGA register */
+#endif
 #define KINETIS_ADC_CLMD_OFFSET  0x0054 /* ADC minus-side general calibration value register */
 #define KINETIS_ADC_CLMS_OFFSET  0x0058 /* ADC minus-side general calibration value register */
 #define KINETIS_ADC_CLM4_OFFSET  0x005c /* ADC minus-side general calibration value register */
@@ -80,7 +82,7 @@
 #define KINETIS_ADC_CLM0_OFFSET  0x006c /* ADC minus-side general calibration value register */
 
 /* Register Addresses ***********************************************************************/
-# define KINETIS_ADC1_BASE      0x400bb000 /* Analog-to-digital converter (ADC) 1 */
+# define KINETIS_ADC1_BASE       0x400bb000 /* Analog-to-digital converter (ADC) 1 */
 
 #define KINETIS_ADC0_SC1A        (KINETIS_ADC0_BASE+KINETIS_ADC_SC1A_OFFSET)
 #define KINETIS_ADC0_SC1B        (KINETIS_ADC0_BASE+KINETIS_ADC_SC1B_OFFSET)
@@ -102,7 +104,9 @@
 #define KINETIS_ADC0_CLP2        (KINETIS_ADC0_BASE+KINETIS_ADC_CLP2_OFFSET)
 #define KINETIS_ADC0_CLP1        (KINETIS_ADC0_BASE+KINETIS_ADC_CLP1_OFFSET)
 #define KINETIS_ADC0_CLP0        (KINETIS_ADC0_BASE+KINETIS_ADC_CLP0_OFFSET)
-#define KINETIS_ADC0_PGA         (KINETIS_ADC0_BASE+KINETIS_ADC_PGA_OFFSET)
+#ifndef KINETIS_K64
+#  define KINETIS_ADC0_PGA       (KINETIS_ADC0_BASE+KINETIS_ADC_PGA_OFFSET)
+#endif
 #define KINETIS_ADC0_CLMD        (KINETIS_ADC0_BASE+KINETIS_ADC_CLMD_OFFSET)
 #define KINETIS_ADC0_CLMS        (KINETIS_ADC0_BASE+KINETIS_ADC_CLMS_OFFSET)
 #define KINETIS_ADC0_CLM4        (KINETIS_ADC0_BASE+KINETIS_ADC_CLM4_OFFSET)
@@ -131,7 +135,9 @@
 #define KINETIS_ADC1_CLP2        (KINETIS_ADC1_BASE+KINETIS_ADC_CLP2_OFFSET)
 #define KINETIS_ADC1_CLP1        (KINETIS_ADC1_BASE+KINETIS_ADC_CLP1_OFFSET)
 #define KINETIS_ADC1_CLP0        (KINETIS_ADC1_BASE+KINETIS_ADC_CLP0_OFFSET)
-#define KINETIS_ADC1_PGA         (KINETIS_ADC1_BASE+KINETIS_ADC_PGA_OFFSET)
+#ifndef KINETIS_K64
+#  define KINETIS_ADC1_PGA       (KINETIS_ADC1_BASE+KINETIS_ADC_PGA_OFFSET)
+#endif
 #define KINETIS_ADC1_CLMD        (KINETIS_ADC1_BASE+KINETIS_ADC_CLMD_OFFSET)
 #define KINETIS_ADC1_CLMS        (KINETIS_ADC1_BASE+KINETIS_ADC_CLMS_OFFSET)
 #define KINETIS_ADC1_CLM4        (KINETIS_ADC1_BASE+KINETIS_ADC_CLM4_OFFSET)
@@ -272,22 +278,26 @@
 #define ADC_CLP0_MASK             (0x3f)    /* Bits 0-5: Calibration value */
 
 /* ADC PGA register */
+
+#ifndef KINETIS_K64
                                             /* Bits 0-15: Reserved */
-#define ADC_PGA_PGAG_SHIFT        (16)      /* Bits 16-19: PGA gain setting*/
-#define ADC_PGA_PGAG_MASK         (15 << ADC_PGA_PGAG_SHIFT)
-#  define ADC_PGA_PGAG_1          (0 << ADC_PGA_PGAG_SHIFT)
-#  define ADC_PGA_PGAG_2          (1 << ADC_PGA_PGAG_SHIFT)
-#  define ADC_PGA_PGAG_4          (2 << ADC_PGA_PGAG_SHIFT)
-#  define ADC_PGA_PGAG_8          (3 << ADC_PGA_PGAG_SHIFT)
-#  define ADC_PGA_PGAG_16         (4 << ADC_PGA_PGAG_SHIFT)
-#  define ADC_PGA_PGAG_32         (5 << ADC_PGA_PGAG_SHIFT)
-#  define ADC_PGA_PGAG_64         (6 << ADC_PGA_PGAG_SHIFT)
-#ifdef KINETIS_K40
-#  define ADC_PGA_PGALP           (1 << 20) /* Bit 20:  PGA low-power mode control */
-#endif
+#  define ADC_PGA_PGAG_SHIFT      (16)      /* Bits 16-19: PGA gain setting*/
+#  define ADC_PGA_PGAG_MASK       (15 << ADC_PGA_PGAG_SHIFT)
+#    define ADC_PGA_PGAG_1        (0 << ADC_PGA_PGAG_SHIFT)
+#    define ADC_PGA_PGAG_2        (1 << ADC_PGA_PGAG_SHIFT)
+#    define ADC_PGA_PGAG_4        (2 << ADC_PGA_PGAG_SHIFT)
+#    define ADC_PGA_PGAG_8        (3 << ADC_PGA_PGAG_SHIFT)
+#    define ADC_PGA_PGAG_16       (4 << ADC_PGA_PGAG_SHIFT)
+#    define ADC_PGA_PGAG_32       (5 << ADC_PGA_PGAG_SHIFT)
+#    define ADC_PGA_PGAG_64       (6 << ADC_PGA_PGAG_SHIFT)
+#  ifdef KINETIS_K40
+#    define ADC_PGA_PGALP         (1 << 20) /* Bit 20:  PGA low-power mode control */
+#  endif
                                             /* Bits 21-22: Reserved */
-#define ADC_PGA_PGAEN             (1 << 23) /* Bit 23:  PGA enable*/
+#  define ADC_PGA_PGAEN           (1 << 23) /* Bit 23:  PGA enable*/
                                             /* Bits 24-31: Reserved */
+#endif
+
 /* ADC minus-side general calibration value registers */
 
 #define ADC_CLMD_MASK             (0x3f)    /* Bits 0-5: Calibration value */
@@ -310,4 +320,4 @@
  * Public Functions
  ********************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_KINETIS_KINETIS_ADC_H */
+#endif /* __ARCH_ARM_SRC_KINETIS_CHIP_KINETIS_ADC_H */

@@ -373,6 +373,3 @@ kinesis_setdividers(uint32_t div1, uint32_t div2, uint32_t div3, uint32_t div4)
 
   putreg32(regval, KINETIS_FMC_PFAPR);
 }
-
-
-
