@@ -1,7 +1,7 @@
 /************************************************************************************
- * arch/arm/src/kinetis/kinetis_rngb.h
+ * arch/arm/src/kinetis/chip/kinetis_rngb.h
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_KINETIS_KINETIS_RNGB_H
-#define __ARCH_ARM_SRC_KINETIS_KINETIS_RNGB_H
+#ifndef __ARCH_ARM_SRC_KINETIS_CHIP_KINETIS_RNGB_H
+#define __ARCH_ARM_SRC_KINETIS_CHIP_KINETIS_RNGB_H
 
 /************************************************************************************
  * Included Files
@@ -158,4 +158,4 @@
  ************************************************************************************/
 
 #endif /* KINETIS_NRNG && KINETIS_NRNG > 0 */
-#endif /* __ARCH_ARM_SRC_KINETIS_KINETIS_RNGB_H */
+#endif /* __ARCH_ARM_SRC_KINETIS_CHIP_KINETIS_RNGB_H */

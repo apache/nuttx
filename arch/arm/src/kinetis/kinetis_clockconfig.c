@@ -45,7 +45,7 @@
 
 #include "kinetis.h"
 #include "chip/kinetis_mcg.h"
-#include "kinetis_sim.h"
+#include "chip/kinetis_sim.h"
 #include "chip/kinetis_fmc.h"
 #include "chip/kinetis_llwu.h"
 #include "chip/kinetis_pinmux.h"

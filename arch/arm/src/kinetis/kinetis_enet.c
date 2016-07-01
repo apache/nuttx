@@ -66,7 +66,7 @@
 #include "kinetis.h"
 #include "kinetis_config.h"
 #include "chip/kinetis_pinmux.h"
-#include "kinetis_sim.h"
+#include "chip/kinetis_sim.h"
 #include "chip/kinetis_mpu.h"
 #include "chip/kinetis_enet.h"
 

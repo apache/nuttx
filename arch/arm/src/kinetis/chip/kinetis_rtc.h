@@ -1,7 +1,7 @@
 /************************************************************************************
- * arch/arm/src/kinetis/kinetis_rtc.h
+ * arch/arm/src/kinetis/chip/kinetis_rtc.h
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_KINETIS_KINETIS_RTC_H
-#define __ARCH_ARM_SRC_KINETIS_KINETIS_RTC_H
+#ifndef __ARCH_ARM_SRC_KINETIS_CHIP_KINETIS_RTC_H
+#define __ARCH_ARM_SRC_KINETIS_CHIP_KINETIS_RTC_H
 
 /************************************************************************************
  * Included Files
@@ -59,7 +59,7 @@
 #define KINETIS_RTC_CR_OFFSET    0x0010 /* RTC Control Register */
 #define KINETIS_RTC_SR_OFFSET    0x0014 /* RTC Status Register */
 #define KINETIS_RTC_LR_OFFSET    0x0018 /* RTC Lock Register */
-#ifdef KINETIS_K40
+#if defined(KINETIS_K40) || defined(KINETIS_K64)
 #  define KINETIS_RTC_IER_OFFSET 0x001c /* RTC Interrupt Enable Register (K40) */
 #endif
 #ifdef KINETIS_K60
@@ -77,7 +77,7 @@
 #define KINETIS_RTC_CR           (KINETIS_RTC_BASE+KINETIS_RTC_CR_OFFSET)
 #define KINETIS_RTC_SR           (KINETIS_RTC_BASE+KINETIS_RTC_SR_OFFSET)
 #define KINETIS_RTC_LR           (KINETIS_RTC_BASE+KINETIS_RTC_LR_OFFSET)
-#ifdef KINETIS_K40
+#if defined(KINETIS_K40) || defined(KINETIS_K64)
 #  define KINETIS_RTC_IER        (KINETIS_RTC_BASE+KINETIS_RTC_IER_OFFSET)
 #endif
 #ifdef KINETIS_K60
@@ -141,7 +141,7 @@
                                            /* Bits 7-31: Reserved */
 /* RTC Interrupt Enable Register (32-bits, K40) */
 
-#ifdef KINETIS_K40
+#if defined(KINETIS_K40) || defined(KINETIS_K64)
 #  define RTC_IER_TIIE           (1 << 0)  /* Bit 0:  Time Invalid Interrupt Enable */
 #  define RTC_IER_TOIE           (1 << 1)  /* Bit 1:  Time Overflow Interrupt Enable */
 #  define RTC_IER_TAIE           (1 << 2)  /* Bit 2:  Time Alarm Interrupt Enable */
@@ -167,7 +167,7 @@
 #define RTC_WAR_CRW              (1 << 4)  /* Bit 4:  Control Register Write */
 #define RTC_WAR_SRW              (1 << 5)  /* Bit 5:  Status Register Write */
 #define RTC_WAR_LRW              (1 << 6)  /* Bit 6:  Lock Register Write */
-#ifdef KINETIS_K40
+#if defined(KINETIS_K40) || defined(KINETIS_K64)
 #  define RTC_WAR_IERW           (1 << 7)  /* Bit 7:  Interrupt Enable Register Write */
 #endif
 #ifdef KINETIS_K60
@@ -183,7 +183,7 @@
 #define RTC_RAR_CRR              (1 << 4)  /* Bit 4:  Control Register Read */
 #define RTC_RAR_SRR              (1 << 5)  /* Bit 5:  Status Register Read */
 #define RTC_RAR_LRR              (1 << 6)  /* Bit 6:  Lock Register Read */
-#ifdef KINETIS_K40
+#if defined(KINETIS_K40) || defined(KINETIS_K64)
 #  define RTC_RAR_IERR           (1 << 7)  /* Bit 7:  Interrupt Enable Register Read */
 #endif
 #ifdef KINETIS_K60
@@ -204,4 +204,4 @@
  ************************************************************************************/
 
 #endif /* KINETIS_NRTC && KINETIS_NRTC > 0 */
-#endif /* __ARCH_ARM_SRC_KINETIS_KINETIS_RTC_H */
+#endif /* __ARCH_ARM_SRC_KINETIS_CHIP_KINETIS_RTC_H */

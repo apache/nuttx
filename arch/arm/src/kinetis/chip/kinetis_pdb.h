@@ -1,7 +1,7 @@
 /********************************************************************************************
- * arch/arm/src/kinetis/kinetis_pdb.h
+ * arch/arm/src/kinetis/chip/kinetis_pdb.h
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ********************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_KINETIS_KINETIS_PDB_H
-#define __ARCH_ARM_SRC_KINETIS_KINETIS_PDB_H
+#ifndef __ARCH_ARM_SRC_KINETIS_CHIP_KINETIS_PDB_H
+#define __ARCH_ARM_SRC_KINETIS_CHIP_KINETIS_PDB_H
 
 /********************************************************************************************
  * Included Files
@@ -83,6 +83,10 @@
 
 #define KINETIS_PDB_PO0EN_OFFSET     0x0190 /* Pulse-Out 0 Enable Register */
 #define KINETIS_PDB_PO0DLY_OFFSET    0x0194 /* Pulse-Out 0 Delay Register */
+#ifdef KINETIS_K64
+#  define KINETIS_PDB_PO1DLY_OFFSET  0x0198 /* Pulse-Out 1 Delay Register */
+#  define KINETIS_PDB_PO2DLY_OFFSET  0x019c /* Pulse-Out 2 Delay Register */
+#endif
 
 /* Register Addresses ***********************************************************************/
 
@@ -119,6 +123,10 @@
 
 #define KINETIS_PDB0_PO0EN           (KINETIS_PDB0_BASE+KINETIS_PDB_PO0EN_OFFSET)
 #define KINETIS_PDB0_PO0DLY          (KINETIS_PDB0_BASE+KINETIS_PDB_PO0DLY_OFFSET)
+#ifdef KINETIS_K64
+#  define KINETIS_PDB0_PO1DLY        (KINETIS_PDB0_BASE+KINETIS_PDB_PO1DLY_OFFSET)
+#  define KINETIS_PDB0_PO2DLY        (KINETIS_PDB0_BASE+KINETIS_PDB_PO2DLY_OFFSET)
+#endif
 
 /* Register Bit Definitions *****************************************************************/
 
@@ -252,4 +260,4 @@
  * Public Functions
  ********************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_KINETIS_KINETIS_PDB_H */
+#endif /* __ARCH_ARM_SRC_KINETIS_CHIP_KINETIS_PDB_H */

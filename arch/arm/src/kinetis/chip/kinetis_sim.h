@@ -1,7 +1,7 @@
 /************************************************************************************
- * arch/arm/src/kinetis/kinetis_sim.h
+ * arch/arm/src/kinetis/chip/kinetis_sim.h
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_KINETIS_KINETIS_SIM_H
-#define __ARCH_ARM_SRC_KINETIS_KINETIS_SIM_H
+#ifndef __ARCH_ARM_SRC_KINETIS_CHIP_KINETIS_SIM_H
+#define __ARCH_ARM_SRC_KINETIS_CHIP_KINETIS_SIM_H
 
 /************************************************************************************
  * Included Files
@@ -489,29 +489,29 @@
 #  define SIM_FCFG1_EESIZE_32B        (9 << SIM_FCFG1_EESIZE_SHIFT)  /* 32 Bytes */
 #  define SIM_FCFG1_EESIZE_NONE       (15 << SIM_FCFG1_EESIZE_SHIFT) /* 0 Bytes */
                                                 /* Bits 20-23: Reserved */
-#ifdef KINETIS_K40
-#define SIM_FCFG1_PFSIZE_SHIFT        (24)      /* Bits 24-27: Program flash size (K40) */
-#define SIM_FCFG1_PFSIZE_MASK         (15 << SIM_FCFG1_PFSIZE_SHIFT)
-#  define SIM_FCFG1_PFSIZE_128KB      (7 << SIM_FCFG1_PFSIZE_SHIFT)  /* 128KB program flash, 4KB protection region */
-#  define SIM_FCFG1_PFSIZE_256KB      (9 << SIM_FCFG1_PFSIZE_SHIFT)  /* 256KB program flash, 8KB protection region */
-#  define SIM_FCFG1_PFSIZE_512KB      (11 << SIM_FCFG1_PFSIZE_SHIFT) /* 512KB program flash, 16KB protection region */
-#  define SIM_FCFG1_PFSIZE_512KB2     (15 << SIM_FCFG1_PFSIZE_SHIFT) /* 512KB program flash, 16KB protection region */
-#define SIM_FCFG1_NVMSIZE_SHIFT       (28)      /* Bits 28-31: FlexNVM size (K40)*/
-#define SIM_FCFG1_NVMSIZE_MASK        (15 << SIM_FCFG1_NVMSIZE_SHIFT)
-#  define SIM_FCFG1_NVMSIZE_NONE      (0 << SIM_FCFG1_NVMSIZE_SHIFT)  /*  0KB FlexNVM */
-#  define SIM_FCFG1_NVMSIZE_128KB     (7 << SIM_FCFG1_NVMSIZE_SHIFT)  /* 128KB FlexNVM, 16KB protection region */
-#  define SIM_FCFG1_NVMSIZE_256KB     (9 << SIM_FCFG1_NVMSIZE_SHIFT)  /* 256KB FlexNVM, 32KB protection region */
-#  define SIM_FCFG1_NVMSIZE_256KB2    (15 << SIM_FCFG1_NVMSIZE_SHIFT) /* 256KB FlexNVM, 32KB protection region */
+#if defined(KINETIS_K40) || defined(KINETIS_K64)
+#  define SIM_FCFG1_PFSIZE_SHIFT      (24)      /* Bits 24-27: Program flash size (K40) */
+#  define SIM_FCFG1_PFSIZE_MASK       (15 << SIM_FCFG1_PFSIZE_SHIFT)
+#    define SIM_FCFG1_PFSIZE_128KB    (7 << SIM_FCFG1_PFSIZE_SHIFT)  /* 128KB program flash, 4KB protection region */
+#    define SIM_FCFG1_PFSIZE_256KB    (9 << SIM_FCFG1_PFSIZE_SHIFT)  /* 256KB program flash, 8KB protection region */
+#    define SIM_FCFG1_PFSIZE_512KB    (11 << SIM_FCFG1_PFSIZE_SHIFT) /* 512KB program flash, 16KB protection region */
+#    define SIM_FCFG1_PFSIZE_512KB2   (15 << SIM_FCFG1_PFSIZE_SHIFT) /* 512KB program flash, 16KB protection region */
+#  define SIM_FCFG1_NVMSIZE_SHIFT     (28)      /* Bits 28-31: FlexNVM size (K40)*/
+#  define SIM_FCFG1_NVMSIZE_MASK      (15 << SIM_FCFG1_NVMSIZE_SHIFT)
+#    define SIM_FCFG1_NVMSIZE_NONE    (0 << SIM_FCFG1_NVMSIZE_SHIFT)  /*  0KB FlexNVM */
+#    define SIM_FCFG1_NVMSIZE_128KB   (7 << SIM_FCFG1_NVMSIZE_SHIFT)  /* 128KB FlexNVM, 16KB protection region */
+#    define SIM_FCFG1_NVMSIZE_256KB   (9 << SIM_FCFG1_NVMSIZE_SHIFT)  /* 256KB FlexNVM, 32KB protection region */
+#    define SIM_FCFG1_NVMSIZE_256KB2  (15 << SIM_FCFG1_NVMSIZE_SHIFT) /* 256KB FlexNVM, 32KB protection region */
 #endif
 
 #ifdef KINETIS_K60
-#define SIM_FCFG1_FSIZE_SHIFT         (24)      /* Bits 24-31: Flash size (K60)*/
-#define SIM_FCFG1_FSIZE_MASK          (0xff << SIM_FCFG1_FSIZE_SHIFT)
-#  define SIM_FCFG1_FSIZE_32KB        (2 << SIM_FCFG1_FSIZE_SHIFT)  /* 32KB program flash, 1KB protection region */
-#  define SIM_FCFG1_FSIZE_64KB        (4 << SIM_FCFG1_FSIZE_SHIFT)  /* 64KB program flash, 2KB protection region */
-#  define SIM_FCFG1_FSIZE_128KB       (6 << SIM_FCFG1_FSIZE_SHIFT)  /* 128KB program flash, 4KB protection region */
-#  define SIM_FCFG1_FSIZE_256KB       (8 << SIM_FCFG1_FSIZE_SHIFT)  /* 256KB program flash, 8KB protection region */
-#  define SIM_FCFG1_FSIZE_512KB       (12 << SIM_FCFG1_FSIZE_SHIFT) /* 512KB program flash, 16KB protection region */
+#  define SIM_FCFG1_FSIZE_SHIFT       (24)      /* Bits 24-31: Flash size (K60)*/
+#  define SIM_FCFG1_FSIZE_MASK        (0xff << SIM_FCFG1_FSIZE_SHIFT)
+#    define SIM_FCFG1_FSIZE_32KB      (2 << SIM_FCFG1_FSIZE_SHIFT)  /* 32KB program flash, 1KB protection region */
+#    define SIM_FCFG1_FSIZE_64KB      (4 << SIM_FCFG1_FSIZE_SHIFT)  /* 64KB program flash, 2KB protection region */
+#    define SIM_FCFG1_FSIZE_128KB     (6 << SIM_FCFG1_FSIZE_SHIFT)  /* 128KB program flash, 4KB protection region */
+#    define SIM_FCFG1_FSIZE_256KB     (8 << SIM_FCFG1_FSIZE_SHIFT)  /* 256KB program flash, 8KB protection region */
+#    define SIM_FCFG1_FSIZE_512KB     (12 << SIM_FCFG1_FSIZE_SHIFT) /* 512KB program flash, 16KB protection region */
 #endif
 
 /* Flash Configuration Register 2 */
@@ -542,4 +542,4 @@
  * Public Functions
  ************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_KINETIS_KINETIS_SIM_H */
+#endif /* __ARCH_ARM_SRC_KINETIS_CHIP_KINETIS_SIM_H */
