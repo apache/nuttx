@@ -1,7 +1,7 @@
 /************************************************************************************
- * arch/arm/src/kinetis/kinetis_cmt.h
+ * arch/arm/src/kinetis/chip/kinetis_cmt.h
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_KINETIS_KINETIS_CMT_H
-#define __ARCH_ARM_SRC_KINETIS_KINETIS_CMT_H
+#ifndef __ARCH_ARM_SRC_KINETIS_CHIP_KINETIS_CMT_H
+#define __ARCH_ARM_SRC_KINETIS_CHIP_KINETIS_CMT_H
 
 /************************************************************************************
  * Included Files
@@ -135,4 +135,4 @@
  * Public Functions
  ************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_KINETIS_KINETIS_CMT_H */
+#endif /* __ARCH_ARM_SRC_KINETIS_CHIP_KINETIS_CMT_H */

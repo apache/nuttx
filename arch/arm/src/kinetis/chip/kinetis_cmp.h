@@ -1,7 +1,7 @@
 /********************************************************************************************
- * arch/arm/src/kinetis/kinetis_cmp.h
+ * arch/arm/src/kinetis/chip/kinetis_cmp.h
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ********************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_KINETIS_KINETIS_CMP_H
-#define __ARCH_ARM_SRC_KINETIS_KINETIS_CMP_H
+#ifndef __ARCH_ARM_SRC_KINETIS_CHIP_KINETIS_CMP_H
+#define __ARCH_ARM_SRC_KINETIS_CHIP_KINETIS_CMP_H
 
 /********************************************************************************************
  * Included Files
@@ -172,7 +172,9 @@
 #  define CMP_MUXCR_PSEL_IN5      (5 << CMP_MUXCR_PSEL_SHIFT)
 #  define CMP_MUXCR_PSEL_IN6      (6 << CMP_MUXCR_PSEL_SHIFT)
 #  define CMP_MUXCR_PSEL_IN7      (7 << CMP_MUXCR_PSEL_SHIFT)
-#define CMP_MUXCR_MEN             (1 << 6)  /* Bit 6:  MMUX Enable */
+#ifndef KINETIS_K64
+#  define CMP_MUXCR_MEN           (1 << 6)  /* Bit 6:  MMUX Enable */
+#endif
 #define CMP_MUXCR_PEN             (1 << 7)  /* Bit 7:  PMUX Enable */
 
 /********************************************************************************************
@@ -187,4 +189,4 @@
  * Public Functions
  ********************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_KINETIS_KINETIS_CMP_H */
+#endif /* __ARCH_ARM_SRC_KINETIS_CHIP_KINETIS_CMP_H */

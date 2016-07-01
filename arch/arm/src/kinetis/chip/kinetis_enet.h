@@ -1,7 +1,7 @@
 /********************************************************************************************
- * arch/arm/src/kinetis/kinetis_enet.h
+ * arch/arm/src/kinetis/chip/kinetis_enet.h
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ********************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_KINETIS_KINETIS_ENET_H
-#define __ARCH_ARM_SRC_KINETIS_KINETIS_ENET_H
+#ifndef __ARCH_ARM_SRC_KINETIS_CHIP_KINETIS_ENET_H
+#define __ARCH_ARM_SRC_KINETIS_CHIP_KINETIS_ENET_H
 
 /********************************************************************************************
  * Included Files
@@ -649,4 +649,4 @@ struct enet_desc_s
  ********************************************************************************************/
 
 #endif /* KINETIS_NENET &&  KINETIS_NENET > 0 */
-#endif /* __ARCH_ARM_SRC_KINETIS_KINETIS_ENET_H */
+#endif /* __ARCH_ARM_SRC_KINETIS_CHIP_KINETIS_ENET_H */

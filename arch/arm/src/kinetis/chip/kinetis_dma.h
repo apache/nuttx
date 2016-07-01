@@ -1,7 +1,7 @@
 /****************************************************************************************************
- * arch/arm/src/kinetis/kinetis_dma.h
+ * arch/arm/src/kinetis/chip/kinetis_dma.h
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ****************************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_KINETIS_KINETIS_DMA_H
-#define __ARCH_ARM_SRC_KINETIS_KINETIS_DMA_H
+#ifndef __ARCH_ARM_SRC_KINETIS_CHIP_KINETIS_DMA_H
+#define __ARCH_ARM_SRC_KINETIS_CHIP_KINETIS_DMA_H
 
 /****************************************************************************************************
  * Included Files
@@ -83,18 +83,20 @@
 #define KINETIS_DMA_DCHPRI13_OFFSET       0x010e /* Channel 13 Priority Register */
 #define KINETIS_DMA_DCHPRI12_OFFSET       0x010f /* Channel 12 Priority Register */
 
-#define KINETIS_DMA_TCD_OFFSET(n)         (0x0000+((n) << 5))
-#define KINETIS_DMA_TCD_SADDR_OFFSET      0x0000 /* TCD Source Address */
-#define KINETIS_DMA_TCD_SOFF_OFFSET       0x0004 /* TCD Signed Source Address Offset */
-#define KINETIS_DMA_TCD_ATTR_OFFSET       0x0006 /* TCD Transfer Attributes */
-#define KINETIS_DMA_TCD_NBYTES_OFFSET     0x0008 /* TCD Minor Byte Count */
-#define KINETIS_DMA_TCD_SLAST_OFFSET      0x000c /* TCD Last Source Address Adjustment */
-#define KINETIS_DMA_TCD_DADDR_OFFSET      0x0010 /* TCD Destination Address */
-#define KINETIS_DMA_TCD_DOFF_OFFSET       0x0014 /* TCD Signed Destination Address Offset */
-#define KINETIS_DMA_TCD_CITER_OFFSET      0x0016 /* TCD Current Minor Loop Link, Major Loop Count */
-#define KINETIS_DMA_TCD_DLASTSGA_OFFSET   0x0018 /* TCD Last Destination Address Adjustment/Scatter Gather Address */
-#define KINETIS_DMA_TCD_CSR_OFFSET        0x001c /* TCD Control and Status */
-#define KINETIS_DMA_TCD_BITER_OFFSET      0x001e /* TCD Beginning Minor Loop Link, Major Loop Count */
+#ifndef KINETIS_K64
+#  define KINETIS_DMA_TCD_OFFSET(n)       (0x0000+((n) << 5))
+#  define KINETIS_DMA_TCD_SADDR_OFFSET    0x0000 /* TCD Source Address */
+#  define KINETIS_DMA_TCD_SOFF_OFFSET     0x0004 /* TCD Signed Source Address Offset */
+#  define KINETIS_DMA_TCD_ATTR_OFFSET     0x0006 /* TCD Transfer Attributes */
+#  define KINETIS_DMA_TCD_NBYTES_OFFSET   0x0008 /* TCD Minor Byte Count */
+#  define KINETIS_DMA_TCD_SLAST_OFFSET    0x000c /* TCD Last Source Address Adjustment */
+#  define KINETIS_DMA_TCD_DADDR_OFFSET    0x0010 /* TCD Destination Address */
+#  define KINETIS_DMA_TCD_DOFF_OFFSET     0x0014 /* TCD Signed Destination Address Offset */
+#  define KINETIS_DMA_TCD_CITER_OFFSET    0x0016 /* TCD Current Minor Loop Link, Major Loop Count */
+#  define KINETIS_DMA_TCD_DLASTSGA_OFFSET 0x0018 /* TCD Last Destination Address Adjustment/Scatter Gather Address */
+#  define KINETIS_DMA_TCD_CSR_OFFSET      0x001c /* TCD Control and Status */
+#  define KINETIS_DMA_TCD_BITER_OFFSET    0x001e /* TCD Beginning Minor Loop Link, Major Loop Count */
+#endif
 
 #define KINETIS_DMA_TCD0_SADDR_OFFSET     0x0000 /* TCD Source Address */
 #define KINETIS_DMA_TCD0_SOFF_OFFSET      0x0004 /* TCD Signed Source Address Offset */
@@ -323,19 +325,21 @@
 #define KINETIS_DMA_DCHPRI13              (KINETIS_DMAC_BASE+KINETIS_DMA_DCHPRI13_OFFSET)
 #define KINETIS_DMA_DCHPRI12              (KINETIS_DMAC_BASE+KINETIS_DMA_DCHPRI12_OFFSET)
 
-#define KINETIS_DMA_TCD_BASE(n)           (KINETIS_DMADESC_BASE+KINETIS_DMA_TCD_OFFSET(n))
+#ifndef KINETIS_K64
+#  define KINETIS_DMA_TCD_BASE(n)         (KINETIS_DMADESC_BASE+KINETIS_DMA_TCD_OFFSET(n))
 
-#define KINETIS_DMA_TCD_SADDR(n)          (KINETIS_DMA_TCD_BASE(n)+KINETIS_DMA_TCD_SADDR_OFFSET)
-#define KINETIS_DMA_TCD_SOFF(n)           (KINETIS_DMA_TCD_BASE(n)+KINETIS_DMA_TCD_SOFF_OFFSET)
-#define KINETIS_DMA_TCD_ATTR(n)           (KINETIS_DMA_TCD_BASE(n)+KINETIS_DMA_TCD_ATTR_OFFSET)
-#define KINETIS_DMA_TCD_NBYTES(n)         (KINETIS_DMA_TCD_BASE(n)+KINETIS_DMA_TCD_NBYTES_OFFSET)
-#define KINETIS_DMA_TCD_SLAST(n)          (KINETIS_DMA_TCD_BASE(n)+KINETIS_DMA_TCD_SLAST_OFFSET)
-#define KINETIS_DMA_TCD_DADDR(n)          (KINETIS_DMA_TCD_BASE(n)+KINETIS_DMA_TCD_DADDR_OFFSET)
-#define KINETIS_DMA_TCD_DOFF(n)           (KINETIS_DMA_TCD_BASE(n)+KINETIS_DMA_TCD_DOFF_OFFSET)
-#define KINETIS_DMA_TCD_CITER(n)          (KINETIS_DMA_TCD_BASE(n)+KINETIS_DMA_TCD_CITER_OFFSET)
-#define KINETIS_DMA_TCD_DLASTSGA(n)       (KINETIS_DMA_TCD_BASE(n)+KINETIS_DMA_TCD_DLASTSGA_OFFSET)
-#define KINETIS_DMA_TCD_CSR(n)            (KINETIS_DMA_TCD_BASE(n)+KINETIS_DMA_TCD_CSR_OFFSET)
-#define KINETIS_DMA_TCD_BITER(n)          (KINETIS_DMA_TCD_BASE(n)+KINETIS_DMA_TCD_BITER_OFFSET)
+#  define KINETIS_DMA_TCD_SADDR(n)        (KINETIS_DMA_TCD_BASE(n)+KINETIS_DMA_TCD_SADDR_OFFSET)
+#  define KINETIS_DMA_TCD_SOFF(n)         (KINETIS_DMA_TCD_BASE(n)+KINETIS_DMA_TCD_SOFF_OFFSET)
+#  define KINETIS_DMA_TCD_ATTR(n)         (KINETIS_DMA_TCD_BASE(n)+KINETIS_DMA_TCD_ATTR_OFFSET)
+#  define KINETIS_DMA_TCD_NBYTES(n)       (KINETIS_DMA_TCD_BASE(n)+KINETIS_DMA_TCD_NBYTES_OFFSET)
+#  define KINETIS_DMA_TCD_SLAST(n)        (KINETIS_DMA_TCD_BASE(n)+KINETIS_DMA_TCD_SLAST_OFFSET)
+#  define KINETIS_DMA_TCD_DADDR(n)        (KINETIS_DMA_TCD_BASE(n)+KINETIS_DMA_TCD_DADDR_OFFSET)
+#  define KINETIS_DMA_TCD_DOFF(n)         (KINETIS_DMA_TCD_BASE(n)+KINETIS_DMA_TCD_DOFF_OFFSET)
+#  define KINETIS_DMA_TCD_CITER(n)        (KINETIS_DMA_TCD_BASE(n)+KINETIS_DMA_TCD_CITER_OFFSET)
+#  define KINETIS_DMA_TCD_DLASTSGA(n)     (KINETIS_DMA_TCD_BASE(n)+KINETIS_DMA_TCD_DLASTSGA_OFFSET)
+#  define KINETIS_DMA_TCD_CSR(n)          (KINETIS_DMA_TCD_BASE(n)+KINETIS_DMA_TCD_CSR_OFFSET)
+#  define KINETIS_DMA_TCD_BITER(n)        (KINETIS_DMA_TCD_BASE(n)+KINETIS_DMA_TCD_BITER_OFFSET)
+#endif
 
 #define KINETIS_DMA_TCD0_SADDR            (KINETIS_DMADESC_BASE+KINETIS_DMA_TCD0_SADDR_OFFSET)
 #define KINETIS_DMA_TCD0_SOFF             (KINETIS_DMADESC_BASE+KINETIS_DMA_TCD0_SOFF_OFFSET)
@@ -772,4 +776,4 @@
  * Public Functions
  ****************************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_KINETIS_KINETIS_DMA_H */
+#endif /* __ARCH_ARM_SRC_KINETIS_CHIP_KINETIS_DMA_H */

@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/net/kinetis_enet.c
+ * arch/arm/src/kinetis/kinetis_enet.c
  *
  *   Copyright (C) 2011-2012, 2014-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -68,7 +68,7 @@
 #include "chip/kinetis_pinmux.h"
 #include "kinetis_sim.h"
 #include "kinetis_mpu.h"
-#include "kinetis_enet.h"
+#include "chip/kinetis_enet.h"
 
 #if defined(KINETIS_NENET) && KINETIS_NENET > 0
 

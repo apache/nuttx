@@ -1,7 +1,7 @@
 /************************************************************************************
- * arch/arm/src/kinetis/kinetis_crc.h
+ * arch/arm/src/kinetis/chip/kinetis_crc.h
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_KINETIS_KINETIS_CRC_H
-#define __ARCH_ARM_SRC_KINETIS_KINETIS_CRC_H
+#ifndef __ARCH_ARM_SRC_KINETIS_CHIP_KINETIS_CRC_H
+#define __ARCH_ARM_SRC_KINETIS_CHIP_KINETIS_CRC_H
 
 /************************************************************************************
  * Included Files
@@ -52,13 +52,13 @@
 
 /* Register Offsets *****************************************************************/
 
-#define KINETIS_CRC_CRC_OFFSET    0x0000 /* CRC Data Register */
+#define KINETIS_CRC_DATA_OFFSET   0x0000 /* CRC Data Register */
 #define KINETIS_CRC_GPOLY_OFFSET  0x0004 /* CRC Polynomial Register */
 #define KINETIS_CRC_CTRL_OFFSET   0x0008 /* CRC Control Register */
 
 /* Register Addresses ***************************************************************/
 
-#define KINETIS_CRC_CRC           (KINETIS_CRC_BASE+KINETIS_CRC_CRC_OFFSET)
+#define KINETIS_CRC_DATA          (KINETIS_CRC_BASE+KINETIS_CRC_DATA_OFFSET)
 #define KINETIS_CRC_GPOLY         (KINETIS_CRC_BASE+KINETIS_CRC_GPOLY_OFFSET)
 #define KINETIS_CRC_CTRL          (KINETIS_CRC_BASE+KINETIS_CRC_CTRL_OFFSET)
 
@@ -66,14 +66,14 @@
 
 /* CRC Data Register (32-bit) */
 
-#define CRC_CRC_LL_SHIFT          (0)       /* Bits 0-7: CRC Low Lower Byte */
-#define CRC_CRC_LL_MASK           (0xff << CRC_CRC_LL_SHIFT)
-#define CRC_CRC_LU_SHIFT          (8)       /* Bits 8-15: CRC Low Upper Byte */
-#define CRC_CRC_LU_MASK           (0xff << CRC_CRC_LU_SHIFT)
-#define CRC_CRC_HL_SHIFT          (16)      /* Bits 16-23: CRC High Lower Byte */
-#define CRC_CRC_HL_MASK           (0xff << CRC_CRC_HL_SHIFT)
-#define CRC_CRC_HU_SHIFT          (24)      /* Bits 24-31: CRC High Upper Byte */
-#define CRC_CRC_HU_MASK           (0xff << CRC_CRC_HU_SHIFT)
+#define CRC_DATA_LL_SHIFT         (0)       /* Bits 0-7: CRC Low Lower Byte */
+#define CRC_DATA_LL_MASK          (0xff << CRC_DATA_LL_SHIFT)
+#define CRC_DATA_LU_SHIFT         (8)       /* Bits 8-15: CRC Low Upper Byte */
+#define CRC_DATA_LU_MASK          (0xff << CRC_DATA_LU_SHIFT)
+#define CRC_DATA_HL_SHIFT         (16)      /* Bits 16-23: CRC High Lower Byte */
+#define CRC_DATA_HL_MASK          (0xff << CRC_DATA_HL_SHIFT)
+#define CRC_DATA_HU_SHIFT         (24)      /* Bits 24-31: CRC High Upper Byte */
+#define CRC_DATA_HU_MASK          (0xff << CRC_DATA_HU_SHIFT)
 
 /* CRC Polynomial Register */
 
@@ -114,4 +114,4 @@
  ************************************************************************************/
 
 #endif /* KINETIS_NCRC && KINETIS_NCRC > 0 */
-#endif /* __ARCH_ARM_SRC_KINETIS_KINETIS_CRC_H */
+#endif /* __ARCH_ARM_SRC_KINETIS_CHIP_KINETIS_CRC_H */
