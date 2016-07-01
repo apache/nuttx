@@ -51,7 +51,7 @@
 #include "kinetis.h"
 #include "kinetis_uart.h"
 #include "kinetis_sim.h"
-#include "kinetis_pinmux.h"
+#include "chip/kinetis_pinmux.h"
 
 /****************************************************************************
  * Pre-processor Definitions

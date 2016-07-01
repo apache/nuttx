@@ -48,7 +48,7 @@
 #include "kinetis_sim.h"
 #include "kinetis_fmc.h"
 #include "kinetis_llwu.h"
-#include "kinetis_pinmux.h"
+#include "chip/kinetis_pinmux.h"
 
 /****************************************************************************
  * Pre-processor Definitions
