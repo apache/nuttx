@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/freedom-k64f/src/k64_buttons.c
  *
- *   Copyright (C) 2011, 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,19 +52,12 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* The TWR-K60N512 has user buttons (plus a reset button):
  *
  * 1. SW1 (IRQ0)   PTA19
  * 2. SW2 (IRQ1)   PTE26
  */
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -74,10 +67,10 @@
  * Name: board_button_initialize
  *
  * Description:
- *   board_button_initialize() must be called to initialize button resources.  After
- *   that, board_buttons() may be called to collect the current state of all
- *   buttons or board_button_irq() may be called to register button interrupt
- *   handlers.
+ *   board_button_initialize() must be called to initialize button resources.
+ *   After that, board_buttons() may be called to collect the current state
+ *   of all buttons or board_button_irq() may be called to register button
+ *   interrupt handlers.
  *
  ****************************************************************************/
 
@@ -110,28 +103,29 @@ uint8_t board_buttons(void)
   return ret
 }
 
-/************************************************************************************
+/****************************************************************************
  * Button support.
  *
  * Description:
- *   board_button_initialize() must be called to initialize button resources.  After
- *   that, board_buttons() may be called to collect the current state of all
- *   buttons or board_button_irq() may be called to register button interrupt
- *   handlers.
+ *   board_button_initialize() must be called to initialize button
+ *   resources.  After that, board_buttons() may be called to collect the
+ *   current state of all buttons or board_button_irq() may be called to
+ *   register button interrupt handlers.
  *
- *   After board_button_initialize() has been called, board_buttons() may be called to
- *   collect the state of all buttons.  board_buttons() returns an 8-bit bit set
- *   with each bit associated with a button.  See the BUTTON_*_BIT and JOYSTICK_*_BIT
- *   definitions in board.h for the meaning of each bit.
+ *   After board_button_initialize() has been called, board_buttons() may
+ *   be called to collect the state of all buttons.  board_buttons() returns
+ *   an 8-bit bit set with each bit associated with a button.  See the
+ *   BUTTON_*_BIT and JOYSTICK_*_BIT definitions in board.h for the meaning
+ *   of each bit.
  *
- *   board_button_irq() may be called to register an interrupt handler that will
- *   be called when a button is depressed or released.  The ID value is a
- *   button enumeration value that uniquely identifies a button resource. See the
- *   BUTTON_* and JOYSTICK_* definitions in board.h for the meaning of enumeration
- *   value.  The previous interrupt handler address is returned (so that it may
- *   restored, if so desired).
+ *   board_button_irq() may be called to register an interrupt handler that
+ *   will be called when a button is depressed or released.  The ID value is
+ *   a button enumeration value that uniquely identifies a button resource.
+ *   See the BUTTON_* and JOYSTICK_* definitions in board.h for the meaning
+ *   of enumeration value.  The previous interrupt handler address is
+ *   returned (so that it may restored, if so desired).
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_ARCH_IRQBUTTONS
 xcpt_t board_button_irq(int id, xcpt_t irqhandler)
@@ -164,7 +158,7 @@ xcpt_t board_button_irq(int id, xcpt_t irqhandler)
 
   /* Then make sure that interrupts are enabled on the pin */
 
-  k64_pindmaenable(pinset);
+  kinetis_pindmaenable(pinset);
   return oldhandler;
 }
 #endif

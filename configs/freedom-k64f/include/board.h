@@ -1,8 +1,7 @@
 /************************************************************************************
  * configs/freedom-k64f/include/board.h
- * include/arch/board/board.h
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_BOARD_BOARD_H
-#define __ARCH_BOARD_BOARD_H
+#ifndef __CONFIG_FREEDOM_K64F_INCLUDE_BOARD_H
+#define __CONFIG_FREEDOM_K64F_INCLUDE_BOARD_H
 
 /************************************************************************************
  * Included Files
@@ -378,7 +377,8 @@
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -386,6 +386,7 @@ extern "C" {
 /************************************************************************************
  * Public Function Prototypes
  ************************************************************************************/
+
 /************************************************************************************
  * Name: kinetis_boardinitialize
  *
@@ -396,7 +397,7 @@ extern "C" {
  *
  ************************************************************************************/
 
-EXTERN void kinetis_boardinitialize(void);
+void kinetis_boardinitialize(void);
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -404,4 +405,4 @@ EXTERN void kinetis_boardinitialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif  /* __ARCH_BOARD_BOARD_H */
+#endif  /* __CONFIG_FREEDOM_K64F_INCLUDE_BOARD_H */

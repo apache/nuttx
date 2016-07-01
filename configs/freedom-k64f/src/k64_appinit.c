@@ -1,7 +1,7 @@
 /****************************************************************************
  * config/freedom-k64f/src/k64_appinit.c
  *
- *   Copyright (C) 2011, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,7 +46,7 @@
 
 #include <nuttx/board.h>
 
-#ifdef CONFIG_K64_SDHC
+#ifdef CONFIG_KINETIS_SDHC
 #  include <nuttx/sdio.h>
 #  include <nuttx/mmcsd.h>
 #endif
@@ -88,7 +88,7 @@
  * is not enabled.
  */
 
-#if defined(CONFIG_DISABLE_MOUNTPOINT) || !defined(CONFIG_K64_SDHC)
+#if defined(CONFIG_DISABLE_MOUNTPOINT) || !defined(CONFIG_KINETIS_SDHC)
 #  undef NSH_HAVEMMCSD
 #endif
 
@@ -102,8 +102,8 @@
 #  error "CONFIG_GPIO_IRQ required for card detect interrupt"
 #endif
 
-#ifndef CONFIG_K64_PORTEINTS
-#  error "CONFIG_K64_PORTEINTS required for card detect interrupt"
+#ifndef CONFIG_KINETIS_PORTEINTS
+#  error "CONFIG_KINETIS_PORTEINTS required for card detect interrupt"
 #endif
 
 /****************************************************************************
@@ -224,7 +224,7 @@ int board_app_initialize(uintptr_t arg)
   /* Attached the card detect interrupt (but don't enable it yet) */
 
   kinetis_pinconfig(GPIO_SD_CARDDETECT);
-  k64_pinirqattach(GPIO_SD_CARDDETECT, k64_cdinterrupt);
+  kinetis_pinirqattach(GPIO_SD_CARDDETECT, k64_cdinterrupt);
 
   /* Configure the write protect GPIO */
 
@@ -264,7 +264,7 @@ int board_app_initialize(uintptr_t arg)
 
   /* Enable CD interrupts to handle subsequent media changes */
 
-  k64_pinirqenable(GPIO_SD_CARDDETECT);
+  kinetis_pinirqenable(GPIO_SD_CARDDETECT);
 #endif
   return OK;
 }

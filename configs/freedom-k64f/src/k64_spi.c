@@ -1,7 +1,7 @@
 /************************************************************************************
- * configs/freedom-k64f/src/k60_spi.c
+ * configs/freedom-k64f/src/k64_spi.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,7 +51,7 @@
 #include "kinetis.h"
 #include "freedom-k64f.h"
 
-#if defined(CONFIG_K64_SPI1) || defined(CONFIG_K64_SPI2)
+#if defined(CONFIG_KINETIS_SPI1) || defined(CONFIG_KINETIS_SPI2)
 
 /************************************************************************************
  * Public Functions
@@ -77,8 +77,8 @@ void weak_function k64_spidev_initialize(void)
  *   These external functions must be provided by board-specific logic.  They are
  *   implementations of the select, status, and cmddata methods of the SPI interface
  *   defined by struct spi_ops_s (see include/nuttx/spi/spi.h). All other methods
- *   including kinetis_spibus_initialize()) are provided by common Kinetis logic.  To use
- *   this common SPI logic on your board:
+ *   including kinetis_spibus_initialize()) are provided by common Kinetis logic.
+ *   To use this common SPI logic on your board:
  *
  *   1. Provide logic in kinetis_boardinitialize() to configure SPI chip select
  *      pins.
@@ -98,7 +98,7 @@ void weak_function k64_spidev_initialize(void)
  *
  ************************************************************************************/
 
-#ifdef CONFIG_K64_SPI1
+#ifdef CONFIG_KINETIS_SPI1
 void kinetis_spi1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
   spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
@@ -112,7 +112,7 @@ uint8_t kinetis_spi1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 }
 #endif
 
-#ifdef CONFIG_K64_SPI2
+#ifdef CONFIG_KINETIS_SPI2
 void kinetis_spi2select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
   spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
@@ -126,7 +126,7 @@ uint8_t kinetis_spi2status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 }
 #endif
 
-#ifdef CONFIG_K64_SPI3
+#ifdef CONFIG_KINETIS_SPI3
 void kinetis_spi3select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
   spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
@@ -140,4 +140,4 @@ uint8_t kinetis_spi3status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 }
 #endif
 
-#endif /* CONFIG_K64_SPI1 || CONFIG_K64_SPI2 */
+#endif /* CONFIG_KINETIS_SPI1 || CONFIG_KINETIS_SPI2 */

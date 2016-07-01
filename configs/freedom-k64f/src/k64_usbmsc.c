@@ -1,7 +1,7 @@
 /****************************************************************************
- * configs/freedom-k64f/src/k60_usbmsc.c
+ * configs/freedom-k64f/src/k64_usbmsc.c
  *
- *   Copyright (C) 2011, 2013, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Configure and register the Kinetis MMC/SD block driver.

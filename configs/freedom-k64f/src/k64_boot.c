@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/freedom-k64f/src/k64_boot.c
  *
- *   Copyright (C) 2011, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,14 +48,6 @@
 #include "freedom-k64f.h"
 
 /************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
-
-/************************************************************************************
- * Private Functions
- ************************************************************************************/
-
-/************************************************************************************
  * Public Functions
  ************************************************************************************/
 
@@ -71,32 +63,32 @@
 
 void kinetis_boardinitialize(void)
 {
+#if defined(CONFIG_KINETIS_SPI1) || defined(CONFIG_KINETIS_SPI2)
   /* Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak function
    * k64_spidev_initialize() has been brought into the link.
    */
 
-#if defined(CONFIG_K64_SPI1) || defined(CONFIG_K64_SPI2)
   if (k64_spidev_initialize)
     {
       k64_spidev_initialize();
     }
 #endif
 
+#if defined(CONFIG_USBDEV) && defined(CONFIG_KINETIS_USB)
    /* Initialize USB is 1) USBDEV is selected, 2) the USB controller is not
     * disabled, and 3) the weak function k64_usbinitialize() has been brought
     * into the build.
     */
 
-#if defined(CONFIG_USBDEV) && defined(CONFIG_K64_USB)
   if (k64_usbinitialize)
     {
       k64_usbinitialize();
     }
 #endif
 
+#ifdef CONFIG_ARCH_LEDS
   /* Configure on-board LEDs if LED support has been selected. */
 
-#ifdef CONFIG_ARCH_LEDS
   board_autoled_initialize();
 #endif
 }

@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/freedom-k64f/src/k64_leds.c
  *
- *   Copyright (C) 2011, 2013, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,6 +49,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* The FREEDOM-K64F has four LEDs:
  *
  * 1. E1 / Orange LED   PTA11

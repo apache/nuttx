@@ -1,7 +1,7 @@
 /************************************************************************************
- * configs/twr-k60n512/src/twr-k60n512.h
+ * configs/freedom-k64f/src/freedom-k64f.h
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __CONFIGS_FREEDOM_K64F_SRC_FRDMK64_H
-#define __CONFIGS_FREEDOM_K64F_SRC_FRDMK64_H
+#ifndef __CONFIGS_FREEDOM_K64F_SRC_FREEDOM_K64F_H
+#define __CONFIGS_FREEDOM_K64F_SRC_FREEDOM_K64F_H
 
 /************************************************************************************
  * Included Files
@@ -55,10 +55,10 @@
  */
 
 #if KINETIS_NSPI < 1
-#  undef CONFIG_K64_SPI1
-#  undef CONFIG_K64_SPI2
+#  undef CONFIG_KINETIS_SPI1
+#  undef CONFIG_KINETIS_SPI2
 #elif KINETIS_NSPI < 2
-#  undef CONFIG_K64_SPI2
+#  undef CONFIG_KINETIS_SPI2
 #endif
 
 /* FREEDOM-K64F GPIOs ****************************************************************/
@@ -293,4 +293,4 @@ void weak_function k64_spidev_initialize(void);
 void weak_function k64_usbinitialize(void);
 
 #endif /* __ASSEMBLY__ */
-#endif /* __CONFIGS_FREEDOM_K64F_SRC_FRDMK64_H */
+#endif /* __CONFIGS_FREEDOM_K64F_SRC_FREEDOM_K64F_H */
