@@ -1,7 +1,7 @@
 /************************************************************************************
- * arch/arm/src/kinetis/kinetis_mcg.h
+ * arch/arm/src/kinetis/chip/kinetis_mcg.h
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_KINETIS_KINETIS_MCG_H
-#define __ARCH_ARM_SRC_KINETIS_KINETIS_MCG_H
+#ifndef __ARCH_ARM_SRC_KINETIS_CHIP_KINETIS_MCG_H
+#define __ARCH_ARM_SRC_KINETIS_CHIP_KINETIS_MCG_H
 
 /************************************************************************************
  * Included Files
@@ -60,6 +60,10 @@
 #define KINETIS_MCG_ATC_OFFSET    0x0008 /* MCG Auto Trim Control Register */
 #define KINETIS_MCG_ATCVH_OFFSET  0x000a /* MCG Auto Trim Compare Value High Register */
 #define KINETIS_MCG_ATCVL_OFFSET  0x000b /* MCG Auto Trim Compare Value Low Register */
+#ifdef KINETIS_K64
+#  define KINETIS_MCG_C7_OFFSET   0x000c /* MCG Control 7 Register */
+#  define KINETIS_MCG_C8_OFFSET   0x000d /* MCG Control 8 Register */
+#endif
 
 /* Register Addresses ***************************************************************/
 
@@ -73,6 +77,10 @@
 #define KINETIS_MCG_ATC           (KINETIS_MCG_BASE+KINETIS_MCG_ATC_OFFSET)
 #define KINETIS_MCG_ATCVH         (KINETIS_MCG_BASE+KINETIS_MCG_ATCVH_OFFSET)
 #define KINETIS_MCG_ATCVL         (KINETIS_MCG_BASE+KINETIS_MCG_ATCVL_OFFSET)
+#ifdef KINETIS_K64
+#  define KINETIS_MCG_C7          (KINETIS_MCG_BASE+KINETIS_MCG_C7_OFFSET)
+#  define KINETIS_MCG_C8          (KINETIS_MCG_BASE+KINETIS_MCG_C8_OFFSET)
+#endif
 
 /* Register Bit Definitions *********************************************************/
 
@@ -171,6 +179,10 @@
 
 /* MCG Auto Trim Compare Value High/Low Registers (8-bit compare value) */
 
+/* MCG Control 7 Register */
+
+/* MCG Control 8 Register */
+
 /************************************************************************************
  * Public Types
  ************************************************************************************/
@@ -183,4 +195,4 @@
  * Public Functions
  ************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_KINETIS_KINETIS_MCG_H */
+#endif /* __ARCH_ARM_SRC_KINETIS_CHIP_KINETIS_MCG_H */

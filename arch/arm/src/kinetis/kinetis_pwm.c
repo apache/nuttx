@@ -58,9 +58,9 @@
 #include "chip.h"
 
 #include "kinetis.h"
-#include "kinetis_pwm.h"
-#include "kinetis_gpio.h"
-#include "kinetis_ftm.h"
+#include "chip/kinetis_pwm.h"
+#include "chip/kinetis_gpio.h"
+#include "chip/kinetis_ftm.h"
 #include "kinetis_sim.h"
 
 /* This module then only compiles if there is at least one enabled timer

@@ -1,7 +1,7 @@
 /************************************************************************************
- * arch/arm/src/kinetis/kinetis_fmc.h
+ * arch/arm/src/kinetis/kinetis_k64fmc.h
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_KINETIS_KINETIS_FMC_H
-#define __ARCH_ARM_SRC_KINETIS_KINETIS_FMC_H
+#ifndef __ARCH_ARM_SRC_KINETIS_CHIP_KINETIS_K64FMC_H
+#define __ARCH_ARM_SRC_KINETIS_CHIP_KINETIS_K64FMC_H
 
 /************************************************************************************
  * Included Files
@@ -50,54 +50,38 @@
 
 /* Register Offsets *****************************************************************/
 
-#define KINETIS_FMC_PFAPR_OFFSET    0x0000 /* Flash Access Protection Register */
-#define KINETIS_FMC_PFB0CR_OFFSET   0x0004 /* Flash Bank 0 Control Register */
-#define KINETIS_FMC_PFB1CR_OFFSET   0x0008 /* Flash Bank 1 Control Register */
+#define KINETIS_FMC_PFAPR_OFFSET        0x0000 /* Flash Access Protection Register */
+#define KINETIS_FMC_PFB0CR_OFFSET       0x0004 /* Flash Bank 0 Control Register */
+#define KINETIS_FMC_PFB1CR_OFFSET       0x0008 /* Flash Bank 1 Control Register */
 
 /* Cache Directory Storage for way=w and set=s, w=0..3, s=0..7 */
 
-#define KINETIS_FMC_TAGVD_OFFSET(w,s) (0x100+((w)<<5)+((s)<<2))
+#define KINETIS_FMC_TAGVD_OFFSET(w,s)   (0x100 + ((w) << 5) + ((s) << 2))
 
 #define KINETIS_FMC_TAGVDW0S0_OFFSET    0x0100 /* Cache Directory Storage */
 #define KINETIS_FMC_TAGVDW0S1_OFFSET    0x0104 /* Cache Directory Storage */
 #define KINETIS_FMC_TAGVDW0S2_OFFSET    0x0108 /* Cache Directory Storage */
 #define KINETIS_FMC_TAGVDW0S3_OFFSET    0x010c /* Cache Directory Storage */
-#define KINETIS_FMC_TAGVDW0S4_OFFSET    0x0110 /* Cache Directory Storage */
-#define KINETIS_FMC_TAGVDW0S5_OFFSET    0x0114 /* Cache Directory Storage */
-#define KINETIS_FMC_TAGVDW0S6_OFFSET    0x0118 /* Cache Directory Storage */
-#define KINETIS_FMC_TAGVDW0S7_OFFSET    0x011c /* Cache Directory Storage */
 
-#define KINETIS_FMC_TAGVDW1S0_OFFSET    0x0120 /* Cache Directory Storage */
-#define KINETIS_FMC_TAGVDW1S1_OFFSET    0x0124 /* Cache Directory Storage */
-#define KINETIS_FMC_TAGVDW1S2_OFFSET    0x0128 /* Cache Directory Storage */
-#define KINETIS_FMC_TAGVDW1S3_OFFSET    0x012c /* Cache Directory Storage */
-#define KINETIS_FMC_TAGVDW1S4_OFFSET    0x0130 /* Cache Directory Storage */
-#define KINETIS_FMC_TAGVDW1S5_OFFSET    0x0134 /* Cache Directory Storage */
-#define KINETIS_FMC_TAGVDW1S6_OFFSET    0x0138 /* Cache Directory Storage */
-#define KINETIS_FMC_TAGVDW1S7_OFFSET    0x013c /* Cache Directory Storage */
+#define KINETIS_FMC_TAGVDW1S0_OFFSET    0x0110 /* Cache Directory Storage */
+#define KINETIS_FMC_TAGVDW1S1_OFFSET    0x0114 /* Cache Directory Storage */
+#define KINETIS_FMC_TAGVDW1S2_OFFSET    0x0118 /* Cache Directory Storage */
+#define KINETIS_FMC_TAGVDW1S3_OFFSET    0x011c /* Cache Directory Storage */
 
-#define KINETIS_FMC_TAGVDW2S0_OFFSET    0x0140 /* Cache Directory Storage */
-#define KINETIS_FMC_TAGVDW2S1_OFFSET    0x0144 /* Cache Directory Storage */
-#define KINETIS_FMC_TAGVDW2S2_OFFSET    0x0148 /* Cache Directory Storage */
-#define KINETIS_FMC_TAGVDW2S3_OFFSET    0x014c /* Cache Directory Storage */
-#define KINETIS_FMC_TAGVDW2S4_OFFSET    0x0150 /* Cache Directory Storage */
-#define KINETIS_FMC_TAGVDW2S5_OFFSET    0x0154 /* Cache Directory Storage */
-#define KINETIS_FMC_TAGVDW2S6_OFFSET    0x0158 /* Cache Directory Storage */
-#define KINETIS_FMC_TAGVDW2S7_OFFSET    0x015c /* Cache Directory Storage */
+#define KINETIS_FMC_TAGVDW2S0_OFFSET    0x0120 /* Cache Directory Storage */
+#define KINETIS_FMC_TAGVDW2S1_OFFSET    0x0124 /* Cache Directory Storage */
+#define KINETIS_FMC_TAGVDW2S2_OFFSET    0x0128 /* Cache Directory Storage */
+#define KINETIS_FMC_TAGVDW2S3_OFFSET    0x012c /* Cache Directory Storage */
 
-#define KINETIS_FMC_TAGVDW3S0_OFFSET    0x0160 /* Cache Directory Storage */
-#define KINETIS_FMC_TAGVDW3S1_OFFSET    0x0164 /* Cache Directory Storage */
-#define KINETIS_FMC_TAGVDW3S2_OFFSET    0x0168 /* Cache Directory Storage */
-#define KINETIS_FMC_TAGVDW3S3_OFFSET    0x016c /* Cache Directory Storage */
-#define KINETIS_FMC_TAGVDW3S4_OFFSET    0x0170 /* Cache Directory Storage */
-#define KINETIS_FMC_TAGVDW3S5_OFFSET    0x0174 /* Cache Directory Storage */
-#define KINETIS_FMC_TAGVDW3S6_OFFSET    0x0178 /* Cache Directory Storage */
-#define KINETIS_FMC_TAGVDW3S7_OFFSET    0x017c /* Cache Directory Storage */
+#define KINETIS_FMC_TAGVDW3S0_OFFSET    0x0130 /* Cache Directory Storage */
+#define KINETIS_FMC_TAGVDW3S1_OFFSET    0x0134 /* Cache Directory Storage */
+#define KINETIS_FMC_TAGVDW3S2_OFFSET    0x0138 /* Cache Directory Storage */
+#define KINETIS_FMC_TAGVDW3S3_OFFSET    0x013c /* Cache Directory Storage */
 
 /* Cache Data Storage (upper and lower) for way=w and set=s, w=0..3, s=0..7 */
 
-#define KINETIS_FMC_DATAU_OFFSET(w,s) (0x200+((w)<<6)+((s)<<2))
-#define KINETIS_FMC_DATAL_OFFSET(w,s) (0x204+((w)<<6)+((s)<<2))
+#define KINETIS_FMC_DATAU_OFFSET(w,s)   (0x200 + ((w) << 6) + ((s) << 2))
+#define KINETIS_FMC_DATAL_OFFSET(w,s)   (0x204 + ((w) << 6) + ((s) << 2))
 
 #define KINETIS_FMC_DATAW0S0U_OFFSET    0x0200 /* Cache Data Storage (upper word) */
 #define KINETIS_FMC_DATAW0S0L_OFFSET    0x0204 /* Cache Data Storage (lower word) */
@@ -107,65 +91,33 @@
 #define KINETIS_FMC_DATAW0S2L_OFFSET    0x0214 /* Cache Data Storage (lower word) */
 #define KINETIS_FMC_DATAW0S3U_OFFSET    0x0218 /* Cache Data Storage (upper word) */
 #define KINETIS_FMC_DATAW0S3L_OFFSET    0x021c /* Cache Data Storage (lower word) */
-#define KINETIS_FMC_DATAW0S4U_OFFSET    0x0220 /* Cache Data Storage (upper word) */
-#define KINETIS_FMC_DATAW0S4L_OFFSET    0x0224 /* Cache Data Storage (lower word) */
-#define KINETIS_FMC_DATAW0S5U_OFFSET    0x0228 /* Cache Data Storage (upper word) */
-#define KINETIS_FMC_DATAW0S5L_OFFSET    0x022c /* Cache Data Storage (lower word) */
-#define KINETIS_FMC_DATAW0S6U_OFFSET    0x0230 /* Cache Data Storage (upper word) */
-#define KINETIS_FMC_DATAW0S6L_OFFSET    0x0234 /* Cache Data Storage (lower word) */
-#define KINETIS_FMC_DATAW0S7U_OFFSET    0x0238 /* Cache Data Storage (upper word) */
-#define KINETIS_FMC_DATAW0S7L_OFFSET    0x023c /* Cache Data Storage (lower word) */
 
-#define KINETIS_FMC_DATAW1S0U_OFFSET    0x0240 /* Cache Data Storage (upper word) */
-#define KINETIS_FMC_DATAW1S0L_OFFSET    0x0244 /* Cache Data Storage (lower word) */
-#define KINETIS_FMC_DATAW1S1U_OFFSET    0x0248 /* Cache Data Storage (upper word) */
-#define KINETIS_FMC_DATAW1S1L_OFFSET    0x024c /* Cache Data Storage (lower word) */
-#define KINETIS_FMC_DATAW1S2U_OFFSET    0x0250 /* Cache Data Storage (upper word) */
-#define KINETIS_FMC_DATAW1S2L_OFFSET    0x0254 /* Cache Data Storage (lower word) */
-#define KINETIS_FMC_DATAW1S3U_OFFSET    0x0258 /* Cache Data Storage (upper word) */
-#define KINETIS_FMC_DATAW1S3L_OFFSET    0x025c /* Cache Data Storage (lower word) */
-#define KINETIS_FMC_DATAW1S4U_OFFSET    0x0260 /* Cache Data Storage (upper word) */
-#define KINETIS_FMC_DATAW1S4L_OFFSET    0x0264 /* Cache Data Storage (lower word) */
-#define KINETIS_FMC_DATAW1S5U_OFFSET    0x0268 /* Cache Data Storage (upper word) */
-#define KINETIS_FMC_DATAW1S5L_OFFSET    0x026c /* Cache Data Storage (lower word) */
-#define KINETIS_FMC_DATAW1S6U_OFFSET    0x0270 /* Cache Data Storage (upper word) */
-#define KINETIS_FMC_DATAW1S6L_OFFSET    0x0274 /* Cache Data Storage (lower word) */
-#define KINETIS_FMC_DATAW1S7U_OFFSET    0x0278 /* Cache Data Storage (upper word) */
-#define KINETIS_FMC_DATAW1S7L_OFFSET    0x027c /* Cache Data Storage (lower word) */
+#define KINETIS_FMC_DATAW1S0U_OFFSET    0x0220 /* Cache Data Storage (upper word) */
+#define KINETIS_FMC_DATAW1S0L_OFFSET    0x0224 /* Cache Data Storage (lower word) */
+#define KINETIS_FMC_DATAW1S1U_OFFSET    0x0228 /* Cache Data Storage (upper word) */
+#define KINETIS_FMC_DATAW1S1L_OFFSET    0x022c /* Cache Data Storage (lower word) */
+#define KINETIS_FMC_DATAW1S2U_OFFSET    0x0230 /* Cache Data Storage (upper word) */
+#define KINETIS_FMC_DATAW1S2L_OFFSET    0x0234 /* Cache Data Storage (lower word) */
+#define KINETIS_FMC_DATAW1S3U_OFFSET    0x0238 /* Cache Data Storage (upper word) */
+#define KINETIS_FMC_DATAW1S3L_OFFSET    0x023c /* Cache Data Storage (lower word) */
 
-#define KINETIS_FMC_DATAW2S0U_OFFSET    0x0280 /* Cache Data Storage (upper word) */
-#define KINETIS_FMC_DATAW2S0L_OFFSET    0x0284 /* Cache Data Storage (lower word) */
-#define KINETIS_FMC_DATAW2S1U_OFFSET    0x0288 /* Cache Data Storage (upper word) */
-#define KINETIS_FMC_DATAW2S1L_OFFSET    0x028c /* Cache Data Storage (lower word) */
-#define KINETIS_FMC_DATAW2S2U_OFFSET    0x0290 /* Cache Data Storage (upper word) */
-#define KINETIS_FMC_DATAW2S2L_OFFSET    0x0294 /* Cache Data Storage (lower word) */
-#define KINETIS_FMC_DATAW2S3U_OFFSET    0x0298 /* Cache Data Storage (upper word) */
-#define KINETIS_FMC_DATAW2S3L_OFFSET    0x029c /* Cache Data Storage (lower word) */
-#define KINETIS_FMC_DATAW2S4U_OFFSET    0x02a0 /* Cache Data Storage (upper word) */
-#define KINETIS_FMC_DATAW2S4L_OFFSET    0x02a4 /* Cache Data Storage (lower word) */
-#define KINETIS_FMC_DATAW2S5U_OFFSET    0x02a8 /* Cache Data Storage (upper word) */
-#define KINETIS_FMC_DATAW2S5L_OFFSET    0x02ac /* Cache Data Storage (lower word) */
-#define KINETIS_FMC_DATAW2S6U_OFFSET    0x02b0 /* Cache Data Storage (upper word) */
-#define KINETIS_FMC_DATAW2S6L_OFFSET    0x02b4 /* Cache Data Storage (lower word) */
-#define KINETIS_FMC_DATAW2S7U_OFFSET    0x02b8 /* Cache Data Storage (upper word) */
-#define KINETIS_FMC_DATAW2S7L_OFFSET    0x02bc /* Cache Data Storage (lower word) */
+#define KINETIS_FMC_DATAW2S0U_OFFSET    0x0240 /* Cache Data Storage (upper word) */
+#define KINETIS_FMC_DATAW2S0L_OFFSET    0x0244 /* Cache Data Storage (lower word) */
+#define KINETIS_FMC_DATAW2S1U_OFFSET    0x0248 /* Cache Data Storage (upper word) */
+#define KINETIS_FMC_DATAW2S1L_OFFSET    0x024c /* Cache Data Storage (lower word) */
+#define KINETIS_FMC_DATAW2S2U_OFFSET    0x0250 /* Cache Data Storage (upper word) */
+#define KINETIS_FMC_DATAW2S2L_OFFSET    0x0254 /* Cache Data Storage (lower word) */
+#define KINETIS_FMC_DATAW2S3U_OFFSET    0x0258 /* Cache Data Storage (upper word) */
+#define KINETIS_FMC_DATAW2S3L_OFFSET    0x025c /* Cache Data Storage (lower word) */
 
-#define KINETIS_FMC_DATAW3S0U_OFFSET    0x02c0 /* Cache Data Storage (upper word) */
-#define KINETIS_FMC_DATAW3S0L_OFFSET    0x02c4 /* Cache Data Storage (lower word) */
-#define KINETIS_FMC_DATAW3S1U_OFFSET    0x02c8 /* Cache Data Storage (upper word) */
-#define KINETIS_FMC_DATAW3S1L_OFFSET    0x02cc /* Cache Data Storage (lower word) */
-#define KINETIS_FMC_DATAW3S2U_OFFSET    0x02d0 /* Cache Data Storage (upper word) */
-#define KINETIS_FMC_DATAW3S2L_OFFSET    0x02d4 /* Cache Data Storage (lower word) */
-#define KINETIS_FMC_DATAW3S3U_OFFSET    0x02d8 /* Cache Data Storage (upper word) */
-#define KINETIS_FMC_DATAW3S3L_OFFSET    0x02dc /* Cache Data Storage (lower word) */
-#define KINETIS_FMC_DATAW3S4U_OFFSET    0x02e0 /* Cache Data Storage (upper word) */
-#define KINETIS_FMC_DATAW3S4L_OFFSET    0x02e4 /* Cache Data Storage (lower word) */
-#define KINETIS_FMC_DATAW3S5U_OFFSET    0x02e8 /* Cache Data Storage (upper word) */
-#define KINETIS_FMC_DATAW3S5L_OFFSET    0x02ec /* Cache Data Storage (lower word) */
-#define KINETIS_FMC_DATAW3S6U_OFFSET    0x02f0 /* Cache Data Storage (upper word) */
-#define KINETIS_FMC_DATAW3S6L_OFFSET    0x02f4 /* Cache Data Storage (lower word) */
-#define KINETIS_FMC_DATAW3S7U_OFFSET    0x02f8 /* Cache Data Storage (upper word) */
-#define KINETIS_FMC_DATAW3S7L_OFFSET    0x02fc /* Cache Data Storage (lower word) */
+#define KINETIS_FMC_DATAW3S0U_OFFSET    0x0260 /* Cache Data Storage (upper word) */
+#define KINETIS_FMC_DATAW3S0L_OFFSET    0x0264 /* Cache Data Storage (lower word) */
+#define KINETIS_FMC_DATAW3S1U_OFFSET    0x0268 /* Cache Data Storage (upper word) */
+#define KINETIS_FMC_DATAW3S1L_OFFSET    0x026c /* Cache Data Storage (lower word) */
+#define KINETIS_FMC_DATAW3S2U_OFFSET    0x0270 /* Cache Data Storage (upper word) */
+#define KINETIS_FMC_DATAW3S2L_OFFSET    0x0274 /* Cache Data Storage (lower word) */
+#define KINETIS_FMC_DATAW3S3U_OFFSET    0x0278 /* Cache Data Storage (upper word) */
+#define KINETIS_FMC_DATAW3S3L_OFFSET    0x027c /* Cache Data Storage (lower word) */
 
 /* Register Addresses ***************************************************************/
 
@@ -181,37 +133,21 @@
 #define KINETIS_FMC_TAGVDW0S1           (KINETIS_FMC_BASE+KINETIS_FMC_TAGVDW0S1_OFFSET)
 #define KINETIS_FMC_TAGVDW0S2           (KINETIS_FMC_BASE+KINETIS_FMC_TAGVDW0S2_OFFSET)
 #define KINETIS_FMC_TAGVDW0S3           (KINETIS_FMC_BASE+KINETIS_FMC_TAGVDW0S3_OFFSET)
-#define KINETIS_FMC_TAGVDW0S4           (KINETIS_FMC_BASE+KINETIS_FMC_TAGVDW0S4_OFFSET)
-#define KINETIS_FMC_TAGVDW0S5           (KINETIS_FMC_BASE+KINETIS_FMC_TAGVDW0S5_OFFSET)
-#define KINETIS_FMC_TAGVDW0S6           (KINETIS_FMC_BASE+KINETIS_FMC_TAGVDW0S6_OFFSET)
-#define KINETIS_FMC_TAGVDW0S7           (KINETIS_FMC_BASE+KINETIS_FMC_TAGVDW0S7_OFFSET)
 
 #define KINETIS_FMC_TAGVDW1S0           (KINETIS_FMC_BASE+KINETIS_FMC_TAGVDW1S0_OFFSET)
 #define KINETIS_FMC_TAGVDW1S1           (KINETIS_FMC_BASE+KINETIS_FMC_TAGVDW1S1_OFFSET)
 #define KINETIS_FMC_TAGVDW1S2           (KINETIS_FMC_BASE+KINETIS_FMC_TAGVDW1S2_OFFSET)
 #define KINETIS_FMC_TAGVDW1S3           (KINETIS_FMC_BASE+KINETIS_FMC_TAGVDW1S3_OFFSET)
-#define KINETIS_FMC_TAGVDW1S4           (KINETIS_FMC_BASE+KINETIS_FMC_TAGVDW1S4_OFFSET)
-#define KINETIS_FMC_TAGVDW1S5           (KINETIS_FMC_BASE+KINETIS_FMC_TAGVDW1S5_OFFSET)
-#define KINETIS_FMC_TAGVDW1S6           (KINETIS_FMC_BASE+KINETIS_FMC_TAGVDW1S6_OFFSET)
-#define KINETIS_FMC_TAGVDW1S7           (KINETIS_FMC_BASE+KINETIS_FMC_TAGVDW1S7_OFFSET)
 
 #define KINETIS_FMC_TAGVDW2S0           (KINETIS_FMC_BASE+KINETIS_FMC_TAGVDW2S0_OFFSET)
 #define KINETIS_FMC_TAGVDW2S1           (KINETIS_FMC_BASE+KINETIS_FMC_TAGVDW2S1_OFFSET)
 #define KINETIS_FMC_TAGVDW2S2           (KINETIS_FMC_BASE+KINETIS_FMC_TAGVDW2S2_OFFSET)
 #define KINETIS_FMC_TAGVDW2S3           (KINETIS_FMC_BASE+KINETIS_FMC_TAGVDW2S3_OFFSET)
-#define KINETIS_FMC_TAGVDW2S4           (KINETIS_FMC_BASE+KINETIS_FMC_TAGVDW2S4_OFFSET)
-#define KINETIS_FMC_TAGVDW2S5           (KINETIS_FMC_BASE+KINETIS_FMC_TAGVDW2S5_OFFSET)
-#define KINETIS_FMC_TAGVDW2S6           (KINETIS_FMC_BASE+KINETIS_FMC_TAGVDW2S6_OFFSET)
-#define KINETIS_FMC_TAGVDW2S7           (KINETIS_FMC_BASE+KINETIS_FMC_TAGVDW2S7_OFFSET)
 
 #define KINETIS_FMC_TAGVDW3S0           (KINETIS_FMC_BASE+KINETIS_FMC_TAGVDW3S0_OFFSET)
 #define KINETIS_FMC_TAGVDW3S1           (KINETIS_FMC_BASE+KINETIS_FMC_TAGVDW3S1_OFFSET)
 #define KINETIS_FMC_TAGVDW3S2           (KINETIS_FMC_BASE+KINETIS_FMC_TAGVDW3S2_OFFSET)
 #define KINETIS_FMC_TAGVDW3S3           (KINETIS_FMC_BASE+KINETIS_FMC_TAGVDW3S3_OFFSET)
-#define KINETIS_FMC_TAGVDW3S4           (KINETIS_FMC_BASE+KINETIS_FMC_TAGVDW3S4_OFFSET)
-#define KINETIS_FMC_TAGVDW3S5           (KINETIS_FMC_BASE+KINETIS_FMC_TAGVDW3S5_OFFSET)
-#define KINETIS_FMC_TAGVDW3S6           (KINETIS_FMC_BASE+KINETIS_FMC_TAGVDW3S6_OFFSET)
-#define KINETIS_FMC_TAGVDW3S7           (KINETIS_FMC_BASE+KINETIS_FMC_TAGVDW3S7_OFFSET)
 
 /* Cache Data Storage (upper and lower) for way=w and set=s, w=0..3, s=0..7 */
 
@@ -226,14 +162,6 @@
 #define KINETIS_FMC_DATAW0S2L           (KINETIS_FMC_BASE+KINETIS_FMC_DATAW0S2L_OFFSET)
 #define KINETIS_FMC_DATAW0S3U           (KINETIS_FMC_BASE+KINETIS_FMC_DATAW0S3U_OFFSET)
 #define KINETIS_FMC_DATAW0S3L           (KINETIS_FMC_BASE+KINETIS_FMC_DATAW0S3L_OFFSET)
-#define KINETIS_FMC_DATAW0S4U           (KINETIS_FMC_BASE+KINETIS_FMC_DATAW0S4U_OFFSET)
-#define KINETIS_FMC_DATAW0S4L           (KINETIS_FMC_BASE+KINETIS_FMC_DATAW0S4L_OFFSET)
-#define KINETIS_FMC_DATAW0S5U           (KINETIS_FMC_BASE+KINETIS_FMC_DATAW0S5U_OFFSET)
-#define KINETIS_FMC_DATAW0S5L           (KINETIS_FMC_BASE+KINETIS_FMC_DATAW0S5L_OFFSET)
-#define KINETIS_FMC_DATAW0S6U           (KINETIS_FMC_BASE+KINETIS_FMC_DATAW0S6U_OFFSET)
-#define KINETIS_FMC_DATAW0S6L           (KINETIS_FMC_BASE+KINETIS_FMC_DATAW0S6L_OFFSET)
-#define KINETIS_FMC_DATAW0S7U           (KINETIS_FMC_BASE+KINETIS_FMC_DATAW0S7U_OFFSET)
-#define KINETIS_FMC_DATAW0S7L           (KINETIS_FMC_BASE+KINETIS_FMC_DATAW0S7L_OFFSET)
 
 #define KINETIS_FMC_DATAW1S0U           (KINETIS_FMC_BASE+KINETIS_FMC_DATAW1S0U_OFFSET)
 #define KINETIS_FMC_DATAW1S0L           (KINETIS_FMC_BASE+KINETIS_FMC_DATAW1S0L_OFFSET)
@@ -243,14 +171,6 @@
 #define KINETIS_FMC_DATAW1S2L           (KINETIS_FMC_BASE+KINETIS_FMC_DATAW1S2L_OFFSET)
 #define KINETIS_FMC_DATAW1S3U           (KINETIS_FMC_BASE+KINETIS_FMC_DATAW1S3U_OFFSET)
 #define KINETIS_FMC_DATAW1S3L           (KINETIS_FMC_BASE+KINETIS_FMC_DATAW1S3L_OFFSET)
-#define KINETIS_FMC_DATAW1S4U           (KINETIS_FMC_BASE+KINETIS_FMC_DATAW1S4U_OFFSET)
-#define KINETIS_FMC_DATAW1S4L           (KINETIS_FMC_BASE+KINETIS_FMC_DATAW1S4L_OFFSET)
-#define KINETIS_FMC_DATAW1S5U           (KINETIS_FMC_BASE+KINETIS_FMC_DATAW1S5U_OFFSET)
-#define KINETIS_FMC_DATAW1S5L           (KINETIS_FMC_BASE+KINETIS_FMC_DATAW1S5L_OFFSET)
-#define KINETIS_FMC_DATAW1S6U           (KINETIS_FMC_BASE+KINETIS_FMC_DATAW1S6U_OFFSET)
-#define KINETIS_FMC_DATAW1S6L           (KINETIS_FMC_BASE+KINETIS_FMC_DATAW1S6L_OFFSET)
-#define KINETIS_FMC_DATAW1S7U           (KINETIS_FMC_BASE+KINETIS_FMC_DATAW1S7U_OFFSET)
-#define KINETIS_FMC_DATAW1S7L           (KINETIS_FMC_BASE+KINETIS_FMC_DATAW1S7L_OFFSET)
 
 #define KINETIS_FMC_DATAW2S0U           (KINETIS_FMC_BASE+KINETIS_FMC_DATAW2S0U_OFFSET)
 #define KINETIS_FMC_DATAW2S0L           (KINETIS_FMC_BASE+KINETIS_FMC_DATAW2S0L_OFFSET)
@@ -260,14 +180,6 @@
 #define KINETIS_FMC_DATAW2S2L           (KINETIS_FMC_BASE+KINETIS_FMC_DATAW2S2L_OFFSET)
 #define KINETIS_FMC_DATAW2S3U           (KINETIS_FMC_BASE+KINETIS_FMC_DATAW2S3U_OFFSET)
 #define KINETIS_FMC_DATAW2S3L           (KINETIS_FMC_BASE+KINETIS_FMC_DATAW2S3L_OFFSET)
-#define KINETIS_FMC_DATAW2S4U           (KINETIS_FMC_BASE+KINETIS_FMC_DATAW2S4U_OFFSET)
-#define KINETIS_FMC_DATAW2S4L           (KINETIS_FMC_BASE+KINETIS_FMC_DATAW2S4L_OFFSET)
-#define KINETIS_FMC_DATAW2S5U           (KINETIS_FMC_BASE+KINETIS_FMC_DATAW2S5U_OFFSET)
-#define KINETIS_FMC_DATAW2S5L           (KINETIS_FMC_BASE+KINETIS_FMC_DATAW2S5L_OFFSET)
-#define KINETIS_FMC_DATAW2S6U           (KINETIS_FMC_BASE+KINETIS_FMC_DATAW2S6U_OFFSET)
-#define KINETIS_FMC_DATAW2S6L           (KINETIS_FMC_BASE+KINETIS_FMC_DATAW2S6L_OFFSET)
-#define KINETIS_FMC_DATAW2S7U           (KINETIS_FMC_BASE+KINETIS_FMC_DATAW2S7U_OFFSET)
-#define KINETIS_FMC_DATAW2S7L           (KINETIS_FMC_BASE+KINETIS_FMC_DATAW2S7L_OFFSET)
 
 #define KINETIS_FMC_DATAW3S0U           (KINETIS_FMC_BASE+KINETIS_FMC_DATAW3S0U_OFFSET)
 #define KINETIS_FMC_DATAW3S0L           (KINETIS_FMC_BASE+KINETIS_FMC_DATAW3S0L_OFFSET)
@@ -277,14 +189,6 @@
 #define KINETIS_FMC_DATAW3S2L           (KINETIS_FMC_BASE+KINETIS_FMC_DATAW3S2L_OFFSET)
 #define KINETIS_FMC_DATAW3S3U           (KINETIS_FMC_BASE+KINETIS_FMC_DATAW3S3U_OFFSET)
 #define KINETIS_FMC_DATAW3S3L           (KINETIS_FMC_BASE+KINETIS_FMC_DATAW3S3L_OFFSET)
-#define KINETIS_FMC_DATAW3S4U           (KINETIS_FMC_BASE+KINETIS_FMC_DATAW3S4U_OFFSET)
-#define KINETIS_FMC_DATAW3S4L           (KINETIS_FMC_BASE+KINETIS_FMC_DATAW3S4L_OFFSET)
-#define KINETIS_FMC_DATAW3S5U           (KINETIS_FMC_BASE+KINETIS_FMC_DATAW3S5U_OFFSET)
-#define KINETIS_FMC_DATAW3S5L           (KINETIS_FMC_BASE+KINETIS_FMC_DATAW3S5L_OFFSET)
-#define KINETIS_FMC_DATAW3S6U           (KINETIS_FMC_BASE+KINETIS_FMC_DATAW3S6U_OFFSET)
-#define KINETIS_FMC_DATAW3S6L           (KINETIS_FMC_BASE+KINETIS_FMC_DATAW3S6L_OFFSET)
-#define KINETIS_FMC_DATAW3S7U           (KINETIS_FMC_BASE+KINETIS_FMC_DATAW3S7U_OFFSET)
-#define KINETIS_FMC_DATAW3S7L           (KINETIS_FMC_BASE+KINETIS_FMC_DATAW3S7L_OFFSET)
 
 /* Register Bit Definitions *********************************************************/
 
@@ -365,8 +269,8 @@
 /* Cache Directory Storage for way=w and set=s, w=0..3, s=0..7 */
 
 #define FMC_TAGVD_VALID                 (1 << 0)  /* Bit 0:  1-bit valid for cache entry */
-                                                  /* Bits 1-5: Reserved */
-#define FMC_TAGVD_TAG_SHIFT             (6)       /* Bits 6-18: 13-bit tag for cache entry */
+                                                  /* Bits 1-4: Reserved */
+#define FMC_TAGVD_TAG_SHIFT             (5)       /* Bits 5-18: 13-bit tag for cache entry */
 #define FMC_TAGVD_TAG_MASK              (0x1fff << FMC_TAGVD_TAG_SHIFT)
                                                   /* Bits 19-31: Reserved */
 
@@ -386,4 +290,4 @@
  * Public Functions
  ************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_KINETIS_KINETIS_FMC_H */
+#endif /* __ARCH_ARM_SRC_KINETIS_CHIP_KINETIS_K64FMC_H */

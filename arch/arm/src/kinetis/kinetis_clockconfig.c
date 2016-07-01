@@ -44,10 +44,10 @@
 #include "up_arch.h"
 
 #include "kinetis.h"
-#include "kinetis_mcg.h"
+#include "chip/kinetis_mcg.h"
 #include "kinetis_sim.h"
-#include "kinetis_fmc.h"
-#include "kinetis_llwu.h"
+#include "chip/kinetis_fmc.h"
+#include "chip/kinetis_llwu.h"
 #include "chip/kinetis_pinmux.h"
 
 /****************************************************************************

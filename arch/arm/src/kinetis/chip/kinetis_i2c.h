@@ -1,7 +1,7 @@
 /********************************************************************************************
- * arch/arm/src/kinetis/kinetis_i2c.h
+ * arch/arm/src/kinetis/chip/kinetis_i2c.h
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ********************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_KINETIS_KINETIS_I2CE_H
-#define __ARCH_ARM_SRC_KINETIS_KINETIS_I2CE_H
+#ifndef __ARCH_ARM_SRC_KINETIS_CHIP_KINETIS_I2CE_H
+#define __ARCH_ARM_SRC_KINETIS_CHIP_KINETIS_I2CE_H
 
 /********************************************************************************************
  * Included Files
@@ -90,6 +90,19 @@
 #define KINETIS_I2C1_A2          (KINETIS_I2C1_BASE+KINETIS_I2C_A2_OFFSET)
 #define KINETIS_I2C1_SLTH        (KINETIS_I2C1_BASE+KINETIS_I2C_SLTH_OFFSET)
 #define KINETIS_I2C1_SLTL        (KINETIS_I2C1_BASE+KINETIS_I2C_SLTL_OFFSET)
+
+#define KINETIS_I2C2_A1          (KINETIS_I2C2_BASE+KINETIS_I2C_A1_OFFSET)
+#define KINETIS_I2C2_F           (KINETIS_I2C2_BASE+KINETIS_I2C_F_OFFSET)
+#define KINETIS_I2C2_C1          (KINETIS_I2C2_BASE+KINETIS_I2C_C1_OFFSET)
+#define KINETIS_I2C2_S           (KINETIS_I2C2_BASE+KINETIS_I2C_S_OFFSET)
+#define KINETIS_I2C2_D           (KINETIS_I2C2_BASE+KINETIS_I2C_D_OFFSET)
+#define KINETIS_I2C2_C2          (KINETIS_I2C2_BASE+KINETIS_I2C_C2_OFFSET)
+#define KINETIS_I2C2_FLT         (KINETIS_I2C2_BASE+KINETIS_I2C_FLT_OFFSET)
+#define KINETIS_I2C2_RA          (KINETIS_I2C2_BASE+KINETIS_I2C_RA_OFFSET)
+#define KINETIS_I2C2_SMB         (KINETIS_I2C2_BASE+KINETIS_I2C_SMB_OFFSET)
+#define KINETIS_I2C2_A2          (KINETIS_I2C2_BASE+KINETIS_I2C_A2_OFFSET)
+#define KINETIS_I2C2_SLTH        (KINETIS_I2C2_BASE+KINETIS_I2C_SLTH_OFFSET)
+#define KINETIS_I2C2_SLTL        (KINETIS_I2C2_BASE+KINETIS_I2C_SLTL_OFFSET)
 
 /* Register Bit Definitions *****************************************************************/
 
@@ -182,4 +195,4 @@
  * Public Functions
  ********************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_KINETIS_KINETIS_I2CE_H */
+#endif /* __ARCH_ARM_SRC_KINETIS_CHIP_KINETIS_I2CE_H */
