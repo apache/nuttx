@@ -1,7 +1,7 @@
 /************************************************************************************
- * arch/arm/src/kinetis/kinetis_mcm.h
+ * arch/arm/src/kinetis/chip/kinetis_mcm.h
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_KINETIS_KINETIS_MCM_H
-#define __ARCH_ARM_SRC_KINETIS_KINETIS_MCM_H
+#ifndef __ARCH_ARM_SRC_KINETIS_CHIP_KINETIS_MCM_H
+#define __ARCH_ARM_SRC_KINETIS_CHIP_KINETIS_MCM_H
 
 /************************************************************************************
  * Included Files
@@ -57,6 +57,9 @@
 #define KINETIS_MCM_ETBCC_OFFSET    0x0014 /* ETB counter control register */
 #define KINETIS_MCM_ETBRL_OFFSET    0x0018 /* ETB reload register */
 #define KINETIS_MCM_ETBCNT_OFFSET   0x001c /* ETB counter value register */
+#ifdef KINETIS_K64
+#  define KINETIS_MCM_PID_OFFSET    0x0030 /* Process ID register */
+#endif
 
 /* Register Addresses ***************************************************************/
 
@@ -67,6 +70,9 @@
 #define KINETIS_MCM_ETBCC           (KINETIS_MCM_BASE+KINETIS_MCM_ETBCC_OFFSET)
 #define KINETIS_MCM_ETBRL           (KINETIS_MCM_BASE+KINETIS_MCM_ETBRL_OFFSET)
 #define KINETIS_MCM_ETBCNT          (KINETIS_MCM_BASE+KINETIS_MCM_ETBCNT_OFFSET)
+#ifdef KINETIS_K64
+#  define KINETIS_MCM_PID           (KINETIS_MCM_BASE+KINETIS_MCM_PID_OFFSET)
+#endif
 
 /* Register Bit Definitions *********************************************************/
 
@@ -148,4 +154,4 @@
  * Public Functions
  ************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_KINETIS_KINETIS_MCM_H */
+#endif /* __ARCH_ARM_SRC_KINETIS_CHIP_KINETIS_MCM_H */

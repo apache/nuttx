@@ -48,7 +48,6 @@
 #include "up_arch.h"
 #include "up_internal.h"
 
-#include "kinetis_memorymap.h"
 #include "kinetis.h"
 #include "chip/kinetis_gpio.h"
 

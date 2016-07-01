@@ -1,7 +1,7 @@
 /************************************************************************************
- * arch/arm/src/kinetis/kinetis_mmcau.h
+ * arch/arm/src/kinetis/chip/kinetis_mmcau.h
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_KINETIS_KINETIS_MMCAU_H
-#define __ARCH_ARM_SRC_KINETIS_KINETIS_MMCAU_H
+#ifndef __ARCH_ARM_SRC_KINETIS_CHIP_KINETIS_MMCAU_H
+#define __ARCH_ARM_SRC_KINETIS_CHIP_KINETIS_MMCAU_H
 
 /************************************************************************************
  * Included Files
@@ -61,9 +61,11 @@
 #define KINETIS_CAU_CA3_OFFSET   0x0005  /* General Purpose Register 3 */
 #define KINETIS_CAU_CA4_OFFSET   0x0006  /* General Purpose Register 4 */
 #define KINETIS_CAU_CA5_OFFSET   0x0007  /* General Purpose Register 5 */
-#define KINETIS_CAU_CA6_OFFSET   0x0008  /* General Purpose Register 6 */
-#define KINETIS_CAU_CA7_OFFSET   0x0009  /* General Purpose Register 7 */
-#define KINETIS_CAU_CA8_OFFSET   0x000a  /* General Purpose Register 8 */
+#ifndef KINETIS_K64
+#  define KINETIS_CAU_CA6_OFFSET 0x0008  /* General Purpose Register 6 */
+#  define KINETIS_CAU_CA7_OFFSET 0x0009  /* General Purpose Register 7 */
+#  define KINETIS_CAU_CA8_OFFSET 0x000a  /* General Purpose Register 8 */
+#endif
 
 /* Register Addresses ***************************************************************/
 
@@ -77,9 +79,11 @@
 #define KINETIS_CAU_CA3          (KINETIS_MMCAU_BASE+KINETIS_CAU_CA3_OFFSET)
 #define KINETIS_CAU_CA4          (KINETIS_MMCAU_BASE+KINETIS_CAU_CA4_OFFSET)
 #define KINETIS_CAU_CA5          (KINETIS_MMCAU_BASE+KINETIS_CAU_CA5_OFFSET)
-#define KINETIS_CAU_CA6          (KINETIS_MMCAU_BASE+KINETIS_CAU_CA6_OFFSET)
-#define KINETIS_CAU_CA7          (KINETIS_MMCAU_BASE+KINETIS_CAU_CA7_OFFSET)
-#define KINETIS_CAU_CA8          (KINETIS_MMCAU_BASE+KINETIS_CAU_CA8_OFFSET)
+#ifndef KINETIS_K64
+#  define KINETIS_CAU_CA6        (KINETIS_MMCAU_BASE+KINETIS_CAU_CA6_OFFSET)
+#  define KINETIS_CAU_CA7        (KINETIS_MMCAU_BASE+KINETIS_CAU_CA7_OFFSET)
+#  define KINETIS_CAU_CA8        (KINETIS_MMCAU_BASE+KINETIS_CAU_CA8_OFFSET)
+#endif
 
 /* Register Bit Definitions *********************************************************/
 
@@ -135,4 +139,4 @@
  ************************************************************************************/
 
 #endif /* KINETIS_NMMCAU && KINETIS_NMMCAU > 0 */
-#endif /* __ARCH_ARM_SRC_KINETIS_KINETIS_MMCAU_H */
+#endif /* __ARCH_ARM_SRC_KINETIS_CHIP_KINETIS_MMCAU_H */

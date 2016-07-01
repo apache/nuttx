@@ -42,7 +42,7 @@
 
 #include <nuttx/config.h>
 
-#include "kinetis_memorymap.h"
+#include "chip/kinetis_memorymap.h"
 
 /************************************************************************************
  * Pre-processor Definitions

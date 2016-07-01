@@ -1,7 +1,7 @@
 /********************************************************************************************
- * arch/arm/src/kinetis/chip/kinetis_pinmux.h
+ * arch/arm/src/kinetis/chip/kinetis_memorymap.h
  *
- *   Copyright (C) 2011, 2015-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ********************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_KINETIS_CHIP_KINETIS_PINMUX_H
-#define __ARCH_ARM_SRC_KINETIS_CHIP_KINETIS_PINMUX_H
+#ifndef __ARCH_ARM_SRC_KINETIS_CHIP_KINETIS_MEMORYMAP_H
+#define __ARCH_ARM_SRC_KINETIS_CHIP_KINETIS_MEMORYMAP_H
 
 /********************************************************************************************
  * Included Files
@@ -49,15 +49,15 @@
  */
 
 #if defined(KINETIS_K20)
-#  include "chip/kinetis_k20pinmux.h"
+#  include "chip/kinetis_k20memorymap.h"
 #elif defined(KINETIS_K40)
-#  include "chip/kinetis_k40pinmux.h"
+#  include "chip/kinetis_k40memorymap.h"
 #elif defined(KINETIS_K60)
-#  include "chip/kinetis_k60pinmux.h"
+#  include "chip/kinetis_k60memorymap.h"
 #elif defined(KINETIS_K64)
-#  include "chip/kinetis_k64pinmux.h"
+#  include "chip/kinetis_k64memorymap.h"
 #else
-#  error "No pin multiplexing for this Kinetis part"
+#  error "No memory map for this Kinetis part"
 #endif
 
 /********************************************************************************************
@@ -76,4 +76,4 @@
  * Public Functions
  ********************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_KINETIS_CHIP_KINETIS_PINMUX_H */
+#endif /* __ARCH_ARM_SRC_KINETIS_CHIP_KINETIS_MEMORYMAP_H */

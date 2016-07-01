@@ -49,11 +49,11 @@
  */
 
 #if defined(KINETIS_K20) || defined(KINETIS_K40) || defined(KINETIS_K60)
-#  include "kinetis_k20k40k60fmc.h"
+#  include "chip/kinetis_k20k40k60fmc.h"
 #elif defined(KINETIS_K64)
-#  include "kinetis_k64fmc.h"
+#  include "chip/kinetis_k64fmc.h"
 #else
-#  error "No pin multiplexing for this Kinetis part"
+#  error "No FMC definitions for this Kinetis part"
 #endif
 
 /********************************************************************************************
