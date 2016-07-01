@@ -49,7 +49,7 @@
 
 #include "kinetis_config.h"
 #include "kinetis.h"
-#include "kinetis_uart.h"
+#include "chip/kinetis_uart.h"
 #include "chip/kinetis_sim.h"
 #include "chip/kinetis_pinmux.h"
 

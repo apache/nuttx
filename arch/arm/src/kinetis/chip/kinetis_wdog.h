@@ -1,7 +1,7 @@
 /********************************************************************************************
- * arch/arm/src/kinetis/kinetis_wdog.h
+ * arch/arm/src/kinetis/chip/kinetis_wdog.h
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ********************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_KINETIS_KINETIS_WDOG_H
-#define __ARCH_ARM_SRC_KINETIS_KINETIS_WDOG_H
+#ifndef __ARCH_ARM_SRC_KINETIS_CHIP_KINETIS_WDOG_H
+#define __ARCH_ARM_SRC_KINETIS_CHIP_KINETIS_WDOG_H
 
 /********************************************************************************************
  * Included Files
@@ -90,7 +90,9 @@
 #define WDOG_STCTRLH_DBGEN           (1 << 5)  /* Bit 5:  Enables or disables WDOG in Debug mode */
 #define WDOG_STCTRLH_STOPEN          (1 << 6)  /* Bit 6:  Enables or disables WDOG in stop mode */
 #define WDOG_STCTRLH_WAITEN          (1 << 7)  /* Bit 7:  Enables or disables WDOG in wait mode */
-#define WDOG_STCTRLH_STNDBYEN        (1 << 8)  /* Bit 8:  Enables or disables WDOG in Standby mode */
+#ifndef KINETIS_K64
+#  define WDOG_STCTRLH_STNDBYEN      (1 << 8)  /* Bit 8:  Enables or disables WDOG in Standby mode */
+#endif
                                                /* Bit 9:  Reserved */
 #define WDOG_STCTRLH_TESTWDOG        (1 << 10) /* Bit 10: Selects functional test mode */
 #define WDOG_STCTRLH_TESTSEL         (1 << 11) /* Bit 11: Selects the test to be run */
@@ -132,4 +134,4 @@
  * Public Functions
  ********************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_KINETIS_KINETIS_WDOG_H */
+#endif /* __ARCH_ARM_SRC_KINETIS_CHIP_KINETIS_WDOG_H */

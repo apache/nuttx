@@ -1,7 +1,7 @@
 /************************************************************************************
- * arch/arm/src/kinetis/kinetis_usbdcd.h
+ * arch/arm/src/kinetis/chip/kinetis_usbdcd.h
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_KINETIS_KINETIS_USBDCD_H
-#define __ARCH_ARM_SRC_KINETIS_KINETIS_USBDCD_H
+#ifndef __ARCH_ARM_SRC_KINETIS_CHIP_KINETIS_USBDCD_H
+#define __ARCH_ARM_SRC_KINETIS_CHIP_KINETIS_USBDCD_H
 
 /************************************************************************************
  * Included Files
@@ -50,12 +50,17 @@
 
 /* Register Offsets *****************************************************************/
 
-#define KINETIS_USBDCD_CONTROL_OFFSET    0x0000 /* Control Register */
-#define KINETIS_USBDCD_CLOCK_OFFSET      0x0004 /* Clock Register */
-#define KINETIS_USBDCD_STATUS_OFFSET     0x0008 /* Status Register */
-#define KINETIS_USBDCD_TIMER0_OFFSET     0x0010 /* TIMER0 Register */
-#define KINETIS_USBDCD_TIMER1_OFFSET     0x0014 /* TIMER1 Register */
-#define KINETIS_USBDCD_TIMER2_OFFSET     0x0018 /* TIMER2 Register */
+#define KINETIS_USBDCD_CONTROL_OFFSET       0x0000 /* Control Register */
+#define KINETIS_USBDCD_CLOCK_OFFSET         0x0004 /* Clock Register */
+#define KINETIS_USBDCD_STATUS_OFFSET        0x0008 /* Status Register */
+#define KINETIS_USBDCD_TIMER0_OFFSET        0x0010 /* TIMER0 Register */
+#define KINETIS_USBDCD_TIMER1_OFFSET        0x0014 /* TIMER1 Register */
+#ifdef KINETIS_K64
+#  define KINETIS_USBDCD_TIMER2_BC11_OFFSET 0x0018 /* TIMER2_BC11 Register */
+#  define KINETIS_USBDCD_TIMER2_BC12_OFFSET 0x001c /* TIMER2_BC12 Register */
+#else
+#  define KINETIS_USBDCD_TIMER2_OFFSET      0x0018 /* TIMER2 Register */
+#endif
 
 /* Register Addresses ***************************************************************/
 
@@ -64,7 +69,12 @@
 #define KINETIS_USBDCD_STATUS            (KINETIS_USBDCD_BASE+KINETIS_USBDCD_STATUS_OFFSET)
 #define KINETIS_USBDCD_TIMER0            (KINETIS_USBDCD_BASE+KINETIS_USBDCD_TIMER0_OFFSET)
 #define KINETIS_USBDCD_TIMER1            (KINETIS_USBDCD_BASE+KINETIS_USBDCD_TIMER1_OFFSET)
-#define KINETIS_USBDCD_TIMER2            (KINETIS_USBDCD_BASE+KINETIS_USBDCD_TIMER2_OFFSET)
+#ifdef KINETIS_K64
+#  define KINETIS_USBDCD_TIMER2_BC11     (KINETIS_USBDCD_BASE+KINETIS_USBDCD_TIMER2_BC11_OFFSET)
+#  define KINETIS_USBDCD_TIMER2_BC12     (KINETIS_USBDCD_BASE+KINETIS_USBDCD_TIMER2_BC12_OFFSET)
+#else
+#  define KINETIS_USBDCD_TIMER2          (KINETIS_USBDCD_BASE+KINETIS_USBDCD_TIMER2_OFFSET)
+#endif
 
 /* Register Bit Definitions *********************************************************/
 
@@ -138,4 +148,4 @@
  * Public Functions
  ************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_KINETIS_KINETIS_USBDCD_H */
+#endif /* __ARCH_ARM_SRC_KINETIS_CHIP_KINETIS_USBDCD_H */
