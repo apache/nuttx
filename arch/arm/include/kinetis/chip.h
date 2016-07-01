@@ -1044,7 +1044,7 @@
 #  define KINETIS_NMMCAU          1            /* Hardware encryption */
 #  define KINETIS_NCRC            1            /* CRC */
 
-#if defined(CONFIG_ARCH_CHIP_MK64FX512VLL12)
+#elif defined(CONFIG_ARCH_CHIP_MK64FX512VLL12)
 #  undef  KINETIS_K20                          /* Not Kinetics K20 family */
 #  undef  KINETIS_K40                          /* Not Kinetics K40 family */
 #  undef  KINETIS_K60                          /* Not Kinetis K60 family */
@@ -1062,7 +1062,7 @@
 #  define KINETIS_NSDHC           1            /* SD host controller */
 #  define KINETIS_NI2C            3            /* Three I2C modules */
 #  define KINETIS_NUART           6            /* Six UART modues */
-#  define KINETIS_NSPI            3             Three SPI modules
+#  define KINETIS_NSPI            3            /* Three SPI modules */
 #  define KINETIS_NCAN            1            /* One CAN controllers */
 #  define KINETIS_NI2S            1            /* One I2S modules */
 #  define KINETIS_NSLCD           1            /* One segment LCD interface (up to 36x8/40x4) */
@@ -1111,7 +1111,7 @@
 #  define KINETIS_NRNG            1            /* Random number generator */
 #  define KINETIS_NMMCAU          1            /* Hardware encryption */
 #  define KINETIS_NCRC            1            /* CRC */
-//
+
 #elif defined(CONFIG_ARCH_CHIP_MK64FN1M0VDC12)
 #  undef  KINETIS_K20                          /* Not Kinetics K20 family */
 #  undef  KINETIS_K40                          /* Not Kinetics K40 family */
@@ -1164,7 +1164,7 @@
 #  define KINETIS_NSDHC           1            /* SD host controller */
 #  define KINETIS_NI2C            3            /* Three I2C modules */
 #  define KINETIS_NUART           6            /* Six UART modues */
-#  define KINETIS_NSPI            3             Three SPI modules
+#  define KINETIS_NSPI            3            /* Three SPI modules */
 #  define KINETIS_NCAN            1            /* One CAN controllers */
 #  define KINETIS_NI2S            1            /* One I2S modules */
 #  define KINETIS_NSLCD           1            /* One segment LCD interface (up to 36x8/40x4) */
@@ -1198,7 +1198,7 @@
 #  define KINETIS_NSDHC           1            /* SD host controller */
 #  define KINETIS_NI2C            3            /* Three I2C modules */
 #  define KINETIS_NUART           6            /* Six UART modues */
-#  define KINETIS_NSPI            3             Three SPI modules
+#  define KINETIS_NSPI            3            /* Three SPI modules */
 #  define KINETIS_NCAN            1            /* One CAN controllers */
 #  define KINETIS_NI2S            1            /* One I2S modules */
 #  define KINETIS_NSLCD           1            /* One segment LCD interface (up to 36x8/40x4) */
@@ -1232,7 +1232,7 @@
 #  define KINETIS_NSDHC           1            /* SD host controller */
 #  define KINETIS_NI2C            3            /* Three I2C modules */
 #  define KINETIS_NUART           6            /* Six UART modues */
-#  define KINETIS_NSPI            3             Three SPI modules
+#  define KINETIS_NSPI            3            /* Three SPI modules */
 #  define KINETIS_NCAN            1            /* One CAN controllers */
 #  define KINETIS_NI2S            1            /* One I2S modules */
 #  define KINETIS_NSLCD           1            /* One segment LCD interface (up to 36x8/40x4) */
@@ -1247,7 +1247,7 @@
 #  define KINETIS_NRNG            1            /* Random number generator */
 #  define KINETIS_NMMCAU          1            /* Hardware encryption */
 #  define KINETIS_NCRC            1            /* CRC */
-//
+
 #elif defined(CONFIG_ARCH_CHIP_MK64FN1M0VMD12)
 #  undef  KINETIS_K20                          /* Not Kinetics K20 family */
 #  undef  KINETIS_K40                          /* Not Kinetics K40 family */
@@ -1266,7 +1266,7 @@
 #  define KINETIS_NSDHC           1            /* SD host controller */
 #  define KINETIS_NI2C            3            /* Three I2C modules */
 #  define KINETIS_NUART           6            /* Six UART modues */
-#  define KINETIS_NSPI            3             Three SPI modules
+#  define KINETIS_NSPI            3            /* Three SPI modules */
 #  define KINETIS_NCAN            1            /* One CAN controllers */
 #  define KINETIS_NI2S            1            /* One I2S modules */
 #  define KINETIS_NSLCD           1            /* One segment LCD interface (up to 36x8/40x4) */

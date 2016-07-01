@@ -1283,6 +1283,8 @@ nuttx/
  |   |   `- README.txt
  |   |- fire-stm32v2/
  |   |   `- README.txt
+ |   |- freedom-k64f/
+ |   |   `- README.txt
  |   |- freedom-kl25z/
  |   |   `- README.txt
  |   |- freedom-kl26z/

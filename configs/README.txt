@@ -261,6 +261,10 @@ configs/fire-stm32v2
   STM32F103VET6 chip.  See http://firestm32.taobao.com .  Version 2 and 3 of
   the boards are supported but only version 2 has been tested.
 
+configs/freedom-k64f
+  Kinetis K64 Cortex-M4 MCU.  This port uses the FreeScale FREEDOM-K64F
+  development board.
+
 configs/freedom-kl25z
 configs/freedom-kl26z
   These configurations are for the Freescale Freedom KL25Z and very similar
