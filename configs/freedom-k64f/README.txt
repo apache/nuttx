@@ -57,6 +57,12 @@ Serial Console
   The primary serial port interface signals are PTB16 UART1_RX and PTB17
   UART1_TX. These signals are connected to the OpenSDAv2 circuit.
 
+  REVISIT: The above quote was taken from the "FRDM-K64F Freedom Module User’s
+  Guide". It appears from the "K64 Sub-Family Reference Manual" that the only
+  options for UART1 are {PTC3, PTE1} for UART1_RX and {PTC4, PTE0} for UART1_TX.
+
+  PTB16 and PTB17 are valid options for UART0, however.
+
 LEDs and Buttons
 ================
 
