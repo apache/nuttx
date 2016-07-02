@@ -54,8 +54,34 @@ OpenSDAv2
 Serial Console
 ==============
 
+  USB VCOM Console
+  ----------------
   The primary serial port interface signals are PTB16 UART0_RX and PTB17
-  UART0_TX. These signals are connected to the OpenSDAv2 circuit.
+  UART0_TX. These signals are connected to the OpenSDAv2 VCOM circuit.
+
+  Serial Shield Console
+  ---------------------
+  An alternative serial port might use a standard serial shield mounted
+  on the Freedom Board.  In this case, Arduino pin D1 provides UART TX and
+  pin D0 privides UART RX.
+
+  The I/O headers on the FRDM-K64F board are arranged to enable
+  compatibility with Arduino shield. The outer rows of pins (even numbered
+  pins) on the headers, share the same mechanical spacing and placement with
+  the I/O headers on the Arduino Revision 3 (R3) standard.
+
+  The Arduino D0 and D1 pins then correspond to pins 2 and 4 on the J1 I/O
+  connector:
+
+    Arduino Pin              FRDM-K64F J1 Connector
+    ------------------------ -----------------------
+    UART TX, Arduino D1 pin  Pin 4, PTC17, UART3_TX
+    UART RX, Arduino D0 pin  Pin 2, PTC16, UART3_RX
+
+  Default Serial Console
+  ----------------------
+  By default, these configuration are setup to use the Serial Console on
+  UART3.  That, however, is easily reconfigured.
 
 LEDs and Buttons
 ================
@@ -344,7 +370,10 @@ Where <subdir> is one of the following:
        CONFIG_ARMV7M_OABI_TOOLCHAIN=y      : The older OABI version
        CONFIG_RAW_BINARY=y                 : Output formats: ELF and raw binary
 
-    3. An SDHC driver is under work and can be enabled in the NSH configuration
+    3. The Serial Console is provided on UART3 with the correct pin
+       configuration for use with an Arduino Serial Shield.
+
+    4. An SDHC driver is under work and can be enabled in the NSH configuration
        for further testing be setting the following configuration values as
        follows:
 
