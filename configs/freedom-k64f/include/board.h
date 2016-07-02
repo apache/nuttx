@@ -132,7 +132,24 @@
  *   BLUE   PTB21/SPI2_SCK/FB_AD30/CMP1_OUT
  *   GREEN  PTE26/ENET_1588_CLKIN/UART4_CTS_b/RTC_CLKOUT/USB0_CLKIN
  *
- * If CONFIG_ARCH_LEDs is defined, then NuttX will control the LED on board
+ * If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in any
+ * way.  The following definitions are used to access individual LEDs.
+ */
+
+/* LED index values for use with board_userled() */
+
+#define BOARD_LED_R       0
+#define BOARD_LED_G       1
+#define BOARD_LED_B       2
+#define BOARD_NLEDS       3
+
+/* LED bits for use with board_userled_all() */
+
+#define BOARD_LED_R_BIT   (1 << BOARD_LED_R)
+#define BOARD_LED_G_BIT   (1 << BOARD_LED_G)
+#define BOARD_LED_B_BIT   (1 << BOARD_LED_B)
+
+/* If CONFIG_ARCH_LEDs is defined, then NuttX will control the LED on board
  * the Freedom K64F.  The following definitions describe how NuttX controls
  * the LEDs:
  *

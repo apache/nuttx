@@ -40,6 +40,8 @@ CSRCS = k64_boot.c k64_spi.c
 
 ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += k64_autoleds.c
+else
+CSRCS += k64_userleds.c
 endif
 
 ifeq ($(CONFIG_ARCH_BUTTONS),y)
