@@ -198,15 +198,12 @@
  * maps to the correct alternative.
  */
 
-/* The primary serial port interface signals are PTB16 UART1_RX and PTB17 UART1_TX.
+/* The primary serial port interface signals are PTB16 UART0_RX and PTB17 UART0_TX.
  * These signals are connected to the OpenSDAv2 circuit.
- *
- * REVISIT: The above quote was taken from the "FRDM-K64F Freedom Module User’s
- * Guide". It appears from the "K64 Sub-Family Reference Manual" that the only
- * options for UART1 are {PTC3, PTE1} for UART1_RX and {PTC4, PTE0} for UART1_TX.
- *
- * PTB16 and PTB17 are valid options for UART0, however.
  */
+
+#define PIN_UART0_RX      PIN_UART0_RX_3
+#define PIN_UART0_TX      PIN_UART0_TX_3
 
 /************************************************************************************
  * Public Data
