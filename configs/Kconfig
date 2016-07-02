@@ -208,8 +208,9 @@ config ARCH_BOARD_FREEDOM_K64F
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
 	---help---
-		Kinetis K64 Cortex-M4 MCU.  This port uses the FreeScale FREEDOM-K64F
 		development board.
+		This port uses the FreeScale FREEDOM-K64F development board. This
+		board uses the Kinetis K64 MK64FN1M0VLL12 Cortex-M4 MCU.
 
 config ARCH_BOARD_FREEDOM_KL25Z
 	bool "Freescale Freedom KL25Z"

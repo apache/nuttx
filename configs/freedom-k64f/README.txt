@@ -4,283 +4,88 @@ README.txt
 This is the README file for the port of NuttX to the Freescale Freedom-K64F
 develoment board.
 
-REVISIT: At present, this is just a clone of the TWR-K60N512 README file.
-
 Contents
 ========
 
-  o Kinetis TWR-K60N512 Features
-  o Kinetis TWR-K60N512 Pin Configuration
-    - On-Board Connections
-    - Connections via the General Purpose Tower Plug-in (TWRPI) Socket
-    - Connections via the Tower Primary Connector Side A
-    - Connections via the Tower Primary Connector Side B
-    - TWR-SER Serial Board Connection
-  o LEDs
+  o Freedom K64F Features
+  o Serial Console
+  o LEDs and Buttons
   o Development Environment
   o GNU Toolchain Options
-  o IDEs
-  o NuttX EABI "buildroot" Toolchain
-  o NuttX OABI "buildroot" Toolchain
-  o NXFLAT Toolchain
 
 Kinetis TWR-K60N512 Features:
 =============================
 
-  o K60N512 in 144 MAPBGA, K60N512VMD100
-  o Capacitive Touch Pads
-  o Integrated, Open-Source JTAG
-  o SD Card Slot
-  o MMA7660 3-axis accelerometer
-  o Tower Plug-In (TWRPI) Socket for expansion (sensors, etc.)
-  o Touch TWRPI Socket adds support for various capacitive touch boards
-    (e.g. keypads, rotary dials, sliders, etc.)
-  o Tower connectivity for access to USB, Ethernet, RS232/RS485, CAN, SPI,
-    I²C, Flexbus, etc.
-  o Plus: Potentiometer, 4 LEDs, 2 pushbuttons, infrared port
+  The features of the FRDM-K64F hardware are as follows:
 
-Kinetis TWR-K60N512 Pin Configuration
-=====================================
+  - MK64FN1M0VLL12 MCU (120 MHz, 1 MB flash memory, 256 KB RAM, low-power,
+    crystal-less USB, and 100 LQFP)
+  - Dual role USB interface with micro-B USB connector
+  - RGB LED
+  - FXOS8700CQ - accelerometer and magnetometer
+  - Two user push buttons
+  - Flexible power supply option - OpenSDAv2 USB, K64 USB, and external
+    source
+  - Easy access to MCU input/output through Arduino R3TM compatible I/O
+    connectors
+  - Programmable OpenSDAv2 debug circuit supporting the CMSIS-DAP Interface
+    software that provides:
+    o Mass storage device (MSD) flash programming interface
+    o CMSIS-DAP debug interface over a driver-less USB HID connection
+       providing run-control debugging and compatibility with IDE tools
+    o Virtual serial port interface
+    o Open-source CMSIS-DAP software project: github.com/mbedmicro/CMSIS-DAP.
+  - Ethernet
+  - SDHC
+  - Add-on RF module: nRF24L01+ Nordic 2.4GHz Radio
+  - Add-on Bluetooth module: JY-MCU BT board V1.05 BT
 
-On-Board Connections
--------------------- ------------------------- -------- -------------------
-FEATURE              CONNECTION                PORT/PIN PIN FUNCTION
--------------------- ------------------------- -------- -------------------
-OSJTAG USB-to-serial OSJTAG Bridge RX Data     PTE9     UART5_RX
-Bridge               OSJTAG Bridge TX Data     PTE8     UART5_TX
-SD Card Slot         SD Clock                  PTE2     SDHC0_DCLK
-                     SD Command                PTE3     SDHC0_CMD
-                     SD Data0                  PTE1     SDHC0_D0
-                     SD Data1                  PTE0     SDHC0_D1
-                     SD Data2                  PTE5     SDHC0_D2
-                     SD Data3                  PTE4     SDHC0_D3
-                     SD Card Detect            PTE28    PTE28
-                     SD Write Protect          PTE27    PTE27
-Infrared Port        IR Transmit               PTD7     CMT_IRO
-                     IR Receive                PTC6     CMP0_IN0
-Pushbuttons          SW1 (IRQ0)                PTA19    PTA19
-                     SW2 (IRQ1)                PTE26    PTE26
-                     SW3 (RESET)               RESET_b  RESET_b
-Touch Pads           E1 / Touch                PTA4     TSI0_CH5
-                     E2 / Touch                PTB3     TSI0_CH8
-                     E3 / Touch                PTB2     TSI0_CH7
-                     E4 / Touch                PTB16    TSI0_CH9
-LEDs                 E1 / Orange LED           PTA11    PTA11
-                     E2 / Yellow LED           PTA28    PTA28
-                     E3 / Green LED            PTA29    PTA29
-                     E4 / Blue LED             PTA10    PTA10
-Potentiometer        Potentiometer (R71)       ?        ADC1_DM1
-Accelerometer        I2C SDA                   PTD9     I2C0_SDA
-                     I2C SCL                   PTD8     I2C0_SCL
-                     IRQ                       PTD10    PTD10
-Touch Pad / Segment  Electrode 0 (J3 Pin 3)    PTB0     TSI0_CH0
-LCD TWRPI Socket     Electrode 1 (J3 Pin 5)    PTB1     TSI0_CH6
-                     Electrode 2 (J3 Pin 7)    PTB2     TSI0_CH7
-                     Electrode 3 (J3 Pin 8)    PTB3     TSI0_CH8
-                     Electrode 4 (J3 Pin 9)    PTC0     TSI0_CH13
-                     Electrode 5 (J3 Pin 10)   PTC1     TSI0_CH14
-                     Electrode 6 (J3 Pin 11)   PTC2     TSI0_CH15
-                     Electrode 7 (J3 Pin 12)   PTA4     TSI0_CH5
-                     Electrode 8 (J3 Pin 13)   PTB16    TSI0_CH9
-                     Electrode 9 (J3 Pin 14)   PTB17    TSI0_CH10
-                     Electrode 10 (J3 Pin 15)  PTB18    TSI0_CH11
-                     Electrode 11 (J3 Pin 16)  PTB19    TSI0_CH12
-                     TWRPI ID0 (J3 Pin 17)     ?        ADC1_DP1
-                     TWRPI ID1 (J3 Pin 18)     ?        ADC1_SE16
+OpenSDAv2
+=========
 
-Connections via the General Purpose Tower Plug-in (TWRPI) Socket
--------------------- ------------------------- -------- -------------------
-FEATURE             CONNECTION                 PORT/PIN PIN FUNCTION
--------------------- ------------------------- -------- -------------------
-General Purpose      TWRPI AN0 (J4 Pin 8)       ?        ADC0_DP0/ADC1_DP3
-TWRPI Socket         TWRPI AN1 (J4 Pin 9)       ?        ADC0_DM0/ADC1_DM3
-                     TWRPI AN2 (J4 Pin 12)      ?        ADC1_DP0/ADC0_DP3
-                     TWRPI ID0 (J4 Pin 17)      ?        ADC0_DP1
-                     TWRPI ID1 (J4 Pin 18)      ?        ADC0_DM1
-                     TWRPI I2C SCL (J5 Pin 3)   PTD8     I2C0_SCL
-                     TWRPI I2C SDA (J5 Pin 4)   PTD9     I2C0_SDA
-                     TWRPI SPI MISO (J5 Pin 9)  PTD14    SPI2_SIN
-                     TWRPI SPI MOSI (J5 Pin 10) PTD13    SPI2_SOUT
-                     TWRPI SPI SS (J5 Pin 11)   PTD15    SPI2_PCS0
-                     TWRPI SPI CLK (J5 Pin 12)  PTD12    SPI2_SCK
-                     TWRPI GPIO0 (J5 Pin 15)    PTD10    PTD10
-                     TWRPI GPIO1 (J5 Pin 16)    PTB8     PTB8
-                     TWRPI GPIO2 (J5 Pin 17)    PTB9     PTB9
-                     TWRPI GPIO3 (J5 Pin 18)    PTA19    PTA19
-                     TWRPI GPIO4 (J5 Pin 19)    PTE26    PTE26
+  The FRDM-K64F platform features OpenSDAv2, the Freescale open-source
+  hardware embedded serial and debug adapter running an open-source
+  bootloader. This circuit offers several options for serial communication,
+  flash programming, and run-control debugging. OpenSDAv2 is an mbed
+  HDK-compatible debug interface preloaded with the open-source CMSIS-DAP
+  Interface firmware (mbed interface) for rapid prototyping and product
+  development.
 
-The TWR-K60N512 features two expansion card-edge connectors that interface
-to the Primary and Secondary Elevator boards in a Tower system. The Primary
-Connector (comprised of sides A and B) is utilized by the TWR-K60N512 while
-the Secondary Connector (comprised of sides C and D) only makes connections
-to the GND pins.
+Serial Console
+==============
 
-Connections via the Tower Primary Connector Side A
---- -------------------- --------------------------------
-PIN NAME                 USAGE
---- -------------------- --------------------------------
-A7  SCL0                 PTD8
-A8  SDA0                 PTD9
-A9  GPIO9 / CTS1         PTC19
-A10 GPIO8 / SDHC_D2      PTE5
-A11 GPIO7 / SD_WP_DET    PTE27
-A13 ETH_MDC              PTB1
-A14 ETH_MDIO             PTB0
-A16 ETH_RXDV             PTA14
-A19 ETH_RXD1             PTA12
-A20 ETH_RXD0             PTA13
-A21 SSI_MCLK             PTE6
-A22 SSI_BCLK             PTE12
-A23 SSI_FS               PTE11
-A24 SSI_RXD              PTE7
-A25 SSI_TXD              PTE10
-A27 AN3                  PGA0_DP/ADC0_DP0/ADC1_DP3
-A28 AN2                  PGA0_DM/ADC0_DM0/ADC1_DM3
-A29 AN1                  PGA1_DP/ADC1_DP0/ADC0_DP3
-A30 AN0                  PGA1_DM/ADC1_DM0/ADC0_DM3
-A33 TMR1                 PTA9
-A34 TMR0                 PTA8
-A35 GPIO6                PTB9
-A37 PWM3                 PTA6
-A38 PWM2                 PTC3
-A39 PWM1                 PTC2
-A40 PWM0                 PTC1
-A41 RXD0                 PTE25
-A42 TXD0                 PTE24
-A43 RXD1                 PTC16
-A44 TXD1                 PTC17
-A64 CLKOUT0              PTC3
-A66 EBI_AD14             PTC0
-A67 EBI_AD13             PTC1
-A68 EBI_AD12             PTC2
-A69 EBI_AD11             PTC4
-A70 EBI_AD10             PTC5
-A71 EBI_AD9              PTC6
-A71 EBI_R/W_b            PTC11
-A72 EBI_AD8              PTC7
-A73 EBI_AD7              PTC8
-A74 EBI_AD6              PTC9
-A75 EBI_AD5              PTC10
-A76 EBI_AD4              PTD2
-A77 EBI_AD3              PTD3
-A78 EBI_AD2              PTD4
-A79 EBI_AD1              PTD5
-A80 EBI_AD0              PTD6
+  The primary serial port interface signals are PTB16 UART1_RX and PTB17
+  UART1_TX. These signals are connected to the OpenSDAv2 circuit.
 
-Connections via the Tower Primary Connector Side B
---- -------------------- --------------------------------
-PIN NAME                 USAGE
---- -------------------- --------------------------------
-B7  SDHC_CLK / SPI1_CLK  PTE2
-B9  SDHC_D3 / SPI1_CS0_b PTE4
-B10 SDHC_CMD / SPI1_MOSI PTE1
-B11 SDHC_D0 / SPI1_MISO  PTE3
-B13 ETH_RXER             PTA5
-B15 ETH_TXEN             PTA15
-B19 ETH_TXD1             PTA17
-B20 ETH_TXD0             PTA16
-B21 GPIO1 / RTS1         PTC18
-B22 GPIO2 / SDHC_D1      PTE0
-B23 GPIO3                PTE28
-B24 CLKIN0               PTA18
-B25 CLKOUT1              PTE26
-B27 AN7                  PTB7
-B28 AN6                  PTB6
-B29 AN5                  PTB5
-B30 AN4                  PTB4
-B34 TMR2                 PTD6
-B35 GPIO4                PTB8
-B37 PWM7                 PTA2
-B38 PWM6                 PTA1
-B39 PWM5                 PTD5
-B40 PWM4                 PTA7
-B41 CANRX0               PTE25
-B42 CANTX0               PTE24
-B44 SPI0_MISO            PTD14
-B45 SPI0_MOSI            PTD13
-B46 SPI0_CS0_b           PTD11
-B47 SPI0_CS1_b           PTD15
-B48 SPI0_CLK             PTD12
-B50 SCL1                 PTD8
-B51 SDA1                 PTD9
-B52 GPIO5 / SD_CARD_DET  PTE28
-B55 IRQ_H                PTA24
-B56 IRQ_G                PTA24
-B57 IRQ_F                PTA25
-B58 IRQ_E                PTA25
-B59 IRQ_D                PTA26
-B60 IRQ_C                PTA26
-B61 IRQ_B                PTA27
-B62 IRQ_A                PTA27
-B63 EBI_ALE / EBI_CS1_b  PTD0
-B64 EBI_CS0_b            PTD1
-B66 EBI_AD15             PTB18
-B67 EBI_AD16             PTB17
-B68 EBI_AD17             PTB16
-B69 EBI_AD18             PTB11
-B70 EBI_AD19             PTB10
-B72 EBI_OE_b             PTB19
-B73 EBI_D7               PTB20
-B74 EBI_D6               PTB21
-B75 EBI_D5               PTB22
-B76 EBI_D4               PTB23
-B77 EBI_D3               PTC12
-B78 EBI_D2               PTC13
-B79 EBI_D1               PTC14
-B80 EBI_D0               PTC15
+LEDs and Buttons
+================
 
-TWR-SER Serial Board Connection
-===============================
+  RGB LED
+  -------
+  An RGB LED is connected through GPIO as shown below:
 
-The serial board connects into the tower and then maps to the tower pins to
-yet other functions (see TWR-SER.pdf).
+    LED    K64
+    ------ -------------------------------------------------------
+    RED    PTB22/SPI2_SOUT/FB_AD29/CMP2_OUT
+    BLUE   PTB21/SPI2_SCK/FB_AD30/CMP1_OUT
+    GREEN  PTE26/ENET_1588_CLKIN/UART4_CTS_b/RTC_CLKOUT/USB0_CLKIN
 
-For the serial port, the following jumpers are required:
+  If CONFIG_ARCH_LEDs is defined, then NuttX will control the LED on board the
+  Freedom KL25Z.  Usage of these LEDs is defined in include/board.h and
+  src/k64_leds.c.  The following definitions describe how NuttX controls the LEDs:
 
-  J15: 1-2 (default)
-  J17: 1-2 (default)
-  J18: 1-2 (default)
-  J19: 1-2 (default)
-
-The two connections map as follows:
-
-  A41 RXD0  - Not connected
-  A42 TXD0  - Not connected
-  A43 RXD1  - ELE_RXD (connects indirectory to DB-9 connector J8)
-  A44 TXD1  - ELE_TXD (connects indirectory to DB-9 connector J8)
-
-Finally, we can conclude that:
-
-  UART4 (PTE24/25) is not connected, and
-  UART3 (PTC16/17) is associated with the DB9 connector
-
-NOTE: UART5 is associated with OSJTAG bridge and may also be usable.
-
-LEDs
-====
-
-The TWR-K60N100 board has four LEDs labeled D2..D4 on the board.  Usage of
-these LEDs is defined in include/board.h and src/up_leds.c.  They are encoded
-as follows:
-
-    SYMBOL                Meaning                  LED1*    LED2    LED3    LED4
-    -------------------   -----------------------  -------  ------- ------- ------
-    LED_STARTED           NuttX has been started   ON       OFF     OFF     OFF
-    LED_HEAPALLOCATE      Heap has been allocated  OFF      ON      OFF     OFF
-    LED_IRQSENABLED       Interrupts enabled       ON       ON      OFF     OFF
-    LED_STACKCREATED      Idle stack created       OFF      OFF     ON      OFF
-    LED_INIRQ             In an interrupt**        ON       N/C     N/C     OFF
-    LED_SIGNAL            In a signal handler***   N/C      ON      N/C     OFF
-    LED_ASSERTION         An assertion failed      ON       ON      N/C     OFF
-    LED_PANIC             The system has crashed   N/C      N/C      N/C    ON
-    LED_IDLE              STM32 is is sleep mode   (Optional, not used)
-
-  * If LED1, LED2, LED3 are statically on, then NuttX probably failed to boot
-    and these LEDs will give you some indication of where the failure was
- ** The normal state is LED3 ON and LED1 faintly glowing.  This faint glow
-    is because of timer interrupts that result in the LED being illuminated
-    on a small proportion of the time.
-*** LED2 may also flicker normally if signals are processed.
+    SYMBOL                Meaning                 LED state
+                                                  RED   GREEN  BLUE
+    -------------------  -----------------------  -----------------
+    LED_STARTED          NuttX has been started    OFF  OFF  OFF
+    LED_HEAPALLOCATE     Heap has been allocated   OFF  OFF  ON
+    LED_IRQSENABLED      Interrupts enabled        OFF  OFF  ON
+    LED_STACKCREATED     Idle stack created        OFF  ON   OFF
+    LED_INIRQ            In an interrupt          (no change)
+    LED_SIGNAL           In a signal handler      (no change)
+    LED_ASSERTION        An assertion failed      (no change)
+    LED_PANIC            The system has crashed    FLASH OFF OFF
+    LED_IDLE             K64 is in sleep mode     (Optional, not used)
 
 Development Environment
 =======================
@@ -293,29 +98,22 @@ Development Environment
 GNU Toolchain Options
 =====================
 
-  The NuttX make system has been modified to support the following different
-  toolchain options.
+  The NuttX make system supports several GNU-based toolchains under Linux,
+  Cygwin under Windows, and Windoes native.  To select a toolchain:
 
-  1. The CodeSourcery GNU toolchain,
-  2. The devkitARM GNU toolchain,
-  3. The NuttX buildroot Toolchain (see below).
+  1. Use 'make menuconfig' and select the toolchain that you are using
+     under the System Type menu.
+  2. The default toolchain is the NuttX buildroot under Linux or Cygwin:
 
-  All testing has been conducted using the CodeSourcery Windows toolchain.  To
-  use the devkitARM or the NuttX GNU toolchain, you simply need to change the
-  the following configuration options to your .config (or defconfig) file:
+    CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y
 
-    CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y  : CodeSourcery under Windows
-    CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYL=y  : CodeSourcery under Linux
-    CONFIG_ARMV7M_TOOLCHAIN_DEVKITARM=y      : devkitARM under Windows
-    CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y      : NuttX buildroot under Linux or Cygwin (default)
+     If you are not using CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT, then you may
+     also have to modify the PATH in the setenv.h file if your make cannot
+     find the tools.
 
-  If you are not using CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT, then you may also have to modify
-  the PATH in the setenv.h file if your make cannot find the tools.
-
-  NOTE: the CodeSourcery (for Windows) and devkitARM toolchains are
-  Windows native toolchains.  The CodeSourcey (for Linux) and NuttX buildroot
-  toolchains are Cygwin and/or Linux native toolchains. There are several limitations
-  to using a Windows based toolchain in a Cygwin environment.  The three biggest are:
+  NOTE:  Using native Windows toolchains under Cygwin has some limitations.
+  This incuudes the CodeSourcery (for Windows) and devkitARM toolchains are
+  Windows native toolchains.  The biggest limitations are:
 
   1. The Windows toolchain cannot follow Cygwin paths.  Path conversions are
      performed automatically in the Cygwin makefiles using the 'cygpath' utility
@@ -334,143 +132,8 @@ GNU Toolchain Options
 
      An alias in your .bashrc file might make that less painful.
 
-  NOTE 1: The CodeSourcery toolchain (2009q1) does not work with default optimization
-  level of -Os (See Make.defs).  It will work with -O0, -O1, or -O2, but not with
-  -Os.
-
-  NOTE 2: The devkitARM toolchain includes a version of MSYS make.  Make sure that
-  the paths to Cygwin's /bin and /usr/bin directories appear BEFORE the devkitARM
-  path or will get the wrong version of make.
-
-IDEs
-====
-
-  NuttX is built using command-line make.  It can be used with an IDE, but some
-  effort will be required to create the project.
-
-  Makefile Build
-  --------------
-  Under Eclipse, it is pretty easy to set up an "empty makefile project" and
-  simply use the NuttX makefile to build the system.  That is almost for free
-  under Linux.  Under Windows, you will need to set up the "Cygwin GCC" empty
-  makefile project in order to work with Windows (Google for "Eclipse Cygwin" -
-  there is a lot of help on the internet).
-
-  Native Build
-  ------------
-  Here are a few tips before you start that effort:
-
-  1) Select the toolchain that you will be using in your .config file
-  2) Start the NuttX build at least one time from the Cygwin command line
-     before trying to create your project.  This is necessary to create
-     certain auto-generated files and directories that will be needed.
-  3) Set up include pathes:  You will need include/, arch/arm/src/k40,
-     arch/arm/src/common, arch/arm/src/armv7-m, and sched/.
-  4) All assembly files need to have the definition option -D __ASSEMBLY__
-     on the command line.
-
-  Startup files will probably cause you some headaches.  The NuttX startup file
-  is arch/arm/src/kinetis/k40_vectors.S.
-
-NuttX EABI "buildroot" Toolchain
-================================
-
-  A GNU GCC-based toolchain is assumed.  The files */setenv.sh should
-  be modified to point to the correct path to the Cortex-M4 GCC toolchain (if
-  different from the default in your PATH variable).
-
-  If you have no Cortex-M4 toolchain, one can be downloaded from the NuttX
-  Bitbucket download site (https://bitbucket.org/nuttx/buildroot/downloads/).
-  This GNU toolchain builds and executes in the Linux or Cygwin environment.
-
-  NOTE:  The NuttX toolchain may not include optimizations for Cortex-M4 (ARMv7E-M).
-
-  1. You must have already configured Nuttx in <some-dir>/nuttx.
-
-     cd tools
-     ./configure.sh twr-k60n512/<sub-dir>
-
-  2. Download the latest buildroot package into <some-dir>
-
-  3. unpack the buildroot tarball.  The resulting directory may
-     have versioning information on it like buildroot-x.y.z.  If so,
-     rename <some-dir>/buildroot-x.y.z to <some-dir>/buildroot.
-
-  4. cd <some-dir>/buildroot
-
-  5. cp configs/cortexm3-eabi-defconfig-4.6.3 .config
-
-  6. make oldconfig
-
-  7. make
-
-  8. Edit setenv.h, if necessary, so that the PATH variable includes
-     the path to the newly built binaries.
-
-  See the file configs/README.txt in the buildroot source tree.  That has more
-  details PLUS some special instructions that you will need to follow if you are
-  building a Cortex-M4 toolchain for Cygwin under Windows.
-
-  NOTE:  Unfortunately, the 4.6.3 EABI toolchain is not compatible with the
-  the NXFLAT tools.  See the top-level TODO file (under "Binary loaders") for
-  more information about this problem. If you plan to use NXFLAT, please do not
-  use the GCC 4.6.3 EABI toochain; instead use the GCC 4.3.3 OABI toolchain.
-  See instructions below.
-
-NuttX OABI "buildroot" Toolchain
-================================
-
-  The older, OABI buildroot toolchain is also available.  To use the OABI
-  toolchain:
-
-  1. When building the buildroot toolchain, either (1) modify the cortexm3-eabi-defconfig-4.6.3
-     configuration to use EABI (using 'make menuconfig'), or (2) use an exising OABI
-     configuration such as cortexm3-defconfig-4.3.3
-
-  2. Modify the Make.defs file to use the OABI conventions:
-
-    +CROSSDEV = arm-nuttx-elf-
-    +ARCHCPUFLAGS = -mtune=cortex-m3 -march=armv7-m -mfloat-abi=soft
-    +NXFLATLDFLAGS2 = $(NXFLATLDFLAGS1) -T$(TOPDIR)/binfmt/libnxflat/gnu-nxflat-gotoff.ld -no-check-sections
-    -CROSSDEV = arm-nuttx-eabi-
-    -ARCHCPUFLAGS = -mcpu=cortex-m3 -mthumb -mfloat-abi=soft
-    -NXFLATLDFLAGS2 = $(NXFLATLDFLAGS1) -T$(TOPDIR)/binfmt/libnxflat/gnu-nxflat-pcrel.ld -no-check-sections
-
-NXFLAT Toolchain
-================
-
-  If you are *not* using the NuttX buildroot toolchain and you want to use
-  the NXFLAT tools, then you will still have to build a portion of the buildroot
-  tools -- just the NXFLAT tools.  The buildroot with the NXFLAT tools can
-  be downloaded from the NuttX Bitbucket download site
-  (https://bitbucket.org/nuttx/nuttx/downloads/).
-
-  This GNU toolchain builds and executes in the Linux or Cygwin environment.
-
-  1. You must have already configured Nuttx in <some-dir>/nuttx.
-
-     cd tools
-     ./configure.sh lpcxpresso-lpc1768/<sub-dir>
-
-  2. Download the latest buildroot package into <some-dir>
-
-  3. unpack the buildroot tarball.  The resulting directory may
-     have versioning information on it like buildroot-x.y.z.  If so,
-     rename <some-dir>/buildroot-x.y.z to <some-dir>/buildroot.
-
-  4. cd <some-dir>/buildroot
-
-  5. cp configs/cortexm3-defconfig-nxflat .config
-
-  6. make oldconfig
-
-  7. make
-
-  8. Edit setenv.h, if necessary, so that the PATH variable includes
-     the path to the newly builtNXFLAT binaries.
-
-TWR-K60N512-specific Configuration Options
-==========================================
+Freedom K64F Configuration Options
+==================================
 
     CONFIG_ARCH - Identifies the arch/ subdirectory.  This sould
        be set to:
@@ -487,21 +150,21 @@ TWR-K60N512-specific Configuration Options
 
     CONFIG_ARCH_CHIP - Identifies the arch/*/chip subdirectory
 
-       CONFIG_ARCH_CHIP=k40
+       CONFIG_ARCH_CHIP=kinetis
 
     CONFIG_ARCH_CHIP_name - For use in C code to identify the exact
        chip:
 
-       CONFIG_ARCH_CHIP_MK60N512VMD100
+       CONFIG_ARCH_CHIP_MK64FN1M0VLL12
 
     CONFIG_ARCH_BOARD - Identifies the configs subdirectory and
        hence, the board that supports the particular chip or SoC.
 
-       CONFIG_ARCH_BOARD=twr-k60n512 (for the TWR-K60N512 development board)
+       CONFIG_ARCH_BOARD="freedom-k64f" (for the Freedom K64F development board)
 
     CONFIG_ARCH_BOARD_name - For use in C code
 
-       CONFIG_ARCH_BOARD_TWR_K60N512=y
+       CONFIG_ARCH_BOARD_FREEDOM_K64F=y
 
     CONFIG_ARCH_LOOPSPERMSEC - Must be calibrated for correct operation
        of delay loops

@@ -262,8 +262,8 @@ configs/fire-stm32v2
   the boards are supported but only version 2 has been tested.
 
 configs/freedom-k64f
-  Kinetis K64 Cortex-M4 MCU.  This port uses the FreeScale FREEDOM-K64F
-  development board.
+  This port uses the FreeScale FREEDOM-K64F development board. This board
+  uses the Kinetis K64 MK64FN1M0VLL12 Cortex-M4 MCU.
 
 configs/freedom-kl25z
 configs/freedom-kl26z

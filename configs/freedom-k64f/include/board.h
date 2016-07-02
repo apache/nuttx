@@ -124,24 +124,30 @@
 #endif
 
 /* LED definitions ******************************************************************/
-/* The FREEDOM-K64F has four LEDs:
+/* The Freedom K64F has a single RGB LED driven by the K64F as follows:
  *
- * 1. E1 / Orange LED   PTA11
- * 2. E2 / Yellow LED   PTA28
- * 3. E3 / Green LED    PTA29
- * 4  E4 / Blue LED     PTA10
+ *   LED    K64
+ *   ------ -------------------------------------------------------
+ *   RED    PTB22/SPI2_SOUT/FB_AD29/CMP2_OUT
+ *   BLUE   PTB21/SPI2_SCK/FB_AD30/CMP1_OUT
+ *   GREEN  PTE26/ENET_1588_CLKIN/UART4_CTS_b/RTC_CLKOUT/USB0_CLKIN
  *
- * The 4 LEDs are encoded as follows:
- */
-
-#define LED_STARTED       0  /* LED1 */
-#define LED_HEAPALLOCATE  1  /* LED2 */
-#define LED_IRQSENABLED   2  /* LED1 + LED2 */
-#define LED_STACKCREATED  3  /* LED3 */
-#define LED_INIRQ         4  /* LED1 + LED3 */
-#define LED_SIGNAL        5  /* LED2 + LED3 */
-#define LED_ASSERTION     6  /* LED1 + LED2 + LED3 */
-#define LED_PANIC         7  /* N/C  + N/C  + N/C + LED4 */
+ * If CONFIG_ARCH_LEDs is defined, then NuttX will control the LED on board
+ * the Freedom K64F.  The following definitions describe how NuttX controls
+ * the LEDs:
+ *
+ *   SYMBOL                Meaning                 LED state
+ *                                                 RED   GREEN  BLUE
+ *   -------------------  -----------------------  -----------------   */
+#define LED_STARTED       1 /* NuttX has been started    OFF  OFF  OFF */
+#define LED_HEAPALLOCATE  2 /* Heap has been allocated   OFF  OFF  ON  */
+#define LED_IRQSENABLED   0 /* Interrupts enabled        OFF  OFF  ON  */
+#define LED_STACKCREATED  3 /* Idle stack created        OFF  ON   OFF */
+#define LED_INIRQ         0 /* In an interrupt          (no change)    */
+#define LED_SIGNAL        0 /* In a signal handler      (no change)    */
+#define LED_ASSERTION     0 /* An assertion failed      (no change)    */
+#define LED_PANIC         4 /* The system has crashed    FLASH OFF OFF */
+#undef  LED_IDLE            /* K64 is in sleep mode     (Not used)     */
 
 /* Button definitions ***************************************************************/
 /* The FREEDOM-K64F has user buttons (plus a reset button):
