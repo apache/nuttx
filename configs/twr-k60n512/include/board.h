@@ -154,8 +154,8 @@
 #define BUTTON_SW1        0
 #define BUTTON_SW2        1
 
-#define BUTTON_SW1_BIT    (1 << BUTTON_WAKEUP)
-#define BUTTON_SW2_BIT    (1 << BUTTON_TAMPER)
+#define BUTTON_SW1_BIT    (1 << BUTTON_SW1)
+#define BUTTON_SW2_BIT    (1 << BUTTON_SW2)
 
 /* Alternative pin resolution *******************************************************/
 /* If there are alternative configurations for various pins in the
