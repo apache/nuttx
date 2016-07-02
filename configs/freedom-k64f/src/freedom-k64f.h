@@ -62,12 +62,29 @@
 #endif
 
 /* FREEDOM-K64F GPIOs ****************************************************************/
+/* A micro Secure Digital (SD) card slot is available on the FRDM-K64F connected to
+ * the SD Host Controller (SDHC) signals of the MCU. This slot will accept micro
+ * format SD memory cards. The SD card detect pin (PTE6) is an open switch that
+ * shorts with VDD when card is inserted.
+ *
+ * There is no Write Protect pin available to the K64F.
+ */
 
-#define GPIO_SD_CARDDETECT (GPIO_PULLUP | PIN_INT_BOTH | PIN_PORTE | PIN28)
-#define GPIO_SD_WRPROTECT  (GPIO_PULLUP | PIN_PORTE | PIN27)
+#define GPIO_SD_CARDDETECT (GPIO_PULLUP | PIN_INT_BOTH | PIN_PORTE | PIN6)
 
-#define GPIO_SW1           (GPIO_PULLUP | PIN_INT_BOTH | PIN_PORTA | PIN19)
-#define GPIO_SW2           (GPIO_PULLUP | PIN_INT_BOTH | PIN_PORTE | PIN26)
+/* Two push buttons, SW2 and SW3, are available on FRDM-K64F board, where SW2 is
+ * connected to PTC6 and SW3 is connected to PTA4. Besides the general purpose
+ * input/output functions, SW2 and SW3 can be low-power wake up signal. Also, only
+ * SW3 can be a non-maskable interrupt.
+ *
+ *   Switch    GPIO Function
+ *   --------- ---------------------------------------------------------------
+ *   SW2       PTC6/SPI0_SOUT/PD0_EXTRG/I2S0_RX_BCLK/FB_AD9/I2S0_MCLK/LLWU_P10
+ *   SW3       PTA4/FTM0_CH1/NMI_b/LLWU_P3
+ */
+
+#define GPIO_SW2           (GPIO_PULLUP | PIN_INT_BOTH | PIN_PORTC | PIN6)
+#define GPIO_SW3           (GPIO_PULLUP | PIN_INT_BOTH | PIN_PORTA | PIN4)
 
 /* An RGB LED is connected through GPIO as shown below:
  *

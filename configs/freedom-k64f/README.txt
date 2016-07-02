@@ -87,6 +87,18 @@ LEDs and Buttons
     LED_PANIC            The system has crashed    FLASH OFF OFF
     LED_IDLE             K64 is in sleep mode     (Optional, not used)
 
+  Buttons
+  -------
+  Two push buttons, SW2 and SW3, are available on FRDM-K64F board, where
+  SW2 is connected to PTC6 and SW3 is connected to PTA4. Besides the
+  general purpose input/output functions, SW2 and SW3 can be low-power
+  wake up signal. Also, only SW3 can be a non-maskable interrupt.
+
+  Switch    GPIO Function
+  --------- ---------------------------------------------------------------
+  SW2       PTC6/SPI0_SOUT/PD0_EXTRG/I2S0_RX_BCLK/FB_AD9/I2S0_MCLK/LLWU_P10
+  SW3       PTA4/FTM0_CH1/NMI_b/LLWU_P3
+
 Development Environment
 =======================
 

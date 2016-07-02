@@ -53,10 +53,15 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* The TWR-K60N512 has user buttons (plus a reset button):
+/* Two push buttons, SW2 and SW3, are available on FRDM-K64F board, where SW2 is
+ * connected to PTC6 and SW3 is connected to PTA4. Besides the general purpose
+ * input/output functions, SW2 and SW3 can be low-power wake up signal. Also, only
+ * SW3 can be a non-maskable interrupt.
  *
- * 1. SW1 (IRQ0)   PTA19
- * 2. SW2 (IRQ1)   PTE26
+ *   Switch    GPIO Function
+ *   --------- ---------------------------------------------------------------
+ *   SW2       PTC6/SPI0_SOUT/PD0_EXTRG/I2S0_RX_BCLK/FB_AD9/I2S0_MCLK/LLWU_P10
+ *   SW3       PTA4/FTM0_CH1/NMI_b/LLWU_P3
  */
 
 /****************************************************************************
@@ -78,8 +83,8 @@ void board_button_initialize(void)
 {
    /* Configure the two buttons as inputs */
 
-   kinetis_pinconfig(GPIO_SW1);
    kinetis_pinconfig(GPIO_SW2);
+   kinetis_pinconfig(GPIO_SW3);
 }
 
 /****************************************************************************
@@ -90,14 +95,14 @@ uint8_t board_buttons(void)
 {
   uint8_t ret = 0;
 
-  if (kinetis_gpioread(GPIO_SW1))
-    {
-      ret |= BUTTON_SW1_BIT;
-    }
-
   if (kinetis_gpioread(GPIO_SW2))
     {
       ret |= BUTTON_SW2_BIT;
+    }
+
+  if (kinetis_gpioread(GPIO_SW3))
+    {
+      ret |= BUTTON_SW3_BIT;
     }
 
   return ret
@@ -135,13 +140,13 @@ xcpt_t board_button_irq(int id, xcpt_t irqhandler)
 
   /* Map the button id to the GPIO bit set. */
 
-  if (id == BUTTON_SW1)
-    {
-      pinset = GPIO_SW1;
-    }
-  else if (id == BUTTON_SW2)
+  if (id == BUTTON_SW2)
     {
       pinset = GPIO_SW2;
+    }
+  else if (id == BUTTON_SW3)
+    {
+      pinset = GPIO_SW3;
     }
   else
     {

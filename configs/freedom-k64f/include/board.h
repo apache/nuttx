@@ -167,17 +167,22 @@
 #undef  LED_IDLE            /* K64 is in sleep mode     (Not used)     */
 
 /* Button definitions ***************************************************************/
-/* The FREEDOM-K64F has user buttons (plus a reset button):
+/* Two push buttons, SW2 and SW3, are available on FRDM-K64F board, where SW2 is
+ * connected to PTC6 and SW3 is connected to PTA4. Besides the general purpose
+ * input/output functions, SW2 and SW3 can be low-power wake up signal. Also, only
+ * SW3 can be a non-maskable interrupt.
  *
- * 1. SW1 (IRQ0)   PTA19
- * 2. SW2 (IRQ1)   PTE26
+ *   Switch    GPIO Function
+ *   --------- ---------------------------------------------------------------
+ *   SW2       PTC6/SPI0_SOUT/PD0_EXTRG/I2S0_RX_BCLK/FB_AD9/I2S0_MCLK/LLWU_P10
+ *   SW3       PTA4/FTM0_CH1/NMI_b/LLWU_P3
  */
 
-#define BUTTON_SW1        0
-#define BUTTON_SW2        1
+#define BUTTON_SW2        0
+#define BUTTON_SW3        1
 
-#define BUTTON_SW1_BIT    (1 << BUTTON_WAKEUP)
-#define BUTTON_SW2_BIT    (1 << BUTTON_TAMPER)
+#define BUTTON_SW2_BIT    (1 << BUTTON_WAKEUP)
+#define BUTTON_SW3_BIT    (1 << BUTTON_TAMPER)
 
 /* Alternative pin resolution *******************************************************/
 /* If there are alternative configurations for various pins in the
