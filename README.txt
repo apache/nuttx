@@ -1327,8 +1327,6 @@ nuttx/
  |   |   `- README.txt
  |   |- mirtoo/
  |   |   `- README.txt
- |   |- mt-db-x3/
- |   |   `- README.txt
  |   |- moteino-mega/
  |   |   `- README.txt
  |   |- mx1ads/
