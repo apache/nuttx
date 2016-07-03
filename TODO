@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated June 6, 2016)
+NuttX TODO List (Last updated July 3, 2016)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -17,7 +17,7 @@ nuttx/:
   (9)  Kernel/Protected Build
   (3)  C++ Support
   (6)  Binary loaders (binfmt/)
- (12)  Network (net/, drivers/net)
+ (11)  Network (net/, drivers/net)
   (4)  USB (drivers/usbdev, drivers/usbhost)
   (0)  Other drivers (drivers/)
  (11)  Libraries (libc/, libm/)
@@ -1350,12 +1350,6 @@ o File system / Generic drivers (fs/, drivers/)
 
   Title:       CHMOD(), TRUNCATE(), AND FSTAT()
   Description: Implement chmod(), truncate(), and fstat().
-  Status:      Open
-  Priority:    Low
-
-  Title:       CAN POLL SUPPORT
-  Description: At present, the CAN driver does not support the poll() method.
-               See drivers/can.c
   Status:      Open
   Priority:    Low
 
