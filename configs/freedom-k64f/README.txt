@@ -13,7 +13,7 @@ Contents
   o Development Environment
   o GNU Toolchain Options
 
-Kinetis TWR-K60N512 Features:
+Kinetis Freedom K64F Features:
 =============================
 
   The features of the FRDM-K64F hardware are as follows:
@@ -247,8 +247,8 @@ Freedom K64F Configuration Options
     CONFIG_KINETIS_UART3    -- Support UART3
     CONFIG_KINETIS_UART4    -- Support UART4
     CONFIG_KINETIS_UART5    -- Support UART5
-    CONFIG_KINETIS_ENET     -- Support Ethernet (K60 only)
-    CONFIG_KINETIS_RNGB     -- Support the random number generator(K60 only)
+    CONFIG_KINETIS_ENET     -- Support Ethernet (K5x, K6x, and K7x only)
+    CONFIG_KINETIS_RNGB     -- Support the random number generator(K6x only)
     CONFIG_KINETIS_FLEXCAN0 -- Support FlexCAN0
     CONFIG_KINETIS_FLEXCAN1 -- Support FlexCAN1
     CONFIG_KINETIS_SPI0     -- Support SPI0
@@ -269,7 +269,7 @@ Freedom K64F Configuration Options
     CONFIG_KINETIS_FTM2     -- Support FlexTimer 2
     CONFIG_KINETIS_LPTIMER  -- Support the low power timer
     CONFIG_KINETIS_RTC      -- Support RTC
-    CONFIG_KINETIS_SLCD     -- Support the segment LCD (K60 only)
+    CONFIG_KINETIS_SLCD     -- Support the segment LCD (K3x, K4x, and K5x only)
     CONFIG_KINETIS_EWM      -- Support the external watchdog
     CONFIG_KINETIS_CMT      -- Support Carrier Modulator Transmitter
     CONFIG_KINETIS_USBOTG   -- Support USB OTG (see also CONFIG_USBHOST and CONFIG_USBDEV)
@@ -311,7 +311,7 @@ Freedom K64F Configuration Options
     CONFIG_KINETIS_PORTDINTS -- Support 32 Port D interrupts
     CONFIG_KINETIS_PORTEINTS -- Support 32 Port E interrupts
 
-  Kinetis K60 specific device driver settings
+  Kinetis K64 specific device driver settings
 
     CONFIG_UARTn_SERIAL_CONSOLE - selects the UARTn (n=0..5) for the
       console and ttys0 (default is the UART0).
@@ -335,11 +335,11 @@ Freedom K64F Configuration Options
 Configurations
 ==============
 
-Each TWR-K60N512 configuration is maintained in a sub-directory and
+Each Freedom K64F configuration is maintained in a sub-directory and
 can be selected as follow:
 
     cd tools
-    ./configure.sh twr-k60n512/<subdir>
+    ./configure.sh freedom-k64f/<subdir>
     cd -
     . ./setenv.sh
 

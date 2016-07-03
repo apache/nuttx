@@ -37,7 +37,7 @@
  * 128Kb of SRAM beginning at address 0x1800:0000 (SRAM_L) and 0x2000:000
  * (SRAM_U).
  *
- * NOTE: that the first part of the K40 FLASH region is reserved for
+ * NOTE: that the first part of the K64 FLASH region is reserved for
  *       interrupt vectflash and, following that, is a region from 0x0000:0400
  *       to 0x0000:040f that is reserved for the FLASH control fields (FCF).
  *
