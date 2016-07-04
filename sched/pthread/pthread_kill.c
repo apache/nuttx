@@ -86,8 +86,8 @@
 int pthread_kill(pthread_t thread, int signo)
 {
 #ifdef HAVE_GROUP_MEMBERS
-  /* If group members are support then pthread_kill() differs from kill().
-   * kill(), in this case, must following the POSIX rules for delivery of
+  /* If group members are supported then pthread_kill() differs from kill().
+   * kill(), in this case, must follow the POSIX rules for delivery of
    * signals in the group environment.  Otherwise, kill(), like
    * pthread_kill() will just deliver the signal to the thread ID it is
    * requested to use.
