@@ -1,7 +1,7 @@
 //***************************************************************************
 // include/cxx/csignal
 //
-//   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+//   Copyright (C) 2009, 2016 Gregory Nutt. All rights reserved.
 //   Author: Gregory Nutt <gnutt@nuttx.org>
 //
 // Redistribution and use in source and binary forms, with or without
@@ -55,6 +55,7 @@ namespace std
   using ::siginfo_t;
   using ::sigaction;
   using ::kill;
+  using ::raise;
   using ::sigemptyset;
   using ::sigfillset;
   using ::sigaddset;
