@@ -56,11 +56,11 @@
 static int     gpio_open(FAR struct file *filep);
 static int     gpio_close(FAR struct file *filep);
 static ssize_t gpio_read(FAR struct file *filep, FAR char *buffer,
-                 size_t buflen);
+                         size_t buflen);
 static ssize_t gpio_write(FAR struct file *filep, FAR const char *buffer,
-                 size_t buflen);
+                          size_t buflen);
 static int     gpio_ioctl(FAR struct file *filep, int cmd,
-                 unsigned long arg);
+                          unsigned long arg);
 
 /****************************************************************************
  * Private Data
@@ -168,7 +168,7 @@ static int gpio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
   FAR struct inode *inode;
   FAR struct gpio_common_dev_s *dev;
-  int ret = OK;
+  int ret;
 
   DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
   inode = filep->f_inode;
@@ -176,53 +176,66 @@ static int gpio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   dev = inode->i_private;
 
   switch (cmd)
-  {
-  /* Command:     GPIO_WRITE
-   * Description: Set the value of an output GPIO
-   * Argument:    0=output a low value; 1=outut a high value
-   */
+    {
+      /* Command:     GPIO_WRITE
+       * Description: Set the value of an output GPIO
+       * Argument:    0=output a low value; 1=outut a high value
+       */
 
-  case GPIO_WRITE:
-    if (dev->gp_output)
-      {
-        FAR struct gpio_output_dev_s *outdev =
-          (FAR struct gpio_output_dev_s *)dev;
+      case GPIO_WRITE:
+        if (dev->gp_output)
+          {
+            FAR struct gpio_output_dev_s *outdev =
+              (FAR struct gpio_output_dev_s *)dev;
 
-        DEBUGASSERT(outdev->gpout_write != NULL &&
-                    ((arg == 0UL) || (arg == 1UL)));
-        ret = outdev->gpout_write(outdev, (int)arg);
-      }
-    else
-      {
-        ret = -EACCES;
-      }
-    break;
+            DEBUGASSERT(outdev->gpout_write != NULL &&
+                        ((arg == 0UL) || (arg == 1UL)));
+            ret = outdev->gpout_write(outdev, (int)arg);
+          }
+        else
+          {
+            ret = -EACCES;
+          }
+        break;
 
-  /* Command:     GPIO_READ
-   * Description: Read the value of an input or output GPIO
-   * Argument:    A pointer to an integer value to receive the result:
-   *              0=low value; 1=high value.
-   */
+      /* Command:     GPIO_READ
+       * Description: Read the value of an input or output GPIO
+       * Argument:    A pointer to an integer value to receive the result:
+       *              0=low value; 1=high value.
+       */
 
-  case GPIO_READ:
-    if (dev->gp_output)
-      {
-        FAR struct gpio_output_dev_s *outdev =
-          (FAR struct gpio_output_dev_s *)dev;
+      case GPIO_READ:
+        {
+          FAR int *ptr = (FAR int *)((uintptr_t)arg);
+          DEBUGASSERT(ptr != NULL);
 
-        DEBUGASSERT(outdev->gpout_read != NULL);
-        ret = outdev->gpout_read(outdev);
-      }
-    else
-      {
-        FAR struct gpio_input_dev_s *indev =
-          (FAR struct gpio_input_dev_s *)dev;
+          if (dev->gp_output)
+            {
+              FAR struct gpio_output_dev_s *outdev =
+                (FAR struct gpio_output_dev_s *)dev;
 
-        DEBUGASSERT(indev->gpin_read != NULL);
-        ret = indev->gpin_read(indev);
-      }
-    break;
-  }
+              DEBUGASSERT(outdev->gpout_read != NULL);
+              ret = outdev->gpout_read(outdev, ptr);
+            }
+          else
+            {
+              FAR struct gpio_input_dev_s *indev =
+                (FAR struct gpio_input_dev_s *)dev;
+
+              DEBUGASSERT(indev->gpin_read != NULL);
+              ret = indev->gpin_read(indev, ptr);
+            }
+
+          DEBUGASSERT(ret < 0 || *ptr == 0 || *ptr == 1);
+        }
+        break;
+
+      /* Unrecognized command */
+
+      default:
+        ret = -ENOTTY;
+        break;
+    }
 
   return ret;
 }

@@ -85,7 +85,7 @@ struct gpio_input_dev_s
 
   /* Fields unique to input pins */
 
-  CODE int (*gpin_read)(FAR struct gpio_input_dev_s *dev);
+  CODE int (*gpin_read)(FAR struct gpio_input_dev_s *dev, FAR int *value);
 
   /* Lower-half private definitions may follow */
 };
@@ -101,7 +101,7 @@ struct gpio_output_dev_s
 
   /* Fields unique to output pins */
 
-  CODE int (*gpout_read)(FAR struct gpio_output_dev_s *dev);
+  CODE int (*gpout_read)(FAR struct gpio_output_dev_s *dev, FAR int *value);
   CODE int (*gpout_write)(FAR struct gpio_output_dev_s *dev, int value);
 
   /* Lower-half private definitions may follow */
