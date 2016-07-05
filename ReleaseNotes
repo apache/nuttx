@@ -2570,7 +2570,7 @@ New features and extended functionality:
       particular for a CDC/ACM with MSC USB composite driver).
 
       Added a new RAM logging driver.  This will allow debug output into
-      a RAM buffer associated with a character driver at /dev/syslog.
+      a RAM buffer associated with a character driver at /dev/ramlog.
       Added the new command 'dmesg' to NSH that can be used to dump the
       current contents of the log.  This is useful for systems that do not
       have the usual serial console (for example, if you only have a

@@ -135,7 +135,6 @@ int ioctl(int fd, int req, unsigned long arg)
   int errcode;
 #if CONFIG_NFILE_DESCRIPTORS > 0
   FAR struct file *filep;
-  int ret = OK;
 
   /* Did we get a valid file descriptor? */
 
