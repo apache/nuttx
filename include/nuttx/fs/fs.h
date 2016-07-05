@@ -896,6 +896,26 @@ int file_fsync(FAR struct file *filep);
 #endif
 
 /****************************************************************************
+ * Name: file_ioctl
+ *
+ * Description:
+ *   Perform device specific operations.
+ *
+ * Parameters:
+ *   file     File structure instance
+ *   req      The ioctl command
+ *   arg      The argument of the ioctl cmd
+ *
+ * Return:
+ *   See ioctl() below.
+ *
+ ****************************************************************************/
+
+#if CONFIG_NFILE_DESCRIPTORS > 0
+int file_ioctl(FAR struct file *filep, int req, unsigned long arg);
+#endif
+
+/****************************************************************************
  * Name: file_vfcntl
  *
  * Description:

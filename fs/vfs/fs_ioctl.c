@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/vfs/fs_ioctl.c
  *
- *   Copyright (C) 2007-2010, 2012-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2010, 2012-2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -57,6 +57,47 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: file_ioctl
+ *
+ * Description:
+ *   Perform device specific operations.
+ *
+ * Parameters:
+ *   file     File structure instance
+ *   req      The ioctl command
+ *   arg      The argument of the ioctl cmd
+ *
+ * Return:
+ *   See ioctl() below.
+ *
+ ****************************************************************************/
+
+#if CONFIG_NFILE_DESCRIPTORS > 0
+int file_ioctl(FAR struct file *filep, int req, unsigned long arg)
+{
+  FAR struct inode *inode;
+  int ret;
+
+  /* Is a driver registered? Does it support the ioctl method? */
+
+  inode = filep->f_inode;
+  if (inode && inode->u.i_ops && inode->u.i_ops->ioctl)
+    {
+      /* Yes, then let it perform the ioctl */
+
+      ret = (int)inode->u.i_ops->ioctl(filep, req, arg);
+      if (ret < 0)
+        {
+          set_errno(-ret);
+          return ERROR;
+        }
+    }
+
+  return OK;
+}
+#endif /* CONFIG_NFILE_DESCRIPTORS > 0 */
+
+/****************************************************************************
  * Name: ioctl/fs_ioctl
  *
  * Description:
@@ -93,9 +134,8 @@ int ioctl(int fd, int req, unsigned long arg)
 {
   int errcode;
 #if CONFIG_NFILE_DESCRIPTORS > 0
-  FAR struct file     *filep;
-  FAR struct inode    *inode;
-  int                  ret = OK;
+  FAR struct file *filep;
+  int ret = OK;
 
   /* Did we get a valid file descriptor? */
 
@@ -130,20 +170,9 @@ int ioctl(int fd, int req, unsigned long arg)
 
   /* Is a driver registered? Does it support the ioctl method? */
 
-  inode = filep->f_inode;
-  if (inode && inode->u.i_ops && inode->u.i_ops->ioctl)
-    {
-      /* Yes, then let it perform the ioctl */
-
-      ret = (int)inode->u.i_ops->ioctl(filep, req, arg);
-      if (ret < 0)
-        {
-          errcode = -ret;
-          goto errout;
-        }
-    }
-
-  return ret;
+  return file_ioctl(filep, req, arg);
+#else
+  errcode = ENOTTY;
 #endif
 
 errout:
