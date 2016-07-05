@@ -199,7 +199,7 @@ static inline ssize_t syslog_dev_write(FAR const void *buf, size_t nbytes)
   /* Let the driver perform the write */
 
   inode = g_syslog_dev.sl_file.f_inode;
-  DEBUGASSERT(inode != NULL);
+  DEBUGASSERT(inode != NULL && inode->u.i_ops->write != NULL);
 
   return inode->u.i_ops->write(&g_syslog_dev.sl_file, buf, nbytes);
 }
