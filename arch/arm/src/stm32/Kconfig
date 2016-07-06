@@ -1285,6 +1285,7 @@ config STM32_LOWDENSITY
 config STM32_STM32F20XX
 	bool
 	default n
+	select ARCH_HAVE_TICKLESS
 
 config STM32_STM32F205
 	bool
@@ -2165,6 +2166,42 @@ config STM32_TSC
 	bool "TSC"
 	default n
 	depends on STM32_STM32F30XX
+
+config STM32_ONESHOT
+	bool "TIM one-shot wrapper"
+	default n if !SCHED_TICKLESS
+	default y if SCHED_TICKLESS
+	---help---
+		Enable a wrapper around the low level timer/counter functions to
+		support one-shot timer.
+
+config STM32_FREERUN
+	bool "TIM free-running wrapper"
+	default n if !SCHED_TICKLESS
+	default y if SCHED_TICKLESS
+	---help---
+		Enable a wrapper around the low level timer/counter functions to
+		support a free-running timer.
+
+if SCHED_TICKLESS
+
+config STM32_TICKLESS_ONESHOT
+	int "Tickless one-shot timer channel"
+	default 2
+	range 1 14
+	---help---
+		If the Tickless OS feature is enabled, the one clock must be
+		assigned to provided the one-shot timer needed by the OS.
+
+config STM32_TICKLESS_FREERUN
+	int "Tickless free-running timer channel"
+	default 5
+	range 1 14
+	---help---
+		If the Tickless OS feature is enabled, the one clock must be
+		assigned to provided the free-running timer needed by the OS.
+
+endif
 
 config STM32_USART1
 	bool "USART1"

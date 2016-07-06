@@ -538,6 +538,12 @@ static void stm32_tim_setperiod(FAR struct stm32_tim_dev_s *dev,
   stm32_putreg32(dev, STM32_BTIM_ARR_OFFSET, period);
 }
 
+static uint32_t stm32_tim_getcounter(FAR struct stm32_tim_dev_s *dev)
+{
+  DEBUGASSERT(dev != NULL);
+  return stm32_getreg32(dev, STM32_BTIM_CNT_OFFSET);
+}
+
 static int stm32_tim_setisr(FAR struct stm32_tim_dev_s *dev,
                             int (*handler)(int irq, void *context),
                             int source)
@@ -677,6 +683,12 @@ static void stm32_tim_disableint(FAR struct stm32_tim_dev_s *dev, int source)
 static void stm32_tim_ackint(FAR struct stm32_tim_dev_s *dev, int source)
 {
   stm32_putreg16(dev, STM32_BTIM_SR_OFFSET, ~ATIM_SR_UIF);
+}
+
+static int stm32_tim_checkint(FAR struct stm32_tim_dev_s *dev, int source)
+{
+  uint16_t regval = stm32_getreg16(dev, STM32_BTIM_SR_OFFSET);
+  return (regval & ATIM_SR_UIF) ? 1 : 0;
 }
 
 /************************************************************************************
@@ -1324,16 +1336,18 @@ static int stm32_tim_getcapture(FAR struct stm32_tim_dev_s *dev, uint8_t channel
 
 struct stm32_tim_ops_s stm32_tim_ops =
 {
-  .setmode        = &stm32_tim_setmode,
-  .setclock       = &stm32_tim_setclock,
-  .setperiod      = &stm32_tim_setperiod,
-  .setchannel     = &stm32_tim_setchannel,
-  .setcompare     = &stm32_tim_setcompare,
-  .getcapture     = &stm32_tim_getcapture,
-  .setisr         = &stm32_tim_setisr,
-  .enableint      = &stm32_tim_enableint,
-  .disableint     = &stm32_tim_disableint,
-  .ackint         = &stm32_tim_ackint
+  .setmode    = stm32_tim_setmode,
+  .setclock   = stm32_tim_setclock,
+  .setperiod  = stm32_tim_setperiod,
+  .getcounter = stm32_tim_getcounter,
+  .setchannel = stm32_tim_setchannel,
+  .setcompare = stm32_tim_setcompare,
+  .getcapture = stm32_tim_getcapture,
+  .setisr     = stm32_tim_setisr,
+  .enableint  = stm32_tim_enableint,
+  .disableint = stm32_tim_disableint,
+  .ackint     = stm32_tim_ackint,
+  .checkint   = stm32_tim_checkint,
 };
 
 #ifdef CONFIG_STM32_TIM1
