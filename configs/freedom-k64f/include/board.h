@@ -86,7 +86,7 @@
 #define BOARD_OUTDIV1        1              /* Core        = MCG,    120 MHz */
 #define BOARD_OUTDIV2        2              /* Bus         = MCG / 2, 60 MHz */
 #define BOARD_OUTDIV3        2              /* FlexBus     = MCG / 2, 60 MHz */
-#define BOARD_OUTDIV4        4              /* Flash clock = MCG / 4, 30 MHz */
+#define BOARD_OUTDIV4        5              /* Flash clock = MCG / 5, 24 MHz */
 
 #define BOARD_CORECLK_FREQ  (BOARD_MCG_FREQ / BOARD_OUTDIV1)
 #define BOARD_BUS_FREQ      (BOARD_MCG_FREQ / BOARD_OUTDIV2)
