@@ -142,7 +142,7 @@
 
 #define MCG_C5_PRDIV_SHIFT        (0)       /* Bits 0-4: PLL External Reference Divider */
 #define MCG_C5_PRDIV_MASK         (31 << MCG_C5_PRDIV_SHIFT)
-#  define MCG_C5_PRDIV(n)         (((n)-1) << MCG_C5_PRDIV_SHIFT) /* Divide factor n=1..25 */
+#  define MCG_C5_PRDIV(n)         ((uint32_t)((n)-1) << MCG_C5_PRDIV_SHIFT) /* n=1..25 */
 #define MCG_C5_PLLSTEN            (1 << 5)  /* Bit 5:  PLL Stop Enable */
 #define MCG_C5_PLLCLKEN           (1 << 6)  /* Bit 6:  PLL Clock Enable */
                                             /* Bit 7: Reserved */
@@ -151,7 +151,7 @@
 
 #define MCG_C6_VDIV_SHIFT         (0)       /* Bits 0-4: VCO Divider */
 #define MCG_C6_VDIV_MASK          (31 << MCG_C6_VDIV_SHIFT)
-#  define MCG_C6_VDIV(n)          (((n)-24) << MCG_C6_VDIV_SHIFT) /* Divide factor n=24..55 */
+#  define MCG_C6_VDIV(n)          ((uint32_t)((n)-24) << MCG_C6_VDIV_SHIFT) /* n=24..55 */
 #define MCG_C6_CME                (1 << 5)  /* Bit 5:  Clock Monitor Enable */
 #define MCG_C6_PLLS               (1 << 6)  /* Bit 6:  PLL Select */
 #define MCG_C6_LOLIE              (1 << 7)  /* Bit 7:  Loss of Lock Interrrupt Enable */

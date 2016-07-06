@@ -347,10 +347,8 @@ Where <subdir> is one of the following:
 
   nsh:
   ---
-    Configures the NuttShell (nsh) located at apps/examples/nsh.  The
-    Configuration enables both the serial and telnet NSH interfaces.
-    Support for the board's SPI-based MicroSD card is included
-    (but not passing tests as of this writing).
+    Configures the NuttShell (nsh) located at apps/examples/nsh using a
+    serial console on UART3.
 
     NOTES:
 
@@ -373,9 +371,8 @@ Where <subdir> is one of the following:
     3. The Serial Console is provided on UART3 with the correct pin
        configuration for use with an Arduino Serial Shield.
 
-    4. An SDHC driver is under work and can be enabled in the NSH configuration
-       for further testing be setting the following configuration values as
-       follows:
+    4. An SDHC driver is has not yet been tested but can be enabled in the NSH
+       configuration by setting the following configuration values as follows:
 
       CONFIG_KINETIS_SDHC=y                : Enable the SDHC driver
 

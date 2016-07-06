@@ -59,20 +59,23 @@
  */
 
 #define BOARD_EXTCLOCK       1              /* External clock */
-#define BOARD_EXTAL_FREQ     48000000       /* 50MHz Oscillator */
+#define BOARD_EXTAL_FREQ     50000000       /* 50MHz Oscillator from Micrel PHY */
 #define BOARD_XTAL32_FREQ    32768          /* 32KHz RTC Oscillator */
 
 /* PLL Configuration.  Either the external clock or crystal frequency is used to
  * select the PRDIV value. Only reference clock frequencies are supported that will
  * produce a 2MHz reference clock to the PLL.
  *
- *   PLL Input frequency:   PLLIN  = REFCLK/PRDIV = 50MHz/25 = 2MHz
- *   PLL Output frequency:  PLLOUT = PLLIN*VDIV   = 2Mhz*48 = 96MHz
+ *   PLL Input frequency:   PLLIN  = REFCLK / PRDIV = 50  Mhz  / 20 = 2.5 MHz
+ *   PLL Output frequency:  PLLOUT = PLLIN  * VDIV  = 2.5 Mhz  * 48 = 120 MHz
  *   MCG Frequency:         PLLOUT = 96MHz
+ *
+ * PRDIV register value is the divider minus one.  So 20 -> 19
+ * VDIV  regiser value is offset by 24.  So 28 -> 24
  */
 
-#define BOARD_PRDIV          19             /* PLL External Reference Divider */
-#define BOARD_VDIV           24             /* PLL VCO Divider (frequency multiplier) */
+#define BOARD_PRDIV          20             /* PLL External Reference Divider */
+#define BOARD_VDIV           48             /* PLL VCO Divider (frequency multiplier) */
 
 #define BOARD_PLLIN_FREQ     (BOARD_EXTAL_FREQ / BOARD_PRDIV)
 #define BOARD_PLLOUT_FREQ    (BOARD_PLLIN_FREQ * BOARD_VDIV)
@@ -80,10 +83,10 @@
 
 /* SIM CLKDIV1 dividers */
 
-#define BOARD_OUTDIV1        1              /* Core        = MCG, 96MHz */
-#define BOARD_OUTDIV2        2              /* Bus         = MCG/2, 48MHz */
-#define BOARD_OUTDIV3        2              /* FlexBus     = MCG/2, 48MHz */
-#define BOARD_OUTDIV4        4              /* Flash clock = MCG/4, 24MHz */
+#define BOARD_OUTDIV1        1              /* Core        = MCG,    120 MHz */
+#define BOARD_OUTDIV2        2              /* Bus         = MCG / 2, 60 MHz */
+#define BOARD_OUTDIV3        2              /* FlexBus     = MCG / 2, 60 MHz */
+#define BOARD_OUTDIV4        4              /* Flash clock = MCG / 4, 30 MHz */
 
 #define BOARD_CORECLK_FREQ  (BOARD_MCG_FREQ / BOARD_OUTDIV1)
 #define BOARD_BUS_FREQ      (BOARD_MCG_FREQ / BOARD_OUTDIV2)
