@@ -160,18 +160,20 @@ struct stm32_tim_ops_s
   int  (*setmode)(FAR struct stm32_tim_dev_s *dev, stm32_tim_mode_t mode);
   int  (*setclock)(FAR struct stm32_tim_dev_s *dev, uint32_t freq);
   void (*setperiod)(FAR struct stm32_tim_dev_s *dev, uint32_t period);
-
   uint32_t (*getcounter)(FAR struct stm32_tim_dev_s *dev);
 
   /* General and Advanced Timers Adds */
 
-  int  (*setchannel)(FAR struct stm32_tim_dev_s *dev, uint8_t channel, stm32_tim_channel_t mode);
-  int  (*setcompare)(FAR struct stm32_tim_dev_s *dev, uint8_t channel, uint32_t compare);
+  int  (*setchannel)(FAR struct stm32_tim_dev_s *dev, uint8_t channel,
+                     stm32_tim_channel_t mode);
+  int  (*setcompare)(FAR struct stm32_tim_dev_s *dev, uint8_t channel,
+                     uint32_t compare);
   int  (*getcapture)(FAR struct stm32_tim_dev_s *dev, uint8_t channel);
 
   /* Timer interrupts */
 
-  int  (*setisr)(FAR struct stm32_tim_dev_s *dev, int (*handler)(int irq, void *context), int source);
+  int  (*setisr)(FAR struct stm32_tim_dev_s *dev,
+                 int (*handler)(int irq, void *context), int source);
   void (*enableint)(FAR struct stm32_tim_dev_s *dev, int source);
   void (*disableint)(FAR struct stm32_tim_dev_s *dev, int source);
   void (*ackint)(FAR struct stm32_tim_dev_s *dev, int source);
