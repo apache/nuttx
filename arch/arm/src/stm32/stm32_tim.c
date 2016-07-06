@@ -294,6 +294,28 @@ struct stm32_tim_priv_s
  * Private Function prototypes
  ************************************************************************************/
 
+/* Register helpers */
+
+static inline uint16_t stm32_getreg16(FAR struct stm32_tim_dev_s *dev,
+                                      uint8_t offset);
+static inline void stm32_putreg16(FAR struct stm32_tim_dev_s *dev, uint8_t offset,
+                                  uint16_t value);
+static inline void stm32_modifyreg16(FAR struct stm32_tim_dev_s *dev,
+                                     uint8_t offset, uint16_t clearbits,
+                                     uint16_t setbits);
+static inline uint32_t stm32_getreg32(FAR struct stm32_tim_dev_s *dev,
+                                      uint8_t offset);
+static inline void stm32_putreg32(FAR struct stm32_tim_dev_s *dev, uint8_t offset,
+                                  uint32_t value);
+
+/* Timer helpers */
+
+static void stm32_tim_reload_counter(FAR struct stm32_tim_dev_s *dev);
+static void stm32_tim_enable(FAR struct stm32_tim_dev_s *dev);
+static void stm32_tim_disable(FAR struct stm32_tim_dev_s *dev);
+static void stm32_tim_reset(FAR struct stm32_tim_dev_s *dev);
+static void stm32_tim_gpioconfig(uint32_t cfg, stm32_tim_channel_t mode);
+
 /* Timer methods */
 
 static int stm32_tim_setmode(FAR struct stm32_tim_dev_s *dev, stm32_tim_mode_t mode);
@@ -634,6 +656,76 @@ static void stm32_tim_gpioconfig(uint32_t cfg, stm32_tim_channel_t mode)
 #endif
 
 /************************************************************************************
+ * Name: stm32_tim_setmode
+ ************************************************************************************/
+
+static int stm32_tim_setmode(FAR struct stm32_tim_dev_s *dev, stm32_tim_mode_t mode)
+{
+  uint16_t val = ATIM_CR1_CEN | ATIM_CR1_ARPE;
+
+  DEBUGASSERT(dev != NULL);
+
+  /* This function is not supported on basic timers. To enable or
+   * disable it, simply set its clock to valid frequency or zero.
+   */
+
+#if STM32_NBTIM > 0
+  if (((struct stm32_tim_priv_s *)dev)->base == STM32_TIM6_BASE
+#endif
+#if STM32_NBTIM > 1
+      ||  ((struct stm32_tim_priv_s *)dev)->base == STM32_TIM7_BASE
+#endif
+#if STM32_NBTIM > 0
+  )
+    {
+      return -EINVAL;
+    }
+#endif
+
+  /* Decode operational modes */
+
+  switch (mode & STM32_TIM_MODE_MASK)
+    {
+      case STM32_TIM_MODE_DISABLED:
+        val = 0;
+        break;
+
+      case STM32_TIM_MODE_DOWN:
+        val |= ATIM_CR1_DIR;
+
+      case STM32_TIM_MODE_UP:
+        break;
+
+      case STM32_TIM_MODE_UPDOWN:
+        val |= ATIM_CR1_CENTER1;
+        // Our default: Interrupts are generated on compare, when counting down
+        break;
+
+      case STM32_TIM_MODE_PULSE:
+        val |= ATIM_CR1_OPM;
+        break;
+
+      default:
+        return -EINVAL;
+    }
+
+  stm32_tim_reload_counter(dev);
+  stm32_putreg16(dev, STM32_BTIM_CR1_OFFSET, val);
+
+#if STM32_NATIM > 0
+  /* Advanced registers require Main Output Enable */
+
+    if (((struct stm32_tim_priv_s *)dev)->base == STM32_TIM1_BASE ||
+        ((struct stm32_tim_priv_s *)dev)->base == STM32_TIM8_BASE)
+      {
+        stm32_modifyreg16(dev, STM32_ATIM_BDTR_OFFSET, 0, ATIM_BDTR_MOE);
+      }
+#endif
+
+  return OK;
+}
+
+/************************************************************************************
  * Name: stm32_tim_setclock
  ************************************************************************************/
 
@@ -797,243 +889,6 @@ static uint32_t stm32_tim_getcounter(FAR struct stm32_tim_dev_s *dev)
 {
   DEBUGASSERT(dev != NULL);
   return stm32_getreg32(dev, STM32_BTIM_CNT_OFFSET);
-}
-
-/************************************************************************************
- * Name: stm32_tim_setisr
- ************************************************************************************/
-
-static int stm32_tim_setisr(FAR struct stm32_tim_dev_s *dev,
-                            int (*handler)(int irq, void *context),
-                            int source)
-{
-  int vectorno;
-
-  DEBUGASSERT(dev != NULL);
-  DEBUGASSERT(source == 0);
-
-  switch (((struct stm32_tim_priv_s *)dev)->base)
-    {
-#ifdef CONFIG_STM32_TIM1
-      case STM32_TIM1_BASE:
-        vectorno = STM32_IRQ_TIM1UP;
-        break;
-#endif
-#ifdef CONFIG_STM32_TIM2
-      case STM32_TIM2_BASE:
-        vectorno = STM32_IRQ_TIM2;
-        break;
-#endif
-#ifdef CONFIG_STM32_TIM3
-      case STM32_TIM3_BASE:
-        vectorno = STM32_IRQ_TIM3;
-        break;
-#endif
-#ifdef CONFIG_STM32_TIM4
-      case STM32_TIM4_BASE:
-        vectorno = STM32_IRQ_TIM4;
-        break;
-#endif
-#ifdef CONFIG_STM32_TIM5
-      case STM32_TIM5_BASE:
-        vectorno = STM32_IRQ_TIM5;
-        break;
-#endif
-#ifdef CONFIG_STM32_TIM6
-      case STM32_TIM6_BASE:
-        vectorno = STM32_IRQ_TIM6;
-        break;
-#endif
-#ifdef CONFIG_STM32_TIM7
-      case STM32_TIM7_BASE:
-        vectorno = STM32_IRQ_TIM7;
-        break;
-#endif
-#ifdef CONFIG_STM32_TIM8
-      case STM32_TIM8_BASE:
-        vectorno = STM32_IRQ_TIM8UP;
-        break;
-#endif
-#ifdef CONFIG_STM32_TIM9
-      case STM32_TIM9_BASE:
-        vectorno = STM32_IRQ_TIM9;
-        break;
-#endif
-#ifdef CONFIG_STM32_TIM10
-      case STM32_TIM10_BASE:
-        vectorno = STM32_IRQ_TIM10;
-        break;
-#endif
-#ifdef CONFIG_STM32_TIM11
-      case STM32_TIM11_BASE:
-        vectorno = STM32_IRQ_TIM11;
-        break;
-#endif
-#ifdef CONFIG_STM32_TIM12
-      case STM32_TIM12_BASE:
-        vectorno = STM32_IRQ_TIM12;
-        break;
-#endif
-#ifdef CONFIG_STM32_TIM13
-      case STM32_TIM13_BASE:
-        vectorno = STM32_IRQ_TIM13;
-        break;
-#endif
-#ifdef CONFIG_STM32_TIM14
-      case STM32_TIM14_BASE:
-        vectorno = STM32_IRQ_TIM14;
-        break;
-#endif
-#ifdef CONFIG_STM32_TIM15
-      case STM32_TIM15_BASE:
-        vectorno = STM32_IRQ_TIM15;
-        break;
-#endif
-#ifdef CONFIG_STM32_TIM16
-      case STM32_TIM16_BASE:
-        vectorno = STM32_IRQ_TIM16;
-        break;
-#endif
-#ifdef CONFIG_STM32_TIM17
-      case STM32_TIM17_BASE:
-        vectorno = STM32_IRQ_TIM17;
-        break;
-#endif
-
-      default:
-        return -EINVAL;
-    }
-
-  /* Disable interrupt when callback is removed */
-
-  if (!handler)
-    {
-      up_disable_irq(vectorno);
-      irq_detach(vectorno);
-      return OK;
-    }
-
-  /* Otherwise set callback and enable interrupt */
-
-  irq_attach(vectorno, handler);
-  up_enable_irq(vectorno);
-
-#ifdef CONFIG_ARCH_IRQPRIO
-  /* Set the interrupt priority */
-
-  up_prioritize_irq(vectorno, NVIC_SYSH_PRIORITY_DEFAULT);
-#endif
-
-  return OK;
-}
-
-/************************************************************************************
- * Name: stm32_tim_enableint
- ************************************************************************************/
-
-static void stm32_tim_enableint(FAR struct stm32_tim_dev_s *dev, int source)
-{
-  DEBUGASSERT(dev != NULL);
-  stm32_modifyreg16(dev, STM32_BTIM_DIER_OFFSET, 0, ATIM_DIER_UIE);
-}
-
-/************************************************************************************
- * Name: stm32_tim_disableint
- ************************************************************************************/
-
-static void stm32_tim_disableint(FAR struct stm32_tim_dev_s *dev, int source)
-{
-  DEBUGASSERT(dev != NULL);
-  stm32_modifyreg16(dev, STM32_BTIM_DIER_OFFSET, ATIM_DIER_UIE, 0);
-}
-
-/************************************************************************************
- * Name: stm32_tim_ackint
- ************************************************************************************/
-
-static void stm32_tim_ackint(FAR struct stm32_tim_dev_s *dev, int source)
-{
-  stm32_putreg16(dev, STM32_BTIM_SR_OFFSET, ~ATIM_SR_UIF);
-}
-
-/************************************************************************************
- * Name: stm32_tim_checkint
- ************************************************************************************/
-
-static int stm32_tim_checkint(FAR struct stm32_tim_dev_s *dev, int source)
-{
-  uint16_t regval = stm32_getreg16(dev, STM32_BTIM_SR_OFFSET);
-  return (regval & ATIM_SR_UIF) ? 1 : 0;
-}
-
-/************************************************************************************
- * Name: stm32_tim_setmode
- ************************************************************************************/
-
-static int stm32_tim_setmode(FAR struct stm32_tim_dev_s *dev, stm32_tim_mode_t mode)
-{
-  uint16_t val = ATIM_CR1_CEN | ATIM_CR1_ARPE;
-
-  DEBUGASSERT(dev != NULL);
-
-  /* This function is not supported on basic timers. To enable or
-   * disable it, simply set its clock to valid frequency or zero.
-   */
-
-#if STM32_NBTIM > 0
-  if (((struct stm32_tim_priv_s *)dev)->base == STM32_TIM6_BASE
-#endif
-#if STM32_NBTIM > 1
-      ||  ((struct stm32_tim_priv_s *)dev)->base == STM32_TIM7_BASE
-#endif
-#if STM32_NBTIM > 0
-  )
-    {
-      return -EINVAL;
-    }
-#endif
-
-  /* Decode operational modes */
-
-  switch (mode & STM32_TIM_MODE_MASK)
-    {
-      case STM32_TIM_MODE_DISABLED:
-        val = 0;
-        break;
-
-      case STM32_TIM_MODE_DOWN:
-        val |= ATIM_CR1_DIR;
-
-      case STM32_TIM_MODE_UP:
-        break;
-
-      case STM32_TIM_MODE_UPDOWN:
-        val |= ATIM_CR1_CENTER1;
-        // Our default: Interrupts are generated on compare, when counting down
-        break;
-
-      case STM32_TIM_MODE_PULSE:
-        val |= ATIM_CR1_OPM;
-        break;
-
-      default:
-        return -EINVAL;
-    }
-
-  stm32_tim_reload_counter(dev);
-  stm32_putreg16(dev, STM32_BTIM_CR1_OFFSET, val);
-
-#if STM32_NATIM > 0
-  /* Advanced registers require Main Output Enable */
-
-    if (((struct stm32_tim_priv_s *)dev)->base == STM32_TIM1_BASE ||
-        ((struct stm32_tim_priv_s *)dev)->base == STM32_TIM8_BASE)
-      {
-        stm32_modifyreg16(dev, STM32_ATIM_BDTR_OFFSET, 0, ATIM_BDTR_MOE);
-      }
-#endif
-
-  return OK;
 }
 
 /************************************************************************************
@@ -1609,6 +1464,173 @@ static int stm32_tim_getcapture(FAR struct stm32_tim_dev_s *dev, uint8_t channel
     }
 
   return -EINVAL;
+}
+
+/************************************************************************************
+ * Name: stm32_tim_setisr
+ ************************************************************************************/
+
+static int stm32_tim_setisr(FAR struct stm32_tim_dev_s *dev,
+                            int (*handler)(int irq, void *context),
+                            int source)
+{
+  int vectorno;
+
+  DEBUGASSERT(dev != NULL);
+  DEBUGASSERT(source == 0);
+
+  switch (((struct stm32_tim_priv_s *)dev)->base)
+    {
+#ifdef CONFIG_STM32_TIM1
+      case STM32_TIM1_BASE:
+        vectorno = STM32_IRQ_TIM1UP;
+        break;
+#endif
+#ifdef CONFIG_STM32_TIM2
+      case STM32_TIM2_BASE:
+        vectorno = STM32_IRQ_TIM2;
+        break;
+#endif
+#ifdef CONFIG_STM32_TIM3
+      case STM32_TIM3_BASE:
+        vectorno = STM32_IRQ_TIM3;
+        break;
+#endif
+#ifdef CONFIG_STM32_TIM4
+      case STM32_TIM4_BASE:
+        vectorno = STM32_IRQ_TIM4;
+        break;
+#endif
+#ifdef CONFIG_STM32_TIM5
+      case STM32_TIM5_BASE:
+        vectorno = STM32_IRQ_TIM5;
+        break;
+#endif
+#ifdef CONFIG_STM32_TIM6
+      case STM32_TIM6_BASE:
+        vectorno = STM32_IRQ_TIM6;
+        break;
+#endif
+#ifdef CONFIG_STM32_TIM7
+      case STM32_TIM7_BASE:
+        vectorno = STM32_IRQ_TIM7;
+        break;
+#endif
+#ifdef CONFIG_STM32_TIM8
+      case STM32_TIM8_BASE:
+        vectorno = STM32_IRQ_TIM8UP;
+        break;
+#endif
+#ifdef CONFIG_STM32_TIM9
+      case STM32_TIM9_BASE:
+        vectorno = STM32_IRQ_TIM9;
+        break;
+#endif
+#ifdef CONFIG_STM32_TIM10
+      case STM32_TIM10_BASE:
+        vectorno = STM32_IRQ_TIM10;
+        break;
+#endif
+#ifdef CONFIG_STM32_TIM11
+      case STM32_TIM11_BASE:
+        vectorno = STM32_IRQ_TIM11;
+        break;
+#endif
+#ifdef CONFIG_STM32_TIM12
+      case STM32_TIM12_BASE:
+        vectorno = STM32_IRQ_TIM12;
+        break;
+#endif
+#ifdef CONFIG_STM32_TIM13
+      case STM32_TIM13_BASE:
+        vectorno = STM32_IRQ_TIM13;
+        break;
+#endif
+#ifdef CONFIG_STM32_TIM14
+      case STM32_TIM14_BASE:
+        vectorno = STM32_IRQ_TIM14;
+        break;
+#endif
+#ifdef CONFIG_STM32_TIM15
+      case STM32_TIM15_BASE:
+        vectorno = STM32_IRQ_TIM15;
+        break;
+#endif
+#ifdef CONFIG_STM32_TIM16
+      case STM32_TIM16_BASE:
+        vectorno = STM32_IRQ_TIM16;
+        break;
+#endif
+#ifdef CONFIG_STM32_TIM17
+      case STM32_TIM17_BASE:
+        vectorno = STM32_IRQ_TIM17;
+        break;
+#endif
+
+      default:
+        return -EINVAL;
+    }
+
+  /* Disable interrupt when callback is removed */
+
+  if (!handler)
+    {
+      up_disable_irq(vectorno);
+      irq_detach(vectorno);
+      return OK;
+    }
+
+  /* Otherwise set callback and enable interrupt */
+
+  irq_attach(vectorno, handler);
+  up_enable_irq(vectorno);
+
+#ifdef CONFIG_ARCH_IRQPRIO
+  /* Set the interrupt priority */
+
+  up_prioritize_irq(vectorno, NVIC_SYSH_PRIORITY_DEFAULT);
+#endif
+
+  return OK;
+}
+
+/************************************************************************************
+ * Name: stm32_tim_enableint
+ ************************************************************************************/
+
+static void stm32_tim_enableint(FAR struct stm32_tim_dev_s *dev, int source)
+{
+  DEBUGASSERT(dev != NULL);
+  stm32_modifyreg16(dev, STM32_BTIM_DIER_OFFSET, 0, ATIM_DIER_UIE);
+}
+
+/************************************************************************************
+ * Name: stm32_tim_disableint
+ ************************************************************************************/
+
+static void stm32_tim_disableint(FAR struct stm32_tim_dev_s *dev, int source)
+{
+  DEBUGASSERT(dev != NULL);
+  stm32_modifyreg16(dev, STM32_BTIM_DIER_OFFSET, ATIM_DIER_UIE, 0);
+}
+
+/************************************************************************************
+ * Name: stm32_tim_ackint
+ ************************************************************************************/
+
+static void stm32_tim_ackint(FAR struct stm32_tim_dev_s *dev, int source)
+{
+  stm32_putreg16(dev, STM32_BTIM_SR_OFFSET, ~ATIM_SR_UIF);
+}
+
+/************************************************************************************
+ * Name: stm32_tim_checkint
+ ************************************************************************************/
+
+static int stm32_tim_checkint(FAR struct stm32_tim_dev_s *dev, int source)
+{
+  uint16_t regval = stm32_getreg16(dev, STM32_BTIM_SR_OFFSET);
+  return (regval & ATIM_SR_UIF) ? 1 : 0;
 }
 
 /************************************************************************************
