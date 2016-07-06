@@ -44,6 +44,7 @@
 
 #include <stdint.h>
 #include <time.h>
+#include <debug.h>
 
 #include "stm32_tim.h"
 

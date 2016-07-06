@@ -44,8 +44,9 @@
 #include <stdbool.h>
 #include <assert.h>
 #include <errno.h>
+#include <debug.h>
 
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 #include <nuttx/clock.h>
 
 #include "stm32_oneshot.h"
@@ -223,7 +224,7 @@ int stm32_oneshot_start(struct stm32_oneshot_s *oneshot,
 
   /* Was the oneshot already running? */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   if (oneshot->running)
     {
       /* Yes.. then cancel it */
@@ -276,7 +277,7 @@ int stm32_oneshot_start(struct stm32_oneshot_s *oneshot,
    */
 
   oneshot->running = true;
-  irqrestore(flags);
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -317,7 +318,7 @@ int stm32_oneshot_cancel(struct stm32_oneshot_s *oneshot,
 
   /* Was the timer running? */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   if (!oneshot->running)
     {
       /* No.. Just return zero timer remaining and successful cancellation.
@@ -327,7 +328,7 @@ int stm32_oneshot_cancel(struct stm32_oneshot_s *oneshot,
 
       ts->tv_sec  = 0;
       ts->tv_nsec = 0;
-      irqrestore(flags);
+      leave_critical_section(flags);
       return OK;
     }
 
@@ -355,7 +356,7 @@ int stm32_oneshot_cancel(struct stm32_oneshot_s *oneshot,
   oneshot->running = false;
   oneshot->handler = NULL;
   oneshot->arg     = NULL;
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   /* Did the caller provide us with a location to return the time
    * remaining?

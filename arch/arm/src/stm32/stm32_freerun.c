@@ -45,7 +45,7 @@
 #include <assert.h>
 #include <errno.h>
 
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 #include <nuttx/clock.h>
 
 #include "stm32_freerun.h"
@@ -201,7 +201,7 @@ int stm32_freerun_counter(struct stm32_freerun_s *freerun,
    * be lost.
    */
 
-  flags    = irqsave();
+  flags    = enter_critical_section();
 
   overflow = freerun->overflow;
   counter  = STM32_TIM_GETCOUNTER(freerun->tch);
@@ -228,7 +228,7 @@ int stm32_freerun_counter(struct stm32_freerun_s *freerun,
       freerun->overflow = overflow;
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
 
   tmrinfo("counter=%lu (%lu) overflow=%lu, pending=%i\n",
          (unsigned long)counter,  (unsigned long)verify,
