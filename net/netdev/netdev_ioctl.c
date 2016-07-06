@@ -1026,13 +1026,13 @@ static int netdev_rtioctl(FAR struct socket *psock, int cmd,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: netdev_ioctl
+ * Name: psock_ioctl
  *
  * Description:
  *   Perform network device specific operations.
  *
  * Parameters:
- *   sockfd   Socket descriptor of device
+ *   psock    A pointer to a NuttX-specific, internal socket structure
  *   cmd      The ioctl command
  *   arg      The argument of the ioctl cmd
  *
@@ -1041,7 +1041,7 @@ static int netdev_rtioctl(FAR struct socket *psock, int cmd,
  *   On a failure, -1 is returned with errno set appropriately
  *
  *   EBADF
- *     'sockfd' is not a valid descriptor.
+ *     'psock' is not a valid, connected socket structure.
  *   EFAULT
  *     'arg' references an inaccessible memory area.
  *   ENOTTY
@@ -1056,9 +1056,8 @@ static int netdev_rtioctl(FAR struct socket *psock, int cmd,
  *
  ****************************************************************************/
 
-int netdev_ioctl(int sockfd, int cmd, unsigned long arg)
+int psock_ioctl(FAR struct socket *psock, int cmd, unsigned long arg)
 {
-  FAR struct socket *psock = sockfd_socket(sockfd);
   int ret;
 
   /* Check if this is a valid command.  In all cases, arg is a pointer that has
@@ -1072,9 +1071,9 @@ int netdev_ioctl(int sockfd, int cmd, unsigned long arg)
       goto errout;
     }
 
-  /* Verify that the sockfd corresponds to valid, allocated socket */
+  /* Verify that the psock corresponds to valid, allocated socket */
 
-  if (!psock || psock->s_crefs <= 0)
+  if (psock == NULL || psock->s_crefs <= 0)
     {
       ret = -EBADF;
       goto errout;
@@ -1123,6 +1122,44 @@ int netdev_ioctl(int sockfd, int cmd, unsigned long arg)
 errout:
   set_errno(-ret);
   return ERROR;
+}
+
+/****************************************************************************
+ * Name: netdev_ioctl
+ *
+ * Description:
+ *   Perform network device specific operations.
+ *
+ * Parameters:
+ *   sockfd   Socket descriptor of device
+ *   cmd      The ioctl command
+ *   arg      The argument of the ioctl cmd
+ *
+ * Return:
+ *   >=0 on success (positive non-zero values are cmd-specific)
+ *   On a failure, -1 is returned with errno set appropriately
+ *
+ *   EBADF
+ *     'sockfd' is not a valid socket descriptor.
+ *   EFAULT
+ *     'arg' references an inaccessible memory area.
+ *   ENOTTY
+ *     'cmd' not valid.
+ *   EINVAL
+ *     'arg' is not valid.
+ *   ENOTTY
+ *     'sockfd' is not associated with a network device.
+ *   ENOTTY
+ *      The specified request does not apply to the kind of object that the
+ *      descriptor 'sockfd' references.
+ *
+ ****************************************************************************/
+
+int netdev_ioctl(int sockfd, int cmd, unsigned long arg)
+{
+  FAR struct socket *psock = sockfd_socket(sockfd);
+
+  return psock_ioctl(psock, cmd, arg);
 }
 
 /****************************************************************************
