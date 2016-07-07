@@ -102,11 +102,11 @@ static int syslog_devchan_putc(int ch)
 
   /* Check for a linefeed */
 
-  if (ch == '/n')
+  if (ch == '\n')
     {
       /* Pre-pend a carriage return */
 
-      ret = syslog_dev_putc('/r');
+      ret = syslog_dev_putc('\r');
       if (ret < 0)
         {
           return ret;

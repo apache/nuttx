@@ -54,7 +54,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define ArraySize(x) (sizeof((x)) / sizeof((x)[0]))
+#define ARRAYSIZE(x) (sizeof((x)) / sizeof((x)[0]))
 
 /****************************************************************************
  * Private Data
@@ -96,7 +96,7 @@ void board_autoled_initialize(void)
 
   /* Configure the LD1 GPIO for output. Initial state is OFF */
 
-  for (i = 0; i < ArraySize(g_ledmap); i++)
+  for (i = 0; i < ARRAYSIZE(g_ledmap); i++)
     {
       stm32_configgpio(g_ledmap[i]);
     }

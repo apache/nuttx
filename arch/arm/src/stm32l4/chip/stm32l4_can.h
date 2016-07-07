@@ -74,6 +74,7 @@
 #define STM32L4_CAN_MCR_OFFSET      0x0000  /* CAN master control register */
 #define STM32L4_CAN_MSR_OFFSET      0x0004  /* CAN master status register */
 #define STM32L4_CAN_TSR_OFFSET      0x0008  /* CAN transmit status register */
+#define STM32L4_CAN_RFR_OFFSET(m)   (0x000c + ((m) << 2))
 #define STM32L4_CAN_RF0R_OFFSET     0x000c  /* CAN receive FIFO 0 register */
 #define STM32L4_CAN_RF1R_OFFSET     0x0010  /* CAN receive FIFO 1 register */
 #define STM32L4_CAN_IER_OFFSET      0x0014  /* CAN interrupt enable register */
@@ -82,39 +83,39 @@
 
 /* CAN mailbox registers (3 TX and 2 RX) */
 
-#define STM32L4_CAN_TIR_OFFSET(m)   (0x0180+((m)<<4))
+#define STM32L4_CAN_TIR_OFFSET(m)   (0x0180 + ((m) << 4))
 #define STM32L4_CAN_TI0R_OFFSET     0x0180  /* TX mailbox identifier register 0 */
 #define STM32L4_CAN_TI1R_OFFSET     0x0190  /* TX mailbox identifier register 1 */
 #define STM32L4_CAN_TI2R_OFFSET     0x01a0  /* TX mailbox identifier register 2 */
 
-#define STM32L4_CAN_TDTR_OFFSET(m)  (0x0184+((m)<<4))
+#define STM32L4_CAN_TDTR_OFFSET(m)  (0x0184 + ((m) << 4))
 #define STM32L4_CAN_TDT0R_OFFSET    0x0184  /* Mailbox data length control and time stamp register 0 */
 #define STM32L4_CAN_TDT1R_OFFSET    0x0194  /* Mailbox data length control and time stamp register 1 */
 #define STM32L4_CAN_TDT2R_OFFSET    0x01a4  /* Mailbox data length control and time stamp register 2 */
 
-#define STM32L4_CAN_TDLR_OFFSET(m)  (0x0188+((m)<<4))
+#define STM32L4_CAN_TDLR_OFFSET(m)  (0x0188 + ((m) << 4))
 #define STM32L4_CAN_TDL0R_OFFSET    0x0188  /* Mailbox data low register 0 */
 #define STM32L4_CAN_TDL1R_OFFSET    0x0198  /* Mailbox data low register 1 */
 #define STM32L4_CAN_TDL2R_OFFSET    0x01a8  /* Mailbox data low register 2 */
 
-#define STM32L4_CAN_TDHR_OFFSET(m)  (0x018c+((m)<<4))
+#define STM32L4_CAN_TDHR_OFFSET(m)  (0x018c + ((m) << 4))
 #define STM32L4_CAN_TDH0R_OFFSET    0x018c  /* Mailbox data high register 0 */
 #define STM32L4_CAN_TDH1R_OFFSET    0x019c  /* Mailbox data high register 1 */
 #define STM32L4_CAN_TDH2R_OFFSET    0x01ac  /* Mailbox data high register 2 */
 
-#define STM32L4_CAN_RIR_OFFSET(m)   (0x01b0+((m)<<4))
+#define STM32L4_CAN_RIR_OFFSET(m)   (0x01b0 + ((m) << 4))
 #define STM32L4_CAN_RI0R_OFFSET     0x01b0  /* Rx FIFO mailbox identifier register 0 */
 #define STM32L4_CAN_RI1R_OFFSET     0x01c0  /* Rx FIFO mailbox identifier register 1 */
 
-#define STM32L4_CAN_RDTR_OFFSET(m)  (0x01b4+((m)<<4))
+#define STM32L4_CAN_RDTR_OFFSET(m)  (0x01b4 + ((m) << 4))
 #define STM32L4_CAN_RDT0R_OFFSET    0x01b4  /* Rx FIFO mailbox data length control and time stamp register 0 */
 #define STM32L4_CAN_RDT1R_OFFSET    0x01c4  /* Rx FIFO mailbox data length control and time stamp register 1 */
 
-#define STM32L4_CAN_RDLR_OFFSET(m)  (0x01b8+((m)<<4))
+#define STM32L4_CAN_RDLR_OFFSET(m)  (0x01b8 + ((m) << 4))
 #define STM32L4_CAN_RDL0R_OFFSET    0x01b8  /* Receive FIFO mailbox data low register 0 */
 #define STM32L4_CAN_RDL1R_OFFSET    0x01c8  /* Receive FIFO mailbox data low register 1 */
 
-#define STM32L4_CAN_RDHR_OFFSET(m)  (0x01bc+((m)<<4))
+#define STM32L4_CAN_RDHR_OFFSET(m)  (0x01bc + ((m) << 4))
 #define STM32L4_CAN_RDH0R_OFFSET    0x01bc  /* Receive FIFO mailbox data high register 0 */
 #define STM32L4_CAN_RDH1R_OFFSET    0x01cc  /* Receive FIFO mailbox data high register 1 */
 
@@ -126,7 +127,7 @@
 #define STM32L4_CAN_FFA1R_OFFSET    0x0214  /* CAN filter FIFO assignment register */
 #define STM32L4_CAN_FA1R_OFFSET     0x021c  /* CAN filter activation register */
 
-/* There are 14 or 28 filter banks (depending) on the device.  Each filter bank is
+/* There are 14 filter banks on the device.  Each filter bank is
  * composed of two 32-bit registers, CAN_FiR:
  *  F0R1 Offset 0x240
  *  F0R2 Offset 0x244
@@ -143,6 +144,7 @@
 #  define STM32L4_CAN1_MCR          (STM32L4_CAN1_BASE+STM32L4_CAN_MCR_OFFSET)
 #  define STM32L4_CAN1_MSR          (STM32L4_CAN1_BASE+STM32L4_CAN_MSR_OFFSET)
 #  define STM32L4_CAN1_TSR          (STM32L4_CAN1_BASE+STM32L4_CAN_TSR_OFFSET)
+#  define STM32L4_CAN1_RFR(m)       (STM32L4_CAN1_BASE+STM32L4_CAN_RFR_OFFSET(m))
 #  define STM32L4_CAN1_RF0R         (STM32L4_CAN1_BASE+STM32L4_CAN_RF0R_OFFSET)
 #  define STM32L4_CAN1_RF1R         (STM32L4_CAN1_BASE+STM32L4_CAN_RF1R_OFFSET)
 #  define STM32L4_CAN1_IER          (STM32L4_CAN1_BASE+STM32L4_CAN_IER_OFFSET)
@@ -302,7 +304,7 @@
 #define CAN_BTR_SJW_SHIFT         (24)      /* Bits 25-24: Resynchronization Jump Width */
 #define CAN_BTR_SJW_MASK          (3 << CAN_BTR_SJW_SHIFT)
 #define CAN_BTR_LBKM              (1 << 30) /* Bit 30: Loop Back Mode (Debug) */
-#define CAN_BTR_SILM              (1 << 31) /* Bit 31: Silent Mode (Debug) */
+#define CAN_BTR_SILM              (1ul << 31) /* Bit 31: Silent Mode (Debug) */
 
 #define CAN_BTR_BRP_MAX           (1024)    /* Maximum BTR value (without decrement) */
 #define CAN_BTR_TSEG1_MAX         (16)      /* Maximum TSEG1 value (without decrement) */
@@ -394,43 +396,23 @@
 
 /* CAN filter mode register */
 
-#if defined(CONFIG_STM32L4_CONNECTIVITYLINE) || defined(CONFIG_STM32L4_STM32F20XX) || defined(CONFIG_STM32L4_STM32F40XX)
-#  define CAN_FM1R_FBM_SHIFT      (0)      /* Bits 13:0: Filter Mode */
-#  define CAN_FM1R_FBM_MASK       (0x3fff << CAN_FM1R_FBM_SHIFT)
-#else
-#  define CAN_FM1R_FBM_SHIFT      (0)      /* Bits 27:0: Filter Mode */
-#  define CAN_FM1R_FBM_MASK       (0x0fffffff << CAN_FM1R_FBM_SHIFT)
-#endif
+#define CAN_FM1R_FBM_SHIFT        (0)      /* Bits 13:0: Filter Mode */
+#define CAN_FM1R_FBM_MASK         (0x3fff << CAN_FM1R_FBM_SHIFT)
 
 /* CAN filter scale register */
 
-#if defined(CONFIG_STM32L4_CONNECTIVITYLINE) || defined(CONFIG_STM32L4_STM32F20XX) || defined(CONFIG_STM32L4_STM32F40XX)
-#  define CAN_FS1R_FSC_SHIFT      (0)      /* Bits 13:0: Filter Scale Configuration */
-#  define CAN_FS1R_FSC_MASK       (0x3fff << CAN_FS1R_FSC_SHIFT)
-#else
-#  define CAN_FS1R_FSC_SHIFT      (0)      /* Bits 27:0: Filter Scale Configuration */
-#  define CAN_FS1R_FSC_MASK       (0x0fffffff << CAN_FS1R_FSC_SHIFT)
-#endif
+#define CAN_FS1R_FSC_SHIFT        (0)      /* Bits 13:0: Filter Scale Configuration */
+#define CAN_FS1R_FSC_MASK         (0x3fff << CAN_FS1R_FSC_SHIFT)
 
 /* CAN filter FIFO assignment register */
 
-#if defined(CONFIG_STM32L4_CONNECTIVITYLINE) || defined(CONFIG_STM32L4_STM32F20XX) || defined(CONFIG_STM32L4_STM32F40XX)
-#  define CAN_FFA1R_FFA_SHIFT     (0)      /* Bits 13:0: Filter FIFO Assignment */
-#  define CAN_FFA1R_FFA_MASK      (0x3fff << CAN_FFA1R_FFA_SHIFT)
-#else
-#  define CAN_FFA1R_FFA_SHIFT     (0)      /* Bits 27:0: Filter FIFO Assignment */
-#  define CAN_FFA1R_FFA_MASK      (0x0fffffff << CAN_FFA1R_FFA_SHIFT)
-#endif
+#define CAN_FFA1R_FFA_SHIFT       (0)      /* Bits 13:0: Filter FIFO Assignment */
+#define CAN_FFA1R_FFA_MASK        (0x3fff << CAN_FFA1R_FFA_SHIFT)
 
 /* CAN filter activation register */
 
-#if defined(CONFIG_STM32L4_CONNECTIVITYLINE) || defined(CONFIG_STM32L4_STM32F20XX) || defined(CONFIG_STM32L4_STM32F40XX)
-#  define CAN_FA1R_FACT_SHIFT     (0)      /* Bits 13:0: Filter Active */
-#  define CAN_FA1R_FACT_MASK      (0x3fff << CAN_FA1R_FACT_SHIFT)
-#else
-#  define CAN_FA1R_FACT_SHIFT     (0)      /* Bits 27:0: Filter Active */
-#  define CAN_FA1R_FACT_MASK      (0x0fffffff << CAN_FA1R_FACT_SHIFT)
-#endif
+#define CAN_FA1R_FACT_SHIFT       (0)      /* Bits 13:0: Filter Active */
+#define CAN_FA1R_FACT_MASK        (0x3fff << CAN_FA1R_FACT_SHIFT)
 
 /************************************************************************************
  * Public Types

@@ -271,7 +271,7 @@
 #define BUTTON_CENTER_BIT  (1 << BUTTON_CENTER)
 #define BUTTON_LEFT_BIT    (1 << BUTTON_LEFT)
 #define BUTTON_DOWN_BIT    (1 << BUTTON_DOWN)
-#define BUTTON_TIGHT_BIT   (1 << BUTTON_RIGHT)
+#define BUTTON_RIGHT_BIT   (1 << BUTTON_RIGHT)
 #define BUTTON_UP_BIT      (1 << BUTTON_UP)
 
 /************************************************************************************

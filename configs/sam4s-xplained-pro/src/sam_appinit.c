@@ -63,8 +63,8 @@
 #  include <nuttx/timers/timer.h>
 #endif
 
-#ifdef CONFIG_SYSTEM_USBMONITOR
-#  include <apps/usbmonitor.h>
+#ifdef CONFIG_USBMONITOR
+#  include <nuttx/usb/usbmonitor.h>
 #endif
 
 #include "sam4s-xplained-pro.h"
@@ -169,7 +169,7 @@ int board_app_initialize(uintptr_t arg)
   /* Start the USB Monitor */
 
   syslog(LOG_INFO, "Starting USB Monitor\n");
-  ret = usbmonitor_start(0, NULL);
+  ret = usbmonitor_start();
   if (ret != OK)
     {
       syslog(LOG_ERR, "ERROR: Failed to start USB monitor: %d (%d)\n", ret, errno);

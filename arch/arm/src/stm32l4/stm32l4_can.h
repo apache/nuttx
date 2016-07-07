@@ -117,7 +117,7 @@ extern "C"
  ************************************************************************************/
 
 /****************************************************************************
- * Name: stm32l4_caninitialize
+ * Name: stm32l4can_initialize
  *
  * Description:
  *   Initialize the selected CAN port

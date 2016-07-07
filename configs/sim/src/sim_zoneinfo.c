@@ -1,7 +1,7 @@
 /****************************************************************************
  * config/sim/src/sim_zoneinfo.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,9 +45,9 @@
 #include <errno.h>
 
 #include <nuttx/fs/ramdisk.h>
-#include <apps/zoneinfo.h>
+#include <nuttx/zoneinfo.h>
 
-#ifdef CONFIG_SYSTEM_ZONEINFO_ROMFS
+#ifdef CONFIG_LIB_ZONEINFO_ROMFS
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -80,7 +80,7 @@
  * Name: sim_zoneinfo
  *
  * Description:
- *   Mount the TZ database.  The apps/system/zoneinfo directory contains
+ *   Mount the TZ database.  The nuttx/zoneinfo directory contains
  *   logic to create a version of the TZ/Olson database.
  *   This database is required if localtime() support is selected via
  *   CONFIG_LIBC_LOCALTIME.  This logic in that directory does the following:
@@ -149,5 +149,5 @@ int sim_zoneinfo(int minor)
   return OK;
 }
 
-#endif /* CONFIG_SYSTEM_ZONEINFO_ROMFS */
+#endif /* CONFIG_LIB_ZONEINFO_ROMFS */
 

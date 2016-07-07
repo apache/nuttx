@@ -28,7 +28,8 @@ The files in the libc/ directory are organized (mostly) according which file
 in the include/ directory provides the prototype for library functions.  So
 we have:
 
-  audio     - This part of the audio system: nuttx/audio/audio.h
+  audio     - This part of he audio system: nuttx/audio/audio.h
+  hex2bin   - hex2bin.h
   libgen    - libgen.h
   fixedmath - fixedmath.h
   math      - math.h
@@ -42,6 +43,9 @@ we have:
   string    - string.h
   time      - time.h
   unistd    - unistd.h
+
+Most of these are "standard" header files; some are not: hex2bin.h and
+fixemath.h are non-standard.
 
 There is also a misc/ subdirectory that contains various internal functions
 and interfaces from header files that are too few to warrant their own sub-

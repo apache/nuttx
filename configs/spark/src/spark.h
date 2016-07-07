@@ -45,6 +45,7 @@
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
 #include <stdint.h>
+#include <arch/chip/chip.h>
 
 /************************************************************************************
  * Pre-processor Definitions

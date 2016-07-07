@@ -244,31 +244,23 @@ static inline void stm32l4_prioritize_syscall(int priority)
 static int stm32l4_irqinfo(int irq, uintptr_t *regaddr, uint32_t *bit,
                          uintptr_t offset)
 {
+  int n;
+
   DEBUGASSERT(irq >= STM32L4_IRQ_NMI && irq < NR_IRQS);
 
   /* Check for external interrupt */
 
   if (irq >= STM32L4_IRQ_FIRST)
     {
-      if (irq < STM32L4_IRQ_FIRST + 32)
+      n = irq - STM32L4_IRQ_FIRST;
+      *regaddr = NVIC_IRQ_ENABLE(n) + offset;
+
+      while (n >= 32)
         {
-           *regaddr = (NVIC_IRQ0_31_ENABLE + offset);
-           *bit     = 1 << (irq - STM32L4_IRQ_FIRST);
+          n -= 32;
         }
-      else if (irq < STM32L4_IRQ_FIRST + 64)
-        {
-           *regaddr = (NVIC_IRQ32_63_ENABLE + offset);
-           *bit     = 1 << (irq - STM32L4_IRQ_FIRST - 32);
-        }
-      else if (irq < NR_IRQS)
-        {
-           *regaddr = (NVIC_IRQ64_95_ENABLE + offset);
-           *bit     = 1 << (irq - STM32L4_IRQ_FIRST - 64);
-        }
-      else
-        {
-          return ERROR; /* Invalid interrupt */
-        }
+
+      *bit     = 1 << n;
     }
 
   /* Handle processor exceptions.  Only a few can be disabled */
@@ -314,11 +306,14 @@ void up_irqinitialize(void)
 {
   uint32_t regaddr;
   int num_priority_registers;
+  int i;
 
   /* Disable all interrupts */
 
-  putreg32(0, NVIC_IRQ0_31_ENABLE);
-  putreg32(0, NVIC_IRQ32_63_ENABLE);
+  for (i = 0; i < NR_IRQS - STM32L4_IRQ_FIRST; i += 32)
+    {
+      putreg32(0xffffffff, NVIC_IRQ_CLEAR(i));
+    }
 
   /* Colorize the interrupt stack for debug purposes */
 

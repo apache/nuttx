@@ -73,7 +73,7 @@ int sim_bringup(void);
  * Name: sim_zoneinfo
  *
  * Description:
- *   Mount the TZ database.  The apps/system/zoneinfo directory contains
+ *   Mount the TZ database.  The nuttx/zoneinfo directory contains
  *   logic to create a version of the TZ/Olson database.
  *   This database is required if localtime() support is selected via
  *   CONFIG_LIBC_LOCALTIME.  This logic in that directory does the following:
@@ -107,7 +107,7 @@ int sim_bringup(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SYSTEM_ZONEINFO_ROMFS
+#ifdef CONFIG_LIB_ZONEINFO_ROMFS
 int sim_zoneinfo(int minor);
 #endif
 

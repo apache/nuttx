@@ -344,6 +344,7 @@ context: check_context include/nuttx/config.h include/nuttx/version.h include/ma
 # and symbolic links created by the context target.
 
 clean_context:
+	$(Q) $(MAKE) -C configs TOPDIR="$(TOPDIR)" clean_context
 	$(call DELFILE, include/nuttx/config.h)
 	$(call DELFILE, include/nuttx/version.h)
 	$(call DELFILE, include/math.h)
@@ -480,23 +481,35 @@ pass2dep: context tools/mkdeps$(HOSTEXEEXT) tools/cnvwindeps$(HOSTEXEEXT)
 # location: http://ymorin.is-a-geek.org/projects/kconfig-frontends.  See
 # README.txt file in the NuttX tools GIT repository for additional information.
 
-config: context apps_preconfig
+do_config: context apps_preconfig
 	$(Q) APPSDIR=${CONFIG_APPS_DIR} kconfig-conf Kconfig
 
-oldconfig: context apps_preconfig
+config: do_config clean_context
+
+do_oldconfig: context apps_preconfig
 	$(Q) APPSDIR=${CONFIG_APPS_DIR} kconfig-conf --oldconfig Kconfig
 
-olddefconfig: context apps_preconfig
+oldconfig: do_oldconfig clean_context
+
+do_olddefconfig: context apps_preconfig
 	$(Q) APPSDIR=${CONFIG_APPS_DIR} kconfig-conf --olddefconfig Kconfig
 
-menuconfig: context apps_preconfig
+olddefconfig: do_olddefconfig clean_context
+
+do_menuconfig: context apps_preconfig
 	$(Q) APPSDIR=${CONFIG_APPS_DIR} kconfig-mconf Kconfig
 
-qconfig: context apps_preconfig
+menuconfig: do_menuconfig clean_context
+
+do_qconfig: context apps_preconfig
 	$(Q) APPSDIR=${CONFIG_APPS_DIR} kconfig-qconf Kconfig
+
+qconfig: do_qconfig clean_context
 
 gconfig: context apps_preconfig
 	$(Q) APPSDIR=${CONFIG_APPS_DIR} kconfig-gconf Kconfig
+
+gconfig: do_gconfig clean_context
 
 # export
 #

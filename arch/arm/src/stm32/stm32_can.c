@@ -58,16 +58,17 @@
 #include "up_internal.h"
 #include "up_arch.h"
 
-
 #include "chip.h"
 #include "stm32.h"
 #include "stm32_can.h"
 
-#if defined(CONFIG_CAN) && (defined(CONFIG_STM32_CAN1) || defined(CONFIG_STM32_CAN2))
+#if defined(CONFIG_CAN) && \
+    (defined(CONFIG_STM32_CAN1) || defined(CONFIG_STM32_CAN2))
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Delays *******************************************************************/
 /* Time out for INAK bit */
 
@@ -106,19 +107,21 @@ struct stm32_can_s
 
 /* CAN Register access */
 
-static uint32_t stm32can_getreg(FAR struct stm32_can_s *priv, int offset);
-static uint32_t stm32can_getfreg(FAR struct stm32_can_s *priv, int offset);
+static uint32_t stm32can_getreg(FAR struct stm32_can_s *priv,
+                                int offset);
+static uint32_t stm32can_getfreg(FAR struct stm32_can_s *priv,
+                                 int offset);
 static void stm32can_putreg(FAR struct stm32_can_s *priv, int offset,
-              uint32_t value);
+                            uint32_t value);
 static void stm32can_putfreg(FAR struct stm32_can_s *priv, int offset,
-              uint32_t value);
+                             uint32_t value);
 #ifdef CONFIG_STM32_CAN_REGDEBUG
 static void stm32can_dumpctrlregs(FAR struct stm32_can_s *priv,
-              FAR const char *msg);
+                                  FAR const char *msg);
 static void stm32can_dumpmbregs(FAR struct stm32_can_s *priv,
-              FAR const char *msg);
+                                FAR const char *msg);
 static void stm32can_dumpfiltregs(FAR struct stm32_can_s *priv,
-              FAR const char *msg);
+                                  FAR const char *msg);
 #else
 #  define stm32can_dumpctrlregs(priv,msg)
 #  define stm32can_dumpmbregs(priv,msg)
@@ -127,14 +130,16 @@ static void stm32can_dumpfiltregs(FAR struct stm32_can_s *priv,
 
 /* Filtering (todo) */
 
-static int  stm32l4can_addextfilter(FAR struct stm32l4_can_s *priv,
-              FAR struct canioc_extfilter_s *arg);
-static int  stm32l4can_delextfilter(FAR struct stm32l4_can_s *priv,
-              int arg);
-static int  stm32l4can_addstdfilter(FAR struct stm32l4_can_s *priv,
-              FAR struct canioc_stdfilter_s *arg);
-static int  stm32l4can_delstdfilter(FAR struct stm32l4_can_s *priv,
-              int arg);
+#ifdef CONFIG_CAN_EXTID
+static int  stm32can_addextfilter(FAR struct stm32_can_s *priv,
+                                  FAR struct canioc_extfilter_s *arg);
+static int  stm32can_delextfilter(FAR struct stm32_can_s *priv,
+                                  int arg);
+#endif
+static int  stm32can_addstdfilter(FAR struct stm32_can_s *priv,
+                                  FAR struct canioc_stdfilter_s *arg);
+static int  stm32can_delstdfilter(FAR struct stm32_can_s *priv,
+                                  int arg);
 
 /* CAN driver methods */
 
@@ -144,10 +149,11 @@ static void stm32can_shutdown(FAR struct can_dev_s *dev);
 static void stm32can_rxint(FAR struct can_dev_s *dev, bool enable);
 static void stm32can_txint(FAR struct can_dev_s *dev, bool enable);
 static int  stm32can_ioctl(FAR struct can_dev_s *dev, int cmd,
-              unsigned long arg);
-static int  stm32can_remoterequest(FAR struct can_dev_s *dev, uint16_t id);
+                           unsigned long arg);
+static int  stm32can_remoterequest(FAR struct can_dev_s *dev,
+                                   uint16_t id);
 static int  stm32can_send(FAR struct can_dev_s *dev,
-              FAR struct can_msg_s *msg);
+                          FAR struct can_msg_s *msg);
 static bool stm32can_txready(FAR struct can_dev_s *dev);
 static bool stm32can_txempty(FAR struct can_dev_s *dev);
 
@@ -160,6 +166,8 @@ static int  stm32can_txinterrupt(int irq, FAR void *context);
 
 /* Initialization */
 
+static int  stm32can_enterinitmode(FAR struct stm32_can_s *priv);
+static int  stm32can_exitinitmode(FAR struct stm32_can_s *priv);
 static int  stm32can_bittiming(FAR struct stm32_can_s *priv);
 static int  stm32can_cellinit(FAR struct stm32_can_s *priv);
 static int  stm32can_filterinit(FAR struct stm32_can_s *priv);
@@ -344,7 +352,6 @@ static uint32_t stm32can_getfreg(FAR struct stm32_can_s *priv, int offset)
 #ifdef CONFIG_STM32_CAN_REGDEBUG
 static void stm32can_vputreg(uint32_t addr, uint32_t value)
 {
-
   /* Show the register value being written */
 
   caninfo("%08x<-%08x\n", addr, value);
@@ -396,7 +403,7 @@ static void stm32can_putfreg(FAR struct stm32_can_s *priv, int offset,
 
 #ifdef CONFIG_STM32_CAN_REGDEBUG
 static void stm32can_dumpctrlregs(FAR struct stm32_can_s *priv,
-                             FAR const char *msg)
+                                  FAR const char *msg)
 {
   if (msg)
     {
@@ -441,7 +448,7 @@ static void stm32can_dumpctrlregs(FAR struct stm32_can_s *priv,
 
 #ifdef CONFIG_STM32_CAN_REGDEBUG
 static void stm32can_dumpmbregs(FAR struct stm32_can_s *priv,
-                           FAR const char *msg)
+                                FAR const char *msg)
 {
   if (msg)
     {
@@ -502,7 +509,7 @@ static void stm32can_dumpmbregs(FAR struct stm32_can_s *priv,
 
 #ifdef CONFIG_STM32_CAN_REGDEBUG
 static void stm32can_dumpfiltregs(FAR struct stm32_can_s *priv,
-                             FAR const char *msg)
+                                  FAR const char *msg)
 {
   int i;
 
@@ -623,7 +630,8 @@ static int stm32can_setup(FAR struct can_dev_s *dev)
   ret = stm32can_cellinit(priv);
   if (ret < 0)
     {
-      canerr("ERROR: CAN%d cell initialization failed: %d\n", priv->port, ret);
+      canerr("ERROR: CAN%d cell initialization failed: %d\n",
+             priv->port, ret);
       return ret;
     }
 
@@ -635,7 +643,8 @@ static int stm32can_setup(FAR struct can_dev_s *dev)
   ret = stm32can_filterinit(priv);
   if (ret < 0)
     {
-      canerr("ERROR: CAN%d filter initialization failed: %d\n", priv->port, ret);
+      canerr("ERROR: CAN%d filter initialization failed: %d\n",
+             priv->port, ret);
       return ret;
     }
 
@@ -648,7 +657,7 @@ static int stm32can_setup(FAR struct can_dev_s *dev)
   ret = irq_attach(priv->canrx[0], stm32can_rx0interrupt);
   if (ret < 0)
     {
-      canerr(ERROR: "Failed to attach CAN%d RX0 IRQ (%d)",
+      canerr("ERROR: Failed to attach CAN%d RX0 IRQ (%d)",
              priv->port, priv->canrx[0]);
       return ret;
     }
@@ -750,6 +759,7 @@ static void stm32can_rxint(FAR struct can_dev_s *dev, bool enable)
     {
       regval &= ~(CAN_IER_FMPIE0 | CAN_IER_FMPIE1);
     }
+
   stm32can_putreg(priv, STM32_CAN_IER_OFFSET, regval);
 }
 
@@ -892,6 +902,7 @@ static int stm32can_ioctl(FAR struct can_dev_s *dev, int cmd,
               /* This timing is not possible */
 
               ret = -EINVAL;
+              break;
             }
 
           /* Otherwise, nquanta is can_bit_quanta, ts1 and ts2 are
@@ -905,11 +916,13 @@ static int stm32can_ioctl(FAR struct can_dev_s *dev, int cmd,
               DEBUGASSERT(brp >= 1 && brp <= CAN_BTR_BRP_MAX);
             }
 
-          caninfo("TS1: %d TS2: %d BRP: %d\n", bt->bt_tseg1, bt->bt_tseg2, brp);
+          caninfo("TS1: %d TS2: %d BRP: %d\n",
+                  bt->bt_tseg1, bt->bt_tseg2, brp);
 
           /* Configure bit timing. */
 
-          regval &= ~(CAN_BTR_BRP_MASK | CAN_BTR_TS1_MASK | CAN_BTR_TS2_MASK | CAN_BTR_SJW_MASK);
+          regval &= ~(CAN_BTR_BRP_MASK | CAN_BTR_TS1_MASK |
+                      CAN_BTR_TS2_MASK | CAN_BTR_SJW_MASK);
           regval |= ((brp          - 1) << CAN_BTR_BRP_SHIFT) |
                     ((bt->bt_tseg1 - 1) << CAN_BTR_TS1_SHIFT) |
                     ((bt->bt_tseg2 - 1) << CAN_BTR_TS2_SHIFT) |
@@ -918,7 +931,7 @@ static int stm32can_ioctl(FAR struct can_dev_s *dev, int cmd,
           /* Bit timing can only be configured in init mode. */
 
           ret = stm32can_enterinitmode(priv);
-          if (ret != 0)
+          if (ret < 0)
             {
               break;
             }
@@ -926,10 +939,10 @@ static int stm32can_ioctl(FAR struct can_dev_s *dev, int cmd,
           stm32can_putreg(priv, STM32_CAN_BTR_OFFSET, regval);
 
           ret = stm32can_exitinitmode(priv);
-
-          if (ret == 0)
+          if (ret >= 0)
             {
-              priv->baud  = STM32_PCLK1_FREQUENCY / (brp * (bt->bt_tseg1 + bt->bt_tseg2 + 1));
+              priv->baud  = STM32_PCLK1_FREQUENCY /
+                (brp * (bt->bt_tseg1 + bt->bt_tseg2 + 1));
             }
         }
         break;
@@ -984,26 +997,26 @@ static int stm32can_ioctl(FAR struct can_dev_s *dev, int cmd,
 
           if (bm->bm_loopback)
             {
-            regval |= CAN_BTR_LBKM;
+              regval |= CAN_BTR_LBKM;
             }
           else
             {
-            regval &= ~CAN_BTR_LBKM;
+              regval &= ~CAN_BTR_LBKM;
             }
 
           if (bm->bm_silent)
             {
-            regval |= CAN_BTR_SILM;
+              regval |= CAN_BTR_SILM;
             }
           else
             {
-            regval &= ~CAN_BTR_SILM;
+              regval &= ~CAN_BTR_SILM;
             }
 
           /* This register can only be configured in init mode. */
 
           ret = stm32can_enterinitmode(priv);
-          if (ret != 0)
+          if (ret < 0)
             {
               break;
             }
@@ -1027,7 +1040,8 @@ static int stm32can_ioctl(FAR struct can_dev_s *dev, int cmd,
       case CANIOC_ADD_EXTFILTER:
         {
           DEBUGASSERT(arg != 0);
-          ret = stm32can_addextfilter(priv, (FAR struct canioc_extfilter_s *)arg);
+          ret = stm32can_addextfilter(priv,
+                                      (FAR struct canioc_extfilter_s *)arg);
         }
         break;
 
@@ -1043,7 +1057,9 @@ static int stm32can_ioctl(FAR struct can_dev_s *dev, int cmd,
 
       case CANIOC_DEL_EXTFILTER:
         {
+#if 0 /* Unimplemented */
           DEBUGASSERT(arg <= priv->config->nextfilters);
+#endif
           ret = stm32can_delextfilter(priv, (int)arg);
         }
         break;
@@ -1061,7 +1077,8 @@ static int stm32can_ioctl(FAR struct can_dev_s *dev, int cmd,
       case CANIOC_ADD_STDFILTER:
         {
           DEBUGASSERT(arg != 0);
-          ret = stm32can_addstdfilter(priv, (FAR struct canioc_stdfilter_s *)arg);
+          ret = stm32can_addstdfilter(priv,
+                                      (FAR struct canioc_stdfilter_s *)arg);
         }
         break;
 
@@ -1077,7 +1094,9 @@ static int stm32can_ioctl(FAR struct can_dev_s *dev, int cmd,
 
       case CANIOC_DEL_STDFILTER:
         {
+#if 0 /* Unimplemented */
           DEBUGASSERT(arg <= priv->config->nstdfilters);
+#endif
           ret = stm32can_delstdfilter(priv, (int)arg);
         }
         break;
@@ -1135,7 +1154,8 @@ static int stm32can_remoterequest(FAR struct can_dev_s *dev, uint16_t id)
  *
  ****************************************************************************/
 
-static int stm32can_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
+static int stm32can_send(FAR struct can_dev_s *dev,
+                         FAR struct can_msg_s *msg)
 {
   FAR struct stm32_can_s *priv = dev->cd_priv;
   FAR uint8_t *ptr;
@@ -1231,6 +1251,7 @@ static int stm32can_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
             }
         }
     }
+
   stm32can_putreg(priv, STM32_CAN_TDLR_OFFSET(txmb), regval);
 
   regval = 0;
@@ -1257,6 +1278,7 @@ static int stm32can_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
             }
         }
     }
+
   stm32can_putreg(priv, STM32_CAN_TDHR_OFFSET(txmb), regval);
 
   /* Enable the transmit mailbox empty interrupt (may already be enabled) */
@@ -1661,6 +1683,7 @@ static int stm32can_txinterrupt(int irq, FAR void *context)
  *   Tbs1 = Tq * ts1
  *   Tbs2 = Tq * ts2
  *   Tq = brp * Tpclk1
+ *   baud = Fpclk1 / (brp  * (1 + ts1 + ts2))
  *
  * Where:
  *   Tpclk1 is the period of the APB1 clock (PCLK1).
@@ -1757,10 +1780,12 @@ static int stm32can_bittiming(FAR struct stm32_can_s *priv)
 }
 
 /****************************************************************************
- * Name: stm32can_cellinit
+ * Name: stm32can_enterinitmode
  *
  * Description:
- *   CAN cell initialization
+ *   Put the CAN cell in Initialization mode. This only disconnects the CAN
+ *   peripheral, no registers are changed. The initialization mode is
+ *   required to change the baud rate.
  *
  * Input Parameter:
  *   priv - A pointer to the private data structure for this CAN block
@@ -1770,22 +1795,16 @@ static int stm32can_bittiming(FAR struct stm32_can_s *priv)
  *
  ****************************************************************************/
 
-static int stm32can_cellinit(FAR struct stm32_can_s *priv)
+static int stm32can_enterinitmode(FAR struct stm32_can_s *priv)
 {
-  volatile uint32_t timeout;
   uint32_t regval;
-  int ret;
+  volatile uint32_t timeout;
 
   caninfo("CAN%d\n", priv->port);
 
-  /* Exit from sleep mode */
-
-  regval  = stm32can_getreg(priv, STM32_CAN_MCR_OFFSET);
-  regval &= ~CAN_MCR_SLEEP;
-  stm32can_putreg(priv, STM32_CAN_MCR_OFFSET, regval);
-
   /* Enter initialization mode */
 
+  regval  = stm32can_getreg(priv, STM32_CAN_MCR_OFFSET);
   regval |= CAN_MCR_INRQ;
   stm32can_putreg(priv, STM32_CAN_MCR_OFFSET, regval);
 
@@ -1810,31 +1829,29 @@ static int stm32can_cellinit(FAR struct stm32_can_s *priv)
       return -ETIMEDOUT;
     }
 
-  /* Disable the following modes:
-   *
-   *  - Time triggered communication mode
-   *  - Automatic bus-off management
-   *  - Automatic wake-up mode
-   *  - No automatic retransmission
-   *  - Receive FIFO locked mode
-   *  - Transmit FIFO priority
-   */
+  return OK;
+}
 
-  regval   = stm32can_getreg(priv, STM32_CAN_MCR_OFFSET);
-  regval &= ~(CAN_MCR_TXFP | CAN_MCR_RFLM | CAN_MCR_NART |
-              CAN_MCR_AWUM | CAN_MCR_ABOM | CAN_MCR_TTCM);
-  stm32can_putreg(priv, STM32_CAN_MCR_OFFSET, regval);
+/****************************************************************************
+ * Name: stm32can_exitinitmode
+ *
+ * Description:
+ *   Put the CAN cell out of the Initialization mode (to Normal mode)
+ *
+ * Input Parameter:
+ *   priv - A pointer to the private data structure for this CAN block
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
 
-  /* Configure bit timing. */
+static int stm32can_exitinitmode(FAR struct stm32_can_s *priv)
+{
+  uint32_t regval;
+  volatile uint32_t timeout;
 
-  ret = stm32can_bittiming(priv);
-  if (ret < 0)
-    {
-      canerr("ERROR: Failed to set bit timing: %d\n", ret);
-      return ret;
-    }
-
-  /* Exit initialization mode */
+  /* Exit Initialization mode, enter Normal mode */
 
   regval  = stm32can_getreg(priv, STM32_CAN_MCR_OFFSET);
   regval &= ~CAN_MCR_INRQ;
@@ -1861,7 +1878,68 @@ static int stm32can_cellinit(FAR struct stm32_can_s *priv)
              regval);
       return -ETIMEDOUT;
     }
+
   return OK;
+}
+
+/****************************************************************************
+ * Name: stm32can_cellinit
+ *
+ * Description:
+ *   CAN cell initialization
+ *
+ * Input Parameter:
+ *   priv - A pointer to the private data structure for this CAN block
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int stm32can_cellinit(FAR struct stm32_can_s *priv)
+{
+  uint32_t regval;
+  int ret;
+
+  caninfo("CAN%d\n", priv->port);
+
+  /* Exit from sleep mode */
+
+  regval  = stm32can_getreg(priv, STM32_CAN_MCR_OFFSET);
+  regval &= ~CAN_MCR_SLEEP;
+  stm32can_putreg(priv, STM32_CAN_MCR_OFFSET, regval);
+
+  ret = stm32can_enterinitmode(priv);
+  if(ret != 0)
+    {
+      return ret;
+    }
+
+  /* Disable the following modes:
+   *
+   *  - Time triggered communication mode
+   *  - Automatic bus-off management
+   *  - Automatic wake-up mode
+   *  - No automatic retransmission
+   *  - Receive FIFO locked mode
+   *  - Transmit FIFO priority
+   */
+
+  regval   = stm32can_getreg(priv, STM32_CAN_MCR_OFFSET);
+  regval &= ~(CAN_MCR_TXFP | CAN_MCR_RFLM | CAN_MCR_NART |
+              CAN_MCR_AWUM | CAN_MCR_ABOM | CAN_MCR_TTCM);
+  stm32can_putreg(priv, STM32_CAN_MCR_OFFSET, regval);
+
+  /* Configure bit timing. */
+
+  ret = stm32can_bittiming(priv);
+  if (ret < 0)
+    {
+      canerr("ERROR: Failed to set bit timing: %d\n", ret);
+      return ret;
+    }
+
+  return stm32can_exitinitmode(priv);
 }
 
 /****************************************************************************
@@ -1987,11 +2065,13 @@ static int stm32can_filterinit(FAR struct stm32_can_s *priv)
  *
  ****************************************************************************/
 
-static int  stm32can_addextfilter(FAR struct stm32_can_s *priv,
-                                    FAR struct canioc_extfilter_s *arg)
+#ifdef CONFIG_CAN_EXTID
+static int stm32can_addextfilter(FAR struct stm32_can_s *priv,
+                                 FAR struct canioc_extfilter_s *arg)
 {
   return -ENOTTY;
 }
+#endif
 
 /****************************************************************************
  * Name: stm32can_delextfilter
@@ -2011,13 +2091,15 @@ static int  stm32can_addextfilter(FAR struct stm32_can_s *priv,
  *
  ****************************************************************************/
 
-static int  stm32can_delextfilter(FAR struct stm32_can_s *priv, int arg)
+#ifdef CONFIG_CAN_EXTID
+static int stm32can_delextfilter(FAR struct stm32_can_s *priv, int arg)
 {
   return -ENOTTY;
 }
+#endif
 
 /****************************************************************************
- * Name: stm32can_addextfilter
+ * Name: stm32can_addstdfilter
  *
  * Description:
  *   Add a filter for standard CAN IDs
@@ -2033,8 +2115,8 @@ static int  stm32can_delextfilter(FAR struct stm32_can_s *priv, int arg)
  *
  ****************************************************************************/
 
-static int  stm32can_addstdfilter(FAR struct stm32_can_s *priv,
-                                    FAR struct canioc_stdfilter_s *arg)
+static int stm32can_addstdfilter(FAR struct stm32_can_s *priv,
+                                 FAR struct canioc_stdfilter_s *arg)
 {
   return -ENOTTY;
 }
@@ -2057,7 +2139,7 @@ static int  stm32can_addstdfilter(FAR struct stm32_can_s *priv,
  *
  ****************************************************************************/
 
-static int  stm32can_delstdfilter(FAR struct stm32_can_s *priv, int arg)
+static int stm32can_delstdfilter(FAR struct stm32_can_s *priv, int arg)
 {
   return -ENOTTY;
 }

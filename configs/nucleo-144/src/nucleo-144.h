@@ -128,8 +128,68 @@
 #define NUCLEO_SPI_BUS3_CS2  10
 #define NUCLEO_SPI_BUS3_CS3  11
 
-#if defined(CONFIG_STM32_SDIO)
-#define GPIO_SDIO_NCD (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI | GPIO_PORTB | GPIO_PIN15)
+#if defined(CONFIG_STM32F7_SDMMC1) || defined(CONFIG_STM32F7_SDMMC2)
+# define HAVE_SDIO
+#endif
+
+#if defined(CONFIG_DISABLE_MOUNTPOINT) || !defined(CONFIG_MMCSD_SDIO)
+#  undef HAVE_SDIO
+#endif
+
+#define SDIO_SLOTNO 0  /* Only one slot */
+
+#ifdef HAVE_SDIO
+
+#  if defined(CONFIG_STM32F7_SDMMC1)
+#    define GPIO_SDMMC1_NCD (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI | GPIO_PORTC | GPIO_PIN6)
+#  endif
+
+#  if defined(CONFIG_NSH_MMCSDSLOTNO) && (CONFIG_NSH_MMCSDSLOTNO != 0)
+#    warning "Only one MMC/SD slot, slot 0"
+#    define CONFIG_NSH_MMCSDSLOTNO SDIO_SLOTNO
+#  endif
+
+#  if defined(CONFIG_NSH_MMCSDMINOR)
+#    define SDIO_MINOR CONFIG_NSH_MMCSDMINOR
+#  else
+#    define SDIO_MINOR 0
+#  endif
+
+  /* SD card bringup does not work if performed on the IDLE thread because it
+   * will cause waiting.  Use either:
+   *
+   *  CONFIG_LIB_BOARDCTL=y, OR
+   *  CONFIG_BOARD_INITIALIZE=y && CONFIG_BOARD_INITTHREAD=y
+   */
+
+#  if defined(CONFIG_BOARD_INITIALIZE) && !defined(CONFIG_LIB_BOARDCTL) && \
+     !defined(CONFIG_BOARD_INITTHREAD)
+#    warning SDIO initialization cannot be perfomed on the IDLE thread
+#    undef HAVE_SDIO
+#  endif
+#endif
+
+/* USB OTG FS
+ *
+ * PA9  OTG_FS_VBUS VBUS sensing (also connected to the green LED)
+ * PC0  OTG_FS_PowerSwitchOn
+ * PD5  OTG_FS_Overcurrent
+ */
+
+#define GPIO_OTGFS_VBUS   (GPIO_INPUT|GPIO_FLOAT|GPIO_SPEED_100MHz|\
+                           GPIO_OPENDRAIN|GPIO_PORTA|GPIO_PIN9)
+
+#define GPIO_OTGFS_PWRON  (GPIO_OUTPUT|GPIO_FLOAT|GPIO_SPEED_100MHz|\
+                           GPIO_PUSHPULL|GPIO_PORTG|GPIO_PIN6)
+
+#ifdef CONFIG_USBHOST
+#  define GPIO_OTGFS_OVER (GPIO_INPUT|GPIO_EXTI|GPIO_FLOAT|\
+                           GPIO_SPEED_100MHz|GPIO_PUSHPULL|\
+                           GPIO_PORTG|GPIO_PIN7)
+
+#else
+#  define GPIO_OTGFS_OVER (GPIO_INPUT|GPIO_FLOAT|GPIO_SPEED_100MHz|\
+                           GPIO_PUSHPULL|GPIO_PORTG|GPIO_PIN7)
 #endif
 
 /************************************************************************************
@@ -194,6 +254,39 @@ int stm32_dma_alloc_init(void);
 
 #ifdef CONFIG_ADC
 int board_adc_initialize(void);
+#endif
+
+/****************************************************************************
+ * Name: stm32_sdio_initialize
+ *
+ * Description:
+ *   Called at application startup time to initialize the SCMMC functionality.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_MMCSD
+int stm32_sdio_initialize(void);
+#endif
+
+/************************************************************************************
+ * Name: stm32_usbinitialize
+ *
+ * Description:
+ *   Called from stm32_usbinitialize very early in inialization to setup USB-related
+ *   GPIO pins for the nucleo-144 board.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_STM32F7_OTGFS
+void stm32_usbinitialize(void);
+#endif
+
+/************************************************************************************
+ * Name: stm32_bbsram_int
+ ************************************************************************************/
+
+#ifdef CONFIG_STM32F7_BBSRAM
+int stm32_bbsram_int(void);
 #endif
 
 #endif /* __ASSEMBLY__ */

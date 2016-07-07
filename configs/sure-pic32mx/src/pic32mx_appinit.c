@@ -51,8 +51,8 @@
 #include <nuttx/lcd/hd4478ou.h>
 #include <nuttx/usb/usbhost.h>
 
-#ifdef CONFIG_SYSTEM_USBMONITOR
-#  include <apps/usbmonitor.h>
+#ifdef CONFIG_USBMONITOR
+#  include <nuttx/usb/usbmonitor.h>
 #endif
 
 #include "pic32mx.h"
@@ -152,7 +152,7 @@
 
 /* Check if we should enable the USB monitor before starting NSH */
 
-#if !defined(CONFIG_USBDEV_TRACE) || !defined(CONFIG_SYSTEM_USBMONITOR)
+#if !defined(CONFIG_USBDEV_TRACE) || !defined(CONFIG_USBMONITOR)
 #  undef NSH_HAVE_USBMONITOR
 #endif
 
@@ -415,7 +415,7 @@ int board_app_initialize(uintptr_t arg)
     {
       /* Start the USB Monitor */
 
-      ret = usbmonitor_start(0, NULL);
+      ret = usbmonitor_start();
     }
 #endif
 

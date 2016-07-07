@@ -733,7 +733,7 @@ Where <subdir> is one of the following:
           infinite loops and deadlocks:  Debug output generates USB debug
           output which generatates USB debug output, etc.  If you want USB
           debug output, you should consider enabling USB trace
-          (CONFIG_USBDEV_TRACE) and perhaps the USB monitor (CONFIG_SYSTEM_USBMONITOR).
+          (CONFIG_USBDEV_TRACE) and perhaps the USB monitor (CONFIG_USBMONITOR).
 
           See the usbnsh configuration below for more information on configuring
           USB trace output and the USB monitor.

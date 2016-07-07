@@ -83,9 +83,8 @@
 
 enum bbsramdf_e
 {
-  eCRCValid = 1,  /* The crc is valid */
-  eDirty    = 2,  /* The file was closed */
-
+  BBSRAM_CRC_VALID = 1,        /* The crc is valid */
+  BBSRAM_DIRTY     = 2,        /* The file was closed */
 };
 
 struct bbsramd_s

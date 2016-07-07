@@ -52,6 +52,26 @@ config IOEXPANDER_MULTIPIN
 		This settings enable the definition of routines for
 		optimized simultaneous access to multiple pins.
 
+config IOEXPANDER_SHADOW_MODE
+	bool "Use Shadow Mode instead of Read-Modify-Write Operations"
+	default n
+	---help---
+		This setting enables a mode where the output and pin
+		configuration registers are held in RAM.
+		With this for example we do not need to read back the
+		output-register every time we want to change one pin.
+		We do instead change the bit in the internal register
+		and then just write this register to the IO-Expander.
+		This reduces bus traffic and eliminates the problem of
+		EMC-caused toggling of output pins.
+
+config IOEXPANDER_RETRY
+	bool "Retry to send commands and data at I2C communication errors"
+	default n
+	---help---
+		Retry to send commands and data if a I2C-communication
+		error occurs (eg. caused by EMC).
+
 endif # IOEXPANDER
 
 config DEV_GPIO

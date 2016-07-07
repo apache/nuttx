@@ -61,9 +61,9 @@
 #include "up_arch.h"
 
 #include "kinetis.h"
-#include "kinetis_pinmux.h"
-#include "kinetis_sim.h"
-#include "kinetis_sdhc.h"
+#include "chip/kinetis_pinmux.h"
+#include "chip/kinetis_sim.h"
+#include "chip/kinetis_sdhc.h"
 
 #ifdef CONFIG_KINETIS_SDHC
 

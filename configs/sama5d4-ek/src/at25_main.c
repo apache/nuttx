@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/sama5d4-ek/src/at25_main.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,10 +47,10 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <debug.h>
+#include <hex2bin.h>
 
 #include <nuttx/streams.h>
 #include <arch/irq.h>
-#include <apps/hex2bin.h>
 
 #include "sama5d4-ek.h"
 

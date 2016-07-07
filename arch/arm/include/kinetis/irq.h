@@ -83,7 +83,7 @@
  * K20P64M72SF1RM
  */
 
-#if defined(CONFIG_ARCH_CHIP_MK20DX256VLH7)
+#if defined(CONFIG_ARCH_FAMILY_K20)
 #  define KINETIS_IRQ_DMACH0      (16)  /* Vector 16: DMA channel 0 transfer complete */
 #  define KINETIS_IRQ_DMACH1      (17)  /* Vector 17: DMA channel 1 transfer complete */
 #  define KINETIS_IRQ_DMACH2      (18)  /* Vector 18: DMA channel 2 transfer complete */
@@ -162,9 +162,7 @@
  * K40P144M100SF2RM
  */
 
-#elif defined(CONFIG_ARCH_CHIP_MK40X128VLQ100) || defined(CONFIG_ARCH_CHIP_MK40X128VMD100) || \
-    defined(CONFIG_ARCH_CHIP_MK40X256VLQ100) || defined(CONFIG_ARCH_CHIP_MK40X256VMD100) || \
-    defined(CONFIG_ARCH_CHIP_MK40N512VLQ100) || defined(CONFIG_ARCH_CHIP_MK40N512VMD100)
+#elif defined(CONFIG_ARCH_FAMILY_K40)
 
 #  define KINETIS_IRQ_DMACH0      (16)  /* Vector 16: DMA channel 0 transfer complete */
 #  define KINETIS_IRQ_DMACH1      (17)  /* Vector 17: DMA channel 1 transfer complete */
@@ -274,10 +272,7 @@
  * K60P144M100SF2RM
  */
 
-#elif defined(CONFIG_ARCH_CHIP_MK60N256VLQ100) || defined(CONFIG_ARCH_CHIP_MK60X256VLQ100) || \
-      defined(CONFIG_ARCH_CHIP_MK60N512VLQ100) || defined(CONFIG_ARCH_CHIP_MK60N256VMD100) || \
-      defined(CONFIG_ARCH_CHIP_MK60X256VMD100) || defined(CONFIG_ARCH_CHIP_MK60N512VMD100) || \
-      defined(CONFIG_ARCH_CHIP_MK60N512VLL100)
+#elif defined(CONFIG_ARCH_FAMILY_K60)
 
 #  define KINETIS_IRQ_DMACH0      (16)  /* Vector 16: DMA channel 0 transfer complete */
 #  define KINETIS_IRQ_DMACH1      (17)  /* Vector 17: DMA channel 1 transfer complete */
@@ -382,6 +377,105 @@
 
 #  define NR_VECTORS              (120) /* 120 vectors */
 #  define NR_IRQS                 (108) /* 120 interrupts but 108 IRQ numbers */
+
+/* K64 Family ***********************************************************************
+ *
+ * The memory map for the following parts is defined in NXP document
+ * K64P144M120SF5RM.pdf
+ */
+
+#elif defined(CONFIG_ARCH_FAMILY_K64)
+
+#  define KINETIS_IRQ_DMACH0      (16)  /* Vector 16: DMA channel 0 transfer complete */
+#  define KINETIS_IRQ_DMACH1      (17)  /* Vector 17: DMA channel 1 transfer complete */
+#  define KINETIS_IRQ_DMACH2      (18)  /* Vector 18: DMA channel 2 transfer complete */
+#  define KINETIS_IRQ_DMACH3      (19)  /* Vector 19: DMA channel 3 transfer complete */
+#  define KINETIS_IRQ_DMACH4      (20)  /* Vector 20: DMA channel 4 transfer complete */
+#  define KINETIS_IRQ_DMACH5      (21)  /* Vector 21: DMA channel 5 transfer complete */
+#  define KINETIS_IRQ_DMACH6      (22)  /* Vector 22: DMA channel 6 transfer complete */
+#  define KINETIS_IRQ_DMACH7      (23)  /* Vector 23: DMA channel 7 transfer complete */
+#  define KINETIS_IRQ_DMACH8      (24)  /* Vector 24: DMA channel 8 transfer complete */
+#  define KINETIS_IRQ_DMACH9      (25)  /* Vector 25: DMA channel 9 transfer complete */
+#  define KINETIS_IRQ_DMACH10     (26)  /* Vector 26: DMA channel 10 transfer complete */
+#  define KINETIS_IRQ_DMACH11     (27)  /* Vector 27: DMA channel 11 transfer complete */
+#  define KINETIS_IRQ_DMACH12     (28)  /* Vector 28: DMA channel 12 transfer complete */
+#  define KINETIS_IRQ_DMACH13     (29)  /* Vector 29: DMA channel 13 transfer complete */
+#  define KINETIS_IRQ_DMACH14     (30)  /* Vector 30: DMA channel 14 transfer complete */
+#  define KINETIS_IRQ_DMACH15     (31)  /* Vector 31: DMA channel 15 transfer complete */
+#  define KINETIS_IRQ_DMAERR      (32)  /* Vector 32: DMA error interrupt channels 0-15 */
+#  define KINETIS_IRQ_MCM         (33)  /* Vector 33: MCM Normal interrupt */
+#  define KINETIS_IRQ_FLASHCC     (34)  /* Vector 34: Flash memory command complete */
+#  define KINETIS_IRQ_FLASHRC     (35)  /* Vector 35: Flash memory read collision */
+#  define KINETIS_IRQ_SMCLVD      (36)  /* Vector 36: Mode Controller low-voltage
+                                         *            detect, low-voltage warning */
+#  define KINETIS_IRQ_LLWU        (37)  /* Vector 37: LLWU Normal Low Leakage Wakeup */
+#  define KINETIS_IRQ_WDOG        (38)  /* Vector 38: Watchdog */
+#  define KINETIS_IRQ_RNGB        (39)  /* Vector 39: Random number generator */
+#  define KINETIS_IRQ_I2C0        (40)  /* Vector 40: I2C0 */
+#  define KINETIS_IRQ_I2C1        (41)  /* Vector 41: I2C1 */
+#  define KINETIS_IRQ_SPI0        (42)  /* Vector 42: SPI0 all sources */
+#  define KINETIS_IRQ_SPI1        (43)  /* Vector 43: SPI1 all sources */
+#  define KINETIS_IRQ_I2S0        (44)  /* Vector 44: Transmit */
+#  define KINETIS_IRQ_I2S1        (45)  /* Vector 45: Transmit */
+                                        /* Vector 46: Reserved */
+#  define KINETIS_IRQ_UART0S      (47)  /* Vector 47: UART0 status */
+#  define KINETIS_IRQ_UART0E      (48)  /* Vector 48: UART0 error */
+#  define KINETIS_IRQ_UART1S      (49)  /* Vector 49: UART1 status */
+#  define KINETIS_IRQ_UART1E      (50)  /* Vector 50: UART1 error */
+#  define KINETIS_IRQ_UART2S      (51)  /* Vector 51: UART2 status */
+#  define KINETIS_IRQ_UART2E      (52)  /* Vector 52: UART2 error */
+#  define KINETIS_IRQ_UART3S      (53)  /* Vector 53: UART3 status */
+#  define KINETIS_IRQ_UART3E      (54)  /* Vector 54: UART3 error */
+#  define KINETIS_IRQ_ADC0        (55)  /* Vector 55: ADC0 */
+#  define KINETIS_IRQ_CMP0        (56)  /* Vector 56: CMP0 */
+#  define KINETIS_IRQ_CMP1        (57)  /* Vector 57: CMP1 */
+#  define KINETIS_IRQ_FTM0        (58)  /* Vector 58: FTM0 all sources */
+#  define KINETIS_IRQ_FTM1        (59)  /* Vector 59: FTM1 all sources */
+#  define KINETIS_IRQ_FTM2        (60)  /* Vector 60: FTM2 all sources */
+#  define KINETIS_IRQ_CMT         (61)  /* Vector 61: CMT */
+#  define KINETIS_IRQ_RTC0        (62)  /* Vector 62: RTC alarm interrupt */
+#  define KINETIS_IRQ_RTC1        (63)  /* Vector 63: RTC seconds interrupt */
+#  define KINETIS_IRQ_PITCH0      (64)  /* Vector 64: PIT channel 0 */
+#  define KINETIS_IRQ_PITCH1      (65)  /* Vector 65: PIT channel 1 */
+#  define KINETIS_IRQ_PITCH2      (66)  /* Vector 66: PIT channel 2 */
+#  define KINETIS_IRQ_PITCH3      (67)  /* Vector 67: PIT channel 3 */
+#  define KINETIS_IRQ_PDB         (68)  /* Vector 68: PDB */
+#  define KINETIS_IRQ_USBOTG      (69)  /* Vector 68: USB OTG */
+#  define KINETIS_IRQ_USBCD       (70)  /* Vector 70: USB charger detect */
+                                        /* Vector 71: Reserved */
+#  define KINETIS_IRQ_DAC0        (72)  /* Vector 72: DAC0 */
+#  define KINETIS_IRQ_MCG         (73)  /* Vector 73: MCG */
+#  define KINETIS_IRQ_LPT         (74)  /* Vector 74: Low power timer */
+#  define KINETIS_IRQ_PORTA       (75)  /* Vector 75: Pin detect port A */
+#  define KINETIS_IRQ_PORTB       (76)  /* Vector 76: Pin detect port B */
+#  define KINETIS_IRQ_PORTC       (77)  /* Vector 77: Pin detect port C */
+#  define KINETIS_IRQ_PORTD       (78)  /* Vector 78: Pin detect port D */
+#  define KINETIS_IRQ_PORTE       (79)  /* Vector 79: Pin detect port E */
+#  define KINETIS_IRQ_SOFTWARE    (80)  /* Vector 80: Software interrupt */
+#  define KINETIS_IRQ_SPI2        (81)  /* Vector 81: SPI2 all sources */
+#  define KINETIS_IRQ_UART4S      (82)  /* Vector 82: UART4 status */
+#  define KINETIS_IRQ_UART4E      (83)  /* Vector 83: UART4 error */
+#  define KINETIS_IRQ_UART5S      (84)  /* Vector 84: UART5 status */
+#  define KINETIS_IRQ_UART5E      (85)  /* Vector 85: UART5 error */
+#  define KINETIS_IRQ_CMP2        (86)  /* Vector 86: CMP2 */
+#  define KINETIS_IRQ_FTM3        (87)  /* Vector 87: FTM3 all sources */
+#  define KINETIS_IRQ_DAC1        (88)  /* Vector 88: DAC1 */
+#  define KINETIS_IRQ_ADC1        (89)  /* Vector 89: ADC1 */
+#  define KINETIS_IRQ_I2C2        (90)  /* Vector 90: I2C2 */
+#  define KINETIS_IRQ_CAN0MB      (91)  /* Vector 91: CAN0 OR'ed Message buffer (0-15) */
+#  define KINETIS_IRQ_CAN0BO      (92)  /* Vector 92: CAN0 Bus Off */
+#  define KINETIS_IRQ_CAN0ERR     (93)  /* Vector 93: CAN0 Error */
+#  define KINETIS_IRQ_CAN0TW      (94)  /* Vector 94: CAN0 Transmit Warning */
+#  define KINETIS_IRQ_CAN0RW      (95)  /* Vector 95: CAN0 Receive Warning */
+#  define KINETIS_IRQ_CAN0WU      (96)  /* Vector 96: CAN0 Wake UP */
+#  define KINETIS_IRQ_SDHC        (97)  /* Vector 97: SDHC */
+#  define KINETIS_IRQ_EMACTMR     (98)  /* Vector 91: Ethernet MAC IEEE 1588 timer interrupt */
+#  define KINETIS_IRQ_EMACTX      (99)  /* Vector 92: Ethernet MAC transmit interrupt */
+#  define KINETIS_IRQ_EMACRX      (100) /* Vector 93: Ethernet MAC receive interrupt */
+#  define KINETIS_IRQ_EMACMISC    (101) /* Vector 94: Ethernet MAC error and misc interrupt */
+
+#  define NR_VECTORS              (102) /* 102 vectors */
+#  define NR_IRQS                 (102) /* 85 interrupts but 102 IRQ numbers */
 
 #else
   /* The interrupt vectors for other parts are defined in other documents and may or

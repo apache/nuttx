@@ -396,7 +396,7 @@ static int pl2303_setup(FAR struct uart_dev_s *dev)
   </tr>
   <tr>
     <td width="30%" align="left" valign="top">
-      <code>CONFIG_SYSTEM_USBMONITOR=y</code>
+      <code>CONFIG_USBMONITOR=y</code>
     </td>
     <td align="left" valign="top">
       Enable the USB monitor daemon
@@ -404,7 +404,7 @@ static int pl2303_setup(FAR struct uart_dev_s *dev)
   </tr>
   <tr>
     <td width="30%" align="left" valign="top">
-      <code>CONFIG_SYSTEM_USBMONITOR_STACKSIZE=<i>nnnn</i></code>
+      <code>CONFIG_USBMONITOR_STACKSIZE=<i>nnnn</i></code>
     </td>
     <td align="left" valign="top">
       Sets the USB monitor daemon stack size to <i>nnnn</i>.
@@ -413,7 +413,7 @@ static int pl2303_setup(FAR struct uart_dev_s *dev)
   </tr>
   <tr>
     <td width="30%" align="left" valign="top">
-      <code>CONFIG_SYSTEM_USBMONITOR_PRIORITY=50</code>
+      <code>CONFIG_USBMONITOR_PRIORITY=50</code>
     </td>
     <td align="left" valign="top">
       Sets the USB monitor daemon priority to <i>nnnn</i>.
@@ -423,7 +423,7 @@ static int pl2303_setup(FAR struct uart_dev_s *dev)
   </tr>
   <tr>
     <td width="30%" align="left" valign="top">
-      <code>CONFIG_SYSTEM_USBMONITOR_INTERVAL=<i>nnnn</i></code>
+      <code>CONFIG_USBMONITOR_INTERVAL=<i>nnnn</i></code>
     </td>
     <td align="left" valign="top">
       Dump the buffered USB data every <i>nnnn</i> seconds.
@@ -432,11 +432,11 @@ static int pl2303_setup(FAR struct uart_dev_s *dev)
   </tr>
   <tr>
     <td width="30%" align="left" valign="top">
-      <code>CONFIG_SYSTEM_USBMONITOR_TRACEINIT=y</code><br>
-      <code>CONFIG_SYSTEM_USBMONITOR_TRACECLASS=y</code><br>
-      <code>CONFIG_SYSTEM_USBMONITOR_TRACETRANSFERS=y</code><br>
-      <code>CONFIG_SYSTEM_USBMONITOR_TRACECONTROLLER=y</code><br>
-      <code>CONFIG_SYSTEM_USBMONITOR_TRACEINTERRUPTS=y</code><br>
+      <code>CONFIG_USBMONITOR_TRACEINIT=y</code><br>
+      <code>CONFIG_USBMONITOR_TRACECLASS=y</code><br>
+      <code>CONFIG_USBMONITOR_TRACETRANSFERS=y</code><br>
+      <code>CONFIG_USBMONITOR_TRACECONTROLLER=y</code><br>
+      <code>CONFIG_USBMONITOR_TRACEINTERRUPTS=y</code><br>
     </td>
     <td align="left" valign="top">
       Selects which USB event(s) that you want to be traced.

@@ -65,7 +65,7 @@
 
 /* Dump GPIO registers */
 
-#if CONFIG_DEBUG_SPI_INFO
+#ifdef CONFIG_DEBUG_SPI_INFO
 #  define spi_dumpgpio(m) lpc17_dumpgpio(SDCCS_GPIO, m)
 #else
 #  define spi_dumpgpio(m)
