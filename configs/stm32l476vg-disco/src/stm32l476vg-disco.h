@@ -59,6 +59,9 @@
 #define HAVE_N25QXXX_NXFFS    1
 #define HAVE_N25QXXX_SMARTFS  1
 #define HAVE_N25QXXX_CHARDEV  1
+#define HAVE_USBDEV           1
+#define HAVE_USBHOST          1
+#define HAVE_USBMONITOR       1
 
 #if !defined(CONFIG_FS_PROCFS)
 #  undef HAVE_PROC
@@ -123,6 +126,55 @@
 /* This is the on-chip progmem memroy driver minor number */
 
 #define PROGMEM_MTD_MINOR 1
+
+/* Can't support USB host or device features if USB OTG FS is not enabled */
+
+#ifndef CONFIG_STM32L4_OTGFS
+#  undef HAVE_USBDEV
+#  undef HAVE_USBHOST
+#  undef HAVE_USBMONITOR
+#endif
+
+/* Can't support USB device monitor if USB device is not enabled */
+
+#ifndef CONFIG_USBDEV
+#  undef HAVE_USBDEV
+#  undef HAVE_USBMONITOR
+#endif
+
+/* Can't support USB host is USB host is not enabled */
+
+#ifndef CONFIG_USBHOST
+#  undef HAVE_USBHOST
+#endif
+
+/* Check if we should enable the USB monitor before starting NSH */
+
+#if !defined(CONFIG_USBDEV_TRACE) || !defined(CONFIG_SYSTEM_USBMONITOR)
+#  undef HAVE_USBMONITOR
+#endif
+
+/* USB OTG FS
+ *
+ * PC11  OTG_FS_VBUS VBUS sensing (also connected to the green LED)
+ * PC9   OTG_FS_PowerSwitchOn
+ * PC10  OTG_FS_Overcurrent
+ */
+
+#define GPIO_OTGFS_VBUS   (GPIO_INPUT|GPIO_FLOAT|GPIO_SPEED_100MHz|\
+                           GPIO_OPENDRAIN|GPIO_PORTC|GPIO_PIN11)
+#define GPIO_OTGFS_PWRON  (GPIO_OUTPUT|GPIO_FLOAT|GPIO_SPEED_100MHz|\
+                           GPIO_PUSHPULL|GPIO_PORTC|GPIO_PIN9)
+
+#ifdef CONFIG_USBHOST
+#  define GPIO_OTGFS_OVER (GPIO_INPUT|GPIO_EXTI|GPIO_FLOAT|\
+                           GPIO_SPEED_100MHz|GPIO_PUSHPULL|\
+                           GPIO_PORTC|GPIO_PIN10)
+
+#else
+#  define GPIO_OTGFS_OVER (GPIO_INPUT|GPIO_FLOAT|GPIO_SPEED_100MHz|\
+                           GPIO_PUSHPULL|GPIO_PORTC|GPIO_PIN10)
+#endif
 
 /* LED.
  * LD4: the red LED on PB2
@@ -211,14 +263,14 @@ extern struct spi_dev_s *g_spi2;
 void stm32_spiinitialize(void);
 
 /************************************************************************************
- * Name: stm32_usbinitialize
+ * Name: stm32l4_usbinitialize
  *
  * Description:
  *   Called to setup USB-related GPIO pins.
  *
  ************************************************************************************/
 
-void stm32_usbinitialize(void);
+void stm32l4_usbinitialize(void);
 
 /************************************************************************************
  * Name: board_adc_initialize

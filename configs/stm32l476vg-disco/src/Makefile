@@ -42,7 +42,7 @@ ifeq ($(CONFIG_ARCH_BOARD_STM32L4_CUSTOM_CLOCKCONFIG),y)
 CSRCS += stm32_clockconfig.c
 endif
 
-ifeq ($(CONFIG_STM32_OTGFS),y)
+ifeq ($(CONFIG_STM32L4_OTGFS),y)
 CSRCS += stm32_usb.c
 endif
 
