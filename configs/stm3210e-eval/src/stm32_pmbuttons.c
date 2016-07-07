@@ -318,9 +318,9 @@ void stm32_pmbuttons(void)
 
       if (oldhandler != NULL)
         {
-          warn("WARNING: oldhandler:%p is not NULL!  "
-               "Button events may be lost or aliased!\n",
-               oldhandler);
+          swarn("WARNING: oldhandler:%p is not NULL!  "
+                "Button events may be lost or aliased!\n",
+                oldhandler);
         }
     }
 #endif

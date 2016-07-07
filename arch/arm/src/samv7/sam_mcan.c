@@ -802,6 +802,7 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+
 /* CAN mode of operation */
 
 enum sam_canmode_e
@@ -1833,6 +1834,22 @@ static int mcan_add_extfilter(FAR struct sam_mcan_s *priv,
 
           if (priv->nextalloc == 1)
             {
+              /* Enable the Initialization state */
+
+              regval  = mcan_getreg(priv, SAM_MCAN_CCCR_OFFSET);
+              regval |= MCAN_CCCR_INIT;
+              mcan_putreg(priv, SAM_MCAN_CCCR_OFFSET, regval);
+
+              /* Wait for initialization mode to take effect */
+
+              while ((mcan_getreg(priv, SAM_MCAN_CCCR_OFFSET) & MCAN_CCCR_INIT) == 0);
+
+              /* Enable writing to configuration registers */
+
+              regval  = mcan_getreg(priv, SAM_MCAN_CCCR_OFFSET);
+              regval |= (MCAN_CCCR_INIT | MCAN_CCCR_CCE);
+              mcan_putreg(priv, SAM_MCAN_CCCR_OFFSET, regval);
+
              /* Update the Global Filter Configuration so that received
               * messages are rejected if they do not match the acceptance
               * filter.
@@ -1844,6 +1861,12 @@ static int mcan_add_extfilter(FAR struct sam_mcan_s *priv,
               regval &= ~MCAN_GFC_ANFE_MASK;
               regval |= MCAN_GFC_ANFE_REJECTED;
               mcan_putreg(priv, SAM_MCAN_GFC_OFFSET, regval);
+
+              /* Disable writing to configuration registers */
+
+              regval  = mcan_getreg(priv, SAM_MCAN_CCCR_OFFSET);
+              regval &= ~(MCAN_CCCR_INIT | MCAN_CCCR_CCE);
+              mcan_putreg(priv, SAM_MCAN_CCCR_OFFSET, regval);
             }
 
           mcan_dev_unlock(priv);
@@ -1903,6 +1926,22 @@ static int mcan_del_extfilter(FAR struct sam_mcan_s *priv, int ndx)
 
   if (priv->nextalloc == 0)
     {
+      /* Enable the Initialization state */
+
+      regval  = mcan_getreg(priv, SAM_MCAN_CCCR_OFFSET);
+      regval |= MCAN_CCCR_INIT;
+      mcan_putreg(priv, SAM_MCAN_CCCR_OFFSET, regval);
+
+      /* Wait for initialization mode to take effect */
+
+      while ((mcan_getreg(priv, SAM_MCAN_CCCR_OFFSET) & MCAN_CCCR_INIT) == 0);
+
+      /* Enable writing to configuration registers */
+
+      regval  = mcan_getreg(priv, SAM_MCAN_CCCR_OFFSET);
+      regval |= (MCAN_CCCR_INIT | MCAN_CCCR_CCE);
+      mcan_putreg(priv, SAM_MCAN_CCCR_OFFSET, regval);
+
       /* If there are no extended filters, then modify Global Filter
        * Configuration so that all rejected messages are places in RX
        * FIFO0.
@@ -1914,6 +1953,12 @@ static int mcan_del_extfilter(FAR struct sam_mcan_s *priv, int ndx)
       regval &= ~MCAN_GFC_ANFE_MASK;
       regval |= MCAN_GFC_ANFE_RX_FIFO0;
       mcan_putreg(priv, SAM_MCAN_GFC_OFFSET, regval);
+
+      /* Disable writing to configuration registers */
+
+      regval  = mcan_getreg(priv, SAM_MCAN_CCCR_OFFSET);
+      regval &= ~(MCAN_CCCR_INIT | MCAN_CCCR_CCE);
+      mcan_putreg(priv, SAM_MCAN_CCCR_OFFSET, regval);
     }
 
   /* Deactivate the filter last so that no messages are lost. */
@@ -2021,6 +2066,22 @@ static int mcan_add_stdfilter(FAR struct sam_mcan_s *priv,
 
           if (priv->nstdalloc == 1)
             {
+              /* Enable the Initialization state */
+
+              regval  = mcan_getreg(priv, SAM_MCAN_CCCR_OFFSET);
+              regval |= MCAN_CCCR_INIT;
+              mcan_putreg(priv, SAM_MCAN_CCCR_OFFSET, regval);
+
+              /* Wait for initialization mode to take effect */
+
+              while ((mcan_getreg(priv, SAM_MCAN_CCCR_OFFSET) & MCAN_CCCR_INIT) == 0);
+
+              /* Enable writing to configuration registers */
+
+              regval  = mcan_getreg(priv, SAM_MCAN_CCCR_OFFSET);
+              regval |= (MCAN_CCCR_INIT | MCAN_CCCR_CCE);
+              mcan_putreg(priv, SAM_MCAN_CCCR_OFFSET, regval);
+
              /* Update the Global Filter Configuration so that received
               * messages are rejected if they do not match the acceptance
               * filter.
@@ -2032,6 +2093,12 @@ static int mcan_add_stdfilter(FAR struct sam_mcan_s *priv,
               regval &= ~MCAN_GFC_ANFS_MASK;
               regval |= MCAN_GFC_ANFS_REJECTED;
               mcan_putreg(priv, SAM_MCAN_GFC_OFFSET, regval);
+
+              /* Disable writing to configuration registers */
+
+              regval  = mcan_getreg(priv, SAM_MCAN_CCCR_OFFSET);
+              regval &= ~(MCAN_CCCR_INIT | MCAN_CCCR_CCE);
+              mcan_putreg(priv, SAM_MCAN_CCCR_OFFSET, regval);
             }
 
           mcan_dev_unlock(priv);
@@ -2089,6 +2156,22 @@ static int mcan_del_stdfilter(FAR struct sam_mcan_s *priv, int ndx)
 
   if (priv->nstdalloc == 0)
     {
+      /* Enable the Initialization state */
+
+      regval  = mcan_getreg(priv, SAM_MCAN_CCCR_OFFSET);
+      regval |= MCAN_CCCR_INIT;
+      mcan_putreg(priv, SAM_MCAN_CCCR_OFFSET, regval);
+
+      /* Wait for initialization mode to take effect */
+
+      while ((mcan_getreg(priv, SAM_MCAN_CCCR_OFFSET) & MCAN_CCCR_INIT) == 0);
+
+      /* Enable writing to configuration registers */
+
+      regval  = mcan_getreg(priv, SAM_MCAN_CCCR_OFFSET);
+      regval |= (MCAN_CCCR_INIT | MCAN_CCCR_CCE);
+      mcan_putreg(priv, SAM_MCAN_CCCR_OFFSET, regval);
+
       /* If there are no standard filters, then modify Global Filter
        * Configuration so that all rejected messages are places in RX
        * FIFO0.
@@ -2100,6 +2183,12 @@ static int mcan_del_stdfilter(FAR struct sam_mcan_s *priv, int ndx)
       regval &= ~MCAN_GFC_ANFS_MASK;
       regval |= MCAN_GFC_ANFS_RX_FIFO0;
       mcan_putreg(priv, SAM_MCAN_GFC_OFFSET, regval);
+
+      /* Disable writing to configuration registers */
+
+      regval  = mcan_getreg(priv, SAM_MCAN_CCCR_OFFSET);
+      regval &= ~(MCAN_CCCR_INIT | MCAN_CCCR_CCE);
+      mcan_putreg(priv, SAM_MCAN_CCCR_OFFSET, regval);
     }
 
   /* Deactivate the filter last so that no messages are lost. */

@@ -223,11 +223,20 @@ static int pca9555_setbit(FAR struct pca9555_dev_s *pca, uint8_t addr,
 
   buf[0] = addr;
 
+#ifdef CONFIG_IOEXPANDER_SHADOW_MODE
+  /* Get the shadowed register value */
+
+  buf[1] = pca->sreg[addr];
+
+#else
+  /* Get the register value from the IO-Expander */
+
   ret = pca9555_writeread(pca, &buf[0], 1, &buf[1], 1);
   if (ret < 0)
     {
       return ret;
     }
+#endif
 
   if (bitval)
     {
@@ -238,7 +247,23 @@ static int pca9555_setbit(FAR struct pca9555_dev_s *pca, uint8_t addr,
       buf[1] &= ~(1 << pin);
     }
 
-  return pca9555_write(pca, buf, 2);
+#ifdef CONFIG_IOEXPANDER_SHADOW_MODE
+  /* Save the new register value in the shadow register */
+
+  pca->sreg[addr] = buf[1];
+#endif
+
+  ret = pca9555_write(pca, buf, 2);
+#ifdef CONFIG_IOEXPANDER_RETRY
+  if (ret != OK)
+    {
+      /* Try again (only once) */
+
+      ret = pca9555_write(pca, buf, 2);
+    }
+#endif
+
+  return ret;
 }
 
 /****************************************************************************
@@ -270,6 +295,12 @@ static int pca9555_getbit(FAR struct pca9555_dev_s *pca, uint8_t addr,
     {
       return ret;
     }
+
+#ifdef CONFIG_IOEXPANDER_SHADOW_MODE
+  /* Save the new register value in the shadow register */
+
+  pca->sreg[addr] = buf;
+#endif
 
   *val = (buf >> pin) & 1;
   return OK;
@@ -417,6 +448,13 @@ static int pca9555_getmultibits(FAR struct pca9555_dev_s *pca, uint8_t addr,
       return ret;
     }
 
+#ifdef CONFIG_IOEXPANDER_SHADOW_MODE
+  /* Save the new register value in the shadow register */
+
+  pca->sreg[addr]   = buf[0];
+  pca->sreg[addr+1] = buf[1];
+#endif
+
   /* Read the requested bits */
 
   for (i = 0; i < count; i++)
@@ -465,15 +503,22 @@ static int pca9555_multiwritepin(FAR struct ioexpander_dev_s *dev,
 
   /* Start by reading both registers, whatever the pins to change. We could
    * attempt to read one port only if all pins were on the same port, but
-   * this would not save much. */
+   * this would not save much.
+   */
 
+#ifndef CONFIG_IOEXPANDER_SHADOW_MODE
   ret = pca9555_writeread(pca, &addr, 1, &buf[1], 2);
   if (ret < 0)
     {
-
       pca9555_unlock(pca);
       return ret;
     }
+#else
+  /* In Shadow-Mode we "read" the pin status from the shadow registers */
+
+  buf[1] = pca->sreg[addr];
+  buf[2] = pca->sreg[addr+1];
+#endif
 
   /* Apply the user defined changes */
 
@@ -505,6 +550,11 @@ static int pca9555_multiwritepin(FAR struct ioexpander_dev_s *dev,
   /* Now write back the new pins states */
 
   buf[0] = addr;
+#ifdef CONFIG_IOEXPANDER_SHADOW_MODE
+  /* Save the new register values in the shadow register */
+  pca->sreg[addr] = buf[1];
+  pca->sreg[addr+1] = buf[2];
+#endif
   ret = pca9555_write(pca, buf, 3);
 
   pca9555_unlock(pca);
@@ -585,6 +635,11 @@ static void pca9555_irqworker(void *arg)
   ret = pca9555_writeread(pca, &addr, 1, buf, 2);
   if (ret == OK)
     {
+#ifdef CONFIG_IOEXPANDER_SHADOW_MODE
+      /* Don't forget to update the shadow registers at this point */
+
+      pca->sreg[addr] = buf;
+#endif
       bits = ((unsigned int)buf[0] << 8) | buf[1];
 
       /* If signal PID is registered, enqueue signal. */

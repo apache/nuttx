@@ -1,0 +1,58 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+
+config USBMONITOR_STACKSIZE
+	int "USB Monitor daemon stack size"
+	default 2048
+	---help---
+		The stack size to use the the USB monitor daemon.  Default: 2048
+
+config USBMONITOR_PRIORITY
+	int "USB Monitor daemon priority"
+	default 50
+	---help---
+		The priority to use the the USB monitor daemon.  Default: 50
+
+config USBMONITOR_INTERVAL
+	int "USB Monitor dump frequency"
+	default 2
+	---help---
+		The rate in seconds that the USB monitor will wait before dumping
+		the next set of buffered USB trace data.  Default:  2 seconds.
+
+if USBDEV && USBDEV_TRACE
+
+config USBMONITOR_TRACEINIT
+	bool "Show USB device initialization events"
+	default n
+	---help---
+		Show initialization events
+
+config USBMONITOR_TRACECLASS
+	bool "Show USB device class driver events"
+	default n
+	---help---
+		Show class driver events
+
+config USBMONITOR_TRACETRANSFERS
+	bool "Show USB device data transfer events"
+	default n
+	---help---
+		Show data transfer events
+
+config USBMONITOR_TRACECONTROLLER
+	bool "Show USB device controller events"
+	default n
+	---help---
+		Show controller events
+
+config USBMONITOR_TRACEINTERRUPTS
+	bool "Show USB device interrupt-related events"
+	default n
+	---help---
+		Show interrupt-related events
+
+endif # USBDEV && USBDEV_TRACE

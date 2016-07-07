@@ -14,7 +14,7 @@ Other required configuration settings:
 
   CONFIG_NFILE_DESCRIPTORS > 3
   CONFIG_BINFMT_DISABLE=n
-  CONFIG_PCODE=y
+  CONFIG_BINFMT_PCODE=y
 
 Directory Contents
 ------------------
@@ -83,16 +83,16 @@ Here is a simple test configuration using the NuttX simulator:
 
    This enables building the PCODE binary format
 
-     CONFIG_PCODE=y
-     CONFIG_PCODE_PRIORITY=100
-     CONFIG_PCODE_STACKSIZE=2048
+     CONFIG_BINFMT_PCODE=y
+     CONFIG_BINFMT_PCODE_PRIORITY=100
+     CONFIG_BINFMT_PCODE_STACKSIZE=2048
 
    This enables building and mount a test filesystem:
 
-     CONFIG_PCODE_TEST_FS=y
-     CONFIG_PCODE_TEST_DEVMINOR=3
-     CONFIG_PCODE_TEST_DEVPATH="/dev/ram3"
-     CONFIG_PCODE_TEST_MOUNTPOINT="/bin"
+     CONFIG_BINFMT_PCODE_TEST_FS=y
+     CONFIG_BINFMT_PCODE_TEST_DEVMINOR=3
+     CONFIG_BINFMT_PCODE_TEST_DEVPATH="/dev/ram3"
+     CONFIG_BINFMT_PCODE_TEST_MOUNTPOINT="/bin"
 
    Debug options can also be enabled with:
 
@@ -127,23 +127,24 @@ Here is a simple test configuration using the NuttX simulator:
 Issues
 ------
 
-1. As implemented now, there is a tight coupling between the nuttx/directory
-   and the apps/ directory.  That should not be the case; the nuttx/ logic
-   should be completely independent of apps/ logic (but not vice versa).
+1. As implemented now, there is a tight coupling between the nuttx/binfmt
+   directory and the apps/interpreters/pcode directory.  That should not
+   be the case; the nuttx/ logic should be completely independent of apps/
+   logic (but not vice versa).
 
 2. The current implementation will not work in the CONFIG_BUILD_PROTECTED or
    CONFIG_BUILD_KERNEL configurations.  That is because of the little proxy
-   logic (function pcode_proxy() in the file pcode.c).  (a) That logic would
-   attempt to link with P-code logic that resides in user space.  That will
-   not work.  And (2) that proxy would be started in user mode but in the
-   kernel address space which will certainly crash immediately.
+   logic (function pcode_proxy() and prun() in the file pcode.c).  (a) That
+   logic would attempt to link with P-code logic that resides in user space.
+   That will not work.  And (2) that proxy would be started in user mode but
+   in the kernel address space which will certainly crash immediately.
 
 The general idea to fix both of these problems is as follows:
 
 1. Eliminate the pcode_proxy.  Instead start a P-Code execution program that
    resides in the file system.  That P-Code execution program already
-   exists.  It is in apps/system/prun.  This program should be built as,
-   say, an ELF binary and installed in a file system.
+   exists.  This program should be built as, say, an ELF binary and
+   installed in a file system.
 
 2. Add a configuration setting that gives the full path to where the pexec
    program is stored in the filesystem.

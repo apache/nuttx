@@ -663,7 +663,7 @@ CONFIG_NSH_CONSOLE=y
 #
 # Intel HEX to binary conversion
 #
-# CONFIG_SYSTEM_HEX2BIN is not set
+# CONFIG_LIB_HEX2BIN is not set
 
 #
 # I2C tool

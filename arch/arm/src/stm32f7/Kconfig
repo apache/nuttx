@@ -1195,6 +1195,10 @@ config STM32F7_QUADSPI
 	bool "QuadSPI"
 	default n
 
+config STM32F7_PWR
+	bool "PWR"
+	default n
+
 config STM32F7_RNG
 	bool "RNG"
 	default n
@@ -1215,12 +1219,16 @@ config STM32F7_SDMMC1
 	bool "SDMMC1"
 	default n
 	select ARCH_HAVE_SDIO
+	select ARCH_HAVE_SDIOWAIT_WRCOMPLETE
+	select SDIO_PREFLIGHT
 
 config STM32F7_SDMMC2
 	bool "SDMMC2"
 	default n
 	depends on STM32F7_HAVE_SDMMC2
 	select ARCH_HAVE_SDIO
+	select ARCH_HAVE_SDIOWAIT_WRCOMPLETE
+	select SDIO_PREFLIGHT
 
 config STM32F7_SPDIFRX
 	bool "SPDIFRX"
@@ -1710,11 +1718,156 @@ config STM32F7_I2C_DUTY16_9
 
 endmenu # "I2C Configuration"
 
+config STM32F7_SDMMC_XFRDEBUG
+	bool "SDMMC transfer debug"
+	depends on DEBUG_FS_INFO && (STM32F7_SDMMC1 || STM32F7_SDMMC2)
+	default n
+	---help---
+		Enable special debug instrumentation analyze SDMMC data transfers.
+		This logic is as non-invasive as possible:  It samples SDMMC
+		registers at key points in the data transfer and then dumps all of
+		the registers at the end of the transfer.  If DEBUG_DMA is also
+		enabled, then DMA register will be collected as well.  Requires also
+		DEBUG_FS and CONFIG_DEBUG_INFO.
+
+menu "SDMMC1 Configuration"
+	depends on STM32F7_SDMMC1
+
+config SDMMC1_DMA
+	bool "Support DMA data transfers on SDMMC1"
+	default y if STM32F7_DMA2
+	depends on STM32F7_DMA2
+	---help---
+		Support DMA data transfers on SDMMC1.  Requires STM32F7_SDMMC1 and config STM32F7_DMA2.
+
+config SDMMC1_PRI
+	hex "SDMMC1 interrupt priority"
+	default 128
+	depends on ARCH_IRQPRIO && EXPERIMENTAL
+	---help---
+		Select SDMMC1 interrupt priority.  Default: 128.
+
+config SDMMC1_DMAPRIO
+	hex "SDMMC1 DMA priority"
+	default 0x00010000
+	---help---
+		Select SDMMC1 DMA prority.
+
+		Options are: 0x00000000 low, 0x00010000 medium,
+		0x00020000 high, 0x00030000 very high.  Default: medium.
+
+config SDMMC1_WIDTH_D1_ONLY
+	bool "Use D1 only on SDMMC1"
+	default n
+	---help---
+		Select 1-bit transfer mode.  Default: 4-bit transfer mode.
+
+endmenu # "SDMMC1 Configuration"
+
+menu "SDMMC2 Configuration"
+	depends on STM32F7_SDMMC2
+
+config SDMMC2_DMA
+	bool "Support DMA data transfers on SDMMC2"
+	default y if STM32F7_DMA2
+	depends on STM32F7_DMA2
+	---help---
+		Support DMA data transfers on SDMMC2.  Requires STM32F7_SDMMC2 and config STM32F7_DMA2.
+
+config SDMMC2_PRI
+	hex "SDMMC2 interrupt priority"
+	default 128
+	depends on ARCH_IRQPRIO && EXPERIMENTAL
+	---help---
+		Select SDMMC2 interrupt priority.  Default: 128.
+
+config SDMMC2_DMAPRIO
+	hex "SDMMC2 DMA priority"
+	default 0x00010000
+	---help---
+		Select SDMMC1 DMA prority.
+
+		Options are: 0x00000000 low, 0x00010000 medium,
+		0x00020000 high, 0x00030000 very high.  Default: medium.
+
+config SDMMC2_WIDTH_D1_ONLY
+	bool "Use D1 only on SDMMC2"
+	default n
+	---help---
+		Select 1-bit transfer mode.  Default: 4-bit transfer mode.
+
+endmenu # "SDMMC2 Configuration"
+
+if STM32F7_BKPSRAM
+
+config STM32F7_BBSRAM
+	bool "BBSRAM File Support"
+	default n
+
+config STM32F7_BBSRAM_FILES
+	int "Max Files to support in BBSRAM"
+	default 4
+
+config STM32F7_SAVE_CRASHDUMP
+	bool "Enable Saving Panic to BBSRAM"
+	default n
+
+endif # STM32F7_BKPSRAM
+
+config STM32F7_HAVE_RTC_COUNTER
+	bool
+	default n
+
+config STM32F7_HAVE_RTC_SUBSECONDS
+	bool
+	default n
+
+config RTC_MAGIC_REG
+	int "The BKP register used to store/check the Magic value to determine if RTC is set already"
+	default 0
+	range  0 31
+	depends on RTC && !STM32F7_HAVE_RTC_COUNTER
+
+config RTC_MAGIC
+	hex "Value used as Magic to determine if RTC is set already"
+	default 0xfacefeee
+	depends on RTC && !STM32F7_HAVE_RTC_COUNTER
+
+choice
+	prompt "RTC clock source"
+	default STM32F7_RTC_LSECLOCK
+	depends on RTC
+
+config STM32F7_RTC_HSECLOCK
+	bool "HSE clock"
+	---help---
+		Drive the RTC with the HSE clock, divided down to 1MHz.
+
+config STM32F7_RTC_LSECLOCK
+	bool "LSE clock"
+	---help---
+		Drive the RTC with the LSE clock
+
+config STM32F7_RTC_LSICLOCK
+	bool "LSI clock"
+	---help---
+		Drive the RTC with the LSI clock
+
+endchoice #"RTC clock source"
+
 config STM32F7_CUSTOM_CLOCKCONFIG
 		bool "Custom clock configuration"
 	default n
 	---help---
 		Enables special, board-specific STM32 clock configuration.
+
+config STM32F7_DTCMEXCLUDE
+	bool "Exclude DTCM SRAM from the heap"
+	default y if ELF
+	depends on ARMV7M_HAVE_DTCM
+	---help---
+		Exclude DTCM SRAM from the HEAP because it appears to be impossible
+		to execute ELF modules from DTCM RAM (REVISIT!).
 
 config STM32F7_DTCM_PROCFS
 	bool "DTCM SRAM PROCFS support"
@@ -3364,222 +3517,10 @@ endif # !STM32F7_PWM_MULTICHAN
 
 endif # STM32F7_TIM14_PWM
 
-config STM32F7_TIM15_PWM
-	bool "TIM15 PWM"
-	default n
-	depends on STM32F7_TIM15
-	---help---
-		Reserve timer 15 for use by PWM
-
-		Timer devices may be used for different purposes.  One special purpose is
-		to generate modulated outputs for such things as motor control.  If STM32F7_TIM15
-		is defined then THIS following may also be defined to indicate that
-		the timer is intended to be used for pulsed output modulation.
-
-if STM32F7_TIM15_PWM
-
-if STM32F7_PWM_MULTICHAN
-
-config STM32F7_TIM15_CHANNEL1
-	bool "TIM15 Channel 1"
-	default n
-	---help---
-		Enables channel 1.
-
-if STM32F7_TIM15_CHANNEL1
-
-config STM32F7_TIM15_CH1MODE
-	int "TIM15 Channel 1 Mode"
-	default 0
-	range 0 3 if STM32F7_STM32F30XX
-	range 0 1 if !STM32F7_STM32F30XX
-	---help---
-		Specifies the channel mode.
-
-config STM32F7_TIM15_CH1OUT
-	bool "TIM15 Channel 1 Output"
-	default n
-	---help---
-		Enables channel 1 output.
-
-endif # STM32F7_TIM15_CHANNEL1
-
-config STM32F7_TIM15_CHANNEL2
-	bool "TIM15 Channel 2"
-	default n
-	---help---
-		Enables channel 2.
-
-if STM32F7_TIM15_CHANNEL2
-
-config STM32F7_TIM15_CH2MODE
-	int "TIM15 Channel 2 Mode"
-	default 0
-	range 0 3 if STM32F7_STM32F30XX
-	range 0 1 if !STM32F7_STM32F30XX
-	---help---
-		Specifies the channel mode.
-
-config STM32F7_TIM15_CH2OUT
-	bool "TIM15 Channel 2 Output"
-	default n
-	---help---
-		Enables channel 2 output.
-
-endif # STM32F7_TIM15_CHANNEL2
-
-endif # STM32F7_PWM_MULTICHAN
-
-if !STM32F7_PWM_MULTICHAN
-
-config STM32F7_TIM15_CHANNEL
-	int "TIM15 PWM Output Channel"
-	default 1
-	range 1 2
-	---help---
-		If TIM15 is enabled for PWM usage, you also need specifies the timer output
-		channel {1,2}
-
-config STM32F7_TIM15_CHMODE
-	int "TIM15 Channel Mode"
-	default 0
-	range 0 3 if STM32F7_STM32F30XX
-	range 0 1 if !STM32F7_STM32F30XX
-	---help---
-		Specifies the channel mode.
-
-endif # !STM32F7_PWM_MULTICHAN
-
-endif # STM32F7_TIM15_PWM
-
-config STM32F7_TIM16_PWM
-	bool "TIM16 PWM"
-	default n
-	depends on STM32F7_TIM16
-	---help---
-		Reserve timer 16 for use by PWM
-
-		Timer devices may be used for different purposes.  One special purpose is
-		to generate modulated outputs for such things as motor control.  If STM32F7_TIM16
-		is defined then THIS following may also be defined to indicate that
-		the timer is intended to be used for pulsed output modulation.
-
-if STM32F7_TIM16_PWM
-
-if STM32F7_PWM_MULTICHAN
-
-config STM32F7_TIM16_CHANNEL1
-	bool "TIM16 Channel 1"
-	default n
-	---help---
-		Enables channel 1.
-
-if STM32F7_TIM16_CHANNEL1
-
-config STM32F7_TIM16_CH1MODE
-	int "TIM16 Channel 1 Mode"
-	default 0
-	range 0 1
-	---help---
-		Specifies the channel mode.
-
-config STM32F7_TIM16_CH1OUT
-	bool "TIM16 Channel 1 Output"
-	default n
-	---help---
-		Enables channel 1 output.
-
-endif # STM32F7_TIM16_CHANNEL1
-
-endif # STM32F7_PWM_MULTICHAN
-
-if !STM32F7_PWM_MULTICHAN
-
-config STM32F7_TIM16_CHANNEL
-	int "TIM16 PWM Output Channel"
-	default 1
-	range 1 1
-	---help---
-		If TIM16 is enabled for PWM usage, you also need specifies the timer output
-		channel {1}
-
-config STM32F7_TIM16_CHMODE
-	int "TIM16 Channel Mode"
-	default 0
-	range 0 1
-	---help---
-		Specifies the channel mode.
-
-endif # !STM32F7_PWM_MULTICHAN
-
-endif # STM32F7_TIM16_PWM
-
-config STM32F7_TIM17_PWM
-	bool "TIM17 PWM"
-	default n
-	depends on STM32F7_TIM17
-	---help---
-		Reserve timer 17 for use by PWM
-
-		Timer devices may be used for different purposes.  One special purpose is
-		to generate modulated outputs for such things as motor control.  If STM32F7_TIM17
-		is defined then THIS following may also be defined to indicate that
-		the timer is intended to be used for pulsed output modulation.
-
-if STM32F7_TIM17_PWM
-
-if STM32F7_PWM_MULTICHAN
-
-config STM32F7_TIM17_CHANNEL1
-	bool "TIM17 Channel 1"
-	default n
-	---help---
-		Enables channel 1.
-
-if STM32F7_TIM17_CHANNEL1
-
-config STM32F7_TIM17_CH1MODE
-	int "TIM17 Channel 1 Mode"
-	default 0
-	range 0 1
-	---help---
-		Specifies the channel mode.
-
-config STM32F7_TIM17_CH1OUT
-	bool "TIM17 Channel 1 Output"
-	default n
-	---help---
-		Enables channel 1 output.
-
-endif # STM32F7_TIM17_CHANNEL1
-
-endif # STM32F7_PWM_MULTICHAN
-
-if !STM32F7_PWM_MULTICHAN
-
-config STM32F7_TIM17_CHANNEL
-	int "TIM17 PWM Output Channel"
-	default 1
-	range 1 1
-	---help---
-		If TIM17 is enabled for PWM usage, you also need specifies the timer output
-		channel {1}
-
-config STM32F7_TIM17_CHMODE
-	int "TIM17 Channel Mode"
-	default 0
-	range 0 1
-	---help---
-		Specifies the channel mode.
-
-endif # !STM32F7_PWM_MULTICHAN
-
-endif # STM32F7_TIM17_PWM
-
 config STM32F7_PWM_MULTICHAN
 	bool "PWM Multiple Output Channels"
 	default n
-	depends on STM32F7_TIM1_PWM || STM32F7_TIM2_PWM || STM32F7_TIM3_PWM || STM32F7_TIM4_PWM || STM32F7_TIM5_PWM || STM32F7_TIM8_PWM || STM32F7_TIM9_PWM || STM32F7_TIM10_PWM || STM32F7_TIM11_PWM || STM32F7_TIM12_PWM || STM32F7_TIM13_PWM || STM32F7_TIM14_PWM || STM32F7_TIM15_PWM || STM32F7_TIM16_PWM || STM32F7_TIM17_PWM
+	depends on STM32F7_TIM1_PWM || STM32F7_TIM2_PWM || STM32F7_TIM3_PWM || STM32F7_TIM4_PWM || STM32F7_TIM5_PWM || STM32F7_TIM8_PWM || STM32F7_TIM9_PWM || STM32F7_TIM10_PWM || STM32F7_TIM11_PWM || STM32F7_TIM12_PWM || STM32F7_TIM13_PWM || STM32F7_TIM14_PWM
 	select ARCH_HAVE_PWM_MULTICHAN
 	---help---
 		Specifies that the PWM driver supports multiple output

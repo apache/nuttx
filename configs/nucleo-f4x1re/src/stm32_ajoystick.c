@@ -206,7 +206,8 @@ static int ajoy_sample(FAR const struct ajoy_lowerhalf_s *lower,
    * channels are enabled).
    */
 
-  nread = file_read(&g_adcfile, adcmsg, MAX_ADC_CHANNELS * sizeof(struct adc_msg_s));
+  nread = file_read(&g_adcfile, adcmsg,
+                    MAX_ADC_CHANNELS * sizeof(struct adc_msg_s));
   if (nread < 0)
     {
       int errcode = get_errno();

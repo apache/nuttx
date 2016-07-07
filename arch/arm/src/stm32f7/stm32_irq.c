@@ -656,7 +656,7 @@ int up_prioritize_irq(int irq, int priority)
   uint32_t regval;
   int shift;
 
-  DEBUGASSERT(irq >= STM32_IRQ_MEMFAULT && irq < STM32_IRQ_NIRQS &&
+  DEBUGASSERT(irq >= STM32_IRQ_MEMFAULT && irq < NR_IRQS &&
               (unsigned)priority <= NVIC_SYSH_PRIORITY_MIN);
 
   if (irq < STM32_IRQ_FIRST)

@@ -508,6 +508,7 @@ endif # USBHOST_RTL8187
 config USBHOST_TRACE
 	bool "Enable USB HCD tracing for debug"
 	default n
+	select HAVE_USBTRACE
 	---help---
 		Enables USB tracing for debug.  Only supported for the HCD and,
 		further, no supported by all HCD implementations.

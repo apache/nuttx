@@ -40,13 +40,13 @@
  * Included Files
  ************************************************************************************/
 
-#include "chip/stm32_sdmmc.h"
-
 #include <nuttx/config.h>
 #include <sys/types.h>
 #include <stdbool.h>
 
 #include "chip.h"
+#include "chip/stm32_sdmmc.h"
+
 
 /************************************************************************************
  * Public Functions

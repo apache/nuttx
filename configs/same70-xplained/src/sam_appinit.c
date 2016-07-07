@@ -45,7 +45,7 @@
 
 #include "same70-xplained.h"
 
-#if defined(CONFIG_LIB_BOARDCTL) && !defined(CONFIG_BUILD_KERNEL)
+#ifdef CONFIG_LIB_BOARDCTL
 
 /****************************************************************************
  * Public Functions
@@ -87,4 +87,4 @@ int board_app_initialize(uintptr_t arg)
 #endif
 }
 
-#endif /* CONFIG_LIB_BOARDCTL && !CONFIG_BUILD_KERNEL */
+#endif /* CONFIG_LIB_BOARDCTL */

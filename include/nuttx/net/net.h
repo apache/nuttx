@@ -969,6 +969,39 @@ int psock_setsockopt(FAR struct socket *psock, int level, int option,
                      FAR const void *value, socklen_t value_len);
 
 /****************************************************************************
+ * Name: psock_ioctl
+ *
+ * Description:
+ *   Perform network device specific operations.
+ *
+ * Parameters:
+ *   psock    A pointer to a NuttX-specific, internal socket structure
+ *   cmd      The ioctl command
+ *   arg      The argument of the ioctl cmd
+ *
+ * Return:
+ *   >=0 on success (positive non-zero values are cmd-specific)
+ *   On a failure, -1 is returned with errno set appropriately
+ *
+ *   EBADF
+ *     'psock' is not a valid, connected socket structure.
+ *   EFAULT
+ *     'arg' references an inaccessible memory area.
+ *   ENOTTY
+ *     'cmd' not valid.
+ *   EINVAL
+ *     'arg' is not valid.
+ *   ENOTTY
+ *     'sockfd' is not associated with a network device.
+ *   ENOTTY
+ *      The specified request does not apply to the kind of object that the
+ *      descriptor 'sockfd' references.
+ *
+ ****************************************************************************/
+
+int psock_ioctl(FAR struct socket *psock, int cmd, unsigned long arg);
+
+/****************************************************************************
  * Name: netdev_ioctl
  *
  * Description:
@@ -984,7 +1017,7 @@ int psock_setsockopt(FAR struct socket *psock, int level, int option,
  *   On a failure, -1 is returned with errno set appropriately
  *
  *   EBADF
- *     'sockfd' is not a valid descriptor.
+ *     'sockfd' is not a valid socket descriptor.
  *   EFAULT
  *     'arg' references an inaccessible memory area.
  *   ENOTTY

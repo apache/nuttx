@@ -71,7 +71,7 @@ int sim_bringup(void)
   int ret;
 #endif
 
-#ifdef CONFIG_SYSTEM_ZONEINFO_ROMFS
+#ifdef CONFIG_LIB_ZONEINFO_ROMFS
   /* Mount the TZ database */
 
   (void)sim_zoneinfo(3);
