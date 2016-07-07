@@ -117,10 +117,62 @@
 #  define CONFIG_USBDEV_EP5_TXFIFO_SIZE 128
 #endif
 
-#if (CONFIG_USBDEV_RXFIFO_SIZE + CONFIG_USBDEV_EP0_TXFIFO_SIZE +\
-     CONFIG_USBDEV_EP1_TXFIFO_SIZE + CONFIG_USBDEV_EP2_TXFIFO_SIZE +\
-     CONFIG_USBDEV_EP3_TXFIFO_SIZE + CONFIG_USBDEV_EP4_TXFIFO_SIZE +\
-     CONFIG_USBDEV_EP5_TXFIFO_SIZE ) > 1280
+/* Number of endpoints */
+
+#define STM32_NENDPOINTS             (6)          /* ep0-5 x 2 for IN and OUT */
+
+/* Adjust actual number of endpoints based upon size; 0 means 'not available',
+ * and we expect that the first 0-length endpoint implies that all others
+ * after are unused as well (irrespective of what their size is set to be).
+ */
+
+#if CONFIG_USBDEV_EP1_TXFIFO_SIZE == 0
+#  undef STM32_NENDPOINTS
+#  define STM32_NENDPOINTS 1
+#  undef CONFIG_USBDEV_EP2_TXFIFO_SIZE
+#  define CONFIG_USBDEV_EP2_TXFIFO_SIZE 0
+#  undef CONFIG_USBDEV_EP3_TXFIFO_SIZE
+#  define CONFIG_USBDEV_EP3_TXFIFO_SIZE 0
+#  undef CONFIG_USBDEV_EP4_TXFIFO_SIZE
+#  define CONFIG_USBDEV_EP4_TXFIFO_SIZE 0
+#  undef CONFIG_USBDEV_EP5_TXFIFO_SIZE
+#  define CONFIG_USBDEV_EP5_TXFIFO_SIZE 0
+#elif CONFIG_USBDEV_EP2_TXFIFO_SIZE == 0
+#  undef STM32_NENDPOINTS
+#  define STM32_NENDPOINTS 2
+#  undef CONFIG_USBDEV_EP3_TXFIFO_SIZE
+#  define CONFIG_USBDEV_EP3_TXFIFO_SIZE 0
+#  undef CONFIG_USBDEV_EP4_TXFIFO_SIZE
+#  define CONFIG_USBDEV_EP4_TXFIFO_SIZE 0
+#  undef CONFIG_USBDEV_EP5_TXFIFO_SIZE
+#  define CONFIG_USBDEV_EP5_TXFIFO_SIZE 0
+#elif CONFIG_USBDEV_EP3_TXFIFO_SIZE == 0
+#  undef STM32_NENDPOINTS
+#  define STM32_NENDPOINTS 3
+#  undef CONFIG_USBDEV_EP4_TXFIFO_SIZE
+#  define CONFIG_USBDEV_EP4_TXFIFO_SIZE 0
+#  undef CONFIG_USBDEV_EP5_TXFIFO_SIZE
+#  define CONFIG_USBDEV_EP5_TXFIFO_SIZE 0
+#elif CONFIG_USBDEV_EP4_TXFIFO_SIZE == 0
+#  undef STM32_NENDPOINTS
+#  define STM32_NENDPOINTS 4
+#  undef CONFIG_USBDEV_EP5_TXFIFO_SIZE
+#  define CONFIG_USBDEV_EP5_TXFIFO_SIZE 0
+#elif CONFIG_USBDEV_EP5_TXFIFO_SIZE == 0
+#  undef STM32_NENDPOINTS
+#  define STM32_NENDPOINTS 5
+#endif
+
+/* Sanity check on allocations specified. */
+
+#if (CONFIG_USBDEV_RXFIFO_SIZE +\
+     CONFIG_USBDEV_EP0_TXFIFO_SIZE +\
+     CONFIG_USBDEV_EP1_TXFIFO_SIZE +\
+     CONFIG_USBDEV_EP2_TXFIFO_SIZE +\
+     CONFIG_USBDEV_EP3_TXFIFO_SIZE +\
+     CONFIG_USBDEV_EP4_TXFIFO_SIZE +\
+     CONFIG_USBDEV_EP5_TXFIFO_SIZE +\
+     0 ) > 1280
 #  error "FIFO allocations exceed FIFO memory size"
 #endif
 
@@ -141,35 +193,35 @@
 #define STM32_EP1_TXFIFO_BYTES ((CONFIG_USBDEV_EP1_TXFIFO_SIZE + 3) & ~3)
 #define STM32_EP1_TXFIFO_WORDS ((CONFIG_USBDEV_EP1_TXFIFO_SIZE + 3) >> 2)
 
-#if STM32_EP1_TXFIFO_WORDS < 16
+#if STM32_EP1_TXFIFO_BYTES != 0 && STM32_EP1_TXFIFO_WORDS < 16
 #  error "CONFIG_USBDEV_EP1_TXFIFO_SIZE is out of range"
 #endif
 
 #define STM32_EP2_TXFIFO_BYTES ((CONFIG_USBDEV_EP2_TXFIFO_SIZE + 3) & ~3)
 #define STM32_EP2_TXFIFO_WORDS ((CONFIG_USBDEV_EP2_TXFIFO_SIZE + 3) >> 2)
 
-#if STM32_EP2_TXFIFO_WORDS < 16
+#if STM32_EP2_TXFIFO_BYTES != 0 && STM32_EP2_TXFIFO_WORDS < 16
 #  error "CONFIG_USBDEV_EP2_TXFIFO_SIZE is out of range"
 #endif
 
 #define STM32_EP3_TXFIFO_BYTES ((CONFIG_USBDEV_EP3_TXFIFO_SIZE + 3) & ~3)
 #define STM32_EP3_TXFIFO_WORDS ((CONFIG_USBDEV_EP3_TXFIFO_SIZE + 3) >> 2)
 
-#if STM32_EP3_TXFIFO_WORDS < 16
+#if STM32_EP3_TXFIFO_BYTES != 0 && STM32_EP3_TXFIFO_WORDS < 16
 #  error "CONFIG_USBDEV_EP3_TXFIFO_SIZE is out of range"
 #endif
 
 #define STM32_EP4_TXFIFO_BYTES ((CONFIG_USBDEV_EP4_TXFIFO_SIZE + 3) & ~3)
 #define STM32_EP4_TXFIFO_WORDS ((CONFIG_USBDEV_EP4_TXFIFO_SIZE + 3) >> 2)
 
-#if STM32_EP4_TXFIFO_WORDS < 16
+#if STM32_EP4_TXFIFO_BYTES != 0 && STM32_EP4_TXFIFO_WORDS < 16
 #  error "CONFIG_USBDEV_EP4_TXFIFO_SIZE is out of range"
 #endif
 
 #define STM32_EP5_TXFIFO_BYTES ((CONFIG_USBDEV_EP5_TXFIFO_SIZE + 3) & ~3)
 #define STM32_EP5_TXFIFO_WORDS ((CONFIG_USBDEV_EP5_TXFIFO_SIZE + 3) >> 2)
 
-#if STM32_EP5_TXFIFO_WORDS < 16
+#if STM32_EP5_TXFIFO_BYTES != 0 && STM32_EP5_TXFIFO_WORDS < 16
 #  error "CONFIG_USBDEV_EP5_TXFIFO_SIZE is out of range"
 #endif
 
@@ -259,10 +311,20 @@
 #define STM32_TRACEINTID_SETUPDONE          (90 + 3)
 #define STM32_TRACEINTID_SETUPRECVD         (90 + 4)
 
-/* Endpoints ******************************************************************/
+/* CONFIG_USB_DUMPBUFFER will dump the contents of buffers to the console. */
 
-/* Number of endpoints */
-#define STM32_NENDPOINTS             (6)          /* ep0-5 x 2 for IN and OUT */
+#define CONFIG_USB_DUMPBUFFER
+
+#if !defined(CONFIG_DEBUG_INFO) || !defined(CONFIG_DEBUG_USB)
+#  undef CONFIG_USB_DUMPBUFFER
+#endif
+#ifdef CONFIG_USB_DUMPBUFFER
+#  define usb_dumpbuffer(t,b,l) lib_dumpbuffer(t,b,l)
+#else
+#  define usb_dumpbuffer(t,b,l)
+#endif
+
+/* Endpoints ******************************************************************/
 
 /* Odd physical endpoint numbers are IN; even are OUT */
 
@@ -273,8 +335,11 @@
 
 #define EP0                          (0)
 
-/* The set of all endpoints available to the class implementation (1-3) */
-#define STM32_EP_AVAILABLE           (0x3e)       /* All available endpoints */
+/* The set of all endpoints available to the class implementation (1-n).
+ * This is a bitmap, and the first endpoint (0) is reserved.
+ */
+
+#define STM32_EP_AVAILABLE           (((1 << STM32_NENDPOINTS) - 1) & ~1)
 
 /* Maximum packet sizes for full speed endpoints */
 
@@ -496,7 +561,7 @@ struct stm32_usbdev_s
 
 /* Register operations ********************************************************/
 
-#if defined(CONFIG_STM32_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG)
+#if defined(CONFIG_STM32_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG_USB)
 static uint32_t    stm32_getreg(uint32_t addr);
 static void        stm32_putreg(uint32_t val, uint32_t addr);
 #else
@@ -816,7 +881,7 @@ const struct trace_msg_t g_usb_trace_strings_intdecode[] =
  *
  ****************************************************************************/
 
-#if defined(CONFIG_STM32_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG)
+#if defined(CONFIG_STM32_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG_USB)
 static uint32_t stm32_getreg(uint32_t addr)
 {
   static uint32_t prevaddr = 0;
@@ -879,7 +944,7 @@ static uint32_t stm32_getreg(uint32_t addr)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_STM32_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG)
+#if defined(CONFIG_STM32_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG_USB)
 static void stm32_putreg(uint32_t val, uint32_t addr)
 {
   /* Show the register value being written */
@@ -1053,6 +1118,8 @@ static void stm32_txfifo_write(FAR struct stm32_ep_s *privep,
   uint32_t regval;
   int nwords;
   int i;
+
+  usb_dumpbuffer(">>>",buf,nbytes);
 
   /* Convert the number of bytes to words */
 
@@ -1442,6 +1509,8 @@ static void stm32_rxfifo_read(FAR struct stm32_ep_s *privep,
       *dest++ = data.b[2];
       *dest++ = data.b[3];
     }
+
+  usb_dumpbuffer("<<<",dest-len,len);
 }
 
 /****************************************************************************
@@ -1472,6 +1541,8 @@ static void stm32_rxfifo_discard(FAR struct stm32_ep_s *privep, int len)
           volatile uint32_t data = stm32_getreg(regaddr);
           (void)data;
         }
+
+      uinfo("<<< discarding %d\n",len);
     }
 }
 
@@ -2106,7 +2177,7 @@ static inline void stm32_ep0out_testmode(FAR struct stm32_usbdev_s *priv,
  * Name: stm32_ep0out_stdrequest
  *
  * Description:
- *   Handle a stanard request on EP0.  Pick off the things of interest to the
+ *   Handle a standard request on EP0.  Pick off the things of interest to the
  *   USB device controller driver; pass what is left to the class driver.
  *
  ****************************************************************************/
@@ -2321,6 +2392,8 @@ static inline void stm32_ep0out_stdrequest(struct stm32_usbdev_s *priv,
 
             stm32_setaddress(priv, (uint16_t)priv->ctrlreq.value[0]);
             stm32_ep0in_transmitzlp(priv);
+
+            uinfo("USB_REQ_SETADDRESS %02x\n",(uint16_t)priv->ctrlreq.value[0]);
           }
         else
           {
@@ -4209,7 +4282,7 @@ static int stm32_ep_disable(FAR struct usbdev_ep_s *ep)
 {
   FAR struct stm32_ep_s *privep = (FAR struct stm32_ep_s *)ep;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_USB
   if (!ep)
     {
       usbtrace(TRACE_DEVERROR(STM32_TRACEERR_INVALIDPARMS), 0);
@@ -4249,7 +4322,7 @@ static FAR struct usbdev_req_s *stm32_ep_allocreq(FAR struct usbdev_ep_s *ep)
 {
   FAR struct stm32_req_s *privreq;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_USB
   if (!ep)
     {
       usbtrace(TRACE_DEVERROR(STM32_TRACEERR_INVALIDPARMS), 0);
@@ -4282,7 +4355,7 @@ static void stm32_ep_freereq(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s
 {
   FAR struct stm32_req_s *privreq = (FAR struct stm32_req_s *)req;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_USB
   if (!ep || !req)
     {
       usbtrace(TRACE_DEVERROR(STM32_TRACEERR_INVALIDPARMS), 0);
@@ -4354,7 +4427,7 @@ static int stm32_ep_submit(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *
 
   /* Some sanity checking */
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_USB
   if (!req || !req->callback || !req->buf || !ep)
     {
       usbtrace(TRACE_DEVERROR(STM32_TRACEERR_INVALIDPARMS), 0);
@@ -4366,7 +4439,7 @@ static int stm32_ep_submit(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *
   usbtrace(TRACE_EPSUBMIT, privep->epphy);
   priv = privep->dev;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_USB
   if (!priv->driver)
     {
       usbtrace(TRACE_DEVERROR(STM32_TRACEERR_NOTCONFIGURED), priv->usbdev.speed);
@@ -4443,7 +4516,7 @@ static int stm32_ep_cancel(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *
   FAR struct stm32_ep_s *privep = (FAR struct stm32_ep_s *)ep;
   irqstate_t flags;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_USB
   if (!ep || !req)
     {
       usbtrace(TRACE_DEVERROR(STM32_TRACEERR_INVALIDPARMS), 0);
@@ -4901,7 +4974,7 @@ static int stm32_selfpowered(struct usbdev_s *dev, bool selfpowered)
 
   usbtrace(TRACE_DEVSELFPOWERED, (uint16_t)selfpowered);
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_USB
   if (!dev)
     {
       usbtrace(TRACE_DEVERROR(STM32_TRACEERR_INVALIDPARMS), 0);
@@ -5248,47 +5321,59 @@ static void stm32_hwinitialize(FAR struct stm32_usbdev_s *priv)
 
   stm32_putreg(STM32_RXFIFO_WORDS, STM32_OTGFS_GRXFSIZ);
 
+#if STM32_NENDPOINTS > 0
   /* EP0 TX */
 
   address = STM32_RXFIFO_WORDS;
   regval  = (address << OTGFS_DIEPTXF0_TX0FD_SHIFT) |
             (STM32_EP0_TXFIFO_WORDS << OTGFS_DIEPTXF0_TX0FSA_SHIFT);
   stm32_putreg(regval, STM32_OTGFS_DIEPTXF0);
+#endif
 
+#if STM32_NENDPOINTS > 1
   /* EP1 TX */
 
   address += STM32_EP0_TXFIFO_WORDS;
   regval   = (address << OTGFS_DIEPTXF_INEPTXSA_SHIFT) |
              (STM32_EP1_TXFIFO_WORDS << OTGFS_DIEPTXF_INEPTXFD_SHIFT);
   stm32_putreg(regval, STM32_OTGFS_DIEPTXF1);
+#endif
 
+#if STM32_NENDPOINTS > 2
   /* EP2 TX */
 
   address += STM32_EP1_TXFIFO_WORDS;
   regval   = (address << OTGFS_DIEPTXF_INEPTXSA_SHIFT) |
              (STM32_EP2_TXFIFO_WORDS << OTGFS_DIEPTXF_INEPTXFD_SHIFT);
   stm32_putreg(regval, STM32_OTGFS_DIEPTXF2);
+#endif
 
+#if STM32_NENDPOINTS > 3
   /* EP3 TX */
 
   address += STM32_EP2_TXFIFO_WORDS;
   regval   = (address << OTGFS_DIEPTXF_INEPTXSA_SHIFT) |
              (STM32_EP3_TXFIFO_WORDS << OTGFS_DIEPTXF_INEPTXFD_SHIFT);
   stm32_putreg(regval, STM32_OTGFS_DIEPTXF3);
+#endif
 
+#if STM32_NENDPOINTS > 4
   /* EP4 TX */
 
   address += STM32_EP3_TXFIFO_WORDS;
   regval   = (address << OTGFS_DIEPTXF_INEPTXSA_SHIFT) |
              (STM32_EP4_TXFIFO_WORDS << OTGFS_DIEPTXF_INEPTXFD_SHIFT);
   stm32_putreg(regval, STM32_OTGFS_DIEPTXF4);
+#endif
 
+#if STM32_NENDPOINTS > 5
   /* EP5 TX */
 
   address += STM32_EP4_TXFIFO_WORDS;
   regval   = (address << OTGFS_DIEPTXF_INEPTXSA_SHIFT) |
              (STM32_EP5_TXFIFO_WORDS << OTGFS_DIEPTXF_INEPTXFD_SHIFT);
   stm32_putreg(regval, STM32_OTGFS_DIEPTXF5);
+#endif
 
 
   /* Flush the FIFOs */
@@ -5583,7 +5668,7 @@ int usbdev_register(struct usbdevclass_driver_s *driver)
 
   usbtrace(TRACE_DEVREGISTER, 0);
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_USB
   if (!driver || !driver->ops->bind || !driver->ops->unbind ||
       !driver->ops->disconnect || !driver->ops->setup)
     {
@@ -5654,7 +5739,7 @@ int usbdev_unregister(struct usbdevclass_driver_s *driver)
 
   usbtrace(TRACE_DEVUNREGISTER, 0);
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_USB
   if (driver != priv->driver)
     {
       usbtrace(TRACE_DEVERROR(STM32_TRACEERR_INVALIDPARMS), 0);

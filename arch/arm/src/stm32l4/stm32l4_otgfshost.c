@@ -1285,7 +1285,7 @@ static int stm32_ctrlep_alloc(FAR struct stm32_usbhost_s *priv,
   ctrlep = (FAR struct stm32_ctrlinfo_s *)kmm_malloc(sizeof(struct stm32_ctrlinfo_s));
   if (ctrlep == NULL)
     {
-      udbg("ERROR: Failed to allocate control endpoint container\n");
+      uerr("ERROR: Failed to allocate control endpoint container\n");
       return -ENOMEM;
     }
 
@@ -1295,7 +1295,7 @@ static int stm32_ctrlep_alloc(FAR struct stm32_usbhost_s *priv,
                              hport->funcaddr, hport->speed, ctrlep);
   if (ret < 0)
     {
-      udbg("ERROR: stm32_ctrlchan_alloc failed: %d\n", ret);
+      uerr("ERROR: stm32_ctrlchan_alloc failed: %d\n", ret);
       kmm_free(ctrlep);
       return ret;
     }
@@ -1347,7 +1347,7 @@ static int stm32_xfrep_alloc(FAR struct stm32_usbhost_s *priv,
   chidx = stm32_chan_alloc(priv);
   if (chidx < 0)
     {
-      udbg("ERROR: Failed to allocate a host channel\n");
+      uerr("ERROR: Failed to allocate a host channel\n");
       return -ENOMEM;
     }
 
@@ -1857,7 +1857,7 @@ static ssize_t stm32_in_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
       ret = stm32_in_setup(priv, chidx);
       if (ret < 0)
         {
-          udbg("ERROR: stm32_in_setup failed: %d\n", ret);
+          uerr("ERROR: stm32_in_setup failed: %d\n", ret);
           return (ssize_t)ret;
         }
 
@@ -1888,7 +1888,7 @@ static ssize_t stm32_in_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
             {
               /* Break out and return the error */
 
-              udbg("ERROR: stm32_chan_wait failed: %d\n", ret);
+              uerr("ERROR: stm32_chan_wait failed: %d\n", ret);
               return (ssize_t)ret;
             }
         }
@@ -1933,7 +1933,7 @@ static void stm32_in_next(FAR struct stm32_usbhost_s *priv,
           return;
         }
 
-      udbg("ERROR: stm32_in_setup failed: %d\n", ret);
+      uerr("ERROR: stm32_in_setup failed: %d\n", ret);
       result = ret;
     }
 
@@ -1991,7 +1991,7 @@ static int stm32_in_asynch(FAR struct stm32_usbhost_s *priv, int chidx,
   ret = stm32_chan_asynchsetup(priv, chan, callback, arg);
   if (ret < 0)
     {
-      udbg("ERROR: stm32_chan_asynchsetup failed: %d\n", ret);
+      uerr("ERROR: stm32_chan_asynchsetup failed: %d\n", ret);
       return ret;
     }
 
@@ -2000,7 +2000,7 @@ static int stm32_in_asynch(FAR struct stm32_usbhost_s *priv, int chidx,
   ret = stm32_in_setup(priv, chidx);
   if (ret < 0)
     {
-      udbg("ERROR: stm32_in_setup failed: %d\n", ret);
+      uerr("ERROR: stm32_in_setup failed: %d\n", ret);
     }
 
   /* And return with the transfer pending */
@@ -2126,7 +2126,7 @@ static ssize_t stm32_out_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
       ret = stm32_out_setup(priv, chidx);
       if (ret < 0)
         {
-          udbg("ERROR: stm32_out_setup failed: %d\n", ret);
+          uerr("ERROR: stm32_out_setup failed: %d\n", ret);
           return (ssize_t)ret;
         }
 
@@ -2154,7 +2154,7 @@ static ssize_t stm32_out_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
             {
               /* Break out and return the error */
 
-              udbg("ERROR: stm32_chan_wait failed: %d\n", ret);
+              uerr("ERROR: stm32_chan_wait failed: %d\n", ret);
               return (ssize_t)ret;
             }
 
@@ -2219,7 +2219,7 @@ static void stm32_out_next(FAR struct stm32_usbhost_s *priv,
           return;
         }
 
-      udbg("ERROR: stm32_out_setup failed: %d\n", ret);
+      uerr("ERROR: stm32_out_setup failed: %d\n", ret);
       result = ret;
     }
 
@@ -2277,7 +2277,7 @@ static int stm32_out_asynch(FAR struct stm32_usbhost_s *priv, int chidx,
   ret = stm32_chan_asynchsetup(priv, chan, callback, arg);
   if (ret < 0)
     {
-      udbg("ERROR: stm32_chan_asynchsetup failed: %d\n", ret);
+      uerr("ERROR: stm32_chan_asynchsetup failed: %d\n", ret);
       return ret;
     }
 
@@ -2286,7 +2286,7 @@ static int stm32_out_asynch(FAR struct stm32_usbhost_s *priv, int chidx,
   ret = stm32_out_setup(priv, chidx);
   if (ret < 0)
     {
-      udbg("ERROR: stm32_out_setup failed: %d\n", ret);
+      uerr("ERROR: stm32_out_setup failed: %d\n", ret);
     }
 
   /* And return with the transfer pending */
@@ -2371,7 +2371,7 @@ static inline void stm32_gint_hcinisr(FAR struct stm32_usbhost_s *priv,
   /* AND the two to get the set of enabled, pending HC interrupts */
 
   pending &= regval;
-  ullvdbg("HCINTMSK%d: %08x pending: %08x\n", chidx, regval, pending);
+  uinfo("HCINTMSK%d: %08x pending: %08x\n", chidx, regval, pending);
 
   /* Check for a pending ACK response received/transmitted (ACK) interrupt */
 
@@ -2632,7 +2632,7 @@ static inline void stm32_gint_hcoutisr(FAR struct stm32_usbhost_s *priv,
   /* AND the two to get the set of enabled, pending HC interrupts */
 
   pending &= regval;
-  ullvdbg("HCINTMSK%d: %08x pending: %08x\n", chidx, regval, pending);
+  uinfo("HCINTMSK%d: %08x pending: %08x\n", chidx, regval, pending);
 
   /* Check for a pending ACK response received/transmitted (ACK) interrupt */
 
@@ -2950,7 +2950,7 @@ static inline void stm32_gint_rxflvlisr(FAR struct stm32_usbhost_s *priv)
   /* Read and pop the next status from the Rx FIFO */
 
   grxsts = stm32_getreg(STM32_OTGFS_GRXSTSP);
-  ullvdbg("GRXSTS: %08x\n", grxsts);
+  uinfo("GRXSTS: %08x\n", grxsts);
 
   /* Isolate the channel number/index in the status word */
 
@@ -3103,7 +3103,7 @@ static inline void stm32_gint_nptxfeisr(FAR struct stm32_usbhost_s *priv)
 
   /* Write the next group of packets into the Tx FIFO */
 
-  ullvdbg("HNPTXSTS: %08x chidx: %d avail: %d buflen: %d xfrd: %d wrsize: %d\n",
+  uinfo("HNPTXSTS: %08x chidx: %d avail: %d buflen: %d xfrd: %d wrsize: %d\n",
            regval, chidx, avail, chan->buflen, chan->xfrd, wrsize);
 
   stm32_gint_wrpacket(priv, chan->buffer, chidx, wrsize);
@@ -3191,7 +3191,7 @@ static inline void stm32_gint_ptxfeisr(FAR struct stm32_usbhost_s *priv)
 
   /* Write the next group of packets into the Tx FIFO */
 
-  ullvdbg("HPTXSTS: %08x chidx: %d avail: %d buflen: %d xfrd: %d wrsize: %d\n",
+  uinfo("HPTXSTS: %08x chidx: %d avail: %d buflen: %d xfrd: %d wrsize: %d\n",
            regval, chidx, avail, chan->buflen, chan->xfrd, wrsize);
 
   stm32_gint_wrpacket(priv, chan->buffer, chidx, wrsize);
@@ -3866,7 +3866,7 @@ static int stm32_rh_enumerate(FAR struct stm32_usbhost_s *priv,
   ret = stm32_ctrlchan_alloc(priv, 0, 0, priv->rhport.hport.speed, &priv->ep0);
   if (ret < 0)
     {
-      udbg("ERROR: Failed to allocate a control endpoint: %d\n", ret);
+      uerr("ERROR: Failed to allocate a control endpoint: %d\n", ret);
     }
 
   return ret;
@@ -3912,7 +3912,7 @@ static int stm32_enumerate(FAR struct usbhost_connection_s *conn,
     {
       /* Return to the disconnected state */
 
-      udbg("ERROR: Enumeration failed: %d\n", ret);
+      uerr("ERROR: Enumeration failed: %d\n", ret);
       stm32_gint_disconnected(priv);
     }
 
@@ -4728,7 +4728,7 @@ static int stm32_connect(FAR struct usbhost_driver_s *drvr,
   /* Set the connected/disconnected flag */
 
   hport->connected = connected;
-  ullvdbg("Hub port %d connected: %s\n", hport->port, connected ? "YES" : "NO");
+  uinfo("Hub port %d connected: %s\n", hport->port, connected ? "YES" : "NO");
 
   /* Report the connection event */
 
