@@ -1,8 +1,9 @@
 /************************************************************************************
- * arch/arm/src/stm32l4/stm32l4_pwr.h
+ * arch/arm/src/stm32l4/stm32l4_otgfs.h
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
- *   Author: dev@ziggurat29.com
+ *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *           dev@ziggurat29.com
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,8 +34,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32L4_STM32L4_PWR_H
-#define __ARCH_ARM_SRC_STM32L4_STM32L4_PWR_H
+#ifndef __ARCH_ARM_SRC_STM32L4_STM32L4_OTGFS_H
+#define __ARCH_ARM_SRC_STM32L4_STM32L4_OTGFS_H
 
 /************************************************************************************
  * Included Files
@@ -42,13 +43,25 @@
 
 #include <nuttx/config.h>
 
-#include <stdbool.h>
+#include <stdint.h>
 
-#include "chip.h"
-#include "chip/stm32l4_pwr.h"
+#include "stm32l4.h"
+
+#include "chip/stm32l4x6xx_otgfs.h"
+
+#if defined(CONFIG_STM32L4_OTGFS)
 
 /************************************************************************************
  * Pre-processor Definitions
+ ************************************************************************************/
+/* Configuration ********************************************************************/
+
+#ifndef CONFIG_OTGFS_PRI
+#  define CONFIG_OTGFS_PRI NVIC_SYSH_PRIORITY_DEFAULT
+#endif
+
+/************************************************************************************
+ * Public Functions
  ************************************************************************************/
 
 #ifndef __ASSEMBLY__
@@ -62,62 +75,48 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
-
-/************************************************************************************
- * Name: enableclk
+/****************************************************************************
+ * Name: stm32l4_otgfshost_initialize
  *
  * Description:
- *   Enable/disable the clock to the power control peripheral.  Enabling must be done
- *   after the APB1 clock is validly configured, and prior to using any functionality
- *   controlled by the PWR block (i.e. much of anything else provided by this module).
- * 
+ *   Initialize USB host device controller hardware.
+ *
  * Input Parameters:
- *   enable - True: enable the clock to the Power control (PWR) block.
+ *   controller -- If the device supports more than USB host controller, then
+ *     this identifies which controller is being initialized.  Normally, this
+ *     is just zero.
  *
  * Returned Value:
- *   True:  the PWR block was previously enabled.
+ *   And instance of the USB host interface.  The controlling task should
+ *   use this interface to (1) call the wait() method to wait for a device
+ *   to be connected, and (2) call the enumerate() method to bind the device
+ *   to a class driver.
  *
- ************************************************************************************/
+ * Assumptions:
+ * - This function should called in the initialization sequence in order
+ *   to initialize the USB device functionality.
+ * - Class drivers should be initialized prior to calling this function.
+ *   Otherwise, there is a race condition if the device is already connected.
+ *
+ ****************************************************************************/
 
-bool stm32l4_pwr_enableclk(bool enable);
+#ifdef CONFIG_USBHOST
+struct usbhost_connection_s;
+FAR struct usbhost_connection_s *stm32l4_otgfshost_initialize(int controller);
+#endif
 
 /************************************************************************************
- * Name: stm32l4_pwr_enablebkp
+ * Name:  stm32l4_usbsuspend
  *
  * Description:
- *   Enables access to the backup domain (RTC registers, RTC backup data registers
- *   and backup SRAM).
- *
- * Input Parameters:
- *   writable - True: enable ability to write to backup domain registers
- *
- * Returned Value:
- *   True: The backup domain was previously writable.
+ *   Board logic must provide the stm32l4_usbsuspend logic if the OTG FS device driver
+ *   is used.  This function is called whenever the USB enters or leaves suspend
+ *   mode. This is an opportunity for the board logic to shutdown clocks, power,
+ *   etc. while the USB is suspended.
  *
  ************************************************************************************/
 
-bool stm32l4_pwr_enablebkp(bool writable);
-
-/************************************************************************************
- * Name: stm32l4_pwr_enableusv
- *
- * Description:
- *   Enables or disables the USB Supply Valid monitoring.  Setting this bit is
- *   mandatory to use the USB OTG FS peripheral.
- *
- * Input Parameters:
- *   set - True: Vddusb is valid; False: Vddusb is not present. Logical and electrical
- *         isolation is applied to ignore this supply.
- *
- * Returned Value:
- *   True: The bit was previously set.
- *
- ************************************************************************************/
-
-bool stm32l4_pwr_enableusv(bool set);
+void stm32l4_usbsuspend(FAR struct usbdev_s *dev, bool resume);
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -125,4 +124,6 @@ bool stm32l4_pwr_enableusv(bool set);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_STM32L4_STM32L4_PWR_H */
+#endif /* CONFIG_STM32_OTGFS */
+#endif /* __ARCH_ARM_SRC_STM32_STM32_OTGFS_H */
+
