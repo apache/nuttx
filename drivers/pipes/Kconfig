@@ -2,3 +2,9 @@
 # For a description of the syntax of this configuration file,
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
+
+config DEV_PIPE_SIZE
+	int "Pipe Size"
+	default 1024
+	---help---
+		Sets the size of the pipe ringbuffer in bytes.
