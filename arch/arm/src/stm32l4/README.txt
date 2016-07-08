@@ -33,7 +33,7 @@ QSPI     : works in polling, interrupt, DMA, and also memory-mapped modes
 CAN      : TODO
 OTGFS    : dev implemented, tested, outstanding issue with CDCACM (ACM_SET_LINE_CODING, but otherwise works);
          : host implemented, only build smoke-tested (i.e. builds, but no functional testing yet)
-Timers   : TODO
+Timers   : Implemented, with PWM oneshot and freerun, tickless OS support.  Limited testing (focused on tickless OS so far)
 PM       : TODO, PWR registers defined
 FSMC     : TODO
 AES      : TODO

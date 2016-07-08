@@ -463,6 +463,25 @@
 
 #endif
 
+/* Timer Frequencies, if APBx is set to 1, frequency is same to APBx
+ * otherwise frequency is 2xAPBx.
+ * Note: TIM1,8,15,16,17 are on APB2, others on APB1
+ */
+
+#define BOARD_TIM1_FREQUENCY    STM32L4_HCLK_FREQUENCY
+#define BOARD_TIM2_FREQUENCY    (STM32L4_HCLK_FREQUENCY / 2)
+#define BOARD_TIM3_FREQUENCY    (STM32L4_HCLK_FREQUENCY / 2)
+#define BOARD_TIM4_FREQUENCY    (STM32L4_HCLK_FREQUENCY / 2)
+#define BOARD_TIM5_FREQUENCY    (STM32L4_HCLK_FREQUENCY / 2)
+#define BOARD_TIM6_FREQUENCY    (STM32L4_HCLK_FREQUENCY / 2)
+#define BOARD_TIM7_FREQUENCY    (STM32L4_HCLK_FREQUENCY / 2)
+#define BOARD_TIM8_FREQUENCY    STM32L4_HCLK_FREQUENCY
+#define BOARD_TIM15_FREQUENCY   STM32L4_HCLK_FREQUENCY
+#define BOARD_TIM16_FREQUENCY   STM32L4_HCLK_FREQUENCY
+#define BOARD_TIM17_FREQUENCY   STM32L4_HCLK_FREQUENCY
+#define BOARD_LPTIM1_FREQUENCY  (STM32L4_HCLK_FREQUENCY / 2)
+#define BOARD_LPTIM2_FREQUENCY  (STM32L4_HCLK_FREQUENCY / 2)
+
 /************************************************************************************
  * Public Data
  ************************************************************************************/
