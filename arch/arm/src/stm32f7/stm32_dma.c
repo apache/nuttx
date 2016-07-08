@@ -986,13 +986,14 @@ bool stm32_dmacapable(uint32_t maddr, uint32_t count, uint32_t ccr)
         break;
 
       default:
+
         /* Everything else is unsupported by DMA */
 
         dmainfo("stm32_dmacapable: transfer targets unknown/unsupported region\n");
         return false;
     }
 
-    dmainfo("stm32_dmacapable: transfer OK\n");
+  dmainfo("stm32_dmacapable: transfer OK\n");
   return true;
 }
 #endif
