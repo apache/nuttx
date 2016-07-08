@@ -290,7 +290,7 @@ struct up_dev_s
   bool              rxenable;  /* DMA-based reception en/disable */
   uint16_t          rxdmain;   /* Next byte in the DMA where hardware will write */
   uint16_t          rxdmaout;  /* Next byte in the DMA buffer to be read */
-  VAR char * const  rxfifo;    /* Receive DMA buffer */
+  char      *const  rxfifo;    /* Receive DMA buffer */
 #endif
 
 #ifdef HAVE_RS485
