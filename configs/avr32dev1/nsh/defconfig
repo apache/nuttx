@@ -20,7 +20,7 @@ CONFIG_WINDOWS_CYGWIN=y
 #
 # Build Configuration
 #
-CONFIG_APPS_DIR="../apps"
+# CONFIG_APPS_DIR="../apps"
 # CONFIG_BUILD_2PASS is not set
 
 #

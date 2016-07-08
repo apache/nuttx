@@ -2848,7 +2848,7 @@ static int stm32_dmapreflight(FAR struct sdio_dev_s *dev,
   /* DMA must be possible to the buffer */
 
   if (!stm32_dmacapable((uintptr_t)buffer, (buflen + 3) >> 2,
-                        STM32_SDMMC_RXDMA32_CONFIG | priv->dmapri))
+                        SDMMC_RXDMA32_CONFIG | priv->dmapri))
     {
       return -EFAULT;
     }
@@ -3012,6 +3012,7 @@ static int stm32_dmasendsetup(FAR struct sdio_dev_s *dev,
   stm32_dmasetup(priv->dma, priv->base + STM32_SDMMC_FIFO_OFFSET, (uint32_t)buffer,
                  (buflen + 3) >> 2, SDMMC_TXDMA32_CONFIG | priv->dmapri);
 
+  sdmmc_modifyreg32(priv, STM32_SDMMC_DCTRL_OFFSET, 0, STM32_SDMMC_DCTRL_DMAEN);
   stm32_sample(priv, SAMPLENDX_BEFORE_ENABLE);
 
   /* Start the DMA */

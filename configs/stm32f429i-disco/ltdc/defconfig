@@ -43,7 +43,7 @@ CONFIG_RAW_BINARY=y
 # Debug Options
 #
 CONFIG_DEBUG_ALERT=y
-CONFIG_DEBUG_FEATURES=y
+# CONFIG_DEBUG_FEATURES is not set
 
 #
 # Debug SYSLOG Output Controls
