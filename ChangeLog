@@ -12267,3 +12267,31 @@
 	  significant corrections (LEDs, buttons, README, etc) and extensions
 	  and updates to match more recent BSPs (2016-07-01).
 	* libc/signal: Add raise() (2016-07-04).
+	* drivers/syslog: Add a SYSLOG character device that can be used to re-
+	  direct output to the SYSLOG (2016-07-05).
+	* net/netdev: Break out internal interface psock_ioctl() (2016-07-06).
+	* configs/stm32f4disovery: add can driver for stm32f4discovery.  From
+	  Matthias Renner (2016-07-06).
+	* configs/freedom-k64f: Increase MCU clock to 120MHz (2016-07-06).
+	* arch/arm/src/stm32:  Add support for Tickless mode (two timer
+	  implementation).  From Max Neklyudov (2016-07-06).
+	* drivers/usbdev: cdcacm_unbind leaks write request objects.  This
+	  arises due to freeing the bulk IN endpoint before the loop that
+	  frees the requests via cdcasm_freereq.  That function checks the
+	  parameters and skips the freeing if either is NULL.  Freeing the bulk
+	  IN enpoint will cause the first param to be NULL, thereby bypassing
+	  the free operation.  To fix, I moved the release of the bulk IN
+	  endpoint until after to loop (much as was the case for the OUT and
+	  read requests, which did not exhibit the problem).  From ziggurat29
+	  (2016-07-07).
+	* arch/arm/src/stm32l4: Update usb dev/host controller drivers to
+	  reflect new(ish) logging standards; augment device enpoint and fifo
+	  allocation #defines to do more sanity checking, and be automatically
+	  adaptive to size changes.  Update README.txt to reflect current status
+	  of the implementation.  From ziggurat29 (2016-07-07).
+	* arch/arm/src/stm32f7: Fixed STM32F7 DMA stm32_dmacapable.  DMA working
+	  on SDMMC.  From David Sidrane (2016-07-07).
+	* configs/stm32f4discovery:  add configuration files for canard.  From
+	  Matthias Renner (2016-07-08).
+	* drivers/pipe: Add missing configuration for pipe ring buffer size.
+	  From Frank Benkert (2016-07-08).
