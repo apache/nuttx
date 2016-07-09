@@ -771,7 +771,7 @@ static ssize_t smartfs_write(FAR struct file *filep, const char *buffer,
           if (ret < 0)
             {
               ferr("ERROR: Error %d writing sector %d data\n", 
-                   et, sf->currsector);
+                   ret, sf->currsector);
               goto errout_with_semaphore;
             }
 

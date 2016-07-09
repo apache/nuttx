@@ -76,7 +76,7 @@
 int file_ioctl(FAR struct file *filep, int req, unsigned long arg)
 {
   FAR struct inode *inode;
-  int ret;
+  int ret = OK;
 
   /* Is a driver registered? Does it support the ioctl method? */
 
@@ -93,7 +93,7 @@ int file_ioctl(FAR struct file *filep, int req, unsigned long arg)
         }
     }
 
-  return OK;
+  return ret;
 }
 #endif /* CONFIG_NFILE_DESCRIPTORS > 0 */
 
