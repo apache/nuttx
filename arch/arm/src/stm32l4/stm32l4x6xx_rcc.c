@@ -407,17 +407,17 @@ static inline void rcc_enableapb1(void)
   regval |= RCC_APB1ENR1_OPAMPEN;
 #endif
 
+#ifdef CONFIG_STM32L4_LPTIM1
+  /* Low power timer 1 clock enable */
+
+  regval |= RCC_APB1ENR1_LPTIM1EN;
+#endif
+
   putreg32(regval, STM32L4_RCC_APB1ENR1);   /* Enable peripherals */
 
  /* Second APB1 register */
 
   regval = getreg32(STM32L4_RCC_APB1ENR2);
-
-#ifdef CONFIG_STM32L4_LPTIM1
-  /* Low power timer 1 clock enable */
-
-  regval |= RCC_APB1ENR2_LPTIM1EN;
-#endif
 
 #ifdef CONFIG_STM32L4_LPUART1
   /* Low power uart clock enable */
