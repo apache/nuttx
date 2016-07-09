@@ -76,24 +76,42 @@
 int file_ioctl(FAR struct file *filep, int req, unsigned long arg)
 {
   FAR struct inode *inode;
-  int ret = OK;
+  int errcode;
+  int ret;
 
-  /* Is a driver registered? Does it support the ioctl method? */
+  DEBUGASSERT(filep != NULL);
+
+  /* Is a driver opened? */
 
   inode = filep->f_inode;
-  if (inode && inode->u.i_ops && inode->u.i_ops->ioctl)
+  if (!inode)
     {
-      /* Yes, then let it perform the ioctl */
+      errcode = EBADF;
+      goto errout;
+    }
 
-      ret = (int)inode->u.i_ops->ioctl(filep, req, arg);
-      if (ret < 0)
-        {
-          set_errno(-ret);
-          return ERROR;
-        }
+  /* Does the driver support the ioctl method? */
+
+  if (inode->u.i_ops == NULL || inode->u.i_ops->ioctl == NULL)
+    {
+      errcode = ENOTTY;
+      goto errout;
+    }
+
+  /* Yes on both accounts.  Let the driver perform the ioctl command */
+
+  ret = (int)inode->u.i_ops->ioctl(filep, req, arg);
+  if (ret < 0)
+    {
+      errcode = -ret;
+      goto errout;
     }
 
   return ret;
+
+errout:
+  set_errno(errcode);
+  return ERROR;
 }
 #endif /* CONFIG_NFILE_DESCRIPTORS > 0 */
 
@@ -162,12 +180,17 @@ int ioctl(int fd, int req, unsigned long arg)
   filep = fs_getfilep(fd);
   if (!filep)
     {
-      /* The errno value has already been set */
+      /* Apparently, the fd does not correspond to any open file.  In the
+       * case of errors, the errno value has already been set by
+       * fs_getfilep().
+       */
 
       return ERROR;
     }
 
-  /* Is a driver registered? Does it support the ioctl method? */
+  /* Perform the file ioctl.  If file_ioctl() fails, it will set the errno
+   * value appropriately.
+   */
 
   return file_ioctl(filep, req, arg);
 #else
