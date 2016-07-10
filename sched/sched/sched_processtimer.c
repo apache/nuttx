@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/sched/sched_processtimer.c
  *
- *   Copyright (C) 2007, 2009, 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2014-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -144,6 +144,12 @@ static inline void sched_process_scheduler(void)
 
 void sched_process_timer(void)
 {
+#ifdef CONFIG_SCHED_TIMEKEEPING
+  /* Process wall time */
+
+  clock_update_wall_time();
+#endif
+
   /* Increment the system time (if in the link) */
 
 #ifdef CONFIG_HAVE_WEAKFUNCTIONS

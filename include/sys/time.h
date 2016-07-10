@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/sys/time.h
  *
- *   Copyright (C) 2009, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -112,6 +112,7 @@
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
+
 /* struct timeval represents time as seconds plus microseconds */
 
 struct timeval
@@ -189,6 +190,18 @@ int gettimeofday(FAR struct timeval *tv, FAR struct timezone *tz);
  ****************************************************************************/
 
 int settimeofday(FAR const struct timeval *tv, FAR struct timezone *tz);
+
+/****************************************************************************
+ * Name: adjtime
+ *
+ * Description:
+ *   Correct the time to synchronize the system clock
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SCHED_TIMEKEEPING
+int adjtime(const struct timeval *delta, struct timeval *olddelta);
+#endif
 
 #undef EXTERN
 #if defined(__cplusplus)

@@ -272,10 +272,43 @@ void up_timer_initialize(void)
  *
  ****************************************************************************/
 
+#ifndef CONFIG_SCHED_TIMEKEEPING
+
 int up_timer_gettime(FAR struct timespec *ts)
 {
   return stm32_freerun_counter(&g_tickless.freerun, ts);
 }
+
+#else
+
+int up_timer_getcounter(FAR uint64_t *cycles)
+{
+  return stm32_freerun_counter(&g_tickless.freerun, cycles);
+}
+
+#endif /* CONFIG_SCHED_TIMEKEEPING */
+
+/****************************************************************************
+ * Name: up_timer_getmask
+ *
+ * Description:
+ *   To be provided
+ *
+ * Input Parameters:
+ *   mask - Location to return the 64-bit mask
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SCHED_TIMEKEEPING
+void up_timer_getmask(FAR uint64_t *mask)
+{
+  DEBUGASSERT(mask != NULL);
+  *mask = g_tickless.freerun.counter_mask;
+}
+#endif /* CONFIG_SCHED_TIMEKEEPING */
 
 /****************************************************************************
  * Name: up_timer_cancel
