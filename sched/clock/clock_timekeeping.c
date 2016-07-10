@@ -199,7 +199,7 @@ errout_in_critical_section:
  *
  ****************************************************************************/
 
-int adjtime(const struct timeval *delta, struct timeval *olddelta)
+int adjtime(FAR const struct timeval *delta, FAR struct timeval *olddelta)
 {
   irqstate_t flags;
   long adjust_usec;

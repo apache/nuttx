@@ -154,6 +154,7 @@ uintptr_t STUB_clock_systimer(int nbr);
 uintptr_t STUB_clock_getres(int nbr, uintptr_t parm1, uintptr_t parm2);
 uintptr_t STUB_clock_gettime(int nbr, uintptr_t parm1, uintptr_t parm2);
 uintptr_t STUB_clock_settime(int nbr, uintptr_t parm1, uintptr_t parm2);
+uintptr_t STUB_adjtime(int nbr, uintptr_t parm1, uintptr_t parm2);
 
 /* The following are defined only if POSIX timers are supported */
 

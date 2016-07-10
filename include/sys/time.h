@@ -228,7 +228,7 @@ int settimeofday(FAR const struct timeval *tv, FAR struct timezone *tz);
  ****************************************************************************/
 
 #ifdef CONFIG_SCHED_TIMEKEEPING
-int adjtime(const struct timeval *delta, struct timeval *olddelta);
+int adjtime(FAR const struct timeval *delta, FAR struct timeval *olddelta);
 #endif
 
 #undef EXTERN
