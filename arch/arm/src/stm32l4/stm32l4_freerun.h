@@ -56,7 +56,7 @@
  ****************************************************************************/
 
 /* The freerun client must allocate an instance of this structure and called
- * stm32_freerun_initialize() before using the freerun facilities.  The client
+ * stm32l4_freerun_initialize() before using the freerun facilities.  The client
  * should not access the contents of this structure directly since the
  * contents are subject to change.
  */
@@ -118,7 +118,7 @@ int stm32l4_freerun_initialize(struct stm32l4_freerun_s *freerun, int chan,
  * Input Parameters:
  *   freerun Caller allocated instance of the freerun state structure.  This
  *           structure must have been previously initialized via a call to
- *           stm32_freerun_initialize();
+ *           stm32l4_freerun_initialize();
  *   ts      The location in which to return the time remaining on the
  *           oneshot timer.
  *
@@ -140,7 +140,7 @@ int stm32l4_freerun_counter(struct stm32l4_freerun_s *freerun,
  * Input Parameters:
  *   freerun Caller allocated instance of the freerun state structure.  This
  *           structure must have been previously initialized via a call to
- *           stm32_freerun_initialize();
+ *           stm32l4_freerun_initialize();
  *
  * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is returned

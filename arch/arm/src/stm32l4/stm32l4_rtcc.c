@@ -685,7 +685,7 @@ static int rtchw_check_alrbwf(void)
 #endif
 
 /************************************************************************************
- * Name: stm32_rtchw_set_alrmXr X is a or b
+ * Name: stm32l4_rtchw_set_alrmXr X is a or b
  *
  * Description:
  *   Set the alarm (A or B) hardware registers, using the required hardware access

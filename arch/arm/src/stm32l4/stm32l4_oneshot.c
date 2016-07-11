@@ -65,7 +65,7 @@ static struct stm32l4_oneshot_s *g_oneshot;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32_oneshot_handler
+ * Name: stm32l4_oneshot_handler
  *
  * Description:
  *   Timer interrupt callback.  When the oneshot timer interrupt expires,
@@ -83,7 +83,7 @@ static struct stm32l4_oneshot_s *g_oneshot;
  *
  ****************************************************************************/
 
-static int stm32_oneshot_handler(int irq, void *context)
+static int stm32l4_oneshot_handler(int irq, void *context)
 {
   struct stm32l4_oneshot_s *oneshot = g_oneshot;
   oneshot_handler_t oneshot_handler;
@@ -174,7 +174,7 @@ int stm32l4_oneshot_initialize(struct stm32l4_oneshot_s *oneshot, int chan,
 }
 
 /****************************************************************************
- * Name: stm32_oneshot_max_delay
+ * Name: stm32l4_oneshot_max_delay
  *
  * Description:
  *   Determine the maximum delay of the one-shot timer (in microseconds)
@@ -199,7 +199,7 @@ int stm32l4_oneshot_max_delay(struct stm32l4_oneshot_s *oneshot, uint64_t *usec)
  * Input Parameters:
  *   oneshot Caller allocated instance of the oneshot state structure.  This
  *           structure must have been previously initialized via a call to
- *           stm32_oneshot_initialize();
+ *           stm32l4_oneshot_initialize();
  *   handler The function to call when when the oneshot timer expires.
  *   arg     An opaque argument that will accompany the callback.
  *   ts      Provides the duration of the one shot timer.
@@ -259,7 +259,7 @@ int stm32l4_oneshot_start(struct stm32l4_oneshot_s *oneshot,
 
   /* Set up to receive the callback when the interrupt occurs */
 
-  STM32L4_TIM_SETISR(oneshot->tch, stm32_oneshot_handler, 0);
+  STM32L4_TIM_SETISR(oneshot->tch, stm32l4_oneshot_handler, 0);
 
   /* Set timer period */
 
@@ -294,7 +294,7 @@ int stm32l4_oneshot_start(struct stm32l4_oneshot_s *oneshot,
  * Input Parameters:
  *   oneshot Caller allocated instance of the oneshot state structure.  This
  *           structure must have been previously initialized via a call to
- *           stm32_oneshot_initialize();
+ *           stm32l4_oneshot_initialize();
  *   ts      The location in which to return the time remaining on the
  *           oneshot timer.  A time of zero is returned if the timer is
  *           not running.  ts may be zero in which case the time remaining

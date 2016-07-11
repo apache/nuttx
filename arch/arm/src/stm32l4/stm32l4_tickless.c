@@ -118,7 +118,7 @@
  * Private Types
  ****************************************************************************/
 
-struct stm32_tickless_s
+struct stm32l4_tickless_s
 {
   struct stm32l4_oneshot_s oneshot;
   struct stm32l4_freerun_s freerun;
@@ -128,14 +128,14 @@ struct stm32_tickless_s
  * Private Data
  ****************************************************************************/
 
-static struct stm32_tickless_s g_tickless;
+static struct stm32l4_tickless_s g_tickless;
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32_oneshot_handler
+ * Name: stm32l4_oneshot_handler
  *
  * Description:
  *   Called when the one shot timer expires
@@ -152,7 +152,7 @@ static struct stm32_tickless_s g_tickless;
  *
  ****************************************************************************/
 
-static void stm32_oneshot_handler(void *arg)
+static void stm32l4_oneshot_handler(void *arg)
 {
   tmrinfo("Expired...\n");
   sched_timer_expiration();
@@ -201,7 +201,7 @@ void up_timer_initialize(void)
                                  CONFIG_USEC_PER_TICK);
   if (ret < 0)
     {
-      tmrerr("ERROR: stm32_oneshot_initialize failed\n");
+      tmrerr("ERROR: stm32l4_oneshot_initialize failed\n");
       PANIC();
     }
 
@@ -211,7 +211,7 @@ void up_timer_initialize(void)
   ret = stm32l4_oneshot_max_delay(&g_tickless.oneshot, &max_delay);
   if (ret < 0)
     {
-      tmrerr("ERROR: stm32_oneshot_max_delay failed\n");
+      tmrerr("ERROR: stm32l4_oneshot_max_delay failed\n");
       PANIC();
     }
 
@@ -235,7 +235,7 @@ void up_timer_initialize(void)
                                  CONFIG_USEC_PER_TICK);
   if (ret < 0)
     {
-      tmrerr("ERROR: stm32_freerun_initialize failed\n");
+      tmrerr("ERROR: stm32l4_freerun_initialize failed\n");
       PANIC();
     }
 }
@@ -346,6 +346,6 @@ int up_timer_cancel(FAR struct timespec *ts)
 
 int up_timer_start(FAR const struct timespec *ts)
 {
-  return stm32l4_oneshot_start(&g_tickless.oneshot, stm32_oneshot_handler, NULL, ts);
+  return stm32l4_oneshot_start(&g_tickless.oneshot, stm32l4_oneshot_handler, NULL, ts);
 }
 #endif /* CONFIG_SCHED_TICKLESS */

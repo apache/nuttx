@@ -57,7 +57,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define STM32_NALARMS 2
+#define STM32L4_NALARMS 2
 
 /****************************************************************************
  * Private Types
@@ -93,7 +93,7 @@ struct stm32l4_lowerhalf_s
 #ifdef CONFIG_RTC_ALARM
   /* Alarm callback information */
 
-  struct stm32l4_cbinfo_s cbinfo[STM32_NALARMS];
+  struct stm32l4_cbinfo_s cbinfo[STM32L4_NALARMS];
 #endif
 };
 
@@ -200,7 +200,7 @@ static void stm32l4_alarm_callback(FAR void *arg, unsigned int alarmid)
 #endif /* CONFIG_RTC_ALARM */
 
 /****************************************************************************
- * Name: stm32_rdtime
+ * Name: stm32l4_rdtime
  *
  * Description:
  *   Implements the rdtime() method of the RTC driver interface
