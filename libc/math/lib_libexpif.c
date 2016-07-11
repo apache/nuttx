@@ -43,13 +43,13 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define M_E2    (M_E * M_E)
-#define M_E4    (M_E2 * M_E2)
-#define M_E8    (M_E4 * M_E4)
-#define M_E16   (M_E8 * M_E8)
-#define M_E32   (M_E16 * M_E16)
-#define M_E64   (M_E32 * M_E32)
-#define M_E128  (M_E64 * M_E64)
+#define M_E2     (M_E   * M_E)
+#define M_E4     (M_E2  * M_E2)
+#define M_E8     (M_E4  * M_E4)
+#define M_E16    (M_E8  * M_E8)
+#define M_E32    (M_E16 * M_E16)
+#define M_E64    (M_E32 * M_E32)
+#define M_E128   (M_E64 * M_E64)
 
 /****************************************************************************
  * Private Data
@@ -57,14 +57,14 @@
 
 static const float g_expif_square_tbl[8] =
 {
-  (float)M_E,                   /* e^1 */
-  (float)M_E2,                  /* e^2 */
-  (float)M_E4,                  /* e^4 */
-  (float)M_E8,                  /* e^8 */
-  (float)M_E16,                 /* e^16 */
-  (float)M_E32,                 /* e^32 */
-  (float)M_E64,                 /* e^64 */
-  (float)M_E128,                /* e^128 */
+  (float)M_E,    /* e^1 */
+  (float)M_E2,   /* e^2 */
+  (float)M_E4,   /* e^4 */
+  (float)M_E8,   /* e^8 */
+  (float)M_E16,  /* e^16 */
+  (float)M_E32,  /* e^32 */
+  (float)M_E64,  /* e^64 */
+  (float)M_E128, /* e^128 */
 };
 
 /****************************************************************************
@@ -83,7 +83,7 @@ float lib_expif(size_t n)
 
   val = 1.0F;
 
-  for (i = 0; n; i++)
+  for (i = 0; n != 0; i++)
     {
       if ((n & (1 << i)) != 0)
         {
