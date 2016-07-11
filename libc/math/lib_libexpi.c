@@ -58,7 +58,7 @@
  * Private Data
  ****************************************************************************/
 
-static double g_expi_square_tbl[11] =
+static const double g_expi_square_tbl[11] =
 {
   M_E,                          /* e^1 */
   M_E2,                         /* e^2 */
@@ -91,7 +91,7 @@ double lib_expi(size_t n)
 
   for (i = 0; n; i++)
     {
-      if (n & (1 << i))
+      if ((n & (1 << i)) != 0)
         {
           n   &= ~(1 << i);
           val *= g_expi_square_tbl[i];

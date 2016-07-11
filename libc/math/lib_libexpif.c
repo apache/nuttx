@@ -55,7 +55,7 @@
  * Private Data
  ****************************************************************************/
 
-static float g_expif_square_tbl[11] =
+static const float g_expif_square_tbl[8] =
 {
   (float)M_E,                   /* e^1 */
   (float)M_E2,                  /* e^2 */
@@ -85,7 +85,7 @@ float lib_expif(size_t n)
 
   for (i = 0; n; i++)
     {
-      if (n & (1 << i))
+      if ((n & (1 << i)) != 0)
         {
           n   &= ~(1 << i);
           val *= g_expif_square_tbl[i];
