@@ -50,7 +50,7 @@
 #include "up_arch.h"
 #include "kinetis.h"
 #include "kinetis_usbotg.h"
-#include "kinetis_sim.h"
+#include "chip/kinetis_sim.h"
 #include "teensy-3x.h"
 
 /************************************************************************************
