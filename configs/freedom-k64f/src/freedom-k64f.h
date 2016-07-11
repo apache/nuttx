@@ -91,13 +91,13 @@
  *   LED    K64
  *   ------ -------------------------------------------------------
  *   RED    PTB22/SPI2_SOUT/FB_AD29/CMP2_OUT
- *   BLUE   PTB21/SPI2_SCK/FB_AD30/CMP1_OUT
  *   GREEN  PTE26/ENET_1588_CLKIN/UART4_CTS_b/RTC_CLKOUT/USB0_CLKIN
+ *   BLUE   PTB21/SPI2_SCK/FB_AD30/CMP1_OUT
  */
 
 #define GPIO_LED_R         (GPIO_LOWDRIVE | GPIO_OUTPUT_ONE | PIN_PORTB | PIN22)
-#define GPIO_LED_G         (GPIO_LOWDRIVE | GPIO_OUTPUT_ONE | PIN_PORTB | PIN21)
-#define GPIO_LED_B         (GPIO_LOWDRIVE | GPIO_OUTPUT_ONE | PIN_PORTE | PIN26)
+#define GPIO_LED_G         (GPIO_LOWDRIVE | GPIO_OUTPUT_ONE | PIN_PORTE | PIN26)
+#define GPIO_LED_B         (GPIO_LOWDRIVE | GPIO_OUTPUT_ONE | PIN_PORTB | PIN21)
 
 /************************************************************************************
  * Public data

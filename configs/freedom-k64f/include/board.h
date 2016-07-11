@@ -162,18 +162,18 @@
  * the Freedom K64F.  The following definitions describe how NuttX controls
  * the LEDs:
  *
- *   SYMBOL                Meaning                 LED state
- *                                                 RED   GREEN  BLUE
- *   -------------------  -----------------------  -----------------   */
-#define LED_STARTED       1 /* NuttX has been started    OFF  OFF  OFF */
-#define LED_HEAPALLOCATE  2 /* Heap has been allocated   OFF  OFF  ON  */
-#define LED_IRQSENABLED   0 /* Interrupts enabled        OFF  OFF  ON  */
-#define LED_STACKCREATED  3 /* Idle stack created        OFF  ON   OFF */
-#define LED_INIRQ         0 /* In an interrupt          (no change)    */
-#define LED_SIGNAL        0 /* In a signal handler      (no change)    */
-#define LED_ASSERTION     0 /* An assertion failed      (no change)    */
-#define LED_PANIC         4 /* The system has crashed    FLASH OFF OFF */
-#undef  LED_IDLE            /* K64 is in sleep mode     (Not used)     */
+ *   SYMBOL                Meaning                      LED state
+ *                                                      RED   GREEN  BLUE
+ *   -------------------  ----------------------------  ----------------- */
+#define LED_STARTED       1 /* NuttX has been started    OFF   OFF    OFF */
+#define LED_HEAPALLOCATE  2 /* Heap has been allocated   OFF   OFF    ON  */
+#define LED_IRQSENABLED   0 /* Interrupts enabled        OFF   OFF    ON  */
+#define LED_STACKCREATED  3 /* Idle stack created        OFF   ON     OFF */
+#define LED_INIRQ         0 /* In an interrupt          (no change)       */
+#define LED_SIGNAL        0 /* In a signal handler      (no change)       */
+#define LED_ASSERTION     0 /* An assertion failed      (no change)       */
+#define LED_PANIC         4 /* The system has crashed    FLASH OFF    OFF */
+#undef  LED_IDLE            /* K64 is in sleep mode     (Not used)        */
 
 /* Button definitions ***************************************************************/
 /* Two push buttons, SW2 and SW3, are available on FRDM-K64F board, where SW2 is

@@ -1448,7 +1448,7 @@ static inline void kinetis_initphy(struct kinetis_driver_s *priv)
   phydata = 0;
   kinetis_readmii(priv, CONFIG_ENET_PHYADDR, PHY_STATUS, &phydata);
 
-  /* Set up the transmit and receive contrel registers based on the
+  /* Set up the transmit and receive control registers based on the
    * configuration and the auto negotiation results.
    */
 
