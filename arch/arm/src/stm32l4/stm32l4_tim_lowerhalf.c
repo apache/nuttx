@@ -144,9 +144,9 @@ static int stm32l4_timer_handler(FAR struct stm32l4_lowerhalf_s *lower);
 static int stm32l4_start(FAR struct timer_lowerhalf_s *lower);
 static int stm32l4_stop(FAR struct timer_lowerhalf_s *lower);
 static int stm32l4_settimeout(FAR struct timer_lowerhalf_s *lower,
-                            uint32_t timeout);
+                              uint32_t timeout);
 static tccb_t stm32l4_sethandler(FAR struct timer_lowerhalf_s *lower,
-                               tccb_t handler);
+                                 tccb_t handler);
 
 /****************************************************************************
  * Private Data
@@ -437,9 +437,9 @@ static int stm32l4_start(FAR struct timer_lowerhalf_s *lower)
  *
  ****************************************************************************/
 
-static int stm32l4_stop(struct timer_lowerhalf_s *lower)
+static int stm32l4_stop(FAR struct timer_lowerhalf_s *lower)
 {
-  struct stm32l4_lowerhalf_s *priv = (struct stm32l4_lowerhalf_s *)lower;
+  FAR struct stm32l4_lowerhalf_s *priv = (FAR struct stm32l4_lowerhalf_s *)lower;
 
   if (priv->started)
     {
@@ -471,7 +471,8 @@ static int stm32l4_stop(struct timer_lowerhalf_s *lower)
  *
  ****************************************************************************/
 
-static int stm32l4_settimeout(FAR struct timer_lowerhalf_s *lower, uint32_t timeout)
+static int stm32l4_settimeout(FAR struct timer_lowerhalf_s *lower,
+                              uint32_t timeout)
 {
   FAR struct stm32l4_lowerhalf_s *priv = (FAR struct stm32l4_lowerhalf_s *)lower;
   uint64_t maxtimeout;
@@ -517,7 +518,7 @@ static int stm32l4_settimeout(FAR struct timer_lowerhalf_s *lower, uint32_t time
  ****************************************************************************/
 
 static tccb_t stm32l4_sethandler(FAR struct timer_lowerhalf_s *lower,
-                               tccb_t newhandler)
+                                 tccb_t newhandler)
 {
   FAR struct stm32l4_lowerhalf_s *priv = (FAR struct stm32l4_lowerhalf_s *)lower;
 

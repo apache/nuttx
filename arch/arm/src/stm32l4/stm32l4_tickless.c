@@ -152,7 +152,7 @@ static struct stm32l4_tickless_s g_tickless;
  *
  ****************************************************************************/
 
-static void stm32l4_oneshot_handler(void *arg)
+static void stm32l4_oneshot_handler(FAR void *arg)
 {
   tmrinfo("Expired...\n");
   sched_timer_expiration();
