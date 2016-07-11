@@ -47,9 +47,9 @@ float asinf(float x)
       y_sin = sinf(y);
       y_cos = cosf(y);
 
-      if (y > M_PI_2 || y < -M_PI_2)
+      if (y > M_PI_2_F || y < -M_PI_2_F)
         {
-          y = fmodf(y, M_PI);
+          y = fmodf(y, M_PI_F);
         }
 
       if (y_sin + FLT_EPSILON >= x && y_sin - FLT_EPSILON <= x)

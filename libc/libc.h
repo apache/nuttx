@@ -1,7 +1,7 @@
 /****************************************************************************
  * libc/libc.h
  *
- *   Copyright (C) 2007-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -211,6 +211,7 @@ int lib_checkbase(int base, const char **pptr);
 /* Defined in lib_expi.c */
 
 #ifdef CONFIG_LIBM
+float  lib_expif(size_t n);
 double lib_expi(size_t n);
 #endif
 

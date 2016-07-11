@@ -89,8 +89,8 @@ float expf(float x)
 
   /* Perform Taylor series approximation with eleven terms */
 
-  value = 0.0;
-  x0 = 1.0;
+  value = 0.0F;
+  x0 = 1.0F;
   for (i = 0; i < 10; i++)
     {
       value += x0 * _flt_inv_fact[i];
@@ -99,11 +99,11 @@ float expf(float x)
 
   /* Multiply by exp of the integer component */
 
-  value *= lib_expi(int_part);
+  value *= lib_expif(int_part);
 
   if (invert)
     {
-      return (1.0 / value);
+      return (1.0F / value);
     }
   else
     {

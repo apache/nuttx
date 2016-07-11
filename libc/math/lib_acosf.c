@@ -37,5 +37,5 @@
 
 float acosf(float x)
 {
-  return (M_PI_2 - asinf(x));
+  return (M_PI_2_F - asinf(x));
 }
