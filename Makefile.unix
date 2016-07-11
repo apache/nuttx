@@ -280,16 +280,6 @@ tools/cnvwindeps$(HOSTEXEEXT):
 # setting up symbolic links with 'generic' directory names to specific,
 # configured directories.
 #
-# Link the apps/include directory to include/apps
-
-include/apps: Make.defs
-ifneq ($(APPDIR),)
-	@echo "LN: include/apps to $(APPDIR)/include"
-	$(Q) if [ -d $(TOPDIR)/$(APPDIR)/include ]; then \
-		$(DIRLINK) $(TOPDIR)/$(APPDIR)/include include/apps; \
-	fi
-endif
-
 # Link the arch/<arch-name>/include directory to include/arch
 
 include/arch: Make.defs
@@ -324,7 +314,7 @@ ifneq ($(CONFIG_ARCH_CHIP),)
 	$(Q) $(DIRLINK) $(TOPDIR)/$(ARCH_INC)/$(CONFIG_ARCH_CHIP) include/arch/chip
 endif
 
-dirlinks: include/arch include/arch/board include/arch/chip $(ARCH_SRC)/board $(ARCH_SRC)/chip include/apps
+dirlinks: include/arch include/arch/board include/arch/chip $(ARCH_SRC)/board $(ARCH_SRC)/chip
 
 # context
 #
@@ -354,7 +344,6 @@ clean_context:
 	$(Q) $(DIRUNLINK) include/arch
 	$(Q) $(DIRUNLINK) $(ARCH_SRC)/board
 	$(Q) $(DIRUNLINK) $(ARCH_SRC)/chip
-	$(Q) $(DIRUNLINK) include/apps
 
 # check_context
 #
