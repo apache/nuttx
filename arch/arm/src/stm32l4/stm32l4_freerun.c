@@ -1,4 +1,4 @@
-/****************************************************************************
+s/****************************************************************************
  * arch/arm/src/stm32l4/stm32l4_freerun.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
@@ -64,7 +64,7 @@ static struct stm32l4_freerun_s *g_freerun;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32_freerun_handler
+ * Name: stm32l4_freerun_handler
  *
  * Description:
  *   Timer interrupt callback.  When the freerun timer counter overflows,
@@ -81,7 +81,7 @@ static struct stm32l4_freerun_s *g_freerun;
  *
  ****************************************************************************/
 
-static int stm32_freerun_handler(int irq, void *context)
+static int stm32l4_freerun_handler(int irq, void *context)
 {
   struct stm32l4_freerun_s *freerun = g_freerun;
 
@@ -149,7 +149,7 @@ int stm32l4_freerun_initialize(struct stm32l4_freerun_s *freerun, int chan,
 
   /* Set up to receive the callback when the counter overflow occurs */
 
-  STM32L4_TIM_SETISR(freerun->tch, stm32_freerun_handler, 0);
+  STM32L4_TIM_SETISR(freerun->tch, stm32l4_freerun_handler, 0);
 
   /* Set timer period */
 
@@ -173,7 +173,7 @@ int stm32l4_freerun_initialize(struct stm32l4_freerun_s *freerun, int chan,
  * Input Parameters:
  *   freerun Caller allocated instance of the freerun state structure.  This
  *           structure must have been previously initialized via a call to
- *           stm32_freerun_initialize();
+ *           stm32l4_freerun_initialize();
  *   ts      The location in which to return the time from the free-running
  *           timer.
  *
@@ -197,7 +197,7 @@ int stm32l4_freerun_counter(struct stm32l4_freerun_s *freerun,
   DEBUGASSERT(freerun && freerun->tch && ts);
 
   /* Temporarily disable the overflow counter.  NOTE that we have to be
-   * careful here because  stm32_tc_getpending() will reset the pending
+   * careful here because  stm32l4_tc_getpending() will reset the pending
    * interrupt status.  If we do not handle the overflow here then, it will
    * be lost.
    */
@@ -267,7 +267,7 @@ int stm32l4_freerun_counter(struct stm32l4_freerun_s *freerun,
  * Input Parameters:
  *   freerun Caller allocated instance of the freerun state structure.  This
  *           structure must have been previously initialized via a call to
- *           stm32_freerun_initialize();
+ *           stm32l4_freerun_initialize();
  *
  * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is returned
