@@ -171,12 +171,12 @@ config ARCH_HAVE_TIMEKEEPING
 	bool
 	default n
 
-config SCHED_TIMEKEEPING
+config CLOCK_TIMEKEEPING
 	bool "Support timekeeping algorithms"
 	default n
 	depends on EXPERIMENTAL && ARCH_HAVE_TIMEKEEPING
 	---help---
-		SCHED_TIMEKEEPING enables experimental time management algorithms.
+		CLOCK_TIMEKEEPING enables experimental time management algorithms.
 
 config JULIAN_TIME
 	bool "Enables Julian time conversions"

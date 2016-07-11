@@ -48,7 +48,7 @@
 #include <nuttx/irq.h>
 
 #include "clock/clock.h"
-#ifdef CONFIG_SCHED_TIMEKEEPING
+#ifdef CONFIG_CLOCK_TIMEKEEPING
 #  include "clock/clock_timekeeping.h"
 #endif
 
@@ -79,7 +79,7 @@ int clock_settime(clockid_t clock_id, FAR const struct timespec *tp)
 
   if (clock_id == CLOCK_REALTIME)
     {
-#ifndef CONFIG_SCHED_TIMEKEEPING
+#ifndef CONFIG_CLOCK_TIMEKEEPING
       /* Interrupts are disabled here so that the in-memory time
        * representation and the RTC setting will be as close as
        * possible.

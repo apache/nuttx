@@ -79,7 +79,7 @@ extern volatile uint32_t g_system_timer;
 #  endif
 #endif
 
-#ifndef CONFIG_SCHED_TIMEKEEPING
+#ifndef CONFIG_CLOCK_TIMEKEEPING
 extern struct timespec   g_basetime;
 #endif
 

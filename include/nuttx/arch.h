@@ -1496,11 +1496,11 @@ void up_timer_initialize(void);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_SCHED_TICKLESS) && !defined(CONFIG_SCHED_TIMEKEEPING)
+#if defined(CONFIG_SCHED_TICKLESS) && !defined(CONFIG_CLOCK_TIMEKEEPING)
 int up_timer_gettime(FAR struct timespec *ts);
 #endif
 
-#ifdef CONFIG_SCHED_TIMEKEEPING
+#ifdef CONFIG_CLOCK_TIMEKEEPING
 int up_timer_getcounter(FAR uint64_t *cycles);
 void up_timer_getmask(FAR uint64_t *mask);
 #endif

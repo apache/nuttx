@@ -80,7 +80,7 @@ static struct stm32_freerun_s *g_freerun;
  *
  ****************************************************************************/
 
-#ifndef CONFIG_SCHED_TIMEKEEPING
+#ifndef CONFIG_CLOCK_TIMEKEEPING
 static int stm32_freerun_handler(int irq, void *context)
 {
   struct stm32_freerun_s *freerun = g_freerun;
@@ -91,7 +91,7 @@ static int stm32_freerun_handler(int irq, void *context)
   STM32_TIM_ACKINT(freerun->tch, 0);
   return OK;
 }
-#endif /* CONFIG_SCHED_TIMEKEEPING */
+#endif /* CONFIG_CLOCK_TIMEKEEPING */
 
 /****************************************************************************
  * Public Functions
@@ -145,11 +145,11 @@ int stm32_freerun_initialize(struct stm32_freerun_s *freerun, int chan,
   freerun->chan         = chan;
   freerun->running      = false;
 
-#ifdef CONFIG_SCHED_TIMEKEEPING
+#ifdef CONFIG_CLOCK_TIMEKEEPING
   freerun->counter_mask = 0xffffffffull;
 #endif
 
-#ifndef CONFIG_SCHED_TIMEKEEPING
+#ifndef CONFIG_CLOCK_TIMEKEEPING
   freerun->overflow     = 0;
   g_freerun             = freerun;
 
@@ -166,7 +166,7 @@ int stm32_freerun_initialize(struct stm32_freerun_s *freerun, int chan,
 
   STM32_TIM_SETMODE(freerun->tch, STM32_TIM_MODE_UP);
 
-#ifndef CONFIG_SCHED_TIMEKEEPING
+#ifndef CONFIG_CLOCK_TIMEKEEPING
   STM32_TIM_ACKINT(freerun->tch, 0);
   STM32_TIM_ENABLEINT(freerun->tch, 0);
 #endif
@@ -193,7 +193,7 @@ int stm32_freerun_initialize(struct stm32_freerun_s *freerun, int chan,
  *
  ****************************************************************************/
 
-#ifndef CONFIG_SCHED_TIMEKEEPING
+#ifndef CONFIG_CLOCK_TIMEKEEPING
 
 int stm32_freerun_counter(struct stm32_freerun_s *freerun,
                           struct timespec *ts)
@@ -270,7 +270,7 @@ int stm32_freerun_counter(struct stm32_freerun_s *freerun,
   return OK;
 }
 
-#else /* CONFIG_SCHED_TIMEKEEPING */
+#else /* CONFIG_CLOCK_TIMEKEEPING */
 
 int stm32_freerun_counter(struct stm32_freerun_s *freerun, uint64_t *counter)
 {
@@ -278,7 +278,7 @@ int stm32_freerun_counter(struct stm32_freerun_s *freerun, uint64_t *counter)
   return OK;
 }
 
-#endif /* CONFIG_SCHED_TIMEKEEPING */
+#endif /* CONFIG_CLOCK_TIMEKEEPING */
 
 /****************************************************************************
  * Name: stm32_freerun_uninitialize

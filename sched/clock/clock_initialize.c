@@ -54,7 +54,7 @@
 #include <nuttx/time.h>
 
 #include "clock/clock.h"
-#ifdef CONFIG_SCHED_TIMEKEEPING
+#ifdef CONFIG_CLOCK_TIMEKEEPING
 #  include "clock/clock_timekeeping.h"
 #endif
 
@@ -175,7 +175,7 @@ static void clock_inittime(void)
 {
   /* (Re-)initialize the time value to match the RTC */
 
-#ifndef CONFIG_SCHED_TIMEKEEPING
+#ifndef CONFIG_CLOCK_TIMEKEEPING
 #ifndef CONFIG_RTC_HIRES
   clock_basetime(&g_basetime);
 #endif

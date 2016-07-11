@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>
 
-#ifdef CONFIG_SCHED_TIMEKEEPING
+#ifdef CONFIG_CLOCK_TIMEKEEPING
 
 #include <sys/time.h>
 #include <stdint.h>
@@ -326,4 +326,4 @@ void clock_inittimekeeping(void)
   memset(&g_clock_monotonic_time, 0, sizeof(g_clock_monotonic_time));
 }
 
-#endif /* CONFIG_SCHED_TIMEKEEPING */
+#endif /* CONFIG_CLOCK_TIMEKEEPING */

@@ -83,7 +83,7 @@ systime_t clock_systimer(void)
 
   /* Get the time from the platform specific hardware */
 
-#ifndef CONFIG_SCHED_TIMEKEEPING
+#ifndef CONFIG_CLOCK_TIMEKEEPING
   (void)up_timer_gettime(&ts);
 #else
   (void)clock_timekeeping_get_monotonic_time(&ts);
@@ -100,7 +100,7 @@ systime_t clock_systimer(void)
 
   /* Get the time from the platform specific hardware */
 
-#ifndef CONFIG_SCHED_TIMEKEEPING
+#ifndef CONFIG_CLOCK_TIMEKEEPING
   (void)up_timer_gettime(&ts);
 #else
   (void)clock_timekeeping_get_monotonic_time(&ts);

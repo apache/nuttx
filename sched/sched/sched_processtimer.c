@@ -144,7 +144,7 @@ static inline void sched_process_scheduler(void)
 
 void sched_process_timer(void)
 {
-#ifdef CONFIG_SCHED_TIMEKEEPING
+#ifdef CONFIG_CLOCK_TIMEKEEPING
   /* Process wall time */
 
   clock_update_wall_time();

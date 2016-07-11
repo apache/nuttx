@@ -49,7 +49,7 @@
 #include <nuttx/arch.h>
 
 #include "clock/clock.h"
-#ifdef CONFIG_SCHED_TIMEKEEPING
+#ifdef CONFIG_CLOCK_TIMEKEEPING
 #  include "clock/clock_timekeeping.h"
 #endif
 
@@ -93,7 +93,7 @@ int clock_gettime(clockid_t clock_id, struct timespec *tp)
        * reset.
        */
 
-#if defined(CONFIG_SCHED_TIMEKEEPING)
+#if defined(CONFIG_CLOCK_TIMEKEEPING)
       ret = clock_timekeeping_get_monotonic_time(tp);
 #elif defined(CONFIG_SCHED_TICKLESS)
       ret = up_timer_gettime(tp);
@@ -118,7 +118,7 @@ int clock_gettime(clockid_t clock_id, struct timespec *tp)
        * last set.
        */
 
-#if defined(CONFIG_SCHED_TIMEKEEPING)
+#if defined(CONFIG_CLOCK_TIMEKEEPING)
       ret = clock_timekeeping_get_wall_time(tp);
 #elif defined(CONFIG_SCHED_TICKLESS)
       ret = up_timer_gettime(&ts);
@@ -126,7 +126,7 @@ int clock_gettime(clockid_t clock_id, struct timespec *tp)
       ret = clock_systimespec(&ts);
 #endif
 
-#ifndef CONFIG_SCHED_TIMEKEEPING
+#ifndef CONFIG_CLOCK_TIMEKEEPING
       if (ret == OK)
         {
           /* Add the base time to this.  The base time is the time-of-day
@@ -151,7 +151,7 @@ int clock_gettime(clockid_t clock_id, struct timespec *tp)
           tp->tv_sec  = ts.tv_sec;
           tp->tv_nsec = ts.tv_nsec;
         }
-#endif /* CONFIG_SCHED_TIMEKEEPING */
+#endif /* CONFIG_CLOCK_TIMEKEEPING */
     }
   else
     {

@@ -215,7 +215,7 @@
 #define SYS_clock_getres               (__SYS_clock+1)
 #define SYS_clock_gettime              (__SYS_clock+2)
 #define SYS_clock_settime              (__SYS_clock+3)
-#ifdef CONFIG_SCHED_TIMEKEEPING
+#ifdef CONFIG_CLOCK_TIMEKEEPING
 #  define SYS_adjtime                  (__SYS_clock+4)
 #  define __SYS_timers                 (__SYS_clock+5)
 #else

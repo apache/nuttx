@@ -272,7 +272,7 @@ void up_timer_initialize(void)
  *
  ****************************************************************************/
 
-#ifndef CONFIG_SCHED_TIMEKEEPING
+#ifndef CONFIG_CLOCK_TIMEKEEPING
 
 int up_timer_gettime(FAR struct timespec *ts)
 {
@@ -286,7 +286,7 @@ int up_timer_getcounter(FAR uint64_t *cycles)
   return stm32_freerun_counter(&g_tickless.freerun, cycles);
 }
 
-#endif /* CONFIG_SCHED_TIMEKEEPING */
+#endif /* CONFIG_CLOCK_TIMEKEEPING */
 
 /****************************************************************************
  * Name: up_timer_getmask
@@ -302,13 +302,13 @@ int up_timer_getcounter(FAR uint64_t *cycles)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SCHED_TIMEKEEPING
+#ifdef CONFIG_CLOCK_TIMEKEEPING
 void up_timer_getmask(FAR uint64_t *mask)
 {
   DEBUGASSERT(mask != NULL);
   *mask = g_tickless.freerun.counter_mask;
 }
-#endif /* CONFIG_SCHED_TIMEKEEPING */
+#endif /* CONFIG_CLOCK_TIMEKEEPING */
 
 /****************************************************************************
  * Name: up_timer_cancel

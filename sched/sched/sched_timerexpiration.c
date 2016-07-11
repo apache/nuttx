@@ -53,7 +53,7 @@
 #include "wdog/wdog.h"
 #include "clock/clock.h"
 
-#ifdef CONFIG_SCHED_TIMEKEEPING
+#ifdef CONFIG_CLOCK_TIMEKEEPING
 # include "clock/clock_timekeeping.h"
 #endif
 
@@ -266,7 +266,7 @@ static unsigned int sched_timer_process(unsigned int ticks, bool noswitches)
   unsigned int rettime  = 0;
   unsigned int tmp;
 
-#ifdef CONFIG_SCHED_TIMEKEEPING
+#ifdef CONFIG_CLOCK_TIMEKEEPING
   /* Process wall time */
 
   clock_update_wall_time();
