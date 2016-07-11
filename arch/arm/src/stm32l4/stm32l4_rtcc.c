@@ -535,7 +535,7 @@ static void rtc_resume(void)
  ************************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
-static int stm32l4_rtc_alarm_handler(int irq, void *context)
+static int stm32l4_rtc_alarm_handler(int irq, FAR void *context)
 {
   FAR struct alm_cbinfo_s *cbinfo;
   alm_callback_t cb;

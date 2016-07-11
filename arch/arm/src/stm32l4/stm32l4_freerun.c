@@ -57,7 +57,7 @@
  * Private Functions
  ****************************************************************************/
 
-static struct stm32l4_freerun_s *g_freerun;
+FAR static struct stm32l4_freerun_s *g_freerun;
 
 /****************************************************************************
  * Private Functions
@@ -81,9 +81,9 @@ static struct stm32l4_freerun_s *g_freerun;
  *
  ****************************************************************************/
 
-static int stm32l4_freerun_handler(int irq, void *context)
+static int stm32l4_freerun_handler(int irq, FAR void *context)
 {
-  struct stm32l4_freerun_s *freerun = g_freerun;
+  FAR struct stm32l4_freerun_s *freerun = g_freerun;
 
   DEBUGASSERT(freerun != NULL && freerun->overflow < UINT32_MAX);
   freerun->overflow++;
@@ -115,8 +115,8 @@ static int stm32l4_freerun_handler(int irq, void *context)
  *
  ****************************************************************************/
 
-int stm32l4_freerun_initialize(struct stm32l4_freerun_s *freerun, int chan,
-                             uint16_t resolution)
+int stm32l4_freerun_initialize(FAR struct stm32l4_freerun_s *freerun, int chan,
+                               uint16_t resolution)
 {
   uint32_t frequency;
 
@@ -183,8 +183,8 @@ int stm32l4_freerun_initialize(struct stm32l4_freerun_s *freerun, int chan,
  *
  ****************************************************************************/
 
-int stm32l4_freerun_counter(struct stm32l4_freerun_s *freerun,
-                          struct timespec *ts)
+int stm32l4_freerun_counter(FAR struct stm32l4_freerun_s *freerun,
+                            FAR struct timespec *ts)
 {
   uint64_t usec;
   uint32_t counter;
@@ -275,7 +275,7 @@ int stm32l4_freerun_counter(struct stm32l4_freerun_s *freerun,
  *
  ****************************************************************************/
 
-int stm32l4_freerun_uninitialize(struct stm32l4_freerun_s *freerun)
+int stm32l4_freerun_uninitialize(FAR struct stm32l4_freerun_s *freerun)
 {
   DEBUGASSERT(freerun && freerun->tch);
 
