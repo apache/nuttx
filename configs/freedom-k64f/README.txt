@@ -13,6 +13,9 @@ Contents
   o Ethernet
   o Development Environment
   o GNU Toolchain Options
+  o Freedom K64F Configuration Options
+  o Configurations
+  o Status
 
 Kinetis Freedom K64F Features:
 =============================
@@ -380,6 +383,23 @@ can be selected as follow:
 
 Where <subdir> is one of the following:
 
+  netnsh:
+  ------
+    This configuration is identical to the nsh configuration described
+    below except that networking support is enabled.
+
+    NOTES:
+
+    1. Most of the notes associated with the nsh configuration apply here
+       as well (see below).
+
+    2. Default platform/toolchain:
+
+       CONFIG_HOST_WINDOWS=y               : Cygwin under Windows
+       CONFIG_WINDOWS_CYGWIN=y
+       CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y : ARM/mbed toolcahin (arm-none-elf-gcc)
+       CONFIG_INTELHEX_BINARY=y            : Output formats: Intel hex binary
+
   nsh:
   ---
     Configures the NuttShell (nsh) located at apps/examples/nsh using a
@@ -401,7 +421,7 @@ Where <subdir> is one of the following:
        CONFIG_HOST_LINUX=y                 : Linux (Cygwin under Windows okay too).
        CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y : Buildroot (arm-nuttx-elf-gcc)
        CONFIG_ARMV7M_OABI_TOOLCHAIN=y      : The older OABI version
-       CONFIG_RAW_BINARY=y                 : Output formats: ELF and raw binary
+       CONFIG_INTELHEX_BINARY=y            : Output formats: Intel hex binary
 
     3. The Serial Console is provided on UART3 with the correct pin
        configuration for use with an Arduino Serial Shield.
@@ -426,3 +446,14 @@ Where <subdir> is one of the following:
       CONFIG_SCHED_WORKQUEUE=y             : Enable the NuttX workqueue
 
       CONFIG_NSH_ARCHINIT=y                : Provide NSH initializeation logic
+
+Status
+======
+
+  2016-07-11:  Received hardware today and the board came up on the very
+    first try.  That does not happen often.  At this point, the very basic
+    NSH configuration is working and LEDs are working.  The only odd
+    behavior that I see is that pressing SW3 causes an unexpected interrupt
+    error.
+  2016-07-12:  Added support for the KSZ8081 PHY and added the netnsh
+    configuration.  Untested as of this writing.
