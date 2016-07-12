@@ -76,23 +76,23 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* CONFIG_ENET_NETHIFS determines the number of physical interfaces
+/* CONFIG_KINETIS_ENETNETHIFS determines the number of physical interfaces
  * that will be supported.
  */
 
-#if CONFIG_ENET_NETHIFS != 1
-#  error "CONFIG_ENET_NETHIFS must be one for now"
+#if CONFIG_KINETIS_ENETNETHIFS != 1
+#  error "CONFIG_KINETIS_ENETNETHIFS must be one for now"
 #endif
 
-#if CONFIG_ENET_NTXBUFFERS < 1
+#if CONFIG_KINETIS_ENETNTXBUFFERS < 1
 #  error "Need at least one TX buffer"
 #endif
 
-#if CONFIG_ENET_NRXBUFFERS < 1
+#if CONFIG_KINETIS_ENETNRXBUFFERS < 1
 #  error "Need at least one RX buffer"
 #endif
 
-#define NENET_NBUFFERS (CONFIG_ENET_NTXBUFFERS+CONFIG_ENET_NRXBUFFERS)
+#define NENET_NBUFFERS (CONFIG_KINETIS_ENETNTXBUFFERS+CONFIG_KINETIS_ENETNRXBUFFERS)
 
 #ifndef CONFIG_NET_MULTIBUFFER
 #  error "CONFIG_NET_MULTIBUFFER is required in the configuration"
@@ -108,14 +108,47 @@
 #define MII_MAXPOLLS      (0x1ffff)
 #define LINK_WAITUS       (500*1000)
 
-/* PHY hardware specifics.  This was copied from the FreeScale code examples.
- * this is a vendor specific register and bit settings.  I really should
- * do the research and find out what this really is.
+/* PHY definitions.
+ *
+ * The selected PHY must be selected from the drivers/net/Kconfig PHY menu.
+ * A description of the PHY must be provided here.  That description must
+ * include:
+ *
+ * 1. BOARD_PHY_NAME: A PHY name string (for debug output),
+ * 2. BOARD_PHYID1 and BOARD_PHYID2: The PHYID1 and PHYID2 values (from
+ *    include/nuttx/net/mii.h)
+ * 3. BOARD_PHY_STATUS:  The address of the status register to use when
+ *    querying link status (from include/nuttx/net/mii.h)
+ * 4. BOARD_PHY_ISDUPLEX:  A macro that can convert the status register
+ *    value into a boolean: true=duplex mode, false=half-duplex mode
+ * 5. BOARD_PHY_10BASET:  A macro that can convert the status register
+ *    value into a boolean: true=10Base-T, false=Not 10Base-T
+ * 6. BOARD_PHY_100BASET:  A macro that can convert the status register
+ *    value into a boolean: true=100Base-T, false=Not 100Base-T
+ *
+ * The Tower SER board uses a KSZ8041 PHY.
+ * The Freedom K64F board uses a KSZ8081 PHY
  */
 
-#define PHY_STATUS         (0x1f)
-#define PHY_DUPLEX_STATUS  (4 << 2)
-#define PHY_SPEED_STATUS   (1 << 2)
+#if defined(CONFIG_ETH0_PHY_KSZ8041)
+#  define BOARD_PHY_NAME        "KSZ8041"
+#  define BOARD_PHYID1          MII_PHYID1_KSZ8041
+#  define BOARD_PHYID2          MII_PHYID2_KSZ8041
+#  define BOARD_PHY_STATUS      MII_KSZ8041_PHYCTRL2
+#  define BOARD_PHY_ISDUPLEX(s) (((s) & (4 << MII_PHYCTRL2_MODE_SHIFT)) != 0)
+#  define BOARD_PHY_10BASET(s)  (((s) & (1 << MII_PHYCTRL2_MODE_SHIFT)) != 0)
+#  define BOARD_PHY_100BASET(s) (((s) & (2 << MII_PHYCTRL2_MODE_SHIFT)) != 0)
+#elif defined(CONFIG_ETH0_PHY_KSZ8081)
+#  define BOARD_PHY_NAME        "KSZ8081"
+#  define BOARD_PHYID1          MII_PHYID1_KSZ8081
+#  define BOARD_PHYID2          MII_PHYID2_KSZ8081
+#  define BOARD_PHY_STATUS      MII_KSZ8081_PHYCTRL2
+#  define BOARD_PHY_ISDUPLEX(s) (((s) & (4 << MII_PHYCTRL2_MODE_SHIFT)) != 0)
+#  define BOARD_PHY_10BASET(s)  (((s) & (1 << MII_PHYCTRL2_MODE_SHIFT)) != 0)
+#  define BOARD_PHY_100BASET(s) (((s) & (2 << MII_PHYCTRL2_MODE_SHIFT)) != 0)
+#else
+#  error "Unrecognized or missing PHY selection"
+#endif
 
 /* Estimate the hold time to use based on the peripheral (bus) clock:
  *
@@ -188,7 +221,7 @@ struct kinetis_driver_s
  * Private Data
  ****************************************************************************/
 
-static struct kinetis_driver_s g_enet[CONFIG_ENET_NETHIFS];
+static struct kinetis_driver_s g_enet[CONFIG_KINETIS_ENETNETHIFS];
 
 /****************************************************************************
  * Private Function Prototypes
@@ -222,8 +255,8 @@ static int  kinetis_interrupt(int irq, FAR void *context);
 
 /* Watchdog timer expirations */
 
-static void kinetis_polltimer(int argc, uint32_t arg, ...);
 static void kinetis_txtimeout(int argc, uint32_t arg, ...);
+static void kinetis_polltimer(int argc, uint32_t arg, ...);
 
 /* NuttX callback functions */
 
@@ -241,6 +274,10 @@ static int kinetis_ioctl(struct net_driver_s *dev, int cmd, long arg);
 /* PHY/MII support */
 
 static inline void kinetis_initmii(struct kinetis_driver_s *priv);
+static int kinetis_writemii(struct kinetis_driver_s *priv, uint8_t phyaddr,
+                            uint8_t regaddr, uint16_t data);
+static int kinetis_readmii(struct kinetis_driver_s *priv, uint8_t phyaddr,
+                           uint8_t regaddr, uint16_t *data);
 static inline void kinetis_initphy(struct kinetis_driver_s *priv);
 
 /* Initialization */
@@ -323,7 +360,7 @@ static bool kinetics_txringfull(FAR struct kinetis_driver_s *priv)
    */
 
   txnext = priv->txhead + 1;
-  if (txnext >= CONFIG_ENET_NTXBUFFERS)
+  if (txnext >= CONFIG_KINETIS_ENETNTXBUFFERS)
     {
       txnext = 0;
     }
@@ -375,7 +412,7 @@ static int kinetis_transmit(FAR struct kinetis_driver_s *priv)
 
   txdesc = &priv->txdesc[priv->txhead];
   priv->txhead++;
-  if (priv->txhead >= CONFIG_ENET_NTXBUFFERS)
+  if (priv->txhead >= CONFIG_KINETIS_ENETNTXBUFFERS)
     {
       priv->txhead = 0;
     }
@@ -392,7 +429,7 @@ static int kinetis_transmit(FAR struct kinetis_driver_s *priv)
    */
 
   txdesc->length  = kinesis_swap16(priv->dev.d_len);
-#ifdef CONFIG_ENET_ENHANCEDBD
+#ifdef CONFIG_KINETIS_ENETENHANCEDBD
   txdesc->bdu     = 0x00000000;
   txdesc->status2 = TXDESC_INT | TXDESC_TS; /* | TXDESC_IINS | TXDESC_PINS; */
 #endif
@@ -668,7 +705,7 @@ static void kinetis_receive(FAR struct kinetis_driver_s *priv)
       /* Update the index to the next descriptor */
 
       priv->rxtail++;
-      if (priv->rxtail >= CONFIG_ENET_NRXBUFFERS)
+      if (priv->rxtail >= CONFIG_KINETIS_ENETNRXBUFFERS)
         {
           priv->rxtail = 0;
         }
@@ -708,7 +745,7 @@ static void kinetis_txdone(FAR struct kinetis_driver_s *priv)
       /* Yes.. bump up the tail pointer, making space for a new TX descriptor */
 
       priv->txtail++;
-      if (priv->txtail >= CONFIG_ENET_NTXBUFFERS)
+      if (priv->txtail >= CONFIG_KINETIS_ENETNTXBUFFERS)
         {
           priv->txtail = 0;
         }
@@ -961,7 +998,7 @@ static int kinetis_ifup(struct net_driver_s *dev)
 
   /* Select legacy of enhanced buffer descriptor format */
 
-#ifdef CONFIG_ENET_ENHANCEDBD
+#ifdef CONFIG_KINETIS_ENETENHANCEDBD
   putreg32(ENET_ECR_EN1588, KINETIS_ENET_ECR);
 #else
   putreg32(0, KINETIS_ENET_ECR);
@@ -1216,7 +1253,7 @@ static int kinetis_ioctl(struct net_driver_s *dev, int cmd, long arg)
     {
       struct mii_ioctl_data_s *req =
         (struct mii_ioctl_data_s *)((uintptr_t)arg);
-      req->phy_id = CONFIG_ENET_PHYADDR;
+      req->phy_id = CONFIG_KINETIS_ENETPHYADDR;
       ret = OK;
     }
     break;
@@ -1424,13 +1461,41 @@ static inline void kinetis_initphy(struct kinetis_driver_s *priv)
     {
       usleep(LINK_WAITUS);
       phydata = 0xffff;
-      kinetis_readmii(priv, CONFIG_ENET_PHYADDR, MII_PHYID1, &phydata);
+      kinetis_readmii(priv, CONFIG_KINETIS_ENETPHYADDR, MII_PHYID1, &phydata);
     }
   while (phydata == 0xffff);
 
+#if CONFIG_DEBUG_NET_ERROR
+  /* Verify PHYID1.  Compare OUI bits 3-18 */
+
+  ninfo("%s: PHYID1: %04x\n", BOARD_PHY_NAME, phydata);
+  if (phydata != BOARD_PHYID1)
+    {
+      nerr("ERROR: PHYID1=%04x incorrect for %s.  Expected %04x\n",
+           phydata, BOARD_PHY_NAME, BOARD_PHYID1);
+    }
+  else
+    {
+      /* Read PHYID2 */
+
+      kinetis_readmii(priv, CONFIG_KINETIS_ENETPHYADDR, MII_PHYID2, &phydata);
+      ninfo("%s: PHYID2: %04x\n", BOARD_PHY_NAME, phydata);
+
+      /* Verify PHYID2:  Compare OUI bits 19-24 and the 6-bit model number
+       * (ignoring the 4-bit revision number).
+       */
+
+      if ((phydata & 0xfff0) != (BOARD_PHYID2 & 0xfff0))
+        {
+          nerr("ERROR: PHYID2=%04x incorrect for %s.  Expected %04x\n",
+               (phydata & 0xfff0), BOARD_PHY_NAME, (BOARD_PHYID2 & 0xfff0));
+        }
+    }
+#endif
+
   /* Start auto negotiation */
 
-  kinetis_writemii(priv, CONFIG_ENET_PHYADDR, MII_MCR,
+  kinetis_writemii(priv, CONFIG_KINETIS_ENETPHYADDR, MII_MCR,
                   (MII_MCR_ANRESTART | MII_MCR_ANENABLE));
 
   /* Wait (potentially forever) for auto negotiation to complete */
@@ -1438,21 +1503,24 @@ static inline void kinetis_initphy(struct kinetis_driver_s *priv)
   do
     {
       usleep(LINK_WAITUS);
-      kinetis_readmii(priv, CONFIG_ENET_PHYADDR, MII_MSR, &phydata);
-
+      kinetis_readmii(priv, CONFIG_KINETIS_ENETPHYADDR, MII_MSR, &phydata);
     }
   while ((phydata & MII_MSR_ANEGCOMPLETE) == 0);
+
+  ninfo("%s: MII_MSR: %04x\n", BOARD_PHY_NAME, phydata);
 
   /* When we get here we have a link - Find the negotiated speed and duplex. */
 
   phydata = 0;
-  kinetis_readmii(priv, CONFIG_ENET_PHYADDR, PHY_STATUS, &phydata);
+  kinetis_readmii(priv, CONFIG_KINETIS_ENETPHYADDR, BOARD_PHY_STATUS, &phydata);
+
+  ninfo("%s: BOARD_PHY_STATUS: %04x\n", BOARD_PHY_NAME, phydata);
 
   /* Set up the transmit and receive control registers based on the
    * configuration and the auto negotiation results.
    */
 
-#ifdef CONFIG_ENET_USEMII
+#ifdef CONFIG_KINETIS_ENETUSEMII
   rcr = ENET_RCR_MII_MODE | ENET_RCR_CRCFWD |
         CONFIG_NET_ETH_MTU << ENET_RCR_MAX_FL_SHIFT |
         ENET_RCR_MII_MODE;
@@ -1468,7 +1536,7 @@ static inline void kinetis_initphy(struct kinetis_driver_s *priv)
 
   /* Setup half or full duplex */
 
-  if ((phydata & PHY_DUPLEX_STATUS) != 0)
+  if (BOARD_PHY_ISDUPLEX(phydata))
     {
       /* Full duplex */
 
@@ -1481,11 +1549,16 @@ static inline void kinetis_initphy(struct kinetis_driver_s *priv)
       rcr |= ENET_RCR_DRT;
     }
 
-  if ((phydata & PHY_SPEED_STATUS) != 0)
+  if (BOARD_PHY_10BASET(phydata))
     {
       /* 10Mbps */
 
       rcr |= ENET_RCR_RMII_10T;
+    }
+  else if (!BOARD_PHY_100BASET(phydata))
+    {
+      nerr("ERROR: Neither 10- nor 100-BaseT reported: PHY STATUS=%04x\n",
+           phydata);
     }
 
   putreg32(rcr, KINETIS_ENET_RCR);
@@ -1520,7 +1593,7 @@ static void kinetis_initbuffers(struct kinetis_driver_s *priv)
 
   /* Get an aligned RX descriptor (array) address */
 
-  addr        +=  CONFIG_ENET_NTXBUFFERS * sizeof(struct enet_desc_s);
+  addr        +=  CONFIG_KINETIS_ENETNTXBUFFERS * sizeof(struct enet_desc_s);
   priv->rxdesc = (struct enet_desc_s *)addr;
 
   /* Get the beginning of the first aligned buffer */
@@ -1529,12 +1602,12 @@ static void kinetis_initbuffers(struct kinetis_driver_s *priv)
 
   /* Then fill in the TX descriptors */
 
-  for (i = 0; i < CONFIG_ENET_NTXBUFFERS; i++)
+  for (i = 0; i < CONFIG_KINETIS_ENETNTXBUFFERS; i++)
     {
       priv->txdesc[i].status1 = 0;
       priv->txdesc[i].length  = 0;
       priv->txdesc[i].data    = (uint8_t *)kinesis_swap32((uint32_t)addr);
-#ifdef CONFIG_ENET_ENHANCEDBD
+#ifdef CONFIG_KINETIS_ENETENHANCEDBD
       priv->txdesc[i].status2 = TXDESC_IINS | TXDESC_PINS;
 #endif
       addr                   += KINETIS_BUF_SIZE;
@@ -1542,12 +1615,12 @@ static void kinetis_initbuffers(struct kinetis_driver_s *priv)
 
   /* Then fill in the RX descriptors */
 
-  for (i = 0; i < CONFIG_ENET_NRXBUFFERS; i++)
+  for (i = 0; i < CONFIG_KINETIS_ENETNRXBUFFERS; i++)
     {
       priv->rxdesc[i].status1 = RXDESC_E;
       priv->rxdesc[i].length  = 0;
       priv->rxdesc[i].data    = (uint8_t *)kinesis_swap32((uint32_t)addr);
-#ifdef CONFIG_ENET_ENHANCEDBD
+#ifdef CONFIG_KINETIS_ENETENHANCEDBD
       priv->rxdesc[i].bdu     = 0;
       priv->rxdesc[i].status2 = RXDESC_INT;
 #endif
@@ -1556,8 +1629,8 @@ static void kinetis_initbuffers(struct kinetis_driver_s *priv)
 
   /* Set the wrap bit in the last descriptors to form a ring */
 
-  priv->txdesc[CONFIG_ENET_NTXBUFFERS-1].status1 |= TXDESC_W;
-  priv->rxdesc[CONFIG_ENET_NRXBUFFERS-1].status1 |= RXDESC_W;
+  priv->txdesc[CONFIG_KINETIS_ENETNTXBUFFERS-1].status1 |= TXDESC_W;
+  priv->rxdesc[CONFIG_KINETIS_ENETNRXBUFFERS-1].status1 |= RXDESC_W;
 
   /* We start with RX descriptor 0 and with no TX descriptors in use */
 
@@ -1631,7 +1704,7 @@ int kinetis_netinitialize(int intf)
 
   /* Get the interface structure associated with this interface number. */
 
-  DEBUGASSERT(intf < CONFIG_ENET_NETHIFS);
+  DEBUGASSERT(intf < CONFIG_KINETIS_ENETNETHIFS);
   priv = &g_enet[intf];
 
   /* Enable the ENET clock */
@@ -1646,9 +1719,9 @@ int kinetis_netinitialize(int intf)
 
   putreg32(0, KINETIS_MPU_CESR);
 
+#ifdef CONFIG_KINETIS_ENETUSEMII
   /* Configure all ENET/MII pins */
 
-#ifdef CONFIG_ENET_USEMII
   kinetis_pinconfig(PIN_MII0_MDIO);
   kinetis_pinconfig(PIN_MII0_MDC);
   kinetis_pinconfig(PIN_MII0_RXDV);
@@ -1668,6 +1741,8 @@ int kinetis_netinitialize(int intf)
   kinetis_pinconfig(PIN_MII0_CRS);
   kinetis_pinconfig(PIN_MII0_COL);
 #else
+  /* Use RMII subset */
+
   kinetis_pinconfig(PIN_RMII0_MDIO);
   kinetis_pinconfig(PIN_RMII0_MDC);
   kinetis_pinconfig(PIN_RMII0_CRS_DV);
@@ -1773,7 +1848,7 @@ int kinetis_netinitialize(int intf)
  *
  ****************************************************************************/
 
-#if CONFIG_ENET_NETHIFS == 1
+#if CONFIG_KINETIS_ENETNETHIFS == 1
 void up_netinitialize(void)
 {
   (void)kinetis_netinitialize(0);
