@@ -56,77 +56,6 @@
 #if defined(CONFIG_LIB_BOARDCTL) || defined(CONFIG_BOARD_INITIALIZE)
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-/* Configuration ************************************************************/
-
-/* Automount procfs */
-
-#define HAVE_PROC 1
-
-#if !defined(CONFIG_FS_PROCFS)
-#  undef HAVE_PROC
-#endif
-
-#if defined(HAVE_PROC) && defined(CONFIG_DISABLE_MOUNTPOINT)
-#  warning Mountpoints disabled.  No procfs support
-#  undef HAVE_PROC
-#endif
-
-#if defined(CONFIG_NSH_PROC_MOUNTPOINT)
-#  define PROCFS_MOUNTPOUNT CONFIG_NSH_PROC_MOUNTPOINT
-#else
-#  define PROCFS_MOUNTPOUNT "/proc"
-#endif
-
-/* PORT and SLOT number probably depend on the board configuration */
-
-#ifdef CONFIG_ARCH_BOARD_FREEDOM_K64F
-#  define NSH_HAVEUSBDEV 1
-#  define NSH_HAVEMMCSD  1
-#  if defined(CONFIG_NSH_MMCSDSLOTNO) && CONFIG_NSH_MMCSDSLOTNO != 0
-#    error "Only one MMC/SD slot, slot 0"
-#    undef CONFIG_NSH_MMCSDSLOTNO
-#  endif
-#  ifndef CONFIG_NSH_MMCSDSLOTNO
-#    define CONFIG_NSH_MMCSDSLOTNO 0
-#  endif
-#else
-   /* Add configuration for new Kinetis boards here */
-#  error "Unrecognized Kinetis board"
-#  undef NSH_HAVEUSBDEV
-#  undef NSH_HAVEMMCSD
-#endif
-
-/* Can't support USB features if USB is not enabled */
-
-#ifndef CONFIG_USBDEV
-#  undef NSH_HAVEUSBDEV
-#endif
-
-/* Can't support MMC/SD features if mountpoints are disabled or if SDHC support
- * is not enabled.
- */
-
-#if defined(CONFIG_DISABLE_MOUNTPOINT) || !defined(CONFIG_KINETIS_SDHC)
-#  undef NSH_HAVEMMCSD
-#endif
-
-#ifndef CONFIG_NSH_MMCSDMINOR
-#  define CONFIG_NSH_MMCSDMINOR 0
-#endif
-
-/* We expect to receive GPIO interrupts for card insertion events */
-
-#ifndef CONFIG_GPIO_IRQ
-#  error "CONFIG_GPIO_IRQ required for card detect interrupt"
-#endif
-
-#ifndef CONFIG_KINETIS_PORTEINTS
-#  error "CONFIG_KINETIS_PORTEINTS required for card detect interrupt"
-#endif
-
-/****************************************************************************
  * Private Types
  ****************************************************************************/
 
@@ -246,19 +175,18 @@ int k64_bringup(void)
 
   /* Configure the write protect GPIO */
 
-  kinetis_pinconfig(GPIO_SD_WRPROTECT);
+  //kinetis_pinconfig(GPIO_SD_WRPROTECT);
 
   /* Mount the SDHC-based MMC/SD block driver */
   /* First, get an instance of the SDHC interface */
 
-  syslog(LOG_INFO, "Initializing SDHC slot %d\n",
-         CONFIG_NSH_MMCSDSLOTNO);
+  syslog(LOG_INFO, "Initializing SDHC slot %d\n", MMCSD_SLOTNO);
 
-  g_nsh.sdhc = sdhc_initialize(CONFIG_NSH_MMCSDSLOTNO);
+  g_nsh.sdhc = sdhc_initialize(MMCSD_SLOTNO);
   if (!g_nsh.sdhc)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize SDHC slot %d\n",
-             CONFIG_NSH_MMCSDSLOTNO);
+             MMCSD_SLOTNO);
       return -ENODEV;
     }
 

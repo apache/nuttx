@@ -49,6 +49,65 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
+/* Application Configuration ********************************************************/
+
+/* Assume we have everything */
+
+#define HAVE_PROC      1
+#define NSH_HAVEUSBDEV 1
+#define NSH_HAVEMMCSD  1
+
+/* Automount procfs */
+
+#if !defined(CONFIG_FS_PROCFS)
+#  undef HAVE_PROC
+#endif
+
+#if defined(HAVE_PROC) && defined(CONFIG_DISABLE_MOUNTPOINT)
+#  warning Mountpoints disabled.  No procfs support
+#  undef HAVE_PROC
+#endif
+
+#if defined(CONFIG_NSH_PROC_MOUNTPOINT)
+#  define PROCFS_MOUNTPOUNT CONFIG_NSH_PROC_MOUNTPOINT
+#else
+#  define PROCFS_MOUNTPOUNT "/proc"
+#endif
+
+/* SD card support */
+
+#define MMCSD_SLOTNO 0
+
+/* Can't support MMC/SD features if mountpoints are disabled or if SDHC support
+ * is not enabled.
+ */
+
+#if defined(CONFIG_DISABLE_MOUNTPOINT) || !defined(CONFIG_KINETIS_SDHC)
+#  undef NSH_HAVEMMCSD
+#endif
+
+#ifdef NSH_HAVEMMCSD
+#  if defined(CONFIG_NSH_MMCSDSLOTNO) && CONFIG_NSH_MMCSDSLOTNO != 0
+#    error "Only one MMC/SD slot, slot 0"
+#  endif
+
+/* We expect to receive GPIO interrupts for card insertion events */
+
+#  ifndef CONFIG_GPIO_IRQ
+#    error "CONFIG_GPIO_IRQ required for card detect interrupt"
+#  endif
+
+#  ifndef CONFIG_KINETIS_PORTEINTS
+#    error "CONFIG_KINETIS_PORTEINTS required for card detect interrupt"
+#  endif
+#endif
+
+/* Can't support USB features if USB is not enabled */
+
+#ifndef CONFIG_USBDEV
+#  undef NSH_HAVEUSBDEV
+#endif
+
 /* How many SPI modules does this chip support? The LM3S6918 supports 2 SPI
  * modules (others may support more -- in such case, the following must be
  * expanded).
