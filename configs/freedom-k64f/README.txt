@@ -134,34 +134,40 @@ Ethernet
 
   ------------ ----------------- --------------------------------------------
   KSZ8081      Board Signal(s)   K64F Pin
-  Pin Signal                     Function
+  Pin Signal                     Function                       pinmux Name
   --- -------- ----------------- --------------------------------------------
-   1  VDD_1V2  VDDPLL_1.2V       ---
-   2  VDDA_3V3 VDDA_ENET         ---
-   3  RXM      ENET1_RX-         ---
-   4  RXP      ENET1_RX+         ---
-   5  TXM      ENET1_TX-         ---
-   6  TXP      ENET1_TX+         ---
-   7  X0       RMII_XTAL0        ---
-   8  XI       RMII_XTAL1        ---
-   9  REXT     ---               ---, Apparently not connected
-  10  MDIO     RMII0_MDIO        PTB0/RMII0_MDIO
-  11  MDC      RMII0_MDC         PTB1/RMII0_MDC
-  12  RXD1     RMII0_RXD_1       PTA12/RMII0_RXD1
-  13  RXD0     RMII0_RXD_0       PTA13/RMII0_RXD0
-  14  VDDIO    VDDIO_ENET        ---
-  15  CRS_DIV                    PTA14/RMII0_CRS_DV
-  16  REF_CLK  RMII_RXCLK        PTA18/EXTAL0, PHY clock input
-  17  RXER     RMII0_RXER        PTA5/RMII0_RXER
-  18  INTRP    RMII0_INT_B,      J14 Pin 2, Apparently not available unless jumpered
-               PHY_INT_1
-  19  TXEN     RMII0_TXEN        PTA15/RMII0_TXEN
-  20  TXD0     RMII0_TXD_0       PTA16/RMII0_TXD0
-  21  TXD1     RMII0_TXD_1       PTA17/RMII0_TXD1
-  22  GND1     ---               ---
-  24  nRST     PHY_RST_B         ---
-  25  GND2     ---               ---
+   1  VDD_1V2  VDDPLL_1.2V       ---                            ---
+   2  VDDA_3V3 VDDA_ENET         ---                            ---
+   3  RXM      ENET1_RX-         ---                            ---
+   4  RXP      ENET1_RX+         ---                            ---
+   5  TXM      ENET1_TX-         ---                            ---
+   6  TXP      ENET1_TX+         ---                            ---
+   7  X0       RMII_XTAL0        ---                            ---
+   8  XI       RMII_XTAL1        ---                            ---
+   9  REXT     ---               ---, Apparently not connected  ---
+  10  MDIO     RMII0_MDIO        PTB0/RMII0_MDIO                PIN_RMII0_MDIO
+  11  MDC      RMII0_MDC         PTB1/RMII0_MDC                 PIN_RMII0_MDC
+  12  RXD1     RMII0_RXD_1       PTA12/RMII0_RXD1               PIN_RMII0_RXD1
+  13  RXD0     RMII0_RXD_0       PTA13/RMII0_RXD0               PIN_RMII0_RXD0
+  14  VDDIO    VDDIO_ENET        ---                            ---
+  15  CRS_DIV                    PTA14/RMII0_CRS_DV             PIN_RMII0_CRS_DV
+  16  REF_CLK  RMII_RXCLK        PTA18/EXTAL0, PHY clock input  ---
+  17  RXER     RMII0_RXER        PTA5/RMII0_RXER                PIN_RMII0_RXER
+  18  INTRP    RMII0_INT_B,      J14 Pin 2, Apparently not      ---
+               PHY_INT_1         available unless jumpered
+  19  TXEN     RMII0_TXEN        PTA15/RMII0_TXEN               PIN_RMII0_TXEN
+  20  TXD0     RMII0_TXD_0       PTA16/RMII0_TXD0               PIN_RMII0_TXD0
+  21  TXD1     RMII0_TXD_1       PTA17/RMII0_TXD1               PIN_RMII0_TXD1
+  22  GND1     ---               ---                            ---
+  24  nRST     PHY_RST_B         ---                            ---
+  25  GND2     ---               ---                            ---
   --- -------- ----------------- --------------------------------------------
+
+  No external pullup is available on MDIO signal when MK64FN1M0VLL12 MCU is
+  requests status of the Ethernet link connection. Internal pullup is required
+  when port configuration for MDIO signal is enabled:
+
+    CONFIG_KINETIS_ENET_MDIOPULLUP=y
 
 Development Environment
 =======================
@@ -400,6 +406,12 @@ Where <subdir> is one of the following:
        CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y : ARM/mbed toolcahin (arm-none-elf-gcc)
        CONFIG_INTELHEX_BINARY=y            : Output formats: Intel hex binary
 
+    3. No external pullup is available on MDIO signal when MK64FN1M0VLL12 MCU
+       is requests status of the Ethernet link connection. Internal pullup is
+       required when port configuration for MDIO signal is enabled:
+
+       CONFIG_KINETIS_ENET_MDIOPULLUP=y
+
   nsh:
   ---
     Configures the NuttShell (nsh) located at apps/examples/nsh using a
@@ -455,5 +467,13 @@ Status
     NSH configuration is working and LEDs are working.  The only odd
     behavior that I see is that pressing SW3 causes an unexpected interrupt
     error.
+
   2016-07-12:  Added support for the KSZ8081 PHY and added the netnsh
-    configuration.  Untested as of this writing.
+    configuration.  The network is basically functional, but a lot more
+    testing is needed to confirm that.
+ 
+    In testing, I notice a strange thing.  If I run at full optimization the
+    code runs (albeit with bugs-to-be-solved).  But with no optimization or
+    even at -O1, the system fails to boot.  This seems to be related to the
+    watchdog timer.
+

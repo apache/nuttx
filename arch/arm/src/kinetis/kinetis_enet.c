@@ -193,6 +193,7 @@ struct kinetis_driver_s
   uint8_t txtail;              /* The oldest busy TX descriptor */
   uint8_t txhead;              /* The next TX descriptor to use */
   uint8_t rxtail;              /* The next RX descriptor to use */
+  uint8_t phyaddr;             /* Selected PHY address */
   WDOG_ID txpoll;              /* TX poll timer */
   WDOG_ID txtimeout;           /* TX timeout timer */
   struct enet_desc_s *txdesc;  /* A pointer to the list of TX descriptor */
@@ -278,7 +279,7 @@ static int kinetis_writemii(struct kinetis_driver_s *priv, uint8_t phyaddr,
                             uint8_t regaddr, uint16_t data);
 static int kinetis_readmii(struct kinetis_driver_s *priv, uint8_t phyaddr,
                            uint8_t regaddr, uint16_t *data);
-static inline void kinetis_initphy(struct kinetis_driver_s *priv);
+static inline int kinetis_initphy(struct kinetis_driver_s *priv);
 
 /* Initialization */
 
@@ -954,6 +955,7 @@ static int kinetis_ifup(struct net_driver_s *dev)
     (FAR struct kinetis_driver_s *)dev->d_private;
   uint8_t *mac = dev->d_mac.ether_addr_octet;
   uint32_t regval;
+  int ret;
 
   ninfo("Bringing up: %d.%d.%d.%d\n",
         dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
@@ -986,7 +988,12 @@ static int kinetis_ifup(struct net_driver_s *dev)
 
   /* Configure the PHY */
 
-  kinetis_initphy(priv);
+  ret = kinetis_initphy(priv);
+  if (ret < 0)
+    {
+      nerr("ERROR: Failed to configure the PHY: %d\n", ret);
+      return ret;
+    }
 
   /* Handle promiscuous mode */
 
@@ -1253,7 +1260,7 @@ static int kinetis_ioctl(struct net_driver_s *dev, int cmd, long arg)
     {
       struct mii_ioctl_data_s *req =
         (struct mii_ioctl_data_s *)((uintptr_t)arg);
-      req->phy_id = CONFIG_KINETIS_ENETPHYADDR;
+      req->phy_id = priv->phyaddr;
       ret = OK;
     }
     break;
@@ -1418,6 +1425,7 @@ static int kinetis_readmii(struct kinetis_driver_s *priv, uint8_t phyaddr,
 
   if (timeout >= MII_MAXPOLLS)
     {
+      nerr("ERROR: Timed out waiting for transfer to complete\n");
       return -ETIMEDOUT;
     }
 
@@ -1441,31 +1449,59 @@ static int kinetis_readmii(struct kinetis_driver_s *priv, uint8_t phyaddr,
  *   priv - Reference to the private ENET driver state structure
  *
  * Returned Value:
- *   None
+ *   Zero (OK) returned on success; a negated errno value is returned on any
+ *   failure;
  *
  * Assumptions:
  *
  ****************************************************************************/
 
-static inline void kinetis_initphy(struct kinetis_driver_s *priv)
+static inline int kinetis_initphy(struct kinetis_driver_s *priv)
 {
   uint32_t rcr;
   uint32_t tcr;
   uint16_t phydata;
+  uint8_t phyaddr;
+  int retries;
+  int ret;
 
   /* Loop (potentially infinitely?) until we successfully communicate with
    * the PHY.
    */
 
-  do
+  for (phyaddr = 0; phyaddr < 32; phyaddr++)
     {
-      usleep(LINK_WAITUS);
-      phydata = 0xffff;
-      kinetis_readmii(priv, CONFIG_KINETIS_ENETPHYADDR, MII_PHYID1, &phydata);
-    }
-  while (phydata == 0xffff);
+      ninfo("%s: Try phyaddr: %u\n", BOARD_PHY_NAME, phyaddr);
 
-#if CONFIG_DEBUG_NET_ERROR
+      /* Try to read PHYID1 few times using this address */
+
+      retries = 0;
+      do
+        {
+          usleep(LINK_WAITUS);
+          ninfo("%s: Read PHYID1, retries=%d\n",  BOARD_PHY_NAME, retries + 1);
+          phydata = 0xffff;
+          ret = kinetis_readmii(priv, phyaddr, MII_PHYID1, &phydata);
+        }
+      while (ret >= 0 && phydata == 0xffff && ++retries < 3);
+
+      /* If we successfully read anything then break out, using this PHY address */
+
+      if (retries < 3)
+        {
+          break;
+        }
+    }
+
+  if (phyaddr >= 32)
+    {
+      nerr("ERROR: Failed to read %s PHYID1 at any address\n");
+      return -ENOENT;
+    }
+
+  ninfo("%s: Using PHY address %u\n", BOARD_PHY_NAME, phyaddr);
+  priv->phyaddr = phyaddr;
+
   /* Verify PHYID1.  Compare OUI bits 3-18 */
 
   ninfo("%s: PHYID1: %04x\n", BOARD_PHY_NAME, phydata);
@@ -1473,29 +1509,35 @@ static inline void kinetis_initphy(struct kinetis_driver_s *priv)
     {
       nerr("ERROR: PHYID1=%04x incorrect for %s.  Expected %04x\n",
            phydata, BOARD_PHY_NAME, BOARD_PHYID1);
+      return -ENXIO;
     }
-  else
+
+  /* Read PHYID2 */
+
+  ret = kinetis_readmii(priv, phyaddr, MII_PHYID2, &phydata);
+  if (ret < 0)
     {
-      /* Read PHYID2 */
-
-      kinetis_readmii(priv, CONFIG_KINETIS_ENETPHYADDR, MII_PHYID2, &phydata);
-      ninfo("%s: PHYID2: %04x\n", BOARD_PHY_NAME, phydata);
-
-      /* Verify PHYID2:  Compare OUI bits 19-24 and the 6-bit model number
-       * (ignoring the 4-bit revision number).
-       */
-
-      if ((phydata & 0xfff0) != (BOARD_PHYID2 & 0xfff0))
-        {
-          nerr("ERROR: PHYID2=%04x incorrect for %s.  Expected %04x\n",
-               (phydata & 0xfff0), BOARD_PHY_NAME, (BOARD_PHYID2 & 0xfff0));
-        }
+      nerr("ERROR: Failed to read %s PHYID2: %d\n", BOARD_PHY_NAME, ret);
+      return ret;
     }
-#endif
+
+  ninfo("%s: PHYID2: %04x\n", BOARD_PHY_NAME, phydata);
+
+  /* Verify PHYID2:  Compare OUI bits 19-24 and the 6-bit model number
+   * (ignoring the 4-bit revision number).
+   */
+
+  if ((phydata & 0xfff0) != (BOARD_PHYID2 & 0xfff0))
+    {
+      nerr("ERROR: PHYID2=%04x incorrect for %s.  Expected %04x\n",
+           (phydata & 0xfff0), BOARD_PHY_NAME, (BOARD_PHYID2 & 0xfff0));
+      return -ENXIO;
+    }
 
   /* Start auto negotiation */
 
-  kinetis_writemii(priv, CONFIG_KINETIS_ENETPHYADDR, MII_MCR,
+  ninfo("%s: Start autonegotiation...\n",  BOARD_PHY_NAME);
+  kinetis_writemii(priv, phyaddr, MII_MCR,
                   (MII_MCR_ANRESTART | MII_MCR_ANENABLE));
 
   /* Wait (potentially forever) for auto negotiation to complete */
@@ -1503,16 +1545,30 @@ static inline void kinetis_initphy(struct kinetis_driver_s *priv)
   do
     {
       usleep(LINK_WAITUS);
-      kinetis_readmii(priv, CONFIG_KINETIS_ENETPHYADDR, MII_MSR, &phydata);
+      ret = kinetis_readmii(priv, phyaddr, MII_MSR, &phydata);
+      if (ret < 0)
+        {
+          nerr("ERROR: Failed to read %s MII_MSR: %d\n",
+                BOARD_PHY_NAME, ret);
+          return ret;
+        }
     }
   while ((phydata & MII_MSR_ANEGCOMPLETE) == 0);
 
+  ninfo("%s: Autonegotiation complete\n",  BOARD_PHY_NAME);
   ninfo("%s: MII_MSR: %04x\n", BOARD_PHY_NAME, phydata);
 
   /* When we get here we have a link - Find the negotiated speed and duplex. */
 
   phydata = 0;
-  kinetis_readmii(priv, CONFIG_KINETIS_ENETPHYADDR, BOARD_PHY_STATUS, &phydata);
+  ret = kinetis_readmii(priv, phyaddr, BOARD_PHY_STATUS, &phydata);
+  if (ret < 0)
+    {
+      nerr("ERROR: Failed to read %s BOARD_PHY_STATUS{%02x]: %d\n",
+           BOARD_PHY_NAME, BOARD_PHY_STATUS, ret);
+      return ret;
+   }
+
 
   ninfo("%s: BOARD_PHY_STATUS: %04x\n", BOARD_PHY_NAME, phydata);
 
@@ -1540,29 +1596,42 @@ static inline void kinetis_initphy(struct kinetis_driver_s *priv)
     {
       /* Full duplex */
 
+      ninfo("%s: Full duplex\n",  BOARD_PHY_NAME);
       tcr |= ENET_TCR_FDEN;
     }
   else
     {
       /* Half duplex */
 
+      ninfo("%s: Half duplex\n",  BOARD_PHY_NAME);
       rcr |= ENET_RCR_DRT;
     }
 
   if (BOARD_PHY_10BASET(phydata))
     {
-      /* 10Mbps */
+      /* 10 Mbps */
 
+      ninfo("%s: 10 Base-T\n",  BOARD_PHY_NAME);
       rcr |= ENET_RCR_RMII_10T;
     }
   else if (!BOARD_PHY_100BASET(phydata))
     {
+      /* 100 Mbps */
+
+      ninfo("%s: 100 Base-T\n",  BOARD_PHY_NAME);
+    }
+  else
+    {
+      /* This might happen if autonegotiation did not complete(?) */
+
       nerr("ERROR: Neither 10- nor 100-BaseT reported: PHY STATUS=%04x\n",
            phydata);
+      return -EIO;
     }
 
   putreg32(rcr, KINETIS_ENET_RCR);
   putreg32(tcr, KINETIS_ENET_TCR);
+  return OK;
 }
 
 /****************************************************************************

@@ -548,17 +548,26 @@ config KINETIS_ENETNTXBUFFERS
 		Number of Ethernet Tx buffers to use. The size of one buffer is
 		determined by NET_BUFSIZE
 
-config KINETIS_ENETPHYADDR
-	int "PHY address"
-	default 1
-	---help---
-		MII/RMII address of the PHY
-
 config KINETIS_ENETUSEMII
 	bool "Use MII interface"
 	default n
 	---help---
 		The the MII PHY interface.  Default:  Use RMII interface
+
+config KINETIS_ENET_MDIOPULLUP
+	bool "MDIO pull-up"
+	default n
+	---help---
+		If there is no on-board pull-up resister on the MII/RMII MDIO line,
+		then this option may be selected in order to configure an internal
+		pull-up on MDIO.
+
+config KINETIS_ENET_NORXER
+	bool "Suppress RXER"
+	default n
+	---help---
+		If selected, then the MII/RMII RXER output will be configured as a
+		GPIO and pulled low.
 
 endmenu # Kinetis Ethernet Configuration
 

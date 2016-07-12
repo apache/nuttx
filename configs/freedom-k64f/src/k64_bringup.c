@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/mount.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <syslog.h>
@@ -58,6 +59,25 @@
  * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
+
+/* Automount procfs */
+
+#define HAVE_PROC 1
+
+#if !defined(CONFIG_FS_PROCFS)
+#  undef HAVE_PROC
+#endif
+
+#if defined(HAVE_PROC) && defined(CONFIG_DISABLE_MOUNTPOINT)
+#  warning Mountpoints disabled.  No procfs support
+#  undef HAVE_PROC
+#endif
+
+#if defined(CONFIG_NSH_PROC_MOUNTPOINT)
+#  define PROCFS_MOUNTPOUNT CONFIG_NSH_PROC_MOUNTPOINT
+#else
+#  define PROCFS_MOUNTPOUNT "/proc"
+#endif
 
 /* PORT and SLOT number probably depend on the board configuration */
 
@@ -199,9 +219,24 @@ static int k64_cdinterrupt(int irq, FAR void *context)
 
 int k64_bringup(void)
 {
-#ifdef NSH_HAVEMMCSD
   int ret;
 
+#ifdef HAVE_PROC
+  /* Mount the proc filesystem */
+
+  syslog(LOG_INFO, "Mounting procfs to /proc\n");
+
+  ret = mount(NULL, PROCFS_MOUNTPOUNT, "procfs", 0, NULL);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to mount the PROC filesystem: %d (%d)\n",
+             ret, errno);
+      return ret;
+    }
+#endif
+
+#ifdef NSH_HAVEMMCSD
   /* Configure GPIO pins */
 
   /* Attached the card detect interrupt (but don't enable it yet) */
@@ -249,6 +284,8 @@ int k64_bringup(void)
 
   kinetis_pinirqenable(GPIO_SD_CARDDETECT);
 #endif
+
+  UNUSED(ret);
   return OK;
 }
 
